@@ -537,7 +537,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Could not open from LAN: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support.\n"
 
-#define MSGTR_CantOpenDVD "Couldn't open DVD device: %s\n"
+#define MSGTR_CantOpenDVD "Couldn't open DVD device: %s (%s)\n"
 
 // stream_dvd.c
 #define MSGTR_DVDspeedCantOpen "Couldn't open DVD device for writing, changing DVD speed needs write access.\n"

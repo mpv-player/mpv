@@ -24,6 +24,8 @@
 #include <sys/ioctl.h>
 #endif
 
+#include <errno.h>
+
 #define FIRST_AC3_AID 128
 #define FIRST_DTS_AID 136
 #define FIRST_MPG_AID 0
@@ -781,12 +783,12 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         snprintf(temp_device, len, "/dev/rdisk%d", i);
         dvd = DVDOpen(temp_device);
         if(!dvd) {
-          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device);
+          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device, strerror(errno));
         } else {
 #if DVDREAD_VERSION <= LIBDVDREAD_VERSION(0,9,4)
           dvd_file_t *dvdfile = DVDOpenFile(dvd,dvd_title,DVD_READ_INFO_FILE);
           if(!dvdfile) {
-            mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device);
+            mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device, strerror(errno));
             DVDClose(dvd);
             continue;
           }
@@ -806,7 +808,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     {
         dvd = DVDOpen(dvd_device);
         if(!dvd) {
-          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device);
+          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device, strerror(errno));
           m_struct_free(&stream_opts,opts);
           return STREAM_UNSUPPORTED;
         }

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include "mp_msg.h"
 #include "osdep/timer.h"
 #include "input/input.h"
@@ -356,7 +357,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   else if(dvd_device) filename= dvd_device; 
   else filename = DEFAULT_DVD_DEVICE;
   if(!(priv=new_dvdnav_stream(filename))) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename);
+    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename, strerror(errno));
     return STREAM_UNSUPPORTED;
   }
 
