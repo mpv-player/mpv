@@ -1307,6 +1307,8 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
 {
     HRESULT hr;
 
+    AM_MEDIA_TYPE conn_mt; //Media type of established connection
+
     IPin *pSGIn;
     IPin *pSGOut;
     IPin *pNRIn=NULL;
@@ -1396,6 +1398,12 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: Unable to create pCapturePin<->pSGIn connection. Error:0x%x\n", (unsigned int)hr);
             break;
         }
+        hr = OLE_CALL_ARGS(pCapturePin, ConnectionMediaType, &conn_mt);
+        if(FAILED(hr))
+        {
+            mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_GetActualMediatypeFailed, (unsigned int)hr);
+            CopyMediaType(&conn_mt, pmt);
+        }
 
         if(priv->tv_param->hidden_video_renderer){
             IEnumFilters* pEnum;
@@ -1449,6 +1457,11 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
 
         hr = S_OK;
     } while(0);
+
+    FreeMediaType(pmt);
+    CopyMediaType(pmt, &conn_mt);
+    FreeMediaType(&conn_mt);
+
     OLE_RELEASE_SAFE(pSGF);
     OLE_RELEASE_SAFE(pSGIn);
     OLE_RELEASE_SAFE(pSGOut);
