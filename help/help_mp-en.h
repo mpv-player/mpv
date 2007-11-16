@@ -2158,3 +2158,4 @@ static char help_text[]=
 #define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Directshow graph initialization failure.\n"
 #define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: Unable to find video capture device\n"
 #define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Unable to find audio capture device\n"
+#define MSGTR_TVI_DS_GetActualMediatypeFailed "tvi_dshow: Unable to get actual mediatype (Error:0x%x). Assuming equal to requested.\n"
