@@ -65,11 +65,6 @@ static void dvd_set_speed(char *device, unsigned speed)
 
   if (!S_ISBLK(st.st_mode)) return; /* not a block device */
 
-  if ((fd = open(device, O_RDWR | O_NONBLOCK)) == -1) {
-    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDspeedCantOpen);
-    return;
-  }
-
   if (speed < 100) { /* speed times 1350KB/s (DVD single speed) */
     speed *= 1350;
   }
@@ -113,6 +108,11 @@ static void dvd_set_speed(char *device, unsigned speed)
   /* 1 second */
   AV_WB16(buffer + 18, 1000);
   AV_WB16(buffer + 26, 1000);
+
+  if ((fd = open(device, O_RDWR | O_NONBLOCK)) == -1) {
+    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDspeedCantOpen);
+    return;
+  }
 
   if (ioctl(fd, SG_IO, &sghdr) < 0) {
     mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitFail);
