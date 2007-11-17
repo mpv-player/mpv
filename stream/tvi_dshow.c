@@ -1426,6 +1426,12 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
             OLE_RELEASE_SAFE(pEnum);
         }else
         {
+#if 0
+            /*
+               Code below is disabled, because terminating chain with NullRenderer leads to jerky video.
+               Perhaps, this happens because  NullRenderer filter discards each received
+               frame while discarded frames causes live source filter to dramatically reduce frame rate. 
+            */
             /* adding sink for video stream */
             hr = CoCreateInstance((GUID *) & CLSID_NullRenderer, NULL,CLSCTX_INPROC_SERVER, &IID_IBaseFilter,(void *) &pNR);
             if(FAILED(hr)){
@@ -1453,6 +1459,7 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
                     break;
                 }
             }
+#endif
         }
 
         hr = S_OK;
