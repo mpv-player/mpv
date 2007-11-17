@@ -108,15 +108,17 @@ static void dvd_set_speed(char *device, unsigned speed)
   AV_WB16(buffer + 18, 1000);
   AV_WB16(buffer + 26, 1000);
 
-  if ((fd = open(device, O_RDWR | O_NONBLOCK)) == -1) {
+  fd = open(device, O_RDWR | O_NONBLOCK);
+  if (fd == -1) {
     mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDspeedCantOpen);
     return;
   }
 
-  if (ioctl(fd, SG_IO, &sghdr) < 0) {
+  if (ioctl(fd, SG_IO, &sghdr) < 0)
     mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitFail);
-  } else
-  mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitOk);
+  else
+    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitOk);
+
   close(fd);
 #endif
 }
