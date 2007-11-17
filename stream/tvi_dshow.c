@@ -1390,7 +1390,7 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
 
         if(priv->tv_param->normalize_audio_chunks && !memcmp(&(pmt->majortype),&(MEDIATYPE_Audio),16)){
             set_buffer_preference(20,(WAVEFORMATEX*)(pmt->pbFormat),pCapturePin,pSGIn);
-    }
+        }
 
         /* connecting filters together: VideoCapture --> SampleGrabber */
         hr = OLE_CALL_ARGS(priv->pGraph, Connect, pCapturePin, pSGIn);
