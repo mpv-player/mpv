@@ -110,8 +110,9 @@ static void dvd_set_speed(char *device, unsigned speed)
   AV_WB32(buffer + 12, speed);
   AV_WB32(buffer + 20, speed);
 
-  buffer[18] = buffer[26] = 0x03; /* 1 second */
-  buffer[19] = buffer[27] = 0xe8;
+  /* 1 second */
+  AV_WB16(buffer + 18, 1000);
+  AV_WB16(buffer + 26, 1000);
 
   if (ioctl(fd, SG_IO, &sghdr) < 0) {
     mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitFail);
