@@ -118,6 +118,7 @@ static void dvd_set_speed(char *device, unsigned speed)
     mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitFail);
   } else
   mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitOk);
+  close(fd);
 #endif
 }
 
