@@ -62,9 +62,24 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
   return 1;
 }
 
+static const struct {
+  const char *type;
+  uint32_t *format;
+} type2format[] = {
+  { "bmp",  mmioFOURCC('b', 'm', 'p', ' ') },
+  { "jpeg", mmioFOURCC('I', 'J', 'P', 'G') },
+  { "jpg",  mmioFOURCC('I', 'J', 'P', 'G') },
+  { "png",  mmioFOURCC('M', 'P', 'N', 'G') },
+  { "tga",  mmioFOURCC('M', 'T', 'G', 'A') },
+  { "tif",  mmioFOURCC('t', 'i', 'f', 'f') },
+  { "sgi",  mmioFOURCC('S', 'G', 'I', '1') },
+  { NULL,   0 }
+};
+
 static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video_t   *sh_video = NULL;
   mf_t         *mf = NULL;
+  int i;
   
   if(!demuxer->stream->url) return NULL;
   if(strncmp(demuxer->stream->url, "mf://", 5)) return NULL;
@@ -99,19 +114,15 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   // video_read_properties() will choke
   sh_video->ds = demuxer->video;
   
-  if ( !strcasecmp( mf_type,"jpg" ) || 
-        !(strcasecmp(mf_type, "jpeg"))) sh_video->format = mmioFOURCC('I', 'J', 'P', 'G');
-  else 
-     if ( !strcasecmp( mf_type,"png" )) sh_video->format = mmioFOURCC('M', 'P', 'N', 'G' );
-  else
-     if ( !strcasecmp( mf_type,"tif" )) sh_video->format = mmioFOURCC('t', 'i', 'f', 'f' );
-  else 
-     if ( !strcasecmp( mf_type,"tga" )) sh_video->format = mmioFOURCC('M', 'T', 'G', 'A' );
-  else
-     if ( !strcasecmp( mf_type,"bmp" )) sh_video->format = mmioFOURCC('b', 'm', 'p', ' ' );
-   else
-     if (!strcasecmp( mf_type,"sgi" )) sh_video->format = mmioFOURCC('S', 'G', 'I', '1');
-  else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknown input file type.\n" ); free( mf ); return NULL; }
+  for (i = 0; type2format[i].type; i++)
+    if (strcasecmp(mf_type, type2format[i].type) == 0)
+      break;
+  if (!type2format[i].type) {
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknown input file type.\n" );
+    free(mf);
+    return NULL;
+  }
+  sh_video->format = type2format[i].format;
 
   sh_video->disp_w = mf_w;
   sh_video->disp_h = mf_h;
