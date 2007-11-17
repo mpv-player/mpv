@@ -49,7 +49,7 @@ static void dvd_set_speed(char *device, unsigned speed)
 #if defined(__linux__) && defined(SG_IO) && defined(GPCMD_SET_STREAMING)
   int fd;
   unsigned char buffer[28];
-  unsigned char cmd[16];
+  unsigned char cmd[12];
   unsigned char sense[16];
   struct sg_io_hdr sghdr;
   struct stat st;
