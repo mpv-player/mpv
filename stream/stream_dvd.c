@@ -79,10 +79,9 @@ static void dvd_set_speed(char *device, unsigned speed)
   sghdr.interface_id = 'S';
   sghdr.timeout = 5000;
   sghdr.dxfer_direction = SG_DXFER_TO_DEV;
-  sghdr.mx_sb_len = 0;
   sghdr.dxfer_len = sizeof(buffer);
-  sghdr.cmd_len = sizeof(cmd);
   sghdr.dxferp = buffer;
+  sghdr.cmd_len = sizeof(cmd);
   sghdr.cmdp = cmd;
 
   memset(cmd, 0, sizeof(cmd));
