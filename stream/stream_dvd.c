@@ -38,6 +38,7 @@
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"
 #include "libmpdemux/demuxer.h"
+#include "libavutil/intreadwrite.h"
 
 extern int stream_cache_size;
 extern char* dvd_device;
@@ -105,10 +106,9 @@ static void dvd_set_speed(char *device, unsigned speed)
   buffer[10] = 0xff;
   buffer[11] = 0xff;
 
-  buffer[12] = buffer[20] = (speed >> 24) & 0xff; /* <speed> kilobyte */
-  buffer[13] = buffer[21] = (speed >> 16) & 0xff;
-  buffer[14] = buffer[22] = (speed >> 8)  & 0xff;
-  buffer[15] = buffer[23] = speed & 0xff;
+  /* <speed> kilobyte */
+  AV_WB32(buffer + 12, speed);
+  AV_WB32(buffer + 20, speed);
 
   buffer[18] = buffer[26] = 0x03; /* 1 second */
   buffer[19] = buffer[27] = 0xe8;
