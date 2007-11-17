@@ -51,11 +51,9 @@ static void dvd_set_speed(char *device, unsigned speed)
   int fd;
   unsigned char buffer[28];
   unsigned char cmd[12];
-  unsigned char sense[16];
   struct sg_io_hdr sghdr;
   struct stat st;
 
-  memset(sense, 0, sizeof(sense));
   memset(&st, 0, sizeof(st));
 
   if (stat(device, &st) == -1) return;
@@ -81,10 +79,9 @@ static void dvd_set_speed(char *device, unsigned speed)
   sghdr.interface_id = 'S';
   sghdr.timeout = 5000;
   sghdr.dxfer_direction = SG_DXFER_TO_DEV;
-  sghdr.mx_sb_len = sizeof(sense);
+  sghdr.mx_sb_len = 0;
   sghdr.dxfer_len = sizeof(buffer);
   sghdr.cmd_len = sizeof(cmd);
-  sghdr.sbp = sense;
   sghdr.dxferp = buffer;
   sghdr.cmdp = cmd;
 
