@@ -14,6 +14,9 @@ Now download dvdnav from MPHQ (dvdnav includes its own version of dvdread):
 $ svn co svn://svn.mplayerhq.hu/dvdnav/trunk/libdvdnav libdvdnav
 $ cd libdvdnav
 $ ./autogen.sh && ./configure && make
+(or, if you feel brave and want to help us improving the new build system,
+$ ./configure2 && make
+) 
 install it as root with
 $ make install
 
