@@ -70,8 +70,6 @@ static void dvd_set_speed(char *device, unsigned speed)
     return;
   case -1: /* restore default value */
     if (dvd_speed == 0) return; /* we haven't touched the speed setting */
-    speed = 0;
-    buffer[0] = 4; /* restore default */
     mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDrestoreSpeed);
     break;
   default: /* limit to <speed> KB/s */
@@ -98,9 +96,13 @@ static void dvd_set_speed(char *device, unsigned speed)
   /* first sector 0, last sector 0xffffffff */
   AV_WB32(buffer + 8, 0xffffffff);
 
+  if (speed == -1)
+    buffer[0] = 4; /* restore default */
+  else {
   /* <speed> kilobyte */
   AV_WB32(buffer + 12, speed);
   AV_WB32(buffer + 20, speed);
+  }
 
   /* 1 second */
   AV_WB16(buffer + 18, 1000);
