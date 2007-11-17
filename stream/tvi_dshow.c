@@ -1619,6 +1619,53 @@ static int get_control(priv_t * priv, int control, int *pvalue)
 }
 
 /**
+ * \brief create AM_MEDIA_TYPE structure, corresponding to given FourCC code and width/height/fps
+ * \param fcc FourCC code for video format
+ * \param width picture width
+ * \param height pciture height
+ * \param fps frames per second (required for bitrate calculation)
+ *
+ * \return pointer to AM_MEDIA_TYPE structure if success, NULL - otherwise
+ */
+static AM_MEDIA_TYPE* create_video_format(int fcc, int width, int height, int fps)
+{
+    int i;
+    AM_MEDIA_TYPE mt;
+    VIDEOINFOHEADER vHdr;
+
+    /* Check given fcc in lookup table*/
+    for(i=0; img_fmt_list[i].fmt && img_fmt_list[i].fmt!=fcc; i++) /* NOTHING */;
+    if(!img_fmt_list[i].fmt)
+        return NULL;
+
+    memset(&mt, 0, sizeof(AM_MEDIA_TYPE));
+    memset(&vHdr, 0, sizeof(VIDEOINFOHEADER));
+
+    vHdr.bmiHeader.biSize = sizeof(vHdr.bmiHeader);
+    vHdr.bmiHeader.biWidth = width;
+    vHdr.bmiHeader.biHeight = height;
+    //FIXME: is biPlanes required too?
+    //vHdr.bmiHeader.biPlanes = img_fmt_list[i].nPlanes;
+    vHdr.bmiHeader.biBitCount = img_fmt_list[i].nBits;
+    vHdr.bmiHeader.biCompression = img_fmt_list[i].nCompression;
+    vHdr.bmiHeader.biSizeImage = width * height * img_fmt_list[i].nBits / 8;
+    vHdr.dwBitRate = vHdr.bmiHeader.biSizeImage * 8 * fps;
+
+    mt.pbFormat = (char*)&vHdr;
+    mt.cbFormat = sizeof(vHdr);
+
+    mt.majortype = MEDIATYPE_Video;
+    mt.subtype = *img_fmt_list[i].subtype;
+    mt.formattype = FORMAT_VideoInfo;
+
+    mt.bFixedSizeSamples = 1;
+    mt.bTemporalCompression = 0;
+    mt.lSampleSize = vHdr.bmiHeader.biSizeImage;
+
+    return CreateMediaType(&mt);
+}
+
+/**
  * \brief extracts fcc,width,height from AM_MEDIA_TYPE
  *
  * \param pmt pointer to AM_MEDIA_TYPE to extract data from
