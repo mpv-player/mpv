@@ -55,10 +55,7 @@ static void dvd_set_speed(char *device, unsigned speed)
   struct sg_io_hdr sghdr;
   struct stat st;
 
-  memset(&sghdr, 0, sizeof(sghdr));
-  memset(buffer, 0, sizeof(buffer));
   memset(sense, 0, sizeof(sense));
-  memset(cmd, 0, sizeof(cmd));
   memset(&st, 0, sizeof(st));
 
   if (stat(device, &st) == -1) return;
@@ -80,6 +77,7 @@ static void dvd_set_speed(char *device, unsigned speed)
     break;
   }
 
+  memset(&sghdr, 0, sizeof(sghdr));
   sghdr.interface_id = 'S';
   sghdr.timeout = 5000;
   sghdr.dxfer_direction = SG_DXFER_TO_DEV;
@@ -90,9 +88,11 @@ static void dvd_set_speed(char *device, unsigned speed)
   sghdr.dxferp = buffer;
   sghdr.cmdp = cmd;
 
+  memset(cmd, 0, sizeof(cmd));
   cmd[0] = GPCMD_SET_STREAMING;
   cmd[10] = sizeof(buffer);
 
+  memset(buffer, 0, sizeof(buffer));
   /* first sector 0, last sector 0xffffffff */
   AV_WB32(buffer + 8, 0xffffffff);
 
