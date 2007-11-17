@@ -2800,7 +2800,11 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	break;
     case 3:	// "pausing_toggle"
 	mpctx->was_paused = !mpctx->was_paused;
-	// fall through
+	if (mpctx->was_paused)
+	    mpctx->osd_function = OSD_PAUSE;
+	else if (mpctx->osd_function == OSD_PAUSE)
+	    mpctx->osd_function = OSD_PLAY;
+	break;
     case 2:	// "pausing_keep"
 	if (mpctx->was_paused)
 	    mpctx->osd_function = OSD_PAUSE;
