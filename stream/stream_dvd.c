@@ -65,10 +65,6 @@ static void dvd_set_speed(char *device, unsigned speed)
 
   if (!S_ISBLK(st.st_mode)) return; /* not a block device */
 
-  if (speed < 100) { /* speed times 1350KB/s (DVD single speed) */
-    speed *= 1350;
-  }
-
   switch (speed) {
   case 0: /* don't touch speed setting */
     return;
@@ -79,6 +75,9 @@ static void dvd_set_speed(char *device, unsigned speed)
     mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDrestoreSpeed);
     break;
   default: /* limit to <speed> KB/s */
+    // speed < 100 is multiple of DVD single speed (1350KB/s)
+    if (speed < 100)
+      speed *= 1350;
     mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitSpeed, speed);
     break;
   }
