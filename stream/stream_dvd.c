@@ -95,15 +95,13 @@ static void dvd_set_speed(char *device, unsigned speed)
   memset(buffer, 0, sizeof(buffer));
   /* first sector 0, last sector 0xffffffff */
   AV_WB32(buffer + 8, 0xffffffff);
-
   if (speed == -1)
     buffer[0] = 4; /* restore default */
   else {
-  /* <speed> kilobyte */
-  AV_WB32(buffer + 12, speed);
-  AV_WB32(buffer + 20, speed);
+    /* <speed> kilobyte */
+    AV_WB32(buffer + 12, speed);
+    AV_WB32(buffer + 20, speed);
   }
-
   /* 1 second */
   AV_WB16(buffer + 18, 1000);
   AV_WB16(buffer + 26, 1000);
