@@ -95,10 +95,8 @@ static void dvd_set_speed(char *device, unsigned speed)
   cmd[0] = GPCMD_SET_STREAMING;
   cmd[10] = sizeof(buffer);
 
-  buffer[8] = 0xff;  /* first sector 0, last sector 0xffffffff */
-  buffer[9] = 0xff;
-  buffer[10] = 0xff;
-  buffer[11] = 0xff;
+  /* first sector 0, last sector 0xffffffff */
+  AV_WB32(buffer + 8, 0xffffffff);
 
   /* <speed> kilobyte */
   AV_WB32(buffer + 12, speed);
