@@ -115,6 +115,8 @@ static int fill_queue(struct af_instance_s* af, af_data_t* data, int offset)
   return offset - offset_unchanged;
 }
 
+#define UNROLL_PADDING (4*4)
+
 static int best_overlap_offset_float(af_scaletempo_t* s)
 {
   float *pw, *po, *ppc, *search_start;
@@ -174,8 +176,12 @@ static int best_overlap_offset_s16(af_scaletempo_t* s)
     ps  += s->samples_overlap - s->num_channels;
     i  = -(s->samples_overlap - s->num_channels);
     do {
-      corr += ppc[i] * ps[i];
-    } while (++i < 0);
+      corr += ppc[i+0] * ps[i+0];
+      corr += ppc[i+1] * ps[i+1];
+      corr += ppc[i+2] * ps[i+2];
+      corr += ppc[i+3] * ps[i+3];
+      i += 4;
+    } while (i < 0);
     if (corr > best_corr) {
       best_corr = corr;
       best_off  = off;
@@ -368,12 +374,13 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         int64_t t = frames_overlap;
         int32_t n = 8589934588LL / (t * t);  // 4 * (2^31 - 1) / t^2
         int32_t* pw;
-        s->buf_pre_corr = realloc(s->buf_pre_corr, s->bytes_overlap * 2);
+        s->buf_pre_corr = realloc(s->buf_pre_corr, s->bytes_overlap * 2 + UNROLL_PADDING);
         s->table_window = realloc(s->table_window, s->bytes_overlap * 2 - nch * bps * 2);
         if(!s->buf_pre_corr || !s->table_window) {
           af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
           return AF_ERROR;
         }
+        memset((char *)s->buf_pre_corr + s->bytes_overlap * 2, 0, UNROLL_PADDING);
         pw = s->table_window;
         for (i=1; i<frames_overlap; i++) {
           int32_t v = ( i * (t - i) * n ) >> 15;
@@ -406,7 +413,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     s->bytes_queue
       = (s->frames_search + frames_stride + frames_overlap) * bps * nch;
-    s->buf_queue = realloc(s->buf_queue, s->bytes_queue);
+    s->buf_queue = realloc(s->buf_queue, s->bytes_queue + UNROLL_PADDING);
     if(!s->buf_queue) {
       af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
       return AF_ERROR;
