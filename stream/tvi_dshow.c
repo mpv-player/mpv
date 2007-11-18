@@ -2411,6 +2411,9 @@ static HRESULT build_video_chain(priv_t *priv)
 {
     HRESULT hr;
 
+    if(priv->v_buf)
+        return S_OK;
+
     if (priv->pVideoStreamConfig) {
 	hr = OLE_CALL_ARGS(priv->pVideoStreamConfig, SetFormat, priv->pmtVideo);
 	if (FAILED(hr)) {
@@ -2446,6 +2449,9 @@ static HRESULT build_video_chain(priv_t *priv)
 static HRESULT build_audio_chain(priv_t *priv)
 {
     HRESULT hr;
+
+    if(priv->a_buf)
+        return S_OK;
 
     if(priv->immediate_mode)
         return S_OK;
@@ -2488,6 +2494,9 @@ static HRESULT build_vbi_chain(priv_t *priv)
 {
 #ifdef HAVE_TV_TELETEXT
     HRESULT hr;
+
+    if(priv->vbi_buf)
+        return S_OK;
 
     if(priv->tv_param->tdevice)
     {
