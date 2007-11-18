@@ -1303,11 +1303,11 @@ static void get_capabilities(priv_t * priv)
  */
 static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
 			       grabber_ringbuffer_t * pbuf,
-			       AM_MEDIA_TYPE * pmt, const GUID* ppin_category)
+			       AM_MEDIA_TYPE ** arpmt,
+			       AM_MEDIA_TYPE* pmt, const GUID* ppin_category)
 {
     HRESULT hr;
-
-    AM_MEDIA_TYPE conn_mt; //Media type of established connection
+    int nFormatProbed = 0;
 
     IPin *pSGIn;
     IPin *pSGOut;
@@ -1320,12 +1320,16 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
     ISampleGrabber *pSG = NULL;
 
     hr=S_OK;
-    CopyMediaType(&conn_mt, pmt);
+
+    //No supported formats
+    if(!arpmt[0])
+        return E_FAIL;
+
     do{
         hr = OLE_CALL_ARGS(priv->pBuilder, FindPin,
     		   (IUnknown *) pCaptureFilter,
     		   PINDIR_OUTPUT, ppin_category,
-    		   &(pmt->majortype), FALSE, 0, &pCapturePin);
+    		   &(arpmt[nFormatProbed]->majortype), FALSE, 0, &pCapturePin);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: FindPin(pCapturePin) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
@@ -1365,7 +1369,7 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: QueryInterface(IID_ISampleGrabber) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        hr = OLE_CALL_ARGS(pSG, SetMediaType, pmt);	//set desired mediatype
+        hr = OLE_CALL_ARGS(pSG, SetMediaType, arpmt[nFormatProbed]);	//set desired mediatype
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetMediaType(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
@@ -1389,8 +1393,8 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
         }
         OLE_RELEASE_SAFE(pSG);
 
-        if(priv->tv_param->normalize_audio_chunks && !memcmp(&(pmt->majortype),&(MEDIATYPE_Audio),16)){
-            set_buffer_preference(20,(WAVEFORMATEX*)(pmt->pbFormat),pCapturePin,pSGIn);
+        if(priv->tv_param->normalize_audio_chunks && !memcmp(&(arpmt[nFormatProbed]->majortype),&(MEDIATYPE_Audio),16)){
+            set_buffer_preference(20,(WAVEFORMATEX*)(arpmt[nFormatProbed]->pbFormat),pCapturePin,pSGIn);
         }
 
         /* connecting filters together: VideoCapture --> SampleGrabber */
@@ -1399,7 +1403,8 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: Unable to create pCapturePin<->pSGIn connection. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        hr = OLE_CALL_ARGS(pCapturePin, ConnectionMediaType, &conn_mt);
+
+        hr = OLE_CALL_ARGS(pCapturePin, ConnectionMediaType, pmt);
         if(FAILED(hr))
         {
             mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_GetActualMediatypeFailed, (unsigned int)hr);
@@ -1451,7 +1456,7 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
             /*
                Prevent ending VBI chain with NullRenderer filter, because this causes VBI pin disconnection
             */
-            if(memcmp(&(pmt->majortype),&MEDIATYPE_VBI,16)){
+            if(memcmp(&(arpmt[nFormatProbed]->majortype),&MEDIATYPE_VBI,16)){
                 /* connecting filters together: SampleGrabber --> NullRenderer */
                 hr = OLE_CALL_ARGS(priv->pGraph, Connect, pSGOut, pNRIn);
                 if(FAILED(hr)){
@@ -1464,10 +1469,6 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
 
         hr = S_OK;
     } while(0);
-
-    FreeMediaType(pmt);
-    CopyMediaType(pmt, &conn_mt);
-    FreeMediaType(&conn_mt);
 
     OLE_RELEASE_SAFE(pSGF);
     OLE_RELEASE_SAFE(pSGIn);
@@ -2443,7 +2444,7 @@ static HRESULT build_video_chain(priv_t *priv)
     }
 
     priv->v_buf->buffersize *= 1024 * 1024;
-    hr=build_sub_graph(priv, priv->pVideoFilter, priv->v_buf, priv->pmtVideo,&PIN_CATEGORY_CAPTURE);
+    hr=build_sub_graph(priv, priv->pVideoFilter, priv->v_buf, priv->arpmtVideo, priv->pmtVideo, &PIN_CATEGORY_CAPTURE);
     if(FAILED(hr)){
         mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVideoSubGraph,(unsigned int)hr);
         return hr;
@@ -2486,7 +2487,7 @@ static HRESULT build_audio_chain(priv_t *priv)
                 (((VIDEOINFOHEADER *) priv->pmtVideo->pbFormat)->dwBitRate),
                 (((WAVEFORMATEX *) (priv->pmtAudio->pbFormat))->nAvgBytesPerSec));
 
-        hr=build_sub_graph(priv, priv->pAudioFilter, priv->a_buf,priv->pmtAudio,&PIN_CATEGORY_CAPTURE);
+        hr=build_sub_graph(priv, priv->pAudioFilter, priv->a_buf,priv->arpmtAudio,priv->pmtAudio,&PIN_CATEGORY_CAPTURE);
         if(FAILED(hr)){
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildAudioSubGraph,(unsigned int)hr);
             return 0;
@@ -2505,6 +2506,7 @@ static HRESULT build_vbi_chain(priv_t *priv)
 {
 #ifdef HAVE_TV_TELETEXT
     HRESULT hr;
+    AM_MEDIA_TYPE* arpmtVBI[2] = { priv->pmtVBI, NULL };
 
     if(priv->vbi_buf)
         return S_OK;
@@ -2519,7 +2521,7 @@ static HRESULT build_vbi_chain(priv_t *priv)
 
         priv->pmtVBI=calloc(1,sizeof(AM_MEDIA_TYPE));
         priv->pmtVBI->majortype=MEDIATYPE_VBI;
-        hr=build_sub_graph(priv, priv->pVideoFilter, priv->vbi_buf,priv->pmtVBI,&PIN_CATEGORY_VBI);
+        hr=build_sub_graph(priv, priv->pVideoFilter, priv->vbi_buf,arpmtVBI,NULL,&PIN_CATEGORY_VBI);
         if(FAILED(hr)){
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVBISubGraph,(unsigned int)hr);
             return 0;
@@ -3076,6 +3078,8 @@ static int control(priv_t * priv, int cmd, void *arg)
     case TVI_CONTROL_VID_SET_FORMAT:
 	{
 	    int fcc, i;
+	    void* tmp;
+
 	    if (priv->state)
 		return TVI_CONTROL_FALSE;
 	    fcc = *(int *) arg;
@@ -3089,7 +3093,15 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (!priv->arpmtVideo[i])
 		return TVI_CONTROL_FALSE;
 
-	    priv->nVideoFormatUsed = i;
+	    tmp = priv->arpmtVideo[0];
+	    priv->arpmtVideo[0] = priv->arpmtVideo[i];
+	    priv->arpmtVideo[i] = tmp;
+
+	    tmp = priv->arVideoCaps[0];
+	    priv->arVideoCaps[0] = priv->arVideoCaps[i];
+	    priv->arVideoCaps[i] = tmp;
+
+	    priv->nVideoFormatUsed = 0;
 
 	    if (priv->pmtVideo)
 		DeleteMediaType(priv->pmtVideo);
