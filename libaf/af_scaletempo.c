@@ -60,14 +60,14 @@ typedef struct af_scaletempo_s
   int     samples_standing;
   int     bytes_overlap;
   int     bytes_standing;
-  int8_t* buf_overlap;
-  int8_t* table_blend;
-  void    (*output_overlap)(struct af_scaletempo_s* s, int8_t* out_buf, int bytes_off);
+  void*   buf_overlap;
+  void*   table_blend;
+  void    (*output_overlap)(struct af_scaletempo_s* s, void* out_buf, int bytes_off);
   // best overlap
   int     frames_search;
   int     num_channels;
-  int8_t* buf_pre_corr;
-  int8_t* table_window;
+  void*   buf_pre_corr;
+  void*   table_window;
   int     (*best_overlap_offset)(struct af_scaletempo_s* s);
   short   shift_corr;
   // command line
@@ -123,9 +123,10 @@ static int best_overlap_offset_float(af_scaletempo_t* s)
   int best_off = 0;
   int i, off;
 
-  pw  = (float*)s->table_window;
-  po  = (float*)s->buf_overlap + s->num_channels;
-  ppc = (float*)s->buf_pre_corr;
+  pw  = s->table_window;
+  po  = s->buf_overlap;
+  po += s->num_channels;
+  ppc = s->buf_pre_corr;
   for (i=s->num_channels; i<s->samples_overlap; i++) {
     *ppc++ = *pw++ * *po++;
   }
@@ -134,7 +135,7 @@ static int best_overlap_offset_float(af_scaletempo_t* s)
   for (off=0; off<s->frames_search; off++) {
     float corr = 0;
     float* ps = search_start;
-    ppc = (float*)s->buf_pre_corr;
+    ppc = s->buf_pre_corr;
     for (i=s->num_channels; i<s->samples_overlap; i++) {
       corr += *ppc++ * *ps++;
     }
@@ -156,9 +157,10 @@ static int best_overlap_offset_s16(af_scaletempo_t* s)
   int best_off = 0;
   int i, off;
 
-  pw  = (int32_t*)s->table_window;
-  po  = (int16_t*)s->buf_overlap + s->num_channels;
-  ppc = (int32_t*)s->buf_pre_corr;
+  pw  = s->table_window;
+  po  = s->buf_overlap;
+  po += s->num_channels;
+  ppc = s->buf_pre_corr;
   for (i=s->num_channels; i<s->samples_overlap; i++) {
     *ppc++ = ( *pw++ * *po++ ) >> 15;
   }
@@ -167,7 +169,7 @@ static int best_overlap_offset_s16(af_scaletempo_t* s)
   for (off=0; off<s->frames_search; off++) {
     int32_t corr = 0;
     int16_t* ps = search_start;
-    ppc = (int32_t*)s->buf_pre_corr;
+    ppc = s->buf_pre_corr;
     for (i=s->num_channels; i<s->samples_overlap; i++) {
       corr += ( *ppc++ * *ps++ ) >> s->shift_corr;
     }
@@ -181,24 +183,24 @@ static int best_overlap_offset_s16(af_scaletempo_t* s)
   return best_off * 2 * s->num_channels;
 }
 
-static void output_overlap_float(af_scaletempo_t* s, int8_t* buf_out,
+static void output_overlap_float(af_scaletempo_t* s, void* buf_out,
 				  int bytes_off)
 {
-  float* pout = (float*)buf_out;
-  float* pb   = (float*)s->table_blend;
-  float* po   = (float*)s->buf_overlap;
+  float* pout = buf_out;
+  float* pb   = s->table_blend;
+  float* po   = s->buf_overlap;
   float* pin  = (float*)(s->buf_queue + bytes_off);
   int i;
   for (i=0; i<s->samples_overlap; i++) {
     *pout++ = *po - *pb++ * ( *po - *pin++ ); po++;
   }
 }
-static void output_overlap_s16(af_scaletempo_t* s, int8_t* buf_out,
+static void output_overlap_s16(af_scaletempo_t* s, void* buf_out,
 			       int bytes_off)
 {
-  int16_t* pout = (int16_t*)buf_out;
-  int32_t* pb   = (int32_t*)s->table_blend;
-  int16_t* po   = (int16_t*)s->buf_overlap;
+  int16_t* pout = buf_out;
+  int32_t* pb   = s->table_blend;
+  int16_t* po   = s->buf_overlap;
   int16_t* pin  = (int16_t*)(s->buf_queue + bytes_off);
   int i;
   for (i=0; i<s->samples_overlap; i++) {
@@ -333,7 +335,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       }
       bzero(s->buf_overlap, s->bytes_overlap);
       if (use_int) {
-        int32_t* pb = (int32_t*)s->table_blend;
+        int32_t* pb = s->table_blend;
         int64_t blend = 0;
         for (i=0; i<frames_overlap; i++) {
           int32_t v = blend / frames_overlap;
@@ -344,7 +346,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         }
         s->output_overlap = output_overlap_s16;
       } else {
-        float* pb = (float*)s->table_blend;
+        float* pb = s->table_blend;
         for (i=0; i<frames_overlap; i++) {
           float v = i / (float)frames_overlap;
           for (j=0; j<nch; j++) {
@@ -369,7 +371,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
           af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
           return AF_ERROR;
         }
-        pw = (int32_t*)s->table_window;
+        pw = s->table_window;
         for (i=1; i<frames_overlap; i++) {
           int32_t v = ( i * (t - i) * n ) >> 15;
           for (j=0; j<nch; j++) {
@@ -386,7 +388,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
           af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
           return AF_ERROR;
         }
-        pw = (float*)s->table_window;
+        pw = s->table_window;
         for (i=1; i<frames_overlap; i++) {
           float v = i * (frames_overlap - i);
           for (j=0; j<nch; j++) {
