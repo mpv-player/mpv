@@ -2021,18 +2021,29 @@ static HRESULT get_available_formats_stream(IAMStreamConfig *
 
 	pBuf = (void **) malloc((count + 1) * sizeof(void *));
 	if (pBuf) {
+	    int dst = 0;
 	    memset(pBuf, 0, (count + 1) * sizeof(void *));
 
 	    for (i = 0; i < count; i++) {
-		pBuf[i] = malloc(size);
+		pBuf[dst] = malloc(size);
 
-		if (!pBuf[i])
+		if (!pBuf[dst])
 		    break;
 
 		hr = OLE_CALL_ARGS(pStreamConfig, GetStreamCaps, i,
-			       &(arpmt[i]), pBuf[i]);
+			       &(arpmt[dst]), pBuf[dst]);
 		if (FAILED(hr))
 		    break;
+		if(!memcmp(&(arpmt[dst]->majortype), &MEDIATYPE_Video, 16) && !subtype2imgfmt(&(arpmt[dst]->subtype)))
+		{
+		    DisplayMediaType("Skipping unsupported video format", arpmt[dst]);
+		    DeleteMediaType(arpmt[dst]);
+		    free(pBuf[dst]);
+		    arpmt[dst]=NULL;
+		    pBuf[dst]=NULL;
+		    continue;
+		}
+		dst++;
 	    }
 	    if (i == count) {
 		*parpmtMedia = arpmt;
