@@ -60,7 +60,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
 
 static const struct {
   const char *type;
-  uint32_t *format;
+  uint32_t format;
 } type2format[] = {
   { "bmp",  mmioFOURCC('b', 'm', 'p', ' ') },
   { "jpeg", mmioFOURCC('I', 'J', 'P', 'G') },
