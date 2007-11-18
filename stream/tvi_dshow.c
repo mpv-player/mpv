@@ -1320,6 +1320,7 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
     ISampleGrabber *pSG = NULL;
 
     hr=S_OK;
+    CopyMediaType(&conn_mt, pmt);
     do{
         hr = OLE_CALL_ARGS(priv->pBuilder, FindPin,
     		   (IUnknown *) pCaptureFilter,
@@ -1402,7 +1403,6 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
         if(FAILED(hr))
         {
             mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_GetActualMediatypeFailed, (unsigned int)hr);
-            CopyMediaType(&conn_mt, pmt);
         }
 
         if(priv->tv_param->hidden_video_renderer){
