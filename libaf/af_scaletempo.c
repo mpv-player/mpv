@@ -170,9 +170,12 @@ static int best_overlap_offset_s16(af_scaletempo_t* s)
     int32_t corr = 0;
     int16_t* ps = search_start;
     ppc = s->buf_pre_corr;
-    for (i=s->num_channels; i<s->samples_overlap; i++) {
+    ppc += s->samples_overlap - s->num_channels;
+    ps  += s->samples_overlap - s->num_channels;
+    i  = -(s->samples_overlap - s->num_channels);
+    do {
       corr += ( *ppc++ * *ps++ ) >> s->shift_corr;
-    }
+    } while (++i < 0);
     if (corr > best_corr) {
       best_corr = corr;
       best_off  = off;
