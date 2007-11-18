@@ -155,7 +155,8 @@ static int best_overlap_offset_s16(af_scaletempo_t* s)
   int16_t *po, *search_start;
   int32_t best_corr = INT_MIN;
   int best_off = 0;
-  int i, off;
+  int off;
+  long i;
 
   pw  = s->table_window;
   po  = s->buf_overlap;
