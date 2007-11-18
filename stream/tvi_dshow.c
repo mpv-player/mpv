@@ -1369,11 +1369,6 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: QueryInterface(IID_ISampleGrabber) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        hr = OLE_CALL_ARGS(pSG, SetMediaType, arpmt[nFormatProbed]);	//set desired mediatype
-        if(FAILED(hr)){
-            mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetMediaType(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
-            break;
-        }
     //    hr = OLE_CALL_ARGS(pSG, SetCallback, (ISampleGrabberCB *) pCSGCB, 1);	//we want to receive copy of sample's data
         hr = OLE_CALL_ARGS(pSG, SetCallback, (ISampleGrabberCB *) priv->pCSGCB, 0);	//we want to receive sample
 
@@ -1391,18 +1386,22 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetBufferSamples(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        OLE_RELEASE_SAFE(pSG);
-
         if(priv->tv_param->normalize_audio_chunks && !memcmp(&(arpmt[nFormatProbed]->majortype),&(MEDIATYPE_Audio),16)){
             set_buffer_preference(20,(WAVEFORMATEX*)(arpmt[nFormatProbed]->pbFormat),pCapturePin,pSGIn);
         }
 
+        hr = OLE_CALL_ARGS(pSG, SetMediaType, arpmt[nFormatProbed]);	//set desired mediatype
+        if(FAILED(hr)){
+            mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetMediaType(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
+            break;
+        }
         /* connecting filters together: VideoCapture --> SampleGrabber */
         hr = OLE_CALL_ARGS(priv->pGraph, Connect, pCapturePin, pSGIn);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: Unable to create pCapturePin<->pSGIn connection. Error:0x%x\n", (unsigned int)hr);
             break;
         }
+        OLE_RELEASE_SAFE(pSG);
 
         hr = OLE_CALL_ARGS(pCapturePin, ConnectionMediaType, pmt);
         if(FAILED(hr))
