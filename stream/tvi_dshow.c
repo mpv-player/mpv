@@ -1393,17 +1393,17 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
         for(nFormatProbed=0; arpmt[nFormatProbed]; nFormatProbed++)
         {
             DisplayMediaType("Probing format", arpmt[nFormatProbed]);
-        hr = OLE_CALL_ARGS(pSG, SetMediaType, arpmt[nFormatProbed]);	//set desired mediatype
-        if(FAILED(hr)){
-            mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetMediaType(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
-            continue;
-        }
-        /* connecting filters together: VideoCapture --> SampleGrabber */
-        hr = OLE_CALL_ARGS(priv->pGraph, Connect, pCapturePin, pSGIn);
-        if(FAILED(hr)){
-            mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: Unable to create pCapturePin<->pSGIn connection. Error:0x%x\n", (unsigned int)hr);
-            continue;
-        }
+            hr = OLE_CALL_ARGS(pSG, SetMediaType, arpmt[nFormatProbed]);	//set desired mediatype
+            if(FAILED(hr)){
+                mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetMediaType(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
+                continue;
+            }
+            /* connecting filters together: VideoCapture --> SampleGrabber */
+            hr = OLE_CALL_ARGS(priv->pGraph, Connect, pCapturePin, pSGIn);
+            if(FAILED(hr)){
+                mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: Unable to create pCapturePin<->pSGIn connection. Error:0x%x\n", (unsigned int)hr);
+                continue;
+            }
 	    break;
         }
         OLE_RELEASE_SAFE(pSG);
