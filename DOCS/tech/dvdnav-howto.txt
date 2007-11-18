@@ -20,7 +20,9 @@ $ ./configure2 && make
 install it as root with
 $ make install
 
-Cd to MPlyer's source tree and run ./configure with your preferred parameters.
+Cd to MPlyer's source tree and configure mplayer with the following command:
+$ ./configure --disable-dvdread-internal
+followed by your preferred parameters.
 After ./configure is run it should say that support for dvdnav and dvdread was enabled,
 otherwise investigate in configure.log the sections relative to the two libraries
 and try to understand what went wrong; if you can't solve the problem yourself
