@@ -2419,6 +2419,8 @@ static HRESULT build_video_chain(priv_t *priv)
     }
 
     priv->v_buf=calloc(1,sizeof(grabber_ringbuffer_t));
+    if(!priv->v_buf)
+        return E_OUTOFMEMORY;
 
     if (priv->tv_param->buffer_size >= 0) {
 	priv->v_buf->buffersize = priv->tv_param->buffer_size;
@@ -2458,6 +2460,8 @@ static HRESULT build_audio_chain(priv_t *priv)
 
     if(priv->pmtAudio){
         priv->a_buf=calloc(1,sizeof(grabber_ringbuffer_t));
+        if(!priv->a_buf)
+            return E_OUTOFMEMORY;
 
         /* let the audio buffer be the same size (in seconds) than video one */
         priv->a_buf->buffersize=audio_buf_size_from_video(
@@ -2488,6 +2492,9 @@ static HRESULT build_vbi_chain(priv_t *priv)
     if(priv->tv_param->tdevice)
     {
         priv->vbi_buf=calloc(1,sizeof(grabber_ringbuffer_t));
+        if(!priv->vbi_buf)
+            return E_OUTOFMEMORY;
+
         init_ringbuffer(priv->vbi_buf,24,priv->tsp.bufsize);
 
         priv->pmtVBI=calloc(1,sizeof(AM_MEDIA_TYPE));
