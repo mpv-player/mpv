@@ -367,7 +367,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         int32_t* pw;
         s->buf_pre_corr = realloc(s->buf_pre_corr, s->bytes_overlap * 2);
         s->table_window = realloc(s->table_window, s->bytes_overlap * 2 - nch * bps * 2);
-        if(!s->buf_pre_corr && !s->table_window) {
+        if(!s->buf_pre_corr || !s->table_window) {
           af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
           return AF_ERROR;
         }
