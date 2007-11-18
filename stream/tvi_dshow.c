@@ -3090,6 +3090,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	{
 	    int fcc, i;
 	    void* tmp;
+	    int result = TVI_CONTROL_TRUE;
 
 	    if (priv->state)
 		return TVI_CONTROL_FALSE;
@@ -3102,7 +3103,31 @@ static int control(priv_t * priv, int cmd, void *arg)
 		    (priv->arpmtVideo[i], fcc, priv->width, priv->height))
 		    break;
 	    if (!priv->arpmtVideo[i])
-		return TVI_CONTROL_FALSE;
+	    {
+		int fps = 0;
+		VIDEOINFOHEADER* Vhdr = NULL;
+		AM_MEDIA_TYPE *pmt;
+
+		mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: will try also use undeclared video format: %dx%d, %s\n",priv->width, priv->height, vo_format_name(fcc));
+
+		if (priv->arpmtVideo[0])
+		    Vhdr = (VIDEOINFOHEADER *) priv->arpmtVideo[0]->pbFormat;
+
+		if(Vhdr && Vhdr->bmiHeader.biSizeImage)
+		    fps = Vhdr->dwBitRate / (8 * Vhdr->bmiHeader.biSizeImage);
+
+		pmt=create_video_format(fcc, priv->width, priv->height, fps);
+		if(!pmt)
+		{
+		    mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: Unable to create AM_MEDIA_TYPE structure for given format\n");
+		    return TVI_CONTROL_FALSE;
+		}
+		priv->arpmtVideo=realloc(priv->arpmtVideo, (i+2)*sizeof(AM_MEDIA_TYPE*));
+		priv->arpmtVideo[i+1] = NULL;
+		priv->arpmtVideo[i] = pmt;
+
+		result = TVI_CONTROL_FALSE;
+	    }
 
 	    tmp = priv->arpmtVideo[0];
 	    priv->arpmtVideo[0] = priv->arpmtVideo[i];
@@ -3125,7 +3150,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    extract_video_format(priv->arpmtVideo[priv->nVideoFormatUsed],
 				 &(priv->fcc), &(priv->width),
 				 &(priv->height));
-	    return TVI_CONTROL_TRUE;
+	    return result;
 	}
     case TVI_CONTROL_VID_GET_FORMAT:
 	{
