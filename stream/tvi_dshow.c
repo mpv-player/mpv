@@ -2402,15 +2402,12 @@ static inline int audio_buf_size_from_video(int video_buf_size, int video_bitrat
 }
 
 /**
- * \brief playback/capture real start
+ * \brief build video stream chain in graph
+ * \param priv private data structure
  *
- * \param priv driver's private data structure 
- *
- * \return 1 if success, 0 - otherwise
- *
- * TODO: move some code from init() here
- */                          
-static int start(priv_t * priv)
+ * \return S_OK if chain was built successfully, apropriate error code otherwise
+ */
+static HRESULT build_video_chain(priv_t *priv)
 {
     HRESULT hr;
 
@@ -2418,14 +2415,6 @@ static int start(priv_t * priv)
 	hr = OLE_CALL_ARGS(priv->pVideoStreamConfig, SetFormat, priv->pmtVideo);
 	if (FAILED(hr)) {
 	    mp_msg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableSelectVideoFormat, (unsigned int)hr);
-	}
-    }
-
-    if (!priv->immediate_mode && priv->pAudioStreamConfig) {
-	hr = OLE_CALL_ARGS(priv->pAudioStreamConfig, SetFormat,
-		       priv->pmtAudio);
-	if (FAILED(hr)) {
-	    mp_msg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableSelectAudioFormat, (unsigned int)hr);
 	}
     }
 
@@ -2441,9 +2430,33 @@ static int start(priv_t * priv)
     hr=build_sub_graph(priv, priv->pVideoFilter, priv->v_buf, priv->pmtVideo,&PIN_CATEGORY_CAPTURE);
     if(FAILED(hr)){
         mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVideoSubGraph,(unsigned int)hr);
-        return 0;
+        return hr;
     }
-    if(priv->pmtAudio && !priv->immediate_mode){
+    return S_OK;
+}
+
+/**
+ * \brief build audio stream chain in graph
+ * \param priv private data structure
+ *
+ * \return S_OK if chain was built successfully, apropriate error code otherwise
+ */
+static HRESULT build_audio_chain(priv_t *priv)
+{
+    HRESULT hr;
+
+    if(priv->immediate_mode)
+        return S_OK;
+
+    if (priv->pAudioStreamConfig) {
+	hr = OLE_CALL_ARGS(priv->pAudioStreamConfig, SetFormat,
+		       priv->pmtAudio);
+	if (FAILED(hr)) {
+	    mp_msg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableSelectAudioFormat, (unsigned int)hr);
+	}
+    }
+
+    if(priv->pmtAudio){
         priv->a_buf=calloc(1,sizeof(grabber_ringbuffer_t));
 
         /* let the audio buffer be the same size (in seconds) than video one */
@@ -2458,8 +2471,20 @@ static int start(priv_t * priv)
             return 0;
         }
     }
+    return S_OK;
+}
 
+/**
+ * \brief build VBI stream chain in graph
+ * \param priv private data structure
+ *
+ * \return S_OK if chain was built successfully, apropriate error code otherwise
+ */
+static HRESULT build_vbi_chain(priv_t *priv)
+{
 #ifdef HAVE_TV_TELETEXT
+    HRESULT hr;
+
     if(priv->tv_param->tdevice)
     {
         priv->vbi_buf=calloc(1,sizeof(grabber_ringbuffer_t));
@@ -2474,6 +2499,34 @@ static int start(priv_t * priv)
         }
     }
 #endif
+    return S_OK;
+}
+
+/**
+ * \brief playback/capture real start
+ *
+ * \param priv driver's private data structure 
+ *
+ * \return 1 if success, 0 - otherwise
+ *
+ * TODO: move some code from init() here
+ */                          
+static int start(priv_t * priv)
+{
+    HRESULT hr;
+
+    hr = build_video_chain(priv);
+    if(FAILED(hr))
+        return 0;
+
+    hr = build_audio_chain(priv);
+    if(FAILED(hr))
+        return 0;
+
+    hr = build_vbi_chain(priv);
+    if(FAILED(hr))
+        return 0;
+
     /*
        Graph is ready to capture. Starting graph.
      */
