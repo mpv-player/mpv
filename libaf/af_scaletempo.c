@@ -69,7 +69,6 @@ typedef struct af_scaletempo_s
   void*   buf_pre_corr;
   void*   table_window;
   int     (*best_overlap_offset)(struct af_scaletempo_s* s);
-  short   shift_corr;
   // command line
   float   scale_nominal;
   float   ms_stride;
@@ -153,7 +152,7 @@ static int best_overlap_offset_s16(af_scaletempo_t* s)
 {
   int32_t *pw, *ppc;
   int16_t *po, *search_start;
-  int32_t best_corr = INT_MIN;
+  int64_t best_corr = INT64_MIN;
   int best_off = 0;
   int off;
   long i;
@@ -168,12 +167,14 @@ static int best_overlap_offset_s16(af_scaletempo_t* s)
 
   search_start = (int16_t*)s->buf_queue + s->num_channels;
   for (off=0; off<s->frames_search; off++) {
-    int32_t corr = 0;
+    int64_t corr = 0;
     int16_t* ps = search_start;
     ppc = s->buf_pre_corr;
+    ppc += s->samples_overlap - s->num_channels;
+    ps  += s->samples_overlap - s->num_channels;
     i  = -(s->samples_overlap - s->num_channels);
     do {
-      corr += ( *ppc++ * *ps++ ) >> s->shift_corr;
+      corr += ppc[i] * ps[i];
     } while (++i < 0);
     if (corr > best_corr) {
       best_corr = corr;
@@ -380,7 +381,6 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
             *pw++ = v;
           }
         }
-        s->shift_corr = av_log2( 2*(s->samples_overlap - nch) - 1 );
         s->best_overlap_offset = best_overlap_offset_s16;
       } else {
         float* pw;
