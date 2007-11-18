@@ -3131,6 +3131,11 @@ static int control(priv_t * priv, int cmd, void *arg)
 	{
             if(!priv->pmtVideo)
                 return TVI_CONTROL_FALSE;
+	    /*
+	       Build video chain (for video format negotiation).
+	       If this was done before, routine will do nothing.
+	    */
+	    build_video_chain(priv);
 	    DisplayMediaType("VID_GET_FORMAT", priv->pmtVideo);
 	    if (priv->fcc) {
 		*(int *) arg = priv->fcc;
