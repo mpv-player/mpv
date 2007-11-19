@@ -127,6 +127,8 @@ typedef struct {
     double tStart;              ///< pts of first sample (first sample should have pts 0)
 } grabber_ringbuffer_t;
 
+typedef enum { unknown, video, audio, vbi } stream_type;
+
 /**
      CSampleGrabberCD definition
 */
@@ -136,6 +138,23 @@ typedef struct CSampleGrabberCB {
     GUID interfaces[2];
     grabber_ringbuffer_t *pbuf;
 } CSampleGrabberCB;
+
+/**
+    Chain related structure
+ */
+typedef struct {
+    stream_type type;                  ///< stream type
+
+    IBaseFilter *pCaptureFilter;       ///< capture device filter
+    IAMStreamConfig *pStreamConfig;    ///< for configuring stream
+
+    grabber_ringbuffer_t *rbuf;        ///< sample frabber data
+
+    AM_MEDIA_TYPE *pmt;                ///< stream properties.
+    int nFormatUsed;                   ///< index of used format
+    AM_MEDIA_TYPE **arpmt;             ///< available formats
+    void** arStreamCaps;               ///< VIDEO_STREAM_CONFIG_CAPS or AUDIO_STREAM_CONFIG_CAPS
+} chain_t;
 
 typedef struct {
     int dev_index;              ///< capture device index in device list (defaul: 0, first available device)
@@ -157,26 +176,7 @@ typedef struct {
     int first_channel;          ///< channel number of first entry in freq table
     int input;                  ///< used input
 
-    // video related stuff
-    int nVideoFormatUsed;                   ///< index of used video format
-    AM_MEDIA_TYPE **arpmtVideo;             ///< available video formats
-    VIDEO_STREAM_CONFIG_CAPS **arVideoCaps; ///< capabilities of output video
-    AM_MEDIA_TYPE *pmtVideo;                ///< video stream properties
-    grabber_ringbuffer_t *v_buf;
-    IBaseFilter *pVideoFilter;              ///< interface for capture device
-    IAMStreamConfig *pVideoStreamConfig;    ///< for configuring video stream
-
-    // audio related stuff
-    int nAudioFormatUsed;                   ///< index of used audio format
-    AM_MEDIA_TYPE **arpmtAudio;             ///< available audio formats
-    AUDIO_STREAM_CONFIG_CAPS **arAudioCaps; ///< capabilities of output audio
-    AM_MEDIA_TYPE *pmtAudio;                ///< audio stream properties.
-    grabber_ringbuffer_t *a_buf;
-    IBaseFilter *pAudioFilter;              ///< interface for audio capture device (if adevice passed)
-    IAMStreamConfig *pAudioStreamConfig;    ///< for configuring audio stream
-
-    AM_MEDIA_TYPE *pmtVBI;                  ///< available audio formats
-    grabber_ringbuffer_t *vbi_buf;
+    chain_t* chains[3];                     ///< chains' data (0-video, 1-audio, 2-vbi)
 
     IAMTVTuner *pTVTuner;                   ///< interface for tuner device
     IGraphBuilder *pGraph;                  ///< filter graph
@@ -1240,7 +1240,7 @@ static void get_capabilities(priv_t * priv)
     }
 
     if (priv->adev_index != -1) {
-	hr = OLE_CALL_ARGS(priv->pAudioFilter, EnumPins, &pEnum);
+	hr = OLE_CALL_ARGS(priv->chains[1]->pCaptureFilter, EnumPins, &pEnum);
 	if (FAILED(hr))
 	    return;
 	mp_msg(MSGT_TV, MSGL_V, MSGTR_TVI_DS_AvailableAudioInputs);
@@ -2238,8 +2238,8 @@ static double grab_audio_frame(priv_t * priv, char *buffer, int len)
     int bytes = 0;
     int i;
     double pts;
-    grabber_ringbuffer_t *rb = priv->a_buf;
-    grabber_ringbuffer_t *vrb = priv->v_buf;
+    grabber_ringbuffer_t *rb = priv->chains[1]->rbuf;
+    grabber_ringbuffer_t *vrb = priv->chains[0]->rbuf;
 
     if (!rb || !rb->ringbuffer)
 	return 1;
@@ -2286,10 +2286,10 @@ static double grab_audio_frame(priv_t * priv, char *buffer, int len)
  */
 static int get_audio_framesize(priv_t * priv)
 {
-    if (!priv->a_buf)
+    if (!priv->chains[1]->rbuf)
 	return 1;		//no audio       
-    mp_msg(MSGT_TV,MSGL_DBG3,"get_audio_framesize: %d\n",priv->a_buf->blocksize);
-    return priv->a_buf->blocksize;
+    mp_msg(MSGT_TV,MSGL_DBG3,"get_audio_framesize: %d\n",priv->chains[1]->rbuf->blocksize);
+    return priv->chains[1]->rbuf->blocksize;
 }
 
 #ifdef HAVE_TV_TELETEXT
@@ -2323,7 +2323,7 @@ static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
 
 static void vbi_grabber(priv_t* priv)
 {
-    grabber_ringbuffer_t *rb = priv->vbi_buf;
+    grabber_ringbuffer_t *rb = priv->chains[2]->rbuf;
     int i;
     unsigned char* buf;
     if (!rb || !rb->ringbuffer)
@@ -2354,7 +2354,7 @@ static double grab_video_frame(priv_t * priv, char *buffer, int len)
     int bytes = 0;
     int i;
     double pts;
-    grabber_ringbuffer_t *rb = priv->v_buf;
+    grabber_ringbuffer_t *rb = priv->chains[0]->rbuf;
 
     if (!rb || !rb->ringbuffer)
 	return 1;
@@ -2400,10 +2400,10 @@ static int get_video_framesize(priv_t * priv)
 {
 //      if(!priv->pmtVideo) return 1; //no video       
 //      return(priv->pmtVideo->lSampleSize);
-    if (!priv->v_buf)
+    if (!priv->chains[0]->rbuf)
 	return 1;		//no video       
-mp_msg(MSGT_TV,MSGL_DBG3,"geT_video_framesize: %d\n",priv->v_buf->blocksize);
-    return priv->v_buf->blocksize;
+mp_msg(MSGT_TV,MSGL_DBG3,"geT_video_framesize: %d\n",priv->chains[0]->rbuf->blocksize);
+    return priv->chains[0]->rbuf->blocksize;
 }
 
 /**
@@ -2434,28 +2434,28 @@ static HRESULT build_video_chain(priv_t *priv)
 {
     HRESULT hr;
 
-    if(priv->v_buf)
+    if(priv->chains[0]->rbuf)
         return S_OK;
 
-    if (priv->pVideoStreamConfig) {
-	hr = OLE_CALL_ARGS(priv->pVideoStreamConfig, SetFormat, priv->pmtVideo);
+    if (priv->chains[0]->pStreamConfig) {
+	hr = OLE_CALL_ARGS(priv->chains[0]->pStreamConfig, SetFormat, priv->chains[0]->pmt);
 	if (FAILED(hr)) {
 	    mp_msg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableSelectVideoFormat, (unsigned int)hr);
 	}
     }
 
-    priv->v_buf=calloc(1,sizeof(grabber_ringbuffer_t));
-    if(!priv->v_buf)
+    priv->chains[0]->rbuf=calloc(1,sizeof(grabber_ringbuffer_t));
+    if(!priv->chains[0]->rbuf)
         return E_OUTOFMEMORY;
 
     if (priv->tv_param->buffer_size >= 0) {
-	priv->v_buf->buffersize = priv->tv_param->buffer_size;
+	priv->chains[0]->rbuf->buffersize = priv->tv_param->buffer_size;
     } else {
-	priv->v_buf->buffersize = 16;
+	priv->chains[0]->rbuf->buffersize = 16;
     }
 
-    priv->v_buf->buffersize *= 1024 * 1024;
-    hr=build_sub_graph(priv, priv->pVideoFilter, priv->v_buf, priv->arpmtVideo, priv->pmtVideo, &PIN_CATEGORY_CAPTURE);
+    priv->chains[0]->rbuf->buffersize *= 1024 * 1024;
+    hr=build_sub_graph(priv, priv->chains[0]->pCaptureFilter, priv->chains[0]->rbuf, priv->chains[0]->arpmt, priv->chains[0]->pmt, &PIN_CATEGORY_CAPTURE);
     if(FAILED(hr)){
         mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVideoSubGraph,(unsigned int)hr);
         return hr;
@@ -2473,32 +2473,32 @@ static HRESULT build_audio_chain(priv_t *priv)
 {
     HRESULT hr;
 
-    if(priv->a_buf)
+    if(priv->chains[1]->rbuf)
         return S_OK;
 
     if(priv->immediate_mode)
         return S_OK;
 
-    if (priv->pAudioStreamConfig) {
-	hr = OLE_CALL_ARGS(priv->pAudioStreamConfig, SetFormat,
-		       priv->pmtAudio);
+    if (priv->chains[1]->pStreamConfig) {
+	hr = OLE_CALL_ARGS(priv->chains[1]->pStreamConfig, SetFormat,
+		       priv->chains[1]->pmt);
 	if (FAILED(hr)) {
 	    mp_msg(MSGT_TV,MSGL_ERR,MSGTR_TVI_DS_UnableSelectAudioFormat, (unsigned int)hr);
 	}
     }
 
-    if(priv->pmtAudio){
-        priv->a_buf=calloc(1,sizeof(grabber_ringbuffer_t));
-        if(!priv->a_buf)
+    if(priv->chains[1]->pmt){
+        priv->chains[1]->rbuf=calloc(1,sizeof(grabber_ringbuffer_t));
+        if(!priv->chains[1]->rbuf)
             return E_OUTOFMEMORY;
 
         /* let the audio buffer be the same size (in seconds) than video one */
-        priv->a_buf->buffersize=audio_buf_size_from_video(
-                priv->v_buf->buffersize,
-                (((VIDEOINFOHEADER *) priv->pmtVideo->pbFormat)->dwBitRate),
-                (((WAVEFORMATEX *) (priv->pmtAudio->pbFormat))->nAvgBytesPerSec));
+        priv->chains[1]->rbuf->buffersize=audio_buf_size_from_video(
+                priv->chains[0]->rbuf->buffersize,
+                (((VIDEOINFOHEADER *) priv->chains[0]->pmt->pbFormat)->dwBitRate),
+                (((WAVEFORMATEX *) (priv->chains[1]->pmt->pbFormat))->nAvgBytesPerSec));
 
-        hr=build_sub_graph(priv, priv->pAudioFilter, priv->a_buf,priv->arpmtAudio,priv->pmtAudio,&PIN_CATEGORY_CAPTURE);
+        hr=build_sub_graph(priv, priv->chains[1]->pCaptureFilter, priv->chains[1]->rbuf,priv->chains[1]->arpmt,priv->chains[1]->pmt,&PIN_CATEGORY_CAPTURE);
         if(FAILED(hr)){
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildAudioSubGraph,(unsigned int)hr);
             return 0;
@@ -2517,22 +2517,22 @@ static HRESULT build_vbi_chain(priv_t *priv)
 {
 #ifdef HAVE_TV_TELETEXT
     HRESULT hr;
-    AM_MEDIA_TYPE* arpmtVBI[2] = { priv->pmtVBI, NULL };
+    AM_MEDIA_TYPE* arpmtVBI[2] = { priv->chains[2]->pmt, NULL };
 
-    if(priv->vbi_buf)
+    if(priv->chains[2]->rbuf)
         return S_OK;
 
     if(priv->tv_param->tdevice)
     {
-        priv->vbi_buf=calloc(1,sizeof(grabber_ringbuffer_t));
-        if(!priv->vbi_buf)
+        priv->chains[2]->rbuf=calloc(1,sizeof(grabber_ringbuffer_t));
+        if(!priv->chains[2]->rbuf)
             return E_OUTOFMEMORY;
 
-        init_ringbuffer(priv->vbi_buf,24,priv->tsp.bufsize);
+        init_ringbuffer(priv->chains[2]->rbuf,24,priv->tsp.bufsize);
 
-        priv->pmtVBI=calloc(1,sizeof(AM_MEDIA_TYPE));
-        priv->pmtVBI->majortype=MEDIATYPE_VBI;
-        hr=build_sub_graph(priv, priv->pVideoFilter, priv->vbi_buf,arpmtVBI,NULL,&PIN_CATEGORY_VBI);
+        priv->chains[2]->pmt=calloc(1,sizeof(AM_MEDIA_TYPE));
+        priv->chains[2]->pmt->majortype=MEDIATYPE_VBI;
+        hr=build_sub_graph(priv, priv->chains[0]->pCaptureFilter, priv->chains[2]->rbuf,arpmtVBI,NULL,&PIN_CATEGORY_VBI);
         if(FAILED(hr)){
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVBISubGraph,(unsigned int)hr);
             return 0;
@@ -2605,9 +2605,19 @@ static int init(priv_t * priv)
     IEnumFilters *pEnum;
     IBaseFilter *pFilter;
     IPin *pVPOutPin;
+    int i;
 
     priv->state=0;
+
     CoInitialize(NULL);
+
+    for(i=0; i<3;i++)
+        priv->chains[i] = calloc(1, sizeof(chain_t));
+
+    priv->chains[0]->type=video;
+    priv->chains[1]->type=audio;
+    priv->chains[2]->type=vbi;
+
     do{
         hr = CoCreateInstance((GUID *) & CLSID_FilterGraph, NULL,
     			  CLSCTX_INPROC_SERVER, &IID_IGraphBuilder,
@@ -2636,33 +2646,33 @@ static int init(priv_t * priv)
         }
     
         mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Searching for available video capture devices\n");
-        priv->pVideoFilter = find_capture_device(priv->dev_index, &CLSID_VideoInputDeviceCategory);
-        if(!priv->pVideoFilter){
+        priv->chains[0]->pCaptureFilter = find_capture_device(priv->dev_index, &CLSID_VideoInputDeviceCategory);
+        if(!priv->chains[0]->pCaptureFilter){
             mp_msg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_NoVideoCaptureDevice);
             break;
         }
-        hr = OLE_CALL_ARGS(priv->pGraph, AddFilter, priv->pVideoFilter, NULL);
+        hr = OLE_CALL_ARGS(priv->pGraph, AddFilter, priv->chains[0]->pCaptureFilter, NULL);
         if(FAILED(hr)){
             mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Unable to add video capture device to Directshow graph. Error:0x%x\n", (unsigned int)hr);
             break;
         }
         mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Searching for available audio capture devices\n");
         if (priv->adev_index != -1) {
-        	priv->pAudioFilter = find_capture_device(priv->adev_index, &CLSID_AudioInputDeviceCategory);	//output available audio edevices
-                if(!priv->pAudioFilter){
+        	priv->chains[1]->pCaptureFilter = find_capture_device(priv->adev_index, &CLSID_AudioInputDeviceCategory);	//output available audio edevices
+                if(!priv->chains[1]->pCaptureFilter){
                     mp_msg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_NoAudioCaptureDevice);
                     break;
                 }
 
-        	hr = OLE_CALL_ARGS(priv->pGraph, AddFilter, priv->pAudioFilter, NULL);
+        	hr = OLE_CALL_ARGS(priv->pGraph, AddFilter, priv->chains[1]->pCaptureFilter, NULL);
                 if(FAILED(hr)){
         	    mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: Unable to add audio capture device to Directshow graph. Error:0x%x\n", (unsigned int)hr);
                     break;
                 }
         } else
-        	hr = OLE_QUERYINTERFACE(priv->pVideoFilter, IID_IBaseFilter, priv->pAudioFilter);
+        	hr = OLE_QUERYINTERFACE(priv->chains[0]->pCaptureFilter, IID_IBaseFilter, priv->chains[1]->pCaptureFilter);
 
-        hr = OLE_QUERYINTERFACE(priv->pVideoFilter, IID_IAMVideoProcAmp,priv->pVideoProcAmp);
+        hr = OLE_QUERYINTERFACE(priv->chains[0]->pCaptureFilter, IID_IAMVideoProcAmp,priv->pVideoProcAmp);
         if (FAILED(hr) && hr != E_NOINTERFACE)
             mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Get IID_IAMVideoProcAmp failed (0x%x).\n", (unsigned int)hr);
 
@@ -2674,7 +2684,7 @@ static int init(priv_t * priv)
         hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
         		   &PIN_CATEGORY_CAPTURE,
         		   &MEDIATYPE_Video,
-        		   priv->pVideoFilter,
+        		   priv->chains[0]->pCaptureFilter,
         		   &IID_IAMCrossbar, (void **) &(priv->pCrossbar));
         if (FAILED(hr)) {
             mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_SelectingInputNotSupported);
@@ -2684,28 +2694,28 @@ static int init(priv_t * priv)
         hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
         		   &PIN_CATEGORY_CAPTURE,
         		   &MEDIATYPE_Video,
-        		   priv->pVideoFilter,
+        		   priv->chains[0]->pCaptureFilter,
         		   &IID_IAMStreamConfig,
-        		   (void **) &(priv->pVideoStreamConfig));
+        		   (void **) &(priv->chains[0]->pStreamConfig));
         if (FAILED(hr)) {
             mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_ChangingWidthHeightNotSupported);
-            priv->pVideoStreamConfig = NULL;
+            priv->chains[0]->pStreamConfig = NULL;
         }
 
         hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
 		   &PIN_CATEGORY_CAPTURE,
 		   &MEDIATYPE_Audio,
-		   priv->pAudioFilter,
+		   priv->chains[1]->pCaptureFilter,
 		   &IID_IAMStreamConfig,
-		   (void **) &(priv->pAudioStreamConfig));
+		   (void **) &(priv->chains[1]->pStreamConfig));
         if (FAILED(hr)) {
             mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Get IAMStreamConfig(audio) failed (0x%x).\n", (unsigned int)hr);
-            priv->pAudioStreamConfig = NULL;
+            priv->chains[1]->pStreamConfig = NULL;
         }
 
         if (priv->tv_param->amode >= 0) {
 	    IAMTVAudio *pTVAudio;
-	    hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface, NULL, NULL,priv->pVideoFilter,&IID_IAMTVAudio, (void *) &pTVAudio);
+	    hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface, NULL, NULL,priv->chains[0]->pCaptureFilter,&IID_IAMTVAudio, (void *) &pTVAudio);
             if (hr == S_OK) {
                 switch (priv->tv_param->amode) {
                 case 0:
@@ -2735,75 +2745,75 @@ static int init(priv_t * priv)
            min/max values.
          */
 
-        hr = get_available_formats_stream(priv->pVideoStreamConfig,
+        hr = get_available_formats_stream(priv->chains[0]->pStreamConfig,
 				      &MEDIATYPE_Video,
-				      &(priv->arpmtVideo),
-				      (void ***) &(priv->arVideoCaps));
+				      &(priv->chains[0]->arpmt),
+				      (void ***) &(priv->chains[0]->arStreamCaps));
         if (FAILED(hr)) {
             mp_msg(MSGT_TV, MSGL_DBG2, "Unable to use IAMStreamConfig for retriving available video formats (Error:0x%x). Using EnumMediaTypes instead\n", (unsigned int)hr);
-            hr = get_available_formats_pin(priv->pBuilder, priv->pVideoFilter,
+            hr = get_available_formats_pin(priv->pBuilder, priv->chains[0]->pCaptureFilter,
 				       &MEDIATYPE_Video,
-				       &(priv->arpmtVideo),
-				       (void ***) &(priv->arVideoCaps));
+				       &(priv->chains[0]->arpmt),
+				       (void ***) &(priv->chains[0]->arStreamCaps));
             if(FAILED(hr)){
                 mp_msg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_UnableGetsupportedVideoFormats, (unsigned int)hr);
                 break;
             }
         }
-        priv->nVideoFormatUsed = 0;
+        priv->chains[0]->nFormatUsed = 0;
 
-        if (!priv->arpmtVideo[priv->nVideoFormatUsed]
-            || !extract_video_format(priv->arpmtVideo[priv->nVideoFormatUsed],
+        if (!priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed]
+            || !extract_video_format(priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed],
 				 &(priv->fcc), &(priv->width),
 				 &(priv->height))) {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_ErrorParsingVideoFormatStruct);
             break;
         }
-        priv->pmtVideo = CreateMediaType(priv->arpmtVideo[priv->nVideoFormatUsed]);
+        priv->chains[0]->pmt = CreateMediaType(priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed]);
         /* 
            Getting available audio formats (last pointer in array will be NULL)
          */
-        hr = get_available_formats_stream(priv->pAudioStreamConfig,
+        hr = get_available_formats_stream(priv->chains[1]->pStreamConfig,
 				      &MEDIATYPE_Audio,
-				      &(priv->arpmtAudio),
-				      (void ***) &(priv->arAudioCaps));
+				      &(priv->chains[1]->arpmt),
+				      (void ***) &(priv->chains[1]->arStreamCaps));
         if (FAILED(hr)) {
             mp_msg(MSGT_TV, MSGL_DBG2, "Unable to use IAMStreamConfig for retriving available audio formats (Error:0x%x). Using EnumMediaTypes instead\n", (unsigned int)hr);
-            hr = get_available_formats_pin(priv->pBuilder, priv->pAudioFilter,
+            hr = get_available_formats_pin(priv->pBuilder, priv->chains[1]->pCaptureFilter,
 				       &MEDIATYPE_Audio,
-				       &(priv->arpmtAudio),
-				       (void ***) &(priv->arAudioCaps));
+				       &(priv->chains[1]->arpmt),
+				       (void ***) &(priv->chains[1]->arStreamCaps));
             if (FAILED(hr)) {
                 mp_msg(MSGT_TV,MSGL_WARN, MSGTR_TVI_DS_UnableGetsupportedAudioFormats, (unsigned int)hr);
                 /* 
                    Following combination will disable sound
                  */
-                priv->arpmtAudio = (AM_MEDIA_TYPE **) malloc(sizeof(AM_MEDIA_TYPE *));
-                priv->arpmtAudio[0] = NULL;
-                priv->pmtAudio = NULL;
-                priv->pAudioStreamConfig = NULL;
+                priv->chains[1]->arpmt = (AM_MEDIA_TYPE **) malloc(sizeof(AM_MEDIA_TYPE *));
+                priv->chains[1]->arpmt[0] = NULL;
+                priv->chains[1]->pmt = NULL;
+                priv->chains[1]->pStreamConfig = NULL;
             }
         }
         /* debug */
         {
             int i;
-            for (i = 0; priv->arpmtVideo[i]; i++) {
-                DisplayMediaType("Available video format", priv->arpmtVideo[i]);
+            for (i = 0; priv->chains[0]->arpmt[i]; i++) {
+                DisplayMediaType("Available video format", priv->chains[0]->arpmt[i]);
             }
-            for (i = 0; priv->arpmtAudio[i]; i++) {
-                DisplayMediaType("Available audio format", priv->arpmtAudio[i]);
+            for (i = 0; priv->chains[1]->arpmt[i]; i++) {
+                DisplayMediaType("Available audio format", priv->chains[1]->arpmt[i]);
             }
         }
-        priv->nAudioFormatUsed = 0;
-        if (priv->arpmtAudio[priv->nAudioFormatUsed]) {
-            priv->pmtAudio = CreateMediaType(priv->arpmtAudio[priv->nAudioFormatUsed]);
-            if (!extract_audio_format(priv->pmtAudio, &(priv->samplerate), NULL, NULL)) {
+        priv->chains[1]->nFormatUsed = 0;
+        if (priv->chains[1]->arpmt[priv->chains[1]->nFormatUsed]) {
+            priv->chains[1]->pmt = CreateMediaType(priv->chains[1]->arpmt[priv->chains[1]->nFormatUsed]);
+            if (!extract_audio_format(priv->chains[1]->pmt, &(priv->samplerate), NULL, NULL)) {
                 mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_ErrorParsingAudioFormatStruct);
-                DisplayMediaType("audio format failed",priv->arpmtAudio[priv->nAudioFormatUsed]);
+                DisplayMediaType("audio format failed",priv->chains[1]->arpmt[priv->chains[1]->nFormatUsed]);
                 break;
             }
         }
-        show_filter_info(priv->pVideoFilter);
+        show_filter_info(priv->chains[0]->pCaptureFilter);
 
         hr = OLE_QUERYINTERFACE(priv->pGraph, IID_IMediaControl,priv->pMediaControl);
         if(FAILED(hr)){
@@ -2812,7 +2822,7 @@ static int init(priv_t * priv)
         }
         hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
 		   &PIN_CATEGORY_CAPTURE, NULL,
-		   priv->pVideoFilter,
+		   priv->chains[0]->pCaptureFilter,
 		   &IID_IAMTVTuner, (void **) &(priv->pTVTuner));
 
         if (!priv->pTVTuner) {
@@ -2858,7 +2868,7 @@ static int init(priv_t * priv)
          Otherwise we will get 0x8007001f (Device is not functioning properly) when attempting to start graph
         */
         hr = OLE_CALL_ARGS(priv->pBuilder, FindPin,
-		   (IUnknown *) priv->pVideoFilter,
+		   (IUnknown *) priv->chains[0]->pCaptureFilter,
 		   PINDIR_OUTPUT,
 		   &PIN_CATEGORY_VIDEOPORT, NULL, FALSE,
 		   0, (IPin **) & pVPOutPin);
@@ -2943,71 +2953,78 @@ static int uninit(priv_t * priv)
     priv->state = 0;
 
     if (priv->pGraph) {
-	if (priv->pVideoFilter)
-	    OLE_CALL_ARGS(priv->pGraph, RemoveFilter, priv->pVideoFilter);
-	if (priv->pAudioFilter)
-	    OLE_CALL_ARGS(priv->pGraph, RemoveFilter, priv->pAudioFilter);
+	if (priv->chains[0]->pCaptureFilter)
+	    OLE_CALL_ARGS(priv->pGraph, RemoveFilter, priv->chains[0]->pCaptureFilter);
+	if (priv->chains[1]->pCaptureFilter)
+	    OLE_CALL_ARGS(priv->pGraph, RemoveFilter, priv->chains[1]->pCaptureFilter);
     }
     OLE_RELEASE_SAFE(priv->pCrossbar);
-    OLE_RELEASE_SAFE(priv->pVideoStreamConfig);
-    OLE_RELEASE_SAFE(priv->pAudioStreamConfig);
+    OLE_RELEASE_SAFE(priv->chains[0]->pStreamConfig);
+    OLE_RELEASE_SAFE(priv->chains[1]->pStreamConfig);
     OLE_RELEASE_SAFE(priv->pVideoProcAmp);
-    OLE_RELEASE_SAFE(priv->pVideoFilter);
-    OLE_RELEASE_SAFE(priv->pAudioFilter);
+    OLE_RELEASE_SAFE(priv->chains[0]->pCaptureFilter);
+    OLE_RELEASE_SAFE(priv->chains[1]->pCaptureFilter);
     OLE_RELEASE_SAFE(priv->pGraph);
     OLE_RELEASE_SAFE(priv->pBuilder);
     OLE_RELEASE_SAFE(priv->pCSGCB);
 
-    if (priv->pmtVideo)
-	DeleteMediaType(priv->pmtVideo);
-    if (priv->pmtAudio)
-	DeleteMediaType(priv->pmtAudio);
-    if (priv->pmtVBI)
-	DeleteMediaType(priv->pmtVBI);
+    if (priv->chains[0]->pmt)
+	DeleteMediaType(priv->chains[0]->pmt);
+    if (priv->chains[1]->pmt)
+	DeleteMediaType(priv->chains[1]->pmt);
+    if (priv->chains[2]->pmt)
+	DeleteMediaType(priv->chains[2]->pmt);
 
-    if (priv->arpmtVideo) {
-	for (i = 0; priv->arpmtVideo[i]; i++) {
-	    DeleteMediaType(priv->arpmtVideo[i]);
+    if (priv->chains[0]->arpmt) {
+	for (i = 0; priv->chains[0]->arpmt[i]; i++) {
+	    DeleteMediaType(priv->chains[0]->arpmt[i]);
 	}
-	free(priv->arpmtVideo);
+	free(priv->chains[0]->arpmt);
     }
-    if (priv->arVideoCaps) {
-	for (i = 0; priv->arVideoCaps[i]; i++) {
-	    free(priv->arVideoCaps[i]);
+    if (priv->chains[0]->arStreamCaps) {
+	for (i = 0; priv->chains[0]->arStreamCaps[i]; i++) {
+	    free(priv->chains[0]->arStreamCaps[i]);
 	}
-	free(priv->arVideoCaps);
+	free(priv->chains[0]->arStreamCaps);
     }
-    if (priv->arpmtAudio) {
-	for (i = 0; priv->arpmtAudio[i]; i++) {
-	    DeleteMediaType(priv->arpmtAudio[i]);
+    if (priv->chains[1]->arpmt) {
+	for (i = 0; priv->chains[1]->arpmt[i]; i++) {
+	    DeleteMediaType(priv->chains[1]->arpmt[i]);
 	}
-	free(priv->arpmtAudio);
+	free(priv->chains[1]->arpmt);
     }
-    if (priv->arAudioCaps) {
-	for (i = 0; priv->arAudioCaps[i]; i++) {
-	    free(priv->arAudioCaps[i]);
+    if (priv->chains[1]->arStreamCaps) {
+	for (i = 0; priv->chains[1]->arStreamCaps[i]; i++) {
+	    free(priv->chains[1]->arStreamCaps[i]);
 	}
-	free(priv->arAudioCaps);
+	free(priv->chains[1]->arStreamCaps);
     }
-    if (priv->a_buf) {
-	destroy_ringbuffer(priv->a_buf);
-	free(priv->a_buf);
-	priv->a_buf = NULL;
+    if (priv->chains[1]->rbuf) {
+	destroy_ringbuffer(priv->chains[1]->rbuf);
+	free(priv->chains[1]->rbuf);
+	priv->chains[1]->rbuf = NULL;
     }
-    if (priv->v_buf) {
-	destroy_ringbuffer(priv->v_buf);
-	free(priv->v_buf);
-	priv->v_buf = NULL;
+    if (priv->chains[0]->rbuf) {
+	destroy_ringbuffer(priv->chains[0]->rbuf);
+	free(priv->chains[0]->rbuf);
+	priv->chains[0]->rbuf = NULL;
     }
-    if (priv->vbi_buf) {
-	destroy_ringbuffer(priv->vbi_buf);
-	free(priv->vbi_buf);
-	priv->vbi_buf = NULL;
+    if (priv->chains[2]->rbuf) {
+	destroy_ringbuffer(priv->chains[2]->rbuf);
+	free(priv->chains[2]->rbuf);
+	priv->chains[2]->rbuf = NULL;
     }
     if(priv->freq_table){
         priv->freq_table_len=-1;
         free(priv->freq_table);
         priv->freq_table=NULL;
+    }
+
+    for(i=0; i<3;i++)
+    {
+        if(priv->chains[i])
+            free(priv->chains[i]);
+        priv->chains[i] = NULL;
     }
     CoUninitialize();
     return (1);
@@ -3096,13 +3113,13 @@ static int control(priv_t * priv, int cmd, void *arg)
 		return TVI_CONTROL_FALSE;
 	    fcc = *(int *) arg;
 
-            if(!priv->arpmtVideo)
+            if(!priv->chains[0]->arpmt)
                 return TVI_CONTROL_FALSE;
-	    for (i = 0; priv->arpmtVideo[i]; i++)
+	    for (i = 0; priv->chains[0]->arpmt[i]; i++)
 		if (check_video_format
-		    (priv->arpmtVideo[i], fcc, priv->width, priv->height))
+		    (priv->chains[0]->arpmt[i], fcc, priv->width, priv->height))
 		    break;
-	    if (!priv->arpmtVideo[i])
+	    if (!priv->chains[0]->arpmt[i])
 	    {
 		int fps = 0;
 		VIDEOINFOHEADER* Vhdr = NULL;
@@ -3110,8 +3127,8 @@ static int control(priv_t * priv, int cmd, void *arg)
 
 		mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: will try also use undeclared video format: %dx%d, %s\n",priv->width, priv->height, vo_format_name(fcc));
 
-		if (priv->arpmtVideo[0])
-		    Vhdr = (VIDEOINFOHEADER *) priv->arpmtVideo[0]->pbFormat;
+		if (priv->chains[0]->arpmt[0])
+		    Vhdr = (VIDEOINFOHEADER *) priv->chains[0]->arpmt[0]->pbFormat;
 
 		if(Vhdr && Vhdr->bmiHeader.biSizeImage)
 		    fps = Vhdr->dwBitRate / (8 * Vhdr->bmiHeader.biSizeImage);
@@ -3122,46 +3139,46 @@ static int control(priv_t * priv, int cmd, void *arg)
 		    mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: Unable to create AM_MEDIA_TYPE structure for given format\n");
 		    return TVI_CONTROL_FALSE;
 		}
-		priv->arpmtVideo=realloc(priv->arpmtVideo, (i+2)*sizeof(AM_MEDIA_TYPE*));
-		priv->arpmtVideo[i+1] = NULL;
-		priv->arpmtVideo[i] = pmt;
+		priv->chains[0]->arpmt=realloc(priv->chains[0]->arpmt, (i+2)*sizeof(AM_MEDIA_TYPE*));
+		priv->chains[0]->arpmt[i+1] = NULL;
+		priv->chains[0]->arpmt[i] = pmt;
 
 		result = TVI_CONTROL_FALSE;
 	    }
 
-	    tmp = priv->arpmtVideo[0];
-	    priv->arpmtVideo[0] = priv->arpmtVideo[i];
-	    priv->arpmtVideo[i] = tmp;
+	    tmp = priv->chains[0]->arpmt[0];
+	    priv->chains[0]->arpmt[0] = priv->chains[0]->arpmt[i];
+	    priv->chains[0]->arpmt[i] = tmp;
 
-	    tmp = priv->arVideoCaps[0];
-	    priv->arVideoCaps[0] = priv->arVideoCaps[i];
-	    priv->arVideoCaps[i] = tmp;
+	    tmp = priv->chains[0]->arStreamCaps[0];
+	    priv->chains[0]->arStreamCaps[0] = priv->chains[0]->arStreamCaps[i];
+	    priv->chains[0]->arStreamCaps[i] = tmp;
 
-	    priv->nVideoFormatUsed = 0;
+	    priv->chains[0]->nFormatUsed = 0;
 
-	    if (priv->pmtVideo)
-		DeleteMediaType(priv->pmtVideo);
-	    priv->pmtVideo =
-		CreateMediaType(priv->arpmtVideo[priv->nVideoFormatUsed]);
-	    DisplayMediaType("VID_SET_FORMAT", priv->pmtVideo);
+	    if (priv->chains[0]->pmt)
+		DeleteMediaType(priv->chains[0]->pmt);
+	    priv->chains[0]->pmt =
+		CreateMediaType(priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed]);
+	    DisplayMediaType("VID_SET_FORMAT", priv->chains[0]->pmt);
 	    /*
 	       Setting width & height to preferred by driver values
 	     */
-	    extract_video_format(priv->arpmtVideo[priv->nVideoFormatUsed],
+	    extract_video_format(priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed],
 				 &(priv->fcc), &(priv->width),
 				 &(priv->height));
 	    return result;
 	}
     case TVI_CONTROL_VID_GET_FORMAT:
 	{
-            if(!priv->pmtVideo)
+            if(!priv->chains[0]->pmt)
                 return TVI_CONTROL_FALSE;
 	    /*
 	       Build video chain (for video format negotiation).
 	       If this was done before, routine will do nothing.
 	    */
 	    build_video_chain(priv);
-	    DisplayMediaType("VID_GET_FORMAT", priv->pmtVideo);
+	    DisplayMediaType("VID_GET_FORMAT", priv->chains[0]->pmt);
 	    if (priv->fcc) {
 		*(int *) arg = priv->fcc;
 		return (TVI_CONTROL_TRUE);
@@ -3176,7 +3193,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (priv->state)
 		return TVI_CONTROL_FALSE;
 
-	    pCaps = priv->arVideoCaps[priv->nVideoFormatUsed];
+	    pCaps = priv->chains[0]->arStreamCaps[priv->chains[0]->nFormatUsed];
 	    if (!pCaps)
 		return TVI_CONTROL_FALSE;
 	    if (width < pCaps->MinOutputSize.cx
@@ -3186,11 +3203,11 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (width % pCaps->OutputGranularityX)
 		return TVI_CONTROL_FALSE;
 
-	    if (!priv->pmtVideo || !priv->pmtVideo->pbFormat)
+	    if (!priv->chains[0]->pmt || !priv->chains[0]->pmt->pbFormat)
 		return TVI_CONTROL_FALSE;
-	    Vhdr = (VIDEOINFOHEADER *) priv->pmtVideo->pbFormat;
+	    Vhdr = (VIDEOINFOHEADER *) priv->chains[0]->pmt->pbFormat;
 	    Vhdr->bmiHeader.biWidth = width;
-	    priv->pmtVideo->lSampleSize = Vhdr->bmiHeader.biSizeImage =
+	    priv->chains[0]->pmt->lSampleSize = Vhdr->bmiHeader.biSizeImage =
 		labs(Vhdr->bmiHeader.biBitCount * Vhdr->bmiHeader.biWidth *
 		     Vhdr->bmiHeader.biHeight) >> 3;
 
@@ -3210,7 +3227,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	{
 	    VIDEO_STREAM_CONFIG_CAPS *pCaps;
 	    int width = *(int *) arg;
-	    pCaps = priv->arVideoCaps[priv->nVideoFormatUsed];
+	    pCaps = priv->chains[0]->arStreamCaps[priv->chains[0]->nFormatUsed];
 	    if (!pCaps)
 		return TVI_CONTROL_FALSE;
 	    if (width < pCaps->MinOutputSize.cx
@@ -3229,7 +3246,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (priv->state)
 		return TVI_CONTROL_FALSE;
 
-	    pCaps = priv->arVideoCaps[priv->nVideoFormatUsed];
+	    pCaps = priv->chains[0]->arStreamCaps[priv->chains[0]->nFormatUsed];
 	    if (!pCaps)
 		return TVI_CONTROL_FALSE;
 	    if (height < pCaps->MinOutputSize.cy
@@ -3239,15 +3256,15 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (height % pCaps->OutputGranularityY)
 		return TVI_CONTROL_FALSE;
 
-	    if (!priv->pmtVideo || !priv->pmtVideo->pbFormat)
+	    if (!priv->chains[0]->pmt || !priv->chains[0]->pmt->pbFormat)
 		return TVI_CONTROL_FALSE;
-	    Vhdr = (VIDEOINFOHEADER *) priv->pmtVideo->pbFormat;
+	    Vhdr = (VIDEOINFOHEADER *) priv->chains[0]->pmt->pbFormat;
 
 	    if (Vhdr->bmiHeader.biHeight < 0)
 		Vhdr->bmiHeader.biHeight = -height;
 	    else
 		Vhdr->bmiHeader.biHeight = height;
-	    priv->pmtVideo->lSampleSize = Vhdr->bmiHeader.biSizeImage =
+	    priv->chains[0]->pmt->lSampleSize = Vhdr->bmiHeader.biSizeImage =
 		labs(Vhdr->bmiHeader.biBitCount * Vhdr->bmiHeader.biWidth *
 		     Vhdr->bmiHeader.biHeight) >> 3;
 
@@ -3266,7 +3283,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	{
 	    VIDEO_STREAM_CONFIG_CAPS *pCaps;
 	    int height = *(int *) arg;
-	    pCaps = priv->arVideoCaps[priv->nVideoFormatUsed];
+	    pCaps = priv->chains[0]->arStreamCaps[priv->chains[0]->nFormatUsed];
 	    if (!pCaps)
 		return TVI_CONTROL_FALSE;
 	    if (height < pCaps->MinOutputSize.cy
@@ -3279,7 +3296,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    return (TVI_CONTROL_TRUE);
 	}
     case TVI_CONTROL_IS_AUDIO:
-	if (!priv->pmtAudio)
+	if (!priv->chains[1]->pmt)
 	    return TVI_CONTROL_FALSE;
 	else
 	    return TVI_CONTROL_TRUE;
@@ -3288,7 +3305,7 @@ static int control(priv_t * priv, int cmd, void *arg)
     case TVI_CONTROL_AUD_GET_FORMAT:
 	{
 	    *(int *) arg = AF_FORMAT_S16_LE;
-	    if (!priv->pmtAudio)
+	    if (!priv->chains[1]->pmt)
 		return TVI_CONTROL_FALSE;
 	    else
 		return TVI_CONTROL_TRUE;
@@ -3296,7 +3313,7 @@ static int control(priv_t * priv, int cmd, void *arg)
     case TVI_CONTROL_AUD_GET_CHANNELS:
 	{
 	    *(int *) arg = priv->channels;
-	    if (!priv->pmtAudio)
+	    if (!priv->chains[1]->pmt)
 		return TVI_CONTROL_FALSE;
 	    else
 		return TVI_CONTROL_TRUE;
@@ -3306,24 +3323,24 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    int i, samplerate;
 	    if (priv->state)
 		return TVI_CONTROL_FALSE;
-	    if (!priv->arpmtAudio[0])
+	    if (!priv->chains[1]->arpmt[0])
 		return TVI_CONTROL_FALSE;
 
 	    samplerate = *(int *) arg;;
 
-	    for (i = 0; priv->arpmtAudio[i]; i++)
+	    for (i = 0; priv->chains[1]->arpmt[i]; i++)
 		if (check_audio_format
-		    (priv->arpmtAudio[i], samplerate, 16, priv->channels))
+		    (priv->chains[1]->arpmt[i], samplerate, 16, priv->channels))
 		    break;
-	    if (!priv->arpmtAudio[i]) {	
+	    if (!priv->chains[1]->arpmt[i]) {	
                 //request not found. failing back to first available
 		mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_SamplerateNotsupported, samplerate);
 		i = 0;
 	    }
-	    if (priv->pmtAudio)
-		DeleteMediaType(priv->pmtAudio);
-	    priv->pmtAudio = CreateMediaType(priv->arpmtAudio[i]);
-	    extract_audio_format(priv->arpmtAudio[i], &(priv->samplerate),
+	    if (priv->chains[1]->pmt)
+		DeleteMediaType(priv->chains[1]->pmt);
+	    priv->chains[1]->pmt = CreateMediaType(priv->chains[1]->arpmt[i]);
+	    extract_audio_format(priv->chains[1]->arpmt[i], &(priv->samplerate),
 				 NULL, &(priv->channels));
 	    return TVI_CONTROL_TRUE;
 	}
@@ -3332,7 +3349,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    *(int *) arg = priv->samplerate;
 	    if (!priv->samplerate)
 		return TVI_CONTROL_FALSE;
-	    if (!priv->pmtAudio)
+	    if (!priv->chains[1]->pmt)
 		return TVI_CONTROL_FALSE;
 	    else
 		return TVI_CONTROL_TRUE;
@@ -3340,11 +3357,11 @@ static int control(priv_t * priv, int cmd, void *arg)
     case TVI_CONTROL_AUD_GET_SAMPLESIZE:
 	{
 	    WAVEFORMATEX *pWF;
-	    if (!priv->pmtAudio)
+	    if (!priv->chains[1]->pmt)
 		return TVI_CONTROL_FALSE;
-	    if (!priv->pmtAudio->pbFormat)
+	    if (!priv->chains[1]->pmt->pbFormat)
 		return TVI_CONTROL_FALSE;
-	    pWF = (WAVEFORMATEX *) priv->pmtAudio->pbFormat;
+	    pWF = (WAVEFORMATEX *) priv->chains[1]->pmt->pbFormat;
 	    *(int *) arg = pWF->wBitsPerSample / 8;
 	    return TVI_CONTROL_TRUE;
 	}
@@ -3368,7 +3385,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 		return TVI_CONTROL_FALSE;
 	    lAnalogFormat = tv_norms[tv_available_norms[i]].index;
 
-	    hr = OLE_QUERYINTERFACE(priv->pVideoFilter,IID_IAMAnalogVideoDecoder, pVD);
+	    hr = OLE_QUERYINTERFACE(priv->chains[0]->pCaptureFilter,IID_IAMAnalogVideoDecoder, pVD);
 	    if (hr != S_OK)                            
 		return TVI_CONTROL_FALSE;
 	    hr = OLE_CALL_ARGS(pVD, put_TVFormat, lAnalogFormat);
@@ -3385,7 +3402,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    HRESULT hr;
 	    IAMAnalogVideoDecoder *pVD;
 
-	    hr = OLE_QUERYINTERFACE(priv->pVideoFilter,IID_IAMAnalogVideoDecoder, pVD);
+	    hr = OLE_QUERYINTERFACE(priv->chains[0]->pCaptureFilter,IID_IAMAnalogVideoDecoder, pVD);
 	    if (hr == S_OK) {
 		hr = OLE_CALL_ARGS(pVD, get_TVFormat, &lAnalogFormat);
 		OLE_RELEASE_SAFE(pVD);
@@ -3466,11 +3483,11 @@ static int control(priv_t * priv, int cmd, void *arg)
     case TVI_CONTROL_VID_GET_FPS:
 	{
 	    VIDEOINFOHEADER *Vhdr;
-	    if (!priv->pmtVideo)
+	    if (!priv->chains[0]->pmt)
 		return TVI_CONTROL_FALSE;
-	    if (!priv->pmtVideo->pbFormat)
+	    if (!priv->chains[0]->pmt->pbFormat)
 		return TVI_CONTROL_FALSE;
-	    Vhdr = (VIDEOINFOHEADER *) priv->pmtVideo->pbFormat;
+	    Vhdr = (VIDEOINFOHEADER *) priv->chains[0]->pmt->pbFormat;
 	    *(float *) arg =
 		(1.0 * Vhdr->dwBitRate) / (Vhdr->bmiHeader.biSizeImage * 8);
 	    return TVI_CONTROL_TRUE;
