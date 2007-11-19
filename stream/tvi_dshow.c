@@ -2673,6 +2673,9 @@ static int init(priv_t * priv)
         } else
         	hr = OLE_QUERYINTERFACE(priv->chains[0]->pCaptureFilter, IID_IBaseFilter, priv->chains[1]->pCaptureFilter);
 
+ 	/* increase refrence counter for capture filter ad store pointer into vbi chain structure too */
+      	hr = OLE_QUERYINTERFACE(priv->chains[0]->pCaptureFilter, IID_IBaseFilter, priv->chains[2]->pCaptureFilter);
+
         hr = OLE_QUERYINTERFACE(priv->chains[0]->pCaptureFilter, IID_IAMVideoProcAmp,priv->pVideoProcAmp);
         if (FAILED(hr) && hr != E_NOINTERFACE)
             mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Get IID_IAMVideoProcAmp failed (0x%x).\n", (unsigned int)hr);
