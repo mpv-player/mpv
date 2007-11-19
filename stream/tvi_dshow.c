@@ -2697,7 +2697,7 @@ static int init(priv_t * priv)
 
         hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
         		   &PIN_CATEGORY_CAPTURE,
-        		   &MEDIATYPE_Video,
+        		   priv->chains[0]->majortype,
         		   priv->chains[0]->pCaptureFilter,
         		   &IID_IAMStreamConfig,
         		   (void **) &(priv->chains[0]->pStreamConfig));
