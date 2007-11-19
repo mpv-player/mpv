@@ -2938,6 +2938,43 @@ static int init(priv_t * priv)
 }
 
 /**
+ * \brief chain uninitialization
+ * \param chain chain data structure
+ */
+static void destroy_chain(chain_t *chain)
+{
+    int i;
+
+    if(!chain)
+        return;
+
+    OLE_RELEASE_SAFE(chain->pStreamConfig);
+    OLE_RELEASE_SAFE(chain->pCaptureFilter);
+    if (chain->pmt)
+	DeleteMediaType(chain->pmt);
+
+    if (chain->arpmt) {
+	for (i = 0; chain->arpmt[i]; i++) {
+	    DeleteMediaType(chain->arpmt[i]);
+	}
+	free(chain->arpmt);
+    }
+
+    if (chain->arStreamCaps) {
+	for (i = 0; chain->arStreamCaps[i]; i++) {
+	    free(chain->arStreamCaps[i]);
+	}
+	free(chain->arStreamCaps);
+    }
+
+    if (chain->rbuf) {
+	destroy_ringbuffer(chain->rbuf);
+	free(chain->rbuf);
+	chain->rbuf = NULL;
+    }
+    free(chain);
+}
+/**
  * \brief driver uninitialization
  *
  * \param priv driver's private data structure 
@@ -2971,61 +3008,11 @@ static int uninit(priv_t * priv)
 	    OLE_CALL_ARGS(priv->pGraph, RemoveFilter, priv->chains[1]->pCaptureFilter);
     }
     OLE_RELEASE_SAFE(priv->pCrossbar);
-    OLE_RELEASE_SAFE(priv->chains[0]->pStreamConfig);
-    OLE_RELEASE_SAFE(priv->chains[1]->pStreamConfig);
     OLE_RELEASE_SAFE(priv->pVideoProcAmp);
-    OLE_RELEASE_SAFE(priv->chains[0]->pCaptureFilter);
-    OLE_RELEASE_SAFE(priv->chains[1]->pCaptureFilter);
     OLE_RELEASE_SAFE(priv->pGraph);
     OLE_RELEASE_SAFE(priv->pBuilder);
     OLE_RELEASE_SAFE(priv->pCSGCB);
 
-    if (priv->chains[0]->pmt)
-	DeleteMediaType(priv->chains[0]->pmt);
-    if (priv->chains[1]->pmt)
-	DeleteMediaType(priv->chains[1]->pmt);
-    if (priv->chains[2]->pmt)
-	DeleteMediaType(priv->chains[2]->pmt);
-
-    if (priv->chains[0]->arpmt) {
-	for (i = 0; priv->chains[0]->arpmt[i]; i++) {
-	    DeleteMediaType(priv->chains[0]->arpmt[i]);
-	}
-	free(priv->chains[0]->arpmt);
-    }
-    if (priv->chains[0]->arStreamCaps) {
-	for (i = 0; priv->chains[0]->arStreamCaps[i]; i++) {
-	    free(priv->chains[0]->arStreamCaps[i]);
-	}
-	free(priv->chains[0]->arStreamCaps);
-    }
-    if (priv->chains[1]->arpmt) {
-	for (i = 0; priv->chains[1]->arpmt[i]; i++) {
-	    DeleteMediaType(priv->chains[1]->arpmt[i]);
-	}
-	free(priv->chains[1]->arpmt);
-    }
-    if (priv->chains[1]->arStreamCaps) {
-	for (i = 0; priv->chains[1]->arStreamCaps[i]; i++) {
-	    free(priv->chains[1]->arStreamCaps[i]);
-	}
-	free(priv->chains[1]->arStreamCaps);
-    }
-    if (priv->chains[1]->rbuf) {
-	destroy_ringbuffer(priv->chains[1]->rbuf);
-	free(priv->chains[1]->rbuf);
-	priv->chains[1]->rbuf = NULL;
-    }
-    if (priv->chains[0]->rbuf) {
-	destroy_ringbuffer(priv->chains[0]->rbuf);
-	free(priv->chains[0]->rbuf);
-	priv->chains[0]->rbuf = NULL;
-    }
-    if (priv->chains[2]->rbuf) {
-	destroy_ringbuffer(priv->chains[2]->rbuf);
-	free(priv->chains[2]->rbuf);
-	priv->chains[2]->rbuf = NULL;
-    }
     if(priv->freq_table){
         priv->freq_table_len=-1;
         free(priv->freq_table);
@@ -3034,8 +3021,7 @@ static int uninit(priv_t * priv)
 
     for(i=0; i<3;i++)
     {
-        if(priv->chains[i])
-            free(priv->chains[i]);
+        destroy_chain(priv->chains[i]);
         priv->chains[i] = NULL;
     }
     CoUninitialize();
