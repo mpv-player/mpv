@@ -150,6 +150,7 @@ typedef struct {
     IAMStreamConfig *pStreamConfig;    ///< for configuring stream
 
     grabber_ringbuffer_t *rbuf;        ///< sample frabber data
+    CSampleGrabberCB* pCSGCB;          ///< callback object
 
     AM_MEDIA_TYPE *pmt;                ///< stream properties.
     int nFormatUsed;                   ///< index of used format
@@ -186,7 +187,6 @@ typedef struct {
     IAMVideoProcAmp *pVideoProcAmp;         ///< for adjusting hue,saturation,etc
     IAMCrossbar *pCrossbar;                 ///< for selecting input (Tuner,Composite,S-Video,...)
     DWORD dwRegister;                       ///< allow graphedit to connect to our graph
-    CSampleGrabberCB* pCSGCB;               ///< callback object
     void *priv_vbi;                         ///< private VBI data structure
     tt_stream_props tsp;                    ///< data for VBI initialization
 
@@ -1355,8 +1355,8 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
         }
 
         /* creating ringbuffer for video samples */
-        priv->pCSGCB = CSampleGrabberCB_Create(chain->rbuf);
-        if(!priv->pCSGCB){
+        chain->pCSGCB = CSampleGrabberCB_Create(chain->rbuf);
+        if(!chain->pCSGCB){
             mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: CSampleGrabberCB_Create(pbuf) call failed. Error:0x%x\n", (unsigned int)E_OUTOFMEMORY);
             break;
         }
@@ -1368,7 +1368,7 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
             break;
         }
     //    hr = OLE_CALL_ARGS(pSG, SetCallback, (ISampleGrabberCB *) pCSGCB, 1);	//we want to receive copy of sample's data
-        hr = OLE_CALL_ARGS(pSG, SetCallback, (ISampleGrabberCB *) priv->pCSGCB, 0);	//we want to receive sample
+        hr = OLE_CALL_ARGS(pSG, SetCallback, (ISampleGrabberCB *) chain->pCSGCB, 0);	//we want to receive sample
 
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetCallback(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
@@ -2950,6 +2950,8 @@ static void destroy_chain(chain_t *chain)
 
     OLE_RELEASE_SAFE(chain->pStreamConfig);
     OLE_RELEASE_SAFE(chain->pCaptureFilter);
+    OLE_RELEASE_SAFE(chain->pCSGCB);
+
     if (chain->pmt)
 	DeleteMediaType(chain->pmt);
 
@@ -3011,8 +3013,6 @@ static int uninit(priv_t * priv)
     OLE_RELEASE_SAFE(priv->pVideoProcAmp);
     OLE_RELEASE_SAFE(priv->pGraph);
     OLE_RELEASE_SAFE(priv->pBuilder);
-    OLE_RELEASE_SAFE(priv->pCSGCB);
-
     if(priv->freq_table){
         priv->freq_table_len=-1;
         free(priv->freq_table);
