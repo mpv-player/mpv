@@ -2518,7 +2518,6 @@ static HRESULT build_vbi_chain(priv_t *priv)
 {
 #ifdef HAVE_TV_TELETEXT
     HRESULT hr;
-    AM_MEDIA_TYPE* arpmtVBI[2] = { priv->chains[2]->pmt, NULL };
 
     if(priv->chains[2]->rbuf)
         return S_OK;
@@ -2531,9 +2530,7 @@ static HRESULT build_vbi_chain(priv_t *priv)
 
         init_ringbuffer(priv->chains[2]->rbuf,24,priv->tsp.bufsize);
 
-        priv->chains[2]->pmt=calloc(1,sizeof(AM_MEDIA_TYPE));
-        priv->chains[2]->pmt->majortype=MEDIATYPE_VBI;
-        hr=build_sub_graph(priv, priv->chains[0]->pCaptureFilter, priv->chains[2]->rbuf,arpmtVBI,NULL,&PIN_CATEGORY_VBI);
+        hr=build_sub_graph(priv, priv->chains[0]->pCaptureFilter, priv->chains[2]->rbuf,priv->chains[2]->arpmt,NULL,&PIN_CATEGORY_VBI);
         if(FAILED(hr)){
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVBISubGraph,(unsigned int)hr);
             return 0;
@@ -2798,6 +2795,16 @@ static int init(priv_t * priv)
                 priv->chains[1]->pStreamConfig = NULL;
             }
         }
+        /*
+           Getting formats for VBI stream
+        */
+        priv->chains[2]->nFormatUsed = 0;
+        priv->chains[2]->arpmt = calloc(2, sizeof(AM_MEDIA_TYPE*));
+        priv->chains[2]->arpmt[0] = calloc(1, sizeof(AM_MEDIA_TYPE));
+        priv->chains[2]->arpmt[0]->majortype = MEDIATYPE_VBI;
+
+        priv->chains[2]->pmt = CreateMediaType(priv->chains[2]->arpmt[priv->chains[2]->nFormatUsed]);
+
         /* debug */
         {
             int i;
