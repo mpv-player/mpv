@@ -148,6 +148,10 @@ typedef struct {
 
     IBaseFilter *pCaptureFilter;       ///< capture device filter
     IAMStreamConfig *pStreamConfig;    ///< for configuring stream
+    ISampleGrabber *pSG;               ///< ISampleGrabber interface of SampleGrabber filter
+    IBaseFilter *pSGF;                 ///< IBaseFilter interface of SampleGrabber filter
+    IPin *pCapturePin;                 ///< output capture pin
+    IPin *pSGIn;                       ///< input pin of SampleGrabber filter
 
     grabber_ringbuffer_t *rbuf;        ///< sample frabber data
     CSampleGrabberCB* pCSGCB;          ///< callback object
@@ -1293,6 +1297,52 @@ static void get_capabilities(priv_t * priv)
 *---------------------------------------------------------------------------------------
 */
 /**
+ * \brief routine for reconnecting two pins with new media type
+ * \param pGraph IGraphBuilder interface
+ * \param chan chain data
+ * \param pmt [in/out] new mediatype for pin connection
+ *
+ * \return S_OK if operation successfult, error code otherwise
+ * will also return media type of new connection into pmt variable
+ */
+static HRESULT reconnect_pins(IGraphBuilder *pGraph, chain_t *chain, AM_MEDIA_TYPE *pmt)
+{
+    AM_MEDIA_TYPE old_mt;
+    HRESULT hr;
+
+    do {
+        /* save old media type for reconnection in case of error */
+        hr = OLE_CALL_ARGS(chain->pCapturePin, ConnectionMediaType, &old_mt);
+        if(FAILED(hr))
+            return hr;
+
+        hr = OLE_CALL(chain->pCapturePin, Disconnect);
+        if(FAILED(hr))
+            return hr;
+
+        hr = OLE_CALL_ARGS(chain->pSG, SetMediaType, pmt);
+        if(FAILED(hr))
+            return hr;
+
+        hr = OLE_CALL_ARGS(pGraph, Connect, chain->pCapturePin, chain->pSGIn);
+        if(FAILED(hr))
+        {
+            OLE_CALL_ARGS(chain->pSG, SetMediaType, &old_mt);
+            OLE_CALL_ARGS(pGraph, Connect, chain->pCapturePin, chain->pSGIn);
+            break;
+        }
+        hr = OLE_CALL_ARGS(chain->pCapturePin, ConnectionMediaType, &old_mt);
+
+        hr = S_OK;
+    } while(0);
+
+    FreeMediaType(pmt);
+    CopyMediaType(pmt, &old_mt);
+    FreeMediaType(&old_mt);
+    return hr;
+}
+
+/**
  * \brief building in graph audio/video capture chain
  *
  * \param priv           driver's private data
@@ -1307,15 +1357,10 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
     HRESULT hr;
     int nFormatProbed = 0;
 
-    IPin *pSGIn;
     IPin *pSGOut;
     IPin *pNRIn=NULL;
-    IPin *pCapturePin;
 
     IBaseFilter *pNR = NULL;
-    IBaseFilter *pSGF = NULL;
-
-    ISampleGrabber *pSG = NULL;
 
     hr=S_OK;
 
@@ -1327,28 +1372,28 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
         hr = OLE_CALL_ARGS(priv->pBuilder, FindPin,
     		   (IUnknown *) chain->pCaptureFilter,
     		   PINDIR_OUTPUT, ppin_category,
-    		   chain->majortype, FALSE, 0, &pCapturePin);
+    		   chain->majortype, FALSE, 0, &chain->pCapturePin);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: FindPin(pCapturePin) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
         /* Addinf SampleGrabber filter for video stream */
-        hr = CoCreateInstance((GUID *) & CLSID_SampleGrabber, NULL,CLSCTX_INPROC_SERVER, &IID_IBaseFilter,(void *) &pSGF);
+        hr = CoCreateInstance((GUID *) & CLSID_SampleGrabber, NULL,CLSCTX_INPROC_SERVER, &IID_IBaseFilter,(void *) &chain->pSGF);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: CoCreateInstance(SampleGrabber) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        hr = OLE_CALL_ARGS(priv->pGraph, AddFilter, pSGF, L"Sample Grabber");
+        hr = OLE_CALL_ARGS(priv->pGraph, AddFilter, chain->pSGF, L"Sample Grabber");
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: AddFilter(SampleGrabber) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        hr = OLE_CALL_ARGS(priv->pBuilder, FindPin, (IUnknown *) pSGF,PINDIR_INPUT, NULL, NULL, FALSE, 0, &pSGIn);
+        hr = OLE_CALL_ARGS(priv->pBuilder, FindPin, (IUnknown *) chain->pSGF,PINDIR_INPUT, NULL, NULL, FALSE, 0, &chain->pSGIn);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: FindPin(pSGIn) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        hr = OLE_CALL_ARGS(priv->pBuilder, FindPin, (IUnknown *) pSGF,PINDIR_OUTPUT, NULL, NULL, FALSE, 0, &pSGOut);
+        hr = OLE_CALL_ARGS(priv->pBuilder, FindPin, (IUnknown *) chain->pSGF,PINDIR_OUTPUT, NULL, NULL, FALSE, 0, &pSGOut);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: FindPin(pSGOut) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
@@ -1362,50 +1407,49 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
         }
 
         /* initializing SampleGrabber filter */
-        hr = OLE_QUERYINTERFACE(pSGF, IID_ISampleGrabber, pSG);
+        hr = OLE_QUERYINTERFACE(chain->pSGF, IID_ISampleGrabber, chain->pSG);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: QueryInterface(IID_ISampleGrabber) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
     //    hr = OLE_CALL_ARGS(pSG, SetCallback, (ISampleGrabberCB *) pCSGCB, 1);	//we want to receive copy of sample's data
-        hr = OLE_CALL_ARGS(pSG, SetCallback, (ISampleGrabberCB *) chain->pCSGCB, 0);	//we want to receive sample
+        hr = OLE_CALL_ARGS(chain->pSG, SetCallback, (ISampleGrabberCB *) chain->pCSGCB, 0);	//we want to receive sample
 
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetCallback(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        hr = OLE_CALL_ARGS(pSG, SetOneShot, FALSE);	//... for all frames
+        hr = OLE_CALL_ARGS(chain->pSG, SetOneShot, FALSE);	//... for all frames
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetOneShot(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        hr = OLE_CALL_ARGS(pSG, SetBufferSamples, FALSE);	//... do not buffer samples in sample grabber
+        hr = OLE_CALL_ARGS(chain->pSG, SetBufferSamples, FALSE);	//... do not buffer samples in sample grabber
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetBufferSamples(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
 
         if(priv->tv_param->normalize_audio_chunks && chain->type==audio){
-            set_buffer_preference(20,(WAVEFORMATEX*)(chain->arpmt[nFormatProbed]->pbFormat),pCapturePin,pSGIn);
+            set_buffer_preference(20,(WAVEFORMATEX*)(chain->arpmt[nFormatProbed]->pbFormat),chain->pCapturePin,chain->pSGIn);
         }
 
         for(nFormatProbed=0; chain->arpmt[nFormatProbed]; nFormatProbed++)
         {
             DisplayMediaType("Probing format", chain->arpmt[nFormatProbed]);
-            hr = OLE_CALL_ARGS(pSG, SetMediaType, chain->arpmt[nFormatProbed]);	//set desired mediatype
+            hr = OLE_CALL_ARGS(chain->pSG, SetMediaType, chain->arpmt[nFormatProbed]);	//set desired mediatype
             if(FAILED(hr)){
                 mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetMediaType(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
                 continue;
             }
             /* connecting filters together: VideoCapture --> SampleGrabber */
-            hr = OLE_CALL_ARGS(priv->pGraph, Connect, pCapturePin, pSGIn);
+            hr = OLE_CALL_ARGS(priv->pGraph, Connect, chain->pCapturePin, chain->pSGIn);
             if(FAILED(hr)){
                 mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: Unable to create pCapturePin<->pSGIn connection. Error:0x%x\n", (unsigned int)hr);
                 continue;
             }
 	    break;
         }
-        OLE_RELEASE_SAFE(pSG);
 
         if(!chain->arpmt[nFormatProbed])
         {
@@ -1414,7 +1458,7 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
             break;
         }
 
-        hr = OLE_CALL_ARGS(pCapturePin, ConnectionMediaType, chain->pmt);
+        hr = OLE_CALL_ARGS(chain->pCapturePin, ConnectionMediaType, chain->pmt);
         if(FAILED(hr))
         {
             mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_GetActualMediatypeFailed, (unsigned int)hr);
@@ -1424,7 +1468,7 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
             IEnumFilters* pEnum;
             IBaseFilter* pFilter;
 
-            hr=OLE_CALL_ARGS(priv->pBuilder,RenderStream,NULL,NULL,(IUnknown*)pCapturePin,NULL,NULL);
+            hr=OLE_CALL_ARGS(priv->pBuilder,RenderStream,NULL,NULL,(IUnknown*)chain->pCapturePin,NULL,NULL);
 
             OLE_CALL_ARGS(priv->pGraph, EnumFilters, &pEnum);
             while (OLE_CALL_ARGS(pEnum, Next, 1, &pFilter, NULL) == S_OK) {
@@ -1480,12 +1524,9 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
         hr = S_OK;
     } while(0);
 
-    OLE_RELEASE_SAFE(pSGF);
-    OLE_RELEASE_SAFE(pSGIn);
     OLE_RELEASE_SAFE(pSGOut);
     OLE_RELEASE_SAFE(pNR);
     OLE_RELEASE_SAFE(pNRIn);
-    OLE_RELEASE_SAFE(pCapturePin);
 
     return hr;
 }
@@ -2951,6 +2992,10 @@ static void destroy_chain(chain_t *chain)
     OLE_RELEASE_SAFE(chain->pStreamConfig);
     OLE_RELEASE_SAFE(chain->pCaptureFilter);
     OLE_RELEASE_SAFE(chain->pCSGCB);
+    OLE_RELEASE_SAFE(chain->pCapturePin);
+    OLE_RELEASE_SAFE(chain->pSGIn);
+    OLE_RELEASE_SAFE(chain->pSG);
+    OLE_RELEASE_SAFE(chain->pSGF);
 
     if (chain->pmt)
 	DeleteMediaType(chain->pmt);
