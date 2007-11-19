@@ -3371,7 +3371,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    hr = OLE_QUERYINTERFACE(priv->pVideoFilter,IID_IAMAnalogVideoDecoder, pVD);
 	    if (hr != S_OK)                            
 		return TVI_CONTROL_FALSE;
-	    hr = OLE_CALL_ARGS(pVD, get_TVFormat, &lAnalogFormat);
+	    hr = OLE_CALL_ARGS(pVD, put_TVFormat, lAnalogFormat);
 	    OLE_RELEASE_SAFE(pVD);
 	    if (FAILED(hr))
 		return (TVI_CONTROL_FALSE);
