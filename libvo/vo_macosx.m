@@ -249,6 +249,9 @@ static void uninit(void)
     {
         mpGLView = nil;
         [autoreleasepool release];
+        NSAutoreleasePool *finalPool = [[NSAutoreleasePool alloc] init];
+        [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
+        [finalPool release];
     }
 }
 
