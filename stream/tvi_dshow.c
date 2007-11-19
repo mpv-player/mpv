@@ -144,6 +144,7 @@ typedef struct CSampleGrabberCB {
  */
 typedef struct {
     stream_type type;                  ///< stream type
+    const GUID* majortype;                   ///< GUID of major mediatype (video/audio/vbi)
 
     IBaseFilter *pCaptureFilter;       ///< capture device filter
     IAMStreamConfig *pStreamConfig;    ///< for configuring stream
@@ -2615,8 +2616,11 @@ static int init(priv_t * priv)
         priv->chains[i] = calloc(1, sizeof(chain_t));
 
     priv->chains[0]->type=video;
+    priv->chains[0]->majortype=&MEDIATYPE_Video;
     priv->chains[1]->type=audio;
+    priv->chains[1]->majortype=&MEDIATYPE_Audio;
     priv->chains[2]->type=vbi;
+    priv->chains[2]->majortype=&MEDIATYPE_VBI;
 
     do{
         hr = CoCreateInstance((GUID *) & CLSID_FilterGraph, NULL,
@@ -2683,7 +2687,7 @@ static int init(priv_t * priv)
 
         hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
         		   &PIN_CATEGORY_CAPTURE,
-        		   &MEDIATYPE_Video,
+        		   priv->chains[0]->majortype,
         		   priv->chains[0]->pCaptureFilter,
         		   &IID_IAMCrossbar, (void **) &(priv->pCrossbar));
         if (FAILED(hr)) {
@@ -2704,7 +2708,7 @@ static int init(priv_t * priv)
 
         hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
 		   &PIN_CATEGORY_CAPTURE,
-		   &MEDIATYPE_Audio,
+		   priv->chains[1]->majortype,
 		   priv->chains[1]->pCaptureFilter,
 		   &IID_IAMStreamConfig,
 		   (void **) &(priv->chains[1]->pStreamConfig));
@@ -2746,13 +2750,13 @@ static int init(priv_t * priv)
          */
 
         hr = get_available_formats_stream(priv->chains[0]->pStreamConfig,
-				      &MEDIATYPE_Video,
+				      priv->chains[0]->majortype,
 				      &(priv->chains[0]->arpmt),
 				      (void ***) &(priv->chains[0]->arStreamCaps));
         if (FAILED(hr)) {
             mp_msg(MSGT_TV, MSGL_DBG2, "Unable to use IAMStreamConfig for retriving available video formats (Error:0x%x). Using EnumMediaTypes instead\n", (unsigned int)hr);
             hr = get_available_formats_pin(priv->pBuilder, priv->chains[0]->pCaptureFilter,
-				       &MEDIATYPE_Video,
+				       priv->chains[0]->majortype,
 				       &(priv->chains[0]->arpmt),
 				       (void ***) &(priv->chains[0]->arStreamCaps));
             if(FAILED(hr)){
@@ -2774,13 +2778,13 @@ static int init(priv_t * priv)
            Getting available audio formats (last pointer in array will be NULL)
          */
         hr = get_available_formats_stream(priv->chains[1]->pStreamConfig,
-				      &MEDIATYPE_Audio,
+				      priv->chains[1]->majortype,
 				      &(priv->chains[1]->arpmt),
 				      (void ***) &(priv->chains[1]->arStreamCaps));
         if (FAILED(hr)) {
             mp_msg(MSGT_TV, MSGL_DBG2, "Unable to use IAMStreamConfig for retriving available audio formats (Error:0x%x). Using EnumMediaTypes instead\n", (unsigned int)hr);
             hr = get_available_formats_pin(priv->pBuilder, priv->chains[1]->pCaptureFilter,
-				       &MEDIATYPE_Audio,
+				       priv->chains[1]->majortype,
 				       &(priv->chains[1]->arpmt),
 				       (void ***) &(priv->chains[1]->arStreamCaps));
             if (FAILED(hr)) {
