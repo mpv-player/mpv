@@ -1302,10 +1302,7 @@ static void get_capabilities(priv_t * priv)
  *
  * \note routine does not frees memory, allocated for grabber_rinbuffer_s structure
  */
-static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
-			       grabber_ringbuffer_t * pbuf,
-			       AM_MEDIA_TYPE ** arpmt,
-			       AM_MEDIA_TYPE* pmt, const GUID* ppin_category)
+static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_category)
 {
     HRESULT hr;
     int nFormatProbed = 0;
@@ -1323,14 +1320,14 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
     hr=S_OK;
 
     //No supported formats
-    if(!arpmt[0])
+    if(!chain->arpmt[0])
         return E_FAIL;
 
     do{
         hr = OLE_CALL_ARGS(priv->pBuilder, FindPin,
-    		   (IUnknown *) pCaptureFilter,
+    		   (IUnknown *) chain->pCaptureFilter,
     		   PINDIR_OUTPUT, ppin_category,
-    		   &(arpmt[nFormatProbed]->majortype), FALSE, 0, &pCapturePin);
+    		   chain->majortype, FALSE, 0, &pCapturePin);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: FindPin(pCapturePin) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
@@ -1358,7 +1355,7 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
         }
 
         /* creating ringbuffer for video samples */
-        priv->pCSGCB = CSampleGrabberCB_Create(pbuf);
+        priv->pCSGCB = CSampleGrabberCB_Create(chain->rbuf);
         if(!priv->pCSGCB){
             mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: CSampleGrabberCB_Create(pbuf) call failed. Error:0x%x\n", (unsigned int)E_OUTOFMEMORY);
             break;
@@ -1387,14 +1384,15 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
             mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetBufferSamples(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-        if(priv->tv_param->normalize_audio_chunks && !memcmp(&(arpmt[nFormatProbed]->majortype),&(MEDIATYPE_Audio),16)){
-            set_buffer_preference(20,(WAVEFORMATEX*)(arpmt[nFormatProbed]->pbFormat),pCapturePin,pSGIn);
+
+        if(priv->tv_param->normalize_audio_chunks && chain->type==audio){
+            set_buffer_preference(20,(WAVEFORMATEX*)(chain->arpmt[nFormatProbed]->pbFormat),pCapturePin,pSGIn);
         }
 
-        for(nFormatProbed=0; arpmt[nFormatProbed]; nFormatProbed++)
+        for(nFormatProbed=0; chain->arpmt[nFormatProbed]; nFormatProbed++)
         {
-            DisplayMediaType("Probing format", arpmt[nFormatProbed]);
-            hr = OLE_CALL_ARGS(pSG, SetMediaType, arpmt[nFormatProbed]);	//set desired mediatype
+            DisplayMediaType("Probing format", chain->arpmt[nFormatProbed]);
+            hr = OLE_CALL_ARGS(pSG, SetMediaType, chain->arpmt[nFormatProbed]);	//set desired mediatype
             if(FAILED(hr)){
                 mp_msg(MSGT_TV,MSGL_DBG2,"tvi_dshow: SetMediaType(pSG) call failed. Error:0x%x\n", (unsigned int)hr);
                 continue;
@@ -1409,14 +1407,14 @@ static HRESULT build_sub_graph(priv_t * priv, IBaseFilter * pCaptureFilter,
         }
         OLE_RELEASE_SAFE(pSG);
 
-        if(!arpmt[nFormatProbed])
+        if(!chain->arpmt[nFormatProbed])
         {
             mp_msg(MSGT_TV, MSGL_WARN, "tvi_dshow: Unable to negotiate media format\n");
             hr = E_FAIL;
             break;
         }
 
-        hr = OLE_CALL_ARGS(pCapturePin, ConnectionMediaType, pmt);
+        hr = OLE_CALL_ARGS(pCapturePin, ConnectionMediaType, chain->pmt);
         if(FAILED(hr))
         {
             mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_GetActualMediatypeFailed, (unsigned int)hr);
@@ -2456,7 +2454,7 @@ static HRESULT build_video_chain(priv_t *priv)
     }
 
     priv->chains[0]->rbuf->buffersize *= 1024 * 1024;
-    hr=build_sub_graph(priv, priv->chains[0]->pCaptureFilter, priv->chains[0]->rbuf, priv->chains[0]->arpmt, priv->chains[0]->pmt, &PIN_CATEGORY_CAPTURE);
+    hr=build_sub_graph(priv, priv->chains[0], &PIN_CATEGORY_CAPTURE);
     if(FAILED(hr)){
         mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVideoSubGraph,(unsigned int)hr);
         return hr;
@@ -2499,7 +2497,7 @@ static HRESULT build_audio_chain(priv_t *priv)
                 (((VIDEOINFOHEADER *) priv->chains[0]->pmt->pbFormat)->dwBitRate),
                 (((WAVEFORMATEX *) (priv->chains[1]->pmt->pbFormat))->nAvgBytesPerSec));
 
-        hr=build_sub_graph(priv, priv->chains[1]->pCaptureFilter, priv->chains[1]->rbuf,priv->chains[1]->arpmt,priv->chains[1]->pmt,&PIN_CATEGORY_CAPTURE);
+        hr=build_sub_graph(priv, priv->chains[1],&PIN_CATEGORY_CAPTURE);
         if(FAILED(hr)){
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildAudioSubGraph,(unsigned int)hr);
             return 0;
@@ -2530,7 +2528,7 @@ static HRESULT build_vbi_chain(priv_t *priv)
 
         init_ringbuffer(priv->chains[2]->rbuf,24,priv->tsp.bufsize);
 
-        hr=build_sub_graph(priv, priv->chains[0]->pCaptureFilter, priv->chains[2]->rbuf,priv->chains[2]->arpmt,NULL,&PIN_CATEGORY_VBI);
+        hr=build_sub_graph(priv, priv->chains[2],&PIN_CATEGORY_VBI);
         if(FAILED(hr)){
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnableBuildVBISubGraph,(unsigned int)hr);
             return 0;
