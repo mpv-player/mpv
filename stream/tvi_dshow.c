@@ -145,6 +145,7 @@ typedef struct CSampleGrabberCB {
 typedef struct {
     stream_type type;                  ///< stream type
     const GUID* majortype;                   ///< GUID of major mediatype (video/audio/vbi)
+    const GUID* pin_category;          ///< pin category (pointer to one of PIN_CATEGORY_*)
 
     IBaseFilter *pCaptureFilter;       ///< capture device filter
     IAMStreamConfig *pStreamConfig;    ///< for configuring stream
@@ -2451,6 +2452,66 @@ static inline int audio_buf_size_from_video(int video_buf_size, int video_bitrat
 }
 
 /**
+ * \brief common chain initialization routine
+ * \param chain chain data structure
+ *
+ * \note pCaptureFilter member should be initialized before call to this routine
+ */
+static HRESULT init_chain_common(ICaptureGraphBuilder2 *pBuilder, chain_t *chain)
+{
+    HRESULT hr;
+    int i;
+
+    if(!chain->pCaptureFilter)
+        return E_POINTER;
+
+    show_filter_info(chain->pCaptureFilter);
+
+    hr = OLE_CALL_ARGS(pBuilder, FindPin,
+            (IUnknown *) chain->pCaptureFilter,
+            PINDIR_OUTPUT, chain->pin_category,
+            chain->majortype, FALSE, 0, &chain->pCapturePin);
+
+    if (FAILED(hr)) {
+        mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: FindPin(pCapturePin) call failed. Error:0x%x\n", (unsigned int)hr);
+        return hr;
+    }
+
+    hr = OLE_CALL_ARGS(pBuilder, FindInterface,
+            chain->pin_category,
+            chain->majortype,
+            chain->pCaptureFilter,
+            &IID_IAMStreamConfig,
+            (void **) &(chain->pStreamConfig));
+    if (FAILED(hr))
+        chain->pStreamConfig = NULL;
+
+    /* 
+       Getting available video formats (last pointer in array  will be NULL) 
+       First tryin to call IAMStreamConfig::GetStreamCaos. this will give us additional information such as
+       min/max picture dimensions, etc. If this call fails trying IPIn::EnumMediaTypes with default
+       min/max values.
+    */
+    hr = get_available_formats_stream(chain);
+    if (FAILED(hr)) {
+        mp_msg(MSGT_TV, MSGL_DBG2, "Unable to use IAMStreamConfig for retriving available formats (Error:0x%x). Using EnumMediaTypes instead\n", (unsigned int)hr);
+        hr = get_available_formats_pin(pBuilder, chain);
+        if(FAILED(hr)){
+            chain->arpmt = calloc(1, sizeof(AM_MEDIA_TYPE *));
+            chain->arStreamCaps = calloc(1, sizeof(void*));
+        }
+    }
+    chain->nFormatUsed = 0;
+
+    //If argument to CreateMediaType is NULL then result will be NULL too.
+    chain->pmt = CreateMediaType(chain->arpmt[0]);
+
+    for (i = 0; chain->arpmt[i]; i++)
+        DisplayMediaType("Available format", chain->arpmt[i]);
+
+    return S_OK;
+}
+/**
  * \brief build video stream chain in graph
  * \param priv private data structure
  *
@@ -2639,10 +2700,13 @@ static int init(priv_t * priv)
 
     priv->chains[0]->type=video;
     priv->chains[0]->majortype=&MEDIATYPE_Video;
+    priv->chains[0]->pin_category=&PIN_CATEGORY_CAPTURE;
     priv->chains[1]->type=audio;
     priv->chains[1]->majortype=&MEDIATYPE_Audio;
+    priv->chains[1]->pin_category=&PIN_CATEGORY_CAPTURE;
     priv->chains[2]->type=vbi;
     priv->chains[2]->majortype=&MEDIATYPE_VBI;
+    priv->chains[2]->pin_category=&PIN_CATEGORY_VBI;
 
     do{
         hr = CoCreateInstance((GUID *) & CLSID_FilterGraph, NULL,
@@ -2720,28 +2784,6 @@ static int init(priv_t * priv)
             priv->pCrossbar = NULL;
         }
 
-        hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
-        		   &PIN_CATEGORY_CAPTURE,
-        		   priv->chains[0]->majortype,
-        		   priv->chains[0]->pCaptureFilter,
-        		   &IID_IAMStreamConfig,
-        		   (void **) &(priv->chains[0]->pStreamConfig));
-        if (FAILED(hr)) {
-            mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_ChangingWidthHeightNotSupported);
-            priv->chains[0]->pStreamConfig = NULL;
-        }
-
-        hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface,
-		   &PIN_CATEGORY_CAPTURE,
-		   priv->chains[1]->majortype,
-		   priv->chains[1]->pCaptureFilter,
-		   &IID_IAMStreamConfig,
-		   (void **) &(priv->chains[1]->pStreamConfig));
-        if (FAILED(hr)) {
-            mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Get IAMStreamConfig(audio) failed (0x%x).\n", (unsigned int)hr);
-            priv->chains[1]->pStreamConfig = NULL;
-        }
-
         if (priv->tv_param->amode >= 0) {
 	    IAMTVAudio *pTVAudio;
 	    hr = OLE_CALL_ARGS(priv->pBuilder, FindInterface, NULL, NULL,priv->chains[0]->pCaptureFilter,&IID_IAMTVAudio, (void *) &pTVAudio);
@@ -2767,23 +2809,20 @@ static int init(priv_t * priv)
                     mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_UnableSetAudioMode, priv->tv_param->amode,(unsigned int)hr);
             }
         }
-        /* 
-           Getting available video formats (last pointer in array  will be NULL) 
-           First tryin to call IAMStreamConfig::GetStreamCaos. this will give us additional information such as
-           min/max picture dimensions, etc. If this call fails trying IPIn::EnumMediaTypes with default
-           min/max values.
-         */
 
-        hr = get_available_formats_stream(priv->chains[0]);
-        if (FAILED(hr)) {
-            mp_msg(MSGT_TV, MSGL_DBG2, "Unable to use IAMStreamConfig for retriving available video formats (Error:0x%x). Using EnumMediaTypes instead\n", (unsigned int)hr);
-            hr = get_available_formats_pin(priv->pBuilder, priv->chains[0]);
-            if(FAILED(hr)){
-                mp_msg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_UnableGetsupportedVideoFormats, (unsigned int)hr);
-                break;
-            }
-        }
-        priv->chains[0]->nFormatUsed = 0;
+        // Video chain initialization
+        hr = init_chain_common(priv->pBuilder, priv->chains[0]);
+        if(FAILED(hr))
+            break;
+
+        // Audio chain initialization
+        init_chain_common(priv->pBuilder, priv->chains[1]);
+
+        // VBI chain initialization
+        init_chain_common(priv->pBuilder, priv->chains[2]);
+
+        if (!priv->chains[0]->pStreamConfig)
+            mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_ChangingWidthHeightNotSupported);
 
         if (!priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed]
             || !extract_video_format(priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed],
@@ -2792,55 +2831,14 @@ static int init(priv_t * priv)
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_ErrorParsingVideoFormatStruct);
             break;
         }
-        priv->chains[0]->pmt = CreateMediaType(priv->chains[0]->arpmt[priv->chains[0]->nFormatUsed]);
-        /* 
-           Getting available audio formats (last pointer in array will be NULL)
-         */
-        hr = get_available_formats_stream(priv->chains[1]);
-        if (FAILED(hr)) {
-            mp_msg(MSGT_TV, MSGL_DBG2, "Unable to use IAMStreamConfig for retriving available audio formats (Error:0x%x). Using EnumMediaTypes instead\n", (unsigned int)hr);
-            hr = get_available_formats_pin(priv->pBuilder, priv->chains[1]);
-            if (FAILED(hr)) {
-                mp_msg(MSGT_TV,MSGL_WARN, MSGTR_TVI_DS_UnableGetsupportedAudioFormats, (unsigned int)hr);
-                /* 
-                   Following combination will disable sound
-                 */
-                priv->chains[1]->arpmt = (AM_MEDIA_TYPE **) malloc(sizeof(AM_MEDIA_TYPE *));
-                priv->chains[1]->arpmt[0] = NULL;
-                priv->chains[1]->pmt = NULL;
-                priv->chains[1]->pStreamConfig = NULL;
-            }
-        }
-        /*
-           Getting formats for VBI stream
-        */
-        priv->chains[2]->nFormatUsed = 0;
-        priv->chains[2]->arpmt = calloc(2, sizeof(AM_MEDIA_TYPE*));
-        priv->chains[2]->arpmt[0] = calloc(1, sizeof(AM_MEDIA_TYPE));
-        priv->chains[2]->arpmt[0]->majortype = MEDIATYPE_VBI;
 
-        priv->chains[2]->pmt = CreateMediaType(priv->chains[2]->arpmt[priv->chains[2]->nFormatUsed]);
-
-        /* debug */
-        {
-            int i;
-            for (i = 0; priv->chains[0]->arpmt[i]; i++) {
-                DisplayMediaType("Available video format", priv->chains[0]->arpmt[i]);
-            }
-            for (i = 0; priv->chains[1]->arpmt[i]; i++) {
-                DisplayMediaType("Available audio format", priv->chains[1]->arpmt[i]);
-            }
-        }
-        priv->chains[1]->nFormatUsed = 0;
         if (priv->chains[1]->arpmt[priv->chains[1]->nFormatUsed]) {
-            priv->chains[1]->pmt = CreateMediaType(priv->chains[1]->arpmt[priv->chains[1]->nFormatUsed]);
             if (!extract_audio_format(priv->chains[1]->pmt, &(priv->samplerate), NULL, NULL)) {
                 mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_ErrorParsingAudioFormatStruct);
                 DisplayMediaType("audio format failed",priv->chains[1]->arpmt[priv->chains[1]->nFormatUsed]);
                 break;
             }
         }
-        show_filter_info(priv->chains[0]->pCaptureFilter);
 
         hr = OLE_QUERYINTERFACE(priv->pGraph, IID_IMediaControl,priv->pMediaControl);
         if(FAILED(hr)){
