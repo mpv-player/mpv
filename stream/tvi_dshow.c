@@ -2047,16 +2047,16 @@ static HRESULT get_available_formats_stream(chain_t *chain)
 	    mp_msg(MSGT_TV, MSGL_DBG4,
 		   "tvi_dshow: Wrong video structure size for GetNumberOfCapabilities (get_available_formats_stream)\n");
 	    return E_FAIL;
-	} else if (chain->type == audio){
-	    if (size != sizeof(AUDIO_STREAM_CONFIG_CAPS)) {
-		mp_msg(MSGT_TV, MSGL_DBG4,
+	}
+    } else if (chain->type == audio){
+	if (size != sizeof(AUDIO_STREAM_CONFIG_CAPS)) {
+	    mp_msg(MSGT_TV, MSGL_DBG4,
 		       "tvi_dshow: Wrong audio structure size for GetNumberOfCapabilities (get_available_formats_stream)\n");
-		return E_FAIL;
-	    } else {
+	    return E_FAIL;
+	}
+    } else {
 		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TVI_DS_UnsupportedMediaType,"get_available_formats_stream");
 		return E_FAIL;
-	    }
-	}
     }
     done = 0;
 
