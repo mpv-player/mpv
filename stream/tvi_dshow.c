@@ -2033,7 +2033,7 @@ static HRESULT get_available_formats_stream(chain_t *chain)
     mp_msg(MSGT_TV, MSGL_DBG4,
 	   "tvi_dshow: get_available_formats_stream called\n");
 
-    if (!chain->pStreamConfig || !chain->majortype)
+    if (!chain->pStreamConfig)
 	return E_POINTER;
 
     hr=OLE_CALL_ARGS(chain->pStreamConfig, GetNumberOfCapabilities, &count, &size);
