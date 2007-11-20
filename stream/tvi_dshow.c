@@ -2146,6 +2146,16 @@ static HRESULT get_available_formats_pin(ICaptureGraphBuilder2 * pBuilder,
     if (!pBuilder || !chain->pCaptureFilter)
 	return E_POINTER;
 
+    if (!chain->pCapturePin)
+    {
+        hr = OLE_CALL_ARGS(pBuilder, FindPin,
+    		   (IUnknown *) chain->pCaptureFilter,
+    		   PINDIR_OUTPUT, &PIN_CATEGORY_CAPTURE,
+    		   chain->majortype, FALSE, 0, &chain->pCapturePin);
+
+        if (!chain->pCapturePin)
+            return E_POINTER;
+    }
     if (chain->type == video) {
 	size = sizeof(VIDEO_STREAM_CONFIG_CAPS);
     } else if (chain->type == audio) {
