@@ -651,7 +651,7 @@ this (adjust for the drive letter of your CD-ROM):
 DVDs also work, adjust <option>-dvd-device</option> for the drive letter
 of your DVD-ROM:
 <screen>
-mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:
+mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d:</replaceable>
 </screen>
 The <application>Cygwin</application>/<application>MinGW</application>
 console is rather slow. Redirecting output or using the
