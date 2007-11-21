@@ -37,6 +37,7 @@ typedef struct {
 MIMEto4CC supported_audio[NMS_MAX_FORMATS] = {
     {"MPA", 0x55}, 
     {"vorbis", mmioFOURCC('v','r','b','s')},
+    {"mpeg4-generic", mmioFOURCC('M','P','4','A')},
     {NULL, 0},
 };
 
