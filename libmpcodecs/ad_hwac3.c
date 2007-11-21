@@ -51,8 +51,9 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
   /* sync frame:*/
   while(1)
   {
-    // DTS has a 10 byte header
-    while(sh_audio->a_in_buffer_len < 10)
+    // Original code DTS has a 10 bytes header.
+    // Now max 12 bytes for 14 bits DTS header.
+    while(sh_audio->a_in_buffer_len < 12)
     {
       int c = demux_getc(sh_audio->ds);
       if(c<0)
@@ -61,7 +62,7 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
     }
 
     length = dts_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
-    if(length >= 10)
+    if(length >= 12)
     {
       if(isdts != 1)
       {
@@ -81,14 +82,14 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
       break; /* we're done.*/
     }
     /* bad file => resync*/
-    memcpy(sh_audio->a_in_buffer, sh_audio->a_in_buffer + 1, 9);
+    memcpy(sh_audio->a_in_buffer, sh_audio->a_in_buffer + 1, 11);
     --sh_audio->a_in_buffer_len;
   }
   mp_msg(MSGT_DECAUDIO, MSGL_DBG2, "ac3dts: %s len=%d  flags=0x%X  %d Hz %d bit/s\n", isdts == 1 ? "DTS" : isdts == 0 ? "AC3" : "unknown", length, flags, sample_rate, bit_rate);
 
   sh_audio->samplerate = sample_rate;
   sh_audio->i_bps = bit_rate / 8;
-  demux_read_data(sh_audio->ds, sh_audio->a_in_buffer + 10, length - 10);
+  demux_read_data(sh_audio->ds, sh_audio->a_in_buffer + 12, length - 12);
   sh_audio->a_in_buffer_len = length;
     
   // TODO: is DTS also checksummed?
@@ -246,31 +247,127 @@ static int dts_decode_header(uint8_t *indata_ptr, int *rate, int *nblks, int *sf
   int fsize;
   int amode;
 
-  if(((indata_ptr[0] << 24) | (indata_ptr[1] << 16) | (indata_ptr[2] << 8)
-    | (indata_ptr[3])) != 0x7ffe8001)
-    return -1;
+  int word_mode;
+  int le_mode;
 
-  ftype = indata_ptr[4] >> 7;
+  unsigned int first4bytes = indata_ptr[0] << 24 | indata_ptr[1] << 16
+                             | indata_ptr[2] << 8 | indata_ptr[3];
 
-  surp = (indata_ptr[4] >> 2) & 0x1f;
-  surp = (surp + 1) % 32;
+  switch(first4bytes)
+  {
+    /* 14 bits LE */
+    case 0xff1f00e8:
+      /* Also make sure frame type is 1. */
+      if ((indata_ptr[4]&0xf0) != 0xf0 || indata_ptr[5] != 0x07)
+        return -1;
+      word_mode = 0;
+      le_mode = 1;
+      break;
+    /* 14 bits BE */
+    case 0x1fffe800:
+      /* Also make sure frame type is 1. */
+      if (indata_ptr[4] != 0x07 || (indata_ptr[5]&0xf0) != 0xf0)
+        return -1;
+      word_mode = 0;
+      le_mode = 0;
+      break;
+    /* 16 bits LE */
+    case 0xfe7f0180:
+      word_mode = 1;
+      le_mode = 1;
+      break;
+    /* 16 bits BE */
+    case 0x7ffe8001:
+      word_mode = 1;
+      le_mode = 0;
+      break;
+    default:
+      return -1;
+  }
 
-  unknown_bit = (indata_ptr[4] >> 1) & 0x01;
+  if(word_mode)
+  {
+    /* First bit after first 32 bits:
+       Frame type ( 1: Normal frame; 0: Termination frame ) */
+    ftype = indata_ptr[4+le_mode] >> 7;
 
-  *nblks = (indata_ptr[4] & 0x01) << 6 | (indata_ptr[5] >> 2);
-  *nblks = *nblks + 1;
-
-  fsize = (indata_ptr[5] & 0x03) << 12 | (indata_ptr[6] << 4) | (indata_ptr[7] >> 4);
-  fsize = fsize + 1;
-    
-  amode = (indata_ptr[7] & 0x0f) << 2 | (indata_ptr[8] >> 6);
-  *sfreq = (indata_ptr[8] >> 2) & 0x0f;
-  *rate = (indata_ptr[8] & 0x03) << 3 | ((indata_ptr[9] >> 5) & 0x07);
-    
   if(ftype != 1) 
   {
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: Termination frames not handled, REPORT BUG\n");
     return -1;
+  }
+    /* Next 5 bits: Surplus Sample Count V SURP 5 bits */
+    surp = indata_ptr[4+le_mode] >> 2 & 0x1f;
+    /* Number of surplus samples */
+    surp = (surp + 1) % 32;
+
+    /* One unknown bit, crc? */
+    unknown_bit = indata_ptr[4+le_mode] >> 1 & 0x01;
+
+    /* NBLKS 7 bits: Valid Range=5-127, Invalid Range=0-4 */
+    *nblks = (indata_ptr[4+le_mode] & 0x01) << 6 | indata_ptr[5-le_mode] >> 2;
+    /* NBLKS+1 indicates the number of 32 sample PCM audio blocks per channel
+       encoded in the current frame per channel. */
+    ++(*nblks);
+
+    /* Frame Byte Size V FSIZE 14 bits: 0-94=Invalid, 95-8191=Valid range-1
+       (ie. 96 bytes to 8192 bytes), 8192-16383=Invalid
+       FSIZE defines the byte size of the current audio frame. */
+    fsize = (indata_ptr[5-le_mode] & 0x03) << 12 | indata_ptr[6+le_mode] << 4
+            | indata_ptr[7-le_mode] >> 4;
+    ++fsize;
+
+    /* Audio Channel Arrangement ACC AMODE 6 bits */
+    amode = (indata_ptr[7-le_mode] & 0x0f) << 2 | indata_ptr[8+le_mode] >> 6;
+
+    /* Source Sampling rate ACC SFREQ 4 bits */
+    *sfreq = indata_ptr[8+le_mode] >> 2 & 0x0f;
+    /* Transmission Bit Rate ACC RATE 5 bits */
+    *rate = (indata_ptr[8+le_mode] & 0x03) << 3
+            | (indata_ptr[9-le_mode] >> 5 & 0x07);
+  }
+  else
+  {
+    /* in the case judgement, we assure this */
+    ftype = 1;
+    surp = 0;
+    /* 14 bits support, every 2 bytes, & 0x3fff, got used 14 bits */
+    /* Bits usage:
+       32 bits: Sync code (28 + 4)      1th and 2th word, 4 bits in 3th word
+       1  bits: Frame type              1 bits in 3th word
+       5  bits: SURP                    5 bits in 3th word
+       1  bits: crc?                    1 bits in 3th word
+       7  bits: NBLKS                   3 bits in 3th word, 4 bits in 4th word
+       14 bits: FSIZE                   10 bits in 4th word, 4 bits in 5th word
+                                        in 14 bits mode, FSIZE = FSIZE*8/14*2
+       6  bits: AMODE                   6 bits in 5th word
+       4  bits: SFREQ                   4 bits in 5th word
+       5  bits: RATE                    5 bits in 6th word
+       total bits: 75 bits    */
+
+    /* NBLKS 7 bits: Valid Range=5-127, Invalid Range=0-4 */
+    *nblks = (indata_ptr[5-le_mode] & 0x07) << 4
+             | (indata_ptr[6+le_mode] & 0x3f) >> 2;
+    /* NBLKS+1 indicates the number of 32 sample PCM audio blocks per channel
+       encoded in the current frame per channel. */
+    ++(*nblks);
+
+    /* Frame Byte Size V FSIZE 14 bits: 0-94=Invalid, 95-8191=Valid range-1
+       (ie. 96 bytes to 8192 bytes), 8192-16383=Invalid
+       FSIZE defines the byte size of the current audio frame. */
+    fsize = (indata_ptr[6+le_mode] & 0x03) << 12 | indata_ptr[7-le_mode] << 4
+            | (indata_ptr[8+le_mode] & 0x3f) >> 2;
+    ++fsize;
+    fsize = fsize * 8 / 14 * 2;
+
+    /* Audio Channel Arrangement ACC AMODE 6 bits */
+    amode = (indata_ptr[8+le_mode] & 0x03) << 4
+            | (indata_ptr[9-le_mode] & 0xf0) >> 4;
+
+    /* Source Sampling rate ACC SFREQ 4 bits */
+    *sfreq = indata_ptr[9-le_mode] & 0x0f;
+    /* Transmission Bit Rate ACC RATE 5 bits */
+    *rate = (indata_ptr[10+le_mode] & 0x3f) >> 1;
   }
     
   if(*sfreq != 13) 
@@ -364,15 +461,22 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: more data than fits\n");
   }
 #ifdef WORDS_BIGENDIAN
-  memcpy(&buf[8], indata_ptr, fsize);
+  /* BE stream */
+  if (indata_ptr[0] == 0x1f || indata_ptr[0] == 0x7f)
 #else
+  /* LE stream */
+  if (indata_ptr[0] == 0xff || indata_ptr[0] == 0xfe)
+#endif
+  memcpy(&buf[8], indata_ptr, fsize);
+  else
+  {
   swab(indata_ptr, &buf[8], fsize);
   if (fsize & 1) {
     buf[8+fsize-1] = 0;
     buf[8+fsize] = indata_ptr[fsize-1];
     fsize++;
   }
-#endif
+  }
   memset(&buf[fsize + 8], 0, nr_samples * 2 * 2 - (fsize + 8));
 
   return nr_samples * 2 * 2;
