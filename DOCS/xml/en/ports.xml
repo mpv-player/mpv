@@ -648,6 +648,9 @@ You can play VCDs by playing the <filename>.DAT</filename> or
 <filename>.MPG</filename> files that Windows exposes on VCDs. It works like
 this (adjust for the drive letter of your CD-ROM):
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
+Alternatively, you can play a VCD track directly by using:
+<screen>mplayer vcd://<replaceable>&lt;track&gt;</replaceable> -cdrom-device <replaceable>d:</replaceable>
+</screen>
 DVDs also work, adjust <option>-dvd-device</option> for the drive letter
 of your DVD-ROM:
 <screen>
