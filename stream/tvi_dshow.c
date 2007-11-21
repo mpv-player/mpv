@@ -3158,6 +3158,9 @@ static int control(priv_t * priv, int cmd, void *arg)
 		priv->chains[0]->arpmt[i+1] = NULL;
 		priv->chains[0]->arpmt[i] = pmt;
 
+		priv->chains[0]->arStreamCaps=realloc(priv->chains[0]->arCtreamCaps, (i+2)*sizeof(void*));
+		priv->chains[0]->arpmt[i+1] = NULL;
+
 		result = TVI_CONTROL_FALSE;
 	    }
 
