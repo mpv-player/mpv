@@ -27,6 +27,27 @@ int rtsp_transport_tcp = 0;
 int rtsp_transport_sctp = 0;
 // extern int rtsp_port;
 
+typedef struct {
+    char * mime;
+    unsigned int fourcc;
+} MIMEto4CC;
+
+#define NMS_MAX_FORMATS 16
+
+MIMEto4CC supported_audio[NMS_MAX_FORMATS] = {
+    {"MPA", 0x55}, 
+    {"vorbis", mmioFOURCC('v','r','b','s')},
+    {NULL, 0},
+};
+
+MIMEto4CC supported_video[NMS_MAX_FORMATS] = {
+    {"MPV", mmioFOURCC('M','P','E','G')},
+    {"H264", mmioFOURCC('H','2','6','4')},
+    {"H263-1998", mmioFOURCC('H','2','6','3')},
+    {"MP4V-ES", mmioFOURCC('M','P','4','V')},
+    {NULL, 0},
+};
+
 typedef enum { NEMESI_SESSION_VIDEO,
                NEMESI_SESSION_AUDIO } Nemesi_SessionType;
 
@@ -47,6 +68,19 @@ typedef struct {
 
 #define INVERT_STYPE(stype) ((stype + 1) % 2)
 
+static unsigned int get4CC(MIMEto4CC * supported_formats, char const * format)
+{
+    unsigned i;
+
+    for(i = 0; i < NMS_MAX_FORMATS; ++i) {
+        if (!supported_formats[i].mime)
+            return 0;
+        else if ( strcmp(supported_formats[i].mime, format) == 0 )
+            return supported_formats[i].fourcc;
+    }
+
+    return 0;
+}
 
 static rtp_ssrc *wait_for_packets(Nemesi_DemuxerStreamData * ndsd, Nemesi_SessionType stype)
 {
@@ -200,14 +234,9 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                 sh_audio->ds = d_audio;
                 wf->nSamplesPerSec = 0;
 
-                //List of known audio formats
-                if (!strcmp(format_name, "MPA"))
-                    wf->wFormatTag =
-                        sh_audio->format = 0x55;
-                else if (!strcmp(format_name, "vorbis"))
-                    wf->wFormatTag =
-                        sh_audio->format = mmioFOURCC('v','r','b','s');
-                else
+                wf->wFormatTag =
+                sh_audio->format = get4CC(supported_audio, format_name);
+                if ( !(wf->wFormatTag) )
                     mp_msg(MSGT_DEMUX, MSGL_WARN,
                            "Unknown MPlayer format code for MIME"
                            " type \"audio/%s\"\n", format_name);
@@ -248,20 +277,9 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                     sh_video->frametime = 1.0/fps;
                 }
 
-                //List of known video formats
-                if (!strcmp(format_name, "MPV")) {
-                    bih->biCompression =
-                        sh_video->format = mmioFOURCC('M','P','E','G');
-                } else if (!strcmp(format_name, "H264")) {
-                    bih->biCompression =
-                        sh_video->format = mmioFOURCC('H','2','6','4');
-                } else if (!strcmp(format_name, "H263-1998")) {
-                    bih->biCompression =
-                        sh_video->format = mmioFOURCC('H','2','6','3');
-                } else if (!strcmp(format_name, "MP4V-ES")) {
-                    bih->biCompression =
-                        sh_video->format = mmioFOURCC('M','P','4','V');
-                } else {
+                bih->biCompression =
+                sh_video->format = get4CC(supported_video, format_name);
+                if ( !(bih->biCompression) ) {
                     mp_msg(MSGT_DEMUX, MSGL_WARN,
                         "Unknown MPlayer format code for MIME"
                         " type \"video/%s\"\n", format_name);
@@ -322,6 +340,8 @@ int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds)
         demuxer->stream->eof = 1;
         return 0;
     }
+
+    memset(&fr, 0, sizeof(fr));
 
     stype = DS_TO_STYPE(demuxer, ds);
     if ( (ssrc = wait_for_packets(ndsd, stype)) == NULL ) {
