@@ -94,7 +94,7 @@ void InitTimer()
 #if 0
 #include <stdio.h>
 
-int main() {
+int main(void) {
   int i,j, r, c = 200;
   long long t = 0;
   

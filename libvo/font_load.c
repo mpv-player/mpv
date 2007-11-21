@@ -337,7 +337,7 @@ fail_out:
 }
 
 #if 0
-int main(){
+int main(void){
 
 read_font_desc("high_arpi.desc",1);
 

@@ -512,7 +512,7 @@ unsigned char buf[W*H*3/2];
 char code[256*1024];
 
 
-main() {
+main(void) {
 	int i, size;
 	FILE *fp;
 

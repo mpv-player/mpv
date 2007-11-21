@@ -71,7 +71,7 @@ void globfree(glob_t *pglob)
 }
 
 #if 0
-int main(){
+int main(void){
    glob_t        gg;
    printf("globtest\n");
    glob( "*.jpeg",0,NULL,&gg );

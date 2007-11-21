@@ -45,7 +45,7 @@ static inline long long rdtsc()
 #endif
 
 
-int main(){
+int main(void){
 int accel=0;
 int sample_rate=0;
 int bit_rate=0;
