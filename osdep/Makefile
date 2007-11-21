@@ -14,7 +14,7 @@ SRCS_COMMON-$(NEED_SWAB)             += swab.c
 SRCS_COMMON-$(NEED_VSSCANF)          += vsscanf.c
 
 getch = getch2.c
-timer = timer-lx.c
+timer = timer-linux.c
 ifeq ($(TARGET_WIN32),yes)
 timer = timer-win2.c
 endif
