@@ -759,25 +759,6 @@ static void write_pes_padding(uint8_t *buff, uint16_t len)
 	memset(&buff[6], 0xff, len - 6);
 }
 
-static void write_psm_block(muxer_t *muxer, stream_t *stream)
-{
-	uint16_t offset, stuffing_len;
-	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
-	uint8_t *buff = priv->buff;
-	
-	offset = write_mpeg_pack_header(muxer, buff);
-	offset += write_mpeg_psm(muxer, &buff[offset]);
-	stuffing_len = priv->packet_size - offset;
-	if(stuffing_len > 0)
-	{
-		//insert a PES padding packet
-		write_pes_padding(&buff[offset], stuffing_len);
-		offset += stuffing_len;
-	}
-	stream_write_buffer(stream, buff, offset);
-	priv->headers_size += offset;
-}
-
 
 static int write_nav_pack(uint8_t *buff)
 {
