@@ -1498,7 +1498,7 @@ echores $_host_cc
 echocheck "cross compilation"
 if test $_cross_compile = auto ; then
   cat > $TMPC << EOF
-int main() { return 0; }
+int main(void) { return 0; }
 EOF
   _cross_compile=yes
   cc_check && "$TMPEXE" && _cross_compile=no
@@ -2137,7 +2137,7 @@ EOF
     
     echocheck "CPU type"
     cat > $TMPC << EOF
-int main() {
+int main(void) {
     unsigned long ver, mask;
     asm ("implver %0" : "=r" (ver));
     asm ("amask %1, %0" : "=r" (mask) : "r" (-1));
@@ -2407,7 +2407,7 @@ echocheck ".align is a power of two"
 if test "$_asmalign_pot" = auto ; then
 _asmalign_pot=no
 cat > $TMPC << EOF
-main() { asm (".align 3"); }
+main(void) { asm (".align 3"); }
 EOF
 cc_check && _asmalign_pot=yes
 fi
@@ -2431,7 +2431,7 @@ if ppc ; then
         
         p=''
         cat > $TMPC << EOF
-int main() {
+int main(void) {
     return 0;
 }
 EOF
@@ -2677,7 +2677,7 @@ echores "$_runtime_cpudetection"
 
 echocheck "restrict keyword"
 for restrict_keyword in restrict __restrict __restrict__ ; do
-  echo "void foo(char * $restrict_keyword p); int main(){}" > $TMPC
+  echo "void foo(char * $restrict_keyword p); int main(void){}" > $TMPC
   if cc_check; then
     _def_restrict_keyword=$restrict_keyword
     break;
@@ -2703,7 +2703,7 @@ int foo (int a) {
     a = __builtin_expect (a, 10);
     return a == 10 ? 0 : 1;
 }
-int main() { return foo(10) && foo(0); }
+int main(void) { return foo(10) && foo(0); }
 EOF
 _builtin_expect=no
 cc_check && _builtin_expect=yes
@@ -5455,7 +5455,7 @@ if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
 #include <cdio/version.h>
 #include <cdio/cdda.h>
 #include <cdio/paranoia.h>
-int main()
+int main(void)
 {
     void *test = cdda_verbose_set;
     printf("%s\n", CDIO_VERSION);
@@ -5533,7 +5533,7 @@ if test "$_freetype" = auto ; then
 #if ((FREETYPE_MAJOR < 2) || ((FREETYPE_MINOR == 0) && (FREETYPE_PATCH < 9)))
 #error "Need FreeType 2.0.9 or newer"
 #endif
-int main()
+int main(void)
 {
     FT_Library library;
     FT_Int major=-1,minor=-1,patch=-1;
@@ -5577,7 +5577,7 @@ if test "$_fontconfig" = auto ; then
         cat > $TMPC << EOF
 #include <stdio.h>
 #include <fontconfig/fontconfig.h>
-int main()
+int main(void)
 {
     int err = FcInit();
     if(err == FcFalse){
@@ -5622,7 +5622,7 @@ if test "$_ass" = auto ; then
 #if ((FREETYPE_MAJOR < 2) || (FREETYPE_MINOR < 1) || ((FREETYPE_MINOR == 1) && (FREETYPE_PATCH < 8)))
 #error "Need FreeType 2.1.8 or newer"
 #endif
-int main() { return 0; }
+int main(void) { return 0; }
 EOF
     _ass=no
     cc_check `$_freetypeconfig --cflags` `$_freetypeconfig --libs` && tmp_run && _ass=yes
@@ -5646,7 +5646,7 @@ if test "$_fribidi" = auto ; then
 /* workaround for fribidi 0.10.4 and below */
 #define FRIBIDI_CHARSET_UTF8 FRIBIDI_CHAR_SET_UTF8
 #include <fribidi/fribidi.h>
-int main()
+int main(void)
 {
     if(fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8) {
        printf("Fribidi headers are not consistents with the library!\n");
@@ -5675,7 +5675,7 @@ echocheck "ENCA"
 if test "$_enca" = auto ; then
     cat > $TMPC << EOF
 #include <enca.h>
-int main()
+int main(void)
 {
     const char **langs;
     size_t langcnt;
@@ -7064,7 +7064,7 @@ if test "$_big_endian" = auto ; then
   cat > $TMPC <<EOF
 short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
-int main(){
+int main(void){
   return (int)ascii_name;
 } 
 EOF
@@ -7501,7 +7501,7 @@ CFLAGS="-I. -I.. -I../libavutil $CFLAGS"
 CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
 cat > $TMPC << EOF
-int main() { return 0; }
+int main(void) { return 0; }
 EOF
 if test "$cc_vendor" = "gnu" ; then
   cc_check -Wdeclaration-after-statement && CFLAGS="-Wdeclaration-after-statement $CFLAGS"
