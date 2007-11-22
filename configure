@@ -165,16 +165,6 @@ sh3() {
   esac
 }
 
-# not boolean test: implement the posix shell "!" operator for a
-# non-posix /bin/sh.
-#   usage:  not {command}
-# returns exit status "success" when the execution of "command"
-# fails.
-not() {
-  eval "$@"
-  test $? -ne 0
-}
-
 # Use this before starting a check
 echocheck() {
   echo "============ Checking for $@ ============" >> "$TMPLOG"
@@ -1299,7 +1289,7 @@ fi
 echo "Detected operating system: $system_name"
 echo "Detected host architecture: $host_arch"
 
-if test "$_runtime_cpudetection" = yes && not x86 && not ppc; then
+if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
   die "Runtime CPU detection only works for x86, x86-64 and PPC!"
 fi
 
@@ -1527,14 +1517,14 @@ if test "$_runtime_cpudetection" = no ; then
 
 # Cygwin has /proc/cpuinfo, but only supports Intel CPUs
 # FIXME: Remove the cygwin check once AMD CPUs are supported
-if test -r /proc/cpuinfo && not cygwin; then
+if test -r /proc/cpuinfo && ! cygwin; then
   # Linux with /proc mounted, extract CPU information from it
   _cpuinfo="cat /proc/cpuinfo"
-elif test -r /compat/linux/proc/cpuinfo && not x86_32 ; then
+elif test -r /compat/linux/proc/cpuinfo && ! x86_32 ; then
   # FreeBSD with Linux emulation /proc mounted,
   # extract CPU information from it
   _cpuinfo="cat /compat/linux/proc/cpuinfo"
-elif darwin && not x86_32 ; then
+elif darwin && ! x86_32 ; then
   # use hostinfo on Darwin
   _cpuinfo="hostinfo"
 elif aix; then
@@ -1785,7 +1775,7 @@ EOF
       cc_check -march=$proc $cpuopt=$proc  || proc=k6
     fi
     if test "$proc" = "k6" || test "$proc" = "c3"; then
-      if not cc_check -march=$proc $cpuopt=$proc; then
+      if ! cc_check -march=$proc $cpuopt=$proc; then
         if cc_check -march=i586 $cpuopt=i686; then
           proc=i586-i686
         else 
@@ -2802,7 +2792,7 @@ _socklib=no
 for _ld_tmp in "" "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
   cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && _socklib=yes && break
 done
-if test $_winsock2 = auto && not cygwin ; then
+if test $_winsock2 = auto && ! cygwin ; then
   _winsock2=no
   cat > $TMPC << EOF
 #include <winsock2.h>
@@ -2980,7 +2970,7 @@ if test "$_memalign" = yes ; then
 else
  _def_memalign='#undef HAVE_MEMALIGN'
  _def_map_memalign='#define memalign(a,b) malloc(b)'
- not darwin && _def_memalign_hack='#define CONFIG_MEMALIGN_HACK 1'
+ darwin || _def_memalign_hack='#define CONFIG_MEMALIGN_HACK 1'
 fi
 echores "$_memalign"
 
@@ -3067,7 +3057,7 @@ void* func(void *arg) { return arg; }
 int main(void) { pthread_t tid; return pthread_create (&tid, 0, func, 0) == 0 ? 0 : 1; }
 EOF
 _pthreads=no
-if not hpux ; then
+if ! hpux ; then
   for _ld_tmp in "-lpthreadGC2" "" "-lpthread" "-pthread" ; do
     # for crosscompilation, we cannot execute the program, be happy if we can link statically
     cc_check $_ld_tmp && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
@@ -3082,9 +3072,7 @@ else
   _res_comment="v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled"
   _def_pthreads='#undef HAVE_PTHREADS'
   _nas=no ; _tv_v4l1=no ; _macosx=no
-  if not mingw32 ; then
-    _win32dll=no
-  fi
+  mingw32 || _win32dll=no
 fi
 echores "$_pthreads"
 
@@ -5490,7 +5478,7 @@ fi
 echores "$_libcdio"
 
 if test "$_cdda" = yes ; then
-    test $_cddb = auto && test $_network = yes && not darwin && _cddb=yes
+    test $_cddb = auto && test $_network = yes && ! darwin && _cddb=yes
     _def_cdparanoia='#define HAVE_CDDA'
     _inputmodules="cdda $_inputmodules"
 else
@@ -6155,7 +6143,7 @@ fi
 echocheck "Win32 codecs"
 if test "$_win32dll" = auto ; then
   _win32dll=no
-  if x86_32 && not qnx; then
+  if x86_32 && ! qnx; then
     _win32dll=yes
   fi
 fi
@@ -6163,7 +6151,7 @@ if test "$_win32dll" = yes ; then
   _def_win32dll='#define USE_WIN32DLL 1'
   test -z "$_win32codecsdir" && _win32codecsdir=$_codecsdir
   _res_comment="using $_win32codecsdir"
-  if not win32 ; then
+  if ! win32 ; then
     _def_win32_loader='#define WIN32_LOADER 1'
   else
     _ld_extra="$_ld_extra -ladvapi32 -lole32"
@@ -7029,7 +7017,7 @@ echores "$_select"
 
 
 echocheck "ftp"
-if not beos && test "$_ftp" = yes ; then
+if ! beos && test "$_ftp" = yes ; then
   _def_ftp='#define HAVE_FTP 1'
   _inputmodules="ftp $_inputmodules"
 else
@@ -7180,11 +7168,10 @@ if test "$_gui" = yes ; then
 
   # Required libraries
   if test "$_libavcodec" != yes ||
-      not "echo $_libavdecoders | grep PNG_DECODER >/dev/null 2>&1" ; then
+      ! "echo $_libavdecoders | grep PNG_DECODER >/dev/null 2>&1" ; then
     die "The GUI requires libavcodec with PNG support (needs zlib)."
   fi
-if not win32 ; then
-  test "$_x11" != yes && die "X11 support required for GUI compilation."
+win32 || test "$_x11" != yes && die "X11 support required for GUI compilation."
 
   echocheck "XShape extension"
   if test "$_xshape" = auto ; then
@@ -7284,11 +7271,11 @@ if test "$_gtk1" = yes ; then
   _def_gtk2_gui='#undef HAVE_GTK2_GUI'
 fi
 
-else #if not win32
+else #if ! win32
   _libs_mplayer="$_libs_mplayer -lcomdlg32 -lcomctl32 -lshell32 -lkernel32"
   _def_gui='#define HAVE_NEW_GUI 1'
   _def_gtk2_gui='#undef HAVE_GTK2_GUI'
-fi #if not win32
+fi #if ! win32
 
 else #if test "$_gui"
   _def_gui='#undef HAVE_NEW_GUI'
@@ -7353,7 +7340,7 @@ fi
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
 bsd && _ld_dl_dynamic='-rdynamic'
-if test "$_real" = yes || test "$_xanim" = yes && not win32 && not qnx && not darwin ; then
+if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin ; then
   _ld_dl_dynamic='-rdynamic'
 fi
 
