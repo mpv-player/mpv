@@ -3,11 +3,6 @@
 #include "dvdread/ifo_types.h"
 #include "dvdread/ifo_read.h"
 #include "dvdread/nav_read.h"
-#elif defined(USE_DVDNAV)
-#include <dvd_reader.h>
-#include <ifo_types.h>
-#include <ifo_read.h>
-#include <nav_read.h>
 #else
 #include <dvdread/dvd_reader.h>
 #include <dvdread/ifo_types.h>
