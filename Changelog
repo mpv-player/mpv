@@ -23,6 +23,7 @@ MPlayer (1.0)
     * DNxHD (SMPTE VC-3) encoder
     * H.264 PAFF decoding
     * Nellymoser audio codec
+    * VC-1/WMV3 MMX optimizations
 
     Drivers:
     * Replace PolypAudio by PulseAudio (-ao pulse)
