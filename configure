@@ -8503,7 +8503,7 @@ $_def_xshape
 EOF
 
 # Do not overwrite an unchanged config.h to avoid superfluous rebuilds.
-! cmp -s "$TMPH" config.h && mv -f "$TMPH" config.h
+cmp -s "$TMPH" config.h || mv -f "$TMPH" config.h
 
 #############################################################################
 
