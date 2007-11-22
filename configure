@@ -7168,10 +7168,11 @@ if test "$_gui" = yes ; then
 
   # Required libraries
   if test "$_libavcodec" != yes ||
-      ! "echo $_libavdecoders | grep PNG_DECODER >/dev/null 2>&1" ; then
+      ! echo $_libavdecoders | grep PNG_DECODER >/dev/null 2>&1 ; then
     die "The GUI requires libavcodec with PNG support (needs zlib)."
   fi
-win32 || test "$_x11" != yes && die "X11 support required for GUI compilation."
+if ! win32 ; then
+  test "$_x11" != yes && die "X11 support required for GUI compilation."
 
   echocheck "XShape extension"
   if test "$_xshape" = auto ; then
@@ -8543,7 +8544,7 @@ if test "$_mtrr" = yes ; then
   echo
 fi
 
-if not x86_32; then
+if ! x86_32; then
   cat <<EOF
 NOTE: Win32 codec DLLs are not supported on your CPU ($host_arch) or your
 operating system ($system_name). You may encounter a few files that cannot
