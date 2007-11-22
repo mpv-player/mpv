@@ -400,7 +400,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 		goto fail;
         }
 	
-	((URLContext*)(priv->oc->pb.opaque))->priv_data= muxer;
+	((URLContext*)(priv->oc->pb->opaque))->priv_data= muxer;
 	
 	muxer->priv = (void *) priv;
 	muxer->cont_new_stream = &lavf_new_stream;
