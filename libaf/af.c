@@ -514,7 +514,7 @@ af_data_t* af_play(af_stream_t* s, af_data_t* data)
     if (data->len <= 0) break;
     data=af->play(af,data);
     af=af->next;
-  }while(af);
+  }while(af && data);
   return data;
 }
 
