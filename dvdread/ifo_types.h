@@ -407,55 +407,6 @@ typedef struct {
 } ATTRIBUTE_PACKED user_ops_t;
 
 /**
- * Subpicture stream mapping for a subtitle
- */
-typedef struct {
-#ifdef WORDS_BIGENDIAN
-  unsigned int present   : 1;
-  unsigned int zero1     : 2;
-  unsigned int s_4p3     : 5; /* stream for 4:3 on any display */
-
-  unsigned int zero2     : 3;
-  unsigned int s_wide    : 5; /* stream for 16:9 on widescreen display */
-
-  unsigned int zero3     : 3;
-  unsigned int s_lbox    : 5; /* stream for 16:9 on letterboxed 4:3 display */
-
-  unsigned int zero4     : 3;
-  unsigned int s_panscan : 5; /* stream for 16:9 with pan&scan data on 4:3 display */
-#else
-  unsigned int s_4p3     : 5; /* stream for 4:3 on any display */
-  unsigned int zero1     : 2;
-  unsigned int present   : 1;
-
-  unsigned int s_wide    : 5; /* stream for 16:9 on widescreen display */
-  unsigned int zero2     : 3;
-
-  unsigned int s_lbox    : 5; /* stream for 16:9 on letterboxed 4:3 display */
-  unsigned int zero3     : 3;
-
-  unsigned int s_panscan : 5; /* stream for 16:9 with pan&scan data on 4:3 display */
-  unsigned int zero4     : 3;
-#endif
-} ATTRIBUTE_PACKED subp_mapping_t;
-
-/**
- * Audio stream mapping for a soundtrack
- */
-typedef struct {
-#ifdef WORDS_BIGENDIAN
-  unsigned int present : 1;
-  unsigned int zero1   : 4;
-  unsigned int s_audio : 3;
-#else
-  unsigned int s_audio : 3;
-  unsigned int zero1   : 4;
-  unsigned int present : 1;
-#endif
-  uint8_t zero2;
-} ATTRIBUTE_PACKED audio_mapping_t;
-
-/**
  * Program Chain Information.
  */
 typedef struct {
@@ -464,8 +415,8 @@ typedef struct {
   uint8_t  nr_of_cells;
   dvd_time_t playback_time;
   user_ops_t prohibited_ops;
-  audio_mapping_t audio_control[8];
-  subp_mapping_t subp_control[32];
+  uint16_t audio_control[8];
+  uint32_t subp_control[32];
   uint16_t next_pgc_nr;
   uint16_t prev_pgc_nr;
   uint16_t goup_pgc_nr;

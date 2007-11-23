@@ -797,14 +797,14 @@ void ifoPrint_PGC(pgc_t *pgc) {
   ifoPrint_USER_OPS(&pgc->prohibited_ops);
   
   for(i = 0; i < 8; i++) {
-    if(pgc->audio_control[i].present) { /* The 'is present' bit */
+    if(pgc->audio_control[i] & 0x8000) { /* The 'is present' bit */
       printf("Audio stream %i control: %04x\n", 
              i, pgc->audio_control[i]);
     }
   }
   
   for(i = 0; i < 32; i++) {
-    if(pgc->subp_control[i].present) { /* The 'is present' bit */
+    if(pgc->subp_control[i] & 0x80000000) { /* The 'is present' bit */
       printf("Subpicture stream %2i control: %08x\n", 
              i, pgc->subp_control[i]);
     }

@@ -763,10 +763,10 @@ static int ifoRead_PGC(ifo_handle_t *ifofile, pgc_t *pgc, unsigned int offset) {
 
   /* verify time (look at print_time) */
   for(i = 0; i < 8; i++)
-    if(!pgc->audio_control[i].present)
+    if(!pgc->audio_control[i] & 0x8000)
       CHECK_ZERO(pgc->audio_control[i]);
   for(i = 0; i < 32; i++)
-    if(!pgc->subp_control[i].present)
+    if(!pgc->subp_control[i] & 0x80000000)
       CHECK_ZERO(pgc->subp_control[i]);
   
   /* Check that time is 0:0:0:0 also if nr_of_programs == 0 */
