@@ -180,13 +180,14 @@ static void flip_page(void)
 {
 	if(shared_buffer)
 		[mplayerosxProxy render];
-	else
+	else {
+		[mpGLView setCurrentTexture];
 		[mpGLView render];
+	}
 }
 
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
-	[mpGLView setCurrentTexture];
 	return 0;
 }
 
@@ -204,9 +205,6 @@ static int draw_frame(uint8_t *src[])
 			memcpy_pic(image_data, src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
 			break;
 	}
-	
-	if(!shared_buffer)
-		[mpGLView setCurrentTexture];
 	
 	return 0;
 }
