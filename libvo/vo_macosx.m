@@ -119,10 +119,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			break;
 	}
 	image_bytes = (image_depth + 7) / 8;
-	image_data = malloc(image_width*image_height*image_bytes);
 		
 	if(!shared_buffer)
 	{		
+		image_data = malloc(image_width*image_height*image_bytes);
+
 		monitor_aspect = (float)screen_frame.size.width/(float)screen_frame.size.height;
 		
 		//set aspect
