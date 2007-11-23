@@ -1280,7 +1280,8 @@ void vobsub_seek(void * vobhandle, float pts)
 	    return;
     queue = vob->spu_streams + vobsub_id;
     queue->current_index = 0;
-    while ((queue->packets + queue->current_index)->pts100 < seek_pts100)
+    while (queue->current_index < queue->packets_size
+            && (queue->packets + queue->current_index)->pts100 < seek_pts100)
       ++queue->current_index;
     if (queue->current_index > 0)
       --queue->current_index;
