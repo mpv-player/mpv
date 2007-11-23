@@ -43,6 +43,7 @@ MIMEto4CC supported_audio[NMS_MAX_FORMATS] = {
 
 MIMEto4CC supported_video[NMS_MAX_FORMATS] = {
     {"MPV", mmioFOURCC('M','P','E','G')},
+    {"theora",mmioFOURCC('t','h','e','o')},
     {"H264", mmioFOURCC('H','2','6','4')},
     {"H263-1998", mmioFOURCC('H','2','6','3')},
     {"MP4V-ES", mmioFOURCC('M','P','4','V')},
