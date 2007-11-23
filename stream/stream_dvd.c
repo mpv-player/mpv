@@ -927,11 +927,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       if(vts_file->vts_pgcit) {
         int i;
         for(i=0;i<8;i++)
-#ifdef USE_DVDREAD_INTERNAL
-          if(pgc->audio_control[i].present) {
-#else
           if(pgc->audio_control[i] & 0x8000) {
-#endif
             audio_attr_t * audio = &vts_file->vtsi_mat->vts_audio_attr[i];
             int language = 0;
             char tmp[] = "unknown";
@@ -945,11 +941,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
             }
 
             audio_stream->language=language;
-#ifdef USE_DVDREAD_INTERNAL
-            audio_stream->id=pgc->audio_control[i].s_audio;
-#else
             audio_stream->id=pgc->audio_control[i] >> 8 & 7;
-#endif
             switch(audio->audio_format) {
               case 0: // ac3
                 audio_stream->id+=FIRST_AC3_AID;
@@ -996,11 +988,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
       d->nr_of_subtitles=0;
       for(i=0;i<32;i++)
-#ifdef USE_DVDREAD_INTERNAL
-      if(pgc->subp_control[i].present) {
-#else
       if(pgc->subp_control[i] & 0x80000000) {
-#endif
         subp_attr_t * subtitle = &vts_file->vtsi_mat->vts_subp_attr[i];
         video_attr_t *video = &vts_file->vtsi_mat->vts_video_attr;
         int language = 0;
@@ -1017,17 +1005,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         sub_stream->language=language;
         sub_stream->id=d->nr_of_subtitles;
         if(video->display_aspect_ratio == 0) /* 4:3 */
-#ifdef USE_DVDREAD_INTERNAL
-          sub_stream->id = pgc->subp_control[i].s_4p3;
-#else
           sub_stream->id = pgc->subp_control[i] >> 24 & 31;
-#endif
         else if(video->display_aspect_ratio == 3) /* 16:9 */
-#ifdef USE_DVDREAD_INTERNAL
-          sub_stream->id = pgc->subp_control[i].s_lbox;
-#else
           sub_stream->id = pgc->subp_control[i] >> 8 & 31;
-#endif
 
         mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, sub_stream->id, tmp);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sub_stream->id);
