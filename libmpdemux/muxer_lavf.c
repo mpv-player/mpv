@@ -40,7 +40,7 @@ extern char *info_comment;
 typedef struct {
 	//AVInputFormat *avif;
 	AVFormatContext *oc;
-	ByteIOContext pb;
+	ByteIOContext *pb;
 	int audio_streams;
 	int video_streams;
 	int64_t last_pts;
@@ -317,7 +317,7 @@ static void write_trailer(muxer_t *muxer)
 		av_freep(&(priv->oc->streams[i]));
 	}
 
-	url_fclose(&(priv->oc->pb));
+	url_fclose(priv->oc->pb);
 
 	av_free(priv->oc);
 }

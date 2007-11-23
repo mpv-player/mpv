@@ -64,7 +64,7 @@ m_option_t lavfdopts_conf[] = {
 typedef struct lavf_priv_t{
     AVInputFormat *avif;
     AVFormatContext *avfc;
-    ByteIOContext pb;
+    ByteIOContext *pb;
     int audio_streams;
     int video_streams;
     int sub_streams;
@@ -471,9 +471,9 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     
     url_fopen(&priv->pb, mp_filename, URL_RDONLY);
     
-    ((URLContext*)(priv->pb.opaque))->priv_data= demuxer->stream;
+    ((URLContext*)(priv->pb->opaque))->priv_data= demuxer->stream;
         
-    if(av_open_input_stream(&avfc, &priv->pb, mp_filename, priv->avif, &ap)<0){
+    if(av_open_input_stream(&avfc, priv->pb, mp_filename, priv->avif, &ap)<0){
         mp_msg(MSGT_HEADER,MSGL_ERR,"LAVF_header: av_open_input_stream() failed\n");
         return NULL;
     }
