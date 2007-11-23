@@ -252,6 +252,11 @@ static void uninit(void)
         [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
         [finalPool release];
     }
+    if (!shared_buffer)
+    {
+        free(image_data);
+        image_data = NULL;
+    }
 }
 
 static int preinit(const char *arg)
