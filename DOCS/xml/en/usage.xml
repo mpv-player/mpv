@@ -7,14 +7,15 @@
 <title>Command line</title>
 
 <para>
-<application>MPlayer</application> utilizes a complex playtree. It consists
-of global options written as first, for example
-<screen>mplayer -vfm 5</screen>
-and options written after filenames, that apply only to the given
-filename/URL/whatever, for example:
+<application>MPlayer</application> utilizes a complex playtree. Options passed
+on the command line can apply to all files/URLs or just to specific ones
+depending on their position. For example
+<screen>mplayer -vfm ffmpeg movie1.avi movie2.avi</screen>
+will use FFmpeg decoders for both files, but
 <screen>
-mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4
+mplayer -vfm ffmpeg <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm dmo
 </screen>
+will play the second file with a DMO decoder.
 </para>
 
 <para>
