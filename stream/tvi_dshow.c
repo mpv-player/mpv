@@ -3141,8 +3141,8 @@ static int control(priv_t * priv, int cmd, void *arg)
 /* need rewrite */
     case TVI_CONTROL_VID_SET_FORMAT:
 	{
-	    int fcc, i;
-	    void* tmp;
+	    int fcc, i,j;
+	    void* tmp,*tmp2;
 	    int result = TVI_CONTROL_TRUE;
 
 	    if (priv->state)
@@ -3185,13 +3185,16 @@ static int control(priv_t * priv, int cmd, void *arg)
 		result = TVI_CONTROL_FALSE;
 	    }
 
-	    tmp = priv->chains[0]->arpmt[0];
-	    priv->chains[0]->arpmt[0] = priv->chains[0]->arpmt[i];
-	    priv->chains[0]->arpmt[i] = tmp;
 
-	    tmp = priv->chains[0]->arStreamCaps[0];
-	    priv->chains[0]->arStreamCaps[0] = priv->chains[0]->arStreamCaps[i];
-	    priv->chains[0]->arStreamCaps[i] = tmp;
+            tmp=priv->chains[0]->arpmt[i];
+            tmp2=priv->chains[0]->arStreamCaps[i];
+            for(j=i; j>0; j--)
+            {
+                priv->chains[0]->arpmt[j] = priv->chains[0]->arpmt[j-1];
+                priv->chains[0]->arStreamCaps[j] = priv->chains[0]->arStreamCaps[j-1];
+            }
+            priv->chains[0]->arpmt[0] = tmp;
+            priv->chains[0]->arStreamCaps[0] = tmp2;
 
 	    priv->chains[0]->nFormatUsed = 0;
 
