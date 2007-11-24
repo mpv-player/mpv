@@ -2497,8 +2497,7 @@ static HRESULT init_chain_common(ICaptureGraphBuilder2 *pBuilder, chain_t *chain
         mp_msg(MSGT_TV, MSGL_DBG2, "Unable to use IAMStreamConfig for retriving available formats (Error:0x%x). Using EnumMediaTypes instead\n", (unsigned int)hr);
         hr = get_available_formats_pin(pBuilder, chain);
         if(FAILED(hr)){
-            chain->arpmt = calloc(1, sizeof(AM_MEDIA_TYPE *));
-            chain->arStreamCaps = calloc(1, sizeof(void*));
+            return hr;
         }
     }
     chain->nFormatUsed = 0;
@@ -2815,11 +2814,33 @@ static int init(priv_t * priv)
         if(FAILED(hr))
             break;
 
-        // Audio chain initialization
-        init_chain_common(priv->pBuilder, priv->chains[1]);
+        /*
+           Audio chain initialization
+           Since absent audio stream is not fatal,
+           at least one NULL pointer should be kept in format arrays
+           (to avoid another additional check everywhere for array presence).
+        */
+        hr = init_chain_common(priv->pBuilder, priv->chains[1]);
+        if(FAILED(hr))
+        {
+            mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: Unable to initialize audio chain (Error:0x%x). Audio disabled\n", (unsigned long)hr);
+            priv->chains[1]->arpmt=calloc(1, sizeof(AM_MEDIA_TYPE*));
+            priv->chains[1]->arStreamCaps=calloc(1, sizeof(void*));
+        }
 
-        // VBI chain initialization
-        init_chain_common(priv->pBuilder, priv->chains[2]);
+        /*
+           VBI chain initialization
+           Since absent VBI stream is not fatal,
+           at least one NULL pointer should be kept in format arrays
+           (to avoid another additional check everywhere for array presence).
+        */
+        hr = init_chain_common(priv->pBuilder, priv->chains[2]);
+        if(FAILED(hr))
+        {
+            mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: Unable to initialize VBI chain (Error:0x%x). Teletext disabled\n", (unsigned long)hr);
+            priv->chains[2]->arpmt=calloc(1, sizeof(AM_MEDIA_TYPE*));
+            priv->chains[2]->arStreamCaps=calloc(1, sizeof(void*));
+        }
 
         if (!priv->chains[0]->pStreamConfig)
             mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TVI_DS_ChangingWidthHeightNotSupported);
