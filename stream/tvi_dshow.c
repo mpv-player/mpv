@@ -2067,29 +2067,18 @@ static HRESULT get_available_formats_stream(chain_t *chain)
 
 	pBuf = (void **) malloc((count + 1) * sizeof(void *));
 	if (pBuf) {
-	    int dst = 0;
 	    memset(pBuf, 0, (count + 1) * sizeof(void *));
 
 	    for (i = 0; i < count; i++) {
-		pBuf[dst] = malloc(size);
+		pBuf[i] = malloc(size);
 
-		if (!pBuf[dst])
+		if (!pBuf[i])
 		    break;
 
 		hr = OLE_CALL_ARGS(chain->pStreamConfig, GetStreamCaps, i,
-			       &(arpmt[dst]), pBuf[dst]);
+			       &(arpmt[i]), pBuf[i]);
 		if (FAILED(hr))
 		    break;
-		if(!memcmp(&(arpmt[dst]->majortype), &MEDIATYPE_Video, 16) && !subtype2imgfmt(&(arpmt[dst]->subtype)))
-		{
-		    DisplayMediaType("Skipping unsupported video format", arpmt[dst]);
-		    DeleteMediaType(arpmt[dst]);
-		    free(pBuf[dst]);
-		    arpmt[dst]=NULL;
-		    pBuf[dst]=NULL;
-		    continue;
-		}
-		dst++;
 	    }
 	    if (i == count) {
 		chain->arpmt = arpmt;
