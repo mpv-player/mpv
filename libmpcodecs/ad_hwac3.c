@@ -369,13 +369,13 @@ static int dts_decode_header(uint8_t *indata_ptr, int *rate, int *nblks, int *sf
     /* Transmission Bit Rate ACC RATE 5 bits */
     *rate = (indata_ptr[10+le_mode] & 0x3f) >> 1;
   }
-    
+#if 0
   if(*sfreq != 13) 
   {
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: Only 48kHz supported, REPORT BUG\n");
     return -1;
   }
-    
+#endif
   if((fsize > 8192) || (fsize < 96)) 
   {
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: fsize: %d invalid, REPORT BUG\n", fsize);
@@ -418,6 +418,43 @@ static int dts_syncinfo(uint8_t *indata_ptr, int *flags, int *sample_rate, int *
   return fsize;
 }
 
+static int convert_14bits_to_16bits(const unsigned char *src,
+                                    unsigned char *dest,
+                                    int len,
+                                    int is_le)
+{
+  uint16_t *p = (uint16_t *)dest;
+  int spacebits = 16;
+  int leftbits;
+  while (len > 0) {
+    uint16_t v;
+    if (len == 1)
+      v = is_le ? src[0] : src[0] << 8;
+    else
+      v = is_le ? src[1] << 8 | src[0] : src[0] << 8 | src[1];
+    leftbits = 14;
+    src += 2;
+    len -= 2;
+    if (spacebits == 0) {
+      ++p;
+      spacebits = 16;
+    }
+    if (spacebits == 16)
+      *p = 0;
+    if (spacebits < leftbits) {
+      leftbits -= spacebits;
+      *p |= (v & 0x3FFF) >> leftbits;
+      ++p;
+      *p = 0;
+      spacebits = 16;
+    }
+    *p |= ((v << (16 - leftbits)) & 0xFFFF) >> (16 - spacebits);
+    spacebits -= leftbits;
+  }
+  if (spacebits < 16)
+    ++p;
+  return (unsigned char *)p - dest;
+}
 
 static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *buf)
 {
@@ -425,15 +462,13 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
   int fsize;
   int rate;
   int sfreq;
-  int burst_len;
   int nr_samples;
+  int convert_16bits = 0;
   uint16_t *buf16 = (uint16_t *)buf;
 
   fsize = dts_decode_header(indata_ptr, &rate, &nblks, &sfreq);
   if(fsize < 0)
     return -1;
- 
-  burst_len = fsize * 8;
   nr_samples = nblks * 32;
 
   buf16[0] = 0xf872; /* iec 61937     */
@@ -454,12 +489,35 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
     buf16[2] = 0x0000;
     break;
   }
-  buf16[3] = burst_len;
  
   if(fsize + 8 > nr_samples * 2 * 2)
   {
+    // dts wav (14bits LE) match this condition, one way to passthrough
+    // is not add iec 61937 header, decoders will notice the dts header
+    // and identify the dts stream. Another way here is convert
+    // the stream from 14 bits to 16 bits.
+    if ((indata_ptr[0] == 0xff || indata_ptr[0] == 0x1f)
+        && fsize * 14 / 16 + 8 <= nr_samples * 2 * 2) {
+      // The input stream is 14 bits, we can shrink it to 16 bits
+      // to save space for add the 61937 header
+      fsize = convert_14bits_to_16bits((const uint16_t *)indata_ptr,
+                                       (uint16_t *)&buf[8],
+                                       fsize,
+                                       indata_ptr[0] == 0xff /* is LE */
+                                       );
+      mp_msg(MSGT_DECAUDIO, MSGL_DBG3, "DTS: shrink 14 bits stream to "
+             "16 bits %02x%02x%02x%02x => %02x%02x%02x%02x, new size %d.\n",
+             indata_ptr[0], indata_ptr[1], indata_ptr[2], indata_ptr[3],
+             buf[8], buf[9], buf[10], buf[11], fsize);
+      convert_16bits = 1;
+    }
+    else
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: more data than fits\n");
   }
+
+  buf16[3] = fsize << 3;
+
+  if (!convert_16bits) {
 #ifdef WORDS_BIGENDIAN
   /* BE stream */
   if (indata_ptr[0] == 0x1f || indata_ptr[0] == 0x7f)
@@ -475,6 +533,7 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
     buf[8+fsize-1] = 0;
     buf[8+fsize] = indata_ptr[fsize-1];
     fsize++;
+  }
   }
   }
   memset(&buf[fsize + 8], 0, nr_samples * 2 * 2 - (fsize + 8));
