@@ -755,6 +755,10 @@ static int ifoRead_PGC(ifo_handle_t *ifofile, pgc_t *pgc, unsigned int offset) {
   B2N_16(pgc->cell_playback_offset);
   B2N_16(pgc->cell_position_offset);
 
+  for(i = 0; i < 8; i++)
+    B2N_16(pgc->audio_control[i]);
+  for(i = 0; i < 32; i++)
+    B2N_32(pgc->subp_control[i]);
   for(i = 0; i < 16; i++)
     B2N_32(pgc->palette[i]);
   
