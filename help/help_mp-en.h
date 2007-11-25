@@ -222,6 +222,9 @@ static char help_text[]=
 #define MSGTR_Bottom "bottom"
 #define MSGTR_Center "center"
 #define MSGTR_Top "top"
+#define MSGTR_SubSourceFile "file"
+#define MSGTR_SubSourceVobsub "vobsub"
+#define MSGTR_SubSourceDemux "embedded"
 
 // osd bar names
 #define MSGTR_Volume "Volume"
@@ -243,6 +246,7 @@ static char help_text[]=
 #define MSGTR_FramedroppingStatus "Framedropping: %s"
 #define MSGTR_VSyncStatus "VSync: %s"
 #define MSGTR_SubSelectStatus "Subtitles: %s"
+#define MSGTR_SubSourceStatus "Sub source: %s"
 #define MSGTR_SubPosStatus "Sub position: %s/100"
 #define MSGTR_SubAlignStatus "Sub alignment: %s"
 #define MSGTR_SubDelayStatus "Sub delay: %s"
