@@ -88,19 +88,24 @@ static void rescale_input_coordinates(int ix, int iy, double *dx, double *dy)
 	   vo_dheight, vo_fs);
 }
 
-static int sub_source(MPContext * mpctx)
+static int sub_source_by_pos(MPContext * mpctx, int pos)
 {
     int source = -1;
     int top = -1;
     int i;
     for (i = 0; i < SUB_SOURCES; i++) {
 	int j = mpctx->global_sub_indices[i];
-	if ((j >= 0) && (j > top) && (mpctx->global_sub_pos >= j)) {
+	if ((j >= 0) && (j > top) && (pos >= j)) {
 	    source = i;
 	    top = j;
 	}
     }
     return source;
+}
+
+static int sub_source(MPContext * mpctx)
+{
+    return sub_source_by_pos(mpctx, mpctx->global_sub_pos);
 }
 
 /**
@@ -1363,6 +1368,175 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
     return M_PROPERTY_OK;
 }
 
+/// Selected sub source (RW)
+static int mp_property_sub_source(m_option_t * prop, int action, void *arg,
+                                  MPContext * mpctx)
+{
+    int source;
+    if (!mpctx->sh_video || mpctx->global_sub_size <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        *(int *) arg = sub_source(mpctx);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        *(char **) arg = malloc(64);
+        (*(char **) arg)[63] = 0;
+        switch (sub_source(mpctx))
+        {
+        case SUB_SOURCE_SUBS:
+            snprintf(*(char **) arg, 63, MSGTR_SubSourceFile);
+            break;
+        case SUB_SOURCE_VOBSUB:
+            snprintf(*(char **) arg, 63, MSGTR_SubSourceVobsub);
+            break;
+        case SUB_SOURCE_DEMUX:
+            snprintf(*(char **) arg, 63, MSGTR_SubSourceDemux);
+            break;
+        default:
+            snprintf(*(char **) arg, 63, MSGTR_Disabled);
+        }
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        M_PROPERTY_CLAMP(prop, *(int*)arg);
+        if (*(int *) arg < 0)
+            mpctx->global_sub_pos = -1;
+        else if (*(int *) arg != sub_source(mpctx)) {
+            if (*(int *) arg != sub_source_by_pos(mpctx, mpctx->global_sub_indices[*(int *) arg]))
+                return M_PROPERTY_UNAVAILABLE;
+            mpctx->global_sub_pos = mpctx->global_sub_indices[*(int *) arg];
+        }
+        break;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN: {
+        int step_all = (arg && *(int*)arg != 0 ? *(int*)arg : 1)
+                       * (action == M_PROPERTY_STEP_UP ? 1 : -1);
+        int step = (step_all > 0) ? 1 : -1;
+        int cur_source = sub_source(mpctx);
+        source = cur_source;
+        while (step_all) {
+            source += step;
+            if (source >= SUB_SOURCES)
+                source = -1;
+            else if (source < -1)
+                source = SUB_SOURCES - 1;
+            if (source == cur_source || source == -1 ||
+                    source == sub_source_by_pos(mpctx, mpctx->global_sub_indices[source]))
+                step_all -= step;
+        }
+        if (source == cur_source)
+            return M_PROPERTY_OK;
+        if (source == -1)
+            mpctx->global_sub_pos = -1;
+        else
+            mpctx->global_sub_pos = mpctx->global_sub_indices[source];
+        break;
+    }
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+    --mpctx->global_sub_pos;
+    return mp_property_sub(prop, M_PROPERTY_STEP_UP, NULL, mpctx);
+}
+
+/// Selected subtitles from specific source (RW)
+static int mp_property_sub_by_type(m_option_t * prop, int action, void *arg,
+                                   MPContext * mpctx)
+{
+    int source, is_cur_source, offset;
+    if (!mpctx->sh_video || mpctx->global_sub_size <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    if (!strcmp(prop->name, "sub_file"))
+        source = SUB_SOURCE_SUBS;
+    else if (!strcmp(prop->name, "sub_vob"))
+        source = SUB_SOURCE_VOBSUB;
+    else if (!strcmp(prop->name, "sub_demux"))
+        source = SUB_SOURCE_DEMUX;
+    else
+        return M_PROPERTY_ERROR;
+
+    offset = mpctx->global_sub_indices[source];
+    if (offset < 0 || source != sub_source_by_pos(mpctx, offset))
+        return M_PROPERTY_UNAVAILABLE;
+
+    is_cur_source = sub_source(mpctx) == source;
+    switch (action) {
+    case M_PROPERTY_GET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        *(int *) arg = (is_cur_source) ? mpctx->global_sub_pos - offset : -1;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        if (is_cur_source)
+            return mp_property_sub(prop, M_PROPERTY_PRINT, arg, mpctx);
+        *(char **) arg = malloc(64);
+        (*(char **) arg)[63] = 0;
+        snprintf(*(char **) arg, 63, MSGTR_Disabled);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        if (*(int *) arg >= 0) {
+            mpctx->global_sub_pos = offset + *(int *) arg;
+            if (mpctx->global_sub_pos >= mpctx->global_sub_size
+                    || sub_source(mpctx) != source) {
+                mpctx->global_sub_pos = -1;
+                *(int *) arg = -1;
+            }
+        }
+        else
+            mpctx->global_sub_pos = -1;
+        break;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN: {
+        int step_all = (arg && *(int*)arg != 0 ? *(int*)arg : 1)
+                       * (action == M_PROPERTY_STEP_UP ? 1 : -1);
+        int step = (step_all > 0) ? 1 : -1;
+        int max_sub_pos_for_source = -1;
+        if (!is_cur_source)
+            mpctx->global_sub_pos = -1;
+        while (step_all) {
+            if (mpctx->global_sub_pos == -1) {
+                if (step > 0)
+                    mpctx->global_sub_pos = offset;
+                else if (max_sub_pos_for_source == -1) {
+                    // Find max pos for specific source
+                    mpctx->global_sub_pos = mpctx->global_sub_size - 1;
+                    while (mpctx->global_sub_pos >= 0
+                            && sub_source(mpctx) != source)
+                        --mpctx->global_sub_pos;
+                }
+                else
+                    mpctx->global_sub_pos = max_sub_pos_for_source;
+            }
+            else {
+                mpctx->global_sub_pos += step;
+                if (mpctx->global_sub_pos < offset ||
+                        mpctx->global_sub_pos >= mpctx->global_sub_size ||
+                        sub_source(mpctx) != source)
+                    mpctx->global_sub_pos = -1;
+            }
+            step_all -= step;
+        }
+        break;
+    }
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+    --mpctx->global_sub_pos;
+    return mp_property_sub(prop, M_PROPERTY_STEP_UP, NULL, mpctx);
+}
+
 /// Subtitle delay (RW)
 static int mp_property_sub_delay(m_option_t * prop, int action, void *arg,
 				 MPContext * mpctx)
@@ -1702,6 +1876,14 @@ static m_option_t mp_properties[] = {
     // Subs
     { "sub", mp_property_sub, CONF_TYPE_INT,
      M_OPT_MIN, -1, 0, NULL },
+    { "sub_source", mp_property_sub_source, CONF_TYPE_INT,
+     M_OPT_RANGE, -1, SUB_SOURCES - 1, NULL },
+    { "sub_vob", mp_property_sub_by_type, CONF_TYPE_INT,
+     M_OPT_MIN, -1, 0, NULL },
+    { "sub_demux", mp_property_sub_by_type, CONF_TYPE_INT,
+     M_OPT_MIN, -1, 0, NULL },
+    { "sub_file", mp_property_sub_by_type, CONF_TYPE_INT,
+     M_OPT_MIN, -1, 0, NULL },
     { "sub_delay", mp_property_sub_delay, CONF_TYPE_FLOAT,
      0, 0, 0, NULL },
     { "sub_pos", mp_property_sub_pos, CONF_TYPE_INT,
@@ -1830,6 +2012,10 @@ static struct {
     { "vsync", MP_CMD_SWITCH_VSYNC, 1, 0, -1, MSGTR_VSyncStatus },
 	// subs
     { "sub", MP_CMD_SUB_SELECT, 1, 0, -1, MSGTR_SubSelectStatus },
+    { "sub_source", MP_CMD_SUB_SOURCE, 1, 0, -1, MSGTR_SubSourceStatus },
+    { "sub_vob", MP_CMD_SUB_VOB, 1, 0, -1, MSGTR_SubSelectStatus },
+    { "sub_demux", MP_CMD_SUB_DEMUX, 1, 0, -1, MSGTR_SubSelectStatus },
+    { "sub_file", MP_CMD_SUB_FILE, 1, 0, -1, MSGTR_SubSelectStatus },
     { "sub_pos", MP_CMD_SUB_POS, 0, 0, -1, MSGTR_SubPosStatus },
     { "sub_alignment", MP_CMD_SUB_ALIGNMENT, 1, 0, -1, MSGTR_SubAlignStatus },
     { "sub_delay", MP_CMD_SUB_DELAY, 0, 0, OSD_MSG_SUB_DELAY, MSGTR_SubDelayStatus },

@@ -295,6 +295,34 @@ sub_select [value]
     Cycle through the available subtitles if [value] is omitted or less
     than -1. Supported subtitle sources are -sub options on the command
     line, VOBsubs, DVD subtitles, and Ogg and Matroska text streams.
+    This command is mainly for cycling all subtitles, if you want to set
+    a specific subtitle, use sub_file, sub_vob, or sub_demux.
+
+sub_source [source]
+    Display first subtitle from [source]. Here [source] is an integer:
+    SUB_SOURCE_SUBS   (0) for file subs
+    SUB_SOURCE_VOBSUB (1) for VOBsub files
+    SUB_SOURCE_DEMUX  (2) for subtitle embedded in the media file or DVD subs.
+    If [source] is -1, will turn off subtitle display. If [source] less than -1,
+    will cycle between the first subtitle of each currently available sources.
+
+sub_file [value]
+    Display subtitle specifid by [value] for file subs. The [value] is
+    corresponding to ID_FILE_SUB_ID values reported by '-identify'.
+    If [value] is -1, will turn off subtitle display. If [value] less than -1,
+    will cycle all file subs.
+
+sub_vob [value]
+    Display subtitle specifid by [value] for vobsubs. The [value] is
+    corresponding to ID_VOBSUB_ID values reported by '-identify'.
+    If [value] is -1, will turn off subtitle display. If [value] less than -1,
+    will cycle all vobsubs.
+
+sub_demux [value]
+    Display subtitle specifid by [value] for subtitles from DVD or embedded
+    in media file. The [value] is corresponding to ID_SUBTITLE_ID values
+    reported by '-identify'. If [value] is -1, will turn off subtitle display.
+    If [value] less than -1, will cycle all DVD subs or embedded subs.
 
 sub_scale <value> [abs]
     Adjust the subtitle size by +/- <value> or set it to <value> when [abs]
@@ -465,6 +493,10 @@ aspect             float                     X
 switch_video       int       -2      255     X   X   X    select video stream
 switch_program     int       -1      65535   X   X   X    (see TAB default keybind)
 sub                int       -1              X   X   X    select subtitle stream
+sub_source         int       -1      2       X   X   X    select subtitle source
+sub_file           int       -1              X   X   X    select file subtitles
+sub_vob            int       -1              X   X   X    select vobsubs
+sub_demux          int       -1              X   X   X    select subs from demux
 sub_delay          float                     X   X   X
 sub_pos            int       0       100     X   X   X    subtitle position
 sub_alignment      int       0       2       X   X   X    subtitle alignment

@@ -92,6 +92,10 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_REMOVE, "sub_remove", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_SUB_SELECT, "vobsub_lang", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } }, // for compatibility
   { MP_CMD_SUB_SELECT, "sub_select", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } },
+  { MP_CMD_SUB_SOURCE, "sub_source", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } },
+  { MP_CMD_SUB_VOB, "sub_vob", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } },
+  { MP_CMD_SUB_DEMUX, "sub_demux", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } },
+  { MP_CMD_SUB_FILE, "sub_file", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } },
   { MP_CMD_SUB_LOG, "sub_log", 0, { {-1,{0}} } },
   { MP_CMD_SUB_SCALE, "sub_scale",1, { {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_GET_PERCENT_POS, "get_percent_pos", 0, { {-1,{0}} } },
