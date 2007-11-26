@@ -93,7 +93,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
     break;
   }
 
-  line_end = ((*(end-1)) == '\r') ? end-1 : end;
+  line_end = (end > p->iter && *(end-1) == '\r') ? end-1 : end;
   if(line_end - p->iter >= 0)
     p->line = (char*)realloc(p->line,line_end - p->iter+1);
   else
