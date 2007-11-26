@@ -721,7 +721,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 	HTTP_header_t *http_hdr = NULL;
 	unsigned int i;
 	int fd = stream->fd;
-	int res = 0;
+	int res = STREAM_UNSUPPORTED;
 	int redirect = 0;
 	int auth_retry=0;
 	int seekable=0;
@@ -783,6 +783,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 						*file_format = DEMUXER_TYPE_AAC;
 					else
 						*file_format = DEMUXER_TYPE_AUDIO;
+					res = STREAM_ERROR;
 					goto out;
 				}
 				case 400: // Server Full
@@ -836,6 +837,14 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 				next_url = http_get_field( http_hdr, "Location" );
 				if( next_url!=NULL ) {
 					stream->streaming_ctrl->url = url_redirect( &url, next_url );
+					if (!strcasecmp(url->protocol, "mms")) {
+						res = STREAM_REDIRECTED;
+						goto err_out;
+					}
+					if (strcasecmp(url->protocol, "http")) {
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Unsupported http %d redirect to %s protocol\n", http_hdr->status_code, url->protocol);
+						goto err_out;
+					}
 					redirect = 1;	
 				}
 				break;
@@ -853,7 +862,6 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 err_out:
 	if (fd > 0) closesocket( fd );
 	fd = -1;
-	res = STREAM_UNSUPPORTED;
 	http_free( http_hdr );
 	http_hdr = NULL;
 out:
@@ -908,6 +916,8 @@ static int open_s1(stream_t *stream,int mode, void* opts, int* file_format) {
 		if (stream->fd >= 0)
 			closesocket(stream->fd);
 		stream->fd = -1;
+		if (seekable == STREAM_REDIRECTED)
+			return seekable;
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
 		return STREAM_UNSUPPORTED;

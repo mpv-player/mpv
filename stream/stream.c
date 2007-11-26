@@ -145,7 +145,8 @@ stream_info_t* auto_open_streams[] = {
 };
 
 stream_t* open_stream_plugin(stream_info_t* sinfo,char* filename,int mode,
-			     char** options, int* file_format, int* ret) {
+			     char** options, int* file_format, int* ret,
+			     char** redirected_url) {
   void* arg = NULL;
   stream_t* s;
   m_struct_t* desc = (m_struct_t*)sinfo->opts;
@@ -178,6 +179,16 @@ stream_t* open_stream_plugin(stream_info_t* sinfo,char* filename,int mode,
   s->flags |= mode;
   *ret = sinfo->open(s,mode,arg,file_format);
   if((*ret) != STREAM_OK) {
+#ifdef MPLAYER_NETWORK
+    if (*ret == STREAM_REDIRECTED && redirected_url) {
+        if (s->streaming_ctrl && s->streaming_ctrl->url
+            && s->streaming_ctrl->url->url)
+          *redirected_url = strdup(s->streaming_ctrl->url->url);
+        else
+          *redirected_url = NULL;
+    }
+    streaming_ctrl_free(s->streaming_ctrl);
+#endif
     free(s->url);
     free(s);
     return NULL;
@@ -204,6 +215,7 @@ stream_t* open_stream_full(char* filename,int mode, char** options, int* file_fo
   int i,j,l,r;
   stream_info_t* sinfo;
   stream_t* s;
+  char *redirected_url = NULL;
 
   for(i = 0 ; auto_open_streams[i] ; i++) {
     sinfo = auto_open_streams[i];
@@ -218,9 +230,17 @@ stream_t* open_stream_full(char* filename,int mode, char** options, int* file_fo
          ((strncmp(sinfo->protocols[j],filename,l) == 0) &&
 		      (strncmp("://",filename+l,3) == 0))) {
 	*file_format = DEMUXER_TYPE_UNKNOWN;
-	s = open_stream_plugin(sinfo,filename,mode,options,file_format,&r);
+	s = open_stream_plugin(sinfo,filename,mode,options,file_format,&r,
+				&redirected_url);
 	if(s) return s;
-	if(r != STREAM_UNSUPPORTED) {
+	if(r == STREAM_REDIRECTED && redirected_url) {
+	  mp_msg(MSGT_OPEN,MSGL_V, "[%s] open %s redirected to %s\n",
+		 sinfo->info, filename, redirected_url);
+	  s = open_stream_full(redirected_url, mode, options, file_format);
+	  free(redirected_url);
+	  return s;
+	}
+	else if(r != STREAM_UNSUPPORTED) {
 	  mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_FailedToOpen,filename);
 	  return NULL;
 	}

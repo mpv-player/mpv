@@ -43,6 +43,7 @@
 #define STREAM_SEEK  (STREAM_SEEK_BW|STREAM_SEEK_FW)
 
 //////////// Open return code
+#define STREAM_REDIRECTED -2
 /// This can't open the requested protocol (used by stream wich have a
 /// * protocol when they don't know the requested protocol)
 #define STREAM_UNSUPPORTED -1
