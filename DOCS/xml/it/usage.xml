@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24056 -->
+<!-- synced with r25146	-->
 <chapter id="usage">
 <title>Utilizzo</title>
 
@@ -8,13 +8,14 @@
 
 <para>
 <application>MPlayer</application> usa una sequenza di riproduzione complessa.
-Consta di opzioni globali definite per prime, per esempio
-<screen>mplayer -vfm 5</screen>
-e opzioni definite dopo il nome file, che si applicano solo a quel dato
-file/URL/quelchelé, per esempio:
+Le opzioni passate sulla riga comando possono venir applicate a tutti i
+file/URL o solo ad alcuni, a seconda della loro posizione. Per esempio
+<screen>mplayer -vfm ffmpeg movie1.avi movie2.avi</screen>
+userà i decodificatori FFmpeg per ambedue i file, mentre
 <screen>
-mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4
+mplayer -vfm ffmpeg <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm dmo
 </screen>
+riprodurrà il secondo file con un decodificatore DMO.
 </para>
 
 <para>
