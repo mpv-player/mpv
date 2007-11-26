@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24344 -->
+<!-- synced with r24346 -->
 <chapter id="cd-dvd">
 <title>Utilizzo CD/DVD</title>
 
@@ -154,20 +154,41 @@ modalità può esser specificata attraverso la variabile d'ambiente
 </para>
 </formalpara>
 
+<sect2 id="region_code">
+<title>Codici regionali</title>
 <para>
-<emphasis role="bold">Attenzione</emphasis>: puoi cambiare la zona solo 5 volte.
-I lettori DVD RPC-1 proteggono le impostazioni di zona solo via software. I
-lettori RPC-2 hanno invece una protezione hardware che permette solo 5
-modifiche. Può esser necessario/consigliato aggiornare il firmware a RPC-1 se
-hai un lettore DVD RPC-2. Puoi provare a cercare aggiornamenti di firmware per
-il tuo lettore su internet,
-<ulink url="http://forum.rpc-1.com/dl_all.php">questo forum su firmware</ulink>
-potrebbe essere un buon punto di partenza per la tua ricerca.
-Se non c'è alcun aggiornamento di firmware disponibile per il tuo dispositivo,
-usa lo strumento
-<ulink url="http://linvdr.org/projects/regionset/">regionset</ulink> per
-impostare la zona del tuo lettore DVD (sotto Linux).
+I lettori DVD al giorno d'oggi sono venduti con una costrizione senza senso
+chiamata <ulink url="http://it.wikipedia.org/wiki/DVD-Video#Codici_regionali">codice regionale</ulink>
+(<ulink url="http://en.wikipedia.org/wiki/DVD_region_code">in inglese</ulink>).
+Questa è una strategia per forzare i lettori DVD ad accettare solamente DVD
+prodotti per una delle sei diverse regioni in cui è stato diviso il mondo.
+Come un gruppo di persone possano sedersi attorno ad un tavolo, partorire
+un'idea del genere ed aspettarsi che il mondo del 21° secolo si pieghi ai loro
+voleri, è aldilà di ogni comprensione.
 </para>
+
+<para>
+I lettori che forzano l'impostazione regionale solo via software sono anche
+conosciuti come lettori RPC-1, quelli che lo gestiscono via hardware come RPC-2.
+I lettori RPC-2 permettono la modifica della regione per cinque volte, prima
+che resti bloccata.
+Sotto Linux puoi usare lo strumento
+<ulink url="http://linvdr.org/projects/regionset/">regionset</ulink> per
+per impostare il codice regionale del tuo lettore DVD.
+</para>
+
+<para>
+Grazie al cielo, è possibile convertire lettori RPC-2 in lettori RPC-1
+attraverso un aggiornamento del firmware. Inserisci il modello del tuo lettore
+DVD nel tuo motore di ricerca preferito oppure dai un'occhiata ai forum e alle
+sezioni di download di
+<ulink url="http://www.rpc1.org/">"The firmware page"</ulink>.
+Anche se si devono applicare le solite precauzioni per l'aggiornamento del
+firmware, le esperienze relative alla rimozione della forzatura del codice
+regionale sono generalmente positive.
+</para>
+</sect2>
+
 </sect1>
 
 
