@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24710 -->
+<!-- synced with r25011 -->
 <chapter id="video">
 <title>Dispositivi di uscita video</title>
 
@@ -1984,6 +1984,32 @@ dove il canale si vede (per es. 2) con la sintassi:
 Per cambiare canale premi i tasti <keycap>h</keycap> (successivo) e
 <keycap>k</keycap> (precedente), oppure usa il
 <link linkend="osdmenu">menu OSD</link>.
+</para>
+
+<para>
+Per disabilitare temporaneamente il flusso video o audio, copia quello che
+segue in <filename>~/.mplayer/input.conf</filename>:
+<screen>
+% set_property  switch_video -2
+&amp; step_property switch_video
+? set_property  switch_audio -2
+^ step_property switch_audio
+</screen>
+(Reimpostando i comandi da tastiera come si preferisce.) Premendo il tasto
+corrispondente a switch_x -2, il flusso relativo verrà chiuso;
+premendo il tasto corrispondente a step_x il flusso verrà riaperto.
+Nota che quando ci sono più flussi audio e video nel multiplex questo
+meccanismo non funzionerà nel modo che ci si aspetta.
+</para>
+
+<para>
+Durante la riproduzione (non durante la registrazione), per evitare
+saltellamenti e messaggi di errore tipo 'Il tuo sistema è troppo LENTO',
+si consiglia di aggiungere
+<screen>
+-mc 10 -speed 0.97 -af scaletempo
+</screen>
+alla riga comando, impostando i parametri di scaletempo come si preferisce.
 </para>
 
 <para>
