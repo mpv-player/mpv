@@ -393,7 +393,7 @@ static void clos(menu_t* menu) {
 static int open_fs(menu_t* menu, char* args) {
   char *path = mpriv->path, *freepath = NULL;
   int r = 0;
-  char wd[PATH_MAX+1];
+  char wd[PATH_MAX+1], b[PATH_MAX+1];
   args = NULL; // Warning kill
 
   menu->draw = menu_list_draw;
@@ -425,22 +425,32 @@ static int open_fs(menu_t* menu, char* args) {
   }
   
   getcwd(wd,PATH_MAX);
-  if(!path || path[0] == '\0') {
-    int l = strlen(wd) + 2;
-    char b[l];
-    sprintf(b,"%s/",wd);
-    r = open_dir(menu,b);
-  } else if(path[0] != '/') {
-    int al = strlen(path);
-    int l = strlen(wd) + al + 3;
-    char b[l];
-    if(b[al-1] != '/')
-      sprintf(b,"%s/%s/",wd,path);
+  if (!path || path[0] == '\0')
+    path = wd;
+  if (path[0] != '/') {
+    if(path[strlen(path)-1] != '/')
+      snprintf(b,sizeof(b),"%s/%s/",wd,path);
     else
-      sprintf(b,"%s/%s",wd,path);
-    r = open_dir(menu,b);
-  } else
-    r = open_dir(menu,path);
+      snprintf(b,sizeof(b),"%s/%s",wd,path);
+    path = b;
+  } else if (path[strlen(path)-1]!='/') {
+    sprintf(b,"%s/",path);
+    path = b;
+  }
+  if (menu_chroot && menu_chroot[0] == '/') {
+    int l = strlen(menu_chroot);
+    if (l > 0 && menu_chroot[l-1] == '/')
+      --l;
+    if (strncmp(menu_chroot, path, l) || (path[l] != '\0' && path[l] != '/')) {
+      if (menu_chroot[l] == '/')
+        path = menu_chroot;
+      else {
+        sprintf(b,"%s/",menu_chroot);
+        path = b;
+      }
+    }
+  }
+  r = open_dir(menu,path);
 
   if (freepath)
     free(freepath);
