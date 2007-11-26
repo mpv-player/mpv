@@ -246,9 +246,10 @@ static void uninit(void)
     
     if(mpGLView)
     {
+        NSAutoreleasePool *finalPool;
         mpGLView = nil;
         [autoreleasepool release];
-        NSAutoreleasePool *finalPool = [[NSAutoreleasePool alloc] init];
+        finalPool = [[NSAutoreleasePool alloc] init];
         [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
         [finalPool release];
     }
