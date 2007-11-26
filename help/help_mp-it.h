@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r24790
+// Updated to help_mp-en.h r25158
 
 // ========================= MPlayer help ===========================
 
@@ -219,6 +219,7 @@ static char help_text[]=
 #define MSGTR_Bottom "in basso"
 #define MSGTR_Center "al centro"
 #define MSGTR_Top "in alto"
+#define MSGTR_SubSourceDemux "incorporati"
 
 // osd bar names
 #define MSGTR_Volume "Volume"
@@ -240,6 +241,7 @@ static char help_text[]=
 #define MSGTR_FramedroppingStatus "Scarto fotogrammi: %so"
 #define MSGTR_VSyncStatus "VSync: %s"
 #define MSGTR_SubSelectStatus "Sottotitoli: %s"
+#define MSGTR_SubSourceStatus "Origine sottotitoli: %s"
 #define MSGTR_SubPosStatus "Posizione sottotitoli: %s/100"
 #define MSGTR_SubAlignStatus "Allineamento sottotitoli: %s"
 #define MSGTR_SubDelayStatus "Ritardo sottotitoli: %s"
@@ -1759,6 +1761,17 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection "[VO_DXR3] Impossibile ricavare la correzione overlay della dimensione X!\nEsco.\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Impossibile impostare il mix segnale!\n"
 
+// libvo/font_load_ft.c
+
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "New_Face in errore. Forse il percorso del font è errato.\nPer favore indica il file dei font per il testo (~/.mplayer/subfont.ttf).\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "New_Memory_Face in errore..\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "font sottotitoli: load_sub_face in errore.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "font sottotitoli: prepare_charset in errore.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Impossibile preparare il font dei sottotitoli.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Impossibile preparare il font per l'OSD.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Impossibile generare le tabelle.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType in errore.\n"
+
 // libvo/vo_mga.c
 
 #define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): ridimensionato a %dx%d.\n"
@@ -2131,3 +2144,4 @@ static char help_text[]=
 #define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Inizializzazione graph di Directshow fallita.\n"
 #define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: Impossibile trovare il dispositivo di acquisizione video.\n"
 #define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Impossibile trovare il dispositivo di acquisizione audio.\n"
+#define MSGTR_TVI_DS_GetActualMediatypeFailed "tvi_dshow: Impossibile ricavare il mediatype attuale (Errore:0x%x). Assumo sia uguale a quello richiesto.\n"
