@@ -448,6 +448,14 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
     asx_warning_attrib_required(parser,"REF" ,"HREF" );
     return;
   }
+  // replace http my mmshttp to avoid infinite loops
+  if (strncmp(href, "http://", 7) == 0) {
+    char *newref = malloc(3 + strlen(href) + 1);
+    strcpy(newref, "mms");
+    strcpy(newref + 3, href);
+    free(href);
+    href = newref;
+  }
 
   play_tree_add_file(pt,href);
 
