@@ -424,35 +424,27 @@ static int convert_14bits_to_16bits(const unsigned char *src,
                                     int is_le)
 {
   uint16_t *p = (uint16_t *)dest;
+  uint16_t buf = 0;
   int spacebits = 16;
-  int leftbits;
+  if (len <= 0) return 0;
   while (len > 0) {
     uint16_t v;
     if (len == 1)
       v = is_le ? src[0] : src[0] << 8;
     else
       v = is_le ? src[1] << 8 | src[0] : src[0] << 8 | src[1];
-    leftbits = 14;
+    v <<= 2;
     src += 2;
     len -= 2;
-    if (spacebits == 0) {
-      ++p;
-      spacebits = 16;
+    buf |= v >> (16 - spacebits);
+    spacebits -= 14;
+    if (spacebits < 0) {
+      *p++ = buf;
+      spacebits += 16;
+      buf = v << (spacebits - 2);
     }
-    if (spacebits == 16)
-      *p = 0;
-    if (spacebits < leftbits) {
-      leftbits -= spacebits;
-      *p |= (v & 0x3FFF) >> leftbits;
-      ++p;
-      *p = 0;
-      spacebits = 16;
-    }
-    *p |= ((v << (16 - leftbits)) & 0xFFFF) >> (16 - spacebits);
-    spacebits -= leftbits;
   }
-  if (spacebits < 16)
-    ++p;
+  *p++ = buf;
   return (unsigned char *)p - dest;
 }
 
