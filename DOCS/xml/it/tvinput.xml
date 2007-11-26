@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r23536 -->
+<!-- synced with r24604 -->
 <chapter id="tv">
 <title>TV</title>
 
@@ -188,6 +188,102 @@ approccio usa la massima informazione disponibile ed è un po' più
 resiliente ai disturbi. I chip bt8x8 possono calcolare la media dei pixel solo
 sulla direzione orizzontale a causa di una limitazione hardware.
 </para></informalexample>
+</sect2>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="tv-teletext">
+<title>Televideo (teletext)</title>
+
+<para>
+Il televideo è attualmente disponibile solo in MPlayer per i driver v4l e v4l2.
+</para>
+
+<sect2 id="tv-teletext-implementation-notes">
+<title>Note sull'implementazione</title>
+
+<para>
+<application>MPlayer</application> gestisce il testo normale, la grafica e i
+collegamenti per la navigazione.
+Sfortunatamente, le pagine colorate non sono ancora decodificate completamente -
+tutte le pagine vengono mostrate in scala di grigi.
+Vengono gestite anche le pagine dei sottotitoli (conosciute anche come
+'Closed Captions').
+</para>
+
+<para>
+<application>MPlayer</application> inizia a memorizzare nella cache tutte le
+pagine di televideo sin dall'inizio della ricezione dall'ingresso TV, perciò
+non devi attendere fino a quando si carica la pagina voluta.
+</para>
+
+<para>
+Nota: usare il televideo con <option>-vo xv</option> genera strani colori.
+</para>
+</sect2>
+
+<sect2 id="tv-teletext-usage">
+<title>Usare il televideo</title>
+
+<para>
+Per abilitare la decodifica del televideo devi specificare il dispositivo VBI da
+cui ottenere i dati televideo (solitamente <filename>/dev/vbi0</filename> per
+Linux). Puoi fare ciò speificando <option>tdevice</option> nel tuo file di
+configurazione, come mostrato qui sotto:
+<screen>tv=tdevice=/dev/vbi0</screen>
+</para>
+
+<para>
+Potresti voler indicare il codice di lingua del televideo per la tua zona.
+Per elencare tutti i codici di zona disponibili usa
+<screen>tv=tdevice=/dev/vbi0:tlang=<replaceable>-1</replaceable></screen>
+Qui c'è un esempio per il russo:
+<screen>tv=tdevice=/dev/vbi0:tlang=<replaceable>33</replaceable></screen>
+</para>
+
+<para>
+</para>
+</sect2>
+
+<sect2 id="tv-teletext-hotkeys">
+<title>Tasti comando per il televideo</title>
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row>
+  <entry>Tasto</entry>
+  <entry>Descrizione</entry>
+</row>
+</thead>
+<tbody>
+<row>
+  <entry>X</entry>
+  <entry>Abilita/disabilita il televideo</entry>
+</row>
+<row>
+  <entry>C</entry>
+  <entry>Passa attraverso le modalità di visione del televideo (opaco,
+  trasparente, opaco invertito, trasparente invertito</entry>
+</row>
+<row>
+  <entry>Sinistra/Destra</entry>
+  <entry>Va alla pagina precedente/successiva del televideo</entry>
+</row>
+<row>
+  <entry>PaginaSu/PaginaGiù</entry>
+  <entry>Va alla sottopagina successiva/precedente del televideo</entry>
+</row>
+<row>
+  <entry>cifre</entry>
+  <entry>Indica il numero della pagina del televideo a cui andare</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
 </sect2>
 </sect1>
 
