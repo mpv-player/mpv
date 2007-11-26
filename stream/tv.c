@@ -155,6 +155,7 @@ static void tv_scan(tvi_handle_t *tvh)
                     mp_msg(MSGT_TV,MSGL_INFO,",");
                 tv_channel_tmp=tv_channel_tmp->next;
             }
+            mp_msg(MSGT_TV, MSGL_INFO, "\n");
         }
         if (!tv_channel_current) tv_channel_current=tv_channel_list;
         if (tv_channel_current)
