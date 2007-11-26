@@ -370,7 +370,7 @@ static int control(uint32_t request, void *data, ...)
 	uint32_t d_width;
 	uint32_t d_height;
 	
-	long swapInterval = 1;
+	GLint swapInterval = 1;
 	
 	NSRect frame;
 	CVReturn error = kCVReturnSuccess;
