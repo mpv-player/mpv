@@ -1,4 +1,4 @@
-.\" synced with r24837
+.\" synced with r24954
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -261,7 +261,7 @@ Suono muto.
 Passa attraverso tutte le tracce video disponibili.
 .IPs "# (solo DVD, MPEG, Matroska, AVI e libavformat)" 
 Passa attraverso tutte le tracce audio disponibili.
-.IPs "TAB (solo MPEG-TS)"
+.IPs "TAB (solo MPEG-TS e libavformat)"
 Passa attraverso tutti i programmi disponibili.
 .IPs "f\ \ \ \ "
 Attiva/\:disattiva schermo intero (vedi anche opzione \-fs).
@@ -2771,8 +2771,11 @@ driver di uscita audio OpenAL sperimentale
 driver di uscita audio PulseAudio
 .PD 0
 .RSs
-.IPs "<host>[:<sink di uscita>]"
+.IPs "[<host>][:<sink di uscita>]"
 specifica l'host e facoltativamente il sink di uscita da usare.
+Una stringa <host> vuota usa una connessione locale.
+Specificare "localhost" in <host> usa un trasferimento di rete (molto
+probabilmente non è quello che vuoi).
 .RE
 .PD 1
 .
