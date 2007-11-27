@@ -47,7 +47,6 @@ static int rtsp_streaming_open (stream_t *stream, int mode, void *opts,
                                 int *file_format)
 {
     rtsp_ctrl * ctl;
-    extern int index_mode;
     URL_t *url;
     stream->fd = -1;
 
