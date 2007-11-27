@@ -25,7 +25,7 @@
 
 int rtsp_transport_tcp = 0;
 int rtsp_transport_sctp = 0;
-// extern int rtsp_port;
+int rtsp_port = 0;
 
 typedef struct {
     char * mime;
@@ -145,7 +145,7 @@ demuxer_t* demux_open_rtp(demuxer_t* demuxer)
     Nemesi_DemuxerStreamData * ndsd = calloc(1, sizeof(Nemesi_DemuxerStreamData));
 
     memset(&hints,0,sizeof(hints));
-//  if (rtsp_port) hints.first_rtp_port = rtsp_port;
+    if (rtsp_port) hints.first_rtp_port = rtsp_port;
     if (rtsp_transport_tcp) {
         hints.pref_rtsp_proto = TCP;
         hints.pref_rtp_proto = TCP;

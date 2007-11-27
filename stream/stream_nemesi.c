@@ -35,7 +35,6 @@
 #include "tcp.h"
 
 extern int network_bandwidth;
-int rtsp_port = 0;
 char *rtsp_destination = NULL;
 
 static int rtsp_streaming_seek(int fd, off_t pos,
