@@ -492,8 +492,8 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
         && fsize * 14 / 16 + 8 <= nr_samples * 2 * 2) {
       // The input stream is 14 bits, we can shrink it to 16 bits
       // to save space for add the 61937 header
-      fsize = convert_14bits_to_16bits((const uint16_t *)indata_ptr,
-                                       (uint16_t *)&buf[8],
+      fsize = convert_14bits_to_16bits(indata_ptr,
+                                       &buf[8],
                                        fsize,
                                        indata_ptr[0] == 0xff /* is LE */
                                        );
