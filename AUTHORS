@@ -790,6 +790,11 @@ Tresoldi, Paolo "PaulTT" (ptt) <paultt@hackerjournal.it>
 Tropea, Salvador Eduardo <salvador@inti.gov.ar>
     * subtitle parsing/displaying related patches
 
+Ulion <ulion2002 gmail.com>
+    * ad_hwac3 passthrough improvement
+    * osd menu improvement
+    * mac osx port improvement
+
 Urpala, Uoti (uau) <uoti.urpala@pp1.inet.fi>
     * A/V sync fixes
 
