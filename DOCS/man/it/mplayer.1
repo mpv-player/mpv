@@ -1,4 +1,4 @@
-.\" synced with r24954
+.\" synced with r25179
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -446,7 +446,7 @@ per televideo (teletext): vengono usati per controllare il televideo della TV)
 .PP
 .PD 0
 .RS
-.IPs "X"
+.IPs "X\ \ \ \ "
 Attiva/\:disattiva il televideo.
 .IPs "Q and W"
 Va alla pagina televideo successiva/\:precedente.
@@ -2773,9 +2773,8 @@ driver di uscita audio PulseAudio
 .RSs
 .IPs "[<host>][:<sink di uscita>]"
 specifica l'host e facoltativamente il sink di uscita da usare.
-Una stringa <host> vuota usa una connessione locale.
-Specificare "localhost" in <host> usa un trasferimento di rete (molto
-probabilmente non è quello che vuoi).
+Una stringa <host> vuota usa una connessione locale, "localhost" usa
+un trasferimento via rete (molto probabilmente non è quello che vuoi).
 .RE
 .PD 1
 .
