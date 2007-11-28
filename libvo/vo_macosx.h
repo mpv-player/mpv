@@ -12,6 +12,18 @@
 #import <QuartzCore/QuartzCore.h>
 #import <QuickTime/QuickTime.h>
 
+// MPlayer OS X VO Protocol
+@protocol MPlayerOSXVOProto
+- (int) startWithWidth: (bycopy int)width
+            withHeight: (bycopy int)height
+             withBytes: (bycopy int)bytes
+            withAspect: (bycopy int)aspect;
+- (void) stop;
+- (void) render;
+- (void) toggleFullscreen;
+- (void) ontop;
+@end
+
 @interface MPlayerOpenGLView : NSOpenGLView
 {
 	//Cocoa

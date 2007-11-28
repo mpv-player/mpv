@@ -26,7 +26,8 @@
 #include "osdep/keycodes.h"
 
 //Cocoa
-NSProxy *mplayerosxProxy;
+NSDistantObject *mplayerosxProxy;
+id <MPlayerOSXVOProto> mplayerosxProto;
 MPlayerOpenGLView *mpGLView;
 NSAutoreleasePool *autoreleasepool;
 OSType pixelFormat;
@@ -162,7 +163,16 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		
 		//connnect to mplayerosx
 		mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:@"mplayerosx" host:nil];
-		[mplayerosxProxy startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:(int)(movie_aspect*100)];
+		if ([mplayerosxProxy conformsToProtocol:@protocol(MPlayerOSXVOProto)]) {
+			[mplayerosxProxy setProtocolForProxy:@protocol(MPlayerOSXVOProto)];
+			mplayerosxProto = (id <MPlayerOSXVOProto>)mplayerosxProxy;
+			[mplayerosxProto startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:(int)(movie_aspect*100)];
+		}
+		else {
+			[mplayerosxProxy release];
+			mplayerosxProxy = nil;
+			mplayerosxProto = nil;
+		}
 	}
 	return 0;
 }
@@ -180,7 +190,7 @@ static void draw_osd(void)
 static void flip_page(void)
 {
 	if(shared_buffer)
-		[mplayerosxProxy render];
+		[mplayerosxProto render];
 	else {
 		[mpGLView setCurrentTexture];
 		[mpGLView render];
@@ -232,7 +242,10 @@ static void uninit(void)
 {
 	if(shared_buffer)
 	{
-		[mplayerosxProxy stop];
+		[mplayerosxProto stop];
+		mplayerosxProto = nil;
+		[mplayerosxProxy release];
+		mplayerosxProxy = nil;
 
 		if (shmdt(image_data) == -1)
 			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shmdt failed\n");
@@ -331,9 +344,9 @@ static int control(uint32_t request, void *data, ...)
 		case VOCTRL_PAUSE: return (int_pause=1);
 		case VOCTRL_RESUME: return (int_pause=0);
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
-		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); if(!shared_buffer){ [mpGLView ontop]; } else { [mplayerosxProxy ontop]; } return VO_TRUE;
+		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); if(!shared_buffer){ [mpGLView ontop]; } else { [mplayerosxProto ontop]; } return VO_TRUE;
 		case VOCTRL_ROOTWIN: vo_rootwin = (!(vo_rootwin)); [mpGLView rootwin]; return VO_TRUE;
-		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); if(!shared_buffer){ [mpGLView fullscreen: NO]; } else { [mplayerosxProxy toggleFullscreen]; } return VO_TRUE;
+		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); if(!shared_buffer){ [mpGLView fullscreen: NO]; } else { [mplayerosxProto toggleFullscreen]; } return VO_TRUE;
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
 		case VOCTRL_SET_PANSCAN: [mpGLView panscan]; return VO_TRUE;
 	}
