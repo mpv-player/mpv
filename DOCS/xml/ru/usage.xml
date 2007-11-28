@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24056 -->
+<!-- synced with r25146 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -7,15 +7,15 @@
 <title>Командная строка</title>
 
 <para>
-<application>MPlayer</application> использует составное дерево проигрывания.
-Оно состоит из глобальных опций, идущих первыми, например
-<screen>mplayer -vfm 5</screen>,
-и опций, идущих после имени файла, которые применяются только к данному
-файлу/URL/и т.п., например:
-
+<application>MPlayer</application> использует составное дерево воспроизведения.
+Опции, указанные в командной строке, могут применяться ко всем файлам/URL или
+только к некоторым, в зависимости от местоположения. Например
+<screen>mplayer -vfm ffmpeg movie1.avi movie2.avi</screen>,
+будет использовать FFmpeg декодеры для каждого из двух файлов, а
 <screen>
-mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4
+mplayer -vfm ffmpeg <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm dmo
 </screen>
+будет воспроизводить второй файл, используя DMO декодер.
 </para>
 
 <para>
