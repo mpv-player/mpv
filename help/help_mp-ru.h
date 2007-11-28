@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r24924
+// Synced with help_mp-en.h: r25158
 
 // ========================= MPlayer help ===========================
 
@@ -217,6 +217,9 @@ static char help_text[]=
 #define MSGTR_Bottom "низ"
 #define MSGTR_Center "центр"
 #define MSGTR_Top "верх"
+#define MSGTR_SubSourceFile "из файла"
+#define MSGTR_SubSourceVobsub "vobsub"
+#define MSGTR_SubSourceDemux "внедренные"
 
 // osd bar names
 #define MSGTR_Volume "Громкость"
@@ -238,6 +241,7 @@ static char help_text[]=
 #define MSGTR_FramedroppingStatus "Пропуск кадров: %s"
 #define MSGTR_VSyncStatus "Вертикальная синхронизация: %s"
 #define MSGTR_SubSelectStatus "Субтитры: %s"
+#define MSGTR_SubSourceStatus "Источник субтитров: %s"
 #define MSGTR_SubPosStatus "Позиция субтитров: %s/100"
 #define MSGTR_SubAlignStatus "Выравнивание субтитров: %s"
 #define MSGTR_SubDelayStatus "Задержка субтитров: %s"
@@ -532,7 +536,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Не могу открыть по сети: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer не был скомпилирован с поддержкой чтения SMB.\n"
 
-#define MSGTR_CantOpenDVD "Не могу открыть DVD: %s\n"
+#define MSGTR_CantOpenDVD "Не могу открыть DVD: %s (%s)\n"
 
 // stream_dvd.c
 #define MSGTR_DVDspeedCantOpen "Невозможно открыть DVD устройство для записи, изменение скорости DVD требует доступ на запись.\n"
@@ -2155,4 +2159,5 @@ static char help_text[]=
 #define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Ошибка инициализации Directshow графа.\n"
 #define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: Невозможно найти устройство захвата видео\n"
 #define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Невозможно найти устройство захвата аудио\n"
+#define MSGTR_TVI_DS_GetActualMediatypeFailed "tvi_dshow: Невозможно получить текущий медиа формат (Ошибка:0x%x). Предполагается совпадающий с запрошенным.\n"
 
