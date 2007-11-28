@@ -348,6 +348,22 @@ static int control(stream_t *stream, int cmd, void* arg) {
   return STREAM_UNSUPPORTED;
 }
 
+static void identify_chapters(dvdnav_t *nav, uint32_t title)
+{
+  uint64_t *parts=NULL;
+  uint32_t n, i, t;
+  n = dvdnav_describe_title_chapters(nav, title, &parts);
+  if(parts) {
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "CHAPTERS: ");
+    for(i=0; i<n; i++) {
+      t = parts[i] /  90000;
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d,", t/3600, (t/60)%60, t%60);
+    }
+    free(parts);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "\n");
+  }
+}
+
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
@@ -362,6 +378,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
 
   if(p->track > 0) {
+    if(mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
+      identify_chapters(priv->dvdnav, p->track);
     if(dvd_chapter > 0 && dvd_last_chapter > 0 && dvd_chapter > dvd_last_chapter) {
       mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, invalid chapter range: %d > %d\n", dvd_chapter, dvd_last_chapter);
       return STREAM_UNSUPPORTED;
