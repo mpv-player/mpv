@@ -57,7 +57,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
     hd = (HANDLE)_get_osfhandle(fd);
     if (!DeviceIoControl(hd, IOCTL_CDROM_READ_TOC, NULL, 0, &vcd->toc,
 		sizeof(CDROM_TOC), &dwBytesReturned, NULL)) {
-	mp_msg(MSGT_OPEN, MSGL_ERR, "read CDROM toc header: %u\n",
+	mp_msg(MSGT_OPEN, MSGL_ERR, "read CDROM toc header: %lu\n",
 		GetLastError());
 	free(vcd);
 	return NULL;
