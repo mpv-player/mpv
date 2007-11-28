@@ -84,6 +84,8 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 	if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO)) {
 	    if (i > vcd->toc.FirstTrack) {
 		min = vcd->toc.TrackData[index].Address[1] - min;
+		sec = vcd->toc.TrackData[index].Address[2] - sec;
+		frame = vcd->toc.TrackData[index].Address[3] - frame;
 		if (frame < 0) {
 		    frame += 75;
 		    sec--;
