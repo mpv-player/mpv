@@ -21,7 +21,7 @@ static inline void vcd_set_msf(mp_vcd_priv_t* vcd, unsigned sect)
 }
 
 static inline unsigned vcd_get_msf(mp_vcd_priv_t* vcd, int track){
-    int index = track + vcd->toc.FirstTrack - 1;
+    int index = track - vcd->toc.FirstTrack;
     /* -150 to compensate the 2-second pregap */
     return vcd->toc.TrackData[index].Address[3] +
 	(vcd->toc.TrackData[index].Address[2] +
