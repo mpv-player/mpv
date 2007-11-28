@@ -10701,6 +10701,17 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .fi
 .
 .PP
+.B Play DTS-CD with passthrough:
+.nf
+mplayer \-ac hwdts \-rawaudio format=0x2001 \-cdrom\-device /dev/cdrom cdda://
+.fi
+.br
+You can also use \-afm hwac3 instead of \-ac hwdts.
+Adjust '/dev/cdrom' to match the CD-ROM device on your system.
+If your external receiver supports decoding raw DTS streams,
+you can directly play it via cdda:// without setting format, hwac3 or hwdts.
+.
+.PP
 .B Play a 6-channel AAC file with only two speakers:
 .nf
 mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
