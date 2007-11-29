@@ -3,15 +3,23 @@
 /* 
  * vo_jpeg.c, JPEG Renderer for MPlayer
  *
- * 
- * Changelog
- * 
- * Original version: Copyright 2002 by Pontscho (pontscho@makacs.poliod.hu)
- * 2003-04-25   Spring cleanup -- Alex
- * 2004-08-04   Added multiple subdirectory support -- Ivo (ivop@euronet.nl)
- * 2004-09-01   Cosmetics update -- Ivo
- * 2004-09-05   Added suboptions parser -- Ivo
- * 2005-01-16   Replaced suboption parser by call to subopt-helper --Ivo
+ * Copyright (C) 2002 by Pontscho <pontscho@makacs.poliod.hu>
+ * Copyright (C) 2003 by Alex
+ * Copyright (C) 2004, 2005 by Ivo van Poorten <ivop@euronet.nl>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  */
 
