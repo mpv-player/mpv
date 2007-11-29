@@ -7,17 +7,6 @@
  * Written by Ivo van Poorten. (C) Copyright 2004, 2005.
  * Licensed under GNU General Public License version 2.
  *
- *
- * Changelog
- * 
- * 2004-01-15   Replaced suboption parser by call to subopt-helper.
- *              Got rid of stupid malloc_failed function.
- * 2004-09-16   Second draft. It now acts on VOCTRL_DRAW_IMAGE and does not
- *              maintain a local copy of the image if the format is YV12.
- *              Speed improvement and uses less memory.
- * 2004-09-09   First draft.
- *
- *
  */
 
 /* ------------------------------------------------------------------------- */
