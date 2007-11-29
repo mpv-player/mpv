@@ -350,10 +350,12 @@ static int control(stream_t *stream, int cmd, void* arg) {
 
 static void identify_chapters(dvdnav_t *nav, uint32_t title)
 {
-  uint64_t *parts=NULL;
+  uint64_t *parts=NULL, duration=0;
   uint32_t n, i, t;
-  n = dvdnav_describe_title_chapters(nav, title, &parts);
+  n = dvdnav_describe_title_chapters(nav, title, &parts, &duration);
   if(parts) {
+    t = duration / 90;
+    mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title, t / 1000, t % 1000);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "TITLE %u, CHAPTERS: ", title);
     for(i=0; i<n; i++) {
       t = parts[i] /  90000;
