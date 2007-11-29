@@ -397,6 +397,12 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_OPEN,MSGL_INFO,"dvdnav_stream, you didn't specify a track number (as in dvdnav://1), playing whole disc\n");
     dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);
   }
+  if(p->track <= 0 && mp_msg_test(MSGT_IDENTIFY, MSGL_INFO)) {
+    uint32_t titles=0, i;
+    dvdnav_get_number_of_titles(priv->dvdnav, &titles);
+    for(i=0; i<titles; i++)
+      identify_chapters(priv->dvdnav, i);
+  }
   if(dvd_angle > 1)
     dvdnav_angle_change(priv->dvdnav, dvd_angle);
 
