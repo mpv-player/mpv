@@ -3,19 +3,21 @@
 /* 
  * vo_md5sum.c, md5sum Video Output Driver for MPlayer
  *
- * 
- * Written by Ivo van Poorten. (C) Copyright 2004, 2005.
- * Licensed under GNU General Public License version 2.
+ * Written by Ivo van Poorten. (C) Copyright 2004, 2005, 2006.
  *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
- * Changelog
- * 
- * 2006-07-02   Removed imported md5sum code and rely on libavutil now
- * 2005-01-16   Replaced suboption parser by call to subopt-helper.
- * 2004-09-16   Second draft. It now acts on VOCTRL_DRAW_IMAGE and does not
- *              maintain a local copy of the image if the format is YV12.
- *              Speed improvement and uses less memory.
- * 2004-09-13   First draft.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  */
 
