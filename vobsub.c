@@ -991,7 +991,7 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
     rar_stream_t *fd = rar_open(name, "rb");
     if (fd == NULL) {
         if (force)
-	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "VobSub: Can't open IFO file\n");
+	    mp_msg(MSGT_VOBSUB,MSGL_WARN, "VobSub: Can't open IFO file\n");
     } else {
 	// parse IFO header
 	unsigned char block[0x800];
