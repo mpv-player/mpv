@@ -20,39 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
- *
- * Changelog
- *
- * 2005-06-21   Replaced erroneous use of mp_msg by af_msg
- * 2005-05-30   Removed int16 to float conversion; leave that to af_format
- * 2004-12-23   Added to CVS
- * 2004-12-22   Cleaned up cosmetics
- *              Made conversion loops in play() more cache-friendly
- * 2004-12-20   Fixed bug for stereo effect on mono signal
- *                  (trivial >1 to >=1 change; would segfault otherwise :-) )
- *              Removed trailing whitespace and fixed warn/err messages
- *              Have CONTROL_REINIT return a proper value
- * 2004-12-13   More Doxygen comments
- * 2004-12-12   Made af_ladspa optional (updated configure, af.c, etc.)
- * 2004-12-11   Added deactivate and cleanup to uninit.
- *              Finished Doxygen comments.
- *              Moved translatable messages to help_mp-en.h
- * 2004-12-10   Added ranges to list of controls for ease of use.
- *              Fixed sig11 bug. Implemented (dummy) outputcontrols. Some
- *              perfectly normal audio processing filters also have output
- *              controls.
- * 2004-12-08   Added support for generators (no input, one output)
- *              Added support for stereo effects
- *              Added LADSPA_PATH support!
- * 2004-12-07   Fixed changing buffersize. Now it's really working, also in
- *              real-time.
- * 2004-12-06   First working version, mono-effects (1 input --> 1 output) only
- * 2004-12-05   Started, Loading of plugin/label, Check inputs/outputs/controls
- *              Due to lack of documentation, I studied the ladspa_sdk source
- *              code and the loader code of Audacity (by Dominic Mazzoni). So,
- *              certain similarities in (small) pieces of code are not
- *              coincidental :-) No C&P jobs though!
- *
  */
 
 /* ------------------------------------------------------------------------- */
