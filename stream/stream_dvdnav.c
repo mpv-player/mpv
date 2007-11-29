@@ -354,7 +354,7 @@ static void identify_chapters(dvdnav_t *nav, uint32_t title)
   uint32_t n, i, t;
   n = dvdnav_describe_title_chapters(nav, title, &parts);
   if(parts) {
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "CHAPTERS: ");
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "TITLE %u, CHAPTERS: ", title);
     for(i=0; i<n; i++) {
       t = parts[i] /  90000;
       mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d,", t/3600, (t/60)%60, t%60);
