@@ -364,6 +364,18 @@ static void identify_chapters(dvdnav_t *nav, uint32_t title)
   }
 }
 
+static void identify(dvdnav_priv_t *priv, struct stream_priv_s *p)
+{
+  uint32_t titles=0, i;
+  if(p->track <= 0) {
+    dvdnav_get_number_of_titles(priv->dvdnav, &titles);
+    for(i=0; i<titles; i++)
+      identify_chapters(priv->dvdnav, i);
+  }
+  else
+    identify_chapters(priv->dvdnav, p->track);
+}
+
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
@@ -378,8 +390,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
 
   if(p->track > 0) {
-    if(mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
-      identify_chapters(priv->dvdnav, p->track);
     if(dvd_chapter > 0 && dvd_last_chapter > 0 && dvd_chapter > dvd_last_chapter) {
       mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, invalid chapter range: %d > %d\n", dvd_chapter, dvd_last_chapter);
       return STREAM_UNSUPPORTED;
@@ -397,12 +407,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_OPEN,MSGL_INFO,"dvdnav_stream, you didn't specify a track number (as in dvdnav://1), playing whole disc\n");
     dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);
   }
-  if(p->track <= 0 && mp_msg_test(MSGT_IDENTIFY, MSGL_INFO)) {
-    uint32_t titles=0, i;
-    dvdnav_get_number_of_titles(priv->dvdnav, &titles);
-    for(i=0; i<titles; i++)
-      identify_chapters(priv->dvdnav, i);
-  }
+  if(mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
+    identify(priv, p);
   if(dvd_angle > 1)
     dvdnav_angle_change(priv->dvdnav, dvd_angle);
 
