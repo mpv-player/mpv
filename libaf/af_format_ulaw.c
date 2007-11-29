@@ -11,8 +11,8 @@
 //=============================================================================
 */
 
-#ifndef __af_format_ulaw_c
-#define __af_format_ulaw_c
+#ifndef AF_FORMAT_ULAW_C
+#define AF_FORMAT_ULAW_C
 
 #include <inttypes.h>
 
@@ -824,4 +824,4 @@ static int to_ulaw(void* in, void* out, int len, int bps, int format)
   return AF_OK;
 }
 
-#endif /* __af_format_ulaw_c */
+#endif /* AF_FORMAT_ULAW_C */
