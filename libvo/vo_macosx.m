@@ -875,6 +875,8 @@ static int control(uint32_t request, void *data, ...)
 - (void) check_events
 {
 	event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate dateWithTimeIntervalSinceNow:0.0001] inMode:NSEventTrackingRunLoopMode dequeue:YES];
+	if (event == nil)
+		return;
 	[NSApp sendEvent:event];
 }
 
