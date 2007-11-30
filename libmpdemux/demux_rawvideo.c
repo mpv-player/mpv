@@ -77,7 +77,7 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   case IMGFMT_NV12:
   case IMGFMT_HM12:
   case IMGFMT_YV12: imgsize=width*height+2*(width>>1)*(height>>1);break;
-  case IMGFMT_YUY2: imgsize=width*height*2;break;
+  case IMGFMT_YUY2:
   case IMGFMT_UYVY: imgsize=width*height*2;break;
   case IMGFMT_Y800:
   case IMGFMT_Y8: imgsize=width*height;break;
