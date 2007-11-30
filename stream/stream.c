@@ -88,7 +88,7 @@ extern stream_info_t stream_info_file;
 extern stream_info_t stream_info_dvd;
 #endif
 
-stream_info_t* auto_open_streams[] = {
+static stream_info_t* auto_open_streams[] = {
 #ifdef HAVE_VCD
   &stream_info_vcd,
 #endif
