@@ -33,27 +33,6 @@ testflags=" spaces extensions crlf tabs trailws rcsid oll charset stupid gnu \
 res depr"
 allflags="$testflags showcont color head svn "
 
-# Default settings
-
-_spaces=yes
-_extensions=yes
-_crlf=yes
-_tabs=no
-_trailws=no
-_rcsid=no
-_oll=no
-_charset=no
-_stupid=no
-_showcont=no
-_gnu=no
-_res=no
-_depr=no
-
-_color=yes
-_head=yes
-_svn=yes
-_files=
-
 # -----------------------------------------------------------------------------
 
 # Avoid locale problems
@@ -93,6 +72,19 @@ all_filenames() {
 }
 
 # -----------------------------------------------------------------------------
+
+# Default settings
+
+set_all_tests no
+_spaces=yes
+_extensions=yes
+_crlf=yes
+
+_showcont=no
+_color=yes
+_head=yes
+_svn=yes
+_files=
 
 # Parse command line
 
