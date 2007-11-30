@@ -342,7 +342,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
         return AF_ERROR;
       }
-      bzero(s->buf_overlap, s->bytes_overlap);
+      memset(s->buf_overlap, 0, s->bytes_overlap);
       if (use_int) {
         int32_t* pb = s->table_blend;
         int64_t blend = 0;
