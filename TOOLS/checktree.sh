@@ -30,7 +30,7 @@
 # All yes/no flags. Spaces around flagnames are important!
 
 testflags=" spaces extensions crlf tabs trailws rcsid oll charset stupid gnu \
-res "
+res depr"
 allflags="$testflags showcont color head svn "
 
 # Default settings
@@ -47,6 +47,7 @@ _stupid=no
 _showcont=no
 _gnu=no
 _res=no
+_depr=no
 
 _color=yes
 _head=yes
@@ -111,6 +112,7 @@ for i in "$@"; do
         printoption "stupid    " "test for stupid code"
         printoption "gnu       " "test for GNUisms"
         printoption "res       " "test for reserved identifiers"
+        printoption "depr      " "test for deprecated function calls"
         echo
         printoption "all       " "enable all tests" "no"
         echo  "                   (-noall can be specified as -none)"
@@ -175,7 +177,7 @@ fi
 
 filelist=`all_filenames`
 
-if [ "$_stupid" = "yes" -o "$_res" = "yes" ] ; then
+if [ "$_stupid" = "yes" -o "$_res" = "yes" -o "$_depr" = "yes" ] ; then
     # generate 'shortlist' to avoid false positives in xpm files, docs, etc,
     # when one only needs to check .c and .h files
     chfilelist=`echo $filelist | tr ' ' '\n' | grep "[\.][ch]$"`
@@ -325,3 +327,20 @@ if [ "$_stupid" = "yes" -a -n "$chfilelist" ]; then
 fi
 
 # -----------------------------------------------------------------------------
+
+if [ "$_depr" = "yes" -a -n "$chfilelist" ]; then
+    printhead "checking for deprecated and obsolete function calls ..."
+
+    for i in bcmp bcopy bzero getcwd getipnodebyname inet_ntoa inet_addr \
+        atoq ecvt fcvt ecvt_r fcvt_r qecvt_r qfcvt_r finite ftime gcvt herror \
+        hstrerror getpass getpw getutent getutid getutline pututline setutent \
+        endutent utmpname gsignal ssignal gsignal_r ssignal_r infnan memalign \
+        valloc re_comp re_exec drem dremf dreml rexec svc_getreq sigset \
+        sighold sigrelse sigignore sigvec sigmask sigblock sigsetmask \
+        siggetmask ualarm ulimit usleep statfs fstatfs ustat get_kernel_syms \
+        query_module sbrk
+    do
+        printhead "--> $i()"
+        grep $_grepopts "[^a-zA-Z0-9]$i[ $TAB]*(" $chfilelist
+    done
+fi
