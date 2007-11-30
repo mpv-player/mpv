@@ -63,6 +63,8 @@ static float old_movie_aspect;
 static float winAlpha = 1;
 static int int_pause = 0;
 
+static BOOL isLeopardOrLater;
+
 static vo_info_t info = 
 {
 	"Mac OSX Core Video",
@@ -301,6 +303,7 @@ static int preinit(const char *arg)
 	NSApplicationLoad();
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
 	NSApp = [NSApplication sharedApplication];
+	isLeopardOrLater = floor(NSAppKitVersionNumber) > 824;
 	
 	if(!shared_buffer)
 	{
@@ -878,6 +881,16 @@ static int control(uint32_t request, void *data, ...)
 	if (event == nil)
 		return;
 	[NSApp sendEvent:event];
+	// Without SDL's bootstrap code (include SDL.h in mplayer.c),
+	// on Leopard, we got trouble to get the play window auto focused
+	// when app is actived. Following code fix this problem.
+#ifndef HAVE_SDL
+	if (isLeopardOrLater && [event type] == NSAppKitDefined
+			&& [event subtype] == NSApplicationActivatedEventType) {
+		[window makeMainWindow];
+		[window makeKeyAndOrderFront:mpGLView];
+	}
+#endif
 }
 
 /*
