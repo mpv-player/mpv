@@ -50,8 +50,8 @@ static int control(int cmd,void *arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-    ao_data.buffersize= 65536;
-    ao_data.outburst=1024;
+    ao_data.buffersize= 16384*channels;
+    ao_data.outburst=512*channels;
     ao_data.channels=channels;
     ao_data.samplerate=rate;
     ao_data.format=format;
