@@ -650,7 +650,6 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
     unsigned int scaley = 0x100 * dys / spu->orig_frame_height;
     bbox[0] = spu->start_col * scalex / 0x100;
     bbox[1] = spu->start_col * scalex / 0x100 + spu->width * scalex / 0x100;
-printf("spu_align: %d, %d, %d\n", spu_alignment, dxs, dys);
     switch (spu_alignment) {
     case 0:
       bbox[3] = dys*sub_pos/100 + spu->height * scaley / 0x100;
