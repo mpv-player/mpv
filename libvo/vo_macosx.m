@@ -46,6 +46,10 @@ NSArray *screen_array;
 
 //image
 unsigned char *image_data;
+// For double buffering
+static uint8_t image_page = 0;
+static unsigned char *image_datas[2];
+
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_depth;
@@ -126,6 +130,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	if(!shared_buffer)
 	{		
 		image_data = malloc(image_width*image_height*image_bytes);
+		image_datas[0] = image_data;
+		if (vo_doublebuffering)
+			image_datas[1] = malloc(image_width*image_height*image_bytes);
+		image_page = 0;
 
 		monitor_aspect = (float)screen_frame.size.width/(float)screen_frame.size.height;
 		
@@ -196,6 +204,10 @@ static void flip_page(void)
 	else {
 		[mpGLView setCurrentTexture];
 		[mpGLView render];
+		if (vo_doublebuffering) {
+			image_page = 1 - image_page;
+			image_data = image_datas[image_page];
+		}
 	}
 }
 
@@ -270,7 +282,11 @@ static void uninit(void)
     }
     if (!shared_buffer)
     {
-        free(image_data);
+        free(image_datas[0]);
+        if (vo_doublebuffering)
+            free(image_datas[1]);
+        image_datas[0] = NULL;
+        image_datas[1] = NULL;
         image_data = NULL;
     }
 }
@@ -404,15 +420,20 @@ static int control(uint32_t request, void *data, ...)
 	[glContext setView:self];
 	[glContext makeCurrentContext];	
 	
-	error = CVPixelBufferCreateWithBytes( NULL, image_width, image_height, pixelFormat, image_data, image_width*image_bytes, NULL, NULL, NULL, &currentFrameBuffer);
+	error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat, image_datas[0], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[0]);
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create Pixel Buffer(%d)\n", error);
+	if (vo_doublebuffering) {
+		error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat, image_datas[1], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[1]);
+		if(error != kCVReturnSuccess)
+			mp_msg(MSGT_VO, MSGL_ERR,"Failed to create Pixel Double Buffer(%d)\n", error);
+	}
 	
 	error = CVOpenGLTextureCacheCreate(NULL, 0, [glContext CGLContextObj], [[self pixelFormat] CGLPixelFormatObj], 0, &textureCache);
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture Cache(%d)\n", error);
 	
-	error = CVOpenGLTextureCacheCreateTextureFromImage(	NULL, textureCache, currentFrameBuffer, 0, &texture);
+	error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
 	
@@ -761,7 +782,7 @@ static int control(uint32_t request, void *data, ...)
 {
 	CVReturn error = kCVReturnSuccess;
 	
-	error = CVOpenGLTextureCacheCreateTextureFromImage (NULL, textureCache,  currentFrameBuffer,  0, &texture);
+	error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
 

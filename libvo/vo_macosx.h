@@ -32,7 +32,7 @@
 	NSEvent *event;
 	
 	//CoreVideo
-	CVPixelBufferRef currentFrameBuffer;
+	CVPixelBufferRef frameBuffers[2];
 	CVOpenGLTextureCacheRef textureCache;
 	CVOpenGLTextureRef texture;
 	NSRect textureFrame;
