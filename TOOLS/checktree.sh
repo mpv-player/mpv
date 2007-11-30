@@ -30,7 +30,7 @@
 # All yes/no flags. Spaces around flagnames are important!
 
 testflags=" spaces extensions crlf tabs trailws rcsid oll charset stupid gnu \
-res depr"
+res depr "
 allflags="$testflags showcont color head svn "
 
 # -----------------------------------------------------------------------------
