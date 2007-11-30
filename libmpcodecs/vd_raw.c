@@ -22,6 +22,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
 	if (*(int *)arg == format) return CONTROL_TRUE;
+	if (*(int *)arg == IMGFMT_YUY2 && format == MKTAG('y', 'u', 'v', '2')) return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
     return CONTROL_UNKNOWN;
@@ -57,6 +58,7 @@ static void uninit(sh_video_t *sh){
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
     int frame_size;
+    int format = sh->bih ? sh->bih->biCompression : sh->format;
     
     if(len<=0) return NULL; // skipped frame
 
@@ -104,6 +106,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 #endif
 	}
 	frame_size=mpi->stride[0]*mpi->h;
+	if (format == MKTAG('y', 'u', 'v', '2')) {
+	  int i;
+	  for (i = 1; i < frame_size; i += 2)
+	    mpi->planes[0][i] ^= 128;
+	}
 	if(mpi->bpp<8) frame_size=frame_size*mpi->bpp/8;
     }
 
