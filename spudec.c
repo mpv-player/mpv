@@ -348,9 +348,9 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
   unsigned int off;
   unsigned int start_off = 0;
   unsigned int next_off;
-  unsigned int start_pts;
-  unsigned int end_pts;
-  unsigned int current_nibble[2];
+  unsigned int start_pts = 0;
+  unsigned int end_pts = 0;
+  unsigned int current_nibble[2] = {0, 0};
   unsigned int control_start;
   unsigned int display = 0;
   unsigned int start_col = 0;
@@ -650,6 +650,7 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
     unsigned int scaley = 0x100 * dys / spu->orig_frame_height;
     bbox[0] = spu->start_col * scalex / 0x100;
     bbox[1] = spu->start_col * scalex / 0x100 + spu->width * scalex / 0x100;
+printf("spu_align: %d, %d, %d\n", spu_alignment, dxs, dys);
     switch (spu_alignment) {
     case 0:
       bbox[3] = dys*sub_pos/100 + spu->height * scaley / 0x100;
