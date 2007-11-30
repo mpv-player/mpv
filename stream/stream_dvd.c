@@ -748,11 +748,9 @@ static int control(stream_t *stream,int cmd,void* arg)
 
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
-  char *filename;
   int k;
 
-  filename = strdup(stream->url);
-  mp_msg(MSGT_OPEN,MSGL_V,"URL: %s\n", filename);
+  mp_msg(MSGT_OPEN,MSGL_V,"URL: %s\n", stream->url);
   dvd_title = p->title;
   if(1){
     //int ret,ret2;
