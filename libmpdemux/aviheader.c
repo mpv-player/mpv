@@ -274,6 +274,7 @@ while(1){
         chunksize=0;
         sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
         sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+        sh_video->format = sh_video->bih->biCompression;
 //        if(demuxer->video->id==-1) demuxer->video->id=stream_id;
         // IdxFix:
         idxfix_videostream=stream_id;
