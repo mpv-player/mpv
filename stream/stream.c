@@ -88,7 +88,7 @@ extern stream_info_t stream_info_file;
 extern stream_info_t stream_info_dvd;
 #endif
 
-static stream_info_t* auto_open_streams[] = {
+static const stream_info_t* auto_open_streams[] = {
 #ifdef HAVE_VCD
   &stream_info_vcd,
 #endif
@@ -144,7 +144,7 @@ static stream_info_t* auto_open_streams[] = {
   NULL
 };
 
-stream_t* open_stream_plugin(stream_info_t* sinfo,char* filename,int mode,
+stream_t* open_stream_plugin(const stream_info_t* sinfo,char* filename,int mode,
 			     char** options, int* file_format, int* ret,
 			     char** redirected_url) {
   void* arg = NULL;
@@ -213,7 +213,7 @@ stream_t* open_stream_plugin(stream_info_t* sinfo,char* filename,int mode,
 
 stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format) {
   int i,j,l,r;
-  stream_info_t* sinfo;
+  const stream_info_t* sinfo;
   stream_t* s;
   char *redirected_url = NULL;
 
