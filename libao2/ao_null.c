@@ -50,7 +50,7 @@ static int control(int cmd,void *arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-    int samplesize = (format == AF_FORMAT_U8 || format == AF_FORMAT_S8) ? 1: 2;
+    int samplesize = af_fmt2bits(format) / 8;
     ao_data.outburst = 256 * channels * samplesize;
     // A "buffer" for about 0.2 seconds of audio
     ao_data.buffersize = (int)(rate * 0.2 / 256 + 1) * ao_data.outburst;
