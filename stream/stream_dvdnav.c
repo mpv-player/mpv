@@ -23,6 +23,7 @@ extern int dvd_chapter;
 extern int dvd_last_chapter;
 extern int dvd_angle;
 extern char *audio_lang, *dvdsub_lang;
+extern char *dvd_audio_stream_channels[6], *dvd_audio_stream_types[8];
 
 static struct stream_priv_s {
   int track;
@@ -378,6 +379,55 @@ static void identify(dvdnav_priv_t *priv, struct stream_priv_s *p)
     identify_chapters(priv->dvdnav, p->track);
 }
 
+static void show_audio_subs_languages(dvdnav_t *nav)
+{
+  uint8_t lg;
+  uint16_t i, lang, format, id, channels;
+  int base[6] = {128, 0, 0, 0, 160, 136, 0};
+  char tmp[3];
+  for(i=0; i<8; i++)
+  {
+    lg = dvdnav_get_audio_logical_stream(nav, i);
+    if(lg == 0xff) continue;
+    channels = dvdnav_audio_stream_channels(nav, lg);
+    if(channels == 0xFFFF)
+      channels = 2; //unknown
+    else
+      channels--;
+    lang = dvdnav_audio_stream_to_lang(nav, lg);
+    if(lang == 0xFFFF)
+      tmp[0] = tmp[1] = '?';
+    else
+    {
+      tmp[0] = lang >> 8;
+      tmp[1] = lang & 0xFF;
+    }
+    tmp[2] = 0;
+    format = dvdnav_audio_stream_format(nav, lg);
+    if(format == 0xFFFF || format > 6)
+      format = 1; //unknown
+    id = i + base[format];
+    mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo, i,
+      dvd_audio_stream_types[format], dvd_audio_stream_channels[channels], tmp, id); 
+  }
+  
+  for(i=0; i<32; i++)
+  {
+    lg = dvdnav_get_spu_logical_stream(nav, i);
+    if(lg == 0xff) continue;
+    lang = dvdnav_spu_stream_to_lang(nav, lg);
+    if(lang == 0xFFFF)
+      tmp[0] = tmp[1] = '?';
+    else
+    {
+      tmp[0] = lang >> 8;
+      tmp[1] = lang & 0xFF;
+    }
+    tmp[2] = 0;
+    mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i+0x20, tmp);
+  }
+}
+
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
@@ -411,6 +461,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
   if(mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
     identify(priv, p);
+  if(p->track > 0)
+    show_audio_subs_languages(priv->dvdnav);
   if(dvd_angle > 1)
     dvdnav_angle_change(priv->dvdnav, dvd_angle);
 
