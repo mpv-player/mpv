@@ -375,7 +375,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 
 // return value:
 //     0 = EOF
-//     1 = succesfull
+//     1 = successful
 int ds_fill_buffer(demux_stream_t *ds){
   demuxer_t *demux=ds->demuxer;
   if(ds->current) free_demux_packet(ds->current);
@@ -659,12 +659,12 @@ int correct_pts=0;
 /*
   NOTE : Several demuxers may be opened at the same time so
   demuxers should NEVER rely on an external var to enable them
-  self. If a demuxer can't do any autodection it should only use
-  file_format. The user can explictly set file_format with the -demuxer
+  self. If a demuxer can't do any auto-detection it should only use
+  file_format. The user can explicitly set file_format with the -demuxer
   option so there is really no need for another extra var.
-  For conivence an option can be added to set file_format directly
+  For convenience an option can be added to set file_format directly
   to the right type (ex: rawaudio,rawvideo).
-  Also the stream can override the file_format so a demuxer wich rely
+  Also the stream can override the file_format so a demuxer which rely
   on a special stream type can set file_format at the stream level
   (ex: tv,mf).
 */
