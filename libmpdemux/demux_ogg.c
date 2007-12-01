@@ -1243,6 +1243,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   sh_audio_t *sh_audio = demuxer->audio->sh;
   int np;
   uint8_t *extradata = sh_audio->wf + 1;
+  int i;
   unsigned char *p = NULL,*buf;
   int plen;
 
@@ -1296,20 +1297,12 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   od = new_demuxer(s,DEMUXER_TYPE_OGG,0,-2,-2,NULL);
 
   /// Add the header packets in the ogg demuxer audio stream
-  // Initial header
-  dp = new_demux_packet(hdrsizes[0]);
-  memcpy(dp->buffer,extradata,hdrsizes[0]);
-  ds_add_packet(od->audio,dp);
-  extradata += hdrsizes[0];
-  /// Comments
-  dp = new_demux_packet(hdrsizes[1]);
-  memcpy(dp->buffer,extradata,hdrsizes[1]);
-  ds_add_packet(od->audio,dp);
-  extradata += hdrsizes[1];
-  /// Code book
-  dp = new_demux_packet(hdrsizes[2]);
-  memcpy(dp->buffer,extradata,hdrsizes[2]);
-  ds_add_packet(od->audio,dp);
+  for (i = 0; i < 3; i++) {
+    dp = new_demux_packet(hdrsizes[i]);
+    memcpy(dp->buffer,extradata,hdrsizes[i]);
+    ds_add_packet(od->audio,dp);
+    extradata += hdrsizes[i];
+  }
 
   // Finish setting up the ogg demuxer
   od->priv = ogg_d;
