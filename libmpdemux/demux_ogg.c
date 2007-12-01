@@ -157,10 +157,6 @@ extern int dvdsub_id;
 static subtitle ogg_sub;
 //FILE* subout;
 
-#define get_uint16(b) AV_RL16(b)
-#define get_uint32(b) AV_RL32(b)
-#define get_uint64(b) AV_RL64(b)
-
 void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
   int lcv;
   char *packet = pack->packet;
@@ -720,10 +716,10 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
     int nombr, minbr, maxbr;
     ptr = buf[0];
     sh->channels = ptr[11];
-    sh->samplerate = sh->wf->nSamplesPerSec = get_uint32(&ptr[12]);
-    maxbr = get_uint32(&ptr[16]);  //max
-    nombr = get_uint32(&ptr[20]);  //nominal
-    minbr = get_uint32(&ptr[24]);  //minimum
+    sh->samplerate = sh->wf->nSamplesPerSec = AV_RL32(&ptr[12]);
+    maxbr = AV_RL32(&ptr[16]);  //max
+    nombr = AV_RL32(&ptr[20]);  //nominal
+    minbr = AV_RL32(&ptr[24]);  //minimum
 
     if(maxbr == -1)
         maxbr = 0;
@@ -840,10 +836,10 @@ int demux_ogg_open(demuxer_t* demuxer) {
       sh_a = new_sh_audio_aid(demuxer, ogg_d->num_sub, n_audio);
       sh_a->wf = calloc(1, sizeof(WAVEFORMATEX) + pack.bytes);
       sh_a->format = FOURCC_SPEEX;
-      sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint32(&pack.packet[36]);
-      sh_a->channels = sh_a->wf->nChannels = get_uint32(&pack.packet[48]);
+      sh_a->samplerate = sh_a->wf->nSamplesPerSec = AV_RL32(&pack.packet[36]);
+      sh_a->channels = sh_a->wf->nChannels = AV_RL32(&pack.packet[48]);
       sh_a->wf->wFormatTag = sh_a->format;
-      sh_a->wf->nAvgBytesPerSec = get_uint32(&pack.packet[52]);
+      sh_a->wf->nAvgBytesPerSec = AV_RL32(&pack.packet[52]);
       sh_a->wf->nBlockAlign = 0;
       sh_a->wf->wBitsPerSample = 16;
       sh_a->samplesize = 2;
@@ -928,18 +924,18 @@ int demux_ogg_open(demuxer_t* demuxer) {
     } else if(pack.bytes >= 142 && ! strncmp(&pack.packet[1],"Direct Show Samples embedded in Ogg",35) ) {
 
        // Old video header
-      if(get_uint32 (pack.packet+96) == 0x05589f80 && pack.bytes >= 184) {
+      if(AV_RL32(pack.packet+96) == 0x05589f80 && pack.bytes >= 184) {
 	sh_v = new_sh_video_vid(demuxer,ogg_d->num_sub, n_video);
 	sh_v->bih = calloc(1,sizeof(BITMAPINFOHEADER));
 	sh_v->bih->biSize=sizeof(BITMAPINFOHEADER);
 	sh_v->bih->biCompression=
 	sh_v->format = mmioFOURCC(pack.packet[68],pack.packet[69],
 				pack.packet[70],pack.packet[71]);
-	sh_v->frametime = get_uint64(pack.packet+164)*0.0000001;
+	sh_v->frametime = AV_RL64(pack.packet+164)*0.0000001;
 	sh_v->fps = 1/sh_v->frametime;
-	sh_v->disp_w = sh_v->bih->biWidth = get_uint32(pack.packet+176);
-	sh_v->disp_h = sh_v->bih->biHeight = get_uint32(pack.packet+180);
-	sh_v->bih->biBitCount = get_uint16(pack.packet+182);
+	sh_v->disp_w = sh_v->bih->biWidth = AV_RL32(pack.packet+176);
+	sh_v->disp_h = sh_v->bih->biHeight = AV_RL32(pack.packet+180);
+	sh_v->bih->biBitCount = AV_RL16(pack.packet+182);
 	if(!sh_v->bih->biBitCount) sh_v->bih->biBitCount=24; // hack, FIXME
 	sh_v->bih->biPlanes=1;
 	sh_v->bih->biSizeImage=(sh_v->bih->biBitCount>>3)*sh_v->bih->biWidth*sh_v->bih->biHeight;
@@ -951,17 +947,17 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	       ogg_d->num_sub,pack.packet[68],pack.packet[69],pack.packet[70],pack.packet[71],n_video-1);
 	if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_v->bih,MSGL_V);
 	// Old audio header
-      } else if(get_uint32(pack.packet+96) == 0x05589F81) {
+      } else if(AV_RL32(pack.packet+96) == 0x05589F81) {
 	unsigned int extra_size;
 	sh_a = new_sh_audio_aid(demuxer,ogg_d->num_sub, n_audio);
-	extra_size = get_uint16(pack.packet+140);
+	extra_size = AV_RL16(pack.packet+140);
 	sh_a->wf = calloc(1,sizeof(WAVEFORMATEX)+extra_size);
-	sh_a->format = sh_a->wf->wFormatTag = get_uint16(pack.packet+124);
-	sh_a->channels = sh_a->wf->nChannels = get_uint16(pack.packet+126);
-	sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint32(pack.packet+128);
-	sh_a->wf->nAvgBytesPerSec = get_uint32(pack.packet+132);
-	sh_a->wf->nBlockAlign = get_uint16(pack.packet+136);
-	sh_a->wf->wBitsPerSample = get_uint16(pack.packet+138);
+	sh_a->format = sh_a->wf->wFormatTag = AV_RL16(pack.packet+124);
+	sh_a->channels = sh_a->wf->nChannels = AV_RL16(pack.packet+126);
+	sh_a->samplerate = sh_a->wf->nSamplesPerSec = AV_RL32(pack.packet+128);
+	sh_a->wf->nAvgBytesPerSec = AV_RL32(pack.packet+132);
+	sh_a->wf->nBlockAlign = AV_RL16(pack.packet+136);
+	sh_a->wf->wBitsPerSample = AV_RL16(pack.packet+138);
 	sh_a->samplesize = (sh_a->wf->wBitsPerSample+7)/8;
 	sh_a->wf->cbSize = extra_size;
 	if(extra_size > 0)
@@ -987,11 +983,11 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	sh_v->bih->biCompression=
 	sh_v->format = mmioFOURCC(st->subtype[0],st->subtype[1],
 				  st->subtype[2],st->subtype[3]);
-	sh_v->frametime = get_uint64(&st->time_unit)*0.0000001;
+	sh_v->frametime = AV_RL64(&st->time_unit)*0.0000001;
 	sh_v->fps = 1.0/sh_v->frametime;
-	sh_v->bih->biBitCount = get_uint16(&st->bits_per_sample);
-	sh_v->disp_w = sh_v->bih->biWidth = get_uint32(&st->sh.video.width);
-	sh_v->disp_h = sh_v->bih->biHeight = get_uint32(&st->sh.video.height);
+	sh_v->bih->biBitCount = AV_RL16(&st->bits_per_sample);
+	sh_v->disp_w = sh_v->bih->biWidth = AV_RL32(&st->sh.video.width);
+	sh_v->disp_h = sh_v->bih->biHeight = AV_RL32(&st->sh.video.height);
 	if(!sh_v->bih->biBitCount) sh_v->bih->biBitCount=24; // hack, FIXME
 	sh_v->bih->biPlanes=1;
 	sh_v->bih->biSizeImage=(sh_v->bih->biBitCount>>3)*sh_v->bih->biWidth*sh_v->bih->biHeight;
@@ -1005,7 +1001,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	/// New audio header
       } else if(strncmp(st->streamtype,"audio",5) == 0) {
 	char buffer[5];
-	unsigned int extra_size = get_uint32 (&st->size) - sizeof(stream_header);
+	unsigned int extra_size = AV_RL32(&st->size) - sizeof(stream_header);
 	unsigned int extra_offset = 0;
 
 	memcpy(buffer,st->subtype,4);
@@ -1024,11 +1020,11 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	sh_a = new_sh_audio_aid(demuxer,ogg_d->num_sub, n_audio);
 	sh_a->wf = calloc(1,sizeof(WAVEFORMATEX)+extra_size);
 	sh_a->format =  sh_a->wf->wFormatTag = strtol(buffer, NULL, 16);
-	sh_a->channels = sh_a->wf->nChannels = get_uint16(&st->sh.audio.channels);
-	sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint64(&st->samples_per_unit);
-	sh_a->wf->nAvgBytesPerSec = get_uint32(&st->sh.audio.avgbytespersec);
-	sh_a->wf->nBlockAlign = get_uint16(&st->sh.audio.blockalign);
-	sh_a->wf->wBitsPerSample = get_uint16(&st->bits_per_sample);
+	sh_a->channels = sh_a->wf->nChannels = AV_RL16(&st->sh.audio.channels);
+	sh_a->samplerate = sh_a->wf->nSamplesPerSec = AV_RL64(&st->samples_per_unit);
+	sh_a->wf->nAvgBytesPerSec = AV_RL32(&st->sh.audio.avgbytespersec);
+	sh_a->wf->nBlockAlign = AV_RL16(&st->sh.audio.blockalign);
+	sh_a->wf->wBitsPerSample = AV_RL16(&st->bits_per_sample);
 	sh_a->samplesize = (sh_a->wf->wBitsPerSample+7)/8;
 	sh_a->wf->cbSize = extra_size;
 	if(extra_size)
@@ -1043,7 +1039,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	/// Check for text (subtitles) header
       } else if (strncmp(st->streamtype, "text", 4) == 0) {
           mp_msg(MSGT_DEMUX, MSGL_INFO, "[Ogg] stream %d: subtitles (SRT-like text subtitles), -sid %d\n", ogg_d->num_sub, ogg_d->n_text);
-	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
+	  ogg_d->subs[ogg_d->num_sub].samplerate= AV_RL64(&st->time_unit)/10;
 	  ogg_d->subs[ogg_d->num_sub].text = 1;
           ogg_d->subs[ogg_d->num_sub].id = ogg_d->n_text;
           if (demuxer->sub->id == ogg_d->n_text)
