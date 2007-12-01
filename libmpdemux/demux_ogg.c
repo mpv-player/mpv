@@ -1254,8 +1254,10 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   }
   /// Get the size of the 3 header packet
   extradata += 22;
-  memcpy(hdrsizes, extradata, 3*sizeof(uint32_t));
-  extradata += 3*sizeof(uint32_t);
+  for (i = 0; i < 3; i++) {
+    hdrsizes[i] = AV_RL32(extradata);
+    extradata += 4;
+  }
 //  printf("\n!!!!!! hdr sizes: %d %d %d   \n",hdrsizes[0],hdrsizes[1],hdrsizes[2]);
 
   /// Check the size
