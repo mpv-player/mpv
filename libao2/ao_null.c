@@ -50,14 +50,14 @@ static int control(int cmd,void *arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-    ao_data.buffersize= 16384*channels;
-    ao_data.outburst=512*channels;
+    int samplesize = (format == AF_FORMAT_U8 || format == AF_FORMAT_S8) ? 1: 2;
+    ao_data.outburst = 256 * channels * samplesize;
+    // A "buffer" for about 0.2 seconds of audio
+    ao_data.buffersize = (int)(rate * 0.2 / 256 + 1) * ao_data.outburst;
     ao_data.channels=channels;
     ao_data.samplerate=rate;
     ao_data.format=format;
-    ao_data.bps=channels*rate;
-    if (format != AF_FORMAT_U8 && format != AF_FORMAT_S8)
-	ao_data.bps*=2; 
+    ao_data.bps=channels*rate*samplesize;
     buffer=0;
     gettimeofday(&last_tv, 0);
 
