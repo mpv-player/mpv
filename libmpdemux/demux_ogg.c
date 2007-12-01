@@ -1242,6 +1242,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   demux_packet_t *dp;
   sh_audio_t *sh_audio = demuxer->audio->sh;
   int np;
+  uint8_t *extradata = sh_audio->wf + 1;
   unsigned char *p = NULL,*buf;
   int plen;
 
@@ -1251,7 +1252,9 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
     goto fallback;
   }
   /// Get the size of the 3 header packet
-  memcpy(hdrsizes, ((unsigned char*)sh_audio->wf)+22+sizeof(WAVEFORMATEX), 3*sizeof(uint32_t));
+  extradata += 22;
+  memcpy(hdrsizes, extradata, 3*sizeof(uint32_t));
+  extradata += 3*sizeof(uint32_t);
 //  printf("\n!!!!!! hdr sizes: %d %d %d   \n",hdrsizes[0],hdrsizes[1],hdrsizes[2]);
 
   /// Check the size
@@ -1295,15 +1298,17 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   /// Add the header packets in the ogg demuxer audio stream
   // Initial header
   dp = new_demux_packet(hdrsizes[0]);
-  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+22+sizeof(WAVEFORMATEX)+3*sizeof(uint32_t),hdrsizes[0]);
+  memcpy(dp->buffer,extradata,hdrsizes[0]);
   ds_add_packet(od->audio,dp);
+  extradata += hdrsizes[0];
   /// Comments
   dp = new_demux_packet(hdrsizes[1]);
-  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+22+sizeof(WAVEFORMATEX)+3*sizeof(uint32_t)+hdrsizes[0],hdrsizes[1]);
+  memcpy(dp->buffer,extradata,hdrsizes[1]);
   ds_add_packet(od->audio,dp);
+  extradata += hdrsizes[1];
   /// Code book
   dp = new_demux_packet(hdrsizes[2]);
-  memcpy(dp->buffer,((unsigned char*)sh_audio->wf)+22+sizeof(WAVEFORMATEX)+3*sizeof(uint32_t)+hdrsizes[0]+hdrsizes[1],hdrsizes[2]);
+  memcpy(dp->buffer,extradata,hdrsizes[2]);
   ds_add_packet(od->audio,dp);
 
   // Finish setting up the ogg demuxer
