@@ -274,7 +274,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
      /* we pass complete packets to theora, mustn't strip the header! */
      os->lastsize = 1;
      
-     /* header packets beginn on 1-bit: thus check (*data&0x80).  We don't
+     /* header packets begin on 1-bit: thus check (*data&0x80).  We don't
 	have theora_state st, until all header packets were passed to the
 	decoder. */
      if (context != NULL && !(*data&0x80))
@@ -800,7 +800,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
     ogg_d->last_size = np;
     // We got one page now
 
-    if( ! ogg_page_bos(page) ) { // It's not a begining page
+    if( ! ogg_page_bos(page) ) { // It's not a beginning page
       // Header parsing end here, we need to get the page otherwise it will be lost
       int id = demux_ogg_get_page_stream(ogg_d,NULL);
       if(id >= 0)
@@ -1245,7 +1245,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   unsigned char *p = NULL,*buf;
   int plen;
 
-  /// Check that the cbSize is enouth big for the following reads
+  /// Check that the cbSize is big enough for the following reads
   if(sh_audio->wf->cbSize < 22+3*sizeof(uint32_t)) {
     mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI Ogg : Initial audio header is too small !!!!!\n");
     goto fallback;
