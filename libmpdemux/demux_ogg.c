@@ -1248,7 +1248,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   int plen;
 
   /// Check that the cbSize is big enough for the following reads
-  if(sh_audio->wf->cbSize < 22+3*sizeof(uint32_t)) {
+  if(sh_audio->wf->cbSize < 22+3*4) {
     mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI Ogg : Initial audio header is too small !!!!!\n");
     goto fallback;
   }
@@ -1261,7 +1261,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
 //  printf("\n!!!!!! hdr sizes: %d %d %d   \n",hdrsizes[0],hdrsizes[1],hdrsizes[2]);
 
   /// Check the size
-  if(sh_audio->wf->cbSize < 22+3*sizeof(uint32_t)+hdrsizes[0]+hdrsizes[1] + hdrsizes[2]) {
+  if(sh_audio->wf->cbSize < 22+3*4+hdrsizes[0]+hdrsizes[1] + hdrsizes[2]) {
     mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI Ogg : Audio header is too small !!!!!\n");
     goto fallback;
   }
