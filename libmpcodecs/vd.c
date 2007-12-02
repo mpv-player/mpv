@@ -134,7 +134,6 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     unsigned int out_fmt=0;
     int screen_size_x=0;//SCREEN_SIZE_X;
     int screen_size_y=0;//SCREEN_SIZE_Y;
-//    vo_functions_t* video_out=sh->video_out;
     vf_instance_t* vf=sh->vfilter,*sc=NULL;
     int palette=0;
     int vocfg_flags=0;
