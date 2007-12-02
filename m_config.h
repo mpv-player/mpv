@@ -34,7 +34,7 @@ struct m_config_option {
   /// Full name (ie option:subopt).
   char* name;
   /// Option description.
-  struct m_option* opt;
+  const struct m_option* opt;
   /// Save slot stack.
   m_config_save_slot_t* slots;
   /// See \ref ConfigOptionFlags.
@@ -120,7 +120,7 @@ m_config_pop(m_config_t* config);
  *  \return 1 on success, 0 on failure.
  */
 int
-m_config_register_options(m_config_t *config, struct m_option *args);
+m_config_register_options(m_config_t *config, const struct m_option *args);
 
 /// Set an option.
 /** \param config The config object.
@@ -144,7 +144,7 @@ m_config_check_option(m_config_t *config, char* arg, char* param);
 /** \param config The config object.
  *  \param arg The option's name.
  */
-struct m_option*
+const struct m_option*
 m_config_get_option(m_config_t *config, char* arg);
 
 /// Print a list of all registered options.

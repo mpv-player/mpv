@@ -29,7 +29,7 @@ static int
 show_profile(m_option_t *opt, char* name, char *param);
 
 static void
-m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix);
+m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefix);
 
 static int
 list_options(m_option_t *opt, char* name, char *param);
@@ -182,7 +182,7 @@ m_config_pop(m_config_t* config) {
 }
 
 static void
-m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
+m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefix) {
   m_config_option_t *co;
   m_config_save_slot_t* sl;
 
@@ -206,7 +206,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
 
   // Option with children -> add them
   if(arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
-    m_option_t *ol = arg->p;
+    const m_option_t *ol = arg->p;
     int i;
     co->slots = NULL;
     for(i = 0 ; ol[i].name != NULL ; i++)
@@ -246,7 +246,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
 }
 
 int
-m_config_register_options(m_config_t *config, m_option_t *args) {
+m_config_register_options(m_config_t *config, const m_option_t *args) {
   int i;
 
 #ifdef MP_DEBUG
@@ -374,7 +374,7 @@ m_config_check_option(m_config_t *config, char* arg, char* param) {
 }
 
 
-m_option_t*
+const m_option_t*
 m_config_get_option(m_config_t *config, char* arg) {
   m_config_option_t *co;
 
@@ -391,9 +391,9 @@ m_config_get_option(m_config_t *config, char* arg) {
     return NULL;
 }
 
-void*
+const void*
 m_config_get_option_ptr(m_config_t *config, char* arg) {
-  m_option_t* conf;
+  const m_option_t* conf;
 
 #ifdef MP_DEBUG
   assert(config != NULL);
@@ -415,7 +415,7 @@ m_config_print_option_list(m_config_t *config) {
 
   mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_OptionListHeader);
   for(co = config->opts ; co ; co = co->next) {
-    m_option_t* opt = co->opt;
+    const m_option_t* opt = co->opt;
     if(opt->type->flags & M_OPT_TYPE_HAS_CHILD) continue;
     if(opt->flags & M_OPT_MIN)
       sprintf(min,"%-8.0f",opt->min);
