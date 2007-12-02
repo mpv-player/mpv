@@ -156,7 +156,7 @@ static struct m_struct_st stream_opts = {
   stream_opts_fields
 };
 
-int dvd_parse_chapter_range(m_option_t *conf, const char *range) {
+int dvd_parse_chapter_range(const m_option_t *conf, const char *range) {
   const char *s;
   char *t;
   if (!range)

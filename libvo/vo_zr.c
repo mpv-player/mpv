@@ -649,7 +649,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[],
 
 /* copied and adapted from vo_aa_parseoption */
 int
-vo_zr_parseoption(m_option_t* conf, char *opt, char *param){
+vo_zr_parseoption(const m_option_t* conf, const char *opt, const char *param){
     /* got an option starting with zr */
     zr_info_t *zr = &zr_info[zr_parsing];
     int i;
@@ -775,7 +775,7 @@ vo_zr_parseoption(m_option_t* conf, char *opt, char *param){
     return ERR_NOT_AN_OPTION;
 }
 
-void vo_zr_revertoption(m_option_t* opt,char* param) {
+void vo_zr_revertoption(const m_option_t* opt,const char* param) {
 
   zr_info_t *zr = &zr_info[1];
   zr_count = 1;
