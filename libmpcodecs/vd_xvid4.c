@@ -47,7 +47,7 @@ static int chromadeblock = 0;
 static int lumadering = 0;
 static int chromadering = 0;
 
-m_option_t xvid_dec_opts[] = {
+const m_option_t xvid_dec_opts[] = {
 	{ "dr2", &do_dr2, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{ "nodr2", &do_dr2, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{ "filmeffect", &filmeffect, CONF_TYPE_FLAG, 0, 0, 1, NULL},

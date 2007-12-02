@@ -20,7 +20,7 @@ static int samplesize = 2;
 static int bitrate = 0;
 static int format = 0x1; // Raw PCM
 
-m_option_t demux_rawaudio_opts[] = {
+const m_option_t demux_rawaudio_opts[] = {
   { "channels", &channels, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },
   { "rate", &samplerate, CONF_TYPE_INT,CONF_RANGE,1000,8*48000, NULL },
   { "samplesize", &samplesize, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },

@@ -73,7 +73,7 @@ static struct m_struct_st stream_opts = {
 };
 
 /// We keep these options but now they set the defaults
-m_option_t cdda_opts[] = {
+const m_option_t cdda_opts[] = {
   { "speed", &cdda_dflts.speed, CONF_TYPE_INT, M_OPT_RANGE,1,100, NULL },
   { "paranoia", &cdda_dflts.paranoia_mode, CONF_TYPE_INT,M_OPT_RANGE, 0, 2, NULL },
   { "generic-dev", &cdda_dflts.generic_dev, CONF_TYPE_STRING, 0, 0, 0, NULL },

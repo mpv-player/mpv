@@ -52,7 +52,7 @@ static char *opt_format;
 static char *opt_cryptokey;
 extern int ts_prog;
 
-m_option_t lavfdopts_conf[] = {
+const m_option_t lavfdopts_conf[] = {
 	{"probesize", &(opt_probesize), CONF_TYPE_INT, CONF_RANGE, 32, INT_MAX, NULL},
 	{"format",    &(opt_format),    CONF_TYPE_STRING,       0,  0,       0, NULL},
 	{"analyzeduration",    &(opt_analyzeduration),    CONF_TYPE_INT,       CONF_RANGE,  0,       INT_MAX, NULL},

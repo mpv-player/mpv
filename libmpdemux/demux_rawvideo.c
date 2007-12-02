@@ -22,7 +22,7 @@ static int height = 0;
 static float fps = 25;
 static int imgsize=0;
 
-m_option_t demux_rawvideo_opts[] = {
+const m_option_t demux_rawvideo_opts[] = {
   // size:
   { "w", &width, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },
   { "h", &height, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },

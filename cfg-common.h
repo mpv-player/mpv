@@ -376,9 +376,9 @@ extern float a52_drc_level;
 
 /* defined in libmpdemux: */
 extern int hr_mp3_seek;
-extern m_option_t demux_rawaudio_opts[];
-extern m_option_t demux_rawvideo_opts[];
-extern m_option_t cdda_opts[];
+extern const m_option_t demux_rawaudio_opts[];
+extern const m_option_t demux_rawvideo_opts[];
+extern const m_option_t cdda_opts[];
 
 extern char* sub_stream;
 extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
@@ -504,10 +504,10 @@ const m_option_t pvropts_conf[]={
 
 #ifdef HAS_DVBIN_SUPPORT
 #include "stream/dvbin.h"
-extern m_config_t dvbin_opts_conf[];
+extern const m_config_t dvbin_opts_conf[];
 #endif
 
-extern m_option_t lavfdopts_conf[];
+extern const m_option_t lavfdopts_conf[];
 
 extern int rtspStreamOverTCP;
 extern int rtsp_transport_tcp;
@@ -704,8 +704,8 @@ struct {
 };
 #endif /* WIN32 */
 
-extern m_option_t lavc_decode_opts_conf[];
-extern m_option_t xvid_dec_opts[];
+extern const m_option_t lavc_decode_opts_conf[];
+extern const m_option_t xvid_dec_opts[];
 
 int dvd_parse_chapter_range(const m_option_t*, const char*);
 

@@ -98,7 +98,7 @@ static struct m_struct_st stream_opts = {
 
 
 
-m_option_t dvbin_opts_conf[] = {
+const m_option_t dvbin_opts_conf[] = {
 	{"prog", &stream_defaults.prog, CONF_TYPE_STRING, 0, 0 ,0, NULL},
 	{"card", &stream_defaults.card, CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
 	{"type", "DVB card type is autodetected and can't be overridden\n", CONF_TYPE_PRINT, CONF_NOCFG, 0 ,0, NULL},
