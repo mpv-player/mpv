@@ -37,7 +37,7 @@ static int movie_w,movie_h;
 static int playing = 0;
 
 // vo device used to blank the screen for the overlay init
-static  vo_functions_t* sub_vo = NULL;
+static const vo_functions_t* sub_vo = NULL;
 
 static uint8_t* sub_img = NULL;
 static int sub_x,sub_y,sub_w,sub_h;

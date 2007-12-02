@@ -71,7 +71,7 @@ typedef struct {
   unsigned char *scaled_aimage;
   int auto_palette; /* 1 if we lack a palette and must use an heuristic. */
   int font_start_level;  /* Darkest value used for the computed font */
-  vo_functions_t *hw_spu;
+  const vo_functions_t *hw_spu;
   int spu_changed;
 } spudec_handle_t;
 

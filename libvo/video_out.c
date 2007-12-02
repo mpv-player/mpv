@@ -147,7 +147,7 @@ extern vo_functions_t video_out_pnm;
 extern vo_functions_t video_out_md5sum;
 #endif
 
-vo_functions_t* video_out_drivers[] =
+const vo_functions_t* const video_out_drivers[] =
 {
 #ifdef HAVE_XVR100
         &video_out_xvr100,
@@ -288,7 +288,7 @@ void list_video_out(void){
       mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
-vo_functions_t* init_best_video_out(char** vo_list){
+const vo_functions_t* init_best_video_out(char** vo_list){
     int i;
     // first try the preferred drivers, with their optional subdevice param:
     if(vo_list && vo_list[0])
@@ -304,7 +304,7 @@ vo_functions_t* init_best_video_out(char** vo_list){
 	    ++vo_subdevice;
 	}
 	for(i=0;video_out_drivers[i];i++){
-	    vo_functions_t* video_driver=video_out_drivers[i];
+	    const vo_functions_t* video_driver=video_out_drivers[i];
 	    const vo_info_t *info = video_driver->info;
 	    if(!strcmp(info->short_name,vo)){
 		// name matches, try it
@@ -323,14 +323,14 @@ vo_functions_t* init_best_video_out(char** vo_list){
     // now try the rest...
     vo_subdevice=NULL;
     for(i=0;video_out_drivers[i];i++){
-	vo_functions_t* video_driver=video_out_drivers[i];
+	const vo_functions_t* video_driver=video_out_drivers[i];
 	if(!video_driver->preinit(vo_subdevice))
 	    return video_driver; // success!
     }
     return NULL;
 }
 
-int config_video_out(vo_functions_t *vo, uint32_t width, uint32_t height,
+int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      char *title, uint32_t format) {
   panscan_init();

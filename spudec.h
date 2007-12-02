@@ -15,7 +15,7 @@ void spudec_free(void *this);
 void spudec_reset(void *this);	// called after seek
 int spudec_visible(void *this); // check if spu is visible
 void spudec_set_font_factor(void * this, double factor); // sets the equivalent to ffactor
-void spudec_set_hw_spu(void *this, vo_functions_t *hw_spu);
+void spudec_set_hw_spu(void *this, const vo_functions_t *hw_spu);
 int spudec_changed(void *this);
 void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox);
 void spudec_set_forced_subs_only(void * const this, const unsigned int flag);

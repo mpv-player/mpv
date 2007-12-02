@@ -90,7 +90,7 @@ typedef struct {
   unsigned char *scaled_aimage;
   int auto_palette; /* 1 if we lack a palette and must use an heuristic. */
   int font_start_level;  /* Darkest value used for the computed font */
-  vo_functions_t *hw_spu;
+  const vo_functions_t *hw_spu;
   int spu_changed;
   unsigned int forced_subs_only;     /* flag: 0=display all subtitle, !0 display only forced subtitles */
   unsigned int is_forced_sub;         /* true if current subtitle is a forced subtitle */
@@ -1170,7 +1170,7 @@ void spudec_free(void *this)
   }
 }
 
-void spudec_set_hw_spu(void *this, vo_functions_t *hw_spu)
+void spudec_set_hw_spu(void *this, const vo_functions_t *hw_spu)
 {
   spudec_handle_t *spu = (spudec_handle_t*)this;
   if (!spu)

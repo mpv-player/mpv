@@ -23,7 +23,7 @@ extern float sub_delay;
 
 struct vf_priv_s {
     double pts;
-    vo_functions_t *vo;
+    const vo_functions_t *vo;
 #ifdef USE_ASS
     ass_renderer_t* ass_priv;
     int prev_visibility;
@@ -222,7 +222,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->start_slice=start_slice;
     vf->uninit=uninit;
     vf->priv=calloc(1, sizeof(struct vf_priv_s));
-    vf->priv->vo = (vo_functions_t *)args;
+    vf->priv->vo = (const vo_functions_t *)args;
     if(!video_out) return 0; // no vo ?
 //    if(video_out->preinit(args)) return 0; // preinit failed
     return 1;

@@ -176,14 +176,14 @@ typedef struct vo_functions_s
 
 } vo_functions_t;
 
-vo_functions_t* init_best_video_out(char** vo_list);
-int config_video_out(vo_functions_t *vo, uint32_t width, uint32_t height,
+const vo_functions_t* init_best_video_out(char** vo_list);
+int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      char *title, uint32_t format);
 void list_video_out(void);
 
 // NULL terminated array of all drivers
-extern vo_functions_t* video_out_drivers[];
+extern const vo_functions_t* const video_out_drivers[];
 
 extern int vo_flags;
 
