@@ -5,8 +5,6 @@
 
 #include "cfg-common.h"
 
-extern int fakemono; // defined in dec_audio.c
-
 extern int sws_flags;
 extern int readPPOpt(void *, char *arg);
 extern void revertPPOpt(void *conf, char* opt);

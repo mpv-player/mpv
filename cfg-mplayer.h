@@ -10,7 +10,6 @@ extern unsigned doubleclick_time;
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
 extern char *dfb_params;
-extern int fakemono; // defined in dec_audio.c
 
 extern char *lirc_configfile;
 

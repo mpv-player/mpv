@@ -356,6 +356,7 @@ extern int field_dominance;
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;
+extern int fakemono;
 
 /* defined in network.c */
 extern char *network_username;
