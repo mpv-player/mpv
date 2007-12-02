@@ -134,7 +134,7 @@ GdkPixmap   * fpixmap;
 GdkBitmap   * dmask;
 GdkBitmap   * fmask;
 
-static char * Filter( char * name )
+static char * Filter( const char * name )
 {
  static char tmp[32];
  int  i,c;
