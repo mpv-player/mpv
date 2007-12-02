@@ -5,55 +5,26 @@
 
 #include "cfg-common.h"
 
-#ifdef USE_FAKE_MONO
 extern int fakemono; // defined in dec_audio.c
-#endif
 
 extern int sws_flags;
 extern int readPPOpt(void *, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
 extern char *pp_help;
 
-#ifdef HAVE_MP3LAME
 extern m_option_t lameopts_conf[];
-#endif
-
-#ifdef USE_LIBAVCODEC
 extern m_option_t lavcopts_conf[];
-#endif
-
-#ifdef HAVE_TOOLAME
 extern m_option_t toolameopts_conf[];
-#endif
-
-#ifdef HAVE_TWOLAME
 extern m_option_t twolameopts_conf[];
-#endif
-
-#ifdef HAVE_FAAC
 extern m_option_t faacopts_conf[];
-#endif
-
-#ifdef USE_WIN32DLL
 extern m_option_t vfwopts_conf[];
-#endif
-
-#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 extern m_option_t xvidencopts_conf[];
-#endif
 
-#if defined(HAVE_X264)
 extern void x264enc_set_param(m_option_t* opt, char* arg);
-#endif
 
-#ifdef USE_LIBLZO
 extern m_option_t nuvopts_conf[];
-#endif
-
 extern m_option_t mpegopts_conf[];
-#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
 extern m_option_t lavfopts_conf[];
-#endif
 
 m_option_t ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY, NULL},

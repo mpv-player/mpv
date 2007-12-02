@@ -7,20 +7,12 @@
 extern int key_fifo_size;
 extern unsigned doubleclick_time;
 
-#ifdef HAVE_FBDEV
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
-#endif
-#ifdef HAVE_DIRECTFB
 extern char *dfb_params;
-#endif
-#ifdef USE_FAKE_MONO
 extern int fakemono; // defined in dec_audio.c
-#endif
 
-#ifdef HAVE_LIRC
 extern char *lirc_configfile;
-#endif
 
 extern float vo_panscanrange;
 /* only used at startup (setting these values from configfile) */
@@ -34,35 +26,23 @@ extern int vidmode;
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
 
-#ifdef HAVE_X11
 extern int fs_layer;
 extern int stop_xscreensaver;
-#endif
 
-#ifdef HAVE_MENU
 extern int menu_startup;
 extern int menu_keepdir;
 extern char *menu_chroot;
-#ifdef  USE_FRIBIDI
 extern char *menu_fribidi_charset;
 extern int menu_flip_hebrew;
 extern int menu_fribidi_flip_commas;
-#endif
-#endif /* HAVE_MENU */
 
-#ifdef HAVE_ZR
 extern int vo_zr_parseoption(m_option_t* conf, char *opt, char * param);
 extern void vo_zr_revertoption(m_option_t* opt,char* pram);
-#endif
 
-#ifdef HAVE_DXR2
 extern m_option_t dxr2_opts[];
-#endif
 
-#ifdef HAVE_NEW_GUI
 extern char * skinName;
 extern int guiWinID;
-#endif
 
 
 /* from libvo/aspect.c */

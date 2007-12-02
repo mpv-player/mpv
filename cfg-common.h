@@ -357,7 +357,6 @@ extern int field_dominance;
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;
 
-#ifdef MPLAYER_NETWORK
 /* defined in network.c */
 extern char *network_username;
 extern char *network_password;
@@ -370,11 +369,7 @@ extern int network_prefer_ipv4;
 extern int network_ipv4_only_proxy;
 extern int reuse_socket;
 
-#endif
-
-#ifdef USE_DVDREAD
 extern int dvd_speed; /* stream/stream_dvd.c */
-#endif
 
 extern float a52_drc_level;
 
@@ -511,17 +506,11 @@ m_option_t pvropts_conf[]={
 extern m_config_t dvbin_opts_conf[];
 #endif
 
-#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
 extern m_option_t lavfdopts_conf[];
-#endif
 
-#ifdef STREAMING_LIVE555
 extern int rtspStreamOverTCP;
-#endif
-#ifdef LIBNEMESI
 extern int rtsp_transport_tcp;
 extern int rtsp_transport_sctp;
-#endif
 extern int rtsp_port;
 extern char *rtsp_destination;
 
@@ -714,13 +703,8 @@ struct {
 };
 #endif /* WIN32 */
 
-#ifdef USE_LIBAVCODEC
 extern m_option_t lavc_decode_opts_conf[];
-#endif
-
-#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 extern m_option_t xvid_dec_opts[];
-#endif
 
 int dvd_parse_chapter_range(m_option_t*, const char*);
 
