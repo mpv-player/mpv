@@ -423,9 +423,8 @@ int fsFileExist( unsigned char * fname )
 
 void fs_Ok_released( GtkButton * button,gpointer user_data )
 {
- unsigned char * str;
  GList         * item;
- int             size,j,i = 1;
+ int             i = 1;
  struct stat     fs;
 
  stat( fsSelectedFile,&fs );
