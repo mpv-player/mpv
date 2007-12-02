@@ -836,6 +836,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 				// TODO: RFC 2616, recommand to detect infinite redirection loops
 				next_url = http_get_field( http_hdr, "Location" );
 				if( next_url!=NULL ) {
+					int is_ultravox = strcasecmp(stream->streaming_ctrl->url->protocol, "unsv") == 0;
 					stream->streaming_ctrl->url = url_redirect( &url, next_url );
 					if (!strcasecmp(url->protocol, "mms")) {
 						res = STREAM_REDIRECTED;
@@ -844,6 +845,10 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 					if (strcasecmp(url->protocol, "http")) {
 						mp_msg(MSGT_NETWORK,MSGL_ERR,"Unsupported http %d redirect to %s protocol\n", http_hdr->status_code, url->protocol);
 						goto err_out;
+					}
+					if (is_ultravox)  {
+						free(url->protocol);
+						url->protocol = strdup("unsv");
 					}
 					redirect = 1;	
 				}
