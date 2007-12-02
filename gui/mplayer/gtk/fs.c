@@ -36,7 +36,6 @@ gchar         * fsSelectedDirectory = NULL;
 unsigned char * fsThatDir = ".";
 const gchar   * fsFilter = "*";
 
-int             fsPressed = 0;
 int             fsType    = 0;
 
 char * fsVideoFilterNames[][2] =
@@ -402,7 +401,6 @@ void fs_fsPathCombo_changed( GtkEditable * editable,gpointer user_data )
  const unsigned char * str;
 
  str=gtk_entry_get_text( GTK_ENTRY( user_data ) );
- fsPressed=2;
  if ( chdir( str ) != -1 ) CheckDir( fsFNameList,get_current_dir_name() );
 }
 
@@ -440,28 +438,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    return;
   }
 
- switch( fsPressed )
-  {
-   case 1:
         fsSelectedDirectory=(unsigned char *)get_current_dir_name();
-        break;
-   case 2:
-        str=gtk_entry_get_text( GTK_ENTRY( fsPathCombo ) );
-        fsSelectedFile=str;
-        if ( !fsFileExist( fsSelectedFile ) ) { HideFileSelect(); return; }
-        fsSelectedDirectory=fsSelectedFile;
-        size=strlen( fsSelectedDirectory );
-        for ( j=0;j<size;j++ )
-         {
-          if ( fsSelectedDirectory[ size - j ] == '/' )
-           {
-            fsSelectedFile+=size - j + 1;
-            fsSelectedDirectory[ size - j ]=0;
-            break;
-           }
-         }
-        break;
-  }
  switch ( fsType )
   {
    case fsVideoSelector:
@@ -511,7 +488,6 @@ void fs_Cancel_released( GtkButton * button,gpointer user_data )
 void fs_fsFNameList_select_row( GtkWidget * widget,gint row,gint column,GdkEventButton *bevent,gpointer user_data )
 {
  gtk_clist_get_text( GTK_CLIST(widget ),row,1,&fsSelectedFile );
- fsPressed=1;
  if( bevent && bevent->type == GDK_BUTTON_PRESS )  gtk_button_released( GTK_BUTTON( fsOk ) );
 }
 
