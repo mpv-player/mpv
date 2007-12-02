@@ -45,7 +45,7 @@
 #include "libmpcodecs/vf_scale.h"
 #include "libavutil/rational.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"yuv4mpeg output for mjpegtools",
 	"yuv4mpeg",

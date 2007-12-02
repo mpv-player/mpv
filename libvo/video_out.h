@@ -110,7 +110,7 @@ typedef struct vo_info_s
 
 typedef struct vo_functions_s
 {
-	vo_info_t *info;
+	const vo_info_t *info;
 	/*
 	 * Preinitializes driver (real INITIALIZATION)
 	 *   arg - currently it's vo_subdevice

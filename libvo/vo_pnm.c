@@ -65,7 +65,7 @@
 
 /* Info */
 
-static vo_info_t info=
+static const vo_info_t info=
 {
 	"PPM/PGM/PGMYUV file",
 	"pnm",

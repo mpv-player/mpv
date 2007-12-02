@@ -22,7 +22,7 @@
 #include "video_out_internal.h"
 #include "subopt-helper.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"PNG file",
 	"png",

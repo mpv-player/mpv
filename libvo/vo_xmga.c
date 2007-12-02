@@ -47,7 +47,7 @@ static unsigned int timerd = 0;
 #include "gui/interface.h"
 #endif
 
-static vo_info_t info = {
+static const vo_info_t info = {
     "Matrox G200/G4x0/G550 overlay in X11 window (using /dev/mga_vid)",
     "xmga",
     "Zoltan Ponekker <pontscho@makacs.poliod.hu>",

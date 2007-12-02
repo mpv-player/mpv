@@ -29,7 +29,7 @@
 #include "aspect.h"
 #include "sub.h"
 
-static vo_info_t info =
+static const vo_info_t info =
   {
     "S3 Virge over fbdev",
     "s3fb",

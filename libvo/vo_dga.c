@@ -30,7 +30,7 @@
 #include <X11/extensions/xf86vmode.h>
 #endif
 
-static vo_info_t info = {
+static const vo_info_t info = {
 #ifdef HAVE_DGA2
     "DGA ( Direct Graphic Access V2.0 )",
 #else

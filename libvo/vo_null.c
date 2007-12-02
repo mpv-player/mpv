@@ -30,7 +30,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"Null video output",
 	"null",

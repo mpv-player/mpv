@@ -19,7 +19,7 @@
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
   "X11 (OpenGL)",
   "gl",

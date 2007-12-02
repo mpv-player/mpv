@@ -51,7 +51,7 @@
 
 #include "fastmemcpy.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"3dfx (/dev/3dfx)",
 	"3dfx",

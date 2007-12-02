@@ -135,7 +135,7 @@ static directx_fourcc_caps g_ddpf[] =
 };
 #define NUM_FORMATS (sizeof(g_ddpf) / sizeof(g_ddpf[0]))
 
-static vo_info_t info =
+static const vo_info_t info =
 {
 	"Directx DDraw YUV/RGB/BGR renderer",
 	"directx",

@@ -31,7 +31,7 @@
 #include "aspect.h"
 #include "mp_msg.h"
 
-static vo_info_t info = {
+static const vo_info_t info = {
 	"Framebuffer Device",
 	"fbdev",
 	"Szabolcs Berecz <szabi@inf.elte.hu>",

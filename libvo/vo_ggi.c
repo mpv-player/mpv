@@ -36,7 +36,7 @@
 /* maximum buffers */
 #undef GGI_FLIP
 
-static vo_info_t info =
+static const vo_info_t info =
 {
     "General Graphics Interface (GGI) output",
     "ggi",

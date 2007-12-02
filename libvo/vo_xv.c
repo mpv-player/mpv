@@ -47,7 +47,7 @@ Buffer allocation:
 
 #include "libavutil/common.h"
 
-static vo_info_t info = {
+static const vo_info_t info = {
     "X11/Xv",
     "xv",
     "Gerd Knorr <kraxel@goldbach.in-berlin.de> and others",

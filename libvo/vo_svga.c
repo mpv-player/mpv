@@ -92,7 +92,7 @@ static struct {
   int locks;
 }PageStore[MAXPAGES];
 
-static vo_info_t info = {
+static const vo_info_t info = {
     "SVGAlib",
     "svga",
     "Ivan Kalvachev <iive@users.sf.net>",

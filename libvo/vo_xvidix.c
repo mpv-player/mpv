@@ -38,7 +38,7 @@
 #endif
 
 
-static vo_info_t info = {
+static const vo_info_t info = {
     "X11 (VIDIX)",
     "xvidix",
     "Alex Beregszaszi",

@@ -37,7 +37,7 @@
 #endif
 
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
     "General X11 driver for overlay capable video output drivers",
     "xover",

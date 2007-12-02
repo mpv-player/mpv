@@ -38,7 +38,7 @@
 
 #include "vo_quartz.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"Mac OSX (Quartz)",
 	"quartz",

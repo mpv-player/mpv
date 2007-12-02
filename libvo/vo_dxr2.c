@@ -132,7 +132,7 @@ m_option_t dxr2_opts[] = {
   { NULL,NULL, 0, 0, 0, 0, NULL}
 };
 
-static vo_info_t info = {
+static const vo_info_t info = {
   "DXR2 video out",
   "dxr2",
   "Alban Bedel <albeu@free.fr> and Tobias Diedrich <ranma@gmx.at>",

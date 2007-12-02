@@ -33,7 +33,7 @@
 #define TEXTURE_WIDTH 128
 #undef TEXTURE_WIDTH
 
-static vo_info_t info =
+static const vo_info_t info =
 {
   "X11 (OpenGL) - multiple textures version",
   "gl2",

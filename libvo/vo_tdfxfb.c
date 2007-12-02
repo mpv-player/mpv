@@ -47,7 +47,7 @@
 #include "aspect.h"
 #include "sub.h"
 
-static vo_info_t info =
+static const vo_info_t info =
 {
 	"3Dfx Banshee/Voodoo3/Voodoo5",
 	"tdfxfb",

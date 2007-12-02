@@ -58,7 +58,7 @@
 
 /* Info */
 
-static vo_info_t info=
+static const vo_info_t info=
 {
 	"md5sum of each frame",
 	"md5sum",

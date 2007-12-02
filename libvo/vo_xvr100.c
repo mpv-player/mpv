@@ -52,7 +52,7 @@
 #include "mp_msg.h"
 
 
-static vo_info_t info = {
+static const vo_info_t info = {
     "sun xvr-100",
     "xvr100",
     "Denes Balatoni",

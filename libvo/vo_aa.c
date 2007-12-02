@@ -44,7 +44,7 @@
 #define MESSAGE_SIZE 512
 #define MESSAGE_DEKO " +++ %s +++ "
 
-	static vo_info_t info = {
+	static const vo_info_t info = {
 	    "AAlib",
 	    "aa",
 	    "Alban Bedel <albeu@free.fr> and Folke Ashberg <folke@ashberg.de>",

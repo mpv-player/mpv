@@ -58,7 +58,7 @@
 #define TRIPLE 1
 #endif
 
-static vo_info_t info = {
+static const vo_info_t info = {
 	"Direct Framebuffer Device",
 	"directfb",
 	"Jiri Svoboda Jiri.Svoboda@seznam.cz",

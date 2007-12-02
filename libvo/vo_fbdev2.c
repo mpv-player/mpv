@@ -22,7 +22,7 @@
 #include "sub.h"
 #include "mp_msg.h"
 
-static vo_info_t info = {
+static const vo_info_t info = {
 	"Framebuffer Device",
 	"fbdev2",
 	"Joey Parrish <joey@nicewarrior.org>",

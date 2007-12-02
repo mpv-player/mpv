@@ -56,7 +56,7 @@ static opt_t subopts[] = {
   {NULL}
 };
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
   "V4L2 MPEG Video Decoder Output",
   "v4l2",

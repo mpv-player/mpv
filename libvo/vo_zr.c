@@ -30,7 +30,7 @@
 
 #include "jpeg_enc.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"Zoran ZR360[56]7/ZR36060 Driver (DC10(+)/buz/lml33/MatroxRR)",
 	"zr",

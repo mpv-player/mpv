@@ -126,7 +126,7 @@
 #include "subopt-helper.h"
 #include "mp_fifo.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"SDL YUV/RGB/BGR renderer (SDL v1.1.7+ only!)",
 	"sdl",

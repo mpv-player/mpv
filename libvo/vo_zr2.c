@@ -29,7 +29,7 @@
 #include "subopt-helper.h"
 #include "fastmemcpy.h"
 
-static vo_info_t info = {
+static const vo_info_t info = {
 	"Zoran ZR360[56]7/ZR36060 Driver (DC10(+)/buz/lml33/MatroxRR)",
 	"zr2",
 	"Rik Snel <rsnel@cube.dyndns.org>",

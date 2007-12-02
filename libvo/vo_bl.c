@@ -47,7 +47,7 @@
 #include "m_option.h"
 #include "fastmemcpy.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"Blinkenlights driver: http://www.blinkenlights.de",
 	"bl",

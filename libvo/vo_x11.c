@@ -50,7 +50,7 @@ int XShmGetEventBase(Display *);
 #include "mplayer.h"
 #endif
 
-static vo_info_t info = {
+static const vo_info_t info = {
     "X11 ( XImage/Shm )",
     "x11",
     "Aaron Holtzman <aholtzma@ess.engr.uvic.ca>",

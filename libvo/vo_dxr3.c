@@ -152,7 +152,7 @@
 
 #define SPU_SUPPORT
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"DXR3/H+ video out",
 	"dxr3",

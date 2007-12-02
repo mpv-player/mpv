@@ -61,7 +61,7 @@
 #define MPLAYER_VERSION 0.90
 #define VO_GIF_REVISION 6
 
-static vo_info_t info = {
+static const vo_info_t info = {
 	"animated GIF output",
 	"gif89a",
 	"Joey Parrish joey@nicewarrior.org",

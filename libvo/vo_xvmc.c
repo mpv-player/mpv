@@ -119,7 +119,7 @@ static void xvmc_clean_surfaces(void);
 static int count_free_surfaces();
 static xvmc_render_state_t * find_free_surface();
 
-static vo_info_t info = {
+static const vo_info_t info = {
   "XVideo Motion Compensation",
   "xvmc",
   "Ivan Kalvachev <iive@users.sf.net>",

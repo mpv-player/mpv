@@ -41,7 +41,7 @@
 #include "aspect.h"
 #include "mp_fifo.h"
 
-static vo_info_t info = {
+static const vo_info_t info = {
      "DirectFB / Matrox G200/G400/G450/G550",
      "dfbmga",
      "Ville Syrjala <syrjala@sci.fi>",

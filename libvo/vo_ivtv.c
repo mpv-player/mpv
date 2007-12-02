@@ -62,7 +62,7 @@ static opt_t subopts[] = {
   {NULL}
 };
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
   "IVTV MPEG Video Decoder TV-Out",
   "ivtv",

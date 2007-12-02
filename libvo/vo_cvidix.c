@@ -26,7 +26,7 @@
 #include "vidix/vidixlib.h"
 
 
-static vo_info_t info = {
+static const vo_info_t info = {
     "console VIDIX",
     "cvidix",
     "Sascha Sommer",

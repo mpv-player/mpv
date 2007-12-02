@@ -38,7 +38,7 @@
   #include <caca0.h>
 #endif
 
-static vo_info_t info = {
+static const vo_info_t info = {
   "libcaca",
   "caca",
   "Pigeon <pigeon@pigeond.net>",

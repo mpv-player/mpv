@@ -22,7 +22,7 @@
 #include "sub.h"
 #include "aspect.h"
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"Matrox G200/G4x0/G550 overlay (/dev/mga_vid)",
 	"mga",

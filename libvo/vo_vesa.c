@@ -67,7 +67,7 @@ extern char *monitor_dotclock_str;
 
 #define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
-static vo_info_t info = 
+static const vo_info_t info = 
 {
 	"VESA VBE 2.0 video output",
 	"vesa",
