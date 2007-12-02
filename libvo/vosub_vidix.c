@@ -27,12 +27,12 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "vosub_vidix.h"
 #include "vidix/vidixlib.h"
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
 #include "sub.h"
+#include "vosub_vidix.h"
 
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
@@ -634,7 +634,7 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
 //  return server_control(request,data); //VO_NOTIMPL;
 }
 
-int vidix_preinit(const char *drvname,void *server)
+int vidix_preinit(const char *drvname,vo_functions_t *server)
 {
   int err;
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
