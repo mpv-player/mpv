@@ -31,7 +31,6 @@
 #define VOCTRL_GUI_NOWINDOW 19
 /* used to switch to fullscreen */
 #define VOCTRL_FULLSCREEN 5
-#define VOCTRL_SCREENSHOT 6
 /* signal a device pause */
 #define VOCTRL_PAUSE 7
 /* start/resume playback */

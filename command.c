@@ -2722,7 +2722,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    ((vf_instance_t *) sh_video->vfilter)->
 		    control(sh_video->vfilter, VFCTRL_SCREENSHOT,
 			    &cmd->args[0].v.i))
-		    mpctx->video_out->control(VOCTRL_SCREENSHOT, NULL);
+		    mp_msg(MSGT_CPLAYER, MSGL_INFO, "failed (forgot -vf screenshot?)\n");
 	    }
 	    break;
 
