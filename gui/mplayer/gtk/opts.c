@@ -1454,7 +1454,7 @@ GList *appendESDDevices(GList *l) {
 
 // Gets text string from a gtk entry, interpreting 
 // MSGTR_PREFERENCES_DriverDefault as null string.
-char *getGtkEntryText(GtkWidget *from) {
+const char *getGtkEntryText(GtkWidget *from) {
   const char *tmp = gtk_entry_get_text(GTK_ENTRY(from));
   if (strcmp(tmp, MSGTR_PREFERENCES_DriverDefault) == 0) {
     tmp = NULL;
