@@ -204,7 +204,7 @@ struct m_option_type {
    *  \return An allocated string containing the text value or (void*)-1
    *          on error.
    */
-  char* (*print)(const m_option_t* opt,  void* val);
+  char* (*print)(const m_option_t* opt, const void* val);
 
   /** \name
    *  These functions are called to save/set/restore the status of the
@@ -461,7 +461,7 @@ m_option_parse(const m_option_t* opt,const char *name, char *param, void* dst, i
 
 /// Helper to print options, see \ref m_option_type::print.
 inline static  char*
-m_option_print(const m_option_t* opt,  void* val_ptr) {
+m_option_print(const m_option_t* opt, const void* val_ptr) {
   if(opt->type->print)
     return opt->type->print(opt,val_ptr);
   else

@@ -114,7 +114,7 @@ static int parse_flag(const m_option_t* opt,const char *name, char *param, void*
   }
 }
 
-static char* print_flag(const m_option_t* opt,  void* val) {
+static char* print_flag(const m_option_t* opt,  const void* val) {
   if(VAL(val) == opt->min)
     return strdup("no");
   else
@@ -167,7 +167,7 @@ static int parse_int(const m_option_t* opt,const char *name, char *param, void* 
   return 1;
 }
 
-static char* print_int(const m_option_t* opt,  void* val) {
+static char* print_int(const m_option_t* opt,  const void* val) {
   opt = NULL;
   return dup_printf("%d",VAL(val));
 }
@@ -239,7 +239,7 @@ static int parse_double(const m_option_t* opt,const char *name, char *param, voi
   return 1;
 }
 
-static char* print_double(const m_option_t* opt,  void* val) {
+static char* print_double(const m_option_t* opt,  const void* val) {
   opt = NULL;
   return dup_printf("%f",VAL(val));
 }
@@ -267,7 +267,7 @@ static int parse_float(const m_option_t* opt,const char *name, char *param, void
     return r;
 }
 
-static char* print_float(const m_option_t* opt,  void* val) {
+static char* print_float(const m_option_t* opt,  const void* val) {
   opt = NULL;
   return dup_printf("%f",VAL(val));
 }
@@ -322,7 +322,7 @@ static int parse_position(const m_option_t* opt,const char *name, char *param, v
   return 1;
 }
 
-static char* print_position(const m_option_t* opt,  void* val) {
+static char* print_position(const m_option_t* opt,  const void* val) {
   return dup_printf("%"PRId64,(int64_t)VAL(val));
 }
 
@@ -373,7 +373,7 @@ static int parse_str(const m_option_t* opt,const char *name, char *param, void* 
 
 }
 
-static char* print_str(const m_option_t* opt,  void* val) {
+static char* print_str(const m_option_t* opt,  const void* val) {
   return (val && VAL(val) && strlen(VAL(val)) > 0) ? strdup(VAL(val)) : NULL;
 }
 
@@ -636,7 +636,7 @@ static void copy_str_list(const m_option_t* opt,void* dst, void* src) {
   VAL(dst) = d;
 }
 
-static char* print_str_list(const m_option_t* opt, void* src) {
+static char* print_str_list(const m_option_t* opt, const void* src) {
   char **lst = NULL;
   char *ret = NULL,*last = NULL;
   int i;
