@@ -46,12 +46,12 @@ menu_info_t* menu_info_list[] = {
   NULL
 };
 
-typedef struct menu_def_st {
+struct menu_def_st {
   char* name;
   menu_info_t* type;
   void* cfg;
   char* args;
-} menu_def_t;
+};
 
 static struct MPContext *menu_ctx = NULL;
 static menu_def_t* menu_list = NULL;
@@ -220,6 +220,7 @@ menu_t* menu_open(char *name) {
   m->priv_st = &(menu_list[i].type->priv_st);
   m->priv = m_struct_copy(m->priv_st,menu_list[i].cfg);
   m->ctx = menu_ctx;
+  m->type = &menu_list[i];
   if(menu_list[i].type->open(m,menu_list[i].args))
     return m;
   if(m->priv)

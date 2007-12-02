@@ -2,6 +2,8 @@
 struct menu_priv_s;
 typedef struct  menu_s menu_t;
 
+typedef struct menu_def_st menu_def_t;
+
 struct  menu_s {
   struct MPContext *ctx;
   void (*draw)(menu_t* menu,mp_image_t* mpi);
@@ -13,6 +15,7 @@ struct  menu_s {
   int show; // Draw it ?
   int cl; // Close request (user sent a close cmd or
   menu_t* parent;
+  menu_def_t *type;
 };
 
 typedef struct menu_info_s {
