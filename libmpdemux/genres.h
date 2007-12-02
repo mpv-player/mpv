@@ -18,7 +18,7 @@
 #define GENRES_H
 
 
-char *genres[] = {
+const char * const genres[] = {
 "Blues",					/* 0 */
 "Classic Rock",				/* 1 */
 "Country",					/* 2 */
