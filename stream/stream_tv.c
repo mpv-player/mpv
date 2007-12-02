@@ -113,7 +113,7 @@ tv_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   return STREAM_OK;
 }
 
-stream_info_t stream_info_tv = {
+const stream_info_t stream_info_tv = {
   "TV Input",
   "tv",
   "Benjamin Zores, Albeu",

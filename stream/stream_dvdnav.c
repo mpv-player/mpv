@@ -725,7 +725,7 @@ void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
   hl->ey = hlev.ey;
 }
 
-stream_info_t stream_info_dvdnav = {
+const stream_info_t stream_info_dvdnav = {
   "DVDNAV stream",
   "null",
   "",

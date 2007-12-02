@@ -13,7 +13,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 }
 
 
-stream_info_t stream_info_null = {
+const stream_info_t stream_info_null = {
   "Null stream",
   "null",
   "Albeu",

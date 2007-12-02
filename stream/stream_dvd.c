@@ -1110,7 +1110,7 @@ ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
     return open_s(stream, mode, dvd_priv, file_format);
 }
 
-stream_info_t stream_info_dvd = {
+const stream_info_t stream_info_dvd = {
   "DVD stream",
   "null",
   "",
@@ -1121,7 +1121,7 @@ stream_info_t stream_info_dvd = {
   1 // Urls are an option string
 };
 
-stream_info_t stream_info_ifo = {
+const stream_info_t stream_info_ifo = {
   "DVD IFO input",
   "ifo",
   "Benjamin Zores",

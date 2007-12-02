@@ -64,7 +64,7 @@ static int rtsp_streaming_open (stream_t *stream, int mode, void *opts,
     return STREAM_OK;
 }
 
-stream_info_t stream_info_rtsp = {
+const stream_info_t stream_info_rtsp = {
   "RTSP streaming",
   "rtsp",
   "Alessandro Molina",

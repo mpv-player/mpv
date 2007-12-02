@@ -382,7 +382,7 @@ static void close_cdda(stream_t* s) {
   free(p);
 }
 
-stream_info_t stream_info_cdda = {
+const stream_info_t stream_info_cdda = {
   "CDDA",
   "cdda",
   "Albeu",

@@ -103,7 +103,7 @@ rtp_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   return STREAM_OK;
 }
 
-stream_info_t stream_info_rtp = {
+const stream_info_t stream_info_rtp = {
   "MPEG over RTP streaming",
   "rtp",
   "Dave Chapman, Benjamin Zores",

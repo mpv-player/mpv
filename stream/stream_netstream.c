@@ -296,7 +296,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   return STREAM_ERROR;
 }
 
-stream_info_t stream_info_netstream = {
+const stream_info_t stream_info_netstream = {
   "Net stream",
   "netstream",
   "Albeu",

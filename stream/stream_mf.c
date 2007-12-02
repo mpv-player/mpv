@@ -34,7 +34,7 @@ mf_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   return STREAM_OK;
 }
 
-stream_info_t stream_info_mf = {
+const stream_info_t stream_info_mf = {
   "Multiple files input",
   "mf",
   "Benjamin Zores, Albeu",

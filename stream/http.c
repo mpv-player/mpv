@@ -954,7 +954,7 @@ static int open_s2(stream_t *stream,int mode, void* opts, int* file_format) {
 }
 
 
-stream_info_t stream_info_http1 = {
+const stream_info_t stream_info_http1 = {
   "http streaming",
   "null",
   "Bertrand, Albeau, Reimar Doeffinger, Arpi?",
@@ -965,7 +965,7 @@ stream_info_t stream_info_http1 = {
   0 // Urls are an option string
 };
 
-stream_info_t stream_info_http2 = {
+const stream_info_t stream_info_http2 = {
   "http streaming",
   "null",
   "Bertrand, Albeu, Arpi? who?",

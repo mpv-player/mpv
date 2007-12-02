@@ -1766,7 +1766,7 @@ pvr_force_freq_step (stream_t *stream, int step)
   return force_freq_step (pvr, step);
 }
 
-stream_info_t stream_info_pvr = {
+const stream_info_t stream_info_pvr = {
   "V4L2 MPEG Input (a.k.a PVR)",
   "pvr",
   "Benjamin Zores",

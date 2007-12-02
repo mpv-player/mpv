@@ -840,7 +840,7 @@ dvb_config_t *dvb_get_config(void)
 
 
 
-stream_info_t stream_info_dvb = {
+const stream_info_t stream_info_dvb = {
 	"Dvb Input",
 	"dvbin",
 	"Nico",

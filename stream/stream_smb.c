@@ -153,7 +153,7 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
   return STREAM_OK;
 }
 
-stream_info_t stream_info_smb = {
+const stream_info_t stream_info_smb = {
   "Server Message Block",
   "smb",
   "M. Tourne",

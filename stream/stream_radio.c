@@ -1252,7 +1252,7 @@ static void close_s(struct stream_st * stream){
     stream->priv=NULL;
 }
 
-stream_info_t stream_info_radio = {
+const stream_info_t stream_info_radio = {
     "Radio stream",
     "Radio",
     "Vladimir Voroshilov",

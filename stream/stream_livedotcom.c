@@ -96,7 +96,7 @@ static int open_live_sdp(stream_t *stream,int mode, void* opts, int* file_format
 }
 
 
-stream_info_t stream_info_rtsp_sip = {
+const stream_info_t stream_info_rtsp_sip = {
   "standard RTSP and SIP",
   "RTSP and SIP",
   "Ross Finlayson",
@@ -107,7 +107,7 @@ stream_info_t stream_info_rtsp_sip = {
   0 // Urls are an option string
 };
 
-stream_info_t stream_info_sdp = {
+const stream_info_t stream_info_sdp = {
   "SDP stream descriptor",
   "SDP",
   "Ross Finlayson",

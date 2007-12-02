@@ -897,7 +897,7 @@ fail:
 }
 
 
-stream_info_t stream_info_pnm = {
+const stream_info_t stream_info_pnm = {
   "RealNetworks pnm",
   "pnm",
   "Arpi, xine team",

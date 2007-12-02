@@ -36,57 +36,57 @@
 //#include "vcd_read_bincue.h"
 
 #ifdef HAVE_VCD
-extern stream_info_t stream_info_vcd;
+extern const stream_info_t stream_info_vcd;
 #endif
 #ifdef HAVE_CDDA
-extern stream_info_t stream_info_cdda;
+extern const stream_info_t stream_info_cdda;
 #endif
 #ifdef MPLAYER_NETWORK
-extern stream_info_t stream_info_netstream;
-extern stream_info_t stream_info_pnm;
-extern stream_info_t stream_info_asf;
-extern stream_info_t stream_info_rtsp;
-extern stream_info_t stream_info_rtp;
-extern stream_info_t stream_info_udp;
-extern stream_info_t stream_info_http1;
-extern stream_info_t stream_info_http2;
+extern const stream_info_t stream_info_netstream;
+extern const stream_info_t stream_info_pnm;
+extern const stream_info_t stream_info_asf;
+extern const stream_info_t stream_info_rtsp;
+extern const stream_info_t stream_info_rtp;
+extern const stream_info_t stream_info_udp;
+extern const stream_info_t stream_info_http1;
+extern const stream_info_t stream_info_http2;
 #endif
 #ifdef HAS_DVBIN_SUPPORT
-extern stream_info_t stream_info_dvb;
+extern const stream_info_t stream_info_dvb;
 #endif
 #ifdef USE_TV
-extern stream_info_t stream_info_tv;
+extern const stream_info_t stream_info_tv;
 #endif
 #ifdef USE_RADIO
-extern stream_info_t stream_info_radio;
+extern const stream_info_t stream_info_radio;
 #endif
 #ifdef HAVE_PVR
-extern stream_info_t stream_info_pvr;
+extern const stream_info_t stream_info_pvr;
 #endif
 #ifdef HAVE_FTP
-extern stream_info_t stream_info_ftp;
+extern const stream_info_t stream_info_ftp;
 #endif
 #ifdef HAVE_VSTREAM
-extern stream_info_t stream_info_vstream;
+extern const stream_info_t stream_info_vstream;
 #endif
 #ifdef USE_DVDNAV
-extern stream_info_t stream_info_dvdnav;
+extern const stream_info_t stream_info_dvdnav;
 #endif
 #ifdef LIBSMBCLIENT
-extern stream_info_t stream_info_smb;
+extern const stream_info_t stream_info_smb;
 #endif
 #ifdef STREAMING_LIVE555
-extern stream_info_t stream_info_sdp;
-extern stream_info_t stream_info_rtsp_sip;
+extern const stream_info_t stream_info_sdp;
+extern const stream_info_t stream_info_rtsp_sip;
 #endif
 
-extern stream_info_t stream_info_cue;
-extern stream_info_t stream_info_null;
-extern stream_info_t stream_info_mf;
-extern stream_info_t stream_info_file;
+extern const stream_info_t stream_info_cue;
+extern const stream_info_t stream_info_null;
+extern const stream_info_t stream_info_mf;
+extern const stream_info_t stream_info_file;
 #ifdef USE_DVDREAD
-extern stream_info_t stream_info_ifo;
-extern stream_info_t stream_info_dvd;
+extern const stream_info_t stream_info_ifo;
+extern const stream_info_t stream_info_dvd;
 #endif
 
 static const stream_info_t* const auto_open_streams[] = {
