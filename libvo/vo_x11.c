@@ -268,7 +268,7 @@ static void freeMyXImage(void)
 #define BO_NATIVE    LSBFirst
 #define BO_NONNATIVE MSBFirst
 #endif
-struct fmt2Xfmtentry_s {
+const struct fmt2Xfmtentry_s {
   uint32_t mpfmt;
   int byte_order;
   unsigned red_mask;
@@ -316,7 +316,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     Colormap theCmap;
     XSetWindowAttributes xswa;
     unsigned long xswamask;
-    struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
+    const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
 
 #ifdef HAVE_XF86VM
     unsigned int modeline_width, modeline_height;
