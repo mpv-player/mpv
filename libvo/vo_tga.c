@@ -46,7 +46,7 @@ static const vo_info_t info =
 };
 
 
-LIBVO_EXTERN (tga)
+const LIBVO_EXTERN (tga)
 
 /* locals vars */
 static int      frame_num = 0;

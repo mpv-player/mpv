@@ -143,7 +143,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN(directx)
+const LIBVO_EXTERN(directx)
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)

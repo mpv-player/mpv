@@ -29,7 +29,7 @@ static const vo_info_t info = {
 	""
 };
 
-LIBVO_EXTERN(fbdev2)
+const LIBVO_EXTERN(fbdev2)
 
 static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 {

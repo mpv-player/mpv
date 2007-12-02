@@ -59,7 +59,7 @@ static const vo_info_t info = {
     ""
 };
 
-LIBVO_EXTERN(xvr100)
+const LIBVO_EXTERN(xvr100)
 
 #define PFB_VRAM_MMAPBASE 0x08000000
 #define PFB_VRAM_MMAPLEN 0x04000000 /* depends on memory size */

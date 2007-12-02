@@ -41,7 +41,7 @@ static const vo_info_t info =
   ""
 };
 
-LIBVO_EXTERN(gl2)
+const LIBVO_EXTERN(gl2)
 
 /* local data */
 static unsigned char *ImageData=NULL;

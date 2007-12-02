@@ -66,7 +66,7 @@ static const vo_info_t info=
 	""
 };
 
-LIBVO_EXTERN (md5sum)
+const LIBVO_EXTERN (md5sum)
 
 /* ------------------------------------------------------------------------- */
 

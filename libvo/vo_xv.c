@@ -54,7 +54,7 @@ static const vo_info_t info = {
     ""
 };
 
-LIBVO_EXTERN(xv)
+const LIBVO_EXTERN(xv)
 #ifdef HAVE_SHM
 #include <sys/ipc.h>
 #include <sys/shm.h>

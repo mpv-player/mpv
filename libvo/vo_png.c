@@ -30,7 +30,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN (png)
+const LIBVO_EXTERN (png)
 
 static int z_compression = Z_NO_COMPRESSION;
 static int framenum = 0;

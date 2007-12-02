@@ -67,7 +67,7 @@ static const vo_info_t info=
 	""
 };
 
-LIBVO_EXTERN (jpeg)
+const LIBVO_EXTERN (jpeg)
 
 /* ------------------------------------------------------------------------- */
 

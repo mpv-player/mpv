@@ -27,7 +27,7 @@ static const vo_info_t info =
   ""
 };
 
-LIBVO_EXTERN(gl)
+const LIBVO_EXTERN(gl)
 
 #ifdef GL_WIN32
 static int gl_vinfo = 0;

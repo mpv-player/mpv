@@ -59,7 +59,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN(3dfx)
+const LIBVO_EXTERN(3dfx)
 
 static uint32_t is_fullscreen = 1;
 

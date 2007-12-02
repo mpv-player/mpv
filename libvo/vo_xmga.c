@@ -54,7 +54,7 @@ static const vo_info_t info = {
     ""
 };
 
-LIBVO_EXTERN(xmga)
+const LIBVO_EXTERN(xmga)
 static XGCValues wGCV;
 
 static uint32_t mDepth;

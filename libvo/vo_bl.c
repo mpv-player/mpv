@@ -55,7 +55,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN (bl)
+const LIBVO_EXTERN (bl)
 
 /* General variables */
 

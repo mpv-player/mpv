@@ -38,7 +38,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN (zr)
+const LIBVO_EXTERN (zr)
 
 #define	ZR_MAX_DEVICES 4
 /* General variables */

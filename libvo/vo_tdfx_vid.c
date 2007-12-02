@@ -51,7 +51,7 @@ static const vo_info_t info =
 
 //#define VERBOSE
 
-LIBVO_EXTERN(tdfx_vid)
+const LIBVO_EXTERN(tdfx_vid)
 
 static tdfx_vid_config_t tdfx_cfg;
 

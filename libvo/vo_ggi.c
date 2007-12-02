@@ -44,7 +44,7 @@ static const vo_info_t info =
     "major"
 };
 
-LIBVO_EXTERN(ggi)
+const LIBVO_EXTERN(ggi)
 
 
 static struct ggi_conf_s {

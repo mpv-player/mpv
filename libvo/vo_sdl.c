@@ -134,7 +134,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN(sdl)
+const LIBVO_EXTERN(sdl)
 
 #include <SDL.h>
 //#include <SDL/SDL_syswm.h>

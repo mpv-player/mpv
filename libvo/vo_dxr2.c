@@ -139,7 +139,7 @@ static const vo_info_t info = {
   ""
 };
 
-LIBVO_EXTERN (dxr2)
+const LIBVO_EXTERN (dxr2)
 
 static char *ucodesearchpath[] = {
   "/usr/local/lib/dxr2/dvd12.ux",

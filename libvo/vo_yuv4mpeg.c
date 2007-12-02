@@ -53,7 +53,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN (yuv4mpeg)
+const LIBVO_EXTERN (yuv4mpeg)
 
 static int image_width = 0;
 static int image_height = 0;

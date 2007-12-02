@@ -126,7 +126,7 @@ static const vo_info_t info = {
   ""
 };
 
-LIBVO_EXTERN(xvmc);
+const LIBVO_EXTERN(xvmc);
 
 //shm stuff from vo_xv
 #ifdef HAVE_SHM

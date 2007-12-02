@@ -68,7 +68,7 @@ static const vo_info_t info = {
 	""
 };
 
-LIBVO_EXTERN(gif89a)
+const LIBVO_EXTERN(gif89a)
 
 
 // how many frames per second we are aiming for during output.

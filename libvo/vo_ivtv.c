@@ -69,7 +69,7 @@ static const vo_info_t info =
   "Benjamin Zores",
   ""
 };
-LIBVO_EXTERN (ivtv)
+const LIBVO_EXTERN (ivtv)
 
 /* ivtv internals */
 

@@ -37,7 +37,7 @@ static const vo_info_t info =
     ""
   };
 
-LIBVO_EXTERN(s3fb)
+const LIBVO_EXTERN(s3fb)
 
 typedef struct vga_type {
   int cr38, cr39, cr53;

@@ -36,7 +36,7 @@ static const vo_info_t info = {
 	""
 };
 
-LIBVO_EXTERN(zr2)
+const LIBVO_EXTERN(zr2)
 
 typedef struct {
 	/* options */

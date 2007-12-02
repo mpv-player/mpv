@@ -48,7 +48,7 @@ static const vo_info_t info = {
      ""
 };
 
-LIBVO_EXTERN(dfbmga)
+const LIBVO_EXTERN(dfbmga)
 
 /******************************
 *	   directfb 	      *

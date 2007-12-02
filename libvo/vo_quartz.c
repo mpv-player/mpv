@@ -46,7 +46,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN(quartz)
+const LIBVO_EXTERN(quartz)
 
 static uint32_t image_depth;
 static uint32_t image_format;

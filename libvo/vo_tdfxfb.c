@@ -55,7 +55,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN(tdfxfb)
+const LIBVO_EXTERN(tdfxfb)
 
 /* Some registers on the card */
 #define S2S_STRECH_BLT		2			// BLT + Strech

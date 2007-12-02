@@ -38,7 +38,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN(null)
+const LIBVO_EXTERN(null)
 
 static uint32_t image_width, image_height;
 

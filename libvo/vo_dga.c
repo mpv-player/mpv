@@ -45,7 +45,7 @@ static const vo_info_t info = {
     ""
 };
 
-LIBVO_EXTERN(dga)
+const LIBVO_EXTERN(dga)
 //------------------------------------------------------------------
 //#define BITSPP (vo_dga_modes[vo_dga_active_mode].vdm_bitspp)
 //#define BYTESPP (vo_dga_modes[vo_dga_active_mode].vdm_bytespp)

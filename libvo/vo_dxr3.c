@@ -159,7 +159,7 @@ static const vo_info_t info =
 	"David Holm <dholm@iname.com>",
 	""
 };
-LIBVO_EXTERN (dxr3)
+const LIBVO_EXTERN (dxr3)
 
 /* Resolutions and positions */
 static int v_width, v_height;

@@ -30,7 +30,7 @@ static const vo_info_t info =
 	"Based on some code by Aaron Holtzman <aholtzma@ess.engr.uvic.ca>"
 };
 
-LIBVO_EXTERN(mga)
+const LIBVO_EXTERN(mga)
 
 #include "mga_common.c"
 

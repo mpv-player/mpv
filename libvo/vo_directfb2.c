@@ -65,7 +65,7 @@ static const vo_info_t info = {
 	"v 2.0 (for DirectFB version >=0.9.13)"
 };
 
-LIBVO_EXTERN(directfb)
+const LIBVO_EXTERN(directfb)
 
 /******************************
 *      vo_directfb globals    *

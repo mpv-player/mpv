@@ -45,7 +45,7 @@ static const vo_info_t info = {
   ""
 };
 
-LIBVO_EXTERN (caca)
+const LIBVO_EXTERN (caca)
 
 /* caca stuff */
 static struct caca_bitmap *cbitmap = NULL;

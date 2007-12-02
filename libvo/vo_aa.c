@@ -51,7 +51,7 @@
 	    ""
 	};
 
-LIBVO_EXTERN(aa)
+const LIBVO_EXTERN(aa)
 
 /* aa's main context we use */
 aa_context *c;

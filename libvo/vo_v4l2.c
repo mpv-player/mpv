@@ -63,7 +63,7 @@ static const vo_info_t info =
   "Benjamin Zores",
   ""
 };
-LIBVO_EXTERN (v4l2)
+const LIBVO_EXTERN (v4l2)
 
 int
 v4l2_write (unsigned char *data, int len)

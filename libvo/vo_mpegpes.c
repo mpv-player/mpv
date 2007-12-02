@@ -76,7 +76,7 @@ static const vo_info_t info =
 	""
 };
 
-LIBVO_EXTERN (mpegpes)
+const LIBVO_EXTERN (mpegpes)
 
 static int
 config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format)
