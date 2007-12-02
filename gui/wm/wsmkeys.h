@@ -3,7 +3,7 @@
 
 #include "wskeys.h"
 
-TwsKeyNames wsKeyNames[ wsKeyNumber ] =
+const TwsKeyNames wsKeyNames[ wsKeyNumber ] =
  {
   { wsq, "q" }, { wsa, "a" }, { wsz, "z" }, { wsw, "w" }, { wss, "s" }, { wsx, "x" },
   { wse, "e" }, { wsd, "d" }, { wsr, "r" }, { wsf, "f" }, { wsv, "v" }, { wst, "t" },

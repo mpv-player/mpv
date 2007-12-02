@@ -159,7 +159,7 @@ typedef struct
  const char * name;
 } TwsKeyNames;
 
-extern TwsKeyNames wsKeyNames[ wsKeyNumber ];
+extern const TwsKeyNames wsKeyNames[ wsKeyNumber ];
 
 #endif
 
