@@ -158,8 +158,8 @@ typedef struct {
 
 static unsigned char fixParity[256];
 
-static tt_char tt_space={0x20,7,0,0,0,0,0,0,0x20};
-static tt_char tt_error={'?',1,0,0,0,0,0,0,'?'}; // Red '?' on black background
+static const tt_char tt_space={0x20,7,0,0,0,0,0,0,0x20};
+static const tt_char tt_error={'?',1,0,0,0,0,0,0,'?'}; // Red '?' on black background
 static double si[12];
 static double co[12];
 
@@ -216,7 +216,7 @@ enum {
 
 // conversion table for chars 0x20-0x7F (UTF8)
 // TODO: add another languages
-static unsigned int lang_chars[LANGS][0x60]={
+static const unsigned int lang_chars[LANGS][0x60]={
  {
   //Latin
   0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,
@@ -307,7 +307,7 @@ static unsigned int lang_chars[LANGS][0x60]={
  * 06:  £ $ é ° ç » ¬ # ù à ò è ì  Italian
  *
  */
-static unsigned int latin_subchars[8][13]={
+static const unsigned int latin_subchars[8][13]={
   // English
   {0xa3,0x24,0x40,0xab,0xbd,0xbb,0xac,0x23,0xad,0xbc,0xa6,0xbe,0xf7},
   // French
@@ -343,8 +343,8 @@ static unsigned int latin_subchars[8][13]={
 struct {
     unsigned char lang_code;
     unsigned char charset;
-    char* lang_name;
-} tt_languages[]=
+    const char* lang_name;
+} const tt_languages[]=
 {
   { 0x01, LATIN,     "French"},
   { 0x02, LATIN,     "Swedish/Finnish/Hungarian"},
@@ -399,7 +399,7 @@ struct {
  * \note Bits must be correctly ordered, that is for 24/18 (lowest bit first)
  * P1 P2 D1 P3 D2 D3 D4 P4  D5 D6 D7 D8 D9 DA DB P5  DC DD DE DF DG DH DI P6
  */
-int corrHamm24(unsigned char *data){
+static int corrHamm24(unsigned char *data){
     unsigned char syndrom=0;
     int cw=data[0] | (data[1]<<8) | (data[2]<<16);
     int i;
