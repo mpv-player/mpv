@@ -53,7 +53,7 @@ char *network_useragent=NULL;
 int   network_ipv4_only_proxy = 0;
 
 
-mime_struct_t mime_type_table[] = {
+const mime_struct_t mime_type_table[] = {
 	// MP3 streaming, some MP3 streaming server answer with audio/mpeg
 	{ "audio/mpeg", DEMUXER_TYPE_AUDIO },
 	// MPEG streaming
