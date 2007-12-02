@@ -75,7 +75,7 @@ void set_video_quality(sh_video_t *sh_video,int quality){
     mpvdec->control(sh_video,VDCTRL_SET_PP_LEVEL, (void*)(&quality));
 }
 
-int set_video_colors(sh_video_t *sh_video,char *item,int value)
+int set_video_colors(sh_video_t *sh_video,const char *item,int value)
 {
     vf_instance_t* vf=sh_video->vfilter;
     vf_equalizer_t data;
@@ -98,7 +98,7 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
     return 0;
 }
 
-int get_video_colors(sh_video_t *sh_video,char *item,int *value)
+int get_video_colors(sh_video_t *sh_video,const char *item,int *value)
 {
     vf_instance_t* vf=sh_video->vfilter;
     vf_equalizer_t data;

@@ -41,8 +41,8 @@ extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
 extern int vo_gamma_contrast;
 extern int vo_gamma_hue;
-extern int set_video_colors(sh_video_t *sh_video, char *item, int value);
-extern int get_video_colors(sh_video_t *sh_video, char *item, int *value);
+extern int set_video_colors(sh_video_t *sh_video, const char *item, int value);
+extern int get_video_colors(sh_video_t *sh_video, const char *item, int *value);
 
 guiInterface_t guiIntfStruct;
 int addurl = 0;
