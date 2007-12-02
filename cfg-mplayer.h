@@ -35,8 +35,8 @@ extern char *menu_fribidi_charset;
 extern int menu_flip_hebrew;
 extern int menu_fribidi_flip_commas;
 
-extern int vo_zr_parseoption(m_option_t* conf, char *opt, char * param);
-extern void vo_zr_revertoption(m_option_t* opt,char* pram);
+extern int vo_zr_parseoption(const m_option_t* conf, char *opt, char * param);
+extern void vo_zr_revertoption(const m_option_t* opt,char* pram);
 
 extern m_option_t dxr2_opts[];
 
@@ -53,13 +53,13 @@ extern int readPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
 extern char* pp_help;
 
-m_option_t vd_conf[]={
+const m_option_t vd_conf[]={
 	{"help", "Use MPlayer with an appropriate video file instead of live partners to avoid vd.\n", CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 #ifdef USE_TV
-m_option_t tvscan_conf[]={
+const m_option_t tvscan_conf[]={
 	{"autostart", &stream_tv_defaults.scan, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"threshold", &stream_tv_defaults.scan_threshold, CONF_TYPE_INT, CONF_RANGE, 1, 100, NULL},
 	{"period", &stream_tv_defaults.scan_period, CONF_TYPE_FLOAT, CONF_RANGE, 0.1, 2.0, NULL},
@@ -79,7 +79,7 @@ m_option_t tvscan_conf[]={
  * by Folke
  */
 
-m_option_t mplayer_opts[]={
+const m_option_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
 
 //---------------------- libao/libvo options ------------------------

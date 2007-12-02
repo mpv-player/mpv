@@ -18,13 +18,13 @@ extern m_option_t faacopts_conf[];
 extern m_option_t vfwopts_conf[];
 extern m_option_t xvidencopts_conf[];
 
-extern void x264enc_set_param(m_option_t* opt, char* arg);
+extern void x264enc_set_param(const m_option_t* opt, char* arg);
 
 extern m_option_t nuvopts_conf[];
 extern m_option_t mpegopts_conf[];
 extern m_option_t lavfopts_conf[];
 
-m_option_t ovc_conf[]={
+const m_option_t ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY, NULL},
 	{"frameno", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_FRAMENO, NULL},
 	{"lavc", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBAVCODEC, NULL},
@@ -63,7 +63,7 @@ m_option_t ovc_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-m_option_t oac_conf[]={
+const m_option_t oac_conf[]={
 	{"copy", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_COPY, NULL},
 	{"pcm", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_PCM, NULL},
 #ifdef HAVE_MP3LAME
@@ -113,7 +113,7 @@ m_option_t oac_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-m_option_t info_conf[]={
+const m_option_t info_conf[]={
 	{"name", &info_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"artist", &info_artist, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"genre", &info_genre, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -133,7 +133,7 @@ m_option_t info_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-m_option_t of_conf[]={
+const m_option_t of_conf[]={
 	{"avi", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_AVI, NULL},
 	{"mpeg", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_MPEG, NULL},
 #if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
@@ -156,7 +156,7 @@ m_option_t of_conf[]={
 extern float avi_aspect_override; /* defined in libmpdemux/muxer_avi.c */
 extern int write_odml; /* defined in libmpdemux/muxer_avi.c */
 
-m_option_t mencoder_opts[]={
+const m_option_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 
 	{"frameno-file", &frameno_filename, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},

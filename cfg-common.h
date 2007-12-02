@@ -393,7 +393,7 @@ extern off_t ps_probe;
 
 
 #ifdef USE_RADIO
-m_option_t radioopts_conf[]={
+const m_option_t radioopts_conf[]={
     {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"driver", &stream_radio_defaults.driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
 #ifdef RADIO_BSDBT848_HDR
@@ -410,7 +410,7 @@ m_option_t radioopts_conf[]={
 #endif /* USE_RADIO */
 
 #ifdef USE_TV
-m_option_t tvopts_conf[]={
+const m_option_t tvopts_conf[]={
 	{"on", "-tv on has been removed, use tv:// instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"immediatemode", &stream_tv_defaults.immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
 	{"noaudio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -488,7 +488,7 @@ extern char *pvr_param_bitrate_mode;
 extern int pvr_param_bitrate_peak;
 extern char *pvr_param_stream_type;
 
-m_option_t pvropts_conf[]={
+const m_option_t pvropts_conf[]={
 	{"aspect", &pvr_param_aspect_ratio, CONF_TYPE_INT, 0, 1, 4, NULL},
 	{"arate", &pvr_param_sample_rate, CONF_TYPE_INT, 0, 32000, 48000, NULL},
 	{"alayer", &pvr_param_audio_layer, CONF_TYPE_INT, 0, 1, 2, NULL},
@@ -525,7 +525,7 @@ extern float sws_lum_gblur;
 extern float sws_chr_sharpen;
 extern float sws_lum_sharpen;
 
-m_option_t scaler_filter_conf[]={
+const m_option_t scaler_filter_conf[]={
 	{"lgb", &sws_lum_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 	{"cgb", &sws_chr_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 	{"cvs", &sws_chr_vshift, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -546,7 +546,7 @@ extern int vivo_param_height;
 extern int vivo_param_vformat;
 extern char *dvd_device, *cdrom_device;
 
-m_option_t vivoopts_conf[]={
+const m_option_t vivoopts_conf[]={
 	{"version", &vivo_param_version, CONF_TYPE_INT, 0, 0, 0, NULL},
 	/* audio options */
 	{"acodec", &vivo_param_acodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -567,7 +567,7 @@ extern char * mf_type;
 extern m_obj_settings_t* vf_settings;
 extern m_obj_list_t vf_obj_list;
 
-m_option_t mfopts_conf[]={
+const m_option_t mfopts_conf[]={
         {"on", "-mf on has been removed, use mf:// instead.\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
         {"w", &mf_w, CONF_TYPE_INT, 0, 0, 0, NULL},
         {"h", &mf_h, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -578,13 +578,13 @@ m_option_t mfopts_conf[]={
 
 #include "libaf/af.h"
 extern af_cfg_t af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
-m_option_t audio_filter_conf[]={       
+const m_option_t audio_filter_conf[]={       
 	{"list", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
         {"force", &af_cfg.force, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-m_option_t msgl_config[]={
+const m_option_t msgl_config[]={
 	{ "all", &mp_msg_level_all, CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL},
 
 	{ "global", &mp_msg_levels[MSGT_GLOBAL], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
@@ -707,6 +707,6 @@ struct {
 extern m_option_t lavc_decode_opts_conf[];
 extern m_option_t xvid_dec_opts[];
 
-int dvd_parse_chapter_range(m_option_t*, const char*);
+int dvd_parse_chapter_range(const m_option_t*, const char*);
 
 #endif /* MAIN_CONF */
