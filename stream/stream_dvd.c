@@ -24,6 +24,7 @@
 #include <sys/ioctl.h>
 #endif
 
+#include <libgen.h>
 #include <errno.h>
 
 #define FIRST_AC3_AID 128
@@ -1077,6 +1078,37 @@ fail:
   return STREAM_UNSUPPORTED;
 }
 
+static int
+ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+{
+    char *ext;
+    char* filename;
+    struct stream_priv_s *dvd_priv;
+
+    ext = strrchr (stream->url, '.');
+    if (!ext || strcasecmp (ext + 1, "ifo"))
+        return STREAM_UNSUPPORTED;
+
+    mp_msg(MSGT_DVD, MSGL_INFO, ".IFO detected. Redirecting to dvd://\n");
+    if (!dvd_device)
+        dvd_device = strdup(dirname (stream->url));
+
+    filename = strdup(basename(stream->url));
+
+    dvd_priv=calloc(1, sizeof(struct stream_priv_s));
+    if(!strncasecmp(filename,"vts_",4))
+    {
+        if(sscanf(filename+3, "_%02d_", &dvd_priv->title)!=1)
+            dvd_priv->title=1;
+    }else
+        dvd_priv->title=1;
+
+    free(filename);
+    free(stream->url);
+    stream->url=strdup("dvd://");
+
+    return open_s(stream, mode, dvd_priv, file_format);
+}
 
 stream_info_t stream_info_dvd = {
   "DVD stream",
@@ -1087,4 +1119,15 @@ stream_info_t stream_info_dvd = {
   { "dvd", NULL },
   &stream_opts,
   1 // Urls are an option string
+};
+
+stream_info_t stream_info_ifo = {
+  "DVD IFO input",
+  "ifo",
+  "Benjamin Zores",
+  "Mostly used to play DVDs on disk through OSD Menu",
+  ifo_stream_open,
+  { "file", "", NULL },
+  NULL,
+  0
 };

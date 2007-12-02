@@ -85,6 +85,7 @@ extern stream_info_t stream_info_null;
 extern stream_info_t stream_info_mf;
 extern stream_info_t stream_info_file;
 #ifdef USE_DVDREAD
+extern stream_info_t stream_info_ifo;
 extern stream_info_t stream_info_dvd;
 #endif
 
@@ -132,6 +133,7 @@ static const stream_info_t* const auto_open_streams[] = {
 #endif
   &stream_info_cue,
 #ifdef USE_DVDREAD
+  &stream_info_ifo,
   &stream_info_dvd,
 #endif
 #ifdef USE_DVDNAV
