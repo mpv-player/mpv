@@ -86,7 +86,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 			
     if ((no_more_opts == 0) && (*opt == '-') && (*(opt+1) != 0)) /* option */
       {
-	m_option_t* mp_opt = NULL;
+	const m_option_t* mp_opt = NULL;
 	/* remove trailing '-' */
 	opt++;
 	mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "this_opt = option: %s\n", opt);

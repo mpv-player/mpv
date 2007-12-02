@@ -170,7 +170,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  else
 	    last_parent->flags &= ~PLAY_TREE_RND;
 	} else {
-	  m_option_t* mp_opt = NULL;
+	  const m_option_t* mp_opt = NULL;
 	  play_tree_t* entry = NULL;
 
 	  tmp = is_entry_option(opt,(i+1<argc) ? argv[i + 1] : NULL,&entry);
