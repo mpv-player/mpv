@@ -51,7 +51,7 @@ static struct stream_priv_s {
 
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
 /// URL definition
-static m_option_t stream_opts_fields[] = {
+static const m_option_t stream_opts_fields[] = {
   {"username", ST_OFF(user), CONF_TYPE_STRING, 0, 0 ,0, NULL},
   {"password", ST_OFF(pass), CONF_TYPE_STRING, 0, 0 ,0, NULL},
   {"hostname", ST_OFF(host), CONF_TYPE_STRING, 0, 0 ,0, NULL},

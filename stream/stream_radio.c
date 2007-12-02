@@ -141,7 +141,7 @@ typedef struct radio_driver_s {
 } radio_driver_t;
 
 #define ST_OFF(f) M_ST_OFF(radio_param_t,f)
-static m_option_t stream_opts_fields[] = {
+static const m_option_t stream_opts_fields[] = {
     {"hostname", ST_OFF(freq_channel), CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
     {"filename", ST_OFF(capture), CONF_TYPE_STRING, 0, 0 ,0, NULL},
     { NULL, NULL, 0, 0, 0, 0,  NULL }

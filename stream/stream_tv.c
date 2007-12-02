@@ -81,7 +81,7 @@ tv_param_t stream_tv_defaults = {
 };
 
 #define ST_OFF(f) M_ST_OFF(tv_param_t,f)
-static m_option_t stream_opts_fields[] = {
+static const m_option_t stream_opts_fields[] = {
     {"hostname", ST_OFF(channel), CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"filename", ST_OFF(input), CONF_TYPE_INT, 0, 0 ,0, NULL},
     { NULL, NULL, 0, 0, 0, 0,  NULL }

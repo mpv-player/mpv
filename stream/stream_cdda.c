@@ -47,7 +47,7 @@ static struct cdda_params {
 };
 
 #define ST_OFF(f) M_ST_OFF(struct cdda_params,f)
-m_option_t cdda_params_fields[] = {
+static const m_option_t cdda_params_fields[] = {
   { "speed", ST_OFF(speed), CONF_TYPE_INT, M_OPT_RANGE,1,100, NULL },
   { "paranoia", ST_OFF(paranoia_mode), CONF_TYPE_INT,M_OPT_RANGE, 0, 2, NULL },
   { "generic-dev", ST_OFF(generic_dev), CONF_TYPE_STRING, 0, 0, 0, NULL },

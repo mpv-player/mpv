@@ -75,7 +75,7 @@ stream_defaults =
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s, f)
 
 /// URL definition
-static m_option_t stream_params[] = {
+static const m_option_t stream_params[] = {
 	{"prog", ST_OFF(prog), CONF_TYPE_STRING, 0, 0 ,0, NULL},
 	{"card", ST_OFF(card), CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
 	{"type", ST_OFF(type), CONF_TYPE_STRING, 0, 0 ,0, NULL},
