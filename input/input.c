@@ -1248,7 +1248,7 @@ static mp_cmd_t *read_events(int time, int paused)
 
 int
 mp_input_queue_cmd(mp_cmd_t* cmd) {
-  if(cmd_queue_length  >= CMD_QUEUE_SIZE)
+  if(!cmd || cmd_queue_length  >= CMD_QUEUE_SIZE)
     return 0;
   cmd_queue[cmd_queue_end] = cmd;
   cmd_queue_end = (cmd_queue_end + 1) % CMD_QUEUE_SIZE;
