@@ -52,10 +52,6 @@
 #include "libmpcodecs/vf_scale.h"
 
 
-#ifdef HAVE_PNG
-extern vo_functions_t video_out_png;
-#endif
-
 extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
