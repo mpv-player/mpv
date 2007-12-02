@@ -173,7 +173,7 @@ open (vf_instance_t *vf, char* args)
 }
 
 
-vf_info_t vf_info_lavcdeint = {
+const vf_info_t vf_info_lavcdeint = {
     "libavcodec's deinterlacing filter",
     "lavcdeint",
     "Joe Rabinoff",

@@ -1057,7 +1057,7 @@ static int open(vf_instance_t *vf, char* args){
 	return 1;
 }
 
-vf_info_t vf_info_zrmjpeg = {
+const vf_info_t vf_info_zrmjpeg = {
     "realtime zoran MJPEG encoding",
     "zrmjpeg",
     "Rik Snel",

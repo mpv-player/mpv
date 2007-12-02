@@ -64,7 +64,7 @@ static int open(vf_instance_t *vf, char* args)
 	return 1;
 }
 
-vf_info_t vf_info_harddup = {
+const vf_info_t vf_info_harddup = {
     "resubmit duplicate frames for encoding",
     "harddup",
     "Rich Felker",

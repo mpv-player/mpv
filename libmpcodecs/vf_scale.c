@@ -674,7 +674,7 @@ static m_struct_t vf_opts = {
   vf_opts_fields
 };
 
-vf_info_t vf_info_scale = {
+const vf_info_t vf_info_scale = {
     "software scaling",
     "scale",
     "A'rpi",

@@ -359,7 +359,7 @@ static int open(vf_instance_t *vf, char* args){
 	return 1;
 }
 
-vf_info_t vf_info_hqdn3d = {
+const vf_info_t vf_info_hqdn3d = {
     "High Quality 3D Denoiser",
     "hqdn3d",
     "Daniel Moreno & A'rpi",

@@ -319,7 +319,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_test = {
+const vf_info_t vf_info_test = {
     "test pattern generator",
     "test",
     "Michael Niedermayer",

@@ -309,7 +309,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_2xsai = {
+const vf_info_t vf_info_2xsai = {
     "2xSai BGR bitmap 2x scaler",
     "2xsai",
     "A'rpi",

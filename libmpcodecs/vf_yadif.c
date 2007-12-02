@@ -512,7 +512,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_yadif = {
+const vf_info_t vf_info_yadif = {
     "Yet Another DeInterlacing Filter",
     "yadif",
     "Michael Niedermayer",

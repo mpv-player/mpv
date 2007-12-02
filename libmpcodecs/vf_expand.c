@@ -464,7 +464,7 @@ static m_struct_t vf_opts = {
 
 
 
-vf_info_t vf_info_expand = {
+const vf_info_t vf_info_expand = {
 #ifdef OSD_SUPPORT
     "expanding & osd",
 #else

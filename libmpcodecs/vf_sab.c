@@ -311,7 +311,7 @@ static int open(vf_instance_t *vf, char* args){
 	return 1;
 }
 
-vf_info_t vf_info_sab = {
+const vf_info_t vf_info_sab = {
     "shape adaptive blur",
     "sab",
     "Michael Niedermayer",

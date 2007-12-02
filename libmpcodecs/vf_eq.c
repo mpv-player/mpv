@@ -236,7 +236,7 @@ static m_struct_t vf_opts = {
   vf_opts_fields
 };
 
-vf_info_t vf_info_eq = {
+const vf_info_t vf_info_eq = {
 	"soft video equalizer",
 	"eq",
 	"Richard Felker",

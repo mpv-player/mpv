@@ -260,7 +260,7 @@ static int open(vf_instance_t *vf, char* args){
 	return 1;
 }
 
-vf_info_t vf_info_denoise3d = {
+const vf_info_t vf_info_denoise3d = {
     "3D Denoiser (variable lowpass filter)",
     "denoise3d",
     "Daniel Moreno",

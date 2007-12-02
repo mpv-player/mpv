@@ -16,7 +16,7 @@
 
 #include "libvo/fastmemcpy.h"
 
-vf_info_t vf_info_divtc;
+const vf_info_t vf_info_divtc;
 
 struct vf_priv_s
    {
@@ -692,7 +692,7 @@ static int open(vf_instance_t *vf, char* args)
    return 1;
    }
 
-vf_info_t vf_info_divtc =
+const vf_info_t vf_info_divtc =
    {
    "inverse telecine for deinterlaced video",
    "divtc",

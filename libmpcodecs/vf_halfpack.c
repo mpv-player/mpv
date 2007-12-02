@@ -210,7 +210,7 @@ static int open(vf_instance_t *vf, char* args)
 	return 1;
 }
 
-vf_info_t vf_info_halfpack = {
+const vf_info_t vf_info_halfpack = {
 	"yuv planar 4:2:0 -> packed 4:2:2, half height",
 	"halfpack",
 	"Richard Felker",

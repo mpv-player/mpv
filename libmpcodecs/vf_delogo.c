@@ -270,7 +270,7 @@ static m_struct_t vf_opts = {
     vf_opts_fields
 };
 
-vf_info_t vf_info_delogo = {
+const vf_info_t vf_info_delogo = {
     "simple logo remover",
     "delogo",
     "Jindrich Makovicka, Alex Beregszaszi",

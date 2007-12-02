@@ -181,7 +181,7 @@ static m_struct_t vf_opts = {
   vf_opts_fields
 };
 
-vf_info_t vf_info_hue = {
+const vf_info_t vf_info_hue = {
 	"hue changer",
 	"hue",
 	"Michael Niedermayer",

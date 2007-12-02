@@ -479,7 +479,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_pp7 = {
+const vf_info_t vf_info_pp7 = {
     "postprocess 7",
     "pp7",
     "Michael Niedermayer",

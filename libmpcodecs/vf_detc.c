@@ -425,7 +425,7 @@ static int open(vf_instance_t *vf, char* args)
 	return 1;
 }
 
-vf_info_t vf_info_detc = {
+const vf_info_t vf_info_detc = {
     "de-telecine filter",
     "detc",
     "Rich Felker",

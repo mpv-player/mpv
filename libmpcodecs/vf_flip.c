@@ -80,7 +80,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_flip = {
+const vf_info_t vf_info_flip = {
     "flip image upside-down",
     "flip",
     "A'rpi",

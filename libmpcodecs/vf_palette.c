@@ -195,7 +195,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_palette = {
+const vf_info_t vf_info_palette = {
     "8bpp indexed (using palette) -> BGR 15/16/24/32 conversion",
     "palette",
     "A'rpi & Alex",

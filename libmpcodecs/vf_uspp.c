@@ -377,7 +377,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_uspp = {
+const vf_info_t vf_info_uspp = {
     "ultra simple/slow postprocess",
     "uspp",
     "Michael Niedermayer",

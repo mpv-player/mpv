@@ -138,7 +138,7 @@ static int open(vf_instance_t *vf, char* args)
 	return 1;
 }
 
-vf_info_t vf_info_down3dright = {
+const vf_info_t vf_info_down3dright = {
 	"convert stereo movie from top-bottom to left-right field",
 	"down3dright",
 	"Zdenek Kabelac",

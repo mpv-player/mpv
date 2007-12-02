@@ -86,7 +86,7 @@ static m_struct_t vf_opts = {
   vf_opts_fields
 };
 
-vf_info_t vf_info_format = {
+const vf_info_t vf_info_format = {
     "force output format",
     "format",
     "A'rpi",

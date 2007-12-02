@@ -297,7 +297,7 @@ static void uninit(vf_instance_t *vf)
 }
 
 
-vf_info_t vf_info_screenshot = {
+const vf_info_t vf_info_screenshot = {
     "screenshot to file",
     "screenshot",
     "A'rpi, Jindrich Makovicka",

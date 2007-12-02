@@ -136,7 +136,7 @@ static int open(vf_instance_t *vf, char* args)
 	return 1;
 }
 
-vf_info_t vf_info_softpulldown = {
+const vf_info_t vf_info_softpulldown = {
     "mpeg2 soft 3:2 pulldown",
     "softpulldown",
     "Tobias Diedrich <ranma+mplayer@tdiedrich.de>",

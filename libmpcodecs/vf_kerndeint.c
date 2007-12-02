@@ -336,7 +336,7 @@ static int open(vf_instance_t *vf, char* args){
 	return 1;
 }
 
-vf_info_t vf_info_kerndeint = {
+const vf_info_t vf_info_kerndeint = {
     "Kernel Deinterlacer",
     "kerndeint",
     "Donald Graft",

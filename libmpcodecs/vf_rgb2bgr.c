@@ -91,7 +91,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_rgb2bgr = {
+const vf_info_t vf_info_rgb2bgr = {
     "fast 24/32bpp RGB<->BGR conversion",
     "rgb2bgr",
     "A'rpi",

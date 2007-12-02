@@ -1436,7 +1436,7 @@ static int open(vf_instance_t *vf, char* args)
     return 1;
 }
 
-vf_info_t vf_info_filmdint = {
+const vf_info_t vf_info_filmdint = {
     "Advanced inverse telecine filer",
     "filmdint",
     "Zoltan Hidvegi",

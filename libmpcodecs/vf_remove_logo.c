@@ -897,7 +897,7 @@ void uninit(vf_instance_t * vf)
 /**
  * \brief Meta data about our filter.
  */
-vf_info_t vf_info_remove_logo = {
+const vf_info_t vf_info_remove_logo = {
     "Removes a tv logo based on a mask image.",
     "remove-logo",
     "Robert Edele",

@@ -70,7 +70,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_yuy2 = {
+const vf_info_t vf_info_yuy2 = {
     "fast YV12/Y422p -> YUY2 conversion",
     "yuy2",
     "A'rpi",

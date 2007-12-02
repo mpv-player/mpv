@@ -75,7 +75,7 @@ static int open(vf_instance_t *vf, char* args){
     return 1;
 }
 
-vf_info_t vf_info_yvu9 = {
+const vf_info_t vf_info_yvu9 = {
     "fast YVU9->YV12 conversion",
     "yvu9",
     "alex",
