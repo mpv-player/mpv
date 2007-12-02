@@ -82,7 +82,7 @@ void vidix_term( void )
     mp_msg(MSGT_VO,MSGL_DBG2, "vosub_vidix: vidix_term() was called\n"); }
 	vidix_stop();
 	vdlClose(vidix_handler);
-//  ((vo_functions_t *)vo_server)->control=server_control;
+//  vo_server->control=server_control;
 }
 
 static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
@@ -669,12 +669,12 @@ int vidix_preinit(const char *drvname,vo_functions_t *server)
 	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SUB_VIDIX_Description, vidix_cap.name);
 	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SUB_VIDIX_Author, vidix_cap.author);
 	/* we are able to tune up this stuff depend on fourcc format */
-	((vo_functions_t *)server)->draw_slice=vidix_draw_slice;
-	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
-	((vo_functions_t *)server)->flip_page=vidix_flip_page;
-	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
-//	server_control = ((vo_functions_t *)server)->control;
-//	((vo_functions_t *)server)->control=vidix_control;
+	server->draw_slice=vidix_draw_slice;
+	server->draw_frame=vidix_draw_frame;
+	server->flip_page=vidix_flip_page;
+	server->draw_osd=vidix_draw_osd;
+//	server_control = server->control;
+//	server->control=vidix_control;
 	vo_server = server;
 	return 0;
 }
