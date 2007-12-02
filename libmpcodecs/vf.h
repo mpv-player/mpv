@@ -62,7 +62,7 @@ typedef struct vf_instance_s {
 
 typedef struct vf_seteq_s 
 {
-    char *item;
+    const char *item;
     int value;
 } vf_equalizer_t;
 
