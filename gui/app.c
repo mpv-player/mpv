@@ -14,7 +14,7 @@
 #include "mplayer/gmplayer.h"
 #include "interface.h"
 
-evName evNames[] =
+static const evName evNames[] =
  {
   { evNone,              "evNone"              },
   { evPlay,              "evPlay"              },
@@ -66,7 +66,7 @@ evName evNames[] =
   { evSetAspect,	 "evSetAspect"	       }
  };
 
-int evBoxs = sizeof( evNames ) / sizeof( evName );
+static const int evBoxs = sizeof( evNames ) / sizeof( evName );
 
 // ---
 

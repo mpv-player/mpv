@@ -97,9 +97,6 @@ typedef struct
  const char * name;
 } evName;
 
-extern int evBoxs;
-extern evName evNames[];
-
 #define itNULL      0
 #define itButton    101 // button
 #define itHPotmeter 102 // horizontal potmeter
