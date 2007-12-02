@@ -34,7 +34,7 @@
 gchar         * fsSelectedFile = NULL;
 gchar         * fsSelectedDirectory = NULL;
 unsigned char * fsThatDir = ".";
-gchar         * fsFilter = "*";
+const gchar   * fsFilter = "*";
 
 int             fsPressed = 0;
 int             fsType    = 0;
@@ -352,7 +352,7 @@ void fs_fsFilterCombo_activate( GtkEditable * editable,gpointer user_data )
 
 void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
 {
- char * str;
+ const char * str;
  int    i;
 
  str=gtk_entry_get_text( GTK_ENTRY(user_data ) );
@@ -391,7 +391,7 @@ void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
 
 void fs_fsPathCombo_activate( GtkEditable * editable,gpointer user_data )
 {
- unsigned char * str;
+ const unsigned char * str;
 
  str=gtk_entry_get_text( GTK_ENTRY( user_data ) );
  if ( chdir( str ) != -1 ) CheckDir( fsFNameList,get_current_dir_name() );
@@ -399,7 +399,7 @@ void fs_fsPathCombo_activate( GtkEditable * editable,gpointer user_data )
 
 void fs_fsPathCombo_changed( GtkEditable * editable,gpointer user_data )
 {
- unsigned char * str;
+ const unsigned char * str;
 
  str=gtk_entry_get_text( GTK_ENTRY( user_data ) );
  fsPressed=2;
