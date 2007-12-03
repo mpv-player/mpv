@@ -365,7 +365,6 @@ static int filter_n_bytes(sh_audio_t *sh, int len)
     // Filter
     af_data_t filter_input = {
 	.audio = sh->a_buffer,
-	.len = len,
 	.rate = sh->samplerate,
 	.nch = sh->channels,
 	.format = sh->sample_format
@@ -388,6 +387,7 @@ static int filter_n_bytes(sh_audio_t *sh, int len)
 	sh->a_buffer_len += ret;
     }
 
+    filter_input.len = len;
     af_fix_parameters(&filter_input);
     filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
