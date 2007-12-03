@@ -361,9 +361,9 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
 
 static int filter_n_bytes(sh_audio_t *sh, int len)
 {
-    assert(len-1 + sh->audio_out_minsize <= sh->a_buffer_size);
-
     int error = 0;
+
+    assert(len-1 + sh->audio_out_minsize <= sh->a_buffer_size);
 
     // Decode more bytes if needed
     while (sh->a_buffer_len < len) {
