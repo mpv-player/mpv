@@ -330,7 +330,7 @@ if [ "$_depr" = "yes" -a -n "$chfilelist" ]; then
         valloc re_comp re_exec drem dremf dreml rexec svc_getreq sigset \
         sighold sigrelse sigignore sigvec sigmask sigblock sigsetmask \
         siggetmask ualarm ulimit usleep statfs fstatfs ustat get_kernel_syms \
-        query_module sbrk
+        query_module sbrk tempnam tmpnam mktemp mkstemp
     do
         printhead "--> $i()"
         grep $_grepopts "[^a-zA-Z0-9]$i[ $TAB]*(" $chfilelist
