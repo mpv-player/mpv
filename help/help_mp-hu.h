@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r24924 (2007. 11. 02.)
+// Sync'ed with help_mp-en.h r25158 (2007. 11. 30.)
 
 // ========================= MPlayer help ===========================
 
@@ -221,6 +221,9 @@ static char help_text[]=
 #define MSGTR_Bottom "alul"
 #define MSGTR_Center "középen"
 #define MSGTR_Top "fent"
+#define MSGTR_SubSourceFile "fájl"
+#define MSGTR_SubSourceVobsub "vobsub"
+#define MSGTR_SubSourceDemux "beágyazott"
 
 // osd bar names
 #define MSGTR_Volume "Hangerő"
@@ -242,6 +245,7 @@ static char help_text[]=
 #define MSGTR_FramedroppingStatus "Képkocka dobás: %s"
 #define MSGTR_VSyncStatus "VSync: %s"
 #define MSGTR_SubSelectStatus "Feliratok: %s"
+#define MSGTR_SubSourceStatus "Felirat forrás: %s"
 #define MSGTR_SubPosStatus "Felirat helye: %s/100"
 #define MSGTR_SubAlignStatus "Felirat illesztés: %s"
 #define MSGTR_SubDelayStatus "Felirat késés: %s"
@@ -536,7 +540,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Nem nyitható meg a hálózatról: '%s'\n"
 #define MSGTR_SMBNotCompiled "Nincs befordítva az MPlayerbe az SMB támogatás\n"
 
-#define MSGTR_CantOpenDVD "Nem tudom megnyitni a DVD eszközt: %s\n"
+#define MSGTR_CantOpenDVD "Nem tudom megnyitni a DVD eszközt: %s (%s)\n"
 
 // stream_dvd.c
 #define MSGTR_DVDspeedCantOpen "Nem nyitható meg a DVD eszköz írásra, a DVD sebesség változtatásához írási jog kell.\n"
@@ -2157,3 +2161,4 @@ static char help_text[]=
 #define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Directshow graph inicializálás sikertelen.\n"
 #define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: A videó mentési eszköz nem található\n"
 #define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Az audió mentési eszköz nem található\n"
+#define MSGTR_TVI_DS_GetActualMediatypeFailed "tvi_dshow: Nem kérdezhető le az aktuális médiatípus (Hiba:0x%x). Feltételezhetően azonos a kérttel.\n"

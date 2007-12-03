@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24710 -->
+<!-- synced with r25017 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1931,6 +1931,31 @@ ahol a csatorna látható (pl. 2) az alábbi szintaxissal:
 A csatornaváltáshoz nyomd meg a <keycap>h</keycap> (következő) vagy
 a <keycap>k</keycap> (előző) gombot vagy használd az
 <link linkend="osdmenu">OSD menü</link>t.
+</para>
+
+<para>
+Az audió vagy videó folyam ideiglenes kikapcsolásához másold be
+a következőket a <filename>~/.mplayer/input.conf</filename> fájlba:
+<screen>
+% set_property  switch_video -2
+&amp; step_property switch_video
+? set_property  switch_audio -2
+^ step_property switch_audio
+</screen>
+(A billentyűket átírhatod a kívántra.) Ha megnyomod a switch_x -2 parancshoz
+tartozó billentyűt, a megfelelő folyam bezárásra kerül; ha a step_x-hez
+tartozót, akkor a folyam újra meg lesz nyitva.
+Ügyelj rá, hogy ez a kapcsolási mechanizmus nem a várt módon fog működni,
+ha a több audió és videó folyam van.
+</para>
+
+<para>
+Lejátszás közben (nem rögzítés közben), a dadogás és 'A rendszeret túl lassú ehhez'
+üzenetek megelőzése érdekében javasolt a
+<screen>
+-mc 10 -speed 0.97 -af scaletempo
+</screen>
+használata a parancssorban, a scaletempo paramétereinek megfelelő beállításával.
 </para>
 
 <para>

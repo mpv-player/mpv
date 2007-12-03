@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24056 -->
+<!-- synced with r25146 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -8,13 +8,14 @@
 
 <para>
 Az <application>MPlayer</application> egy komplex lejátszási sort használ.
-Először a globális opciók szerepelnek, például
-<screen>mplayer -vfm 5</screen>
-majd a fájlnév után írt kapcsolók, amik csak a megadott
-fájlra/URL-re/bármire vonatkoznak, például:
+A parancssorban megadott opciók minden fájlra/URL-re vagy, a helyüktől
+függően csak bizonyosokra vonatkoznak. Például az
+<screen>mplayer -vfm ffmpeg movie1.avi movie2.avi</screen>
+FFmpeg dekódolót használ mindkét fájlhoz, azonban az
 <screen>
-mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4
+mplayer -vfm ffmpeg <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm dmo
 </screen>
+a második fájlt a DMO dekóderrel jeleníti meg.
 </para>
 
 <para>

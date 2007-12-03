@@ -1,4 +1,4 @@
-.\" Synced with r24954
+.\" Synced with r25278
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 11. 04." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 12. 03." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -428,7 +428,7 @@ a TV teletext irányítására szolgálnak.)
 .PP
 .PD 0
 .RS
-.IPs "X"
+.IPs "X\ \ \ \ "
 Teletext ki/\:bekapcsolása.
 .IPs "Q and W"
 Ugrás a következõ/\:elõzõ teletext oldalra.
@@ -840,8 +840,8 @@ A \-msglevel identify=4 rövidítése.
 A fájl paramétereinek kiírása emészthetõ formában.
 Bõvebb információt kínál a feliratról, az audiósávok nyelvérõl és ID-irõl is.
 Néhány esetben több információt kapsz a \-msglevel identify=6 kapcsolóval.
-Például egy DVD esetén kiírja minden egyes fejezet idõbeli hosszát
-és a lemez ID-t is.
+Például egy DVD esetén kiírja a fejezeteket és az egyes címek idõbeli hosszát,
+valamint a lemez ID-t is.
 A TOOLS/midentify wrapper script eltünteti a maradék kimenetet, és
 (remélhetõleg) shell escape-eli a fájlneveket.
 .
@@ -926,7 +926,7 @@ A fájl kiválasztó menü könyvtárát a megadott könyvtárra állítja.
 .I PÉLDA:
 .PD 0
 .RSs
-.IPs "\-menu\-chroot=/home"
+.IPs "\-menu\-chroot /home"
 Lekorlátozza a fájl kiválasztó menüt a /\:home könyvtárra és annak alkönyvtáraira
 (pl.\& nincs hozzáférés a / könyvtárhoz, de van a /home/user_name könyvtárhoz).
 .RE
@@ -2674,9 +2674,8 @@ PulseAudio audió kimeneti vezérlõ
 .RSs
 .IPs "[<hoszt>][:<kimenet csökkenés>]"
 Megadja a használandó hosztot és opcionálisan a kimenet csökkenést.
-Az üres <hoszt> karakterlánc egy helyi kapcsolatot használ.
-A "localhost" hosztként való megadása hálózati átvitelt használ (valószínûleg
-nem ezt akarod).
+Az üres <hoszt> karakterlánc egy helyi kapcsolatot, a "localhost"
+hálózati átvitelt használ (valószínûleg nem ezt akarod).
 .RE
 .PD 1
 .
@@ -10720,6 +10719,17 @@ mplayer \-vo zr \-vf scale=352:288 file.avi
 .nf
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .fi
+.
+.PP
+.B DTS-CD lejátszása áteresztéssel:
+.nf
+mplayer \-ac hwdts \-rawaudio format=0x2001 \-cdrom\-device /dev/cdrom cdda://
+.fi
+.br
+You can also use \-afm hwac3 instead of \-ac hwdts.
+Adjust '/dev/cdrom' to match the CD-ROM device on your system.
+If your external receiver supports decoding raw DTS streams,
+you can directly play it via cdda:// without setting format, hwac3 or hwdts.
 .
 .PP
 .B Egy 6 csatornás AAC fájl lejátszása két hangszórón:

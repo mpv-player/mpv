@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24907 -->
+<!-- synced with r25123 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -648,10 +648,13 @@ VCD-ket is lejátszhatsz a <filename>.DAT</filename> vagy
 <filename>.MPG</filename> fájlok lejátszásával, amit a Windows meglát a VCD-n.
 Így nagyszerűen működik (javítsd ki a CD-ROM-od betűjelét):
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
+Alternatívaként lejátszhatsz egy VCD sávot közvetlenül így:
+<screen>mplayer vcd://<replaceable>&lt;sáv&gt;</replaceable> -cdrom-device <replaceable>d:</replaceable>
+</screen>
 A DVD-k is működnek, add meg a <option>-dvd-device</option> kapcsolóval
 a DVD-ROM-od betűjelét:
 <screen>
-mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:
+mplayer dvd://<replaceable>&lt;cím&gt;</replaceable> -dvd-device <replaceable>d:</replaceable>
 </screen>
 A <application>Cygwin</application>/<application>MinGW</application>
 konzol meglehetősen lassú. Kimenet átirányítással vagy a
