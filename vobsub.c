@@ -849,7 +849,8 @@ static int
 vobsub_parse_cuspal(vobsub_t *vob, const char *line)
 {
     //colors: XXXXXX, XXXXXX, XXXXXX, XXXXXX
-    unsigned int n;
+    unsigned int n, tmp;
+    int r, g, b, y, u, v;
     n = 0;
     line += 40;
     while(1){
@@ -861,7 +862,14 @@ vobsub_parse_cuspal(vobsub_t *vob, const char *line)
 	    ++p;
 	if (p - line !=6)
 	    return -1;
-	vob->cuspal[n++] = strtoul(line, NULL,16);
+	tmp = strtoul(line, NULL, 16);
+	r = tmp >> 16 & 0xff;
+	g = tmp >> 8 & 0xff;
+	b = tmp & 0xff;
+	y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
+	u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
+	v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
+	vob->cuspal[n++] = y << 16 | u << 8 | v;
 	if (n==4)
 	    break;
 	if(*p == ',')
