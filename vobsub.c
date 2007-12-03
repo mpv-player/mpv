@@ -26,6 +26,9 @@
 #include "libavutil/common.h"
 
 extern int vobsub_id;
+// Record the original -vobsubid set by commandline, since vobsub_id will be
+// overridden if slang match any of vobsub streams.
+static int vobsubid = -2;
 
 /**********************************************************************
  * RAR stream handling
@@ -606,6 +609,7 @@ typedef struct {
     packet_queue_t *spu_streams;
     unsigned int spu_streams_size;
     unsigned int spu_streams_current;
+    unsigned int spu_valid_streams_size;
 } vobsub_t;
 
 /* Make sure that the spu stream idx exists. */
@@ -1066,6 +1070,8 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
     vobsub_t *vob = malloc(sizeof(vobsub_t));
     if(spu)
       *spu = NULL;
+    if (vobsubid == -2)
+      vobsubid = vobsub_id;
     if (vob) {
 	char *buf;
 	vob->custom = 0;
@@ -1075,6 +1081,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	vob->spu_streams = NULL;
 	vob->spu_streams_size = 0;
 	vob->spu_streams_current = 0;
+	vob->spu_valid_streams_size = 0;
 	vob->delay = 0;
 	vob->forced_subs=0;
 	buf = malloc(strlen(name) + 5);
@@ -1173,8 +1180,12 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 		    }
 		}
 		vob->spu_streams_current = vob->spu_streams_size;
-		while (vob->spu_streams_current-- > 0)
+		while (vob->spu_streams_current-- > 0) {
 		    vob->spu_streams[vob->spu_streams_current].current_index = 0;
+		    if (vobsubid == vob->spu_streams_current ||
+			    vob->spu_streams[vob->spu_streams_current].packets_size > 0)
+			++vob->spu_valid_streams_size;
+		}
 		mpeg_free(mpg);
 	    }
 	    free(buf);
@@ -1199,7 +1210,7 @@ unsigned int
 vobsub_get_indexes_count(void *vobhandle)
 {
     vobsub_t *vob = (vobsub_t *) vobhandle;
-    return vob->spu_streams_size;
+    return vob->spu_valid_streams_size;
 }
 
 char *
@@ -1207,6 +1218,35 @@ vobsub_get_id(void *vobhandle, unsigned int index)
 {
     vobsub_t *vob = (vobsub_t *) vobhandle;
     return (index < vob->spu_streams_size) ? vob->spu_streams[index].id : NULL;
+}
+
+int vobsub_get_id_by_index(void *vobhandle, unsigned int index)
+{
+    vobsub_t *vob = vobhandle;
+    int i, j;
+    if (vob == NULL)
+        return -1;
+    for (i = 0, j = 0; i < vob->spu_streams_size; ++i)
+        if (i == vobsubid || vob->spu_streams[i].packets_size > 0) {
+            if (j == index)
+                return i;
+            ++j;
+        }
+    return -1;
+}
+
+int vobsub_get_index_by_id(void *vobhandle, int id)
+{
+    vobsub_t *vob = vobhandle;
+    int i, j;
+    if (vob == NULL || id < 0 || id >= vob->spu_streams_size)
+        return -1;
+    if (id != vobsubid && !vob->spu_streams[id].packets_size)
+        return -1;
+    for (i = 0, j = 0; i < id; ++i)
+        if (i == vobsubid || vob->spu_streams[i].packets_size > 0)
+            ++j;
+    return j;
 }
 
 unsigned int 

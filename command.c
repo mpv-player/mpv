@@ -1309,9 +1309,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 #endif
 
     if (source == SUB_SOURCE_VOBSUB) {
-	vobsub_id =
-	    mpctx->global_sub_pos -
-	    mpctx->global_sub_indices[SUB_SOURCE_VOBSUB];
+        vobsub_id = vobsub_get_id_by_index(vo_vobsub, mpctx->global_sub_pos - mpctx->global_sub_indices[SUB_SOURCE_VOBSUB]);
     } else if (source == SUB_SOURCE_SUBS) {
 	mpctx->set_of_sub_pos =
 	    mpctx->global_sub_pos - mpctx->global_sub_indices[SUB_SOURCE_SUBS];
@@ -1472,7 +1470,13 @@ static int mp_property_sub_by_type(m_option_t * prop, int action, void *arg,
     case M_PROPERTY_GET:
         if (!arg)
             return M_PROPERTY_ERROR;
-        *(int *) arg = (is_cur_source) ? mpctx->global_sub_pos - offset : -1;
+        if (is_cur_source) {
+            *(int *) arg = mpctx->global_sub_pos - offset;
+            if (source == SUB_SOURCE_VOBSUB)
+                *(int *) arg = vobsub_get_id_by_index(vo_vobsub, *(int *) arg);
+        }
+        else
+            *(int *) arg = -1;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
         if (!arg)
@@ -1487,8 +1491,11 @@ static int mp_property_sub_by_type(m_option_t * prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
         if (*(int *) arg >= 0) {
-            mpctx->global_sub_pos = offset + *(int *) arg;
-            if (mpctx->global_sub_pos >= mpctx->global_sub_size
+            int index = *(int *)arg;
+            if (source == SUB_SOURCE_VOBSUB)
+                index = vobsub_get_index_by_id(vo_vobsub, index);
+            mpctx->global_sub_pos = offset + index;
+            if (index < 0 || mpctx->global_sub_pos >= mpctx->global_sub_size
                     || sub_source(mpctx) != source) {
                 mpctx->global_sub_pos = -1;
                 *(int *) arg = -1;

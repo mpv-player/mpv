@@ -3172,9 +3172,10 @@ if(mpctx->sh_video) {
 
 if (mpctx->global_sub_size) {
   // find the best sub to use
-  if (vobsub_id >= 0) {
+  int vobsub_index_id = vobsub_get_index_by_id(vo_vobsub, vobsub_id);
+  if (vobsub_index_id >= 0) {
     // if user asks for a vobsub id, use that first.
-    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] + vobsub_id;
+    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] + vobsub_index_id;
   } else if (dvdsub_id >= 0 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
     // if user asks for a dvd sub id, use that next.
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id;

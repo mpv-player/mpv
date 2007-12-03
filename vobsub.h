@@ -10,6 +10,11 @@ extern void vobsub_close(void *this);
 extern unsigned int vobsub_get_indexes_count(void * /* vobhandle */);
 extern char *vobsub_get_id(void * /* vobhandle */, unsigned int /* index */);
 
+/// Get vobsub id by its index in the valid streams.
+extern int vobsub_get_id_by_index(void *vobhandle, unsigned int index);
+/// Get index in the valid streams by vobsub id.
+extern int vobsub_get_index_by_id(void *vobhandle, int id);
+
 extern void *vobsub_out_open(const char *basename, const unsigned int *palette, unsigned int orig_width, unsigned int orig_height, const char *id, unsigned int index);
 extern void vobsub_out_output(void *me, const unsigned char *packet, int len, double pts);
 extern void vobsub_out_close(void *me);
