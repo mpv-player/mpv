@@ -362,6 +362,15 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
 static int filter_n_bytes(sh_audio_t *sh, int len)
 {
     int error = 0;
+    // Filter
+    af_data_t filter_input = {
+	.audio = sh->a_buffer,
+	.len = len,
+	.rate = sh->samplerate,
+	.nch = sh->channels,
+	.format = sh->sample_format
+    };
+    af_data_t *filter_output;
 
     assert(len-1 + sh->audio_out_minsize <= sh->a_buffer_size);
 
@@ -379,16 +388,8 @@ static int filter_n_bytes(sh_audio_t *sh, int len)
 	sh->a_buffer_len += ret;
     }
 
-    // Filter
-    af_data_t filter_input = {
-	.audio = sh->a_buffer,
-	.len = len,
-	.rate = sh->samplerate,
-	.nch = sh->channels,
-	.format = sh->sample_format
-    };
     af_fix_parameters(&filter_input);
-    af_data_t *filter_output = af_play(sh->afilter, &filter_input);
+    filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
 	return -1;
     if (sh->a_out_buffer_size < sh->a_out_buffer_len + filter_output->len) {
