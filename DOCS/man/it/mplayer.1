@@ -1,4 +1,4 @@
-.\" synced with r25179
+.\" synced with r25278
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -875,8 +875,8 @@ Visualizza i parametri del file in un formato facile da interpretare.
 Stampa anche informazioni dettagliate sui sottotitoli, le tracce audio ed i
 vari ID.
 In alcuni casi puoi avere più informazioni utilizzando \-msglevel identify=6.
-Per esempio, per un DVD verrà indicata la lunghezza di ogni titolo, così come
-l'ID del disco.
+Per esempio, per un DVD verranno mostrati i capitoli e la lunghezza di ogni
+titolo, così come l'ID del disco.
 Lo script di appoggio TOOLS/\:midentify toglie il resto delle stampe di MPlayer
 e (si spera) corregge per la shell (shellescapes) i nomi dei file.
 .
@@ -11084,6 +11084,17 @@ mplayer \-vo zr \-vf scale=352:288 file.avi
 .nf
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .fi
+.
+.PP
+.B Riproduce DTS-CD con il decodificatore harware (passthrough):
+.nf
+mplayer \-ac hwdts \-rawaudio format=0x2001 \-cdrom\-device /dev/cdrom cdda://
+.fi
+.br
+Puoi anche usare \-afm invece di \-ac hwdts.
+Modifica '/dev/cdrom' affinché corrisponda al lettore CD-ROM sul tuo sistema.
+Se il tuo ricevitore esterno gestisce la decodifica di flussi grezzi DTS, puoi
+riprodurli direttamente con cdda:// senza impostare il formato, hwac3 o hwdts.
 .
 .PP
 .B Riproduce un file AAC con 6 canali utilizzando solo due altoparlanti:
