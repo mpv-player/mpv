@@ -3,30 +3,6 @@
 #ifndef SAVAGE_REGS_H
 #define SAVAGE_REGS_H
 
-/* These are here until xf86PciInfo.h is updated. */
-
-#ifndef PCI_CHIP_S3TWISTER_P
-#define PCI_CHIP_S3TWISTER_P	0x8d01
-#endif
-#ifndef PCI_CHIP_S3TWISTER_K
-#define PCI_CHIP_S3TWISTER_K	0x8d02
-#endif
-#ifndef PCI_CHIP_SUPSAV_MX128
-#define PCI_CHIP_SUPSAV_MX128		0x8c22
-#define PCI_CHIP_SUPSAV_MX64		0x8c24
-#define PCI_CHIP_SUPSAV_MX64C		0x8c26
-#define PCI_CHIP_SUPSAV_IX128SDR	0x8c2a
-#define PCI_CHIP_SUPSAV_IX128DDR	0x8c2b
-#define PCI_CHIP_SUPSAV_IX64SDR		0x8c2c
-#define PCI_CHIP_SUPSAV_IX64DDR		0x8c2d
-#define PCI_CHIP_SUPSAV_IXCSDR		0x8c2e
-#define PCI_CHIP_SUPSAV_IXCDDR		0x8c2f
-#endif
-#ifndef PCI_CHIP_PROSAVAGE_DDR
-#define PCI_CHIP_PROSAVAGE_DDR	0x8d03
-#define PCI_CHIP_PROSAVAGE_DDRK	0x8d04
-#endif
-
 #define S3_SAVAGE3D_SERIES(chip)  ((chip>=S3_SAVAGE3D) && (chip<=S3_SAVAGE_MX))
 
 #define S3_SAVAGE4_SERIES(chip)   ((chip==S3_SAVAGE4) || (chip==S3_PROSAVAGE))
