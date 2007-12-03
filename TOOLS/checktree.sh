@@ -66,8 +66,10 @@ all_filenames() {
         | grep -v "\.\#\|\~$\|\.depend\|\/\.svn\/\|config.mak\|^\./config\.h" \
         | grep -v "^\./version\.h\|\.o$\|\.a$\|configure.log\|^\./help_mp.h"
     else
-        svn info -R | sed -n '/Path:/bb; :a; d; b; :b; s/Path: /.\//; h; :c; n;
+        for p in . libavcodec libavutil libavformat ; do
+        svn info -R $p | sed -n '/Path:/bb; :a; d; b; :b; s/Path: /.\//; h; :c; n;
                               /Node Kind:/bd; bc; :d; /directory/ba; g; p;'
+        done
     fi
 }
 
