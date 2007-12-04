@@ -15,8 +15,10 @@
  *  along with MPlayer; if not, write to the Free Software Foundation,
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-#include "demux_nemesi.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include "stream/stream.h"
+#include "demuxer.h"
 #include "stheader.h"
 #define HAVE_STRUCT_SOCKADDR_STORAGE
 #include "nemesi/rtsp.h"
@@ -135,7 +137,7 @@ static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
     }
 }
 
-demuxer_t* demux_open_rtp(demuxer_t* demuxer)
+static demuxer_t* demux_open_rtp(demuxer_t* demuxer)
 {
     nms_rtsp_hints hints;
     char * url = demuxer->stream->streaming_ctrl->url->url;
@@ -330,7 +332,7 @@ static void stream_add_packet(Nemesi_DemuxerStreamData * ndsd,
     ds_add_packet(ds, dp);
 }
 
-int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds)
+static int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds)
 {
     Nemesi_DemuxerStreamData * ndsd = demuxer->priv;
     Nemesi_SessionType stype;
@@ -372,7 +374,7 @@ int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds)
 }
 
 
-void demux_close_rtp(demuxer_t* demuxer)
+static void demux_close_rtp(demuxer_t* demuxer)
 {
     Nemesi_DemuxerStreamData * ndsd = demuxer->priv;
     rtsp_ctrl * ctl = ndsd->rtsp;
