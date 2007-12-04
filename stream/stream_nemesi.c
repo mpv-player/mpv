@@ -25,13 +25,13 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "config.h"
-
 #include "nemesi/rtsp.h"
-#include "libmpdemux/demux_nemesi.h"
 
 #include <errno.h>
 
 #include "stream.h"
+#include "libmpdemux/demuxer.h"
+
 #include "tcp.h"
 
 extern int network_bandwidth;
