@@ -486,11 +486,11 @@ static int demux_rtp_control(struct demuxer_st *demuxer, int cmd, void *arg)
 }
 
 demuxer_desc_t demuxer_desc_rtp_nemesi = {
-  "libNemesi demuxer",
-  "rtp",
+  "libnemesi RTP demuxer",
+  "nemesi",
   "",
   "Alessandro Molina",
-  "requires libNemesi",
+  "requires libnemesi",
   DEMUXER_TYPE_RTP_NEMESI,
   0, // no autodetect
   NULL,

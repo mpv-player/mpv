@@ -660,7 +660,7 @@ static int demux_rtp_control(struct demuxer_st *demuxer, int cmd, void *arg) {
 
 demuxer_desc_t demuxer_desc_rtp = {
   "LIVE555 RTP demuxer",
-  "rtp",
+  "live555",
   "",
   "Ross Finlayson",
   "requires LIVE555 Streaming Media library",
