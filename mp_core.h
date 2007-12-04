@@ -125,5 +125,5 @@ double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 			 ao_functions_t *audio_out);
 void exit_player_with_rc(const char* how, int rc);
 void rm_osd_msg(int id);
-void add_subtitles(char *filename, float fps, int silent);
+void add_subtitles(char *filename, float fps, int noerr);
 int reinit_video_chain(void);

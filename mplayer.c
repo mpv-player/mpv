@@ -926,7 +926,7 @@ int playtree_add_playlist(play_tree_t* entry)
   return PT_NEXT_SRC;
 }
 
-void add_subtitles(char *filename, float fps, int silent)
+void add_subtitles(char *filename, float fps, int noerr)
 {
     sub_data *subd;
 #ifdef USE_ASS
@@ -948,11 +948,11 @@ void add_subtitles(char *filename, float fps, int silent)
     if (ass_enabled && subd && !asst)
         asst = ass_read_subdata(ass_library, subd, fps);
 
-    if (!asst && !subd && !silent)
+    if (!asst && !subd)
 #else
-    if(!subd && !silent) 
+    if(!subd) 
 #endif
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_CantLoadSub,
+        mp_msg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR, MSGTR_CantLoadSub,
 		filename_recode(filename));
     
 #ifdef USE_ASS
@@ -3158,7 +3158,7 @@ if(mpctx->sh_video) {
     int i = 0;
     free(psub); // release the buffer created by get_path() above
     while (tmp[i]) {
-        add_subtitles (tmp[i], mpctx->sh_video->fps, 0);
+        add_subtitles (tmp[i], mpctx->sh_video->fps, 1);
         free(tmp[i++]);
     }
     free(tmp);
