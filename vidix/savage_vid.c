@@ -277,18 +277,18 @@ static
 unsigned int GetBlendForFourCC( int id )
 {
     switch( id ) {
+	case IMGFMT_UYVY:
+	    return 0;
 	case IMGFMT_YUY2:
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
 	    return 1;
 	case IMGFMT_Y211:
 	    return 4;
-	case IMGFMT_RGB15:
+	case IMGFMT_BGR15:
 	    return 3;
-	case IMGFMT_RGB16:
+	case IMGFMT_BGR16:
 	    return 5;
         default:
-	    return 0;
+	    return 1;
     }
 }
 
@@ -450,12 +450,6 @@ SavageDisplayVideoOld(void)
 
 
 
-    /* Set surface format. */
-
-		OUTREG(SSTREAM_CONTROL_REG,GetBlendForFourCC(info->format) << 24 | info->src_w);
-
-		debugout(SSTREAM_CONTROL_REG,GetBlendForFourCC(info->format) << 24 | info->src_w);
-
     /* Calculate horizontal scale factor. */
 
     //FIXME: enable scaling
@@ -491,9 +485,9 @@ SavageDisplayVideoOld(void)
     OUTREG(SSTREAM_WINDOW_SIZE_REG, OS_WH(info->drw_w, info->drw_h) );
     debugout(SSTREAM_WINDOW_SIZE_REG, OS_WH(info->drw_w, info->drw_h) );
 
+    /* Set surface format and adjust scaling */
 
-
-    ssControl = 0;
+    ssControl = GetBlendForFourCC(info->format) << 24 | info->src_w;
 
     if( info->src_w > (info->drw_w << 1) )
     {
@@ -510,10 +504,6 @@ SavageDisplayVideoOld(void)
 	    ssControl |= HDSCALE_64;
     }
 
-    ssControl |= info->src_w;
-    ssControl |= (1 << 24);
-
-    //FIXME: enable scaling
     OUTREG(SSTREAM_CONTROL_REG, ssControl);
     debugout(SSTREAM_CONTROL_REG, ssControl);
 
@@ -1063,8 +1053,8 @@ is_supported_fourcc (uint32_t fourcc)
 //    case IMGFMT_YV12:
 //    case IMGFMT_I420:
     case IMGFMT_UYVY:
-    case IMGFMT_YVYU:
     case IMGFMT_YUY2:
+    case IMGFMT_Y211:
     case IMGFMT_RGB15:
     case IMGFMT_RGB16:
 //    case IMGFMT_BGR32:
@@ -1229,6 +1219,7 @@ savage_config_playback (vidix_playback_t * vinfo)
 
    info->pitch = ((info->src_w << 1) + 15) & ~15;
 
+#if 0
   swap_uv = 0;
   switch (vinfo->fourcc)
   {
@@ -1275,6 +1266,7 @@ savage_config_playback (vidix_playback_t * vinfo)
 
 		  break;
   }
+#endif
 			info->pitch |= ((info->pitch >> 1) << 16);
 
 		  vinfo->frame_size = info->pitch * info->src_h;
