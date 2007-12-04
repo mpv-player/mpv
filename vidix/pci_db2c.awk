@@ -26,12 +26,13 @@
 
 BEGIN {
 
-    if(ARGC != 2) {
+    if(ARGC != 3) {
 # check for arguments:
 	print "Usage awk -f pci_db2c.awk pci.db (and make sure pci.db file exists first)";
 	exit(1);
     }
     in_file = ARGV[1];
+    with_pci_db = ARGV[2];
     vendor_file = "pci_vendors.h";
     ids_file = "pci_ids.h"
     name_file = "pci_names.c"
@@ -60,9 +61,11 @@ BEGIN {
     print_name_struct(name_h_file);
     print "#include <stddef.h>">name_file
     print "#include \"pci_names.h\"">name_file
+    if (with_pci_db) {
     print "#include \"pci_dev_ids.c\"">name_file
     print "">name_file
     print "static struct vendor_id_s vendor_ids[] = {">name_file
+    }
     first_pass=1;
     init_name_db();
     while(getline <in_file) 
@@ -78,7 +81,7 @@ BEGIN {
 		printf("#define VENDOR_%s\t", svend_name) >vendor_file;
 		if(length(svend_name) < 9) printf("\t") >vendor_file;
 		printf("0x%s /*%s*/\n",field[2], name_field) >vendor_file;
-		printf("{ 0x%s, \"%s\", dev_lst_%s },\n",field[2], name_field, field[2]) >name_file;
+		if (with_pci_db) printf("{ 0x%s, \"%s\", dev_lst_%s },\n",field[2], name_field, field[2]) >name_file;
 		printf("/* Vendor: %s: %s */\n", field[2], name_field) > ids_file
 		if(first_pass == 1) { first_pass=0; }
 		else	{ print "{ 0xFFFF,  NULL }\n};" >dev_ids_file; }
@@ -118,7 +121,7 @@ BEGIN {
     print "#endif/*PCI_IDS_INCLUDED*/">ids_file
     print "">name_h_file
     print "#endif/*PCI_NAMES_INCLUDED*/">name_h_file
-    print "};">name_file
+    if (with_pci_db) print "};">name_file
     print "{ 0xFFFF,  NULL }" >dev_ids_file;
     print "};">dev_ids_file
     print_func_bodies(name_file);
@@ -172,16 +175,19 @@ function print_func_bodies(out_file)
    print "">out_file
    print "const char *pci_vendor_name(unsigned short id)" >out_file
    print "{" >out_file
+   if (with_pci_db) {
    print "  unsigned i;" >out_file
    print "  for(i=0;i<sizeof(vendor_ids)/sizeof(struct vendor_id_s);i++)">out_file
    print "  {" >out_file
    print "\tif(vendor_ids[i].id == id) return vendor_ids[i].name;" >out_file
    print "  }" >out_file
+   }
    print "  return NULL;" >out_file
    print "}">out_file
    print "" >out_file
    print "const char *pci_device_name(unsigned short vendor_id, unsigned short device_id)" >out_file
    print "{" >out_file
+   if (with_pci_db) {
    print "  unsigned i, j;" >out_file
    print "  for(i=0;i<sizeof(vendor_ids)/sizeof(struct vendor_id_s);i++)">out_file
    print "  {" >out_file
@@ -196,6 +202,7 @@ function print_func_bodies(out_file)
    print "\t  break;" >out_file
    print "\t}" >out_file
    print "  }" >out_file
+   }
    print "  return NULL;">out_file
    print "}">out_file
    return

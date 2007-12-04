@@ -47,7 +47,7 @@ rage128_vid.o: radeon_vid.c
 	$(CC) -c $(CFLAGS) -DRAGE128 -o $@ $<
 
 pci_names.c pci_dev_ids.c: pci.db
-	LC_ALL=C awk -f pci_db2c.awk $<
+	LC_ALL=C awk -f pci_db2c.awk $< $(VIDIX_PCIDB)
 
 clean::
 	rm -f pci_*.c pci_*.h

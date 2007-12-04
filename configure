@@ -337,6 +337,7 @@ Video output:
   --with-vidix-drivers[=*] list of VIDIX drivers to be compiled in
                            Available: cyberblade,ivtv,mach64,mga,mga_crtc2,
                            nvidia,pm2,pm3,radeon,rage128,savage,sis,unichrome
+  --disable-vidix-pcidb    disable VIDIX PCI device name database
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-dga2            enable DGA 2 support [autodetect]
   --enable-dga1            enable DGA 1 support [autodetect]
@@ -610,6 +611,7 @@ _winsock2=auto
 _smbsupport=auto
 _vidix_internal=auto
 _vidix_external=auto
+_vidix_pcidb=yes
 _joystick=no
 _xvid=auto
 _x264=auto
@@ -997,6 +999,7 @@ for ac_option do
   --with-vidix-drivers=*)
     _vidix_drivers=`echo $ac_option | cut -d '=' -f 2`
     ;;
+  --disable-vidix-pcidb)        _vidix_pcidb=no         ;;
   --enable-joystick)	_joystick=yes	;;
   --disable-joystick)	_joystick=no	;;
   --enable-xvid)	_xvid=yes	;;
@@ -4257,6 +4260,13 @@ else
   _novomodules="xvidix $_novomodules"
 fi
 
+echocheck "VIDIX PCI device name database"
+echores "$_vidix_pcidb"
+if test "$_vidix_pcidb" = yes ; then
+  _vidix_pcidb_val=1
+else
+  _vidix_pcidb_val=0
+fi
 
 echocheck "/dev/mga_vid"
 if test "$_mga" = auto ; then
@@ -7574,6 +7584,7 @@ DVBIN = $_dvbin
 VIDIX = $_vidix
 VIDIX_INTERNAL = $_vidix_internal
 VIDIX_EXTERNAL = $_vidix_external
+VIDIX_PCIDB = $_vidix_pcidb_val
 CONFIG_PP = yes
 MP3LAME = $_mp3lame
 LIBMENU = $_menu
