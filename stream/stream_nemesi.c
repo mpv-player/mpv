@@ -59,7 +59,7 @@ static int rtsp_streaming_open (stream_t *stream, int mode, void *opts,
     stream->streaming_ctrl->url = check4proxies(url);
     stream->streaming_ctrl->streaming_seek = rtsp_streaming_seek;
 
-    *file_format = DEMUXER_TYPE_RTP;
+    *file_format = DEMUXER_TYPE_RTP_NEMESI;
     stream->type = STREAMTYPE_STREAM;
     return STREAM_OK;
 }

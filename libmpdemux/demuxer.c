@@ -63,6 +63,7 @@ extern demuxer_desc_t demuxer_desc_audio;
 extern demuxer_desc_t demuxer_desc_xmms;
 extern demuxer_desc_t demuxer_desc_mpeg_ty;
 extern demuxer_desc_t demuxer_desc_rtp;
+extern demuxer_desc_t demuxer_desc_rtp_nemesi;
 extern demuxer_desc_t demuxer_desc_lavf;
 extern demuxer_desc_t demuxer_desc_lavf_preferred;
 extern demuxer_desc_t demuxer_desc_aac;
@@ -116,8 +117,11 @@ demuxer_desc_t* demuxer_list[] = {
 #endif
   &demuxer_desc_audio,
   &demuxer_desc_mpeg_ty,
-#if defined(STREAMING_LIVE555) || defined(LIBNEMESI)
+#ifdef STREAMING_LIVE555
   &demuxer_desc_rtp,
+#endif
+#ifdef LIBNEMESI
+  &demuxer_desc_rtp_nemesi,
 #endif
 #ifdef USE_LIBAVFORMAT
   &demuxer_desc_lavf,

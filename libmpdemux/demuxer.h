@@ -56,11 +56,12 @@
 #define DEMUXER_TYPE_MPEG_GXF 42
 #define DEMUXER_TYPE_NUT 43
 #define DEMUXER_TYPE_LAVF_PREFERRED 44
+#define DEMUXER_TYPE_RTP_NEMESI 45
 
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 44
+#define DEMUXER_TYPE_MAX 45
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code
