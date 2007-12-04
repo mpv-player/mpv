@@ -370,19 +370,16 @@ static void read_cmd(menu_t* menu,int cmd) {
 }
 
 static void read_key(menu_t* menu,int c){
-  if(c == KEY_BS)
-    read_cmd(menu,MENU_CMD_LEFT);
-  else {
     char **str;
     for (str=mpriv->actions; str && *str; str++)
       if (c == (*str)[0]) {
         action = &(*str)[2];
         read_cmd(menu,MENU_CMD_ACTION);
-        break;
+        return;
       }
-    if (!str || !*str)
-      menu_list_read_key(menu,c,1);
-  }
+  if (menu_dflt_read_key(menu, c))
+    return;
+  menu_list_jump_to_key(menu, c);
 }
 
 static void clos(menu_t* menu) {

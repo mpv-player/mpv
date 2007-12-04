@@ -238,6 +238,9 @@ int mp_input_add_event_fd(int fd, void (*read_func)(void));
 
 void mp_input_rm_event_fd(int fd);
 
+/// Get input key from its name.
+int mp_input_get_key_from_name(const char *name);
+
 // This function can be used to put a command in the system again. It's used by libmpdemux
 // when it performs a blocking operation to resend the command it received to the main
 // loop.

@@ -1373,7 +1373,7 @@ mp_input_get_key_name(int key) {
 
 }
 
-static int
+int
 mp_input_get_key_from_name(const char *name) {
   int i,ret = 0,len = strlen(name);
   if(len == 1) { // Direct key code

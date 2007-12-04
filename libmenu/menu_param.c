@@ -157,10 +157,6 @@ static int parse_args(menu_t* menu,char* args) {
   }
 }
 
-static void read_key(menu_t* menu,int c) {
-  menu_list_read_key(menu,c,0);
-}
-
 static void read_cmd(menu_t* menu,int cmd) {
   list_entry_t* e = mpriv->p.current;
 
@@ -247,7 +243,6 @@ static int openMenu(menu_t* menu, char* args) {
 
   menu->draw = menu_list_draw;
   menu->read_cmd = read_cmd;
-  menu->read_key = read_key;
   menu->close = closeMenu;
 
 

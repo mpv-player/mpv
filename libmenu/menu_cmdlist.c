@@ -91,10 +91,6 @@ static void read_cmd(menu_t* menu,int cmd) {
   }
 }
 
-static void read_key(menu_t* menu,int c){
-  menu_list_read_key(menu,c,0);
-}
-
 static void free_entry(list_entry_t* entry) {
   if(entry->ok)
     free(entry->ok);
@@ -152,7 +148,6 @@ static int parse_args(menu_t* menu,char* args) {
 static int open_cmdlist(menu_t* menu, char* args) {
   menu->draw = menu_list_draw;
   menu->read_cmd = read_cmd;
-  menu->read_key = read_key;
   menu->close = close_menu;
 
   if(!args) {

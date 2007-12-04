@@ -96,7 +96,9 @@ static void read_cmd(menu_t* menu,int cmd) {
 }
 
 static void read_key(menu_t* menu,int c){
-  menu_list_read_key(menu,c,1);
+  if (menu_dflt_read_key(menu, c))
+    return;
+  menu_list_jump_to_key(menu, c);
 }
 
 static void close_menu(menu_t* menu) {

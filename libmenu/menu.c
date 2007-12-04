@@ -15,6 +15,7 @@
 #include "osdep/keycodes.h"
 #include "asxparser.h"
 #include "stream/stream.h"
+#include "input/input.h"
 
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/mp_image.h"
@@ -46,6 +47,18 @@ menu_info_t* menu_info_list[] = {
   NULL
 };
 
+typedef struct key_cmd_s {
+  int key;
+  char *cmd;
+} key_cmd_t;
+
+typedef struct menu_cmd_bindings_s {
+  char *name;
+  key_cmd_t *bindings;
+  int binding_num;
+  struct menu_cmd_bindings_s *parent;
+} menu_cmd_bindings_t;
+
 struct menu_def_st {
   char* name;
   menu_info_t* type;
@@ -56,7 +69,17 @@ struct menu_def_st {
 static struct MPContext *menu_ctx = NULL;
 static menu_def_t* menu_list = NULL;
 static int menu_count = 0;
+static menu_cmd_bindings_t *cmd_bindings = NULL;
+static int cmd_bindings_num = 0;
 
+
+menu_cmd_bindings_t *get_cmd_bindings(const char *name) {
+  int i;
+  for (i = 0; i < cmd_bindings_num; ++i)
+    if (!strcasecmp(cmd_bindings[i].name, name))
+      return &cmd_bindings[i];
+  return NULL;
+}
 
 static int menu_parse_config(char* buffer) {
   char *element,*body, **attribs, *name;
@@ -84,6 +107,59 @@ static int menu_parse_config(char* buffer) {
       continue;
     }
 
+    if (!strcasecmp(element, "keybindings")) {
+      menu_cmd_bindings_t *bindings = cmd_bindings;
+      const char *parent_bindings;
+      cmd_bindings = realloc(cmd_bindings,
+                             (cmd_bindings_num+1)*sizeof(menu_cmd_bindings_t));
+      for (i = 0; i < cmd_bindings_num; ++i)
+        if (cmd_bindings[i].parent)
+          cmd_bindings[i].parent = cmd_bindings[i].parent-bindings+cmd_bindings;
+      bindings = &cmd_bindings[cmd_bindings_num];
+      memset(bindings, 0, sizeof(menu_cmd_bindings_t));
+      bindings->name = strdup(name);
+      parent_bindings = asx_get_attrib("parent",attribs);
+      if (parent_bindings)
+        bindings->parent = get_cmd_bindings(parent_bindings);
+      free(element);
+      asx_free_attribs(attribs);
+      if (body) {
+        char *bd = body;
+        char *b, *key, *cmd;
+        int keycode;
+        for(;;) {
+          r = asx_get_element(parser,&bd,&element,&b,&attribs);
+          if(r < 0) {
+            mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_SyntaxErrorAtLine,
+                   parser->line);
+            free(body);
+            asx_parser_free(parser);
+            return 0;
+          }
+          if(r == 0)
+            break;
+          key = asx_get_attrib("key",attribs);
+          cmd = asx_get_attrib("cmd",attribs);
+          if (key && (keycode = mp_input_get_key_from_name(key)) >= 0) {
+            mp_msg(MSGT_GLOBAL,MSGL_V,
+                   "[libmenu] got keybinding element %s %s=>[%s].\n",
+                   element, key, cmd ? cmd : "");
+            bindings->bindings = realloc(bindings->bindings,
+                                   (bindings->binding_num+1)*sizeof(key_cmd_t));
+            bindings->bindings[bindings->binding_num].key = keycode;
+            bindings->bindings[bindings->binding_num].cmd = cmd ? strdup(cmd)
+                                                                : NULL;
+            ++bindings->binding_num;
+          }
+          free(element);
+          asx_free_attribs(attribs);
+          free(b);
+        }
+        free(body);
+      }
+      ++cmd_bindings_num;
+      continue;
+    }
     // Try to find this menu type in our list
     for(i = 0, minfo = NULL ; menu_info_list[i] ; i++) {
       if(strcasecmp(element,menu_info_list[i]->name) == 0) {
@@ -178,30 +254,34 @@ void menu_unint(void) {
   }
   free(menu_list);
   menu_count = 0;
+  for (i = 0; i < cmd_bindings_num; ++i) {
+    free(cmd_bindings[i].name);
+    while(cmd_bindings[i].binding_num > 0)
+      free(cmd_bindings[i].bindings[--cmd_bindings[i].binding_num].cmd);
+    free(cmd_bindings[i].bindings);
+  }
+  free(cmd_bindings);
 }
 
 /// Default read_key function
-void menu_dflt_read_key(menu_t* menu,int cmd) {
-  switch(cmd) {
-  case KEY_UP:
-    menu->read_cmd(menu,MENU_CMD_UP);
-    break;
-  case KEY_DOWN:
-    menu->read_cmd(menu,MENU_CMD_DOWN);
-    break;
-  case KEY_LEFT:
-    menu->read_cmd(menu,MENU_CMD_LEFT);
-    break;
-  case KEY_ESC:
-    menu->read_cmd(menu,MENU_CMD_CANCEL);
-    break;
-  case KEY_RIGHT:
-    menu->read_cmd(menu,MENU_CMD_RIGHT);
-    break;
-  case KEY_ENTER:
-    menu->read_cmd(menu,MENU_CMD_OK);
-    break;
+int menu_dflt_read_key(menu_t* menu,int cmd) {
+  int i;
+  menu_cmd_bindings_t *bindings = get_cmd_bindings(menu->type->name);
+  if (!bindings)
+    bindings = get_cmd_bindings(menu->type->type->name);
+  if (!bindings)
+    bindings = get_cmd_bindings("default");
+  while (bindings) {
+    for (i = 0; i < bindings->binding_num; ++i) {
+      if (bindings->bindings[i].key == cmd) {
+        if (bindings->bindings[i].cmd)
+          mp_input_queue_cmd(mp_input_parse_cmd(bindings->bindings[i].cmd));
+        return 1;
+      }
+    }
+    bindings = bindings->parent;
   }
+  return 0;
 }
 
 menu_t* menu_open(char *name) {

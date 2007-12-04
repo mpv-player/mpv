@@ -38,6 +38,10 @@ typedef struct menu_info_s {
 #define MENU_CMD_LEFT 4
 #define MENU_CMD_RIGHT 5 
 #define MENU_CMD_ACTION 6
+#define MENU_CMD_HOME 7
+#define MENU_CMD_END 8
+#define MENU_CMD_PAGE_UP 9
+#define MENU_CMD_PAGE_DOWN 10
 
 /// Global init/uninit
 int menu_init(struct MPContext *mpctx, char* cfg_file);
@@ -52,7 +56,7 @@ void menu_close(menu_t* menu);
 void menu_read_key(menu_t* menu,int cmd);
 
 //// Default implementation
-void menu_dflt_read_key(menu_t* menu,int cmd);
+int menu_dflt_read_key(menu_t* menu,int cmd);
 
 /////////// Helpers
 

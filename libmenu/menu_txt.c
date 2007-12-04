@@ -66,26 +66,19 @@ static void read_cmd(menu_t* menu,int cmd) {
     menu->show = 0;
     menu->cl = 1;
     break;
-  }
-}
-
-static void read_key(menu_t* menu,int c) {
-  switch (c) {
-  case KEY_HOME:
+  case MENU_CMD_HOME:
     mpriv->cur_line = 0;
     break;
-  case KEY_END:
+  case MENU_CMD_END:
     mpriv->cur_line = mpriv->num_lines - 1;
     break;
-  case KEY_PAGE_UP:
+  case MENU_CMD_PAGE_UP:
     mpriv->cur_line =  mpriv->cur_line > mpriv->disp_lines ?
       mpriv->cur_line - mpriv->disp_lines : 0;
     break;
-  case KEY_PAGE_DOWN:
+  case MENU_CMD_PAGE_DOWN:
     mpriv->cur_line = mpriv->cur_line + mpriv->disp_lines > mpriv->num_lines - 1 ? mpriv->num_lines - 1 : mpriv->cur_line + mpriv->disp_lines;
     break;
-  default:
-    menu_dflt_read_key(menu,c);
   }
 }
 
@@ -129,7 +122,6 @@ static int open_txt(menu_t* menu, char* args) {
 
   menu->draw = draw;
   menu->read_cmd = read_cmd;
-  menu->read_key = read_key;
 
   if(!mpriv->file) {
     mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_MenuTxtNeedATxtFileName);

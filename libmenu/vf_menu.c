@@ -73,6 +73,14 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
       menu_read_cmd(priv->current,MENU_CMD_OK);
     else if(strcmp(arg,"cancel") == 0)
       menu_read_cmd(priv->current,MENU_CMD_CANCEL);
+    else if(strcmp(arg,"home") == 0)
+      menu_read_cmd(priv->current,MENU_CMD_HOME);
+    else if(strcmp(arg,"end") == 0)
+      menu_read_cmd(priv->current,MENU_CMD_END);
+    else if(strcmp(arg,"pageup") == 0)
+      menu_read_cmd(priv->current,MENU_CMD_PAGE_UP);
+    else if(strcmp(arg,"pagedown") == 0)
+      menu_read_cmd(priv->current,MENU_CMD_PAGE_DOWN);
     else if(strcmp(arg,"hide") == 0 || strcmp(arg,"toggle") == 0)
       priv->current->show = 0;
     else

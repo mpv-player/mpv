@@ -221,20 +221,6 @@ static void draw(menu_t* menu, mp_image_t* mpi) {
   return;
 }
 
-static void read_cmd(menu_t* menu,int cmd) {
-  switch(cmd) {
-  case MENU_CMD_UP:
-    break;
-  case MENU_CMD_DOWN:
-  case MENU_CMD_OK:
-    break;
-  case MENU_CMD_CANCEL:
-    menu->show = 0;
-    menu->cl = 1;
-    break;
-  }
-}
-
 static void check_child(menu_t* menu) {
 #ifndef __MINGW32__
   fd_set rfd;
@@ -362,16 +348,16 @@ static void enter_cmd(menu_t* menu) {
   //mpriv->input = mpriv->cur_history->buffer;
 }
 
-static void read_key(menu_t* menu,int c) {
-  if(!mpriv->child || !mpriv->raw_child) switch(c) {
-  case KEY_ESC:
+static void read_cmd(menu_t* menu,int cmd) {
+  switch(cmd) {
+  case MENU_CMD_CANCEL:
     if(mpriv->hide_time)
       mpriv->hide_ts = GetTimerMS();
     else
       menu->show = 0;
     mpriv->show_ts = 0;
     return;
-  case KEY_ENTER: {
+  case MENU_CMD_OK: {
     mp_cmd_t* c;
     if(mpriv->child) {
       char *str = mpriv->cur_history->buffer;
@@ -422,27 +408,31 @@ static void read_key(menu_t* menu,int c) {
     }
     return;
   }
-  case KEY_DELETE:
-  case KEY_BS: {
+  case MENU_CMD_UP:
+    if(mpriv->cur_history->prev)
+      mpriv->cur_history = mpriv->cur_history->prev;
+    break;
+  case MENU_CMD_DOWN:
+    if(mpriv->cur_history->next)
+      mpriv->cur_history = mpriv->cur_history->next;
+    break;
+  }
+}
+
+static void read_key(menu_t* menu,int c) {
+  if(mpriv->child && mpriv->raw_child) {
+    write(mpriv->child_fd[0],&c,sizeof(int));
+    return;
+  }
+
+  if (c == KEY_DELETE || c == KEY_BS) {
     unsigned int i = strlen(mpriv->cur_history->buffer);
     if(i > 0)
       mpriv->cur_history->buffer[i-1] = '\0';
     return;
   }
-  case KEY_UP:
-    if(mpriv->cur_history->prev)
-      mpriv->cur_history = mpriv->cur_history->prev;
-    break;
-  case KEY_DOWN:
-    if(mpriv->cur_history->next)
-      mpriv->cur_history = mpriv->cur_history->next;
-    break;
-  }
-
-  if(mpriv->child && mpriv->raw_child) {
-    write(mpriv->child_fd[0],&c,sizeof(int));
+  if (menu_dflt_read_key(menu, c))
     return;
-  }
 
   if(isascii(c)) {
     int l = strlen(mpriv->cur_history->buffer);
@@ -453,7 +443,7 @@ static void read_key(menu_t* menu,int c) {
     mpriv->cur_history->buffer[l] = (char)c;
     mpriv->cur_history->buffer[l+1] = '\0';
   }
-
+  return;
 }
 
 

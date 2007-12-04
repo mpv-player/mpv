@@ -153,6 +153,8 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
 }
 
 void menu_list_read_cmd(menu_t* menu,int cmd) {
+  list_entry_t* m;
+  int i;
   switch(cmd) {
   case MENU_CMD_UP:
     while(mpriv->current->prev) {
@@ -179,6 +181,27 @@ void menu_list_read_cmd(menu_t* menu,int cmd) {
       if(!mpriv->current->hide) return;
     }
     break;
+  case MENU_CMD_HOME:
+    mpriv->current = mpriv->menu;
+    break;
+  case MENU_CMD_END:
+    for(m = mpriv->current ; m && m->next ; m = m->next)
+      /**/;
+    if(m)
+      mpriv->current = m;
+    break;
+  case MENU_CMD_PAGE_UP:
+    for(i = 0, m = mpriv->current ; m && m->prev && i < mpriv->disp_lines ; m = m->prev, i++)
+      /**/;
+    if(m)
+      mpriv->current = m;
+    break;
+  case MENU_CMD_PAGE_DOWN:
+    for(i = 0, m = mpriv->current ; m && m->next && i < mpriv->disp_lines ; m = m->next, i++)
+      /**/;
+    if(m)
+      mpriv->current = m;
+    break;
   case MENU_CMD_LEFT:
   case MENU_CMD_CANCEL:
     menu->show = 0;
@@ -187,57 +210,25 @@ void menu_list_read_cmd(menu_t* menu,int cmd) {
   }    
 }
 
-void menu_list_jump_to_key(menu_t* menu,int c) {
+int menu_list_jump_to_key(menu_t* menu,int c) {
   if(c < 256 && isalnum(c)) {
     list_entry_t* e = mpriv->current;
     if(e->txt[0] == c) e = e->next;
     for(  ; e ; e = e->next) {
 	if(e->txt[0] == c) {
 	  mpriv->current = e;
-	  return;
+	  return 1;
 	}
     }
     for(e = mpriv->menu ; e ;  e = e->next) {
 	if(e->txt[0] == c) {
 	  mpriv->current = e;
-	  return;
+	  return 1;
 	}
     }
-  } else
-    menu_dflt_read_key(menu,c);
-}
-
-void menu_list_read_key(menu_t* menu,int c,int jump_to) {
-  list_entry_t* m;
-  int i;
-  switch(c) {
-  case KEY_HOME:
-    mpriv->current = mpriv->menu;
-    break;
-  case KEY_END:
-    for(m = mpriv->current ; m && m->next ; m = m->next)
-      /**/;
-    if(m)
-      mpriv->current = m;
-    break;
-  case KEY_PAGE_UP:
-    for(i = 0, m = mpriv->current ; m && m->prev && i < mpriv->disp_lines ; m = m->prev, i++)
-      /**/;
-    if(m)
-      mpriv->current = m;
-    break;
-  case KEY_PAGE_DOWN:
-    for(i = 0, m = mpriv->current ; m && m->next && i < mpriv->disp_lines ; m = m->next, i++)
-      /**/;
-    if(m)
-      mpriv->current = m;
-    break;
-  default:
-    if(jump_to)
-      menu_list_jump_to_key(menu,c);
-    else
-      menu_dflt_read_key(menu,c);
-  }    
+    return 1;
+  }
+  return 0;
 }
 
 void menu_list_add_entry(menu_t* menu,list_entry_t* entry) {
