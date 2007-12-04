@@ -325,7 +325,7 @@ int b_alive;
         if (err != noErr)
         {
             ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device: [%4.4s]\n", (char *)&err);
-            return CONTROL_FALSE;
+            goto err_out;
         }
 
         /* Retrieve the length of the device name. */
@@ -336,7 +336,7 @@ int b_alive;
         if (err != noErr)
         {
             ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device name length: [%4.4s]\n", (char *)&err);
-            return CONTROL_FALSE;
+            goto err_out;
         }
 
         /* Retrieve the name of the device. */
@@ -347,7 +347,8 @@ int b_alive;
         if (err != noErr)
         {
             ao_msg(MSGT_AO, MSGL_WARN, "could not get default audio device name: [%4.4s]\n", (char *)&err);
-            return CONTROL_FALSE;
+            free( psz_name);
+            goto err_out;
         }
 
         ao_msg(MSGT_AO,MSGL_V, "got default audio output device ID: %#lx Name: %s\n", devid_def, psz_name );
@@ -381,8 +382,7 @@ int b_alive;
 		break;
 	default:
 		ao_msg(MSGT_AO, MSGL_WARN, "Unsupported format (0x%08x)\n", format);
-		return CONTROL_FALSE;
-		break;
+		goto err_out;
 	}
 
     if((format&AF_FORMAT_POINT_MASK)==AF_FORMAT_F) {
@@ -438,7 +438,7 @@ int b_alive;
         if (ao->i_hog_pid != -1 && ao->i_hog_pid != getpid())
         {
             ao_msg(MSGT_AO, MSGL_WARN, "Selected audio device is exclusively in use by another program.\n" );
-            return CONTROL_FALSE;
+            goto err_out;
         }
         ao->stream_format = inDesc;
         return OpenSPDIF();
@@ -454,20 +454,20 @@ int b_alive;
 	comp = FindNextComponent(NULL, &desc);  //Finds an component that meets the desc spec's
 	if (comp == NULL) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to find Output Unit component\n");
-		return CONTROL_FALSE;
+		goto err_out;
 	}
 		
 	err = OpenAComponent(comp, &(ao->theOutputUnit));  //gains access to the services provided by the component
 	if (err) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to open Output Unit component: [%4.4s]\n", (char *)&err);
-		return CONTROL_FALSE;
+		goto err_out;
 	}
 
 	// Initialize AudioUnit 
 	err = AudioUnitInitialize(ao->theOutputUnit);
 	if (err) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to initialize Output Unit component: [%4.4s]\n", (char *)&err);
-		return CONTROL_FALSE;
+		goto err_out1;
 	}
 
 	size =  sizeof(AudioStreamBasicDescription);
@@ -475,7 +475,7 @@ int b_alive;
 
 	if (err) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to set the input format: [%4.4s]\n", (char *)&err);
-		return CONTROL_FALSE;
+		goto err_out2;
 	}
 
 	size = sizeof(UInt32);
@@ -484,7 +484,7 @@ int b_alive;
 	if (err)
 	{
 		ao_msg(MSGT_AO,MSGL_WARN, "AudioUnitGetProperty returned [%4.4s] when getting kAudioDevicePropertyBufferSize\n", (char *)&err);
-		return CONTROL_FALSE;
+		goto err_out2;
 	}
 
 	ao->chunk_size = maxFrames;//*inDesc.mBytesPerFrame;
@@ -507,12 +507,22 @@ int b_alive;
     err = AudioUnitSetProperty(ao->theOutputUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &renderCallback, sizeof(AURenderCallbackStruct));
 	if (err) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to set the render callback: [%4.4s]\n", (char *)&err);
-		return CONTROL_FALSE;
+		goto err_out2;
 	}
 
 	reset();
     
     return CONTROL_OK;
+
+err_out2:
+    AudioUnitUninitialize(ao->theOutputUnit);
+err_out1:
+    CloseComponent(ao->theOutputUnit);
+err_out:
+    free(ao->buffer);
+    free(ao);
+    ao = NULL;
+    return CONTROL_FALSE; 
 }
 
 /*****************************************************************************
@@ -539,7 +549,8 @@ static int OpenSPDIF()
     if (err != noErr)
     {
         ao_msg(MSGT_AO, MSGL_WARN, "failed to set hogmode: [%4.4s]\n", (char *)&err);
-        return CONTROL_FALSE;
+        ao->i_hog_pid = -1;
+        goto err_out;
     }
 
     /* Set mixable to false if we are allowed to. */
@@ -560,7 +571,7 @@ static int OpenSPDIF()
     if (err != noErr)
     {
         ao_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n", (char *)&err);
-        return CONTROL_FALSE;
+        goto err_out;
     }
 
     /* Get a list of all the streams on this device. */
@@ -570,7 +581,7 @@ static int OpenSPDIF()
     if (err != noErr)
     {
         ao_msg(MSGT_AO, MSGL_WARN, "could not get number of streams: [%4.4s]\n", (char *)&err);
-        return CONTROL_FALSE;
+        goto err_out;
     }
 
     i_streams = i_param_size / sizeof(AudioStreamID);
@@ -578,7 +589,7 @@ static int OpenSPDIF()
     if (p_streams == NULL)
     {
         ao_msg(MSGT_AO, MSGL_WARN, "out of memory\n" );
-        return CONTROL_FALSE;
+        goto err_out;
     }
 
     err = AudioDeviceGetProperty(ao->i_selected_dev, 0, FALSE,
@@ -588,7 +599,7 @@ static int OpenSPDIF()
     {
         ao_msg(MSGT_AO, MSGL_WARN, "could not get number of streams: [%4.4s]\n", (char *)&err);
         if (p_streams) free(p_streams);
-        return CONTROL_FALSE;
+        goto err_out;
     }
 
     ao_msg(MSGT_AO, MSGL_V, "current device stream number: %d\n", i_streams);
@@ -693,13 +704,13 @@ static int OpenSPDIF()
     if (ao->i_stream_index < 0)
     {
         ao_msg(MSGT_AO, MSGL_WARN, "can not find any digital output stream format when OpenSPDIF().\n");
-        return CONTROL_FALSE;
+        goto err_out;
     }
 
     print_format(MSGL_V, "original stream format:", &ao->sfmt_revert);
 
     if (!AudioStreamChangeFormat(ao->i_stream_id, ao->stream_format))
-        return CONTROL_FALSE;
+        goto err_out;
 
     err = AudioDeviceAddPropertyListener(ao->i_selected_dev,
                                          kAudioPropertyWildcardChannel,
@@ -744,12 +755,42 @@ static int OpenSPDIF()
     if (err != noErr)
     {
         ao_msg(MSGT_AO, MSGL_WARN, "AudioDeviceAddIOProc failed: [%4.4s]\n", (char *)&err);
-        return CONTROL_FALSE;
+        goto err_out1;
     }
 
     reset();
 
     return CONTROL_TRUE;
+
+err_out1:
+    if (ao->b_revert)
+        AudioStreamChangeFormat(ao->i_stream_id, ao->sfmt_revert);
+err_out:
+    if (ao->b_changed_mixing && ao->sfmt_revert.mFormatID != kAudioFormat60958AC3)
+    {
+        int b_mix = 1;
+        err = AudioDeviceSetProperty(ao->i_selected_dev, 0, 0, FALSE,
+                                     kAudioDevicePropertySupportsMixing,
+                                     i_param_size, &b_mix);
+        if (err != noErr)
+            ao_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
+                   (char *)&err);
+    }
+    if (ao->i_hog_pid == getpid())
+    {
+        ao->i_hog_pid = -1;
+        i_param_size = sizeof(ao->i_hog_pid);
+        err = AudioDeviceSetProperty(ao->i_selected_dev, 0, 0, FALSE,
+                                     kAudioDevicePropertyHogMode,
+                                     i_param_size, &ao->i_hog_pid);
+        if (err != noErr)
+            ao_msg(MSGT_AO, MSGL_WARN, "Could not release hogmode: [%4.4s]\n",
+                   (char *)&err);
+    }
+    free(ao->buffer);
+    free(ao);
+    ao = NULL;
+    return CONTROL_FALSE; 
 }
 
 /*****************************************************************************
