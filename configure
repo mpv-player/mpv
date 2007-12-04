@@ -6275,11 +6275,11 @@ EOF
       fi
   fi
 fi
-if test "$_live" = yes && test "$_network" = yes && test "$_nemesi" = no; then
+if test "$_live" = yes && test "$_network" = yes; then
   _res_comment="using $_livelibdir"
   _def_live='#define STREAMING_LIVE555 1'
  _inputmodules="live555 $_inputmodules"
-elif test "$_live_dist" = yes && test "$_network" = yes && test "$_nemesi" = no; then
+elif test "$_live_dist" = yes && test "$_network" = yes; then
   _res_comment="using distribution version"
   _live="yes"
   _def_live='#define STREAMING_LIVE555 1'
