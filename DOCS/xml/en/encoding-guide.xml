@@ -963,7 +963,7 @@ video is taken from the center of the frame. And because of the way DVD
 video is sampled, make sure the offset is an even number. (In fact, as a
 rule, never use odd values for any parameter when you are cropping and
 scaling video.) If you are not comfortable throwing a few extra pixels
-away, you might prefer instead to scale the video instead. We will look
+away, you might prefer to scale the video instead. We will look
 at this in our example below.
 You can actually let the <option>cropdetect</option> filter do all of the
 above for you, as it has an optional <option>round</option> parameter that
@@ -1009,7 +1009,7 @@ movie in time, plus a small amount of "overhead" (see the section on
 for instance).
 Other parameters such as scaling, cropping, etc. will
 <emphasis role="bold">not</emphasis> alter the file size unless you
-change the bitrate as well!.
+change the bitrate as well!
 </para>
 
 <para>
@@ -1081,7 +1081,7 @@ First, you should compute the encoded aspect ratio:
 </para></listitem>
 <listitem><para>
   PRdvd is the pixel ratio of the DVD which is equal to 1.25=(720/576) for PAL
-  DVDs and 1.5=(720/480) for NTSC DVDs,
+  DVDs and 1.5=(720/480) for NTSC DVDs.
 </para></listitem>
 </itemizedlist>
 </para>
