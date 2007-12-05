@@ -221,7 +221,7 @@ static int dts_sync(sh_audio_t *sh, int *flags)
         if(length >= HEADER_SIZE)
             break;
 
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "skip\n");
+//        mp_msg(MSGT_DECAUDIO, MSGL_V, "skip\n");
         memmove(sh->a_in_buffer, sh->a_in_buffer+1, HEADER_SIZE-1);
         --sh->a_in_buffer_len;
     }
