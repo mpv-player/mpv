@@ -179,7 +179,7 @@ fi
 
 filelist=`all_filenames`
 
-case "$_stupid$_res$_depr" in
+case "$_stupid$_res$_depr$_gnu" in
     *yes*)
     # generate 'shortlist' to avoid false positives in xpm files, docs, etc,
     # when one only needs to check .c and .h files
@@ -253,9 +253,9 @@ fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_gnu" = "yes" ]; then
+if [ "$_gnu" = "yes" -a -n "$chfilelist" ]; then
     printhead "checking for GNUisms ..."
-    grep $_grepopts "case.*\.\.\..*:" $filelist
+    grep $_grepopts "case.*\.\.\..*:" $chfilelist
 fi
 
 # -----------------------------------------------------------------------------
