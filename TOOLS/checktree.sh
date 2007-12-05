@@ -168,6 +168,13 @@ else
     COLE=""
 fi
 
+# Test presence of svn info
+
+if [ "$_svn" = "yes" -a ! -d .svn ] ; then
+    echo "No svn info available. Please use -nosvn." >&2
+    exit 1
+fi
+
 # Generate filelist once so -svn isn't _that_ much slower than -nosvn anymore
 
 filelist=`all_filenames`
