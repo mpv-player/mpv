@@ -179,11 +179,13 @@ fi
 
 filelist=`all_filenames`
 
-if [ "$_stupid" = "yes" -o "$_res" = "yes" -o "$_depr" = "yes" ] ; then
+case "$_stupid$_res$_depr" in
+    *yes*)
     # generate 'shortlist' to avoid false positives in xpm files, docs, etc,
     # when one only needs to check .c and .h files
     chfilelist=`echo $filelist | tr ' ' '\n' | grep "[\.][ch]$"`
-fi
+    ;;
+esac
 
 if [ "$_showcont" = "yes" ]; then
   _diffopts="-u"
