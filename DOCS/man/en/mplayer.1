@@ -2016,20 +2016,22 @@ Override some style parameters.
 .TP
 .B \-ass\-hinting <type>
 Set hinting type.
+<type> can be:
 .PD 0
 .RSs
-.IPs <type>
-0: No hinting.
-.br
-1: FreeType autohinter, light mode.
-.br
-2: FreeType autohinter, normal mode.
-.br
-3: Font native hinter.
-.br
-0\-3 + 4: The same, but hinting will only be performed if OSD is rendered at
+.IPs 0
+No hinting.
+.IPs 1
+FreeType autohinter, light mode.
+.IPs 2
+FreeType autohinter, normal mode.
+.IPs 3
+Font native hinter.
+.IPs "0-3 + 4"
+The same, but hinting will only be performed if OSD is rendered at
 screen resolution and, therefore, will not be scaled.
-.br
+.RE
+.RSs
 The default value is 7 (use native hinter for unscaled OSD and no hinting otherwise).
 .RE
 .PD 1
