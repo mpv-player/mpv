@@ -350,7 +350,6 @@ static LRESULT CALLBACK OpenUrlWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPAR
         return 0;
         case WM_DESTROY:
         {
-            PostQuitMessage (0);
             addurl = 0;
             return 0;
         }
@@ -610,9 +609,6 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
             updatetracklist(hwnd);
         }
             break;
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            return 0;
     }
     return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
@@ -736,9 +732,6 @@ static LRESULT CALLBACK SkinBrowserWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, 
                 }
             }
         }
-            return 0;
-        case WM_DESTROY:
-            PostQuitMessage(0);
             return 0;
     }
     return DefWindowProc(hwnd, iMsg, wParam, lParam);
@@ -872,9 +865,6 @@ static LRESULT CALLBACK TitleChapterWndProc(HWND hwnd, UINT iMsg, WPARAM wParam,
             }
         }
         return 0;
-        case WM_DESTROY:
-            PostQuitMessage (0);
-            return 0;
     }
     return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
@@ -1090,9 +1080,6 @@ static LRESULT CALLBACK EqWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
             }
         }
         return 0;
-        case WM_DESTROY:
-            PostQuitMessage (0);
-            return 0;
     }
     return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }

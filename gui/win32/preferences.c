@@ -656,9 +656,6 @@ static LRESULT CALLBACK PrefsWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM
             }
             return 0;
         }
-        case WM_DESTROY:
-            PostQuitMessage (0);
-            return 0;
     }
     return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
