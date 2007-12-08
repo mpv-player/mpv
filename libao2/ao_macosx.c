@@ -296,13 +296,12 @@ AURenderCallbackStruct renderCallback;
 OSStatus err;
 UInt32 size, maxFrames, i_param_size;
 char *psz_name;
-int aoIsCreated = ao != NULL;
 AudioDeviceID devid_def = 0;
 int b_alive;
 
     ao_msg(MSGT_AO,MSGL_V, "init([%dHz][%dch][%s][%d])\n", rate, channels, af_fmt2str_short(format), flags);
 
-    if (!aoIsCreated) { ao = malloc(sizeof(ao_macosx_t)); ao->buffer = NULL;}
+    ao = calloc(1, sizeof(ao_macosx_t));
 
     ao->i_selected_dev = 0;
     ao->b_supports_digital = 0;
@@ -497,8 +496,7 @@ int b_alive;
 
 	ao->num_chunks = (ao_data.bps+ao->chunk_size-1)/ao->chunk_size;
     ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
-    ao->buffer = aoIsCreated ? realloc(ao->buffer,(ao->num_chunks + 1)*ao->chunk_size)
-							: calloc(ao->num_chunks + 1, ao->chunk_size);
+    ao->buffer = calloc(ao->num_chunks + 1, ao->chunk_size);
 	
 	ao_msg(MSGT_AO,MSGL_V, "using %5d chunks of %d bytes (buffer len %d bytes)\n", (int)ao->num_chunks, (int)ao->chunk_size, (int)ao->buffer_len);
 
@@ -742,8 +740,7 @@ static int OpenSPDIF()
 
     ao->num_chunks = (ao_data.bps+ao->chunk_size-1)/ao->chunk_size;
     ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
-    ao->buffer = NULL!=ao->buffer ? realloc(ao->buffer,(ao->num_chunks + 1)*ao->chunk_size)
-                                  : calloc(ao->num_chunks + 1, ao->chunk_size);
+    ao->buffer = calloc(ao->num_chunks + 1, ao->chunk_size);
 
     ao_msg(MSGT_AO,MSGL_V, "using %5d chunks of %d bytes (buffer len %d bytes)\n", (int)ao->num_chunks, (int)ao->chunk_size, (int)ao->buffer_len);
 
