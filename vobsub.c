@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <math.h>
 
 #include "config.h"
 #include "version.h"
@@ -802,6 +803,21 @@ vobsub_parse_origin(vobsub_t *vob, const char *line)
     return 0;
 }
 
+unsigned int vobsub_palette_to_yuv(unsigned int pal)
+{
+    int r, g, b, y, u, v;
+    // Palette in idx file is not rgb value, it was calculated by wrong forumla.
+    // Here's reversed forumla of the one used to generate palette in idx file.
+    r = pal >> 16 & 0xff;
+    g = pal >> 8 & 0xff;
+    b = pal & 0xff;
+    y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
+    u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
+    v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
+    y = y * 219 / 255 + 16;
+    return y << 16 | u << 8 | v;
+}
+
 static int
 vobsub_parse_palette(vobsub_t *vob, const char *line)
 {
@@ -810,7 +826,7 @@ vobsub_parse_palette(vobsub_t *vob, const char *line)
     n = 0;
     while (1) {
 	const char *p;
-	int r, g, b, y, u, v, tmp;
+	int tmp;
 	while (isspace(*line))
 	    ++line;
 	p = line;
@@ -819,14 +835,7 @@ vobsub_parse_palette(vobsub_t *vob, const char *line)
 	if (p - line != 6)
 	    return -1;
 	tmp = strtoul(line, NULL, 16);
-	r = tmp >> 16 & 0xff;
-	g = tmp >> 8 & 0xff;
-	b = tmp & 0xff;
-	y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
-	u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
-	v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
-	y = y * 219 / 255 + 16;
-	vob->palette[n++] = y << 16 | u << 8 | v;
+	vob->palette[n++] = vobsub_palette_to_yuv(tmp);
 	if (n == 16)
 	    break;
 	if (*p == ',')

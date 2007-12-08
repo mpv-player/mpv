@@ -22,6 +22,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
+#include "vobsub.h"
 #include "subreader.h"
 #include "libvo/sub.h"
 
@@ -305,7 +306,7 @@ vobsub_parse_size (sh_sub_t *sh, const char *start)
 static int
 vobsub_parse_palette (sh_sub_t *sh, const char *start)
 {
-  int i, r, g, b, y, u, v, tmp;
+  int i, tmp;
 
   start += 8;
   while (isspace(*start))
@@ -314,14 +315,7 @@ vobsub_parse_palette (sh_sub_t *sh, const char *start)
     {
       if (sscanf(start, "%06x", &tmp) != 1)
         break;
-      r = tmp >> 16 & 0xff;
-      g = tmp >> 8 & 0xff;
-      b = tmp & 0xff;
-      y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
-      u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
-      v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
-      y = y * 219 / 255 + 16;
-      sh->palette[i] = y << 16 | u << 8 | v;
+      sh->palette[i] = vobsub_palette_to_yuv(tmp);
       start += 6;
       while ((*start == ',') || isspace(*start))
         start++;
