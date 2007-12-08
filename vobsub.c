@@ -825,6 +825,7 @@ vobsub_parse_palette(vobsub_t *vob, const char *line)
 	y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
 	u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
 	v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
+	y = y * 219 / 255 + 16;
 	vob->palette[n++] = y << 16 | u << 8 | v;
 	if (n == 16)
 	    break;
