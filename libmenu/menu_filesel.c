@@ -180,7 +180,7 @@ static void free_extensions(char **extensions){
   }
 }
 
-static int _open_dir(menu_t* menu,char* args) {
+static int menu_open_dir(menu_t* menu,char* args) {
   char **namelist, **tp;
   struct dirent *dp;
   struct stat st;
@@ -292,9 +292,9 @@ bailout:
   return 1;
 }
 static int open_dir(menu_t* menu,char* args) {
-  if (_open_dir(menu, args))
+  if (menu_open_dir(menu, args))
     return 1;
-  if (menu_chroot && _open_dir(menu, menu_chroot))
+  if (menu_chroot && menu_open_dir(menu, menu_chroot))
     return 1;
   return 0;
 }
