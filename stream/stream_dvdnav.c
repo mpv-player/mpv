@@ -141,11 +141,7 @@ static void dvdnav_get_highlight (dvdnav_priv_t *priv, int display_mode) {
 static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len) {
   int event = DVDNAV_NOP;
 
-  if (!len) return -1;
   *len=-1;
-  if (!priv) return -1;
-  if (!buf) return -1;
-
   if (dvdnav_get_next_block(priv->dvdnav,buf,&event,len)!=DVDNAV_STATUS_OK) {
     mp_msg(MSGT_OPEN,MSGL_V, "Error getting next block from DVD %d (%s)\n",event, dvdnav_err_to_string(priv->dvdnav) );
     *len=-1;
