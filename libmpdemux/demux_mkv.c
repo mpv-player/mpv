@@ -356,13 +356,15 @@ vobsub_parse_custom_colors (sh_sub_t *sh, const char *start)
           use_custom_colors ? "ON" : "OFF");
    if ((start = strstr(start, "colors:")) != NULL)
      {
+       unsigned int tmp;
        start += 7;
        while (isspace(*start))
          start++;
        for (i = 0; i < 4; i++)
          {
-           if (sscanf(start, "%06x", &sh->colors[i]) != 1)
+           if (sscanf(start, "%06x", &tmp) != 1)
              break;
+           sh->colors[i] = vobsub_rgb_to_yuv(tmp);
            start += 6;
            while ((*start == ',') || isspace(*start))
              start++;

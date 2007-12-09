@@ -817,6 +817,18 @@ unsigned int vobsub_palette_to_yuv(unsigned int pal)
     return y << 16 | u << 8 | v;
 }
 
+unsigned int vobsub_rgb_to_yuv(unsigned int rgb)
+{
+    int r, g, b, y, u, v;
+    r = rgb >> 16 & 0xff;
+    g = rgb >> 8 & 0xff;
+    b = rgb & 0xff;
+    y = ( 0.299   * r + 0.587   * g + 0.114   * b) * 219 / 255 + 16.5;
+    u = (-0.16874 * r - 0.33126 * g + 0.5     * b) * 224 / 255 + 128.5;
+    v = ( 0.5     * r - 0.41869 * g - 0.08131 * b) * 224 / 255 + 128.5;
+    return y << 16 | u << 8 | v;
+}
+
 static int
 vobsub_parse_palette(vobsub_t *vob, const char *line)
 {
@@ -863,7 +875,6 @@ vobsub_parse_cuspal(vobsub_t *vob, const char *line)
 {
     //colors: XXXXXX, XXXXXX, XXXXXX, XXXXXX
     unsigned int n, tmp;
-    int r, g, b, y, u, v;
     n = 0;
     line += 40;
     while(1){
@@ -876,13 +887,7 @@ vobsub_parse_cuspal(vobsub_t *vob, const char *line)
 	if (p - line !=6)
 	    return -1;
 	tmp = strtoul(line, NULL, 16);
-	r = tmp >> 16 & 0xff;
-	g = tmp >> 8 & 0xff;
-	b = tmp & 0xff;
-	y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
-	u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
-	v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
-	vob->cuspal[n++] = y << 16 | u << 8 | v;
+	vob->cuspal[n++] = vobsub_rgb_to_yuv(tmp);
 	if (n==4)
 	    break;
 	if(*p == ',')
