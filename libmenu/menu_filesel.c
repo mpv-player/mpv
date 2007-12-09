@@ -302,24 +302,14 @@ static int open_dir(menu_t* menu,char* args) {
 static char *action;
 
 static void read_cmd(menu_t* menu,int cmd) {
-  mp_cmd_t* c = NULL;
   switch(cmd) {
   case MENU_CMD_LEFT:
     mpriv->p.current = mpriv->p.menu; // Hack : we consider that the first entry is ../
   case MENU_CMD_RIGHT:
   case MENU_CMD_OK: {
     // Directory
-    if(mpriv->p.current->d) {
-      if(mpriv->dir_action) {
-	int fname_len = strlen(mpriv->dir) + strlen(mpriv->p.current->p.txt) + 1;
-	char filename[fname_len];
-	char* str;
-	sprintf(filename,"%s%s",mpriv->dir,mpriv->p.current->p.txt);
-	str = replace_path(mpriv->dir_action,filename);
-	c = mp_input_parse_cmd(str);
-	if(str != mpriv->dir_action)
-	  free(str);
-      } else { // Default action : open this dirctory ourself
+    if(mpriv->p.current->d && !mpriv->dir_action) {
+        // Default action : open this dirctory ourself
 	int l = strlen(mpriv->dir);
 	char *slash =  NULL, *p = NULL;
 	if(strcmp(mpriv->p.current->p.txt,"../") == 0) {
@@ -343,21 +333,22 @@ static void read_cmd(menu_t* menu,int cmd) {
 	  menu->cl = 1;
 	}
 	free(p);
-      }
-    } else { // Files
+    } else { // File and directory dealt with action string.
+      mp_cmd_t* c;
       int fname_len = strlen(mpriv->dir) + strlen(mpriv->p.current->p.txt) + 1;
       char filename[fname_len];
       char *str;
+      char *action = mpriv->p.current->d ? mpriv->dir_action:mpriv->file_action;
       sprintf(filename,"%s%s",mpriv->dir,mpriv->p.current->p.txt);
-      str = replace_path(mpriv->file_action,filename);
+      str = replace_path(action, filename);
       c = mp_input_parse_cmd(str);
-      if(str != mpriv->file_action)
+      if (str != action)
 	free(str);
-    }	  
     if(c) {
       mp_input_queue_cmd(c);
       if(mpriv->auto_close)
 	menu->cl = 1;
+    }
     }
   } break;
   case MENU_CMD_ACTION: {
