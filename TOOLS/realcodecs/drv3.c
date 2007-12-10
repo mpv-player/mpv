@@ -175,7 +175,7 @@ static void hexdump(void *pos, int len) {
 
 ulong RV20toYUV420CustomMessage(ulong* p1,ulong p2) {
 	ulong result;
-	ulong *pp1=p1;
+//	ulong *pp1=p1;
 	ulong temp[16];
 	fprintf(stderr, "#R# => RV20toYUV420CustomMessage(%p,%p) [%d,%d,%d] \n", p1, p2, p1[0],p1[1],p1[2]);
 #if 1
