@@ -719,6 +719,10 @@ mp_input_parse_cmd(char* str) {
   assert(str != NULL);
 #endif
 
+  // Ignore heading spaces.
+  while (str[0] == ' ' || str[0] == '\t')
+    ++str;
+
   if (strncmp(str, "pausing ", 8) == 0) {
     pausing = 1;
     str = &str[8];
