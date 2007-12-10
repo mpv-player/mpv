@@ -110,7 +110,7 @@ void toc() {
 		usecs+=1000000;
 		--secs;
 	}
-//	fprintf(stderr, "Duration: %d.%0.6ds\n", secs, usecs);
+//	fprintf(stderr, "Duration: %ld.%0.6lds\n", secs, usecs);
 }
 
 
@@ -149,7 +149,7 @@ ulong RV20toYUV420CustomMessage(ulong* p1,ulong p2) {
 	ulong result;
 //	ulong *pp1=p1;
 //	ulong temp[16];
-	fprintf(stderr, "#R# => RV20toYUV420CustomMessage(%p,%p) [%d,%d,%d] \n", p1, p2, p1[0],p1[1],p1[2]);
+	fprintf(stderr, "#R# => RV20toYUV420CustomMessage(%p,%p) [%ld,%ld,%ld] \n", p1, p2, p1[0],p1[1],p1[2]);
 #if 0
 	if(p1[0]==0x24){
 	    hexdump(p1[2],64);
@@ -161,7 +161,7 @@ ulong RV20toYUV420CustomMessage(ulong* p1,ulong p2) {
 	}
 #endif
 
-//	fprintf(stderr, "ulong p2=0x%0x(%d))\n", p2, p2);
+//	fprintf(stderr, "ulong p2=0x%0lx(%ld))\n", p2, p2);
 //	hexdump((void*)p1, 12);
 //	if (pp1[0]==0x24) {
 //		hexdump((void*)(pp1[2]),128);
@@ -169,19 +169,19 @@ ulong RV20toYUV420CustomMessage(ulong* p1,ulong p2) {
 //	tic();
 	result=(*rvyuvCustomMessage)(p1,p2);
 //	toc();
-	fprintf(stderr, "#R# <= RV20toYUV420CustomMessage --> 0x%0x(%d)\n", result, result);
+	fprintf(stderr, "#R# <= RV20toYUV420CustomMessage --> 0x%0lx(%ld)\n", result, result);
 	return result;
 }
 
 ulong RV20toYUV420Free(ulong p1) {
 	ulong result;
-	fprintf(stderr, "RV20toYUV420Free(ulong p1=0x%0x(%d))\n", p1, p1);
+	fprintf(stderr, "RV20toYUV420Free(ulong p1=0x%0lx(%ld))\n", p1, p1);
 //	hexdump((void*)p1, 44);
 	tic();
 	result=(*rvyuvFree)(p1);
 	toc();
 //	hexdump((void*)p1, 44);
-	fprintf(stderr, "RV20toYUV420Free --> 0x%0x(%d)\n\n\n", result, result);
+	fprintf(stderr, "RV20toYUV420Free --> 0x%0lx(%ld)\n\n\n", result, result);
 	return result;
 }
 
@@ -191,10 +191,10 @@ ulong RV20toYUV420HiveMessage(ulong *p1,ulong p2) {
 	ulong result;
 	fprintf(stderr, "#R# RV20toYUV420HiveMessage(%p,%p)\n", p1, p2);
 //	    p1->constant,p1->width,p1->height,p1->format1,p1->format2);
-//	fprintf(stderr, "ulong p2=0x%0x(%d))\n", p2, p2);
+//	fprintf(stderr, "ulong p2=0x%0lx(%ld))\n", p2, p2);
 //	hexdump((void*)p1, sizeof(struct init_data));
 
-	fprintf(stderr,">HIVE %d %p\n",p1[0],p1[1]);
+	fprintf(stderr,">HIVE %ld %p\n",p1[0],p1[1]);
 
 	fprintf(stderr,"COPY INIT DATA!\n");
 	memset(h_temp,0x77,1000);
@@ -215,11 +215,11 @@ ulong RV20toYUV420HiveMessage(ulong *p1,ulong p2) {
 //	p1[0]=0;
 //	p1[1]=0x20000000;
 	
-	fprintf(stderr,"<HIVE %d %p\n",p1[0],p1[1]);
+	fprintf(stderr,"<HIVE %ld %p\n",p1[0],p1[1]);
 
 //	hexdump((void*)p1, sizeof(struct init_data));
 //	hexdump((void*)p1, 8);
-	fprintf(stderr, "#R# RV20toYUV420HiveMessage --> 0x%0x(%d)\n\n", result, result);
+	fprintf(stderr, "#R# RV20toYUV420HiveMessage --> 0x%0lx(%ld)\n\n", result, result);
 	return result;
 }
 
@@ -238,8 +238,8 @@ static char i_temp[32768];
 
 ulong RV20toYUV420Init(ulong p1,ulong p2) {
 	ulong result;
-	fprintf(stderr, "#R# RV20toYUV420Init(ulong p1=0x%0x(%d), ", p1, p1);
-	fprintf(stderr, "ulong p2=0x%0x(%d))\n", p2, p2);
+	fprintf(stderr, "#R# RV20toYUV420Init(ulong p1=0x%0lx(%ld), ", p1, p1);
+	fprintf(stderr, "ulong p2=0x%0lx(%ld))\n", p2, p2);
 
 	fprintf(stderr,"COPY INIT DATA!\n");
 	memcpy(i_temp,p1,24);
@@ -255,7 +255,7 @@ ulong RV20toYUV420Init(ulong p1,ulong p2) {
 	memset(i_temp,0x77,1000);
 
 //	hexdump(*((void**)p2), 512);
-	fprintf(stderr, "#R# RV20toYUV420Init --> 0x%0x(%d)\n\n\n", result, result);
+	fprintf(stderr, "#R# RV20toYUV420Init --> 0x%0lx(%ld)\n\n\n", result, result);
 	return result;
 }
 
@@ -321,7 +321,7 @@ ulong RV20toYUV420Transform(ulong p1,ulong p2,ulong p3,ulong p4,ulong p5) {
 	crc_src=build_crc(pch, pp3[0]);
 
 	pp4=pp3[3];	
-	fprintf(stderr,"transin1[%p]: {%d/%d} ",pp4,pp3[2],pp3[0]);
+	fprintf(stderr,"transin1[%p]: {%ld/%ld} ",pp4,pp3[2],pp3[0]);
 //	pp4[0],pp4[1],pp4[2],pp4[3],
 //	pp4[4],pp4[5],pp4[6],pp4[7]);
 	
@@ -329,7 +329,7 @@ ulong RV20toYUV420Transform(ulong p1,ulong p2,ulong p3,ulong p4,ulong p5) {
 	
 	memcpy(temp,pp4,8*(pp3[2]+1));
 	for(i=0;i<=pp3[2];i++){
-	    fprintf(stderr," %p(%d)",temp[i*2],temp[i*2+1]);
+	    fprintf(stderr," %p(%ld)",temp[i*2],temp[i*2+1]);
 	}
         fprintf(stderr,"\n");
 	
@@ -375,9 +375,9 @@ ulong RV20toYUV420Transform(ulong p1,ulong p2,ulong p3,ulong p4,ulong p5) {
 
 //	pp3=p3;
 	// TRANSFORM: <timestamp> <numblocks> <len> <crc_src> <crc_dest> <p4[4]>
-//	fprintf(stderr, "TRAFO:\t%d\t%d\t%d\t%.8X\t%.8X\t%d\n",
+//	fprintf(stderr, "TRAFO:\t%ld\t%ld\t%ld\t%.8lX\t%.8lX\t%ld\n",
 //		pp3[5], pp3[2], pp3[0], crc_src, crc0, pp3[4]);
-	fprintf(stderr, "#R# Decode: %d(%d) [%08X] pts=%d -> %d [%08X]\n",
+	fprintf(stderr, "#R# Decode: %ld(%ld) [%08lX] pts=%ld -> %ld [%08lX]\n",
 	    pp3[0],pp3[2],crc_src,pp3[5],
 	    result,crc0);
 
@@ -385,7 +385,7 @@ ulong RV20toYUV420Transform(ulong p1,ulong p2,ulong p3,ulong p4,ulong p5) {
 //	hexdump((char*)p2, /*64*/ pp4[3]*pp4[4]/2);
 //	hexdump((void*)p4, 20);
 //	hexdump((void*)p5, 512);
-//	fprintf(stderr, "RV20toYUV420Transform --> 0x%0x(%d)\n\n\n", result, result);
+//	fprintf(stderr, "RV20toYUV420Transform --> 0x%0lx(%ld)\n\n\n", result, result);
 	return result;
 }
 
