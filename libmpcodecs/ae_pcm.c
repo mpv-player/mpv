@@ -8,6 +8,7 @@
 #include "mp_msg.h"
 #include "libmpdemux/aviheader.h"
 #include "libaf/af_format.h"
+#include "libaf/reorder_ch.h"
 #include "libmpdemux/ms_hdr.h"
 #include "stream/stream.h"
 #include "libmpdemux/muxer.h"
@@ -38,6 +39,14 @@ static int bind_pcm(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 static int encode_pcm(audio_encoder_t *encoder, uint8_t *dest, void *src, int nsamples, int max_size)
 {
 	max_size = FFMIN(nsamples, max_size);
+	if (encoder->params.channels == 6 || encoder->params.channels == 5) {
+		max_size -= max_size % (encoder->params.channels * 2);
+		reorder_channel_copy_nch(src, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+		                         dest, AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,
+		                         encoder->params.channels,
+		                         max_size / 2, 2);
+	}
+	else
 	memcpy(dest, src, max_size);
 	return max_size;
 }

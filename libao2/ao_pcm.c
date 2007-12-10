@@ -8,6 +8,7 @@
 #include "mpbswap.h"
 #include "subopt-helper.h"
 #include "libaf/af_format.h"
+#include "libaf/reorder_ch.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "mp_msg.h"
@@ -199,6 +200,15 @@ static int play(void* data,int len,int flags){
 	  }
 	}
 #endif 
+
+	if (ao_data.channels == 6 || ao_data.channels == 5) {
+		int frame_size = le2me_16(wavhdr.bits) / 8;
+		len -= len % (frame_size * ao_data.channels);
+		reorder_channel_nch(data, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+		                    AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,
+		                    ao_data.channels,
+		                    len / frame_size, frame_size);
+	}
 
 	//printf("PCM: Writing chunk!\n");
 	fwrite(data,len,1,fp);

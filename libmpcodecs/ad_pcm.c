@@ -5,6 +5,7 @@
 #include "config.h"
 #include "ad_internal.h"
 #include "libaf/af_format.h"
+#include "libaf/reorder_ch.h"
 
 static ad_info_t info = 
 {
@@ -126,5 +127,11 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
       // based on channels in preinit()
       return -1;
   len=demux_read_data(sh_audio->ds,buf,len);
+  if (len > 0 && sh_audio->channels >= 5) {
+    reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,
+                        AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                        sh_audio->channels,
+                        len / sh_audio->samplesize, sh_audio->samplesize);
+  }
   return len;
 }

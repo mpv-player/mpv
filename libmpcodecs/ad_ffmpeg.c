@@ -7,6 +7,7 @@
 #include "help_mp.h"
 
 #include "ad_internal.h"
+#include "libaf/reorder_ch.h"
 
 #include "mpbswap.h"
 
@@ -166,6 +167,25 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	if(y<0){ mp_msg(MSGT_DECAUDIO,MSGL_V,"lavc_audio: error\n");break; }
 	if(y<x) sh_audio->ds->buffer_pos+=y-x;  // put back data (HACK!)
 	if(len2>0){
+	  if (((AVCodecContext *)sh_audio->context)->channels >= 5) {
+            int src_ch_layout = AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT;
+            const char *codec=((AVCodecContext*)sh_audio->context)->codec->name;
+            if (!strcasecmp(codec, "ac3"))
+              src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_AC3_DEFAULT;
+            else if (!strcasecmp(codec, "dca"))
+              src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_DCA_DEFAULT;
+            else if (!strcasecmp(codec, "libfaad")
+                || !strcasecmp(codec, "mpeg4aac"))
+              src_ch_layout = AF_CHANNEL_LAYOUT_AAC_DEFAULT;
+            else if (!strcasecmp(codec, "liba52"))
+              src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_LIBA52_DEFAULT;
+            else
+              src_ch_layout = AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT;
+            reorder_channel_nch(buf, src_ch_layout,
+                                AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                                ((AVCodecContext *)sh_audio->context)->channels,
+                                len2 / 2, 2);
+	  }
 	  //len=len2;break;
 	  if(len<0) len=len2; else len+=len2;
 	  buf+=len2;

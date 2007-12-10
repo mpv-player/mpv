@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "ad_internal.h"
+#include "libaf/reorder_ch.h"
 
 static ad_info_t info = 
 {
@@ -277,6 +278,14 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       /* XXX: samples already multiplied by channels! */
       mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%ld Bytes)!\n",
       sh->samplesize*faac_finfo.samples);
+
+      if (sh->channels >= 5)
+        reorder_channel_copy_nch(faac_sample_buffer,
+                                 AF_CHANNEL_LAYOUT_AAC_DEFAULT,
+                                 buf+len, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                                 sh->channels,
+                                 faac_finfo.samples, sh->samplesize);
+      else
       memcpy(buf+len,faac_sample_buffer, sh->samplesize*faac_finfo.samples);
       last_dec_len = sh->samplesize*faac_finfo.samples;
       len += last_dec_len;

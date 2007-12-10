@@ -26,6 +26,7 @@ SRCS_COMMON = af.c \
               af_volume.c \
               filter.c \
               format.c \
+              reorder_ch.c \
               window.c \
               $(AF_SRCS) \
 

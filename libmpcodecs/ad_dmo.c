@@ -7,6 +7,7 @@
 #include "help_mp.h"
 
 #include "ad_internal.h"
+#include "libaf/reorder_ch.h"
 
 static ad_info_t info = 
 {
@@ -93,6 +94,13 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
         } else {
           sh_audio->a_in_buffer_len-=size_in;
           memmove(sh_audio->a_in_buffer,&sh_audio->a_in_buffer[size_in],sh_audio->a_in_buffer_len);
+        }
+        if (size_out > 0 && sh_audio->channels >= 5) {
+          reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,
+                              AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                              sh_audio->channels,
+                              size_out / sh_audio->samplesize,
+                              sh_audio->samplesize);
         }
 //        len=size_out;
   return size_out;

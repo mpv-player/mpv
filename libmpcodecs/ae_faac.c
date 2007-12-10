@@ -8,6 +8,7 @@
 #include "mp_msg.h"
 #include "libmpdemux/aviheader.h"
 #include "libaf/af_format.h"
+#include "libaf/reorder_ch.h"
 #include "libmpdemux/ms_hdr.h"
 #include "stream/stream.h"
 #include "libmpdemux/muxer.h"
@@ -98,6 +99,12 @@ static int get_frame_size(audio_encoder_t *encoder)
 
 static int encode_faac(audio_encoder_t *encoder, uint8_t *dest, void *src, int len, int max_size)
 {
+	if (encoder->params.channels >= 5)
+		reorder_channel_nch(src, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+		                    AF_CHANNEL_LAYOUT_AAC_DEFAULT,
+		                    encoder->params.channels,
+		                    len / divisor, divisor);
+
 	// len is divided by the number of bytes per sample
 	enc_frame_size = faacEncEncode(faac,  (int32_t*) src,  len / divisor, dest, max_size);
 	
