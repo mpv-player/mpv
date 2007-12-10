@@ -210,14 +210,14 @@ for(i=0;i<len;i++) fgetc(f);
 
 while((c=fgetc(f))>=0){
 
-    printf("%08X  %02X\n",ftell(f),c);
+    printf("%08lX  %02X\n",ftell(f),c);
 
     prefix=0;
     if(c==0x82){
 	prefix=1;
 	//continue;
 	c=fgetc(f);
-	printf("%08X  %02X\n",ftell(f),c);
+	printf("%08lX  %02X\n",ftell(f),c);
     }
 
     if(c==0x00){
