@@ -138,7 +138,7 @@ static af_instance_t* af_create(af_stream_t* s, const char* name_with_cmd)
   if(AF_OK == new->info->open(new) && 
      AF_ERROR < new->control(new,AF_CONTROL_POST_CREATE,&s->cfg)){
     if(cmdline){
-      if(!AF_ERROR<new->control(new,AF_CONTROL_COMMAND_LINE,cmdline))
+      if(AF_ERROR>=new->control(new,AF_CONTROL_COMMAND_LINE,cmdline))
         goto err_out;
     }
     free(name);
