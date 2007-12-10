@@ -111,8 +111,8 @@ void print_wave_header(WAVEFORMATEX *h){
   
   printf("Format Tag: %d (0x%X)\n",h->wFormatTag,h->wFormatTag);
   printf("Channels: %d\n",h->nChannels);
-  printf("Samplerate: %d\n",h->nSamplesPerSec);
-  printf("avg byte/sec: %d\n",h->nAvgBytesPerSec);
+  printf("Samplerate: %ld\n",h->nSamplesPerSec);
+  printf("avg byte/sec: %ld\n",h->nAvgBytesPerSec);
   printf("Block align: %d\n",h->nBlockAlign);
   printf("bits/sample: %d\n",h->wBitsPerSample);
   printf("cbSize: %d\n",h->cbSize);
@@ -137,13 +137,13 @@ void print_wave_header(WAVEFORMATEX *h){
 
 void print_video_header(BITMAPINFOHEADER *h){
   printf("======= VIDEO Format ======\n");
-	printf("  biSize %d\n", h->biSize);
-	printf("  biWidth %d\n", h->biWidth);
-	printf("  biHeight %d\n", h->biHeight);
+	printf("  biSize %ld\n", h->biSize);
+	printf("  biWidth %ld\n", h->biWidth);
+	printf("  biHeight %ld\n", h->biHeight);
 	printf("  biPlanes %d\n", h->biPlanes);
 	printf("  biBitCount %d\n", h->biBitCount);
-	printf("  biCompression %d='%.4s'\n", h->biCompression, &h->biCompression);
-	printf("  biSizeImage %d\n", h->biSizeImage);
+	printf("  biCompression %ld='%.4s'\n", h->biCompression, &h->biCompression);
+	printf("  biSizeImage %ld\n", h->biSizeImage);
   printf("===========================\n");
 }
 
@@ -171,7 +171,7 @@ while(fread(&objh,sizeof(objh),1,f)>0){
       printf("stream type: %s\n",chunk_type(streamh.type));
       printf("stream concealment: %s\n",chunk_type(streamh.concealment));
       printf("type: %d bytes,  stream: %d bytes  ID: %d\n",(int)streamh.type_size,(int)streamh.stream_size,(int)streamh.stream_no);
-      printf("FILEPOS=0x%X\n",ftell(f));
+      printf("FILEPOS=0x%lX\n",ftell(f));
       // type-specific data:
       fread(buffer,streamh.type_size,1,f);
       switch(*((unsigned int*)&streamh.type)){
@@ -216,7 +216,7 @@ while(fread(&objh,sizeof(objh),1,f)>0){
             if(flags&1){
               segs=p[0]-0x80;++p;
             }
-            printf("%08X:  flag=%02X  segs=%d  pad=%d  time=%d  dur=%d\n",
+            printf("%08X:  flag=%02X  segs=%d  pad=%d  time=%ld  dur=%d\n",
               fpos,flags,segs,padding,time,duration);
             for(seg=0;seg<segs;seg++){
               ASF_segmhdr_t* sh=(ASF_segmhdr_t*)p;
