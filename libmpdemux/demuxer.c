@@ -1170,11 +1170,13 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
         }
 
         if(chapter_name) {
-            char *tmp = malloc(16);
             *chapter_name = NULL;
-            if(num_chapters  && *num_chapters && tmp) {
-                sprintf(tmp, " of %3d", *num_chapters);
-                *chapter_name = tmp;
+            if (num_chapters && *num_chapters) {
+                char *tmp = malloc(16);
+                if (tmp) {
+                    sprintf(tmp, " of %3d", *num_chapters);
+                    *chapter_name = tmp;
+                }
             }
         }
 
