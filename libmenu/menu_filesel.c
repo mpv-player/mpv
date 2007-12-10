@@ -117,6 +117,26 @@ typedef int (*kill_warn)(const void*, const void*);
 static int mylstat(char *dir, char *file,struct stat* st) {
   int l = strlen(dir) + strlen(file);
   char s[l+2];
+  if (!strcmp("..", file)) {
+    char *slash;
+    l -= 3;
+    strcpy(s, dir);
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+    if (s[l] == '/' || s[l] == '\\')
+#else
+    if (s[l] == '/')
+#endif
+      s[l] = '\0';
+    slash = strrchr(s, '/');
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+    if (!slash)
+      slash = strrchr(s,'\\');
+#endif
+    if (!slash)
+      return stat(dir,st);
+    slash[1] = '\0';
+    return stat(s,st);
+  }
   sprintf(s,"%s/%s",dir,file);
   return stat(s,st);
 }
@@ -229,7 +249,8 @@ static int menu_open_dir(menu_t* menu,char* args) {
           && !strncmp (mpriv->dir, menu_chroot, len))
         continue;
     }
-    mylstat(args,dp->d_name,&st);
+    if (mylstat(args,dp->d_name,&st))
+      continue;
     if (file_filter && extensions && !S_ISDIR(st.st_mode)) {
       if((ext = strrchr(dp->d_name,'.')) == NULL)
         continue;
