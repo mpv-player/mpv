@@ -1138,6 +1138,7 @@ static void radeon_vid_make_default(void)
   besr.graphics_key_msk=0;
   besr.graphics_key_clr=0;
   besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_TRUE|CMP_MIX_AND;
+  besr.merge_cntl |= 0x00000100;  /* DISP_RGB_OFFSET_EN */
 }
 
 static int find_chip(unsigned chip_id)
