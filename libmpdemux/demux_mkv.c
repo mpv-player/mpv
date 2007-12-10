@@ -306,13 +306,14 @@ vobsub_parse_size (sh_sub_t *sh, const char *start)
 static int
 vobsub_parse_palette (sh_sub_t *sh, const char *start)
 {
-  int i, tmp;
+  int i;
 
   start += 8;
   while (isspace(*start))
     start++;
   for (i = 0; i < 16; i++)
     {
+      unsigned int tmp;
       if (sscanf(start, "%06x", &tmp) != 1)
         break;
       sh->palette[i] = vobsub_palette_to_yuv(tmp);
@@ -356,12 +357,12 @@ vobsub_parse_custom_colors (sh_sub_t *sh, const char *start)
           use_custom_colors ? "ON" : "OFF");
    if ((start = strstr(start, "colors:")) != NULL)
      {
-       unsigned int tmp;
        start += 7;
        while (isspace(*start))
          start++;
        for (i = 0; i < 4; i++)
          {
+           unsigned int tmp;
            if (sscanf(start, "%06x", &tmp) != 1)
              break;
            sh->colors[i] = vobsub_rgb_to_yuv(tmp);
