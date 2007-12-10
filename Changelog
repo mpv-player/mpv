@@ -4,6 +4,7 @@ MPlayer (1.0)
     Decoders:
     * Nellymoser audio decoding via lavc
     * Support for X8 frame (fixes "J-type picture is not supported" for WMV2)
+    * Apple's raw YUV2 in MOV
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
@@ -14,6 +15,7 @@ MPlayer (1.0)
     * vf_ow new overcomplete wavelet denoiser
     * change vf_screenshot dependency from libpng to lavc
     * add af_scaletempo which maintains audio pitch when changing playback speed
+    * fix multi-channel reordering
 
     Streaming:
     * tv:// support for win32
