@@ -102,13 +102,14 @@ af_instance_t* af_get(af_stream_t* s, char* name)
 
 /*/ Function for creating a new filter of type name. The name may
   contain the commandline parameters for the filter */
-static af_instance_t* af_create(af_stream_t* s, char* name)
+static af_instance_t* af_create(af_stream_t* s, const char* name_with_cmd)
 {
+  char* name = strdup(name_with_cmd);
   char* cmdline = name;
 
   // Allocate space for the new filter and reset all pointers
   af_instance_t* new=malloc(sizeof(af_instance_t));
-  if(!new){
+  if (!name || !new) {
     af_msg(AF_MSG_ERROR,"[libaf] Could not allocate memory\n");
     goto err_out;
   }  
@@ -137,17 +138,18 @@ static af_instance_t* af_create(af_stream_t* s, char* name)
   if(AF_OK == new->info->open(new) && 
      AF_ERROR < new->control(new,AF_CONTROL_POST_CREATE,&s->cfg)){
     if(cmdline){
-      if(AF_ERROR<new->control(new,AF_CONTROL_COMMAND_LINE,cmdline))
-	return new;
+      if(!AF_ERROR<new->control(new,AF_CONTROL_COMMAND_LINE,cmdline))
+        goto err_out;
     }
-    else
-      return new; 
+    free(name);
+    return new; 
   }
   
 err_out:
   free(new);
   af_msg(AF_MSG_ERROR,"[libaf] Couldn't create or open audio filter '%s'\n",
 	 name);  
+  free(name);
   return NULL;
 }
 
