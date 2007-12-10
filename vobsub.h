@@ -17,6 +17,8 @@ extern int vobsub_get_index_by_id(void *vobhandle, int id);
 
 /// Convert palette value in idx file to yuv.
 unsigned int vobsub_palette_to_yuv(unsigned int pal);
+/// Convert rgb value to yuv.
+unsigned int vobsub_rgb_to_yuv(unsigned int rgb);
 
 extern void *vobsub_out_open(const char *basename, const unsigned int *palette, unsigned int orig_width, unsigned int orig_height, const char *id, unsigned int index);
 extern void vobsub_out_output(void *me, const unsigned char *packet, int len, double pts);
