@@ -337,7 +337,7 @@ static int main_loop(int listen_fd) {
   return 0;
 }
 
-int main(int argc, char** argv) {
+int main(void) {
   int listen_fd;
   struct sockaddr_in addr;
 
