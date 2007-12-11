@@ -4,6 +4,7 @@ MPlayer (1.0)
     Decoders:
     * Nellymoser audio decoding via lavc
     * Support for X8 frame (fixes "J-type picture is not supported" for WMV2)
+    * Support for DTS WAV/DTS-CD passthrough by ad_hwac3
     * Apple's raw YUV2 in MOV
 
     Demuxers:
