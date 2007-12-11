@@ -58,32 +58,26 @@ static void read_cmd(menu_t* menu,int cmd) {
   switch(cmd) {
   case MENU_CMD_RIGHT:
     if(mpriv->p.current->right) {
-      mp_cmd_t* c = mp_input_parse_cmd(mpriv->p.current->right);
-      if(c) mp_input_queue_cmd(c);
+      mp_input_parse_and_queue_cmds(mpriv->p.current->right);
       break;
     } // fallback on ok if right is not defined
   case MENU_CMD_OK: {
     if(mpriv->p.current->ok) {
-      mp_cmd_t* c = mp_input_parse_cmd(mpriv->p.current->ok);
-      if(c)
+      if (mp_input_parse_and_queue_cmds(mpriv->p.current->ok))
         {
           if (mpriv->auto_close)
               mp_input_queue_cmd (mp_input_parse_cmd ("menu hide"));
-	mp_input_queue_cmd(c);
         }
     }
    } break;
   case MENU_CMD_LEFT:
     if(mpriv->p.current->left) {
-      mp_cmd_t* c = mp_input_parse_cmd(mpriv->p.current->left);
-      if(c) mp_input_queue_cmd(c);
+      mp_input_parse_and_queue_cmds(mpriv->p.current->left);
       break;
     } // fallback on cancel if left is not defined
   case MENU_CMD_CANCEL:
     if(mpriv->p.current->cancel) {
-      mp_cmd_t* c = mp_input_parse_cmd(mpriv->p.current->cancel);
-      if(c)
-	mp_input_queue_cmd(c);
+      mp_input_parse_and_queue_cmds(mpriv->p.current->cancel);
       break;
     }
   default:

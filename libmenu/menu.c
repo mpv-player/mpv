@@ -275,7 +275,7 @@ int menu_dflt_read_key(menu_t* menu,int cmd) {
     for (i = 0; i < bindings->binding_num; ++i) {
       if (bindings->bindings[i].key == cmd) {
         if (bindings->bindings[i].cmd)
-          mp_input_queue_cmd(mp_input_parse_cmd(bindings->bindings[i].cmd));
+          mp_input_parse_and_queue_cmds(bindings->bindings[i].cmd);
         return 1;
       }
     }

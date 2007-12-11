@@ -355,21 +355,18 @@ static void read_cmd(menu_t* menu,int cmd) {
 	}
 	free(p);
     } else { // File and directory dealt with action string.
-      mp_cmd_t* c;
       int fname_len = strlen(mpriv->dir) + strlen(mpriv->p.current->p.txt) + 1;
       char filename[fname_len];
       char *str;
       char *action = mpriv->p.current->d ? mpriv->dir_action:mpriv->file_action;
       sprintf(filename,"%s%s",mpriv->dir,mpriv->p.current->p.txt);
       str = replace_path(action, filename);
-      c = mp_input_parse_cmd(str);
+      if (mp_input_parse_and_queue_cmds(str)) {
+        if(mpriv->auto_close)
+	  menu->cl = 1;
+      }
       if (str != action)
 	free(str);
-    if(c) {
-      mp_input_queue_cmd(c);
-      if(mpriv->auto_close)
-	menu->cl = 1;
-    }
     }
   } break;
   case MENU_CMD_ACTION: {
@@ -378,7 +375,7 @@ static void read_cmd(menu_t* menu,int cmd) {
     char *str;
     sprintf(filename,"%s%s",mpriv->dir,mpriv->p.current->p.txt);
     str = replace_path(action, filename);
-    mp_input_queue_cmd(mp_input_parse_cmd(str));
+    mp_input_parse_and_queue_cmds(str);
     if(str != action)
       free(str);
   } break;
