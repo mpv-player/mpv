@@ -448,6 +448,9 @@ static void check_os_katmai_support( void )
 
 #ifdef __APPLE__
 #include <sys/sysctl.h>
+#elif __AMIGAOS4__
+/* nothing */
+#else
 #include <signal.h>
 #include <setjmp.h>
 
