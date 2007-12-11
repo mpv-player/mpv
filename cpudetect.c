@@ -446,7 +446,7 @@ static void check_os_katmai_support( void )
 }
 #else /* ARCH_X86 */
 
-#ifdef SYS_DARWIN
+#ifdef __APPLE__
 #include <sys/sysctl.h>
 #else
 #ifndef __AMIGAOS4__
@@ -467,7 +467,7 @@ static void sigill_handler (int sig)
     siglongjmp (jmpbuf, 1);
 }
 #endif //__AMIGAOS4__
-#endif
+#endif /* __APPLE__ */
 
 void GetCpuCaps( CpuCaps *caps)
 {
@@ -483,7 +483,7 @@ void GetCpuCaps( CpuCaps *caps)
 	caps->isX86=0;
 	caps->hasAltiVec = 0;
 #ifdef HAVE_ALTIVEC   
-#ifdef SYS_DARWIN   
+#ifdef __APPLE__
 /*
   rip-off from ffmpeg altivec detection code.
   this code also appears on Apple's AltiVec pages.
@@ -500,7 +500,7 @@ void GetCpuCaps( CpuCaps *caps)
                         if (has_vu != 0)
                                 caps->hasAltiVec = 1;
         }
-#else /* SYS_DARWIN */
+#else /* __APPLE__ */
 #ifdef __AMIGAOS4__
         ULONG result = 0;
 
@@ -527,7 +527,7 @@ void GetCpuCaps( CpuCaps *caps)
           }
         }
 #endif //__AMIGAOS4__
-#endif /* SYS_DARWIN */
+#endif /* __APPLE__ */
         mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
 #endif /* HAVE_ALTIVEC */
 
