@@ -8259,7 +8259,7 @@ $_def_vcd
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(WIN32)
 #define DEFAULT_CDROM_DEVICE    "D:"
-#define DEFAULT_DVD_DEVICE	"D:"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(__APPLE__) || defined(__DARWIN__)
 #define DEFAULT_CDROM_DEVICE    "/dev/disk1"
 #define DEFAULT_DVD_DEVICE	"/dev/rdiskN"
