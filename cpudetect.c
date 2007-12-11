@@ -500,8 +500,7 @@ void GetCpuCaps( CpuCaps *caps)
                         if (has_vu != 0)
                                 caps->hasAltiVec = 1;
         }
-#else /* __APPLE__ */
-#ifdef __AMIGAOS4__
+#elif __AMIGAOS4__
         ULONG result = 0;
 
         GetCPUInfoTags(GCIT_VectorUnit, &result, TAG_DONE);
@@ -526,7 +525,6 @@ void GetCpuCaps( CpuCaps *caps)
             caps->hasAltiVec = 1;
           }
         }
-#endif //__AMIGAOS4__
 #endif /* __APPLE__ */
         mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
 #endif /* HAVE_ALTIVEC */
