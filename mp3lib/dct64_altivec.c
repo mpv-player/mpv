@@ -11,7 +11,7 @@
 
 #include "mpg123.h"
 
-#ifndef SYS_DARWIN
+#ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
 

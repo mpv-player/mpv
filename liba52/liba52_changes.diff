@@ -1548,7 +1548,7 @@
  
 +#ifdef HAVE_ALTIVEC
 +
-+#ifndef SYS_DARWIN
++#ifdef HAVE_ALTIVEC_H
 +#include <altivec.h>
 +#endif
 +

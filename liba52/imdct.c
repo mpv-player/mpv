@@ -367,7 +367,7 @@ void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias)
 
 #ifdef HAVE_ALTIVEC
 
-#ifndef SYS_DARWIN
+#ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
 
