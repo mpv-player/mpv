@@ -31,7 +31,7 @@
 
 #include "mangle.h"
 
-#ifdef __DCT36_OPTIMIZE_FOR_K7
+#ifdef DCT36_OPTIMIZE_FOR_K7
 void dct36_3dnowex(real *inbuf, real *o1,
     real *o2, real *wintab, real *tsbuf)
 #else
@@ -171,7 +171,7 @@ void dct36_3dnow(real *inbuf, real *o1,
 	"movd 108(%%edx),%%mm6\n\t"
 	"punpckldq 104(%%edx),%%mm6\n\t"
 	"pfmul %%mm6,%%mm5\n\t"
-#ifdef __DCT36_OPTIMIZE_FOR_K7
+#ifdef DCT36_OPTIMIZE_FOR_K7
 	"pswapd %%mm5,%%mm5\n\t"
 	"movq %%mm5,32(%%ecx)\n\t"
 #else

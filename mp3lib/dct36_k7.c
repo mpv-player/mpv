@@ -29,6 +29,6 @@
  * 2003/06/21: Moved to GCC inline assembly - Alex Beregszaszi
  */
 
-#define __DCT36_OPTIMIZE_FOR_K7
+#define DCT36_OPTIMIZE_FOR_K7
 
 #include "dct36_3dnow.c"
