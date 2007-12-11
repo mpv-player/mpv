@@ -3,9 +3,6 @@
 extern void vfm_help(void);
 
 extern int init_best_video_codec(sh_video_t *sh_video,char** video_codec_list,char** video_fm_list);
-
-//extern int init_video(sh_video_t *sh_video, int *pitches);
-extern int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status);
 extern void uninit_video(sh_video_t *sh_video);
 
 extern void *decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame, double pts);

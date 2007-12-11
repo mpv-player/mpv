@@ -175,7 +175,7 @@ void vfm_help(void){
 	    mpcodecs_vd_drivers[i]->info->comment);
 }
 
-int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
+static int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
     int force = 0;
     unsigned int orig_fourcc=sh_video->bih?sh_video->bih->biCompression:0;
     sh_video->codec=NULL;
