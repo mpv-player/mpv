@@ -1263,6 +1263,7 @@ if test -z "$_target" ; then
       s390x) host_arch=s390x ;;
       mips*) host_arch=mips ;;
       vax) host_arch=vax ;;
+      xtensa*) host_arch=xtensa ;;
       *) host_arch=UNKNOWN ;;
     esac
     ;;
@@ -1627,7 +1628,7 @@ EOF
 fi
 
 
-_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM ARMV4L SH3 POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN GENERIC'
+_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM ARMV4L SH3 POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _arch='X86 X86_32'
@@ -2236,6 +2237,16 @@ EOF
     _arch='VAX'
     _target_arch='ARCH_VAX = yes'
     iproc='vax'
+    proc=''
+    _march=''
+    _mcpu=''
+    _optimizing=''
+    ;;
+
+  xtensa)
+    _arch='XTENSA'
+    _target_arch='ARCH_XTENSA = yes'
+    iproc='xtensa'
     proc=''
     _march=''
     _mcpu=''

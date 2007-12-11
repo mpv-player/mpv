@@ -568,5 +568,9 @@ void GetCpuCaps( CpuCaps *caps)
 #ifdef ARCH_VAX
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO, "CPU: Digital VAX\n" );
 #endif
+
+#ifdef ARCH_XTENSA
+	mp_msg(MSGT_CPUDETECT,MSGL_INFO, "CPU: Tensilica Xtensa\n" );
+#endif
 }
 #endif /* !ARCH_X86 */
