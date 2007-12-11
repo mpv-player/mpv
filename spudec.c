@@ -69,7 +69,7 @@ typedef struct {
   size_t packet_reserve;	/* size of the memory pointed to by packet */
   unsigned int packet_offset;	/* end of the currently assembled fragment */
   unsigned int packet_size;	/* size of the packet once all fragments are assembled */
-  unsigned int packet_pts;	/* PTS for this packet */
+  int packet_pts;		/* PTS for this packet */
   unsigned int palette[4];
   unsigned int alpha[4];
   unsigned int cuspal[4];
@@ -341,7 +341,7 @@ static void compute_palette(spudec_handle_t *this, packet_t *packet)
   }
 }
 
-static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
+static void spudec_process_control(spudec_handle_t *this, int pts100)
 {
   int a,b; /* Temporary vars */
   unsigned int date, type;
@@ -376,7 +376,7 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
 	/* Menu ID, 1 byte */
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Menu ID\n");
         /* shouldn't a Menu ID type force display start? */
-	start_pts = pts100 + date;
+	start_pts = pts100 < 0 && -pts100 >= date ? 0 : pts100 + date;
 	end_pts = UINT_MAX;
 	display = 1;
 	this->is_forced_sub=~0; // current subtitle is forced
@@ -384,7 +384,7 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
       case 0x01:
 	/* Start display */
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Start display!\n");
-	start_pts = pts100 + date;
+	start_pts = pts100 < 0 && -pts100 >= date ? 0 : pts100 + date;
 	end_pts = UINT_MAX;
 	display = 1;
 	this->is_forced_sub=0;
@@ -392,7 +392,7 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
       case 0x02:
 	/* Stop display */
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Stop display!\n");
-	end_pts = pts100 + date;
+	end_pts = pts100 < 0 && -pts100 >= date ? 0 : pts100 + date;
 	break;
       case 0x03:
 	/* Palette */
@@ -450,14 +450,17 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
       }
     }
   next_control:
-    if (display) {
+    if (!display)
+      continue;
+    if (end_pts == UINT_MAX && start_off != next_off) {
+      end_pts = get_be16(this->packet + next_off) * 1024;
+      end_pts = 1 - pts100 >= end_pts ? 0 : pts100 + end_pts - 1;
+    }
+    if (end_pts > 0) {
       packet_t *packet = calloc(1, sizeof(packet_t));
       int i;
       packet->start_pts = start_pts;
-      if (end_pts == UINT_MAX && start_off != next_off) {
-	start_pts = pts100 + get_be16(this->packet + next_off) * 1024;
-        packet->end_pts = start_pts - 1;
-      } else packet->end_pts = end_pts;
+      packet->end_pts = end_pts;
       packet->current_nibble[0] = current_nibble[0];
       packet->current_nibble[1] = current_nibble[1];
       packet->start_row = start_row;
@@ -479,17 +482,18 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
   }
 }
 
-static void spudec_decode(spudec_handle_t *this, unsigned int pts100)
+static void spudec_decode(spudec_handle_t *this, int pts100)
 {
-  if(this->hw_spu) {
+  if (!this->hw_spu)
+    spudec_process_control(this, pts100);
+  else if (pts100 >= 0) {
     static vo_mpegpes_t packet = { NULL, 0, 0x20, 0 };
     static vo_mpegpes_t *pkg=&packet;
     packet.data = this->packet;
     packet.size = this->packet_size;
     packet.timestamp = pts100;
     this->hw_spu->draw_frame((uint8_t**)&pkg);
-  } else
-    spudec_process_control(this, pts100);
+  }
 }
 
 int spudec_changed(void * this)
@@ -498,7 +502,7 @@ int spudec_changed(void * this)
     return (spu->spu_changed || spu->now_pts > spu->end_pts);
 }
 
-void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsigned int pts100)
+void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pts100)
 {
   spudec_handle_t *spu = (spudec_handle_t*)this;
 //  spudec_heartbeat(this, pts100);

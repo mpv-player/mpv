@@ -1297,6 +1297,22 @@ vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
   unsigned int pts100 = 90000 * pts;
   if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
     packet_queue_t *queue = vob->spu_streams + vobsub_id;
+
+    int reseek_count = 0;
+    unsigned int lastpts = 0;
+    while (queue->current_index < queue->packets_size
+            && queue->packets[queue->current_index].pts100 <= pts100) {
+      lastpts = queue->packets[queue->current_index].pts100;
+      ++queue->current_index;
+      ++reseek_count;
+    }
+    while (reseek_count--) {
+      --queue->current_index;
+      if (queue->packets[queue->current_index-1].pts100 != UINT_MAX &&
+          queue->packets[queue->current_index-1].pts100 != lastpts)
+        break;
+    }
+
     while (queue->current_index < queue->packets_size) {
       packet_t *pkt = queue->packets + queue->current_index;
       if (pkt->pts100 != UINT_MAX)

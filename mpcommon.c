@@ -97,7 +97,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
 		}
 	    }
 	    if (len<=0 || !packet) break;
-	    if (timestamp >= 0)
+	    if (vo_vobsub || timestamp >= 0)
 		spudec_assemble(vo_spudec, packet, len, timestamp);
 	}
 
