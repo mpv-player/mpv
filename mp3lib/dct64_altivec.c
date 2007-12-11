@@ -11,8 +11,6 @@
 
 #include "mpg123.h"
 
-#ifdef HAVE_ALTIVEC
-
 #ifndef SYS_DARWIN
 #include <altivec.h>
 #endif
@@ -538,6 +536,3 @@ void dct64_altivec(real *a,real *b,real *c)
   out1[0x10*13] = b1[0x17] + b1[0x1F];
   out1[0x10*15] = b1[0x1F];
 }
-
-#endif /* HAVE_ALTIVEC */
-
