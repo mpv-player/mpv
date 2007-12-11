@@ -7458,7 +7458,7 @@ _libs_mplayer=$_ld_tmp
 
 #############################################################################
 if darwin ; then
-  CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -DSYS_DARWIN -shared-libgcc"
+  CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -shared-libgcc"
   if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
     CFLAGS="$CFLAGS -no-cpp-precomp"
   fi
