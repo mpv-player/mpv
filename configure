@@ -8257,9 +8257,6 @@ $_def_vcd
 #ifdef sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
-#elif defined(HPUX)
-#define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
-#define DEFAULT_DVD_DEVICE     "/dev/dvd"
 #elif defined(WIN32)
 #define DEFAULT_CDROM_DEVICE    "D:"
 #define DEFAULT_DVD_DEVICE	"D:"
