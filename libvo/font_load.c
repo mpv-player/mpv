@@ -158,7 +158,7 @@ while(fgets(sor,1020,f)){
       }
   } else    
 
-#ifdef SYS_AMIGAOS4
+#ifdef __AMIGAOS4__
 #define FONT_PATH_SEP ""
 #else
 //! path seperator for font paths, may not be more than one character

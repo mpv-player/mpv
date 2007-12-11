@@ -8269,7 +8269,7 @@ $_def_vcd
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 #define DEFAULT_CDROM_DEVICE	"/dev/acd0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
-#elif defined(SYS_AMIGAOS4)
+#elif defined(__AMIGAOS4__)
 #define DEFAULT_CDROM_DEVICE    "a1ide.device:2"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #else
