@@ -448,8 +448,6 @@ static void check_os_katmai_support( void )
 
 #ifdef __APPLE__
 #include <sys/sysctl.h>
-#else
-#ifndef __AMIGAOS4__
 #include <signal.h>
 #include <setjmp.h>
 
@@ -466,7 +464,6 @@ static void sigill_handler (int sig)
     canjump = 0;
     siglongjmp (jmpbuf, 1);
 }
-#endif //__AMIGAOS4__
 #endif /* __APPLE__ */
 
 void GetCpuCaps( CpuCaps *caps)
