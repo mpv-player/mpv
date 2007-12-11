@@ -255,6 +255,12 @@ mp_input_get_cmd(int time, int paused, int peek_only);
 mp_cmd_t*
 mp_input_parse_cmd(char* str);
 
+/**
+ * Parse and queue commands separated by '\n'.
+ * @return count of commands new queued.
+ */
+int mp_input_parse_and_queue_cmds(const char *str);
+
 /// These filters allow you to process the command before MPlayer.
 /// If a filter returns a true value mp_input_get_cmd will return NULL.
 void

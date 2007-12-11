@@ -21,6 +21,7 @@
 #include "osdep/getch2.h"
 #include "osdep/keycodes.h"
 #include "osdep/timer.h"
+#include "avstring.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "m_config.h"
@@ -707,6 +708,28 @@ void mp_input_rm_event_fd(int fd)
     mp_input_rm_key_fd(fd);
 }
 
+int mp_input_parse_and_queue_cmds(const char *str) {
+    int cmd_num = 0;
+
+    while (*str == '\n' || *str == '\r' || *str == ' ')
+        ++str;
+    while (*str) {
+        mp_cmd_t *cmd;
+        size_t len = strcspn(str, "\r\n");
+        char *cmdbuf = malloc(len+1);
+        av_strlcpy(cmdbuf, str, len+1);
+        cmd = mp_input_parse_cmd(cmdbuf);
+        if (cmd) {
+            mp_input_queue_cmd(cmd);
+            ++cmd_num;
+        }
+        str += len;
+        while (*str == '\n' || *str == '\r' || *str == ' ')
+            ++str;
+        free(cmdbuf);
+    }
+    return cmd_num;
+}
 
 mp_cmd_t*
 mp_input_parse_cmd(char* str) {
