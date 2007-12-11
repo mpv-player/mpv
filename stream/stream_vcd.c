@@ -21,7 +21,7 @@
 
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "vcd_read_fbsd.h" 
-#elif defined(SYS_DARWIN)
+#elif defined(__APPLE__)
 #include "vcd_read_darwin.h" 
 #elif defined(WIN32)
 #include "vcd_read_win32.h"

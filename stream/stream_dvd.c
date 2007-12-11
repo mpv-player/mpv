@@ -768,7 +768,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      */
     if(!dvd_device) dvd_device=strdup(DEFAULT_DVD_DEVICE);
     dvd_set_speed(dvd_device, dvd_speed);
-#ifdef SYS_DARWIN
+#if defined(__APPLE__) || defined(__DARWIN__)
     /* Dynamic DVD drive selection on Darwin */
     if(!strcmp(dvd_device, "/dev/rdiskN")) {
       int i;
@@ -800,7 +800,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         return STREAM_UNSUPPORTED;
       }
     } else
-#endif /* SYS_DARWIN */
+#endif /* defined(__APPLE__) || defined(__DARWIN__) */
     {
         dvd = DVDOpen(dvd_device);
         if(!dvd) {
