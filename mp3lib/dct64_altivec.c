@@ -9,6 +9,7 @@
 
 #define real float
 
+#include <stdio.h>
 #include "mpg123.h"
 
 #ifdef HAVE_ALTIVEC_H
