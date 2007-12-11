@@ -382,7 +382,7 @@ void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias)
 #define WORD_s2 0x18,0x19,0x1a,0x1b
 #define WORD_s3 0x1c,0x1d,0x1e,0x1f
 
-#ifdef SYS_DARWIN
+#ifdef __APPLE_CC__
 #define vcprm(a,b,c,d) (const vector unsigned char)(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
 #else
 #define vcprm(a,b,c,d) (const vector unsigned char){WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d}
@@ -398,13 +398,13 @@ void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias)
 #define FLOAT_n -1.
 #define FLOAT_p 1.
 
-#ifdef SYS_DARWIN
+#ifdef __APPLE_CC__
 #define vcii(a,b,c,d) (const vector float)(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
 #else
 #define vcii(a,b,c,d) (const vector float){FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d}
 #endif
 
-#ifdef SYS_DARWIN
+#ifdef __APPLE_CC__
 #define FOUROF(a) (a)
 #else
 #define FOUROF(a) {a,a,a,a}
