@@ -533,7 +533,7 @@ if (frameno_filename) {
   init_freetype();
 #endif
 #ifdef HAVE_FONTCONFIG
-  if(!font_fontconfig)
+  if(font_fontconfig <= 0)
   {
 #endif
 #ifdef HAVE_BITMAP_FONT

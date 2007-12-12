@@ -1139,7 +1139,7 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
     if (vo_font) free_font_desc(vo_font);
 
 #ifdef HAVE_FONTCONFIG
-    if (font_fontconfig)
+    if (font_fontconfig > 0)
     {
 	if (!font_name)
 	    font_name = strdup("sans-serif");

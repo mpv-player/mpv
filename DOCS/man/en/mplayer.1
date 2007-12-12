@@ -1982,6 +1982,10 @@ Turn on SSA/ASS subtitle rendering.
 With this option, libass will be used for SSA/ASS
 external subtitles and Matroska tracks.
 You may also want to use \-embeddedfonts.
+.br
+.I NOTE:
+When fontconfig is compiled-in, \-ass turns on \-fontconfig
+unless explicitly turned off with \-nofontconfig.
 .
 .TP
 .B \-ass\-border\-color <value>
@@ -2161,6 +2165,10 @@ With fontconfig, this option determines the fontconfig font name.
 .TP
 .B \-fontconfig (fontconfig only)
 Enables the usage of fontconfig managed fonts.
+.br
+.I NOTE:
+\-ass automatically turns this on unless explicitly overridden
+with \-nofontconfig.
 .
 .TP
 .B \-forcedsubsonly
