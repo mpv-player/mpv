@@ -796,9 +796,15 @@ dvb_config_t *dvb_get_config(void)
 		}
 		
 		if((access(conf_file, F_OK | R_OK) != 0))
+		{
+			if(conf_file)
+				free(conf_file);
 			conf_file = get_path("channels.conf");
+		}
 
 		list = dvb_get_channels(conf_file, type);
+		if(conf_file)
+			free(conf_file);
 		if(list == NULL)
 			continue;
 		
