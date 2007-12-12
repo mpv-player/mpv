@@ -18,13 +18,11 @@
 #include "m_property.h"
 #include "asxparser.h"
 
-#include "libmpcodecs/img_format.h"
 #include "libmpcodecs/mp_image.h"
 
 #include "menu.h"
 #include "menu_list.h"
 #include "input/input.h"
-#include "osdep/keycodes.h"
 #include "command.h"
 
 struct list_entry_s {
