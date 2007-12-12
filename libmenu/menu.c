@@ -109,7 +109,7 @@ static int menu_parse_config(char* buffer) {
 
     if (!strcasecmp(element, "keybindings")) {
       menu_cmd_bindings_t *bindings = cmd_bindings;
-      const char *parent_bindings;
+      char *parent_bindings;
       cmd_bindings = realloc(cmd_bindings,
                              (cmd_bindings_num+1)*sizeof(menu_cmd_bindings_t));
       for (i = 0; i < cmd_bindings_num; ++i)
@@ -117,10 +117,12 @@ static int menu_parse_config(char* buffer) {
           cmd_bindings[i].parent = cmd_bindings[i].parent-bindings+cmd_bindings;
       bindings = &cmd_bindings[cmd_bindings_num];
       memset(bindings, 0, sizeof(menu_cmd_bindings_t));
-      bindings->name = strdup(name);
+      bindings->name = name;
       parent_bindings = asx_get_attrib("parent",attribs);
-      if (parent_bindings)
+      if (parent_bindings) {
         bindings->parent = get_cmd_bindings(parent_bindings);
+        free(parent_bindings);
+      }
       free(element);
       asx_free_attribs(attribs);
       if (body) {
@@ -147,10 +149,12 @@ static int menu_parse_config(char* buffer) {
             bindings->bindings = realloc(bindings->bindings,
                                    (bindings->binding_num+1)*sizeof(key_cmd_t));
             bindings->bindings[bindings->binding_num].key = keycode;
-            bindings->bindings[bindings->binding_num].cmd = cmd ? strdup(cmd)
-                                                                : NULL;
+            bindings->bindings[bindings->binding_num].cmd = cmd;
             ++bindings->binding_num;
           }
+          else
+            free(cmd);
+          free(key);
           free(element);
           asx_free_attribs(attribs);
           free(b);
