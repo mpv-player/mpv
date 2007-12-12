@@ -1,4 +1,4 @@
-.\" synced with r25278
+.\" synced with r25379
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -2068,6 +2068,10 @@ Abilita la renderizzazione dei sottotitoli SSA/ASS.
 Con questa opzione, verrà usata libass per i sottotitoli SSA/ASS esterni e per
 le tracce Matroska.
 Potresti voler utilizzare anche \-embeddedfonts.
+.br
+.I NOTA:
+Quando fontconfig è compilato nell'eseguibile, \-ass abilita \-fontconfig
+a meno che non venga esplicitamente disabilitata con \-nofontconfig.
 .
 .TP
 .B \-ass\-border\-color <valore>
@@ -2103,20 +2107,22 @@ Sovrascrive alcuni parametri dello stile.
 .TP
 .B \-ass\-hinting <tipo>
 Imposta il tipo di hinting.
+<tipo> può essere:
 .PD 0
 .RSs
-.IPs <tipo>
-0: Nessun hinting.
-.br
-1: autohinter FreeType, modalità leggera.
-.br
-2: autohinter FreeType, modalità normale.
-.br
-3: hinter nativo del font.
-.br
-0\-3 + 4: Lo stesso, ma l'hinting verrà eseguito solo se l'OSD è renderizzato
-alla risoluzione video e, inoltre, non ridimensionato.
-.br
+.IPs 0
+nessun hinting
+.IPs 1
+autohinter FreeType, modalità leggera
+.IPs 2
+autohinter FreeType, modalità normale
+.IPs 3
+hinter nativo del font
+.IPs "0-3 + 4"
+Lo stesso, ma l'hinting verrà eseguito solo se l'OSD è renderizzato alla
+risoluzione video e quindi non sarà ridimensionato.
+.RE
+.RSs
 Il valore di default è 7 (usa l'hinter nativo per OSD non ridimensionato e
 nessun hinting negli altri casi).
 .RE
@@ -2248,6 +2254,10 @@ Con fontconfig, questa opzione determina il nome del font fontconfig.
 .TP
 .B \-fontconfig (solo fontconfig)
 Abilita l'utilizzo dei font gestiti da fontconfig.
+.br
+.I NOTA:
+Abilitata automaticamente da \-ass a meno che non venga esplicitamente
+disabilitata con \-nofontconfig.
 .
 .TP
 .B \-forcedsubsonly
@@ -5038,8 +5048,6 @@ canali 2 e 3 conterranno solo silenzio ma lo 0 e 1 verrano scambiati.
 Cambierà il numero di canali a 5 e attiverà 4 indirizzamenti che copieranno
 il canale 0 sui canali da 0 a 3.
 I canali 4 e 5 conterranno silenzio.
-.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
-Dovrebbe far sì che l'uscita ffdca a 6 canali (DTS) funzioni bene con ALSA.
 .RE
 .PD 1
 .
