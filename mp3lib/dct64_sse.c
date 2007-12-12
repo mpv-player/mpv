@@ -2,7 +2,7 @@
  * Discrete Cosine Tansform (DCT) for SSE
  * Copyright (c) 2006 Zuxy MENG <zuxy.meng@gmail.com>
  * based upon code from mp3lib/dct64.c, mp3lib/dct64_altivec.c
- * and mp3lib/dct64_MMX.c
+ * and mp3lib/dct64_mmx.c
  */
 
 #include <libavutil/mem.h>
