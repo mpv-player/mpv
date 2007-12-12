@@ -386,6 +386,8 @@ retry1:
 
 static int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
 
+extern void dct64_altivec(real *, real *, real *);
+
 #include "layer2.c"
 #include "layer3.c"
 #include "layer1.c"
