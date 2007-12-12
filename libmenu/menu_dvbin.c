@@ -213,6 +213,7 @@ static void read_cmd(menu_t* menu, int cmd)
 				sprintf(cmd_name, "loadfile 'dvb://%d@%s'", mpriv->card+1, elem->p.txt);
 		
 		c = mp_input_parse_cmd(cmd_name);
+		free(cmd_name);
     	if(c)
           {
             if (mpriv->auto_close)
