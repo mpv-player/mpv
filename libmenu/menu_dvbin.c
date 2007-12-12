@@ -83,8 +83,8 @@ static int fill_channels_menu(menu_t *menu, dvb_channels_list  *dvb_list_ptr)
 
 	mpriv->level = 2;
 	if(dvb_list_ptr == NULL)
-    {
-    	mp_msg(MSGT_DEMUX, MSGL_ERR, "dvb_set_channel: LIST NULL PTR, quit\n");
+	{
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "dvb_set_channel: LIST NULL PTR, quit\n");
 		n = 1;
 		if((elem = calloc(1, sizeof(list_entry_t))) != NULL)
 		{
@@ -94,10 +94,10 @@ static int fill_channels_menu(menu_t *menu, dvb_channels_list  *dvb_list_ptr)
 			menu_list_add_entry(menu, elem);
 		}
 		return 1;
-    }
-		for(n = 0; n < dvb_list_ptr->NUM_CHANNELS; n++)
-		{
-			channel = &(dvb_list_ptr->channels[n]);
+	}
+	for(n = 0; n < dvb_list_ptr->NUM_CHANNELS; n++)
+	{
+		channel = &(dvb_list_ptr->channels[n]);
 		if((elem = calloc(1, sizeof(list_entry_t))) != NULL)
 		{
 			elem->p.next 	= NULL;
@@ -110,7 +110,6 @@ static int fill_channels_menu(menu_t *menu, dvb_channels_list  *dvb_list_ptr)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "dvb_menu: fill_menu: couldn't malloc %d bytes for menu item: %s, exit\n", 
 					sizeof(list_entry_t), strerror(errno));
-		
 			break;
 		}
 	}  
@@ -127,27 +126,26 @@ static int fill_cards_menu(menu_t *menu, dvb_config_t *conf)
 	for(n = 0; n < conf->count; n++)
 	{
 		if((elem = calloc(1, sizeof(list_entry_t))) != NULL)
-			{
-				elem->p.next 	= NULL;
+		{
+			elem->p.next 	= NULL;
 			elem->p.txt	= strdup(conf->cards[n].name);
-				elem->num 	= n;
+			elem->num 	= n;
 				
-				if(n == 0)
-				    elem->p.prev = NULL;
+			if(n == 0)
+			    elem->p.prev = NULL;
 				
-				menu_list_add_entry(menu, elem);
-			}
-			else
-			{
+			menu_list_add_entry(menu, elem);
+		}
+		else
+		{
 			fprintf(stderr, "dvb_menu: fill_menu: couldn't malloc %d bytes for menu item: %s, exit\n", 
-						sizeof(list_entry_t), strerror(errno));
-			
-			  if(n)
+				sizeof(list_entry_t), strerror(errno));
+			if(n)
 				return 1;
-			
-			  return 0;
-			}
-		}  
+
+			return 0;
+		}
+	}  
 	
 	return n;
 }
@@ -168,7 +166,7 @@ static int fill_menu(menu_t* menu)
 			elem->p.txt = strdup("NO DVB configuration present!");
 
 			menu_list_add_entry(menu, elem);
-	return 1;
+			return 1;
 		}
 		return 0;
 	}
@@ -212,15 +210,15 @@ static void read_cmd(menu_t* menu, int cmd)
 			else
 				sprintf(cmd_name, "loadfile 'dvb://%d@%s'", mpriv->card+1, elem->p.txt);
 		
-		c = mp_input_parse_cmd(cmd_name);
-		free(cmd_name);
-    	if(c)
-          {
-            if (mpriv->auto_close)
-              mp_input_queue_cmd (mp_input_parse_cmd ("menu hide"));
-            mp_input_queue_cmd(c);
-          }
-  	}
+			c = mp_input_parse_cmd(cmd_name);
+			free(cmd_name);
+			if(c)
+			{
+				if(mpriv->auto_close)
+					mp_input_queue_cmd (mp_input_parse_cmd ("menu hide"));
+				mp_input_queue_cmd(c);
+			}
+		}
   	}
   	break;
 
