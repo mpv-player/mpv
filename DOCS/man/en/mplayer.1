@@ -4704,6 +4704,37 @@ cutoff frequency (0.0\-1.0), default set depending upon filter length
 .PD 1
 .
 .TP
+.B lavcac3enc[=tospdif[:bitrate[:minchn]]]
+Encode multi-channel audio to AC-3 at runtime using libavcodec.
+Supports 16-bit native-endian input format, maximum 6 channels.
+The output is big-endian when outputting a raw AC-3 stream,
+native-endian when outputting to S/PDIF.
+The output sample rate of this filter is same with the input sample rate.
+When input sample rate is 48kHz, 44.1kHz, or 32kHz, this filter directly use it.
+Otherwise a resampler filter is auto-inserted before this filter to make
+the input and output sample rate be 48kHz.
+You need to specify '\-channels N' to make the decoder decode audio into
+N-channel, then the filter can encode the N-channel input to AC-3.
+.br
+.PD 0
+.RSs
+.IPs <tospdif>
+Output raw AC-3 stream if zero or not set,
+output to S/PDIF for passthrough when <tospdif> is set non-zero.
+.IPs <bitrate>
+The bitrate to encode the AC-3 stream.
+Set it to either 384 or 384000 to get 384kbits.
+Valid values: 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256,
+              320, 384, 448, 512, 576, 640
+Default bitrate is based on the input channel number:
+1ch: 96,  2ch: 192,  3ch: 224,  4ch: 384,  5ch: 448,  6ch: 448
+.IPs <minchn>
+If the input channel number is less than <minchn>, the filter will
+detach itself (default: 5).
+.RE
+.PD 1
+.
+.TP
 .B sweep[=speed]
 Produces a sine sweep.
 .PD 0

@@ -32,5 +32,6 @@ SRCS_COMMON = af.c \
 
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)      += af_export.c
 SRCS_COMMON-$(LIBAVCODEC)           += af_lavcresample.c
+SRCS_COMMON-$(LIBAVCODEC_A)         += af_lavcac3enc.c
 
 include ../mpcommon.mak

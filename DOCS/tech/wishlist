@@ -69,8 +69,6 @@ Filters:
 
  * insert af volnorm during playback
 
- * encode multi-channel audio into ac3 at runtime and passthrough it to s/pdif
-
  * allow frame insertion & removal in video filters (with timestamps)
 
  * xinerama video filter that splits movie to 2 screens (like zr)
