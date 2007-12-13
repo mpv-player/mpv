@@ -1216,3 +1216,74 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
         return current;
     }
 }
+
+int demuxer_get_current_chapter(demuxer_t *demuxer) {
+    int chapter = -1;
+    if (!demuxer->num_chapters || !demuxer->chapters) {
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_CHAPTER,
+                           &chapter) == STREAM_UNSUPPORTED)
+            chapter = -1;
+    }
+    else {
+        sh_video_t *sh_video = demuxer->video->sh;
+        sh_audio_t *sh_audio = demuxer->audio->sh;
+        uint64_t now;
+        now = (sh_video ? sh_video->pts : (sh_audio?sh_audio->pts:0))*1000+0.5;
+        for (chapter = demuxer->num_chapters - 1; chapter >= 0; --chapter) {
+            if (demuxer->chapters[chapter].start <= now)
+                break;
+        }
+    }
+    return chapter;
+}
+
+char *demuxer_chapter_name(demuxer_t *demuxer, int chapter) {
+    if (demuxer->num_chapters && demuxer->chapters) {
+        if (chapter >=0 && chapter < demuxer->num_chapters &&
+                demuxer->chapters[chapter].name)
+            return strdup(demuxer->chapters[chapter].name);
+    }
+    return NULL;
+}
+
+char *demuxer_chapter_display_name(demuxer_t *demuxer, int chapter) {
+    char *chapter_name = demuxer_chapter_name(demuxer, chapter);
+    if (chapter_name) {
+        char *tmp = malloc(strlen(chapter_name) + 14);
+        snprintf(tmp, 63, "(%d) %s", chapter + 1, chapter_name);
+        free(chapter_name); 
+        return tmp;
+    }
+    else {
+        int chapter_num = demuxer_chapter_count(demuxer);
+        char tmp[30];
+        if (chapter_num <= 0)
+            sprintf(tmp, "(%d)", chapter + 1);
+        else
+            sprintf(tmp, "(%d) of %d", chapter + 1, chapter_num);
+        return strdup(tmp);
+    }
+}
+
+float demuxer_chapter_time(demuxer_t *demuxer, int chapter, float *end) {
+    if (demuxer->num_chapters && demuxer->chapters && chapter >= 0
+            && chapter < demuxer->num_chapters) {
+        if (end)
+            *end = demuxer->chapters[chapter].end / 1000.0;
+        return demuxer->chapters[chapter].start / 1000.0;
+    }
+    return -1.0;
+}
+
+int demuxer_chapter_count(demuxer_t *demuxer) {
+    if (!demuxer->num_chapters || !demuxer->chapters) {
+        int num_chapters = 0;
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS,
+                           &num_chapters) == STREAM_UNSUPPORTED)
+            num_chapters = 0;
+        return num_chapters;
+    }
+    else
+        return demuxer->num_chapters;
+}
+
