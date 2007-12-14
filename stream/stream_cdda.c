@@ -331,12 +331,12 @@ static int seek(stream_t* s,off_t newpos) {
   int i;
   
   s->pos = newpos;
-  if(s->pos < 0) {
+  sec = s->pos/CD_FRAMESIZE_RAW;
+  if (s->pos < 0 || sec >= p->end_sector) {
     s->eof = 1;
     return 0;
   }
 
-  sec = s->pos/CD_FRAMESIZE_RAW;
 //printf("pos: %d, sec: %d ## %d\n", (int)s->pos, (int)sec, CD_FRAMESIZE_RAW);
 //printf("sector: %d  new: %d\n", p->sector, sec );
  
