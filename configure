@@ -218,7 +218,7 @@ Optional features:
   --disable-mplayer      disable MPlayer compilation [enable]
   --enable-gui           enable GMPlayer compilation (GTK+ GUI) [disable]
   --enable-gtk1          force using GTK 1.2 for the GUI  [disable]
-  --enable-largefiles    enable support for files > 2GB [disable]
+  --disable-largefiles   disable support for files > 2GB [enable]
   --enable-linux-devfs   set default devices to devfs [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-termios       use termios database for key codes [autodetect]
@@ -634,7 +634,7 @@ _tga=yes
 _directfb=auto
 _zr=auto
 _bl=no
-_largefiles=no
+_largefiles=yes
 #_language=en
 _shm=auto
 _linux_devfs=no
