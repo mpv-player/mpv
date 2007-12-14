@@ -2593,6 +2593,13 @@ utilisée par l'OSD et l'effacer (par défaut\ : ^[[A\\r^[[K).
 Indique à MPlayer de traiter le fichier de sous-titre au format unicode.
 .
 .TP
+.B \-unrarexec <cheming version l'exécutable unrar> (ne gère pas MingW
+actuellemnt.)
+Défini le cheming version l'exécutable unrar pour que MPlayer puisse
+l'utiliser pour ouvrir les fichiers vobsub compressés au format RAR.
+Le chemin doit inclure le nom de l'exécutable, par exemple: /opt/bin/unrar.
+.
+.TP
 .B \-utf8
 Indique à MPlayer de traiter le fichier de sous-titre au un format UTF-8.
 .
@@ -4957,6 +4964,38 @@ longueur du filtre)
 .PD 1
 .
 .TP
+.B lavcac3enc[=vers_spdif[:débit[:canal_min]]]
+Code en AC-3 à la volée du son multi-canaux  grâce à libavcodec.
+Gère en entrée le format 16-bit native-endian, avec 6 canaux au maximum.
+La sortie est big-endian quand la sortie est un flux AC-3 brut,
+native-endian quand la sortie est S/PDIF.
+Quand le taux d'échantillonnage de l'entrée est 48kHz, 44.1kHz, ou 32kHz,
+le taux est le même en sortie.
+Dans le cas contraire, un filtre de ré-échantillonnage est automatiquent
+rajouté devant ce filtre pour que le taux d'entrée et de sortie soit 48kHz.
+Vous devez spécifier '\-channels N' pour que le décodeur décode le son en N
+canaux, pour que ce filtre puisse alors coder les N canaux en AC-3.
+.br
+.PD 0
+.RSs
+.IPs <vers_spdif>
+Sort au flux AC-3 brut si égal à 0 ou non spécifié, sort 
+transit vers S/PDIF quand <vers_spdif> est différent de 0.
+.IPs <débit>
+Le débit de codage du flux AC-3.
+Spécifiez 384 ou 384000 pour obtenir 384kbit/s.
+Valeurs valides\ : 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256,
+320, 384, 448, 512, 576, 640
+Le débit par défaut est fonction du nombre de canaux d'entrée\ :
+1 canal\ : 96, 2 canaux\ : 192,  3 canaux\ : 224,  4 canaux\ : 384,
+5 canaux\ : 448, 6 canaux\ : 448.
+.IPs <canal_min>
+Si le nombre de canaux d'entrée est inférieur à <canal_min>, le filtre se
+détachera (par defaut\ : 5).
+.RE
+.PD 1
+.
+.TP
 .B sweep[=vitesse]
 Produit un balayage sinus, tonalité dont la fréquence augmente avec le
 temps.
@@ -5083,9 +5122,6 @@ quand même échangés.
 Changerait le nombre de canaux à 6 et construit 4 routes copiant
 les canaux 0 vers les canaux 0 et 3
 Les canaux 4 et 5 contiendront du silence.
-.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
-Devrait permettre un rendu correct des flux à 6 canaux décodés avec ffdca (DTS)
-et envoyés vers ALSA.
 .RE
 .PD 1
 .
@@ -5432,6 +5468,77 @@ sur les deux canaux dans le flux final.
 Attention, ce filtre transformera votre son en mono.
 Fonctionne mieux avec les sons stéréo; il est vain d'essayer ce
 filtre avec d'autres types de sources.
+.
+.TP
+.B scaletempo[=option1:option2:...]
+Change l'échelle de temps du son sans altérer la hauteur de ton,
+optionnellement synchronisé avec la vitesse de lecture (par défaut).
+.br
+Cela fonctionne en jouant \'stride\' ms de son à vitesse normale
+puis \'stride*scale\' ms de son d'entrée.
+Les échantillons sont ensuite joints en combinant 'overlap'% de
+stride avec les échantillons du stride précédent.
+Optionnellement, il détermine statistiquement sur les \'search\' ms de son
+à venir la meilleure position d'overlap.
+.PD 0
+.RSs
+.IPs scale=<quantité>
+Change l'échelle temporelle (par défaut\ : 1.0).
+Définissez cette quantité en plus de la vitesse.
+.IPs stride=<quantité>
+Durée en millisecondes de chaque stride de sortie (par défaut\ : 60).
+De valeurs trop grandes produiront des sauts très audibles, et de valeurs
+trop faible un écho.
+De valeurs trop faibles changeront la hauteur de ton.
+Accroître cette valeur augmente la performance.
+.IPs overlap=<pourcent>
+Pourcetage de stride à chevaucher (overlap) (par défaut\ : .20).
+Baisser cette valeur augmente la performance.
+.IPs search=<quantité>>
+Durée en milli-secondes sur laquelle chercher la meilleur position de
+chevauchement (overlap) (par defaut\ : 14).
+Diminuer cette durée améliorera beaucoup la performance.
+Sur les machines lentes, vous devrez probablement beaucoup diminuer cette
+valeur.
+.IPs speed=<tempo|pitch|both|none>
+Défini la réponse à un changement de vitesse.
+.RSss
+.IPs tempo
+Ajuste le tempo pour rester synchronisé (par défaut)
+.IPs pitch
+Inverse l'effet de ce filtre.
+Ajuste le ton sans changer le tempo.
+Ajoutez \'[ speed_mult 0.9438743126816935\' et \'] speed_mult 1.059463094352953\'
+à votre input.conf pour ajuster par demi-ton.
+.I ATTENTION\ :
+Perd la synchronisation avec la vidéo.
+Looses synch with video.
+.IPs both
+Ajuste le tempo et le ton.
+.IPs none
+Ignore les changements de vitesse.
+.RE
+.RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.IPs "mplayer \-af scaletempo \-speed 1.2 media.ogg"
+Jouera le média à 1.2x la vitesse normale, avec le son à un ton normal.
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=none \-speed 1.2 media.ogg"
+Jouera le média à 1.2x la vitesse normale, avec le son à un ton normal,
+mais changer la vitesse de lecture n'affectera pas le tempo.
+.IPs "mplayer \-af scaletempo=stride=30:overlap=.50:search=10 media.ogg"
+Ajustera la qualité et les paramètres de performance.
+.IPs "mplayer \-af format=floatne,scaletempo media.ogg"
+Fera scaletempo effectuer les calculs en flottant.
+Peut-être plus rapide sur certaines plateformes.
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=pitch audio.ogg"
+Jouera le média à 1.2x la vitesse normale, avec le son à un ton normal.
+Changer la vitesse de lecture affectera le ton, en laissant le tempo à 1.2x.
+.RE
+.PD 1
 .
 .
 .
