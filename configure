@@ -256,6 +256,7 @@ Optional features:
   --disable-freetype     disable FreeType 2 font rendering [autodetect]
   --disable-fontconfig   disable fontconfig font lookup [autodetect]
   --disable-unrarlib     disable Unique RAR File Library [enabled]
+  --disable-unrarexec    disable using of UnRAR executable [enabled]
   --enable-menu          enable OSD menu (not DVD menu) [disabled]
   --disable-sortsub      disable subtitle sorting [enabled]
   --enable-fribidi       enable the FriBiDi libs [autodetect]
@@ -592,6 +593,7 @@ _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
 _unrarlib=yes
+_unrar_exec=auto
 _win32dll=auto
 _select=yes
 _radio=no
@@ -1097,6 +1099,8 @@ for ac_option do
   --disable-fontconfig) _fontconfig=no  ;;
   --enable-unrarlib)	_unrarlib=yes	;;
   --disable-unrarlib)	_unrarlib=no	;;
+  --enable-unrarexec)   _unrar_exec=yes ;;
+  --disable-unrarexec)  _unrar_exec=no  ;;
   --enable-ftp)         _ftp=yes        ;;
   --disable-ftp)        _ftp=no         ;;
   --enable-vstream)     _vstream=yes    ;;
@@ -6715,6 +6719,18 @@ else
 fi
 echores "$_unrarlib"
 
+echocheck "UnRAR executable"
+if test "$_unrar_exec" = auto ; then
+    _unrar_exec="yes"
+    mingw32 && _unrar_exec="no"
+fi
+if test "$_unrar_exec" = yes ; then
+    _def_unrar_exec='#define USE_UNRAR_EXEC 1'
+else
+    _def_unrar_exec='#undef USE_UNRAR_EXEC'
+fi
+echores "$_unrar_exec"
+
 echocheck "TV interface"
 if test "$_tv" = yes ; then
   _def_tv='#define USE_TV 1'
@@ -7611,6 +7627,7 @@ SPEEX = $_speex
 MUSEPACK = $_musepack
 
 UNRARLIB = $_unrarlib
+UNRAR_EXEC = $_unrar_exec
 PNG = $_png
 JPEG = $_jpeg
 GIF = $_gif
@@ -8164,6 +8181,9 @@ $_def_fastmemcpy
 
 /* Use unrarlib for Vobsubs */
 $_def_unrarlib
+
+/* Use UnRAR executable for Vobsubs */
+$_def_unrar_exec
 
 /* gui support, please do not edit this option */
 $_def_gui

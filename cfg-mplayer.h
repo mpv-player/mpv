@@ -35,6 +35,8 @@ extern char *menu_fribidi_charset;
 extern int menu_flip_hebrew;
 extern int menu_fribidi_flip_commas;
 
+extern char *unrar_executable;
+
 extern int vo_zr_parseoption(const m_option_t* conf, char *opt, char * param);
 extern void vo_zr_revertoption(const m_option_t* opt,char* pram);
 
@@ -267,6 +269,9 @@ const m_option_t mplayer_opts[]={
 	// these should be moved to -common, and supported in MEncoder
 	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
+#ifdef USE_UNRAR_EXEC
+	{"unrarexec", &unrar_executable, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#endif
 
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 

@@ -2481,6 +2481,12 @@ used for the OSD and clear it (default: ^[[A\\r^[[K).
 Tells MPlayer to handle the subtitle file as unicode.
 .
 .TP
+.B \-unrarexec <path to unrar executable> (does not support MingW currently.)
+Specify the path to the unrar executable so MPlayer can use it to access
+rar-compressed vobsub files (default: not set, so the feature is off).
+The path must include the executable's filename, i.e.\& /usr/local/bin/unrar.
+.
+.TP
 .B "\-utf8 \ \ "
 Tells MPlayer to handle the subtitle file as UTF-8.
 .
