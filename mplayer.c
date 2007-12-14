@@ -387,6 +387,11 @@ void *mpctx_get_audio_out(MPContext *mpctx)
     return mpctx->audio_out;
 }
 
+void *mpctx_get_demuxer(MPContext *mpctx)
+{
+    return mpctx->demuxer;
+}
+
 void *mpctx_get_playtree_iter(MPContext *mpctx)
 {
     return mpctx->playtree_iter;

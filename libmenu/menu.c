@@ -24,6 +24,7 @@
 #include "menu.h"
 
 extern menu_info_t menu_info_cmdlist;
+extern menu_info_t menu_info_chapsel;
 extern menu_info_t menu_info_pt;
 extern menu_info_t menu_info_filesel;
 extern menu_info_t menu_info_txt;
@@ -37,6 +38,7 @@ extern menu_info_t menu_info_dvbsel;
 menu_info_t* menu_info_list[] = {
   &menu_info_pt,
   &menu_info_cmdlist,
+  &menu_info_chapsel,
   &menu_info_filesel,
   &menu_info_txt,
   &menu_info_console,
