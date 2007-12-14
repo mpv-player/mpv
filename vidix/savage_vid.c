@@ -229,14 +229,13 @@ struct savage_info {
     unsigned int wx,wy;                /*window x && y*/
     unsigned int screen_x;            /*screen width*/
     unsigned int screen_y;            /*screen height*/
-    unsigned long buffer_size;		 /* size of the image buffer	       */
+    unsigned long frame_size;		 /* frame size */
     struct savage_chip chip;	 /* NV architecture structure		       */
     void* video_base;		 /* virtual address of control region	       */
     void* control_base;		 /* virtual address of fb region	       */
     unsigned long picture_base;	 /* direct pointer to video picture	       */
     unsigned long picture_offset;	 /* offset of video picture in frame buffer    */
 //	struct savage_dma dma;           /* DMA structure                              */
-    unsigned int cur_frame;
     unsigned int num_frames;             /* number of buffers                          */
     int bps;			/* bytes per line */
   void (*SavageWaitIdle) ();
@@ -861,7 +860,7 @@ savage_init (void)
 
 //  info->chip.PCIO   = (uint8_t *)  (info->control_base + SAVAGE_NEWMMIO_VGABASE);
 
-  // FIXME: enable mmio?
+  /* switch to vga registers */
   val = VGAIN8 (0x3c3);
   VGAOUT8 (0x3c3, val | 0x01);
   val = VGAIN8 (0x3cc);
@@ -1129,7 +1128,7 @@ savage_set_eq (const vidix_video_eq_t * eq)
 static int
 savage_config_playback (vidix_playback_t * vinfo)
 {
-  unsigned int i;
+  unsigned int i, bpp;
 
   if (!is_supported_fourcc (vinfo->fourcc))
     return -1;
@@ -1152,10 +1151,6 @@ savage_config_playback (vidix_playback_t * vinfo)
   info->saturation = 128;
   info->hue = 0;
 
-
-  vinfo->dga_addr=(void*)(info->picture_base);
-
-
 		  vinfo->offset.y = 0;
 		  vinfo->offset.v = 0;
 		  vinfo->offset.u = 0;
@@ -1169,70 +1164,53 @@ savage_config_playback (vidix_playback_t * vinfo)
 
    info->pitch = ((info->src_w << 1) + 15) & ~15;
 
-#if 0
-  swap_uv = 0;
   switch (vinfo->fourcc)
   {
-	  case IMGFMT_YUY2:
-	  case IMGFMT_UYVY:
-			
-		  info->pitch = ((info->src_w << 1) + (vinfo->dest.pitch.y-1)) & ~(vinfo->dest.pitch.y-1);
-
-			info->pitch = info->src_w << 1;
-      info->pitch = ALIGN_TO (info->src_w << 1, 32);
-      uv_size = 0;
-		  break;
-	  case IMGFMT_YV12:
-		swap_uv = 1;
-
-
-	
-		/*
-			srcPitch = (info->src_w + 3) & ~3;
-			vinfo->offset.u = srcPitch * info->src_h;
-			srcPitch2 = ((info->src_w >> 1) + 3) & ~3;
-			vinfo->offset.v = (srcPitch2 * (info->src_h >> 1)) + vinfo->offset.v;
-
-			vinfo->dest.pitch.y=srcPitch ;
-			vinfo->dest.pitch.v=srcPitch2 ;
-			vinfo->dest.pitch.u=srcPitch2 ;
-			*/
-	
-
-      info->pitch = ALIGN_TO (info->src_w, 32);
-      uv_size = (info->pitch >> 1) * (info->src_h >> 1);
-
-  vinfo->offset.y = 0;
-  vinfo->offset.v = vinfo->offset.y + info->pitch * info->src_h;
-  vinfo->offset.u = vinfo->offset.v + uv_size;
-  vinfo->frame_size = vinfo->offset.u + uv_size;
-/*  YOffs = info->offset.y;
-  UOffs = (swap_uv ? vinfo->offset.v : vinfo->offset.u);
-  VOffs = (swap_uv ? vinfo->offset.u : vinfo->offset.v);
-	*/
-//	  vinfo->offset.y = info->src_w;
-//	  vinfo->offset.v = vinfo->offset.y + info->src_w /2 * info->src_h;
-//	  vinfo->offset.u = vinfo->offset.v + (info->src_w >> 1) * (info->src_h >> 1) ;
-
-		  break;
+  case IMGFMT_Y211:
+    bpp = 1;
+    break;
+  case IMGFMT_BGR24:
+    bpp = 3;
+    break;
+  case IMGFMT_BGR32:
+    bpp = 4;
+    break;
+  default:
+    bpp = 2;
+    break;
   }
-#endif
-			info->pitch |= ((info->pitch >> 1) << 16);
 
-		  vinfo->frame_size = info->pitch * info->src_h;
+  info->pitch = ((info->src_w * bpp) + 15) & ~15;
+  info->pitch |= ((info->pitch / bpp) << 16);
+  printf("$#### destination pitch = %u\n", info->pitch & 0xffff);
+  
+  vinfo->frame_size = (info->pitch & 0xffff) * info->src_h;
+  info->frame_size = vinfo->frame_size;
 
-			printf("$#### destination pitch = %u\n", info->pitch&0xffff);
+  info->picture_offset = info->screen_x * info->screen_y * (info->bpp >> 3);
+  if (info->picture_offset > (info->chip.fbsize - vinfo->frame_size)) {
+    printf("not enough memory for overlay\n");
+    return -1;
+  }
 
+  if (info->chip.arch == S3_SAVAGE3D)
+    info->video_base = map_phys_mem(pci_info.base0, info->chip.fbsize);
+  else
+    info->video_base = map_phys_mem(pci_info.base1, info->chip.fbsize);
 
+  if (info->video_base == NULL) {
+    printf("errno = %s\n",  strerror(errno));
+    return -1;
+  }
 
+  info->picture_base = (uint32_t) info->video_base + info->picture_offset;
+  vinfo->dga_addr = (void*)(info->picture_base);
+  vinfo->num_frames = (info->chip.fbsize - info->picture_offset)/vinfo->frame_size;
+  if(vinfo->num_frames > VID_PLAY_MAXFRAMES) vinfo->num_frames = VID_PLAY_MAXFRAMES;
 
-  info->buffer_size = vinfo->frame_size;
-  info->num_frames = vinfo->num_frames= (info->chip.fbsize - info->picture_offset)/vinfo->frame_size;
-  if(vinfo->num_frames > MAX_FRAMES)vinfo->num_frames = MAX_FRAMES;
-//    vinfo->num_frames = 1;
-//    printf("[nvidia_vid] Number of frames %i\n",vinfo->num_frames);
-  for(i=0;i <vinfo->num_frames;i++)vinfo->offsets[i] = vinfo->frame_size*i;
-
+  for(i = 0; i < vinfo->num_frames; i++)
+    vinfo->offsets[i] = vinfo->frame_size * i;
+ 
   return 0;
 }
 
