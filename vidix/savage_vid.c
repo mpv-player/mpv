@@ -332,8 +332,8 @@ static void SavageSetColorOld(void)
 
 
   if( 
-  (info->format == IMGFMT_RGB15) ||
-	(info->format == IMGFMT_RGB16)
+  (info->format == IMGFMT_BGR15) ||
+	(info->format == IMGFMT_BGR16)
     )
     {
   OUTREG( COLOR_ADJUSTMENT_REG, 0 );
