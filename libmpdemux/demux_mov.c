@@ -936,7 +936,7 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 		if (trak->fourcc == mmioFOURCC('r', 'a', 'w', ' ')) {
 		    sh->format = IMGFMT_RGB | depth;
 		} else
-		sh->format=trak->fourcc;
+		    sh->format=trak->fourcc;
 
 		// crude video delay from editlist0 hack ::atm
 		if(trak->editlist_size>=1) {
