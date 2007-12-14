@@ -593,15 +593,6 @@ SavageStreamsOn(void)
 
 		enable_app_io ();
 
-    /* Unlock extended registers. */
-
-	/* FIXME: it looks like mmaped io is broken with vgaout16  */
-    VGAOUT16(vgaCRIndex, 0x4838 );
-    VGAOUT16(vgaCRIndex, 0xa039);
-    VGAOUT16(0x3c4, 0x0608);
-
-		
-	
     VGAOUT8( vgaCRIndex, EXT_MISC_CTRL2 );
 
     if( S3_SAVAGE_MOBILE_SERIES(info->chip.arch) )
@@ -728,13 +719,6 @@ static void SavageStreamsOff(void)
     unsigned char jStreamsControl;
     unsigned short vgaCRIndex = 0x3d0 + 4;
     unsigned short vgaCRReg = 0x3d0 + 5;
-
-
-    /* Unlock extended registers. */
-
-    VGAOUT16(vgaCRIndex, 0x4838);
-    VGAOUT16(vgaCRIndex, 0xa039);
-    VGAOUT16(0x3c4, 0x0608);
 
     VGAOUT8( vgaCRIndex, EXT_MISC_CTRL2 );
     if( S3_SAVAGE_MOBILE_SERIES(info->chip.arch)  ||
@@ -883,15 +867,6 @@ savage_init (void)
   val = VGAIN8 (0x3cc);
   VGAOUT8 (0x3c2, val | 0x01);
 
-  if (info->chip.arch >= S3_SAVAGE4)
-	{
-		VGAOUT8 (0x3d4, 0x40);
-		val = VGAIN8 (0x3d5);
-		VGAOUT8 (0x3d5, val | 1);
-	}
-
-
-
   /* unprotect CRTC[0-7] */
   VGAOUT8(vgaCRIndex, 0x11);
   tmp = VGAIN8(vgaCRReg);
@@ -903,17 +878,6 @@ savage_init (void)
   VGAOUT16(vgaCRIndex, 0x4838);
   VGAOUT16(vgaCRIndex, 0xa039);
   VGAOUT16(0x3c4, 0x0608);
-
-  VGAOUT8(vgaCRIndex, 0x40);
-  tmp = VGAIN8(vgaCRReg);
-  VGAOUT8(vgaCRReg, tmp & ~0x01);
-
-  /* unlock sys regs */
-  VGAOUT8(vgaCRIndex, 0x38);
-  VGAOUT8(vgaCRReg, 0x48);
-
-  /* Unlock system registers. */
-  VGAOUT16(vgaCRIndex, 0x4838);
 
   /* Next go on to detect amount of installed ram */
 
@@ -971,24 +935,6 @@ savage_init (void)
   VGAOUT8 (0x3d4, 0x66);
   VGAOUT8 (0x3d5, cr66 & ~0x02); */ // clear reset flag
  /* udelay (10000); */
-
-	/* This maps framebuffer @6MB, thus 2MB are left for video. */
-	if (info->chip.arch == S3_SAVAGE3D) {
-		info->video_base = map_phys_mem(pci_info.base0, info->chip.fbsize);
-		info->picture_offset = 1024*768* 4 * ((info->chip.fbsize > 4194304)?2:1);
-	}
-	else {
-		info->video_base = map_phys_mem(pci_info.base1, info->chip.fbsize);
-		info->picture_offset = info->chip.fbsize - FRAMEBUFFER_SIZE;
-//			info->picture_offset = 1024*1024* 4 * 2;
-	}
-	if ( info->video_base == NULL){
-		printf("errno = %s\n",  strerror(errno));
-		return -1; 
-	}
-
-
-	info->picture_base = (uint32_t) info->video_base + info->picture_offset;
 
 	if ( info->chip.arch == S3_SAVAGE3D ){
 		mtrr = mtrr_set_type(pci_info.base0, info->chip.fbsize, MTRR_TYPE_WRCOMB);
