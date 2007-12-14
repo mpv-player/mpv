@@ -369,6 +369,82 @@ static int mp_property_time_pos(m_option_t * prop, int action,
                                                 mpctx->audio_out));
 }
 
+/// Current chapter (RW)
+static int mp_property_chapter(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    int chapter;
+    float next_pts = 0;
+    int chapter_num;
+    int step_all;
+    char *chapter_name = NULL;
+
+    switch (action) {
+    case M_PROPERTY_GET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        *(int *) arg = demuxer_get_current_chapter(mpctx->demuxer);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        chapter = demuxer_get_current_chapter(mpctx->demuxer);
+        if (chapter < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        chapter_name = demuxer_chapter_display_name(mpctx->demuxer, chapter);
+        if (!chapter_name)
+            return M_PROPERTY_UNAVAILABLE;
+        *(char **) arg = chapter_name;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        M_PROPERTY_CLAMP(prop, *(int*)arg);
+        chapter = demuxer_get_current_chapter(mpctx->demuxer);
+        if (chapter < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        step_all = *(int *)arg - (chapter + 1);
+        chapter += step_all;
+        break;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN: {
+        step_all = (arg && *(int*)arg != 0 ? *(int*)arg : 1)
+                   * (action == M_PROPERTY_STEP_UP ? 1 : -1);
+        chapter = demuxer_get_current_chapter(mpctx->demuxer);
+        if (chapter < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        chapter += step_all;
+        if (chapter < 0)
+            chapter = 0;
+        break;
+    }
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+    rel_seek_secs = 0;
+    abs_seek_pos = 0;
+    chapter = demuxer_seek_chapter(mpctx->demuxer, chapter, 1,
+                                   &next_pts, &chapter_num, &chapter_name);
+    if (chapter >= 0) {
+        if (next_pts > -1.0) {
+            abs_seek_pos = 1;
+            rel_seek_secs = next_pts;
+        }
+        if (chapter_name)
+            set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+                        MSGTR_OSDChapter, chapter + 1, chapter_name);
+    }
+    else if (step_all > 0)
+        rel_seek_secs = 1000000000.;
+    else
+        set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+                    MSGTR_OSDChapter, 0, MSGTR_Unknown);
+    if (chapter_name)
+        free(chapter_name);
+    return M_PROPERTY_OK;
+}
+
 /// Demuxer meta data
 static int mp_property_metadata(m_option_t * prop, int action, void *arg,
                                 MPContext * mpctx) {
@@ -1809,6 +1885,8 @@ static m_option_t mp_properties[] = {
      M_OPT_RANGE, 0, 100, NULL },
     { "time_pos", mp_property_time_pos, CONF_TYPE_TIME,
      M_OPT_MIN, 0, 0, NULL },
+    { "chapter", mp_property_chapter, CONF_TYPE_INT,
+     M_OPT_MIN, 1, 0, NULL },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
      0, 0, 0, NULL },
 
@@ -1998,6 +2076,7 @@ static struct {
 } set_prop_cmd[] = {
     // general
     { "loop", MP_CMD_LOOP, 0, 0, -1, MSGTR_LoopStatus },
+    { "chapter", MP_CMD_SEEK_CHAPTER, 0, 0, -1, NULL },
     // audio
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
     { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
@@ -2900,41 +2979,6 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 
 	case MP_CMD_KEYDOWN_EVENTS:
 	    mplayer_put_key(cmd->args[0].v.i);
-	    break;
-
-	case MP_CMD_SEEK_CHAPTER:{
-		int seek = cmd->args[0].v.i;
-		int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
-		int chap;
-		float next_pts = 0;
-		int num_chapters;
-		char *chapter_name;
-
-		rel_seek_secs = 0;
-		abs_seek_pos = 0;
-		chap =
-		    demuxer_seek_chapter(mpctx->demuxer, seek, abs,
-					 &next_pts, &num_chapters,
-					 &chapter_name);
-		if (chap != -1) {
-		    if (next_pts > -1.0) {
-			abs_seek_pos = 1;
-			rel_seek_secs = next_pts;
-		    }
-		    if (chapter_name) {
-			set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
-				    MSGTR_OSDChapter, chap + 1, chapter_name);
-			free(chapter_name);
-		    }
-		} else {
-		    if (seek > 0)
-			rel_seek_secs = 1000000000.;
-		    else
-			set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
-				    MSGTR_OSDChapter, 0, MSGTR_Unknown);
-		}
-		break;
-	    }
 	    break;
 
 	case MP_CMD_SET_MOUSE_POS:{
