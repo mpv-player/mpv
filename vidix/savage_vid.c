@@ -1248,6 +1248,25 @@ savage_playback_off (void)
   return 0;
 }
 
+/**
+ * @brief Driver should prepare and activate corresponded frame.
+ *
+ * @param frame the frame index.
+ *
+ * @return 0.
+ *
+ * @note This function is used only for double and triple buffering
+ *       and never used for single buffering playback.
+ */
+int
+savage_frame_select (unsigned int frame)
+{
+  OUTREG(SSTREAM_FBADDR0_REG, info->picture_offset
+         + (info->frame_size * frame));
+ 
+  return 0;
+}
+
 static void debugout(unsigned int addr, unsigned int val){
 	return ;
     switch ( addr ){
@@ -1345,6 +1364,7 @@ VDXDriver savage_drv = {
   .config_playback = savage_config_playback,
   .playback_on = savage_playback_on,
   .playback_off = savage_playback_off,
+  .frame_sel = savage_frame_select,
   .get_eq = savage_get_eq,
   .set_eq = savage_set_eq,
   .set_gkey = savage_set_gkeys,
