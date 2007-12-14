@@ -328,6 +328,7 @@ static int seek(stream_t* s,off_t newpos) {
   cd_track_t *cd_track;
   int sec;
   int current_track=0, seeked_track=0;
+  int seek_to_track = 0;
   int i;
   
   s->pos = newpos;
@@ -347,10 +348,11 @@ static int seek(stream_t* s,off_t newpos) {
 	}
 	if( sec>=p->cd->disc_toc[i].dwStartSector && sec<p->cd->disc_toc[i+1].dwStartSector ) {
 		seeked_track = i;
+		seek_to_track = sec == p->cd->disc_toc[i].dwStartSector;
 	}
   }
 //printf("current: %d, seeked: %d\n", current_track, seeked_track);
-	if( current_track!=seeked_track ) {
+	if (current_track != seeked_track && !seek_to_track) {
 //printf("Track %d, sector=%d\n", seeked_track, sec);
 		  cd_track = cd_info_get_track(p->cd_info, seeked_track+1);
 		  if( cd_track!=NULL ) {
