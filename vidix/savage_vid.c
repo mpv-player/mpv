@@ -287,6 +287,10 @@ unsigned int GetBlendForFourCC( int id )
 	    return 3;
 	case IMGFMT_BGR16:
 	    return 5;
+	case IMGFMT_BGR24:
+	    return 6;
+	case IMGFMT_BGR32:
+	    return 7;
         default:
 	    return 1;
     }
@@ -1057,7 +1061,8 @@ is_supported_fourcc (uint32_t fourcc)
     case IMGFMT_Y211:
     case IMGFMT_RGB15:
     case IMGFMT_RGB16:
-//    case IMGFMT_BGR32:
+    case IMGFMT_BGR24:
+    case IMGFMT_BGR32:
       return 1;
     default:
       return 0;
