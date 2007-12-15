@@ -865,7 +865,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 	}
 	
 	if (*file_format != DEMUXER_TYPE_PLAYLIST)
-	*file_format = DEMUXER_TYPE_ASF;
+		*file_format = DEMUXER_TYPE_ASF;
 	stream->type = STREAMTYPE_STREAM;
 	fixup_network_stream_cache(stream);
 	return STREAM_OK;
