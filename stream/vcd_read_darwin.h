@@ -23,6 +23,7 @@ typedef struct mp_vcd_priv_st
 	int fd;
 	cdsector_t buf;
 	dk_cd_read_track_info_t entry;
+	struct CDDiscInfo hdr;
 	CDMSF msf;
 } mp_vcd_priv_t;
 
@@ -57,32 +58,19 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 
 int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
-	dk_cd_read_disc_info_t tochdr;
-	struct CDDiscInfo hdr;
-	
 	struct CDTrackInfo entry;
 	
-	//read toc header
-    memset(&tochdr, 0, sizeof(tochdr));
-    tochdr.buffer = &hdr;
-    tochdr.bufferLength = sizeof(hdr);
-  
-    if (ioctl(vcd->fd, DKIOCCDREADDISCINFO, &tochdr) < 0)
-	{
-		mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
-		return -1;
-    }
-	if (track > hdr.lastTrackNumberInLastSessionLSB) {
+	if (track > vcd->hdr.lastTrackNumberInLastSessionLSB) {
 		mp_msg(MSGT_OPEN, MSGL_ERR,
 		       "track number %d greater than last track number %d\n",
-		       track, hdr.lastTrackNumberInLastSessionLSB);
+		       track, vcd->hdr.lastTrackNumberInLastSessionLSB);
 		return -1;
 	}
 	
 	//read track info
 	memset( &vcd->entry, 0, sizeof(vcd->entry));
 	vcd->entry.addressType = kCDTrackInfoAddressTypeTrackNumber;
-	vcd->entry.address = track<hdr.lastTrackNumberInLastSessionLSB?track+1:hdr.lastTrackNumberInLastSessionLSB;
+	vcd->entry.address = track<vcd->hdr.lastTrackNumberInLastSessionLSB?track+1:vcd->hdr.lastTrackNumberInLastSessionLSB;
 	vcd->entry.bufferLength = sizeof(entry);
 	vcd->entry.buffer = &entry;
   
@@ -91,7 +79,7 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 		mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
 		return -1;
 	}
-	if (track == hdr.lastTrackNumberInLastSessionLSB)
+	if (track == vcd->hdr.lastTrackNumberInLastSessionLSB)
 		vcd->msf = CDConvertLBAToMSF(be2me_32(entry.trackStartAddress) +
 		                             be2me_32(entry.trackSize));
 	else
@@ -185,6 +173,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
  
 	vcd = malloc(sizeof(mp_vcd_priv_t));
 	vcd->fd = fd;
+	vcd->hdr = hdr;
 	vcd->msf = trackMSF;
 	return vcd;
 }
