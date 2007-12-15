@@ -109,8 +109,8 @@ typedef struct {
 #define TUNER_CBL	3
 #define TUNER_ATSC	4
 
-extern int dvb_step_channel(dvb_priv_t *, int);
-extern int dvb_set_channel(dvb_priv_t *, int, int);
+extern int dvb_step_channel(stream_t *, int);
+extern int dvb_set_channel(stream_t *, int, int);
 extern dvb_config_t *dvb_get_config(void);
 
 #endif

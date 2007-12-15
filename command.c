@@ -2628,10 +2628,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 #endif /* HAVE_PVR */
 	    }
 #ifdef HAS_DVBIN_SUPPORT
-	    if ((mpctx->stream->type == STREAMTYPE_DVB)
-		&& mpctx->stream->priv) {
-		dvb_priv_t *priv = (dvb_priv_t *) mpctx->stream->priv;
-		if (priv->is_on) {
+	    if (mpctx->stream->type == STREAMTYPE_DVB) {
 		    int dir;
 		    int v = cmd->args[0].v.i;
 
@@ -2642,9 +2639,8 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			dir = DVB_CHANNEL_LOWER;
 
 
-		    if (dvb_step_channel(priv, dir))
+		    if (dvb_step_channel(mpctx->stream, dir))
 			mpctx->eof = mpctx->dvbin_reopen = 1;
-		}
 	    }
 #endif				/* HAS_DVBIN_SUPPORT */
 	    break;
@@ -2671,19 +2667,12 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 
 #ifdef HAS_DVBIN_SUPPORT
 	case MP_CMD_DVB_SET_CHANNEL:
-	    if ((mpctx->stream->type == STREAMTYPE_DVB)
-		&& mpctx->stream->priv) {
-		dvb_priv_t *priv = (dvb_priv_t *) mpctx->stream->priv;
-		if (priv->is_on) {
-		    if (priv->list->current <= cmd->args[0].v.i)
+	    if (mpctx->stream->type == STREAMTYPE_DVB) {
 			mpctx->last_dvb_step = 1;
-		    else
-			mpctx->last_dvb_step = -1;
 
 		    if (dvb_set_channel
-			(priv, cmd->args[1].v.i, cmd->args[0].v.i))
+			(mpctx->stream, cmd->args[1].v.i, cmd->args[0].v.i))
 			mpctx->eof = mpctx->dvbin_reopen = 1;
-		}
 	    }
 	    break;
 #endif				/* HAS_DVBIN_SUPPORT     */

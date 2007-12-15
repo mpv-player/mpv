@@ -469,11 +469,11 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 
 static void dvbin_close(stream_t *stream);
 
-int dvb_set_channel(dvb_priv_t *priv, int card, int n)
+int dvb_set_channel(stream_t *stream, int card, int n)
 {
 	dvb_channels_list *new_list;
 	dvb_channel_t *channel;
-	stream_t *stream  = (stream_t*) priv->stream;
+	dvb_priv_t *priv = stream->priv;
 	char buf[4096];
 	dvb_config_t *conf = (dvb_config_t *) priv->config;
 	int devno;
@@ -557,10 +557,11 @@ int dvb_set_channel(dvb_priv_t *priv, int card, int n)
 
 
 
-int dvb_step_channel(dvb_priv_t *priv, int dir)
+int dvb_step_channel(stream_t *stream, int dir)
 {
 	int new_current;
 	dvb_channels_list *list;
+	dvb_priv_t *priv = stream->priv;
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_STEP_CHANNEL dir %d\n", dir);
 
@@ -579,7 +580,7 @@ int dvb_step_channel(dvb_priv_t *priv, int dir)
 
 	new_current = (list->NUM_CHANNELS + list->current + (dir == DVB_CHANNEL_HIGHER ? 1 : -1)) % list->NUM_CHANNELS;
 
-	return dvb_set_channel(priv, priv->card, new_current);
+	return dvb_set_channel(stream, priv->card, new_current);
 }
 
 
@@ -640,7 +641,7 @@ static int dvb_streaming_start(dvb_priv_t *priv, struct stream_priv_s *opts, int
 	}
 
 
-	if(!dvb_set_channel(priv, priv->card, priv->list->current))
+	if(!dvb_set_channel(stream, priv->card, priv->list->current))
 	{
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR, COULDN'T SET CHANNEL  %i: ", priv->list->current);
 		dvbin_close(stream);

@@ -3115,11 +3115,8 @@ if(mpctx->sh_video){
 if(!mpctx->sh_video && !mpctx->sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NoStreamFound);
 #ifdef HAS_DVBIN_SUPPORT
-	if((mpctx->stream->type == STREAMTYPE_DVB) && mpctx->stream->priv)
+	if(mpctx->stream->type == STREAMTYPE_DVB)
 	{
-	  dvb_priv_t *priv = (dvb_priv_t*) mpctx->stream->priv;
-	  if(priv->is_on)
-	  {
 		int dir;
 		int v = mpctx->last_dvb_step;
 		if(v > 0)
@@ -3127,9 +3124,8 @@ if(!mpctx->sh_video && !mpctx->sh_audio){
 		else
 			dir = DVB_CHANNEL_LOWER;
 			
-		if(dvb_step_channel(priv, dir))
+		if(dvb_step_channel(mpctx->stream, dir))
 			mpctx->eof = mpctx->dvbin_reopen = 1;
-	  }
 	}
 #endif	
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
