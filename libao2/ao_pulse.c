@@ -256,10 +256,10 @@ static void uninit(int immed) {
 
 /** Play the specified data to the pulseaudio server */
 static int play(void* data, int len, int flags) {
-        if (pa_stream_write(stream, data, len, NULL, 0, PA_SEEK_RELATIVE) < 0) {
-            GENERIC_ERR_MSG(context, "pa_stream_write() failed");
-            return -1;
-        }
+    if (pa_stream_write(stream, data, len, NULL, 0, PA_SEEK_RELATIVE) < 0) {
+        GENERIC_ERR_MSG(context, "pa_stream_write() failed");
+        return -1;
+    }
     return len;
 }
 
