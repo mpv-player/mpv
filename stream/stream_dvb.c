@@ -626,11 +626,11 @@ static void dvbin_close(stream_t *stream)
 }
 
 
-static int dvb_streaming_start(dvb_priv_t *priv, struct stream_priv_s *opts, int tuner_type, char *progname)
+static int dvb_streaming_start(stream_t *stream, struct stream_priv_s *opts, int tuner_type, char *progname)
 {
 	int i;
 	dvb_channel_t *channel = NULL;
-	stream_t *stream  = (stream_t*) priv->stream;
+	dvb_priv_t *priv = stream->priv;
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndvb_streaming_start(PROG: %s, CARD: %d, VID: %d, AID: %d, TYPE: %s, FILE: %s)\r\n",
 	    opts->prog, opts->card, opts->vid, opts->aid,  opts->type, opts->file);
@@ -691,7 +691,6 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 		return STREAM_ERROR;
 
 	priv = (dvb_priv_t *)stream->priv;
-	priv->stream = stream;
 	priv->config = dvb_get_config();
 	if(priv->config == NULL)
 	{
@@ -741,7 +740,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 		progname = p->prog;
 
 
-	if(! dvb_streaming_start(priv, p, tuner_type, progname))
+	if(! dvb_streaming_start(stream, p, tuner_type, progname))
 	{
 		free(stream->priv);
 		stream->priv = NULL;

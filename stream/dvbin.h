@@ -97,7 +97,6 @@ typedef struct {
 	dvb_channels_list *list;
 	int tuner_type;
 	int is_on;
-	stream_t *stream;
 	int retry;
 	int timeout;
 	int last_freq;
