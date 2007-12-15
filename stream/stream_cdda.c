@@ -261,7 +261,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 
   st->priv = priv;
   st->start_pos = priv->start_sector*CD_FRAMESIZE_RAW;
-  st->end_pos = priv->end_sector*CD_FRAMESIZE_RAW;
+  st->end_pos = (priv->end_sector + 1) * CD_FRAMESIZE_RAW;
   st->type = STREAMTYPE_CDDA;
   st->sector_size = CD_FRAMESIZE_RAW;
 
@@ -289,6 +289,11 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   int16_t * buf;
   int i;
   
+  if((p->sector < p->start_sector) || (p->sector > p->end_sector)) {
+    s->eof = 1;
+    return 0;
+  }
+
   buf = paranoia_read(p->cdp,cdparanoia_callback);
   if (!buf)
     return 0;
@@ -301,11 +306,6 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   p->sector++;
   s->pos = p->sector*CD_FRAMESIZE_RAW;
   memcpy(buffer,buf,CD_FRAMESIZE_RAW);
-
-  if((p->sector < p->start_sector) || (p->sector >= p->end_sector)) {
-    s->eof = 1;
-    return 0;
-  }
 
   for(i=0;i<p->cd->tracks;i++){
 	  if(p->cd->disc_toc[i].dwStartSector==p->sector-1) {
@@ -333,7 +333,7 @@ static int seek(stream_t* s,off_t newpos) {
   
   s->pos = newpos;
   sec = s->pos/CD_FRAMESIZE_RAW;
-  if (s->pos < 0 || sec >= p->end_sector) {
+  if (s->pos < 0 || sec > p->end_sector) {
     s->eof = 1;
     return 0;
   }
