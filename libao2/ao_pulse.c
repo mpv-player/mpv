@@ -256,10 +256,12 @@ static void uninit(int immed) {
 
 /** Play the specified data to the pulseaudio server */
 static int play(void* data, int len, int flags) {
+    pa_threaded_mainloop_lock(mainloop);
     if (pa_stream_write(stream, data, len, NULL, 0, PA_SEEK_RELATIVE) < 0) {
         GENERIC_ERR_MSG(context, "pa_stream_write() failed");
-        return -1;
+        len = -1;
     }
+    pa_threaded_mainloop_unlock(mainloop);
     return len;
 }
 
