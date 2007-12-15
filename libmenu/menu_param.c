@@ -32,6 +32,7 @@ struct list_entry_s {
   char* prop;
   m_option_t* opt;
   char* menu;
+  int auto_update;
 };
 
 struct menu_priv_s {
@@ -81,14 +82,15 @@ static void entry_set_text(menu_t* menu, list_entry_t* e) {
   free(val);
 }
 
-static void update_entries(menu_t* menu) {
+static void update_entries(menu_t* menu, int auto_update) {
   list_entry_t* e;
   for(e = mpriv->p.menu ; e ; e = e->p.next)
-    if(e->txt || e->prop) entry_set_text(menu,e);
+    if ((e->txt || e->prop) && (!auto_update || e->auto_update))
+      entry_set_text(menu, e);
 }
 
 static int parse_args(menu_t* menu,char* args) {
-  char *element,*body, **attribs, *name, *txt;
+  char *element,*body, **attribs, *name, *txt, *auto_update;
   list_entry_t* m = NULL;
   int r;
   m_option_t* opt;
@@ -144,6 +146,15 @@ static int parse_args(menu_t* menu,char* args) {
     m->prop = name; name = NULL;
     m->name = asx_get_attrib("name",attribs);
     if(!m->name) m->name = strdup(opt ? opt->name : "-");
+    auto_update = asx_get_attrib("auto-update", attribs);
+    if (auto_update) {
+      if (!strcmp(auto_update, "1") ||
+          !strcasecmp(auto_update, "on") ||
+          !strcasecmp(auto_update, "yes") ||
+          !strcasecmp(auto_update, "true"))
+        m->auto_update = 1;
+      free(auto_update);
+    }
     entry_set_text(menu,m);
     menu_list_add_entry(menu,m);
 
@@ -164,13 +175,13 @@ static void read_cmd(menu_t* menu,int cmd) {
       if(!mpriv->edit) break;
     case MENU_CMD_RIGHT:
       if(mp_property_do(e->prop,M_PROPERTY_STEP_UP,NULL,menu->ctx) > 0)
-        update_entries(menu);
+        update_entries(menu, 0);
       return;
     case MENU_CMD_DOWN:
       if(!mpriv->edit) break;
     case MENU_CMD_LEFT:
       if(mp_property_do(e->prop,M_PROPERTY_STEP_DOWN,NULL,menu->ctx) > 0)
-        update_entries(menu);
+        update_entries(menu, 0);
       return;
       
     case MENU_CMD_OK:
@@ -179,13 +190,13 @@ static void read_cmd(menu_t* menu,int cmd) {
       // shortcut for flags
       if(e->opt->type == CONF_TYPE_FLAG) {
 	if(mp_property_do(e->prop,M_PROPERTY_STEP_UP,NULL,menu->ctx) > 0)
-          update_entries(menu);
+          update_entries(menu, 0);
         return;
       }
       // switch
       mpriv->edit = !mpriv->edit;
       // update the menu
-      update_entries(menu);
+      update_entries(menu, 0);
       // switch the pointer
       if(mpriv->edit) {
         mpriv->ptr = mpriv->p.ptr;
@@ -196,7 +207,7 @@ static void read_cmd(menu_t* menu,int cmd) {
     case MENU_CMD_CANCEL:
       if(!mpriv->edit) break;
       mpriv->edit = 0;
-      update_entries(menu);
+      update_entries(menu, 0);
       mpriv->p.ptr = mpriv->ptr;
       return;
     }
@@ -237,9 +248,14 @@ static void closeMenu(menu_t* menu) {
   menu_list_uninit(menu,free_entry);
 }
 
+static void menu_pref_draw(menu_t* menu, mp_image_t* mpi) {
+  update_entries(menu, 1);
+  menu_list_draw(menu, mpi);
+}
+
 static int openMenu(menu_t* menu, char* args) {
 
-  menu->draw = menu_list_draw;
+  menu->draw = menu_pref_draw;
   menu->read_cmd = read_cmd;
   menu->close = closeMenu;
 
