@@ -72,11 +72,17 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 		mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
 		return -1;
     }
+	if (track > hdr.lastTrackNumberInLastSessionLSB) {
+		mp_msg(MSGT_OPEN, MSGL_ERR,
+		       "track number %d greater than last track number %d\n",
+		       track, hdr.lastTrackNumberInLastSessionLSB);
+		return -1;
+	}
 	
 	//read track info
 	memset( &vcd->entry, 0, sizeof(vcd->entry));
 	vcd->entry.addressType = kCDTrackInfoAddressTypeTrackNumber;
-	vcd->entry.address = track<hdr.lastTrackNumberInLastSessionLSB?track+1:CDROM_LEADOUT;
+	vcd->entry.address = track<hdr.lastTrackNumberInLastSessionLSB?track+1:hdr.lastTrackNumberInLastSessionLSB;
 	vcd->entry.bufferLength = sizeof(entry);
 	vcd->entry.buffer = &entry;
   
@@ -85,6 +91,10 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 		mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
 		return -1;
 	}
+	if (track == hdr.lastTrackNumberInLastSessionLSB)
+		vcd->msf = CDConvertLBAToMSF(be2me_32(entry.trackStartAddress) +
+		                             be2me_32(entry.trackSize));
+	else
 	vcd->msf = CDConvertLBAToMSF(be2me_32(entry.trackStartAddress));
 	return VCD_SECTOR_DATA*vcd_get_msf(vcd);
 }
@@ -117,9 +127,10 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", hdr.lastTrackNumberInLastSessionLSB);
 	for (i=hdr.firstTrackNumberInLastSessionLSB ; i<=hdr.lastTrackNumberInLastSessionLSB + 1; i++)
 	{
+		if (i <= hdr.lastTrackNumberInLastSessionLSB) {
 		memset( &tocentry, 0, sizeof(tocentry));
 		tocentry.addressType = kCDTrackInfoAddressTypeTrackNumber;
-		tocentry.address = i<=hdr.lastTrackNumberInLastSessionLSB ? i : CDROM_LEADOUT;
+		tocentry.address = i;
 		tocentry.bufferLength = sizeof(entry);
 		tocentry.buffer = &entry;
 
@@ -130,6 +141,10 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 		}
 		
 		trackMSF = CDConvertLBAToMSF(be2me_32(entry.trackStartAddress));
+		}
+		else
+			trackMSF = CDConvertLBAToMSF(be2me_32(entry.trackStartAddress)
+			                             + be2me_32(entry.trackSize));
         
 		//mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
 		if (i<=hdr.lastTrackNumberInLastSessionLSB)
