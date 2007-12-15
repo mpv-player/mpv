@@ -21,9 +21,9 @@ typedef struct
 typedef struct mp_vcd_priv_st
 {
 	int fd;
+	cdsector_t buf;
 	dk_cd_read_track_info_t entry;
 	CDMSF msf;
-	cdsector_t buf;
 } mp_vcd_priv_t;
 
 static inline void vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect)
