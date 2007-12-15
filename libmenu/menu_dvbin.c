@@ -248,6 +248,7 @@ static void read_cmd(menu_t* menu, int cmd)
 
 static void close_menu(menu_t* menu)
 {
+	dvb_free_config(mpriv->config);
 	menu_list_uninit(menu, free_entry);
 }
 

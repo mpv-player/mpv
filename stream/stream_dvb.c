@@ -125,7 +125,6 @@ extern int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc,
 		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout);
 extern char *dvb_dvrdev[4], *dvb_demuxdev[4], *dvb_frontenddev[4];
 
-static dvb_config_t *dvb_config = NULL;
 
 
 static dvb_channels_list *dvb_get_channels(char *filename, int type)
@@ -425,7 +424,26 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 	return list;
 }
 
+void dvb_free_config(dvb_config_t *config)
+{
+	int i;
 
+	for(i=0; i<config->count; i++) 
+	{
+		if(config->cards[i].name)
+			free(config->cards[i].name);
+		if(!config->cards[i].list)
+			continue;
+		if(config->cards[i].list->channels)
+		{
+			if(config->cards[i].list->channels->name)
+				free(config->cards[i].list->channels->name);
+			free(config->cards[i].list->channels);
+		}
+		free(config->cards[i].list);
+	}  
+	free(config);
+}
 
 static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 {
@@ -525,7 +543,6 @@ int dvb_set_channel(stream_t *stream, int card, int n)
 		}
 	}
 
-	dvb_config->priv = priv;
 	priv->card = card;
 	priv->list = new_list;
 	priv->retry = 5;
@@ -605,7 +622,7 @@ static void dvbin_close(stream_t *stream)
 #endif
 
 	priv->is_on = 0;
-	dvb_config->priv = NULL;
+	dvb_free_config(priv->config);
 }
 
 
@@ -675,15 +692,13 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 
 	priv = (dvb_priv_t *)stream->priv;
 	priv->stream = stream;
-	dvb_config = dvb_get_config();
-	if(dvb_config == NULL)
+	priv->config = dvb_get_config();
+	if(priv->config == NULL)
 	{
 		free(priv);
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "DVB CONFIGURATION IS EMPTY, exit\n");
 		return STREAM_ERROR;
 	}
-	dvb_config->priv = priv;
-	priv->config = dvb_config;
 
 	priv->card = -1;
 	for(i=0; i<priv->config->count; i++)
@@ -752,8 +767,6 @@ dvb_config_t *dvb_get_config(void)
 	dvb_card_config_t *cards = NULL, *tmp;
 	dvb_config_t *conf = NULL;
 	
-	if(dvb_config != NULL)
-		return dvb_config;
 			
 	conf = malloc(sizeof(dvb_config_t));
 	if(conf == NULL)
@@ -841,7 +854,6 @@ dvb_config_t *dvb_get_config(void)
 		conf = NULL;
 	}
 
-	dvb_config = conf;
 	return conf;
 }
 
