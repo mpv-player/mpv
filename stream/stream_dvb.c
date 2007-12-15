@@ -426,7 +426,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 
 void dvb_free_config(dvb_config_t *config)
 {
-	int i;
+	int i, j;
 
 	for(i=0; i<config->count; i++) 
 	{
@@ -436,8 +436,11 @@ void dvb_free_config(dvb_config_t *config)
 			continue;
 		if(config->cards[i].list->channels)
 		{
-			if(config->cards[i].list->channels->name)
-				free(config->cards[i].list->channels->name);
+			for(j=0; j<config->cards[i].list->NUM_CHANNELS; j++)
+			{
+				if(config->cards[i].list->channels[j].name)
+					free(config->cards[i].list->channels[j].name);
+			}
 			free(config->cards[i].list->channels);
 		}
 		free(config->cards[i].list);
