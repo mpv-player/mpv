@@ -91,6 +91,12 @@ static void success_cb(pa_stream *s, int success, void *userdata) {
     pa_threaded_mainloop_signal(mainloop, 0);
 }
 
+/**
+ * \brief waits for a pulseaudio operation to finish, frees it and
+ *        unlocks the mainloop
+ * \param op operation to wait for
+ * \return 1 if operation has finished normally (DONE state), 0 otherwise
+ */
 static int waitop(pa_operation *op) {
     pa_operation_state_t state;
     if (!op) return 0;
