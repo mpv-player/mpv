@@ -304,7 +304,6 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
 #endif
 
   p->sector++;
-  s->pos = p->sector*CD_FRAMESIZE_RAW;
   memcpy(buffer,buf,CD_FRAMESIZE_RAW);
 
   for(i=0;i<p->cd->tracks;i++){
