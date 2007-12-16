@@ -1,4 +1,4 @@
-.\" synced with r25315
+.\" synced with r25389
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -11306,6 +11306,19 @@ mplayer \-vo zr \-vf scale=352:288 file.avi
 .PP
 .B Lecture sur carte zoran (nouvelle méthode)\ :
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
+.
+.PP
+.B Lecture d'un CD-DTS en passthrough:
+.nf
+mplayer \-ac hwdts \-rawaudio format=0x2001 \-cdrom\-device /dev/cdrom cdda://
+.fi
+.br
+Vous pouvez aussi utiliser \-afm hwac3 au lieu de \-ac hwdts.
+Adaptez '/dev/cdrom' pour que ça corresponde avec le périphérique CD-ROM de
+votre machine.
+Si votre récepteur externe gère le décodage de flux DTS bruts,
+vous pouvez lire directement avec cdda://, sans préciser le format,
+hwac3 ou hwdts.
 .
 .PP
 .B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
