@@ -59,6 +59,7 @@ extern int font_fontconfig;
 static int font_fontconfig = -1;
 #endif
 extern char* font_name;
+extern char* sub_font_name;
 extern float text_font_scale_factor;
 extern int subtitle_autoscale;
 
@@ -90,7 +91,7 @@ ass_track_t* ass_default_track(ass_library_t* library) {
 		sid = ass_alloc_style(track);
 		style = track->styles + sid;
 		style->Name = strdup("Default");
-		style->FontName = (font_fontconfig >= 0 && font_name) ? strdup(font_name) : strdup("Sans");
+		style->FontName = (font_fontconfig >= 0 && sub_font_name) ? strdup(sub_font_name) : (font_fontconfig >= 0 && font_name) ? strdup(font_name) : strdup("Sans");
 
 		fs = track->PlayResY * text_font_scale_factor / 100.;
 		// approximate autoscale coefficients
@@ -234,9 +235,11 @@ void ass_configure(ass_renderer_t* priv, int w, int h, int unscaled) {
 void ass_configure_fonts(ass_renderer_t* priv) {
 	char *dir, *path, *family;
 	dir = get_path("fonts");
-	if (font_fontconfig < 0 && font_name) path = strdup(font_name);
+	if (font_fontconfig < 0 && sub_font_name) path = strdup(sub_font_name);
+	else if (font_fontconfig < 0 && font_name) path = strdup(font_name);
 	else path = get_path("subfont.ttf");
-	if (font_fontconfig >= 0 && font_name) family = strdup(font_name);
+	if (font_fontconfig >= 0 && sub_font_name) family = strdup(sub_font_name);
+	else if (font_fontconfig >= 0 && font_name) family = strdup(font_name);
 	else family = 0;
 
 	ass_set_fonts(priv, path, family);
