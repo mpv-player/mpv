@@ -47,6 +47,10 @@
         #include <ddk/ntddcdrm.h>
 #elif (__bsdi__)
         #include <dvd.h>
+#elif defined(__APPLE__) || defined(__DARWIN__)
+        #include <IOKit/storage/IOCDTypes.h>
+        #include <IOKit/storage/IOCDMediaBSDClient.h>
+	#include "mpbswap.h"
 #endif
 
 #include "cdd.h"
@@ -64,7 +68,7 @@ static int cdtoc_last_track;
 
 int 
 read_toc(const char *dev) {
-	int first, last;
+	int first = 0, last = -1;
 	int i;
 #ifdef WIN32
         HANDLE drive;
@@ -142,6 +146,52 @@ read_toc(const char *dev) {
 		cdtoc[i].min = toc_buffer.addr.msf.minute;
 		cdtoc[i].sec = toc_buffer.addr.msf.second;
 		cdtoc[i].frame = toc_buffer.addr.msf.frame;
+	}
+#elif defined(__APPLE__) || defined(__DARWIN__)
+	{
+	dk_cd_read_toc_t tochdr;
+	uint8_t buf[4];
+	uint8_t buf2[100 * sizeof(CDTOCDescriptor) + sizeof(CDTOC)];
+	memset(&tochdr, 0, sizeof(tochdr));
+	tochdr.bufferLength = sizeof(buf);
+	tochdr.buffer = &buf;
+	if (!ioctl(drive, DKIOCCDREADTOC, &tochdr)
+			&& tochdr.bufferLength == sizeof(buf)) {
+		first = buf[2] - 1;
+		last = buf[3];
+	}
+	if (last >= 0) {
+		memset(&tochdr, 0, sizeof(tochdr));
+		tochdr.bufferLength = sizeof(buf2);
+		tochdr.buffer = &buf2;
+		tochdr.format = kCDTOCFormatTOC;
+		if (ioctl(drive, DKIOCCDREADTOC, &tochdr)
+				|| tochdr.bufferLength < sizeof(CDTOC))
+			last = -1;
+	}
+	if (last >= 0) {
+		CDTOC *cdToc = (CDTOC *)buf2;
+		CDTrackInfo lastTrack;
+		dk_cd_read_track_info_t trackInfoParams;
+		for (i = first; i < last; ++i) {
+			CDMSF msf = CDConvertTrackNumberToMSF(i + 1, cdToc);
+			cdtoc[i].min = msf.minute;
+			cdtoc[i].sec = msf.second;
+			cdtoc[i].frame = msf.frame;
+		}
+		memset(&trackInfoParams, 0, sizeof(trackInfoParams));
+		trackInfoParams.addressType = kCDTrackInfoAddressTypeTrackNumber;
+		trackInfoParams.bufferLength = sizeof(lastTrack);
+		trackInfoParams.address = last;
+		trackInfoParams.buffer = &lastTrack;
+		if (!ioctl(drive, DKIOCCDREADTRACKINFO, &trackInfoParams)) {
+			CDMSF msf = CDConvertLBAToMSF(be2me_32(lastTrack.trackStartAddress)
+			                              + be2me_32(lastTrack.trackSize));
+			cdtoc[last].min = msf.minute;
+			cdtoc[last].sec = msf.second;
+			cdtoc[last].frame = msf.frame;
+		}
+	}
 	}
 #endif
 	close(drive);

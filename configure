@@ -5503,7 +5503,7 @@ fi
 echores "$_libcdio"
 
 if test "$_cdda" = yes ; then
-    test $_cddb = auto && test $_network = yes && ! darwin && _cddb=yes
+    test $_cddb = auto && test $_network = yes && _cddb=yes
     _def_cdparanoia='#define HAVE_CDDA'
     _inputmodules="cdda $_inputmodules"
 else
