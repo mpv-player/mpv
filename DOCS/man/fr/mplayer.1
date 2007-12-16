@@ -1,4 +1,4 @@
-.\" synced with r24875
+.\" synced with r25315
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -246,7 +246,7 @@ juste une trame et remettra le film en pause (toute autre touche arrête la
 pause).
 .IPs "q / ESC"
 Stoppe la lecture et quitte.
-.IPs "+ et -"
+.IPs "+ et \-"
 Ajuste le décalage audio de +/\- 0.1 secondes.
 .IPs "/ et *"
 Réduit/\:augmente le volume.
@@ -451,7 +451,7 @@ le télétexte de la TV.)
 .PP
 .PD 0
 .RS
-.IPs "X"
+.IPs "X\ \ \ \ "
 Bascule entre le télétexte activé ou désactivé.
 .IPs "Q at W"
 Aller à la page télétexte suivante/précédente.
@@ -883,8 +883,8 @@ Affiche aussi des informations plus détaillées à propos des langues et des
 identifiants des sous-titres et des pistes audio.
 Dans certains cas, vous aurez encore plus d'informations en utilisant
 \-msglevel identify=6.
-Par exemple, pour les DVDs, cela listera la durée de chaque titre, tout
-comme le numéro d'identifiant du DVD.
+Par exemple, pour les DVDs, cela listera la durée de chaque titre et de
+chaque chapitre, tout comme le numéro d'identifiant du DVD.
 Le script TOOLS/\:midentify supprime le reste de l'affichage et (espérons-le)
 formate les noms de fichiers pour le shell.
 .
@@ -978,7 +978,7 @@ Cloître le menu de sélection de fichiers à un emplacement spécifique.
 .I EXEMPLE\ :
 .PD 0
 .RSs
-.IPs "\-menu\-chroot=/home"
+.IPs "\-menu\-chroot /home"
 Limite au répertoire et sous-répertoire /\:home/ le menu de sélection de fichier
 (c-à-d qu'il ne sera pas possible d'accéder à /, tandis que /\:home/\:user_name/
 sera accessible).
@@ -2089,6 +2089,10 @@ Active le rendu des sous-titres SSA/ASS.
 Avec cette option, libass sera utilisé pour les fichiers de
 sous-titres et ceux contenus dans les pistes Matroska.
 Fonctionne avec \-embeddedfonts.
+.br
+.I NOTE\ :
+Quand fontconfig est activé à compilation, \-ass active \-fontconfig à moins
+que vous l'empêchiez explicitement avec l'option \-nofontconfig.
 .
 .TP
 .B \-ass\-border\-color <valeur>
@@ -2124,20 +2128,22 @@ Force les paramètres de style.
 .TP
 .B \-ass\-hinting <type>
 Défini le type de d'indice (hinting).
+<type> peut prendre les valeurs\ :
 .PD 0
 .RSs
-.IPs <type>
-0: pas d'indice.
-.br
-1: indice auto de FreeType, mode léger.
-.br
-2: indice auto de FreeType, mode normal.
-.br
-3: indice natif de la police.
-.br
-0\-3 + 4: Idem, sauf que les indices ne seront pris en compte que si l'OSD
-est rendu à la résolution de l'écran, c-à-d qui non redimensionné.
-.br
+.IPs 0
+pas d'indice
+.IPs 1
+indice auto de FreeType, mode léger
+.IPs 2
+indice auto de FreeType, mode normal
+.IPs 3
+indice natif de la police
+.IPs "0\-3 + 4"
+Idem, sauf que les indices ne seront pris en compte que si l'OSD est rendu
+à la résolution de l'écran, auquel cas il n'y aura pas de redimensionnement.
+.RE
+.RSs
 La valeur par défaut est 7 (indice natif pour l'OSD non redimensionné et pas
 d'utilisation des indices dans le cas contraire).
 .RE
@@ -2269,6 +2275,10 @@ Avec Fontconfig, cette option détermine le nom de police fontconfig.
 .TP
 .B \-fontconfig (fontconfig uniquement)
 Active l'utilisation des polices gérées par fontconfig.
+.br
+.I NOTE\ :
+\-ass active cette option automatiquement à moins que vous l'empêchiez
+explicitement avec l'option \-nofontconfig.
 .
 .TP
 .B \-forcedsubsonly
@@ -2822,6 +2832,9 @@ Pilote de sortie audio PulseAudio
 .RSs
 .IPs "<hôte>[:<récepteur>]"
 Défini l'hôte et optionnellement le récepteur à utiliser.
+Si vous passez une chaîne vide en tant que <récepteur>, la connection restera
+locale, tandis que "localhost") générera du traffic réseau (ce qui n'est
+probablement pas ce que vous voulez).
 .RE
 .PD 1
 .
@@ -5732,7 +5745,7 @@ hauteur/largeur redimensionné.
 \-3: Calcule l/h en utilisant l'autre dimension et le rapport
 hauteur/\:largeur original.
 .br
--(n+8): Comment \-n ci-dessus, mais en arrondissant les dimensions au plus
+\-(n+8): Comme \-n ci-dessus, mais en arrondissant les dimensions au plus
 proche multiple de 16.
 .REss
 .IPs <ilaced>
@@ -5899,7 +5912,7 @@ Conversion d'espace de couleur RGB 24/32 <\-> BGR 24/32
 .PD 0
 .RSs
 .IPs swap
-Échange aussi R <-> B.
+Échange aussi R <\-> B.
 .RE
 .PD 1
 .
@@ -8513,7 +8526,7 @@ avec qcomp 0.5 ou quelque chose comme ça (par défaut)
 opérateurs infixes\ :
 .RE
 .RSs
-.IPs +,\-,*,/\:,^
+.IPs +,\-,*,/,^
 .RE
 .PP
 .RS
@@ -11325,12 +11338,12 @@ mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o titre2.avi \-oac copy
 .
 .PP
 .B Même chose, mais avec un bitrate de 1800kbit et des macro-blocs optimisés\ :
-mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
+mencoder dvd://2 \-o titre2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
 .PP
 .B Même chose, mais une compression MJPEG\ :
-mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
+mencoder dvd://2 \-o titre2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800
 .
 .PP
