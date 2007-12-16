@@ -244,18 +244,17 @@ II. POLICY / RULES:
    keep related changes together.
 
 
-4. Do not change behavior of the program (renaming options etc) or
-   remove functionality from the code without approval in a discussion on
-   the mplayer-dev-eng mailing list.
+4. Do not change behavior of the program (renaming options etc) or remove
+   functionality from the code without approval in a discussion on the
+   mplayer-dev-eng mailing list.
 
 
-5. Do not commit changes
-   which change behavior, defaults etc, without asking first. The same
-   applies to compiler warning fixes, trivial looking fixes and to code
-   maintained by other developers. We usually have a reason for doing things
-   the way we do. Send your changes as patches to the mplayer-dev-eng mailing
-   list, and if the code maintainers say OK, you may commit. This does not
-   apply to files you wrote and/or maintain.
+5. Do not commit changes which change behavior, defaults etc, without asking
+   first. The same applies to compiler warning fixes, trivial looking fixes and
+   to code maintained by other developers. We usually have a reason for doing
+   things the way we do. Send your changes as patches to the mplayer-dev-eng
+   mailing list, and if the code maintainers say OK, you may commit. This does
+   not apply to files you wrote and/or maintain.
 
 
 6. We refuse source indentation and other cosmetic changes if they are mixed
@@ -276,11 +275,11 @@ II. POLICY / RULES:
 
 
 8. If you apply a patch by someone else, include the name and email address in
-   the log message. Since the mplayer-cvslog mailing list is publicly
-   archived you should add some spam protection to the email address. Send an
-   answer to mplayer-dev-eng (or wherever you got the patch from) saying that
-   you applied the patch. If the patch contains a documentation change, commit
-   that as well; do not leave it to the documentation maintainers.
+   the log message. Since the mplayer-cvslog mailing list is publicly archived
+   you should add some spam protection to the email address. Send an answer to
+   mplayer-dev-eng (or wherever you got the patch from) saying that you applied
+   the patch. If the patch contains a documentation change, commit that as
+   well; do not leave it to the documentation maintainers.
 
 
 9. Do NOT commit to code actively maintained by others without permission. Send
@@ -308,8 +307,8 @@ II. POLICY / RULES:
      - use of internal or external libraries
 
 
-13. Try to keep important discussions and requests (also) on the
-    mplayer-dev-eng mailing list, so that all developers can benefit from them.
+13. Try to keep important discussions and requests (also) on the mplayer-dev-eng
+    mailing list, so that all developers can benefit from them.
     IRC is good for quick discussions, but nobody is there 24/7.
 
 
