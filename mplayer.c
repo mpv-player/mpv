@@ -1055,7 +1055,7 @@ void init_vo_spudec(void) {
  * make it all work is to use the builtin SDL-bootstrap code, which 
  * will be done automatically by replacing our main() if we include SDL.h.
  */
-#if defined(SYS_DARWIN) && defined(HAVE_SDL)
+#if defined(__APPLE__) && defined(HAVE_SDL)
 #include <SDL.h>
 #endif
 

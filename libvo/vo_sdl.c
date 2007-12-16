@@ -731,7 +731,7 @@ static void set_fullmode (int mode) {
 	 * re-assign it.  The comment in sdl_close() seems to imply that we 
 	 * should not free() anything.
 	 */
-	#ifdef SYS_DARWIN
+	#ifdef __APPLE__
 	{
 	const SDL_VideoInfo *vidInfo = NULL;
 	vidInfo = SDL_GetVideoInfo ();

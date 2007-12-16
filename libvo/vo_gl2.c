@@ -22,7 +22,7 @@
 #endif
 
 #undef TEXTUREFORMAT_ALWAYS
-#ifdef SYS_DARWIN
+#ifdef __APPLE__
 #define TEXTUREFORMAT_ALWAYS GL_RGBA8
 #endif
 
@@ -808,7 +808,7 @@ query_format(uint32_t format)
         return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
       break;
-#ifdef SYS_DARWIN
+#ifdef __APPLE__
     case IMGFMT_RGB32:
 #else
     case IMGFMT_RGB24:
