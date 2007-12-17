@@ -143,22 +143,22 @@ static int menu_parse_config(char* buffer) {
           if(r == 0)
             break;
           if (!strcasecmp(element, "binding")) {
-          key = asx_get_attrib("key",attribs);
-          cmd = asx_get_attrib("cmd",attribs);
-          if (key && (keycode = mp_input_get_key_from_name(key)) >= 0) {
-            keycode &= ~MP_NO_REPEAT_KEY;
-            mp_msg(MSGT_GLOBAL,MSGL_V,
-                   "[libmenu] got keybinding element %d %s=>[%s].\n",
-                   keycode, key, cmd ? cmd : "");
-            bindings->bindings = realloc(bindings->bindings,
+            key = asx_get_attrib("key",attribs);
+            cmd = asx_get_attrib("cmd",attribs);
+            if (key && (keycode = mp_input_get_key_from_name(key)) >= 0) {
+              keycode &= ~MP_NO_REPEAT_KEY;
+              mp_msg(MSGT_GLOBAL,MSGL_V,
+                     "[libmenu] got keybinding element %d %s=>[%s].\n",
+                     keycode, key, cmd ? cmd : "");
+              bindings->bindings = realloc(bindings->bindings,
                                    (bindings->binding_num+1)*sizeof(key_cmd_t));
-            bindings->bindings[bindings->binding_num].key = keycode;
-            bindings->bindings[bindings->binding_num].cmd = cmd;
-            ++bindings->binding_num;
-          }
-          else
-            free(cmd);
-          free(key);
+              bindings->bindings[bindings->binding_num].key = keycode;
+              bindings->bindings[bindings->binding_num].cmd = cmd;
+              ++bindings->binding_num;
+            }
+            else
+              free(cmd);
+            free(key);
           }
           free(element);
           asx_free_attribs(attribs);
