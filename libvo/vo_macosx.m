@@ -111,6 +111,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		screen_id = 0;
 	}
 	screen_frame = [screen_handle frame];
+	vo_screenwidth = screen_frame.size.width;
+	vo_screenheight = screen_frame.size.height;
 
 	//misc mplayer setup
 	image_width = width;
@@ -669,6 +671,8 @@ static int control(uint32_t request, void *data, ...)
 	int padding = 0;
 	
 	NSRect frame = [self frame];
+	vo_dwidth = frame.size.width;
+	vo_dheight = frame.size.height;
 	
 	glViewport(0, 0, frame.size.width, frame.size.height);
 	glMatrixMode(GL_PROJECTION);
@@ -820,8 +824,11 @@ static int control(uint32_t request, void *data, ...)
 		old_frame = [window frame];	//save main window size & position
 		if(screen_force)
 			screen_frame = [screen_handle frame];
-		else
+		else {
 			screen_frame = [[window screen] frame];
+			vo_screenwidth = screen_frame.size.width;
+			vo_screenheight = screen_frame.size.height;
+		}
 
 		[window setFrame:screen_frame display:YES animate:animate]; //zoom-in window with nice useless sfx
 		old_view_frame = [self bounds];
