@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r24954
+.\" sync with en/mplayer.1 r25389
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -425,7 +425,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .PP
 .PD 0
 .RS
-.IPs "X"
+.IPs "X\\\\"
 打开/\:关闭电视字幕。
 .IPs "Q和W"
 切换至下一个/\:上一个电视字幕页面。
@@ -798,7 +798,7 @@ xv, xvidix 和 dfbmga。
 是 \-msglevel identify=4 的简式。使用易于分析的格式显示文件参数。
 也打印更详细的字幕信息和音轨语言和 ID。
 在某些情形下, 你使用 \-msglevel identify=6 能得到更多的信息。
-例如, 对于 DVD 能列出每个标题的时长和碟片 ID 号。
+例如, 对于 DVD 能列出每个标题的章节和时长，以及一个碟片 ID 号。
 wrapper(封套) 脚本 TOOLS/\:midentify 能抑制 MPlayer 的其它输出
 并(希望能) shellescapes(脚本转义) 文件名。
 .
@@ -879,7 +879,7 @@ n 大小的 FIFO 能容纳 (n\-1) 缓冲事件。
 .I 示例：
 .PD 0
 .RSs
-.IPs "\-menu\-chroot=/home"
+.IPs \-menu\-chroot /home"
 将限制文件选择菜单查找/\:home以及其下的目录（即不可能访问 /，但可以访问
 /home/user_name）。
 .RE
@@ -1846,6 +1846,10 @@ MPlayer将同时打印“-tv channels=”选项中的值，包括已有的以及
 打开 SSA/ASS 字幕提供。
 通过此选项, libass 将用于 SSA/ASS 外部字幕和 Matroska 轨迹。
 你可能也想使用 \-embeddedfonts。
+.br
+.I 注意：
+当字体配置是预先编译进去的时，除非明确使用 \-nofontconfig 关闭该选项，
+否则 \-ass 将打开 \-fontconfig。
 .
 .TP
 .B \-ass\-border\-color <参数值>
@@ -1880,19 +1884,22 @@ SSA/ASS 提供器能在那里放置字幕 (与 \-ass\-use\-margins 组合用)。
 .TP
 .B \-ass\-hinting <类型>
 设置微调类型。
+<类型> 可以是：
 .PD 0
 .RSs
 .IPs <类型>
-0：无微调。
-.br
-1：FreeType自动微调器，轻量模式。
-.br
-2: FreeType自动微调器，普通模式。
-.br
-3: 字体内置微调。
-.br
-0\-3 + 4：相同，但微调只有当OSD以全屏方式显示而因此不会伸缩时才会使用。
-.br
+.IPs 0
+无微调。
+.IPs 1
+FreeType自动微调器，轻量模式。
+.IPs 2
+FreeType自动微调器，普通模式。
+.IPs 3
+字体内置微调。
+.IPs 0\-3 + 4
+相同，但微调只有当OSD以全屏方式显示而因此不会伸缩时才会使用。
+.RE
+.RSs
 默认值为7（当OSD不伸缩时使用内置微调器，否则无微调）。
 .RE
 .PD 1
@@ -2009,6 +2016,9 @@ SSA/ASS 提供器能在那里放置字幕 (与 \-ass\-use\-margins 组合用)。
 .TP
 .B \-fontconfig (仅用于 fontconfig)
 启用使用 fontconfig 管理的字体。
+.br
+.I 注意：
+\-ass 自动打开该选项，除非明确使用 \-nofontconfig 改变这一行为。
 .
 .TP
 .B \-forcedsubsonly
@@ -2301,6 +2311,12 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 告诉 MPlayer 把字幕文件作为 unicode 来处理。
 .
 .TP
+.B \-unrarexec <unrar 可执行文件的路径>（当前不支持 MingW 。）
+指定 unrar 可执行文件的路径，以使 MPlayer 可以使用它来读取 RAR 压缩的
+ VOBSUB 文件（默认值：未设置路径，因此该功能关闭）。
+该路径必须包含可执行文件的文件名，例如 \& /usr/local/bin/unrar。
+.
+.TP
 .B "\-utf8 \ \ "
 告诉 MPlayer 把字幕文件作为 UTF-8 来处理。
 .
@@ -2479,8 +2495,8 @@ PulseAudio 音频输出驱动
 .RSs
 .IPs "<主机>[:<输出泄漏值>]"
 指定所使用的主机，并选择性地指定所使用的输出泄漏值。
-<主机>字符串为空的话，则使用本地连接。
-使用“localhost”作为<主机>的话，则使用网络传输（很可能不是你所希望的）。
+<主机> 字符串为空的话，则使用本地连接。指定“localhost”则使用网络传输
+（很可能不是你所希望的）。
 .RE
 .PD 1
 .
@@ -4402,6 +4418,36 @@ Xvid 的内部后期处理过滤器有:
 .PD 1
 .
 .TP
+.B lavcac3enc[=至SPDIF[:比特率[:最少声道]]]
+用 libavccodec 库将多声道音频实时编码至 AC-3。
+支持16位任意字节顺序的输入格式，最多6个声道。
+当输出原始 AC-3 音频流时，输出是按高位字节优先顺序；当输出至 S/PDIF
+时，则是按设备的字节顺序。
+该过滤器的输出采样率与输入采样率相同。
+当输入采样率为 48kHz、44.1kHz 或 32kHz 时，该过滤镜则直接采用这个值。
+否则，将自动在此过滤器前插入一个重采样过滤器，以使输入和输出采样率均为
+48kHz。
+你需要指定‘\-channels N’以使编码器将音频解码为 N 声道，然后过滤器就可以
+将 N 声道的输入编码为 AC-3 了。
+.br
+.PD 0
+.RSs
+.IPs <至SPDIF>
+若值为零或未设置则输出原始 AC-3 音频流；
+当 <至SPDIF> 设为非零值时，则输出至 S/PDIF 以略过解码。
+.IPs <比特率>
+编码 AC-3 流时采用的比特率。
+将其设为 384 或 384000 以得到 384kbits 的比特率。
+有效值为：32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256,
+         320, 384, 448, 512, 576, 640
+默认的比特率取决于输入的声道数：
+1声道：96，2声道：192，3声道：224，4声道：384，5声道：448，6声道：448
+.IPs <最少声道>
+如果输入的声道数少于 <最少声道>，那么过滤器脱离过滤器队列。（默认值：5）
+.RE
+.PD 1
+.
+.TP
 .B sweep[=speed]
 产生正弦 sweep。
 .PD 0
@@ -4507,8 +4553,6 @@ delta 的正弦, 使用非常低的值听此扫听(sweep)。
 会观察到如果回放媒体含有两个声道, 声道 2 和 3 无声, 但声道 0 和 1 仍要交换。
 .IPs "mplayer \-af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
 改成 6 声道并设置 4 对路由: 拷贝声道 0 到声道 0 至 3。声道 4 和 5 无声。
-.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
-应该能使6声道ffdca（DTS）输出正确地与ALSA协同工作。
 .RE
 .PD 1
 .
@@ -9993,6 +10037,17 @@ mplayer \-vo zr \-vf scale=352:288 file.avi
 .nf
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .fi
+.
+.PP
+.B 以直通模式播放 DTS-CD：
+.nf
+mplayer \-ac hwdts \-rawaudio format=0x2001 \-cdrom\-device /dev/cdrom cdda://
+.fi
+.br
+你可以使用 \-afm hwac3 代替 \-ac hwdts。
+调整‘/dev/cdrom’使其与你系统中的 CD-ROM 设备相适应。
+如果你的外部的接收设备支持解码原始 DTS 音频流，那么你可以通过 cdda://
+直接播放，而不用设置格式，hwac3 或 hwdts。
 .
 .PP
 .B 只用两个扬声器播放 6-声道 AAC 文件:
