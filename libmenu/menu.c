@@ -142,6 +142,7 @@ static int menu_parse_config(char* buffer) {
           }
           if(r == 0)
             break;
+          if (!strcasecmp(element, "binding")) {
           key = asx_get_attrib("key",attribs);
           cmd = asx_get_attrib("cmd",attribs);
           if (key && (keycode = mp_input_get_key_from_name(key)) >= 0) {
@@ -158,6 +159,7 @@ static int menu_parse_config(char* buffer) {
           else
             free(cmd);
           free(key);
+          }
           free(element);
           asx_free_attribs(attribs);
           free(b);
