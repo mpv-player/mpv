@@ -146,8 +146,8 @@ static int menu_parse_config(char* buffer) {
           cmd = asx_get_attrib("cmd",attribs);
           if (key && (keycode = mp_input_get_key_from_name(key)) >= 0) {
             mp_msg(MSGT_GLOBAL,MSGL_V,
-                   "[libmenu] got keybinding element %s %s=>[%s].\n",
-                   element, key, cmd ? cmd : "");
+                   "[libmenu] got keybinding element %d %s=>[%s].\n",
+                   keycode, key, cmd ? cmd : "");
             bindings->bindings = realloc(bindings->bindings,
                                    (bindings->binding_num+1)*sizeof(key_cmd_t));
             bindings->bindings[bindings->binding_num].key = keycode;
