@@ -805,11 +805,6 @@ static int control(uint32_t request, void *data, ...)
 	static NSRect old_frame;
 	static NSRect old_view_frame;
 	
-	if(screen_force)
-		screen_frame = [screen_handle frame];
-	else
-		screen_frame = [[window screen] frame];
-
 	panscan_calc();
 			
 	//go fullscreen
@@ -823,6 +818,11 @@ static int control(uint32_t request, void *data, ...)
 		}
 		
 		old_frame = [window frame];	//save main window size & position
+		if(screen_force)
+			screen_frame = [screen_handle frame];
+		else
+			screen_frame = [[window screen] frame];
+
 		[window setFrame:screen_frame display:YES animate:animate]; //zoom-in window with nice useless sfx
 		old_view_frame = [self bounds];
 		
