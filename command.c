@@ -381,9 +381,12 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
+        chapter = demuxer_get_current_chapter(mpctx->demuxer);
+        if (chapter < 0)
+            return M_PROPERTY_UNAVAILABLE;
         if (!arg)
             return M_PROPERTY_ERROR;
-        *(int *) arg = demuxer_get_current_chapter(mpctx->demuxer);
+        *(int *) arg = chapter;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
         if (!arg)
