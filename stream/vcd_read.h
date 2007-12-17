@@ -17,6 +17,7 @@ struct mp_vcd_priv_st {
   int fd;
   struct cdrom_tocentry entry;
   char buf[VCD_SECTOR_SIZE];
+  struct cdrom_tochdr tochdr;
 };
 
 static inline void vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect){
@@ -45,13 +46,8 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd,int track){
 }
 
 int vcd_get_track_end(mp_vcd_priv_t* vcd,int track){
-  struct cdrom_tochdr tochdr;
-  if (ioctl(vcd->fd,CDROMREADTOCHDR,&tochdr)==-1) {
-    mp_msg(MSGT_STREAM,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
-    return -1;
-  }
   vcd->entry.cdte_format = CDROM_MSF;
-  vcd->entry.cdte_track  = track<tochdr.cdth_trk1?(track+1):CDROM_LEADOUT;
+  vcd->entry.cdte_track  = track<vcd->tochdr.cdth_trk1?(track+1):CDROM_LEADOUT;
   if (ioctl(vcd->fd, CDROMREADTOCENTRY, &vcd->entry)) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
     return -1;
@@ -118,6 +114,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd){
     }
   vcd = malloc(sizeof(mp_vcd_priv_t));
   vcd->fd = fd;
+  vcd->tochdr = tochdr;
   return vcd;
 }
 

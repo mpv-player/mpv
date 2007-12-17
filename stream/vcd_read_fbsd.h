@@ -40,6 +40,7 @@ typedef struct mp_vcd_priv_st {
 #else
   cdsector_t buf;
 #endif
+  struct ioc_toc_header tochdr;
 } mp_vcd_priv_t;
 
 static inline void
@@ -120,13 +121,8 @@ vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 int
 vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
-  struct ioc_toc_header tochdr;
-  if (ioctl(vcd->fd, CDIOREADTOCHEADER, &tochdr) == -1) {
-    mp_msg(MSGT_STREAM,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
-    return -1;
-  }
   if (!read_toc_entry(vcd,
-          track < tochdr.ending_track ? track + 1 : CDROM_LEADOUT))
+          track < vcd->tochdr.ending_track ? track + 1 : CDROM_LEADOUT))
     return -1;
   return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
@@ -145,6 +141,7 @@ vcd_read_toc(int fd)
   mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", tochdr.ending_track);
   vcd = malloc(sizeof(mp_vcd_priv_t));
   vcd->fd = fd;
+  vcd->tochdr = tochdr;
   for (i = tochdr.starting_track; i <= tochdr.ending_track + 1; i++) {
     if (!read_toc_entry(vcd,
           i <= tochdr.ending_track ? i : CDROM_LEADOUT)) {
