@@ -1270,7 +1270,7 @@ struct subreader {
 };
 
 #ifdef HAVE_ENCA
-const char* guess_buffer_cp(unsigned char* buffer, int buflen,  char *preferred_language, const char *fallback)
+const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback)
 {
     const char **languages;
     size_t langcnt;
@@ -1310,7 +1310,7 @@ const char* guess_buffer_cp(unsigned char* buffer, int buflen,  char *preferred_
 }
 
 #define MAX_GUESS_BUFFER_SIZE (256*1024)
-const char* guess_cp(stream_t *st, char *preferred_language, const char *fallback)
+const char* guess_cp(stream_t *st, const char *preferred_language, const char *fallback)
 {
     size_t buflen;
     unsigned char *buffer;

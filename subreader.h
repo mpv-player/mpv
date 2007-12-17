@@ -74,8 +74,8 @@ struct stream_st;
 void subcp_open (struct stream_st *st); /* for demux_ogg.c */
 void subcp_close (void); /* for demux_ogg.c */
 #ifdef HAVE_ENCA
-const char* guess_buffer_cp(unsigned char* buffer, int buflen, char *preferred_language, const char *fallback);
-const char* guess_cp(struct stream_st *st, char *preferred_language, const char *fallback);
+const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback);
+const char* guess_cp(struct stream_st *st, const char *preferred_language, const char *fallback);
 #endif
 char ** sub_filenames(const char *path, char *fname);
 void list_sub_file(sub_data* subd);
