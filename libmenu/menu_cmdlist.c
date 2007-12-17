@@ -90,6 +90,10 @@ static void free_entry(list_entry_t* entry) {
     free(entry->ok);
   if(entry->cancel)
     free(entry->cancel);
+  if(entry->left)
+    free(entry->left);
+  if(entry->right)
+    free(entry->right);
   free(entry->p.txt);
   free(entry);
 }
