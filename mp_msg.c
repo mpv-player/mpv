@@ -89,7 +89,7 @@ int mp_msg_test(int mod, int lev)
 void mp_msg(int mod, int lev, const char *format, ... ){
     va_list va;
     char tmp[MSGSIZE_MAX];
-    
+
     if (!mp_msg_test(mod, lev)) return; // do not display
     va_start(va, format);
     vsnprintf(tmp, MSGSIZE_MAX, format, va);
@@ -143,7 +143,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
           printf("\033[%d;3%dm***  COLOR TEST %d  ***\n",(c>7),c&7,c);
       flag=0;
     }
-#endif    
+#endif
     {   unsigned char v_colors[10]={9,1,3,15,7,2,2,8,8,8};
         static const char *mod_text[MSGT_MAX]= {
                                 "GLOBAL",
