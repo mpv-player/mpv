@@ -145,6 +145,7 @@ static int menu_parse_config(char* buffer) {
           key = asx_get_attrib("key",attribs);
           cmd = asx_get_attrib("cmd",attribs);
           if (key && (keycode = mp_input_get_key_from_name(key)) >= 0) {
+            keycode &= ~MP_NO_REPEAT_KEY;
             mp_msg(MSGT_GLOBAL,MSGL_V,
                    "[libmenu] got keybinding element %d %s=>[%s].\n",
                    keycode, key, cmd ? cmd : "");
