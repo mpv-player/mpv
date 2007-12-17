@@ -96,6 +96,53 @@ static int seek(stream_t* s,off_t pos);
 static int fill_buffer(stream_t* s, char* buffer, int max_len);
 static void close_cdda(stream_t* s);
 
+static int get_track_by_sector(cdda_priv *p, unsigned int sector) {
+  int i;
+  for (i = p->cd->tracks; i >= 0 ; --i)
+    if (p->cd->disc_toc[i].dwStartSector <= sector)
+      break;
+  return i;
+}
+
+static int control(stream_t *stream, int cmd, void *arg) {
+  cdda_priv* p = stream->priv;
+  switch(cmd) {
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+    {
+      int start_track = get_track_by_sector(p, p->start_sector);
+      int end_track = get_track_by_sector(p, p->end_sector);
+      *(unsigned int *)arg = end_track + 1 - start_track;
+      return STREAM_OK;
+    }
+    case STREAM_CTRL_SEEK_TO_CHAPTER:
+    {
+      int r;
+      unsigned int track = *(unsigned int *)arg;
+      int start_track = get_track_by_sector(p, p->start_sector);
+      int seek_sector;
+      track += start_track;
+      if (track >= p->cd->tracks) {
+        stream->eof = 1;
+        return STREAM_ERROR;
+      }
+      seek_sector = track <= 0 ? p->start_sector
+                               : p->cd->disc_toc[track].dwStartSector;
+      r = seek(stream, seek_sector * CD_FRAMESIZE_RAW);
+      if (r)
+        return STREAM_OK;
+      break;
+    }
+    case STREAM_CTRL_GET_CURRENT_CHAPTER:
+    {
+      int start_track = get_track_by_sector(p, p->start_sector);
+      int cur_track = get_track_by_sector(p, p->sector);
+      *(unsigned int *)arg = cur_track - start_track;
+      return STREAM_OK;
+    }
+  }
+  return STREAM_UNSUPPORTED;
+}
+
 static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   struct cdda_params* p = (struct cdda_params*)opts;
   int mode = p->paranoia_mode;
@@ -267,6 +314,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 
   st->fill_buffer = fill_buffer;
   st->seek = seek;
+  st->control = control;
   st->close = close_cdda;
 
   *file_format = DEMUXER_TYPE_RAWAUDIO;
