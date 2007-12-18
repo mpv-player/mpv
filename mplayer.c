@@ -2272,7 +2272,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 	mpctx->sh_audio->a_out_buffer_len = 0;
     }
 
-    if (vo_vobsub) {
+    if (vo_vobsub && mpctx->sh_video) {
 	current_module = "seek_vobsub_reset";
 	vobsub_seek(vo_vobsub, mpctx->sh_video->pts);
     }
