@@ -25,7 +25,7 @@ typedef struct menu_info_s {
   const char *name;
   const char *author;
   const char *comment;
-  m_struct_t priv_st; // Config struct definition
+  struct m_struct_st priv_st; // Config struct definition
   // cfg is a config struct as defined in cfg_st, it may be used as a priv struct
   // cfg is filled from the attributs found in the cfg file
   // the args param hold the content of the balise in the cfg file (if any)
