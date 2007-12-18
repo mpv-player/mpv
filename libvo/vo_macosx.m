@@ -1052,8 +1052,8 @@ static int control(uint32_t request, void *data, ...)
 		// Fix to mplayer defined button order: left, middle, right
 		if (buttonNumber == 1)
 			buttonNumber = 2;
-		else if (buttonNumber == 1)
-			buttonNumber = 2;
+		else if (buttonNumber == 2)
+			buttonNumber = 1;
 		switch([theEvent type])
 		{
 			case NSLeftMouseDown:
