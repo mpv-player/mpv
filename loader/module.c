@@ -426,7 +426,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 		}
 	}
 
-	if (!wm)
+	if (!wm && !strstr(checked, "avisynth.dll"))
 	    printf("Win32 LoadLibrary failed to load: %s\n", checked);
 
 #define RVA(x) ((char *)wm->module+(unsigned int)(x))
