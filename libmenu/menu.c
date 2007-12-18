@@ -254,7 +254,7 @@ int menu_init(struct MPContext *mpctx, char* cfg_file) {
 }
 
 // Destroy all this stuff
-void menu_unint(void) {
+void menu_uninit(void) {
   int i;
   for(i = 0 ; menu_list && menu_list[i].name ; i++) {
     free(menu_list[i].name);
