@@ -4,13 +4,15 @@ typedef struct  menu_s menu_t;
 
 typedef struct menu_def_st menu_def_t;
 
+struct m_struct_st;
+
 struct  menu_s {
   struct MPContext *ctx;
   void (*draw)(menu_t* menu,mp_image_t* mpi);
   void (*read_cmd)(menu_t* menu,int cmd);
   void (*read_key)(menu_t* menu,int cmd);
   void (*close)(menu_t* menu);
-  m_struct_t* priv_st;
+  struct m_struct_st* priv_st;
   struct menu_priv_s* priv;
   int show; // Draw it ?
   int cl; // Close request (user sent a close cmd or
