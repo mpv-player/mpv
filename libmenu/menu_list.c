@@ -68,7 +68,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
     count++;
   }
   if(need_w > dw) need_w = dw;
-  if(x > 0)
+  if(x >= 0)
     x += mpriv->minb;
   if(y > 0)
     y += mpriv->minb;
