@@ -1048,17 +1048,23 @@ static int control(uint32_t request, void *data, ...)
 {
 	if ( [theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9 )
 	{
+		int buttonNumber = [theEvent buttonNumber];
+		// Fix to mplayer defined button order: left, middle, right
+		if (buttonNumber == 1)
+			buttonNumber = 2;
+		else if (buttonNumber == 1)
+			buttonNumber = 2;
 		switch([theEvent type])
 		{
 			case NSLeftMouseDown:
 			case NSRightMouseDown:
 			case NSOtherMouseDown:
-				mplayer_put_key((MOUSE_BTN0 + [theEvent buttonNumber]) | MP_KEY_DOWN);
+				mplayer_put_key((MOUSE_BTN0 + buttonNumber) | MP_KEY_DOWN);
 				break;
 			case NSLeftMouseUp:
 			case NSRightMouseUp:
 			case NSOtherMouseUp:
-				mplayer_put_key(MOUSE_BTN0 + [theEvent buttonNumber]);
+				mplayer_put_key(MOUSE_BTN0 + buttonNumber);
 				break;
 		}
 	}

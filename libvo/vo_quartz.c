@@ -328,10 +328,10 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 							mplayer_put_key(MOUSE_BTN0);
 							break;
 						case kEventMouseButtonSecondary:
-							mplayer_put_key(MOUSE_BTN1);
+							mplayer_put_key(MOUSE_BTN2);
 							break;
 						case kEventMouseButtonTertiary:
-							mplayer_put_key(MOUSE_BTN2);
+							mplayer_put_key(MOUSE_BTN1);
 							break;
 				
 						default:result = eventNotHandledErr;break;
@@ -358,10 +358,10 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 							mplayer_put_key(MOUSE_BTN0 | MP_KEY_DOWN);
 							break;
 						case kEventMouseButtonSecondary:
-							mplayer_put_key(MOUSE_BTN1 | MP_KEY_DOWN);
+							mplayer_put_key(MOUSE_BTN2 | MP_KEY_DOWN);
 							break;
 						case kEventMouseButtonTertiary:
-							mplayer_put_key(MOUSE_BTN2 | MP_KEY_DOWN);
+							mplayer_put_key(MOUSE_BTN1 | MP_KEY_DOWN);
 							break;
 				
 						default:result = eventNotHandledErr;break;
