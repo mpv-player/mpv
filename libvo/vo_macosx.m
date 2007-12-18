@@ -693,12 +693,12 @@ static int control(uint32_t request, void *data, ...)
 		if((d_height*aspectX)>(frame.size.height))
 		{
 			padding = (frame.size.width - d_width*aspectY)/2;
-			textureFrame = NSMakeRect(padding, 0, d_width*aspectY+padding, d_height*aspectY);
+			textureFrame = NSMakeRect(padding, 0, d_width*aspectY, d_height*aspectY);
 		}
 		else
 		{
 			padding = ((frame.size.height) - d_height*aspectX)/2;
-			textureFrame = NSMakeRect(0, padding, d_width*aspectX, d_height*aspectX+padding);
+			textureFrame = NSMakeRect(0, padding, d_width*aspectX, d_height*aspectX);
 		}
 	}
 	else
@@ -723,9 +723,9 @@ static int control(uint32_t request, void *data, ...)
 	glColor3f(1,1,1);
 	glBegin(GL_QUADS);
 	glTexCoord2f(upperLeft[0], upperLeft[1]); glVertex2i(	textureFrame.origin.x-(vo_panscan_x >> 1), textureFrame.origin.y-(vo_panscan_y >> 1));
-	glTexCoord2f(lowerLeft[0], lowerLeft[1]); glVertex2i(	textureFrame.origin.x-(vo_panscan_x >> 1), textureFrame.size.height+(vo_panscan_y >> 1));
-	glTexCoord2f(lowerRight[0], lowerRight[1]); glVertex2i(	textureFrame.size.width+(vo_panscan_x >> 1), textureFrame.size.height+(vo_panscan_y >> 1));
-	glTexCoord2f(upperRight[0], upperRight[1]); glVertex2i(	textureFrame.size.width+(vo_panscan_x >> 1), textureFrame.origin.y-(vo_panscan_y >> 1));
+	glTexCoord2f(lowerLeft[0], lowerLeft[1]); glVertex2i(textureFrame.origin.x-(vo_panscan_x >> 1), NSMaxY(textureFrame)+(vo_panscan_y >> 1));
+	glTexCoord2f(lowerRight[0], lowerRight[1]); glVertex2i(NSMaxX(textureFrame)+(vo_panscan_x >> 1), NSMaxY(textureFrame)+(vo_panscan_y >> 1));
+	glTexCoord2f(upperRight[0], upperRight[1]); glVertex2i(NSMaxX(textureFrame)+(vo_panscan_x >> 1), textureFrame.origin.y-(vo_panscan_y >> 1));
 	glEnd();
 	glDisable(CVOpenGLTextureGetTarget(texture));
 	
