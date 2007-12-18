@@ -10,7 +10,7 @@
  * (these portions are licensed under GNU GPL v2 or "(at your option)
  * any later version")
  * 
- * Other stuff: Copyright (C) Rik Snel 2002, License GNU GPL v2
+ * Other stuff: Copyright (C) Rik Snel 2002, License GNU GPL v2 or later
  *
  * patch from Stefan Schuermans <1stein@schuermans.info>:
  *   - correction of "maxval" in Blinkenlights UDP protcol

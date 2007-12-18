@@ -1,6 +1,6 @@
 /* 
  * vo_zr.c - playback on zoran cards 
- * Copyright (C) Rik Snel 2001,2002, License GNU GPL v2
+ * Copyright (C) Rik Snel 2001,2002, License GNU GPL v2 or later
  */
 
 /* $Id$ */

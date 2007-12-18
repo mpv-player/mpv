@@ -5,7 +5,7 @@
  * as by the zr video driver.
  */
 /*
- * Copyright (C) 2005 Rik Snel <rsnel@cube.dyndns.org>, license GPL v2
+ * Copyright (C) 2005 Rik Snel <rsnel@cube.dyndns.org>, license GPL v2 or later
  * - based on vd_lavc.c by A'rpi (C) 2002-2003
  * - parts from ffmpeg Copyright (c) 2000-2003 Fabrice Bellard
  *

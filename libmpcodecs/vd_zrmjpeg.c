@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 Rik Snel <rsnel@cube.dyndns.org>, license GPL v2
+ * Copyright (C) 2005 Rik Snel <rsnel@cube.dyndns.org>, license GPL v2 or later
  * - based on vd_mpegpes.c by A'rpi (C) 2002-2003 
  * - guess_mjpeg_type code stolen from lav_io.c (C) 2000 Rainer Johanni
  *   <Rainer@Johanni.de> from the mjpegtools package
