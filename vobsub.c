@@ -1106,23 +1106,13 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
 void *
 vobsub_open(const char *const name,const char *const ifo,const int force,void** spu)
 {
-    vobsub_t *vob = malloc(sizeof(vobsub_t));
+    vobsub_t *vob = calloc(1, sizeof(vobsub_t));
     if(spu)
       *spu = NULL;
     if (vobsubid == -2)
       vobsubid = vobsub_id;
     if (vob) {
 	char *buf;
-	vob->custom = 0;
-	vob->have_palette = 0;
-	vob->orig_frame_width = 0;
-	vob->orig_frame_height = 0;
-	vob->spu_streams = NULL;
-	vob->spu_streams_size = 0;
-	vob->spu_streams_current = 0;
-	vob->spu_valid_streams_size = 0;
-	vob->delay = 0;
-	vob->forced_subs=0;
 	buf = malloc(strlen(name) + 5);
 	if (buf) {
 	    rar_stream_t *fd;
