@@ -2113,7 +2113,13 @@ void pause_loop(void)
     if (mpctx->audio_out && mpctx->sh_audio)
 	mpctx->audio_out->pause();	// pause audio, keep data if possible
 
-    while ( (cmd = mp_input_get_cmd(20, 1, 1)) == NULL) {
+    while ( (cmd = mp_input_get_cmd(20, 1, 1)) == NULL
+            || cmd->id == MP_CMD_SET_MOUSE_POS) {
+	if (cmd) {
+	  cmd = mp_input_get_cmd(0,1,0);
+	  mp_cmd_free(cmd);
+	  continue;
+	}
 	if (mpctx->sh_video && mpctx->video_out && vo_config_count)
 	    mpctx->video_out->check_events();
 #ifdef HAVE_NEW_GUI
