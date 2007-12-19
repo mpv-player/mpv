@@ -628,7 +628,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
       font = vo_font->font[c];
       if(font >= 0) {
  	int cs = (vo_font->pic_a[font]->h - vo_font->height) / 2;
-	if ((sx + vo_font->width[c] < xmax)  &&  (sy + vo_font->height < ymax) )
+	if ((sx + vo_font->width[c] <= xmax) && (sy + vo_font->height <= ymax) )
 	  draw_alpha(vo_font->width[c], vo_font->height,
 		     vo_font->pic_b[font]->bmp+vo_font->start[c] +
 		     cs * vo_font->pic_a[font]->w,
@@ -666,13 +666,18 @@ void menu_text_size(char* txt,int max_width, int vspace, int warp, int* _w, int*
   while (*txt) {
     int c=utf8_get_char((const char**)&txt);
     if(c == '\n' || (warp && i + vo_font->width[c] >= max_width)) {
+      i -= vo_font->charspace;
+      if (i > w) w = i;
       if(*txt)
 	l++;
       i = 0;
       if(c == '\n') continue;
     }
     i += vo_font->width[c]+vo_font->charspace;
-    if(i > w) w = i;
+  }
+  if (i > 0) {
+    i -= vo_font->charspace;
+    if (i > w) w = i;
   }
   
   *_w = w;
