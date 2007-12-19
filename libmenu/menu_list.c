@@ -107,16 +107,16 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
 
   bg_w = need_w+2*mpriv->minb;
   if(th > 0) {
+    int tw,th2;
+    menu_text_size(mpriv->title,dw,mpriv->vspace,1,&tw,&th2);
     if(mpriv->title_bg >= 0) {
-      int tw,th2;
-      menu_text_size(mpriv->title,dw,mpriv->vspace,1,&tw,&th2);
       if(tw+2*mpriv->minb > bg_w) bg_w = tw+2*mpriv->minb;
       menu_draw_box(mpi,mpriv->title_bg,mpriv->title_bg_alpha,
                     x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace/2,bg_w,th);
     }
     menu_draw_text_full(mpi,mpriv->title,
 			x < 0 ? mpi->w / 2 : x,
-			dy+y,dw,0,
+			dy+y, x < 0 ? dw : (tw > need_w ? tw : need_w), 0,
 			mpriv->vspace,1,
 			MENU_TEXT_TOP|MENU_TEXT_HCENTER,
 			MENU_TEXT_TOP|(x < 0 ? MENU_TEXT_HCENTER :MENU_TEXT_LEFT));
