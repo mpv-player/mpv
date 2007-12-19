@@ -231,6 +231,8 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
   this->stride = packet->stride;
   for (i = 0; i < 4; ++i) {
     alpha[i] = mkalpha(packet->alpha[i]);
+    if (this->custom && (this->cuspal[i] >> 31) != 0)
+      alpha[i] = 0;
     if (alpha[i] == 0)
       cmap[i] = 0;
     else if (this->custom){

@@ -912,7 +912,7 @@ vobsub_parse_cuspal(vobsub_t *vob, const char *line)
 	if (p - line !=6)
 	    return -1;
 	tmp = strtoul(line, NULL, 16);
-	vob->cuspal[n++] = vobsub_rgb_to_yuv(tmp);
+	vob->cuspal[n++] |= vobsub_rgb_to_yuv(tmp);
 	if (n==4)
 	    break;
 	if(*p == ',')
@@ -922,14 +922,15 @@ vobsub_parse_cuspal(vobsub_t *vob, const char *line)
     return 0;
 }
 
-/* don't know how to use tridx */
 static int
-vobsub_parse_tridx(const char *line)
+vobsub_parse_tridx(vobsub_t *vob, const char *line)
 {
     //tridx: XXXX
-    int tridx;
-    tridx = strtoul((line + 26), NULL, 16);
-    tridx = ((tridx&0x1000)>>12) | ((tridx&0x100)>>7) | ((tridx&0x10)>>2) | ((tridx&1)<<3);
+    int tridx, i;
+    tridx = strtoul((line + 26), NULL, 2);
+    for (i = 0; i < 4; ++i)
+        if ((tridx << i) & 0x08)
+            vob->cuspal[i] |= 1 << 31;
     return tridx;
 }
 
@@ -1017,7 +1018,7 @@ vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 	    res = vobsub_parse_timestamp(vob, line + 10);
 	else if (strncmp("custom colors:", line, 14) == 0)
 	    //custom colors: ON/OFF, tridx: XXXX, colors: XXXXXX, XXXXXX, XXXXXX,XXXXXX
-	    res = vobsub_parse_cuspal(vob, line) + vobsub_parse_tridx(line) + vobsub_parse_custom(vob, line);
+	    res = vobsub_parse_cuspal(vob, line) + vobsub_parse_tridx(vob, line) + vobsub_parse_custom(vob, line);
 	else if (strncmp("forced subs:", line, 12) == 0)
 		res = vobsub_parse_forced_subs(vob, line + 12);
 	else {

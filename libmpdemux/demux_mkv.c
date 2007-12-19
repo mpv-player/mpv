@@ -344,6 +344,8 @@ static int
 vobsub_parse_custom_colors (sh_sub_t *sh, const char *start)
 {
   int use_custom_colors, i;
+  const char *p;
+  unsigned int tridx = 0;
 
   use_custom_colors = 0;
   start += 14;
@@ -355,6 +357,8 @@ vobsub_parse_custom_colors (sh_sub_t *sh, const char *start)
      use_custom_colors = 0;
    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub custom colors: %s\n",
           use_custom_colors ? "ON" : "OFF");
+   if ((p = strstr(start, "tridx:")) != NULL)
+     tridx = strtoul(p + 6, NULL, 2);
    if ((start = strstr(start, "colors:")) != NULL)
      {
        start += 7;
@@ -366,6 +370,8 @@ vobsub_parse_custom_colors (sh_sub_t *sh, const char *start)
            if (sscanf(start, "%06x", &tmp) != 1)
              break;
            sh->colors[i] = vobsub_rgb_to_yuv(tmp);
+           if ((tridx << i) & 0x08)
+             sh->colors[i] |= 1 << 31;
            start += 6;
            while ((*start == ',') || isspace(*start))
              start++;
@@ -373,8 +379,8 @@ vobsub_parse_custom_colors (sh_sub_t *sh, const char *start)
        if (i == 4)
          {
            sh->custom_colors = 4;
-           mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub colors: %06x,"
-                  "%06x,%06x,%06x\n", sh->colors[0],
+           mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub colors: %08x,"
+                  "%08x,%08x,%08x\n", sh->colors[0],
                   sh->colors[1], sh->colors[2],
                   sh->colors[3]);
          }
