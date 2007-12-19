@@ -668,6 +668,10 @@ void uninit_player(unsigned int mask){
     inited_flags&=~INITED_INPUT;
     current_module="uninit_input";
     mp_input_uninit();
+#ifdef HAVE_MENU
+    if (use_menu)
+      menu_uninit();
+#endif
   }
 
   current_module=NULL;
@@ -2616,9 +2620,6 @@ if(slave_mode)
 else if(!noconsolecontrols)
     mp_input_add_event_fd(0, getch2);
 
-inited_flags|=INITED_INPUT;
-current_module = NULL;
-
 #ifdef HAVE_MENU
  if(use_menu) {
    if(menu_cfg && menu_init(mpctx, menu_cfg))
@@ -2639,6 +2640,9 @@ current_module = NULL;
  }
 #endif
   
+inited_flags|=INITED_INPUT;
+current_module = NULL;
+
   /// Catch signals
 #ifndef __MINGW32__
   signal(SIGCHLD,child_sighandler);
