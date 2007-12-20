@@ -1710,10 +1710,9 @@ void saver_on(Display * mDisplay)
 {
 
 #ifdef HAVE_XDPMS
-    int nothing;
-
     if (dpms_disabled)
     {
+        int nothing;
         if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
         {
             if (!DPMSEnable(mDisplay))
