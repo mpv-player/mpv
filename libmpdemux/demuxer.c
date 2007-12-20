@@ -383,6 +383,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 int ds_fill_buffer(demux_stream_t *ds){
   demuxer_t *demux=ds->demuxer;
   if(ds->current) free_demux_packet(ds->current);
+  ds->current=NULL;
   if( mp_msg_test(MSGT_DEMUXER,MSGL_DBG3) ){
     if(ds==demux->audio) mp_dbg(MSGT_DEMUXER,MSGL_DBG3,"ds_fill_buffer(d_audio) called\n");else
     if(ds==demux->video) mp_dbg(MSGT_DEMUXER,MSGL_DBG3,"ds_fill_buffer(d_video) called\n");else
@@ -431,7 +432,6 @@ int ds_fill_buffer(demux_stream_t *ds){
   }
   ds->buffer_pos=ds->buffer_size=0;
   ds->buffer=NULL;
-  ds->current=NULL;
   mp_msg(MSGT_DEMUXER,MSGL_V,"ds_fill_buffer: EOF reached (stream: %s)  \n",ds==demux->audio?"audio":"video");
   ds->eof=1;
   return 0;
