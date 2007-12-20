@@ -63,6 +63,7 @@ static int isRootwin;
 extern float monitor_aspect;
 extern float movie_aspect;
 static float old_movie_aspect;
+extern int enable_mouse_movements;
 
 static float winAlpha = 1;
 static int int_pause = 0;
@@ -671,8 +672,6 @@ static int control(uint32_t request, void *data, ...)
 	int padding = 0;
 	
 	NSRect frame = [self frame];
-	vo_dwidth = frame.size.width;
-	vo_dheight = frame.size.height;
 	
 	glViewport(0, 0, frame.size.width, frame.size.height);
 	glMatrixMode(GL_PROJECTION);
@@ -705,6 +704,8 @@ static int control(uint32_t request, void *data, ...)
 	{
 		textureFrame = frame;
 	}
+	vo_dwidth = textureFrame.size.width;
+	vo_dheight = textureFrame.size.height;
 }
 
 /*
@@ -1003,6 +1004,16 @@ static int control(uint32_t request, void *data, ...)
 	{
 		CGDisplayShowCursor(kCGDirectMainDisplay);
 		mouseHide = NO;
+	}
+	if (enable_mouse_movements) {
+		NSPoint p =[self convertPoint:[theEvent locationInWindow] fromView:nil];
+		if ([self mouse:p inRect:textureFrame]) {
+                	char cmdstr[40];
+                	snprintf(cmdstr, sizeof(cmdstr), "set_mouse_pos %i %i",
+			         (int)(vo_fs ? p.x : (p.x - textureFrame.origin.x)),
+			         (int)(vo_fs ? [self frame].size.height - p.y: (NSMaxY(textureFrame) - p.y)));
+                	mp_input_queue_cmd(mp_input_parse_cmd(cmdstr));
+		}
 	}
 }
 
