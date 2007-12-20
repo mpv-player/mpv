@@ -45,7 +45,7 @@ static rar_stream_t *
 rar_open(const char *const filename, const char *const mode)
 {
     rar_stream_t *stream;
-    /* unrarlib can only read */
+    /* unrar_exec can only read */
     if (strcmp("r", mode) && strcmp("rb", mode)) {
 	errno = EINVAL;
 	return NULL;
