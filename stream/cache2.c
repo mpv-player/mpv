@@ -250,7 +250,7 @@ static void exit_sighandler(int x){
 }
 
 int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
-  int ss=(stream->type==STREAMTYPE_VCD)?VCD_SECTOR_DATA:STREAM_BUFFER_SIZE;
+  int ss = stream->sector_size ? stream->sector_size : STREAM_BUFFER_SIZE;
   cache_vars_t* s;
 
   if (stream->type==STREAMTYPE_STREAM && stream->fd < 0) {
