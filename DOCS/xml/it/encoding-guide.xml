@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 24% synced with r22753 -->
+<!-- 30% synced with r22753 -->
 <chapter id="encoding-guide">
 <title>La codifica con <application>MEncoder</application></title>
 
@@ -8,7 +8,7 @@
   MPEG-4 ("DivX") di alta qualità</title>
 
 <para>
-Una domanda frequente è "Come posso generare il rip con la migliore quallità
+Una domanda frequente è "Come posso generare il rip con la migliore qualità
 per una dimensione data?". Un'altra domanda è "Come posso fare il rip da DVD
 migliore in assoluto? Non mi interessa la dimensione del file, voglio solo la
 più alta qualità."
@@ -72,7 +72,7 @@ Per generare una codifica adeguata, devi sapere il formato originario.
 Il non tenerne conto porterà a molti __flaws__ nella tua codifica, inclusi
 artefatti orrendi __combing__ (interlacing) e fotogrammi duplicati o addirittura
 perduti.
-Oltre ad essere brutti, gli artefatti influenzano negativamente l'efficenza
+Oltre ad essere brutti, gli artefatti influenzano negativamente l'efficienza
 della codifica: otterrai una peggior qualità a parità di bitrate.
 </para>
 
@@ -1075,12 +1075,12 @@ and
 
 <para>
 Okay, ma cos'è la CQ?
-However, if you have a target size for your movie (1 or 2 CDs for instance),
-there is a limited total number of bits that you can spend; therefore it is
-necessary to find a good tradeoff between compressibility and quality.
 Il CQ rappresenta il numero di bit per pixel e per fotogramma in codifica.
 Parlando più semplicemente, più alto è la CQ, più difficilmente si vedranno
 codificati degli artefatti.
+Tuttavia, se desideri una particolare dimensione per il tuo film (per esempio
+1 o 2 CD), hai un numero limitato di bit da utilizzare; devi quindi trovare un
+buon compromesso tra compressione e qualità.
 </para>
 
 <para>
@@ -1313,178 +1313,182 @@ Nota le opzioni <option>ilme</option> e <option>ildct</option>.
 <!-- ********** -->
 
 <sect2 id="menc-feat-dvd-mpeg4-av-sync">
-<title>Notes on Audio/Video synchronization</title>
+<title>Note sulla sincronizzazione Audio/Video</title>
 
 <para>
-<application>MEncoder</application>'s audio/video synchronization
-algorithms were designed with the intention of recovering files with
-broken sync.
-However, in some cases they can cause unnecessary skipping and duplication of
-frames, and possibly slight A/V desync, when used with proper input
-(of course, A/V sync issues apply only if you process or copy the
-audio track while transcoding the video, which is strongly encouraged).
-Therefore, you may have to switch to basic A/V sync with
-the <option>-mc 0</option> option, or put this in your
-<systemitem>~/.mplayer/mencoder</systemitem> config file, as long as
-you are only working with good sources (DVD, TV capture, high quality
-MPEG-4 rips, etc) and not broken ASF/RM/MOV files.
+Gli algoritmi di sincronizzazione audio/video di
+<application>MEncoder</application> sono stati progettati con l'intento di
+recuperare file con sincronia danneggiata.
+In alcuni casi tuttavia, possono generare inutili duplicazioni o scarti di
+fotogrammi, e possibilmente leggera desincronia A/V quando vengono usati con
+sorgenti buone (i problemi di sincronizzazione A/V accadono solo se elabori o
+copi la traccia audio mentre transcodifichi il video, il che è decisamente
+consigliato).
+Perciò potresti dover passare ad una sincronizzazione di base con l'opzione
+<option>-mc 0</option>, o metterla nel tuo file di configurazione
+<systemitem>~/.mplayer/mencoder</systemitem>, sempre che tu stia lavorando con
+buone sorgenti (DVD, acquisizione TV, rip MPEG-4 ad alta qualità, etc) e non
+con file ASF/RM/MOV rovinati.
 </para>
 
 <para>
-If you want to further guard against strange frame skips and
-duplication, you can use both <option>-mc 0</option> and
-<option>-noskip</option>.
-This will prevent <emphasis>all</emphasis> A/V sync, and copy frames
-one-to-one, so you cannot use it if you will be using any filters that
-unpredictably add or drop frames, or if your input file has variable
-framerate!
-Therefore, using <option>-noskip</option> is not in general recommended.
+Se vuoi proteggerti ulteriormente da strani salti e duplicazioni di fotogrammi,
+puoi usare sia <option>-mc 0</option> che <option>-noskip</option>.
+Questo disabiliterà <emphasis>tutte</emphasis> le sincronizzazioni A/V, e
+copierà i fotogrammi uno ad uno, perciò è inutilizzabile se stai usando dei
+filtri che aggiungono o rimuovono arbitrariamente fotogrammi, ovvero se il
+tuo file sorgente ha una frequenza fotogrammi non costante!
+Quindi l'utilizzo di <option>-noskip</option> in linea di massima si sconsiglia.
 </para>
 
 <para>
-The so-called "three-pass" audio encoding which
-<application>MEncoder</application> supports has been reported to cause A/V
-desync.
-This will definitely happen if it is used in conjunction with certain
-filters, therefore, it is now recommended <emphasis>not</emphasis> to
-use three-pass audio mode.
-This feature is only left for compatibility purposes and for expert
-users who understand when it is safe to use and when it is not.
-If you have never heard of three-pass mode before, forget that we
-even mentioned it!
+Si sa che la cosiddetta codifica audio in "tre passi", che
+<application>MEncoder</application> gestisce, può causare desincronizzazione
+A/V.
+Il che capiterà prontamente se viene usata insieme con alcuni filtri, per cui
+si consiglia di <emphasis>non</emphasis> usare la modalità audio a tre passi.
+Questa caratteristica viene lasciata solo per finalità di compatibilità e
+per utenti esperti che sanno quando sia adeguato usarla e quando no.
+Se non hai mai sentito parlar prima della modalità a tre passi, dimenticati
+di averla anche solo sentita nominare!
 </para>
 
 <para>
-There have also been reports of A/V desync when encoding from stdin
-with <application>MEncoder</application>.
-Do not do this! Always use a file or CD/DVD/etc device as input.
+Ci sono anche stati rapporti di desincronia A/V codificando con
+<application>MEncoder</application> da stdin.
+Non farlo! Usa sempre come ingresso un file o un dispositivo CD/DVD/etc.
 </para>
 </sect2>
 
 <!-- ********** -->
 
 <sect2 id="menc-feat-dvd-mpeg4-codec">
-<title>Choosing the video codec</title>
+<title>Scegliere il codec video</title>
 
 <para>
-Which video codec is best to choose depends on several factors,
-like size, quality, streamability, usability and popularity, some of
-which widely depend on personal taste and technical constraints.
+Quale possa esere il miglior codec video dipende da molti fattori, come
+dimensione, qualità, possibilita di farne lo streaming, usabilit, diffusione,
+alcuni dei quali dipendono fortemente dai gusti personali e dalle variabili
+tecniche in gioco.
 </para>
 <itemizedlist>
 <listitem>
   <para>
-  <emphasis role="bold">Compression efficiency</emphasis>:
-  It is quite easy to understand that most newer-generation codecs are
-  made to increase quality and compression.
-  Therefore, the authors of this guide and many other people suggest that
-  you cannot go wrong
+  E' abbastanza facile da capire che i codec più recenti sono fatti per
+  aumentare qualità e compressione.
+  Quindi gli autori di questa guida e moltra altra gente suggeriscono che non
+  potete sbagliare
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'><para>
-  Be careful, however: Decoding DVD-resolution MPEG-4 AVC videos
-  requires a fast machine (i.e. a Pentium 4 over 1.5GHz or a Pentium M
-  over 1GHz).
+  Fai comunque attenzione: la decodifica di video MPEG-4 AVC a risoluzione DVD
+  richiede una macchina veloce (per es. un Pentium 4 oltre 1.5GHz o un Pentium
+  M superiore a 1GHz).
   </para></footnote>
-  when choosing MPEG-4 AVC codecs like
-  <systemitem class="library">x264</systemitem> instead of MPEG-4 ASP codecs
-  such as <systemitem class="library">libavcodec</systemitem> MPEG-4 or
+  quando scegliete un qualche codec MPEG-4 AVC come
+  <systemitem class="library">x264</systemitem> piuttosto che un codec MPEG-4
+  ASP come l'MPEG-4 di <systemitem class="library">libavcodec</systemitem> o
   <systemitem class="library">Xvid</systemitem>.
-  (Advanced codec developers may be interested in reading Michael
-  Niedermayer's opinion on
-  "<ulink url="http://guru.multimedia.cx/?p=10">why MPEG4-ASP sucks</ulink>".)
-  Likewise, you should get better quality using MPEG-4 ASP than you
-  would with MPEG-2 codecs.
+  (Per sviluppatori avenzati di codec potrebbe essere interessante leggere
+  l'opinione di Michael Niedermayer sul
+  "<ulink url="http://guru.multimedia.cx/?p=10">perché MPEG-4 ASP faccia schifo</ulink>"
+  (in inglese).)
+  Analogamente dovresti ottenere una miglior qualità usando MPEG-4 ASP rispetto
+  a quella ottenuta con codec MPEG-2.
   </para>
 
   <para>
-  However, newer codecs which are in heavy development can suffer from
-  bugs which have not yet been noticed and which can ruin an encode.
-  This is simply the tradeoff for using bleeding-edge technology.
+  Tuttavia, i codec più recenti che sono sotto pesante sviluppo possono avere
+  problemi che non sono ancora stati scoperti, e che possono rovinare una
+  codifica.
+  Questo è semplicemente il contrappasso per usare la tecnologia di punta.
   </para>
   
   <para>
-  What is more, beginning to use a new codec requires that you spend some
-  time becoming familiar with its options, so that you know what
-  to adjust to achieve a desired picture quality.
+  Inoltre iniziare ad utilizzare un codec nuovo richiede l'utilizzo di un po'
+  di tempo per familiarizzare con le sue opzioni, affinché tu sappia cosa
+  impostare per ottenere la qualità dell'immagine voluta.
   </para>
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">Hardware compatibility</emphasis>:
-  It usually takes a long time for standalone video players to begin to
-  include support for the latest video codecs.
-  As a result, most only support MPEG-1 (like VCD, XVCD and KVCD), MPEG-2
-  (like DVD, SVCD and KVCD) and MPEG-4 ASP (like DivX,
-  <systemitem class="library">libavcodec</systemitem>'s LMP4 and
+  <emphasis role="bold">Compatibilità Hardware</emphasis>:
+  Solitamente ci va un po' di tempo prima che i lettori da tavolo incomincino ad
+  includere il supporto per il video codec più recente.
+  Il risultato è che la maggior parte legge MPEG-1 (come i VCD, XVCD e KVCD),
+  MPEG-2 (come DVD, SVCD e KVCD) e MPEG-4 ASP (come DivX,
+  LMP4 di <systemitem class="library">libavcodec</systemitem> e
   <systemitem class="library">Xvid</systemitem>)
-  (Beware: Usually, not all MPEG-4 ASP features are supported).
-  Please refer to the technical specs of your player (if they are available),
-  or google around for more information.
+  (attenzione: solitamente non sono gestite tutte le caratteristiche
+  MPEG-4 ASP).
+  Fai per favore riferimento alle specifiche tecniche del tuo lettore (ove
+  disponibili) o cerca su internet per ulteriori informazioni.
 </para></listitem>
 
 <listitem>
   <para>
-  <emphasis role="bold">Best quality per encoding time</emphasis>:
-  Codecs that have been around for some time (such as
-  <systemitem class="library">libavcodec</systemitem> MPEG-4 and
-  <systemitem class="library">Xvid</systemitem>) are usually heavily
-  optimized with all kinds of smart algorithms and SIMD assembly code.
-  That is why they tend to yield the best quality per encoding time ratio.
-  However, they may have some very advanced options that, if enabled,
-  will make the encode really slow for marginal gains.
+  <emphasis role="bold">Miglior qualità per tempo di codifica</emphasis>:
+  Codec che sono in giro da parecchio tempo (come MPEG-4 di
+  <systemitem class="library">libavcodec</systemitem> e
+  <systemitem class="library">Xvid</systemitem>) sono spesso molto ottimizzati
+  con ogni tipo di algoritmo furbo e codice SIMD in assembly.
+  Per questo tendono a fornire il miglior rapporto tra qualità e tempo di
+  codifica. Tuttavia, possono avere delle opzioni avanzate che, quando
+  abilitate, rendono la codifica molto lenta fornendo poco guadagno.
   </para>
   
   <para>
-  If you are after blazing speed you should stick around the default
-  settings of the video codec (although you should still try the other
-  options which are mentioned in other sections of this guide).
+  Se stai cercando di incrementare la velocità dovresti cercare di non
+  modificare troppo le impostazioni di default del codec video (anche se
+  dovresti comunque provare le altre opzioni che sono citate in altre sezioni
+  di questa guida).
   </para>
   
   <para>
-  You may also consider choosing a codec which can do multi-threaded
-  processing, though this is only useful for users of machines with
-  several CPUs.
-  <systemitem class="library">libavcodec</systemitem> MPEG-4 does
-  allow that, but speed gains are limited, and there is a slight
-  negative effect on picture quality.
-  <systemitem class="library">Xvid</systemitem>'s multi-threaded encoding,
-  activated by the <option>threads</option> option, can be used to
-  boost encoding speed &mdash; by about 40-60% in typical cases &mdash;
-  with little if any picture degradation.
-  <systemitem class="library">x264</systemitem> also allows multi-threaded
-  encoding, which currently speeds up encoding by 94% per CPU core while
-  lowering PSNR between 0.005dB and 0.01dB on a typical setup.
+  Puoi tenere in considerazione anche la scelta di un codec che possa eseguire
+  elaborazioni multi-thread, anche se ciò è utile solo per utenti di macchine
+  con più di una CPU.
+  MPEG-4 di <systemitem class="library">libavcodec</systemitem> lo permette,
+  ma il guadagno in velocità è limitato, e c'è un leggere effetto negativo
+  sulla qualità dell'immagine.
+  La codifica multi-thread di <systemitem class="library">Xvid</systemitem>,
+  attivata dall'opzione <option>threads</option>, può essere usata per
+  accelerare la velocità di codifica &mdash; tipicamente di circa il 40-60%
+  &mdash; con poco se non nessun degrado dell'immagine.
+  Anche <systemitem class="library">x264</systemitem> permette la codifica in
+  multi-thread, la quale attualmente velocizza la codifica del 94% per core di
+  CPU mentre abbassa il PSNR tra 0.005dB e 0.01dB, con impostazioni tipiche.
   </para>
 </listitem>
 
 <listitem>
   <para>
-  <emphasis role="bold">Personal taste</emphasis>:
-  This is where it gets almost irrational: For the same reason that some
-  hung on to DivX&nbsp;3 for years when newer codecs were already doing wonders,
-  some folks will prefer <systemitem class="library">Xvid</systemitem>
-  or <systemitem class="library">libavcodec</systemitem> MPEG-4 over
+  <emphasis role="bold">Gusto personale</emphasis>:
+  Qui è dove capita l'irrazionale: per la stessa ragione per cui alcuni
+  restano attaccati a DivX&nbsp;3 per anni, mentre nuovi codec stanno
+  facendo meraviglie, alcuni personaggi preferiranno
+  <systemitem class="library">Xvid</systemitem> o MPEG-4 di
+  <systemitem class="library">libavcodec</systemitem> a
   <systemitem class="library">x264</systemitem>.
   </para>
   <para>
-  You should make your own judgement; do not take advice from people who
-  swear by one codec.
-  Take a few sample clips from raw sources and compare different
-  encoding options and codecs to find one that suits you best.
-  The best codec is the one you master, and the one that looks
-  best to your eyes on your display
+  Dovresti prendere le tue decisioni; non prendere consigli da gente che
+  fanno giuramenti su un codec.
+  Prendi alcuni pezzi di esempio da sorgenti grezze e compara le diverse
+  opzioni di codifica e di codec per trovare quello che ti garba di più.
+  Il miglior codec è quello che riesci a gestire al meglio, e quello che ai
+  tuoi occhi e sul tuo schermo si vede meglio.
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'><para>
-  The same encode may not look the same on someone else's monitor or
-  when played back by a different decoder, so future-proof your encodes by
-  playing them back on different setups.
+  La stessa codifica potrebbe non apparire uguale sullo schermo di qualcun
+  altro o se riprodotta con un decodificatore differente, perciò controlla
+  i tuoi risultati riproducendoli in diverse condizioni.
   </para></footnote>!
   </para>
 </listitem>
 </itemizedlist>
 
 <para>
-Please refer to the section
-<link linkend="menc-feat-selecting-codec">selecting codecs and container formats</link>
-to get a list of supported codecs.
+Fai per favore riferimento alla sezione
+<link linkend="menc-feat-selecting-codec">selezionare codec e formati contenitore</link>
+per avere un elenco dei codec usabili.
 </para>
 </sect2>
 
@@ -1494,104 +1498,106 @@ to get a list of supported codecs.
 <title>Audio</title>
 
 <para>
-Audio is a much simpler problem to solve: if you care about quality, just
-leave it as is.
-Even AC-3 5.1 streams are at most 448Kbit/s, and they are worth every bit.
-You might be tempted to transcode the audio to high quality Vorbis, but
-just because you do not have an A/V receiver for AC-3 pass-through today
-does not mean you will not have one tomorrow. Future-proof your DVD rips by
-preserving the AC-3 stream.
-You can keep the AC-3 stream either by copying it directly into the video
-stream <link linkend="menc-feat-mpeg4">during the encoding</link>.
-You can also extract the AC-3 stream in order to mux it into containers such
-as NUT or Matroska.
+L'audio è un problema di decisamente più facile soluzione: se ti interessa la
+qualità, lascialo semplicemente com'è.
+Anche i flussi AC-3 5.1 sono al massimo a 448Kbit/s, e ne valgono ogni bit.
+Potresti esser tentato di trascodificare l'audio in Vorbis ad alta qualità, ma
+solo perché a tutt'oggi non hai un decodificatore AC-3 pass-through ciò non
+significa che non ne avrai uno in futuro. Assicura un futuro ai tuoi rip da DVD
+preservando il flusso in AC-3.
+Puoi mantenere il flusso AC-3 anche copiandolo direttamente nel flusso video
+<link linkend="menc-feat-mpeg4">durante la codifica</link>.
+Puoi anche estrarre il flusso AC-3 al fine di farne il mux in contenitori come
+NUT o Matroska.
 <screen>
-mplayer <replaceable>source_file.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>sound.ac3</replaceable>
+mplayer <replaceable>file_sorgente.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>suono.ac3</replaceable>
 </screen>
-will dump into the file <replaceable>sound.ac3</replaceable> the
-audio track number 129 from the file
-<replaceable>source_file.vob</replaceable> (NB: DVD VOB files
-usually use a different audio numbering,
-which means that the VOB audio track 129 is the 2nd audio track of the file).
+effettuerà il dump della traccia audio numero 129 dal file
+<replaceable>file_sorgente.vob</replaceable> nel file
+<replaceable>suono.ac3</replaceable> (NB: i file VOB da DVD spesso usano una
+numerazione dell'audio diversa, il che significa che la traccia audio 129 è la
+seconda traccia del file).
 </para>
 
 <para>
-But sometimes you truly have no choice but to further compress the
-sound so that more bits can be spent on the video.
-Most people choose to compress audio with either MP3 or Vorbis audio codecs.
-While the latter is a very space-efficient codec, MP3 is better supported
-by hardware players, although this trend is changing.
+Alcune volte invece, non hai davvero altra scelta se non comprimere
+ulteriormente il suono per poter usare più bit per il video.
+La maggior parte delle persone sceglie di comprimere l'audio con i codec MP3
+ovvero Vorbis.
+Mentre quest'ultimo è un codec decisamente efficiente per lo spazio, MP3 è
+meglio supportato dai lettori da tavolo, anche se la situazione sta cambiando.
 </para>
 
 <para>
-Do <emphasis>not</emphasis> use <option>-nosound</option> when encoding
-a file with audio, even if you will be encoding and muxing audio
-separately later.
-Though it may work in ideal cases, using <option>-nosound</option> is
-likely to hide some problems in your encoding command line setting.
-In other words, having a soundtrack during your encode assures you that,
-provided you do not see messages such as
-<quote>Too many audio packets in the buffer</quote>, you will be able
-to get proper sync.
+<emphasis>Non</emphasis> usare <option>-nosound</option> mentre codifichi un
+file con dell'audio, anche se farai la codifica e il mux dell'audio
+separatamente in seguito.
+Anche se potesse andar bene in casi ideali, facilmente usare
+<option>-nosound</option> nasconderà alcuni problemi nelle tue impostazioni di
+codifica sulla riga comando.
+In altre parole mantenere la colonna sonora durante la codifica ti assicura,
+a patto che tu non veda messaggi del tipo
+<quote>Troppi pacchetti audio nel buffer</quote>, di ottenere un'adeguata
+sincronizzazione.
 </para>
 
 <para>
-You need to have <application>MEncoder</application> process the sound.
-You can for example copy the orignal soundtrack during the encode with
-<option>-oac copy</option> or convert it to a "light" 4 kHz mono WAV
-PCM with <option>-oac pcm -channels 1 -srate 4000</option>.
-Otherwise, in some cases, it will generate a video file that will not sync
-with the audio.
-Such cases are when the number of video frames in the source file does
-not match up to the total length of audio frames or whenever there
-are discontinuities/splices where there are missing or extra audio frames.
-The correct way to handle this kind of problem is to insert silence or
-cut audio at these points.
-However <application>MPlayer</application> cannot do that, so if you
-demux the AC-3 audio and encode it with a separate app (or dump it to PCM with
-<application>MPlayer</application>), the splices will be left incorrect
-and the only way to correct them is to drop/dup video frames at the
-splice.
-As long as <application>MEncoder</application> sees the audio when it is
-encoding the video, it can do this dropping/duping (which is usually OK
-since it takes place at full black/scenechange), but if
-<application>MEncoder</application> cannot see the audio, it will just
-process all frames as-is and they will not fit the final audio stream when
-you for example merge your audio and video track into a Matroska file.
+Devi fare in modo che <application>MEncoder</application> processi il suono.
+Puoi per esempio copiare la colonna sonora originaria durante la codifica con
+<option>-oac copy</option>, o convertirla in un "leggero" PCM WAV mono a 4 kHz
+con <option>-oac pcm -channels 1 -srate 4000</option>.
+In caso contrario in alcuni casi verrà generato un file video che sarà
+desincronizzato con l'audio.
+Casi del genere sono quelli in cui il numero dei fotogrammi video nel file di
+origine non corrisponde alla lunghezza totale dei fotogrammi audio oppure
+ogniqualvolta vi siano delle discontinuità/splice in cui mancano o ci sono
+fotogrammi audio in più.
+Il modo giusto di gestire questo tipo di problemi è inserire del silenzio o
+tagliare l'audio in quei punti.
+Tuttavia <application>MPlayer</application> non è in grado di farlo, per cui se
+fai il demux dell'audio AC-3 e lo codifichi con un'altro programma (o ne fai il
+dump in PCM con <application>MPlayer</application>), gli splice rimarranno
+sbagliati e l'unico modo per correggerli è scartare/duplicare fotogrammi video
+nel punto di splice.
+Fintantochè <application>MEncoder</application> vede l'audio mentre codifica il
+video, può eseguire questo scarto/duplicazione (che solitamente è OK, dato che
+capita con scene nere o cambi scena), ma se <application>MEncoder</application>
+non vede l'audio, processerà i fotogrammi così come sono e alla fine non
+corrisponderanno al flusso audio finale quando per esempio inserirai i flussi
+audio e video dentro a un file Matroska.
 </para>
 
 <para>
-First of all, you will have to convert the DVD sound into a WAV file that the
-audio codec can use as input.
-For example:
+Prima di tutto dovrai convertire l'audio DVD in un file WAV che il codec audio
+possa usare come ingresso.
+Per esempio:
 <screen>
-mplayer <replaceable>source_file.vob</replaceable> -ao pcm:file=<replaceable>destination_sound.wav</replaceable> \
+mplayer <replaceable>file_sorgente.vob</replaceable> -ao pcm:file=<replaceable>suono_destinazione.wav</replaceable> \
     -vc dummy -aid 1 -vo null
 </screen>
-will dump the second audio track from the file
-<replaceable>source_file.vob</replaceable> into the file
-<replaceable>destination_sound.wav</replaceable>.
-You may want to normalize the sound before encoding, as DVD audio tracks
-are commonly recorded at low volumes.
-You can use the tool <application>normalize</application> for instance,
-which is available in most distributions.
-If you are using Windows, a tool such as <application>BeSweet</application>
-can do the same job.
-You will compress in either Vorbis or MP3.
-For example:
-<screen>oggenc -q1 <replaceable>destination_sound.wav</replaceable></screen>
-will encode <replaceable>destination_sound.wav</replaceable> with
-the encoding quality 1, which is roughly equivalent to 80Kb/s, and
-is the minimum quality at which you should encode if you care about
-quality.
-Please note that <application>MEncoder</application> currently cannot 
-mux Vorbis audio tracks
-into the output file because it only supports AVI and MPEG
-containers as an output, each of which may lead to audio/video
-playback synchronization problems with some players when the AVI file
-contain VBR audio streams such as Vorbis.
-Do not worry, this document will show you how you can do that with third
-party programs.
+eseguirà il dump della seconda traccia audio dal file
+<replaceable>file_sorgente.vob</replaceable> sul file
+<replaceable>suono_destinazione.wav</replaceable>.
+Potresti voler normalizzare il suono prima della codifica, visto che le tracce
+audio dei DVD spesso sono registrate a volumi bassi.
+Puoi usare per esempio lo strumento <application>normalize</application>, che
+è disponibile nella maggior parte delle distribuzioni.
+Se stai usando Windows, lo stesso mestiere lo può fare uno strumento tipo
+<application>BeSweet</application>.
+Effettuerai la compressione in Vorbis ovvero in MP3.
+
+Per esempio:
+<screen>oggenc -q1 <replaceable>suono_destinazione.wav</replaceable></screen>
+codificherà <replaceable>suono_destinazione.wav</replaceable> con qualità
+di codifica 1, che equivale circa a 80Kb/s, ed è la qualità minima in cui
+dovresti codificare se ti interessa la qualità.
+Fai per favore attenzione che attualmente <application>MEncoder</application>
+non è in grado di fare il mux di tracce audio Vorbis nel file di uscita,
+perché gestisce solo contenitori AVI e MPEG in uscita, ognuno dei quali può
+portare a problemi di sincronizzazione audio/video durante la riproduzione con
+alcuni lettori quando il file AVI contiene flussi audio VBR come Vorbis.
+Non preoccuparti, questa documentazione ti mostrerà come tu possa farlo
+comunque con programmi di terze parti.
 </para>
 </sect2>
 
