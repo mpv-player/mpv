@@ -58,7 +58,7 @@ rar_open(const char *const filename, const char *const mode)
     if (stream->file == NULL) {
 	char *rar_filename;
 	const char *p;
-	int rc = 0;
+	int rc;
 	/* Guess the RAR archive filename */
 	rar_filename = NULL;
 	p = strrchr(filename, '.');
@@ -92,9 +92,8 @@ rar_open(const char *const filename, const char *const mode)
 	    /* There is no matching filename in the archive. However, sometimes
 	     * the files we are looking for have been given arbitrary names in the archive.
 	     * Let's look for a file with an exact match in the extension only. */
-	    int i, num_files = -1, name_len;
+	    int i, num_files, name_len;
 	    ArchiveList_struct *list, *lp;
-	    if (num_files <= 0)
 	    num_files = unrar_exec_list(rar_filename, &list);
 	    if (num_files > 0) {
 		char *demanded_ext;
