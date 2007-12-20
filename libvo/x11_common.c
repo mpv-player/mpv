@@ -1767,9 +1767,6 @@ void saver_on(Display * mDisplay)
 
 void saver_off(Display * mDisplay)
 {
-
-    int interval, prefer_blank, allow_exp;
-
 #ifdef HAVE_XDPMS
     int nothing;
 
@@ -1792,6 +1789,7 @@ void saver_off(Display * mDisplay)
 #endif
     if (!timeout_save)
     {
+        int interval, prefer_blank, allow_exp;
         XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank,
                         &allow_exp);
         if (timeout_save)
