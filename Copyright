@@ -136,14 +136,6 @@ Directory:  libmpdemux/genres.h
 Copyright:  2001 Jason Carter
 License:    GNU General Public License
 
-Name:       unrarlib
-Version:    0.4.0 + patches
-Homepage:   http://www.unrarlib.org/
-Directory:  unrarlib.[ch]
-Copyright:  2000-2002 Christian Scheurer (www.ChristianScheurer.ch)
-            2000-2002 by Johannes Winkelmann (jw@tks6.net)
-License:    GNU General Public License / UniquE RAR File Library License
-
 Name:       FreeSDP
 Version:    0.4.1
 Homepage:   https://savannah.nongnu.org/projects/freesdp/

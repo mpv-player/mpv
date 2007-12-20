@@ -24,7 +24,23 @@
 #ifndef UNRAR_EXEC_H
 #define UNRAR_EXEC_H
 
-#include "unrarlib.h"
+struct RAR_archive_entry
+{
+  char           *Name;
+  unsigned long  PackSize;
+  unsigned long  UnpSize;
+  unsigned long  FileCRC;
+  unsigned long  FileTime;
+  unsigned char  UnpVer;
+  unsigned char  Method;
+  unsigned long  FileAttr;
+};
+
+typedef struct  archivelist
+{
+  struct RAR_archive_entry item;
+  struct archivelist         *next;
+} ArchiveList_struct;
 
 extern char* unrar_executable;
 

@@ -34,7 +34,6 @@ SRCS_COMMON = asxparser.c \
               subreader.c \
               vobsub.c \
 
-SRCS_COMMON-$(UNRARLIB) += unrarlib.c
 SRCS_COMMON-$(UNRAR_EXEC) += unrar_exec.c
 
 SRCS_MPLAYER = mplayer.c \

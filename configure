@@ -255,7 +255,6 @@ Optional features:
   --disable-bitmap-font  disable bitmap font support [enable]
   --disable-freetype     disable FreeType 2 font rendering [autodetect]
   --disable-fontconfig   disable fontconfig font lookup [autodetect]
-  --disable-unrarlib     disable Unique RAR File Library [enabled]
   --disable-unrarexec    disable using of UnRAR executable [enabled]
   --enable-menu          enable OSD menu (not DVD menu) [disabled]
   --disable-sortsub      disable subtitle sorting [enabled]
@@ -592,7 +591,6 @@ _sgiaudio=auto
 _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
-_unrarlib=yes
 _unrar_exec=auto
 _win32dll=auto
 _select=yes
@@ -1097,8 +1095,6 @@ for ac_option do
   --disable-freetype)   _freetype=no    ;;
   --enable-fontconfig)  _fontconfig=yes ;;
   --disable-fontconfig) _fontconfig=no  ;;
-  --enable-unrarlib)	_unrarlib=yes	;;
-  --disable-unrarlib)	_unrarlib=no	;;
   --enable-unrarexec)   _unrar_exec=yes ;;
   --disable-unrarexec)  _unrar_exec=no  ;;
   --enable-ftp)         _ftp=yes        ;;
@@ -6711,13 +6707,6 @@ else
 fi
 echores "$_fastmemcpy"
 
-echocheck "UniquE RAR File Library"
-if test "$_unrarlib" = yes ; then
-    _def_unrarlib='#define USE_UNRARLIB 1'
-else
-    _def_unrarlib='#undef USE_UNRARLIB'
-fi
-echores "$_unrarlib"
 
 echocheck "UnRAR executable"
 if test "$_unrar_exec" = auto ; then
@@ -7626,7 +7615,6 @@ FAAD = $_faad
 SPEEX = $_speex
 MUSEPACK = $_musepack
 
-UNRARLIB = $_unrarlib
 UNRAR_EXEC = $_unrar_exec
 PNG = $_png
 JPEG = $_jpeg
@@ -8178,9 +8166,6 @@ $_def_nemesi
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_def_fastmemcpy
-
-/* Use unrarlib for Vobsubs */
-$_def_unrarlib
 
 /* Use UnRAR executable for Vobsubs */
 $_def_unrar_exec

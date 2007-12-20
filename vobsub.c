@@ -22,8 +22,6 @@
 #include "mp_msg.h"
 #ifdef USE_UNRAR_EXEC
 #include "unrar_exec.h"
-#elif defined(USE_UNRARLIB)
-#include "unrarlib.h"
 #endif
 #include "libavutil/common.h"
 
@@ -35,9 +33,8 @@ static int vobsubid = -2;
 /**********************************************************************
  * RAR stream handling
  * The RAR file must have the same basename as the file to open
- * See <URL:http://www.unrarlib.org/>
  **********************************************************************/
-#if defined(USE_UNRARLIB) || defined(USE_UNRAR_EXEC)
+#ifdef USE_UNRAR_EXEC
 typedef struct {
     FILE *file;
     unsigned char *data;
@@ -90,27 +87,15 @@ rar_open(const char *const filename, const char *const mode)
 	} else {
 		p++;
 	}
-#ifdef USE_UNRAR_EXEC
 	rc = unrar_exec_get(&stream->data, &stream->size, p, rar_filename);
-#endif
-#ifdef USE_UNRARLIB
-	if (!rc)
-	rc = urarlib_get(&stream->data, &stream->size, (char*) p, rar_filename, "");
-#endif
 	if (!rc) {
 	    /* There is no matching filename in the archive. However, sometimes
 	     * the files we are looking for have been given arbitrary names in the archive.
 	     * Let's look for a file with an exact match in the extension only. */
 	    int i, num_files = -1, name_len;
 	    ArchiveList_struct *list, *lp;
-#ifdef USE_UNRARLIB
-	    /* the cast in the next line is a hack to overcome a design flaw (IMHO) in unrarlib */
-	    num_files = urarlib_list (rar_filename, (ArchiveList_struct *)&list);
-#endif
-#ifdef USE_UNRAR_EXEC
 	    if (num_files <= 0)
 	    num_files = unrar_exec_list(rar_filename, &list);
-#endif
 	    if (num_files > 0) {
 		char *demanded_ext;
 		demanded_ext = strrchr (p, '.');
@@ -119,24 +104,13 @@ rar_open(const char *const filename, const char *const mode)
 	    	    for (i=0, lp=list; i<num_files; i++, lp=lp->next) {
 			name_len = strlen (lp->item.Name);
 			if (name_len >= demanded_ext_len && !strcasecmp (lp->item.Name + name_len - demanded_ext_len, demanded_ext)) {
-#ifdef USE_UNRAR_EXEC
 	                    rc = unrar_exec_get(&stream->data, &stream->size,
                                                 lp->item.Name, rar_filename);
 		            if (rc) break;
-#endif
-#ifdef USE_UNRARLIB
-		            rc = urarlib_get(&stream->data, &stream->size,
-                                             lp->item.Name, rar_filename, "");
-		            if (rc) break;
-#endif
 			}
 		    }
 		}
-#ifdef USE_UNRARLIB
-	    	urarlib_freelist (list);
-#else
 	    	unrar_exec_freelist(list);
-#endif
 	    }
 	    if (!rc) {
 		free(rar_filename);
