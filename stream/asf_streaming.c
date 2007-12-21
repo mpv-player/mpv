@@ -37,6 +37,20 @@ extern int network_bandwidth;
 int asf_mmst_streaming_start( stream_t *stream );
 static int asf_http_streaming_start(stream_t *stream, int *demuxer_type);
 
+static int asf_read_wrapper(int fd, void *buffer, int len, streaming_ctrl_t *stream_ctrl) {
+    uint8_t *buf = buffer;
+    while (len > 0) {
+        int got = nop_streaming_read(fd, buf, len, stream_ctrl);
+        if (got <= 0) {
+            mp_msg(MSGT_NETWORK, MSGL_ERR, MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream);
+            return got;
+        }
+        buf += got;
+        len -= got;
+    }
+    return 1;
+}
+
 // We can try several protocol for asf streaming
 // * first the UDP protcol, if there is a firewall, UDP
 //   packets will not come back, so the mmsu will fail.
@@ -177,11 +191,8 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	// is big, the ASF header will be split in 2 network chunk.
 	// So we need to retrieve all the chunk before starting to parse the header.
   do {
-	  for( r=0; r < (int)sizeof(ASF_stream_chunck_t) ; ) {
-		i = nop_streaming_read(fd,((char*)&chunk)+r,sizeof(ASF_stream_chunck_t) - r,streaming_ctrl);
-		if(i <= 0) return -1;
-		r += i;
-	  }
+	  if (asf_read_wrapper(fd, &chunk, sizeof(ASF_stream_chunck_t), streaming_ctrl) <= 0)
+	    return -1;
 	  // Endian handling of the stream chunk
 	  le2me_ASF_stream_chunck_t(&chunk);
 	  size = asf_streaming( &chunk, &r) - sizeof(ASF_stream_chunck_t);
@@ -210,14 +221,8 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  buffer += buffer_size;
 	  buffer_size += size;
 	  
-	  for(r = 0; r < size;) {
-	    i = nop_streaming_read(fd,buffer+r,size-r,streaming_ctrl);
-	    if(i < 0) {
-		    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream);
-		    return -1;
-	    }
-	    r += i;
-	  }  
+	  if (asf_read_wrapper(fd, buffer, size, streaming_ctrl) <= 0)
+	    return -1;
 
 	  if( chunk_size2read==0 ) {
 		if(size < (int)sizeof(asfh)) {
@@ -414,18 +419,8 @@ static int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ct
 
   while(1) {
     if (rest == 0 && waiting == 0) {
-      read = 0;
-      while(read < (int)sizeof(ASF_stream_chunck_t)){
-	int r = nop_streaming_read( fd, ((char*)&chunk) + read, 
-				    sizeof(ASF_stream_chunck_t)-read, 
-				    streaming_ctrl );
-	if(r <= 0){
-	  if( r < 0) 
-	    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader);
-	  return -1;
-	}
-	read += r;
-      }
+      if (asf_read_wrapper(fd, &chunk, sizeof(ASF_stream_chunck_t), streaming_ctrl) <= 0)
+        return -1;
       
       // Endian handling of the stream chunk
       le2me_ASF_stream_chunck_t(&chunk);
@@ -457,15 +452,9 @@ static int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ct
 	rest = chunk_size - size;
 	chunk_size = size;
       }
-      while(read < chunk_size) {
-	int got = nop_streaming_read( fd,buffer+read,chunk_size-read,streaming_ctrl );
-	if(got <= 0) {
-	  if(got < 0)
-	    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrReadingChunk);
-	  return -1;
-	}
-	read += got;
-      }
+      if (asf_read_wrapper(fd, buffer, chunk_size, streaming_ctrl) <= 0)
+        return -1;
+      read = chunk_size;
       waiting -= read;
       if (drop_chunk) continue;
     }
