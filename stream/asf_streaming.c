@@ -240,11 +240,6 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
   buffer = chunk_buffer;
   size = buffer_size;
 	  
-  if(asfh.cno > 256) {
-    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid);
-    return -1;
-  }
-
   start = sizeof(asfh);
   
   pos = find_asf_guid(buffer, asf_file_header_guid, start, size);
