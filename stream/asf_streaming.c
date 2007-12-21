@@ -208,7 +208,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  
 	  // audit: do not overflow buffer_size
 	  if (size > SIZE_MAX - buffer_size) return -1;
-	  buffer = (char*) malloc(size+buffer_size);
+	  buffer = malloc(size+buffer_size);
 	  if(buffer == NULL) {
 	    mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_ASF_BufferMallocFailed,size+buffer_size);
 	    return -1;
@@ -277,7 +277,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  asf_ctrl->n_audio = 1;
 	} else {
 	  asf_ctrl->n_audio++;
-	  asf_ctrl->audio_streams = (int*)realloc(asf_ctrl->audio_streams,
+	  asf_ctrl->audio_streams = realloc(asf_ctrl->audio_streams,
 						     asf_ctrl->n_audio*sizeof(int));
 	}
 	asf_ctrl->audio_streams[asf_ctrl->n_audio-1] = streamh->stream_no;
@@ -288,7 +288,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  asf_ctrl->n_video = 1;
 	} else {
 	  asf_ctrl->n_video++;
-	  asf_ctrl->video_streams = (int*)realloc(asf_ctrl->video_streams,
+	  asf_ctrl->video_streams = realloc(asf_ctrl->video_streams,
 						     asf_ctrl->n_video*sizeof(int));
 	}
 	asf_ctrl->video_streams[asf_ctrl->n_video-1] = streamh->stream_no;
