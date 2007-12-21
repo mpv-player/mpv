@@ -175,7 +175,6 @@ static int max_idx(int s_count, int *s_rates, int bound) {
 }
 
 static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
-  ASF_header_t asfh;
   ASF_stream_chunck_t chunk;
   asf_http_streaming_ctrl_t* asf_ctrl = streaming_ctrl->data;
   char* buffer=NULL, *chunk_buffer=NULL;
@@ -227,20 +226,19 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	    return -1;
 
 	  if( chunk_size2read==0 ) {
-		if(size < (int)sizeof(asfh)) {
+		ASF_header_t *asfh = (ASF_header_t *)buffer;
+		if(size < (int)sizeof(ASF_header_t)) {
 		    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrChunk2Small);
 		    return -1;
 		} else mp_msg(MSGT_NETWORK,MSGL_DBG2,"Got chunk\n");
-	  	memcpy(&asfh,buffer,sizeof(asfh));
-	  	le2me_ASF_header_t(&asfh);
-		chunk_size2read = asfh.objh.size;
+		chunk_size2read = AV_RL64(&asfh->objh.size);
 		mp_msg(MSGT_NETWORK,MSGL_DBG2,"Size 2 read=%d\n", chunk_size2read);
 	  }
   } while( buffer_size<chunk_size2read);
   buffer = chunk_buffer;
   size = buffer_size;
 	  
-  start = sizeof(asfh);
+  start = sizeof(ASF_header_t);
   
   pos = find_asf_guid(buffer, asf_file_header_guid, start, size);
   if (pos >= 0) {
