@@ -310,21 +310,20 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	char *end = &buffer[size];
 	
 	mp_msg(MSGT_NETWORK, MSGL_V, "Stream bitrate properties object\n");
+		if (ptr + 2 > end) goto len_err_out;
 		stream_count = AV_RL16(ptr);
 		ptr += 2;
-		if (ptr > end) goto len_err_out;
 		mp_msg(MSGT_NETWORK, MSGL_V, " stream count=[0x%x][%u]\n",
 		        stream_count, stream_count );
 		for( i=0 ; i<stream_count ; i++ ) {
 			uint32_t rate;
 			int id;
 			int j;
+			if (ptr + 6 > end) goto len_err_out;
 			id = AV_RL16(ptr);
 			ptr += 2;
-			if (ptr > end) goto len_err_out;
 			rate = AV_RL32(ptr);
 			ptr += 4;
-			if (ptr > end) goto len_err_out;
 			mp_msg(MSGT_NETWORK, MSGL_V,
                                 "  stream id=[0x%x][%u]\n", id, id);
 			mp_msg(MSGT_NETWORK, MSGL_V,
