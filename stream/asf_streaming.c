@@ -25,6 +25,8 @@
 #include "network.h"
 #include "tcp.h"
 
+#include "libavutil/intreadwrite.h"
+
 #ifdef ARCH_X86
 #define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))
 #else
@@ -305,24 +307,24 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
     // stream bitrate properties object
 	int stream_count;
 	char *ptr = &buffer[pos];
+	char *end = &buffer[size];
 	
 	mp_msg(MSGT_NETWORK, MSGL_V, "Stream bitrate properties object\n");
-		stream_count = le2me_16(*(uint16_t*)ptr);
-		ptr += sizeof(uint16_t);
-		if (ptr > &buffer[size]) goto len_err_out;
+		stream_count = AV_RL16(ptr);
+		ptr += 2;
+		if (ptr > end) goto len_err_out;
 		mp_msg(MSGT_NETWORK, MSGL_V, " stream count=[0x%x][%u]\n",
 		        stream_count, stream_count );
 		for( i=0 ; i<stream_count ; i++ ) {
 			uint32_t rate;
 			int id;
 			int j;
-			id = le2me_16(*(uint16_t*)ptr);
-			ptr += sizeof(uint16_t);
-			if (ptr > &buffer[size]) goto len_err_out;
-			memcpy(&rate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
-			ptr += sizeof(uint32_t);
-			if (ptr > &buffer[size]) goto len_err_out;
-			rate = le2me_32(rate);
+			id = AV_RL16(ptr);
+			ptr += 2;
+			if (ptr > end) goto len_err_out;
+			rate = AV_RL32(ptr);
+			ptr += 4;
+			if (ptr > end) goto len_err_out;
 			mp_msg(MSGT_NETWORK, MSGL_V,
                                 "  stream id=[0x%x][%u]\n", id, id);
 			mp_msg(MSGT_NETWORK, MSGL_V,
