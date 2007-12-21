@@ -252,14 +252,13 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
     ASF_file_header_t *fileh = (ASF_file_header_t *) &buffer[pos];
     pos += sizeof(ASF_file_header_t);
     if (pos > size) goto len_err_out;
-      le2me_ASF_file_header_t(fileh);
 /*
       if(fileh.packetsize != fileh.packetsize2) {
 	printf("Error packetsize check don't match\n");
 	return -1;
       }
 */
-      asf_ctrl->packet_size = fileh->max_packet_size;
+      asf_ctrl->packet_size = AV_RL32(&fileh->max_packet_size);
       // before playing. 
       // preroll: time in ms to bufferize before playing
       streaming_ctrl->prebuffer_size = (unsigned int)(((double)fileh->preroll/1000.0)*((double)fileh->max_bitrate/8.0));
@@ -271,7 +270,6 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
     ASF_stream_header_t *streamh = (ASF_stream_header_t *)&buffer[pos];
     pos += sizeof(ASF_stream_header_t);
     if (pos > size) goto len_err_out;
-      le2me_ASF_stream_header_t(streamh);
       switch(ASF_LOAD_GUID_PREFIX(streamh->type)) {
       case 0xF8699E40 : // audio stream
 	if(asf_ctrl->audio_streams == NULL){
@@ -282,7 +280,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  asf_ctrl->audio_streams = realloc(asf_ctrl->audio_streams,
 						     asf_ctrl->n_audio*sizeof(int));
 	}
-	asf_ctrl->audio_streams[asf_ctrl->n_audio-1] = streamh->stream_no;
+	asf_ctrl->audio_streams[asf_ctrl->n_audio-1] = AV_RL16(&streamh->stream_no);
 	break;
       case 0xBC19EFC0 : // video stream
 	if(asf_ctrl->video_streams == NULL){
@@ -293,7 +291,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  asf_ctrl->video_streams = realloc(asf_ctrl->video_streams,
 						     asf_ctrl->n_video*sizeof(int));
 	}
-	asf_ctrl->video_streams[asf_ctrl->n_video-1] = streamh->stream_no;
+	asf_ctrl->video_streams[asf_ctrl->n_video-1] = AV_RL16(&streamh->stream_no);
 	break;
       }
   }
