@@ -177,7 +177,7 @@ static int max_idx(int s_count, int *s_rates, int bound) {
 static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
   ASF_header_t asfh;
   ASF_stream_chunck_t chunk;
-  asf_http_streaming_ctrl_t* asf_ctrl = (asf_http_streaming_ctrl_t*) streaming_ctrl->data;
+  asf_http_streaming_ctrl_t* asf_ctrl = streaming_ctrl->data;
   char* buffer=NULL, *chunk_buffer=NULL;
   int i,r,size,pos = 0;
   int start;
