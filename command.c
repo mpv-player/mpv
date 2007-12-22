@@ -385,11 +385,12 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     int step_all;
     char *chapter_name = NULL;
 
+    chapter = demuxer_get_current_chapter(mpctx->demuxer);
+    if (chapter < 0)
+        return M_PROPERTY_UNAVAILABLE;
+
     switch (action) {
     case M_PROPERTY_GET:
-        chapter = demuxer_get_current_chapter(mpctx->demuxer);
-        if (chapter < 0)
-            return M_PROPERTY_UNAVAILABLE;
         if (!arg)
             return M_PROPERTY_ERROR;
         *(int *) arg = chapter;
@@ -397,9 +398,6 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT: {
         if (!arg)
             return M_PROPERTY_ERROR;
-        chapter = demuxer_get_current_chapter(mpctx->demuxer);
-        if (chapter < 0)
-            return M_PROPERTY_UNAVAILABLE;
         chapter_name = demuxer_chapter_display_name(mpctx->demuxer, chapter);
         if (!chapter_name)
             return M_PROPERTY_UNAVAILABLE;
@@ -410,9 +408,6 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int*)arg);
-        chapter = demuxer_get_current_chapter(mpctx->demuxer);
-        if (chapter < 0)
-            return M_PROPERTY_UNAVAILABLE;
         step_all = *(int *)arg - (chapter + 1);
         chapter += step_all;
         break;
@@ -420,9 +415,6 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_STEP_DOWN: {
         step_all = (arg && *(int*)arg != 0 ? *(int*)arg : 1)
                    * (action == M_PROPERTY_STEP_UP ? 1 : -1);
-        chapter = demuxer_get_current_chapter(mpctx->demuxer);
-        if (chapter < 0)
-            return M_PROPERTY_UNAVAILABLE;
         chapter += step_all;
         if (chapter < 0)
             chapter = 0;
