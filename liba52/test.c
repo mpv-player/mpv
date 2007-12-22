@@ -1,7 +1,6 @@
-
 // liba52 sample by A'rpi/ESP-team
-// reads ac3 stream form stdin, decodes and downmix to s16 stereo pcm and
-// writes it to stdout.  resulting stream playbackable with sox:
+// Reads an AC-3 stream from stdin, decodes and downmixes to s16 stereo PCM
+// and writes it to stdout. The resulting stream is playable with sox:
 //   play -c 2 -r 48000 out.sw
 
 //#define TIMING //needs Pentium or newer 
