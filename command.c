@@ -731,16 +731,17 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 {
     int current_id = -1, tmp;
 
-    if (!mpctx->sh_audio)
-	return M_PROPERTY_UNAVAILABLE;
-
     switch (action) {
     case M_PROPERTY_GET:
+	if (!mpctx->sh_audio)
+	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 	*(int *) arg = audio_id;
 	return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
+	if (!mpctx->sh_audio)
+	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 
