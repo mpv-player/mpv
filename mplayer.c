@@ -119,10 +119,8 @@ char * proc_priority=NULL;
 #include "playtree.h"
 #include "playtreeparser.h"
 
-#ifdef HAVE_NEW_GUI
 extern int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* config);
 extern int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* config, int enqueue);
-#endif
 
 //**************************************************************************//
 //             Config
@@ -148,9 +146,7 @@ static int cfg_include(m_option_t *conf, char *filename){
 //             XScreensaver
 //**************************************************************************//
 
-#ifdef HAVE_X11
 void xscreensaver_heartbeat(void);
-#endif
 
 //**************************************************************************//
 //**************************************************************************//
