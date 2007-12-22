@@ -1005,7 +1005,7 @@ static int control(uint32_t request, void *data, ...)
 		CGDisplayShowCursor(kCGDirectMainDisplay);
 		mouseHide = NO;
 	}
-	if (enable_mouse_movements) {
+	if (enable_mouse_movements && !isRootwin) {
 		NSPoint p =[self convertPoint:[theEvent locationInWindow] fromView:nil];
 		if ([self mouse:p inRect:textureFrame]) {
                 	char cmdstr[40];
