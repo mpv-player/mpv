@@ -60,11 +60,13 @@ const m_option_t lavfdopts_conf[] = {
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+#define BIO_BUFFER_SIZE 32768
 
 typedef struct lavf_priv_t{
     AVInputFormat *avif;
     AVFormatContext *avfc;
     ByteIOContext *pb;
+    uint8_t buffer[BIO_BUFFER_SIZE];
     int audio_streams;
     int video_streams;
     int sub_streams;
@@ -126,30 +128,21 @@ static const AVCodecTag mp_bmp_tags[] = {
 
 const struct AVCodecTag *mp_bmp_taglists[] = {codec_bmp_tags, mp_bmp_tags, 0};
 
-static int mp_open(URLContext *h, const char *filename, int flags){
-    return 0;
-}
-
-static int mp_read(URLContext *h, unsigned char *buf, int size){
-    stream_t *stream = (stream_t*)h->priv_data;
+static int mp_read(void *opaque, uint8_t *buf, int size) {
+    stream_t *stream = opaque;
     int ret;
 
     if(stream_eof(stream)) //needed?
         return -1;
     ret=stream_read(stream, buf, size);
 
-    mp_msg(MSGT_HEADER,MSGL_DBG2,"%d=mp_read(%p, %p, %d), eof:%d\n", ret, h, buf, size, stream->eof);
+    mp_msg(MSGT_HEADER,MSGL_DBG2,"%d=mp_read(%p, %p, %d), eof:%d\n", ret, stream, buf, size, stream->eof);
     return ret;
 }
 
-static int mp_write(URLContext *h, unsigned char *buf, int size){
-    return -1;
-}
-
-static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
-    stream_t *stream = (stream_t*)h->priv_data;
-    
-    mp_msg(MSGT_HEADER,MSGL_DBG2,"mp_seek(%p, %d, %d)\n", h, (int)pos, whence);
+static offset_t mp_seek(void *opaque, offset_t pos, int whence) {
+    stream_t *stream = opaque;
+    mp_msg(MSGT_HEADER,MSGL_DBG2,"mp_seek(%p, %d, %d)\n", stream, (int)pos, whence);
     if(whence == SEEK_CUR)
         pos +=stream_tell(stream);
     else if(whence == SEEK_END && stream->end_pos > 0)
@@ -170,19 +163,6 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
 
     return pos - stream->start_pos;
 }
-
-static int mp_close(URLContext *h){
-    return 0;
-}
-
-static URLProtocol mp_protocol = {
-    "mp",
-    mp_open,
-    mp_read,
-    mp_write,
-    mp_seek,
-    mp_close,
-};
 
 static void list_formats(void) {
     AVInputFormat *fmt;
@@ -443,8 +423,6 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     stream_seek(demuxer->stream, 0);
 
-    register_protocol(&mp_protocol);
-
     avfc = av_alloc_format_context();
 
     if (opt_cryptokey)
@@ -469,10 +447,9 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     else
         strncpy(mp_filename + 3, "foobar.dummy", sizeof(mp_filename)-3);
     
-    url_fopen(&priv->pb, mp_filename, URL_RDONLY);
+    priv->pb = alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
+                              demuxer->stream, mp_read, NULL, mp_seek);
     
-    ((URLContext*)(priv->pb->opaque))->priv_data= demuxer->stream;
-        
     if(av_open_input_stream(&avfc, priv->pb, mp_filename, priv->avif, &ap)<0){
         mp_msg(MSGT_HEADER,MSGL_ERR,"LAVF_header: av_open_input_stream() failed\n");
         return NULL;
@@ -787,8 +764,9 @@ static void demux_close_lavf(demuxer_t *demuxer)
         if(priv->avfc)
        {
          av_freep(&priv->avfc->key);
-         av_close_input_file(priv->avfc); priv->avfc= NULL;
+         av_close_input_stream(priv->avfc);
         }
+        av_freep(&priv->pb);
         free(priv); demuxer->priv= NULL;
     }
 }
