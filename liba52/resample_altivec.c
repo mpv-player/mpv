@@ -71,7 +71,7 @@ static int a52_resample_STEREO_to_2_altivec(float * _f, int16_t * s16){
   for (i = 0; i < 256; i+= 8) {
     f0 = vec_ld(0, f);
     f4 = vec_ld(16, f);
-    
+
     f256 = vec_ld(1024, f);
     f260 = vec_ld(1040, f);
 

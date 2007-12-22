@@ -69,14 +69,14 @@ void* tmp;
       }
     }
 #endif
-    
+
     tmp=a52_resample_C(flags,chans);
     if(tmp){
 	if(a52_resample==NULL) fprintf(stderr, "No accelerated resampler found\n");
 	a52_resample=tmp;
 	return tmp;
     }
-    
+
     fprintf(stderr, "Unimplemented resampler for mode 0x%X -> %d channels conversion - Contact MPlayer developers!\n", flags, chans);
     return NULL;
 }
