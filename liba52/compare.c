@@ -3,6 +3,7 @@
 // and dies if there is too large an error ( ABS(a-b)>1 ).
 
 #include <stdio.h>
+#include <stdlib.h>
 
 // FIXME: No checks but it is just for debugging so who cares ;)
 
