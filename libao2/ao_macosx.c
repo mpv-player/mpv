@@ -4,6 +4,10 @@
  *
  *      Original Copyright (C) Timothy J. Wood - Aug 2000
  *
+ *      The S/PDIF part of the code is based on the auhal audio output
+ *      module from the VideoLAN:
+ *      Copyright (c) 2006 Derk-Jan Hartman <hartman at videolan dot org>
+ *
  *  This file is part of libao, a cross-platform library.  See
  *  README for a history of this source code.
  *
