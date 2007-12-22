@@ -447,8 +447,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     else
         strncpy(mp_filename + 3, "foobar.dummy", sizeof(mp_filename)-3);
     
-    priv->pb = alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
-                              demuxer->stream, mp_read, NULL, mp_seek);
+    priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
+                                 demuxer->stream, mp_read, NULL, mp_seek);
     priv->pb->is_streamed = !demuxer->stream->end_pos;
     
     if(av_open_input_stream(&avfc, priv->pb, mp_filename, priv->avif, &ap)<0){
