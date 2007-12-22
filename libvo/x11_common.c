@@ -27,6 +27,10 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
+#ifdef HAVE_XSS
+#include <X11/extensions/scrnsaver.h>
+#endif
+
 #ifdef HAVE_XDPMS
 #include <X11/extensions/dpms.h>
 #endif
