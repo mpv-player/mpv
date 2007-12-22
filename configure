@@ -2930,10 +2930,7 @@ return v; }
 EOF
 _fast_inttypes=no
 cc_check && _fast_inttypes=yes
-if test "$_fast_inttypes" = yes ; then
-  # nothing to do
-  :
-else
+if test "$_fast_inttypes" = no ; then
   _def_fast_inttypes='  
     typedef signed char int_fast8_t;
     typedef signed int  int_fast16_t;
