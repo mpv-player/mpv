@@ -1,5 +1,3 @@
-// this code is based on a52dec/libao/audio_out_oss.c
-
 static inline int16_t convert (int32_t i)
 {
     if (i > 0x43c07fff)

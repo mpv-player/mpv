@@ -1,4 +1,3 @@
-// this code is based on a52dec/libao/audio_out_oss.c
 // AltiVec support Copyright (c) 2004 Romain Dolbeau <romain@dolbeau.org>
 
 #ifdef HAVE_ALTIVEC_H
