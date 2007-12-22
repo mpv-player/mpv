@@ -3,7 +3,7 @@
 
 /* optimization TODO / NOTES 
     movntq is slightly faster (0.5% with the current test.c benchmark) 
-	(but thats just test.c so that needs to be testd in reallity)
+	(but that is just test.c so that needs to be tested in reality)
 	and it would mean (C / MMX2 / MMX / 3DNOW) versions 
 */
 
