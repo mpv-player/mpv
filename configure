@@ -363,6 +363,7 @@ Video output:
   --enable-xinerama        enable Xinerama support [autodetect]
   --enable-x11             enable X11 video output [autodetect]
   --enable-xshape          enable XShape support [autodetect]
+  --disable-xss            disable screensaver support via xss [autodetect]
   --enable-fbdev           enable FBDev video output [autodetect]
   --enable-mlib            enable mediaLib video output (Solaris) [disable]
   --enable-3dfx            enable obsolete /dev/3dfx video output [disable]
@@ -514,6 +515,7 @@ _mencoder=yes
 _mplayer=yes
 _x11=auto
 _xshape=auto
+_xss=auto
 _dga1=auto
 _dga2=auto
 _xv=auto
@@ -812,6 +814,8 @@ for ac_option do
   --disable-x11)	_x11=no		;;
   --enable-xshape)	_xshape=yes	;;
   --disable-xshape)	_xshape=no	;;
+  --enable-xss)	_xss=yes	;;
+  --disable-xss)	_xss=no	;;
   --enable-xv)		_xv=yes		;;
   --disable-xv)		_xv=no		;;
   --enable-xvmc)        _xvmc=yes       ;;
@@ -3907,6 +3911,26 @@ else
 fi
 echores "$_x11"
 
+echocheck "Xss screensaver extensions"
+if test "$_xss" = auto ; then
+  cat > $TMPC << EOF
+#include <X11/Xlib.h>
+#include <X11/extensions/scrnsaver.h>
+int main(void) {
+    XScreenSaverSuspend(NULL, True);
+    return 0;
+}
+EOF
+  _xss=no
+  cc_check -lXss && _xss=yes
+fi
+if test "$_xss" = yes ; then
+  _def_xss='#define HAVE_XSS 1'
+  _libs_mplayer="$_libs_mplayer -lXss"
+else
+  _def_xss='#undef HAVE_XSS'
+fi
+echores "$_xss"
 
 echocheck "DPMS"
 _xdpms3=no
@@ -8497,6 +8521,7 @@ $_def_dvb
 $_def_dvb_in
 $_def_svga
 $_def_vesa
+$_def_xss
 $_def_xdpms
 $_def_aa
 $_def_caca

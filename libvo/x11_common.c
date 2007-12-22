@@ -1702,6 +1702,22 @@ static void xscreensaver_enable(void)
     xs_windowid = 0;
 }
 
+static int xss_suspend(Bool suspend)
+{
+#ifndef HAVE_XSS
+    return 0;
+#else
+    int event, error, major, minor;
+    if (XScreenSaverQueryExtension(mDisplay, &event, &error) != True ||
+        XScreenSaverQueryVersion(mDisplay, &major, &minor) != True)
+        return 0;
+    if (major < 1 || major == 1 && minor < 1)
+        return 0;
+    XScreenSaverSuspend(mDisplay, suspend);
+    return 1;
+#endif
+}
+
 /*
  * End of XScreensaver stuff
  */
@@ -1709,6 +1725,8 @@ static void xscreensaver_enable(void)
 void saver_on(Display * mDisplay)
 {
 
+    if (xss_suspend(False))
+        return;
 #ifdef HAVE_XDPMS
     if (dpms_disabled)
     {
@@ -1767,9 +1785,11 @@ void saver_on(Display * mDisplay)
 
 void saver_off(Display * mDisplay)
 {
-#ifdef HAVE_XDPMS
     int nothing;
 
+    if (xss_suspend(True))
+        return;
+#ifdef HAVE_XDPMS
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
     {
         BOOL onoff;
