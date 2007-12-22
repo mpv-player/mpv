@@ -51,6 +51,10 @@
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 #endif
+#ifdef HAVE_MENU
+#include "m_struct.h"
+#include "libmenu/menu.h"
+#endif
 #ifdef HAVE_NEW_GUI
 #include "gui/interface.h"
 #endif
@@ -59,6 +63,8 @@
 #include "mp_fifo.h"
 
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
+
+extern int use_menu;
 
 static void rescale_input_coordinates(int ix, int iy, double *dx, double *dy)
 {
@@ -2991,6 +2997,10 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				    "Selected button number %d", button);
 		}
+#endif
+#ifdef HAVE_MENU
+		if (use_menu && dx >= 0.0 && dy >= 0.0)
+		    menu_update_mouse_pos(dx, dy);
 #endif
 	    }
 	    break;

@@ -44,6 +44,7 @@ typedef struct menu_info_s {
 #define MENU_CMD_END 8
 #define MENU_CMD_PAGE_UP 9
 #define MENU_CMD_PAGE_DOWN 10
+#define MENU_CMD_CLICK 11
 
 /// Global init/uninit
 int menu_init(struct MPContext *mpctx, char* cfg_file);
@@ -59,6 +60,9 @@ void menu_read_key(menu_t* menu,int cmd);
 
 //// Default implementation
 int menu_dflt_read_key(menu_t* menu,int cmd);
+
+/// Receive mouse position events.
+void menu_update_mouse_pos(double x, double y);
 
 /////////// Helpers
 

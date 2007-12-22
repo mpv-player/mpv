@@ -81,6 +81,8 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
       menu_read_cmd(priv->current,MENU_CMD_PAGE_UP);
     else if(strcmp(arg,"pagedown") == 0)
       menu_read_cmd(priv->current,MENU_CMD_PAGE_DOWN);
+    else if(strcmp(arg,"click") == 0)
+      menu_read_cmd(priv->current,MENU_CMD_CLICK);
     else if(strcmp(arg,"hide") == 0 || strcmp(arg,"toggle") == 0)
       priv->current->show = 0;
     else

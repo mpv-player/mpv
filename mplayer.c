@@ -352,7 +352,7 @@ static vf_info_t* libmenu_vfs[] = {
   NULL
 };
 static vf_instance_t* vf_menu = NULL;
-static int use_menu = 0;
+int use_menu = 0;
 static char* menu_cfg = NULL;
 static char* menu_root = "main";
 #endif

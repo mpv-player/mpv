@@ -68,6 +68,10 @@ struct menu_def_st {
   char* args;
 };
 
+double menu_mouse_x = -1.0;
+double menu_mouse_y = -1.0;
+int menu_mouse_pos_updated = 0;
+
 static struct MPContext *menu_ctx = NULL;
 static menu_def_t* menu_list = NULL;
 static int menu_count = 0;
@@ -322,6 +326,12 @@ menu_t* menu_open(char *name) {
 void menu_draw(menu_t* menu,mp_image_t* mpi) {
   if(menu->show && menu->draw)
     menu->draw(menu,mpi);
+}
+
+void menu_update_mouse_pos(double x, double y) {
+  menu_mouse_x = x;
+  menu_mouse_y = y;
+  menu_mouse_pos_updated = 1;
 }
 
 void menu_read_cmd(menu_t* menu,int cmd) {

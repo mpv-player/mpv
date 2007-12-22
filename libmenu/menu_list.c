@@ -18,6 +18,16 @@
 #define IMPL 1
 #include "menu_list.h"
 
+extern double menu_mouse_x;
+extern double menu_mouse_y;
+extern int menu_mouse_pos_updated;
+static int mouse_x;
+static int mouse_y;
+static int selection_x;
+static int selection_y;
+static int selection_w;
+static int selection_h;
+
 #define mpriv (menu->priv)
 
 void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
@@ -127,9 +137,39 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   
   dx = x < 0 ? (mpi->w - need_w) / 2 : x;
   bx = x < 0 ? (mpi->w - bg_w) / 2 : x - mpriv->minb;
+
+  // If mouse moved, try to update selected menu item by the mouse position.
+  if (menu_mouse_pos_updated) {
+    mouse_x = menu_mouse_x * mpi->width;
+    mouse_y = menu_mouse_y * mpi->height;
+    if (mouse_x >= bx && mouse_x < bx + bg_w) {
+      int by = dy + y - mpriv->vspace / 2;
+      int max_by = dh + y + mpriv->vspace / 2;
+      if (mouse_y >= by && mouse_y < max_by) {
+        int cur_no = (mouse_y - by) / line_h;
+        list_entry_t* e = m;
+        for (i = 0; e != NULL; e = e->next) {
+          if (e->hide) continue;
+          if (i == cur_no) {
+            mpriv->current = e;
+            break;
+          }
+          ++i;
+        }
+      }
+    }
+    menu_mouse_pos_updated = 0;
+  }
+
   for( ; m != NULL && dy + vo_font->height < dh ; m = m->next ) {
     if(m->hide) continue;
     if(m == mpriv->current) {
+      // Record rectangle of current selection box.
+      selection_x = bx;
+      selection_y = dy + y - mpriv->vspace / 2;
+      selection_w = bg_w;
+      selection_h = line_h;
+
       if(mpriv->ptr_bg >= 0)
         menu_draw_box(mpi,mpriv->ptr_bg,mpriv->ptr_bg_alpha,
                       bx, dy + y - mpriv->vspace / 2,
@@ -210,6 +250,11 @@ void menu_list_read_cmd(menu_t* menu,int cmd) {
   case MENU_CMD_CANCEL:
     menu->show = 0;
     menu->cl = 1;
+    break;
+  case MENU_CMD_CLICK:
+    if (mouse_x >= selection_x && mouse_x < selection_x + selection_w &&
+        mouse_y >= selection_y && mouse_y < selection_y + selection_h)
+      menu_read_cmd(menu, MENU_CMD_OK);
     break;
   }    
 }
