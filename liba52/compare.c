@@ -1,10 +1,10 @@
-// File written by Michael Niedermayer and its under GPL
-// simple file compare program, it finds the number of rounding errors 
-// and dies if there is a larger error ( ABS(a-b)>1 )
+// File written by Michael Niedermayer and it is under GPL.
+// Simple file compare program, it finds the number of rounding errors
+// and dies if there is too large an error ( ABS(a-b)>1 ).
 
 #include <stdio.h>
 
-// FIXME no checks but its just for debuging so who cares ;)
+// FIXME: No checks but it is just for debugging so who cares ;)
 
 int main(int argc, char **argv)
 {
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 		if(d<0) d=-d; // ABS
 		if(d>1)
 		{
-			printf("FATAL error, too large differnce found (%d)!\n", d);
+			printf("FATAL error, too large a difference found (%d)!\n", d);
 			exit(1);
 		}
 		
@@ -53,3 +53,4 @@ int main(int argc, char **argv)
 	printf("%d (+/-1)differences found\n", dif);
 	exit(0);
 }
+
