@@ -1059,7 +1059,7 @@ static int mp_property_framedropping(m_option_t * prop, int action,
 static int mp_property_gamma(m_option_t * prop, int action, void *arg,
 			     MPContext * mpctx)
 {
-    int *gamma = prop->priv, r;
+    int *gamma = prop->priv, r, val;
 
     if (!mpctx->sh_video)
 	return M_PROPERTY_UNAVAILABLE;
@@ -1080,12 +1080,13 @@ static int mp_property_gamma(m_option_t * prop, int action, void *arg,
 	    break;
 	return r;
     case M_PROPERTY_GET:
-	if (!arg)
-	    return M_PROPERTY_ERROR;
-	r = get_video_colors(mpctx->sh_video, prop->name, arg);
-	if (r <= 0)
-	    break;
-	return r;
+	if (get_video_colors(mpctx->sh_video, prop->name, &val) > 0) {
+	    if (!arg)
+		return M_PROPERTY_ERROR;
+	    *(int *)arg = val;
+	    return M_PROPERTY_OK;
+	}
+	break;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
 	*gamma += (arg ? *(int *) arg : 1) *
