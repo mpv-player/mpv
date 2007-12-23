@@ -113,7 +113,7 @@
     and has more flexible stream options (including network stuff) like ASF.
     
     Headers: header can be placed at the beginning or at the end of file.
-    About half of my files has it at the begining, others has it at the end.
+    About half of my files have it at the beginning, others have it at the end.
     Broken files are only playable if they have header at the beginning!
     
     Codecs: any codecs allowed, both CBR and VBR.

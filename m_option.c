@@ -661,7 +661,7 @@ const m_option_type_t m_option_type_string_list = {
   "A list of strings separated by ','\n"
   "Option with a name ending in an * permits using the following suffix: \n"
   "\t-add: Add the given parameters at the end of the list.\n"
-  "\t-pre: Add the given parameters at the begining of the list.\n"
+  "\t-pre: Add the given parameters at the beginning of the list.\n"
   "\t-del: Remove the entry at the given indices.\n"
   "\t-clr: Clear the list.\n"
   "e.g: -vf-add flip,mirror -vf-del 2,5\n",  

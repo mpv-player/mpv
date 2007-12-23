@@ -169,7 +169,7 @@ play_tree_remove(play_tree_t* pt, int free_it, int with_children) {
     assert(pt->prev->next == pt);
 #endif
     pt->prev->next = NULL;
-  } // Begining of list
+  } // Beginning of list
   else if(pt->next) {
 #ifdef MP_DEBUG
     assert(pt->next->prev == pt);

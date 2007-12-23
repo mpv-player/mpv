@@ -78,7 +78,7 @@ Using a lock file is recommended but not necessary. The temporary file
 generation is handled by `mktemp` which is available from
 http://www.mktemp.org/mktemp/ .
 
-The script contains a few configuration variables at the begining that
+The script contains a few configuration variables at the beginning that
 can and should be set:
 PATH: The $PATH to be used within the script (recommended).
 LOCK: The full path to the lock file to be used (/var/lock/mplayer-mirror-lock
@@ -137,7 +137,7 @@ DO NOT send the private key to the mirror mailing list.
 
 The public key should be placed in the ~/.ssh/authorized_keys file of the
 user running the updates. To restrict the ssh key to only one command place
-the following directives at the begining of the line with the key:
+the following directives at the beginning of the line with the key:
 from="*.mplayerhq.hu",command="<path_to_update_mplayer_rsync>"
 e.g.:
 ---

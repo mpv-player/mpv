@@ -87,7 +87,7 @@ PLAY_TREE_ITER_ERROR  : obvious
 PLAY_TREE_ITER_ENTRY : we are now on an entry
 PLAY_TREE_ITER_NODE  : we are now on a node
 PLAY_TREE_ITER_END : we are now at end
-(( Note : I must add a PLAY_TREE_ITER_BEGINING for the begining. Don't know
+(( Note : I must add a PLAY_TREE_ITER_BEGINNING for the beginning. Don't know
 what it will return in a such case.  PLAY_TREE_ITER_ERROR ? ))
 
 There is also play_tree_iter_up_step which can be used to break a loop or skip
