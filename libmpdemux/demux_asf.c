@@ -42,6 +42,23 @@ extern int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf);
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
+/**
+ * \brief reads int stored in number of bytes given by len
+ * \param ptr pointer to read from, is incremented appropriately
+ * \param len lowest 2 bits indicate number of bytes to read
+ * \param def default value to return if len is invalid
+ */
+static inline unsigned read_varlen(uint8_t **ptr, int len, int def) {
+    const uint8_t *p = *ptr;
+    len &= 3;
+    switch (len) {
+      case 1: *ptr += 1; return *p;
+      case 2: *ptr += 2; return LOAD_LE16(p);
+      case 3: *ptr += 4; return LOAD_LE32(p);
+    }
+    return def;
+}
+
 static void asf_descrambling(unsigned char **src,unsigned len, struct asf_priv* asf){
   unsigned char *dst=malloc(len);
   unsigned char *s2=*src;
@@ -374,30 +391,13 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 	    p+=2; // skip flags & segtype
 
             // Read packet size (plen):
-	    switch((flags>>5)&3){
-	    case 3: plen=LOAD_LE32(p);p+=4;break;	// dword
-	    case 2: plen=LOAD_LE16(p);p+=2;break;	// word
-	    case 1: plen=p[0];p++;break;		// byte
-	    default: plen=0;
-		//plen==0 is handled later
-		//mp_msg(MSGT_DEMUX,MSGL_V,"Invalid plen type! assuming plen=0\n");
-	    }
+	    plen = read_varlen(&p, flags >> 5, 0);
 
             // Read sequence:
-	    switch((flags>>1)&3){
-	    case 3: sequence=LOAD_LE32(p);p+=4;break;	// dword
-	    case 2: sequence=LOAD_LE16(p);p+=2;break;	// word
-	    case 1: sequence=p[0];p++;break;		// byte
-	    default: sequence=0;
-	    }
+	    sequence = read_varlen(&p, flags >> 1, 0);
 
             // Read padding size (padding):
-	    switch((flags>>3)&3){
-	    case 3: padding=LOAD_LE32(p);p+=4;break;	// dword
-	    case 2: padding=LOAD_LE16(p);p+=2;break;	// word
-	    case 1: padding=p[0];p++;break;		// byte
-	    default: padding=0;
-	    }
+	    padding = read_varlen(&p, flags >> 3, 0);
 	    
 	    if(((flags>>5)&3)!=0){
               // Explicit (absoulte) packet size
@@ -450,28 +450,13 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 	      p++;
 
               // Read media object number (seq):
-	      switch((segtype>>4)&3){
-	      case 3: seq=LOAD_LE32(p);p+=4;break;	// dword
-	      case 2: seq=LOAD_LE16(p);p+=2;break;	// word
-	      case 1: seq=p[0];p++;break;		// byte
-	      default: seq=0;
-	      }
+	      seq = read_varlen(&p, segtype >> 4, 0);
 	      
               // Read offset or timestamp:
-	      switch((segtype>>2)&3){
-	      case 3: x=LOAD_LE32(p);p+=4;break;	// dword
-	      case 2: x=LOAD_LE16(p);p+=2;break;	// word
-	      case 1: x=p[0];p++;break;		// byte
-	      default: x=0;
-	      }
+	      x = read_varlen(&p, segtype >> 2, 0);
 
               // Read replic.data len:
-	      switch((segtype)&3){
-	      case 3: rlen=LOAD_LE32(p);p+=4;break;	// dword
-	      case 2: rlen=LOAD_LE16(p);p+=2;break;	// word
-	      case 1: rlen=p[0];p++;break;		// byte
-	      default: rlen=0;
-	      }
+	      rlen = read_varlen(&p, segtype, 0);
 	      
 //	      printf("### rlen=%d   \n",rlen);
       
@@ -496,12 +481,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 
               if(flags&1){
                 // multiple segments
-		switch(segsizetype){
-	          case 3: len=LOAD_LE32(p);p+=4;break;	// dword
-	          case 2: len=LOAD_LE16(p);p+=2;break;	// word
-	          case 1: len=p[0];p++;break;		// byte
-	          default: len=plen-(p-asf->packet); // ???
-		}
+		len = read_varlen(&p, segsizetype, plen-(p-asf->packet));
               } else {
                 // single segment
                 len=plen-(p-asf->packet);
