@@ -13,27 +13,7 @@
 #include "demuxer.h"
 
 #include "libvo/fastmemcpy.h"
-
-/*
- * Load 16/32-bit values in little endian byte order
- * from an unaligned address
- */
-#ifdef ARCH_X86
-#define	LOAD_LE32(p)	(*(unsigned int*)(p))
-#define	LOAD_LE16(p)	(*(unsigned short*)(p))
-#define	LOAD_BE32(p)	(((unsigned char*)(p))[3]     | \
- 			 ((unsigned char*)(p))[2]<< 8 | \
- 			 ((unsigned char*)(p))[1]<<16 | \
- 			 ((unsigned char*)(p))[0]<<24 )
-#else
-#define	LOAD_LE32(p)	(((unsigned char*)(p))[0]     | \
- 			 ((unsigned char*)(p))[1]<< 8 | \
- 			 ((unsigned char*)(p))[2]<<16 | \
- 			 ((unsigned char*)(p))[3]<<24 )
-#define	LOAD_LE16(p)	(((unsigned char*)(p))[0]     | \
-			 ((unsigned char*)(p))[1]<<8)
-#define	LOAD_BE32(p)	(*(unsigned int*)(p))
-#endif
+#include "libavutil/intreadwrite.h"
 
 // defined at asfheader.c:
 
@@ -53,8 +33,8 @@ static inline unsigned read_varlen(uint8_t **ptr, int len, int def) {
     len &= 3;
     switch (len) {
       case 1: *ptr += 1; return *p;
-      case 2: *ptr += 2; return LOAD_LE16(p);
-      case 3: *ptr += 4; return LOAD_LE32(p);
+      case 2: *ptr += 2; return AV_RL16(p);
+      case 3: *ptr += 4; return AV_RL32(p);
     }
     return def;
 }
@@ -236,13 +216,13 @@ static void get_payload_extension_data(demuxer_t *demux, unsigned char** pp, uns
             payextsize = asf->aud_repdata_sizes[i];
 
         if (payextsize == 65535) {
-            payextsize = LOAD_LE16(pi);
+            payextsize = AV_RL16(pi);
             pi+=2;
         }
        
         // if this is the timing info extension then read the payload time
         if (i == ext_timing_index)
-            payload_time =  (uint64_t) LOAD_LE32(pi+8) | (uint64_t)LOAD_LE32(pi+8 + 4) << 32;
+            payload_time = AV_RL64(pi+8);
         
         // if this is the video frame info extension then 
         // set the keyframe indicator, the 'new frame segment' indicator
@@ -409,8 +389,8 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 	    }
 
 	    // Read time & duration:
-	    time = LOAD_LE32(p); p+=4;
-	    duration = LOAD_LE16(p); p+=2;
+	    time = AV_RL32(p); p+=4;
+	    duration = AV_RL16(p); p+=2;
 
 	    // Read payload flags:
             if(flags&1){
@@ -468,7 +448,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
               default:
 	        if(rlen>=8){
             	    p+=4;	// skip object size
-            	    time2=LOAD_LE32(p); // read PTS
+            	    time2=AV_RL32(p); // read PTS
             	    if (asf->asf_is_dvr_ms)
             	        get_payload_extension_data(demux, &p, streamno, seq, &keyframe, &time2);
 		    p+=rlen-4;
