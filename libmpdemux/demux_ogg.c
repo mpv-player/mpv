@@ -326,9 +326,9 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
 }
 
 // check if clang has substring from comma separated langlist
-static int demux_ogg_check_lang(const char *clang, char *langlist)
+static int demux_ogg_check_lang(const char *clang, const char *langlist)
 {
-  char *c;
+  const char *c;
 
   if (!langlist || !*langlist)
     return 0;
@@ -352,7 +352,7 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
   char **cmt = vc->user_comments;
   int index, i;
   ogg_demuxer_t *ogg_d = d->priv;
-  struct table {
+  static const struct table {
     const char *ogg;
     const char *mp;
   } table[] = {
@@ -649,7 +649,7 @@ static int demux_ogg_sub_reverse_id(demuxer_t *demuxer, int id) {
  *  \param demuxer The demuxer about whose subtitles we are inquiring.
  *  \param index The subtitle number.
  */
-char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
+const char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
   ogg_demuxer_t *ogg_d = demuxer->priv;
   return (index < 0) ? NULL : (index >= ogg_d->n_text) ? NULL : ogg_d->text_langs[index];
 }

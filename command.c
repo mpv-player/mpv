@@ -1305,7 +1305,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	}
 #ifdef HAVE_OGGVORBIS
 	if (mpctx->demuxer->type == DEMUXER_TYPE_OGG && d_sub && dvdsub_id >= 0) {
-	    char *lang = demux_ogg_sub_lang(mpctx->demuxer, dvdsub_id);
+	    const char *lang = demux_ogg_sub_lang(mpctx->demuxer, dvdsub_id);
 	    if (!lang)
 		lang = MSGTR_Unknown;
 	    snprintf(*(char **) arg, 63, "(%d) %s", dvdsub_id, lang);
