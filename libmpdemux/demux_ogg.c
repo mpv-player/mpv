@@ -807,7 +807,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
     }
 
     /// Init  the data structure needed for a logical stream
-    ogg_d->subs = realloc(ogg_d->subs,(ogg_d->num_sub+1)*sizeof(ogg_stream_t));
+    ogg_d->subs = realloc_struct(ogg_d->subs,ogg_d->num_sub+1,sizeof(ogg_stream_t));
     memset(&ogg_d->subs[ogg_d->num_sub],0,sizeof(ogg_stream_t));
     /// Get the stream serial number
     s_no = ogg_page_serialno(page);
@@ -1046,9 +1046,9 @@ int demux_ogg_open(demuxer_t* demuxer) {
             text_id = ogg_d->num_sub;
           new_sh_sub(demuxer, ogg_d->n_text);
           ogg_d->n_text++;
-          ogg_d->text_ids = realloc(ogg_d->text_ids, sizeof(int) * ogg_d->n_text);
+          ogg_d->text_ids = realloc_struct(ogg_d->text_ids, ogg_d->n_text, sizeof(int));
           ogg_d->text_ids[ogg_d->n_text - 1] = ogg_d->num_sub;
-          ogg_d->text_langs = realloc(ogg_d->text_langs, sizeof(char *) * ogg_d->n_text);
+          ogg_d->text_langs = realloc_struct(ogg_d->text_langs, ogg_d->n_text, sizeof(char *));
           ogg_d->text_langs[ogg_d->n_text - 1] = NULL;
 	//// Unknown header type
       } else
