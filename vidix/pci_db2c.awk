@@ -114,7 +114,7 @@ BEGIN {
 		printf("0x%s /*%s*/\n", substr(field[2], 9), name_field) >ids_file
 	}
     }
-    print "Total lines parsed:", line;
+    #print "Total lines parsed:", line;
     print "">vendor_file
     print "#endif/*PCI_VENDORS_INCLUDED*/">vendor_file
     print "">ids_file
