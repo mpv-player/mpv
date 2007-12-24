@@ -190,6 +190,9 @@ static demuxer_t* demux_open_rtp(demuxer_t* demuxer)
         return demuxer;
     }
 
+    if (!ctl->rtsp_queue)
+        return demuxer;
+
     media = ctl->rtsp_queue->media_queue;
     for (; media; media=media->next) {
         sdp_medium_info * info = media->medium_info;
