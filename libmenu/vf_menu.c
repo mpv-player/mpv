@@ -59,7 +59,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
   case MP_CMD_MENU : {  // Convert txt cmd from the users into libmenu stuff
     char* arg = cmd->args[0].v.s;
     
-    if(!priv->current->show && !(strcmp(arg,"hide") == 0) )
+    if (!priv->current->show && strcmp(arg,"hide"))
       priv->current->show = 1;
     else if(strcmp(arg,"up") == 0)
       menu_read_cmd(priv->current,MENU_CMD_UP);
