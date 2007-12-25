@@ -61,7 +61,7 @@ static void read_cmd(menu_t* menu,int cmd) {
       mp_input_parse_and_queue_cmds(mpriv->p.current->right);
       break;
     } // fallback on ok if right is not defined
-  case MENU_CMD_OK: {
+  case MENU_CMD_OK:
     if(mpriv->p.current->ok) {
       if (mp_input_parse_and_queue_cmds(mpriv->p.current->ok))
         {
@@ -69,7 +69,7 @@ static void read_cmd(menu_t* menu,int cmd) {
               mp_input_queue_cmd (mp_input_parse_cmd ("menu hide"));
         }
     }
-   } break;
+    break;
   case MENU_CMD_LEFT:
     if(mpriv->p.current->left) {
       mp_input_parse_and_queue_cmds(mpriv->p.current->left);
