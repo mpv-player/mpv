@@ -290,6 +290,7 @@ static int screenshot_open(vf_instance_t *vf, char* args)
 
 static void uninit(vf_instance_t *vf)
 {
+    av_freep(&vf->priv->avctx);
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
     if (vf->priv->buffer) free(vf->priv->buffer);
     free(vf->priv->outbuffer);
