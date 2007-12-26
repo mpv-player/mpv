@@ -120,8 +120,8 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
   }
 }
   
-static void key_cb(int code) {
-  menu_read_key(st_priv->current,code);
+static int key_cb(int code) {
+  return menu_read_key(st_priv->current,code);
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){

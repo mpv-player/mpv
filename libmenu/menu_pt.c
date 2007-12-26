@@ -95,10 +95,10 @@ static void read_cmd(menu_t* menu,int cmd) {
   }
 }
 
-static void read_key(menu_t* menu,int c){
+static int read_key(menu_t* menu,int c){
   if (menu_dflt_read_key(menu, c))
-    return;
-  menu_list_jump_to_key(menu, c);
+    return 1;
+  return menu_list_jump_to_key(menu, c);
 }
 
 static void close_menu(menu_t* menu) {

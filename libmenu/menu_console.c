@@ -419,20 +419,20 @@ static void read_cmd(menu_t* menu,int cmd) {
   }
 }
 
-static void read_key(menu_t* menu,int c) {
+static int read_key(menu_t* menu,int c) {
   if(mpriv->child && mpriv->raw_child) {
     write(mpriv->child_fd[0],&c,sizeof(int));
-    return;
+    return 1;
   }
 
   if (c == KEY_DELETE || c == KEY_BS) {
     unsigned int i = strlen(mpriv->cur_history->buffer);
     if(i > 0)
       mpriv->cur_history->buffer[i-1] = '\0';
-    return;
+    return 1;
   }
   if (menu_dflt_read_key(menu, c))
-    return;
+    return 1;
 
   if(isascii(c)) {
     int l = strlen(mpriv->cur_history->buffer);
@@ -442,8 +442,9 @@ static void read_key(menu_t* menu,int c) {
     }
     mpriv->cur_history->buffer[l] = (char)c;
     mpriv->cur_history->buffer[l+1] = '\0';
+    return 1;
   }
-  return;
+  return 0;
 }
 
 

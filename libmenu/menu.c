@@ -347,11 +347,11 @@ void menu_close(menu_t* menu) {
   free(menu);
 }
 
-void menu_read_key(menu_t* menu,int cmd) {
+int menu_read_key(menu_t* menu,int cmd) {
   if(menu->read_key)
-    menu->read_key(menu,cmd);
+    return menu->read_key(menu,cmd);
   else
-    menu_dflt_read_key(menu,cmd);
+    return menu_dflt_read_key(menu,cmd);
 }
 
 ///////////////////////////// Helpers ////////////////////////////////////

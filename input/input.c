@@ -537,7 +537,7 @@ static mp_cmd_bind_t* cmd_binds_default = NULL;
 static mp_cmd_filter_t* cmd_filters = NULL;
 
 // Callback to allow the menu filter to grab the incoming keys
-void (*mp_input_key_cb)(int code) = NULL;
+int (*mp_input_key_cb)(int code) = NULL;
 
 static mp_input_fd_t key_fds[MP_MAX_KEY_FD];
 static unsigned int num_key_fd = 0;
@@ -1070,7 +1070,7 @@ interpret_key(int code, int paused)
       if (code & MP_KEY_DOWN)
 	  return NULL;
       code &= ~(MP_KEY_DOWN|MP_NO_REPEAT_KEY);
-      mp_input_key_cb(code);
+      if (mp_input_key_cb(code))
     return NULL;
   }
 

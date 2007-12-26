@@ -10,7 +10,7 @@ struct  menu_s {
   struct MPContext *ctx;
   void (*draw)(menu_t* menu,mp_image_t* mpi);
   void (*read_cmd)(menu_t* menu,int cmd);
-  void (*read_key)(menu_t* menu,int cmd);
+  int (*read_key)(menu_t* menu,int cmd);
   void (*close)(menu_t* menu);
   struct m_struct_st* priv_st;
   struct menu_priv_s* priv;
@@ -56,7 +56,7 @@ menu_t* menu_open(char *name);
 void menu_draw(menu_t* menu,mp_image_t* mpi);
 void menu_read_cmd(menu_t* menu,int cmd);
 void menu_close(menu_t* menu);
-void menu_read_key(menu_t* menu,int cmd);
+int menu_read_key(menu_t* menu,int cmd);
 
 //// Default implementation
 int menu_dflt_read_key(menu_t* menu,int cmd);
