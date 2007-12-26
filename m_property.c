@@ -146,11 +146,16 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx) {
         } else if(str[0] == '?' && str[1] == '(' && (e = strchr(str+2,':'))) {
             lvl++;
             if(!skip) {            
-                int pl = e-str-2;
+                int is_not = str[2] == '!';
+                int pl = e - str - (is_not ? 3 : 2);
                 char pname[pl+1];
-                memcpy(pname,str+2,pl);
+                memcpy(pname, str + (is_not ? 3 : 2), pl);
                 pname[pl] = 0;
-                if(m_property_do(prop_list,pname,M_PROPERTY_GET,NULL,ctx) < 0)
+                if(m_property_do(prop_list,pname,M_PROPERTY_GET,NULL,ctx) < 0) {
+                    if (!is_not)
+                        skip = 1, skip_lvl = lvl;
+                }
+                else if (is_not)
                     skip = 1, skip_lvl = lvl;
             }
             str = e+1, l = 0;
