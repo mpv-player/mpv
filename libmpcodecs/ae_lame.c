@@ -69,8 +69,6 @@ m_option_t lameopts_conf[]={
 };
 
 
-static int pass;
-
 static int bind_lame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 {
     mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MP3AudioSelected);
