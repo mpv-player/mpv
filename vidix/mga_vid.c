@@ -1164,7 +1164,7 @@ static int mga_init(void)
     mga_vid_in_use = 0;
 
     printf("Matrox MGA G200/G400/G450 YUV Video interface v2.01 (c) Aaron Holtzman & A'rpi\n");
-#ifdef CRCT2
+#ifdef CRTC2
     printf("Driver compiled with TV-out (second-head) support\n");
 #endif
 
