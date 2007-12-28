@@ -45,7 +45,6 @@ struct menu_priv_s {
   char* title;
   char* file_action;
   char* dir_action;
-  int auto_close;
   char** actions;
   char* filter; 
 };
@@ -58,7 +57,6 @@ static struct menu_priv_s cfg_dflt = {
   "Select a file: %p",
   "loadfile '%p'",
   NULL,
-  0,
   NULL,
   NULL
 };
@@ -71,7 +69,6 @@ static m_option_t cfg_fields[] = {
   { "title", ST_OFF(title),  CONF_TYPE_STRING, 0, 0, 0, NULL },
   { "file-action", ST_OFF(file_action),  CONF_TYPE_STRING, 0, 0, 0, NULL },
   { "dir-action", ST_OFF(dir_action),  CONF_TYPE_STRING, 0, 0, 0, NULL },
-  { "auto-close", ST_OFF(auto_close), CONF_TYPE_FLAG, 0, 0, 1, NULL },
   { "actions", ST_OFF(actions), CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
   { "filter", ST_OFF(filter), CONF_TYPE_STRING, 0, 0, 0, NULL},
   { NULL, NULL, NULL, 0,0,0,NULL }
@@ -354,10 +351,7 @@ static void read_cmd(menu_t* menu,int cmd) {
       char *action = mpriv->p.current->d ? mpriv->dir_action:mpriv->file_action;
       sprintf(filename,"%s%s",mpriv->dir,mpriv->p.current->p.txt);
       str = replace_path(action, filename);
-      if (mp_input_parse_and_queue_cmds(str)) {
-        if(mpriv->auto_close)
-	  menu->cl = 1;
-      }
+      mp_input_parse_and_queue_cmds(str);
       if (str != action)
 	free(str);
     }
