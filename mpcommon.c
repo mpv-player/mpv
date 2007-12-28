@@ -28,7 +28,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
     int len;
     char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
     static subtitle subs;
-    if (type == 'a')
+    if (dvdsub_id >= 0 && type == 'a')
 #ifdef USE_ASS
       if (!ass_enabled)
 #endif
@@ -59,7 +59,8 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
     }
 
     // DVD sub:
-    if (vo_config_count && vo_spudec && type == 'v') {
+    if (vo_config_count && vo_spudec &&
+	(vobsub_id >= 0 || (dvdsub_id >= 0 && type == 'v'))) {
 	int timestamp;
 	current_module = "spudec";
 	spudec_heartbeat(vo_spudec, 90000*sh_video->timer);
