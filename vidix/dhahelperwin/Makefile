@@ -9,7 +9,7 @@ dhahelper.o: dhahelper.c dhahelper.h
 	$(CC) -Wall -Os -c $< -o $@
 
 dhahelper-rc.o: dhahelper.rc common.ver ntverp.h
-	windres -I. $< $@
+	$(WINDRES) -I. $< $@
 
 base.tmp: dhahelper.o dhahelper-rc.o
 	$(CC)   -Wl,--base-file,$@ \

@@ -30,4 +30,4 @@ SRCS_COMMON += $(getch)
 include ../mpcommon.mak
 
 mplayer-rc.o: mplayer.rc
-	windres -o $@ $<
+	$(WINDRES) -o $@ $<

@@ -400,6 +400,7 @@ Miscellaneous options:
   --as=ASSEMBLER         assembler to build MPlayer [as]
   --ar=AR                librarian to build MPlayer [ar]
   --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
+  --windres=WINDRES      windres to build MPlayer [windres]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
   --charset=charset      convert the console messages to this character set
@@ -478,6 +479,7 @@ _mtrr=auto
 _altivec=auto
 _install=install
 _ranlib=ranlib
+_windres=windres
 _ldconfig=ldconfig
 _cc=cc
 _ar=ar
@@ -769,6 +771,9 @@ for ac_option do
     ;;
   --ranlib=*)
     _ranlib=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --windres=*)
+    _windres=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --charset=*)
     _charset=`echo $ac_option | cut -d '=' -f 2`
@@ -7597,6 +7602,7 @@ CC = $_cc
 CXX = $_cc
 HOST_CC = $_host_cc
 RANLIB = $_ranlib
+WINDRES = $_windres
 LDCONFIG = $_ldconfig
 INSTALL = $_install
 EXTRA_INC = $_inc_extra
