@@ -1,4 +1,4 @@
-.\" synced with r25379
+.\" synced with r25455
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -1030,7 +1030,7 @@ Sono supportate le seguenti espansioni:
 .RSs
 .IPs ${NOME}
 Espande al valore della proprietà NOME.
-.IPs $(NOME:TESTO)
+.IPs ?(NOME:TESTO)
 Espande a TESTO solo se la proprietà NOME è disponibile.
 .RE
 .
@@ -2580,6 +2580,14 @@ usata per l'OSD e ripulirla (default: ^[[A\\r^[[K).
 .TP
 .B \-unicode
 Dice a MPlayer di gestire i sottotitoli come unicode.
+.
+.TP
+.B \-unrarexec <percorso dell'eseguibile unrar> (attualmente non supporta MinGW)
+Specifica il percorso dell'eseguibile unrar affinché MPlayer lo possa usare per
+leggere file vobsub compressi in rar (default: non impostata, e quindi funzione
+disabilitata).
+Il percorso deve contenere il nome dell'eseguibile, per es.\&
+/usr/local/bin/unrar.
 .
 .TP
 .B "\-utf8 \ \ "
@@ -4916,6 +4924,38 @@ log2 del numero di valori di polifase (..., 10->1024, 11->2048, 12->4096,
 .IPs <taglio>
 frequenza di taglio (0.0\-1.0), il valore di default dipende dalla
 lunghezza del filtro
+.RE
+.PD 1
+.
+.TP
+.B lavcac3enc[=suspdif[:frequenza[:mincan]]]
+Codifica l'audio multicanale in AC-3 durante l'esecuzione usando libavcodec.
+Accetta il formato d'ingresso a 16 bit native-endian, massimo 6 canali.
+Il formato di uscita è big-endian quando viene emesso un flusso AC-3 grezzo,
+native-endian quando viene passato a S/PDIF.
+La frequenza di campionamento di uscita di questo filtro dipende da quella in
+ingresso.
+Se la frequenza in ingresso è 48kHz, 44.1kHz, o 32kHz viene usata direttamente.
+In caso contrario viene inserito automaticamente un filtro resample prima di
+questo, per fare in modo che ingresso e uscita siano a 48kHz.
+Devi specificare '\-channels N' per far sì che il decodificatore decodifichi in
+N canali l'audio, poi il filtro potrà codificare l'ingresso a N canali in AC-3.
+.br
+.PD 0
+.RSs
+.IPs <suspdif>
+Emette un flusso AC-3 grezzo se zero o non impostata, esce su S/PDIF verso il
+decodificatore hardware (passthrough) quando <suspdif> è diversa da zero.
+.IPs <frequenza>
+La frequenza in cui codificare il flusso AC-3.
+Impostala a 384 o 384000 per ottenere 384kbit.
+Valori ammessi: 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320,
+384, 448, 512, 576, 640.
+La frequenza di default si basa sul numero di canali di ingresso:
+1can: 96,  2can: 192,  3can: 224,  4can: 384,  5can: 448,  6can: 448.
+.IPs <mincan>
+Se il numero di canali di ingresso è inferiore a <mincan>, il filtro si
+disattiverà da solo (default: 5).
 .RE
 .PD 1
 .
