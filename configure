@@ -2757,19 +2757,22 @@ if test "$_posix4" = yes ; then
 fi
 echores "$_posix4"
 
-echocheck "lrintf"
+for func in llrint lrint lrintf round roundf; do
+echocheck $func
 cat > $TMPC << EOF
 #include <math.h>
-int main(void) { long (*foo)(float); foo = lrintf; (void)(*foo)(0.0); return 0; }
+int main(void) { long (*foo)(float); foo = $func; (void)(*foo)(0.0); return 0; }
 EOF
-_lrintf=no
-cc_check -D_GNU_SOURCE $_ld_lm && _lrintf=yes
-if test "$_lrintf" = yes ; then
-  _def_lrintf="#define HAVE_LRINTF 1"
+eval _$func=no
+cc_check -D_GNU_SOURCE $_ld_lm && eval _$func=yes
+if eval test "x\$_$func" = "xyes"; then
+  eval _def_$func="\"#define HAVE_`echo $func | tr '[a-z]' '[A-Z]'` 1\""
+  echores yes
 else
-  _def_lrintf="#undef HAVE_LRINTF"
+  eval _def_$func="\"#undef HAVE_`echo $func | tr '[a-z]' '[A-Z]'`\""
+  echores no
 fi
-echores "$_lrintf"
+done
 
 
 echocheck "mkstemp"
@@ -8329,8 +8332,12 @@ $_def_vcd
 **
 *---------------------------------------------------------------------------*/
 
-/* C99 lrintf function available */
+/* C99 *lrint* and round* functions available */
+$_def_llrint
+$_def_lrint
 $_def_lrintf
+$_def_round
+$_def_roundf
 
 /* mkstemp support */
 $_def_mkstemp
