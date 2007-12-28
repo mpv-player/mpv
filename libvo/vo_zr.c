@@ -225,7 +225,7 @@ int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
 	zr->zrq.size = MJPEG_SIZE;
 
 	if (ioctl(zr->vdes, MJPIOC_REQBUFS, &zr->zrq)) {
-		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %d buffers of size %d\n", zr->zrq.count, zr->zrq.size);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %ld buffers of size %ld\n", zr->zrq.count, zr->zrq.size);
 		return 1;
 	}
 
@@ -234,11 +234,11 @@ int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
 			PROT_READ|PROT_WRITE, MAP_SHARED, zr->vdes, 0);
 
 	if (zr->buf == MAP_FAILED) {
-		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %d buffers of size %d\n", zr->zrq.count, zr->zrq.size);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %ld buffers of size %ld\n", zr->zrq.count, zr->zrq.size);
 		return 1;
 	}
 	
-	mp_msg(MSGT_VO, MSGL_V, "zr: got %d buffers of size %d (wanted %d buffers of size %d)\n", zr->zrq.count, zr->zrq.size, MJPEG_NBUFFERS, MJPEG_SIZE);
+	mp_msg(MSGT_VO, MSGL_V, "zr: got %ld buffers of size %ld (wanted %d buffers of size %d)\n", zr->zrq.count, zr->zrq.size, MJPEG_NBUFFERS, MJPEG_SIZE);
 	if (zr->zrq.count < MJPEG_NBUFFERS) {
 		mp_msg(MSGT_VO, MSGL_V, "zr: got not enough buffers\n");
 		return 1;
