@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24795 -->
+<!-- synced with r25308 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1057,7 +1057,7 @@ Először, ki kell számítanod az elkódolt képarányt:
 </para></listitem>
 <listitem><para>
   PRdvd a DVD pixel rátája, ami PAL DVD-k esetén 1.25=(720/576)
-  és 1.5=(720/480) NTSC DVD-knél,
+  és 1.5=(720/480) NTSC DVD-knél.
 </para></listitem>
 </itemizedlist>
 </para>

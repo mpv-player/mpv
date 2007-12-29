@@ -1,4 +1,4 @@
-.\" Synced with r25278
+.\" Synced with r25529
 .\" MPlayer (C) 2000-2007 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 12. 03." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2007. 12. 28." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -991,8 +991,10 @@ A következõ bõvítmények támogatottak:
 .RSs
 .IPs ${NAME}
 A NAME tulajdonság értéke kerül a helyére.
-.IPs $(NAME:TEXT)
+.IPs ?(NAME:TEXT)
 Csak akkor jelenik meg a TEXT, ha a NAME elérhetõ.
+.IPs ?(!NAME:TEXT)
+Csak akkor jelenik meg a TEXT, ha a NAME nem elérhetõ.
 .RE
 .
 .TP
@@ -1990,8 +1992,12 @@ Lásd még a \-vf expand opciót.
 .B \-ass (csak FreeType)
 Bekapcsolja az SSA/ASS felirat renderelést.
 Ezzel az opcióval a libass lesz használva az SSA/ASS
-külsõ feliratokhoz és matroska sávokhoz.
+külsõ feliratokhoz és Matroska sávokhoz.
 Ajánlott még a \-embeddedfonts engedélyezése is.
+.br
+.I MGEJEGYZÉS:
+Ha a fontconfig be van fordítva, a \-ass bekapcsolja a \-fontconfig
+kapcsolót, kivéve, ha explicit le van tiltva a \-nofontconfig-gal.
 .
 .TP
 .B \-ass\-border\-color <érték>
@@ -2026,20 +2032,22 @@ Felülír pár stílus paramétert.
 .TP
 .B \-ass\-hinting <típus>
 A hint típusát állítja be.
+A <típus> lehet:
 .PD 0
 .RSs
-.IPs <típus>
-0: Nincs hint.
-.br
-1: FreeType autohinter, könnyû mód.
-.br
-2: FreeType autohinter, normális mód.
-.br
-3: Betûtípus natív hinter-e.
-.br
-0\-3 + 4: Ugyan az, de a hint csak akkor hajtódik végre, ha az OSD a képernyõ
+.IPs 0
+nincs hint
+.IPs 1
+FreeType autohinter, könnyû mód
+.IPs 2
+FreeType autohinter, normális mód
+.IPs 3
+betûtípus natív hinter-e
+.IPs "0-3 + 4"
+Ugyan az, de a hint csak akkor hajtódik végre, ha az OSD a képernyõ
 felbontásában kerül renderelésre, vagyis nem lesz méretezve.
-.br
+.RE
+.RSs
 Az alapértelmezett érték a 7 (natív hinter használata nem méretezett OSD-hez, különben nincs hint).
 .RE
 .PD 1
@@ -2169,6 +2177,10 @@ A fontconfig-gal ez az opció a fontconfig betûtípus nevét határozza meg.
 .TP
 .B \-fontconfig (csak fontconfig)
 A fontconfig-gal karbantartott betûtípusok használatának engedélyezése.
+.br
+.I MEGJEGYZÉS:
+A \-ass automatikusan bekapcsolja ezt, kivéve, ha explicit felül van
+bírálva a \-nofontconfig kapcsolóval.
 .
 .TP
 .B \-forcedsubsonly
@@ -2481,6 +2493,13 @@ le kell törölnie (alapértelmezett: ^[[A\\r^[[K).
 .TP
 .B \-unicode
 Megadja az MPlayernek, hogy a feliratot UNICODE-ként kezelje.
+.
+.TP
+.B \-unrarexec <unrar futtatható elérési útvonala> (a MingW jelenleg nem támogatott)
+Megadja az futtatható unrar elérési útvonalát, így az MPlayer fel tudja
+használni a rar-ral tömörített vobsub fájlok lejátszásához (alapértelmezésben
+nincs beállítva, így ez a funkció nem használható).
+Az elérési útnak tartalmaznia kell a futtatható fájlnevét is, pl.\& /usr/local/bin/unrar.
 .
 .TP
 .B "\-utf8 \ \ "
@@ -4722,6 +4741,38 @@ levágási frekvencia (0.0\-1.0), alapértelmezésként a szûrõ hossz alapján állítód
 .PD 1
 .
 .TP
+.B lavcac3enc[=tospdif[:bitráta[:minchn]]]
+Több csatornás audiót kódol AC-3-ba futásidõben a libavcodec-kel.
+Támogatja a 16 bites natív-endian bemeneti formátumot, maximum 6 csatornával.
+Az eredmény big-endian, ha nyers AC-3 folyam a kimenet, natív-endian,
+ha S/PDIF-re megy.
+A szûrõ kimeneti mintavételi rátája ugyan az, mint a bemeneté.
+Ha a bemenet mintavételi rátája 48kHz, 44.1kHz vagy 32kHz, ez szûrõ közvetlenül
+azt használja.
+Máskülönben a resampler szûrõ automatikusan lefut ezen szûrõ elõtt, hogy a
+bemenet és a kimenet mintavételi rátája is 48kHz legyen.
+Meg kell adnod a '\-channels N' kapcsolót, hogy a dekódoló az audiót N csatornásra
+alakítsa, majd a szûrõ az N csatornát elkódolja AC-3-ba.
+.br
+.PD 0
+.RSs
+.IPs <tospdif>
+Nyers AC-3 folyamot ad, ha ez nulla vagy nincs beállítva,
+a kimenet S/PDIF-en lesz áteresztve, ha a <tospdif> nem nulla.
+.IPs <bitráta>
+A kódolt AC-3 folyam bitrátája.
+Állítsd be 384-re vagy 384000-re a 384kbit-hez.
+Érvényes értékek: 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256,
+                  320, 384, 448, 512, 576, 640
+Az alapértelmezett bitráta a bemeneti csatornák számától függ:
+1ch: 96,  2ch: 192,  3ch: 224,  4ch: 384,  5ch: 448,  6ch: 448
+.IPs <minchn>
+Ha a bemeneti csatornaszám kisebb, mint a <minchn>, a szûrõ kiiktatja
+magát (alapértelmezett: 5).
+.RE
+.PD 1
+.
+.TP
 .B sweep[=sebesség]
 Sine sweep-et csinál.
 .PD 0
@@ -4844,8 +4895,6 @@ csatornát tartalmaz, akkor a 2. és 3. csatorna elnémul, de a 0.
 A csatornák számát 6-ra módosítja és beállít 4 útvonalat, ami
 a 0. csatornát átmásolja a 0. és a 3. csatornára.
 A 4. és 5. csatorna elnémul.
-.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
-A 6-csatornás ffdca (DTS) kimenet helyes mûködése ALSA-val.
 .RE
 .PD 1
 .
