@@ -1,4 +1,4 @@
-.\" partial sync with en/mplayer.1 r25389
+.\" sync with en/mplayer.1 r25529
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -46,15 +46,15 @@
 .TH MPlayer 1 "2007-06-01" "MPlayer 项目" "电影播放器"
 .
 .SH 名称
-mplayer  \- 电影播放器
+mplayer  \- 影视播放器
 .br
-mencoder \- 电影编解码器
+mencoder \- 影视编解码器
 .
 .\" --------------------------------------------------------------------------
 .\" 概要
 .\" --------------------------------------------------------------------------
 .
-.SH 概要
+.SH 总览
 .na
 .nh
 .B mplayer
@@ -63,31 +63,31 @@ mencoder \- 电影编解码器
 .br
 .B mplayer
 [选项] 文件1
-[指定选项] [文件2] [指定选项]
+[分选项] [文件2] [分选项]
 .
 .br
 .B mplayer
 [选项]
 {文件和选项组}
-[组指定选项]
+[组专用的分选项]
 .
 .br
 .B mplayer
-[dvd|dvdnav]://[标题|[开头标题]\-末尾标题]
+[dvd|dvdnav]://[标题|[开始标题]\-结束标题]
 [选项]
 .
 .br
 .B mplayer
-vcd://轨迹[/设备]
+vcd://曲目[/设备]
 .
 .br
 .B mplayer
-tv://[频道][/input_id]
+tv://[频道][/输入ID]
 [选项]
 .
 .br
 .B mplayer
-radio://[频道|频率][/capture]
+radio://[频道|频率][/捕捉设备]
 [选项]
 .
 .br
@@ -107,12 +107,12 @@ mf://[文件掩码|@列表文件]
 .
 .br
 .B mplayer
-[cdda|cddb]://轨迹[\-末轨迹][:速度][/设备]
+[cdda|cddb]://曲目[\-结束曲目][:速度][/设备]
 [选项]
 .
 .br
 .B mplayer
-cue://文件[:轨迹]
+cue://文件[:曲目]
 [选项]
 .
 .br
@@ -138,7 +138,7 @@ tivo://主机/[list|llist|fsid]
 .br
 .B gmplayer
 [选项]
-[\-skin\ 皮肤]
+[\-skin\ 外观模板]
 .
 .br
 .B mencoder
@@ -148,7 +148,7 @@ tivo://主机/[list|llist|fsid]
 .br
 .B mencoder
 [选项] 文件1
-[指定选项] [文件2] [指定选项]
+[分选项] [文件2] [分选项]
 .ad
 .hy
 .
@@ -936,8 +936,11 @@ n 大小的 FIFO 能容纳 (n\-1) 缓冲事件。
 .RSs
 .IPs ${NAME}
 扩展为属性 NAME 的值。
-.IPs $(NAME:TEXT)
-仅当属性 NAME 可用时扩展 TEXT(文字)。
+.IPs ?(NAME:TEXT)
+仅当属性 NAME 可用时扩展 TEXT（文字）。
+.IPs ?(!NAME:TEXT)
+仅当属性 NAME 不可用时扩展 TEXT（文字）。
+Expand TEXT only if the property NAME is not available.
 .RE
 .
 .TP
