@@ -136,7 +136,7 @@ static uint32_t pfb_colorkey;
 
 
 void pfb_overlay_on() {
-    int i, h_inc, h_step, ecp_div;
+    int h_inc, h_step, ecp_div;
 
     pfb_vregs[PFB_CLOCK_CNTL_INDEX] = (pfb_vregs[PFB_CLOCK_CNTL_INDEX] & ~0x0000003f) | 0x00000008;
     ecp_div = (pfb_vregs[PFB_CLOCK_CNTL_DATA] >> 8) & 0x3;
