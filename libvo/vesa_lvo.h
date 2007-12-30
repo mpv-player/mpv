@@ -4,7 +4,7 @@
  *	Copyright (C) Nick Kurshev <nickols_k@mail.ru> - Oct 2001
  *
  *  You can redistribute this file under terms and conditions
- *  of GNU General Public licence v2.
+ *  of GNU General Public licence v2 or later.
  *
  * This file contains vo_vesa interface to Linux Video Overlay.
  */
