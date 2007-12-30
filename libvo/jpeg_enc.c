@@ -35,24 +35,11 @@
 #include "libavcodec/avcodec.h"
 #include "libavcodec/dsputil.h"
 #include "libavcodec/mpegvideo.h"
+#include "libavcodec/mjpegenc.h"
 
 #include "jpeg_enc.h"
 
 extern int avcodec_inited;
-
-/* zr_mjpeg_encode_mb needs access to these tables for the black & white 
- * option */
-typedef struct MJpegContext {
-    uint8_t huff_size_dc_luminance[12];
-    uint16_t huff_code_dc_luminance[12];
-    uint8_t huff_size_dc_chrominance[12];
-    uint16_t huff_code_dc_chrominance[12];
-
-    uint8_t huff_size_ac_luminance[256];
-    uint16_t huff_code_ac_luminance[256];
-    uint8_t huff_size_ac_chrominance[256];
-    uint16_t huff_code_ac_chrominance[256];
-} MJpegContext;
 
 
 /* Begin excessive code duplication ************************************/
