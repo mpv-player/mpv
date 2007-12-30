@@ -61,7 +61,7 @@ const LIBVO_EXTERN (bl)
 
 static unsigned char *image = NULL;
 static unsigned char *tmp = NULL;
-static int framenum, yoff, stride;
+static int framenum;
 static char *bl_subdevice = NULL;
 static int prevpts = -1;
 
