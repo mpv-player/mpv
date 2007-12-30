@@ -146,7 +146,7 @@ void ass_free_style(ass_track_t* track, int sid);
 void ass_free_event(ass_track_t* track, int eid);
 
 /**
- * \brief Process Codec Private section of subtitle stream
+ * \brief Parse Codec Private section of subtitle stream
  * \param track target track
  * \param data string to parse
  * \param size length of data
@@ -154,7 +154,7 @@ void ass_free_event(ass_track_t* track, int eid);
 void ass_process_codec_private(ass_track_t* track, char *data, int size);
 
 /**
- * \brief Process a chunk of subtitle stream data. In matroska, this containes exactly 1 event (or a commentary)
+ * \brief Parse a chunk of subtitle stream data. In matroska, this containes exactly 1 event (or a commentary)
  * \param track track
  * \param data string to parse
  * \param size length of data
