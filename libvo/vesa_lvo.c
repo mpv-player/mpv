@@ -29,6 +29,7 @@
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
+#include "sub.h"
 #include "libmpcodecs/vfcap.h"
 
 #define WIDTH_ALIGN 32 /* should be 16 for rage:422 and 32 for rage:420 */
