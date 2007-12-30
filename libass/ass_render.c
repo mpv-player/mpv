@@ -2102,6 +2102,9 @@ static int ass_start_frame(ass_renderer_t *priv, ass_track_t* track, long long n
 
 	if (!priv->settings.frame_width && !priv->settings.frame_height)
 		return 1; // library not initialized
+
+	if (track->n_events == 0)
+		return 1; // nothing to do
 	
 	frame_context.ass_priv = priv;
 	frame_context.width = global_settings->frame_width;
