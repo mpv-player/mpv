@@ -234,6 +234,7 @@ void     vlvo_flip_page(void)
   }	
 }
 
+#if 0
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
   UNUSED(x0);
@@ -280,6 +281,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         draw_alpha_null(x0,y0,w,h,src,srca,stride);
     }
 }
+#endif
 
 void     vlvo_draw_osd(void)
 {
