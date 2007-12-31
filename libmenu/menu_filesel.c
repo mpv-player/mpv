@@ -31,6 +31,7 @@
 
 int menu_keepdir = 0;
 char *menu_chroot = NULL;
+extern char *filename;
 
 struct list_entry_s {
   struct list_entry p;
@@ -425,8 +426,21 @@ static int open_fs(menu_t* menu, char* args) {
   }
   
   getcwd(wd,PATH_MAX);
-  if (!path || path[0] == '\0')
-    path = wd;
+  if (!path || path[0] == '\0') {
+    char *slash = NULL;
+    if (filename && !strstr(filename, "://") && (path=realpath(filename, b))) {
+      slash = strrchr(path, '/');
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+      // FIXME: Do we need and can convert all '\\' in path to '/' on win32?
+      if (!slash)
+        slash = strrchr(path, '\\');
+#endif
+    }
+    if (slash)
+      slash[1] = '\0';
+    else
+      path = wd;
+  }
   if (path[0] != '/') {
     if(path[strlen(path)-1] != '/')
       snprintf(b,sizeof(b),"%s/%s/",wd,path);
