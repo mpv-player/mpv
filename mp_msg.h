@@ -132,9 +132,10 @@ void mp_msg(int mod, int lev, const char *format, ... );
 #   else
 #      define mp_dbg(mod,lev, ... ) /* only useful for developers */
 #   endif
-#endif
+#endif /* __GNUC__ */
 
 const char* filename_recode(const char* filename);
 
-#endif
-#endif
+#endif /* TARGET_OS2 */
+
+#endif /* MP_MSG_H */
