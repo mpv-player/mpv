@@ -4,7 +4,7 @@
  *	Copyright (C) Nick Kurshev <nickols_k@mail.ru> - 2002
  *
  *  You can redistribute this file under terms and conditions
- *  of GNU General Public licence v2.
+ *  of GNU General Public licence v2 or later.
  *
  * This file contains vosub_vidix interface to any mplayer's VO driver
  */

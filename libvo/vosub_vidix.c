@@ -5,7 +5,7 @@
  *	Copyright (C) Alex Beregszaszi
  *
  *  You can redistribute this file under terms and conditions
- *  of GNU General Public licence v2.
+ *  of GNU General Public licence v2 or later.
  *
  * This file contains vidix interface to any mplayer's VO plugin.
  * (Partly based on vesa_lvo.c from mplayer's package)
