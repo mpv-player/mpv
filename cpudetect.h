@@ -57,5 +57,4 @@ void GetCpuCaps(CpuCaps *caps);
 /* returned value is malloc()'ed so free() it after use */
 char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]);
 
-#endif /* !CPUDETECT_H */
-
+#endif /* CPUDETECT_H */
