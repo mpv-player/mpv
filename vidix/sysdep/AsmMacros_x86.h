@@ -343,6 +343,6 @@ static __inline__ void intr_enable()
   __asm__ __volatile__("sti");
 }
 
-#endif
+//#endif
 
-//#endif /* ASMMACROS_X86_H */
+#endif /* ASMMACROS_X86_H */
