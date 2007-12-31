@@ -257,5 +257,4 @@ extern void wsScreenSaverOff( Display * mDisplay );
 
 #define wgIsRect( X,Y,tX,tY,bX,bY ) ( ( (X) > (tX) )&&( (Y) > (tY) )&&( (X) < (bX) )&&( (Y) < (bY) ) )
 
-#endif
-
+#endif /* GUI_WS_H */

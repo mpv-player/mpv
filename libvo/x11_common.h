@@ -125,5 +125,4 @@ void update_xinerama_info(void);
 
 int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
 
-#endif
-
+#endif /* X11_COMMON_H */

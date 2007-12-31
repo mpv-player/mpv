@@ -13,4 +13,4 @@ typedef struct {
 
 int mpae_init_toolame(audio_encoder_t *encoder);
 
-#endif
+#endif /* MPAE_TOOLAME_H */

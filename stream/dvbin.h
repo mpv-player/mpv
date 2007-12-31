@@ -113,4 +113,4 @@ extern int dvb_set_channel(stream_t *, int, int);
 extern dvb_config_t *dvb_get_config(void);
 extern void dvb_free_config(dvb_config_t *config);
 
-#endif
+#endif /* DVBIN_H */

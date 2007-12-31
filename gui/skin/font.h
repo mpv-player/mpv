@@ -34,5 +34,4 @@ extern int  fntTextWidth( int id,char * str );
 extern int        fntRead( char * path,char * fname );
 extern txSample * fntRender( wItem * item,int px,const char * fmt,... );
 
-#endif
-
+#endif /* GUI_FONT_H */

@@ -255,4 +255,4 @@ static double inline gen_cos(double x)
 #undef cos
 #define cos(x) gen_cos(x)
 
-#endif
+#endif /* GENERIC_MATH_H */

@@ -41,4 +41,4 @@ Boolean awaitRTPPacket(demuxer_t* demuxer, demux_stream_t* ds,
     // "streamType": 0 => video; 1 => audio
     // This routine returns False if the input stream has closed
 
-#endif
+#endif /* DEMUX_RTP_INTERNAL_H */

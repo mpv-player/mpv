@@ -30,4 +30,4 @@ extern void af_window_blackman(int n,_ftype_t* w);
 extern void af_window_flattop(int n,_ftype_t* w);
 extern void af_window_kaiser(int n, _ftype_t* w,_ftype_t b);
 
-#endif
+#endif /* WINDOW_H */

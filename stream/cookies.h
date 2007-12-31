@@ -13,4 +13,4 @@
 extern void cookies_set(HTTP_header_t * http_hdr, const char *hostname,
 			const char *url);
 
-#endif
+#endif /* COOKIES_H */

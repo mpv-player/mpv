@@ -9,4 +9,4 @@ extern GtkWidget * About;
 extern GtkWidget * create_About( void );
 extern void ShowAboutBox( void );
 
-#endif
+#endif /* GUI_ABOUT_H */

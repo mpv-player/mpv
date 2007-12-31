@@ -244,4 +244,4 @@ struct asf_priv {
     unsigned bps;
 };
 
-#endif
+#endif /* ASF_H */

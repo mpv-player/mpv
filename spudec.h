@@ -19,5 +19,5 @@ void spudec_set_hw_spu(void *this, const vo_functions_t *hw_spu);
 int spudec_changed(void *this);
 void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox);
 void spudec_set_forced_subs_only(void * const this, const unsigned int flag);
-#endif
 
+#endif /* MPLAYER_SPUDEC_H */

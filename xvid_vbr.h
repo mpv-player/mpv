@@ -228,4 +228,4 @@ extern int vbrUpdate(vbr_control_t *state,
 		     int ublocks);
 extern int vbrFinish(vbr_control_t *state);
 
-#endif
+#endif /* XVID_VBR_H */

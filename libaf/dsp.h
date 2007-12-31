@@ -19,4 +19,4 @@
 #include <window.h>
 #include <filter.h>
 
-#endif
+#endif /* DSP_H */

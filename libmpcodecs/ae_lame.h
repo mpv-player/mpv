@@ -5,4 +5,4 @@
 
 int mpae_init_lame(audio_encoder_t *encoder);
 
-#endif
+#endif /* AE_LAME_H */

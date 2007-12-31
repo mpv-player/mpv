@@ -28,4 +28,4 @@ int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
 // Close a RTP demuxer
 void demux_close_rtp(demuxer_t* demuxer);
 
-#endif
+#endif /* DEMUX_RTP_H */

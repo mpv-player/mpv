@@ -50,4 +50,4 @@ void wsXDNDClearAwareness(wsTWindow* window);
 /* XdndFinished */
 #define XDND_FINISHED_TARGET_WIN(e)	((e)->xclient.data.l[0])
 
-#endif
+#endif /* GUI_WSXDND_H */

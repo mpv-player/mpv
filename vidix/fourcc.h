@@ -79,4 +79,4 @@
 /*  Vendor-specific formats   */
 #define IMGFMT_WNVA    vid_fourcc('W','N','V','A') /* Winnov hw compress */
 
-#endif
+#endif /* FOURCC_H */

@@ -68,4 +68,4 @@ struct __attribute__((__packed__)) dhahelper_t {
 
 typedef struct dhahelper_t dhahelper_t;
 
-#endif
+#endif /* _DHAHELPER_H */

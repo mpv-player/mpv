@@ -9,4 +9,4 @@ extern GtkWidget * MessageBox;
 extern GtkWidget * create_MessageBox( int type );
 extern void ShowMessageBox( const char * msg );
 
-#endif
+#endif /* GUI_MB_H */

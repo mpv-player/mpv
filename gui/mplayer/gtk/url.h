@@ -8,4 +8,4 @@ extern int         gtkVURLDialogBox;
 extern void ShowURLDialogBox( void );
 extern GtkWidget * create_URL( void );
 
-#endif
+#endif /* GUI_URL_H */

@@ -23,4 +23,4 @@ void *xbuffer_copyin(void *buf, int index, const void *data, int len);
 void *xbuffer_ensure_size(void *buf, int size);
 void *xbuffer_strcat(void *buf, char *data);
 
-#endif
+#endif /* XCL_H */

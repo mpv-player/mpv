@@ -44,4 +44,4 @@
 
 int asmrp_match (const char *rules, int bandwidth, int *matches) ;
 
-#endif
+#endif /* HAVE_ASMRP_H */

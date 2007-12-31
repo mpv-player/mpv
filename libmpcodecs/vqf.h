@@ -223,4 +223,4 @@ DllPort int   TvqGetFbTotalBits();  // query total number of used bits
 #endif
 
 
-#endif
+#endif /* tvqdec_h */

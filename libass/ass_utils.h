@@ -57,5 +57,4 @@ static inline int double_to_d16(double x) {
 	return (int)(x * 0x10000);
 }
 
-#endif
-
+#endif /* ASS_UTILS_H */

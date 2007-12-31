@@ -37,4 +37,4 @@ extern int gui_sub_pos_y;
 extern int cfg_read(void);
 extern int cfg_write(void);
 
-#endif
+#endif /* GUI_WINCFG_H */

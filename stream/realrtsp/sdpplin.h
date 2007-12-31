@@ -105,5 +105,4 @@ sdpplin_t *sdpplin_parse(char *data);
 
 void sdpplin_free(sdpplin_t *description);
 
-#endif
-
+#endif /* HAVE_SDPPLIN_H */

@@ -110,5 +110,4 @@ typedef struct ass_track_s {
 	parser_priv_t* parser_priv;
 } ass_track_t;
 
-#endif
-
+#endif /* ASS_TYPES_H */

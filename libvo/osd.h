@@ -15,5 +15,4 @@ extern void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *
 extern void vo_draw_alpha_rgb15(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
 extern void vo_draw_alpha_rgb16(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
 
-#endif
-
+#endif /* MPLAYER_OSD_H */

@@ -15,4 +15,4 @@ extern char * trimleft( char * in );
 extern char * strswap( char * in,char what,char whereof );
 extern char * trim( char * in );
 
-#endif
+#endif /* GUI_SKIN_H */

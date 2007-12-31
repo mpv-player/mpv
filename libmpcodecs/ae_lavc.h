@@ -5,4 +5,4 @@
 
 int mpae_init_lavc(audio_encoder_t *encoder);
 
-#endif
+#endif /* AE_LAVC_H */

@@ -80,5 +80,4 @@ void rtsp_schedule_field(rtsp_t *s, const char *string);
 void rtsp_unschedule_field(rtsp_t *s, const char *string);
 void rtsp_unschedule_all(rtsp_t *s);
 
-#endif
-
+#endif /* HAVE_RTSP_H */

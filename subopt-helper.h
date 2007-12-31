@@ -47,4 +47,4 @@ int int_pos( int * i );
 int strargcmp(strarg_t *arg, const char *str);
 int strargcasecmp(strarg_t *arg, char *str);
 
-#endif
+#endif /* SUBOPT_HELPER_H */

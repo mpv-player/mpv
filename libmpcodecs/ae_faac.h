@@ -5,4 +5,4 @@
 
 int mpae_init_faac(audio_encoder_t *encoder);
 
-#endif
+#endif /* MPAE_FAAC_H */

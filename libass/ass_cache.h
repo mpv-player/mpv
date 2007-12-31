@@ -94,5 +94,4 @@ void hashmap_done(hashmap_t* map);
 void* hashmap_insert(hashmap_t* map, void* key, void* value);
 void* hashmap_find(hashmap_t* map, void* key);
 
-#endif
-
+#endif /* ASS_CACHE_H */

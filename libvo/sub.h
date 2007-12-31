@@ -139,4 +139,5 @@ void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey);
 #endif
 
 #endif
-#endif
+
+#endif /* MPLAYER_SUB_H */

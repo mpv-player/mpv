@@ -16,4 +16,5 @@ typedef enum tagCOINIT {
 HRESULT STDCALL CoInitialize(LPVOID pvReserved);
 HRESULT STDCALL CoInitializeEx(LPVOID pvReserved, DWORD dwCoinit);
 void STDCALL CoUninitialize(void);
-#endif
+
+#endif /* WINE_OBJBASE_H */

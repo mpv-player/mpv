@@ -16,4 +16,4 @@ typedef struct
 
 mf_t* open_mf(char * filename);
 
-#endif
+#endif /* MF_H */

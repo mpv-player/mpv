@@ -205,5 +205,4 @@ void ass_add_font(ass_library_t* library, char* name, char* data, int data_size)
  */
 long long ass_step_sub(ass_track_t* track, long long now, int movement);
 
-#endif
-
+#endif /* ASS_H */

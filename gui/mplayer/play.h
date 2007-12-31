@@ -31,4 +31,4 @@ extern void EventHandling( void );
 
 extern void mplSetFileName( char * dir,char * name,int type );
 
-#endif
+#endif /* GUI_PLAY_H */

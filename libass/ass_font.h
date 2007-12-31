@@ -48,4 +48,4 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 FT_Vector ass_font_get_kerning(ass_font_t* font, uint32_t c1, uint32_t c2);
 void ass_font_free(ass_font_t* font);
 
-#endif
+#endif /* ASS_FONT_H */

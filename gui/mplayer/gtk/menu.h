@@ -10,4 +10,4 @@ extern GtkWidget * AddSubMenu( GtkWidget *window1, const char * immagine_xpm, Gt
 extern GtkWidget * AddSeparator( GtkWidget * Menu );
 extern GtkWidget * create_PopUpMenu( void );
 
-#endif
+#endif /* GUI_MENU_H */

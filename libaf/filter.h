@@ -66,4 +66,4 @@ extern int af_filter_szxform(_ftype_t* a, _ftype_t* b, _ftype_t Q, _ftype_t fc, 
   xq[xi]=(xq)[(xi)+(n)]=*(in);\
   xi=(++(xi))&((n)-1);
 
-#endif
+#endif /* FILTER_H */

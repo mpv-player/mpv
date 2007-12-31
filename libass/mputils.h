@@ -8,4 +8,4 @@
 #include "libvo/sub.h" // for utf8_get_char
 #include "libavutil/common.h"
 
-#endif
+#endif /* ASS_MPUTILS_H */

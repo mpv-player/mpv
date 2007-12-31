@@ -32,4 +32,4 @@ extern const GUID DMOCATEGORY_AUDIO_NOISE_SUPPRESS;
 extern const GUID DMOCATEGORY_AGC;
 */
 
-#endif
+#endif /* DMO_GUIDS_H */

@@ -10,4 +10,4 @@
 
 int read_rtp_from_server(int fd, char *buffer, int length);
 
-#endif
+#endif /* RTP_H */

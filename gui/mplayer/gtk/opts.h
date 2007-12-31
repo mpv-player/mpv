@@ -13,4 +13,4 @@ extern GtkWidget * create_AudioConfig( void );
 
 extern void ShowPreferences( void );
 
-#endif
+#endif /* GUI_OPTS_H */

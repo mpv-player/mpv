@@ -36,5 +36,4 @@ struct ass_library_s {
 	int num_fontdata;
 };
 
-#endif
-
+#endif /* ASS_LIBRARY_H */

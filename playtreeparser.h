@@ -47,6 +47,6 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced);
 void
 play_tree_add_bpf(play_tree_t* pt, char* filename);
 
-#endif
+#endif /* PLAYTREEPARSER_H */
 
 ///@}

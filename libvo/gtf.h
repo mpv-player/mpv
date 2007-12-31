@@ -45,4 +45,4 @@ typedef struct {
 void GTF_calcTimings(double X,double Y,double freq, int type,
                      int want_margins, int want_interlace,struct VesaCRTCInfoBlock *result);
 
-#endif
+#endif /* GTF_H */

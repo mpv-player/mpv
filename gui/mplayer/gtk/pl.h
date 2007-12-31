@@ -9,4 +9,4 @@ extern void HidePlayList( void );
 
 extern GtkWidget * create_PlayList (void);
 
-#endif
+#endif /* GUI_PL_H */

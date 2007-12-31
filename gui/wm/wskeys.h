@@ -161,5 +161,4 @@ typedef struct
 
 extern const TwsKeyNames wsKeyNames[ wsKeyNumber ];
 
-#endif
-
+#endif /* GUI_WSKEYS_H */

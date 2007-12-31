@@ -282,6 +282,6 @@ void pt_iter_goto_head(play_tree_iter_t* iter);
 
 ///@}
 
-#endif
+#endif /* PLAYTREE_H */
 
 ///@}

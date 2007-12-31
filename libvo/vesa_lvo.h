@@ -24,4 +24,4 @@ uint32_t vlvo_draw_frame(uint8_t *src[]);
 void     vlvo_flip_page(void);
 void     vlvo_draw_osd(void);
 
-#endif
+#endif /* VESA_LVO_H */

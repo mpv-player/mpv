@@ -9,4 +9,4 @@ extern GtkWidget * SkinBrowser;
 extern void ShowSkinBrowser( void );
 extern GtkWidget * create_SkinBrowser( void );
 
-#endif
+#endif /* GUI_SB_H */

@@ -117,4 +117,4 @@ typedef struct {
 
 const char *vo_format_name(int format);
 
-#endif
+#endif /* IMG_FORMAT_H */

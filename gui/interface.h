@@ -223,4 +223,4 @@ extern char * gstrchr( char * str,int c );
   sprintf( s,"%s/%s",d,n );                     \
  }
 
-#endif
+#endif /* GUI_INTERFACE_H */

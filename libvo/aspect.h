@@ -20,5 +20,4 @@ void aspect_save_screenres(int scrw, int scrh);
 
 void aspect(int *srcw, int *srch, int zoom);
 
-#endif
-
+#endif /* ASPECT_H */

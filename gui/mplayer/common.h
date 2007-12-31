@@ -18,4 +18,4 @@ extern void PutImage( txSample * bf,int x,int y,int max,int ofs );
 extern void SimplePotmeterPutImage( txSample * bf,int x,int y,float frac );
 extern void Render( wsTWindow * window,wItem * Items,int nrItems,char * db,int size );
 
-#endif
+#endif /* GUI_COMMON_H */

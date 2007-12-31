@@ -69,4 +69,4 @@ extern gtkASS_t gtkASS;
 extern int cfg_read( void );
 extern int cfg_write( void );
 
-#endif
+#endif /* GUI_CFG_H */

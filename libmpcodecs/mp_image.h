@@ -228,4 +228,4 @@ static inline void free_mp_image(mp_image_t* mpi){
 mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt);
 void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi);
 
-#endif
+#endif /* MP_IMAGE_H */

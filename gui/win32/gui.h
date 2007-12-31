@@ -117,4 +117,4 @@ extern void display_eqwindow(gui_t *gui);
 extern void display_prefswindow(gui_t *gui);
 extern void display_opensubtitlewindow(gui_t *gui);
 
-#endif
+#endif /* GUI_GUI_H */

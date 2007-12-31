@@ -328,4 +328,4 @@ extern int (APIENTRY *SwapInterval)(int);
 extern void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei,
                              GLsizei, GLint, GLenum, GLenum, const GLvoid *);
 
-#endif
+#endif /* GL_COMMON_H */

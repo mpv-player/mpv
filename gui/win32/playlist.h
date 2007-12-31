@@ -56,4 +56,4 @@ struct playlist_t
 extern playlist_t *create_playlist(void);
 extern BOOL adddirtoplaylist(playlist_t *playlist, const char* path, BOOL recursive);
 
-#endif
+#endif /* GUI_PLAYLIST_H */

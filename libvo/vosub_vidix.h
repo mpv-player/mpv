@@ -35,4 +35,4 @@ int vidix_grkey_support(void);
 int vidix_grkey_get(vidix_grkey_t *gr_key);
 int vidix_grkey_set(const vidix_grkey_t *gr_key);
 
-#endif
+#endif /* VOSUB_VIDIX_H */

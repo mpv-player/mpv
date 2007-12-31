@@ -183,4 +183,4 @@ pcmpeqb(cmmx_t a, cmmx_t b)
     return pcmpzb(a ^ b);
 }
 
-#endif
+#endif /* CMMX_H */

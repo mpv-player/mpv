@@ -212,4 +212,4 @@ extern skin_t *loadskin(char *skindir, int desktopbpp);
 #define evShowWindow      7004
 #define evFirstLoad       7005
 
-#endif
+#endif /* GUI_SKINLOAD_H */

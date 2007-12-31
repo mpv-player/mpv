@@ -40,4 +40,4 @@ int rtsp_session_read(rtsp_session_t *session, char *data, int len);
 
 void rtsp_session_end(rtsp_session_t *session);
 
-#endif
+#endif /* HAVE_RTSP_SESSION_H */

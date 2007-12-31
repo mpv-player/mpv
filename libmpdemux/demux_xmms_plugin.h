@@ -152,4 +152,4 @@ typedef struct _VisPlugin
 	void (*render_freq)(short freq_data[2][256]); /* Render the freq data, don't do anything time consuming in here */
 } VisPlugin;
 
-#endif
+#endif /* PLUGIN_H */

@@ -72,4 +72,4 @@ typedef struct ao_control_vol_s {
 	float right;
 } ao_control_vol_t;
 
-#endif
+#endif /* AUDIO_OUT_H */

@@ -568,4 +568,4 @@ static unsigned char qt_default_grayscale_palette_256[256 * 4] = {
   /* 255, 0xFF */  0x00, 0x00, 0x00, 0x00
 };
 
-#endif
+#endif /* QTPALETTE_H */

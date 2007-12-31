@@ -92,4 +92,4 @@ extern int	mtrr_set_type(unsigned base,unsigned size,int type);
 }
 #endif
 
-#endif
+#endif /* LIBDHA_H */

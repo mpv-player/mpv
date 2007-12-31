@@ -11,4 +11,4 @@ typedef struct {
 
 int mpae_init_twolame(audio_encoder_t *encoder);
 
-#endif
+#endif /* MPAE_TWOLAME_H */

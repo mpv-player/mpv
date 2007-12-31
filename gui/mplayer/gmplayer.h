@@ -31,4 +31,4 @@ extern void mplMenuMouseHandle( int X,int Y,int RX,int RY );
 extern void mplPBInit( void );
 extern void mplPBShow( int x, int y );
 
-#endif
+#endif /* GUI_GMPLAYER_H */

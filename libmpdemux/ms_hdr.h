@@ -79,4 +79,4 @@ typedef struct {
 #endif
 #endif
 
-#endif
+#endif /* MS_HDR_H */

@@ -3,4 +3,4 @@
 
 extern void cache_uninit(stream_t *s);
 
-#endif
+#endif /* CACHE2_H */

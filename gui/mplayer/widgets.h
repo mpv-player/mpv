@@ -60,4 +60,4 @@ extern void gtkMessageBox( int type,const gchar * str );
 extern void gtkSetLayer( GtkWidget * wdg );
 extern void gtkActive( GtkWidget * wdg );
 
-#endif
+#endif /* GUI_WIDGETS_H */

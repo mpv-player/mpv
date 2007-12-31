@@ -152,5 +152,4 @@
 #define wsGrayInsert    0x9e + 256
 #define wsGrayDelete    0x9f + 256
 
-#endif
-
+#endif /* WSKEYS_H */

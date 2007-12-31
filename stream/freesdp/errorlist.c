@@ -69,4 +69,4 @@ fsdp_strerror (fsdp_error_t err_no)
   return (fsdp_error_t_s[err_no]);
 }
 
-#endif
+#endif /* FSDP_ERRORLIST_C */

@@ -9,4 +9,4 @@ extern GtkWidget * Equalizer;
 extern GtkWidget * create_Equalizer( void );
 extern void ShowEqualizer( void );
 
-#endif
+#endif /* GUI_EQ_H */

@@ -184,4 +184,4 @@ extern void btnModify( int event,float state );
 extern float btnGetValue( int event );
 extern void btnSet( int event,int set );
 
-#endif
+#endif /* GUI_APP_H */

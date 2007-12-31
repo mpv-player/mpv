@@ -119,4 +119,4 @@ void free_sh_video(sh_video_t *sh);
 int video_read_properties(sh_video_t *sh_video);
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps);
 
-#endif
+#endif /* STHEADER_H */

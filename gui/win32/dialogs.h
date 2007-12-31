@@ -131,4 +131,4 @@
 #define GTK_MB_WARNING       0x4
 #define GTK_MB_SIMPLE        0x8
 
-#endif
+#endif /* GUI_DIALOGS_H */

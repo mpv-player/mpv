@@ -314,4 +314,4 @@ typedef struct vidix_oem_fx_s
 }
 #endif
 
-#endif
+#endif /* VIDIX_H */

@@ -45,5 +45,4 @@ int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_gly
 
 void ass_free_bitmap(bitmap_t* bm);
 
-#endif
-
+#endif /* ASS_BITMAP_H */

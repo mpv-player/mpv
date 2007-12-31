@@ -254,5 +254,5 @@ extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
 
 #endif 
-		
-#endif
+
+#endif /* VIDEO_OUT_H */

@@ -18,4 +18,4 @@ extern void ShowFileSelect( int type, int modal );
 
 extern GtkWidget * create_FileSelect( void );
 
-#endif
+#endif /* GUI_FS_H */

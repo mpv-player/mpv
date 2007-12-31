@@ -273,4 +273,4 @@ void rmff_dump_pheader(rmff_pheader_t *h, char *data);
  */
 void rmff_free_header(rmff_header_t *h);
 
-#endif
+#endif /* HAVE_RMFF_H */

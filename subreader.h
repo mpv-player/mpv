@@ -89,4 +89,5 @@ void find_sub(sub_data* subd,int key);
 void step_sub(sub_data *subd, float pts, int movement);
 void sub_add_text(subtitle *sub, const char *txt, int len, double endpts);
 int sub_clear_text(subtitle *sub, double pts);
-#endif
+
+#endif /* MPLAYER_SUBREADER_H */

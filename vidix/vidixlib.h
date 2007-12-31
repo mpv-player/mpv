@@ -141,4 +141,4 @@ int	  vdlPlaybackCopyFrame(VDL_HANDLE, const vidix_dma_t * );
 }
 #endif
 
-#endif
+#endif /* VIDIXLIB_H */

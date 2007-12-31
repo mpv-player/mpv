@@ -17,4 +17,4 @@ extern int FILE_munmap( LPVOID start, DWORD size_high, DWORD size_low );
 extern int wcsnicmp(const unsigned short* s1, const unsigned short* s2, int n);
 extern int __vprintf( const char *format, ... );
 
-#endif
+#endif /* loader_ext_h */

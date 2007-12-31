@@ -7,4 +7,4 @@ extern int   cutItemToInt( char * in,char sep,int num );
 extern float cutItemToFloat( char * in,char sep,int num );
 extern void  cutChunk( char * in,char * s1 );
 
-#endif
+#endif /* GUI_CUT_H */

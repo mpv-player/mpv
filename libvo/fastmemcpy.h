@@ -105,4 +105,4 @@ static inline void * memcpy_pic2(void * dst, const void * src,
 	return retval;
 }
 
-#endif
+#endif /* FASTMEMCPY_H */

@@ -50,5 +50,4 @@ typedef struct {
 	int changed;
 } mp_eosd_images_t;
 
-#endif
-
+#endif /* ASS_MP_H */
