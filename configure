@@ -7563,7 +7563,7 @@ fi
 if test "$_dvdnav" = auto ; then
   cat > $TMPC <<EOF
 #include <inttypes.h>
-#include <dvdnav.h>
+#include <dvdnav/dvdnav.h>
 int main(void) { dvdnav_t *dvd=0; return 0; }
 EOF
   _dvdnav=no
