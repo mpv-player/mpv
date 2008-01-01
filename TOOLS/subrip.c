@@ -1,4 +1,3 @@
-/* -*- compile-command: "gcc -g -Wall -I.. -o subrip subrip.c ../vobsub.o ../spudec.o ../mp_msg.o ../unrarlib.o ../libswscale/swscale.o ../libswscale/rgb2rgb.o ../libswscale/yuv2rgb.o ../libmpcodecs/img_format.o -lm" -*- */
 /*
  * Use with CVS JOCR/GOCR.
  *
