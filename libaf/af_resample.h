@@ -14,6 +14,9 @@
    only be included by af_resample.c 
 */ 
 
+#ifndef AF_RESAMPLE_H
+#define AF_RESAMPLE_H
+
 #undef L
 #undef SHIFT
 #undef FORMAT
@@ -159,3 +162,5 @@
   s->xi = xi;
   s->i = i;
 #endif /* DN */
+
+#endif /* AF_RESAMPLE_H */

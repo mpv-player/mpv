@@ -1,3 +1,5 @@
+#ifndef PARSE_ES_H
+#define PARSE_ES_H
 
 #define MAX_VIDEO_PACKET_SIZE (224*1024+4)
 #define VIDEOBUFFER_SIZE 0x100000
@@ -16,3 +18,4 @@ int read_video_packet(demux_stream_t *ds);
 // return: next packet code
 int skip_video_packet(demux_stream_t *ds);
 
+#endif /* PARSE_ES_H */

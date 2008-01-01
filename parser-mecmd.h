@@ -1,3 +1,5 @@
+#ifndef PARSER_MECMD_H
+#define PARSER_MECMD_H
 
 /// \file
 /// \ingroup ConfigParsers MEntry
@@ -29,3 +31,5 @@ m_entry_t*
 m_config_parse_me_command_line(m_config_t *config, int argc, char **argv);
 
 ///@}
+
+#endif /* PARSER_MECMD_H */

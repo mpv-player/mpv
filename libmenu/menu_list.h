@@ -1,3 +1,5 @@
+#ifndef MENU_LIST_H
+#define MENU_LIST_H
 
 typedef struct list_entry_s list_entry_t;
 
@@ -80,5 +82,5 @@ extern const menu_list_priv_t menu_list_priv_dflt;
   { "ptr-bg", M_ST_OFF(menu_list_priv_t,ptr_bg), CONF_TYPE_INT, M_OPT_RANGE, -1, 255, NULL }, \
   { "ptr-bg-alpha", M_ST_OFF(menu_list_priv_t,ptr_bg_alpha), \
     CONF_TYPE_INT, M_OPT_RANGE, 0, 255, NULL } \
-  
 
+#endif /* MENU_LIST_H */

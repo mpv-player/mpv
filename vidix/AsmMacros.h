@@ -63,6 +63,9 @@
  *   Modified for readability by Nick Kurshev
 */
 
+#ifndef ASMMACROS_H
+#define ASMMACROS_H
+
 #if defined(__GNUC__)
 #if defined(__alpha__)
 #include "sysdep/AsmMacros_alpha.h"
@@ -115,3 +118,5 @@ void outl(U16_t, U32_t);
 
 #endif /* _MINIX and _ACK */
 #endif /* __GNUC__ */
+
+#endif /* ASMMACROS_H */

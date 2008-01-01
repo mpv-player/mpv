@@ -1,4 +1,5 @@
-
+#ifndef MOUSE_H
+#define MOUSE_H
 
 #define MOUSE_BASE ((0x100+256)|MP_NO_REPEAT_KEY)
 #define MOUSE_BTN0 (MOUSE_BASE+0)
@@ -23,3 +24,5 @@
 #define MOUSE_BTN7_DBL (MOUSE_BASE_DBL+7)
 #define MOUSE_BTN8_DBL (MOUSE_BASE_DBL+8)
 #define MOUSE_BTN9_DBL (MOUSE_BASE_DBL+9)
+
+#endif /* MOUSE_H */

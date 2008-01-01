@@ -1,3 +1,6 @@
+#ifndef GLOB_H
+#define GLOB_H
+
 #include "config.h"
 
 typedef struct {
@@ -9,3 +12,5 @@ typedef struct {
 void globfree(glob_t *pglob);
 
 int  glob(const char *pattern, int flags, int (*errfunc)(const char *epath, int eerrno), glob_t *pglob);
+
+#endif /* GLOB_H */

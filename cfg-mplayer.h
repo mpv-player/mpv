@@ -1,3 +1,6 @@
+#ifndef CFG_MPLAYER_H
+#define CFG_MPLAYER_H
+
 /*
  * config for cfgparser
  */
@@ -363,3 +366,6 @@ const m_option_t mplayer_opts[]={
 	{"vd", vd_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
+
+#endif /* CFG_MPLAYER_H */
+

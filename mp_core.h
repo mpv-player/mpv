@@ -1,3 +1,6 @@
+#ifndef MP_CORE_H
+#define MP_CORE_H
+
 // definitions used internally by the core player code
 
 #define INITED_VO 1
@@ -127,3 +130,5 @@ void exit_player_with_rc(const char* how, int rc);
 void rm_osd_msg(int id);
 void add_subtitles(char *filename, float fps, int noerr);
 int reinit_video_chain(void);
+
+#endif /* MP_CORE_H */

@@ -1,3 +1,5 @@
+#ifndef VD_H
+#define VD_H
 
 #include "mp_image.h"
 #include "mpc_info.h"
@@ -32,3 +34,5 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
 void mpcodecs_draw_slice(sh_video_t *sh, unsigned char** src, int* stride, int w,int h, int x, int y);
 
 #define VDFLAGS_DROPFRAME 3
+
+#endif /* VD_H */

@@ -4,6 +4,9 @@
  * Family F codenames owe much thanks to Neil Phillips, author of x86test.
  */
 
+#ifndef CPUTABLE_H
+#define CPUTABLE_H
+
 #define MAX_VENDORS 8 /* Number of CPU Vendors */
 
 //#define N_UNKNOWN "unknown"
@@ -526,3 +529,4 @@ static const struct {
 	{"GenuineTMx86","Transmeta"}
 };	
 
+#endif /* CPUTABLE_H */

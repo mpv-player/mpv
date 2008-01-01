@@ -8,6 +8,9 @@
 //=============================================================================
 */
 
+#ifndef EQUALIZER_H
+#define EQUALIZER_H
+
 /* Equalizer plugin header file defines struct used for setting or
    getting the gain of a specific channel and frequency */
 
@@ -31,3 +34,5 @@ nr.    	center frequency
 8	8.000 kHz
 9       16.00 kHz
 */
+
+#endif /* EQUALIZER_H */

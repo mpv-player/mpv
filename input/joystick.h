@@ -1,3 +1,5 @@
+#ifndef JOYSTICK_H
+#define JOYSTICK_H
 
 #define JOY_BASE   (0x100+128)
 #define JOY_AXIS0_PLUS (JOY_BASE+0)
@@ -37,3 +39,4 @@ int mp_input_joystick_init(char* dev);
 
 int mp_input_joystick_read(int fd);
 
+#endif /* JOYSTICK_H */

@@ -1,3 +1,6 @@
+#ifndef STREAM_DVD_H
+#define STREAM_DVD_H
+
 #ifdef USE_DVDREAD_INTERNAL
 #include "dvdread/dvd_reader.h"
 #include "dvdread/ifo_types.h"
@@ -44,3 +47,5 @@ int dvd_lang_from_sid(stream_t *stream, int id);
 int dvd_aid_from_lang(stream_t *stream, unsigned char* lang);
 int dvd_sid_from_lang(stream_t *stream, unsigned char* lang);
 int dvd_chapter_from_cell(dvd_priv_t *dvd,int title,int cell);
+
+#endif /* STREAM_DVD_H */

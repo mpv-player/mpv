@@ -1,5 +1,8 @@
 /* nuppelvideo.h  rh */
 
+#ifndef NUPPELVIDEO_H
+#define NUPPELVIDEO_H
+
 #include "libavutil/intfloat_readwrite.h"
 
 typedef struct  __attribute__((packed)) rtfileheader
@@ -156,3 +159,4 @@ typedef struct audbuffertype
    (h)->lavc_maxqdiff = le2me_32((h)->lavc_maxqdiff);		\
   }
 
+#endif /* NUPPELVIDEO_H */

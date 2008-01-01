@@ -1,3 +1,6 @@
+#ifndef COMPONENTS_H
+#define COMPONENTS_H
+
 // Basic types:
 
 typedef char *                          Ptr;
@@ -739,3 +742,4 @@ static inline void dump_CodecDecompressParams(void* xxx){
 
 }
 
+#endif /* COMPONENTS_H */

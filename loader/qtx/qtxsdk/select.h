@@ -1,3 +1,5 @@
+#ifndef SELECT_H
+#define SELECT_H
 
 enum {
     kComponentOpenSelect        = -1,                           /* ComponentInstance for this open */
@@ -66,3 +68,5 @@ enum {
     kImageCodecScheduleFrameSelect             = 0x0208,
     kImageCodecCancelTriggerSelect             = 0x0209
 };
+
+#endif /* SELECT_H */

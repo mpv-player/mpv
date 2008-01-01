@@ -1,3 +1,5 @@
+#ifndef CFG_MENCODER_H
+#define CFG_MENCODER_H
 
 /*
  * config for cfgparser
@@ -265,3 +267,5 @@ const m_option_t mencoder_opts[]={
 //	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
+
+#endif /* CFG_MENCODER.H */

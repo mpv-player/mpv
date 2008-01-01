@@ -1,3 +1,6 @@
+#ifndef XVMC_RENDER_H
+#define XVMC_RENDER_H
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
@@ -48,3 +51,5 @@ typedef   struct{
   void * p_osd_target_surface_render;//pointer to the surface where subpicture is rendered
 
 } xvmc_render_state_t;
+
+#endif /* XVMC_RENDER_H */

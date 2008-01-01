@@ -1,3 +1,5 @@
+#ifndef MP3_HDR_H
+#define MP3_HDR_H
 
 int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* freq, int* spf, int* mpa_layer, int* br);
 
@@ -9,3 +11,5 @@ static inline int mp_check_mp3_header(unsigned int head){
     if(mp_decode_mp3_header((unsigned char*)(&head))<=0) return 0;
     return 1;
 }
+
+#endif /* MP3_HDR_H */

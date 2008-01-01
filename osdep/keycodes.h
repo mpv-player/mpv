@@ -1,5 +1,8 @@
 /*  KEY code definitions for GyS-TermIO v2.0  (C) 1999 A'rpi/ESP-team */
 
+#ifndef KEYCODES_H
+#define KEYCODES_H
+
 #define KEY_ENTER 13
 #define KEY_TAB 9
 
@@ -70,3 +73,5 @@
 /* Special keys */
 #define KEY_INTERN (0x1000)
 #define KEY_CLOSE_WIN (KEY_INTERN+0)
+
+#endif /* KEYCODES_H */

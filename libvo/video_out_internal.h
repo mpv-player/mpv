@@ -20,6 +20,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#ifndef VIDEO_OUT_INTERNAL_H
+#define VIDEO_OUT_INTERNAL_H
+
 /* All video drivers will want this */
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
@@ -54,5 +57,4 @@ static int preinit(const char *);
 
 #include "osd.h"
 
-
-
+#endif /* VIDEO_OUT_INTERNAL_H */

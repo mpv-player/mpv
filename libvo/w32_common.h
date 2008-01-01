@@ -1,3 +1,6 @@
+#ifndef W32COMMON_H
+#define W32COMMON_H
+
 extern int vo_depthonscreen;
 extern int vo_screenwidth;
 extern int vo_screenheight;
@@ -17,3 +20,5 @@ extern int vo_w32_check_events(void);
 extern int vo_w32_config(uint32_t, uint32_t, uint32_t);
 extern void destroyRenderingContext(void);
 extern void w32_update_xinerama_info(void);
+
+#endif /* W32COMMON_H */

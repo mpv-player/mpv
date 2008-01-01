@@ -1,3 +1,6 @@
+#ifndef INPUT_H
+#define INPUT_H
+
 // All command IDs
 #define MP_CMD_SEEK   0
 #define MP_CMD_AUDIO_DELAY 1
@@ -294,3 +297,4 @@ mp_input_uninit(void);
 int
 mp_input_check_interrupt(int time);
 
+#endif /* INPUT_H */

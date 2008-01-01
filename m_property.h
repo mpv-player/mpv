@@ -1,3 +1,5 @@
+#ifndef M_PROPERTY_H
+#define M_PROPERTY_H
 
 /// \defgroup Properties
 ///
@@ -198,3 +200,5 @@ int m_property_bitrate(m_option_t* prop,int action,void* arg,int rate);
 ///@}
 
 ///@}
+
+#endif /* M_PROPERTY_H */

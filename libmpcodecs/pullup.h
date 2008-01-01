@@ -1,4 +1,5 @@
-
+#ifndef PULLUP_H
+#define PULLUP_H
 
 #define PULLUP_CPU_MMX 1
 #define PULLUP_CPU_MMX2 2
@@ -80,4 +81,4 @@ void pullup_preinit_context(struct pullup_context *c);
 void pullup_init_context(struct pullup_context *c);
 void pullup_free_context(struct pullup_context *c);
 
-
+#endif /* PULLUP_H */

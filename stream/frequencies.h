@@ -5,6 +5,10 @@
  *
  * Frequencies are given in kHz 
  */
+
+#ifndef FREQUENCIES_H
+#define FREQUENCIES_H
+
 #define NTSC_AUDIO_CARRIER	4500
 #define PAL_AUDIO_CARRIER_I	6000
 #define PAL_AUDIO_CARRIER_BGHN	5500
@@ -109,3 +113,5 @@ extern const struct CHANLISTS   chanlists[];
 extern int                chantab;
 extern const struct CHANLIST *chanlist;
 extern int                chancount;
+
+#endif /* FREQUENCIES_H */

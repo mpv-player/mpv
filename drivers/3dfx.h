@@ -20,6 +20,8 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef MPLAYER_3DFX_H
+#define MPLAYER_3DFX_H
 
 #define VOODOO_IO_REG_OFFSET     ((unsigned long int)0x0000000)
 #define VOODOO_YUV_REG_OFFSET    ((unsigned long int)0x0080100)
@@ -370,4 +372,4 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 
 /* ------------------------------------------------------------------------- */
 
-
+#endif /* MPLAYER_3DFX_H */
