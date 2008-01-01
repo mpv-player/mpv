@@ -1,6 +1,6 @@
-#ifndef _parser_cfg_h
-#define _parser_cfg_h
+#ifndef PARSER_CFG_H
+#define PARSER_CFG_H
 
 extern int m_config_parse_config_file(m_config_t* config, char *conffile);
 
-#endif
+#endif /* PARSER_CFG_H */

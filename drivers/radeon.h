@@ -8,8 +8,8 @@
  * and partly compatible with Rage128 set (in OV0, CAP0, CAP1 parts)
 */
 
-#ifndef	_RADEON_H
-#define	_RADEON_H
+#ifndef	RADEON_H
+#define	RADEON_H
 
 
 /* radeon PCI ids */
@@ -2043,4 +2043,4 @@
 
 /* End of field	default	values.	*/
 
-#endif	/* RADEON_H */
+#endif /* RADEON_H */

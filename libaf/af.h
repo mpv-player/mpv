@@ -1,5 +1,5 @@
-#ifndef __af_h__
-#define __af_h__
+#ifndef AF_H
+#define AF_H
 
 #include <stdio.h>
 
@@ -354,4 +354,4 @@ extern af_msg_cfg_t af_msg_cfg; // Message
 #endif
 //! \}
 
-#endif /* __af_h__ */
+#endif /* AF_H */

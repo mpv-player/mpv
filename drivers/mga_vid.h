@@ -12,8 +12,8 @@
  * license. See http://www.gnu.org/copyleft/gpl.html for details.
  */
 
-#ifndef __LINUX_MGAVID_H
-#define __LINUX_MGAVID_H
+#ifndef MGA_VID_H
+#define MGA_VID_H
 
 typedef struct mga_vid_config_s
 {
@@ -56,4 +56,4 @@ uint32_t num_frames;
 
 #define MGA_VID_VERSION 0x0201
 
-#endif
+#endif /* MGA_VID_H */

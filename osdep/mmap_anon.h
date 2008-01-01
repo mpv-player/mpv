@@ -1,8 +1,8 @@
-#ifndef _OSDEP_MMAP_ANON_H_
-#define _OSDEP_MMAP_ANON_H_
+#ifndef MMAP_ANON_H
+#define MMAP_ANON_H
 
 #include <sys/types.h>
 
 void *mmap_anon(void *, size_t, int, int, off_t);
 
-#endif /* _OSDEP_MMAP_ANON_H_ */
+#endif /* MMAP_ANON_H */
