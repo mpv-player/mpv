@@ -14,4 +14,4 @@ int DMO_AudioDecoder_Convert(DMO_AudioDecoder *this, const void* in_data, unsign
 
 int DMO_AudioDecoder_GetSrcSize(DMO_AudioDecoder *this, int dest_size);
 
-#endif // AVIFILE_DMO_AUDIODECODER_H
+#endif /* AVIFILE_DMO_AUDIODECODER_H */

@@ -91,4 +91,4 @@ AM_MEDIA_TYPE* CreateMediaType(const AM_MEDIA_TYPE* pSrc);
  */
 int CompareMediaTypes(const AM_MEDIA_TYPE * pmt1, const AM_MEDIA_TYPE * pmt2, int bWildcards);
 
-#endif // DS_MEDIA_TYPE_H
+#endif /* DS_MEDIA_TYPE_H */

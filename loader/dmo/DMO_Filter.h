@@ -1,4 +1,4 @@
- #ifndef DMO_FILTER_H
+#ifndef DMO_FILTER_H
 #define DMO_FILTER_H
 
 #include "dmo_guids.h"

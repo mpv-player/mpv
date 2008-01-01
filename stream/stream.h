@@ -308,4 +308,4 @@ typedef struct {
  int channels;
 } stream_language_t;
 
-#endif // STREAM_H
+#endif /* STREAM_H */

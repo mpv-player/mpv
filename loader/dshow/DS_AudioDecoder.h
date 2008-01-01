@@ -14,4 +14,4 @@ int DS_AudioDecoder_Convert(DS_AudioDecoder *this, const void* in_data, unsigned
 
 int DS_AudioDecoder_GetSrcSize(DS_AudioDecoder *this, int dest_size);
 
-#endif // AVIFILE_DS_AUDIODECODER_H
+#endif /* AVIFILE_DS_AUDIODECODER_H */

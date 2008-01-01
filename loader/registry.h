@@ -43,4 +43,4 @@ long __stdcall RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_co
 };
 #endif
 
-#endif // AVIFILE_REGISTRY_H
+#endif /* AVIFILE_REGISTRY_H */
