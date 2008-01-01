@@ -102,4 +102,4 @@ static int kerning(font_desc_t *desc, int prevc, int c) { return 0; }
 raw_file* load_raw(char *name,int verbose);
 font_desc_t* read_font_desc(const char* fname,float factor,int verbose);
 
-#endif /* ! MPLAYER_FONT_LOAD_H */
+#endif /* MPLAYER_FONT_LOAD_H */

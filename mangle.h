@@ -15,5 +15,4 @@
 #define MANGLE(a) #a
 #endif
 
-#endif /* !MANGLE_H */
-
+#endif /* MANGLE_H */
