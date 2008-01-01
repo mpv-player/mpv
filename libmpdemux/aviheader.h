@@ -353,4 +353,4 @@ typedef struct {
 
 #define AVI_IDX_OFFSET(x) ((((uint64_t)(x)->dwFlags&0xffff0000)<<16)+(x)->dwChunkOffset)
 
-#endif /* _aviheader_h */
+#endif /* AVIHEADER_H */
