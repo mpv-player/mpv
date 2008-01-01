@@ -27,7 +27,7 @@
  */
 
 #ifndef VO_QUARTZ_H
-#define VO_QUARTZ_H 1
+#define VO_QUARTZ_H
 
 /* These are the Macintosh key scancode constants -- from Inside Macintosh */
 #define QZ_ESCAPE		0x35
