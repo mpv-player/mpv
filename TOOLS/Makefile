@@ -18,7 +18,7 @@ all: $(OBJS)
 
 subrip$(EXESUF): subrip.c
 	$(CC) $(CFLAGS) -o $@ $< ../vobsub.o ../spudec.o \
-          ../unrarlib.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
+          ../unrar_exec.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
           ../libmpcodecs/img_format.o $(COMMON_LIBS)
 
 #FIXME: Linking is broken, help welcome.
