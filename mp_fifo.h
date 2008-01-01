@@ -4,4 +4,4 @@
 int mplayer_get_key(int fd);
 void mplayer_put_key(int code);
 
-#endif
+#endif /* MP_FIFO_H */

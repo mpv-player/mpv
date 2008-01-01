@@ -34,5 +34,4 @@ typedef struct pnm_s pnm_t;
 
 //int      pnm_read (pnm_t *this, char *data, int len);
 
-#endif
-
+#endif /* HAVE_PNM_H */
