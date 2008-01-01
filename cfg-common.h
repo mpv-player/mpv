@@ -1,3 +1,6 @@
+/* This header intentionally has no multiple inclusion guards. It gets
+ * #included twice from both cfg-mplayer.h and cfg-mencoder.h. */
+
 #ifdef MAIN_CONF /* this will be included in conf[] */
 
 // ------------------------- common options --------------------
