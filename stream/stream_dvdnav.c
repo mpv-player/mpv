@@ -10,6 +10,7 @@
 #include "input/input.h"
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
+#include <dvdnav.h>
 #include "stream_dvdnav.h"
 #include "libvo/video_out.h"
 #include "libavutil/common.h"
@@ -17,6 +18,16 @@
 #include "m_option.h"
 #include "m_struct.h"
 #include "help_mp.h"
+
+typedef struct {
+  dvdnav_t *       dvdnav;              /* handle to libdvdnav stuff */
+  char *           filename;            /* path */
+  unsigned int     duration;            /* in milliseconds */
+  int              mousex, mousey;
+  int              title;
+  unsigned int     spu_clut[16], spu_set;
+  dvdnav_highlight_event_t hlev;
+} dvdnav_priv_t;
 
 extern char *dvd_device;
 extern int dvd_chapter;

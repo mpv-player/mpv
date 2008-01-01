@@ -14,17 +14,6 @@ typedef struct {
   uint16_t ex, ey;
 } nav_highlight_t;
 
-typedef struct {
-  dvdnav_t *       dvdnav;              /* handle to libdvdnav stuff */
-  char *           filename;            /* path */
-  unsigned int     duration;            /* in milliseconds */
-  int              mousex, mousey;
-  int              title;
-  unsigned int     spu_clut[16], spu_set;
-  dvdnav_highlight_event_t hlev;
-} dvdnav_priv_t;
-
-
 int dvdnav_number_of_subs(stream_t *stream);
 int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language);
 int dvdnav_lang_from_aid(stream_t *stream, int id, unsigned char *buf);
