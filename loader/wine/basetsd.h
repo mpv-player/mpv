@@ -170,4 +170,4 @@ typedef UINT_PTR SIZE_T, *PSIZE_T;
 } /* extern "C" */
 #endif /* defined(__cplusplus) */
 
-#endif /* !defined(WINE_BASETSD_H) */
+#endif /* WINE_BASETSD_H */

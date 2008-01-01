@@ -7,6 +7,6 @@
 #error "2 as alignment isn't supported by the compiler"
 #endif /* defined(__GNUC__) || defined(__SUNPRO_CC) ; !defined(RC_INVOKED) */
 
-#else /* !defined(WINE_PSHPACK_H) */
+#else /* WINE_PSHPACK_H */
 #error "Nested pushing of alignment isn't supported by the compiler"
-#endif /* !defined(WINE_PSHPACK_H) */
+#endif /* WINE_PSHPACK_H */
