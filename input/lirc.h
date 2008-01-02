@@ -10,4 +10,4 @@ mp_input_lirc_read(int fd,char* dest, int s);
 void
 mp_input_lirc_close(int fd);
 
-#define /* LIRC_H */
+#endif /* LIRC_H */

@@ -153,4 +153,4 @@
 #define VER_LEGALTRADEMARKS_STR             \
     "ReactOS(R) is a registered trademark of the ReactOS Foundation."
 
-#define /* NTVERP_H */
+#endif /* NTVERP_H */
