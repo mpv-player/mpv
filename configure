@@ -2764,7 +2764,7 @@ cat > $TMPC << EOF
 int main(void) { long (*foo)(float); foo = $func; (void)(*foo)(0.0); return 0; }
 EOF
 eval _$func=no
-cc_check -D_GNU_SOURCE $_ld_lm && eval _$func=yes
+cc_check -D_ISOC99_SOURCE $_ld_lm && eval _$func=yes
 if eval test "x\$_$func" = "xyes"; then
   eval _def_$func="\"#define HAVE_`echo $func | tr '[a-z]' '[A-Z]'` 1\""
   echores yes
