@@ -34,11 +34,15 @@ endif
 # that includes svgalib_helper.o:
 #CFLAGS += -DDEV_SVGA=\"/dev/svga\" -DCONFIG_SVGAHELPER -Isvgalib_helper/
 
-libs: pci_names.c
+PCI_FILES = pci_dev_ids.c pci_ids.h pci_names.c pci_names.h pci_vendors.h
 
-dep depend:: pci_names.c
+libs: $(PCI_FILES)
+
+dep depend:: $(PCI_FILES)
 
 include ../mpcommon.mak
+
+$(OBJS_MPLAYER): $(PCI_FILES)
 
 mga_crtc2_vid.o: mga_vid.c
 	$(CC) -c $(CFLAGS) -DCRTC2 -o $@ $<
@@ -46,8 +50,8 @@ mga_crtc2_vid.o: mga_vid.c
 rage128_vid.o: radeon_vid.c
 	$(CC) -c $(CFLAGS) -DRAGE128 -o $@ $<
 
-pci_dev_ids.c pci_ids.h pci_names.c pci_names.h pci_vendors.h: pci.db
+$(PCI_FILES): pci.db
 	LC_ALL=C awk -f pci_db2c.awk $< $(VIDIX_PCIDB)
 
 clean::
-	rm -f pci_*.c pci_*.h
+	rm -f $(PCI_FILES)
