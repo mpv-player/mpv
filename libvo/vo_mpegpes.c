@@ -98,7 +98,7 @@ config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uin
 
 static int preinit(const char *arg){
 #ifdef HAVE_DVB
-    int card = 0;
+    int card = -1;
     char vo_file[30], ao_file[30], *tmp;
     
     if(arg != NULL){
@@ -115,6 +115,21 @@ static int preinit(const char *arg){
     
     if(!arg){
     //|O_NONBLOCK
+        //search the first usable card
+        if(card==-1) {
+          int n;
+          for(n=0; n<4; n++) {
+            sprintf(vo_file, "/dev/dvb/adapter%d/video0", n);
+            if(access(vo_file, F_OK | W_OK)==0) {
+              card = n;
+              break;
+            }
+          }
+        }
+        if(card==-1) {
+          mp_msg(MSGT_VO,MSGL_INFO, "Couldn't find a usable dvb video device, exiting\n");
+          return -1;
+        }
 #ifndef HAVE_DVB_HEAD
 	mp_msg(MSGT_VO,MSGL_INFO, "Opening /dev/ost/video+audio\n");
 	sprintf(vo_file, "/dev/ost/video");

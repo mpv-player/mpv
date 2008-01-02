@@ -139,7 +139,7 @@ static int init_device(int card)
 
 static int preinit(const char *arg)
 {
-	int card = 1;
+	int card = -1;
 	char *ao_file = NULL;
 
 	opt_t subopts[] = {
@@ -152,6 +152,21 @@ static int preinit(const char *arg)
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "AO_MPEGPES, Unrecognized options\n");
 		return -1;
+	}
+	if(card==-1)
+	{
+		//search the first usable card
+		int n;
+		char file[30];
+		for(n=0; n<4; n++)
+		{
+			sprintf(file, "/dev/dvb/adapter%d/audio0", n);
+			if(access(file, F_OK | W_OK)==0)
+			{
+				card = n+1;
+				break;
+			}
+        	}
 	}
 	if((card < 1) || (card > 4))
 	{
