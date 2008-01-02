@@ -418,7 +418,7 @@ audio_encoder_t *aencoder = NULL;
     if(!strcmp(argv[i], "-really-quiet"))
       verbose= -10;
 
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2007 MPlayer Team\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2008 MPlayer Team\n");
 
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
