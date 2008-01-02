@@ -1,8 +1,8 @@
 /*
- *      Copyright (C) Rudolf Marek <r.marek@sh.cvut.cz> - Aug 2002
+ *  Copyright (C) 2002 Rudolf Marek <r.marek@assembler.cz>
  *
  *  You can redistribute this file under terms and conditions
- *  of GNU General Public licence v2.
+ *  of GNU General Public licence v2 or later.
  * 
  *  GTF calculations formulas are taken from GTF_V1R1.xls
  *  created by ANDY.MORRISH@NSC.COM
