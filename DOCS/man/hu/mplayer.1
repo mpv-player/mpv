@@ -1,4 +1,4 @@
-.\" Synced with r25529
+.\" Synced with r25587
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007. 12. 28." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 01. 03." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -2756,6 +2756,7 @@ fájlba írja ha nincs telepített DVB kártya.
 .RSs
 .IPs card=<1\-4>
 Használandó DVB kártya, ha több, mint egy kártya van.
+Ha nincs megadva, az mplayer megkeresi az elsõ használható kártyát.
 .IPs file=<fájlnév>
 kimeneti fájl neve
 .RE
@@ -3946,6 +3947,7 @@ Kimeneti videó vezérlõ a DVB kártyákhoz, ami a kimenetet egy MPEG-PES fájlba
 .IPs card=<1\-4>
 Megadja a használandó eszköz számát, ha több, mint egy kimeneti DVB kártya van
 (csak V3 API, mint pl. az 1.x.y sorozatú vezérlõk).
+Ha nincs megadva, az mplayer megkeresi az elsõ használható kártyát.
 .IPs <fájlnév>
 kimeneti fájl neve (alapértelmezett: ./grab.mpg).
 .RE
@@ -10727,6 +10729,12 @@ mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .fi
 .
 .PP
+.B DVD lejátszása dvdnav-val a /dev/sr1 eszközrõl:
+.nf
+mplayer dvdnav:////dev/sr1
+.fi
+.
+.PP
 .B Stream-elés HTTP-n keresztül:
 .nf
 mplayer http://mplayer.hq/example.avi
@@ -10867,7 +10875,7 @@ leírja, hogyan készíthetsz hasznos hibajelentést.
 Az MPlayert eredetileg Gereöffy Árpád írta.
 Lásd az AUTHORS fájlt a többi közremûködõ listájához.
 .PP
-MPlayer (C) 2000\-2007 Az MPlayer Csapat
+MPlayer (C) 2000\-2008 Az MPlayer Csapat
 .PP
 Ezt a man oldalt nagyrészt Gabucino, Jonas Jermann és Diego Biurrun írta.
 A karbantartó Diego Biurrun.
