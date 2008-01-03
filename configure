@@ -8147,6 +8147,8 @@ $_def_muxers
 #define HAVE_EBP_AVAILABLE 1
 #endif
 
+#define HAVE_SOCKLEN_T 1
+
 #define CONFIG_GPL 1
 #define ENABLE_SMALL 0
 
