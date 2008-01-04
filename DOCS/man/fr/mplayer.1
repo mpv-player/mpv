@@ -1,4 +1,4 @@
-.\" synced with r25455
+.\" synced with r25587
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -2898,6 +2898,7 @@ fichier MPEG-PES si aucune carte DVB n'est installée.
 .RSs
 .IPs card=<1\-4>
 Carte DVB à utiliser si plus qu'une carte est présente.
+Si non spécifié, MPlayer utilisera la première carte détectée.
 .IPs file=<filename>
 fichier de sortie
 .RE
@@ -4149,6 +4150,7 @@ MPEG-PES dans un fichier si aucune carte DVB n'est installée.
 .IPs card=<1\-4>
 Défini le numéro de périphérique à utiliser si vous avez plus d'une carte
 DVB (API V3 uniquement, comme la série de pilotes 1.x.y).
+Si non spécifié, MPlayer utilisera la première carte détectée.
 .IPs <nom_fichier>
 nom du fichier de sortie (par défaut\ : ./grab.mpg)
 .RE
@@ -11275,9 +11277,14 @@ mplayer dvd://1 \-dvd\-device /dev/\:dvd2
 mplayer dvd://1 \-dvd\-device /chemin/\:vers/\:répertoire/
 .
 .PP
-.B Copie le titre 1 du DVD sur le disque dur, sous le nom "title1.vob":
+.B Copie le titre 1 du DVD sur le disque dur, sous le nom "title1.vob"\ :
 mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .
+.PP
+.B Joue un DVD depuis le périphérique /dev/sr1 avec dvdnav \:
+mplayer dvdnav:////dev/sr1
+.
+.PP
 .B Streaming depuis HTTP\ :
 mplayer http://mplayer.hq/exemple.avi
 .
