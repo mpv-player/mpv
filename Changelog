@@ -21,6 +21,7 @@ MPlayer (1.0)
     Streaming:
     * tv:// support for win32
     * fix teletext on some systems
+    * dvd streams can switch angles
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
