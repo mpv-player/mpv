@@ -743,6 +743,25 @@ static int control(stream_t *stream,int cmd,void* arg)
             *((double *)arg) = !d->vts_file->vtsi_mat->vts_video_attr.display_aspect_ratio ? 4.0/3.0 : 16.0/9.0;
             return 1;
         }
+        case STREAM_CTRL_GET_NUM_ANGLES:
+        {
+            *((int *)arg) = d->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
+            return 1;
+        }
+        case STREAM_CTRL_GET_ANGLE:
+        {
+            *((int *)arg) = dvd_angle+1;
+            return 1;
+        }
+        case STREAM_CTRL_SET_ANGLE:
+        {
+            int ang = *((int *)arg);
+            if(ang>d->vmg_file->tt_srpt->title[dvd_title].nr_of_angles || ang<=0)
+                break;
+            dvd_angle = ang - 1;
+            d->angle_seek = 1;
+            return 1;
+        }
     }
     return STREAM_UNSUPPORTED;
 }
