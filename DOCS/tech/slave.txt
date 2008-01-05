@@ -241,6 +241,10 @@ seek_chapter <value> [type]
         0 is a relative seek of +/- <value> chapters (default).
         1 is a seek to chapter <value>.
 
+switch_angle <value>
+    Switch to the angle with the id [value]. Cycle through the
+    available angles if [value] is omitted or negative.
+
 set_mouse_pos <x> <y>
     Tells MPlayer the coordinates of the mouse in the window.
     This command doesn't move the mouse!
@@ -456,6 +460,7 @@ stream_start       pos       0               X            start pos in stream
 stream_end         pos       0               X            end pos in stream
 stream_length      pos       0               X            (end - start)
 chapter            int       0               X   X   X    select chapter
+angle              int       0               X   X   X    select angle
 length             time                      X            length of file in seconds
 percent_pos        int       0       100     X   X   X    position in percent
 time_pos           time      0               X   X   X    position in seconds
