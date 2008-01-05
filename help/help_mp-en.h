@@ -212,6 +212,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Speed: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDChapter "Chapter: (%d) %s"
+#define MSGTR_OSDAngle "Angle: %d/%d"
 
 // property values
 #define MSGTR_Enabled "enabled"

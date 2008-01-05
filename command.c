@@ -446,6 +446,67 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_OK;
 }
 
+/// Current dvd angle (RW)
+static int mp_property_angle(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    int angle;
+    int angles;
+    char *angle_name = NULL;
+
+    angle = demuxer_get_current_angle(mpctx->demuxer);
+    if (angle < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    angles = demuxer_angles_count(mpctx->demuxer);
+    if (angles <= 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        *(int *) arg = angle;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        angle_name = calloc(1, 64);
+        if (!angle_name)
+            return M_PROPERTY_UNAVAILABLE;
+        snprintf(angle_name, 64, "%d/%d", angle, angles);
+        *(char **) arg = angle_name;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET:
+        if (!arg)
+            return M_PROPERTY_ERROR;
+        angle = *(int *)arg;
+        M_PROPERTY_CLAMP(prop, angle);
+        break;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN: {
+        int step = 0;
+        if(arg)
+            step = *(int*)arg;
+        if(!step)
+            step = 1;
+        step *= (action == M_PROPERTY_STEP_UP ? 1 : -1);
+        angle += step;
+        if (angle < 1) //cycle
+            angle = angles;
+        break;
+    }
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+    angle = demuxer_set_angle(mpctx->demuxer, angle);
+    set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+                        MSGTR_OSDAngle, angle, angles);
+    if (angle_name)
+        free(angle_name);
+    return M_PROPERTY_OK;
+}
+
 /// Demuxer meta data
 static int mp_property_metadata(m_option_t * prop, int action, void *arg,
                                 MPContext * mpctx) {
@@ -1889,6 +1950,8 @@ static m_option_t mp_properties[] = {
      M_OPT_MIN, 0, 0, NULL },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
      M_OPT_MIN, 1, 0, NULL },
+    { "angle", mp_property_angle, CONF_TYPE_INT,
+     CONF_RANGE, -2, 10, NULL },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
      0, 0, 0, NULL },
 
@@ -2079,6 +2142,7 @@ static struct {
     // general
     { "loop", MP_CMD_LOOP, 0, 0, -1, MSGTR_LoopStatus },
     { "chapter", MP_CMD_SEEK_CHAPTER, 0, 0, -1, NULL },
+    { "angle", MP_CMD_SWITCH_ANGLE, 0, 0, -1, NULL },
     // audio
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
     { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
