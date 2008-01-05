@@ -145,7 +145,7 @@ static char help_text[]=
 "  version de gcc. C'est la faute de MPlayer ? Lire DOCS/HTML/fr/bugreports.html\n"\
 "  et suivre les instructions. Nous pourrons et voudrons vous aider si vous\n"\
 "  fournissiez ces informations en rapportant un bogue possible.\n"
-#define MSGTR_LoadingConfig "Chargement du config '%s'\n"
+#define MSGTR_LoadingConfig "Chargement du fichier de configuration '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB : fichier sous-titres ajouté (%d): %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB : fichier sous-titres enlevé (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Erreur d'ouverture du fichier [%s] en écriture !\n"
