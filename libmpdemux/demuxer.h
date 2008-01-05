@@ -397,5 +397,11 @@ char *demuxer_chapter_display_name(demuxer_t *demuxer, int chapter);
 float demuxer_chapter_time(demuxer_t *demuxer, int chapter, float *end);
 /// Get total chapter number.
 int demuxer_chapter_count(demuxer_t *demuxer);
+/// Get current angle index.
+int demuxer_get_current_angle(demuxer_t *demuxer);
+/// Set angle.
+int demuxer_set_angle(demuxer_t *demuxer, int angle);
+/// Get number of angles.
+int demuxer_angles_count(demuxer_t *demuxer);
 
 #endif /* DEMUXER_H */

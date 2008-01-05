@@ -1287,3 +1287,52 @@ int demuxer_chapter_count(demuxer_t *demuxer) {
         return demuxer->num_chapters;
 }
 
+int demuxer_angles_count(demuxer_t *demuxer) {
+    int ris, angles=-1;
+
+    ris = stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_ANGLES, &angles);
+    if(ris == STREAM_UNSUPPORTED) return -1;
+    return angles;
+}
+
+int demuxer_get_current_angle(demuxer_t *demuxer) {
+    int ris, curr_angle=-1;
+    ris = stream_control(demuxer->stream, STREAM_CTRL_GET_ANGLE, &curr_angle);
+    if(ris == STREAM_UNSUPPORTED) return -1;
+    return curr_angle;
+}
+
+
+int demuxer_set_angle(demuxer_t *demuxer, int angle) {
+    int ris, angles=-1;
+    sh_video_t *sh_video = demuxer->video->sh;
+    sh_audio_t *sh_audio = demuxer->audio->sh;
+
+    angles = demuxer_angles_count(demuxer);
+    if((angles < 1) || (angle > angles)) return -1;
+
+    if(demuxer->video->sh)
+        ds_free_packs(demuxer->video);
+
+    if(demuxer->audio->sh)
+        ds_free_packs(demuxer->audio);
+
+    if(demuxer->sub->id >= 0)
+        ds_free_packs(demuxer->sub);
+
+    ris = stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
+    if(ris == STREAM_UNSUPPORTED) return -1;
+
+    demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
+    if(sh_video) {
+        ds_fill_buffer(demuxer->video);
+        resync_video_stream(sh_video);
+    }
+
+    if(sh_audio) {
+        ds_fill_buffer(demuxer->audio);
+        resync_audio_stream(sh_audio);
+    }
+
+    return angle;
+}
