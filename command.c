@@ -590,12 +590,12 @@ static int mp_property_audio_delay(m_option_t * prop, int action,
     switch (action) {
     case M_PROPERTY_SET:
     case M_PROPERTY_STEP_UP:
-    case M_PROPERTY_STEP_DOWN:
-	if (!arg)
-	    return M_PROPERTY_ERROR;
-	else {
+    case M_PROPERTY_STEP_DOWN: {
+	    int ret;
 	    float delay = audio_delay;
-	    m_property_delay(prop, action, arg, &audio_delay);
+	    ret = m_property_delay(prop, action, arg, &audio_delay);
+	    if (ret != M_PROPERTY_OK)
+		return ret;
 	    if (mpctx->sh_audio)
 		mpctx->delay -= audio_delay - delay;
 	}
