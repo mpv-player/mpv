@@ -403,11 +403,12 @@ read_next:
         for(i=0;i<9;i++)	// check if all values zero:
           if((skip=d->dsi_pack.sml_agli.data[i].address)!=0) break;
 #endif
-        if(skip) {
+        if(skip && skip!=0x7fffffff) {
           // sml_agli table has valid data (at least one non-zero):
          d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+
          d->dsi_pack.sml_agli.data[dvd_angle].address;
          d->angle_seek=0;
+         d->cur_pack--;
          mp_msg(MSGT_DVD,MSGL_V, "Angle-seek synced using sml_agli map!  new_lba=0x%X  \n",d->cur_pack);
         } else {
           // check if we're in the right cell, jump otherwise:
