@@ -457,8 +457,8 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src,
 		    column_fidct_s((int16_t*)(&p->threshold_mtx[0]), block+x*8, block3+x*8, 8); //yes, this is a HOTSPOT
 		}
 	    row_idct_s(block3+0*8, p->temp + (y&15)*stride+x0+2-(y&1), stride, 2*(BLOCKSZ-1));
-	    memcpy(block, block+(BLOCKSZ-1)*64, 8*8*sizeof(DCTELEM)); //cycling
-	    memcpy(block3, block3+(BLOCKSZ-1)*64, 6*8*sizeof(DCTELEM));  
+	    memmove(block, block+(BLOCKSZ-1)*64, 8*8*sizeof(DCTELEM)); //cycling
+	    memmove(block3, block3+(BLOCKSZ-1)*64, 6*8*sizeof(DCTELEM));
 	}
 	//
 	es=width+8-x0; //  8, ...      
