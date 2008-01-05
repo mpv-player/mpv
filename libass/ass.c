@@ -337,6 +337,15 @@ void process_force_style(ass_track_t* track) {
 		*eq = '\0';
 		token = eq + 1;
 
+		if(!strcasecmp(*fs, "PlayResX"))
+			track->PlayResX = atoi(token);
+		else if(!strcasecmp(*fs, "PlayResY"))
+			track->PlayResY = atoi(token);
+		else if(!strcasecmp(*fs, "Timer"))
+			track->Timer = atof(token);
+		else if(!strcasecmp(*fs, "WrapStyle"))
+			track->WrapStyle = atoi(token);
+
 		dt = strrchr(*fs, '.');
 		if (dt) {
 			*dt = '\0';
