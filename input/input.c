@@ -117,6 +117,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_GET_META_TRACK, "get_meta_track", 0, { {-1,{0}} } },
   { MP_CMD_GET_META_GENRE, "get_meta_genre", 0, { {-1,{0}} } },
   { MP_CMD_SWITCH_AUDIO, "switch_audio", 0, { { MP_CMD_ARG_INT,{-1} }, {-1,{0}} } },
+  { MP_CMD_SWITCH_ANGLE, "switch_angle", 0, { { MP_CMD_ARG_INT,{-1} }, {-1,{0}} } },
 #ifdef USE_TV
   { MP_CMD_TV_START_SCAN, "tv_start_scan", 0,  { {-1,{0}} }},
   { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
@@ -468,6 +469,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   
   { { '!', 0 }, "seek_chapter -1" },
   { { '@', 0 }, "seek_chapter 1" },
+  { { 'A', 0 }, "switch_angle 1" },
 
   { { 0 }, NULL }
 };
