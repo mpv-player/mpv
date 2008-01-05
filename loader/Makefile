@@ -35,7 +35,7 @@ include ../mpcommon.mak
 
 CFLAGS+=-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
 
-dshow/test: dshow/test.c $(LIBNAME)
+dshow/test: dshow/test.c $(LIBNAME_COMMON)
 	$(CC) $(CFLAGS) -o $@ $^ -lstdc++
 
 clean::
