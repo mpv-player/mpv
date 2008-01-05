@@ -156,6 +156,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
 
     mod->mux->bih->biWidth = width;
     mod->mux->bih->biHeight = height;
+    mod->mux->bih->biSizeImage = width * height * 3;
     mod->mux->aspect = (float)d_width/d_height;
     
     // make sure param is initialized
@@ -172,35 +173,9 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     switch(outfmt) {
     case IMGFMT_I420:
         param.i_csp = X264_CSP_I420;
-        mod->mux->bih->biSizeImage = width * height * 3;
         break;
     case IMGFMT_YV12:
         param.i_csp = X264_CSP_YV12;
-        mod->mux->bih->biSizeImage = width * height * 3;
-        break;
-    case IMGFMT_422P:
-        param.i_csp = X264_CSP_I422;
-        mod->mux->bih->biSizeImage = width * height * 3;
-        break;
-    case IMGFMT_444P:
-        param.i_csp = X264_CSP_I444;
-        mod->mux->bih->biSizeImage = width * height * 3;
-        break;
-    case IMGFMT_YVYU:
-        param.i_csp = X264_CSP_YUYV;
-        mod->mux->bih->biSizeImage = width * height * 3;
-        break;
-    case IMGFMT_RGB:
-        param.i_csp = X264_CSP_RGB;
-        mod->mux->bih->biSizeImage = width * height * 3;
-        break;
-    case IMGFMT_BGR:
-        param.i_csp = X264_CSP_BGR;
-        mod->mux->bih->biSizeImage = width * height * 3;
-        break;
-    case IMGFMT_BGR32:
-        param.i_csp = X264_CSP_BGRA;
-        mod->mux->bih->biSizeImage = width * height * 4;
         break;
     default:
         mp_msg(MSGT_MENCODER, MSGL_ERR, "Wrong colorspace.\n");
