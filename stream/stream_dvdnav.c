@@ -351,6 +351,33 @@ static int control(stream_t *stream, int cmd, void* arg) {
         return 1;
       break;
     }
+    case STREAM_CTRL_GET_NUM_ANGLES:
+    {
+        uint32_t curr, angles;
+        if(dvdnav_get_angle_info(priv->dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+          break;
+        *((int *)arg) = angles;
+        return 1;
+    }
+    case STREAM_CTRL_GET_ANGLE:
+    {
+        uint32_t curr, angles;
+        if(dvdnav_get_angle_info(priv->dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+          break;
+        *((int *)arg) = curr;
+        return 1;
+    }
+    case STREAM_CTRL_SET_ANGLE:
+    {
+        uint32_t curr, angles;
+        int new_angle = *((int *)arg);
+        if(dvdnav_get_angle_info(priv->dvdnav, &curr, &angles) != DVDNAV_STATUS_OK)
+          break;
+        if(new_angle>angles || new_angle<1)
+            break;
+        if(dvdnav_angle_change(priv->dvdnav, new_angle) != DVDNAV_STATUS_OK)
+        return 1;
+    }
   }
 
   return STREAM_UNSUPPORTED;
