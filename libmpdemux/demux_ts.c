@@ -2397,7 +2397,6 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 				pmt->es[idx].type = VIDEO_MPEG4;
 				break;
 			case 0x0f:
-			case 0x11:
 				pmt->es[idx].type = AUDIO_AAC;
 				break;
 			case 0x1b:
