@@ -371,7 +371,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		dp_hdr->chunks,	// number of sub-packets - 1
 		extra,		// table of sub-packet offsets
 		0,		// unknown, seems to be unused
-		dp_hdr->timestamp,// timestamp (the integer value from the stream)
+		0,		// timestamp (should be unneded)
 	};
 
 	if(len<=0 || flags&2) return NULL; // skipped frame || hardframedrop
