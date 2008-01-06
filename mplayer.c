@@ -833,7 +833,7 @@ if ((conffile = get_path("")) == NULL) {
 }
 }
 
-void load_per_file_config (m_config_t* conf, const char *const file)
+static void load_per_file_config (m_config_t* conf, const char *const file)
 {
     char *confpath;
     char cfg[strlen(file)+10];
@@ -894,7 +894,7 @@ static int libmpdemux_was_interrupted(int eof) {
 
 #define mp_basename(s) (strrchr(s,'\\')==NULL?(mp_basename2(s)):(strrchr(s,'\\')+1))
 
-int playtree_add_playlist(play_tree_t* entry)
+static int playtree_add_playlist(play_tree_t* entry)
 {
   play_tree_add_bpf(entry,filename);
 
@@ -2082,7 +2082,7 @@ static double update_video(int *blit_frame)
     return frame_time;
 }
 
-void pause_loop(void)
+static void pause_loop(void)
 {
     mp_cmd_t* cmd;
     if (!quiet) {
