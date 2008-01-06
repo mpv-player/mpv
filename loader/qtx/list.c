@@ -19,8 +19,6 @@ void* GetProcAddress(void* handle,char* func);
 #define __cdecl   __attribute__((__cdecl__))
 #define APIENTRY 
 
-typedef long OSErr;
-
 int main(int argc, char *argv[]){
     void *handler;
     ComponentDescription desc;
