@@ -665,12 +665,11 @@ got_audio:
 	    static int cnt2=CRACK_MATRIX;
 #endif
 	    if (((sh_audio_t *)ds->sh)->format == mmioFOURCC('M', 'P', '4', 'A')) {
-		uint16_t *sub_packet_lengths, sub_packets, i;
+		uint16_t sub_packet_lengths[16], sub_packets, i;
 		/* AAC in Real: several AAC frames in one Real packet. */
 		/* Second byte, upper four bits: number of AAC frames */
 		/* next n * 2 bytes: length of the AAC frames in bytes, BE */
 		sub_packets = (stream_read_word(demuxer->stream) & 0xf0) >> 4;
-		sub_packet_lengths = calloc(sub_packets, sizeof(uint16_t));
 		for (i = 0; i < sub_packets; i++)
 		    sub_packet_lengths[i] = stream_read_word(demuxer->stream);
 		for (i = 0; i < sub_packets; i++) {
@@ -682,7 +681,6 @@ got_audio:
 		    dp->pos = demuxer->filepos;
 		    ds_add_packet(ds, dp);
 		}
-		free(sub_packet_lengths);
 		return 1;
 	    }
         if ((priv->intl_id[stream_id] == mmioFOURCC('I', 'n', 't', '4')) ||
