@@ -50,6 +50,5 @@ qtx/list: qtx/list.c  $(TEST_OBJS)
 clean::
 	rm -f dshow/*.o dshow/*.a dshow/*~
 	rm -f dmo/*.o dmo/*.a dmo/*~
-
-distclean::
 	rm -f dshow/test dshow/test.raw
+	rm -f qtx/list qtx/qtxload
