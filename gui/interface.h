@@ -153,17 +153,17 @@ extern void guiLoadFont( void );
 extern void guiLoadSubtitle( char * name );
 extern void guiMessageBox(int level, char * str);
 
-typedef struct _plItem 
+typedef struct plItem
 {
- struct _plItem * prev,* next;
+ struct plItem * prev,* next;
  int       played;
  char    * path;
  char    * name;
 } plItem;
 
-typedef struct _urlItem
+typedef struct urlItem
 {
- struct _urlItem *next;
+ struct urlItem *next;
  char    * url;
 } URLItem;
 

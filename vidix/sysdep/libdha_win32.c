@@ -13,7 +13,7 @@
   to request services from the MAPDEV VxD.
 */
 
-typedef struct _MapDevRequest
+typedef struct MapDevRequest
 {
 	DWORD	mdr_ServiceID;		/* supplied by caller */
 	LPVOID	mdr_PhysicalAddress;	/* supplied by caller */

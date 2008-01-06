@@ -133,7 +133,7 @@ typedef struct
 }
 GeneralPlugin;
 
-typedef struct _VisPlugin
+typedef struct VisPlugin
 {
 	void *handle; 	/* Filled in by xmms */
 	char *filename; /* Filled in by xmms */
@@ -145,7 +145,7 @@ typedef struct _VisPlugin
 	void (*cleanup)(void); /* Called when the plugin is disabled */
 	void (*about)(void); /* Show the about box */
 	void (*configure)(void); /* Show the configure box */
-	void (*disable_plugin)(struct _VisPlugin *); /* Call this with a pointer to your plugin to disable the plugin */
+	void (*disable_plugin)(struct VisPlugin *); /* Call this with a pointer to your plugin to disable the plugin */
 	void (*playback_start)(void); /* Called when playback starts */
 	void (*playback_stop)(void); /* Called when playback stops */
 	void (*render_pcm)(short pcm_data[2][512]); /* Render the PCM data, don't do anything time consuming in here */

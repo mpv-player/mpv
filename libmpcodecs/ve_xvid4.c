@@ -319,7 +319,7 @@ m_option_t xvidencopts_conf[] =
  * Module private data
  ****************************************************************************/
 
-typedef struct _xvid_mplayer_module_t
+typedef struct xvid_mplayer_module_t
 {
 	/* Instance related global vars */
 	void *instance;

@@ -116,7 +116,7 @@ typedef enum tagPhysicalConnectorType { PhysConn_Video_Tuner = 1,
     PhysConn_Audio_AudioDecoder = PhysConn_Audio_USB + 1
 } PhysicalConnectorType;
 
-typedef struct _VIDEO_STREAM_CONFIG_CAPS {
+typedef struct VIDEO_STREAM_CONFIG_CAPS {
     GUID guid;			// will be MEDIATYPE_Video
     ULONG VideoStandard;	// logical OR of all AnalogVideoStandards
     // supported
@@ -142,7 +142,7 @@ typedef struct _VIDEO_STREAM_CONFIG_CAPS {
     LONG MaxBitsPerSecond;
 } VIDEO_STREAM_CONFIG_CAPS, *PVIDEO_STREAM_CONFIG_CAPS;
 
-typedef struct _AUDIO_STREAM_CONFIG_CAPS {
+typedef struct AUDIO_STREAM_CONFIG_CAPS {
     GUID guid;
     ULONG MinimumChannels;
     ULONG MaximumChannels;
@@ -238,12 +238,12 @@ typedef enum tagTVAudioMode {
     AMTVAUDIO_MODE_LANG_C = 0x0040,
 } TVAudioMode;
 
-typedef struct _FilterInfo {
+typedef struct FilterInfo {
     WCHAR achName[128];
     LPFILTERGRAPH pGraph;
 } FILTER_INFO;
 
-typedef struct _PinInfo {
+typedef struct PinInfo {
     LPBASEFILTER pFilter;
     PIN_DIRECTION dir;
     unsigned short achName[128];

@@ -27,7 +27,7 @@
 #define CHUNK_FDSC mmioFOURCC('F', 'D', 'S', 'C')
 #define CHUNK_STAB mmioFOURCC('S', 'T', 'A', 'B')
 
-typedef struct _film_chunk_t
+typedef struct film_chunk_t
 {
   off_t chunk_offset;
   int chunk_size;
@@ -37,7 +37,7 @@ typedef struct _film_chunk_t
   float pts;
 } film_chunk_t;
 
-typedef struct _film_data_t
+typedef struct film_data_t
 {
   unsigned int total_chunks;
   unsigned int current_chunk;

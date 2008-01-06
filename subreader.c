@@ -1781,7 +1781,7 @@ static int whiteonly(char *s)
     return 1;
 }
 
-typedef struct _subfn 
+typedef struct subfn
 {
     int priority;
     char *fname;

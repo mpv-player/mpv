@@ -8,7 +8,7 @@
 #ifndef GENERIC_MATH_H
 #define GENERIC_MATH_H
 
-typedef struct _gen_sincos
+typedef struct gen_sincos
 {
   double x;
   double sinx;

@@ -17,7 +17,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-typedef struct __FrameInfo
+typedef struct FrameInfo
 {
     ssize_t frameSize;
     ssize_t paddingSize;

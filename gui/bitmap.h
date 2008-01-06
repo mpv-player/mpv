@@ -1,7 +1,7 @@
 #ifndef GUI_BITMAP_H
 #define GUI_BITMAP_H
 
-typedef struct _txSample
+typedef struct txSample
 {
  unsigned long Width;
  unsigned long Height;

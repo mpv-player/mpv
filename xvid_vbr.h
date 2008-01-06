@@ -58,7 +58,7 @@ typedef vbr_finish_function *vbr_finish_function_ptr;
  * The VBR CONTROLER structure - the spin of the library
  *****************************************************************************/
 
-typedef struct _vbr_control_t
+typedef struct vbr_control_t
 {
 
 	/* All modes - specifies what VBR algorithm has to be used */

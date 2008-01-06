@@ -25,9 +25,9 @@ struct nuv_signature
 	char version[5];    /* "0.05" + \0 */
 };
 
-typedef struct _nuv_position_t nuv_position_t;
+typedef struct nuv_position_t nuv_position_t;
 
-struct _nuv_position_t 
+struct nuv_position_t
 {
 	off_t offset;
 	float time;
@@ -35,7 +35,7 @@ struct _nuv_position_t
 	nuv_position_t* next;
 };
 
-typedef struct _nuv_info_t 
+typedef struct nuv_info_t
 {
 	int current_audio_frame;
 	int current_video_frame;

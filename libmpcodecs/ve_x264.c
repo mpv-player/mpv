@@ -48,7 +48,7 @@
 
 #include <x264.h>
 
-typedef struct _h264_module_t {
+typedef struct h264_module_t {
     muxer_stream_t *mux;
     x264_t *    x264;
     x264_picture_t  pic;
