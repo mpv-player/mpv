@@ -239,7 +239,7 @@ extern int vo_colorkey;
 
 extern int WinID;
 
-#if defined(HAVE_FBDEV)||defined(HAVE_VESA) 
+#if defined(HAVE_FBDEV) || defined(HAVE_VESA)
 
 typedef struct {
         float min;
@@ -253,6 +253,6 @@ extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
 
-#endif 
+#endif /* defined(HAVE_FBDEV) || defined(HAVE_VESA) */
 
 #endif /* VIDEO_OUT_H */
