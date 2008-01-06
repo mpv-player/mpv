@@ -20,7 +20,7 @@ SRCS_MPLAYER = app.c \
                bitmap.c \
                cfg.c \
                interface.c \
-               mplayer/common.c \
+               mplayer/gui_common.c \
                mplayer/menu.c \
                mplayer/mw.c \
                mplayer/pb.c \

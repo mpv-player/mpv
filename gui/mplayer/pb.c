@@ -29,7 +29,7 @@
 #include "gmplayer.h"
 #include "play.h"
 #include "widgets.h"
-#include "common.h"
+#include "gui_common.h"
 
 extern unsigned int GetTimerMS( void );
 extern unsigned int GetTimer( void );

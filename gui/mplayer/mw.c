@@ -50,7 +50,7 @@ int             boxMoved = 0;
 int             sx = 0,sy = 0;
 int             i,pot = 0;
 
-#include "common.h"
+#include "gui_common.h"
 
 void mplMainDraw( void )
 {
