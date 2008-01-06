@@ -63,7 +63,7 @@ int main(int argc, char *argv[]){
     handler2= LoadLibraryA("/root/.wine/fake_windows/Windows/System/QuickTime/QuickTimeEssentials.qtx");
     printf("done\n");
     dispatcher = GetProcAddress(handler2, "SMD_ComponentDispatch");
-//    handler = expLoadLibraryA("/usr/lib/win32/On2_VP3.qtx");
+//    handler = expLoadLibraryA("/usr/local/lib/codecs/On2_VP3.qtx");
 //    dispatcher = GetProcAddress(handler, "CDComponentDispatcher");
     printf("handler: %p, dispatcher: %p  theqtdp: %p\n", handler, dispatcher, theqtdp);
 

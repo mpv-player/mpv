@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
     OSErr ret;
 
     Setup_LDT_Keeper();
-    handler = LoadLibraryA("/usr/lib/win32/qtmlClient.dll");
+    handler = LoadLibraryA("/usr/local/lib/codecs/qtmlClient.dll");
     printf("***************************\n");
     InitializeQTML = 0x1000c870; //GetProcAddress(handler, "InitializeQTML");
     EnterMovies = 0x10003ac0; //GetProcAddress(handler, "EnterMovies");
