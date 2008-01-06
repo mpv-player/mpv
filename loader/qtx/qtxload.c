@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
     int i;
 
     mp_msg_init();
-    mp_msg_set_level(10);
+    //mp_msg_set_level(10);
 
     Setup_LDT_Keeper();
     printf("loading qts\n");
