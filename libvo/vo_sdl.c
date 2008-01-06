@@ -40,52 +40,6 @@
  *  the Free Software Foundation.
  *
  *  -- end old disclaimer -- 
- *
- *  Changes:
- *    Dominik Schnitzer <dominik@schnitzer.at> - November 08, 2000.
- *    - Added resizing support, fullscreen: changed the sdlmodes selection
- *       routine.
- *    - SDL bugfixes: removed the atexit(SLD_Quit), SDL_Quit now resides in
- *       the plugin_exit routine.
- *    - Commented the source :)
- *    - Shortcuts: for switching between Fullscreen/Windowed mode and for
- *       cycling between the different Fullscreen modes.
- *    - Small bugfixes: proper width/height of movie
- *    Dominik Schnitzer <dominik@schnitzer.at> - November 11, 2000.
- *    - Cleanup code, more comments
- *    - Better error handling
- *    Bruno Barreyra <barreyra@ufl.edu> - December 10, 2000.
- *    - Eliminated memcpy's for entire frames
- *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 11, 2001
- *    - Added aspect-ratio awareness for fullscreen
- *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 11, 2001
- *    - Fixed aspect-ratio awareness, did only vertical scaling (black bars above
- *       and below), now also does horizontal scaling (black bars left and right),
- *       so you get the biggest possible picture with correct aspect-ratio.
- *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 12, 2001
- *    - Minor bugfix to aspect-ratio for non-4:3-resolutions (like 1280x1024)
- *    - Bugfix to check_events() to reveal mouse cursor after 'q'-quit in
- *       fullscreen-mode
- *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 10, 2001
- *    - Changed keypress-detection from keydown to keyup, seems to fix keyrepeat
- *       bug (key had to be pressed twice to be detected)
- *    - Changed key-handling: 'f' cycles fullscreen/windowed, ESC/RETURN/'q' quits
- *    - Bugfix which avoids exit, because return is passed to sdl-output on startup,
- *       which caused the player to exit (keyboard-buffer problem? better solution
- *       recommed)
- *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 11, 2001
- *    - OSD and subtitle support added
- *    - some minor code-changes
- *    - added code to comply with new fullscreen meaning
- *    - changed fullscreen-mode-cycling from '+' to 'c' (interferred with audiosync
- *       adjustment)
- *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 13, 2001
- *    - added keymapping to toggle OSD ('o' key) 
- *    - added some defines to modify some sdl-out internas (see comments)
- *
- *    Felix Buenemann: further changes will be visible through cvs log, don't want
- *     to update this all the time (CVS info on http://mplayer.sourceforge.net)
- *
  */
 
 /* define to force software-surface (video surface stored in system memory)*/
