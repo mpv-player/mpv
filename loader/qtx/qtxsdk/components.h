@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
+#include <inttypes.h>
+
 // Basic types:
 
 typedef char *                          Ptr;
