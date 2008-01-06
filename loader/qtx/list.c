@@ -1,7 +1,5 @@
 /* to compile:
    edit ../win32.c, change the #if 0 to 1 at line 1326 to enabel quicktime fix!
-   (cd ..;make distclean;make)
-   gcc -o list list.c ../libloader.a -lpthread -ldl -lm -ggdb ../../cpudetect.o
  */
 
 #include <stdio.h>

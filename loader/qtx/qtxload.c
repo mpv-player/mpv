@@ -1,5 +1,3 @@
-/* to compile: gcc -o qtxload qtxload.c ../libloader.a -lpthread -ldl -ggdb ../../cpudetect.o */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
