@@ -17,7 +17,7 @@
 #include "interface.h"
 #include "../widgets.h"
 #include "pl.h"
-#include "common.h"
+#include "gtk_common.h"
 
 static char * book_open_xpm[] = {
 	"16 16 4 1",

@@ -22,7 +22,7 @@
 #include "../widgets.h"
 
 #include "eq.h"
-#include "common.h"
+#include "gtk_common.h"
 
 #define eqRange 15
 

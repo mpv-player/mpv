@@ -21,7 +21,7 @@
 #include "../widgets.h"
 #include "fs.h"
 #include "opts.h"
-#include "common.h"
+#include "gtk_common.h"
 
 #ifndef __linux__
 #define get_current_dir_name()  getcwd(NULL, PATH_MAX)

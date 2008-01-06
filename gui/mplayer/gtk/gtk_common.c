@@ -2,7 +2,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "common.h"
+#include "gtk_common.h"
 
 void WidgetDestroy( GtkWidget * widget,GtkWidget ** widget_pointer )
 {

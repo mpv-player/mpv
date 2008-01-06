@@ -8,7 +8,7 @@
 
 #include "../widgets.h"
 #include "mb.h"
-#include "common.h"
+#include "gtk_common.h"
 
 GtkWidget * gtkMessageBoxText;
 GtkWidget * MessageBox = NULL;

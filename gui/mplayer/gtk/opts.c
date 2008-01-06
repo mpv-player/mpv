@@ -25,7 +25,7 @@
 #include "../widgets.h"
 #include "opts.h"
 #include "fs.h"
-#include "common.h"
+#include "gtk_common.h"
 
 // for mpcodecs_[av]d_drivers:
 #include "libmpcodecs/vd.h"

@@ -41,7 +41,7 @@ SRCS_MPLAYER = wm/ws.c \
                mplayer/gtk/opts.c \
                mplayer/gtk/url.c \
                mplayer/gtk/eq.c \
-               mplayer/gtk/common.c \
+               mplayer/gtk/gtk_common.c \
 
 endif
 

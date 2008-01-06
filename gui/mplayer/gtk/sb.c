@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include "sb.h"
-#include "common.h"
+#include "gtk_common.h"
 
 #include "app.h"
 #include "config.h"

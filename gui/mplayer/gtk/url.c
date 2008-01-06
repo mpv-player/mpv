@@ -10,7 +10,7 @@
 #include <gtk/gtk.h>
 
 #include "url.h"
-#include "common.h"
+#include "gtk_common.h"
 #include "interface.h"
 #include "app.h"
 #include "../widgets.h"

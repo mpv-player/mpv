@@ -6,7 +6,7 @@
 #include "mplayer/pixmaps/about.xpm"
 #include "../widgets.h"
 #include "about.h"
-#include "common.h"
+#include "gtk_common.h"
 
 GtkWidget * About = NULL;
 
