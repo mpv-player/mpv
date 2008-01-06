@@ -5,7 +5,8 @@ LIBNAME_MPLAYER = libgui.a
 #CFLAGS += -DDEBUG
 
 ifeq ($(TARGET_WIN32),yes)
-SRCS_MPLAYER = win32/dialogs.c \
+SRCS_MPLAYER = bitmap.c \
+               win32/dialogs.c \
                win32/gui.c \
                win32/interface.c \
                win32/playlist.c \
@@ -13,35 +14,34 @@ SRCS_MPLAYER = win32/dialogs.c \
                win32/skinload.c \
                win32/widgetrender.c \
                win32/wincfg.c \
-               bitmap.c \
 
 else
-SRCS_MPLAYER = wm/ws.c \
-               wm/wsxdnd.c \
-               app.c \
-               interface.c \
-               cfg.c \
+SRCS_MPLAYER = app.c \
                bitmap.c \
-               skin/skin.c \
-               skin/font.c \
-               skin/cut.c \
-               mplayer/widgets.c \
-               mplayer/play.c \
-               mplayer/mw.c \
-               mplayer/sw.c \
-               mplayer/menu.c \
-               mplayer/pb.c \
+               cfg.c \
+               interface.c \
                mplayer/common.c \
-               mplayer/gtk/menu.c \
-               mplayer/gtk/mb.c \
+               mplayer/menu.c \
+               mplayer/mw.c \
+               mplayer/pb.c \
+               mplayer/play.c \
+               mplayer/sw.c \
+               mplayer/widgets.c \
                mplayer/gtk/about.c \
+               mplayer/gtk/eq.c \
+               mplayer/gtk/fs.c \
+               mplayer/gtk/gtk_common.c \
+               mplayer/gtk/mb.c \
+               mplayer/gtk/menu.c \
+               mplayer/gtk/opts.c \
                mplayer/gtk/pl.c \
                mplayer/gtk/sb.c \
-               mplayer/gtk/fs.c \
-               mplayer/gtk/opts.c \
                mplayer/gtk/url.c \
-               mplayer/gtk/eq.c \
-               mplayer/gtk/gtk_common.c \
+               skin/cut.c \
+               skin/font.c \
+               skin/skin.c \
+               wm/ws.c \
+               wm/wsxdnd.c \
 
 endif
 
