@@ -666,12 +666,19 @@ got_audio:
 #endif
 	    if (((sh_audio_t *)ds->sh)->format == mmioFOURCC('M', 'P', '4', 'A')) {
 		uint16_t sub_packet_lengths[16], sub_packets, i;
+		int totlen = 0;
 		/* AAC in Real: several AAC frames in one Real packet. */
 		/* Second byte, upper four bits: number of AAC frames */
 		/* next n * 2 bytes: length of the AAC frames in bytes, BE */
+		if (len < 2)
+		    goto discard;
 		sub_packets = (stream_read_word(demuxer->stream) & 0xf0) >> 4;
+		if (len < 2 * sub_packets)
+		    goto discard;
 		for (i = 0; i < sub_packets; i++)
-		    sub_packet_lengths[i] = stream_read_word(demuxer->stream);
+		    totlen += sub_packet_lengths[i] = stream_read_word(demuxer->stream);
+		if (len < totlen )
+		    goto discard;
 		for (i = 0; i < sub_packets; i++) {
 		    demux_packet_t *dp = new_demux_packet(sub_packet_lengths[i]);
 		    stream_read(demuxer->stream, dp->buffer, sub_packet_lengths[i]);
@@ -693,15 +700,21 @@ got_audio:
             spc = priv->sub_packet_cnt;
             switch (priv->intl_id[stream_id]) {
                 case mmioFOURCC('I', 'n', 't', '4'):
+                    if (len < cfs * sph/2)
+                        goto discard;
                     for (x = 0; x < sph / 2; x++)
                         stream_read(demuxer->stream, priv->audio_buf + x * 2 * w + spc * cfs, cfs);
                     break;
                 case mmioFOURCC('g', 'e', 'n', 'r'):
+                    if (len < w)
+                        goto discard;
                     for (x = 0; x < w / sps; x++)
                         stream_read(demuxer->stream, priv->audio_buf + sps * (sph * x + ((sph + 1) / 2) * (spc & 1) +
                                     (spc >> 1)), sps);
                     break;
                 case mmioFOURCC('s', 'i', 'p', 'r'):
+                    if (len < w)
+                        goto discard;
                     stream_read(demuxer->stream, priv->audio_buf + spc * w, w);
                     if (spc == sph - 1) {
                         int n;
