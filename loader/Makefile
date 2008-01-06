@@ -35,8 +35,8 @@ include ../mpcommon.mak
 
 CFLAGS+=-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
 
-dshow/test: dshow/test.c $(LIBNAME_COMMON)
-	$(CC) $(CFLAGS) -o $@ $^ -lstdc++
+dshow/test: dshow/test.c $(LIBNAME_COMMON) ../cpudetect.o ../get_path.o ../mp_msg.o ../mp_fifo.o ../osdep/libosdep.a
+	$(CC) $(CFLAGS) -o $@ $^ -ltermcap -ldl -lm -lpthread -g -lstdc++
 
 clean::
 	rm -f dshow/*.o dshow/*.a dshow/*~
