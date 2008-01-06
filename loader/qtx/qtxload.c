@@ -7,13 +7,11 @@
 #include "qtxsdk/components.h"
 #include "qtxsdk/select.h"
 
-#define DEF_DISPATCHER(name) ComponentResult (*##name)(ComponentParameters *, void **)
-
 /* ilyen egy sima komponens */
 ComponentResult ComponentDummy(
     ComponentParameters *params,
     void **globals,
-    DEF_DISPATCHER(ComponentDispatch))
+    ComponentResult (*ComponentDispatch)(ComponentParameters *, void **))
 {
     printf("ComponentDummy(params: %p, globals: %p, dispatcher: %p) called!\n",
 	params, globals, ComponentDispatch);
