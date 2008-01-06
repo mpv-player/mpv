@@ -1,7 +1,7 @@
 !!ARBfp1.0
 # Custom YUV->RGB conversion program for MPlayer's -vo gl.
 # Copyleft (C) Reimar Döffinger, 2005
-# Licensed under the GNU GPL v2
+# Licensed under the GNU GPL v2 or later
 # Usage: mplayer -vo gl:yuv=4:customprog=emboss.fp
 # This is an emboss effect.
 PARAM sizes = program.env[0];
