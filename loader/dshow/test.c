@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "wine/mmreg.h"
 #include "wine/vfw.h"
