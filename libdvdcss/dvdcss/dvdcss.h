@@ -102,4 +102,4 @@ LIBDVDCSS_EXPORT char *   dvdcss_error ( dvdcss_t );
 }
 #endif
 
-#endif /* <dvdcss/dvdcss.h> */
+#endif /* DVDCSS_DVDCSS_H  */
