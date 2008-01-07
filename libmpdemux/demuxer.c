@@ -271,6 +271,7 @@ void free_sh_audio(demuxer_t *demuxer, int id) {
     demuxer->a_streams[id] = NULL;
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_audio at %p\n",sh);
     if(sh->wf) free(sh->wf);
+    if(sh->codecdata) free(sh->codecdata);
     free(sh);
 }
 
