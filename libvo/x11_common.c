@@ -1663,48 +1663,13 @@ static unsigned int time_last;
 void xscreensaver_heartbeat(void)
 {
     unsigned int time = GetTimerMS();
-    XEvent ev;
 
-    if (mDisplay && xs_windowid && (time - time_last) > 30000)
+    if (mDisplay && screensaver_off && (time - time_last) > 30000)
     {
         time_last = time;
 
-        ev.xany.type = ClientMessage;
-        ev.xclient.display = mDisplay;
-        ev.xclient.window = xs_windowid;
-        ev.xclient.message_type = screensaver;
-        ev.xclient.format = 32;
-        memset(&ev.xclient.data, 0, sizeof(ev.xclient.data));
-        ev.xclient.data.l[0] = (long) deactivate;
-
-        mp_msg(MSGT_VO, MSGL_DBG2, "Pinging xscreensaver.\n");
-        old_handler = XSetErrorHandler(badwindow_handler);
-        XSendEvent(mDisplay, xs_windowid, False, 0L, &ev);
-        XSync(mDisplay, False);
-        XSetErrorHandler(old_handler);        
+        XResetScreenSaver(mDisplay);
     }
-}
-
-static void xscreensaver_disable(Display * dpy)
-{
-    mp_msg(MSGT_VO, MSGL_DBG2, "xscreensaver_disable()\n");
-
-    xs_windowid = find_xscreensaver_window(dpy);
-    if (!xs_windowid)
-    {
-        mp_msg(MSGT_VO, MSGL_INFO, MSGTR_CouldNotFindXScreenSaver);
-        return;
-    }
-    mp_msg(MSGT_VO, MSGL_INFO,
-           "xscreensaver_disable: xscreensaver wid=%ld.\n", xs_windowid);
-
-    deactivate = XInternAtom(dpy, "DEACTIVATE", False);
-    screensaver = XInternAtom(dpy, "SCREENSAVER", False);
-}
-
-static void xscreensaver_enable(void)
-{
-    xs_windowid = 0;
 }
 
 static int xss_suspend(Bool suspend)
@@ -1765,30 +1730,6 @@ void saver_on(Display * mDisplay)
         dpms_disabled = 0;
     }
 #endif
-
-    if (timeout_save)
-    {
-        int dummy, interval, prefer_blank, allow_exp;
-
-        XGetScreenSaver(mDisplay, &dummy, &interval, &prefer_blank,
-                        &allow_exp);
-        XSetScreenSaver(mDisplay, timeout_save, interval, prefer_blank,
-                        allow_exp);
-        XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank,
-                        &allow_exp);
-        timeout_save = 0;
-    }
-
-    if (stop_xscreensaver)
-        xscreensaver_enable();
-    if (kdescreensaver_was_running && stop_xscreensaver)
-    {
-        system
-            ("dcop kdesktop KScreensaverIface enable true 2>/dev/null >/dev/null");
-        kdescreensaver_was_running = 0;
-    }
-
-
 }
 
 void saver_off(Display * mDisplay)
@@ -1818,28 +1759,6 @@ void saver_off(Display * mDisplay)
         }
     }
 #endif
-    if (!timeout_save)
-    {
-        int interval, prefer_blank, allow_exp;
-        XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank,
-                        &allow_exp);
-        if (timeout_save)
-            XSetScreenSaver(mDisplay, 0, interval, prefer_blank,
-                            allow_exp);
-    }
-    // turning off screensaver
-    if (stop_xscreensaver)
-        xscreensaver_disable(mDisplay);
-    if (stop_xscreensaver && !kdescreensaver_was_running)
-    {
-        kdescreensaver_was_running =
-            (system
-             ("dcop kdesktop KScreensaverIface isEnabled 2>/dev/null | sed 's/1/true/g' | grep true 2>/dev/null >/dev/null")
-             == 0);
-        if (kdescreensaver_was_running)
-            system
-                ("dcop kdesktop KScreensaverIface enable false 2>/dev/null >/dev/null");
-    }
 }
 
 static XErrorHandler old_handler = NULL;
