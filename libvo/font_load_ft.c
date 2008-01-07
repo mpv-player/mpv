@@ -840,6 +840,7 @@ static font_desc_t* init_font_desc(void)
     desc->height = 0;
     desc->max_width = 0;
     desc->max_height = 0;
+    desc->freetype = 1;
 
     desc->tables.g = NULL;
     desc->tables.gt2 = NULL;
