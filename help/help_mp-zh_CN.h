@@ -1,4 +1,4 @@
-//Synced with help_mp-en.h r24924
+//Synced with help_mp-en.h r25158
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -17,48 +17,48 @@
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
-"用法:   mplayer [选项] [URL|路径/]文件名\n"
+"用法：            mplayer [选项] [URL|路径/]文件名\n"
 "\n"
-"基本选项: (完整列表参见手册页)\n"
-" -vo <drv>        选择视频输出驱动 (查看驱动列表用“-vo help”)\n"
-" -ao <drv>        选择音频输出驱动 (查看驱动列表用“-ao help”)\n"
+"基本选项：        （完整列表参见手册页）\n"
+" -vo <drv>        选择视频输出驱动程序（查看驱动程序列表用“-vo help”）\n"
+" -ao <drv>        选择音频输出驱动程序（查看驱动程序列表用“-ao help”）\n"
 #ifdef HAVE_VCD
-" vcd://<trackno>  播放 (S)VCD 轨迹号 (原始设备, 无需安挂)\n"
+" vcd://<曲目号>   播放 (S)VCD（超级VCD）曲目（无格式设备，无需装载）\n"
 #endif
 #ifdef USE_DVDREAD
-" dvd://<titleno>  从设备而不是普通文件上播放 DVD 标题号\n"
-" -alang/-slang    选择 DVD 音轨/字幕的语言(使用两字符的国家代号)\n"
+" dvd://<标题号>   从设备而不是从普通文件上播放 DVD 标题\n"
+" -alang/-slang    选择 DVD 音频/字幕的语言（使用两字符的国家代号）\n"
 #endif
-" -ss <position>   寻找到给定(多少秒或时分秒 hh:mm:ss 的)位置\n"
+" -ss <位置>       定位至给定（秒数或时:分:秒 - hh:mm:ss）位置\n"
 " -nosound         不播放声音\n"
-" -fs              全屏播放 (或者用 -vm, -zoom, 详见于手册页)\n"
-" -x <x> -y <y>    设置显示的分辨率(提供给 -vm 或者 -zoom 使用)\n"
-" -sub <file>      指定字幕文件 (参见 -subfps, -subdelay)\n"
-" -playlist <file> 指定播放列表文件\n"
-" -vid x -aid y    选择用于播放的 x 视频流和 y 音频流通道号\n"
-" -fps x -srate y  改变视频率为 x 帧秒(fps)和音频率为 y 赫兹(Hz)\n"
-" -pp <quality>    使用后期处理过滤器/滤镜 (详见于手册页)\n"
-" -framedrop       使用丢帧(用于慢机器)\n"
+" -fs              全屏播放（或用 -vm、-zoom，详见手册相关页面）\n"
+" -x <x> -y <y>    设置显示的分辨率（用以与 -vm 或 -zoom 一起使用）\n"
+" -sub <文件>      指定所使用的字幕文件（另见 -subfps、-subdelay）\n"
+" -playlist <文件> 指定播放列表文件\n"
+" -vid x -aid y    选择播放视频流（x）和音频流（y）\n"
+" -fps x -srate y  改变视频帧率为 x（fps），音频采样率为 y（Hz）\n"
+" -pp <质量>       启用后期处理过滤器/滤镜（详见于手册相关页面）\n"
+" -framedrop       启用丢帧（用于运行慢的机器）\n"
 "\n"
-"基本控制键: (完整的列表参见于手册页, 同时也请核查 input.conf)\n"
-" <-  or  ->       后退/快进 10 秒\n"
-" down or up       后退/快进 1 分钟\n"
-" pgdown or pgup   后退/快进 10 分钟\n"
-" < or >           跳到播放列表中的前一个/后一个\n"
-" p or SPACE       暂停播放(按任意键继续)\n"
-" q or ESC         停止播放并退出程序\n"
-" + or -           调整音频延迟增加/减少 0.1 秒\n"
-" o                循环 OSD 模式:  无/搜索条/搜索条加计时器\n"
-" * or /           增加或减少 PCM 音量\n"
-" x or z           调整字幕延迟增加/减少 0.1 秒\n"
-" r or t           上/下调整字幕位置, 参见“-vf expand”\n"
+"基本控制键：      （完整列表见手册相关页面，也请查阅 input.conf）\n"
+" <-  或  ->       后退/快进 10 秒\n"
+" 上 或 下         后退/快进 1 分钟\n"
+" pgdown 或 pgup   后退/快进 10 分钟\n"
+" < 或 >           跳到播放列表中的前一个/后一个\n"
+" p 或 空格键      暂停影片（按任意键继续）\n"
+" q 或 ESC         停止播放并退出程序\n"
+" + 或 -           音频延迟 +/- 0.1 秒\n"
+" o                循环切换 OSD 模式：无/定位条/定位条加计时器\n"
+" * 或 /           增加或减少 PCM 音量\n"
+" x 或 z           字幕延迟 +/- 0.1 秒\n"
+" r 或 t           字幕位置上移/下移，另见“-vf expand”\n"
 "\n"
-" * * *  详细内容，更多的(高级)选项和控制键，请参见手册页  * * *\n"
+" * * * 参见手册相关页面可获取具体内容，及更多（高级）选项和控制键的信息 * * *\n"
 "\n";
 #endif
 
 // libmpcodecs/ad_dvdpcm.c:
-#define MSGTR_SamplesWanted "这个格式的采样需要更好的支持。请联系开发者。\n"
+#define MSGTR_SamplesWanted "该格式需要编码样本以优化相关技术支持。请联系开发者。\n"
 
 // ========================= MPlayer messages ===========================
 
@@ -226,6 +226,9 @@ static char help_text[]=
 #define MSGTR_Bottom "底部"
 #define MSGTR_Center "中部"
 #define MSGTR_Top "顶部"
+#define MSGTR_SubSourceFile "字幕文件"
+#define MSGTR_SubSourceVobsub "VOBSUB"
+#define MSGTR_SubSourceDemux "内嵌字幕"
 
 // osd bar names
 #define MSGTR_Volume "音量"
@@ -247,6 +250,7 @@ static char help_text[]=
 #define MSGTR_FramedroppingStatus "丢帧: %s"
 #define MSGTR_VSyncStatus "视频同步: %s"
 #define MSGTR_SubSelectStatus "字幕: %s"
+#define MSGTR_SubSourceStatus "字幕来源：%s"
 #define MSGTR_SubPosStatus "字幕位置: %s/100"
 #define MSGTR_SubAlignStatus "字幕对齐: %s"
 #define MSGTR_SubDelayStatus "字幕延迟: %s"
@@ -531,7 +535,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "打不开局域网内的: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer 没有编译成支持 SMB 的读取。\n"
 
-#define MSGTR_CantOpenDVD "打不开 DVD 设备: %s\n"
+#define MSGTR_CantOpenDVD "打不开 DVD 设备：%s（%s）\n"
 
 // stream_dvd.c
 #define MSGTR_DVDspeedCantOpen "不能以写方式打开DVD设备, 改变DVD速度需要写方式。\n"
@@ -2151,3 +2155,4 @@ static char help_text[]=
 #define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow：Directshow 流程图初始化失败。\n"
 #define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow：无法找到视频捕捉设备\n"
 #define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow：无法找到音频捕捉设备\n"
+#define MSGTR_TVI_DS_GetActualMediatypeFailed "tvi_dshow：无法识别媒体的实际类型（错误代码：0x%x）。默认其与所请求的类型一致。\n"
