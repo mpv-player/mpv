@@ -383,16 +383,16 @@
  *                    so users with different desktop sizes can keep
  *                    captured data off the desktop
  */
-#define _VINWID                                  704
-#define _VINHGT                         _VINHGT_NTSC
-#define _VINHGT_NTSC                             240
-#define _VINHGT_PAL                              290
-#define _VIN_WINDOW                  (704 * 291 * 2)
-#define _VBI_WINDOW                   (704 * 64 * 2)
+#define VINWID                                   704
+#define VINHGT                           VINHGT_NTSC
+#define VINHGT_NTSC                              240
+#define VINHGT_PAL                               290
+#define VIN_WINDOW                   (704 * 291 * 2)
+#define VBI_WINDOW                    (704 * 64 * 2)
 
-#define _VIN_FIELD_EVEN                            1
-#define _VIN_FIELD_ODD                             2
-#define _VIN_FIELD_BOTH                            4
+#define VIN_FIELD_EVEN                             1
+#define VIN_FIELD_ODD                              2
+#define VIN_FIELD_BOTH                             4
 
 
 /* i2c registers (TW; not on 300/310/325 series) */
