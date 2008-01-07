@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *****************************************************************************/
 
-#ifndef _DHAHELPER_H
-#define _DHAHELPER_H 1
+#ifndef DHAHELPER_H
+#define DHAHELPER_H
 
 // Define the various device type values.  Note that values used by Microsoft
 // Corporation are in the range 0-32767, and 32768-65535 are reserved for use
@@ -68,4 +68,4 @@ struct __attribute__((__packed__)) dhahelper_t {
 
 typedef struct dhahelper_t dhahelper_t;
 
-#endif /* _DHAHELPER_H */
+#endif /* DHAHELPER_H */
