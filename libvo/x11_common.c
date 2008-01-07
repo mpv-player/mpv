@@ -1657,6 +1657,7 @@ static Window xs_windowid = 0;
 static Atom deactivate;
 static Atom screensaver;
 
+static int screensaver_off;
 static unsigned int time_last;
 
 void xscreensaver_heartbeat(void)
@@ -1729,6 +1730,9 @@ static int xss_suspend(Bool suspend)
 void saver_on(Display * mDisplay)
 {
 
+    if (!screensaver_off)
+        return;
+    screensaver_off = 0;
     if (xss_suspend(False))
         return;
 #ifdef HAVE_XDPMS
@@ -1791,6 +1795,9 @@ void saver_off(Display * mDisplay)
 {
     int nothing;
 
+    if (screensaver_off)
+        return;
+    screensaver_off = 1;
     if (xss_suspend(True))
         return;
 #ifdef HAVE_XDPMS
