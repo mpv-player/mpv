@@ -75,8 +75,6 @@ static int old_gravity = NorthWestGravity;
 int stop_xscreensaver = 0;
 
 static int dpms_disabled = 0;
-static int timeout_save = 0;
-static int kdescreensaver_was_running = 0;
 
 char *mDisplayName = NULL;
 Display *mDisplay = NULL;
@@ -1593,69 +1591,6 @@ void vo_x11_ontop(void)
 /*
  * XScreensaver stuff
  */
-
-static int got_badwindow;
-static XErrorHandler old_handler;
-
-static int badwindow_handler(Display * dpy, XErrorEvent * error)
-{
-    if (error->error_code != BadWindow)
-        return (*old_handler) (dpy, error);
-
-    got_badwindow = True;
-    return 0;
-}
-
-static Window find_xscreensaver_window(Display * dpy)
-{
-    int i;
-    Window root = RootWindowOfScreen(DefaultScreenOfDisplay(dpy));
-    Window root2, parent, *kids;
-    Window retval = 0;
-    Atom xs_version;
-    unsigned int nkids = 0;
-
-    xs_version = XInternAtom(dpy, "_SCREENSAVER_VERSION", True);
-
-    if (!(xs_version != None &&
-          XQueryTree(dpy, root, &root2, &parent, &kids, &nkids) &&
-          kids && nkids))
-        return 0;
-
-    old_handler = XSetErrorHandler(badwindow_handler);
-
-    for (i = 0; i < nkids; i++)
-    {
-        Atom type;
-        int format;
-        unsigned long nitems, bytesafter;
-        char *v;
-        int status;
-
-        got_badwindow = False;
-        status =
-            XGetWindowProperty(dpy, kids[i], xs_version, 0, 200, False,
-                               XA_STRING, &type, &format, &nitems,
-                               &bytesafter, (unsigned char **) &v);
-        XSync(dpy, False);
-        if (got_badwindow)
-            status = BadWindow;
-
-        if (status == Success && type != None)
-        {
-            retval = kids[i];
-            break;
-        }
-    }
-    XFree(kids);
-    XSetErrorHandler(old_handler);
-
-    return retval;
-}
-
-static Window xs_windowid = 0;
-static Atom deactivate;
-static Atom screensaver;
 
 static int screensaver_off;
 static unsigned int time_last;
