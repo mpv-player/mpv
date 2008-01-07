@@ -89,6 +89,8 @@ int enable_mouse_movements=0;
 char * proc_priority=NULL;
 #endif
 
+char *heartbeat_cmd;
+
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 
 #ifdef HAVE_RTC
@@ -3442,6 +3444,14 @@ if(!mpctx->sh_video) {
 	xscreensaver_heartbeat();
     }
 #endif
+    if (heartbeat_cmd) {
+        static unsigned last_heartbeat;
+        unsigned now = GetTimerMS();
+        if (now - last_heartbeat > 30000) {
+            last_heartbeat = now;
+            system(heartbeat_cmd);
+        }
+    }
 
     frame_time_remaining = sleep_until_update(&time_frame, &aq_sleep_time);
 
