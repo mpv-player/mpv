@@ -90,8 +90,7 @@ void ass_add_font(ass_library_t* priv, char* name, char* data, int size)
 		return;
 	grow_array((void**)&priv->fontdata, priv->num_fontdata, sizeof(*priv->fontdata));
 	
-	priv->fontdata[idx].name = malloc(strlen(name));
-	strcpy(priv->fontdata[idx].name, name);
+	priv->fontdata[idx].name = strdup(name);
 	
 	priv->fontdata[idx].data = malloc(size);
 	memcpy(priv->fontdata[idx].data, data, size);
