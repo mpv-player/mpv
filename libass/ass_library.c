@@ -37,6 +37,7 @@ void ass_library_done(ass_library_t* priv)
 	if (priv) {
 		ass_set_fonts_dir(priv, NULL);
 		ass_set_style_overrides(priv, NULL);
+		ass_clear_fonts(priv);
 		free(priv);
 	}
 }
@@ -84,10 +85,27 @@ static void grow_array(void **array, int nelem, size_t elsize)
 
 void ass_add_font(ass_library_t* priv, char* name, char* data, int size)
 {
+	int idx = priv->num_fontdata;
+	if (!name || !data || !size)
+		return;
 	grow_array((void**)&priv->fontdata, priv->num_fontdata, sizeof(*priv->fontdata));
-	priv->fontdata[priv->num_fontdata].name = name;
-	priv->fontdata[priv->num_fontdata].data = data;
-	priv->fontdata[priv->num_fontdata].size = size;
+	
+	priv->fontdata[idx].name = malloc(strlen(name));
+	strcpy(priv->fontdata[idx].name, name);
+	
+	priv->fontdata[idx].data = malloc(size);
+	memcpy(priv->fontdata[idx].data, data, size);
+	
+	priv->fontdata[idx].size = size;
+	
 	priv->num_fontdata ++;
 }
 
+void ass_clear_fonts(ass_library_t* priv)
+{
+	int i;
+	for (i = 0; i < priv->num_fontdata; ++i) {
+		free(priv->fontdata[i].name);
+		free(priv->fontdata[i].data);
+	}
+}

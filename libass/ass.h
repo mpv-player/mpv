@@ -196,6 +196,11 @@ int ass_read_styles(ass_track_t* track, char* fname, char* codepage);
 void ass_add_font(ass_library_t* library, char* name, char* data, int data_size);
 
 /**
+ * \brief Remove all fonts stored in ass_library object
+ */
+void ass_clear_fonts(ass_library_t* library);
+
+/**
  * \brief Calculates timeshift from now to the start of some other subtitle event, depending on movement parameter
  * \param track subtitle track
  * \param now current time, ms
