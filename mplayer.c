@@ -3664,6 +3664,8 @@ uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
     subdata=NULL;
 #ifdef USE_ASS
     ass_track = NULL;
+    if (ass_library)
+        ass_clear_fonts(ass_library);
 #endif
 
 if(mpctx->eof == PT_NEXT_ENTRY || mpctx->eof == PT_PREV_ENTRY) {
