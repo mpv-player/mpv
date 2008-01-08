@@ -781,8 +781,7 @@ static void exit_sighandler(int x){
       if (crash_debug) {
         int gdb_pid;
         char spid[20];
-        snprintf(spid, 19, "%i", getpid());
-        spid[19] = 0;
+        snprintf(spid, sizeof(spid), "%i", getpid());
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forking...\n");
         gdb_pid = fork();
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forked...\n");
