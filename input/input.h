@@ -298,4 +298,6 @@ mp_input_uninit(void);
 int
 mp_input_check_interrupt(int time);
 
+extern int async_quit_request;
+
 #endif /* INPUT_H */

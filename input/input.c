@@ -541,6 +541,8 @@ static mp_cmd_filter_t* cmd_filters = NULL;
 // Callback to allow the menu filter to grab the incoming keys
 int (*mp_input_key_cb)(int code) = NULL;
 
+int async_quit_request;
+
 static mp_input_fd_t key_fds[MP_MAX_KEY_FD];
 static unsigned int num_key_fd = 0;
 static mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
@@ -1312,6 +1314,8 @@ mp_input_get_cmd(int time, int paused, int peek_only) {
   mp_cmd_filter_t* cf;
   int from_queue;
 
+  if (async_quit_request)
+    return mp_input_parse_cmd("quit 1");
   while(1) {
     from_queue = 1;
     ret = mp_input_get_queued_cmd(peek_only);

@@ -764,7 +764,8 @@ static void exit_sighandler(int x){
   case SIGQUIT:
   case SIGTERM:
   case SIGKILL:
-      break;  // killed from keyboard (^C) or killed [-9]
+      async_quit_request = 1;
+      return;  // killed from keyboard (^C) or killed [-9]
   case SIGILL:
 #ifdef RUNTIME_CPUDETECT
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGILL_RTCpuSel);
@@ -798,7 +799,8 @@ static void exit_sighandler(int x){
       }
 #endif  
   }
-  exit_player(NULL);
+  getch2_disable();
+  exit(1);
 }
 
 extern void mp_input_register_options(m_config_t* cfg);
