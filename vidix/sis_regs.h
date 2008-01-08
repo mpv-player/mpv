@@ -27,12 +27,12 @@
 #define inSISREG(base)          INPORT8(base)
 #define outSISREG(base,val)     OUTPORT8(base, val)
 #define orSISREG(base,val)      do { \
-                      unsigned char __Temp = INPORT8(base); \
-                      outSISREG(base, __Temp | (val)); \
+                      unsigned char tmp = INPORT8(base); \
+                      outSISREG(base, tmp | (val)); \
                     } while (0)
 #define andSISREG(base,val)     do { \
-                      unsigned char __Temp = INPORT8(base); \
-                      outSISREG(base, __Temp & (val)); \
+                      unsigned char tmp = INPORT8(base); \
+                      outSISREG(base, tmp & (val)); \
                     } while (0)
 
 #define inSISIDXREG(base,idx,var)   do { \
@@ -42,22 +42,22 @@
                       OUTPORT8(base, idx); OUTPORT8((base)+1, val); \
                     } while (0)
 #define orSISIDXREG(base,idx,val)   do { \
-                      unsigned char __Temp; \
+                      unsigned char tmp; \
                       OUTPORT8(base, idx);   \
-                      __Temp = INPORT8((base)+1)|(val); \
-                      outSISIDXREG(base,idx,__Temp); \
+                      tmp = INPORT8((base)+1)|(val); \
+                      outSISIDXREG(base,idx,tmp); \
                     } while (0)
 #define andSISIDXREG(base,idx,and)  do { \
-                      unsigned char __Temp; \
+                      unsigned char tmp; \
                       OUTPORT8(base, idx);   \
-                      __Temp = INPORT8((base)+1)&(and); \
-                      outSISIDXREG(base,idx,__Temp); \
+                      tmp = INPORT8((base)+1)&(and); \
+                      outSISIDXREG(base,idx,tmp); \
                     } while (0)
 #define setSISIDXREG(base,idx,and,or)   do { \
-                      unsigned char __Temp; \
+                      unsigned char tmp; \
                       OUTPORT8(base, idx);   \
-                      __Temp = (INPORT8((base)+1)&(and))|(or); \
-                      outSISIDXREG(base,idx,__Temp); \
+                      tmp = (INPORT8((base)+1)&(and))|(or); \
+                      outSISIDXREG(base,idx,tmp); \
                     } while (0)
 
 #define BITMASK(h,l)    (((unsigned)(1U << ((h)-(l)+1))-1)<<(l))
