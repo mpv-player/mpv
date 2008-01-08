@@ -780,12 +780,12 @@ static void exit_sighandler(int x){
 #ifdef CRASH_DEBUG
       if (crash_debug) {
         int gdb_pid;
-        char spid[20];
-        snprintf(spid, sizeof(spid), "%i", getpid());
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forking...\n");
         gdb_pid = fork();
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forked...\n");
         if (gdb_pid == 0) { // We are the child
+          char spid[20];
+          snprintf(spid, sizeof(spid), "%i", getppid());
           getch2_disable(); // allow terminal to work properly with gdb
           if (execlp("gdb", "gdb", prog_path, spid, "-ex", "bt", NULL) == -1)
             mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't start gdb\n");
