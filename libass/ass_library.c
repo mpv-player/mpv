@@ -107,4 +107,7 @@ void ass_clear_fonts(ass_library_t* priv)
 		free(priv->fontdata[i].name);
 		free(priv->fontdata[i].data);
 	}
+	free(priv->fontdata);
+	priv->fontdata = NULL;
+	priv->num_fontdata = 0;
 }
