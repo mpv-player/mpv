@@ -7766,6 +7766,8 @@ CONFIG_ZLIB=$_zlib
 CONFIG_GPL=yes
 CONFIG_ENCODERS=$_mencoder
 CONFIG_MUXERS=$_mencoder
+# Prevent building libavcodec/imgresample.c with conflicting symbols
+CONFIG_SWSCALER=yes
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
