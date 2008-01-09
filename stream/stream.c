@@ -10,7 +10,6 @@
 #include <sys/wait.h>
 #endif
 #include <fcntl.h>
-#include <signal.h>
 #include <strings.h>
 
 #include "config.h"

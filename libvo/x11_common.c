@@ -13,7 +13,6 @@
 
 #include <string.h>
 #include <unistd.h>
-#include <signal.h>
 #include <assert.h>
 
 #include "video_out.h"
