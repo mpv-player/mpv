@@ -747,13 +747,15 @@ static int gen_sh_audio(sh_audio_t* sh, mov_track_t* trak, int timescale) {
 		         default:
 			  if (len > 8 && len + 44 <= trak->stdata_len) {
 				sh->codecdata_len = len-8;
-				sh->codecdata = trak->stdata+44+8;
+				sh->codecdata = malloc(sh->codecdata_len);
+				memcpy(sh->codecdata, trak->stdata+44+8, sh->codecdata_len);
 			  }
 		        }
 		    } else {
 		      if (len > 8 && len + 44 <= trak->stdata_len) {
 		    sh->codecdata_len = len-8;
-		    sh->codecdata = trak->stdata+44+8;
+		    sh->codecdata = malloc(sh->codecdata_len);
+		    memcpy(sh->codecdata, trak->stdata+44+8, sh->codecdata_len);
 		      }
 		    }
 		  }
