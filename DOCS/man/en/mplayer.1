@@ -580,6 +580,25 @@ To end the profile, start another one or use the profile name 'default'
 to continue with normal options.
 .fi
 .PP
+.I "EXAMPLE MPLAYER PROFILE:"
+.sp 1
+.nf
+
+[protocol.dvd]
+profile-desc="Profile for dvd:// streams"
+vf=pp=hb/vb/dr/al/fd
+alang=en
+
+[protocol.dvdnav]
+profile-desc="Profile for dvdnav:// streams"
+profile=protocol.dvd
+mouse-movements=yes
+
+[extension.flv]
+profile-desc="Profile for .flv files"
+flip=yes
+.fi
+.PP
 .I "EXAMPLE MENCODER PROFILE:"
 .sp 1
 .nf
