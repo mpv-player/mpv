@@ -836,6 +836,52 @@ if ((conffile = get_path("")) == NULL) {
 }
 }
 
+#define PROFILE_CFG_PROTOCOL "protocol."
+
+static void load_per_protocol_config (m_config_t* conf, const char *const file)
+{
+    char *str;
+    char protocol[strlen (PROFILE_CFG_PROTOCOL) + strlen (file) + 1];
+    m_profile_t *p;
+    
+    /* does filename actually uses a protocol ? */
+    str = strstr (file, "://");
+    if (!str)
+        return;
+
+    sprintf (protocol, "%s%s", PROFILE_CFG_PROTOCOL, file);
+    protocol[strlen (PROFILE_CFG_PROTOCOL)+strlen(file)-strlen(str)] = '\0';
+    p = m_config_get_profile (conf, protocol);
+    if (p)
+    {
+        mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingProtocolProfile, protocol);
+        m_config_set_profile(conf,p);
+    }
+}
+
+#define PROFILE_CFG_EXTENSION "extension."
+
+static void load_per_extension_config (m_config_t* conf, const char *const file)
+{
+    char *str;
+    char extension[strlen (PROFILE_CFG_EXTENSION) + 8];
+    m_profile_t *p;
+
+    /* does filename actually have an extension ? */
+    str = strrchr (filename, '.');
+    if (!str)
+        return;
+
+    sprintf (extension, PROFILE_CFG_EXTENSION);
+    strncat (extension, ++str, 7);
+    p = m_config_get_profile (conf, extension);
+    if (p)
+    {
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingExtensionProfile, extension);
+      m_config_set_profile(conf,p);
+    }
+}
+
 static void load_per_file_config (m_config_t* conf, const char *const file)
 {
     char *confpath;
@@ -2695,6 +2741,8 @@ play_next_file:
   mpctx->global_sub_size = 0;
   { int i; for (i = 0; i < SUB_SOURCES; i++) mpctx->global_sub_indices[i] = -1; }
 
+  if (filename) load_per_protocol_config (mconfig, filename);
+  if (filename) load_per_extension_config (mconfig, filename);
   if (filename) load_per_file_config (mconfig, filename);
 
 // We must enable getch2 here to be able to interrupt network connection

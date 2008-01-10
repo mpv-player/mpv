@@ -151,6 +151,8 @@ static char help_text[]=
 "  DOCS/HTML/en/bugreports.html and follow the instructions there. We can't and\n"\
 "  won't help unless you provide this information when reporting a possible bug.\n"
 #define MSGTR_LoadingConfig "Loading config '%s'\n"
+#define MSGTR_LoadingProtocolProfile "Loading protocol-related profile '%s'\n"
+#define MSGTR_LoadingExtensionProfile "Loading extension-related profile '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: Added subtitle file (%d): %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB: Removed subtitle file (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Error opening file [%s] for writing!\n"
