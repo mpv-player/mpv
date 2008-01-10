@@ -1469,6 +1469,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	    // default: assume 1:1 mapping of sid and stream id
 	    d_sub->id = dvdsub_id;
 	    d_sub->sh = mpctx->demuxer->s_streams[d_sub->id];
+	    ds_free_packs(d_sub);
 	    for (i = 0; i < MAX_S_STREAMS; i++) {
 		sh_sub_t *sh = mpctx->demuxer->s_streams[i];
 		if (sh && sh->sid == dvdsub_id) {
