@@ -882,6 +882,23 @@ static void load_per_extension_config (m_config_t* conf, const char *const file)
     }
 }
 
+#define PROFILE_CFG_VO "vo."
+#define PROFILE_CFG_AO "ao."
+
+static void load_per_output_config (m_config_t* conf, char *cfg, char *out)
+{
+    char profile[strlen (cfg) + strlen (out) + 1];
+    m_profile_t *p;
+
+    sprintf (profile, "%s%s", cfg, out);
+    p = m_config_get_profile (conf, profile);
+    if (p)
+    {
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingExtensionProfile, profile);
+      m_config_set_profile(conf,p);
+    }
+}
+
 static void load_per_file_config (m_config_t* conf, const char *const file)
 {
     char *confpath;
@@ -2746,6 +2763,11 @@ play_next_file:
     load_per_extension_config (mconfig, filename);
     load_per_file_config (mconfig, filename);
   }
+
+  if (video_driver_list)
+    load_per_output_config (mconfig, PROFILE_CFG_VO, video_driver_list[0]);
+  if (audio_driver_list)
+    load_per_output_config (mconfig, PROFILE_CFG_AO, audio_driver_list[0]);
 
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
