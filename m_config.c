@@ -477,7 +477,7 @@ m_config_set_profile_option(m_config_t* config, m_profile_t* p,
   return 1;
 }
 
-static void
+void
 m_config_set_profile(m_config_t* config, m_profile_t* p) {
   int i;
   if(config->profile_depth > MAX_PROFILE_DEPTH) {

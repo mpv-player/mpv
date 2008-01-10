@@ -193,6 +193,15 @@ int
 m_config_set_profile_option(m_config_t* config, m_profile_t* p,
 			    char* name, char* val);
 
+/// Enables profile usage
+/** Used by the config file parser when loading a profile.
+ * 
+ *  \param config The config object.
+ *  \param p The profile object.
+ */
+void
+m_config_set_profile(m_config_t* config, m_profile_t* p);
+
 ///@}
 
 ///@}
