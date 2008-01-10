@@ -731,6 +731,8 @@ static void scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y
   color[2] = spu->image[base + spu->stride];
   color[3] = spu->image[base + spu->stride + 1];
   scale[0] = (table_x[x].left_up * table_y[y].left_up >> 16) * alpha[0];
+  if (table_y[y].left_up == 0x10000) // necessary to avoid overflow-case
+    scale[0] = table_x[x].left_up * alpha[0];
   scale[1] = (table_x[x].right_down * table_y[y].left_up >>16) * alpha[1];
   scale[2] = (table_x[x].left_up * table_y[y].right_down >> 16) * alpha[2];
   scale[3] = (table_x[x].right_down * table_y[y].right_down >> 16) * alpha[3];
