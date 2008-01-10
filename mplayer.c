@@ -2741,9 +2741,11 @@ play_next_file:
   mpctx->global_sub_size = 0;
   { int i; for (i = 0; i < SUB_SOURCES; i++) mpctx->global_sub_indices[i] = -1; }
 
-  if (filename) load_per_protocol_config (mconfig, filename);
-  if (filename) load_per_extension_config (mconfig, filename);
-  if (filename) load_per_file_config (mconfig, filename);
+  if (filename) {
+    load_per_protocol_config (mconfig, filename);
+    load_per_extension_config (mconfig, filename);
+    load_per_file_config (mconfig, filename);
+  }
 
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
