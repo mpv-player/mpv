@@ -75,7 +75,8 @@ static int init(sh_audio_t *sh)
   // If we don't get the ES descriptor, try manual config
   if(!sh->codecdata_len && sh->wf) {
     sh->codecdata_len = sh->wf->cbSize;
-    sh->codecdata = (char*)(sh->wf+1);
+    sh->codecdata = malloc(sh->codecdata_len);
+    memcpy(sh->codecdata, sh->wf+1, sh->codecdata_len);
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: codecdata extracted from WAVEFORMATEX\n");
   }
   if(!sh->codecdata_len) {
