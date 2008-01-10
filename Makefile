@@ -302,7 +302,7 @@ uninstall:
 clean::
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
-	  codecs.conf.h help_mp.h version.h
+	  codecs.conf.h help_mp.h version.h TAGS tags
 	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
 
 distclean:: doxygen_clean
@@ -312,6 +312,14 @@ distclean:: doxygen_clean
 
 strip:
 	strip -s $(ALL_PRG)
+
+TAGS:
+	@rm -f $@; \
+	( find -name '*.[chS]' -print ) | xargs etags -a
+
+tags:
+	@rm -f $@; \
+	( find -name '*.[chS]' -print ) | xargs ctags -a;
 
 # ./configure must be rerun if it changed
 config.mak: configure
@@ -399,4 +407,4 @@ gui/libgui.a: .norecurse $(wildcard gui/*.[ch] gui/*/*.[ch] gui/*/*/*.[ch])
 
 libass/libass.a: .norecurse $(wildcard libass/*.[ch])
 
-.PHONY: all install* uninstall strip doxygen doxygen_clean
+.PHONY: all install* uninstall strip doxygen doxygen_clean TAGS tags
