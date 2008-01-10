@@ -427,6 +427,7 @@ static int open_fs(menu_t* menu, char* args) {
   
   getcwd(wd,PATH_MAX);
   if (!path || path[0] == '\0') {
+#if 0
     char *slash = NULL;
     if (filename && !strstr(filename, "://") && (path=realpath(filename, b))) {
       slash = strrchr(path, '/');
@@ -439,6 +440,7 @@ static int open_fs(menu_t* menu, char* args) {
     if (slash)
       slash[1] = '\0';
     else
+#endif
       path = wd;
   }
   if (path[0] != '/') {
