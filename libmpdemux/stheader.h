@@ -100,6 +100,8 @@ typedef struct {
   int custom_colors;
   unsigned int colors[4];
   int forced_subs_only;
+  unsigned char* extradata; // extra header data passed from demuxer
+  int extradata_len;
 #ifdef USE_ASS
   ass_track_t* ass_track;  // for SSA/ASS streams (type == 'a')
 #endif
