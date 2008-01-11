@@ -162,9 +162,26 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     af_data_t *l;
     int len, left, outsize = 0, destsize;
     char *buf, *src, *dest;
+    int max_output_len;
+    int frame_num = (data->len + s->pending_len) / s->expect_len;
 
-    if (AF_OK != RESIZE_LOCAL_BUFFER(af,data))
-        return NULL;
+    if (s->add_iec61937_header)
+        max_output_len = AC3_FRAME_SIZE * 2 * 2 * frame_num;
+    else
+        max_output_len = AC3_MAX_CODED_FRAME_SIZE * frame_num;
+
+    if (af->data->len < max_output_len) {
+        af_msg(AF_MSG_VERBOSE,"[libaf] Reallocating memory in module %s, "
+               "old len = %i, new len = %i\n", af->info->name, af->data->len,
+                max_output_len);
+        free(af->data->audio);
+        af->data->audio = malloc(max_output_len);
+        if (!af->data->audio) {
+            af_msg(AF_MSG_FATAL,"[libaf] Could not allocate memory \n");
+            return NULL;
+        }
+        af->data->len = max_output_len;
+    }
 
     l = af->data;           // Local data
     buf = (char *)l->audio;
