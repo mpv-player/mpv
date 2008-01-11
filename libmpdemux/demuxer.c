@@ -22,6 +22,11 @@
 
 #include "libaf/af_format.h"
 
+#ifdef USE_ASS
+#include "libass/ass.h"
+#include "libass/ass_mp.h"
+#endif
+
 extern void resync_video_stream(sh_video_t *sh_video);
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 
@@ -239,6 +244,7 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid) {
 void free_sh_sub(sh_sub_t *sh) {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     if (sh->extradata) free(sh->extradata);
+    if (sh->ass_track) ass_free_track(sh->ass_track);
     free(sh);
 }
 
@@ -813,6 +819,18 @@ int biComp=le2me_32(sh_video->bih->biCompression);
     sh_video->i_bps*0.008f,
     sh_video->i_bps/1024.0f );
 }
+#ifdef USE_ASS
+ if (ass_enabled && ass_library) {
+   for (i = 0; i < MAX_S_STREAMS; ++i) {
+     sh_sub_t* sh = demuxer->s_streams[i];
+     if (sh && sh->type == 'a') {
+       sh->ass_track = ass_new_track(ass_library);
+       if (sh->ass_track && sh->extradata)
+         ass_process_codec_private(sh->ass_track, sh->extradata, sh->extradata_len);
+     }
+   }
+ }
+#endif
 return demuxer;
 }
 

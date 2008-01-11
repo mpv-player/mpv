@@ -956,10 +956,6 @@ demux_mkv_free_trackentry(mkv_track_t *track) {
     free (track->audio_buf);
   if (track->audio_timestamp)
     free (track->audio_timestamp);
-#ifdef USE_ASS
-  if (track->sh_sub && track->sh_sub->ass_track)
-    ass_free_track (track->sh_sub->ass_track);
-#endif
   demux_mkv_free_encodings(track->encodings, track->num_encodings);
   free(track);
 }
@@ -2254,38 +2250,6 @@ demux_mkv_parse_vobsub_data (demuxer_t *demuxer)
     }
 }
 
-/** \brief Parse the private data for SSA/ASS subtitle tracks.
-
-  This function tries to parse the private data for all SSA/ASS tracks.
-  The private data contains the normal text from the original script,
-  from the start to the beginning of 'Events' section, including '[Events]' line.
-
-  \param demuxer The generic demuxer.
-*/
-#ifdef USE_ASS
-static void
-demux_mkv_parse_ass_data (demuxer_t *demuxer)
-{
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  mkv_track_t *track;
-  int i;
-
-  for (i = 0; i < mkv_d->num_tracks; i++)
-    {
-      track = mkv_d->tracks[i];
-      if (track->type != MATROSKA_TRACK_SUBTITLE ||
-          track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB)
-        continue;
-
-      if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
-        {
-          track->sh_sub->ass_track = ass_new_track(ass_library);
-          ass_process_codec_private(track->sh_sub->ass_track, track->private_data, track->private_size);
-        }
-    }
-}
-#endif
-
 static int
 demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
 {
@@ -2549,10 +2513,7 @@ demux_mkv_open (demuxer_t *demuxer)
     }
 
   demux_mkv_parse_vobsub_data (demuxer);
-#ifdef USE_ASS
-  if (ass_enabled)
-    demux_mkv_parse_ass_data (demuxer);
-#endif
+
   /* DO NOT automatically select a subtitle track and behave like DVD */
   /* playback: only show subtitles if the user explicitely wants them. */
   track = NULL;
