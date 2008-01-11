@@ -2308,6 +2308,10 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
           track->private_data = buffer;
           track->private_size = size;
         }
+      sh->extradata=malloc(track->private_size);
+      memcpy (sh->extradata, track->private_data,
+              track->private_size);
+      sh->extradata_len = track->private_size;
     }
   else
     {
