@@ -136,18 +136,18 @@ static int write_buffer(unsigned char* data, int len) {
 static int read_buffer(float **bufs, int cnt, int num_bufs) {
   int buffered = buf_used();
   int i, j;
-  int orig_cnt = cnt;
-  if (cnt * sizeof(float) * num_bufs > buffered)
+  if (cnt * sizeof(float) * num_bufs > buffered) {
+    int orig_cnt = cnt;
     cnt = buffered / sizeof(float) / num_bufs;
+    for (i = 0; i < num_bufs; i++)
+      memset(&bufs[i][cnt], 0, (orig_cnt - cnt) * sizeof(float));
+  }
   for (i = 0; i < cnt; i++) {
     for (j = 0; j < num_bufs; j++) {
-      bufs[j][i] = *((float *)(&buffer[read_pos]));
+      bufs[j][i] = *(float *)&buffer[read_pos];
       read_pos = (read_pos + sizeof(float)) % BUFFSIZE;
     }
   }
-  for (i = cnt; i < orig_cnt; i++)
-    for (j = 0; j < num_bufs; j++)
-      bufs[j][i] = 0;
   return cnt;
 }
 
