@@ -241,7 +241,7 @@ static int init(int rate, int channels, int format, int flags) {
   }
   if (!client_name) {
     client_name = malloc(40);
-  sprintf(client_name, "MPlayer [%d]", getpid());
+    sprintf(client_name, "MPlayer [%d]", getpid());
   }
   client = jack_client_new(client_name);
   if (!client) {
@@ -356,7 +356,7 @@ static int get_space(void) {
  */
 static int play(void *data, int len, int flags) {
   if (!(flags & AOPLAY_FINAL_CHUNK))
-  len -= len % ao_data.outburst;
+    len -= len % ao_data.outburst;
   underrun = 0;
   return write_buffer(data, len);
 }
