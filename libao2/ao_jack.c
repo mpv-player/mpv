@@ -258,9 +258,9 @@ static int init(int rate, int channels, int format, int flags) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] no physical ports available\n");
     goto err_out;
   }
-  num_ports = 1;
-  while (matching_ports[num_ports]) num_ports++;
-  if (channels > num_ports) channels = num_ports;
+  i = 1;
+  while (matching_ports[i]) i++;
+  if (channels > i) channels = i;
   num_ports = channels;
 
   // create out output ports
