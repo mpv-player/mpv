@@ -827,7 +827,8 @@ int biComp=le2me_32(sh_video->bih->biCompression);
        sh->ass_track = ass_new_track(ass_library);
        if (sh->ass_track && sh->extradata)
          ass_process_codec_private(sh->ass_track, sh->extradata, sh->extradata_len);
-     }
+     } else if (sh && sh->type == 't')
+       sh->ass_track = ass_default_track(ass_library);
    }
  }
 #endif

@@ -1483,7 +1483,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 		if (sh->type == 'v')
 		    init_vo_spudec();
 #ifdef USE_ASS
-		else if (ass_enabled && sh->type == 'a')
+		else if (ass_enabled && (sh->type == 'a' || sh->type == 't'))
 		    ass_track = sh->ass_track;
 #endif
             } else {

@@ -120,11 +120,10 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                 continue;
             }
             if (type == 't' && ass_enabled) { // plaintext subs with libass
-                static ass_track_t *global_ass_track = NULL;
-                if (!global_ass_track) global_ass_track = ass_default_track(ass_library);
-                ass_track = global_ass_track;
+                sh_sub_t* sh = d_dvdsub->sh;
+                ass_track = sh ? sh->ass_track : NULL;
                 vo_sub = NULL;
-                if (pts != MP_NOPTS_VALUE) {
+                if (ass_track && pts != MP_NOPTS_VALUE) {
                     if (endpts == MP_NOPTS_VALUE) endpts = pts + 3;
                     sub_clear_text(&subs, MP_NOPTS_VALUE);
                     sub_add_text(&subs, packet, len, endpts);
