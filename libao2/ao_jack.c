@@ -254,11 +254,12 @@ static int init(int rate, int channels, int format, int flags) {
   if (!port_name)
     port_flags |= JackPortIsPhysical;
   matching_ports = jack_get_ports(client, port_name, NULL, port_flags);
-  for (num_ports = 0; matching_ports && matching_ports[num_ports]; num_ports++) ;
-  if (!num_ports) {
+  if (!matching_ports || !matching_ports[0]) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] no physical ports available\n");
     goto err_out;
   }
+  num_ports = 1;
+  while (matching_ports[num_ports]) num_ports++;
   if (channels > num_ports) channels = num_ports;
   num_ports = channels;
 
