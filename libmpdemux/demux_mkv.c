@@ -2236,8 +2236,7 @@ demux_mkv_parse_vobsub_data (demuxer_t *demuxer)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   mkv_track_t *track;
-  int i, m, size;
-  uint8_t *buffer;
+  int i;
 
   for (i = 0; i < mkv_d->num_tracks; i++)
     {
@@ -2246,14 +2245,6 @@ demux_mkv_parse_vobsub_data (demuxer_t *demuxer)
           (track->subtitle_type != MATROSKA_SUBTYPE_VOBSUB))
         continue;
 
-      size = track->private_size;
-      m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
-      if (buffer && m)
-        {
-          free (track->private_data);
-          track->private_data = buffer;
-          track->private_size = size;
-        }
       if (!demux_mkv_parse_idx (track))
         {
           free (track->private_data);
@@ -2277,8 +2268,7 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   mkv_track_t *track;
-  int i, m, size;
-  uint8_t *buffer;
+  int i;
 
   for (i = 0; i < mkv_d->num_tracks; i++)
     {
@@ -2290,14 +2280,6 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
       if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
         {
           track->sh_sub->ass_track = ass_new_track(ass_library);
-          size = track->private_size;
-          m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
-          if (buffer && m)
-            {
-              free (track->private_data);
-              track->private_data = buffer;
-              track->private_size = size;
-            }
           ass_process_codec_private(track->sh_sub->ass_track, track->private_data, track->private_size);
         }
     }
@@ -2309,6 +2291,8 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
 {
   if (track->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN)
     {
+      int size, m;
+      uint8_t *buffer;
       sh_sub_t *sh = new_sh_sub_sid(demuxer, track->tnum, sid);
       track->sh_sub = sh;
       sh->type = 't';
@@ -2316,6 +2300,14 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
         sh->type = 'v';
       if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
         sh->type = 'a';
+      size = track->private_size;
+      m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
+      if (buffer && m)
+        {
+          free (track->private_data);
+          track->private_data = buffer;
+          track->private_size = size;
+        }
     }
   else
     {
