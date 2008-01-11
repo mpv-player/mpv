@@ -164,10 +164,9 @@ static int control(int cmd, void *arg) {
  * \param num_bufs number of buffers
  */
 static void silence(float **bufs, int cnt, int num_bufs) {
-  int i, j;
-  for (i = 0; i < cnt; i++)
-    for (j = 0; j < num_bufs; j++)
-      bufs[j][i] = 0;
+  int i;
+  for (i = 0; i < num_bufs; i++)
+    memset(bufs[i], 0, cnt * sizeof(float));
 }
 
 /**
