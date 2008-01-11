@@ -120,6 +120,8 @@ static int write_buffer(unsigned char* data, int len) {
   return len;
 }
 
+static void silence(float **bufs, int cnt, int num_bufs);
+
 /**
  * \brief read data from buffer and splitting it into channels
  * \param bufs num_bufs float buffers, each will contain the data of one channel
@@ -137,10 +139,8 @@ static int read_buffer(float **bufs, int cnt, int num_bufs) {
   int buffered = buf_used();
   int i, j;
   if (cnt * sizeof(float) * num_bufs > buffered) {
-    int orig_cnt = cnt;
+    silence(bufs, cnt, num_bufs);
     cnt = buffered / sizeof(float) / num_bufs;
-    for (i = 0; i < num_bufs; i++)
-      memset(&bufs[i][cnt], 0, (orig_cnt - cnt) * sizeof(float));
   }
   for (i = 0; i < cnt; i++) {
     for (j = 0; j < num_bufs; j++) {
