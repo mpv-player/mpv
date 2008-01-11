@@ -2702,8 +2702,6 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
                  int64_t size, uint64_t block_duration, uint64_t timecode)
 {
   demux_packet_t *dp;
-  char *ptr1;
-  int i;
 
   if (block_duration == 0)
     {
@@ -2712,28 +2710,9 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
       return;
     }
 
-#ifdef USE_ASS
-  if (ass_enabled && track->subtitle_type == MATROSKA_SUBTYPE_SSA) {
-    ass_process_chunk(track->sh_sub->ass_track, block, size, (long long)timecode, (long long)block_duration);
-    return;
-  }
-#endif
-
-  ptr1 = block;
-  if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
-    {
-      /* Find text section. */
-      for (i=0; i < 8 && *ptr1 != '\0'; ptr1++)
-        if (*ptr1 == ',')
-          i++;
-      if (*ptr1 == '\0')  /* Broken line? */
-        return;
-    }
-
   sub_utf8 = 1;
-  size -= ptr1 - block;
   dp = new_demux_packet(size);
-  memcpy(dp->buffer, ptr1, size);
+  memcpy(dp->buffer, block, size);
   dp->pts = timecode / 1000.0f;
   dp->endpts = (timecode + block_duration) / 1000.0f;
   ds_add_packet(demuxer->sub, dp);

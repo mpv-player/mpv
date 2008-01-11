@@ -28,11 +28,6 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
     int len;
     char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
     static subtitle subs;
-    if (dvdsub_id >= 0 && type == 'a')
-#ifdef USE_ASS
-      if (!ass_enabled)
-#endif
-      type = 't';
     if (reset) {
         sub_clear_text(&subs, MP_NOPTS_VALUE);
         if (vo_sub) {
@@ -104,7 +99,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
 
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
-    } else if (dvdsub_id >= 0 && type == 't') {
+    } else if (dvdsub_id >= 0 && (type == 't' || type == 'a')) {
         double curpts = sh_video->pts + sub_delay;
         double endpts;
         vo_sub = &subs;
@@ -115,7 +110,16 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
             endpts = d_dvdsub->first->endpts;
             len = ds_get_packet_sub(d_dvdsub, &packet);
 #ifdef USE_ASS
-            if (ass_enabled) {
+            if (type == 'a' && ass_enabled) { // ssa/ass subs with libass
+                sh_sub_t* sh = d_dvdsub->sh;
+                ass_track = sh ? sh->ass_track : NULL;
+                if (ass_track)
+                    ass_process_chunk(ass_track, packet, len,
+                                      (long long)(pts*1000 + 0.5),
+                                      (long long)((endpts-pts)*1000 + 0.5));
+                continue;
+            }
+            if (type == 't' && ass_enabled) { // plaintext subs with libass
                 static ass_track_t *global_ass_track = NULL;
                 if (!global_ass_track) global_ass_track = ass_default_track(ass_library);
                 ass_track = global_ass_track;
@@ -128,11 +132,23 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                     subs.end = endpts * 100;
                     ass_process_subtitle(ass_track, &subs);
                 }
-            } else
+                continue;
+            }
 #endif
             if (pts != MP_NOPTS_VALUE) {
                 if (endpts == MP_NOPTS_VALUE)
                     sub_clear_text(&subs, MP_NOPTS_VALUE);
+                if (type == 'a') { // ssa/ass subs without libass => convert to plaintext
+                    int i;
+                    unsigned char* p = packet;
+                    for (i=0; i < 8 && *p != '\0'; p++)
+                        if (*p == ',')
+                            i++;
+                    if (*p == '\0')  /* Broken line? */
+                        continue;
+                    len -= p - packet;
+                    packet = p;
+                }
                 sub_add_text(&subs, packet, len, endpts);
                 vo_osd_changed(OSDTYPE_SUBTITLE);
             }
