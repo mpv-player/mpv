@@ -287,7 +287,7 @@ static int init(int rate, int channels, int format, int flags) {
   jack_latency = (float)(jack_port_get_total_latency(client, ports[0]) +
                          jack_get_buffer_size(client)) / (float)rate;
   callback_interval = 0;
-  buffer = (unsigned char *) malloc(BUFFSIZE);
+  buffer = malloc(BUFFSIZE);
 
   ao_data.channels = channels;
   ao_data.samplerate = rate;
