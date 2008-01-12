@@ -174,6 +174,14 @@ typedef struct demux_chapter_s
   char* name;
 } demux_chapter_t;
 
+typedef struct demux_attachment_s
+{
+  char* name;
+  char* type;
+  void* data;
+  unsigned int data_size;
+} demux_attachment_t;
+
 typedef struct demuxer_st {
   demuxer_desc_t *desc;  ///< Demuxer description structure
   off_t filepos; // input stream current pos.
@@ -199,6 +207,9 @@ typedef struct demuxer_st {
   demux_chapter_t* chapters;
   int num_chapters;
   
+  demux_attachment_t* attachments;
+  int num_attachments;
+
   void* priv;  // fileformat-dependent data
   char** info;
 } demuxer_t;
@@ -383,6 +394,9 @@ extern int demuxer_type_by_filename(char* filename);
 
 extern void demuxer_help(void);
 extern int get_demuxer_type_from_name(char *demuxer_name, int *force);
+
+int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
+                           const char* type, const void* data, size_t size);
 
 int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end);
 int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts, int *num_chapters, char **chapter_name);

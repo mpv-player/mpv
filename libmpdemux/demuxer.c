@@ -339,6 +339,14 @@ skip_streamfree:
           free(demuxer->chapters[i].name);
       free(demuxer->chapters);
     }
+    if (demuxer->attachments) {
+      for (i=0; i<demuxer->num_attachments; i++) {
+        free(demuxer->attachments[i].name);
+        free(demuxer->attachments[i].type);
+        free(demuxer->attachments[i].data);
+      }
+      free(demuxer->attachments);
+    }
     free(demuxer);
 }
 
@@ -1120,6 +1128,20 @@ int demuxer_switch_video(demuxer_t *demuxer, int index){
     if (res == DEMUXER_CTRL_NOTIMPL)
       index = demuxer->video->id;
     return index;
+}
+
+int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
+                           const char* type, const void* data, size_t size) {
+    if (!(demuxer->num_attachments & 31))
+        demuxer->attachments = realloc(demuxer->attachments, (demuxer->num_attachments + 32) * sizeof(demux_attachment_t));
+
+    demuxer->attachments[demuxer->num_attachments].name = strdup(name);
+    demuxer->attachments[demuxer->num_attachments].type = strdup(type);
+    demuxer->attachments[demuxer->num_attachments].data = malloc(size);
+    memcpy(demuxer->attachments[demuxer->num_attachments].data, data, size);
+    demuxer->attachments[demuxer->num_attachments].data_size = size;
+
+    return demuxer->num_attachments ++;
 }
 
 int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end){
