@@ -393,16 +393,26 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
         }
         case CODEC_TYPE_SUBTITLE:{
             sh_sub_t* sh_sub;
+            char type;
             if(priv->sub_streams >= MAX_S_STREAMS)
                 break;
             /* only support text subtitles for now */
-            if(codec->codec_id != CODEC_ID_TEXT)
+            if(codec->codec_id == CODEC_ID_TEXT)
+                type = 't';
+            else if(codec->codec_id == CODEC_ID_SSA)
+                type = 'a';
+            else
                 break;
             sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
             mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "lavf", priv->sub_streams);
             if(!sh_sub) break;
             priv->sstreams[priv->sub_streams] = i;
-            sh_sub->type = 't';
+            sh_sub->type = type;
+            if (codec->extradata_size) {
+                sh_sub->extradata = malloc(codec->extradata_size);
+                memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
+                sh_sub->extradata_len = codec->extradata_size;
+            }
             demuxer->sub->sh = demuxer->s_streams[priv->sub_streams++];
             break;
         }
