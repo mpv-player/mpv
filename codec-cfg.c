@@ -823,6 +823,8 @@ void stringset_init(stringset_t *set) {
 }
 
 void stringset_free(stringset_t *set) {
+  int count = 0;
+  while ((*set)[count]) free((*set)[count++]);
   free(*set);
   *set = NULL;
 }
