@@ -153,7 +153,7 @@ static char *ucodesearchpath[] = {
 static unsigned char dxr2buf[BUF_SIZE];
 static unsigned int  dxr2bufpos = 0;
 
-int write_dxr2(unsigned char *data, int len)
+int write_dxr2(const unsigned char *data, int len)
 {
   int w = 0;
 

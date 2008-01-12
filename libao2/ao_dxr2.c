@@ -157,7 +157,7 @@ static int get_space(void){
 
 static void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned int timestamp,int freq_id)
 {
-  extern int write_dxr2(unsigned char *data, int len);
+  extern int write_dxr2(const unsigned char *data, int len);
   
   if(dxr2_fd < 0) {
     mp_msg(MSGT_AO,MSGL_ERR,"DXR2 fd is not valid\n");
@@ -176,7 +176,7 @@ static void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned in
 // it should round it down to outburst*n
 // return: number of bytes played
 static int play(void* data,int len,int flags){
-  extern int write_dxr2(unsigned char *data, int len);
+  extern int write_dxr2(const unsigned char *data, int len);
 
   // MPEG and AC3 don't work :-(
     if(ao_data.format==AF_FORMAT_MPEG2)
