@@ -3118,6 +3118,19 @@ if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_D
 if (mpctx->global_sub_size <= mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id)
   mpctx->global_sub_size = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id + 1;
 
+#ifdef USE_ASS
+if (ass_enabled && ass_library) {
+  for (i = 0; i < mpctx->demuxer->num_attachments; ++i) {
+    demux_attachment_t* att = mpctx->demuxer->attachments + i;
+    if (extract_embedded_fonts &&
+        att->name && att->type && att->data && att->data_size &&
+        (strcmp(att->type, "application/x-truetype-font") == 0 ||
+         strcmp(att->type, "application/x-font") == 0))
+      ass_add_font(ass_library, att->name, att->data, att->data_size);
+  }
+}
+#endif
+
 current_module="demux_open2";
 
 //file_format=demuxer->file_format;

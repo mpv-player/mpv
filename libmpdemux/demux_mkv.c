@@ -143,15 +143,6 @@ typedef struct mkv_index
   uint64_t timecode, filepos;
 } mkv_index_t;
 
-typedef struct mkv_attachment
-{
-  char* name;
-  char* mime;
-  uint64_t uid;
-  void* data;
-  unsigned int data_size;
-} mkv_attachment_t;
-
 typedef struct mkv_demuxer
 {
   off_t segment_start;
@@ -186,9 +177,6 @@ typedef struct mkv_demuxer
   
   int last_aid;
   int audio_tracks[MAX_A_STREAMS];
-  
-  mkv_attachment_t *attachments;
-  int num_attachments;
 } mkv_demuxer_t;
 
 #define REALHEADER_SIZE    16
@@ -1457,7 +1445,6 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
               int i;
               char* name = NULL;
               char* mime = NULL;
-              uint64_t uid = 0;
               char* data = NULL;
               int data_size = 0;
 
@@ -1465,9 +1452,6 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
               l = len + i;
 
               mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] | + an attachment...\n");
-
-              grow_array(&mkv_d->attachments, mkv_d->num_attachments,
-                         sizeof(*mkv_d->attachments));
 
               while (len > 0)
                 {
@@ -1490,10 +1474,6 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
                         return 0;
                       mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + FileMimeType: %s\n",
                         mime);
-                      break;
-
-                    case MATROSKA_ID_FILEUID:
-                      uid = ebml_read_uint (s, &l);
                       break;
 
                     case MATROSKA_ID_FILEDATA:
@@ -1521,22 +1501,10 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
                   len -= l + il;
                 }
 
-              mkv_d->attachments[mkv_d->num_attachments].name = name;
-              mkv_d->attachments[mkv_d->num_attachments].mime = mime;
-              mkv_d->attachments[mkv_d->num_attachments].uid = uid;
-              mkv_d->attachments[mkv_d->num_attachments].data = data;
-              mkv_d->attachments[mkv_d->num_attachments].data_size = data_size;
-              mkv_d->num_attachments ++;
+              demuxer_add_attachment(demuxer, name, mime, data, data_size);
               mp_msg(MSGT_DEMUX, MSGL_V,
                      "[mkv] Attachment: %s, %s, %u bytes\n",
                      name, mime, data_size);
-#ifdef USE_ASS
-              if (ass_library &&
-                  extract_embedded_fonts && name && data && data_size &&
-                  mime && (strcmp(mime, "application/x-truetype-font") == 0 ||
-                  strcmp(mime, "application/x-font") == 0))
-                ass_add_font(ass_library, name, data, data_size);
-#endif
               break;
             }
 
@@ -2596,17 +2564,6 @@ demux_close_mkv (demuxer_t *demuxer)
         free (mkv_d->parsed_cues);
       if (mkv_d->parsed_seekhead)
         free (mkv_d->parsed_seekhead);
-      if (mkv_d->attachments) {
-        for (i = 0; i < mkv_d->num_attachments; ++i) {
-          if (mkv_d->attachments[i].name)
-            free (mkv_d->attachments[i].name);
-          if (mkv_d->attachments[i].mime)
-            free (mkv_d->attachments[i].mime);
-          if (mkv_d->attachments[i].data)
-            free (mkv_d->attachments[i].data);
-        }
-        free (mkv_d->attachments);
-      }
       free (mkv_d);
     }
 }
