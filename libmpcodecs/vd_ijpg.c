@@ -117,18 +117,20 @@ METHODDEF(void) my_error_exit (j_common_ptr cinfo)
  longjmp(myerr->setjmp_buffer, 1);
 }
 
-static struct     jpeg_decompress_struct cinfo;
-static struct     my_error_mgr jerr;
 static int        row_stride;
 static unsigned char *temp_row=NULL;
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
+ struct jpeg_decompress_struct cinfo;
+ struct my_error_mgr jerr;
  mp_image_t * mpi = NULL;
  int	      width,height,depth,i;
 
  if ( len <= 0 ) return NULL; // skipped frame
 
+ memset(&cinfo, 0, sizeof(cinfo));
+ memset(&jerr, 0, sizeof(jerr));
  cinfo.err=jpeg_std_error( &jerr.pub );
  jerr.pub.error_exit=my_error_exit;
  if( setjmp( jerr.setjmp_buffer ) )
