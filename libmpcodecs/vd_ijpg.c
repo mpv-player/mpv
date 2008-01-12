@@ -62,15 +62,15 @@ METHODDEF(void) init_source (j_decompress_ptr cinfo)
 
 METHODDEF(boolean) fill_input_buffer (j_decompress_ptr cinfo)
 {
- my_src_ptr src = (my_src_ptr) cinfo->src;                                                         
+ my_src_ptr src = (my_src_ptr) cinfo->src;
  src->pub.next_input_byte = src->inbuf;
  src->pub.bytes_in_buffer = src->bufsize;
  return TRUE;
 }
-                                                                                                        
-METHODDEF(void) skip_input_data (j_decompress_ptr cinfo, long num_bytes)                           
-{                                                                                                  
- my_src_ptr src = (my_src_ptr) cinfo->src;                                                        
+
+METHODDEF(void) skip_input_data (j_decompress_ptr cinfo, long num_bytes)
+{
+ my_src_ptr src = (my_src_ptr) cinfo->src;
 
  if (num_bytes > 0)
   {
@@ -84,9 +84,9 @@ METHODDEF(void) skip_input_data (j_decompress_ptr cinfo, long num_bytes)
   }
 }
 
-METHODDEF(void) term_source (j_decompress_ptr cinfo) { }                                           
-						   
-GLOBAL(void) jpeg_buf_src ( j_decompress_ptr cinfo, char * inbuf,int bufsize )                     
+METHODDEF(void) term_source (j_decompress_ptr cinfo) { }
+
+GLOBAL(void) jpeg_buf_src ( j_decompress_ptr cinfo, char * inbuf,int bufsize )
 {
  my_src_ptr src;
  if (cinfo->src == NULL) cinfo->src=malloc( sizeof( my_source_mgr ) );
@@ -137,7 +137,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
    mp_msg( MSGT_DECVIDEO,MSGL_ERR,"[ijpg] setjmp error ...\n" );
    return NULL;
   }
-  
+
  jpeg_create_decompress( &cinfo );
  jpeg_buf_src( &cinfo,data,len );
  jpeg_read_header( &cinfo,TRUE );
@@ -203,9 +203,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
        }
    }
   }
-  
- jpeg_finish_decompress(&cinfo);                                                                   
- jpeg_destroy_decompress(&cinfo);                                                                  
-	    
+
+ jpeg_finish_decompress(&cinfo);
+ jpeg_destroy_decompress(&cinfo);
+
  return mpi;
 }
