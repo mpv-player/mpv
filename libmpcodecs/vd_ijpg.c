@@ -29,9 +29,17 @@ LIBVD_EXTERN(ijpg)
 
 static int last_w=-1;
 static int last_h=-1;
+static int last_depth=-1;
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
+    if (cmd == VDCTRL_QUERY_FORMAT) {
+        int format = *(int *)arg;
+        if ((last_depth == 24 && format == IMGFMT_RGB24) ||
+            (last_depth == 8  && format == IMGFMT_Y8   ))
+            return CONTROL_TRUE;
+        return CONTROL_FALSE;
+    }
     return CONTROL_UNKNOWN;
 }
 
@@ -117,8 +125,6 @@ METHODDEF(void) my_error_exit (j_common_ptr cinfo)
  longjmp(myerr->setjmp_buffer, 1);
 }
 
-static unsigned char *temp_row=NULL;
-
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  struct jpeg_decompress_struct cinfo;
@@ -152,11 +158,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
    default: mp_msg( MSGT_DECVIDEO,MSGL_ERR,"Sorry, unsupported JPEG colorspace: %d.\n",depth ); return NULL;
  }
 
- if ( last_w!=width || last_h!=height )
+ if ( last_w!=width || last_h!=height || last_depth != depth )
   {
-   if(!mpcodecs_config_vo( sh,width,height, IMGFMT_RGB24 )) return NULL;
-   if(temp_row) free(temp_row);
-   temp_row=malloc(3*width+16);
+   last_depth = depth;
+   if(!mpcodecs_config_vo( sh,width,height, depth == 8 ? IMGFMT_Y8 : IMGFMT_RGB24 )) return NULL;
    last_w=width; last_h=height;
   }
 
@@ -166,42 +171,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  for ( i=0;i < height;i++ )
   {
    unsigned char * drow = mpi->planes[0] + mpi->stride[0] * i;
-   unsigned char * row = (mpi->imgfmt==IMGFMT_RGB24 && depth==24) ? drow : temp_row;
-   jpeg_read_scanlines( &cinfo,(JSAMPLE**)&row,1 );
-   if(depth==8){
-       // grayscale -> rgb/bgr 24/32
-       int x;
-       if(mpi->bpp==32)
-         for(x=0;x<width;x++) drow[4*x]=0x010101*row[x];
-       else
-         for(x=0;x<width;x++) drow[3*x+0]=drow[3*x+1]=drow[3*x+2]=row[x];
-   } else {
-       int x;
-       switch(mpi->imgfmt){
-       // rgb24 -> bgr24
-       case IMGFMT_BGR24:
-           for(x=0;x<3*width;x+=3){
-	       drow[x+0]=row[x+2];
-	       drow[x+1]=row[x+1];
-	       drow[x+2]=row[x+0];
-	   }
-	   break;
-       // rgb24 -> bgr32
-       case IMGFMT_BGR32:
-           for(x=0;x<width;x++){
-#ifdef WORDS_BIGENDIAN
-	       drow[4*x+1]=row[3*x+0];
-	       drow[4*x+2]=row[3*x+1];
-	       drow[4*x+3]=row[3*x+2];
-#else
-	       drow[4*x+0]=row[3*x+2];
-	       drow[4*x+1]=row[3*x+1];
-	       drow[4*x+2]=row[3*x+0];
-#endif
-	   }
-	   break;
-       }
-   }
+   jpeg_read_scanlines( &cinfo,(JSAMPLE**)&drow,1 );
   }
 
  jpeg_finish_decompress(&cinfo);
