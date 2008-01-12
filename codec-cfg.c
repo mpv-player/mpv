@@ -1022,7 +1022,7 @@ int main(int argc, char* argv[])
 		printf("/* GENERATED FROM %s, DO NOT EDIT! */\n\n",argv[1]);
 		
 		for (i=0; i<2; i++) {
-		  	printf("codecs_t %s[] = {\n", nm[i]);
+		  	printf("const codecs_t %s[] = {\n", nm[i]);
 			for (j = 0; j < nr[i]; j++) {
 			  	printf("{");
 
