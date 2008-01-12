@@ -117,7 +117,6 @@ METHODDEF(void) my_error_exit (j_common_ptr cinfo)
  longjmp(myerr->setjmp_buffer, 1);
 }
 
-static int        row_stride;
 static unsigned char *temp_row=NULL;
 
 // decode a frame
@@ -163,8 +162,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
  mpi=mpcodecs_get_image( sh,MP_IMGTYPE_TEMP,MP_IMGFLAG_ACCEPT_STRIDE,width,height );
  if ( !mpi ) return NULL;
-
- row_stride=cinfo.output_width * cinfo.output_components;
 
  for ( i=0;i < height;i++ )
   {
