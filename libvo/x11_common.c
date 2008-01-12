@@ -1959,6 +1959,17 @@ static int vo_gamma = 0;
 static int vo_brightness = 0;
 static int vo_contrast = 0;
 
+static int transform_color(float val,
+                           float brightness, float contrast, float gamma) {
+    float s = pow(val, gamma);
+    s = (s - 0.5) * contrast + 0.5;
+    s += brightness;
+    if (s < 0)
+        s = 0;
+    if (s > 1)
+        s = 1;
+    return (unsigned short) (s * 65535);
+}
 
 uint32_t vo_x11_set_equalizer(char *name, int value)
 {
@@ -2001,34 +2012,9 @@ uint32_t vo_x11_set_equalizer(char *name, int value)
     /* now recalculate the colormap using the newly set value */
     for (k = 0; k < cm_size; k++)
     {
-        float s;
-
-        s = pow(rf * k, gamma);
-        s = (s - 0.5) * contrast + 0.5;
-        s += brightness;
-        if (s < 0)
-            s = 0;
-        if (s > 1)
-            s = 1;
-        cols[k].red = (unsigned short) (s * 65535);
-
-        s = pow(gf * k, gamma);
-        s = (s - 0.5) * contrast + 0.5;
-        s += brightness;
-        if (s < 0)
-            s = 0;
-        if (s > 1)
-            s = 1;
-        cols[k].green = (unsigned short) (s * 65535);
-
-        s = pow(bf * k, gamma);
-        s = (s - 0.5) * contrast + 0.5;
-        s += brightness;
-        if (s < 0)
-            s = 0;
-        if (s > 1)
-            s = 1;
-        cols[k].blue = (unsigned short) (s * 65535);
+        cols[k].red   = transform_color(rf * k, brightness, contrast, gamma);
+        cols[k].green = transform_color(gf * k, brightness, contrast, gamma);
+        cols[k].blue  = transform_color(bf * k, brightness, contrast, gamma);
     }
 
     XStoreColors(mDisplay, cmap, cols, cm_size);
