@@ -21,7 +21,6 @@ static uint32_t qlowpixelMask = 0x18631863;
 static uint32_t redblueMask = 0xF81F;
 static uint32_t greenMask = 0x7E0;
 static int PixelsPerMask = 2;
-static int xsai_depth = 0;
 
 #define makecol(r,g,b) (r+(g<<8)+(b<<16))
 #define makecol_depth(d,r,g,b) (r+(g<<8)+(b<<16))
@@ -66,8 +65,6 @@ int Init_2xSaI(int d)
 //	TRACE("QColor Mask:      0x%lX\n", qcolorMask);
 //	TRACE("QLow Pixel Mask:  0x%lX\n", qlowpixelMask);
 	
-	xsai_depth = d;
-
 	return 0;
 }
 
