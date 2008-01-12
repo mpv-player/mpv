@@ -80,15 +80,13 @@ int Init_2xSaI(int d)
 	+ ((((A & qlowpixelMask) + (B & qlowpixelMask) + (C & qlowpixelMask) + (D & qlowpixelMask)) >> 2) & qlowpixelMask)
 
 
-static unsigned char *src_line[4];
-static unsigned char *dst_line[2];
-
 void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch, 
 		   uint8_t *dst, uint32_t dst_pitch,
 		   uint32_t width, uint32_t height, int sbpp) {
 
 	unsigned int x, y;
 	uint32_t color[16];
+	unsigned char *src_line[4];
 
 	/* Point to the first 3 lines. */
 	src_line[0] = src;
@@ -120,6 +118,7 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 	}
 
 	for (y = 0; y < height; y++) {
+		unsigned char *dst_line[2];
 
 		dst_line[0] = dst + dst_pitch*2*y;
 		dst_line[1] = dst + dst_pitch*(2*y+1);
