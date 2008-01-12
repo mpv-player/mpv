@@ -248,14 +248,8 @@ void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
 	for (i = 0; i < font->n_faces; ++i) {
 		FT_Face face = font->faces[i];
 		if (FT_Get_Char_Index(face, ch)) {
-			int v, v2;
-			v = face->size->metrics.ascender;
-			v2 = FT_MulFix(face->bbox.yMax, face->size->metrics.y_scale);
-			*asc = (v > v2 * 0.9) ? v : v2;
-				
-			v = - face->size->metrics.descender;
-			v2 = - FT_MulFix(face->bbox.yMin, face->size->metrics.y_scale);
-			*desc = (v > v2 * 0.9) ? v : v2;
+			*asc = face->size->metrics.ascender;
+			*desc = - face->size->metrics.descender;
 			return;
 		}
 	}
