@@ -175,7 +175,8 @@ void vfm_help(void){
 	    mpcodecs_vd_drivers[i]->info->comment);
 }
 
-static int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
+static int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status,
+               stringset_t *selected){
     int force = 0;
     unsigned int orig_fourcc=sh_video->bih?sh_video->bih->biCompression:0;
     sh_video->codec=NULL;
@@ -194,11 +195,11 @@ static int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status)
           sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,
           sh_video->codec,force) )) break;
 	// ok we found one codec
-	if(sh_video->codec->flags&CODECS_FLAG_SELECTED) continue; // already tried & failed
+	if(stringset_test(selected, sh_video->codec->name)) continue; // already tried & failed
 	if(codecname && strcmp(sh_video->codec->name,codecname)) continue; // -vc
 	if(vfm && strcmp(sh_video->codec->drv,vfm)) continue; // vfm doesn't match
 	if(!force && sh_video->codec->status<status) continue; // too unstable
-	sh_video->codec->flags|=CODECS_FLAG_SELECTED; // tagging it
+	stringset_add(selected, sh_video->codec->name); // tagging it
 	// ok, it matches all rules, let's find the driver!
 	for (i=0; mpcodecs_vd_drivers[i] != NULL; i++)
 //	    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
@@ -279,21 +280,22 @@ static int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status)
 
 int init_best_video_codec(sh_video_t *sh_video,char** video_codec_list,char** video_fm_list){
 char* vc_l_default[2]={"",(char*)NULL};
+stringset_t selected;
 // hack:
 if(!video_codec_list) video_codec_list=vc_l_default;
 // Go through the codec.conf and find the best codec...
 sh_video->inited=0;
-codecs_reset_selection(0);
+stringset_init(&selected);
 while(!sh_video->inited && *video_codec_list){
   char* video_codec=*(video_codec_list++);
   if(video_codec[0]){
     if(video_codec[0]=='-'){
       // disable this codec:
-      select_codec(video_codec+1,0);
+      stringset_add(&selected, video_codec+1);
     } else {
       // forced codec by name:
       mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_ForcedVideoCodec,video_codec);
-      init_video(sh_video,video_codec,NULL,-1);
+      init_video(sh_video,video_codec,NULL,-1, &selected);
     }
   } else {
     int status;
@@ -305,14 +307,15 @@ while(!sh_video->inited && *video_codec_list){
         char* video_fm=*(fmlist++);
 	mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_TryForceVideoFmtStr,video_fm);
 	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
-	    if(init_video(sh_video,NULL,video_fm,status)) break;
+	    if(init_video(sh_video,NULL,video_fm,status, &selected)) break;
       }
     }
     if(!sh_video->inited)
 	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
-	    if(init_video(sh_video,NULL,NULL,status)) break;
+	    if(init_video(sh_video,NULL,NULL,status, &selected)) break;
   }
 }
+stringset_free(&selected);
 
 if(!sh_video->inited){
     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);

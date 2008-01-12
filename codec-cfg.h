@@ -10,7 +10,6 @@
 // Global flags:
 #define CODECS_FLAG_SEEKABLE	(1<<0)
 #define CODECS_FLAG_ALIGN16	(1<<1)
-#define CODECS_FLAG_SELECTED	(1<<15)  /* for internal use */
 
 // Outfmt flags:
 #define CODECS_FLAG_FLIP	(1<<0)
@@ -65,9 +64,13 @@ codecs_t* find_audio_codec(unsigned int fourcc, unsigned int *fourccmap,
                            codecs_t *start, int force);
 codecs_t* find_codec(unsigned int fourcc, unsigned int *fourccmap,
                      codecs_t *start, int audioflag, int force);
-void select_codec(char* codecname,int audioflag);
 void list_codecs(int audioflag);
-void codecs_reset_selection(int audioflag);
 void codecs_uninit_free(void);
+
+typedef char ** stringset_t;
+void stringset_init(stringset_t *set);
+void stringset_free(stringset_t *set);
+void stringset_add(stringset_t *set, const char *str);
+int stringset_test(stringset_t *set, const char *str);
 
 #endif /* CODEC_CFG_H */

@@ -818,36 +818,30 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 	return NULL;
 }
 
-void select_codec(char* codecname,int audioflag){
-	int i;
-	codecs_t *c;
-//	printf("select_codec('%s')\n",codecname);
-	if (audioflag) {
-		i = nr_acodecs;
-		c = audio_codecs;
-	} else {
-		i = nr_vcodecs;
-		c = video_codecs;
-	}
-	if(i)
-	for (/* NOTHING */; i--; c++)
-	    if(!strcmp(c->name,codecname))
-		c->flags|=CODECS_FLAG_SELECTED;
+void stringset_init(stringset_t *set) {
+  *set = calloc(1, sizeof(char *));
 }
 
-void codecs_reset_selection(int audioflag){
-	int i;
-	codecs_t *c;
-	if (audioflag) {
-		i = nr_acodecs;
-		c = audio_codecs;
-	} else {
-		i = nr_vcodecs;
-		c = video_codecs;
-	}
-	if(i)
-	for (/* NOTHING */; i--; c++)
-		c->flags&=(~CODECS_FLAG_SELECTED);
+void stringset_free(stringset_t *set) {
+  free(*set);
+  *set = NULL;
+}
+
+void stringset_add(stringset_t *set, const char *str) {
+  int count = 0;
+  while ((*set)[count]) count++;
+  count++;
+  *set = realloc(*set, sizeof(char *) * (count + 1));
+  (*set)[count - 1] = strdup(str);
+  (*set)[count] = NULL;
+}
+
+int stringset_test(stringset_t *set, const char *str) {
+  stringset_t s;
+  for (s = *set; *s; s++)
+    if (strcmp(*s, str) == 0)
+      return 1;
+  return 0;
 }
 
 void list_codecs(int audioflag){
