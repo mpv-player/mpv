@@ -244,7 +244,9 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid) {
 void free_sh_sub(sh_sub_t *sh) {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     if (sh->extradata) free(sh->extradata);
+#ifdef USE_ASS
     if (sh->ass_track) ass_free_track(sh->ass_track);
+#endif
     free(sh);
 }
 
