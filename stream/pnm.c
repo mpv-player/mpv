@@ -122,7 +122,6 @@ struct pnm_s {
 
 
 /* header of rm files */
-#define RM_HEADER_SIZE 0x12
 static const unsigned char rm_header[]={
         0x2e, 0x52, 0x4d, 0x46, /* object_id      ".RMF" */
         0x00, 0x00, 0x00, 0x12, /* header_size    0x12   */
@@ -132,7 +131,6 @@ static const unsigned char rm_header[]={
 };
 
 /* data chunk header */
-#define PNM_DATA_HEADER_SIZE 18
 static const unsigned char pnm_data_header[]={
         'D','A','T','A',
          0,0,0,0,       /* data chunk size  */
@@ -158,7 +156,6 @@ static const unsigned char pnm_guid[]      = "3eac2411-83d5-11d2-f3ea-d7c3a51aa8
 static const unsigned char pnm_response[]  = "97715a899cbe41cee00dd434851535bf";
 static const unsigned char client_string[] = "WinNT_9.0_6.0.6.45_plus32_MP60_en-US_686l";
 
-#define PNM_HEADER_SIZE 11
 static const unsigned char pnm_header[] = {
         'P','N','A',
         0x00, 0x0a,
@@ -166,7 +163,6 @@ static const unsigned char pnm_header[] = {
         0x00, 0x02,
         0x00, 0x01 };
 
-#define PNM_CLIENT_CAPS_SIZE 126
 static const unsigned char pnm_client_caps[] = {
     0x07, 0x8a, 'p','n','r','v', 
        0, 0x90, 'p','n','r','v', 
@@ -194,13 +190,11 @@ static const uint32_t pnm_default_bandwidth=10485800;
 static const uint32_t pnm_available_bandwidths[]={14400,19200,28800,33600,34430,57600,
                                   115200,262200,393216,524300,1544000,10485800};
 
-#define PNM_TWENTYFOUR_SIZE 16
 static const unsigned char pnm_twentyfour[]={
     0xd5, 0x42, 0xa3, 0x1b, 0xef, 0x1f, 0x70, 0x24,
     0x85, 0x29, 0xb3, 0x8d, 0xba, 0x11, 0xf3, 0xd6 };
 
 /* now other data follows. marked with 0x0000 at the beginning */
-static int after_chunks_length=6;
 static const unsigned char after_chunks[]={
     0x00, 0x00, /* mark */
     
@@ -439,13 +433,13 @@ static int pnm_write_chunk(uint16_t chunk_id, uint16_t length,
 static void pnm_send_request(pnm_t *p, uint32_t bandwidth) {
 
   uint16_t i16;
-  int c=PNM_HEADER_SIZE;
+  int c=sizeof(pnm_header);
   char fixme[]={0,1};
 
-  memcpy(p->buffer,pnm_header,PNM_HEADER_SIZE);
+  memcpy(p->buffer,pnm_header,sizeof(pnm_header));
   c+=pnm_write_chunk(PNA_CLIENT_CHALLANGE,strlen(pnm_challenge),
           pnm_challenge,&p->buffer[c]);
-  c+=pnm_write_chunk(PNA_CLIENT_CAPS,PNM_CLIENT_CAPS_SIZE,
+  c+=pnm_write_chunk(PNA_CLIENT_CAPS,sizeof(pnm_client_caps),
           pnm_client_caps,&p->buffer[c]);
   c+=pnm_write_chunk(0x0a,0,NULL,&p->buffer[c]);
   c+=pnm_write_chunk(0x0c,0,NULL,&p->buffer[c]);
@@ -464,12 +458,12 @@ static void pnm_send_request(pnm_t *p, uint32_t bandwidth) {
   c+=pnm_write_chunk(0x12,0,NULL,&p->buffer[c]);
   c+=pnm_write_chunk(PNA_GUID,strlen(pnm_guid),
           pnm_guid,&p->buffer[c]);
-  c+=pnm_write_chunk(PNA_TWENTYFOUR,PNM_TWENTYFOUR_SIZE,
+  c+=pnm_write_chunk(PNA_TWENTYFOUR,sizeof(pnm_twentyfour),
           pnm_twentyfour,&p->buffer[c]);
   
   /* data after chunks */
-  memcpy(&p->buffer[c],after_chunks,after_chunks_length);
-  c+=after_chunks_length;
+  memcpy(&p->buffer[c],after_chunks,sizeof(after_chunks));
+  c+=sizeof(after_chunks);
 
   /* client id string */
   p->buffer[c]=PNA_CLIENT_STRING;
@@ -541,8 +535,8 @@ static int pnm_get_headers(pnm_t *p, int *need_response) {
     if (chunk_type == 0) break;
     if (chunk_type == PNA_TAG)
     {
-      memcpy(ptr, rm_header, RM_HEADER_SIZE);
-      chunk_size=RM_HEADER_SIZE;
+      memcpy(ptr, rm_header, sizeof(rm_header));
+      chunk_size=sizeof(rm_header);
       *need_response=nr;
     }
     if (chunk_type == DATA_TAG)
@@ -573,8 +567,8 @@ static int pnm_get_headers(pnm_t *p, int *need_response) {
   rm_read (p->s, &p->buffer[PREAMBLE_SIZE], 64);
 
   /* now write a data header */
-  memcpy(ptr, pnm_data_header, PNM_DATA_HEADER_SIZE);
-  size+=PNM_DATA_HEADER_SIZE;
+  memcpy(ptr, pnm_data_header, sizeof(pnm_data_header));
+  size+=sizeof(pnm_data_header);
 /*  
   h=rmff_scan_header(p->header);
   rmff_fix_header(h);
