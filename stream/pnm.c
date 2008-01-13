@@ -406,10 +406,8 @@ static int pnm_get_chunk(pnm_t *p,
 static int pnm_write_chunk(uint16_t chunk_id, uint16_t length, 
     const char *chunk, char *data) {
 
-  data[0]=(chunk_id>>8)%0xff;
-  data[1]=chunk_id%0xff;
-  data[2]=(length>>8)%0xff;
-  data[3]=length%0xff;
+  AV_WB16(&data[0], chunk_id);
+  AV_WB16(&data[2], length);
   memcpy(&data[4],chunk,length);
   
   return length+4;
@@ -543,12 +541,7 @@ static int pnm_get_headers(pnm_t *p, int *need_response) {
   }
   
   /* set data offset */
-  size--;
-  prop_hdr[42]=(size>>24)%0xff;
-  prop_hdr[43]=(size>>16)%0xff;
-  prop_hdr[44]=(size>>8)%0xff;
-  prop_hdr[45]=(size)%0xff;
-  size++;
+  AV_WB32(&prop_hdr[42], size - 1);
 
   /* read challenge */
   memcpy (p->buffer, ptr, PREAMBLE_SIZE);
