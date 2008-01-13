@@ -31,8 +31,6 @@
 
 #define PES_MAX_SIZE 2048
 
-static unsigned char pes_header[PES_MAX_SIZE];
-
 static const unsigned char ps2_header[] = {
   0x00, 0x00, 0x01, 0xba, 0x44, 0x00, 0x04, 0x00,
   0x04, 0x01, 0x01, 0x86, 0xa3, 0xf8
@@ -54,6 +52,7 @@ send_mpeg_pes_packet_ll(unsigned char *data, int len, int id, uint64_t pts,
   int n = 0;
   int idx, plen;
   int hdr;
+  unsigned char pes_header[PES_MAX_SIZE];
 
   mp_msg (MSGT_HEADER, MSGL_DBG2,
           "MPEG%d PES packet: 0x%x => %lu   \n", type, id, pts);
