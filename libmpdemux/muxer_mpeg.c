@@ -59,9 +59,6 @@
 static char ftypes[] = {'?', 'I', 'P', 'B'}; 
 #define FTYPE(x) (ftypes[(x)])
 
-#define MAX_PATTERN_LENGTH 2000000
-static unsigned char bff_mask[MAX_PATTERN_LENGTH];	//2 million frames are enough
-
 static const char *framerates[] = {
 	"unchanged", "23.976", "24", "25", "29.97", "30", "50", "59.94", "60"
 };
@@ -155,6 +152,10 @@ typedef struct {
 	uint32_t vbitrate;
 	int patch_seq, patch_sde;
 	int psm_streams_cnt;
+
+//2 million frames are enough
+#define MAX_PATTERN_LENGTH 2000000
+	uint8_t bff_mask[MAX_PATTERN_LENGTH];
 } muxer_priv_t;
 
 
@@ -1611,7 +1612,7 @@ static int soft_telecine(muxer_priv_t *priv, muxer_headers_t *vpriv, uint8_t *fp
 		se_ptr[1] &= 0xf7;
 	
 	//disable tff and rff and overwrite them with the value in bff_mask
-	pce_ptr[3] = (pce_ptr[3] & 0x7d) | bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
+	pce_ptr[3] = (pce_ptr[3] & 0x7d) | priv->bff_mask[vpriv->display_frame % MAX_PATTERN_LENGTH];
 	pce_ptr[4] |= 0x80;	//sets progressive frame
 	
 	vpriv->display_frame += n;
@@ -2459,7 +2460,7 @@ static void setup_sys_params(muxer_priv_t *priv)
 }
 
 /* excerpt from DGPulldown Copyright (C) 2005-2006, Donald Graft */
-static void generate_flags(int source, int target)
+static void generate_flags(uint8_t *bff_mask, int source, int target)
 {
 	unsigned int i, trfp;
 	uint64_t dfl,tfl;
@@ -2616,7 +2617,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer)
 		}
 		else
 		{
-			generate_flags(sfps, tfps);
+			generate_flags(priv->bff_mask, sfps, tfps);
 			conf_telecine = TELECINE_DGPULLDOWN;
 			conf_vframerate = conf_telecine_dest;
 		}
