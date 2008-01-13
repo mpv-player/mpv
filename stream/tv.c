@@ -43,7 +43,7 @@ char *tv_channel_last_real;
 /* enumerating drivers (like in stream.c) */
 extern tvi_info_t tvi_info_dummy;
 #ifdef HAVE_TV_DSHOW
-extern tvi_info_dshow;
+extern tvi_info_t tvi_info_dshow;
 #endif
 #ifdef HAVE_TV_V4L1
 extern tvi_info_t tvi_info_v4l;
