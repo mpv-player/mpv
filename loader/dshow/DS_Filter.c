@@ -217,7 +217,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	for (i = 0; i < fetched; i++)
 	{
 	    PIN_DIRECTION direction = -1;
-	    array[i]->vt->QueryDirection(array[i], (PIN_DIRECTION*)&direction);
+	    array[i]->vt->QueryDirection(array[i], &direction);
 	    if (!This->m_pInputPin && direction == PINDIR_INPUT)
 	    {
 		This->m_pInputPin = array[i];
