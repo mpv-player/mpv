@@ -47,7 +47,7 @@ static const m_option_t stream_opts_fields[] = {
   { "string", ST_OFF(filename), CONF_TYPE_STRING, 0, 0 ,0, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
-static struct m_struct_st stream_opts = {
+static const struct m_struct_st stream_opts = {
   "cue",
   sizeof(struct stream_priv_s),
   &stream_priv_dflts,

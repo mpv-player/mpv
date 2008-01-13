@@ -65,7 +65,7 @@ static const m_option_t cdda_params_fields[] = {
   { "filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL },
   {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-static struct m_struct_st stream_opts = {
+static const struct m_struct_st stream_opts = {
   "cdda",
   sizeof(struct cdda_params),
   &cdda_dflts,

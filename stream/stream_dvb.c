@@ -89,7 +89,7 @@ static const m_option_t stream_params[] = {
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-static struct m_struct_st stream_opts = {
+static const struct m_struct_st stream_opts = {
 	"dvbin",
 	sizeof(struct stream_priv_s),
 	&stream_defaults,

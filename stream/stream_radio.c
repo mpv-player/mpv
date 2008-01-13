@@ -147,7 +147,7 @@ static const m_option_t stream_opts_fields[] = {
     { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
-static struct m_struct_st stream_opts = {
+static const struct m_struct_st stream_opts = {
     "radio",
     sizeof(radio_param_t),
     &stream_radio_defaults,
