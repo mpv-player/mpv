@@ -44,6 +44,8 @@
 #include <winsock2.h>
 #endif
 
+#include "libavutil/intreadwrite.h"
+
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
 #include "help_mp.h"
@@ -102,16 +104,6 @@ struct pnm_s {
   uint32_t      ts_last[2];     /* timestamps of last chunks      */
   unsigned int  packet;         /* number of last recieved packet */
 };
-
-/*
- * utility macros
- */
-
-#define BE_16(x)  ((((uint8_t*)(x))[0] << 8) | ((uint8_t*)(x))[1])
-#define BE_32(x)  ((((uint8_t*)(x))[0] << 24) | \
-                   (((uint8_t*)(x))[1] << 16) | \
-                   (((uint8_t*)(x))[2] << 8) | \
-                    ((uint8_t*)(x))[3])
 
 /* D means direct (no pointer) */
 #define BE_16D(x) ((x & 0xff00) >> 8)|((x & 0x00ff) << 8)
@@ -324,8 +316,8 @@ static int pnm_get_chunk(pnm_t *p,
   
   max -= PREAMBLE_SIZE;
 
-  *chunk_type = BE_32(data);
-  chunk_size = BE_32(data+4);
+  *chunk_type = AV_RB32(data);
+  chunk_size = AV_RB32(data+4);
 
   switch (*chunk_type) {
     case PNA_TAG:
@@ -350,7 +342,7 @@ static int pnm_get_chunk(pnm_t *p,
 	    return -1;
 	  rm_read (p->s, ptr+2, 1);
 	  max = -1;
-	  n=BE_16(ptr+1);
+	  n=AV_RB16(ptr+1);
 	  if (max < n)
 	    return -1;
 	  rm_read (p->s, ptr+3, n);
@@ -686,7 +678,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   /* a server message */
   if (p->buffer[0] == 'X')
   {
-    int size=BE_16(&p->buffer[1]);
+    int size=AV_RB16(&p->buffer[1]);
 
     rm_read (p->s, &p->buffer[8], size-5);
     p->buffer[size+3]=0;
@@ -726,8 +718,8 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   }
 
   /* check offsets */
-  fof1=BE_16(&p->buffer[1]);
-  fof2=BE_16(&p->buffer[3]);
+  fof1=AV_RB16(&p->buffer[1]);
+  fof2=AV_RB16(&p->buffer[3]);
   if (fof1 != fof2)
   {
     mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: frame offsets are different: 0x%04x 0x%04x\n",fof1,fof2);
@@ -735,7 +727,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   }
 
   /* get first index */
-  p->seq_current[0]=BE_16(&p->buffer[5]);
+  p->seq_current[0]=AV_RB16(&p->buffer[5]);
   
   /* now read the rest of stream chunk */
   n = rm_read (p->s, &p->recv[5], fof1-5);
@@ -745,7 +737,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   p->seq_current[1]=p->recv[5];
 
   /* get timestamp */
-  p->ts_current=BE_32(&p->recv[6]);
+  p->ts_current=AV_RB32(&p->recv[6]);
   
   /* get stream number */
   stream=pnm_calc_stream(p);
@@ -758,7 +750,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   p->recv[0]=0;        /* object version */
   p->recv[1]=0;
 
-  fof2=BE_16(&fof2);
+  fof2=AV_RB16(&fof2);
   memcpy(&p->recv[2], &fof2, 2);
   /*p->recv[2]=(fof2>>8)%0xff;*/   /* length */
   /*p->recv[3]=(fof2)%0xff;*/
