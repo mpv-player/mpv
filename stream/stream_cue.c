@@ -95,12 +95,17 @@ static struct cue_track_pos {
 /* number of tracks on the cd */
 static int nTracks = 0;
 
+static int digits2int(char s[2], int errval) {
+  uint8_t a = s[0] - '0';
+  uint8_t b = s[1] - '0';
+  if (a > 9 || b > 9)
+    return errval;
+  return a * 10 + b;
+}
+
 /* presumes Line is preloaded with the "current" line of the file */
 static int cue_getTrackinfo(char *Line, tTrack *track)
 {
-  char min;
-  char sec;
-  char fps;
   int already_set = 0;
 
   /* Get the 'mode' */
@@ -131,19 +136,13 @@ static int cue_getTrackinfo(char *Line, tTrack *track)
     if (strncmp(&Line[4], "INDEX ", 6)==0)
     {
       /* check stuff here so if the answer is false the else stuff below won't be executed */
-      Line[12] = 0;
-      if ((already_set == 0) &&
-          ((strcmp(&Line[10], "00")==0) || (strcmp(&Line[10], "01")==0)))
+      if ((already_set == 0) && digits2int(Line + 10, 100) <= 1)
       {
         already_set = 1;
 
-        min = ((Line[13]-'0')<<4) | (Line[14]-'0');
-        sec = ((Line[16]-'0')<<4) | (Line[17]-'0');
-        fps = ((Line[19]-'0')<<4) | (Line[20]-'0');
-
-        track->minute = (((min>>4)*10) + (min&0xf));
-        track->second = (((sec>>4)*10) + (sec&0xf));
-        track->frame  = (((fps>>4)*10) + (fps&0xf));
+        track->minute = digits2int(Line + 13, 0);
+        track->second = digits2int(Line + 16, 0);
+        track->frame  = digits2int(Line + 19, 0);
       }
     }
     else if (strncmp(&Line[4], "PREGAP ", 7)==0) { ; /* ignore */ }
