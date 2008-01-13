@@ -751,7 +751,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   p->recv[4]=0;         /* stream number */
   p->recv[5]=stream;
   
-  p->recv[10]=p->recv[10] & 0xfe; /* streambox seems to do that... */
+  p->recv[10] &= 0xfe; /* streambox seems to do that... */
 
   p->packet++;
 
