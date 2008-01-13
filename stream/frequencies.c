@@ -747,7 +747,7 @@ static const struct CHANLIST pal_italy[] = {
     FREQ_UHF
 };
 
-static struct CHANLIST pal_ireland[] = {
+static const struct CHANLIST pal_ireland[] = {
     { "A0",     45750 },
     { "A1",     48000 },
     { "A2",     53750 },
