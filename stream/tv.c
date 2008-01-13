@@ -207,7 +207,7 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 
 static int norm_from_string(tvi_handle_t *tvh, char* norm)
 {
-    tvi_functions_t *funcs = tvh->functions;
+    const tvi_functions_t *funcs = tvh->functions;
     char str[20];
     int ret;
 
@@ -318,7 +318,7 @@ static void parse_channels(tvi_handle_t *tvh)
 static int open_tv(tvi_handle_t *tvh)
 {
     int i;
-    tvi_functions_t *funcs = tvh->functions;
+    const tvi_functions_t *funcs = tvh->functions;
     int tv_fmt_list[] = {
       IMGFMT_YV12,
       IMGFMT_I420,
@@ -622,7 +622,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     tvi_handle_t *tvh;
     sh_video_t *sh_video;
     sh_audio_t *sh_audio = NULL;
-    tvi_functions_t *funcs;
+    const tvi_functions_t *funcs;
 
     demuxer->priv=NULL;
     if(!(tvh=tv_begin(demuxer->stream->priv))) return NULL;
@@ -788,7 +788,7 @@ static void demux_close_tv(demuxer_t *demuxer)
 /* utilities for mplayer (not mencoder!!) */
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
 {
-    tvi_functions_t *funcs = tvh->functions;
+    const tvi_functions_t *funcs = tvh->functions;
 
     switch(opt)
     {
@@ -809,7 +809,7 @@ int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
 
 int tv_get_color_options(tvi_handle_t *tvh, int opt, int* value)
 {
-    tvi_functions_t *funcs = tvh->functions;
+    const tvi_functions_t *funcs = tvh->functions;
 
     switch(opt)
     {
