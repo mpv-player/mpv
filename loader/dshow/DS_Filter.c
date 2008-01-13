@@ -130,7 +130,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
     MemAllocator* tempAll;
     ALLOCATOR_PROPERTIES props,props1;
     HRESULT result;
-    DS_Filter* This = (DS_Filter*) malloc(sizeof(DS_Filter));
+    DS_Filter* This = malloc(sizeof(DS_Filter));
     if (!This)
 	return NULL;
 
