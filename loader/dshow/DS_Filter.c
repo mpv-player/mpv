@@ -98,9 +98,9 @@ void DS_Filter_Destroy(DS_Filter* This)
 static HRESULT STDCALL DS_Filter_CopySample(void* pUserData,IMediaSample* pSample){
     BYTE* pointer;
     int len;
-    SampleProcUserData* pData=(SampleProcUserData*)pUserData;
+    SampleProcUserData* pData=pUserData;
     Debug printf("CopySample called(%p,%p)\n",pSample,pUserData);
-    if (pSample->vt->GetPointer(pSample, (BYTE**) &pointer))
+    if (pSample->vt->GetPointer(pSample, &pointer))
 	return 1;
     len = pSample->vt->GetActualDataLength(pSample);
     if (len == 0)
