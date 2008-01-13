@@ -79,8 +79,8 @@ typedef struct stream_info_st {
   /// opts is at least in it's defaults settings and may have been
   /// altered by url parsing if enabled and the options string parsing.
   int (*open)(struct stream_st* st, int mode, void* opts, int* file_format);
-  char* protocols[MAX_STREAM_PROTOCOLS];
-  void* opts;
+  const char* protocols[MAX_STREAM_PROTOCOLS];
+  const void* opts;
   int opts_url; /* If this is 1 we will parse the url as an option string
 		 * too. Otherwise options are only parsed from the
 		 * options string given to open_stream_plugin */
