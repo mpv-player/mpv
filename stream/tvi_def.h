@@ -12,7 +12,7 @@ static int get_audio_framesize(priv_t *priv);
 
 int teletext_control(void* p, int cmd, void *arg);
 
-static tvi_functions_t functions =
+static const tvi_functions_t functions =
 {
     init,
     uninit,

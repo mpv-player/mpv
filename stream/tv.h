@@ -102,7 +102,7 @@ typedef struct tvi_functions_s
 } tvi_functions_t;
 
 typedef struct tvi_handle_s {
-    tvi_functions_t	*functions;
+    const tvi_functions_t	*functions;
     void		*priv;
     int 		seq;
 
