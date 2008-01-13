@@ -289,7 +289,7 @@ static void demux_close_gif(demuxer_t* demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_gif = {
+const demuxer_desc_t demuxer_desc_gif = {
   "GIF demuxer",
   "gif",
   "GIF",

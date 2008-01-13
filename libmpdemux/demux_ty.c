@@ -881,7 +881,7 @@ static demuxer_t* demux_open_ty(demuxer_t* demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_mpeg_ty = {
+const demuxer_desc_t demuxer_desc_mpeg_ty = {
   "TiVo demuxer",
   "tivo",
   "TiVo",

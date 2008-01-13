@@ -203,7 +203,7 @@ static int demux_mpc_control(demuxer_t *demuxer,int cmd, void *arg){
 }
 
 
-demuxer_desc_t demuxer_desc_mpc = {
+const demuxer_desc_t demuxer_desc_mpc = {
   "Musepack demuxer",
   "mpc",
   "MPC",

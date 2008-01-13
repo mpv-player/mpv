@@ -1908,7 +1908,7 @@ static int demux_real_control(demuxer_t *demuxer, int cmd, void *arg)
 }
 
 
-demuxer_desc_t demuxer_desc_real = {
+const demuxer_desc_t demuxer_desc_real = {
   "Realmedia demuxer",
   "real",
   "REAL",

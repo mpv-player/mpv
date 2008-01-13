@@ -249,7 +249,7 @@ static void demux_close_roq(demuxer_t* demuxer) {
 }
   
 
-demuxer_desc_t demuxer_desc_roq = {
+const demuxer_desc_t demuxer_desc_roq = {
   "RoQ demuxer",
   "roq",
   "ROQ",

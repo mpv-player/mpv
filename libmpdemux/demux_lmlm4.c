@@ -352,7 +352,7 @@ static void demux_close_lmlm4(demuxer_t *demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_lmlm4 = {
+const demuxer_desc_t demuxer_desc_lmlm4 = {
   "LMLM4 MPEG4 Compression Card stream demuxer",
   "lmlm4",
   "RAW LMLM4",

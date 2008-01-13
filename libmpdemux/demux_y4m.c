@@ -271,7 +271,7 @@ static void demux_close_y4m(demuxer_t *demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_y4m = {
+const demuxer_desc_t demuxer_desc_y4m = {
   "YUV4MPEG2 demuxer",
   "y4m",
   "YUV4MPEG2",

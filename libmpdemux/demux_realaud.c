@@ -350,7 +350,7 @@ int demux_seek_ra(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, in
 #endif
 
 
-demuxer_desc_t demuxer_desc_realaudio = {
+const demuxer_desc_t demuxer_desc_realaudio = {
   "Realaudio demuxer",
   "realaudio",
   "REALAUDIO",

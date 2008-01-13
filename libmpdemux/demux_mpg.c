@@ -1125,7 +1125,7 @@ static demuxer_t* demux_mpg_ps_open(demuxer_t* demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_mpeg_ps = {
+const demuxer_desc_t demuxer_desc_mpeg_ps = {
   "MPEG PS demuxer",
   "mpegps",
   "MPEG-PS",
@@ -1142,7 +1142,7 @@ demuxer_desc_t demuxer_desc_mpeg_ps = {
 };
 
 
-demuxer_desc_t demuxer_desc_mpeg_pes = {
+const demuxer_desc_t demuxer_desc_mpeg_pes = {
   "MPEG PES demuxer",
   "mpegpes",
   "MPEG-PES",
@@ -1159,7 +1159,7 @@ demuxer_desc_t demuxer_desc_mpeg_pes = {
 };
 
 
-demuxer_desc_t demuxer_desc_mpeg_gxf = {
+const demuxer_desc_t demuxer_desc_mpeg_gxf = {
   "MPEG ES in GXF demuxer",
   "mpeggxf",
   "MPEG-ES in GXF",
@@ -1175,7 +1175,7 @@ demuxer_desc_t demuxer_desc_mpeg_gxf = {
   NULL
 };
 
-demuxer_desc_t demuxer_desc_mpeg_es = {
+const demuxer_desc_t demuxer_desc_mpeg_es = {
   "MPEG ES demuxer",
   "mpeges",
   "MPEG-ES",
@@ -1192,7 +1192,7 @@ demuxer_desc_t demuxer_desc_mpeg_es = {
 };
 
 
-demuxer_desc_t demuxer_desc_mpeg4_es = {
+const demuxer_desc_t demuxer_desc_mpeg4_es = {
   "MPEG4 ES demuxer",
   "mpeg4es",
   "MPEG-ES",
@@ -1209,7 +1209,7 @@ demuxer_desc_t demuxer_desc_mpeg4_es = {
 };
 
 
-demuxer_desc_t demuxer_desc_h264_es = {
+const demuxer_desc_t demuxer_desc_h264_es = {
   "H.264 ES demuxer",
   "h264es",
   "H264-ES",

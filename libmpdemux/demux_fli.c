@@ -199,7 +199,7 @@ static int fli_check_file(demuxer_t* demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_fli = {
+const demuxer_desc_t demuxer_desc_fli = {
   "Autodesk FLIC demuxer",
   "fli",
   "FLI",

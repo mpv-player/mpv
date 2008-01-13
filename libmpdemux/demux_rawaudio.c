@@ -96,7 +96,7 @@ static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 }
 
 
-demuxer_desc_t demuxer_desc_rawaudio = {
+const demuxer_desc_t demuxer_desc_rawaudio = {
   "Raw audio demuxer",
   "rawaudio",
   "rawaudio",

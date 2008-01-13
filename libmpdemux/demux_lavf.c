@@ -783,7 +783,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_lavf = {
+const demuxer_desc_t demuxer_desc_lavf = {
   "libavformat demuxer",
   "lavf",
   "libavformat",
@@ -799,7 +799,7 @@ demuxer_desc_t demuxer_desc_lavf = {
   demux_lavf_control
 };
 
-demuxer_desc_t demuxer_desc_lavf_preferred = {
+const demuxer_desc_t demuxer_desc_lavf_preferred = {
   "libavformat preferred demuxer",
   "lavfpref",
   "libavformat",

@@ -3536,7 +3536,7 @@ demux_mkv_get_audio_lang(demuxer_t *demuxer, int track_num, char *lang,
 }
 
 
-demuxer_desc_t demuxer_desc_matroska = {
+const demuxer_desc_t demuxer_desc_matroska = {
   "Matroska demuxer",
   "mkv",
   "Matroska",

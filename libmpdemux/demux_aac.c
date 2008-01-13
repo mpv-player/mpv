@@ -250,7 +250,7 @@ static void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_
 }
 
 
-demuxer_desc_t demuxer_desc_aac = {
+const demuxer_desc_t demuxer_desc_aac = {
   "AAC demuxer",
   "aac",
   "AAC",

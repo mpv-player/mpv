@@ -172,7 +172,7 @@ static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {
   }
 }
 
-demuxer_desc_t demuxer_desc_mf = {
+const demuxer_desc_t demuxer_desc_mf = {
   "mf demuxer",
   "mf",
   "MF",

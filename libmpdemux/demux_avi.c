@@ -17,8 +17,8 @@
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 extern int demux_ogg_open(demuxer_t* demuxer);
 
-extern demuxer_desc_t demuxer_desc_avi_ni;
-extern demuxer_desc_t demuxer_desc_avi_nini;
+extern const demuxer_desc_t demuxer_desc_avi_ni;
+extern const demuxer_desc_t demuxer_desc_avi_nini;
 
 // PTS:  0=interleaved  1=BPS-based
 int pts_from_bps=1;
@@ -851,7 +851,7 @@ static demuxer_t* demux_open_hack_avi(demuxer_t *demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_avi = {
+const demuxer_desc_t demuxer_desc_avi = {
   "AVI demuxer",
   "avi",
   "AVI",
@@ -867,7 +867,7 @@ demuxer_desc_t demuxer_desc_avi = {
   demux_avi_control
 };
 
-demuxer_desc_t demuxer_desc_avi_ni = {
+const demuxer_desc_t demuxer_desc_avi_ni = {
   "AVI demuxer, non-interleaved",
   "avini",
   "AVI",
@@ -883,7 +883,7 @@ demuxer_desc_t demuxer_desc_avi_ni = {
   demux_avi_control
 };
 
-demuxer_desc_t demuxer_desc_avi_nini = {
+const demuxer_desc_t demuxer_desc_avi_nini = {
   "AVI demuxer, non-interleaved and no index",
   "avinini",
   "AVI",

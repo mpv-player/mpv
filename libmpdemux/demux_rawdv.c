@@ -248,7 +248,7 @@ static int demux_rawdv_control(demuxer_t *demuxer,int cmd, void *arg) {
 }
 
 
-demuxer_desc_t demuxer_desc_rawdv = {
+const demuxer_desc_t demuxer_desc_rawdv = {
   "Raw DV demuxer",
   "rawdv",
   "RAWDV",

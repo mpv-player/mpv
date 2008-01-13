@@ -139,7 +139,7 @@ static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 }
 
 
-demuxer_desc_t demuxer_desc_rawvideo = {
+const demuxer_desc_t demuxer_desc_rawvideo = {
   "Raw video demuxer",
   "rawvideo",
   "rawvideo",

@@ -292,7 +292,7 @@ static void demux_close_nut(demuxer_t *demuxer) {
 }
 
 
-demuxer_desc_t demuxer_desc_nut = {
+const demuxer_desc_t demuxer_desc_nut = {
 	"NUT demuxer",
 	"nut",
 	"libnut",

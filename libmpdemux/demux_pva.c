@@ -514,7 +514,7 @@ static void demux_close_pva(demuxer_t * demuxer)
 }
 			
 
-demuxer_desc_t demuxer_desc_pva = {
+const demuxer_desc_t demuxer_desc_pva = {
   "PVA demuxer",
   "pva",
   "PVA",

@@ -399,7 +399,7 @@ static int demux_xmms_control(demuxer_t *demuxer,int cmd, void *arg){
 }
 
 
-demuxer_desc_t demuxer_desc_xmms = {
+const demuxer_desc_t demuxer_desc_xmms = {
     "XMMS demuxer",
     "xmms",
     "XMMS",

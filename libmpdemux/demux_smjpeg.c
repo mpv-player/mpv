@@ -172,7 +172,7 @@ static void demux_close_smjpeg(demuxer_t *demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_smjpeg = {
+const demuxer_desc_t demuxer_desc_smjpeg = {
   "smjpeg demuxer",
   "smjpeg",
   "SMJPEG",

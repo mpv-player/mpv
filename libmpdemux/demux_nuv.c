@@ -443,7 +443,7 @@ static void demux_close_nuv(demuxer_t* demuxer) {
 }
 
 
-demuxer_desc_t demuxer_desc_nuv = {
+const demuxer_desc_t demuxer_desc_nuv = {
   "NuppelVideo demuxer",
   "nuv",
   "NuppelVideo",

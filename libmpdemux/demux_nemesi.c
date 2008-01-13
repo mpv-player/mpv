@@ -488,7 +488,7 @@ static int demux_rtp_control(struct demuxer_st *demuxer, int cmd, void *arg)
     }
 }
 
-demuxer_desc_t demuxer_desc_rtp_nemesi = {
+const demuxer_desc_t demuxer_desc_rtp_nemesi = {
   "libnemesi RTP demuxer",
   "nemesi",
   "",

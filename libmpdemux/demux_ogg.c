@@ -1568,7 +1568,7 @@ static int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
 
 
 
-demuxer_desc_t demuxer_desc_ogg = {
+const demuxer_desc_t demuxer_desc_ogg = {
   "Ogg demuxer",
   "ogg",
   "Ogg",

@@ -200,7 +200,7 @@ static void demux_seek_vqf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
 static void demux_close_vqf(demuxer_t* demuxer) {}
 
 
-demuxer_desc_t demuxer_desc_vqf = {
+const demuxer_desc_t demuxer_desc_vqf = {
   "TwinVQ demuxer",
   "vqf",
   "VQF",

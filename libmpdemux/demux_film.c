@@ -460,7 +460,7 @@ static int film_check_file(demuxer_t* demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_film = {
+const demuxer_desc_t demuxer_desc_film = {
   "FILM/CPK demuxer for Sega Saturn CD-ROM games",
   "film",
   "FILM",

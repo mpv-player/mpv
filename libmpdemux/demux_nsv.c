@@ -315,7 +315,7 @@ static void demux_close_nsv(demuxer_t* demuxer) {
 }
 
 
-demuxer_desc_t demuxer_desc_nsv = {
+const demuxer_desc_t demuxer_desc_nsv = {
   "NullsoftVideo demuxer",
   "nsv",
   "Nullsoft Streaming Video",

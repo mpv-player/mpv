@@ -645,7 +645,7 @@ static void demux_close_asf(demuxer_t *demuxer) {
     free(asf);
 }
 
-demuxer_desc_t demuxer_desc_asf = {
+const demuxer_desc_t demuxer_desc_asf = {
   "ASF demuxer",
   "asf",
   "ASF",

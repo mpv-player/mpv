@@ -3357,7 +3357,7 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 }
 
 
-demuxer_desc_t demuxer_desc_mpeg_ts = {
+const demuxer_desc_t demuxer_desc_mpeg_ts = {
   "MPEG-TS demuxer",
   "mpegts",
   "TS",

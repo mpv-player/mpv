@@ -2313,7 +2313,7 @@ static int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg){
 }
 
 
-demuxer_desc_t demuxer_desc_mov = {
+const demuxer_desc_t demuxer_desc_mov = {
   "Quicktime/MP4 demuxer",
   "mov",
   "Quicktime/MOV",

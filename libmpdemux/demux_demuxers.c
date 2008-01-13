@@ -15,7 +15,7 @@ typedef struct dd_priv {
   demuxer_t* sd;
 } dd_priv_t;
 
-extern demuxer_desc_t demuxer_desc_demuxers;
+extern const demuxer_desc_t demuxer_desc_demuxers;
 
 demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   demuxer_t* ret;
@@ -125,7 +125,7 @@ static int demux_demuxers_control(demuxer_t *demuxer,int cmd, void *arg){
   return DEMUXER_CTRL_NOTIMPL;
 }
 
-demuxer_desc_t demuxer_desc_demuxers = {
+const demuxer_desc_t demuxer_desc_demuxers = {
   "Demuxers demuxer",
   "", // Not selectable
   "",

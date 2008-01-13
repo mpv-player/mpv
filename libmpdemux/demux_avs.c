@@ -462,7 +462,7 @@ static int avs_check_file(demuxer_t *demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_avs = {
+const demuxer_desc_t demuxer_desc_avs = {
   "Avisynth demuxer",
   "avs",
   "AVS",

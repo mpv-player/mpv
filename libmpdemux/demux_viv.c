@@ -749,7 +749,7 @@ static void demux_close_vivo(demuxer_t *demuxer)
 }
 
 
-demuxer_desc_t demuxer_desc_vivo = {
+const demuxer_desc_t demuxer_desc_vivo = {
   "Vivo demuxer",
   "vivo",
   "VIVO",

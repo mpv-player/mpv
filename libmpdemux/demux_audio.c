@@ -712,7 +712,7 @@ static int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
 }
 
 
-demuxer_desc_t demuxer_desc_audio = {
+const demuxer_desc_t demuxer_desc_audio = {
   "Audio demuxer",
   "audio",
   "Audio file",
