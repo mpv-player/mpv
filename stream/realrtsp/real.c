@@ -90,12 +90,7 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
   int   i;
   unsigned char zres[16], buf[64];
 
-  /* initialize return values */
-  memset(response, 0, 41);
-  memset(chksum, 0, 9);
-
   /* initialize buffer */
-  memset(buf, 0, 64);
   AV_WB32(buf, 0xa1e9149d);
   AV_WB32(buf+4, 0x0e6b3b59);
 
@@ -105,14 +100,12 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
     ch_len = strlen (challenge);
 
     if (ch_len == 40) /* what a hack... */
-    {
-      challenge[32]=0;
       ch_len=32;
-    }
     if ( ch_len > 56 ) ch_len=56;
     
     /* copy challenge to buf */
     memcpy(buf+8, challenge, ch_len);
+    memset(buf+8+ch_len, 0, 56-ch_len);
   }
   
     /* xor challenge bytewise with xor_table */
@@ -131,6 +124,7 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
   /* calculate checksum */
   for (i=0; i<8; i++)
     chksum[i] = response[i*4];
+  chksum[8] = 0;
 }
 
 
