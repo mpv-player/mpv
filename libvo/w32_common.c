@@ -400,9 +400,7 @@ void vo_w32_ontop( void )
 {
     vo_ontop = !vo_ontop;
     if (!vo_fs) {
-        HWND layer = HWND_NOTOPMOST;
-        if (vo_ontop) layer = HWND_TOPMOST;
-        SetWindowPos(vo_window, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
+        createRenderingContext();
     }
 }
 
