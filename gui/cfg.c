@@ -85,7 +85,7 @@ extern int    stop_xscreensaver;
 extern int    m_config_parse_config_file(m_config_t* config, char *conffile);
 
 static m_config_t * gui_conf;
-static m_option_t gui_opts[] =
+static const m_option_t gui_opts[] =
 {
  { "enable_audio_equ",&gtkEnableAudioEqualizer,CONF_TYPE_FLAG,0,0,1,NULL },
  
