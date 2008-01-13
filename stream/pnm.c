@@ -206,9 +206,9 @@ static int rm_write(int s, const char *buf, int len) {
       total += n;
     else if (n < 0) {
 #ifndef HAVE_WINSOCK2
-      if ((timeout>0) && ((errno == EAGAIN) || (errno == EINPROGRESS))) {
+      if (timeout>0 && (errno == EAGAIN || errno == EINPROGRESS)) {
 #else
-      if ((timeout>0) && ((errno == EAGAIN) || (WSAGetLastError() == WSAEINPROGRESS))) {
+      if (timeout>0 && (errno == EAGAIN || WSAGetLastError() == WSAEINPROGRESS)) {
 #endif
         usec_sleep (1000000); timeout--;
       } else
@@ -264,7 +264,7 @@ static void hexdump (char *buf, int length) {
   for (i = 0; i < length; i++) {
     unsigned char c = buf[i];
 
-    if ((c >= 32) && (c <= 128))
+    if (c >= 32 && c <= 128)
       mp_msg(MSGT_OPEN, MSGL_INFO, "%c", c);
     else
       mp_msg(MSGT_OPEN, MSGL_INFO, ".");
@@ -599,16 +599,16 @@ static int pnm_calc_stream(pnm_t *p) {
     case 0:
     case 2: /* both types or none possible, not so good */
       /* try to figure out by second index */
-      if (  (p->seq_current[1] == p->seq_num[1])
-          &&(p->seq_current[1] != p->seq_num[3]))
+      if (   p->seq_current[1] == p->seq_num[1]
+          && p->seq_current[1] != p->seq_num[3])
       {
         /* ok, only stream0 matches */
         p->seq_num[0]=p->seq_current[0]+1;
         p->seq_num[1]++;
         return 0;
       }
-      if (  (p->seq_current[1] == p->seq_num[3])
-          &&(p->seq_current[1] != p->seq_num[1]))
+      if (   p->seq_current[1] == p->seq_num[3]
+          && p->seq_current[1] != p->seq_num[1])
       {
         /* ok, only stream1 matches */
         p->seq_num[2]=p->seq_current[0]+1;
@@ -646,10 +646,8 @@ static int pnm_get_stream_chunk(pnm_t *p) {
 
   /* send a keepalive                               */
   /* realplayer seems to do that every 43th package */
-  if ((p->packet%43) == 42)  
-  {
+  if (p->packet%43 == 42)  
     rm_write(p->s,&keepalive,1);
-  }
 
   /* data chunks begin with: 'Z' <o> <o> <i1> 'Z' <i2>
    * where <o> is the offset to next stream chunk,
@@ -694,9 +692,8 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   n=0;
   while (p->buffer[0] != 0x5a) {
     int i;
-    for (i=1; i<8; i++) {
+    for (i=1; i<8; i++)
       p->buffer[i-1]=p->buffer[i];
-    }
     rm_read (p->s, &p->buffer[7], 1);
     n++;
   }
@@ -706,7 +703,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
 #endif
 
   /* check for 'Z's */
-  if ((p->buffer[0] != 0x5a)||(p->buffer[7] != 0x5a))
+  if (p->buffer[0] != 0x5a || p->buffer[7] != 0x5a)
   {
     mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: bad boundaries\n");
     hexdump(p->buffer, 8);
@@ -727,7 +724,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   
   /* now read the rest of stream chunk */
   n = rm_read (p->s, &p->recv[5], fof1-5);
-  if (n<(fof1-5)) return 0;
+  if (n<fof1-5) return 0;
 
   /* get second index */
   p->seq_current[1]=p->recv[5];
@@ -840,9 +837,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
   mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_PNM, URL: %s\n", stream->url);
   stream->streaming_ctrl = streaming_ctrl_new();
-  if(stream->streaming_ctrl==NULL) {
+  if(stream->streaming_ctrl==NULL)
     return STREAM_ERROR;
-  }
+
   stream->streaming_ctrl->bandwidth = network_bandwidth;
   url = url_new(stream->url);
   stream->streaming_ctrl->url = check4proxies(url);
