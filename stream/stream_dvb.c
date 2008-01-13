@@ -123,7 +123,6 @@ extern int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
 		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
 		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout);
-extern char *dvb_dvrdev[4], *dvb_demuxdev[4], *dvb_frontenddev[4];
 
 
 
