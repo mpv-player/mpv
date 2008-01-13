@@ -1,5 +1,5 @@
 /* XPM */
-static const char * error_xpm[] = {
+static const char * const error_xpm[] = {
 "48 47 494 2",
 "  	c None",
 ". 	c #A56152",

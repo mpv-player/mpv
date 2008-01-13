@@ -1,5 +1,5 @@
 /* XPM */
-static const char * mplayer_desktop_xpm[] = {
+static const char * const mplayer_desktop_xpm[] = {
 "47 39 107 2",
 "  	c None",
 ". 	c #6D619F",

@@ -1,5 +1,5 @@
 /* XPM */
-static const char * empty1px_xpm[] = {
+static const char * const empty1px_xpm[] = {
 "1 1 1 1",
 " 	c None",
 " "};

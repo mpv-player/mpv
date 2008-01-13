@@ -1,5 +1,5 @@
 /* XPM */
-static const char * skin_xpm[] = {
+static const char * const skin_xpm[] = {
 "16 16 162 2",
 "  	c None",
 ". 	c #DBA97F",

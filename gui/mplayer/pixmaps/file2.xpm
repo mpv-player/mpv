@@ -1,5 +1,5 @@
 /* XPM */
-static const char * file2_xpm[] = {
+static const char * const file2_xpm[] = {
 "16 16 8 1",
 " 	c None",
 ".	c #000000",

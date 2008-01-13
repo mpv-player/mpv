@@ -1,5 +1,5 @@
 /* XPM */
-static const char * tonguebla_xpm[] = {
+static const char * const tonguebla_xpm[] = {
 "16 16 137 2",
 "  	c None",
 ". 	c #FC151B",

@@ -1,5 +1,5 @@
 /* XPM */
-static const char * question_xpm[] = {
+static const char * const question_xpm[] = {
 "48 48 284 2",
 "  	c None",
 ". 	c #9B4C3A",

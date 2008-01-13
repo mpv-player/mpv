@@ -1,5 +1,5 @@
 /* XPM */
-static const char * playvcd_xpm[] = {
+static const char * const playvcd_xpm[] = {
 "16 16 182 2",
 "  	c None",
 ". 	c #CC9665",

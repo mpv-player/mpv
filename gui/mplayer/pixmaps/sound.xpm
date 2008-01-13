@@ -1,5 +1,5 @@
 /* XPM */
-static const char * sound_xpm[] = {
+static const char * const sound_xpm[] = {
 "16 16 121 2",
 "  	c None",
 ". 	c #939CA9",

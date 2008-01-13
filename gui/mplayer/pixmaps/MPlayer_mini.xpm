@@ -1,5 +1,5 @@
 /* XPM */
-static const char * MPlayer_mini_xpm[] = {
+static const char * const MPlayer_mini_xpm[] = {
 "146 121 514 2",
 "  	c None",
 ". 	c #2C2256",

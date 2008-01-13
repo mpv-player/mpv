@@ -1,5 +1,5 @@
 /* XPM */
-static const char * prefs_xpm[] = {
+static const char * const prefs_xpm[] = {
 "16 16 50 1",
 " 	c None",
 ".	c #000000",

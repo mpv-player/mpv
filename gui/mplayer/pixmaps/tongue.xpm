@@ -1,5 +1,5 @@
 /* XPM */
-static const char * tongue_xpm[] = {
+static const char * const tongue_xpm[] = {
 "16 16 150 2",
 "  	c None",
 ". 	c #FC151B",

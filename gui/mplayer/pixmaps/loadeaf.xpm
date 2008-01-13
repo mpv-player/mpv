@@ -1,5 +1,5 @@
 /* XPM */
-static const char * loadeaf_xpm[] = {
+static const char * const loadeaf_xpm[] = {
 "16 16 132 2",
 "  	c None",
 ". 	c #5C5C5C",
