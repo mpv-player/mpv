@@ -130,13 +130,15 @@ int cfg_write(void)
         for (i=0; gui_opts[i].name; i++)
         {
             char *v = m_option_print(&gui_opts[i], gui_opts[i].p);
+            if(v == (char *)-1) {
+                mp_msg(MSGT_GPLAYER, MSGL_WARN, MSGTR_UnableToSaveOption, gui_opts[i].name);
+                v = NULL;
+            }
             if(v)
             {
                 fprintf(f, "%s = \"%s\"\n", gui_opts[i].name, v);
                 free(v);
             }
-            else if((int) v == -1)
-                mp_msg(MSGT_GPLAYER, MSGL_WARN, MSGTR_UnableToSaveOption, gui_opts[i].name);
         }
         fclose(f);
     }
