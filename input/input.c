@@ -50,7 +50,7 @@
 /// For the args, the first field is the type (actually int, float or string), the second
 /// is the default value wich is used for optional arguments
 
-static mp_cmd_t mp_cmds[] = {
+static const mp_cmd_t mp_cmds[] = {
 #ifdef USE_RADIO
   { MP_CMD_RADIO_STEP_CHANNEL, "radio_step_channel", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
   { MP_CMD_RADIO_SET_CHANNEL, "radio_set_channel", 1, { { MP_CMD_ARG_STRING, {0}}, {-1,{0}}  }},
@@ -193,7 +193,7 @@ static mp_cmd_t mp_cmds[] = {
 /// The names of the keys as used in input.conf
 /// If you add some new keys, you also need to add them here
 
-static mp_key_name_t key_names[] = {
+static const mp_key_name_t key_names[] = {
   { ' ', "SPACE" },
   { '#', "SHARP" },
   { KEY_ENTER, "ENTER" },
@@ -334,7 +334,7 @@ static mp_key_name_t key_names[] = {
 // The first arg is a null terminated array of key codes.
 // The second is the command
 
-static mp_cmd_bind_t def_cmd_binds[] = {
+static const mp_cmd_bind_t def_cmd_binds[] = {
 
   { {  MOUSE_BTN3, 0 }, "seek 10" },
   { {  MOUSE_BTN4, 0 }, "seek -10" },
@@ -475,7 +475,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
 
 
 #ifdef HAVE_NEW_GUI
-static mp_cmd_bind_t gui_def_cmd_binds[] = {
+static const mp_cmd_bind_t gui_def_cmd_binds[] = {
 
   { { 'l', 0 }, "gui_loadfile" },
   { { 't', 0 }, "gui_loadsubtitle" },
