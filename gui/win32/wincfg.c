@@ -58,7 +58,7 @@ extern char *proc_priority;
 extern int m_config_parse_config_file(m_config_t *config, char *conffile);
 
 static m_config_t *gui_conf;
-static m_option_t gui_opts[] =
+static const m_option_t gui_opts[] =
 {
     {   "priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {   "vo_driver", &video_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL },
