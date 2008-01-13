@@ -135,7 +135,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
         this->m_sOurType.cbFormat = bihs;
         this->m_sOurType.pbFormat = (char*)this->m_sVhdr;
 
-	this->m_sVhdr2 = (VIDEOINFOHEADER*)(malloc(sizeof(VIDEOINFOHEADER)+12));
+	this->m_sVhdr2 = malloc(sizeof(VIDEOINFOHEADER)+12);
 	memcpy(this->m_sVhdr2, this->m_sVhdr, sizeof(VIDEOINFOHEADER));
         memset((char*)this->m_sVhdr2 + sizeof(VIDEOINFOHEADER), 0, 12);
 	this->m_sVhdr2->bmiHeader.biCompression = 0;
