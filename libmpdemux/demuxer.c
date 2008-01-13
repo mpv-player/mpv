@@ -720,7 +720,7 @@ if (file_format) {
         demuxer_t *demux2 = demuxer;
         // Move messages to demuxer detection code?
         mp_msg(MSGT_DEMUXER, MSGL_INFO, MSGTR_Detected_XXX_FileFormat, demuxer_desc->shortdesc);
-        file_format = demuxer_desc->type = fformat;
+        file_format = fformat;
         if (!demuxer->desc->open || (demux2 = demuxer->desc->open(demuxer))) {
           demuxer = demux2;
           goto dmx_open;
