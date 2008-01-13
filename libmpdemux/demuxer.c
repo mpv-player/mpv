@@ -74,7 +74,7 @@ extern demuxer_desc_t demuxer_desc_lavf_preferred;
 extern demuxer_desc_t demuxer_desc_aac;
 extern demuxer_desc_t demuxer_desc_nut;
 
-demuxer_desc_t* demuxer_list[] = {
+const demuxer_desc_t* const demuxer_list[] = {
   &demuxer_desc_rawaudio,
   &demuxer_desc_rawvideo,
 #ifdef USE_TV
@@ -182,7 +182,7 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
  * @param file_format    type of the demuxer
  * @return               structure for the demuxer, NULL if not found
  */
-static demuxer_desc_t* get_demuxer_desc_from_type(int file_format)
+static const demuxer_desc_t* get_demuxer_desc_from_type(int file_format)
 {
   int i;
 
@@ -701,7 +701,7 @@ demuxer_t *demuxer=NULL;
 
 sh_video_t *sh_video=NULL;
 
-demuxer_desc_t *demuxer_desc;
+const demuxer_desc_t *demuxer_desc;
 int fformat = 0;
 int i;
 

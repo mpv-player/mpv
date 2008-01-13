@@ -183,7 +183,7 @@ typedef struct demux_attachment_s
 } demux_attachment_t;
 
 typedef struct demuxer_st {
-  demuxer_desc_t *desc;  ///< Demuxer description structure
+  const demuxer_desc_t *desc;  ///< Demuxer description structure
   off_t filepos; // input stream current pos.
   off_t movi_start;
   off_t movi_end;
