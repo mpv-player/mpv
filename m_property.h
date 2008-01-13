@@ -106,7 +106,7 @@ typedef struct {
 
 /// \ingroup Properties
 /// \brief Property action callback.
-typedef int(*m_property_ctrl_f)(m_option_t* prop,int action,void* arg,void *ctx);
+typedef int(*m_property_ctrl_f)(const m_option_t* prop,int action,void* arg,void *ctx);
 
 /// Do an action on a property.
 /** \param prop_list The list of properties.
@@ -115,11 +115,11 @@ typedef int(*m_property_ctrl_f)(m_option_t* prop,int action,void* arg,void *ctx)
  *  \param arg Argument, usually a pointer to the data type used by the property.
  *  \return See \ref PropertyActionsReturn.
  */
-int m_property_do(m_option_t* prop_list, const char* prop,
+int m_property_do(const m_option_t* prop_list, const char* prop,
                   int action, void* arg, void *ctx);
 
 /// Print a list of properties.
-void m_properties_print_help_list(m_option_t* list);
+void m_properties_print_help_list(const m_option_t* list);
 
 /// Expand a property string.
 /** This function allows to print strings containing property values.
@@ -132,7 +132,7 @@ void m_properties_print_help_list(m_option_t* list);
  *  \param str The string to expand.
  *  \return The newly allocated expanded string.
  */
-char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx);
+char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ctx);
 
 // Helpers to use MPlayer's properties
 
@@ -156,46 +156,46 @@ char* mp_property_print(const char *name, void* ctx);
     } while(0)
 
 /// Implement get.
-int m_property_int_ro(m_option_t* prop,int action,
+int m_property_int_ro(const m_option_t* prop,int action,
                       void* arg,int var);
 
 /// Implement set, get and step up/down.
-int m_property_int_range(m_option_t* prop,int action,
+int m_property_int_range(const m_option_t* prop,int action,
                          void* arg,int* var);
 
 /// Same as m_property_int_range but cycle.
-int m_property_choice(m_option_t* prop,int action,
+int m_property_choice(const m_option_t* prop,int action,
                       void* arg,int* var);
 
 /// Switch betwen min and max.
-int m_property_flag(m_option_t* prop,int action,
+int m_property_flag(const m_option_t* prop,int action,
                     void* arg,int* var);
 
 /// Implement get, print.
-int m_property_float_ro(m_option_t* prop,int action,
+int m_property_float_ro(const m_option_t* prop,int action,
                         void* arg,float var);
 
 /// Implement set, get and step up/down
-int m_property_float_range(m_option_t* prop,int action,
+int m_property_float_range(const m_option_t* prop,int action,
                            void* arg,float* var);
 
 /// float with a print function which print the time in ms
-int m_property_delay(m_option_t* prop,int action,
+int m_property_delay(const m_option_t* prop,int action,
                      void* arg,float* var);
 
 /// Implement get, print
-int m_property_double_ro(m_option_t* prop,int action,
+int m_property_double_ro(const m_option_t* prop,int action,
                          void* arg,double var);
 
 /// Implement print
-int m_property_time_ro(m_option_t* prop,int action,
+int m_property_time_ro(const m_option_t* prop,int action,
                        void* arg,double var);
 
 /// get/print the string
-int m_property_string_ro(m_option_t* prop,int action,void* arg, char* str);
+int m_property_string_ro(const m_option_t* prop,int action,void* arg, char* str);
 
 /// get/print a bitrate
-int m_property_bitrate(m_option_t* prop,int action,void* arg,int rate);
+int m_property_bitrate(const m_option_t* prop,int action,void* arg,int rate);
 
 ///@}
 

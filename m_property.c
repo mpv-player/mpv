@@ -17,10 +17,10 @@
 
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 
-static int do_action(m_option_t* prop_list, const char* name,
+static int do_action(const m_option_t* prop_list, const char* name,
                      int action, void* arg, void *ctx) {
     const char* sep;
-    m_option_t* prop;
+    const m_option_t* prop;
     m_property_action_t ka;
     int r;
     if((sep = strchr(name,'/')) && sep[1]) {
@@ -40,15 +40,15 @@ static int do_action(m_option_t* prop_list, const char* name,
     r = ((m_property_ctrl_f)prop->p)(prop,action,arg,ctx);
     if(action == M_PROPERTY_GET_TYPE && r < 0) {
         if(!arg) return M_PROPERTY_ERROR;
-        *(m_option_t**)arg = prop;
+        *(const m_option_t**)arg = prop;
         return M_PROPERTY_OK;
     }
     return r;
 }
 
-int m_property_do(m_option_t* prop_list, const char* name,
+int m_property_do(const m_option_t* prop_list, const char* name,
                   int action, void* arg, void *ctx) {
-    m_option_t* opt;
+    const m_option_t* opt;
     void* val;
     char* str;
     int r;
@@ -97,7 +97,7 @@ int m_property_do(m_option_t* prop_list, const char* name,
     return do_action(prop_list,name,action,arg,ctx);
 }
 
-char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx) {
+char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ctx) {
     int l,fr=0,pos=0,size=strlen(str)+512;
     char *p = NULL,*e,*ret = malloc(size), num_val;
     int skip = 0, lvl = 0, skip_lvl = 0;
@@ -177,13 +177,13 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str, void *ctx) {
     return ret;
 }
 
-void m_properties_print_help_list(m_option_t* list) {
+void m_properties_print_help_list(const m_option_t* list) {
     char min[50],max[50];
     int i,count = 0;
     
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_PropertyListHeader);
     for(i = 0 ; list[i].name ; i++) {
-        m_option_t* opt = &list[i];
+        const m_option_t* opt = &list[i];
         if(opt->flags & M_OPT_MIN)
             sprintf(min,"%-8.0f",opt->min);
         else
@@ -204,7 +204,7 @@ void m_properties_print_help_list(m_option_t* list) {
 
 // Some generic property implementations
 
-int m_property_int_ro(m_option_t* prop,int action,
+int m_property_int_ro(const m_option_t* prop,int action,
                       void* arg,int var) {
     switch(action) {
     case M_PROPERTY_GET:
@@ -215,7 +215,7 @@ int m_property_int_ro(m_option_t* prop,int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-int m_property_int_range(m_option_t* prop,int action,
+int m_property_int_range(const m_option_t* prop,int action,
                          void* arg,int* var) {
     switch(action) {
     case M_PROPERTY_SET:
@@ -233,7 +233,7 @@ int m_property_int_range(m_option_t* prop,int action,
     return m_property_int_ro(prop,action,arg,*var);
 }
 
-int m_property_choice(m_option_t* prop,int action,
+int m_property_choice(const m_option_t* prop,int action,
                       void* arg,int* var) {
     switch(action) {
     case M_PROPERTY_STEP_UP:
@@ -245,7 +245,7 @@ int m_property_choice(m_option_t* prop,int action,
     return m_property_int_range(prop,action,arg,var);
 }
 
-int m_property_flag(m_option_t* prop,int action,
+int m_property_flag(const m_option_t* prop,int action,
                     void* arg,int* var) {
     switch(action) {
     case M_PROPERTY_STEP_UP:
@@ -260,7 +260,7 @@ int m_property_flag(m_option_t* prop,int action,
     return m_property_int_range(prop,action,arg,var);
 }
 
-int m_property_float_ro(m_option_t* prop,int action,
+int m_property_float_ro(const m_option_t* prop,int action,
                         void* arg,float var) {
     switch(action) {
     case M_PROPERTY_GET:
@@ -276,7 +276,7 @@ int m_property_float_ro(m_option_t* prop,int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-int m_property_float_range(m_option_t* prop,int action,
+int m_property_float_range(const m_option_t* prop,int action,
                            void* arg,float* var) {
     switch(action) {
     case M_PROPERTY_SET:
@@ -294,7 +294,7 @@ int m_property_float_range(m_option_t* prop,int action,
     return m_property_float_ro(prop,action,arg,*var);
 }
 
-int m_property_delay(m_option_t* prop,int action,
+int m_property_delay(const m_option_t* prop,int action,
                      void* arg,float* var) {
     switch(action) {
     case M_PROPERTY_PRINT:
@@ -307,7 +307,7 @@ int m_property_delay(m_option_t* prop,int action,
     }
 }
 
-int m_property_double_ro(m_option_t* prop,int action,
+int m_property_double_ro(const m_option_t* prop,int action,
                          void* arg,double var) {
     switch(action) {
     case M_PROPERTY_GET:
@@ -323,7 +323,7 @@ int m_property_double_ro(m_option_t* prop,int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-int m_property_time_ro(m_option_t* prop,int action,
+int m_property_time_ro(const m_option_t* prop,int action,
                        void* arg,double var) {
     switch(action) {
     case M_PROPERTY_PRINT:
@@ -348,7 +348,7 @@ int m_property_time_ro(m_option_t* prop,int action,
     return m_property_double_ro(prop,action,arg,var);
 }
 
-int m_property_string_ro(m_option_t* prop,int action,void* arg,char* str) {
+int m_property_string_ro(const m_option_t* prop,int action,void* arg,char* str) {
     switch(action) {
     case M_PROPERTY_GET:
         if(!arg) return 0;
@@ -362,7 +362,7 @@ int m_property_string_ro(m_option_t* prop,int action,void* arg,char* str) {
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-int m_property_bitrate(m_option_t* prop,int action,void* arg,int rate) {
+int m_property_bitrate(const m_option_t* prop,int action,void* arg,int rate) {
     switch(action) {
     case M_PROPERTY_PRINT:
         if (!arg)
