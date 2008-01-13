@@ -136,7 +136,7 @@ typedef struct video_registers_s
 
 static bes_registers_t besr;
 #define DECLARE_VREG(name) { #name, name, 0 }
-static video_registers_t vregs[] = 
+static const video_registers_t vregs[] = 
 {
   DECLARE_VREG(VIDEOMUX_CNTL),
   DECLARE_VREG(VIPPAD_MASK),
@@ -945,7 +945,7 @@ typedef struct tagREF_TRANSFORM
 } REF_TRANSFORM;
 
 /* Parameters for ITU-R BT.601 and ITU-R BT.709 colour spaces */
-REF_TRANSFORM trans[2] =
+static const REF_TRANSFORM trans[2] =
 {
 	{1.1678, 0.0, 1.6007, -0.3929, -0.8154, 2.0232, 0.0}, /* BT.601 */
 	{1.1678, 0.0, 1.7980, -0.2139, -0.5345, 2.1186, 0.0}  /* BT.709 */
@@ -1052,7 +1052,7 @@ typedef struct
 }GAMMA_SETTINGS;
 
 /* Recommended gamma curve parameters */
-GAMMA_SETTINGS r200_def_gamma[18] = 
+static const GAMMA_SETTINGS r200_def_gamma[18] = 
 {
 	{OV0_GAMMA_0_F, 0x100, 0x0000},
 	{OV0_GAMMA_10_1F, 0x100, 0x0020},
@@ -1074,7 +1074,7 @@ GAMMA_SETTINGS r200_def_gamma[18] =
 	{OV0_GAMMA_3C0_3FF, 0x100, 0x0700}
 };
 
-GAMMA_SETTINGS r100_def_gamma[6] = 
+static const GAMMA_SETTINGS r100_def_gamma[6] = 
 {
 	{OV0_GAMMA_0_F, 0x100, 0x0000},
 	{OV0_GAMMA_10_1F, 0x100, 0x0020},
@@ -1386,7 +1386,7 @@ typedef struct fourcc_desc_s
     unsigned max_srcw;
 }fourcc_desc_t;
 
-static fourcc_desc_t supported_fourcc[] = 
+static const fourcc_desc_t supported_fourcc[] = 
 {
   { IMGFMT_Y800, 1567 },
   { IMGFMT_YVU9, 1567 },
@@ -2429,7 +2429,7 @@ typedef struct RangeAndCoefSet {
 /* Filter Setup Routine */
 static void FilterSetup ( uint32_t val_OV0_P1_H_INC )
 {
-    static RANGEANDCOEFSET ArrayOfSets[] = {
+    static const RANGEANDCOEFSET ArrayOfSets[] = {
 	{0.25, {{ 7,	16,  9,	 0}, { 7,   16,	 9,  0}, { 5,	15, 11,	 1}, { 4,   15, 12,  1}, { 3,	13,   13,    3}, }},
 	{0.26, {{ 7,	16,  9,	 0}, { 7,   16,	 9,  0}, { 5,	15, 11,	 1}, { 4,   15, 12,  1}, { 3,	13, 13,	 3}, }},
 	{0.27, {{ 7,	16,  9,	 0}, { 7,   16,	 9,  0}, { 5,	15, 11,	 1}, { 4,   15, 12,  1}, { 3,	13, 13,	 3}, }},
