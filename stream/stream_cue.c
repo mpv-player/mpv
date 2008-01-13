@@ -98,7 +98,6 @@ static int nTracks = 0;
 /* presumes Line is preloaded with the "current" line of the file */
 static int cue_getTrackinfo(char *Line, tTrack *track)
 {
-  char inum[3];
   char min;
   char sec;
   char fps;
@@ -132,9 +131,9 @@ static int cue_getTrackinfo(char *Line, tTrack *track)
     if (strncmp(&Line[4], "INDEX ", 6)==0)
     {
       /* check stuff here so if the answer is false the else stuff below won't be executed */
-      strncpy(inum, &Line[10], 2); inum[2] = '\0';
+      Line[12] = 0;
       if ((already_set == 0) &&
-          ((strcmp(inum, "00")==0) || (strcmp(inum, "01")==0)))
+          ((strcmp(&Line[10], "00")==0) || (strcmp(&Line[10], "01")==0)))
       {
         already_set = 1;
 
