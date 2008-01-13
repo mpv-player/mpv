@@ -1921,7 +1921,7 @@ static int mp_property_teletext_page(m_option_t * prop, int action, void *arg,
 /// All properties available in MPlayer.
 /** \ingroup Properties
  */
-static m_option_t mp_properties[] = {
+static const m_option_t mp_properties[] = {
     // General
     { "osdlevel", mp_property_osdlevel, CONF_TYPE_INT,
      M_OPT_RANGE, 0, 3, NULL },
