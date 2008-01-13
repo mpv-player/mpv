@@ -105,9 +105,6 @@ struct pnm_s {
   unsigned int  packet;         /* number of last recieved packet */
 };
 
-/* D means direct (no pointer) */
-#define BE_16D(x) ((x & 0xff00) >> 8)|((x & 0x00ff) << 8)
-
 /* sizes */
 #define PREAMBLE_SIZE 8
 #define CHECKSUM_SIZE 3
@@ -459,7 +456,7 @@ static void pnm_send_request(pnm_t *p, uint32_t bandwidth) {
 
   /* client id string */
   p->buffer[c]=PNA_CLIENT_STRING;
-  i16=BE_16D((strlen(client_string)-1)); /* don't know why do we have -1 here */
+  AV_WB16(&p->buffer[c+1], strlen(client_string)-1); /* don't know why do we have -1 here */
   memcpy(&p->buffer[c+1],&i16,2);
   memcpy(&p->buffer[c+3],client_string,strlen(client_string)+1);
   c=c+3+strlen(client_string)+1;
@@ -467,8 +464,7 @@ static void pnm_send_request(pnm_t *p, uint32_t bandwidth) {
   /* file path */
   p->buffer[c]=0;
   p->buffer[c+1]=PNA_PATH_REQUEST;
-  i16=BE_16D(strlen(p->path));
-  memcpy(&p->buffer[c+2],&i16,2);
+  AV_WB16(&p->buffer[c+2], strlen(p->path));
   memcpy(&p->buffer[c+4],p->path,strlen(p->path));
   c=c+4+strlen(p->path);
 
@@ -750,10 +746,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   p->recv[0]=0;        /* object version */
   p->recv[1]=0;
 
-  fof2=AV_RB16(&fof2);
-  memcpy(&p->recv[2], &fof2, 2);
-  /*p->recv[2]=(fof2>>8)%0xff;*/   /* length */
-  /*p->recv[3]=(fof2)%0xff;*/
+  AV_WB16(&p->recv[2], fof2); /* length */
 
   p->recv[4]=0;         /* stream number */
   p->recv[5]=stream;
