@@ -195,13 +195,13 @@ static const uint32_t pnm_available_bandwidths[]={14400,19200,28800,33600,34430,
                                   115200,262200,393216,524300,1544000,10485800};
 
 #define PNM_TWENTYFOUR_SIZE 16
-static unsigned char pnm_twentyfour[]={
+static const unsigned char pnm_twentyfour[]={
     0xd5, 0x42, 0xa3, 0x1b, 0xef, 0x1f, 0x70, 0x24,
     0x85, 0x29, 0xb3, 0x8d, 0xba, 0x11, 0xf3, 0xd6 };
 
 /* now other data follows. marked with 0x0000 at the beginning */
 static int after_chunks_length=6;
-static unsigned char after_chunks[]={
+static const unsigned char after_chunks[]={
     0x00, 0x00, /* mark */
     
     0x50, 0x84, /* seems to be fixated */
