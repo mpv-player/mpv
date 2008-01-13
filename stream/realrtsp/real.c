@@ -88,14 +88,14 @@ static void real_calc_response_and_checksum (char *response, char *chksum, char 
 
   int   ch_len;
   int   i;
-  unsigned char zres[16], buf[128];
+  unsigned char zres[16], buf[64];
 
   /* initialize return values */
-  memset(response, 0, 64);
-  memset(chksum, 0, 34);
+  memset(response, 0, 41);
+  memset(chksum, 0, 9);
 
   /* initialize buffer */
-  memset(buf, 0, 128);
+  memset(buf, 0, 64);
   AV_WB32(buf, 0xa1e9149d);
   AV_WB32(buf+4, 0x0e6b3b59);
 
@@ -435,8 +435,8 @@ rmff_header_t *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidt
   char *session_id=NULL;
   rmff_header_t *h;
   char *challenge1;
-  char challenge2[64];
-  char checksum[34];
+  char challenge2[41];
+  char checksum[9];
   char *subscribe;
   char *buf = xbuffer_init(256);
   char *mrl=rtsp_get_mrl(rtsp_session);
