@@ -10,7 +10,7 @@
 
 static tvi_handle_t *tvi_init_dummy(tv_param_t* tv_param);
 /* information about this file */
-tvi_info_t tvi_info_dummy = {
+const tvi_info_t tvi_info_dummy = {
 	tvi_init_dummy,
 	"NULL-TV",
 	"dummy",

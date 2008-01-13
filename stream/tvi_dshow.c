@@ -102,7 +102,7 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param);
 /** 
     information about this file
 */
-tvi_info_t tvi_info_dshow = {
+const tvi_info_t tvi_info_dshow = {
     tvi_init_dshow,
     "DirectShow TV",
     "dshow",

@@ -69,7 +69,7 @@
 
 static tvi_handle_t *tvi_init_bsdbt848(tv_param_t* tv_param);
 /* information about this file */
-tvi_info_t tvi_info_bsdbt848 = {
+const tvi_info_t tvi_info_bsdbt848 = {
     tvi_init_bsdbt848,
     "Brooktree848 Support",
     "bsdbt848",

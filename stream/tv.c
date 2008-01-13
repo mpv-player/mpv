@@ -41,11 +41,11 @@ tv_channels_t *tv_channel_current, *tv_channel_last;
 char *tv_channel_last_real;
 
 /* enumerating drivers (like in stream.c) */
-extern tvi_info_t tvi_info_dummy;
-extern tvi_info_t tvi_info_dshow;
-extern tvi_info_t tvi_info_v4l;
-extern tvi_info_t tvi_info_v4l2;
-extern tvi_info_t tvi_info_bsdbt848;
+extern const tvi_info_t tvi_info_dummy;
+extern const tvi_info_t tvi_info_dshow;
+extern const tvi_info_t tvi_info_v4l;
+extern const tvi_info_t tvi_info_v4l2;
+extern const tvi_info_t tvi_info_bsdbt848;
 
 /** List of drivers in autodetection order */
 static const tvi_info_t* tvi_driver_list[]={

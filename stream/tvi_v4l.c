@@ -49,7 +49,7 @@
 
 static tvi_handle_t *tvi_init_v4l(tv_param_t* tv_param);
 
-tvi_info_t tvi_info_v4l = {
+const tvi_info_t tvi_info_v4l = {
     tvi_init_v4l,
     "Video 4 Linux input",
     "v4l",

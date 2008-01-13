@@ -49,7 +49,7 @@ known issues:
 #define info tvi_info_v4l2
 static tvi_handle_t *tvi_init_v4l2(tv_param_t* tv_param);
 /* information about this file */
-tvi_info_t tvi_info_v4l2 = {
+const tvi_info_t tvi_info_v4l2 = {
     tvi_init_v4l2,
     "Video 4 Linux 2 input",
     "v4l2",
