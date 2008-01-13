@@ -129,7 +129,6 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
     const char* em = NULL;
     MemAllocator* tempAll;
     ALLOCATOR_PROPERTIES props,props1;
-    HRESULT result;
     DS_Filter* This = malloc(sizeof(DS_Filter));
     if (!This)
 	return NULL;
@@ -168,6 +167,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 	IEnumPins* enum_pins = 0;
 	IPin* array[256];
 	ULONG fetched;
+        HRESULT result;
         unsigned int i;
 
 	This->m_iHandle = LoadLibraryA(dllname);
