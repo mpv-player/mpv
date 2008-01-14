@@ -7226,6 +7226,8 @@ if test "$_gui" = yes ; then
       ! echo $_libavdecoders | grep PNG_DECODER >/dev/null 2>&1 ; then
     die "The GUI requires libavcodec with PNG support (needs zlib)."
   fi
+  test "$_freetype" = no && test "$_bitmap_font" = no && \
+    die "The GUI requires either FreeType or bitmap font support."
 if ! win32 ; then
   test "$_x11" != yes && die "X11 support required for GUI compilation."
 
