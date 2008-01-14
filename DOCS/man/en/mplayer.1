@@ -872,6 +872,11 @@ paths if "." is in your path like on Windows).
 .sp 1
 This can be "misused" to disable screensavers that do not support the proper
 X API for this.
+If you think this is too complicated ask the author of the screensaver program
+to support the proper X APIs for this.
+.sp 1
+.I EXAMPLE for xscreensaver:
+mplayer \-heartbeat-cmd "xscreensaver-command -deactivate" file
 .sp 1
 .I EXAMPLE for gnome screensaver:
 mplayer \-heartbeat-cmd "gnome-screensaver-command -p" file
