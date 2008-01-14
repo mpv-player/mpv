@@ -861,7 +861,7 @@ More intense frame dropping (breaks decoding).
 Leads to image distortion!
 .
 .TP
-.B \-heartbeat-cmd
+.B \-heartbeat\-cmd
 Command that is executed every 30 seconds during playback via system() -
 i.e. using the shell.
 .sp 1
@@ -876,10 +876,10 @@ If you think this is too complicated ask the author of the screensaver program
 to support the proper X APIs for this.
 .sp 1
 .I EXAMPLE for xscreensaver:
-mplayer \-heartbeat-cmd "xscreensaver-command -deactivate" file
+mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
 .sp 1
 .I EXAMPLE for gnome screensaver:
-mplayer \-heartbeat-cmd "gnome-screensaver-command -p" file
+mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .RE
 .PD 1
 .
