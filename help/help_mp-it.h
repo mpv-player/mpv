@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <see AUTHORS for email address>
 
-// Updated to help_mp-en.h r25158
+// Updated to help_mp-en.h r25663
 
 // ========================= MPlayer help ===========================
 
@@ -147,6 +147,8 @@ static char help_text[]=
 "  aiutarti, e non lo faremo, se non ci dai queste informazioni quando segnali\n"\
 "  un possibile problema.\n"
 #define MSGTR_LoadingConfig "Carico configurazione '%s'\n"
+#define MSGTR_LoadingProtocolProfile "Carico il profilo '%s' riguardante il protocollo\n"
+#define MSGTR_LoadingExtensionProfile "Carico il profilo '%s' riguardante l'estensione\n"
 #define MSGTR_AddedSubtitleFile "SUB: Aggiunto file sottotitoli (%d): %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB: Rimosso file sottotitoli (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Errore durante l'apertura del file [%s] per la scrittura!\n"
@@ -209,6 +211,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Velocità: x %6.2f"
 #define MSGTR_OSDosd "OSD: %so"
 #define MSGTR_OSDChapter "Capitolo: (%d) %s"
+#define MSGTR_OSDAngle "Angolazione: %d/%d"
 
 // property values
 #define MSGTR_Enabled "abilitat"
