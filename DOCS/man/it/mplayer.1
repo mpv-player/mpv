@@ -1,4 +1,4 @@
-.\" synced with r25455
+.\" synced with r25757
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -301,6 +301,8 @@ Mostra il nome del file sull'OSD.
 Va all'inizio del capitolo precedente/\:successivo.
 .IPs "D (solo \-vo xvmc, \-vf yadif, \-vf kerndeint)"
 Attiva/\:disattiva deinterlacciatore.
+.IPs "A"
+Passa attraverso tutte le angolazioni del DVD.
 .RE
 .PD 1
 .PP
@@ -598,6 +600,31 @@ Per indicare la fine del profilo, se ne può iniziare un altro oppure usare il
 nome di profilo 'default' e continuare con le opzioni abituali.
 .fi
 .PP
+.I "ESEMPI DI PROFILI PER MPLAYER:"
+.sp 1
+.nf
+
+[protocol.dvd]
+profile-desc="Profilo per flussi dvd://"
+vf=pp=hb/vb/dr/al/fd
+alang=en
+
+[protocol.dvdnav]
+profile-desc="Profilo per flussi dvdnav://"
+profile=protocol.dvd
+mouse-movements=yes
+
+[extension.flv]
+profile-desc="Profilo per file .flv"
+flip=yes
+
+[vo.x11]
+opzione=parametro
+
+[ao.alsa]
+opzione=parametro
+.fi
+.PP
 .I "ESEMPI DI PROFILI PER MENCODER:"
 .sp 1
 .nf
@@ -869,6 +896,31 @@ Scarto ancora più intenso di fotogrammi (rovina la decodifica).
 Porta a distorsioni delle immagini!
 .
 .TP
+.B \-heartbeat\-cmd
+Command that is executed every 30 seconds during playback via system() -
+i.e. using the shell.
+Comando da eseguire via system () ogni 30 secondi durante la riproduzione -
+per es.\& usando la shell.
+.sp 1
+.I NOTA:
+MPlayer usa questo comando senza fare alcun controllo, è tua responsabilità
+assicurarti che non causi problemi di sicurezza (per es.\& assicurati di usare
+percorsi assoluti se "." e nella tua PATH come in Windows).
+.sp 1
+Questo può essere usato (male) per disabilitare salvaschermi che non usano le
+corrette API di X per ciò.
+Se pensi sia troppo complicato, chiedi all'autore del salvaschermo di supportare
+le API di X adeguate per farlo.
+.sp 1
+.I ESEMPIO per xscreensaver:
+mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
+.sp 1
+.I ESEMPIO per il salvaschermo di gnome:
+mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
+.RE
+.PD 1
+.
+.TP
 .B \-identify
 Scorciatoia per \-msglevel identify=4.
 Visualizza i parametri del file in un formato facile da interpretare.
@@ -1032,6 +1084,8 @@ Sono supportate le seguenti espansioni:
 Espande al valore della proprietà NOME.
 .IPs ?(NOME:TESTO)
 Espande a TESTO solo se la proprietà NOME è disponibile.
+.IPs ?(!NOME:TESTO)
+Espande a TESTO solo se la proprietà NOME non è disponibile.
 .RE
 .
 .TP
@@ -1361,11 +1415,9 @@ una frequenza, prima di abbandonare (default:30).
 .
 .TP
 .B \-dvd\-device <percorso del dispositivo> (solo DVD)
-Specifica il nome del dispositivo DVD (default: /dev/\:dvd).
+Specifica il nome del dispositivo DVD o del file .iso (default: /dev/\:dvd).
 Puoi anche specificare una directory che contiene una serie di file copiati
 direttamente da un DVD (p.es.\& con vobcopy).
-Nota che usare \-dumpstream è generalmente un metodo migliore per copiare
-titoli DVD (vedi gli esempi).
 .
 .TP
 .B \-dvd\-speed <fattore di velocità in KB/s> (solo DVD)
@@ -2095,12 +2147,14 @@ renderizzatore SSA/ASS.
 .
 .TP
 .B \-ass\-force\-style <[Style.]Param=Value[,...]>
-Sovrascrive alcuni parametri dello stile.
+Sovrascrive alcuni parametri dello stile o informazioni dello script.
 .sp
 .I ESEMPIO:
 .PD 0
 .RSs
 \-ass\-force\-style FontName=Arial,Default.Bold=1
+.br
+\-ass\-force\-style PlayResY=768
 .RE
 .PD 1
 .
@@ -2855,7 +2909,8 @@ se non c'è alcuna scheda DVB presente.
 .PD 0
 .RSs
 .IPs card=<1\-4>
-Scheda DVB da usare se più di una presenti.
+Scheda DVB da usare quando non ce n'è una sola.
+Se non specificata mplayer cercherà la prima scheda utilizzabile.
 .IPs file=<nomefile>
 nome file di uscita
 .RE
@@ -3764,6 +3819,16 @@ Valida solo per modalità yuv 2, 3, 4 e 6.
 Richiede un'unità supplementare di texture.
 Schede video vecchie non saranno in grado di gestire questo per la crominanza,
 perlomeno in modalità a schermo intero.
+.br
+2: Usa un filtraggio cubico in direzione orizzontale, un filtraggio lineare su
+quella verticale.
+Funziona su meno schede che il metodo 1.
+.br
+3: Lo stesso di 1, ma non usa una texture supplementare. Potrebbe essere più
+veloce su alcune schede.
+.br
+4: Usa una maschera di eliminazione particolari (unsharp) con dimensione 3x3 e
+valore 0.5. Sperimentale.
 .RE
 .IPs cscale=<n>
 Seleziona la funzione di ridimensionamento da usare per il ridimensionamento
@@ -4096,6 +4161,7 @@ in formato MPEG-PES se non è presente nessuna scheda DVB.
 .IPs card=<1\-4>
 Specifica il numero del dispositivo da usare se hai più di una scheda di
 uscita DVB (solo API V3, come i driver della serie 1.x.y).
+Se non specificata mplayer cercherà la prima scheda utilizzabile.
 .IPs <nomefile>
 Permette di specificare il nome del file di uscita (default: ./grab.mpg).
 .RE
@@ -4555,7 +4621,7 @@ Salta il numero indicato di righe di macroblocchi in alto.
 Salta il filtro loop (anche detto deblocking) durante la decodifica H.264.
 Dato che il fotogramma filtrato si suppone venga usato come riferimento
 per la decodifica dei fotogrammi dipendenti, questo ha un effetto peggiore
-sulla qualità che non applicare il deblocking per es. a filmati MPEG-2.
+sulla qualità che non applicare il deblocking per es.\& a filmati MPEG-2.
 Ma perlomeno per HDTV ad alto bitrate, questo da un buon aumento di velocità
 con un'impercettibile perdita di qualità.
 .sp 1
@@ -11089,6 +11155,12 @@ mplayer dvd://1 \-dvd\-device /percorso/\:della/\:directory/
 .B Copia un titolo DVD sul disco fisso, salvando sul file "titolo1.vob":
 .nf
 mplayer dvd://1 \-dumpstream \-dumpfile titolo1.vob
+.fi
+.
+.PP
+.B Riproduce un DVD con dvdnav dal percorso /dev/sr1:
+.nf
+mplayer dvdnav:////dev/sr1
 .fi
 .
 .PP
