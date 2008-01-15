@@ -811,6 +811,7 @@ static const char *yuv_lookup3d_prog_template =
 static void create_scaler_textures(int scaler, int *texu, char *texs) {
   switch (scaler) {
     case YUV_SCALER_BILIN:
+    case YUV_SCALER_BICUB_NOTEX:
       break;
     case YUV_SCALER_BICUB:
     case YUV_SCALER_BICUB_X:
