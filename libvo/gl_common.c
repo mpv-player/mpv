@@ -1160,13 +1160,13 @@ static void glSetupYUVFragprog(float brightness, float contrast,
   float ry, ru, rv, rc;
   float gy, gu, gv, gc;
   float by, bu, bv, bc;
+  create_conv_textures(YUV_CONVERSION(type), &cur_texu, conv_texs,
+      brightness, contrast, uvcos, uvsin, rgamma, ggamma, bgamma);
   create_scaler_textures(YUV_LUM_SCALER(type), &cur_texu, lum_scale_texs);
   if (YUV_CHROM_SCALER(type) == YUV_LUM_SCALER(type))
     memcpy(chrom_scale_texs, lum_scale_texs, sizeof(chrom_scale_texs));
   else
     create_scaler_textures(YUV_CHROM_SCALER(type), &cur_texu, chrom_scale_texs);
-  create_conv_textures(YUV_CONVERSION(type), &cur_texu, conv_texs,
-      brightness, contrast, uvcos, uvsin, rgamma, ggamma, bgamma);
   glGetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
   if (i < cur_texu)
     mp_msg(MSGT_VO, MSGL_ERR,
