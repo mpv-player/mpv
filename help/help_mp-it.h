@@ -1,6 +1,6 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
-// Updated by: PaulTT <paultt@hackerjournal.it>
+// Updated by: PaulTT <see AUTHORS for email address>
 
 // Updated to help_mp-en.h r25158
 
