@@ -1486,7 +1486,7 @@ mp_input_bind_keys(int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
   }
   
   if(!bind) {
-    bind_section->cmd_binds = (mp_cmd_bind_t*)realloc(bind_section->cmd_binds,(i+2)*sizeof(mp_cmd_bind_t));
+    bind_section->cmd_binds = realloc(bind_section->cmd_binds,(i+2)*sizeof(mp_cmd_bind_t));
     memset(&bind_section->cmd_binds[i],0,2*sizeof(mp_cmd_bind_t));
     bind = &bind_section->cmd_binds[i];
   }
