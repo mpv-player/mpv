@@ -760,9 +760,10 @@ static const char *bicub_x_filt_template_RECT =
   "TEX a.r, fragment.texcoord[%c], texture[%c], "textype";" \
   "TEX b.r, coord.xyxy, texture[%c], "textype";" \
   "TEX b.g, coord.zwzw, texture[%c], "textype";" \
+  "ADD b.r, b.r, b.g;" \
   "TEX b.b, coord2.xyxy, texture[%c], "textype";" \
-  "TEX b.a, coord2.zwzw, texture[%c], "textype";" \
-  "DP4 b, b, {0.25, 0.25, 0.25, 0.25};" \
+  "TEX b.g, coord2.zwzw, texture[%c], "textype";" \
+  "DP3 b, b, {0.25, 0.25, 0.25};" \
   "SUB b.r, a.r, b.r;" \
   "MAD yuv.%c, b.r, %s, a.r;"
 
