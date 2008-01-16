@@ -2066,7 +2066,7 @@ compilation should go without problems.
 <varlistentry>
 <term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>device</replaceable></option></term>
 <listitem><para>
-<option>overlay</option> activates the overlay instead of TVOut. It requires
+<option>overlay</option> activates the overlay instead of TV-out. It requires
 that you have a properly configured overlay setup to work right. The easiest
 way to configure the overlay is to first run autocal. Then run mplayer with
 dxr3 output and without overlay turned on, run dxr3view. In dxr3view you can
@@ -2348,7 +2348,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
   <listitem>
     <para>
     Using the <emphasis role="bold">matroxfb modules</emphasis> in the 2.4
-    kernels. 2.2 kernels don't have the TVout feature in them, thus unusable
+    kernels. 2.2 kernels don't have the TV-out feature in them, thus unusable
     for this. You have to enable ALL matroxfb-specific feature during
     compilation (except MultiHead), and compile them into
     <emphasis role="bold">modules</emphasis>!

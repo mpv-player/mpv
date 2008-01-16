@@ -169,7 +169,7 @@ const m_option_t mplayer_opts[]={
 	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE|CONF_OLD, 0, 4096, NULL},
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	// set aspect ratio of monitor - useful for 16:9 TVout
+	// set aspect ratio of monitor - useful for 16:9 TV-out
 	{"monitoraspect", &force_monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9.0, NULL},
 	{"monitorpixelaspect", &monitor_pixel_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 9.0, NULL},
 	// video mode switching: (x11,xv,dga)

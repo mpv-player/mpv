@@ -612,7 +612,7 @@ TIPS FOR SMOKE & CLOUDS
 
 Q: I'm trying  to encode Dante's Peak and I'm  having problems with clouds,
 fog and  smoke: They don't  look fine  (they look very  bad if I  watch the
-movie  in TVout).  There are  some artifacts,  white clouds  looks as  snow
+movie  in TV-out).  There are  some artifacts,  white clouds  looks as  snow
 mountains, there are things likes hip in the colors so one can see frontier
 curves between white and light gray and  dark gray ... (I don't know if you
 can understand me, I want to mean that the colors don't change smoothly)
