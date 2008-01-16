@@ -607,11 +607,7 @@ Open a console and change to that directory. Then type
 <screen>gcc -o dhasetup.exe dhasetup.c</screen>
 and execute
 <screen>dhasetup.exe install</screen>
-as Administrator. After that you will have to reboot. When you are
-done, copy the <systemitem class="library">.so</systemitem> files from
-<filename class="directory">vidix/drivers</filename> to the
-<filename class="directory">mplayer/vidix</filename> directory
-relative to your <filename>mplayer.exe</filename>.
+as Administrator. After that you will have to reboot.
 </para>
 
 <para>
