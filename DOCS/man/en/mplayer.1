@@ -3653,9 +3653,10 @@ Older cards will not be able to handle this for chroma at least in fullscreen mo
 2: Use cubic filtering in horizontal, linear filtering in vertical direction.
 Works on a few more cards than method 1.
 .br
-3: Same as 1 but does not use a lookup texture. Might be faster on some cards.
+3: Same as 1 but does not use a lookup texture.
+Might be faster on some cards.
 .br
-4: Use unsharp masking with 3x3 support and a strength of 0.5. Experimental.
+4: Use experimental unsharp masking with 3x3 support and a strength of 0.5.
 .RE
 .IPs cscale=<n>
 Select the scaling function to use for chrominance scaling.
@@ -3930,7 +3931,7 @@ Specifies the TV norm.
 4: PAL-60
 .br
 5: NTSC
-.REss
+.RE
 .IPs <0\-3>
 Specifies the device number to use if you have more than one em8300 card.
 .RE
@@ -3944,9 +3945,9 @@ specific video output driver for TV-out.
 Also see the lavc video filter.
 .PD 0
 .RSs
-.IPs device
+.IPs <device>
 Explicitly choose the MPEG decoder device name to use (default: /dev/video16).
-.IPs output
+.IPs <output>
 Explicitly choose the TV-out output to be used for the video signal.
 .RE
 .PD 1
@@ -3957,9 +3958,9 @@ Video output driver for V4L2 compliant cards with built-in hardware MPEG decoder
 Also see the lavc video filter.
 .PD 0
 .RSs
-.IPs device
+.IPs <device>
 Explicitly choose the MPEG decoder device name to use (default: /dev/video16).
-.IPs output
+.IPs <output>
 Explicitly choose the TV-out output to be used for the video signal.
 .RE
 .PD 1
