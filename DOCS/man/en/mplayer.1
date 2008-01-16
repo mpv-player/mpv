@@ -585,17 +585,17 @@ to continue with normal options.
 .nf
 
 [protocol.dvd]
-profile-desc="Profile for dvd:// streams"
+profile-desc="profile for dvd:// streams"
 vf=pp=hb/vb/dr/al/fd
 alang=en
 
 [protocol.dvdnav]
-profile-desc="Profile for dvdnav:// streams"
+profile-desc="profile for dvdnav:// streams"
 profile=protocol.dvd
 mouse-movements=yes
 
 [extension.flv]
-profile-desc="Profile for .flv files"
+profile-desc="profile for .flv files"
 flip=yes
 
 [vo.x11]
@@ -2533,9 +2533,9 @@ used for the OSD and clear it (default: ^[[A\\r^[[K).
 Tells MPlayer to handle the subtitle file as unicode.
 .
 .TP
-.B \-unrarexec <path to unrar executable> (does not support MingW currently.)
+.B \-unrarexec <path to unrar executable> (not supported on MingW)
 Specify the path to the unrar executable so MPlayer can use it to access
-rar-compressed vobsub files (default: not set, so the feature is off).
+rar-compressed VOBsub files (default: not set, so the feature is off).
 The path must include the executable's filename, i.e.\& /usr/local/bin/unrar.
 .
 .TP
@@ -2955,7 +2955,7 @@ match the window perfectly (default: 0).
 .IPs overlay
 Activate overlay (default).
 .IPs nooverlay
-Activate TVout.
+Activate TV-out.
 .IPs overlay-ratio=<1\-2500>
 Tune the overlay (default: 1000).
 .RE
@@ -3167,12 +3167,12 @@ Not supported by all video output drivers.
 .TP
 .B \-screenh <pixels>
 Specify the vertical screen resolution for video output drivers which
-do not know the screen resolution like fbdev, x11 and TVout.
+do not know the screen resolution like fbdev, x11 and TV-out.
 .
 .TP
 .B \-screenw <pixels>
 Specify the horizontal screen resolution for video output drivers which
-do not know the screen resolution like fbdev, x11 and TVout.
+do not know the screen resolution like fbdev, x11 and TV-out.
 .
 .TP
 .B \-stop\-xscreensaver (X11 only)
@@ -3911,7 +3911,7 @@ Also see the lavc video filter.
 .PD 0
 .RSs
 .IPs overlay
-Activates the overlay instead of TVOut.
+Activates the overlay instead of TV-out.
 .IPs prebuf
 Turns on prebuffering.
 .IPs "sync\ "
@@ -3940,14 +3940,14 @@ Specifies the device number to use if you have more than one em8300 card.
 .B ivtv (IVTV only)
 Conexant CX23415 (iCompression iTVC15) or Conexant CX23416 (iCompression
 iTVC16) MPEG decoder chip (Hauppauge WinTV PVR-150/250/350/500)
-specific video output driver for TV-Out.
+specific video output driver for TV-out.
 Also see the lavc video filter.
 .PD 0
 .RSs
 .IPs device
 Explicitly choose the MPEG decoder device name to use (default: /dev/video16).
 .IPs output
-Explicitly choose the TV-Out output to be used for the video signal.
+Explicitly choose the TV-out output to be used for the video signal.
 .RE
 .PD 1
 .
@@ -3960,7 +3960,7 @@ Also see the lavc video filter.
 .IPs device
 Explicitly choose the MPEG decoder device name to use (default: /dev/video16).
 .IPs output
-Explicitly choose the TV-Out output to be used for the video signal.
+Explicitly choose the TV-out output to be used for the video signal.
 .RE
 .PD 1
 .
@@ -4775,7 +4775,7 @@ The output is big-endian when outputting a raw AC-3 stream,
 native-endian when outputting to S/PDIF.
 The output sample rate of this filter is same with the input sample rate.
 When input sample rate is 48kHz, 44.1kHz, or 32kHz, this filter directly use it.
-Otherwise a resampler filter is auto-inserted before this filter to make
+Otherwise a resampling filter is auto-inserted before this filter to make
 the input and output sample rate be 48kHz.
 You need to specify '\-channels N' to make the decoder decode audio into
 N-channel, then the filter can encode the N-channel input to AC-3.
