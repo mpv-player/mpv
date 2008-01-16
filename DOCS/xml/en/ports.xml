@@ -590,7 +590,7 @@ performance varies greatly between systems and SDL is known to
 distort video or crash on some systems. If the image is
 distorted, try turning off hardware acceleration with
 <option>-vo directx:noaccel</option>. Download
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">DirectX 7 header files</ulink>
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/dx7headers.tgz">DirectX 7 header files</ulink>
 to compile the DirectX video output driver. Furthermore you need to have
 DirectX 7 or later installed for the DirectX video output driver to work.
 </para>
@@ -724,7 +724,7 @@ it before compiling <application>MPlayer</application>.
 <para>
 Complete instructions for building <application>MPlayer</application>
 and necessary libraries can be found in the
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
 </para>
 </sect2>
 </sect1>
