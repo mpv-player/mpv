@@ -1295,8 +1295,7 @@ vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
       ++queue->current_index;
       ++reseek_count;
     }
-    while (reseek_count--) {
-      --queue->current_index;
+    while (reseek_count-- && --queue->current_index) {
       if (queue->packets[queue->current_index-1].pts100 != UINT_MAX &&
           queue->packets[queue->current_index-1].pts100 != lastpts)
         break;
