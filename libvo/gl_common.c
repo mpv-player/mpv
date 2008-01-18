@@ -756,26 +756,19 @@ static const char *bicub_x_filt_template_RECT =
   "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};"
   BICUB_X_FILT_MAIN("RECT");
 
-#define UNSHARP_FILT_MAIN(textype) \
-  "TEX a.r, fragment.texcoord[%c], texture[%c], "textype";" \
-  "TEX b.r, coord.xyxy, texture[%c], "textype";" \
-  "TEX b.g, coord.zwzw, texture[%c], "textype";" \
+static const char *unsharp_filt_template =
+  "PARAM dcoord = {%f, %f, %f, %f};"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord;"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord;"
+  "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
+  "TEX b.r, coord.xyxy, texture[%c], %s;"
+  "TEX b.g, coord.zwzw, texture[%c], %s;"
   "ADD b.r, b.r, b.g;" \
-  "TEX b.b, coord2.xyxy, texture[%c], "textype";" \
-  "TEX b.g, coord2.zwzw, texture[%c], "textype";" \
-  "DP3 b, b, {0.25, 0.25, 0.25};" \
-  "SUB b.r, a.r, b.r;" \
-  "MAD yuv.%c, b.r, %s, a.r;"
-
-static const char *unsharp_filt_template_2D =
-  "ADD coord, fragment.texcoord[%c].xyxy, {%f, %f, -%f, -%f};"
-  "ADD coord2, fragment.texcoord[%c].xyxy, {%f, -%f, -%f, %f};"
-  UNSHARP_FILT_MAIN("2D");
-
-static const char *unsharp_filt_template_RECT =
-  "ADD coord, fragment.texcoord[%c].xyxy, {0.5, 0.5, -0.5, -0.5};"
-  "ADD coord2, fragment.texcoord[%c].xyxy, {0.5, -0.5, -0.5, 0.5};" 
-  UNSHARP_FILT_MAIN("RECT");
+  "TEX b.b, coord2.xyxy, texture[%c], %s;"
+  "TEX b.g, coord2.zwzw, texture[%c], %s;"
+  "DP3 b, b, {0.25, 0.25, 0.25};"
+  "SUB b.r, a.r, b.r;"
+  "MAD yuv.%c, b.r, %s, a.r;";
 
 static const char *yuv_prog_template =
   "PARAM ycoef = {%.4f, %.4f, %.4f};"
@@ -1015,10 +1008,13 @@ static void create_conv_textures(int conv, int *texu, char *texs,
  */
 static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                     char in_tex, char out_comp, int rect, int texw, int texh) {
+  const char *ttype = rect ? "RECT" : "2D";
+  const float ptw = rect ? 1.0 : 1.0 / texw;
+  const float pth = rect ? 1.0 : 1.0 / texh;
   switch (scaler) {
     case YUV_SCALER_BILIN:
       snprintf(*prog_pos, *remain, bilin_filt_template, out_comp, in_tex,
-                 in_tex, rect ? "RECT" : "2D");
+                 in_tex, ttype);
       break;
     case YUV_SCALER_BICUB:
       if (rect)
@@ -1056,18 +1052,11 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                  in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
       break;
     case YUV_SCALER_UNSHARP:
-      if (rect)
-        snprintf(*prog_pos, *remain, unsharp_filt_template_RECT,
-                 in_tex,
-                 in_tex,
-                 in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp,
-                 "{0.5}");
-      else
-        snprintf(*prog_pos, *remain, unsharp_filt_template_2D,
-                 in_tex, (float)0.5 / texw, (float)0.5 / texh, (float)0.5 / texw, (float)0.5 / texh,
-                 in_tex, (float)0.5 / texw, (float)0.5 / texh, (float)0.5 / texw, (float)0.5 / texh,
-                 in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp,
-                 "{0.5}");
+      snprintf(*prog_pos, *remain, unsharp_filt_template,
+               0.5 * ptw, 0.5 * pth, 0.5 * ptw, -0.5 * pth,
+               in_tex, in_tex, in_tex,
+               in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
+               in_tex, ttype, out_comp, "{0.5}");
       break;
   }
   *remain -= strlen(*prog_pos);
