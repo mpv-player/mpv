@@ -763,7 +763,7 @@ static const char *unsharp_filt_template =
   "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
   "TEX b.r, coord.xyxy, texture[%c], %s;"
   "TEX b.g, coord.zwzw, texture[%c], %s;"
-  "ADD b.r, b.r, b.g;" \
+  "ADD b.r, b.r, b.g;"
   "TEX b.b, coord2.xyxy, texture[%c], %s;"
   "TEX b.g, coord2.zwzw, texture[%c], %s;"
   "DP3 b, b, {0.25, 0.25, 0.25};"
