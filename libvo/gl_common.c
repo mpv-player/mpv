@@ -770,6 +770,30 @@ static const char *unsharp_filt_template =
   "SUB b.r, a.r, b.r;"
   "MAD yuv.%c, b.r, %s, a.r;";
 
+static const char *unsharp_filt_template2 =
+  "PARAM dcoord = {%f, %f, %f, %f};"
+  "PARAM dcoord2 = {%f, 0, 0, %f};"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord;"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord;"
+  "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
+  "TEX b.r, coord.xyxy, texture[%c], %s;"
+  "TEX b.g, coord.zwzw, texture[%c], %s;"
+  "ADD b.r, b.r, b.g;"
+  "TEX b.b, coord2.xyxy, texture[%c], %s;"
+  "TEX b.g, coord2.zwzw, texture[%c], %s;"
+  "ADD b.r, b.r, b.b;"
+  "ADD b.a, b.r, b.g;"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord2;"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord2;"
+  "TEX b.r, coord.xyxy, texture[%c], %s;"
+  "TEX b.g, coord.zwzw, texture[%c], %s;"
+  "ADD b.r, b.r, b.g;"
+  "TEX b.b, coord2.xyxy, texture[%c], %s;"
+  "TEX b.g, coord2.zwzw, texture[%c], %s;"
+  "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.01953125};"
+  "MAD b.r, a.r, {0.859375}, b.r;"
+  "MAD yuv.%c, b.r, %s, a.r;";
+
 static const char *yuv_prog_template =
   "PARAM ycoef = {%.4f, %.4f, %.4f};"
   "PARAM ucoef = {%.4f, %.4f, %.4f};"
@@ -827,6 +851,7 @@ static void create_scaler_textures(int scaler, int *texu, char *texs) {
     case YUV_SCALER_BILIN:
     case YUV_SCALER_BICUB_NOTEX:
     case YUV_SCALER_UNSHARP:
+    case YUV_SCALER_UNSHARP2:
       break;
     case YUV_SCALER_BICUB:
     case YUV_SCALER_BICUB_X:
@@ -1053,6 +1078,15 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                0.5 * ptw, 0.5 * pth, 0.5 * ptw, -0.5 * pth,
                in_tex, in_tex, in_tex,
                in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
+               in_tex, ttype, out_comp, "{0.5}");
+      break;
+    case YUV_SCALER_UNSHARP2:
+      snprintf(*prog_pos, *remain, unsharp_filt_template2,
+               1.2 * ptw, 1.2 * pth, 1.2 * ptw, -1.2 * pth,
+               1.5 * ptw, 1.5 * pth,
+               in_tex, in_tex, in_tex,
+               in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
+               in_tex, ttype, in_tex, in_tex, in_tex, ttype, in_tex, ttype, in_tex, ttype,
                in_tex, ttype, out_comp, "{0.5}");
       break;
   }

@@ -244,6 +244,7 @@ int loadGPUProgram(GLenum target, char *prog);
 //! use cubic scaling without additional lookup texture
 #define YUV_SCALER_BICUB_NOTEX 3
 #define YUV_SCALER_UNSHARP 4
+#define YUV_SCALER_UNSHARP2 5
 //! mask for conversion type
 #define YUV_CONVERSION_MASK 0xF
 //! mask for scaler type
