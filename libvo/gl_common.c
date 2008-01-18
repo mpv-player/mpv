@@ -1024,8 +1024,7 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
       else
         snprintf(*prog_pos, *remain, bicub_filt_template_2D,
                  in_tex, (float)texw, (float)texh,
-                 texs[0], (float)1.0 / texw, (float)1.0 / texw,
-                 texs[0], (float)1.0 / texh, (float)1.0 / texh,
+                 texs[0], ptw, ptw, texs[0], pth, pth,
                  in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
       break;
     case YUV_SCALER_BICUB_X:
@@ -1036,7 +1035,7 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
       else
         snprintf(*prog_pos, *remain, bicub_x_filt_template_2D,
                  in_tex, (float)texw, (float)texh,
-                 texs[0], (float)1.0 / texw, (float)1.0 / texw,
+                 texs[0], ptw, ptw,
                  in_tex, in_tex, in_tex, in_tex, out_comp);
       break;
     case YUV_SCALER_BICUB_NOTEX:
@@ -1046,9 +1045,7 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                  in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
       else
         snprintf(*prog_pos, *remain, bicub_notex_filt_template_2D,
-                 in_tex, (float)texw, (float)texh,
-                 (float)1.0 / texw, (float)1.0 / texw,
-                 (float)1.0 / texh, (float)1.0 / texh,
+                 in_tex, (float)texw, (float)texh, ptw, ptw, pth, pth,
                  in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
       break;
     case YUV_SCALER_UNSHARP:
