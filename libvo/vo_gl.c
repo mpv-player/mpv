@@ -686,7 +686,7 @@ static uint32_t get_image(mp_image_t *mpi) {
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   if (mpi->planes[0] == NULL) {
     if (!err_shown)
-      mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not aquire buffer for dr\n"
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not acquire buffer for dr\n"
                                 "Expect a _major_ speed penalty\n");
     err_shown = 1;
     return VO_FALSE;
