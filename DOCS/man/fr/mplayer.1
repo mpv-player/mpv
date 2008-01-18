@@ -1,4 +1,4 @@
-.\" synced with r25657
+.\" synced with r25786
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -301,6 +301,8 @@ Affiche le nom de fichier dans l'OSD.
 Saute au début du chapitre précédant/suivant.
 .IPs "D (\-vo xvmc, \-vf yadif et \-vf kerndeint uniquement)"
 Active/désactive le désentrelacement.
+.IPs "A"
+Bascule entre les angles du DVD.
 .RE
 .PD 1
 .PP
@@ -608,6 +610,31 @@ Pour finir le profil, commencez-un nouveau, ou utilisez le nom de
 profil 'default' pour continuer avec les options normales.
 .fi
 .PP
+.I "EXEMPLE DE PROFIL MPLAYER\ :"
+.sp 1
+.nf
+
+[protocol.dvd]
+profile-desc="profil pour les flux dvd://"
+vf=pp=hb/vb/dr/al/fd
+alang=en
+
+[protocol.dvdnav]
+profile-desc="profil pour les flux dvdnav://"
+profile=protocol.dvd
+mouse-movements=yes
+
+[extension.flv]
+profile-desc="profil pour les fichiers .flv"
+flip=yes
+
+[vo.pnm]
+outdir=/tmp
+
+[ao.alsa]
+device=spdif
+.fi
+.PP
 .I "EXEMPLE DE PROFIL MENCODER\ :"
 .sp 1
 .nf
@@ -874,6 +901,30 @@ Affiche un court résumé des options.
 .B \-hardframedrop
 Saute les trames de façon plus brutale (casse le décodage).
 Mène à des distorsions d'image!
+.
+.TP
+.B \-heartbeat\-cmd
+Commande exécutée via system() - càd via le shell - toutes les 30 secondes
+lors de la lecture.
+.sp 1
+.I NOTE\ :
+MPlayer utilise cette commande sans aucune sorte de vérification, il est
+donc de votre responsablité qu'elle ne pose pas de problème de sécurité
+(càd que vous devriez spécifier le chemin absolu, surtout si "." est dans
+le chemin de recherche $PATH, comme c'est le cas sous Windows).
+.sp 1
+Ceci peut être "détourné" pour désactiver un reposeur d'écran ne gérant par
+l'API de X prévu à cet effet.
+Si cela vous semble un peu trop compliqué, demandez à l'auteur du programme
+de reposeur d'écran de gérer l'API de X dédiée.
+.sp 1
+.I EXEMPLE pour xscreensaver:
+mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
+.sp 1
+.I EXEMPLE pour le reposeur d'écran de gnome:
+mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
+.RE
+.PD 1
 .
 .TP
 .B \-identify
@@ -2601,10 +2652,9 @@ utilisée par l'OSD et l'effacer (par défaut\ : ^[[A\\r^[[K).
 Indique à MPlayer de traiter le fichier de sous-titre au format unicode.
 .
 .TP
-.B \-unrarexec <cheming version l'exécutable unrar> (ne gère pas MingW
-actuellemnt.)
+.B \-unrarexec <cheming version l'exécutable unrar> (non gèré sous MingW)
 Défini le cheming version l'exécutable unrar pour que MPlayer puisse
-l'utiliser pour ouvrir les fichiers vobsub compressés au format RAR.
+l'utiliser pour ouvrir les fichiers VOBsub compressés au format RAR.
 Le chemin doit inclure le nom de l'exécutable, par exemple: /opt/bin/unrar.
 .
 .TP
@@ -3798,6 +3848,13 @@ pas en mode plein écran.
 2: Utilise un fitrage cubique en direction horizontale, et un filtre
 linéaire en vectical.
 Fonctionne avec un peu plus de cartes que la méthode 1.
+.br
+3: Comme 1 sauf qu'elle n'effecture pas de consultation de table de texture.
+Peut être plus rapide sur certaines cartes.
+.br
+4: Utilise un masquage flou expérimental de taille 3x3 et d'une force de 0.5.
+.br
+5: Utilise un masquage flou expérimental de taille 5x5 et d'une force de 0.5.
 .RE
 .IPs cscale=<n>
 Sélection de la fonction de mise à l'échelle à utiliser pour la chrominance.
@@ -4101,7 +4158,7 @@ Spécifie la norme TV.
 4: PAL-60
 .br
 5: NTSC
-.REss
+.RE
 .IPs <0\-3>
 Définit le numéro de périphérique à utiliser si vous avez plus d'une carte
 em8300.
@@ -4117,10 +4174,10 @@ Hauppauge WinTV PVR-150/250/350/500.
 Voir aussi le filtre vidéo lavc.
 .PD 0
 .RSs
-.IPs device
+.IPs <périph>
 Choisit explicitement le périphérique de décodage MPEG à utiliser
 (par défaut\ : /dev/\:video16).
-.IPs output
+.IPs <sortie>
 Choisit explicitement le type de connecteur signal vidéo à utiliser
 pour la sortie TV.
 .RE
@@ -4132,9 +4189,9 @@ Périphérique de sortie vidéo pour les cartes V4L2 à décodeur MPEG matériel.
 Voir aussi le vidéo lavc.
 .PD 0
 .RSs
-.IPs device
+.IPs <périph>
 Spécifie le nom du périphérique décodeur MPEG à utiliser (par defaut\ : /dev/video16).
-.IPs output
+.IPs <sortie>
 Spécifie la sortie TV à utiliser pour envoyer le signal vidéo.
 .RE
 .PD 1
