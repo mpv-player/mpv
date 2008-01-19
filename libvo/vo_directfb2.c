@@ -1135,7 +1135,7 @@ static uint32_t get_image(mp_image_t *mpi)
 {
 
         int err;
-        void *dst;
+        uint8_t *dst;
         int pitch;
 
 //    if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: get_image() called\n");
@@ -1149,10 +1149,10 @@ static uint32_t get_image(mp_image_t *mpi)
        // we're lucky or codec accepts stride => ok, let's go!
 
 	    if (frame) {
-		err = frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch);
+		err = frame->Lock(frame,DSLF_WRITE|DSLF_READ,(void *)&dst,&pitch);
 		framelocked=1;
 	    } else {
- 		err = primary->Lock(primary,DSLF_WRITE,&dst,&pitch);
+ 		err = primary->Lock(primary,DSLF_WRITE,(void *)&dst,&pitch);
 		primarylocked=1;
 	    }
 
@@ -1205,9 +1205,9 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
         int i;
 	unsigned int pitch;
-        void *dst;
-        void *dst2;
-        void *srcp;
+        uint8_t *dst;
+        uint8_t *dst2;
+        uint8_t *srcp;
 	unsigned int p;
 
 //        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: draw_slice entered\n");
@@ -1215,10 +1215,10 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 	unlock();
 
 	if (frame) {
-		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch));
+		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,(void *)&dst,&pitch));
 		framelocked = 1;
         } else {
-		DFBCHECK (primary->Lock(primary,DSLF_WRITE,&dst,&pitch));
+		DFBCHECK (primary->Lock(primary,DSLF_WRITE,(void *)&dst,&pitch));
 		primarylocked = 1;
         };
 	
@@ -1305,16 +1305,16 @@ static uint32_t put_image(mp_image_t *mpi){
     // memcpy all planes - sad but necessary
         int i;
 	unsigned int pitch;
-        void *dst;
-	void *src;
+        uint8_t *dst;
+	uint8_t *src;
 	unsigned int p;
 
 //        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - planar branch\n");
 	if (frame) {
-		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch));
+		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,(void *)&dst,&pitch));
 		framelocked = 1;
         } else {
-		DFBCHECK (primary->Lock(primary,DSLF_WRITE,&dst,&pitch));
+		DFBCHECK (primary->Lock(primary,DSLF_WRITE,(void *)&dst,&pitch));
 		primarylocked = 1;
         };
 	
@@ -1391,15 +1391,15 @@ static uint32_t put_image(mp_image_t *mpi){
 */
 
 	unsigned int pitch;
-        void *dst;
+        uint8_t *dst;
 
 //        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - non-planar branch\n");
 	if (frame) {
-		DFBCHECK (frame->Lock(frame,DSLF_WRITE,&dst,&pitch));
+		DFBCHECK (frame->Lock(frame,DSLF_WRITE,(void *)&dst,&pitch));
 		framelocked = 1;
 		mem2agpcpy_pic(dst,mpi->planes[0] + mpi->y * mpi->stride[0] + mpi->x * (mpi->bpp >> 3)  ,mpi->w * (mpi->bpp >> 3),mpi->h,pitch,mpi->stride[0]);
         } else {
-		DFBCHECK (primary->Lock(primary,DSLF_WRITE,&dst,&pitch));
+		DFBCHECK (primary->Lock(primary,DSLF_WRITE,(void *)&dst,&pitch));
 		primarylocked = 1;
 		mem2agpcpy_pic(dst + yoffset * pitch + xoffset * (mpi->bpp >> 3),mpi->planes[0] + mpi->y * mpi->stride[0] + mpi->x * (mpi->bpp >> 3)  ,mpi->w * (mpi->bpp >> 3),mpi->h,pitch,mpi->stride[0]);
         };
