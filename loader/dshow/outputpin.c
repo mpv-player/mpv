@@ -751,7 +751,7 @@ static HRESULT STDCALL COutputMemPin_ReceiveMultiple(IMemInputPin * This,
 					    /* [out] */ long *nSamplesProcessed)
 {
     HRESULT hr;
-    Debug printf("COutputMemPin_ReceiveMultiple(%p) %d\n", This,nSamples);
+    Debug printf("COutputMemPin_ReceiveMultiple(%p) %ld\n", This,nSamples);
     for(*nSamplesProcessed=0; *nSamplesProcessed < nSamples; *nSamplesProcessed++) {
          hr = This->vt->Receive(This,pSamples[*nSamplesProcessed]);
          if (hr != S_OK) break;
