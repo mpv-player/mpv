@@ -375,7 +375,7 @@ static unsigned int inited_flags=0;
 
 #define mp_basename2(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
 
-void *mpctx_get_video_out(MPContext *mpctx)
+const void *mpctx_get_video_out(MPContext *mpctx)
 {
     return mpctx->video_out;
 }

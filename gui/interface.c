@@ -506,7 +506,7 @@ static void remove_vf( char * str )
 
 int guiGetEvent( int type,char * arg )
 {
-  ao_functions_t *audio_out = NULL;
+  const ao_functions_t *audio_out = NULL;
   const vo_functions_t *video_out = NULL;
   mixer_t *mixer = NULL;
 

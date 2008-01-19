@@ -61,8 +61,8 @@ static RECT old_rect;
 static DWORD style;
 static HANDLE hThread;
 static unsigned threadId;
-ao_functions_t *audio_out = NULL;
-vo_functions_t *video_out = NULL;
+const ao_functions_t *audio_out = NULL;
+const vo_functions_t *video_out = NULL;
 mixer_t *mixer = NULL;
 
 /* test for playlist files, no need to specify -playlist on the commandline.
