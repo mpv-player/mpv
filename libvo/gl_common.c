@@ -252,39 +252,39 @@ static void *setNull(const GLubyte *s) {
 }
 
 typedef struct {
-  void **funcptr;
+  void *funcptr;
   const char *extstr;
   const char *funcnames[7];
 } extfunc_desc_t;
 
 static const extfunc_desc_t extfuncs[] = {
-  {(void **)&GenBuffers, NULL, {"glGenBuffers", "glGenBuffersARB", NULL}},
-  {(void **)&DeleteBuffers, NULL, {"glDeleteBuffers", "glDeleteBuffersARB", NULL}},
-  {(void **)&BindBuffer, NULL, {"glBindBuffer", "glBindBufferARB", NULL}},
-  {(void **)&MapBuffer, NULL, {"glMapBuffer", "glMapBufferARB", NULL}},
-  {(void **)&UnmapBuffer, NULL, {"glUnmapBuffer", "glUnmapBufferARB", NULL}},
-  {(void **)&BufferData, NULL, {"glBufferData", "glBufferDataARB", NULL}},
-  {(void **)&CombinerParameterfv, "NV_register_combiners", {"glCombinerParameterfv", "glCombinerParameterfvNV", NULL}},
-  {(void **)&CombinerParameteri, "NV_register_combiners", {"glCombinerParameteri", "glCombinerParameteriNV", NULL}},
-  {(void **)&CombinerInput, "NV_register_combiners", {"glCombinerInput", "glCombinerInputNV", NULL}},
-  {(void **)&CombinerOutput, "NV_register_combiners", {"glCombinerOutput", "glCombinerOutputNV", NULL}},
-  {(void **)&BeginFragmentShader, "ATI_fragment_shader", {"glBeginFragmentShaderATI", NULL}},
-  {(void **)&EndFragmentShader, "ATI_fragment_shader", {"glEndFragmentShaderATI", NULL}},
-  {(void **)&SampleMap, "ATI_fragment_shader", {"glSampleMapATI", NULL}},
-  {(void **)&ColorFragmentOp2, "ATI_fragment_shader", {"glColorFragmentOp2ATI", NULL}},
-  {(void **)&ColorFragmentOp3, "ATI_fragment_shader", {"glColorFragmentOp3ATI", NULL}},
-  {(void **)&SetFragmentShaderConstant, "ATI_fragment_shader", {"glSetFragmentShaderConstantATI", NULL}},
-  {(void **)&ActiveTexture, NULL, {"glActiveTexture", "glActiveTextureARB", NULL}},
-  {(void **)&BindTexture, NULL, {"glBindTexture", "glBindTextureARB", "glBindTextureEXT", NULL}},
-  {(void **)&MultiTexCoord2f, NULL, {"glMultiTexCoord2f", "glMultiTexCoord2fARB", NULL}},
-  {(void **)&GenPrograms, "_program", {"glGenProgramsARB", NULL}},
-  {(void **)&DeletePrograms, "_program", {"glDeleteProgramsARB", NULL}},
-  {(void **)&BindProgram, "_program", {"glBindProgramARB", NULL}},
-  {(void **)&ProgramString, "_program", {"glProgramStringARB", NULL}},
-  {(void **)&GetProgramiv, "_program", {"glGetProgramivARB", NULL}},
-  {(void **)&ProgramEnvParameter4f, "_program", {"glProgramEnvParameter4fARB", NULL}},
-  {(void **)&SwapInterval, "_swap_control", {"glXSwapInterval", "glXSwapIntervalEXT", "glXSwapIntervalSGI", "wglSwapInterval", "wglSwapIntervalEXT", "wglSwapIntervalSGI", NULL}},
-  {(void **)&TexImage3D, NULL, {"glTexImage3D", NULL}},
+  {&GenBuffers, NULL, {"glGenBuffers", "glGenBuffersARB", NULL}},
+  {&DeleteBuffers, NULL, {"glDeleteBuffers", "glDeleteBuffersARB", NULL}},
+  {&BindBuffer, NULL, {"glBindBuffer", "glBindBufferARB", NULL}},
+  {&MapBuffer, NULL, {"glMapBuffer", "glMapBufferARB", NULL}},
+  {&UnmapBuffer, NULL, {"glUnmapBuffer", "glUnmapBufferARB", NULL}},
+  {&BufferData, NULL, {"glBufferData", "glBufferDataARB", NULL}},
+  {&CombinerParameterfv, "NV_register_combiners", {"glCombinerParameterfv", "glCombinerParameterfvNV", NULL}},
+  {&CombinerParameteri, "NV_register_combiners", {"glCombinerParameteri", "glCombinerParameteriNV", NULL}},
+  {&CombinerInput, "NV_register_combiners", {"glCombinerInput", "glCombinerInputNV", NULL}},
+  {&CombinerOutput, "NV_register_combiners", {"glCombinerOutput", "glCombinerOutputNV", NULL}},
+  {&BeginFragmentShader, "ATI_fragment_shader", {"glBeginFragmentShaderATI", NULL}},
+  {&EndFragmentShader, "ATI_fragment_shader", {"glEndFragmentShaderATI", NULL}},
+  {&SampleMap, "ATI_fragment_shader", {"glSampleMapATI", NULL}},
+  {&ColorFragmentOp2, "ATI_fragment_shader", {"glColorFragmentOp2ATI", NULL}},
+  {&ColorFragmentOp3, "ATI_fragment_shader", {"glColorFragmentOp3ATI", NULL}},
+  {&SetFragmentShaderConstant, "ATI_fragment_shader", {"glSetFragmentShaderConstantATI", NULL}},
+  {&ActiveTexture, NULL, {"glActiveTexture", "glActiveTextureARB", NULL}},
+  {&BindTexture, NULL, {"glBindTexture", "glBindTextureARB", "glBindTextureEXT", NULL}},
+  {&MultiTexCoord2f, NULL, {"glMultiTexCoord2f", "glMultiTexCoord2fARB", NULL}},
+  {&GenPrograms, "_program", {"glGenProgramsARB", NULL}},
+  {&DeletePrograms, "_program", {"glDeleteProgramsARB", NULL}},
+  {&BindProgram, "_program", {"glBindProgramARB", NULL}},
+  {&ProgramString, "_program", {"glProgramStringARB", NULL}},
+  {&GetProgramiv, "_program", {"glGetProgramivARB", NULL}},
+  {&ProgramEnvParameter4f, "_program", {"glProgramEnvParameter4fARB", NULL}},
+  {&SwapInterval, "_swap_control", {"glXSwapInterval", "glXSwapIntervalEXT", "glXSwapIntervalSGI", "wglSwapInterval", "wglSwapIntervalEXT", "wglSwapIntervalSGI", NULL}},
+  {&TexImage3D, NULL, {"glTexImage3D", NULL}},
   {NULL}
 };
 
@@ -314,7 +314,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
       for (i = 0; !ptr && dsc->funcnames[i]; i++)
         ptr = getProcAddress((const GLubyte *)dsc->funcnames[i]);
     }
-    *(dsc->funcptr) = ptr;
+    *(void **)dsc->funcptr = ptr;
   }
   if (strstr(allexts, "_texture_float"))
     hqtexfmt = GL_RGB32F;
