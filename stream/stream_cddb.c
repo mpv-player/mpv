@@ -338,10 +338,10 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 		perror("fstat");
 		file_size = 4096;
 	} else {
-		file_size = stats.st_size;
+		file_size = stats.st_size < UINT_MAX ? stats.st_size : UINT_MAX - 1;
 	}
 	
-	cddb_data->xmcd_file = malloc(file_size);
+	cddb_data->xmcd_file = malloc(file_size+1);
 	if( cddb_data->xmcd_file==NULL ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 		close(file_fd);
@@ -353,6 +353,7 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 		close(file_fd);
 		return -1;
 	}
+	cddb_data->xmcd_file[cddb_data->xmcd_file_size] = 0;
 	
 	close(file_fd);
 	
