@@ -442,13 +442,13 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			ptr = strdup(ptr);
 			// Ok found the beginning of the file
 			// look for the end
-			ptr2 = strstr(ptr, "\r\n.\r\n");
-			if( ptr2==NULL ) {
+			ptr2 = strstr(ptr, "\n.\r\n");
+			if (!ptr2)
 				ptr2 = strstr(ptr, "\n.\n");
-				if( ptr2==NULL ) {
+			if (ptr2) ptr2++;
+			else {
 					mp_msg(MSGT_DEMUX, MSGL_FIXME, "Unable to find '.'\n");
 					ptr2=ptr+strlen(ptr); //return -1;
-				}
 			}
 			// Ok found the end
 			// do a sanity check
