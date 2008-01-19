@@ -757,9 +757,9 @@ static const char *bicub_x_filt_template_RECT =
   BICUB_X_FILT_MAIN("RECT");
 
 static const char *unsharp_filt_template =
-  "PARAM dcoord = {%f, %f, %f, %f};"
-  "ADD coord, fragment.texcoord[%c].xyxy, dcoord;"
-  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord;"
+  "PARAM dcoord%c = {%f, %f, %f, %f};"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;"
   "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
   "TEX b.r, coord.xyxy, texture[%c], %s;"
   "TEX b.g, coord.zwzw, texture[%c], %s;"
@@ -771,10 +771,10 @@ static const char *unsharp_filt_template =
   "MAD yuv.%c, b.r, %s, a.r;";
 
 static const char *unsharp_filt_template2 =
-  "PARAM dcoord = {%f, %f, %f, %f};"
-  "PARAM dcoord2 = {%f, 0, 0, %f};"
-  "ADD coord, fragment.texcoord[%c].xyxy, dcoord;"
-  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord;"
+  "PARAM dcoord%c = {%f, %f, %f, %f};"
+  "PARAM dcoord2%c = {%f, 0, 0, %f};"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord%c;"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord%c;"
   "TEX a.r, fragment.texcoord[%c], texture[%c], %s;"
   "TEX b.r, coord.xyxy, texture[%c], %s;"
   "TEX b.g, coord.zwzw, texture[%c], %s;"
@@ -783,8 +783,8 @@ static const char *unsharp_filt_template2 =
   "TEX b.g, coord2.zwzw, texture[%c], %s;"
   "ADD b.r, b.r, b.b;"
   "ADD b.a, b.r, b.g;"
-  "ADD coord, fragment.texcoord[%c].xyxy, dcoord2;"
-  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord2;"
+  "ADD coord, fragment.texcoord[%c].xyxy, dcoord2%c;"
+  "SUB coord2, fragment.texcoord[%c].xyxy, dcoord2%c;"
   "TEX b.r, coord.xyxy, texture[%c], %s;"
   "TEX b.g, coord.zwzw, texture[%c], %s;"
   "ADD b.r, b.r, b.g;"
@@ -1075,18 +1075,19 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
       break;
     case YUV_SCALER_UNSHARP:
       snprintf(*prog_pos, *remain, unsharp_filt_template,
-               0.5 * ptw, 0.5 * pth, 0.5 * ptw, -0.5 * pth,
-               in_tex, in_tex, in_tex,
+               out_comp, 0.5 * ptw, 0.5 * pth, 0.5 * ptw, -0.5 * pth,
+               in_tex, out_comp, in_tex, out_comp, in_tex,
                in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
                in_tex, ttype, out_comp, "{0.5}");
       break;
     case YUV_SCALER_UNSHARP2:
       snprintf(*prog_pos, *remain, unsharp_filt_template2,
-               1.2 * ptw, 1.2 * pth, 1.2 * ptw, -1.2 * pth,
-               1.5 * ptw, 1.5 * pth,
-               in_tex, in_tex, in_tex,
+               out_comp, 1.2 * ptw, 1.2 * pth, 1.2 * ptw, -1.2 * pth,
+               out_comp, 1.5 * ptw, 1.5 * pth,
+               in_tex, out_comp, in_tex, out_comp, in_tex,
                in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
-               in_tex, ttype, in_tex, in_tex, in_tex, ttype, in_tex, ttype, in_tex, ttype,
+               in_tex, ttype, in_tex, out_comp, in_tex, out_comp,
+               in_tex, ttype, in_tex, ttype, in_tex, ttype,
                in_tex, ttype, out_comp, "{0.5}");
       break;
   }
