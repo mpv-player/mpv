@@ -1,4 +1,5 @@
-// Most of this was written by mbm@linux.com and released on the GPL2 License.
+// Most of this was written by Mike Baker <mbm@linux.com>
+// and released under the GPL2 License.
 //
 // Modifications and SEVERE cleanup of the code was done by 
 // Christopher Wingert 
