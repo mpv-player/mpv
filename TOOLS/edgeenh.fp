@@ -2,7 +2,7 @@
 # Custom YUV->RGB conversion program for MPlayer's -vo gl.
 # Copyleft (C) Reimar Döffinger, 2005
 # Licensed under the GNU GPL v2 or later
-# Usage: mplayer -vo gl:yuv=4:customprog=edgedetect.fp
+# Usage: mplayer -vo gl:yuv=4:customprog=edgeenh.fp
 # This is some custom edge-enhancement like effect.
 # Try adjusting the gamma!
 # program.env[0].xy contains the size of one source texel
