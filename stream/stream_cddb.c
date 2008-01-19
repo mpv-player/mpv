@@ -455,7 +455,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 				return -1;
 			}
 			cddb_data->xmcd_file = ptr;
-			cddb_data->xmcd_file_size = ptr2-ptr+2;
+			cddb_data->xmcd_file_size = ptr2-ptr;
 			cddb_data->xmcd_file[cddb_data->xmcd_file_size] = '\0';
 			// Avoid the http_free function to free the xmcd file...save a mempcy...
 			http_hdr->body = NULL;
