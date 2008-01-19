@@ -447,8 +447,8 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 				ptr2 = strstr(ptr, "\n.\n");
 			if (ptr2) ptr2++;
 			else {
-					mp_msg(MSGT_DEMUX, MSGL_FIXME, "Unable to find '.'\n");
-					ptr2=ptr+strlen(ptr); //return -1;
+				mp_msg(MSGT_DEMUX, MSGL_FIXME, "Unable to find '.'\n");
+				ptr2=ptr+strlen(ptr); //return -1;
 			}
 			// Ok found the end
 			// do a sanity check
