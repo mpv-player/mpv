@@ -790,7 +790,7 @@ static const char *unsharp_filt_template2 =
   "ADD b.r, b.r, b.g;"
   "TEX b.b, coord2.xyxy, texture[%c], %s;"
   "TEX b.g, coord2.zwzw, texture[%c], %s;"
-  "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.01953125};"
+  "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.09765625};"
   "MAD b.r, a.r, {0.859375}, b.r;"
   "MAD yuv.%c, b.r, %s, a.r;";
 
