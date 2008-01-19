@@ -582,6 +582,7 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   case WAV : {
     unsigned align = sh_audio->wf->nBlockAlign;
     l = sh_audio->wf->nAvgBytesPerSec;
+    if (l <= 0) l = 65536;
     if (demux->movi_end && l > demux->movi_end - stream_tell(s)) {
       // do not read beyond end, there might be junk after data chunk
       l = demux->movi_end - stream_tell(s);
