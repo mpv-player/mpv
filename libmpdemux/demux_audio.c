@@ -691,7 +691,7 @@ static void demux_close_audio(demuxer_t* demuxer) {
 
 static int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
     sh_audio_t *sh_audio=demuxer->audio->sh;
-    int audio_length = demuxer->movi_end / sh_audio->i_bps;
+    int audio_length = sh_audio->i_bps ? demuxer->movi_end / sh_audio->i_bps : 0;
     da_priv_t* priv = demuxer->priv;
 	    
     switch(cmd) {
