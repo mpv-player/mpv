@@ -134,6 +134,8 @@ void panscan_calc( void )
  if (vo_panscanrange > 0) {
    aspect(&fwidth,&fheight,A_ZOOM);
    vo_panscan_area = (aspdat.scrh-fheight);
+   if (!vo_panscan_area)
+     vo_panscan_area = aspdat.scrw - fwidth;
    vo_panscan_area *= vo_panscanrange;
  } else
    vo_panscan_area = -vo_panscanrange * aspdat.scrh;
