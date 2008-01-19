@@ -447,7 +447,7 @@ int bpp;
 } videomode_t;
 
 
-DFBEnumerationResult video_modes_callback( unsigned int width,unsigned int height,unsigned int bpp, void *data)
+DFBEnumerationResult video_modes_callback( int width,int height,int bpp, void *data)
 {
      videomode_t *params =(videomode_t *)data;
 
