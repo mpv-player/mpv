@@ -739,7 +739,8 @@ mp_input_parse_cmd(char* str) {
   int i,l;
   int pausing = 0;
   char *ptr,*e;
-  mp_cmd_t *cmd, *cmd_def;
+  mp_cmd_t *cmd;
+  const mp_cmd_t *cmd_def;
 
 #ifdef MP_DEBUG
   assert(str != NULL);
@@ -985,7 +986,7 @@ mp_input_add_cmd_filter(mp_input_cmd_filter func, void* ctx) {
   
 
 static char*
-mp_input_find_bind_for_key(mp_cmd_bind_t* binds, int n,int* keys) {
+mp_input_find_bind_for_key(const mp_cmd_bind_t* binds, int n,int* keys) {
   int j;
 
   if (n <= 0) return NULL;
@@ -1453,7 +1454,7 @@ mp_input_get_input_from_name(char* name,int* keys) {
 #define SPACE_CHAR " \n\r\t"
 
 void
-mp_input_bind_keys(int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
+mp_input_bind_keys(const int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
   int i = 0,j;
   mp_cmd_bind_t* bind = NULL;
   mp_cmd_bind_section_t* bind_section = NULL;
@@ -1497,7 +1498,7 @@ mp_input_bind_keys(int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
 }
 
 void
-mp_input_add_binds(mp_cmd_bind_t* list) {
+mp_input_add_binds(const mp_cmd_bind_t* list) {
   int i;
   for(i = 0 ; list[i].cmd ; i++)
     mp_input_bind_keys(list[i].input,list[i].cmd);
@@ -1810,7 +1811,7 @@ static int mp_input_print_key_list(m_option_t* cfg) {
 }
 
 static int mp_input_print_cmd_list(m_option_t* cfg) {
-  mp_cmd_t *cmd;
+  const mp_cmd_t *cmd;
   int i,j;
   const char* type;
 
