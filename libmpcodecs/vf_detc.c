@@ -273,7 +273,7 @@ static int do_put_image(struct vf_instance_s* vf, mp_image_t *dmpi)
 	int dropflag;
 
 	switch (p->drop) {
-	case 0:
+	default:
 		dropflag = 0;
 		break;
 	case 1:
