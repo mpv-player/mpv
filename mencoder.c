@@ -757,7 +757,7 @@ mux_v->source=sh_video;
 mux_v->h.dwSampleSize=0; // VBR
 #ifdef USE_LIBAVCODEC
 {
-    AVRational q= av_d2q(force_ofps?force_ofps:sh_video->fps*playback_speed, 30000);
+    AVRational q= av_d2q(force_ofps?force_ofps:sh_video->fps*playback_speed, 60000);
     mux_v->h.dwScale= q.den;
     mux_v->h.dwRate = q.num;
 }
