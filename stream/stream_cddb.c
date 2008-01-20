@@ -58,6 +58,7 @@
 #include "version.h"
 #include "stream.h"
 #include "network.h"
+#include "libavutil/intreadwrite.h"
 
 #define DEFAULT_FREEDB_SERVER	"freedb.freedb.org"
 #define DEFAULT_CACHE_DIR	"/.cddb/"
@@ -503,8 +504,9 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 		} else {
 			len = ptr2-ptr+1;
 		}
+		len = FFMIN(sizeof(album_title) - 1, len);
 		strncpy(album_title, ptr, len);
-		album_title[len-2]='\0';
+		album_title[len]='\0';
 	}
 	mp_msg(MSGT_DEMUX, MSGL_STATUS, MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle, album_title);
 	return 0;
@@ -540,8 +542,9 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 				} else {
 					len = ptr2-ptr+1;
 				}
+				len = FFMIN(sizeof(album_title) - 1, len);
 				strncpy(album_title, ptr, len);
-				album_title[len-2]='\0';
+				album_title[len]='\0';
 			}
 			mp_msg(MSGT_DEMUX, MSGL_STATUS, MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle, album_title);
 			return cddb_request_titles(cddb_data);
