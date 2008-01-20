@@ -360,7 +360,7 @@ int vo_w32_init(void) {
   }
 
     if (WinID >= 0)
-      vo_window = WinID;
+      vo_window = (HWND)WinID;
     else {
     vo_window = CreateWindowEx(0, classname, classname,
                   vo_border ? (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP,
@@ -376,7 +376,7 @@ int vo_w32_init(void) {
     myEnumDisplayMonitors = NULL;
     user32 = GetModuleHandle("user32.dll");
     if (user32) {
-        myMonitorFromWindow = GetProcAddress(user32, "MonitorFromWindow");
+        myMonitorFromWindow = (void *)GetProcAddress(user32, "MonitorFromWindow");
         myGetMonitorInfo = GetProcAddress(user32, "GetMonitorInfoA");
         myEnumDisplayMonitors = GetProcAddress(user32, "EnumDisplayMonitors");
     }
