@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <limits.h>
 #ifdef WIN32
 #ifdef __MINGW32__
 #define mkdir(a,b) mkdir(a)
