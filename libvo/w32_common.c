@@ -192,7 +192,7 @@ void w32_update_xinerama_info(void) {
     aspect_save_screenres(vo_screenwidth, vo_screenheight);
 }
 
-static void updateScreenProperties() {
+static void updateScreenProperties(void) {
     DEVMODE dm;
     dm.dmSize = sizeof dm;
     dm.dmDriverExtra = 0;
@@ -391,7 +391,7 @@ void vo_w32_fullscreen(void) {
     createRenderingContext();
 }
 
-void vo_w32_border() {
+void vo_w32_border(void) {
     vo_border = !vo_border;
     createRenderingContext();
 }
@@ -404,7 +404,7 @@ void vo_w32_ontop( void )
     }
 }
 
-void vo_w32_uninit() {
+void vo_w32_uninit(void) {
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: uninit\n");
     resetMode();
     ShowCursor(1);
