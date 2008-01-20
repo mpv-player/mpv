@@ -10,6 +10,7 @@ extern int vo_vm;
 extern int vo_w32_init(void);
 extern void vo_w32_uninit(void);
 extern void vo_w32_ontop(void);
+extern void vo_w32_border(void);
 extern void vo_w32_fullscreen(void);
 extern int vo_w32_check_events(void);
 extern int vo_w32_config(uint32_t, uint32_t, uint32_t);
