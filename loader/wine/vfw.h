@@ -502,7 +502,7 @@ long VFWAPIV ICDraw(HIC hic,long dwFlags,void* lpFormat,void* lpData,long cbData
 
 #define	AVIGETFRAMEF_BESTDISPLAYFMT	1
 
-typedef struct _AVISTREAMINFOA {
+typedef struct AVISTREAMINFOA {
     long	fccType;
     long	fccHandler;
     long	dwFlags;        /* AVIIF_* */
@@ -523,7 +523,7 @@ typedef struct _AVISTREAMINFOA {
     char	szName[64];
 } AVISTREAMINFOA, * LPAVISTREAMINFOA, *PAVISTREAMINFOA;
 
-typedef struct _AVISTREAMINFOW {
+typedef struct AVISTREAMINFOW {
     long	fccType;
     long	fccHandler;
     long	dwFlags;
@@ -563,7 +563,7 @@ DECL_WINELIB_TYPE_AW(PAVISTREAMINFO)
 #define AVIFILECAPS_ALLKEYFRAMES	0x00000010
 #define AVIFILECAPS_NOCOMPRESSION	0x00000020
 
-typedef struct _AVIFILEINFOW {
+typedef struct AVIFILEINFOW {
     long               dwMaxBytesPerSec;
     long               dwFlags;
     long               dwCaps;
@@ -578,7 +578,7 @@ typedef struct _AVIFILEINFOW {
     short               szFileType[64];
 } AVIFILEINFOW, * LPAVIFILEINFOW, *PAVIFILEINFOW;
 
-typedef struct _AVIFILEINFOA {
+typedef struct AVIFILEINFOA {
     long               dwMaxBytesPerSec;
     long               dwFlags;
     long               dwCaps;

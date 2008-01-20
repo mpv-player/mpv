@@ -7,7 +7,7 @@
 #define DS_MEDIATYPE_H
 #include "guids.h"
                   
-typedef struct __attribute__((__packed__)) _MediaType
+typedef struct __attribute__((__packed__)) MediaType
 {
     GUID	majortype;		//0x0
     GUID	subtype;		//0x10

@@ -704,8 +704,8 @@ return "???";
 
 static int c_level=0;
 
-static int dump_component(char* name,int type,void* _orig, ComponentParameters *params,void** glob){
-    int ( *orig)(ComponentParameters *params, void** glob) = _orig;
+static int dump_component(char* name, int type, void* orig, ComponentParameters *params,void** glob){
+    int ( *orig)(ComponentParameters *params, void** glob) = orig;
     int ret,i;
 
     fprintf(stderr,"%*sComponentCall: %s  flags=0x%X  size=%d  what=0x%X %s\n",3*c_level,"",name,params->flags, params->paramSize, params->what, component_func(params->what));
@@ -1051,8 +1051,8 @@ FARPROC MODULE_GetProcAddress(
 #endif
 
     if(!strcmp(function,"theQuickTimeDispatcher")
-//      || !strcmp(function,"_CallComponentFunctionWithStorage")
-//      || !strcmp(function,"_CallComponent")
+//      || !strcmp(function,"CallComponentFunctionWithStorage")
+//      || !strcmp(function,"CallComponent")
       ){
 	fprintf(stderr,"theQuickTimeDispatcher catched -> %p\n",retproc);
       report_entry = report_func;

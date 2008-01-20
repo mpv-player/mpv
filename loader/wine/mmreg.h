@@ -14,26 +14,26 @@
  * Defines/Enums
  */
 
-#ifndef _ACM_WAVEFILTER
-#define _ACM_WAVEFILTER
+#ifndef ACM_WAVEFILTER
+#define ACM_WAVEFILTER
 
 #include "windef.h"
 
 #define WAVE_FILTER_UNKNOWN     0x0000
 #define WAVE_FILTER_DEVELOPMENT 0xFFFF
 
-typedef struct __attribute__((__packed__)) _WAVEFILTER {
+typedef struct __attribute__((__packed__)) WAVEFILTER {
   DWORD   cbStruct;
   DWORD   dwFilterTag;
   DWORD   fdwFilter;
   DWORD   dwReserved[5];
 } WAVEFILTER, *PWAVEFILTER, *NPWAVEFILTER, *LPWAVEFILTER;
-#endif /* _ACM_WAVEFILTER */
+#endif /* ACM_WAVEFILTER */
 
 #ifndef WAVE_FILTER_VOLUME
 #define WAVE_FILTER_VOLUME      0x0001
 
-typedef struct __attribute__((__packed__)) _WAVEFILTER_VOLUME {
+typedef struct __attribute__((__packed__)) WAVEFILTER_VOLUME {
    WAVEFILTER      wfltr;
    DWORD           dwVolume;
 } VOLUMEWAVEFILTER, *PVOLUMEWAVEFILTER, *NPVOLUMEWAVEFILTER, *LPVOLUMEWAVEFILTER;
@@ -51,7 +51,7 @@ typedef struct __attribute__((__packed__)) WAVEFILTER_ECHO {
     
 #ifndef _WAVEFORMATEX_
 #define _WAVEFORMATEX_
-typedef struct __attribute__((__packed__)) _WAVEFORMATEX {
+typedef struct __attribute__((__packed__)) WAVEFORMATEX {
   WORD   wFormatTag;
   WORD   nChannels;
   DWORD  nSamplesPerSec;

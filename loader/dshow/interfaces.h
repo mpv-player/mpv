@@ -12,10 +12,10 @@
 
 /*    Sh*t. MSVC++ and g++ use different methods of storing vtables.    */
 
-typedef struct _IReferenceClock IReferenceClock;
-typedef struct _IFilterGraph IFilterGraph;
+typedef struct IReferenceClock IReferenceClock;
+typedef struct IFilterGraph IFilterGraph;
 
-typedef struct _IBaseFilter IBaseFilter;
+typedef struct IBaseFilter IBaseFilter;
 
 typedef enum
 {
@@ -23,14 +23,14 @@ typedef enum
     PINDIR_OUTPUT
 } PIN_DIRECTION;
 
-typedef struct _PinInfo
+typedef struct PinInfo
 {
     IBaseFilter* pFilter;
     PIN_DIRECTION dir;
     unsigned short achName[128];
 } PIN_INFO;
 
-typedef struct _AllocatorProperties
+typedef struct AllocatorProperties
 {
     long cBuffers;
     long cbBuffer;
@@ -38,7 +38,7 @@ typedef struct _AllocatorProperties
     long cbPrefix;
 } ALLOCATOR_PROPERTIES;
 
-typedef struct _IEnumMediaTypes IEnumMediaTypes;
+typedef struct IEnumMediaTypes IEnumMediaTypes;
 typedef struct IEnumMediaTypes_vt
 {
     INHERIT_IUNKNOWN();
@@ -53,11 +53,11 @@ typedef struct IEnumMediaTypes_vt
     HRESULT STDCALL ( *Clone )(IEnumMediaTypes* This,
 			       /* [out] */ IEnumMediaTypes** ppEnum);
 } IEnumMediaTypes_vt;
-struct _IEnumMediaTypes { IEnumMediaTypes_vt* vt; };
+struct IEnumMediaTypes { IEnumMediaTypes_vt* vt; };
 
 
 
-typedef struct _IPin IPin;
+typedef struct IPin IPin;
 typedef struct IPin_vt
 {
     INHERIT_IUNKNOWN();
@@ -91,10 +91,10 @@ typedef struct IPin_vt
 				    /* [in] */ REFERENCE_TIME tStop,
 				    /* [in] */ double dRate);
 } IPin_vt;
-struct _IPin { IPin_vt *vt; };
+struct IPin { IPin_vt *vt; };
 
 
-typedef struct _IEnumPins IEnumPins;
+typedef struct IEnumPins IEnumPins;
 typedef struct IEnumPins_vt
 {
     INHERIT_IUNKNOWN();
@@ -113,10 +113,10 @@ typedef struct IEnumPins_vt
     HRESULT STDCALL ( *Clone )(IEnumPins* This,
 			       /* [out] */ IEnumPins** ppEnum);
 } IEnumPins_vt;
-struct _IEnumPins { struct IEnumPins_vt* vt; };
+struct IEnumPins { struct IEnumPins_vt* vt; };
 
 
-typedef struct _IMediaSample IMediaSample;
+typedef struct IMediaSample IMediaSample;
 typedef struct IMediaSample_vt
 {
     INHERIT_IUNKNOWN();
@@ -174,11 +174,11 @@ typedef struct IMediaSample_vt
 				      /* [in] */ long long* pTimeStart,
 				      /* [in] */ long long* pTimeEnd);
 } IMediaSample_vt;
-struct _IMediaSample { struct IMediaSample_vt* vt; };
+struct IMediaSample { struct IMediaSample_vt* vt; };
 
 
 
-//typedef struct _IBaseFilter IBaseFilter;
+//typedef struct IBaseFilter IBaseFilter;
 typedef struct IBaseFilter_vt
 {
     INHERIT_IUNKNOWN();
@@ -211,11 +211,11 @@ typedef struct IBaseFilter_vt
     HRESULT STDCALL ( *QueryVendorInfo )(IBaseFilter* This,
 					 /* [string][out] */ unsigned short** pVendorInfo);
 } IBaseFilter_vt;
-struct _IBaseFilter { struct IBaseFilter_vt* vt; };
+struct IBaseFilter { struct IBaseFilter_vt* vt; };
 
 
 
-typedef struct _IMemAllocator IMemAllocator;
+typedef struct IMemAllocator IMemAllocator;
 typedef struct IMemAllocator_vt
 {
     INHERIT_IUNKNOWN();
@@ -241,11 +241,11 @@ typedef struct IMemAllocator_vt
     HRESULT STDCALL ( *ReleaseBuffer )(IMemAllocator* This,
 				       /* [in] */ IMediaSample* pBuffer);
 } IMemAllocator_vt;
-struct _IMemAllocator { IMemAllocator_vt* vt; };
+struct IMemAllocator { IMemAllocator_vt* vt; };
 
 
 
-typedef struct _IMemInputPin IMemInputPin;
+typedef struct IMemInputPin IMemInputPin;
 typedef struct IMemInputPin_vt
 {
     INHERIT_IUNKNOWN();
@@ -265,10 +265,10 @@ typedef struct IMemInputPin_vt
 					 /* [out] */ long *nSamplesProcessed);
     HRESULT STDCALL ( *ReceiveCanBlock )(IMemInputPin * This);
 } IMemInputPin_vt;
-struct _IMemInputPin { IMemInputPin_vt* vt; };
+struct IMemInputPin { IMemInputPin_vt* vt; };
 
 
-typedef struct _IHidden IHidden;
+typedef struct IHidden IHidden;
 typedef struct IHidden_vt
 {
     INHERIT_IUNKNOWN();
@@ -285,10 +285,10 @@ typedef struct IHidden_vt
     HRESULT STDCALL ( *SetSmth5 )(IHidden* This, int v1, int v2);
     HRESULT STDCALL ( *GetSmth6 )(IHidden* This, int* pv);
 } IHidden_vt;
-struct _IHidden { struct IHidden_vt* vt; };
+struct IHidden { struct IHidden_vt* vt; };
 
 
-typedef struct _IHidden2 IHidden2;
+typedef struct IHidden2 IHidden2;
 typedef struct IHidden2_vt
 {
     INHERIT_IUNKNOWN();
@@ -302,7 +302,7 @@ typedef struct IHidden2_vt
     HRESULT STDCALL ( *unk7 )(void);
     HRESULT STDCALL ( *unk8 )(void);
 } IHidden2_vt;
-struct _IHidden2 { struct IHidden2_vt* vt; };
+struct IHidden2 { struct IHidden2_vt* vt; };
 
 
 // fixme

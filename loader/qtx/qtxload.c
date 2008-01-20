@@ -53,8 +53,8 @@ int main(int argc, char *argv[]){
 //    handler = LoadLibraryA("/root/.wine/fake_windows/Windows/System/QuickTime.qts");
     handler = LoadLibraryA("QuickTime.qts");
     theqtdp = GetProcAddress(handler, "theQuickTimeDispatcher");
-    compcall = GetProcAddress(handler, "_CallComponent");
-    compcallws = GetProcAddress(handler, "_CallComponentFunctionWithStorage");
+    compcall = GetProcAddress(handler, "CallComponent");
+    compcallws = GetProcAddress(handler, "CallComponentFunctionWithStorage");
 
     InitializeQTML = 0x6299e590;//GetProcAddress(handler, "InitializeQTML");
     InitializeQTML(6+16);

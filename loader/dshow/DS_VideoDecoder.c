@@ -11,7 +11,7 @@
 #include "libwin32.h"
 #include "DS_Filter.h"
 
-struct _DS_VideoDecoder
+struct DS_VideoDecoder
 {
     IVideoDecoder iv;
     
@@ -54,9 +54,9 @@ static SampleProcUserData sampleProcData;
 int DS_VideoDecoder_GetCapabilities(DS_VideoDecoder *this)
 {return this->m_Caps;}
 	    
-typedef struct _ct ct;
+typedef struct ct ct;
 
-struct _ct {
+struct ct {
 		unsigned int bits;
 		fourcc_t fcc;
 		const GUID *subtype;

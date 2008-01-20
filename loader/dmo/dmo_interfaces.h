@@ -6,7 +6,7 @@
 /*
  * IMediaBuffer interface
  */
-typedef struct _IMediaBuffer IMediaBuffer;
+typedef struct IMediaBuffer IMediaBuffer;
 typedef struct IMediaBuffer_vt
 {
     INHERIT_IUNKNOWN();
@@ -19,10 +19,10 @@ typedef struct IMediaBuffer_vt
 					    /* [out] */ char** ppBuffer,
 					    /* [out] */ unsigned long* pcbLength);
 } IMediaBuffer_vt;
-struct _IMediaBuffer { IMediaBuffer_vt* vt; };
+struct IMediaBuffer { IMediaBuffer_vt* vt; };
 
 
-typedef struct _DMO_OUTPUT_DATA_BUFFER
+typedef struct DMO_OUTPUT_DATA_BUFFER
 {
     IMediaBuffer *pBuffer;
     unsigned long dwStatus;
@@ -34,7 +34,7 @@ typedef struct _DMO_OUTPUT_DATA_BUFFER
 /*
  * IMediaObject interface
  */
-typedef struct _IMediaObject IMediaObject;
+typedef struct IMediaObject IMediaObject;
 typedef struct IMediaObject_vt
 {
     INHERIT_IUNKNOWN();
@@ -106,12 +106,12 @@ typedef struct IMediaObject_vt
 				       /* [out] */ unsigned long *pdwStatus);
     HRESULT STDCALL ( *Lock )(IMediaObject * This, long bLock);
 } IMediaObject_vt;
-struct _IMediaObject { IMediaObject_vt* vt; };
+struct IMediaObject { IMediaObject_vt* vt; };
 
 /*
  * IEnumDMO interface
  */
-typedef struct _IEnumDMO IEnumDMO;
+typedef struct IEnumDMO IEnumDMO;
 typedef struct IEnumDMO_vt
 {
     INHERIT_IUNKNOWN();
@@ -127,12 +127,12 @@ typedef struct IEnumDMO_vt
     HRESULT STDCALL ( *Clone )(IEnumDMO * This,
 			       /* [out] */ IEnumDMO **ppEnum);
 } IEnumDMO_vt;
-struct _IEnumDMO { IEnumDMO_vt* vt; };
+struct IEnumDMO { IEnumDMO_vt* vt; };
 
 /*
  * IMediaObjectInPlace interface
  */
-typedef struct _IMediaObjectInPlace IMediaObjectInPlace;
+typedef struct IMediaObjectInPlace IMediaObjectInPlace;
 typedef struct IMediaObjectInPlace_vt
 {
     INHERIT_IUNKNOWN();
@@ -148,13 +148,13 @@ typedef struct IMediaObjectInPlace_vt
 				    /* [out] */ REFERENCE_TIME *pLatencyTime);
 
 } IMediaObjectInPlace_vt;
-struct _IMediaObjectInPlace { IMediaObjectInPlace_vt* vt; };
+struct IMediaObjectInPlace { IMediaObjectInPlace_vt* vt; };
 
 
 /*
  * IDMOQualityControl interface
  */
-typedef struct _IDMOQualityControl IDMOQualityControl;
+typedef struct IDMOQualityControl IDMOQualityControl;
 typedef struct IDMOQualityControl_vt
 {
     INHERIT_IUNKNOWN();
@@ -166,12 +166,12 @@ typedef struct IDMOQualityControl_vt
     HRESULT STDCALL ( *GetStatus )(IDMOQualityControl * This,
 				   /* [out] */ unsigned long *pdwFlags);
 } IDMOQualityControl_vt;
-struct _IDMOQualityControl { IDMOQualityControl_vt* vt; };
+struct IDMOQualityControl { IDMOQualityControl_vt* vt; };
 
 /*
  * IDMOVideoOutputOptimizations  interface
  */
-typedef struct _IDMOVideoOutputOptimizations  IDMOVideoOutputOptimizations;
+typedef struct IDMOVideoOutputOptimizations  IDMOVideoOutputOptimizations;
 typedef struct IDMOVideoOutputOptimizations_vt
 {
     INHERIT_IUNKNOWN();
@@ -189,6 +189,6 @@ typedef struct IDMOVideoOutputOptimizations_vt
 						      unsigned long ulOutputStreamIndex,
 						      unsigned long *pdwRequestedFeatures);
 } IDMOVideoOutputOptimizations_vt;
-struct _IDMOVideoOutputOptimizations { IDMOVideoOutputOptimizations_vt* vt; };
+struct IDMOVideoOutputOptimizations { IDMOVideoOutputOptimizations_vt* vt; };
 
 #endif /* DMO_INTERFACE_H */

@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-struct _CMediaBuffer
+struct CMediaBuffer
 {
     IMediaBuffer_vt* vt;
     DECLARE_IUNKNOWN();

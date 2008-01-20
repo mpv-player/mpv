@@ -17,7 +17,7 @@
 
 #include "DMO_VideoDecoder.h"
 
-struct _DMO_VideoDecoder
+struct DMO_VideoDecoder
 {
     IVideoDecoder iv;
     
@@ -54,9 +54,9 @@ struct _DMO_VideoDecoder
 
 //int DMO_VideoDecoder_GetCapabilities(DMO_VideoDecoder *this){return this->m_Caps;}
 
-typedef struct _ct ct;
+typedef struct ct ct;
 
-struct _ct {
+struct ct {
     fourcc_t fcc;
     unsigned int bits;
     const GUID* subtype;

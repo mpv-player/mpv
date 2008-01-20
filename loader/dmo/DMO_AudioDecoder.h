@@ -1,7 +1,7 @@
 #ifndef AVIFILE_DMO_AUDIODECODER_H
 #define AVIFILE_DMO_AUDIODECODER_H
 
-typedef struct _DMO_AudioDecoder DMO_AudioDecoder;
+typedef struct DMO_AudioDecoder DMO_AudioDecoder;
 
 //DMO_AudioDecoder * DMO_AudioDecoder_Create(const CodecInfo * info, const WAVEFORMATEX* wf);
 DMO_AudioDecoder * DMO_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* wf,int out_channels);

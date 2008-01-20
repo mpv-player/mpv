@@ -25,10 +25,10 @@ extern "C" {
 #include "wine/vfw.h"
 #include "wine/msacm.h"
 
-unsigned int _GetPrivateProfileIntA(const char* appname, const char* keyname, int default_value, const char* filename);
-int _GetPrivateProfileStringA(const char* appname, const char* keyname,
+unsigned int GetPrivateProfileIntA_(const char* appname, const char* keyname, int default_value, const char* filename);
+int GetPrivateProfileStringA_(const char* appname, const char* keyname,
 	const char* def_val, char* dest, unsigned int len, const char* filename);
-int _WritePrivateProfileStringA(const char* appname, const char* keyname,
+int WritePrivateProfileStringA_(const char* appname, const char* keyname,
 	const char* string, const char* filename);
 
 INT WINAPI LoadStringA( HINSTANCE instance, UINT resource_id,

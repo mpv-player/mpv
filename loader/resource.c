@@ -36,13 +36,13 @@ WORD WINE_LanguageId=0x409;//english
 
 #define HRSRC_MAP_BLOCKSIZE 16
 
-typedef struct _HRSRC_ELEM
+typedef struct HRSRC_ELEM
 {
     HANDLE hRsrc;
     WORD     type;
 } HRSRC_ELEM;
 
-typedef struct _HRSRC_MAP
+typedef struct HRSRC_MAP
 {
     int nAlloc;
     int nUsed;

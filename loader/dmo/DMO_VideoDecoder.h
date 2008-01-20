@@ -1,7 +1,7 @@
 #ifndef AVIFILE_DMO_VIDEODECODER_H
 #define AVIFILE_DMO_VIDEODECODER_H
 
-typedef struct _DMO_VideoDecoder DMO_VideoDecoder;
+typedef struct DMO_VideoDecoder DMO_VideoDecoder;
 
 int DMO_VideoDecoder_GetCapabilities(DMO_VideoDecoder *this);
 

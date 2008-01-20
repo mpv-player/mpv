@@ -33,18 +33,18 @@ typedef DWORD CALLBACK (*LPTHREAD_START_ROUTINE)(LPVOID);
 #define OUTPUT_DEBUG_STRING_EVENT   8
 #define RIP_EVENT                   9
 
-typedef struct _EXCEPTION_DEBUG_INFO {
+typedef struct EXCEPTION_DEBUG_INFO {
     EXCEPTION_RECORD ExceptionRecord;
     DWORD dwFirstChance;
 } EXCEPTION_DEBUG_INFO;
 
-typedef struct _CREATE_THREAD_DEBUG_INFO {
+typedef struct CREATE_THREAD_DEBUG_INFO {
     HANDLE hThread;
     LPVOID lpThreadLocalBase;
     LPTHREAD_START_ROUTINE lpStartAddress;
 } CREATE_THREAD_DEBUG_INFO;
 
-typedef struct _CREATE_PROCESS_DEBUG_INFO {
+typedef struct CREATE_PROCESS_DEBUG_INFO {
     HANDLE hFile;
     HANDLE hProcess;
     HANDLE hThread;
@@ -57,15 +57,15 @@ typedef struct _CREATE_PROCESS_DEBUG_INFO {
     WORD fUnicode;
 } CREATE_PROCESS_DEBUG_INFO;
 
-typedef struct _EXIT_THREAD_DEBUG_INFO {
+typedef struct EXIT_THREAD_DEBUG_INFO {
     DWORD dwExitCode;
 } EXIT_THREAD_DEBUG_INFO;
 
-typedef struct _EXIT_PROCESS_DEBUG_INFO {
+typedef struct EXIT_PROCESS_DEBUG_INFO {
     DWORD dwExitCode;
 } EXIT_PROCESS_DEBUG_INFO;
 
-typedef struct _LOAD_DLL_DEBUG_INFO {
+typedef struct LOAD_DLL_DEBUG_INFO {
     HANDLE hFile;
     LPVOID   lpBaseOfDll;
     DWORD    dwDebugInfoFileOffset;
@@ -74,22 +74,22 @@ typedef struct _LOAD_DLL_DEBUG_INFO {
     WORD     fUnicode;
 } LOAD_DLL_DEBUG_INFO;
 
-typedef struct _UNLOAD_DLL_DEBUG_INFO {
+typedef struct UNLOAD_DLL_DEBUG_INFO {
     LPVOID lpBaseOfDll;
 } UNLOAD_DLL_DEBUG_INFO;
 
-typedef struct _OUTPUT_DEBUG_STRING_INFO {
+typedef struct OUTPUT_DEBUG_STRING_INFO {
     LPSTR lpDebugStringData;
     WORD  fUnicode;
     WORD  nDebugStringLength;
 } OUTPUT_DEBUG_STRING_INFO;
 
-typedef struct _RIP_INFO {
+typedef struct RIP_INFO {
     DWORD dwError;
     DWORD dwType;
 } RIP_INFO;
 
-typedef struct _DEBUG_EVENT {
+typedef struct DEBUG_EVENT {
     DWORD dwDebugEventCode;
     DWORD dwProcessId;
     DWORD dwThreadId;
@@ -158,7 +158,7 @@ typedef struct
 #define DRIVE_RAMDISK              6
 
 /* The security attributes structure */
-typedef struct _SECURITY_ATTRIBUTES
+typedef struct SECURITY_ATTRIBUTES
 {
     DWORD   nLength;
     LPVOID  lpSecurityDescriptor;
@@ -754,7 +754,7 @@ typedef struct
 } BY_HANDLE_FILE_INFORMATION ;
 
 
-typedef struct _SYSTEM_POWER_STATUS
+typedef struct SYSTEM_POWER_STATUS
 {
   WIN_BOOL16  ACLineStatus;
   BYTE    BatteryFlag;
@@ -764,7 +764,7 @@ typedef struct _SYSTEM_POWER_STATUS
   DWORD   BatteryFullLifeTime;
 } SYSTEM_POWER_STATUS, *LPSYSTEM_POWER_STATUS;
 
-typedef struct _MEMORY_BASIC_INFORMATION
+typedef struct MEMORY_BASIC_INFORMATION
 {
     LPVOID   BaseAddress;
     LPVOID   AllocationBase;
@@ -826,7 +826,7 @@ DECL_WINELIB_TYPE_AW(ENUMRESLANGPROC)
 #define	LOAD_WITH_ALTERED_SEARCH_PATH	0x00000008
 
 /* ifdef _x86_ ... */
-typedef struct _LDT_ENTRY {
+typedef struct LDT_ENTRY {
     WORD	LimitLow;
     WORD	BaseLow;
     union {
@@ -852,11 +852,11 @@ typedef struct _LDT_ENTRY {
 } LDT_ENTRY, *LPLDT_ENTRY;
 
 
-typedef enum _GET_FILEEX_INFO_LEVELS {
+typedef enum GET_FILEEX_INFO_LEVELS {
     GetFileExInfoStandard
 } GET_FILEEX_INFO_LEVELS;
 
-typedef struct _WIN32_FILE_ATTRIBUTES_DATA {
+typedef struct WIN32_FILE_ATTRIBUTES_DATA {
     DWORD    dwFileAttributes;
     FILETIME ftCreationTime;
     FILETIME ftLastAccessTime;
@@ -865,7 +865,7 @@ typedef struct _WIN32_FILE_ATTRIBUTES_DATA {
     DWORD    nFileSizeLow;
 } WIN32_FILE_ATTRIBUTE_DATA, *LPWIN32_FILE_ATTRIBUTE_DATA;
 
-typedef struct _DllVersionInfo {
+typedef struct DllVersionInfo {
     DWORD cbSize;
     DWORD dwMajorVersion;
     DWORD dwMinorVersion;

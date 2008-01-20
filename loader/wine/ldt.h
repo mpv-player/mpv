@@ -48,11 +48,11 @@ typedef struct
 
 extern ldt_copy_entry ldt_copy[LDT_SIZE];
 
-#define __AHSHIFT  3  /* don't change! */
-#define __AHINCR   (1 << __AHSHIFT)
+#define AHSHIFT  3  /* don't change! */
+#define AHINCR   (1 << AHSHIFT)
 
-#define SELECTOR_TO_ENTRY(sel)  (((int)(sel) & 0xffff) >> __AHSHIFT)
-#define ENTRY_TO_SELECTOR(i)    ((i) ? (((int)(i) << __AHSHIFT) | 7) : 0)
+#define SELECTOR_TO_ENTRY(sel)  (((int)(sel) & 0xffff) >> AHSHIFT)
+#define ENTRY_TO_SELECTOR(i)    ((i) ? (((int)(i) << AHSHIFT) | 7) : 0)
 #define IS_LDT_ENTRY_FREE(i)    (!(ldt_flags_copy[(i)] & LDT_FLAGS_ALLOCATED))
 #define IS_SELECTOR_FREE(sel)   (IS_LDT_ENTRY_FREE(SELECTOR_TO_ENTRY(sel)))
 #define GET_SEL_BASE(sel)       (ldt_copy[SELECTOR_TO_ENTRY(sel)].base)
@@ -67,7 +67,7 @@ extern ldt_copy_entry ldt_copy[LDT_SIZE];
 #define PTR_SEG_OFF_TO_SEGPTR(seg,off) \
    ((SEGPTR)MAKELONG(off,seg))
 #define PTR_SEG_OFF_TO_HUGEPTR(seg,off) \
-   PTR_SEG_OFF_TO_SEGPTR( (seg) + (HIWORD(off) << __AHSHIFT), LOWORD(off) )
+   PTR_SEG_OFF_TO_SEGPTR( (seg) + (HIWORD(off) << AHSHIFT), LOWORD(off) )
 
 #define W32S_APPLICATION() (PROCESS_Current()->flags & PDB32_WIN32S_PROC)
 #define W32S_OFFSET 0x10000

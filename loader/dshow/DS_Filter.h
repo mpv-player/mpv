@@ -18,8 +18,8 @@ typedef struct {
    and then set up m_pAll.
  **/
 
-typedef struct _DS_Filter DS_Filter;
-struct _DS_Filter
+typedef struct DS_Filter DS_Filter;
+struct DS_Filter
 {
     int m_iHandle;
     IBaseFilter* m_pFilter;

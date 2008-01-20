@@ -5,8 +5,8 @@
 
 #include "allocator.h"
 
-typedef struct _COutputMemPin COutputMemPin;
-typedef struct _COutputPin COutputPin;
+typedef struct COutputMemPin COutputMemPin;
+typedef struct COutputPin COutputPin;
 
 /**
  Callback routine for copying samples from pin into filter
@@ -15,7 +15,7 @@ typedef struct _COutputPin COutputPin;
 */
 typedef  HRESULT STDCALL (*SAMPLEPROC)(void* pUserData,IMediaSample*sample);
 
-struct _COutputPin
+struct COutputPin
 {
     IPin_vt* vt;
     DECLARE_IUNKNOWN();

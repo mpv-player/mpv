@@ -3,8 +3,8 @@
 
 #include "interfaces.h"
 
-typedef struct _CBaseFilter2 CBaseFilter2;
-struct _CBaseFilter2
+typedef struct CBaseFilter2 CBaseFilter2;
+struct CBaseFilter2
 {
     IBaseFilter_vt* vt;
     DECLARE_IUNKNOWN();
@@ -17,8 +17,8 @@ struct _CBaseFilter2
 CBaseFilter2* CBaseFilter2Create(void);
 
 
-typedef struct _CBaseFilter CBaseFilter;
-struct _CBaseFilter
+typedef struct CBaseFilter CBaseFilter;
+struct CBaseFilter
 {
     IBaseFilter_vt* vt;
     DECLARE_IUNKNOWN();  // has to match CBaseFilter2 - INHERITANCE!!

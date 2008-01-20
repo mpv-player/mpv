@@ -10,7 +10,7 @@
 
 #include "DS_Filter.h"
 
-struct _DS_AudioDecoder
+struct DS_AudioDecoder
 { 
     WAVEFORMATEX in_fmt;
     AM_MEDIA_TYPE m_sOurType, m_sDestType;

@@ -13,7 +13,7 @@
 #include "DMO_Filter.h"
 #include "DMO_AudioDecoder.h"
 
-struct _DMO_AudioDecoder
+struct DMO_AudioDecoder
 { 
     DMO_MEDIA_TYPE m_sOurType, m_sDestType;
     DMO_Filter* m_pDMO_Filter;

@@ -82,10 +82,10 @@ typedef enum {
 	MODULE32_ELFDLL
 } MODULE32_TYPE;
 
-typedef struct _wine_modref
+typedef struct wine_modref
 {
-	struct _wine_modref	*next;
-	struct _wine_modref	*prev;
+	struct wine_modref	*next;
+	struct wine_modref	*prev;
 	MODULE32_TYPE		type;
 	union {
 		PE_MODREF	pe;
@@ -95,7 +95,7 @@ typedef struct _wine_modref
 	HMODULE			module;
 
 	int			nDeps;
-	struct _wine_modref	**deps;
+	struct wine_modref	**deps;
 
 	int			flags;
 	int			refCount;

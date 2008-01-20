@@ -4,10 +4,10 @@
 #include "interfaces.h"
 #include "cmediasample.h"
 
-typedef struct _avm_list_t avm_list_t;
-typedef struct _MemAllocator MemAllocator;
+typedef struct avm_list_t avm_list_t;
+typedef struct MemAllocator MemAllocator;
 
-struct _MemAllocator
+struct MemAllocator
 {
     IMemAllocator_vt* vt;
     DECLARE_IUNKNOWN();

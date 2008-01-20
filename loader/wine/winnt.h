@@ -85,25 +85,24 @@
 typedef WCHAR TCHAR, *PTCHAR;
 typedef LPWSTR PTSTR, LPTSTR;
 typedef LPCWSTR PCTSTR, LPCTSTR;
-#define __TEXT(string) L##string /*probably wrong */
+#define TEXT(string) L##string /*probably wrong */
 # else  /* UNICODE */
 typedef char TCHAR, *PTCHAR;
 typedef LPSTR PTSTR, LPTSTR;
 typedef LPCSTR PCTSTR, LPCTSTR;
-#define __TEXT(string) string
+#define TEXT(string) string
 # endif /* UNICODE */
-#define TEXT(quote) __TEXT(quote)
 
 typedef BYTE     BOOLEAN;
 typedef BOOLEAN *PBOOLEAN;
 
-typedef struct _LIST_ENTRY {
-  struct _LIST_ENTRY *Flink;
-  struct _LIST_ENTRY *Blink;
+typedef struct LIST_ENTRY {
+  struct LIST_ENTRY *Flink;
+  struct LIST_ENTRY *Blink;
 } LIST_ENTRY, *PLIST_ENTRY;
 
-typedef struct _SINGLE_LIST_ENTRY {
-  struct _SINGLE_LIST_ENTRY *Next;
+typedef struct SINGLE_LIST_ENTRY {
+  struct SINGLE_LIST_ENTRY *Next;
 } SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
 
 /* Heap flags */
@@ -149,7 +148,7 @@ typedef struct _SINGLE_LIST_ENTRY {
 
 #define SIZE_OF_80387_REGISTERS      80
 
-typedef struct _FLOATING_SAVE_AREA
+typedef struct FLOATING_SAVE_AREA
 {
     DWORD   ControlWord;
     DWORD   StatusWord;
@@ -162,7 +161,7 @@ typedef struct _FLOATING_SAVE_AREA
     DWORD   Cr0NpxState;
 } FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
 
-typedef struct _CONTEXT86
+typedef struct CONTEXT86
 {
     DWORD   ContextFlags;
 
@@ -235,7 +234,7 @@ typedef CONTEXT86 CONTEXT;
 #define CONTEXT_INTEGER		(CONTEXT_ALPHA | 0x00000004L)
 #define CONTEXT_FULL  (CONTEXT_CONTROL | CONTEXT_FLOATING_POINT | CONTEXT_INTEGER)
 
-typedef struct _CONTEXT
+typedef struct CONTEXT
 {
     /* selected by CONTEXT_FLOATING_POINT */
     ULONGLONG FltF0;
@@ -316,8 +315,8 @@ typedef struct _CONTEXT
     DWORD Fill[4];
 } CONTEXT;
 
-#define _QUAD_PSR_OFFSET   HighSoftFpcr
-#define _QUAD_FLAGS_OFFSET HighFir
+#define QUAD_PSR_OFFSET   HighSoftFpcr
+#define QUAD_FLAGS_OFFSET HighFir
 
 #endif  /* _ALPHA_ */
 
@@ -332,7 +331,7 @@ typedef struct _CONTEXT
 
 #define CONTEXT_FULL (CONTEXT_CONTROL | CONTEXT_FLOATING_POINT | CONTEXT_INTEGER)
 
-typedef struct _CONTEXT
+typedef struct CONTEXT
 {
     DWORD Argument[4];
     /* These are selected by CONTEXT_FLOATING_POINT */
@@ -521,7 +520,7 @@ typedef struct
     DWORD Dr7;
 } CONTEXT;
 
-typedef struct _STACK_FRAME_HEADER
+typedef struct STACK_FRAME_HEADER
 {
     DWORD BackChain;
     DWORD GlueSaved1;
@@ -568,7 +567,7 @@ typedef struct _STACK_FRAME_HEADER
 
 #define CONTEXT_FULL (CONTEXT_CONTROL | CONTEXT_FLOATING_POINT | CONTEXT_INTEGER)
 
-typedef struct _CONTEXT
+typedef struct CONTEXT
 {
     DWORD ContextFlags;
 
@@ -679,50 +678,50 @@ typedef HANDLE *PHANDLE;
 #ifdef __i386__
 
 #ifdef NEED_UNDERSCORE_PREFIX
-# define __ASM_NAME(name) "_" name
+# define ASM_NAME(name) "_" name
 #else
-# define __ASM_NAME(name) name
+# define ASM_NAME(name) name
 #endif
 
 #ifdef __GNUC__
-# define __ASM_GLOBAL_FUNC(name,code) \
+# define ASM_GLOBAL_FUNC(name,code) \
       __asm__( ".align 4\n\t" \
-               ".globl " __ASM_NAME(#name) "\n\t" \
-               ".type " __ASM_NAME(#name) ",@function\n" \
-               __ASM_NAME(#name) ":\n\t" \
+               ".globl " ASM_NAME(#name) "\n\t" \
+               ".type " ASM_NAME(#name) ",@function\n" \
+               ASM_NAME(#name) ":\n\t" \
                code );
 #else  /* __GNUC__ */
-# define __ASM_GLOBAL_FUNC(name,code) \
-      void __asm_dummy_##name(void) { \
+# define ASM_GLOBAL_FUNC(name,code) \
+      void asm_dummy_##name(void) { \
           asm( ".align 4\n\t" \
-               ".globl " __ASM_NAME(#name) "\n\t" \
-               ".type " __ASM_NAME(#name) ",@function\n" \
-               __ASM_NAME(#name) ":\n\t" \
+               ".globl " ASM_NAME(#name) "\n\t" \
+               ".type " ASM_NAME(#name) ",@function\n" \
+               ASM_NAME(#name) ":\n\t" \
                code ); \
       }
 #endif  /* __GNUC__ */
 
-#define _DEFINE_REGS_ENTRYPOINT( name, fn, args ) \
-    __ASM_GLOBAL_FUNC( name, \
-                       "call " __ASM_NAME("CALL32_Regs") "\n\t" \
-                       ".long " __ASM_NAME(#fn) "\n\t" \
-                       ".byte " #args ", " #args )
+#define DEFINE_REGS_ENTRYPOINT( name, fn, args ) \
+    ASM_GLOBAL_FUNC( name, \
+                     "call " ASM_NAME("CALL32_Regs") "\n\t" \
+                     ".long " ASM_NAME(#fn) "\n\t" \
+                     ".byte " #args ", " #args )
 #define DEFINE_REGS_ENTRYPOINT_0( name, fn ) \
-  _DEFINE_REGS_ENTRYPOINT( name, fn, 0 )
+  DEFINE_REGS_ENTRYPOINT( name, fn, 0 )
 #define DEFINE_REGS_ENTRYPOINT_1( name, fn, t1 ) \
-  _DEFINE_REGS_ENTRYPOINT( name, fn, 4 )
+  DEFINE_REGS_ENTRYPOINT( name, fn, 4 )
 #define DEFINE_REGS_ENTRYPOINT_2( name, fn, t1, t2 ) \
-  _DEFINE_REGS_ENTRYPOINT( name, fn, 8 )
+  DEFINE_REGS_ENTRYPOINT( name, fn, 8 )
 #define DEFINE_REGS_ENTRYPOINT_3( name, fn, t1, t2, t3 ) \
-  _DEFINE_REGS_ENTRYPOINT( name, fn, 12 )
+  DEFINE_REGS_ENTRYPOINT( name, fn, 12 )
 #define DEFINE_REGS_ENTRYPOINT_4( name, fn, t1, t2, t3, t4 ) \
-  _DEFINE_REGS_ENTRYPOINT( name, fn, 16 )
+  DEFINE_REGS_ENTRYPOINT( name, fn, 16 )
 
 #endif  /* __i386__ */
 
 #ifdef __sparc__
 /* FIXME: use getcontext() to retrieve full context */
-#define _GET_CONTEXT \
+#define GET_CONTEXT \
     CONTEXT context;   \
     do { memset(&context, 0, sizeof(CONTEXT));            \
          context.ContextFlags = CONTEXT_CONTROL;          \
@@ -731,19 +730,19 @@ typedef HANDLE *PHANDLE;
 
 #define DEFINE_REGS_ENTRYPOINT_0( name, fn ) \
   void WINAPI name ( void ) \
-  { _GET_CONTEXT; fn( &context ); }
+  { GET_CONTEXT; fn( &context ); }
 #define DEFINE_REGS_ENTRYPOINT_1( name, fn, t1 ) \
   void WINAPI name ( t1 a1 ) \
-  { _GET_CONTEXT; fn( a1, &context ); }
+  { GET_CONTEXT; fn( a1, &context ); }
 #define DEFINE_REGS_ENTRYPOINT_2( name, fn, t1, t2 ) \
   void WINAPI name ( t1 a1, t2 a2 ) \
-  { _GET_CONTEXT; fn( a1, a2, &context ); }
+  { GET_CONTEXT; fn( a1, a2, &context ); }
 #define DEFINE_REGS_ENTRYPOINT_3( name, fn, t1, t2, t3 ) \
   void WINAPI name ( t1 a1, t2 a2, t3 a3 ) \
-  { _GET_CONTEXT; fn( a1, a2, a3, &context ); }
+  { GET_CONTEXT; fn( a1, a2, a3, &context ); }
 #define DEFINE_REGS_ENTRYPOINT_4( name, fn, t1, t2, t3, t4 ) \
   void WINAPI name ( t1 a1, t2 a2, t3 a3, t4 a4 ) \
-  { _GET_CONTEXT; fn( a1, a2, a3, a4, &context ); }
+  { GET_CONTEXT; fn( a1, a2, a3, a4, &context ); }
 
 #endif /* __sparc__ */
 
@@ -994,11 +993,11 @@ typedef HANDLE *PHANDLE;
 
 #define EXCEPTION_MAXIMUM_PARAMETERS 15
 
-typedef struct __EXCEPTION_RECORD
+typedef struct EXCEPTION_RECORD
 {
     DWORD    ExceptionCode;
     DWORD    ExceptionFlags;
-    struct __EXCEPTION_RECORD *ExceptionRecord;
+    struct EXCEPTION_RECORD *ExceptionRecord;
 
     LPVOID   ExceptionAddress;
     DWORD    NumberParameters;
@@ -1010,7 +1009,7 @@ typedef struct __EXCEPTION_RECORD
  * in except() and the UnhandledExceptionFilter().
  */
  
-typedef struct _EXCEPTION_POINTERS 
+typedef struct EXCEPTION_POINTERS
 {
   PEXCEPTION_RECORD  ExceptionRecord;
   PCONTEXT           ContextRecord;
@@ -1023,14 +1022,14 @@ typedef struct _EXCEPTION_POINTERS
  * larger exception frames for their own use.
  */
 
-struct __EXCEPTION_FRAME;
+struct EXCEPTION_FRAME;
 
-typedef DWORD (*PEXCEPTION_HANDLER)(PEXCEPTION_RECORD,struct __EXCEPTION_FRAME*,
-                                    PCONTEXT,struct __EXCEPTION_FRAME **);
+typedef DWORD (*PEXCEPTION_HANDLER)(PEXCEPTION_RECORD, struct EXCEPTION_FRAME*,
+                                    PCONTEXT, struct EXCEPTION_FRAME **);
 
-typedef struct __EXCEPTION_FRAME
+typedef struct EXCEPTION_FRAME
 {
-  struct __EXCEPTION_FRAME *Prev;
+  struct EXCEPTION_FRAME *Prev;
   PEXCEPTION_HANDLER       Handler;
 } EXCEPTION_FRAME, *PEXCEPTION_FRAME;
 
@@ -1055,9 +1054,9 @@ WINAPI SetUnhandledExceptionFilter( LPTOP_LEVEL_EXCEPTION_FILTER filter );
 #define DBG_CONTROL_BREAK           0x40010008
 #define DBG_EXCEPTION_NOT_HANDLED   0x80010001
 
-typedef struct _NT_TIB 
+typedef struct NT_TIB
 {
-	struct _EXCEPTION_REGISTRATION_RECORD *ExceptionList;
+	struct EXCEPTION_REGISTRATION_RECORD *ExceptionList;
 	PVOID StackBase;
 	PVOID StackLimit;
 	PVOID SubSystemTib;
@@ -1066,21 +1065,21 @@ typedef struct _NT_TIB
           DWORD Version;
 	} DUMMYUNIONNAME;
 	PVOID ArbitraryUserPointer;
-	struct _NT_TIB *Self;
+	struct NT_TIB *Self;
 } NT_TIB, *PNT_TIB;
 
-struct _TEB;
+struct TEB;
 /*
 #if defined(__i386__) && defined(__GNUC__)
-extern inline struct _TEB * WINAPI NtCurrentTeb(void);
-extern inline struct _TEB * WINAPI NtCurrentTeb(void)
+extern inline struct TEB * WINAPI NtCurrentTeb(void);
+extern inline struct TEB * WINAPI NtCurrentTeb(void)
 {
-    struct _TEB *teb;
+    struct TEB *teb;
     __asm__(".byte 0x64\n\tmovl (0x18),%0" : "=r" (teb));
     return teb;
 }
 #else
-extern struct _TEB * WINAPI NtCurrentTeb(void);
+extern struct TEB * WINAPI NtCurrentTeb(void);
 #endif
 */
 
@@ -1088,7 +1087,7 @@ extern struct _TEB * WINAPI NtCurrentTeb(void);
  * File formats definitions
  */
 
-typedef struct _IMAGE_DOS_HEADER {
+typedef struct IMAGE_DOS_HEADER {
     WORD  e_magic;      /* 00: MZ Header signature */
     WORD  e_cblp;       /* 02: Bytes on last page of file */
     WORD  e_cp;         /* 04: Pages in file */
@@ -1155,7 +1154,7 @@ typedef struct
     WORD  ne_expver;            /* 3e Expected Windows version number */
 } IMAGE_OS2_HEADER,*PIMAGE_OS2_HEADER;
 
-typedef struct _IMAGE_VXD_HEADER {
+typedef struct IMAGE_VXD_HEADER {
   WORD  e32_magic;
   BYTE  e32_border;
   BYTE  e32_worder;
@@ -1281,7 +1280,7 @@ typedef struct _IMAGE_VXD_HEADER {
 #define	IMAGE_SUBSYSTEM_OS2_CUI		5
 #define	IMAGE_SUBSYSTEM_POSIX_CUI	7
 
-typedef struct _IMAGE_FILE_HEADER {
+typedef struct IMAGE_FILE_HEADER {
   WORD  Machine;
   WORD  NumberOfSections;
   DWORD TimeDateStamp;
@@ -1291,14 +1290,14 @@ typedef struct _IMAGE_FILE_HEADER {
   WORD  Characteristics;
 } IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
 
-typedef struct _IMAGE_DATA_DIRECTORY {
+typedef struct IMAGE_DATA_DIRECTORY {
   DWORD VirtualAddress;
   DWORD Size;
 } IMAGE_DATA_DIRECTORY, *PIMAGE_DATA_DIRECTORY;
 
 #define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16
 
-typedef struct _IMAGE_OPTIONAL_HEADER {
+typedef struct IMAGE_OPTIONAL_HEADER {
 
   /* Standard fields */
 
@@ -1338,7 +1337,7 @@ typedef struct _IMAGE_OPTIONAL_HEADER {
   IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 } IMAGE_OPTIONAL_HEADER, *PIMAGE_OPTIONAL_HEADER;
 
-typedef struct _IMAGE_NT_HEADERS {
+typedef struct IMAGE_NT_HEADERS {
   DWORD Signature;
   IMAGE_FILE_HEADER FileHeader;
   IMAGE_OPTIONAL_HEADER OptionalHeader;
@@ -1346,7 +1345,7 @@ typedef struct _IMAGE_NT_HEADERS {
 
 #define IMAGE_SIZEOF_SHORT_NAME 8
 
-typedef struct _IMAGE_SECTION_HEADER {
+typedef struct IMAGE_SECTION_HEADER {
   BYTE  Name[IMAGE_SIZEOF_SHORT_NAME];
   union {
     DWORD PhysicalAddress;
@@ -1418,7 +1417,7 @@ typedef struct _IMAGE_SECTION_HEADER {
 
 #include "pshpack2.h"
 
-typedef struct _IMAGE_SYMBOL {
+typedef struct IMAGE_SYMBOL {
     union {
         BYTE    ShortName[8];
         struct {
@@ -1437,7 +1436,7 @@ typedef IMAGE_SYMBOL *PIMAGE_SYMBOL;
 
 #define IMAGE_SIZEOF_SYMBOL 18
 
-typedef struct _IMAGE_LINENUMBER {
+typedef struct IMAGE_LINENUMBER {
     union {
         DWORD   SymbolTableIndex;
         DWORD   VirtualAddress;
@@ -1448,7 +1447,7 @@ typedef IMAGE_LINENUMBER *PIMAGE_LINENUMBER;
 
 #define IMAGE_SIZEOF_LINENUMBER  6
 
-typedef union _IMAGE_AUX_SYMBOL {
+typedef union IMAGE_AUX_SYMBOL {
     struct {
         DWORD    TagIndex;
         union {
@@ -1589,7 +1588,7 @@ typedef IMAGE_AUX_SYMBOL *PIMAGE_AUX_SYMBOL;
 
 /* Export module directory */
 
-typedef struct _IMAGE_EXPORT_DIRECTORY {
+typedef struct IMAGE_EXPORT_DIRECTORY {
 	DWORD	Characteristics;
 	DWORD	TimeDateStamp;
 	WORD	MajorVersion;
@@ -1604,13 +1603,13 @@ typedef struct _IMAGE_EXPORT_DIRECTORY {
 } IMAGE_EXPORT_DIRECTORY,*PIMAGE_EXPORT_DIRECTORY;
 
 /* Import name entry */
-typedef struct _IMAGE_IMPORT_BY_NAME {
+typedef struct IMAGE_IMPORT_BY_NAME {
 	WORD	Hint;
 	BYTE	Name[1];
 } IMAGE_IMPORT_BY_NAME,*PIMAGE_IMPORT_BY_NAME;
 
 /* Import thunk */
-typedef struct _IMAGE_THUNK_DATA {
+typedef struct IMAGE_THUNK_DATA {
 	union {
 		LPBYTE    ForwarderString;
 		FARPROC Function;
@@ -1621,7 +1620,7 @@ typedef struct _IMAGE_THUNK_DATA {
 
 /* Import module directory */
 
-typedef struct _IMAGE_IMPORT_DESCRIPTOR {
+typedef struct IMAGE_IMPORT_DESCRIPTOR {
 	union {
 		DWORD	Characteristics; /* 0 for terminating null import descriptor  */
 		PIMAGE_THUNK_DATA OriginalFirstThunk;	/* RVA to original unbound IAT */
@@ -1643,7 +1642,7 @@ typedef struct _IMAGE_IMPORT_DESCRIPTOR {
 #define	IMAGE_SNAP_BY_ORDINAL(Ordinal)	((Ordinal & IMAGE_ORDINAL_FLAG) != 0)
 #define	IMAGE_ORDINAL(Ordinal)		(Ordinal & 0xffff)
 
-typedef struct _IMAGE_BOUND_IMPORT_DESCRIPTOR
+typedef struct IMAGE_BOUND_IMPORT_DESCRIPTOR
 {
     DWORD   TimeDateStamp;
     WORD    OffsetModuleName;
@@ -1651,21 +1650,21 @@ typedef struct _IMAGE_BOUND_IMPORT_DESCRIPTOR
 /* Array of zero or more IMAGE_BOUND_FORWARDER_REF follows */
 } IMAGE_BOUND_IMPORT_DESCRIPTOR,  *PIMAGE_BOUND_IMPORT_DESCRIPTOR;
 
-typedef struct _IMAGE_BOUND_FORWARDER_REF
+typedef struct IMAGE_BOUND_FORWARDER_REF
 {
     DWORD   TimeDateStamp;
     WORD    OffsetModuleName;
     WORD    Reserved;
 } IMAGE_BOUND_FORWARDER_REF, *PIMAGE_BOUND_FORWARDER_REF;
 
-typedef struct _IMAGE_BASE_RELOCATION
+typedef struct IMAGE_BASE_RELOCATION
 {
 	DWORD	VirtualAddress;
 	DWORD	SizeOfBlock;
 	WORD	TypeOffset[1];
 } IMAGE_BASE_RELOCATION,*PIMAGE_BASE_RELOCATION;
 
-typedef struct _IMAGE_RELOCATION
+typedef struct IMAGE_RELOCATION
 {
     union {
         DWORD   VirtualAddress;
@@ -1839,7 +1838,7 @@ typedef IMAGE_RELOCATION *PIMAGE_RELOCATION;
 #define IMAGE_ARCHIVE_LINKER_MEMBER          "/               "
 #define IMAGE_ARCHIVE_LONGNAMES_MEMBER       "//              "
 
-typedef struct _IMAGE_ARCHIVE_MEMBER_HEADER
+typedef struct IMAGE_ARCHIVE_MEMBER_HEADER
 {
     BYTE     Name[16];
     BYTE     Date[12];
@@ -1855,7 +1854,7 @@ typedef struct _IMAGE_ARCHIVE_MEMBER_HEADER
 /*
  * Resource directory stuff
  */
-typedef struct _IMAGE_RESOURCE_DIRECTORY {
+typedef struct IMAGE_RESOURCE_DIRECTORY {
 	DWORD	Characteristics;
 	DWORD	TimeDateStamp;
 	WORD	MajorVersion;
@@ -1868,7 +1867,7 @@ typedef struct _IMAGE_RESOURCE_DIRECTORY {
 #define	IMAGE_RESOURCE_NAME_IS_STRING		0x80000000
 #define	IMAGE_RESOURCE_DATA_IS_DIRECTORY	0x80000000
 
-typedef struct _IMAGE_RESOURCE_DIRECTORY_ENTRY {
+typedef struct IMAGE_RESOURCE_DIRECTORY_ENTRY {
 	union {
 		struct {
 			unsigned NameOffset:31;
@@ -1887,17 +1886,17 @@ typedef struct _IMAGE_RESOURCE_DIRECTORY_ENTRY {
 } IMAGE_RESOURCE_DIRECTORY_ENTRY,*PIMAGE_RESOURCE_DIRECTORY_ENTRY;
 
 
-typedef struct _IMAGE_RESOURCE_DIRECTORY_STRING {
+typedef struct IMAGE_RESOURCE_DIRECTORY_STRING {
 	WORD	Length;
 	CHAR	NameString[ 1 ];
 } IMAGE_RESOURCE_DIRECTORY_STRING,*PIMAGE_RESOURCE_DIRECTORY_STRING;
 
-typedef struct _IMAGE_RESOURCE_DIR_STRING_U {
+typedef struct IMAGE_RESOURCE_DIR_STRING_U {
 	WORD	Length;
 	WCHAR	NameString[ 1 ];
 } IMAGE_RESOURCE_DIR_STRING_U,*PIMAGE_RESOURCE_DIR_STRING_U;
 
-typedef struct _IMAGE_RESOURCE_DATA_ENTRY {
+typedef struct IMAGE_RESOURCE_DATA_ENTRY {
 	DWORD	OffsetToData;
 	DWORD	Size;
 	DWORD	CodePage;
@@ -1909,7 +1908,7 @@ typedef VOID CALLBACK (*PIMAGE_TLS_CALLBACK)(
 	LPVOID DllHandle,DWORD Reason,LPVOID Reserved
 );
 
-typedef struct _IMAGE_TLS_DIRECTORY {
+typedef struct IMAGE_TLS_DIRECTORY {
 	DWORD	StartAddressOfRawData;
 	DWORD	EndAddressOfRawData;
 	LPDWORD	AddressOfIndex;
@@ -1918,7 +1917,7 @@ typedef struct _IMAGE_TLS_DIRECTORY {
 	DWORD	Characteristics;
 } IMAGE_TLS_DIRECTORY,*PIMAGE_TLS_DIRECTORY;
 
-typedef struct _IMAGE_DEBUG_DIRECTORY {
+typedef struct IMAGE_DEBUG_DIRECTORY {
   DWORD Characteristics;
   DWORD TimeDateStamp;
   WORD  MajorVersion;
@@ -1941,7 +1940,7 @@ typedef struct _IMAGE_DEBUG_DIRECTORY {
 #define IMAGE_DEBUG_TYPE_BORLAND        9
 #define IMAGE_DEBUG_TYPE_RESERVED10    10
 
-typedef struct _IMAGE_COFF_SYMBOLS_HEADER {
+typedef struct IMAGE_COFF_SYMBOLS_HEADER {
   DWORD NumberOfSymbols;
   DWORD LvaToFirstSymbol;
   DWORD NumberOfLinenumbers;
@@ -1957,7 +1956,7 @@ typedef struct _IMAGE_COFF_SYMBOLS_HEADER {
 #define FRAME_TSS       2
 #define FRAME_NONFPO    3
 
-typedef struct _FPO_DATA {
+typedef struct FPO_DATA {
   DWORD ulOffStart;
   DWORD cbProcSize;
   DWORD cdwLocals;
@@ -1970,7 +1969,7 @@ typedef struct _FPO_DATA {
   unsigned cbFrame  : 2;
 } FPO_DATA, *PFPO_DATA;
 
-typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY {
+typedef struct IMAGE_LOAD_CONFIG_DIRECTORY {
   DWORD Characteristics;
   DWORD TimeDateStamp;
   WORD  MajorVersion;
@@ -1991,7 +1990,7 @@ typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY {
   DWORD Reserved[1];
 } IMAGE_LOAD_CONFIG_DIRECTORY, *PIMAGE_LOAD_CONFIG_DIRECTORY;
 
-typedef struct _IMAGE_FUNCTION_ENTRY {
+typedef struct IMAGE_FUNCTION_ENTRY {
   DWORD StartingAddress;
   DWORD EndingAddress;
   DWORD EndOfPrologue;
@@ -1999,7 +1998,7 @@ typedef struct _IMAGE_FUNCTION_ENTRY {
 
 /* This is the structure that appears at the very start of a .DBG file. */
 
-typedef struct _IMAGE_SEPARATE_DEBUG_HEADER {
+typedef struct IMAGE_SEPARATE_DEBUG_HEADER {
 	WORD	Signature;
 	WORD	Flags;
 	WORD	Machine;
@@ -2053,7 +2052,7 @@ typedef PVOID PACCESS_TOKEN;
  * TOKEN_INFORMATION_CLASS
  */
 
-typedef enum _TOKEN_INFORMATION_CLASS {
+typedef enum TOKEN_INFORMATION_CLASS {
   TokenUser = 1, 
   TokenGroups, 
   TokenPrivileges, 
@@ -2066,14 +2065,14 @@ typedef enum _TOKEN_INFORMATION_CLASS {
   TokenStatistics 
 } TOKEN_INFORMATION_CLASS; 
 
-#ifndef _SECURITY_DEFINED
-#define _SECURITY_DEFINED
+#ifndef SECURITY_DEFINED
+#define SECURITY_DEFINED
 
 #include "pshpack1.h"
 
 typedef DWORD ACCESS_MASK, *PACCESS_MASK;
 
-typedef struct _GENERIC_MAPPING {
+typedef struct GENERIC_MAPPING {
     ACCESS_MASK GenericRead;
     ACCESS_MASK GenericWrite;
     ACCESS_MASK GenericExecute;
@@ -2089,7 +2088,7 @@ typedef struct {
 
 #ifndef SID_DEFINED
 #define SID_DEFINED
-typedef struct _SID {
+typedef struct SID {
     BYTE Revision;
     BYTE SubAuthorityCount;
     SID_IDENTIFIER_AUTHORITY IdentifierAuthority;
@@ -2114,7 +2113,7 @@ typedef struct _SID {
 #define MIN_ACL_REVISION ACL_REVISION2
 #define MAX_ACL_REVISION ACL_REVISION4
 
-typedef struct _ACL {
+typedef struct ACL {
     BYTE AclRevision;
     BYTE Sbz1;
     WORD AclSize;
@@ -2163,7 +2162,7 @@ typedef struct {
 
 #include "poppack.h"
 
-#endif /* _SECURITY_DEFINED */
+#endif /* SECURITY_DEFINED */
 
 #include "pshpack1.h"
 
@@ -2171,7 +2170,7 @@ typedef struct {
  * SID_AND_ATTRIBUTES
  */
 
-typedef struct _SID_AND_ATTRIBUTES {
+typedef struct SID_AND_ATTRIBUTES {
   PSID  Sid; 
   DWORD Attributes; 
 } SID_AND_ATTRIBUTES ; 
@@ -2234,7 +2233,7 @@ typedef struct _SID_AND_ATTRIBUTES {
  * TOKEN_USER
  */
 
-typedef struct _TOKEN_USER {
+typedef struct TOKEN_USER {
   SID_AND_ATTRIBUTES User; 
 } TOKEN_USER; 
 
@@ -2242,7 +2241,7 @@ typedef struct _TOKEN_USER {
  * TOKEN_GROUPS
  */
 
-typedef struct _TOKEN_GROUPS  {
+typedef struct TOKEN_GROUPS  {
   DWORD GroupCount; 
   SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY]; 
 } TOKEN_GROUPS; 
@@ -2251,7 +2250,7 @@ typedef struct _TOKEN_GROUPS  {
  * LUID_AND_ATTRIBUTES
  */
 
-typedef union _LARGE_INTEGER {
+typedef union LARGE_INTEGER {
     struct {
         DWORD    LowPart;
         LONG     HighPart;
@@ -2259,7 +2258,7 @@ typedef union _LARGE_INTEGER {
     LONGLONG QuadPart;
 } LARGE_INTEGER, *LPLARGE_INTEGER, *PLARGE_INTEGER;
 
-typedef union _ULARGE_INTEGER {
+typedef union ULARGE_INTEGER {
     struct {
         DWORD    LowPart;
         LONG     HighPart;
@@ -2273,7 +2272,7 @@ typedef union _ULARGE_INTEGER {
 
 typedef LARGE_INTEGER LUID,*PLUID;
 
-typedef struct _LUID_AND_ATTRIBUTES {
+typedef struct LUID_AND_ATTRIBUTES {
   LUID   Luid; 
   DWORD  Attributes; 
 } LUID_AND_ATTRIBUTES; 
@@ -2282,7 +2281,7 @@ typedef struct _LUID_AND_ATTRIBUTES {
  * PRIVILEGE_SET
  */
 
-typedef struct _PRIVILEGE_SET {
+typedef struct PRIVILEGE_SET {
     DWORD PrivilegeCount;
     DWORD Control;
     LUID_AND_ATTRIBUTES Privilege[ANYSIZE_ARRAY];
@@ -2292,7 +2291,7 @@ typedef struct _PRIVILEGE_SET {
  * TOKEN_PRIVILEGES
  */
 
-typedef struct _TOKEN_PRIVILEGES {
+typedef struct TOKEN_PRIVILEGES {
   DWORD PrivilegeCount; 
   LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY]; 
 } TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES; 
@@ -2301,7 +2300,7 @@ typedef struct _TOKEN_PRIVILEGES {
  * TOKEN_OWNER
  */
 
-typedef struct _TOKEN_OWNER {
+typedef struct TOKEN_OWNER {
   PSID Owner; 
 } TOKEN_OWNER; 
 
@@ -2309,7 +2308,7 @@ typedef struct _TOKEN_OWNER {
  * TOKEN_PRIMARY_GROUP
  */
 
-typedef struct _TOKEN_PRIMARY_GROUP {
+typedef struct TOKEN_PRIMARY_GROUP {
   PSID PrimaryGroup; 
 } TOKEN_PRIMARY_GROUP; 
 
@@ -2318,7 +2317,7 @@ typedef struct _TOKEN_PRIMARY_GROUP {
  * TOKEN_DEFAULT_DACL
  */
 
-typedef struct _TOKEN_DEFAULT_DACL { 
+typedef struct TOKEN_DEFAULT_DACL {
   PACL DefaultDacl; 
 } TOKEN_DEFAULT_DACL; 
 
@@ -2326,7 +2325,7 @@ typedef struct _TOKEN_DEFAULT_DACL {
  * TOKEN_SOURCEL
  */
 
-typedef struct _TOKEN_SOURCE {
+typedef struct TOKEN_SOURCE {
   char Sourcename[8]; 
   LUID SourceIdentifier; 
 } TOKEN_SOURCE; 
@@ -2344,7 +2343,7 @@ typedef enum tagTOKEN_TYPE {
  * SECURITY_IMPERSONATION_LEVEL
  */
 
-typedef enum _SECURITY_IMPERSONATION_LEVEL {
+typedef enum SECURITY_IMPERSONATION_LEVEL {
   SecurityAnonymous, 
   SecurityIdentification, 
   SecurityImpersonation, 
@@ -2358,7 +2357,7 @@ typedef BOOLEAN SECURITY_CONTEXT_TRACKING_MODE,
  *	Quality of Service
  */
 
-typedef struct _SECURITY_QUALITY_OF_SERVICE {
+typedef struct SECURITY_QUALITY_OF_SERVICE {
   DWORD				Length;
   SECURITY_IMPERSONATION_LEVEL	ImpersonationLevel;
   SECURITY_CONTEXT_TRACKING_MODE ContextTrackingMode;
@@ -2369,7 +2368,7 @@ typedef struct _SECURITY_QUALITY_OF_SERVICE {
  * TOKEN_STATISTICS
  */
 
-typedef struct _TOKEN_STATISTICS {
+typedef struct TOKEN_STATISTICS {
   LUID  TokenId; 
   LUID  AuthenticationId; 
   LARGE_INTEGER ExpirationTime; 
@@ -2392,7 +2391,7 @@ typedef struct _TOKEN_STATISTICS {
 #define	ACL_REVISION2	2
 
 /* ACEs, directly starting after an ACL */
-typedef struct _ACE_HEADER {
+typedef struct ACE_HEADER {
 	BYTE	AceType;
 	BYTE	AceFlags;
 	WORD	AceSize;
@@ -2422,25 +2421,25 @@ typedef struct _ACE_HEADER {
  * 4: ACCESS_MASK
  * 8... : SID
  */
-typedef struct _ACCESS_ALLOWED_ACE {
+typedef struct ACCESS_ALLOWED_ACE {
 	ACE_HEADER	Header;
 	DWORD		Mask;
 	DWORD		SidStart;
 } ACCESS_ALLOWED_ACE,*PACCESS_ALLOWED_ACE;
 
-typedef struct _ACCESS_DENIED_ACE {
+typedef struct ACCESS_DENIED_ACE {
 	ACE_HEADER	Header;
 	DWORD		Mask;
 	DWORD		SidStart;
 } ACCESS_DENIED_ACE,*PACCESS_DENIED_ACE;
 
-typedef struct _SYSTEM_AUDIT_ACE {
+typedef struct SYSTEM_AUDIT_ACE {
 	ACE_HEADER	Header;
 	DWORD		Mask;
 	DWORD		SidStart;
 } SYSTEM_AUDIT_ACE,*PSYSTEM_AUDIT_ACE;
 
-typedef struct _SYSTEM_ALARM_ACE {
+typedef struct SYSTEM_ALARM_ACE {
 	ACE_HEADER	Header;
 	DWORD		Mask;
 	DWORD		SidStart;

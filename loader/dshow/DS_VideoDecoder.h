@@ -1,7 +1,7 @@
 #ifndef AVIFILE_DS_VIDEODECODER_H
 #define AVIFILE_DS_VIDEODECODER_H
 
-typedef struct _DS_VideoDecoder DS_VideoDecoder;
+typedef struct DS_VideoDecoder DS_VideoDecoder;
 
 int DS_VideoDecoder_GetCapabilities(DS_VideoDecoder *this);
 

@@ -954,7 +954,7 @@ WIN_BOOL PE_InitDLL( WINE_MODREF *wm, DWORD type, LPVOID lpReserved )
 }
 
 static LPVOID
-_fixup_address(PIMAGE_OPTIONAL_HEADER opt,int delta,LPVOID addr) {
+fixup_address(PIMAGE_OPTIONAL_HEADER opt,int delta,LPVOID addr) {
 	if (	((DWORD)addr>opt->ImageBase) &&
 		((DWORD)addr<opt->ImageBase+opt->SizeOfImage)
 	)

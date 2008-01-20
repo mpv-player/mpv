@@ -95,7 +95,7 @@ extern "C" {
 #  ifndef _EGCS_ 
 #define __stdcall __attribute__((__stdcall__))
 #define __cdecl   __attribute__((__cdecl__))
-#  define __RESTORE_ES  __asm__ __volatile__("pushl %ds\n\tpopl %es")
+#  define RESTORE_ES  __asm__ __volatile__("pushl %ds\n\tpopl %es")
 #  endif
 # else
 // #  error You need gcc >= 2.7 to build Wine on a 386
@@ -103,7 +103,7 @@ extern "C" {
 #else 
 # define __stdcall
 # define __cdecl
-# define __RESTORE_ES
+# define RESTORE_ES
 #endif
 
 #define CALLBACK    __stdcall
@@ -581,7 +581,7 @@ typedef struct tagPOINT
     LONG  y;
 } POINT, *PPOINT, *LPPOINT;
 
-typedef struct _POINTL
+typedef struct POINTL
 {
     LONG x;
     LONG y;

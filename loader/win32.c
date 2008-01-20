@@ -2800,16 +2800,16 @@ static int WINAPI expWritePrivateProfileStringA(const char* appname,
     return 0;
 }
 
-unsigned int _GetPrivateProfileIntA(const char* appname, const char* keyname, INT default_value, const char* filename)
+unsigned int GetPrivateProfileIntA_(const char* appname, const char* keyname, INT default_value, const char* filename)
 {
     return expGetPrivateProfileIntA(appname, keyname, default_value, filename);
 }
-int _GetPrivateProfileStringA(const char* appname, const char* keyname,
+int GetPrivateProfileStringA_(const char* appname, const char* keyname,
 			      const char* def_val, char* dest, unsigned int len, const char* filename)
 {
     return expGetPrivateProfileStringA(appname, keyname, def_val, dest, len, filename);
 }
-int _WritePrivateProfileStringA(const char* appname, const char* keyname,
+int WritePrivateProfileStringA_(const char* appname, const char* keyname,
 				const char* string, const char* filename)
 {
     return expWritePrivateProfileStringA(appname, keyname, string, filename);
@@ -2817,9 +2817,9 @@ int _WritePrivateProfileStringA(const char* appname, const char* keyname,
 
 
 
-static int WINAPI expDefDriverProc(int _private, int id, int msg, int arg1, int arg2)
+static int WINAPI expDefDriverProc(int private, int id, int msg, int arg1, int arg2)
 {
-    dbgprintf("DefDriverProc(0x%x, 0x%x, 0x%x, 0x%x, 0x%x) => 0\n", _private, id, msg, arg1, arg2);
+    dbgprintf("DefDriverProc(0x%x, 0x%x, 0x%x, 0x%x, 0x%x) => 0\n", private, id, msg, arg1, arg2);
     return 0;
 }
 
@@ -3038,7 +3038,7 @@ static int WINAPI expGetSystemPaletteEntries(int hdc, int iStartIndex, int nEntr
 }
 
 /*
- typedef struct _TIME_ZONE_INFORMATION {
+ typedef struct TIME_ZONE_INFORMATION {
  long Bias;
  char StandardName[32];
  SYSTEMTIME StandardDate;
@@ -4004,8 +4004,8 @@ static int exp_initterm(int v1, int v2)
 }
 #else
 /* merged from wine - 2002.04.21 */
-typedef void (*_INITTERMFUNC)();
-static int exp_initterm(_INITTERMFUNC *start, _INITTERMFUNC *end)
+typedef void (*INITTERMFUNC)();
+static int exp_initterm(INITTERMFUNC *start, INITTERMFUNC *end)
 {
     dbgprintf("_initterm(0x%x, 0x%x) %p\n", start, end, *start);
     while (start < end)

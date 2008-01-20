@@ -33,7 +33,7 @@ typedef struct CEnumMediaTypes
 /**
    IMemOutput interface implementation
 */
-struct _COutputMemPin
+struct COutputMemPin
 {
     IMemInputPin_vt* vt;
     DECLARE_IUNKNOWN();
