@@ -92,9 +92,6 @@ static const AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_MUSEPACK7,         MKTAG('M', 'P', 'C', ' ')},
     { CODEC_ID_MUSEPACK8,         MKTAG('M', 'P', 'C', '8')},
     { CODEC_ID_NELLYMOSER,        MKTAG('N', 'E', 'L', 'L')},    
-    { CODEC_ID_PCM_S24BE,         MKTAG('i', 'n', '2', '4')},
-    { CODEC_ID_PCM_S16BE,         MKTAG('t', 'w', 'o', 's')},
-    { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
     { CODEC_ID_ROQ_DPCM,          MKTAG('R', 'o', 'Q', 'A')},
     { CODEC_ID_SHORTEN,           MKTAG('s', 'h', 'r', 'n')},
     { CODEC_ID_TTA,               MKTAG('T', 'T', 'A', '1')},
@@ -105,6 +102,17 @@ static const AVCodecTag mp_wav_tags[] = {
 };
 
 const struct AVCodecTag *mp_wav_taglists[] = {codec_wav_tags, mp_wav_tags, 0};
+
+static const AVCodecTag mp_wav_override_tags[] = {
+    { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
+    { CODEC_ID_PCM_U8,            0},
+    { CODEC_ID_PCM_S16BE,         MKTAG('t', 'w', 'o', 's')},
+    { CODEC_ID_PCM_S16LE,         0},
+    { CODEC_ID_PCM_S24BE,         MKTAG('i', 'n', '2', '4')},
+    { 0, 0 },
+};
+
+const struct AVCodecTag *mp_wav_override_taglists[] = {mp_wav_override_tags, 0};
 
 static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_AMV,               MKTAG('A', 'M', 'V', 'V')},
@@ -271,6 +279,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 break;
             priv->astreams[priv->audio_streams] = i;
             priv->audio_streams++;
+            // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
+            codec->codec_tag= av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
             // mp4a tag is used for all mp4 files no matter what they actually contain
             if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
                 codec->codec_tag= 0;
