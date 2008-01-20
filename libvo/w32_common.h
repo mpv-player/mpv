@@ -1,16 +1,11 @@
 #ifndef W32COMMON_H
 #define W32COMMON_H
 
-extern int vo_depthonscreen;
-extern int vo_screenwidth;
-extern int vo_screenheight;
 extern uint32_t o_dwidth;
 extern uint32_t o_dheight;
 extern HWND vo_w32_window;
 extern HDC vo_hdc;
-extern int vo_fs;
 extern int vo_vm;
-extern int vo_ontop;
 
 extern int vo_w32_init(void);
 extern void vo_w32_uninit(void);
