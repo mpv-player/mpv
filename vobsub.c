@@ -1279,14 +1279,9 @@ vobsub_set_from_lang(void *vobhandle, unsigned char * lang)
     mp_msg(MSGT_VOBSUB, MSGL_WARN, "No matching VOBSUB language found!\n");
     return -1;
 }
-    
-int
-vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
-  vobsub_t *vob = (vobsub_t *)vobhandle;
-  unsigned int pts100 = 90000 * pts;
-  if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
-    packet_queue_t *queue = vob->spu_streams + vobsub_id;
 
+/// make sure we seek to the first packet of packets having same pts values.
+static void vobsub_queue_reseek(packet_queue_t *queue, unsigned int pts100) {
     int reseek_count = 0;
     unsigned int lastpts = 0;
     while (queue->current_index < queue->packets_size
@@ -1300,6 +1295,16 @@ vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
           queue->packets[queue->current_index-1].pts100 != lastpts)
         break;
     }
+}
+
+int
+vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
+  vobsub_t *vob = (vobsub_t *)vobhandle;
+  unsigned int pts100 = 90000 * pts;
+  if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
+    packet_queue_t *queue = vob->spu_streams + vobsub_id;
+
+    vobsub_queue_reseek(queue, pts100);
 
     while (queue->current_index < queue->packets_size) {
       packet_t *pkt = queue->packets + queue->current_index;
@@ -1346,11 +1351,7 @@ void vobsub_seek(void * vobhandle, float pts)
 	    return;
     queue = vob->spu_streams + vobsub_id;
     queue->current_index = 0;
-    while (queue->current_index < queue->packets_size
-            && (queue->packets + queue->current_index)->pts100 < seek_pts100)
-      ++queue->current_index;
-    if (queue->current_index > 0)
-      --queue->current_index;
+    vobsub_queue_reseek(queue, seek_pts100);
   }
 }
 
