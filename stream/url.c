@@ -328,6 +328,7 @@ url_escape_string(char *outbuf, const char *inbuf) {
 		}
 	}
 	
+	tmp = NULL;
 	while(i < len) {
 		// look for the next char that must be kept
 		for  (j=i;j<len;j++) {
