@@ -140,8 +140,11 @@ static WIN_BOOL MODULE_InitDll( WINE_MODREF *wm, DWORD type, LPVOID lpReserved )
 {
     WIN_BOOL retv = TRUE;
 
+    #ifdef DEBUG
     static LPCSTR typeName[] = { "PROCESS_DETACH", "PROCESS_ATTACH",
                                  "THREAD_ATTACH", "THREAD_DETACH" };
+    #endif
+
     assert( wm );
 
 
@@ -945,7 +948,9 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
 static int report_func_ret(void *stack_base, int stack_size, reg386_t *reg, uint32_t *flags)
 {
   //int i;
+#ifdef DEBUG_QTX_API
   short err;
+#endif
 
   // restore ret addr:
   --ret_i;
