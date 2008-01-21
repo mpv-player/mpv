@@ -119,7 +119,7 @@ static void scale_image(struct vf_priv_s* priv, mp_image_t *mpi)
     dst_stride[0] = priv->stride;
     dst_stride[1] = dst_stride[2] = 0;
     if (!priv->buffer)
-	priv->buffer = (uint8_t*)memalign(16, dst_stride[0]*priv->dh);
+	priv->buffer = memalign(16, dst_stride[0]*priv->dh);
 
     dst[0] = priv->buffer;
     dst[1] = dst[2] = 0;
@@ -132,7 +132,7 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
     if (vf->priv->shot) {
 	vf->priv->store_slices = 1;
 	if (!vf->priv->buffer)
-	    vf->priv->buffer = (uint8_t*)memalign(16, vf->priv->stride*vf->priv->dh);
+	    vf->priv->buffer = memalign(16, vf->priv->stride*vf->priv->dh);
     }
     
 }
