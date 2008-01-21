@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r25158 (2007. 11. 30.)
+// Sync'ed with help_mp-en.h r25663 (2008. 01. 21.)
 
 // ========================= MPlayer help ===========================
 
@@ -150,6 +150,8 @@ static char help_text[]=
 "  és nem fogunk segíteni, amíg nem szolgálsz megfelelő információkkal a\n"\
 "  hiba bejelentésekor.\n"
 #define MSGTR_LoadingConfig "'%s' konfiguráció betöltése\n"
+#define MSGTR_LoadingProtocolProfile "'%s' protokol-függő profil betöltése\n"
+#define MSGTR_LoadingExtensionProfile "'%s' kiterjesztés-függő profil betöltése\n"
 #define MSGTR_AddedSubtitleFile "SUB: Felirat fájl (%d) hozzáadva: %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB: Felirat fájl (%d) eltávolítva: %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Hiba a(z) [%s] fájl írásakor!\n"
@@ -211,6 +213,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Sebesség: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDChapter "Fejezet: (%d) %s"
+#define MSGTR_OSDAngle "Szög: %d/%d"
 
 // property values
 #define MSGTR_Enabled "bekapcsolva"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25017 -->
+<!-- synced with r25772 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -2078,7 +2078,7 @@ a kártyádat, és a fordításnak hiba nélkül le kell futnia.
 <varlistentry>
 <term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>eszköz</replaceable></option></term>
 <listitem><para>
-Az <option>overlay</option> az átlapolást aktiválja a TVOut helyett. A helyes
+Az <option>overlay</option> az átlapolást aktiválja a TV-out helyett. A helyes
 működéshez megfelelően beállított overlay setup kell. A legegyszerűbb út
 az átlapolás beállításához először az autocal majd az mplayer futtatása
 dxr3 kimenettel és az átlapolás bekapcsolása nélkül futtasd a dxr3view-t. A
@@ -2361,7 +2361,7 @@ a Matrox G450/G550 TV-kimenet utasításaiért lásd a következő részt!
   <listitem>
     <para>
     A 2.4-es kernelekben lévő <emphasis role="bold">matroxfb modulok</emphasis>
-    használatával. A 2.2-es kernel-ekben nincs TVout tulajdonság hozzájuk, így
+    használatával. A 2.2-es kernel-ekben nincs TV-out tulajdonság hozzájuk, így
     használhatatlanok erre. Engedélyezned kell az ÖSSZES matroxfb-specifikus
     tulajdonságot a fordítás alatt (kivéve a MultiHead-et) és
     <emphasis role="bold">modulokba</emphasis> kell fordítanod!

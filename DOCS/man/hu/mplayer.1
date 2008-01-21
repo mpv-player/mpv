@@ -1,4 +1,4 @@
-.\" Synced with r25587
+.\" Synced with r25821
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 01. 03." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 01. 21." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -287,6 +287,8 @@ Fájlnév megjelenítése az OSD-n.
 Ugrás az elõzõ/következõ fejezet elejére.
 .IPs "D (csak \-vo xvmc, \-vf yadif, \-vf kerndeint mellett)"
 Deinterlacer aktiválása/deaktiválása.
+.IPs "A"
+DVD szög váltás.
 .RE
 .PD 1
 .PP
@@ -505,7 +507,7 @@ könyvtáradban van (pl.\& /etc/\:mplayer vagy /usr/\:local/\:etc/\:mplayer),
 a felhasználói szintû pedig '~/\:.mplayer/\:config'.
 A MEncoder konfigurációs fájl a 'mencoder.conf' a konfigurációs könyvtáradban
 van (pl.\& /etc/\:mplayer vagy /usr/\:local/\:etc/\:mplayer), a felhasználói
-szintû pedig a '~/\:.mplayer/\:mencoder.conf.
+szintû pedig a '~/\:.mplayer/\:mencoder.conf'.
 A felhasználóspecifikus opciók felülbírálják a rendszerszintûeket, a
 parancssorban megadottak pedig mindkettõt.
 A konfigurációs fájl szintaxisa 'opció=<érték>', \'#' jeltõl számitva
@@ -572,7 +574,32 @@ Egy profil a négyzetes zárójelbe tett nevével kezdõdik, pl. '[en-profilom]'.
 Az összes ezutáni opció a profil része lesz.
 A leírás (melyet a \-profile help mutat) a profile-desc opcióval adható meg.
 A profil befejezéséhez kezdj egy újat vagy használd a 'default' profil nevet
-az általános opciók folytatásához.
+az általános opciókkal történõ folytatásához.
+.fi
+.PP
+.I "PÉLDA MPLAYER PROFIL:"
+.sp 1
+.nf
+
+[protocol.dvd]
+profile-desc="profil dvd:// folyamokhoz"
+vf=pp=hb/vb/dr/al/fd
+alang=en
+
+[protocol.dvdnav]
+profile-desc="profil dvdnav:// folyamokhoz"
+profile=protocol.dvd
+mouse-movements=yes
+
+[extension.flv]
+profile-desc="profil .flv fájlokhoz"
+flip=yes
+
+[vo.pnm]
+outdir=/tmp
+
+[ao.alsa]
+device=spdif
 .fi
 .PP
 .I "PÉLDA MENCODER PROFIL:"
@@ -833,6 +860,29 @@ Rövid segítõ szöveg kiírása.
 .B \-hardframedrop
 Intenzívebb képkockaeldobás (a dekódolási minõség rovására).
 Torz képekhez vezet!
+.
+.TP
+.B \-heartbeat\-cmd
+Parancs, mely a lejátszás során 30 másodpercenként lefut egy system() hívás
+segítségével - pl.\& shell használat.
+.sp 1
+.I MEGJEGYZÉS:
+Az MPlayer ezt a parancsot ellenõrzés nélkül használja, a te felelõsséged,
+hogy ne okozzon biztonsági problémát (pl.\& gyõzõdj meg róla, hogy teljes elérési
+utakat használsz, ha a "." benne van az elérési utadban, mint Windows alatt).
+.sp 1
+Ezt "ki lehet használni" az olyan képernyõvédõ letiltásához, amely nem támogatja
+ehhez a megfelelõ X API-t.
+Ha úgy gondolod, hogy ez túl komplikált, kérd meg a képernyõvédõ szerzõjét, hogy
+támogassa a szükséges X API-kat.
+.sp 1
+.I PÉLDA az xscreensaver-hez:
+mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" fájl
+.sp 1
+.I PÉLDA a gnome képernyõvédõjéhez:
+mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" fájl
+.RE
+.PD 1
 .
 .TP
 .B \-identify
@@ -1312,11 +1362,9 @@ várakozással töltött másodpercek maximális száma. Alapértelmezett 30.
 .
 .TP
 .B \-dvd\-device <eszköz elérési útja> (csak DVD)
-Megadja a DVD eszközt (alapértelmezett: /dev/\:dvd).
+Megadja a DVD eszközt vagy .iso fájlnevet (alapértelmezett: /dev/\:dvd).
 Megadhatsz egy könyvtárat is, ami egy elõzõleg DVD-rõl (pl. vobcopy-val)
-lemásolt fájlokat tartalmaz. Vedd figyelembe, hogy a \-dumpstream
-használata általában jobb megoldás a DVD sávok másolásához
-(lásd a példákat).
+lemásolt fájlokat tartalmaz.
 .
 .TP
 .B \-dvd\-speed <együttható vagy sebesség KB/s-ben> (csak DVD)
@@ -2020,12 +2068,14 @@ Beállítja a betûtípusokhoz használt arány együtthatót az SSA/ASS renderelõben.
 .
 .TP
 .B \-ass\-force\-style <[Stílus.]Param=Érték[,...]>
-Felülír pár stílus paramétert.
+Felülír pár stílus vagy script infó paramétert.
 .sp
 .I PÉLDA:
 .PD 0
 .RSs
 \-ass\-force\-style FontName=Arial,Default.Bold=1
+.br
+\-ass\-force\-style PlayResY=768
 .RE
 .PD 1
 .
@@ -2495,9 +2545,9 @@ le kell törölnie (alapértelmezett: ^[[A\\r^[[K).
 Megadja az MPlayernek, hogy a feliratot UNICODE-ként kezelje.
 .
 .TP
-.B \-unrarexec <unrar futtatható elérési útvonala> (a MingW jelenleg nem támogatott)
+.B \-unrarexec <unrar futtatható elérési útvonala> (MingW alatt nem támogatott)
 Megadja az futtatható unrar elérési útvonalát, így az MPlayer fel tudja
-használni a rar-ral tömörített vobsub fájlok lejátszásához (alapértelmezésben
+használni a rar-ral tömörített VOBsub fájlok lejátszásához (alapértelmezésben
 nincs beállítva, így ez a funkció nem használható).
 Az elérési útnak tartalmaznia kell a futtatható fájlnevét is, pl.\& /usr/local/bin/unrar.
 .
@@ -3130,12 +3180,12 @@ Nem minden videó kimeneti vezérlõ támogatja.
 .TP
 .B \-screenh <pixel>
 A függõleges képernyõ felbontás megadása az olyan videó kimeneti vezérlõnek,
-ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TVout.
+ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TV-out.
 .
 .TP
 .B \-screenw <pixel>
 A vízszintes képernyõ felbontás megadása az olyan videó kimeneti vezérlõnek,
-ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TVout.
+ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TV-out.
 .
 .TP
 .B \-stop\-xscreensaver (csak X11)
@@ -3625,6 +3675,13 @@ A régi kártyák nem tudják használni ezt a telítettséget, legalábbis teljes képer
 .br
 2: Köbös szûrés vízszintes, lineáris szûrés függõleges irányban.
 Egy kicsit több kártyán mûködik, mint az 1.
+.br
+3: Ugyan az, mint az 1, de nem használ texturát.
+Néhány kártyán gyorsabb lehet.
+.br
+4: Kísérleti életlenítõ maszkot használ 3x3 támogatással és 0.5-ös erõsséggel.
+.br
+5: Kísérleti életlenítõ maszkot használ 5x5 támogatással és 0.5-ös erõsséggel.
 .RE
 .IPs cscale=<n>
 Kiválasztja a használandó méretezõ függvényt a színességhez.
@@ -3904,7 +3961,7 @@ Megadja a TV normát.
 4: PAL-60
 .br
 5: NTSC
-.REss
+.RE
 .IPs <0\-3>
 Megadja a használni kívánt eszköz számát, ha egynél több em8300 kártyád van.
 .RE
@@ -3918,9 +3975,9 @@ specifikus videó vezérlõ a TV kimenethez.
 Lásd még a lavc videó szûrõt.
 .PD 0
 .RSs
-.IPs eszköz
+.IPs <eszköz>
 Explicit kiválasztja a használni kívánt MPEG dekódoló eszköz nevét (alapértelmezett: /dev/video16).
-.IPs kimenet
+.IPs <kimenet>
 Explicit kiválasztja a TV kimenet videó jelhez használt kimenetét.
 .RE
 .PD 1
@@ -3931,10 +3988,10 @@ Videó kimeneti vezérlõ a V4L2-t ismerõ kártyákhoz beépített hardveres MPEG dekód
 Lásd még a lavc videó szûrõt.
 .PD 0
 .RSs
-.IPs eszköz
+.IPs <eszköz>
 Explicit kiválasztja a használni kívánt MPEG dekódoló eszköz nevét (alapértelmezett: /dev/video16).
-.IPs kimenet
-Explicit kiválasztja a használni kívánt TV-Out kimenetet a videó jelnek.
+.IPs <kimenet>
+Explicit kiválasztja a használni kívánt TV kimenetet a videó jelnek.
 .RE
 .PD 1
 .
@@ -4751,7 +4808,7 @@ ha S/PDIF-re megy.
 A szûrõ kimeneti mintavételi rátája ugyan az, mint a bemeneté.
 Ha a bemenet mintavételi rátája 48kHz, 44.1kHz vagy 32kHz, ez szûrõ közvetlenül
 azt használja.
-Máskülönben a resampler szûrõ automatikusan lefut ezen szûrõ elõtt, hogy a
+Máskülönben a resampling szûrõ automatikusan lefut ezen szûrõ elõtt, hogy a
 bemenet és a kimenet mintavételi rátája is 48kHz legyen.
 Meg kell adnod a '\-channels N' kapcsolót, hogy a dekódoló az audiót N csatornásra
 alakítsa, majd a szûrõ az N csatornát elkódolja AC-3-ba.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25123 -->
+<!-- synced with r25771 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -591,7 +591,7 @@ az OpenGL teljesítménye nagyban változik a rendszerek között, az SDL pedig
 torzítja a képet vagy összeomlik néhány rendszeren. Ha torz a kép,
 próbáld meg kikapcsolni a hardveres gyorsítást a
 <option>-vo directx:noaccel</option> kapcsolóval. Töltsd le a
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">DirectX 7 fejléc fájlokat</ulink>
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/dx7headers.tgz">DirectX 7 fejléc fájlokat</ulink>
 a DirectX videó kimeneti vezérlő beforgatásához.
 </para>
 
@@ -607,11 +607,7 @@ az <application>MPlayer</application> forrás fádban. Nyisd meg a konzolt
 <screen>gcc -o dhasetup.exe dhasetup.c</screen>
 és futtasd
 <screen>dhasetup.exe install</screen>
-mint Adminisztrátor. Ezután újra kell indítanod a gépet. Ha készen vagy
-másold a <systemitem class="library">.so</systemitem> fájlokat a
-<filename class="directory">vidix/drivers</filename> könyvtárból az
-<filename class="directory">mplayer/vidix</filename> könyvtárba,
-az <filename>mplayer.exe</filename>-hez relatíven.
+Adminisztrátorként. Ezután újra kell indítanod a gépet.
 </para>
 
 <para>
@@ -724,7 +720,7 @@ telepítsd, mielőtt az <application>MPlayer</application>t fordítanád.
 <para>
 Az <application>MPlayer</application> és a szükséges függvénykönyvtárak
 elkészítésének módját elolvashatod az
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.
 </para>
 </sect2>
 </sect1>
