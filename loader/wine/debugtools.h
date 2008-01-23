@@ -33,15 +33,6 @@ enum DEBUG_CLASS { DBCL_FIXME, DBCL_ERR, DBCL_WARN, DBCL_TRACE, DBCL_COUNT };
 #define SET_DEBUGGING(dbcl,dbch,on) \
     ((on) ? ((dbch)[0] |= 1 << (dbcl)) : ((dbch)[0] &= ~(1 << (dbcl))))
 
-#ifndef __GNUC__
-#define __FUNCTION__ ""
-#endif
-
-// illegal identifier
-#define DPRINTF__(dbcl,dbch) \
-  (!GET_DEBUGGING(dbcl,(dbch)) || (dbg_header_##dbcl((dbch),__FUNCTION__),0)) ? \
-     (void)0 : (void)dbg_printf
-
 /* Exported definitions and macros */
 
 /* These function return a printable version of a string, including
