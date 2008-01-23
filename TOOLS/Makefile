@@ -6,6 +6,7 @@ OBJS = alaw-gen$(EXESUF) \
 	asfinfo$(EXESUF) \
 	avi-fix$(EXESUF) \
 	avisubdump$(EXESUF) \
+	compare$(EXESUF) \
 	dump_mp4$(EXESUF) \
 	modify_reg$(EXESUF) \
 	movinfo$(EXESUF) \

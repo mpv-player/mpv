@@ -519,6 +519,16 @@ Usage:        modify_reg -r <registry_file> -l
 Notes:        Necessary to use CoreAVC with MPlayer
 
 
+compare.c
+
+Author:       Michael Niedermayer
+
+Description:  Simple file compare program that detects the number of rounding
+              errors and dies if the error is too large.
+
+Usage:        compare <file1> <file2>
+
+
 realcodecs/
 
 Author:       miscellaneous
