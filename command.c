@@ -1742,6 +1742,27 @@ static int mp_property_sub_visibility(m_option_t * prop, int action,
     }
 }
 
+#ifdef USE_ASS
+/// Use margins for libass subtitles (RW)
+static int mp_property_ass_use_margins(m_option_t * prop, int action,
+				      void *arg, MPContext * mpctx)
+{
+    if (!mpctx->sh_video)
+	return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_SET:
+	if (!arg)
+	    return M_PROPERTY_ERROR;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+	ass_force_reload = 1;
+    default:
+	return m_property_flag(prop, action, arg, &ass_use_margins);
+    }
+}
+#endif
+
 /// Show only forced subtitles (RW)
 static int mp_property_sub_forced_only(m_option_t * prop, int action,
 				       void *arg, MPContext * mpctx)
@@ -2049,6 +2070,10 @@ static const m_option_t mp_properties[] = {
     { "sub_scale", mp_property_sub_scale, CONF_TYPE_FLOAT,
      M_OPT_RANGE, 0, 100, NULL },
 #endif
+#ifdef USE_ASS
+    { "ass_use_margins", mp_property_ass_use_margins, CONF_TYPE_FLAG,
+     M_OPT_RANGE, 0, 1, NULL },
+#endif
 
 #ifdef USE_TV
     { "tv_brightness", mp_property_tv_color, CONF_TYPE_INT,
@@ -2176,6 +2201,9 @@ static struct {
     { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1, 0, -1, MSGTR_SubForcedOnlyStatus },
 #ifdef HAVE_FREETYPE
     { "sub_scale", MP_CMD_SUB_SCALE, 0, 0, -1, MSGTR_SubScale},
+#endif
+#ifdef USE_ASS
+    { "ass_use_margins", MP_CMD_ASS_USE_MARGINS, 1, 0, -1, NULL },
 #endif
 #ifdef USE_TV
     { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, MSGTR_Brightness },
