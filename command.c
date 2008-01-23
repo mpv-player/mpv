@@ -1803,8 +1803,8 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
             }
             else {
 #endif
-            text_font_scale_factor = *(float *) arg;
-            force_load_font = 1;
+                text_font_scale_factor = *(float *) arg;
+                force_load_font = 1;
 #ifdef USE_ASS
             }
 #endif
@@ -1820,10 +1820,10 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
             }
             else {
 #endif
-            text_font_scale_factor += (arg ? *(float *) arg : 0.1)*
-                (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
-            M_PROPERTY_CLAMP(prop, text_font_scale_factor);
-            force_load_font = 1;
+                text_font_scale_factor += (arg ? *(float *) arg : 0.1)*
+                  (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
+                M_PROPERTY_CLAMP(prop, text_font_scale_factor);
+                force_load_font = 1;
 #ifdef USE_ASS
             }
 #endif
@@ -1834,7 +1834,7 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
                 return m_property_float_ro(prop, action, arg, ass_font_scale);
             else
 #endif
-            return m_property_float_ro(prop, action, arg, text_font_scale_factor);
+                return m_property_float_ro(prop, action, arg, text_font_scale_factor);
     }
 }
 #endif
