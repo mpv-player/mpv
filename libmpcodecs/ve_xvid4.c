@@ -1066,7 +1066,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 	if(pass == 0) {
 		mp_msg(MSGT_MENCODER, MSGL_ERR,
 		       "xvid: you must specify one or a valid combination of "
-		       "'bitrate', 'pass', 'quantizer' settings\n");
+		       "'bitrate', 'pass', 'fixed_quant' settings\n");
 		return(BAD);
 	}
 
