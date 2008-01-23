@@ -4268,12 +4268,6 @@ static double expcos(double x)
     return cos(x);
 }
 
-/* doens't work */
-static long exp_ftol_wrong(double x)
-{
-    return (long) x;
-}
-
 #else
 
 static void explog10(void)
