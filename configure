@@ -4557,31 +4557,6 @@ else
 fi
 
 
-echocheck "zr"
-if test "$_zr" = auto ; then
-  #36067's seem to identify themselves as 36057PQC's, so the line
-  #below should work for 36067's and 36057's.
-  if grep -e "Multimedia video controller: Zoran Corporation ZR36057" /proc/pci > /dev/null 2>&1; then
-    _zr=yes
-  else
-    _zr=no
-  fi
-fi
-if test "$_zr" = yes ; then
-  if test "$_libavcodec_a" = yes ; then
-    _def_zr='#define HAVE_ZR 1'
-    _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
-    _vomodules="zr zr2 $_vomodules"
-  else
-    _res_comment="libavcodec (static) is required by zr, sorry"
-    _novomodules="zr $_novomodules"
-    _def_zr='#undef HAVE_ZR'
-  fi
-else
-  _def_zr='#undef HAVE_ZR'
-  _novomodules="zr zr2 $_novomodules"
-fi
-echores "$_zr"
 
 
 echocheck "PNG support"
@@ -6671,6 +6646,32 @@ else
 fi
 echores "$_libnut"
 
+#check must be done after libavcodec one
+echocheck "zr"
+if test "$_zr" = auto ; then
+  #36067's seem to identify themselves as 36057PQC's, so the line
+  #below should work for 36067's and 36057's.
+  if grep -e "Multimedia video controller: Zoran Corporation ZR36057" /proc/pci > /dev/null 2>&1; then
+    _zr=yes
+  else
+    _zr=no
+  fi
+fi
+if test "$_zr" = yes ; then
+  if test "$_libavcodec_a" = yes ; then
+    _def_zr='#define HAVE_ZR 1'
+    _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
+    _vomodules="zr zr2 $_vomodules"
+  else
+    _res_comment="libavcodec (static) is required by zr, sorry"
+    _novomodules="zr $_novomodules"
+    _def_zr='#undef HAVE_ZR'
+  fi
+else
+  _def_zr='#undef HAVE_ZR'
+  _novomodules="zr zr2 $_novomodules"
+fi
+echores "$_zr"
 
 # mencoder requires (optional) those libs: libmp3lame
 if test "$_mencoder" != no ; then
