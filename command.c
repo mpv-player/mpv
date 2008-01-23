@@ -1796,17 +1796,44 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
             if (!arg)
                 return M_PROPERTY_ERROR;
             M_PROPERTY_CLAMP(prop, *(float *) arg);
+#ifdef USE_ASS
+            if (ass_enabled) {
+                ass_font_scale = *(float *) arg;
+                ass_force_reload = 1;
+            }
+            else {
+#endif
             text_font_scale_factor = *(float *) arg;
             force_load_font = 1;
+#ifdef USE_ASS
+            }
+#endif
             return M_PROPERTY_OK;
         case M_PROPERTY_STEP_UP:
         case M_PROPERTY_STEP_DOWN:
+#ifdef USE_ASS
+            if (ass_enabled) {
+                ass_font_scale += (arg ? *(float *) arg : 0.1)*
+                  (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
+                M_PROPERTY_CLAMP(prop, ass_font_scale);
+                ass_force_reload = 1;
+            }
+            else {
+#endif
             text_font_scale_factor += (arg ? *(float *) arg : 0.1)*
                 (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
             M_PROPERTY_CLAMP(prop, text_font_scale_factor);
             force_load_font = 1;
+#ifdef USE_ASS
+            }
+#endif
             return M_PROPERTY_OK;
         default:
+#ifdef USE_ASS
+            if (ass_enabled)
+                return m_property_float_ro(prop, action, arg, ass_font_scale);
+            else
+#endif
             return m_property_float_ro(prop, action, arg, text_font_scale_factor);
     }
 }
