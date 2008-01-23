@@ -81,7 +81,7 @@ static void stop_playing(vo_zr2_priv_t *p) {
 static const char *guess_device(const char *suggestion, int inform) {
 	struct stat vstat;
 	int res;
-	char *devs[] = {
+	static const char * const devs[] = {
 		"/dev/video",
 		"/dev/video0",
 		"/dev/v4l/video0",
@@ -89,7 +89,7 @@ static const char *guess_device(const char *suggestion, int inform) {
 		"/dev/v4l",
 		NULL
 	};
-	char **dev = devs;
+	const char * const *dev = devs;
 
 	if (suggestion) {
 		if (!*suggestion) {
