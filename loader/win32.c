@@ -246,11 +246,12 @@ typedef struct th_list_t{
 
 
 // have to be cleared by GARBAGE COLLECTOR
-static unsigned char* heap=NULL;
-static int heap_counter=0;
+//static unsigned char* heap=NULL;
+//static int heap_counter=0;
 static tls_t* g_tls=NULL;
 static th_list* list=NULL;
 
+#if 0
 static void test_heap(void)
 {
     int offset=0;
@@ -271,6 +272,7 @@ static void test_heap(void)
 	    printf("Free heap corruption at address %d\n", offset);
 	}
 }
+#endif
 #undef MEMORY_DEBUG
 
 #ifdef MEMORY_DEBUG
