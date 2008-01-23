@@ -106,6 +106,7 @@ static int init(sh_video_t *sh){
     CodecInfo cinfo;	// for ImageCodecGetCodecInfo()
     ImageSubCodecDecompressCapabilities icap; // for ImageCodecInitialize()
 
+    codec_inited = 0;
 #ifdef MACOSX
     EnterMovies();
 #else
