@@ -50,4 +50,7 @@ typedef struct {
 	int changed;
 } mp_eosd_images_t;
 
+extern int ass_force_reload;
+ass_image_t* ass_mp_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now, int* detect_change);
+
 #endif /* ASS_MP_H */

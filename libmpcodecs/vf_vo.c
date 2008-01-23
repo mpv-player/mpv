@@ -134,7 +134,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
                 ass_set_aspect_ratio(vf->priv->ass_priv, (double)res.w / res.h);
             }
 
-            images.imgs = ass_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5, &images.changed);
+            images.imgs = ass_mp_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5, &images.changed);
             if (!vf->priv->prev_visibility)
                 images.changed = 2;
             vf->priv->prev_visibility = 1;

@@ -259,3 +259,15 @@ ass_library_t* ass_init(void) {
 	free(path);
 	return priv;
 }
+
+int ass_force_reload = 0; // flag set if global ass-related settings were changed
+
+ass_image_t* ass_mp_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now, int* detect_change) {
+	if (ass_force_reload) {
+		ass_set_margins(priv, ass_top_margin, ass_bottom_margin, 0, 0);
+		ass_set_use_margins(priv, ass_use_margins);
+		ass_set_font_scale(priv, ass_font_scale);
+		ass_force_reload = 0;
+	}
+	return ass_render_frame(priv, track, now, detect_change);
+}
