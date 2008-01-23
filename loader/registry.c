@@ -183,6 +183,7 @@ void free_registry(void)
 }
 
 
+#if 0
 static reg_handle_t* find_handle_by_name(const char* name)
 {
 	reg_handle_t* t;
@@ -195,6 +196,7 @@ static reg_handle_t* find_handle_by_name(const char* name)
 	}
 	return 0;
 }
+#endif
 static struct reg_value* find_value_by_name(const char* name)
 {
 	int i;
@@ -313,6 +315,7 @@ static void init_registry(void)
 	insert_handle(HKEY_CURRENT_USER, "HKCU");
 }
 
+#if 0
 static reg_handle_t* find_handle_2(long key, const char* subkey)
 {
 	char* full_name;
@@ -332,6 +335,7 @@ static reg_handle_t* find_handle_2(long key, const char* subkey)
 	free(full_name);
 	return t;
 }
+#endif
 
 long __stdcall RegOpenKeyExA(long key, const char* subkey, long reserved, long access, int* newkey)
 {
