@@ -759,6 +759,15 @@ void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
   hl->ey = hlev.ey;
 }
 
+void mp_dvdnav_switch_title (stream_t *stream, int title) {
+  dvdnav_priv_t *priv = (dvdnav_priv_t *) stream->priv;
+  uint32_t titles;
+
+  dvdnav_get_number_of_titles (priv->dvdnav, &titles);
+  if (title > 0 && title <= titles)
+    dvdnav_title_play (priv->dvdnav, title);
+}
+
 const stream_info_t stream_info_dvdnav = {
   "DVDNAV stream",
   "null",

@@ -3134,6 +3134,12 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 				"Selected button number %d", button);
 	    }
 	    break;
+
+	case MP_CMD_SWITCH_TITLE:
+	    if (mpctx->stream->type == STREAMTYPE_DVDNAV)
+	        mp_dvdnav_switch_title(mpctx->stream, cmd->args[0].v.i);
+	    break;
+
 #endif
 
 	default:
