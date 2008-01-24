@@ -349,10 +349,18 @@ switch_audio [value] (currently MPEG*, AVI, Matroska and streams handled by liba
     Switch to the audio track with the id [value]. Cycle through the
     available tracks if [value] is omitted or negative.
 
+switch_angle [value] (DVDs only)
+    Switch to the DVD angle with the id [value]. Cycle through the
+    available angles if [value] is omitted or negative.
+
 switch_ratio [value]
     Change aspect ratio at runtime. [value] is the new aspect ratio expressed
     as a float (e.g. 1.77778 for 16/9).
     There might be problems with some video filters.
+
+switch_title [value] (DVDNAV only)
+    Switch to the DVD title with the id [value]. Cycle through the
+    available titles if [value] is omitted or negative.
 
 switch_vsync [value]
     Toggle vsync (1 == on, 0 == off). If [value] is not provided,
@@ -476,6 +484,8 @@ audio_bitrate      int                       X
 samplerate         int                       X
 channels           int                       X
 switch_audio       int       -2      255     X   X   X    select audio stream
+switch_angle       int       -2      255     X   X   X    select DVD angle
+switch_title       int       -2      255     X   X   X    select DVD title
 fullscreen         flag      0       1       X   X   X
 deinterlace        flag      0       1       X   X   X
 ontop              flag      0       1       X   X   X
