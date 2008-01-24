@@ -58,7 +58,7 @@ static const struct m_struct_st stream_opts = {
 static int seek(stream_t *s, off_t newpos);
 
 static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
-  char * title_str;
+  const char * title_str;
   dvdnav_priv_t *priv;
 
   if (!filename)
