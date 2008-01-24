@@ -414,7 +414,7 @@ static void show_audio_subs_languages(dvdnav_t *nav)
 {
   uint8_t lg;
   uint16_t i, lang, format, id, channels;
-  int base[6] = {128, 0, 0, 0, 160, 136, 0};
+  int base[7] = {128, 0, 0, 0, 160, 136, 0};
   char tmp[3];
   for(i=0; i<8; i++)
   {
