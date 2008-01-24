@@ -30,9 +30,6 @@ typedef struct {
 } dvdnav_priv_t;
 
 extern char *dvd_device;
-extern int dvd_chapter;
-extern int dvd_last_chapter;
-extern int dvd_angle;
 extern char *audio_lang, *dvdsub_lang;
 extern char *dvd_audio_stream_channels[6], *dvd_audio_stream_types[8];
 
