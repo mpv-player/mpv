@@ -242,7 +242,7 @@ seek_chapter <value> [type]
         1 is a seek to chapter <value>.
 
 switch_angle <value>
-    Switch to the angle with the id [value]. Cycle through the
+    Switch to the angle with the ID [value]. Cycle through the
     available angles if [value] is omitted or negative.
 
 set_mouse_pos <x> <y>
@@ -346,11 +346,11 @@ forced_subs_only [value]
     Toggle/set forced subtitles only.
 
 switch_audio [value] (currently MPEG*, AVI, Matroska and streams handled by libavformat)
-    Switch to the audio track with the id [value]. Cycle through the
+    Switch to the audio track with the ID [value]. Cycle through the
     available tracks if [value] is omitted or negative.
 
 switch_angle [value] (DVDs only)
-    Switch to the DVD angle with the id [value]. Cycle through the
+    Switch to the DVD angle with the ID [value]. Cycle through the
     available angles if [value] is omitted or negative.
 
 switch_ratio [value]
@@ -359,7 +359,7 @@ switch_ratio [value]
     There might be problems with some video filters.
 
 switch_title [value] (DVDNAV only)
-    Switch to the DVD title with the id [value]. Cycle through the
+    Switch to the DVD title with the ID [value]. Cycle through the
     available titles if [value] is omitted or negative.
 
 switch_vsync [value]
