@@ -106,6 +106,7 @@ NeAACDecHandle NEAACDECAPI NeAACDecOpen(void)
     hDecoder->config.downMatrix = 0;
     hDecoder->adts_header_present = 0;
     hDecoder->adif_header_present = 0;
+    hDecoder->latm_header_present = 0;
 #ifdef ERROR_RESILIENCE
     hDecoder->aacSectionDataResilienceFlag = 0;
     hDecoder->aacScalefactorDataResilienceFlag = 0;
@@ -320,7 +321,7 @@ int8_t NEAACDECAPI NeAACDecInit2(NeAACDecHandle hDecoder, uint8_t *pBuffer,
 
     /* decode the audio specific config */
     rc = AudioSpecificConfig2(pBuffer, SizeOfDecoderSpecificInfo, &mp4ASC,
-        &(hDecoder->pce));
+        &(hDecoder->pce), hDecoder->latm_header_present);
 
     /* copy the relevant info to the decoder handle */
     *samplerate = mp4ASC.samplingFrequency;

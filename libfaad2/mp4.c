@@ -123,56 +123,49 @@ int8_t NEAACDECAPI NeAACDecAudioSpecificConfig(uint8_t *pBuffer,
                                                uint32_t buffer_size,
                                                mp4AudioSpecificConfig *mp4ASC)
 {
-    return AudioSpecificConfig2(pBuffer, buffer_size, mp4ASC, NULL);
+    return AudioSpecificConfig2(pBuffer, buffer_size, mp4ASC, NULL, 0);
 }
 
-int8_t AudioSpecificConfig2(uint8_t *pBuffer,
-                            uint32_t buffer_size,
+int8_t AudioSpecificConfigFromBitfile(bitfile *ld,
                             mp4AudioSpecificConfig *mp4ASC,
-                            program_config *pce)
+                            program_config *pce, uint32_t buffer_size, uint8_t short_form)
 {
-    bitfile ld;
     int8_t result = 0;
+    uint32_t startpos = faad_get_processed_bits(ld);
 #ifdef SBR_DEC
     int8_t bits_to_decode = 0;
 #endif
 
-    if (pBuffer == NULL)
-        return -7;
     if (mp4ASC == NULL)
         return -8;
 
     memset(mp4ASC, 0, sizeof(mp4AudioSpecificConfig));
 
-    faad_initbits(&ld, pBuffer, buffer_size);
-    faad_byte_align(&ld);
-
-    mp4ASC->objectTypeIndex = (uint8_t)faad_getbits(&ld, 5
+    mp4ASC->objectTypeIndex = (uint8_t)faad_getbits(ld, 5
         DEBUGVAR(1,1,"parse_audio_decoder_specific_info(): ObjectTypeIndex"));
 
-    mp4ASC->samplingFrequencyIndex = (uint8_t)faad_getbits(&ld, 4
+    mp4ASC->samplingFrequencyIndex = (uint8_t)faad_getbits(ld, 4
         DEBUGVAR(1,2,"parse_audio_decoder_specific_info(): SamplingFrequencyIndex"));
+    if(mp4ASC->samplingFrequencyIndex==0x0f)
+        faad_getbits(ld, 24);
 
-    mp4ASC->channelsConfiguration = (uint8_t)faad_getbits(&ld, 4
+    mp4ASC->channelsConfiguration = (uint8_t)faad_getbits(ld, 4
         DEBUGVAR(1,3,"parse_audio_decoder_specific_info(): ChannelsConfiguration"));
 
     mp4ASC->samplingFrequency = get_sample_rate(mp4ASC->samplingFrequencyIndex);
 
     if (ObjectTypesTable[mp4ASC->objectTypeIndex] != 1)
     {
-        faad_endbits(&ld);
         return -1;
     }
 
     if (mp4ASC->samplingFrequency == 0)
     {
-        faad_endbits(&ld);
         return -2;
     }
 
     if (mp4ASC->channelsConfiguration > 7)
     {
-        faad_endbits(&ld);
         return -3;
     }
 
@@ -192,7 +185,7 @@ int8_t AudioSpecificConfig2(uint8_t *pBuffer,
         uint8_t tmp;
 
         mp4ASC->sbr_present_flag = 1;
-        tmp = (uint8_t)faad_getbits(&ld, 4
+        tmp = (uint8_t)faad_getbits(ld, 4
             DEBUGVAR(1,5,"parse_audio_decoder_specific_info(): extensionSamplingFrequencyIndex"));
         /* check for downsampled SBR */
         if (tmp == mp4ASC->samplingFrequencyIndex)
@@ -200,12 +193,12 @@ int8_t AudioSpecificConfig2(uint8_t *pBuffer,
         mp4ASC->samplingFrequencyIndex = tmp;
         if (mp4ASC->samplingFrequencyIndex == 15)
         {
-            mp4ASC->samplingFrequency = (uint32_t)faad_getbits(&ld, 24
+            mp4ASC->samplingFrequency = (uint32_t)faad_getbits(ld, 24
                 DEBUGVAR(1,6,"parse_audio_decoder_specific_info(): extensionSamplingFrequencyIndex"));
         } else {
             mp4ASC->samplingFrequency = get_sample_rate(mp4ASC->samplingFrequencyIndex);
         }
-        mp4ASC->objectTypeIndex = (uint8_t)faad_getbits(&ld, 5
+        mp4ASC->objectTypeIndex = (uint8_t)faad_getbits(ld, 5
             DEBUGVAR(1,7,"parse_audio_decoder_specific_info(): ObjectTypeIndex"));
     }
 #endif
@@ -215,12 +208,12 @@ int8_t AudioSpecificConfig2(uint8_t *pBuffer,
         mp4ASC->objectTypeIndex == 3 || mp4ASC->objectTypeIndex == 4 ||
         mp4ASC->objectTypeIndex == 6 || mp4ASC->objectTypeIndex == 7)
     {
-        result = GASpecificConfig(&ld, mp4ASC, pce);
+        result = GASpecificConfig(ld, mp4ASC, pce);
 
 #ifdef ERROR_RESILIENCE
     } else if (mp4ASC->objectTypeIndex >= ER_OBJECT_START) { /* ER */
-        result = GASpecificConfig(&ld, mp4ASC, pce);
-        mp4ASC->epConfig = (uint8_t)faad_getbits(&ld, 2
+        result = GASpecificConfig(ld, mp4ASC, pce);
+        mp4ASC->epConfig = (uint8_t)faad_getbits(ld, 2
             DEBUGVAR(1,143,"parse_audio_decoder_specific_info(): epConfig"));
 
         if (mp4ASC->epConfig != 0)
@@ -239,27 +232,29 @@ int8_t AudioSpecificConfig2(uint8_t *pBuffer,
 
 
 #ifdef SBR_DEC
-    bits_to_decode = (int8_t)(buffer_size*8 - faad_get_processed_bits(&ld));
-
+    if(short_form)
+        bits_to_decode = 0;
+    else
+    bits_to_decode = (int8_t)(buffer_size*8 - (startpos-faad_get_processed_bits(ld)));
     if ((mp4ASC->objectTypeIndex != 5) && (bits_to_decode >= 16))
     {
-        int16_t syncExtensionType = (int16_t)faad_getbits(&ld, 11
+        int16_t syncExtensionType = (int16_t)faad_getbits(ld, 11
             DEBUGVAR(1,9,"parse_audio_decoder_specific_info(): syncExtensionType"));
 
         if (syncExtensionType == 0x2b7)
         {
-            mp4ASC->objectTypeIndex = (uint8_t)faad_getbits(&ld, 5
+            mp4ASC->objectTypeIndex = (uint8_t)faad_getbits(ld, 5
                 DEBUGVAR(1,10,"parse_audio_decoder_specific_info(): extensionAudioObjectType"));
 
             if (mp4ASC->objectTypeIndex == 5)
             {
-                mp4ASC->sbr_present_flag = (uint8_t)faad_get1bit(&ld
+                mp4ASC->sbr_present_flag = (uint8_t)faad_get1bit(ld
                     DEBUGVAR(1,11,"parse_audio_decoder_specific_info(): sbr_present_flag"));
 
                 if (mp4ASC->sbr_present_flag)
                 {
                     uint8_t tmp;
-                    tmp = (uint8_t)faad_getbits(&ld, 4
+                    tmp = (uint8_t)faad_getbits(ld, 4
                         DEBUGVAR(1,12,"parse_audio_decoder_specific_info(): extensionSamplingFrequencyIndex"));
 
                     /* check for downsampled SBR */
@@ -269,7 +264,7 @@ int8_t AudioSpecificConfig2(uint8_t *pBuffer,
 
                     if (mp4ASC->samplingFrequencyIndex == 15)
                     {
-                        mp4ASC->samplingFrequency = (uint32_t)faad_getbits(&ld, 24
+                        mp4ASC->samplingFrequency = (uint32_t)faad_getbits(ld, 24
                             DEBUGVAR(1,13,"parse_audio_decoder_specific_info(): extensionSamplingFrequencyIndex"));
                     } else {
                         mp4ASC->samplingFrequency = get_sample_rate(mp4ASC->samplingFrequencyIndex);
@@ -293,7 +288,21 @@ int8_t AudioSpecificConfig2(uint8_t *pBuffer,
     }
 #endif
 
-    faad_endbits(&ld);
-
     return result;
 }
+
+int8_t AudioSpecificConfig2(uint8_t *pBuffer,
+                            uint32_t buffer_size,
+                            mp4AudioSpecificConfig *mp4ASC,
+                            program_config *pce,
+                            uint8_t short_form)
+{
+    uint8_t ret = 0;
+    bitfile ld;
+    faad_initbits(&ld, pBuffer, buffer_size);
+    faad_byte_align(&ld);
+    ret = AudioSpecificConfigFromBitfile(&ld, mp4ASC, pce, buffer_size, short_form);
+    faad_endbits(&ld);
+    return ret;
+}
+
