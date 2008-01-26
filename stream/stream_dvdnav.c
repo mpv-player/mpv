@@ -30,6 +30,7 @@ typedef enum {
   NAV_FLAG_WAIT_READ            = 1 << 5,  /* suspend read from stream */
   NAV_FLAG_VTS_DOMAIN           = 1 << 6,  /* vts domain */
   NAV_FLAG_SPU_SET              = 1 << 7,  /* spu_clut is valid */
+  NAV_FLAG_STREAM_CHANGE        = 1 << 8,  /* title, chapter, audio or SPU */
 } dvdnav_state_t;
 
 typedef struct {
@@ -198,6 +199,7 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
         uint32_t nextstill;
 
         priv->state &= ~NAV_FLAG_WAIT_SKIP;
+        priv->state |= NAV_FLAG_STREAM_CHANGE;
         if(ev->pgc_length)
           priv->duration = ev->pgc_length/90;
 
@@ -233,6 +235,11 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
       }
       case DVDNAV_VTS_CHANGE: {
         priv->state &= ~NAV_FLAG_WAIT_SKIP;
+        priv->state |= NAV_FLAG_STREAM_CHANGE;
+        break;
+      }
+      case DVDNAV_SPU_STREAM_CHANGE: {
+        priv->state |= NAV_FLAG_STREAM_CHANGE;
         break;
       }
     }
@@ -899,9 +906,22 @@ int mp_dvdnav_cell_has_changed (stream_t *stream, int clear) {
     return 0;
   if (clear)
     priv->state &= ~NAV_FLAG_CELL_CHANGED;
+  if (clear) priv->state |= NAV_FLAG_STREAM_CHANGE;
   return 1;
 }
 
+/* Notify if something has changed in stream
+ * Can be related to title, chapter, audio or SPU
+ */
+int mp_dvdnav_stream_has_changed (stream_t *stream) {
+  dvdnav_priv_t *priv = stream->priv;
+
+  if (!(priv->state & NAV_FLAG_STREAM_CHANGE))
+    return 0;
+
+  priv->state &= ~NAV_FLAG_STREAM_CHANGE;
+  return 1;
+}
 
 const stream_info_t stream_info_dvdnav = {
   "DVDNAV stream",

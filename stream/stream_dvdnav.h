@@ -27,5 +27,6 @@ int mp_dvdnav_skip_still (stream_t *stream);
 int mp_dvdnav_skip_wait (stream_t *stream);
 void mp_dvdnav_read_wait (stream_t *stream, int mode, int automode);
 int mp_dvdnav_cell_has_changed (stream_t *stream, int clear);
+int mp_dvdnav_stream_has_changed (stream_t *stream);
 
 #endif /* MPLAYER_STREAM_DVDNAV_H */
