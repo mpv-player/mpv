@@ -3769,6 +3769,14 @@ if(auto_quality>0){
    mp_dvdnav_get_highlight (mpctx->stream, &hl);
    osd_set_nav_box (hl.sx, hl.sy, hl.ex, hl.ey);
    vo_osd_changed (OSDTYPE_DVDNAV);
+
+   if (mp_dvdnav_stream_has_changed(mpctx->stream)) {
+     double ar = -1.0;
+     if (stream_control (mpctx->demuxer->stream,
+                         STREAM_CTRL_GET_ASPECT_RATIO, &ar)
+         != STREAM_UNSUPPORTED)
+       mpctx->sh_video->stream_aspect = ar;
+   }
  }
 #endif
  
