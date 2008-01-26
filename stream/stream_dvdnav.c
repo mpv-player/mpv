@@ -303,6 +303,8 @@ static int fill_buffer(stream_t *s, char *but, int len)
         mp_msg(MSGT_CPLAYER,MSGL_ERR, "DVDNAV stream read error!\n");
         return 0;
       }
+      if (event != DVDNAV_BLOCK_OK)
+        dvdnav_get_highlight (priv, 1);
       switch (event) {
         case DVDNAV_STOP: {
           priv->state |= NAV_FLAG_EOF;
@@ -347,6 +349,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
             if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > dvd_last_chapter)
               return 0;
             }
+          dvdnav_get_highlight (priv, 1);
         }
         break;
       }
