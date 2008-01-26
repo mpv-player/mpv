@@ -49,6 +49,7 @@
 #ifdef SBR_DEC
 #include "sbr_syntax.h"
 #endif
+#include "mp4.h"
 
 
 /* static function declarations */
@@ -149,9 +150,9 @@ int8_t GASpecificConfig(bitfile *ld, mp4AudioSpecificConfig *mp4ASC,
                 DEBUGVAR(1,145,"GASpecificConfig(): aacScalefactorDataResilienceFlag"));
             mp4ASC->aacSpectralDataResilienceFlag = faad_get1bit(ld
                 DEBUGVAR(1,146,"GASpecificConfig(): aacSpectralDataResilienceFlag"));
-
-            /* 1 bit: extensionFlag3 */
         }
+        /* 1 bit: extensionFlag3 */
+        faad_getbits(ld, 1);
     }
 #endif
 
