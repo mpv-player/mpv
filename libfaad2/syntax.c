@@ -548,7 +548,7 @@ void raw_data_block(NeAACDecHandle hDecoder, NeAACDecFrameInfo *hInfo,
 
     /* new in corrigendum 14496-3:2002 */
 #ifdef DRM
-    if (hDecoder->object_type != DRM_ER_LC)
+    if (hDecoder->object_type != DRM_ER_LC && !hDecoder->latm_header_present)
 #endif
     {
         faad_byte_align(ld);
