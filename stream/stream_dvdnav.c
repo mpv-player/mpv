@@ -806,8 +806,7 @@ int dvdnav_number_of_subs(stream_t *stream) {
  */
 unsigned int *mp_dvdnav_get_spu_clut(stream_t *stream) {
     dvdnav_priv_t *priv=(dvdnav_priv_t*)stream->priv;
-    if (!(priv->state & NAV_FLAG_SPU_SET)) return NULL;
-    return priv->spu_clut;
+    return (priv->state & NAV_FLAG_SPU_SET) ? priv->spu_clut : NULL;
 }
 
 /**
