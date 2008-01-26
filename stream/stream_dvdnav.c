@@ -904,9 +904,10 @@ int mp_dvdnav_cell_has_changed (stream_t *stream, int clear) {
   dvdnav_priv_t *priv = stream->priv;
   if (!(priv->state & NAV_FLAG_CELL_CHANGED))
     return 0;
-  if (clear)
+  if (clear) {
     priv->state &= ~NAV_FLAG_CELL_CHANGED;
-  if (clear) priv->state |= NAV_FLAG_STREAM_CHANGE;
+    priv->state |= NAV_FLAG_STREAM_CHANGE;
+  }
   return 1;
 }
 
