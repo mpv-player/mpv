@@ -601,6 +601,7 @@ static int num_elementary_packets101=0;
 static int num_elementary_packets12x=0;
 static int num_elementary_packets1B6=0;
 static int num_elementary_packetsPES=0;
+static int num_mpeg12_startcode=0;
 static int num_h264_slice=0; //combined slice
 static int num_h264_dpa=0; //DPA Slice
 static int num_h264_dpb=0; //DPB Slice
@@ -618,6 +619,7 @@ static void clear_stats(void)
   num_elementary_packets1B6=0;
   num_elementary_packets12x=0;
   num_elementary_packetsPES=0;
+  num_mpeg12_startcode=0;
   num_h264_slice=0; //combined slice
   num_h264_dpa=0; //DPA Slice
   num_h264_dpb=0; //DPB Slice
@@ -632,6 +634,7 @@ static void clear_stats(void)
 static inline void update_stats(int head)
 {
   if(head==0x1B6) ++num_elementary_packets1B6;
+  else if(head==0x1B3 || head==0x1B8) ++num_mpeg12_startcode;
   else if(head==0x100) ++num_elementary_packets100;
   else if(head==0x101) ++num_elementary_packets101;
   else if(head==0x1BD || (0x1C0<=head && head<=0x1EF))
@@ -683,7 +686,7 @@ static int demux_mpg_probe(demuxer_t *demuxer) {
        return file_format;
 
       // some hack to get meaningfull error messages to our unhappy users:
-      if(num_elementary_packets100>=2 && num_elementary_packets101>=2 &&
+      if(num_mpeg12_startcode>=2 && num_elementary_packets100>=2 && num_elementary_packets101>=2 &&
          abs(num_elementary_packets101+8-num_elementary_packets100)<16) {
          if(num_elementary_packetsPES>=4 && num_elementary_packetsPES>=num_elementary_packets100-4) {
            return file_format;
