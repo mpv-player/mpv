@@ -348,7 +348,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
             int tit=0, part=0;
             if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > dvd_last_chapter)
               return 0;
-            }
+          }
           dvdnav_get_highlight (priv, 1);
         }
         break;
