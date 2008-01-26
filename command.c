@@ -3124,12 +3124,8 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		if (mpctx->stream->type != STREAMTYPE_DVDNAV)
 		    break;
 
-		if (mp_dvdnav_handle_input
-		    (mpctx->stream, cmd->args[0].v.i, &button)) {
-		    uninit_player(INITED_ALL - (INITED_STREAM | INITED_INPUT |
-				   (fixed_vo ? INITED_VO : 0)));
-		    brk_cmd = 2;
-		} else if (button > 0)
+		mp_dvdnav_handle_input(mpctx->stream,cmd->args[0].v.i,&button);
+		if (button > 0)
 		    set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				"Selected button number %d", button);
 	    }

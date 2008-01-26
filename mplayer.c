@@ -573,6 +573,17 @@ char *get_metadata (metadata_t type) {
 /// step size of mixer changes
 int volstep = 3;
 
+#ifdef USE_DVDNAV
+static void mp_dvdnav_context_free(MPContext *ctx){
+    if (ctx->nav_smpi) free_mp_image(ctx->nav_smpi);
+    ctx->nav_smpi = NULL;
+    if (ctx->nav_buffer) free(ctx->nav_buffer);
+    ctx->nav_buffer = NULL;
+    ctx->nav_start = NULL;
+    ctx->nav_in_size = 0;
+}
+#endif
+
 void uninit_player(unsigned int mask){
   mask=inited_flags&mask;
 
@@ -622,6 +633,9 @@ void uninit_player(unsigned int mask){
     current_module="uninit_vo";
     mpctx->video_out->uninit();
     mpctx->video_out=NULL;
+#ifdef USE_DVDNAV
+    mp_dvdnav_context_free(mpctx);
+#endif
   }
 
   // Must be after libvo uninit, as few vo drivers (svgalib) have tty code.
@@ -1767,6 +1781,136 @@ static float timing_sleep(float time_frame)
     return time_frame;
 }
 
+#ifdef USE_DVDNAV
+#ifndef FF_B_TYPE
+#define FF_B_TYPE 3
+#endif
+/// store decoded video image
+static mp_image_t * mp_dvdnav_copy_mpi(mp_image_t *to_mpi,
+                                       mp_image_t *from_mpi) {
+    mp_image_t *mpi;
+
+    /// Do not store B-frames
+    if (from_mpi->pict_type == FF_B_TYPE)
+        return to_mpi;
+
+    if (to_mpi &&
+        to_mpi->w == from_mpi->w &&
+        to_mpi->h == from_mpi->h &&
+        to_mpi->imgfmt == from_mpi->imgfmt)
+        mpi = to_mpi;
+    else {
+        if (to_mpi)
+            free_mp_image(to_mpi);
+        if (from_mpi->w == 0 || from_mpi->h == 0)
+            return NULL;
+        mpi = alloc_mpi(from_mpi->w,from_mpi->h,from_mpi->imgfmt);
+    }
+
+    copy_mpi(mpi,from_mpi);
+    return mpi;
+}
+
+static void mp_dvdnav_reset_stream (MPContext *ctx) {
+    if (ctx->sh_video) {
+        /// clear video pts
+        ctx->d_video->pts = 0.0f;
+        ctx->sh_video->pts = 0.0f;
+        ctx->sh_video->i_pts = 0.0f;
+        ctx->sh_video->last_pts = 0.0f;
+        ctx->sh_video->num_buffered_pts = 0;
+        ctx->sh_video->num_frames = 0;
+        ctx->sh_video->num_frames_decoded = 0;
+        ctx->sh_video->timer = 0.0f;
+        ctx->sh_video->stream_delay = 0.0f;
+        ctx->sh_video->timer = 0;
+        ctx->demuxer->stream_pts = MP_NOPTS_VALUE;
+    }
+
+    if (ctx->sh_audio) {
+        /// free audio packets and reset
+        ds_free_packs(ctx->d_audio);
+        audio_delay -= ctx->sh_audio->stream_delay;
+        ctx->delay =- audio_delay;
+        ctx->audio_out->reset();
+        resync_audio_stream(ctx->sh_audio);
+    }
+
+    if (ctx->d_sub) dvdsub_id = -2;
+        
+    audio_delay = 0.0f;
+    correct_pts = 0;
+
+    /// clear all EOF related flags
+    ctx->d_video->eof = ctx->d_audio->eof = ctx->stream->eof = 0;
+}
+
+/// Restore last decoded DVDNAV (still frame)
+static mp_image_t *mp_dvdnav_restore_smpi(int *in_size,
+                                          unsigned char **start,
+                                          mp_image_t *decoded_frame)
+{
+    if (mpctx->stream->type != STREAMTYPE_DVDNAV)
+        return decoded_frame;
+
+    /// a change occured in dvdnav stream
+    if (mp_dvdnav_cell_has_changed(mpctx->stream,0)) {
+        mp_dvdnav_read_wait(mpctx->stream, 1, 1);
+        mp_dvdnav_context_free(mpctx);
+        mp_dvdnav_reset_stream(mpctx);
+        mp_dvdnav_read_wait(mpctx->stream, 0, 1);
+        mp_dvdnav_cell_has_changed(mpctx->stream,1);
+    }
+
+    if (*in_size < 0) {
+        float len;
+
+        /// Display still frame, if any
+        if (mpctx->nav_smpi && !mpctx->nav_buffer)
+            decoded_frame = mpctx->nav_smpi;
+
+        /// increment video frame : continue playing after still frame
+        len = demuxer_get_time_length(mpctx->demuxer);
+        if (mpctx->sh_video->pts >= len &&
+            mpctx->sh_video->pts > 0.0 && len > 0.0) {
+            mp_dvdnav_skip_still(mpctx->stream);
+            mp_dvdnav_skip_wait(mpctx->stream);
+        }
+        mpctx->sh_video->pts += 1 / mpctx->sh_video->fps;
+    
+        if (mpctx->nav_buffer) {
+            *start = mpctx->nav_start;
+            *in_size = mpctx->nav_in_size;
+            if (mpctx->nav_start)
+                memcpy(*start,mpctx->nav_buffer,mpctx->nav_in_size);
+        }
+    }
+
+    return decoded_frame;
+}
+
+/// Save last decoded DVDNAV (still frame)
+static void mp_dvdnav_save_smpi(int in_size,
+                                unsigned char *start,
+                                mp_image_t *decoded_frame)
+{
+    if (mpctx->stream->type != STREAMTYPE_DVDNAV)
+        return;
+  
+    if (mpctx->nav_buffer)
+        free(mpctx->nav_buffer);
+
+    mpctx->nav_buffer = malloc(in_size);
+    mpctx->nav_start = start;
+    mpctx->nav_in_size = mpctx->nav_buffer ? in_size : -1;
+    if (mpctx->nav_buffer)
+        memcpy(mpctx->nav_buffer,start,in_size);
+
+    if (decoded_frame && mpctx->nav_smpi != decoded_frame)
+        mpctx->nav_smpi = mp_dvdnav_copy_mpi(mpctx->nav_smpi,decoded_frame);
+}
+#endif /* USE_DVDNAV */
+
 static void adjust_sync_and_print_status(int between_frames, float timing_error)
 {
     current_module="av_sync";
@@ -2079,7 +2223,7 @@ static double update_video(int *blit_frame)
     *blit_frame = 0; // Don't blit if we hit EOF
     if (!correct_pts) {
 	unsigned char* start=NULL;
-	void *decoded_frame;
+	void *decoded_frame = NULL;
 	int drop_frame=0;
 	int in_size;
 
@@ -2087,6 +2231,15 @@ static double update_video(int *blit_frame)
 	frame_time = sh_video->next_frame_time;
 	in_size = video_read_frame(sh_video, &sh_video->next_frame_time,
 				   &start, force_fps);
+#ifdef USE_DVDNAV
+	/// wait, still frame or EOF
+	if (mpctx->stream->type == STREAMTYPE_DVDNAV && in_size < 0) {
+	    if (mp_dvdnav_is_eof(mpctx->stream)) return -1;
+	    if (mpctx->d_video) mpctx->d_video->eof = 0;
+	    if (mpctx->d_audio) mpctx->d_audio->eof = 0;
+	    mpctx->stream->eof = 0;
+	} else
+#endif
 	if (in_size < 0)
 	    return -1;
 	if (in_size > max_framesize)
@@ -2117,8 +2270,17 @@ static double update_video(int *blit_frame)
 	update_teletext(sh_video, mpctx->demuxer, 0);
 	update_osd_msg();
 	current_module = "decode_video";
+#ifdef USE_DVDNAV
+	decoded_frame = mp_dvdnav_restore_smpi(&in_size,&start,decoded_frame);
+	/// still frame has been reached, no need to decode
+	if (in_size > 0 && !decoded_frame)
+#endif
 	decoded_frame = decode_video(sh_video, start, in_size, drop_frame,
 				     sh_video->pts);
+#ifdef USE_DVDNAV
+	/// save back last still frame for future display
+	mp_dvdnav_save_smpi(in_size,start,decoded_frame);
+#endif
 	current_module = "filter_video";
 	*blit_frame = (decoded_frame && filter_video(sh_video, decoded_frame,
 						    sh_video->pts));
@@ -3463,6 +3625,13 @@ if (end_at.type == END_AT_SIZE) {
     end_at.type = END_AT_NONE;
 }
 
+#ifdef USE_DVDNAV
+mp_dvdnav_context_free(mpctx);
+if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
+    mp_dvdnav_read_wait(mpctx->stream, 0, 1);
+    mp_dvdnav_cell_has_changed(mpctx->stream,1);
+}
+#endif
 
 while(!mpctx->eof){
     float aq_sleep_time=0;
