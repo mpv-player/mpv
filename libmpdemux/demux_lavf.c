@@ -613,6 +613,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, float audio
 
     if (flags & 1) { // absolute seek
       priv->last_pts = priv->avfc->start_time;
+    } else {
       if (rel_seek_secs < 0) avsflags = AVSEEK_FLAG_BACKWARD;
     }
     if (flags & 2) { // percent seek
