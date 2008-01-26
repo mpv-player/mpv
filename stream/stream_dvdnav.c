@@ -594,7 +594,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
 
 void mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
-  dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
+  dvdnav_priv_t * priv = stream->priv;
   dvdnav_t *nav = priv->dvdnav;
   dvdnav_status_t status=DVDNAV_STATUS_ERR;
   pci_t *pci = dvdnav_get_current_nav_pci(nav);
@@ -654,7 +654,7 @@ void mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
 }
 
 void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* button) {
-  dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
+  dvdnav_priv_t * priv = stream->priv;
   dvdnav_t *nav = priv->dvdnav;
   dvdnav_status_t status;
   pci_t *pci = dvdnav_get_current_nav_pci(nav);
@@ -675,7 +675,7 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
  * \return -1 on error, current subtitle id if successful
  */
 int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
-  dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
+  dvdnav_priv_t * priv = stream->priv;
   int k;
   uint8_t format, lg;
   uint16_t lang, lcode;;
@@ -718,7 +718,7 @@ int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
 int dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
   uint8_t lg;
   uint16_t lang;
-  dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
+  dvdnav_priv_t * priv = stream->priv;
 
   if(aid < 0)
     return 0;
@@ -740,7 +740,7 @@ int dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
  * \return -1 on error, current subtitle id if successful
  */
 int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
-  dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
+  dvdnav_priv_t * priv = stream->priv;
   uint8_t lg, k;
   uint16_t lang, lcode;
 
@@ -770,7 +770,7 @@ int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
 int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
     uint8_t lg;
     uint16_t lang;
-    dvdnav_priv_t *priv=(dvdnav_priv_t*)stream->priv;
+    dvdnav_priv_t *priv = stream->priv;
     if(sid < 0) return 0;
     lg = dvdnav_get_spu_logical_stream(priv->dvdnav, sid);
     lang = dvdnav_spu_stream_to_lang(priv->dvdnav, lg);
@@ -787,7 +787,7 @@ int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
  * \return 0 on error, something meaningful otherwise
  */
 int dvdnav_number_of_subs(stream_t *stream) {
-  dvdnav_priv_t * priv=(dvdnav_priv_t*)stream->priv;
+  dvdnav_priv_t * priv = stream->priv;
   uint8_t lg, k, n=0;
 
   if (priv->state & NAV_FLAG_VTS_DOMAIN) return 0;
@@ -805,7 +805,7 @@ int dvdnav_number_of_subs(stream_t *stream) {
  * \return spu clut pointer
  */
 unsigned int *mp_dvdnav_get_spu_clut(stream_t *stream) {
-    dvdnav_priv_t *priv=(dvdnav_priv_t*)stream->priv;
+    dvdnav_priv_t *priv = stream->priv;
     return (priv->state & NAV_FLAG_SPU_SET) ? priv->spu_clut : NULL;
 }
 
@@ -815,7 +815,7 @@ unsigned int *mp_dvdnav_get_spu_clut(stream_t *stream) {
  * \param hl    : - highlight struct pointer
  */
 void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
-  dvdnav_priv_t *priv = (dvdnav_priv_t *) stream->priv;
+  dvdnav_priv_t *priv = stream->priv;
   dvdnav_highlight_event_t hlev = priv->hlev;
 
   hl->sx = hlev.sx;
@@ -825,7 +825,7 @@ void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
 }
 
 void mp_dvdnav_switch_title (stream_t *stream, int title) {
-  dvdnav_priv_t *priv = (dvdnav_priv_t *) stream->priv;
+  dvdnav_priv_t *priv = stream->priv;
   uint32_t titles;
 
   dvdnav_get_number_of_titles (priv->dvdnav, &titles);
