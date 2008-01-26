@@ -83,6 +83,7 @@ extern "C" {
 #define RAW        0
 #define ADIF       1
 #define ADTS       2
+#define LATM       3
 
 /* SBR signalling */
 #define NO_SBR           0

@@ -49,6 +49,7 @@ extern "C" {
 #define RAW        0
 #define ADIF       1
 #define ADTS       2
+#define LATM       3
 
 /* SBR signalling */
 #define NO_SBR           0
@@ -116,6 +117,7 @@ uint8_t reordered_spectral_data(NeAACDecHandle hDecoder, ic_stream *ics, bitfile
                                 int16_t *spectral_data);
 void aac_scalable_main_element(NeAACDecHandle hDecoder, NeAACDecFrameInfo *hInfo,
                                bitfile *ld, program_config *pce, drc_info *drc);
+uint32_t faad_latm_frame(latm_header *latm, bitfile *ld);
 
 
 #ifdef __cplusplus
