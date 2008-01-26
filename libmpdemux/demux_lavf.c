@@ -411,6 +411,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 type = 't';
             else if(codec->codec_id == CODEC_ID_SSA)
                 type = 'a';
+            else if(codec->codec_id == CODEC_ID_DVD_SUBTITLE)
+                type = 'v';
             else
                 break;
             sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
