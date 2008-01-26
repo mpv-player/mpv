@@ -564,17 +564,12 @@ unsigned int store_ughvlc(unsigned char *s, unsigned int v){
 }
 
 static void init_vobsub(sh_sub_t *sh, mov_track_t *trak) {
-  int i;
-  uint8_t *pal = trak->stdata;
   sh->type = 'v';
   if (trak->stdata_len < 106)
     return;
-  sh->has_palette = 1;
-  pal += 42;
-  for (i = 0; i < 16; i++) {
-    sh->palette[i] = BE_32(pal);
-    pal += 4;
-  }
+  sh->extradata_len = 16*4;
+  sh->extradata = malloc(sh->extradata_len);
+  memcpy(sh->extradata, trak->stdata + 42, sh->extradata_len);
 }
 
 static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
