@@ -29,6 +29,7 @@ typedef enum {
   NAV_FLAG_WAIT_READ_AUTO       = 1 << 4,  /* wait read auto mode */
   NAV_FLAG_WAIT_READ            = 1 << 5,  /* suspend read from stream */
   NAV_FLAG_VTS_DOMAIN           = 1 << 6,  /* vts domain */
+  NAV_FLAG_SPU_SET              = 1 << 7,  /* spu_clut is valid */
 } dvdnav_state_t;
 
 typedef struct {
@@ -37,7 +38,7 @@ typedef struct {
   unsigned int     duration;            /* in milliseconds */
   int              mousex, mousey;
   int              title;
-  unsigned int     spu_clut[16], spu_set;
+  unsigned int     spu_clut[16];
   dvdnav_highlight_event_t hlev;
   int              still_length;        /* still frame duration */
   unsigned int     state;
@@ -219,7 +220,7 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
       }
       case DVDNAV_SPU_CLUT_CHANGE: {
         memcpy(priv->spu_clut, buf, 16*sizeof(unsigned int));
-        priv->spu_set = 1;
+        priv->state |= NAV_FLAG_SPU_SET;
         break;
       }
       case DVDNAV_WAIT: {
@@ -805,7 +806,7 @@ int dvdnav_number_of_subs(stream_t *stream) {
  */
 unsigned int *mp_dvdnav_get_spu_clut(stream_t *stream) {
     dvdnav_priv_t *priv=(dvdnav_priv_t*)stream->priv;
-    if(!priv->spu_set) return NULL;
+    if (!(priv->state & NAV_FLAG_SPU_SET)) return NULL;
     return priv->spu_clut;
 }
 
