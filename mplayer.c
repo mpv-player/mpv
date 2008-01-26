@@ -49,6 +49,8 @@
 
 #include "cfg-mplayer-def.h"
 
+#include "libavutil/intreadwrite.h"
+
 #include "subreader.h"
 
 #include "libvo/video_out.h"
@@ -1119,6 +1121,12 @@ void init_vo_spudec(void) {
   if (vo_spudec==NULL) {
     sh_sub_t *sh = (sh_sub_t *)mpctx->d_sub->sh;
     unsigned int *palette = NULL;
+    if (sh && !sh->has_palette && sh->extradata_len == 16*4) {
+      int i;
+      for (i = 0; i < 16; i++)
+        sh->palette[i] = AV_RB32(sh->extradata + i*4);
+      sh->has_palette = 1;
+    }
     if (sh && sh->has_palette)
       palette = sh->palette;
     current_module="spudec_init_normal";
