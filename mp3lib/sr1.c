@@ -3,11 +3,7 @@
 
 /* 1 frame = 4608 byte PCM */
 
-#ifdef __GNUC__
 #define LOCAL static inline
-#else
-#define LOCAL static _inline
-#endif
 
 //#undef LOCAL
 //#define LOCAL
