@@ -116,20 +116,17 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                 packet += 2;
             }
 #ifdef USE_ASS
-            if (type == 'a' && ass_enabled) { // ssa/ass subs with libass
+            if (ass_enabled) {
                 sh_sub_t* sh = d_dvdsub->sh;
                 ass_track = sh ? sh->ass_track : NULL;
-                if (ass_track)
+                if (!ass_track) continue;
+                if (type == 'a') { // ssa/ass subs with libass
                     ass_process_chunk(ass_track, packet, len,
                                       (long long)(pts*1000 + 0.5),
                                       (long long)((endpts-pts)*1000 + 0.5));
-                continue;
-            }
-            if ((type == 't' || type == 'm') && ass_enabled) { // plaintext subs with libass
-                sh_sub_t* sh = d_dvdsub->sh;
-                ass_track = sh ? sh->ass_track : NULL;
+            } else { // plaintext subs with libass
                 vo_sub = NULL;
-                if (ass_track && pts != MP_NOPTS_VALUE) {
+                if (pts != MP_NOPTS_VALUE) {
                     if (endpts == MP_NOPTS_VALUE) endpts = pts + 3;
                     sub_clear_text(&subs, MP_NOPTS_VALUE);
                     sub_add_text(&subs, packet, len, endpts);
@@ -137,6 +134,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                     subs.end = endpts * 100;
                     ass_process_subtitle(ass_track, &subs);
                 }
+            }
                 continue;
             }
 #endif
