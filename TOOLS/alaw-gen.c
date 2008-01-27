@@ -21,7 +21,7 @@ f=fopen("alaw.out","rb");
 for(i=0;i<256;i++){
   signed short x;
   fread(&x,2,1,f);
-  printf("%6d",x);
+  printf("%7d",x);
   if(i!=255) putchar(',');
   if((i&7)==7) printf("\n");
 }
@@ -36,7 +36,7 @@ f=fopen("alaw.out","rb");
 for(i=0;i<256;i++){
   signed short x;
   fread(&x,2,1,f);
-  printf("%6d",x);
+  printf("%7d",x);
   if(i!=255) putchar(',');
   if((i&7)==7) printf("\n");
 }
