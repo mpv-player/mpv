@@ -66,7 +66,7 @@ static uint32_t firegl_shift = 0;
 #define RADEON_ASSERT(msg) printf(RADEON_MSG"################# FATAL:"msg);
 
 #define VERBOSE_LEVEL 0
-static int __verbose = 0;
+static int verbosity = 0;
 typedef struct bes_registers_s
 {
   /* base address of yuv framebuffer */
@@ -1209,7 +1209,7 @@ static int radeon_probe(int verbose, int force)
   pciinfo_t lst[MAX_PCI_DEVICES];
   unsigned i,num_pci;
   int err;
-  __verbose = verbose;
+  verbosity = verbose;
   err = pci_scan(lst,&num_pci);
   if(err)
   {
@@ -1302,7 +1302,7 @@ static int radeon_init(void)
 {
   int err;
 
-  if(__verbose>0) printf("[radeon_vid] version %d\n", VIDIX_VERSION);
+  if(verbosity > 0) printf("[radeon_vid] version %d\n", VIDIX_VERSION);
 
   if(!probed) 
   {
@@ -1552,8 +1552,8 @@ static void radeon_vid_display_video( void )
     OUTREG(OV0_FOUR_TAP_COEF_4,besr.four_tap_coeff[4]);
     if(besr.swap_uv) OUTREG(OV0_TEST,INREG(OV0_TEST)|OV0_SWAP_UV);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
-    if(__verbose > VERBOSE_LEVEL) printf(RADEON_MSG"we wanted: scaler=%08X\n",bes_flags);
-    if(__verbose > VERBOSE_LEVEL) radeon_vid_dump_regs();
+    if(verbosity > VERBOSE_LEVEL) printf(RADEON_MSG"we wanted: scaler=%08X\n",bes_flags);
+    if(verbosity > VERBOSE_LEVEL) radeon_vid_dump_regs();
 }
 
 /* Goal of this function: hide RGB background and provide black screen around movie.
@@ -3183,7 +3183,7 @@ static int radeon_frame_select(unsigned frame)
     OUTREG(OV0_VID_BUF5_BASE_ADRS,	off[5]);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
     if(besr.vid_nbufs == 2) radeon_wait_vsync();
-    if(__verbose > VERBOSE_LEVEL) radeon_vid_dump_regs();
+    if(verbosity > VERBOSE_LEVEL) radeon_vid_dump_regs();
     return 0;
 }
 

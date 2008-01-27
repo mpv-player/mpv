@@ -55,7 +55,7 @@ static int supports_lcd_v_stretch=0;
 
 static pciinfo_t pci_info;
 static int probed = 0;
-static int __verbose = 0;
+static int verbosity = 0;
 
 #define VERBOSE_LEVEL 1
 
@@ -292,7 +292,7 @@ static int mach64_get_vert_stretch(void)
     int yres= mach64_get_yres();
 
     if(!supports_lcd_v_stretch){
-        if(__verbose>0) printf("[mach64] vertical stretching not supported\n");
+        if(verbosity > 0) printf("[mach64] vertical stretching not supported\n");
         return 1<<16;
     }
 
@@ -315,7 +315,7 @@ static int mach64_get_vert_stretch(void)
     
     OUTREG(LCD_INDEX, lcd_index);
     
-    if(__verbose>0) printf("[mach64] vertical stretching factor= %d\n", ret);
+    if(verbosity > 0) printf("[mach64] vertical stretching factor= %d\n", ret);
     
     return ret;
 }
@@ -411,7 +411,7 @@ static int mach64_probe(int verbose,int force)
   pciinfo_t lst[MAX_PCI_DEVICES];
   unsigned i,num_pci;
   int err;
-  __verbose = verbose;
+  verbosity = verbose;
   err = pci_scan(lst,&num_pci);
   if(err)
   {
@@ -476,7 +476,7 @@ static int mach64_init(void)
     printf("[mach64] Driver was not probed but is being initializing\n");
     return EINTR;
   }
-  if(__verbose>0) printf("[mach64] version %d\n", VIDIX_VERSION);
+  if(verbosity > 0) printf("[mach64] version %d\n", VIDIX_VERSION);
   
   if((mach64_mmio_base = map_phys_mem(pci_info.base2,0x1000))==(void *)-1) return ENOMEM;
   mach64_wait_for_idle();
@@ -524,7 +524,7 @@ static int mach64_init(void)
   reset_regs();
   mach64_vid_make_default();
 
-  if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
+  if(verbosity > VERBOSE_LEVEL) mach64_vid_dump_regs();
   return 0;
 }
 
@@ -715,7 +715,7 @@ static void mach64_vid_display_video( void )
 	case IMGFMT_YUY2:
 	default:           OUTREG(VIDEO_FORMAT, 0x000B0000); break;
     }
-    if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
+    if(verbosity > VERBOSE_LEVEL) mach64_vid_dump_regs();
 }
 
 static int mach64_vid_init_video( vidix_playback_t *config )
@@ -771,7 +771,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     besr.fourcc = config->fourcc;
     ecp = (INPLL(PLL_VCLK_CNTL) & PLL_ECP_DIV) >> 4;
 
-    if(__verbose>0) printf("[mach64] ecp: %d\n", ecp);
+    if(verbosity > 0) printf("[mach64] ecp: %d\n", ecp);
     v_inc = src_h * mach64_get_vert_stretch();
     
     if(mach64_is_interlace()) v_inc<<=1;
@@ -950,7 +950,7 @@ static int mach64_frame_sel(unsigned int frame)
     OUTREG(SCALER_BUF1_OFFSET_V,	off[5]);
     if(num_mach64_buffers==2) mach64_wait_vsync(); //only wait for vsync if we do double buffering
        
-    if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
+    if(verbosity > VERBOSE_LEVEL) mach64_vid_dump_regs();
     return 0;
 }
 
