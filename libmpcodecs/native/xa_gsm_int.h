@@ -22,6 +22,9 @@
  *
  ********************************************************************/
 
+#ifndef XA_GSM_INT_H
+#define XA_GSM_INT_H
+
 #include "xa_gsm.h"
 
 
@@ -128,3 +131,4 @@ typedef struct {
 
 */
 
+#endif /* XA_GSM_INT_H */

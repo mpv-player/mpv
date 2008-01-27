@@ -21,6 +21,9 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#ifndef RTJPEGN_H
+#define RTJPEGN_H
+
 #define __u8 uint8_t
 #define __u16 uint16_t
 #define __u32 uint32_t
@@ -52,5 +55,5 @@ extern void RTjpeg_yuvrgb8(__u8 *buf, __u8 *rgb, int stride);
 extern void RTjpeg_yuvrgb16(__u8 *buf, __u8 *rgb, int stride);
 extern void RTjpeg_yuvrgb24(__u8 *buf, __u8 *rgb, int stride);
 extern void RTjpeg_yuvrgb32(__u8 *buf, __u8 *rgb, int stride);
-		  
 
+#endif /* RTJPEGN_H */
