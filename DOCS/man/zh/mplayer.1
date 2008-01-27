@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r25529
+.\" sync with en/mplayer.1 r25821
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -43,7 +43,7 @@
 .\" 名称
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2007-06-01" "MPlayer 项目" "电影播放器"
+.TH MPlayer 1 "2008-01-01" "MPlayer 项目" "电影播放器"
 .
 .SH 名称
 mplayer  \- 影视播放器
@@ -565,17 +565,42 @@ spuaa=20
 或使用配置集名称 "default" 继续正常的选项。
 .fi
 .PP
-.I "MENCODER 配置集示例:"
+.I "MPLAYER 配置集示例："
+.sp 1
+.nf
+
+[protocol.dvd]
+profile-desc="用于 dvd:// 媒体流的配置集"
+vf=pp=hb/vb/dr/al/fd
+alang=en
+
+[protocol.dvdnav]
+profile-desc="用于 dvdnav:// 媒体流的配置集"
+profile=protocol.dvd
+mouse-movements=yes
+
+[extension.flv]
+profile-desc="用于 .flv 文件的配置集"
+flip=yes
+
+[vo.pnm]
+outdir=/tmp
+
+[ao.alsa]
+device=spdif
+.fi
+.PP
+.I "MENCODER 配置集示例："
 .sp 1
 .nf
 
 [mpeg4]
-profile-desc="MPEG4 encoding"
+profile-desc="MPEG4 编码"
 ovc=lacv=yes
 lavcopts=vcodec=mpeg4:vbitrate=1200
 
 [mpeg4\-hq]
-profile-desc="HQ MPEG4 encoding"
+profile-desc="高质量 MPEG4 编码"
 profile=mpeg4
 lavcopts=mbd=2:trell=yes:v4mv=yes
 .fi
@@ -792,6 +817,25 @@ xv, xvidix 和 dfbmga。
 .TP
 .B \-hardframedrop
 更高强度的丢帧(破坏解码)。导致图像失真!
+.
+.TP
+.B \-heartbeat\-cmd
+在播放的时候每隔 30 秒通过 system() 调用（即通过 shell 调用）执行的命令。
+.sp 1
+.I 注意：
+MPlayer 执行此命令时不加以检查，所以你有责任确保该命令不造成任何安全问题（例
+如，如果“.”就像在 Windows 中那样是在你的路径中，则确保使用完整路径）。
+.sp 1
+该选项可能被“误用”于禁用不支持正确的 X API 的屏幕保护程序。
+如果你觉得这太复杂了，请要求屏幕保护程序的作者提供对于正确 X API 的支持。
+.sp 1
+.I 用于 xscreensaver 的示例：
+mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
+.sp 1
+.I 用于 gnome screensaver 的示例：
+mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
+.RE
+.PD 1
 .
 .TP
 .B \-identify
@@ -1227,9 +1271,8 @@ HTTP 请求时发送 cookies。
 .
 .TP
 .B \-dvd\-device <设备路径> (仅用于 DVD)
-指定 DVD 设备(默认是: /dev/\:dvd)。
-你也可以指定目录, 其中包含以前直接从 DVD 拷贝(比如用 vobcopy)的文件。
-首先注意使用 \-dumpstream 通常是更好的拷贝 DVD 的方法(请参见示例)。
+指定 DVD 设备或 .iso 文件名（默认是: /dev/\:dvd）。
+你也可以指定目录, 其中包含以前直接从 DVD 拷贝（比如用 vobcopy）的文件。
 .
 .TP
 .B \-dvd\-speed <以KB/s为单位的因数或速度值> （仅适用于DVD） 
@@ -1875,12 +1918,14 @@ SSA/ASS 提供器能在那里放置字幕 (与 \-ass\-use\-margins 组合用)。
 .
 .TP
 .B \-ass\-force\-style <[Style.]Param=参数值[,...]>
-重载一些风格参数。
+改写一些样式或脚本信息的参数。
 .sp
 .I 示例:
 .PD 0
 .RSs
 \-ass\-force\-style FontName=Arial,Default.Bold=1
+.br
+\-ass\-force\-style PlayResY=768
 .RE
 .PD 1
 .
@@ -2314,9 +2359,9 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 告诉 MPlayer 把字幕文件作为 unicode 来处理。
 .
 .TP
-.B \-unrarexec <unrar 可执行文件的路径>（当前不支持 MingW 。）
+.B \-unrarexec <unrar 可执行文件的路径>（MingW 平台上不支持。）
 指定 unrar 可执行文件的路径，以使 MPlayer 可以使用它来读取 RAR 压缩的
- VOBSUB 文件（默认值：未设置路径，因此该功能关闭）。
+ VOBSub 文件（默认值：未设置路径，因此该功能关闭）。
 该路径必须包含可执行文件的文件名，例如 \& /usr/local/bin/unrar。
 .
 .TP
@@ -2559,6 +2604,8 @@ DVB 卡音频输出驱动输出到 MPEG-PES 文件如果没安装 DVB 卡。
 .RSs
 .IPs card=<1\-4>
 指定 DVB 卡如果有多于一个卡。
+如果不指定，mplayer 将搜索第一个可用的卡。
+If not specified mplayer will search the first usable card.
 .IPs file=<文件名>
 输出文件名
 .RE
@@ -2839,7 +2886,7 @@ gl, gl2, directx 和 tdfxfb 视频输出驱动支持。
 .B \-monitoraspect <宽高比> (也请参见 \-aspect)
 设置监视器或电视屏幕的宽高比。
 值 0 将禁用先前的设置（例如，配置文件中的设置）。如果激活了，此
-选项将屏蔽\-monitorpixelaspect中的设置。
+选项将改写 \-monitorpixelaspect 中的设置。
 .sp 1
 .I 示例:
 .PD 0
@@ -3359,6 +3406,13 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 至少在全屏模式, 较旧的卡不能处理色度。
 .br
 2：在水平方向使用立方体过滤，在垂直方向使用线性过滤。比起方式1适用于稍多的显卡。
+.br
+3：与 1 相同，但不使用参照纹理。
+可能在一些显卡上运行较快。
+.br
+4：使用实验性的非锐化的蔽码，参数为支持 3x3 和 0.5 的强化。
+.br
+5：使用实验性的非锐化的蔽码，参数为支持 5x5 和 0.5 的强化。
 .RE
 .IPs cscale=<n>
 选择缩放功能供调节色度.
@@ -3615,23 +3669,23 @@ Hollywood Plus) 专用的视频输出驱动。
 4: PAL-60
 .br
 5: NTSC
-.REss
+.RE
 .IPs <0\-3>
 如果有多于一个 em8300 卡, 指定设备号。
 .RE
 .PD 1
 .
 .TP
-.B ivtv (IVTV 仅适用于 )
+.B ivtv（仅适用于 IVTV）
 Conexant CX23415 (iCompression iTVC15) 或 Conexant CX23416 (iCompression
 iTVC16) MPEG 解码器芯片 (Hauppauge WinTV PVR-150/250/350/500)
 专用的视频输出驱动供电视输出。
 也请参见 lavc 视频过滤器。
 .PD 0
 .RSs
-.IPs device
+.IPs <device>
 显式选择 MPEG 解码器设备名 (默认是: /dev/video16)。
-.IPs output
+.IPs <output>
 显式选择电视输出用于视频信号。
 .RE
 .PD 1
@@ -3642,9 +3696,9 @@ iTVC16) MPEG 解码器芯片 (Hauppauge WinTV PVR-150/250/350/500)
 另参见lavc视频滤镜。
 .PD 0
 .RSs
-.IPs device
+.IPs <device>
 明确选定所使用的MPEG解码设备的名称（默认值：/dev/video16）。
-.IPs output
+.IPs <output>
 明确选定用于视频信号的电视输出输出口。
 .RE
 .PD 1
@@ -3656,6 +3710,7 @@ iTVC16) MPEG 解码器芯片 (Hauppauge WinTV PVR-150/250/350/500)
 .RSs
 .IPs card=<1\-4>
 如果有多于一个 DVB 输出卡, 指定设备号 (仅适用于 V3 API, 比如 1.x.y 驱动系列)。
+如果不指定，mplayer 将搜索第一个可用的卡。
 .IPs <文件名>
 输出文件名 (默认是: ./grab.mpg)
 .RE
@@ -10000,6 +10055,12 @@ mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .fi
 .
 .PP
+.B 使用 dvdnav 播放一张 /dev/sr1: 路径下的 DVD 碟片
+.nf
+mplayer dvdnav:////dev/sr1
+.fi
+.
+.PP
 .B 播放 HTTP 流:
 .nf
 mplayer http://mplayer.hq/example.avi
@@ -10137,7 +10198,7 @@ rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \
 MPlayer 最初由 Arpad Gereoffy 制作。
 其它许多贡献者的部分清单, 请参见 AUTHORS(作者) 文件。
 .PP
-MPlayer 是 (C) 2000\-2007 The MPlayer Team (MPlayer 团队) 所有
+MPlayer 是 (C) 2000\-2008 The MPlayer Team (MPlayer 团队) 所有
 .PP
 本(英文)手册页主要由 Gabucino, Jonas Jermann 和 Diego Biurrun 编写, 
 由 Diego Biurrun 维护。
