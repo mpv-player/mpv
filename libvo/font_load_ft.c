@@ -940,7 +940,7 @@ int kerning(font_desc_t *desc, int prevc, int c)
     return f266ToInt(kern.x);
 }
 
-font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_height)
+font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_height, float font_scale_factor)
 {
     font_desc_t *desc = NULL;
 
@@ -980,8 +980,8 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
 	break;
     }
 
-    subtitle_font_ppem = movie_size*text_font_scale_factor/100.0;
-    osd_font_ppem = movie_size*osd_font_scale_factor/100.0;
+    subtitle_font_ppem = movie_size*font_scale_factor/100.0;
+    osd_font_ppem = movie_size*(font_scale_factor+1)/100.0;
 
     if (subtitle_font_ppem < 5) subtitle_font_ppem = 5;
     if (osd_font_ppem < 5) osd_font_ppem = 5;
@@ -1122,7 +1122,7 @@ int done_freetype(void)
     return 0;
 }
 
-void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_name) 
+void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_name, float font_scale_factor)
 {
 #ifdef HAVE_FONTCONFIG
     FcPattern *fc_pattern;
@@ -1163,10 +1163,10 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
 	}
 	// s doesn't need to be freed according to fontconfig docs
 	FcPatternGetString(fc_pattern, FC_FILE, 0, &s);
-	*fontp=read_font_desc_ft(s, width, height);
+	*fontp=read_font_desc_ft(s, width, height, font_scale_factor);
 	FcPatternDestroy(fc_pattern);
     }
     else
 #endif
-    *fontp=read_font_desc_ft(font_name, width, height);
+    *fontp=read_font_desc_ft(font_name, width, height, font_scale_factor);
 }

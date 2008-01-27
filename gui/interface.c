@@ -384,7 +384,7 @@ extern m_obj_settings_t * vf_settings;
 void guiLoadFont( void )
 {
 #ifdef HAVE_FREETYPE
-  load_font_ft(vo_image_width, vo_image_height, &vo_font, font_name);
+  load_font_ft(vo_image_width, vo_image_height, &vo_font, font_name, osd_font_scale_factor);
 #else
  if ( vo_font )
   {

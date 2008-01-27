@@ -206,7 +206,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
   // here is the right place to get screen dimensions
   if (force_load_font) {
     force_load_font = 0;
-    load_font_ft(width,height,&vo_font,font_name);
+    load_font_ft(width,height,&vo_font,font_name,osd_font_scale_factor);
   }
 #endif
   if(outfmt == IMGFMT_MPEGPES)
