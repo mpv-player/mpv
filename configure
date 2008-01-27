@@ -480,7 +480,6 @@ _altivec=auto
 _install=install
 _ranlib=ranlib
 _windres=windres
-_ldconfig=ldconfig
 _cc=cc
 _ar=ar
 test "$CC" && _cc="$CC"
@@ -1306,10 +1305,6 @@ if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
   die "Runtime CPU detection only works for x86, x86-64 and PPC!"
 fi
 
-
-if openbsd ; then
-  _ldconfig="ldconfig -R"
-fi
 
 if freebsd ; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
@@ -7609,7 +7604,6 @@ CXX = $_cc
 HOST_CC = $_host_cc
 RANLIB = $_ranlib
 WINDRES = $_windres
-LDCONFIG = $_ldconfig
 INSTALL = $_install
 EXTRA_INC = $_inc_extra
 EXTRAXX_INC = $_inc_extra $_inc_extraxx
