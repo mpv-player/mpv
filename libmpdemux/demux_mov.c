@@ -1327,8 +1327,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "mov", priv->track_db);
 			if (trak->fourcc == mmioFOURCC('m','p','4','s'))
 				init_vobsub(sh, trak);
-			else
-				sh->type = 't';
+			else {
+				sh->type = 'm';
+				sub_utf8 = 1;
+			}
 		} else
 		mp_msg(MSGT_DEMUX, MSGL_V, "Generic track - not completely understood! (id: %d)\n",
 		    trak->id);
@@ -2188,13 +2190,6 @@ if(trak->pos==0 && trak->stream_header_len>0){
         int len = trak->samples[samplenr].size;
         double subpts = (double)trak->samples[samplenr].pts / (double)trak->timescale;
         stream_seek(demuxer->stream, pos);
-        if (sh->type != 'v') {
-          stream_skip(demuxer->stream, 2); // size
-          len -= 2;
-          if (len < 0) len = 0;
-          if (len > MOV_MAX_SUBLEN) len = MOV_MAX_SUBLEN;
-          sub_utf8 = 1;
-        }
         ds_read_packet(demuxer->sub, demuxer->stream, len, subpts, pos, 0);
         priv->current_sub = samplenr;
       }

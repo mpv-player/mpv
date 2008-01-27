@@ -10,6 +10,7 @@
 #ifdef HAVE_TV_TELETEXT
 #include "stream/tv.h"
 #endif
+#include "libavutil/intreadwrite.h"
 
 double sub_last_pts = -303;
 
@@ -99,7 +100,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
 
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
-    } else if (dvdsub_id >= 0 && (type == 't' || type == 'a')) {
+    } else if (dvdsub_id >= 0 && (type == 't' || type == 'm' || type == 'a')) {
         double curpts = sh_video->pts + sub_delay;
         double endpts;
         vo_sub = &subs;
@@ -109,6 +110,11 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                 break;
             endpts = d_dvdsub->first->endpts;
             len = ds_get_packet_sub(d_dvdsub, &packet);
+            if (type == 'm') {
+                if (len < 2) continue;
+                len = FFMIN(len - 2, AV_RB16(packet));
+                packet += 2;
+            }
 #ifdef USE_ASS
             if (type == 'a' && ass_enabled) { // ssa/ass subs with libass
                 sh_sub_t* sh = d_dvdsub->sh;
@@ -119,7 +125,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                                       (long long)((endpts-pts)*1000 + 0.5));
                 continue;
             }
-            if (type == 't' && ass_enabled) { // plaintext subs with libass
+            if ((type == 't' || type == 'm') && ass_enabled) { // plaintext subs with libass
                 sh_sub_t* sh = d_dvdsub->sh;
                 ass_track = sh ? sh->ass_track : NULL;
                 vo_sub = NULL;
