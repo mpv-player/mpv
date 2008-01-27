@@ -117,23 +117,23 @@ static int swap_fourcc __initdata = 0;
 #if defined(__i386__)
 /* Ugly but only way */
 #undef AVOID_FPU
-static double inline __FastSin(double x) 
+static inline double FastSin(double x)
 {
    register double res;
    __asm __volatile("fsin":"=t"(res):"0"(x));
    return res;
 }
 #undef sin
-#define sin(x) __FastSin(x)
+#define sin(x) FastSin(x)
 
-static double inline __FastCos(double x) 
+static inline double FastCos(double x)
 {
    register double res;
    __asm __volatile("fcos":"=t"(res):"0"(x));
    return res;
 }
 #undef cos
-#define cos(x) __FastCos(x)
+#define cos(x) FastCos(x)
 #else
 #include "generic_math.h"
 #endif /*__386__*/
@@ -381,10 +381,10 @@ static char *fourcc_format_name(int format)
 #define OUTREG(addr,val)	writel(val, (radeon_mmio_base)+addr)
 #define OUTREGP(addr,val,mask)  					\
 	do {								\
-		unsigned int _tmp = INREG(addr);			\
-		_tmp &= (mask);						\
-		_tmp |= (val);						\
-		OUTREG(addr, _tmp);					\
+		unsigned int tmp = INREG(addr);				\
+		tmp &= (mask);						\
+		tmp |= (val);						\
+		OUTREG(addr, tmp);					\
 	} while (0)
 
 static uint32_t radeon_vid_get_dbpp( void )
@@ -427,7 +427,7 @@ static __inline__ void radeon_engine_flush ( void )
 }
 
 
-static __inline__ void _radeon_fifo_wait (int entries)
+static __inline__ void radeon_fifo_wait (int entries)
 {
 	int i;
 
@@ -437,12 +437,12 @@ static __inline__ void _radeon_fifo_wait (int entries)
 }
 
 
-static __inline__ void _radeon_engine_idle ( void )
+static __inline__ void radeon_engine_idle ( void )
 {
 	int i;
 
 	/* ensure FIFO is empty before waiting for idle */
-	_radeon_fifo_wait (64);
+	radeon_fifo_wait (64);
 
 	for (i=0; i<2000000; i++) {
 		if (((INREG(RBBM_STATUS) & GUI_ACTIVE)) == 0) {
@@ -451,9 +451,6 @@ static __inline__ void _radeon_engine_idle ( void )
 		}
 	}
 }
-
-#define radeon_engine_idle()		_radeon_engine_idle()
-#define radeon_fifo_wait(entries)	_radeon_fifo_wait(entries)
 
 #if 0
 static void __init radeon_vid_save_state( void )
