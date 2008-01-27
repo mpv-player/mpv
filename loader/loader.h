@@ -9,7 +9,6 @@
 /*
  * Modified for use with MPlayer, detailed changelog at
  * http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
  */
 
 #ifndef LOADER_H

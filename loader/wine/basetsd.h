@@ -6,7 +6,6 @@
 /*
  * Modified for use with MPlayer, detailed changelog at
  * http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
  */
 
 #ifndef WINE_BASETSD_H

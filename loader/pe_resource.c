@@ -11,7 +11,6 @@
  *
  * Modified for use with MPlayer, detailed changelog at
  * http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
  *
  */
 #include "config.h"
