@@ -704,6 +704,8 @@ void exit_player_with_rc(const char* how, int rc){
 
 #ifdef HAVE_FREETYPE
   current_module="uninit_font";
+  if (sub_font && sub_font != vo_font) free_font_desc(sub_font);
+  sub_font = NULL;
   if (vo_font) free_font_desc(vo_font);
   vo_font = NULL;
   done_freetype();
