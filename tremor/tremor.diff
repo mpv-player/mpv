@@ -184,3 +184,25 @@
  
  static int ilog(unsigned int v){
    int ret=0;
+--- os.h	(revision 25873)
++++ os.h	(working copy)
+@@ -20,18 +20,8 @@
+ #include <math.h>
+ #include "os_types.h"
+ 
+-#ifndef _V_IFDEFJAIL_H_
+-#  define _V_IFDEFJAIL_H_
++#define STIN static inline
+ 
+-#  ifdef __GNUC__
+-#    define STIN static __inline__
+-#  elif _WIN32
+-#    define STIN static __inline
+-#  endif
+-#else
+-#  define STIN static
+-#endif
+-
+ #ifndef M_PI
+ #  define M_PI (3.1415926536f)
+ #endif

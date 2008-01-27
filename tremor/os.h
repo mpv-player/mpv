@@ -20,17 +20,7 @@
 #include <math.h>
 #include "os_types.h"
 
-#ifndef _V_IFDEFJAIL_H_
-#  define _V_IFDEFJAIL_H_
-
-#  ifdef __GNUC__
-#    define STIN static __inline__
-#  elif _WIN32
-#    define STIN static __inline
-#  endif
-#else
-#  define STIN static
-#endif
+#define STIN static inline
 
 #ifndef M_PI
 #  define M_PI (3.1415926536f)
