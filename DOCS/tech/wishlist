@@ -55,6 +55,16 @@ Cleanup:
 
  * Restructure configure and fix CPU flags supported but not shown.
 
+ * Port libmpdemux demuxers to libavformat or write your own from scratch.
+   libmpdemux is considered deprecated and should eventually be removed.
+   As of 2008-01-28, the following demuxers are missing from libavformat:
+
+   - TiVo (ty streams, not TiVo To Go)
+   - VIVO
+   - VQF
+   - XMMS
+   - libnemesi
+   - SL support for MPEG-TS
 
 
 Filters:
