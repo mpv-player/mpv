@@ -1,4 +1,4 @@
-//Synced with help_mp-en.h r25158
+//Synced with help_mp-en.h r25663 （MSGTR_NoGui）
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -65,51 +65,51 @@ static char help_text[]=
 // mplayer.c:
 
 #define MSGTR_Exiting "\n正在退出..\n"
-#define MSGTR_ExitingHow "\n正在退出... (%s)\n"
+#define MSGTR_ExitingHow "\n正在退出...（%s）\n"
 #define MSGTR_Exit_quit "退出"
-#define MSGTR_Exit_eof "文件结束"
+#define MSGTR_Exit_eof "文件末尾"
 #define MSGTR_Exit_error "致命错误"
-#define MSGTR_IntBySignal "\nMPlayer 被 %d 信号中断(属于 %s 模块)\n"
-#define MSGTR_NoHomeDir "找不到主(HOME)目录\n"
-#define MSGTR_GetpathProblem "get_path(\"config\") 问题\n"
-#define MSGTR_CreatingCfgFile "创建配置文件: %s\n"
+#define MSGTR_IntBySignal "\nMPlayer 被 %d 信号中断（位于 %s 模块）\n"
+#define MSGTR_NoHomeDir "找不到 HOME 目录\n"
+#define MSGTR_GetpathProblem "get_path(\"config\") 调用出现问题\n"
+#define MSGTR_CreatingCfgFile "创建配置文件：%s\n"
 #define MSGTR_BuiltinCodecsConf "使用内建默认的 codecs.conf 文件。\n"
-#define MSGTR_CantLoadFont "不能加载位图字体: %s\n"
-#define MSGTR_CantLoadSub "不能加载字幕: %s\n"
-#define MSGTR_DumpSelectedStreamMissing "转储: 致命错误: 指定的流不存在!\n"
-#define MSGTR_CantOpenDumpfile "打不开转储文件。\n"
-#define MSGTR_CoreDumped "core dumped :)\n"
-#define MSGTR_FPSnotspecified "FPS 在文件头中没有指定或者无效，用 -fps 选项。\n"
-#define MSGTR_TryForceAudioFmtStr "尝试锁定为音频编解码器驱动族 %s...\n"
+#define MSGTR_CantLoadFont "不能加载位图字体：%s\n"
+#define MSGTR_CantLoadSub "不能加载字幕：%s\n"
+#define MSGTR_DumpSelectedStreamMissing "内存转储：致命错误：指定的媒体流不存在！\n"
+#define MSGTR_CantOpenDumpfile "打不开内存转储文件。\n"
+#define MSGTR_CoreDumped "内核转储 :)\n"
+#define MSGTR_FPSnotspecified "FPS 在文件头中没有指定或者无效，请使用 -fps 选项。\n"
+#define MSGTR_TryForceAudioFmtStr "尝试强制使用音频编解码器驱动族 %s...\n"
 #define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的编解码器。\n"
-#define MSGTR_RTFMCodecs "请阅读 DOCS/zh/codecs.html!\n"
-#define MSGTR_TryForceVideoFmtStr "尝试锁定为视频编解码器驱动族 %s...\n"
-#define MSGTR_CantFindVideoCodec "找不到匹配 -vo 所选的和视频格式 0x%X 的编解码器。\n"
-#define MSGTR_CannotInitVO "致命错误: 无法初始化视频驱动!\n"
-#define MSGTR_CannotInitAO "不能打开/初始化音频设备 -> 没声音。\n"
+#define MSGTR_RTFMCodecs "请阅读 DOCS/zh/codecs.html！\n"
+#define MSGTR_TryForceVideoFmtStr "尝试强制使用视频编解码器驱动族 %s...\n"
+#define MSGTR_CantFindVideoCodec "找不到匹配所选 -vo 参数和视频格式 0x%X 的编解码器。\n"
+#define MSGTR_CannotInitVO "致命错误：无法初始化视频驱动！\n"
+#define MSGTR_CannotInitAO "不能打开/初始化音频设备 -> 禁用声音。\n"
 #define MSGTR_StartPlaying "开始播放...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ************************************************\n"\
-"         ****      你的系统太“慢”了, 播放不了!     ****\n"\
+"         ****     你的系统运行太“慢”，播放不了!    ****\n"\
 "         ************************************************\n"\
-" 可能的原因, 问题, 和解决办法：\n"\
-"- 最常见的原因：损坏的或有错误的 _音频_ 驱动\n"\
-"  - 试试 -ao sdl 或使用 ALSA  的 OSS 模拟。\n"\
-"  - 试验不同的 -autosync 的值，不妨从 30 开始。\n"\
-"- 视频输出太慢\n"\
-"  - (参考 -vo help)试试 -vo 用不同的驱动或者试试 -framedrop！\n"\
-"- CPU 太慢\n"\
-"  - 不要试图在慢速 CPU 上播放大的 DVD/DivX! 试试一些 lavdopts 选项,\n"\
-"    例如: -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all。\n"\
-"- 损坏的文件\n"\
-"  - 试试下列选项的各种组合: -nobps -ni -forceidx -mc 0。\n"\
-"- 太慢的媒体(如 NFS/SMB 安挂点, DVD, VCD 等)\n"\
-"  - 试试 -cache 8192。\n"\
-"- 你在用 -cache 选项播放一个非交错的 AVI 文件？\n"\
-"  - 试试 -nocache。\n"\
-"阅读 DOCS/zh/video.html 和 DOCS/zh/sound.html 来寻找调整/加速的技巧。\n"\
-"如果这些一个都用不上, 阅读 DOCS/zh/bugreports.html！\n\n"
+" 可能的原因、问题和变通的办法：\n"\
+"- 最常见的原因：损坏的或有漏洞的 _audio_ 驱动\n"\
+"  - 试试 -ao sdl 或使用 ALSA  的 OSS 模拟方式。\n"\
+"  - 尝试使用不同的 -autosync 的值，不妨从 30 开始。\n"\
+"- 视频输出运行慢\n"\
+"  - 试试 -vo 用不同的驱动（参见 -vo help 以获取驱动列表）或者试试 -framedrop！\n"\
+"- CPU 运行慢\n"\
+"  - 不要试图在运行慢的 CPU 上播放大容量的 DVD/DivX！试试 lavdopts 中的一些选项，\n"\
+"    例如：-vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all。\n"\
+"- 文件损坏\n"\
+"  - 试试组合使用 -nobps -ni -forceidx -mc 0 这些选项。\n"\
+"- 媒体读取慢（NFS/SMB 挂载、DVD、VCD 等设备）\n"\
+"  - 试试 -cache 8192 选项。\n"\
+"- 你是否在用 -cache 选项播放一个非交错合并的 AVI 文件？\n"\
+"  - 试试 -nocache 选项。\n"\
+"阅读 DOCS/zh/video.html 和 DOCS/zh/sound.html，寻找调整/加速的技巧。\n"\
+"如果这些一个都帮不了你，请阅读 DOCS/zh/bugreports.html。\n\n"
 
 #define MSGTR_NoGui "MPlayer 的编译没有支持 GUI。\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI 需要 X11。\n"
@@ -155,6 +155,8 @@ static char help_text[]=
 "  并遵循上面的步骤报告错误。除非你在报告一个可能的错误时候提供我们\n"\
 "  所需要的信息, 否则我们不能也不会帮助你。\n"
 #define MSGTR_LoadingConfig "正在装载配置文件 '%s'\n"
+#define MSGTR_LoadingProtocolProfile "加载协议的相关配置集‘%s’\n"
+#define MSGTR_LoadingExtensionProfile "加载扩展组件的相关配置集‘%s’\n"
 #define MSGTR_AddedSubtitleFile "字幕: 添加字幕文件 (%d): %s\n"
 #define MSGTR_RemovedSubtitleFile "字幕: 删除字幕文件 (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "打开写入文件 [%s] 失败!\n"
@@ -216,6 +218,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "速度: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDChapter "章节: (%d) %s"
+#define MSGTR_OSDAngle "视角：%d/%d"
 
 // property values
 #define MSGTR_Enabled "已启用"
