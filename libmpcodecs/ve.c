@@ -18,6 +18,9 @@ extern vf_info_t ve_info_qtvideo;
 extern vf_info_t ve_info_nuv;
 extern vf_info_t ve_info_x264;
 
+/* Please do not add any new encoders here. If you want to implement a new
+ * encoder, add it to libavcodec */
+
 static vf_info_t* encoder_list[]={
 #ifdef USE_LIBAVCODEC
     &ve_info_lavc,

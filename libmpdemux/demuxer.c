@@ -74,6 +74,9 @@ extern const demuxer_desc_t demuxer_desc_lavf_preferred;
 extern const demuxer_desc_t demuxer_desc_aac;
 extern const demuxer_desc_t demuxer_desc_nut;
 
+/* Please do not add any new demuxers here. If you want to implement a new
+ * demuxer, add it to libavformat */
+
 const demuxer_desc_t* const demuxer_list[] = {
   &demuxer_desc_rawaudio,
   &demuxer_desc_rawvideo,

@@ -49,6 +49,9 @@ extern vd_functions_t mpcodecs_vd_libdv;
 extern vd_functions_t mpcodecs_vd_lzo;
 extern vd_functions_t mpcodecs_vd_qtvideo;
 
+/* Please do not add any new decoders here. If you want to implement a new
+ * decoder, add it to libavcodec */
+
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
 #ifdef USE_LIBAVCODEC
