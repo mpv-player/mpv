@@ -206,7 +206,7 @@ vcd_read(mp_vcd_priv_t* vcd, char *mem)
   sc.cmd[10] = 0;     // no subchannel
   sc.cmdlen = 12;
   sc.databuf = (caddr_t) mem;
-  sc.datalen = 2328;
+  sc.datalen = VCD_SECTOR_DATA;
   sc.senselen = sizeof(sc.sense);
   sc.flags = SCCMD_READ;
   sc.timeout = 10000;
