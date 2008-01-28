@@ -4,8 +4,9 @@ updated to libmpcodecs arch by A'rpi
 
 SEE ALSO: libmpcodecs.txt !!!
 
-NOTE: If you want to implement a new codec, please add it to libavcodec.
-libmpcodecs is considered deprecated.
+NOTE: If you want to implement a new native codec, please add it to
+libavcodec. libmpcodecs is considered mostly deprecated, except for wrappers
+around external libraries and codecs requiring binary support.
 
 Introduction
 ------------

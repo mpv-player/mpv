@@ -75,7 +75,8 @@ extern const demuxer_desc_t demuxer_desc_aac;
 extern const demuxer_desc_t demuxer_desc_nut;
 
 /* Please do not add any new demuxers here. If you want to implement a new
- * demuxer, add it to libavformat */
+ * demuxer, add it to libavformat, except for wrappers around external
+ * libraries and demuxers requiring binary support. */
 
 const demuxer_desc_t* const demuxer_list[] = {
   &demuxer_desc_rawaudio,
@@ -145,7 +146,8 @@ const demuxer_desc_t* const demuxer_list[] = {
   &demuxer_desc_xmms,
 #endif
   /* Please do not add any new demuxers here. If you want to implement a new
-   * demuxer, add it to libavformat */
+   * demuxer, add it to libavformat, except for wrappers around external
+   * libraries and demuxers requiring binary support. */
   NULL
 };
 

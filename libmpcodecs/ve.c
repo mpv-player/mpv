@@ -19,7 +19,8 @@ extern vf_info_t ve_info_nuv;
 extern vf_info_t ve_info_x264;
 
 /* Please do not add any new encoders here. If you want to implement a new
- * encoder, add it to libavcodec */
+ * encoder, add it to libavcodec, except for wrappers around external
+ * libraries and encoders requiring binary support. */
 
 static vf_info_t* encoder_list[]={
 #ifdef USE_LIBAVCODEC
@@ -45,7 +46,8 @@ static vf_info_t* encoder_list[]={
     &ve_info_x264,
 #endif
     /* Please do not add any new encoders here. If you want to implement a new
-     * encoder, add it to libavcodec */
+     * encoder, add it to libavcodec, except for wrappers around external
+     * libraries and encoders requiring binary support. */
     NULL
 };
 
