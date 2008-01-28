@@ -32,6 +32,7 @@
 extern "C" {
 #endif
 
+#include "bits.h"
 #include "decoder.h"
 
 int8_t NEAACDECAPI NeAACDecAudioSpecificConfig(uint8_t *pBuffer,
