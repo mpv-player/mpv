@@ -411,6 +411,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             /* only support text subtitles for now */
             if(codec->codec_id == CODEC_ID_TEXT)
                 type = 't';
+            else if(codec->codec_id == CODEC_ID_MOV_TEXT)
+                type = 'm';
             else if(codec->codec_id == CODEC_ID_SSA)
                 type = 'a';
             else if(codec->codec_id == CODEC_ID_DVD_SUBTITLE)
