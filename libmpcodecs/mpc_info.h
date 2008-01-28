@@ -1,6 +1,6 @@
+#ifndef MPC_INFO_H
+#define MPC_INFO_H
 
-#ifndef MP_CODEC_INFO_T
-#define MP_CODEC_INFO_T
 typedef struct mp_codec_info_s
 {
         /* codec long name ("Autodesk FLI/FLC Animation decoder" */
@@ -22,4 +22,4 @@ typedef struct mp_codec_info_s
 #define CONTROL_ERROR -2
 #define CONTROL_NA -3
 
-#endif /* MP_CODEC_INFO_T */
+#endif /* MPC_INFO_H */

@@ -33,8 +33,8 @@
  *   Original location: www.linuxvideo.org/gatos
  */
 
-#ifndef LIBDHA_H
-#define LIBDHA_H
+#ifndef DHA_H
+#define DHA_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,4 +92,4 @@ extern int	mtrr_set_type(unsigned base,unsigned size,int type);
 }
 #endif
 
-#endif /* LIBDHA_H */
+#endif /* DHA_H */

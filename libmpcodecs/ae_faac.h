@@ -1,8 +1,8 @@
-#ifndef MPAE_FAAC_H
-#define MPAE_FAAC_H
+#ifndef AE_FAAC_H
+#define AE_FAAC_H
 
 #include "ae.h"
 
 int mpae_init_faac(audio_encoder_t *encoder);
 
-#endif /* MPAE_FAAC_H */
+#endif /* AE_FAAC_H */

@@ -1,5 +1,5 @@
-#ifndef MPAE_TWOLAME_H
-#define MPAE_TWOLAME_H
+#ifndef AE_TWOLAME_H
+#define AE_TWOLAME_H
 
 #include "ae.h"
 #include <twolame.h>
@@ -11,4 +11,4 @@ typedef struct {
 
 int mpae_init_twolame(audio_encoder_t *encoder);
 
-#endif /* MPAE_TWOLAME_H */
+#endif /* AE_TWOLAME_H */

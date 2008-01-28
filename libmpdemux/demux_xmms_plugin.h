@@ -21,8 +21,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef PLUGIN_H
-#define PLUGIN_H
+#ifndef DEMUX_XMMS_PLUGIN_H
+#define DEMUX_XMMS_PLUGIN_H
 
 typedef enum
 {
@@ -152,4 +152,4 @@ typedef struct VisPlugin
 	void (*render_freq)(short freq_data[2][256]); /* Render the freq data, don't do anything time consuming in here */
 } VisPlugin;
 
-#endif /* PLUGIN_H */
+#endif /* DEMUX_XMMS_PLUGIN_H */

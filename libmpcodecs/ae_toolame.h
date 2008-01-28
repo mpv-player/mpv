@@ -1,5 +1,5 @@
-#ifndef MPAE_TOOLAME_H
-#define MPAE_TOOLAME_H
+#ifndef AE_TOOLAME_H
+#define AE_TOOLAME_H
 
 #include "ae.h"
 #include <toolame.h>
@@ -13,4 +13,4 @@ typedef struct {
 
 int mpae_init_toolame(audio_encoder_t *encoder);
 
-#endif /* MPAE_TOOLAME_H */
+#endif /* AE_TOOLAME_H */

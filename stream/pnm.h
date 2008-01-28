@@ -22,8 +22,8 @@
  * pnm util functions header by joschka
  */
  
-#ifndef HAVE_PNM_H
-#define HAVE_PNM_H
+#ifndef PNM_H
+#define PNM_H
 
 #include <inttypes.h>
 /*#include "xine_internal.h" */
@@ -34,4 +34,4 @@ typedef struct pnm_s pnm_t;
 
 //int      pnm_read (pnm_t *this, char *data, int len);
 
-#endif /* HAVE_PNM_H */
+#endif /* PNM_H */

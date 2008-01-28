@@ -3,8 +3,8 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
-#ifndef loader_ext_h
-#define loader_ext_h
+#ifndef LOADER_EXT_H
+#define LOADER_EXT_H
 
 #include "wine/windef.h"
 
@@ -16,4 +16,4 @@ extern int FILE_munmap( LPVOID start, DWORD size_high, DWORD size_low );
 extern int wcsnicmp(const unsigned short* s1, const unsigned short* s2, int n);
 extern int __vprintf( const char *format, ... );
 
-#endif /* loader_ext_h */
+#endif /* LOADER_EXT_H */

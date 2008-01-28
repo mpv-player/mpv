@@ -1,5 +1,5 @@
-#ifndef MPLAYER_MMX_H
-#define MPLAYER_MMX_H
+#ifndef MMX_H
+#define MMX_H
 
 typedef union {
     long long               q;      /* Quadword (64-bit) value */
@@ -77,4 +77,4 @@ typedef union {
 
 #define emms() __asm__ __volatile__ ("emms")
 
-#endif /* MPLAYER_MMX_H */
+#endif /* MMX_H */
