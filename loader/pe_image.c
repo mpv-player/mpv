@@ -96,17 +96,17 @@ static void dump_exports( HMODULE hModule )
       if (!*function) continue;  
       if (TRACE_ON(win32))
       {
-	DPRINTF( "%4ld %08lx %p", i + pe_exports->Base, *function, RVA(*function) );
+	dbg_printf( "%4ld %08lx %p", i + pe_exports->Base, *function, RVA(*function) );
 	
 	for (j = 0; j < pe_exports->NumberOfNames; j++)
           if (ordinal[j] == i)
           {
-              DPRINTF( "  %s", (char*)RVA(name[j]) );
+              dbg_printf( "  %s", (char*)RVA(name[j]) );
               break;
           }
 	if ((*function >= rva_start) && (*function <= rva_end))
-	  DPRINTF(" (forwarded -> %s)", (char *)RVA(*function));
-	DPRINTF("\n");
+	  dbg_printf(" (forwarded -> %s)", (char *)RVA(*function));
+	dbg_printf("\n");
       }
   }
 }
@@ -484,19 +484,19 @@ HMODULE PE_LoadImage( int handle, LPCSTR filename, WORD *version )
     
     if ( nt->FileHeader.Machine != IMAGE_FILE_MACHINE_I386 )
     {
-        MESSAGE("Trying to load PE image for unsupported architecture (");
+        dbg_printf("Trying to load PE image for unsupported architecture (");
         switch (nt->FileHeader.Machine)
         {
-        case IMAGE_FILE_MACHINE_UNKNOWN: MESSAGE("Unknown"); break;
-        case IMAGE_FILE_MACHINE_I860:    MESSAGE("I860"); break;
-        case IMAGE_FILE_MACHINE_R3000:   MESSAGE("R3000"); break;
-        case IMAGE_FILE_MACHINE_R4000:   MESSAGE("R4000"); break;
-        case IMAGE_FILE_MACHINE_R10000:  MESSAGE("R10000"); break;
-        case IMAGE_FILE_MACHINE_ALPHA:   MESSAGE("Alpha"); break;
-        case IMAGE_FILE_MACHINE_POWERPC: MESSAGE("PowerPC"); break;
-        default: MESSAGE("Unknown-%04x", nt->FileHeader.Machine); break;
+        case IMAGE_FILE_MACHINE_UNKNOWN: dbg_printf("Unknown"); break;
+        case IMAGE_FILE_MACHINE_I860:    dbg_printf("I860"); break;
+        case IMAGE_FILE_MACHINE_R3000:   dbg_printf("R3000"); break;
+        case IMAGE_FILE_MACHINE_R4000:   dbg_printf("R4000"); break;
+        case IMAGE_FILE_MACHINE_R10000:  dbg_printf("R10000"); break;
+        case IMAGE_FILE_MACHINE_ALPHA:   dbg_printf("Alpha"); break;
+        case IMAGE_FILE_MACHINE_POWERPC: dbg_printf("PowerPC"); break;
+        default: dbg_printf("Unknown-%04x", nt->FileHeader.Machine); break;
         }
-        MESSAGE(")\n");
+        dbg_printf(")\n");
         goto error;
     }
 

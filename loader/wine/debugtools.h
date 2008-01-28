@@ -53,12 +53,6 @@ extern int dbg_vprintf( const char *format, va_list args );
 static inline LPCSTR debugstr_a( LPCSTR s )  { return debugstr_an( s, 80 ); }
 static inline LPCSTR debugstr_w( LPCWSTR s ) { return debugstr_wn( s, 80 ); }
 
-#ifdef __GNUC__
-extern int dbg_printf(const char *format, ...) __attribute__((format (printf,1,2)));
-#else
-extern int dbg_printf(const char *format, ...);
-#endif
-
 #define TRACE_(X) TRACE
 #define WARN_(X) TRACE
 #define WARN TRACE
@@ -74,8 +68,5 @@ extern int dbg_printf(const char *format, ...);
     extern char dbch_##ch[];
 #define DEFAULT_DEBUG_CHANNEL(ch) \
     extern char dbch_##ch[]; static char * const __dbch_default = dbch_##ch;
-
-#define DPRINTF dbg_printf
-#define MESSAGE dbg_printf
 
 #endif  /* WINE_DEBUGTOOLS_H */
