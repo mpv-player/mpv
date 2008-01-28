@@ -1,3 +1,6 @@
+NOTE: If you want to implement a new decoder, please add it to libavcodec.
+libmpcodecs is considered deprecated.
+
 The libMPcodecs API details, hints - by A'rpi
 ==================================
 

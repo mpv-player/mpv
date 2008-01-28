@@ -97,6 +97,8 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #if defined(USE_QTX_CODECS) || defined(MACOSX)
 	&mpcodecs_vd_qtvideo,
 #endif
+    /* Please do not add any new decoders here. If you want to implement a new
+     * decoder, add it to libavcodec */
 	NULL
 };
 

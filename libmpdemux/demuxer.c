@@ -141,6 +141,8 @@ const demuxer_desc_t* const demuxer_list[] = {
 #ifdef HAVE_XMMS
   &demuxer_desc_xmms,
 #endif
+  /* Please do not add any new demuxers here. If you want to implement a new
+   * demuxer, add it to libavformat */
   NULL
 };
 

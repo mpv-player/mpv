@@ -41,6 +41,8 @@ static vf_info_t* encoder_list[]={
 #ifdef HAVE_X264
     &ve_info_x264,
 #endif
+    /* Please do not add any new encoders here. If you want to implement a new
+     * encoder, add it to libavcodec */
     NULL
 };
 

@@ -4,6 +4,9 @@ updated to libmpcodecs arch by A'rpi
 
 SEE ALSO: libmpcodecs.txt !!!
 
+NOTE: If you want to implement a new codec, please add it to libavcodec.
+libmpcodecs is considered deprecated.
+
 Introduction
 ------------
 I've developed a number of open source decoders for the MPlayer project,
