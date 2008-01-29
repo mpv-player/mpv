@@ -1573,8 +1573,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			if( udta_len>udta_size)
 				udta_len=udta_size;
 			{
-			char dump[udta_len-4];
-			stream_read(demuxer->stream, (char *)&dump, udta_len-4-4);
+			stream_skip(demuxer->stream, udta_len-4-4);
 			udta_size -= udta_len;
 			}
 		    }
