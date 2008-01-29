@@ -23,7 +23,7 @@ MPlayer (1.0)
     * tv:// support for win32
     * fix teletext on some systems
     * dvd streams can switch angles
-    * dvd still menus are now supported
+    * dvd still menus are now supported via dvdnav://
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
