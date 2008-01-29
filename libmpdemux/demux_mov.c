@@ -238,6 +238,8 @@ void mov_build_index(mov_track_t* trak,int timescale){
     s=0;
     for(j=0;j<trak->durmap_size;j++){
 	for(i=0;i<trak->durmap[j].num;i++){
+	    if (s >= trak->samples_size)
+		break;
 	    trak->samples[s].pts=pts;
 	    ++s;
 	    pts+=trak->durmap[j].dur;
@@ -249,6 +251,8 @@ void mov_build_index(mov_track_t* trak,int timescale){
     for(j=0;j<trak->chunks_size;j++){
 	off_t pos=trak->chunks[j].pos;
 	for(i=0;i<trak->chunks[j].size;i++){
+	    if (s >= trak->samples_size)
+		break;
 	    trak->samples[s].pos=pos;
 	    mp_msg(MSGT_DEMUX, MSGL_DBG3, "Sample %5d: pts=%8d  off=0x%08X  size=%d\n",s,
 		trak->samples[s].pts,
