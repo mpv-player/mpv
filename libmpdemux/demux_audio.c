@@ -131,6 +131,7 @@ static mp3_hdr_t *add_mp3_hdr(mp3_hdr_t **list, off_t st_pos,
   return NULL;
 }
 
+#if 0
 #define FLAC_SIGNATURE_SIZE 4
 #define FLAC_STREAMINFO_SIZE 34
 #define FLAC_SEEKPOINT_SIZE 18
@@ -273,6 +274,7 @@ get_flac_metadata (demuxer_t* demuxer)
     }
   } while ((preamble[0] & 0x80) == 0);
 }
+#endif
 
 static int demux_audio_open(demuxer_t* demuxer) {
   stream_t *s;
@@ -510,7 +512,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	    }
 	    if (sh_audio->i_bps < 1) // guess value to prevent crash
 	      sh_audio->i_bps = 64 * 1024;
-	    get_flac_metadata (demuxer);
+//	    get_flac_metadata (demuxer);
 	    break;
   }
 
