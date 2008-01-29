@@ -980,7 +980,7 @@ if(!demuxer->seekable){
     if(sh_video) sh_video->timer=0; // !!!!!!
 #endif
 
-    if(flags & 1)  // absolute seek
+    if(flags & SEEK_ABSOLUTE)
       pts = 0.0f;
     else {
       if(demuxer->stream_pts == MP_NOPTS_VALUE)
@@ -988,7 +988,7 @@ if(!demuxer->seekable){
       pts = demuxer->stream_pts;
     }
 
-    if(flags & 2) {  // percent seek
+    if(flags & SEEK_FACTOR) {
       if(stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &tmp) == STREAM_UNSUPPORTED)
         goto dmx_seek;
       pts += tmp * rel_seek_secs;

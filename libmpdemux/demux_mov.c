@@ -2202,19 +2202,19 @@ if(trak->pos==0 && trak->stream_header_len>0){
 static float mov_seek_track(mov_track_t* trak,float pts,int flags){
 
 //    printf("MOV track seek called  %5.3f  \n",pts);
-    if(flags&2) pts*=trak->length; else pts*=(float)trak->timescale;
+    if(flags&SEEK_FACTOR) pts*=trak->length; else pts*=(float)trak->timescale;
 
 if(trak->samplesize){
     int sample=pts/trak->duration;
 //    printf("MOV track seek - chunk: %d  (pts: %5.3f  dur=%d)  \n",sample,pts,trak->duration);
-    if(!(flags&1)) sample+=trak->chunks[trak->pos].sample; // relative
+    if(!(flags&SEEK_ABSOLUTE)) sample+=trak->chunks[trak->pos].sample; // relative
     trak->pos=0;
     while(trak->pos<trak->chunks_size && trak->chunks[trak->pos].sample<sample) ++trak->pos;
     if (trak->pos == trak->chunks_size) return -1;
     pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
 } else {
     unsigned int ipts;
-    if(!(flags&1)) pts+=trak->samples[trak->pos].pts;
+    if(!(flags&SEEK_ABSOLUTE)) pts+=trak->samples[trak->pos].pts;
     if(pts<0) pts=0;
     ipts=pts;
     //printf("MOV track seek - sample: %d  \n",ipts);

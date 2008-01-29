@@ -350,8 +350,8 @@ static void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,
 
     if(priv->ip->get_time()<0) return;
 
-    pos = (flags & 1) ? 0 : priv->spos / sh_audio->wf->nAvgBytesPerSec;
-    if (flags & 2)
+    pos = (flags & SEEK_ABSOLUTE) ? 0 : priv->spos / sh_audio->wf->nAvgBytesPerSec;
+    if (flags & SEEK_FACTOR)
         pos+= rel_seek_secs*xmms_length;
     else
         pos+= rel_seek_secs;

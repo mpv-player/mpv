@@ -124,8 +124,8 @@ static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
   sh_video_t* sh_video = demuxer->video->sh;
   off_t pos;
 
-  pos = (flags & 1) ? demuxer->movi_start : stream_tell(s);
-  if(flags & 2)
+  pos = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : stream_tell(s);
+  if(flags & SEEK_FACTOR)
     pos += ((demuxer->movi_end - demuxer->movi_start)*rel_seek_secs);
   else
     pos += (rel_seek_secs*sh_video->i_bps);

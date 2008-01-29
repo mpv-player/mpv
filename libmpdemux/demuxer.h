@@ -83,6 +83,9 @@
 #define DEMUXER_CTRL_SWITCH_VIDEO 14
 #define DEMUXER_CTRL_IDENTIFY_PROGRAM 15
 
+#define SEEK_ABSOLUTE (1 << 0)
+#define SEEK_FACTOR   (1 << 1)
+
 // Holds one packet/frame/whatever
 typedef struct demux_packet_st {
   int len;

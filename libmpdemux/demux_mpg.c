@@ -893,14 +893,14 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
     float oldpts = 0;
     off_t oldpos = demuxer->filepos;
     float newpts = 0; 
-    off_t newpos = (flags & 1) ? demuxer->movi_start : oldpos;
+    off_t newpos = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : oldpos;
 
     if(mpg_d)
       oldpts = mpg_d->last_pts;
-    newpts = (flags & 1) ? 0.0 : oldpts;
+    newpts = (flags & SEEK_ABSOLUTE) ? 0.0 : oldpts;
   //================= seek in MPEG ==========================
   //calculate the pts to seek to
-    if(flags & 2) {
+    if(flags & SEEK_FACTOR) {
       if (mpg_d && mpg_d->first_to_final_pts_len > 0.0)
         newpts += mpg_d->first_to_final_pts_len * rel_seek_secs;
       else
@@ -909,7 +909,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
       newpts += rel_seek_secs;
     if (newpts < 0) newpts = 0;
 	
-    if(flags&2){
+    if(flags&SEEK_FACTOR){
 	// float seek 0..1
 	newpos+=(demuxer->movi_end-demuxer->movi_start)*rel_seek_secs;
     } else {

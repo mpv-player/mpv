@@ -1366,8 +1366,8 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
   old_pos = ogg_d->pos;
 
   //calculate the granulepos to seek to
-    gp = flags & 1 ? 0 : os->lastpos;
-  if(flags & 2) {
+    gp = flags & SEEK_ABSOLUTE ? 0 : os->lastpos;
+  if(flags & SEEK_FACTOR) {
     if (ogg_d->final_granulepos > 0)
       gp += ogg_d->final_granulepos * rel_seek_secs;
       else
@@ -1392,8 +1392,8 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
     pos = ogg_d->syncpoints[sp].page_pos;
     precision = 0;
   } else {
-    pos = flags & 1 ? 0 : ogg_d->pos;
-    if(flags & 2)
+    pos = flags & SEEK_ABSOLUTE ? 0 : ogg_d->pos;
+    if(flags & SEEK_FACTOR)
       pos += (demuxer->movi_end - demuxer->movi_start) * rel_seek_secs;
     else {
       if (ogg_d->final_granulepos > 0) {

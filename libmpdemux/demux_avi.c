@@ -571,12 +571,12 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int
     int video_chunk_pos=d_video->pos;
     int i;
 
-      if(flags&1){
+      if(flags&SEEK_ABSOLUTE){
 	// seek absolute
 	video_chunk_pos=0;
       }
       
-      if(flags&2){
+      if(flags&SEEK_FACTOR){
 	rel_seek_frames=rel_seek_secs*priv->numberofframes;
       }
     

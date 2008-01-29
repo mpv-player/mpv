@@ -84,8 +84,8 @@ static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
   sh_audio_t* sh_audio = demuxer->audio->sh;
   off_t base,pos;
 
-  base = (flags & 1) ? demuxer->movi_start : stream_tell(s);
-  if(flags & 2)
+  base = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : stream_tell(s);
+  if(flags & SEEK_FACTOR)
     pos = base + ((demuxer->movi_end - demuxer->movi_start)*rel_seek_secs);
   else
     pos = base + (rel_seek_secs*sh_audio->i_bps);

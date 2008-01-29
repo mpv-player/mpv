@@ -49,9 +49,9 @@ typedef struct film_data_t
 static void demux_seek_film(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
 {
   film_data_t *film_data = (film_data_t *)demuxer->priv;
-  int new_current_chunk=(flags&1)?0:film_data->current_chunk;
+  int new_current_chunk=(flags&SEEK_ABSOLUTE)?0:film_data->current_chunk;
 
-  if(flags&2)
+  if(flags&SEEK_FACTOR)
       new_current_chunk += rel_seek_secs * film_data->total_chunks; // 0..1
   else
       new_current_chunk += rel_seek_secs * film_data->chunks_per_second; // secs

@@ -156,9 +156,9 @@ static void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
   da_priv_t* priv = demuxer->priv;
   stream_t* s = demuxer->stream;
   float target = rel_seek_secs;
-  if (flags & 2)
+  if (flags & SEEK_FACTOR)
     target *= priv->length;
-  if (!(flags & 1))
+  if (!(flags & SEEK_ABSOLUTE))
     target += priv->last_pts;
   if (target < priv->last_pts) {
     stream_seek(s, demuxer->movi_start);

@@ -18,9 +18,9 @@
 static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   mf_t * mf = (mf_t *)demuxer->priv;
   sh_video_t   * sh_video = demuxer->video->sh;
-  int newpos = (flags & 1)?0:mf->curr_frame - 1;
+  int newpos = (flags & SEEK_ABSOLUTE)?0:mf->curr_frame - 1;
   
-  if ( flags & 2 ) newpos+=rel_seek_secs*(mf->nr_of_files - 1);
+  if ( flags & SEEK_FACTOR ) newpos+=rel_seek_secs*(mf->nr_of_files - 1);
    else newpos+=rel_seek_secs * sh_video->fps;
   if ( newpos < 0 ) newpos=0;
   if( newpos >= mf->nr_of_files) newpos=mf->nr_of_files - 1;

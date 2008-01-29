@@ -247,12 +247,12 @@ static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_dela
 	int ret;
 	const int tmp[] = { 0, -1 };
 
-	if (!(flags & 1)) {
+	if (!(flags & SEEK_ABSOLUTE)) {
 		nutflags |= 1; // relative
 		if (time_pos > 0) nutflags |= 2; // forwards
 	}
 
-	if (flags & 2) // percent
+	if (flags & SEEK_FACTOR)
 		time_pos *= priv->s[0].max_pts *
 		               (double)priv->s[0].time_base.num /
 		                       priv->s[0].time_base.den;

@@ -3107,8 +3107,8 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 			video_stats = sh_video->i_bps;
 	}
 
-	newpos = (flags & 1) ? demuxer->movi_start : demuxer->filepos;
-	if(flags & 2) // float seek 0..1
+	newpos = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : demuxer->filepos;
+	if(flags & SEEK_FACTOR) // float seek 0..1
 		newpos+=(demuxer->movi_end-demuxer->movi_start)*rel_seek_secs;
 	else
 	{

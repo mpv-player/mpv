@@ -522,7 +522,7 @@ static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
 
   //================= seek in ASF ==========================
     float p_rate=asf->packetrate; // packets / sec
-    off_t rel_seek_packs=(flags&2)?	 // FIXME: int may be enough?
+    off_t rel_seek_packs=(flags&SEEK_FACTOR)?	 // FIXME: int may be enough?
 	(rel_seek_secs*(demuxer->movi_end-demuxer->movi_start)/asf->packetsize):
 	(rel_seek_secs*p_rate);
     off_t rel_seek_bytes=rel_seek_packs*asf->packetsize;
@@ -530,7 +530,7 @@ static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
     //printf("ASF: packs: %d  duration: %d  \n",(int)fileh.packets,*((int*)&fileh.duration));
 //    printf("ASF_seek: %d secs -> %d packs -> %d bytes  \n",
 //       rel_seek_secs,rel_seek_packs,rel_seek_bytes);
-    newpos=((flags&1)?demuxer->movi_start:demuxer->filepos)+rel_seek_bytes;
+    newpos=((flags&SEEK_ABSOLUTE)?demuxer->movi_start:demuxer->filepos)+rel_seek_bytes;
     if(newpos<0 || newpos<demuxer->movi_start) newpos=demuxer->movi_start;
 //    printf("\r -- asf: newpos=%d -- \n",newpos);
     stream_seek(demuxer->stream,newpos);

@@ -38,8 +38,8 @@ static void demux_seek_rawdv(demuxer_t *demuxer,float rel_seek_secs,float audio_
 {
    rawdv_frames_t *frames = (rawdv_frames_t *)demuxer->priv;
    sh_video_t *sh_video = demuxer->video->sh;
-   off_t newpos=(flags&1)?0:frames->current_frame;
-   if(flags&2)
+   off_t newpos=(flags&SEEK_ABSOLUTE)?0:frames->current_frame;
+   if(flags&SEEK_FACTOR)
    {
       // float 0..1
       newpos+=rel_seek_secs*frames->frame_number;

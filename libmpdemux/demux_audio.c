@@ -646,8 +646,8 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_
   s = demuxer->stream;
   priv = demuxer->priv;
 
-  if(priv->frmt == MP3 && hr_mp3_seek && !(flags & 2)) {
-    len = (flags & 1) ? rel_seek_secs - priv->next_pts : rel_seek_secs;
+  if(priv->frmt == MP3 && hr_mp3_seek && !(flags & SEEK_FACTOR)) {
+    len = (flags & SEEK_ABSOLUTE) ? rel_seek_secs - priv->next_pts : rel_seek_secs;
     if(len < 0) {
       stream_seek(s,demuxer->movi_start);
       len = priv->next_pts + len;
@@ -658,8 +658,8 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_
     return;
   }
 
-  base = flags&1 ? demuxer->movi_start : stream_tell(s);
-  if(flags&2)
+  base = flags&SEEK_ABSOLUTE ? demuxer->movi_start : stream_tell(s);
+  if(flags&SEEK_FACTOR)
     pos = base + ((demuxer->movi_end - demuxer->movi_start)*rel_seek_secs);
   else
     pos = base + (rel_seek_secs*sh_audio->i_bps);

@@ -760,9 +760,9 @@ static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, float audio_
    //================= seek in MPEG ==========================
    demuxer->filepos = stream_tell( demuxer->stream );
 
-   newpos = ( flags & 1 ) ? demuxer->movi_start : demuxer->filepos;
+   newpos = ( flags & SEEK_ABSOLUTE ) ? demuxer->movi_start : demuxer->filepos;
 
-   if( flags & 2 )
+   if( flags & SEEK_FACTOR )
       // float seek 0..1
       newpos += ( demuxer->movi_end - demuxer->movi_start ) * rel_seek_secs;
    else

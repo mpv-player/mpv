@@ -218,7 +218,7 @@ static void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_
 
 	ds_free_packs(d_audio);
 
-	time = (flags & 1) ? rel_seek_secs - priv->last_pts : rel_seek_secs;
+	time = (flags & SEEK_ABSOLUTE) ? rel_seek_secs - priv->last_pts : rel_seek_secs;
 	if(time < 0) 
 	{
 		stream_seek(demuxer->stream, demuxer->movi_start);

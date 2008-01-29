@@ -2483,8 +2483,8 @@ static void edl_update(MPContext *mpctx)
 }
 
 
-// style & 1 == 0 means seek relative to current position, == 1 means absolute
-// style & 2 == 0 means amount in seconds, == 2 means fraction of file length
+// style & SEEK_ABSOLUTE == 0 means seek relative to current position, == 1 means absolute
+// style & SEEK_FACTOR == 0 means amount in seconds, == 2 means fraction of file length
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
 static int seek(MPContext *mpctx, double amount, int style)
 {
@@ -3626,7 +3626,7 @@ if(play_n_frames==0){
 }
 
 if (seek_to_sec) {
-    seek(mpctx, seek_to_sec, 1);
+    seek(mpctx, seek_to_sec, SEEK_ABSOLUTE);
     end_at.pos += seek_to_sec;
 }
 
@@ -3831,7 +3831,7 @@ if(step_sec>0) {
     if(mpctx->loop_times==1) mpctx->loop_times=-1;
     play_n_frames=play_n_frames_mf;
     mpctx->eof=0;
-    abs_seek_pos=1; rel_seek_secs=seek_to_sec;
+    abs_seek_pos=SEEK_ABSOLUTE; rel_seek_secs=seek_to_sec;
     loop_seek = 1;
   }
 

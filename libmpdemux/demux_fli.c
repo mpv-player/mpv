@@ -25,8 +25,8 @@ typedef struct {
 static void demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   fli_frames_t *frames = (fli_frames_t *)demuxer->priv;
   sh_video_t *sh_video = demuxer->video->sh;
-  int newpos=(flags&1)?0:frames->current_frame;
-  if(flags&2){
+  int newpos=(flags&SEEK_ABSOLUTE)?0:frames->current_frame;
+  if(flags&SEEK_FACTOR){
       // float 0..1
       newpos+=rel_seek_secs*frames->num_frames;
   } else {
