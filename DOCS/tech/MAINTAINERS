@@ -130,7 +130,7 @@ streams:
     * stream_radio.c - Vladimir Voroshilov
     * stream_dvb.c - Nico Sabbi
     * stream_dvd.c - Nico Sabbi
-    * stream_dvdnav.c - Nico Sabbi
+    * stream_dvdnav.c - Nico Sabbi and Benjamin Zores
 
 codec support:
     * FFmpeg: Michael Niedermayer
