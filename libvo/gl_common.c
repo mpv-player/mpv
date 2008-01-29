@@ -1151,6 +1151,8 @@ int loadGPUProgram(GLenum target, char *prog) {
   return 1;
 }
 
+#define MAX_PROGSZ (1024*1024)
+
 /**
  * \brief setup a fragment program that will do YUV->RGB conversion
  * \param brightness brightness adjustment offset
@@ -1164,14 +1166,14 @@ static void glSetupYUVFragprog(float brightness, float contrast,
                         float uvcos, float uvsin, float rgamma,
                         float ggamma, float bgamma, int type, int rect,
                         int texw, int texh) {
-  char yuv_prog[4000] =
+  static const char prog_hdr[] =
     "!!ARBfp1.0\n"
     "OPTION ARB_precision_hint_fastest;"
     // all scaler variables must go here so they aren't defined
     // multiple times when the same scaler is used more than once
     "TEMP coord, coord2, cdelta, parmx, parmy, a, b, yuv;";
-  int prog_remain = sizeof(yuv_prog) - strlen(yuv_prog);
-  char *prog_pos = &yuv_prog[strlen(yuv_prog)];
+  int prog_remain;
+  char *yuv_prog, *prog_pos;
   int cur_texu = 3;
   char lum_scale_texs[1];
   char chrom_scale_texs[1];
@@ -1198,6 +1200,10 @@ static void glSetupYUVFragprog(float brightness, float contrast,
     mp_msg(MSGT_VO, MSGL_FATAL, "[gl] ProgramString function missing!\n");
     return;
   }
+  yuv_prog = malloc(MAX_PROGSZ);
+  strcpy(yuv_prog, prog_hdr);
+  prog_pos    = yuv_prog + sizeof(prog_hdr) - 1;
+  prog_remain = MAX_PROGSZ - sizeof(prog_hdr);
   add_scaler(YUV_LUM_SCALER(type), &prog_pos, &prog_remain, lum_scale_texs,
              '0', 'r', rect, texw, texh);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
@@ -1230,6 +1236,7 @@ static void glSetupYUVFragprog(float brightness, float contrast,
   }
   mp_msg(MSGT_VO, MSGL_V, "[gl] generated fragment program:\n%s\n", yuv_prog);
   loadGPUProgram(GL_FRAGMENT_PROGRAM, yuv_prog);
+  free(yuv_prog);
 }
 
 /**
