@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef ASS_LIBRARY_H
-#define ASS_LIBRARY_H
+#ifndef LIBASS_LIBRARY_H
+#define LIBASS_LIBRARY_H
 
 typedef struct ass_fontdata_s {
 	char* name;
@@ -36,4 +36,4 @@ struct ass_library_s {
 	int num_fontdata;
 };
 
-#endif /* ASS_LIBRARY_H */
+#endif /* LIBASS_LIBRARY_H */

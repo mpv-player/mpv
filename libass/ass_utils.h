@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef ASS_UTILS_H
-#define ASS_UTILS_H
+#ifndef LIBASS_UTILS_H
+#define LIBASS_UTILS_H
 
 int mystrtoi(char** p, int base, int* res);
 int mystrtou32(char** p, int base, uint32_t* res);
@@ -57,4 +57,4 @@ static inline int double_to_d16(double x) {
 	return (int)(x * 0x10000);
 }
 
-#endif /* ASS_UTILS_H */
+#endif /* LIBASS_UTILS_H */

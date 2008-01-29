@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef ASS_MP_H
-#define ASS_MP_H
+#ifndef LIBASS_MP_H
+#define LIBASS_MP_H
 
 #include "subreader.h"
 
@@ -53,4 +53,4 @@ typedef struct {
 extern int ass_force_reload;
 ass_image_t* ass_mp_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now, int* detect_change);
 
-#endif /* ASS_MP_H */
+#endif /* LIBASS_MP_H */

@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef ASS_BITMAP_H
-#define ASS_BITMAP_H
+#ifndef LIBASS_BITMAP_H
+#define LIBASS_BITMAP_H
 
 typedef struct ass_synth_priv_s ass_synth_priv_t;
 
@@ -45,4 +45,4 @@ int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_gly
 
 void ass_free_bitmap(bitmap_t* bm);
 
-#endif /* ASS_BITMAP_H */
+#endif /* LIBASS_BITMAP_H */

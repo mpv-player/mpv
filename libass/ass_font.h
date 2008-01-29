@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef ASS_FONT_H
-#define ASS_FONT_H
+#ifndef LIBASS_FONT_H
+#define LIBASS_FONT_H
 
 typedef struct ass_font_desc_s {
 	char* family;
@@ -48,4 +48,4 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 FT_Vector ass_font_get_kerning(ass_font_t* font, uint32_t c1, uint32_t c2);
 void ass_font_free(ass_font_t* font);
 
-#endif /* ASS_FONT_H */
+#endif /* LIBASS_FONT_H */

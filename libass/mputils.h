@@ -1,5 +1,5 @@
-#ifndef MPUTILS_H
-#define MPUTILS_H
+#ifndef LIBASS_MPUTILS_H
+#define LIBASS_MPUTILS_H
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -8,4 +8,4 @@
 #include "libvo/sub.h" // for utf8_get_char
 #include "libavutil/common.h"
 
-#endif /* MPUTILS_H */
+#endif /* LIBASS_MPUTILS_H */

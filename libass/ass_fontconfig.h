@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef ASS_FONTCONFIG_H
-#define ASS_FONTCONFIG_H
+#ifndef LIBASS_FONTCONFIG_H
+#define LIBASS_FONTCONFIG_H
 
 #ifdef HAVE_FONTCONFIG
 #include <fontconfig/fontconfig.h>
@@ -31,4 +31,4 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index, uint32_t code);
 void fontconfig_done(fc_instance_t* priv);
 
-#endif /* ASS_FONTCONFIG_H */
+#endif /* LIBASS_FONTCONFIG_H */

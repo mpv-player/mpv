@@ -18,8 +18,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef ASS_H
-#define ASS_H
+#ifndef LIBASS_ASS_H
+#define LIBASS_ASS_H
 
 #include "ass_types.h"
 
@@ -210,4 +210,4 @@ void ass_clear_fonts(ass_library_t* library);
  */
 long long ass_step_sub(ass_track_t* track, long long now, int movement);
 
-#endif /* ASS_H */
+#endif /* LIBASS_ASS_H */
