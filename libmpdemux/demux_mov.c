@@ -175,11 +175,12 @@ void mov_build_index(mov_track_t* trak,int timescale){
     i=trak->chunkmap_size;
     while(i>0){
 	--i;
-	for(j=trak->chunkmap[i].first;j<last;j++){
+	j=FFMAX(trak->chunkmap[i].first, 0);
+	for(;j<last;j++){
 	    trak->chunks[j].desc=trak->chunkmap[i].sdid;
 	    trak->chunks[j].size=trak->chunkmap[i].spc;
 	}
-	last=trak->chunkmap[i].first;
+	last=FFMIN(trak->chunkmap[i].first, trak->chunks_size);
     }
 
 #if 0
