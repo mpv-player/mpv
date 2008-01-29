@@ -594,7 +594,7 @@ static HTTP_header_t *asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 						continue;
 					}
 					asf_nb_stream++;
-					ptr += sprintf(ptr, "ffff:%d:%d ", stream_id, enable);
+					ptr += sprintf(ptr, "ffff:%x:%d ", stream_id, enable);
 				}
 			}
 			if(asf_http_ctrl->n_video > 0) {
@@ -607,7 +607,7 @@ static HTTP_header_t *asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 						continue;
 					}
 					asf_nb_stream++;
-					ptr += sprintf(ptr, "ffff:%d:%d ", stream_id, enable);
+					ptr += sprintf(ptr, "ffff:%x:%d ", stream_id, enable);
 				}
 			}
 			http_set_field( http_hdr, str );
