@@ -6,6 +6,7 @@ MPlayer (1.0)
     * Support for X8 frame (fixes "J-type picture is not supported" for WMV2)
     * Support for DTS WAV/DTS-CD passthrough by ad_hwac3
     * Apple's raw YUV2 in MOV
+    * LATM over LOAS AAC decoding via internal libfaad2
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
@@ -22,6 +23,7 @@ MPlayer (1.0)
     * tv:// support for win32
     * fix teletext on some systems
     * dvd streams can switch angles
+    * dvd still menus are now supported
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
