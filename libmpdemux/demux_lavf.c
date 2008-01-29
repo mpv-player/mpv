@@ -106,9 +106,9 @@ const struct AVCodecTag *mp_wav_taglists[] = {codec_wav_tags, mp_wav_tags, 0};
 
 static const AVCodecTag mp_wav_override_tags[] = {
     { CODEC_ID_PCM_S8,            MKTAG('t', 'w', 'o', 's')},
-    { CODEC_ID_PCM_U8,            0},
+    { CODEC_ID_PCM_U8,            1},
     { CODEC_ID_PCM_S16BE,         MKTAG('t', 'w', 'o', 's')},
-    { CODEC_ID_PCM_S16LE,         0},
+    { CODEC_ID_PCM_S16LE,         1},
     { CODEC_ID_PCM_S24BE,         MKTAG('i', 'n', '2', '4')},
     { 0, 0 },
 };
@@ -271,6 +271,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
 
     switch(codec->codec_type){
         case CODEC_TYPE_AUDIO:{
+            int override_tag;
             WAVEFORMATEX *wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
             sh_audio_t* sh_audio;
             if(priv->audio_streams >= MAX_A_STREAMS)
@@ -282,7 +283,9 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             priv->astreams[priv->audio_streams] = i;
             priv->audio_streams++;
             // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
-            codec->codec_tag= av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
+            override_tag= av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
+            if (override_tag)
+                codec->codec_tag= override_tag;
             // mp4a tag is used for all mp4 files no matter what they actually contain
             if(codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
                 codec->codec_tag= 0;
