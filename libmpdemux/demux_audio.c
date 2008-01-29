@@ -131,7 +131,7 @@ static mp3_hdr_t *add_mp3_hdr(mp3_hdr_t **list, off_t st_pos,
   return NULL;
 }
 
-#if 0
+#if 0 /* this code is a mess, clean it up before reenabling */
 #define FLAC_SIGNATURE_SIZE 4
 #define FLAC_STREAMINFO_SIZE 34
 #define FLAC_SEEKPOINT_SIZE 18
