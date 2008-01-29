@@ -344,7 +344,7 @@ static int mp_property_percent_pos(m_option_t * prop, int action,
                                  demuxer_get_percent_pos(mpctx->demuxer));
     }
 
-    abs_seek_pos = 3;
+    abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
     rel_seek_secs = pos / 100.0;
     return M_PROPERTY_OK;
 }
@@ -359,7 +359,7 @@ static int mp_property_time_pos(m_option_t * prop, int action,
     case M_PROPERTY_SET:
         if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(double*)arg);
-        abs_seek_pos = 1;
+        abs_seek_pos = SEEK_ABSOLUTE;
         rel_seek_secs = *(double*)arg;
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
@@ -429,7 +429,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                    &next_pts, &chapter_num, &chapter_name);
     if (chapter >= 0) {
         if (next_pts > -1.0) {
-            abs_seek_pos = 1;
+            abs_seek_pos = SEEK_ABSOLUTE;
             rel_seek_secs = next_pts;
         }
         if (chapter_name)
@@ -2310,13 +2310,13 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		v = cmd->args[0].v.f;
 		abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
 		if (abs == 2) {	/* Absolute seek to a specific timestamp in seconds */
-		    abs_seek_pos = 1;
+		    abs_seek_pos = SEEK_ABSOLUTE;
 		    if (sh_video)
 			mpctx->osd_function =
 			    (v > sh_video->pts) ? OSD_FFW : OSD_REW;
 		    rel_seek_secs = v;
 		} else if (abs) {	/* Absolute seek by percentage */
-		    abs_seek_pos = 3;
+		    abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
 		    if (sh_video)
 			mpctx->osd_function = OSD_FFW;	// Direction isn't set correctly
 		    rel_seek_secs = v / 100.0;
