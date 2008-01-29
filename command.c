@@ -3098,7 +3098,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    pointer_y = (int) (dy * (double) sh_video->disp_h);
 		    mp_dvdnav_update_mouse_pos(mpctx->stream,
 					       pointer_x, pointer_y, &button);
-		    if (button > 0)
+		    if (osd_level > 1 && button > 0)
 			set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				    "Selected button number %d", button);
 		}
@@ -3117,7 +3117,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    break;
 
 		mp_dvdnav_handle_input(mpctx->stream,cmd->args[0].v.i,&button);
-		if (button > 0)
+		if (osd_level > 1 && button > 0)
 		    set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				"Selected button number %d", button);
 	    }
