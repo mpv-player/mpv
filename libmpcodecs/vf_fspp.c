@@ -42,6 +42,7 @@
 #include "cpudetect.h"
 
 #include "libavutil/intreadwrite.h"
+#include "libavutil/mem.h"
 #include "libavcodec/avcodec.h"
 #include "libavcodec/dsputil.h"
 
@@ -703,24 +704,24 @@ const vf_info_t vf_info_fspp = {
 
 static uint64_t attribute_used __attribute__((aligned(8))) temps[4];//!!
 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_0_382683433=FIX64(0.382683433, 14); 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_0_541196100=FIX64(0.541196100, 14); 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_0_707106781=FIX64(0.707106781, 14); 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_1_306562965=FIX64(1.306562965, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_382683433)=FIX64(0.382683433, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_541196100)=FIX64(0.541196100, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_707106781)=FIX64(0.707106781, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_306562965)=FIX64(1.306562965, 14); 
 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_1_414213562_A=FIX64(1.414213562, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_414213562_A)=FIX64(1.414213562, 14); 
 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_1_847759065=FIX64(1.847759065, 13); 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_2_613125930=FIX64(-2.613125930, 13); //-
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_1_414213562=FIX64(1.414213562, 13); 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_1_082392200=FIX64(1.082392200, 13);
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_847759065)=FIX64(1.847759065, 13); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_2_613125930)=FIX64(-2.613125930, 13); //-
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_414213562)=FIX64(1.414213562, 13); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_082392200)=FIX64(1.082392200, 13);
 //for t3,t5,t7 == 0 shortcut
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_0_847759065=FIX64(0.847759065, 14); 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_0_566454497=FIX64(0.566454497, 14); 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_FIX_0_198912367=FIX64(0.198912367, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_847759065)=FIX64(0.847759065, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_566454497)=FIX64(0.566454497, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_198912367)=FIX64(0.198912367, 14); 
 
-static uint64_t attribute_used __attribute__((aligned(8))) MM_DESCALE_RND=C64(4);
-static uint64_t attribute_used __attribute__((aligned(8))) MM_2=C64(2);
+DECLARE_ASM_CONST(8, uint64_t, MM_DESCALE_RND)=C64(4);
+DECLARE_ASM_CONST(8, uint64_t, MM_2)=C64(2);
 
 #else /* !HAVE_MMX */
 
