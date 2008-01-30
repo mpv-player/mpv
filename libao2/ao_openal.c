@@ -161,10 +161,16 @@ static void unqueue_buffers(void) {
   ALint p;
   int s, i;
   for (s = 0;  s < ao_data.channels; s++) {
+    int till_wrap = NUM_BUF - unqueue_buf[s];
     alGetSourcei(sources[s], AL_BUFFERS_PROCESSED, &p);
-    for (i = 0; i < p; i++) {
-      alSourceUnqueueBuffers(sources[s], 1, &buffers[s][unqueue_buf[s]]);
-      unqueue_buf[s] = (unqueue_buf[s] + 1) % NUM_BUF;
+    if (p >= till_wrap) {
+      alSourceUnqueueBuffers(sources[s], till_wrap, &buffers[s][unqueue_buf[s]]);
+      unqueue_buf[s] = 0;
+      p -= till_wrap;
+    }
+    if (p) {
+      alSourceUnqueueBuffers(sources[s], p, &buffers[s][unqueue_buf[s]]);
+      unqueue_buf[s] += p;
     }
   }
 }
