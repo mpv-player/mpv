@@ -201,7 +201,9 @@ static int get_space(void) {
   ALint queued;
   unqueue_buffers();
   alGetSourcei(sources[0], AL_BUFFERS_QUEUED, &queued);
-  return (NUM_BUF - queued) * CHUNK_SIZE * ao_data.channels;
+  queued = NUM_BUF - queued - 3;
+  if (queued < 0) return 0;
+  return queued * CHUNK_SIZE * ao_data.channels;
 }
 
 /**
