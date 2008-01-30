@@ -46,6 +46,15 @@ MPlayer (1.0)
     * AC3/DTS passthrough for ao_macosx
     * Fix frozen OSD on Mac OS X
 
+  rc2try2:
+
+    Security:
+    * buffer overflow in url.c fixed
+    * buffer overflow in stream_cddb.c fixed
+    * stack overflow in demuxer_audio.c fixed
+    * buffer overflow in demuxer_mov.c fixed
+
+
   rc2: "AreWeThereYet?" October 7, 2007
   (SVN revisions: MPlayer r24722, FFmpeg r10677)
 
