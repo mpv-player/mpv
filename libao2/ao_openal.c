@@ -159,7 +159,7 @@ static void uninit(int immed) {
 
 static void unqueue_buffers(void) {
   ALint p;
-  int s, i;
+  int s;
   for (s = 0;  s < ao_data.channels; s++) {
     int till_wrap = NUM_BUF - unqueue_buf[s];
     alGetSourcei(sources[s], AL_BUFFERS_PROCESSED, &p);
