@@ -173,7 +173,7 @@ static void unqueue_buffers(void) {
  * \brief stop playing and empty buffers (for seeking/pause)
  */
 static void reset(void) {
-  alSourceRewindv(ao_data.channels, sources);
+  alSourceStopv(ao_data.channels, sources);
   unqueue_buffers();
 }
 
