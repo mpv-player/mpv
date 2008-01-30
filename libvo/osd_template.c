@@ -380,7 +380,7 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
 		"pand %%mm4, %%mm0\n\t" 	//0R0B0R0B
 		"psrlw $8, %%mm1\n\t"		//0?0G0?0G
 		"movd	%%eax, %%mm2\n\t" 	//srca 0000DCBA
-		"paddb	"MANGLE(bFF)", %%mm2\n\t"
+		"paddb	%3, %%mm2\n\t"
 		"punpcklbw %%mm2, %%mm2\n\t"	//srca DDCCBBAA
 		"movq %%mm2, %%mm3\n\t"
 		"punpcklbw %%mm7, %%mm2\n\t"	//srca 0B0B0A0A
@@ -410,7 +410,7 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
 		"paddb	%%mm6, %%mm0\n\t"
 		"movq	%%mm0, 8%0\n\t"
 		"1:\n\t"
-		:: "m" (dstbase[4*x]), "m" (srca[x]), "m" (src[x])
+		:: "m" (dstbase[4*x]), "m" (srca[x]), "m" (src[x]), "m" (bFF)
 		: "%eax");
 	}
 #endif

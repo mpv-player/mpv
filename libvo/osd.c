@@ -17,7 +17,7 @@
 #endif
 
 #ifdef CAN_COMPILE_X86_ASM
-static const uint64_t bFF attribute_used __attribute__((aligned(8))) = 0xFFFFFFFFFFFFFFFFULL;
+static const uint64_t bFF __attribute__((aligned(8))) = 0xFFFFFFFFFFFFFFFFULL;
 static const unsigned long long mask24lh  __attribute__((aligned(8))) = 0xFFFF000000000000ULL;
 static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FFFFFFFFFFFFULL;
 #endif
