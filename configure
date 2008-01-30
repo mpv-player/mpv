@@ -5173,7 +5173,7 @@ int main(void) {
   return 0;
 }
 EOF
-  for I in "-lopenal" "-framework OpenAL" ; do
+  for I in "-lopenal" "-lopenal32" "-framework OpenAL" ; do
     cc_check $I && _openal=yes && break
     cc_check -DOPENAL_AL_H=1 $I && _def_openal_h='#define OPENAL_AL_H 1' && _openal=yes && break
   done
