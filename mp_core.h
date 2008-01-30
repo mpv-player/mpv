@@ -1,6 +1,8 @@
 #ifndef MP_CORE_H
 #define MP_CORE_H
 
+#include "mp_osd.h"
+
 // definitions used internally by the core player code
 
 #define INITED_VO 1
@@ -29,21 +31,6 @@
 #define PT_PREV_SRC -2
 #define PT_UP_NEXT 3
 #define PT_UP_PREV -3
-
-
-#define OSD_MSG_TV_CHANNEL              0
-#define OSD_MSG_TEXT                    1
-#define OSD_MSG_SUB_DELAY               2
-#define OSD_MSG_SPEED                   3
-#define OSD_MSG_OSD_STATUS              4
-#define OSD_MSG_BAR                     5
-#define OSD_MSG_PAUSE                   6
-#define OSD_MSG_RADIO_CHANNEL           7
-/// Base id for messages generated from the commmand to property bridge.
-#define OSD_MSG_PROPERTY                0x100
-
-#define MAX_OSD_LEVEL 3
-#define MAX_TERM_OSD_LEVEL 1
 
 
 typedef struct MPContext {
@@ -119,8 +106,6 @@ extern FILE *edl_fd;
 extern int file_filter;
 // These appear in options list
 extern float playback_speed;
-extern int osd_duration;
-extern int term_osd;
 extern int fixed_vo;
 extern int forced_subs_only;
 
@@ -129,12 +114,9 @@ int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data);
 void uninit_player(unsigned int mask);
 void reinit_audio_chain(void);
 void init_vo_spudec(void);
-void set_osd_bar(int type,const char* name,double min,double max,double val);
-void set_osd_msg(int id, int level, int time, const char* fmt, ...);
 double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 			 ao_functions_t *audio_out);
 void exit_player_with_rc(const char* how, int rc);
-void rm_osd_msg(int id);
 void add_subtitles(char *filename, float fps, int noerr);
 int reinit_video_chain(void);
 
