@@ -726,15 +726,15 @@ DECLARE_ASM_CONST(8, uint64_t, MM_2)=C64(2);
 #else /* !HAVE_MMX */
 
 typedef int32_t int_simd16_t;
-static int16_t FIX_0_382683433=FIX(0.382683433, 14); 
-static int16_t FIX_0_541196100=FIX(0.541196100, 14); 
-static int16_t FIX_0_707106781=FIX(0.707106781, 14); 
-static int16_t FIX_1_306562965=FIX(1.306562965, 14); 
-static int16_t FIX_1_414213562_A=FIX(1.414213562, 14); 
-static int16_t FIX_1_847759065=FIX(1.847759065, 13); 
-static int16_t FIX_2_613125930=FIX(-2.613125930, 13); //-
-static int16_t FIX_1_414213562=FIX(1.414213562, 13); 
-static int16_t FIX_1_082392200=FIX(1.082392200, 13);
+static const int16_t FIX_0_382683433=FIX(0.382683433, 14); 
+static const int16_t FIX_0_541196100=FIX(0.541196100, 14); 
+static const int16_t FIX_0_707106781=FIX(0.707106781, 14); 
+static const int16_t FIX_1_306562965=FIX(1.306562965, 14); 
+static const int16_t FIX_1_414213562_A=FIX(1.414213562, 14); 
+static const int16_t FIX_1_847759065=FIX(1.847759065, 13); 
+static const int16_t FIX_2_613125930=FIX(-2.613125930, 13); //-
+static const int16_t FIX_1_414213562=FIX(1.414213562, 13); 
+static const int16_t FIX_1_082392200=FIX(1.082392200, 13);
 
 #endif
 
