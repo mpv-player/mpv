@@ -435,6 +435,13 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             demuxer->sub->sh = demuxer->s_streams[priv->sub_streams++];
             break;
         }
+        case CODEC_TYPE_ATTACHMENT:{
+            if (st->codec->codec_id == CODEC_ID_TTF)
+                demuxer_add_attachment(demuxer, st->filename,
+                                       "application/x-truetype-font",
+                                       codec->extradata, codec->extradata_size);
+            break;
+        }
         default:
             st->discard= AVDISCARD_ALL;
     }
