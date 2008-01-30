@@ -212,7 +212,7 @@ static int play(void *data, int len, int flags) {
   int i, j, k;
   int ch;
   int16_t *d = data;
-  len /= ao_data.outburst;
+  len /= ao_data.channels * CHUNK_SIZE;
   for (i = 0; i < len; i++) {
     for (ch = 0; ch < ao_data.channels; ch++) {
       for (j = 0, k = ch; j < CHUNK_SIZE / 2; j++, k += ao_data.channels)
@@ -227,7 +227,7 @@ static int play(void *data, int len, int flags) {
   alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
   if (state != AL_PLAYING) // checked here in case of an underrun
     alSourcePlayv(ao_data.channels, sources);
-  return len * ao_data.outburst;
+  return len * ao_data.channels * CHUNK_SIZE;
 }
 
 static float get_delay(void) {
