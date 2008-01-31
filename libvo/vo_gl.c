@@ -149,8 +149,8 @@ static void resize(int x,int y){
 #endif
   vo_osd_changed(OSDTYPE_OSD);
   }
-  if (vo_fs && use_aspect && !vo_doublebuffering)
-    glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
+  flip_page();
 }
 
 static void texSize(int w, int h, int *texw, int *texh) {
