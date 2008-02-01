@@ -4927,7 +4927,7 @@ fi
 echores "$_dxr3"
 
 
-echocheck "IVTV TV-Out"
+echocheck "IVTV TV-Out (pre linux-2.6.24)"
 if test "$_ivtv" = auto ; then
   cat > $TMPC << EOF
 #include <stdlib.h>
@@ -4935,7 +4935,13 @@ if test "$_ivtv" = auto ; then
 #include <linux/types.h>
 #include <linux/videodev2.h>
 #include <linux/ivtv.h>
-int main(void) { return 0; }
+#include <sys/ioctl.h>
+int main(void) { 
+struct ivtv_cfg_stop_decode sd;
+struct ivtv_cfg_start_decode sd1;
+ioctl (0, IVTV_IOC_START_DECODE, &sd1);
+ioctl (0, IVTV_IOC_STOP_DECODE, &sd);
+return 0; }
 EOF
   _ivtv=no
   cc_check && _ivtv=yes
