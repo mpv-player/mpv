@@ -10,7 +10,7 @@ extern int soft_vol;
 extern float soft_vol_max;
 
 typedef struct mixer_s {
-    ao_functions_t *audio_out;
+    const ao_functions_t *audio_out;
     af_stream_t *afilter;
     int volstep;
     int muted;

@@ -75,7 +75,7 @@ extern ao_functions_t audio_out_mpegpes;
 extern ao_functions_t audio_out_pcm;
 extern ao_functions_t audio_out_pss;
 
-ao_functions_t* audio_out_drivers[] =
+const ao_functions_t* const audio_out_drivers[] =
 {
 // native:
 #ifdef HAVE_DIRECTX
@@ -154,7 +154,7 @@ void list_audio_out(void){
       mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
-ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags){
+const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags){
     int i;
     // first try the preferred drivers, with their optional subdevice param:
     if(ao_list && ao_list[0])
@@ -177,7 +177,7 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
 	else
 	    ao_len = strlen(ao);
 	for(i=0;audio_out_drivers[i];i++){
-	    ao_functions_t* audio_out=audio_out_drivers[i];
+	    const ao_functions_t* audio_out=audio_out_drivers[i];
 	    if(!strncmp(audio_out->info->short_name,ao,ao_len)){
 		// name matches, try it
 		if(audio_out->init(rate,channels,format,flags))
@@ -194,7 +194,7 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
     }
     // now try the rest...
     for(i=0;audio_out_drivers[i];i++){
-	ao_functions_t* audio_out=audio_out_drivers[i];
+	const ao_functions_t* audio_out=audio_out_drivers[i];
 //	if(audio_out->control(AOCONTROL_QUERY_FORMAT, (int)format) == CONTROL_TRUE)
 	if(audio_out->init(rate,channels,format,flags))
 	    return audio_out; // success!

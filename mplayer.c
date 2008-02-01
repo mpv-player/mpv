@@ -1707,7 +1707,7 @@ static double written_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio)
 
 // Return pts value corresponding to currently playing audio.
 double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
-				ao_functions_t *audio_out)
+				const ao_functions_t *audio_out)
 {
     return written_audio_pts(sh_audio, d_audio) - playback_speed *
 	audio_out->get_delay();

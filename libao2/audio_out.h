@@ -45,10 +45,10 @@ extern char *ao_subdevice;
 extern ao_data_t ao_data;
 
 void list_audio_out(void);
-ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags);
+const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags);
 
 // NULL terminated array of all drivers
-extern ao_functions_t* audio_out_drivers[];
+extern const ao_functions_t* const audio_out_drivers[];
 
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1
