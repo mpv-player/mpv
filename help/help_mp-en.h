@@ -944,6 +944,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
+#define MSGTR_PREFERENCES_FontEncoding23 "Arabic Windows (CP1256)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "No autoscale"
 #define MSGTR_PREFERENCES_FontPropWidth "Proportional to movie width"
 #define MSGTR_PREFERENCES_FontPropHeight "Proportional to movie height"
