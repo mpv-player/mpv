@@ -61,6 +61,18 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             vo_dheight = r.bottom;
             break;
         case WM_WINDOWPOSCHANGING:
+            if (vo_keepaspect && !vo_fs) {
+              WINDOWPOS *wpos = lParam;
+              int xborder, yborder;
+              RECT r2;
+              GetClientRect(vo_window, &r);
+              GetWindowRect(vo_window, &r2);
+              xborder = (r2.right - r2.left) - (r.right - r.left);
+              yborder = (r2.bottom - r2.top) - (r.bottom - r.top);
+              wpos->cx -= xborder; wpos->cy -= yborder;
+              aspect_fit(&wpos->cx, &wpos->cy, wpos->cx, wpos->cy);
+              wpos->cx += xborder; wpos->cy += yborder;
+            }
             return 0;
         case WM_CLOSE:
             mplayer_put_key(KEY_CLOSE_WIN);
