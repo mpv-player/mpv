@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r25663 (2008. 01. 21.)
+// Sync'ed with help_mp-en.h r25947 (2008. 02. 02.)
 
 // ========================= MPlayer help ===========================
 
@@ -943,6 +943,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai karakterkészlet (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cirill karakterkészlet (Windows) (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Szláv és közép-európai karakterkészlet (Windows) (CP1250)"
+#define MSGTR_PREFERENCES_FontEncoding23 "Arab Windows (CP1256)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Nincs automata karakterméret választás"
 #define MSGTR_PREFERENCES_FontPropWidth "Karakterméret film szélességéhez való állítása"
 #define MSGTR_PREFERENCES_FontPropHeight "Karakterméret film magasságához való állítása"
