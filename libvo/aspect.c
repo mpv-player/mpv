@@ -66,44 +66,27 @@ void aspect_save_screenres(int scrw, int scrh){
  * resolution, that the scaled image should fit into
  */
 
-void aspect(int *srcw, int *srch, int zoom){
+void aspect_fit(int *srcw, int *srch, int fitw, int fith){
   int tmpw;
 
-  if( !zoom && geometry_wh_changed ) {
 #ifdef ASPECT_DEBUG
-    printf("aspect(0) no aspect forced!\n");
-#endif
-    return; // the user doesn't want to fix aspect
-  }
-
-#ifdef ASPECT_DEBUG
-  printf("aspect(0) fitin: %dx%d zoom: %d screenaspect: %.2f\n",aspdat.scrw,aspdat.scrh,
-      zoom,monitor_aspect);
+  printf("aspect(0) fitin: %dx%d screenaspect: %.2f\n",aspdat.scrw,aspdat.scrh,
+      monitor_aspect);
   printf("aspect(1) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
-  if(zoom){
-    *srcw = aspdat.scrw;
-    *srch = (int)(((float)aspdat.scrw / (float)aspdat.prew * (float)aspdat.preh)
+    *srcw = fitw;
+    *srch = (int)(((float)fitw / (float)aspdat.prew * (float)aspdat.preh)
                * ((float)aspdat.scrh / ((float)aspdat.scrw / monitor_aspect)));
-  }else{
-    *srcw = aspdat.prew;
-    *srch = (int)((float)aspdat.preh
-               * ((float)aspdat.scrh / ((float)aspdat.scrw / monitor_aspect)));
-  }
   *srch+= *srch%2; // round
 #ifdef ASPECT_DEBUG
   printf("aspect(2) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
   if(*srch>aspdat.scrh || *srch<aspdat.orgh){
-    if(zoom)
-      tmpw = (int)(((float)aspdat.scrh / (float)aspdat.preh * (float)aspdat.prew)
-                * ((float)aspdat.scrw / ((float)aspdat.scrh / (1.0/monitor_aspect))));
-    else
-      tmpw = (int)((float)aspdat.prew
+      tmpw = (int)(((float)fith / (float)aspdat.preh * (float)aspdat.prew)
                 * ((float)aspdat.scrw / ((float)aspdat.scrh / (1.0/monitor_aspect))));
     tmpw+= tmpw%2; // round
     if(tmpw<=aspdat.scrw /*&& tmpw>=aspdat.orgw*/){
-      *srch = zoom?aspdat.scrh:aspdat.preh;
+      *srch = fith;
       *srcw = tmpw;
     }else{
 #ifndef ASPECT_TEST
@@ -117,6 +100,18 @@ void aspect(int *srcw, int *srch, int zoom){
 #ifdef ASPECT_DEBUG
   printf("aspect(3) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
+}
+
+void aspect(int *srcw, int *srch, int zoom){
+  int fitw = zoom ? aspdat.scrw : aspdat.prew;
+  int fith = zoom ? aspdat.scrh : aspdat.preh;
+  if( !zoom && geometry_wh_changed ) {
+#ifdef ASPECT_DEBUG
+    printf("aspect(0) no aspect forced!\n");
+#endif
+    return; // the user doesn't want to fix aspect
+  }
+  aspect_fit(srcw, srch, fitw, fith);
 }
 
 void panscan_init( void )
