@@ -684,6 +684,7 @@ int get_demuxer_type_from_name(char *demuxer_name, int *force)
 int extension_parsing=1; // 0=off 1=mixed (used only for unstable formats)
 
 int correct_pts=0;
+int user_correct_pts=-1;
 
 /*
   NOTE : Several demuxers may be opened at the same time so
@@ -869,6 +870,7 @@ extern float stream_cache_seek_min_percent;
 demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int dvdsub_id,char* filename){
   stream_t *as = NULL,*ss = NULL;
   demuxer_t *vd,*ad = NULL,*sd = NULL;
+  demuxer_t *res;
   int afmt =DEMUXER_TYPE_UNKNOWN,sfmt = DEMUXER_TYPE_UNKNOWN ;
   int audio_demuxer_type = 0, sub_demuxer_type = 0;
   int demuxer_force = 0, audio_demuxer_force = 0,
@@ -935,13 +937,18 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
   }
 
   if(ad && sd)
-    return new_demuxers_demuxer(vd,ad,sd);
+    res = new_demuxers_demuxer(vd,ad,sd);
   else if(ad)
-    return new_demuxers_demuxer(vd,ad,vd);
+    res = new_demuxers_demuxer(vd,ad,vd);
   else if(sd)
-    return new_demuxers_demuxer(vd,vd,sd);
+    res = new_demuxers_demuxer(vd,vd,sd);
   else
-    return vd;
+    res = vd;
+
+  correct_pts = user_correct_pts;
+  if (correct_pts < 0)
+    correct_pts = demux_control(res, DEMUXER_CTRL_CORRECT_PTS, NULL) == DEMUXER_CTRL_OK;
+  return res;
 }
 
 

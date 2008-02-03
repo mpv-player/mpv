@@ -1827,7 +1827,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
               bih = realloc (bih, bih->biSize);
               memcpy (bih + 1, track->private_data, track->private_size);
             }
-          track->reorder_timecodes = !correct_pts;
+          track->reorder_timecodes = user_correct_pts == 0;
           if (!vi->id) {
               mp_msg (MSGT_DEMUX,MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownCodecID,
                       track->codec_id, track->tnum);
@@ -3456,6 +3456,8 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
   
   switch (cmd)
     {
+    case DEMUXER_CTRL_CORRECT_PTS:
+      return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_TIME_LENGTH:
       if (mkv_d->duration == 0)
         return DEMUXER_CTRL_DONTKNOW;

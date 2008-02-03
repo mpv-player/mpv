@@ -82,6 +82,7 @@
 #define DEMUXER_CTRL_RESYNC 13
 #define DEMUXER_CTRL_SWITCH_VIDEO 14
 #define DEMUXER_CTRL_IDENTIFY_PROGRAM 15
+#define DEMUXER_CTRL_CORRECT_PTS 16
 
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)
@@ -143,6 +144,7 @@ typedef struct demuxer_info_st {
 struct demuxer_st;
 
 extern int correct_pts;
+extern int user_correct_pts;
 
 /**
  * Demuxer description structure

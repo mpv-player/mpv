@@ -463,7 +463,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     if (opt_cryptokey)
         parse_cryptokey(avfc, opt_cryptokey);
-    if (correct_pts)
+    if (user_correct_pts != 0)
         avfc->flags |= AVFMT_FLAG_GENPTS;
     if (index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
@@ -644,6 +644,8 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
     lavf_priv_t *priv = demuxer->priv;
 
     switch (cmd) {
+        case DEMUXER_CTRL_CORRECT_PTS:
+	    return DEMUXER_CTRL_OK;
         case DEMUXER_CTRL_GET_TIME_LENGTH:
 	    if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
 	        return DEMUXER_CTRL_DONTKNOW;
