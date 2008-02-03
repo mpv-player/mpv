@@ -1849,7 +1849,6 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
     if (ctx->d_sub) dvdsub_id = -2;
         
     audio_delay = 0.0f;
-    correct_pts = 0;
 
     /// clear all EOF related flags
     ctx->d_video->eof = ctx->d_audio->eof = ctx->stream->eof = 0;
