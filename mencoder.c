@@ -412,6 +412,8 @@ ao_data_t ao_data = {0,0,0,0,OUTBURST,-1,0};
 audio_encoding_params_t aparams;
 audio_encoder_t *aencoder = NULL;
 
+user_correct_pts = 0;
+
   mp_msg_init();
 
   for(i=1; i<argc; i++)
