@@ -19,5 +19,6 @@ void aspect_save_screenres(int scrw, int scrh);
 #define A_NOZOOM 0
 
 void aspect(int *srcw, int *srch, int zoom);
+void aspect_fit(int *srcw, int *srch, int fitw, int fith);
 
 #endif /* ASPECT_H */
