@@ -2413,6 +2413,7 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 				pmt->es[idx].type = AUDIO_A52;
 				break;
 			case 0x8A:
+			case 0x82:
 				pmt->es[idx].type = AUDIO_DTS;
 				break;
 			case 0xEA:
