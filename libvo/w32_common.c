@@ -156,11 +156,9 @@ int vo_w32_check_events(void) {
     }
     if (WinID >= 0) {
         RECT r;
-        GetClientRect(vo_window, &r);
+        GetClientRect(WinID, &r);
         if (r.right != vo_dwidth || r.bottom != vo_dheight)
-            event_flags |= VO_EVENT_RESIZE;
-        vo_dwidth = r.right;
-        vo_dheight = r.bottom;
+            MoveWindow(vo_window, 0, 0, r.right, r.bottom, FALSE);
     }
     
     return event_flags;
@@ -372,15 +370,20 @@ int vo_w32_init(void) {
   }
 
     if (WinID >= 0)
-      vo_window = (HWND)WinID;
-    else {
+    {
+        RECT r;
+        GetClientRect(WinID, &r);
+        vo_dwidth = r.right; vo_dheight = r.bottom;
+        vo_window = CreateWindowEx(0, classname, classname,
+                     WS_CHILD | WS_VISIBLE,
+                     0, 0, vo_dwidth, vo_dheight, WinID, 0, hInstance, 0);
+    } else
     vo_window = CreateWindowEx(0, classname, classname,
                   vo_border ? (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP,
                   CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
     if (!vo_window) {
         mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to create window!\n");
         return 0;
-    }
     }
 
     myMonitorFromWindow = NULL;
@@ -421,7 +424,6 @@ void vo_w32_uninit(void) {
     resetMode();
     ShowCursor(1);
     vo_depthonscreen = 0;
-    if (WinID < 0)
     DestroyWindow(vo_window);
     vo_window = 0;
     UnregisterClass(classname, 0);
