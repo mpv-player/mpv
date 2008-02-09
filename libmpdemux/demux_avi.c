@@ -378,7 +378,7 @@ do{
 }
 
 // AVI demuxer parameters:
-int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
+int index_mode=-1;  // -1=untouched  0=don't use index  1=use (generate) index
 char *index_file_save = NULL, *index_file_load = NULL;
 int force_ni=0;     // force non-interleaved AVI parsing
 
