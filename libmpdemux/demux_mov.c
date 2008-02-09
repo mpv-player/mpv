@@ -41,6 +41,7 @@
 #include "stheader.h"
 
 #include "libmpcodecs/img_format.h"
+#include "libavutil/intreadwrite.h"
 
 #include "libvo/sub.h"
 
@@ -55,15 +56,8 @@
 #include <fcntl.h>
 #endif
 
-#define BE_16(x) (((unsigned char *)(x))[0] <<  8 | \
-		  ((unsigned char *)(x))[1])
-#define BE_32(x) (((unsigned char *)(x))[0] << 24 | \
-		  ((unsigned char *)(x))[1] << 16 | \
-		  ((unsigned char *)(x))[2] <<  8 | \
-		  ((unsigned char *)(x))[3])
-
-#define char2short(x,y)	BE_16(&(x)[(y)])
-#define char2int(x,y) 	BE_32(&(x)[(y)])
+#define char2short(x,y)	AV_RB16(&(x)[(y)])
+#define char2int(x,y) 	AV_RB32(&(x)[(y)])
 
 typedef struct {
     unsigned int pts; // duration
@@ -1075,14 +1069,14 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC number of sequence param sets: %d\n", cnt = (*(trak->stdata+pos+13) & 0x1f));
 		        poffs = pos + 14;
 		        for (i = 0; i < cnt; i++) {
-		          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC sps %d have length %d\n", i, BE_16(trak->stdata+poffs));
-		          poffs += BE_16(trak->stdata+poffs) + 2;
+		          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC sps %d have length %d\n", i, AV_RB16(trak->stdata+poffs));
+		          poffs += AV_RB16(trak->stdata+poffs) + 2;
 		        }
 		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC number of picture param sets: %d\n", *(trak->stdata+poffs));
 		        poffs++;
 		        for (i = 0; i < cnt; i++) {
-		          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC pps %d have length %d\n", i, BE_16(trak->stdata+poffs));
-		          poffs += BE_16(trak->stdata+poffs) + 2;
+		          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC pps %d have length %d\n", i, AV_RB16(trak->stdata+poffs));
+		          poffs += AV_RB16(trak->stdata+poffs) + 2;
 		        }
 		        // Copy avcC for the AVC decoder
 		        // This data will be put in extradata below, where BITMAPINFOHEADER is created
@@ -1141,13 +1135,13 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 		  memset(sh->bih,0,sizeof(BITMAPINFOHEADER) + palette_count * 4);
 		  sh->bih->biSize=40 + palette_count * 4;
 		  // fetch the relevant fields
-		  flag = BE_16(&trak->stdata[hdr_ptr]);
+		  flag = AV_RB16(&trak->stdata[hdr_ptr]);
 		  hdr_ptr += 2;
-		  start = BE_32(&trak->stdata[hdr_ptr]);
+		  start = AV_RB32(&trak->stdata[hdr_ptr]);
 		  hdr_ptr += 4;
-		  count_flag = BE_16(&trak->stdata[hdr_ptr]);
+		  count_flag = AV_RB16(&trak->stdata[hdr_ptr]);
 		  hdr_ptr += 2;
-		  end = BE_16(&trak->stdata[hdr_ptr]);
+		  end = AV_RB16(&trak->stdata[hdr_ptr]);
 		  hdr_ptr += 2;
 		  palette_map = (unsigned char *)sh->bih + 40;
 		  mp_msg(MSGT_DEMUX, MSGL_V, "Allocated %d entries for palette\n",
@@ -1195,7 +1189,7 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 		    mp_msg(MSGT_DEMUX, MSGL_V, "Loading palette from file\n");
 		    for (i = start; i <= end; i++)
 		    {
-		      entry = BE_16(&trak->stdata[hdr_ptr]);
+		      entry = AV_RB16(&trak->stdata[hdr_ptr]);
 		      hdr_ptr += 2;
 		      // apparently, if count_flag is set, entry is same as i
 		      if (count_flag & 0x8000)
