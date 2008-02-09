@@ -374,7 +374,7 @@ int vo_w32_init(void) {
         RECT r;
         GetClientRect(WinID, &r);
         vo_dwidth = r.right; vo_dheight = r.bottom;
-        vo_window = CreateWindowEx(0, classname, classname,
+        vo_window = CreateWindowEx(WS_EX_NOPARENTNOTIFY, classname, classname,
                      WS_CHILD | WS_VISIBLE,
                      0, 0, vo_dwidth, vo_dheight, WinID, 0, hInstance, 0);
     } else
