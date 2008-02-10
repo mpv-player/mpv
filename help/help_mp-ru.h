@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r25158
+// Synced with help_mp-en.h: r25947
 
 // ========================= MPlayer help ===========================
 
@@ -146,6 +146,8 @@ static char help_text[]=
 "  прочтите DOCS/HTML/ru/bugreports.html и следуйте инструкциям оттуда.\n"\
 "  Мы не сможем и не будем помогать, пока Вы не предоставите эту информацию,\nсообщая о возможной ошибке.\n"
 #define MSGTR_LoadingConfig "Загружаю конфигурационный файл '%s'\n"
+#define MSGTR_LoadingProtocolProfile "Загружаю профиль для протокола '%s'\n"
+#define MSGTR_LoadingExtensionProfile "Загружаю профиль для расширения '%s'\n"
 #define MSGTR_AddedSubtitleFile "СУБТИТРЫ: добавлен файл субтитров (%d): %s\n"
 #define MSGTR_RemovedSubtitleFile "СУБТИТРЫ: Удалён файл субтитров (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Ошибка открытия файла [%s] для записи!\n"
@@ -207,6 +209,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Скорость: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDChapter "Раздел: (%d) %s"
+#define MSGTR_OSDAngle "Угол: %d/%d"
 
 // property values
 #define MSGTR_Enabled "включено"
@@ -936,6 +939,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "Тайская кодировка (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Кириллица Window$ (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Славянский/Центрально-европейский Window$ (CP1250)"
+#define MSGTR_PREFERENCES_FontEncoding23 "Арабский Windows (CP1256)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Не масштабировать"
 #define MSGTR_PREFERENCES_FontPropWidth "Пропорционально ширине фильма"
 #define MSGTR_PREFERENCES_FontPropHeight "Пропорционально высоте фильма"
