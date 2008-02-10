@@ -22,13 +22,13 @@ static const char classname[] = "MPlayer - Media player for Win32";
 int vo_vm = 0;
 
 // last non-fullscreen extends
-int prev_width;
-int prev_height;
-int prev_x;
-int prev_y;
+static int prev_width;
+static int prev_height;
+static int prev_x;
+static int prev_y;
 
-uint32_t o_dwidth;
-uint32_t o_dheight;
+static uint32_t o_dwidth;
+static uint32_t o_dheight;
 
 static HINSTANCE hInstance;
 #define vo_window vo_w32_window
