@@ -1,4 +1,4 @@
-.\" synced with r25955
+.\" synced with r25973
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -885,6 +885,9 @@ Saute l'affichage de certaines trames pour maintenir la synchro A/V sur
 les machines lentes.
 Les filtres vidéo ne sont pas appliqués sur de telles trames.
 Pour les trames-B même leur décodage est complètement désactivé.
+Notez que le décodeur libmpeg2 est particulièrement sujet à plantage
+lorsque cette option est utilisée, ainsi vous devriez peut-être utiliser à
+la place "\-vc ffmpeg12,".
 .
 .TP
 .B \-(no)gui
