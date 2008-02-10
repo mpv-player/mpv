@@ -43,6 +43,7 @@ static BOOL (WINAPI* myEnumDisplayMonitors)(HDC, LPCRECT, MONITORENUMPROC, LPARA
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     RECT r;
     POINT p;
+    if (WinID < 0 || message == WM_PAINT || message == WM_SIZE) {
     switch (message) {
         case WM_PAINT:
             event_flags |= VO_EVENT_EXPOSE;
@@ -142,6 +143,19 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                     mplayer_put_key(MOUSE_BTN4);
                 break;
             }
+    }
+    } else switch (message) {
+        case WM_MOUSEMOVE:
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_LBUTTONDBLCLK:
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONUP:
+        case WM_MBUTTONDBLCLK:
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONUP:
+        case WM_RBUTTONDBLCLK:
+            SendMessage(WinID, message, wParam, lParam);
     }
     
     return DefWindowProc(hWnd, message, wParam, lParam);
@@ -361,7 +375,7 @@ int vo_w32_init(void) {
         mplayerIcon = LoadIcon(0, IDI_APPLICATION);
 
   {
-    WNDCLASSEX wcex = { sizeof wcex, CS_OWNDC, WndProc, 0, 0, hInstance, mplayerIcon, LoadCursor(0, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), 0, classname, mplayerIcon };
+    WNDCLASSEX wcex = { sizeof wcex, CS_OWNDC | CS_DBLCLKS, WndProc, 0, 0, hInstance, mplayerIcon, LoadCursor(0, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), 0, classname, mplayerIcon };
 
     if (!RegisterClassEx(&wcex)) {
         mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to register window class!\n");
