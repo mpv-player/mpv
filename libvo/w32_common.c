@@ -155,7 +155,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         case WM_RBUTTONDOWN:
         case WM_RBUTTONUP:
         case WM_RBUTTONDBLCLK:
-            SendMessage(WinID, message, wParam, lParam);
+            SendNotifyMessage(WinID, message, wParam, lParam);
     }
     
     return DefWindowProc(hWnd, message, wParam, lParam);
