@@ -18,7 +18,7 @@ extern int enable_mouse_movements;
 #define MONITOR_DEFAULTTOPRIMARY 1
 #endif
 
-static const char* classname = "MPlayer - Media player for Win32";
+static const char classname[] = "MPlayer - Media player for Win32";
 int vo_vm = 0;
 
 // last non-fullscreen extends
