@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25017 -->
+<!-- synced with r25772 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -2070,7 +2070,7 @@ MPEG декодер на чипе em8300 от Sigma Designs
 <varlistentry>
 <term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>device</replaceable></option></term>
 <listitem><para>
-Опция <option>overlay</option> активирует оверлей вместо TVOut. Для корректной работы
+Опция <option>overlay</option> активирует оверлей вместо TV-out. Для корректной работы
 она требует его правильной настройки. Самый простой способ правильно его
 настроить - сначала запустить autocal, затем запустить mplayer с драйвером
 dxr3 и выключенным оверлеем, потом запустить dxr3view. В dxr3view вы можете
@@ -2343,7 +2343,7 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
   <listitem>
     <para>
     Используя <emphasis role="bold">модули matroxfb</emphasis> в 2.4 ядрах.
-    2.2 ядра не имеют в этих модулях возможности работы с TVout, так что для нашего 
+    2.2 ядра не имеют в этих модулях возможности работы с TV-out, так что для нашего 
     дела непригодны. Вы должны включить ВСЕ matroxfb-относящиеся возможности во время компиляции
     (кроме MultiHead), и скомпилировать их в <emphasis role="bold">модули</emphasis>!
     Вам также необходима задействованная I2C.

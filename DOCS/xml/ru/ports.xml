@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25123 -->
+<!-- synced with r25771 -->
 <chapter id="ports" xreflabel="Портинг">
 <title>Портинг</title>
 
@@ -585,7 +585,7 @@ SDL, но производительность OpenGL сильно зависи�
 системах искажает видео или вылетает. 
 Если изображение искажено, попробуйте отключить аппаратное ускорение, указав
 <option>-vo directx:noaccel</option>. Скачайте
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">файлы заголовков 
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/dx7headers.tgz">файлы заголовков 
 DirectX 7</ulink>, чтобы скомпилировать видео драйвер DirectX. Кроме того,
 вам потребуется установленный DirectX 7, чтобы работал DirectX видеодрайвер.
 </para>
@@ -604,11 +604,6 @@ DirectX 7</ulink>, чтобы скомпилировать видео драйв
 и запустите
 <screen>dhasetup.exe install</screen>
 под Администратором. Теперь Вам нужно перезагрузить машину.
-Когда всё будет закончено, скопируйте файлы
-<systemitem class="library">.so</systemitem> из каталога
-<filename class="directory">vidix/drivers</filename> в каталог
-<filename class="directory">mplayer/vidix</filename> относительно вашего
-<filename>mplayer.exe</filename>.
 </para>
 
 <para>
@@ -724,7 +719,7 @@ mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>
 <para>
 Полные инструкции по сборке <application>MPlayer</application> и необходимых 
 библиотек могут быть найдены на странице
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
 </para>
 </sect2>
 </sect1>
