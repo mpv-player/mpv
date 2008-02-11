@@ -2,7 +2,6 @@
 #define W32COMMON_H
 
 extern HWND vo_w32_window;
-extern HDC vo_hdc;
 extern int vo_vm;
 
 extern int vo_w32_init(void);
