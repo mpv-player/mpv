@@ -867,7 +867,7 @@ static int preinit(const char *arg)
               "    use GL_NEAREST scaling for customtex texture\n"
               "  customtrect\n"
               "    use texture_rectangle for customtex texture\n"
-              "  osdcolor=<0xRRGGBB>\n"
+              "  osdcolor=<0xAARRGGBB>\n"
               "    use the given color for the OSD\n"
               "\n" );
       return -1;
