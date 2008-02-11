@@ -544,7 +544,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   // convert alpha from weird MPlayer scale.
   // in-place is not possible since it is reused for future OSDs
   for (i = h * stride - 1; i >= 0; i--)
-    tmp[i] = srca[i] - 1;
+    tmp[i] = -srca[i];
   glUploadTex(gl_target, GL_ALPHA, GL_UNSIGNED_BYTE, tmp, stride,
               0, 0, w, h, 0);
   free(tmp);
@@ -615,13 +615,13 @@ flip_page(void)
       glCallList(eosdDispList);
     }
     if (osdtexCnt > 0) {
-      glColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff);
+      glColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff - (osd_color >> 24));
       // draw OSD
 #ifndef FAST_OSD
-      glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
+      glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
       glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdaDispList);
 #endif
-      glBlendFunc(GL_ONE, GL_ONE);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
       glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
     }
     // set rendering parameters back to defaults
