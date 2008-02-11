@@ -1437,7 +1437,11 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
  * \return function pointer returned by wglGetProcAddress
  */
 static void *w32gpa(const GLubyte *procName) {
-  return wglGetProcAddress(procName);
+  HMODULE oglmod;
+  void *res = wglGetProcAddress(procName);
+  if (res) return res;
+  oglmod = GetModuleHandle("opengl32.dll");
+  return GetProcAddress(oglmod, procName);
 }
 
 int setGlWindow(int *vinfo, HGLRC *context, HWND win)
