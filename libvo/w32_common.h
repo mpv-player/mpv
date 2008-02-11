@@ -1,8 +1,6 @@
 #ifndef W32COMMON_H
 #define W32COMMON_H
 
-extern uint32_t o_dwidth;
-extern uint32_t o_dheight;
 extern HWND vo_w32_window;
 extern HDC vo_hdc;
 extern int vo_vm;
