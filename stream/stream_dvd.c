@@ -883,22 +883,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_CURRENT_TITLE=%d\n", dvd_title);
     --dvd_title; // remap 1.. -> 0..
     /**
-     * Make sure the chapter number is valid for this title.
-     */
-    mp_msg(MSGT_OPEN,MSGL_STATUS, MSGTR_DVDnumChapters, tt_srpt->title[dvd_title].nr_of_ptts);
-    if(dvd_chapter<1 || dvd_chapter>tt_srpt->title[dvd_title].nr_of_ptts) {
-      mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidChapter, dvd_chapter);
-      goto fail;
-    }
-    if(dvd_last_chapter>0) {
-      if(dvd_last_chapter<dvd_chapter || dvd_last_chapter>tt_srpt->title[dvd_title].nr_of_ptts) {
-        mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidLastChapter, dvd_last_chapter);
-        goto fail;
-      }
-    }
-    --dvd_chapter; // remap 1.. -> 0..
-    /* XXX No need to remap dvd_last_chapter */
-    /**
      * Make sure the angle number is valid for this title.
      */
     mp_msg(MSGT_OPEN,MSGL_STATUS, MSGTR_DVDnumAngles, tt_srpt->title[dvd_title].nr_of_angles);
@@ -1041,18 +1025,13 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      * Determine which program chain we want to watch.  This is based on the
      * chapter number.
      */
-    pgc_id = vts_file->vts_ptt_srpt->title[ttn].ptt[dvd_chapter].pgcn; // local
-    pgn  = vts_file->vts_ptt_srpt->title[ttn].ptt[dvd_chapter].pgn;  // local
+    pgc_id = vts_file->vts_ptt_srpt->title[ttn].ptt[0].pgcn; // local
+    pgn  = vts_file->vts_ptt_srpt->title[ttn].ptt[0].pgn;  // local
     d->cur_pgc_idx = pgc_id-1;
     d->cur_pgc = vts_file->vts_pgcit->pgci_srp[pgc_id-1].pgc;
     d->cur_cell = d->cur_pgc->program_map[pgn-1] - 1; // start playback here
     d->packs_left=-1;      // for Navi stuff
     d->angle_seek=0;
-    /* XXX dvd_last_chapter is in the range 1..nr_of_ptts */
-    if(dvd_last_chapter > 0 && dvd_last_chapter < tt_srpt->title[dvd_title].nr_of_ptts) {
-      pgn=vts_file->vts_ptt_srpt->title[ttn].ptt[dvd_last_chapter].pgn;
-      d->last_cell=d->cur_pgc->program_map[pgn-1] - 1;
-    } else
       d->last_cell=d->cur_pgc->nr_of_cells;
 
     if(d->cur_pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK ) 

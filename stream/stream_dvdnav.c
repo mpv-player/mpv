@@ -558,17 +558,11 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
 
   if(p->track > 0) {
-    if(dvd_chapter > 0 && dvd_last_chapter > 0 && dvd_chapter > dvd_last_chapter) {
-      mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, invalid chapter range: %d > %d\n", dvd_chapter, dvd_last_chapter);
-      return STREAM_UNSUPPORTED;
-    }
     priv->title = p->track;
     if(dvdnav_title_play(priv->dvdnav, p->track) != DVDNAV_STATUS_OK) {
       mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, couldn't select title %d, error '%s'\n", p->track, dvdnav_err_to_string(priv->dvdnav));
       return STREAM_UNSUPPORTED;
     }
-    if(dvd_chapter > 0)
-      dvdnav_part_play(priv->dvdnav, p->track, dvd_chapter);
   } else if (p->track == 0) {
     if(dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root) != DVDNAV_STATUS_OK)
       dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);

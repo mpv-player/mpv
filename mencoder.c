@@ -603,6 +603,11 @@ if(stream->type==STREAMTYPE_DVDNAV){
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_CannotOpenDemuxer);
 	mencoder_exit(1,NULL);
   }
+ 
+  if(dvd_chapter>1) {
+    float pts;
+    demuxer_seek_chapter(demuxer, dvd_chapter-1, 1, &pts, NULL, NULL);
+  }
 
 d_audio=demuxer2 ? demuxer2->audio : demuxer->audio;
 d_video=demuxer->video;
@@ -1097,6 +1102,11 @@ while(!at_eof){
     if(play_n_frames>=0){
       --play_n_frames;
       if(play_n_frames<0) break;
+    }
+    if(dvd_last_chapter>0) {
+      int cur_chapter = demuxer_get_current_chapter(demuxer);
+      if(cur_chapter!=-1 && cur_chapter+1>dvd_last_chapter)
+        break;
     }
 
 goto_redo_edl:

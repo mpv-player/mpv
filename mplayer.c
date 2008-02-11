@@ -3278,6 +3278,11 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
 
 if(!mpctx->demuxer) 
   goto goto_next_file;
+if(dvd_chapter>1) {
+  float pts;
+  demuxer_seek_chapter(mpctx->demuxer, dvd_chapter-1, 1, &pts, NULL, NULL);
+}
+
 inited_flags|=INITED_DEMUXER;
 
 if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_DVDNAV) {
@@ -3644,6 +3649,13 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
 
 while(!mpctx->eof){
     float aq_sleep_time=0;
+
+if(dvd_last_chapter>0) {
+  int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer);
+  if(cur_chapter!=-1 && cur_chapter+1>dvd_last_chapter)
+    goto goto_next_file;
+}
+
 if(!mpctx->sh_audio && mpctx->d_audio->sh) {
   mpctx->sh_audio = mpctx->d_audio->sh;
   mpctx->sh_audio->ds = mpctx->d_audio;

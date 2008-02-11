@@ -2526,17 +2526,6 @@ demux_mkv_open (demuxer_t *demuxer)
       demuxer->movi_start = s->start_pos;
       demuxer->movi_end = s->end_pos;
       demuxer->seekable = 1;
-      if (demuxer->chapters && dvd_chapter>1 && dvd_chapter<=demuxer->num_chapters)
-        {
-          if (!mkv_d->has_first_tc)
-            {
-              mkv_d->first_tc = 0;
-              mkv_d->has_first_tc = 1;
-            }
-          demux_mkv_seek (demuxer,
-                          demuxer->chapters[dvd_chapter-1].start/1000.0, 0.0,
-                          SEEK_ABSOLUTE);
-        }
     }
 
   return DEMUXER_TYPE_MATROSKA;
