@@ -228,9 +228,7 @@ static inline demux_packet_t* new_demux_packet(int len){
   demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
   dp->len=len;
   dp->next=NULL;
-  // still using 0 by default in case there is some code that uses 0 for both
-  // unknown and a valid pts value
-  dp->pts=correct_pts ? MP_NOPTS_VALUE : 0;
+  dp->pts=MP_NOPTS_VALUE;
   dp->endpts=MP_NOPTS_VALUE;
   dp->stream_pts = MP_NOPTS_VALUE;
   dp->pos=0;

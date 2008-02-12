@@ -425,7 +425,7 @@ int ds_fill_buffer(demux_stream_t *ds){
       ds->pos=p->pos;
       ds->dpos+=p->len; // !!!
       ++ds->pack_no;
-      if (p->pts != (correct_pts ? MP_NOPTS_VALUE : 0)) {
+      if (p->pts != MP_NOPTS_VALUE) {
         ds->pts=p->pts;
         ds->pts_bytes=0;
       }
@@ -580,9 +580,8 @@ int ds_get_packet_pts(demux_stream_t *ds,unsigned char **start, double *pts)
             return -1;
 	}
     }
-    // Should use MP_NOPTS_VALUE for "unknown pts" in the packets too
     // Return pts unless this read starts from the middle of a packet
-    if (!ds->buffer_pos && (correct_pts || ds->current->pts))
+    if (!ds->buffer_pos)
 	*pts = ds->current->pts;
     len=ds->buffer_size-ds->buffer_pos;
     *start = &ds->buffer[ds->buffer_pos];
