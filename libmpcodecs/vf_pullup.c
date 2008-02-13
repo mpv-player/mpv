@@ -286,7 +286,7 @@ static int open(vf_instance_t *vf, char* args)
 	return 1;
 }
 
-const const vf_info_t vf_info_pullup = {
+const vf_info_t vf_info_pullup = {
     "pullup (from field sequence to frames)",
     "pullup",
     "Rich Felker",
