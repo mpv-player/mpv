@@ -65,6 +65,7 @@ static const struct {
   { "bmp",  mmioFOURCC('b', 'm', 'p', ' ') },
   { "jpeg", mmioFOURCC('I', 'J', 'P', 'G') },
   { "jpg",  mmioFOURCC('I', 'J', 'P', 'G') },
+  { "pcx",  mmioFOURCC('p', 'c', 'x', ' ') },
   { "png",  mmioFOURCC('M', 'P', 'N', 'G') },
   { "tga",  mmioFOURCC('M', 'T', 'G', 'A') },
   { "tif",  mmioFOURCC('t', 'i', 'f', 'f') },
