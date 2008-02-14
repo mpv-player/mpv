@@ -35,7 +35,7 @@ static subtitle *fb,*bb;
 
 static unsigned int cursor_pos=0;
 
-static int inited=0;
+static int initialized=0;
 
 #define CC_ROLLON 1
 #define CC_ROLLUP 2
@@ -102,7 +102,7 @@ void subcc_init(void)
 	fb=&buf1;
 	bb=&buf2;
 	
-	inited=1;
+	initialized=1;
 }
 
 static void append_char(char c)
@@ -326,7 +326,7 @@ static void subcc_decode(unsigned char *inputbuffer, unsigned int inputlength)
 void subcc_process_data(unsigned char *inputdata,unsigned int len)
 {
 	if(!subcc_enabled) return;
-	if(!inited) subcc_init();
+	if(!initialized) subcc_init();
 	
 	subcc_decode(inputdata, len);
 }

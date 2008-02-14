@@ -45,7 +45,7 @@ typedef struct af_ac3enc_s {
     int min_channel_num;
 } af_ac3enc_t;
 
-extern int  avcodec_inited;
+extern int  avcodec_initialized;
 
 // Initialization and runtime control
 static int control(struct af_instance_s *af, int cmd, void *arg)
@@ -287,10 +287,10 @@ static int af_open(af_instance_t* af){
     af->data=calloc(1,sizeof(af_data_t));
     af->setup=s;
 
-    if (!avcodec_inited){
+    if (!avcodec_initialized){
         avcodec_init();
         avcodec_register_all();
-        avcodec_inited=1;
+        avcodec_initialized=1;
     }
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");

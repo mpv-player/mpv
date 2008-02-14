@@ -33,7 +33,7 @@ LIBVD_EXTERN(zrmjpeg)
 #include "libvo/video_out.h"
 
 typedef struct {
-	int vo_inited;
+	int vo_initialized;
 	unsigned int preferred_csp;
 } vd_zrmjpeg_ctx_t;
 
@@ -215,12 +215,12 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags) {
 	mp_image_t* mpi;
 	vd_zrmjpeg_ctx_t *ctx = sh->context;
 
-	if (!ctx->vo_inited) {
+	if (!ctx->vo_initialized) {
 		ctx->preferred_csp = guess_mjpeg_type(data, len, sh->disp_h);
 		if (ctx->preferred_csp == 0) return NULL;
 		mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, 
 				ctx->preferred_csp);
-		ctx->vo_inited = 1;
+		ctx->vo_initialized = 1;
 	}
 
 	mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, 

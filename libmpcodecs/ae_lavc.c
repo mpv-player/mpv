@@ -27,7 +27,7 @@ extern char *lavc_param_acodec;
 extern int  lavc_param_abitrate;
 extern int  lavc_param_atag;
 extern int  lavc_param_audio_global_header;
-extern int  avcodec_inited;
+extern int  avcodec_initialized;
 static int compressed_frame_size = 0;
 #ifdef USE_LIBAVFORMAT
 #ifdef USE_LIBAVFORMAT_SO
@@ -178,10 +178,10 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 		return 0;
 	}
 
-	if(!avcodec_inited){
+	if(!avcodec_initialized){
 		avcodec_init();
 		avcodec_register_all();
-		avcodec_inited=1;
+		avcodec_initialized=1;
 	}
 
 	lavc_acodec = avcodec_find_encoder_by_name(lavc_param_acodec);

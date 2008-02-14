@@ -173,7 +173,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    pw = info->sequence->display_width * info->sequence->pixel_width;
 	    ph = info->sequence->display_height * info->sequence->pixel_height;
 	    if(ph) sh->aspect = (float) pw / (float) ph;
-	    // video parameters inited/changed, (re)init libvo:
+	    // video parameters initialized/changed, (re)init libvo:
 	    if (info->sequence->width >> 1 == info->sequence->chroma_width &&
 		info->sequence->height >> 1 == info->sequence->chroma_height) {
 		if(!mpcodecs_config_vo(sh,

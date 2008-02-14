@@ -33,7 +33,7 @@ int btns = 0;
 
 int mp_input_joystick_init(char* dev) {
   int fd,l=0;
-  int inited = 0;
+  int initialized = 0;
   struct js_event ev;
   
   mp_msg(MSGT_INPUT,MSGL_V,MSGTR_INPUT_JOYSTICK_Opening,dev ? dev : JS_DEV);
@@ -44,7 +44,7 @@ int mp_input_joystick_init(char* dev) {
     return -1;
   }
   
-  while(! inited) {
+  while(! initialized) {
     l = 0;
     while((unsigned int)l < sizeof(struct js_event)) {
       int r = read(fd,((char*)&ev)+l,sizeof(struct js_event)-l);
@@ -52,7 +52,7 @@ int mp_input_joystick_init(char* dev) {
 	if(errno == EINTR)
 	  continue;
 	else if(errno == EAGAIN) {
-	  inited = 1;
+	  initialized = 1;
 	  break;
 	}
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,strerror(errno));

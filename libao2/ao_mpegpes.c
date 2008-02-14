@@ -127,7 +127,7 @@ static int init_device(int card)
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SET AV SYNC: %s\n", strerror(errno));
 		return -1;
 	}
-	//FIXME: in vo_mpegpes audio was inited as MUTEd
+	//FIXME: in vo_mpegpes audio was initialized as MUTEd
 	if((ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, false) < 0))
 	{
 		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SET MUTE: %s\n", strerror(errno));

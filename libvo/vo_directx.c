@@ -375,7 +375,7 @@ static void uninit(void)
 	FreeLibrary( hddraw_dll);
 	hddraw_dll= NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>ddraw.dll freed\n");
-	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>uninited\n");    
+	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>uninitialized\n");    
 }
 
 static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, LPSTR lpDriverName, LPVOID lpContext, HMONITOR  hm)
@@ -509,7 +509,7 @@ static uint32_t Directx_InitDirectDraw()
 	        mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't set displaymode\n");
 	        return 1;
 		}
-	    mp_msg(MSGT_VO, MSGL_V,"<vo_directx><INFO>Inited adapter %i for %i x %i @ %i \n",vo_adapter_num,vm_width,vm_height,vm_bpp);	
+	    mp_msg(MSGT_VO, MSGL_V,"<vo_directx><INFO>Initialized adapter %i for %i x %i @ %i \n",vo_adapter_num,vm_width,vm_height,vm_bpp);	
 	    return 0;	
 	}
 	if (g_lpdd->lpVtbl->SetCooperativeLevel(g_lpdd, hWnd, DDSCL_NORMAL) != DD_OK) // or DDSCL_SETFOCUSWINDOW
@@ -517,7 +517,7 @@ static uint32_t Directx_InitDirectDraw()
         mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>could not set cooperativelevel for hardwarecheck\n");
 		return 1;
     }
-    mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>DirectDraw Inited\n");
+    mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>DirectDraw Initialized\n");
 	return 0;
 }	
 

@@ -546,7 +546,7 @@ void vo_uninit(void)
     if (!mDisplay)
     {
         mp_msg(MSGT_VO, MSGL_V,
-               "vo: x11 uninit called but X11 not inited..\n");
+               "vo: x11 uninit called but X11 not initialized..\n");
         return;
     }
 // if( !vo_depthonscreen ) return;

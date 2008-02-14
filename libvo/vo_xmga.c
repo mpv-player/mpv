@@ -68,7 +68,7 @@ static Window mRoot;
 
 static XSetWindowAttributes xWAttribs;
 
-static int inited = 0;
+static int initialized = 0;
 
 #define VO_XMGA
 #include "mga_common.c"
@@ -169,7 +169,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
     mp_msg(MSGT_VO, MSGL_V, "Using colorkey: %x\n", colorkey);
 
-    inited = 1;
+    initialized = 1;
 
 #ifdef HAVE_NEW_GUI
     if (use_gui)
@@ -262,8 +262,8 @@ static void uninit(void)
 {
     mp_msg(MSGT_VO, MSGL_V, "vo: uninit!\n");
     mga_uninit();
-    if (!inited)
+    if (!initialized)
         return;                 // no window?
-    inited = 0;
+    initialized = 0;
     vo_x11_uninit();            // destroy the window
 }

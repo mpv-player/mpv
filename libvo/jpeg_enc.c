@@ -39,7 +39,7 @@
 
 #include "jpeg_enc.h"
 
-extern int avcodec_inited;
+extern int avcodec_initialized;
 
 
 /* Begin excessive code duplication ************************************/
@@ -319,11 +319,11 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	/* if libavcodec is used by the decoder then we must not
 	 * initialize again, but if it is not initialized then we must
 	 * initialize it here. */
-	if (!avcodec_inited) {
+	if (!avcodec_initialized) {
 		/* we need to initialize libavcodec */
 		avcodec_init();
 		avcodec_register_all();
-		avcodec_inited=1;
+		avcodec_initialized=1;
 	}
 
 	if (ff_mjpeg_encode_init(j->s) < 0) {

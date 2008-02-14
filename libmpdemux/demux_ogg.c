@@ -111,7 +111,7 @@ typedef struct ogg_stream {
   int id;
 
   vorbis_info      vi;
-  int vi_inited;
+  int vi_initialized;
 
   void *ogg_d;
 } ogg_stream_t;
@@ -245,7 +245,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
   if(os->vorbis) {
     if(*pack->packet & PACKET_TYPE_HEADER)
       os->hdr_packets++;
-    else if (os->vi_inited)
+    else if (os->vi_initialized)
     {
        vorbis_info *vi;
        int32_t blocksize;
@@ -690,7 +690,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
   }
   vorbis_comment_clear(&vc);
   if(!init_error)
-    os->vi_inited = 1;
+    os->vi_initialized = 1;
 
   len = op[0].bytes + op[1].bytes + op[2].bytes;
   sh->wf = calloc(1, sizeof(WAVEFORMATEX) + len + len/255 + 64);
@@ -1519,7 +1519,7 @@ static void demux_close_ogg(demuxer_t* demuxer) {
     {
       os = &ogg_d->subs[i];
       ogg_stream_clear(&os->stream);
-      if(os->vi_inited)
+      if(os->vi_initialized)
         vorbis_info_clear(&os->vi);
     }
     free(ogg_d->subs);

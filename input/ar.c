@@ -106,7 +106,7 @@ static const cookie_keycode_map_t *ar_codes;
 
 static IOHIDQueueInterface **queue;
 static IOHIDDeviceInterface **hidDeviceInterface = NULL;
-static int inited = 0;
+static int initialized = 0;
 static int hidDeviceIsOpen;
 
 /* Maximum number of elements in queue before oldest elements
@@ -221,7 +221,7 @@ int mp_input_ar_init(void)
     IOHIDElementCookie *cookies = NULL;
     int nr_cookies = 0;
 
-    if (inited)
+    if (initialized)
         mp_input_ar_close(-1);
 
     if (floor(NSAppKitVersionNumber) <= 824 /* NSAppKitVersionNumber10_4 */) {
@@ -286,7 +286,7 @@ int mp_input_ar_init(void)
     // not useful anymore
     IOObjectRelease(hidObjectIterator);
 
-    inited = 1;
+    initialized = 1;
     return 0;
 
 mp_input_ar_init_error:
@@ -335,7 +335,7 @@ int mp_input_ar_read(int fd)
     char cookie_queue[MAX_QUEUE_SIZE];
     int value_queue[MAX_QUEUE_SIZE];
 
-    if (inited == 0)
+    if (initialized == 0)
         return MP_INPUT_NOTHING;
 
     while ((result = (*queue)->getNextEvent(queue, &event, zeroTime, 0)) == kIOReturnSuccess) {
@@ -415,7 +415,7 @@ int mp_input_ar_read(int fd)
 
 void mp_input_ar_close(int fd)
 {
-    if (inited == 0)
+    if (initialized == 0)
         return;
 
     // Close the device.
@@ -431,7 +431,7 @@ void mp_input_ar_close(int fd)
     // Release the interface.
     (*hidDeviceInterface)->Release(hidDeviceInterface);
 
-    inited = 0;
+    initialized = 0;
 }
 
 #ifdef TEST

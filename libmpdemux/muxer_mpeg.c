@@ -1111,7 +1111,7 @@ static int get_packet_stats(muxer_priv_t *priv, muxer_stream_t *s, pack_stats_t 
 static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 {
 	//try to fill a packet as much as possible
-	//spriv->pack_offset is the start position inited to 0
+	//spriv->pack_offset is the start position initialized to 0
 	//data is taken from spriv->framebuf
 	//if audio and a52 insert the headers
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;

@@ -369,7 +369,7 @@ short edl_decision = 0; ///< 1 when an EDL operation has been made.
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode.
 int use_filedir_conf;
 
-static unsigned int inited_flags=0;
+static unsigned int initialized_flags=0;
 #include "mpcommon.h"
 #include "command.h"
 
@@ -587,12 +587,12 @@ static void mp_dvdnav_context_free(MPContext *ctx){
 #endif
 
 void uninit_player(unsigned int mask){
-  mask=inited_flags&mask;
+  mask=initialized_flags&mask;
 
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n*** uninit(0x%X)\n",mask);
 
-  if(mask&INITED_ACODEC){
-    inited_flags&=~INITED_ACODEC;
+  if(mask&INITIALIZED_ACODEC){
+    initialized_flags&=~INITIALIZED_ACODEC;
     current_module="uninit_acodec";
     if(mpctx->sh_audio) uninit_audio(mpctx->sh_audio);
 #ifdef HAVE_NEW_GUI
@@ -602,8 +602,8 @@ void uninit_player(unsigned int mask){
     mpctx->mixer.afilter = NULL;
   }
 
-  if(mask&INITED_VCODEC){
-    inited_flags&=~INITED_VCODEC;
+  if(mask&INITIALIZED_VCODEC){
+    initialized_flags&=~INITIALIZED_VCODEC;
     current_module="uninit_vcodec";
     if(mpctx->sh_video) uninit_video(mpctx->sh_video);
     mpctx->sh_video=NULL;
@@ -612,8 +612,8 @@ void uninit_player(unsigned int mask){
 #endif
   }
  
-  if(mask&INITED_DEMUXER){
-    inited_flags&=~INITED_DEMUXER;
+  if(mask&INITIALIZED_DEMUXER){
+    initialized_flags&=~INITIALIZED_DEMUXER;
     current_module="free_demuxer";
     if(mpctx->demuxer){
 	mpctx->stream=mpctx->demuxer->stream;
@@ -623,15 +623,15 @@ void uninit_player(unsigned int mask){
   }
 
   // kill the cache process:
-  if(mask&INITED_STREAM){
-    inited_flags&=~INITED_STREAM;
+  if(mask&INITIALIZED_STREAM){
+    initialized_flags&=~INITIALIZED_STREAM;
     current_module="uninit_stream";
     if(mpctx->stream) free_stream(mpctx->stream);
     mpctx->stream=NULL;
   }
 
-  if(mask&INITED_VO){
-    inited_flags&=~INITED_VO;
+  if(mask&INITIALIZED_VO){
+    initialized_flags&=~INITIALIZED_VO;
     current_module="uninit_vo";
     mpctx->video_out->uninit();
     mpctx->video_out=NULL;
@@ -641,45 +641,45 @@ void uninit_player(unsigned int mask){
   }
 
   // Must be after libvo uninit, as few vo drivers (svgalib) have tty code.
-  if(mask&INITED_GETCH2){
-    inited_flags&=~INITED_GETCH2;
+  if(mask&INITIALIZED_GETCH2){
+    initialized_flags&=~INITIALIZED_GETCH2;
     current_module="uninit_getch2";
     mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n[[[uninit getch2]]]\n");
   // restore terminal:
     getch2_disable();
   }
 
-  if(mask&INITED_VOBSUB){
-    inited_flags&=~INITED_VOBSUB;
+  if(mask&INITIALIZED_VOBSUB){
+    initialized_flags&=~INITIALIZED_VOBSUB;
     current_module="uninit_vobsub";
     if(vo_vobsub) vobsub_close(vo_vobsub);
     vo_vobsub=NULL;
   }
 
-  if (mask&INITED_SPUDEC){
-    inited_flags&=~INITED_SPUDEC;
+  if (mask&INITIALIZED_SPUDEC){
+    initialized_flags&=~INITIALIZED_SPUDEC;
     current_module="uninit_spudec";
     spudec_free(vo_spudec);
     vo_spudec=NULL;
   }
 
-  if(mask&INITED_AO){
-    inited_flags&=~INITED_AO;
+  if(mask&INITIALIZED_AO){
+    initialized_flags&=~INITIALIZED_AO;
     current_module="uninit_ao";
     if (mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
     mpctx->audio_out->uninit(mpctx->eof?0:1); mpctx->audio_out=NULL;
   }
 
 #ifdef HAVE_NEW_GUI
-  if(mask&INITED_GUI){
-    inited_flags&=~INITED_GUI;
+  if(mask&INITIALIZED_GUI){
+    initialized_flags&=~INITIALIZED_GUI;
     current_module="uninit_gui";
     guiDone();
   }
 #endif
 
-  if(mask&INITED_INPUT){
-    inited_flags&=~INITED_INPUT;
+  if(mask&INITIALIZED_INPUT){
+    initialized_flags&=~INITIALIZED_INPUT;
     current_module="uninit_input";
     mp_input_uninit();
 #ifdef HAVE_MENU
@@ -694,7 +694,7 @@ void uninit_player(unsigned int mask){
 void exit_player_with_rc(const char* how, int rc){
 
   if (mpctx->user_muted && !mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
-  uninit_player(INITED_ALL);
+  uninit_player(INITIALIZED_ALL);
 #ifdef HAVE_X11
 #ifdef HAVE_NEW_GUI
   if ( !use_gui )
@@ -755,7 +755,7 @@ static void exit_sighandler(int x){
   if (!crash_debug || x != SIGTRAP)
 #endif
   ++sig_count;
-  if(inited_flags==0 && sig_count>1) exit(1);
+  if(initialized_flags==0 && sig_count>1) exit(1);
   if(sig_count==5)
     {
       /* We're crashing bad and can't uninit cleanly :( 
@@ -1084,7 +1084,7 @@ void update_set_of_subtitles(void)
 void init_vo_spudec(void) {
   if (vo_spudec)
     spudec_free(vo_spudec);
-  inited_flags &= ~INITED_SPUDEC;
+  initialized_flags &= ~INITIALIZED_SPUDEC;
   vo_spudec = NULL;
   if (spudec_ifo) {
     unsigned int palette[16], width, height;
@@ -1137,7 +1137,7 @@ void init_vo_spudec(void) {
   }
 
   if (vo_spudec!=NULL)
-    inited_flags|=INITED_SPUDEC;
+    initialized_flags|=INITIALIZED_SPUDEC;
 }
 
 /*
@@ -1589,7 +1589,7 @@ if(mpctx->sh_audio){
     mpctx->d_audio->id = -2;
     return;
   } else
-    inited_flags|=INITED_ACODEC;
+    initialized_flags|=INITIALIZED_ACODEC;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 
@@ -1617,13 +1617,13 @@ if(mpctx->sh_audio){
       ao_data.format,0))){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
-    uninit_player(INITED_ACODEC); // close codec
+    uninit_player(INITIALIZED_ACODEC); // close codec
     mpctx->sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
     mpctx->d_audio->id = -2;
     return;
   } else {
     // SUCCESS:
-    inited_flags|=INITED_AO;
+    initialized_flags|=INITIALIZED_AO;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
       mpctx->audio_out->info->short_name,
       ao_data.samplerate, ao_data.channels,
@@ -1639,7 +1639,7 @@ if(mpctx->sh_audio){
     if(!build_afilter_chain(mpctx->sh_audio, &ao_data)) {
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
 //      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
-//      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
+//      uninit_player(INITIALIZED_ACODEC|INITIALIZED_AO); // close codec & ao
 //      sh_audio=mpctx->d_audio->sh=NULL; // -> nosound
     }
 #endif
@@ -2121,7 +2121,7 @@ int reinit_video_chain(void) {
     sh_video_t * const sh_video = mpctx->sh_video;
     double ar=-1.0;
     //================== Init VIDEO (codec & libvo) ==========================
-    if(!fixed_vo || !(inited_flags&INITED_VO)){
+    if(!fixed_vo || !(initialized_flags&INITIALIZED_VO)){
     current_module="preinit_libvo";
 
     //shouldn't we set dvideo->id=-2 when we fail?
@@ -2131,7 +2131,7 @@ int reinit_video_chain(void) {
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
       goto err_out;
     }
-    inited_flags|=INITED_VO;
+    initialized_flags|=INITIALIZED_VO;
   }
 
   if(stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
@@ -2190,12 +2190,12 @@ int reinit_video_chain(void) {
   init_best_video_codec(sh_video,video_codec_list,video_fm_list);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
-  if(!sh_video->inited){
-    if(!fixed_vo) uninit_player(INITED_VO);
+  if(!sh_video->initialized){
+    if(!fixed_vo) uninit_player(INITIALIZED_VO);
     goto err_out;
   }
 
-  inited_flags|=INITED_VCODEC;
+  initialized_flags|=INITIALIZED_VCODEC;
 
   if (sh_video->codec)
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
@@ -2879,7 +2879,7 @@ else if(!noconsolecontrols)
  }
 #endif
   
-inited_flags|=INITED_INPUT;
+initialized_flags|=INITIALIZED_INPUT;
 current_module = NULL;
 
   /// Catch signals
@@ -2916,7 +2916,7 @@ current_module = NULL;
   if(use_gui){
        guiInit();
        guiGetEvent(guiSetContext, mpctx);
-       inited_flags|=INITED_GUI;
+       initialized_flags|=INITIALIZED_GUI;
        guiGetEvent( guiCEvent,(char *)((gui_no_filename) ? 0 : 1) );
   }
 #endif
@@ -2943,11 +2943,11 @@ play_next_file:
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
 if(!noconsolecontrols && !slave_mode){
-  if(inited_flags&INITED_GETCH2)
+  if(initialized_flags&INITIALIZED_GETCH2)
     mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_Getch2InitializedTwice);
   else
     getch2_enable();  // prepare stdin for hotkeys...
-  inited_flags|=INITED_GETCH2;
+  initialized_flags|=INITIALIZED_GETCH2;
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n[[[init getch2]]]\n");
 }
 
@@ -3096,7 +3096,7 @@ if (edl_output_filename) {
       free(buf);
     }
     if(vo_vobsub){
-      inited_flags|=INITED_VOBSUB;
+      initialized_flags|=INITIALIZED_VOBSUB;
       vobsub_set_from_lang(vo_vobsub, dvdsub_lang);
       // check if vobsub requested only to display forced subtitles
       forced_subs_only=vobsub_get_forced_subs_flag(vo_vobsub);
@@ -3127,7 +3127,7 @@ if (edl_output_filename) {
     mpctx->eof = libmpdemux_was_interrupted(PT_NEXT_ENTRY);
     goto goto_next_file;
   }
-  inited_flags|=INITED_STREAM;
+  initialized_flags|=INITIALIZED_STREAM;
 
 #ifdef HAVE_NEW_GUI
   if ( use_gui ) guiGetEvent( guiSetStream,(char *)mpctx->stream );
@@ -3283,7 +3283,7 @@ if(dvd_chapter>1) {
   demuxer_seek_chapter(mpctx->demuxer, dvd_chapter-1, 1, &pts, NULL, NULL);
 }
 
-inited_flags|=INITED_DEMUXER;
+initialized_flags|=INITIALIZED_DEMUXER;
 
 if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_DVDNAV) {
   int i;
@@ -3579,14 +3579,14 @@ if(!mpctx->sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks.\n",mpctx->d_audio->packs);
   ds_free_packs(mpctx->d_audio); // free buffered chunks
   //mpctx->d_audio->id=-2;         // do not read audio chunks
-  //uninit_player(INITED_AO); // close device
+  //uninit_player(INITIALIZED_AO); // close device
 }
 if(!mpctx->sh_video){
    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Video_NoVideo);
    mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks.\n",mpctx->d_video->packs);
    ds_free_packs(mpctx->d_video);
    mpctx->d_video->id=-2;
-   //if(!fixed_vo) uninit_player(INITED_VO);
+   //if(!fixed_vo) uninit_player(INITIALIZED_VO);
 }
 
 if (!mpctx->sh_video && !mpctx->sh_audio)
@@ -3694,7 +3694,7 @@ if(!mpctx->sh_video) {
   if (!mpctx->num_buffered_frames) {
       double frame_time = update_video(&blit_frame);
       mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
-      if (mpctx->sh_video->vf_inited < 0) {
+      if (mpctx->sh_video->vf_initialized < 0) {
 	  mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NotInitializeVOPorVO);
 	  mpctx->eof = 1; goto goto_next_file;
       }
@@ -3896,7 +3896,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->eof);
 if(mpctx->dvbin_reopen)
 {
   mpctx->eof = 0;
-  uninit_player(INITED_ALL-(INITED_GUI|INITED_STREAM|INITED_INPUT|INITED_GETCH2|(fixed_vo?INITED_VO:0)));
+  uninit_player(INITIALIZED_ALL-(INITIALIZED_GUI|INITIALIZED_STREAM|INITIALIZED_INPUT|INITIALIZED_GETCH2|(fixed_vo?INITIALIZED_VO:0)));
   cache_uninit(mpctx->stream);
   mpctx->dvbin_reopen = 0;
   goto goto_enable_cache;
@@ -3935,7 +3935,7 @@ if(benchmark){
 }
 
 // time to uninit all, except global stuff:
-uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
+uninit_player(INITIALIZED_ALL-(INITIALIZED_GUI+INITIALIZED_INPUT+(fixed_vo?INITIALIZED_VO:0)));
 
   if ( mpctx->set_of_sub_size > 0 ) 
    {

@@ -125,7 +125,7 @@ typedef struct radio_priv_s {
     int                 audio_buffer_size; ///< size of ringbuffer
     int                 audio_cnt;         ///< size of meanfull data inringbuffer
     int                 audio_drop;        ///< number of dropped bytes
-    int                 audio_inited;
+    int                 audio_initialized;
 #endif
     radio_param_t       *radio_param;
 } radio_priv_t;
@@ -822,7 +822,7 @@ static int init_audio(radio_priv_t *priv)
     int is_oss=1;
     int seconds=2;
     char* tmp;
-    if (priv->audio_inited) return 1;
+    if (priv->audio_initialized) return 1;
 
     /* do_capture==0 mplayer was not started with capture keyword, so disabling capture*/
     if(!priv->do_capture)
@@ -885,7 +885,7 @@ static int init_audio(radio_priv_t *priv)
 
     audio_in_start_capture(&priv->audio_in);
 
-    priv->audio_inited = 1;
+    priv->audio_initialized = 1;
 
     return STREAM_OK;
 }

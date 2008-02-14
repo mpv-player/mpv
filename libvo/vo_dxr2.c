@@ -841,7 +841,7 @@ static int preinit(const char *arg) {
       use_ol = 0;
     } else {
       uint32_t fmt = IMGFMT_BGR24;
-      mp_msg(MSGT_VO,MSGL_V,"VO: [dxr2] Sub vo %s inited\n",arg);
+      mp_msg(MSGT_VO,MSGL_V,"VO: [dxr2] Sub vo %s initialized\n",arg);
       if(sub_vo->control(VOCTRL_QUERY_FORMAT,&fmt) <= 0) {
 	mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] Sub vo %s doesn't support BGR24 => no overlay\n",arg);
 	sub_vo->uninit();

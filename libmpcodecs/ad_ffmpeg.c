@@ -30,7 +30,7 @@ LIBAD_EXTERN(ffmpeg)
 #include "avcodec.h"
 #endif
 
-extern int avcodec_inited;
+extern int avcodec_initialized;
 
 static int preinit(sh_audio_t *sh)
 {
@@ -45,10 +45,10 @@ static int init(sh_audio_t *sh_audio)
     AVCodec *lavc_codec;
 
     mp_msg(MSGT_DECAUDIO,MSGL_V,"FFmpeg's libavcodec audio codec\n");
-    if(!avcodec_inited){
+    if(!avcodec_initialized){
       avcodec_init();
       avcodec_register_all();
-      avcodec_inited=1;
+      avcodec_initialized=1;
     }
     
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_audio->codec->dll);

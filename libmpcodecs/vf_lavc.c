@@ -17,7 +17,7 @@
 #include "libavcodec/avcodec.h"
 #endif
 
-extern int avcodec_inited;
+extern int avcodec_initialized;
 
 struct vf_priv_s {
     unsigned char* outbuf;
@@ -127,10 +127,10 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
 
-    if (!avcodec_inited){
+    if (!avcodec_initialized){
 	avcodec_init();
 	avcodec_register_all();
-	avcodec_inited=1;
+	avcodec_initialized=1;
     }
 
     vf->priv->codec = (AVCodec *)avcodec_find_encoder_by_name("mpeg1video");

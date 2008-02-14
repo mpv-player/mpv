@@ -170,7 +170,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static int codec_inited = 0;
+static int codec_initialized = 0;
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
@@ -182,7 +182,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     int width = mpi->width;
     int height = mpi->height;
     int stride = width*2;
-if(!codec_inited){
+if(!codec_initialized){
     FrameRect.top=0;
     FrameRect.left=0;
     FrameRect.right=width;
@@ -243,7 +243,7 @@ if(!codec_inited){
     mp_msg(MSGT_MENCODER,MSGL_DBG2,"Sequence ID:%i\n",seq);
 
     dump_ImageDescription(*desc);
-    codec_inited++;
+    codec_initialized++;
 }
     cres = CompressSequenceFrame (
     	seq,

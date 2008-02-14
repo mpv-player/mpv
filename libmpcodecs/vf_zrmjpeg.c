@@ -39,7 +39,7 @@
 #undef free
 #undef realloc
 
-extern int avcodec_inited;
+extern int avcodec_initialized;
 
 /* some convenient #define's, is this portable enough? */
 /// Printout  with vf_zrmjpeg: prefix at VERBOSE level
@@ -52,7 +52,7 @@ extern int avcodec_inited;
 
 // "local" flag in vd_ffmpeg.c. If not set, avcodec_init() et. al. need to be called
 // set when init is done, so that initialization is not done twice.
-extern int avcodec_inited;
+extern int avcodec_initialized;
 
 /// structure copied from mjpeg.c
 /* zrmjpeg_encode_mb needs access to these tables for the black & white
@@ -479,10 +479,10 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	/* if libavcodec is used by the decoder then we must not
 	 * initialize again, but if it is not initialized then we must
 	 * initialize it here. */
-	if (!avcodec_inited) {
+	if (!avcodec_initialized) {
 		avcodec_init();
 		avcodec_register_all();
-		avcodec_inited=1;
+		avcodec_initialized=1;
 	}
 
 	// Build mjpeg huffman code tables, setting up j->s->mjpeg_ctx
@@ -921,11 +921,11 @@ static int open(vf_instance_t *vf, char* args){
 
 	/* if libavcodec is already initialized, we must not initialize it
 	 * again, but if it is not initialized then we mustinitialize it now. */
-	if (!avcodec_inited) {
+	if (!avcodec_initialized) {
 		/* we need to initialize libavcodec */
 		avcodec_init();
 		avcodec_register_all();
-		avcodec_inited=1;
+		avcodec_initialized=1;
 	}
 
 	if (args) {

@@ -58,7 +58,7 @@ static unsigned long WINAPI (*wrvyuv_transform)(char*, char*,transform_in_t*,uns
 #endif
 
 static void *rv_handle=NULL;
-static int inited=0;
+static int initialized=0;
 static uint8_t *buffer = NULL;
 static int bufsz = 0;
 #ifdef USE_WIN32DLL
@@ -341,7 +341,7 @@ static void uninit(sh_video_t *sh){
 	if(rv_handle) dlclose(rv_handle);
 #endif
 	rv_handle=NULL;
-	inited = 0;
+	initialized = 0;
 	if (buffer)
 	    free(buffer);
 	buffer = NULL;
@@ -392,12 +392,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	result=(*rvyuv_transform)(dp_data, buffer, &transform_in,
 		transform_out, sh->context);
 
-	if(!inited){  // rv30 width/height now known
+	if(!initialized){  // rv30 width/height now known
 	    sh->aspect=(float)sh->disp_w/(float)sh->disp_h;
 	    sh->disp_w=transform_out[3];
 	    sh->disp_h=transform_out[4];
 	    if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
-	    inited=1;
+	    initialized=1;
 	} 
 	    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
 		    sh->disp_w, sh->disp_h);
@@ -411,7 +411,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 	if(transform_out[0] &&
 	   (sh->disp_w != transform_out[3] || sh->disp_h != transform_out[4]))
-	    inited = 0;
+	    initialized = 0;
 	
 	return (result?NULL:mpi);
 }

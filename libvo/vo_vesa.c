@@ -1046,7 +1046,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 static void
 uninit(void)
 {
-    // not inited
+    // not initialized
     vesa_term();
     if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         mp_msg(MSGT_VO,MSGL_DBG3, "vo_vesa: uninit was called\n");

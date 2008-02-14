@@ -225,7 +225,7 @@ csp_again:
 	     }
 	}
 	mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_VOincompCodec);
-	sh->vf_inited=-1;
+	sh->vf_initialized=-1;
 	return 0;	// failed
     }
     out_fmt=sh->codec->outfmt[j];
@@ -312,11 +312,11 @@ csp_again:
 			 out_fmt)==0){
 //                      "MPlayer",out_fmt)){
 	mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_CannotInitVO);
-	sh->vf_inited=-1;
+	sh->vf_initialized=-1;
 	return 0;
     }
 
-    sh->vf_inited=1;
+    sh->vf_initialized=1;
 
     if (vo_gamma_gamma != 1000)
         set_video_colors(sh, "gamma", vo_gamma_gamma);

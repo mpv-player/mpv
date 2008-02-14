@@ -5,18 +5,18 @@
 
 // definitions used internally by the core player code
 
-#define INITED_VO 1
-#define INITED_AO 2
-#define INITED_GUI 4
-#define INITED_GETCH2 8
-#define INITED_SPUDEC 32
-#define INITED_STREAM 64
-#define INITED_INPUT    128
-#define INITED_VOBSUB  256
-#define INITED_DEMUXER 512
-#define INITED_ACODEC  1024
-#define INITED_VCODEC  2048
-#define INITED_ALL 0xFFFF
+#define INITIALIZED_VO      1
+#define INITIALIZED_AO      2
+#define INITIALIZED_GUI     4
+#define INITIALIZED_GETCH2  8
+#define INITIALIZED_SPUDEC  32
+#define INITIALIZED_STREAM  64
+#define INITIALIZED_INPUT   128
+#define INITIALIZED_VOBSUB  256
+#define INITIALIZED_DEMUXER 512
+#define INITIALIZED_ACODEC  1024
+#define INITIALIZED_VCODEC  2048
+#define INITIALIZED_ALL     0xFFFF
 
 
 #define SUB_SOURCE_SUBS 0

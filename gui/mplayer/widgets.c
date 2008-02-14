@@ -35,7 +35,7 @@ GtkWidget     * ErrorPixmap;
 
 int gtkPopupMenu = 0;
 int gtkPopupMenuParam = 0;
-int gtkInited = 0;
+int gtkInitialized = 0;
 
 #include "gtk/sb.h"
 #include "gtk/pl.h"
@@ -78,7 +78,7 @@ void gtkInit( void )
   gtk_widget_destroy( win );
  }
  
- gtkInited=1;
+ gtkInitialized=1;
 }
 
 void gtkAddIcon( GtkWidget * window )
@@ -115,7 +115,7 @@ void gtkEventHandling( void )
 
 void gtkMessageBox( int type,const gchar * str )
 {
- if ( !gtkInited ) return;
+ if ( !gtkInitialized ) return;
  ShowMessageBox( str );
  gtk_label_set_text( GTK_LABEL( gtkMessageBoxText ),str );
  /* enable linewrapping by alex */

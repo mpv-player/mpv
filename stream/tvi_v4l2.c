@@ -133,7 +133,7 @@ typedef struct {
     volatile int                audio_drop;
     volatile int                shutdown;
 
-    int                         audio_inited;
+    int                         audio_initialized;
     double                      audio_secs_per_block;
     long long                   audio_usecs_per_block;
     long long                   audio_skew_total;
@@ -365,7 +365,7 @@ static void setup_audio_buffer_sizes(priv_t *priv)
 
 static void init_audio(priv_t *priv)
 {
-    if (priv->audio_inited) return;
+    if (priv->audio_initialized) return;
 
     if (!priv->tv_param->noaudio) {
 #if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
@@ -398,7 +398,7 @@ static void init_audio(priv_t *priv)
 
         if (audio_in_setup(&priv->audio_in) < 0) return;
 
-        priv->audio_inited = 1;
+        priv->audio_initialized = 1;
     }
 }
 
@@ -960,28 +960,28 @@ static int control(priv_t *priv, int cmd, void *arg)
         return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_FORMAT:
         init_audio(priv);
-        if (!priv->audio_inited) return TVI_CONTROL_FALSE;
+        if (!priv->audio_initialized) return TVI_CONTROL_FALSE;
         *(int *)arg = AF_FORMAT_S16_LE;
         mp_msg(MSGT_TV, MSGL_V, "%s: get audio format: %d\n",
                info.short_name, *(int *)arg);
         return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_SAMPLERATE:
         init_audio(priv);
-        if (!priv->audio_inited) return TVI_CONTROL_FALSE;
+        if (!priv->audio_initialized) return TVI_CONTROL_FALSE;
         *(int *)arg = priv->audio_in.samplerate;
         mp_msg(MSGT_TV, MSGL_V, "%s: get audio samplerate: %d\n",
                info.short_name, *(int *)arg);
         return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_SAMPLESIZE:
         init_audio(priv);
-        if (!priv->audio_inited) return TVI_CONTROL_FALSE;
+        if (!priv->audio_initialized) return TVI_CONTROL_FALSE;
         *(int *)arg = priv->audio_in.bytes_per_sample;
         mp_msg(MSGT_TV, MSGL_V, "%s: get audio samplesize: %d\n",
                info.short_name, *(int *)arg);
         return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_CHANNELS:
         init_audio(priv);
-        if (!priv->audio_inited) return TVI_CONTROL_FALSE;
+        if (!priv->audio_initialized) return TVI_CONTROL_FALSE;
         *(int *)arg = priv->audio_in.channels;
         mp_msg(MSGT_TV, MSGL_V, "%s: get audio channels: %d\n",
                info.short_name, *(int *)arg);
@@ -1170,7 +1170,7 @@ static int init(priv_t *priv)
     priv->audio_skew_buffer = NULL;
     priv->audio_skew_delta_buffer = NULL;
 
-    priv->audio_inited = 0;
+    priv->audio_initialized = 0;
 
     /* Open the video device. */
     priv->video_fd = open(priv->video_dev, O_RDWR);
@@ -1383,7 +1383,7 @@ static int start(priv_t *priv)
     /* setup audio parameters */
 
     init_audio(priv);
-    if (!priv->tv_param->noaudio && !priv->audio_inited) return 0;
+    if (!priv->tv_param->noaudio && !priv->audio_initialized) return 0;
 
     /* we need this to size the audio buffer properly */
     if (priv->immediate_mode) {

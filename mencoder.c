@@ -876,7 +876,7 @@ default: {
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
     init_best_video_codec(sh_video,video_codec_list,video_fm_list);
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-    if(!sh_video->inited) mencoder_exit(1,NULL);
+    if(!sh_video->initialized) mencoder_exit(1,NULL);
  }
 }
 
@@ -1330,7 +1330,7 @@ default:
       skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), MP_NOPTS_VALUE);
     blit_frame = decoded_frame && filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE);}
     
-    if (sh_video->vf_inited < 0) mencoder_exit(1, NULL);
+    if (sh_video->vf_initialized < 0) mencoder_exit(1, NULL);
     
     if(!blit_frame){
       if (play_n_frames >= 0)

@@ -61,7 +61,7 @@ static subtitle ty_OSD1;
 static subtitle ty_OSD2;
 static subtitle *ty_pOSD1;
 static subtitle *ty_pOSD2;
-static int             tyOSDInited = 0;
+static int             tyOSDInitialized = 0;
 static int             tyOSDUpdate = 0;
 
 static void ty_DrawOSD(void)
@@ -870,7 +870,7 @@ void ty_processuserdata( unsigned char* buf, int len )
 
 	if ( subcc_enabled )
 	{
-		if ( tyOSDInited == 0 )
+		if ( tyOSDInitialized == 0 )
 		{
 			for ( index = 0; index < SUB_MAX_TEXT ; index++ )
 			{
@@ -883,7 +883,7 @@ void ty_processuserdata( unsigned char* buf, int len )
 			ty_pOSD1 = &ty_OSD1;
 			ty_pOSD2 = &ty_OSD2;
 			tyOSDUpdate = 0;
-			tyOSDInited = 1;
+			tyOSDInitialized = 1;
 		}
 
 		if ( buf[ 0 ] == 0x01 )

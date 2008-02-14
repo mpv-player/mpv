@@ -843,7 +843,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 	if (audio_id == -2
 	    || (audio_id > -1
 		&& mpctx->demuxer->audio->id != current_id && current_id != -2))
-	    uninit_player(INITED_AO | INITED_ACODEC);
+	    uninit_player(INITIALIZED_AO | INITIALIZED_ACODEC);
 	if (audio_id > -1 && mpctx->demuxer->audio->id != current_id) {
 	    sh_audio_t *sh2;
 	    sh2 = mpctx->demuxer->a_streams[mpctx->demuxer->audio->id];
@@ -901,8 +901,8 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 	if (video_id == -2
 	    || (video_id > -1 && mpctx->demuxer->video->id != current_id
 		&& current_id != -2))
-	    uninit_player(INITED_VCODEC |
-			  (fixed_vo && video_id != -2 ? 0 : INITED_VO));
+	    uninit_player(INITIALIZED_VCODEC |
+			  (fixed_vo && video_id != -2 ? 0 : INITIALIZED_VO));
 	if (video_id > -1 && mpctx->demuxer->video->id != current_id) {
 	    sh_video_t *sh2;
 	    sh2 = mpctx->demuxer->v_streams[mpctx->demuxer->video->id];

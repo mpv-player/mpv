@@ -327,7 +327,7 @@ static int control(uint32_t request, void *data, ...)
       vo_x11_ontop();
       return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
-      if ( !inited || !vo_fs ) return VO_FALSE;
+      if ( !initialized || !vo_fs ) return VO_FALSE;
       return VO_TRUE;
   case VOCTRL_FULLSCREEN:
       vo_x11_fullscreen();

@@ -37,7 +37,7 @@ list_options(m_option_t *opt, char* name, char *param);
 m_config_t*
 m_config_new(void) {
   m_config_t* config;
-  static int inited = 0;
+  static int initialized = 0;
   static m_option_type_t profile_opt_type;
   static m_option_t ref_opts[] = {
     { "profile", NULL, &profile_opt_type, CONF_NOSAVE, 0, 0, NULL },
@@ -49,8 +49,8 @@ m_config_new(void) {
 
   config = calloc(1,sizeof(m_config_t));
   config->lvl = 1; // 0 Is the defaults
-  if(!inited) {
-    inited = 1;
+  if(!initialized) {
+    initialized = 1;
     profile_opt_type = m_option_type_string_list;
     profile_opt_type.parse = parse_profile;
     profile_opt_type.set = set_profile;

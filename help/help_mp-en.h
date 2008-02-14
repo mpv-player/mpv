@@ -163,7 +163,7 @@ static char help_text[]=
 #define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC init error in ioctl (rtc_pie_on): %s\n"
 #define MSGTR_UsingTimingType "Using %s timing.\n"
 #define MSGTR_NoIdleAndGui "The -idle option cannot be used with GMPlayer.\n"
-#define MSGTR_MenuInitialized "Menu inited: %s\n"
+#define MSGTR_MenuInitialized "Menu initialized: %s\n"
 #define MSGTR_MenuInitFailed "Menu init failed.\n"
 #define MSGTR_Getch2InitializedTwice "WARNING: getch2_init called twice!\n"
 #define MSGTR_DumpstreamFdUnavailable "Cannot dump this stream - no file descriptor available.\n"

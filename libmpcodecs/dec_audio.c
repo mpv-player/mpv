@@ -98,7 +98,7 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 	return 0;
     }
 
-    sh_audio->inited = 1;
+    sh_audio->initialized = 1;
 
     if (!sh_audio->channels || !sh_audio->samplerate) {
 	mp_msg(MSGT_DECAUDIO, MSGL_WARN, MSGTR_UnknownAudio);
@@ -233,9 +233,9 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
     if (!audio_codec_list)
 	audio_codec_list = ac_l_default;
     // Go through the codec.conf and find the best codec...
-    sh_audio->inited = 0;
+    sh_audio->initialized = 0;
     stringset_init(&selected);
-    while (!sh_audio->inited && *audio_codec_list) {
+    while (!sh_audio->initialized && *audio_codec_list) {
 	char *audio_codec = *(audio_codec_list++);
 	if (audio_codec[0]) {
 	    if (audio_codec[0] == '-') {
@@ -254,7 +254,7 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
 	    if (audio_fm_list) {
 		char **fmlist = audio_fm_list;
 		// try first the preferred codec families:
-		while (!sh_audio->inited && *fmlist) {
+		while (!sh_audio->initialized && *fmlist) {
 		    char *audio_fm = *(fmlist++);
 		    mp_msg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_TryForceAudioFmtStr,
 			   audio_fm);
@@ -264,7 +264,7 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
 			    break;
 		}
 	    }
-	    if (!sh_audio->inited)
+	    if (!sh_audio->initialized)
 		for (status = CODECS_STATUS__MAX; status >= CODECS_STATUS__MIN;
 		     --status)
 		    if (init_audio(sh_audio, NULL, NULL, status, &selected))
@@ -273,7 +273,7 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
     }
     stringset_free(&selected);
 
-    if (!sh_audio->inited) {
+    if (!sh_audio->initialized) {
 	mp_msg(MSGT_DECAUDIO, MSGL_ERR, MSGTR_CantFindAudioCodec,
 	       sh_audio->format);
 	mp_msg(MSGT_DECAUDIO, MSGL_HINT, MSGTR_RTFMCodecs);
@@ -293,7 +293,7 @@ void uninit_audio(sh_audio_t *sh_audio)
 	free(sh_audio->afilter);
 	sh_audio->afilter = NULL;
     }
-    if (sh_audio->inited) {
+    if (sh_audio->initialized) {
 	mp_msg(MSGT_DECAUDIO, MSGL_V, MSGTR_UninitAudioStr,
 	       sh_audio->codec->drv);
 	sh_audio->ad_driver->uninit(sh_audio);
@@ -301,7 +301,7 @@ void uninit_audio(sh_audio_t *sh_audio)
 	if (sh_audio->dec_handle)
 	    dlclose(sh_audio->dec_handle);
 #endif
-	sh_audio->inited = 0;
+	sh_audio->initialized = 0;
     }
     free(sh_audio->a_out_buffer);
     sh_audio->a_out_buffer = NULL;
@@ -467,14 +467,14 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
     sh_audio->a_in_buffer_len = 0;	// clear audio input buffer
-    if (!sh_audio->inited)
+    if (!sh_audio->initialized)
 	return;
     sh_audio->ad_driver->control(sh_audio, ADCTRL_RESYNC_STREAM, NULL);
 }
 
 void skip_audio_frame(sh_audio_t *sh_audio)
 {
-    if (!sh_audio->inited)
+    if (!sh_audio->initialized)
 	return;
     if (sh_audio->ad_driver->control(sh_audio, ADCTRL_SKIP_FRAME, NULL) ==
 	CONTROL_TRUE)

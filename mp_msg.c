@@ -27,7 +27,7 @@ int use_gui;
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 3072
 
-int mp_msg_levels[MSGT_MAX]; // verbose level of this module. inited to -2
+int mp_msg_levels[MSGT_MAX]; // verbose level of this module. initialized to -2
 int mp_msg_level_all = MSGL_STATUS;
 int verbose = 0;
 #ifdef USE_ICONV

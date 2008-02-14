@@ -95,7 +95,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
-static int codec_inited=0;
+static int codec_initialized=0;
 
 // init driver
 static int init(sh_video_t *sh){
@@ -106,7 +106,7 @@ static int init(sh_video_t *sh){
     CodecInfo cinfo;	// for ImageCodecGetCodecInfo()
     ImageSubCodecDecompressCapabilities icap; // for ImageCodecInitialize()
 
-    codec_inited = 0;
+    codec_initialized = 0;
 #ifdef MACOSX
     EnterMovies();
 #else
@@ -315,7 +315,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     decpar.bufferSize = len;
     (**framedescHandle).dataSize=len;
 
-if(!codec_inited){
+if(!codec_initialized){
     result = QTNewGWorldFromPtr(
         &OutBufferGWorld,  
 //        kYUVSPixelFormat, //pixel format of new GWorld == YUY2
@@ -382,7 +382,7 @@ if(!codec_inited){
 //    printf("ImageCodecPreDecompress cres=0x%X\n",cres);
 
 
-    codec_inited=1;
+    codec_initialized=1;
 }
 
 #if 0

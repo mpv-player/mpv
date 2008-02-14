@@ -11,7 +11,7 @@ typedef struct {
   demux_stream_t *ds;
   struct codecs_st *codec;
   unsigned int format;
-  int inited;
+  int initialized;
   float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
   // output format:
   int sample_format;
@@ -56,7 +56,7 @@ typedef struct {
   demux_stream_t *ds;
   struct codecs_st *codec;
   unsigned int format;
-  int inited;
+  int initialized;
   float timer;		  // absolute time in video stream, since last start/seek
   float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
   // frame counters:
@@ -79,7 +79,7 @@ typedef struct {
   // output driver/filters: (set by libmpcodecs core)
   unsigned int outfmtidx;
   struct vf_instance_s *vfilter;          // the video filter chain, used for this video stream
-  int vf_inited;
+  int vf_initialized;
 #ifdef DYNAMIC_PLUGINS
   void *dec_handle;
 #endif

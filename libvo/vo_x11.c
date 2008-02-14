@@ -25,7 +25,7 @@
 
 static int Shmem_Flag;
 
-//static int Quiet_Flag;  Here also what is this for. It's used but isn't inited ?
+//static int Quiet_Flag;  Here also what is this for. It's used but isn't initialized?
 static XShmSegmentInfo Shminfo[1];
 static int gXErrorFlag;
 static int CompletionType = -1;

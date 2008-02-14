@@ -36,7 +36,7 @@ extern char* passtmpfile;
 #include "libavcodec/avcodec.h"
 #endif
 
-extern int avcodec_inited;
+extern int avcodec_initialized;
 
 /* video options */
 static char *lavc_param_vcodec = "mpeg4";
@@ -1019,10 +1019,10 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
 		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
 
-    if (!avcodec_inited){
+    if (!avcodec_initialized){
 	avcodec_init();
 	avcodec_register_all();
-	avcodec_inited=1;
+	avcodec_initialized=1;
     }
 
     vf->priv->codec = (AVCodec *)avcodec_find_encoder_by_name(lavc_param_vcodec);

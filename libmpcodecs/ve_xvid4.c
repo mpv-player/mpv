@@ -1283,7 +1283,7 @@ flush_internal_buffers(xvid_mplayer_module_t *mod)
 	xvid_enc_frame_t *frame = &mod->frame;
 
 	if (mod->instance == NULL)
-	    return;/*encoder not inited*/
+	    return; /* encoder not initialized */
 
 	/* Init a fake frame to force flushing */
 	frame->version = XVID_VERSION;
