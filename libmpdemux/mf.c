@@ -25,7 +25,7 @@
 
 int    mf_w = 0; //352; // let codecs to detect it
 int    mf_h = 0; //288;
-float  mf_fps = 25.0;
+double mf_fps = 25.0;
 char * mf_type = NULL; //"jpg";
 
 mf_t* open_mf(char * filename){
