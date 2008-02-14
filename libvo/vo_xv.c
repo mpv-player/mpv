@@ -45,7 +45,7 @@ Buffer allocation:
 #include "gui/interface.h"
 #endif
 
-#include "ffmpeg/libavutil/common.h"
+#include "libavutil/common.h"
 
 static const vo_info_t info = {
     "X11/Xv",
