@@ -173,7 +173,7 @@
 	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},
 	
 	// force video/audio rate:
-	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
+	{"fps", &force_fps, CONF_TYPE_DOUBLE, CONF_MIN, 0, 0, NULL},
 	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000, NULL},
 	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 1, 6, NULL},
 	{"format", &audio_output_format, CONF_TYPE_AFMT, 0, 0, 0, NULL},

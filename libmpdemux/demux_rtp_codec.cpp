@@ -327,7 +327,7 @@ static void needVideoFrameRate(demuxer_t* demuxer,
   // figure out the frame rate by itself, so (unless the user specifies
   // it manually, using "-fps") we figure it out ourselves here, using the
   // presentation timestamps in successive packets,
-  extern float force_fps; if (force_fps != 0.0) return; // user used "-fps"
+  extern double force_fps; if (force_fps != 0.0) return; // user used "-fps"
 
   demux_stream_t* d_video = demuxer->video;
   sh_video_t* sh_video = (sh_video_t*)(d_video->sh);

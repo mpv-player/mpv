@@ -108,7 +108,7 @@ static void link_session_and_fetch_conf(Nemesi_DemuxerStreamData * ndsd,
                                         rtp_session * sess,
                                         rtp_buff * buff, unsigned int * fps)
 {
-    extern float force_fps;
+    extern double force_fps;
     rtp_ssrc *ssrc = NULL;
     rtp_frame * fr = &ndsd->first_pkt[stype];
     rtp_buff trash_buff;

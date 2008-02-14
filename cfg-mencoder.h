@@ -168,7 +168,7 @@ const m_option_t mencoder_opts[]={
 
 	// set output framerate - recommended for variable-FPS (ASF etc) files
 	// and for 29.97FPS progressive MPEG2 streams
-	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN|CONF_GLOBAL, 0, 0, NULL},
+	{"ofps", &force_ofps, CONF_TYPE_DOUBLE, CONF_MIN|CONF_GLOBAL, 0, 0, NULL},
 	{"o", &out_filename, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 
 	// limit number of skippable frames after a non-skipped one
