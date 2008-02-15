@@ -772,13 +772,14 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 			seekable = strncmp(accept_ranges,"bytes",5)==0;
 		}
 
+		print_icy_metadata(http_hdr);
+
 		// Check if the response is an ICY status_code reason_phrase
 		if( !strcasecmp(http_hdr->protocol, "ICY") ||
 		     http_get_field(http_hdr, "Icy-MetaInt") ) {
 			switch( http_hdr->status_code ) {
 				case 200: { // OK
 					char *field_data;
-					print_icy_metadata(http_hdr);
 					// If content-type == video/nsv we most likely have a winamp video stream 
 					// otherwise it should be mp3. if there are more types consider adding mime type 
 					// handling like later
