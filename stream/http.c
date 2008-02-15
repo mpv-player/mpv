@@ -716,6 +716,23 @@ base64_encode(const void *enc, int encLen, char *out, int outMax) {
 	}
 }
 
+static void print_icy_metadata(HTTP_header_t *http_hdr) {
+	const char *field_data;
+	// note: I skip icy-notice1 and 2, as they contain html <BR>
+	// and are IMHO useless info ::atmos
+	if( (field_data = http_get_field(http_hdr, "icy-name")) != NULL )
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Name   : %s\n", field_data);
+	if( (field_data = http_get_field(http_hdr, "icy-genre")) != NULL )
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Genre  : %s\n", field_data);
+	if( (field_data = http_get_field(http_hdr, "icy-url")) != NULL )
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Website: %s\n", field_data);
+	// XXX: does this really mean public server? ::atmos
+	if( (field_data = http_get_field(http_hdr, "icy-pub")) != NULL )
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Public : %s\n", atoi(field_data)?"yes":"no");
+	if( (field_data = http_get_field(http_hdr, "icy-br")) != NULL )
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Bitrate: %skbit/s\n", field_data);
+}
+
 //! If this function succeeds you must closesocket stream->fd
 static int http_streaming_start(stream_t *stream, int* file_format) {
 	HTTP_header_t *http_hdr = NULL;
@@ -761,20 +778,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 			switch( http_hdr->status_code ) {
 				case 200: { // OK
 					char *field_data;
-					// note: I skip icy-notice1 and 2, as they contain html <BR>
-					// and are IMHO useless info ::atmos
-					if( (field_data = http_get_field(http_hdr, "icy-name")) != NULL )
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"Name   : %s\n", field_data);
-					if( (field_data = http_get_field(http_hdr, "icy-genre")) != NULL )
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"Genre  : %s\n", field_data);
-					if( (field_data = http_get_field(http_hdr, "icy-url")) != NULL )
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"Website: %s\n", field_data);
-					// XXX: does this really mean public server? ::atmos
-					if( (field_data = http_get_field(http_hdr, "icy-pub")) != NULL )
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"Public : %s\n", atoi(field_data)?"yes":"no");
-					if( (field_data = http_get_field(http_hdr, "icy-br")) != NULL )
-						mp_msg(MSGT_NETWORK,MSGL_INFO,"Bitrate: %skbit/s\n", field_data);
-					
+					print_icy_metadata(http_hdr);
 					// If content-type == video/nsv we most likely have a winamp video stream 
 					// otherwise it should be mp3. if there are more types consider adding mime type 
 					// handling like later
