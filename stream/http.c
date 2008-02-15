@@ -756,7 +756,8 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 		}
 
 		// Check if the response is an ICY status_code reason_phrase
-		if( !strcasecmp(http_hdr->protocol, "ICY") ) {
+		if( !strcasecmp(http_hdr->protocol, "ICY") ||
+		     http_get_field(http_hdr, "Icy-MetaInt") ) {
 			switch( http_hdr->status_code ) {
 				case 200: { // OK
 					char *field_data = NULL;
