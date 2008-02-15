@@ -109,7 +109,7 @@ __asm__ __volatile__(\
 #elif defined ( HAVE_3DNOW )
 #define PREFETCH  "prefetch"
 #else
-#define PREFETCH "/nop"
+#define PREFETCH " # nop"
 #endif
 
 /* On K6 femms is faster of emms. On K7 femms is directly mapped on emms. */
@@ -258,7 +258,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	if(i>=BLOCK_SIZE/64)
 		asm volatile(
 			"xor %%"REG_a", %%"REG_a"	\n\t"
-			".balign 16		\n\t"
+			ASMALIGN(4)
 			"1:			\n\t"
 				"movl (%0, %%"REG_a"), %%ebx 	\n\t"
 				"movl 32(%0, %%"REG_a"), %%ebx 	\n\t"
@@ -270,7 +270,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 
 			"xor %%"REG_a", %%"REG_a"	\n\t"
 
-				".balign 16		\n\t"
+				ASMALIGN(4)
 				"2:			\n\t"
 				"movq (%0, %%"REG_a"), %%mm0\n"
 				"movq 8(%0, %%"REG_a"), %%mm1\n"

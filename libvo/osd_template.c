@@ -16,8 +16,8 @@
 #define PREFETCHW "prefetcht0"
 #define PAVGB	  "pavgb"
 #else
-#define PREFETCH "/nop"
-#define PREFETCHW "/nop"
+#define PREFETCH " # nop"
+#define PREFETCHW " # nop"
 #endif
 
 #ifdef HAVE_3DNOW
