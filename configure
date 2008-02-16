@@ -2444,7 +2444,7 @@ int main(void) {
 }
 EOF
         FSF_flags='-maltivec -mabi=altivec'
-        Darwin_flags='-faltivec -D__APPLE_ALTIVEC__'
+        Darwin_flags='-faltivec'
 
         # check for Darwin-style flags first, since
         # gcc-3.3 (August Update from Apple) on MacOS 10.2.8
