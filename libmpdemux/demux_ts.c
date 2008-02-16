@@ -729,11 +729,9 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 
 			p = progid_for_pid(priv, es.pid, param->prog);
 			if(p != -1)
-				has_tables++;
-
-			if((param->prog == 0) && (p != -1))
 			{
-				if(chosen_pid)
+				has_tables++;
+				if(!param->prog && chosen_pid)
 					param->prog = p;
 			}
 
