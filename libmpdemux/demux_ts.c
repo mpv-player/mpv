@@ -3169,7 +3169,7 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 			break;
 		else	//H264
 		{
-			if((i & ~0x60) == 0x105) break;
+			if((i & ~0x60) == 0x105 || (i & ~0x60) == 0x107) break;
 		}
 
 		if(!i || !skip_video_packet(d_video)) break; // EOF?
