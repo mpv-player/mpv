@@ -875,6 +875,13 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 
 	if(video_found || audio_found)
 	{
+		if(!param->prog)
+		{
+			p = progid_for_pid(priv, video_found ? param->vpid : param->apid, 0);
+			if(p != -1)
+				param->prog = p;
+		}
+
 		if(demuxer->stream->eof && (ret == 0))
 			ret = init_pos;
 		mp_msg(MSGT_DEMUXER, MSGL_INFO, " PROGRAM N. %d\n", param->prog);
