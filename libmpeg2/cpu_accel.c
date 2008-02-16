@@ -168,7 +168,7 @@ static uint32_t arch_accel (void)
 
     canjump = 1;
 
-#if defined( __APPLE_CC__ ) && defined( __APPLE_ALTIVEC__ ) /* apple */
+#if defined(__APPLE_CC__)	/* apple */
 #define VAND(a,b,c) "vand v" #a ",v" #b ",v" #c "\n\t"
 #else			/* gnu */
 #define VAND(a,b,c) "vand " #a "," #b "," #c "\n\t"
