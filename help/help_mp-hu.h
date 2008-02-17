@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r25947 (2008. 02. 02.)
+// Sync'ed with help_mp-en.h r25994 (2008. 02. 17.)
 
 // ========================= MPlayer help ===========================
 

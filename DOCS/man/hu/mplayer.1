@@ -1,4 +1,4 @@
-.\" Synced with r25821
+.\" Synced with r26015
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 01. 21." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 02. 17." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -840,7 +840,7 @@ Jelenleg a következõ meghajtók támogatják a fixed-vo-t: gl, gl2, mga, svga, x11,
 xmga, xv, xvidix és dfbmga.
 .
 .TP
-.B \-framedrop (lásd még \-hardframedrop)
+.B \-framedrop (lásd még \-hardframedrop, csak -no-correct-pts mellett mûködik)
 Néhány képkocka megjelenítésének hanyagolása, hogy lassú rendszereken is
 megfelelõ legyen az A/V szinkron. A videó szûrõk nem vonatkoznak ezekre
 a képkockákra.
@@ -857,9 +857,11 @@ Nem mûködik konfig-fájl opcióként.
 Rövid segítõ szöveg kiírása.
 .
 .TP
-.B \-hardframedrop
+.B \-hardframedrop (csak -no-correct-pts mellett mûködik)
 Intenzívebb képkockaeldobás (a dekódolási minõség rovására).
 Torz képekhez vezet!
+Figyelj rá, hogy különösen a libmpeg2 dekódolóval ez összeomolhat,
+ezért fontold meg a "\-vc ffmpeg12," használatát.
 .
 .TP
 .B \-heartbeat\-cmd
@@ -3593,8 +3595,8 @@ Letiltva sokkal jobban néznek ki FreeType betûtípusokkal és a határokat
 használja teljes képernyõs módban.
 Nem mûködik jól ass feliratokkal (lásd \-ass), helyettük OpenGL támogatás
 nélkül is renderelheted a \-vf ass kapcsolóval.
-.IPs osdcolor=<0xRRGGBB>
-OSD színe (alapértelmezett: 0xffffff, ez megfelel a fehérnek).
+.IPs osdcolor=<0xAARRGGBB>
+OSD színe (alapértelmezett: 0x00ffffff, ez megfelel a nem transzparens fehérnek).
 .IPs rectangle=<0,1,2>
 Kiválasztja a téglalap alakú textúrák használatát, ami videó RAM-ot spórol
 meg, de sokszor lassabb (alapértelmezett: 0).
@@ -9852,7 +9854,7 @@ Nem lesznek felhasználva a direkt makroblokkok.
 A mozgásvektorok a szomszédos blokkokból lesznek extrapolálva.
 (alapértelmezett)
 .IPs temporal
-A mozgásvektorok a következõ P-kockából lesznek interpolálva.
+A mozgásvektorok a következõ P-kockából lesznek extrapolálva.
 .IPs auto
 A codec minden egyes kockánál választ a térbeli és az idõbeli közül.
 .RE
@@ -10777,12 +10779,6 @@ mplayer dvd://1 \-dvd\-device /dev/\:dvd2
 .B DVD videó lejátszása egy könyvtárban lévõ VOB fájlokból:
 .nf
 mplayer dvd://1 \-dvd\-device /konyvtar/\:eleresi/\:utja/
-.fi
-.
-.PP
-.B Egy DVD mûsor merevlemezre másolása, mentés a "title1.vob" fájlba:
-.nf
-mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .fi
 .
 .PP
