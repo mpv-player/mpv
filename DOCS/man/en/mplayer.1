@@ -4699,6 +4699,27 @@ Setup a chain of audio filters.
 .PP
 .I NOTE:
 To get a full list of available audio filters, see \-af help.
+.sp 1
+Audio filters are managed in lists.
+There are a few commands to manage the filter list.
+.
+.TP
+.B \-af\-add <filter1[,filter2,...]>
+Appends the filters given as arguments to the filter list.
+.
+.TP
+.B \-af\-pre <filter1[,filter2,...]>
+Prepends the filters given as arguments to the filter list.
+.
+.TP
+.B \-af\-del <index1[,index2,...]>
+Deletes the filters at the given indexes.
+Index numbers start at 0, negative numbers address the end of the
+list (\-1 is the last).
+.
+.TP
+.B \-af\-clr
+Completely empties the filter list.
 .PP
 Available filters are:
 .
