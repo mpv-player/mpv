@@ -201,8 +201,8 @@
 	{"sound", &audio_id, CONF_TYPE_FLAG, 0, -2, -1, NULL},
 	{"nosound", &audio_id, CONF_TYPE_FLAG, 0, -1, -2, NULL},
 
+	{"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"af-adv", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-	{"af", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
 	{"vop", "-vop has been removed, use -vf instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
 	{"vf*", &vf_settings, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0, &vf_obj_list},
