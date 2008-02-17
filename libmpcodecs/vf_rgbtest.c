@@ -14,6 +14,7 @@
 
 struct vf_priv_s {
     unsigned int fmt;
+    int w, h;
 };
 
 static unsigned int getfmt(unsigned int outfmt){
@@ -79,6 +80,8 @@ static void put_pixel(uint8_t *buf, int x, int y, int stride, int r, int g, int 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
+    if (vf->priv->w > 0) { d_width  = width  = vf->priv->w; }
+    if (vf->priv->h > 0) { d_height = height = vf->priv->h; }
     vf->priv->fmt=getfmt(outfmt);
     mp_msg(MSGT_VFILTER,MSGL_V,"rgb test format:%s\n", vo_format_name(outfmt));
     return vf_next_config(vf,width,height,d_width,d_height,flags,vf->priv->fmt);
@@ -87,19 +90,21 @@ static int config(struct vf_instance_s* vf,
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     int x, y;
+    int w = vf->priv->w > 0 ? vf->priv->w : mpi->w;
+    int h = vf->priv->h > 0 ? vf->priv->h : mpi->h;
 
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-	mpi->w, mpi->h);
+	w, h);
 
-     for(y=0; y<mpi->h; y++){
-         for(x=0; x<mpi->w; x++){
-             int c= 256*x/mpi->w;
+     for(y=0; y<h; y++){
+         for(x=0; x<w; x++){
+             int c= 256*x/w;
              int r=0,g=0,b=0;
              
-             if(3*y<mpi->h)        r=c;
-             else if(3*y<2*mpi->h) g=c;
+             if(3*y<h)        r=c;
+             else if(3*y<2*h) g=c;
              else                  b=c;
              
              put_pixel(dmpi->planes[0], x, y, dmpi->stride[0], r, g, b, vf->priv->fmt);
@@ -122,6 +127,9 @@ static int open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
+    vf->priv->w = vf->priv->h = 0;
+    if (args)
+        sscanf(args, "%d:%d", &vf->priv->w, &vf->priv->h);
     return 1;
 }
 
