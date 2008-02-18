@@ -28,10 +28,15 @@
 #define WORD_s3 0x1c,0x1d,0x1e,0x1f
 
 #ifdef __APPLE_CC__
-#define vcprm(a,b,c,d) (const vector unsigned char)(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
+#define AVV(x...) (x)
 #else
-#define vcprm(a,b,c,d) (const vector unsigned char){WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d}
+#define AVV(x...) {x}
 #endif
+
+#define vcprm(a,b,c,d) (const vector unsigned char)AVV(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
+#define vcii(a,b,c,d) (const vector float)AVV(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
+
+#define FOUROF(a) AVV(a,a,a,a)
 
 // vcprmle is used to keep the same index as in the SSE version.
 // it's the same as vcprm, with the index inversed
@@ -42,18 +47,6 @@
 // n is _n_egative, p is _p_ositive
 #define FLOAT_n -1.
 #define FLOAT_p 1.
-
-#ifdef __APPLE_CC__
-#define vcii(a,b,c,d) (const vector float)(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
-#else
-#define vcii(a,b,c,d) (const vector float){FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d}
-#endif
-
-#ifdef __APPLE_CC__
-#define FOUROF(a) (a)
-#else
-#define FOUROF(a) {a,a,a,a}
-#endif
 
 void dct64_altivec(real *a,real *b,real *c)
 {
