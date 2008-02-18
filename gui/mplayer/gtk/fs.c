@@ -26,7 +26,7 @@
 #ifndef __linux__
 #define get_current_dir_name()  getcwd(NULL, PATH_MAX)
 #else
- extern char * get_current_dir_name( void );
+extern char * get_current_dir_name( void );
 #endif
 
 gchar         * fsSelectedFile = NULL;
@@ -79,13 +79,13 @@ char * fsSubtitleFilterNames[][2] =
 int fsLastSubtitleFilterSelected = -1;
 
 char * fsOtherFilterNames[][2] =
-         { 
+         {
 	   { "All files", "*"     },
 	   { NULL,NULL }
 	 };
-	 
+
 char * fsAudioFileNames[][2] =
-	 { 
+	 {
 	   { "WAV files (*.wav)",					   "*.wav" },
 	   { "MP3 files (*.mp2, *.mp3)",				   "*.mp2,*.mp3" },
 	   { "OGG Vorbis files (*.ogg)",				   "*.ogg" },
@@ -187,7 +187,7 @@ void CheckDir( GtkWidget * list,char * directory )
      if ( ( tmp[c] == ',' )||( tmp[c] == '\0' ) )
       {
        tmp[c]=0; c=-1;
-       glob( Filter( tmp ),glob_param,NULL,&gg ); 
+       glob( Filter( tmp ),glob_param,NULL,&gg );
        glob_param=GLOB_APPEND;
       }
     }
@@ -215,7 +215,7 @@ void ShowFileSelect( int type,int modal )
 
  if ( fsFileSelect ) gtkActive( fsFileSelect );
   else fsFileSelect=create_FileSelect();
- 
+
  fsType=type;
  switch ( type )
   {
@@ -280,7 +280,7 @@ void ShowFileSelect( int type,int modal )
    struct stat f;
    char * dir = strdup( tmp );
 
-   do 
+   do
     {
      char * c = strrchr( dir,'/' );
      stat( dir,&f );
@@ -289,14 +289,14 @@ void ShowFileSelect( int type,int modal )
     } while ( strrchr( dir,'/' ) );
 
    if ( dir[0] ) chdir( dir );
-   
+
    free( dir );
   }
- 
+
  if ( fsTopList_items ) g_list_free( fsTopList_items ); fsTopList_items=NULL;
  {
   int  i, c = 1;
-  
+
   if ( fsType == fsVideoSelector )
    {
     for ( i=0;i < fsPersistant_MaxPos;i++ )
@@ -309,7 +309,7 @@ void ShowFileSelect( int type,int modal )
  fsTopList_items=g_list_append( fsTopList_items,"/mnt" );
  fsTopList_items=g_list_append( fsTopList_items,"/" );
  gtk_combo_set_popdown_strings( GTK_COMBO( fsCombo4 ),fsTopList_items );
-  
+
  gtk_window_set_modal( GTK_WINDOW( fsFileSelect ),modal );
 
  gtk_widget_show( fsFileSelect );
@@ -531,7 +531,7 @@ GtkWidget * create_FileSelect( void )
  gtk_window_set_policy( GTK_WINDOW( fsFileSelect ),TRUE,TRUE,TRUE );
  gtk_window_set_wmclass( GTK_WINDOW( fsFileSelect ),"FileSelect","MPlayer" );
  fsColorMap=gdk_colormap_get_system();
- 
+
  gtk_widget_realize( fsFileSelect );
  gtkAddIcon( fsFileSelect );
 
