@@ -116,6 +116,7 @@ morphos() { issystem "MorphOS" ; return "$?" ; }
 amigaos() { issystem "AmigaOS" ; return "$?" ; }
 win32()   { cygwin || mingw32  ; return "$?" ; }
 beos()    { issystem "BEOS"    ; return "$?" ; }
+os2()     { issystem "OS/2"    ; return "$?" ; }
 
 # arch test boolean functions
 # x86/x86pc is used by QNX
@@ -1228,6 +1229,9 @@ if test -z "$_target" ; then
   MINGW32*)
     system_name=MINGW32
     ;;
+  OS/2*)
+    system_name=OS/2
+    ;;
   *)
     system_name="$system_name-UNKNOWN"
     ;;
@@ -1352,6 +1356,14 @@ fi
 
 if qnx ; then
   _ld_extra="$_ld_extra -lph"
+fi
+
+if os2 ; then
+  _exesuf=".exe"
+  _need_shmem=no
+  _ar="emxomfar -p256"
+  _ranlib="echo ignoring ranlib"
+  _ld_extra="$_ld_extra -Zomf -Zstack 16384 -Zbin-files -Zargs-wild -lmmpm2"
 fi
 
 for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
@@ -3444,7 +3456,8 @@ int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfd
 EOF
 _posix_select=no
 _def_posix_select='#undef HAVE_POSIX_SELECT'
-cc_check && _posix_select=yes \
+#select() of kLIBC (OS/2) supports socket only
+! os2 && cc_check && _posix_select=yes \
   && _def_posix_select='#define HAVE_POSIX_SELECT 1'
 echores "$_posix_select"
 
@@ -6178,6 +6191,7 @@ fi
 if test -z "$_codecsdir" ; then
   _codecsdir="$_libdir/codecs"
   mingw32 && _codecsdir="codecs"
+  os2 && _codecsdir="codecs"
 fi
 
 
@@ -7415,7 +7429,7 @@ fi
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
 bsd && _ld_dl_dynamic='-rdynamic'
-if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin ; then
+if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin && ! os2 ; then
   _ld_dl_dynamic='-rdynamic'
 fi
 
@@ -7544,6 +7558,9 @@ fi
 if cygwin ; then
   CFLAGS="$CFLAGS -D__CYGWIN__"
 fi
+if os2 ; then
+  CFLAGS="$CFLAGS -Zomf"
+fi
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
   CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
@@ -7552,6 +7569,7 @@ if test "$_largefiles" = yes || freebsd ; then
     CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
     cygwin && CFLAGS="$CFLAGS -DSYS_CYGWIN"
     beos && CFLAGS="$CFLAGS -DSYS_BEOS"
+    os2 && CFLAGS="$CFLAGS -DSYS_OS2"
   fi
 fi
 
@@ -8329,7 +8347,7 @@ $_def_vcd
 #ifdef sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(__OS2__)
 #define DEFAULT_CDROM_DEVICE    "D:"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(__APPLE__) || defined(__DARWIN__)
