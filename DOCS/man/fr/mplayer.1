@@ -1,4 +1,4 @@
-.\" synced with r25984
+.\" synced with r26017
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -880,7 +880,7 @@ Actuellement les pilotes suivants fonctionnent avec fixed-vo: gl, gl2, mga,
 svga, x11, xmga, xv, xvidix et dfbmga.
 .
 .TP
-.B \-framedrop (voir aussi \-hardframedrop)
+.B \-framedrop (voir aussi \-hardframedrop, ne fonctionne qu'avec \-no-correct-pts)
 Saute l'affichage de certaines trames pour maintenir la synchro A/V sur
 les machines lentes.
 Les filtres vidéo ne sont pas appliqués sur de telles trames.
@@ -901,7 +901,7 @@ Ne fonctionne pas en tant qu'option de fichier de configuration.
 Affiche un court résumé des options.
 .
 .TP
-.B \-hardframedrop
+.B \-hardframedrop (ne fonctionne qu'avec \-no-correct-pts)
 Saute les trames de façon plus brutale (casse le décodage).
 Mène à des distorsions d'image!
 .
