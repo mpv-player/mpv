@@ -1428,9 +1428,9 @@
 +}
 +
 +#endif // ARCH_X86 || ARCH_X86_64
---- liba52/imdct.c	2006-06-12 15:18:27.000000000 +0200
-+++ liba52/imdct.c	2006-06-12 19:18:39.000000000 +0200
-@@ -26,6 +26,11 @@
+--- liba52/imdct.c	2008-02-19 00:18:33.000000000 +0100
++++ liba52/imdct.c	2008-02-19 00:16:40.000000000 +0100
+@@ -22,6 +26,11 @@
   * You should have received a copy of the GNU General Public License
   * along with this program; if not, write to the Free Software
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -1542,7 +1542,7 @@
  {
      int i, k;
      sample_t t_r, t_i, a_r, a_i, b_r, b_i, w_1, w_2;
-@@ -285,6 +365,714 @@
+@@ -285,6 +365,707 @@
      }
  }
  
@@ -1564,10 +1564,15 @@
 +#define WORD_s3 0x1c,0x1d,0x1e,0x1f
 +
 +#ifdef __APPLE_CC__
-+#define vcprm(a,b,c,d) (const vector unsigned char)(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
++#define AVV(x...) (x)
 +#else
-+#define vcprm(a,b,c,d) (const vector unsigned char){WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d}
++#define AVV(x...) {x}
 +#endif
++
++#define vcprm(a,b,c,d) (const vector unsigned char)AVV(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
++#define vcii(a,b,c,d) (const vector float)AVV(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
++
++#define FOUROF(a) AVV(a,a,a,a)
 +
 +// vcprmle is used to keep the same index as in the SSE version.
 +// it's the same as vcprm, with the index inversed
@@ -1578,18 +1583,6 @@
 +// n is _n_egative, p is _p_ositive
 +#define FLOAT_n -1.
 +#define FLOAT_p 1.
-+
-+#ifdef __APPLE_CC__
-+#define vcii(a,b,c,d) (const vector float)(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
-+#else
-+#define vcii(a,b,c,d) (const vector float){FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d}
-+#endif
-+
-+#ifdef __APPLE_CC__
-+#define FOUROF(a) (a)
-+#else
-+#define FOUROF(a) {a,a,a,a}
-+#endif
 +
 +
 +void
@@ -2257,7 +2250,7 @@
  void a52_imdct_256(sample_t * data, sample_t * delay, sample_t bias)
  {
      int i, k;
-@@ -364,7 +1152,7 @@
+@@ -364,7 +1145,7 @@
  
  void a52_imdct_init (uint32_t mm_accel)
  {
@@ -2266,7 +2259,7 @@
      double sum;
  
      /* compute imdct window - kaiser-bessel derived window, alpha = 5.0 */
-@@ -416,6 +1204,99 @@
+@@ -416,6 +1197,99 @@
  	post2[i].real = cos ((M_PI / 128) * (i + 0.5));
  	post2[i].imag = sin ((M_PI / 128) * (i + 0.5));
      }
@@ -2366,7 +2359,7 @@
  
  #ifdef LIBA52_DJBFFT
      if (mm_accel & MM_ACCEL_DJBFFT) {
-@@ -426,7 +1307,5 @@
+@@ -426,7 +1300,5 @@
  #endif
      {
  	fprintf (stderr, "No accelerated IMDCT transform found\n");
