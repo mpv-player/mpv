@@ -14,8 +14,9 @@
    only be included by af_resample.c 
 */ 
 
-#ifndef AF_RESAMPLE_H
-#define AF_RESAMPLE_H
+/* This header intentionally has no multiple inclusion guards. It is meant to
+ * be included multiple times and generates different code depending on the
+ * value of certain #defines. */
 
 #undef L
 #undef SHIFT
@@ -162,5 +163,3 @@
   s->xi = xi;
   s->i = i;
 #endif /* DN */
-
-#endif /* AF_RESAMPLE_H */
