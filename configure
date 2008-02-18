@@ -7551,6 +7551,7 @@ if test "$_largefiles" = yes || freebsd ; then
     # dvdread support requires this (for off64_t)
     CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
     cygwin && CFLAGS="$CFLAGS -DSYS_CYGWIN"
+    beos && CFLAGS="$CFLAGS -DSYS_BEOS"
   fi
 fi
 
