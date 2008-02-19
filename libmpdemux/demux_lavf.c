@@ -46,6 +46,8 @@
 #define PROBE_BUF_SIZE 2048
 
 extern char *audio_lang;
+extern char *dvdsub_lang;
+extern int dvdsub_id;
 static unsigned int opt_probesize = 0;
 static unsigned int opt_analyzeduration = 0;
 static char *opt_format;
@@ -433,7 +435,14 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
                 sh_sub->extradata_len = codec->extradata_size;
             }
-            demuxer->sub->sh = demuxer->s_streams[priv->sub_streams++];
+            if (demuxer->sub->id == -1
+                || (demuxer->sub->id == -2 && (dvdsub_lang && st->language[0] && !strncmp(dvdsub_lang, st->language, 3)))
+                || demuxer->sub->id == priv->sub_streams) {
+                dvdsub_id = i;
+                demuxer->sub->id = priv->sub_streams;
+                demuxer->sub->sh = sh_sub;
+            }
+            priv->sub_streams++;
             break;
         }
         case CODEC_TYPE_ATTACHMENT:{
