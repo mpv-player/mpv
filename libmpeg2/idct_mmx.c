@@ -44,7 +44,7 @@
 
 
 #if 0
-/* C row IDCT - its just here to document the MMXEXT and MMX versions */
+/* C row IDCT - it is just here to document the MMXEXT and MMX versions */
 static inline void idct_row (int16_t * row, int offset,
 			     int16_t * table, int32_t * rounder)
 {
@@ -329,7 +329,7 @@ static inline void mmx_row_mid (int16_t * const row, const int store,
 
 
 #if 0
-/* C column IDCT - its just here to document the MMXEXT and MMX versions */
+/* C column IDCT - it is just here to document the MMXEXT and MMX versions */
 static inline void idct_col (int16_t * col, int offset)
 {
 /* multiplication - as implemented on mmx */
