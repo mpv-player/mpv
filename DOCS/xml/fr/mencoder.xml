@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20043 -->
+<!-- synced with r24342 -->
 <chapter id="mencoder">
 <title>Utilisation basique de <application>MEncoder</application></title>
 
@@ -53,11 +53,11 @@ Audio</entry><entry>Description</entry></row>
 </row>
 <row>
 <entry>faac</entry>
-<entry>L'encodeur audio ACC FAAC</entry>
+<entry>L'encodeur audio AAC FAAC</entry>
 </row>
 <row>
 <entry>toolame</entry>
-<entry>Encoder Audio MPEG Layer 2 </entry>
+<entry>Encodeur Audio MPEG Layer 2 </entry>
 </row>
 <row>
 <entry>twolame</entry>
@@ -69,7 +69,7 @@ Audio</entry><entry>Description</entry></row>
 </row>
 <row>
 <entry>copy</entry>
-<entry>Ne réencode pas, il compresse juste les frames</entry>
+<entry>Ne réencode pas, copie simplement les trames (déjà) compressées</entry>
 </row>
 </tbody>
 </tgroup>
@@ -98,8 +98,7 @@ Profile)</entry>
 </row>
 <row>
 <entry>x264</entry>
-<entry>Le x264, un codec MPEG-4 AVC (Advanced Video Coding), le
-AKA H.264</entry>
+<entry>Le x264, un codec MPEG-4 AVC (Advanced Video Coding), aussi connu sous le nom de  H.264</entry>
 </row>
 <row>
 <entry>nuv</entry>
@@ -112,12 +111,11 @@ temps réel.</entry>
 </row>
 <row>
 <entry>copy</entry>
-<entry>Ne réencode pas, il compresse juste les frames</entry>
+<entry>Ne réencode pas, copie simplement les trames (déjà) compressées</entry>
 </row>
 <row>
 <entry>frameno</entry>
-<entry>Utilisé pour l'encodage en 3 passes, (not
-recommended)</entry>
+<entry>Utilisé pour l'encodage en 3 passes, (non recommandé)</entry>
 </row>
 </tbody>
 </tgroup>
@@ -127,7 +125,7 @@ recommended)</entry>
 Les options de sorties pour le type de container sont
 sélectionnées
 grâce à l'option <option>-of</option>.
-Type:
+Tapez:
 <screen>mencoder -of help</screen>
 permettra de lister tous les codecs vidéo supportés par la version
 de <application>MEncoder</application> sur votre machine.
@@ -157,12 +155,12 @@ Container</entry><entry>Description</entry></row>
 </row>
 <row>
 <entry>rawvideo</entry>
-<entry>Flux vidéo en raw (un seul flux vidéo, pas de
+<entry>Flux vidéo brut (un seul flux vidéo, pas de
 multiplexage)</entry>
 </row>
 <row>
 <entry>rawaudio</entry>
-<entry>Flux audio en raw (un seul flux audio, pas de
+<entry>Flux audio brut (un seul flux audio, pas de
 multiplexage)</entry>
 </row>
 </tbody>
@@ -172,8 +170,8 @@ Le container AVI est le container natif de
 <application>MEncoder</application>,
 ce qui veut dire que c'est le mieux supporté et que
 <application>MEncoder</application>
-a été crée pour cela.
-Malgré ceci, d'autres formats de containers sont utilisables, mais
+a été conçu pour cela.
+Comme mentionné ci-dessus, d'autres formats de containers sont utilisables, mais
 vous risquez d'avoir certains problèmes à les utiliser.
 </para>
 
@@ -183,7 +181,7 @@ vous risquez d'avoir certains problèmes à les utiliser.
 Containers <systemitem class="library">libavformat</systemitem> :
 </para>
 <para>
-Si vous avez sélectionné If you selected <systemitem class="library">libavformat</systemitem>
+Si vous avez sélectionné <systemitem class="library">libavformat</systemitem>
 pour le multiplexage du fichier de sortie (en utilisant l'option
 <option>-of lavf</option>),
 le choix du format du container sera déterminé en fonction de
@@ -246,7 +244,7 @@ pas encore les spécifications)</entry>
 </row>
 <row>
 <entry>dv</entry>
-<entry>Container numérique des vidéos Sony</entry>
+<entry>Container numérique des vidéos Sony (Digital Video)</entry>
 </row>
 </tbody>
 </tgroup>
@@ -263,7 +261,8 @@ est correct. Pensez ben à vérifier la synchronisation de
 l'audio avec la vidéo et que le fichier est lisible par un autre
 lecteur que <application>MPlayer</application>.
 </para>
-<informalexample>
+<example id="encode_to_macromedia_flash_format">
+<title>Encoder au format Macromedia Flash</title>
 <para>Exemple :</para>
 <para>
 Création d'une vidéo Macromedia Flash afin de la lire dans un
@@ -276,7 +275,7 @@ mencoder <replaceable>input.avi</replaceable> -o
 -srate 22050
 </screen>
 </para>
-</informalexample>
+</example>
 
 </sect1>
 
@@ -296,7 +295,7 @@ encoder depuis un chapitre DVD ou une piste VCD.
 Si vous avez déjà copié le DVD sur votre disque dur (en
 utilisant par exemple un logiciel comme
 <application>dvdbackup</application>,
-généralement disponible sur les systèmes), et que vous souhaitez
+généralement disponible sur la plupart des systèmes), et que vous souhaitez
 encoder depuis cette copie, vous devrez quand même utiliser la
 syntaxe <option>dvd://</option>, avec l'option
 <option>-dvd-device</option> pointant vers la racine du répertoire
@@ -322,13 +321,13 @@ Ceci permettant de couper votre film sur un chapitre et non au
 milieu d'une scène.
 </para>
 <para>
-Si vous disposez d'un carte pouvant acquérir le signal Télé,
+Si vous disposez d'une carte d'acquisition TV,
 vous pouvez sans soucis encoder le signal d'entrée.
 Utilisez l'option
 <option>tv://</option><replaceable>NuméroChaine</replaceable>
 comme nom de fichier et l'option <option>-tv</option> afin de
 configurer les nombreux paramètres de captures.
-Les entrés DVB marchent sur le même principe.
+Les entrées DVB marchent sur le même principe.
 </para>
 </sect1>
 
@@ -354,13 +353,13 @@ sur Internet.
 <example id="copy_audio_track">
 <title>Copie de la piste audio</title>
 <para>
-Encodage deux passes de second chapitre d'un DVD vers de l'AVI
+Encodage deux passes du second chapitre d'un DVD vers de l'AVI
 MPEG-4 ("DivX") avec la simple copie de la piste audio.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
-<replaceable>film.avi</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o
-<replaceable>film.avi</replaceable>
+<replaceable>sortie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
+	-oac copy -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -371,20 +370,20 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o
 Encodage deux passes d'un DVD en AVI MPEG-4 ("DivX") avec la
 conversion
 de la piste audio en MP3.
+Soyez prudent en utilisant cette méthode car elle peut mener, dans certains cas,
+à des désynchronisation audio/vidéo.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac
-mp3lame
--lameopts vbr=3 -o <replaceable>film.avi</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac
-mp3lame
--lameopts vbr=3 -o <replaceable>film.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
+	-oac mp3lame -lameopts vbr=3 -o /dev/null
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
+	-oac mp3lame -lameopts vbr=3 -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </example>
 </sect1>
 
 <sect1 id="menc-feat-handheld-psp">
-<title>Encodage au format Sony PSP</title>
+<title>Encodage au format vidéo Sony PSP</title>
 
  <para>
    <application>MEncoder</application> supporte l'encodage au format
@@ -395,9 +394,9 @@ mp3lame
    d'encoder sans problème :
  <itemizedlist>
  <listitem><para>
-   <emphasis role="bold">Taux d'encodage</emphasis>: il ne devrait pas être
+   <emphasis role="bold">Débit vidéo</emphasis>: il ne devrait pas être
    supérieur à 1500kbps. Cependant, les dernières versions supportent
-   presque tous les taux d'encodage tant que l'en-tête donne une
+   presque tous les débits tant que l'en-tête rapporte une
    valeur raisonable.
  </para></listitem>
  <listitem><para>
@@ -414,13 +413,14 @@ mp3lame
  </itemizedlist>
  </para>
  
- <example>
- <title>Exemple</title>
+ <example id="encode_for_psp">
+ <title>Encodage pour PSP</title>
  <para>
  <screen>
- mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
- -af lavcresample=24000 -vf harddup -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
- -ofps 30000/1001 input.video -o output.psp
+mencoder -ofps 30000/1001 -af lavcresample=24000 -vf harddup -of lavf \
+    -oac lavc -ovc lavc -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+    -lavfopts format=psp \
+    <replaceable>entree.video</replaceable> -o <replaceable>sortie.psp</replaceable>
  </screen>
    Vous pouvez définir le titre de la vidéo avec
    <option>-info name=<replaceable>TitreDuFilm</replaceable></option>.
@@ -433,8 +433,8 @@ mp3lame
 <para>
 <application>MEncoder</application> peut créer des fichiers au
 format MPEG (MPEG-PS).
-Habituellement, vous utilisez des formations vidéos comme le
-MPEG-1 ou MPEG-2 pour l'encodage vers des formats contraints
+Habituellement, vous utilisez des formats vidéos comme le
+MPEG-1 ou MPEG-2 pour l'encodage vers des formats avec des contraintes spécifiques
 comme le SVCD, VCD, ou encore le DVD.
 Les exigences particulières de ces formats sont expliqués dans
 la section du
@@ -453,21 +453,38 @@ Exemple :
 mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc
 -lavcopts vcodec=mpeg1video -oac copy
 <replaceable>autres_options</replaceable> -o
-<replaceable>output.mpg</replaceable>
+<replaceable>sortie.mpg</replaceable>
 </screen>
 Création d'un fichier MPEG-1 lisible sur un système basique
 comme peu l'être un MS Windows fraîchement installé :
 <screen>
-mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts
+mencoder <replaceable>entree.avi</replaceable> -of mpeg -mpegopts
 format=mpeg1:tsaf:muxrate=2000 -o
 <replaceable>output.mpg</replaceable> -oac lavc -ovc lavc \
 -lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
+Le même encodage, mais en utilisant le multiplexeur MPEG <systemitem class="library">libavformat</systemitem> :
+<screen>
+mencoder <replaceable>entree.avi</replaceable> -o <replaceable>VCD.mpg</replaceable> -ofps 25 -vf scale=352:288,harddup -of lavf \
+    -lavfopts format=mpg -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
+    -lavcopts vcodec=mpeg1video:vrc_buf_size=327:keyint=15:vrc_maxrate=1152:vbitrate=1152:vmax_b_frames=0
+</screen>
 </para>
 </informalexample>
 
+<note><title>Astuce:</title>
+<para>
+Si, pour quelques raisons, la qualité vidéo de la seconde passe
+n'est pas satisfaisante, vous pouvez recommencer l'encodage avec
+un débit cible différent, à condition que vous ayez sauvegardé
+le fichier de statistiques de la passe précédente.
+Ceci est possible car le rôle premier du fichier de statistiques
+est d'enregistrer la compléxité de chaque trame, ce qui ne dépend pas
+fortement du débit. Cependant, if faut noter que vous obtiendrez de meilleurs
+résultats si toutes les passes utilisent un débit cible similaire.
+</para>
+</note>
 </sect1>
-
 
 
 <sect1 id="menc-feat-rescale">
@@ -496,9 +513,8 @@ utilisera 2: bicubique.
 <para>
 Utilisation :
 <screen>
-mencoder <replaceable>entrée.mpg</replaceable> -ovc lavc -lavcopts
-vcodec=mpeg4 -vf scale=640:480 -o
-<replaceable>sortie.avi</replaceable>
+mencoder <replaceable>entree.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell \
+	-vf scale=640:480 -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -552,9 +568,8 @@ jetez un coup d'oeil à <filename>codecs.conf</filename>.
 <para>
 Exemple:
 <screen>
-mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag
-0x706D -ovc lavc -lavcopts vcodec=mpeg4 -o
-<replaceable>output.avi</replaceable>
+mencoder <replaceable>entree.nsv</replaceable> -oac copy -fafmttag 0x706D \
+	-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 
@@ -616,7 +631,7 @@ répertoire courant:
 <screen>
 mencoder
 mf://<replaceable>trame001.jpg,trame002.jpg</replaceable> -mf
-w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4
+w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell
 -oac copy -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
@@ -624,11 +639,27 @@ w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4
 
 <informalexample>
 <para>
+Création d'un fichier MPEG4 depuis une liste de fichiers JPEG (le fichier list.txt contenu
+dans le répertoire courant, liste les fichiers utilisés comme source, un par ligne):
+<screen>
+mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
+    -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>sortie.avi</replaceable>
+</screen>
+</para>
+</informalexample>
+
+Il est possible de mélanger différents types d'images, quelque soit 
+la méthode utilisée &mdash; fichiers individuels, joker( i.e * )
+ou fichier avec liste &mdash; à condition que, bien sûr, elles soient de même dimension.
+De fait, vous pouvez par exemple, prendre une image de type PNG
+comme titre, et ensuite faire un diaporama de vos photos JPEG.
+
+<informalexample>
+<para>
 Créer un fichier Motion JPEG (MJPEG) à partir de tous les fichiers
 JPEG du répertoire courant:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac
-copy -o <replaceable>sortie.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -636,12 +667,9 @@ copy -o <replaceable>sortie.avi</replaceable>
 <informalexample>
 <para>
 Créer un fichier non-compressé à partir de tous les fichiers
-PNG du
-répertoire courant:
+PNG du répertoire courant:
 <screen>
-mencoder mf:// -mf w=800:h=600:fps=25:type=png -ovc raw -oac
-copy -o
-<replaceable>sortie.avi</replaceable>
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -657,16 +685,14 @@ format AVI RGB brut.
 Créer un fichier Motion PNG (MPNG) à partir de tous les
 fichiers PNG du répertoire courant:
 <screen>
-mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac
-copy -o <replaceable>sortie.avi</replaceable>
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Créer un fichier Motion TGA (MTGA) à partir de tous les
-fichiers TGA
+Créer un fichier Motion TGA (MTGA) à partir de tous les fichiers TGA
 du répertoire courant:
 <screen>
 mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac
@@ -725,25 +751,26 @@ et <filename>.sub</filename> déjà existants. Vous devrez donc les
 enlever tous avant de commencer.
 </para>
 
-<example>
+<example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
 <title>Copier deux sous-titres d'un DVD pendant l'encodage
 deux passes</title>
 <screen>
-rm subtitles.idx subtitles.sub
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5
+rm <replaceable>soustitres.idx</replaceable> <replaceable>soustitres.sub</replaceable>
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 \
+	-vobsubout <replaceable>soustitres</replaceable> -vobsuboutindex 0 -sid 2
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
+	-vobsubout <replaceable>soustitres</replaceable> -vobsuboutindex 1 -sid 5
 </screen>
 </example>
 
-<example>
-<title>Copier les sous-titres français depuis un fichier
-MPEG</title>
+<example id="copying_a_french_subtitle_from_an_mpeg_file">
+<title>Copier les sous-titres français depuis un fichier MPEG</title>
 <screen>
-rm soustitres.idx soustitres.sub
-mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable> -vobsubout soustitres -vobsuboutindex 0 -vobsuboutid fr -sid 1
+rm <replaceable>soustitres.idx</replaceable> <replaceable>soustitres.sub</replaceable>
+mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable> -vobsubout <replaceable>soustitres</replaceable> -vobsuboutindex 0  \
+	-vobsuboutid fr -sid 1 -nosound -ovc copy
 </screen>
 </example>
-
 </sect1>
 
 <sect1 id="aspect">
@@ -753,12 +780,9 @@ Les fichiers des DVDs et des SVCDs (c-à-d MPEG1/2) contiennent une
 valeur de ratio d'aspect, qui décrit comment le lecteur devrait
 dimensionner le flux vidéo, pour que les personnages n'aient pas
 des "têtes d'oeuf" (ex. 480x480 + 4:3 = 640x480).
-De toute façon, quand vous encodez un fichier AVI (DivX), vous
-devez être conscients
-que les entêtes
-AVI ne stockent pas cette valeur. Redimensionner le film est assez
-infâme et coûteux en
-temps, il doit y avoir une meilleur solution !
+Cependant, quand vous encodez un fichier AVI (DivX), vous devez être conscients
+que les entêtes AVI ne stockent pas cette valeur. Redimensionner le film est assez
+infâme et coûteux en temps, il doit y avoir une meilleure solution !
 </para>
 
 <para>Il y en a une.</para>
@@ -775,7 +799,7 @@ Excepté <application>MPlayer</application>.
 <para>
 Cette fonction ne peut être utilisée qu'avec le codec
 <systemitem>mpeg4</systemitem> de
-<emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>.
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 Gardez bien à l'esprit que même si
 <application>MPlayer</application>
 lit correctement le fichier créé, les autres lecteurs sont susceptibles d'utiliser un mauvais ratio.
@@ -791,11 +815,8 @@ et <systemitem>crop</systemitem>.
 
 <para>
 Utilisation
-<screen>mencoder
-<replaceable>échantillon-svcd.mpg</replaceable> -ovc
-lavc -lavcopts vcodec=mpeg4:autoaspect -vf
-crop=714:548:0:14 -oac copy -o
-<replaceable>sortie.avi</replaceable></screen>
+<screen>mencoder <replaceable>echantillon-svcd.mpg</replaceable> -vf crop=714:548:0:14 -oac copy -ovc lavc \
+    -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -o <replaceable>sortie.avi</replaceable></screen>
 </para>
 </sect1>
 
