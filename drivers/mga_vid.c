@@ -1,10 +1,5 @@
 //#define CRTC2
 
-// YUY2 support (see config.format) added by A'rpi/ESP-team
-// double buffering added by A'rpi/ESP-team
-// brightness/contrast introduced by eyck
-// multiple card support by Attila Kinali <attila@kinali.ch>
-
 // Set this value, if autodetection fails! (video ram size in megabytes)
 // #define MGA_MEMORY_SIZE 16
 
@@ -13,20 +8,33 @@
 #define MGA_VSYNC_POS 2
 
 /*
- *
- * mga_vid.c
+ * Matrox MGA G200/G400 YUV Video Interface module Version 0.1.0
+ * BES == Back End Scaler
  *
  * Copyright (C) 1999 Aaron Holtzman
- * 
- * Module skeleton based on gutted agpgart module by Jeff Hartmann 
- * <slicer@ionet.net>
  *
- * Matrox MGA G200/G400 YUV Video Interface module Version 0.1.0
- * 
- * BES == Back End Scaler
- * 
- * This software has been released under the terms of the GNU Public
- * license. See http://www.gnu.org/copyleft/gpl.html for details.
+ * Module skeleton based on gutted agpgart module by
+ * Jeff Hartmann <slicer@ionet.net>
+ * YUY2 support (see config.format) added by A'rpi/ESP-team
+ * double buffering added by A'rpi/ESP-team
+ * brightness/contrast introduced by eyck
+ * multiple card support by Attila Kinali <attila@kinali.ch>
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 //It's entirely possible this major conflicts with something else

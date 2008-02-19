@@ -1,20 +1,29 @@
 /*
- *
- * radeon_vid.c
+ * BES YUV video overlay driver for Radeon/Rage128Pro/Rage128 cards
  *
  * Copyright (C) 2001 Nick Kurshev
- * 
- * BES YUV video overlay driver for Radeon/Rage128Pro/Rage128 cards
- * 
- * This software has been released under the terms of the GNU Public
- * license. See http://www.gnu.org/copyleft/gpl.html for details.
  *
- * This file is partly based on mga_vid and sis_vid stuff from
- * mplayer's package.
- * Also here was used code from CVS of GATOS project and X11 trees.
+ * This file is partly based on mga_vid and sis_vid from MPlayer.
+ * Code from CVS of GATOS project and X11 trees was also used.
  *
  * SPECIAL THANKS TO: Hans-Peter Raschke for active testing and hacking
  * Rage128(pro) stuff of this driver.
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #define RADEON_VID_VERSION "1.2.1"
