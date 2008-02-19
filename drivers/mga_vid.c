@@ -1,12 +1,3 @@
-//#define CRTC2
-
-// Set this value, if autodetection fails! (video ram size in megabytes)
-// #define MGA_MEMORY_SIZE 16
-
-//#define MGA_ALLOW_IRQ
-
-#define MGA_VSYNC_POS 2
-
 /*
  * Matrox MGA G200/G400 YUV Video Interface module Version 0.1.0
  * BES == Back End Scaler
@@ -40,6 +31,15 @@
 //It's entirely possible this major conflicts with something else
 //use the 'major' parameter to override the default major number (178)
 /* mknod /dev/mga_vid c 178 0 */
+
+//#define CRTC2
+
+// Set this value, if autodetection fails! (video ram size in megabytes)
+// #define MGA_MEMORY_SIZE 16
+
+//#define MGA_ALLOW_IRQ
+
+#define MGA_VSYNC_POS 2
 
 #include <linux/config.h>
 #include <linux/version.h>
