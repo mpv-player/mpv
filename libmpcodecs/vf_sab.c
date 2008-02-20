@@ -203,7 +203,7 @@ if((x/32)&1){
 					int dx;
 					int iy= y+dy - radius;
 					if     (iy<0)  iy=  -iy;
-					else if(iy>=h) iy= h-iy-1;
+					else if(iy>=h) iy= h+h-iy-1;
 
 					for(dx=0; dx<radius*2+1; dx++){
 						const int ix= x+dx - radius;
@@ -220,13 +220,13 @@ if((x/32)&1){
 					int dx;
 					int iy= y+dy - radius;
 					if     (iy<0)  iy=  -iy;
-					else if(iy>=h) iy= h-iy-1;
+					else if(iy>=h) iy= h+h-iy-1;
 
 					for(dx=0; dx<radius*2+1; dx++){
 						int ix= x+dx - radius;
 						int factor;
 						if     (ix<0)  ix=  -ix;
-						else if(ix>=w) ix= w-ix-1;
+						else if(ix>=w) ix= w+w-ix-1;
 
 						factor= f.colorDiffCoeff[256+preVal - f.preFilterBuf[ix + iy*f.preFilterStride] ]
 							*f.distCoeff[dx + dy*f.distStride];
