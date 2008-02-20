@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20085 -->
+<!-- synced with r25566 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Le Lecteur Vidéo</title>
@@ -17,7 +17,6 @@
   <year>2008</year>
   <holder>MPlayer team</holder>
 </copyright>
-<!--
 <legalnotice>
   <title>License</title>
   <para>This program is free software; you can redistribute it and/or modify
@@ -34,7 +33,6 @@
   along with this program; if not, write to the Free Software Foundation,
   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.</para>
 </legalnotice>
--->
 </bookinfo>
 
 
@@ -81,10 +79,10 @@ matériel, vous pouvez donc apprécier les films en plein écran.
 <application>MPlayer</application> supporte la décompression matérielle
 fournie par certaines cartes MPEG, telles que la <link linkend="dvb">DVB</link>
 et la <link linkend="dxr3">DXR3/Hollywood+</link>.
-Et que dire de ces superbes sous-titres lissés (<emphasis role="bold">14
+Et que dire de ces superbes sous-titres ombrés et lissés (<emphasis role="bold">14
 types supportés</emphasis>) avec des polices européennes/ISO 8859-1,2
-(Hongrois, Anglais, tchèque, etc.), Cyrilliques, Coréennes, ainsi que de
-l'OnScreenDisplay (OSD) ?
+(Hongrois, Anglais, Tchèque, etc.), Cyrilliques, Coréennes, ainsi que de
+l'Affichage Sur Ecran (ou OSD = On Screen Display) ?
 </para>
 
 <para>
@@ -92,7 +90,7 @@ Ce lecteur peut lire les fichiers MPEG endommagés (utile pour certains VCDs),
 ainsi que les mauvais fichiers AVI qui ne sont pas lisibles par le célèbre
 Windows Media Player.
 Même les fichiers AVI sans index sont lisibles, et vous pouvez reconstruire
-ses indexs soit temporairement avec l'option <option>-idx</option>,
+leurs indexs soit temporairement avec l'option <option>-idx</option>,
 soit de manière définitive avec <application>MEncoder</application>, autorisant
 ainsi l'avance/retour rapide !
 Comme vous pouvez le constater, la stabilité et la qualité sont les choses
@@ -120,13 +118,13 @@ audio <emphasis role="bold">PCM/MP3/MP3 VBR</emphasis>.
 et de décodeurs de <application>MPlayer</application></para></listitem>
 <listitem><para>
   Encodage dans tous les codecs
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> de ffmpeg
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> de FFmpeg
 </para></listitem>
 <listitem><para>
   Encodage vidéo depuis <emphasis role="bold">les tuners TV compatibles V4L</emphasis>
 </para></listitem>
 <listitem><para>
-  Encodage/multiplexage vers fichiers AVI entrelacés avec index propre
+  Encodage/multiplexage vers fichiers AVI intercalés avec index propre
 </para></listitem>
 <listitem><para>
   Création de fichiers à partir de flux audio externes
@@ -137,7 +135,7 @@ et de décodeurs de <application>MPlayer</application></para></listitem>
 <listitem><para>
   MP3 audio <emphasis role="bold">VBR</emphasis>
   <important><para>
-  L'audio MP3 VBR peut ne pas être bien lu sur les lecteurs Windows!
+  L'audio MP3 VBR peut ne pas toujours être bien lu par les lecteurs Windows!
   </para></important>
 </para></listitem>
 <listitem><para>
@@ -160,18 +158,10 @@ et de décodeurs de <application>MPlayer</application></para></listitem>
 </para></listitem>
 <listitem><para>
   Peut encoder les sous-titres DVD/VOBsub <emphasis role="bold">ET</emphasis>
-  texte dans le fichier de destination
+  le texte des sous-titres dans le fichier de destination
 </para></listitem>
 <listitem><para>
   Peut ripper les sous-titres DVD en format VOBsub
-</para></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>Fonctionnalités prévues</title>
-<listitem><para>
-  Toujours plus de formats/codecs disponibles
-  (création de fichiers VOB avec des flux DivX4/Indeo5/VIVO :)
 </para></listitem>
 </itemizedlist>
 
