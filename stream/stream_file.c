@@ -113,6 +113,12 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     return STREAM_ERROR;
   }
 
+#if defined(WIN32) || defined(__OS2__)
+  // extract '/' from '/x:/path'
+  if( filename[ 0 ] == '/' && filename[ 1 ] && filename[ 2 ] == ':' )
+    filename++;
+#endif
+
 #if defined(__CYGWIN__)|| defined(__MINGW32__)
   m |= O_BINARY;
 #endif    
