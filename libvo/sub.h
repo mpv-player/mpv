@@ -65,12 +65,10 @@ extern subtitle* vo_sub;
 
 extern unsigned char* vo_osd_text;
 
-#ifdef HAVE_TV_TELETEXT
 extern void* vo_osd_teletext_page;
 extern int vo_osd_teletext_half;
 extern int vo_osd_teletext_mode;
 extern int vo_osd_teletext_format;
-#endif
 
 extern int vo_osd_progbar_type;
 extern int vo_osd_progbar_value;   // 0..255
@@ -104,9 +102,7 @@ extern char * sub_osd_names_short[];
 extern int sub_unicode;
 extern int sub_utf8;
 
-#ifdef USE_ICONV
 extern char *sub_cp;
-#endif
 extern int sub_pos;
 extern int sub_width_p;
 extern int sub_alignment;

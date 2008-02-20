@@ -92,60 +92,26 @@ extern vo_functions_t video_out_aa;
 extern vo_functions_t video_out_caca;
 extern vo_functions_t video_out_mpegpes;
 extern vo_functions_t video_out_yuv4mpeg;
-#ifdef HAVE_DIRECTX
 extern vo_functions_t video_out_directx;
-#endif
-#ifdef HAVE_DXR2
 extern vo_functions_t video_out_dxr2;
-#endif
 extern vo_functions_t video_out_dxr3;
-#ifdef HAVE_IVTV
 extern vo_functions_t video_out_ivtv;
-#endif
-#ifdef HAVE_V4L2_DECODER
 extern vo_functions_t video_out_v4l2;
-#endif
-#ifdef HAVE_JPEG
 extern vo_functions_t video_out_jpeg;
-#endif
-#ifdef HAVE_GIF
 extern vo_functions_t video_out_gif89a;
-#endif
-#ifdef HAVE_VESA
 extern vo_functions_t video_out_vesa;
-#endif
-#ifdef HAVE_DIRECTFB
 extern vo_functions_t video_out_directfb;
-#ifdef HAVE_DFBMGA
 extern vo_functions_t video_out_dfbmga;
-#endif
-#endif
-#ifdef CONFIG_VIDIX
 extern vo_functions_t video_out_xvidix;
 extern vo_functions_t video_out_winvidix;
 extern vo_functions_t video_out_cvidix;
-#endif
-#ifdef HAVE_TDFX_VID
 extern vo_functions_t video_out_tdfx_vid;
-#endif
-#ifdef HAVE_XVR100
 extern vo_functions_t video_out_xvr100;
-#endif
-#ifdef HAVE_TGA
 extern vo_functions_t video_out_tga;
-#endif
-#ifdef MACOSX
-#ifdef MACOSX_COREVIDEO
 extern vo_functions_t video_out_macosx;
-#endif
 extern vo_functions_t video_out_quartz;
-#endif
-#ifdef HAVE_PNM
 extern vo_functions_t video_out_pnm;
-#endif
-#ifdef HAVE_MD5SUM
 extern vo_functions_t video_out_md5sum;
-#endif
 
 const vo_functions_t* const video_out_drivers[] =
 {

@@ -108,10 +108,8 @@ int xv_test_ck( void * arg );
 int xv_test_ckm( void * arg );
 #endif
 
-#ifdef HAVE_NEW_GUI
  extern void vo_setwindow( Window w,GC g );
  extern void vo_x11_putkey(int key);
-#endif
 
 void saver_off( Display * );
 void saver_on( Display * );

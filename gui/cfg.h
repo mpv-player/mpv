@@ -11,25 +11,15 @@ extern int    gtkAONorm;
 extern int    gtkAOFakeSurround;
 extern int    gtkAOExtraStereo;
 extern float  gtkAOExtraStereoMul;
-#ifdef USE_OSS_AUDIO
 extern char * gtkAOOSSMixer;
 extern char * gtkAOOSSMixerChannel;
 extern char * gtkAOOSSDevice;
-#endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
 extern char * gtkAOALSAMixer;
 extern char * gtkAOALSAMixerChannel;
 extern char * gtkAOALSADevice;
-#endif
-#ifdef HAVE_SDL
 extern char * gtkAOSDLDriver;
-#endif
-#ifdef USE_ESD
 extern char * gtkAOESDDevice;
-#endif
-#ifdef HAVE_DXR3
 extern char * gtkDXR3Device;
-#endif
 
 extern int    gtkCacheOn;
 extern int    gtkCacheSize;

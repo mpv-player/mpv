@@ -13,64 +13,26 @@
 ao_data_t ao_data={0,0,0,0,OUTBURST,-1,0};
 char *ao_subdevice = NULL;
 
-#ifdef USE_OSS_AUDIO
 extern ao_functions_t audio_out_oss;
-#endif
-#ifdef MACOSX
 extern ao_functions_t audio_out_macosx;
-#endif
-#ifdef USE_ARTS
 extern ao_functions_t audio_out_arts;
-#endif
-#ifdef USE_ESD
 extern ao_functions_t audio_out_esd;
-#endif
-#ifdef USE_PULSE
 extern ao_functions_t audio_out_pulse;
-#endif
-#ifdef USE_JACK
 extern ao_functions_t audio_out_jack;
-#endif
-#ifdef USE_OPENAL
 extern ao_functions_t audio_out_openal;
-#endif
 extern ao_functions_t audio_out_null;
-#ifdef HAVE_ALSA5
  extern ao_functions_t audio_out_alsa5;
-#endif
-#ifdef HAVE_ALSA9
  extern ao_functions_t audio_out_alsa;
-#endif
-#ifdef HAVE_ALSA1X
  extern ao_functions_t audio_out_alsa;
-#endif
-#ifdef HAVE_NAS
 extern ao_functions_t audio_out_nas;
-#endif
-#ifdef HAVE_SDL
 extern ao_functions_t audio_out_sdl;
-#endif
-#ifdef USE_SUN_AUDIO
 extern ao_functions_t audio_out_sun;
-#endif
-#ifdef USE_SGI_AUDIO
 extern ao_functions_t audio_out_sgi;
-#endif
-#ifdef HAVE_WIN32WAVEOUT
 extern ao_functions_t audio_out_win32;
-#endif
-#ifdef HAVE_DIRECTX
 extern ao_functions_t audio_out_dsound;
-#endif
-#ifdef HAVE_DXR2
 extern ao_functions_t audio_out_dxr2;
-#endif
-#ifdef HAVE_IVTV
 extern ao_functions_t audio_out_ivtv;
-#endif
-#ifdef HAVE_V4L2_DECODER
 extern ao_functions_t audio_out_v4l2;
-#endif
 extern ao_functions_t audio_out_mpegpes;
 extern ao_functions_t audio_out_pcm;
 extern ao_functions_t audio_out_pss;

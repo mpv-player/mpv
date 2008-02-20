@@ -30,9 +30,7 @@ extern menu_info_t menu_info_filesel;
 extern menu_info_t menu_info_txt;
 extern menu_info_t menu_info_console;
 extern menu_info_t menu_info_pref;
-#ifdef HAS_DVBIN_SUPPORT
 extern menu_info_t menu_info_dvbsel;
-#endif
 
 
 menu_info_t* menu_info_list[] = {

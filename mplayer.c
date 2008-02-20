@@ -316,9 +316,7 @@ char** audio_driver_list=NULL;
 // sub:
 char *font_name=NULL;
 char *sub_font_name=NULL;
-#ifdef HAVE_FONTCONFIG
 extern int font_fontconfig;
-#endif
 float font_factor=0.75;
 char **sub_name=NULL;
 float sub_delay=0;
