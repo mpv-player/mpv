@@ -2852,7 +2852,7 @@ if(slave_mode)
 #ifndef __MINGW32__
    mp_input_add_cmd_fd(0,1,NULL,NULL);
 #else
-  mp_input_add_cmd_fd(0,0,mp_input_win32_slave_cmd_func,NULL);
+  mp_input_add_cmd_fd(0,0,mp_input_slave_cmd_func,NULL);
 #endif
 else if(!noconsolecontrols)
     mp_input_add_event_fd(0, getch2);

@@ -13,7 +13,7 @@
 // HACK, stdin is used as something else below
 #undef stdin
 
-int mp_input_win32_slave_cmd_func(int fd,char* dest,int size){
+int mp_input_slave_cmd_func(int fd,char* dest,int size){
   DWORD retval;
   HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
   if(!PeekNamedPipe(stdin, NULL, size, &retval, NULL, NULL) || !retval){
