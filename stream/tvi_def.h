@@ -1,3 +1,6 @@
+#ifndef TVI_DEF_H
+#define TVI_DEF_H
+
 #include <stdlib.h> /* malloc */
 #include <string.h> /* memset */
 
@@ -103,3 +106,5 @@ static inline void fill_blank_frame(char* buffer,int len,int fmt){
         memset(buffer,0xC0,len);
     }
 }
+
+#endif /* TVI_DEF_H */

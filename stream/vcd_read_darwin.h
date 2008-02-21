@@ -1,3 +1,6 @@
+#ifndef VCD_READ_DARWIN_H
+#define VCD_READ_DARWIN_H
+
 #include <sys/types.h>
 #include <CoreFoundation/CFBase.h>
 #include <IOKit/IOKitLib.h>
@@ -200,3 +203,4 @@ static int vcd_read(mp_vcd_priv_t* vcd,char *mem)
       return VCD_SECTOR_DATA;
 }
 
+#endif /* VCD_READ_DARWIN_H */

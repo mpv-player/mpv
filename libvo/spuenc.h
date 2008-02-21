@@ -19,6 +19,9 @@
  *
  */
 
+#ifndef SPUENC_H
+#define SPUENC_H
+
 #include <stdlib.h>
 #define DATASIZE 53220
 
@@ -38,3 +41,5 @@ typedef struct {
 
 void pixbuf_encode_rle(int x, int y, int w, int h, char *inbuf, int stride, encodedata *ed);
 void pixbuf_delete(pixbuf* pb);
+
+#endif /* SPUENC_H */

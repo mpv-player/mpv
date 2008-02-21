@@ -1,3 +1,6 @@
+#ifndef VCD_READ_H
+#define VCD_READ_H
+
 #include "libavutil/intreadwrite.h"
 //=================== VideoCD ==========================
 #if	defined(linux) || defined(sun) || defined(__bsdi__)
@@ -221,3 +224,5 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
 #error vcd is not yet supported on this arch...
 
 #endif
+
+#endif /* VCD_READ_H */
