@@ -8529,11 +8529,6 @@ $_def_gethostbyname2
 
 $_def_altivec_h	// enables usage of altivec.h
 
-/* libmpeg2 uses a different feature test macro for mediaLib */
-#ifdef HAVE_MLIB
-#define LIBMPEG2_MLIB 1
-#endif
-
 /* libvo options */
 #define SCREEN_SIZE_X 1
 #define SCREEN_SIZE_Y 1
