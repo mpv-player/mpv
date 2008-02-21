@@ -2849,11 +2849,7 @@ current_module = "init_input";
 mp_input_init(use_gui);
   mp_input_add_key_fd(-1,0,mplayer_get_key,NULL);
 if(slave_mode)
-#ifndef __MINGW32__
-   mp_input_add_cmd_fd(0,1,NULL,NULL);
-#else
-  mp_input_add_cmd_fd(0,0,mp_input_slave_cmd_func,NULL);
-#endif
+  mp_input_add_cmd_fd(0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
 else if(!noconsolecontrols)
     mp_input_add_event_fd(0, getch2);
 

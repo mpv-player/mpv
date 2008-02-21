@@ -24,6 +24,9 @@ endif
 ifeq ($(TARGET_OS),MINGW32)
 getch = getch2-win.c
 endif
+ifeq ($(TARGET_OS),OS/2)
+getch = getch2-os2.c
+endif
 SRCS_COMMON += $(timer)
 SRCS_COMMON += $(getch)
 
