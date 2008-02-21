@@ -5978,9 +5978,18 @@ p(x,y): returns the value of the pixel at location x/y of the current plane.
 Generate various test patterns.
 .
 .TP
-.B rgbtest
+.B rgbtest[=width:height]
 Generate an RGB test pattern useful for detecting RGB vs BGR issues.
 You should see a red, green and blue stripe from top to bottom.
+.RSs
+.IPs <width>
+Desired width of generated image (default: 0).
+0 means width of input image.
+.br
+.IPs <height>
+Desired height of generated image (default: 0).
+0 means width of input image.
+.RE
 .
 .TP
 .B lavc[=quality:fps]
