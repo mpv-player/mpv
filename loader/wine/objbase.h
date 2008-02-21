@@ -3,7 +3,7 @@
 
 #ifndef STDCALL
 #define STDCALL __attribute__((__stdcall__))
-#endif /* WINE_OBJBASE_H */
+#endif
 
 /* from objbase.h needed for ve_vfw.c */
 typedef enum tagCOINIT {
