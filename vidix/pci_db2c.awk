@@ -46,17 +46,17 @@ BEGIN {
     print_head(name_h_file);
     print_head(dev_ids_file);
     print_includes(dev_ids_file);
-    print "#ifndef PCI_VENDORS_INCLUDED" >vendor_file
-    print "#define PCI_VENDORS_INCLUDED 1">vendor_file
+    print "#ifndef PCI_VENDORS_H" >vendor_file
+    print "#define PCI_VENDORS_H">vendor_file
     print "" >vendor_file
-    print "#ifndef PCI_IDS_INCLUDED" >ids_file
-    print "#define PCI_IDS_INCLUDED 1">ids_file
+    print "#ifndef PCI_IDS_H" >ids_file
+    print "#define PCI_IDS_H">ids_file
     print "" >ids_file
     print "#include \"pci_vendors.h\"">ids_file
     print "" >ids_file
 
-    print "#ifndef PCI_NAMES_INCLUDED" >name_h_file
-    print "#define PCI_NAMES_INCLUDED 1">name_h_file
+    print "#ifndef PCI_NAMES_H" >name_h_file
+    print "#define PCI_NAMES_H">name_h_file
     print "" >name_h_file
     print_name_struct(name_h_file);
     print "#include <stddef.h>">name_file
@@ -116,11 +116,11 @@ BEGIN {
     }
     #print "Total lines parsed:", line;
     print "">vendor_file
-    print "#endif/*PCI_VENDORS_INCLUDED*/">vendor_file
+    print "#endif /* PCI_VENDORS_H */">vendor_file
     print "">ids_file
-    print "#endif/*PCI_IDS_INCLUDED*/">ids_file
+    print "#endif /* PCI_IDS_H */">ids_file
     print "">name_h_file
-    print "#endif/*PCI_NAMES_INCLUDED*/">name_h_file
+    print "#endif /* PCI_NAMES_H */">name_h_file
     if (with_pci_db) print "};">name_file
     print "{ 0xFFFF,  NULL }" >dev_ids_file;
     print "};">dev_ids_file
