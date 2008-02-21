@@ -1,4 +1,4 @@
-.\" synced with r26017
+.\" synced with r26019
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -4957,6 +4957,28 @@ Voir aussi la section des filtres audio de la documentation.
 .PP
 I NOTE\ :
 Pour obtenir une liste complète des filtres audio disponibles, voir \-af help.
+.sp 1
+Les filtres audios sont gérés en liste.
+Voici quelques commandes pour gérer la liste de filtres.
+.
+.TP
+.B \-af\-add <filtre1[,filtre2,...]>
+Ajoute le filtre donné en argument à la fin de la liste de filtres.
+.
+.TP
+.B \-af\-pre <filtre1[,filtre2,...]>
+Ajoute le filtre donné en argument au début de la liste de filtres.
+.
+.TP
+.B \-af\-del <index1[,index2,...]>
+Supprime le filtre à l'index indiqué.
+Les numéros d'index commencent à 0, les nombres négatifs indiquent la fin
+de la liste (\-1 pour le dernier).
+.
+.TP
+.B \-af\-clr
+Vide complètement la liste de filtres.
+.
 .PP
 Les filtres disponibles sont:
 .
@@ -5633,7 +5655,7 @@ position x;y à partir de du coin supérieur gauche de la plus grande image.
 Pour avoir une liste complète des filtres vidéo disponibles, voir \-vf help.
 .sp 1
 Les filtres vidéo sont gérés en liste.
-Il y a quelques commandes pour gérer la liste de filtres.
+Voici quelques commandes pour gérer la liste de filtres.
 .
 .TP
 .B \-vf\-add <filtre1[,filtre2,...]>
