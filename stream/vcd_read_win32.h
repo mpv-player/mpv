@@ -1,3 +1,6 @@
+#ifndef VCD_READ_WIN32_H
+#define VCD_READ_WIN32_H
+
 #include <ddk/ntddcdrm.h>
 
 typedef struct mp_vcd_priv_st mp_vcd_priv_t;
@@ -126,6 +129,8 @@ static int vcd_read(mp_vcd_priv_t* vcd, char *mem)
     memcpy(mem, &vcd->buf[VCD_SECTOR_OFFS], VCD_SECTOR_DATA);
     return VCD_SECTOR_DATA;
 }
+
+#endif /* VCD_READ_WIN32_H */
 
 /*
 vim:noet:sw=4:cino=\:0,g0
