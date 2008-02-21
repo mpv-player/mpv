@@ -161,7 +161,6 @@ static inline void idct_col (int16_t * const block)
     block[8*7] = (a0 - b0) >> 17;
 }
 
-#ifdef CAN_COMPILE_ALPHA_MVI
 void mpeg2_idct_copy_mvi (int16_t * block, uint8_t * dest, const int stride)
 {
     uint64_t clampmask;
@@ -294,7 +293,6 @@ void mpeg2_idct_add_mvi (const int last, int16_t * block,
 	stq (p7, dest + 7 * stride);
     }
 }
-#endif
 
 void mpeg2_idct_copy_alpha (int16_t * block, uint8_t * dest, const int stride)
 {

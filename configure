@@ -317,7 +317,7 @@ Codecs:
   --enable-libdca           enable libdca support [autodetect]
   --disable-mp3lib          disable builtin mp3lib [enabled]
   --disable-liba52          disable builtin liba52 [enabled]
-  --disable-libmpeg2        disable builtin libmpeg2 [enabled]
+  --disable-libmpeg2        disable builtin libmpeg2 [autodetect]
   --disable-musepack        disable musepack support [autodetect]
   --disable-libamr_nb       disable libamr narrowband [autodetect]
   --disable-libamr_wb       disable libamr wideband [autodetect]
@@ -568,7 +568,7 @@ _theora=auto
 _mp3lib=yes
 _liba52=yes
 _libdca=auto
-_libmpeg2=yes
+_libmpeg2=auto
 _faad_internal=auto
 _faad_external=auto
 _faad_fixed=no
@@ -2179,15 +2179,6 @@ EOF
     echores "$proc"
     
     _optimizing="$proc"
-
-    echocheck "MVI instruction support in GCC"
-    if test "$_cc_major" -ge "3" && test "$_mvi" = "1" ; then
-        _def_gcc_mvi_support="#define CAN_COMPILE_ALPHA_MVI 1"
-	echores "yes"
-    else
-	_def_gcc_mvi_support="#undef CAN_COMPILE_ALPHA_MVI"
-	echores "no, GCC = `$_cc -dumpversion 2>&1` (must be >= 3), CPU = $proc (must be pca56 or later)"
-    fi
     ;;
 
   mips)
@@ -6039,6 +6030,17 @@ fi
 echores "$_libdca"
 
 echocheck "internal libmpeg2 support"
+if test "$_libmpeg2" = auto ; then
+  _libmpeg2=yes
+  if alpha && test cc_vendor=gnu; then
+    case $cc_version in
+      2*|3.0*|3.1*) # cannot compile MVI instructions
+        _libmpeg2=no
+        _res_comment="broken gcc"
+        ;;
+    esac
+  fi
+fi
 if test "$_libmpeg2" = yes ; then
   _def_libmpeg2='#define USE_LIBMPEG2 1'
   _codecmodules="libmpeg2 $_codecmodules"
@@ -8328,9 +8330,6 @@ $_def_fast_unaligned
 /* For the PPC.  G5 has the dcbzl when in 64bit mode but G4s and earlier do not
    have the instruction. */
 $_def_dcbzl
-
-/* only gcc3 can compile mvi instructions (libmpeg2) */
-$_def_gcc_mvi_support
 
 /* Define this for Cygwin build for win32 */
 $_def_confwin32

@@ -79,24 +79,6 @@
  #endif
      asm volatile ("mtspr 256, %0\n\t"
  		  VAND (0, 0, 0)
-@@ -195,6 +222,7 @@
- #ifdef ARCH_ALPHA
- static inline uint32_t arch_accel (void)
- {
-+#ifdef CAN_COMPILE_ALPHA_MVI
-     uint64_t no_mvi;
- 
-     asm volatile ("amask %1, %0"
-@@ -202,6 +230,9 @@
- 		  : "rI" (256));	/* AMASK_MVI */
-     return no_mvi ? MPEG2_ACCEL_ALPHA : (MPEG2_ACCEL_ALPHA |
- 					 MPEG2_ACCEL_ALPHA_MVI);
-+#else
-+    return MPEG2_ACCEL_ALPHA;
-+#endif
- }
- #endif /* ARCH_ALPHA */
- #endif /* ACCEL_DETECT */
 @@ -212,7 +243,7 @@
  
      accel = 0;
@@ -233,40 +215,6 @@
  	mpeg2_idct_copy = mpeg2_idct_copy_mmx;
  	mpeg2_idct_add = mpeg2_idct_add_mmx;
  	mpeg2_idct_mmx_init ();
-@@ -254,11 +261,14 @@
-     } else
- #endif
- #ifdef ARCH_ALPHA
-+#ifdef CAN_COMPILE_ALPHA_MVI
-     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
- 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
- 	mpeg2_idct_add = mpeg2_idct_add_mvi;
- 	mpeg2_idct_alpha_init ();
--    } else if (accel & MPEG2_ACCEL_ALPHA) {
-+    } else
-+#endif
-+    if (accel & MPEG2_ACCEL_ALPHA) {
- 	int i;
- 
- 	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
---- libmpeg2/idct_alpha.c	2006-06-16 20:12:26.000000000 +0200
-+++ libmpeg2/idct_alpha.c	2006-06-16 20:12:50.000000000 +0200
-@@ -157,6 +161,7 @@
-     block[8*7] = (a0 - b0) >> 17;
- }
- 
-+#ifdef CAN_COMPILE_ALPHA_MVI
- void mpeg2_idct_copy_mvi (int16_t * block, uint8_t * dest, const int stride)
- {
-     uint64_t clampmask;
-@@ -289,6 +294,7 @@
- 	stq (p7, dest + 7 * stride);
-     }
- }
-+#endif
- 
- void mpeg2_idct_copy_alpha (int16_t * block, uint8_t * dest, const int stride)
- {
 --- libmpeg2/idct_mmx.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/idct_mmx.c	2006-06-16 20:12:50.000000000 +0200
 @@ -23,7 +27,7 @@
