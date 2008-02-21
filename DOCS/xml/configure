@@ -132,7 +132,7 @@ for _try_dtd in \
   /usr/share/sgml/docbook/dtd/*/docbookx.dtd \
   /usr/share/sgml/docbook/dtd/xml/*/docbookx.dtd \
   /usr/share/docbook-xml*/docbookx.dtd \
-  /opt/local/share/xml/docbook-xml/*/docbookx.dtd \
+  /opt/local/share/xml/docbook*/*/docbookx.dtd \
   /usr/share/apps/ksgmltools2/docbook/*/docbookx.dtd
 do
   if test -f "$_try_dtd"
