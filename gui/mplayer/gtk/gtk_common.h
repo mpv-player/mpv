@@ -1,6 +1,6 @@
 
-#ifndef GUI_COMMON_H
-#define GUI_COMMON_H
+#ifndef GUI_GTK_COMMON_H
+#define GUI_GTK_COMMON_H
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
@@ -21,4 +21,4 @@ extern GtkWidget * AddVScaler( GtkAdjustment * adj,GtkWidget * parent,int digit 
 extern GtkWidget * AddComboBox( GtkWidget * parent );
 extern void WidgetDestroy( GtkWidget * widget,GtkWidget ** widget_pointer );
 
-#endif /* GUI_COMMON_H */
+#endif /* GUI_GTK_COMMON_H */
