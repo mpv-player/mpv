@@ -7874,7 +7874,7 @@ cat > $TMPH << EOF
 
 /* Protect against multiple inclusion */
 #ifndef MPLAYER_CONFIG_H
-#define MPLAYER_CONFIG_H 1
+#define MPLAYER_CONFIG_H
 
 #define CONFIGURATION "$_configuration"
 
