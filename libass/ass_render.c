@@ -1623,6 +1623,7 @@ static inline void transform_point_3d(double *a, double *m, double *b)
  */
 static inline void transform_vector_3d(FT_Vector* v, double *m) {
 	const double camera = 2500 * frame_context.border_scale; // camera distance
+	const double cutoff_z = 10.;
 	double a[4], b[4];
 	a[0] = d6_to_double(v->x);
 	a[1] = d6_to_double(v->y);
@@ -1641,8 +1642,8 @@ static inline void transform_vector_3d(FT_Vector* v, double *m) {
 	b[0] *= camera;
 	b[1] *= camera;
 	b[3] = 8 * b[2] + camera;
-	if (b[3] < 0.001 && b[3] > -0.001)
-		b[3] = b[3] < 0. ? -0.001 : 0.001;
+	if (b[3] < cutoff_z)
+		b[3] = cutoff_z;
 	v->x = double_to_d6(b[0] / b[3]);
 	v->y = double_to_d6(b[1] / b[3]);
 }
