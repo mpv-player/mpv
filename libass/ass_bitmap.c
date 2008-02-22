@@ -150,6 +150,20 @@ static bitmap_t* copy_bitmap(const bitmap_t* src)
 	return dst;
 }
 
+static int check_glyph_area(FT_Glyph glyph)
+{
+	FT_BBox bbox;
+	long long dx, dy;
+	FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_TRUNCATE, &bbox);
+	dx = bbox.xMax - bbox.xMin;
+	dy = bbox.yMax - bbox.yMin;
+	if (dx * dy > 8000000) {
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_GlyphBBoxTooLarge, (int)dx, (int)dy);
+		return 1;
+	} else
+		return 0;
+}
+
 static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 {
 	FT_BitmapGlyph bg;
@@ -161,6 +175,8 @@ static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 	int i;
 	int error;
 
+	if (check_glyph_area(glyph))
+		return 0;
 	error = FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, 0, 0);
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FT_Glyph_To_BitmapError, error);

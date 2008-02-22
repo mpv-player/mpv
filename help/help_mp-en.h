@@ -2010,6 +2010,7 @@ static char help_text[]=
 // ass_bitmap.c
 #define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] FT_Glyph_To_Bitmap error %d \n"
 #define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Unsupported pixel mode: %d\n"
+#define MSGTR_LIBASS_GlyphBBoxTooLarge "[ass] Glyph bounding box too large: %dx%dpx\n"
 
 // ass.c
 #define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Warning: no style named '%s' found, using '%s'\n"
