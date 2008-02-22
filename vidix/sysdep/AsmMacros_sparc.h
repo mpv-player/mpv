@@ -59,8 +59,8 @@
  *    advised of the possibility of such damage.
  */
 
-#ifndef ASMMACROS_SPARC_H
-#define ASMMACROS_SPARC_H
+#ifndef MPLAYER_ASMMACROS_SPARC_H
+#define MPLAYER_ASMMACROS_SPARC_H
 
 #ifndef ASI_PL
 #define ASI_PL 0x88
@@ -105,4 +105,4 @@ static __inline__ unsigned int inl(unsigned long port)
 #define intr_disable()
 #define intr_enable()
 
-#endif /* ASMMACROS_SPARC_H */
+#endif /* MPLAYER_ASMMACROS_SPARC_H */

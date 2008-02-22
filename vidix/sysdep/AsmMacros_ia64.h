@@ -59,8 +59,8 @@
  *    advised of the possibility of such damage.
  */
 
-#ifndef ASMMACROS_IA64_H
-#define ASMMACROS_IA64_H
+#ifndef MPLAYER_ASMMACROS_IA64_H
+#define MPLAYER_ASMMACROS_IA64_H
 
 #if defined(linux)
 #include <sys/io.h>
@@ -68,4 +68,4 @@
 #error This stuff is not ported on your system
 #endif
 
-#endif /* ASMMACROS_IA64_H */
+#endif /* MPLAYER_ASMMACROS_IA64_H */

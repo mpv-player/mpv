@@ -4,8 +4,8 @@
     (C) 2002 Alex Beregszaszi <alex@fsn.hu>
 */
 
-#ifndef DHAHELPER_H
-#define DHAHELPER_H
+#ifndef MPLAYER_DHAHELPER_H
+#define MPLAYER_DHAHELPER_H
 
 #include <linux/ioctl.h>
 
@@ -66,4 +66,4 @@ typedef struct dhahelper_pci_s
 #define DHAHELPER_MTRR		_IOWR('D', 3, dhahelper_mtrr_t)
 #define DHAHELPER_PCI		_IOWR('D', 4, dhahelper_pci_t)
 
-#endif /* DHAHELPER_H */
+#endif /* MPLAYER_DHAHELPER_H */

@@ -11,8 +11,8 @@
  *
  */ 
 
-#ifndef PM3_REGS_H
-#define PM3_REGS_H
+#ifndef MPLAYER_PM3_REGS_H
+#define MPLAYER_PM3_REGS_H
 
 /**********************************************
 *  GLINT Permedia3 Control Status registers   *
@@ -1110,4 +1110,4 @@ do{						\
     temp = READ_REG(PM3RD_IndexedData);			\
 }
 #endif
-#endif /* PM3_REGS_H */
+#endif /* MPLAYER_PM3_REGS_H */

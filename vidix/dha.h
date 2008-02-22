@@ -33,8 +33,8 @@
  *   Original location: www.linuxvideo.org/gatos
  */
 
-#ifndef DHA_H
-#define DHA_H
+#ifndef MPLAYER_DHA_H
+#define MPLAYER_DHA_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,4 +92,4 @@ extern int	mtrr_set_type(unsigned base,unsigned size,int type);
 }
 #endif
 
-#endif /* DHA_H */
+#endif /* MPLAYER_DHA_H */

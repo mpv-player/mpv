@@ -22,8 +22,8 @@
  * and partly compatible with Rage128 set (in OV0, CAP0, CAP1 parts)
  */
 
-#ifndef	RADEON_H
-#define	RADEON_H
+#ifndef	MPLAYER_RADEON_H
+#define	MPLAYER_RADEON_H
 
 #define	RADEON_REGSIZE			0x4000
 #define	MM_INDEX			0x0000
@@ -2235,4 +2235,4 @@
 
 /* End of field	default	values.	*/
 
-#endif	/* RADEON_H */
+#endif	/* MPLAYER_RADEON_H */

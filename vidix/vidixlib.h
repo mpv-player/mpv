@@ -32,8 +32,8 @@
  * NOTE: This interface is introduces as driver interface.
  */
 
-#ifndef VIDIXLIB_H
-#define VIDIXLIB_H
+#ifndef MPLAYER_VIDIXLIB_H
+#define MPLAYER_VIDIXLIB_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -141,4 +141,4 @@ int	  vdlPlaybackCopyFrame(VDL_HANDLE, const vidix_dma_t * );
 }
 #endif
 
-#endif /* VIDIXLIB_H */
+#endif /* MPLAYER_VIDIXLIB_H */

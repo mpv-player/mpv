@@ -23,8 +23,8 @@
  */
 /* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/trident/trident_regs.h,v 1.22 2002/01/11 13:06:30 alanh Exp $ */
 
-#ifndef CYBERBLADE_REGS_H
-#define CYBERBLADE_REGS_H
+#ifndef MPLAYER_CYBERBLADE_REGS_H
+#define MPLAYER_CYBERBLADE_REGS_H
 
 #define DEBUG 1
 
@@ -137,4 +137,4 @@
 
 /* --- */
 
-#endif /* CYBERBLADE_REGS_H */
+#endif /* MPLAYER_CYBERBLADE_REGS_H */

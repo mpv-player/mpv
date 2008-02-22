@@ -59,8 +59,8 @@
  *    advised of the possibility of such damage.
  */
 
-#ifndef ASMMACROS_POWERPC_H
-#define ASMMACROS_POWERPC_H
+#ifndef MPLAYER_ASMMACROS_POWERPC_H
+#define MPLAYER_ASMMACROS_POWERPC_H
 
 #if defined(Lynx) || defined(__OpenBSD__)
 
@@ -112,4 +112,4 @@ static __inline__ unsigned long inl(short port)
 
 #endif
 
-#endif /* ASMMACROS_POWERPC_H */
+#endif /* MPLAYER_ASMMACROS_POWERPC_H */

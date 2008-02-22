@@ -59,8 +59,8 @@
  *    advised of the possibility of such damage.
  */
 
-#ifndef ASMMACROS_X86_H
-#define ASMMACROS_X86_H
+#ifndef MPLAYER_ASMMACROS_X86_H
+#define MPLAYER_ASMMACROS_X86_H
 
 //#if defined (WINNT)
 //#error This stuff is not ported on your system
@@ -345,4 +345,4 @@ static __inline__ void intr_enable()
 
 //#endif
 
-#endif /* ASMMACROS_X86_H */
+#endif /* MPLAYER_ASMMACROS_X86_H */

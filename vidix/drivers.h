@@ -19,12 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef VIDIX_DRIVERS_H
-#define VIDIX_DRIVERS_H
+#ifndef MPLAYER_DRIVERS_H
+#define MPLAYER_DRIVERS_H
 
 void vidix_register_all_drivers (void);
 
 int vidix_find_driver (VDXContext *ctx, const char *name,
                        unsigned int cap, int verbose);
 
-#endif /* VIDIX_DRIVERS_H */
+#endif /* MPLAYER_DRIVERS_H */

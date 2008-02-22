@@ -22,8 +22,8 @@
  * and personally my ideas.
  */
 
-#ifndef FOURCC_H
-#define FOURCC_H
+#ifndef MPLAYER_FOURCC_H
+#define MPLAYER_FOURCC_H
 
 /*  Four-character-code (FOURCC) */
 #define vid_fourcc(a,b,c,d)\
@@ -79,4 +79,4 @@
 /*  Vendor-specific formats   */
 #define IMGFMT_WNVA    vid_fourcc('W','N','V','A') /* Winnov hw compress */
 
-#endif /* FOURCC_H */
+#endif /* MPLAYER_FOURCC_H */

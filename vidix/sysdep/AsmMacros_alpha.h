@@ -59,8 +59,9 @@
  *    advised of the possibility of such damage.
  */
 
-#ifndef ASMMACROS_ALPHA_H
-#define ASMMACROS_ALPHA_H
+#ifndef MPLAYER_ASMMACROS_ALPHA_H
+#define MPLAYER_ASMMACROS_ALPHA_H
+
 #if defined (linux)
 #include <sys/io.h>
 #elif defined (__FreeBSD__)
@@ -78,4 +79,4 @@ extern u_int32_t inl(u_int32_t port);
 #define intr_disable()
 #define intr_enable()
 
-#endif /* ASMMACROS_ALPHA_H */
+#endif /* MPLAYER_ASMMACROS_ALPHA_H */

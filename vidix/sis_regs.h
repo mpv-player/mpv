@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef VIDIX_SIS_REGS_H
-#define VIDIX_SIS_REGS_H
+#ifndef MPLAYER_SIS_REGS_H
+#define MPLAYER_SIS_REGS_H
 
 #define inSISREG(base)          INPORT8(base)
 #define outSISREG(base,val)     OUTPORT8(base, val)
@@ -410,4 +410,4 @@
 
 /* Not public (yet?) */
 
-#endif				/* VIDIX_SIS_REGS_H */
+#endif /* MPLAYER_SIS_REGS_H */

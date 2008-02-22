@@ -23,8 +23,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef UNICHROME_REGS_H
-#define UNICHROME_REGS_H
+#ifndef MPLAYER_UNICHROME_REGS_H
+#define MPLAYER_UNICHROME_REGS_H
 
 /* Video status flag */
 
@@ -632,4 +632,4 @@
 
 
 
-#endif /* UNICHROME_REGS_H */
+#endif /* MPLAYER_UNICHROME_REGS_H */

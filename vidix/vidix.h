@@ -32,8 +32,8 @@
  * NOTE: This interface is introduces as driver interface.
  */
 
-#ifndef VIDIX_H
-#define VIDIX_H
+#ifndef MPLAYER_VIDIX_H
+#define MPLAYER_VIDIX_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -314,4 +314,4 @@ typedef struct vidix_oem_fx_s
 }
 #endif
 
-#endif /* VIDIX_H */
+#endif /* MPLAYER_VIDIX_H */

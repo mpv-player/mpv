@@ -14,8 +14,8 @@
  *
  */ 
 
-#ifndef GLINT_REGS_H
-#define GLINT_REGS_H
+#ifndef MPLAYER_GLINT_REGS_H
+#define MPLAYER_GLINT_REGS_H
 
 /**********************************************
 *  GLINT 500TX Configuration Region Registers *
@@ -1301,4 +1301,4 @@ do{								\
 #define ACCESSCHIP2()						\
     pGlint->IOOffset = 0x10000;
 
-#endif /* GLINT_REGS_H */
+#endif /* MPLAYER_GLINT_REGS_H */

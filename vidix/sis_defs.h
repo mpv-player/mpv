@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef VIDIX_SIS_DEFS_H
-#define VIDIX_SIS_DEFS_H
+#ifndef MPLAYER_SIS_DEFS_H
+#define MPLAYER_SIS_DEFS_H
 
 /** PCI IDs **/
 #define VENDOR_SIS            0x1039
@@ -104,4 +104,4 @@ extern unsigned int sis_detected_crt2_devices;
 extern unsigned int sis_force_crt2_type;
 extern int sis_device_id;
 
-#endif				/* VIDIX_SIS_DEFS_H */
+#endif /* MPLAYER_SIS_DEFS_H */

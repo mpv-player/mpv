@@ -1,7 +1,7 @@
 /* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/savage/savage_regs.h,v 1.10 2001/11/04 22:17:48 alanh Exp $ */
 
-#ifndef SAVAGE_REGS_H
-#define SAVAGE_REGS_H
+#ifndef MPLAYER_SAVAGE_REGS_H
+#define MPLAYER_SAVAGE_REGS_H
 
 #define S3_SAVAGE3D_SERIES(chip)  ((chip>=S3_SAVAGE3D) && (chip<=S3_SAVAGE_MX))
 
@@ -276,4 +276,4 @@ do {                                    \
                            & VSCALING_Mask)
 
 
-#endif /* SAVAGE_REGS_H */
+#endif /* MPLAYER_SAVAGE_REGS_H */
