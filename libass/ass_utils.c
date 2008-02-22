@@ -81,6 +81,7 @@ int strtocolor(char** q, uint32_t* res)
 	return result;
 }
 
+#if 0
 static void sprint_tag(uint32_t tag, char* dst)
 {
 	dst[0] = (tag >> 24) & 0xFF;
@@ -105,3 +106,4 @@ void dump_glyph(FT_Glyph g)
 		printf("  point %f, %f \n", d6_to_double(o->points[i].x), d6_to_double(o->points[i].y));
 	}
 }
+#endif
