@@ -231,6 +231,7 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 	int error;
 	FT_Library ft;
 	ass_renderer_t* priv = 0;
+	int vmajor, vminor, vpatch;
 	
 	memset(&render_context, 0, sizeof(render_context));
 	memset(&frame_context, 0, sizeof(frame_context));
@@ -241,6 +242,12 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 		mp_msg(MSGT_ASS, MSGL_FATAL, MSGTR_LIBASS_FT_Init_FreeTypeFailed);
 		goto ass_init_exit;
 	}
+
+	FT_Library_Version(ft, &vmajor, &vminor, &vpatch);
+	mp_msg(MSGT_ASS, MSGL_V, "FreeType library version: %d.%d.%d\n",
+	       vmajor, vminor, vpatch);
+	mp_msg(MSGT_ASS, MSGL_V, "FreeType headers version: %d.%d.%d\n",
+	       FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH);
 
 	priv = calloc(1, sizeof(ass_renderer_t));
 	if (!priv) {
