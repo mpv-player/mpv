@@ -3,8 +3,8 @@
    <rainer@johanni.de>
 */
 
-#ifndef VIDEODEV_MJPEG_H
-#define VIDEODEV_MJPEG_H
+#ifndef MPLAYER_VIDEODEV_MJPEG_H
+#define MPLAYER_VIDEODEV_MJPEG_H
 
 /* This is identical with the mgavideo internal params struct, 
    please tell me if you change this struct here ! <gz@lysator.liu.se) */
@@ -120,4 +120,4 @@ Private IOCTL to set up for displaying MJPEG
 #define MJPIOC_SYNC           _IOR ('v', BASE_VIDIOCPRIVATE+5,  struct mjpeg_sync)
 #define MJPIOC_G_STATUS       _IOWR('v', BASE_VIDIOCPRIVATE+6,  struct mjpeg_status)
 
-#endif /* VIDEODEV_MJPEG_H */
+#endif /* MPLAYER_VIDEODEV_MJPEG_H */

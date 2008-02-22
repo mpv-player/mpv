@@ -1,5 +1,5 @@
-#ifndef GTF_H
-#define GTF_H
+#ifndef MPLAYER_GTF_H
+#define MPLAYER_GTF_H
 
 #include <vbe.h>
 
@@ -45,4 +45,4 @@ typedef struct {
 void GTF_calcTimings(double X,double Y,double freq, int type,
                      int want_margins, int want_interlace,struct VesaCRTCInfoBlock *result);
 
-#endif /* GTF_H */
+#endif /* MPLAYER_GTF_H */

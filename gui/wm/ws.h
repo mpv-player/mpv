@@ -4,8 +4,8 @@
 //   Writed by pontscho / fresh!mindworkz
 // ----------------------------------------------------------------------------------------------
 
-#ifndef GUI_WS_H
-#define GUI_WS_H
+#ifndef MPLAYER_GUI_WS_H
+#define MPLAYER_GUI_WS_H
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -257,4 +257,4 @@ extern void wsScreenSaverOff( Display * mDisplay );
 
 #define wgIsRect( X,Y,tX,tY,bX,bY ) ( ( (X) > (tX) )&&( (Y) > (tY) )&&( (X) < (bX) )&&( (Y) < (bY) ) )
 
-#endif /* GUI_WS_H */
+#endif /* MPLAYER_GUI_WS_H */

@@ -19,8 +19,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef TCP_H
-#define TCP_H
+#ifndef MPLAYER_TCP_H
+#define MPLAYER_TCP_H
 
 /* Connect to a server using a TCP connection */
 int connect2Server (char *host, int port, int verb);
@@ -29,4 +29,4 @@ int connect2Server (char *host, int port, int verb);
 #define TCP_ERROR_FATAL   -2     /* unable to resolve name */
 #define TCP_ERROR_PORT    -1     /* unable to connect to a particular port */
 
-#endif /* TCP_H */
+#endif /* MPLAYER_TCP_H */

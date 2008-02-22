@@ -1,5 +1,5 @@
-#ifndef VCD_READ_H
-#define VCD_READ_H
+#ifndef MPLAYER_VCD_READ_H
+#define MPLAYER_VCD_READ_H
 
 #include "libavutil/intreadwrite.h"
 //=================== VideoCD ==========================
@@ -225,4 +225,4 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
 
 #endif
 
-#endif /* VCD_READ_H */
+#endif /* MPLAYER_VCD_READ_H */

@@ -1,5 +1,5 @@
-#ifndef VF_H
-#define VF_H
+#ifndef MPLAYER_VF_H
+#define MPLAYER_VF_H
 
 struct vf_instance_s;
 struct vf_priv_s;
@@ -123,4 +123,4 @@ int vf_config_wrapper(struct vf_instance_s* vf,
 		      int width, int height, int d_width, int d_height,
 		      unsigned int flags, unsigned int outfmt);
 
-#endif /* VF_H */
+#endif /* MPLAYER_VF_H */

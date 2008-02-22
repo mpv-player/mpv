@@ -1,6 +1,5 @@
-
-#ifndef GUI_CFG_H
-#define GUI_CFG_H
+#ifndef MPLAYER_GUI_CFG_H
+#define MPLAYER_GUI_CFG_H
 
 extern int gtkEnableAudioEqualizer;
 
@@ -59,4 +58,4 @@ extern gtkASS_t gtkASS;
 extern int cfg_read( void );
 extern int cfg_write( void );
 
-#endif /* GUI_CFG_H */
+#endif /* MPLAYER_GUI_CFG_H */

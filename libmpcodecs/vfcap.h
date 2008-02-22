@@ -1,7 +1,7 @@
 // VFCAP_* values: they are flags, returned by query_format():
 
-#ifndef VFCAP_H
-#define VFCAP_H
+#ifndef MPLAYER_VFCAP_H
+#define MPLAYER_VFCAP_H
 
 // set, if the given colorspace is supported (with or without conversion)
 #define VFCAP_CSP_SUPPORTED 0x1
@@ -34,4 +34,4 @@
 // filter will draw EOSD at screen resolution (without scaling)
 #define VFCAP_EOSD_UNSCALED 0x4000
 
-#endif /* VFCAP_H */
+#endif /* MPLAYER_VFCAP_H */

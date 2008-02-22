@@ -1,6 +1,5 @@
-
-#ifndef GUI_WIDGETS_H
-#define GUI_WIDGETS_H
+#ifndef MPLAYER_GUI_WIDGETS_H
+#define MPLAYER_GUI_WIDGETS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,4 +59,4 @@ extern void gtkMessageBox( int type,const gchar * str );
 extern void gtkSetLayer( GtkWidget * wdg );
 extern void gtkActive( GtkWidget * wdg );
 
-#endif /* GUI_WIDGETS_H */
+#endif /* MPLAYER_GUI_WIDGETS_H */

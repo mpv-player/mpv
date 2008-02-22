@@ -5,8 +5,8 @@
 
 // Modified for MPlayer on 2004.12.29
 
-#ifndef VQF_H
-#define VQF_H
+#ifndef MPLAYER_VQF_H
+#define MPLAYER_VQF_H
 
 #ifdef _MSC_VER
 #	ifdef DLL_MODULE
@@ -223,4 +223,4 @@ DllPort int   TvqGetFbTotalBits();  // query total number of used bits
 #endif
 
 
-#endif /* VQF_H */
+#endif /* MPLAYER_VQF_H */

@@ -1,9 +1,8 @@
+#ifndef MPLAYER_PLAYTREE_H
+#define MPLAYER_PLAYTREE_H
 
 /// \file
 /// \ingroup Playtree
-
-#ifndef PLAYTREE_H
-#define PLAYTREE_H
 
 struct stream_st;
 struct m_config;
@@ -282,6 +281,6 @@ void pt_iter_goto_head(play_tree_iter_t* iter);
 
 ///@}
 
-#endif /* PLAYTREE_H */
-
 ///@}
+
+#endif /* MPLAYER_PLAYTREE_H */

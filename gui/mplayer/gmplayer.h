@@ -1,6 +1,5 @@
-
-#ifndef GUI_GMPLAYER_H
-#define GUI_GMPLAYER_H
+#ifndef MPLAYER_GUI_GMPLAYER_H
+#define MPLAYER_GUI_GMPLAYER_H
 
 extern int             mplSubRender;
 extern int             mplMainRender;
@@ -31,4 +30,4 @@ extern void mplMenuMouseHandle( int X,int Y,int RX,int RY );
 extern void mplPBInit( void );
 extern void mplPBShow( int x, int y );
 
-#endif /* GUI_GMPLAYER_H */
+#endif /* MPLAYER_GUI_GMPLAYER_H */

@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef GUI_WINCFG_H
-#define GUI_WINCFG_H
+#ifndef MPLAYER_GUI_WINCFG_H
+#define MPLAYER_GUI_WINCFG_H
 
 extern char *skinName;
 extern int sub_window;
@@ -37,4 +37,4 @@ extern int gui_sub_pos_y;
 extern int cfg_read(void);
 extern int cfg_write(void);
 
-#endif /* GUI_WINCFG_H */
+#endif /* MPLAYER_GUI_WINCFG_H */

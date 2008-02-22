@@ -1,5 +1,5 @@
-#ifndef GUI_WSMKEYS_H
-#define GUI_WSMKEYS_H
+#ifndef MPLAYER_GUI_WSMKEYS_H
+#define MPLAYER_GUI_WSMKEYS_H
 
 #include "wskeys.h"
 
@@ -65,4 +65,4 @@ const TwsKeyNames wsKeyNames[ wsKeyNumber ] =
   { wsKeyNone, "None" }
  };
 
-#endif /* GUI_WSMKEYS_H */
+#endif /* MPLAYER_GUI_WSMKEYS_H */

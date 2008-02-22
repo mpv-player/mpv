@@ -1,5 +1,5 @@
-#ifndef DEC_AUDIO_H
-#define DEC_AUDIO_H
+#ifndef MPLAYER_DEC_AUDIO_H
+#define MPLAYER_DEC_AUDIO_H
 
 // dec_audio.c:
 extern void afm_help(void);
@@ -12,4 +12,4 @@ extern void uninit_audio(sh_audio_t *sh_audio);
 extern int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
 		int *out_samplerate, int *out_channels, int *out_format);
 
-#endif /* DEC_AUDIO_H */
+#endif /* MPLAYER_DEC_AUDIO_H */

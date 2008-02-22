@@ -21,8 +21,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef PVR_H
-#define PVR_H
+#ifndef MPLAYER_PVR_H
+#define MPLAYER_PVR_H
 
 #include "tv.h"
 
@@ -84,4 +84,4 @@ int pvr_set_channel_step (stream_t *stream, int step);
  */
 int pvr_force_freq_step (stream_t *stream, int step);
 
-#endif /* PVR_H */
+#endif /* MPLAYER_PVR_H */

@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TDFX_VID_H
-#define TDFX_VID_H
+#ifndef MPLAYER_TDFX_VID_H
+#define MPLAYER_TDFX_VID_H
 
 #define TDFX_VID_VERSION 1
 
@@ -125,4 +125,4 @@ typedef struct tdfx_vid_overlay_s {
 #define TDFX_VID_OVERLAY_ON _IO ('J', 8)
 #define TDFX_VID_OVERLAY_OFF _IO ('J', 9)
 
-#endif /* TDFX_VID_H */
+#endif /* MPLAYER_TDFX_VID_H */

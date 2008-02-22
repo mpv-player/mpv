@@ -1,5 +1,5 @@
-#ifndef MP_CORE_H
-#define MP_CORE_H
+#ifndef MPLAYER_MP_CORE_H
+#define MPLAYER_MP_CORE_H
 
 #include "mp_osd.h"
 
@@ -120,4 +120,4 @@ void exit_player_with_rc(const char* how, int rc);
 void add_subtitles(char *filename, float fps, int noerr);
 int reinit_video_chain(void);
 
-#endif /* MP_CORE_H */
+#endif /* MPLAYER_MP_CORE_H */

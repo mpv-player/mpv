@@ -1,6 +1,5 @@
-
-#ifndef GUI_INTERFACE_H
-#define GUI_INTERFACE_H
+#ifndef MPLAYER_GUI_INTERFACE_H
+#define MPLAYER_GUI_INTERFACE_H
 
 #include "../config.h"
 #include "mplayer/play.h"
@@ -223,4 +222,4 @@ extern char * gstrchr( char * str,int c );
   sprintf( s,"%s/%s",d,n );                     \
  }
 
-#endif /* GUI_INTERFACE_H */
+#endif /* MPLAYER_GUI_INTERFACE_H */

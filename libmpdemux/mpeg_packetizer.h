@@ -22,8 +22,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef MPEG_PACKETIZER_H
-#define MPEG_PACKETIZER_H
+#ifndef MPLAYER_MPEG_PACKETIZER_H
+#define MPLAYER_MPEG_PACKETIZER_H
 
 /* Send MPEG <type> PES packet */
 int send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts, 
@@ -38,4 +38,4 @@ int send_mpeg_lpcm_packet (unsigned char *data, int len,
                            int id, uint64_t pts, int freq_id,
                            int my_write (const unsigned char *data, int len));
 
-#endif /* MPEG_PACKETIZER_H */
+#endif /* MPLAYER_MPEG_PACKETIZER_H */

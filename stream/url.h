@@ -4,8 +4,8 @@
  * (C) 2001, MPlayer team.
  */
 
-#ifndef URL_H
-#define URL_H
+#ifndef MPLAYER_URL_H
+#define MPLAYER_URL_H
 
 //#define URL_DEBUG
 
@@ -30,4 +30,4 @@ void url_escape_string(char *outbuf, const char *inbuf);
 void url_debug(const URL_t* url);
 #endif /* URL_DEBUG */
 
-#endif /* URL_H */
+#endif /* MPLAYER_URL_H */

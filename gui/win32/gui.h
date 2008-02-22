@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef GUI_GUI_H
-#define GUI_GUI_H
+#ifndef MPLAYER_GUI_GUI_H
+#define MPLAYER_GUI_GUI_H
 
 #include "config.h"
 #include "mplayer.h"
@@ -117,4 +117,4 @@ extern void display_eqwindow(gui_t *gui);
 extern void display_prefswindow(gui_t *gui);
 extern void display_opensubtitlewindow(gui_t *gui);
 
-#endif /* GUI_GUI_H */
+#endif /* MPLAYER_GUI_GUI_H */

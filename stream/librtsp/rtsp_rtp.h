@@ -18,8 +18,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef RTSP_RTP_H
-#define RTSP_RTP_H
+#ifndef MPLAYER_RTSP_RTP_H
+#define MPLAYER_RTSP_RTP_H
 
 #include "rtsp.h"
 
@@ -37,5 +37,5 @@ off_t rtp_read (struct rtp_rtsp_session_t* st, char *buf, off_t length);
 void rtp_session_free (struct rtp_rtsp_session_t *st);
 void rtcp_send_rr (rtsp_t *s, struct rtp_rtsp_session_t *st);
 
-#endif /* RTSP_RTP_H */
+#endif /* MPLAYER_RTSP_RTP_H */
 

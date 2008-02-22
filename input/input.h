@@ -1,5 +1,5 @@
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef MPLAYER_INPUT_H
+#define MPLAYER_INPUT_H
 
 // All command IDs
 #define MP_CMD_SEEK   0
@@ -302,4 +302,4 @@ mp_input_check_interrupt(int time);
 
 extern int async_quit_request;
 
-#endif /* INPUT_H */
+#endif /* MPLAYER_INPUT_H */

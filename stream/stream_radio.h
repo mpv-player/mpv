@@ -1,5 +1,5 @@
-#ifndef STREAM_RADIO_H
-#define STREAM_RADIO_H
+#ifndef MPLAYER_STREAM_RADIO_H
+#define MPLAYER_STREAM_RADIO_H
 
 #define RADIO_CHANNEL_LOWER 1
 #define RADIO_CHANNEL_HIGHER 2
@@ -41,4 +41,4 @@ int radio_set_channel(struct stream_st *stream, char *channel);
 int radio_step_channel(struct stream_st *stream, int direction);
 int radio_step_freq(struct stream_st *stream, float step_interval);
 
-#endif
+#endif /* MPLAYER_STREAM_RADIO_H */

@@ -1,5 +1,5 @@
-#ifndef GLOB_H
-#define GLOB_H
+#ifndef MPLAYER_GLOB_H
+#define MPLAYER_GLOB_H
 
 #include "config.h"
 
@@ -13,4 +13,4 @@ void globfree(glob_t *pglob);
 
 int  glob(const char *pattern, int flags, int (*errfunc)(const char *epath, int eerrno), glob_t *pglob);
 
-#endif /* GLOB_H */
+#endif /* MPLAYER_GLOB_H */

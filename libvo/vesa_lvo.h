@@ -9,8 +9,8 @@
  * This file contains vo_vesa interface to Linux Video Overlay.
  */
 
-#ifndef VESA_LVO_H
-#define VESA_LVO_H
+#ifndef MPLAYER_VESA_LVO_H
+#define MPLAYER_VESA_LVO_H
 
 int	 vlvo_preinit(const char *drvname);
 int      vlvo_init(unsigned src_width,unsigned src_height,
@@ -24,4 +24,4 @@ uint32_t vlvo_draw_frame(uint8_t *src[]);
 void     vlvo_flip_page(void);
 void     vlvo_draw_osd(void);
 
-#endif /* VESA_LVO_H */
+#endif /* MPLAYER_VESA_LVO_H */

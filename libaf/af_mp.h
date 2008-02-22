@@ -1,6 +1,6 @@
 /* Include file for mplayer specific defines and includes */
-#ifndef AF_MP_H
-#define AF_MP_H
+#ifndef MPLAYER_AF_MP_H
+#define MPLAYER_AF_MP_H
 
 #include "config.h"
 #include "mp_msg.h"
@@ -19,4 +19,4 @@
 #define af_msg(lev, args... ) \
   mp_msg(MSGT_AFILTER,(((lev)<0)?((lev)+3):(((lev)==0)?MSGL_INFO:((lev)+5))), ##args )
 
-#endif /* AF_MP_H */
+#endif /* MPLAYER_AF_MP_H */

@@ -1,5 +1,5 @@
-#ifndef VCD_READ_WIN32_H
-#define VCD_READ_WIN32_H
+#ifndef MPLAYER_VCD_READ_WIN32_H
+#define MPLAYER_VCD_READ_WIN32_H
 
 #include <ddk/ntddcdrm.h>
 
@@ -130,7 +130,7 @@ static int vcd_read(mp_vcd_priv_t* vcd, char *mem)
     return VCD_SECTOR_DATA;
 }
 
-#endif /* VCD_READ_WIN32_H */
+#endif /* MPLAYER_VCD_READ_WIN32_H */
 
 /*
 vim:noet:sw=4:cino=\:0,g0

@@ -1,6 +1,5 @@
-
-#ifndef X11_COMMON_H
-#define X11_COMMON_H
+#ifndef MPLAYER_X11_COMMON_H
+#define MPLAYER_X11_COMMON_H
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -123,4 +122,4 @@ void update_xinerama_info(void);
 
 int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
 
-#endif /* X11_COMMON_H */
+#endif /* MPLAYER_X11_COMMON_H */

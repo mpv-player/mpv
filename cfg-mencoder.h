@@ -1,5 +1,5 @@
-#ifndef CFG_MENCODER_H
-#define CFG_MENCODER_H
+#ifndef MPLAYER_CFG_MENCODER_H
+#define MPLAYER_CFG_MENCODER_H
 
 /*
  * config for cfgparser
@@ -268,4 +268,4 @@ const m_option_t mencoder_opts[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-#endif /* CFG_MENCODER.H */
+#endif /* MPLAYER_CFG_MENCODER_H */

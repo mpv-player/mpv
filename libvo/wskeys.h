@@ -1,6 +1,6 @@
 
-#ifndef WSKEYS_H
-#define WSKEYS_H
+#ifndef MPLAYER_WSKEYS_H
+#define MPLAYER_WSKEYS_H
 
 #define wsosbrackets '['
 #define wscsbrackets ']'
@@ -152,4 +152,4 @@
 #define wsGrayInsert    0x9e + 256
 #define wsGrayDelete    0x9f + 256
 
-#endif /* WSKEYS_H */
+#endif /* MPLAYER_WSKEYS_H */

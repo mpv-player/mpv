@@ -1,5 +1,5 @@
-#ifndef CODEC_CFG_H
-#define CODEC_CFG_H
+#ifndef MPLAYER_CODEC_CFG_H
+#define MPLAYER_CODEC_CFG_H
 
 #define CODEC_CFG_MIN	20070407
 
@@ -73,4 +73,4 @@ void stringset_free(stringset_t *set);
 void stringset_add(stringset_t *set, const char *str);
 int stringset_test(stringset_t *set, const char *str);
 
-#endif /* CODEC_CFG_H */
+#endif /* MPLAYER_CODEC_CFG_H */

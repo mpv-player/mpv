@@ -1,5 +1,5 @@
-#ifndef MP_IMAGE_H
-#define MP_IMAGE_H
+#ifndef MPLAYER_MP_IMAGE_H
+#define MPLAYER_MP_IMAGE_H
 
 //--------- codec's requirements (filled by the codec/vf) ---------
 
@@ -228,4 +228,4 @@ static inline void free_mp_image(mp_image_t* mpi){
 mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt);
 void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi);
 
-#endif /* MP_IMAGE_H */
+#endif /* MPLAYER_MP_IMAGE_H */

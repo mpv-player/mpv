@@ -8,12 +8,12 @@
 //=============================================================================
 */
 
-#if !defined DSP_H
+#if !defined MPLAYER_DSP_H
 # error "Never use <filter.h> directly; include <dsp.h> instead"
 #endif
 
-#ifndef FILTER_H
-#define FILTER_H
+#ifndef MPLAYER_FILTER_H
+#define MPLAYER_FILTER_H
 
 
 // Design and implementation of different types of digital filters 
@@ -66,4 +66,4 @@ extern int af_filter_szxform(_ftype_t* a, _ftype_t* b, _ftype_t Q, _ftype_t fc, 
   xq[xi]=(xq)[(xi)+(n)]=*(in);\
   xi=(++(xi))&((n)-1);
 
-#endif /* FILTER_H */
+#endif /* MPLAYER_FILTER_H */

@@ -1,5 +1,5 @@
-#ifndef MS_HDR_H
-#define MS_HDR_H
+#ifndef MPLAYER_MS_HDR_H
+#define MPLAYER_MS_HDR_H
 
 #ifndef _WAVEFORMATEX_
 #define _WAVEFORMATEX_
@@ -79,4 +79,4 @@ typedef struct {
 #endif
 #endif
 
-#endif /* MS_HDR_H */
+#endif /* MPLAYER_MS_HDR_H */

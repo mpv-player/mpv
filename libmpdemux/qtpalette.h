@@ -2,8 +2,8 @@
 //  Automatically generated from a utility derived from XAnim:
 //    http://xanim.va.pubnix.com/home.html
 
-#ifndef QTPALETTE_H
-#define QTPALETTE_H
+#ifndef MPLAYER_QTPALETTE_H
+#define MPLAYER_QTPALETTE_H
 
 static const unsigned char qt_default_palette_4[4 * 4] = {
   0x5E, 0x65, 0x93, 0x00,
@@ -568,4 +568,4 @@ static const unsigned char qt_default_grayscale_palette_256[256 * 4] = {
   /* 255, 0xFF */  0x00, 0x00, 0x00, 0x00
 };
 
-#endif /* QTPALETTE_H */
+#endif /* MPLAYER_QTPALETTE_H */

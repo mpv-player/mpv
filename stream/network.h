@@ -4,8 +4,8 @@
  * (C) 2001, MPlayer team.
  */
 
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef MPLAYER_NETWORK_H
+#define MPLAYER_NETWORK_H
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -63,4 +63,4 @@ HTTP_header_t *http_read_response(int fd);
 int http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry);
 URL_t* check4proxies(URL_t *url);
 
-#endif /* NETWORK_H */
+#endif /* MPLAYER_NETWORK_H */

@@ -16,8 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef FASTMEMCPY_H
-#define FASTMEMCPY_H
+#ifndef MPLAYER_FASTMEMCPY_H
+#define MPLAYER_FASTMEMCPY_H
 
 #include "config.h"
 #include <inttypes.h>
@@ -105,4 +105,4 @@ static inline void * memcpy_pic2(void * dst, const void * src,
 	return retval;
 }
 
-#endif /* FASTMEMCPY_H */
+#endif /* MPLAYER_FASTMEMCPY_H */

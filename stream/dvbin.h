@@ -5,8 +5,8 @@
  * $Id$
  */
 
-#ifndef DVBIN_H
-#define DVBIN_H
+#ifndef MPLAYER_DVBIN_H
+#define MPLAYER_DVBIN_H
 
 #include "stream.h"
 
@@ -113,4 +113,4 @@ extern int dvb_set_channel(stream_t *, int, int);
 extern dvb_config_t *dvb_get_config(void);
 extern void dvb_free_config(dvb_config_t *config);
 
-#endif /* DVBIN_H */
+#endif /* MPLAYER_DVBIN_H */

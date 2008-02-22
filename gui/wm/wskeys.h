@@ -1,6 +1,5 @@
-
-#ifndef GUI_WSKEYS_H
-#define GUI_WSKEYS_H
+#ifndef MPLAYER_GUI_WSKEYS_H
+#define MPLAYER_GUI_WSKEYS_H
 
 #define wsKeyNone -1
 
@@ -161,4 +160,4 @@ typedef struct
 
 extern const TwsKeyNames wsKeyNames[ wsKeyNumber ];
 
-#endif /* GUI_WSKEYS_H */
+#endif /* MPLAYER_GUI_WSKEYS_H */

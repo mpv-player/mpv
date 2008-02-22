@@ -1,5 +1,5 @@
-#ifndef LIRC_H
-#define LIRC_H
+#ifndef MPLAYER_LIRC_H
+#define MPLAYER_LIRC_H
 
 int 
 mp_input_lirc_init(void);
@@ -10,4 +10,4 @@ mp_input_lirc_read(int fd,char* dest, int s);
 void
 mp_input_lirc_close(int fd);
 
-#endif /* LIRC_H */
+#endif /* MPLAYER_LIRC_H */

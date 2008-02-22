@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef RADEON_VID_H
-#define RADEON_VID_H
+#ifndef MPLAYER_RADEON_VID_H
+#define MPLAYER_RADEON_VID_H
 
 typedef struct mga_vid_config_s
 {
@@ -123,4 +123,4 @@ uint32_t num_frames;
 
 #define MGA_VID_VERSION 0x0201
 
-#endif /* RADEON_VID_H */
+#endif /* MPLAYER_RADEON_VID_H */

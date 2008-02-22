@@ -1,7 +1,7 @@
 // EDL version 0.6
 
-#ifndef EDL_H
-#define EDL_H
+#ifndef MPLAYER_EDL_H
+#define MPLAYER_EDL_H
 
 #define EDL_SKIP 0
 #define EDL_MUTE 1
@@ -26,4 +26,4 @@ extern char *edl_output_filename; // file to put EDL entries in (-edlout)
 void free_edl(edl_record_ptr next_edl_record); // free's entire EDL list.
 edl_record_ptr edl_parse_file(void); // fills EDL stack
 
-#endif /* EDL_H */
+#endif /* MPLAYER_EDL_H */

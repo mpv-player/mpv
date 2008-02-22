@@ -1,5 +1,5 @@
-#ifndef ASPECT_H
-#define ASPECT_H
+#ifndef MPLAYER_ASPECT_H
+#define MPLAYER_ASPECT_H
 /* Stuff for correct aspect scaling. */
 
 extern int vo_panscan_x;
@@ -21,4 +21,4 @@ void aspect_save_screenres(int scrw, int scrh);
 void aspect(int *srcw, int *srch, int zoom);
 void aspect_fit(int *srcw, int *srch, int fitw, int fith);
 
-#endif /* ASPECT_H */
+#endif /* MPLAYER_ASPECT_H */

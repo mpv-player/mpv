@@ -1,6 +1,5 @@
-
-#ifndef MP_MSG_H
-#define MP_MSG_H
+#ifndef MPLAYER_MP_MSG_H
+#define MPLAYER_MP_MSG_H
 
 // defined in mplayer.c and mencoder.c
 extern int verbose;
@@ -138,4 +137,4 @@ const char* filename_recode(const char* filename);
 
 #endif /* TARGET_OS2 */
 
-#endif /* MP_MSG_H */
+#endif /* MPLAYER_MP_MSG_H */

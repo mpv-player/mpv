@@ -1,5 +1,5 @@
-#ifndef GL_COMMON_H
-#define GL_COMMON_H
+#ifndef MPLAYER_GL_COMMON_H
+#define MPLAYER_GL_COMMON_H
 
 #include "mp_msg.h"
 #include "config.h"
@@ -330,4 +330,4 @@ extern int (APIENTRY *SwapInterval)(int);
 extern void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei,
                              GLsizei, GLint, GLenum, GLenum, const GLvoid *);
 
-#endif /* GL_COMMON_H */
+#endif /* MPLAYER_GL_COMMON_H */

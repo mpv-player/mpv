@@ -1,5 +1,5 @@
-#ifndef MUXER_H
-#define MUXER_H
+#ifndef MPLAYER_MUXER_H
+#define MPLAYER_MUXER_H
 
 #define MUXER_MAX_STREAMS 16
 
@@ -116,4 +116,4 @@ int muxer_init_muxer_rawvideo(muxer_t *);
 int muxer_init_muxer_lavf(muxer_t *);
 int muxer_init_muxer_rawaudio(muxer_t *);
 
-#endif /* MUXER_H */
+#endif /* MPLAYER_MUXER_H */

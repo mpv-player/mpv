@@ -9,8 +9,8 @@
  * This file contains vosub_vidix interface to any mplayer's VO driver
  */
 
-#ifndef VOSUB_VIDIX_H
-#define VOSUB_VIDIX_H
+#ifndef MPLAYER_VOSUB_VIDIX_H
+#define MPLAYER_VOSUB_VIDIX_H
 
 		    /* drvname can be NULL */
 int	 vidix_preinit(const char *drvname,vo_functions_t *server);
@@ -35,4 +35,4 @@ int vidix_grkey_support(void);
 int vidix_grkey_get(vidix_grkey_t *gr_key);
 int vidix_grkey_set(const vidix_grkey_t *gr_key);
 
-#endif /* VOSUB_VIDIX_H */
+#endif /* MPLAYER_VOSUB_VIDIX_H */

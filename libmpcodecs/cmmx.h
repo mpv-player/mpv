@@ -4,8 +4,8 @@
  * Author: Zoltan Hidvegi
  */
 
-#ifndef CMMX_H
-#define CMMX_H
+#ifndef MPLAYER_CMMX_H
+#define MPLAYER_CMMX_H
 
 typedef unsigned long cmmx_t;
 
@@ -183,4 +183,4 @@ pcmpeqb(cmmx_t a, cmmx_t b)
     return pcmpzb(a ^ b);
 }
 
-#endif /* CMMX_H */
+#endif /* MPLAYER_CMMX_H */

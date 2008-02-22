@@ -1,5 +1,5 @@
-#ifndef XVMC_RENDER_H
-#define XVMC_RENDER_H
+#ifndef MPLAYER_XVMC_RENDER_H
+#define MPLAYER_XVMC_RENDER_H
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -52,4 +52,4 @@ typedef   struct{
 
 } xvmc_render_state_t;
 
-#endif /* XVMC_RENDER_H */
+#endif /* MPLAYER_XVMC_RENDER_H */

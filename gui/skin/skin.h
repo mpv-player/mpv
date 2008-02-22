@@ -1,6 +1,5 @@
-
-#ifndef GUI_SKIN_H
-#define GUI_SKIN_H
+#ifndef MPLAYER_GUI_SKIN_H
+#define MPLAYER_GUI_SKIN_H
 
 #include "app.h"
 
@@ -15,4 +14,4 @@ extern char * trimleft( char * in );
 extern char * strswap( char * in,char what,char whereof );
 extern char * trim( char * in );
 
-#endif /* GUI_SKIN_H */
+#endif /* MPLAYER_GUI_SKIN_H */

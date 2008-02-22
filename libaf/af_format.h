@@ -1,8 +1,9 @@
 /* The sample format system used lin libaf is based on bitmasks. The
    format definition only refers to the storage format not the
    resolution. */
-#ifndef AF_FORMAT_H
-#define AF_FORMAT_H
+
+#ifndef MPLAYER_AF_FORMAT_H
+#define MPLAYER_AF_FORMAT_H
 
 #ifndef MPLAYER_CONFIG_H
 #error af_format.h needs config.h
@@ -93,4 +94,4 @@ extern int af_bits2fmt(int bits);
 extern char* af_fmt2str(int format, char* str, int size);
 extern const char* af_fmt2str_short(int format);
 
-#endif /* AF_FORMAT_H */
+#endif /* MPLAYER_AF_FORMAT_H */

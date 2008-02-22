@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef	RADEON_H
-#define	RADEON_H
+#ifndef	MPLAYER_RADEON_H
+#define	MPLAYER_RADEON_H
 
 
 /* radeon PCI ids */
@@ -2055,4 +2055,4 @@
 
 /* End of field	default	values.	*/
 
-#endif /* RADEON_H */
+#endif /* MPLAYER_RADEON_H */

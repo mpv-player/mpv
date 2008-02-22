@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef GUI_SKINLOAD_H
-#define GUI_SKINLOAD_H
+#ifndef MPLAYER_GUI_SKINLOAD_H
+#define MPLAYER_GUI_SKINLOAD_H
 
 typedef struct
 {
@@ -212,4 +212,4 @@ extern skin_t *loadskin(char *skindir, int desktopbpp);
 #define evShowWindow      7004
 #define evFirstLoad       7005
 
-#endif /* GUI_SKINLOAD_H */
+#endif /* MPLAYER_GUI_SKINLOAD_H */

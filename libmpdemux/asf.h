@@ -1,5 +1,5 @@
-#ifndef ASF_H
-#define ASF_H
+#ifndef MPLAYER_ASF_H
+#define MPLAYER_ASF_H
 
 //#include "config.h"	/* for WORDS_BIGENDIAN */
 #include <inttypes.h>
@@ -244,4 +244,4 @@ struct asf_priv {
     unsigned bps;
 };
 
-#endif /* ASF_H */
+#endif /* MPLAYER_ASF_H */

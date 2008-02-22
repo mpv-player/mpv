@@ -1,5 +1,5 @@
-#ifndef MENU_H
-#define MENU_H
+#ifndef MPLAYER_MENU_H
+#define MPLAYER_MENU_H
 
 struct menu_priv_s;
 typedef struct  menu_s menu_t;
@@ -92,4 +92,4 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
 
 void menu_draw_box(mp_image_t* mpi, unsigned char grey, unsigned char alpha, int x, int y, int w, int h);
 
-#endif /* MENU_H */
+#endif /* MPLAYER_MENU_H */

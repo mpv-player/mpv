@@ -1,5 +1,5 @@
-#ifndef DEC_VIDEO_H
-#define DEC_VIDEO_H
+#ifndef MPLAYER_DEC_VIDEO_H
+#define MPLAYER_DEC_VIDEO_H
 
 // dec_video.c:
 extern void vfm_help(void);
@@ -21,4 +21,4 @@ extern int get_current_video_decoder_lag(sh_video_t *sh_video);
 
 extern int divx_quality;
 
-#endif /* DEC_VIDEO_H */
+#endif /* MPLAYER_DEC_VIDEO_H */

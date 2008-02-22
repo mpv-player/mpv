@@ -1,5 +1,5 @@
-#ifndef AF_H
-#define AF_H
+#ifndef MPLAYER_AF_H
+#define MPLAYER_AF_H
 
 #include <stdio.h>
 
@@ -354,4 +354,4 @@ extern af_msg_cfg_t af_msg_cfg; // Message
 #endif
 //! \}
 
-#endif /* AF_H */
+#endif /* MPLAYER_AF_H */

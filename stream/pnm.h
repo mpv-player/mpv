@@ -22,8 +22,8 @@
  * pnm util functions header by joschka
  */
  
-#ifndef PNM_H
-#define PNM_H
+#ifndef MPLAYER_PNM_H
+#define MPLAYER_PNM_H
 
 #include <inttypes.h>
 /*#include "xine_internal.h" */
@@ -34,4 +34,4 @@ typedef struct pnm_s pnm_t;
 
 //int      pnm_read (pnm_t *this, char *data, int len);
 
-#endif /* PNM_H */
+#endif /* MPLAYER_PNM_H */

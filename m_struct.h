@@ -1,5 +1,5 @@
-#ifndef M_STRUCT_H
-#define M_STRUCT_H
+#ifndef MPLAYER_M_STRUCT_H
+#define MPLAYER_M_STRUCT_H
 
 /// \defgroup OptionsStruct Options struct
 /// \ingroup Options
@@ -105,4 +105,4 @@ m_struct_get_field(const m_struct_t* st,const char* f);
 
 ///@}
 
-#endif /* M_STRUCT_H */
+#endif /* MPLAYER_M_STRUCT_H */

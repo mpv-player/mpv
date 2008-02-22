@@ -1,5 +1,5 @@
-#ifndef DEMUXER_H
-#define DEMUXER_H
+#ifndef MPLAYER_DEMUXER_H
+#define MPLAYER_DEMUXER_H
 
 #ifdef USE_ASS
 #include "libass/ass_types.h"
@@ -421,4 +421,4 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle);
 /// Get number of angles.
 int demuxer_angles_count(demuxer_t *demuxer);
 
-#endif /* DEMUXER_H */
+#endif /* MPLAYER_DEMUXER_H */

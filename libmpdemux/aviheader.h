@@ -1,5 +1,5 @@
-#ifndef AVIHEADER_H
-#define AVIHEADER_H
+#ifndef MPLAYER_AVIHEADER_H
+#define MPLAYER_AVIHEADER_H
 
 //#include "config.h"	/* get correct definition WORDS_BIGENDIAN */
 #include "libavutil/common.h"
@@ -353,4 +353,4 @@ typedef struct {
 
 #define AVI_IDX_OFFSET(x) ((((uint64_t)(x)->dwFlags&0xffff0000)<<16)+(x)->dwChunkOffset)
 
-#endif /* AVIHEADER_H */
+#endif /* MPLAYER_AVIHEADER_H */

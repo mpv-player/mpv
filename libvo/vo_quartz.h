@@ -26,8 +26,8 @@
     slouken@libsdl.org
  */
 
-#ifndef VO_QUARTZ_H
-#define VO_QUARTZ_H
+#ifndef MPLAYER_VO_QUARTZ_H
+#define MPLAYER_VO_QUARTZ_H
 
 /* These are the Macintosh key scancode constants -- from Inside Macintosh */
 #define QZ_ESCAPE		0x35
@@ -149,4 +149,4 @@
 #define QZ_IBOOK_DOWN		0x3D
 #define QZ_IBOOK_UP		0x3E
 
-#endif /* VO_QUARTZ_H */
+#endif /* MPLAYER_VO_QUARTZ_H */

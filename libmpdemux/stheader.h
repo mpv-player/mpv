@@ -1,5 +1,5 @@
-#ifndef STHEADER_H
-#define STHEADER_H
+#ifndef MPLAYER_STHEADER_H
+#define MPLAYER_STHEADER_H
 
 #include "aviheader.h"
 #include "ms_hdr.h"
@@ -121,4 +121,4 @@ void free_sh_video(sh_video_t *sh);
 int video_read_properties(sh_video_t *sh_video);
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps);
 
-#endif /* STHEADER_H */
+#endif /* MPLAYER_STHEADER_H */

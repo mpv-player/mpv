@@ -1,5 +1,5 @@
-#ifndef VD_INTERNAL_H
-#define VD_INTERNAL_H
+#ifndef MPLAYER_VD_INTERNAL_H
+#define MPLAYER_VD_INTERNAL_H
 
 #include "codec-cfg.h"
 #include "img_format.h"
@@ -27,4 +27,4 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags);
 	decode\
 };
 
-#endif /* VD_INTERNAL_H */
+#endif /* MPLAYER_VD_INTERNAL_H */

@@ -1,5 +1,5 @@
-#ifndef CFG_MPLAYER_H
-#define CFG_MPLAYER_H
+#ifndef MPLAYER_CFG_MPLAYER_H
+#define MPLAYER_CFG_MPLAYER_H
 
 /*
  * config for cfgparser
@@ -368,5 +368,5 @@ const m_option_t mplayer_opts[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-#endif /* CFG_MPLAYER_H */
+#endif /* MPLAYER_CFG_MPLAYER_H */
 

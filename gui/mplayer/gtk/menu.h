@@ -1,5 +1,5 @@
-#ifndef GUI_MENU_H
-#define GUI_MENU_H
+#ifndef MPLAYER_GUI_MENU_H
+#define MPLAYER_GUI_MENU_H
 
 #include <gtk/gtk.h>
 
@@ -10,4 +10,4 @@ extern GtkWidget * AddSubMenu( GtkWidget *window1, const char * immagine_xpm, Gt
 extern GtkWidget * AddSeparator( GtkWidget * Menu );
 extern GtkWidget * create_PopUpMenu( void );
 
-#endif /* GUI_MENU_H */
+#endif /* MPLAYER_GUI_MENU_H */

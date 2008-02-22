@@ -1,5 +1,5 @@
-#ifndef CPUDETECT_H
-#define CPUDETECT_H
+#ifndef MPLAYER_CPUDETECT_H
+#define MPLAYER_CPUDETECT_H
 
 #define CPUTYPE_I386	3
 #define CPUTYPE_I486	4
@@ -57,4 +57,4 @@ void GetCpuCaps(CpuCaps *caps);
 /* returned value is malloc()'ed so free() it after use */
 char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]);
 
-#endif /* CPUDETECT_H */
+#endif /* MPLAYER_CPUDETECT_H */

@@ -1,5 +1,5 @@
-#ifndef PARSER_MECMD_H
-#define PARSER_MECMD_H
+#ifndef MPLAYER_PARSER_MECMD_H
+#define MPLAYER_PARSER_MECMD_H
 
 /// \file
 /// \ingroup ConfigParsers MEntry
@@ -32,4 +32,4 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv);
 
 ///@}
 
-#endif /* PARSER_MECMD_H */
+#endif /* MPLAYER_PARSER_MECMD_H */

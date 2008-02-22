@@ -1,5 +1,5 @@
-#ifndef M_CONFIG_H
-#define M_CONFIG_H
+#ifndef MPLAYER_M_CONFIG_H
+#define MPLAYER_M_CONFIG_H
 
 /// \defgroup Config Config manager
 ///
@@ -206,4 +206,4 @@ m_config_set_profile(m_config_t* config, m_profile_t* p);
 
 ///@}
 
-#endif /* M_CONFIG_H */
+#endif /* MPLAYER_M_CONFIG_H */

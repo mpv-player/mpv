@@ -1,5 +1,5 @@
-#ifndef AD_INTERNAL_H
-#define AD_INTERNAL_H
+#ifndef MPLAYER_AD_INTERNAL_H
+#define MPLAYER_AD_INTERNAL_H
 
 #include "codec-cfg.h"
 #include "libaf/af_format.h"
@@ -26,4 +26,4 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buffer,int minlen,int maxl
 	decode_audio\
 };
 
-#endif /* AD_INTERNAL_H */
+#endif /* MPLAYER_AD_INTERNAL_H */

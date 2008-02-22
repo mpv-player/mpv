@@ -15,12 +15,12 @@
    coefficients will be stored.
 */
 
-#if !defined DSP_H
+#if !defined MPLAYER_DSP_H
 # error "Never use <window.h> directly; include <dsp.h> instead"
 #endif
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef MPLAYER_WINDOW_H
+#define MPLAYER_WINDOW_H
 
 extern void af_window_boxcar(int n, _ftype_t* w);
 extern void af_window_triang(int n, _ftype_t* w);
@@ -30,4 +30,4 @@ extern void af_window_blackman(int n,_ftype_t* w);
 extern void af_window_flattop(int n,_ftype_t* w);
 extern void af_window_kaiser(int n, _ftype_t* w,_ftype_t b);
 
-#endif /* WINDOW_H */
+#endif /* MPLAYER_WINDOW_H */

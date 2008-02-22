@@ -1,8 +1,8 @@
 /* GyS-TermIO v2.0 (for GySmail v3)          (C) 1999 A'rpi/ESP-team */
 /* a very small replacement of ncurses library */
 
-#ifndef GETCH2_H
-#define GETCH2_H
+#ifndef MPLAYER_GETCH2_H
+#define MPLAYER_GETCH2_H
 
 /* Screen size. Initialized by load_termcap() and get_screen_size() */
 extern int screen_width;
@@ -35,4 +35,4 @@ extern int mp_input_slave_cmd_func(int fd,char* dest,int size);
 #define MP_INPUT_SLAVE_CMD_FUNC     NULL
 #endif
 
-#endif /* GETCH2_H */
+#endif /* MPLAYER_GETCH2_H */

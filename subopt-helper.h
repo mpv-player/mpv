@@ -1,5 +1,5 @@
-#ifndef SUBOPT_HELPER_H
-#define SUBOPT_HELPER_H
+#ifndef MPLAYER_SUBOPT_HELPER_H
+#define MPLAYER_SUBOPT_HELPER_H
 
 /**
  * \file subopt-helper.h
@@ -47,4 +47,4 @@ int int_pos( int * i );
 int strargcmp(strarg_t *arg, const char *str);
 int strargcasecmp(strarg_t *arg, char *str);
 
-#endif /* SUBOPT_HELPER_H */
+#endif /* MPLAYER_SUBOPT_HELPER_H */

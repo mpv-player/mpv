@@ -1,5 +1,5 @@
-#ifndef DEMUX_RTP_H
-#define DEMUX_RTP_H
+#ifndef MPLAYER_DEMUX_RTP_H
+#define MPLAYER_DEMUX_RTP_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -28,4 +28,4 @@ int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
 // Close a RTP demuxer
 void demux_close_rtp(demuxer_t* demuxer);
 
-#endif /* DEMUX_RTP_H */
+#endif /* MPLAYER_DEMUX_RTP_H */

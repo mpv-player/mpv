@@ -20,8 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef REORDER_CH_H
-#define REORDER_CH_H
+#ifndef MPLAYER_REORDER_CH_H
+#define MPLAYER_REORDER_CH_H
 
 // L   - Left
 // R   - Right
@@ -122,4 +122,4 @@ void reorder_channel_nch(void *buf,
                          int samples,
                          int samplesize);
 
-#endif /* REORDER_CH_H */
+#endif /* MPLAYER_REORDER_CH_H */

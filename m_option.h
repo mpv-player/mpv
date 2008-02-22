@@ -1,5 +1,5 @@
-#ifndef M_OPTION_H
-#define M_OPTION_H
+#ifndef MPLAYER_M_OPTION_H
+#define MPLAYER_M_OPTION_H
 
 /// \defgroup Options
 /// m_option allows to parse, print and copy data of various types.
@@ -500,4 +500,4 @@ m_option_free(const m_option_t* opt,void* dst) {
 
 /*@}*/
 
-#endif /* M_OPTION_H */
+#endif /* MPLAYER_M_OPTION_H */

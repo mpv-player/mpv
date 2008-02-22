@@ -1,5 +1,5 @@
-#ifndef MP_OSD_H
-#define MP_OSD_H
+#ifndef MPLAYER_MP_OSD_H
+#define MPLAYER_MP_OSD_H
 
 #define OSD_MSG_TV_CHANNEL              0
 #define OSD_MSG_TEXT                    1
@@ -23,4 +23,4 @@ void set_osd_bar(int type,const char* name,double min,double max,double val);
 void set_osd_msg(int id, int level, int time, const char* fmt, ...);
 void rm_osd_msg(int id);
 
-#endif /* MP_OSD_H */
+#endif /* MPLAYER_MP_OSD_H */

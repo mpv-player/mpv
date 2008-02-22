@@ -17,8 +17,8 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef METADATA_H
-#define METADATA_H
+#ifndef MPLAYER_METADATA_H
+#define MPLAYER_METADATA_H
 
 typedef enum metadata_s metadata_t;
 enum metadata_s {
@@ -47,5 +47,5 @@ enum metadata_s {
 
 char *get_metadata (metadata_t type);
 
-#endif /* METADATA_H */
+#endif /* MPLAYER_METADATA_H */
 

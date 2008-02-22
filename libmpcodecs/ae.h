@@ -1,6 +1,5 @@
-
-#ifndef AE_H
-#define AE_H
+#ifndef MPLAYER_AE_H
+#define MPLAYER_AE_H
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -43,4 +42,4 @@ typedef struct audio_encoder_s {
 
 audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params_t *params);
 
-#endif /* AE_H */
+#endif /* MPLAYER_AE_H */

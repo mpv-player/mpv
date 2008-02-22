@@ -23,8 +23,8 @@
  *
  *****************************************************************************/
 
-#ifndef XVID_VBR_H
-#define XVID_VBR_H
+#ifndef MPLAYER_XVID_VBR_H
+#define MPLAYER_XVID_VBR_H
 
 #define VBR_VERSION 0
 
@@ -228,4 +228,4 @@ extern int vbrUpdate(vbr_control_t *state,
 		     int ublocks);
 extern int vbrFinish(vbr_control_t *state);
 
-#endif /* XVID_VBR_H */
+#endif /* MPLAYER_XVID_VBR_H */

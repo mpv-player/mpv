@@ -1,5 +1,5 @@
-#ifndef TV_H
-#define TV_H
+#ifndef MPLAYER_TV_H
+#define MPLAYER_TV_H
 
 //#include "libao2/afmt.h"
 //#include "libmpcodecs/img_format.h"
@@ -344,4 +344,4 @@ typedef struct tt_stream_props_s{
     int bufsize;      ///< required buffer size
 } tt_stream_props;
 
-#endif /* TV_H */
+#endif /* MPLAYER_TV_H */

@@ -1,6 +1,5 @@
-
-#ifndef GUI_FONT_H
-#define GUI_FONT_H
+#ifndef MPLAYER_GUI_FONT_H
+#define MPLAYER_GUI_FONT_H
 
 #include "bitmap.h"
 #include "app.h"
@@ -34,4 +33,4 @@ extern int  fntTextWidth( int id,char * str );
 extern int        fntRead( char * path,char * fname );
 extern txSample * fntRender( wItem * item,int px,const char * fmt,... );
 
-#endif /* GUI_FONT_H */
+#endif /* MPLAYER_GUI_FONT_H */

@@ -1,6 +1,5 @@
-
-#ifndef IMG_FORMAT_H
-#define IMG_FORMAT_H
+#ifndef MPLAYER_IMG_FORMAT_H
+#define MPLAYER_IMG_FORMAT_H
 
 /* RGB/BGR Formats */
 
@@ -117,4 +116,4 @@ typedef struct {
 
 const char *vo_format_name(int format);
 
-#endif /* IMG_FORMAT_H */
+#endif /* MPLAYER_IMG_FORMAT_H */

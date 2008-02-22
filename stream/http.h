@@ -4,8 +4,8 @@
  * (C) 2001, MPlayer team.
  */
 
-#ifndef HTTP_H
-#define HTTP_H
+#ifndef MPLAYER_HTTP_H
+#define MPLAYER_HTTP_H
 
 typedef struct HTTP_field_type {
 	char *field_name;
@@ -49,4 +49,4 @@ int		http_add_basic_authentication( HTTP_header_t *http_hdr, const char *usernam
 void		http_debug_hdr( HTTP_header_t *http_hdr );
 
 int 		base64_encode(const void *enc, int encLen, char *out, int outMax);
-#endif /* HTTP_H */
+#endif /* MPLAYER_HTTP_H */

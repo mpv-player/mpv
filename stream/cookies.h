@@ -5,12 +5,12 @@
  * by Dave Lambley <mplayer@davel.me.uk>
  */
 
-#ifndef COOKIES_H
-#define COOKIES_H
+#ifndef MPLAYER_COOKIES_H
+#define MPLAYER_COOKIES_H
 
 #include "http.h"
 
 extern void cookies_set(HTTP_header_t * http_hdr, const char *hostname,
 			const char *url);
 
-#endif /* COOKIES_H */
+#endif /* MPLAYER_COOKIES_H */

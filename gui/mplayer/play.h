@@ -1,6 +1,5 @@
-
-#ifndef GUI_PLAY_H
-#define GUI_PLAY_H
+#ifndef MPLAYER_GUI_PLAY_H
+#define MPLAYER_GUI_PLAY_H
 
 #include "../config.h"
 
@@ -31,4 +30,4 @@ extern void EventHandling( void );
 
 extern void mplSetFileName( char * dir,char * name,int type );
 
-#endif /* GUI_PLAY_H */
+#endif /* MPLAYER_GUI_PLAY_H */

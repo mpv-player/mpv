@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef GENERIC_MATH_H
-#define GENERIC_MATH_H
+#ifndef MPLAYER_GENERIC_MATH_H
+#define MPLAYER_GENERIC_MATH_H
 
 typedef struct gen_sincos
 {
@@ -269,4 +269,4 @@ static double inline gen_cos(double x)
 #undef cos
 #define cos(x) gen_cos(x)
 
-#endif /* GENERIC_MATH_H */
+#endif /* MPLAYER_GENERIC_MATH_H */

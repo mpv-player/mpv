@@ -22,8 +22,8 @@
  * http://www.ece.purdue.edu/~bourman/grad-labs/lab8/pdf/lab.pdf
  */
 
-#ifndef JPEG_ENC_H
-#define JPEG_ENC_H
+#ifndef MPLAYER_JPEG_ENC_H
+#define MPLAYER_JPEG_ENC_H
 
 typedef struct {
 	struct MpegEncContext *s;
@@ -46,4 +46,4 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 
 void jpeg_enc_uninit(jpeg_enc_t *j);
 
-#endif /* JPEG_ENC_H */
+#endif /* MPLAYER_JPEG_ENC_H */

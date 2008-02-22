@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef UNRAR_EXEC_H
-#define UNRAR_EXEC_H
+#ifndef MPLAYER_UNRAR_EXEC_H
+#define MPLAYER_UNRAR_EXEC_H
 
 struct RAR_archive_entry
 {
@@ -51,4 +51,4 @@ int unrar_exec_list(const char *rarfile, ArchiveList_struct **list);
 
 void unrar_exec_freelist(ArchiveList_struct *list);
 
-#endif /* UNRAR_EXEC_H */
+#endif /* MPLAYER_UNRAR_EXEC_H */

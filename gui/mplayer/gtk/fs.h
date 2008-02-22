@@ -1,5 +1,5 @@
-#ifndef GUI_FS_H
-#define GUI_FS_H
+#ifndef MPLAYER_GUI_FS_H
+#define MPLAYER_GUI_FS_H
 
 #include <gtk/gtk.h>
 
@@ -18,4 +18,4 @@ extern void ShowFileSelect( int type, int modal );
 
 extern GtkWidget * create_FileSelect( void );
 
-#endif /* GUI_FS_H */
+#endif /* MPLAYER_GUI_FS_H */

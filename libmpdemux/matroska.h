@@ -4,8 +4,8 @@
  * see http://cvs.corecodec.org/cgi-bin/cvsweb.cgi/~checkout~/matroska/doc/website/specs/codex.html?rev=HEAD&content-type=text/html
  */
 
-#ifndef MATROSKA_H
-#define MATROSKA_H
+#ifndef MPLAYER_MATROSKA_H
+#define MPLAYER_MATROSKA_H
 
 #define MKV_A_AAC_2MAIN  "A_AAC/MPEG2/MAIN"
 #define MKV_A_AAC_2LC    "A_AAC/MPEG2/LC"
@@ -67,4 +67,4 @@ void demux_mkv_get_audio_lang(demuxer_t *demuxer, int track_num, char *lang,
 void demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,
                             int maxlen);
 
-#endif /* MATROSKA_H */
+#endif /* MPLAYER_MATROSKA_H */

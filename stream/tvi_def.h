@@ -1,5 +1,5 @@
-#ifndef TVI_DEF_H
-#define TVI_DEF_H
+#ifndef MPLAYER_TVI_DEF_H
+#define MPLAYER_TVI_DEF_H
 
 #include <stdlib.h> /* malloc */
 #include <string.h> /* memset */
@@ -107,4 +107,4 @@ static inline void fill_blank_frame(char* buffer,int len,int fmt){
     }
 }
 
-#endif /* TVI_DEF_H */
+#endif /* MPLAYER_TVI_DEF_H */

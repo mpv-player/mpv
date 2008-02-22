@@ -7,8 +7,8 @@
  * Data is always low endian
  */
 
-#ifndef NETSTREAM_H
-#define NETSTREAM_H
+#ifndef MPLAYER_NETSTREAM_H
+#define MPLAYER_NETSTREAM_H
 
 typedef struct mp_net_stream_packet_st {
   uint16_t len;
@@ -138,4 +138,4 @@ static void net_stream_opened_2_me(mp_net_stream_opened_t* o) {
   o->end_pos = le2me_64(o->end_pos);
 }
 
-#endif /* NETSTREAM_H */
+#endif /* MPLAYER_NETSTREAM_H */

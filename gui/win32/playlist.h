@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef GUI_PLAYLIST_H
-#define GUI_PLAYLIST_H
+#ifndef MPLAYER_GUI_PLAYLIST_H
+#define MPLAYER_GUI_PLAYLIST_H
 
 typedef struct
 {
@@ -56,4 +56,4 @@ struct playlist_t
 extern playlist_t *create_playlist(void);
 extern BOOL adddirtoplaylist(playlist_t *playlist, const char* path, BOOL recursive);
 
-#endif /* GUI_PLAYLIST_H */
+#endif /* MPLAYER_GUI_PLAYLIST_H */

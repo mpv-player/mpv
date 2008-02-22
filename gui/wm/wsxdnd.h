@@ -1,6 +1,5 @@
-
-#ifndef GUI_WSXDND_H
-#define GUI_WSXDND_H
+#ifndef MPLAYER_GUI_WSXDND_H
+#define MPLAYER_GUI_WSXDND_H
 
 
 void wsXDNDInitialize(void);
@@ -50,4 +49,4 @@ void wsXDNDClearAwareness(wsTWindow* window);
 /* XdndFinished */
 #define XDND_FINISHED_TARGET_WIN(e)	((e)->xclient.data.l[0])
 
-#endif /* GUI_WSXDND_H */
+#endif /* MPLAYER_GUI_WSXDND_H */

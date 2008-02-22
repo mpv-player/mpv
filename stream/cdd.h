@@ -1,5 +1,5 @@
-#ifndef CDD_H
-#define CDD_H
+#ifndef MPLAYER_CDD_H
+#define MPLAYER_CDD_H
 
 #include "config.h"
 #ifndef HAVE_LIBCDIO
@@ -74,4 +74,4 @@ cd_track_t*	cd_info_get_track(cd_info_t *cd_info, unsigned int track_nb);
 
 void 		cd_info_debug(cd_info_t *cd_info);
 
-#endif /* CDD_H */
+#endif /* MPLAYER_CDD_H */

@@ -21,8 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef GUI_DIALOGS_H
-#define GUI_DIALOGS_H
+#ifndef MPLAYER_GUI_DIALOGS_H
+#define MPLAYER_GUI_DIALOGS_H
 
 #define TBS_TOOLTIPS   0x0100
 #define WM_SYSTRAY     (WM_USER+1)
@@ -131,4 +131,4 @@
 #define GTK_MB_WARNING       0x4
 #define GTK_MB_SIMPLE        0x8
 
-#endif /* GUI_DIALOGS_H */
+#endif /* MPLAYER_GUI_DIALOGS_H */

@@ -13,9 +13,8 @@
  * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
-
-#ifndef GENRES_H
-#define GENRES_H
+#ifndef MPLAYER_GENRES_H
+#define MPLAYER_GENRES_H
 
 
 const char * const genres[] = {
@@ -277,5 +276,4 @@ const char * const genres[] = {
 "Unknown",					/* 255 */
 };
 
-
-#endif /* GENRES_H */
+#endif /* MPLAYER_GENRES_H */

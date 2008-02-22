@@ -7,8 +7,8 @@
  *
  */
  
-#ifndef VIDEO_OUT_H
-#define VIDEO_OUT_H
+#ifndef MPLAYER_VIDEO_OUT_H
+#define MPLAYER_VIDEO_OUT_H
 
 #include <inttypes.h>
 #include <stdarg.h>
@@ -255,4 +255,4 @@ extern char *monitor_dotclock_str;
 
 #endif /* defined(HAVE_FBDEV) || defined(HAVE_VESA) */
 
-#endif /* VIDEO_OUT_H */
+#endif /* MPLAYER_VIDEO_OUT_H */

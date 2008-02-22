@@ -1,5 +1,5 @@
-#ifndef TVI_DSHOW_H_
-#define TVI_DSHOW_H_
+#ifndef MPLAYER_TVI_DSHOW_H
+#define MPLAYER_TVI_DSHOW_H
 
 /// \defgroup tvi_dshow TV driver (Directshow)
 
@@ -690,4 +690,4 @@ DECLARE_ENUMERATOR_(IEnumMediaTypes, AM_MEDIA_TYPE *);
 #define OLE_RELEASE_SAFE(p) if(p){ OLE_CALL((IUnknown*)p,Release); p=NULL;}
 #define OLE_QUERYINTERFACE(p,iface,ptr) OLE_CALL_ARGS((IUnknown*)p,QueryInterface,&iface,(void*)&ptr)
 
-#endif	// TVI_DSHOW_H_
+#endif	/* MPLAYER_TVI_DSHOW_H */

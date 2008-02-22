@@ -1,5 +1,5 @@
-#ifndef STREAM_DVD_H
-#define STREAM_DVD_H
+#ifndef MPLAYER_STREAM_DVD_H
+#define MPLAYER_STREAM_DVD_H
 
 #ifdef USE_DVDREAD_INTERNAL
 #include "dvdread/dvd_reader.h"
@@ -48,4 +48,4 @@ int dvd_aid_from_lang(stream_t *stream, unsigned char* lang);
 int dvd_sid_from_lang(stream_t *stream, unsigned char* lang);
 int dvd_chapter_from_cell(dvd_priv_t *dvd,int title,int cell);
 
-#endif /* STREAM_DVD_H */
+#endif /* MPLAYER_STREAM_DVD_H */

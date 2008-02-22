@@ -1,5 +1,5 @@
-#ifndef AF_CONTROL_H
-#define AF_CONTROL_H
+#ifndef MPLAYER_CONTROL_H
+#define MPLAYER_CONTROL_H
 
 /*********************************************
 // Control info struct. 
@@ -234,4 +234,4 @@ typedef struct af_control_ext_s{
 #define AF_CONTROL_PLAYBACK_SPEED	0x00002500 | AF_CONTROL_FILTER_SPECIFIC
 #define AF_CONTROL_SCALETEMPO_AMOUNT	0x00002600 | AF_CONTROL_FILTER_SPECIFIC
 
-#endif /* AF_CONTROL_H */
+#endif /* MPLAYER_CONTROL_H */

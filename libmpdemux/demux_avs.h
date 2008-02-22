@@ -21,8 +21,8 @@
  * Boston, MA 02110-1301 USA.
  */
 
-#ifndef DEMUX_AVS_H
-#define DEMUX_AVS_H
+#ifndef MPLAYER_DEMUX_AVS_H
+#define MPLAYER_DEMUX_AVS_H
 
 enum { AVISYNTH_INTERFACE_VERSION = 2 };
 
@@ -166,4 +166,4 @@ static inline int avs_bits_per_pixel(const AVS_VideoInfo * p)
     }
 }
 
-#endif /* DEMUX_AVS_H */
+#endif /* MPLAYER_DEMUX_AVS_H */

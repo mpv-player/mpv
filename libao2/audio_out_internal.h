@@ -1,5 +1,5 @@
-#ifndef AUDIO_OUT_INTERNAL_H
-#define AUDIO_OUT_INTERNAL_H
+#ifndef MPLAYER_AUDIO_OUT_INTERNAL_H
+#define MPLAYER_AUDIO_OUT_INTERNAL_H
 
 // prototypes:
 //static ao_info_t info;
@@ -27,4 +27,4 @@ static void audio_resume(void);
 	audio_resume\
 };
 
-#endif /* AUDIO_OUT_INTERNAL_H */
+#endif /* MPLAYER_AUDIO_OUT_INTERNAL_H */

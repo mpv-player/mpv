@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MGA_VID_H
-#define MGA_VID_H
+#ifndef MPLAYER_MGA_VID_H
+#define MPLAYER_MGA_VID_H
 
 typedef struct mga_vid_config_s
 {
@@ -65,4 +65,4 @@ uint32_t num_frames;
 
 #define MGA_VID_VERSION 0x0201
 
-#endif /* MGA_VID_H */
+#endif /* MPLAYER_MGA_VID_H */

@@ -1,8 +1,8 @@
-#ifndef AE_PCM_H
-#define AE_PCM_H
+#ifndef MPLAYER_AE_PCM_H
+#define MPLAYER_AE_PCM_H
 
 #include "ae.h"
 
 int mpae_init_pcm(audio_encoder_t *encoder);
 
-#endif /* AE_PCM_H */
+#endif /* MPLAYER_AE_PCM_H */

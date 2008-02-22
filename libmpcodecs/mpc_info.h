@@ -1,5 +1,5 @@
-#ifndef MPC_INFO_H
-#define MPC_INFO_H
+#ifndef MPLAYER_MPC_INFO_H
+#define MPLAYER_MPC_INFO_H
 
 typedef struct mp_codec_info_s
 {
@@ -22,4 +22,4 @@ typedef struct mp_codec_info_s
 #define CONTROL_ERROR -2
 #define CONTROL_NA -3
 
-#endif /* MPC_INFO_H */
+#endif /* MPLAYER_MPC_INFO_H */

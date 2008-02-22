@@ -1,5 +1,5 @@
-#ifndef ASXPARSER_H
-#define ASXPARSER_H
+#ifndef MPLAYER_ASXPARSER_H
+#define MPLAYER_ASXPARSER_H
 
 typedef struct ASX_Parser_t ASX_Parser_t;
 
@@ -49,4 +49,4 @@ typedef void (*ASX_FreeFunc)(void* arg);
 void
 asx_list_free(void* list_ptr,ASX_FreeFunc free_func);
 
-#endif /* ASXPARSER_H */
+#endif /* MPLAYER_ASXPARSER_H */

@@ -1,5 +1,5 @@
-#ifndef DEMUX_RTP_INTERNAL_H
-#define DEMUX_RTP_INTERNAL_H
+#ifndef MPLAYER_DEMUX_RTP_INTERNAL_H
+#define MPLAYER_DEMUX_RTP_INTERNAL_H
 
 #include <stdlib.h>
 
@@ -41,4 +41,4 @@ Boolean awaitRTPPacket(demuxer_t* demuxer, demux_stream_t* ds,
     // "streamType": 0 => video; 1 => audio
     // This routine returns False if the input stream has closed
 
-#endif /* DEMUX_RTP_INTERNAL_H */
+#endif /* MPLAYER_DEMUX_RTP_INTERNAL_H */

@@ -1,6 +1,5 @@
-
-#ifndef GUI_OPTS_H
-#define GUI_OPTS_H
+#ifndef MPLAYER_GUI_OPTS_H
+#define MPLAYER_GUI_OPTS_H
 
 #include <gtk/gtk.h>
 
@@ -13,4 +12,4 @@ extern GtkWidget * create_AudioConfig( void );
 
 extern void ShowPreferences( void );
 
-#endif /* GUI_OPTS_H */
+#endif /* MPLAYER_GUI_OPTS_H */

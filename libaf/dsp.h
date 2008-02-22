@@ -8,8 +8,8 @@
 //=============================================================================
 */
 
-#ifndef	DSP_H
-#define	DSP_H
+#ifndef	MPLAYER_DSP_H
+#define	MPLAYER_DSP_H
 
 /* Implementation of routines used for DSP */
 
@@ -19,4 +19,4 @@
 #include <window.h>
 #include <filter.h>
 
-#endif /* DSP_H */
+#endif /* MPLAYER_DSP_H */

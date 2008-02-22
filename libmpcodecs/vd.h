@@ -1,5 +1,5 @@
-#ifndef VD_H
-#define VD_H
+#ifndef MPLAYER_VD_H
+#define MPLAYER_VD_H
 
 #include "mp_image.h"
 #include "mpc_info.h"
@@ -35,4 +35,4 @@ void mpcodecs_draw_slice(sh_video_t *sh, unsigned char** src, int* stride, int w
 
 #define VDFLAGS_DROPFRAME 3
 
-#endif /* VD_H */
+#endif /* MPLAYER_VD_H */

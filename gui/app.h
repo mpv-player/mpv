@@ -1,6 +1,5 @@
-
-#ifndef GUI_APP_H
-#define GUI_APP_H
+#ifndef MPLAYER_GUI_APP_H
+#define MPLAYER_GUI_APP_H
 
 #include "bitmap.h"
 #include "wm/ws.h"
@@ -184,4 +183,4 @@ extern void btnModify( int event,float state );
 extern float btnGetValue( int event );
 extern void btnSet( int event,int set );
 
-#endif /* GUI_APP_H */
+#endif /* MPLAYER_GUI_APP_H */

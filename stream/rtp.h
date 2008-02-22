@@ -5,9 +5,9 @@
  * $Id$
  */
 
-#ifndef RTP_H
-#define RTP_H
+#ifndef MPLAYER_RTP_H
+#define MPLAYER_RTP_H
 
 int read_rtp_from_server(int fd, char *buffer, int length);
 
-#endif /* RTP_H */
+#endif /* MPLAYER_RTP_H */

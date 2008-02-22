@@ -20,8 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef INPUT_AR_H
-#define INPUT_AR_H
+#ifndef MPLAYER_AR_H
+#define MPLAYER_AR_H
 
 #define AR_BASE      0x500
 #define AR_PLAY      (AR_BASE + 0)
@@ -39,4 +39,4 @@ int mp_input_ar_init(void);
 int mp_input_ar_read(int fd);
 void mp_input_ar_close(int fd);
 
-#endif /* INPUT_AR_H */
+#endif /* MPLAYER_AR_H */

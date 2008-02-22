@@ -29,8 +29,8 @@
  *      fixed a lot of RFC compliance issues.
  */
  
-#ifndef RTSP_H
-#define RTSP_H
+#ifndef MPLAYER_RTSP_H
+#define MPLAYER_RTSP_H
 
 
 /* some codes returned by rtsp_request_* functions */
@@ -80,4 +80,4 @@ void rtsp_schedule_field(rtsp_t *s, const char *string);
 void rtsp_unschedule_field(rtsp_t *s, const char *string);
 void rtsp_unschedule_all(rtsp_t *s);
 
-#endif /* RTSP_H */
+#endif /* MPLAYER_RTSP_H */

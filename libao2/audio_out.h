@@ -1,6 +1,5 @@
-
-#ifndef AUDIO_OUT_H
-#define AUDIO_OUT_H
+#ifndef MPLAYER_AUDIO_OUT_H
+#define MPLAYER_AUDIO_OUT_H
 
 typedef struct ao_info_s
 {
@@ -72,4 +71,4 @@ typedef struct ao_control_vol_s {
 	float right;
 } ao_control_vol_t;
 
-#endif /* AUDIO_OUT_H */
+#endif /* MPLAYER_AUDIO_OUT_H */

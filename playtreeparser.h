@@ -1,3 +1,5 @@
+#ifndef MPLAYER_PLAYTREEPARSER_H
+#define MPLAYER_PLAYTREEPARSER_H
 
 /// \defgroup PlaytreeParser Playtree parser
 /// \ingroup Playtree
@@ -7,9 +9,6 @@
 ///@{
 
 /// \file
-
-#ifndef PLAYTREEPARSER_H
-#define PLAYTREEPARSER_H
 
 struct stream_st;
 
@@ -47,6 +46,6 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced);
 void
 play_tree_add_bpf(play_tree_t* pt, char* filename);
 
-#endif /* PLAYTREEPARSER_H */
-
 ///@}
+
+#endif /* MPLAYER_PLAYTREEPARSER_H */

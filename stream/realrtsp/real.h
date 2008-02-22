@@ -27,8 +27,8 @@
  *
  */
  
-#ifndef HAVE_REAL_H
-#define HAVE_REAL_H
+#ifndef MPLAYER_REAL_H
+#define MPLAYER_REAL_H
 
 #include "rmff.h"
 #include "../librtsp/rtsp.h"
@@ -57,4 +57,4 @@ rmff_header_t *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidt
 struct real_rtsp_session_t *init_real_rtsp_session (void);
 void free_real_rtsp_session (struct real_rtsp_session_t* real_session);
 
-#endif /* HAVE_REAL_H */
+#endif /* MPLAYER_REAL_H */

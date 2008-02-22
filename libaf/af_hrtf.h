@@ -1,5 +1,5 @@
-#ifndef AF_HRTF_H
-#define AF_HRTF_H
+#ifndef MPLAYER_AF_HRTF_H
+#define MPLAYER_AF_HRTF_H
 
 #define HRTF_MIX_51 0
 #define HRTF_MIX_STEREO 1
@@ -490,4 +490,4 @@ float cr_filt[128] = {
    -0.0002379619297227554, 0.0007130120121089036
 };
 
-#endif /* AF_HRTF_H */
+#endif /* MPLAYER_AF_HRTF_H */

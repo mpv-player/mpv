@@ -1,5 +1,5 @@
-#ifndef W32_COMMON_H
-#define W32_COMMON_H
+#ifndef MPLAYER_W32_COMMON_H
+#define MPLAYER_W32_COMMON_H
 
 extern HWND vo_w32_window;
 extern int vo_vm;
@@ -14,4 +14,4 @@ extern int vo_w32_config(uint32_t, uint32_t, uint32_t);
 extern void destroyRenderingContext(void);
 extern void w32_update_xinerama_info(void);
 
-#endif /* W32_COMMON_H */
+#endif /* MPLAYER_W32_COMMON_H */
