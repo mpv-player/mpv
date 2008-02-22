@@ -1207,7 +1207,7 @@ static void print_status(float a_pos, float a_v, float corr)
     width = screen_width;
   else
   width = 80;
-#ifdef WIN32
+#if defined(WIN32) || defined(__OS2__)
   /* Windows command line is broken (MinGW's rxvt works, but we
    * should not depend on that). */
   width--;
