@@ -22,6 +22,8 @@
 
 #include <stdlib.h>
 #include <inttypes.h>
+#include <ft2build.h>
+#include FT_GLYPH_H
 
 #include "mputils.h"
 #include "ass_utils.h"
@@ -79,3 +81,27 @@ int strtocolor(char** q, uint32_t* res)
 	return result;
 }
 
+static void sprint_tag(uint32_t tag, char* dst)
+{
+	dst[0] = (tag >> 24) & 0xFF;
+	dst[1] = (tag >> 16) & 0xFF;
+	dst[2] = (tag >> 8) & 0xFF;
+	dst[3] = tag & 0xFF;
+	dst[4] = 0;
+}
+
+void dump_glyph(FT_Glyph g)
+{
+	char tag[5];
+	int i;
+	FT_OutlineGlyph og = (FT_OutlineGlyph)g;
+	FT_Outline* o = &(og->outline);
+	sprint_tag(g->format, tag);
+	printf("glyph: %p \n", g);
+	printf("format: %s \n", tag);
+	printf("outline: %p \n", o);
+	printf("contours: %d, points: %d, points ptr: %p \n", o->n_contours, o->n_points, o->points);
+	for (i = 0; i < o->n_points; ++i) {
+		printf("  point %f, %f \n", d6_to_double(o->points[i].x), d6_to_double(o->points[i].y));
+	}
+}
