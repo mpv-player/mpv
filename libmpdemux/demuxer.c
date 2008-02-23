@@ -206,6 +206,7 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char
   memset(d,0,sizeof(demuxer_t));
   d->stream=stream;
   d->stream_pts = MP_NOPTS_VALUE;
+  d->reference_clock = MP_NOPTS_VALUE;
   d->movi_start=stream->start_pos;
   d->movi_end=stream->end_pos;
   d->seekable=1;
@@ -405,6 +406,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 // return value:
 //     0 = EOF
 //     1 = successful
+#define MAX_ACUMULATED_PACKETS 64
 int ds_fill_buffer(demux_stream_t *ds){
   demuxer_t *demux=ds->demuxer;
   if(ds->current) free_demux_packet(ds->current);
@@ -418,6 +420,13 @@ int ds_fill_buffer(demux_stream_t *ds){
   while(1){
     if(ds->packs){
       demux_packet_t *p=ds->first;
+      if(demux->reference_clock != MP_NOPTS_VALUE) {
+        if((p->pts != MP_NOPTS_VALUE) && (p->pts > demux->reference_clock)
+            && (ds->packs < MAX_ACUMULATED_PACKETS)) {
+            if(demux_fill_buffer(demux,ds))
+              continue;
+        }
+      }
       // copy useful data:
       ds->buffer=p->buffer;
       ds->buffer_pos=0;

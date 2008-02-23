@@ -194,6 +194,7 @@ typedef struct demuxer_st {
   off_t movi_end;
   stream_t *stream;
   double stream_pts;       // current stream pts, if applicable (e.g. dvd)
+  double reference_clock;
   char *filename; ///< Needed by avs_check_file
   int synced;  // stream synced (used by mpeg)
   int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
