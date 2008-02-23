@@ -3086,8 +3086,9 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 extern void skip_audio_frame(sh_audio_t *sh_audio);
 
-static void reset_fifos(ts_priv_t* priv, int a, int v, int s)
+static void reset_fifos(demuxer_t *demuxer, int a, int v, int s)
 {
+	ts_priv_t* priv = demuxer->priv;
 	if(a)
 	{
 		if(priv->fifo[0].pack != NULL)
@@ -3117,6 +3118,7 @@ static void reset_fifos(ts_priv_t* priv, int a, int v, int s)
 		}
 		priv->fifo[2].offset = 0;
 	}
+	demuxer->reference_clock = MP_NOPTS_VALUE;
 }
 
 
@@ -3134,7 +3136,7 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 	//================= seek in MPEG-TS ==========================
 
 	ts_dump_streams(demuxer->priv);
-	reset_fifos(priv, sh_audio != NULL, sh_video != NULL, demuxer->sub->id > 0);
+	reset_fifos(demuxer, sh_audio != NULL, sh_video != NULL, demuxer->sub->id > 0);
 
 
 	if(sh_audio != NULL)
@@ -3280,7 +3282,7 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 			n = *((int*)arg);
 			if(n == -2)
 			{
-				reset_fifos(priv, areset, vreset, 0);
+				reset_fifos(demuxer, areset, vreset, 0);
 				ds->id = -2;
 				ds->sh = NULL;
 				ds_free_packs(ds);
@@ -3322,7 +3324,7 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 			if(sh)
 			{
 				if(ds->id != priv->ts.streams[i].id)
-					reset_fifos(priv, areset, vreset, 0);
+					reset_fifos(demuxer, areset, vreset, 0);
 				ds->id = priv->ts.streams[i].id;
 				ds->sh = sh;
 				ds_free_packs(ds);
