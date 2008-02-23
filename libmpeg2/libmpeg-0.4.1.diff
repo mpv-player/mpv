@@ -291,11 +291,10 @@
  #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
  
  typedef struct mpeg2_picture_s {
-@@ -156,12 +160,13 @@
+@@ -156,10 +160,13 @@
  #define MPEG2_ACCEL_X86_3DNOW 2
  #define MPEG2_ACCEL_X86_MMXEXT 4
- #define MPEG2_ACCEL_X86_SSE2 8
--#define MPEG2_ACCEL_X86_SSE3 16
++#define MPEG2_ACCEL_X86_SSE2 8
  #define MPEG2_ACCEL_PPC_ALTIVEC 1
  #define MPEG2_ACCEL_ALPHA 1
  #define MPEG2_ACCEL_ALPHA_MVI 2
