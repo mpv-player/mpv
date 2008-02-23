@@ -502,6 +502,20 @@ static inline int32_t progid_for_pid(ts_priv_t *priv, int pid, int32_t req)		//f
 	return -1;
 }
 
+static inline int32_t prog_pcr_pid(ts_priv_t *priv, int progid)
+{
+	int i;
+
+	if(priv->pmt == NULL)
+		return -1;
+	for(i=0; i < priv->pmt_cnt; i++)
+	{
+		if(priv->pmt[i].progid == progid)
+			return priv->pmt[i].PCR_PID;
+	}
+	return -1;
+}
+
 
 static inline int pid_match_lang(ts_priv_t *priv, uint16_t pid, char *lang)
 {
@@ -1036,6 +1050,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 	start_pos = (start_pos <= priv->ts.packet_size ? 0 : start_pos - priv->ts.packet_size);
 	demuxer->movi_start = start_pos;
+	demuxer->reference_clock = MP_NOPTS_VALUE;
 	stream_reset(demuxer->stream);
 	stream_seek(demuxer->stream, start_pos);	//IF IT'S FROM A PIPE IT WILL FAIL, BUT WHO CARES?
 
@@ -2726,11 +2741,38 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			//c==0 is allowed!
 			if(c > 0)
 			{
-				rap_flag = (stream_read_char(stream) & 0x40) >> 6;
+				uint8_t pcrbuf[188];
+				int flags = stream_read_char(stream);
+				int has_pcr;
+				rap_flag = (flags & 0x40) >> 6;
+				has_pcr = flags & 0x10;
+				
 				buf_size--;
-	
 				c--;
-				stream_skip(stream, c);
+				stream_read(stream, pcrbuf, c);
+
+				if(has_pcr)
+				{
+					int pcr_pid = prog_pcr_pid(priv, priv->prog);
+					if(pcr_pid == pid)
+					{
+						uint64_t pcr, pcr_ext;
+	
+						pcr  = (int64_t)(pcrbuf[0]) << 25;
+						pcr |=  pcrbuf[1]         << 17 ;
+						pcr |= (pcrbuf[2]) << 9;
+						pcr |=  pcrbuf[3]  <<  1 ;
+						pcr |= (pcrbuf[4] & 0x80) >>  7;
+	
+						pcr_ext = (pcrbuf[4] & 0x01) << 8;
+						pcr_ext |= pcrbuf[5];
+	
+						pcr = pcr * 300 + pcr_ext;
+						
+						demuxer->reference_clock = (double)pcr/(double)27000000.0;
+					}
+				}
+				
 				buf_size -= c;
 				if(buf_size == 0)
 					continue;
