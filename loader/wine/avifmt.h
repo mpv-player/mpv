@@ -3,14 +3,14 @@
  *  AVIFMT - AVI file format definitions
  *
  ****************************************************************************/
-#ifndef WINE_AVIFMT_H
-#define WINE_AVIFMT_H
+#ifndef MPLAYER_AVIFMT_H
+#define MPLAYER_AVIFMT_H
 
-#ifndef WINE_NOAVIFMT_H
+#ifndef MPLAYER_NOAVIFMT_H
 
 #include "windef.h"
 
-#ifndef WINE_MSACM_H
+#ifndef MPLAYER_MSACM_H
 typedef DWORD FOURCC;
 #endif
 
@@ -236,5 +236,5 @@ typedef struct
 **
 ** Used in video streams.
 */
-#endif /* WINE_NOAVIFMT_H */
-#endif /* WINE_AVIFMT_H */
+#endif /* MPLAYER_NOAVIFMT_H */
+#endif /* MPLAYER_AVIFMT_H */

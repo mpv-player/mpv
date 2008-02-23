@@ -1,8 +1,8 @@
 /*
  * 		Win32 registry defines (see also winnt.h)
  */
-#ifndef WINE_WINREG_H
-#define WINE_WINREG_H
+#ifndef MPLAYER_WINREG_H
+#define MPLAYER_WINREG_H
 
 #include "winbase.h"
 #include "winnt.h"
@@ -54,4 +54,4 @@ typedef ACCESS_MASK REGSAM;
 } /* extern "C" */
 #endif /* defined(__cplusplus) */
 
-#endif  /* WINE_WINREG_H */
+#endif /* MPLAYER_WINREG_H */

@@ -1,5 +1,5 @@
-#ifndef DS_GUIDS_H
-#define DS_GUIDS_H
+#ifndef MPLAYER_GUIDS_H
+#define MPLAYER_GUIDS_H
 
 /*
 this will be defined if <ole2.h> already included before this file
@@ -82,4 +82,4 @@ extern const GUID FORMAT_WaveFormatEx;
 extern const GUID MEDIATYPE_Audio;
 extern const GUID MEDIASUBTYPE_PCM;
 
-#endif /* DS_GUIDS_H */
+#endif /* MPLAYER_GUIDS_H */

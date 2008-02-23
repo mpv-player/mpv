@@ -1,5 +1,5 @@
-#ifndef AVIFILE_REGISTRY_H
-#define AVIFILE_REGISTRY_H
+#ifndef MPLAYER_REGISTRY_H
+#define MPLAYER_REGISTRY_H
 
 /********************************************************
  *
@@ -30,7 +30,7 @@ long __stdcall RegCreateKeyExA(long key, const char* name, long reserved,
 long __stdcall RegSetValueExA(long key, const char* name, long v1, long v2,
 		    const void* data, long size);
 
-#ifdef WINE_WINERROR_H
+#ifdef MPLAYER_WINERROR_H
 
 long __stdcall RegEnumKeyExA(HKEY hKey, DWORD dwIndex, LPSTR lpName, LPDWORD lpcbName,
 		   LPDWORD lpReserved, LPSTR lpClass, LPDWORD lpcbClass,
@@ -42,4 +42,4 @@ long __stdcall RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_co
 };
 #endif
 
-#endif /* AVIFILE_REGISTRY_H */
+#endif /* MPLAYER_REGISTRY_H */

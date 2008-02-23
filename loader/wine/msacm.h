@@ -2,8 +2,8 @@
  *      msacm.h   -       Declarations for MSACM
  */
 
-#ifndef WINE_MSACM_H
-#define WINE_MSACM_H
+#ifndef MPLAYER_MSACM_H
+#define MPLAYER_MSACM_H
 
 #include "windef.h"
 #include "driver.h"
@@ -938,4 +938,4 @@ MMRESULT WINAPI acmStreamUnprepareHeader(
 } /* extern "C" */
 #endif /* defined(__cplusplus) */
 
-#endif  /* WINE_MSACM_H */
+#endif /* MPLAYER_MSACM_H */

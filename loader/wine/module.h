@@ -4,8 +4,8 @@
  * Copyright 1995 Alexandre Julliard
  */
 
-#ifndef WINE_MODULE_H
-#define WINE_MODULE_H
+#ifndef MPLAYER_MODULE_H
+#define MPLAYER_MODULE_H
 
 #include "windef.h"
 #include "pe_image.h"
@@ -146,4 +146,4 @@ extern WINE_MODREF *MODULE_FindModule( LPCSTR path );
 /* resource.c */
 extern INT       WINAPI AccessResource(HMODULE,HRSRC); 
 
-#endif  /* WINE_MODULE_H */
+#endif /* MPLAYER_MODULE_H */

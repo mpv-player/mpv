@@ -1,5 +1,5 @@
-#ifndef LDT_KEEPER_H
-#define LDT_KEEPER_H
+#ifndef MPLAYER_LDT_KEEPER_H
+#define MPLAYER_LDT_KEEPER_H
 
 #ifdef __cplusplus
 extern "C"
@@ -18,4 +18,4 @@ void Restore_LDT_Keeper(ldt_fs_t* ldt_fs);
 }
 #endif
 
-#endif /* LDT_KEEPER_H */
+#endif /* MPLAYER_LDT_KEEPER_H */

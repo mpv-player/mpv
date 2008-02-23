@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef WINE_WINDEF_H
-#define WINE_WINDEF_H
+#ifndef MPLAYER_WINDEF_H
+#define MPLAYER_WINDEF_H
 
 # include "config.h"
 
@@ -338,8 +338,8 @@ typedef LRESULT CALLBACK (*WNDPROC)(HWND,UINT,WPARAM,LPARAM);
  * 16 bit windows code.
  */
 
-#ifndef WINE_WINDEF16_H
-#define WINE_WINDEF16_H
+#ifndef MPLAYER_WINDEF16_H
+#define MPLAYER_WINDEF16_H
 
 #include "windef.h"
 
@@ -453,7 +453,7 @@ typedef VOID    CALLBACK (*TIMERPROC16)(HWND16,UINT16,UINT16,DWORD);
 typedef LRESULT CALLBACK (*WNDENUMPROC16)(HWND16,LPARAM);
 typedef LRESULT CALLBACK (*WNDPROC16)(HWND16,UINT16,WPARAM16,LPARAM);
 
-#endif /* WINE_WINDEF16_H */
+#endif /* MPLAYER_WINDEF16_H */
 
 /* Define some empty macros for compatibility with Windows code. */
 
@@ -637,4 +637,4 @@ typedef const RECTL *LPCRECTL;
 }
 #endif
 
-#endif /* WINE_WINDEF_H */
+#endif /* MPLAYER_WINDEF_H */

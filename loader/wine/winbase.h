@@ -1,5 +1,5 @@
-#ifndef WINE_WINBASE_H
-#define WINE_WINBASE_H
+#ifndef MPLAYER_WINBASE_H
+#define MPLAYER_WINBASE_H
 
 #include "basetsd.h"
 #include "winnt.h"
@@ -1782,4 +1782,4 @@ VOID        WINAPI SetLastError(DWORD);
 }
 #endif
 
-#endif  /* WINE_WINBASE_H */
+#endif /* MPLAYER_WINBASE_H */

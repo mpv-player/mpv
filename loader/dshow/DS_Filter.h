@@ -1,5 +1,5 @@
-#ifndef DS_FILTER_H
-#define DS_FILTER_H
+#ifndef MPLAYER_DS_FILTER_H
+#define MPLAYER_DS_FILTER_H
 
 #include "inputpin.h"
 #include "outputpin.h"
@@ -47,4 +47,4 @@ void DS_Filter_Destroy(DS_Filter* This);
 }
 #endif
 
-#endif /* DS_FILTER_H */
+#endif /* MPLAYER_DS_FILTER_H */

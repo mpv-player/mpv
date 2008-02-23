@@ -1,5 +1,5 @@
-#ifndef DS_OUTPUTPIN_H
-#define DS_OUTPUTPIN_H
+#ifndef MPLAYER_OUTPUTPIN_H
+#define MPLAYER_OUTPUTPIN_H
 
 /* "output pin" - the one that connects to output of filter. */
 
@@ -29,4 +29,4 @@ struct COutputPin
 
 COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt,SAMPLEPROC SampleProc,void* pUserData);
 
-#endif /* DS_OUTPUTPIN_H */
+#endif /* MPLAYER_OUTPUTPIN_H */

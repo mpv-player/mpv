@@ -1,5 +1,5 @@
-#ifndef DMO_H
-#define DMO_H
+#ifndef MPLAYER_DMO_H
+#define MPLAYER_DMO_H
 
 /*
  *
@@ -78,4 +78,4 @@ enum DMO_VIDEO_OUTPUT_STREAM_FLAGS
 #define DMO_E_TYPE_NOT_ACCEPTED  0x80040205
 #define DMO_E_NO_MORE_ITEMS      0x80040206
 
-#endif /* DMO_H */
+#endif /* MPLAYER_DMO_H */

@@ -1,5 +1,5 @@
-#ifndef WINE_NTDEF_H
-#define WINE_NTDEF_H
+#ifndef MPLAYER_NTDEF_H
+#define MPLAYER_NTDEF_H
 
 #include "basetsd.h"
 #include "windef.h"
@@ -98,4 +98,4 @@ typedef OBJECT_ATTRIBUTES *POBJECT_ATTRIBUTES;
 
 #include "poppack.h"
 
-#endif /* WINE_NTDEF_H */
+#endif /* MPLAYER_NTDEF_H */

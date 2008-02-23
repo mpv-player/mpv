@@ -1,5 +1,5 @@
-#ifndef DMO_FILTER_H
-#define DMO_FILTER_H
+#ifndef MPLAYER_DMO_FILTER_H
+#define MPLAYER_DMO_FILTER_H
 
 #include "dmo_guids.h"
 #include "dmo_interfaces.h"
@@ -44,4 +44,4 @@ CMediaBuffer* CMediaBufferCreate(unsigned long maxlen, void* mem, unsigned long 
 }
 #endif
 
-#endif /* DS_FILTER_H */
+#endif /* MPLAYER_DMO_FILTER_H */

@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_H
-#define COMPONENTS_H
+#ifndef MPLAYER_COMPONENTS_H
+#define MPLAYER_COMPONENTS_H
 
 #include <inttypes.h>
 
@@ -744,4 +744,4 @@ static inline void dump_CodecDecompressParams(void* xxx){
 
 }
 
-#endif /* COMPONENTS_H */
+#endif /* MPLAYER_COMPONENTS_H */

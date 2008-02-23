@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef WINE_MMREG_H
-#define WINE_MMREG_H
+#ifndef MPLAYER_MMREG_H
+#define MPLAYER_MMREG_H
 
 /***********************************************************************
  * Defines/Enums
@@ -246,4 +246,4 @@ typedef struct mpeglayer3waveformat_tag {
 #define WAVE_FORMAT_DEVELOPMENT         (0xFFFF)
 
 
-#endif /* WINE_MMREG_H */
+#endif /* MPLAYER_MMREG_H */

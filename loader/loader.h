@@ -11,8 +11,8 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
-#ifndef LOADER_H
-#define LOADER_H
+#ifndef MPLAYER_LOADER_H
+#define MPLAYER_LOADER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,4 +37,4 @@ INT WINAPI LoadStringA( HINSTANCE instance, UINT resource_id,
 }
 #endif
 
-#endif /* LOADER_H */
+#endif /* MPLAYER_LOADER_H */

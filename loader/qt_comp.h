@@ -1,5 +1,5 @@
-#ifndef QT_COMP_H
-#define QT_COMP_H
+#ifndef MPLAYER_QT_COMP_H
+#define MPLAYER_QT_COMP_H
 
 DECL_COMPONENT(sorenson3,"SMD_ComponentDispatch",1)
 DECL_COMPONENT(sorenson,"SorensonYUV9Dispatcher",1)
@@ -27,4 +27,4 @@ DECL_COMPONENT(mace3d,"Mace3DecompDispatch",0)
 
 //DECL_COMPONENT(,"",0)
 
-#endif /* QT_COMP_H */
+#endif /* MPLAYER_QT_COMP_H */

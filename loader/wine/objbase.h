@@ -1,5 +1,5 @@
-#ifndef WINE_OBJBASE_H
-#define WINE_OBJBASE_H
+#ifndef MPLAYER_OBJBASE_H
+#define MPLAYER_OBJBASE_H
 
 #ifndef STDCALL
 #define STDCALL __attribute__((__stdcall__))
@@ -17,4 +17,4 @@ HRESULT STDCALL CoInitialize(LPVOID pvReserved);
 HRESULT STDCALL CoInitializeEx(LPVOID pvReserved, DWORD dwCoinit);
 void STDCALL CoUninitialize(void);
 
-#endif /* WINE_OBJBASE_H */
+#endif /* MPLAYER_OBJBASE_H */

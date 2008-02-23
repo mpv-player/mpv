@@ -3,8 +3,8 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
-#ifndef AVIFILE_COM_H
-#define AVIFILE_COM_H
+#ifndef MPLAYER_COM_H
+#define MPLAYER_COM_H
 
 #include "config.h"
 
@@ -91,4 +91,4 @@ void  STDCALL  CoTaskMemFree(void*);
 
 #endif /* WIN32 */
 
-#endif /* AVIFILE_COM_H */
+#endif /* MPLAYER_COM_H */

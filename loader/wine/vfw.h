@@ -3,8 +3,8 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
-#ifndef WINE_VFW_H
-#define WINE_VFW_H
+#ifndef MPLAYER_VFW_H
+#define MPLAYER_VFW_H
 //#include "pshpack1.h"
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ typedef struct {
 
 #define VFWAPI	
 #define VFWAPIV	
-#ifndef WINE_WINDEF_H
+#ifndef MPLAYER_WINDEF_H
 typedef long (__stdcall__ *DRIVERPROC)(long,HDRVR,unsigned int,long,long);
 #endif
 
@@ -668,4 +668,4 @@ typedef struct {
 #ifdef __cplusplus
 }
 #endif
-#endif /* WINE_VFW_H */
+#endif /* MPLAYER_VFW_H */

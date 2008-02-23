@@ -1,5 +1,5 @@
-#ifndef DS_ALLOCATOR_H
-#define DS_ALLOCATOR_H
+#ifndef MPLAYER_ALLOCATOR_H
+#define MPLAYER_ALLOCATOR_H
 
 #include "interfaces.h"
 #include "cmediasample.h"
@@ -24,4 +24,4 @@ struct MemAllocator
 
 MemAllocator* MemAllocatorCreate(void);
 
-#endif /* DS_ALLOCATOR_H */
+#endif /* MPLAYER_ALLOCATOR_H */

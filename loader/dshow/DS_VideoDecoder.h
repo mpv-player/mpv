@@ -1,5 +1,5 @@
-#ifndef AVIFILE_DS_VIDEODECODER_H
-#define AVIFILE_DS_VIDEODECODER_H
+#ifndef MPLAYER_DS_VIDEODECODER_H
+#define MPLAYER_DS_VIDEODECODER_H
 
 typedef struct DS_VideoDecoder DS_VideoDecoder;
 
@@ -26,4 +26,4 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 int DS_SetAttr_DivX(char* attribute, int value);
 
 
-#endif /* AVIFILE_DS_VIDEODECODER_H */
+#endif /* MPLAYER_DS_VIDEODECODER_H */

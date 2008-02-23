@@ -1,5 +1,5 @@
-#ifndef AVIFILE_DMO_VIDEODECODER_H
-#define AVIFILE_DMO_VIDEODECODER_H
+#ifndef MPLAYER_DMO_VIDEODECODER_H
+#define MPLAYER_DMO_VIDEODECODER_H
 
 typedef struct DMO_VideoDecoder DMO_VideoDecoder;
 
@@ -23,4 +23,4 @@ int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int c
 int DMO_VideoDecoder_SetDirection(DMO_VideoDecoder *this, int d);
 
 
-#endif /* AVIFILE_DMO_VIDEODECODER_H */
+#endif /* MPLAYER_DMO_VIDEODECODER_H */

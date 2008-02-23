@@ -3,8 +3,8 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
-#ifndef LOADER_WIN32_H
-#define LOADER_WIN32_H
+#ifndef MPLAYER_WIN32_H
+#define MPLAYER_WIN32_H
 
 #include <time.h>
 
@@ -40,4 +40,4 @@ typedef struct tls_s tls_t;
 extern void* LookupExternal(const char* library, int ordinal);
 extern void* LookupExternalByName(const char* library, const char* name);
 
-#endif /* LOADER_WIN32_H */
+#endif /* MPLAYER_WIN32_H */

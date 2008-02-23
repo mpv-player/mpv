@@ -1,6 +1,5 @@
-
-#ifndef WINE_DEBUGTOOLS_H
-#define WINE_DEBUGTOOLS_H
+#ifndef MPLAYER_DEBUGTOOLS_H
+#define MPLAYER_DEBUGTOOLS_H
 
 #include <stdarg.h>
 #include "config.h"
@@ -69,4 +68,4 @@ static inline LPCSTR debugstr_w( LPCWSTR s ) { return debugstr_wn( s, 80 ); }
 #define DEFAULT_DEBUG_CHANNEL(ch) \
     extern char dbch_##ch[]; static char * const __dbch_default = dbch_##ch;
 
-#endif  /* WINE_DEBUGTOOLS_H */
+#endif  /* MPLAYER_DEBUGTOOLS_H */

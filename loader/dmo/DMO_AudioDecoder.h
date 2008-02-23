@@ -1,5 +1,5 @@
-#ifndef AVIFILE_DMO_AUDIODECODER_H
-#define AVIFILE_DMO_AUDIODECODER_H
+#ifndef MPLAYER_DMO_AUDIODECODER_H
+#define MPLAYER_DMO_AUDIODECODER_H
 
 typedef struct DMO_AudioDecoder DMO_AudioDecoder;
 
@@ -14,4 +14,4 @@ int DMO_AudioDecoder_Convert(DMO_AudioDecoder *this, const void* in_data, unsign
 
 int DMO_AudioDecoder_GetSrcSize(DMO_AudioDecoder *this, int dest_size);
 
-#endif /* AVIFILE_DMO_AUDIODECODER_H */
+#endif /* MPLAYER_DMO_AUDIODECODER_H */

@@ -1,5 +1,5 @@
-#ifndef QT_FV_H
-#define QT_FV_H
+#ifndef MPLAYER_QT_FV_H
+#define MPLAYER_QT_FV_H
 
 typedef struct qt_fv_s {
     unsigned int id;
@@ -1588,4 +1588,4 @@ qt_fv_t qt_fv_list[]={
 { 0x270029, "TEFeatureFlag"},
 { 0,NULL } };
 
-#endif /* QT_FV_H */
+#endif /* MPLAYER_QT_FV_H */

@@ -1,5 +1,5 @@
-#ifndef WRAPPER_H
-#define WRAPPER_H
+#ifndef MPLAYER_WRAPPER_H
+#define MPLAYER_WRAPPER_H
 
 #include <inttypes.h>
 
@@ -16,5 +16,5 @@ extern void (*wrapper_target)(void);
 extern int wrapper(void);
 extern int null_call(void);
 
-#endif /* WRAPPER_H */
+#endif /* MPLAYER_WRAPPER_H */
 

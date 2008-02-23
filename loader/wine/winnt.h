@@ -4,8 +4,8 @@
  * Copyright 1996 Alexandre Julliard
  */
 
-#ifndef WINE_WINNT_H
-#define WINE_WINNT_H
+#ifndef MPLAYER_WINNT_H
+#define MPLAYER_WINNT_H
 
 #include "windef.h"
 
@@ -2659,4 +2659,4 @@ typedef enum tagSID_NAME_USE {
 
 #include "poppack.h"
 
-#endif  /* WINE_WINNT_H */
+#endif /* MPLAYER_WINNT_H */

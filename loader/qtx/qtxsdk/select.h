@@ -1,5 +1,5 @@
-#ifndef SELECT_H
-#define SELECT_H
+#ifndef MPLAYER_SELECT_H
+#define MPLAYER_SELECT_H
 
 enum {
     kComponentOpenSelect        = -1,                           /* ComponentInstance for this open */
@@ -69,4 +69,4 @@ enum {
     kImageCodecCancelTriggerSelect             = 0x0209
 };
 
-#endif /* SELECT_H */
+#endif /* MPLAYER_SELECT_H */

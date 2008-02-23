@@ -1,5 +1,5 @@
-#ifndef WINE_ELFDLL_H
-#define WINE_ELFDLL_H
+#ifndef MPLAYER_ELFDLL_H
+#define MPLAYER_ELFDLL_H
 
 #include "module.h"
 #include "windef.h"
@@ -11,4 +11,4 @@ void ELFDLL_UnloadLibrary(WINE_MODREF *wm);
 void *ELFDLL_dlopen(const char *libname, int flags);
 extern char *extra_ld_library_path;
 
-#endif /* WINE_ELFDLL_H */
+#endif /* MPLAYER_ELFDLL_H */

@@ -1,5 +1,5 @@
-#ifndef WINEACM_H
-#define WINEACM_H
+#ifndef MPLAYER_WINEACM_H
+#define MPLAYER_WINEACM_H
 /* -*- tab-width: 8; c-basic-offset: 4 -*- */
 
 /***********************************************************************
@@ -69,4 +69,4 @@ PWINE_ACMOBJ MSACM_GetObj(HACMOBJ hObj);
 } /* extern "C" */
 #endif /* defined(__cplusplus) */
 
-#endif /* WINEACM_H */
+#endif /* MPLAYER_WINEACM_H */

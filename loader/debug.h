@@ -1,5 +1,5 @@
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef MPLAYER_DEBUG_H
+#define MPLAYER_DEBUG_H
 
 #ifdef DEBUG
 #define TRACE printf
@@ -9,4 +9,4 @@
 #define dbg_printf(...)
 #endif
 
-#endif /* DEBUG_H */
+#endif /* MPLAYER_DEBUG_H */

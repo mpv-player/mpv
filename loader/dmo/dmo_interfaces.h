@@ -1,5 +1,5 @@
-#ifndef DMO_INTERFACE_H
-#define DMO_INTERFACE_H
+#ifndef MPLAYER_DMO_INTERFACES_H
+#define MPLAYER_DMO_INTERFACES_H
 
 #include "dmo.h"
 
@@ -191,4 +191,4 @@ typedef struct IDMOVideoOutputOptimizations_vt
 } IDMOVideoOutputOptimizations_vt;
 struct IDMOVideoOutputOptimizations { IDMOVideoOutputOptimizations_vt* vt; };
 
-#endif /* DMO_INTERFACE_H */
+#endif /* MPLAYER_DMO_INTERFACES_H */

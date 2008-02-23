@@ -1,5 +1,5 @@
-#ifndef DS_INPUTPIN_H
-#define DS_INPUTPIN_H
+#ifndef MPLAYER_INPUTPIN_H
+#define MPLAYER_INPUTPIN_H
 
 #include "interfaces.h"
 
@@ -67,4 +67,4 @@ typedef struct
 
 CRemotePin2* CRemotePin2Create(CBaseFilter2* parent);
 
-#endif /* DS_INPUTPIN_H */
+#endif /* MPLAYER_INPUTPIN_H */

@@ -1,5 +1,5 @@
-#ifndef DS_CMEDIASAMPLE_H
-#define DS_CMEDIASAMPLE_H
+#ifndef MPLAYER_CMEDIASAMPLE_H
+#define MPLAYER_CMEDIASAMPLE_H
 
 #include "interfaces.h"
 #include "guids.h"
@@ -29,4 +29,4 @@ CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int size);
 // called from allocator
 void CMediaSample_Destroy(CMediaSample* This);
 
-#endif /* DS_CMEDIASAMPLE_H */
+#endif /* MPLAYER_CMEDIASAMPLE_H */

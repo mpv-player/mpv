@@ -3,8 +3,8 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
-#ifndef LOADER_DRIVER_H
-#define LOADER_DRIVER_H
+#ifndef MPLAYER_DRIVER_H
+#define MPLAYER_DRIVER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,4 +24,4 @@ void DrvClose(HDRVR hdrvr);
 }
 #endif
 
-#endif /* LOADER_DRIVER_H */
+#endif /* MPLAYER_DRIVER_H */

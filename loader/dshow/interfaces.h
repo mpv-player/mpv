@@ -1,5 +1,5 @@
-#ifndef DS_INTERFACES_H
-#define DS_INTERFACES_H
+#ifndef MPLAYER_INTERFACES_H
+#define MPLAYER_INTERFACES_H
 
 /*
  * Definition of important DirectShow interfaces.
@@ -329,4 +329,4 @@ struct IDivxFilterInterface_vt
     HRESULT STDCALL ( *get_AspectRatio )(IDivxFilterInterface* This, int* x, IDivxFilterInterface* Thisit, int* y);
 };
 
-#endif  /* DS_INTERFACES_H */
+#endif  /*MPLAYER_INTERFACES_H */
