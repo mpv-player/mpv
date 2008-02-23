@@ -22,8 +22,7 @@
 
 #include "config.h"
 
-#ifdef ARCH_ARM
-#ifdef HAVE_IWMMXT
+#if defined(ARCH_ARM) && defined(HAVE_IWMMXT)
 
 #include <inttypes.h>
 
@@ -57,5 +56,4 @@ mpeg2_mc_t mpeg2_mc_iwmmxt = {
      avg_pixels8_iwmmxt, avg_pixels8_x2_iwmmxt,  avg_pixels8_y2_iwmmxt,  avg_pixels8_xy2_iwmmxt}, \
 };
 
-#endif
-#endif
+#endif /* defined(ARCH_ARM) && defined(HAVE_IWMMXT) */
