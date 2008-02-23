@@ -68,9 +68,9 @@ void mpeg2_mc_init (uint32_t accel)
     else
 #endif
 #ifdef ARCH_ARM
-    if (1 /*accel & MPEG2_ACCEL_ARM*/) {
+    if (accel & MPEG2_ACCEL_ARM) {
 #ifdef HAVE_IWMMXT
-	if (1 /*accel & MPEG2_ACCEL_ARM_IWMMXT*/)
+	if (accel & MPEG2_ACCEL_ARM_IWMMXT)
 	    mpeg2_mc = mpeg2_mc_iwmmxt;
 	else
 #endif

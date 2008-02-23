@@ -258,9 +258,9 @@
      else
  #endif
 +#ifdef ARCH_ARM
-+    if (1 /*accel & MPEG2_ACCEL_ARM*/) {
++    if (accel & MPEG2_ACCEL_ARM) {
 +#ifdef HAVE_IWMMXT
-+	if (1 /*accel & MPEG2_ACCEL_ARM_IWMMXT*/)
++	if (accel & MPEG2_ACCEL_ARM_IWMMXT)
 +	    mpeg2_mc = mpeg2_mc_iwmmxt;
 +	else
 +#endif
@@ -291,14 +291,21 @@
  #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
  
  typedef struct mpeg2_picture_s {
-@@ -154,6 +159,7 @@
- #define MPEG2_ACCEL_X86_MMX 1
+@@ -156,12 +160,13 @@
  #define MPEG2_ACCEL_X86_3DNOW 2
  #define MPEG2_ACCEL_X86_MMXEXT 4
-+#define MPEG2_ACCEL_X86_SSE2 8
+ #define MPEG2_ACCEL_X86_SSE2 8
+-#define MPEG2_ACCEL_X86_SSE3 16
  #define MPEG2_ACCEL_PPC_ALTIVEC 1
  #define MPEG2_ACCEL_ALPHA 1
  #define MPEG2_ACCEL_ALPHA_MVI 2
+ #define MPEG2_ACCEL_SPARC_VIS 1
+ #define MPEG2_ACCEL_SPARC_VIS2 2
++#define MPEG2_ACCEL_ARM 1
++#define MPEG2_ACCEL_ARM_IWMMXT 2
+ #define MPEG2_ACCEL_DETECT 0x80000000
+ 
+ uint32_t mpeg2_accel (uint32_t accel);
 --- libmpeg2/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2_internal.h	2006-06-16 20:12:50.000000000 +0200
 @@ -144,6 +148,12 @@
