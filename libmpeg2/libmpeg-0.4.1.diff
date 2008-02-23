@@ -1,14 +1,3 @@
---- include/attributes.h	2006-06-16 20:12:26.000000000 +0200
-+++ libmpeg2/attributes.h	2006-06-16 20:12:50.000000000 +0200
-@@ -25,7 +29,7 @@
- #ifdef ATTRIBUTE_ALIGNED_MAX
- #define ATTR_ALIGN(align) __attribute__ ((__aligned__ ((ATTRIBUTE_ALIGNED_MAX < align) ? ATTRIBUTE_ALIGNED_MAX : align)))
- #else
--#define ATTR_ALIGN(align)
-+#define ATTR_ALIGN(align) __attribute__ ((__aligned__ ((16 < align) ? 16 : align)))
- #endif
- 
- #ifdef HAVE_BUILTIN_EXPECT
 --- libmpeg2/cpu_accel.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/cpu_accel.c	2006-06-16 20:12:50.000000000 +0200
 @@ -22,6 +26,7 @@

@@ -8142,6 +8142,9 @@ $_def_dvdnav
 /* Define this to enable MPEG 1/2 image postprocessing (requires a FAST CPU!) */
 #define MPEG12_POSTPROC 1
 
+/* maximum alignment used by libmpeg2 */
+#define ATTRIBUTE_ALIGNED_MAX 16
+
 /* Define this to enable image postprocessing in libavcodec (requires a FAST CPU!) */
 $_def_libpostproc
 $_def_libpostproc_a
