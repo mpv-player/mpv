@@ -1990,9 +1990,7 @@ mailing list. Please remember that the list language is English.
 
 <para>
 In the future you may expect the ability to display OSD and subtitles using
-the native OSD feature of DVB cards, as well as more fluent playback of
-non-25fps movies and realtime transcoding between MPEG-2 and MPEG-4 (partial
-decompression).
+the native OSD feature of DVB cards.
 </para>
 </sect2>
 
