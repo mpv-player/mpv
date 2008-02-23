@@ -1881,8 +1881,8 @@ In your audio and video fields you can use an extended syntax:
 <option>...:pid[+pid]:...</option> (for a maximum of 6 pids each);
 in this case <application>MPlayer</application> will include in the
 stream all the indicated pids, plus pid 0 (that contains the PAT).
-You are encouraged to include in each row the PMT pid for the
-corresponding channel (if you know it).
+You should always include in each row the PMT and PCR pids for the
+corresponding channel (if you know them).
 You can also specify 8192, this will select all pids on this frequency
 and you can then switch between the programs with TAB.
 This might need more bandwidth, though cheap cards always transfer all
@@ -1895,7 +1895,9 @@ Other possible uses are: televideo pid, second audio track, etc.
 If <application>MPlayer</application> complains frequently about
 <screen>Too many video/audio packets in the buffer</screen> or
 if you notice a growing desynchronization between audio and
-video try to use the libavformat MPEG-TS demuxer by adding
+video verify the presence of the PCR pid in your stream
+(needed to comply with the buffering model of the transmitter)
+and/or try to use the libavformat MPEG-TS demuxer by adding
 <option>-demuxer lavf -lavfdopts probesize=128</option>
 to your command line.
 </para>
