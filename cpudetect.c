@@ -33,6 +33,11 @@ CpuCaps gCpuCaps;
 #include <windows.h>
 #endif
 
+#ifdef __OS2__
+#define INCL_DOS
+#include <os2.h>
+#endif
+
 #ifdef __AMIGAOS4__
 #include <proto/exec.h>
 #endif
@@ -183,7 +188,8 @@ void GetCpuCaps( CpuCaps *caps)
 		/* FIXME: Does SSE2 need more OS support, too? */
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) \
   || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__) \
-  || defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW32__)
+  || defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW32__) \
+  || defined(__OS2__)
 		if (caps->hasSSE)
 			check_os_katmai_support();
 		if (!caps->hasSSE)
@@ -321,6 +327,24 @@ LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
 }
 #endif /* WIN32 */
 
+#ifdef __OS2__
+ULONG _System os2_sig_handler_sse( PEXCEPTIONREPORTRECORD       p1,
+                                   PEXCEPTIONREGISTRATIONRECORD p2,
+                                   PCONTEXTRECORD               p3,
+                                   PVOID                        p4 )
+{
+   if(p1->ExceptionNum == XCPT_ILLEGAL_INSTRUCTION){
+      mp_msg(MSGT_CPUDETECT, MSGL_V, "SIGILL, ");
+
+      p3->ctx_RegEip += 3;
+      gCpuCaps.hasSSE = 0;
+
+      return XCPT_CONTINUE_EXECUTION;
+   }
+   return XCPT_CONTINUE_SEARCH;
+}
+#endif
+
 /* If we're running on a processor that can do SSE, let's see if we
  * are allowed to or not.  This will catch 2.4.0 or later kernels that
  * haven't been configured for a Pentium III but are running on one,
@@ -388,6 +412,16 @@ static void check_os_katmai_support( void )
       exc_fil = SetUnhandledExceptionFilter(win32_sig_handler_sse);
       __asm __volatile ("xorps %xmm0, %xmm0");
       SetUnhandledExceptionFilter(exc_fil);
+      if ( gCpuCaps.hasSSE ) mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
+      else mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
+   }
+#elif defined(__OS2__)
+   EXCEPTIONREGISTRATIONRECORD RegRec = { 0, &os2_sig_handler_sse };
+   if ( gCpuCaps.hasSSE ) {
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+      DosSetExceptionHandler( &RegRec );
+      __asm __volatile ("xorps %xmm0, %xmm0");
+      DosUnsetExceptionHandler( &RegRec );
       if ( gCpuCaps.hasSSE ) mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
       else mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
    }
