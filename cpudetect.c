@@ -202,6 +202,7 @@ void GetCpuCaps( CpuCaps *caps)
 //		caps->hasMMX2 = 0;
 //		caps->hasMMX = 0;
 
+#ifndef RUNTIME_CPUDETECT
 #ifndef HAVE_MMX
 	if(caps->hasMMX) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"MMX supported but disabled\n");
 	caps->hasMMX=0;
@@ -226,6 +227,7 @@ void GetCpuCaps( CpuCaps *caps)
 	if(caps->has3DNowExt) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"3DNowExt supported but disabled\n");
 	caps->has3DNowExt=0;
 #endif
+#endif  // RUNTIME_CPUDETECT
 }
 
 
