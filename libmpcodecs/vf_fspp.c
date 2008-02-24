@@ -702,8 +702,6 @@ const vf_info_t vf_info_fspp = {
 
 #ifdef HAVE_MMX
 
-static uint64_t attribute_used __attribute__((aligned(8))) temps[4];//!!
-
 DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_382683433)=FIX64(0.382683433, 14); 
 DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_541196100)=FIX64(0.541196100, 14); 
 DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_707106781)=FIX64(0.707106781, 14); 
@@ -867,6 +865,7 @@ static void column_fidct_c(int16_t* thr_adr, DCTELEM *data, DCTELEM *output, int
 
 static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,  int cnt)
 {
+    uint64_t __attribute__((aligned(8))) temps[4];
     asm volatile(
 	ASMALIGN(4)
 	"1:                   \n\t"
@@ -967,7 +966,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"pmulhw "MANGLE(MM_FIX_1_414213562_A)", %%mm1 \n\t"
 	"paddw %%mm6, %%mm2            \n\t" //'t0
 
-	"movq %%mm2, "MANGLE(temps)"+0*8       \n\t" //!
+	"movq %%mm2, 0*8+%3            \n\t" //!
 	"psubw %%mm6, %%mm7            \n\t" //'t3
 
 	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
@@ -976,7 +975,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t5
 	"movq %%mm5, %%mm6             \n\t"
 
-	"movq %%mm7, "MANGLE(temps)"+3*8       \n\t"
+	"movq %%mm7, 3*8+%3            \n\t"
 	"paddw %%mm2, %%mm3            \n\t" //t10
 
 	"paddw %%mm4, %%mm2            \n\t" //t11
@@ -1003,13 +1002,13 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 
 	"paddw %%mm3, %%mm7            \n\t" //z2        
 
-	"movq %%mm5, "MANGLE(temps)"+1*8       \n\t"
+	"movq %%mm5, 1*8+%3            \n\t"
 	"paddw %%mm3, %%mm4            \n\t" //z4
 
 	"movq 3*16(%%"REG_d"), %%mm3       \n\t"
 	"movq %%mm0, %%mm1             \n\t"
 
-	"movq %%mm6, "MANGLE(temps)"+2*8       \n\t"
+	"movq %%mm6, 2*8+%3            \n\t"
 	"psubw %%mm2, %%mm1            \n\t" //z13            
 
 //===
@@ -1069,7 +1068,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	// t4 t5 - - - t6 t7 -
 	//--- t4 (mm0) may be <>0; mm1, mm5, mm6 == 0
 //Typical numbers: nondc - 19%%,  dc - 26%%,  zero - 55%%. zero case alone isn't worthwhile
-	"movq "MANGLE(temps)"+0*8, %%mm4       \n\t"
+	"movq 0*8+%3, %%mm4            \n\t"
 	"movq %%mm0, %%mm1             \n\t"
 
 	"pmulhw "MANGLE(MM_FIX_0_847759065)", %%mm0 \n\t" //tmp6
@@ -1081,7 +1080,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"pmulhw "MANGLE(MM_FIX_0_566454497)", %%mm1 \n\t" //tmp5
 	"paddw %%mm4, %%mm5            \n\t"
 
-	"movq "MANGLE(temps)"+1*8, %%mm6       \n\t"
+	"movq 1*8+%3, %%mm6            \n\t"
 	//paddw mm3, MM_2
 	"psraw $2, %%mm3              \n\t" //tmp7     
 
@@ -1094,7 +1093,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm4, "DCTSIZE_S"*7*2(%%"REG_D") \n\t"
 	"paddw %%mm6, %%mm7            \n\t"
 
-	"movq "MANGLE(temps)"+2*8, %%mm3       \n\t"
+	"movq 2*8+%3, %%mm3            \n\t"
 	"psubw %%mm0, %%mm6            \n\t"
 
 	"movq "DCTSIZE_S"*2*2(%%"REG_D"), %%mm4 \n\t"
@@ -1112,7 +1111,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq "DCTSIZE_S"*3*2(%%"REG_D"), %%mm6 \n\t"
 	"paddw %%mm3, %%mm5            \n\t"
 
-	"movq "MANGLE(temps)"+3*8, %%mm0       \n\t"
+	"movq 3*8+%3, %%mm0            \n\t"
 	"add $8, %%"REG_S"               \n\t"
 
 	"movq %%mm7, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
@@ -1161,7 +1160,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm2, %%mm7             \n\t"
 
 	//---
-	"movq "MANGLE(temps)"+0*8, %%mm4       \n\t"
+	"movq 0*8+%3, %%mm4            \n\t"
 	"psubw %%mm3, %%mm2            \n\t"
 
 	"psllw $1, %%mm2              \n\t"
@@ -1175,7 +1174,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"paddw "DCTSIZE_S"*0*2(%%"REG_D"), %%mm4 \n\t"
 	"psubw %%mm7, %%mm6            \n\t"
 
-	"movq "MANGLE(temps)"+1*8, %%mm3       \n\t"
+	"movq 1*8+%3, %%mm3            \n\t"
 	"paddw %%mm7, %%mm4            \n\t"
 
 	"movq %%mm6, "DCTSIZE_S"*7*2(%%"REG_D") \n\t"
@@ -1184,10 +1183,10 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm4, "DCTSIZE_S"*0*2(%%"REG_D") \n\t"
 	"psubw %%mm7, %%mm1            \n\t" //'t6
 
-	"movq "MANGLE(temps)"+2*8, %%mm7       \n\t"
+	"movq 2*8+%3, %%mm7            \n\t"
 	"psubw %%mm5, %%mm0            \n\t" //'t10
 
-	"movq "MANGLE(temps)"+3*8, %%mm6       \n\t"
+	"movq 3*8+%3, %%mm6            \n\t"
 	"movq %%mm3, %%mm5             \n\t"
 
 	"paddw "DCTSIZE_S"*1*2(%%"REG_D"), %%mm3 \n\t"
@@ -1325,7 +1324,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"pmulhw "MANGLE(MM_FIX_1_414213562_A)", %%mm1 \n\t"
 	"paddw %%mm6, %%mm2            \n\t" //'t0
 
-	"movq %%mm2, "MANGLE(temps)"+0*8       \n\t" //!
+	"movq %%mm2, 0*8+%3            \n\t" //!
 	"psubw %%mm6, %%mm7            \n\t" //'t3
 
 	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
@@ -1334,7 +1333,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t5
 	"movq %%mm5, %%mm6             \n\t"
 
-	"movq %%mm7, "MANGLE(temps)"+3*8       \n\t"
+	"movq %%mm7, 3*8+%3            \n\t"
 	"paddw %%mm2, %%mm3            \n\t" //t10
 
 	"paddw %%mm4, %%mm2            \n\t" //t11
@@ -1361,13 +1360,13 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 
 	"paddw %%mm3, %%mm7            \n\t" //z2        
 
-	"movq %%mm5, "MANGLE(temps)"+1*8       \n\t"
+	"movq %%mm5, 1*8+%3            \n\t"
 	"paddw %%mm3, %%mm4            \n\t" //z4
 
 	"movq 1*8+3*16(%%"REG_d"), %%mm3   \n\t"
 	"movq %%mm0, %%mm1             \n\t"
 
-	"movq %%mm6, "MANGLE(temps)"+2*8       \n\t"
+	"movq %%mm6, 2*8+%3            \n\t"
 	"psubw %%mm2, %%mm1            \n\t" //z13            
 
 //===
@@ -1427,7 +1426,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	// t4 t5 - - - t6 t7 -
 	//--- t4 (mm0) may be <>0; mm1, mm5, mm6 == 0
 //Typical numbers: nondc - 19%%,  dc - 26%%,  zero - 55%%. zero case alone isn't worthwhile
-	"movq "MANGLE(temps)"+0*8, %%mm4       \n\t"
+	"movq 0*8+%3, %%mm4            \n\t"
 	"movq %%mm0, %%mm1             \n\t"
 
 	"pmulhw "MANGLE(MM_FIX_0_847759065)", %%mm0 \n\t" //tmp6
@@ -1439,7 +1438,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"pmulhw "MANGLE(MM_FIX_0_566454497)", %%mm1 \n\t" //tmp5
 	"paddw %%mm4, %%mm5            \n\t"
 
-	"movq "MANGLE(temps)"+1*8, %%mm6       \n\t"
+	"movq 1*8+%3, %%mm6            \n\t"
 	//paddw mm3, MM_2
 	"psraw $2, %%mm3              \n\t" //tmp7     
 
@@ -1452,7 +1451,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm4, "DCTSIZE_S"*7*2(%%"REG_D") \n\t"
 	"paddw %%mm6, %%mm7            \n\t"
 
-	"movq "MANGLE(temps)"+2*8, %%mm3       \n\t"
+	"movq 2*8+%3, %%mm3            \n\t"
 	"psubw %%mm0, %%mm6            \n\t"
 
 	"movq "DCTSIZE_S"*2*2(%%"REG_D"), %%mm4 \n\t"
@@ -1470,7 +1469,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq "DCTSIZE_S"*3*2(%%"REG_D"), %%mm6 \n\t"
 	"paddw %%mm3, %%mm5            \n\t"
 
-	"movq "MANGLE(temps)"+3*8, %%mm0       \n\t"
+	"movq 3*8+%3, %%mm0            \n\t"
 	"add $24, %%"REG_S"              \n\t"
 
 	"movq %%mm7, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
@@ -1521,7 +1520,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm2, %%mm7             \n\t"
 
 	//---
-	"movq "MANGLE(temps)"+0*8, %%mm4       \n\t"
+	"movq 0*8+%3, %%mm4            \n\t"
 	"psubw %%mm3, %%mm2            \n\t"
 
 	"psllw $1, %%mm2              \n\t"
@@ -1535,7 +1534,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"paddw "DCTSIZE_S"*0*2(%%"REG_D"), %%mm4 \n\t"
 	"psubw %%mm7, %%mm6            \n\t"
 
-	"movq "MANGLE(temps)"+1*8, %%mm3       \n\t"
+	"movq 1*8+%3, %%mm3            \n\t"
 	"paddw %%mm7, %%mm4            \n\t"
 
 	"movq %%mm6, "DCTSIZE_S"*7*2(%%"REG_D") \n\t"
@@ -1544,10 +1543,10 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm4, "DCTSIZE_S"*0*2(%%"REG_D") \n\t"
 	"psubw %%mm7, %%mm1            \n\t" //'t6
 
-	"movq "MANGLE(temps)"+2*8, %%mm7       \n\t"
+	"movq 2*8+%3, %%mm7            \n\t"
 	"psubw %%mm5, %%mm0            \n\t" //'t10
 
-	"movq "MANGLE(temps)"+3*8, %%mm6       \n\t"
+	"movq 3*8+%3, %%mm6            \n\t"
 	"movq %%mm3, %%mm5             \n\t"
 
 	"paddw "DCTSIZE_S"*1*2(%%"REG_D"), %%mm3 \n\t"
@@ -1589,7 +1588,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"jnz 1b                \n\t"
 	"5:                      \n\t"
 
-	: "+S"(data), "+D"(output), "+c"(cnt)
+	: "+S"(data), "+D"(output), "+c"(cnt), "=o"(temps)
 	: "d"(thr_adr)
 	: "%"REG_a
 	);
@@ -1667,6 +1666,7 @@ static void row_idct_c(DCTELEM* workspace,
 static void row_idct_mmx (DCTELEM* workspace, 
 			  int16_t* output_adr,  int output_stride,  int cnt)
 {
+    uint64_t __attribute__((aligned(8))) temps[4];
     asm volatile(
 	"lea (%%"REG_a",%%"REG_a",2), %%"REG_d"    \n\t"
 	"1:                     \n\t"
@@ -1722,10 +1722,10 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"movq "DCTSIZE_S"*2*2+"DCTSIZE_S"(%%"REG_S"), %%mm5 \n\t"
 	"paddw %%mm0, %%mm1            \n\t" //t1
 
-	"movq %%mm4, "MANGLE(temps)"+0*8       \n\t" //t0
+	"movq %%mm4, 0*8+%3            \n\t" //t0
 	"movq %%mm3, %%mm4             \n\t"
 
-	"movq %%mm6, "MANGLE(temps)"+1*8       \n\t" //t3
+	"movq %%mm6, 1*8+%3            \n\t" //t3
 	"punpcklwd %%mm2, %%mm3        \n\t"
 
 	//transpose 4x4    
@@ -1775,7 +1775,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"psllw $3, %%mm0              \n\t"
 	"psubw %%mm3, %%mm4            \n\t" //t10    
 
-	"movq "MANGLE(temps)"+0*8, %%mm6       \n\t"
+	"movq 0*8+%3, %%mm6            \n\t"
 	"movq %%mm1, %%mm3             \n\t"
 
 	"psllw $3, %%mm4              \n\t"
@@ -1796,7 +1796,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"movq "MANGLE(MM_DESCALE_RND)", %%mm2   \n\t" //4
 	"psubw %%mm5, %%mm6            \n\t" //d7
 
-	"paddw "MANGLE(temps)"+0*8, %%mm5      \n\t" //d0
+	"paddw 0*8+%3, %%mm5           \n\t" //d0
 	"paddw %%mm2, %%mm1            \n\t"
 
 	"paddw %%mm2, %%mm5            \n\t"
@@ -1823,7 +1823,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"movq %%mm7, (%%"REG_D",%%"REG_a",2)    \n\t"
 	"add %%"REG_d", %%"REG_D"             \n\t" //3*ls
 
-	"movq "MANGLE(temps)"+1*8, %%mm5       \n\t" //t3
+	"movq 1*8+%3, %%mm5           \n\t" //t3
 	"psraw $3, %%mm3              \n\t"
 
 	"paddw (%%"REG_D",%%"REG_a",2), %%mm0   \n\t"
@@ -1832,7 +1832,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"paddw (%%"REG_D",%%"REG_d",), %%mm3    \n\t"
 	"psraw $3, %%mm6              \n\t"
 
-	"paddw "MANGLE(temps)"+1*8, %%mm4      \n\t" //d4        
+	"paddw 1*8+%3, %%mm4           \n\t" //d4        
 	"paddw %%mm2, %%mm5            \n\t"
 
 	"paddw (%%"REG_D",%%"REG_a",4), %%mm6   \n\t"
@@ -1857,7 +1857,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"dec %%"REG_c"                   \n\t"
 	"jnz 1b                  \n\t"
 
-	: "+S"(workspace), "+D"(output_adr), "+c"(cnt)
+	: "+S"(workspace), "+D"(output_adr), "+c"(cnt), "=o"(temps)
 	: "a"(output_stride*sizeof(short))
 	: "%"REG_d
 	);
@@ -1932,6 +1932,7 @@ static void row_fdct_c(DCTELEM *data, const uint8_t *pixels, int line_size, int 
 
 static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size,  int cnt)
 {
+    uint64_t __attribute__((aligned(8))) temps[4];
     asm volatile(
 	"lea (%%"REG_a",%%"REG_a",2), %%"REG_d"    \n\t"
 	"6:                     \n\t"
@@ -1965,10 +1966,10 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"movd (%%"REG_S",%%"REG_a",2), %%mm3    \n\t" //5
 	"paddw %%mm4, %%mm1            \n\t"
 
-	"movq %%mm5, "MANGLE(temps)"+0*8       \n\t" //t7
+	"movq %%mm5, 0*8+%3            \n\t" //t7
 	"punpcklbw %%mm7, %%mm3        \n\t"
 
-	"movq %%mm6, "MANGLE(temps)"+1*8       \n\t" //t6
+	"movq %%mm6, 1*8+%3            \n\t" //t6
 	"movq %%mm2, %%mm4             \n\t"
 
 	"movd (%%"REG_S"), %%mm5           \n\t" //3
@@ -2014,7 +2015,7 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"psubw %%mm1, %%mm5            \n\t" //d1                
 	"movq %%mm0, %%mm6             \n\t"
 
-	"movq "MANGLE(temps)"+1*8, %%mm1       \n\t"
+	"movq 1*8+%3, %%mm1            \n\t"
 	"punpcklwd %%mm5, %%mm0        \n\t"
 
 	"punpckhwd %%mm5, %%mm6        \n\t"
@@ -2038,7 +2039,7 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"movq %%mm7, "DCTSIZE_S"*3*2(%%"REG_D") \n\t"
 	"psllw $2, %%mm3              \n\t" //t10    
 
-	"movq "MANGLE(temps)"+0*8, %%mm2       \n\t"
+	"movq 0*8+%3, %%mm2           \n\t"
 	"psllw $2, %%mm4              \n\t" //t11
 
 	"pmulhw "MANGLE(MM_FIX_0_707106781)", %%mm4 \n\t" //z3
@@ -2101,7 +2102,7 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"dec %%"REG_c"                   \n\t"
 	"jnz 6b                  \n\t"
 
-	: "+S"(pixels), "+D"(data), "+c"(cnt)
+	: "+S"(pixels), "+D"(data), "+c"(cnt), "=o"(temps)
 	: "a"(line_size)
 	: "%"REG_d);
 }
