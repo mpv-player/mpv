@@ -1589,7 +1589,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"jnz 1b                \n\t"
 	"5:                      \n\t"
 
-	: "+S"(data), "+D"(output), "+c"(cnt)// input regs
+	: "+S"(data), "+D"(output), "+c"(cnt)
 	: "d"(thr_adr)
 	: "%"REG_a
 	);
@@ -1857,7 +1857,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"dec %%"REG_c"                   \n\t"
 	"jnz 1b                  \n\t"
 
-	: "+S"(workspace), "+D"(output_adr), "+c"(cnt) //input regs
+	: "+S"(workspace), "+D"(output_adr), "+c"(cnt)
 	: "a"(output_stride*sizeof(short))
 	: "%"REG_d
 	);
@@ -2101,7 +2101,7 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"dec %%"REG_c"                   \n\t"
 	"jnz 6b                  \n\t"
 
-	: "+S"(pixels), "+D"(data), "+c"(cnt) //input regs
+	: "+S"(pixels), "+D"(data), "+c"(cnt)
 	: "a"(line_size)
 	: "%"REG_d);
 }
