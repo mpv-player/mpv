@@ -57,6 +57,11 @@ int modify_ldt(int func, void *ptr, unsigned long bytecount);
 #include <machine/sysarch.h>
 #endif
 
+#if defined(__APPLE__)
+#include <architecture/i386/table.h>
+#include <i386/user_ldt.h>
+#endif
+
 #ifdef __svr4__
 #include <sys/segment.h>
 #include <sys/sysi86.h>
