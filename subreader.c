@@ -1835,8 +1835,9 @@ char** sub_filenames(const char* path, char *fname)
     subcnt = 0;
     
     tmp = strrchr(fname,'/');
-#ifdef WIN32
+#if defined(WIN32) || defined(__OS2__)
     if(!tmp)tmp = strrchr(fname,'\\');
+    if(!tmp)tmp = strrchr(fname,':');
 #endif
     
     // extract filename & dirname from fname
