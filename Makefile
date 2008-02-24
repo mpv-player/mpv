@@ -230,7 +230,7 @@ mencoder$(EXESUF): $(MENCODER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
-	$(HOST_CC) -I. -DCODECS2HTML $< -o $@
+	$(HOST_CC) -O -I. -DCODECS2HTML $< -o $@
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
