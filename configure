@@ -7592,6 +7592,7 @@ if test "$cc_vendor" = "gnu" ; then
   cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
 fi
 
+cc_check -mno-omit-leaf-frame-pointer && CFLAG_NO_OMIT_LEAF_FRAME_POINTER="-mno-omit-leaf-frame-pointer"
 
 #this must be the last test to be performed or the ones following it will likely fail
 #because libdvdnavmini is intentionally not linked against libdvdread (to permit mplayer
@@ -7650,6 +7651,7 @@ INSTALL = $_install
 EXTRA_INC = $_inc_extra
 EXTRAXX_INC = $_inc_extra $_inc_extraxx
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
+CFLAG_NO_OMIT_LEAF_FRAME_POINTER = $CFLAG_NO_OMIT_LEAF_FRAME_POINTER
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
 CFLAG_STACKREALIGN = $_stackrealign
 INSTALLSTRIP = $_install_strip

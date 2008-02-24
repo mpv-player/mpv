@@ -33,7 +33,7 @@ SRCS_COMMON += dshow/DS_AudioDecoder.c \
 
 include ../mpcommon.mak
 
-CFLAGS+=-fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
+CFLAGS+=-fno-omit-frame-pointer $(CFLAG_NO_OMIT_LEAF_FRAME_POINTER)
 
 TEST_OBJS    = $(LIBNAME_COMMON) ../cpudetect.o ../mp_msg.o ../mp_fifo.o ../osdep/libosdep.a
 TEST_LDFLAGS = -ltermcap -ldl -lm -lpthread -g
