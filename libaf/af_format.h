@@ -5,9 +5,7 @@
 #ifndef MPLAYER_AF_FORMAT_H
 #define MPLAYER_AF_FORMAT_H
 
-#ifndef MPLAYER_CONFIG_H
-#error af_format.h needs config.h
-#endif
+#include "config.h"
 
 // Endianness
 #define AF_FORMAT_BE		(0<<0) // Big Endian
