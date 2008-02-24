@@ -4257,7 +4257,7 @@ if test "$_vidix_internal" = auto ; then
   x86 && _vidix_internal=yes
   ppc && linux && _vidix_internal=yes
   alpha && linux && _vidix_internal=yes
-  qnx || beos || darwin && _vidix_internal=no
+  qnx || beos || darwin || os2 && _vidix_internal=no
 fi
 if test "$_vidix_internal" = yes; then
   _res_comment="internal"
