@@ -420,6 +420,7 @@ int ds_fill_buffer(demux_stream_t *ds){
   while(1){
     if(ds->packs){
       demux_packet_t *p=ds->first;
+#if 0
       if(demux->reference_clock != MP_NOPTS_VALUE) {
         if((p->pts != MP_NOPTS_VALUE) && (p->pts > demux->reference_clock)
             && (ds->packs < MAX_ACUMULATED_PACKETS)) {
@@ -427,6 +428,7 @@ int ds_fill_buffer(demux_stream_t *ds){
               continue;
         }
       }
+#endif
       // copy useful data:
       ds->buffer=p->buffer;
       ds->buffer_pos=0;
