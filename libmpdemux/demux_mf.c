@@ -70,6 +70,13 @@ static const struct {
   { "tga",  mmioFOURCC('M', 'T', 'G', 'A') },
   { "tif",  mmioFOURCC('t', 'i', 'f', 'f') },
   { "sgi",  mmioFOURCC('S', 'G', 'I', '1') },
+  { "sun",  mmioFOURCC('s', 'u', 'n', ' ') },
+  { "ras",  mmioFOURCC('s', 'u', 'n', ' ') },
+  { "ra",  mmioFOURCC('s', 'u', 'n', ' ') },
+  { "im1",  mmioFOURCC('s', 'u', 'n', ' ') },
+  { "im8",  mmioFOURCC('s', 'u', 'n', ' ') },
+  { "im24",  mmioFOURCC('s', 'u', 'n', ' ') },
+  { "sunras",  mmioFOURCC('s', 'u', 'n', ' ') },
   { NULL,   0 }
 };
 
