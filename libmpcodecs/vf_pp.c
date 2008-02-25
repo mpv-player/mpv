@@ -20,7 +20,12 @@
 #ifdef USE_LIBPOSTPROC_SO
 #include <postproc/postprocess.h>
 #elif defined(USE_LIBPOSTPROC)
+#define EMU_OLD
 #include "libpostproc/postprocess.h"
+
+#ifdef EMU_OLD
+#include "libpostproc/postprocess_internal.h"
+#endif
 #endif
 
 struct vf_priv_s {
