@@ -24,11 +24,7 @@ LIBAD_EXTERN(ffmpeg)
 
 #define assert(x)
 
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#else
-#include "avcodec.h"
-#endif
+#include "libavcodec/avcodec.h"
 
 extern int avcodec_initialized;
 

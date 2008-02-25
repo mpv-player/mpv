@@ -20,11 +20,7 @@
 
 #include "libmpdemux/nuppelvideo.h" 
 #include "RTjpegN.h"
-#ifdef USE_LIBAVUTIL_SO
-#include <ffmpeg/lzo.h>
-#else
 #include "libavutil/lzo.h"
-#endif
 
 #define KEEP_BUFFER
 

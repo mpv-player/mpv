@@ -6363,7 +6363,7 @@ if test "$_libavutil_a" = auto ; then
 elif test "$_libavutil_so" = auto ; then
   _libavutil_so=no
   cat > $TMPC << EOF
-#include <ffmpeg/common.h>
+#include <libavutil/common.h>
 int main(void) { ff_gcd(1,1); return 0; }
 EOF
   if $_pkg_config --exists libavutil ; then
@@ -6402,7 +6402,7 @@ elif test "$_libavcodec_so" = auto ; then
   _libavcodec_so=no
   _res_comment="libavcodec.so is discouraged over static libavcodec"
   cat > $TMPC << EOF
-#include <ffmpeg/avcodec.h>
+#include <libavcodec/avcodec.h>
 int main(void) { avcodec_find_encoder_by_name(""); return 0; }
 EOF
   if $_pkg_config --exists libavcodec ; then
@@ -6445,8 +6445,8 @@ if test "$_libavformat_a" = auto ; then
 elif test "$_libavformat_so" = auto ; then
   _libavformat_so=no
   cat > $TMPC <<EOF
-  #include <ffmpeg/avformat.h>
-  #include <ffmpeg/opt.h>
+  #include <libavformat/avformat.h>
+  #include <libavcodec/opt.h>
   int main(void) { av_alloc_format_context(); return 0; }
 EOF
   if $_pkg_config --exists libavformat ; then
@@ -6483,7 +6483,7 @@ elif test "$_libpostproc_so" = auto ; then
   cat > $TMPC << EOF
   #define USE_LIBPOSTPROC 1
   #include <inttypes.h>
-  #include <postproc/postprocess.h>
+  #include <libpostproc/postprocess.h>
   int main(void) { pp_get_mode_by_name_and_quality("de", 0); return 0; }
 EOF
   if cc_check -lpostproc $_ld_lm ; then

@@ -5,11 +5,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "bitmap.h"
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#else
 #include "libavcodec/avcodec.h"
-#endif
 #include "libavutil/intreadwrite.h"
 #include "libvo/fastmemcpy.h"
 

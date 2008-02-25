@@ -36,11 +36,7 @@
 #include "asmrp.h"
 #include "sdpplin.h"
 #include "xbuffer.h"
-#if USE_LIBAVUTIL_SO
-#include "ffmpeg/md5.h"
-#else
 #include "libavutil/md5.h"
-#endif
 #include "libavutil/intreadwrite.h"
 #include "../http.h"
 #include "mp_msg.h"

@@ -20,12 +20,7 @@
 #include "vf_scale.h"
 
 #include "libswscale/swscale.h"
-
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#else
 #include "libavcodec/avcodec.h"
-#endif
 
 struct vf_priv_s {
     int frameno;

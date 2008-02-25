@@ -55,12 +55,7 @@
 #include <assert.h>
 
 #include "m_option.h"
-
-#ifdef USE_LIBAVUTIL_SO
-#include <ffmpeg/avutil.h>
-#else
-#include "avutil.h"
-#endif
+#include "libavutil/avutil.h"
 
 #define FINE (!0)
 #define BAD (!FINE)

@@ -25,14 +25,8 @@
 
 #include "config.h"
 #include "af.h"
-
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#include <ffmpeg/rational.h>
-#else
-#include "avcodec.h"
-#include "rational.h"
-#endif
+#include "libavcodec/avcodec.h"
+#include "libavutil/rational.h"
 
 // Data for specific instances of this filter
 typedef struct af_resample_s{

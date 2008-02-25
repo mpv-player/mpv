@@ -84,10 +84,8 @@
 #include "stream/stream_dvdnav.h"
 #endif
 
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#elif USE_LIBAVCODEC_A
-#include "avcodec.h"
+#ifdef USE_LIBAVCODEC
+#include "libavcodec/avcodec.h"
 #endif
 
 #include "libmpcodecs/ae.h"

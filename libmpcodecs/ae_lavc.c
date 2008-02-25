@@ -15,11 +15,7 @@
 #include "config.h"
 #include "libaf/af_format.h"
 #include "libaf/reorder_ch.h"
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#else
 #include "libavcodec/avcodec.h"
-#endif
 
 static AVCodec        *lavc_acodec;
 static AVCodecContext *lavc_actx;
@@ -30,11 +26,7 @@ extern int  lavc_param_audio_global_header;
 extern int  avcodec_initialized;
 static int compressed_frame_size = 0;
 #ifdef USE_LIBAVFORMAT
-#ifdef USE_LIBAVFORMAT_SO
-#include <ffmpeg/avformat.h>
-#else
 #include "libavformat/avformat.h"
-#endif
 extern const struct AVCodecTag *mp_wav_taglists[];
 #endif
 

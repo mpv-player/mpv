@@ -31,17 +31,11 @@
 #include "m_option.h"
 #include "libvo/sub.h"
 
-#ifdef USE_LIBAVFORMAT_SO
-#include <ffmpeg/avformat.h>
-#include <ffmpeg/avutil.h>
-#include <ffmpeg/opt.h>
-#else
-#include "avformat.h"
-#include "avutil.h"
-#include "avi.h"
-#include "opt.h"
-#endif
-#include "riff.h"
+#include "libavformat/avformat.h"
+#include "libavutil/avutil.h"
+#include "libavformat/avi.h"
+#include "libavcodec/opt.h"
+#include "libavformat/riff.h"
 
 #define PROBE_BUF_SIZE 2048
 

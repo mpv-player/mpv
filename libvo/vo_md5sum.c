@@ -41,11 +41,7 @@
 #include "video_out_internal.h"
 #include "mplayer.h"			/* for exit_player() */
 #include "help_mp.h"
-#ifdef USE_LIBAVUTIL_SO
-#include "ffmpeg/md5.h"
-#else
 #include "libavutil/md5.h"
-#endif
 
 /* ------------------------------------------------------------------------- */
 

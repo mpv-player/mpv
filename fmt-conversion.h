@@ -1,11 +1,7 @@
 #ifndef MPLAYER_FMT_CONVERSION_H
 #define MPLAYER_FMT_CONVERSION_H
 
-#ifdef USE_LIBAVUTIL_SO
-#include <ffmpeg/avutil.h>
-#else
-#include "avutil.h"
-#endif
+#include "libavutil/avutil.h"
 #include "img_format.h"
 
 enum PixelFormat imgfmt2pixfmt(int fmt)

@@ -23,11 +23,7 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(ffmpeg)
 
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#else
 #include "libavcodec/avcodec.h"
-#endif
 
 #ifdef HAVE_XVMC
 #include "xvmc_render.h"

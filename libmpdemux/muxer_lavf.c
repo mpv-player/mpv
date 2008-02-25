@@ -17,11 +17,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
-#ifdef USE_LIBAVFORMAT_SO
-#include <ffmpeg/avformat.h>
-#else
-#include "avformat.h"
-#endif
+#include "libavformat/avformat.h"
 #include "libavutil/avstring.h"
 
 enum PixelFormat imgfmt2pixfmt(int fmt);

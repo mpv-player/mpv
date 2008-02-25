@@ -10,12 +10,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#else
 #include "libavcodec/avcodec.h"
-#endif
 
 extern int avcodec_initialized;
 

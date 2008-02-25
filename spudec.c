@@ -23,11 +23,7 @@
 #include <math.h>
 #include "libvo/video_out.h"
 #include "spudec.h"
-#ifdef USE_LIBAVUTIL_SO
-#include <ffmpeg/avutil.h>
-#else
-#include "avutil.h"
-#endif
+#include "libavutil/avutil.h"
 #include "libswscale/swscale.h"
 
 /* Valid values for spu_aamode:

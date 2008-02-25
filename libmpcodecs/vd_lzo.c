@@ -5,12 +5,7 @@
 #include "mp_msg.h"
 
 #include "vd_internal.h"
-
-#ifdef USE_LIBAVUTIL_SO
-#include <ffmpeg/lzo.h>
-#else
 #include "libavutil/lzo.h"
-#endif
 
 #define MOD_NAME "DecLZO"
 

@@ -39,13 +39,8 @@
 #include <zlib.h>
 #endif
 
-#ifdef USE_LIBAVUTIL_SO
-#include <ffmpeg/lzo.h>
-#include <ffmpeg/intreadwrite.h>
-#else
 #include "libavutil/lzo.h"
 #include "libavutil/intreadwrite.h"
-#endif
 #include "libavutil/avstring.h"
 
 static unsigned char sipr_swaps[38][2]={
