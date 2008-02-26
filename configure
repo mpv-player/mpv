@@ -4254,10 +4254,9 @@ _def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
 _vidix_drv_unichrome=no
 if test "$_vidix_internal" = auto ; then
   _vidix_internal=no
-  x86 && _vidix_internal=yes
-  ppc && linux && _vidix_internal=yes
-  alpha && linux && _vidix_internal=yes
-  qnx || beos || darwin || os2 && _vidix_internal=no
+  x86 && linux || freebsd || netbsd || openbsd || sunos || win32 \
+    && _vidix_internal=yes
+  ppc || alpha && linux && _vidix_internal=yes
 fi
 if test "$_vidix_internal" = yes; then
   _res_comment="internal"
