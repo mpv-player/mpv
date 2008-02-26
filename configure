@@ -8184,6 +8184,7 @@ $_def_libavutil_so
 #define CONFIG_DECODERS 1
 /* Use libavcodec's encoders */
 #define CONFIG_ENCODERS 1
+#define ENABLE_ENCODERS 1
 
 /* Use libavformat's demuxers */
 #define CONFIG_DEMUXERS 1
