@@ -40,11 +40,15 @@ MPlayer (1.0)
     Others:
     * many compiler warning fixes
     * Basic support for Closed Captioning Roll-up mode
+    * reworked screensaver disabling support, most users will need to use
+      -heartbeat-cmd due to screensaver authors being unable to design a
+      common API
 
     Ports:
     * small crash with vo_macosx fixed
     * AC3/DTS passthrough for ao_macosx
     * Fix frozen OSD on Mac OS X
+    * vo_gl now works with -wid and nvidia drivers on Windows (this is a hack)
 
   rc2try2:
 
