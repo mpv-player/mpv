@@ -26,6 +26,9 @@ getch = getch2-win.c
 endif
 ifeq ($(TARGET_OS),OS/2)
 getch = getch2-os2.c
+ifneq ($(HAVE_SYS_MMAN_H),yes)
+SRCS_COMMON += mmap-os2.c
+endif
 endif
 SRCS_COMMON += $(timer)
 SRCS_COMMON += $(getch)
