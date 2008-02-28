@@ -602,7 +602,8 @@ if(stream->type==STREAMTYPE_DVDNAV){
  
   if(dvd_chapter>1) {
     float pts;
-    demuxer_seek_chapter(demuxer, dvd_chapter-1, 1, &pts, NULL, NULL);
+    if (demuxer_seek_chapter(demuxer, dvd_chapter-1, 1, &pts, NULL, NULL) >= 0 && pts > -1.0)
+      seek_to_sec = pts;
   }
 
 d_audio=demuxer2 ? demuxer2->audio : demuxer->audio;

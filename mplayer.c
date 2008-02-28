@@ -3274,7 +3274,8 @@ if(!mpctx->demuxer)
   goto goto_next_file;
 if(dvd_chapter>1) {
   float pts;
-  demuxer_seek_chapter(mpctx->demuxer, dvd_chapter-1, 1, &pts, NULL, NULL);
+  if (demuxer_seek_chapter(mpctx->demuxer, dvd_chapter-1, 1, &pts, NULL, NULL) >= 0 && pts > -1.0)
+    seek(mpctx, pts, SEEK_ABSOLUTE);
 }
 
 initialized_flags|=INITIALIZED_DEMUXER;
