@@ -7453,7 +7453,8 @@ if test "$_joystick" = yes ; then
     # TODO add some check
     _def_joystick='#define HAVE_JOYSTICK 1'
   else
-    _joystick="no (unsupported under $system_name)"
+    _joystick="no"
+    _res_comment="unsupported under $system_name"
   fi
 fi
 echores "$_joystick"
