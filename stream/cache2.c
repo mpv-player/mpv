@@ -16,12 +16,16 @@
 #include <unistd.h>
 
 #include "osdep/timer.h"
-#ifndef WIN32
-#include <sys/wait.h>
-#include "osdep/shmem.h"
-#else
+#ifdef WIN32
 #include <windows.h>
 static DWORD WINAPI ThreadProc(void* s);
+#elif defined(__OS2__)
+#define INCL_DOS
+#include <os2.h>
+static void ThreadProc( void *s );
+#else
+#include <sys/wait.h>
+#include "osdep/shmem.h"
 #endif
 
 #include "mp_msg.h"
@@ -190,7 +194,7 @@ int cache_fill(cache_vars_t* s){
 
 cache_vars_t* cache_init(int size,int sector){
   int num;
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__OS2__)
   cache_vars_t* s=shmem_alloc(sizeof(cache_vars_t));
 #else
   cache_vars_t* s=malloc(sizeof(cache_vars_t));
@@ -204,14 +208,14 @@ cache_vars_t* cache_init(int size,int sector){
   }//32kb min_size
   s->buffer_size=num*sector;
   s->sector_size=sector;
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__OS2__)
   s->buffer=shmem_alloc(s->buffer_size);
 #else
   s->buffer=malloc(s->buffer_size);
 #endif
 
   if(s->buffer == NULL){
-#ifndef WIN32
+#if !defined(WIN32) && !defined(__OS2__)
     shmem_free(s,sizeof(cache_vars_t));
 #else
     free(s);
@@ -227,20 +231,23 @@ cache_vars_t* cache_init(int size,int sector){
 void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
   if(!s->cache_pid) return;
-#ifndef WIN32
+#ifdef WIN32
+  TerminateThread((HANDLE)s->cache_pid,0);
+#elif defined(__OS2__)
+  DosKillThread( s->cache_pid );
+  DosWaitThread( &s->cache_pid, DCWW_WAIT );
+#else
   kill(s->cache_pid,SIGKILL);
   waitpid(s->cache_pid,NULL,0);
-#else
-  TerminateThread((HANDLE)s->cache_pid,0);
-  free(c->stream);
 #endif
   if(!c) return;
-#ifndef WIN32
-  shmem_free(c->buffer,c->buffer_size);
-  shmem_free(s->cache_data,sizeof(cache_vars_t));
-#else
+#if defined(WIN32) || defined(__OS2__)
+  free(c->stream);
   free(c->buffer);
   free(s->cache_data);
+#else
+  shmem_free(c->buffer,c->buffer_size);
+  shmem_free(s->cache_data,sizeof(cache_vars_t));
 #endif
 }
 
@@ -275,15 +282,21 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
      min = s->buffer_size - s->fill_limit;
   }
   
-#ifndef WIN32  
+#if !defined(WIN32) && !defined(__OS2__)
   if((stream->cache_pid=fork())){
 #else
   {
+#ifdef WIN32
     DWORD threadId;
+#endif
     stream_t* stream2=malloc(sizeof(stream_t));
     memcpy(stream2,s->stream,sizeof(stream_t));
     s->stream=stream2;
+#ifdef WIN32
     stream->cache_pid = CreateThread(NULL,0,ThreadProc,s,0,&threadId);
+#else   // OS2
+    stream->cache_pid = _beginthread( ThreadProc, NULL, 256 * 1024, s );
+#endif
 #endif
     // wait until cache is filled at least prefill_init %
     mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %"PRId64" [%"PRId64"] %"PRId64"  pre:%d  eof:%d  \n",
@@ -301,9 +314,13 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     return 1; // parent exits
   }
   
-#ifdef WIN32
+#if defined(WIN32) || defined(__OS2__)
 }
+#ifdef WIN32
 static DWORD WINAPI ThreadProc(void*s){
+#else   // OS2
+static void ThreadProc( void *s ){
+#endif
 #endif
   
 #ifdef HAVE_NEW_GUI
