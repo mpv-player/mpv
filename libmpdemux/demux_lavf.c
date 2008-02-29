@@ -338,8 +338,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             if (st->language)
               sh_audio->lang = strdup(st->language);
             if(mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf, MSGL_V);
-            if((audio_lang && st->language[0] && !strncmp(audio_lang, st->language, 3))
-                || (demuxer->audio->id == i || demuxer->audio->id == -1)) {
+            // select the first audio stream
+            if (!demuxer->audio->sh) {
                 demuxer->audio->id = i;
                 demuxer->audio->sh= demuxer->a_streams[i];
             } else

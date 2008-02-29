@@ -2418,14 +2418,7 @@ demux_mkv_open (demuxer_t *demuxer)
 
   /* select audio track */
   track = NULL;
-  if (demuxer->audio->id == -1)  /* automatically select an audio track */
-    {
-      /* check if the user specified an audio language */
-      if (audio_lang != NULL)
-        track = demux_mkv_find_track_by_language(mkv_d, audio_lang,
-                                                 MATROSKA_TRACK_AUDIO);
       if (track == NULL)
-        /* no audio language specified, or language not found */
         /* search for an audio track that has the 'default' flag set */
         for (i=0; i < mkv_d->num_tracks; i++)
           if (mkv_d->tracks[i]->type == MATROSKA_TRACK_AUDIO
@@ -2444,10 +2437,7 @@ demux_mkv_open (demuxer_t *demuxer)
               track = mkv_d->tracks[i];
               break;
             }
-    }
-  else if (demuxer->audio->id != -2)  /* -2 = no audio at all */
-    track = demux_mkv_find_track_by_num (mkv_d, demuxer->audio->id,
-                                         MATROSKA_TRACK_AUDIO);
+
   if (track && demuxer->a_streams[track->tnum])
     {
       demuxer->audio->id = track->tnum;
