@@ -49,6 +49,7 @@ typedef struct {
   int codecdata_len;
   double pts;  // last known pts value in output from decoder
   int pts_bytes; // bytes output by decoder after last known pts
+  char* lang; // track language
 } sh_audio_t;
 
 typedef struct {
@@ -105,6 +106,7 @@ typedef struct {
 #ifdef USE_ASS
   ass_track_t* ass_track;  // for SSA/ASS streams (type == 'a')
 #endif
+  char* lang; // track language
 } sh_sub_t;
 
 // demuxer.c:

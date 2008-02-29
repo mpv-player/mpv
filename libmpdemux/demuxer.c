@@ -255,6 +255,7 @@ void free_sh_sub(sh_sub_t *sh) {
 #ifdef USE_ASS
     if (sh->ass_track) ass_free_track(sh->ass_track);
 #endif
+    free(sh->lang);
     free(sh);
 }
 
@@ -289,6 +290,7 @@ void free_sh_audio(demuxer_t *demuxer, int id) {
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_audio at %p\n",sh);
     if(sh->wf) free(sh->wf);
     if(sh->codecdata) free(sh->codecdata);
+    free(sh->lang);
     free(sh);
 }
 
