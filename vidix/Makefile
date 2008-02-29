@@ -20,7 +20,7 @@ SRCS_MPLAYER-$(VIDIX_PM2)                  += pm2_vid.c
 SRCS_MPLAYER-$(VIDIX_PM3)                  += pm3_vid.c
 SRCS_MPLAYER-$(VIDIX_RADEON)               += radeon_vid.c
 SRCS_MPLAYER-$(VIDIX_RAGE128)              += rage128_vid.c
-SRCS_MPLAYER-$(VIDIX_SAVAGE)               += savage_vid.c
+SRCS_MPLAYER-$(VIDIX_S3)                   += s3_vid.c
 SRCS_MPLAYER-$(VIDIX_SIS)                  += sis_vid.c sis_bridge.c
 SRCS_MPLAYER-$(VIDIX_UNICHROME)            += unichrome_vid.c
 

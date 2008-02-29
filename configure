@@ -337,7 +337,7 @@ Video output:
   --disable-vidix-external disable external VIDIX [for x86 *nix]
   --with-vidix-drivers[=*] list of VIDIX drivers to be compiled in
                            Available: cyberblade,ivtv,mach64,mga,mga_crtc2,
-                           nvidia,pm2,pm3,radeon,rage128,savage,sis,unichrome
+                           nvidia,pm2,pm3,radeon,rage128,s3,sis,unichrome
   --disable-vidix-pcidb    disable VIDIX PCI device name database
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-dga2            enable DGA 2 support [autodetect]
@@ -4246,8 +4246,8 @@ _def_vidix_drv_radeon='#undef CONFIG_VIDIX_DRV_RADEON'
 _vidix_drv_radeon=no
 _def_vidix_drv_rage128='#undef CONFIG_VIDIX_DRV_RAGE128'
 _vidix_drv_rage128=no
-_def_vidix_drv_savage='#undef CONFIG_VIDIX_DRV_SAVAGE'
-_vidix_drv_savage=no
+_def_vidix_drv_s3='#undef CONFIG_VIDIX_DRV_S3'
+_vidix_drv_s3=no
 _def_vidix_drv_sis='#undef CONFIG_VIDIX_DRV_SIS'
 _vidix_drv_sis=no
 _def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
@@ -4277,7 +4277,7 @@ if test "$_vidix" = yes ; then
   _def_vidix='#define CONFIG_VIDIX 1'
   _vosrc="$_vosrc vo_cvidix.c"
   _vomodules="cvidix $_vomodules"
-  test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 savage sis unichrome"
+  test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sis unichrome"
   test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
 
   # some vidix drivers are meant to work on x86 only, discard them elsewhere
@@ -7821,7 +7821,7 @@ VIDIX_PM2=$_vidix_drv_pm2
 VIDIX_PM3=$_vidix_drv_pm3
 VIDIX_RADEON=$_vidix_drv_radeon
 VIDIX_RAGE128=$_vidix_drv_rage128
-VIDIX_SAVAGE=$_vidix_drv_savage
+VIDIX_S3=$_vidix_drv_s3
 VIDIX_SIS=$_vidix_drv_sis
 VIDIX_UNICHROME=$_vidix_drv_unichrome
 
@@ -8504,7 +8504,7 @@ $_def_vidix_drv_nvidia
 $_def_vidix_drv_pm3
 $_def_vidix_drv_radeon
 $_def_vidix_drv_rage128
-$_def_vidix_drv_savage
+$_def_vidix_drv_s3
 $_def_vidix_drv_sis
 $_def_vidix_drv_unichrome
 $_def_vidix_pfx
