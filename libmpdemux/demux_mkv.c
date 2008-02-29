@@ -2475,27 +2475,6 @@ demux_mkv_open (demuxer_t *demuxer)
 
   demux_mkv_parse_vobsub_data (demuxer);
 
-  /* DO NOT automatically select a subtitle track and behave like DVD */
-  /* playback: only show subtitles if the user explicitely wants them. */
-  track = NULL;
-  if (demuxer->sub->id >= 0)
-    track = demux_mkv_find_track_by_num (mkv_d, demuxer->sub->id,
-                                         MATROSKA_TRACK_SUBTITLE);
-  else if (dvdsub_lang != NULL)
-    track = demux_mkv_find_track_by_language (mkv_d, dvdsub_lang,
-                                              MATROSKA_TRACK_SUBTITLE);
-
-  if (track)
-          {
-            mp_msg (MSGT_DEMUX, MSGL_INFO,
-                    MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack, track->tnum);
-	    dvdsub_id = demux_mkv_reverse_id(mkv_d, track->tnum, MATROSKA_TRACK_SUBTITLE);
-            demuxer->sub->id = track->tnum;
-            demuxer->sub->sh = demuxer->s_streams[track->tnum];
-          }
-  else
-    demuxer->sub->id = -2;
-
   if (demuxer->chapters)
     {
       for (i=0; i < (int)demuxer->num_chapters; i++)

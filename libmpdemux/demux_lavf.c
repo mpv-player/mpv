@@ -433,13 +433,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             }
             if (st->language)
               sh_sub->lang = strdup(st->language);
-            if (demuxer->sub->id == -1
-                || (demuxer->sub->id == -2 && (dvdsub_lang && st->language[0] && !strncmp(dvdsub_lang, st->language, 3)))
-                || demuxer->sub->id == priv->sub_streams) {
-                dvdsub_id = priv->sub_streams;
-                demuxer->sub->id = priv->sub_streams;
-                demuxer->sub->sh = sh_sub;
-            }
             priv->sub_streams++;
             break;
         }
