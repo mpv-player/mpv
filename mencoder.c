@@ -600,6 +600,18 @@ if(stream->type==STREAMTYPE_DVDNAV){
 	mencoder_exit(1,NULL);
   }
  
+  if (dvdsub_id < 0 && dvdsub_lang)
+    dvdsub_id = demuxer_sub_track_by_lang(demuxer, dvdsub_lang);
+
+  for (i = 0; i < MAX_S_STREAMS; i++) {
+    sh_sub_t *sh = demuxer->s_streams[i];
+    if (sh && sh->sid == dvdsub_id) {
+      demuxer->sub->id = i;
+      demuxer->sub->sh = sh;
+      break;
+    }
+  }
+
   if(dvd_chapter>1) {
     float pts;
     if (demuxer_seek_chapter(demuxer, dvd_chapter-1, 1, &pts, NULL, NULL) >= 0 && pts > -1.0)
