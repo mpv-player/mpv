@@ -596,7 +596,7 @@ static int s3_probe (int verbose, int force)
   return err;
 }
 
-static int s3_init (const char *args __attribute__ ((unused)))
+static int s3_init (void)
 {
   unsigned char cr36;
   int mtrr, videoRam;
