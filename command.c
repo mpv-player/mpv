@@ -810,8 +810,9 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 	    *(char **) arg = strdup(MSGTR_Disabled);
 	else {
 	    char lang[40] = MSGTR_Unknown;
-	    if (mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA)
-		demux_mkv_get_audio_lang(mpctx->demuxer, audio_id, lang, 9);
+            sh_audio_t* sh = mpctx->sh_audio;
+            if (sh && sh->lang)
+                av_strlcpy(lang, sh->lang, 40);
 #ifdef USE_DVDREAD
 	    else if (mpctx->stream->type == STREAMTYPE_DVD) {
 		int code = dvd_lang_from_aid(mpctx->stream, audio_id);

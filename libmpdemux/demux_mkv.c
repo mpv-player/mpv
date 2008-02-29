@@ -1873,6 +1873,8 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
   if(!sh_a) return 1;
   mkv_d->audio_tracks[mkv_d->last_aid] = track->tnum;
 
+  if (track->language && (strcmp(track->language, "und") != 0))
+    sh_a->lang = strdup(track->language);
   sh_a->ds = demuxer->audio;
   sh_a->wf = malloc (sizeof (WAVEFORMATEX));
   if (track->ms_compat && (track->private_size >= sizeof(WAVEFORMATEX)))
@@ -3501,27 +3503,6 @@ demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,
   if (track && track->language && strcmp(track->language, "und"))
     av_strlcpy(lang, track->language, maxlen);
 }
-
-/** \brief Get the language code for an audio track.
-
-  Retrieves the language code for an audio track if it is known.
-  If the language code is "und" then do not copy it ("und" = "undefined").
-
-  \param demuxer The demuxer to work on
-  \param track_num The n'th audio track to get the language from
-  \param lang Store the language here
-  \param maxlen The maximum number of characters to copy into lang
-*/
-void
-demux_mkv_get_audio_lang(demuxer_t *demuxer, int track_num, char *lang,
-                       int maxlen)
-{
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  mkv_track_t *track = demux_mkv_find_track_by_num (mkv_d, track_num, MATROSKA_TRACK_AUDIO);
-  if (track && track->language && strcmp(track->language, "und"))
-    av_strlcpy(lang, track->language, maxlen);
-}
-
 
 const demuxer_desc_t demuxer_desc_matroska = {
   "Matroska demuxer",
