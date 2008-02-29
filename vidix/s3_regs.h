@@ -1,5 +1,5 @@
-#ifndef _SAVAGE_REGS_H
-#define _SAVAGE_REGS_H
+#ifndef MPLAYER_SAVAGE_REGS_H
+#define MPLAYER_SAVAGE_REGS_H
 
 #define S3_SAVAGE3D_SERIES(chip) ((chip>=S3_SAVAGE3D) && (chip<=S3_SAVAGE_MX))
 #define S3_SAVAGE4_SERIES(chip) ((chip==S3_SAVAGE4) || (chip==S3_PROSAVAGE))
@@ -211,4 +211,4 @@ do { \
 
 #define ALIGN_TO(v, n) (((v) + (n-1)) & ~(n-1))
 
-#endif /* _S3_REGS_H */
+#endif /* MPLAYER_S3_REGS_H */
