@@ -665,7 +665,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	{
 	    int id = *((int*)arg);
 	    int newid = -2;
-	    int i, curridx = -2;
+	    int i, curridx = -1;
 	    int nstreams, *pstreams;
 	    demux_stream_t *ds;
 
@@ -681,14 +681,6 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	        nstreams = priv->audio_streams;
 	        pstreams = priv->astreams;
 	    }
-	    if(id == -2)
-	    {
-	        if(ds->id >= 0)
-	            priv->avfc->streams[ds->id]->discard = AVDISCARD_ALL;
-	        ds_free_packs(ds);
-	        *((int*)arg) = ds->id = -2;
-	        return DEMUXER_CTRL_OK;
-	    }
 	    for(i = 0; i < nstreams; i++)
 	    {
 	        if(pstreams[i] == ds->id) //current stream id
@@ -698,12 +690,14 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	        }
 	    }
 
-	    if(id < 0)
-	    {
-	        i = (curridx + 1) % nstreams;
-	        newid = pstreams[i];
+            if(id == -2) { // no sound
+                i = -1;
+            } else if(id == -1) { // next track
+                i = (curridx + 2) % (nstreams + 1) - 1;
+                if (i >= 0)
+                    newid = pstreams[i];
 	    }
-	    else
+	    else // select track by id
 	    {
 	        for(i = 0; i < nstreams; i++)
 	        {
