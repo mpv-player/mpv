@@ -1405,3 +1405,35 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle) {
 
     return angle;
 }
+
+int demuxer_audio_track_by_lang(demuxer_t* d, char* lang)
+{
+    int i, len;
+    lang += strspn(lang, ",");
+    while((len = strcspn(lang, ",")) > 0) {
+        for (i=0; i < MAX_A_STREAMS; ++i) {
+            sh_audio_t* sh = d->a_streams[i];
+            if (sh && sh->lang && strncmp(sh->lang, lang, len) == 0)
+                return sh->aid;
+        }
+        lang += len;
+        lang += strspn(lang, ",");
+    }
+    return -1;
+}
+
+int demuxer_sub_track_by_lang(demuxer_t* d, char* lang)
+{
+    int i, len;
+    lang += strspn(lang, ",");
+    while((len = strcspn(lang, ",")) > 0) {
+        for (i=0; i < MAX_S_STREAMS; ++i) {
+            sh_sub_t* sh = d->s_streams[i];
+            if (sh && sh->lang && strncmp(sh->lang, lang, len) == 0)
+                return sh->sid;
+        }
+        lang += len;
+        lang += strspn(lang, ",");
+    }
+    return -1;
+}

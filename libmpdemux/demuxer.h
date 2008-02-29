@@ -421,4 +421,9 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle);
 /// Get number of angles.
 int demuxer_angles_count(demuxer_t *demuxer);
 
+// get the index of a track
+// lang is a comma-separated list
+int demuxer_audio_track_by_lang(demuxer_t* demuxer, char* lang);
+int demuxer_sub_track_by_lang(demuxer_t* demuxer, char* lang);
+
 #endif /* MPLAYER_DEMUXER_H */
