@@ -927,18 +927,12 @@ demux_mkv_read_trackvideo (demuxer_t *demuxer, mkv_track_t *track)
  */
 static void
 demux_mkv_free_trackentry(mkv_track_t *track) {
-  if (track->name)
-    free (track->name);
-  if (track->codec_id)
-    free (track->codec_id);
-  if (track->language)
-    free (track->language);
-  if (track->private_data)
-    free (track->private_data);
-  if (track->audio_buf)
-    free (track->audio_buf);
-  if (track->audio_timestamp)
-    free (track->audio_timestamp);
+  free (track->name);
+  free (track->codec_id);
+  free (track->language);
+  free (track->private_data);
+  free (track->audio_buf);
+  free (track->audio_timestamp);
   demux_mkv_free_encodings(track->encodings, track->num_encodings);
   free(track);
 }
@@ -2545,14 +2539,10 @@ demux_close_mkv (demuxer_t *demuxer)
             demux_mkv_free_trackentry(mkv_d->tracks[i]);
           free (mkv_d->tracks);
         }
-      if (mkv_d->indexes)
-        free (mkv_d->indexes);
-      if (mkv_d->cluster_positions)
-        free (mkv_d->cluster_positions);
-      if (mkv_d->parsed_cues)
-        free (mkv_d->parsed_cues);
-      if (mkv_d->parsed_seekhead)
-        free (mkv_d->parsed_seekhead);
+      free (mkv_d->indexes);
+      free (mkv_d->cluster_positions);
+      free (mkv_d->parsed_cues);
+      free (mkv_d->parsed_seekhead);
       free (mkv_d);
     }
 }

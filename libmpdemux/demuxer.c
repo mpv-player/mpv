@@ -251,7 +251,7 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid) {
 
 void free_sh_sub(sh_sub_t *sh) {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
-    if (sh->extradata) free(sh->extradata);
+    free(sh->extradata);
 #ifdef USE_ASS
     if (sh->ass_track) ass_free_track(sh->ass_track);
 #endif
@@ -288,8 +288,8 @@ void free_sh_audio(demuxer_t *demuxer, int id) {
     sh_audio_t *sh = demuxer->a_streams[id];
     demuxer->a_streams[id] = NULL;
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_audio at %p\n",sh);
-    if(sh->wf) free(sh->wf);
-    if(sh->codecdata) free(sh->codecdata);
+    free(sh->wf);
+    free(sh->codecdata);
     free(sh->lang);
     free(sh);
 }
@@ -314,7 +314,7 @@ sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid){
 
 void free_sh_video(sh_video_t* sh){
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_video at %p\n",sh);
-    if(sh->bih) free(sh->bih);
+    free(sh->bih);
     free(sh);
 }
 
@@ -343,12 +343,10 @@ skip_streamfree:
 	free(demuxer->info[i]);
       free(demuxer->info);
     }
-    if(demuxer->filename)
-      free(demuxer->filename);
+    free(demuxer->filename);
     if (demuxer->chapters) {
       for (i=0; i<demuxer->num_chapters; i++)
-        if (demuxer->chapters[i].name)
-          free(demuxer->chapters[i].name);
+        free(demuxer->chapters[i].name);
       free(demuxer->chapters);
     }
     if (demuxer->attachments) {
