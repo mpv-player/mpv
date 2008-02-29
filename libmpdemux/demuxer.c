@@ -1142,6 +1142,10 @@ int demuxer_switch_audio(demuxer_t *demuxer, int index){
     int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index);
     if (res == DEMUXER_CTRL_NOTIMPL)
       index = demuxer->audio->id;
+    if (demuxer->audio->id >= 0)
+      demuxer->audio->sh = demuxer->a_streams[demuxer->audio->id];
+    else
+      demuxer->audio->sh = NULL;
     return index;
 }
 
@@ -1149,6 +1153,10 @@ int demuxer_switch_video(demuxer_t *demuxer, int index){
     int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index);
     if (res == DEMUXER_CTRL_NOTIMPL)
       index = demuxer->video->id;
+    if (demuxer->video->id >= 0)
+      demuxer->video->sh = demuxer->v_streams[demuxer->video->id];
+    else
+      demuxer->video->sh = NULL;
     return index;
 }
 
