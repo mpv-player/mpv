@@ -208,26 +208,6 @@ demux_mkv_find_track_by_num (mkv_demuxer_t *d, int n, int type)
   return NULL;
 }
 
-static mkv_track_t *
-demux_mkv_find_track_by_language (mkv_demuxer_t *d, char *language, int type)
-{
-  int i, len;
-  
-  language += strspn(language,",");
-  while((len = strcspn(language,",")) > 0)
-    {
-      for (i=0; i < d->num_tracks; i++)
-        if (d->tracks[i] != NULL && d->tracks[i]->language != NULL &&
-            d->tracks[i]->type == type &&
-            !strncmp(d->tracks[i]->language, language, len))
-          return d->tracks[i];
-      language += len;
-      language += strspn(language,",");
-    }
-  
-  return NULL;
-}
-
 static void
 add_cluster_position (mkv_demuxer_t *mkv_d, uint64_t position)
 {
