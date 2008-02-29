@@ -431,6 +431,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
                 sh_sub->extradata_len = codec->extradata_size;
             }
+            if (st->language)
+              sh_sub->lang = strdup(st->language);
             if (demuxer->sub->id == -1
                 || (demuxer->sub->id == -2 && (dvdsub_lang && st->language[0] && !strncmp(dvdsub_lang, st->language, 3)))
                 || demuxer->sub->id == priv->sub_streams) {
@@ -789,19 +791,6 @@ redo:
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }
-}
-
-/** \brief Get the language code for a subtitle track.
-
-  Retrieves the language code for a subtitle track.
-
-  \param demuxer The demuxer to work on
-  \param track_num The subtitle track number to get the language from
-*/
-char *demux_lavf_sub_lang(demuxer_t *demuxer, int track_num)
-{
-    lavf_priv_t *priv = demuxer->priv;
-    return priv->avfc->streams[priv->sstreams[track_num]]->language;
 }
 
 static void demux_close_lavf(demuxer_t *demuxer)

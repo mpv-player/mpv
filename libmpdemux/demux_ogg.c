@@ -383,9 +383,13 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
       // copy this language name into the array
       index = demux_ogg_sub_reverse_id(d, id);
       if (index >= 0) {
+	sh_sub_t* sh;
 	// in case of malicious files with more than one lang per track:
 	if (ogg_d->text_langs[index]) free(ogg_d->text_langs[index]);
 	ogg_d->text_langs[index] = strdup(val);
+	sh = d->s_streams[index];
+	if (sh && sh->lang) free(sh->lang);
+	if (sh) sh->lang = strdup(val);
       }
       // check for -slang if subs are uninitialized yet
       if (os->text && d->sub->id < 0 && demux_ogg_check_lang(val, dvdsub_lang))
@@ -643,15 +647,6 @@ static int demux_ogg_sub_reverse_id(demuxer_t *demuxer, int id) {
   for (i = 0; i < ogg_d->n_text; i++)
     if (ogg_d->text_ids[i] == id) return i;
   return -1;
-}
-
-/** \brief Lookup the subtitle language by the subtitle number.  Returns NULL on out-of-bounds input.
- *  \param demuxer The demuxer about whose subtitles we are inquiring.
- *  \param index The subtitle number.
- */
-const char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
-  ogg_demuxer_t *ogg_d = demuxer->priv;
-  return (index < 0) ? NULL : (index >= ogg_d->n_text) ? NULL : ogg_d->text_langs[index];
 }
 
 static void demux_close_ogg(demuxer_t* demuxer);

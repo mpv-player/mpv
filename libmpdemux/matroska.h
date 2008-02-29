@@ -62,7 +62,5 @@
 #define MKV_S_ASS        "S_ASS" // Deprecated
 
 int demux_mkv_change_subs(demuxer_t *demuxer, int new_num);
-void demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,
-                            int maxlen);
 
 #endif /* MPLAYER_MATROSKA_H */

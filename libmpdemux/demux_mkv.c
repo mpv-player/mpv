@@ -2241,6 +2241,8 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
       memcpy (sh->extradata, track->private_data,
               track->private_size);
       sh->extradata_len = track->private_size;
+      if (track->language && (strcmp(track->language, "und") != 0))
+        sh->lang = strdup(track->language);
     }
   else
     {
@@ -3482,26 +3484,6 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
     default:
       return DEMUXER_CTRL_NOTIMPL;
     }
-}
-
-/** \brief Get the language code for a subtitle track.
-
-  Retrieves the language code for a subtitle track if it is known.
-  If the language code is "und" then do not copy it ("und" = "undefined").
-
-  \param demuxer The demuxer to work on
-  \param track_num The subtitle track number to get the language from
-  \param lang Store the language here
-  \param maxlen The maximum number of characters to copy into lang
-*/
-void
-demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,
-                       int maxlen)
-{
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  mkv_track_t *track = demux_mkv_find_track_by_num (mkv_d, track_num, MATROSKA_TRACK_SUBTITLE);
-  if (track && track->language && strcmp(track->language, "und"))
-    av_strlcpy(lang, track->language, maxlen);
 }
 
 const demuxer_desc_t demuxer_desc_matroska = {
