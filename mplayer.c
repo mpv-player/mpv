@@ -3315,6 +3315,9 @@ mpctx->d_audio=mpctx->demuxer->audio;
 mpctx->d_video=mpctx->demuxer->video;
 mpctx->d_sub=mpctx->demuxer->sub;
 
+// select audio stream
+select_audio(mpctx->demuxer, audio_id, audio_lang);
+
 // DUMP STREAMS:
 if((stream_dump_type)&&(stream_dump_type<4)){
   FILE *f;

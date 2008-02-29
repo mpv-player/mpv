@@ -599,6 +599,8 @@ if(stream->type==STREAMTYPE_DVDNAV){
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_CannotOpenDemuxer);
 	mencoder_exit(1,NULL);
   }
+
+  select_audio(demuxer, audio_id, audio_lang);
  
   if (dvdsub_id < 0 && dvdsub_lang)
     dvdsub_id = demuxer_sub_track_by_lang(demuxer, dvdsub_lang);
