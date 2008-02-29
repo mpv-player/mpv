@@ -2418,25 +2418,25 @@ demux_mkv_open (demuxer_t *demuxer)
 
   /* select audio track */
   track = NULL;
-      if (track == NULL)
-        /* search for an audio track that has the 'default' flag set */
-        for (i=0; i < mkv_d->num_tracks; i++)
-          if (mkv_d->tracks[i]->type == MATROSKA_TRACK_AUDIO
-              && mkv_d->tracks[i]->default_track)
-            {
-              track = mkv_d->tracks[i];
-              break;
-            }
+  if (track == NULL)
+    /* search for an audio track that has the 'default' flag set */
+    for (i=0; i < mkv_d->num_tracks; i++)
+      if (mkv_d->tracks[i]->type == MATROSKA_TRACK_AUDIO
+          && mkv_d->tracks[i]->default_track)
+        {
+          track = mkv_d->tracks[i];
+          break;
+        }
 
-      if (track == NULL)
-        /* no track has the 'default' flag set */
-        /* let's take the first audio track */
-        for (i=0; i < mkv_d->num_tracks; i++)
-          if (mkv_d->tracks[i]->type == MATROSKA_TRACK_AUDIO)
-            {
-              track = mkv_d->tracks[i];
-              break;
-            }
+  if (track == NULL)
+    /* no track has the 'default' flag set */
+    /* let's take the first audio track */
+    for (i=0; i < mkv_d->num_tracks; i++)
+      if (mkv_d->tracks[i]->type == MATROSKA_TRACK_AUDIO)
+        {
+          track = mkv_d->tracks[i];
+          break;
+        }
 
   if (track && demuxer->a_streams[track->tnum])
     {
