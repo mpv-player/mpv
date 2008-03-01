@@ -23,7 +23,6 @@ extern ao_functions_t audio_out_openal;
 extern ao_functions_t audio_out_null;
  extern ao_functions_t audio_out_alsa5;
  extern ao_functions_t audio_out_alsa;
- extern ao_functions_t audio_out_alsa;
 extern ao_functions_t audio_out_nas;
 extern ao_functions_t audio_out_sdl;
 extern ao_functions_t audio_out_sun;
