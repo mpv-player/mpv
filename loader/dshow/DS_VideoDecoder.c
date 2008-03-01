@@ -39,7 +39,7 @@ static SampleProcUserData sampleProcData;
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/types.h>
-#ifndef __MINGW32__
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
 #include <stdio.h>
