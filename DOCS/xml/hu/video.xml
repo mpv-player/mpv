@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25772 -->
+<!-- synced with r26073 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1890,8 +1890,8 @@ Az audió és a videó mezőkidben használhatsz kiterjesztett szintaxist:
 <option>...:pid[+pid]:...</option> (egyenként maximálisan 6 pid);
 ebben az esetben az <application>MPlayer</application> beleveszi a
 stream-be az összes jelzett pid-et, plusz a pid 0-t (ami a PAT-ot
-tartalmazza). Javasolt a PMT pid bevétele minden sorba a megfelelő
-csatornáknál (ha tudod).
+tartalmazza). Mindig ajánlott a PMT és MCR pid bevétele minden sorba a
+megfelelő csatornáknál (ha ismered őket).
 Megadhatsz 8192-őt is, ez kiválaszt minden pid-et ezen a frekvencián,
 majd ezután a TAB-bal tudsz váltani a programok között.
 Ez nagyobb sávszélességet igényel, de az olcsóbb kártyák mindig átviszik
@@ -1905,8 +1905,9 @@ Ha az <application>MPlayer</application> rendszeren panaszkodik
 <screen>"Túl sok videó/audió csomag a bufferben"</screen>
 <screen>"Too many video/audio packets in the buffer"</screen>
 üzenettel vagy az audió és videó közötti szinkronizáció
-növekvő eltérését tapasztalod, próbáld meg használni a libavformat-ban
-lévő MPEG-TS demuxer-t a
+növekvő eltérését tapasztalod, nézd meg, hogy van-e PCR pid a folyamban
+(szükséges az átvivő bufferelésének történő megfeleléshez) és/vagy
+próbáld meg használni a libavformat-ban lévő MPEG-TS demuxer-t a
 <option>-demuxer lavf -lavfdopts probesize=128</option>
 opció parancssorhoz történő hozzáadásával.
 </para>
@@ -2001,9 +2002,7 @@ levelezési listához. Kérjük vedd figyelembe, hogy a lista nyelve az angol.
 
 <para>
 A jövőben tervezzük a DVB kártyák által biztosított natív OSD használatát az
-OSD menü és a feliratok megjelenítéséhez, valamint a nem-25fps-es filmek sokkal
-folyékonyabb lejátszását és a valós idejű átkódolást MPEG-2 és MPEG-4
-között (részleges kitömörítés).
+OSD menü és a feliratok megjelenítéséhez.
 </para>
 </sect2>
 

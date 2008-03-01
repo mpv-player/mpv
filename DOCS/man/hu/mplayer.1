@@ -1,4 +1,4 @@
-.\" Synced with r26015
+.\" Synced with r26057
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 02. 17." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 03. 01." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -4727,6 +4727,27 @@ Audió szûrõk listájának beállítása.
 .PP
 .I MEGJEGYZÉS:
 A használható audió szûrõk teljes listájához lásd a \-af help kimenetét.
+.sp 1
+Az audió szûrõk listákban kezelhetõek.
+A szûrõ lista pár paranccsal kezelhet.
+.
+.TP
+.B \-af\-add <szûrõ1[,szûrõ2,...]>
+A paraméterként megadott szûrõket a szûrõ listához adja.
+.
+.TP
+.B \-af\-pre <szûrõ1[,szûrõ2,...]>
+A paraméterként megadott szûrõket a szûrõ lista elejéhez.
+.
+.TP
+.B \-af\-del <index1[,index2,...]>
+A megadott indexû szûrõket törli.
+Az indexek 0-val kezdõdnek, a negatíve számok a lista végét jelölik
+(\-1 az utolsó).
+.
+.TP
+.B \-af\-clr
+Teljesen kiüríti a szûrõ listát.
 .PP
 A rendelkezésre álló szûrõk:
 .
@@ -5984,9 +6005,18 @@ REss
 Különbözõ teszt minták generálása.
 .
 .TP
-.B rgbtest
+.B rgbtest[=szélesség:magasság]
 Egy RGB teszt mintát generál, hasznos az RGB vs. BGR hibák megtalálásában.
 Egy vörös, zöld és kék csíkot kell látnod fentrõl lefelé.
+.RSs
+.IPs <szélesség>
+A generált kép szélessége (alapértelmezett: 0).
+A 0 a bemeneti kép szélességét jelenti.
+.br
+.IPs <magasság>
+A generált kép magassága (alapértelmezett: 0).
+A 0 a bemeneti kép magasságát jelenti.
+.RE
 .
 .TP
 .B lavc[=minõség:fps]
@@ -10779,6 +10809,12 @@ mplayer dvd://1 \-dvd\-device /dev/\:dvd2
 .B DVD videó lejátszása egy könyvtárban lévõ VOB fájlokból:
 .nf
 mplayer dvd://1 \-dvd\-device /konyvtar/\:eleresi/\:utja/
+.fi
+.
+.PP
+.B Egy DVD sáv merevlemezre másolása és mentése a "title1.vob" fájlba:
+.nf
+mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .fi
 .
 .PP

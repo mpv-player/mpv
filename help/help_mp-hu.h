@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r25994 (2008. 02. 17.)
+// Sync'ed with help_mp-en.h r26067 (2008. 03. 01.)
 
 // ========================= MPlayer help ===========================
 
@@ -2009,6 +2009,7 @@ static char help_text[]=
 // ass_bitmap.c
 #define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] FT_Glyph_To_Bitmap hiba %d \n"
 #define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Nem támogatott pixel mód: %d\n"
+#define MSGTR_LIBASS_GlyphBBoxTooLarge "[ass] Glyph határoló doboz túl nagy: %dx%dpx\n"
 
 // ass.c
 #define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Figyelmeztetés: nincs '%s' nevű stílus, '%s' használata\n"
