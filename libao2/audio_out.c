@@ -51,10 +51,7 @@ const ao_functions_t* const audio_out_drivers[] =
 #ifdef USE_OSS_AUDIO
         &audio_out_oss,
 #endif
-#ifdef HAVE_ALSA1X
-        &audio_out_alsa,
-#endif
-#ifdef HAVE_ALSA9
+#if defined (HAVE_ALSA1X) || defined (HAVE_ALSA9)
         &audio_out_alsa,
 #endif
 #ifdef HAVE_ALSA5
