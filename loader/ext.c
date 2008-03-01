@@ -18,7 +18,9 @@
 #include <malloc.h>
 #endif
 #include <unistd.h>
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>

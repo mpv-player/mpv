@@ -17,13 +17,16 @@
  * http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
+#include "config.h"
 #include "ldt_keeper.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
+#endif
 #include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
