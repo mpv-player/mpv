@@ -19,8 +19,8 @@ typedef struct __attribute__((__packed__))
     long   bfOffBits;
 } BITMAPFILEHEADER;
 
-#ifndef _BITMAPINFOHEADER_
-#define _BITMAPINFOHEADER_
+#ifndef BITMAPINFOHEADER_
+#define BITMAPINFOHEADER_
 typedef struct __attribute__((__packed__))
 {
     long 	biSize;

@@ -48,8 +48,8 @@ typedef struct __attribute__((__packed__)) WAVEFILTER_ECHO {
 } ECHOWAVEFILTER, *PECHOWAVEFILTER, *NPECHOWAVEFILTER, *LPECHOWAVEFILTER;
 #endif  /* WAVEFILTER_ECHO */
     
-#ifndef _WAVEFORMATEX_
-#define _WAVEFORMATEX_
+#ifndef WAVEFORMATEX_
+#define WAVEFORMATEX_
 typedef struct __attribute__((__packed__)) WAVEFORMATEX {
   WORD   wFormatTag;
   WORD   nChannels;
@@ -59,7 +59,7 @@ typedef struct __attribute__((__packed__)) WAVEFORMATEX {
   WORD   wBitsPerSample;
   WORD   cbSize;
 } WAVEFORMATEX, *PWAVEFORMATEX, *NPWAVEFORMATEX, *LPWAVEFORMATEX;
-#endif /* _WAVEFORMATEX_ */
+#endif /* WAVEFORMATEX_ */
 
 #ifndef GUID_TYPE
 #define GUID_TYPE
@@ -72,8 +72,8 @@ typedef struct
 } GUID;
 #endif
 
-#ifndef _WAVEFORMATEXTENSIBLE_
-#define _WAVEFORMATEXTENSIBLE_
+#ifndef WAVEFORMATEXTENSIBLE_
+#define WAVEFORMATEXTENSIBLE_
 typedef struct {
     WAVEFORMATEX    Format;
     union {
@@ -85,10 +85,10 @@ typedef struct {
                                         /* present in stream  */
     GUID            SubFormat;
 } WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
-#endif // !_WAVEFORMATEXTENSIBLE_
+#endif /* WAVEFORMATEXTENSIBLE_ */
 
-#ifndef _MPEGLAYER3WAVEFORMAT_
-#define _MPEGLAYER3WAVEFORMAT_
+#ifndef MPEGLAYER3WAVEFORMAT_
+#define MPEGLAYER3WAVEFORMAT_
 typedef struct mpeglayer3waveformat_tag {
   WORD   wFormatTag WINE_PACKED;
   WORD   nChannels WINE_PACKED;
@@ -103,7 +103,7 @@ typedef struct mpeglayer3waveformat_tag {
   WORD          nFramesPerBlock WINE_PACKED;
   WORD          nCodecDelay WINE_PACKED;
 } MPEGLAYER3WAVEFORMAT;
-#endif /* !_MPEGLAYER3WAVEFORMAT_ */
+#endif /* MPEGLAYER3WAVEFORMAT_ */
 
 /* WAVE form wFormatTag IDs */
 

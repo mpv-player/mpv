@@ -1,9 +1,9 @@
 #ifndef MPLAYER_MS_HDR_H
 #define MPLAYER_MS_HDR_H
 
-#ifndef _WAVEFORMATEX_
-#define _WAVEFORMATEX_
-typedef struct __attribute__((__packed__)) _WAVEFORMATEX {
+#ifndef WAVEFORMATEX_
+#define WAVEFORMATEX_
+typedef struct __attribute__((__packed__)) WAVEFORMATEX {
   unsigned short  wFormatTag;
   unsigned short  nChannels;
   unsigned int    nSamplesPerSec;
@@ -12,10 +12,10 @@ typedef struct __attribute__((__packed__)) _WAVEFORMATEX {
   unsigned short  wBitsPerSample;
   unsigned short  cbSize;
 } WAVEFORMATEX, *PWAVEFORMATEX, *NPWAVEFORMATEX, *LPWAVEFORMATEX;
-#endif /* _WAVEFORMATEX_ */
+#endif /* WAVEFORMATEX_ */
 
-#ifndef _MPEGLAYER3WAVEFORMAT_
-#define _MPEGLAYER3WAVEFORMAT_
+#ifndef MPEGLAYER3WAVEFORMAT_
+#define MPEGLAYER3WAVEFORMAT_
 typedef struct __attribute__((__packed__)) mpeglayer3waveformat_tag {
   WAVEFORMATEX wf;
   unsigned short wID;
@@ -24,11 +24,11 @@ typedef struct __attribute__((__packed__)) mpeglayer3waveformat_tag {
   unsigned short nFramesPerBlock;
   unsigned short nCodecDelay;
 } MPEGLAYER3WAVEFORMAT;
-#endif /* _MPEGLAYER3WAVEFORMAT_ */
+#endif /* MPEGLAYER3WAVEFORMAT_ */
 
 /* windows.h #includes wingdi.h on MinGW. */
-#if !defined(_BITMAPINFOHEADER_) && !defined(_WINGDI_H)
-#define _BITMAPINFOHEADER_
+#if !defined(BITMAPINFOHEADER_) && !defined(_WINGDI_H)
+#define BITMAPINFOHEADER_
 typedef struct __attribute__((__packed__))
 {
     int 	biSize;
@@ -47,7 +47,7 @@ typedef struct {
 	BITMAPINFOHEADER bmiHeader;
 	int	bmiColors[1];
 } BITMAPINFO, *LPBITMAPINFO;
-#endif
+#endif /* !defined(BITMAPINFOHEADER_) && !defined(_WINGDI_H) */
 
 #ifndef le2me_BITMAPINFOHEADER
 #ifdef WORDS_BIGENDIAN
