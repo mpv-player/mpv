@@ -11,8 +11,6 @@ SRCS_COMMON += ldt_keeper.c pe_image.c module.c ext.c win32.c \
 # QTX emulation is not supported in Darwin
 ifneq ($(TARGET_OS),Darwin)
 SRCS_COMMON += wrapper.S
-else
-win32.o: CFLAGS += $(CFLAG_STACKREALIGN)
 endif
 endif
 
@@ -34,6 +32,7 @@ SRCS_COMMON += dshow/DS_AudioDecoder.c \
 include ../mpcommon.mak
 
 CFLAGS+=-fno-omit-frame-pointer $(CFLAG_NO_OMIT_LEAF_FRAME_POINTER)
+win32.o: CFLAGS += $(CFLAG_STACKREALIGN)
 
 TEST_OBJS    = $(LIBNAME_COMMON) ../cpudetect.o ../mp_msg.o ../mp_fifo.o ../osdep/libosdep.a
 TEST_LDFLAGS = -ltermcap -ldl -lm -lpthread -g
