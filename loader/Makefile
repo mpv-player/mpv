@@ -5,9 +5,16 @@ LIBNAME_COMMON = libloader.a
 #CFLAGS+=-Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
 
 SRCS_COMMON  = driver.c afl.c vfl.c
-SRCS_COMMON-$(WIN32_EMULATION) += ldt_keeper.c pe_image.c module.c ext.c win32.c \
-               pe_resource.c resource.c registry.c elfdll.c
-SRCS_COMMON-$(QTX_EMULATION) += wrapper.S
+SRCS_COMMON-$(QTX_EMULATION)   += wrapper.S
+SRCS_COMMON-$(WIN32_EMULATION) += elfdll.c \
+                                  ext.c \
+                                  ldt_keeper.c \
+                                  module.c \
+                                  pe_image.c \
+                                  pe_resource.c \
+                                  registry.c \
+                                  resource.c \
+                                  win32.c \
 
 SRCS_COMMON += dshow/DS_AudioDecoder.c \
                dshow/DS_Filter.c \
