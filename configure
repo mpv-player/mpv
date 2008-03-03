@@ -6268,12 +6268,14 @@ echores "$_real"
 
 
 echocheck "QuickTime codecs"
+_qtx_emulation=no
 if test "$_qtx" = auto ; then
   test "$_win32dll" = yes || darwin && _qtx=yes
 fi
 if test "$_qtx" = yes ; then
     _def_qtx='#define USE_QTX_CODECS 1'
     _codecmodules="qtx $_codecmodules"
+    darwin || _qtx_emulation=yes
 else
     _def_qtx='#undef USE_QTX_CODECS'
     _nocodecmodules="qtx $_nocodecmodules"
@@ -7747,6 +7749,7 @@ DVDCSS_INTERNAL = $_libdvdcss_internal
 DVDNAV = $_dvdnav
 WIN32DLL = $_win32dll
 QTX_CODECS = $_qtx
+QTX_EMULATION = $_qtx_emulation
 REAL_CODECS = $_real
 XANIM_CODECS = $_xanim
 LIBAVUTIL = $_libavutil

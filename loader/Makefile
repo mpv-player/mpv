@@ -8,10 +8,7 @@ SRCS_COMMON  = driver.c afl.c vfl.c
 ifneq ($(TARGET_WIN32),yes)
 SRCS_COMMON += ldt_keeper.c pe_image.c module.c ext.c win32.c \
                pe_resource.c resource.c registry.c elfdll.c
-# QTX emulation is not supported in Darwin
-ifneq ($(TARGET_OS),Darwin)
-SRCS_COMMON += wrapper.S
-endif
+SRCS_COMMON-$(QTX_EMULATION) += wrapper.S
 endif
 
 SRCS_COMMON += dshow/DS_AudioDecoder.c \
