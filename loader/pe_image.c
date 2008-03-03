@@ -51,6 +51,8 @@
 #include <fcntl.h>
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
+#else
+#include "osdep/mmap.h"
 #endif
 #include "wine/windef.h"
 #include "wine/winbase.h"

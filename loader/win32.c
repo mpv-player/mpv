@@ -70,6 +70,8 @@ for DLL to know too much about its environment.
 
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
+#else
+#include "osdep/mmap.h"
 #endif
 #include "osdep/mmap_anon.h"
 
