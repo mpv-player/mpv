@@ -6209,6 +6209,7 @@ if test "$_win32dll" = yes ; then
   _res_comment="using $_win32codecsdir"
   if ! win32 ; then
     _def_win32_loader='#define WIN32_LOADER 1'
+    _win32_emulation=yes
   else
     _ld_extra="$_ld_extra -ladvapi32 -lole32"
     _res_comment="using native windows"
@@ -7748,6 +7749,7 @@ DVDREAD_INTERNAL = $_dvdread_internal
 DVDCSS_INTERNAL = $_libdvdcss_internal
 DVDNAV = $_dvdnav
 WIN32DLL = $_win32dll
+WIN32_EMULATION = $_win32_emulation
 QTX_CODECS = $_qtx
 QTX_EMULATION = $_qtx_emulation
 REAL_CODECS = $_real
