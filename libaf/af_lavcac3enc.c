@@ -30,8 +30,8 @@
 #include "help_mp.h"
 #include "reorder_ch.h"
 
-#include "avcodec.h"
-#include "ac3.h"
+#include "libavcodec/avcodec.h"
+#include "libavcodec/ac3.h"
 
 // Data for specific instances of this filter
 typedef struct af_ac3enc_s {
