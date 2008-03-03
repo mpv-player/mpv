@@ -24,13 +24,19 @@ $(LIBNAME_COMMON) $(LIBNAME_MPLAYER) $(LIBNAME_MENCODER):
 	$(RANLIB) $@
 
 clean::
-	rm -f *.o *.a *~
+	rm -f *.o *.a *.ho *~
 
 distclean:: clean
 	rm -f .depend test test2
 
 dep depend::
 	$(CC) -MM $(CFLAGS) $(SRCS_COMMON) $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
+
+%.ho: %.h
+	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
+
+ALLHEADERS = $(wildcard *.h)
+checkheaders: $(ALLHEADERS:.h=.ho)
 
 -include .depend
 
