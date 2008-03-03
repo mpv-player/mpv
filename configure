@@ -7805,7 +7805,7 @@ CONFIG_LIBXVID=$_lavc_xvid
 CONFIG_LIBX264=$_lavc_x264
 CONFIG_ZLIB=$_zlib
 CONFIG_GPL=yes
-CONFIG_ENCODERS=$_mencoder
+CONFIG_ENCODERS=yes
 CONFIG_MUXERS=$_mencoder
 # Prevent building libavcodec/imgresample.c with conflicting symbols
 CONFIG_SWSCALER=yes
