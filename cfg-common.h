@@ -220,7 +220,7 @@
 #ifdef USE_LIBAVCODEC
 	{"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
-#if defined(USE_LIBPOSTPROC) || defined(USE_LIBPOSTPROC_SO)
+#ifdef USE_LIBPOSTPROC
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
@@ -251,7 +251,7 @@
 #ifdef USE_LIBAVCODEC
 	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
-#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
+#ifdef USE_LIBAVFORMAT
         {"lavfdopts",  lavfdopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
