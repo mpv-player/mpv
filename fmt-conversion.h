@@ -1,8 +1,9 @@
 #ifndef MPLAYER_FMT_CONVERSION_H
 #define MPLAYER_FMT_CONVERSION_H
 
+#include <stdio.h>
 #include "libavutil/avutil.h"
-#include "img_format.h"
+#include "libmpcodecs/img_format.h"
 
 enum PixelFormat imgfmt2pixfmt(int fmt)
 {

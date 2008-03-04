@@ -1,6 +1,8 @@
 #ifndef MPLAYER_M_PROPERTY_H
 #define MPLAYER_M_PROPERTY_H
 
+#include "m_option.h"
+
 /// \defgroup Properties
 ///
 /// Properties provide an interface to query and set the state of various

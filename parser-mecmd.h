@@ -1,6 +1,8 @@
 #ifndef MPLAYER_PARSER_MECMD_H
 #define MPLAYER_PARSER_MECMD_H
 
+#include "m_config.h"
+
 /// \file
 /// \ingroup ConfigParsers MEntry
 /// \brief A simple parser with per-entry settings.

@@ -1,6 +1,8 @@
 #ifndef MPLAYER_M_OPTION_H
 #define MPLAYER_M_OPTION_H
 
+#include <string.h>
+
 /// \defgroup Options
 /// m_option allows to parse, print and copy data of various types.
 /// It is the base of the \ref OptionsStruct, \ref Config and

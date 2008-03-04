@@ -1,6 +1,8 @@
 #ifndef MPLAYER_PLAYTREEPARSER_H
 #define MPLAYER_PLAYTREEPARSER_H
 
+#include "playtree.h"
+
 /// \defgroup PlaytreeParser Playtree parser
 /// \ingroup Playtree
 ///

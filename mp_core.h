@@ -2,6 +2,14 @@
 #define MPLAYER_MP_CORE_H
 
 #include "mp_osd.h"
+#include "libao2/audio_out.h"
+#include "playtree.h"
+#include "stream/stream.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+#include "mixer.h"
+#include "libvo/video_out.h"
+#include "subreader.h"
 
 // definitions used internally by the core player code
 
