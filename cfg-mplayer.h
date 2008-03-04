@@ -352,7 +352,7 @@ const m_option_t mplayer_opts[]={
 	{"tvscan", tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"tvscan", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
+#endif /* USE_TV */
 
 #define MAIN_CONF
 #include "cfg-common.h"

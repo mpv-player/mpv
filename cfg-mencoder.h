@@ -72,27 +72,27 @@ const m_option_t oac_conf[]={
 	{"mp3lame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_VBRMP3, NULL},
 #else
 	{"mp3lame", "MPlayer was compiled without libmp3lame support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* HAVE_MP3LAME */
 #ifdef USE_LIBAVCODEC
 	{"lavc", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_LAVC, NULL},
 #else
 	{"lavc", "MPlayer was compiled without libavcodec. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* USE_LIBAVCODEC */
 #ifdef HAVE_TOOLAME
 	{"toolame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_TOOLAME, NULL},
 #else
 	{"toolame", "MPlayer was compiled without libtoolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* HAVE_TOOLAME */
 #ifdef HAVE_TWOLAME
 	{"twolame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_TWOLAME, NULL},
 #else
 	{"twolame", "MPlayer was compiled without libtwolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* HAVE_TWOLAME */
 #ifdef HAVE_FAAC
 	{"faac", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_FAAC, NULL},
 #else
 	{"faac", "MPlayer was compiled without libfaac. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* HAVE_FAAC */
 	{"help", "\nAvailable codecs:\n"
 	"   copy     - frame copy, without re-encoding (useful for AC3)\n"
 	"   pcm      - uncompressed PCM audio\n"
@@ -224,22 +224,22 @@ const m_option_t mencoder_opts[]={
 	{"lavcopts", lavcopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"lavcopts", "MPlayer was compiled without libavcodec. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* USE_LIBAVCODEC */
 #ifdef HAVE_TOOLAME
 	{"toolameopts", toolameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"toolameopts", "MPlayer was compiled without libtoolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* HAVE_TOOLAME */
 #ifdef HAVE_TWOLAME
 	{"twolameopts", twolameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"twolameopts", "MPlayer was compiled without libtwolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* HAVE_TWOLAME */
 #ifdef HAVE_FAAC
 	{"faacopts", faacopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"faacopts", "MPlayer was compiled without libfaac. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* HAVE_FAAC */
 #ifdef USE_WIN32DLL
 	{"xvfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif

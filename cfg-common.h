@@ -26,7 +26,7 @@
 	{"cache-seek-min", &stream_cache_seek_min_percent, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
 #else
 	{"cache", "MPlayer was compiled without cache2 support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* USE_STREAM_CACHE */
 	{"vcd", "-vcd N has been removed, use vcd://N instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
 	{"cuefile", "-cuefile has been removed, use cue://filename:N where N is the track number.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -40,7 +40,7 @@
 	{"dvd-device", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"dvd-speed", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"dvd", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* USE_DVDREAD */
 	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
@@ -82,14 +82,14 @@
         {"rtsp-stream-over-sctp", &rtsp_transport_sctp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
 	{"rtsp-stream-over-tcp", "-rtsp-stream-over-tcp requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* STREAMING_LIVE555 */
 #ifdef MPLAYER_NETWORK
         {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},	
         {"rtsp-destination", &rtsp_destination, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
 #else
         {"rtsp-port", "MPlayer was compiled without network support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"rtsp-destination", "MPlayer was compiled without network support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* MPLAYER_NETWORK */
   
 // ------------------------- demuxer options --------------------
 
@@ -147,17 +147,17 @@
 	{"radio", radioopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"radio", "MPlayer was compiled without Radio interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
+#endif /* USE_RADIO */
 #ifdef USE_TV
 	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"tv", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
+#endif /* USE_TV */
 #ifdef HAVE_PVR
 	{"pvr", pvropts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"pvr", "MPlayer was compiled without V4L2/PVR interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
+#endif /* HAVE_PVR */
 	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #ifdef HAS_DVBIN_SUPPORT
 	{"dvbin", dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -273,7 +273,7 @@
 	{"noflip-hebrew", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"flip-hebrew-commas", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"noflip-hebrew-commas", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* USE_FRIBIDI */
 #ifdef USE_ICONV
 	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif	
@@ -337,9 +337,9 @@
 #else
 	{"fontconfig", "MPlayer was compiled without fontconfig support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"nofontconfig", "MPlayer was compiled without fontconfig support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+#endif /* HAVE_FONTCONFIG */
 
-#else
+#else /* MAIN_CONF */
 
 #include "config.h"
 
@@ -503,7 +503,7 @@ const m_option_t pvropts_conf[]={
 	{"fmt", &pvr_param_stream_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif
+#endif /* HAVE_PVR */
 
 #ifdef HAS_DVBIN_SUPPORT
 #include "stream/dvbin.h"
