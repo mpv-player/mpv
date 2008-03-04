@@ -1788,10 +1788,7 @@ GtkWidget * create_DXR3Config( void )
  vbox3=AddVBox( vbox2,0 );
  AddLabel( MSGTR_PREFERENCES_DXR3_VENC,vbox3 );
  RBVNone=AddRadioButton( MSGTR_PREFERENCES_None,&VEncoder_group,vbox3 );
-#ifdef USE_LIBAVCODEC
  RBVLavc=AddRadioButton( MSGTR_PREFERENCES_DXR3_LAVC,&VEncoder_group,vbox3 );
-#endif
-
 #endif
 
  AddHSeparator( vbox1 );
