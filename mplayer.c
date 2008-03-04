@@ -332,9 +332,6 @@ int suboverlap_enabled = 1;
 #include "libass/ass_mp.h"
 #endif
 
-extern int mp_msg_levels[MSGT_MAX];
-extern int mp_msg_level_all;
-
 char* current_module=NULL; // for debugging
 
 

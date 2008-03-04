@@ -143,9 +143,6 @@ double cur_video_time_usage=0;
 double cur_vout_time_usage=0;
 int benchmark=0;
 
-extern int mp_msg_levels[MSGT_MAX];
-extern int mp_msg_level_all;
-
 #ifdef WIN32
 char * proc_priority=NULL;
 #endif

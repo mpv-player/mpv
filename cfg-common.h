@@ -587,6 +587,9 @@ const m_option_t audio_filter_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+extern int mp_msg_levels[MSGT_MAX];
+extern int mp_msg_level_all;
+
 const m_option_t msgl_config[]={
 	{ "all", &mp_msg_level_all, CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL},
 
