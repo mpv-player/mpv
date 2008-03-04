@@ -47,6 +47,7 @@
 #include "m_option.h"
 #include "m_config.h"
 #include "parser-mecmd.h"
+#include "parser-cfg.h"
 
 #include "get_path.h"
 
@@ -244,8 +245,6 @@ char *current_module;
 //-------------------------- config stuff:
 
 m_config_t* mconfig;
-
-extern int m_config_parse_config_file(m_config_t* config, char *conffile);
 
 static int cfg_inc_verbose(m_option_t *conf){ ++verbose; return 0;}
 
