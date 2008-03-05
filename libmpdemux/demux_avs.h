@@ -24,6 +24,9 @@
 #ifndef MPLAYER_DEMUX_AVS_H
 #define MPLAYER_DEMUX_AVS_H
 
+#include <stdint.h>
+#include "loader/wine/windef.h"
+
 enum { AVISYNTH_INTERFACE_VERSION = 2 };
 
 enum

@@ -1,6 +1,7 @@
 #ifndef MPLAYER_STHEADER_H
 #define MPLAYER_STHEADER_H
 
+#include "demuxer.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
 

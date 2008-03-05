@@ -2,6 +2,7 @@
 #define MPLAYER_EBML_H
 
 #include <inttypes.h>
+#include "stream/stream.h"
 
 
 /* EBML version supported */

@@ -1,6 +1,8 @@
 #ifndef MPLAYER_PARSE_ES_H
 #define MPLAYER_PARSE_ES_H
 
+#include "demuxer.h"
+
 #define MAX_VIDEO_PACKET_SIZE (224*1024+4)
 #define VIDEOBUFFER_SIZE 0x100000
 

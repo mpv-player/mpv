@@ -1,6 +1,11 @@
 #ifndef MPLAYER_DEMUXER_H
 #define MPLAYER_DEMUXER_H
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "stream/stream.h"
 #ifdef USE_ASS
 #include "libass/ass_types.h"
 #endif

@@ -1,6 +1,12 @@
 #ifndef MPLAYER_MUXER_H
 #define MPLAYER_MUXER_H
 
+#include <stdint.h>
+#include <sys/types.h>
+#include "aviheader.h"
+#include "ms_hdr.h"
+#include "stream/stream.h"
+
 #define MUXER_MAX_STREAMS 16
 
 #define MUXER_TYPE_VIDEO 0

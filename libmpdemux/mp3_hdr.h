@@ -1,6 +1,8 @@
 #ifndef MPLAYER_MP3_HDR_H
 #define MPLAYER_MP3_HDR_H
 
+#include <stddef.h>
+
 int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* freq, int* spf, int* mpa_layer, int* br);
 
 #define mp_decode_mp3_header(hbuf)  mp_get_mp3_header(hbuf,NULL,NULL,NULL,NULL,NULL)
