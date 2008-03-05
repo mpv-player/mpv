@@ -1,6 +1,8 @@
 #ifndef MPLAYER_GUI_URL_H
 #define MPLAYER_GUI_URL_H
 
+#include <gtk/gtk.h>
+
 extern GtkWidget * URL;
 extern int         gtkVURLDialogBox;
 

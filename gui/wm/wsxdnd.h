@@ -1,6 +1,7 @@
 #ifndef MPLAYER_GUI_WSXDND_H
 #define MPLAYER_GUI_WSXDND_H
 
+#include "ws.h"
 
 void wsXDNDInitialize(void);
 Bool wsXDNDProcessSelection(wsTWindow* wnd,XEvent *event);

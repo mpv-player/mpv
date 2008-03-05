@@ -24,6 +24,8 @@
 #ifndef MPLAYER_GUI_PLAYLIST_H
 #define MPLAYER_GUI_PLAYLIST_H
 
+#include <windows.h>
+
 typedef struct
 {
     char *filename;
