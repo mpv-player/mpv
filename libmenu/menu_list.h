@@ -1,6 +1,8 @@
 #ifndef MPLAYER_MENU_LIST_H
 #define MPLAYER_MENU_LIST_H
 
+#include "menu.h"
+
 typedef struct list_entry_s list_entry_t;
 
 

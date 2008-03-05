@@ -1,6 +1,9 @@
 #ifndef MPLAYER_MENU_H
 #define MPLAYER_MENU_H
 
+#include "m_struct.h"
+#include "libmpcodecs/mp_image.h"
+
 struct menu_priv_s;
 typedef struct  menu_s menu_t;
 
