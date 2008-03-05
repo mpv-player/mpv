@@ -1783,7 +1783,7 @@ GtkWidget * create_DXR3Config( void )
  gtk_widget_show( CEDXR3Device );
  gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),"/dev/em8300" );
 
-#if defined( USE_LIBAVCODEC )
+#ifdef USE_LIBAVCODEC
  AddHSeparator( vbox2 );
  vbox3=AddVBox( vbox2,0 );
  AddLabel( MSGTR_PREFERENCES_DXR3_VENC,vbox3 );
