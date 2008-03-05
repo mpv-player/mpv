@@ -44,7 +44,7 @@ int gtkInitialized = 0;
 #include "gtk/about.h"
 #include "gtk/opts.h"
 #include "gtk/menu.h"
-#include "gtk/url.h"
+#include "gtk/gtk_url.h"
 #include "gtk/eq.h"
 
 #include "pixmaps/MPlayer_mini.xpm"

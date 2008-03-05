@@ -31,12 +31,12 @@ SRCS_MPLAYER = app.c \
                mplayer/gtk/eq.c \
                mplayer/gtk/fs.c \
                mplayer/gtk/gtk_common.c \
+               mplayer/gtk/gtk_url.c \
                mplayer/gtk/mb.c \
                mplayer/gtk/menu.c \
                mplayer/gtk/opts.c \
                mplayer/gtk/pl.c \
                mplayer/gtk/sb.c \
-               mplayer/gtk/url.c \
                skin/cut.c \
                skin/font.c \
                skin/skin.c \

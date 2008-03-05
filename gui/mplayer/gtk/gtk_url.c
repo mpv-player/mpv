@@ -9,7 +9,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "url.h"
+#include "gtk_url.h"
 #include "gtk_common.h"
 #include "interface.h"
 #include "app.h"
