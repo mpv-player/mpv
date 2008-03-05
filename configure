@@ -8209,9 +8209,6 @@ $_def_muxers
 #define CONFIG_GPL 1
 #define ENABLE_SMALL 0
 
-/* Support for grayscale encoding/decoding in FFmpeg (makes color slower) */
-#define ENABLE_GRAY 1
-
 /* Use AMR codecs from libavcodec. */
 $_def_libamr
 $_def_libamr_nb
