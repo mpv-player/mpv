@@ -21,6 +21,8 @@
 #ifndef LIBASS_TYPES_H
 #define LIBASS_TYPES_H
 
+#include <stdint.h>
+
 #define VALIGN_SUB 0
 #define VALIGN_CENTER 8
 #define VALIGN_TOP 4

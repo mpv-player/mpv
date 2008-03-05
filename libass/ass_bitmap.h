@@ -21,6 +21,9 @@
 #ifndef LIBASS_BITMAP_H
 #define LIBASS_BITMAP_H
 
+#include <ft2build.h>
+#include FT_GLYPH_H
+
 typedef struct ass_synth_priv_s ass_synth_priv_t;
 
 ass_synth_priv_t* ass_synth_init(void);

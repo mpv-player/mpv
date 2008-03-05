@@ -21,6 +21,8 @@
 #ifndef LIBASS_UTILS_H
 #define LIBASS_UTILS_H
 
+#include <stdint.h>
+
 int mystrtoi(char** p, int base, int* res);
 int mystrtou32(char** p, int base, uint32_t* res);
 int mystrtod(char** p, double* res);

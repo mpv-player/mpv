@@ -21,6 +21,11 @@
 #ifndef LIBASS_FONTCONFIG_H
 #define LIBASS_FONTCONFIG_H
 
+#include <stdint.h>
+#include "ass_types.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #ifdef HAVE_FONTCONFIG
 #include <fontconfig/fontconfig.h>
 #endif

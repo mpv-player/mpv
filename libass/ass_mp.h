@@ -22,6 +22,8 @@
 #define LIBASS_MP_H
 
 #include "subreader.h"
+#include "ass_types.h"
+#include "ass.h"
 
 extern ass_library_t* ass_library;
 extern int ass_enabled;

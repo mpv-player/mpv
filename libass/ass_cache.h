@@ -21,6 +21,10 @@
 #ifndef LIBASS_CACHE_H
 #define LIBASS_CACHE_H
 
+#include "ass.h"
+#include "ass_font.h"
+#include "ass_bitmap.h"
+
 void ass_font_cache_init(void);
 ass_font_t* ass_font_cache_find(ass_font_desc_t* desc);
 void* ass_font_cache_add(ass_font_t* font);

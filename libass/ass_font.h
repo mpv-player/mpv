@@ -21,6 +21,12 @@
 #ifndef LIBASS_FONT_H
 #define LIBASS_FONT_H
 
+#include <stdint.h>
+#include <ft2build.h>
+#include FT_GLYPH_H
+#include "ass.h"
+#include "ass_types.h"
+
 typedef struct ass_font_desc_s {
 	char* family;
 	unsigned bold;

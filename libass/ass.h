@@ -21,6 +21,7 @@
 #ifndef LIBASS_ASS_H
 #define LIBASS_ASS_H
 
+#include <stdio.h>
 #include "ass_types.h"
 
 /// Libass renderer object. Contents are private.
