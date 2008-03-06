@@ -8,6 +8,8 @@
 #ifndef MPLAYER_VQF_H
 #define MPLAYER_VQF_H
 
+#include <stdio.h>
+
 #ifdef _MSC_VER
 #	ifdef DLL_MODULE
 #		define DllPort    __declspec( dllexport )

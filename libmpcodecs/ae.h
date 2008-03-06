@@ -1,6 +1,8 @@
 #ifndef MPLAYER_AE_H
 #define MPLAYER_AE_H
 
+#include "libmpdemux/muxer.h"
+
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
 #define ACODEC_VBRMP3 2

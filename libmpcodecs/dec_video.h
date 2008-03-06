@@ -1,6 +1,8 @@
 #ifndef MPLAYER_DEC_VIDEO_H
 #define MPLAYER_DEC_VIDEO_H
 
+#include "libmpdemux/stheader.h"
+
 // dec_video.c:
 extern void vfm_help(void);
 

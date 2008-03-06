@@ -1,6 +1,8 @@
 #ifndef MPLAYER_VF_H
 #define MPLAYER_VF_H
 
+#include "mp_image.h"
+
 struct vf_instance_s;
 struct vf_priv_s;
 

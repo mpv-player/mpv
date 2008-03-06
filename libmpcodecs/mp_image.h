@@ -1,6 +1,10 @@
 #ifndef MPLAYER_MP_IMAGE_H
 #define MPLAYER_MP_IMAGE_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 //--------- codec's requirements (filled by the codec/vf) ---------
 
 //--- buffer content restrictions:

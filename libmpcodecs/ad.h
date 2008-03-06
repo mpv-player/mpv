@@ -2,6 +2,8 @@
 #define MPLAYER_AD_H
 
 #include "mpc_info.h"
+#include "libmpdemux/stheader.h"
+
 typedef mp_codec_info_t ad_info_t;
 
 /* interface of video decoder drivers */
