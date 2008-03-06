@@ -4281,7 +4281,7 @@ if test "$_vidix" = yes ; then
   test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
 
   # some vidix drivers are meant to work on x86 only, discard them elsewhere
-  x86 || _vidix_drivers=`echo $_vidix_drivers | sed -e s/cyberblade// -e s/sis// -e s/unichrome//`
+  x86 || _vidix_drivers=`echo $_vidix_drivers | sed -e s/cyberblade// -e s/sis// -e s/unichrome// -e s/s3//`
 
   for driver in $_vidix_drivers ; do
     uc_driver=`echo $driver | tr '[a-z]' '[A-Z]'`
