@@ -18,7 +18,7 @@
 #include "loader/loader.h"
 //#include "loader/wine/mmreg.h"
 #include "loader/wine/vfw.h"
-#include "loader/wine/avifmt.h"
+#include "libmpdemux/aviheader.h"
 #include "loader/wine/winerror.h"
 #include "loader/wine/objbase.h"
 
