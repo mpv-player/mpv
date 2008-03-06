@@ -249,7 +249,7 @@ static int vfw_encode_frame(BITMAPINFOHEADER* biOutput,void* OutBuf,
 	NULL, keyframe, encoder_frameno, 0, quality,
 	biInput, encoder_buf);
 
-//    printf("ok. size=%d\n",biOutput->biSizeImage);
+//    printf("ok. size=%ld\n",biOutput->biSizeImage);
 
     memcpy(encoder_buf,Image,encoder_buf_size);
     ++encoder_frameno;
