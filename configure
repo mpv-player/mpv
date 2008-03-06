@@ -8208,6 +8208,7 @@ $_def_muxers
 
 #define CONFIG_GPL 1
 #define ENABLE_SMALL 0
+#define ENABLE_GRAY 0
 
 /* Use AMR codecs from libavcodec. */
 $_def_libamr
