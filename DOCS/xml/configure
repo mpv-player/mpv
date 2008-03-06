@@ -11,7 +11,7 @@ for _try_catalog in \
   /etc/sgml/catalog \
   /usr/share/xml/docbook/*/catalog.xml \
   /opt/local/share/xml/docbook-xml/*/catalog.xml \
-  /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog \
+  /usr/share/sgml/docbook/*/*catalog \
   /usr/share/apps/ksgmltools2/customization/en/catalog \
   /usr/share/sgml/catalog \
   /usr/local/share/sgml/catalog \
@@ -40,6 +40,7 @@ fi
 echo "Searching for stylesheets..."
 echo "Searching for html/chunk.xsl..."
 for _try_chunk_xsl in \
+  /usr/share/xml/docbook/*/html/chunk.xsl \
   /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl \
   /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl \
   /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl \
@@ -68,6 +69,7 @@ fi
 
 echo "Searching for html/docbook.xsl..."
 for _try_docbook_xsl in \
+  /usr/share/xml/docbook/*/html/docbook.xsl \
   /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl \
   /usr/share/sgml/docbook/yelp/docbook/html/docbook.xsl \
   /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl \
