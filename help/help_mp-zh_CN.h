@@ -1,4 +1,4 @@
-//Synced with help_mp-en.h r25663 （MSGTR_NoGui）
+//Synced with help_mp-en.h r26067 （MSGTR_Exit_SIGILL_RTCpuSel）
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -111,28 +111,28 @@ static char help_text[]=
 "阅读 DOCS/zh/video.html 和 DOCS/zh/sound.html，寻找调整/加速的技巧。\n"\
 "如果这些一个都帮不了你，请阅读 DOCS/zh/bugreports.html。\n\n"
 
-#define MSGTR_NoGui "MPlayer 的编译没有支持 GUI。\n"
-#define MSGTR_GuiNeedsX "MPlayer GUI 需要 X11。\n"
+#define MSGTR_NoGui "MPlayer 编译时没有包含图形界面的支持。\n"
+#define MSGTR_GuiNeedsX "MPlayer 的图形界面需要 X11。\n"
 #define MSGTR_Playing "\n正在播放 %s。\n"
-#define MSGTR_NoSound "音频: 没声音\n"
-#define MSGTR_FPSforced "FPS 锁定为 %5.3f  (ftime: %5.3f)。\n"
-#define MSGTR_CompiledWithRuntimeDetection "编译用了实时 CPU 检测。\n"
-#define MSGTR_CompiledWithCPUExtensions "编译用了针对 x86 CPU 的扩展指令集:"
-#define MSGTR_AvailableVideoOutputDrivers "可用的视频输出驱动:\n"
-#define MSGTR_AvailableAudioOutputDrivers "可用的音频输出驱动:\n"
-#define MSGTR_AvailableAudioCodecs "可用的音频编解码器:\n"
-#define MSGTR_AvailableVideoCodecs "可用的视频编解码器:\n"
-#define MSGTR_AvailableAudioFm "\n(已编译进的)可用的音频编解码器族/驱动:\n"
-#define MSGTR_AvailableVideoFm "\n(已编译进的)可用的视频编解码器族/驱动:\n"
-#define MSGTR_AvailableFsType "可用的全屏层变换模式:\n"
-#define MSGTR_UsingRTCTiming "使用 Linux 的硬件 RTC 实计时 (%ldHz)。\n"
-#define MSGTR_CannotReadVideoProperties "视频: 无法读取属性\n"
-#define MSGTR_NoStreamFound "找不到流媒体。\n"
-#define MSGTR_ErrorInitializingVODevice "打开/初始化 (-vo) 所选的视频输出设备出错。\n"
-#define MSGTR_ForcedVideoCodec "锁定的视频编解码器: %s\n"
-#define MSGTR_ForcedAudioCodec "锁定的音频编解码器: %s\n"
-#define MSGTR_Video_NoVideo "视频: 没视频\n"
-#define MSGTR_NotInitializeVOPorVO "\n致命错误: 无法初始化 (-vf) 视频过滤器或 (-vo) 视频输出。\n"
+#define MSGTR_NoSound "音频：没有音轨\n"
+#define MSGTR_FPSforced "FPS 强制设为 %5.3f（ftime：%5.3f）。\n"
+#define MSGTR_CompiledWithRuntimeDetection "编译时包含了实时 CPU 类型检测。\n"
+#define MSGTR_CompiledWithCPUExtensions "编译时针对 x86 CPU 扩展指令集优化："
+#define MSGTR_AvailableVideoOutputDrivers "可用的视频输出驱动：\n"
+#define MSGTR_AvailableAudioOutputDrivers "可用的音频输出驱动：\n"
+#define MSGTR_AvailableAudioCodecs "可用的音频编解码器：\n"
+#define MSGTR_AvailableVideoCodecs "可用的视频编解码器：\n"
+#define MSGTR_AvailableAudioFm "\n可用的（编译时已包含的）音频编解码器族/驱动：\n"
+#define MSGTR_AvailableVideoFm "\n可用的（编译时已包含的）视频编解码器族/驱动：\n"
+#define MSGTR_AvailableFsType "可用的全屏图层变换模式：\n"
+#define MSGTR_UsingRTCTiming "使用 Linux 的硬件 RTC 计时（%ldHz）。\n"
+#define MSGTR_CannotReadVideoProperties "视频：无法读取视频属性\n"
+#define MSGTR_NoStreamFound "未找到媒体流。\n"
+#define MSGTR_ErrorInitializingVODevice "打开/初始化所选的（-vo）视频输出设备出错。\n"
+#define MSGTR_ForcedVideoCodec "强制使用视频编解码器：%s\n"
+#define MSGTR_ForcedAudioCodec "强制使用音频编解码器：%s\n"
+#define MSGTR_Video_NoVideo "视频：没有视频流\n"
+#define MSGTR_NotInitializeVOPorVO "\n致命错误：无法初始化视频过滤器（-vf）或视频输出（-vf）。\n"
 #define MSGTR_Paused "\n  =====  暂停  =====\r" // no more than 23 characters (status line for audio files)
 #define MSGTR_PlaylistLoadUnable "\n无法装载播放列表 %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -938,6 +938,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "泰语(CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Windows 的西里尔语(CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Windows 的西里尔/中欧语(CP1250)"
+#define MSGTR_PREFERENCES_FontEncoding23 "Windows 的阿拉伯语(CP1256)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "不自动缩放"
 #define MSGTR_PREFERENCES_FontPropWidth "宽度成比例"
 #define MSGTR_PREFERENCES_FontPropHeight "高度成比例"
@@ -2003,6 +2004,7 @@ static char help_text[]=
 // ass_bitmap.c
 #define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] FT_Glyph_To_Bitmap 出错 %d \n"
 #define MSGTR_LIBASS_UnsupportedPixelMode "[ass] 不支持的象素模式: %d\n"
+#define MSGTR_LIBASS_GlyphBBoxTooLarge "[ass] 文本边界框太大：%dx%dpx\n"
 
 // ass.c
 #define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] 警告: 没有找到风格(style) '%s', 将使用 '%s'\n"
