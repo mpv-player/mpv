@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r25821
+.\" sync with en/mplayer.1 r26057
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -801,7 +801,7 @@ MOUSE_BTN0\-MOUSE_BTN0_DBL。
 xv, xvidix 和 dfbmga。
 .
 .TP
-.B \-framedrop (也请参见 \-hardframedrop)
+.B \-framedrop（也请参见 \-hardframedrop，只能与 -no-correct-pts 一起使用）
 跳过显示一些帧从而在慢的机器上保持 A/V 同步。
 视频滤镜不会应用到这些帧上。对于 B-帧 甚至解码也完全跳过。
 .
@@ -815,8 +815,10 @@ xv, xvidix 和 dfbmga。
 显示简短的选项概要。
 .
 .TP
-.B \-hardframedrop
-更高强度的丢帧(破坏解码)。导致图像失真!
+.B \-hardframedrop（只能与 -no-correct-pts 一起使用）
+更加密集的丢帧（中断解码过程）。将导致图像失真！
+注意，libmpeg2 解码器尤其可能在使用该选项后崩溃，所以请考虑使用
+“\-vc ffmpeg12,”。
 .
 .TP
 .B \-heartbeat\-cmd
@@ -3337,8 +3339,8 @@ OpenGL 视频输出驱动, 简版。
 停用时似乎对 FreeType 更有利并使用全屏模式的边框。
 无法在使用 ass 字幕的情况下正确地工作（参见 \-ass）。作为替代性方法，你可以通过
 \-vf ass在不用OpenGL的情况下渲染这种字幕。
-.IPs osdcolor=<0xRRGGBB>
-OSD 颜色 (默认是: 0xffffff, 对应白色)。
+.IPs osdcolor=<0xAARRGGBB>
+OSD 颜色（默认值是：0x00ffffff，对应不透明的白色）。
 .IPs rectangle=<0,1,2>
 选择矩形纹理保存视频内存的方法, 但常常会更慢 (默认是: 0)。
 .RSss
@@ -4406,6 +4408,26 @@ Xvid 的内部后期处理过滤器有:
 .PP
 .I 注意:
 请参见 \-af help, 获得可用的音频过滤器其完整列表。
+.sp 1
+音频过滤器以列表的形式进行管理。
+有一些命令是用来管理这个过滤器列表的。
+.
+.TP
+.B \-af\-add <过滤器1[,过滤器2,...]>
+将参数中给出的过滤器添加至过滤器列表的末尾。
+.
+.TP
+.B \-af\-pre <过滤器1[,过滤器2,...]>
+将参数中给出的过滤器添加至过滤器列表的开头。
+.
+.TP
+.B \-af\-del <索引号1[,索引号2,...]>
+删除位于所给索引号处的过滤器。
+索引号码起始为 0，负数号码代表从列表的末尾寻址（\-1 代表最后一个）。
+.
+.TP
+.B \-af\-clr
+完全清空过滤器列表。
 .PP
 可用的过滤器有:
 .
@@ -5568,9 +5590,18 @@ p(x,y)：返回当前平面x/y位置上像素的值。
 生成各种测试中的测试用图样。
 .
 .TP
-.B rgbtest
+.B rgbtest[=width:height]
 生成一个RGB测试图样，适用于对比RGB和BGR的场合。
 你会看到由上而下的红、黄、蓝三色条纹。
+.RSs
+.IPs <width>
+期望生成图像所具有的宽度（默认值：0）。
+0 表示输入图像的宽度。
+.br
+.IPs <height>
+期望生成图像所具有的高度（默认值：0）。
+0 表示输入图像的高度。
+.RE
 .
 .TP
 .B lavc[=quality:fps]
