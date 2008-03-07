@@ -4254,9 +4254,9 @@ _def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
 _vidix_drv_unichrome=no
 if test "$_vidix_internal" = auto ; then
   _vidix_internal=no
-  x86 && linux || freebsd || netbsd || openbsd || sunos || win32 \
+  x86 && (linux || freebsd || netbsd || openbsd || sunos || win32) \
     && _vidix_internal=yes
-  ppc || alpha && linux && _vidix_internal=yes
+  (ppc || alpha) && linux && _vidix_internal=yes
 fi
 if test "$_vidix_internal" = yes; then
   _res_comment="internal"
@@ -5389,10 +5389,10 @@ echores "$_vcd"
 echocheck "dvdread"
 if test "$_dvdread_internal" = auto ; then
   _dvdread_internal=no
-  if linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux && \
-      test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
+  if (linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux) && \
+      (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
       test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || \
-      test "$_hpux_scsi_h" = yes ; then
+      test "$_hpux_scsi_h" = yes); then
     _dvdread_internal=yes
     _dvdread=yes
   fi
