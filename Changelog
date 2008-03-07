@@ -43,6 +43,8 @@ MPlayer (1.0)
     * reworked screensaver disabling support, most users will need to use
       -heartbeat-cmd due to screensaver authors being unable to design a
       common API
+    * grayscale decoding/encoding with FFmpeg disabled, it slowed down
+      the color case
 
     Ports:
     * small crash with vo_macosx fixed

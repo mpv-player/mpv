@@ -3211,7 +3211,6 @@ Will usually only work with "\-fstype \-fullscreen" or "\-fstype none".
 .TP
 .B \-zrbw (\-vo zr only)
 Display in black and white.
-For optimal performance, this can be combined with '\-lavdopts gray'.
 .
 .TP
 .B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr only)
@@ -4290,7 +4289,7 @@ Separate multiple options with a colon.
 .I EXAMPLE:
 .PD 0
 .RSs
-\-lavdopts gray:skiploopfilter=all:skipframe=nonref
+\-lavdopts skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -4391,8 +4390,6 @@ Enable optimizations which do not comply to the specification and might
 potentially cause problems, like simpler dequantization, simpler motion
 compensation, assuming use of the default quantization matrix, assuming
 YUV 4:2:0 and skipping a few checks to detect damaged bitstreams.
-.IPs "gray\ "
-grayscale only decoding (a bit faster than with color)
 .IPs "idct=<0\-99> (see \-lavcopts)"
 For best decoding quality use the same IDCT algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
@@ -8334,10 +8331,6 @@ good choice
 .TP
 .B "ss\ \ \ \ \ "
 slice structured mode for H.263+
-.
-.TP
-.B "gray\ \ \ "
-grayscale only encoding (faster)
 .
 .TP
 .B vfdct=<0\-10>
