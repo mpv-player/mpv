@@ -23,6 +23,8 @@
 #ifndef MPLAYER_MMAP_H
 #define MPLAYER_MMAP_H
 
+#include <sys/types.h>
+
 /*
  * Protections are chosen from these bits, or-ed together
  */

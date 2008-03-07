@@ -1,6 +1,7 @@
 #ifndef MPLAYER_GLOB_H
 #define MPLAYER_GLOB_H
 
+#include <sys/types.h>
 #include "config.h"
 
 typedef struct {
