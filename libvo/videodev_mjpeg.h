@@ -6,6 +6,8 @@
 #ifndef MPLAYER_VIDEODEV_MJPEG_H
 #define MPLAYER_VIDEODEV_MJPEG_H
 
+#include <stdlib.h>
+
 /* This is identical with the mgavideo internal params struct, 
    please tell me if you change this struct here ! <gz@lysator.liu.se) */
 struct mjpeg_params

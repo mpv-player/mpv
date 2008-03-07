@@ -12,6 +12,9 @@
 #ifndef MPLAYER_VOSUB_VIDIX_H
 #define MPLAYER_VOSUB_VIDIX_H
 
+#include <stdint.h>
+#include "video_out.h"
+
 		    /* drvname can be NULL */
 int	 vidix_preinit(const char *drvname,vo_functions_t *server);
 int      vidix_init(unsigned src_width,unsigned src_height,

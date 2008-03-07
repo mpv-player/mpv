@@ -23,6 +23,8 @@
 #ifndef MPLAYER_VIDEO_OUT_INTERNAL_H
 #define MPLAYER_VIDEO_OUT_INTERNAL_H
 
+#include <stdint.h>
+
 /* All video drivers will want this */
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"

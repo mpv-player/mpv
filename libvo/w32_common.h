@@ -1,6 +1,9 @@
 #ifndef MPLAYER_W32_COMMON_H
 #define MPLAYER_W32_COMMON_H
 
+#include <stdint.h>
+#include <windows.h>
+
 extern HWND vo_w32_window;
 extern int vo_vm;
 
