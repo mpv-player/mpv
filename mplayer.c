@@ -3907,104 +3907,101 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
 
 if(benchmark){
-  double tot=video_time_usage+vout_time_usage+audio_time_usage;
-  double total_time_usage;
-  total_time_usage_start=GetTimer()-total_time_usage_start;
-  total_time_usage = (float)total_time_usage_start*0.000001;
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nBENCHMARKs: VC:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
-	 video_time_usage,vout_time_usage,audio_time_usage,
-	 total_time_usage-tot,total_time_usage);
-  if(total_time_usage>0.0)
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARK%%: VC:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
-	   100.0*video_time_usage/total_time_usage,
-	   100.0*vout_time_usage/total_time_usage,
-	   100.0*audio_time_usage/total_time_usage,
-	   100.0*(total_time_usage-tot)/total_time_usage,
-	   100.0);
-  if(total_frame_cnt && frame_dropping)
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARKn: disp: %d (%3.2f fps)  drop: %d (%d%%)  total: %d (%3.2f fps)\n",
-	total_frame_cnt-drop_frame_cnt,
-	(total_time_usage>0.5)?((total_frame_cnt-drop_frame_cnt)/total_time_usage):0,
-	drop_frame_cnt,
-	100*drop_frame_cnt/total_frame_cnt,
-	total_frame_cnt,
-	(total_time_usage>0.5)?(total_frame_cnt/total_time_usage):0);
-  
+    double tot=video_time_usage+vout_time_usage+audio_time_usage;
+    double total_time_usage;
+    total_time_usage_start=GetTimer()-total_time_usage_start;
+    total_time_usage = (float)total_time_usage_start*0.000001;
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nBENCHMARKs: VC:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+           video_time_usage,vout_time_usage,audio_time_usage,
+           total_time_usage-tot,total_time_usage);
+    if(total_time_usage>0.0)
+        mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARK%%: VC:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
+               100.0*video_time_usage/total_time_usage,
+               100.0*vout_time_usage/total_time_usage,
+               100.0*audio_time_usage/total_time_usage,
+               100.0*(total_time_usage-tot)/total_time_usage,
+               100.0);
+    if(total_frame_cnt && frame_dropping)
+        mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARKn: disp: %d (%3.2f fps)  drop: %d (%d%%)  total: %d (%3.2f fps)\n",
+               total_frame_cnt-drop_frame_cnt,
+               (total_time_usage>0.5)?((total_frame_cnt-drop_frame_cnt)/total_time_usage):0,
+               drop_frame_cnt,
+               100*drop_frame_cnt/total_frame_cnt,
+               total_frame_cnt,
+               (total_time_usage>0.5)?(total_frame_cnt/total_time_usage):0);
 }
 
 // time to uninit all, except global stuff:
 uninit_player(INITIALIZED_ALL-(INITIALIZED_GUI+INITIALIZED_INPUT+(fixed_vo?INITIALIZED_VO:0)));
 
-  if ( mpctx->set_of_sub_size > 0 ) 
-   {
+if(mpctx->set_of_sub_size > 0) {
     current_module="sub_free";
-    for (i = 0; i < mpctx->set_of_sub_size; ++i) {
-        sub_free( mpctx->set_of_subtitles[i] );
+    for(i = 0; i < mpctx->set_of_sub_size; ++i) {
+        sub_free(mpctx->set_of_subtitles[i]);
 #ifdef USE_ASS
-        if ( mpctx->set_of_ass_tracks[i] )
+        if(mpctx->set_of_ass_tracks[i])
             ass_free_track( mpctx->set_of_ass_tracks[i] );
 #endif
     }
     mpctx->set_of_sub_size = 0;
-   }
-    vo_sub_last = vo_sub=NULL;
-    subdata=NULL;
+}
+vo_sub_last = vo_sub=NULL;
+subdata=NULL;
 #ifdef USE_ASS
-    ass_track = NULL;
-    if (ass_library)
-        ass_clear_fonts(ass_library);
+ass_track = NULL;
+if(ass_library)
+    ass_clear_fonts(ass_library);
 #endif
 
 if(mpctx->eof == PT_NEXT_ENTRY || mpctx->eof == PT_PREV_ENTRY) {
-  mpctx->eof = mpctx->eof == PT_NEXT_ENTRY ? 1 : -1;
-  if(play_tree_iter_step(mpctx->playtree_iter,mpctx->play_tree_step,0) == PLAY_TREE_ITER_ENTRY) {
-    mpctx->eof = 1;
-  } else {
-    play_tree_iter_free(mpctx->playtree_iter);
-    mpctx->playtree_iter = NULL;
-  }
-  mpctx->play_tree_step = 1;
-} else if (mpctx->eof == PT_UP_NEXT || mpctx->eof == PT_UP_PREV) {
-  mpctx->eof = mpctx->eof == PT_UP_NEXT ? 1 : -1;
-  if ( mpctx->playtree_iter ) {
-    if(play_tree_iter_up_step(mpctx->playtree_iter,mpctx->eof,0) == PLAY_TREE_ITER_ENTRY) {
-     mpctx->eof = 1;
+    mpctx->eof = mpctx->eof == PT_NEXT_ENTRY ? 1 : -1;
+    if(play_tree_iter_step(mpctx->playtree_iter,mpctx->play_tree_step,0) == PLAY_TREE_ITER_ENTRY) {
+        mpctx->eof = 1;
     } else {
-      play_tree_iter_free(mpctx->playtree_iter);
-      mpctx->playtree_iter = NULL;
+        play_tree_iter_free(mpctx->playtree_iter);
+        mpctx->playtree_iter = NULL;
     }
-   }
+    mpctx->play_tree_step = 1;
+} else if(mpctx->eof == PT_UP_NEXT || mpctx->eof == PT_UP_PREV) {
+    mpctx->eof = mpctx->eof == PT_UP_NEXT ? 1 : -1;
+    if(mpctx->playtree_iter) {
+        if(play_tree_iter_up_step(mpctx->playtree_iter,mpctx->eof,0) == PLAY_TREE_ITER_ENTRY) {
+            mpctx->eof = 1;
+        } else {
+            play_tree_iter_free(mpctx->playtree_iter);
+            mpctx->playtree_iter = NULL;
+        }
+    }
 } else { // NEXT PREV SRC
-     mpctx->eof = mpctx->eof == PT_PREV_SRC ? -1 : 1;
+    mpctx->eof = mpctx->eof == PT_PREV_SRC ? -1 : 1;
 }
 
 if(mpctx->eof == 0) mpctx->eof = 1;
 
 while(mpctx->playtree_iter != NULL) {
-  filename = play_tree_iter_get_file(mpctx->playtree_iter,mpctx->eof);
-  if(filename == NULL) {
-    if( play_tree_iter_step(mpctx->playtree_iter,mpctx->eof,0) != PLAY_TREE_ITER_ENTRY) {
-      play_tree_iter_free(mpctx->playtree_iter);
-      mpctx->playtree_iter = NULL;
-    };
-  } else
-    break;
-} 
+    filename = play_tree_iter_get_file(mpctx->playtree_iter,mpctx->eof);
+    if(filename == NULL) {
+        if(play_tree_iter_step(mpctx->playtree_iter,mpctx->eof,0) != PLAY_TREE_ITER_ENTRY) {
+            play_tree_iter_free(mpctx->playtree_iter);
+            mpctx->playtree_iter = NULL;
+        };
+    } else
+        break;
+}
 
 #ifdef HAVE_NEW_GUI
- if( use_gui && !mpctx->playtree_iter ) 
-  {
+if(use_gui && !mpctx->playtree_iter) {
 #ifdef USE_DVDREAD
-   if ( !guiIntfStruct.DiskChanged ) 
+    if(!guiIntfStruct.DiskChanged)
 #endif
-   mplEnd();
-  }	
+        mplEnd();
+}
 #endif
 
 if(use_gui || mpctx->playtree_iter != NULL || player_idle_mode){
-  if (!mpctx->playtree_iter) filename = NULL;
-  mpctx->eof = 0;
-  goto play_next_file;
+    if(!mpctx->playtree_iter) filename = NULL;
+    mpctx->eof = 0;
+    goto play_next_file;
 }
 
 
