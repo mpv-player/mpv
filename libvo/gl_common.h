@@ -2,6 +2,7 @@
 #define MPLAYER_GL_COMMON_H
 
 #include <stdio.h>
+#include <stdint.h>
 
 #include "mp_msg.h"
 #include "config.h"
