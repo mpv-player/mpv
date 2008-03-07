@@ -124,10 +124,10 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef HAVE_DIRECTX
         &video_out_directx,
 #endif
-#ifdef MACOSX
 #ifdef MACOSX_COREVIDEO
 	&video_out_macosx,
 #endif
+#ifdef MACOSX
 	&video_out_quartz,
 #endif
 #ifdef HAVE_XMGA
@@ -202,9 +202,9 @@ const vo_functions_t* const video_out_drivers[] =
 #endif
 #ifdef HAVE_DIRECTFB
 	&video_out_directfb,
+#endif
 #ifdef HAVE_DFBMGA
         &video_out_dfbmga,
-#endif
 #endif
 #ifdef CONFIG_VIDIX
 #ifdef HAVE_X11
