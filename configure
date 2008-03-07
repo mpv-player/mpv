@@ -7565,6 +7565,7 @@ if cygwin ; then
 fi
 if os2 ; then
   CFLAGS="$CFLAGS -Zomf"
+  ASFLAGS="$ASFLAGS -Zomf"
 fi
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
@@ -7657,6 +7658,7 @@ OPTFLAGS = $CFLAGS \$(EXTRA_INC)
 CFLAG_NO_OMIT_LEAF_FRAME_POINTER = $CFLAG_NO_OMIT_LEAF_FRAME_POINTER
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
 CFLAG_STACKREALIGN = $_stackrealign
+ASFLAGS = $ASFLAGS
 INSTALLSTRIP = $_install_strip
 CHARSET = $_charset
 HELP_FILE = $_mp_help
