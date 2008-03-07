@@ -5392,7 +5392,7 @@ if test "$_dvdread_internal" = auto ; then
   if linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux && \
       test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
       test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || \
-      test "$_hpux_scsi_h" = yes || darwin || win32 ; then
+      test "$_hpux_scsi_h" = yes ; then
     _dvdread_internal=yes
     _dvdread=yes
   fi
