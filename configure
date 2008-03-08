@@ -7677,7 +7677,7 @@ VIDIX = $_vidix
 VIDIX_INTERNAL = $_vidix_internal
 VIDIX_EXTERNAL = $_vidix_external
 VIDIX_PCIDB = $_vidix_pcidb_val
-CONFIG_PP = yes
+CONFIG_POSTPROC = yes
 MP3LAME = $_mp3lame
 LIBMENU = $_menu
 
