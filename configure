@@ -5391,8 +5391,7 @@ if test "$_dvdread_internal" = auto ; then
   _dvdread_internal=no
   if (linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux) && \
       (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
-      test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || \
-      test "$_hpux_scsi_h" = yes); then
+      test "$_dvdio" = yes || test "$_bsdi_dvd" = yes); then
     _dvdread_internal=yes
     _dvdread=yes
   fi
@@ -5436,6 +5435,7 @@ echocheck "internal libdvdcss"
 if test "$_libdvdcss_internal" = auto ; then
   _libdvdcss_internal=no
   test "$_dvdread_internal" = yes && _libdvdcss_internal=yes
+  hpux && test "$_hpux_scsi_h" = no && _libdvdcss_internal=no
 fi
 if test "$_libdvdcss_internal" = yes ; then
   if linux || netbsd || openbsd || bsdos ; then
