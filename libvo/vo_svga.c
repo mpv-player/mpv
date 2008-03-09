@@ -362,7 +362,7 @@ static int control(uint32_t request, void *data, ...)
   }
 
 #ifdef CONFIG_VIDIX
-  if (vidix_name) {
+  if (vidix_name[0]) {
     switch (request) {
     case VOCTRL_SET_EQUALIZER:
     {
