@@ -88,7 +88,7 @@ static int x_pos, y_pos;
 static struct {
   int yoffset;//y position of the page
   int doffset;//display start of the page
-  void * vbase;//memory start address of the page
+  uint8_t * vbase;//memory start address of the page
   int locks;
 }PageStore[MAXPAGES];
 
