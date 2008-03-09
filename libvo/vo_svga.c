@@ -117,7 +117,7 @@ int i;
 
 static int preinit(const char *arg)
 {
-int i;
+int i,rez;
 char s[64];
 
   getch2_disable();
@@ -181,8 +181,11 @@ char s[64];
     }
   }
   
-  vga_init();
-  return 0;
+  rez = vga_init();
+  if(rez != 0){
+      mp_msg(MSGT_VO,MSGL_ERR, "vo_svga: vga_init() returned error=%d\n",rez);
+  }
+  return !!rez;
 }
 
 static void svga_clear_box(int x,int y,int w,int h){
