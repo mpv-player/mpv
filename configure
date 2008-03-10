@@ -6276,7 +6276,7 @@ fi
 if test "$_qtx" = yes ; then
     _def_qtx='#define USE_QTX_CODECS 1'
     _codecmodules="qtx $_codecmodules"
-    darwin || _qtx_emulation=yes
+    darwin || win32 || _qtx_emulation=yes
 else
     _def_qtx='#undef USE_QTX_CODECS'
     _nocodecmodules="qtx $_nocodecmodules"
