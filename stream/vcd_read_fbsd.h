@@ -17,6 +17,7 @@
 #define TOCADDR(te) ((te).entry.addr)
 #define READ_TOC CDIOREADTOCENTRY
 #endif
+#include "mp_msg.h"
 
 //=================== VideoCD ==========================
 #define	CDROM_LEADOUT	0xAA

@@ -1,6 +1,12 @@
 #ifndef MPLAYER_VCD_READ_H
 #define MPLAYER_VCD_READ_H
 
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+#include "mp_msg.h"
+#include "stream.h"
 #include "libavutil/intreadwrite.h"
 //=================== VideoCD ==========================
 #if	defined(linux) || defined(sun) || defined(__bsdi__)

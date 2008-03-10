@@ -1,6 +1,9 @@
 #ifndef MPLAYER_VCD_READ_DARWIN_H
 #define MPLAYER_VCD_READ_DARWIN_H
 
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <CoreFoundation/CFBase.h>
 #include <IOKit/IOKitLib.h>
@@ -8,6 +11,7 @@
 #include <IOKit/storage/IOCDMedia.h>
 #include <IOKit/storage/IOCDMediaBSDClient.h>
 #include "mpbswap.h"
+#include "mp_msg.h"
 
 //=================== VideoCD ==========================
 #define	CDROM_LEADOUT	0xAA

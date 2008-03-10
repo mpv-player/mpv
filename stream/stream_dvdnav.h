@@ -1,6 +1,9 @@
 #ifndef MPLAYER_STREAM_DVDNAV_H
 #define MPLAYER_STREAM_DVDNAV_H
 
+#include <stdint.h>
+#include "stream.h"
+
 typedef struct {
   int event;             /* event number fromd dvdnav_events.h */
   void * details;        /* event details */

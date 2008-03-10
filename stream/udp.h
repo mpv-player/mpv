@@ -20,6 +20,8 @@
 #ifndef MPLAYER_UDP_H
 #define MPLAYER_UDP_H
 
+#include "url.h"
+
 int udp_open_socket (URL_t *url);
 
 #endif /* MPLAYER_UDP_H */

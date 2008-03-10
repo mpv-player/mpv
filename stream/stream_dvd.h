@@ -1,6 +1,7 @@
 #ifndef MPLAYER_STREAM_DVD_H
 #define MPLAYER_STREAM_DVD_H
 
+#include <stdint.h>
 #ifdef USE_DVDREAD_INTERNAL
 #include "dvdread/dvd_reader.h"
 #include "dvdread/ifo_types.h"
@@ -12,6 +13,7 @@
 #include <dvdread/ifo_read.h>
 #include <dvdread/nav_read.h>
 #endif
+#include "stream.h"
 
 typedef struct {
   dvd_reader_t *dvd;

@@ -2,6 +2,7 @@
 #define MPLAYER_VCD_READ_WIN32_H
 
 #include <ddk/ntddcdrm.h>
+#include "mp_msg.h"
 
 typedef struct mp_vcd_priv_st mp_vcd_priv_t;
 

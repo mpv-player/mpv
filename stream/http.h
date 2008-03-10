@@ -7,6 +7,8 @@
 #ifndef MPLAYER_HTTP_H
 #define MPLAYER_HTTP_H
 
+#include <sys/types.h>
+
 typedef struct HTTP_field_type {
 	char *field_name;
 	struct HTTP_field_type *next;

@@ -24,6 +24,7 @@
 #ifndef MPLAYER_PVR_H
 #define MPLAYER_PVR_H
 
+#include "stream.h"
 #include "tv.h"
 
 /**

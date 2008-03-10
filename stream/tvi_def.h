@@ -3,6 +3,8 @@
 
 #include <stdlib.h> /* malloc */
 #include <string.h> /* memset */
+#include "libmpcodecs/img_format.h"
+#include "tv.h"
 
 static int init(priv_t *priv);
 static int uninit(priv_t *priv);

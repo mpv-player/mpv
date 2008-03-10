@@ -10,6 +10,14 @@
 #ifndef MPLAYER_NETSTREAM_H
 #define MPLAYER_NETSTREAM_H
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/socket.h>
+#include "mp_msg.h"
+#include "mpbswap.h"
+
 typedef struct mp_net_stream_packet_st {
   uint16_t len;
   uint8_t cmd;
