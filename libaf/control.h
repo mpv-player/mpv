@@ -1,6 +1,8 @@
 #ifndef MPLAYER_CONTROL_H
 #define MPLAYER_CONTROL_H
 
+#include <sys/types.h>
+
 /*********************************************
 // Control info struct. 
 //
