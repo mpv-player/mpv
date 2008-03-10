@@ -21,7 +21,6 @@
 
 #include "url.h"
 #include "http.h"
-#include "stream.h"
 
 #define BUFFER_SIZE		2048
 
