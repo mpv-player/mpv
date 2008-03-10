@@ -5,6 +5,8 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
 #include <CoreFoundation/CFBase.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/storage/IOCDTypes.h>
@@ -12,6 +14,7 @@
 #include <IOKit/storage/IOCDMediaBSDClient.h>
 #include "mpbswap.h"
 #include "mp_msg.h"
+#include "stream.h"
 
 //=================== VideoCD ==========================
 #define	CDROM_LEADOUT	0xAA
