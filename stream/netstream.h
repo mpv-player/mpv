@@ -14,7 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#ifndef HAVE_WINSOCK2
 #include <sys/socket.h>
+#endif
 #include "mp_msg.h"
 #include "mpbswap.h"
 
