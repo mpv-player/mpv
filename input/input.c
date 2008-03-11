@@ -1574,11 +1574,9 @@ mp_input_parse_config(char *file) {
       }
       iter++;
       r = strlen(iter);
-      if(r)
-	memmove(buffer,iter,r+1);
+      memmove(buffer,iter,r+1);
       bs = r+1;
-      if(iter[0] != '#')
-	comments = 0;
+      comments = 0;
       continue;
     }
 
