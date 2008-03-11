@@ -7808,7 +7808,8 @@ Macroblock decision algorithm (high quality mode), encode each macro
 block in all modes and choose the best.
 This is slow but results in better quality and file size.
 When mbd is set to 1 or 2, the value of mbcmp is ignored when comparing
-macroblocks.
+macroblocks (the mbcmp value is still used in other places though, in particular
+the motion search algorithms).
 If any comparison setting (precmp, subcmp, cmp, or mbcmp) is nonzero,
 however, a slower but better half-pel motion search will be used,
 regardless of what mbd is set to.
@@ -8639,6 +8640,8 @@ This seems only useful for high bitrate encodings.
 .B mbcmp=<0\-2000>
 Sets the comparison function for the macroblock decision, has only
 an effect if mbd=0.
+This is also used for some motion search functions, in which case
+it has an effect regardless of mbd setting.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
