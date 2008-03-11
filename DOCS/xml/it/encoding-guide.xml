@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 30% synced with r22753 -->
+<!-- 34% synced with r22753 -->
 <chapter id="encoding-guide">
 <title>La codifica con <application>MEncoder</application></title>
 
@@ -1607,177 +1607,173 @@ comunque con programmi di terze parti.
 <title>Muxing</title>
 
 <para>
-Now that you have encoded your video, you will most likely want
-to mux it with one or more audio tracks into a movie container, such
-as AVI, MPEG, Matroska or NUT.
-<application>MEncoder</application> is currently only able to natively output
-audio and video into MPEG and AVI container formats.
-for example:
+Ora che hai codificato il tuo video, vorrai verosimilmente farne il mux in un
+contenitore di filmati con una o più tracce audio, come AVI, MPEG, Matroska o
+NUT.
+<application>MEncoder</application> è attualmente in grado di generare in modo
+nativo solo video in formati contenitore MPEG o AVI.
+Per esempio:
 <screen>
-mencoder -oac copy -ovc copy  -o <replaceable>output_movie.avi</replaceable> \
-    -audiofile <replaceable>input_audio.mp2</replaceable> <replaceable>input_video.avi</replaceable>
+mencoder -oac copy -ovc copy  -o <replaceable>film_in_uscita.avi</replaceable> \
+    -audiofile <replaceable>audio_in_ingresso.mp2</replaceable> <replaceable>video_in_ingresso.avi</replaceable>
 </screen>
-This would merge the video file <replaceable>input_video.avi</replaceable>
-and the audio file <replaceable>input_audio.mp2</replaceable>
-into the AVI file <replaceable>output_movie.avi</replaceable>.
-This command works with MPEG-1 layer I, II and III (more commonly known
-as MP3) audio, WAV and a few other audio formats too.
+Questo miscelerà i file video <replaceable>video_in_ingresso.avi</replaceable>
+e audio <replaceable>audio_in_ingresso.mp2</replaceable> nel file AVI
+<replaceable>film_in_uscita.avi</replaceable>.
+Questo comando funziona con audio MPEG-1 layer I, II e III (più comunemente
+conosciuto come MP3), WAV e qualche altro formato audio.
 </para>
 
 <para>
-<application>MEncoder</application> features experimental support for
-<systemitem class="library">libavformat</systemitem>, which is a
-library from the FFmpeg project that supports muxing and demuxing
-a variety of containers.
-For example:
+<application>MEncoder</application> vanta un supporto sperimentale per
+<systemitem class="library">libavformat</systemitem>, che è una libreria del
+progetto FFmpeg che può fare il mux e il demux di svariati contenitori.
+Per esempio:
 <screen>
-mencoder -oac copy -ovc copy -o <replaceable>output_movie.asf</replaceable> -audiofile <replaceable>input_audio.mp2</replaceable> \
-    <replaceable>input_video.avi</replaceable> -of lavf -lavfopts format=asf
+mencoder -oac copy -ovc copy -o <replaceable>film_di_uscita.asf</replaceable> -audiofile <replaceable>audio_in_ingresso.mp2</replaceable> \
+    <replaceable>video_in_ingresso.avi</replaceable> -of lavf -lavfopts format=asf
 </screen>
-This will do the same thing as the previous example, except that
-the output container will be ASF.
-Please note that this support is highly experimental (but getting
-better every day), and will only work if you compiled
-<application>MPlayer</application> with the support for
-<systemitem class="library">libavformat</systemitem> enabled (which
-means that a pre-packaged binary version will not work in most cases).
+Questo farà la stessa cosa dell'esempio precedente, trannce che il contenitore
+di uscita sarà ASF.
+Per favore nota che questo supporto è altamente sperimentale (ma migliora di
+giorno in giorno), e funzionerà solo se hai compilato
+<application>MPlayer</application> con il supporto per
+<systemitem class="library">libavformat</systemitem> abilitato (il che
+significa che una versione precompilata nella maggior parte dei casi non
+funzionerà).
 </para>
 
 
 <sect3 id="menc-feat-dvd-mpeg4-muxing-filter-issues">
-<title>Improving muxing and A/V sync reliability</title>
+<title>Migliorare il mux e l'affidabilità di sincronizzazione A/V</title>
 
 <para>
-You may experience some serious A/V sync problems while trying to mux
-your video and some audio tracks, where no matter how you adjust the
-audio delay, you will never get proper sync.
-That may happen when you use some video filters that will drop or
-duplicate some frames, like the inverse telecine filters.
-It is strongly encouraged to append the <option>harddup</option> video
-filter at the end of the filter chain to avoid this kind of problem.
+Potresti avere dei seri problemi di sincronizzazione cercando di fare il mux
+del tuo video con alcune tracce audio, indipendentemente da come tu corregga il
+ritardo audio, non otterrai mai una sincronia corretta.
+Ciò potrebbe succedere quando usi un qualche filtro video che scarti o duplichi
+alcuni fotogrammi, come il filtro di telecine inverso.
+Si consiglia vivamente di appendere il filtro video <option>harddup</option>
+alla fine della catena dei filtri, per evitare questo tipo di problema.
 </para>
 
 <para>
-Without <option>harddup</option>, if <application>MEncoder</application>
-wants to duplicate a frame, it relies on the muxer to put a mark on the
-container so that the last frame will be displayed again to maintain
-sync while writing no actual frame.
-With <option>harddup</option>, <application>MEncoder</application>
-will instead just push the last frame displayed again into the filter
-chain.
-This means that the encoder receives the <emphasis>exact</emphasis>
-same frame twice, and compresses it.
-This will result in a slightly bigger file, but will not cause problems
-when demuxing or remuxing into other container formats.
+Senza <option>harddup</option>, se <application>MEncoder</application> vuole
+duplicare un fotogramma, chiede al muxer di mettere un segno sul contenitore
+affinché l'ultimo fotogramma venga mostrato di nuovo per mantenere la
+sincronia, senza scriverne effettivamente alcuno.
+Con <option>harddup</option>, <application>MEncoder</application> farà
+semplicemente passare di nuovo l'ultimo fotogramma nella catena di filtri.
+Questo significa che il codificatore riceve <emphasis>esattamente</emphasis> lo
+stesso fotogramma due volte, e lo comprime.
+Ciò genera un file leggermente più grosso, ma non causerà problemi
+effettuando il demux o il remux in altri formati contenitore.
 </para>
 
 <para>
-You may also have no choice but to use <option>harddup</option> with
-container formats that are not too tightly linked with
-<application>MEncoder</application> such as the ones supported through
-<systemitem class="library">libavformat</systemitem>, which may not
-support frame duplication at the container level.
+Potresti non avere altra scelta che usare <option>harddup</option> con formati
+contenitore che non siano così legati a <application>MEncoder</application>
+come quelli gestiti attraverso
+<systemitem class="library">libavformat</systemitem>, e che possano non gestire
+la duplicazione fotogrammi a livello contenitore.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-dvd-mpeg4-muxing-avi-limitations">
-<title>Limitations of the AVI container</title>
+<title>Limitazioni del contenitore AVI</title>
 
 <para>
-Although it is the most widely-supported container format after MPEG-1,
-AVI also has some major drawbacks.
-Perhaps the most obvious is the overhead.
-For each chunk of the AVI file, 24 bytes are wasted on headers and index.
-This translates into a little over 5 MB per hour, or 1-2.5%
-overhead for a 700 MB movie. This may not seem like much, but it could
-mean the difference between being able to use 700 kbit/sec video or
-714 kbit/sec, and every bit of quality counts.
+Anche se AVI è il formato contenitore più ampiamente gestito dopo MPEG-1, ha
+anche molti gravi inconvenienti.
+Forse il più ovvio è lo spreco di banda.
+Per ogni blocco del file AVI, 24 byte sono sprecati per intestazione e indice.
+Questo porta a poco più di 5 MB per ora, o 1-2.5% di dimensione supplementare
+per un film da 700 MB. Potrebbe non sembrare poi così  tanto, ma potrebbe far
+la differenza tra poter utilizzare 700 oppure 714 kbit/sec per il video, e ogni
+bit è importante per la qualità.
 </para>
 
 <para>
-In addition this gross inefficiency, AVI also has the following major
-limitations:
+Oltre a questa grave inefficenza, AVI ha anche le grandi limitazioni che
+seguono:
 </para>
 
 <orderedlist>
 <listitem><para>
-  Only fixed-fps content can be stored. This is particularly limiting
-  if the original material you want to encode is mixed content, for
-  example a mix of NTSC video and film material.
-  Actually there are hacks that can be used to store mixed-framerate
-  content in AVI, but they increase the (already huge) overhead
-  fivefold or more and so are not practical.
+  Può essere immagazzinato solo contenuto a fps costanti. Questo è decisamente
+  limitante se il materiale di origine che vuoi codificare è contenuto misto,
+  per esempio un misto di video NTSC e film.
+  Ci sono invero alcuni trucchi che possono essere usati per salvare negli AVI
+  contenuto a frequenza di fotogrammi mista, ma aumentano il (già immenso)
+  spreco di banda di cinque volte o giù di lì e quindi non sono pratici.
 </para></listitem>
 <listitem><para>
-  Audio in AVI files must be either constant-bitrate (CBR) or
-  constant-framesize (i.e. all frames decode to the same number of
-  samples).
-  Unfortunately, the most efficient codec, Vorbis, does not meet
-  either of these requirements.
-  Therefore, if you plan to store your movie in AVI, you will have to
-  use a less efficient codec such as MP3 or AC-3.
+  L'audio nei file AVI deve essere a bitrate costante (CBR) o a dimensione di
+  fotogramma fissa (per es. tutti i fotogrammi decodificano lo stesso numero di
+  campioni).
+  Sfortunatamente, il codec più efficente, Vorbis, non ha alcuna delle suddette
+  caratteristiche.
+  Se decidi di salvare il tuo film in AVI, dovrai perciò usare un codec meno
+  efficente, come MP3 o AC-3.
 </para></listitem>
 </orderedlist>
 
 <para>
-Having said all that, <application>MEncoder</application> does not
-currently support variable-fps output or Vorbis encoding.
-Therefore, you may not see these as limitations if
-<application>MEncoder</application> is the
-only tool you will be using to produce your encodes.
-However, it is possible to use <application>MEncoder</application>
-only for video encoding, and then use external tools to encode
-audio and mux it into another container format.
+Detto tutto ciò, <application>MEncoder</application> non gestisce attualmente
+la codifica in uscita a fps variabile o la codifica in Vorbis.
+Quindi non noterai le limitazioni su citate se
+<application>MEncoder</application> è l'unico strumento che userai per produrre
+le tue codifiche.
+Tuttavia è possibile usare <application>MEncoder</application> solo per la
+codifica del video, e poi utilizzare strumenti di terze parti per codificare
+l'audio e farne il mux in un altro formato contenitore.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-dvd-mpeg4-muxing-matroska">
-<title>Muxing into the Matroska container</title>
+<title>Mux nel contenitore Matroska</title>
 
 <para>
-Matroska is a free, open standard container format, aiming
-to offer a lot of advanced features, which older containers
-like AVI cannot handle.
-For example, Matroska supports variable bitrate audio content
-(VBR), variable framerates (VFR), chapters, file attachments,
-error detection code (EDC) and modern A/V Codecs like "Advanced Audio
-Coding" (AAC), "Vorbis" or "MPEG-4 AVC" (H.264), next to nothing
-handled by AVI.
+Matroska è un formato contenitore libero, a standard aperti, che punta ad
+offrire molte caratteristiche avanzate, che contenitori più vecchi come AVI non
+sono in grado di manipolare.
+Per esempio Matroska supporta contenuto audio a bitrate variabile (VBR),
+frequenza fotogrammi variabile (VFR), capitoli, file allegati, codice di
+gestione errori (EDC) e Codec A/V moderni come "Advanced Audio Coding" (AAC),
+"Vorbis" or "MPEG-4 AVC" (H.264), comparato al nulla gestito da AVI.
 </para>
 
 <para>
-The tools required to create Matroska files are collectively called
-<application>mkvtoolnix</application>, and are available for most
-Unix platforms as well as <application>Windows</application>.
-Because Matroska is an open standard you may find other
-tools that suit you better, but since mkvtoolnix is the most
-common, and is supported by the Matroska team itself, we will
-only cover its usage.
+Gli strumenti necessari per creare file Matroska sono chiamati nel loro insieme
+<application>mkvtoolnix</application> e sono disponibili per la maggior parte
+delle piattaforme Unix, così  come per <application>Windows</application>.
+Dato che Matroska è uno standard aperto, potresti trovare altri strumenti che
+ti tornino più utili, ma dato che mkvtoolnix è il più diffuso, ed è
+supportato dal team stesso di Matroska, illustreremo il suo solo utilizzo.
 </para>
 
 <para>
-Probably the easiest way to get started with Matroska is to use 
-<application>MMG</application>, the graphical frontend shipped with
-<application>mkvtoolnix</application>, and follow the
-<ulink url="http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge-gui.html">guide to mkvmerge GUI (mmg)</ulink>
+Probabilmente il modo più semplice di avvicinarsi a Matroska è utilizzare
+<application>MMG</application>, il frontend grafico fornito con
+<application>mkvtoolnix</application>, e seguire la <ulink url="http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge-gui.html">guida della GUI di mkvmerge (mmg)</ulink>.
 </para>
 
 <para>
-You may also mux audio and video files using the command line:
+Puoi anche fare il mux dei file audio e video usando la riga comando:
 <screen>
-mkvmerge -o <replaceable>output.mkv</replaceable> <replaceable>input_video.avi</replaceable> <replaceable>input_audio1.mp3</replaceable> <replaceable>input_audio2.ac3</replaceable>
+mkvmerge -o <replaceable>destinazione.mkv</replaceable> <replaceable>video_sorgente.avi</replaceable> <replaceable>audio_sorgente1.mp3</replaceable> <replaceable>audio_sorgente2.ac3</replaceable>
 </screen>
-This would merge the video file <replaceable>input_video.avi</replaceable>
-and the two audio files <replaceable>input_audio1.mp3</replaceable>
-and <replaceable>input_audio2.ac3</replaceable> into the Matroska
-file <replaceable>output.mkv</replaceable>.
-Matroska, as mentioned earlier, is able to do much more than that, like
-multiple audio tracks (including fine-tuning of audio/video
-synchronization), chapters, subtitles, splitting, etc...
-Please refer to the documentation of those applications for
-more details.
+Questo unirà il file video <replaceable>video_sorgente.avi</replaceable> e i
+due file audio <replaceable>audio_sorgente1.mp3</replaceable> e
+<replaceable>audio_sorgente2.ac3</replaceable> nel file Matroska
+<replaceable>destinazione.mkv</replaceable>.
+Matroska, come detto precedentemente, è in grado di far molto più di questo,
+come tracce audio multiple (inclusa una fine sincronia audio/video), capitoli,
+sottotitoli, salti, etc...
+Fai per favore riferimento alla documentazione di queste applicazioni per
+maggiori delucidazioni.
 </para>
 </sect3>
 </sect2>
@@ -1788,107 +1784,112 @@ more details.
 
 
 <sect1 id="menc-feat-telecine">
-<title>How to deal with telecine and interlacing within NTSC DVDs</title>
+<title>Come trattare telecine e interlacciamento nei DVD NTSC</title>
 
 <sect2 id="menc-feat-telecine-intro">
-<title>Introduction</title>
+<title>Introduzione</title>
 
 <formalpara>
-<title>What is telecine?</title>
+<title>Cos'è telecine?</title>
 <para>
-If you do not understand much of what is written in this document, read the
-<ulink url="http://en.wikipedia.org/wiki/Telecine">Wikipedia entry on telecine</ulink>.
-It is an understandable and reasonably comprehensive
-description of what telecine is.
+Se non comprendi molto quello che è scritto in questo documento, leggi la
+<ulink url="http://en.wikipedia.org/wiki/Telecine">definizione di telecine su Wikipedia</ulink>
+(<ulink url="http://en.wikipedia.org/wiki/Telecine">pagina inglese</ulink>).
+E' una descrizione comprensibile e ragionevolmente completa di cosa si indichi
+con telecine.
 </para></formalpara>
 
 <formalpara>
-<title>A note about the numbers.</title>
+<title>Una nota riguardo i numeri.</title>
 <para>
-Many documents, including the guide linked above, refer to the fields
-per second value of NTSC video as 59.94 and the corresponding frames
-per second values as 29.97 (for telecined and interlaced) and 23.976
-(for progressive). For simplicity, some documents even round these
-numbers to 60, 30, and 24.
+Molti documenti, inclusa la guida su indicata, fanno riferimento al valore dei
+campi per secondo del video NTSC come 59.94 e i valori corrispondenti di
+fotogrammi al secondo come 29.97 (con telecine e interlacciamento) e 23.976
+(per il progressivo). Per semplicità alcune documentazioni arrotondano tali
+cifre a 60, 30 e 24.
 </para></formalpara>
 
 <para>
-Strictly speaking, all those numbers are approximations. Black and
-white NTSC video was exactly 60 fields per second, but 60000/1001
-was later chosen to accomodate color data while remaining compatible
-with contemporary black and white televisions. Digital NTSC video
-(such as on a DVD) is also 60000/1001 fields per second. From this,
-interlaced and telecined video are derived to be 30000/1001 frames
-per second; progressive video is 24000/1001 frames per second.
+Strettamente parlando, tutti questi numeri sono approssimati. Il video NTSC in
+bianco e nero era esattamente 60 campi al secondo, ma successivamente venne
+scelto 60000/1001 per incastrare i dati del colore e rimanere compatibili con
+le televisioni bianco e nero contemporanee. Anche il video NTSC digitale (come
+quello sui DVD) è a 60000/1001 campi al secondo. Da ciò discende che il video
+interlacciato e telecine è 30000/1001 fotogrammi al secondo; il video
+progressivo è 24000/1001 fotogrammi al secondo.
 </para>
 
 <para>
-Older versions of the <application>MEncoder</application> documentation
-and many archived mailing list posts refer to 59.94, 29.97, and 23.976.
-All <application>MEncoder</application> documentation has been updated
-to use the fractional values, and you should use them too.
+Precedenti versioni della documentazioni di <application>MEncoder</application>
+a molti post archiviati della mailig list fanno riferimento a 59.94, 29.97 e
+23.976.
+Tutta la documentazioni di <application>MEncoder</application> è stata
+aggiornata per usare i valori in frazione, e anche tu dovresti usare questi.
 </para>
 
 <para>
-<option>-ofps 23.976</option> is incorrect.
-<option>-ofps 24000/1001</option> should be used instead.
+<option>-ofps 23.976</option> è sbagliato.
+<option>-ofps 24000/1001</option> dovrebbe invece essere usato.
 </para>
 
 <formalpara>
-<title>How telecine is used.</title>
+<title>Come viene usato telecine.</title>
 <para>
 All video intended to be displayed on an NTSC
-television set must be 60000/1001 fields per second. Made-for-TV movies
-and shows are often filmed directly at 60000/1001 fields per second, but
-the majority of cinema is filmed at 24 or 24000/1001 frames per
-second. When cinematic movie DVDs are mastered, the video is then
-converted for television using a process called telecine.
+Tutto il video pensato per essere riprodotto su televisione NTSC deve essere a
+60000/1001 campi al secondo. I film per la TV e gli spettacoli sono spesso
+registrati direttamente a 60000/1001 campi al secondo, ma la stragrande
+maggioranzna dei film per cinema è filmata a 24 o 24000/1001 fotogrammi al
+secondo. Quando i film da cinema vengono masterizzati su DVD, il video viene
+quindi convertito per la televisione usando un processo chiamato telecine
+(o telecinema).
 </para></formalpara>
 
 <para>
-On a DVD, the video is never actually stored as 60000/1001 fields per
-second. For video that was originally 60000/1001, each pair of fields is
-combined to form a frame, resulting in 30000/1001 frames per
-second. Hardware DVD players then read a flag embedded in the video
-stream to determine whether the odd- or even-numbered lines should
-form the first field.
+Su un DVD il video non è praticamente mai memorizzato con 60000/1001 campi al
+secondo. Per un video che originariamente era 60000/1001, ogni coppia di campi
+viene combinata in un fotogramma, risultando in 30000/1001 fotogrammi al
+secondo. I lettori DVD hardware leggono quindi un parametro codificato nel
+flusso video pe rdeterminare se le linee pari o quelle dispari debbano formare
+il primo campo.
 </para>
 
 <para>
-Usually, 24000/1001 frames per second content stays as it is when
-encoded for a DVD, and the DVD player must perform telecining
-on-the-fly. Sometimes, however, the video is telecined
-<emphasis>before</emphasis> being stored on the DVD; even though it
-was originally 24000/1001 frames per second, it becomes 60000/1001 fields per
-second. When it is stored on the DVD, pairs of fields are combined to form
-30000/1001 frames per second.
+Solitamente il contenuto a 24000/1001 fotogrammi per secondi resta così com'è
+quando viene codificato per un DVD, e il lettore DVD deve eseguire il telecine
+al momento. Alcune volte invece, il video subisce il telecine
+<emphasis>prima</emphasis> di essere scritto su DVD; anche se in origine era a
+24000/1001 fotogrammi al secondi, diventa 60000/1001 campi al secondo. Quando
+viene memorizzato su DVD, le coppie di campi vengono assemblate per formare
+30000/1001 fotogrammi al secondo.
 </para>
 
 <para>
-When looking at individual frames formed from 60000/1001 fields per
-second video, telecined or otherwise, interlacing is clearly visible
-wherever there is any motion, because one field (say, the
-even-numbered lines) represents a moment in time 1/(60000/1001)
-seconds later than the other. Playing interlaced video on a computer
-looks ugly both because the monitor is higher resolution and because
-the video is shown frame-after-frame instead of field-after-field.
+Guardando i singoli fotogrammi generati da video a 60000/1001 campi al secondo,
+che sia telecine o no, l'interlacciamento è chiaramente visibile ovunque vi sia
+del movimento, dato che un campo (diciamo le linee pari) rappresenta un istante
+nel tempo 1/(60000/1001) secondi dopo l'altro. Riprodurre video interlacciato
+su un computer risulta brutto sia perché il monitor ha una risoluzione maggiore
+sia perché il video viene mostrato un fotogramma dopo l'altro invece che un
+campo dopo l'altro.
 </para>
 
 <itemizedlist>
-<title>Notes:</title>
+<title>Note:</title>
 <listitem><para>
-  This section only applies to NTSC DVDs, and not PAL.
+  Questa sezione si applica solo ai DVD NTSC, e non a quelli PAL.
 </para></listitem>
 <listitem><para>
-  The example <application>MEncoder</application> lines throughout the
-  document are <emphasis role="bold">not</emphasis> intended for
-  actual use. They are simply the bare minimum required to encode the
-  pertaining video category. How to make good DVD rips or fine-tune
-  <systemitem class="library">libavcodec</systemitem> for maximal
-  quality is not within the scope of this document.
+  Le righe di esempio per <application>MEncoder</application> proposte nella
+  documentazione <emphasis role="bold">non</emphasis> sono pensate per un
+  utilizzo reale. Sono solo quelle minimali richieste per codificare la
+  relativa categoria di video. Come fare buoni rip di DVD o configurare bene
+  <systemitem class="library">libavcodec</systemitem> per la massima qualità
+  non è lo scopo di questa documentazione.
 </para></listitem>
 <listitem><para>
-  There are a couple footnotes specific to this guide, linked like this:
+  Ci sono alcune note a piè di pagina specifiche di questa guida, così 
+  indicate:
   <link linkend="menc-feat-telecine-footnotes">[1]</link>
 </para></listitem>
 </itemizedlist>
