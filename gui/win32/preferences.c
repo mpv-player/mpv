@@ -35,7 +35,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "dialogs.h"
-#include "wincfg.h"
 
 extern char  *proc_priority;
 

@@ -41,7 +41,6 @@
 #include "libvo/video_out.h"
 #include "interface.h"
 #include "gui.h"
-#include "wincfg.h"
 #include "dialogs.h"
 
 // HACK around bug in old mingw
@@ -57,9 +56,7 @@
 /* Globals / Externs */
 extern void renderinfobox(skin_t *skin, window_priv_t *priv);
 extern void renderwidget(skin_t *skin, image *dest, widget *item, int state);
-extern void mplayer_put_key(int code);
 extern void print_version(void);
-extern int WinID;
 float sub_aspect;
 
 DWORD oldtime;

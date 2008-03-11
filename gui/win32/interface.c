@@ -22,7 +22,7 @@
  */
 
 #include <windows.h>
-
+#include <get_path.h>
 #include "interface.h"
 #include "m_option.h"
 #include "mixer.h"
@@ -41,7 +41,6 @@
 #include "access_mpcontext.h"
 #include "gui.h"
 #include "dialogs.h"
-#include "wincfg.h"
 #ifdef HAVE_LIBCDIO
 #include <cdio/cdio.h>
 #endif

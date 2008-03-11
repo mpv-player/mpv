@@ -21,9 +21,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <get_path.h>
 #include "mplayer.h"
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -31,8 +32,8 @@
 #include "m_option.h"
 #include "libvo/video_out.h"
 #include "mixer.h"
-#include "wincfg.h"
 #include "interface.h"
+#include "gui.h"
 
 /* params */
 int   gtkAONorm = 0;
@@ -53,7 +54,6 @@ int gui_sub_pos_x = -1;
 int gui_sub_pos_y = -1;
 
 /* External functions */
-extern int frame_dropping;
 extern char *proc_priority;
 extern int m_config_parse_config_file(m_config_t *config, char *conffile);
 
