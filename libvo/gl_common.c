@@ -737,23 +737,23 @@ static const char *bicub_notex_filt_template_RECT =
   BICUB_FILT_MAIN("RECT");
 
 #define BICUB_X_FILT_MAIN(textype) \
-  "ADD coord, fragment.texcoord[%c].xyxy, cdelta.xyxw;" \
-  "ADD coord2, fragment.texcoord[%c].xyxy, cdelta.zyzw;" \
+  "ADD coord.xy, fragment.texcoord[%c].xyxy, cdelta.xyxy;" \
+  "ADD coord2.xy, fragment.texcoord[%c].xyxy, cdelta.zyzy;" \
   "TEX a.r, coord, texture[%c], "textype";" \
   "TEX b.r, coord2, texture[%c], "textype";" \
   /* x-interpolation */ \
   "LRP yuv.%c, parmx.b, a.rrrr, b.rrrr;"
 
 static const char *bicub_x_filt_template_2D =
-  "MAD coord.x, fragment.texcoord[%c], {%f, %f}, {0.5, 0.5};"
+  "MAD coord.x, fragment.texcoord[%c], {%f}, {0.5};"
   "TEX parmx, coord, texture[%c], 1D;"
-  "MUL cdelta.xz, parmx.rrgg, {-%f, 0, %f, 0};"
+  "MUL cdelta.xyz, parmx.rrgg, {-%f, 0, %f};"
   BICUB_X_FILT_MAIN("2D");
 
 static const char *bicub_x_filt_template_RECT =
-  "ADD coord.x, fragment.texcoord[%c], {0.5, 0.5};"
+  "ADD coord.x, fragment.texcoord[%c], {0.5};"
   "TEX parmx, coord, texture[%c], 1D;"
-  "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};"
+  "MUL cdelta.xyz, parmx.rrgg, {-1, 0, 1};"
   BICUB_X_FILT_MAIN("RECT");
 
 static const char *unsharp_filt_template =
@@ -1059,7 +1059,7 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                  in_tex, in_tex, in_tex, in_tex, out_comp);
       else
         snprintf(*prog_pos, *remain, bicub_x_filt_template_2D,
-                 in_tex, (float)texw, (float)texh,
+                 in_tex, (float)texw,
                  texs[0], ptw, ptw,
                  in_tex, in_tex, in_tex, in_tex, out_comp);
       break;
