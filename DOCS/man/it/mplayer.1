@@ -1,4 +1,4 @@
-.\" synced with r25757
+.\" synced with r26014
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -605,24 +605,24 @@ nome di profilo 'default' e continuare con le opzioni abituali.
 .nf
 
 [protocol.dvd]
-profile-desc="Profilo per flussi dvd://"
+profile-desc="profilo per flussi dvd://"
 vf=pp=hb/vb/dr/al/fd
 alang=en
 
 [protocol.dvdnav]
-profile-desc="Profilo per flussi dvdnav://"
+profile-desc="profilo per flussi dvdnav://"
 profile=protocol.dvd
 mouse-movements=yes
 
 [extension.flv]
-profile-desc="Profilo per file .flv"
+profile-desc="profilo per file .flv"
 flip=yes
 
-[vo.x11]
-opzione=parametro
+[vo.pnm]
+outdir=/tmp
 
 [ao.alsa]
-opzione=parametro
+device=spdif
 .fi
 .PP
 .I "ESEMPI DI PROFILI PER MENCODER:"
@@ -891,9 +891,11 @@ Non funziona come opzione nel file di configurazione.
 Visualizza un breve elenco delle opzioni.
 .
 .TP
-.B \-hardframedrop
+.B \-hardframedrop (funziona solo con \-no\-correct\-pts)
 Scarto ancora più intenso di fotogrammi (rovina la decodifica).
-Porta a distorsioni delle immagini!
+Porta a distorsione delle immagini!
+Nota che nello specifico il decodificatore libmpeg2 può andare in crash,
+quindi considera l'utilizzo di "\-vc ffmpeg12,".
 .
 .TP
 .B \-heartbeat\-cmd
@@ -2634,9 +2636,9 @@ usata per l'OSD e ripulirla (default: ^[[A\\r^[[K).
 Dice a MPlayer di gestire i sottotitoli come unicode.
 .
 .TP
-.B \-unrarexec <percorso dell'eseguibile unrar> (attualmente non supporta MinGW)
+.B \-unrarexec <percorso dell'eseguibile unrar> (non supportato in MinGW)
 Specifica il percorso dell'eseguibile unrar affinché MPlayer lo possa usare per
-leggere file vobsub compressi in rar (default: non impostata, e quindi funzione
+leggere file VOBsub compressi in rar (default: non impostata, e quindi funzione
 disabilitata).
 Il percorso deve contenere il nome dell'eseguibile, per es.\&
 /usr/local/bin/unrar.
@@ -3301,13 +3303,13 @@ Non supportato da tutti i driver di uscita video.
 .B \-screenh <pixels>
 Specifica la risoluzione verticale dello schermo per quei driver di uscita
 video che non riescono a conoscere la risoluzione dello schermo come fbdev,
-x11 e TVout.
+x11 e TV-out.
 .
 .TP
 .B \-screenw <pixels>
 Specifica la risoluzione orizzontale dello schermo per quei driver di uscita
 video che non riescono a conoscere la risoluzione dello schermo come fbdev,
-x11 e TVout.
+x11 e TV-out.
 .
 .TP
 .B \-stop\-xscreensaver (solo X11)
@@ -3736,8 +3738,8 @@ Se disabilitato appare molto meglio con i font FreeType ed utilizza
 i bordi nella modalità a schermo intero.
 Non funziona correttamente con sottotitoli ass (vedi \-ass), puoi tuttavia
 renderizzarli senza il supporto OpenGL attraverso \-vf ass.
-.IPs osdcolor=<0xRRGGBB>
-Colore per l'OSD (default: 0xffffff, che corrisponde al bianco).
+.IPs osdcolor=<0xAARRGGBB>
+Colore per l'OSD (default: 0x00ffffff, che corrisponde al bianco opaco).
 .IPs rectangle=<0,1,2>
 Abilita l'utilizzo di texture rettangolari, fatto che risparmia RAM video 
 ma è spesso più lento (default: 0).
@@ -3822,11 +3824,14 @@ perlomeno in modalità a schermo intero.
 quella verticale.
 Funziona su meno schede che il metodo 1.
 .br
-3: Uguale a 1, ma non usa una texture supplementare. Potrebbe essere più veloce
-su alcune schede.
+3: Uguale a 1, ma non usa una texture supplementare.
+Potrebbe essere più veloce su alcune schede.
 .br
-4: Usa una maschera di eliminazione particolari (unsharp) con dimensione 3x3 e
-valore 0.5. Sperimentale.
+4: Usa una maschera sperimentale di eliminazione particolari (unsharp) con
+dimensione 3x3 e valore 0.5.
+.br
+5: Usa una maschera sperimentale di eliminazione particolari (unsharp) con
+dimensione 5x5 e valore 0.5.
 .RE
 .IPs cscale=<n>
 Seleziona la funzione di ridimensionamento da usare per il ridimensionamento
@@ -4113,7 +4118,7 @@ Specifica la norma TV.
 4: PAL-60
 .br
 5: NTSC
-.REss
+.RE
 .IPs <0\-3>
 Specifica il numero di dispositivo se hai più di una scheda em8300.
 .RE
@@ -4121,17 +4126,17 @@ Specifica il numero di dispositivo se hai più di una scheda em8300.
 .
 .TP
 .B ivtv (solo IVTV)
-Driver di uscita video specifico per uscita TV-Out con chip di decodifica MPEG
+Driver di uscita video specifico per uscita TV-out con chip di decodifica MPEG
 Conexant CX23415 (iCompression iTVC15) o Conexant CX23416 (iCompression iTVC16)
 (Hauppauge WinTV PVR-150/250/350/500)
 Vedi anche il filtro video lavc.
 .PD 0
 .RSs
-.IPs device
+.IPs <dispositivo>
 Seleziona esplicitamente il dispositivo del decodificatore MPEG da usare
 (default: /dev/video16).
-.IPs output
-Seleziona esplicitamente l'uscita TV-Out da usare per il segnale video.
+.IPs <uscita>
+Seleziona esplicitamente l'uscita TV-out da usare per il segnale video.
 .RE
 .PD 1
 .
@@ -4142,11 +4147,11 @@ hardware integrato.
 Vedi anche il filtro video lavc.
 .PD 0
 .RSs
-.IPs device
+.IPs <dispositivo>
 Seleziona esplicitamente il dispositivo del decodificatore MPEG da usare
 (default: /dev/video16).
-.IPs output
-Seleziona esplicitamente l'uscita TV-Out da usare per il segnale video.
+.IPs <uscita>
+Seleziona esplicitamente l'uscita TV-out da usare per il segnale video.
 .RE
 .PD 1
 .
@@ -10200,7 +10205,7 @@ Nessuno: I macroblocchi diretti non vengono usati.
 Spaziale: I vettori di movimento sono estrapolati dai blocchi vicini.
 (default)
 .IPs temporal
-Temporale: I vettori di movimento vengono interpolati dai fotogrammi di tipo
+Temporale: I vettori di movimento vengono estrapolati dai fotogrammi di tipo
 P che seguono.
 .IPs auto
 Automatica: Il codec sceglie tra spaziale e temporale per ciascun fotogramma.
