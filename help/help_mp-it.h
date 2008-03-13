@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <see AUTHORS for email address>
 
-// Updated to help_mp-en.h r25663
+// Updated to help_mp-en.h r26067
 
 // ========================= MPlayer help ===========================
 
@@ -936,6 +936,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
+#define MSGTR_PREFERENCES_FontEncoding23 "Arabic Windows (CP1256)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Nessun ridimensionamento automatico"
 #define MSGTR_PREFERENCES_FontPropWidth "Proporzionale alla larghezza del filmato"
 #define MSGTR_PREFERENCES_FontPropHeight "Proporzionale all'altezza del filmato"
@@ -1991,6 +1992,7 @@ static char help_text[]=
 // ass_bitmap.c
 #define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] Errore FT_Glyph_To_Bitmap %d \n"
 #define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Modalità pixel non supportata: %d\n"
+#define MSGTR_LIBASS_GlyphBBoxTooLarge "[ass] Glyph Bounding Box troppo ampio: %dx%dpx\n"
 
 // ass.c
 #define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Attenzione: non trovato alcuno stile chiamato '%s', uso '%s'\n"
