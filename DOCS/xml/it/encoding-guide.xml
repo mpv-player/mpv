@@ -1835,7 +1835,6 @@ aggiornata per usare i valori in frazione, e anche tu dovresti usare questi.
 <formalpara>
 <title>Come viene usato telecine.</title>
 <para>
-All video intended to be displayed on an NTSC
 Tutto il video pensato per essere riprodotto su televisione NTSC deve essere a
 60000/1001 campi al secondo. I film per la TV e gli spettacoli sono spesso
 registrati direttamente a 60000/1001 campi al secondo, ma la stragrande
