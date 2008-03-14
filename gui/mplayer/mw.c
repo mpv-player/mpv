@@ -8,13 +8,13 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "../config.h"
 #include "gmplayer.h"
 #include "app.h"
 #include "skin/font.h"
 #include "skin/skin.h"
 #include "wm/ws.h"
 
-#include "../config.h"
 #include "../help_mp.h"
 #include "../libvo/x11_common.h"
 #include "../libvo/fastmemcpy.h"

@@ -1,6 +1,5 @@
-
-#include "app.h"
 #include "config.h"
+#include "app.h"
 #include "help_mp.h"
 
 #include "mplayer/pixmaps/about.xpm"

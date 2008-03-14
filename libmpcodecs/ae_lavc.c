@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
+#include "config.h"
 #include "m_option.h"
 #include "mp_msg.h"
 #include "libmpdemux/aviheader.h"
@@ -12,7 +13,6 @@
 #include "libmpdemux/muxer.h"
 #include "ae_lavc.h"
 #include "help_mp.h"
-#include "config.h"
 #include "libaf/af_format.h"
 #include "libaf/reorder_ch.h"
 #include "libavcodec/avcodec.h"

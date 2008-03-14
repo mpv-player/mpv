@@ -24,8 +24,8 @@
 #include <errno.h>
 #include <string.h>
 
-#include "vidixlib.h"
 #include "config.h"
+#include "vidixlib.h"
 #include "libavutil/common.h"
 #include "mpbswap.h"
 #include "config.h"

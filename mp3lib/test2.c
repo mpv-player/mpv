@@ -9,8 +9,8 @@
 #include <unistd.h>
 #include <sys/soundcard.h>
 
-#include "mp3lib/mp3.h"
 #include "config.h"
+#include "mp3lib/mp3.h"
 #include "cpudetect.h"
 
 static FILE* mp3file=NULL;

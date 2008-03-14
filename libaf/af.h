@@ -3,8 +3,8 @@
 
 #include <stdio.h>
 
-#include "af_mp.h"
 #include "config.h"
+#include "af_mp.h"
 #include "control.h"
 #include "af_format.h"
 

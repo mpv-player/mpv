@@ -37,9 +37,9 @@
 #include <errno.h>
 #include <string.h>
 
+#include "config.h"
 #include "vidixlib.h"
 #include "drivers.h"
-#include "config.h"
 #include "libavutil/common.h"
 #include "mpbswap.h"
 

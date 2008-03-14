@@ -9,9 +9,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#include "mp3lib/mp3.h"
 #include "config.h"
-
+#include "mp3lib/mp3.h"
 #include "cpudetect.h"
 extern CpuCaps gCpuCaps;
 

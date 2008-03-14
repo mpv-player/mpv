@@ -6,11 +6,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "config.h"
 #include "sb.h"
 #include "gtk_common.h"
 
 #include "app.h"
-#include "config.h"
 #include "help_mp.h"
 
 #include "../widgets.h"

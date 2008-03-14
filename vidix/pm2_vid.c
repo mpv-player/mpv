@@ -27,13 +27,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "vidix.h"
 #include "vidixlib.h"
 #include "fourcc.h"
 #include "dha.h"
 #include "pci_ids.h"
 #include "pci_names.h"
-#include "config.h"
 
 #include "glint_regs.h"
 

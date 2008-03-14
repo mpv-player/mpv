@@ -2,8 +2,8 @@
 #define MPLAYER_MPBSWAP_H
 
 #include <sys/types.h>
-#include "libavutil/bswap.h"
 #include "config.h"
+#include "libavutil/bswap.h"
 
 #ifndef HAVE_SWAB
 void swab(const void *from, void *to, ssize_t n);

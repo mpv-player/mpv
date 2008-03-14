@@ -19,10 +19,8 @@
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/videodev.h>
-#include "videodev_mjpeg.h"
-
 #include "config.h"
-
+#include "videodev_mjpeg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "mp_msg.h"

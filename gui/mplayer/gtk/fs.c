@@ -6,6 +6,7 @@
 #include <glob.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "../gmplayer.h"
 
 #include "mplayer/pixmaps/up.xpm"
@@ -14,7 +15,6 @@
 
 #include "app.h"
 #include "interface.h"
-#include "config.h"
 #include "help_mp.h"
 #include "stream/stream.h"
 

@@ -15,6 +15,7 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
+#include "../config.h"
 #include "widgets.h"
 #include "app.h"
 #include "wm/ws.h"
@@ -24,7 +25,6 @@
 #include "play.h"
 #include "gtk/fs.h"
 
-#include "../config.h"
 #include "../help_mp.h"
 #include "../mp_msg.h"
 
