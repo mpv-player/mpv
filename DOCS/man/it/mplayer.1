@@ -1,4 +1,4 @@
-.\" synced with r26014
+.\" synced with r26232
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -3349,8 +3349,6 @@ Funzionerà solitamente solo con "\-fstype \-fullscreen" o "\-fstype none".
 .TP
 .B \-zrbw (solo \-vo zr)
 Visualizza in bianco e nero.
-Per ottenere prestazioni ottimali, questa opzione può essere combinata
-con `\-lavdopts gray'.
 .
 .TP
 .B \-zrcrop <[larghezza]x[altezza]+[scostam x]+[scostam y]> (solo \-vo zr)
@@ -4486,7 +4484,7 @@ Opzioni multiple vanno separate con i due punti.
 .I ESEMPIO:
 .PD 0
 .RSs
-\-lavdopts gray:skiploopfilter=all:skipframe=nonref
+\-lavdopts skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -4590,8 +4588,6 @@ e potrebbero potenzialmente causare problemi, come una dequantizzazione
 più semplice, una compensazione di movimento più semplice, presumere l'utilizzo
 della matrice di quantizzazione di default, presumere YUV 4:2:0 ed evitare
 qualche controllo per riconoscere flussi danneggiati.
-.IPs "gray\ "
-decodifica a scala di grigi (un poco più veloce che a colori).
 .IPs "idct=<0\-99> (vedi anche \-lavcopts)"
 Per la miglior qualità di decodifica utilizza lo stesso algoritmo di IDCT sia per la
 decodifica che per la codifica.
@@ -4917,6 +4913,27 @@ Attiva una catena di filtri audio.
 .PP
 .I NOTA:
 Per avere una lista completa dei filtri audio disponibili vedi \-af help.
+.sp 1
+I filtri audio sono gestiti in liste.
+Ci sono alcuni comandi per gestire la lista dei filtri.
+.
+.TP
+.B \-af\-add <filtro1[,filtro2,...]>
+Aggiunge i filtri passati come argomenti alla fine della lista dei filtri.
+.
+.TP
+.B \-af\-pre <filtro1[,filtro2,...]>
+Inserisce i filtri passati come argomenti all'inizio della lista dei filtri.
+.
+.TP
+.B \-af\-del <indice1[,indice2,...]>
+Cancella i filtri all'indice indicato.
+I numeri di indice partono da 0, i numeri negativi puntano alla
+fine della lista (\-1 è l'ultimo).
+.
+.TP
+.B \-af\-clr
+Pulisce (inizializza) completamente la lista dei filtri.
 .PP
 I filtri disponibili sono:
 .
@@ -5541,7 +5558,7 @@ Inserisce i filtri passati come argomenti all'inizio della lista dei filtri.
 .TP
 .B \-vf\-del <indice1[,indice2,...]>
 Cancella i filtri all'indice indicato.
-I numeri di indice partono da 0, i numeri negativi indirizzano la
+I numeri di indice partono da 0, i numeri negativi puntano alla
 fine della lista (\-1 è l'ultimo).
 .
 .TP
@@ -6147,10 +6164,19 @@ p(x,y): restituisce il valore del pixel alla posizione x/y del piano corrente.
 Genera varie figure di test.
 .
 .TP
-.B rgbtest
+.B rgbtest[=larghezza:altezza]
 Genera una figura di test RGB, utile per determinare problemi del tipo
 RGB rispetto a BGR.
 Dovresti vedere delle strisce rosse, verdi e blu dall'alto al basso.
+.RSs
+.IPs <larghezza>
+Larghezza della figura generata (default: 0).
+0 corrisponde alla larghezza dell'immagine originaria.
+.br
+.IPs <altezza>
+Altezza della figura generata (default: 0).
+0 corrisponde all'altezza dell'immagine originaria.
+.RE
 .
 .TP
 .B lavc[=qualità:fps]
@@ -8065,7 +8091,8 @@ codifica ogni macroblocco in tutte le modalità e seleziona la migliore.
 Questa opzione rallenta la codifica ma si ottiene una qualità migliore
 e minori dimensioni del file finale.
 Quando mbd è impostato a 1 o 2, il valore di mbcmp viene ignorato quando si
-confrontano i macroblocchi.
+confrontano i macroblocchi (in altri posti viene comunque usato il valore di
+mbcmp, in particolare negli algoritmi di ricerca del movimento).
 Se un'impostazione di comparazione (precmp, subcmp, cmp, o mbcmp) non è zero,
 tuttavia, verrà usata una ricerca di movimento half-pel, più lenta ma migliore,
 senza considerare l'impostazione di mbd.
@@ -8620,10 +8647,6 @@ buona scelta
 modalità 'slice structured' per H.263+
 .
 .TP
-.B "gray\ \ \ "
-codifica solo a toni di grigio (più veloce)
-.
-.TP
 .B vfdct=<0\-10>
 algoritmo DCT
 .PD 0
@@ -8932,6 +8955,8 @@ Sembra utile solo per codifiche ad alto bitrate.
 .B mbcmp=<0\-2000>
 Seleziona la funzione di comparazione per la decisione del macroblocco,
 utilizzato solo se mbd=0.
+Viene anche usata per alcune funzioni di ricerca del movimento, nel qual caso
+ha effetto indipendentemente dall'impostazione di mbd.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
