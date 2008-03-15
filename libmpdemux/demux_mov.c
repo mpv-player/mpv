@@ -25,7 +25,7 @@
 
 #include "config.h"
 
-#ifdef MACOSX
+#ifdef HAVE_QUICKTIME
 #include <QuickTime/QuickTime.h>
 #include <QuickTime/ImageCompression.h>
 #include <QuickTime/ImageCodec.h>
