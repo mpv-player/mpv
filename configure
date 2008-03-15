@@ -3557,7 +3557,6 @@ if test "$_macosx" = auto ; then
         _macosx=yes
     else
 	_macosx=no
-	_def_macosx='#undef MACOSX'
 	_noaomodules="macosx $_noaomodules"
 	_novomodules="quartz $_novomodules"
     fi
@@ -3576,7 +3575,6 @@ EOF
   if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then 
     _ld_extra="$_ld_extra -framework Carbon -framework QuickTime -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
     _coreaudio=yes
-    _def_macosx='#define MACOSX 1'
     _def_coreaudio='#define HAVE_COREAUDIO 1'
     _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
@@ -3587,7 +3585,6 @@ EOF
   else
     _macosx=no
     _coreaudio=no
-    _def_macosx='#undef MACOSX'
     _def_coreaudio='#undef HAVE_COREAUDIO'
     _noaomodules="macosx $_noaomodules"
     _def_quartz='#undef HAVE_QUARTZ'
@@ -7797,7 +7794,6 @@ FAAD_INTERNAL = $_faad_internal
 FAAD_FIXED = $_faad_fixed
 LIBSMBCLIENT = $_smbsupport
 XMMS_PLUGINS = $_xmms
-MACOSX = $_macosx
 MACOSX_FINDER_SUPPORT = $_macosx_finder_support
 MACOSX_BUNDLE = $_macosx_bundle
 COREAUDIO = $_coreaudio
@@ -8174,7 +8170,6 @@ $_def_win32dll
 #define WIN32_PATH "$_win32codecsdir"
 
 /* Mac OS X specific features */
-$_def_macosx
 $_def_macosx_finder_support
 $_def_macosx_bundle
 $_def_coreaudio
