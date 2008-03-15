@@ -3584,7 +3584,7 @@ EOF
     _vomodules="quartz $_vomodules"
   else
     _macosx=no
-    _coreaudio=yes
+    _coreaudio=no
     _def_macosx='#undef MACOSX'
     _def_coreaudio='#undef HAVE_COREAUDIO'
     _noaomodules="macosx $_noaomodules"
