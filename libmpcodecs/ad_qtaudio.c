@@ -5,7 +5,7 @@
 
 #include "config.h"
 
-#ifdef MACOSX
+#ifdef HAVE_QUICKTIME
 #include <QuickTime/QuickTimeComponents.h>
 #endif
 
@@ -30,7 +30,7 @@ static ad_info_t info =  {
 
 LIBAD_EXTERN(qtaudio)
 
-#if !defined(MACOSX)
+#ifndef HAVE_QUICKTIME
 typedef struct OpaqueSoundConverter*    SoundConverter;
 typedef unsigned long                   OSType;
 typedef unsigned long                   UnsignedFixed;
@@ -164,7 +164,7 @@ static int loader_init()
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"loader_init DONE???\n");
 	return 0;
 }
-#endif /* #if !defined(MACOSX) */
+#endif /* #ifndef HAVE_QUICKTIME */
 
 static SoundConverter			   myConverter = NULL;
 static SoundComponentData		   InputFormatInfo,OutputFormatInfo;
@@ -180,7 +180,7 @@ static int preinit(sh_audio_t *sh){
     unsigned long WantedBufferSize=0; //the size you want your buffers to be
 
 
-#ifdef MACOSX
+#ifdef HAVE_QUICKTIME
     EnterMovies();
 #else
     if(loader_init()) return 0; // failed to load DLL
@@ -280,7 +280,7 @@ static void uninit(sh_audio_t *sh){
 //    FreeLibrary( qtime_qts );
 //    qtime_qts = NULL;
 //    printf("qt dll loader uninit done\n");
-#ifdef MACOSX
+#ifdef HAVE_QUICKTIME
     ExitMovies();
 #endif
 }

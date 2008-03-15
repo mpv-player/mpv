@@ -3583,6 +3583,7 @@ EOF
     _def_quartz='#define HAVE_QUARTZ 1'
     _vosrc="$_vosrc vo_quartz.c"
     _vomodules="quartz $_vomodules"
+    _def_quicktime='#define HAVE_QUICKTIME 1'
   else
     _macosx=no
     _coreaudio=no
@@ -3591,6 +3592,7 @@ EOF
     _noaomodules="macosx $_noaomodules"
     _def_quartz='#undef HAVE_QUARTZ'
     _novomodules="quartz $_novomodules"
+    _def_quicktime='#undef HAVE_QUICKTIME'
   fi
 cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
@@ -8178,6 +8180,7 @@ $_def_macosx_bundle
 $_def_coreaudio
 $_def_corevideo
 $_def_quartz
+$_def_quicktime
 
 /* Build our Win32-loader */
 $_def_win32_loader

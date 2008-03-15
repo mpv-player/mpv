@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#ifdef MACOSX
+#ifdef HAVE_QUICKTIME
 #include <QuickTime/ImageCodec.h>
 #define dump_ImageDescription(x)
 #endif
@@ -30,7 +30,7 @@ LIBVD_EXTERN(qtvideo)
 
 #include "bswap.h"
 
-#ifndef MACOSX
+#ifndef HAVE_QUICKTIME
 #include "loader/qtx/qtxsdk/components.h"
 
 HMODULE   WINAPI LoadLibraryA(LPCSTR);
@@ -53,7 +53,7 @@ static ImageDescriptionHandle framedescHandle;
 static HINSTANCE qtime_qts; // handle to the preloaded quicktime.qts
 static HMODULE handler;
 
-#if !defined(MACOSX)
+#ifndef HAVE_QUICKTIME
 static    Component (*FindNextComponent)(Component prev,ComponentDescription* desc);
 static    OSErr (*GetComponentInfo)(Component prev,ComponentDescription* desc,Handle h1,Handle h2,Handle h3);
 static    long (*CountComponents)(ComponentDescription* desc);
@@ -88,7 +88,7 @@ static    OSErr           (*QTNewGWorldFromPtr)(GWorldPtr *gw,
                                void *baseAddr,
                                long rowBytes); 
 static    OSErr           (*NewHandleClear)(Size byteCount);                          
-#endif /* #if !defined(MACOSX) */
+#endif /* #ifndef HAVE_QUICKTIME */
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -107,7 +107,7 @@ static int init(sh_video_t *sh){
     ImageSubCodecDecompressCapabilities icap; // for ImageCodecInitialize()
 
     codec_initialized = 0;
-#ifdef MACOSX
+#ifdef HAVE_QUICKTIME
     EnterMovies();
 #else
 
@@ -154,7 +154,7 @@ static int init(sh_video_t *sh){
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"InitializeQTML returned %li\n",result);
 //    result=EnterMovies();
 //    printf("EnterMovies->%d\n",result);
-#endif /* MACOSX */
+#endif /* HAVE_QUICKTIME */
 
 #if 0
     memset(&desc,0,sizeof(desc));
@@ -293,7 +293,7 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-#ifdef MACOSX
+#ifdef HAVE_QUICKTIME
     ExitMovies();
 #endif
 }
