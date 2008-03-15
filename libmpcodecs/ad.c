@@ -70,7 +70,7 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_acm,
   &mpcodecs_ad_twin,
 #endif
-#if defined(USE_QTX_CODECS) || defined(MACOSX)
+#ifdef USE_QTX_CODECS
   &mpcodecs_ad_qtaudio,
 #endif
 #ifdef HAVE_FAAD

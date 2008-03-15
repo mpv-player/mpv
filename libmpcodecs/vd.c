@@ -98,7 +98,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef HAVE_LIBDV095
 	&mpcodecs_vd_libdv,
 #endif
-#if defined(USE_QTX_CODECS) || defined(MACOSX)
+#ifdef USE_QTX_CODECS
 	&mpcodecs_vd_qtvideo,
 #endif
     /* Please do not add any new decoders here. If you want to implement a new
