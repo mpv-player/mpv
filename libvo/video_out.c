@@ -127,7 +127,7 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef HAVE_COREVIDEO
 	&video_out_macosx,
 #endif
-#ifdef MACOSX
+#ifdef HAVE_QUARTZ
 	&video_out_quartz,
 #endif
 #ifdef HAVE_XMGA

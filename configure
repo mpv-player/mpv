@@ -3580,6 +3580,7 @@ EOF
     _def_coreaudio='#define HAVE_COREAUDIO 1'
     _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
+    _def_quartz='#define HAVE_QUARTZ 1'
     _vosrc="$_vosrc vo_quartz.c"
     _vomodules="quartz $_vomodules"
   else
@@ -3588,6 +3589,7 @@ EOF
     _def_macosx='#undef MACOSX'
     _def_coreaudio='#undef HAVE_COREAUDIO'
     _noaomodules="macosx $_noaomodules"
+    _def_quartz='#undef HAVE_QUARTZ'
     _novomodules="quartz $_novomodules"
   fi
 cat > $TMPC <<EOF
@@ -7798,6 +7800,7 @@ MACOSX_FINDER_SUPPORT = $_macosx_finder_support
 MACOSX_BUNDLE = $_macosx_bundle
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
+QUARTZ = $_quartz
 TOOLAME=$_toolame
 TWOLAME=$_twolame
 FAAC=$_faac
@@ -8174,6 +8177,7 @@ $_def_macosx_finder_support
 $_def_macosx_bundle
 $_def_coreaudio
 $_def_corevideo
+$_def_quartz
 
 /* Build our Win32-loader */
 $_def_win32_loader
