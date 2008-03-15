@@ -3105,9 +3105,9 @@ if test "$_pthreads" = yes ; then
   _def_pthreads='#define HAVE_PTHREADS 1'
   _def_threads='#define HAVE_THREADS 1'
 else
-  _res_comment="v4l, v4l2, ao_nas, ao_macosx, win32 loader disabled"
+  _res_comment="v4l, v4l2, ao_nas, win32 loader disabled"
   _def_pthreads='#undef HAVE_PTHREADS'
-  _nas=no ; _tv_v4l1=no ; _tv_v4l2=no ; _macosx=no
+  _nas=no ; _tv_v4l1=no ; _tv_v4l2=no
   mingw32 || _win32dll=no
 fi
 echores "$_pthreads"
