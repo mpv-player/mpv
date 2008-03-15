@@ -124,7 +124,7 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef HAVE_DIRECTX
         &video_out_directx,
 #endif
-#ifdef MACOSX_COREVIDEO
+#ifdef HAVE_COREVIDEO
 	&video_out_macosx,
 #endif
 #ifdef MACOSX
