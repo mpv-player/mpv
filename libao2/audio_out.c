@@ -45,7 +45,7 @@ const ao_functions_t* const audio_out_drivers[] =
 #ifdef HAVE_WIN32WAVEOUT
         &audio_out_win32,
 #endif
-#ifdef MACOSX
+#ifdef HAVE_COREAUDIO
         &audio_out_macosx,
 #endif
 #ifdef USE_OSS_AUDIO

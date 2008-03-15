@@ -3575,14 +3575,18 @@ int main(void) {
 EOF
   if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then 
     _ld_extra="$_ld_extra -framework Carbon -framework QuickTime -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
+    _coreaudio=yes
     _def_macosx='#define MACOSX 1'
+    _def_coreaudio='#define HAVE_COREAUDIO 1'
     _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
     _vosrc="$_vosrc vo_quartz.c"
     _vomodules="quartz $_vomodules"
   else
     _macosx=no
+    _coreaudio=yes
     _def_macosx='#undef MACOSX'
+    _def_coreaudio='#undef HAVE_COREAUDIO'
     _noaomodules="macosx $_noaomodules"
     _novomodules="quartz $_novomodules"
   fi
@@ -7792,6 +7796,7 @@ XMMS_PLUGINS = $_xmms
 MACOSX = $_macosx
 MACOSX_FINDER_SUPPORT = $_macosx_finder_support
 MACOSX_BUNDLE = $_macosx_bundle
+COREAUDIO = $_coreaudio
 MACOSX_COREVIDEO = $_macosx_corevideo
 TOOLAME=$_toolame
 TWOLAME=$_twolame
@@ -8167,6 +8172,7 @@ $_def_win32dll
 $_def_macosx
 $_def_macosx_finder_support
 $_def_macosx_bundle
+$_def_coreaudio
 $_def_macosx_corevideo
 
 /* Build our Win32-loader */
