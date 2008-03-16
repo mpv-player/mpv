@@ -1,4 +1,4 @@
-.\" Synced with r26057
+.\" Synced with r26232
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 03. 01." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 03. 16." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -288,7 +288,7 @@ Ugrás az elõzõ/következõ fejezet elejére.
 .IPs "D (csak \-vo xvmc, \-vf yadif, \-vf kerndeint mellett)"
 Deinterlacer aktiválása/deaktiválása.
 .IPs "A"
-DVD szög váltás.
+Lépegetés az elérhetõ DVD szögek között.
 .RE
 .PD 1
 .PP
@@ -840,7 +840,7 @@ Jelenleg a következõ meghajtók támogatják a fixed-vo-t: gl, gl2, mga, svga, x11,
 xmga, xv, xvidix és dfbmga.
 .
 .TP
-.B \-framedrop (lásd még \-hardframedrop, csak -no-correct-pts mellett mûködik)
+.B \-framedrop (lásd még \-hardframedrop, csak \-no\-correct\-pts mellett mûködik)
 Néhány képkocka megjelenítésének hanyagolása, hogy lassú rendszereken is
 megfelelõ legyen az A/V szinkron. A videó szûrõk nem vonatkoznak ezekre
 a képkockákra.
@@ -857,7 +857,7 @@ Nem mûködik konfig-fájl opcióként.
 Rövid segítõ szöveg kiírása.
 .
 .TP
-.B \-hardframedrop (csak -no-correct-pts mellett mûködik)
+.B \-hardframedrop (csak \-no\-correct\-pts mellett mûködik)
 Intenzívebb képkockaeldobás (a dekódolási minõség rovására).
 Torz képekhez vezet!
 Figyelj rá, hogy különösen a libmpeg2 dekódolóval ez összeomolhat,
@@ -3226,7 +3226,6 @@ mûködik.
 .TP
 .B \-zrbw (csak \-vo zr)
 Fekete fehér lejátszás.
-Az optimális teljesítmény eléréséhez kombinálható a '\-lavdopts gray' kapcsolóval.
 .
 .TP
 .B \-zrcrop <[szélesség]x[magasság]+[x offszet]+[y offszet]> (csak \-vo zr)
@@ -4316,7 +4315,7 @@ Több opciót kettõsponttal kell elválasztani.
 .I PÉLDA:
 .PD 0
 .RSs
-\-lavdopts gray:skiploopfilter=all:skipframe=nonref
+\-lavdopts skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -4419,8 +4418,6 @@ hibát okozhat, mint például az egyszerûbb dekvantizáció, egyszerûbb mozgás
 kompenzáció, az alapértelmezett kvantálási mátrix feltételezett használata,
 YUV 4:2:0 feltételezése és még néhány ellenõrzés kihagyása a hibás bitfolyamok
 megtalálására.
-.IPs "gray\ "
-Csak fekete-fehér dekódolás (egy kicsit gyorsabb, mint a színes)
 .IPs "idct=<0\-99> (lásd \-lavcopts)"
 A legjobb dekódolási minõségért használd ugyan azt az IDCT algoritmust a
 dekódoláshoz és a kódoláshoz. Bár az alaposság ezzel kicsit romolhat.
@@ -7833,7 +7830,8 @@ Makroblokk döntési algoritmus (nagyon jó minõségû mód), minden makró
 blokkot elkódol minden módban és kiválasztja a legjobbat.
 Ez lassú, de jobb minõséget és fájl méretet ad.
 Ha az mbd 1-re vagy 2-re van állítva, az mbcmp értéke figyelmen kívül
-marad a makroblokkok összehasonlításakor.
+marad a makroblokkok összehasonlításakor (ennek ellenére az mbcmp értéke más
+helyeken még felhasználásra kerül, különösen a mozgáskeresõ algoritmusokban).
 Ha bármilyen összehasonlító beállítás (precmp, subcmp, cmp, vagy mbcmp)
 értéke nem nulla, egy lassabb, de jobb half-pel mozgás keresés lesz
 használva, függetlenül az mbd beállított értékétõl.
@@ -8358,10 +8356,6 @@ jó választás
 darabolt, struktúrált mód H.263+-hoz
 .
 .TP
-.B "gray\ \ \ "
-csak szürkeárnyalatos kódolás (gyorsabb)
-.
-.TP
 .B vfdct=<0\-10>
 DCT algoritmus
 .PD 0
@@ -8667,6 +8661,8 @@ Ez csak a nagy bitrátájú kódolásoknál tûnik hasznosnak.
 .B mbcmp=<0\-2000>
 Beállítja az összehasonlító függvényt a makroblokk döntéshez, csak mdb=0
 esetén van hatása.
+Ezt használja néhány mozgás keresõ függvény is, ezen esetekben az mdb
+beállításától függetlenül fejti ki hatását.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
