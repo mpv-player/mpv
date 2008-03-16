@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r25947
+// Synced with help_mp-en.h: r26067
 
 // ========================= MPlayer help ===========================
 
@@ -1331,6 +1331,7 @@ static char help_text[]=
 // ass_bitmap.c
 #define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] Сбой FT_Glyph_To_Bitmap %d \n"
 #define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Неподдерживаемый режим пиксела: %d\n"
+#define MSGTR_LIBASS_GlyphBBoxTooLarge "[ass] Рамка, ограничивающая символ, слишком велика: %dx%dpx\n"
 
 // ass.c
 #define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Внимание: стиль '%s' не найден, использую '%s'\n"
