@@ -405,7 +405,7 @@ mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcode
 可生成为只有有限多媒体支持的系统进行播放的MPEG-1文件，例如默认安装的Windows：
 <screen>
 mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 \
-    -o <replaceable>output.mpg</replaceable> -oac lavc -lavcoptc acodec=mp2:abitrate=224 -ovc lavc \
+    -o <replaceable>output.mpg</replaceable> -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
     -lavcopts vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 同上，但使用了<systemitem class="library">libavformat</systemitem> MPEG混合器：

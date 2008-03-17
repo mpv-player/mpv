@@ -444,7 +444,7 @@ Creating an MPEG-1 file suitable to be played on systems with minimal
 multimedia support, such as default Windows installs:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 \
-    -o <replaceable>output.mpg</replaceable> -oac lavc -lavcoptc acodec=mp2:abitrate=224 -ovc lavc \
+    -o <replaceable>output.mpg</replaceable> -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
     -lavcopts vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 Same, but using <systemitem class="library">libavformat</systemitem> MPEG muxer:

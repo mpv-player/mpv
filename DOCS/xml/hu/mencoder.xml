@@ -445,7 +445,7 @@ támogatással rendelkező rendszereken, például alapértelmezett Windows
 telepítéseken történő lejátszásra is:
 <screen>
 mencoder <replaceable>bemenet.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 \
-	-o <replaceable>kimenet.mpg</replaceable> -oac lavc -lavcoptc acodec=mp2:abitrate=224 -ovc lavc \
+	-o <replaceable>kimenet.mpg</replaceable> -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
 	-lavcopts vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 Ugyan ez a <systemitem class="library">libavformat</systemitem> MPEG muxer-ének használatával:

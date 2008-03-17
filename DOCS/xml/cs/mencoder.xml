@@ -445,7 +445,7 @@ Vytvoření MPEG-1 souboru vhodného pro přehrávání na systémech s minimál
 podporou multimédií, jako je výchozí instalace Windows:
 <screen>
 mencoder <replaceable>vstupní.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 \
-    -o <replaceable>výstupní.mpg</replaceable> -oac lavc -lavcoptc acodec=mp2:abitrate=224 -ovc lavc \
+    -o <replaceable>výstupní.mpg</replaceable> -oac lavc -lavcopts acodec=mp2:abitrate=224 -ovc lavc \
     -lavcopts vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 To samé, ale použijeme <systemitem class="library">libavformat</systemitem> MPEG muxer:
