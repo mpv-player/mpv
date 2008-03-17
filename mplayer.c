@@ -1708,6 +1708,27 @@ double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 	audio_out->get_delay();
 }
 
+static int check_framedrop(double frame_time) {
+	// check for frame-drop:
+	current_module = "check_framedrop";
+	if (mpctx->sh_audio && !mpctx->d_audio->eof) {
+	    static int dropped_frames;
+	    float delay = playback_speed*mpctx->audio_out->get_delay();
+	    float d = delay-mpctx->delay;
+	    ++total_frame_cnt;
+	    // we should avoid dropping too many frames in sequence unless we
+	    // are too late. and we allow 100ms A-V delay here:
+	    if (d < -dropped_frames*frame_time-0.100 &&
+				mpctx->osd_function != OSD_PAUSE) {
+		++drop_frame_cnt;
+		++dropped_frames;
+		return frame_dropping;
+	    } else
+		dropped_frames = 0;
+	}
+	return 0;
+}
+
 static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 {
     unsigned char *start;
@@ -1716,6 +1737,7 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
     double pts;
 
     while (1) {
+	int drop_frame = check_framedrop(sh_video->frametime);
 	void *decoded_frame;
 	current_module = "decode video";
 	// XXX Time used in this call is not counted in any performance
@@ -1733,7 +1755,7 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	if (in_size > max_framesize)
 	    max_framesize = in_size;
 	current_module = "decode video";
-	decoded_frame = decode_video(sh_video, start, in_size, 0, pts);
+	decoded_frame = decode_video(sh_video, start, in_size, drop_frame, pts);
 	if (decoded_frame) {
 	    update_subtitles(sh_video, mpctx->d_sub, 0);
 	    update_teletext(sh_video, mpctx->demuxer, 0);
@@ -1741,7 +1763,8 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
 	    current_module = "filter video";
 	    if (filter_video(sh_video, decoded_frame, sh_video->pts))
 		break;
-	}
+	} else if (drop_frame)
+	    return -1;
 	if (hit_eof)
 	    return 0;
     }
@@ -2253,23 +2276,7 @@ static double update_video(int *blit_frame)
 	    mpctx->delay -= frame_time;
 	// video_read_frame can change fps (e.g. for ASF video)
 	vo_fps = sh_video->fps;
-	// check for frame-drop:
-	current_module = "check_framedrop";
-	if (mpctx->sh_audio && !mpctx->d_audio->eof) {
-	    static int dropped_frames;
-	    float delay = playback_speed*mpctx->audio_out->get_delay();
-	    float d = delay-mpctx->delay;
-	    // we should avoid dropping too many frames in sequence unless we
-	    // are too late. and we allow 100ms A-V delay here:
-	    if (d < -dropped_frames*frame_time-0.100 &&
-				mpctx->osd_function != OSD_PAUSE) {
-		drop_frame = frame_dropping;
-		++drop_frame_cnt;
-		++dropped_frames;
-	    } else
-		drop_frame = dropped_frames = 0;
-	    ++total_frame_cnt;
-	}
+	drop_frame = check_framedrop(frame_time);
 	update_subtitles(sh_video, mpctx->d_sub, 0);
 	update_teletext(sh_video, mpctx->demuxer, 0);
 	update_osd_msg();
@@ -2290,7 +2297,8 @@ static double update_video(int *blit_frame)
 						    sh_video->pts));
     }
     else {
-	if (!generate_video_frame(sh_video, mpctx->d_video))
+	int res = generate_video_frame(sh_video, mpctx->d_video);
+	if (!res)
 	    return -1;
 	((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
 					    VFCTRL_GET_PTS, &sh_video->pts);
@@ -2309,7 +2317,7 @@ static double update_video(int *blit_frame)
 	sh_video->timer += frame_time;
 	if(mpctx->sh_audio)
 	    mpctx->delay -= frame_time;
-	*blit_frame = 1;
+	*blit_frame = res > 0;
     }
     return frame_time;
 }
