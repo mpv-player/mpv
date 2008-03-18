@@ -1069,8 +1069,8 @@ static int sub_autodetect (stream_t* st, int *uses_time) {
 int sub_utf8=0;
 #else
 extern int sub_utf8;
-int sub_utf8_prev=0;
 #endif
+int sub_utf8_prev=0;
 
 extern float sub_delay;
 extern float sub_fps;
