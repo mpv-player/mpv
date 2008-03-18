@@ -2296,6 +2296,16 @@ if test "$_runtime_cpudetection" = yes ; then
 fi
 
 
+echocheck "extern symbol prefix"
+cat > $TMPC << EOF
+int ff_extern;
+EOF
+cc_check -c || die "Symbol mangling check failed."
+sym=$(nm -P -g $TMPEXE)
+extern_prefix=${sym%%ff_extern*}
+_def_extern_prefix="#define EXTERN_PREFIX \"$extern_prefix\""
+echores $extern_prefix
+
 
 echocheck "assembler support of -pipe option"
 cat > $TMPC << EOF
@@ -7956,6 +7966,9 @@ $_def_builtin_expect
 #else
 # define attribute_used
 #endif
+
+/* extern symbol prefix */
+$_def_extern_prefix
 
 /* compiler support for named assembler arguments */
 $_def_named_asm_args
