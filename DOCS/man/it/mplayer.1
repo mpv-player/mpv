@@ -1,4 +1,4 @@
-.\" synced with r26232
+.\" synced with r26260
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -873,7 +873,7 @@ Attualmente i seguenti driver funzionano con fixed-vo: gl, gl2, mga, svga, x11,
 xmga, xv, xvidix e dfbmga.
 .
 .TP
-.B \-framedrop (vedi anche \-hardframedrop)
+.B \-framedrop (vedi anche \-hardframedrop, sperimentale se non con \-no\-correct\-pts)
 Elimina la visualizzazione di alcuni fotogrammi per mantenere il sincronismo
 A/V con sistemi lenti.
 I filtri video non vengono applicati a questi fotogrammi.
@@ -891,7 +891,7 @@ Non funziona come opzione nel file di configurazione.
 Visualizza un breve elenco delle opzioni.
 .
 .TP
-.B \-hardframedrop (funziona solo con \-no\-correct\-pts)
+.B \-hardframedrop (sperimentale se non con \-no\-correct\-pts)
 Scarto ancora più intenso di fotogrammi (rovina la decodifica).
 Porta a distorsione delle immagini!
 Nota che nello specifico il decodificatore libmpeg2 può andare in crash,
