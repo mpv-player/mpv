@@ -258,7 +258,7 @@ static char help_text[]=
 #define MSGTR_MissingFilename "\nNome file mancante.\n\n"
 #define MSGTR_CannotOpenFile_Device "Impossibile aprire il file/dispositivo.\n"
 #define MSGTR_CannotOpenDemuxer "Impossibile aprire il demuxer.\n"
-#define MSGTR_NoAudioEncoderSelected "\nNessun encoder audio (-oac) scelto! Scegline uno (vedi -oac help) o -nosound.\n"
+#define MSGTR_NoAudioEncoderSelected "\nNessun encoder audio (-oac) scelto! Selezionane uno (vedi -oac help) o -nosound.\n"
 #define MSGTR_NoVideoEncoderSelected "\nNessun encoder video (-ovc) scelto! Selezionane uno (vedi -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Impossibile aprire il file di output '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Errore nell'apertura dell'encoder.\n"
