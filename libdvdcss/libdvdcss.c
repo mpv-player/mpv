@@ -371,10 +371,8 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
 
         if( i_ret < 0 )
         {
-            _dvdcss_close( dvdcss );
-            free( dvdcss->psz_device );
-            free( dvdcss );
-            return NULL;
+            print_debug( dvdcss,
+                         "could not get disc key" );
         }
     }
 
