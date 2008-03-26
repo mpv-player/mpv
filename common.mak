@@ -2,16 +2,14 @@
 # common bits used by all libraries
 #
 
-LIBSRC = $(SRC_PATH_BARE)/lib$(NAME)
+SRC_DIR = $(SRC_PATH_BARE)/lib$(NAME)
 
 LIBVERSION = $(lib$(NAME)_VERSION)
 LIBMAJOR   = $(lib$(NAME)_VERSION_MAJOR)
 
-vpath %.c $(LIBSRC)
-vpath %.h $(LIBSRC)
-vpath %.S $(LIBSRC)
-
-SRC_DIR = "$(LIBSRC)"
+vpath %.c $(SRC_DIR)
+vpath %.h $(SRC_DIR)
+vpath %.S $(SRC_DIR)
 
 ALLFFLIBS = avcodec avdevice avfilter avformat avutil postproc swscale
 
@@ -58,18 +56,19 @@ $(SLIBNAME_WITH_MAJOR): $(OBJS)
 %.ho: %.h
 	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -Wno-unused -c -o $@ -x c $<
 
-ALLHEADERS = $(subst $(LIBSRC)/,,$(wildcard $(LIBSRC)/*.h))
+ALLHEADERS = $(subst $(SRC_DIR)/,,$(wildcard $(SRC_DIR)/*.h))
 checkheaders: $(filter-out %_template.ho,$(ALLHEADERS:.h=.ho))
 
-# gcc stupidly only outputs the basename of targets with -MM
-depend dep: $(SRCS)
-	$(CC) -MM $(CFLAGS) $^ | sed 's,[0-9a-z._-]*: \([a-z0-9]*/\).*,\1&,' 1>.depend
+depend dep: .depend
+
+.depend: $(SRCS)
+	$(DEPEND_CMD) > .depend
 
 clean::
 	rm -f *.o *~ *.a *.lib *.so *.so.* *.dylib *.dll \
 	      *.def *.dll.a *.exp *.ho *.map $(TESTS)
 
-distclean: clean
+distclean:: clean
 	rm -f .depend
 
 INSTALL_TARGETS-$(BUILD_SHARED) += install-lib-shared
@@ -96,15 +95,15 @@ install-lib-static: $(LIBNAME)
 
 INCINSTDIR = $(INCDIR)/lib$(NAME)
 
-install-headers:
+install-headers::
 	install -d "$(INCINSTDIR)"
 	install -d "$(LIBDIR)/pkgconfig"
-	install -m 644 $(addprefix $(SRC_DIR)/,$(HEADERS)) "$(INCINSTDIR)"
+	install -m 644 $(addprefix "$(SRC_DIR)"/,$(HEADERS)) "$(INCINSTDIR)"
 	install -m 644 $(BUILD_ROOT)/lib$(NAME).pc "$(LIBDIR)/pkgconfig"
 
 uninstall: uninstall-libs uninstall-headers
 
-uninstall-libs:
+uninstall-libs::
 	-rm -f "$(SHLIBDIR)/$(SLIBNAME_WITH_MAJOR)" \
 	       "$(SHLIBDIR)/$(SLIBNAME)"            \
 	       "$(SHLIBDIR)/$(SLIBNAME_WITH_VERSION)"
