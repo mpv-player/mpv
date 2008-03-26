@@ -3902,6 +3902,7 @@ echocheck "X11 headers presence"
       break
     fi
   done
+  if test $_cross_compile = no; then
   for I in /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/openwin/include ; do
     if test -f "$I/X11/Xlib.h" ; then
       _inc_extra="$_inc_extra -I$I"
@@ -3910,6 +3911,7 @@ echocheck "X11 headers presence"
       break
     fi
   done
+  fi
 echores "$_x11_headers"
 
 
