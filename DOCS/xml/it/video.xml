@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25017 -->
+<!-- synced with r26073 -->
 <chapter id="video">
 <title>Dispositivi di uscita video</title>
 
@@ -1947,8 +1947,8 @@ Nei tuoi campi audio e video puoi usare una sintassi espansa:
 <option>...:pid[+pid]:...</option> (fino ad un massimo di 6 pid ciascuno);
 in questo caso <application>MPlayer</application> includerà nel flusso tutti
 i pid indicati, oltre al pid 0 (che contiene il PAT).
-Si consiglia di includere in ogni riga il pid PMT per il canale corrispondente
-(se conosciuto).
+Si consiglia di includere in ogni riga i pid PMT e PCR per il canale
+corrispondente (se conosciuti).
 Puoi anche specificare 8192, che seleziona tutti i pid su quella frequenza e
 puoi anche passare con TAB attraverso i programmi.
 Potrebbe aver bisogno di più banda, anche se le schede economiche passano
@@ -1959,8 +1959,9 @@ Altri utilizzi possibili sono: pid televideo, seconda traccia audio, etc...
 <para>
 Se <application>MPlayer</application> si lamenta frequentemente di
 <screen>Troppi pacchetti video/audio nel buffer</screen> oppure noti una
-desincronizzazione crescente tra l'audio e il video, prova ad usare il demuxer
-MPEG-TS di libavformat aggiungendo 
+desincronizzazione crescente tra l'audio e il video, verifica la presenza del
+pid PCR nel tuo flusso (serve per adeguarsi alla modalità di buffering del
+trasmettitore) e/o prova ad usare il demuxer MPEG-TS di libavformat aggiungendo 
 <option>-demuxer lavf -lavfdopts probesize=128</option> alla tua riga comando.
 </para>
 
