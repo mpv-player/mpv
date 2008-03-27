@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 34% synced with r22753 -->
+<!-- 38% synced with r22753 (row 2069) -->
 <chapter id="encoding-guide">
 <title>La codifica con <application>MEncoder</application></title>
 
@@ -1897,168 +1897,169 @@ campo dopo l'altro.
 <!-- ********** -->
 
 <sect2 id="menc-feat-telecine-ident">
-<title>How to tell what type of video you have</title>
+<title>Come scoprire il tipo di video che possiedi</title>
 
 <sect3 id="menc-feat-telecine-ident-progressive">
-<title>Progressive</title>
+<title>Progressiva</title>
 
 <para>
-Progressive video was originally filmed at 24000/1001 fps, and stored
-on the DVD without alteration.
+Il video progressivo è stato originariamente filmato a 24000/1001 fps, e
+memorizzato sul DVD senza modifica alcuna.
 </para>
 
 <para>
-When you play a progressive DVD in <application>MPlayer</application>,
-<application>MPlayer</application> will print the following line as
-soon as the movie begins to play:
+Quando riproduci un DVD progressivo con <application>MPlayer</application>,
+<application>MPlayer</application> emette la riga seguente appena il video
+inizia la riproduzione:
 <screen>
 demux_mpg: 24000/1001 fps progressive NTSC content detected, switching framerate.
 </screen>
-From this point forward, demux_mpg should never say it finds
-"30000/1001 fps NTSC content."
+Da qui in poi, demux_mpg non dovrebbe mai comunicare di aver trovato
+"30000/1001 fps NTSC content" (contenuto NTSC a 30000/1001 fps).
 </para>
 
 <para>
-When you watch progressive video, you should never see any
-interlacing. Beware, however, because sometimes there is a tiny bit
-of telecine mixed in where you would not expect. I have encountered TV
-show DVDs that have one second of telecine at every scene change, or
-at seemingly random places. I once watched a DVD that had a
-progressive first half, and the second half was telecined. If you
-want to be <emphasis>really</emphasis> thorough, you can scan the
-entire movie:
+Quando guardi video progressivo, non dovresti mai vedere alcuna interlacciatura.
+Fai tuttavia attenzione, poiché alcune volte c'è una piccola parte in telecine
+infilata dove non te la aspetteresti. Ho trovato alcuni DVD di spettacoli
+televisivi che hanno un secondo di telecine ad ogni cambio di scena, o anche in
+momenti casuali. Una volta ho guardato un DVD che aveva una prima parte
+progressiva e la seconda in telecine. Se vuoi esserne
+<emphasis>davvero</emphasis> certo, devi controllare tutto il video:
 <screen>mplayer dvd://1 -nosound -vo null -benchmark</screen>
 Using <option>-benchmark</option> makes
-<application>MPlayer</application> play the movie as quickly as it
-possibly can; still, depending on your hardware, it can take a
-while. Every time demux_mpg reports a framerate change, the line
-immediately above will show you the time at which the change
-occurred.
+L'utilizzo di <option>-benchmark</option> fa sì che
+<application>MPlayer</application> riproduca il filmato il più velocemente
+possibile; tuttavia, in dipendenza dal tuo hardware, può metterci un po'.
+Ogni volta che demux_mpg segnala un cambio nella frequenza fotogrammi
+(framerate), la linea immediatamente sopra ti dirà il tempo ove è cambiata.
 </para>
 
 <para>
-Sometimes progressive video on DVDs is referred to as
-"soft-telecine" because it is intended to
-be telecined by the DVD player.
+Alcune volte il video progressivo sui DVD viene indicato come "soft-telecine"
+perché è fatto in modo che il lettore DVD esegua il telecine.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-ident-telecined">
-<title>Telecined</title>
+<title>Telecine</title>
 
 <para>
-Telecined video was originally filmed at 24000/1001, but was telecined
-<emphasis>before</emphasis> it was written to the DVD.
+Il video in telecine è stato filmato in origine a 24000/1001, ma ha subito il
+telecine <emphasis>prima</emphasis> di essere scritto sul DVD.
 </para>
 
 <para>
-<application>MPlayer</application> does not (ever) report any
-framerate changes when it plays telecined video.
+Quando <application>MPlayer</application> riproduce video in telecine non
+segnala (mai) alcun cambio di framerate.
 </para>
 
 <para>
-Watching a telecined video, you will see interlacing artifacts that
-seem to "blink": they repeatedly appear and disappear.
-You can look closely at this by
+Guardado un video in telecine, noterai artefatti che sembrano "lampeggiare":
+appaiono e scompaiono ripetutamente.
+Puoi notarlo meglio facendo quello che segue
 <orderedlist>
 <listitem><screen>mplayer dvd://1</screen></listitem>
 <listitem><para>
-  Seek to a part with motion.
+  Ricerca una parte con movimento.
 </para></listitem>
 <listitem><para>
-  Use the <keycap>.</keycap> key to step forward one frame at a time.
+  Usa il tasto <keycap>.</keycap> per avanzare di un fotogramma per volta.
 </para></listitem>
 <listitem><para>
-  Look at the pattern of interlaced-looking and progressive-looking
-  frames. If the pattern you see is PPPII,PPPII,PPPII,... then the
-  video is telecined. If you see some other pattern, then the video
-  may have been telecined using some non-standard method;
-  <application>MEncoder</application> cannot losslessly convert
-  non-standard telecine to progressive. If you do not see any
-  pattern at all, then it is most likely interlaced.
+  Guarda il pattern dei fotogrammi che paiono interlacciati e di quelli
+  progressivi. Se il pattern che vedi è PPPII,PPPII,PPPII,... allora il video
+  è in telecine. Se vedi qualche altro pattern, allora il video può aver
+  subito il telecine attraverso qualche metodo strano;
+  <application>MEncoder</application> può effettuare la conversione senza
+  perdita da telecine non standard a progressivo. Se non vedi alcun pattern,
+  allora molto probabilmente è interlacciato.
 </para></listitem>
 </orderedlist>
 </para>
 
 <para>
-Sometimes telecined video on DVDs is referred to as
-"hard-telecine". Since hard-telecine is already 60000/1001 fields
-per second, the DVD player plays the video without any manipulation.
+Alcune volte il video in telecine sui DVD viene indicato come "hard-telecine".
+Dato che l'hard-telecine è già a 60000/1001 campi al secondi, il lettore DVD
+riproduce il video senza elaborazione alcuna.
 </para>
 
 <para>
-Another way to tell if your source is telecined or not is to play
-the source with the <option>-vf pullup</option> and <option>-v</option>
-command line options to see how <option>pullup</option> matches frames.
-If the source is telecined, you should see on the console a 3:2 pattern
-with <systemitem>0+.1.+2</systemitem> and <systemitem>0++1</systemitem>
-alternating.
-This technique has the advantage that you do not need to watch the
-source to identify it, which could be useful if you wish to automate
-the encoding procedure, or to carry out said procedure remotely via
-a slow connection.
+Un altro modo per scoprire se la tua sorgente è in telecine o no è riprodurla
+con le opzioni <option>-vf pullup</option> e <option>-v</option> da riga
+comando per vedere come <option>pullup</option> relaziona i fotogrammi.
+Se la sorgente è in telecine, dovresti vedere sulla console un pattern 3:2 con
+<systemitem>0+.1.+2</systemitem> e <systemitem>0++1</systemitem> che si
+alternano.
+Questa tecnica ha il vantaggio di evitare di guardare la sorgente per doverla
+identificare, il che può tornare utile se vuoi automatizzare la procedura di
+codifica ovvero se vuoi eseguire tale procedura in remoto su una connessione
+lenta.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-ident-interlaced">
-<title>Interlaced</title>
+<title>Interlacciato</title>
 
 <para>
-Interlaced video was originally filmed at 60000/1001 fields per second,
-and stored on the DVD as 30000/1001 frames per second. The interlacing effect
-(often called "combing") is a result of combining pairs of
-fields into frames. Each field is supposed to be 1/(60000/1001) seconds apart,
-and when they are displayed simultaneously the difference is apparent.
+Il video interlacciato è stato filmato in origine a 60000/1001 campi al
+secondo ed è memorizzato sul DVD a 30000/1001 fotogrammi al secondo. L'effetto
+di interlacciatura (spesso chimato "combing") è un risultato di coppie di
+campi che vengono combinate in fotogrammi. Ogni campo è spostato di
+1/(60000/1001) secondi e quando vengono mostrati contemporaneamente la
+differenza si nota.
 </para>
 
 <para>
-As with telecined video, <application>MPlayer</application> should
-not ever report any framerate changes when playing interlaced content.
+Come per il video in telecine, <application>MPlayer</application> non dovrebbe
+mai segnalare alcun cambio di framerete, riproducendo contenuto interlacciato.
 </para>
 
 <para>
-When you view an interlaced video closely by frame-stepping with the
-<keycap>.</keycap> key, you will see that every single frame is interlaced.
+Quando guardi attentamente un video interlacciato avanzando fotogramma per
+fotogramma col tasto <keycap>.</keycap>, noterai che ogni singolo fotogramma è
+interlacciato.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-ident-mixedpt">
-<title>Mixed progressive and telecine</title>
+<title>Progressivo e telecine miscelati</title>
 
 <para>
-All of a "mixed progressive and telecine" video was originally
-24000/1001 frames per second, but some parts of it ended up being telecined.
+Tutto il contenuto di un video "progressivo e telecine miscelato" è stato
+in origine filmato a 24000/1001 fotogrammi al secondo, ma alcune parti alla
+fine hanno subito il telecine.
 </para>
 
 <para>
-When <application>MPlayer</application> plays this category, it will
-(often repeatedly) switch back and forth between "30000/1001 fps NTSC"
-and "24000/1001 fps progressive NTSC". Watch the bottom of
-<application>MPlayer</application>'s output to see these messages.
+Quando <application>MPlayer</application> riproduce questa tipologia di video
+salta (spesso ripetutamente) avanti e indietro tra "30000/1001 fps NTSC" e
+"24000/1001 fps progressive NTSC". Controlla le ultime righe dell'emissione di
+<application>MPlayer</application> per vedere questi messaggi.
 </para>
 
 <para>
-You should check the "30000/1001 fps NTSC" sections to make sure
-they are actually telecine, and not just interlaced.
+Dovresti controllare le sezioni "30000/1001 fps NTSC" per assicurarti che siano
+davvero in telecine e non solamente interlacciate.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-ident-mixedpi">
-<title>Mixed progressive and interlaced</title>
+<title>Progressivo e interlacciato miscelati</title>
 
 <para>
-In "mixed progressive and interlaced" content, progressive
-and interlaced video have been spliced together.
+Nei contenuti con video "progressivo e interlacciato miscelati", il video
+progressivo e interlacciato sono mescolati tra loro.
 </para>
 
 <para>
-This category looks just like "mixed progressive and telecine",
-until you examine the 30000/1001 fps sections and see that they do not have the
-telecine pattern.
+Questa categoria è decisamente simile a "progressivo e telecine miscelato",
+fino a quando non controlli le parti a 30000/1001 fps e scopri che non hanno
+il pattern del telecine.
 </para>
 </sect3>
 </sect2>
