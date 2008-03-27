@@ -97,26 +97,26 @@ die () {
 issystem() {
   test "`echo $system_name | tr A-Z a-z`" = "`echo $1 | tr A-Z a-z`"
 }
-linux()   { issystem "Linux" || issystem "uClinux" ; return "$?" ; }
-sunos()   { issystem "SunOS"   ; return "$?" ; }
-hpux()    { issystem "HP-UX"   ; return "$?" ; }
-irix()    { issystem "IRIX"    ; return "$?" ; }
-aix()     { issystem "AIX"     ; return "$?" ; }
-cygwin()  { issystem "CYGWIN"  ; return "$?" ; }
-freebsd() { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; return "$?" ; }
-netbsd()  { issystem "NetBSD"  ; return "$?" ; }
-bsdos()   { issystem "BSD/OS"  ; return "$?" ; }
-openbsd() { issystem "OpenBSD" ; return "$?" ; }
+linux()     { issystem "Linux" || issystem "uClinux" ; return "$?" ; }
+sunos()     { issystem "SunOS"   ; return "$?" ; }
+hpux()      { issystem "HP-UX"   ; return "$?" ; }
+irix()      { issystem "IRIX"    ; return "$?" ; }
+aix()       { issystem "AIX"     ; return "$?" ; }
+cygwin()    { issystem "CYGWIN"  ; return "$?" ; }
+freebsd()   { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; return "$?" ; }
+netbsd()    { issystem "NetBSD"  ; return "$?" ; }
+bsdos()     { issystem "BSD/OS"  ; return "$?" ; }
+openbsd()   { issystem "OpenBSD" ; return "$?" ; }
 dragonfly() { issystem "DragonFly" ; return "$?" ; }
-qnx()     { issystem "QNX"     ; return "$?" ; }
-darwin()  { issystem "Darwin"  ; return "$?" ; }
-gnu()     { issystem "GNU"     ; return "$?" ; }
-mingw32() { issystem "MINGW32" ; return "$?" ; }
-morphos() { issystem "MorphOS" ; return "$?" ; }
-amigaos() { issystem "AmigaOS" ; return "$?" ; }
-win32()   { cygwin || mingw32  ; return "$?" ; }
-beos()    { issystem "BEOS"    ; return "$?" ; }
-os2()     { issystem "OS/2"    ; return "$?" ; }
+qnx()       { issystem "QNX"     ; return "$?" ; }
+darwin()    { issystem "Darwin"  ; return "$?" ; }
+gnu()       { issystem "GNU"     ; return "$?" ; }
+mingw32()   { issystem "MINGW32" ; return "$?" ; }
+morphos()   { issystem "MorphOS" ; return "$?" ; }
+amigaos()   { issystem "AmigaOS" ; return "$?" ; }
+win32()     { cygwin || mingw32  ; return "$?" ; }
+beos()      { issystem "BEOS"    ; return "$?" ; }
+os2()       { issystem "OS/2"    ; return "$?" ; }
 
 # arch test boolean functions
 # x86/x86pc is used by QNX
