@@ -107,7 +107,6 @@ freebsd() { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; return "$?" ; }
 netbsd()  { issystem "NetBSD"  ; return "$?" ; }
 bsdos()   { issystem "BSD/OS"  ; return "$?" ; }
 openbsd() { issystem "OpenBSD" ; return "$?" ; }
-bsd()     { freebsd || netbsd || bsdos || openbsd ; return "$?" ; }
 qnx()     { issystem "QNX"     ; return "$?" ; }
 darwin()  { issystem "Darwin"  ; return "$?" ; }
 gnu()     { issystem "GNU"     ; return "$?" ; }
@@ -6812,7 +6811,7 @@ fi
 echores "$_tv"
 
 
-if bsd; then
+if freebsd || netbsd || openbsd || bsdos ; then
   echocheck "*BSD BT848 bt8xx header"
   _ioctl_bt848_h=no
   for file in "machine/ioctl_bt848.h" \
@@ -6900,7 +6899,7 @@ EOF
     _noinputmodules="tv-bsdbt848 $_noinputmodules"
   fi
   echores "$_tv_bsdbt848"
-fi #if bsd
+fi #if freebsd || netbsd || openbsd || bsdos
 
 
 echocheck "DirectShow TV interface"
@@ -7061,7 +7060,8 @@ else
 fi
 echores "$_radio_v4l"
 
-if bsd && test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
+if freebsd || netbsd || openbsd || bsdos \
+  && test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
 echocheck "*BSD BrookTree 848 Radio interface"
    _radio_bsdbt848=no
     cat > $TMPC <<EOF
@@ -7077,7 +7077,7 @@ int main(void){
 EOF
     cc_check && _radio_bsdbt848=yes
 echores "$_radio_bsdbt848"
-fi #if bsd && radio && radio_bsdbt848
+fi #if freebsd || netbsd || openbsd || bsdos && _radio && _radio_bsdbt848
 
 if test "$_radio_bsdbt848" = yes ; then
   _def_radio_bsdbt848='#define HAVE_RADIO_BSDBT848 1'
@@ -7449,7 +7449,7 @@ fi
 # Dynamic linking flags 
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
-bsd && _ld_dl_dynamic='-rdynamic'
+freebsd || netbsd || openbsd || bsdos && _ld_dl_dynamic='-rdynamic'
 if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin && ! os2 ; then
   _ld_dl_dynamic='-rdynamic'
 fi
@@ -7573,7 +7573,7 @@ fi
 # Thread support
 if linux ; then
   CFLAGS="$CFLAGS -D_REENTRANT"
-elif bsd ; then
+elif freebsd || netbsd || openbsd || bsdos ; then
   # FIXME bsd needs this so maybe other OS'es
   CFLAGS="$CFLAGS -D_THREAD_SAFE"
 fi
