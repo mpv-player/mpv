@@ -2144,7 +2144,7 @@ corresponding lines for each field (this has drawbacks - see method 3).
   havoc with the encoder's ability to compress well, but
   <systemitem class="library">libavcodec</systemitem> has two
   parameters specifically for dealing with storing interlaced video a
-  bit better: <option> ildct</option> and <option>ilme</option>. Also,
+  bit better: <option>ildct</option> and <option>ilme</option>. Also,
   using <option>mbd=2</option> is strongly recommended
   <link linkend="menc-feat-telecine-footnotes">[2] </link> because it
   will encode macroblocks as non-interlaced in places where there is
