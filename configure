@@ -6818,7 +6818,7 @@ fi
 echores "$_tv"
 
 
-if freebsd || netbsd || openbsd || bsdos ; then
+if freebsd || netbsd || openbsd || dragonfly || bsdos ; then
   echocheck "*BSD BT848 bt8xx header"
   _ioctl_bt848_h=no
   for file in "machine/ioctl_bt848.h" \
@@ -6906,7 +6906,7 @@ EOF
     _noinputmodules="tv-bsdbt848 $_noinputmodules"
   fi
   echores "$_tv_bsdbt848"
-fi #if freebsd || netbsd || openbsd || bsdos
+fi #if freebsd || netbsd || openbsd || dragonfly || bsdos
 
 
 echocheck "DirectShow TV interface"
@@ -7067,7 +7067,7 @@ else
 fi
 echores "$_radio_v4l"
 
-if freebsd || netbsd || openbsd || bsdos \
+if freebsd || netbsd || openbsd || dragonfly || bsdos \
   && test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
 echocheck "*BSD BrookTree 848 Radio interface"
    _radio_bsdbt848=no
@@ -7084,7 +7084,7 @@ int main(void){
 EOF
     cc_check && _radio_bsdbt848=yes
 echores "$_radio_bsdbt848"
-fi #if freebsd || netbsd || openbsd || bsdos && _radio && _radio_bsdbt848
+fi #if freebsd || netbsd || openbsd || dragonfly || bsdos && _radio && _radio_bsdbt848
 
 if test "$_radio_bsdbt848" = yes ; then
   _def_radio_bsdbt848='#define HAVE_RADIO_BSDBT848 1'
@@ -7456,7 +7456,7 @@ fi
 # Dynamic linking flags 
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
-freebsd || netbsd || openbsd || bsdos && _ld_dl_dynamic='-rdynamic'
+freebsd || netbsd || openbsd || dragonfly || bsdos && _ld_dl_dynamic='-rdynamic'
 if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin && ! os2 ; then
   _ld_dl_dynamic='-rdynamic'
 fi
