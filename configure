@@ -107,6 +107,7 @@ freebsd() { issystem "FreeBSD" || issystem "GNU/kFreeBSD"; return "$?" ; }
 netbsd()  { issystem "NetBSD"  ; return "$?" ; }
 bsdos()   { issystem "BSD/OS"  ; return "$?" ; }
 openbsd() { issystem "OpenBSD" ; return "$?" ; }
+dragonfly() { issystem "DragonFly" ; return "$?" ; }
 qnx()     { issystem "QNX"     ; return "$?" ; }
 darwin()  { issystem "Darwin"  ; return "$?" ; }
 gnu()     { issystem "GNU"     ; return "$?" ; }
@@ -1211,7 +1212,7 @@ if test -z "$_target" ; then
   # OS name
   system_name=`uname -s 2>&1`
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS|MorphOS|AIX|AmigaOS)
+  Linux|FreeBSD|NetBSD|OpenBSD|DragonFly|BSD/OS|Darwin|SunOS|QNX|GNU|BeOS|MorphOS|AIX|AmigaOS)
     ;;
   IRIX*)
     system_name=IRIX
@@ -1288,6 +1289,7 @@ else # if test -z "$_target"
     netbsd) system_name=NetBSD ;;
     bsd/os) system_name=BSD/OS ;;
     openbsd) system_name=OpenBSD ;;
+    dragonfly) system_name=DragonFly ;;
     sunos) system_name=SunOS ;;
     qnx) system_name=QNX ;;
     morphos) system_name=MorphOS ;;
@@ -1312,6 +1314,11 @@ fi
 if freebsd ; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
   _inc_extra="$_inc_extra -I/usr/local/include"
+fi
+
+if netbsd || dragonfly ; then
+  _ld_extra="$_ld_extra -L/usr/pkg/lib"
+  _inc_extra="$_inc_extra -I/usr/pkg/include"
 fi
 
 if darwin; then
@@ -2983,7 +2990,7 @@ else
   _def_malloc='#undef HAVE_MALLOC_H'
 fi
 # malloc.h emits a warning in FreeBSD and OpenBSD
-freebsd || openbsd && _def_malloc='#undef HAVE_MALLOC_H'
+freebsd || openbsd || dragonfly && _def_malloc='#undef HAVE_MALLOC_H'
 echores "$_malloc"
 
 
@@ -4270,7 +4277,7 @@ _def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
 _vidix_drv_unichrome=no
 if test "$_vidix_internal" = auto ; then
   _vidix_internal=no
-  x86 && (linux || freebsd || netbsd || openbsd || sunos || win32) \
+  x86 && (linux || freebsd || netbsd || openbsd || dragonfly || sunos || win32) \
     && _vidix_internal=yes
   (ppc || alpha) && linux && _vidix_internal=yes
 fi
@@ -5388,7 +5395,7 @@ fi #if irix
 
 
 echocheck "VCD support"
-if linux || bsdos || freebsd || netbsd || sunos || darwin || mingw32; then
+if linux || freebsd || netbsd || dragonfly || bsdos || darwin || sunos || mingw32; then
   _inputmodules="vcd $_inputmodules"
   _def_vcd='#define HAVE_VCD 1'
   _vcd="yes"
@@ -5405,7 +5412,7 @@ echores "$_vcd"
 echocheck "dvdread"
 if test "$_dvdread_internal" = auto ; then
   _dvdread_internal=no
-  if (linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux) && \
+  if (linux || freebsd || netbsd || openbsd || dragonfly || darwin || win32 || sunos || hpux) && \
       (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
       test "$_dvdio" = yes || test "$_bsdi_dvd" = yes); then
     _dvdread_internal=yes
@@ -5457,7 +5464,7 @@ if test "$_libdvdcss_internal" = yes ; then
   if linux || netbsd || openbsd || bsdos ; then
     _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
     openbsd && _dev_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
-  elif freebsd ; then
+  elif freebsd || dragonfly ; then
     _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
   elif darwin ; then
     _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
@@ -6266,7 +6273,7 @@ if test "$_real" = auto ; then
   _real=no
   _res_comment="dynamic loader support needed"
   if test "$_dl" = yes || test "$_win32dll" = yes &&
-     (linux || freebsd || netbsd || win32 || darwin) ; then
+     (linux || freebsd || netbsd || dragonfly || darwin || win32) ; then
     _real=yes
   fi
 fi
@@ -8392,6 +8399,9 @@ $_def_vcd
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 #define DEFAULT_CDROM_DEVICE	"/dev/acd0"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(__DragonFly__)
+#define DEFAULT_CDROM_DEVICE	"/dev/cd0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(__AMIGAOS4__)
 #define DEFAULT_CDROM_DEVICE    "a1ide.device:2"
