@@ -567,11 +567,11 @@ Dopodiché ricompila <application>MPlayer</application>.
 VFW (Video for Windows) sono le vecchie API Video per Windows. I loro codec
 hanno un'estensione <filename>.DLL</filename> o (raramente)
 <filename>.DRV</filename>. Se <application>MPlayer</application> non riesce a
-riprodurre il tuo AVI dando un messaggio del tipo:
+riprodurre il tuo AVI emettendo un messaggio del tipo:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
 significa che il tuo AVI è codificato con un codec che ha HFYU come fourcc
 (HFYU = HuffYUV codec, DIV3 = DivX Low Motion, etc.). Ora che lo sai, devi
-scoprire quale DLL di Windows viene caricata per reiprodurre quel file. Nel
+scoprire quale DLL di Windows viene caricata per riprodurre quel file. Nel
 nostro caso il <filename>system.ini</filename> contiene questa informazione in
 una riga siffatta:
 <programlisting>VIDC.HFYU=huffyuv.dll</programlisting>
