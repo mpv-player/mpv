@@ -3011,6 +3011,11 @@ while (player_idle_mode && !filename) {
         case MP_CMD_QUIT:
             exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
             break;
+        case MP_CMD_GET_PROPERTY:
+        case MP_CMD_SET_PROPERTY:
+        case MP_CMD_STEP_PROPERTY:
+            run_command(mpctx, cmd);
+            break;
     }
 
     mp_cmd_free(cmd);
