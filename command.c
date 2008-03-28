@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "command.h"
 #include "input/input.h"
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"

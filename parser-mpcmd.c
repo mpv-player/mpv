@@ -18,6 +18,7 @@
 #include "m_option.h"
 #include "m_config.h"
 #include "playtree.h"
+#include "parser-mpcmd.h"
 
 static int recursion_depth = 0;
 static int mode = 0;
