@@ -330,7 +330,8 @@ sdpplin_t *sdpplin_parse(char *data) {
     
     if(filter(data,"a=StreamCount:integer;",&buf)) {
       desc->stream_count=(unsigned int)atoi(buf);
-      desc->stream=malloc(sizeof(sdpplin_stream_t*)*desc->stream_count);
+      desc->stream=calloc(desc->stream_count, sizeof(sdpplin_stream_t*));
+      if (!desc->stream) desc->stream_count = 0;
       handled=1;
       data=nl(data);
     }
