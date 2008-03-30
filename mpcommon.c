@@ -195,6 +195,8 @@ int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang)
 {
     if (audio_id == -1 && audio_lang)
         audio_id = demuxer_audio_track_by_lang(demuxer, audio_lang);
+    if (audio_id == -1)
+        audio_id = demuxer_default_audio_track(demuxer);
     if (audio_id != -1) // -1 (automatic) is the default behaviour of demuxers
         demuxer_switch_audio(demuxer, audio_id);
     if (audio_id == -2) { // some demuxers don't yet know how to switch to no sound

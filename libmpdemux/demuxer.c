@@ -1441,3 +1441,31 @@ int demuxer_sub_track_by_lang(demuxer_t* d, char* lang)
     }
     return -1;
 }
+
+int demuxer_default_audio_track(demuxer_t* d)
+{
+    int i;
+    for (i=0; i < MAX_A_STREAMS; ++i) {
+        sh_audio_t* sh = d->a_streams[i];
+        if (sh && sh->default_track)
+            return sh->aid;
+    }
+    for (i=0; i < MAX_A_STREAMS; ++i) {
+        sh_audio_t* sh = d->a_streams[i];
+        if (sh)
+            return sh->aid;
+    }
+    return -1;
+}
+
+int demuxer_default_sub_track(demuxer_t* d)
+{
+    int i;
+    for (i=0; i < MAX_S_STREAMS; ++i) {
+        sh_sub_t* sh = d->s_streams[i];
+        if (sh && sh->default_track)
+            return sh->sid;
+    }
+    return -1;
+}
+

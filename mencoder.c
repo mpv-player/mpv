@@ -601,6 +601,9 @@ if(stream->type==STREAMTYPE_DVDNAV){
   if (dvdsub_id < 0 && dvdsub_lang)
     dvdsub_id = demuxer_sub_track_by_lang(demuxer, dvdsub_lang);
 
+  if (dvdsub_id < 0)
+    dvdsub_id = demuxer_default_sub_track(demuxer);
+
   for (i = 0; i < MAX_S_STREAMS; i++) {
     sh_sub_t *sh = demuxer->s_streams[i];
     if (sh && sh->sid == dvdsub_id) {

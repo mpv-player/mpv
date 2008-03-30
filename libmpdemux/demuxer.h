@@ -431,4 +431,10 @@ int demuxer_angles_count(demuxer_t *demuxer);
 int demuxer_audio_track_by_lang(demuxer_t* demuxer, char* lang);
 int demuxer_sub_track_by_lang(demuxer_t* demuxer, char* lang);
 
+// find the default track
+// for subtitles, it is the first track with default attribute
+// for audio, additionally, the first track is selected if no track has default attribute set
+int demuxer_default_audio_track(demuxer_t* d);
+int demuxer_default_sub_track(demuxer_t* d);
+
 #endif /* MPLAYER_DEMUXER_H */

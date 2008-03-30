@@ -1849,6 +1849,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
 
   if (track->language && (strcmp(track->language, "und") != 0))
     sh_a->lang = strdup(track->language);
+  sh_a->default_track = track->default_track;
   sh_a->ds = demuxer->audio;
   sh_a->wf = malloc (sizeof (WAVEFORMATEX));
   if (track->ms_compat && (track->private_size >= sizeof(WAVEFORMATEX)))
@@ -2217,6 +2218,7 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
       sh->extradata_len = track->private_size;
       if (track->language && (strcmp(track->language, "und") != 0))
         sh->lang = strdup(track->language);
+      sh->default_track = track->default_track;
     }
   else
     {

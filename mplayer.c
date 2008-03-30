@@ -3459,6 +3459,8 @@ if (mpctx->global_sub_size) {
   int vobsub_index_id = vobsub_get_index_by_id(vo_vobsub, vobsub_id);
   if (dvdsub_id < 0 && dvdsub_lang)
     dvdsub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
+  if (dvdsub_id < 0)
+    dvdsub_id = demuxer_default_sub_track(mpctx->demuxer);
   if (vobsub_index_id >= 0) {
     // if user asks for a vobsub id, use that first.
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] + vobsub_index_id;

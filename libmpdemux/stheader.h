@@ -51,6 +51,7 @@ typedef struct {
   double pts;  // last known pts value in output from decoder
   int pts_bytes; // bytes output by decoder after last known pts
   char* lang; // track language
+  int default_track;
 } sh_audio_t;
 
 typedef struct {
@@ -108,6 +109,7 @@ typedef struct {
   ass_track_t* ass_track;  // for SSA/ASS streams (type == 'a')
 #endif
   char* lang; // track language
+  int default_track;
 } sh_sub_t;
 
 // demuxer.c:
