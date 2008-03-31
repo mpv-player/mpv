@@ -7725,7 +7725,7 @@ EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
 EXTRALIBS_MPLAYER = $_libs_mplayer
 EXTRALIBS_MENCODER = $_libs_mencoder
 
-HAVE_MLIB = $_mlib
+CONFIG_MLIB = $_mlib
 HAVE_PTHREADS = $_pthreads
 HAVE_W32THREADS = $_w32threads
 
