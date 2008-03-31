@@ -7725,8 +7725,6 @@ EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
 EXTRALIBS_MPLAYER = $_libs_mplayer
 EXTRALIBS_MENCODER = $_libs_mencoder
 
-HAVE_XVMC_ACCEL = $_xvmc
-
 HAVE_SYS_MMAN_H = $_mman
 HAVE_POSIX_SELECT = $_posix_select
 
@@ -7881,6 +7879,7 @@ CONFIG_ZLIB=$_zlib
 
 HAVE_PTHREADS = $_pthreads
 HAVE_W32THREADS = $_w32threads
+HAVE_XVMC = $_xvmc
 
 `echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
