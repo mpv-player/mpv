@@ -7725,10 +7725,6 @@ EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
 EXTRALIBS_MPLAYER = $_libs_mplayer
 EXTRALIBS_MENCODER = $_libs_mencoder
 
-CONFIG_MLIB = $_mlib
-HAVE_PTHREADS = $_pthreads
-HAVE_W32THREADS = $_w32threads
-
 HAVE_XVMC_ACCEL = $_xvmc
 
 HAVE_SYS_MMAN_H = $_mman
@@ -7741,13 +7737,6 @@ NEED_SHMEM   = $_need_shmem
 NEED_STRSEP  = $_need_strsep
 NEED_SWAB    = $_need_swab
 NEED_VSSCANF = $_need_vsscanf
-
-# for FFmpeg
-SRC_PATH=..
-BUILD_ROOT=..
-LIBPREF=lib
-LIBSUF=.a
-LIBNAME=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 
 # audio output
 OSS = $_ossaudio
@@ -7780,18 +7769,6 @@ QTX_CODECS = $_qtx
 QTX_EMULATION = $_qtx_emulation
 REAL_CODECS = $_real
 XANIM_CODECS = $_xanim
-LIBAVUTIL = $_libavutil
-LIBAVUTIL_A = $_libavutil_a
-LIBAVUTIL_SO = $_libavutil_so
-LIBAVCODEC = $_libavcodec
-LIBAVCODEC_A = $_libavcodec_a
-LIBAVCODEC_SO = $_libavcodec_so
-LIBAVFORMAT = $_libavformat
-LIBAVFORMAT_A = $_libavformat_a
-LIBAVFORMAT_SO = $_libavformat_so
-LIBPOSTPROC = $_libpostproc
-LIBPOSTPROC_A = $_libpostproc_a
-LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
 LIBLZO = $_liblzo
 LIBDV = $_libdv
@@ -7821,26 +7798,6 @@ QUARTZ = $_quartz
 TOOLAME=$_toolame
 TWOLAME=$_twolame
 FAAC=$_faac
-CONFIG_LIBAMR=$_libamr
-CONFIG_LIBAMR_NB=$_libamr_nb
-CONFIG_LIBAMR_WB=$_libamr_wb
-`echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-`echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-`echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-`echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-`echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-`echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
-CONFIG_LIBFAAC=$_lavc_faac
-CONFIG_LIBMP3LAME=$_lavc_mp3lame
-CONFIG_LIBVORBIS=$_libvorbis
-CONFIG_LIBXVID=$_lavc_xvid
-CONFIG_LIBX264=$_lavc_x264
-CONFIG_ZLIB=$_zlib
-CONFIG_GPL=yes
-CONFIG_ENCODERS=yes
-CONFIG_MUXERS=$_mencoder
-# Prevent building libavcodec/imgresample.c with conflicting symbols
-CONFIG_SWSCALE=yes
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
@@ -7885,6 +7842,52 @@ AO_SRCS = $_aosrc
 
 # --- libaf stuff ---
 AF_SRCS = $_afsrc
+
+# FFmpeg
+LIBAVUTIL = $_libavutil
+LIBAVUTIL_A = $_libavutil_a
+LIBAVUTIL_SO = $_libavutil_so
+LIBAVCODEC = $_libavcodec
+LIBAVCODEC_A = $_libavcodec_a
+LIBAVCODEC_SO = $_libavcodec_so
+LIBAVFORMAT = $_libavformat
+LIBAVFORMAT_A = $_libavformat_a
+LIBAVFORMAT_SO = $_libavformat_so
+LIBPOSTPROC = $_libpostproc
+LIBPOSTPROC_A = $_libpostproc_a
+LIBPOSTPROC_SO = $_libpostproc_so
+
+SRC_PATH=..
+BUILD_ROOT=..
+LIBPREF=lib
+LIBSUF=.a
+LIBNAME=\$(LIBPREF)\$(NAME)\$(LIBSUF)
+
+CONFIG_ENCODERS=yes
+CONFIG_GPL=yes
+CONFIG_MUXERS=$_mencoder
+CONFIG_LIBAMR=$_libamr
+CONFIG_LIBAMR_NB=$_libamr_nb
+CONFIG_LIBAMR_WB=$_libamr_wb
+CONFIG_LIBFAAC=$_lavc_faac
+CONFIG_LIBMP3LAME=$_lavc_mp3lame
+CONFIG_LIBVORBIS=$_libvorbis
+CONFIG_LIBX264=$_lavc_x264
+CONFIG_LIBXVID=$_lavc_xvid
+CONFIG_MLIB = $_mlib
+# Prevent building libavcodec/imgresample.c with conflicting symbols
+CONFIG_SWSCALE=yes
+CONFIG_ZLIB=$_zlib
+
+HAVE_PTHREADS = $_pthreads
+HAVE_W32THREADS = $_w32threads
+
+`echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 
 EOF
 
