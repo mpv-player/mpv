@@ -180,6 +180,8 @@ static int max_framesize=0;
 #include "mixer.h"
 
 #include "mp_core.h"
+#include "options.h"
+#include "defaultopts.h"
 
 //**************************************************************************//
 //**************************************************************************//
@@ -204,8 +206,6 @@ static MPContext mpctx_s = {
 };
 
 static MPContext *mpctx = &mpctx_s;
-
-int fixed_vo=0;
 
 // benchmark:
 double video_time_usage=0;
@@ -2136,10 +2136,11 @@ static int sleep_until_update(float *time_frame, float *aq_sleep_time)
 }
 
 int reinit_video_chain(void) {
+    MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
     double ar=-1.0;
     //================== Init VIDEO (codec & libvo) ==========================
-    if(!fixed_vo || !(initialized_flags&INITIALIZED_VO)){
+    if(opts->fixed_vo || !(initialized_flags&INITIALIZED_VO)){
     current_module="preinit_libvo";
 
     //shouldn't we set dvideo->id=-2 when we fail?
@@ -2209,7 +2210,7 @@ int reinit_video_chain(void) {
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
   if(!sh_video->initialized){
-    if(!fixed_vo) uninit_player(INITIALIZED_VO);
+    if(!opts->fixed_vo) uninit_player(INITIALIZED_VO);
     goto err_out;
   }
 
@@ -2563,8 +2564,10 @@ int gui_no_filename=0;
   
   mp_msg_init();
 
+  MPOpts *opts = &mpctx->opts;
+  set_default_mplayer_options(opts);
   // Create the config context and register the options
-  mconfig = m_config_new();
+  mconfig = m_config_new(opts);
   m_config_register_options(mconfig,mplayer_opts);
   mp_input_register_options(mconfig);
 
@@ -3921,7 +3924,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->eof);
 if(mpctx->dvbin_reopen)
 {
   mpctx->eof = 0;
-  uninit_player(INITIALIZED_ALL-(INITIALIZED_GUI|INITIALIZED_STREAM|INITIALIZED_INPUT|INITIALIZED_GETCH2|(fixed_vo?INITIALIZED_VO:0)));
+  uninit_player(INITIALIZED_ALL-(INITIALIZED_GUI|INITIALIZED_STREAM|INITIALIZED_INPUT|INITIALIZED_GETCH2|(opts->fixed_vo?INITIALIZED_VO:0)));
   cache_uninit(mpctx->stream);
   mpctx->dvbin_reopen = 0;
   goto goto_enable_cache;
@@ -3959,7 +3962,7 @@ if(benchmark){
 }
 
 // time to uninit all, except global stuff:
-uninit_player(INITIALIZED_ALL-(INITIALIZED_GUI+INITIALIZED_INPUT+(fixed_vo?INITIALIZED_VO:0)));
+uninit_player(INITIALIZED_ALL-(INITIALIZED_GUI+INITIALIZED_INPUT+(opts->fixed_vo?INITIALIZED_VO:0)));
 
 if(mpctx->set_of_sub_size > 0) {
     current_module="sub_free";

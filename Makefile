@@ -18,6 +18,7 @@ LDFLAGS_MENCODER = $(EXTRALIBS_MENCODER) \
 SRCS_COMMON = asxparser.c \
               codec-cfg.c \
               cpudetect.c \
+              defaultopts.c \
               edl.c \
               find_sub.c \
               get_path.c \

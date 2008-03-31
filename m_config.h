@@ -78,6 +78,8 @@ typedef struct m_config {
   int profile_depth;
   /// Options defined by the config itself.
   struct m_option* self_opts;
+
+  void *optstruct; // struct mpopts or other
 } m_config_t;
 
 /// \defgroup ConfigOptionFlags Config option flags
@@ -96,7 +98,7 @@ typedef struct m_config {
 /** \ingroup Config
  */
 m_config_t*
-m_config_new(void);
+m_config_new(void *optstruct);
 
 /// Free a config object.
 void

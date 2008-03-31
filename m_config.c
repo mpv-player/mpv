@@ -34,8 +34,28 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
 static int
 list_options(m_option_t *opt, char* name, char *param);
 
+static void m_option_save(const m_config_t *config, const m_option_t *opt,
+                          void *dst)
+{
+    if (opt->type->save) {
+        void *src = opt->new ? (char*)config->optstruct + opt->offset : opt->p;
+        opt->type->save(opt, dst, src);
+    }
+}
+
+static void m_option_set(const m_config_t *config, const m_option_t *opt,
+			 void *src)
+{
+    if (opt->type->set) {
+        void *dst = opt->new ? (char*)config->optstruct + opt->offset : opt->p;
+        opt->type->set(opt, dst, src);
+    }
+}
+
+
+
 m_config_t*
-m_config_new(void) {
+m_config_new(void *optstruct) {
   m_config_t* config;
   static int initialized = 0;
   static m_option_type_t profile_opt_type;
@@ -60,7 +80,8 @@ m_config_new(void) {
   for(i = 0 ; config->self_opts[i].name ; i++)
     config->self_opts[i].priv = config;
   m_config_register_options(config,config->self_opts);
-  
+  config->optstruct = optstruct;
+
   return config;
 }
 
@@ -130,7 +151,7 @@ m_config_push(m_config_t* config) {
       continue;
 
     // Update the current status
-    m_option_save(co->opt,co->slots->data,co->opt->p);
+    m_option_save(config, co->opt, co->slots->data);
     
     // Allocate a new slot    
     slot = calloc(1,sizeof(m_config_save_slot_t) + co->opt->type->size);
@@ -174,7 +195,7 @@ m_config_pop(m_config_t* config) {
       pop++;
     }
     if(pop) // We removed some ctx -> set the previous value
-      m_option_set(co->opt,co->opt->p,co->slots->data);
+      m_option_set(config, co->opt, co->slots->data);
   }
 
   config->lvl--;
@@ -214,9 +235,11 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
   } else {
     m_config_option_t *i;
     // Check if there is already an option pointing to this address
-    if(arg->p) {
+    if(arg->p || arg->new && arg->offset >= 0) {
       for(i = config->opts ; i ; i = i->next ) {
-	if(i->opt->p == arg->p) { // So we don't save the same vars more than 1 time
+        if (arg->new ? (i->opt->new && i->opt->offset == arg->offset)
+            : (!i->opt->new && i->opt->p == arg->p)) {
+          // So we don't save the same vars more than 1 time
 	  co->slots = i->slots;
 	  co->flags |= M_CFG_OPT_ALIAS;
 	  break;
@@ -226,12 +249,12 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
     if(!(co->flags & M_CFG_OPT_ALIAS)) {
     // Allocate a slot for the defaults
     sl = calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
-    m_option_save(arg,sl->data,(void**)arg->p);
+    m_option_save(config, arg, sl->data);
     // Hack to avoid too much trouble with dynamically allocated data :
     // We always use a dynamic version
     if((arg->type->flags & M_OPT_TYPE_DYNAMIC) && arg->p && (*(void**)arg->p)) {
       *(void**)arg->p = NULL;
-      m_option_set(arg,arg->p,sl->data);
+      m_option_set(config, arg, sl->data);
     }
     sl->lvl = 0;
     sl->prev = NULL;
@@ -355,7 +378,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
     return r;
   // Set the option
   if(set) {
-    m_option_set(co->opt,co->opt->p,co->slots->data);
+    m_option_set(config, co->opt, co->slots->data);
     co->flags |= M_CFG_OPT_SET;
   }
 

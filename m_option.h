@@ -282,6 +282,10 @@ struct m_option {
    *  Passing a 'default func' is still valid for all func based option types.
    */
   void* priv;
+
+  int new;
+
+  int offset;
 };
 
 
@@ -474,20 +478,6 @@ m_option_print(const m_option_t* opt, const void* val_ptr) {
     return opt->type->print(opt,val_ptr);
   else
     return (char*)-1;
-}
-
-/// Helper around \ref m_option_type::save.
-inline static  void
-m_option_save(const m_option_t* opt,void* dst, void* src) {
-  if(opt->type->save)
-    opt->type->save(opt,dst,src);
-}
-
-/// Helper around \ref m_option_type::set.
-inline static  void
-m_option_set(const m_option_t* opt,void* dst, void* src) {
-  if(opt->type->set)
-    opt->type->set(opt,dst,src);
 }
 
 /// Helper around \ref m_option_type::copy.

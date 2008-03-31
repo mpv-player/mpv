@@ -5,7 +5,10 @@
  * config for cfgparser
  */
 
+#include <stddef.h>
+
 #include "cfg-common.h"
+#include "options.h"
 
 extern int key_fifo_size;
 extern unsigned doubleclick_time;
@@ -84,6 +87,9 @@ const m_option_t tvscan_conf[]={
  * by Folke
  */
 
+#define FLAG_ON(optname, varname, flags) {optname, NULL, CONF_TYPE_FLAG, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
+#define FLAG_OFF(optname, varname, flags) {optname, NULL, CONF_TYPE_FLAG, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+
 const m_option_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
 
@@ -92,8 +98,8 @@ const m_option_t mplayer_opts[]={
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"vo", &video_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"ao", &audio_driver_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-	{"fixed-vo", &fixed_vo, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
-	{"nofixed-vo", &fixed_vo, CONF_TYPE_FLAG,CONF_GLOBAL, 1, 0, NULL},
+        FLAG_ON("fixed-vo", fixed_vo, CONF_GLOBAL),
+        FLAG_OFF("nofixed-vo", fixed_vo, CONF_GLOBAL),
 	{"ontop", &vo_ontop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noontop", &vo_ontop, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},

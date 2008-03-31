@@ -1,6 +1,7 @@
 #ifndef MPLAYER_MP_CORE_H
 #define MPLAYER_MP_CORE_H
 
+#include "options.h"
 #include "mp_osd.h"
 #include "libao2/audio_out.h"
 #include "playtree.h"
@@ -42,6 +43,7 @@
 
 
 typedef struct MPContext {
+    struct MPOpts opts;
     int osd_show_percentage;
     int osd_function;
     const ao_functions_t *audio_out;
@@ -114,7 +116,6 @@ extern FILE *edl_fd;
 extern int file_filter;
 // These appear in options list
 extern float playback_speed;
-extern int fixed_vo;
 extern int forced_subs_only;
 
 

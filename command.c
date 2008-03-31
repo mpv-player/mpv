@@ -903,7 +903,7 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 	    || (video_id > -1 && mpctx->demuxer->video->id != current_id
 		&& current_id != -2))
 	    uninit_player(INITIALIZED_VCODEC |
-			  (fixed_vo && video_id != -2 ? 0 : INITIALIZED_VO));
+                          (mpctx->opts.fixed_vo && video_id != -2 ? 0 : INITIALIZED_VO));
 	if (video_id > -1 && mpctx->demuxer->video->id != current_id) {
 	    sh_video_t *sh2;
 	    sh2 = mpctx->demuxer->v_streams[mpctx->demuxer->video->id];

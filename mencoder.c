@@ -90,6 +90,10 @@
 #endif
 
 #include "libmpcodecs/ae.h"
+#include "options.h"
+
+MPOpts opts;
+
 int vo_doublebuffering=0;
 int vo_directrendering=0;
 int vo_config_count=1;
@@ -420,7 +424,7 @@ user_correct_pts = 0;
   mp_msg_init();
 
   // Create the config context and register the options
-  mconfig = m_config_new();
+  mconfig = m_config_new(&opts);
   m_config_register_options(mconfig,mencoder_opts);
 
   // Preparse the command line
