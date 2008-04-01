@@ -15,9 +15,9 @@
 -#ifdef ARCH_X86
 +#if defined(ARCH_X86) || defined(ARCH_X86_64)
 +
-+/* MPlayer imports libmpeg2 as decoder, which detects MMX / 3DNow! 
-+ * instructions via assembly. However, it is regarded as duplicaed work
-+ * in MPlayer, so that we enforce to use MPlayer's implementation.
++/* MPlayer imports libmpeg2 as decoder, which detects MMX / 3DNow!
++ * instructions via assembly. However, it is regarded as duplicated work
++ * in MPlayer, so that we enforce using MPlayer's implementation.
 + */
 +#define USE_MPLAYER_CPUDETECT
 +
@@ -31,7 +31,7 @@
  	caps |= MPEG2_ACCEL_X86_MMXEXT;
  
      return caps;
-+#else /* USE_MPLAYER_CPUDETECT: Use MPlayer's cpu capability property */
++#else /* USE_MPLAYER_CPUDETECT: Use MPlayer's CPU capability property. */
 +    caps = 0;
 +    if (gCpuCaps.hasMMX)
 +        caps |= MPEG2_ACCEL_X86_MMX;
@@ -565,7 +565,7 @@ Index: libmpeg2/motion_comp_arm_s.S
 +@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 +
 +	.text
-+	
++
 +@ ----------------------------------------------------------------
 +	.align
 +	.global MC_put_o_16_arm
