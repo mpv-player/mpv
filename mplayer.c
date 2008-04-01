@@ -307,10 +307,6 @@ static int audio_output_format=-1; // AF_FORMAT_UNKNOWN
 static int play_n_frames=-1;
 static int play_n_frames_mf=-1;
 
-// screen info:
-char** video_driver_list=NULL;
-char** audio_driver_list=NULL;
-
 // sub:
 char *font_name=NULL;
 char *sub_font_name=NULL;
@@ -1576,6 +1572,7 @@ static void update_osd_msg(void) {
 
 
 void reinit_audio_chain(void) {
+    struct MPOpts *opts = &mpctx->opts;
 if(mpctx->sh_audio){
   current_module="init_audio_codec";
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
@@ -1605,7 +1602,7 @@ if(mpctx->sh_audio){
   }
 #endif  
   current_module="ao2_init";
-  if(!(mpctx->audio_out=init_best_audio_out(audio_driver_list,
+  if(!(mpctx->audio_out=init_best_audio_out(opts->audio_driver_list,
       0, // plugin flag
       ao_data.samplerate,
       ao_data.channels,
@@ -2136,7 +2133,7 @@ static int sleep_until_update(float *time_frame, float *aq_sleep_time)
 }
 
 int reinit_video_chain(void) {
-    MPOpts *opts = &mpctx->opts;
+    struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
     double ar=-1.0;
     //================== Init VIDEO (codec & libvo) ==========================
@@ -2146,7 +2143,7 @@ int reinit_video_chain(void) {
     //shouldn't we set dvideo->id=-2 when we fail?
     vo_config_count=0;
     //if((mpctx->video_out->preinit(vo_subdevice))!=0){
-    if(!(mpctx->video_out=init_best_video_out(video_driver_list))){
+    if(!(mpctx->video_out=init_best_video_out(opts->video_driver_list))){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
       goto err_out;
     }
@@ -2564,7 +2561,7 @@ int gui_no_filename=0;
   
   mp_msg_init();
 
-  MPOpts *opts = &mpctx->opts;
+  struct MPOpts *opts = &mpctx->opts;
   set_default_mplayer_options(opts);
   // Create the config context and register the options
   mconfig = m_config_new(opts);
@@ -2677,12 +2674,12 @@ int gui_no_filename=0;
     }
 #endif /* HAVE_NEW_GUI */
 
-    if(video_driver_list && strcmp(video_driver_list[0],"help")==0){
+    if(opts->video_driver_list && strcmp(opts->video_driver_list[0],"help")==0){
       list_video_out();
       opt_exit = 1;
     }
 
-    if(audio_driver_list && strcmp(audio_driver_list[0],"help")==0){
+    if(opts->audio_driver_list && strcmp(opts->audio_driver_list[0],"help")==0){
       list_audio_out();
       opt_exit = 1;
     }
@@ -2946,10 +2943,10 @@ play_next_file:
     load_per_file_config (mconfig, filename);
   }
 
-  if (video_driver_list)
-    load_per_output_config (mconfig, PROFILE_CFG_VO, video_driver_list[0]);
-  if (audio_driver_list)
-    load_per_output_config (mconfig, PROFILE_CFG_AO, audio_driver_list[0]);
+  if (opts->video_driver_list)
+    load_per_output_config (mconfig, PROFILE_CFG_VO, opts->video_driver_list[0]);
+  if (opts->audio_driver_list)
+    load_per_output_config (mconfig, PROFILE_CFG_AO, opts->audio_driver_list[0]);
 
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
