@@ -7,8 +7,6 @@
 #ifndef MPLAYER_MATROSKA_H
 #define MPLAYER_MATROSKA_H
 
-#include "demuxer.h"
-
 #define MKV_A_AAC_2MAIN  "A_AAC/MPEG2/MAIN"
 #define MKV_A_AAC_2LC    "A_AAC/MPEG2/LC"
 #define MKV_A_AAC_2SBR   "A_AAC/MPEG2/LC/SBR"
@@ -62,7 +60,5 @@
 #define MKV_S_VOBSUB     "S_VOBSUB"
 #define MKV_S_SSA        "S_SSA" // Deprecated
 #define MKV_S_ASS        "S_ASS" // Deprecated
-
-int demux_mkv_change_subs(demuxer_t *demuxer, int new_num);
 
 #endif /* MPLAYER_MATROSKA_H */
