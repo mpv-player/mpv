@@ -5413,9 +5413,10 @@ echocheck "dvdread"
 if test "$_dvdread_internal" = auto ; then
   _dvdread_internal=no
   _dvdread=no
-  if (linux || freebsd || netbsd || openbsd || dragonfly || darwin || win32 || sunos || hpux) && \
-      (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
-      test "$_dvdio" = yes || test "$_bsdi_dvd" = yes); then
+  if (linux || freebsd || netbsd || openbsd || dragonfly || sunos || hpux) \
+     && (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
+         test "$_dvdio" = yes || test "$_bsdi_dvd" = yes) \
+     || darwin || win32; then
     _dvdread_internal=yes
     _dvdread=yes
   fi
