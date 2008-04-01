@@ -149,7 +149,6 @@ struct mpeg2_decoder_s {
 
     int mpeg1;
 
-    /* for MPlayer: */
     int quantizer_scales[32];
     int quantizer_scale;
     char* quant_store;
@@ -225,7 +224,6 @@ struct mpeg2dec_s {
     uint8_t quantizer_matrix[4][64];
     uint8_t new_quantizer_matrix[4][64];
 
-    /* for MPlayer: */
     unsigned char *pending_buffer;
     int pending_length;
 };

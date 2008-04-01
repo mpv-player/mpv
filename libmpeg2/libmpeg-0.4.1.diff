@@ -240,12 +240,11 @@
  uint32_t mpeg2_accel (uint32_t accel);
 --- libmpeg2/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2_internal.h	2006-06-16 20:12:50.000000000 +0200
-@@ -144,6 +148,12 @@
+@@ -144,6 +148,11 @@
      int second_field;
  
      int mpeg1;
 +
-+    /* for MPlayer: */
 +    int quantizer_scales[32];
 +    int quantizer_scale;
 +    char* quant_store;
@@ -253,12 +252,11 @@
  };
  
  typedef struct {
-@@ -214,6 +224,10 @@
+@@ -214,6 +224,9 @@
      int8_t q_scale_type, scaled[4];
      uint8_t quantizer_matrix[4][64];
      uint8_t new_quantizer_matrix[4][64];
 +
-+    /* for MPlayer: */
 +    unsigned char *pending_buffer;
 +    int pending_length;
  };
