@@ -37,22 +37,16 @@ mpeg2_mc_t mpeg2_mc;
 
 void mpeg2_mc_init (uint32_t accel)
 {
-#ifdef HAVE_MMX2
+#ifdef ARCH_X86
     if (accel & MPEG2_ACCEL_X86_MMXEXT)
 	mpeg2_mc = mpeg2_mc_mmxext;
-    else
-#endif
-#ifdef HAVE_3DNOW
-    if (accel & MPEG2_ACCEL_X86_3DNOW)
+    else if (accel & MPEG2_ACCEL_X86_3DNOW)
 	mpeg2_mc = mpeg2_mc_3dnow;
-    else
-#endif
-#ifdef HAVE_MMX
-    if (accel & MPEG2_ACCEL_X86_MMX)
+    else if (accel & MPEG2_ACCEL_X86_MMX)
 	mpeg2_mc = mpeg2_mc_mmx;
     else
 #endif
-#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
+#ifdef ARCH_PPC
     if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
 	mpeg2_mc = mpeg2_mc_altivec;
     else
@@ -62,20 +56,17 @@ void mpeg2_mc_init (uint32_t accel)
 	mpeg2_mc = mpeg2_mc_alpha;
     else
 #endif
-#if defined(ARCH_SPARC) && defined(HAVE_VIS)
+#ifdef ARCH_SPARC
     if (accel & MPEG2_ACCEL_SPARC_VIS)
 	mpeg2_mc = mpeg2_mc_vis;
     else
 #endif
 #ifdef ARCH_ARM
-    if (accel & MPEG2_ACCEL_ARM) {
-#ifdef HAVE_IWMMXT
-	if (accel & MPEG2_ACCEL_ARM_IWMMXT)
-	    mpeg2_mc = mpeg2_mc_iwmmxt;
-	else
-#endif
-	    mpeg2_mc = mpeg2_mc_arm;
-    } else
+    if (accel & MPEG2_ACCEL_ARM_IWMMXT)
+	mpeg2_mc = mpeg2_mc_iwmmxt;
+    else if (accel & MPEG2_ACCEL_ARM)
+	mpeg2_mc = mpeg2_mc_arm;
+    else
 #endif
 	mpeg2_mc = mpeg2_mc_c;
 }

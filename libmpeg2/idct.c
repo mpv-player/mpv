@@ -239,21 +239,18 @@ static void mpeg2_idct_add_c (const int last, int16_t * block,
 
 void mpeg2_idct_init (uint32_t accel)
 {
-#ifdef HAVE_MMX2
+#ifdef ARCH_X86
     if (accel & MPEG2_ACCEL_X86_MMXEXT) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
 	mpeg2_idct_add = mpeg2_idct_add_mmxext;
 	mpeg2_idct_mmx_init ();
-    } else
-#endif
-#ifdef HAVE_MMX
-    if (accel & MPEG2_ACCEL_X86_MMX) {
+    } else if (accel & MPEG2_ACCEL_X86_MMX) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mmx;
 	mpeg2_idct_add = mpeg2_idct_add_mmx;
 	mpeg2_idct_mmx_init ();
     } else
 #endif
-#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
+#ifdef ARCH_PPC
     if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
 	mpeg2_idct_copy = mpeg2_idct_copy_altivec;
 	mpeg2_idct_add = mpeg2_idct_add_altivec;
