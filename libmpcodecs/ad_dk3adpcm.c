@@ -16,7 +16,6 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "libavutil/common.h"
 #include "mpbswap.h"
 #include "ad_internal.h"
 

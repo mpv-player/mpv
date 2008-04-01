@@ -12,7 +12,6 @@
 
 #include <setjmp.h>
 
-#include "libavutil/common.h"
 #include "mpbswap.h"
 
 #include "vd_internal.h"
