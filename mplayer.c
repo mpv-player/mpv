@@ -2182,7 +2182,7 @@ int reinit_video_chain(void) {
         }
     if (insert) {
       extern vf_info_t vf_info_ass;
-      vf_info_t* libass_vfs[] = {&vf_info_ass, NULL};
+      const vf_info_t* libass_vfs[] = {&vf_info_ass, NULL};
       char* vf_arg[] = {"auto", "1", NULL};
       vf_instance_t* vf_ass = vf_open_plugin(libass_vfs,sh_video->vfilter,"ass",vf_arg);
       if (vf_ass)
