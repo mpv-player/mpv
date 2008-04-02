@@ -1381,7 +1381,7 @@ get_equalizer( char *data, int *value )
 }
 
 static int
-control( uint32_t request, void *data, ... )
+control( uint32_t request, void *data)
 {
      switch (request) {
      case VOCTRL_GUISUPPORT:

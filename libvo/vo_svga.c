@@ -350,7 +350,7 @@ static int find_best_svga_mode(int req_w,int req_h, int req_bpp){
   return bestmode;
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
   switch (request) {
     case VOCTRL_QUERY_FORMAT:

@@ -250,7 +250,7 @@ query_format (uint32_t format)
 }
 
 static int
-control (uint32_t request, void *data, ...)
+control (uint32_t request, void *data)
 {
   switch (request)
   {

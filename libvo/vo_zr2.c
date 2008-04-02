@@ -433,7 +433,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	return 0;
 }
 
-static int control(uint32_t request, void *data, ...) {
+static int control(uint32_t request, void *data) {
 	switch (request) {
   		case VOCTRL_QUERY_FORMAT:
 			return query_format(*((uint32_t*)data));

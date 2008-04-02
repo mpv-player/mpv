@@ -142,7 +142,7 @@ typedef struct vo_functions_s
 	/*
 	 * Control interface
 	 */
-	int (*control)(uint32_t request, void *data, ...);
+	int (*control)(uint32_t request, void *data);
 
         /*
          * Display a new RGB/BGR frame of the video to the screen.

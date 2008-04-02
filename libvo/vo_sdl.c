@@ -1660,7 +1660,7 @@ static uint32_t get_image(mp_image_t *mpi)
     return VO_FALSE;
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
   struct sdl_priv_s *priv = &sdl_priv;
   switch (request) {

@@ -984,7 +984,7 @@ static uint32_t get_image(mp_image_t * mpi)
     return (VO_FALSE);
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
     switch (request)
     {

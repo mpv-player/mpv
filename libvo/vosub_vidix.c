@@ -533,7 +533,7 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
     return VO_FALSE;
 }
 
-uint32_t vidix_control(uint32_t request, void *data, ...)
+uint32_t vidix_control(uint32_t request, void *data)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

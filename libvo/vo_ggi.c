@@ -452,7 +452,7 @@ static void uninit(void)
     ggiExit();
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
     switch (request) {
     case VOCTRL_QUERY_FORMAT:

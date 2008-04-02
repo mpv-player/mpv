@@ -504,7 +504,7 @@ static uint32_t get_image(mp_image_t *mpi)
   return VO_TRUE;
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
   switch(request) {
   case VOCTRL_GET_IMAGE:

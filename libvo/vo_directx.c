@@ -1472,7 +1472,7 @@ static uint32_t color_ctrl_get(char *what, int *value)
 	return r;
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
     switch (request) {
    

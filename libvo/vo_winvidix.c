@@ -329,7 +329,7 @@ static int preinit(const char *arg){
     return(0);
 }
 
-static int control(uint32_t request, void *data, ...){
+static int control(uint32_t request, void *data){
   switch (request) {
   case VOCTRL_FULLSCREEN:
     if(!vo_fs){vo_fs=1;ShowWindow(hWndFS,SW_SHOW);SetForegroundWindow(hWndFS);}  

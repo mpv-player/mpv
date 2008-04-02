@@ -1411,7 +1411,7 @@ static uint32_t put_image(mp_image_t *mpi){
 
 
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
   switch (request) {
     case VOCTRL_QUERY_FORMAT:

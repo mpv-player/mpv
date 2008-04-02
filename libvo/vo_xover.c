@@ -427,7 +427,7 @@ static int preinit(const char *arg)
   return 0;
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
   if(!sub_vo) return VO_ERROR;
   switch (request) {
@@ -449,7 +449,6 @@ static int control(uint32_t request, void *data, ...)
       }
     return VO_TRUE;
   default:
-    // Safe atm bcs nothing use more than 1 arg
     return sub_vo->control(request,data);
   }
   return VO_NOTIMPL;

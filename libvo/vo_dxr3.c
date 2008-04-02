@@ -162,7 +162,7 @@ static overlay_t *overlay_data;
 /* Functions for working with the em8300's internal clock */
 /* End of internal clock functions */
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
 	switch (request) {
 	case VOCTRL_GUISUPPORT:

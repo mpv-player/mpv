@@ -429,7 +429,7 @@ static int query_format(uint32_t format)
     return 0;
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
     switch (request) {
         case VOCTRL_GET_IMAGE:

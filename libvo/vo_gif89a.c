@@ -336,7 +336,7 @@ static int query_format(uint32_t format)
 	return 0;
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
 	if (request == VOCTRL_QUERY_FORMAT) {
 		return query_format(*((uint32_t*)data));

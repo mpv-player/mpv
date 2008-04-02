@@ -43,7 +43,7 @@ static uint8_t *lvo_mem = NULL;
 static uint8_t next_frame;
 static mga_vid_config_t mga_vid_config;
 static unsigned image_bpp,image_height,image_width,src_format;
-uint32_t vlvo_control(uint32_t request, void *data, ...);
+uint32_t vlvo_control(uint32_t request, void *data);
 
 #define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
@@ -303,7 +303,7 @@ uint32_t vlvo_query_info(uint32_t format)
   return VFCAP_CSP_SUPPORTED;
 }
 
-uint32_t vlvo_control(uint32_t request, void *data, ...)
+uint32_t vlvo_control(uint32_t request, void *data)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
