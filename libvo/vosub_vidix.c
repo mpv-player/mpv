@@ -553,36 +553,31 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
 	return VO_TRUE;
   case VOCTRL_SET_EQUALIZER:
   {
-    va_list ap;
-    int value;
     vidix_video_eq_t info;
 
     if(!video_on) return VO_FALSE;
-    va_start(ap, data);
-    value = va_arg(ap, int);
-    va_end(ap);
-    
-//    printf("vidix seteq %s -> %d  \n",data,value);
+
+    struct voctrl_set_equalizer_args *args = data;
     
     /* vidix eq ranges are -1000..1000 */
-    if (!strcasecmp(data, "brightness"))
+    if (!strcasecmp(args->name, "brightness"))
     {
-	info.brightness = value*10;
+	info.brightness = args->value*10;
 	info.cap = VEQ_CAP_BRIGHTNESS;
     }
-    else if (!strcasecmp(data, "contrast"))
+    else if (!strcasecmp(args->name, "contrast"))
     {
-	info.contrast = value*10;
+	info.contrast = args->value*10;
 	info.cap = VEQ_CAP_CONTRAST;
     }
-    else if (!strcasecmp(data, "saturation"))
+    else if (!strcasecmp(args->name, "saturation"))
     {
-	info.saturation = value*10;
+	info.saturation = args->value*10;
 	info.cap = VEQ_CAP_SATURATION;
     }
-    else if (!strcasecmp(data, "hue"))
+    else if (!strcasecmp(args->name, "hue"))
     {
-	info.hue = value*10;
+	info.hue = args->value*10;
 	info.cap = VEQ_CAP_HUE;
     }
 
@@ -592,38 +587,34 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
   }
   case VOCTRL_GET_EQUALIZER:
   {
-    va_list ap;
-    int *value;
     vidix_video_eq_t info;
 
     if(!video_on) return VO_FALSE;
     if (vdlPlaybackGetEq(vidix_handler, &info) != 0)
 	return VO_FALSE;
 
-    va_start(ap, data);
-    value = va_arg(ap, int*);
-    va_end(ap);
+    struct voctrl_get_equalizer_args *args = data;
     
     /* vidix eq ranges are -1000..1000 */
-    if (!strcasecmp(data, "brightness"))
+    if (!strcasecmp(args->name, "brightness"))
     {
 	if (info.cap & VEQ_CAP_BRIGHTNESS)
-	    *value = info.brightness/10;
+	    *args->valueptr = info.brightness/10;
     }
-    else if (!strcasecmp(data, "contrast"))
+    else if (!strcasecmp(args->name, "contrast"))
     {
 	if (info.cap & VEQ_CAP_CONTRAST)
-	    *value = info.contrast/10;
+	    *args->valueptr = info.contrast/10;
     }
-    else if (!strcasecmp(data, "saturation"))
+    else if (!strcasecmp(args->name, "saturation"))
     {
 	if (info.cap & VEQ_CAP_SATURATION)
-	    *value = info.saturation/10;
+	    *args->valueptr = info.saturation/10;
     }
-    else if (!strcasecmp(data, "hue"))
+    else if (!strcasecmp(args->name, "hue"))
     {
 	if (info.cap & VEQ_CAP_HUE)
-	    *value = info.hue/10;
+	    *args->valueptr = info.hue/10;
     }
 
     return VO_TRUE;

@@ -240,22 +240,17 @@ static int control(uint32_t request, void *data, ...)
 	    }
 	case VOCTRL_SET_EQUALIZER:
 	    {
-		va_list ap;
-		int value;
 		em8300_bcs_t bcs;
-		
-		va_start(ap, data);
-		value = va_arg(ap, int);
-		va_end(ap);
+		struct voctrl_set_equalizer_args *args = data;
 
 		if (ioctl(fd_control, EM8300_IOCTL_GETBCS, &bcs) < 0)
 		    return VO_FALSE;
-		if (!strcasecmp(data, "brightness"))
-		    bcs.brightness = (value+100)*5;
-		else if (!strcasecmp(data, "contrast"))
-		    bcs.contrast = (value+100)*5;
-		else if (!strcasecmp(data, "saturation"))
-		    bcs.saturation = (value+100)*5;
+		if (!strcasecmp(args->name, "brightness"))
+		    bcs.brightness = (args->value+100)*5;
+		else if (!strcasecmp(args->name, "contrast"))
+		    bcs.contrast = (args->value+100)*5;
+		else if (!strcasecmp(args->name, "saturation"))
+		    bcs.saturation = (args->value+100)*5;
 		else return VO_FALSE;
         
 		if (ioctl(fd_control, EM8300_IOCTL_SETBCS, &bcs) < 0)
@@ -264,23 +259,18 @@ static int control(uint32_t request, void *data, ...)
 	    }
 	case VOCTRL_GET_EQUALIZER:
 	    {
-		va_list ap;
-		int *value;
 		em8300_bcs_t bcs;
+		struct voctrl_get_equalizer_args *args = data;
 		
-		va_start(ap, data);
-		value = va_arg(ap, int*);
-		va_end(ap);
-
 		if (ioctl(fd_control, EM8300_IOCTL_GETBCS, &bcs) < 0)
 		    return VO_FALSE;
 		
-		if (!strcasecmp(data, "brightness"))
-		    *value = (bcs.brightness/5)-100;
-		else if (!strcasecmp(data, "contrast"))
-		    *value = (bcs.contrast/5)-100;
-		else if (!strcasecmp(data, "saturation"))
-		    *value = (bcs.saturation/5)-100;
+		if (!strcasecmp(args->name, "brightness"))
+		    *args->valueptr = (bcs.brightness/5)-100;
+		else if (!strcasecmp(args->name, "contrast"))
+		    *args->valueptr = (bcs.contrast/5)-100;
+		else if (!strcasecmp(args->name, "saturation"))
+		    *args->valueptr = (bcs.saturation/5)-100;
 		else return VO_FALSE;
         
 		return VO_TRUE;

@@ -1422,25 +1422,13 @@ static int control(uint32_t request, void *data, ...)
 	return put_image(data);    
     case VOCTRL_SET_EQUALIZER:
       {
-        va_list ap;
-	int value;
-    
-        va_start(ap, data);
-	value = va_arg(ap, int);
-        va_end(ap);
-    
-	return(directfb_set_video_eq(data, value));
+	struct voctrl_set_equalizer_args *args = data;
+	return directfb_set_video_eq(args->name, args->value);
       }
     case VOCTRL_GET_EQUALIZER:
       {
-	va_list ap;
-        int *value;
-    
-        va_start(ap, data);
-        value = va_arg(ap, int*);
-        va_end(ap);
-    
-	return(directfb_get_video_eq(data, value));
+	struct voctrl_get_equalizer_args *args = data;
+	return directfb_get_video_eq(args->name, args->valueptr);
       }
   };
   return VO_NOTIMPL;

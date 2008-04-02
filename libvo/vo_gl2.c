@@ -898,23 +898,13 @@ static int control(uint32_t request, void *data, ...)
 #ifndef GL_WIN32
     case VOCTRL_SET_EQUALIZER:
     {
-      va_list ap;
-      int value;
-
-      va_start(ap, data);
-      value = va_arg(ap, int);
-      va_end(ap);
-      return vo_x11_set_equalizer(data, value);
+      struct voctrl_set_equalizer_args *args = data;
+      return vo_x11_set_equalizer(args->name, args->value);
     }
     case VOCTRL_GET_EQUALIZER:
     {
-      va_list ap;
-      int *value;
-
-      va_start(ap, data);
-      value = va_arg(ap, int *);
-      va_end(ap);
-      return vo_x11_get_equalizer(data, value);
+      struct voctrl_get_equalizer_args *args = data;
+      return vo_x11_get_equalizer(args->name, args->valueptr);
     }
 #endif
     case VOCTRL_UPDATE_SCREENINFO:

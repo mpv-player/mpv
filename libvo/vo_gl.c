@@ -941,35 +941,31 @@ static int control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_GET_EQUALIZER:
     if (image_format == IMGFMT_YV12) {
-      va_list va;
-      int *value;
-      va_start(va, data);
-      value = va_arg(va, int *);
-      va_end(va);
-      if (strcasecmp(data, "brightness") == 0) {
-        *value = eq_bri;
+      struct voctrl_get_equalizer_args *args = data;
+      if (strcasecmp(args->name, "brightness") == 0) {
+        *args->valueptr = eq_bri;
         if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
-      } else if (strcasecmp(data, "contrast") == 0) {
-        *value = eq_cont;
+      } else if (strcasecmp(args->name, "contrast") == 0) {
+        *args->valueptr = eq_cont;
         if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
-      } else if (strcasecmp(data, "saturation") == 0) {
-        *value = eq_sat;
-      } else if (strcasecmp(data, "hue") == 0) {
-        *value = eq_hue;
-      } else if (strcasecmp(data, "gamma") ==  0) {
-        *value = eq_rgamma;
+      } else if (strcasecmp(args->name, "saturation") == 0) {
+        *args->valueptr = eq_sat;
+      } else if (strcasecmp(args->name, "hue") == 0) {
+        *args->valueptr = eq_hue;
+      } else if (strcasecmp(args->name, "gamma") ==  0) {
+        *args->valueptr = eq_rgamma;
         if (use_yuv == YUV_CONVERSION_COMBINERS ||
             use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(data, "red_gamma") ==  0) {
-        *value = eq_rgamma;
+      } else if (strcasecmp(args->name, "red_gamma") ==  0) {
+        *args->valueptr = eq_rgamma;
         if (use_yuv == YUV_CONVERSION_COMBINERS ||
             use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(data, "green_gamma") ==  0) {
-        *value = eq_ggamma;
+      } else if (strcasecmp(args->name, "green_gamma") ==  0) {
+        *args->valueptr = eq_ggamma;
         if (use_yuv == YUV_CONVERSION_COMBINERS ||
             use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(data, "blue_gamma") ==  0) {
-        *value = eq_bgamma;
+      } else if (strcasecmp(args->name, "blue_gamma") ==  0) {
+        *args->valueptr = eq_bgamma;
         if (use_yuv == YUV_CONVERSION_COMBINERS ||
             use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
       }
@@ -978,35 +974,31 @@ static int control(uint32_t request, void *data, ...)
     break;
   case VOCTRL_SET_EQUALIZER:
     if (image_format == IMGFMT_YV12) {
-      va_list va;
-      int value;
-      va_start(va, data);
-      value = va_arg(va, int);
-      va_end(va);
-      if (strcasecmp(data, "brightness") == 0) {
-        eq_bri = value;
+      struct voctrl_set_equalizer_args *args = data;
+      if (strcasecmp(args->name, "brightness") == 0) {
+        eq_bri = args->value;
         if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
-      } else if (strcasecmp(data, "contrast") == 0) {
-        eq_cont = value;
+      } else if (strcasecmp(args->name, "contrast") == 0) {
+        eq_cont = args->value;
         if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
-      } else if (strcasecmp(data, "saturation") == 0) {
-        eq_sat = value;
-      } else if (strcasecmp(data, "hue") == 0) {
-        eq_hue = value;
-      } else if (strcasecmp(data, "gamma") ==  0) {
-        eq_rgamma = eq_ggamma = eq_bgamma = value;
+      } else if (strcasecmp(args->name, "saturation") == 0) {
+        eq_sat = args->value;
+      } else if (strcasecmp(args->name, "hue") == 0) {
+        eq_hue = args->value;
+      } else if (strcasecmp(args->name, "gamma") ==  0) {
+        eq_rgamma = eq_ggamma = eq_bgamma = args->value;
         if (use_yuv == YUV_CONVERSION_COMBINERS ||
             use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(data, "red_gamma") ==  0) {
-        eq_rgamma = value;
+      } else if (strcasecmp(args->name, "red_gamma") ==  0) {
+        eq_rgamma = args->value;
         if (use_yuv == YUV_CONVERSION_COMBINERS ||
             use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(data, "green_gamma") ==  0) {
-        eq_ggamma = value;
+      } else if (strcasecmp(args->name, "green_gamma") ==  0) {
+        eq_ggamma = args->value;
         if (use_yuv == YUV_CONVERSION_COMBINERS ||
             use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(data, "blue_gamma") ==  0) {
-        eq_bgamma = value;
+      } else if (strcasecmp(args->name, "blue_gamma") ==  0) {
+        eq_bgamma = args->value;
         if (use_yuv == YUV_CONVERSION_COMBINERS ||
             use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
       }

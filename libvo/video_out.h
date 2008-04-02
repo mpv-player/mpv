@@ -47,7 +47,15 @@
 #define VOCTRL_SET_PANSCAN 16
 /* equalizer controls */
 #define VOCTRL_SET_EQUALIZER 17
+struct voctrl_set_equalizer_args {
+    const char *name;
+    int value;
+};
 #define VOCTRL_GET_EQUALIZER 18
+struct voctrl_get_equalizer_args {
+    const char *name;
+    int *valueptr;
+};
 //#define VOCTRL_GUI_NOWINDOW 19
 /* Frame duplication */
 #define VOCTRL_DUPLICATE_FRAME 20

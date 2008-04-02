@@ -362,33 +362,8 @@ static int control(uint32_t request, void *data, ...)
   }
 
 #ifdef CONFIG_VIDIX
-  if (vidix_name[0]) {
-    switch (request) {
-    case VOCTRL_SET_EQUALIZER:
-    {
-      va_list ap;
-      int value;
-    
-      va_start(ap, data);
-      value = va_arg(ap, int);
-      va_end(ap);
-
-      return vidix_control(request, data, value);
-    }
-    case VOCTRL_GET_EQUALIZER:
-    {
-      va_list ap;
-      int *value;
-    
-      va_start(ap, data);
-      value = va_arg(ap, int*);
-      va_end(ap);
-
-      return vidix_control(request, data, value);
-    }
-    }
+  if (vidix_name[0])
     return vidix_control(request, data);
-  }
 #endif
 
   return VO_NOTIMPL;

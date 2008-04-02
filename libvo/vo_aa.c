@@ -724,31 +724,20 @@ static int control(uint32_t request, void *data, ...)
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_SET_EQUALIZER: {
-    va_list ap;
-    int val;
-
-    va_start(ap, data);
-    val = va_arg(ap, int);
-    va_end(ap);
-
-    if(strcmp((char*)data,"contrast") == 0)
-      p->contrast = ( val + 100 ) * 64 / 100;
-    else if(strcmp((char*)data,"brightness") == 0)
-      p->bright = ( val + 100) * 128 / 100;
+    struct voctrl_set_equalizer_args *args = data;
+    if (strcmp(args->name, "contrast") == 0)
+      p->contrast = (args->value + 100) * 64 / 100;
+    else if (strcmp(args->name, "brightness") == 0)
+      p->bright = (args->value + 100) * 128 / 100;
     return VO_TRUE;
   }
   case VOCTRL_GET_EQUALIZER: {
-    va_list ap;
-    int* val;
+    struct voctrl_get_equalizer_args *args = data;
 
-    va_start(ap, data);
-    val = va_arg(ap, int*);
-    va_end(ap);
-
-    if(strcmp((char*)data,"contrast") == 0)
-      *val = (p->contrast - 64) * 100 / 64;
-    else if(strcmp((char*)data,"brightness") == 0)
-      *val = (p->bright - 128) * 100 / 128;
+    if (strcmp(args->name, "contrast") == 0)
+      *args->valueptr = (p->contrast - 64) * 100 / 64;
+    else if (strcmp(args->name, "brightness") == 0)
+      *args->valueptr = (p->bright - 128) * 100 / 128;
 
     return VO_TRUE;
   }

@@ -240,11 +240,12 @@ static int control(uint32_t request, void *data, ...)
     return draw_image(data);
   case VOCTRL_SET_EQUALIZER:
     {
-     va_list ap;
      short value;
      uint32_t luma,prev;
+     struct voctrl_set_equalizer_args *args = data;
 
-     if ( strcmp( data,"brightness" ) && strcmp( data,"contrast" ) ) return VO_FALSE;
+     if (strcmp(args->name, "brightness") && strcmp(args->name, "contrast"))
+	return VO_FALSE;
 
      if (ioctl(f,MGA_VID_GET_LUMA,&prev)) {
 	perror("Error in mga_vid_config ioctl()");
@@ -254,15 +255,13 @@ static int control(uint32_t request, void *data, ...)
 
 //     printf("GET: 0x%4X 0x%4X  \n",(prev>>16),(prev&0xffff));
 
-     va_start(ap, data);
-     value = va_arg(ap, int);
-     va_end(ap);
+     value = args->value;
      
 //     printf("value: %d -> ",value);
      value=((value+100)*255)/200-128; // maps -100=>-128 and +100=>127
 //     printf("%d  \n",value);
 
-     if(!strcmp(data,"contrast"))
+     if (!strcmp(args->name, "contrast"))
          luma = (prev&0xFFFF0000)|(value&0xFFFF);
      else
          luma = (prev&0xFFFF)|(value<<16);
@@ -278,12 +277,12 @@ static int control(uint32_t request, void *data, ...)
 
   case VOCTRL_GET_EQUALIZER:
     {
-     va_list ap;
-     int * value;
      short val;
      uint32_t luma;
+     struct voctrl_get_equalizer_args *args = data;
      
-     if ( strcmp( data,"brightness" ) && strcmp( data,"contrast" ) ) return VO_FALSE;
+     if (strcmp(args->name, "brightness") && strcmp(args->name, "contrast"))
+        return VO_FALSE;
 
      if (ioctl(f,MGA_VID_GET_LUMA,&luma)) {
 	perror("Error in mga_vid_config ioctl()");
@@ -291,16 +290,12 @@ static int control(uint32_t request, void *data, ...)
 	return VO_FALSE;
      }
      
-     if ( !strcmp( data,"contrast" ) )
+     if (!strcmp(args->name, "contrast"))
 	 val=(luma & 0xFFFF);
      else
 	 val=(luma >> 16);
 	 
-     va_start(ap, data);
-     value = va_arg(ap, int*);
-     va_end(ap);
-
-     *value = (val*200)/255;
+     *args->valueptr = (val*200)/255;
 
      return VO_TRUE;
     }

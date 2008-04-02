@@ -1399,25 +1399,13 @@ control( uint32_t request, void *data, ... )
 
      case VOCTRL_SET_EQUALIZER:
           {
-               va_list ap;
-               int value;
-
-               va_start( ap, data );
-               value = va_arg( ap, int );
-               va_end( ap );
-
-               return set_equalizer( data, value );
+               struct voctrl_set_equalizer_args *args = data;
+               return set_equalizer(args->name, args->value);
           }
      case VOCTRL_GET_EQUALIZER:
           {
-               va_list ap;
-               int *value;
-
-               va_start( ap, data );
-               value = va_arg( ap, int* );
-               va_end( ap );
-
-               return get_equalizer( data, value );
+               struct voctrl_get_equalizer_args *args = data;
+               return get_equalizer(args->name, args->valueptr);
           }
      }
 

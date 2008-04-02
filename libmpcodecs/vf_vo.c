@@ -103,13 +103,15 @@ static int control(struct vf_instance_s* vf, int request, void* data)
     {
 	vf_equalizer_t *eq=data;
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
-	return((video_out->control(VOCTRL_SET_EQUALIZER, eq->item, eq->value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
+	struct voctrl_set_equalizer_args param = {eq->item, eq->value};
+	return video_out->control(VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
     }
     case VFCTRL_GET_EQUALIZER:
     {
 	vf_equalizer_t *eq=data;
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
-	return((video_out->control(VOCTRL_GET_EQUALIZER, eq->item, &eq->value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
+	struct voctrl_get_equalizer_args param = {eq->item, &eq->value};
+	return video_out->control(VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
     }
 #ifdef USE_ASS
     case VFCTRL_INIT_EOSD:

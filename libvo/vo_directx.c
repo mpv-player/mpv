@@ -1564,22 +1564,12 @@ static int control(uint32_t request, void *data, ...)
 		    return VO_TRUE;
 		}
 	case VOCTRL_SET_EQUALIZER: {
-		va_list	ap;
-		int	value;
-		
-		va_start(ap, data);
-		value = va_arg(ap, int);
-		va_end(ap);
-		return color_ctrl_set(data, value);
+		struct voctrl_set_equalizer_args *args = data;
+		return color_ctrl_set(args->name, args->value);
 	}
 	case VOCTRL_GET_EQUALIZER: {
-		va_list	ap;
-		int	*value;
-		
-		va_start(ap, data);
-		value = va_arg(ap, int*);
-		va_end(ap);
-		return color_ctrl_get(data, value);
+		struct voctrl_get_equalizer_args *args = data;
+		return color_ctrl_get(args->name, args->valueptr);
 	}
     case VOCTRL_UPDATE_SCREENINFO:
         if (vidmode) {
