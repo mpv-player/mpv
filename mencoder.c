@@ -345,8 +345,8 @@ static int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
 // so audio can be cut correctly. -1 if there is no limit.
 static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v);
 
-static int at_eof=0;
-static int interrupted=0;
+static volatile int at_eof=0;
+static volatile int interrupted=0;
 
 static void exit_sighandler(int x){
     at_eof=1;
