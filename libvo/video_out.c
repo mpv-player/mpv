@@ -1,5 +1,5 @@
 
-/* this file contains libvo's common functions, variables used by 
+/* this file contains libvo's common functions, variables used by
    many/all drivers. */
 
 #include <stdio.h>
@@ -153,7 +153,7 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_xover,
 #endif
 #ifdef HAVE_GL
-	        &video_out_gl,
+        &video_out_gl,
         &video_out_gl2,
 #endif
 #ifdef HAVE_DGA
@@ -224,7 +224,7 @@ const vo_functions_t* const video_out_drivers[] =
 	&video_out_yuv4mpeg,
 #ifdef HAVE_PNG
 	&video_out_png,
-#endif	
+#endif
 #ifdef HAVE_JPEG
 	&video_out_jpeg,
 #endif
@@ -243,54 +243,56 @@ const vo_functions_t* const video_out_drivers[] =
         NULL
 };
 
-void list_video_out(void){
-      int i=0;
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
-      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_OUTPUTS\n");
-      while (video_out_drivers[i]) {
+void list_video_out(void)
+{
+    int i = 0;
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_OUTPUTS\n");
+    while (video_out_drivers[i]) {
         const vo_info_t *info = video_out_drivers[i++]->info;
-      	mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n", info->short_name, info->name);
-      }
-      mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
+        mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n", info->short_name, info->name);
+    }
+    mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
-const vo_functions_t* init_best_video_out(char** vo_list){
+const vo_functions_t *init_best_video_out(char **vo_list)
+{
     int i;
     // first try the preferred drivers, with their optional subdevice param:
-    if(vo_list && vo_list[0])
-      while(vo_list[0][0]){
-        char* vo=strdup(vo_list[0]);
-	vo_subdevice=strchr(vo,':');
-	if (!strcmp(vo, "pgm"))
-	    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_PGM_HasBeenReplaced);
-	if (!strcmp(vo, "md5"))
-	    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_MD5_HasBeenReplaced);
-	if(vo_subdevice){
-	    vo_subdevice[0]=0;
-	    ++vo_subdevice;
-	}
-	for(i=0;video_out_drivers[i];i++){
-	    const vo_functions_t* video_driver=video_out_drivers[i];
-	    const vo_info_t *info = video_driver->info;
-	    if(!strcmp(info->short_name,vo)){
-		// name matches, try it
-		if(!video_driver->preinit(vo_subdevice))
-		{
-		    free(vo);
-		    return video_driver; // success!
+    if (vo_list && vo_list[0])
+        while (vo_list[0][0]) {
+            char *name = strdup(vo_list[0]);
+            vo_subdevice = strchr(name,':');
+            if (!strcmp(name, "pgm"))
+                mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_PGM_HasBeenReplaced);
+            if (!strcmp(name, "md5"))
+                mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_MD5_HasBeenReplaced);
+            if (vo_subdevice) {
+                vo_subdevice[0] = 0;
+                ++vo_subdevice;
+            }
+            for (i = 0; video_out_drivers[i]; i++) {
+                const vo_functions_t *video_driver = video_out_drivers[i];
+                const vo_info_t *info = video_driver->info;
+                if (!strcmp(info->short_name, name)) {
+                    // name matches, try it
+                    if (!video_driver->preinit(vo_subdevice)) {
+                        free(name);
+                        return video_driver; // success!
+                    }
 		}
 	    }
+            // continue...
+            free(name);
+            ++vo_list;
+            if (!(vo_list[0]))
+                return NULL; // do NOT fallback to others
 	}
-        // continue...
-	free(vo);
-	++vo_list;
-	if(!(vo_list[0])) return NULL; // do NOT fallback to others
-      }
     // now try the rest...
-    vo_subdevice=NULL;
-    for(i=0;video_out_drivers[i];i++){
-	const vo_functions_t* video_driver=video_out_drivers[i];
-	if(!video_driver->preinit(vo_subdevice))
+    vo_subdevice = NULL;
+    for (i = 0; video_out_drivers[i]; i++) {
+        const vo_functions_t *video_driver = video_out_drivers[i];
+        if (!video_driver->preinit(vo_subdevice))
 	    return video_driver; // success!
     }
     return NULL;
@@ -298,28 +300,29 @@ const vo_functions_t* init_best_video_out(char** vo_list){
 
 int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
-                     char *title, uint32_t format) {
-  panscan_init();
-  aspect_save_orig(width,height);
-  aspect_save_prescale(d_width,d_height);
+                     char *title, uint32_t format)
+{
+    panscan_init();
+    aspect_save_orig(width, height);
+    aspect_save_prescale(d_width, d_height);
 
-  if (vo->control(VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
-  aspect(&d_width,&d_height,A_NOZOOM);
-  vo_dx = (int)(vo_screenwidth - d_width) / 2;
-  vo_dy = (int)(vo_screenheight - d_height) / 2;
-  geometry(&vo_dx, &vo_dy, &d_width, &d_height,
-           vo_screenwidth, vo_screenheight);
-  vo_dx += xinerama_x;
-  vo_dy += xinerama_y;
-  vo_dwidth = d_width;
-  vo_dheight = d_height;
-  }
+    if (vo->control(VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
+        aspect(&d_width, &d_height, A_NOZOOM);
+        vo_dx = (int)(vo_screenwidth - d_width) / 2;
+        vo_dy = (int)(vo_screenheight - d_height) / 2;
+        geometry(&vo_dx, &vo_dy, &d_width, &d_height,
+                 vo_screenwidth, vo_screenheight);
+        vo_dx += xinerama_x;
+        vo_dy += xinerama_y;
+        vo_dwidth = d_width;
+        vo_dheight = d_height;
+    }
 
-  return vo->config(width, height, d_width, d_height, flags, title, format);
+    return vo->config(width, height, d_width, d_height, flags, title, format);
 }
 
-#if defined(HAVE_FBDEV)||defined(HAVE_VESA)  
-/* Borrowed from vo_fbdev.c 
+#if defined(HAVE_FBDEV)||defined(HAVE_VESA)
+/* Borrowed from vo_fbdev.c
 Monitor ranges related functions*/
 
 char *monitor_hfreq_str = NULL;
