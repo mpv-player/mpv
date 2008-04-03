@@ -5,6 +5,7 @@ LIBNAME_MPLAYER = libvo.a
 
 SRCS_MPLAYER = aspect.c \
                geometry.c \
+               old_vo_wrapper.c \
                spuenc.c \
                video_out.c \
                vo_mpegpes.c \

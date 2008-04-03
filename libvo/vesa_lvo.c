@@ -43,13 +43,13 @@ static uint8_t *lvo_mem = NULL;
 static uint8_t next_frame;
 static mga_vid_config_t mga_vid_config;
 static unsigned image_bpp,image_height,image_width,src_format;
-uint32_t vlvo_control(uint32_t request, void *data);
+int vlvo_control(uint32_t request, void *data);
 
 #define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
 #define IMAGE_LINE_SIZE(pixel_size) (image_width*(pixel_size))
 
-extern vo_functions_t video_out_vesa;
+extern struct vo_old_functions video_out_vesa;
 
 int vlvo_preinit(const char *drvname)
 {
@@ -155,7 +155,7 @@ void vlvo_term( void )
 	if(lvo_handler != -1) close(lvo_handler);
 }
 
-uint32_t vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
+int vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
@@ -195,7 +195,7 @@ uint32_t vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,i
     return 0;
 }
 
-uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+int vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
    mp_msg(MSGT_VO,MSGL_DBG2, "vesa_lvo: vlvo_draw_slice() was called\n");}
@@ -213,7 +213,7 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
  return 0;
 }
 
-uint32_t vlvo_draw_frame(uint8_t *image[])
+int vlvo_draw_frame(uint8_t *image[])
 {
 /* Note it's very strange but sometime for YUY2 draw_frame is called */
   fast_memcpy(lvo_mem,image[0],mga_vid_config.frame_size);
@@ -303,7 +303,7 @@ uint32_t vlvo_query_info(uint32_t format)
   return VFCAP_CSP_SUPPORTED;
 }
 
-uint32_t vlvo_control(uint32_t request, void *data)
+int vlvo_control(uint32_t request, void *data)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

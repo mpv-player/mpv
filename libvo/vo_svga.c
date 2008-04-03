@@ -135,7 +135,7 @@ char s[64];
       vidix_name[i-5]=0;
       if(arg[i]==':')i++;
       arg+=i;
-      vidix_preinit(vidix_name, &video_out_svga);
+      vidix_preinit(vidix_name, video_out_svga.old_functions);
     }
 #endif
     if(!strncmp(arg,"sq",2)) {

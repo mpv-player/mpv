@@ -29,6 +29,7 @@
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
 #include "geometry.h"
+#include "old_vo_wrapper.h"
 
 static int control(uint32_t request, void *data);
 static int config(uint32_t width, uint32_t height, uint32_t d_width,
@@ -43,9 +44,20 @@ static void uninit(void);
 static int query_format(uint32_t format);
 static int preinit(const char *);
 
-#define LIBVO_EXTERN(x) vo_functions_t video_out_##x =\
+#define LIBVO_EXTERN(x) struct vo_driver video_out_##x =\
 {\
-	&info,\
+    .is_new = 0,\
+    .info = &info,\
+    .preinit = old_vo_preinit,\
+    .config = old_vo_config,\
+    .control = old_vo_control,\
+    .draw_frame = old_vo_draw_frame,\
+    .draw_slice = old_vo_draw_slice,\
+    .draw_osd = old_vo_draw_osd,\
+    .flip_page = old_vo_flip_page,\
+    .check_events = old_vo_check_events,\
+    .uninit = old_vo_uninit,\
+    .old_functions = &(struct vo_old_functions){\
 	preinit,\
 	config,\
 	control,\
@@ -54,7 +66,8 @@ static int preinit(const char *);
      	draw_osd,\
 	flip_page,\
 	check_events,\
-	uninit\
+        uninit,\
+    }\
 };
 
 #include "osd.h"

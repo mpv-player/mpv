@@ -37,7 +37,8 @@ static int movie_w,movie_h;
 static int playing = 0;
 
 // vo device used to blank the screen for the overlay init
-static const vo_functions_t* sub_vo = NULL;
+static const struct vo_old_functions *sub_vo = NULL;
+static const struct vo_info_s *sub_info;
 
 static uint8_t* sub_img = NULL;
 static int sub_x,sub_y,sub_w,sub_h;
@@ -432,7 +433,7 @@ static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
 }
 
 static int dxr2_setup_vga_params(void) {
-  const vo_info_t* vi = sub_vo->info;
+  const vo_info_t* vi = sub_info;
   dxr2_vgaParams_t vga;
 
   int loaded = dxr2_load_vga_params(&vga,(char*)vi->short_name);
@@ -646,7 +647,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t 
     }
     // Does the sub vo support the x11 stuff
     // Fix me : test the other x11 vo's and enable them
-    if(strcmp(sub_vo->info->short_name,"x11") == 0)
+    if(strcmp(sub_info->short_name,"x11") == 0)
       sub_vo_win = 1;
     else
       sub_vo_win = 0;
@@ -820,10 +821,11 @@ static int preinit(const char *arg) {
 	const vo_info_t* vi = video_out_drivers[n]->info;
 	if(!vi)
 	  continue;
-	if(strcasecmp(arg,vi->short_name) == 0)
+	if(!video_out_drivers[n]->is_new && strcasecmp(arg,vi->short_name) == 0)
 	  break;
       }
-      sub_vo = video_out_drivers[n];
+      sub_vo = video_out_drivers[n]->old_functions;
+      sub_info = video_out_drivers[n]->info;
     } else {
       mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] We need a sub driver to initialize the overlay\n");
       use_ol = 0;

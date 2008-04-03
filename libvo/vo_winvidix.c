@@ -323,7 +323,7 @@ static int preinit(const char *arg){
 	vidix_name = NULL;
     }
 
-    if (vidix_preinit(vidix_name, &video_out_winvidix) != 0)
+    if (vidix_preinit(vidix_name, video_out_winvidix.old_functions) != 0)
 	return(1);
 
     return(0);

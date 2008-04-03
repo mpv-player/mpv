@@ -116,15 +116,23 @@ typedef struct vo_info_s
         const char *comment;
 } vo_info_t;
 
-typedef struct vo_functions_s
-{
+struct vo;
+
+struct vo_driver {
+	// Driver uses new API
+	int is_new;
+
+	// This is set if the driver is not new and contains pointers to
+	// old-API functions to be used instead of the ones below.
+	struct vo_old_functions *old_functions;
+
 	const vo_info_t *info;
 	/*
 	 * Preinitializes driver (real INITIALIZATION)
 	 *   arg - currently it's vo_subdevice
 	 *   returns: zero on successful initialization, non-zero on error.
 	 */
-	int (*preinit)(const char *arg);
+	int (*preinit)(struct vo *vo, const char *arg);
         /*
          * Initialize (means CONFIGURE) the display driver.
 	 * params:
@@ -135,21 +143,21 @@ typedef struct vo_functions_s
 	 *   format: fourcc of pixel format
          * returns : zero on successful initialization, non-zero on error.
          */
-        int (*config)(uint32_t width, uint32_t height, uint32_t d_width,
-			 uint32_t d_height, uint32_t fullscreen, char *title,
-			 uint32_t format);
+        int (*config)(struct vo *vo, uint32_t width, uint32_t height,
+	              uint32_t d_width, uint32_t d_height, uint32_t fullscreen,
+		      char *title, uint32_t format);
 
 	/*
 	 * Control interface
 	 */
-	int (*control)(uint32_t request, void *data);
+	int (*control)(struct vo *vo, uint32_t request, void *data);
 
         /*
          * Display a new RGB/BGR frame of the video to the screen.
          * params:
 	 *   src[0] - pointer to the image
          */
-        int (*draw_frame)(uint8_t *src[]);
+        int (*draw_frame)(struct vo *vo, uint8_t *src[]);
 
         /*
          * Draw a planar YUV slice to the buffer:
@@ -159,39 +167,67 @@ typedef struct vo_functions_s
 	 *   w,h = width*height of area to be copied (in Y pixels)
          *   x,y = position at the destination image (in Y pixels)
          */
-        int (*draw_slice)(uint8_t *src[], int stride[], int w,int h, int x,int y);
+        int (*draw_slice)(struct vo *vo, uint8_t *src[], int stride[], int w,
+			  int h, int x, int y);
 
    	/*
          * Draws OSD to the screen buffer
          */
-        void (*draw_osd)(void);
+        void (*draw_osd)(struct vo *vo);
 
         /*
          * Blit/Flip buffer to the screen. Must be called after each frame!
          */
-        void (*flip_page)(void);
+        void (*flip_page)(struct vo *vo);
 
         /*
          * This func is called after every frames to handle keyboard and
 	 * other events. It's called in PAUSE mode too!
          */
-        void (*check_events)(void);
+        void (*check_events)(struct vo *vo);
 
         /*
          * Closes driver. Should restore the original state of the system.
          */
-        void (*uninit)(void);
+        void (*uninit)(struct vo *vo);
+};
 
-} vo_functions_t;
+struct vo_old_functions {
+    int (*preinit)(const char *arg);
+    int (*config)(uint32_t width, uint32_t height, uint32_t d_width,
+                  uint32_t d_height, uint32_t fullscreen, char *title,
+                  uint32_t format);
+    int (*control)(uint32_t request, void *data);
+    int (*draw_frame)(uint8_t *src[]);
+    int (*draw_slice)(uint8_t *src[], int stride[], int w,int h, int x,int y);
+    void (*draw_osd)(void);
+    void (*flip_page)(void);
+    void (*check_events)(void);
+    void (*uninit)(void);
+};
 
-const vo_functions_t* init_best_video_out(char** vo_list);
-int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
+struct vo {
+    const struct vo_driver *driver;
+    void *priv;
+};
+
+struct vo *init_best_video_out(char **vo_list);
+int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      char *title, uint32_t format);
 void list_video_out(void);
 
+int vo_control(struct vo *vo, uint32_t request, void *data);
+int vo_draw_frame(struct vo *vo, uint8_t *src[]);
+int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
+void vo_draw_osd(struct vo *vo);
+void vo_flip_page(struct vo *vo);
+void vo_check_events(struct vo *vo);
+void vo_destroy(struct vo *vo);
+
+
 // NULL terminated array of all drivers
-extern const vo_functions_t* const video_out_drivers[];
+extern const struct vo_driver *video_out_drivers[];
 
 extern int vo_flags;
 

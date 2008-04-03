@@ -976,7 +976,7 @@ static int mp_property_fullscreen(m_option_t * prop, int action, void *arg,
 	else
 #endif
 	if (vo_config_count)
-	    mpctx->video_out->control(VOCTRL_FULLSCREEN, 0);
+	    vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
 	return M_PROPERTY_OK;
     default:
 	return m_property_flag(prop, action, arg, &vo_fs);
@@ -1019,7 +1019,7 @@ static int mp_property_panscan(m_option_t * prop, int action, void *arg,
 {
 
     if (!mpctx->video_out
-	|| mpctx->video_out->control(VOCTRL_GET_PANSCAN, NULL) != VO_TRUE)
+	|| vo_control(mpctx->video_out, VOCTRL_GET_PANSCAN, NULL) != VO_TRUE)
 	return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -1028,7 +1028,7 @@ static int mp_property_panscan(m_option_t * prop, int action, void *arg,
 	    return M_PROPERTY_ERROR;
 	M_PROPERTY_CLAMP(prop, *(float *) arg);
 	vo_panscan = *(float *) arg;
-	mpctx->video_out->control(VOCTRL_SET_PANSCAN, NULL);
+	vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
 	return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
@@ -1038,7 +1038,7 @@ static int mp_property_panscan(m_option_t * prop, int action, void *arg,
 	    vo_panscan = 1;
 	else if (vo_panscan < 0)
 	    vo_panscan = 0;
-	mpctx->video_out->control(VOCTRL_SET_PANSCAN, NULL);
+	vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
 	return M_PROPERTY_OK;
     default:
 	return m_property_float_range(prop, action, arg, &vo_panscan);
@@ -1065,7 +1065,7 @@ static int mp_property_vo_flag(m_option_t * prop, int action, void *arg,
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
 	if (vo_config_count)
-	    mpctx->video_out->control(vo_ctrl, 0);
+	    vo_control(mpctx->video_out, vo_ctrl, 0);
 	return M_PROPERTY_OK;
     default:
 	return m_property_flag(prop, action, arg, vo_var);

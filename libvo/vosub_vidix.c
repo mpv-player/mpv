@@ -33,6 +33,7 @@
 #include "video_out.h"
 #include "sub.h"
 #include "vosub_vidix.h"
+#include "old_vo_wrapper.h"
 
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
@@ -48,7 +49,7 @@ static int video_on=0;
 static vidix_capability_t vidix_cap;
 static vidix_playback_t   vidix_play;
 static vidix_fourcc_t	  vidix_fourcc;
-static vo_functions_t *   vo_server;
+static struct vo_old_functions *vo_server;
 static vidix_yuv_t	  dstrides;
 /*static uint32_t (*server_control)(uint32_t request, void *data, ...);*/
 
@@ -85,7 +86,7 @@ void vidix_term( void )
 //  vo_server->control=server_control;
 }
 
-static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
@@ -149,7 +150,7 @@ static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h
     return -1;
 }
 
-static uint32_t vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
@@ -195,7 +196,7 @@ static uint32_t vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h
     return -1;
 }
 
-static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
@@ -212,7 +213,7 @@ static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,in
     return 0;
 }
 
-uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+int vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled);
     return -1;
@@ -230,7 +231,7 @@ static uint32_t  vidix_draw_image(mp_image_t *mpi){
     return VO_TRUE;
 }
 
-uint32_t vidix_draw_frame(uint8_t *image[])
+int vidix_draw_frame(uint8_t *image[])
 {
   mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled);
   return -1;
@@ -625,7 +626,7 @@ uint32_t vidix_control(uint32_t request, void *data)
 //  return server_control(request,data); //VO_NOTIMPL;
 }
 
-int vidix_preinit(const char *drvname,vo_functions_t *server)
+int vidix_preinit(const char *drvname, struct vo_old_functions *server)
 {
   int err;
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {

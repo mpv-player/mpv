@@ -66,54 +66,54 @@ int vo_colorkey = 0x0000ff00; // default colorkey is green
 //
 // Externally visible list of all vo drivers
 //
-extern vo_functions_t video_out_mga;
-extern vo_functions_t video_out_xmga;
-extern vo_functions_t video_out_x11;
-extern vo_functions_t video_out_xover;
-extern vo_functions_t video_out_xvmc;
-extern vo_functions_t video_out_xv;
-extern vo_functions_t video_out_gl;
-extern vo_functions_t video_out_gl2;
-extern vo_functions_t video_out_dga;
-extern vo_functions_t video_out_sdl;
-extern vo_functions_t video_out_3dfx;
-extern vo_functions_t video_out_tdfxfb;
-extern vo_functions_t video_out_s3fb;
-extern vo_functions_t video_out_null;
-extern vo_functions_t video_out_zr;
-extern vo_functions_t video_out_zr2;
-extern vo_functions_t video_out_bl;
-extern vo_functions_t video_out_fbdev;
-extern vo_functions_t video_out_fbdev2;
-extern vo_functions_t video_out_svga;
-extern vo_functions_t video_out_png;
-extern vo_functions_t video_out_ggi;
-extern vo_functions_t video_out_aa;
-extern vo_functions_t video_out_caca;
-extern vo_functions_t video_out_mpegpes;
-extern vo_functions_t video_out_yuv4mpeg;
-extern vo_functions_t video_out_directx;
-extern vo_functions_t video_out_dxr2;
-extern vo_functions_t video_out_dxr3;
-extern vo_functions_t video_out_ivtv;
-extern vo_functions_t video_out_v4l2;
-extern vo_functions_t video_out_jpeg;
-extern vo_functions_t video_out_gif89a;
-extern vo_functions_t video_out_vesa;
-extern vo_functions_t video_out_directfb;
-extern vo_functions_t video_out_dfbmga;
-extern vo_functions_t video_out_xvidix;
-extern vo_functions_t video_out_winvidix;
-extern vo_functions_t video_out_cvidix;
-extern vo_functions_t video_out_tdfx_vid;
-extern vo_functions_t video_out_xvr100;
-extern vo_functions_t video_out_tga;
-extern vo_functions_t video_out_macosx;
-extern vo_functions_t video_out_quartz;
-extern vo_functions_t video_out_pnm;
-extern vo_functions_t video_out_md5sum;
+extern struct vo_driver video_out_mga;
+extern struct vo_driver video_out_xmga;
+extern struct vo_driver video_out_x11;
+extern struct vo_driver video_out_xover;
+extern struct vo_driver video_out_xvmc;
+extern struct vo_driver video_out_xv;
+extern struct vo_driver video_out_gl;
+extern struct vo_driver video_out_gl2;
+extern struct vo_driver video_out_dga;
+extern struct vo_driver video_out_sdl;
+extern struct vo_driver video_out_3dfx;
+extern struct vo_driver video_out_tdfxfb;
+extern struct vo_driver video_out_s3fb;
+extern struct vo_driver video_out_null;
+extern struct vo_driver video_out_zr;
+extern struct vo_driver video_out_zr2;
+extern struct vo_driver video_out_bl;
+extern struct vo_driver video_out_fbdev;
+extern struct vo_driver video_out_fbdev2;
+extern struct vo_driver video_out_svga;
+extern struct vo_driver video_out_png;
+extern struct vo_driver video_out_ggi;
+extern struct vo_driver video_out_aa;
+extern struct vo_driver video_out_caca;
+extern struct vo_driver video_out_mpegpes;
+extern struct vo_driver video_out_yuv4mpeg;
+extern struct vo_driver video_out_directx;
+extern struct vo_driver video_out_dxr2;
+extern struct vo_driver video_out_dxr3;
+extern struct vo_driver video_out_ivtv;
+extern struct vo_driver video_out_v4l2;
+extern struct vo_driver video_out_jpeg;
+extern struct vo_driver video_out_gif89a;
+extern struct vo_driver video_out_vesa;
+extern struct vo_driver video_out_directfb;
+extern struct vo_driver video_out_dfbmga;
+extern struct vo_driver video_out_xvidix;
+extern struct vo_driver video_out_winvidix;
+extern struct vo_driver video_out_cvidix;
+extern struct vo_driver video_out_tdfx_vid;
+extern struct vo_driver video_out_xvr100;
+extern struct vo_driver video_out_tga;
+extern struct vo_driver video_out_macosx;
+extern struct vo_driver video_out_quartz;
+extern struct vo_driver video_out_pnm;
+extern struct vo_driver video_out_md5sum;
 
-const vo_functions_t* const video_out_drivers[] =
+const struct vo_driver *video_out_drivers[] =
 {
 #ifdef HAVE_XVR100
         &video_out_xvr100,
@@ -243,6 +243,48 @@ const vo_functions_t* const video_out_drivers[] =
         NULL
 };
 
+
+static int vo_preinit(struct vo *vo, const char *arg)
+{
+    return vo->driver->preinit(vo, arg);
+}
+
+int vo_control(struct vo *vo, uint32_t request, void *data)
+{
+    return vo->driver->control(vo, request, data);
+}
+
+int vo_draw_frame(struct vo *vo, uint8_t *src[])
+{
+    return vo->driver->draw_frame(vo, src);
+}
+
+int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y)
+{
+    return vo->driver->draw_slice(vo, src, stride, w, h, x, y);
+}
+
+void vo_draw_osd(struct vo *vo)
+{
+    vo->driver->draw_osd(vo);
+}
+
+void vo_flip_page(struct vo *vo)
+{
+    vo->driver->flip_page(vo);
+}
+
+void vo_check_events(struct vo *vo)
+{
+    vo->driver->check_events(vo);
+}
+
+void vo_destroy(struct vo *vo)
+{
+    vo->driver->uninit(vo);
+    free(vo);
+}
+
 void list_video_out(void)
 {
     int i = 0;
@@ -255,9 +297,10 @@ void list_video_out(void)
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
-const vo_functions_t *init_best_video_out(char **vo_list)
+struct vo *init_best_video_out(char **vo_list)
 {
     int i;
+    struct vo *vo = malloc(sizeof *vo);
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0])
         while (vo_list[0][0]) {
@@ -272,13 +315,15 @@ const vo_functions_t *init_best_video_out(char **vo_list)
                 ++vo_subdevice;
             }
             for (i = 0; video_out_drivers[i]; i++) {
-                const vo_functions_t *video_driver = video_out_drivers[i];
+                const struct vo_driver *video_driver = video_out_drivers[i];
                 const vo_info_t *info = video_driver->info;
                 if (!strcmp(info->short_name, name)) {
                     // name matches, try it
-                    if (!video_driver->preinit(vo_subdevice)) {
+                    memset(vo, 0, sizeof *vo);
+                    vo->driver = video_driver;
+                    if (!vo_preinit(vo, vo_subdevice)) {
                         free(name);
-                        return video_driver; // success!
+                        return vo; // success!
                     }
 		}
 	    }
@@ -291,14 +336,17 @@ const vo_functions_t *init_best_video_out(char **vo_list)
     // now try the rest...
     vo_subdevice = NULL;
     for (i = 0; video_out_drivers[i]; i++) {
-        const vo_functions_t *video_driver = video_out_drivers[i];
-        if (!video_driver->preinit(vo_subdevice))
-	    return video_driver; // success!
+        const struct vo_driver *video_driver = video_out_drivers[i];
+        memset(vo, 0, sizeof *vo);
+        vo->driver = video_driver;
+        if (!vo_preinit(vo, vo_subdevice))
+            return vo; // success!
     }
+    free(vo);
     return NULL;
 }
 
-int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
+int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      char *title, uint32_t format)
 {
@@ -306,7 +354,7 @@ int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
     aspect_save_orig(width, height);
     aspect_save_prescale(d_width, d_height);
 
-    if (vo->control(VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
+    if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
         aspect(&d_width, &d_height, A_NOZOOM);
         vo_dx = (int)(vo_screenwidth - d_width) / 2;
         vo_dy = (int)(vo_screenheight - d_height) / 2;
@@ -318,7 +366,8 @@ int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
         vo_dheight = d_height;
     }
 
-    return vo->config(width, height, d_width, d_height, flags, title, format);
+    return vo->driver->config(vo, width, height, d_width, d_height, flags,
+				  title, format);
 }
 
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA)

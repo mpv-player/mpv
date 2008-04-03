@@ -464,7 +464,7 @@ static int preinit(const char *arg)
     if (!vo_init())
         return (-1);
 
-    if (vidix_preinit(vidix_name, &video_out_xvidix) != 0)
+    if (vidix_preinit(vidix_name, video_out_xvidix.old_functions) != 0)
         return (1);
 
     return (0);

@@ -67,8 +67,8 @@ static uint32_t window_width, window_height;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight;
 
-static const vo_functions_t* sub_vo = NULL;
-
+static const struct vo_old_functions *sub_vo = NULL;
+static const struct vo_info_s *sub_info;
 
 static void set_window(int force_update)
 {
@@ -211,7 +211,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   mp_colorkey_t colork;
   char _title[255];
 
-  sprintf(_title,"MPlayer %s X11 Overlay",sub_vo->info->name);
+  sprintf(_title,"MPlayer %s X11 Overlay", sub_info->name);
   title = _title;
 
   panscan_init();
@@ -384,10 +384,10 @@ static void uninit(void)
   sub_vo = NULL;
   vo_x11_uninit();
   // Restore our callbacks
-  video_out_xover.draw_frame = draw_frame;
-  video_out_xover.draw_slice = draw_slice;
-  video_out_xover.flip_page = flip_page;
-  video_out_xover.draw_osd  = draw_osd;
+  video_out_xover.old_functions->draw_frame = draw_frame;
+  video_out_xover.old_functions->draw_slice = draw_slice;
+  video_out_xover.old_functions->flip_page = flip_page;
+  video_out_xover.old_functions->draw_osd  = draw_osd;
 }
 
 static int preinit(const char *arg)
@@ -399,31 +399,34 @@ static int preinit(const char *arg)
     return 1;
   }
 
-  for(i = 0 ; video_out_drivers[i] != NULL ; i++) {
-    if(!strcmp(video_out_drivers[i]->info->short_name,arg) &&
-       strcmp(video_out_drivers[i]->info->short_name,"xover"))
+  const struct vo_driver *candidate;
+  for(i = 0; (candidate = video_out_drivers[i]) != NULL; i++)
+    if (!candidate->is_new && !strcmp(candidate->info->short_name,arg) &&
+        strcmp(candidate->info->short_name,"xover"))
       break;
-  }
-  if(!video_out_drivers[i]) {
+  if (!candidate) {
     mp_msg(MSGT_VO, MSGL_ERR, "VO XOverlay: Subdriver %s not found\n", arg);
     return 1;
   }
-  if(video_out_drivers[i]->control(VOCTRL_XOVERLAY_SUPPORT,NULL) != VO_TRUE) {
+
+  const struct vo_old_functions *functions = candidate->old_functions;
+  if (functions->control(VOCTRL_XOVERLAY_SUPPORT,NULL) != VO_TRUE) {
     mp_msg(MSGT_VO, MSGL_ERR, "VO XOverlay: %s doesn't support XOverlay\n", arg);
     return 1;
   }
   // X11 init
   if (!vo_init()) return VO_FALSE;
-  if(video_out_drivers[i]->preinit(NULL)) {
+  if(functions->preinit(NULL)) {
     mp_msg(MSGT_VO, MSGL_ERR, "VO XOverlay: Subvo init failed\n");
     return 1;
   }
-  sub_vo = video_out_drivers[i];
+  sub_vo = functions;
+  sub_info = candidate->info;
   // Setup the sub vo callbacks
-  video_out_xover.draw_frame = sub_vo->draw_frame;
-  video_out_xover.draw_slice = sub_vo->draw_slice;
-  video_out_xover.flip_page = sub_vo->flip_page;
-  video_out_xover.draw_osd  = sub_vo->draw_osd;
+  video_out_xover.old_functions->draw_frame = sub_vo->draw_frame;
+  video_out_xover.old_functions->draw_slice = sub_vo->draw_slice;
+  video_out_xover.old_functions->flip_page = sub_vo->flip_page;
+  video_out_xover.old_functions->draw_osd  = sub_vo->draw_osd;
   return 0;
 }
 

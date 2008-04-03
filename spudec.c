@@ -86,7 +86,7 @@ typedef struct {
   unsigned char *scaled_aimage;
   int auto_palette; /* 1 if we lack a palette and must use an heuristic. */
   int font_start_level;  /* Darkest value used for the computed font */
-  const vo_functions_t *hw_spu;
+  struct vo *hw_spu;
   int spu_changed;
   unsigned int forced_subs_only;     /* flag: 0=display all subtitle, !0 display only forced subtitles */
   unsigned int is_forced_sub;         /* true if current subtitle is a forced subtitle */
@@ -490,7 +490,7 @@ static void spudec_decode(spudec_handle_t *this, int pts100)
     packet.data = this->packet;
     packet.size = this->packet_size;
     packet.timestamp = pts100;
-    this->hw_spu->draw_frame((uint8_t**)&pkg);
+    vo_draw_frame(this->hw_spu, (uint8_t**)&pkg);
   }
 }
 
@@ -1104,7 +1104,7 @@ void spudec_update_palette(void * this, unsigned int *palette)
   if (spu && palette) {
     memcpy(spu->global_palette, palette, sizeof(spu->global_palette));
     if(spu->hw_spu)
-      spu->hw_spu->control(VOCTRL_SET_SPU_PALETTE,spu->global_palette);
+      vo_control(spu->hw_spu, VOCTRL_SET_SPU_PALETTE, spu->global_palette);
   }
 }
 
@@ -1174,11 +1174,11 @@ void spudec_free(void *this)
   }
 }
 
-void spudec_set_hw_spu(void *this, const vo_functions_t *hw_spu)
+void spudec_set_hw_spu(void *this, struct vo *hw_spu)
 {
   spudec_handle_t *spu = (spudec_handle_t*)this;
   if (!spu)
     return;
   spu->hw_spu = hw_spu;
-  hw_spu->control(VOCTRL_SET_SPU_PALETTE,spu->global_palette);
+  vo_control(hw_spu, VOCTRL_SET_SPU_PALETTE, spu->global_palette);
 }

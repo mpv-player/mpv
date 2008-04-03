@@ -23,7 +23,7 @@ extern float sub_delay;
 
 struct vf_priv_s {
     double pts;
-    const vo_functions_t *vo;
+    struct vo *vo;
 #ifdef USE_ASS
     ass_renderer_t* ass_priv;
     int prev_visibility;
@@ -43,8 +43,7 @@ static int config(struct vf_instance_s* vf,
 	return 0;
     }
 
-  if(video_out->info)
-  { const vo_info_t *info = video_out->info;
+    const vo_info_t *info = video_out->driver->info;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
          width, height,
          d_width, d_height,
@@ -57,12 +56,11 @@ static int config(struct vf_instance_s* vf,
     mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Author: %s\n", info->author);
     if(info->comment && strlen(info->comment) > 0)
         mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
-  }
 
     // save vo's stride capability for the wanted colorspace:
     vf->default_caps=query_format(vf,outfmt);
 
-    if(config_video_out(video_out,width,height,d_width,d_height,flags,"MPlayer",outfmt))
+    if (vo_config(video_out, width, height, d_width, d_height, flags, "MPlayer", outfmt))
 	return 0;
 
 #ifdef USE_ASS
@@ -80,23 +78,21 @@ static int control(struct vf_instance_s* vf, int request, void* data)
     case VFCTRL_GET_DEINTERLACE:
     {
         if(!video_out) return CONTROL_FALSE; // vo not configured?
-        return(video_out->control(VOCTRL_GET_DEINTERLACE, data)
-                == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
+        return vo_control(video_out, VOCTRL_GET_DEINTERLACE, data) == VO_TRUE;
     }
     case VFCTRL_SET_DEINTERLACE:
     {
         if(!video_out) return CONTROL_FALSE; // vo not configured?
-        return(video_out->control(VOCTRL_SET_DEINTERLACE, data)
-                == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
+        return vo_control(video_out, VOCTRL_SET_DEINTERLACE, data) == VO_TRUE;
     }
     case VFCTRL_DRAW_OSD:
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
-	video_out->draw_osd();
+	vo_draw_osd(video_out);
 	return CONTROL_TRUE;
     case VFCTRL_FLIP_PAGE:
     {
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
-	video_out->flip_page();
+	vo_flip_page(video_out);
 	return CONTROL_TRUE;
     }
     case VFCTRL_SET_EQUALIZER:
@@ -104,14 +100,14 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 	vf_equalizer_t *eq=data;
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
 	struct voctrl_set_equalizer_args param = {eq->item, eq->value};
-	return video_out->control(VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
+	return vo_control(video_out, VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
     }
     case VFCTRL_GET_EQUALIZER:
     {
 	vf_equalizer_t *eq=data;
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
 	struct voctrl_get_equalizer_args param = {eq->item, &eq->value};
-	return video_out->control(VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
+	return vo_control(video_out, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
     }
 #ifdef USE_ASS
     case VFCTRL_INIT_EOSD:
@@ -130,7 +126,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
         if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE)) {
             mp_eosd_res_t res;
             memset(&res, 0, sizeof(res));
-            if (video_out->control(VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
+            if (vo_control(video_out, VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
                 ass_set_frame_size(vf->priv->ass_priv, res.w, res.h);
                 ass_set_margins(vf->priv->ass_priv, res.mt, res.mb, res.ml, res.mr);
                 ass_set_aspect_ratio(vf->priv->ass_priv, (double)res.w / res.h);
@@ -143,7 +139,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
         } else
             vf->priv->prev_visibility = 0;
         vf->priv->prev_visibility = sub_visibility;
-        return (video_out->control(VOCTRL_DRAW_EOSD, &images) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
+        return vo_control(video_out, VOCTRL_DRAW_EOSD, &images) == VO_TRUE;
     }
 #endif
     case VFCTRL_GET_PTS:
@@ -152,12 +148,11 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 	return CONTROL_TRUE;
     }
     }
-    // return video_out->control(request,data);
     return CONTROL_UNKNOWN;
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-    int flags=video_out->control(VOCTRL_QUERY_FORMAT,&fmt);
+    int flags = vo_control(video_out, VOCTRL_QUERY_FORMAT, &fmt);
     // draw_slice() accepts stride, draw_frame() doesn't:
     if(flags)
 	if(fmt==IMGFMT_YV12 || fmt==IMGFMT_I420 || fmt==IMGFMT_IYUV)
@@ -168,7 +163,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 static void get_image(struct vf_instance_s* vf,
         mp_image_t *mpi){
     if(vo_directrendering && vo_config_count)
-	video_out->control(VOCTRL_GET_IMAGE,mpi);
+	vo_control(video_out, VOCTRL_GET_IMAGE, mpi);
 }
 
 static int put_image(struct vf_instance_s* vf,
@@ -177,15 +172,15 @@ static int put_image(struct vf_instance_s* vf,
   // record pts (potentially modified by filters) for main loop
   vf->priv->pts = pts;
   // first check, maybe the vo/vf plugin implements draw_image using mpi:
-  if(video_out->control(VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return 1; // done.
+  if (vo_control(video_out, VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return 1; // done.
   // nope, fallback to old draw_frame/draw_slice:
   if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
     // blit frame:
 //    if(mpi->flags&MP_IMGFLAG_PLANAR)
     if(vf->default_caps&VFCAP_ACCEPT_STRIDE)
-        video_out->draw_slice(mpi->planes,mpi->stride,mpi->w,mpi->h,mpi->x,mpi->y);
+        vo_draw_slice(video_out, mpi->planes,mpi->stride,mpi->w,mpi->h,mpi->x,mpi->y);
     else
-        video_out->draw_frame(mpi->planes);
+        vo_draw_frame(video_out, mpi->planes);
   }
   return 1;
 }
@@ -193,13 +188,13 @@ static int put_image(struct vf_instance_s* vf,
 static void start_slice(struct vf_instance_s* vf,
 		       mp_image_t *mpi) {
     if(!vo_config_count) return; // vo not configured?
-    video_out->control(VOCTRL_START_SLICE,mpi);
+    vo_control(video_out, VOCTRL_START_SLICE,mpi);
 }
 
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     if(!vo_config_count) return; // vo not configured?
-    video_out->draw_slice(src,stride,w,h,x,y);
+    vo_draw_slice(video_out, src,stride,w,h,x,y);
 }
 
 static void uninit(struct vf_instance_s* vf)
@@ -224,9 +219,8 @@ static int open(vf_instance_t *vf, char* args){
     vf->start_slice=start_slice;
     vf->uninit=uninit;
     vf->priv=calloc(1, sizeof(struct vf_priv_s));
-    vf->priv->vo = (const vo_functions_t *)args;
+    vf->priv->vo = (struct vo *)args;
     if(!video_out) return 0; // no vo ?
-//    if(video_out->preinit(args)) return 0; // preinit failed
     return 1;
 }
 

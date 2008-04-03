@@ -21,8 +21,8 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 void     vlvo_term( void );
 uint32_t vlvo_query_info(uint32_t format);
 
-uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y);
-uint32_t vlvo_draw_frame(uint8_t *src[]);
+int vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y);
+int vlvo_draw_frame(uint8_t *src[]);
 void     vlvo_flip_page(void);
 void     vlvo_draw_osd(void);
 

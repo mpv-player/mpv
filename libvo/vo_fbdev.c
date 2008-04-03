@@ -1132,7 +1132,8 @@ static int preinit(const char *vo_subdevice)
 	if (memcmp(vo_subdevice, "vidix", 5) == 0)
 	    vidix_name = &vo_subdevice[5];
 	if(vidix_name)
-	    pre_init_err = vidix_preinit(vidix_name,&video_out_fbdev);
+	    pre_init_err = vidix_preinit(vidix_name,
+                                         video_out_fbdev.old_functions);
 	else
 #endif
 	{

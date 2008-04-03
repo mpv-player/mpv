@@ -152,7 +152,7 @@ static int preinit(const char *arg){
     mp_msg(MSGT_VO, MSGL_INFO, "vo_cvidix: No vidix driver name provided, probing available ones (-v option for details)!\n");
 	vidix_name = NULL;
   }
-  if(vidix_preinit(vidix_name, &video_out_cvidix))return 1;
+  if (vidix_preinit(vidix_name, video_out_cvidix.old_functions))return 1;
   return 0;
 }
 

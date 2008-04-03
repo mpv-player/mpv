@@ -1076,7 +1076,8 @@ static int preinit(const char *arg)
   if(arg) subdev_flags = parseSubDevice(arg);
   if(lvo_name) pre_init_err = vlvo_preinit(lvo_name);
 #ifdef CONFIG_VIDIX
-  else if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_vesa);
+  else if(vidix_name) pre_init_err = vidix_preinit(vidix_name,
+                                                video_out_vesa.old_functions);
 #endif
   // check if we can open /dev/mem (it will be opened later in config(), but if we
   // detect now that we can't we can exit cleanly)
