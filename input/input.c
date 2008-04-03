@@ -619,11 +619,12 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
     return 0;
   }
 
-  memset(&cmd_fds[num_cmd_fd],0,sizeof(mp_input_fd_t));
-  cmd_fds[num_cmd_fd].fd = fd;
-  cmd_fds[num_cmd_fd].read_func = read_func ? read_func : mp_input_default_cmd_func;
-  cmd_fds[num_cmd_fd].close_func = close_func;
-  cmd_fds[num_cmd_fd].no_select = !select;
+  cmd_fds[num_cmd_fd] = (struct mp_input_fd){
+      .fd = fd,
+      .read_func = read_func ? read_func : mp_input_default_cmd_func,
+      .close_func = close_func,
+      .no_select = !select
+  };
   num_cmd_fd++;
 
   return 1;
@@ -678,11 +679,12 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
     return 0;
   }
 
-  memset(&key_fds[num_key_fd],0,sizeof(mp_input_fd_t));
-  key_fds[num_key_fd].fd = fd;
-  key_fds[num_key_fd].read_func = read_func;
-  key_fds[num_key_fd].close_func = close_func;
-  key_fds[num_key_fd].no_select = !select;
+  key_fds[num_key_fd] = (struct mp_input_fd){
+      .fd = fd,
+      .read_func = read_func,
+      .close_func = close_func,
+      .no_select = !select
+  };
   num_key_fd++;
 
   return 1;
@@ -700,11 +702,11 @@ mp_input_add_event_fd(int fd, void (*read_func)(void))
     return 0;
   }
 
-  memset(&key_fds[num_key_fd],0,sizeof(mp_input_fd_t));
-  key_fds[num_key_fd].fd = fd;
-  key_fds[num_key_fd].read_func = read_func;
-  key_fds[num_key_fd].close_func = NULL;
-  key_fds[num_key_fd].no_readfunc_retval = 1;
+  key_fds[num_key_fd] = (struct mp_input_fd){
+      .fd = fd,
+      .read_func = read_func,
+      .no_readfunc_retval = 1,
+  };
   num_key_fd++;
 
   return 1;
