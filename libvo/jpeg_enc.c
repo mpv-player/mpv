@@ -301,7 +301,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->s->out_format = FMT_MJPEG;
 	j->s->intra_only = 1;
 	j->s->encoding = 1;
-	j->s->pict_type = I_TYPE;
+	j->s->pict_type = FF_I_TYPE;
 	j->s->y_dc_scale = 8;
 	j->s->c_dc_scale = 8;
 
