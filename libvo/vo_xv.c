@@ -19,13 +19,15 @@ Buffer allocation:
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "video_out.h"
-#include "video_out_internal.h"
-
+#include "libmpcodecs/vfcap.h"
+#include "libmpcodecs/mp_image.h"
+#include "osd.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -54,93 +56,96 @@ static const vo_info_t info = {
     ""
 };
 
-const LIBVO_EXTERN(xv)
 #ifdef HAVE_SHM
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
-
-static XShmSegmentInfo Shminfo[NUM_BUFFERS];
-static int Shmem_Flag;
 #endif
 
 // Note: depends on the inclusion of X11/extensions/XShm.h
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
+struct xvctx {
+    unsigned int xv_port;
+    XvAdaptorInfo *ai;
+    XvImageFormatValues *fo;
+    unsigned int formats, adaptors, xv_format;
+    int current_buf;
+    int current_ip_buf;
+    int num_buffers;
+    int visible_buf;
+    XvImage *xvimage[NUM_BUFFERS];
+    uint32_t image_width;
+    uint32_t image_height;
+    uint32_t image_format;
+    int is_paused;
+    uint32_t drwX, drwY;
+    uint32_t max_width, max_height; // zero means: not set
+    void (*draw_alpha_fnc)(void *ctx, int x0, int y0, int w, int h,
+                           unsigned char *src, unsigned char *srca,
+                           int stride);
+#ifdef HAVE_SHM
+    XShmSegmentInfo Shminfo[NUM_BUFFERS];
+    int Shmem_Flag;
+#endif
+};
+
 // FIXME: dynamically allocate this stuff
-static void allocate_xvimage(int);
-static unsigned int ver, rel, req, ev, err;
-static unsigned int formats, adaptors, xv_format;
-static XvAdaptorInfo *ai = NULL;
-static XvImageFormatValues *fo=NULL;
-
-static int current_buf = 0;
-static int current_ip_buf = 0;
-static int num_buffers = 1;     // default
-static int visible_buf = -1;    // -1 means: no buffer was drawn yet
-static XvImage *xvimage[NUM_BUFFERS];
+static void allocate_xvimage(struct vo *, int);
 
 
-static uint32_t image_width;
-static uint32_t image_height;
-static uint32_t image_format;
-static int flip_flag;
 
-static int int_pause;
-
-static Window mRoot;
-static uint32_t drwX, drwY, drwBorderWidth, drwDepth;
-static uint32_t max_width = 0, max_height = 0; // zero means: not set
-
-static void (*draw_alpha_fnc) (int x0, int y0, int w, int h,
-                               unsigned char *src, unsigned char *srca,
-                               int stride);
-
-static void draw_alpha_yv12(int x0, int y0, int w, int h,
+static void draw_alpha_yv12(void *p, int x0, int y0, int w, int h,
                             unsigned char *src, unsigned char *srca,
                             int stride)
 {
-    x0 += image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    struct vo *vo = p;
+    struct xvctx *ctx = vo->priv;
+    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
     vo_draw_alpha_yv12(w, h, src, srca, stride,
-                       xvimage[current_buf]->data +
-                       xvimage[current_buf]->offsets[0] +
-                       xvimage[current_buf]->pitches[0] * y0 + x0,
-                       xvimage[current_buf]->pitches[0]);
+                       ctx->xvimage[ctx->current_buf]->data +
+                       ctx->xvimage[ctx->current_buf]->offsets[0] +
+                       ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + x0,
+                       ctx->xvimage[ctx->current_buf]->pitches[0]);
 }
 
-static void draw_alpha_yuy2(int x0, int y0, int w, int h,
+static void draw_alpha_yuy2(void *p, int x0, int y0, int w, int h,
                             unsigned char *src, unsigned char *srca,
                             int stride)
 {
-    x0 += image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    struct vo *vo = p;
+    struct xvctx *ctx = vo->priv;
+    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
-                       xvimage[current_buf]->data +
-                       xvimage[current_buf]->offsets[0] +
-                       xvimage[current_buf]->pitches[0] * y0 + 2 * x0,
-                       xvimage[current_buf]->pitches[0]);
+                       ctx->xvimage[ctx->current_buf]->data +
+                       ctx->xvimage[ctx->current_buf]->offsets[0] +
+                       ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + 2 * x0,
+                       ctx->xvimage[ctx->current_buf]->pitches[0]);
 }
 
-static void draw_alpha_uyvy(int x0, int y0, int w, int h,
+static void draw_alpha_uyvy(void *p, int x0, int y0, int w, int h,
                             unsigned char *src, unsigned char *srca,
                             int stride)
 {
-    x0 += image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    struct vo *vo = p;
+    struct xvctx *ctx = vo->priv;
+    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
-                       xvimage[current_buf]->data +
-                       xvimage[current_buf]->offsets[0] +
-                       xvimage[current_buf]->pitches[0] * y0 + 2 * x0 + 1,
-                       xvimage[current_buf]->pitches[0]);
+                       ctx->xvimage[ctx->current_buf]->data +
+                       ctx->xvimage[ctx->current_buf]->offsets[0] +
+                       ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + 2 * x0 + 1,
+                       ctx->xvimage[ctx->current_buf]->pitches[0]);
 }
 
-static void draw_alpha_null(int x0, int y0, int w, int h,
+static void draw_alpha_null(void *p, int x0, int y0, int w, int h,
                             unsigned char *src, unsigned char *srca,
                             int stride)
 {
 }
 
 
-static void deallocate_xvimage(int foo);
+static void deallocate_xvimage(struct vo *vo, int foo);
 
 static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
   *drwX = *drwY = 0;
@@ -162,9 +167,9 @@ static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
  * connect to server, create and map window,
  * allocate colors and (shared) memory
  */
-static int config(uint32_t width, uint32_t height, uint32_t d_width,
-                       uint32_t d_height, uint32_t flags, char *title,
-                       uint32_t format)
+static int config(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t flags,
+                  char *title, uint32_t format)
 {
     XSizeHints hint;
     XVisualInfo vinfo;
@@ -173,6 +178,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     XWindowAttributes attribs;
     unsigned long xswamask;
     int depth;
+    struct xvctx *ctx = vo->priv;
+    int i;
 
 #ifdef HAVE_XF86VM
     int vm = 0;
@@ -181,46 +188,46 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     static uint32_t vm_height;
 #endif
 
-    image_height = height;
-    image_width = width;
-    image_format = format;
+    ctx->image_height = height;
+    ctx->image_width = width;
+    ctx->image_format = format;
 
-    if ((max_width != 0 && max_height != 0) &&
-        (image_width > max_width || image_height > max_height))
+    if ((ctx->max_width != 0 && ctx->max_height != 0) &&
+        (ctx->image_width > ctx->max_width || ctx->image_height > ctx->max_height))
     {
         mp_msg( MSGT_VO, MSGL_ERR, MSGTR_VO_XV_ImagedimTooHigh,
-                image_width, image_height, max_width, max_height);
+                ctx->image_width, ctx->image_height, ctx->max_width, ctx->max_height);
         return -1;
     }
 
     vo_mouse_autohide = 1;
 
-    int_pause = 0;
-    visible_buf = -1;
+    ctx->is_paused = 0;
+    ctx->visible_buf = -1;
 
 #ifdef HAVE_XF86VM
     if (flags & VOFLAG_MODESWITCHING)
         vm = 1;
 #endif
-    flip_flag = flags & VOFLAG_FLIPPING;
-    num_buffers =
+
+    ctx->num_buffers =
         vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
 
     /* check image formats */
     {
         unsigned int i;
 
-        xv_format = 0;
-        for (i = 0; i < formats; i++)
+        ctx->xv_format = 0;
+        for (i = 0; i < ctx->formats; i++)
         {
             mp_msg(MSGT_VO, MSGL_V,
-                   "Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,
-                   (char *) &fo[i].id,
-                   (fo[i].format == XvPacked) ? "packed" : "planar");
-            if (fo[i].id == format)
-                xv_format = fo[i].id;
+                   "Xvideo image format: 0x%x (%4.4s) %s\n", ctx->fo[i].id,
+                   (char *) &ctx->fo[i].id,
+                   (ctx->fo[i].format == XvPacked) ? "packed" : "planar");
+            if (ctx->fo[i].id == format)
+                ctx->xv_format = ctx->fo[i].id;
         }
-        if (!xv_format)
+        if (!ctx->xv_format)
             return -1;
     }
 
@@ -239,8 +246,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         {
             if ((d_width == 0) && (d_height == 0))
             {
-                vm_width = image_width;
-                vm_height = image_height;
+                vm_width = ctx->image_width;
+                vm_height = ctx->image_height;
             } else
             {
                 vm_width = d_width;
@@ -291,8 +298,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                                            ButtonReleaseMask |
                                            ExposureMask);
                 XMapWindow(mDisplay, vo_window);
+                Window mRoot;
+                uint32_t drwBorderWidth, drwDepth;
                 XGetGeometry(mDisplay, vo_window, &mRoot,
-                             &drwX, &drwY, &vo_dwidth, &vo_dheight,
+                             &ctx->drwX, &ctx->drwY, &vo_dwidth, &vo_dheight,
                              &drwBorderWidth, &drwDepth);
                 if (vo_dwidth <= 0) vo_dwidth = d_width;
                 if (vo_dheight <= 0) vo_dheight = d_height;
@@ -325,33 +334,33 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     mp_msg(MSGT_VO, MSGL_V, "using Xvideo port %d for hw scaling\n",
            xv_port);
 
-    switch (xv_format)
+    switch (ctx->xv_format)
     {
         case IMGFMT_YV12:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
-            draw_alpha_fnc = draw_alpha_yv12;
+            ctx->draw_alpha_fnc = draw_alpha_yv12;
             break;
         case IMGFMT_YUY2:
         case IMGFMT_YVYU:
-            draw_alpha_fnc = draw_alpha_yuy2;
+            ctx->draw_alpha_fnc = draw_alpha_yuy2;
             break;
         case IMGFMT_UYVY:
-            draw_alpha_fnc = draw_alpha_uyvy;
+            ctx->draw_alpha_fnc = draw_alpha_uyvy;
             break;
         default:
-            draw_alpha_fnc = draw_alpha_null;
+            ctx->draw_alpha_fnc = draw_alpha_null;
     }
 
     if (vo_config_count)
-        for (current_buf = 0; current_buf < num_buffers; ++current_buf)
-            deallocate_xvimage(current_buf);
+        for (i = 0; i < ctx->num_buffers; i++)
+            deallocate_xvimage(vo, i);
 
-    for (current_buf = 0; current_buf < num_buffers; ++current_buf)
-        allocate_xvimage(current_buf);
+    for (i = 0; i < ctx->num_buffers; i++)
+        allocate_xvimage(vo, i);
 
-    current_buf = 0;
-    current_ip_buf = 0;
+    ctx->current_buf = 0;
+    ctx->current_ip_buf = 0;
 
 #if 0
     set_gamma_correction();
@@ -359,17 +368,17 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
-    calc_drwXY(&drwX, &drwY);
+    calc_drwXY(&ctx->drwX, &ctx->drwY);
 
     panscan_calc();
     
-    vo_xv_draw_colorkey(drwX - (vo_panscan_x >> 1),
-                        drwY - (vo_panscan_y >> 1),
+    vo_xv_draw_colorkey(ctx->drwX - (vo_panscan_x >> 1),
+                        ctx->drwY - (vo_panscan_y >> 1),
                         vo_dwidth + vo_panscan_x - 1,
                         vo_dheight + vo_panscan_y - 1);
 
-    mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", drwX,
-           drwY, vo_dwidth, vo_dheight);
+    mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
+           ctx->drwY, vo_dwidth, vo_dheight);
 
     if (vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
@@ -377,155 +386,166 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     return 0;
 }
 
-static void allocate_xvimage(int foo)
+static void allocate_xvimage(struct vo *vo, int foo)
 {
+    struct xvctx *ctx = vo->priv;
     /*
      * allocate XvImages.  FIXME: no error checking, without
      * mit-shm this will bomb... trzing to fix ::atmos
      */
 #ifdef HAVE_SHM
     if (mLocalDisplay && XShmQueryExtension(mDisplay))
-        Shmem_Flag = 1;
+        ctx->Shmem_Flag = 1;
     else
     {
-        Shmem_Flag = 0;
+        ctx->Shmem_Flag = 0;
         mp_msg(MSGT_VO, MSGL_INFO,
                MSGTR_LIBVO_XV_SharedMemoryNotSupported);
     }
-    if (Shmem_Flag)
+    if (ctx->Shmem_Flag)
     {
-        xvimage[foo] =
-            (XvImage *) XvShmCreateImage(mDisplay, xv_port, xv_format,
-                                         NULL, image_width, image_height,
-                                         &Shminfo[foo]);
+        ctx->xvimage[foo] =
+            (XvImage *) XvShmCreateImage(mDisplay, xv_port, ctx->xv_format,
+                                         NULL, ctx->image_width, ctx->image_height,
+                                         &ctx->Shminfo[foo]);
 
-        Shminfo[foo].shmid =
-            shmget(IPC_PRIVATE, xvimage[foo]->data_size, IPC_CREAT | 0777);
-        Shminfo[foo].shmaddr = (char *) shmat(Shminfo[foo].shmid, 0, 0);
-        Shminfo[foo].readOnly = False;
+        ctx->Shminfo[foo].shmid =
+            shmget(IPC_PRIVATE, ctx->xvimage[foo]->data_size, IPC_CREAT | 0777);
+        ctx->Shminfo[foo].shmaddr = (char *) shmat(ctx->Shminfo[foo].shmid, 0, 0);
+        ctx->Shminfo[foo].readOnly = False;
 
-        xvimage[foo]->data = Shminfo[foo].shmaddr;
-        XShmAttach(mDisplay, &Shminfo[foo]);
+        ctx->xvimage[foo]->data = ctx->Shminfo[foo].shmaddr;
+        XShmAttach(mDisplay, &ctx->Shminfo[foo]);
         XSync(mDisplay, False);
-        shmctl(Shminfo[foo].shmid, IPC_RMID, 0);
+        shmctl(ctx->Shminfo[foo].shmid, IPC_RMID, 0);
     } else
 #endif
     {
-        xvimage[foo] =
-            (XvImage *) XvCreateImage(mDisplay, xv_port, xv_format, NULL,
-                                      image_width, image_height);
-        xvimage[foo]->data = malloc(xvimage[foo]->data_size);
+        ctx->xvimage[foo] =
+            (XvImage *) XvCreateImage(mDisplay, xv_port, ctx->xv_format, NULL,
+                                      ctx->image_width, ctx->image_height);
+        ctx->xvimage[foo]->data = malloc(ctx->xvimage[foo]->data_size);
         XSync(mDisplay, False);
     }
-    memset(xvimage[foo]->data, 128, xvimage[foo]->data_size);
+    memset(ctx->xvimage[foo]->data, 128, ctx->xvimage[foo]->data_size);
     return;
 }
 
-static void deallocate_xvimage(int foo)
+static void deallocate_xvimage(struct vo *vo, int foo)
 {
+    struct xvctx *ctx = vo->priv;
 #ifdef HAVE_SHM
-    if (Shmem_Flag)
+    if (ctx->Shmem_Flag)
     {
-        XShmDetach(mDisplay, &Shminfo[foo]);
-        shmdt(Shminfo[foo].shmaddr);
+        XShmDetach(mDisplay, &ctx->Shminfo[foo]);
+        shmdt(ctx->Shminfo[foo].shmaddr);
     } else
 #endif
     {
-        free(xvimage[foo]->data);
+        free(ctx->xvimage[foo]->data);
     }
-    XFree(xvimage[foo]);
+    XFree(ctx->xvimage[foo]);
 
     XSync(mDisplay, False);
     return;
 }
 
-static inline void put_xvimage( XvImage * xvi )
+static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 {
+    struct xvctx *ctx = vo->priv;
 #ifdef HAVE_SHM
-    if (Shmem_Flag)
+    if (ctx->Shmem_Flag)
     {
         XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc,
-                      xvi, 0, 0, image_width,
-                      image_height, drwX - (vo_panscan_x >> 1),
-                      drwY - (vo_panscan_y >> 1), vo_dwidth + vo_panscan_x,
+                      xvi, 0, 0, ctx->image_width,
+                      ctx->image_height, ctx->drwX - (vo_panscan_x >> 1),
+                      ctx->drwY - (vo_panscan_y >> 1), vo_dwidth + vo_panscan_x,
                       vo_dheight + vo_panscan_y,
                       False);
     } else
 #endif
     {
         XvPutImage(mDisplay, xv_port, vo_window, vo_gc,
-                   xvi, 0, 0, image_width, image_height,
-                   drwX - (vo_panscan_x >> 1), drwY - (vo_panscan_y >> 1),
+                   xvi, 0, 0, ctx->image_width, ctx->image_height,
+                   ctx->drwX - (vo_panscan_x >> 1), ctx->drwY - (vo_panscan_y >> 1),
                    vo_dwidth + vo_panscan_x,
                    vo_dheight + vo_panscan_y);
     }
 }
 
-static void check_events(void)
+static void check_events(struct vo *vo)
 {
+    struct xvctx *ctx = vo->priv;
     int e = vo_x11_check_events(mDisplay);
 
     if (e & VO_EVENT_RESIZE)
     {
-        XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &vo_dwidth,
-                     &vo_dheight, &drwBorderWidth, &drwDepth);
-        mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", drwX,
-               drwY, vo_dwidth, vo_dheight);
+        Window mRoot;
+        uint32_t drwBorderWidth, drwDepth;
+        XGetGeometry(mDisplay, vo_window, &mRoot, &ctx->drwX, &ctx->drwY,
+                     &vo_dwidth, &vo_dheight, &drwBorderWidth, &drwDepth);
+        mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
+               ctx->drwY, vo_dwidth, vo_dheight);
 
-        calc_drwXY(&drwX, &drwY);
+        calc_drwXY(&ctx->drwX, &ctx->drwY);
     }
 
     if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
     {
-	vo_xv_draw_colorkey(drwX - (vo_panscan_x >> 1),
-			    drwY - (vo_panscan_y >> 1),
+	vo_xv_draw_colorkey(ctx->drwX - (vo_panscan_x >> 1),
+			    ctx->drwY - (vo_panscan_y >> 1),
 			    vo_dwidth + vo_panscan_x - 1,
 			    vo_dheight + vo_panscan_y - 1);
     }
 
-    if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && int_pause)
+    if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && ctx->is_paused)
     {
         /* did we already draw a buffer */
-        if ( visible_buf != -1 )
+        if ( ctx->visible_buf != -1 )
         {
           /* redraw the last visible buffer */
-          put_xvimage( xvimage[visible_buf] );
+          put_xvimage(vo, ctx->xvimage[ctx->visible_buf]);
         }
     }
 }
 
-static void draw_osd(void)
+static void draw_osd(struct vo *vo)
 {
-    vo_draw_text(image_width -
-                 image_width * vo_panscan_x / (vo_dwidth + vo_panscan_x),
-                 image_height, draw_alpha_fnc);
+    struct xvctx *ctx = vo->priv;
+
+    osd_draw_text(ctx->image_width -
+                  ctx->image_width * vo_panscan_x / (vo_dwidth + vo_panscan_x),
+                  ctx->image_height, ctx->draw_alpha_fnc, vo);
 }
 
-static void flip_page(void)
+static void flip_page(struct vo *vo)
 {
-    put_xvimage( xvimage[current_buf] );
+    struct xvctx *ctx = vo->priv;
+    put_xvimage(vo, ctx->xvimage[ctx->current_buf]);
 
     /* remember the currently visible buffer */
-    visible_buf = current_buf;
+    ctx->visible_buf = ctx->current_buf;
 
-    if (num_buffers > 1)
+    if (ctx->num_buffers > 1)
     {
-        current_buf =
-            vo_directrendering ? 0 : ((current_buf + 1) % num_buffers);
+        ctx->current_buf =
+            vo_directrendering ? 0 : ((ctx->current_buf + 1) % ctx->num_buffers);
         XFlush(mDisplay);
     } else
         XSync(mDisplay, False);
     return;
 }
 
-static int draw_slice(uint8_t * image[], int stride[], int w, int h,
-                           int x, int y)
+static int draw_slice(struct vo *vo, uint8_t * image[], int stride[], int w,
+                      int h, int x, int y)
 {
+    struct xvctx *ctx = vo->priv;
     uint8_t *dst;
+    XvImage *current_image = ctx->xvimage[ctx->current_buf];
 
-    dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[0] +
-        xvimage[current_buf]->pitches[0] * y + x;
-    memcpy_pic(dst, image[0], w, h, xvimage[current_buf]->pitches[0],
+    dst = current_image->data + current_image->offsets[0] +
+        current_image->pitches[0] * y + x;
+    memcpy_pic(dst, image[0], w, h, current_image->pitches[0],
                stride[0]);
 
     x /= 2;
@@ -533,95 +553,96 @@ static int draw_slice(uint8_t * image[], int stride[], int w, int h,
     w /= 2;
     h /= 2;
 
-    dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[1] +
-        xvimage[current_buf]->pitches[1] * y + x;
-    if (image_format != IMGFMT_YV12)
-        memcpy_pic(dst, image[1], w, h, xvimage[current_buf]->pitches[1],
+    dst = current_image->data + current_image->offsets[1] +
+        current_image->pitches[1] * y + x;
+    if (ctx->image_format != IMGFMT_YV12)
+        memcpy_pic(dst, image[1], w, h, current_image->pitches[1],
                    stride[1]);
     else
-        memcpy_pic(dst, image[2], w, h, xvimage[current_buf]->pitches[1],
+        memcpy_pic(dst, image[2], w, h, current_image->pitches[1],
                    stride[2]);
 
-    dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[2] +
-        xvimage[current_buf]->pitches[2] * y + x;
-    if (image_format == IMGFMT_YV12)
-        memcpy_pic(dst, image[1], w, h, xvimage[current_buf]->pitches[1],
+    dst = current_image->data + current_image->offsets[2] +
+        current_image->pitches[2] * y + x;
+    if (ctx->image_format == IMGFMT_YV12)
+        memcpy_pic(dst, image[1], w, h, current_image->pitches[1],
                    stride[1]);
     else
-        memcpy_pic(dst, image[2], w, h, xvimage[current_buf]->pitches[1],
+        memcpy_pic(dst, image[2], w, h, current_image->pitches[1],
                    stride[2]);
 
     return 0;
 }
 
-static int draw_frame(uint8_t * src[])
+static int draw_frame(struct vo *vo, uint8_t * src[])
 {
     mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_XV_DrawFrameCalled);
     return -1;
 }
 
-static uint32_t draw_image(mp_image_t * mpi)
+static uint32_t draw_image(struct vo *vo, mp_image_t * mpi)
 {
+    struct xvctx *ctx = vo->priv;
     if (mpi->flags & MP_IMGFLAG_DIRECT)
     {
         // direct rendering:
-        current_buf = (int) (mpi->priv);        // hack!
+        ctx->current_buf = (int) (mpi->priv);        // hack!
         return VO_TRUE;
     }
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         return VO_TRUE;         // done
     if (mpi->flags & MP_IMGFLAG_PLANAR)
     {
-        draw_slice(mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
+        draw_slice(vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
         return VO_TRUE;
     }
     if (mpi->flags & MP_IMGFLAG_YUV)
     {
         // packed YUV:
-        memcpy_pic(xvimage[current_buf]->data +
-                   xvimage[current_buf]->offsets[0], mpi->planes[0],
+        memcpy_pic(ctx->xvimage[ctx->current_buf]->data +
+                   ctx->xvimage[ctx->current_buf]->offsets[0], mpi->planes[0],
                    mpi->w * (mpi->bpp / 8), mpi->h,
-                   xvimage[current_buf]->pitches[0], mpi->stride[0]);
+                   ctx->xvimage[ctx->current_buf]->pitches[0], mpi->stride[0]);
         return VO_TRUE;
     }
     return VO_FALSE;            // not (yet) supported
 }
 
-static uint32_t get_image(mp_image_t * mpi)
+static uint32_t get_image(struct xvctx *ctx, mp_image_t * mpi)
 {
-    int buf = current_buf;      // we shouldn't change current_buf unless we do DR!
+    int buf = ctx->current_buf;      // we shouldn't change current_buf unless we do DR!
 
-    if (mpi->type == MP_IMGTYPE_STATIC && num_buffers > 1)
+    if (mpi->type == MP_IMGTYPE_STATIC && ctx->num_buffers > 1)
         return VO_FALSE;        // it is not static
-    if (mpi->imgfmt != image_format)
+    if (mpi->imgfmt != ctx->image_format)
         return VO_FALSE;        // needs conversion :(
 //    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
     if (mpi->flags & MP_IMGFLAG_READABLE &&
         (mpi->type == MP_IMGTYPE_IPB || mpi->type == MP_IMGTYPE_IP))
     {
         // reference (I/P) frame of IP or IPB:
-        if (num_buffers < 2)
+        if (ctx->num_buffers < 2)
             return VO_FALSE;    // not enough
-        current_ip_buf ^= 1;
+        ctx->current_ip_buf ^= 1;
         // for IPB with 2 buffers we can DR only one of the 2 P frames:
-        if (mpi->type == MP_IMGTYPE_IPB && num_buffers < 3
-            && current_ip_buf)
+        if (mpi->type == MP_IMGTYPE_IPB && ctx->num_buffers < 3
+            && ctx->current_ip_buf)
             return VO_FALSE;
-        buf = current_ip_buf;
+        buf = ctx->current_ip_buf;
         if (mpi->type == MP_IMGTYPE_IPB)
             ++buf;              // preserve space for B
     }
-    if (mpi->height > xvimage[buf]->height)
+    if (mpi->height > ctx->xvimage[buf]->height)
         return VO_FALSE;        //buffer to small
-    if (mpi->width * (mpi->bpp / 8) > xvimage[buf]->pitches[0])
+    if (mpi->width * (mpi->bpp / 8) > ctx->xvimage[buf]->pitches[0])
         return VO_FALSE;        //buffer to small
     if ((mpi->flags & (MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_ACCEPT_WIDTH))
-        || (mpi->width * (mpi->bpp / 8) == xvimage[buf]->pitches[0]))
+        || (mpi->width * (mpi->bpp / 8) == ctx->xvimage[buf]->pitches[0]))
     {
-        current_buf = buf;
-        mpi->planes[0] =
-            xvimage[current_buf]->data + xvimage[current_buf]->offsets[0];
-        mpi->stride[0] = xvimage[current_buf]->pitches[0];
+        ctx->current_buf = buf;
+        XvImage *current_image = ctx->xvimage[ctx->current_buf];
+        mpi->planes[0] = current_image->data + current_image->offsets[0];
+        mpi->stride[0] = current_image->pitches[0];
         mpi->width = mpi->stride[0] / (mpi->bpp / 8);
         if (mpi->flags & MP_IMGFLAG_PLANAR)
         {
@@ -629,83 +650,92 @@ static uint32_t get_image(mp_image_t * mpi)
             {
                 // I420
                 mpi->planes[1] =
-                    xvimage[current_buf]->data +
-                    xvimage[current_buf]->offsets[1];
+                    current_image->data +
+                    current_image->offsets[1];
                 mpi->planes[2] =
-                    xvimage[current_buf]->data +
-                    xvimage[current_buf]->offsets[2];
-                mpi->stride[1] = xvimage[current_buf]->pitches[1];
-                mpi->stride[2] = xvimage[current_buf]->pitches[2];
+                    current_image->data +
+                    current_image->offsets[2];
+                mpi->stride[1] = current_image->pitches[1];
+                mpi->stride[2] = current_image->pitches[2];
             } else
             {
                 // YV12
                 mpi->planes[1] =
-                    xvimage[current_buf]->data +
-                    xvimage[current_buf]->offsets[2];
+                    current_image->data +
+                    current_image->offsets[2];
                 mpi->planes[2] =
-                    xvimage[current_buf]->data +
-                    xvimage[current_buf]->offsets[1];
-                mpi->stride[1] = xvimage[current_buf]->pitches[2];
-                mpi->stride[2] = xvimage[current_buf]->pitches[1];
+                    current_image->data +
+                    current_image->offsets[1];
+                mpi->stride[1] = current_image->pitches[2];
+                mpi->stride[2] = current_image->pitches[1];
             }
         }
         mpi->flags |= MP_IMGFLAG_DIRECT;
-        mpi->priv = (void *) current_buf;
+        mpi->priv = (void *) ctx->current_buf;
 //      printf("mga: get_image() SUCCESS -> Direct Rendering ENABLED\n");
         return VO_TRUE;
     }
     return VO_FALSE;
 }
 
-static int query_format(uint32_t format)
+static int query_format(struct xvctx *ctx, uint32_t format)
 {
     uint32_t i;
     int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
 
     /* check image formats */
-    for (i = 0; i < formats; i++)
+    for (i = 0; i < ctx->formats; i++)
     {
-        if (fo[i].id == format)
+        if (ctx->fo[i].id == format)
             return flag;        //xv_format = fo[i].id;
     }
     return 0;
 }
 
-static void uninit(void)
+static void uninit(struct vo *vo)
 {
+    struct xvctx *ctx = vo->priv;
     int i;
 
     if (!vo_config_count)
         return;
-    visible_buf = -1;
-    XvFreeAdaptorInfo(ai);
-    ai = NULL;
-    if(fo){
-        XFree(fo);
-        fo=NULL;
+    ctx->visible_buf = -1;
+    XvFreeAdaptorInfo(ctx->ai);
+    ctx->ai = NULL;
+    if (ctx->fo) {
+        XFree(ctx->fo);
+        ctx->fo = NULL;
     }
-    for (i = 0; i < num_buffers; i++)
-        deallocate_xvimage(i);
+    for (i = 0; i < ctx->num_buffers; i++)
+        deallocate_xvimage(vo, i);
 #ifdef HAVE_XF86VM
     vo_vm_close(mDisplay);
 #endif
-//  Temporarily disabled until next commit
-//  mp_input_rm_event_fd(ConnectionNumber(mDisplay));
+    mp_input_rm_event_fd(ConnectionNumber(mDisplay));
     vo_x11_uninit();
+    free(ctx);
+    vo->priv = NULL;
 }
 
-static int preinit(const char *arg)
+static void x11_fd_callback(void *ctx)
+{
+    return check_events(ctx);
+}
+
+static int preinit(struct vo *vo, const char *arg)
 {
     XvPortID xv_p;
     int busy_ports = 0;
     unsigned int i;
     strarg_t ck_src_arg = { 0, NULL };
     strarg_t ck_method_arg = { 0, NULL };
+    struct xvctx *ctx = calloc(1, sizeof *ctx);
+    vo->priv = ctx;
 
     opt_t subopts[] =
     {  
       /* name         arg type     arg var         test */
-      {  "port",      OPT_ARG_INT, &xv_port,       (opt_test_f)int_pos },
+      {  "port",      OPT_ARG_INT, &ctx->xv_port,       (opt_test_f)int_pos },
       {  "ck",        OPT_ARG_STR, &ck_src_arg,    xv_test_ck },
       {  "ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm },
       {  NULL }
@@ -726,6 +756,7 @@ static int preinit(const char *arg)
         return -1;
 
     /* check for Xvideo extension */
+    unsigned int ver, rel, req, ev, err;
     if (Success != XvQueryExtension(mDisplay, &ver, &rel, &req, &ev, &err))
     {
         mp_msg(MSGT_VO, MSGL_ERR,
@@ -735,8 +766,8 @@ static int preinit(const char *arg)
 
     /* check for Xvideo support */
     if (Success !=
-        XvQueryAdaptors(mDisplay, DefaultRootWindow(mDisplay), &adaptors,
-                        &ai))
+        XvQueryAdaptors(mDisplay, DefaultRootWindow(mDisplay), &ctx->adaptors,
+                        &ctx->ai))
     {
         mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_XvQueryAdaptorsFailed);
         return -1;
@@ -747,12 +778,12 @@ static int preinit(const char *arg)
     {
         int port_found;
 
-        for (port_found = 0, i = 0; !port_found && i < adaptors; i++)
+        for (port_found = 0, i = 0; !port_found && i < ctx->adaptors; i++)
         {
-            if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask))
+            if ((ctx->ai[i].type & XvInputMask) && (ctx->ai[i].type & XvImageMask))
             {
-                for (xv_p = ai[i].base_id;
-                     xv_p < ai[i].base_id + ai[i].num_ports; ++xv_p)
+                for (xv_p = ctx->ai[i].base_id;
+                     xv_p < ctx->ai[i].base_id + ctx->ai[i].num_ports; ++xv_p)
                 {
                     if (xv_p == xv_port)
                     {
@@ -774,12 +805,12 @@ static int preinit(const char *arg)
         }
     }
 
-    for (i = 0; i < adaptors && xv_port == 0; i++)
+    for (i = 0; i < ctx->adaptors && xv_port == 0; i++)
     {
-        if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask))
+        if ((ctx->ai[i].type & XvInputMask) && (ctx->ai[i].type & XvImageMask))
         {
-            for (xv_p = ai[i].base_id;
-                 xv_p < ai[i].base_id + ai[i].num_ports; ++xv_p)
+            for (xv_p = ctx->ai[i].base_id;
+                 xv_p < ctx->ai[i].base_id + ctx->ai[i].num_ports; ++xv_p)
                 if (!XvGrabPort(mDisplay, xv_p, CurrentTime))
                 {
                     xv_port = xv_p;
@@ -808,29 +839,29 @@ static int preinit(const char *arg)
       return -1; // bail out, colorkey setup failed
     }
     vo_xv_enable_vsync();
-    vo_xv_get_max_img_dim( &max_width, &max_height );
+    vo_xv_get_max_img_dim(&ctx->max_width, &ctx->max_height);
 
-    fo = XvListImageFormats(mDisplay, xv_port, (int *) &formats);
+    ctx->fo = XvListImageFormats(mDisplay, xv_port, (int *) &ctx->formats);
 
-//  Temporarily disabled until next commit changes check_events parameters
-//    mp_input_add_event_fd(ConnectionNumber(mDisplay), check_events);
+    mp_input_add_event_fd(ConnectionNumber(mDisplay), x11_fd_callback, vo);
     return 0;
 }
 
-static int control(uint32_t request, void *data)
+static int control(struct vo *vo, uint32_t request, void *data)
 {
+    struct xvctx *ctx = vo->priv;
     switch (request)
     {
         case VOCTRL_PAUSE:
-            return (int_pause = 1);
+            return (ctx->is_paused = 1);
         case VOCTRL_RESUME:
-            return (int_pause = 0);
+            return (ctx->is_paused = 0);
         case VOCTRL_QUERY_FORMAT:
-            return query_format(*((uint32_t *) data));
+            return query_format(ctx, *((uint32_t *) data));
         case VOCTRL_GET_IMAGE:
-            return get_image(data);
+            return get_image(ctx, data);
         case VOCTRL_DRAW_IMAGE:
-            return draw_image(data);
+            return draw_image(vo, data);
         case VOCTRL_GUISUPPORT:
             return VO_TRUE;
         case VOCTRL_GET_PANSCAN:
@@ -854,11 +885,11 @@ static int control(uint32_t request, void *data)
                                             vo_dwidth + vo_panscan_x - 1,
                                             vo_dheight + vo_panscan_y - 1,
                                             1);
-		    vo_xv_draw_colorkey(drwX - (vo_panscan_x >> 1),
-					drwY - (vo_panscan_y >> 1),
+		    vo_xv_draw_colorkey(ctx->drwX - (vo_panscan_x >> 1),
+					ctx->drwY - (vo_panscan_y >> 1),
 					vo_dwidth + vo_panscan_x - 1,
 					vo_dheight + vo_panscan_y - 1);
-                    flip_page();
+                    flip_page(vo);
                 }
             }
             return VO_TRUE;
@@ -881,3 +912,17 @@ static int control(uint32_t request, void *data)
     }
     return VO_NOTIMPL;
 }
+
+const struct vo_driver video_out_xv = {
+    .is_new = 1,
+    .info = &info,
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_frame = draw_frame,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit
+};
