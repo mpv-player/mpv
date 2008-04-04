@@ -198,10 +198,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     ctx->is_paused = 0;
     ctx->visible_buf = -1;
 
-
-    ctx->num_buffers =
-        vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
-
     /* check image formats */
     ctx->xv_format = 0;
     for (i = 0; i < ctx->formats; i++) {
@@ -340,9 +336,12 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             ctx->draw_alpha_fnc = draw_alpha_null;
     }
 
-    if (vo_config_count)
-        for (i = 0; i < ctx->num_buffers; i++)
-            deallocate_xvimage(vo, i);
+    // In case config has been called before
+    for (i = 0; i < ctx->num_buffers; i++)
+        deallocate_xvimage(vo, i);
+
+    ctx->num_buffers =
+        vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
 
     for (i = 0; i < ctx->num_buffers; i++)
         allocate_xvimage(vo, i);
