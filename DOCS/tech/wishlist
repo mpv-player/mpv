@@ -44,6 +44,8 @@ Small improvements:
 
  * ability to set mplayer default/startup volume
 
+ * ability to cycle switch_aspect
+
 Cleanup:
 
  * integrate dvdnav into mplayer structure
