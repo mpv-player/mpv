@@ -240,7 +240,7 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
 void
 mp_input_rm_key_fd(int fd);
 
-int mp_input_add_event_fd(int fd, void (*read_func)(void));
+int mp_input_add_event_fd(int fd, void (*read_func)(void *ctx), void *ctx);
 
 void mp_input_rm_event_fd(int fd);
 

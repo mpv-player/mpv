@@ -507,6 +507,7 @@ typedef struct mp_input_fd {
   int fd;
   void* read_func;
   mp_close_func_t close_func;
+  void *ctx;
   unsigned eof : 1;
   unsigned drop : 1;
   unsigned dead : 1;
@@ -691,7 +692,7 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
 }
 
 int
-mp_input_add_event_fd(int fd, void (*read_func)(void))
+mp_input_add_event_fd(int fd, void (*read_func)(void *ctx), void *ctx)
 {
   if(num_key_fd == MP_MAX_KEY_FD) {
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
@@ -705,6 +706,7 @@ mp_input_add_event_fd(int fd, void (*read_func)(void))
   key_fds[num_key_fd] = (struct mp_input_fd){
       .fd = fd,
       .read_func = read_func,
+      .ctx = ctx,
       .no_readfunc_retval = 1,
   };
   num_key_fd++;
@@ -1230,7 +1232,7 @@ static mp_cmd_t *read_events(int time, int paused)
 #endif
 
 	if (key_fds[i].no_readfunc_retval) {   // getch2 handler special-cased for now
-	    ((void (*)(void))key_fds[i].read_func)();
+	    ((void (*)(void *))key_fds[i].read_func)(key_fds[i].ctx);
 	    if (cmd_queue_length)
 		return NULL;
 	    code = mplayer_get_key(0);

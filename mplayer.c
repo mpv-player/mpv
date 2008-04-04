@@ -2534,6 +2534,13 @@ static int seek(MPContext *mpctx, double amount, int style)
     return 0;
 }
 
+
+static void read_keys(void *ctx)
+{
+    getch2();
+}
+
+
 int main(int argc,char* argv[]){
 
 
@@ -2856,7 +2863,7 @@ mp_input_init(use_gui);
 if(slave_mode)
   mp_input_add_cmd_fd(0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
 else if(!noconsolecontrols)
-    mp_input_add_event_fd(0, getch2);
+    mp_input_add_event_fd(0, read_keys, NULL);
 // Set the libstream interrupt callback
 stream_set_interrupt_callback(mp_input_check_interrupt);
 
