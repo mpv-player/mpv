@@ -214,22 +214,17 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
 
     /* check image formats */
-    {
-        unsigned int i;
-
-        ctx->xv_format = 0;
-        for (i = 0; i < ctx->formats; i++)
-        {
-            mp_msg(MSGT_VO, MSGL_V,
-                   "Xvideo image format: 0x%x (%4.4s) %s\n", ctx->fo[i].id,
-                   (char *) &ctx->fo[i].id,
-                   (ctx->fo[i].format == XvPacked) ? "packed" : "planar");
-            if (ctx->fo[i].id == format)
-                ctx->xv_format = ctx->fo[i].id;
-        }
-        if (!ctx->xv_format)
-            return -1;
+    ctx->xv_format = 0;
+    for (i = 0; i < ctx->formats; i++) {
+        mp_msg(MSGT_VO, MSGL_V,
+               "Xvideo image format: 0x%x (%4.4s) %s\n", ctx->fo[i].id,
+               (char *) &ctx->fo[i].id,
+               (ctx->fo[i].format == XvPacked) ? "packed" : "planar");
+        if (ctx->fo[i].id == format)
+            ctx->xv_format = ctx->fo[i].id;
     }
+    if (!ctx->xv_format)
+        return -1;
 
 #ifdef HAVE_NEW_GUI
     if (use_gui)
