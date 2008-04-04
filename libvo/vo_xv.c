@@ -181,13 +181,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     struct xvctx *ctx = vo->priv;
     int i;
 
-#ifdef HAVE_XF86VM
-    int vm = 0;
-    unsigned int modeline_width, modeline_height;
-    static uint32_t vm_width;
-    static uint32_t vm_height;
-#endif
-
     ctx->image_height = height;
     ctx->image_width = width;
     ctx->image_format = format;
@@ -205,10 +198,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     ctx->is_paused = 0;
     ctx->visible_buf = -1;
 
-#ifdef HAVE_XF86VM
-    if (flags & VOFLAG_MODESWITCHING)
-        vm = 1;
-#endif
 
     ctx->num_buffers =
         vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
@@ -237,6 +226,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         hint.width = d_width;
         hint.height = d_height;
 #ifdef HAVE_XF86VM
+        unsigned int modeline_width, modeline_height;
+        uint32_t vm_width;
+        uint32_t vm_height;
+        int vm = flags & VOFLAG_MODESWITCHING;
         if (vm)
         {
             if ((d_width == 0) && (d_height == 0))
