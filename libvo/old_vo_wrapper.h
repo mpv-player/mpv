@@ -17,4 +17,6 @@ void old_vo_flip_page(struct vo *vo);
 void old_vo_check_events(struct vo *vo);
 void old_vo_uninit(struct vo *vo);
 
+void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
+
 #endif

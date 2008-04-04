@@ -96,7 +96,7 @@ static void remove_func(int x0,int y0, int w,int h){
     }
 }
 
-static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
+static void draw_func(void *ctx, int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
     unsigned char* dst;
     if(!vo_osd_changed_flag && vf->dmpi->planes[0]==vf->priv->fb_ptr){
 	// ok, enough to update the area inside the video, leave the black bands
@@ -177,7 +177,7 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
 	    vo_remove_text(vf->priv->exp_w,vf->priv->exp_h,remove_func);
 	}
     }
-    vo_draw_text(vf->priv->exp_w,vf->priv->exp_h,draw_func);
+    osd_draw_text(vf->priv->exp_w,vf->priv->exp_h,draw_func, NULL);
     // save buffer pointer for double buffering detection - yes, i know it's
     // ugly method, but note that codecs with DR support does the same...
     if(vf->dmpi)

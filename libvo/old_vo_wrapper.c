@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include "old_vo_wrapper.h"
 #include "video_out.h"
+#include "sub.h"
 
 int old_vo_preinit(struct vo *vo, const char *arg)
 {
@@ -76,5 +77,20 @@ void old_vo_check_events(struct vo *vo)
 void old_vo_uninit(struct vo *vo)
 {
     vo->driver->old_functions->uninit();
+}
+
+
+static void draw_alpha_wrapper(void *ctx, int x0, int y0, int w, int h,
+                               unsigned char *src, unsigned char *srca,
+                               int stride)
+{
+    void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride) = ctx;
+    draw_alpha(x0, y0, w, h, src, srca, stride);
+}
+
+
+void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
+{
+    osd_draw_text(dxs, dys, draw_alpha_wrapper, draw_alpha);
 }
 

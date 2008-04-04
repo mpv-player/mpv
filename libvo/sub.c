@@ -154,9 +154,11 @@ static void alloc_buf(mp_osd_obj_t* obj)
 }
 
 // renders the buffer
-inline static void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+inline static void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
+{
     if (obj->allocated > 0) {
-	draw_alpha(obj->bbox.x1,obj->bbox.y1,
+	draw_alpha(ctx,
+		   obj->bbox.x1,obj->bbox.y1,
 		   obj->bbox.x2-obj->bbox.x1,
 		   obj->bbox.y2-obj->bbox.y1,
 		   obj->bitmap_buffer,
@@ -1022,9 +1024,9 @@ inline static void vo_update_spudec_sub(mp_osd_obj_t* obj, int dxs, int dys)
   obj->flags |= OSDFLAG_BBOX;
 }
 
-inline static void vo_draw_spudec_sub(mp_osd_obj_t* obj, void (*draw_alpha)(int x0, int y0, int w, int h, unsigned char* src, unsigned char* srca, int stride))
+inline static void vo_draw_spudec_sub(mp_osd_obj_t* obj, void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h, unsigned char* src, unsigned char* srca, int stride), void *ctx)
 {
-  spudec_draw_scaled(vo_spudec, obj->dxs, obj->dys, draw_alpha);
+    spudec_draw_scaled(vo_spudec, obj->dxs, obj->dys, draw_alpha, ctx);
 }
 
 void *vo_spudec=NULL;
@@ -1223,7 +1225,8 @@ void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h)){
     }
 }
 
-void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+void osd_draw_text(int dxs,int dys,void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
+{
     mp_osd_obj_t* obj=vo_osd_list;
     vo_update_osd(dxs,dys);
     while(obj){
@@ -1231,7 +1234,7 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	vo_osd_changed_flag=obj->flags&OSDFLAG_CHANGED;	// temp hack
 	switch(obj->type){
 	case OSDTYPE_SPU:
-	    vo_draw_spudec_sub(obj, draw_alpha); // FIXME
+	    vo_draw_spudec_sub(obj, draw_alpha, ctx); // FIXME
 	    break;
 #ifdef USE_DVDNAV
         case OSDTYPE_DVDNAV:
@@ -1242,7 +1245,7 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	case OSDTYPE_OSD:
 	case OSDTYPE_SUBTITLE:
 	case OSDTYPE_PROGBAR:
-	    vo_draw_text_from_buffer(obj,draw_alpha);
+	    vo_draw_text_from_buffer(obj, draw_alpha, ctx);
 	    break;
 	}
 	obj->old_bbox=obj->bbox;

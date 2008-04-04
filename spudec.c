@@ -767,7 +767,7 @@ void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh, int ds,
 	sws_freeContext(ctx);
 }
 
-void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
+void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
 {
   spudec_handle_t *spu = (spudec_handle_t *)me;
   scale_pixel *table_x;
@@ -784,7 +784,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	|| (spu->orig_frame_width == dxs && spu->orig_frame_height == dys))) {
       if (spu->image)
       {
-	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
+	draw_alpha(ctx, spu->start_col, spu->start_row, spu->width, spu->height,
 		   spu->image, spu->aimage, spu->stride);
 	spu->spu_changed = 0;
       }
@@ -1085,7 +1085,7 @@ nothing_to_do:
           spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height;
 	  break;
 	}
-	draw_alpha(spu->scaled_start_col, spu->scaled_start_row, spu->scaled_width, spu->scaled_height,
+	draw_alpha(ctx, spu->scaled_start_col, spu->scaled_start_row, spu->scaled_width, spu->scaled_height,
 		   spu->scaled_image, spu->scaled_aimage, spu->scaled_stride);
 	spu->spu_changed = 0;
       }
