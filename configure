@@ -7857,6 +7857,7 @@ LIBPOSTPROC = $_libpostproc
 LIBPOSTPROC_A = $_libpostproc_a
 LIBPOSTPROC_SO = $_libpostproc_so
 
+BUILD_STATIC=yes
 SRC_PATH=..
 BUILD_ROOT=..
 LIBPREF=lib
