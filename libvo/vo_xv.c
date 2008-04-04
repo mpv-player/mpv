@@ -82,6 +82,8 @@ struct xvctx {
     int is_paused;
     uint32_t drwX, drwY;
     uint32_t max_width, max_height; // zero means: not set
+    int event_fd_registered; // for uninit called from preinit
+    int mode_switched;
     void (*draw_alpha_fnc)(void *ctx, int x0, int y0, int w, int h,
                            unsigned char *src, unsigned char *srca,
                            int stride);
@@ -239,6 +241,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             }
             vo_vm_switch(vm_width, vm_height, &modeline_width,
                          &modeline_height);
+            ctx->mode_switched = 1;
             hint.x = (vo_screenwidth - modeline_width) / 2;
             hint.y = (vo_screenheight - modeline_height) / 2;
             hint.width = modeline_width;
@@ -684,10 +687,9 @@ static void uninit(struct vo *vo)
     struct xvctx *ctx = vo->priv;
     int i;
 
-    if (!vo_config_count)
-        return;
     ctx->visible_buf = -1;
-    XvFreeAdaptorInfo(ctx->ai);
+    if (ctx->ai)
+        XvFreeAdaptorInfo(ctx->ai);
     ctx->ai = NULL;
     if (ctx->fo) {
         XFree(ctx->fo);
@@ -696,9 +698,12 @@ static void uninit(struct vo *vo)
     for (i = 0; i < ctx->num_buffers; i++)
         deallocate_xvimage(vo, i);
 #ifdef HAVE_XF86VM
-    vo_vm_close(mDisplay);
+    if (ctx->mode_switched)
+        vo_vm_close(mDisplay);
 #endif
-    mp_input_rm_event_fd(ConnectionNumber(mDisplay));
+    if (ctx->event_fd_registered)
+        mp_input_rm_event_fd(ConnectionNumber(mDisplay));
+    // uninit() shouldn't get called unless initialization went past vo_init()
     vo_x11_uninit();
     free(ctx);
     vo->priv = NULL;
@@ -748,7 +753,7 @@ static int preinit(struct vo *vo, const char *arg)
     {
         mp_msg(MSGT_VO, MSGL_ERR,
                MSGTR_LIBVO_XV_XvNotSupportedByX11);
-        return -1;
+        goto error;
     }
 
     /* check for Xvideo support */
@@ -757,7 +762,7 @@ static int preinit(struct vo *vo, const char *arg)
                         &ctx->ai))
     {
         mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_XvQueryAdaptorsFailed);
-        return -1;
+        goto error;
     }
 
     /* check adaptors */
@@ -818,12 +823,12 @@ static int preinit(struct vo *vo, const char *arg)
         else
             mp_msg(MSGT_VO, MSGL_ERR,
                    MSGTR_LIBVO_XV_NoXvideoSupport);
-        return -1;
+        goto error;
     }
 
     if ( !vo_xv_init_colorkey() )
     {
-      return -1; // bail out, colorkey setup failed
+      goto error; // bail out, colorkey setup failed
     }
     vo_xv_enable_vsync();
     vo_xv_get_max_img_dim(&ctx->max_width, &ctx->max_height);
@@ -831,7 +836,12 @@ static int preinit(struct vo *vo, const char *arg)
     ctx->fo = XvListImageFormats(mDisplay, xv_port, (int *) &ctx->formats);
 
     mp_input_add_event_fd(ConnectionNumber(mDisplay), x11_fd_callback, vo);
+    ctx->event_fd_registered = 1;
     return 0;
+
+ error:
+    uninit(vo); // free resources
+    return -1;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
