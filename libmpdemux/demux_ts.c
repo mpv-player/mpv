@@ -947,7 +947,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	sh_audio_t *sh_audio;
 	off_t start_pos;
 	tsdemux_init_t params;
-	ts_priv_t * priv = (ts_priv_t*) demuxer->priv;
+	ts_priv_t * priv = demuxer->priv;
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "DEMUX OPEN, AUDIO_ID: %d, VIDEO_ID: %d, SUBTITLE_ID: %d,\n",
 		demuxer->audio->id, demuxer->video->id, demuxer->sub->id);
