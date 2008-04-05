@@ -81,6 +81,8 @@ static video_codec_t find_video_codec(sh_video_t *sh_video)
   else if((fmt == DEMUXER_TYPE_MPEG_PS ||  fmt == DEMUXER_TYPE_MPEG_TS) &&
     (sh_video->format==mmioFOURCC('W', 'V', 'C', '1')))
     return VIDEO_VC1;
+  else if (fmt == DEMUXER_TYPE_ASF && sh_video->bih && sh_video->bih->biCompression == mmioFOURCC('D', 'V', 'R', ' '))
+    return VIDEO_MPEG12;
   else
     return VIDEO_OTHER;
 }
@@ -250,6 +252,10 @@ switch(video_codec){
    break;
  }
  case VIDEO_MPEG12: {
+   if (d_video->demuxer->file_format == DEMUXER_TYPE_ASF) { // DVR-MS
+     if(!sh_video->bih) return 0;
+     sh_video->format=sh_video->bih->biCompression;
+   }
 mpeg_header_parser:
    // Find sequence_header first:
    videobuf_len=0; videobuf_code_len=0;
