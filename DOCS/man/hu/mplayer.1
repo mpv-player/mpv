@@ -1,4 +1,4 @@
-.\" Synced with r26232
+.\" Synced with r26297
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 03. 16." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 04. 05." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -840,7 +840,7 @@ Jelenleg a következõ meghajtók támogatják a fixed-vo-t: gl, gl2, mga, svga, x11,
 xmga, xv, xvidix és dfbmga.
 .
 .TP
-.B \-framedrop (lásd még \-hardframedrop, csak \-no\-correct\-pts mellett mûködik)
+.B \-framedrop (lásd még \-hardframedrop, \-no\-correct\-pts nélkül csak kísérleti jelleggel)
 Néhány képkocka megjelenítésének hanyagolása, hogy lassú rendszereken is
 megfelelõ legyen az A/V szinkron. A videó szûrõk nem vonatkoznak ezekre
 a képkockákra.
@@ -857,7 +857,7 @@ Nem mûködik konfig-fájl opcióként.
 Rövid segítõ szöveg kiírása.
 .
 .TP
-.B \-hardframedrop (csak \-no\-correct\-pts mellett mûködik)
+.B \-hardframedrop (\-no\-correct\-pts nélkül csak kísérleti jelleggel)
 Intenzívebb képkockaeldobás (a dekódolási minõség rovására).
 Torz képekhez vezet!
 Figyelj rá, hogy különösen a libmpeg2 dekódolóval ez összeomolhat,
@@ -894,7 +894,8 @@ Bõvebb információt kínál a feliratról, az audiósávok nyelvérõl és ID-irõl is.
 Néhány esetben több információt kapsz a \-msglevel identify=6 kapcsolóval.
 Például egy DVD esetén kiírja a fejezeteket és az egyes címek idõbeli hosszát,
 valamint a lemez ID-t is.
-A TOOLS/midentify wrapper script eltünteti a maradék kimenetet, és
+Ha a \-frames 0 kapcsolóval használod, elnyom minden kimenetet.
+A TOOLS/\:midentify wrapper script eltünteti a maradék kimenetet, és
 (remélhetõleg) shell escape-eli a fájlneveket.
 .
 .TP
@@ -10441,6 +10442,8 @@ NUT nyílt konténer formátum (kísérleti)
 QuickTime
 .IPs "mp4\ \ "
 MPEG-4 formátum
+.IPs "ipod\ "
+MPEG-4 formátum extra fejléc flag-ekkel, melyek az Apple iPod firmware-jének kellenek
 .IPs "dv\ \ \ "
 Sony Digital Video konténer
 .RE
