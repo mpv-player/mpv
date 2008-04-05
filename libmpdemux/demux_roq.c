@@ -154,6 +154,7 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
         // make the header first
         sh_audio = new_sh_audio(demuxer, 0);
         // make sure the demuxer knows about the new stream header
+        demuxer->audio->id = 0;
         demuxer->audio->sh = sh_audio;
         // make sure that the audio demuxer stream header knows about its
         // parent audio demuxer stream

@@ -53,6 +53,7 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
   demuxer->movi_start = demuxer->stream->start_pos;
   demuxer->movi_end = demuxer->stream->end_pos;
 
+  demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
   sh_audio->ds = demuxer->audio;
 

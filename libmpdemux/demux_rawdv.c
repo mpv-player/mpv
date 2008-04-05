@@ -195,6 +195,7 @@ static demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
    mp_msg(MSGT_DEMUXER,MSGL_V,"demux_open_rawdv() seek to %qu, size: %d, dv_dec->frame_size: %d\n",frames->current_filepos,frames->frame_size, dv_decoder->frame_size);
     if (dv_decoder->audio != NULL && demuxer->audio->id>=-1){
        sh_audio_t *sh_audio =  new_sh_audio(demuxer, 0);
+       demuxer->audio->id = 0;
 	    demuxer->audio->sh = sh_audio;
 	    sh_audio->ds = demuxer->audio;
        mp_msg(MSGT_DEMUXER,MSGL_V,"demux_open_rawdv() chan: %d samplerate: %d\n",dv_decoder->audio->num_channels,dv_decoder->audio->frequency );

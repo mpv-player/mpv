@@ -153,6 +153,7 @@ static demuxer_t* demux_open_vqf(demuxer_t* demuxer) {
     }
   }
 
+  demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
   sh_audio->ds = demuxer->audio;
   stream_seek(s,demuxer->movi_start);

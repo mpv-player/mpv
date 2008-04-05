@@ -136,6 +136,7 @@ static demuxer_t* demux_aac_open(demuxer_t *demuxer)
 	sh = new_sh_audio(demuxer, 0);
 	sh->ds = demuxer->audio;
 	sh->format = mmioFOURCC('M', 'P', '4', 'A');
+	demuxer->audio->id = 0;
 	demuxer->audio->sh = sh;
 
 	demuxer->filepos = stream_tell(demuxer->stream);

@@ -369,6 +369,7 @@ static demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 	if (rtjpeg_fileheader.audioblocks != 0)
 	{
 	    sh_audio = new_sh_audio(demuxer, 0);
+	    demuxer->audio->id = 0;
 	    demuxer->audio->sh = sh_audio;
 	    sh_audio->ds = demuxer->audio;
 	    sh_audio->format = 0x1;
