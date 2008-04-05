@@ -360,6 +360,12 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             priv->video_streams++;
             bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
 
+            if(codec->codec_id == CODEC_ID_RAWVIDEO) {
+                switch (codec->pix_fmt) {
+                    case PIX_FMT_RGB24:
+                        codec->codec_tag= MKTAG(24, 'B', 'G', 'R');
+                }
+            }
             if(!codec->codec_tag)
                 codec->codec_tag= av_codec_get_tag(mp_bmp_taglists, codec->codec_id);
             bih->biSize= sizeof(BITMAPINFOHEADER) + codec->extradata_size;
