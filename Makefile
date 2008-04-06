@@ -43,6 +43,12 @@ SRCS_MPLAYER = mplayer.c \
                mixer.c \
                parser-mpcmd.c \
                command.c \
+               input/input.c \
+
+SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
+SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
+SRCS_MPLAYER-$(LIRC)         += input/lirc.c
+
 
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
@@ -72,7 +78,6 @@ COMMON_LIBS-$(ASS)                += libass/libass.a
 
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
-               input/libinput.a \
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
 LIBS_MPLAYER-$(GUI)               += gui/libgui.a
@@ -104,7 +109,6 @@ INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 PARTS = dvdread \
         gui \
-        input \
         liba52 \
         libaf \
         libao2 \
@@ -128,6 +132,7 @@ PARTS = dvdread \
         tremor \
         vidix \
 
+DIRS =  input \
 
 all:	$(ALL_PRG)
 
@@ -216,9 +221,6 @@ osdep/libosdep.a:
 osdep/mplayer-rc.o: version.h
 	$(MAKE) -C osdep mplayer-rc.o
 
-input/libinput.a:
-	$(MAKE) -C input
-
 libmenu/libmenu.a:
 	$(MAKE) -C libmenu
 
@@ -303,6 +305,7 @@ clean::
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags
 	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
+	for dir in $(DIRS); do rm -f $$dir/*.o $$dir/*.a $$dir/*.ho $$dir/*~ ; done
 
 distclean:: doxygen_clean
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
@@ -380,7 +383,6 @@ libvo/libvo.a: .norecurse $(wildcard libvo/*.[ch])
 libvo/libosd.a: .norecurse $(wildcard libvo/*.[ch])
 libao2/libao2.a: .norecurse $(wildcard libao2/*.[ch])
 osdep/libosdep.a: .norecurse $(wildcard osdep/*.[ch])
-input/libinput.a: .norecurse $(wildcard input/*.[ch])
 
 libmenu/libmenu.a: .norecurse $(wildcard libmenu/*.[ch])
 libaf/libaf.a: .norecurse $(wildcard libaf/*.[ch])
