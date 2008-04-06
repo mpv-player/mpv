@@ -4,7 +4,7 @@ LIBNAME_COMMON   = libmpcodecs.a
 LIBNAME_MENCODER = libmpencoders.a
 
 SRCS_COMMON = native/nuppelvideo.c \
-              native/RTjpegN.c \
+              native/rtjpegn.c \
               native/xa_gsm.c \
               img_format.c \
               mp_image.c \
