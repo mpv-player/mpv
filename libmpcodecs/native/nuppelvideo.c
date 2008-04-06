@@ -18,7 +18,7 @@
 #include "../libvo/fastmemcpy.h"
 
 #include "libmpdemux/nuppelvideo.h" 
-#include "RTjpegN.h"
+#include "rtjpegn.h"
 #include "libavutil/lzo.h"
 
 #define KEEP_BUFFER

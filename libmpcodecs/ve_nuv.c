@@ -21,7 +21,7 @@
 
 #include "libmpdemux/nuppelvideo.h"
 #include <lzo/lzo1x.h>
-#include "native/RTjpegN.h"
+#include "native/rtjpegn.h"
 
 #define LZO_AL(size) (((size) + (sizeof(long) - 1)) / sizeof(long))
 #define LZO_IN_LEN          (1024*1024L)

@@ -31,7 +31,7 @@
 #endif
 
 #include "mpbswap.h"
-#include "RTjpegN.h"
+#include "rtjpegn.h"
 
 #ifdef MMX
 #include "mmx.h"
