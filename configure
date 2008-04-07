@@ -7880,8 +7880,6 @@ CONFIG_MLIB = $_mlib
 CONFIG_SWSCALE=yes
 CONFIG_ZLIB=$_zlib
 
-DEPEND_CMD=\$(CC) -MM \$(CFLAGS) \$(filter-out %.h,$^) | sed "s,[0-9a-z._-]*: \(\$(SRC_DIR)/\)*\([a-z0-9]*/\)[^/]* ,\\2&,"
-
 HAVE_PTHREADS = $_pthreads
 HAVE_W32THREADS = $_w32threads
 HAVE_XVMC = $_xvmc
@@ -7892,6 +7890,10 @@ HAVE_XVMC = $_xvmc
 `echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+
+DEPEND_CMD   = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,\$$^) | sed "s,[0-9a-z._-]*: \(\$(SRC_DIR)/\)*\([a-z0-9]*/\)[^/]* ,\\2&,"
+
+MPDEPEND_CMD = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,$^) | sed "s,[0-9a-z._-]*: \(\$(SRC_DIR)/\)*\([a-z0-9]*/\)[^/]* ,\\2&,"
 
 EOF
 
