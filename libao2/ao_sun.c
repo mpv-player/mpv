@@ -478,8 +478,6 @@ static int init(int rate,int channels,int format,int flags){
 	return 0;
     }
 
-    ioctl(audio_fd, AUDIO_DRAIN, 0);
-
     if (af2sunfmt(format) == AUDIO_ENCODING_NONE)
       format = AF_FORMAT_S16_NE;
 
@@ -583,6 +581,8 @@ static void uninit(int immed){
     // throw away buffered data in the audio driver's STREAMS queue
     if (immed)
 	flush_audio(audio_fd);
+    else
+	ioctl(audio_fd, AUDIO_DRAIN, 0);
     close(audio_fd);
 }
 
