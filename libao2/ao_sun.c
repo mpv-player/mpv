@@ -588,29 +588,7 @@ static void uninit(int immed){
 
 // stop playing and empty buffers (for seeking/pause)
 static void reset(void){
-    audio_info_t info;
-
-    uninit(1);
-    audio_fd=open(audio_dev, O_WRONLY);
-    if(audio_fd<0){
-	mp_msg(MSGT_AO, MSGL_FATAL, MSGTR_AO_SUN_CantReopenReset, strerror(errno));
-	return;
-    }
-
-    ioctl(audio_fd, AUDIO_DRAIN, 0);
-
-    AUDIO_INITINFO(&info);
-    info.play.encoding = af2sunfmt(ao_data.format);
-    info.play.precision =
-	(ao_data.format==AF_FORMAT_S16_NE 
-	 ? AUDIO_PRECISION_16
-	 : AUDIO_PRECISION_8);
-    info.play.channels = ao_data.channels;
-    info.play.sample_rate = ao_data.samplerate;
-    info.play.samples = 0;
-    info.play.eof = 0;
-    info.play.error = 0;
-    ioctl (audio_fd, AUDIO_SETINFO, &info);
+    flush_audio(audio_fd);
     queued_bursts = 0;
     queued_samples = 0;
 }
