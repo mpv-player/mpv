@@ -44,8 +44,19 @@ SRCS_MPLAYER = mplayer.c \
                parser-mpcmd.c \
                command.c \
                input/input.c \
+               libmenu/menu.c \
+               libmenu/menu_chapsel.c \
+               libmenu/menu_cmdlist.c  \
+               libmenu/menu_console.c \
+               libmenu/menu_filesel.c \
+               libmenu/menu_list.c  \
+               libmenu/menu_param.c \
+               libmenu/menu_pt.c \
+               libmenu/menu_txt.c \
+               libmenu/vf_menu.c \
 
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
+SRCS_MPLAYER-$(DVBIN)        += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
 SRCS_MPLAYER-$(LIRC)         += input/lirc.c
 
@@ -81,7 +92,6 @@ LIBS_MPLAYER = libvo/libvo.a \
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
 LIBS_MPLAYER-$(GUI)               += gui/libgui.a
-LIBS_MPLAYER-$(LIBMENU)           += libmenu/libmenu.a
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 libmpdemux/libmpmux.a \
@@ -118,7 +128,6 @@ PARTS = dvdread \
         libavutil \
         libdvdcss \
         libfaad2 \
-        libmenu \
         libmpcodecs \
         libmpdemux \
         libmpeg2 \
@@ -133,6 +142,7 @@ PARTS = dvdread \
         vidix \
 
 DIRS =  input \
+        libmenu \
 
 all:	$(ALL_PRG)
 
@@ -220,9 +230,6 @@ osdep/libosdep.a:
 
 osdep/mplayer-rc.o: version.h
 	$(MAKE) -C osdep mplayer-rc.o
-
-libmenu/libmenu.a:
-	$(MAKE) -C libmenu
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
@@ -384,7 +391,6 @@ libvo/libosd.a: .norecurse $(wildcard libvo/*.[ch])
 libao2/libao2.a: .norecurse $(wildcard libao2/*.[ch])
 osdep/libosdep.a: .norecurse $(wildcard osdep/*.[ch])
 
-libmenu/libmenu.a: .norecurse $(wildcard libmenu/*.[ch])
 libaf/libaf.a: .norecurse $(wildcard libaf/*.[ch])
 dvdread/libdvdread.a: .norecurse $(wildcard dvdread/*.[ch])
 libdvdcss/libdvdcss.a: .norecurse $(wildcard libdvdcss/*.[ch])
