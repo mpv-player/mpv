@@ -33,6 +33,15 @@ SRCS_COMMON = asxparser.c \
               subopt-helper.c \
               subreader.c \
               vobsub.c \
+              libass/ass.c \
+              libass/ass_bitmap.c \
+              libass/ass_cache.c \
+              libass/ass_font.c \
+              libass/ass_fontconfig.c \
+              libass/ass_library.c \
+              libass/ass_mp.c \
+              libass/ass_render.c \
+              libass/ass_utils.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
 
@@ -96,7 +105,6 @@ COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
 COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
 COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
-COMMON_LIBS-$(ASS)                += libass/libass.a
 
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
@@ -128,7 +136,6 @@ PARTS = dvdread \
         liba52 \
         libaf \
         libao2 \
-        libass \
         libavcodec \
         libavformat \
         libavutil \
@@ -147,6 +154,7 @@ PARTS = dvdread \
         vidix \
 
 DIRS =  input \
+        libass \
         libmenu \
         osdep \
 
@@ -170,9 +178,6 @@ libdvdcss/libdvdcss.a:
 
 loader/libloader.a:
 	$(MAKE) -C loader
-
-libass/libass.a:
-	$(MAKE) -C libass
 
 libmpdemux/libmpdemux.a:
 	$(MAKE) -C libmpdemux libmpdemux.a
@@ -414,7 +419,5 @@ libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
 vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
 gui/libgui.a: .norecurse $(wildcard gui/*.[ch] gui/*/*.[ch] gui/*/*/*.[ch])
-
-libass/libass.a: .norecurse $(wildcard libass/*.[ch])
 
 .PHONY: all install* uninstall strip doxygen doxygen_clean TAGS tags
