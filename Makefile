@@ -153,7 +153,7 @@ DIRS =  input \
 all:	$(ALL_PRG)
 
 dep depend:: help_mp.h version.h codecs.conf.h
-	for a in $(PARTS); do $(MAKE) -C $$a dep; done
+	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
 include mpcommon.mak
 
@@ -267,8 +267,8 @@ install-mplayer: mplayer$(EXESUF)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) $(BINDIR)
 
 install-mplayer-man:
-	for i in $(MAN_LANG); do \
-		if test "$$i" = en ; then \
+	for lang in $(MAN_LANG); do \
+		if test "$$lang" = en ; then \
 			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/ ; \
 		else \
 			$(INSTALL) -d $(MANDIR)/$$i/man1 ; \
@@ -278,8 +278,8 @@ install-mplayer-man:
 
 install-mencoder: mencoder$(EXESUF)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) mencoder$(EXESUF) $(BINDIR)
-	for i in $(MAN_LANG); do \
-		if test "$$i" = en ; then \
+	for lang in $(MAN_LANG); do \
+		if test "$$lang" = en ; then \
 			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
 		else \
 			cd $(MANDIR)/$$i/man1 && ln -sf mplayer.1 mencoder.1 ; \
@@ -302,8 +302,8 @@ uninstall:
 	-rm -f $(MANDIR)/man1/mencoder.1 $(MANDIR)/man1/mplayer.1
 	-rm -f $(prefix)/share/pixmaps/mplayer.xpm
 	-rm -f $(prefix)/share/applications/mplayer.desktop
-	for l in $(MAN_LANG); do \
-	  if test "$$l" != "en"; then \
+	for lang in $(MAN_LANG); do \
+	  if test "$$lang" != "en"; then \
 	    rm -f $(MANDIR)/$$l/man1/mplayer.1    \
 	          $(MANDIR)/$$l/man1/mencoder.1   \
 	          $(MANDIR)/$$l/man1/gmplayer.1 ; \
@@ -314,11 +314,11 @@ clean::
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags
-	for a in $(PARTS); do $(MAKE) -C $$a clean; done
+	for part in $(PARTS); do $(MAKE) -C $$part clean; done
 	for dir in $(DIRS); do rm -f $$dir/*.o $$dir/*.a $$dir/*.ho $$dir/*~ ; done
 
 distclean:: doxygen_clean
-	for a in $(PARTS); do $(MAKE) -C $$a distclean; done
+	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
 	$(MAKE) -C TOOLS distclean
 	-rm -f configure.log config.mak config.h
 
