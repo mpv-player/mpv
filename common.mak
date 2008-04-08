@@ -4,7 +4,7 @@
 
 all: # make "all" default target
 
-ifeq ($(SUBDIR),)
+ifndef SUBDIR
 vpath %.c $(SRC_DIR)
 vpath %.h $(SRC_DIR)
 vpath %.S $(SRC_DIR)
@@ -36,6 +36,7 @@ OBJS     += $(OBJS-yes)
 ASM_OBJS += $(ASM_OBJS-yes)
 CPP_OBJS += $(CPP_OBJS-yes)
 FFLIBS   := $(FFLIBS-yes) $(FFLIBS)
+TESTS    += $(TESTS-yes)
 
 FFEXTRALIBS := $(addprefix -l,$(addsuffix $(BUILDSUF),$(FFLIBS))) $(EXTRALIBS)
 FFLDFLAGS   := $(addprefix -L$(BUILD_ROOT)/lib,$(FFLIBS)) $(LDFLAGS)
