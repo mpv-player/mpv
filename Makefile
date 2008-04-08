@@ -33,7 +33,18 @@ SRCS_COMMON = asxparser.c \
               subopt-helper.c \
               subreader.c \
               vobsub.c \
+              osdep/$(GETCH) \
+              osdep/$(TIMER) \
 
+SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
+SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
+SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
+SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
+SRCS_COMMON-$(NEED_SETENV)           += osdep/setenv.c
+SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
+SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
+SRCS_COMMON-$(NEED_SWAB)             += osdep/swab.c
+SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
 SRCS_COMMON-$(UNRAR_EXEC) += unrar_exec.c
 
 SRCS_MPLAYER = mplayer.c \
@@ -96,9 +107,6 @@ LIBS_MPLAYER-$(GUI)               += gui/libgui.a
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 libmpdemux/libmpmux.a \
 
-# Having this in libosdep.a is not enough.
-OBJS_MPLAYER-$(TARGET_WIN32) += osdep/mplayer-rc.o
-
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
@@ -106,8 +114,6 @@ COMMON_LIBS  += $(COMMON_LIBS-yes)
 LIBS_MPLAYER += $(LIBS_MPLAYER-yes)
 OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
 ALL_PRG      += $(ALL_PRG-yes)
-
-COMMON_LIBS += osdep/libosdep.a
 
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(LIBS_MPLAYER)  $(COMMON_LIBS)
 MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(LIBS_MENCODER) $(COMMON_LIBS)
@@ -136,13 +142,13 @@ PARTS = dvdread \
         libvo \
         loader \
         mp3lib \
-        osdep \
         stream \
         tremor \
         vidix \
 
 DIRS =  input \
         libmenu \
+        osdep \
 
 all:	$(ALL_PRG)
 
@@ -225,12 +231,6 @@ vidix/libvidix.a:
 gui/libgui.a:
 	$(MAKE) -C gui
 
-osdep/libosdep.a:
-	$(MAKE) -C osdep
-
-osdep/mplayer-rc.o: version.h
-	$(MAKE) -C osdep mplayer-rc.o
-
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
 
@@ -250,6 +250,9 @@ codecs2html$(EXESUF): mp_msg.o
 
 codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
 	$(CC) -I. -DTESTING codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap -o $@
+
+osdep/mplayer-rc.o: osdep/mplayer.rc version.h
+	$(WINDRES) -o $@ $<
 
 install: install-dirs $(INSTALL_TARGETS)
 
@@ -389,7 +392,6 @@ $(MPLAYER_DEPS) $(MENCODER_DEPS): help_mp.h
 libvo/libvo.a: .norecurse $(wildcard libvo/*.[ch])
 libvo/libosd.a: .norecurse $(wildcard libvo/*.[ch])
 libao2/libao2.a: .norecurse $(wildcard libao2/*.[ch])
-osdep/libosdep.a: .norecurse $(wildcard osdep/*.[ch])
 
 libaf/libaf.a: .norecurse $(wildcard libaf/*.[ch])
 dvdread/libdvdread.a: .norecurse $(wildcard dvdread/*.[ch])
