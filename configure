@@ -1311,6 +1311,8 @@ if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
 fi
 
 
+_timer=timer-linux.c
+_getch=getch2.c
 if freebsd ; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
   _inc_extra="$_inc_extra -I/usr/local/include"
@@ -1324,6 +1326,7 @@ fi
 if darwin; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
   _inc_extra="$_inc_extra -I/usr/local/include"
+  _timer=timer-darwin.c
 fi
 
 if aix ; then
@@ -1341,11 +1344,13 @@ if win32 ; then
   # -lwinmm is always needed for osdep/timer-win2.c
   _ld_extra="$_ld_extra -lwinmm"
   _confwin32='TARGET_WIN32 = yes'
+  _timer=timer-win2.c
 else
   _confwin32='TARGET_WIN32 = no'
 fi
 
 if mingw32 ; then
+  _getch=getch2-win.c
   _need_shmem=no
 fi
 
@@ -1366,6 +1371,7 @@ fi
 
 if os2 ; then
   _exesuf=".exe"
+  _getch=getch2-os2.c
   _need_shmem=no
   _ar="emxomfar -p256"
   _ranlib="echo ignoring ranlib"
@@ -7739,6 +7745,9 @@ NEED_SHMEM   = $_need_shmem
 NEED_STRSEP  = $_need_strsep
 NEED_SWAB    = $_need_swab
 NEED_VSSCANF = $_need_vsscanf
+
+GETCH = $_getch
+TIMER = $_timer
 
 # audio output
 OSS = $_ossaudio
