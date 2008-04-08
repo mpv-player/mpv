@@ -3054,6 +3054,7 @@ if test "$_mman" = yes ; then
   _def_mman='#define HAVE_SYS_MMAN_H 1'
 else
   _def_mman='#undef HAVE_SYS_MMAN_H'
+  os2 && _need_mmap=yes
 fi
 echores "$_mman"
 
@@ -7732,6 +7733,7 @@ HAVE_POSIX_SELECT = $_posix_select
 
 NEED_GETTIMEOFDAY    = $_need_gettimeofday
 NEED_GLOB    = $_need_glob
+NEED_MMAP    = $_need_mmap
 NEED_SETENV  = $_need_setenv
 NEED_SHMEM   = $_need_shmem
 NEED_STRSEP  = $_need_strsep

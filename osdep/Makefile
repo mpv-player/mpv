@@ -7,6 +7,7 @@ SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += macosx_finder_args.c
 
 SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += gettimeofday.c
 SRCS_COMMON-$(NEED_GLOB)             += glob-win.c
+SRCS_COMMON-$(NEED_MMAP)             += mmap-os2.c
 SRCS_COMMON-$(NEED_SETENV)           += setenv.c
 SRCS_COMMON-$(NEED_SHMEM)            += shmem.c
 SRCS_COMMON-$(NEED_STRSEP)           += strsep.c
@@ -26,9 +27,6 @@ getch = getch2-win.c
 endif
 ifeq ($(TARGET_OS),OS/2)
 getch = getch2-os2.c
-ifneq ($(HAVE_SYS_MMAN_H),yes)
-SRCS_COMMON += mmap-os2.c
-endif
 endif
 SRCS_COMMON += $(timer)
 SRCS_COMMON += $(getch)
