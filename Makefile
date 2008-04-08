@@ -153,7 +153,7 @@ DIRS =  input \
 all:	$(ALL_PRG)
 
 dep depend:: help_mp.h version.h codecs.conf.h
-	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
+	for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
 include mpcommon.mak
 
@@ -314,11 +314,11 @@ clean::
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags
-	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
+	for a in $(PARTS); do $(MAKE) -C $$a clean; done
 	for dir in $(DIRS); do rm -f $$dir/*.o $$dir/*.a $$dir/*.ho $$dir/*~ ; done
 
 distclean:: doxygen_clean
-	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
+	for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 	$(MAKE) -C TOOLS distclean
 	-rm -f configure.log config.mak config.h
 
@@ -326,11 +326,11 @@ strip:
 	strip -s $(ALL_PRG)
 
 TAGS:
-	@rm -f $@; \
+	rm -f $@; \
 	( find -name '*.[chS]' -print ) | xargs etags -a
 
 tags:
-	@rm -f $@; \
+	rm -f $@; \
 	( find -name '*.[chS]' -print ) | xargs ctags -a;
 
 # ./configure must be rerun if it changed
