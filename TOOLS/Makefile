@@ -13,7 +13,8 @@ OBJS = alaw-gen$(EXESUF) \
 	subrip$(EXESUF) \
 #	vivodump$(EXESUF) \
 
-COMMON_LIBS = ../mp_msg.o ../mp_fifo.o ../osdep/libosdep.a -ltermcap -lm
+COMMON_LIBS = ../mp_msg.o ../mp_fifo.o ../osdep/$(TIMER) ../osdep/$(GETCH) \
+              -ltermcap -lm
 
 all: $(OBJS)
 
@@ -24,8 +25,7 @@ subrip$(EXESUF): subrip.c
 
 #FIXME: Linking is broken, help welcome.
 vivodump$(EXESUF): vivodump.c
-	$(CC) $(CFLAGS) -o $@ $< ../libmpdemux/libmpdemux.a \
-          ../stream/stream.a $(COMMON_LIBS)
+	$(CC) $(CFLAGS) -o $@ $< ../libmpdemux/libmpdemux.a $(COMMON_LIBS)
 
 fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) $< -o fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
