@@ -16,7 +16,7 @@
 */
 
 #if !defined MPLAYER_DSP_H
-# error "Never use \"window.h\" directly; include \"dsp.h\" instead"
+# error Never use window.h directly; include dsp.h instead.
 #endif
 
 #ifndef MPLAYER_WINDOW_H
