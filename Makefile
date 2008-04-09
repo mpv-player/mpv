@@ -33,6 +33,32 @@ SRCS_COMMON = asxparser.c \
               subopt-helper.c \
               subreader.c \
               vobsub.c \
+              libaf/af.c \
+              libaf/af_center.c \
+              libaf/af_channels.c \
+              libaf/af_comp.c \
+              libaf/af_delay.c \
+              libaf/af_dummy.c \
+              libaf/af_equalizer.c \
+              libaf/af_extrastereo.c \
+              libaf/af_format.c \
+              libaf/af_gate.c \
+              libaf/af_hrtf.c \
+              libaf/af_karaoke.c \
+              libaf/af_pan.c \
+              libaf/af_resample.c \
+              libaf/af_scaletempo.c \
+              libaf/af_sinesuppress.c \
+              libaf/af_sub.c \
+              libaf/af_surround.c \
+              libaf/af_sweep.c \
+              libaf/af_tools.c \
+              libaf/af_volnorm.c \
+              libaf/af_volume.c \
+              libaf/filter.c \
+              libaf/format.c \
+              libaf/reorder_ch.c \
+              libaf/window.c \
               libass/ass.c \
               libass/ass_bitmap.c \
               libass/ass_cache.c \
@@ -46,6 +72,10 @@ SRCS_COMMON = asxparser.c \
               osdep/$(TIMER) \
 
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
+SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
+SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
+SRCS_COMMON-$(LIBAVCODEC)            += libaf/af_lavcresample.c
+SRCS_COMMON-$(LIBAVCODEC_A)          += libaf/af_lavcac3enc.c
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
 SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
 SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
@@ -88,7 +118,6 @@ SRCS_MENCODER = mencoder.c \
                 xvid_vbr.c \
 
 COMMON_LIBS = libmpcodecs/libmpcodecs.a \
-              libaf/libaf.a \
               libmpdemux/libmpdemux.a \
               stream/stream.a \
               libswscale/libswscale.a \
@@ -135,7 +164,6 @@ INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 PARTS = dvdread \
         gui \
         liba52 \
-        libaf \
         libao2 \
         libavcodec \
         libavformat \
@@ -155,6 +183,7 @@ PARTS = dvdread \
         vidix \
 
 DIRS =  input \
+        libaf \
         libass \
         libmenu \
         osdep \
@@ -167,9 +196,6 @@ dep depend:: help_mp.h version.h codecs.conf.h
 include mpcommon.mak
 
 CFLAGS := $(subst -I..,-I.,$(CFLAGS))
-
-libaf/libaf.a:
-	$(MAKE) -C libaf
 
 dvdread/libdvdread.a:
 	$(MAKE) -C dvdread
@@ -397,7 +423,6 @@ libvo/libvo.a: .norecurse $(wildcard libvo/*.[ch])
 libvo/libosd.a: .norecurse $(wildcard libvo/*.[ch])
 libao2/libao2.a: .norecurse $(wildcard libao2/*.[ch])
 
-libaf/libaf.a: .norecurse $(wildcard libaf/*.[ch])
 dvdread/libdvdread.a: .norecurse $(wildcard dvdread/*.[ch])
 libdvdcss/libdvdcss.a: .norecurse $(wildcard libdvdcss/*.[ch])
 
