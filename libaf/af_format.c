@@ -21,7 +21,6 @@ long int lrintf(float);
 #endif
 
 #include "af.h"
-#include "libavutil/common.h"
 #include "mpbswap.h"
 #include "libvo/fastmemcpy.h"
 
