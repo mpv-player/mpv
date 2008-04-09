@@ -59,21 +59,22 @@ SRCS_COMMON = asxparser.c \
               libaf/format.c \
               libaf/reorder_ch.c \
               libaf/window.c \
-              libass/ass.c \
-              libass/ass_bitmap.c \
-              libass/ass_cache.c \
-              libass/ass_font.c \
-              libass/ass_fontconfig.c \
-              libass/ass_library.c \
-              libass/ass_mp.c \
-              libass/ass_render.c \
-              libass/ass_utils.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
 
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
+SRCS_COMMON-$(LIBASS)                += libass/ass.c \
+                                        libass/ass_bitmap.c \
+                                        libass/ass_cache.c \
+                                        libass/ass_font.c \
+                                        libass/ass_fontconfig.c \
+                                        libass/ass_library.c \
+                                        libass/ass_mp.c \
+                                        libass/ass_render.c \
+                                        libass/ass_utils.c \
+
 SRCS_COMMON-$(LIBAVCODEC)            += libaf/af_lavcresample.c
 SRCS_COMMON-$(LIBAVCODEC_A)          += libaf/af_lavcac3enc.c
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
