@@ -21,7 +21,7 @@ all: $(OBJS)
 subrip$(EXESUF): subrip.c
 	$(CC) $(CFLAGS) -o $@ $< ../vobsub.o ../spudec.o \
           ../unrar_exec.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
-          ../libmpcodecs/img_format.o $(COMMON_LIBS)
+          $(COMMON_LIBS)
 
 #FIXME: Linking is broken, help welcome.
 vivodump$(EXESUF): vivodump.c
