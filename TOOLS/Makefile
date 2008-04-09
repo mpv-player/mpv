@@ -43,7 +43,7 @@ REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
 
 realcodecs: $(REAL_TARGETS)
 
-subrip fastmemcpybench realcodecs: CFLAGS += -g
+fastmemcpybench realcodecs: CFLAGS += -g
 
 %.so.6.0: %.o
 	ld -shared -o $@ $< -ldl -lc
