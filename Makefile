@@ -54,7 +54,7 @@ SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
 SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
 SRCS_COMMON-$(NEED_SWAB)             += osdep/swab.c
 SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
-SRCS_COMMON-$(UNRAR_EXEC) += unrar_exec.c
+SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
 
 SRCS_MPLAYER = mplayer.c \
                m_property.c \
