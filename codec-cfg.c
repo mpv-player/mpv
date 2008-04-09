@@ -1022,6 +1022,8 @@ int main(int argc, char* argv[])
 		nr[1] = nr_acodecs;
 		
 		printf("/* GENERATED FROM %s, DO NOT EDIT! */\n\n",argv[1]);
+		printf("#include <stddef.h>\n",argv[1]);
+		printf("#include \"codec-cfg.h\"\n\n",argv[1]);
 		
 		for (i=0; i<2; i++) {
 		  	printf("const codecs_t %s[] = {\n", nm[i]);
