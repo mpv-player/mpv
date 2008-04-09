@@ -41,7 +41,7 @@ bmovl-test$(EXESUF): bmovl-test.c
 	$(CC) $(CFLAGS) -o $@ $< -lSDL_image
 
 vfw2menc$(EXESUF): vfw2menc.c
-	$(CC) $< -o $@ -lwinmm -lole32
+	$(CC) $(CFLAGS) -o $@ $< -lwinmm -lole32
 
 REAL_SRCS    = $(wildcard realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
@@ -69,7 +69,7 @@ NETSTREAM_DEPS += -lwsock32
 endif
 
 netstream: netstream.o $(NETSTREAM_DEPS)
-	$(CC) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 clean distclean:
 	rm -f *.o *~ $(OBJS)
