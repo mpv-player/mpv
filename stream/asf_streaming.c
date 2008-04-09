@@ -27,12 +27,7 @@
 
 #include "libavutil/intreadwrite.h"
 
-#ifdef ARCH_X86
-#define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))
-#else
-#define	ASF_LOAD_GUID_PREFIX(guid)	\
-	((guid)[3] << 24 | (guid)[2] << 16 | (guid)[1] << 8 | (guid)[0])
-#endif
+#include "libmpdemux/asfguid.h"
 
 extern int network_bandwidth;
 
@@ -151,10 +146,6 @@ printf("0x%02X\n", stream_chunck->type );
 	return stream_chunck->size+4;
 }
 
-extern int find_asf_guid(char *buf, const char *guid, int cur_pos, int buf_len);
-extern const char asf_file_header_guid[];
-extern const char asf_stream_header_guid[];
-extern const char asf_stream_group_guid[];
 extern int audio_id;
 extern int video_id;
 
