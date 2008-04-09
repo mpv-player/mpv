@@ -38,6 +38,7 @@ SRCS_COMMON = aac_hdr.c \
               extension.c \
               mf.c \
               mp3_hdr.c \
+              mp_taglists.c \
               mpeg_hdr.c \
               mpeg_packetizer.c \
               parse_es.c \
@@ -67,6 +68,6 @@ SRCS_MENCODER-$(LIBAVFORMAT)           += muxer_lavf.c
 
 include ../mpcommon.mak
 
-demux_lavf.o: CFLAGS += -I../libavcodec
+demux_lavf.o mp_taglists.o: CFLAGS += -I../libavcodec
 
 dep depend: CFLAGS += $(EXTRAXX_INC)

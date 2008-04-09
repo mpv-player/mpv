@@ -20,10 +20,9 @@
 #include "libavformat/avformat.h"
 #include "libavutil/avstring.h"
 
-enum PixelFormat imgfmt2pixfmt(int fmt);
+#include "mp_taglists.h"
 
-extern const struct AVCodecTag *mp_wav_taglists[];
-extern const struct AVCodecTag *mp_bmp_taglists[];
+enum PixelFormat imgfmt2pixfmt(int fmt);
 
 extern char *info_name;
 extern char *info_artist;
