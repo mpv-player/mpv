@@ -36,7 +36,7 @@
  *  GNU General Public License for more details.
  *   
  *  You should have received a copy of the GNU General Public License
- *  along with GNU Make; see the file COPYING.  If not, write to
+ *  along with mpeg2dec; see the file COPYING.  If not, write to
  *  the Free Software Foundation.
  *
  *  -- end old disclaimer -- 
