@@ -9,7 +9,7 @@
 */
 
 #if !defined MPLAYER_DSP_H
-# error "Never use <filter.h> directly; include <dsp.h> instead"
+# error "Never use \"filter.h\" directly; include \"dsp.h\" instead"
 #endif
 
 #ifndef MPLAYER_FILTER_H

@@ -16,7 +16,7 @@
 /* Size of floating point type used in routines */
 #define _ftype_t float
 
-#include <window.h>
-#include <filter.h>
+#include "window.h"
+#include "filter.h"
 
 #endif /* MPLAYER_DSP_H */

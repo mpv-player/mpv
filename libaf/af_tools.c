@@ -1,6 +1,6 @@
 #include <math.h>
 #include <string.h> 
-#include <af.h>
+#include "af.h"
 
 /* Convert to gain value from dB. Returns AF_OK if of and AF_ERROR if
    fail */
