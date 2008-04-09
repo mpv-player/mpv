@@ -20,11 +20,9 @@ all: $(OBJS)
 
 subrip$(EXESUF): subrip.c ../vobsub.o ../spudec.o ../unrar_exec.o \
   ../libswscale/libswscale.a ../libavutil/libavutil.a $(COMMON_LIBS)
-	$(CC) $(CFLAGS) -o $@ $^
 
 #FIXME: Linking is broken, help welcome.
 vivodump$(EXESUF): vivodump.c ../libmpdemux/libmpdemux.a $(COMMON_LIBS)
-	$(CC) $(CFLAGS) -o $@ $^
 
 fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) $< -o fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
@@ -37,10 +35,8 @@ fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) $< -o fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
 
 bmovl-test$(EXESUF): bmovl-test.c -lSDL_image
-	$(CC) $(CFLAGS) -o $@ $^
 
 vfw2menc$(EXESUF): vfw2menc.c -lwinmm -lole32
-	$(CC) $(CFLAGS) -o $@ $^
 
 REAL_SRCS    = $(wildcard realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
