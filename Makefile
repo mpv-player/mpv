@@ -49,6 +49,7 @@ SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
 SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
 SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
+SRCS_COMMON-$(NEED_MMAP)             += osdep/mmap-os2.c
 SRCS_COMMON-$(NEED_SETENV)           += osdep/setenv.c
 SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
 SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
