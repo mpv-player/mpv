@@ -28,9 +28,9 @@ SRCS_COMMON = af.c \
               format.c \
               reorder_ch.c \
               window.c \
-              $(AF_SRCS) \
 
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)      += af_export.c
+SRCS_COMMON-$(LADSPA)               += af_ladspa.c
 SRCS_COMMON-$(LIBAVCODEC)           += af_lavcresample.c
 SRCS_COMMON-$(LIBAVCODEC_A)         += af_lavcac3enc.c
 

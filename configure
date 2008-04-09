@@ -6202,11 +6202,8 @@ EOF
 fi
 if test "$_ladspa" = yes; then
   _def_ladspa="#define HAVE_LADSPA"
-  _afsrc="$_afsrc af_ladspa.c"
-  _afmodules="ladspa $_afmodules"
 else
   _def_ladspa="#undef HAVE_LADSPA"
-  _noafmodules="ladspa $_noafmodules"
 fi
 echores "$_ladspa"
 
@@ -7756,6 +7753,8 @@ ALSA5 = $_alsa5
 ALSA9 = $_alsa9
 ALSA1X = $_alsa1x
 
+LADSPA = $_ladspa
+
 # input/demuxer/codecs
 JOYSTICK = $_joystick
 LIRC = $_lirc
@@ -7850,9 +7849,6 @@ VO_SRCS = $_vosrc
 
 # --- libao2 stuff ---
 AO_SRCS = $_aosrc
-
-# --- libaf stuff ---
-AF_SRCS = $_afsrc
 
 # FFmpeg
 LIBAVUTIL = $_libavutil
@@ -8686,13 +8682,11 @@ cat << EOF
     Codecs: $_codecmodules
     Audio output: $_aomodules
     Video output: $_vomodules
-    Audio filters: $_afmodules
   Disabled optional drivers:
     Input: $_noinputmodules
     Codecs: $_nocodecmodules
     Audio output: $_noaomodules
     Video output: $_novomodules
-    Audio filters: $_noafmodules
 
 'config.h' and 'config.mak' contain your configuration options.
 Note: If you alter theses files (for instance CFLAGS) MPlayer may no longer
