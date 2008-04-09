@@ -18,14 +18,13 @@ COMMON_LIBS = ../mp_msg.o ../mp_fifo.o ../osdep/$(TIMER) ../osdep/$(GETCH) \
 
 all: $(OBJS)
 
-subrip$(EXESUF): subrip.c
-	$(CC) $(CFLAGS) -o $@ $< ../vobsub.o ../spudec.o \
-          ../unrar_exec.o ../libswscale/libswscale.a ../libavutil/libavutil.a \
-          $(COMMON_LIBS)
+subrip$(EXESUF): subrip.c ../vobsub.o ../spudec.o ../unrar_exec.o \
+  ../libswscale/libswscale.a ../libavutil/libavutil.a $(COMMON_LIBS)
+	$(CC) $(CFLAGS) -o $@ $^
 
 #FIXME: Linking is broken, help welcome.
-vivodump$(EXESUF): vivodump.c
-	$(CC) $(CFLAGS) -o $@ $< ../libmpdemux/libmpdemux.a $(COMMON_LIBS)
+vivodump$(EXESUF): vivodump.c ../libmpdemux/libmpdemux.a $(COMMON_LIBS)
+	$(CC) $(CFLAGS) -o $@ $^
 
 fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) $< -o fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
@@ -37,11 +36,11 @@ fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) $< -o fastmem2-k7$(EXESUF)  -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
 	$(CC) $(CFLAGS) $< -o fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
 
-bmovl-test$(EXESUF): bmovl-test.c
-	$(CC) $(CFLAGS) -o $@ $< -lSDL_image
+bmovl-test$(EXESUF): bmovl-test.c -lSDL_image
+	$(CC) $(CFLAGS) -o $@ $^
 
-vfw2menc$(EXESUF): vfw2menc.c
-	$(CC) $(CFLAGS) -o $@ $< -lwinmm -lole32
+vfw2menc$(EXESUF): vfw2menc.c -lwinmm -lole32
+	$(CC) $(CFLAGS) -o $@ $^
 
 REAL_SRCS    = $(wildcard realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
