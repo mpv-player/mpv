@@ -296,6 +296,11 @@ stream_t* new_memory_stream(unsigned char* data,int len);
 stream_t* open_stream(char* filename,char** options,int* file_format);
 stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format);
 stream_t* open_output_stream(char* filename,char** options);
+/// Set the callback to be used by libstream to check for user
+/// interruption during long blocking operations (cache filling, etc).
+void stream_set_interrupt_callback(int (*cb)(int));
+/// Call the interrupt checking callback if there is one.
+int stream_check_interrupt(int time);
 
 extern int dvd_title;
 extern int dvd_chapter;

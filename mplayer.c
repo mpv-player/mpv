@@ -2855,6 +2855,8 @@ if(slave_mode)
   mp_input_add_cmd_fd(0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
 else if(!noconsolecontrols)
     mp_input_add_event_fd(0, getch2);
+// Set the libstream interrupt callback
+stream_set_interrupt_callback(mp_input_check_interrupt);
 
 #ifdef HAVE_MENU
  if(use_menu) {

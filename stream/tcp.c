@@ -19,7 +19,6 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
-#include "input/input.h"
 
 #ifndef HAVE_WINSOCK2
 #include <netdb.h>
@@ -195,7 +194,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	FD_SET( socket_server_fd, &set );
 	// When the connection will be made, we will have a writeable fd
 	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
-	      if(count > 30 || mp_input_check_interrupt(500)) {
+	      if(count > 30 || stream_check_interrupt(500)) {
 		if(count > 30)
 		  mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnTimeout);
 		else

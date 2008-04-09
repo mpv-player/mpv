@@ -32,7 +32,6 @@ static void ThreadProc( void *s );
 #include "help_mp.h"
 
 #include "stream.h"
-#include "input/input.h"
 extern int use_gui;
 
 int stream_fill_buffer(stream_t *s);
@@ -307,7 +306,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 	    (int64_t)s->max_filepos-s->read_filepos
 	);
 	if(s->eof) break; // file is smaller than prefill size
-	if(mp_input_check_interrupt(PREFILL_SLEEP_TIME))
+	if(stream_check_interrupt(PREFILL_SLEEP_TIME))
 	  return 0;
     }
     mp_msg(MSGT_CACHE,MSGL_STATUS,"\n");
