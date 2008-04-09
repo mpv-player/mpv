@@ -3,7 +3,8 @@ include ../config.mak
 LIBNAME_COMMON   = libmpdemux.a
 LIBNAME_MENCODER = libmpmux.a
 
-SRCS_COMMON = asfheader.c \
+SRCS_COMMON = aac_hdr.c \
+              asfheader.c \
               aviheader.c \
               aviprint.c \
               demuxer.c \
