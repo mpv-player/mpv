@@ -305,7 +305,7 @@ install-mplayer-man:
 			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/ ; \
 		else \
 			$(INSTALL) -d $(MANDIR)/$$i/man1 ; \
-			$(INSTALL) -c -m 644 DOCS/man/$$i/mplayer.1 $(MANDIR)/$$i/man1/ ; \
+			$(INSTALL) -c -m 644 DOCS/man/$$lang/mplayer.1 $(MANDIR)/$$i/man1/ ; \
 		fi ; \
 	done
 
@@ -315,7 +315,7 @@ install-mencoder: mencoder$(EXESUF)
 		if test "$$lang" = en ; then \
 			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
 		else \
-			cd $(MANDIR)/$$i/man1 && ln -sf mplayer.1 mencoder.1 ; \
+			cd $(MANDIR)/$$lang/man1 && ln -sf mplayer.1 mencoder.1 ; \
 		fi ; \
 	done
 
@@ -337,9 +337,9 @@ uninstall:
 	-rm -f $(prefix)/share/applications/mplayer.desktop
 	for lang in $(MAN_LANG); do \
 	  if test "$$lang" != "en"; then \
-	    rm -f $(MANDIR)/$$l/man1/mplayer.1    \
-	          $(MANDIR)/$$l/man1/mencoder.1   \
-	          $(MANDIR)/$$l/man1/gmplayer.1 ; \
+	    rm -f $(MANDIR)/$$lang/man1/mplayer.1    \
+	          $(MANDIR)/$$lang/man1/mencoder.1   \
+	          $(MANDIR)/$$lang/man1/gmplayer.1 ; \
 	  fi ; \
 	done
 
