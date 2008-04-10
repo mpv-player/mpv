@@ -14,7 +14,7 @@
 /* Implementation of routines used for DSP */
 
 /* Size of floating point type used in routines */
-#define _ftype_t float
+#define FLOAT_TYPE float
 
 #include "window.h"
 #include "filter.h"
