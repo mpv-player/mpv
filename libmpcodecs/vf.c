@@ -122,10 +122,10 @@ static const vf_info_t* const filter_list[]={
     &vf_info_rotate,
     &vf_info_mirror,
     &vf_info_palette,
+    &vf_info_pp7,
 #ifdef USE_LIBAVCODEC
     &vf_info_lavc,
     &vf_info_lavcdeint,
-    &vf_info_pp7,
     &vf_info_screenshot,
 #endif
 #ifdef HAVE_ZR
