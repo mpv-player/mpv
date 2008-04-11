@@ -1343,10 +1343,7 @@ if win32 ; then
   _exesuf=".exe"
   # -lwinmm is always needed for osdep/timer-win2.c
   _ld_extra="$_ld_extra -lwinmm"
-  _confwin32='TARGET_WIN32 = yes'
   _timer=timer-win2.c
-else
-  _confwin32='TARGET_WIN32 = no'
 fi
 
 if mingw32 ; then
@@ -7825,7 +7822,6 @@ VIDIX_UNICHROME=$_vidix_drv_unichrome
 # --- Some stuff for autoconfigure ----
 $_target_arch
 $_target_arch_x86
-$_confwin32
 TARGET_CPU=$iproc
 HAVE_MMX   = $_mmx
 HAVE_MMX2   = $_mmxext
