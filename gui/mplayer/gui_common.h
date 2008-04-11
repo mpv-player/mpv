@@ -7,9 +7,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "app.h"
-#include "bitmap.h"
-#include "wm/ws.h"
+#include "gui/app.h"
+#include "gui/bitmap.h"
+#include "gui/wm/ws.h"
 
 extern inline void TranslateFilename( int c,char * tmp );
 extern char * Translate( char * str );

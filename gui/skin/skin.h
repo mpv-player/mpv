@@ -1,7 +1,7 @@
 #ifndef MPLAYER_GUI_SKIN_H
 #define MPLAYER_GUI_SKIN_H
 
-#include "app.h"
+#include "gui/app.h"
 
 extern listItems     * skinAppMPlayer;
 

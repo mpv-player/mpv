@@ -10,8 +10,8 @@
 #include "../osdep/shmem.h"
 #include "play.h"
 #include "mplayer.h"
-#include "interface.h"
-#include "wm/ws.h"
+#include "gui/interface.h"
+#include "gui/wm/ws.h"
 
 #define GTK_MB_SIMPLE 0
 #define GTK_MB_MODAL 1

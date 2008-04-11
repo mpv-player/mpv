@@ -8,24 +8,23 @@
 #include <signal.h>
 
 #include "../config.h"
-#include "wm/ws.h"
-#include "wm/wsxdnd.h"
+#include "gui/wm/ws.h"
+#include "gui/wm/wsxdnd.h"
 #include "../help_mp.h"
 #include "../libvo/x11_common.h"
 #include "../libvo/video_out.h"
 #include "../input/input.h"
 
-#include "app.h"
-
-#include "wm/wskeys.h"
-#include "interface.h"
+#include "gui/app.h"
+#include "gui/wm/wskeys.h"
+#include "gui/interface.h"
 
 #include "widgets.h"
 #include "gmplayer.h"
 #include "play.h"
 
-#include "skin/skin.h"
-#include "skin/font.h"
+#include "gui/skin/skin.h"
+#include "gui/skin/font.h"
 
 #include "stream/stream.h"
 

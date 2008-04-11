@@ -11,8 +11,8 @@
 
 #include "gtk_url.h"
 #include "gtk_common.h"
-#include "interface.h"
-#include "app.h"
+#include "gui/interface.h"
+#include "gui/app.h"
 #include "../widgets.h"
 #include "../gmplayer.h"
 #include "help_mp.h"

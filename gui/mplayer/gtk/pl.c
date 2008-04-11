@@ -14,7 +14,7 @@
 #include "help_mp.h"
 #include "stream/stream.h"
 
-#include "interface.h"
+#include "gui/interface.h"
 #include "../widgets.h"
 #include "pl.h"
 #include "gtk_common.h"

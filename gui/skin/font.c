@@ -5,7 +5,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "app.h"
+#include "gui/app.h"
 #include "skin.h"
 #include "font.h"
 #include "cut.h"

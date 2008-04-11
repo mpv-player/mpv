@@ -9,10 +9,10 @@
 #include <string.h>
 
 #include "../config.h"
-#include "app.h"
-#include "skin/font.h"
-#include "skin/skin.h"
-#include "wm/ws.h"
+#include "gui/app.h"
+#include "gui/skin/font.h"
+#include "gui/skin/skin.h"
+#include "gui/wm/ws.h"
 
 #include "../help_mp.h"
 #include "../libvo/x11_common.h"

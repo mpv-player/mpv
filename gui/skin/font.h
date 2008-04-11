@@ -1,8 +1,8 @@
 #ifndef MPLAYER_GUI_FONT_H
 #define MPLAYER_GUI_FONT_H
 
-#include "bitmap.h"
-#include "app.h"
+#include "gui/bitmap.h"
+#include "gui/app.h"
 
 #define fntAlignLeft   0
 #define fntAlignCenter 1

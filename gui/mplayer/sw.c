@@ -8,8 +8,8 @@
 #include "../libvo/x11_common.h"
 
 #include "gmplayer.h"
-#include "app.h"
-#include "interface.h"
+#include "gui/app.h"
+#include "gui/interface.h"
 #include "../help_mp.h"
 #include "widgets.h"
 

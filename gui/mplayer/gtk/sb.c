@@ -10,7 +10,7 @@
 #include "sb.h"
 #include "gtk_common.h"
 
-#include "app.h"
+#include "gui/app.h"
 #include "help_mp.h"
 
 #include "../widgets.h"

@@ -19,9 +19,9 @@
 #include "libmpdemux/stheader.h"
 #include "libmpcodecs/dec_video.h"
 
-#include "app.h"
-#include "cfg.h"
-#include "interface.h"
+#include "gui/app.h"
+#include "gui/cfg.h"
+#include "gui/interface.h"
 #include "../widgets.h"
 #include "opts.h"
 #include "fs.h"

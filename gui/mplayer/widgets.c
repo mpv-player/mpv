@@ -17,8 +17,8 @@
 
 #include "../config.h"
 #include "widgets.h"
-#include "app.h"
-#include "wm/ws.h"
+#include "gui/app.h"
+#include "gui/wm/ws.h"
 
 
 #include "gtk/menu.h"

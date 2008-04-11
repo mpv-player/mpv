@@ -5,12 +5,12 @@
 
 #include "cut.h"
 #include "font.h"
-#include "app.h"
+#include "gui/app.h"
 
 #include "../config.h"
 #include "../mp_msg.h"
 #include "../help_mp.h"
-#include "mplayer/widgets.h"
+#include "gui/mplayer/widgets.h"
 #include "libavutil/avstring.h"
 
 //#define MSGL_DBG2 MSGL_STATUS

@@ -10,8 +10,8 @@
 #include <gtk/gtk.h>
 
 #include "config.h"
-#include "app.h"
-#include "cfg.h"
+#include "gui/app.h"
+#include "gui/cfg.h"
 #include "help_mp.h"
 #include "libaf/equalizer.h"
 #include "libvo/video_out.h"

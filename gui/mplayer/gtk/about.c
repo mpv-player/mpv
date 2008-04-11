@@ -1,8 +1,8 @@
 #include "config.h"
-#include "app.h"
+#include "gui/app.h"
 #include "help_mp.h"
 
-#include "mplayer/pixmaps/about.xpm"
+#include "gui/mplayer/pixmaps/about.xpm"
 #include "../widgets.h"
 #include "about.h"
 #include "gtk_common.h"

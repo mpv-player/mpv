@@ -1,5 +1,5 @@
 #include "config.h"
-#include "app.h"
+#include "gui/app.h"
 #include "help_mp.h"
 
 #include "../pixmaps/error.xpm"

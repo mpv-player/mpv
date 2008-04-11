@@ -11,7 +11,7 @@
 #include "menu.h"
 #include "../widgets.h"
 #include "../gmplayer.h"
-#include "app.h"
+#include "gui/app.h"
 
 #include "stream/stream.h"
 #include "../libmpdemux/demuxer.h"
