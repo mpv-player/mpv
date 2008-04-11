@@ -14,7 +14,6 @@
 #include "help_mp.h"
 
 #include "../widgets.h"
-#include "app.h"
 
 GtkWidget * SkinList = NULL;
 char      * sbSelectedSkin=NULL;
