@@ -4,7 +4,7 @@ LIBNAME_MPLAYER = libgui.a
 
 #CFLAGS += -DDEBUG
 
-ifeq ($(TARGET_WIN32),yes)
+ifeq ($(GUI_WIN32),yes)
 SRCS_MPLAYER = bitmap.c \
                win32/dialogs.c \
                win32/gui.c \

@@ -7395,6 +7395,7 @@ if test "$_gtk1" = yes ; then
 fi
 
 else #if ! win32
+  _gui_win32=yes
   _libs_mplayer="$_libs_mplayer -lcomdlg32 -lcomctl32 -lshell32 -lkernel32"
   _def_gui='#define HAVE_NEW_GUI 1'
   _def_gtk2_gui='#undef HAVE_GTK2_GUI'
@@ -7840,6 +7841,7 @@ HAVE_VIS   = $_vis
 
 # --- GUI stuff ---
 GUI = $_gui
+GUI_WIN32 = $_gui_win32
 
 # --- libvo stuff ---
 VO_SRCS = $_vosrc
