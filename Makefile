@@ -96,20 +96,21 @@ SRCS_MPLAYER = mplayer.c \
                parser-mpcmd.c \
                command.c \
                input/input.c \
-               libmenu/menu.c \
-               libmenu/menu_chapsel.c \
-               libmenu/menu_cmdlist.c  \
-               libmenu/menu_console.c \
-               libmenu/menu_filesel.c \
-               libmenu/menu_list.c  \
-               libmenu/menu_param.c \
-               libmenu/menu_pt.c \
-               libmenu/menu_txt.c \
-               libmenu/vf_menu.c \
 
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
 SRCS_MPLAYER-$(DVBIN)        += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
+SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
+                                libmenu/menu_chapsel.c \
+                                libmenu/menu_cmdlist.c  \
+                                libmenu/menu_console.c \
+                                libmenu/menu_filesel.c \
+                                libmenu/menu_list.c  \
+                                libmenu/menu_param.c \
+                                libmenu/menu_pt.c \
+                                libmenu/menu_txt.c \
+                                libmenu/vf_menu.c \
+
 SRCS_MPLAYER-$(LIRC)         += input/lirc.c
 
 
