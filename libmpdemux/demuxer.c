@@ -485,23 +485,6 @@ while(len>0){
 return bytes;
 }
 
-int demux_read_data_pack(demux_stream_t *ds,unsigned char* mem,int len){
-int x;
-int bytes=0;
-while(len>0){
-  x=ds->buffer_size-ds->buffer_pos;
-  if(x==0){
-    if(!ds_fill_buffer(ds)) return bytes;
-  } else {
-    if(x>len) x=len;
-    if(mem) fast_memcpy(mem+bytes,&ds->buffer[ds->buffer_pos],x);
-    bytes+=x;len-=x;ds->buffer_pos+=x;
-    return bytes; // stop at end of package! (for correct timestamping)
-  }
-}
-return bytes;
-}
-
 /**
  * \brief read data until the given 3-byte pattern is encountered, up to maxlen
  * \param mem memory to read data into, may be NULL to discard data

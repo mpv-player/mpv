@@ -324,7 +324,6 @@ static inline int ds_tell_pts(demux_stream_t *ds){
 }
 
 int demux_read_data(demux_stream_t *ds,unsigned char* mem,int len);
-int demux_read_data_pack(demux_stream_t *ds,unsigned char* mem,int len);
 int demux_pattern_3(demux_stream_t *ds, unsigned char *mem, int maxlen,
                     int *read, uint32_t pattern);
 
