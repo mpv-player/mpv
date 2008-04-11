@@ -126,6 +126,7 @@ static const vf_info_t* const filter_list[]={
     &vf_info_lavc,
     &vf_info_lavcdeint,
     &vf_info_pp7,
+    &vf_info_screenshot,
 #endif
 #ifdef HAVE_ZR
     &vf_info_zrmjpeg,
@@ -184,7 +185,6 @@ static const vf_info_t* const filter_list[]={
     &vf_info_divtc,
     &vf_info_harddup,
     &vf_info_softskip,
-    &vf_info_screenshot,
 #ifdef USE_ASS
     &vf_info_ass,
 #endif
