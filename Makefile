@@ -99,6 +99,43 @@ SRCS_MPLAYER = mplayer.c \
 
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
 SRCS_MPLAYER-$(DVBIN)        += libmenu/menu_dvbin.c
+SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
+                                gui/bitmap.c \
+                                gui/cfg.c \
+                                gui/interface.c \
+                                gui/mplayer/gui_common.c \
+                                gui/mplayer/menu.c \
+                                gui/mplayer/mw.c \
+                                gui/mplayer/pb.c \
+                                gui/mplayer/play.c \
+                                gui/mplayer/sw.c \
+                                gui/mplayer/widgets.c \
+                                gui/mplayer/gtk/about.c \
+                                gui/mplayer/gtk/eq.c \
+                                gui/mplayer/gtk/fs.c \
+                                gui/mplayer/gtk/gtk_common.c \
+                                gui/mplayer/gtk/gtk_url.c \
+                                gui/mplayer/gtk/mb.c \
+                                gui/mplayer/gtk/menu.c \
+                                gui/mplayer/gtk/opts.c \
+                                gui/mplayer/gtk/pl.c \
+                                gui/mplayer/gtk/sb.c \
+                                gui/skin/cut.c \
+                                gui/skin/font.c \
+                                gui/skin/skin.c \
+                                gui/wm/ws.c \
+                                gui/wm/wsxdnd.c \
+
+SRCS_MPLAYER-$(GUI_WIN32)    += gui/bitmap.c \
+                                gui/win32/dialogs.c \
+                                gui/win32/gui.c \
+                                gui/win32/interface.c \
+                                gui/win32/playlist.c \
+                                gui/win32/preferences.c \
+                                gui/win32/skinload.c \
+                                gui/win32/widgetrender.c \
+                                gui/win32/wincfg.c \
+
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
 SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
                                 libmenu/menu_chapsel.c \
@@ -142,7 +179,6 @@ LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
-LIBS_MPLAYER-$(GUI)               += gui/libgui.a
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 libmpdemux/libmpmux.a \
@@ -164,7 +200,6 @@ INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 PARTS = dvdread \
-        gui \
         liba52 \
         libao2 \
         libavcodec \
@@ -262,9 +297,6 @@ tremor/libvorbisidec.a:
 vidix/libvidix.a:
 	$(MAKE) -C vidix
 
-gui/libgui.a:
-	$(MAKE) -C gui
-
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
 
@@ -348,6 +380,9 @@ clean::
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags
+	rm -f gui/mplayer/*.o gui/mplayer/*~ gui/mplayer/gtk/*.o \
+          gui/mplayer/gtk/*~ gui/skin/*.o gui/skin/*~ \
+          gui/wm/*.o gui/wm/*~ gui/win32/*.o gui/win32/*~
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
 	for dir in $(DIRS); do rm -f $$dir/*.o $$dir/*.a $$dir/*.ho $$dir/*~ ; done
 
@@ -446,6 +481,5 @@ libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 
 loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
 vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
-gui/libgui.a: .norecurse $(wildcard gui/*.[ch] gui/*/*.[ch] gui/*/*/*.[ch])
 
 .PHONY: all install* uninstall strip doxygen doxygen_clean TAGS tags
