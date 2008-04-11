@@ -59,10 +59,6 @@ NETSTREAM_DEPS = ../libmpdemux/libmpdemux.a \
                  ../m_struct.o \
                   $(COMMON_LIBS)
 
-ifeq ($(TARGET_WIN32),yes)
-NETSTREAM_DEPS += -lwsock32
-endif
-
 netstream: netstream.o $(NETSTREAM_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^
 
