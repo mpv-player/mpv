@@ -7475,9 +7475,6 @@ openbsd && x86_32 && _ld_extra="$_ld_extra -li386"
 _def_debug='#undef MP_DEBUG'
 test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'
 
-_def_linux='#undef TARGET_LINUX'
-linux && _def_linux='#define TARGET_LINUX 1'
-
 
 echocheck "joystick"
 _def_joystick='#undef HAVE_JOYSTICK'
@@ -8396,8 +8393,6 @@ $_def_confwin32
 #define __CPU__ $iproc
 
 $_mp_wordsize
-
-$_def_linux
 
 $_def_vcd
 
