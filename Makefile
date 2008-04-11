@@ -98,7 +98,9 @@ SRCS_MPLAYER = mplayer.c \
                input/input.c \
 
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
+ifeq ($(LIBMENU), yes)
 SRCS_MPLAYER-$(DVBIN)        += libmenu/menu_dvbin.c
+endif
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
                                 gui/bitmap.c \
                                 gui/cfg.c \
