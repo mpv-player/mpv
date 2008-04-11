@@ -354,10 +354,8 @@ const m_option_t mplayer_opts[]={
 	{"tvscan", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif /* USE_TV */
 
-#define MAIN_CONF
-#include "cfg-common.h"
-#undef MAIN_CONF
-        
+#include "cfg-common-opts.h"
+
 	{"list-properties", &list_properties, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
 	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
