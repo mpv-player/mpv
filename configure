@@ -7291,6 +7291,7 @@ if test "$_gui" = yes ; then
   test "$_freetype" = no && test "$_bitmap_font" = no && \
     die "The GUI requires either FreeType or bitmap font support."
 if ! win32 ; then
+  _gui_gtk=yes
   test "$_x11" != yes && die "X11 support required for GUI compilation."
 
   echocheck "XShape extension"
@@ -7837,6 +7838,7 @@ HAVE_VIS   = $_vis
 
 # --- GUI stuff ---
 GUI = $_gui
+GUI_GTK = $_gui_gtk
 GUI_WIN32 = $_gui_win32
 
 # --- libvo stuff ---
