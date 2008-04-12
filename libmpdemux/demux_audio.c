@@ -150,14 +150,7 @@ get_flac_metadata (demuxer_t* demuxer)
 {
   uint8_t preamble[4];
   unsigned int blk_len;
-  stream_t *s = NULL;
-
-  if (!demuxer)
-    return;
-
-  s = demuxer->stream;
-  if (!s)
-    return;
+  stream_t *s = demuxer->stream;
   
   /* file is qualified; skip over the signature bytes in the stream */
   stream_seek (s, 4);
