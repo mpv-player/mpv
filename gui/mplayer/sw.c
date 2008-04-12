@@ -4,13 +4,13 @@
 #include <inttypes.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../libvo/x11_common.h"
+#include "config.h"
+#include "libvo/x11_common.h"
+#include "help_mp.h"
 
 #include "gmplayer.h"
 #include "gui/app.h"
 #include "gui/interface.h"
-#include "../help_mp.h"
 #include "widgets.h"
 
 int             mplSubRender = 0;

@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "../gmplayer.h"
+#include "gui/mplayer/gmplayer.h"
 
 #include "gui/mplayer/pixmaps/up.xpm"
 #include "gui/mplayer/pixmaps/dir.xpm"
@@ -18,7 +18,7 @@
 #include "help_mp.h"
 #include "stream/stream.h"
 
-#include "../widgets.h"
+#include "gui/mplayer/widgets.h"
 #include "fs.h"
 #include "opts.h"
 #include "gtk_common.h"

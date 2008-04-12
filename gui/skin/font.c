@@ -9,8 +9,8 @@
 #include "skin.h"
 #include "font.h"
 #include "cut.h"
-#include "../mp_msg.h"
-#include "../libavutil/avstring.h"
+#include "mp_msg.h"
+#include "libavutil/avstring.h"
 
 int items;
 

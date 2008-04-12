@@ -7,13 +7,14 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "../config.h"
+#include "config.h"
+#include "help_mp.h"
+#include "libvo/x11_common.h"
+#include "libvo/video_out.h"
+#include "input/input.h"
+
 #include "gui/wm/ws.h"
 #include "gui/wm/wsxdnd.h"
-#include "../help_mp.h"
-#include "../libvo/x11_common.h"
-#include "../libvo/video_out.h"
-#include "../input/input.h"
 
 #include "gui/app.h"
 #include "gui/wm/wskeys.h"

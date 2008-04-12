@@ -8,23 +8,23 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "../config.h"
+#include "config.h"
 #include "gui/app.h"
 #include "gui/skin/font.h"
 #include "gui/skin/skin.h"
 #include "gui/wm/ws.h"
 
-#include "../help_mp.h"
-#include "../libvo/x11_common.h"
-#include "../libvo/fastmemcpy.h"
+#include "help_mp.h"
+#include "libvo/x11_common.h"
+#include "libvo/fastmemcpy.h"
 
-#include "../stream/stream.h"
-#include "../mixer.h"
-#include "../libvo/sub.h"
+#include "stream/stream.h"
+#include "mixer.h"
+#include "libvo/sub.h"
 
-#include "../libmpdemux/demuxer.h"
-#include "../libmpdemux/stheader.h"
-#include "../codec-cfg.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+#include "codec-cfg.h"
 
 #include "gmplayer.h"
 #include "play.h"

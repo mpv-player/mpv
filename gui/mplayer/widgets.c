@@ -15,7 +15,10 @@
 #include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
-#include "../config.h"
+#include "config.h"
+#include "help_mp.h"
+#include "mp_msg.h"
+
 #include "widgets.h"
 #include "gui/app.h"
 #include "gui/wm/ws.h"
@@ -24,9 +27,6 @@
 #include "gtk/menu.h"
 #include "play.h"
 #include "gtk/fs.h"
-
-#include "../help_mp.h"
-#include "../mp_msg.h"
 
 GtkWidget     * PopUpMenu = NULL;
 

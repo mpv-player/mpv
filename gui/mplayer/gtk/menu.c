@@ -9,13 +9,13 @@
 #include "mixer.h"
 
 #include "menu.h"
-#include "../widgets.h"
-#include "../gmplayer.h"
+#include "gui/mplayer/widgets.h"
+#include "gui/mplayer/gmplayer.h"
 #include "gui/app.h"
 
 #include "stream/stream.h"
-#include "../libmpdemux/demuxer.h"
-#include "../libmpdemux/stheader.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
 
 #include "../pixmaps/ab.xpm"
 #include "../pixmaps/half.xpm"

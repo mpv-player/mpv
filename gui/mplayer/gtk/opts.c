@@ -22,7 +22,7 @@
 #include "gui/app.h"
 #include "gui/cfg.h"
 #include "gui/interface.h"
-#include "../widgets.h"
+#include "gui/mplayer/widgets.h"
 #include "opts.h"
 #include "fs.h"
 #include "gtk_common.h"

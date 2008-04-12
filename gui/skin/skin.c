@@ -7,9 +7,9 @@
 #include "font.h"
 #include "gui/app.h"
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "gui/mplayer/widgets.h"
 #include "libavutil/avstring.h"
 

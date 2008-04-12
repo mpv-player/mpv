@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "../config.h"
+#include "config.h"
+#include "help_mp.h"
+#include "mp_msg.h"
 #include "gui/app.h"
 #include "gmplayer.h"
-#include "../help_mp.h"
-#include "../mp_msg.h"
 
 #include "widgets.h"
 

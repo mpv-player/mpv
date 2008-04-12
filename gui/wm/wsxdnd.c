@@ -11,8 +11,8 @@
 
 #include <X11/Xatom.h>
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #define XDND_VERSION 3L
 

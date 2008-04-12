@@ -8,28 +8,28 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "../config.h"
+#include "config.h"
 #include "gmplayer.h"
 #include "gui/app.h"
 #include "gui/skin/font.h"
 #include "gui/skin/skin.h"
 #include "gui/wm/ws.h"
 
-#include "../help_mp.h"
-#include "../libvo/x11_common.h"
-#include "../libvo/fastmemcpy.h"
+#include "help_mp.h"
+#include "libvo/x11_common.h"
+#include "libvo/fastmemcpy.h"
 
-#include "../stream/stream.h"
-#include "../stream/url.h"
-#include "../mixer.h"
-#include "../libvo/sub.h"
-#include "../access_mpcontext.h"
+#include "stream/stream.h"
+#include "stream/url.h"
+#include "mixer.h"
+#include "libvo/sub.h"
+#include "access_mpcontext.h"
 
-#include "../libmpdemux/demuxer.h"
-#include "../libmpdemux/stheader.h"
-#include "../codec-cfg.h"
-#include "../m_option.h"
-#include "../m_property.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+#include "codec-cfg.h"
+#include "m_option.h"
+#include "m_property.h"
 
 #define GUI_REDRAW_WAIT 375
 

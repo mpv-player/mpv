@@ -6,8 +6,8 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "../config.h"
-#include "../osdep/shmem.h"
+#include "config.h"
+#include "osdep/shmem.h"
 #include "play.h"
 #include "mplayer.h"
 #include "gui/interface.h"

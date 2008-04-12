@@ -5,7 +5,7 @@
 #include "../pixmaps/error.xpm"
 #include "../pixmaps/warning.xpm"
 
-#include "../widgets.h"
+#include "gui/mplayer/widgets.h"
 #include "mb.h"
 #include "gtk_common.h"
 

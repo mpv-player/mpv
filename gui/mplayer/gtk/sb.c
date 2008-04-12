@@ -13,7 +13,7 @@
 #include "gui/app.h"
 #include "help_mp.h"
 
-#include "../widgets.h"
+#include "gui/mplayer/widgets.h"
 
 GtkWidget * SkinList = NULL;
 char      * sbSelectedSkin=NULL;

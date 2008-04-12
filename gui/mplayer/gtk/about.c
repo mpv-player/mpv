@@ -3,7 +3,7 @@
 #include "help_mp.h"
 
 #include "gui/mplayer/pixmaps/about.xpm"
-#include "../widgets.h"
+#include "gui/mplayer/widgets.h"
 #include "about.h"
 #include "gtk_common.h"
 

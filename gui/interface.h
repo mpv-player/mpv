@@ -1,7 +1,7 @@
 #ifndef MPLAYER_GUI_INTERFACE_H
 #define MPLAYER_GUI_INTERFACE_H
 
-#include "../config.h"
+#include "config.h"
 #include "mplayer/play.h"
 #include "libvo/font_load.h"
 #include "cfg.h"

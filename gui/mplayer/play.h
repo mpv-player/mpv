@@ -1,7 +1,7 @@
 #ifndef MPLAYER_GUI_PLAY_H
 #define MPLAYER_GUI_PLAY_H
 
-#include "../config.h"
+#include "config.h"
 
 extern int mplGotoTheNext;
 

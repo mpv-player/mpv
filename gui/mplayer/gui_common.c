@@ -13,19 +13,19 @@
 #include "gui/skin/skin.h"
 #include "gui/wm/ws.h"
 
-#include "../config.h"
-#include "../help_mp.h"
-#include "../libvo/x11_common.h"
+#include "config.h"
+#include "help_mp.h"
+#include "libvo/x11_common.h"
 
-#include "../stream/stream.h"
-#include "../mixer.h"
-#include "../libvo/sub.h"
+#include "stream/stream.h"
+#include "mixer.h"
+#include "libvo/sub.h"
 
-#include "../libmpdemux/demuxer.h"
-#include "../libmpdemux/stheader.h"
-#include "../codec-cfg.h"
-#include "../access_mpcontext.h"
-#include "../libavutil/avstring.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+#include "codec-cfg.h"
+#include "access_mpcontext.h"
+#include "libavutil/avstring.h"
 
 
 #include "play.h"

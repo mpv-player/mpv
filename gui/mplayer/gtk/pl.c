@@ -15,7 +15,7 @@
 #include "stream/stream.h"
 
 #include "gui/interface.h"
-#include "../widgets.h"
+#include "gui/mplayer/widgets.h"
 #include "pl.h"
 #include "gtk_common.h"
 
