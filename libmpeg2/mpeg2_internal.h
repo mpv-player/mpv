@@ -265,6 +265,9 @@ void mpeg2_set_fbuf (mpeg2dec_t * mpeg2dec, int b_type);
 void mpeg2_idct_init (uint32_t accel);
 
 /* idct_mmx.c */
+void mpeg2_idct_copy_sse2 (int16_t * block, uint8_t * dest, int stride);
+void mpeg2_idct_add_sse2 (int last, int16_t * block,
+			  uint8_t * dest, int stride);
 void mpeg2_idct_copy_mmxext (int16_t * block, uint8_t * dest, int stride);
 void mpeg2_idct_add_mmxext (int last, int16_t * block,
 			    uint8_t * dest, int stride);

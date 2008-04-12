@@ -257,6 +257,30 @@ typedef	union {
 #define	psadbw_m2r(var,reg)		mmx_m2r (psadbw, var, reg)
 #define	psadbw_r2r(regs,regd)		mmx_r2r (psadbw, regs, regd)
 
+
+/* SSE2 */
+
+typedef	union {
+	long long		q[2];	/* Quadword (64-bit) value */
+	unsigned long long	uq[2];	/* Unsigned Quadword */
+	int			d[4];	/* 2 Doubleword (32-bit) values */
+	unsigned int		ud[4];	/* 2 Unsigned Doubleword */
+	short			w[8];	/* 4 Word (16-bit) values */
+	unsigned short		uw[8];	/* 4 Unsigned Word */
+	char			b[16];	/* 8 Byte (8-bit) values */
+	unsigned char		ub[16];	/* 8 Unsigned Byte */
+	float			s[4];	/* Single-precision (32-bit) value */
+} ATTR_ALIGN(16) sse_t;	/* On an 16-byte (128-bit) boundary */
+
+#define	movdqu_m2r(var,reg)	mmx_m2r (movdqu, var, reg)
+#define	movdqu_r2m(reg,var)	mmx_r2m (movdqu, reg, var)
+#define	movdqu_r2r(regs,regd)	mmx_r2r (movdqu, regs, regd)
+#define	movdqa_m2r(var,reg)	mmx_m2r (movdqa, var, reg)
+#define	movdqa_r2m(reg,var)	mmx_r2m (movdqa, reg, var)
+#define	movdqa_r2r(regs,regd)	mmx_r2r (movdqa, regs, regd)
+
+#define	pshufd_r2r(regs,regd,imm)	mmx_r2ri(pshufd, regs, regd, imm)
+
 #define	pshufw_m2r(var,reg,imm)		mmx_m2ri(pshufw, var, reg, imm)
 #define	pshufw_r2r(regs,regd,imm)	mmx_r2ri(pshufw, regs, regd, imm)
 

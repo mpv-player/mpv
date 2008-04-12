@@ -41,6 +41,7 @@
 
 #define round(bias) ((int)(((bias)+0.5) * (1<<ROW_SHIFT)))
 #define rounder(bias) {round (bias), round (bias)}
+#define rounder_sse2(bias) {round (bias), round (bias), round (bias), round (bias)}
 
 
 #if 0
@@ -81,6 +82,61 @@ static inline void idct_row (int16_t * row, int offset,
     row[7] = (a0 - b0) >> ROW_SHIFT;
 }
 #endif
+
+
+/* SSE2 row IDCT */
+#define sse2_table(c1,c2,c3,c4,c5,c6,c7) {  c4,  c2,  c4,  c6,   \
+					    c4, -c6,  c4, -c2,   \
+					    c4,  c6, -c4, -c2,   \
+					   -c4,  c2,  c4, -c6,   \
+					    c1,  c3,  c3, -c7,   \
+					    c5, -c1,  c7, -c5,   \
+					    c5,  c7, -c1, -c5,   \
+					    c7,  c3,  c3, -c1 }
+
+#define SSE2_IDCT_2ROW(table, row1, row2, round1, round2) do {               \
+    /* no scheduling: trust in out of order execution */                     \
+    /* based on Intel AP-945 */                                              \
+    /* (http://cache-www.intel.com/cd/00/00/01/76/17680_w_idct.pdf) */       \
+                                                                             \
+    /* input */                      /* 1: row1= x7 x5 x3 x1  x6 x4 x2 x0 */ \
+    pshufd_r2r   (row1, xmm1, 0);    /* 1: xmm1= x2 x0 x2 x0  x2 x0 x2 x0 */ \
+    pmaddwd_m2r  (table[0], xmm1);   /* 1: xmm1= x2*C + x0*C ...          */ \
+    pshufd_r2r   (row1, xmm3, 0xaa); /* 1: xmm3= x3 x1 x3 x1  x3 x1 x3 x1 */ \
+    pmaddwd_m2r  (table[2*8], xmm3); /* 1: xmm3= x3*C + x1*C ...          */ \
+    pshufd_r2r   (row1, xmm2, 0x55); /* 1: xmm2= x6 x4 x6 x4  x6 x4 x6 x4 */ \
+    pshufd_r2r   (row1, row1, 0xff); /* 1: row1= x7 x5 x7 x5  x7 x5 x7 x5 */ \
+    pmaddwd_m2r  (table[1*8], xmm2); /* 1: xmm2= x6*C + x4*C ...          */ \
+    paddd_m2r    (round1, xmm1);     /* 1: xmm1= x2*C + x0*C + round ...  */ \
+    pmaddwd_m2r  (table[3*8], row1); /* 1: row1= x7*C + x5*C ...          */ \
+    pshufd_r2r   (row2, xmm5, 0);    /*    2:                             */ \
+    pshufd_r2r   (row2, xmm6, 0x55); /*    2:                             */ \
+    pmaddwd_m2r  (table[0], xmm5);   /*    2:                             */ \
+    paddd_r2r    (xmm2, xmm1);       /* 1: xmm1= a[]                      */ \
+    movdqa_r2r   (xmm1, xmm2);       /* 1: xmm2= a[]                      */ \
+    pshufd_r2r   (row2, xmm7, 0xaa); /*    2:                             */ \
+    pmaddwd_m2r  (table[1*8], xmm6); /*    2:                             */ \
+    paddd_r2r    (xmm3, row1);       /* 1: row1= b[]= 7*C+5*C+3*C+1*C ... */ \
+    pshufd_r2r   (row2, row2, 0xff); /*    2:                             */ \
+    psubd_r2r    (row1, xmm2);       /* 1: xmm2= a[] - b[]                */ \
+    pmaddwd_m2r  (table[2*8], xmm7); /*    2:                             */ \
+    paddd_r2r    (xmm1, row1);       /* 1: row1= a[] + b[]                */ \
+    psrad_i2r    (ROW_SHIFT, xmm2);  /* 1: xmm2= result 4...7             */ \
+    paddd_m2r    (round2, xmm5);     /*    2:                             */ \
+    pmaddwd_m2r  (table[3*8], row2); /*    2:                             */ \
+    paddd_r2r    (xmm6, xmm5);       /*    2:                             */ \
+    movdqa_r2r   (xmm5, xmm6);       /*    2:                             */ \
+    psrad_i2r    (ROW_SHIFT, row1);  /* 1: row1= result 0...4             */ \
+    pshufd_r2r   (xmm2, xmm2, 0x1b); /* 1: [0 1 2 3] -> [3 2 1 0]         */ \
+    packssdw_r2r (xmm2, row1);       /* 1: row1= result[]                 */ \
+    paddd_r2r    (xmm7, row2);       /*    2:                             */ \
+    psubd_r2r    (row2, xmm6);       /*    2:                             */ \
+    paddd_r2r    (xmm5, row2);       /*    2:                             */ \
+    psrad_i2r    (ROW_SHIFT, xmm6);  /*    2:                             */ \
+    psrad_i2r    (ROW_SHIFT, row2);  /*    2:                             */ \
+    pshufd_r2r   (xmm6, xmm6, 0x1b); /*    2:                             */ \
+    packssdw_r2r (xmm6, row2);       /*    2:                             */ \
+} while (0)
 
 
 /* MMXEXT row IDCT */
@@ -400,14 +456,264 @@ static inline void idct_col (int16_t * col, int offset)
 #endif
 
 
-/* MMX column IDCT */
-static inline void idct_col (int16_t * const col, const int offset)
-{
 #define T1 13036
 #define T2 27146
 #define T3 43790
 #define C4 23170
 
+
+/* SSE2 column IDCT */
+static inline void sse2_idct_col (int16_t * const col)
+{
+    /* Almost identical to mmxext version:  */
+    /* just do both 4x8 columns in paraller */
+
+    static const short t1_vector[] ATTR_ALIGN(16) = {T1,T1,T1,T1,T1,T1,T1,T1};
+    static const short t2_vector[] ATTR_ALIGN(16) = {T2,T2,T2,T2,T2,T2,T2,T2};
+    static const short t3_vector[] ATTR_ALIGN(16) = {T3,T3,T3,T3,T3,T3,T3,T3};
+    static const short c4_vector[] ATTR_ALIGN(16) = {C4,C4,C4,C4,C4,C4,C4,C4};
+
+#if defined(__x86_64__)
+
+    /* INPUT: block in xmm8 ... xmm15 */
+
+    movdqa_m2r (*t1_vector, xmm0);	/* xmm0  = T1 */
+    movdqa_r2r (xmm9, xmm1);		/* xmm1  = x1 */
+
+    movdqa_r2r (xmm0, xmm2);		/* xmm2  = T1 */
+    pmulhw_r2r (xmm1, xmm0);		/* xmm0  = T1*x1 */
+
+    movdqa_m2r (*t3_vector, xmm5);	/* xmm5  = T3 */
+    pmulhw_r2r (xmm15, xmm2);		/* xmm2  = T1*x7 */
+
+    movdqa_r2r (xmm5, xmm7);		/* xmm7  = T3-1 */
+    psubsw_r2r (xmm15, xmm0);		/* xmm0  = v17 */
+
+    movdqa_m2r (*t2_vector, xmm9);	/* xmm9  = T2 */
+    pmulhw_r2r (xmm11, xmm5);		/* xmm5  = (T3-1)*x3 */
+
+    paddsw_r2r (xmm2, xmm1);		/* xmm1  = u17 */
+    pmulhw_r2r (xmm13, xmm7);		/* xmm7  = (T3-1)*x5 */
+
+    movdqa_r2r (xmm9, xmm2);		/* xmm2  = T2 */
+    paddsw_r2r (xmm11, xmm5);		/* xmm5  = T3*x3 */
+
+    pmulhw_r2r (xmm10, xmm9);   	/* xmm9  = T2*x2 */
+    paddsw_r2r (xmm13, xmm7);		/* xmm7  = T3*x5 */
+
+    psubsw_r2r (xmm13, xmm5);		/* xmm5  = v35 */
+    paddsw_r2r (xmm11, xmm7);		/* xmm7  = u35 */
+
+    movdqa_r2r (xmm0, xmm6);		/* xmm6  = v17 */
+    pmulhw_r2r (xmm14, xmm2);		/* xmm2  = T2*x6 */
+
+    psubsw_r2r (xmm5, xmm0);		/* xmm0  = b3 */
+    psubsw_r2r (xmm14, xmm9);		/* xmm9  = v26 */
+
+    paddsw_r2r (xmm6, xmm5);		/* xmm5  = v12 */
+    movdqa_r2r (xmm0, xmm11);		/* xmm11 = b3 */
+
+    movdqa_r2r (xmm1, xmm6);		/* xmm6  = u17 */
+    paddsw_r2r (xmm10, xmm2);		/* xmm2  = u26 */
+
+    paddsw_r2r (xmm7, xmm6);		/* xmm6  = b0 */
+    psubsw_r2r (xmm7, xmm1);		/* xmm1  = u12 */
+
+    movdqa_r2r (xmm1, xmm7);		/* xmm7  = u12 */
+    paddsw_r2r (xmm5, xmm1);		/* xmm1  = u12+v12 */
+
+    movdqa_m2r (*c4_vector, xmm0);	/* xmm0  = C4/2 */
+    psubsw_r2r (xmm5, xmm7);		/* xmm7  = u12-v12 */
+
+    movdqa_r2r (xmm6, xmm4);		/* xmm4  = b0 */
+    pmulhw_r2r (xmm0, xmm1);		/* xmm1  = b1/2 */
+
+    movdqa_r2r (xmm9, xmm6);		/* xmm6  = v26 */
+    pmulhw_r2r (xmm0, xmm7);		/* xmm7  = b2/2 */
+
+    movdqa_r2r (xmm8, xmm10);		/* xmm10 = x0 */
+    movdqa_r2r (xmm8, xmm0);		/* xmm0  = x0 */
+
+    psubsw_r2r (xmm12, xmm10);		/* xmm10 = v04 */
+    paddsw_r2r (xmm12, xmm0);		/* xmm0  = u04 */
+
+    paddsw_r2r (xmm10, xmm9);		/* xmm9  = a1 */
+    movdqa_r2r (xmm0, xmm8);		/* xmm8  = u04 */
+
+    psubsw_r2r (xmm6, xmm10);		/* xmm10 = a2 */
+    paddsw_r2r (xmm2, xmm8);		/* xmm5  = a0 */
+
+    paddsw_r2r (xmm1, xmm1);		/* xmm1  = b1 */
+    psubsw_r2r (xmm2, xmm0);		/* xmm0  = a3 */
+
+    paddsw_r2r (xmm7, xmm7);		/* xmm7  = b2 */
+    movdqa_r2r (xmm10, xmm13);		/* xmm13 = a2 */
+
+    movdqa_r2r (xmm9, xmm14);		/* xmm14 = a1 */
+    paddsw_r2r (xmm7, xmm10);		/* xmm10 = a2+b2 */
+
+    psraw_i2r (COL_SHIFT,xmm10);	/* xmm10 = y2 */
+    paddsw_r2r (xmm1, xmm9);		/* xmm9  = a1+b1 */
+
+    psraw_i2r (COL_SHIFT, xmm9);	/* xmm9  = y1 */
+    psubsw_r2r (xmm1, xmm14);		/* xmm14 = a1-b1 */
+
+    psubsw_r2r (xmm7, xmm13);		/* xmm13 = a2-b2 */
+    psraw_i2r (COL_SHIFT,xmm14);	/* xmm14 = y6 */
+
+    movdqa_r2r (xmm8, xmm15);		/* xmm15 = a0 */
+    psraw_i2r (COL_SHIFT,xmm13);	/* xmm13 = y5 */
+
+    paddsw_r2r (xmm4, xmm8);		/* xmm8  = a0+b0 */
+    psubsw_r2r (xmm4, xmm15);		/* xmm15 = a0-b0 */
+
+    psraw_i2r (COL_SHIFT, xmm8);	/* xmm8  = y0 */
+    movdqa_r2r (xmm0, xmm12);		/* xmm12 = a3 */
+
+    psubsw_r2r (xmm11, xmm12);		/* xmm12 = a3-b3 */
+    psraw_i2r (COL_SHIFT,xmm15);	/* xmm15 = y7 */
+
+    paddsw_r2r (xmm0, xmm11);		/* xmm11 = a3+b3 */
+    psraw_i2r (COL_SHIFT,xmm12);	/* xmm12 = y4 */
+
+    psraw_i2r (COL_SHIFT,xmm11);	/* xmm11 = y3 */
+
+    /* OUTPUT: block in xmm8 ... xmm15 */
+
+#else
+    movdqa_m2r (*t1_vector, xmm0);	/* xmm0 = T1 */
+
+    movdqa_m2r (*(col+1*8), xmm1);	/* xmm1 = x1 */
+    movdqa_r2r (xmm0, xmm2);		/* xmm2 = T1 */
+
+    movdqa_m2r (*(col+7*8), xmm4);	/* xmm4 = x7 */
+    pmulhw_r2r (xmm1, xmm0);		/* xmm0 = T1*x1 */
+
+    movdqa_m2r (*t3_vector, xmm5);	/* xmm5 = T3 */
+    pmulhw_r2r (xmm4, xmm2);		/* xmm2 = T1*x7 */
+
+    movdqa_m2r (*(col+5*8), xmm6);	/* xmm6 = x5 */
+    movdqa_r2r (xmm5, xmm7);		/* xmm7 = T3-1 */
+
+    movdqa_m2r (*(col+3*8), xmm3);	/* xmm3 = x3 */
+    psubsw_r2r (xmm4, xmm0);		/* xmm0 = v17 */
+
+    movdqa_m2r (*t2_vector, xmm4);	/* xmm4 = T2 */
+    pmulhw_r2r (xmm3, xmm5);		/* xmm5 = (T3-1)*x3 */
+
+    paddsw_r2r (xmm2, xmm1);		/* xmm1 = u17 */
+    pmulhw_r2r (xmm6, xmm7);		/* xmm7 = (T3-1)*x5 */
+
+    /* slot */
+
+    movdqa_r2r (xmm4, xmm2);		/* xmm2 = T2 */
+    paddsw_r2r (xmm3, xmm5);		/* xmm5 = T3*x3 */
+
+    pmulhw_m2r (*(col+2*8), xmm4);	/* xmm4 = T2*x2 */
+    paddsw_r2r (xmm6, xmm7);		/* xmm7 = T3*x5 */
+
+    psubsw_r2r (xmm6, xmm5);		/* xmm5 = v35 */
+    paddsw_r2r (xmm3, xmm7);		/* xmm7 = u35 */
+
+    movdqa_m2r (*(col+6*8), xmm3);	/* xmm3 = x6 */
+    movdqa_r2r (xmm0, xmm6);		/* xmm6 = v17 */
+
+    pmulhw_r2r (xmm3, xmm2);		/* xmm2 = T2*x6 */
+    psubsw_r2r (xmm5, xmm0);		/* xmm0 = b3 */
+
+    psubsw_r2r (xmm3, xmm4);		/* xmm4 = v26 */
+    paddsw_r2r (xmm6, xmm5);		/* xmm5 = v12 */
+
+    movdqa_r2m (xmm0, *(col+3*8));	/* save b3 in scratch0 */
+    movdqa_r2r (xmm1, xmm6);		/* xmm6 = u17 */
+
+    paddsw_m2r (*(col+2*8), xmm2);	/* xmm2 = u26 */
+    paddsw_r2r (xmm7, xmm6);		/* xmm6 = b0 */
+
+    psubsw_r2r (xmm7, xmm1);		/* xmm1 = u12 */
+    movdqa_r2r (xmm1, xmm7);		/* xmm7 = u12 */
+
+    movdqa_m2r (*(col+0*8), xmm3);	/* xmm3 = x0 */
+    paddsw_r2r (xmm5, xmm1);		/* xmm1 = u12+v12 */
+
+    movdqa_m2r (*c4_vector, xmm0);	/* xmm0 = C4/2 */
+    psubsw_r2r (xmm5, xmm7);		/* xmm7 = u12-v12 */
+
+    movdqa_r2m (xmm6, *(col+5*8));	/* save b0 in scratch1 */
+    pmulhw_r2r (xmm0, xmm1);		/* xmm1 = b1/2 */
+
+    movdqa_r2r (xmm4, xmm6);		/* xmm6 = v26 */
+    pmulhw_r2r (xmm0, xmm7);		/* xmm7 = b2/2 */
+
+    movdqa_m2r (*(col+4*8), xmm5);	/* xmm5 = x4 */
+    movdqa_r2r (xmm3, xmm0);		/* xmm0 = x0 */
+
+    psubsw_r2r (xmm5, xmm3);		/* xmm3 = v04 */
+    paddsw_r2r (xmm5, xmm0);		/* xmm0 = u04 */
+
+    paddsw_r2r (xmm3, xmm4);		/* xmm4 = a1 */
+    movdqa_r2r (xmm0, xmm5);		/* xmm5 = u04 */
+
+    psubsw_r2r (xmm6, xmm3);		/* xmm3 = a2 */
+    paddsw_r2r (xmm2, xmm5);		/* xmm5 = a0 */
+
+    paddsw_r2r (xmm1, xmm1);		/* xmm1 = b1 */
+    psubsw_r2r (xmm2, xmm0);		/* xmm0 = a3 */
+
+    paddsw_r2r (xmm7, xmm7);		/* xmm7 = b2 */
+    movdqa_r2r (xmm3, xmm2);		/* xmm2 = a2 */
+
+    movdqa_r2r (xmm4, xmm6);		/* xmm6 = a1 */
+    paddsw_r2r (xmm7, xmm3);		/* xmm3 = a2+b2 */
+
+    psraw_i2r (COL_SHIFT, xmm3);	/* xmm3 = y2 */
+    paddsw_r2r (xmm1, xmm4);		/* xmm4 = a1+b1 */
+
+    psraw_i2r (COL_SHIFT, xmm4);	/* xmm4 = y1 */
+    psubsw_r2r (xmm1, xmm6);		/* xmm6 = a1-b1 */
+
+    movdqa_m2r (*(col+5*8), xmm1);	/* xmm1 = b0 */
+    psubsw_r2r (xmm7, xmm2);		/* xmm2 = a2-b2 */
+
+    psraw_i2r (COL_SHIFT, xmm6);	/* xmm6 = y6 */
+    movdqa_r2r (xmm5, xmm7);		/* xmm7 = a0 */
+
+    movdqa_r2m (xmm4, *(col+1*8));	/* save y1 */
+    psraw_i2r (COL_SHIFT, xmm2);	/* xmm2 = y5 */
+
+    movdqa_r2m (xmm3, *(col+2*8));	/* save y2 */
+    paddsw_r2r (xmm1, xmm5);		/* xmm5 = a0+b0 */
+
+    movdqa_m2r (*(col+3*8), xmm4);	/* xmm4 = b3 */
+    psubsw_r2r (xmm1, xmm7);		/* xmm7 = a0-b0 */
+
+    psraw_i2r (COL_SHIFT, xmm5);	/* xmm5 = y0 */
+    movdqa_r2r (xmm0, xmm3);		/* xmm3 = a3 */
+
+    movdqa_r2m (xmm2, *(col+5*8));	/* save y5 */
+    psubsw_r2r (xmm4, xmm3);		/* xmm3 = a3-b3 */
+
+    psraw_i2r (COL_SHIFT, xmm7);	/* xmm7 = y7 */
+    paddsw_r2r (xmm0, xmm4);		/* xmm4 = a3+b3 */
+
+    movdqa_r2m (xmm5, *(col+0*8));	/* save y0 */
+    psraw_i2r (COL_SHIFT, xmm3);	/* xmm3 = y4 */
+
+    movdqa_r2m (xmm6, *(col+6*8));	/* save y6 */
+    psraw_i2r (COL_SHIFT, xmm4);	/* xmm4 = y3 */
+
+    movdqa_r2m (xmm7, *(col+7*8));	/* save y7 */
+
+    movdqa_r2m (xmm3, *(col+4*8));	/* save y4 */
+
+    movdqa_r2m (xmm4, *(col+3*8));	/* save y3 */
+#endif
+}
+
+
+/* MMX column IDCT */
+static inline void idct_col (int16_t * const col, const int offset)
+{
     static const short t1_vector[] ATTR_ALIGN(8) = {T1,T1,T1,T1};
     static const short t2_vector[] ATTR_ALIGN(8) = {T2,T2,T2,T2};
     static const short t3_vector[] ATTR_ALIGN(8) = {T3,T3,T3,T3};
@@ -596,6 +902,129 @@ static inline void idct (int16_t * const block)				\
     idct_col (block, 4);						\
 }
 
+static inline void sse2_idct (int16_t * const block)
+{
+    static const int16_t table04[] ATTR_ALIGN(16) =
+	sse2_table (22725, 21407, 19266, 16384, 12873,  8867, 4520);
+    static const int16_t table17[] ATTR_ALIGN(16) =
+	sse2_table (31521, 29692, 26722, 22725, 17855, 12299, 6270);
+    static const int16_t table26[] ATTR_ALIGN(16) =
+	sse2_table (29692, 27969, 25172, 21407, 16819, 11585, 5906);
+    static const int16_t table35[] ATTR_ALIGN(16) =
+	sse2_table (26722, 25172, 22654, 19266, 15137, 10426, 5315);
+
+    static const int32_t rounder0_128[] ATTR_ALIGN(16) =
+	rounder_sse2 ((1 << (COL_SHIFT - 1)) - 0.5);
+    static const int32_t rounder4_128[] ATTR_ALIGN(16) = rounder_sse2 (0);
+    static const int32_t rounder1_128[] ATTR_ALIGN(16) =
+	rounder_sse2 (1.25683487303);	/* C1*(C1/C4+C1+C7)/2 */
+    static const int32_t rounder7_128[] ATTR_ALIGN(16) =
+	rounder_sse2 (-0.25);		/* C1*(C7/C4+C7-C1)/2 */
+    static const int32_t rounder2_128[] ATTR_ALIGN(16) =
+	rounder_sse2 (0.60355339059);	/* C2 * (C6+C2)/2 */
+    static const int32_t rounder6_128[] ATTR_ALIGN(16) =
+	rounder_sse2 (-0.25);		/* C2 * (C6-C2)/2 */
+    static const int32_t rounder3_128[] ATTR_ALIGN(16) =
+	rounder_sse2 (0.087788325588);	/* C3*(-C3/C4+C3+C5)/2 */
+    static const int32_t rounder5_128[] ATTR_ALIGN(16) =
+	rounder_sse2 (-0.441341716183);	/* C3*(-C5/C4+C5-C3)/2 */
+
+#if defined(__x86_64__)
+    movdqa_m2r (block[0*8], xmm8);
+    movdqa_m2r (block[4*8], xmm12);
+    SSE2_IDCT_2ROW (table04,  xmm8, xmm12, *rounder0_128, *rounder4_128);
+
+    movdqa_m2r (block[1*8], xmm9);
+    movdqa_m2r (block[7*8], xmm15);
+    SSE2_IDCT_2ROW (table17,  xmm9, xmm15, *rounder1_128, *rounder7_128);
+
+    movdqa_m2r (block[2*8], xmm10);
+    movdqa_m2r (block[6*8], xmm14);
+    SSE2_IDCT_2ROW (table26, xmm10, xmm14, *rounder2_128, *rounder6_128);
+
+    movdqa_m2r (block[3*8], xmm11);
+    movdqa_m2r (block[5*8], xmm13);
+    SSE2_IDCT_2ROW (table35, xmm11, xmm13, *rounder3_128, *rounder5_128);
+
+    /* OUTPUT: block in xmm8 ... xmm15 */
+
+#else
+    movdqa_m2r (block[0*8], xmm0);
+    movdqa_m2r (block[4*8], xmm4);
+    SSE2_IDCT_2ROW (table04, xmm0, xmm4, *rounder0_128, *rounder4_128);
+    movdqa_r2m (xmm0, block[0*8]);
+    movdqa_r2m (xmm4, block[4*8]);
+
+    movdqa_m2r (block[1*8], xmm0);
+    movdqa_m2r (block[7*8], xmm4);
+    SSE2_IDCT_2ROW (table17, xmm0, xmm4, *rounder1_128, *rounder7_128);
+    movdqa_r2m (xmm0, block[1*8]);
+    movdqa_r2m (xmm4, block[7*8]);
+
+    movdqa_m2r (block[2*8], xmm0);
+    movdqa_m2r (block[6*8], xmm4);
+    SSE2_IDCT_2ROW (table26, xmm0, xmm4, *rounder2_128, *rounder6_128);
+    movdqa_r2m (xmm0, block[2*8]);
+    movdqa_r2m (xmm4, block[6*8]);
+
+    movdqa_m2r (block[3*8], xmm0);
+    movdqa_m2r (block[5*8], xmm4);
+    SSE2_IDCT_2ROW (table35, xmm0, xmm4, *rounder3_128, *rounder5_128);
+    movdqa_r2m (xmm0, block[3*8]);
+    movdqa_r2m (xmm4, block[5*8]);
+#endif
+
+    sse2_idct_col (block);
+}
+
+static void sse2_block_copy (int16_t * const block, uint8_t * dest,
+			     const int stride)
+{
+#if defined(__x86_64__)
+    /* INPUT: block in xmm8 ... xmm15 */
+    packuswb_r2r (xmm8, xmm8);
+    packuswb_r2r (xmm9, xmm9);
+    movq_r2m (xmm8,  *(dest+0*stride));
+    packuswb_r2r (xmm10, xmm10);
+    movq_r2m (xmm9,  *(dest+1*stride));
+    packuswb_r2r (xmm11, xmm11);
+    movq_r2m (xmm10, *(dest+2*stride));
+    packuswb_r2r (xmm12, xmm12);
+    movq_r2m (xmm11, *(dest+3*stride));
+    packuswb_r2r (xmm13, xmm13);
+    movq_r2m (xmm12, *(dest+4*stride));
+    packuswb_r2r (xmm14, xmm14);
+    movq_r2m (xmm13, *(dest+5*stride));
+    packuswb_r2r (xmm15, xmm15);
+    movq_r2m (xmm14, *(dest+6*stride));
+    movq_r2m (xmm15, *(dest+7*stride));
+#else
+    movdqa_m2r (*(block+0*8), xmm0);
+    movdqa_m2r (*(block+1*8), xmm1);
+    movdqa_m2r (*(block+2*8), xmm2);
+    packuswb_r2r (xmm0, xmm0);
+    movdqa_m2r (*(block+3*8), xmm3);
+    packuswb_r2r (xmm1, xmm1);
+    movdqa_m2r (*(block+4*8), xmm4);
+    packuswb_r2r (xmm2, xmm2);
+    movdqa_m2r (*(block+5*8), xmm5);
+    packuswb_r2r (xmm3, xmm3);
+    movdqa_m2r (*(block+6*8), xmm6);
+    packuswb_r2r (xmm4, xmm4);
+    movdqa_m2r (*(block+7*8), xmm7);
+    movq_r2m (xmm0, *(dest+0*stride));
+    packuswb_r2r (xmm5, xmm5);
+    movq_r2m (xmm1, *(dest+1*stride));
+    packuswb_r2r (xmm6, xmm6);
+    movq_r2m (xmm2, *(dest+2*stride));
+    packuswb_r2r (xmm7, xmm7);
+    movq_r2m (xmm3, *(dest+3*stride));
+    movq_r2m (xmm4, *(dest+4*stride));
+    movq_r2m (xmm5, *(dest+5*stride));
+    movq_r2m (xmm6, *(dest+6*stride));
+    movq_r2m (xmm7, *(dest+7*stride));
+#endif
+}
 
 #define COPY_MMX(offset,r0,r1,r2)	\
 do {					\
@@ -625,6 +1054,38 @@ static inline void block_copy (int16_t * const block, uint8_t * dest,
     movq_r2m (mm2, *(dest+stride));
 }
 
+#define ADD_SSE2_2ROW(op, block0, block1)\
+do {					\
+    movq_m2r (*(dest), xmm1);		\
+    movq_m2r (*(dest+stride), xmm2);	\
+    punpcklbw_r2r (xmm0, xmm1);		\
+    punpcklbw_r2r (xmm0, xmm2);		\
+    paddsw_##op (block0, xmm1);		\
+    paddsw_##op (block1, xmm2);		\
+    packuswb_r2r (xmm1, xmm1);		\
+    packuswb_r2r (xmm2, xmm2);		\
+    movq_r2m (xmm1, *(dest));		\
+    movq_r2m (xmm2, *(dest+stride));	\
+    dest += 2*stride;			\
+} while (0)
+
+static void sse2_block_add (int16_t * const block, uint8_t * dest,
+			    const int stride)
+{
+    pxor_r2r(xmm0, xmm0);
+#if defined(__x86_64__)
+    /* INPUT: block in xmm8 ... xmm15 */
+    ADD_SSE2_2ROW(r2r, xmm8, xmm9);
+    ADD_SSE2_2ROW(r2r, xmm10, xmm11);
+    ADD_SSE2_2ROW(r2r, xmm12, xmm13);
+    ADD_SSE2_2ROW(r2r, xmm14, xmm15);
+#else
+    ADD_SSE2_2ROW(m2r, *(block+0*8), *(block+1*8));
+    ADD_SSE2_2ROW(m2r, *(block+2*8), *(block+3*8));
+    ADD_SSE2_2ROW(m2r, *(block+4*8), *(block+5*8));
+    ADD_SSE2_2ROW(m2r, *(block+6*8), *(block+7*8));
+#endif
+}
 
 #define ADD_MMX(offset,r1,r2,r3,r4)	\
 do {					\
@@ -667,6 +1128,19 @@ static inline void block_add (int16_t * const block, uint8_t * dest,
     movq_r2m (mm3, *(dest+stride));
 }
 
+
+static inline void sse2_block_zero (int16_t * const block)
+{
+    pxor_r2r (xmm0, xmm0);
+    movdqa_r2m (xmm0, *(block+0*8));
+    movdqa_r2m (xmm0, *(block+1*8));
+    movdqa_r2m (xmm0, *(block+2*8));
+    movdqa_r2m (xmm0, *(block+3*8));
+    movdqa_r2m (xmm0, *(block+4*8));
+    movdqa_r2m (xmm0, *(block+5*8));
+    movdqa_r2m (xmm0, *(block+6*8));
+    movdqa_r2m (xmm0, *(block+7*8));
+}
 
 static inline void block_zero (int16_t * const block)
 {
@@ -750,6 +1224,25 @@ static inline void block_add_DC (int16_t * const block, uint8_t * dest,
     movq_r2m (mm2, *(dest + stride));
     psubusb_r2r (mm1, mm3);
     movq_r2m (mm3, *(dest + 2*stride));
+}
+
+void mpeg2_idct_copy_sse2 (int16_t * const block, uint8_t * const dest,
+			   const int stride)
+{
+    sse2_idct (block);
+    sse2_block_copy (block, dest, stride);
+    sse2_block_zero (block);
+}
+
+void mpeg2_idct_add_sse2 (const int last, int16_t * const block,
+			  uint8_t * const dest, const int stride)
+{
+    if (last != 129 || (block[0] & (7 << 4)) == (4 << 4)) {
+	sse2_idct (block);
+	sse2_block_add (block, dest, stride);
+	sse2_block_zero (block);
+    } else
+	block_add_DC (block, dest, stride, CPU_MMXEXT);
 }
 
 

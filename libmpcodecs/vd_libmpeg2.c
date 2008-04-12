@@ -74,6 +74,8 @@ static int init(sh_video_t *sh){
        accel |= MPEG2_ACCEL_X86_MMXEXT;
     if(gCpuCaps.has3DNow)
        accel |= MPEG2_ACCEL_X86_3DNOW;
+    if(gCpuCaps.hasSSE2)
+       accel |= MPEG2_ACCEL_X86_SSE2;
     if(gCpuCaps.hasAltiVec)
        accel |= MPEG2_ACCEL_PPC_ALTIVEC;
     #ifdef HAVE_VIS
