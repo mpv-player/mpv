@@ -411,7 +411,6 @@ Miscellaneous options:
                          \$LINGUAS is also honored) [en]
                          (Available: $LANGUAGES all)
   --with-install=PATH    path to a custom install program
-  --enable-color-console enable color console output (UNSUPPORTED) [disable]
 
 Advanced options:
   --enable-mmx              enable MMX [autodetect]
@@ -672,7 +671,6 @@ _w32threads=auto
 _ass=auto
 _rpath=no
 _asmalign_pot=auto
-_color_console=no
 _stream_cache=yes
 _def_stream_cache="#define USE_STREAM_CACHE 1"
 _need_shmem=yes
@@ -1118,8 +1116,6 @@ for ac_option do
   --disable-ass)        _ass=no         ;;
   --enable-rpath)       _rpath=yes      ;;
   --disable-rpath)      _rpath=no       ;;
-  --enable-color-console)  _color_console=yes ;;
-  --disable-color-console) _color_console=no  ;;
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
@@ -7544,14 +7540,6 @@ fi
 echores "$_maemo"
 fi
 
-echocheck "color console output"
-if test "$_color_console" = yes ; then
-  _def_color_console='#define MSG_USE_COLORS 1'
-else
-  _def_color_console='#undef MSG_USE_COLORS'
-fi
-echores "$_color_console"
-
 # linker paths should be the same for mencoder and mplayer
 _ld_tmp=""
 for I in $_libs_mplayer ; do
@@ -8002,9 +7990,6 @@ $_def_crash_debug
 
 /* Toggles debugging informations */
 $_def_debug
-
-/* Toggles color console output */
-$_def_color_console
 
 /* Indicates that libcdio is available for VCD and CD-DA playback */
 $_def_libcdio

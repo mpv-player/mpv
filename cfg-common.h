@@ -4,6 +4,8 @@
 #include "config.h"
 
 extern char *mp_msg_charset;
+extern int mp_msg_color;
+extern int mp_msg_module;
 
 // codec/filter opts: (defined at libmpcodecs/vd.c)
 extern float screen_size_xy;
