@@ -224,6 +224,17 @@ static int load_syms_windows(char *path) {
 #endif
 	return 1;
     }
+
+    wrvyuv_custom_message = GetProcAddress(handle, "RV40toYUV420CustomMessage");
+    wrvyuv_free = GetProcAddress(handle, "RV40toYUV420Free");
+    wrvyuv_init = GetProcAddress(handle, "RV40toYUV420Init");
+    wrvyuv_transform = GetProcAddress(handle, "RV40toYUV420Transform");
+    if(wrvyuv_custom_message &&
+       wrvyuv_free &&
+       wrvyuv_init &&
+       wrvyuv_transform)
+	return 1;
+
     mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
     FreeLibrary(handle);
     return 0; // error
