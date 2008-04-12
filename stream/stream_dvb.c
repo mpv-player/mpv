@@ -63,13 +63,12 @@ static struct stream_priv_s
 	char *prog;
 	int card;
 	char *type;
-	int vid, aid;
 	int timeout;
 	char *file;
 }
 stream_defaults =
 {
-	"", 1, "", 0, 0, 30, NULL
+	"", 1, "", 30, NULL
 };
 
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s, f)
@@ -79,8 +78,6 @@ static const m_option_t stream_params[] = {
 	{"prog", ST_OFF(prog), CONF_TYPE_STRING, 0, 0 ,0, NULL},
 	{"card", ST_OFF(card), CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
 	{"type", ST_OFF(type), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-	{"vid",  ST_OFF(vid),  CONF_TYPE_INT, 0, 0 ,0, NULL},
-	{"aid",  ST_OFF(aid),  CONF_TYPE_INT, 0, 0 ,0, NULL},
 	{"timeout",ST_OFF(timeout),  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
 	{"file", ST_OFF(file), CONF_TYPE_STRING, 0, 0 ,0, NULL},
 
@@ -102,8 +99,6 @@ const m_option_t dvbin_opts_conf[] = {
 	{"prog", &stream_defaults.prog, CONF_TYPE_STRING, 0, 0 ,0, NULL},
 	{"card", &stream_defaults.card, CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
 	{"type", "DVB card type is autodetected and can't be overridden\n", CONF_TYPE_PRINT, CONF_NOCFG, 0 ,0, NULL},
-	{"vid",  &stream_defaults.vid,  CONF_TYPE_INT, 0, 0 ,0, NULL},
-	{"aid",  &stream_defaults.aid,  CONF_TYPE_INT, 0, 0 ,0, NULL},
 	{"timeout",  &stream_defaults.timeout,  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
 	{"file", &stream_defaults.file, CONF_TYPE_STRING, 0, 0 ,0, NULL},
 
@@ -634,8 +629,8 @@ static int dvb_streaming_start(stream_t *stream, struct stream_priv_s *opts, int
 	dvb_channel_t *channel = NULL;
 	dvb_priv_t *priv = stream->priv;
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndvb_streaming_start(PROG: %s, CARD: %d, VID: %d, AID: %d, TYPE: %s, FILE: %s)\r\n",
-	    opts->prog, opts->card, opts->vid, opts->aid,  opts->type, opts->file);
+	mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndvb_streaming_start(PROG: %s, CARD: %d, TYPE: %s, FILE: %s)\r\n",
+	    opts->prog, opts->card, opts->type, opts->file);
 
 	priv->is_on = 0;
 
@@ -731,8 +726,8 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 
 	priv->tuner_type = tuner_type;
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "OPEN_DVB: prog=%s, card=%d, type=%d, vid=%d, aid=%d\n",
-		p->prog, priv->card+1, priv->tuner_type, p->vid, p->aid);
+	mp_msg(MSGT_DEMUX, MSGL_V, "OPEN_DVB: prog=%s, card=%d, type=%d\n",
+		p->prog, priv->card+1, priv->tuner_type);
 
 	priv->list = priv->config->cards[priv->card].list;
 	
