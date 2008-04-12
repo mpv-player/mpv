@@ -214,8 +214,9 @@ static int load_syms_windows(char *path) {
 		    0x31, 0xc0,
 		    0x89, 0x83, 0xf8, 0x05, 0x00, 0x00,
 		    0xe9, 0xd0, 0x00, 0x00, 0x00 };
-		patched = patch_dll((char*)wrvyuv_transform + 0x634132fa - 0x634114d0, oldcode, newcode,
-		                    sizeof(oldcode));
+		patched = patch_dll(
+			(char*)wrvyuv_transform + 0x634132fa - 0x634114d0,
+			oldcode, newcode, sizeof(oldcode));
 		if (!patched)
 		    mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Could not patch Real codec, this might crash on multi-CPU systems\n");
 	    }
