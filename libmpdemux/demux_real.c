@@ -741,7 +741,7 @@ got_audio:
                     break;
             }
             priv->audio_need_keyframe = 0;
-            priv->audio_timestamp[priv->sub_packet_cnt] = (priv->a_pts==timestamp) ? (user_correct_pts > 0 ? MP_NOPTS_VALUE : 0) : (timestamp/1000.0);
+            priv->audio_timestamp[priv->sub_packet_cnt] = (priv->a_pts==timestamp) ? MP_NOPTS_VALUE : (timestamp/1000.0);
             priv->a_pts = timestamp;
             if (priv->sub_packet_cnt == 0)
                 priv->audio_filepos = demuxer->filepos;
