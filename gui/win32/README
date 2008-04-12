@@ -5,8 +5,9 @@ MPlayer Windows GUI (c)
 
 This beta GUI for Windows was originally written by Sascha Sommer and
 has since been heavily modified by myself (Erik Augustson) and Gianluigi
-Tiesi. It follows the same concept for the Linux GUI, and should be
-able to load all(most) of the current skins available for the Linux GUI.
+Tiesi. It follows the same concept as the Linux GUI, and should be able
+to load all (or at least most) of the current skins available for the
+Linux GUI.
 
 To compile, quite simply pass --enable-gui to configure, and it is highly
 recommended to also pass --enable-static="-mwindows" to link mplayer as
