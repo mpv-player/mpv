@@ -14,7 +14,6 @@
 
 #include "libmpcodecs/img_format.h"
 
-extern int demuxer_type;
 static int format = IMGFMT_I420;
 static int size_id = 0;
 static int width = 0;

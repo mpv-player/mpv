@@ -13,7 +13,6 @@
 #include "stheader.h"
 
 
-extern int demuxer_type;
 static int channels = 2;
 static int samplerate = 44100;
 static int samplesize = 2;

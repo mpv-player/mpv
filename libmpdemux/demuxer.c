@@ -844,7 +844,6 @@ return demuxer;
 
 char* audio_stream = NULL;
 char* sub_stream = NULL;
-int demuxer_type = 0; // used by rawaudio and rawvideo
 int audio_stream_cache = 0;
 
 char *demuxer_name = NULL; // parameter from -demuxer
@@ -861,6 +860,7 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
   demuxer_t *vd,*ad = NULL,*sd = NULL;
   demuxer_t *res;
   int afmt =DEMUXER_TYPE_UNKNOWN,sfmt = DEMUXER_TYPE_UNKNOWN ;
+  int demuxer_type;
   int audio_demuxer_type = 0, sub_demuxer_type = 0;
   int demuxer_force = 0, audio_demuxer_force = 0,
       sub_demuxer_force = 0;
