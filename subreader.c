@@ -1065,11 +1065,7 @@ static int sub_autodetect (stream_t* st, int *uses_time) {
     return SUB_INVALID;  // too many bad lines
 }
 
-#ifdef DUMPSUBS
-int sub_utf8=0;
-#else
 extern int sub_utf8;
-#endif
 int sub_utf8_prev=0;
 
 extern float sub_delay;
@@ -2344,24 +2340,3 @@ int sub_clear_text(subtitle *sub, double pts) {
   }
   return changed;
 }
-
-#ifdef DUMPSUBS
-int main(int argc, char **argv) {  // for testing
-    sub_data *subd;
-    
-    if(argc<2){
-        printf("\nUsage: subreader filename.sub\n\n");
-        exit(1);
-    }
-    sub_cp = argv[2]; 
-    subd = sub_read_file(argv[1]);
-    if(!subd){
-        printf("Couldn't load file.\n");
-        exit(1);
-    }
-    
-    list_sub_file(subd);
-
-    return 0;
-}
-#endif
