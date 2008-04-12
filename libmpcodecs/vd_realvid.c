@@ -204,8 +204,7 @@ static int load_syms_windows(char *path) {
 	rv_handle = handle;
 #ifndef WIN32_LOADER
 	{
-	    // drv43260.dll
-	    if (wrvyuv_transform == (void *)0x634114d0) {
+	    if (strstr(path, "drv34260.dll")) {
 		int patched;
 		// patch away multithreaded decoding, it causes crashes
 		static const uint8_t oldcode[13] = {
@@ -215,7 +214,7 @@ static int load_syms_windows(char *path) {
 		    0x31, 0xc0,
 		    0x89, 0x83, 0xf8, 0x05, 0x00, 0x00,
 		    0xe9, 0xd0, 0x00, 0x00, 0x00 };
-		patched = patch_dll((void *)0x634132fa, oldcode, newcode,
+		patched = patch_dll((char*)wrvyuv_transform + 0x634132fa - 0x634114d0, oldcode, newcode,
 		                    sizeof(oldcode));
 		if (!patched)
 		    mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Could not patch Real codec, this might crash on multi-CPU systems\n");
