@@ -3,17 +3,17 @@ MPlayer Windows GUI (c)
 2006 Erik Augustson - <erik_27can@yahoo.com>
 2006 Gianluigi Tiesi - <sherpya@netfarm.it>
 
-This beta gui for win32 was originally written by Sascha Sommer and
+This beta GUI for Windows was originally written by Sascha Sommer and
 has since been heavily modified by myself (Erik Augustson) and Gianluigi
-Tiesi. It follows the same concept for the linux gui, and should be
-able to load all(most) of the current skins available for the linux gui.
+Tiesi. It follows the same concept for the Linux GUI, and should be
+able to load all(most) of the current skins available for the Linux GUI.
 
 To compile, quite simply pass --enable-gui to configure, and it is highly
 recommended to also pass --enable-static="-mwindows" to link mplayer as
-a windows binary. NOTE: this will also link mencoder with -mwindows
-and thus link mencoder as a windows binary as well.
+a Windows binary. NOTE: This will also link mencoder with -mwindows
+and thus link mencoder as a Windows binary as well.
 
-To enable use of the gui, mplayer.exe must be renamed to/copied as
+To enable use of the GUI, mplayer.exe must be renamed / copied to
 gmplayer.exe.
 
 Please send all bug reports/comments/requests/gripes to:
