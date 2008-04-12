@@ -164,7 +164,7 @@ get_flac_metadata (demuxer_t* demuxer)
     if (r != FLAC_SIGNATURE_SIZE)
       return;
 
-    blk_len = (preamble[1] << 16) | (preamble[2] << 8) | (preamble[3] << 0);
+    blk_len = AV_RB24(preamble + 1);
 
     switch (preamble[0] & 0x7F)
     {
