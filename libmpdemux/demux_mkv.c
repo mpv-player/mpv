@@ -43,7 +43,7 @@
 #include "libavutil/intreadwrite.h"
 #include "libavutil/avstring.h"
 
-static unsigned char sipr_swaps[38][2]={
+static const unsigned char sipr_swaps[38][2]={
     {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
     {13,39},{14,73},{15,53},{16,69},{17,57},{19,88},{20,34},{21,71},{24,46},
     {25,94},{26,54},{28,75},{29,50},{32,70},{33,92},{35,74},{38,85},{40,56},
@@ -54,12 +54,13 @@ static unsigned char sipr_swaps[38][2]={
 #define SIPR_FLAVORS 4
 #define ATRC_FLAVORS 8
 #define COOK_FLAVORS 34
-static int sipr_fl2bps[SIPR_FLAVORS] = {813, 1062, 625, 2000};
-static int atrc_fl2bps[ATRC_FLAVORS] = {8269, 11714, 13092, 16538, 18260, 22050, 33075, 44100};
-static int cook_fl2bps[COOK_FLAVORS] = {1000, 1378, 2024, 2584, 4005, 5513, 8010, 4005, 750, 2498,
-                                        4048, 5513, 8010, 11973, 8010, 2584, 4005, 2067, 2584, 2584,
-                                        4005, 4005, 5513, 5513, 8010, 12059, 1550, 8010, 12059, 5513,
-                                        12016, 16408, 22911, 33506};
+static const int sipr_fl2bps[SIPR_FLAVORS] = {813, 1062, 625, 2000};
+static const int atrc_fl2bps[ATRC_FLAVORS] = {8269, 11714, 13092, 16538, 18260, 22050, 33075, 44100};
+static const int cook_fl2bps[COOK_FLAVORS] = {
+    1000, 1378, 2024, 2584, 4005, 5513, 8010, 4005, 750, 2498,
+    4048, 5513, 8010, 11973, 8010, 2584, 4005, 2067, 2584, 2584,
+    4005, 4005, 5513, 5513, 8010, 12059, 1550, 8010, 12059, 5513,
+    12016, 16408, 22911, 33506};
 
 typedef struct
 {
