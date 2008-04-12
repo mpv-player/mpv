@@ -39,7 +39,7 @@
 #include "osdep/keycodes.h"
 #include "stream/stream.h"
 #include "libvo/video_out.h"
-#include "interface.h"
+#include "gui/interface.h"
 #include "gui.h"
 #include "dialogs.h"
 

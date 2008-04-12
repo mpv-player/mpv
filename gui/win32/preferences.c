@@ -30,7 +30,7 @@
 #include "libvo/video_out.h"
 #include "libao2/audio_out.h"
 #include "mixer.h"
-#include "interface.h"
+#include "gui/interface.h"
 #include "gui.h"
 #include "mp_msg.h"
 #include "help_mp.h"

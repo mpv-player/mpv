@@ -32,7 +32,7 @@
 #include "m_option.h"
 #include "libvo/video_out.h"
 #include "mixer.h"
-#include "interface.h"
+#include "gui/interface.h"
 #include "gui.h"
 
 /* params */

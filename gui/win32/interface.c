@@ -23,7 +23,7 @@
 
 #include <windows.h>
 #include <get_path.h>
-#include "interface.h"
+#include "gui/interface.h"
 #include "m_option.h"
 #include "mixer.h"
 #include "mp_msg.h"

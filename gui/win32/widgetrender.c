@@ -25,7 +25,7 @@
 #include <ctype.h>
 #include <windows.h>
 
-#include "interface.h"
+#include "gui/interface.h"
 #include "gui.h"
 
 extern char *codecname;
