@@ -184,14 +184,6 @@ get_flac_metadata (demuxer_t* demuxer)
       break;
     }
 
-    case FLAC_PADDING:
-      stream_skip (s, blk_len);
-      break;
-
-    case FLAC_APPLICATION:
-      stream_skip (s, blk_len);
-      break;
-
     case FLAC_SEEKTABLE:
     {
       int seekpoint_count, i;
@@ -263,10 +255,9 @@ get_flac_metadata (demuxer_t* demuxer)
       break;
     }
 
+    case FLAC_PADDING:
+    case FLAC_APPLICATION:
     case FLAC_CUESHEET:
-      stream_skip (s, blk_len);
-      break;
-
     default: 
       /* 6-127 are presently reserved */
       stream_skip (s, blk_len);
