@@ -168,26 +168,6 @@ get_flac_metadata (demuxer_t* demuxer)
 
     switch (preamble[0] & 0x7F)
     {
-    case FLAC_STREAMINFO:
-    {
-      if (blk_len != FLAC_STREAMINFO_SIZE)
-        return;
-
-      stream_skip (s, FLAC_STREAMINFO_SIZE);
-      break;
-    }
-
-    case FLAC_SEEKTABLE:
-    {
-      int seekpoint_count, i;
-
-      seekpoint_count = blk_len / FLAC_SEEKPOINT_SIZE;
-      for (i = 0; i < seekpoint_count; i++)
-        if (stream_skip (s, FLAC_SEEKPOINT_SIZE) != 1)
-          return;
-      break;
-    }
-
     case FLAC_VORBIS_COMMENT:
     {
       /* For a description of the format please have a look at */
@@ -248,8 +228,10 @@ get_flac_metadata (demuxer_t* demuxer)
       break;
     }
 
+    case FLAC_STREAMINFO:
     case FLAC_PADDING:
     case FLAC_APPLICATION:
+    case FLAC_SEEKTABLE:
     case FLAC_CUESHEET:
     default: 
       /* 6-127 are presently reserved */
