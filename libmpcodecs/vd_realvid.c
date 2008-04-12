@@ -204,7 +204,7 @@ static int load_syms_windows(char *path) {
 	rv_handle = handle;
 #ifndef WIN32_LOADER
 	{
-	    if (strstr(path, "drv34260.dll")) {
+	    if (strstr(path, "drv43260.dll")) {
 		int patched;
 		// patch away multithreaded decoding, it causes crashes
 		static const uint8_t oldcode[13] = {
