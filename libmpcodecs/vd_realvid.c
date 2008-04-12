@@ -217,8 +217,8 @@ static int load_syms_windows(char *path) {
 		    0xe9, 0xd0, 0x00, 0x00, 0x00 };
 		patched = patch_dll((void *)0x634132fa, oldcode, newcode,
 		                    sizeof(oldcode));
-	    if (!patched)
-		mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Could not patch Real codec, this might crash on multi-CPU systems\n");
+		if (!patched)
+		    mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Could not patch Real codec, this might crash on multi-CPU systems\n");
 	    }
 	}
 #endif
