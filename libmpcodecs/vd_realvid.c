@@ -232,8 +232,11 @@ static int load_syms_windows(char *path) {
     if(wrvyuv_custom_message &&
        wrvyuv_free &&
        wrvyuv_init &&
-       wrvyuv_transform)
+       wrvyuv_transform) {
+	dll_type = 1;
+	rv_handle = handle;
 	return 1;
+    }
 
     mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
     FreeLibrary(handle);
