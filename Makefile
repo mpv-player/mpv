@@ -486,4 +486,4 @@ libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
 vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
 
-.PHONY: all install* uninstall strip doxygen doxygen_clean
+.PHONY: all install* uninstall strip doxygen

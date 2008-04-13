@@ -38,4 +38,4 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 
 -include .depend
 
-.PHONY: libs clean distclean dep depend
+.PHONY: libs *clean dep depend
