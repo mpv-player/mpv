@@ -1339,6 +1339,7 @@ if win32 ; then
   _exesuf=".exe"
   # -lwinmm is always needed for osdep/timer-win2.c
   _ld_extra="$_ld_extra -lwinmm"
+  _pe_executable=yes
   _timer=timer-win2.c
 fi
 
@@ -7729,6 +7730,8 @@ NEED_VSSCANF = $_need_vsscanf
 
 GETCH = $_getch
 TIMER = $_timer
+
+PE_EXECUTABLE = $_pe_executable
 
 # audio output
 OSS = $_ossaudio

@@ -152,6 +152,7 @@ SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
 
 SRCS_MPLAYER-$(LIRC)         += input/lirc.c
 
+OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
 
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
