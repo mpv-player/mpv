@@ -367,12 +367,12 @@ static void init_atoms(void)
 }
 
 void update_xinerama_info(void) {
+#ifdef HAVE_XINERAMA
     int screen = xinerama_screen;
     // center coordinates of the window
     int x = vo_dx + vo_dwidth / 2;
     int y = vo_dy + vo_dheight / 2;
     xinerama_x = xinerama_y = 0;
-#ifdef HAVE_XINERAMA
     if (screen >= -1 && XineramaIsActive(mDisplay))
     {
         XineramaScreenInfo *screens;
