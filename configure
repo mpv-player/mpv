@@ -7192,8 +7192,10 @@ echores "$_byte_order"
 echocheck "OSD menu"
 if test "$_menu" = yes ; then
     _def_menu='#define HAVE_MENU 1'
+    test $_dvbin = "yes" && _menu_dvbin=yes
 else
 _def_menu='#undef HAVE_MENU'
+    _menu_dvbin=no
 fi
 echores "$_menu"
 
@@ -7695,6 +7697,7 @@ VIDIX_PCIDB = $_vidix_pcidb_val
 CONFIG_POSTPROC = yes
 MP3LAME = $_mp3lame
 LIBMENU = $_menu
+LIBMENU_DVBIN = $_menu_dvbin
 
 MP3LIB = $_mp3lib
 LIBA52 = $_liba52
