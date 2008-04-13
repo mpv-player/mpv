@@ -476,6 +476,7 @@ libmpcodecs/libmpencoders.a: .norecurse $(wildcard libmpcodecs/*.[ch])
 libavutil/libavutil.a: .norecurse $(wildcard libavutil/*.[ch])
 libavcodec/libavcodec.a: .norecurse $(wildcard libavcodec/*.[ch] libavcodec/*/*.[chS])
 libavformat/libavformat.a: .norecurse $(wildcard libavformat/*.[ch])
+libpostproc/libpostproc.a: .norecurse $(wildcard libpostproc/*.[ch])
 libswscale/libswscale.a: .norecurse $(wildcard libswscale/*.[ch])
 
 libmpeg2/libmpeg2.a: .norecurse $(wildcard libmpeg2/*.[ch])
