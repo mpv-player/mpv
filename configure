@@ -7888,7 +7888,7 @@ HAVE_XVMC = $_xvmc
 `echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavbsfs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 
-DEPEND_CMD   = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,\$$^) | sed "s,[0-9a-z._-]*: \(\$(SRC_DIR)/\)*\([a-z0-9]*/\)[^/]* ,\\2&,"
+DEPEND_CMD   = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,\$^) | sed "s,[0-9a-z._-]*: \(\$(SRC_DIR)/\)*\([a-z0-9]*/\)[^/]* ,\\2&,"
 
 MPDEPEND_CMD = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,$^) | sed "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&,"
 
