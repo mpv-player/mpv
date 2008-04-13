@@ -379,14 +379,14 @@ void update_xinerama_info(void) {
         int num_screens;
 
         screens = XineramaQueryScreens(mDisplay, &num_screens);
-            for (screen = num_screens - 1; screen > 0; screen--) {
-               int left = screens[screen].x_org;
-               int right = left + screens[screen].width;
-               int top = screens[screen].y_org;
-               int bottom = top + screens[screen].height;
-               if (left <= x && x <= right && top <= y && y <= bottom)
-                   break;
-            }
+        for (screen = num_screens - 1; screen > 0; screen--) {
+           int left = screens[screen].x_org;
+           int right = left + screens[screen].width;
+           int top = screens[screen].y_org;
+           int bottom = top + screens[screen].height;
+           if (left <= x && x <= right && top <= y && y <= bottom)
+               break;
+        }
         if (screen < 0)
             screen = 0;
         vo_screenwidth = screens[screen].width;
