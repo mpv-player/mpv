@@ -220,7 +220,13 @@ PARTS = dvdread \
         tremor \
         vidix \
 
-DIRS =  input \
+DIRS =  gui \
+        gui/mplayer \
+        gui/mplayer/gtk \
+        gui/skin \
+        gui/wm \
+        gui/win32 \
+        input \
         libaf \
         libass \
         libmenu \
@@ -381,9 +387,6 @@ clean::
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags
-	rm -f gui/mplayer/*.o gui/mplayer/*~ gui/mplayer/gtk/*.o \
-          gui/mplayer/gtk/*~ gui/skin/*.o gui/skin/*~ \
-          gui/wm/*.o gui/wm/*~ gui/win32/*.o gui/win32/*~
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 
