@@ -368,6 +368,9 @@ static void init_atoms(void)
 
 void update_xinerama_info(void) {
     int screen = xinerama_screen;
+    // center coordinates of the window
+    int x = vo_dx + vo_dwidth / 2;
+    int y = vo_dy + vo_dheight / 2;
     xinerama_x = xinerama_y = 0;
 #ifdef HAVE_XINERAMA
     if (screen >= -1 && XineramaIsActive(mDisplay))
@@ -376,11 +379,6 @@ void update_xinerama_info(void) {
         int num_screens;
 
         screens = XineramaQueryScreens(mDisplay, &num_screens);
-        if (screen >= num_screens)
-            screen = num_screens - 1;
-        if (screen == -1) {
-            int x = vo_dx + vo_dwidth / 2;
-            int y = vo_dy + vo_dheight / 2;
             for (screen = num_screens - 1; screen > 0; screen--) {
                int left = screens[screen].x_org;
                int right = left + screens[screen].width;
@@ -389,7 +387,6 @@ void update_xinerama_info(void) {
                if (left <= x && x <= right && top <= y && y <= bottom)
                    break;
             }
-        }
         if (screen < 0)
             screen = 0;
         vo_screenwidth = screens[screen].width;
