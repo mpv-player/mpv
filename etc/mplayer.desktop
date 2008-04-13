@@ -8,6 +8,7 @@ Comment[de]=Multimedia-Player
 Comment[es]=Reproductor multimedia
 Comment[fr]=Lecteur multimédia
 Comment[it]=Lettore multimediale
+Comment[zh]=多媒体播放器
 Icon=mplayer
 TryExec=gmplayer
 Exec=gmplayer %F
