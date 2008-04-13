@@ -385,7 +385,7 @@ clean::
           gui/mplayer/gtk/*~ gui/skin/*.o gui/skin/*~ \
           gui/wm/*.o gui/wm/*~ gui/win32/*.o gui/win32/*~
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
-	for dir in $(DIRS); do rm -f $$dir/*.o $$dir/*.a $$dir/*.ho $$dir/*~ ; done
+	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 
 distclean:: doxygen_clean
 	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
