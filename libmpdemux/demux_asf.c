@@ -46,7 +46,7 @@ static inline unsigned read_varlen(uint8_t **ptr, int len, int def) {
  * \param len lowest 2 bits indicate number of bytes to read
  */
 static inline int check_varlen(uint8_t *ptr, uint8_t *endptr, int len) {
-    return len&3 ? ptr + (1<<(len&3 - 1)) - 1 < endptr : 1;
+    return len&3 ? ptr + (1<<((len&3) - 1)) <= endptr : 1;
 }
 
 static void asf_descrambling(unsigned char **src,unsigned len, struct asf_priv* asf){
