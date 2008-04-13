@@ -245,4 +245,42 @@ out:
 	return ret;
 }
 
+extern int mp_msg_levels[];
+
+/// Parse the command line option that must be handled at startup.
+int m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
+{
+	int msg_lvl, i, r, ret = 0;
+	char* arg;
+	m_option_t* opt;
+
+	// Hack to shutup the parser error messages.
+	msg_lvl = mp_msg_levels[MSGT_CFGPARSER];
+	mp_msg_levels[MSGT_CFGPARSER] = -11;
+
+	config->mode = M_COMMAND_LINE_PRE_PARSE;
+
+	for(i = 1 ; i < argc ; i++) {
+		arg = argv[i];
+		// Ignore non option
+		if(arg[0] != '-' || arg[1] == 0) continue;
+		arg++;
+		// No more options after --
+		if(arg[0] == '-' && arg[1] == 0) break;
+
+		opt = m_config_get_option(config,arg);
+		// Ignore invalid option
+		if(!opt) continue;
+		// Set, non-pre-parse options will be ignored
+		r = m_config_set_option(config,arg,
+					i+1 < argc ? argv[i+1] : NULL);
+		if(r < 0) ret = r;
+		else i += r;
+	}
+
+	mp_msg_levels[MSGT_CFGPARSER] = msg_lvl;
+
+	return ret;
+}
+
 ///@}

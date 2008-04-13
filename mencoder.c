@@ -408,9 +408,12 @@ user_correct_pts = 0;
 
   mp_msg_init();
 
-  for(i=1; i<argc; i++)
-    if(!strcmp(argv[i], "-really-quiet"))
-      verbose= -10;
+  // Create the config context and register the options
+  mconfig = m_config_new();
+  m_config_register_options(mconfig,mencoder_opts);
+
+  // Preparse the command line
+  m_config_preparse_command_line(mconfig,argc,argv);
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2008 MPlayer Team\n");
 
@@ -465,8 +468,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   }
 }
 
- mconfig = m_config_new();
- m_config_register_options(mconfig,mencoder_opts);
  parse_cfgfiles(mconfig);
  filelist = m_config_parse_me_command_line(mconfig, argc, argv);
  if(!filelist) mencoder_exit(1, MSGTR_ErrorParsingCommandLine);

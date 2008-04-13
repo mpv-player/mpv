@@ -2554,9 +2554,13 @@ int gui_no_filename=0;
   
   mp_msg_init();
 
-  for(i=1; i<argc; i++)
-    if(!strcmp(argv[i], "-really-quiet"))
-      verbose= -10;
+  // Create the config context and register the options
+  mconfig = m_config_new();
+  m_config_register_options(mconfig,mplayer_opts);
+  mp_input_register_options(mconfig);
+
+  // Preparse the command line
+  m_config_preparse_command_line(mconfig,argc,argv);
 
   print_version();
 #if defined(WIN32) && defined(USE_WIN32DLL)
@@ -2582,10 +2586,6 @@ int gui_no_filename=0;
           use_gui=1;
   }
 
-    mconfig = m_config_new();
-    m_config_register_options(mconfig,mplayer_opts);
-    // TODO : add something to let modules register their options
-    mp_input_register_options(mconfig);
     parse_cfgfiles(mconfig);
 
 #ifdef HAVE_NEW_GUI

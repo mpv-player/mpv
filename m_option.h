@@ -321,6 +321,9 @@ struct m_option {
 /// option only if it was set by the user.
 #define M_OPT_OLD		(1<<6)
 
+/// The option should be set during command line pre-parsing
+#define M_OPT_PRE_PARSE		(1<<7)
+
 /// \defgroup OldOptionFlags Backward compatibility
 ///
 /// These are kept for compatibility with older code.
@@ -333,6 +336,7 @@ struct m_option {
 #define CONF_GLOBAL		M_OPT_GLOBAL
 #define CONF_NOSAVE		M_OPT_NOSAVE
 #define CONF_OLD		M_OPT_OLD
+#define CONF_PRE_PARSE		M_OPT_PRE_PARSE
 ///@}
 
 ///@}
@@ -395,6 +399,8 @@ struct m_option {
 #define M_CONFIG_FILE 0
 /// Set when parsing command line arguments.
 #define M_COMMAND_LINE 1
+/// Set when pre-parsing the command line
+#define M_COMMAND_LINE_PRE_PARSE 2
 
 ///@}
 

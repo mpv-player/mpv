@@ -308,6 +308,13 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_InvalidCmdlineOption,arg);
     return M_OPT_INVALID;
   }
+  // During command line preparse set only pre-parse options
+  // Otherwise only set pre-parse option if they were not already set.
+  if(((config->mode == M_COMMAND_LINE_PRE_PARSE) &&
+      !(co->opt->flags & M_OPT_PRE_PARSE)) ||
+     ((config->mode != M_COMMAND_LINE_PRE_PARSE) &&
+      (co->opt->flags & M_OPT_PRE_PARSE) && (co->flags & M_CFG_OPT_SET)))
+    set = 0;
 
   // Option with children are a bit different to parse
   if(co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
