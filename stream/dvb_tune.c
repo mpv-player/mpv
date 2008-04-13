@@ -37,17 +37,10 @@
 #ifdef HAVE_DVB_HEAD
 	#include <linux/dvb/dmx.h>
 	#include <linux/dvb/frontend.h>
-	static const char* const dvb_frontenddev[4]={"/dev/dvb/adapter0/frontend0","/dev/dvb/adapter1/frontend0","/dev/dvb/adapter2/frontend0","/dev/dvb/adapter3/frontend0"};
-	static const char* const dvb_dvrdev[4]={"/dev/dvb/adapter0/dvr0","/dev/dvb/adapter1/dvr0","/dev/dvb/adapter2/dvr0","/dev/dvb/adapter3/dvr0"};
-	static const char* const dvb_demuxdev[4]={"/dev/dvb/adapter0/demux0","/dev/dvb/adapter1/demux0","/dev/dvb/adapter2/demux0","/dev/dvb/adapter3/demux0"};
 #else
 	#include <ost/dmx.h>
 	#include <ost/sec.h>
 	#include <ost/frontend.h>
-	static const char* const dvb_frontenddev[4]={"/dev/ost/frontend0","/dev/ost/frontend1","/dev/ost/frontend2","/dev/ost/frontend3"};
-	static const char* const dvb_dvrdev[4]={"/dev/ost/dvr0","/dev/ost/dvr1","/dev/ost/dvr2","/dev/ost/dvr3"};
-	static const char* const dvb_secdev[4]={"/dev/ost/sec0","/dev/ost/sec1","/dev/ost/sec2","/dev/ost/sec3"};
-	static const char* const dvb_demuxdev[4]={"/dev/ost/demux0","/dev/ost/demux1","/dev/ost/demux2","/dev/ost/demux3"};
 #endif
 
 #include "dvbin.h"
@@ -103,20 +96,31 @@ int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype);
 int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 {
 	int i;
-	
-	priv->fe_fd = open(dvb_frontenddev[n], O_RDWR | O_NONBLOCK);
+	char frontend_dev[32], dvr_dev[32], demux_dev[32], sec_dev[32];
+
+#ifdef HAVE_DVB_HEAD
+	sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
+	sprintf(dvr_dev, "/dev/dvb/adapter%d/dvr0", n);
+	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", n);
+#else
+	sprintf(frontend_dev, "/dev/ost/frontend%d", n);
+	sprintf(dvr_dev, "/dev/ost/dvr%d", n);
+	sprintf(demux_dev, "/dev/ost/demux%d", n);
+	sprintf(sec_dev, "/dev/ost/sec%d", n);
+#endif
+	priv->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK);
 	if(priv->fe_fd < 0)
 	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", dvb_frontenddev[n], errno);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", frontend_dev, errno);
 		return 0;
 	}
 #ifdef HAVE_DVB_HEAD
 	priv->sec_fd=0;
 #else
-	priv->sec_fd = open(dvb_secdev[n], O_RDWR);
+	priv->sec_fd = open(sec_dev, O_RDWR);
 	if(priv->sec_fd < 0)
 	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING SEC DEVICE %s: ERRNO %d\n", dvb_secdev[n], errno);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING SEC DEVICE %s: ERRNO %d\n", sec_dev, errno);
 		close(priv->fe_fd);
 		return 0;
 	}
@@ -125,7 +129,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
 	for(i = 0; i < demux_cnt; i++)
 	{
-		priv->demux_fds[i] = open(dvb_demuxdev[n], O_RDWR | O_NONBLOCK);
+		priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK);
 		if(priv->demux_fds[i] < 0)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DEMUX 0: %d\n", errno);
@@ -133,16 +137,16 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 		}
 		else
 		{
-			mp_msg(MSGT_DEMUX, MSGL_V, "OPEN(%d), file %s: FD=%d, CNT=%d\n", i, dvb_demuxdev[n], priv->demux_fds[i], priv->demux_fds_cnt);
+			mp_msg(MSGT_DEMUX, MSGL_V, "OPEN(%d), file %s: FD=%d, CNT=%d\n", i, demux_dev, priv->demux_fds[i], priv->demux_fds_cnt);
 			priv->demux_fds_cnt++;
 		}
 	}
 
 
-	priv->dvr_fd = open(dvb_dvrdev[n], O_RDONLY| O_NONBLOCK);
+	priv->dvr_fd = open(dvr_dev, O_RDONLY| O_NONBLOCK);
 	if(priv->dvr_fd < 0)
 	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DVR DEVICE %s: %d\n", dvb_dvrdev[n], errno);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DVR DEVICE %s: %d\n", dvr_dev, errno);
 		return 0;
 	}
 
@@ -153,6 +157,13 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 {
 	int i;
+	char demux_dev[32];
+
+#ifdef HAVE_DVB_HEAD
+	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", priv->card);
+#else
+	sprintf(demux_dev, "/dev/ost/demux%d", priv->card);
+#endif
 	
 	mp_msg(MSGT_DEMUX, MSGL_V, "FIX %d -> %d\n", priv->demux_fds_cnt, cnt);
 	if(priv->demux_fds_cnt >= cnt)
@@ -168,7 +179,7 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 	{
 		for(i = priv->demux_fds_cnt; i < cnt; i++)
 		{
-			priv->demux_fds[i] = open(dvb_demuxdev[priv->card], O_RDWR | O_NONBLOCK);
+			priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK);
 			mp_msg(MSGT_DEMUX, MSGL_V, "FIX, OPEN fd(%d): %d\n", i, priv->demux_fds[i]);
 			if(priv->demux_fds[i] < 0)
 			{
