@@ -67,6 +67,7 @@ static int lavc_param_chroma_elim_threshold = 0;
 static int lavc_param_packet_size= 0;
 static int lavc_param_strict= -1;
 static int lavc_param_data_partitioning= 0;
+static int lavc_param_gray=0;
 static float lavc_param_rc_qsquish=1.0;
 static float lavc_param_rc_qmod_amp=0;
 static int lavc_param_rc_qmod_freq=0;
@@ -195,6 +196,7 @@ m_option_t lavcopts_conf[]={
 	{"vstrict", &lavc_param_strict, CONF_TYPE_INT, CONF_RANGE, -99, 99, NULL},
 	{"vdpart", &lavc_param_data_partitioning, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
 	{"keyint", &lavc_param_keyint, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
 	{"mpeg_quant", &lavc_param_mpeg_quant, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"vi_qfactor", &lavc_param_vi_qfactor, CONF_TYPE_FLOAT, CONF_RANGE, -31.0, 31.0, NULL},
 	{"vi_qoffset", &lavc_param_vi_qoffset, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 31.0, NULL},
@@ -554,6 +556,7 @@ static int config(struct vf_instance_s* vf,
 #ifdef CODEC_FLAG_CLOSED_GOP
     lavc_venc_context->flags|= lavc_param_closed_gop;
 #endif    
+    if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
 
     if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
     if(lavc_param_interlaced_dct) lavc_venc_context->flags|= CODEC_FLAG_INTERLACED_DCT;
