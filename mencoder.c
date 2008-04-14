@@ -311,6 +311,9 @@ static void mencoder_exit(int level, const char *how)
 static void parse_cfgfiles( m_config_t* conf )
 {
   char *conffile;
+  if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mencoder.conf") < 0)
+    mencoder_exit(1,MSGTR_ConfigFileError); 
+
   if ((conffile = get_path("mencoder.conf")) == NULL) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
   } else {
