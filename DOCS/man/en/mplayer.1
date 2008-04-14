@@ -692,6 +692,28 @@ debug level 4
 .PD 1
 .
 .TP
+.B \-noconfig <options>
+Do not parse selected configuration files.
+.br
+.I NOTE:
+If \-include or \-use\-filedir\-conf options are
+specified at the command line, they will be honoured.
+.sp 1
+Available options are:
+.PD 0
+.RSs
+.IPs "all\ \ "
+all configuration files
+.IPs "gui (GUI only)"
+GUI configuration file
+.IPs system
+system configuration file
+.IPs "user\ "
+user configuration file
+.RE
+.PD 1
+.
+.TP
 .B \-msgcolor
 Enable colorful console output on terminals that support ANSI color.
 .
