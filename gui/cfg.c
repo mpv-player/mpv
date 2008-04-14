@@ -83,6 +83,7 @@ gtkASS_t gtkASS;
 
 extern int    stop_xscreensaver;
 extern int    m_config_parse_config_file(m_config_t* config, char *conffile);
+int disable_gui_conf=0;
 
 static m_config_t * gui_conf;
 static const m_option_t gui_opts[] =
@@ -222,7 +223,7 @@ int cfg_read( void )
  mp_msg( MSGT_GPLAYER,MSGL_V,"[cfg] reading config file: %s\n",cfg );
  gui_conf=m_config_new();
  m_config_register_options( gui_conf,gui_opts );
- if ( m_config_parse_config_file( gui_conf,cfg ) < 0 ) 
+ if ( !disable_gui_conf && m_config_parse_config_file( gui_conf,cfg ) < 0 ) 
   {
    mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_ConfigFileError );
 //   exit( 1 );

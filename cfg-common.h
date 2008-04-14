@@ -372,6 +372,8 @@ struct {
 };
 #endif /* WIN32 */
 
+extern const m_option_t noconfig_opts[];
+
 extern const m_option_t lavc_decode_opts_conf[];
 extern const m_option_t xvid_dec_opts[];
 

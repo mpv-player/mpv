@@ -821,7 +821,8 @@ static void parse_cfgfiles( m_config_t* conf )
 {
 char *conffile;
 int conffile_fd;
-if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
+if (!disable_system_conf &&
+    m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
   exit_player(NULL);
 if ((conffile = get_path("")) == NULL) {
   mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
@@ -840,7 +841,8 @@ if ((conffile = get_path("")) == NULL) {
       write(conffile_fd, default_config, strlen(default_config));
       close(conffile_fd);
     }
-    if (m_config_parse_config_file(conf, conffile) < 0)
+    if (!disable_user_conf &&
+        m_config_parse_config_file(conf, conffile) < 0)
       exit_player(NULL);
     free(conffile);
   }
