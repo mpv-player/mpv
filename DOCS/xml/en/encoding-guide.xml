@@ -1900,7 +1900,9 @@ the video is shown frame-after-frame instead of field-after-field.
   actual use. They are simply the bare minimum required to encode the
   pertaining video category. How to make good DVD rips or fine-tune
   <systemitem class="library">libavcodec</systemitem> for maximal
-  quality is not within the scope of this document.
+  quality is not within the scope of this section; refer to other
+  sections within the <link linkend="encoding-guide">MEncoder encoding
+  guide</link>.
 </para></listitem>
 <listitem><para>
   There are a couple footnotes specific to this guide, linked like this:
