@@ -1820,7 +1820,7 @@ description of what telecine is.
 <formalpara>
 <title>A note about the numbers.</title>
 <para>
-Many documents, including the guide linked above, refer to the fields
+Many documents, including the article linked above, refer to the fields
 per second value of NTSC video as 59.94 and the corresponding frames
 per second values as 29.97 (for telecined and interlaced) and 23.976
 (for progressive). For simplicity, some documents even round these
