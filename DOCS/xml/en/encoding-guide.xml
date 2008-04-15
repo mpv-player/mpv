@@ -2174,7 +2174,7 @@ corresponding lines for each field (this has drawbacks - see method 3).
   Unfortunately, this option is buggy with
   <application>MEncoder</application>; it ought to work well with
   <application>MEncoder G2</application>, but that is not here yet. You
-  might experience crahes. Anyway, the purpose of <option> -vf
+  might experience crashes. Anyway, the purpose of <option> -vf
   tfields</option> is to create a full frame out of each field, which
   makes the framerate 60000/1001. The advantage of this approach is that no
   data is ever lost; however, since each frame comes from only one
