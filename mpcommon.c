@@ -210,7 +210,9 @@ int select_audio(demuxer_t* demuxer, int audio_id, char* audio_lang)
 /* Parse -noconfig common to both programs */
 int disable_system_conf=0;
 int disable_user_conf=0;
-extern int disable_gui_conf;
+#ifdef HAVE_NEW_GUI
+int disable_gui_conf=0;
+#endif /* HAVE_NEW_GUI */
 
 /* Disable all configuration files */
 static void noconfig_all(void)

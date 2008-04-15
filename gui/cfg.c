@@ -83,7 +83,7 @@ gtkASS_t gtkASS;
 
 extern int    stop_xscreensaver;
 extern int    m_config_parse_config_file(m_config_t* config, char *conffile);
-int disable_gui_conf=0;
+extern int    disable_gui_conf;
 
 static m_config_t * gui_conf;
 static const m_option_t gui_opts[] =
