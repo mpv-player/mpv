@@ -8,5 +8,12 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .audio_driver_list = NULL,
         .video_driver_list = NULL,
         .fixed_vo = 0,
+        .user_correct_pts = -1,
     };
+}
+
+void set_default_mencoder_options(struct MPOpts *opts)
+{
+    set_default_mplayer_options(opts);
+    opts->user_correct_pts = 0;
 }

@@ -13,6 +13,7 @@
 #include <ctype.h>
 #include <inttypes.h>
 
+#include "options.h"
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
@@ -1687,6 +1688,7 @@ static const videocodec_info_t vinfo[] = {
 static int
 demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
 {
+  struct MPOpts *opts = demuxer->opts;
   BITMAPINFOHEADER *bih;
   void *ImageDesc = NULL;
   sh_video_t *sh_v;
@@ -1797,7 +1799,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
               bih = realloc (bih, bih->biSize);
               memcpy (bih + 1, track->private_data, track->private_size);
             }
-          track->reorder_timecodes = user_correct_pts == 0;
+          track->reorder_timecodes = opts->user_correct_pts == 0;
           if (!vi->id) {
               mp_msg (MSGT_DEMUX,MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownCodecID,
                       track->codec_id, track->tnum);

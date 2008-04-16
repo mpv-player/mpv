@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "options.h"
 #include "mp_msg.h"
 #include "cpudetect.h"
 
@@ -300,7 +301,6 @@ static void (*qpel_li)(unsigned char *d, unsigned char *s, int w, int h, int ds,
 static void (*qpel_4tap)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
 
 static int continue_buffered_image(struct vf_instance_s *);
-extern int correct_pts;
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
@@ -312,6 +312,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 
 static int continue_buffered_image(struct vf_instance_s *vf)
 {
+        struct MPOpts *opts = vf->opts;
 	int i=vf->priv->buffered_i;
 	double pts = vf->priv->buffered_pts;
 	mp_image_t *mpi = vf->priv->buffered_mpi;
@@ -362,7 +363,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 				dmpi->stride[2] = 2*mpi->stride[2];
 			}
 			ret |= vf_next_put_image(vf, dmpi, pts);
-			if (correct_pts)
+			if (opts->correct_pts)
 				break;
 			else
 				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
@@ -392,7 +393,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 					mpi->chroma_width, mpi->chroma_height, (i^!tff));
 			}
 			ret |= vf_next_put_image(vf, dmpi, pts);
-			if (correct_pts)
+			if (opts->correct_pts)
 				break;
 			else
 				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
@@ -418,7 +419,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 					dmpi->stride[2], mpi->stride[2]*2, (i^!tff));
 			}
 			ret |= vf_next_put_image(vf, dmpi, pts);
-			if (correct_pts)
+			if (opts->correct_pts)
 				break;
 			else
 				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);

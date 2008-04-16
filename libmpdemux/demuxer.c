@@ -738,9 +738,6 @@ int get_demuxer_type_from_name(char *demuxer_name, int *force)
 
 int extension_parsing = 1; // 0=off 1=mixed (used only for unstable formats)
 
-int correct_pts = 0;
-int user_correct_pts = -1;
-
 /*
   NOTE : Several demuxers may be opened at the same time so
   demuxers should NEVER rely on an external var to enable them
@@ -1045,9 +1042,9 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
     else
         res = vd;
 
-    correct_pts = user_correct_pts;
-    if (correct_pts < 0)
-        correct_pts =
+    opts->correct_pts = opts->user_correct_pts;
+    if (opts->correct_pts < 0)
+        opts->correct_pts =
             demux_control(res, DEMUXER_CTRL_CORRECT_PTS,
                           NULL) == DEMUXER_CTRL_OK;
     return res;

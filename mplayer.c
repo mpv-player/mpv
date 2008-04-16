@@ -2242,11 +2242,12 @@ err_out:
 
 static double update_video(int *blit_frame)
 {
+    struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
     //--------------------  Decode a frame: -----------------------
     double frame_time;
     *blit_frame = 0; // Don't blit if we hit EOF
-    if (!correct_pts) {
+    if (!opts->correct_pts) {
 	unsigned char* start=NULL;
 	void *decoded_frame = NULL;
 	int drop_frame=0;

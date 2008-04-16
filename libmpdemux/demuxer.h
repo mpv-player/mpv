@@ -150,9 +150,6 @@ typedef struct demuxer_info_st {
 
 struct demuxer_st;
 
-extern int correct_pts;
-extern int user_correct_pts;
-
 /**
  * Demuxer description structure
  */

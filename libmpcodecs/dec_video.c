@@ -1,5 +1,6 @@
 
 #include "config.h"
+#include "options.h"
 
 #include <stdio.h>
 #ifdef HAVE_MALLOC_H
@@ -335,8 +336,9 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
     unsigned int t = GetTimer();
     unsigned int t2;
     double tt;
+    struct MPOpts *opts = sh_video->opts;
 
-    if (correct_pts && pts != MP_NOPTS_VALUE) {
+    if (opts->correct_pts && pts != MP_NOPTS_VALUE) {
 	int delay = get_current_video_decoder_lag(sh_video);
 	if (delay >= 0) {
 	    if (delay > sh_video->num_buffered_pts)
@@ -393,7 +395,7 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
     else if (field_dominance == 1)
 	mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
-    if (correct_pts) {
+    if (opts->correct_pts) {
 	if (sh_video->num_buffered_pts) {
 	    sh_video->num_buffered_pts--;
 	    sh_video->pts = sh_video->buffered_pts[sh_video->num_buffered_pts];

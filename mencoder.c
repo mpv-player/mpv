@@ -91,6 +91,7 @@
 
 #include "libmpcodecs/ae.h"
 #include "options.h"
+#include "defaultopts.h"
 
 MPOpts opts;
 
@@ -419,11 +420,10 @@ ao_data_t ao_data = {0,0,0,0,OUTBURST,-1,0};
 audio_encoding_params_t aparams;
 audio_encoder_t *aencoder = NULL;
 
-user_correct_pts = 0;
-
   mp_msg_init();
 
   // Create the config context and register the options
+  set_default_mencoder_options(&opts);
   mconfig = m_config_new(&opts);
   m_config_register_options(mconfig,mencoder_opts);
 

@@ -22,6 +22,7 @@
 #include <limits.h>
 
 #include "config.h"
+#include "options.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -405,6 +406,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
 }
 
 static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
+    struct MPOpts *opts = demuxer->opts;
     AVFormatContext *avfc;
     AVFormatParameters ap;
     const AVOption *opt;
@@ -420,7 +422,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     if (opt_cryptokey)
         parse_cryptokey(avfc, opt_cryptokey);
-    if (user_correct_pts != 0)
+    if (opts->user_correct_pts != 0)
         avfc->flags |= AVFMT_FLAG_GENPTS;
     if (index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;

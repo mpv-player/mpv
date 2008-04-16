@@ -24,6 +24,7 @@
 
 #include "config.h"
 #include "cpudetect.h"
+#include "options.h"
 
 #include "mp_msg.h"
 
@@ -391,7 +392,6 @@ static int config(struct vf_instance_s* vf,
 }
 
 static int continue_buffered_image(struct vf_instance_s *vf);
-extern int correct_pts;
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     int tff;
@@ -422,6 +422,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
 static int continue_buffered_image(struct vf_instance_s *vf)
 {
+    struct MPOpts *opts = vf->opts;
     mp_image_t *mpi = vf->priv->buffered_mpi;
     int tff = vf->priv->buffered_tff;
     double pts = vf->priv->buffered_pts;
@@ -438,10 +439,10 @@ static int continue_buffered_image(struct vf_instance_s *vf)
             mpi->width,mpi->height);
         vf_clone_mpi_attributes(dmpi, mpi);
         filter(vf->priv, dmpi->planes, dmpi->stride, mpi->w, mpi->h, i ^ tff ^ 1, tff);
-        if (correct_pts && i < (vf->priv->mode & 1))
+        if (opts->correct_pts && i < (vf->priv->mode & 1))
             vf_queue_frame(vf, continue_buffered_image);
         ret |= vf_next_put_image(vf, dmpi, pts /*FIXME*/);
-        if (correct_pts)
+        if (opts->correct_pts)
             break;
         if(i<(vf->priv->mode&1))
             vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
