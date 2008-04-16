@@ -211,9 +211,9 @@ typedef struct demuxer_st {
   demux_stream_t *sub;   // dvd subtitle buffer/demuxer
 
   // stream headers:
-  void* a_streams[MAX_A_STREAMS]; // audio streams (sh_audio_t)
-  void* v_streams[MAX_V_STREAMS]; // video sterams (sh_video_t)
-  void *s_streams[MAX_S_STREAMS];   // dvd subtitles (flag)
+  struct sh_audio *a_streams[MAX_A_STREAMS];
+  struct sh_video *v_streams[MAX_V_STREAMS];
+  struct sh_sub   *s_streams[MAX_S_STREAMS];
 
   demux_chapter_t* chapters;
   int num_chapters;

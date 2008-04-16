@@ -7,7 +7,7 @@
 
 // Stream headers:
 
-typedef struct {
+typedef struct sh_audio {
   int aid;
   demux_stream_t *ds;
   struct codecs_st *codec;
@@ -54,7 +54,7 @@ typedef struct {
   int default_track;
 } sh_audio_t;
 
-typedef struct {
+typedef struct sh_video {
   int vid;
   demux_stream_t *ds;
   struct codecs_st *codec;
@@ -94,7 +94,7 @@ typedef struct {
   void* context;   // codec-specific stuff (usually HANDLE or struct pointer)
 } sh_video_t;
 
-typedef struct {
+typedef struct sh_sub {
   int sid;
   char type;                    // t = text, v = VobSub, a = SSA/ASS
   int has_palette;              // If we have a valid palette
