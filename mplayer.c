@@ -3231,7 +3231,7 @@ if(stream_cache_size>0){
 //============ Open DEMUXERS --- DETECT file type =======================
 current_module="demux_open";
 
-mpctx->demuxer=demux_open(mpctx->stream,mpctx->file_format,audio_id,video_id,dvdsub_id,filename);
+mpctx->demuxer=demux_open(opts, mpctx->stream,mpctx->file_format,audio_id,video_id,dvdsub_id,filename);
 
 // HACK to get MOV Reference Files working
 

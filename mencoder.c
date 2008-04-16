@@ -519,7 +519,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 if (frameno_filename) {
   stream2=open_stream(frameno_filename,0,&i);
   if(stream2){
-    demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
+    demuxer2=demux_open(&opts, stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
     if(demuxer2) mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_UsingPass3ControlFile, frameno_filename);
     else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   }
@@ -605,7 +605,7 @@ if(stream->type==STREAMTYPE_DVDNAV){
   if(demuxer2) audio_id=-2; /* do NOT read audio packets... */
 
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
-  demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id,filename);
+  demuxer=demux_open(&opts, stream,file_format,audio_id,video_id,dvdsub_id,filename);
   if(!demuxer){
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_FormatNotRecognized);
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_CannotOpenDemuxer);

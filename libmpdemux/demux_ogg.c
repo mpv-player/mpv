@@ -1226,6 +1226,7 @@ static int demux_ogg_fill_buffer(demuxer_t *d, demux_stream_t *dsds) {
 /// For avi with Ogg audio stream we have to create an ogg demuxer for this
 // stream, then we join the avi and ogg demuxer with a demuxers demuxer
 demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
+  struct MPOpts *opts = demuxer->opts;
   demuxer_t  *od;
   ogg_demuxer_t *ogg_d;
   stream_t* s;
@@ -1287,7 +1288,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
 
   // Create the ds_stream and the ogg demuxer
   s = new_ds_stream(demuxer->audio);
-  od = new_demuxer(s,DEMUXER_TYPE_OGG,0,-2,-2,NULL);
+  od = new_demuxer(opts, s,DEMUXER_TYPE_OGG,0,-2,-2,NULL);
 
   /// Add the header packets in the ogg demuxer audio stream
   for (i = 0; i < 3; i++) {

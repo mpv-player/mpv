@@ -10,6 +10,8 @@
 #include "libass/ass_types.h"
 #endif
 
+struct MPOpts;
+
 #define MAX_PACKS 4096
 #ifdef HAVE_TV_BSDBT848
 #define MAX_PACK_BYTES 0x2000000
@@ -223,6 +225,7 @@ typedef struct demuxer_st {
 
   void* priv;  // fileformat-dependent data
   char** info;
+  struct MPOpts *opts;
 } demuxer_t;
 
 typedef struct {
@@ -305,7 +308,7 @@ static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
 }
 
 demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id);
-demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char *filename);
+demuxer_t* new_demuxer(struct MPOpts *opts, stream_t *stream,int type,int a_id,int v_id,int s_id,char *filename);
 void free_demuxer_stream(demux_stream_t *ds);
 void free_demuxer(demuxer_t *demuxer);
 
@@ -368,7 +371,7 @@ static inline int avi_stream_id(unsigned int id){
   return a*10+b;
 }
 
-demuxer_t* demux_open(stream_t *stream,int file_format,int aid,int vid,int sid,char* filename);
+demuxer_t* demux_open(struct MPOpts *opts, stream_t *stream,int file_format,int aid,int vid,int sid,char* filename);
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags);
 demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd);
 

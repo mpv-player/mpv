@@ -822,6 +822,7 @@ static int avi_check_file(demuxer_t *demuxer)
 
 static demuxer_t* demux_open_hack_avi(demuxer_t *demuxer)
 {
+   struct MPOpts *opts = demuxer->opts;
    sh_audio_t* sh_a;
 
    demuxer = demux_open_avi(demuxer);
@@ -836,7 +837,7 @@ static demuxer_t* demux_open_hack_avi(demuxer_t *demuxer)
       stream_t* s;
       demuxer_t  *od;
       s = new_ds_stream(demuxer->audio);
-      od = new_demuxer(s,DEMUXER_TYPE_OGG,-1,-2,-2,NULL);
+      od = new_demuxer(opts, s,DEMUXER_TYPE_OGG,-1,-2,-2,NULL);
       if(!demux_ogg_open(od)) {
         mp_msg( MSGT_DEMUXER,MSGL_ERR,MSGTR_ErrorOpeningOGGDemuxer);
         free_stream(s);

@@ -4,10 +4,12 @@
 #include "demuxer.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
+struct MPOpts;
 
 // Stream headers:
 
 typedef struct sh_audio {
+  struct MPOpts *opts;
   int aid;
   demux_stream_t *ds;
   struct codecs_st *codec;
@@ -55,6 +57,7 @@ typedef struct sh_audio {
 } sh_audio_t;
 
 typedef struct sh_video {
+  struct MPOpts *opts;
   int vid;
   demux_stream_t *ds;
   struct codecs_st *codec;
@@ -95,6 +98,7 @@ typedef struct sh_video {
 } sh_video_t;
 
 typedef struct sh_sub {
+  struct MPOpts *opts;
   int sid;
   char type;                    // t = text, v = VobSub, a = SSA/ASS
   int has_palette;              // If we have a valid palette

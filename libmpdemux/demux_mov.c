@@ -1908,6 +1908,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
 }
 
 static demuxer_t* mov_read_header(demuxer_t* demuxer){
+    struct MPOpts *opts = demuxer->opts;
     mov_priv_t* priv=demuxer->priv;
     int t_no;
     int best_a_id=-1, best_a_len=0;
@@ -1983,7 +1984,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
     
                 demuxer->video->id = t_no;
                 s = new_ds_stream(demuxer->video);
-                od = demux_open(s, DEMUXER_TYPE_MPEG_PS, -1, -1, -1, NULL);
+                od = demux_open(opts, s, DEMUXER_TYPE_MPEG_PS, -1, -1, -1, NULL);
                 if(od) return new_demuxers_demuxer(od, od, od);
                 demuxer->video->id = -2;	//new linked demuxer couldn't be allocated
                 break;
