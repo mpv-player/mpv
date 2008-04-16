@@ -436,8 +436,7 @@ vf_instance_t* vf_open_plugin(struct MPOpts *opts, const vf_info_t* const* filte
 	}
 	if(!strcmp(filter_list[i]->name,name)) break;
     }
-    vf=malloc(sizeof(vf_instance_t));
-    memset(vf,0,sizeof(vf_instance_t));
+    vf = calloc(1, sizeof *vf);
     vf->opts = opts;
     vf->info=filter_list[i];
     vf->next=next;
