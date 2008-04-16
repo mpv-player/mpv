@@ -135,6 +135,7 @@ int vo_gamma_hue = 1000;
 extern vd_functions_t* mpvdec; // FIXME!
 
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
+    struct MPOpts *opts = sh->opts;
     int i,j;
     unsigned int out_fmt=0;
     int screen_size_x=0;//SCREEN_SIZE_X;
@@ -157,7 +158,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     
     if(get_video_quality_max(sh)<=0 && divx_quality){
 	// user wants postprocess but no pp filter yet:
-	sh->vfilter=vf=vf_open_filter(vf,"pp",NULL);
+	sh->vfilter=vf=vf_open_filter(opts, vf,"pp",NULL);
     }
 
     // check if libvo and codec has common outfmt (no conversion):
@@ -197,13 +198,13 @@ csp_again:
 	// TODO: no match - we should use conversion...
 	if(strcmp(vf->info->name,"scale") && palette!=-1){
 	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_CouldNotFindColorspace);
-	    sc=vf=vf_open_filter(vf,"scale",NULL);
+	    sc=vf=vf_open_filter(opts, vf,"scale",NULL);
 	    goto csp_again;
 	} else
 	if(palette==1){
 	    mp_msg(MSGT_DECVIDEO,MSGL_V,"vd: Trying -vf palette...\n");
 	    palette=-1;
-	    vf=vf_open_filter(vf,"palette",NULL);
+	    vf=vf_open_filter(opts, vf,"palette",NULL);
 	    goto csp_again;
 	} else 
 	{ // sws failed, if the last filter (vf_vo) support MPEGPES try to append vf_lavc
@@ -218,7 +219,7 @@ csp_again:
 	     for(vo = vf ; vo->next ; vo = vo->next)
 	       vp = vo;
 	     if(vo->query_format(vo,IMGFMT_MPEGPES) && (!vp || (vp && strcmp(vp->info->name,"lavc")))) {
-	       ve = vf_open_filter(vo,"lavc",NULL);
+	       ve = vf_open_filter(opts, vo,"lavc",NULL);
 	       if(vp) vp->next = ve;
 		 else vf = ve;
 	       goto csp_again;

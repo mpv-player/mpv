@@ -3,6 +3,7 @@
 
 #include "mp_image.h"
 
+struct MPOpts;
 struct vf_instance_s;
 struct vf_priv_s;
 
@@ -59,6 +60,7 @@ typedef struct vf_instance_s {
     struct vf_instance_s* next;
     mp_image_t *dmpi;
     struct vf_priv_s* priv;
+    struct MPOpts *opts;
 } vf_instance_t;
 
 // control codes:
@@ -97,10 +99,10 @@ typedef struct vf_seteq_s
 void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h);
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h);
 
-vf_instance_t* vf_open_plugin(const vf_info_t* const* filter_list, vf_instance_t* next, const char *name, char **args);
-vf_instance_t* vf_open_filter(vf_instance_t* next, const char *name, char **args);
+vf_instance_t* vf_open_plugin(struct MPOpts *opts, const vf_info_t* const* filter_list, vf_instance_t* next, const char *name, char **args);
+vf_instance_t* vf_open_filter(struct MPOpts *opts, vf_instance_t* next, const char *name, char **args);
 vf_instance_t* vf_add_before_vo(vf_instance_t **vf, char *name, char **args);
-vf_instance_t* vf_open_encoder(vf_instance_t* next, const char *name, char *args);
+vf_instance_t* vf_open_encoder(struct MPOpts *opts, vf_instance_t* next, const char *name, char *args);
 
 unsigned int vf_match_csp(vf_instance_t** vfp,const unsigned int* list,unsigned int preferred);
 void vf_clone_mpi_attributes(mp_image_t* dst, mp_image_t* src);

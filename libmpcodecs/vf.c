@@ -426,7 +426,7 @@ static int vf_default_query_format(struct vf_instance_s* vf, unsigned int fmt){
   return vf_next_query_format(vf,fmt);
 }
 
-vf_instance_t* vf_open_plugin(const vf_info_t* const* filter_list, vf_instance_t* next, const char *name, char **args){
+vf_instance_t* vf_open_plugin(struct MPOpts *opts, const vf_info_t* const* filter_list, vf_instance_t* next, const char *name, char **args){
     vf_instance_t* vf;
     int i;
     for(i=0;;i++){
@@ -438,6 +438,7 @@ vf_instance_t* vf_open_plugin(const vf_info_t* const* filter_list, vf_instance_t
     }
     vf=malloc(sizeof(vf_instance_t));
     memset(vf,0,sizeof(vf_instance_t));
+    vf->opts = opts;
     vf->info=filter_list[i];
     vf->next=next;
     vf->config=vf_next_config;
@@ -465,7 +466,7 @@ vf_instance_t* vf_open_plugin(const vf_info_t* const* filter_list, vf_instance_t
     return NULL;
 }
 
-vf_instance_t* vf_open_filter(vf_instance_t* next, const char *name, char **args){
+vf_instance_t* vf_open_filter(struct MPOpts *opts, vf_instance_t* next, const char *name, char **args){
   if(args && strcmp(args[0],"_oldargs_")) {
     int i,l = 0;
     for(i = 0 ; args && args[2*i] ; i++)
@@ -487,7 +488,7 @@ vf_instance_t* vf_open_filter(vf_instance_t* next, const char *name, char **args
       mp_msg(MSGT_VFILTER,MSGL_INFO,MSGTR_OpeningVideoFilter
 	     "[%s]\n", name);
   }
-  return vf_open_plugin(filter_list,next,name,args);
+  return vf_open_plugin(opts, filter_list,next,name,args);
 }
 
 /**
@@ -498,11 +499,12 @@ vf_instance_t* vf_open_filter(vf_instance_t* next, const char *name, char **args
  * \return pointer to the filter instance that was created.
  */
 vf_instance_t* vf_add_before_vo(vf_instance_t **vf, char *name, char **args) {
+  struct MPOpts *opts = (*vf)->opts;
   vf_instance_t *vo, *prev = NULL, *new;
   // Find the last filter (should be vf_vo)
   for (vo = *vf; vo->next; vo = vo->next)
     prev = vo;
-  new = vf_open_filter(vo, name, args);
+  new = vf_open_filter(opts, vo, name, args);
   if (prev)
     prev->next = new;
   else
@@ -514,6 +516,7 @@ vf_instance_t* vf_add_before_vo(vf_instance_t **vf, char *name, char **args) {
 
 unsigned int vf_match_csp(vf_instance_t** vfp,const unsigned int* list,unsigned int preferred){
     vf_instance_t* vf=*vfp;
+    struct MPOpts *opts = vf->opts;
     const unsigned int* p;
     unsigned int best=0;
     int ret;
@@ -527,7 +530,7 @@ unsigned int vf_match_csp(vf_instance_t** vfp,const unsigned int* list,unsigned 
     if(best) return best; // bingo, they have common csp!
     // ok, then try with scale:
     if(vf->info == &vf_info_scale) return 0; // avoid infinite recursion!
-    vf=vf_open_filter(vf,"scale",NULL);
+    vf=vf_open_filter(opts, vf,"scale",NULL);
     if(!vf) return 0; // failed to init "scale"
     // try the preferred csp first:
     if(preferred && vf->query_format(vf,preferred)) best=preferred; else
@@ -622,6 +625,7 @@ int vf_config_wrapper(struct vf_instance_s* vf,
 int vf_next_config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){
+    struct MPOpts *opts = vf->opts;
     int miss;
     int flags=vf->next->query_format(vf->next,outfmt);
     if(!flags){
@@ -629,7 +633,7 @@ int vf_next_config(struct vf_instance_s* vf,
 	// let's insert the 'scale' filter, it does the job for us:
 	vf_instance_t* vf2;
 	if(vf->next->info==&vf_info_scale) return 0; // scale->scale
-	vf2=vf_open_filter(vf->next,"scale",NULL);
+	vf2=vf_open_filter(opts, vf->next,"scale",NULL);
 	if(!vf2) return 0; // shouldn't happen!
 	vf->next=vf2;
 	flags=vf->next->query_format(vf->next,outfmt);
@@ -643,7 +647,7 @@ int vf_next_config(struct vf_instance_s* vf,
     if(miss&VFCAP_ACCEPT_STRIDE){
 	// vf requires stride support but vf->next doesn't support it!
 	// let's insert the 'expand' filter, it does the job for us:
-	vf_instance_t* vf2=vf_open_filter(vf->next,"expand",NULL);
+	vf_instance_t* vf2=vf_open_filter(opts, vf->next,"expand",NULL);
 	if(!vf2) return 0; // shouldn't happen!
 	vf->next=vf2;
     }
@@ -690,6 +694,7 @@ void vf_next_draw_slice(struct vf_instance_s* vf,unsigned char** src, int * stri
 //============================================================================
 
 vf_instance_t* append_filters(vf_instance_t* last){
+  struct MPOpts *opts = last->opts;
   vf_instance_t* vf;
   int i; 
 
@@ -699,7 +704,7 @@ vf_instance_t* append_filters(vf_instance_t* last){
       /* NOP */;
     for(i-- ; i >= 0 ; i--) {
       //printf("Open filter %s\n",vf_settings[i].name);
-      vf = vf_open_filter(last,vf_settings[i].name,vf_settings[i].attribs);
+      vf = vf_open_filter(opts, last,vf_settings[i].name,vf_settings[i].attribs);
       if(vf) last=vf;
     }
   }

@@ -871,21 +871,21 @@ default: {
   if (!ve) {
     switch(mux_v->codec){
     case VCODEC_LIBAVCODEC:
-        sh_video->vfilter=vf_open_encoder(NULL,"lavc",(char *)mux_v); break;
+        sh_video->vfilter=vf_open_encoder(&opts, NULL,"lavc",(char *)mux_v); break;
     case VCODEC_RAW:
-        sh_video->vfilter=vf_open_encoder(NULL,"raw",(char *)mux_v); break;
+        sh_video->vfilter=vf_open_encoder(&opts, NULL,"raw",(char *)mux_v); break;
     case VCODEC_VFW:
-        sh_video->vfilter=vf_open_encoder(NULL,"vfw",(char *)mux_v); break;
+        sh_video->vfilter=vf_open_encoder(&opts, NULL,"vfw",(char *)mux_v); break;
     case VCODEC_LIBDV:
-        sh_video->vfilter=vf_open_encoder(NULL,"libdv",(char *)mux_v); break;
+        sh_video->vfilter=vf_open_encoder(&opts, NULL,"libdv",(char *)mux_v); break;
     case VCODEC_XVID:
-        sh_video->vfilter=vf_open_encoder(NULL,"xvid",(char *)mux_v); break;
+        sh_video->vfilter=vf_open_encoder(&opts, NULL,"xvid",(char *)mux_v); break;
     case VCODEC_QTVIDEO:
-        sh_video->vfilter=vf_open_encoder(NULL,"qtvideo",(char *)mux_v); break;
+        sh_video->vfilter=vf_open_encoder(&opts, NULL,"qtvideo",(char *)mux_v); break;
     case VCODEC_NUV:        
-        sh_video->vfilter=vf_open_encoder(NULL,"nuv",(char *)mux_v); break;
+        sh_video->vfilter=vf_open_encoder(&opts, NULL,"nuv",(char *)mux_v); break;
     case VCODEC_X264:
-        sh_video->vfilter=vf_open_encoder(NULL,"x264",(char *)mux_v); break;
+        sh_video->vfilter=vf_open_encoder(&opts, NULL,"x264",(char *)mux_v); break;
     }
     if(!mux_v->bih || !sh_video->vfilter){
         mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_EncoderOpenFailed);
@@ -896,7 +896,7 @@ default: {
     // append 'expand' filter, it fixes stride problems and renders osd:
     if (auto_expand) {
       char* vf_args[] = { "osd", "1", NULL };
-      sh_video->vfilter=vf_open_filter(sh_video->vfilter,"expand",vf_args);
+      sh_video->vfilter=vf_open_filter(&opts, sh_video->vfilter,"expand",vf_args);
     }
     sh_video->vfilter=append_filters(sh_video->vfilter);
 

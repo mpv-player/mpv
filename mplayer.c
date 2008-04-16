@@ -2155,12 +2155,12 @@ int reinit_video_chain(void) {
   current_module="init_video_filters";
   {
     char* vf_arg[] = { "_oldargs_", (char*)mpctx->video_out , NULL };
-    sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",vf_arg);
+    sh_video->vfilter=(void*)vf_open_filter(opts, NULL,"vo",vf_arg);
   }
 #ifdef HAVE_MENU
   if(use_menu) {
     char* vf_arg[] = { "_oldargs_", menu_root, NULL };
-    vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",vf_arg);
+    vf_menu = vf_open_plugin(opts,libmenu_vfs,sh_video->vfilter,"menu",vf_arg);
     if(!vf_menu) {
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantOpenLibmenuFilterWithThisRootMenu,menu_root);
       use_menu = 0;
@@ -2184,7 +2184,7 @@ int reinit_video_chain(void) {
       extern vf_info_t vf_info_ass;
       const vf_info_t* libass_vfs[] = {&vf_info_ass, NULL};
       char* vf_arg[] = {"auto", "1", NULL};
-      vf_instance_t* vf_ass = vf_open_plugin(libass_vfs,sh_video->vfilter,"ass",vf_arg);
+      vf_instance_t* vf_ass = vf_open_plugin(opts, libass_vfs,sh_video->vfilter,"ass",vf_arg);
       if (vf_ass)
         sh_video->vfilter=(void*)vf_ass;
       else
