@@ -1,4 +1,4 @@
-.\" synced with r26297
+.\" synced with r26460
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -675,6 +675,10 @@ La variabile di ambiente MPLAYER_CHARSET può aiutarti per evitare sporcizia
 nelle prime linee stampate.
 .
 .TP
+.B \-msgcolor
+Abilita l'emissione di messaggi colorati su terminali che usano colori ANSI.
+.
+.TP
 .B \-msglevel <all=<livello>:<modulo>=<livello>:...>
 Controlla direttamente la verbosità per ogni modulo.
 Il modulo 'all' cambia la verbosità di tutti i moduli non esplicitamente
@@ -712,6 +716,32 @@ livello di debug 2
 livello di debug 3
 .IPs " 9"
 livello di debug 4
+.RE
+.PD 1
+.
+.TP
+.B \-msgmodule
+Antepone il nome del modulo ad ogni messaggio su console.
+.
+.TP
+.B \-noconfig <opzioni>
+Non interpreta i file di configurazione selezionati.
+.br
+.I NOTA:
+Se si specificano le opzioni \-include o \-use\-filedir\-conf sulla riga
+comando, esse vengono rispettate.
+.sp 1
+Le opzioni disponibili sono:
+.PD 0
+.RSs
+.IPs "all\ \ "
+tutti i file di configurazione
+.IPs "gui (solo GUI)"
+file di configurazione della GUI
+.IPs system
+file di configurazione di sistema
+.IPs "user\ "
+file di configurazione dell'utente
 .RE
 .PD 1
 .
@@ -3350,6 +3380,8 @@ Funzionerà solitamente solo con "\-fstype \-fullscreen" o "\-fstype none".
 .TP
 .B \-zrbw (solo \-vo zr)
 Visualizza in bianco e nero.
+Per ottenere prestazioni ottimali, questa opzione può essere combinata
+con `\-lavdopts gray'.
 .
 .TP
 .B \-zrcrop <[larghezza]x[altezza]+[scostam x]+[scostam y]> (solo \-vo zr)
@@ -4485,7 +4517,7 @@ Opzioni multiple vanno separate con i due punti.
 .I ESEMPIO:
 .PD 0
 .RSs
-\-lavdopts skiploopfilter=all:skipframe=nonref
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -4589,6 +4621,8 @@ e potrebbero potenzialmente causare problemi, come una dequantizzazione
 più semplice, una compensazione di movimento più semplice, presumere l'utilizzo
 della matrice di quantizzazione di default, presumere YUV 4:2:0 ed evitare
 qualche controllo per riconoscere flussi danneggiati.
+.IPs "gray\ "
+decodifica a scala di grigi (un poco più veloce che a colori).
 .IPs "idct=<0\-99> (vedi anche \-lavcopts)"
 Per la miglior qualità di decodifica utilizza lo stesso algoritmo di IDCT sia per la
 decodifica che per la codifica.
@@ -8646,6 +8680,10 @@ buona scelta
 .TP
 .B "ss\ \ \ \ \ "
 modalità 'slice structured' per H.263+
+.
+.TP
+.B "gray\ \ \ "
+codifica solo a toni di grigio (più veloce)
 .
 .TP
 .B vfdct=<0\-10>
