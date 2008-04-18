@@ -33,4 +33,4 @@ clean:
 
 distclean: clean
 
-.PHONY: all install dep depend clean distclean
+.PHONY: all install dep depend *clean
