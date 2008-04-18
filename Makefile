@@ -234,9 +234,10 @@ DIRS =  gui \
 
 all:	$(ALL_PRG)
 
-.depend: help_mp.h version.h codecs.conf.h
-dep depend:
-	for part in $(PARTS); do $(MAKE) -C $$part depend; done
+DEPS = $(SRCS_COMMON:.c=.d) $(SRCS_MPLAYER:.c=.d) $(SRCS_MENCODER:.c=.d)
+$(DEPS): help_mp.h version.h codecs.conf.h
+dep depend: $(DEPS)
+	for part in $(PARTS); do $(MAKE) -C $$part .depend; done
 
 include mpcommon.mak
 
@@ -395,6 +396,7 @@ distclean:: doxygen_clean
 	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
 	$(MAKE) -C TOOLS distclean
 	-rm -f configure.log config.mak config.h
+	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 
 strip:
 	strip -s $(ALL_PRG)

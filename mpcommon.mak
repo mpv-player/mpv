@@ -25,9 +25,12 @@ clean::
 	rm -f *.o *.a *.ho *~
 
 distclean:: clean
-	rm -f .depend test test2
+	rm -f *.d .depend test test2
 
 .depend: $(SRCS_COMMON) $(SRCS_MPLAYER) $(SRCS_MENCODER)
+	$(MPDEPEND_CMD) > $@
+
+%.d: %.c
 	$(MPDEPEND_CMD) > $@
 
 %.ho: %.h
@@ -36,6 +39,10 @@ distclean:: clean
 ALLHEADERS = $(wildcard *.h)
 checkheaders: $(ALLHEADERS:.h=.ho)
 
--include .depend
+# Hack to keep .depend from being generated at the top level unnecessarily.
+ifndef DEPS
+DEPS = .depend
+endif
+-include $(DEPS)
 
 .PHONY: libs *clean dep depend
