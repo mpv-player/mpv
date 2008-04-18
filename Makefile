@@ -234,7 +234,8 @@ DIRS =  gui \
 
 all:	$(ALL_PRG)
 
-dep depend:: help_mp.h version.h codecs.conf.h
+.depend: help_mp.h version.h codecs.conf.h
+dep depend:
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
 include mpcommon.mak
@@ -437,54 +438,5 @@ ifneq ($(HELP_FILE),help/help_mp-en.h)
 	@echo '// untranslated messages from the English master file:' >> help_mp.h
 	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
 endif
-
-# explicit dependencies to force version.h to be built even if .depend is missing
-mplayer.o mencoder.o vobsub.o: version.h
-
-# temporary measure to make sure help_mp.h is built. we desperately need correct deps!
-$(MPLAYER_DEPS) $(MENCODER_DEPS): help_mp.h
-
-#
-# the following lines provide _partial_ dependency information
-# for the 'library' directories under main dir, in order to cause
-# the build process to recursively descend into them if something
-# has changed. ideally this will be replaced with a single
-# nonrecursive makefile for the whole project.
-#
-# Now all directories are recursed by default because these rules do not
-# consider dependencies on files in other directories, while the recursively
-# invoked Makefiles do. Conditional recursion only to the directories with
-# changed files can be enabled by creating a file named ".norecurse" and
-# optionally giving it a timestamp in the past. Directories whose .a files
-# are newer than the timestamp and newer than other files in the directory
-# will not be recursed.
-.norecurse:
-
-libvo/libvo.a: .norecurse $(wildcard libvo/*.[ch])
-libvo/libosd.a: .norecurse $(wildcard libvo/*.[ch])
-libao2/libao2.a: .norecurse $(wildcard libao2/*.[ch])
-
-dvdread/libdvdread.a: .norecurse $(wildcard dvdread/*.[ch])
-libdvdcss/libdvdcss.a: .norecurse $(wildcard libdvdcss/*.[ch])
-
-libmpdemux/libmpdemux.a: .norecurse $(wildcard libmpdemux/*.[ch])
-libmpdemux/libmpmux.a: .norecurse $(wildcard libmpdemux/*.[ch])
-stream/stream.a: .norecurse $(wildcard stream/*.[ch] stream/*/*.[ch])
-libmpcodecs/libmpcodecs.a: .norecurse $(wildcard libmpcodecs/*.[ch]) $(wildcard libmpcodecs/native/*.[ch])
-libmpcodecs/libmpencoders.a: .norecurse $(wildcard libmpcodecs/*.[ch])
-
-libavutil/libavutil.a: .norecurse $(wildcard libavutil/*.[ch])
-libavcodec/libavcodec.a: .norecurse $(wildcard libavcodec/*.[ch] libavcodec/*/*.[chS])
-libavformat/libavformat.a: .norecurse $(wildcard libavformat/*.[ch])
-libpostproc/libpostproc.a: .norecurse $(wildcard libpostproc/*.[ch])
-libswscale/libswscale.a: .norecurse $(wildcard libswscale/*.[ch])
-
-libmpeg2/libmpeg2.a: .norecurse $(wildcard libmpeg2/*.[ch])
-liba52/liba52.a: .norecurse $(wildcard liba52/*.[ch])
-mp3lib/libmp3.a: .norecurse $(wildcard mp3lib/*.[ch])
-libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
-
-loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
-vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
 
 .PHONY: all install* uninstall strip doxygen
