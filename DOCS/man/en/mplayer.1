@@ -651,6 +651,10 @@ The MPLAYER_CHARSET environment variable can help you get rid of
 the first lines of garbled output.
 .
 .TP
+.B \-msgcolor
+Enable colorful console output on terminals that support ANSI color.
+.
+.TP
 .B \-msglevel <all=<level>:<module>=<level>:...>
 Control verbosity directly for each module.
 The 'all' module changes the verbosity of all the modules not
@@ -692,6 +696,10 @@ debug level 4
 .PD 1
 .
 .TP
+.B \-msgmodule
+Prepend module name in front of each console message.
+.
+.TP
 .B \-noconfig <options>
 Do not parse selected configuration files.
 .br
@@ -712,14 +720,6 @@ system configuration file
 user configuration file
 .RE
 .PD 1
-.
-.TP
-.B \-msgcolor
-Enable colorful console output on terminals that support ANSI color.
-.
-.TP
-.B \-msgmodule
-Prepend module name in front of each console message.
 .
 .TP
 .B "\-quiet\ "
