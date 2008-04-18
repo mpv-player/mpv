@@ -68,7 +68,6 @@ static int config(struct vf_instance_s* vf,
 	ass_configure(vf->priv->ass_priv, width, height, !!(vf->default_caps & VFCAP_EOSD_UNSCALED));
 #endif
 
-    ++vo_config_count;
     return 1;
 }
 
@@ -86,26 +85,26 @@ static int control(struct vf_instance_s* vf, int request, void* data)
         return vo_control(video_out, VOCTRL_SET_DEINTERLACE, data) == VO_TRUE;
     }
     case VFCTRL_DRAW_OSD:
-	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
+	if(!video_out->config_ok) return CONTROL_FALSE; // vo not configured?
 	vo_draw_osd(video_out);
 	return CONTROL_TRUE;
     case VFCTRL_FLIP_PAGE:
     {
-	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
+	if(!video_out->config_ok) return CONTROL_FALSE; // vo not configured?
 	vo_flip_page(video_out);
 	return CONTROL_TRUE;
     }
     case VFCTRL_SET_EQUALIZER:
     {
 	vf_equalizer_t *eq=data;
-	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
+	if(!video_out->config_ok) return CONTROL_FALSE; // vo not configured?
 	struct voctrl_set_equalizer_args param = {eq->item, eq->value};
 	return vo_control(video_out, VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
     }
     case VFCTRL_GET_EQUALIZER:
     {
 	vf_equalizer_t *eq=data;
-	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
+	if(!video_out->config_ok) return CONTROL_FALSE; // vo not configured?
 	struct voctrl_get_equalizer_args param = {eq->item, &eq->value};
 	return vo_control(video_out, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
     }
@@ -122,7 +121,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
     {
         mp_eosd_images_t images = {NULL, 2};
         double pts = vf->priv->pts;
-        if (!vo_config_count || !vf->priv->ass_priv) return CONTROL_FALSE;
+        if (!video_out->config_ok || !vf->priv->ass_priv) return CONTROL_FALSE;
         if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE)) {
             mp_eosd_res_t res;
             memset(&res, 0, sizeof(res));
@@ -162,13 +161,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static void get_image(struct vf_instance_s* vf,
         mp_image_t *mpi){
-    if(vo_directrendering && vo_config_count)
+    if(vo_directrendering && video_out->config_ok)
 	vo_control(video_out, VOCTRL_GET_IMAGE, mpi);
 }
 
 static int put_image(struct vf_instance_s* vf,
         mp_image_t *mpi, double pts){
-  if(!vo_config_count) return 0; // vo not configured?
+  if(!video_out->config_ok) return 0; // vo not configured?
   // record pts (potentially modified by filters) for main loop
   vf->priv->pts = pts;
   // first check, maybe the vo/vf plugin implements draw_image using mpi:
@@ -187,13 +186,13 @@ static int put_image(struct vf_instance_s* vf,
 
 static void start_slice(struct vf_instance_s* vf,
 		       mp_image_t *mpi) {
-    if(!vo_config_count) return; // vo not configured?
+    if(!video_out->config_ok) return; // vo not configured?
     vo_control(video_out, VOCTRL_START_SLICE,mpi);
 }
 
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
-    if(!vo_config_count) return; // vo not configured?
+    if(!video_out->config_ok) return; // vo not configured?
     vo_draw_slice(video_out, src,stride,w,h,x,y);
 }
 

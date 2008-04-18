@@ -207,6 +207,8 @@ struct vo_old_functions {
 };
 
 struct vo {
+    int config_ok;  // Last config call was successful?
+    int config_count;  // Total number of successful config calls
     const struct vo_driver *driver;
     void *priv;
     struct MPOpts *opts;
@@ -232,8 +234,6 @@ void vo_destroy(struct vo *vo);
 extern const struct vo_driver *video_out_drivers[];
 
 extern int vo_flags;
-
-extern int vo_config_count;
 
 extern int xinerama_screen;
 extern int xinerama_x;

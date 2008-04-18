@@ -9,5 +9,6 @@
 #define IS_OLD_VO 1
 
 #define vo_ontop global_vo->opts->vo_ontop
+#define vo_config_count global_vo->config_count
 
 #endif

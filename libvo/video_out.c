@@ -35,8 +35,6 @@ int vo_depthonscreen=0;
 int vo_screenwidth=0;
 int vo_screenheight=0;
 
-int vo_config_count=0;
-
 // requested resolution/bpp:  (-x -y -bpp options)
 int vo_dx=0;
 int vo_dy=0;
@@ -260,6 +258,8 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
 
 int vo_draw_frame(struct vo *vo, uint8_t *src[])
 {
+    if (!vo->config_ok)
+        return 0;
     return vo->driver->draw_frame(vo, src);
 }
 
@@ -270,16 +270,22 @@ int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int
 
 void vo_draw_osd(struct vo *vo)
 {
+    if (!vo->config_ok)
+        return;
     vo->driver->draw_osd(vo);
 }
 
 void vo_flip_page(struct vo *vo)
 {
+    if (!vo->config_ok)
+        return;
     vo->driver->flip_page(vo);
 }
 
 void vo_check_events(struct vo *vo)
 {
+    if (!vo->config_ok)
+        return;
     vo->driver->check_events(vo);
 }
 
@@ -371,8 +377,11 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
         vo_dheight = d_height;
     }
 
-    return vo->driver->config(vo, width, height, d_width, d_height, flags,
-				  title, format);
+    int ret = vo->driver->config(vo, width, height, d_width, d_height, flags,
+                                 title, format);
+    vo->config_ok = (ret == 0);
+    vo->config_count += vo->config_ok;
+    return ret;
 }
 
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA)

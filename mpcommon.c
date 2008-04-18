@@ -56,8 +56,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
     }
 
     // DVD sub:
-    if (vo_config_count && vo_spudec &&
-        (vobsub_id >= 0 || (dvdsub_id >= 0 && type == 'v'))) {
+    if (vo_spudec && (vobsub_id >= 0 || (dvdsub_id >= 0 && type == 'v'))) {
         int timestamp;
         current_module = "spudec";
         spudec_heartbeat(vo_spudec, 90000*sh_video->timer);

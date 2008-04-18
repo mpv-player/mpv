@@ -867,7 +867,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         case VOCTRL_GUISUPPORT:
             return VO_TRUE;
         case VOCTRL_GET_PANSCAN:
-            if (!vo_config_count || !vo_fs)
+            if (!vo->config_ok || !vo_fs)
                 return VO_FALSE;
             return VO_TRUE;
         case VOCTRL_FULLSCREEN:

@@ -975,7 +975,7 @@ static int mp_property_fullscreen(m_option_t * prop, int action, void *arg,
 	    guiGetEvent(guiIEvent, (char *) MP_CMD_GUI_FULLSCREEN);
 	else
 #endif
-	if (vo_config_count)
+	if (mpctx->video_out->config_ok)
 	    vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
 	return M_PROPERTY_OK;
     default:
@@ -1064,7 +1064,7 @@ static int mp_property_vo_flag(m_option_t * prop, int action, void *arg,
 	    return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-	if (vo_config_count)
+	if (mpctx->video_out->config_ok)
 	    vo_control(mpctx->video_out, vo_ctrl, 0);
 	return M_PROPERTY_OK;
     default:
@@ -2892,7 +2892,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_SCREENSHOT:
-	    if (vo_config_count) {
+	    if (mpctx->video_out && mpctx->video_out->config_ok) {
 		mp_msg(MSGT_CPLAYER, MSGL_INFO, "sending VFCTRL_SCREENSHOT!\n");
 		if (CONTROL_OK !=
 		    ((vf_instance_t *) sh_video->vfilter)->
@@ -3037,7 +3037,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_VO_FULLSCREEN:
-	    if (mpctx->video_out && vo_config_count)
+	    if (mpctx->video_out && mpctx->video_out->config_ok)
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_VO_FULLSCREEN=%d\n", vo_fs);
 	    break;
 

@@ -97,7 +97,6 @@ MPOpts opts;
 
 int vo_doublebuffering=0;
 int vo_directrendering=0;
-int vo_config_count=1;
 int forced_subs_only=0;
 
 //--------------------------

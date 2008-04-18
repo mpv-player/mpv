@@ -2142,7 +2142,6 @@ int reinit_video_chain(void) {
     current_module="preinit_libvo";
 
     //shouldn't we set dvideo->id=-2 when we fail?
-    vo_config_count=0;
     //if((mpctx->video_out->preinit(vo_subdevice))!=0){
     if(!(mpctx->video_out=init_best_video_out(opts, mpctx->x11_state))){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
@@ -2343,7 +2342,7 @@ static void pause_loop(void)
     if (use_gui)
 	guiGetEvent(guiCEvent, (char *)guiSetPause);
 #endif
-    if (mpctx->video_out && mpctx->sh_video && vo_config_count)
+    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
 	vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
 
     if (mpctx->audio_out && mpctx->sh_audio)
@@ -2356,7 +2355,7 @@ static void pause_loop(void)
 	  mp_cmd_free(cmd);
 	  continue;
 	}
-	if (mpctx->sh_video && mpctx->video_out && vo_config_count)
+	if (mpctx->sh_video && mpctx->video_out)
 	    vo_check_events(mpctx->video_out);
 #ifdef HAVE_NEW_GUI
 	if (use_gui) {
@@ -2379,7 +2378,7 @@ static void pause_loop(void)
     mpctx->osd_function=OSD_PLAY;
     if (mpctx->audio_out && mpctx->sh_audio)
         mpctx->audio_out->resume();	// resume audio
-    if (mpctx->video_out && mpctx->sh_video && vo_config_count)
+    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);	// resume video
     (void)GetRelativeTime();	// ignore time that passed during pause
 #ifdef HAVE_NEW_GUI
@@ -2497,7 +2496,7 @@ static int seek(MPContext *mpctx, double amount, int style)
     if (mpctx->sh_video) {
 	current_module = "seek_video_reset";
 	resync_video_stream(mpctx->sh_video);
-	if (vo_config_count)
+	if (mpctx->video_out->config_ok)
 	    vo_control(mpctx->video_out, VOCTRL_RESET, NULL);
 	mpctx->sh_video->num_buffered_pts = 0;
 	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
@@ -3010,7 +3009,7 @@ while (player_idle_mode && !filename) {
     play_tree_t * entry = NULL;
     mp_cmd_t * cmd;
     while (!(cmd = mp_input_get_cmd(0,1,0))) { // wait for command
-        if (mpctx->video_out && vo_config_count)
+        if (mpctx->video_out)
 	    vo_check_events(mpctx->video_out);
         usec_sleep(20000);
     }
@@ -3746,8 +3745,7 @@ if(!mpctx->sh_video) {
 #endif
 
     current_module="vo_check_events";
-    if (vo_config_count)
-	vo_check_events(mpctx->video_out);
+    vo_check_events(mpctx->video_out);
 
 #ifdef HAVE_X11
     if (stop_xscreensaver) {
@@ -3772,8 +3770,7 @@ if(!mpctx->sh_video) {
         if (!frame_time_remaining && blit_frame) {
 	   unsigned int t2=GetTimer();
 
-	   if(vo_config_count)
-	       vo_flip_page(mpctx->video_out);
+           vo_flip_page(mpctx->video_out);
 	   mpctx->num_buffered_frames--;
 
 	   vout_time_usage += (GetTimer() - t2) * 0.000001;
