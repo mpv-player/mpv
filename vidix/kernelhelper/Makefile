@@ -19,3 +19,5 @@ clean:
 	rm -f *.o *~ test
 
 distclean: clean
+
+.PHONY: all install dep depend *clean
