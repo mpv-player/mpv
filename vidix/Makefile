@@ -33,7 +33,7 @@ PCI_FILES = pci_dev_ids.c pci_ids.h pci_names.c pci_names.h pci_vendors.h
 
 libs: $(PCI_FILES)
 
-dep depend:: $(PCI_FILES)
+.depend: $(PCI_FILES)
 
 include ../mpcommon.mak
 
