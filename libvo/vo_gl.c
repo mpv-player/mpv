@@ -920,7 +920,7 @@ static int control(uint32_t request, void *data)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_ONTOP:
-    vo_ontop();
+    vo_gl_ontop();
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
     vo_fullscreen();
