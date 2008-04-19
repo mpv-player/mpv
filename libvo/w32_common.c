@@ -11,6 +11,8 @@
 #include "aspect.h"
 #include "w32_common.h"
 #include "mp_fifo.h"
+// To get "#define vo_ontop global_vo->opts->vo_ontop" etc
+#include "old_vo_defines.h"
 
 extern int enable_mouse_movements;
 

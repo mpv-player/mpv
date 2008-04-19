@@ -1076,8 +1076,8 @@ static int mp_property_vo_flag(m_option_t * prop, int action, void *arg,
 static int mp_property_ontop(m_option_t * prop, int action, void *arg,
 			     MPContext * mpctx)
 {
-    return mp_property_vo_flag(prop, action, arg, VOCTRL_ONTOP, &vo_ontop,
-			       mpctx);
+    return mp_property_vo_flag(prop, action, arg, VOCTRL_ONTOP,
+                               &mpctx->opts.vo_ontop, mpctx);
 }
 
 /// Display in the root window (RW)

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "video_out.h"
 
+extern struct vo *global_vo;
+
 int old_vo_preinit(struct vo *vo, const char *);
 int old_vo_config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height,

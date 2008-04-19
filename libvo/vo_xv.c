@@ -22,6 +22,7 @@ Buffer allocation:
 #include <stdint.h>
 
 #include "config.h"
+#include "options.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "video_out.h"
@@ -173,6 +174,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height, uint32_t flags,
                   char *title, uint32_t format)
 {
+    struct MPOpts *opts = vo->opts;
     XSizeHints hint;
     XVisualInfo vinfo;
     XGCValues xgcv;
@@ -296,7 +298,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             }
         } else
         {
-            vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
+            vo_x11_create_vo_window(vo, &vinfo, vo_dx, vo_dy, d_width, d_height,
                    flags, CopyFromParent, "xv", title);
             XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
         }
@@ -370,8 +372,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
            ctx->drwY, vo_dwidth, vo_dheight);
 
-    if (vo_ontop)
-        vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+    if (opts->vo_ontop)
+        vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
 
     return 0;
 }
@@ -866,7 +868,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
                 return VO_FALSE;
             return VO_TRUE;
         case VOCTRL_FULLSCREEN:
-            vo_x11_fullscreen();
+            vo_x11_fullscreen(vo);
             /* indended, fallthrough to update panscan on fullscreen/windowed switch */
         case VOCTRL_SET_PANSCAN:
             if ((vo_fs && (vo_panscan != vo_panscan_amount))
@@ -901,7 +903,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
                 return vo_xv_get_eq(xv_port, args->name, args->valueptr);
             }
         case VOCTRL_ONTOP:
-            vo_x11_ontop();
+            vo_x11_ontop(vo);
             return VO_TRUE;
         case VOCTRL_UPDATE_SCREENINFO:
             update_xinerama_info();

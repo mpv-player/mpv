@@ -22,8 +22,11 @@
 #include "video_out.h"
 #include "sub.h"
 
+struct vo *global_vo;
+
 int old_vo_preinit(struct vo *vo, const char *arg)
 {
+    global_vo = vo;
     return vo->driver->old_functions->preinit(arg);
 }
 

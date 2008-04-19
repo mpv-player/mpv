@@ -5,6 +5,7 @@
 #include <inttypes.h>
 
 #include "config.h"
+#include "options.h"
 #include "mp_msg.h"
 #include "mp_fifo.h"
 #include "x11_common.h"
@@ -1291,11 +1292,12 @@ Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
  * This also does the grunt-work like setting Window Manager hints etc.
  * If vo_window is already set it just moves and resizes it.
  */
-void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
+void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                              unsigned int width, unsigned int height, int flags,
                              Colormap col_map,
                              const char *classname, const char *title)
 {
+  struct MPOpts *opts = vo->opts;
   if (vo_window == None) {
     XSizeHints hint;
     XEvent xev;
@@ -1326,10 +1328,10 @@ void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
           StructureNotifyMask | KeyPressMask | PointerMotionMask |
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
   }
-  if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+  if (opts->vo_ontop) vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
   vo_x11_nofs_sizepos(vo_dx, vo_dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
-    vo_x11_fullscreen();
+    vo_x11_fullscreen(vo);
 }
 
 void vo_x11_clearwindow_part(Display * mDisplay, Window vo_window,
@@ -1505,8 +1507,9 @@ static int vo_x11_get_fs_type(int supported)
     return type;
 }
 
-void vo_x11_fullscreen(void)
+void vo_x11_fullscreen(struct vo *vo)
 {
+    struct MPOpts *opts = vo->opts;
     int x, y, w, h;
 
     if (WinID >= 0 || vo_fs_flip)
@@ -1570,8 +1573,8 @@ void vo_x11_fullscreen(void)
         XMoveResizeWindow(mDisplay, vo_window, x, y, w, h);
     }
     /* some WMs lose ontop after fullscreen */
-    if ((!(vo_fs)) & vo_ontop)
-        vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+    if ((!(vo_fs)) & opts->vo_ontop)
+        vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
 
     XMapRaised(mDisplay, vo_window);
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // some WMs change window pos on map
@@ -1580,11 +1583,12 @@ void vo_x11_fullscreen(void)
     XFlush(mDisplay);
 }
 
-void vo_x11_ontop(void)
+void vo_x11_ontop(struct vo *vo)
 {
-    vo_ontop = (!(vo_ontop));
+    struct MPOpts *opts = vo->opts;
+    opts->vo_ontop = !opts->vo_ontop;
 
-    vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+    vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
 }
 
 /*

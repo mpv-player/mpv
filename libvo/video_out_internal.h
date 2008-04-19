@@ -30,6 +30,7 @@
 #include "libmpcodecs/mp_image.h"
 #include "geometry.h"
 #include "old_vo_wrapper.h"
+#include "old_vo_defines.h"
 
 static int control(uint32_t request, void *data);
 static int config(uint32_t width, uint32_t height, uint32_t d_width,

@@ -4,6 +4,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+struct vo;
+
 #ifdef X11_FULLSCREEN
 
 #define vo_wm_LAYER 1
@@ -44,7 +46,7 @@ extern void vo_x11_nofs_sizepos(int x, int y, int width, int height);
 extern void vo_x11_sizehint( int x, int y, int width, int height, int max );
 extern int vo_x11_check_events(Display *mydisplay);
 extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
-extern void vo_x11_fullscreen( void );
+void vo_x11_fullscreen(struct vo *vo);
 extern void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer );
 extern void vo_x11_uninit(void);
 extern Colormap vo_x11_create_colormap(XVisualInfo *vinfo);
@@ -54,13 +56,13 @@ extern void fstype_help(void);
 extern Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot,
 	Visual *vis, int x, int y, unsigned int width, unsigned int height,
 	int depth, Colormap col_map);
-extern void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
-	unsigned int width, unsigned int height, int flags,
+void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
+        int x, int y, unsigned int width, unsigned int height, int flags,
 	Colormap col_map, const char *classname, const char *title);
 extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
 	int img_width, int img_height, int use_fs);
 extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
-extern void vo_x11_ontop(void);
+void vo_x11_ontop(struct vo *vo);
 extern void vo_x11_ewmh_fullscreen( int action );
 
 #endif
@@ -121,5 +123,13 @@ void vo_vm_close(Display*);
 void update_xinerama_info(void);
 
 int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
+
+// Old VOs use incompatible function calls, translate them to new
+// prototypes
+#ifdef IS_OLD_VO
+#define vo_x11_create_vo_window(...) vo_x11_create_vo_window(global_vo, __VA_ARGS__)
+#define vo_x11_fullscreen() vo_x11_fullscreen(global_vo)
+#define vo_x11_ontop() vo_x11_ontop(global_vo)
+#endif
 
 #endif /* MPLAYER_X11_COMMON_H */
