@@ -270,6 +270,9 @@ libfaad2/libfaad2.a:
 libmpcodecs/libmpcodecs.a:
 	$(MAKE) -C libmpcodecs
 
+libmpcodecs/libmpencoders.a:
+	$(MAKE) -C libmpcodecs libmpencoders.a
+
 libmpdemux/libmpdemux.a:
 	$(MAKE) -C libmpdemux libmpdemux.a
 
