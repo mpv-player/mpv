@@ -2143,7 +2143,7 @@ int reinit_video_chain(void) {
     //shouldn't we set dvideo->id=-2 when we fail?
     vo_config_count=0;
     //if((mpctx->video_out->preinit(vo_subdevice))!=0){
-    if(!(mpctx->video_out=init_best_video_out(opts->video_driver_list))){
+    if(!(mpctx->video_out=init_best_video_out(opts))){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
       goto err_out;
     }

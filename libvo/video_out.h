@@ -209,9 +209,10 @@ struct vo_old_functions {
 struct vo {
     const struct vo_driver *driver;
     void *priv;
+    struct MPOpts *opts;
 };
 
-struct vo *init_best_video_out(char **vo_list);
+struct vo *init_best_video_out(struct MPOpts *opts);
 int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      char *title, uint32_t format);

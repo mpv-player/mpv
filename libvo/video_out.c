@@ -10,6 +10,7 @@
 //#include <sys/mman.h>
 
 #include "config.h"
+#include "options.h"
 #include "video_out.h"
 #include "aspect.h"
 #include "geometry.h"
@@ -297,8 +298,9 @@ void list_video_out(void)
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
-struct vo *init_best_video_out(char **vo_list)
+struct vo *init_best_video_out(struct MPOpts *opts)
 {
+    char **vo_list = opts->video_driver_list;
     int i;
     struct vo *vo = malloc(sizeof *vo);
     // first try the preferred drivers, with their optional subdevice param:
@@ -319,7 +321,7 @@ struct vo *init_best_video_out(char **vo_list)
                 const vo_info_t *info = video_driver->info;
                 if (!strcmp(info->short_name, name)) {
                     // name matches, try it
-                    memset(vo, 0, sizeof *vo);
+                    *vo = (struct vo){.opts = opts};
                     vo->driver = video_driver;
                     if (!vo_preinit(vo, vo_subdevice)) {
                         free(name);
@@ -337,7 +339,7 @@ struct vo *init_best_video_out(char **vo_list)
     vo_subdevice = NULL;
     for (i = 0; video_out_drivers[i]; i++) {
         const struct vo_driver *video_driver = video_out_drivers[i];
-        memset(vo, 0, sizeof *vo);
+        *vo = (struct vo){.opts = opts};
         vo->driver = video_driver;
         if (!vo_preinit(vo, vo_subdevice))
             return vo; // success!
