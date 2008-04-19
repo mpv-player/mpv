@@ -243,70 +243,70 @@ include mpcommon.mak
 
 CFLAGS := $(subst -I..,-I.,$(CFLAGS))
 
-dvdread/libdvdread.a:
+dvdread/libdvdread.a: dvdread/*.[ch]
 	$(MAKE) -C dvdread
 
-liba52/liba52.a:
+liba52/liba52.a: liba52/*.[ch]
 	$(MAKE) -C liba52
 
-libao2/libao2.a:
+libao2/libao2.a: libao2/*.[ch]
 	$(MAKE) -C libao2
 
-libavcodec/libavcodec.a:
+libavcodec/libavcodec.a: libavcodec/*.[ch] libavcodec/*/*.[chS]
 	$(MAKE) -C libavcodec
 
-libavformat/libavformat.a:
+libavformat/libavformat.a: libavformat/*.[ch]
 	$(MAKE) -C libavformat
 
-libavutil/libavutil.a:
+libavutil/libavutil.a: libavutil/*.[ch]
 	$(MAKE) -C libavutil
 
-libdvdcss/libdvdcss.a:
+libdvdcss/libdvdcss.a: libdvdcss/*.[ch] libdvdcss/*/*.[ch]
 	$(MAKE) -C libdvdcss
 
-libfaad2/libfaad2.a:
+libfaad2/libfaad2.a: libfaad2/*.[ch] libfaad2/*/*.[ch]
 	$(MAKE) -C libfaad2
 
-libmpcodecs/libmpcodecs.a:
+libmpcodecs/libmpcodecs.a: libmpcodecs/*.[ch] libmpcodecs/*/*.[ch]
 	$(MAKE) -C libmpcodecs
 
-libmpcodecs/libmpencoders.a:
+libmpcodecs/libmpencoders.a: libmpcodecs/*.[ch] libmpcodecs/*/*.[ch]
 	$(MAKE) -C libmpcodecs libmpencoders.a
 
-libmpdemux/libmpdemux.a:
+libmpdemux/libmpdemux.a: libmpdemux/*.[ch]
 	$(MAKE) -C libmpdemux libmpdemux.a
 
-libmpdemux/libmpmux.a:
+libmpdemux/libmpmux.a: libmpdemux/*.[ch]
 	$(MAKE) -C libmpdemux libmpmux.a
 
-libmpeg2/libmpeg2.a:
+libmpeg2/libmpeg2.a: libmpeg2/*.[ch]
 	$(MAKE) -C libmpeg2
 
-libpostproc/libpostproc.a:
+libpostproc/libpostproc.a: libpostproc/*.[ch]
 	$(MAKE) -C libpostproc
 
-libswscale/libswscale.a:
+libswscale/libswscale.a: libswscale/*.[ch]
 	$(MAKE) -C libswscale
 
-libvo/libvo.a:
+libvo/libvo.a: libvo/*.[ch]
 	$(MAKE) -C libvo libvo.a
 
-libvo/libosd.a:
+libvo/libosd.a: libvo/*.[ch]
 	$(MAKE) -C libvo libosd.a
 
-loader/libloader.a:
+loader/libloader.a: loader/*.[chSs]
 	$(MAKE) -C loader
 
-mp3lib/libmp3.a:
+mp3lib/libmp3.a: mp3lib/*.[ch]
 	$(MAKE) -C mp3lib
 
-stream/stream.a:
+stream/stream.a: stream/*.[ch] stream/*/*.[ch]
 	$(MAKE) -C stream
 
-tremor/libvorbisidec.a:
+tremor/libvorbisidec.a: tremor/*.[ch]
 	$(MAKE) -C tremor
 
-vidix/libvidix.a:
+vidix/libvidix.a: vidix/*.[ch] vidix/*/*.[ch]
 	$(MAKE) -C vidix
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
