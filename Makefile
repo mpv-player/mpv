@@ -246,11 +246,29 @@ CFLAGS := $(subst -I..,-I.,$(CFLAGS))
 dvdread/libdvdread.a:
 	$(MAKE) -C dvdread
 
+liba52/liba52.a:
+	$(MAKE) -C liba52
+
+libao2/libao2.a:
+	$(MAKE) -C libao2
+
+libavcodec/libavcodec.a:
+	$(MAKE) -C libavcodec
+
+libavformat/libavformat.a:
+	$(MAKE) -C libavformat
+
+libavutil/libavutil.a:
+	$(MAKE) -C libavutil
+
 libdvdcss/libdvdcss.a:
 	$(MAKE) -C libdvdcss
 
-loader/libloader.a:
-	$(MAKE) -C loader
+libfaad2/libfaad2.a:
+	$(MAKE) -C libfaad2
+
+libmpcodecs/libmpcodecs.a:
+	$(MAKE) -C libmpcodecs
 
 libmpdemux/libmpdemux.a:
 	$(MAKE) -C libmpdemux libmpdemux.a
@@ -258,29 +276,14 @@ libmpdemux/libmpdemux.a:
 libmpdemux/libmpmux.a:
 	$(MAKE) -C libmpdemux libmpmux.a
 
-stream/stream.a:
-	$(MAKE) -C stream
-
-libmpcodecs/libmpcodecs.a:
-	$(MAKE) -C libmpcodecs
-
-libavutil/libavutil.a:
-	$(MAKE) -C libavutil
-
-libavcodec/libavcodec.a:
-	$(MAKE) -C libavcodec
+libmpeg2/libmpeg2.a:
+	$(MAKE) -C libmpeg2
 
 libpostproc/libpostproc.a:
 	$(MAKE) -C libpostproc
 
-libavformat/libavformat.a:
-	$(MAKE) -C libavformat
-
 libswscale/libswscale.a:
 	$(MAKE) -C libswscale
-
-libmpeg2/libmpeg2.a:
-	$(MAKE) -C libmpeg2
 
 libvo/libvo.a:
 	$(MAKE) -C libvo libvo.a
@@ -288,17 +291,14 @@ libvo/libvo.a:
 libvo/libosd.a:
 	$(MAKE) -C libvo libosd.a
 
-libao2/libao2.a:
-	$(MAKE) -C libao2
-
-liba52/liba52.a:
-	$(MAKE) -C liba52
-
-libfaad2/libfaad2.a:
-	$(MAKE) -C libfaad2
+loader/libloader.a:
+	$(MAKE) -C loader
 
 mp3lib/libmp3.a:
 	$(MAKE) -C mp3lib
+
+stream/stream.a:
+	$(MAKE) -C stream
 
 tremor/libvorbisidec.a:
 	$(MAKE) -C tremor
