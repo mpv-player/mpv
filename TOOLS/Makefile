@@ -8,10 +8,13 @@ OBJS = alaw-gen$(EXESUF) \
 	avisubdump$(EXESUF) \
 	compare$(EXESUF) \
 	dump_mp4$(EXESUF) \
-	modify_reg$(EXESUF) \
 	movinfo$(EXESUF) \
 	subrip$(EXESUF) \
 #	vivodump$(EXESUF) \
+
+ifdef ARCH_X86
+OBJS += modify_reg$(EXESUF)
+endif
 
 COMMON_LIBS = ../mp_msg.o ../mp_fifo.o ../osdep/$(TIMER) ../osdep/$(GETCH) \
               -ltermcap -lm
