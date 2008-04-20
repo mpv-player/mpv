@@ -6,6 +6,10 @@
 
 struct vo;
 
+struct vo_x11_state {
+    int unused; // placeholder to avoid empty struct
+};
+
 #ifdef X11_FULLSCREEN
 
 #define vo_wm_LAYER 1
@@ -36,6 +40,7 @@ extern int mLocalDisplay;
 
 extern int vo_mouse_autohide;
 
+void vo_x11_init_state(struct vo_x11_state *s);
 extern int vo_init( void );
 extern void vo_uninit( void );
 extern void vo_x11_decoration( Display * vo_Display,Window w,int d );

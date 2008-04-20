@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
+#include "talloc.h"
 
 #ifdef WIN32
 #define _UWIN 1  /*disable Non-underscored versions of non-ANSI functions as otherwise int eof would conflict with eof()*/
@@ -2143,7 +2144,7 @@ int reinit_video_chain(void) {
     //shouldn't we set dvideo->id=-2 when we fail?
     vo_config_count=0;
     //if((mpctx->video_out->preinit(vo_subdevice))!=0){
-    if(!(mpctx->video_out=init_best_video_out(opts))){
+    if(!(mpctx->video_out=init_best_video_out(opts, mpctx->x11_state))){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
       goto err_out;
     }
@@ -2562,6 +2563,10 @@ int gui_no_filename=0;
   
   mp_msg_init();
 
+#ifdef HAVE_X11
+  mpctx->x11_state = talloc_ptrtype(NULL, mpctx->x11_state);
+  vo_x11_init_state(mpctx->x11_state);
+#endif
   struct MPOpts *opts = &mpctx->opts;
   set_default_mplayer_options(opts);
   // Create the config context and register the options

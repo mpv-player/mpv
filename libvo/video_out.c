@@ -20,6 +20,9 @@
 #include "help_mp.h"
 
 #include "osdep/shmem.h"
+#ifdef HAVE_X11
+#include "x11_common.h"
+#endif
 
 //int vo_flags=0;
 
@@ -298,7 +301,7 @@ void list_video_out(void)
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
-struct vo *init_best_video_out(struct MPOpts *opts)
+struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11)
 {
     char **vo_list = opts->video_driver_list;
     int i;
@@ -321,7 +324,7 @@ struct vo *init_best_video_out(struct MPOpts *opts)
                 const vo_info_t *info = video_driver->info;
                 if (!strcmp(info->short_name, name)) {
                     // name matches, try it
-                    *vo = (struct vo){.opts = opts};
+                    *vo = (struct vo){.opts = opts, .x11 = x11};
                     vo->driver = video_driver;
                     if (!vo_preinit(vo, vo_subdevice)) {
                         free(name);
@@ -339,7 +342,7 @@ struct vo *init_best_video_out(struct MPOpts *opts)
     vo_subdevice = NULL;
     for (i = 0; video_out_drivers[i]; i++) {
         const struct vo_driver *video_driver = video_out_drivers[i];
-        *vo = (struct vo){.opts = opts};
+        *vo = (struct vo){.opts = opts, .x11 = x11};
         vo->driver = video_driver;
         if (!vo_preinit(vo, vo_subdevice))
             return vo; // success!

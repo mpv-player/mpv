@@ -210,9 +210,10 @@ struct vo {
     const struct vo_driver *driver;
     void *priv;
     struct MPOpts *opts;
+    struct vo_x11_state *x11;
 };
 
-struct vo *init_best_video_out(struct MPOpts *opts);
+struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11);
 int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      char *title, uint32_t format);

@@ -122,6 +122,10 @@ static int vo_x11_get_fs_type(int supported);
 static void saver_off(Display *);
 static void saver_on(Display *);
 
+void vo_x11_init_state(struct vo_x11_state *s)
+{
+    *s = (struct vo_x11_state){};
+}
 
 /*
  * Sends the EWMH fullscreen state event.
