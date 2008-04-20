@@ -106,7 +106,7 @@ static void draw_alpha_yv12(void *p, int x0, int y0, int w, int h,
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo->dwidth + vo_panscan_x);
     vo_draw_alpha_yv12(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
@@ -120,7 +120,7 @@ static void draw_alpha_yuy2(void *p, int x0, int y0, int w, int h,
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo->dwidth + vo_panscan_x);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
@@ -134,7 +134,7 @@ static void draw_alpha_uyvy(void *p, int x0, int y0, int w, int h,
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo_dwidth + vo_panscan_x);
+    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo->dwidth + vo_panscan_x);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
@@ -151,19 +151,19 @@ static void draw_alpha_null(void *p, int x0, int y0, int w, int h,
 
 static void deallocate_xvimage(struct vo *vo, int foo);
 
-static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
+static void calc_drwXY(struct vo *vo, uint32_t *drwX, uint32_t *drwY) {
   *drwX = *drwY = 0;
   if (vo_fs) {
-    aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
-    vo_dwidth = FFMIN(vo_dwidth, vo_screenwidth);
-    vo_dheight = FFMIN(vo_dheight, vo_screenheight);
-    *drwX = (vo_screenwidth - vo_dwidth) / 2;
-    *drwY = (vo_screenheight - vo_dheight) / 2;
+    aspect(&vo->dwidth, &vo->dheight, A_ZOOM);
+    vo->dwidth = FFMIN(vo->dwidth, vo_screenwidth);
+    vo->dheight = FFMIN(vo->dheight, vo_screenheight);
+    *drwX = (vo_screenwidth - vo->dwidth) / 2;
+    *drwY = (vo_screenheight - vo->dheight) / 2;
     mp_msg(MSGT_VO, MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",
-           *drwX, *drwY, vo_dwidth, vo_dheight);
+           *drwX, *drwY, vo->dwidth, vo->dheight);
   } else if (WinID == 0) {
-    *drwX = vo_dx;
-    *drwY = vo_dy;
+    *drwX = vo->dx;
+    *drwY = vo->dy;
   }
 }
 
@@ -223,8 +223,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     else
 #endif
     {
-        hint.x = vo_dx;
-        hint.y = vo_dy;
+        hint.x = vo->dx;
+        hint.y = vo->dy;
         hint.width = d_width;
         hint.height = d_height;
 #ifdef HAVE_XF86VM
@@ -292,15 +292,15 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                 Window mRoot;
                 uint32_t drwBorderWidth, drwDepth;
                 XGetGeometry(x11->display, vo_window, &mRoot,
-                             &ctx->drwX, &ctx->drwY, &vo_dwidth, &vo_dheight,
+                             &ctx->drwX, &ctx->drwY, &vo->dwidth, &vo->dheight,
                              &drwBorderWidth, &drwDepth);
-                if (vo_dwidth <= 0) vo_dwidth = d_width;
-                if (vo_dheight <= 0) vo_dheight = d_height;
-                aspect_save_prescale(vo_dwidth, vo_dheight);
+                if (vo->dwidth <= 0) vo->dwidth = d_width;
+                if (vo->dheight <= 0) vo->dheight = d_height;
+                aspect_save_prescale(vo->dwidth, vo->dheight);
             }
         } else
         {
-            vo_x11_create_vo_window(vo, &vinfo, vo_dx, vo_dy, d_width, d_height,
+            vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
                    flags, CopyFromParent, "xv", title);
             XChangeWindowAttributes(x11->display, vo_window, xswamask, &xswa);
         }
@@ -360,19 +360,19 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     set_gamma_correction();
 #endif
 
-    aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
+    aspect(&vo->dwidth, &vo->dheight, A_NOZOOM);
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
-    calc_drwXY(&ctx->drwX, &ctx->drwY);
+    calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
 
     panscan_calc();
     
     vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
                         ctx->drwY - (vo_panscan_y >> 1),
-                        vo_dwidth + vo_panscan_x - 1,
-                        vo_dheight + vo_panscan_y - 1);
+                        vo->dwidth + vo_panscan_x - 1,
+                        vo->dheight + vo_panscan_y - 1);
 
     mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
-           ctx->drwY, vo_dwidth, vo_dheight);
+           ctx->drwY, vo->dwidth, vo->dheight);
 
     if (opts->vo_ontop)
         vo_x11_setlayer(x11->display, vo_window, opts->vo_ontop);
@@ -455,8 +455,8 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
         XvShmPutImage(x11->display, xv_port, vo_window, vo_gc,
                       xvi, 0, 0, ctx->image_width,
                       ctx->image_height, ctx->drwX - (vo_panscan_x >> 1),
-                      ctx->drwY - (vo_panscan_y >> 1), vo_dwidth + vo_panscan_x,
-                      vo_dheight + vo_panscan_y,
+                      ctx->drwY - (vo_panscan_y >> 1), vo->dwidth + vo_panscan_x,
+                      vo->dheight + vo_panscan_y,
                       False);
     } else
 #endif
@@ -464,8 +464,8 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
         XvPutImage(x11->display, xv_port, vo_window, vo_gc,
                    xvi, 0, 0, ctx->image_width, ctx->image_height,
                    ctx->drwX - (vo_panscan_x >> 1), ctx->drwY - (vo_panscan_y >> 1),
-                   vo_dwidth + vo_panscan_x,
-                   vo_dheight + vo_panscan_y);
+                   vo->dwidth + vo_panscan_x,
+                   vo->dheight + vo_panscan_y);
     }
 }
 
@@ -480,19 +480,19 @@ static void check_events(struct vo *vo)
         Window mRoot;
         uint32_t drwBorderWidth, drwDepth;
         XGetGeometry(x11->display, vo_window, &mRoot, &ctx->drwX, &ctx->drwY,
-                     &vo_dwidth, &vo_dheight, &drwBorderWidth, &drwDepth);
+                     &vo->dwidth, &vo->dheight, &drwBorderWidth, &drwDepth);
         mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
-               ctx->drwY, vo_dwidth, vo_dheight);
+               ctx->drwY, vo->dwidth, vo->dheight);
 
-        calc_drwXY(&ctx->drwX, &ctx->drwY);
+        calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
     }
 
     if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
     {
 	vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
 			    ctx->drwY - (vo_panscan_y >> 1),
-			    vo_dwidth + vo_panscan_x - 1,
-			    vo_dheight + vo_panscan_y - 1);
+			    vo->dwidth + vo_panscan_x - 1,
+			    vo->dheight + vo_panscan_y - 1);
     }
 
     if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && ctx->is_paused)
@@ -511,7 +511,7 @@ static void draw_osd(struct vo *vo)
     struct xvctx *ctx = vo->priv;
 
     osd_draw_text(ctx->image_width -
-                  ctx->image_width * vo_panscan_x / (vo_dwidth + vo_panscan_x),
+                  ctx->image_width * vo_panscan_x / (vo->dwidth + vo_panscan_x),
                   ctx->image_height, ctx->draw_alpha_fnc, vo);
 }
 
@@ -883,14 +883,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
                 if (old_y != vo_panscan_y)
                 {
-                    vo_x11_clearwindow_part(vo->x11->display, vo_window,
-                                            vo_dwidth + vo_panscan_x - 1,
-                                            vo_dheight + vo_panscan_y - 1,
+                    vo_x11_clearwindow_part(vo, vo_window,
+                                            vo->dwidth + vo_panscan_x - 1,
+                                            vo->dheight + vo_panscan_y - 1,
                                             1);
 		    vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
 					ctx->drwY - (vo_panscan_y >> 1),
-					vo_dwidth + vo_panscan_x - 1,
-					vo_dheight + vo_panscan_y - 1);
+					vo->dwidth + vo_panscan_x - 1,
+					vo->dheight + vo_panscan_y - 1);
                     flip_page(vo);
                 }
             }

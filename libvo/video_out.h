@@ -213,6 +213,10 @@ struct vo {
     void *priv;
     struct MPOpts *opts;
     struct vo_x11_state *x11;
+    int dx;
+    int dy;
+    int dwidth;
+    int dheight;
 };
 
 struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11);
@@ -245,10 +249,6 @@ extern int vo_screenwidth;
 extern int vo_screenheight;
 
 // requested resolution/bpp:  (-x -y -bpp options)
-extern int vo_dx;
-extern int vo_dy;
-extern int vo_dwidth;
-extern int vo_dheight;
 extern int vo_dbpp;
 
 extern int vo_grabpointer;

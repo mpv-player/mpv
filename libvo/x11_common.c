@@ -385,8 +385,8 @@ void update_xinerama_info(struct vo *vo) {
         if (screen >= num_screens)
             screen = num_screens - 1;
         if (screen == -1) {
-            int x = vo_dx + vo_dwidth / 2;
-            int y = vo_dy + vo_dheight / 2;
+            int x = vo->dx + vo->dwidth / 2;
+            int y = vo->dy + vo->dheight / 2;
             for (screen = num_screens - 1; screen > 0; screen--) {
                int left = screens[screen].x_org;
                int right = left + screens[screen].width;
@@ -1058,12 +1058,12 @@ int vo_x11_check_events(struct vo *vo)
 //         if (vo_fs && Event.xconfigure.width != vo_screenwidth && Event.xconfigure.height != vo_screenheight) break;
                 if (vo_window == None)
                     break;
-                vo_dwidth = Event.xconfigure.width;
-                vo_dheight = Event.xconfigure.height;
+                vo->dwidth = Event.xconfigure.width;
+                vo->dheight = Event.xconfigure.height;
 #if 0
                 /* when resizing, x and y are zero :( */
-                vo_dx = Event.xconfigure.x;
-                vo_dy = Event.xconfigure.y;
+                vo->dx = Event.xconfigure.x;
+                vo->dy = Event.xconfigure.y;
 #else
                 {
                     Window root;
@@ -1074,7 +1074,7 @@ int vo_x11_check_events(struct vo *vo)
                                  &foo /*width */ , &foo /*height */ , &foo,
                                  &foo);
                     XTranslateCoordinates(display, vo_window, root, 0, 0,
-                                          &vo_dx, &vo_dy, &win);
+                                          &vo->dx, &vo->dy, &win);
                 }
 #endif
                 ret |= VO_EVENT_RESIZE;
@@ -1188,8 +1188,8 @@ static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
   }
   else
   {
-   vo_dwidth = width;
-   vo_dheight = height;
+   vo->dwidth = width;
+   vo->dheight = height;
    XMoveResizeWindow(vo->x11->display, vo_window, x, y, width, height);
   }
 }
@@ -1311,8 +1311,8 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     XSizeHints hint;
     XEvent xev;
     vo_fs = 0;
-    vo_dwidth = width;
-    vo_dheight = height;
+    vo->dwidth = width;
+    vo->dheight = height;
     vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vis->visual,
                       x, y, width, height, vis->depth, col_map);
     vo_x11_classhint(mDisplay, vo_window, classname);
@@ -1338,21 +1338,22 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
   }
   if (opts->vo_ontop) vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
-  vo_x11_nofs_sizepos(vo, vo_dx, vo_dy, width, height);
+  vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen(vo);
 }
 
-void vo_x11_clearwindow_part(Display * mDisplay, Window vo_window,
+void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
                              int img_width, int img_height, int use_fs)
 {
+    Display *mDisplay = vo->x11->display;
     int u_dheight, u_dwidth, left_ov, left_ov2;
 
     if (!f_gc)
         return;
 
-    u_dheight = use_fs ? vo_screenheight : vo_dheight;
-    u_dwidth = use_fs ? vo_screenwidth : vo_dwidth;
+    u_dheight = use_fs ? vo_screenheight : vo->dheight;
+    u_dwidth = use_fs ? vo_screenwidth : vo->dwidth;
     if ((u_dheight <= img_height) && (u_dwidth <= img_width))
         return;
 
@@ -1546,10 +1547,10 @@ void vo_x11_fullscreen(struct vo *vo)
         vo_fs = VO_TRUE;
         if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
         {
-            vo_old_x = vo_dx;
-            vo_old_y = vo_dy;
-            vo_old_width = vo_dwidth;
-            vo_old_height = vo_dheight;
+            vo_old_x = vo->dx;
+            vo_old_y = vo->dy;
+            vo_old_width = vo->dwidth;
+            vo_old_height = vo->dheight;
         }
             update_xinerama_info(vo);
             x = xinerama_x;

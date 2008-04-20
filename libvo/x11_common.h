@@ -57,7 +57,7 @@ extern void fstype_help(void);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
         int x, int y, unsigned int width, unsigned int height, int flags,
 	Colormap col_map, const char *classname, const char *title);
-extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
+void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
 	int img_width, int img_height, int use_fs);
 extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
 void vo_x11_ontop(struct vo *vo);
@@ -140,6 +140,7 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define vo_xv_get_max_img_dim(...) vo_xv_get_max_img_dim(global_vo, __VA_ARGS__)
 #define vo_xv_init_colorkey() vo_xv_init_colorkey(global_vo)
 #define vo_xv_draw_colorkey(...) vo_xv_draw_colorkey(global_vo, __VA_ARGS__)
+#define vo_x11_clearwindow_part(display, ...) vo_x11_clearwindow_part(global_vo, __VA_ARGS__)
 
 #define mDisplay global_vo->x11->display
 #endif

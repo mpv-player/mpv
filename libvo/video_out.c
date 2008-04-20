@@ -36,10 +36,6 @@ int vo_screenwidth=0;
 int vo_screenheight=0;
 
 // requested resolution/bpp:  (-x -y -bpp options)
-int vo_dx=0;
-int vo_dy=0;
-int vo_dwidth=0;
-int vo_dheight=0;
 int vo_dbpp=0;
 
 int vo_nomouse_input = 0;
@@ -367,14 +363,14 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
         aspect(&d_width, &d_height, A_NOZOOM);
-        vo_dx = (int)(vo_screenwidth - d_width) / 2;
-        vo_dy = (int)(vo_screenheight - d_height) / 2;
-        geometry(&vo_dx, &vo_dy, &d_width, &d_height,
+        vo->dx = (int)(vo_screenwidth - d_width) / 2;
+        vo->dy = (int)(vo_screenheight - d_height) / 2;
+        geometry(&vo->dx, &vo->dy, &d_width, &d_height,
                  vo_screenwidth, vo_screenheight);
-        vo_dx += xinerama_x;
-        vo_dy += xinerama_y;
-        vo_dwidth = d_width;
-        vo_dheight = d_height;
+        vo->dx += xinerama_x;
+        vo->dy += xinerama_y;
+        vo->dwidth = d_width;
+        vo->dheight = d_height;
     }
 
     int ret = vo->driver->config(vo, width, height, d_width, d_height, flags,

@@ -66,32 +66,34 @@
 
 extern int use_menu;
 
-static void rescale_input_coordinates(int ix, int iy, double *dx, double *dy)
+static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
+                                      double *dx, double *dy)
 {
+    struct vo *vo = mpctx->video_out;
     //remove the borders, if any, and rescale to the range [0,1],[0,1]
     if (vo_fs) {		//we are in full-screen mode
-	if (vo_screenwidth > vo_dwidth)	//there are borders along the x axis
-	    ix -= (vo_screenwidth - vo_dwidth) / 2;
-	if (vo_screenheight > vo_dheight)	//there are borders along the y axis (usual way)
-	    iy -= (vo_screenheight - vo_dheight) / 2;
+	if (vo_screenwidth > vo->dwidth)  //there are borders along the x axis
+	    ix -= (vo_screenwidth - vo->dwidth) / 2;
+	if (vo_screenheight > vo->dheight)  //there are borders along the y axis (usual way)
+	    iy -= (vo_screenheight - vo->dheight) / 2;
 
-	if (ix < 0 || ix > vo_dwidth) {
+	if (ix < 0 || ix > vo->dwidth) {
 	    *dx = *dy = -1.0;
 	    return;
 	}			//we are on one of the borders
-	if (iy < 0 || iy > vo_dheight) {
+	if (iy < 0 || iy > vo->dheight) {
 	    *dx = *dy = -1.0;
 	    return;
 	}			//we are on one of the borders
     }
 
-    *dx = (double) ix / (double) vo_dwidth;
-    *dy = (double) iy / (double) vo_dheight;
+    *dx = (double) ix / (double) vo->dwidth;
+    *dy = (double) iy / (double) vo->dheight;
 
     mp_msg(MSGT_CPLAYER, MSGL_V,
 	   "\r\nrescaled coordinates: %.3lf, %.3lf, screen (%d x %d), vodisplay: (%d, %d), fullscreen: %d\r\n",
-	   *dx, *dy, vo_screenwidth, vo_screenheight, vo_dwidth,
-	   vo_dheight, vo_fs);
+	   *dx, *dy, vo_screenwidth, vo_screenheight, vo->dwidth,
+	   vo->dheight, vo_fs);
 }
 
 static int sub_source_by_pos(MPContext * mpctx, int pos)
@@ -3076,7 +3078,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		double dx, dy;
 		pointer_x = cmd->args[0].v.i;
 		pointer_y = cmd->args[1].v.i;
-		rescale_input_coordinates(pointer_x, pointer_y, &dx, &dy);
+		rescale_input_coordinates(mpctx, pointer_x, pointer_y, &dx, &dy);
 #ifdef USE_DVDNAV
 		if (mpctx->stream->type == STREAMTYPE_DVDNAV
 		    && dx > 0.0 && dy > 0.0) {
