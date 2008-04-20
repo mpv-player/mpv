@@ -4046,6 +4046,16 @@ static int exp_initterm(INITTERMFUNC *start, INITTERMFUNC *end)
 }
 #endif
 
+/* Fake _initterm_e from msvcr80.dll, needed by sirenacm.dll
+ * NOTE: If I make this an alias for _initterm, then sirenacm.dll tries to call
+   other uninmplemented functions; keep this in mind if some future codec needs
+   a real implementation of this function */
+static int exp_initterm_e(INITTERMFUNC *start, INITTERMFUNC *end)
+{
+    dbgprintf("_initterm_e(0x%x, 0x%x)\n", start, end);
+    return 0;
+}
+
 static void* exp__dllonexit()
 {
     // FIXME extract from WINE
@@ -4819,6 +4829,14 @@ static WIN_BOOL WINAPI expEnumDisplaySettingsA(LPCSTR name ,DWORD n,
     return 1;
 }
 
+// Fake implementation of _decode_pointer from msvcr80.dll, needed by sirenacm.dll
+// NOTE: undocumented function, probably the declaration is not right
+static int exp_decode_pointer(void *ptr)
+{
+    dbgprintf("_decode_pointer (0x%08x)\n", ptr);
+    return 0;
+}
+
 struct exports
 {
     char name[64];
@@ -5247,6 +5265,17 @@ struct exports exp_shlwapi[]={
     FF(PathFindFileNameA, -1)
 };
 
+struct exports exp_msvcr80[]={
+    FF(_CIpow,-1)
+    FF(_CIsin,-1)
+    FF(_CIcos,-1)
+    FF(_CIsqrt,-1)
+    FF(memset,-1)
+    FF(_initterm_e, -1)
+    FF(_initterm, -1)
+    FF(_decode_pointer, -1)
+};
+
 #define LL(X) \
     {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
 
@@ -5272,6 +5301,7 @@ struct libs libraries[]={
 #endif
     LL(comdlg32)
     LL(shlwapi)
+    LL(msvcr80)
 };
 
 static WIN_BOOL WINAPI ext_stubs(void)
