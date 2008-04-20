@@ -30,6 +30,31 @@
   inspired by http://swapped.cc/halloc/
 */
 
+// Hardcode these for MPlayer assuming a working system.
+// Original used autoconf detection with workarounds for broken systems.
+#define HAVE_VA_COPY
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdbool.h>
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define strnlen rep_strnlen
+static size_t rep_strnlen(const char *s, size_t max)
+{
+        size_t len;
+  
+        for (len = 0; len < max; len++) {
+                if (s[len] == '\0') {
+                        break;
+                }
+        }
+        return len;  
+}
+
+
+
 #ifdef _SAMBA_BUILD_
 #include "version.h"
 #if (SAMBA_VERSION_MAJOR<4)
@@ -47,7 +72,8 @@
 #endif /* _SAMBA_BUILD_ */
 
 #ifndef _TALLOC_SAMBA3
-#include "replace.h"
+// Workarounds for missing standard features, not used in MPlayer
+// #include "replace.h"
 #include "talloc.h"
 #endif /* not _TALLOC_SAMBA3 */
 
