@@ -8,6 +8,7 @@ struct vo;
 
 struct vo_x11_state {
     Display *display;
+    int depthonscreen;
 };
 
 #ifdef X11_FULLSCREEN
@@ -143,6 +144,7 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define vo_x11_clearwindow_part(display, ...) vo_x11_clearwindow_part(global_vo, __VA_ARGS__)
 
 #define mDisplay global_vo->x11->display
+#define vo_depthonscreen global_vo->x11->depthonscreen
 #endif
 
 #endif /* MPLAYER_X11_COMMON_H */

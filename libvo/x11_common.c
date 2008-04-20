@@ -427,7 +427,7 @@ int vo_init(struct vo *vo)
 	if (vo_rootwin)
 		WinID = 0; // use root window
 
-    if (vo_depthonscreen)
+    if (x11->depthonscreen)
     {
         saver_off(x11->display);
         return 1;               // already called
@@ -490,7 +490,7 @@ int vo_init(struct vo *vo)
         mXImage =
             XGetImage(x11->display, mRootWin, 0, 0, 1, 1, AllPlanes, ZPixmap);
 
-    vo_depthonscreen = depth;   // display depth on screen
+    x11->depthonscreen = depth;   // display depth on screen
 
     // get bits/pixel from XImage structure:
     if (mXImage == NULL)
@@ -500,15 +500,15 @@ int vo_init(struct vo *vo)
     {
         /*
          * for the depth==24 case, the XImage structures might use
-         * 24 or 32 bits of data per pixel.  The global variable
-         * vo_depthonscreen stores the amount of data per pixel in the
+         * 24 or 32 bits of data per pixel.  The x11->depthonscreen
+         * field stores the amount of data per pixel in the
          * XImage structure!
          *
          * Maybe we should rename vo_depthonscreen to (or add) vo_bpp?
          */
         bpp = mXImage->bits_per_pixel;
-        if ((vo_depthonscreen + 7) / 8 != (bpp + 7) / 8)
-            vo_depthonscreen = bpp;     // by A'rpi
+        if ((x11->depthonscreen + 7) / 8 != (bpp + 7) / 8)
+            x11->depthonscreen = bpp;     // by A'rpi
         mask =
             mXImage->red_mask | mXImage->green_mask | mXImage->blue_mask;
         mp_msg(MSGT_VO, MSGL_V,
@@ -516,12 +516,12 @@ int vo_init(struct vo *vo)
                mXImage->red_mask, mXImage->green_mask, mXImage->blue_mask);
         XDestroyImage(mXImage);
     }
-    if (((vo_depthonscreen + 7) / 8) == 2)
+    if (((x11->depthonscreen + 7) / 8) == 2)
     {
         if (mask == 0x7FFF)
-            vo_depthonscreen = 15;
+            x11->depthonscreen = 15;
         else if (mask == 0xFFFF)
-            vo_depthonscreen = 16;
+            x11->depthonscreen = 16;
     }
 // XCloseDisplay( mDisplay );
 /* slightly improved local display detection AST */
@@ -535,7 +535,7 @@ int vo_init(struct vo *vo)
         mLocalDisplay = 0;
     mp_msg(MSGT_VO, MSGL_V,
            "vo: X11 running at %dx%d with depth %d and %d bpp (\"%s\" => %s display)\n",
-           vo_screenwidth, vo_screenheight, depth, vo_depthonscreen,
+           vo_screenwidth, vo_screenheight, depth, x11->depthonscreen,
            dispName, mLocalDisplay ? "local" : "remote");
 
     vo_wm_type = vo_wm_detect(vo);
@@ -560,7 +560,7 @@ void vo_uninit(struct vo_x11_state *x11)
     mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
     XSetErrorHandler(NULL);
     XCloseDisplay(x11->display);
-    vo_depthonscreen = 0;
+    x11->depthonscreen = 0;
     x11->display = NULL;
 }
 
