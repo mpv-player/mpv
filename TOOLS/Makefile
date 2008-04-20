@@ -64,7 +64,7 @@ netstream: netstream.o $(NETSTREAM_DEPS)
 
 clean distclean:
 	rm -f *.o *~ $(OBJS)
-	rm -f fastmem-* fastmem2-* fastmemcpybench netstream
+	rm -f fastmem-* fastmem2-* netstream
 	rm -f bmovl-test$(EXESUF) vfw2menc$(EXESUF)
 	rm -f $(REAL_TARGETS)
 
