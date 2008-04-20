@@ -43,6 +43,7 @@ LIBVO_EXTERN(winvidix)
 /* VIDIX related */
 static char *vidix_name;
 
+static int depthonscreen;
 /* Image parameters */
 static uint32_t image_width;
 static uint32_t image_height;
@@ -116,7 +117,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
                /*update vidix*/
                /* FIXME: implement runtime resize/move if possible, this way is very ugly! */
 	           vidix_stop();
-	           if(vidix_init(image_width, image_height, vo_dx, vo_dy, vo_dwidth, vo_dheight, image_format, vo_depthonscreen, vo_screenwidth, vo_screenheight) != 0)
+	           if(vidix_init(image_width, image_height, vo_dx, vo_dy, vo_dwidth, vo_dheight, image_format, depthonscreen, vo_screenwidth, vo_screenheight) != 0)
 	               mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s\n", strerror(errno));
                /*set colorkey*/       
                vidix_start();
@@ -190,7 +191,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_h
     image_format = format;
     vo_screenwidth = GetSystemMetrics(SM_CXSCREEN);
     vo_screenheight = GetSystemMetrics(SM_CYSCREEN);
-    vo_depthonscreen = GetDeviceCaps(GetDC(GetDesktopWindow()),BITSPIXEL);
+    depthonscreen = GetDeviceCaps(GetDC(GetDesktopWindow()),BITSPIXEL);
     
 
     aspect_save_orig(width, height);

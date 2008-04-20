@@ -23,6 +23,7 @@ extern int enable_mouse_movements;
 static const char classname[] = "MPlayer - Media player for Win32";
 int vo_vm = 0;
 
+static int depthonscreen;
 // last non-fullscreen extends
 static int prev_width;
 static int prev_height;
@@ -233,7 +234,7 @@ static void updateScreenProperties(void) {
 
     vo_screenwidth = dm.dmPelsWidth;
     vo_screenheight = dm.dmPelsHeight;
-    vo_depthonscreen = dm.dmBitsPerPel;
+    depthonscreen = dm.dmBitsPerPel;
     w32_update_xinerama_info();
 }
 
@@ -243,7 +244,7 @@ static void changeMode(void) {
     dm.dmDriverExtra = 0;
 
     dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-    dm.dmBitsPerPel = vo_depthonscreen;
+    dm.dmBitsPerPel = depthonscreen;
     dm.dmPelsWidth = vo_screenwidth;
     dm.dmPelsHeight = vo_screenheight;
 
@@ -253,7 +254,7 @@ static void changeMode(void) {
         int i;
         for (i = 0; EnumDisplaySettings(0, i, &dm); ++i) {
             int score = (dm.dmPelsWidth - o_dwidth) * (dm.dmPelsHeight - o_dheight);
-            if (dm.dmBitsPerPel != vo_depthonscreen) continue;
+            if (dm.dmBitsPerPel != depthonscreen) continue;
             if (dm.dmPelsWidth < o_dwidth) continue;
             if (dm.dmPelsHeight < o_dheight) continue;
 
@@ -343,7 +344,7 @@ static int createRenderingContext(void) {
 
     SetPixelFormat(vo_hdc, pf, &pfd);
     
-    mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, vo_depthonscreen);
+    mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, depthonscreen);
 
     ReleaseDC(vo_window, vo_hdc);
     return 1;
@@ -442,7 +443,7 @@ void vo_w32_uninit(void) {
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: uninit\n");
     resetMode();
     ShowCursor(1);
-    vo_depthonscreen = 0;
+    depthonscreen = 0;
     DestroyWindow(vo_window);
     vo_window = 0;
     UnregisterClass(classname, 0);

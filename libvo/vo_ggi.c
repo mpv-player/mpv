@@ -67,6 +67,8 @@ static struct ggi_conf_s {
     } flushregion;
 
     int voflags;
+
+    int depthonscreen;
 } ggi_conf;
 
 
@@ -194,7 +196,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
         ggiSetFlags(ggi_conf.drawvis, GGIFLAG_ASYNC);
     }
-    vo_depthonscreen = GT_DEPTH(mode.graphtype);
+    ggi_conf.depthonscreen = GT_DEPTH(mode.graphtype);
     vo_screenwidth = mode.virt.x;
     vo_screenheight = mode.virt.y;
 
@@ -358,9 +360,9 @@ static int query_format(uint32_t format)
             | VFCAP_CSP_SUPPORTED_BY_HW
             | VFCAP_ACCEPT_STRIDE;
 
-    if ((!vo_depthonscreen || !vo_dbpp) && ggi_conf.vis) {
+    if ((!ggi_conf.depthonscreen || !vo_dbpp) && ggi_conf.vis) {
         if (ggiGetMode(ggi_conf.vis, &mode) == 0) {
-            vo_depthonscreen = GT_DEPTH(mode.graphtype);
+            ggi_conf.depthonscreen = GT_DEPTH(mode.graphtype);
             vo_dbpp = GT_SIZE(mode.graphtype);
         }
         if (GT_SCHEME(mode.graphtype) == GT_AUTO) {
@@ -368,7 +370,7 @@ static int query_format(uint32_t format)
         }
         if (GT_SCHEME(mode.graphtype) != GT_TRUECOLOR) {
             mode.graphtype = GT_32BIT;
-            vo_depthonscreen = GT_DEPTH(mode.graphtype);
+            ggi_conf.depthonscreen = GT_DEPTH(mode.graphtype);
             vo_dbpp = GT_SIZE(mode.graphtype);
         }
     }
