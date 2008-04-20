@@ -11,6 +11,7 @@
 
 #include "config.h"
 #include "options.h"
+#include "talloc.h"
 #include "video_out.h"
 #include "aspect.h"
 #include "geometry.h"
@@ -282,7 +283,7 @@ void vo_check_events(struct vo *vo)
 void vo_destroy(struct vo *vo)
 {
     vo->driver->uninit(vo);
-    free(vo);
+    talloc_free(vo);
 }
 
 void list_video_out(void)
@@ -301,7 +302,7 @@ struct vo *init_best_video_out(struct MPOpts *opts)
 {
     char **vo_list = opts->video_driver_list;
     int i;
-    struct vo *vo = malloc(sizeof *vo);
+    struct vo *vo = talloc_ptrtype(NULL, vo);
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0])
         while (vo_list[0][0]) {

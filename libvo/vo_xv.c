@@ -23,6 +23,7 @@ Buffer allocation:
 
 #include "config.h"
 #include "options.h"
+#include "talloc.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "video_out.h"
@@ -707,8 +708,6 @@ static void uninit(struct vo *vo)
         mp_input_rm_event_fd(ConnectionNumber(mDisplay));
     // uninit() shouldn't get called unless initialization went past vo_init()
     vo_x11_uninit();
-    free(ctx);
-    vo->priv = NULL;
 }
 
 static void x11_fd_callback(void *ctx)
@@ -723,7 +722,7 @@ static int preinit(struct vo *vo, const char *arg)
     unsigned int i;
     strarg_t ck_src_arg = { 0, NULL };
     strarg_t ck_method_arg = { 0, NULL };
-    struct xvctx *ctx = calloc(1, sizeof *ctx);
+    struct xvctx *ctx = talloc_zero(vo, struct xvctx);
     vo->priv = ctx;
 
     opt_t subopts[] =
