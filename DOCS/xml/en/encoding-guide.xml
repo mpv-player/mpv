@@ -2245,6 +2245,23 @@ mencoder dvd://1 -oac copy -vf pullup,softskip
   --></screen>
 </para></listitem>
 <listitem><para>
+  <option>-vf filmdint</option> is similar to
+  <option>-vf pullup</option>: both filters attempt to match a pair of
+  fields to form a complete frame. <option>filmdint</option> will
+  deinterlace individual fields that it cannot match, however, whereas
+  <option>pullup</option> will simply drop them. Also, the two filters
+  have separate detection code, and filmdint may tend to match fields a
+  bit less often. Which filter works better may depend on the input
+  video and personal taste; feel free to experiment with fine-tuning
+  the filters' options if you encounter problems with either one (see
+  the man page for details). For most well-mastered input video,
+  however, both filters work quite well, so either one is a safe choice
+  to start with.
+  <screen>
+mencoder dvd://1 -oac copy -vf filmdint -ovc lavc -ofps 24000/1001<!--
+  --></screen>
+</para></listitem>
+<listitem><para>
   An older method
   is to, rather than inverse-telecine the telecined parts, telecine
   the non-telecined parts and then inverse-telecine the whole
@@ -2258,18 +2275,6 @@ mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
   </screen>
 </para></listitem>
 
-<listitem><para>
-  I have not used <option>-vf filmdint</option> myself, but here is what
-  D Richard Felker III has to say:
-
-  <blockquote><para>It is OK, but IMO it tries to deinterlace rather
-     than doing inverse telecine too often (much like settop DVD
-     players &amp; progressive TVs) which gives ugly flickering and
-     other artifacts. If you are going to use it, you at least need to
-     spend some time tuning the options and watching the output first
-     to make sure it is not messing up.
-  </para></blockquote>
-</para></listitem>
 </itemizedlist>
 </sect3>
 
