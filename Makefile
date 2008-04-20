@@ -62,6 +62,7 @@ SRCS_COMMON = asxparser.c \
               libaf/window.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
+              talloc.c
 
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
