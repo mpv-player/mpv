@@ -91,20 +91,6 @@ char **vo_fstype_list;
 /* 1 means that the WM is metacity (broken as hell) */
 int metacity_hack = 0;
 
-static Atom XA_NET_SUPPORTED;
-static Atom XA_NET_WM_STATE;
-static Atom XA_NET_WM_STATE_FULLSCREEN;
-static Atom XA_NET_WM_STATE_ABOVE;
-static Atom XA_NET_WM_STATE_STAYS_ON_TOP;
-static Atom XA_NET_WM_STATE_BELOW;
-static Atom XA_NET_WM_PID;
-static Atom XA_WIN_PROTOCOLS;
-static Atom XA_WIN_LAYER;
-static Atom XA_WIN_HINTS;
-static Atom XA_BLACKBOX_PID;
-static Atom XAWM_PROTOCOLS;
-static Atom XAWM_DELETE_WINDOW;
-
 static int vo_old_x = 0;
 static int vo_old_y = 0;
 static int vo_old_width = 0;
@@ -267,9 +253,9 @@ static void fstype_dump(int fstype)
                "[x11] Current fstype setting doesn't honour any X atoms\n");
 }
 
-static int net_wm_support_state_test(Atom atom)
+static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
 {
-#define NET_WM_STATE_TEST(x) { if (atom == XA_NET_WM_STATE_##x) { mp_msg( MSGT_VO,MSGL_V, "[x11] Detected wm supports " #x " state.\n" ); return vo_wm_##x; } }
+#define NET_WM_STATE_TEST(x) { if (atom == x11->XA_NET_WM_STATE_##x) { mp_msg( MSGT_VO,MSGL_V, "[x11] Detected wm supports " #x " state.\n" ); return vo_wm_##x; } }
 
     NET_WM_STATE_TEST(FULLSCREEN);
     NET_WM_STATE_TEST(ABOVE);
@@ -293,6 +279,7 @@ static int x11_get_property(struct vo_x11_state *x11, Atom type, Atom ** args,
 
 static int vo_wm_detect(struct vo *vo)
 {
+    struct vo_x11_state *x11 = vo->x11;
     int i;
     int wm = 0;
     unsigned long nitems;
@@ -302,12 +289,12 @@ static int vo_wm_detect(struct vo *vo)
         return 0;
 
 // -- supports layers
-    if (x11_get_property(vo->x11, XA_WIN_PROTOCOLS, &args, &nitems))
+    if (x11_get_property(x11, x11->XA_WIN_PROTOCOLS, &args, &nitems))
     {
         mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports layers.\n");
         for (i = 0; i < nitems; i++)
         {
-            if (args[i] == XA_WIN_LAYER)
+            if (args[i] == x11->XA_WIN_LAYER)
             {
                 wm |= vo_wm_LAYER;
                 metacity_hack |= 1;
@@ -327,18 +314,18 @@ static int vo_wm_detect(struct vo *vo)
         }
     }
 // --- netwm 
-    if (x11_get_property(vo->x11, XA_NET_SUPPORTED, &args, &nitems))
+    if (x11_get_property(x11, x11->XA_NET_SUPPORTED, &args, &nitems))
     {
         mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports NetWM.\n");
         for (i = 0; i < nitems; i++)
-            wm |= net_wm_support_state_test(args[i]);
+            wm |= net_wm_support_state_test(vo->x11, args[i]);
         XFree(args);
 #if 0
         // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
         // (in their implementation it only changes internal window state, nothing more!!!)
         if (wm & vo_wm_FULLSCREEN)
         {
-            if (x11_get_property(vo->x11, XA_BLACKBOX_PID, &args, &nitems))
+            if (x11_get_property(x11, x11->XA_BLACKBOX_PID, &args, &nitems))
             {
                 mp_msg(MSGT_VO, MSGL_V,
                        "[x11] Detected wm is a broken OpenBox.\n");
@@ -354,8 +341,8 @@ static int vo_wm_detect(struct vo *vo)
     return wm;
 }
 
-#define XA_INIT(x) XA##x = XInternAtom(d, #x, False)
-static void init_atoms(Display *d)
+#define XA_INIT(x) x11->XA##x = XInternAtom(x11->display, #x, False)
+static void init_atoms(struct vo_x11_state *x11)
 {
     XA_INIT(_NET_SUPPORTED);
     XA_INIT(_NET_WM_STATE);
@@ -457,7 +444,7 @@ int vo_init(struct vo *vo)
     mScreen = DefaultScreen(x11->display);  // screen ID
     mRootWin = RootWindow(x11->display, mScreen);   // root window ID
 
-    init_atoms(vo->x11->display);
+    init_atoms(vo->x11);
 
 #ifdef HAVE_XF86VM
     {
@@ -948,16 +935,17 @@ void vo_x11_decoration(Display * vo_Display, Window w, int d)
     }
 }
 
-void vo_x11_classhint(Display * display, Window window, char *name)
+void vo_x11_classhint(struct vo *vo, Window window, char *name)
 {
+    struct vo_x11_state *x11 = vo->x11;
     XClassHint wmClass;
     pid_t pid = getpid();
 
     wmClass.res_name = name;
     wmClass.res_class = "MPlayer";
-    XSetClassHint(display, window, &wmClass);
-    XChangeProperty(display, window, XA_NET_WM_PID, XA_CARDINAL, 32,
-                    PropModeReplace, (unsigned char *) &pid, 1);
+    XSetClassHint(x11->display, window, &wmClass);
+    XChangeProperty(x11->display, window, x11->XA_NET_WM_PID, XA_CARDINAL,
+                    32, PropModeReplace, (unsigned char *) &pid, 1);
 }
 
 Window vo_window = None;
@@ -1023,6 +1011,7 @@ static int mouse_waiting_hide;
 
 int vo_x11_check_events(struct vo *vo)
 {
+    struct vo_x11_state *x11 = vo->x11;
     struct MPOpts *opts = vo->opts;
     Display *display = vo->x11->display;
     int ret = 0;
@@ -1167,8 +1156,8 @@ int vo_x11_check_events(struct vo *vo)
                 vo_fs_flip = 0;
                 break;
 	    case ClientMessage:
-                if (Event.xclient.message_type == XAWM_PROTOCOLS &&
-                    Event.xclient.data.l[0] == XAWM_DELETE_WINDOW)
+                if (Event.xclient.message_type == x11->XAWM_PROTOCOLS &&
+                    Event.xclient.data.l[0] == x11->XAWM_DELETE_WINDOW)
                     mplayer_put_key(KEY_CLOSE_WIN);
                 break;
         }
@@ -1235,7 +1224,7 @@ void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max
     XSetWMNormalHints(vo->x11->display, vo_window, &vo_hint);
 }
 
-static int vo_x11_get_gnome_layer(Display * mDisplay, Window win)
+static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
 {
     Atom type;
     int format;
@@ -1243,7 +1232,7 @@ static int vo_x11_get_gnome_layer(Display * mDisplay, Window win)
     unsigned long bytesafter;
     unsigned short *args = NULL;
 
-    if (XGetWindowProperty(mDisplay, win, XA_WIN_LAYER, 0, 16384,
+    if (XGetWindowProperty(x11->display, win, x11->XA_WIN_LAYER, 0, 16384,
                            False, AnyPropertyType, &type, &format, &nitems,
                            &bytesafter,
                            (unsigned char **) &args) == Success
@@ -1257,7 +1246,7 @@ static int vo_x11_get_gnome_layer(Display * mDisplay, Window win)
 }
 
 //
-static Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
+static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot,
                                    Visual * vis, int x, int y,
                                    unsigned int width, unsigned int height,
                                    int depth, Colormap col_map)
@@ -1277,12 +1266,12 @@ static Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
     xswa.bit_gravity = StaticGravity;
 
     ret_win =
-        XCreateWindow(mDisplay, mRootWin, x, y, width, height, 0, depth,
+        XCreateWindow(x11->display, mRootWin, x, y, width, height, 0, depth,
                       CopyFromParent, vis, xswamask, &xswa);
-    XSetWMProtocols(mDisplay, ret_win, &XAWM_DELETE_WINDOW, 1);
+    XSetWMProtocols(x11->display, ret_win, &x11->XAWM_DELETE_WINDOW, 1);
     if (!f_gc)
-        f_gc = XCreateGC(mDisplay, ret_win, 0, 0);
-    XSetForeground(mDisplay, f_gc, 0);
+        f_gc = XCreateGC(x11->display, ret_win, 0, 0);
+    XSetForeground(x11->display, f_gc, 0);
 
     return ret_win;
 }
@@ -1309,6 +1298,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                              const char *classname, const char *title)
 {
   struct MPOpts *opts = vo->opts;
+  struct vo_x11_state *x11 = vo->x11;
   Display *mDisplay = vo->x11->display;
   if (vo_window == None) {
     XSizeHints hint;
@@ -1316,9 +1306,9 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     vo_fs = 0;
     vo->dwidth = width;
     vo->dheight = height;
-    vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vis->visual,
+    vo_window = vo_x11_create_smooth_window(x11, mRootWin, vis->visual,
                       x, y, width, height, vis->depth, col_map);
-    vo_x11_classhint(mDisplay, vo_window, classname);
+    vo_x11_classhint(vo, vo_window, classname);
     XStoreName(mDisplay, vo_window, title);
     vo_hidecursor(mDisplay, vo_window);
     XSelectInput(mDisplay, vo_window, StructureNotifyMask);
@@ -1340,7 +1330,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
           StructureNotifyMask | KeyPressMask | PointerMotionMask |
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
   }
-  if (opts->vo_ontop) vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
+  if (opts->vo_ontop) vo_x11_setlayer(vo, vo_window, opts->vo_ontop);
   vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen(vo);
@@ -1391,8 +1381,9 @@ void vo_x11_clearwindow(struct vo *vo, Window vo_window)
 }
 
 
-void vo_x11_setlayer(Display * mDisplay, Window vo_window, int layer)
+void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
 {
+    struct vo_x11_state *x11 = vo->x11;
     if (WinID >= 0)
         return;
 
@@ -1401,20 +1392,20 @@ void vo_x11_setlayer(Display * mDisplay, Window vo_window, int layer)
         XClientMessageEvent xev;
 
         if (!orig_layer)
-            orig_layer = vo_x11_get_gnome_layer(mDisplay, vo_window);
+            orig_layer = vo_x11_get_gnome_layer(x11, vo_window);
 
         memset(&xev, 0, sizeof(xev));
         xev.type = ClientMessage;
-        xev.display = mDisplay;
+        xev.display = x11->display;
         xev.window = vo_window;
-        xev.message_type = XA_WIN_LAYER;
+        xev.message_type = x11->XA_WIN_LAYER;
         xev.format = 32;
         xev.data.l[0] = layer ? fs_layer : orig_layer;  // if not fullscreen, stay on default layer
         xev.data.l[1] = CurrentTime;
         mp_msg(MSGT_VO, MSGL_V,
                "[x11] Layered style stay on top (layer %ld).\n",
                xev.data.l[0]);
-        XSendEvent(mDisplay, mRootWin, False, SubstructureNotifyMask,
+        XSendEvent(x11->display, mRootWin, False, SubstructureNotifyMask,
                    (XEvent *) & xev);
     } else if (vo_fs_type & vo_wm_NETWM)
     {
@@ -1423,26 +1414,26 @@ void vo_x11_setlayer(Display * mDisplay, Window vo_window, int layer)
 
         memset(&xev, 0, sizeof(xev));
         xev.type = ClientMessage;
-        xev.message_type = XA_NET_WM_STATE;
-        xev.display = mDisplay;
+        xev.message_type = x11->XA_NET_WM_STATE;
+        xev.display = x11->display;
         xev.window = vo_window;
         xev.format = 32;
         xev.data.l[0] = layer;
 
         if (vo_fs_type & vo_wm_STAYS_ON_TOP)
-            xev.data.l[1] = XA_NET_WM_STATE_STAYS_ON_TOP;
+            xev.data.l[1] = x11->XA_NET_WM_STATE_STAYS_ON_TOP;
         else if (vo_fs_type & vo_wm_ABOVE)
-            xev.data.l[1] = XA_NET_WM_STATE_ABOVE;
+            xev.data.l[1] = x11->XA_NET_WM_STATE_ABOVE;
         else if (vo_fs_type & vo_wm_FULLSCREEN)
-            xev.data.l[1] = XA_NET_WM_STATE_FULLSCREEN;
+            xev.data.l[1] = x11->XA_NET_WM_STATE_FULLSCREEN;
         else if (vo_fs_type & vo_wm_BELOW)
             // This is not fallback. We can safely assume that the situation
             // where only NETWM_STATE_BELOW is supported doesn't exist.
-            xev.data.l[1] = XA_NET_WM_STATE_BELOW;
+            xev.data.l[1] = x11->XA_NET_WM_STATE_BELOW;
 
-        XSendEvent(mDisplay, mRootWin, False, SubstructureRedirectMask,
+        XSendEvent(x11->display, mRootWin, False, SubstructureRedirectMask,
                    (XEvent *) & xev);
-        state = XGetAtomName(mDisplay, xev.data.l[1]);
+        state = XGetAtomName(x11->display, xev.data.l[1]);
         mp_msg(MSGT_VO, MSGL_V,
                "[x11] NET style stay on top (layer %d). Using state %s.\n",
                layer, state);
@@ -1583,14 +1574,14 @@ void vo_x11_fullscreen(struct vo *vo)
     {
         vo_x11_decoration(x11->display, vo_window, (vo_fs) ? 0 : 1);
         vo_x11_sizehint(vo, x, y, w, h, 0);
-        vo_x11_setlayer(x11->display, vo_window, vo_fs);
+        vo_x11_setlayer(vo, vo_window, vo_fs);
 
 
         XMoveResizeWindow(x11->display, vo_window, x, y, w, h);
     }
     /* some WMs lose ontop after fullscreen */
     if ((!(vo_fs)) & opts->vo_ontop)
-        vo_x11_setlayer(x11->display, vo_window, opts->vo_ontop);
+        vo_x11_setlayer(vo, vo_window, opts->vo_ontop);
 
     XMapRaised(x11->display, vo_window);
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // some WMs change window pos on map
@@ -1604,7 +1595,7 @@ void vo_x11_ontop(struct vo *vo)
     struct MPOpts *opts = vo->opts;
     opts->vo_ontop = !opts->vo_ontop;
 
-    vo_x11_setlayer(vo->x11->display, vo_window, opts->vo_ontop);
+    vo_x11_setlayer(vo, vo_window, opts->vo_ontop);
 }
 
 /*

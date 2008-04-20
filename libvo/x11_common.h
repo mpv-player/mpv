@@ -9,6 +9,19 @@ struct vo;
 struct vo_x11_state {
     Display *display;
     int depthonscreen;
+    Atom XA_NET_SUPPORTED;
+    Atom XA_NET_WM_STATE;
+    Atom XA_NET_WM_STATE_FULLSCREEN;
+    Atom XA_NET_WM_STATE_ABOVE;
+    Atom XA_NET_WM_STATE_STAYS_ON_TOP;
+    Atom XA_NET_WM_STATE_BELOW;
+    Atom XA_NET_WM_PID;
+    Atom XA_WIN_PROTOCOLS;
+    Atom XA_WIN_LAYER;
+    Atom XA_WIN_HINTS;
+    Atom XA_BLACKBOX_PID;
+    Atom XAWM_PROTOCOLS;
+    Atom XAWM_DELETE_WINDOW;
 };
 
 #ifdef X11_FULLSCREEN
@@ -44,12 +57,12 @@ void vo_x11_init_state(struct vo_x11_state *s);
 int vo_init(struct vo *vo);
 void vo_uninit(struct vo_x11_state *x11);
 extern void vo_x11_decoration( Display * vo_Display,Window w,int d );
-extern void vo_x11_classhint( Display * display,Window window,char *name );
+void vo_x11_classhint(struct vo *vo, Window window, char *name);
 void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max);
 int vo_x11_check_events(struct vo *vo);
 extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
 void vo_x11_fullscreen(struct vo *vo);
-extern void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer );
+void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
 void vo_x11_uninit(struct vo *vo);
 Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo);
 uint32_t vo_x11_set_equalizer(struct vo *vo, char *name, int value);
@@ -144,6 +157,8 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define vo_x11_clearwindow_part(display, ...) vo_x11_clearwindow_part(global_vo, __VA_ARGS__)
 #define vo_vm_close(display) vo_vm_close(global_vo)
 #define vo_x11_clearwindow(display, window) vo_x11_clearwindow(global_vo, window)
+#define vo_x11_classhint(display, window, name) vo_x11_classhint(global_vo, window, name)
+#define vo_x11_setlayer(display, window, layer) vo_x11_setlayer(global_vo, window, layer)
 
 #define mDisplay global_vo->x11->display
 #define vo_depthonscreen global_vo->x11->depthonscreen

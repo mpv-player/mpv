@@ -376,7 +376,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
            ctx->drwY, vo->dwidth, vo->dheight);
 
     if (opts->vo_ontop)
-        vo_x11_setlayer(x11->display, vo_window, opts->vo_ontop);
+        vo_x11_setlayer(vo, vo_window, opts->vo_ontop);
 
     return 0;
 }
