@@ -4837,6 +4837,22 @@ static int exp_decode_pointer(void *ptr)
     return 0;
 }
 
+/* Fake implementation of sdt::_Lockit::_Lockit(void) from msvcp60.dll
+   Needed by SCLS.DLL */
+static int exp_0Lockit_dummy(void)
+{
+    dbgprintf("0Lockit_dummy (??0_Lockit@std@@QAE@XZ)\n");
+    return 0;
+}
+
+/* Fake implementation of sdt::_Lockit::~_Lockit(void) from msvcp60.dll
+   Needed by SCLS.DLL */
+static int exp_1Lockit_dummy(void)
+{
+    dbgprintf("1Lockit_dummy (??1_Lockit@std@@QAE@XZ)\n");
+    return 0;
+}
+
 struct exports
 {
     char name[64];
@@ -5276,6 +5292,11 @@ struct exports exp_msvcr80[]={
     FF(_decode_pointer, -1)
 };
 
+struct exports exp_msvcp60[]={
+    {"??0_Lockit@std@@QAE@XZ", -1, exp_0Lockit_dummy},
+    {"??1_Lockit@std@@QAE@XZ", -1, exp_1Lockit_dummy}
+};
+
 #define LL(X) \
     {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
 
@@ -5302,6 +5323,7 @@ struct libs libraries[]={
     LL(comdlg32)
     LL(shlwapi)
     LL(msvcr80)
+    LL(msvcp60)
 };
 
 static WIN_BOOL WINAPI ext_stubs(void)
