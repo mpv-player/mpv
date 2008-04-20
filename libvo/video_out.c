@@ -30,10 +30,6 @@ int xinerama_screen = -1;
 int xinerama_x;
 int xinerama_y;
 
-// currect resolution/bpp on screen:  (should be autodetected by vo_init())
-int vo_screenwidth=0;
-int vo_screenheight=0;
-
 int vo_nomouse_input = 0;
 int vo_grabpointer = 1;
 int vo_doublebuffering = 1;
@@ -353,16 +349,17 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      char *title, uint32_t format)
 {
+    struct MPOpts *opts = vo->opts;
     panscan_init();
     aspect_save_orig(width, height);
     aspect_save_prescale(d_width, d_height);
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
         aspect(&d_width, &d_height, A_NOZOOM);
-        vo->dx = (int)(vo_screenwidth - d_width) / 2;
-        vo->dy = (int)(vo_screenheight - d_height) / 2;
+        vo->dx = (int)(opts->vo_screenwidth - d_width) / 2;
+        vo->dy = (int)(opts->vo_screenheight - d_height) / 2;
         geometry(&vo->dx, &vo->dy, &d_width, &d_height,
-                 vo_screenwidth, vo_screenheight);
+                 opts->vo_screenwidth, opts->vo_screenheight);
         vo->dx += xinerama_x;
         vo->dy += xinerama_y;
         vo->dwidth = d_width;

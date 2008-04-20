@@ -15,4 +15,6 @@
 #define vo_dwidth global_vo->dwidth
 #define vo_dheight global_vo->dheight
 #define vo_dbpp global_vo->opts->vo_dbpp
+#define vo_screenwidth global_vo->opts->vo_screenwidth
+#define vo_screenheight global_vo->opts->vo_screenheight
 #endif

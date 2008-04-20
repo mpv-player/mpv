@@ -152,13 +152,14 @@ static void draw_alpha_null(void *p, int x0, int y0, int w, int h,
 static void deallocate_xvimage(struct vo *vo, int foo);
 
 static void calc_drwXY(struct vo *vo, uint32_t *drwX, uint32_t *drwY) {
+    struct MPOpts *opts = vo->opts;
   *drwX = *drwY = 0;
   if (vo_fs) {
     aspect(&vo->dwidth, &vo->dheight, A_ZOOM);
-    vo->dwidth = FFMIN(vo->dwidth, vo_screenwidth);
-    vo->dheight = FFMIN(vo->dheight, vo_screenheight);
-    *drwX = (vo_screenwidth - vo->dwidth) / 2;
-    *drwY = (vo_screenheight - vo->dheight) / 2;
+    vo->dwidth = FFMIN(vo->dwidth, opts->vo_screenwidth);
+    vo->dheight = FFMIN(vo->dheight, opts->vo_screenheight);
+    *drwX = (opts->vo_screenwidth - vo->dwidth) / 2;
+    *drwY = (opts->vo_screenheight - vo->dheight) / 2;
     mp_msg(MSGT_VO, MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",
            *drwX, *drwY, vo->dwidth, vo->dheight);
   } else if (WinID == 0) {
@@ -246,8 +247,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             vo_vm_switch(vo, vm_width, vm_height, &modeline_width,
                          &modeline_height);
             ctx->mode_switched = 1;
-            hint.x = (vo_screenwidth - modeline_width) / 2;
-            hint.y = (vo_screenheight - modeline_height) / 2;
+            hint.x = (opts->vo_screenwidth - modeline_width) / 2;
+            hint.y = (opts->vo_screenheight - modeline_height) / 2;
             hint.width = modeline_width;
             hint.height = modeline_height;
             aspect_save_screenres(modeline_width, modeline_height);
@@ -706,7 +707,7 @@ static void uninit(struct vo *vo)
         deallocate_xvimage(vo, i);
 #ifdef HAVE_XF86VM
     if (ctx->mode_switched)
-        vo_vm_close(vo->x11->display);
+        vo_vm_close(vo);
 #endif
     if (ctx->event_fd_registered)
         mp_input_rm_event_fd(ConnectionNumber(vo->x11->display));

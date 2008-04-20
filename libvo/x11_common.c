@@ -373,6 +373,7 @@ static void init_atoms(Display *d)
 }
 
 void update_xinerama_info(struct vo *vo) {
+    struct MPOpts *opts = vo->opts;
     int screen = xinerama_screen;
     xinerama_x = xinerama_y = 0;
 #ifdef HAVE_XINERAMA
@@ -398,19 +399,20 @@ void update_xinerama_info(struct vo *vo) {
         }
         if (screen < 0)
             screen = 0;
-        vo_screenwidth = screens[screen].width;
-        vo_screenheight = screens[screen].height;
+        opts->vo_screenwidth = screens[screen].width;
+        opts->vo_screenheight = screens[screen].height;
         xinerama_x = screens[screen].x_org;
         xinerama_y = screens[screen].y_org;
 
         XFree(screens);
     }
 #endif
-    aspect_save_screenres(vo_screenwidth, vo_screenheight);
+    aspect_save_screenres(opts->vo_screenwidth, opts->vo_screenheight);
 }
 
 int vo_init(struct vo *vo)
 {
+    struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
 // int       mScreen;
     int depth, bpp;
@@ -462,17 +464,17 @@ int vo_init(struct vo *vo)
         int clock;
 
         XF86VidModeGetModeLine(x11->display, mScreen, &clock, &modeline);
-        if (!vo_screenwidth)
-            vo_screenwidth = modeline.hdisplay;
-        if (!vo_screenheight)
-            vo_screenheight = modeline.vdisplay;
+        if (!opts->vo_screenwidth)
+            opts->vo_screenwidth = modeline.hdisplay;
+        if (!opts->vo_screenheight)
+            opts->vo_screenheight = modeline.vdisplay;
     }
 #endif
     {
-        if (!vo_screenwidth)
-            vo_screenwidth = DisplayWidth(x11->display, mScreen);
-        if (!vo_screenheight)
-            vo_screenheight = DisplayHeight(x11->display, mScreen);
+        if (!opts->vo_screenwidth)
+            opts->vo_screenwidth = DisplayWidth(x11->display, mScreen);
+        if (!opts->vo_screenheight)
+            opts->vo_screenheight = DisplayHeight(x11->display, mScreen);
     }
     // get color depth (from root window, or the best visual):
     XGetWindowAttributes(x11->display, mRootWin, &attribs);
@@ -535,7 +537,7 @@ int vo_init(struct vo *vo)
         mLocalDisplay = 0;
     mp_msg(MSGT_VO, MSGL_V,
            "vo: X11 running at %dx%d with depth %d and %d bpp (\"%s\" => %s display)\n",
-           vo_screenwidth, vo_screenheight, depth, x11->depthonscreen,
+           opts->vo_screenwidth, opts->vo_screenheight, depth, x11->depthonscreen,
            dispName, mLocalDisplay ? "local" : "remote");
 
     vo_wm_type = vo_wm_detect(vo);
@@ -1021,6 +1023,7 @@ static int mouse_waiting_hide;
 
 int vo_x11_check_events(struct vo *vo)
 {
+    struct MPOpts *opts = vo->opts;
     Display *display = vo->x11->display;
     int ret = 0;
     XEvent Event;
@@ -1054,8 +1057,8 @@ int vo_x11_check_events(struct vo *vo)
                 ret |= VO_EVENT_EXPOSE;
                 break;
             case ConfigureNotify:
-//         if (!vo_fs && (Event.xconfigure.width == vo_screenwidth || Event.xconfigure.height == vo_screenheight)) break;
-//         if (vo_fs && Event.xconfigure.width != vo_screenwidth && Event.xconfigure.height != vo_screenheight) break;
+//         if (!vo_fs && (Event.xconfigure.width == opts->vo_screenwidth || Event.xconfigure.height == opts->vo_screenheight)) break;
+//         if (vo_fs && Event.xconfigure.width != opts->vo_screenwidth && Event.xconfigure.height != opts->vo_screenheight) break;
                 if (vo_window == None)
                     break;
                 vo->dwidth = Event.xconfigure.width;
@@ -1346,14 +1349,15 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
                              int img_width, int img_height, int use_fs)
 {
+    struct MPOpts *opts = vo->opts;
     Display *mDisplay = vo->x11->display;
     int u_dheight, u_dwidth, left_ov, left_ov2;
 
     if (!f_gc)
         return;
 
-    u_dheight = use_fs ? vo_screenheight : vo->dheight;
-    u_dwidth = use_fs ? vo_screenwidth : vo->dwidth;
+    u_dheight = use_fs ? opts->vo_screenheight : vo->dheight;
+    u_dwidth = use_fs ? opts->vo_screenwidth : vo->dwidth;
     if ((u_dheight <= img_height) && (u_dwidth <= img_width))
         return;
 
@@ -1375,14 +1379,15 @@ void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
     XFlush(mDisplay);
 }
 
-void vo_x11_clearwindow(Display * mDisplay, Window vo_window)
+void vo_x11_clearwindow(struct vo *vo, Window vo_window)
 {
+    struct MPOpts *opts = vo->opts;
     if (!f_gc)
         return;
-    XFillRectangle(mDisplay, vo_window, f_gc, 0, 0, vo_screenwidth,
-                   vo_screenheight);
+    XFillRectangle(vo->x11->display, vo_window, f_gc, 0, 0,
+                   opts->vo_screenwidth, opts->vo_screenheight);
     //
-    XFlush(mDisplay);
+    XFlush(vo->x11->display);
 }
 
 
@@ -1555,8 +1560,8 @@ void vo_x11_fullscreen(struct vo *vo)
             update_xinerama_info(vo);
             x = xinerama_x;
             y = xinerama_y;
-            w = vo_screenwidth;
-            h = vo_screenheight;
+            w = opts->vo_screenwidth;
+            h = opts->vo_screenheight;
     }
     {
         long dummy;
@@ -1766,6 +1771,7 @@ void vo_x11_selectinput_witherr(Display * display, Window w,
 void vo_vm_switch(struct vo *vo, uint32_t X, uint32_t Y, int *modeline_width,
                   int *modeline_height)
 {
+    struct MPOpts *opts = vo->opts;
     Display *mDisplay = vo->x11->display;
     int vm_event, vm_error;
     int vm_ver, vm_rev;
@@ -1808,14 +1814,16 @@ void vo_vm_switch(struct vo *vo, uint32_t X, uint32_t Y, int *modeline_width,
         XF86VidModeLockModeSwitch(mDisplay, mScreen, 0);
         XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);
         XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);
-        X = (vo_screenwidth - *modeline_width) / 2;
-        Y = (vo_screenheight - *modeline_height) / 2;
+        X = (opts->vo_screenwidth - *modeline_width) / 2;
+        Y = (opts->vo_screenheight - *modeline_height) / 2;
         XF86VidModeSetViewPort(mDisplay, mScreen, X, Y);
     }
 }
 
-void vo_vm_close(Display * dpy)
+void vo_vm_close(struct vo *vo)
 {
+    Display *dpy = vo->x11->display;
+    struct MPOpts *opts = vo->opts;
 #ifdef HAVE_NEW_GUI
     if (vidmodes != NULL && vo_window != None)
 #else
@@ -1832,12 +1840,12 @@ void vo_vm_close(Display * dpy)
         XF86VidModeGetAllModeLines(dpy, mScreen, &modecount,
                                    &vidmodes);
         for (i = 0; i < modecount; i++)
-            if ((vidmodes[i]->hdisplay == vo_screenwidth)
-                && (vidmodes[i]->vdisplay == vo_screenheight))
+            if ((vidmodes[i]->hdisplay == opts->vo_screenwidth)
+                && (vidmodes[i]->vdisplay == opts->vo_screenheight))
             {
                 mp_msg(MSGT_VO, MSGL_INFO,
                        "Returning to original mode %dx%d\n",
-                       vo_screenwidth, vo_screenheight);
+                       opts->vo_screenwidth, opts->vo_screenheight);
                 break;
             }
 
@@ -2456,6 +2464,7 @@ int vo_xv_init_colorkey(struct vo *vo)
 void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
                          int32_t w, int32_t h)
 {
+    struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
   if( xv_ck_info.method == CK_METHOD_MANUALFILL ||
       xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
@@ -2475,19 +2484,19 @@ void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
     if ( y > 0 )
       XFillRectangle(x11->display, vo_window, vo_gc,
                       0, 0,
-                      vo_screenwidth, y);
+                      opts->vo_screenwidth, y);
     if (x > 0)
       XFillRectangle(x11->display, vo_window, vo_gc,
                       0, 0,
-                      x, vo_screenheight);
-    if (x + w < vo_screenwidth)
+                      x, opts->vo_screenheight);
+    if (x + w < opts->vo_screenwidth)
       XFillRectangle(x11->display, vo_window, vo_gc,
                       x + w, 0,
-                      vo_screenwidth, vo_screenheight);
-    if (y + h < vo_screenheight)
+                      opts->vo_screenwidth, opts->vo_screenheight);
+    if (y + h < opts->vo_screenheight)
       XFillRectangle(x11->display, vo_window, vo_gc,
                       0, y + h,
-                      vo_screenwidth, vo_screenheight);
+                      opts->vo_screenwidth, opts->vo_screenheight);
   }
 }
 

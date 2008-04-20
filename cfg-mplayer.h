@@ -173,8 +173,8 @@ const m_option_t mplayer_opts[]={
 	{"x", &opt_screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"y", &opt_screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	// set screen dimensions (when not detectable or virtual!=visible)
-	{"screenw", &vo_screenwidth, CONF_TYPE_INT, CONF_RANGE|CONF_OLD, 0, 4096, NULL},
-	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE|CONF_OLD, 0, 4096, NULL},
+        INTRANGE("screenw", vo_screenwidth, 0, 4096, CONF_OLD),
+        INTRANGE("screenh", vo_screenheight, 0, 4096, CONF_OLD),
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - useful for 16:9 TV-out

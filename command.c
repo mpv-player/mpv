@@ -69,13 +69,14 @@ extern int use_menu;
 static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
                                       double *dx, double *dy)
 {
+    struct MPOpts *opts = &mpctx->opts;
     struct vo *vo = mpctx->video_out;
     //remove the borders, if any, and rescale to the range [0,1],[0,1]
     if (vo_fs) {		//we are in full-screen mode
-	if (vo_screenwidth > vo->dwidth)  //there are borders along the x axis
-	    ix -= (vo_screenwidth - vo->dwidth) / 2;
-	if (vo_screenheight > vo->dheight)  //there are borders along the y axis (usual way)
-	    iy -= (vo_screenheight - vo->dheight) / 2;
+	if (opts->vo_screenwidth > vo->dwidth)  //there are borders along the x axis
+	    ix -= (opts->vo_screenwidth - vo->dwidth) / 2;
+	if (opts->vo_screenheight > vo->dheight)  //there are borders along the y axis (usual way)
+	    iy -= (opts->vo_screenheight - vo->dheight) / 2;
 
 	if (ix < 0 || ix > vo->dwidth) {
 	    *dx = *dy = -1.0;
@@ -92,7 +93,7 @@ static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
 
     mp_msg(MSGT_CPLAYER, MSGL_V,
 	   "\r\nrescaled coordinates: %.3lf, %.3lf, screen (%d x %d), vodisplay: (%d, %d), fullscreen: %d\r\n",
-	   *dx, *dy, vo_screenwidth, vo_screenheight, vo->dwidth,
+	   *dx, *dy, opts->vo_screenwidth, opts->vo_screenheight, vo->dwidth,
 	   vo->dheight, vo_fs);
 }
 

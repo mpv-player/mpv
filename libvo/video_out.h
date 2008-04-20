@@ -245,10 +245,6 @@ extern int xinerama_screen;
 extern int xinerama_x;
 extern int xinerama_y;
 
-// correct resolution/bpp on screen:  (should be autodetected by vo_init())
-extern int vo_screenwidth;
-extern int vo_screenheight;
-
 extern int vo_grabpointer;
 extern int vo_doublebuffering;
 extern int vo_directrendering;

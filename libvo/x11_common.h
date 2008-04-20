@@ -60,7 +60,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
 	Colormap col_map, const char *classname, const char *title);
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
 	int img_width, int img_height, int use_fs);
-extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
+void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 void vo_x11_ontop(struct vo *vo);
 void vo_x11_ewmh_fullscreen(Display *mDisplay, int action);
 
@@ -113,7 +113,7 @@ int xv_test_ckm( void * arg );
 
 #ifdef HAVE_XF86VM
 void vo_vm_switch(struct vo *vo, uint32_t, uint32_t, int*, int*);
-void vo_vm_close(Display*);
+void vo_vm_close(struct vo *vo);
 #endif
 
 void update_xinerama_info(struct vo *vo);
@@ -142,6 +142,8 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define vo_xv_init_colorkey() vo_xv_init_colorkey(global_vo)
 #define vo_xv_draw_colorkey(...) vo_xv_draw_colorkey(global_vo, __VA_ARGS__)
 #define vo_x11_clearwindow_part(display, ...) vo_x11_clearwindow_part(global_vo, __VA_ARGS__)
+#define vo_vm_close(display) vo_vm_close(global_vo)
+#define vo_x11_clearwindow(display, window) vo_x11_clearwindow(global_vo, window)
 
 #define mDisplay global_vo->x11->display
 #define vo_depthonscreen global_vo->x11->depthonscreen
