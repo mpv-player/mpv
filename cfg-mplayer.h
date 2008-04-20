@@ -90,6 +90,7 @@ const m_option_t tvscan_conf[]={
 #define FLAG_ON(optname, varname, flags) {optname, NULL, CONF_TYPE_FLAG, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
 #define FLAG_OFF(optname, varname, flags) {optname, NULL, CONF_TYPE_FLAG, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define STRINGLIST(optname, varname, flags) {optname, NULL, CONF_TYPE_STRING_LIST, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define INTRANGE(optname, varname, min, max, flags) {optname, NULL, CONF_TYPE_INT, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
 
 const m_option_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
@@ -189,7 +190,7 @@ const m_option_t mplayer_opts[]={
 	{"fsmode", "-fsmode is obsolete, avoid it and use -fstype instead.\nIf you really want it, try -fsmode-dontuse, but don't report bugs!\n", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
 	{"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	// set bpp (x11+vm, dga, fbdev, vesa, svga?)
-        {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
+        INTRANGE("bpp", vo_dbpp, 0, 32, 0),
 	{"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"nocolorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0x1000000, NULL},
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},

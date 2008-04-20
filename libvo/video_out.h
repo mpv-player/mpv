@@ -213,6 +213,8 @@ struct vo {
     void *priv;
     struct MPOpts *opts;
     struct vo_x11_state *x11;
+
+    // requested position/resolution
     int dx;
     int dy;
     int dwidth;
@@ -247,9 +249,6 @@ extern int xinerama_y;
 extern int vo_depthonscreen;
 extern int vo_screenwidth;
 extern int vo_screenheight;
-
-// requested resolution/bpp:  (-x -y -bpp options)
-extern int vo_dbpp;
 
 extern int vo_grabpointer;
 extern int vo_doublebuffering;

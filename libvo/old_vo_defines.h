@@ -14,5 +14,5 @@
 #define vo_dy global_vo->dy
 #define vo_dwidth global_vo->dwidth
 #define vo_dheight global_vo->dheight
-
+#define vo_dbpp global_vo->opts->vo_dbpp
 #endif

@@ -35,9 +35,6 @@ int vo_depthonscreen=0;
 int vo_screenwidth=0;
 int vo_screenheight=0;
 
-// requested resolution/bpp:  (-x -y -bpp options)
-int vo_dbpp=0;
-
 int vo_nomouse_input = 0;
 int vo_grabpointer = 1;
 int vo_doublebuffering = 1;

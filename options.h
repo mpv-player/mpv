@@ -6,6 +6,7 @@ typedef struct MPOpts {
     char **audio_driver_list;
     int fixed_vo;
     int vo_ontop;
+    int vo_dbpp;
     int correct_pts;
     int user_correct_pts;
 } MPOpts;
