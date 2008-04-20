@@ -77,7 +77,6 @@ int stop_xscreensaver = 0;
 static int dpms_disabled = 0;
 
 char *mDisplayName = NULL;
-Display *mDisplay = NULL;
 Window mRootWin;
 int mScreen;
 int mLocalDisplay;
@@ -106,8 +105,6 @@ static Atom XA_BLACKBOX_PID;
 static Atom XAWM_PROTOCOLS;
 static Atom XAWM_DELETE_WINDOW;
 
-#define XA_INIT(x) XA##x = XInternAtom(mDisplay, #x, False)
-
 static int vo_old_x = 0;
 static int vo_old_y = 0;
 static int vo_old_width = 0;
@@ -134,7 +131,7 @@ void vo_x11_init_state(struct vo_x11_state *s)
  *                         _NET_WM_STATE_ADD    -- add state
  *                         _NET_WM_STATE_TOGGLE -- toggle
  */
-void vo_x11_ewmh_fullscreen(int action)
+void vo_x11_ewmh_fullscreen(Display *mDisplay, int action)
 {
     assert(action == _NET_WM_STATE_REMOVE ||
            action == _NET_WM_STATE_ADD || action == _NET_WM_STATE_TOGGLE);
@@ -281,19 +278,20 @@ static int net_wm_support_state_test(Atom atom)
     return 0;
 }
 
-static int x11_get_property(Atom type, Atom ** args, unsigned long *nitems)
+static int x11_get_property(struct vo_x11_state *x11, Atom type, Atom ** args,
+                            unsigned long *nitems)
 {
     int format;
     unsigned long bytesafter;
 
     return (Success ==
-            XGetWindowProperty(mDisplay, mRootWin, type, 0, 16384, False,
+            XGetWindowProperty(x11->display, mRootWin, type, 0, 16384, False,
                                AnyPropertyType, &type, &format, nitems,
                                &bytesafter, (unsigned char **) args)
             && *nitems > 0);
 }
 
-static int vo_wm_detect(void)
+static int vo_wm_detect(struct vo *vo)
 {
     int i;
     int wm = 0;
@@ -304,7 +302,7 @@ static int vo_wm_detect(void)
         return 0;
 
 // -- supports layers
-    if (x11_get_property(XA_WIN_PROTOCOLS, &args, &nitems))
+    if (x11_get_property(vo->x11, XA_WIN_PROTOCOLS, &args, &nitems))
     {
         mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports layers.\n");
         for (i = 0; i < nitems; i++)
@@ -329,7 +327,7 @@ static int vo_wm_detect(void)
         }
     }
 // --- netwm 
-    if (x11_get_property(XA_NET_SUPPORTED, &args, &nitems))
+    if (x11_get_property(vo->x11, XA_NET_SUPPORTED, &args, &nitems))
     {
         mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports NetWM.\n");
         for (i = 0; i < nitems; i++)
@@ -340,7 +338,7 @@ static int vo_wm_detect(void)
         // (in their implementation it only changes internal window state, nothing more!!!)
         if (wm & vo_wm_FULLSCREEN)
         {
-            if (x11_get_property(XA_BLACKBOX_PID, &args, &nitems))
+            if (x11_get_property(vo->x11, XA_BLACKBOX_PID, &args, &nitems))
             {
                 mp_msg(MSGT_VO, MSGL_V,
                        "[x11] Detected wm is a broken OpenBox.\n");
@@ -356,7 +354,8 @@ static int vo_wm_detect(void)
     return wm;
 }
 
-static void init_atoms(void)
+#define XA_INIT(x) XA##x = XInternAtom(d, #x, False)
+static void init_atoms(Display *d)
 {
     XA_INIT(_NET_SUPPORTED);
     XA_INIT(_NET_WM_STATE);
@@ -373,16 +372,16 @@ static void init_atoms(void)
     XA_INIT(WM_DELETE_WINDOW);
 }
 
-void update_xinerama_info(void) {
+void update_xinerama_info(struct vo *vo) {
     int screen = xinerama_screen;
     xinerama_x = xinerama_y = 0;
 #ifdef HAVE_XINERAMA
-    if (screen >= -1 && XineramaIsActive(mDisplay))
+    if (screen >= -1 && XineramaIsActive(vo->x11->display))
     {
         XineramaScreenInfo *screens;
         int num_screens;
 
-        screens = XineramaQueryScreens(mDisplay, &num_screens);
+        screens = XineramaQueryScreens(vo->x11->display, &num_screens);
         if (screen >= num_screens)
             screen = num_screens - 1;
         if (screen == -1) {
@@ -410,8 +409,9 @@ void update_xinerama_info(void) {
     aspect_save_screenres(vo_screenwidth, vo_screenheight);
 }
 
-int vo_init(void)
+int vo_init(struct vo *vo)
 {
+    struct vo_x11_state *x11 = vo->x11;
 // int       mScreen;
     int depth, bpp;
     unsigned int mask;
@@ -429,7 +429,7 @@ int vo_init(void)
 
     if (vo_depthonscreen)
     {
-        saver_off(mDisplay);
+        saver_off(x11->display);
         return 1;               // already called
     }
 
@@ -445,23 +445,23 @@ int vo_init(void)
 
     mp_msg(MSGT_VO, MSGL_V, "X11 opening display: %s\n", dispName);
 
-    mDisplay = XOpenDisplay(dispName);
-    if (!mDisplay)
+    x11->display = XOpenDisplay(dispName);
+    if (!x11->display)
     {
         mp_msg(MSGT_VO, MSGL_ERR,
                "vo: couldn't open the X11 display (%s)!\n", dispName);
         return 0;
     }
-    mScreen = DefaultScreen(mDisplay);  // screen ID
-    mRootWin = RootWindow(mDisplay, mScreen);   // root window ID
+    mScreen = DefaultScreen(x11->display);  // screen ID
+    mRootWin = RootWindow(x11->display, mScreen);   // root window ID
 
-    init_atoms();
+    init_atoms(vo->x11->display);
 
 #ifdef HAVE_XF86VM
     {
         int clock;
 
-        XF86VidModeGetModeLine(mDisplay, mScreen, &clock, &modeline);
+        XF86VidModeGetModeLine(x11->display, mScreen, &clock, &modeline);
         if (!vo_screenwidth)
             vo_screenwidth = modeline.hdisplay;
         if (!vo_screenheight)
@@ -470,25 +470,25 @@ int vo_init(void)
 #endif
     {
         if (!vo_screenwidth)
-            vo_screenwidth = DisplayWidth(mDisplay, mScreen);
+            vo_screenwidth = DisplayWidth(x11->display, mScreen);
         if (!vo_screenheight)
-            vo_screenheight = DisplayHeight(mDisplay, mScreen);
+            vo_screenheight = DisplayHeight(x11->display, mScreen);
     }
     // get color depth (from root window, or the best visual):
-    XGetWindowAttributes(mDisplay, mRootWin, &attribs);
+    XGetWindowAttributes(x11->display, mRootWin, &attribs);
     depth = attribs.depth;
 
     if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
     {
         Visual *visual;
 
-        depth = vo_find_depth_from_visuals(mDisplay, mScreen, &visual);
+        depth = vo_find_depth_from_visuals(x11->display, mScreen, &visual);
         if (depth != -1)
-            mXImage = XCreateImage(mDisplay, visual, depth, ZPixmap,
+            mXImage = XCreateImage(x11->display, visual, depth, ZPixmap,
                                    0, NULL, 1, 1, 8, 1);
     } else
         mXImage =
-            XGetImage(mDisplay, mRootWin, 0, 0, 1, 1, AllPlanes, ZPixmap);
+            XGetImage(x11->display, mRootWin, 0, 0, 1, 1, AllPlanes, ZPixmap);
 
     vo_depthonscreen = depth;   // display depth on screen
 
@@ -538,19 +538,19 @@ int vo_init(void)
            vo_screenwidth, vo_screenheight, depth, vo_depthonscreen,
            dispName, mLocalDisplay ? "local" : "remote");
 
-    vo_wm_type = vo_wm_detect();
+    vo_wm_type = vo_wm_detect(vo);
 
     vo_fs_type = vo_x11_get_fs_type(vo_wm_type);
 
     fstype_dump(vo_fs_type);
 
-    saver_off(mDisplay);
+    saver_off(x11->display);
     return 1;
 }
 
-void vo_uninit(void)
+void vo_uninit(struct vo_x11_state *x11)
 {
-    if (!mDisplay)
+    if (!x11->display)
     {
         mp_msg(MSGT_VO, MSGL_V,
                "vo: x11 uninit called but X11 not initialized..\n");
@@ -559,9 +559,9 @@ void vo_uninit(void)
 // if( !vo_depthonscreen ) return;
     mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
     XSetErrorHandler(NULL);
-    XCloseDisplay(mDisplay);
+    XCloseDisplay(x11->display);
     vo_depthonscreen = 0;
-    mDisplay = NULL;
+    x11->display = NULL;
 }
 
 #include "osdep/keycodes.h"
@@ -971,15 +971,15 @@ void vo_setwindow(Window w, GC g)
 }
 #endif
 
-void vo_x11_uninit(void)
+void vo_x11_uninit(struct vo *vo)
 {
-    saver_on(mDisplay);
+    saver_on(vo->x11->display);
     if (vo_window != None)
-        vo_showcursor(mDisplay, vo_window);
+        vo_showcursor(vo->x11->display, vo_window);
 
     if (f_gc)
     {
-        XFreeGC(mDisplay, f_gc);
+        XFreeGC(vo->x11->display, f_gc);
         f_gc = NULL;
     }
 #ifdef HAVE_NEW_GUI
@@ -989,22 +989,22 @@ void vo_x11_uninit(void)
     {
         if (vo_gc)
         {
-            XSetBackground(mDisplay, vo_gc, 0);
-            XFreeGC(mDisplay, vo_gc);
+            XSetBackground(vo->x11->display, vo_gc, 0);
+            XFreeGC(vo->x11->display, vo_gc);
             vo_gc = NULL;
         }
         if (vo_window != None)
         {
-            XClearWindow(mDisplay, vo_window);
+            XClearWindow(vo->x11->display, vo_window);
             if (WinID < 0)
             {
                 XEvent xev;
 
-                XUnmapWindow(mDisplay, vo_window);
-                XDestroyWindow(mDisplay, vo_window);
+                XUnmapWindow(vo->x11->display, vo_window);
+                XDestroyWindow(vo->x11->display, vo_window);
                 do
                 {
-                    XNextEvent(mDisplay, &xev);
+                    XNextEvent(vo->x11->display, &xev);
                 }
                 while (xev.type != DestroyNotify
                        || xev.xdestroywindow.event != vo_window);
@@ -1019,8 +1019,9 @@ void vo_x11_uninit(void)
 static unsigned int mouse_timer;
 static int mouse_waiting_hide;
 
-int vo_x11_check_events(Display * mydisplay)
+int vo_x11_check_events(struct vo *vo)
 {
+    Display *display = vo->x11->display;
     int ret = 0;
     XEvent Event;
     char buf[100];
@@ -1031,13 +1032,13 @@ int vo_x11_check_events(Display * mydisplay)
 
     if ((vo_mouse_autohide) && mouse_waiting_hide &&
                                  (GetTimerMS() - mouse_timer >= 1000)) {
-        vo_hidecursor(mydisplay, vo_window);
+        vo_hidecursor(display, vo_window);
         mouse_waiting_hide = 0;
     }
 
-    while (XPending(mydisplay))
+    while (XPending(display))
     {
-        XNextEvent(mydisplay, &Event);
+        XNextEvent(display, &Event);
 #ifdef HAVE_NEW_GUI
         if (use_gui)
         {
@@ -1069,10 +1070,10 @@ int vo_x11_check_events(Display * mydisplay)
                     int foo;
                     Window win;
 
-                    XGetGeometry(mydisplay, vo_window, &root, &foo, &foo,
+                    XGetGeometry(display, vo_window, &root, &foo, &foo,
                                  &foo /*width */ , &foo /*height */ , &foo,
                                  &foo);
-                    XTranslateCoordinates(mydisplay, vo_window, root, 0, 0,
+                    XTranslateCoordinates(display, vo_window, root, 0, 0,
                                           &vo_dx, &vo_dy, &win);
                 }
 #endif
@@ -1108,7 +1109,7 @@ int vo_x11_check_events(Display * mydisplay)
 
                 if (vo_mouse_autohide)
                 {
-                    vo_showcursor(mydisplay, vo_window);
+                    vo_showcursor(display, vo_window);
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
@@ -1116,7 +1117,7 @@ int vo_x11_check_events(Display * mydisplay)
             case ButtonPress:
                 if (vo_mouse_autohide)
                 {
-                    vo_showcursor(mydisplay, vo_window);
+                    vo_showcursor(display, vo_window);
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
@@ -1132,7 +1133,7 @@ int vo_x11_check_events(Display * mydisplay)
             case ButtonRelease:
                 if (vo_mouse_autohide)
                 {
-                    vo_showcursor(mydisplay, vo_window);
+                    vo_showcursor(display, vo_window);
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
@@ -1147,7 +1148,7 @@ int vo_x11_check_events(Display * mydisplay)
             case PropertyNotify:
                 {
                     char *name =
-                        XGetAtomName(mydisplay, Event.xproperty.atom);
+                        XGetAtomName(display, Event.xproperty.atom);
 
                     if (!name)
                         break;
@@ -1159,7 +1160,7 @@ int vo_x11_check_events(Display * mydisplay)
                 break;
             case MapNotify:
                 vo_hint.win_gravity = old_gravity;
-                XSetWMNormalHints(mDisplay, vo_window, &vo_hint);
+                XSetWMNormalHints(display, vo_window, &vo_hint);
                 vo_fs_flip = 0;
                 break;
 	    case ClientMessage:
@@ -1175,9 +1176,10 @@ int vo_x11_check_events(Display * mydisplay)
 /**
  * \brief sets the size and position of the non-fullscreen window.
  */
-static void vo_x11_nofs_sizepos(int x, int y, int width, int height)
+static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
+                                int width, int height)
 {
-  vo_x11_sizehint(x, y, width, height, 0);
+    vo_x11_sizehint(vo, x, y, width, height, 0);
   if (vo_fs) {
     vo_old_x = x;
     vo_old_y = y;
@@ -1188,11 +1190,11 @@ static void vo_x11_nofs_sizepos(int x, int y, int width, int height)
   {
    vo_dwidth = width;
    vo_dheight = height;
-   XMoveResizeWindow(mDisplay, vo_window, x, y, width, height);
+   XMoveResizeWindow(vo->x11->display, vo_window, x, y, width, height);
   }
 }
 
-void vo_x11_sizehint(int x, int y, int width, int height, int max)
+void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max)
 {
     vo_hint.flags = 0;
     if (vo_keepaspect)
@@ -1227,7 +1229,7 @@ void vo_x11_sizehint(int x, int y, int width, int height, int max)
 
     vo_hint.flags |= PWinGravity;
     vo_hint.win_gravity = StaticGravity;
-    XSetWMNormalHints(mDisplay, vo_window, &vo_hint);
+    XSetWMNormalHints(vo->x11->display, vo_window, &vo_hint);
 }
 
 static int vo_x11_get_gnome_layer(Display * mDisplay, Window win)
@@ -1304,6 +1306,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                              const char *classname, const char *title)
 {
   struct MPOpts *opts = vo->opts;
+  Display *mDisplay = vo->x11->display;
   if (vo_window == None) {
     XSizeHints hint;
     XEvent xev;
@@ -1320,7 +1323,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     hint.width = width; hint.height = height;
     hint.flags = PPosition | PSize;
     XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
-    vo_x11_sizehint(x, y, width, height, 0);
+    vo_x11_sizehint(vo, x, y, width, height, 0);
     // map window
     XMapWindow(mDisplay, vo_window);
     XClearWindow(mDisplay, vo_window);
@@ -1335,7 +1338,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
   }
   if (opts->vo_ontop) vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
-  vo_x11_nofs_sizepos(vo_dx, vo_dy, width, height);
+  vo_x11_nofs_sizepos(vo, vo_dx, vo_dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen(vo);
 }
@@ -1516,6 +1519,7 @@ static int vo_x11_get_fs_type(int supported)
 void vo_x11_fullscreen(struct vo *vo)
 {
     struct MPOpts *opts = vo->opts;
+    struct vo_x11_state *x11 = vo->x11;
     int x, y, w, h;
 
     if (WinID >= 0 || vo_fs_flip)
@@ -1532,12 +1536,12 @@ void vo_x11_fullscreen(struct vo *vo)
             h = vo_old_height;
 	}
 
-        vo_x11_ewmh_fullscreen(_NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
+        vo_x11_ewmh_fullscreen(x11->display, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
         vo_fs = VO_FALSE;
     } else
     {
         // win->fs
-        vo_x11_ewmh_fullscreen(_NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
+        vo_x11_ewmh_fullscreen(x11->display, _NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
 
         vo_fs = VO_TRUE;
         if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
@@ -1547,7 +1551,7 @@ void vo_x11_fullscreen(struct vo *vo)
             vo_old_width = vo_dwidth;
             vo_old_height = vo_dheight;
         }
-            update_xinerama_info();
+            update_xinerama_info(vo);
             x = xinerama_x;
             y = xinerama_y;
             w = vo_screenwidth;
@@ -1556,7 +1560,7 @@ void vo_x11_fullscreen(struct vo *vo)
     {
         long dummy;
 
-        XGetWMNormalHints(mDisplay, vo_window, &vo_hint, &dummy);
+        XGetWMNormalHints(x11->display, vo_window, &vo_hint, &dummy);
         if (!(vo_hint.flags & PWinGravity))
             old_gravity = NorthWestGravity;
         else
@@ -1564,29 +1568,29 @@ void vo_x11_fullscreen(struct vo *vo)
     }
     if (vo_wm_type == 0 && !(vo_fsmode & 16))
     {
-        XUnmapWindow(mDisplay, vo_window);      // required for MWM
-        XWithdrawWindow(mDisplay, vo_window, mScreen);
+        XUnmapWindow(x11->display, vo_window);      // required for MWM
+        XWithdrawWindow(x11->display, vo_window, mScreen);
         vo_fs_flip = 1;
     }
 
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
     {
-        vo_x11_decoration(mDisplay, vo_window, (vo_fs) ? 0 : 1);
-        vo_x11_sizehint(x, y, w, h, 0);
-        vo_x11_setlayer(mDisplay, vo_window, vo_fs);
+        vo_x11_decoration(x11->display, vo_window, (vo_fs) ? 0 : 1);
+        vo_x11_sizehint(vo, x, y, w, h, 0);
+        vo_x11_setlayer(x11->display, vo_window, vo_fs);
 
 
-        XMoveResizeWindow(mDisplay, vo_window, x, y, w, h);
+        XMoveResizeWindow(x11->display, vo_window, x, y, w, h);
     }
     /* some WMs lose ontop after fullscreen */
     if ((!(vo_fs)) & opts->vo_ontop)
-        vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
+        vo_x11_setlayer(x11->display, vo_window, opts->vo_ontop);
 
-    XMapRaised(mDisplay, vo_window);
+    XMapRaised(x11->display, vo_window);
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // some WMs change window pos on map
-        XMoveResizeWindow(mDisplay, vo_window, x, y, w, h);
-    XRaiseWindow(mDisplay, vo_window);
-    XFlush(mDisplay);
+        XMoveResizeWindow(x11->display, vo_window, x, y, w, h);
+    XRaiseWindow(x11->display, vo_window);
+    XFlush(x11->display);
 }
 
 void vo_x11_ontop(struct vo *vo)
@@ -1594,7 +1598,7 @@ void vo_x11_ontop(struct vo *vo)
     struct MPOpts *opts = vo->opts;
     opts->vo_ontop = !opts->vo_ontop;
 
-    vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
+    vo_x11_setlayer(vo->x11->display, vo_window, opts->vo_ontop);
 }
 
 /*
@@ -1604,19 +1608,19 @@ void vo_x11_ontop(struct vo *vo)
 static int screensaver_off;
 static unsigned int time_last;
 
-void xscreensaver_heartbeat(void)
+void xscreensaver_heartbeat(struct vo_x11_state *x11)
 {
     unsigned int time = GetTimerMS();
 
-    if (mDisplay && screensaver_off && (time - time_last) > 30000)
+    if (x11->display && screensaver_off && (time - time_last) > 30000)
     {
         time_last = time;
 
-        XResetScreenSaver(mDisplay);
+        XResetScreenSaver(x11->display);
     }
 }
 
-static int xss_suspend(Bool suspend)
+static int xss_suspend(Display *mDisplay, Bool suspend)
 {
 #ifndef HAVE_XSS
     return 0;
@@ -1642,7 +1646,7 @@ static void saver_on(Display * mDisplay)
     if (!screensaver_off)
         return;
     screensaver_off = 0;
-    if (xss_suspend(False))
+    if (xss_suspend(mDisplay, False))
         return;
 #ifdef HAVE_XDPMS
     if (dpms_disabled)
@@ -1683,7 +1687,7 @@ static void saver_off(Display * mDisplay)
     if (screensaver_off)
         return;
     screensaver_off = 1;
-    if (xss_suspend(True))
+    if (xss_suspend(mDisplay, True))
         return;
 #ifdef HAVE_XDPMS
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
@@ -1758,9 +1762,10 @@ void vo_x11_selectinput_witherr(Display * display, Window w,
 }
 
 #ifdef HAVE_XF86VM
-void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
+void vo_vm_switch(struct vo *vo, uint32_t X, uint32_t Y, int *modeline_width,
                   int *modeline_height)
 {
+    Display *mDisplay = vo->x11->display;
     int vm_event, vm_error;
     int vm_ver, vm_rev;
     int i, j, have_vm = 0;
@@ -1823,7 +1828,7 @@ void vo_vm_close(Display * dpy)
 
         free(vidmodes);
         vidmodes = NULL;
-        XF86VidModeGetAllModeLines(mDisplay, mScreen, &modecount,
+        XF86VidModeGetAllModeLines(dpy, mScreen, &modecount,
                                    &vidmodes);
         for (i = 0; i < modecount; i++)
             if ((vidmodes[i]->hdisplay == vo_screenwidth)
@@ -1904,12 +1909,13 @@ static XColor cols[256];
 static int cm_size, red_mask, green_mask, blue_mask;
 
 
-Colormap vo_x11_create_colormap(XVisualInfo * vinfo)
+Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo)
 {
+    struct vo_x11_state *x11 = vo->x11;
     unsigned k, r, g, b, ru, gu, bu, m, rv, gv, bv, rvu, gvu, bvu;
 
     if (vinfo->class != DirectColor)
-        return XCreateColormap(mDisplay, mRootWin, vinfo->visual,
+        return XCreateColormap(x11->display, mRootWin, vinfo->visual,
                                AllocNone);
 
     /* can this function get called twice or more? */
@@ -1953,8 +1959,8 @@ Colormap vo_x11_create_colormap(XVisualInfo * vinfo)
         gv += gvu;
         bv += bvu;
     }
-    cmap = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocAll);
-    XStoreColors(mDisplay, cmap, cols, cm_size);
+    cmap = XCreateColormap(x11->display, mRootWin, vinfo->visual, AllocAll);
+    XStoreColors(x11->display, cmap, cols, cm_size);
     return cmap;
 }
 
@@ -1981,7 +1987,7 @@ static int transform_color(float val,
     return (unsigned short) (s * 65535);
 }
 
-uint32_t vo_x11_set_equalizer(char *name, int value)
+uint32_t vo_x11_set_equalizer(struct vo *vo, char *name, int value)
 {
     float gamma, brightness, contrast;
     float rf, gf, bf;
@@ -2027,8 +2033,8 @@ uint32_t vo_x11_set_equalizer(char *name, int value)
         cols[k].blue  = transform_color(bf * k, brightness, contrast, gamma);
     }
 
-    XStoreColors(mDisplay, cmap, cols, cm_size);
-    XFlush(mDisplay);
+    XStoreColors(vo->x11->display, cmap, cols, cm_size);
+    XFlush(vo->x11->display);
     return VO_TRUE;
 }
 
@@ -2048,7 +2054,7 @@ uint32_t vo_x11_get_equalizer(char *name, int *value)
 }
 
 #ifdef HAVE_XV
-int vo_xv_set_eq(uint32_t xv_port, char *name, int value)
+int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char *name, int value)
 {
     XvAttribute *attributes;
     int i, howmany, xv_atom;
@@ -2056,11 +2062,11 @@ int vo_xv_set_eq(uint32_t xv_port, char *name, int value)
     mp_dbg(MSGT_VO, MSGL_V, "xv_set_eq called! (%s, %d)\n", name, value);
 
     /* get available attributes */
-    attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+    attributes = XvQueryPortAttributes(vo->x11->display, xv_port, &howmany);
     for (i = 0; i < howmany && attributes; i++)
         if (attributes[i].flags & XvSettable)
         {
-            xv_atom = XInternAtom(mDisplay, attributes[i].name, True);
+            xv_atom = XInternAtom(vo->x11->display, attributes[i].name, True);
 /* since we have SET_DEFAULTS first in our list, we can check if it's available
    then trigger it if it's ok so that the other values are at default upon query */
             if (xv_atom != None)
@@ -2111,32 +2117,32 @@ int vo_xv_set_eq(uint32_t xv_port, char *name, int value)
                 port_value =
                     (port_value + 100) * (port_max - port_min) / 200 +
                     port_min;
-                XvSetPortAttribute(mDisplay, xv_port, xv_atom, port_value);
+                XvSetPortAttribute(vo->x11->display, xv_port, xv_atom, port_value);
                 return (VO_TRUE);
             }
         }
     return (VO_FALSE);
 }
 
-int vo_xv_get_eq(uint32_t xv_port, char *name, int *value)
+int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char *name, int *value)
 {
 
     XvAttribute *attributes;
     int i, howmany, xv_atom;
 
     /* get available attributes */
-    attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+    attributes = XvQueryPortAttributes(vo->x11->display, xv_port, &howmany);
     for (i = 0; i < howmany && attributes; i++)
         if (attributes[i].flags & XvGettable)
         {
-            xv_atom = XInternAtom(mDisplay, attributes[i].name, True);
+            xv_atom = XInternAtom(vo->x11->display, attributes[i].name, True);
 /* since we have SET_DEFAULTS first in our list, we can check if it's available
    then trigger it if it's ok so that the other values are at default upon query */
             if (xv_atom != None)
             {
                 int val, port_value = 0, port_min, port_max;
 
-                XvGetPortAttribute(mDisplay, xv_port, xv_atom,
+                XvGetPortAttribute(vo->x11->display, xv_port, xv_atom,
                                    &port_value);
 
                 port_min = attributes[i].min_value;
@@ -2197,20 +2203,21 @@ unsigned int xv_port; ///< The selected Xv port.
  * \return Returns the atom if available, else None is returned.
  *
  */
-static Atom xv_intern_atom_if_exists( char const * atom_name )
+static Atom xv_intern_atom_if_exists(struct vo_x11_state *x11,
+                                     char const *atom_name)
 {
   XvAttribute * attributes;
   int attrib_count,i;
   Atom xv_atom = None;
 
-  attributes = XvQueryPortAttributes( mDisplay, xv_port, &attrib_count );
+  attributes = XvQueryPortAttributes(x11->display, xv_port, &attrib_count );
   if( attributes!=NULL )
   {
     for ( i = 0; i < attrib_count; ++i )
     {
       if ( strcmp(attributes[i].name, atom_name ) == 0 )
       {
-        xv_atom = XInternAtom( mDisplay, atom_name, False );
+        xv_atom = XInternAtom(x11->display, atom_name, False );
         break; // found what we want, break out
       }
     }
@@ -2224,12 +2231,13 @@ static Atom xv_intern_atom_if_exists( char const * atom_name )
  * \brief Try to enable vsync for xv.
  * \return Returns -1 if not available, 0 on failure and 1 on success.
  */
-int vo_xv_enable_vsync(void)
+int vo_xv_enable_vsync(struct vo *vo)
 {
-  Atom xv_atom = xv_intern_atom_if_exists("XV_SYNC_TO_VBLANK");
+    struct vo_x11_state *x11 = vo->x11;
+    Atom xv_atom = xv_intern_atom_if_exists(x11, "XV_SYNC_TO_VBLANK");
   if (xv_atom == None)
     return -1;
-  return XvSetPortAttribute(mDisplay, xv_port, xv_atom, 1) == Success;
+  return XvSetPortAttribute(x11->display, xv_port, xv_atom, 1) == Success;
 }
 
 /**
@@ -2243,13 +2251,13 @@ int vo_xv_enable_vsync(void)
  * \param height [out] The maximum height gets stored here.
  *
  */
-void vo_xv_get_max_img_dim( uint32_t * width, uint32_t * height )
+void vo_xv_get_max_img_dim(struct vo *vo,  uint32_t * width, uint32_t * height)
 {
   XvEncodingInfo * encodings;
   //unsigned long num_encodings, idx; to int or too long?!
   unsigned int num_encodings, idx;
 
-  XvQueryEncodings( mDisplay, xv_port, &num_encodings, &encodings);
+  XvQueryEncodings(vo->x11->display, xv_port, &num_encodings, &encodings);
 
   if ( encodings )
   {
@@ -2348,13 +2356,14 @@ void vo_xv_print_ck_info(void)
  * NOTE: If vo_colorkey has bits set after the first 3 low order bytes
  *       we don't draw anything as this means it was forced to off.
  */
-int vo_xv_init_colorkey(void)
+int vo_xv_init_colorkey(struct vo *vo)
 {
+    struct vo_x11_state *x11 = vo->x11;
   Atom xv_atom;
   int rez;
 
   /* check if colorkeying is needed */
-  xv_atom = xv_intern_atom_if_exists( "XV_COLORKEY" );
+  xv_atom = xv_intern_atom_if_exists(vo->x11, "XV_COLORKEY");
 
   /* if we have to deal with colorkeying ... */
   if( xv_atom != None && !(vo_colorkey & 0xFF000000) )
@@ -2367,9 +2376,9 @@ int vo_xv_init_colorkey(void)
       /* check if we have to set the colorkey too */
       if ( xv_ck_info.source == CK_SRC_SET )
       {
-        xv_atom = XInternAtom(mDisplay, "XV_COLORKEY",False);
+        xv_atom = XInternAtom(x11->display, "XV_COLORKEY",False);
   
-        rez = XvSetPortAttribute( mDisplay, xv_port, xv_atom, vo_colorkey );
+        rez = XvSetPortAttribute(x11->display, xv_port, xv_atom, vo_colorkey);
         if ( rez != Success )
         {
           mp_msg( MSGT_VO, MSGL_FATAL,
@@ -2382,7 +2391,7 @@ int vo_xv_init_colorkey(void)
     {
       int colorkey_ret;
 
-      rez=XvGetPortAttribute(mDisplay,xv_port, xv_atom, &colorkey_ret);
+      rez=XvGetPortAttribute(x11->display,xv_port, xv_atom, &colorkey_ret);
       if ( rez == Success )
       {
          xv_colorkey = colorkey_ret;
@@ -2396,7 +2405,7 @@ int vo_xv_init_colorkey(void)
       }
     }
 
-    xv_atom = xv_intern_atom_if_exists( "XV_AUTOPAINT_COLORKEY" );    
+    xv_atom = xv_intern_atom_if_exists(vo->x11, "XV_AUTOPAINT_COLORKEY");
 
     /* should we draw the colorkey ourselves or activate autopainting? */
     if ( xv_ck_info.method == CK_METHOD_AUTOPAINT )
@@ -2405,7 +2414,7 @@ int vo_xv_init_colorkey(void)
  
       if ( xv_atom != None ) // autopaint is supported
       {
-        rez = XvSetPortAttribute( mDisplay, xv_port, xv_atom, 1 );
+        rez = XvSetPortAttribute(x11->display, xv_port, xv_atom, 1);
       }
 
       if ( rez != Success )
@@ -2418,7 +2427,7 @@ int vo_xv_init_colorkey(void)
     {
       if ( xv_atom != None ) // we have autopaint attribute
       {
-        XvSetPortAttribute( mDisplay, xv_port, xv_atom, 0 );
+        XvSetPortAttribute(x11->display, xv_port, xv_atom, 0);
       }
     }
   }
@@ -2443,14 +2452,15 @@ int vo_xv_init_colorkey(void)
  * It doesn't call XFlush.
  *
  */
-void vo_xv_draw_colorkey(  int32_t x,  int32_t y,
-                                  int32_t w,  int32_t h  )
+void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
+                         int32_t w, int32_t h)
 {
+    struct vo_x11_state *x11 = vo->x11;
   if( xv_ck_info.method == CK_METHOD_MANUALFILL ||
       xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
   {
-    XSetForeground( mDisplay, vo_gc, xv_colorkey );
-    XFillRectangle( mDisplay, vo_window, vo_gc,
+    XSetForeground(x11->display, vo_gc, xv_colorkey );
+    XFillRectangle(x11->display, vo_window, vo_gc,
                     x, y,
                     w, h );
   }
@@ -2459,22 +2469,22 @@ void vo_xv_draw_colorkey(  int32_t x,  int32_t y,
   /* TODO! move this to vo_x11_clearwindow_part() */
   if ( vo_fs )
   {
-    XSetForeground( mDisplay, vo_gc, 0 );
+    XSetForeground(x11->display, vo_gc, 0 );
     /* making non-overlap fills, requires 8 checks instead of 4 */
     if ( y > 0 )
-      XFillRectangle( mDisplay, vo_window, vo_gc,
+      XFillRectangle(x11->display, vo_window, vo_gc,
                       0, 0,
                       vo_screenwidth, y);
     if (x > 0)
-      XFillRectangle( mDisplay, vo_window, vo_gc,
+      XFillRectangle(x11->display, vo_window, vo_gc,
                       0, 0,
                       x, vo_screenheight);
     if (x + w < vo_screenwidth)
-      XFillRectangle( mDisplay, vo_window, vo_gc,
+      XFillRectangle(x11->display, vo_window, vo_gc,
                       x + w, 0,
                       vo_screenwidth, vo_screenheight);
     if (y + h < vo_screenheight)
-      XFillRectangle( mDisplay, vo_window, vo_gc,
+      XFillRectangle(x11->display, vo_window, vo_gc,
                       0, y + h,
                       vo_screenwidth, vo_screenheight);
   }

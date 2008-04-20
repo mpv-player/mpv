@@ -151,7 +151,7 @@ static int cfg_include(m_option_t *conf, char *filename){
 //             XScreensaver
 //**************************************************************************//
 
-void xscreensaver_heartbeat(void);
+void xscreensaver_heartbeat(struct vo_x11_state *);
 
 //**************************************************************************//
 //**************************************************************************//
@@ -689,7 +689,7 @@ void exit_player_with_rc(const char* how, int rc){
 #ifdef HAVE_NEW_GUI
   if ( !use_gui )
 #endif
-  vo_uninit();	// Close the X11 connection (if any is open).
+  vo_uninit(mpctx->x11_state);	// Close the X11 connection (if any is open).
 #endif
 
 #ifdef HAVE_FREETYPE
@@ -3752,7 +3752,7 @@ if(!mpctx->sh_video) {
 #ifdef HAVE_X11
     if (stop_xscreensaver) {
 	current_module = "stop_xscreensaver";
-	xscreensaver_heartbeat();
+	xscreensaver_heartbeat(mpctx->x11_state);
     }
 #endif
     if (heartbeat_cmd) {

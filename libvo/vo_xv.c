@@ -176,6 +176,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                   char *title, uint32_t format)
 {
     struct MPOpts *opts = vo->opts;
+    struct vo_x11_state *x11 = vo->x11;
     XSizeHints hint;
     XVisualInfo vinfo;
     XGCValues xgcv;
@@ -242,7 +243,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                 vm_width = d_width;
                 vm_height = d_height;
             }
-            vo_vm_switch(vm_width, vm_height, &modeline_width,
+            vo_vm_switch(vo, vm_width, vm_height, &modeline_width,
                          &modeline_height);
             ctx->mode_switched = 1;
             hint.x = (vo_screenwidth - modeline_width) / 2;
@@ -256,12 +257,12 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         hint.flags = PPosition | PSize /* | PBaseSize */ ;
         hint.base_width = hint.width;
         hint.base_height = hint.height;
-        XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay),
+        XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
                              &attribs);
         depth = attribs.depth;
         if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
             depth = 24;
-        XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
+        XMatchVisualInfo(x11->display, mScreen, depth, TrueColor, &vinfo);
 
         xswa.background_pixel = 0;
         if (xv_ck_info.method == CK_METHOD_BACKGROUND)
@@ -276,10 +277,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             vo_window = WinID ? ((Window) WinID) : mRootWin;
             if (WinID)
             {
-                XUnmapWindow(mDisplay, vo_window);
-                XChangeWindowAttributes(mDisplay, vo_window, xswamask,
+                XUnmapWindow(x11->display, vo_window);
+                XChangeWindowAttributes(x11->display, vo_window, xswamask,
                                         &xswa);
-                vo_x11_selectinput_witherr(mDisplay, vo_window,
+                vo_x11_selectinput_witherr(x11->display, vo_window,
                                            StructureNotifyMask |
                                            KeyPressMask |
                                            PropertyChangeMask |
@@ -287,10 +288,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                                            ButtonPressMask |
                                            ButtonReleaseMask |
                                            ExposureMask);
-                XMapWindow(mDisplay, vo_window);
+                XMapWindow(x11->display, vo_window);
                 Window mRoot;
                 uint32_t drwBorderWidth, drwDepth;
-                XGetGeometry(mDisplay, vo_window, &mRoot,
+                XGetGeometry(x11->display, vo_window, &mRoot,
                              &ctx->drwX, &ctx->drwY, &vo_dwidth, &vo_dheight,
                              &drwBorderWidth, &drwDepth);
                 if (vo_dwidth <= 0) vo_dwidth = d_width;
@@ -301,22 +302,22 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         {
             vo_x11_create_vo_window(vo, &vinfo, vo_dx, vo_dy, d_width, d_height,
                    flags, CopyFromParent, "xv", title);
-            XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
+            XChangeWindowAttributes(x11->display, vo_window, xswamask, &xswa);
         }
 
         if (vo_gc != None)
-            XFreeGC(mDisplay, vo_gc);
-        vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
-        XSync(mDisplay, False);
+            XFreeGC(x11->display, vo_gc);
+        vo_gc = XCreateGC(x11->display, vo_window, 0L, &xgcv);
+        XSync(x11->display, False);
 #ifdef HAVE_XF86VM
         if (vm)
         {
             /* Grab the mouse pointer in our window */
             if (vo_grabpointer)
-                XGrabPointer(mDisplay, vo_window, True, 0,
+                XGrabPointer(x11->display, vo_window, True, 0,
                              GrabModeAsync, GrabModeAsync,
                              vo_window, None, CurrentTime);
-            XSetInputFocus(mDisplay, vo_window, RevertToNone, CurrentTime);
+            XSetInputFocus(x11->display, vo_window, RevertToNone, CurrentTime);
         }
 #endif
     }
@@ -365,7 +366,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     panscan_calc();
     
-    vo_xv_draw_colorkey(ctx->drwX - (vo_panscan_x >> 1),
+    vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
                         ctx->drwY - (vo_panscan_y >> 1),
                         vo_dwidth + vo_panscan_x - 1,
                         vo_dheight + vo_panscan_y - 1);
@@ -374,7 +375,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
            ctx->drwY, vo_dwidth, vo_dheight);
 
     if (opts->vo_ontop)
-        vo_x11_setlayer(mDisplay, vo_window, opts->vo_ontop);
+        vo_x11_setlayer(x11->display, vo_window, opts->vo_ontop);
 
     return 0;
 }
@@ -382,12 +383,13 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 static void allocate_xvimage(struct vo *vo, int foo)
 {
     struct xvctx *ctx = vo->priv;
+    struct vo_x11_state *x11 = vo->x11;
     /*
      * allocate XvImages.  FIXME: no error checking, without
      * mit-shm this will bomb... trzing to fix ::atmos
      */
 #ifdef HAVE_SHM
-    if (mLocalDisplay && XShmQueryExtension(mDisplay))
+    if (mLocalDisplay && XShmQueryExtension(x11->display))
         ctx->Shmem_Flag = 1;
     else
     {
@@ -398,7 +400,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
     if (ctx->Shmem_Flag)
     {
         ctx->xvimage[foo] =
-            (XvImage *) XvShmCreateImage(mDisplay, xv_port, ctx->xv_format,
+            (XvImage *) XvShmCreateImage(x11->display, xv_port, ctx->xv_format,
                                          NULL, ctx->image_width, ctx->image_height,
                                          &ctx->Shminfo[foo]);
 
@@ -408,17 +410,17 @@ static void allocate_xvimage(struct vo *vo, int foo)
         ctx->Shminfo[foo].readOnly = False;
 
         ctx->xvimage[foo]->data = ctx->Shminfo[foo].shmaddr;
-        XShmAttach(mDisplay, &ctx->Shminfo[foo]);
-        XSync(mDisplay, False);
+        XShmAttach(x11->display, &ctx->Shminfo[foo]);
+        XSync(x11->display, False);
         shmctl(ctx->Shminfo[foo].shmid, IPC_RMID, 0);
     } else
 #endif
     {
         ctx->xvimage[foo] =
-            (XvImage *) XvCreateImage(mDisplay, xv_port, ctx->xv_format, NULL,
+            (XvImage *) XvCreateImage(x11->display, xv_port, ctx->xv_format, NULL,
                                       ctx->image_width, ctx->image_height);
         ctx->xvimage[foo]->data = malloc(ctx->xvimage[foo]->data_size);
-        XSync(mDisplay, False);
+        XSync(x11->display, False);
     }
     memset(ctx->xvimage[foo]->data, 128, ctx->xvimage[foo]->data_size);
     return;
@@ -430,7 +432,7 @@ static void deallocate_xvimage(struct vo *vo, int foo)
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag)
     {
-        XShmDetach(mDisplay, &ctx->Shminfo[foo]);
+        XShmDetach(vo->x11->display, &ctx->Shminfo[foo]);
         shmdt(ctx->Shminfo[foo].shmaddr);
     } else
 #endif
@@ -439,17 +441,18 @@ static void deallocate_xvimage(struct vo *vo, int foo)
     }
     XFree(ctx->xvimage[foo]);
 
-    XSync(mDisplay, False);
+    XSync(vo->x11->display, False);
     return;
 }
 
 static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 {
     struct xvctx *ctx = vo->priv;
+    struct vo_x11_state *x11 = vo->x11;
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag)
     {
-        XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc,
+        XvShmPutImage(x11->display, xv_port, vo_window, vo_gc,
                       xvi, 0, 0, ctx->image_width,
                       ctx->image_height, ctx->drwX - (vo_panscan_x >> 1),
                       ctx->drwY - (vo_panscan_y >> 1), vo_dwidth + vo_panscan_x,
@@ -458,7 +461,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     } else
 #endif
     {
-        XvPutImage(mDisplay, xv_port, vo_window, vo_gc,
+        XvPutImage(x11->display, xv_port, vo_window, vo_gc,
                    xvi, 0, 0, ctx->image_width, ctx->image_height,
                    ctx->drwX - (vo_panscan_x >> 1), ctx->drwY - (vo_panscan_y >> 1),
                    vo_dwidth + vo_panscan_x,
@@ -469,13 +472,14 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 static void check_events(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
-    int e = vo_x11_check_events(mDisplay);
+    struct vo_x11_state *x11 = vo->x11;
+    int e = vo_x11_check_events(vo);
 
     if (e & VO_EVENT_RESIZE)
     {
         Window mRoot;
         uint32_t drwBorderWidth, drwDepth;
-        XGetGeometry(mDisplay, vo_window, &mRoot, &ctx->drwX, &ctx->drwY,
+        XGetGeometry(x11->display, vo_window, &mRoot, &ctx->drwX, &ctx->drwY,
                      &vo_dwidth, &vo_dheight, &drwBorderWidth, &drwDepth);
         mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
                ctx->drwY, vo_dwidth, vo_dheight);
@@ -485,7 +489,7 @@ static void check_events(struct vo *vo)
 
     if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
     {
-	vo_xv_draw_colorkey(ctx->drwX - (vo_panscan_x >> 1),
+	vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
 			    ctx->drwY - (vo_panscan_y >> 1),
 			    vo_dwidth + vo_panscan_x - 1,
 			    vo_dheight + vo_panscan_y - 1);
@@ -523,9 +527,9 @@ static void flip_page(struct vo *vo)
     {
         ctx->current_buf =
             vo_directrendering ? 0 : ((ctx->current_buf + 1) % ctx->num_buffers);
-        XFlush(mDisplay);
+        XFlush(vo->x11->display);
     } else
-        XSync(mDisplay, False);
+        XSync(vo->x11->display, False);
     return;
 }
 
@@ -702,12 +706,12 @@ static void uninit(struct vo *vo)
         deallocate_xvimage(vo, i);
 #ifdef HAVE_XF86VM
     if (ctx->mode_switched)
-        vo_vm_close(mDisplay);
+        vo_vm_close(vo->x11->display);
 #endif
     if (ctx->event_fd_registered)
-        mp_input_rm_event_fd(ConnectionNumber(mDisplay));
+        mp_input_rm_event_fd(ConnectionNumber(vo->x11->display));
     // uninit() shouldn't get called unless initialization went past vo_init()
-    vo_x11_uninit();
+    vo_x11_uninit(vo);
 }
 
 static void x11_fd_callback(void *ctx)
@@ -724,6 +728,7 @@ static int preinit(struct vo *vo, const char *arg)
     strarg_t ck_method_arg = { 0, NULL };
     struct xvctx *ctx = talloc_zero(vo, struct xvctx);
     vo->priv = ctx;
+    struct vo_x11_state *x11 = vo->x11;
 
     opt_t subopts[] =
     {  
@@ -745,12 +750,12 @@ static int preinit(struct vo *vo, const char *arg)
     /* modify colorkey settings according to the given options */
     xv_setup_colorkeyhandling( ck_method_arg.str, ck_src_arg.str );
 
-    if (!vo_init())
+    if (!vo_init(vo))
         return -1;
 
     /* check for Xvideo extension */
     unsigned int ver, rel, req, ev, err;
-    if (Success != XvQueryExtension(mDisplay, &ver, &rel, &req, &ev, &err))
+    if (Success != XvQueryExtension(x11->display, &ver, &rel, &req, &ev, &err))
     {
         mp_msg(MSGT_VO, MSGL_ERR,
                MSGTR_LIBVO_XV_XvNotSupportedByX11);
@@ -759,7 +764,7 @@ static int preinit(struct vo *vo, const char *arg)
 
     /* check for Xvideo support */
     if (Success !=
-        XvQueryAdaptors(mDisplay, DefaultRootWindow(mDisplay), &ctx->adaptors,
+        XvQueryAdaptors(x11->display, DefaultRootWindow(x11->display), &ctx->adaptors,
                         &ctx->ai))
     {
         mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_XvQueryAdaptorsFailed);
@@ -788,7 +793,7 @@ static int preinit(struct vo *vo, const char *arg)
         }
         if (port_found)
         {
-            if (XvGrabPort(mDisplay, xv_port, CurrentTime))
+            if (XvGrabPort(x11->display, xv_port, CurrentTime))
                 xv_port = 0;
         } else
         {
@@ -804,7 +809,7 @@ static int preinit(struct vo *vo, const char *arg)
         {
             for (xv_p = ctx->ai[i].base_id;
                  xv_p < ctx->ai[i].base_id + ctx->ai[i].num_ports; ++xv_p)
-                if (!XvGrabPort(mDisplay, xv_p, CurrentTime))
+                if (!XvGrabPort(x11->display, xv_p, CurrentTime))
                 {
                     xv_port = xv_p;
                     break;
@@ -827,16 +832,15 @@ static int preinit(struct vo *vo, const char *arg)
         goto error;
     }
 
-    if ( !vo_xv_init_colorkey() )
-    {
+    if (!vo_xv_init_colorkey(vo)) {
       goto error; // bail out, colorkey setup failed
     }
-    vo_xv_enable_vsync();
-    vo_xv_get_max_img_dim(&ctx->max_width, &ctx->max_height);
+    vo_xv_enable_vsync(vo);
+    vo_xv_get_max_img_dim(vo, &ctx->max_width, &ctx->max_height);
 
-    ctx->fo = XvListImageFormats(mDisplay, xv_port, (int *) &ctx->formats);
+    ctx->fo = XvListImageFormats(x11->display, xv_port, (int *) &ctx->formats);
 
-    mp_input_add_event_fd(ConnectionNumber(mDisplay), x11_fd_callback, vo);
+    mp_input_add_event_fd(ConnectionNumber(x11->display), x11_fd_callback, vo);
     ctx->event_fd_registered = 1;
     return 0;
 
@@ -879,11 +883,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
                 if (old_y != vo_panscan_y)
                 {
-                    vo_x11_clearwindow_part(mDisplay, vo_window,
+                    vo_x11_clearwindow_part(vo->x11->display, vo_window,
                                             vo_dwidth + vo_panscan_x - 1,
                                             vo_dheight + vo_panscan_y - 1,
                                             1);
-		    vo_xv_draw_colorkey(ctx->drwX - (vo_panscan_x >> 1),
+		    vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
 					ctx->drwY - (vo_panscan_y >> 1),
 					vo_dwidth + vo_panscan_x - 1,
 					vo_dheight + vo_panscan_y - 1);
@@ -894,18 +898,18 @@ static int control(struct vo *vo, uint32_t request, void *data)
         case VOCTRL_SET_EQUALIZER:
             {
                 struct voctrl_set_equalizer_args *args = data;
-                return vo_xv_set_eq(xv_port, args->name, args->value);
+                return vo_xv_set_eq(vo, xv_port, args->name, args->value);
             }
         case VOCTRL_GET_EQUALIZER:
             {
                 struct voctrl_get_equalizer_args *args = data;
-                return vo_xv_get_eq(xv_port, args->name, args->valueptr);
+                return vo_xv_get_eq(vo, xv_port, args->name, args->valueptr);
             }
         case VOCTRL_ONTOP:
             vo_x11_ontop(vo);
             return VO_TRUE;
         case VOCTRL_UPDATE_SCREENINFO:
-            update_xinerama_info();
+            update_xinerama_info(vo);
             return VO_TRUE;
     }
     return VO_NOTIMPL;

@@ -7,7 +7,7 @@
 struct vo;
 
 struct vo_x11_state {
-    int unused; // placeholder to avoid empty struct
+    Display *display;
 };
 
 #ifdef X11_FULLSCREEN
@@ -33,7 +33,6 @@ extern int vo_fs_type;
 extern char** vo_fstype_list;
 
 extern char *mDisplayName;
-extern Display *mDisplay;
 extern Window mRootWin;
 extern int mScreen;
 extern int mLocalDisplay;
@@ -41,18 +40,18 @@ extern int mLocalDisplay;
 extern int vo_mouse_autohide;
 
 void vo_x11_init_state(struct vo_x11_state *s);
-extern int vo_init( void );
-extern void vo_uninit( void );
+int vo_init(struct vo *vo);
+void vo_uninit(struct vo_x11_state *x11);
 extern void vo_x11_decoration( Display * vo_Display,Window w,int d );
 extern void vo_x11_classhint( Display * display,Window window,char *name );
-extern void vo_x11_sizehint( int x, int y, int width, int height, int max );
-extern int vo_x11_check_events(Display *mydisplay);
+void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max);
+int vo_x11_check_events(struct vo *vo);
 extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
 void vo_x11_fullscreen(struct vo *vo);
 extern void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer );
-extern void vo_x11_uninit(void);
-extern Colormap vo_x11_create_colormap(XVisualInfo *vinfo);
-extern uint32_t vo_x11_set_equalizer(char *name, int value);
+void vo_x11_uninit(struct vo *vo);
+Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo);
+uint32_t vo_x11_set_equalizer(struct vo *vo, char *name, int value);
 extern uint32_t vo_x11_get_equalizer(char *name, int *value);
 extern void fstype_help(void);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
@@ -62,7 +61,7 @@ extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
 	int img_width, int img_height, int use_fs);
 extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
 void vo_x11_ontop(struct vo *vo);
-extern void vo_x11_ewmh_fullscreen( int action );
+void vo_x11_ewmh_fullscreen(Display *mDisplay, int action);
 
 #endif
 
@@ -74,12 +73,12 @@ extern XSizeHints vo_hint;
 //XvPortID xv_port;
 extern unsigned int xv_port;
 
-extern int vo_xv_set_eq(uint32_t xv_port, char * name, int value);
-extern int vo_xv_get_eq(uint32_t xv_port, char * name, int *value);
+int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char * name, int value);
+int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char * name, int *value);
 
-extern int vo_xv_enable_vsync(void);
+int vo_xv_enable_vsync(struct vo *vo);
 
-extern void vo_xv_get_max_img_dim( uint32_t * width, uint32_t * height );
+void vo_xv_get_max_img_dim(struct vo *vo, uint32_t * width, uint32_t * height);
 
 /*** colorkey handling ***/
 typedef struct xv_ck_info_s
@@ -99,8 +98,8 @@ typedef struct xv_ck_info_s
 extern xv_ck_info_t xv_ck_info;
 extern unsigned long xv_colorkey;
 
-extern int vo_xv_init_colorkey(void);
-extern void vo_xv_draw_colorkey(int32_t x, int32_t y, int32_t w, int32_t h);
+int vo_xv_init_colorkey(struct vo *vo);
+void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y, int32_t w, int32_t h);
 extern void xv_setup_colorkeyhandling(char const * ck_method_str, char const * ck_str);
 
 /*** test functions for common suboptions ***/
@@ -112,11 +111,11 @@ int xv_test_ckm( void * arg );
  extern void vo_x11_putkey(int key);
 
 #ifdef HAVE_XF86VM
-void vo_vm_switch(uint32_t, uint32_t, int*, int*);
+void vo_vm_switch(struct vo *vo, uint32_t, uint32_t, int*, int*);
 void vo_vm_close(Display*);
 #endif
 
-void update_xinerama_info(void);
+void update_xinerama_info(struct vo *vo);
 
 int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
 
@@ -126,6 +125,23 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define vo_x11_create_vo_window(...) vo_x11_create_vo_window(global_vo, __VA_ARGS__)
 #define vo_x11_fullscreen() vo_x11_fullscreen(global_vo)
 #define vo_x11_ontop() vo_x11_ontop(global_vo)
+#define vo_init() vo_init(global_vo)
+#define vo_x11_ewmh_fullscreen(action) vo_x11_ewmh_fullscreen(global_vo->x11->display, action)
+#define update_xinerama_info() update_xinerama_info(global_vo)
+#define vo_x11_uninit() vo_x11_uninit(global_vo)
+#define vo_x11_check_events(display) vo_x11_check_events(global_vo)
+#define vo_x11_sizehint(...) vo_x11_sizehint(global_vo, __VA_ARGS__)
+#define vo_vm_switch(...) vo_vm_switch(global_vo, __VA_ARGS__)
+#define vo_x11_create_colormap(vinfo) vo_x11_create_colormap(global_vo, vinfo)
+#define vo_x11_set_equalizer(...) vo_x11_set_equalizer(global_vo, __VA_ARGS__)
+#define vo_xv_set_eq(...) vo_xv_set_eq(global_vo, __VA_ARGS__)
+#define vo_xv_get_eq(...) vo_xv_get_eq(global_vo, __VA_ARGS__)
+#define vo_xv_enable_vsync() vo_xv_enable_vsync(global_vo)
+#define vo_xv_get_max_img_dim(...) vo_xv_get_max_img_dim(global_vo, __VA_ARGS__)
+#define vo_xv_init_colorkey() vo_xv_init_colorkey(global_vo)
+#define vo_xv_draw_colorkey(...) vo_xv_draw_colorkey(global_vo, __VA_ARGS__)
+
+#define mDisplay global_vo->x11->display
 #endif
 
 #endif /* MPLAYER_X11_COMMON_H */

@@ -13,6 +13,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include "old_vo_defines.h"
 #include "gl_common.h"
 
 /**
