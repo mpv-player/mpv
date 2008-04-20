@@ -328,7 +328,7 @@ static inline void *__talloc(const void *context, size_t size)
 	}
 
 	if (unlikely(size >= MAX_TALLOC_SIZE)) {
-		return NULL;
+		abort(); // return NULL;
 	}
 
 	if (context != NULL) {
@@ -338,7 +338,7 @@ static inline void *__talloc(const void *context, size_t size)
 
 	if (tc == NULL) {
 		tc = (struct talloc_chunk *)malloc(TC_HDR_SIZE+size);
-		if (unlikely(tc == NULL)) return NULL;
+		if (unlikely(tc == NULL)) abort(); // return NULL;
 		tc->flags = TALLOC_MAGIC;
 		tc->pool  = NULL;
 	}
@@ -960,7 +960,7 @@ void *_talloc_realloc(const void *context, void *ptr, size_t size, const char *n
 	}
 
 	if (unlikely(size >= MAX_TALLOC_SIZE)) {
-		return NULL;
+		abort(); // return NULL;
 	}
 
 	/* realloc(NULL) is equivalent to malloc() */
@@ -972,7 +972,7 @@ void *_talloc_realloc(const void *context, void *ptr, size_t size, const char *n
 
 	/* don't allow realloc on referenced pointers */
 	if (unlikely(tc->refs)) {
-		return NULL;
+		abort(); // return NULL;
 	}
 
 	/* don't shrink if we have less than 1k to gain */
@@ -1012,7 +1012,7 @@ void *_talloc_realloc(const void *context, void *ptr, size_t size, const char *n
 #endif
 	if (unlikely(!new_ptr)) {	
 		tc->flags &= ~TALLOC_FLAG_FREE; 
-		return NULL; 
+		abort(); // return NULL; 
 	}
 
 	tc = (struct talloc_chunk *)new_ptr;
@@ -1466,7 +1466,7 @@ char *talloc_vasprintf(const void *t, const char *fmt, va_list ap)
 	len = vsnprintf(&c, 1, fmt, ap2);
 	va_end(ap2);
 	if (unlikely(len < 0)) {
-		return NULL;
+		abort(); // return NULL;
 	}
 
 	ret = (char *)__talloc(t, len+1);
@@ -1604,7 +1604,7 @@ char *talloc_asprintf_append_buffer(char *s, const char *fmt, ...)
 void *_talloc_array(const void *ctx, size_t el_size, unsigned count, const char *name)
 {
 	if (count >= MAX_TALLOC_SIZE/el_size) {
-		return NULL;
+		abort(); // return NULL;
 	}
 	return _talloc_named_const(ctx, el_size * count, name);
 }
@@ -1615,7 +1615,7 @@ void *_talloc_array(const void *ctx, size_t el_size, unsigned count, const char 
 void *_talloc_zero_array(const void *ctx, size_t el_size, unsigned count, const char *name)
 {
 	if (count >= MAX_TALLOC_SIZE/el_size) {
-		return NULL;
+		abort(); // return NULL;
 	}
 	return _talloc_zero(ctx, el_size * count, name);
 }
@@ -1626,7 +1626,7 @@ void *_talloc_zero_array(const void *ctx, size_t el_size, unsigned count, const 
 void *_talloc_realloc_array(const void *ctx, void *ptr, size_t el_size, unsigned count, const char *name)
 {
 	if (count >= MAX_TALLOC_SIZE/el_size) {
-		return NULL;
+		abort(); // return NULL;
 	}
 	return _talloc_realloc(ctx, ptr, el_size * count, name);
 }
