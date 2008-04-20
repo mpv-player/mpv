@@ -62,12 +62,12 @@ NETSTREAM_DEPS = ../libmpdemux/libmpdemux.a \
                  ../m_struct.o \
                   $(COMMON_LIBS)
 
-netstream: netstream.o $(NETSTREAM_DEPS)
+netstream$(EXESUF): netstream.o $(NETSTREAM_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean distclean:
 	rm -f *.o *~ $(OBJS)
-	rm -f fastmem*-* netstream
+	rm -f fastmem*-* netstream$(EXESUF)
 	rm -f bmovl-test$(EXESUF) vfw2menc$(EXESUF)
 	rm -f $(REAL_TARGETS)
 
