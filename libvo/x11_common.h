@@ -38,11 +38,8 @@ extern int vo_mouse_autohide;
 
 extern int vo_init( void );
 extern void vo_uninit( void );
-extern void vo_hidecursor ( Display* , Window );
-extern void vo_showcursor( Display *disp, Window win );
 extern void vo_x11_decoration( Display * vo_Display,Window w,int d );
 extern void vo_x11_classhint( Display * display,Window window,char *name );
-extern void vo_x11_nofs_sizepos(int x, int y, int width, int height);
 extern void vo_x11_sizehint( int x, int y, int width, int height, int max );
 extern int vo_x11_check_events(Display *mydisplay);
 extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
@@ -53,9 +50,6 @@ extern Colormap vo_x11_create_colormap(XVisualInfo *vinfo);
 extern uint32_t vo_x11_set_equalizer(char *name, int value);
 extern uint32_t vo_x11_get_equalizer(char *name, int *value);
 extern void fstype_help(void);
-extern Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot,
-	Visual *vis, int x, int y, unsigned int width, unsigned int height,
-	int depth, Colormap col_map);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
         int x, int y, unsigned int width, unsigned int height, int flags,
 	Colormap col_map, const char *classname, const char *title);
@@ -111,9 +105,6 @@ int xv_test_ckm( void * arg );
 
  extern void vo_setwindow( Window w,GC g );
  extern void vo_x11_putkey(int key);
-
-void saver_off( Display * );
-void saver_on( Display * );
 
 #ifdef HAVE_XF86VM
 void vo_vm_switch(uint32_t, uint32_t, int*, int*);

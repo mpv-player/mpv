@@ -119,6 +119,8 @@ XF86VidModeModeLine modeline;
 #endif
 
 static int vo_x11_get_fs_type(int supported);
+static void saver_off(Display *);
+static void saver_on(Display *);
 
 
 /*
@@ -163,7 +165,7 @@ void vo_x11_ewmh_fullscreen(int action)
     }
 }
 
-void vo_hidecursor(Display * disp, Window win)
+static void vo_hidecursor(Display * disp, Window win)
 {
     Cursor no_ptr;
     Pixmap bm_no;
@@ -188,7 +190,7 @@ void vo_hidecursor(Display * disp, Window win)
     XFreeColors(disp,colormap,&black.pixel,1,0);
 }
 
-void vo_showcursor(Display * disp, Window win)
+static void vo_showcursor(Display * disp, Window win)
 {
     if (WinID == 0)
         return;
@@ -1169,7 +1171,7 @@ int vo_x11_check_events(Display * mydisplay)
 /**
  * \brief sets the size and position of the non-fullscreen window.
  */
-void vo_x11_nofs_sizepos(int x, int y, int width, int height)
+static void vo_x11_nofs_sizepos(int x, int y, int width, int height)
 {
   vo_x11_sizehint(x, y, width, height, 0);
   if (vo_fs) {
@@ -1246,7 +1248,7 @@ static int vo_x11_get_gnome_layer(Display * mDisplay, Window win)
 }
 
 //
-Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
+static Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
                                    Visual * vis, int x, int y,
                                    unsigned int width, unsigned int height,
                                    int depth, Colormap col_map)
@@ -1630,7 +1632,7 @@ static int xss_suspend(Bool suspend)
  * End of XScreensaver stuff
  */
 
-void saver_on(Display * mDisplay)
+static void saver_on(Display * mDisplay)
 {
 
     if (!screensaver_off)
@@ -1670,7 +1672,7 @@ void saver_on(Display * mDisplay)
 #endif
 }
 
-void saver_off(Display * mDisplay)
+static void saver_off(Display * mDisplay)
 {
     int nothing;
 
