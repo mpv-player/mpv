@@ -263,7 +263,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         depth = attribs.depth;
         if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
             depth = 24;
-        XMatchVisualInfo(x11->display, mScreen, depth, TrueColor, &vinfo);
+        XMatchVisualInfo(x11->display, x11->screen, depth, TrueColor, &vinfo);
 
         xswa.background_pixel = 0;
         if (x11->xv_ck_info.method == CK_METHOD_BACKGROUND)
@@ -275,7 +275,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
         if (WinID >= 0)
         {
-            x11->window = WinID ? ((Window) WinID) : mRootWin;
+            x11->window = WinID ? ((Window) WinID) : x11->rootwin;
             if (WinID)
             {
                 XUnmapWindow(x11->display, x11->window);
@@ -390,7 +390,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
      * mit-shm this will bomb... trzing to fix ::atmos
      */
 #ifdef HAVE_SHM
-    if (mLocalDisplay && XShmQueryExtension(x11->display))
+    if (x11->display_is_local && XShmQueryExtension(x11->display))
         ctx->Shmem_Flag = 1;
     else
     {

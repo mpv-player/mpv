@@ -9,6 +9,9 @@ struct vo;
 struct vo_x11_state {
     Display *display;
     Window window;
+    Window rootwin;
+    int screen;
+    int display_is_local;
     int depthonscreen;
 
     GC vo_gc;
@@ -181,6 +184,9 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define xv_port global_vo->x11->xv_port
 #define vo_gc global_vo->x11->vo_gc
 #define vo_mouse_autohide global_vo->x11->vo_mouse_autohide
+#define mRootWin global_vo->x11->rootwin
+#define mScreen global_vo->x11->screen
+#define mLocalDisplay global_vo->x11->display_is_local
 #endif
 
 #endif /* MPLAYER_X11_COMMON_H */

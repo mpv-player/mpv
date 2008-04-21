@@ -75,9 +75,6 @@ int stop_xscreensaver = 0;
 static int dpms_disabled = 0;
 
 char *mDisplayName = NULL;
-Window mRootWin;
-int mScreen;
-int mLocalDisplay;
 
 char **vo_fstype_list;
 
@@ -254,7 +251,7 @@ static int x11_get_property(struct vo_x11_state *x11, Atom type, Atom ** args,
     unsigned long bytesafter;
 
     return (Success ==
-            XGetWindowProperty(x11->display, mRootWin, type, 0, 16384, False,
+            XGetWindowProperty(x11->display, x11->rootwin, type, 0, 16384, False,
                                AnyPropertyType, &type, &format, nitems,
                                &bytesafter, (unsigned char **) args)
             && *nitems > 0);
@@ -424,8 +421,8 @@ int vo_init(struct vo *vo)
                "vo: couldn't open the X11 display (%s)!\n", dispName);
         return 0;
     }
-    mScreen = DefaultScreen(x11->display);  // screen ID
-    mRootWin = RootWindow(x11->display, mScreen);   // root window ID
+    x11->screen = DefaultScreen(x11->display);  // screen ID
+    x11->rootwin = RootWindow(x11->display, x11->screen);   // root window ID
 
     init_atoms(vo->x11);
 
@@ -433,7 +430,7 @@ int vo_init(struct vo *vo)
     {
         int clock;
 
-        XF86VidModeGetModeLine(x11->display, mScreen, &clock, &modeline);
+        XF86VidModeGetModeLine(x11->display, x11->screen, &clock, &modeline);
         if (!opts->vo_screenwidth)
             opts->vo_screenwidth = modeline.hdisplay;
         if (!opts->vo_screenheight)
@@ -442,25 +439,25 @@ int vo_init(struct vo *vo)
 #endif
     {
         if (!opts->vo_screenwidth)
-            opts->vo_screenwidth = DisplayWidth(x11->display, mScreen);
+            opts->vo_screenwidth = DisplayWidth(x11->display, x11->screen);
         if (!opts->vo_screenheight)
-            opts->vo_screenheight = DisplayHeight(x11->display, mScreen);
+            opts->vo_screenheight = DisplayHeight(x11->display, x11->screen);
     }
     // get color depth (from root window, or the best visual):
-    XGetWindowAttributes(x11->display, mRootWin, &attribs);
+    XGetWindowAttributes(x11->display, x11->rootwin, &attribs);
     depth = attribs.depth;
 
     if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
     {
         Visual *visual;
 
-        depth = vo_find_depth_from_visuals(x11->display, mScreen, &visual);
+        depth = vo_find_depth_from_visuals(x11->display, x11->screen, &visual);
         if (depth != -1)
             mXImage = XCreateImage(x11->display, visual, depth, ZPixmap,
                                    0, NULL, 1, 1, 8, 1);
     } else
         mXImage =
-            XGetImage(x11->display, mRootWin, 0, 0, 1, 1, AllPlanes, ZPixmap);
+            XGetImage(x11->display, x11->rootwin, 0, 0, 1, 1, AllPlanes, ZPixmap);
 
     x11->depthonscreen = depth;   // display depth on screen
 
@@ -502,13 +499,13 @@ int vo_init(struct vo *vo)
     else if (strncmp(dispName, "localhost:", 10) == 0)
         dispName += 9;
     if (*dispName == ':' && atoi(dispName + 1) < 10)
-        mLocalDisplay = 1;
+        x11->display_is_local = 1;
     else
-        mLocalDisplay = 0;
+        x11->display_is_local = 0;
     mp_msg(MSGT_VO, MSGL_V,
            "vo: X11 running at %dx%d with depth %d and %d bpp (\"%s\" => %s display)\n",
            opts->vo_screenwidth, opts->vo_screenheight, depth, x11->depthonscreen,
-           dispName, mLocalDisplay ? "local" : "remote");
+           dispName, x11->display_is_local ? "local" : "remote");
 
     x11->wm_type = vo_wm_detect(vo);
 
@@ -870,7 +867,7 @@ void vo_x11_decoration(struct vo *vo, int d)
     if (vo_fsmode & 8)
     {
         XSetTransientForHint(x11->display, x11->window,
-                             RootWindow(x11->display, mScreen));
+                             RootWindow(x11->display, x11->screen));
     }
 
     vo_MotifHints = XInternAtom(x11->display, "_MOTIF_WM_HINTS", 0);
@@ -1234,7 +1231,7 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot
     xswa.bit_gravity = StaticGravity;
 
     ret_win =
-        XCreateWindow(x11->display, mRootWin, x, y, width, height, 0, depth,
+        XCreateWindow(x11->display, x11->rootwin, x, y, width, height, 0, depth,
                       CopyFromParent, vis, xswamask, &xswa);
     XSetWMProtocols(x11->display, ret_win, &x11->XAWM_DELETE_WINDOW, 1);
     if (!x11->f_gc)
@@ -1274,7 +1271,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     vo_fs = 0;
     vo->dwidth = width;
     vo->dheight = height;
-    x11->window = vo_x11_create_smooth_window(x11, mRootWin, vis->visual,
+    x11->window = vo_x11_create_smooth_window(x11, x11->rootwin, vis->visual,
                       x, y, width, height, vis->depth, col_map);
     vo_x11_classhint(vo, x11->window, classname);
     XStoreName(mDisplay, x11->window, title);
@@ -1375,7 +1372,7 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         mp_msg(MSGT_VO, MSGL_V,
                "[x11] Layered style stay on top (layer %ld).\n",
                xev.data.l[0]);
-        XSendEvent(x11->display, mRootWin, False, SubstructureNotifyMask,
+        XSendEvent(x11->display, x11->rootwin, False, SubstructureNotifyMask,
                    (XEvent *) & xev);
     } else if (x11->fs_type & vo_wm_NETWM)
     {
@@ -1401,7 +1398,7 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
             // where only NETWM_STATE_BELOW is supported doesn't exist.
             xev.data.l[1] = x11->XA_NET_WM_STATE_BELOW;
 
-        XSendEvent(x11->display, mRootWin, False, SubstructureRedirectMask,
+        XSendEvent(x11->display, x11->rootwin, False, SubstructureRedirectMask,
                    (XEvent *) & xev);
         state = XGetAtomName(x11->display, xev.data.l[1]);
         mp_msg(MSGT_VO, MSGL_V,
@@ -1536,7 +1533,7 @@ void vo_x11_fullscreen(struct vo *vo)
     if (x11->wm_type == 0 && !(vo_fsmode & 16))
     {
         XUnmapWindow(x11->display, x11->window);      // required for MWM
-        XWithdrawWindow(x11->display, x11->window, mScreen);
+        XWithdrawWindow(x11->display, x11->window, x11->screen);
         x11->fs_flip = 1;
     }
 
@@ -1732,8 +1729,9 @@ void vo_x11_selectinput_witherr(Display * display, Window w,
 void vo_vm_switch(struct vo *vo, uint32_t X, uint32_t Y, int *modeline_width,
                   int *modeline_height)
 {
+    struct vo_x11_state *x11 = vo->x11;
     struct MPOpts *opts = vo->opts;
-    Display *mDisplay = vo->x11->display;
+    Display *mDisplay = x11->display;
     int vm_event, vm_error;
     int vm_ver, vm_rev;
     int i, j, have_vm = 0;
@@ -1753,7 +1751,7 @@ void vo_vm_switch(struct vo *vo, uint32_t X, uint32_t Y, int *modeline_width,
     if (have_vm)
     {
         if (vidmodes == NULL)
-            XF86VidModeGetAllModeLines(mDisplay, mScreen, &modecount,
+            XF86VidModeGetAllModeLines(mDisplay, x11->screen, &modecount,
                                        &vidmodes);
         j = 0;
         *modeline_width = vidmodes[0]->hdisplay;
@@ -1772,12 +1770,12 @@ void vo_vm_switch(struct vo *vo, uint32_t X, uint32_t Y, int *modeline_width,
 
         mp_msg(MSGT_VO, MSGL_INFO, MSGTR_SelectedVideoMode,
                *modeline_width, *modeline_height, X, Y);
-        XF86VidModeLockModeSwitch(mDisplay, mScreen, 0);
-        XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);
-        XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);
+        XF86VidModeLockModeSwitch(mDisplay, x11->screen, 0);
+        XF86VidModeSwitchToMode(mDisplay, x11->screen, vidmodes[j]);
+        XF86VidModeSwitchToMode(mDisplay, x11->screen, vidmodes[j]);
         X = (opts->vo_screenwidth - *modeline_width) / 2;
         Y = (opts->vo_screenheight - *modeline_height) / 2;
-        XF86VidModeSetViewPort(mDisplay, mScreen, X, Y);
+        XF86VidModeSetViewPort(mDisplay, x11->screen, X, Y);
     }
 }
 
@@ -1798,7 +1796,7 @@ void vo_vm_close(struct vo *vo)
 
         free(vidmodes);
         vidmodes = NULL;
-        XF86VidModeGetAllModeLines(dpy, mScreen, &modecount,
+        XF86VidModeGetAllModeLines(dpy, vo->x11->screen, &modecount,
                                    &vidmodes);
         for (i = 0; i < modecount; i++)
             if ((vidmodes[i]->hdisplay == opts->vo_screenwidth)
@@ -1885,7 +1883,7 @@ Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo)
     unsigned k, r, g, b, ru, gu, bu, m, rv, gv, bv, rvu, gvu, bvu;
 
     if (vinfo->class != DirectColor)
-        return XCreateColormap(x11->display, mRootWin, vinfo->visual,
+        return XCreateColormap(x11->display, x11->rootwin, vinfo->visual,
                                AllocNone);
 
     /* can this function get called twice or more? */
@@ -1929,7 +1927,7 @@ Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo)
         gv += gvu;
         bv += bvu;
     }
-    cmap = XCreateColormap(x11->display, mRootWin, vinfo->visual, AllocAll);
+    cmap = XCreateColormap(x11->display, x11->rootwin, vinfo->visual, AllocAll);
     XStoreColors(x11->display, cmap, cols, cm_size);
     return cmap;
 }
