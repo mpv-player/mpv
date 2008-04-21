@@ -234,10 +234,6 @@ static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
 // A/V sync:
        int autosync=0; // 30 might be a good default value.
 
-// may be changed by GUI:  (FIXME!)
-float rel_seek_secs=0;
-int abs_seek_pos=0;
-
 // codecs:
 char **audio_codec_list=NULL; // override audio codec
 char **video_codec_list=NULL; // override video codec
@@ -2359,7 +2355,7 @@ static void pause_loop(struct MPContext *mpctx)
 	if (use_gui) {
 	    guiEventHandling();
 	    guiGetEvent(guiReDraw, NULL);
-	    if (guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos))
+	    if (guiIntfStruct.Playing!=2 || (mpctx->rel_seek_secs || mpctx->abs_seek_pos))
 		break;
 	}
 #endif
@@ -2463,8 +2459,8 @@ static void edl_update(MPContext *mpctx)
     if (mpctx->sh_video->pts >= next_edl_record->start_sec) {
 	if (next_edl_record->action == EDL_SKIP) {
 	    mpctx->osd_function = OSD_FFW;
-	    abs_seek_pos = 0;
-	    rel_seek_secs = next_edl_record->length_sec;
+	    mpctx->abs_seek_pos = 0;
+	    mpctx->rel_seek_secs = next_edl_record->length_sec;
 	    mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop "
 		   "[%f], length [%f]\n", next_edl_record->start_sec,
 		   next_edl_record->stop_sec, next_edl_record->length_sec);
@@ -3849,7 +3845,7 @@ if(auto_quality>0){
 // handle -sstep
 if(step_sec>0) {
 	mpctx->osd_function=OSD_FFW;
-	rel_seek_secs+=step_sec;
+	mpctx->rel_seek_secs+=step_sec;
 }
 
  edl_update(mpctx);
@@ -3878,12 +3874,12 @@ if(step_sec>0) {
     if(opts->loop_times==1) opts->loop_times=-1;
     play_n_frames=play_n_frames_mf;
     mpctx->eof=0;
-    abs_seek_pos=SEEK_ABSOLUTE; rel_seek_secs=seek_to_sec;
+    mpctx->abs_seek_pos=SEEK_ABSOLUTE; mpctx->rel_seek_secs=seek_to_sec;
     loop_seek = 1;
   }
 
-if(rel_seek_secs || abs_seek_pos){
-  if (seek(mpctx, rel_seek_secs, abs_seek_pos) >= 0) {
+if(mpctx->rel_seek_secs || mpctx->abs_seek_pos){
+  if (seek(mpctx, mpctx->rel_seek_secs, mpctx->abs_seek_pos) >= 0) {
         // Set OSD:
       if(!loop_seek){
 	if( !edl_decision )
@@ -3891,8 +3887,8 @@ if(rel_seek_secs || abs_seek_pos){
       }
   }
 
-  rel_seek_secs=0;
-  abs_seek_pos=0;
+  mpctx->rel_seek_secs=0;
+  mpctx->abs_seek_pos=0;
   loop_seek=0;
   edl_decision = 0;
 }

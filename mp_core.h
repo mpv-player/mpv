@@ -74,6 +74,10 @@ typedef struct MPContext {
     // by the audio CPU usage meter.
     double delay;
 
+    // Used to communicate the parameters of a seek between parts
+    float rel_seek_secs;
+    int abs_seek_pos;
+
     float begin_skip; ///< start time of the current skip while on edlout mode
     // audio is muted if either EDL or user activates mute
     short edl_muted; ///< Stores whether EDL is currently in muted mode.
@@ -108,8 +112,6 @@ typedef struct MPContext {
 
 
 // Most of these should not be globals
-extern int abs_seek_pos;
-extern float rel_seek_secs;
 extern FILE *edl_fd;
 extern int file_filter;
 // These appear in options list

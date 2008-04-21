@@ -348,8 +348,8 @@ static int mp_property_percent_pos(m_option_t * prop, int action,
                                  demuxer_get_percent_pos(mpctx->demuxer));
     }
 
-    abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
-    rel_seek_secs = pos / 100.0;
+    mpctx->abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
+    mpctx->rel_seek_secs = pos / 100.0;
     return M_PROPERTY_OK;
 }
 
@@ -363,12 +363,12 @@ static int mp_property_time_pos(m_option_t * prop, int action,
     case M_PROPERTY_SET:
         if(!arg) return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(double*)arg);
-        abs_seek_pos = SEEK_ABSOLUTE;
-        rel_seek_secs = *(double*)arg;
+        mpctx->abs_seek_pos = SEEK_ABSOLUTE;
+        mpctx->rel_seek_secs = *(double*)arg;
         return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        rel_seek_secs += (arg ? *(double*)arg : 10.0) *
+        mpctx->rel_seek_secs += (arg ? *(double*)arg : 10.0) *
             (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
         return M_PROPERTY_OK;
     }
@@ -427,21 +427,21 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
-    rel_seek_secs = 0;
-    abs_seek_pos = 0;
+    mpctx->rel_seek_secs = 0;
+    mpctx->abs_seek_pos = 0;
     chapter = demuxer_seek_chapter(mpctx->demuxer, chapter, 1,
                                    &next_pts, &chapter_num, &chapter_name);
     if (chapter >= 0) {
         if (next_pts > -1.0) {
-            abs_seek_pos = SEEK_ABSOLUTE;
-            rel_seek_secs = next_pts;
+            mpctx->abs_seek_pos = SEEK_ABSOLUTE;
+            mpctx->rel_seek_secs = next_pts;
         }
         if (chapter_name)
             set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
                         MSGTR_OSDChapter, chapter + 1, chapter_name);
     }
     else if (step_all > 0)
-        rel_seek_secs = 1000000000.;
+        mpctx->rel_seek_secs = 1000000000.;
     else
         set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
                     MSGTR_OSDChapter, 0, MSGTR_Unknown);
@@ -2301,18 +2301,18 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		v = cmd->args[0].v.f;
 		abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
 		if (abs == 2) {	/* Absolute seek to a specific timestamp in seconds */
-		    abs_seek_pos = SEEK_ABSOLUTE;
+		    mpctx->abs_seek_pos = SEEK_ABSOLUTE;
 		    if (sh_video)
 			mpctx->osd_function =
 			    (v > sh_video->pts) ? OSD_FFW : OSD_REW;
-		    rel_seek_secs = v;
+		    mpctx->rel_seek_secs = v;
 		} else if (abs) {	/* Absolute seek by percentage */
-		    abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
+		    mpctx->abs_seek_pos = SEEK_ABSOLUTE | SEEK_FACTOR;
 		    if (sh_video)
 			mpctx->osd_function = OSD_FFW;	// Direction isn't set correctly
-		    rel_seek_secs = v / 100.0;
+		    mpctx->rel_seek_secs = v / 100.0;
 		} else {
-		    rel_seek_secs += v;
+		    mpctx->rel_seek_secs += v;
 		    mpctx->osd_function = (v > 0) ? OSD_FFW : OSD_REW;
 		}
 		brk_cmd = 1;
