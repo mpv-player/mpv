@@ -201,9 +201,7 @@ static MPContext mpctx_s = {
     .set_of_sub_pos = -1,
     .file_format = DEMUXER_TYPE_UNKNOWN,
     .loop_times = -1,
-#ifdef HAS_DVBIN_SUPPORT
     .last_dvb_step = 1,
-#endif
 };
 
 static MPContext *mpctx = &mpctx_s;

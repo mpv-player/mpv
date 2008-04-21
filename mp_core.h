@@ -94,10 +94,8 @@ typedef struct MPContext {
 
     int file_format;
 
-#ifdef HAS_DVBIN_SUPPORT
     int last_dvb_step;
     int dvbin_reopen;
-#endif
 
     int was_paused;
 
