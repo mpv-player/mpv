@@ -89,11 +89,6 @@ char **vo_fstype_list;
 /* 1 means that the WM is metacity (broken as hell) */
 int metacity_hack = 0;
 
-static int vo_old_x = 0;
-static int vo_old_y = 0;
-static int vo_old_width = 0;
-static int vo_old_height = 0;
-
 #ifdef HAVE_XF86VM
 XF86VidModeModeInfo **vidmodes = NULL;
 XF86VidModeModeLine modeline;
@@ -982,7 +977,7 @@ void vo_x11_uninit(struct vo *vo)
             x11->window = None;
         }
         vo_fs = 0;
-        vo_old_width = vo_old_height = 0;
+        x11->vo_old_width = x11->vo_old_height = 0;
     }
 }
 
@@ -1147,12 +1142,13 @@ int vo_x11_check_events(struct vo *vo)
 static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
                                 int width, int height)
 {
+    struct vo_x11_state *x11 = vo->x11;
     vo_x11_sizehint(vo, x, y, width, height, 0);
   if (vo_fs) {
-    vo_old_x = x;
-    vo_old_y = y;
-    vo_old_width = width;
-    vo_old_height = height;
+    x11->vo_old_x = x;
+    x11->vo_old_y = y;
+    x11->vo_old_width = width;
+    x11->vo_old_height = height;
   }
   else
   {
@@ -1506,10 +1502,10 @@ void vo_x11_fullscreen(struct vo *vo)
         // fs->win
         if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
         {
-            x = vo_old_x;
-            y = vo_old_y;
-            w = vo_old_width;
-            h = vo_old_height;
+            x = x11->vo_old_x;
+            y = x11->vo_old_y;
+            w = x11->vo_old_width;
+            h = x11->vo_old_height;
 	}
 
         vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
@@ -1522,10 +1518,10 @@ void vo_x11_fullscreen(struct vo *vo)
         vo_fs = VO_TRUE;
         if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
         {
-            vo_old_x = vo->dx;
-            vo_old_y = vo->dy;
-            vo_old_width = vo->dwidth;
-            vo_old_height = vo->dheight;
+            x11->vo_old_x = vo->dx;
+            x11->vo_old_y = vo->dy;
+            x11->vo_old_width = vo->dwidth;
+            x11->vo_old_height = vo->dheight;
         }
             update_xinerama_info(vo);
             x = xinerama_x;

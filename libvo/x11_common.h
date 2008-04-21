@@ -26,6 +26,11 @@ struct vo_x11_state {
     int mouse_waiting_hide;
     int orig_layer;
     int old_gravity;
+    int vo_old_x;
+    int vo_old_y;
+    int vo_old_width;
+    int vo_old_height;
+
 
     unsigned int olddecor;
     unsigned int oldfuncs;
