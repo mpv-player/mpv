@@ -87,12 +87,6 @@ const m_option_t tvscan_conf[]={
  * by Folke
  */
 
-#define FLAG_ON(optname, varname, flags) {optname, NULL, CONF_TYPE_FLAG, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
-#define FLAG_OFF(optname, varname, flags) {optname, NULL, CONF_TYPE_FLAG, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
-#define FLAG_CONSTANTS(optname, varname, offvalue, value, flags) {optname, NULL, CONF_TYPE_FLAG, flags, offvalue, value, NULL, 1, offsetof(struct MPOpts, varname)}
-#define STRINGLIST(optname, varname, flags) {optname, NULL, CONF_TYPE_STRING_LIST, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
-#define INTRANGE(optname, varname, min, max, flags) {optname, NULL, CONF_TYPE_INT, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
-
 const m_option_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
 
