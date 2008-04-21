@@ -1,8 +1,3 @@
-#ifndef MPLAYER_CFG_COMMON_OPTS_H
-#define MPLAYER_CFG_COMMON_OPTS_H
-
-#include "config.h"
-
 // ------------------------- common options --------------------
 	{"quiet", &quiet, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"noquiet", &quiet, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
@@ -341,5 +336,3 @@
 	{"fontconfig", "MPlayer was compiled without fontconfig support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"nofontconfig", "MPlayer was compiled without fontconfig support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif /* HAVE_FONTCONFIG */
-
-#endif /* MPLAYER_CFG_COMMON_OPTS_H */
