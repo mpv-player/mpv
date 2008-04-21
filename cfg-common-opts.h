@@ -175,7 +175,7 @@
 	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000, NULL},
 	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 1, 6, NULL},
 	{"format", &audio_output_format, CONF_TYPE_AFMT, 0, 0, 0, NULL},
-	{"speed", &playback_speed, CONF_TYPE_FLOAT, CONF_RANGE, 0.01, 100.0, NULL},
+        FLOATRANGE("speed", playback_speed, 0.01, 100.0, 0),
 
 	// set a-v distance
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},

@@ -196,23 +196,24 @@ static int mp_property_loop(m_option_t * prop, int action, void *arg,
 static int mp_property_playback_speed(m_option_t * prop, int action,
 				      void *arg, MPContext * mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     switch (action) {
     case M_PROPERTY_SET:
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 	M_PROPERTY_CLAMP(prop, *(float *) arg);
-	playback_speed = *(float *) arg;
+	opts->playback_speed = *(float *) arg;
 	build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data);
 	return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-	playback_speed += (arg ? *(float *) arg : 0.1) *
+	opts->playback_speed += (arg ? *(float *) arg : 0.1) *
 	    (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
-	M_PROPERTY_CLAMP(prop, playback_speed);
+	M_PROPERTY_CLAMP(prop, opts->playback_speed);
 	build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data);
 	return M_PROPERTY_OK;
     }
-    return m_property_float_range(prop, action, arg, &playback_speed);
+    return m_property_float_range(prop, action, arg, &opts->playback_speed);
 }
 
 /// filename with path (RO)
@@ -374,9 +375,7 @@ static int mp_property_time_pos(m_option_t * prop, int action,
     }
     return m_property_time_ro(prop, action, arg,
                               mpctx->sh_video ? mpctx->sh_video->pts :
-                              playing_audio_pts(mpctx->sh_audio,
-                                                mpctx->d_audio,
-                                                mpctx->audio_out));
+                              playing_audio_pts(mpctx));
 }
 
 /// Current chapter (RW)
@@ -2288,6 +2287,7 @@ static int set_property_command(MPContext * mpctx, mp_cmd_t * cmd)
 
 int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 {
+    struct MPOpts *opts = &mpctx->opts;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     sh_video_t * const sh_video = mpctx->sh_video;
     int brk_cmd = 0;
@@ -2391,9 +2391,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	case MP_CMD_EDL_MARK:
 	    if (edl_fd) {
 		float v = sh_video ? sh_video->pts :
-		    playing_audio_pts(sh_audio, mpctx->d_audio,
-				      mpctx->audio_out);
-
+		    playing_audio_pts(mpctx);
 		if (mpctx->begin_skip == MP_NOPTS_VALUE) {
 		    mpctx->begin_skip = v;
 		    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdloutStartSkip);
@@ -2419,26 +2417,26 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 
 	case MP_CMD_SPEED_INCR:{
 		float v = cmd->args[0].v.f;
-		playback_speed += v;
+		opts->playback_speed += v;
 		build_afilter_chain(mpctx, sh_audio, &ao_data);
 		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
-			    playback_speed);
+			    opts->playback_speed);
 	    } break;
 
 	case MP_CMD_SPEED_MULT:{
 		float v = cmd->args[0].v.f;
-		playback_speed *= v;
+		opts->playback_speed *= v;
 		build_afilter_chain(mpctx, sh_audio, &ao_data);
 		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
-			    playback_speed);
+			    opts->playback_speed);
 	    } break;
 
 	case MP_CMD_SPEED_SET:{
 		float v = cmd->args[0].v.f;
-		playback_speed = v;
+		opts->playback_speed = v;
 		build_afilter_chain(mpctx, sh_audio, &ao_data);
 		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
-			    playback_speed);
+			    opts->playback_speed);
 	    } break;
 
 	case MP_CMD_FRAME_STEP:
@@ -3055,9 +3053,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		if (sh_video)
 		    pos = sh_video->pts;
 		else if (sh_audio && mpctx->audio_out)
-		    pos =
-			playing_audio_pts(sh_audio, mpctx->d_audio,
-					  mpctx->audio_out);
+		    pos = playing_audio_pts(mpctx);
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_TIME_POSITION=%.1f\n", pos);
 	    }
 	    break;

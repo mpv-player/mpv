@@ -205,8 +205,6 @@ int benchmark=0;
        int auto_quality=0;
 static int output_quality=0;
 
-float playback_speed=1.0;
-
 int use_gui=0;
 
 #ifdef HAVE_NEW_GUI
@@ -1176,6 +1174,7 @@ static void sadd_hhmmssf(char *buf, unsigned *pos, int len, float time) {
  */
 static void print_status(struct MPContext *mpctx, float a_pos, float a_v, float corr)
 {
+    struct MPOpts *opts = &mpctx->opts;
   sh_video_t * const sh_video = mpctx->sh_video;
   int width;
   char *line;
@@ -1223,9 +1222,9 @@ static void print_status(struct MPContext *mpctx, float a_pos, float a_v, float 
   if (sh_video) {
     if (sh_video->timer > 0.5)
       saddf(line, &pos, width, "%2d%% %2d%% %4.1f%% ",
-        (int)(100.0*video_time_usage*playback_speed/(double)sh_video->timer),
-        (int)(100.0*vout_time_usage*playback_speed/(double)sh_video->timer),
-        (100.0*audio_time_usage*playback_speed/(double)sh_video->timer));
+        (int)(100.0*video_time_usage*opts->playback_speed/(double)sh_video->timer),
+        (int)(100.0*vout_time_usage*opts->playback_speed/(double)sh_video->timer),
+        (100.0*audio_time_usage*opts->playback_speed/(double)sh_video->timer));
     else
       saddf(line, &pos, width, "??%% ??%% ??,?%% ");
   } else if (mpctx->sh_audio) {
@@ -1247,8 +1246,8 @@ static void print_status(struct MPContext *mpctx, float a_pos, float a_v, float 
 #endif
 
   // other
-  if (playback_speed != 1)
-    saddf(line, &pos, width, "%4.2fx ", playback_speed);
+  if (opts->playback_speed != 1)
+    saddf(line, &pos, width, "%4.2fx ", opts->playback_speed);
 
   // end
   if (erase_to_end_of_line) {
@@ -1270,6 +1269,7 @@ static void print_status(struct MPContext *mpctx, float a_pos, float a_v, float 
  */
 int build_afilter_chain(struct MPContext *mpctx, sh_audio_t *sh_audio, ao_data_t *ao_data)
 {
+    struct MPOpts *opts = &mpctx->opts;
   int new_srate;
   int result;
   if (!sh_audio)
@@ -1282,17 +1282,17 @@ int build_afilter_chain(struct MPContext *mpctx, sh_audio_t *sh_audio, ao_data_t
   }
   if(af_control_any_rev(sh_audio->afilter,
                         AF_CONTROL_PLAYBACK_SPEED | AF_CONTROL_SET,
-                        &playback_speed)) {
+                        &opts->playback_speed)) {
     new_srate = sh_audio->samplerate;
   } else {
-    new_srate = sh_audio->samplerate * playback_speed;
+    new_srate = sh_audio->samplerate * opts->playback_speed;
     if (new_srate != ao_data->samplerate) {
       // limits are taken from libaf/af_resample.c
       if (new_srate < 8000)
         new_srate = 8000;
       if (new_srate > 192000)
         new_srate = 192000;
-      playback_speed = (float)new_srate / (float)sh_audio->samplerate;
+      opts->playback_speed = (float)new_srate / (float)sh_audio->samplerate;
     }
   }
   result =  init_audio_filters(sh_audio, new_srate,
@@ -1636,8 +1636,10 @@ if(mpctx->sh_audio){
 
 // Return pts value corresponding to the end point of audio written to the
 // ao so far.
-static double written_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio)
+static double written_audio_pts(struct MPContext *mpctx)
 {
+    sh_audio_t *sh_audio = mpctx->sh_audio;
+    demux_stream_t *d_audio = mpctx->d_audio;
     double buffered_output;
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
@@ -1680,25 +1682,25 @@ static double written_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio)
 
     // Filters divide audio length by playback_speed, so multiply by it
     // to get the length in original units without speedup or slowdown
-    a_pts -= buffered_output * playback_speed / ao_data.bps;
+    a_pts -= buffered_output * mpctx->opts.playback_speed / ao_data.bps;
 
     return a_pts;
 }
 
 // Return pts value corresponding to currently playing audio.
-double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
-				const ao_functions_t *audio_out)
+double playing_audio_pts(struct MPContext *mpctx)
 {
-    return written_audio_pts(sh_audio, d_audio) - playback_speed *
-	audio_out->get_delay();
+    return written_audio_pts(mpctx) - mpctx->opts.playback_speed *
+	mpctx->audio_out->get_delay();
 }
 
 static int check_framedrop(struct MPContext *mpctx, double frame_time) {
+    struct MPOpts *opts = &mpctx->opts;
 	// check for frame-drop:
 	current_module = "check_framedrop";
 	if (mpctx->sh_audio && !mpctx->d_audio->eof) {
 	    static int dropped_frames;
-	    float delay = playback_speed*mpctx->audio_out->get_delay();
+	    float delay = opts->playback_speed*mpctx->audio_out->get_delay();
 	    float d = delay-mpctx->delay;
 	    ++total_frame_cnt;
 	    // we should avoid dropping too many frames in sequence unless we
@@ -1930,6 +1932,7 @@ static void adjust_sync_and_print_status(struct MPContext *mpctx,
                                          int between_frames,
                                          float timing_error)
 {
+    struct MPOpts *opts = &mpctx->opts;
     current_module="av_sync";
 
     if(mpctx->sh_audio){
@@ -1947,9 +1950,9 @@ static void adjust_sync_and_print_status(struct MPContext *mpctx,
 	     * value here, even a "corrected" one, would be incompatible with
 	     * autosync mode.)
 	     */
-	    a_pts = written_audio_pts(mpctx->sh_audio, mpctx->d_audio) - mpctx->delay;
+	    a_pts = written_audio_pts(mpctx) - mpctx->delay;
 	else
-	    a_pts = playing_audio_pts(mpctx->sh_audio, mpctx->d_audio, mpctx->audio_out);
+	    a_pts = playing_audio_pts(mpctx);
 
 	v_pts = mpctx->sh_video->pts;
 
@@ -1967,7 +1970,7 @@ static void adjust_sync_and_print_status(struct MPContext *mpctx,
 		/* Do not correct target time for the next frame if this frame
 		 * was late not because of wrong target time but because the
 		 * target time could not be met */
-		x = (AV_delay + timing_error * playback_speed) * 0.1f;
+		x = (AV_delay + timing_error * opts->playback_speed) * 0.1f;
 	    if (x < -max_pts_correction)
 		x = -max_pts_correction;
 	    else if (x> max_pts_correction)
@@ -1994,6 +1997,7 @@ static void adjust_sync_and_print_status(struct MPContext *mpctx,
 
 static int fill_audio_out_buffers(struct MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     unsigned int t;
     double tt;
     int playsize;
@@ -2057,7 +2061,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
 	    sh_audio->a_out_buffer_len -= playsize;
 	    memmove(sh_audio->a_out_buffer, &sh_audio->a_out_buffer[playsize],
 		    sh_audio->a_out_buffer_len);
-	    mpctx->delay += playback_speed*playsize/(double)ao_data.bps;
+	    mpctx->delay += opts->playback_speed*playsize/(double)ao_data.bps;
 	}
 	else if (audio_eof && mpctx->audio_out->get_delay() < .04) {
 	    // Sanity check to avoid hanging in case current ao doesn't output
@@ -2072,6 +2076,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
 static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
                               float *aq_sleep_time)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int frame_time_remaining = 0;
     current_module="calc_sleep_time";
 
@@ -2091,12 +2096,12 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 	     * sync to settle at the right value (but it eventually will.)
 	     * This settling time is very short for values below 100.
 	     */
-	    float predicted = mpctx->delay / playback_speed + *time_frame;
+	    float predicted = mpctx->delay / opts->playback_speed + *time_frame;
 	    float difference = delay - predicted;
 	    delay = predicted + difference / (float)autosync;
 	}
 
-	*time_frame = delay - mpctx->delay / playback_speed;
+	*time_frame = delay - mpctx->delay / opts->playback_speed;
 
 	// delay = amount of audio buffered in soundcard/driver
 	if (delay > 0.25) delay=0.25; else
@@ -3707,7 +3712,7 @@ if(!mpctx->sh_video) {
   // handle audio-only case:
   double a_pos=0;
   if(!quiet || end_at.type == END_AT_TIME )
-    a_pos = playing_audio_pts(mpctx->sh_audio, mpctx->d_audio, mpctx->audio_out);
+    a_pos = playing_audio_pts(mpctx);
 
   if(!quiet)
       print_status(mpctx, a_pos, 0, 0);
@@ -3735,7 +3740,7 @@ if(!mpctx->sh_video) {
       else {
 	  // might return with !eof && !blit_frame if !correct_pts
 	  mpctx->num_buffered_frames += blit_frame;
-	  time_frame += frame_time / playback_speed;  // for nosound
+	  time_frame += frame_time / opts->playback_speed;  // for nosound
       }
   }
 
@@ -3903,7 +3908,7 @@ if(mpctx->rel_seek_secs || mpctx->abs_seek_pos){
           guiIntfStruct.Position=demuxer_get_percent_pos(mpctx->demuxer);
 	}
 	if ( mpctx->sh_video ) guiIntfStruct.TimeSec=mpctx->sh_video->pts;
-	  else if ( mpctx->sh_audio ) guiIntfStruct.TimeSec=playing_audio_pts(mpctx->sh_audio, mpctx->d_audio, mpctx->audio_out);
+	  else if ( mpctx->sh_audio ) guiIntfStruct.TimeSec=playing_audio_pts(mpctx);
 	guiIntfStruct.LengthInSec=demuxer_get_time_length(mpctx->demuxer);
 	guiGetEvent( guiReDraw,NULL );
 	guiGetEvent( guiSetVolume,NULL );

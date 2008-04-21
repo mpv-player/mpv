@@ -12,6 +12,7 @@ typedef struct MPOpts {
     int correct_pts;
     int loop_times;
     int user_correct_pts;
+    float playback_speed;
 } MPOpts;
 
 #endif

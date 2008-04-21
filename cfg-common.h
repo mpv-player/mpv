@@ -384,5 +384,6 @@ int dvd_parse_chapter_range(const m_option_t*, const char*);
 #define FLAG_CONSTANTS(optname, varname, offvalue, value, flags) {optname, NULL, CONF_TYPE_FLAG, flags, offvalue, value, NULL, 1, offsetof(struct MPOpts, varname)}
 #define STRINGLIST(optname, varname, flags) {optname, NULL, CONF_TYPE_STRING_LIST, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define INTRANGE(optname, varname, min, max, flags) {optname, NULL, CONF_TYPE_INT, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
+#define FLOATRANGE(optname, varname, min, max, flags) {optname, NULL, CONF_TYPE_FLOAT, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
 
 #endif /* MPLAYER_CFG_COMMON_H */

@@ -115,7 +115,6 @@ typedef struct MPContext {
 extern FILE *edl_fd;
 extern int file_filter;
 // These appear in options list
-extern float playback_speed;
 extern int forced_subs_only;
 
 
@@ -123,8 +122,7 @@ int build_afilter_chain(struct MPContext *mpctx, sh_audio_t *sh_audio, ao_data_t
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 void init_vo_spudec(struct MPContext *mpctx);
-double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
-			 const ao_functions_t *audio_out);
+double playing_audio_pts(struct MPContext *mpctx);
 void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc);
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr);
 int reinit_video_chain(struct MPContext *mpctx);

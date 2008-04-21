@@ -10,6 +10,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .fixed_vo = 0,
         .loop_times = -1,
         .user_correct_pts = -1,
+        .playback_speed = 1.,
     };
 }
 

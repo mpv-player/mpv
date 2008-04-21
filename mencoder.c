@@ -166,7 +166,6 @@ static int audio_density=2;
 double force_fps=0;
 static double force_ofps=0; // set to 24 for inverse telecine
 static int skip_limit=-1;
-float playback_speed=1.0;
 
 static int force_srate=0;
 static int audio_output_format=0;
@@ -673,7 +672,7 @@ sh_video=d_video->sh;
     mencoder_exit(1,NULL);
   }
 
-if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf || playback_speed != 1.0)){
+if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf || opts.playback_speed != 1.0)){
   // Go through the codec.conf and find the best codec...
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
   if(!init_best_audio_codec(sh_audio,audio_codec_list,audio_fm_list)){
@@ -684,12 +683,12 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf || playback_spee
 
   if (sh_audio) {
     new_srate = sh_audio->samplerate;
-    if (playback_speed != 1.0) {
-        new_srate *= playback_speed;
+    if (opts.playback_speed != 1.0) {
+        new_srate *= opts.playback_speed;
         // limits are taken from libaf/af_resample.c
         if (new_srate < 8000) new_srate = 8000;
         if (new_srate > 192000) new_srate = 192000;
-        playback_speed = (float)new_srate / (float)sh_audio->samplerate;
+        opts.playback_speed = (float)new_srate / (float)sh_audio->samplerate;
     }
   }
 
@@ -789,14 +788,14 @@ mux_v->source=sh_video;
 mux_v->h.dwSampleSize=0; // VBR
 #ifdef USE_LIBAVCODEC
 {
-    double fps = force_ofps?force_ofps:sh_video->fps*playback_speed;
+    double fps = force_ofps?force_ofps:sh_video->fps*opts.playback_speed;
     AVRational q= av_d2q(fps, fps*1001+2);
     mux_v->h.dwScale= q.den;
     mux_v->h.dwRate = q.num;
 }
 #else
 mux_v->h.dwScale=10000;
-mux_v->h.dwRate=mux_v->h.dwScale*(force_ofps?force_ofps:sh_video->fps*playback_speed);
+mux_v->h.dwRate=mux_v->h.dwScale*(force_ofps?force_ofps:sh_video->fps*opts.playback_speed);
 #endif
 
 mux_v->codec=out_video_codec;
@@ -972,7 +971,7 @@ if(mux_a->codec != ACODEC_COPY) {
 }
 switch(mux_a->codec){
 case ACODEC_COPY:
-    if (playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
+    if (opts.playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
     if (sh_audio->format >= 0x10000) {
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantCopyAudioFormat, sh_audio->format);
 	mencoder_exit(1,NULL);
@@ -1000,8 +999,8 @@ case ACODEC_COPY:
 	mux_a->h.dwScale=mux_a->h.dwSampleSize;
 	mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
     }
-    mux_a->h.dwRate *= playback_speed;
-    mux_a->wf->nSamplesPerSec *= playback_speed;
+    mux_a->h.dwRate *= opts.playback_speed;
+    mux_a->wf->nSamplesPerSec *= opts.playback_speed;
     mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
 	mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
 	mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
@@ -1031,17 +1030,17 @@ else {
 		mencoder_exit(1,NULL);
 	}
 	if (sh_audio && mux_a->codec == ACODEC_COPY) {
-		if (playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
+		if (opts.playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
 		mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
 		       mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
 		       mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
 		if (sh_audio->wf) {
 			if ((mux_a->wf->wFormatTag != sh_audio->wf->wFormatTag) ||
 			    (mux_a->wf->nChannels != sh_audio->wf->nChannels) ||
-			    (mux_a->wf->nSamplesPerSec != sh_audio->wf->nSamplesPerSec * playback_speed))
+			    (mux_a->wf->nSamplesPerSec != sh_audio->wf->nSamplesPerSec * opts.playback_speed))
 			{
 				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (int)(sh_audio->wf->nSamplesPerSec * playback_speed),
+				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (int)(sh_audio->wf->nSamplesPerSec * opts.playback_speed),
 				       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
 				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
 				mencoder_exit(1,NULL);
@@ -1049,10 +1048,10 @@ else {
 		} else {
 			if ((mux_a->wf->wFormatTag != sh_audio->format) ||
 			    (mux_a->wf->nChannels != sh_audio->channels) ||
-			    (mux_a->wf->nSamplesPerSec != sh_audio->samplerate * playback_speed))
+			    (mux_a->wf->nSamplesPerSec != sh_audio->samplerate * opts.playback_speed))
 			{
 				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (int)(sh_audio->wf->nSamplesPerSec * playback_speed),
+				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (int)(sh_audio->wf->nSamplesPerSec * opts.playback_speed),
 				       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
 				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
 				mencoder_exit(1,NULL);
@@ -1279,7 +1278,7 @@ if(sh_audio){
         frame_data.in_size=video_read_frame(sh_video,&frame_data.frame_time,&frame_data.start,force_fps);
         sh_video->timer+=frame_data.frame_time;
     }
-    frame_data.frame_time /= playback_speed;
+    frame_data.frame_time /= opts.playback_speed;
     if(frame_data.in_size<0){ at_eof=1; break; }
     ++decoded_frameno;
 
@@ -1428,7 +1427,7 @@ if(sh_audio && !demuxer2){
     // av = compensated (with out buffering delay) A-V diff
     AV_delay=(a_pts-v_pts);
     AV_delay-=audio_delay;
-    AV_delay /= playback_speed;
+    AV_delay /= opts.playback_speed;
     AV_delay-=mux_a->timer-(mux_v->timer-(v_timer_corr+v_pts_corr));
     // adjust for encoder delays
     AV_delay -= (float) mux_a->encoder_delay * mux_a->h.dwScale/mux_a->h.dwRate;
@@ -1438,9 +1437,9 @@ if(sh_audio && !demuxer2){
         if(x<-max_pts_correction) x=-max_pts_correction; else
         if(x> max_pts_correction) x= max_pts_correction;
         if(default_max_pts_correction>=0)
-          max_pts_correction=default_max_pts_correction*playback_speed;
+          max_pts_correction=default_max_pts_correction*opts.playback_speed;
         else
-          max_pts_correction=sh_video->frametime*0.10 *playback_speed; // +-10% of time
+          max_pts_correction=sh_video->frametime*0.10 *opts.playback_speed; // +-10% of time
 	// sh_video->timer-=x;
 	c_total+=x;
 	v_pts_corr+=x;
