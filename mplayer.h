@@ -2,6 +2,8 @@
 #ifndef MPLAYER_MPLAYER_H
 #define MPLAYER_MPLAYER_H
 
+#include "mp_msg.h"
+
 extern char* current_module;
 
 extern char * dvd_device;
@@ -47,7 +49,15 @@ extern int video_id;
 extern int dvdsub_id;
 extern int vobsub_id;
 
-extern void exit_player(const char* how);
-extern void update_set_of_subtitles(void);
+static inline void exit_player(const char *how)
+{
+    if (how)
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Deprecated exit call: %s", how);
+    exit(1);
+}
+
+struct MPContext;
+
+extern void update_set_of_subtitles(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MPLAYER_H */

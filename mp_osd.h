@@ -19,7 +19,9 @@
 extern int osd_duration;
 extern int term_osd;
 
-void set_osd_bar(int type,const char* name,double min,double max,double val);
+struct MPContext;
+
+void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,double max,double val);
 void set_osd_msg(int id, int level, int time, const char* fmt, ...);
 void rm_osd_msg(int id);
 

@@ -45,7 +45,9 @@ enum metadata_s {
   META_INFO_GENRE
 };
 
-char *get_metadata (metadata_t type);
+struct MPContext;
+
+char *get_metadata(struct MPContext *mpctx, metadata_t type);
 
 #endif /* MPLAYER_METADATA_H */
 

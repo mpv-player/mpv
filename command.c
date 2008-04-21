@@ -202,14 +202,14 @@ static int mp_property_playback_speed(m_option_t * prop, int action,
 	    return M_PROPERTY_ERROR;
 	M_PROPERTY_CLAMP(prop, *(float *) arg);
 	playback_speed = *(float *) arg;
-	build_afilter_chain(mpctx->sh_audio, &ao_data);
+	build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data);
 	return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
 	playback_speed += (arg ? *(float *) arg : 0.1) *
 	    (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
 	M_PROPERTY_CLAMP(prop, playback_speed);
-	build_afilter_chain(mpctx->sh_audio, &ao_data);
+	build_afilter_chain(mpctx, mpctx->sh_audio, &ao_data);
 	return M_PROPERTY_OK;
     }
     return m_property_float_range(prop, action, arg, &playback_speed);
@@ -848,14 +848,14 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 	if (audio_id == -2
 	    || (audio_id > -1
 		&& mpctx->demuxer->audio->id != current_id && current_id != -2))
-	    uninit_player(INITIALIZED_AO | INITIALIZED_ACODEC);
+	    uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
 	if (audio_id > -1 && mpctx->demuxer->audio->id != current_id) {
 	    sh_audio_t *sh2;
 	    sh2 = mpctx->demuxer->a_streams[mpctx->demuxer->audio->id];
 	    if (sh2) {
 		sh2->ds = mpctx->demuxer->audio;
 		mpctx->sh_audio = sh2;
-		reinit_audio_chain();
+		reinit_audio_chain(mpctx);
 	    }
 	}
 	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", audio_id);
@@ -906,7 +906,7 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 	if (video_id == -2
 	    || (video_id > -1 && mpctx->demuxer->video->id != current_id
 		&& current_id != -2))
-	    uninit_player(INITIALIZED_VCODEC |
+	    uninit_player(mpctx, INITIALIZED_VCODEC |
                           (mpctx->opts.fixed_vo && video_id != -2 ? 0 : INITIALIZED_VO));
 	if (video_id > -1 && mpctx->demuxer->video->id != current_id) {
 	    sh_video_t *sh2;
@@ -914,7 +914,7 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 	    if (sh2) {
 		sh2->ds = mpctx->demuxer->video;
 		mpctx->sh_video = sh2;
-		reinit_video_chain();
+		reinit_video_chain(mpctx);
 	    }
 	}
 	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_TRACK=%d\n", video_id);
@@ -1472,7 +1472,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	    if (d_sub->sh && d_sub->id >= 0) {
 		sh_sub_t *sh = d_sub->sh;
 		if (sh->type == 'v')
-		    init_vo_spudec();
+		    init_vo_spudec(mpctx);
 #ifdef USE_ASS
 		else if (ass_enabled)
 		    ass_track = sh->ass_track;
@@ -2260,12 +2260,12 @@ static int set_property_command(MPContext * mpctx, mp_cmd_t * cmd)
     if (set_prop_cmd[i].osd_progbar) {
 	if (prop->type == CONF_TYPE_INT) {
 	    if (mp_property_do(pname, M_PROPERTY_GET, &r, mpctx) > 0)
-		set_osd_bar(set_prop_cmd[i].osd_progbar,
+		set_osd_bar(mpctx, set_prop_cmd[i].osd_progbar,
 			    set_prop_cmd[i].osd_msg, prop->min, prop->max, r);
 	} else if (prop->type == CONF_TYPE_FLOAT) {
 	    float f;
 	    if (mp_property_do(pname, M_PROPERTY_GET, &f, mpctx) > 0)
-		set_osd_bar(set_prop_cmd[i].osd_progbar,
+		set_osd_bar(mpctx, set_prop_cmd[i].osd_progbar,
 			    set_prop_cmd[i].osd_msg, prop->min, prop->max, f);
 	} else
 	    mp_msg(MSGT_CPLAYER, MSGL_ERR,
@@ -2420,7 +2420,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	case MP_CMD_SPEED_INCR:{
 		float v = cmd->args[0].v.f;
 		playback_speed += v;
-		build_afilter_chain(sh_audio, &ao_data);
+		build_afilter_chain(mpctx, sh_audio, &ao_data);
 		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
 			    playback_speed);
 	    } break;
@@ -2428,7 +2428,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	case MP_CMD_SPEED_MULT:{
 		float v = cmd->args[0].v.f;
 		playback_speed *= v;
-		build_afilter_chain(sh_audio, &ao_data);
+		build_afilter_chain(mpctx, sh_audio, &ao_data);
 		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
 			    playback_speed);
 	    } break;
@@ -2436,7 +2436,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	case MP_CMD_SPEED_SET:{
 		float v = cmd->args[0].v.f;
 		playback_speed = v;
-		build_afilter_chain(sh_audio, &ao_data);
+		build_afilter_chain(mpctx, sh_audio, &ao_data);
 		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
 			    playback_speed);
 	    } break;
@@ -2452,7 +2452,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_QUIT:
-	    exit_player_with_rc(MSGTR_Exit_quit,
+	    exit_player_with_rc(mpctx, MSGTR_Exit_quit,
 				(cmd->nargs > 0) ? cmd->args[0].v.i : 0);
 
 	case MP_CMD_PLAY_TREE_STEP:{
@@ -2831,7 +2831,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	case MP_CMD_SUB_LOAD:
 	    if (sh_video) {
 		int n = mpctx->set_of_sub_size;
-		add_subtitles(cmd->args[0].v.s, sh_video->fps, 0);
+		add_subtitles(mpctx, cmd->args[0].v.s, sh_video->fps, 0);
 		if (n != mpctx->set_of_sub_size) {
 		    if (mpctx->global_sub_indices[SUB_SOURCE_SUBS] < 0)
 			mpctx->global_sub_indices[SUB_SOURCE_SUBS] =
@@ -2918,12 +2918,12 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 
 	case MP_CMD_GET_FILENAME:{
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_FILENAME='%s'\n",
-		       get_metadata(META_NAME));
+		       get_metadata(mpctx, META_NAME));
 	    }
 	    break;
 
 	case MP_CMD_GET_VIDEO_CODEC:{
-		char *inf = get_metadata(META_VIDEO_CODEC);
+		char *inf = get_metadata(mpctx, META_VIDEO_CODEC);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_VIDEO_CODEC='%s'\n", inf);
@@ -2932,7 +2932,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_VIDEO_BITRATE:{
-		char *inf = get_metadata(META_VIDEO_BITRATE);
+		char *inf = get_metadata(mpctx, META_VIDEO_BITRATE);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_VIDEO_BITRATE='%s'\n", inf);
@@ -2941,7 +2941,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_VIDEO_RESOLUTION:{
-		char *inf = get_metadata(META_VIDEO_RESOLUTION);
+		char *inf = get_metadata(mpctx, META_VIDEO_RESOLUTION);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO,
@@ -2951,7 +2951,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_AUDIO_CODEC:{
-		char *inf = get_metadata(META_AUDIO_CODEC);
+		char *inf = get_metadata(mpctx, META_AUDIO_CODEC);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_CODEC='%s'\n", inf);
@@ -2960,7 +2960,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_AUDIO_BITRATE:{
-		char *inf = get_metadata(META_AUDIO_BITRATE);
+		char *inf = get_metadata(mpctx, META_AUDIO_BITRATE);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_BITRATE='%s'\n", inf);
@@ -2969,7 +2969,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_AUDIO_SAMPLES:{
-		char *inf = get_metadata(META_AUDIO_SAMPLES);
+		char *inf = get_metadata(mpctx, META_AUDIO_SAMPLES);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_AUDIO_SAMPLES='%s'\n", inf);
@@ -2978,7 +2978,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_META_TITLE:{
-		char *inf = get_metadata(META_INFO_TITLE);
+		char *inf = get_metadata(mpctx, META_INFO_TITLE);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_TITLE='%s'\n", inf);
@@ -2987,7 +2987,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_META_ARTIST:{
-		char *inf = get_metadata(META_INFO_ARTIST);
+		char *inf = get_metadata(mpctx, META_INFO_ARTIST);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_ARTIST='%s'\n", inf);
@@ -2996,7 +2996,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_META_ALBUM:{
-		char *inf = get_metadata(META_INFO_ALBUM);
+		char *inf = get_metadata(mpctx, META_INFO_ALBUM);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_ALBUM='%s'\n", inf);
@@ -3005,7 +3005,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_META_YEAR:{
-		char *inf = get_metadata(META_INFO_YEAR);
+		char *inf = get_metadata(mpctx, META_INFO_YEAR);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_YEAR='%s'\n", inf);
@@ -3014,7 +3014,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_META_COMMENT:{
-		char *inf = get_metadata(META_INFO_COMMENT);
+		char *inf = get_metadata(mpctx, META_INFO_COMMENT);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_COMMENT='%s'\n", inf);
@@ -3023,7 +3023,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_META_TRACK:{
-		char *inf = get_metadata(META_INFO_TRACK);
+		char *inf = get_metadata(mpctx, META_INFO_TRACK);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_TRACK='%s'\n", inf);
@@ -3032,7 +3032,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_GET_META_GENRE:{
-		char *inf = get_metadata(META_INFO_GENRE);
+		char *inf = get_metadata(mpctx, META_INFO_GENRE);
 		if (!inf)
 		    inf = strdup("");
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_META_GENRE='%s'\n", inf);
