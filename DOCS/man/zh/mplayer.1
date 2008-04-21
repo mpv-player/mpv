@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r26057
+.\" sync with en/mplayer.1 r26460
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -286,8 +286,10 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 用 OSD 显示文件名。
 .IPs "! 和 @"
 寻到前一章节/后一章节的开始处。
-.IPs "D (仅用于\-vo xvmc, \-vf yadif, \-vf kerndeint)"
-激活/撤销去交错。
+.IPs "D（仅用于\-vo xvmc, \-vf yadif, \-vf kerndeint）"
+激活/禁用解隔行扫描过滤器。
+.IPs "A"
+在可用的 DVD 视角间循环切换。
 .RE
 .PD 1
 .PP
@@ -634,6 +636,10 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 环境变量 MPLAYER_CHARSET 能帮你去除开头几行混乱的输出。
 .
 .TP
+.B \-msgcolor
+在支持 ANSI 彩色标准的终端上启用彩色控制屏幕。
+.
+.TP
 .B \-msglevel <all=<级别>:<模块>=<级别>:...>
 直接对各个模块控制冗赘度。
 此 "all" 模块改变所有模块(虽然没有在命令行中显式指定)的冗赘级别。
@@ -668,6 +674,32 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 调试级别 3
 .IPs " 9"
 调试级别 4
+.RE
+.PD 1
+.
+.TP
+.B \-msgmodule
+在每条控制屏幕消息前加上模块名。
+.
+.TP
+.B \-noconfig <若干选项>
+不解析所选的配置文件。
+.br
+.I 注意：
+如果命令行中指定了 \-include 或 \-use\-filedir\-conf 选项，
+那么这些选项将优先生效。
+.sp 1
+可用选项有：
+.PD 0
+.RSs
+.IPs "all\ \ "
+所有的配置文件
+.IPs "gui（仅仅是 GUI）"
+GUI 的配置文件
+.IPs system
+系统配置文件
+.IPs "user\ "
+用户配置文件
 .RE
 .PD 1
 .
@@ -801,7 +833,7 @@ MOUSE_BTN0\-MOUSE_BTN0_DBL。
 xv, xvidix 和 dfbmga。
 .
 .TP
-.B \-framedrop（也请参见 \-hardframedrop，只能与 -no-correct-pts 一起使用）
+.B \-framedrop（也请参见 \-hardframedrop，未指定 -no-correct-pts 时只可用于实验）
 跳过显示一些帧从而在慢的机器上保持 A/V 同步。
 视频滤镜不会应用到这些帧上。对于 B-帧 甚至解码也完全跳过。
 .
@@ -815,7 +847,7 @@ xv, xvidix 和 dfbmga。
 显示简短的选项概要。
 .
 .TP
-.B \-hardframedrop（只能与 -no-correct-pts 一起使用）
+.B \-hardframedrop（未指定 -no-correct-pts 时只可用于实验）
 更加密集的丢帧（中断解码过程）。将导致图像失真！
 注意，libmpeg2 解码器尤其可能在使用该选项后崩溃，所以请考虑使用
 “\-vc ffmpeg12,”。
@@ -841,12 +873,13 @@ mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .
 .TP
 .B \-identify
-是 \-msglevel identify=4 的简式。使用易于分析的格式显示文件参数。
-也打印更详细的字幕信息和音轨语言和 ID。
-在某些情形下, 你使用 \-msglevel identify=6 能得到更多的信息。
-例如, 对于 DVD 能列出每个标题的章节和时长，以及一个碟片 ID 号。
-wrapper(封套) 脚本 TOOLS/\:midentify 能抑制 MPlayer 的其它输出
-并(希望能) shellescapes(脚本转义) 文件名。
+是 \-msglevel identify=4 的简写形式。使用便于解析的格式显示文件参数。
+同时打印更为详细的关于字幕和音轨的语言与 ID 号的信息。
+在某些情形下，使用 \-msglevel identify=6 能得到更多的信息。
+例如，对于一张 DVD 碟片，该选项能列出每个标题的章节和时长，以及一个碟片 ID 号。
+将此选项与 \-frames 0 一起使用能禁止所有输出。
+封装脚本 TOOLS/\:midentify 禁止 MPlayer 的其它输出，
+并且（很可能）shellescapes（脚本转义）了文件名。
 .
 .TP
 .B \-idle (也请参见 \-slave)
@@ -7316,10 +7349,11 @@ iter（递归重叠的区块，仅用于snow）
 .B mbd=<0\-2>（另参见*cmp、qpel）
 宏块决策算法（高质量模式），将每个宏块在所有的模式下编码然后选择最佳的模式。
 该模式运行很慢，但能使质量提高，文件大小降低。
-当mbd设为1或2时，比较宏块过程中将不考虑mbcmp的值。
-然而当某个比较设置（precmp、subcmp、cmp或mbcmp）为非零值时，将会使用一种更慢但更
-好的半像素运动搜索模式，而不管mbd设为何值。
-如果设置了qpel参数，则将肯定使用四分之一像素运动搜索模式。
+当 mbd 设为1或2时，比较宏块过程中将不考虑 mbcmp 的值（但是其它地方还是使用
+了 mbcmp 值，特别是运动搜索算法中）。
+然而当某个比较设置（precmp、subcmp、cmp 或 mbcmp）为非零值时，将会使用一种更慢但更
+好的半像素运动搜索模式，而不管 mbd 设为何值。
+如果设置了 qpel 参数，则将肯定使用四分之一像素运动搜索模式。
 .PD 0
 .RSs
 .IPs 0
@@ -8107,7 +8141,8 @@ vlc编码（Golomb-Rice）
 .
 .TP
 .B mbcmp=<0\-2000>
-设置用于宏块决策的比较函数，只有当mbd=0时才有作用。
+设置用于宏块决策的比较函数，只有当 mbd=0 时才有作用。
+该选项也用于一些运动搜索函数中，此时不管 mbd 设置如何它都有作用。
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -9727,8 +9762,10 @@ NUT开放容器格式（实验性）
 QuickTime
 .IPs "mp4\ \ "
 MPEG-4格式
+.IPs "ipod\ "
+含有苹果 iPod 固件所需额外标志数据的 MPEG-4 格式
 .IPs "dv\ \ \ "
-Sony数字视频容器格式
+Sony 数字视频容器格式
 .RE
 .PD 1
 .TP
