@@ -18,6 +18,10 @@ struct vo_x11_state {
     unsigned long xv_colorkey;
     unsigned int xv_port;
 
+    unsigned int olddecor;
+    unsigned int oldfuncs;
+    XComposeStatus compose_status;
+
     Atom XA_NET_SUPPORTED;
     Atom XA_NET_WM_STATE;
     Atom XA_NET_WM_STATE_FULLSCREEN;
@@ -65,7 +69,7 @@ extern int vo_mouse_autohide;
 void vo_x11_init_state(struct vo_x11_state *s);
 int vo_init(struct vo *vo);
 void vo_uninit(struct vo_x11_state *x11);
-extern void vo_x11_decoration( Display * vo_Display,Window w,int d );
+extern void vo_x11_decoration(struct vo *vo, int d );
 void vo_x11_classhint(struct vo *vo, Window window, char *name);
 void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max);
 int vo_x11_check_events(struct vo *vo);

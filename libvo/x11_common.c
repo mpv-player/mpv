@@ -105,13 +105,6 @@ static int vo_x11_get_fs_type(int supported);
 static void saver_off(Display *);
 static void saver_on(Display *);
 
-void vo_x11_init_state(struct vo_x11_state *s)
-{
-    *s = (struct vo_x11_state){
-        .xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR },
-    };
-}
-
 /*
  * Sends the EWMH fullscreen state event.
  *
@@ -876,12 +869,9 @@ typedef struct
 static MotifWmHints vo_MotifWmHints;
 static Atom vo_MotifHints = None;
 
-void vo_x11_decoration(Display * vo_Display, Window w, int d)
+void vo_x11_decoration(struct vo *vo, int d)
 {
-    static unsigned int olddecor = MWM_DECOR_ALL;
-    static unsigned int oldfuncs =
-        MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
-        MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE;
+    struct vo_x11_state *x11 = vo->x11;
     Atom mtype;
     int mformat;
     unsigned long mn, mb;
@@ -891,26 +881,27 @@ void vo_x11_decoration(Display * vo_Display, Window w, int d)
 
     if (vo_fsmode & 8)
     {
-        XSetTransientForHint(vo_Display, w,
-                             RootWindow(vo_Display, mScreen));
+        XSetTransientForHint(x11->display, x11->window,
+                             RootWindow(x11->display, mScreen));
     }
 
-    vo_MotifHints = XInternAtom(vo_Display, "_MOTIF_WM_HINTS", 0);
+    vo_MotifHints = XInternAtom(x11->display, "_MOTIF_WM_HINTS", 0);
     if (vo_MotifHints != None)
     {
         if (!d)
         {
             MotifWmHints *mhints = NULL;
 
-            XGetWindowProperty(vo_Display, w, vo_MotifHints, 0, 20, False,
+            XGetWindowProperty(x11->display, x11->window,
+                               vo_MotifHints, 0, 20, False,
                                vo_MotifHints, &mtype, &mformat, &mn,
                                &mb, (unsigned char **) &mhints);
             if (mhints)
             {
                 if (mhints->flags & MWM_HINTS_DECORATIONS)
-                    olddecor = mhints->decorations;
+                    x11->olddecor = mhints->decorations;
                 if (mhints->flags & MWM_HINTS_FUNCTIONS)
-                    oldfuncs = mhints->functions;
+                    x11->oldfuncs = mhints->functions;
                 XFree(mhints);
             }
         }
@@ -920,8 +911,8 @@ void vo_x11_decoration(Display * vo_Display, Window w, int d)
             MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
         if (d)
         {
-            vo_MotifWmHints.functions = oldfuncs;
-            d = olddecor;
+            vo_MotifWmHints.functions = x11->oldfuncs;
+            d = x11->olddecor;
         }
 #if 0
         vo_MotifWmHints.decorations =
@@ -930,7 +921,8 @@ void vo_x11_decoration(Display * vo_Display, Window w, int d)
         vo_MotifWmHints.decorations =
             d | ((vo_fsmode & 2) ? MWM_DECOR_MENU : 0);
 #endif
-        XChangeProperty(vo_Display, w, vo_MotifHints, vo_MotifHints, 32,
+        XChangeProperty(x11->display, x11->window, vo_MotifHints,
+                        vo_MotifHints, 32,
                         PropModeReplace,
                         (unsigned char *) &vo_MotifWmHints,
                         (vo_fsmode & 4) ? 4 : 5);
@@ -1012,7 +1004,6 @@ int vo_x11_check_events(struct vo *vo)
     XEvent Event;
     char buf[100];
     KeySym keySym;
-    static XComposeStatus stat;
 
 // unsigned long  vo_KeyTable[512];
 
@@ -1074,7 +1065,7 @@ int vo_x11_check_events(struct vo *vo)
 #endif
 
                     XLookupString(&Event.xkey, buf, sizeof(buf), &keySym,
-                                  &stat);
+                                  &x11->compose_status);
 #ifdef XF86XK_AudioPause
                     vo_x11_putkey_ext(keySym);
 #endif
@@ -1567,7 +1558,7 @@ void vo_x11_fullscreen(struct vo *vo)
 
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
     {
-        vo_x11_decoration(x11->display, x11->window, (vo_fs) ? 0 : 1);
+        vo_x11_decoration(vo, (vo_fs) ? 0 : 1);
         vo_x11_sizehint(vo, x, y, w, h, 0);
         vo_x11_setlayer(vo, x11->window, vo_fs);
 
@@ -2558,3 +2549,13 @@ void xv_setup_colorkeyhandling(struct vo *vo, const char *ck_method_str,
 }
 
 #endif
+
+void vo_x11_init_state(struct vo_x11_state *s)
+{
+    *s = (struct vo_x11_state){
+        .xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR },
+        .olddecor = MWM_DECOR_ALL,
+        .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
+                    MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
+    };
+}
