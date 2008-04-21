@@ -69,8 +69,6 @@
 
 extern int enable_mouse_movements;
 int fs_layer = WIN_LAYER_ABOVE_DOCK;
-static int orig_layer = 0;
-static int old_gravity = NorthWestGravity;
 
 int stop_xscreensaver = 0;
 
@@ -1129,7 +1127,7 @@ int vo_x11_check_events(struct vo *vo)
                 }
                 break;
             case MapNotify:
-                x11->vo_hint.win_gravity = old_gravity;
+                x11->vo_hint.win_gravity = x11->old_gravity;
                 XSetWMNormalHints(display, x11->window, &x11->vo_hint);
                 vo_fs_flip = 0;
                 break;
@@ -1372,8 +1370,8 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
     {
         XClientMessageEvent xev;
 
-        if (!orig_layer)
-            orig_layer = vo_x11_get_gnome_layer(x11, vo_window);
+        if (!x11->orig_layer)
+            x11->orig_layer = vo_x11_get_gnome_layer(x11, vo_window);
 
         memset(&xev, 0, sizeof(xev));
         xev.type = ClientMessage;
@@ -1381,7 +1379,7 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         xev.window = vo_window;
         xev.message_type = x11->XA_WIN_LAYER;
         xev.format = 32;
-        xev.data.l[0] = layer ? fs_layer : orig_layer;  // if not fullscreen, stay on default layer
+        xev.data.l[0] = layer ? fs_layer : x11->orig_layer;  // if not fullscreen, stay on default layer
         xev.data.l[1] = CurrentTime;
         mp_msg(MSGT_VO, MSGL_V,
                "[x11] Layered style stay on top (layer %ld).\n",
@@ -1540,9 +1538,9 @@ void vo_x11_fullscreen(struct vo *vo)
 
         XGetWMNormalHints(x11->display, x11->window, &x11->vo_hint, &dummy);
         if (!(x11->vo_hint.flags & PWinGravity))
-            old_gravity = NorthWestGravity;
+            x11->old_gravity = NorthWestGravity;
         else
-            old_gravity = x11->vo_hint.win_gravity;
+            x11->old_gravity = x11->vo_hint.win_gravity;
     }
     if (vo_wm_type == 0 && !(vo_fsmode & 16))
     {
@@ -2552,5 +2550,6 @@ void vo_x11_init_state(struct vo_x11_state *s)
         .olddecor = MWM_DECOR_ALL,
         .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
                     MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
+        .old_gravity = NorthWestGravity,
     };
 }
