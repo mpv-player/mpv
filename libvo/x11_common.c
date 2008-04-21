@@ -117,7 +117,7 @@ void vo_x11_init_state(struct vo_x11_state *s)
  *                         _NET_WM_STATE_ADD    -- add state
  *                         _NET_WM_STATE_TOGGLE -- toggle
  */
-void vo_x11_ewmh_fullscreen(Display *mDisplay, int action)
+void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
 {
     assert(action == _NET_WM_STATE_REMOVE ||
            action == _NET_WM_STATE_ADD || action == _NET_WM_STATE_TOGGLE);
@@ -130,12 +130,12 @@ void vo_x11_ewmh_fullscreen(Display *mDisplay, int action)
         xev.xclient.type = ClientMessage;
         xev.xclient.serial = 0;
         xev.xclient.send_event = True;
-        xev.xclient.message_type = XInternAtom(mDisplay,
+        xev.xclient.message_type = XInternAtom(x11->display,
                                                "_NET_WM_STATE", False);
-        xev.xclient.window = vo_window;
+        xev.xclient.window = x11->window;
         xev.xclient.format = 32;
         xev.xclient.data.l[0] = action;
-        xev.xclient.data.l[1] = XInternAtom(mDisplay,
+        xev.xclient.data.l[1] = XInternAtom(x11->display,
                                             "_NET_WM_STATE_FULLSCREEN",
                                             False);
         xev.xclient.data.l[2] = 0;
@@ -143,7 +143,7 @@ void vo_x11_ewmh_fullscreen(Display *mDisplay, int action)
         xev.xclient.data.l[4] = 0;
 
         /* finally send that damn thing */
-        if (!XSendEvent(mDisplay, DefaultRootWindow(mDisplay), False,
+        if (!XSendEvent(x11->display, DefaultRootWindow(x11->display), False,
                         SubstructureRedirectMask | SubstructureNotifyMask,
                         &xev))
         {
@@ -948,24 +948,16 @@ void vo_x11_classhint(struct vo *vo, Window window, char *name)
                     32, PropModeReplace, (unsigned char *) &pid, 1);
 }
 
-Window vo_window = None;
 GC vo_gc = NULL;
 GC f_gc = NULL;
 XSizeHints vo_hint;
 
-#ifdef HAVE_NEW_GUI
-void vo_setwindow(Window w, GC g)
-{
-    vo_window = w;
-    vo_gc = g;
-}
-#endif
-
 void vo_x11_uninit(struct vo *vo)
 {
-    saver_on(vo->x11->display);
-    if (vo_window != None)
-        vo_showcursor(vo->x11->display, vo_window);
+    struct vo_x11_state *x11 = vo->x11;
+    saver_on(x11->display);
+    if (x11->window != None)
+        vo_showcursor(x11->display, x11->window);
 
     if (f_gc)
     {
@@ -983,23 +975,23 @@ void vo_x11_uninit(struct vo *vo)
             XFreeGC(vo->x11->display, vo_gc);
             vo_gc = NULL;
         }
-        if (vo_window != None)
+        if (x11->window != None)
         {
-            XClearWindow(vo->x11->display, vo_window);
+            XClearWindow(x11->display, x11->window);
             if (WinID < 0)
             {
                 XEvent xev;
 
-                XUnmapWindow(vo->x11->display, vo_window);
-                XDestroyWindow(vo->x11->display, vo_window);
+                XUnmapWindow(x11->display, x11->window);
+                XDestroyWindow(x11->display, x11->window);
                 do
                 {
-                    XNextEvent(vo->x11->display, &xev);
+                    XNextEvent(x11->display, &xev);
                 }
                 while (xev.type != DestroyNotify
-                       || xev.xdestroywindow.event != vo_window);
+                       || xev.xdestroywindow.event != x11->window);
             }
-            vo_window = None;
+            x11->window = None;
         }
         vo_fs = 0;
         vo_old_width = vo_old_height = 0;
@@ -1024,7 +1016,7 @@ int vo_x11_check_events(struct vo *vo)
 
     if ((vo_mouse_autohide) && mouse_waiting_hide &&
                                  (GetTimerMS() - mouse_timer >= 1000)) {
-        vo_hidecursor(display, vo_window);
+        vo_hidecursor(display, x11->window);
         mouse_waiting_hide = 0;
     }
 
@@ -1035,7 +1027,7 @@ int vo_x11_check_events(struct vo *vo)
         if (use_gui)
         {
             guiGetEvent(0, (char *) &Event);
-            if (vo_window != Event.xany.window)
+            if (x11->window != Event.xany.window)
                 continue;
         }
 #endif
@@ -1048,7 +1040,7 @@ int vo_x11_check_events(struct vo *vo)
             case ConfigureNotify:
 //         if (!vo_fs && (Event.xconfigure.width == opts->vo_screenwidth || Event.xconfigure.height == opts->vo_screenheight)) break;
 //         if (vo_fs && Event.xconfigure.width != opts->vo_screenwidth && Event.xconfigure.height != opts->vo_screenheight) break;
-                if (vo_window == None)
+                if (x11->window == None)
                     break;
                 vo->dwidth = Event.xconfigure.width;
                 vo->dheight = Event.xconfigure.height;
@@ -1062,10 +1054,10 @@ int vo_x11_check_events(struct vo *vo)
                     int foo;
                     Window win;
 
-                    XGetGeometry(display, vo_window, &root, &foo, &foo,
+                    XGetGeometry(display, x11->window, &root, &foo, &foo,
                                  &foo /*width */ , &foo /*height */ , &foo,
                                  &foo);
-                    XTranslateCoordinates(display, vo_window, root, 0, 0,
+                    XTranslateCoordinates(display, x11->window, root, 0, 0,
                                           &vo->dx, &vo->dy, &win);
                 }
 #endif
@@ -1101,7 +1093,7 @@ int vo_x11_check_events(struct vo *vo)
 
                 if (vo_mouse_autohide)
                 {
-                    vo_showcursor(display, vo_window);
+                    vo_showcursor(display, x11->window);
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
@@ -1109,7 +1101,7 @@ int vo_x11_check_events(struct vo *vo)
             case ButtonPress:
                 if (vo_mouse_autohide)
                 {
-                    vo_showcursor(display, vo_window);
+                    vo_showcursor(display, x11->window);
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
@@ -1125,7 +1117,7 @@ int vo_x11_check_events(struct vo *vo)
             case ButtonRelease:
                 if (vo_mouse_autohide)
                 {
-                    vo_showcursor(display, vo_window);
+                    vo_showcursor(display, x11->window);
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
@@ -1152,7 +1144,7 @@ int vo_x11_check_events(struct vo *vo)
                 break;
             case MapNotify:
                 vo_hint.win_gravity = old_gravity;
-                XSetWMNormalHints(display, vo_window, &vo_hint);
+                XSetWMNormalHints(display, x11->window, &vo_hint);
                 vo_fs_flip = 0;
                 break;
 	    case ClientMessage:
@@ -1182,12 +1174,13 @@ static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
   {
    vo->dwidth = width;
    vo->dheight = height;
-   XMoveResizeWindow(vo->x11->display, vo_window, x, y, width, height);
+   XMoveResizeWindow(vo->x11->display, vo->x11->window, x, y, width, height);
   }
 }
 
 void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max)
 {
+    struct vo_x11_state *x11 = vo->x11;
     vo_hint.flags = 0;
     if (vo_keepaspect)
     {
@@ -1221,7 +1214,7 @@ void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max
 
     vo_hint.flags |= PWinGravity;
     vo_hint.win_gravity = StaticGravity;
-    XSetWMNormalHints(vo->x11->display, vo_window, &vo_hint);
+    XSetWMNormalHints(x11->display, x11->window, &vo_hint);
 }
 
 static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
@@ -1300,37 +1293,37 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
   struct MPOpts *opts = vo->opts;
   struct vo_x11_state *x11 = vo->x11;
   Display *mDisplay = vo->x11->display;
-  if (vo_window == None) {
+  if (x11->window == None) {
     XSizeHints hint;
     XEvent xev;
     vo_fs = 0;
     vo->dwidth = width;
     vo->dheight = height;
-    vo_window = vo_x11_create_smooth_window(x11, mRootWin, vis->visual,
+    x11->window = vo_x11_create_smooth_window(x11, mRootWin, vis->visual,
                       x, y, width, height, vis->depth, col_map);
-    vo_x11_classhint(vo, vo_window, classname);
-    XStoreName(mDisplay, vo_window, title);
-    vo_hidecursor(mDisplay, vo_window);
-    XSelectInput(mDisplay, vo_window, StructureNotifyMask);
+    vo_x11_classhint(vo, x11->window, classname);
+    XStoreName(mDisplay, x11->window, title);
+    vo_hidecursor(mDisplay, x11->window);
+    XSelectInput(mDisplay, x11->window, StructureNotifyMask);
     hint.x = x; hint.y = y;
     hint.width = width; hint.height = height;
     hint.flags = PPosition | PSize;
-    XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
+    XSetStandardProperties(mDisplay, x11->window, title, title, None, NULL, 0, &hint);
     vo_x11_sizehint(vo, x, y, width, height, 0);
     // map window
-    XMapWindow(mDisplay, vo_window);
-    XClearWindow(mDisplay, vo_window);
+    XMapWindow(mDisplay, x11->window);
+    XClearWindow(mDisplay, x11->window);
     // wait for map
     do {
       XNextEvent(mDisplay, &xev);
-    } while (xev.type != MapNotify || xev.xmap.event != vo_window);
-    XSelectInput(mDisplay, vo_window, NoEventMask);
+    } while (xev.type != MapNotify || xev.xmap.event != x11->window);
+    XSelectInput(mDisplay, x11->window, NoEventMask);
     XSync(mDisplay, False);
-    vo_x11_selectinput_witherr(mDisplay, vo_window,
+    vo_x11_selectinput_witherr(mDisplay, x11->window,
           StructureNotifyMask | KeyPressMask | PointerMotionMask |
           ButtonPressMask | ButtonReleaseMask | ExposureMask);
   }
-  if (opts->vo_ontop) vo_x11_setlayer(vo, vo_window, opts->vo_ontop);
+  if (opts->vo_ontop) vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
   vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen(vo);
@@ -1533,12 +1526,12 @@ void vo_x11_fullscreen(struct vo *vo)
             h = vo_old_height;
 	}
 
-        vo_x11_ewmh_fullscreen(x11->display, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
+        vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
         vo_fs = VO_FALSE;
     } else
     {
         // win->fs
-        vo_x11_ewmh_fullscreen(x11->display, _NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
+        vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
 
         vo_fs = VO_TRUE;
         if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
@@ -1557,7 +1550,7 @@ void vo_x11_fullscreen(struct vo *vo)
     {
         long dummy;
 
-        XGetWMNormalHints(x11->display, vo_window, &vo_hint, &dummy);
+        XGetWMNormalHints(x11->display, x11->window, &vo_hint, &dummy);
         if (!(vo_hint.flags & PWinGravity))
             old_gravity = NorthWestGravity;
         else
@@ -1565,28 +1558,28 @@ void vo_x11_fullscreen(struct vo *vo)
     }
     if (vo_wm_type == 0 && !(vo_fsmode & 16))
     {
-        XUnmapWindow(x11->display, vo_window);      // required for MWM
-        XWithdrawWindow(x11->display, vo_window, mScreen);
+        XUnmapWindow(x11->display, x11->window);      // required for MWM
+        XWithdrawWindow(x11->display, x11->window, mScreen);
         vo_fs_flip = 1;
     }
 
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
     {
-        vo_x11_decoration(x11->display, vo_window, (vo_fs) ? 0 : 1);
+        vo_x11_decoration(x11->display, x11->window, (vo_fs) ? 0 : 1);
         vo_x11_sizehint(vo, x, y, w, h, 0);
-        vo_x11_setlayer(vo, vo_window, vo_fs);
+        vo_x11_setlayer(vo, x11->window, vo_fs);
 
 
-        XMoveResizeWindow(x11->display, vo_window, x, y, w, h);
+        XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
     }
     /* some WMs lose ontop after fullscreen */
     if ((!(vo_fs)) & opts->vo_ontop)
-        vo_x11_setlayer(vo, vo_window, opts->vo_ontop);
+        vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
 
-    XMapRaised(x11->display, vo_window);
+    XMapRaised(x11->display, x11->window);
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // some WMs change window pos on map
-        XMoveResizeWindow(x11->display, vo_window, x, y, w, h);
-    XRaiseWindow(x11->display, vo_window);
+        XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
+    XRaiseWindow(x11->display, x11->window);
     XFlush(x11->display);
 }
 
@@ -1595,7 +1588,7 @@ void vo_x11_ontop(struct vo *vo)
     struct MPOpts *opts = vo->opts;
     opts->vo_ontop = !opts->vo_ontop;
 
-    vo_x11_setlayer(vo, vo_window, opts->vo_ontop);
+    vo_x11_setlayer(vo, vo->x11->window, opts->vo_ontop);
 }
 
 /*
@@ -1816,7 +1809,7 @@ void vo_vm_close(struct vo *vo)
     Display *dpy = vo->x11->display;
     struct MPOpts *opts = vo->opts;
 #ifdef HAVE_NEW_GUI
-    if (vidmodes != NULL && vo_window != None)
+    if (vidmodes != NULL && vo->x11->vo_window != None)
 #else
     if (vidmodes != NULL)
 #endif
@@ -2461,7 +2454,7 @@ void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
       xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
   {
     XSetForeground(x11->display, vo_gc, xv_colorkey );
-    XFillRectangle(x11->display, vo_window, vo_gc,
+    XFillRectangle(x11->display, x11->window, vo_gc,
                     x, y,
                     w, h );
   }
@@ -2473,19 +2466,19 @@ void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
     XSetForeground(x11->display, vo_gc, 0 );
     /* making non-overlap fills, requires 8 checks instead of 4 */
     if ( y > 0 )
-      XFillRectangle(x11->display, vo_window, vo_gc,
+      XFillRectangle(x11->display, x11->window, vo_gc,
                       0, 0,
                       opts->vo_screenwidth, y);
     if (x > 0)
-      XFillRectangle(x11->display, vo_window, vo_gc,
+      XFillRectangle(x11->display, x11->window, vo_gc,
                       0, 0,
                       x, opts->vo_screenheight);
     if (x + w < opts->vo_screenwidth)
-      XFillRectangle(x11->display, vo_window, vo_gc,
+      XFillRectangle(x11->display, x11->window, vo_gc,
                       x + w, 0,
                       opts->vo_screenwidth, opts->vo_screenheight);
     if (y + h < opts->vo_screenheight)
-      XFillRectangle(x11->display, vo_window, vo_gc,
+      XFillRectangle(x11->display, x11->window, vo_gc,
                       0, y + h,
                       opts->vo_screenwidth, opts->vo_screenheight);
   }

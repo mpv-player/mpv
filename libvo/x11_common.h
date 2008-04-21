@@ -8,6 +8,7 @@ struct vo;
 
 struct vo_x11_state {
     Display *display;
+    Window window;
     int depthonscreen;
     Atom XA_NET_SUPPORTED;
     Atom XA_NET_WM_STATE;
@@ -75,11 +76,10 @@ void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
 	int img_width, int img_height, int use_fs);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 void vo_x11_ontop(struct vo *vo);
-void vo_x11_ewmh_fullscreen(Display *mDisplay, int action);
+void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action);
 
 #endif
 
-extern Window     vo_window;
 extern GC         vo_gc;
 extern XSizeHints vo_hint;
 
@@ -121,7 +121,6 @@ int xv_test_ck( void * arg );
 int xv_test_ckm( void * arg );
 #endif
 
- extern void vo_setwindow( Window w,GC g );
  extern void vo_x11_putkey(int key);
 
 #ifdef HAVE_XF86VM
@@ -162,6 +161,7 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 
 #define mDisplay global_vo->x11->display
 #define vo_depthonscreen global_vo->x11->depthonscreen
+#define vo_window global_vo->x11->window
 #endif
 
 #endif /* MPLAYER_X11_COMMON_H */

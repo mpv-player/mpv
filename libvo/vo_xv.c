@@ -275,13 +275,13 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
         if (WinID >= 0)
         {
-            vo_window = WinID ? ((Window) WinID) : mRootWin;
+            x11->window = WinID ? ((Window) WinID) : mRootWin;
             if (WinID)
             {
-                XUnmapWindow(x11->display, vo_window);
-                XChangeWindowAttributes(x11->display, vo_window, xswamask,
+                XUnmapWindow(x11->display, x11->window);
+                XChangeWindowAttributes(x11->display, x11->window, xswamask,
                                         &xswa);
-                vo_x11_selectinput_witherr(x11->display, vo_window,
+                vo_x11_selectinput_witherr(x11->display, x11->window,
                                            StructureNotifyMask |
                                            KeyPressMask |
                                            PropertyChangeMask |
@@ -289,10 +289,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                                            ButtonPressMask |
                                            ButtonReleaseMask |
                                            ExposureMask);
-                XMapWindow(x11->display, vo_window);
+                XMapWindow(x11->display, x11->window);
                 Window mRoot;
                 uint32_t drwBorderWidth, drwDepth;
-                XGetGeometry(x11->display, vo_window, &mRoot,
+                XGetGeometry(x11->display, x11->window, &mRoot,
                              &ctx->drwX, &ctx->drwY, &vo->dwidth, &vo->dheight,
                              &drwBorderWidth, &drwDepth);
                 if (vo->dwidth <= 0) vo->dwidth = d_width;
@@ -303,22 +303,22 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         {
             vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
                    flags, CopyFromParent, "xv", title);
-            XChangeWindowAttributes(x11->display, vo_window, xswamask, &xswa);
+            XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
         }
 
         if (vo_gc != None)
             XFreeGC(x11->display, vo_gc);
-        vo_gc = XCreateGC(x11->display, vo_window, 0L, &xgcv);
+        vo_gc = XCreateGC(x11->display, x11->window, 0L, &xgcv);
         XSync(x11->display, False);
 #ifdef HAVE_XF86VM
         if (vm)
         {
             /* Grab the mouse pointer in our window */
             if (vo_grabpointer)
-                XGrabPointer(x11->display, vo_window, True, 0,
+                XGrabPointer(x11->display, x11->window, True, 0,
                              GrabModeAsync, GrabModeAsync,
-                             vo_window, None, CurrentTime);
-            XSetInputFocus(x11->display, vo_window, RevertToNone, CurrentTime);
+                             x11->window, None, CurrentTime);
+            XSetInputFocus(x11->display, x11->window, RevertToNone, CurrentTime);
         }
 #endif
     }
@@ -376,7 +376,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
            ctx->drwY, vo->dwidth, vo->dheight);
 
     if (opts->vo_ontop)
-        vo_x11_setlayer(vo, vo_window, opts->vo_ontop);
+        vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
 
     return 0;
 }
@@ -453,7 +453,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag)
     {
-        XvShmPutImage(x11->display, xv_port, vo_window, vo_gc,
+        XvShmPutImage(x11->display, xv_port, x11->window, vo_gc,
                       xvi, 0, 0, ctx->image_width,
                       ctx->image_height, ctx->drwX - (vo_panscan_x >> 1),
                       ctx->drwY - (vo_panscan_y >> 1), vo->dwidth + vo_panscan_x,
@@ -462,7 +462,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     } else
 #endif
     {
-        XvPutImage(x11->display, xv_port, vo_window, vo_gc,
+        XvPutImage(x11->display, xv_port, x11->window, vo_gc,
                    xvi, 0, 0, ctx->image_width, ctx->image_height,
                    ctx->drwX - (vo_panscan_x >> 1), ctx->drwY - (vo_panscan_y >> 1),
                    vo->dwidth + vo_panscan_x,
@@ -480,7 +480,7 @@ static void check_events(struct vo *vo)
     {
         Window mRoot;
         uint32_t drwBorderWidth, drwDepth;
-        XGetGeometry(x11->display, vo_window, &mRoot, &ctx->drwX, &ctx->drwY,
+        XGetGeometry(x11->display, x11->window, &mRoot, &ctx->drwX, &ctx->drwY,
                      &vo->dwidth, &vo->dheight, &drwBorderWidth, &drwDepth);
         mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
                ctx->drwY, vo->dwidth, vo->dheight);
@@ -853,6 +853,7 @@ static int preinit(struct vo *vo, const char *arg)
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct xvctx *ctx = vo->priv;
+    struct vo_x11_state *x11 = vo->x11;
     switch (request)
     {
         case VOCTRL_PAUSE:
@@ -884,7 +885,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
                 if (old_y != vo_panscan_y)
                 {
-                    vo_x11_clearwindow_part(vo, vo_window,
+                    vo_x11_clearwindow_part(vo, x11->window,
                                             vo->dwidth + vo_panscan_x - 1,
                                             vo->dheight + vo_panscan_y - 1,
                                             1);
