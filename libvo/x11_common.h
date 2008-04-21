@@ -10,6 +10,14 @@ struct vo_x11_state {
     Display *display;
     Window window;
     int depthonscreen;
+
+    struct xv_ck_info_s {
+        int method; ///< CK_METHOD_* constants
+        int source; ///< CK_SRC_* constants
+    } xv_ck_info;
+    unsigned long xv_colorkey;
+    unsigned int xv_port;
+
     Atom XA_NET_SUPPORTED;
     Atom XA_NET_WM_STATE;
     Atom XA_NET_WM_STATE_FULLSCREEN;
@@ -83,10 +91,6 @@ void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action);
 extern GC         vo_gc;
 extern XSizeHints vo_hint;
 
-#ifdef HAVE_XV
-//XvPortID xv_port;
-extern unsigned int xv_port;
-
 int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char * name, int value);
 int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char * name, int *value);
 
@@ -95,11 +99,6 @@ int vo_xv_enable_vsync(struct vo *vo);
 void vo_xv_get_max_img_dim(struct vo *vo, uint32_t * width, uint32_t * height);
 
 /*** colorkey handling ***/
-typedef struct xv_ck_info_s
-{
-  int method; ///< CK_METHOD_* constants
-  int source; ///< CK_SRC_* constants
-} xv_ck_info_t;
 
 #define CK_METHOD_NONE       0 ///< no colorkey drawing
 #define CK_METHOD_BACKGROUND 1 ///< set colorkey as window background
@@ -109,17 +108,13 @@ typedef struct xv_ck_info_s
 #define CK_SRC_SET           1 ///< use and set specified / default colorkey
 #define CK_SRC_CUR           2 ///< use current colorkey ( get it from xv )
 
-extern xv_ck_info_t xv_ck_info;
-extern unsigned long xv_colorkey;
-
 int vo_xv_init_colorkey(struct vo *vo);
 void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y, int32_t w, int32_t h);
-extern void xv_setup_colorkeyhandling(char const * ck_method_str, char const * ck_str);
+void xv_setup_colorkeyhandling(struct vo *vo, const char *ck_method_str, const char *ck_str);
 
 /*** test functions for common suboptions ***/
 int xv_test_ck( void * arg );
 int xv_test_ckm( void * arg );
-#endif
 
  extern void vo_x11_putkey(int key);
 
@@ -158,10 +153,14 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define vo_x11_clearwindow(display, window) vo_x11_clearwindow(global_vo, window)
 #define vo_x11_classhint(display, window, name) vo_x11_classhint(global_vo, window, name)
 #define vo_x11_setlayer(display, window, layer) vo_x11_setlayer(global_vo, window, layer)
+#define xv_setup_colorkeyhandling(a, b) xv_setup_colorkeyhandling(global_vo, a, b)
 
 #define mDisplay global_vo->x11->display
 #define vo_depthonscreen global_vo->x11->depthonscreen
 #define vo_window global_vo->x11->window
+#define xv_ck_info global_vo->x11->xv_ck_info
+#define xv_colorkey global_vo->x11->xv_colorkey
+#define xv_port global_vo->x11->xv_port
 #endif
 
 #endif /* MPLAYER_X11_COMMON_H */

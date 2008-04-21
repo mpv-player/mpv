@@ -107,7 +107,9 @@ static void saver_on(Display *);
 
 void vo_x11_init_state(struct vo_x11_state *s)
 {
-    *s = (struct vo_x11_state){};
+    *s = (struct vo_x11_state){
+        .xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR },
+    };
 }
 
 /*
@@ -2183,11 +2185,6 @@ int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char *name, int *value)
     return (VO_FALSE);
 }
 
-/** \brief contains flags changing the execution of the colorkeying code */
-xv_ck_info_t xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR };
-unsigned long xv_colorkey; ///< The color used for manual colorkeying.
-unsigned int xv_port; ///< The selected Xv port.
-
 /**
  * \brief Interns the requested atom if it is available.
  *
@@ -2203,7 +2200,7 @@ static Atom xv_intern_atom_if_exists(struct vo_x11_state *x11,
   int attrib_count,i;
   Atom xv_atom = None;
 
-  attributes = XvQueryPortAttributes(x11->display, xv_port, &attrib_count );
+  attributes = XvQueryPortAttributes(x11->display, x11->xv_port, &attrib_count );
   if( attributes!=NULL )
   {
     for ( i = 0; i < attrib_count; ++i )
@@ -2230,7 +2227,7 @@ int vo_xv_enable_vsync(struct vo *vo)
     Atom xv_atom = xv_intern_atom_if_exists(x11, "XV_SYNC_TO_VBLANK");
   if (xv_atom == None)
     return -1;
-  return XvSetPortAttribute(x11->display, xv_port, xv_atom, 1) == Success;
+  return XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, 1) == Success;
 }
 
 /**
@@ -2246,11 +2243,12 @@ int vo_xv_enable_vsync(struct vo *vo)
  */
 void vo_xv_get_max_img_dim(struct vo *vo,  uint32_t * width, uint32_t * height)
 {
+    struct vo_x11_state *x11 = vo->x11;
   XvEncodingInfo * encodings;
   //unsigned long num_encodings, idx; to int or too long?!
   unsigned int num_encodings, idx;
 
-  XvQueryEncodings(vo->x11->display, xv_port, &num_encodings, &encodings);
+  XvQueryEncodings(x11->display, x11->xv_port, &num_encodings, &encodings);
 
   if ( encodings )
   {
@@ -2281,11 +2279,11 @@ void vo_xv_get_max_img_dim(struct vo *vo,  uint32_t * width, uint32_t * height)
  * Outputs the content of |ck_handling| as a readable message.
  *
  */
-void vo_xv_print_ck_info(void)
+static void vo_xv_print_ck_info(struct vo_x11_state *x11)
 {
   mp_msg( MSGT_VO, MSGL_V, "[xv common] " );
 
-  switch ( xv_ck_info.method )
+  switch ( x11->xv_ck_info.method )
   {
     case CK_METHOD_NONE:
       mp_msg( MSGT_VO, MSGL_V, "Drawing no colorkey.\n" ); return;
@@ -2299,32 +2297,32 @@ void vo_xv_print_ck_info(void)
 
   mp_msg( MSGT_VO, MSGL_V, "\n[xv common] " );
 
-  switch ( xv_ck_info.source )
+  switch ( x11->xv_ck_info.source )
   {
     case CK_SRC_CUR:      
       mp_msg( MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06lx).\n",
-              xv_colorkey );
+              x11->xv_colorkey );
       break;
     case CK_SRC_USE:
-      if ( xv_ck_info.method == CK_METHOD_AUTOPAINT )
+      if ( x11->xv_ck_info.method == CK_METHOD_AUTOPAINT )
       {
         mp_msg( MSGT_VO, MSGL_V,
                 "Ignoring colorkey from MPlayer (0x%06lx).\n",
-                xv_colorkey );
+                x11->xv_colorkey );
       }
       else
       {
         mp_msg( MSGT_VO, MSGL_V,
                 "Using colorkey from MPlayer (0x%06lx)."
                 " Use -colorkey to change.\n",
-                xv_colorkey );
+                x11->xv_colorkey );
       }
       break;
     case CK_SRC_SET:
       mp_msg( MSGT_VO, MSGL_V,
               "Setting and using colorkey from MPlayer (0x%06lx)."
               " Use -colorkey to change.\n",
-              xv_colorkey );
+              x11->xv_colorkey );
       break;
   }
 }
@@ -2362,16 +2360,16 @@ int vo_xv_init_colorkey(struct vo *vo)
   if( xv_atom != None && !(vo_colorkey & 0xFF000000) )
   {
     /* check if we should use the colorkey specified in vo_colorkey */
-    if ( xv_ck_info.source != CK_SRC_CUR )
+    if ( x11->xv_ck_info.source != CK_SRC_CUR )
     {
-      xv_colorkey = vo_colorkey;
+      x11->xv_colorkey = vo_colorkey;
   
       /* check if we have to set the colorkey too */
-      if ( xv_ck_info.source == CK_SRC_SET )
+      if ( x11->xv_ck_info.source == CK_SRC_SET )
       {
         xv_atom = XInternAtom(x11->display, "XV_COLORKEY",False);
   
-        rez = XvSetPortAttribute(x11->display, xv_port, xv_atom, vo_colorkey);
+        rez = XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, vo_colorkey);
         if ( rez != Success )
         {
           mp_msg( MSGT_VO, MSGL_FATAL,
@@ -2384,10 +2382,10 @@ int vo_xv_init_colorkey(struct vo *vo)
     {
       int colorkey_ret;
 
-      rez=XvGetPortAttribute(x11->display,xv_port, xv_atom, &colorkey_ret);
+      rez=XvGetPortAttribute(x11->display,x11->xv_port, xv_atom, &colorkey_ret);
       if ( rez == Success )
       {
-         xv_colorkey = colorkey_ret;
+         x11->xv_colorkey = colorkey_ret;
       }
       else
       {
@@ -2401,36 +2399,36 @@ int vo_xv_init_colorkey(struct vo *vo)
     xv_atom = xv_intern_atom_if_exists(vo->x11, "XV_AUTOPAINT_COLORKEY");
 
     /* should we draw the colorkey ourselves or activate autopainting? */
-    if ( xv_ck_info.method == CK_METHOD_AUTOPAINT )
+    if ( x11->xv_ck_info.method == CK_METHOD_AUTOPAINT )
     {
       rez = !Success; // reset rez to something different than Success
  
       if ( xv_atom != None ) // autopaint is supported
       {
-        rez = XvSetPortAttribute(x11->display, xv_port, xv_atom, 1);
+        rez = XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, 1);
       }
 
       if ( rez != Success )
       {
         // fallback to manual colorkey drawing
-        xv_ck_info.method = CK_METHOD_MANUALFILL;
+        x11->xv_ck_info.method = CK_METHOD_MANUALFILL;
       }
     }
     else // disable colorkey autopainting if supported
     {
       if ( xv_atom != None ) // we have autopaint attribute
       {
-        XvSetPortAttribute(x11->display, xv_port, xv_atom, 0);
+        XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, 0);
       }
     }
   }
   else // do no colorkey drawing at all
   {
-    xv_ck_info.method = CK_METHOD_NONE;
+    x11->xv_ck_info.method = CK_METHOD_NONE;
   } /* end: should we draw colorkey */
 
   /* output information about the current colorkey settings */
-  vo_xv_print_ck_info();
+  vo_xv_print_ck_info(x11);
 
   return 1; // success
 }
@@ -2450,10 +2448,10 @@ void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
 {
     struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
-  if( xv_ck_info.method == CK_METHOD_MANUALFILL ||
-      xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
+  if( x11->xv_ck_info.method == CK_METHOD_MANUALFILL ||
+      x11->xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
   {
-    XSetForeground(x11->display, vo_gc, xv_colorkey );
+    XSetForeground(x11->display, vo_gc, x11->xv_colorkey );
     XFillRectangle(x11->display, x11->window, vo_gc,
                     x, y,
                     w, h );
@@ -2525,19 +2523,20 @@ int xv_test_ckm( void * arg )
  * \param str Pointer to the string or NULL
  *
  */
-void xv_setup_colorkeyhandling( char const * ck_method_str,
-                                char const * ck_str )
+void xv_setup_colorkeyhandling(struct vo *vo, const char *ck_method_str,
+                               const char *ck_str)
 {
+    struct vo_x11_state *x11 = vo->x11;
   /* check if a valid pointer to the string was passed */
   if ( ck_str )
   {
     if ( strncmp( ck_str, "use", 3 ) == 0 )
     {
-      xv_ck_info.source = CK_SRC_USE;
+      x11->xv_ck_info.source = CK_SRC_USE;
     }
     else if ( strncmp( ck_str, "set", 3 ) == 0 )
     {
-      xv_ck_info.source = CK_SRC_SET;
+      x11->xv_ck_info.source = CK_SRC_SET;
     }
   }
   /* check if a valid pointer to the string was passed */
@@ -2545,15 +2544,15 @@ void xv_setup_colorkeyhandling( char const * ck_method_str,
   {
     if ( strncmp( ck_method_str, "bg", 2 ) == 0 )
     {
-      xv_ck_info.method = CK_METHOD_BACKGROUND;
+      x11->xv_ck_info.method = CK_METHOD_BACKGROUND;
     }
     else if ( strncmp( ck_method_str, "man", 3 ) == 0 )
     {
-      xv_ck_info.method = CK_METHOD_MANUALFILL;
+      x11->xv_ck_info.method = CK_METHOD_MANUALFILL;
     }    
     else if ( strncmp( ck_method_str, "auto", 4 ) == 0 )
     {
-      xv_ck_info.method = CK_METHOD_AUTOPAINT;
+      x11->xv_ck_info.method = CK_METHOD_AUTOPAINT;
     }    
   }
 }

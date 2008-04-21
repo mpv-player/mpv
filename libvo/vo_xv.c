@@ -266,9 +266,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         XMatchVisualInfo(x11->display, mScreen, depth, TrueColor, &vinfo);
 
         xswa.background_pixel = 0;
-        if (xv_ck_info.method == CK_METHOD_BACKGROUND)
+        if (x11->xv_ck_info.method == CK_METHOD_BACKGROUND)
         {
-          xswa.background_pixel = xv_colorkey;
+          xswa.background_pixel = x11->xv_colorkey;
         }
         xswa.border_pixel = 0;
         xswamask = CWBackPixel | CWBorderPixel;
@@ -324,7 +324,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     mp_msg(MSGT_VO, MSGL_V, "using Xvideo port %d for hw scaling\n",
-           xv_port);
+           x11->xv_port);
 
     switch (ctx->xv_format)
     {
@@ -401,7 +401,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
     if (ctx->Shmem_Flag)
     {
         ctx->xvimage[foo] =
-            (XvImage *) XvShmCreateImage(x11->display, xv_port, ctx->xv_format,
+            (XvImage *) XvShmCreateImage(x11->display, x11->xv_port, ctx->xv_format,
                                          NULL, ctx->image_width, ctx->image_height,
                                          &ctx->Shminfo[foo]);
 
@@ -418,7 +418,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
 #endif
     {
         ctx->xvimage[foo] =
-            (XvImage *) XvCreateImage(x11->display, xv_port, ctx->xv_format, NULL,
+            (XvImage *) XvCreateImage(x11->display, x11->xv_port, ctx->xv_format, NULL,
                                       ctx->image_width, ctx->image_height);
         ctx->xvimage[foo]->data = malloc(ctx->xvimage[foo]->data_size);
         XSync(x11->display, False);
@@ -453,7 +453,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag)
     {
-        XvShmPutImage(x11->display, xv_port, x11->window, vo_gc,
+        XvShmPutImage(x11->display, x11->xv_port, x11->window, vo_gc,
                       xvi, 0, 0, ctx->image_width,
                       ctx->image_height, ctx->drwX - (vo_panscan_x >> 1),
                       ctx->drwY - (vo_panscan_y >> 1), vo->dwidth + vo_panscan_x,
@@ -462,7 +462,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     } else
 #endif
     {
-        XvPutImage(x11->display, xv_port, x11->window, vo_gc,
+        XvPutImage(x11->display, x11->xv_port, x11->window, vo_gc,
                    xvi, 0, 0, ctx->image_width, ctx->image_height,
                    ctx->drwX - (vo_panscan_x >> 1), ctx->drwY - (vo_panscan_y >> 1),
                    vo->dwidth + vo_panscan_x,
@@ -740,7 +740,7 @@ static int preinit(struct vo *vo, const char *arg)
       {  NULL }
     };
 
-    xv_port = 0;
+    x11->xv_port = 0;
 
     /* parse suboptions */
     if ( subopt_parse( arg, subopts ) != 0 )
@@ -749,7 +749,7 @@ static int preinit(struct vo *vo, const char *arg)
     }
 
     /* modify colorkey settings according to the given options */
-    xv_setup_colorkeyhandling( ck_method_arg.str, ck_src_arg.str );
+    xv_setup_colorkeyhandling(vo, ck_method_arg.str, ck_src_arg.str);
 
     if (!vo_init(vo))
         return -1;
@@ -773,7 +773,7 @@ static int preinit(struct vo *vo, const char *arg)
     }
 
     /* check adaptors */
-    if (xv_port)
+    if (x11->xv_port)
     {
         int port_found;
 
@@ -784,7 +784,7 @@ static int preinit(struct vo *vo, const char *arg)
                 for (xv_p = ctx->ai[i].base_id;
                      xv_p < ctx->ai[i].base_id + ctx->ai[i].num_ports; ++xv_p)
                 {
-                    if (xv_p == xv_port)
+                    if (xv_p == x11->xv_port)
                     {
                         port_found = 1;
                         break;
@@ -794,17 +794,17 @@ static int preinit(struct vo *vo, const char *arg)
         }
         if (port_found)
         {
-            if (XvGrabPort(x11->display, xv_port, CurrentTime))
-                xv_port = 0;
+            if (XvGrabPort(x11->display, x11->xv_port, CurrentTime))
+                x11->xv_port = 0;
         } else
         {
             mp_msg(MSGT_VO, MSGL_WARN,
                    MSGTR_LIBVO_XV_InvalidPortParameter);
-            xv_port = 0;
+            x11->xv_port = 0;
         }
     }
 
-    for (i = 0; i < ctx->adaptors && xv_port == 0; i++)
+    for (i = 0; i < ctx->adaptors && x11->xv_port == 0; i++)
     {
         if ((ctx->ai[i].type & XvInputMask) && (ctx->ai[i].type & XvImageMask))
         {
@@ -812,7 +812,7 @@ static int preinit(struct vo *vo, const char *arg)
                  xv_p < ctx->ai[i].base_id + ctx->ai[i].num_ports; ++xv_p)
                 if (!XvGrabPort(x11->display, xv_p, CurrentTime))
                 {
-                    xv_port = xv_p;
+                    x11->xv_port = xv_p;
                     break;
                 } else
                 {
@@ -822,7 +822,7 @@ static int preinit(struct vo *vo, const char *arg)
                 }
         }
     }
-    if (!xv_port)
+    if (!x11->xv_port)
     {
         if (busy_ports)
             mp_msg(MSGT_VO, MSGL_ERR,
@@ -839,7 +839,7 @@ static int preinit(struct vo *vo, const char *arg)
     vo_xv_enable_vsync(vo);
     vo_xv_get_max_img_dim(vo, &ctx->max_width, &ctx->max_height);
 
-    ctx->fo = XvListImageFormats(x11->display, xv_port, (int *) &ctx->formats);
+    ctx->fo = XvListImageFormats(x11->display, x11->xv_port, (int *) &ctx->formats);
 
     mp_input_add_event_fd(ConnectionNumber(x11->display), x11_fd_callback, vo);
     ctx->event_fd_registered = 1;
@@ -900,12 +900,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         case VOCTRL_SET_EQUALIZER:
             {
                 struct voctrl_set_equalizer_args *args = data;
-                return vo_xv_set_eq(vo, xv_port, args->name, args->value);
+                return vo_xv_set_eq(vo, x11->xv_port, args->name, args->value);
             }
         case VOCTRL_GET_EQUALIZER:
             {
                 struct voctrl_get_equalizer_args *args = data;
-                return vo_xv_get_eq(vo, xv_port, args->name, args->valueptr);
+                return vo_xv_get_eq(vo, x11->xv_port, args->name, args->valueptr);
             }
         case VOCTRL_ONTOP:
             vo_x11_ontop(vo);
