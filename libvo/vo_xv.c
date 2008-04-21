@@ -200,7 +200,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
     }
 
-    vo_mouse_autohide = 1;
+    x11->vo_mouse_autohide = 1;
 
     ctx->is_paused = 0;
     ctx->visible_buf = -1;

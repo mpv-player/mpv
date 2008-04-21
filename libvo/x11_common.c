@@ -79,11 +79,6 @@ Window mRootWin;
 int mScreen;
 int mLocalDisplay;
 
-/* output window id */
-int vo_mouse_autohide = 0;
-int vo_wm_type = 0;
-int vo_fs_type = 0; // needs to be accessible for GUI X11 code
-static int vo_fs_flip = 0;
 char **vo_fstype_list;
 
 /* 1 means that the WM is metacity (broken as hell) */
@@ -110,7 +105,7 @@ void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
     assert(action == _NET_WM_STATE_REMOVE ||
            action == _NET_WM_STATE_ADD || action == _NET_WM_STATE_TOGGLE);
 
-    if (vo_fs_type & vo_wm_FULLSCREEN)
+    if (x11->fs_type & vo_wm_FULLSCREEN)
     {
         XEvent xev;
 
@@ -515,11 +510,11 @@ int vo_init(struct vo *vo)
            opts->vo_screenwidth, opts->vo_screenheight, depth, x11->depthonscreen,
            dispName, mLocalDisplay ? "local" : "remote");
 
-    vo_wm_type = vo_wm_detect(vo);
+    x11->wm_type = vo_wm_detect(vo);
 
-    vo_fs_type = vo_x11_get_fs_type(vo_wm_type);
+    x11->fs_type = vo_x11_get_fs_type(x11->wm_type);
 
-    fstype_dump(vo_fs_type);
+    fstype_dump(x11->fs_type);
 
     saver_off(x11->display);
     return 1;
@@ -993,7 +988,7 @@ int vo_x11_check_events(struct vo *vo)
 
 // unsigned long  vo_KeyTable[512];
 
-    if ((vo_mouse_autohide) && x11->mouse_waiting_hide &&
+    if ((x11->vo_mouse_autohide) && x11->mouse_waiting_hide &&
                                  (GetTimerMS() - x11->mouse_timer >= 1000)) {
         vo_hidecursor(display, x11->window);
         x11->mouse_waiting_hide = 0;
@@ -1070,7 +1065,7 @@ int vo_x11_check_events(struct vo *vo)
                     mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
                 }
 
-                if (vo_mouse_autohide)
+                if (x11->vo_mouse_autohide)
                 {
                     vo_showcursor(display, x11->window);
                     x11->mouse_waiting_hide = 1;
@@ -1078,7 +1073,7 @@ int vo_x11_check_events(struct vo *vo)
                 }
                 break;
             case ButtonPress:
-                if (vo_mouse_autohide)
+                if (x11->vo_mouse_autohide)
                 {
                     vo_showcursor(display, x11->window);
                     x11->mouse_waiting_hide = 1;
@@ -1094,7 +1089,7 @@ int vo_x11_check_events(struct vo *vo)
                                  1) | MP_KEY_DOWN);
                 break;
             case ButtonRelease:
-                if (vo_mouse_autohide)
+                if (x11->vo_mouse_autohide)
                 {
                     vo_showcursor(display, x11->window);
                     x11->mouse_waiting_hide = 1;
@@ -1124,7 +1119,7 @@ int vo_x11_check_events(struct vo *vo)
             case MapNotify:
                 x11->vo_hint.win_gravity = x11->old_gravity;
                 XSetWMNormalHints(display, x11->window, &x11->vo_hint);
-                vo_fs_flip = 0;
+                x11->fs_flip = 0;
                 break;
 	    case ClientMessage:
                 if (Event.xclient.message_type == x11->XAWM_PROTOCOLS &&
@@ -1362,7 +1357,7 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
     if (WinID >= 0)
         return;
 
-    if (vo_fs_type & vo_wm_LAYER)
+    if (x11->fs_type & vo_wm_LAYER)
     {
         XClientMessageEvent xev;
 
@@ -1382,7 +1377,7 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
                xev.data.l[0]);
         XSendEvent(x11->display, mRootWin, False, SubstructureNotifyMask,
                    (XEvent *) & xev);
-    } else if (vo_fs_type & vo_wm_NETWM)
+    } else if (x11->fs_type & vo_wm_NETWM)
     {
         XClientMessageEvent xev;
         char *state;
@@ -1395,13 +1390,13 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         xev.format = 32;
         xev.data.l[0] = layer;
 
-        if (vo_fs_type & vo_wm_STAYS_ON_TOP)
+        if (x11->fs_type & vo_wm_STAYS_ON_TOP)
             xev.data.l[1] = x11->XA_NET_WM_STATE_STAYS_ON_TOP;
-        else if (vo_fs_type & vo_wm_ABOVE)
+        else if (x11->fs_type & vo_wm_ABOVE)
             xev.data.l[1] = x11->XA_NET_WM_STATE_ABOVE;
-        else if (vo_fs_type & vo_wm_FULLSCREEN)
+        else if (x11->fs_type & vo_wm_FULLSCREEN)
             xev.data.l[1] = x11->XA_NET_WM_STATE_FULLSCREEN;
-        else if (vo_fs_type & vo_wm_BELOW)
+        else if (x11->fs_type & vo_wm_BELOW)
             // This is not fallback. We can safely assume that the situation
             // where only NETWM_STATE_BELOW is supported doesn't exist.
             xev.data.l[1] = x11->XA_NET_WM_STATE_BELOW;
@@ -1494,13 +1489,13 @@ void vo_x11_fullscreen(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     int x, y, w, h;
 
-    if (WinID >= 0 || vo_fs_flip)
+    if (WinID >= 0 || x11->fs_flip)
         return;
 
     if (vo_fs)
     {
         // fs->win
-        if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
+        if ( ! (x11->fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
         {
             x = x11->vo_old_x;
             y = x11->vo_old_y;
@@ -1516,7 +1511,7 @@ void vo_x11_fullscreen(struct vo *vo)
         vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
 
         vo_fs = VO_TRUE;
-        if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
+        if ( ! (x11->fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
         {
             x11->vo_old_x = vo->dx;
             x11->vo_old_y = vo->dy;
@@ -1538,14 +1533,14 @@ void vo_x11_fullscreen(struct vo *vo)
         else
             x11->old_gravity = x11->vo_hint.win_gravity;
     }
-    if (vo_wm_type == 0 && !(vo_fsmode & 16))
+    if (x11->wm_type == 0 && !(vo_fsmode & 16))
     {
         XUnmapWindow(x11->display, x11->window);      // required for MWM
         XWithdrawWindow(x11->display, x11->window, mScreen);
-        vo_fs_flip = 1;
+        x11->fs_flip = 1;
     }
 
-    if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
+    if ( ! (x11->fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
     {
         vo_x11_decoration(vo, (vo_fs) ? 0 : 1);
         vo_x11_sizehint(vo, x, y, w, h, 0);
@@ -1559,7 +1554,7 @@ void vo_x11_fullscreen(struct vo *vo)
         vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
 
     XMapRaised(x11->display, x11->window);
-    if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // some WMs change window pos on map
+    if ( ! (x11->fs_type & vo_wm_FULLSCREEN) ) // some WMs change window pos on map
         XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
     XRaiseWindow(x11->display, x11->window);
     XFlush(x11->display);

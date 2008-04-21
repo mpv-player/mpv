@@ -20,6 +20,11 @@ struct vo_x11_state {
     unsigned long xv_colorkey;
     unsigned int xv_port;
 
+    int vo_mouse_autohide;
+    int wm_type;
+    int fs_type;
+    int fs_flip;
+
     GC f_gc;
     XSizeHints vo_hint;
     unsigned int mouse_timer;
@@ -77,8 +82,6 @@ extern char *mDisplayName;
 extern Window mRootWin;
 extern int mScreen;
 extern int mLocalDisplay;
-
-extern int vo_mouse_autohide;
 
 void vo_x11_init_state(struct vo_x11_state *s);
 int vo_init(struct vo *vo);
@@ -177,6 +180,7 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define xv_colorkey global_vo->x11->xv_colorkey
 #define xv_port global_vo->x11->xv_port
 #define vo_gc global_vo->x11->vo_gc
+#define vo_mouse_autohide global_vo->x11->vo_mouse_autohide
 #endif
 
 #endif /* MPLAYER_X11_COMMON_H */
