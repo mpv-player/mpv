@@ -306,9 +306,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
         }
 
-        if (vo_gc != None)
-            XFreeGC(x11->display, vo_gc);
-        vo_gc = XCreateGC(x11->display, x11->window, 0L, &xgcv);
+        if (x11->vo_gc != None)
+            XFreeGC(x11->display, x11->vo_gc);
+        x11->vo_gc = XCreateGC(x11->display, x11->window, 0L, &xgcv);
         XSync(x11->display, False);
 #ifdef HAVE_XF86VM
         if (vm)
@@ -453,7 +453,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag)
     {
-        XvShmPutImage(x11->display, x11->xv_port, x11->window, vo_gc,
+        XvShmPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc,
                       xvi, 0, 0, ctx->image_width,
                       ctx->image_height, ctx->drwX - (vo_panscan_x >> 1),
                       ctx->drwY - (vo_panscan_y >> 1), vo->dwidth + vo_panscan_x,
@@ -462,7 +462,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     } else
 #endif
     {
-        XvPutImage(x11->display, x11->xv_port, x11->window, vo_gc,
+        XvPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc,
                    xvi, 0, 0, ctx->image_width, ctx->image_height,
                    ctx->drwX - (vo_panscan_x >> 1), ctx->drwY - (vo_panscan_y >> 1),
                    vo->dwidth + vo_panscan_x,

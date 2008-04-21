@@ -11,12 +11,17 @@ struct vo_x11_state {
     Window window;
     int depthonscreen;
 
+    GC vo_gc;
+
     struct xv_ck_info_s {
         int method; ///< CK_METHOD_* constants
         int source; ///< CK_SRC_* constants
     } xv_ck_info;
     unsigned long xv_colorkey;
     unsigned int xv_port;
+
+    GC f_gc;
+    XSizeHints vo_hint;
 
     unsigned int olddecor;
     unsigned int oldfuncs;
@@ -92,9 +97,6 @@ void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action);
 
 #endif
 
-extern GC         vo_gc;
-extern XSizeHints vo_hint;
-
 int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char * name, int value);
 int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, char * name, int *value);
 
@@ -165,6 +167,7 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 #define xv_ck_info global_vo->x11->xv_ck_info
 #define xv_colorkey global_vo->x11->xv_colorkey
 #define xv_port global_vo->x11->xv_port
+#define vo_gc global_vo->x11->vo_gc
 #endif
 
 #endif /* MPLAYER_X11_COMMON_H */

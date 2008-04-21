@@ -942,10 +942,6 @@ void vo_x11_classhint(struct vo *vo, Window window, char *name)
                     32, PropModeReplace, (unsigned char *) &pid, 1);
 }
 
-GC vo_gc = NULL;
-GC f_gc = NULL;
-XSizeHints vo_hint;
-
 void vo_x11_uninit(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -953,21 +949,21 @@ void vo_x11_uninit(struct vo *vo)
     if (x11->window != None)
         vo_showcursor(x11->display, x11->window);
 
-    if (f_gc)
+    if (x11->f_gc)
     {
-        XFreeGC(vo->x11->display, f_gc);
-        f_gc = NULL;
+        XFreeGC(vo->x11->display, x11->f_gc);
+        x11->f_gc = NULL;
     }
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by the GUI */
     if (!use_gui)
 #endif
     {
-        if (vo_gc)
+        if (x11->vo_gc)
         {
-            XSetBackground(vo->x11->display, vo_gc, 0);
-            XFreeGC(vo->x11->display, vo_gc);
-            vo_gc = NULL;
+            XSetBackground(vo->x11->display, x11->vo_gc, 0);
+            XFreeGC(vo->x11->display, x11->vo_gc);
+            x11->vo_gc = NULL;
         }
         if (x11->window != None)
         {
@@ -1136,8 +1132,8 @@ int vo_x11_check_events(struct vo *vo)
                 }
                 break;
             case MapNotify:
-                vo_hint.win_gravity = old_gravity;
-                XSetWMNormalHints(display, x11->window, &vo_hint);
+                x11->vo_hint.win_gravity = old_gravity;
+                XSetWMNormalHints(display, x11->window, &x11->vo_hint);
                 vo_fs_flip = 0;
                 break;
 	    case ClientMessage:
@@ -1174,40 +1170,40 @@ static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
 void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max)
 {
     struct vo_x11_state *x11 = vo->x11;
-    vo_hint.flags = 0;
+    x11->vo_hint.flags = 0;
     if (vo_keepaspect)
     {
-        vo_hint.flags |= PAspect;
-        vo_hint.min_aspect.x = width;
-        vo_hint.min_aspect.y = height;
-        vo_hint.max_aspect.x = width;
-        vo_hint.max_aspect.y = height;
+        x11->vo_hint.flags |= PAspect;
+        x11->vo_hint.min_aspect.x = width;
+        x11->vo_hint.min_aspect.y = height;
+        x11->vo_hint.max_aspect.x = width;
+        x11->vo_hint.max_aspect.y = height;
     }
 
-    vo_hint.flags |= PPosition | PSize;
-    vo_hint.x = x;
-    vo_hint.y = y;
-    vo_hint.width = width;
-    vo_hint.height = height;
+    x11->vo_hint.flags |= PPosition | PSize;
+    x11->vo_hint.x = x;
+    x11->vo_hint.y = y;
+    x11->vo_hint.width = width;
+    x11->vo_hint.height = height;
     if (max)
     {
-        vo_hint.flags |= PMaxSize;
-        vo_hint.max_width = width;
-        vo_hint.max_height = height;
+        x11->vo_hint.flags |= PMaxSize;
+        x11->vo_hint.max_width = width;
+        x11->vo_hint.max_height = height;
     } else
     {
-        vo_hint.max_width = 0;
-        vo_hint.max_height = 0;
+        x11->vo_hint.max_width = 0;
+        x11->vo_hint.max_height = 0;
     }
 
     // Set minimum height/width to 4 to avoid off-by-one errors
     // and because mga_vid requires a minimal size of 4 pixels.
-    vo_hint.flags |= PMinSize;
-    vo_hint.min_width = vo_hint.min_height = 4;
+    x11->vo_hint.flags |= PMinSize;
+    x11->vo_hint.min_width = x11->vo_hint.min_height = 4;
 
-    vo_hint.flags |= PWinGravity;
-    vo_hint.win_gravity = StaticGravity;
-    XSetWMNormalHints(x11->display, x11->window, &vo_hint);
+    x11->vo_hint.flags |= PWinGravity;
+    x11->vo_hint.win_gravity = StaticGravity;
+    XSetWMNormalHints(x11->display, x11->window, &x11->vo_hint);
 }
 
 static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
@@ -1255,9 +1251,9 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot
         XCreateWindow(x11->display, mRootWin, x, y, width, height, 0, depth,
                       CopyFromParent, vis, xswamask, &xswa);
     XSetWMProtocols(x11->display, ret_win, &x11->XAWM_DELETE_WINDOW, 1);
-    if (!f_gc)
-        f_gc = XCreateGC(x11->display, ret_win, 0, 0);
-    XSetForeground(x11->display, f_gc, 0);
+    if (!x11->f_gc)
+        x11->f_gc = XCreateGC(x11->display, ret_win, 0, 0);
+    XSetForeground(x11->display, x11->f_gc, 0);
 
     return ret_win;
 }
@@ -1325,11 +1321,12 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
                              int img_width, int img_height, int use_fs)
 {
+    struct vo_x11_state *x11 = vo->x11;
     struct MPOpts *opts = vo->opts;
     Display *mDisplay = vo->x11->display;
     int u_dheight, u_dwidth, left_ov, left_ov2;
 
-    if (!f_gc)
+    if (!x11->f_gc)
         return;
 
     u_dheight = use_fs ? opts->vo_screenheight : vo->dheight;
@@ -1340,15 +1337,15 @@ void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
     left_ov = (u_dheight - img_height) / 2;
     left_ov2 = (u_dwidth - img_width) / 2;
 
-    XFillRectangle(mDisplay, vo_window, f_gc, 0, 0, u_dwidth, left_ov);
-    XFillRectangle(mDisplay, vo_window, f_gc, 0, u_dheight - left_ov - 1,
+    XFillRectangle(mDisplay, vo_window, x11->f_gc, 0, 0, u_dwidth, left_ov);
+    XFillRectangle(mDisplay, vo_window, x11->f_gc, 0, u_dheight - left_ov - 1,
                    u_dwidth, left_ov + 1);
 
     if (u_dwidth > img_width)
     {
-        XFillRectangle(mDisplay, vo_window, f_gc, 0, left_ov, left_ov2,
+        XFillRectangle(mDisplay, vo_window, x11->f_gc, 0, left_ov, left_ov2,
                        img_height);
-        XFillRectangle(mDisplay, vo_window, f_gc, u_dwidth - left_ov2 - 1,
+        XFillRectangle(mDisplay, vo_window, x11->f_gc, u_dwidth - left_ov2 - 1,
                        left_ov, left_ov2 + 1, img_height);
     }
 
@@ -1357,13 +1354,14 @@ void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
 
 void vo_x11_clearwindow(struct vo *vo, Window vo_window)
 {
+    struct vo_x11_state *x11 = vo->x11;
     struct MPOpts *opts = vo->opts;
-    if (!f_gc)
+    if (!x11->f_gc)
         return;
-    XFillRectangle(vo->x11->display, vo_window, f_gc, 0, 0,
+    XFillRectangle(x11->display, vo_window, x11->f_gc, 0, 0,
                    opts->vo_screenwidth, opts->vo_screenheight);
     //
-    XFlush(vo->x11->display);
+    XFlush(x11->display);
 }
 
 
@@ -1543,11 +1541,11 @@ void vo_x11_fullscreen(struct vo *vo)
     {
         long dummy;
 
-        XGetWMNormalHints(x11->display, x11->window, &vo_hint, &dummy);
-        if (!(vo_hint.flags & PWinGravity))
+        XGetWMNormalHints(x11->display, x11->window, &x11->vo_hint, &dummy);
+        if (!(x11->vo_hint.flags & PWinGravity))
             old_gravity = NorthWestGravity;
         else
-            old_gravity = vo_hint.win_gravity;
+            old_gravity = x11->vo_hint.win_gravity;
     }
     if (vo_wm_type == 0 && !(vo_fsmode & 16))
     {
@@ -2442,8 +2440,8 @@ void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
   if( x11->xv_ck_info.method == CK_METHOD_MANUALFILL ||
       x11->xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
   {
-    XSetForeground(x11->display, vo_gc, x11->xv_colorkey );
-    XFillRectangle(x11->display, x11->window, vo_gc,
+    XSetForeground(x11->display, x11->vo_gc, x11->xv_colorkey );
+    XFillRectangle(x11->display, x11->window, x11->vo_gc,
                     x, y,
                     w, h );
   }
@@ -2452,22 +2450,22 @@ void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
   /* TODO! move this to vo_x11_clearwindow_part() */
   if ( vo_fs )
   {
-    XSetForeground(x11->display, vo_gc, 0 );
+    XSetForeground(x11->display, x11->vo_gc, 0 );
     /* making non-overlap fills, requires 8 checks instead of 4 */
     if ( y > 0 )
-      XFillRectangle(x11->display, x11->window, vo_gc,
+      XFillRectangle(x11->display, x11->window, x11->vo_gc,
                       0, 0,
                       opts->vo_screenwidth, y);
     if (x > 0)
-      XFillRectangle(x11->display, x11->window, vo_gc,
+      XFillRectangle(x11->display, x11->window, x11->vo_gc,
                       0, 0,
                       x, opts->vo_screenheight);
     if (x + w < opts->vo_screenwidth)
-      XFillRectangle(x11->display, x11->window, vo_gc,
+      XFillRectangle(x11->display, x11->window, x11->vo_gc,
                       x + w, 0,
                       opts->vo_screenwidth, opts->vo_screenheight);
     if (y + h < opts->vo_screenheight)
-      XFillRectangle(x11->display, x11->window, vo_gc,
+      XFillRectangle(x11->display, x11->window, x11->vo_gc,
                       0, y + h,
                       opts->vo_screenwidth, opts->vo_screenheight);
   }
