@@ -160,7 +160,7 @@ static void vo_hidecursor(Display * disp, Window win)
     Pixmap bm_no;
     XColor black, dummy;
     Colormap colormap;
-    static char bm_no_data[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    const char bm_no_data[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
     if (WinID == 0)
         return;                 // do not hide if playing on the root window
