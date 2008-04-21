@@ -10,6 +10,7 @@ typedef struct MPOpts {
     int vo_screenheight;
     int vo_dbpp;
     int correct_pts;
+    int loop_times;
     int user_correct_pts;
 } MPOpts;
 

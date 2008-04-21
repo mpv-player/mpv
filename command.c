@@ -177,18 +177,19 @@ static int mp_property_osdlevel(m_option_t * prop, int action, void *arg,
 static int mp_property_loop(m_option_t * prop, int action, void *arg,
                             MPContext * mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     switch (action) {
     case M_PROPERTY_PRINT:
         if (!arg) return M_PROPERTY_ERROR;
-        if (mpctx->loop_times < 0)
+        if (opts->loop_times < 0)
             *(char**)arg = strdup("off");
-        else if (mpctx->loop_times == 0)
+        else if (opts->loop_times == 0)
             *(char**)arg = strdup("inf");
         else
             break;
         return M_PROPERTY_OK;
     }
-    return m_property_int_range(prop, action, arg, &mpctx->loop_times);
+    return m_property_int_range(prop, action, arg, &opts->loop_times);
 }
 
 /// Playback speed (RW)

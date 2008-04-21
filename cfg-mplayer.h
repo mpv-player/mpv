@@ -89,6 +89,7 @@ const m_option_t tvscan_conf[]={
 
 #define FLAG_ON(optname, varname, flags) {optname, NULL, CONF_TYPE_FLAG, flags, 0, 1, NULL, 1, offsetof(struct MPOpts, varname)}
 #define FLAG_OFF(optname, varname, flags) {optname, NULL, CONF_TYPE_FLAG, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define FLAG_CONSTANTS(optname, varname, offvalue, value, flags) {optname, NULL, CONF_TYPE_FLAG, flags, offvalue, value, NULL, 1, offsetof(struct MPOpts, varname)}
 #define STRINGLIST(optname, varname, flags) {optname, NULL, CONF_TYPE_STRING_LIST, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define INTRANGE(optname, varname, min, max, flags) {optname, NULL, CONF_TYPE_INT, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
 
@@ -322,8 +323,8 @@ const m_option_t mplayer_opts[]={
 	{"guiwid", &guiWinID, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
 
-	{"noloop", &mpctx_s.loop_times, CONF_TYPE_FLAG, 0, 0, -1, NULL},
-	{"loop", &mpctx_s.loop_times, CONF_TYPE_INT, CONF_RANGE, -1, 10000, NULL},
+	FLAG_CONSTANTS("noloop", loop_times, 0, -1, 0),
+	INTRANGE("loop", loop_times, -1, 10000, 0),
 	{"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// a-v sync stuff:
