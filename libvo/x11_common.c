@@ -988,9 +988,6 @@ void vo_x11_uninit(struct vo *vo)
     }
 }
 
-static unsigned int mouse_timer;
-static int mouse_waiting_hide;
-
 int vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1003,10 +1000,10 @@ int vo_x11_check_events(struct vo *vo)
 
 // unsigned long  vo_KeyTable[512];
 
-    if ((vo_mouse_autohide) && mouse_waiting_hide &&
-                                 (GetTimerMS() - mouse_timer >= 1000)) {
+    if ((vo_mouse_autohide) && x11->mouse_waiting_hide &&
+                                 (GetTimerMS() - x11->mouse_timer >= 1000)) {
         vo_hidecursor(display, x11->window);
-        mouse_waiting_hide = 0;
+        x11->mouse_waiting_hide = 0;
     }
 
     while (XPending(display))
@@ -1083,16 +1080,16 @@ int vo_x11_check_events(struct vo *vo)
                 if (vo_mouse_autohide)
                 {
                     vo_showcursor(display, x11->window);
-                    mouse_waiting_hide = 1;
-                    mouse_timer = GetTimerMS();
+                    x11->mouse_waiting_hide = 1;
+                    x11->mouse_timer = GetTimerMS();
                 }
                 break;
             case ButtonPress:
                 if (vo_mouse_autohide)
                 {
                     vo_showcursor(display, x11->window);
-                    mouse_waiting_hide = 1;
-                    mouse_timer = GetTimerMS();
+                    x11->mouse_waiting_hide = 1;
+                    x11->mouse_timer = GetTimerMS();
                 }
 #ifdef HAVE_NEW_GUI
                 // Ignore mouse button 1-3 under GUI.
@@ -1107,8 +1104,8 @@ int vo_x11_check_events(struct vo *vo)
                 if (vo_mouse_autohide)
                 {
                     vo_showcursor(display, x11->window);
-                    mouse_waiting_hide = 1;
-                    mouse_timer = GetTimerMS();
+                    x11->mouse_waiting_hide = 1;
+                    x11->mouse_timer = GetTimerMS();
                 }
 #ifdef HAVE_NEW_GUI
                 // Ignore mouse button 1-3 under GUI.

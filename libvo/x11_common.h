@@ -22,6 +22,8 @@ struct vo_x11_state {
 
     GC f_gc;
     XSizeHints vo_hint;
+    unsigned int mouse_timer;
+    int mouse_waiting_hide;
 
     unsigned int olddecor;
     unsigned int oldfuncs;
