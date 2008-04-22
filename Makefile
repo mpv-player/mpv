@@ -231,6 +231,7 @@ DIRS =  gui \
         libass \
         libmenu \
         osdep \
+        TOOLS \
 
 all:	$(ALL_PRG)
 
@@ -388,7 +389,7 @@ uninstall:
 	  fi ; \
 	done
 
-clean::
+clean:: toolsclean
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags
@@ -397,7 +398,6 @@ clean::
 
 distclean:: doxygen_clean
 	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
-	$(MAKE) -C TOOLS distclean
 	-rm -f configure.log config.mak config.h
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 
@@ -444,4 +444,71 @@ ifneq ($(HELP_FILE),help/help_mp-en.h)
 	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
 endif
 
-.PHONY: all install* uninstall strip doxygen
+
+TOOLS = TOOLS/alaw-gen$(EXESUF) \
+        TOOLS/asfinfo$(EXESUF) \
+        TOOLS/avi-fix$(EXESUF) \
+        TOOLS/avisubdump$(EXESUF) \
+        TOOLS/compare$(EXESUF) \
+        TOOLS/dump_mp4$(EXESUF) \
+        TOOLS/movinfo$(EXESUF) \
+        TOOLS/subrip$(EXESUF) \
+
+ifdef ARCH_X86
+TOOLS += TOOLS/modify_reg$(EXESUF)
+endif
+
+tools: $(TOOLS)
+
+TOOLS_COMMON_LIBS = mp_msg.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
+              -ltermcap -lm
+
+TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
+
+TOOLS/subrip$(EXESUF): TOOLS/subrip.c vobsub.o spudec.o unrar_exec.o \
+  libswscale/libswscale.a libavutil/libavutil.a $(TOOLS_COMMON_LIBS)
+
+TOOLS/vfw2menc$(EXESUF): TOOLS/vfw2menc.c -lwinmm -lole32
+
+#FIXME: Linking is broken, help welcome.
+TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c libmpdemux/libmpdemux.a $(TOOLS_COMMON_LIBS)
+
+fastmemcpybench: TOOLS/fastmemcpybench.c
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-k6$(EXESUF)   -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-k7$(EXESUF)   -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-sse$(EXESUF)  -DNAME=\"sse\"      -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-mmx$(EXESUF) -DNAME=\"mga-mmx\"  -DHAVE_MGA -DHAVE_MMX
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-k6$(EXESUF)  -DNAME=\"mga-k6\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-k7$(EXESUF)  -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+
+REAL_SRCS    = $(wildcard TOOLS/realcodecs/*.c)
+REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
+
+realcodecs: $(REAL_TARGETS)
+
+fastmemcpybench realcodecs: CFLAGS += -g
+
+%.so.6.0: %.o
+	ld -shared -o $@ $< -ldl -lc
+
+# FIXME: netstream linking is a mess that should be fixed properly some day.
+# It does not work with either GUI, LIVE555, libavformat, cdparanoia enabled.
+NETSTREAM_DEPS = libmpdemux/libmpdemux.a \
+                 stream/stream.a \
+                 dvdread/libdvdread.a \
+                 libdvdcss/libdvdcss.a \
+                 libavutil/libavutil.a \
+                 m_option.o \
+                 m_struct.o \
+                 $(TOOLS_COMMON_LIBS)
+
+TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
+	$(CC) $(CFLAGS) -o $@ $^
+
+toolsclean:
+	rm -f $(TOOLS) TOOLS/fastmem*-* TOOLS/netstream$(EXESUF)
+	rm -f TOOLS/bmovl-test$(EXESUF) TOOLS/vfw2menc$(EXESUF) $(REAL_TARGETS)
+
+.PHONY: all install* uninstall strip doxygen tools
