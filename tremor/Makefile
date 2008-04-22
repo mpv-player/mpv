@@ -17,6 +17,4 @@ SRCS_COMMON = bitwise.c \
               synthesis.c \
               window.c \
 
-CFLAGS-$(TREMOR_LOW)  += -D_LOW_ACCURACY_
-
 include ../mpcommon.mak

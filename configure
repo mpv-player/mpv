@@ -5922,6 +5922,7 @@ if test "$_tremor_internal" = yes ; then
   _codecmodules="tremor(internal) $_codecmodules"
   _res_comment="internal Tremor"
   if test "$_tremor_low" = yes ; then
+    CFLAGS="$CFLAGS -D_LOW_ACCURACY_"
     _res_comment="internal low accuracy Tremor"
   fi
 elif test "$_tremor_external" = yes ; then
