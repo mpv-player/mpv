@@ -214,11 +214,14 @@ PARTS = dvdread \
         libpostproc \
         libswscale \
         libvo \
-        loader \
         mp3lib \
         stream \
         tremor \
         vidix \
+
+ifdef ARCH_X86
+PARTS += loader
+endif
 
 DIRS =  gui \
         gui/mplayer \
