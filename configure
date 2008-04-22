@@ -7818,17 +7818,7 @@ VIDIX_UNICHROME=$_vidix_drv_unichrome
 $_target_arch
 $_target_arch_x86
 TARGET_CPU=$iproc
-HAVE_MMX   = $_mmx
-HAVE_MMX2   = $_mmxext
-HAVE_3DNOW   = $_3dnow
-HAVE_3DNOWEX   = $_3dnowext
-HAVE_SSE   = $_sse
-HAVE_CMOV   = $_cmov
-HAVE_ALTIVEC   = $_altivec
-HAVE_ARMV5TE   = $_armv5te
-HAVE_ARMV6   = $_armv6
-HAVE_IWMMXT   = $_iwmmxt
-HAVE_VIS   = $_vis
+`echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/'`
 
 # --- GUI stuff ---
 GUI_GTK = $_gui_gtk
