@@ -233,7 +233,10 @@ DIRS =  gui \
         osdep \
         TOOLS \
 
-all:	$(ALL_PRG)
+all:	recurse $(ALL_PRG)
+
+recurse:
+	for part in $(PARTS); do $(MAKE) -C $$part; done
 
 DEPS = $(SRCS_COMMON:.c=.d) $(SRCS_MPLAYER:.c=.d) $(SRCS_MENCODER:.c=.d)
 $(DEPS): help_mp.h version.h codecs.conf.h
@@ -244,70 +247,70 @@ include mpcommon.mak
 
 CFLAGS := $(subst -I..,-I.,$(CFLAGS))
 
-dvdread/libdvdread.a: dvdread/*.[ch]
+dvdread/libdvdread.a:
 	$(MAKE) -C dvdread
 
-liba52/liba52.a: liba52/*.[ch]
+liba52/liba52.a:
 	$(MAKE) -C liba52
 
-libao2/libao2.a: libao2/*.[ch]
+libao2/libao2.a:
 	$(MAKE) -C libao2
 
-libavcodec/libavcodec.a: libavcodec/*.[ch] libavcodec/*/*.[chS]
+libavcodec/libavcodec.a:
 	$(MAKE) -C libavcodec
 
-libavformat/libavformat.a: libavformat/*.[ch]
+libavformat/libavformat.a:
 	$(MAKE) -C libavformat
 
-libavutil/libavutil.a: libavutil/*.[ch]
+libavutil/libavutil.a:
 	$(MAKE) -C libavutil
 
-libdvdcss/libdvdcss.a: libdvdcss/*.[ch] libdvdcss/*/*.[ch]
+libdvdcss/libdvdcss.a:
 	$(MAKE) -C libdvdcss
 
-libfaad2/libfaad2.a: libfaad2/*.[ch] libfaad2/*/*.[ch]
+libfaad2/libfaad2.a:
 	$(MAKE) -C libfaad2
 
-libmpcodecs/libmpcodecs.a: libmpcodecs/*.[ch] libmpcodecs/*/*.[ch]
+libmpcodecs/libmpcodecs.a:
 	$(MAKE) -C libmpcodecs
 
-libmpcodecs/libmpencoders.a: libmpcodecs/*.[ch] libmpcodecs/*/*.[ch]
+libmpcodecs/libmpencoders.a:
 	$(MAKE) -C libmpcodecs libmpencoders.a
 
-libmpdemux/libmpdemux.a: libmpdemux/*.[ch]
+libmpdemux/libmpdemux.a:
 	$(MAKE) -C libmpdemux libmpdemux.a
 
-libmpdemux/libmpmux.a: libmpdemux/*.[ch]
+libmpdemux/libmpmux.a:
 	$(MAKE) -C libmpdemux libmpmux.a
 
-libmpeg2/libmpeg2.a: libmpeg2/*.[ch]
+libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
 
-libpostproc/libpostproc.a: libpostproc/*.[ch]
+libpostproc/libpostproc.a:
 	$(MAKE) -C libpostproc
 
-libswscale/libswscale.a: libswscale/*.[ch]
+libswscale/libswscale.a:
 	$(MAKE) -C libswscale
 
-libvo/libvo.a: libvo/*.[ch]
+libvo/libvo.a:
 	$(MAKE) -C libvo libvo.a
 
-libvo/libosd.a: libvo/*.[ch]
+libvo/libosd.a:
 	$(MAKE) -C libvo libosd.a
 
-loader/libloader.a: loader/*.[chSs]
+loader/libloader.a:
 	$(MAKE) -C loader
 
-mp3lib/libmp3.a: mp3lib/*.[ch]
+mp3lib/libmp3.a:
 	$(MAKE) -C mp3lib
 
-stream/stream.a: stream/*.[ch] stream/*/*.[ch]
+stream/stream.a:
 	$(MAKE) -C stream
 
-tremor/libvorbisidec.a: tremor/*.[ch]
+tremor/libvorbisidec.a:
 	$(MAKE) -C tremor
 
-vidix/libvidix.a: vidix/*.[ch] vidix/*/*.[ch]
+vidix/libvidix.a:
 	$(MAKE) -C vidix
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
@@ -511,4 +514,4 @@ toolsclean:
 	rm -f $(TOOLS) TOOLS/fastmem*-* TOOLS/netstream$(EXESUF)
 	rm -f TOOLS/bmovl-test$(EXESUF) TOOLS/vfw2menc$(EXESUF) $(REAL_TARGETS)
 
-.PHONY: all install* uninstall strip doxygen tools
+.PHONY: all doxygen install* uninstall recurse strip tools
