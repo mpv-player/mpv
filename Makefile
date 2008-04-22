@@ -167,19 +167,19 @@ COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
 COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
 COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
 COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
-COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
-COMMON_LIBS-$(MP3LIB)             += mp3lib/libmp3.a
+COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
+COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
 COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
-COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
-COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
+COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/tremor.a
+COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/dvdread.a
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
 
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
 
-LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
+LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 libmpdemux/libmpmux.a \
@@ -247,7 +247,7 @@ include mpcommon.mak
 
 CFLAGS := $(subst -I..,-I.,$(CFLAGS))
 
-dvdread/libdvdread.a:
+dvdread/dvdread.a:
 	$(MAKE) -C dvdread
 
 liba52/liba52.a:
@@ -298,19 +298,19 @@ libvo/libvo.a:
 libvo/libosd.a:
 	$(MAKE) -C libvo libosd.a
 
-loader/libloader.a:
+loader/loader.a:
 	$(MAKE) -C loader
 
-mp3lib/libmp3.a:
+mp3lib/mp3lib.a:
 	$(MAKE) -C mp3lib
 
 stream/stream.a:
 	$(MAKE) -C stream
 
-tremor/libvorbisidec.a:
+tremor/tremor.a:
 	$(MAKE) -C tremor
 
-vidix/libvidix.a:
+vidix/vidix.a:
 	$(MAKE) -C vidix
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)

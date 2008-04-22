@@ -1,6 +1,6 @@
 include ../config.mak
 
-LIBNAME_COMMON = libvorbisidec.a
+LIBNAME_COMMON = tremor.a
 
 SRCS_COMMON = bitwise.c \
               block.c \

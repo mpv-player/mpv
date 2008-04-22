@@ -1,6 +1,6 @@
 include ../config.mak
 
-LIBNAME_COMMON = libdvdread.a
+LIBNAME_COMMON = dvdread.a
 
 SRCS_COMMON = cmd_print.c \
               dvd_input.c \

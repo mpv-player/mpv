@@ -1,6 +1,6 @@
 include ../config.mak
 
-LIBNAME_COMMON = libloader.a
+LIBNAME_COMMON = loader.a
 
 #CFLAGS+=-Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
 
