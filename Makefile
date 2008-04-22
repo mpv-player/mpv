@@ -247,71 +247,21 @@ include mpcommon.mak
 
 CFLAGS := $(subst -I..,-I.,$(CFLAGS))
 
-dvdread/dvdread.a:
-	$(MAKE) -C dvdread
+define RECURSIVE_RULE
+$(part)/$(part).a:
+	$(MAKE) -C $(part)
+endef
 
-liba52/liba52.a:
-	$(MAKE) -C liba52
-
-libao2/libao2.a:
-	$(MAKE) -C libao2
-
-libavcodec/libavcodec.a:
-	$(MAKE) -C libavcodec
-
-libavformat/libavformat.a:
-	$(MAKE) -C libavformat
-
-libavutil/libavutil.a:
-	$(MAKE) -C libavutil
-
-libdvdcss/libdvdcss.a:
-	$(MAKE) -C libdvdcss
-
-libfaad2/libfaad2.a:
-	$(MAKE) -C libfaad2
-
-libmpcodecs/libmpcodecs.a:
-	$(MAKE) -C libmpcodecs
+$(foreach part,$(PARTS),$(eval $(RECURSIVE_RULE)))
 
 libmpcodecs/libmpencoders.a:
 	$(MAKE) -C libmpcodecs libmpencoders.a
 
-libmpdemux/libmpdemux.a:
-	$(MAKE) -C libmpdemux libmpdemux.a
-
 libmpdemux/libmpmux.a:
 	$(MAKE) -C libmpdemux libmpmux.a
 
-libmpeg2/libmpeg2.a:
-	$(MAKE) -C libmpeg2
-
-libpostproc/libpostproc.a:
-	$(MAKE) -C libpostproc
-
-libswscale/libswscale.a:
-	$(MAKE) -C libswscale
-
-libvo/libvo.a:
-	$(MAKE) -C libvo libvo.a
-
 libvo/libosd.a:
 	$(MAKE) -C libvo libosd.a
-
-loader/loader.a:
-	$(MAKE) -C loader
-
-mp3lib/mp3lib.a:
-	$(MAKE) -C mp3lib
-
-stream/stream.a:
-	$(MAKE) -C stream
-
-tremor/tremor.a:
-	$(MAKE) -C tremor
-
-vidix/vidix.a:
-	$(MAKE) -C vidix
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
