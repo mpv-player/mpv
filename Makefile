@@ -86,6 +86,21 @@ SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
 SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
 SRCS_COMMON-$(NEED_SWAB)             += osdep/swab.c
 SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
+SRCS_COMMON-$(TREMOR_INTERNAL)       += tremor/bitwise.c \
+                                        tremor/block.c \
+                                        tremor/codebook.c \
+                                        tremor/floor0.c \
+                                        tremor/floor1.c \
+                                        tremor/framing.c \
+                                        tremor/info.c \
+                                        tremor/mapping0.c \
+                                        tremor/mdct.c \
+                                        tremor/registry.c \
+                                        tremor/res012.c \
+                                        tremor/sharedbook.c \
+                                        tremor/synthesis.c \
+                                        tremor/window.c \
+
 SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
 
 SRCS_MPLAYER = mplayer.c \
@@ -172,7 +187,6 @@ COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
 COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
-COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/tremor.a
 COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/dvdread.a
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
 
@@ -216,7 +230,6 @@ PARTS = dvdread \
         libvo \
         mp3lib \
         stream \
-        tremor \
         vidix \
 
 ifdef ARCH_X86
@@ -234,6 +247,7 @@ DIRS =  gui \
         libass \
         libmenu \
         osdep \
+        tremor \
         TOOLS \
 
 all:	recurse $(ALL_PRG)
