@@ -3377,7 +3377,7 @@ if(mpctx->sh_video){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotReadVideoProperties);
     mpctx->sh_video=mpctx->d_video->sh=NULL;
   } else {
-    mp_msg(MSGT_CPLAYER,MSGL_V,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
+    mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_FilefmtFourccSizeFpsFtime,
 	   mpctx->demuxer->file_format,mpctx->sh_video->format, mpctx->sh_video->disp_w,mpctx->sh_video->disp_h,
 	   mpctx->sh_video->fps,mpctx->sh_video->frametime
 	   );
