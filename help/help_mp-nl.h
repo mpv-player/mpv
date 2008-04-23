@@ -318,7 +318,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "Fout in het configuratie bestand of configuratie bestand ontbreekt"
 #define MSGTR_ErrorParsingCommandLine "Fout bij het analyseren van de commandoregel"
 #define MSGTR_VideoStreamRequired "Een Video stream is verplicht!\n"
-#define MSGTR_ForcingInputFPS "input fps zal geinterpreteerd worden als %5.2f \n"
+#define MSGTR_ForcingInputFPS "input fps zal geinterpreteerd worden als %5.3f \n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Het output bestandsformaat RAWVIDEO ondersteunt geen audio - geluid \n"
 #define MSGTR_DemuxerDoesntSupportNosound "Deze demuxer ondersteunt -nosound nog niet.\n"
 #define MSGTR_MemAllocFailed "geheugentoewijzing gefaald"

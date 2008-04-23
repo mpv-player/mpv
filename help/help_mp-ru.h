@@ -406,7 +406,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "ошибка в конфигурационном файле"
 #define MSGTR_ErrorParsingCommandLine "ошибка анализа командной строки"
 #define MSGTR_VideoStreamRequired "Наличие видеопотока обязательно!\n"
-#define MSGTR_ForcingInputFPS "входные кадры/сек будут заменены на %5.2f\n"
+#define MSGTR_ForcingInputFPS "входные кадры/сек будут заменены на %5.3f\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Выходной формат файла RAWVIDEO не поддерживает аудио - отключаю аудио\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Этот демультиплексор пока что не поддерживает -nosound.\n"
 #define MSGTR_MemAllocFailed "не могу выделить память"
@@ -599,7 +599,7 @@ static char help_text[]=
 #define MSGTR_FormatNotRecognized "======= Извините, формат этого файла не распознан/не поддерживается ==========\n"\
 				  "===== Если это AVI, ASF или MPEG поток, пожалуйста свяжитесь с автором! ======\n"
 #define MSGTR_SettingProcessPriority "Устанавливаю приоритет процесса: %s\n"
-#define MSGTR_FilefmtFourccSizeFpsFtime "[V] формат:%d  fourcc:0x%X  размер:%dx%d  fps:%5.2f  ftime:=%6.4f\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] формат:%d  fourcc:0x%X  размер:%dx%d  fps:%5.3f  ftime:=%6.4f\n"
 #define MSGTR_CannotInitializeMuxer "Невозможно инициализировать мультиплексор."
 #define MSGTR_MissingVideoStream "Видеопоток не найден!\n"
 #define MSGTR_MissingAudioStream "Аудиопоток не найден -> без звука\n"

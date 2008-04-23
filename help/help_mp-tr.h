@@ -407,7 +407,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "ayar dosyası hatası"
 #define MSGTR_ErrorParsingCommandLine "komutsatırı ayrıştırma hatası"
 #define MSGTR_VideoStreamRequired "Video yayını(stream) zorunlu!\n"
-#define MSGTR_ForcingInputFPS "girdi fps değeri %5.2f olarak yorumlanacak\n"
+#define MSGTR_ForcingInputFPS "girdi fps değeri %5.3f olarak yorumlanacak\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Çıktı dosyası RAWVIDEO biçimi sesi desteklemiyor - ses devre dışı bırakılıyor\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Ayrıştırıcı -nosound seçeneğini henüz desteklemiyor.\n"
 #define MSGTR_MemAllocFailed "Bellek atanamadı\n"

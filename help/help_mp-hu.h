@@ -410,7 +410,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "konfigurációs fájl hibája"
 #define MSGTR_ErrorParsingCommandLine "hiba a parancssor értelmezésekor"
 #define MSGTR_VideoStreamRequired "Video stream szükséges!\n"
-#define MSGTR_ForcingInputFPS "Az input fps inkább %5.2f-ként lesz értelmezve.\n"
+#define MSGTR_ForcingInputFPS "Az input fps inkább %5.3f-ként lesz értelmezve.\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "A RAWVIDEO kimeneti fájl formátum nem támogatja a hangot - audió letiltva.\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Ez a demuxer még nem támogatja a -nosound kapcsolót.\n"
 #define MSGTR_MemAllocFailed "Nem sikerült a memóriafoglalás.\n"
@@ -603,7 +603,7 @@ static char help_text[]=
 #define MSGTR_FormatNotRecognized "========= Sajnos ez a fájlformátum ismeretlen vagy nem támogatott ===========\n"\
 				  "= Ha ez egy AVI, ASF vagy MPEG fájl, lépj kapcsolatba a készítőkkel (hiba)! =\n"
 #define MSGTR_SettingProcessPriority "Folyamat priorításának beállítása: %s\n"
-#define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  méret:%dx%d  fps:%5.2f  ftime:=%6.4f\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  méret:%dx%d  fps:%5.3f  ftime:=%6.4f\n"
 #define MSGTR_CannotInitializeMuxer "A muxer nem inicializálható."
 #define MSGTR_MissingVideoStream "Nincs képfolyam!\n"
 #define MSGTR_MissingAudioStream "Nincs hangfolyam... -> hang nélkül\n"

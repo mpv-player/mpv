@@ -331,7 +331,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "грешка в конфигурационния файл"
 #define MSGTR_ErrorParsingCommandLine "грешка при обработката на командния ред"
 #define MSGTR_VideoStreamRequired "Задължително е да има видео поток!\n"
-#define MSGTR_ForcingInputFPS "Входящите кадри в секунда ще се интерпретират като %5.2f\n"
+#define MSGTR_ForcingInputFPS "Входящите кадри в секунда ще се интерпретират като %5.3f\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Изходния формат RAWVIDEO не поддържа аудио - звука се премахва\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Tози разпределител все още не поддържа -nosound .\n"
 #define MSGTR_MemAllocFailed "не може да задели памет"
