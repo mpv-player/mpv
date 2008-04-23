@@ -111,6 +111,11 @@ SRCS_MPLAYER = mplayer.c \
                parser-mpcmd.c \
                command.c \
                input/input.c \
+               libao2/audio_out.c \
+               libao2/ao_mpegpes.c \
+               libao2/ao_null.c \
+               libao2/ao_pcm.c \
+               $(addprefix libao2/,$(AO_SRCS)) \
 
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
@@ -191,7 +196,6 @@ COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/dvdread.a
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
 
 LIBS_MPLAYER = libvo/libvo.a \
-               libao2/libao2.a \
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
 
@@ -216,7 +220,6 @@ INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 PARTS = dvdread \
         liba52 \
-        libao2 \
         libavcodec \
         libavformat \
         libavutil \
@@ -244,6 +247,7 @@ DIRS =  gui \
         gui/win32 \
         input \
         libaf \
+        libao2 \
         libass \
         libmenu \
         osdep \
