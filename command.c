@@ -793,6 +793,7 @@ static int mp_property_balance(m_option_t * prop, int action, void *arg,
 static int mp_property_audio(m_option_t * prop, int action, void *arg,
 			     MPContext * mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int current_id = -1, tmp;
 
     switch (action) {
@@ -801,7 +802,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
-	*(int *) arg = audio_id;
+        *(int *) arg = opts->audio_id;
 	return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
 	if (!mpctx->sh_audio)
@@ -809,7 +810,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 
-	if (audio_id < 0)
+        if (opts->audio_id < 0)
 	    *(char **) arg = strdup(MSGTR_Disabled);
 	else {
 	    char lang[40] = MSGTR_Unknown;
@@ -818,7 +819,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
                 av_strlcpy(lang, sh->lang, 40);
 #ifdef USE_DVDREAD
 	    else if (mpctx->stream->type == STREAMTYPE_DVD) {
-		int code = dvd_lang_from_aid(mpctx->stream, audio_id);
+                int code = dvd_lang_from_aid(mpctx->stream, opts->audio_id);
 		if (code) {
 		    lang[0] = code >> 8;
 		    lang[1] = code;
@@ -829,10 +830,10 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 
 #ifdef USE_DVDNAV
 	    else if (mpctx->stream->type == STREAMTYPE_DVDNAV)
-		dvdnav_lang_from_aid(mpctx->stream, audio_id, lang);
+                dvdnav_lang_from_aid(mpctx->stream, opts->audio_id, lang);
 #endif
 	    *(char **) arg = malloc(64);
-	    snprintf(*(char **) arg, 64, "(%d) %s", audio_id, lang);
+            snprintf(*(char **) arg, 64, "(%d) %s", opts->audio_id, lang);
 	}
 	return M_PROPERTY_OK;
 
@@ -843,12 +844,12 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 	else
 	    tmp = -1;
 	current_id = mpctx->demuxer->audio->id;
-	audio_id = demuxer_switch_audio(mpctx->demuxer, tmp);
-	if (audio_id == -2
-	    || (audio_id > -1
+        opts->audio_id = demuxer_switch_audio(mpctx->demuxer, tmp);
+        if (opts->audio_id == -2
+            || (opts->audio_id > -1
 		&& mpctx->demuxer->audio->id != current_id && current_id != -2))
 	    uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
-	if (audio_id > -1 && mpctx->demuxer->audio->id != current_id) {
+        if (opts->audio_id > -1 && mpctx->demuxer->audio->id != current_id) {
 	    sh_audio_t *sh2;
 	    sh2 = mpctx->demuxer->a_streams[mpctx->demuxer->audio->id];
 	    if (sh2) {
@@ -857,7 +858,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 		reinit_audio_chain(mpctx);
 	    }
 	}
-	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", audio_id);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", opts->audio_id);
 	return M_PROPERTY_OK;
     default:
 	return M_PROPERTY_NOT_IMPLEMENTED;
@@ -869,6 +870,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 static int mp_property_video(m_option_t * prop, int action, void *arg,
 			     MPContext * mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int current_id = -1, tmp;
 
     switch (action) {
@@ -877,7 +879,7 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 	    return M_PROPERTY_UNAVAILABLE;
 	if (!arg)
 	    return M_PROPERTY_ERROR;
-	*(int *) arg = video_id;
+        *(int *) arg = opts->video_id;
 	return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
 	if (!mpctx->sh_video)
@@ -885,12 +887,12 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 
-	if (video_id < 0)
+        if (opts->video_id < 0)
 	    *(char **) arg = strdup(MSGTR_Disabled);
 	else {
 	    char lang[40] = MSGTR_Unknown;
 	    *(char **) arg = malloc(64);
-	    snprintf(*(char **) arg, 64, "(%d) %s", video_id, lang);
+            snprintf(*(char **) arg, 64, "(%d) %s", opts->video_id, lang);
 	}
 	return M_PROPERTY_OK;
 
@@ -901,13 +903,13 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 	    tmp = *((int *) arg);
 	else
 	    tmp = -1;
-	video_id = demuxer_switch_video(mpctx->demuxer, tmp);
-	if (video_id == -2
-	    || (video_id > -1 && mpctx->demuxer->video->id != current_id
+        opts->video_id = demuxer_switch_video(mpctx->demuxer, tmp);
+        if (opts->video_id == -2
+            || (opts->video_id > -1 && mpctx->demuxer->video->id != current_id
 		&& current_id != -2))
 	    uninit_player(mpctx, INITIALIZED_VCODEC |
-                          (mpctx->opts.fixed_vo && video_id != -2 ? 0 : INITIALIZED_VO));
-	if (video_id > -1 && mpctx->demuxer->video->id != current_id) {
+                          (mpctx->opts.fixed_vo && opts->video_id != -2 ? 0 : INITIALIZED_VO));
+        if (opts->video_id > -1 && mpctx->demuxer->video->id != current_id) {
 	    sh_video_t *sh2;
 	    sh2 = mpctx->demuxer->v_streams[mpctx->demuxer->video->id];
 	    if (sh2) {
@@ -916,7 +918,7 @@ static int mp_property_video(m_option_t * prop, int action, void *arg,
 		reinit_video_chain(mpctx);
 	    }
 	}
-	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_TRACK=%d\n", video_id);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_TRACK=%d\n", opts->video_id);
 	return M_PROPERTY_OK;
 
     default:

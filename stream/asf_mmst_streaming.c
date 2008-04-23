@@ -35,7 +35,7 @@
 #include <inttypes.h>
 
 #include "config.h"
-
+#include "options.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -648,6 +648,7 @@ int asf_mmst_streaming_start(stream_t *stream)
 
   memset (data, 0, 40);
 
+  int audio_id = stream->opts->audio_id;
   if (audio_id > 0) {
     data[2] = 0xFF;
     data[3] = 0xFF;

@@ -8,6 +8,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "options.h"
 
 #ifndef HAVE_WINSOCK2
 #define closesocket close
@@ -145,9 +146,6 @@ printf("0x%02X\n", stream_chunck->type );
 	}
 	return stream_chunck->size+4;
 }
-
-extern int audio_id;
-extern int video_id;
 
 static void close_s(stream_t *stream) {
 	close(stream->fd);
@@ -364,24 +362,24 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
     return -1;
   }
 
-  if (audio_id > 0)
+  if (*streaming_ctrl->audio_id_ptr > 0)
     // a audio stream was forced
-    asf_ctrl->audio_id = audio_id;
+    asf_ctrl->audio_id = *streaming_ctrl->audio_id_ptr;
   else if (a_idx >= 0)
     asf_ctrl->audio_id = asf_ctrl->audio_streams[a_idx];
   else if (asf_ctrl->n_audio) {
     mp_msg(MSGT_NETWORK, MSGL_WARN, MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio);
-    audio_id = -2;
+    *streaming_ctrl->audio_id_ptr = -2;
   }
 
-  if (video_id > 0)
+  if (*streaming_ctrl->video_id_ptr > 0)
     // a video stream was forced
-    asf_ctrl->video_id = video_id;
+    asf_ctrl->video_id = *streaming_ctrl->video_id_ptr;
   else if (v_idx >= 0)
     asf_ctrl->video_id = asf_ctrl->video_streams[v_idx];
   else if (asf_ctrl->n_video) {
     mp_msg(MSGT_NETWORK, MSGL_WARN, MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo);
-    video_id = -2;
+    *streaming_ctrl->video_id_ptr = -2;
   }
 
   return 1;
@@ -817,6 +815,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 	if( stream->streaming_ctrl==NULL ) {
 		return STREAM_ERROR;
 	}
+        stream->streaming_ctrl->audio_id_ptr = &stream->opts->audio_id;
+        stream->streaming_ctrl->video_id_ptr = &stream->opts->video_id;
 	stream->streaming_ctrl->bandwidth = network_bandwidth;
 	url = url_new(stream->url);
 	stream->streaming_ctrl->url = check4proxies(url);

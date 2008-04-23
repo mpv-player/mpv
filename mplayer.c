@@ -243,9 +243,6 @@ extern char *demuxer_name; // override demuxer
 extern char *audio_demuxer_name; // override audio demuxer
 extern char *sub_demuxer_name; // override sub demuxer
 
-// streaming:
-int audio_id=-1;
-int video_id=-1;
 int dvdsub_id=-2;
 int vobsub_id=-1;
 char* audio_lang=NULL;
@@ -3209,7 +3206,7 @@ if(stream_dump_type==5){
 #ifdef USE_DVDREAD
 if(mpctx->stream->type==STREAMTYPE_DVD){
   current_module="dvd lang->id";
-  if(audio_id==-1) audio_id=dvd_aid_from_lang(mpctx->stream,audio_lang);
+  if(opts->audio_id==-1) opts->audio_id=dvd_aid_from_lang(mpctx->stream,audio_lang);
   if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=-1;
   if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(mpctx->stream,dvdsub_lang);
   // setup global sub numbering
@@ -3222,7 +3219,7 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 #ifdef USE_DVDNAV
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
-  if(audio_id==-1) audio_id=dvdnav_aid_from_lang(mpctx->stream,audio_lang);
+  if(opts->audio_id==-1) opts->audio_id=dvdnav_aid_from_lang(mpctx->stream,audio_lang);
   if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=-1;
   if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
   // setup global sub numbering
@@ -3245,7 +3242,7 @@ if(stream_cache_size>0){
 //============ Open DEMUXERS --- DETECT file type =======================
 current_module="demux_open";
 
-mpctx->demuxer=demux_open(opts, mpctx->stream,mpctx->file_format,audio_id,video_id,dvdsub_id,filename);
+mpctx->demuxer=demux_open(opts, mpctx->stream,mpctx->file_format,opts->audio_id,opts->video_id,dvdsub_id,filename);
 
 // HACK to get MOV Reference Files working
 
@@ -3350,7 +3347,7 @@ mpctx->d_video=mpctx->demuxer->video;
 mpctx->d_sub=mpctx->demuxer->sub;
 
 // select audio stream
-select_audio(mpctx->demuxer, audio_id, audio_lang);
+select_audio(mpctx->demuxer, opts->audio_id, audio_lang);
 
 // DUMP STREAMS:
 if((stream_dump_type)&&(stream_dump_type<4)){

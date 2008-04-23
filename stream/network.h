@@ -46,6 +46,9 @@ typedef struct streaming_control {
 	int (*streaming_read)( int fd, char *buffer, int buffer_size, struct streaming_control *stream_ctrl );
 	int (*streaming_seek)( int fd, off_t pos, struct streaming_control *stream_ctrl );
 	void *data;
+    // hacks for asf
+    int *audio_id_ptr;
+    int *video_id_ptr;
 } streaming_ctrl_t;
 
 //int streaming_start( stream_t *stream, int *demuxer_type, URL_t *url );

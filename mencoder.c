@@ -112,8 +112,6 @@ float stream_cache_seek_min_percent=50.0;
 #define cache_fill_status 0
 #endif
 
-int audio_id=-1;
-int video_id=-1;
 int dvdsub_id=-2;
 int vobsub_id=-1;
 char* audio_lang=NULL;
@@ -584,14 +582,14 @@ play_next_file:
 
 #ifdef USE_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
-  if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
+  if(audio_lang && opts.audio_id==-1) opts.audio_id=dvd_aid_from_lang(stream,audio_lang);
   if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
 }
 #endif
 
 #ifdef USE_DVDNAV
 if(stream->type==STREAMTYPE_DVDNAV){
-  if(audio_lang && audio_id==-1) audio_id=dvdnav_aid_from_lang(stream,audio_lang);
+  if(audio_lang && opts.audio_id==-1) opts.audio_id=dvdnav_aid_from_lang(stream,audio_lang);
   if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=dvdnav_sid_from_lang(stream,dvdsub_lang);
 }
 #endif
@@ -600,17 +598,17 @@ if(stream->type==STREAMTYPE_DVDNAV){
 
   if(stream_cache_size>0) stream_enable_cache(stream,stream_cache_size*1024,0,0);
 
-  if(demuxer2) audio_id=-2; /* do NOT read audio packets... */
+  if(demuxer2) opts.audio_id=-2; /* do NOT read audio packets... */
 
-  //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
-  demuxer=demux_open(&opts, stream,file_format,audio_id,video_id,dvdsub_id,filename);
+  //demuxer=demux_open(stream,file_format,opts.video_id,opts.audio_id,dvdsub_id);
+  demuxer=demux_open(&opts, stream,file_format,opts.audio_id,opts.video_id,dvdsub_id,filename);
   if(!demuxer){
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_FormatNotRecognized);
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_CannotOpenDemuxer);
 	mencoder_exit(1,NULL);
   }
 
-  select_audio(demuxer, audio_id, audio_lang);
+  select_audio(demuxer, opts.audio_id, audio_lang);
  
   if (dvdsub_id < 0 && dvdsub_lang)
     dvdsub_id = demuxer_sub_track_by_lang(demuxer, dvdsub_lang);
@@ -662,7 +660,7 @@ sh_video=d_video->sh;
   }
 
   if(sh_audio && out_audio_codec<0){
-    if(audio_id==-2)
+    if(opts.audio_id==-2)
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_DemuxerDoesntSupportNosound);
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoAudioEncoderSelected);
     mencoder_exit(1,NULL);
