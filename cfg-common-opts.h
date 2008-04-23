@@ -115,10 +115,10 @@
 	{"loadidx", &index_file_load, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// select audio/video/subtitle stream
-        INTRANGE("aid", audio_id, 0, 8190, 0),
-        INTRANGE("vid", video_id, 0, 8190, 0),
-        INTRANGE("sid", sub_id, 0, 8190, 0),
-        FLAG_CONSTANTS("novideo", video_id, -1, -2, 0),
+        OPT_INTRANGE("aid", audio_id, 0, 0, 8190),
+        OPT_INTRANGE("vid", video_id, 0, 0, 8190),
+        OPT_INTRANGE("sid", sub_id, 0, 0, 8190),
+        OPT_FLAG_CONSTANTS("novideo", video_id, 0, -1, -2),
 
 	{ "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
 	{ "nohr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -175,7 +175,7 @@
 	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000, NULL},
 	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 1, 6, NULL},
 	{"format", &audio_output_format, CONF_TYPE_AFMT, 0, 0, 0, NULL},
-        FLOATRANGE("speed", playback_speed, 0.01, 100.0, 0),
+        OPT_FLOATRANGE("speed", playback_speed, 0, 0.01, 100.0),
 
 	// set a-v distance
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
@@ -196,8 +196,8 @@
 #endif
 
 	// disable audio
-        FLAG_CONSTANTS("sound", audio_id, -2, -1, 0),
-        FLAG_CONSTANTS("nosound", audio_id, -1, -2, 0),
+        OPT_FLAG_CONSTANTS("sound", audio_id, 0, -2, -1),
+        OPT_FLAG_CONSTANTS("nosound", audio_id, 0, -1, -2),
 
 	{"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"af-adv", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

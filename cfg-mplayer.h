@@ -93,12 +93,12 @@ const m_option_t mplayer_opts[]={
 //---------------------- libao/libvo options ------------------------
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo.\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-        STRINGLIST("vo", video_driver_list, 0),
-        STRINGLIST("ao", audio_driver_list, 0),
-        FLAG_ON("fixed-vo", fixed_vo, CONF_GLOBAL),
-        FLAG_OFF("nofixed-vo", fixed_vo, CONF_GLOBAL),
-        FLAG_ON("ontop", vo_ontop, 0),
-        FLAG_OFF("noontop", vo_ontop, 0),
+        OPT_STRINGLIST("vo", video_driver_list, 0),
+        OPT_STRINGLIST("ao", audio_driver_list, 0),
+        OPT_FLAG_ON("fixed-vo", fixed_vo, CONF_GLOBAL),
+        OPT_FLAG_OFF("nofixed-vo", fixed_vo, CONF_GLOBAL),
+        OPT_FLAG_ON("ontop", vo_ontop, 0),
+        OPT_FLAG_OFF("noontop", vo_ontop, 0),
 	{"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noborder", &vo_border, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -168,8 +168,8 @@ const m_option_t mplayer_opts[]={
 	{"x", &opt_screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"y", &opt_screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	// set screen dimensions (when not detectable or virtual!=visible)
-        INTRANGE("screenw", vo_screenwidth, 0, 4096, CONF_OLD),
-        INTRANGE("screenh", vo_screenheight, 0, 4096, CONF_OLD),
+        OPT_INTRANGE("screenw", vo_screenwidth, CONF_OLD, 0, 4096),
+        OPT_INTRANGE("screenh", vo_screenheight, CONF_OLD, 0, 4096),
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - useful for 16:9 TV-out
@@ -185,7 +185,7 @@ const m_option_t mplayer_opts[]={
 	{"fsmode", "-fsmode is obsolete, avoid it and use -fstype instead.\nIf you really want it, try -fsmode-dontuse, but don't report bugs!\n", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
 	{"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	// set bpp (x11+vm, dga, fbdev, vesa, svga?)
-        INTRANGE("bpp", vo_dbpp, 0, 32, 0),
+        OPT_INTRANGE("bpp", vo_dbpp, 0, 0, 32),
 	{"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"nocolorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0x1000000, NULL},
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -317,13 +317,13 @@ const m_option_t mplayer_opts[]={
 	{"guiwid", &guiWinID, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
 
-	FLAG_CONSTANTS("noloop", loop_times, 0, -1, 0),
-	INTRANGE("loop", loop_times, -1, 10000, 0),
+	OPT_FLAG_CONSTANTS("noloop", loop_times, 0, 0, -1),
+	OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
 	{"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// a-v sync stuff:
-        FLAG_ON("correct-pts", user_correct_pts, 0),
-        FLAG_OFF("no-correct-pts", user_correct_pts, 0),
+        OPT_FLAG_ON("correct-pts", user_correct_pts, 0),
+        OPT_FLAG_OFF("no-correct-pts", user_correct_pts, 0),
 	{"noautosync", &autosync, CONF_TYPE_FLAG, 0, 0, -1, NULL},
 	{"autosync", &autosync, CONF_TYPE_INT, CONF_RANGE, 0, 10000, NULL},
 //	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
