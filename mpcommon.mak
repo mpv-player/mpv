@@ -36,6 +36,9 @@ distclean:: clean
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
+%.o: %.m
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 ALLHEADERS = $(wildcard *.h)
 checkheaders: $(ALLHEADERS:.h=.ho)
 

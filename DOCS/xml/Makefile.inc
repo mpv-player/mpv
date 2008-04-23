@@ -30,7 +30,6 @@ endif
 HTML_STYLESHEET ?= ../default.css
 
 # This is the main target...
-.PHONY: all html-chunked html-single xmllint
 all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
 html-single: $(HTMLFILE)
@@ -77,3 +76,5 @@ $(filter-out main.xml, $(patsubst ../en/%,%, $(wildcard ../en/*.xml))):
 distclean:
 	rm -f main.xml
 	rm -f `find *.xml -type l`;
+
+.PHONY: all html-chunked html-single xmllint distclean

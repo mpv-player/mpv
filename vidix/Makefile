@@ -1,6 +1,6 @@
 include ../config.mak
 
-LIBNAME_MPLAYER = libvidix.a
+LIBNAME_MPLAYER = vidix.a
 
 SRCS_MPLAYER    = vidixlib.c \
                   drivers.c \

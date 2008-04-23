@@ -1,4 +1,4 @@
-.\" synced with r26019
+.\" synced with r26460
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -302,7 +302,7 @@ Saute au début du chapitre précédant/suivant.
 .IPs "D (\-vo xvmc, \-vf yadif et \-vf kerndeint uniquement)"
 Active/désactive le désentrelacement.
 .IPs "A"
-Bascule entre les angles du DVD.
+Bascule entre les angles du DVD disponibles.
 .RE
 .PD 1
 .PP
@@ -684,6 +684,10 @@ La variable d'environnment MPLAYER_CHARSET vous permettra de ne plus subir
 la troncature des premières lignes affichées.
 .
 .TP
+.B \-msgcolor
+Colorise la sortie console dans les terminaux supportant les couleurs ANSI.
+.
+.TP
 .B \-msglevel <all=<niveau>:<module>=<niveau>:...>
 Contrôle directement le niveau de verbosité de chaque module.
 Le module 'all' change le niveau de verbosité de tous les modules
@@ -722,6 +726,32 @@ niveau de debug 2
 niveau de debug 3
 .IPs " 9"
 niveau de debug 4
+.RE
+.PD 1
+.
+.TP
+.B \-msgmodule
+Préfixe les messages console du nom du module concerné.
+.
+.TP
+.B \-noconfig <options>
+Ne tient pas compte des fichiers de configuration donnés.
+.br
+.I NOTE\ :
+Si les options \-include ou \-use\-filedir\-conf sont donnés en ligne de commande,
+elles seront honorées.
+.sp 1
+Les options disponibles sont\ :
+.PD 0
+.RSs
+.IPs "all\ \ "
+tous les fichiers de configuration
+.IPs "gui (GUI uniquement)"
+le fichier de l'interface graphique (GUI)
+.IPs system
+la configuration du système
+.IPs "user\ "
+la configuration de l'utilisateur
 .RE
 .PD 1
 .
@@ -880,7 +910,7 @@ Actuellement les pilotes suivants fonctionnent avec fixed-vo: gl, gl2, mga,
 svga, x11, xmga, xv, xvidix et dfbmga.
 .
 .TP
-.B \-framedrop (voir aussi \-hardframedrop, ne fonctionne qu'avec \-no-correct-pts)
+.B \-framedrop (voir aussi \-hardframedrop, expérimental sans \-no\-correct\-pts)
 Saute l'affichage de certaines trames pour maintenir la synchro A/V sur
 les machines lentes.
 Les filtres vidéo ne sont pas appliqués sur de telles trames.
@@ -901,7 +931,7 @@ Ne fonctionne pas en tant qu'option de fichier de configuration.
 Affiche un court résumé des options.
 .
 .TP
-.B \-hardframedrop (ne fonctionne qu'avec \-no-correct-pts)
+.B \-hardframedrop (expérimental sans \-no\-correct\-pts)
 Saute les trames de façon plus brutale (casse le décodage).
 Mène à des distorsions d'image!
 .
@@ -939,6 +969,7 @@ Dans certains cas, vous aurez encore plus d'informations en utilisant
 \-msglevel identify=6.
 Par exemple, pour les DVDs, cela listera la durée de chaque titre et de
 chaque chapitre, tout comme le numéro d'identifiant du DVD.
+Ajoutez l'option \-frames 0 pour supprimer toute sortie console superflue.
 Le script TOOLS/\:midentify supprime le reste de l'affichage et (espérons-le)
 formate les noms de fichiers pour le shell.
 .
@@ -6289,7 +6320,7 @@ p(x,y)\ : retourne la valeur du pixel de coordonnées (x,y) du plan courant.
 Génère divers motifs de test.
 .
 .TP
-.B rgbtest
+.B rgbtest[=largeur:hauteur]
 Génère un motif de test RGB utile pour détecter les problèmes entre RGB BGR.
 Vous devriez voir une frise rouge, verte et bleue du haut vers le bas.
 .RSs
@@ -8236,8 +8267,10 @@ Algorithme de décision de macro-block (mode haute qualité), encode chaque
 macro-block dans tous les modes et choisit le meilleur.
 C'est lent mais permet d'améliorer la qualité visuelle et réduire la taille 
 du fichier.
-Quand mbd est mis à 1 ou 2, la valeur de de mbcmp est ingnoré quand les
-macro-blocks sont comparés entre eux.
+Quand mbd est mis à 1 ou 2, la valeur de de mbcmp est ignoré quand les
+macro-blocks sont comparés entre eux (la valeur de mbcmp reste utilisée dans
+d'autres endroits, en particulier dans les algorithmes de recherche de
+mouvement).
 En revanche, si l'une des options de comparaisons (precmp, subcmp, cmp, or
 mbcmp) n'est pas à zéro, une recherche de mouvement half-pel plus lente et
 de meilleure qualité est utilisée, quel que soit la valeur de mbd.
@@ -9115,6 +9148,8 @@ Cela ne semble utile que pour les encodages à haut débit.
 .B mbcmp=<0\-2000>
 Choisit la fonction de comparaison pour décider du meilleur du macroblock
 à coder, n'a d'effet que si mbd=0.
+Est aussi utilisé dans certaines fonctions de recherche de mouvement, auquel cas
+a un effet quelquesoit la valeur de mbd.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -11003,7 +11038,10 @@ NUT open container format (expérimental)
 .IPs "mov\ \ "
 QuickTime
 .IPs "mp4\ \ "
-MPEG-4 format
+format MPEG-4
+.IPs "ipod\ "
+format MPEG-4 avec les drapeaux supplémentaires requis par les micrologiciels
+(firmware) des iPods d'Apple
 .IPs "dv\ \ \ "
 Sony Digital Video container
 .RE

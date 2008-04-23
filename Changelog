@@ -7,6 +7,7 @@ MPlayer (1.0)
     * Support for DTS WAV/DTS-CD passthrough by ad_hwac3
     * Apple's raw YUV2 in MOV
     * LATM over LOAS AAC decoding via internal libfaad2
+    * Video game codecs: BFI video
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files

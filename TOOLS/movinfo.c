@@ -328,7 +328,7 @@ int main(int argc,char* argv[])
     if ((f = fopen(argc>1?argv[1]:"Akira.mov","rb")) == NULL)
 	return 1;
 
-    printf("%.8s    %.4s (%.8s) %05s [%s]\n\n",
+    printf("%.8s    %.4s (%.8s) %5s [%s]\n\n",
 	"position", "atom", "atomtype", "len", "human readable atom name");
 
     lschunks(f, 0, 0);

@@ -60,10 +60,15 @@ SRCS_COMMON = asxparser.c \
               libaf/format.c \
               libaf/reorder_ch.c \
               libaf/window.c \
+              libvo/aclib.c \
+              libvo/osd.c \
+              libvo/sub.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
               talloc.c
 
+SRCS_COMMON-$(BITMAP_FONT)           += libvo/font_load.c
+SRCS_COMMON-$(FREETYPE)              += libvo/font_load_ft.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
@@ -88,6 +93,21 @@ SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
 SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
 SRCS_COMMON-$(NEED_SWAB)             += osdep/swab.c
 SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
+SRCS_COMMON-$(TREMOR_INTERNAL)       += tremor/bitwise.c \
+                                        tremor/block.c \
+                                        tremor/codebook.c \
+                                        tremor/floor0.c \
+                                        tremor/floor1.c \
+                                        tremor/framing.c \
+                                        tremor/info.c \
+                                        tremor/mapping0.c \
+                                        tremor/mdct.c \
+                                        tremor/registry.c \
+                                        tremor/res012.c \
+                                        tremor/sharedbook.c \
+                                        tremor/synthesis.c \
+                                        tremor/window.c \
+
 SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
 
 SRCS_MPLAYER = mplayer.c \
@@ -98,6 +118,20 @@ SRCS_MPLAYER = mplayer.c \
                parser-mpcmd.c \
                command.c \
                input/input.c \
+               libao2/audio_out.c \
+               libao2/ao_mpegpes.c \
+               libao2/ao_null.c \
+               libao2/ao_pcm.c \
+               $(addprefix libao2/,$(AO_SRCS)) \
+               libvo/aspect.c \
+               libvo/geometry.c \
+               libvo/old_vo_wrapper.c \
+               libvo/spuenc.c \
+               libvo/video_out.c \
+               libvo/vo_mpegpes.c \
+               libvo/vo_null.c \
+               libvo/vo_yuv4mpeg.c \
+               $(addprefix libvo/,$(VO_SRCS)) \
 
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
@@ -152,6 +186,8 @@ SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
 SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(LIRC)         += input/lirc.c
 
+SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c
+
 OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
 
 SRCS_MENCODER = mencoder.c \
@@ -163,25 +199,20 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libmpdemux/libmpdemux.a \
               stream/stream.a \
               libswscale/libswscale.a \
-              libvo/libosd.a \
 
 COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
 COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
 COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
 COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
-COMMON_LIBS-$(WIN32DLL)           += loader/libloader.a
-COMMON_LIBS-$(MP3LIB)             += mp3lib/libmp3.a
+COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
+COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
 COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
-COMMON_LIBS-$(TREMOR_INTERNAL)    += tremor/libvorbisidec.a
-COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/libdvdread.a
+COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/dvdread.a
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
 
-LIBS_MPLAYER = libvo/libvo.a \
-               libao2/libao2.a \
-
-LIBS_MPLAYER-$(VIDIX)             += vidix/libvidix.a
+LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
 
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 libmpdemux/libmpmux.a \
@@ -204,7 +235,6 @@ INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 PARTS = dvdread \
         liba52 \
-        libao2 \
         libavcodec \
         libavformat \
         libavutil \
@@ -215,12 +245,13 @@ PARTS = dvdread \
         libmpeg2 \
         libpostproc \
         libswscale \
-        libvo \
-        loader \
         mp3lib \
         stream \
-        tremor \
         vidix \
+
+ifdef ARCH_X86
+PARTS += loader
+endif
 
 DIRS =  gui \
         gui/mplayer \
@@ -230,11 +261,18 @@ DIRS =  gui \
         gui/win32 \
         input \
         libaf \
+        libao2 \
         libass \
         libmenu \
+        libvo \
         osdep \
+        tremor \
+        TOOLS \
 
-all:	$(ALL_PRG)
+all:	recurse $(ALL_PRG)
+
+recurse:
+	for part in $(PARTS); do $(MAKE) -C $$part; done
 
 DEPS = $(SRCS_COMMON:.c=.d) $(SRCS_MPLAYER:.c=.d) $(SRCS_MENCODER:.c=.d)
 $(DEPS): help_mp.h version.h codecs.conf.h
@@ -245,71 +283,18 @@ include mpcommon.mak
 
 CFLAGS := $(subst -I..,-I.,$(CFLAGS))
 
-dvdread/libdvdread.a: dvdread/*.[ch]
-	$(MAKE) -C dvdread
+define RECURSIVE_RULE
+$(part)/$(part).a:
+	$(MAKE) -C $(part)
+endef
 
-liba52/liba52.a: liba52/*.[ch]
-	$(MAKE) -C liba52
+$(foreach part,$(PARTS),$(eval $(RECURSIVE_RULE)))
 
-libao2/libao2.a: libao2/*.[ch]
-	$(MAKE) -C libao2
-
-libavcodec/libavcodec.a: libavcodec/*.[ch] libavcodec/*/*.[chS]
-	$(MAKE) -C libavcodec
-
-libavformat/libavformat.a: libavformat/*.[ch]
-	$(MAKE) -C libavformat
-
-libavutil/libavutil.a: libavutil/*.[ch]
-	$(MAKE) -C libavutil
-
-libdvdcss/libdvdcss.a: libdvdcss/*.[ch] libdvdcss/*/*.[ch]
-	$(MAKE) -C libdvdcss
-
-libfaad2/libfaad2.a: libfaad2/*.[ch] libfaad2/*/*.[ch]
-	$(MAKE) -C libfaad2
-
-libmpcodecs/libmpcodecs.a: libmpcodecs/*.[ch] libmpcodecs/*/*.[ch]
-	$(MAKE) -C libmpcodecs
-
-libmpcodecs/libmpencoders.a: libmpcodecs/*.[ch] libmpcodecs/*/*.[ch]
+libmpcodecs/libmpencoders.a:
 	$(MAKE) -C libmpcodecs libmpencoders.a
 
-libmpdemux/libmpdemux.a: libmpdemux/*.[ch]
-	$(MAKE) -C libmpdemux libmpdemux.a
-
-libmpdemux/libmpmux.a: libmpdemux/*.[ch]
+libmpdemux/libmpmux.a:
 	$(MAKE) -C libmpdemux libmpmux.a
-
-libmpeg2/libmpeg2.a: libmpeg2/*.[ch]
-	$(MAKE) -C libmpeg2
-
-libpostproc/libpostproc.a: libpostproc/*.[ch]
-	$(MAKE) -C libpostproc
-
-libswscale/libswscale.a: libswscale/*.[ch]
-	$(MAKE) -C libswscale
-
-libvo/libvo.a: libvo/*.[ch]
-	$(MAKE) -C libvo libvo.a
-
-libvo/libosd.a: libvo/*.[ch]
-	$(MAKE) -C libvo libosd.a
-
-loader/libloader.a: loader/*.[chSs]
-	$(MAKE) -C loader
-
-mp3lib/libmp3.a: mp3lib/*.[ch]
-	$(MAKE) -C mp3lib
-
-stream/stream.a: stream/*.[ch] stream/*/*.[ch]
-	$(MAKE) -C stream
-
-tremor/libvorbisidec.a: tremor/*.[ch]
-	$(MAKE) -C tremor
-
-vidix/libvidix.a: vidix/*.[ch] vidix/*/*.[ch]
-	$(MAKE) -C vidix
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
@@ -390,16 +375,15 @@ uninstall:
 	  fi ; \
 	done
 
-clean::
+clean:: toolsclean
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
-	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
+	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 
 distclean:: doxygen_clean
 	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
-	$(MAKE) -C TOOLS distclean
 	-rm -f configure.log config.mak config.h
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 
@@ -446,4 +430,71 @@ ifneq ($(HELP_FILE),help/help_mp-en.h)
 	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
 endif
 
-.PHONY: all install* uninstall strip doxygen
+
+TOOLS = TOOLS/alaw-gen$(EXESUF) \
+        TOOLS/asfinfo$(EXESUF) \
+        TOOLS/avi-fix$(EXESUF) \
+        TOOLS/avisubdump$(EXESUF) \
+        TOOLS/compare$(EXESUF) \
+        TOOLS/dump_mp4$(EXESUF) \
+        TOOLS/movinfo$(EXESUF) \
+        TOOLS/subrip$(EXESUF) \
+
+ifdef ARCH_X86
+TOOLS += TOOLS/modify_reg$(EXESUF)
+endif
+
+tools: $(TOOLS)
+
+TOOLS_COMMON_LIBS = mp_msg.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
+              -ltermcap -lm
+
+TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
+
+TOOLS/subrip$(EXESUF): TOOLS/subrip.c vobsub.o spudec.o unrar_exec.o \
+  libswscale/libswscale.a libavutil/libavutil.a $(TOOLS_COMMON_LIBS)
+
+TOOLS/vfw2menc$(EXESUF): TOOLS/vfw2menc.c -lwinmm -lole32
+
+#FIXME: Linking is broken, help welcome.
+TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c libmpdemux/libmpdemux.a $(TOOLS_COMMON_LIBS)
+
+fastmemcpybench: TOOLS/fastmemcpybench.c
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-k6$(EXESUF)   -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-k7$(EXESUF)   -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-sse$(EXESUF)  -DNAME=\"sse\"      -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-mmx$(EXESUF) -DNAME=\"mga-mmx\"  -DHAVE_MGA -DHAVE_MMX
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-k6$(EXESUF)  -DNAME=\"mga-k6\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-k7$(EXESUF)  -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+
+REAL_SRCS    = $(wildcard TOOLS/realcodecs/*.c)
+REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
+
+realcodecs: $(REAL_TARGETS)
+
+fastmemcpybench realcodecs: CFLAGS += -g
+
+%.so.6.0: %.o
+	ld -shared -o $@ $< -ldl -lc
+
+# FIXME: netstream linking is a mess that should be fixed properly some day.
+# It does not work with either GUI, LIVE555, libavformat, cdparanoia enabled.
+NETSTREAM_DEPS = libmpdemux/libmpdemux.a \
+                 stream/stream.a \
+                 dvdread/libdvdread.a \
+                 libdvdcss/libdvdcss.a \
+                 libavutil/libavutil.a \
+                 m_option.o \
+                 m_struct.o \
+                 $(TOOLS_COMMON_LIBS)
+
+TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
+	$(CC) $(CFLAGS) -o $@ $^
+
+toolsclean:
+	rm -f $(TOOLS) TOOLS/fastmem*-* TOOLS/netstream$(EXESUF)
+	rm -f TOOLS/bmovl-test$(EXESUF) TOOLS/vfw2menc$(EXESUF) $(REAL_TARGETS)
+
+.PHONY: all doxygen *install* recurse strip tools

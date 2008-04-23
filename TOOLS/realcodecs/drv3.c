@@ -138,7 +138,7 @@ void toc() {
 		usecs+=1000000;
 		--secs;
 	}
-//	fprintf(stderr, "Duration: %ld.%0.6lds\n", secs, usecs);
+//	fprintf(stderr, "Duration: %ld.%.6lds\n", secs, usecs);
 }
 
 

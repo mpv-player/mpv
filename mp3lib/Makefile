@@ -1,6 +1,6 @@
 include ../config.mak
 
-LIBNAME_COMMON = libmp3.a
+LIBNAME_COMMON = mp3lib.a
 
 SRCS_COMMON = sr1.c
 SRCS_COMMON-$(HAVE_MMX)       += decode_mmx.c

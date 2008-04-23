@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26287 -->
+<!-- synced with r26474 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1789,7 +1789,7 @@ a telecine.
 <formalpara>
 <title>Megjegyzés a számokhoz.</title>
 <para>
-Sok dokumentáció, beleértve a fent belinkeltet is, az NTSC videó mező
+Sok dokumentáció, beleértve a fent belinkelt cikket is, az NTSC videó mező
 per másodperc értékét 59.94-ként határozza meg, és a megfelelő képkocka
 per másodperc értéket 29.97-nek (telecine-s és átlapolt) és 23.976-nak
 írja (progresszív). Az egyszerűség kedvéért sok dokumentáció még ezeket
@@ -1870,7 +1870,9 @@ kockáról kockára mutatja meg, mezőről mezőre történő lejátszás helyet
   írva. Csak a legalapvetőbb dolgokat mutatják, ami a megfelelő kategóriába
   tartozó videók kódolásához szükséges. A jó DVD rip-ek készítése vagy a
   <systemitem class="library">libavcodec</systemitem> finomhangolása a
-  maximális minőség eléréséhez nem tartozik ezen dokumentum célkitűzései közé.
+  maximális minőség eléréséhez nem tartozik ezen fejezet célkitűzései közé,
+  nézd meg a <link linkend="encoding-guide">MEncoder kódolási útmutató</link>
+  többi részét.
 </para></listitem>
 <listitem><para>
   Sok megjegyzés vonatkozik erre a leírásra, melyek így vannak jelölve:
@@ -2147,7 +2149,7 @@ felépítéséhez (ennek vannak hátrányai - lásd a 3. módszert).
 <listitem><para>
   Sajnos ez a kapcsoló hibás a <application>MEncoder</application>ben;
   talán a <application>MEncoder G2</application>-vel működni fog,
-  de itt most még nem. Belefuthatsz fagyásokba. Egyébként a <option> -vf
+  de itt most még nem. Fagyásokat tapasztalhatsz. Egyébként a <option> -vf
   tfields</option> célja az lenne, hogy teljes képkockát készít
   mindegyik mezőből, ami miatt a frameráta 60000/1001 lesz. Ennek a
   megközelítésnek az az előnye, hogy soha nincs adatvesztés; habár
@@ -2219,7 +2221,23 @@ mencoder dvd://1 -oac copy -vf pullup,softskip
   --></screen>
 </para></listitem>
 <listitem><para>
-  A másik módszer, a telecine-s részek inverz-telecine-lése
+  A <option>-vf filmdint</option> hasonló a
+  <option>-vf pullup</option>-hoz: mindkét szűrő megpróbálja egyeztetni a
+  mezőpárokat, hogy azok egy komplett képkockát adjanak. A <option>filmdint</option>
+  deinterlace-lni fogja az egyedi mezőket, amelyeket nem tud egyeztetni,
+  míg a <option>pullup</option> egyszerűen csak eldobja őket. A két szűrő
+  különböző detektáló kódot alkalmaz és a filmdint néha túl kevés mezőt
+  egyeztet. Az, hogy melyik szűrő a jobb, a bemeneti videótól és az egyéni
+  ízléstől függ; kísérletezz szabadon a szűrők opcióinak finomhangolásával,
+  ha valamelyikkel problémád van (lásd a man oldalt a részletekért).
+  A legtöbb jól elkészített bemeneti videónál mindkettő eléggé jól működik,
+  így bármelyik jó választás lehet a kezdéshez.
+  <screen>
+mencoder dvd://1 -oac copy -vf filmdint -ovc lavc -ofps 24000/1001<!--
+  --></screen>
+</para></listitem>
+<listitem><para>
+  A régebbi módszer, a telecine-s részek inverz-telecine-lése
   helyett a nem-telecine-s részek telecine-lése majd a teljes
   videó inverz-telecine-lése. Zavarosan hangzik? A softpulldown
   egy olyan szűrő, ami végigmegy a videón és a teljes fájlt
@@ -2232,18 +2250,6 @@ mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
   </screen>
 </para></listitem>
 
-<listitem><para>
-  Én magam nem használtam a <option>-vf filmdint</option>-et, de álljon itt
-  D Richard Felker III hozzászólása:
-
-  <blockquote><para>Rendben, de IMO inkább deinterlace-t próbálj
-	 a túl gyakori inverz telecine helyett (inkább settop DVD
-     lejátszók &amp; progresszív TV-k) ami csúnya vibrálást és egyéb
-     jelenségeket okoz. Ha használni akarod, el kell töltened egy kis
-     időt az opciók próbálgatásával és az eredmény megfigyelésével,
-     hogy biztos légy benne, nem rontja el az egészet.
-  </para></blockquote>
-</para></listitem>
 </itemizedlist>
 </sect3>
 

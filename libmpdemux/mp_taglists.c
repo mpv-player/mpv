@@ -60,6 +60,7 @@ const struct AVCodecTag *mp_wav_override_taglists[] = {mp_wav_override_tags, 0};
 static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_AMV,               MKTAG('A', 'M', 'V', 'V')},
     { CODEC_ID_BETHSOFTVID,       MKTAG('B', 'E', 'T', 'H')},
+    { CODEC_ID_BFI,               MKTAG('B', 'F', 'I', 'V')},
     { CODEC_ID_C93,               MKTAG('C', '9', '3', 'V')},
     { CODEC_ID_DSICINVIDEO,       MKTAG('D', 'C', 'I', 'V')},
     { CODEC_ID_DXA,               MKTAG('D', 'X', 'A', '1')},

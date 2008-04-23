@@ -451,6 +451,7 @@ multiple paths separated by ':'):
   --with-gtk-config=PATH      path to gtk*-config
   --with-sdl-config=PATH      path to sdl*-config
   --with-dvdnav-config=PATH   path to dvdnav-config
+  --with-dvdread-config=PATH   path to dvdread-config
 
 This configure script is NOT autoconf-based, even though its output is similar.
 It will try to autodetect all configuration options. If you --enable an option
@@ -576,6 +577,7 @@ _ladspa=auto
 _xmms=no
 _dvdnav=auto
 _dvdnavconfig=dvdnav-config
+_dvdreadconfig=dvdread-config
 _dvdread=auto
 _dvdread_internal=auto
 _libdvdcss_internal=auto
@@ -740,6 +742,9 @@ for ac_option do
     ;;
   --with-dvdnav-config=*)
     _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-dvdread-config=*)
+    _dvdreadconfig=`echo $ac_option | cut -d '=' -f 2`
     ;;
 
   --extra-libs=*)
@@ -5435,6 +5440,18 @@ EOF
     cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
       -ldvdread $_ld_dl && _dvdread=yes && _res_comment="external"
   fi
+  if test "$_dvdread" = no ; then
+    _dvdreadconfig="dvdread-config"
+    _dvdreadcflags=`$_dvdreadconfig --cflags`
+    _dvdreadlibs=`$_dvdreadconfig --libs`
+    if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
+      $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
+      _dvdread=yes
+      _inc_extra="$_inc_extra $_dvdreadcflags"
+      _ld_extra="$_ld_extra $_dvdreadlibs"
+      _res_comment="external"
+    fi
+  fi
 fi
 
 if test "$_dvdread_internal" = yes; then
@@ -5905,6 +5922,7 @@ if test "$_tremor_internal" = yes ; then
   _codecmodules="tremor(internal) $_codecmodules"
   _res_comment="internal Tremor"
   if test "$_tremor_low" = yes ; then
+    CFLAGS="$CFLAGS -D_LOW_ACCURACY_"
     _res_comment="internal low accuracy Tremor"
   fi
 elif test "$_tremor_external" = yes ; then
@@ -7817,17 +7835,7 @@ VIDIX_UNICHROME=$_vidix_drv_unichrome
 $_target_arch
 $_target_arch_x86
 TARGET_CPU=$iproc
-HAVE_MMX   = $_mmx
-HAVE_MMX2   = $_mmxext
-HAVE_3DNOW   = $_3dnow
-HAVE_3DNOWEX   = $_3dnowext
-HAVE_SSE   = $_sse
-HAVE_CMOV   = $_cmov
-HAVE_ALTIVEC   = $_altivec
-HAVE_ARMV5TE   = $_armv5te
-HAVE_ARMV6   = $_armv6
-HAVE_IWMMXT   = $_iwmmxt
-HAVE_VIS   = $_vis
+`echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/'`
 
 # --- GUI stuff ---
 GUI_GTK = $_gui_gtk

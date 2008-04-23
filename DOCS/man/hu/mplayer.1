@@ -1,4 +1,4 @@
-.\" Synced with r26297
+.\" Synced with r26460
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 04. 05." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 04. 21." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -651,6 +651,10 @@ sorok elrontott kimenetétõl.
 
 .
 .TP
+.B \-msgcolor
+Engedélyezi a színes konzol kimenetet az ANSI színeket támogató terminálokon.
+.
+.TP
 .B \-msglevel <all=<szint>:<module>=<szint>:...>
 Külön beállítja a beszédességet minden modulhoz.
 Az 'all' modul minden más, explicit nem megadott modul beszédességét beállítja.
@@ -687,6 +691,32 @@ bõbeszédû üzenetek
 3. szintû debug
 .IPs 9
 4. szintû debug
+.RE
+.PD 1
+.
+.TP
+.B \-msgmodule
+Minden egyes konzol üzenet elé beilleszti a modul nevét.
+.
+.TP
+.B \-noconfig <opciók>
+Ne értelmezze a kiválaszott konfigurációs fájlokat.
+.br
+.I MEGJEGYZÉS:
+Ha a \-include vagy \-use\-filedir\-conf opciók adottak a
+parancssorban, figyelembe lesznek véve.
+.sp 1
+Elérhetõ opciók:
+.PD 0
+.RSs
+.IPs "all\ \ "
+minden konfigurációs fájl
+.IPs "gui (csak GUI)"
+GUI konfigurációs fájl
+.IPs system
+rendszer konfigurációs fájl
+.IPs "user\ "
+felhasználói konfigurációs fájl
 .RE
 .PD 1
 .
@@ -3227,6 +3257,7 @@ mûködik.
 .TP
 .B \-zrbw (csak \-vo zr)
 Fekete fehér lejátszás.
+Az optimális teljesítményhez kombinálható a '\-lavdopts gray' kapcsolóval.
 .
 .TP
 .B \-zrcrop <[szélesség]x[magasság]+[x offszet]+[y offszet]> (csak \-vo zr)
@@ -4316,7 +4347,7 @@ Több opciót kettõsponttal kell elválasztani.
 .I PÉLDA:
 .PD 0
 .RSs
-\-lavdopts skiploopfilter=all:skipframe=nonref
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -4419,6 +4450,8 @@ hibát okozhat, mint például az egyszerûbb dekvantizáció, egyszerûbb mozgás
 kompenzáció, az alapértelmezett kvantálási mátrix feltételezett használata,
 YUV 4:2:0 feltételezése és még néhány ellenõrzés kihagyása a hibás bitfolyamok
 megtalálására.
+.IPs "gray\ "
+csak fekete-fehér dekódolás (egy kicsit gyorsabb, mint színekkel)
 .IPs "idct=<0\-99> (lásd \-lavcopts)"
 A legjobb dekódolási minõségért használd ugyan azt az IDCT algoritmust a
 dekódoláshoz és a kódoláshoz. Bár az alaposság ezzel kicsit romolhat.
@@ -8355,6 +8388,10 @@ jó választás
 .TP
 .B "ss\ \ \ \ \ "
 darabolt, struktúrált mód H.263+-hoz
+.
+.TP
+.B "gray\ \ \ "
+csak fekete-fehér kódolás (gyorsabb)
 .
 .TP
 .B vfdct=<0\-10>
