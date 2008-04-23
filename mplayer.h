@@ -44,7 +44,6 @@ extern int frame_dropping;
 
 extern int auto_quality;
 
-extern int dvdsub_id;
 extern int vobsub_id;
 
 static inline void exit_player(const char *how)

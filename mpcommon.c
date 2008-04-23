@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "options.h"
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
@@ -26,6 +27,7 @@ subtitle* vo_sub_last = NULL;
 
 void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
 {
+    struct MPOpts *opts = sh_video->opts;
     unsigned char *packet=NULL;
     int len;
     char type = d_dvdsub->sh ? ((sh_sub_t *)d_dvdsub->sh)->type : 'v';
@@ -56,7 +58,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
     }
 
     // DVD sub:
-    if (vo_spudec && (vobsub_id >= 0 || (dvdsub_id >= 0 && type == 'v'))) {
+    if (vo_spudec && (vobsub_id >= 0 || (opts->sub_id >= 0 && type == 'v'))) {
         int timestamp;
         current_module = "spudec";
         spudec_heartbeat(vo_spudec, 90000*sh_video->timer);
@@ -100,7 +102,8 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
 
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
-    } else if (dvdsub_id >= 0 && (type == 't' || type == 'm' || type == 'a')) {
+    } else if (opts->sub_id >= 0
+               && (type == 't' || type == 'm' || type == 'a')) {
         double curpts = sh_video->pts + sub_delay;
         double endpts;
         vo_sub = &subs;

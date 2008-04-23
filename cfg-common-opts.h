@@ -117,7 +117,7 @@
 	// select audio/video/subtitle stream
         INTRANGE("aid", audio_id, 0, 8190, 0),
         INTRANGE("vid", video_id, 0, 8190, 0),
-	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 8190, NULL},
+        INTRANGE("sid", sub_id, 0, 8190, 0),
         FLAG_CONSTANTS("novideo", video_id, -1, -2, 0),
 
 	{ "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },

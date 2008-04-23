@@ -243,7 +243,6 @@ extern char *demuxer_name; // override demuxer
 extern char *audio_demuxer_name; // override audio demuxer
 extern char *sub_demuxer_name; // override sub demuxer
 
-int dvdsub_id=-2;
 int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
@@ -1851,7 +1850,7 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
         resync_audio_stream(ctx->sh_audio);
     }
 
-    if (ctx->d_sub) dvdsub_id = -2;
+    if (ctx->d_sub) opts->sub_id = -2;
         
     audio_delay = 0.0f;
 
@@ -3207,8 +3206,8 @@ if(stream_dump_type==5){
 if(mpctx->stream->type==STREAMTYPE_DVD){
   current_module="dvd lang->id";
   if(opts->audio_id==-1) opts->audio_id=dvd_aid_from_lang(mpctx->stream,audio_lang);
-  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=-1;
-  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(mpctx->stream,dvdsub_lang);
+  if(dvdsub_lang && opts->sub_id==-2) opts->sub_id=-1;
+  if(dvdsub_lang && opts->sub_id==-1) opts->sub_id=dvd_sid_from_lang(mpctx->stream,dvdsub_lang);
   // setup global sub numbering
   mpctx->global_sub_indices[SUB_SOURCE_DEMUX] = mpctx->global_sub_size; // the global # of the first demux-specific sub.
   mpctx->global_sub_size += dvd_number_of_subs(mpctx->stream);
@@ -3220,8 +3219,8 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
   if(opts->audio_id==-1) opts->audio_id=dvdnav_aid_from_lang(mpctx->stream,audio_lang);
-  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=-1;
-  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
+  if(dvdsub_lang && opts->sub_id==-2) opts->sub_id=-1;
+  if(dvdsub_lang && opts->sub_id==-1) opts->sub_id=dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
   // setup global sub numbering
   mpctx->global_sub_indices[SUB_SOURCE_DEMUX] = mpctx->global_sub_size; // the global # of the first demux-specific sub.
   mpctx->global_sub_size += dvdnav_number_of_subs(mpctx->stream);
@@ -3242,7 +3241,7 @@ if(stream_cache_size>0){
 //============ Open DEMUXERS --- DETECT file type =======================
 current_module="demux_open";
 
-mpctx->demuxer=demux_open(opts, mpctx->stream,mpctx->file_format,opts->audio_id,opts->video_id,dvdsub_id,filename);
+mpctx->demuxer=demux_open(opts, mpctx->stream,mpctx->file_format,opts->audio_id,opts->video_id,opts->sub_id,filename);
 
 // HACK to get MOV Reference Files working
 
@@ -3321,9 +3320,9 @@ if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_D
       maxid = FFMAX(maxid, mpctx->demuxer->s_streams[i]->sid);
   mpctx->global_sub_size += maxid + 1;
 }
-// Make dvdsub_id always selectable if set.
-if (mpctx->global_sub_size <= mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id)
-  mpctx->global_sub_size = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id + 1;
+// Make opts->sub_id always selectable if set.
+if (mpctx->global_sub_size <= mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id)
+  mpctx->global_sub_size = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id + 1;
 
 #ifdef USE_ASS
 if (ass_enabled && ass_library) {
@@ -3478,16 +3477,16 @@ if(mpctx->sh_video) {
 if (mpctx->global_sub_size) {
   // find the best sub to use
   int vobsub_index_id = vobsub_get_index_by_id(vo_vobsub, vobsub_id);
-  if (dvdsub_id < 0 && dvdsub_lang)
-    dvdsub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
-  if (dvdsub_id < 0)
-    dvdsub_id = demuxer_default_sub_track(mpctx->demuxer);
+  if (opts->sub_id < 0 && dvdsub_lang)
+    opts->sub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
+  if (opts->sub_id < 0)
+    opts->sub_id = demuxer_default_sub_track(mpctx->demuxer);
   if (vobsub_index_id >= 0) {
     // if user asks for a vobsub id, use that first.
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] + vobsub_index_id;
-  } else if (dvdsub_id >= 0 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
+  } else if (opts->sub_id >= 0 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
     // if user asks for a dvd sub id, use that next.
-    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id;
+    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id;
   } else if (mpctx->global_sub_indices[SUB_SOURCE_SUBS] >= 0) {
     // if there are text subs to use, use those.  (autosubs come last here)
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_SUBS];

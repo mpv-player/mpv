@@ -234,8 +234,6 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     return d;
 }
 
-extern int dvdsub_id;
-
 sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
 {
     if (id > MAX_S_STREAMS - 1 || id < 0) {

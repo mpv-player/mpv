@@ -112,7 +112,6 @@ float stream_cache_seek_min_percent=50.0;
 #define cache_fill_status 0
 #endif
 
-int dvdsub_id=-2;
 int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
@@ -583,14 +582,14 @@ play_next_file:
 #ifdef USE_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
   if(audio_lang && opts.audio_id==-1) opts.audio_id=dvd_aid_from_lang(stream,audio_lang);
-  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
+  if(dvdsub_lang && opts.sub_id==-2) opts.sub_id=dvd_sid_from_lang(stream,dvdsub_lang);
 }
 #endif
 
 #ifdef USE_DVDNAV
 if(stream->type==STREAMTYPE_DVDNAV){
   if(audio_lang && opts.audio_id==-1) opts.audio_id=dvdnav_aid_from_lang(stream,audio_lang);
-  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=dvdnav_sid_from_lang(stream,dvdsub_lang);
+  if(dvdsub_lang && opts.sub_id==-2) opts.sub_id=dvdnav_sid_from_lang(stream,dvdsub_lang);
 }
 #endif
 
@@ -600,8 +599,8 @@ if(stream->type==STREAMTYPE_DVDNAV){
 
   if(demuxer2) opts.audio_id=-2; /* do NOT read audio packets... */
 
-  //demuxer=demux_open(stream,file_format,opts.video_id,opts.audio_id,dvdsub_id);
-  demuxer=demux_open(&opts, stream,file_format,opts.audio_id,opts.video_id,dvdsub_id,filename);
+  //demuxer=demux_open(stream,file_format,opts.video_id,opts.audio_id,opts.sub_id);
+  demuxer=demux_open(&opts, stream,file_format,opts.audio_id,opts.video_id,opts.sub_id,filename);
   if(!demuxer){
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_FormatNotRecognized);
     mp_msg(MSGT_DEMUXER, MSGL_FATAL, MSGTR_CannotOpenDemuxer);
@@ -610,15 +609,15 @@ if(stream->type==STREAMTYPE_DVDNAV){
 
   select_audio(demuxer, opts.audio_id, audio_lang);
  
-  if (dvdsub_id < 0 && dvdsub_lang)
-    dvdsub_id = demuxer_sub_track_by_lang(demuxer, dvdsub_lang);
+  if (opts.sub_id < 0 && dvdsub_lang)
+    opts.sub_id = demuxer_sub_track_by_lang(demuxer, dvdsub_lang);
 
-  if (dvdsub_id < 0)
-    dvdsub_id = demuxer_default_sub_track(demuxer);
+  if (opts.sub_id < 0)
+    opts.sub_id = demuxer_default_sub_track(demuxer);
 
   for (i = 0; i < MAX_S_STREAMS; i++) {
     sh_sub_t *sh = demuxer->s_streams[i];
-    if (sh && sh->sid == dvdsub_id) {
+    if (sh && sh->sid == opts.sub_id) {
       demuxer->sub->id = i;
       demuxer->sub->sh = sh;
       break;
@@ -716,7 +715,7 @@ if (!curfile) { // curfile is non zero when a second file is opened
 if (vobsub_out) {
     unsigned int palette[16], width, height;
     unsigned char tmp[3] = { 0, 0, 0 };
-    if (spudec_ifo && vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, dvdsub_id, tmp) >= 0)
+    if (spudec_ifo && vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, opts.sub_id, tmp) >= 0)
 	vobsub_writer = vobsub_out_open(vobsub_out, palette, sh_video->disp_w, sh_video->disp_h,
 					vobsub_out_id?vobsub_out_id:(char *)tmp, vobsub_out_index);
 #ifdef USE_DVDREAD
@@ -726,7 +725,7 @@ if (vobsub_out) {
 	    int i;
 	    dvd_priv_t *dvd = (dvd_priv_t*)stream->priv;
 	    for (i = 0; i < dvd->nr_of_subtitles; ++i)
-		if (dvd->subtitles[i].id == dvdsub_id) {
+		if (dvd->subtitles[i].id == opts.sub_id) {
 		    tmp[0] = (dvd->subtitles[i].language >> 8) & 0xff;
 		    tmp[1] = dvd->subtitles[i].language & 0xff;
 		    tmp[2] = 0;

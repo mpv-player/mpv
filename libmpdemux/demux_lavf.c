@@ -42,9 +42,6 @@
 
 #define PROBE_BUF_SIZE 2048
 
-extern char *audio_lang;
-extern char *dvdsub_lang;
-extern int dvdsub_id;
 static unsigned int opt_probesize = 0;
 static unsigned int opt_analyzeduration = 0;
 static char *opt_format;

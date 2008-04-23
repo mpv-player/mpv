@@ -12,6 +12,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .user_correct_pts = -1,
         .audio_id = -1,
         .video_id = -1,
+        .sub_id = -2,
         .playback_speed = 1.,
     };
 }

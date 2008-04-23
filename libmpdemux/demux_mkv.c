@@ -181,11 +181,6 @@ typedef struct mkv_demuxer
 #define RAPROPERTIES4_SIZE 56
 #define RAPROPERTIES5_SIZE 70
 
-/* for e.g. "-slang ger" */
-extern char *dvdsub_lang;
-extern char *audio_lang;
-extern int dvdsub_id;
-
 /**
  * \brief ensures there is space for at least one additional element
  * \param array array to grow

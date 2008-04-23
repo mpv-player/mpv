@@ -1305,6 +1305,7 @@ static int mp_property_sub_pos(m_option_t * prop, int action, void *arg,
 static int mp_property_sub(m_option_t * prop, int action, void *arg,
 			   MPContext * mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     demux_stream_t *const d_sub = mpctx->d_sub;
     const int global_sub_size = mpctx->global_sub_size;
     int source = -1, reset_spu = 0;
@@ -1345,10 +1346,10 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	}
 #ifdef USE_DVDNAV
 	if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
-	    if (vo_spudec && dvdsub_id >= 0) {
+            if (vo_spudec && opts->sub_id >= 0) {
 		unsigned char lang[3];
-		if (dvdnav_lang_from_sid(mpctx->stream, dvdsub_id, lang)) {
-		    snprintf(*(char **) arg, 63, "(%d) %s", dvdsub_id, lang);
+                if (dvdnav_lang_from_sid(mpctx->stream, opts->sub_id, lang)) {
+                    snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, lang);
 		    return M_PROPERTY_OK;
 		}
 	    }
@@ -1358,10 +1359,10 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	if ((mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA
              || mpctx->demuxer->type == DEMUXER_TYPE_LAVF
              || mpctx->demuxer->type == DEMUXER_TYPE_OGG)
-             && d_sub && d_sub->sh && dvdsub_id >= 0) {
+             && d_sub && d_sub->sh && opts->sub_id >= 0) {
             const char* lang = ((sh_sub_t*)d_sub->sh)->lang;
             if (!lang) lang = MSGTR_Unknown;
-	    snprintf(*(char **) arg, 63, "(%d) %s", dvdsub_id, lang);
+            snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, lang);
 	    return M_PROPERTY_OK;
 	}
 
@@ -1374,18 +1375,18 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	}
 #ifdef USE_DVDREAD
 	if (vo_spudec && mpctx->stream->type == STREAMTYPE_DVD
-	    && dvdsub_id >= 0) {
+            && opts->sub_id >= 0) {
 	    char lang[3];
-	    int code = dvd_lang_from_sid(mpctx->stream, dvdsub_id);
+            int code = dvd_lang_from_sid(mpctx->stream, opts->sub_id);
 	    lang[0] = code >> 8;
 	    lang[1] = code;
 	    lang[2] = 0;
-	    snprintf(*(char **) arg, 63, "(%d) %s", dvdsub_id, lang);
+            snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, lang);
 	    return M_PROPERTY_OK;
 	}
 #endif
-	if (dvdsub_id >= 0) {
-	    snprintf(*(char **) arg, 63, "(%d) %s", dvdsub_id, MSGTR_Unknown);
+        if (opts->sub_id >= 0) {
+            snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, MSGTR_Unknown);
 	    return M_PROPERTY_OK;
 	}
 	snprintf(*(char **) arg, 63, MSGTR_Disabled);
@@ -1429,7 +1430,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
     subdata = NULL;
 
     vobsub_id = -1;
-    dvdsub_id = -1;
+    opts->sub_id = -1;
     if (d_sub) {
 	if (d_sub->id > -2)
 	    reset_spu = 1;
@@ -1454,17 +1455,17 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	    vo_osd_changed(OSDTYPE_SUBTITLE);
 	}
     } else if (source == SUB_SOURCE_DEMUX) {
-	dvdsub_id =
+        opts->sub_id =
 	    mpctx->global_sub_pos - mpctx->global_sub_indices[SUB_SOURCE_DEMUX];
-	if (d_sub && dvdsub_id < MAX_S_STREAMS) {
+        if (d_sub && opts->sub_id < MAX_S_STREAMS) {
 	    int i = 0;
 	    // default: assume 1:1 mapping of sid and stream id
-	    d_sub->id = dvdsub_id;
+            d_sub->id = opts->sub_id;
 	    d_sub->sh = mpctx->demuxer->s_streams[d_sub->id];
 	    ds_free_packs(d_sub);
 	    for (i = 0; i < MAX_S_STREAMS; i++) {
 		sh_sub_t *sh = mpctx->demuxer->s_streams[i];
-		if (sh && sh->sid == dvdsub_id) {
+                if (sh && sh->sid == opts->sub_id) {
 		    d_sub->id = i;
 		    d_sub->sh = sh;
 		    break;
@@ -1488,9 +1489,9 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
     if (vo_spudec
 	&& (mpctx->stream->type == STREAMTYPE_DVD
 	    || mpctx->stream->type == STREAMTYPE_DVDNAV)
-	&& dvdsub_id < 0 && reset_spu) {
-	dvdsub_id = -2;
-	d_sub->id = dvdsub_id;
+        && opts->sub_id < 0 && reset_spu) {
+        opts->sub_id = -2;
+        d_sub->id = opts->sub_id;
     }
 #endif
     update_subtitles(mpctx->sh_video, d_sub, 1);

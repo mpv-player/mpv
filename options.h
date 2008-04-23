@@ -14,6 +14,7 @@ typedef struct MPOpts {
     int user_correct_pts;
     int audio_id;
     int video_id;
+    int sub_id;
     float playback_speed;
 } MPOpts;
 
