@@ -377,7 +377,7 @@ clean:: toolsclean
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
-	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
+	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 
 distclean:: doxygen_clean
 	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
