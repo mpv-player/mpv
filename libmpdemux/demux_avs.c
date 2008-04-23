@@ -430,6 +430,8 @@ static void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs, float audio_
       sh_video->num_frames_decoded = AVS->frameno;
       sh_video->num_frames = AVS->frameno;
     }
+    video_pos += audio_delay;
+    if (video_pos < 0) video_pos = 0;
     if (sh_audio)
       AVS->sampleno = FFMIN(video_pos * sh_audio->samplerate,
                             AVS->video_info->num_audio_samples);
