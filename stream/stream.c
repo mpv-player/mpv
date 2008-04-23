@@ -121,9 +121,11 @@ static const stream_info_t* const auto_open_streams[] = {
   NULL
 };
 
-static stream_t* open_stream_plugin(const stream_info_t* sinfo,char* filename,int mode,
-			     char** options, int* file_format, int* ret,
-			     char** redirected_url) {
+static stream_t *open_stream_plugin(const stream_info_t *sinfo, char *filename,
+                                    int mode, struct MPOpts *options,
+                                    int *file_format, int *ret,
+                                    char **redirected_url)
+{
   void* arg = NULL;
   stream_t* s;
   m_struct_t* desc = (m_struct_t*)sinfo->opts;
@@ -140,18 +142,9 @@ static stream_t* open_stream_plugin(const stream_info_t* sinfo,char* filename,in
 	return NULL;
       }	
     }
-    if(options) {
-      int i;
-      for(i = 0 ; options[i] != NULL ; i += 2) {
-	mp_msg(MSGT_OPEN,MSGL_DBG2, "Set stream arg %s=%s\n",
-	       options[i],options[i+1]);
-	if(!m_struct_set(desc,arg,options[i],options[i+1]))
-	  mp_msg(MSGT_OPEN,MSGL_WARN, "Failed to set stream option %s=%s\n",
-		 options[i],options[i+1]);
-      }
-    }
   }
   s = new_stream(-2,-2);
+  s->opts = options;
   s->url=strdup(filename);
   s->flags |= mode;
   *ret = sinfo->open(s,mode,arg,file_format);
@@ -188,7 +181,9 @@ static stream_t* open_stream_plugin(const stream_info_t* sinfo,char* filename,in
 }
 
 
-stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format) {
+stream_t *open_stream_full(char *filename,int mode, struct MPOpts *options,
+                           int* file_format)
+{
   int i,j,l,r;
   const stream_info_t* sinfo;
   stream_t* s;
@@ -230,7 +225,8 @@ stream_t* open_stream_full(char* filename,int mode, char** options, int* file_fo
   return NULL;
 }
 
-stream_t* open_output_stream(char* filename,char** options) {
+stream_t *open_output_stream(char *filename, struct MPOpts *options)
+{
   int file_format; //unused
   if(!filename) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"open_output_stream(), NULL filename, report this bug\n");

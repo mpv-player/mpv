@@ -112,6 +112,7 @@ typedef struct stream_st {
   void* cache_data;
   void* priv; // used for DVD, TV, RTSP etc
   char* url;  // strdup() of filename/url
+  struct MPOpts *opts;
 #ifdef MPLAYER_NETWORK
   streaming_ctrl_t *streaming_ctrl;
 #endif
@@ -288,14 +289,15 @@ inline static int stream_skip(stream_t *s,off_t len){
   return 1;
 }
 
+struct MPOpts;
 void stream_reset(stream_t *s);
 int stream_control(stream_t *s, int cmd, void *arg);
 stream_t* new_stream(int fd,int type);
 void free_stream(stream_t *s);
 stream_t* new_memory_stream(unsigned char* data,int len);
-stream_t* open_stream(char* filename,char** options,int* file_format);
-stream_t* open_stream_full(char* filename,int mode, char** options, int* file_format);
-stream_t* open_output_stream(char* filename,char** options);
+stream_t* open_stream(char* filename, struct MPOpts *options,int* file_format);
+stream_t* open_stream_full(char* filename,int mode, struct MPOpts *options, int* file_format);
+stream_t* open_output_stream(char* filename,struct MPOpts *options);
 /// Set the callback to be used by libstream to check for user
 /// interruption during long blocking operations (cache filling, etc).
 void stream_set_interrupt_callback(int (*cb)(int));

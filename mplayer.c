@@ -3150,7 +3150,7 @@ if (edl_output_filename) {
   mpctx->sh_video=NULL;
 
   current_module="open_stream";
-  mpctx->stream=open_stream(filename,0,&mpctx->file_format);
+  mpctx->stream = open_stream(filename, opts, &mpctx->file_format);
   if(!mpctx->stream) { // error...
       mpctx->eof = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY);
     goto goto_next_file;
