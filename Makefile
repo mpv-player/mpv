@@ -59,9 +59,14 @@ SRCS_COMMON = asxparser.c \
               libaf/format.c \
               libaf/reorder_ch.c \
               libaf/window.c \
+              libvo/aclib.c \
+              libvo/osd.c \
+              libvo/sub.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
 
+SRCS_COMMON-$(BITMAP_FONT)           += libvo/font_load.c
+SRCS_COMMON-$(FREETYPE)              += libvo/font_load_ft.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
@@ -116,6 +121,14 @@ SRCS_MPLAYER = mplayer.c \
                libao2/ao_null.c \
                libao2/ao_pcm.c \
                $(addprefix libao2/,$(AO_SRCS)) \
+               libvo/aspect.c \
+               libvo/geometry.c \
+               libvo/spuenc.c \
+               libvo/video_out.c \
+               libvo/vo_mpegpes.c \
+               libvo/vo_null.c \
+               libvo/vo_yuv4mpeg.c \
+               $(addprefix libvo/,$(VO_SRCS)) \
 
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
@@ -170,6 +183,8 @@ SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
 SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(LIRC)         += input/lirc.c
 
+SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c
+
 OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
 
 SRCS_MENCODER = mencoder.c \
@@ -181,7 +196,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               libmpdemux/libmpdemux.a \
               stream/stream.a \
               libswscale/libswscale.a \
-              libvo/libosd.a \
 
 COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
 COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
@@ -194,8 +208,6 @@ COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
 COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
 COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/dvdread.a
 COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
-
-LIBS_MPLAYER = libvo/libvo.a \
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
 
@@ -230,7 +242,6 @@ PARTS = dvdread \
         libmpeg2 \
         libpostproc \
         libswscale \
-        libvo \
         mp3lib \
         stream \
         vidix \
@@ -250,6 +261,7 @@ DIRS =  gui \
         libao2 \
         libass \
         libmenu \
+        libvo \
         osdep \
         tremor \
         TOOLS \
@@ -280,9 +292,6 @@ libmpcodecs/libmpencoders.a:
 
 libmpdemux/libmpmux.a:
 	$(MAKE) -C libmpdemux libmpmux.a
-
-libvo/libosd.a:
-	$(MAKE) -C libvo libosd.a
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
