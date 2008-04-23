@@ -18,6 +18,7 @@
 #include "metadata.h"
 #include "libmpcodecs/vf.h"
 #include "libmpcodecs/vd.h"
+#include "mp_osd.h"
 #include "libvo/video_out.h"
 #include "libvo/font_load.h"
 #include "playtree.h"

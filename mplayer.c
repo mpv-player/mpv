@@ -54,6 +54,7 @@
 
 #include "subreader.h"
 
+#include "mp_osd.h"
 #include "libvo/video_out.h"
 
 #include "libvo/font_load.h"

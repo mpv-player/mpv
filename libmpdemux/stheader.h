@@ -1,7 +1,6 @@
 #ifndef MPLAYER_STHEADER_H
 #define MPLAYER_STHEADER_H
 
-#include "demuxer.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
 struct MPOpts;
@@ -11,7 +10,7 @@ struct MPOpts;
 typedef struct sh_audio {
   struct MPOpts *opts;
   int aid;
-  demux_stream_t *ds;
+  struct demux_stream *ds;
   struct codecs_st *codec;
   unsigned int format;
   int initialized;
@@ -59,7 +58,7 @@ typedef struct sh_audio {
 typedef struct sh_video {
   struct MPOpts *opts;
   int vid;
-  demux_stream_t *ds;
+  struct demux_stream *ds;
   struct codecs_st *codec;
   unsigned int format;
   int initialized;
@@ -109,9 +108,7 @@ typedef struct sh_sub {
   int forced_subs_only;
   unsigned char* extradata; // extra header data passed from demuxer
   int extradata_len;
-#ifdef USE_ASS
-  ass_track_t* ass_track;  // for SSA/ASS streams (type == 'a')
-#endif
+  struct ass_track_s *ass_track;  // for SSA/ASS streams (type == 'a')
   char* lang; // track language
   int default_track;
 } sh_sub_t;

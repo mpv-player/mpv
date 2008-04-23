@@ -6,9 +6,6 @@
 #include <string.h>
 
 #include "stream/stream.h"
-#ifdef USE_ASS
-#include "libass/ass_types.h"
-#endif
 
 struct MPOpts;
 
@@ -108,7 +105,7 @@ typedef struct demux_packet_st {
   struct demux_packet_st* next;
 } demux_packet_t;
 
-typedef struct {
+typedef struct demux_stream {
   int buffer_pos;          // current buffer position
   int buffer_size;         // current buffer size
   unsigned char* buffer;   // current buffer, never free() it, always use free_demux_packet(buffer_ref);

@@ -2,14 +2,7 @@
 #define MPLAYER_MP_CORE_H
 
 #include "options.h"
-#include "mp_osd.h"
-#include "libao2/audio_out.h"
-#include "playtree.h"
-#include "stream/stream.h"
-#include "libmpdemux/demuxer.h"
-#include "libmpdemux/stheader.h"
 #include "mixer.h"
-#include "libvo/video_out.h"
 #include "subreader.h"
 
 // definitions used internally by the core player code
@@ -48,18 +41,18 @@ typedef struct MPContext {
     int osd_show_percentage;
     int osd_function;
     const ao_functions_t *audio_out;
-    play_tree_t *playtree;
-    play_tree_iter_t *playtree_iter;
+    struct play_tree *playtree;
+    struct play_tree_iter *playtree_iter;
     int eof;
     int play_tree_step;
 
-    stream_t *stream;
-    demuxer_t *demuxer;
-    sh_audio_t *sh_audio;
-    sh_video_t *sh_video;
-    demux_stream_t *d_audio;
-    demux_stream_t *d_video;
-    demux_stream_t *d_sub;
+    struct stream_st *stream;
+    struct demuxer_st *demuxer;
+    struct sh_audio *sh_audio;
+    struct sh_video *sh_video;
+    struct demux_stream *d_audio;
+    struct demux_stream *d_video;
+    struct demux_stream *d_sub;
     mixer_t mixer;
     struct vo *video_out;
     // Frames buffered in the vo ready to flip. Currently always 0 or 1.
@@ -88,11 +81,9 @@ typedef struct MPContext {
     int set_of_sub_pos;
     int set_of_sub_size;
     int global_sub_indices[SUB_SOURCES];
-#ifdef USE_ASS
     // set_of_ass_tracks[i] contains subtitles from set_of_subtitles[i]
     // parsed by libass or NULL if format unsupported
-    ass_track_t* set_of_ass_tracks[MAX_SUBTITLE_FILES];
-#endif
+    struct ass_track_s *set_of_ass_tracks[MAX_SUBTITLE_FILES];
     sub_data* set_of_subtitles[MAX_SUBTITLE_FILES];
 
     int file_format;
@@ -118,7 +109,7 @@ extern int file_filter;
 extern int forced_subs_only;
 
 
-int build_afilter_chain(struct MPContext *mpctx, sh_audio_t *sh_audio, ao_data_t *ao_data);
+int build_afilter_chain(struct MPContext *mpctx, struct sh_audio *sh_audio, struct ao_data_s *ao_data);
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 void init_vo_spudec(struct MPContext *mpctx);
