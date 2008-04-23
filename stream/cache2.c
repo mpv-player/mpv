@@ -63,13 +63,13 @@ static int min_fill=0;
 
 int cache_fill_status=0;
 
-void cache_stats(cache_vars_t* s){
+static void cache_stats(cache_vars_t* s){
   int newb=s->max_filepos-s->read_filepos; // new bytes in the buffer
   mp_msg(MSGT_CACHE,MSGL_INFO,"0x%06X  [0x%06X]  0x%06X   ",(int)s->min_filepos,(int)s->read_filepos,(int)s->max_filepos);
   mp_msg(MSGT_CACHE,MSGL_INFO,"%3d %%  (%3d%%)\n",100*newb/s->buffer_size,100*min_fill/s->buffer_size);
 }
 
-int cache_read(cache_vars_t* s,unsigned char* buf,int size){
+static int cache_read(cache_vars_t* s,unsigned char* buf,int size){
   int total=0;
   while(size>0){
     int pos,newb,len;
@@ -115,7 +115,7 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
   return total;
 }
 
-int cache_fill(cache_vars_t* s){
+static int cache_fill(cache_vars_t* s){
   int back,back2,newb,space,len,pos;
   off_t read=s->read_filepos;
   
@@ -191,7 +191,7 @@ int cache_fill(cache_vars_t* s){
   
 }
 
-cache_vars_t* cache_init(int size,int sector){
+static cache_vars_t* cache_init(int size,int sector){
   int num;
 #if !defined(WIN32) && !defined(__OS2__)
   cache_vars_t* s=shmem_alloc(sizeof(cache_vars_t));

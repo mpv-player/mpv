@@ -24,7 +24,9 @@ extern const demuxer_desc_t demuxer_desc_avi_nini;
 int pts_from_bps=1;
 
 // Select ds from ID
-demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
+static demux_stream_t* demux_avi_select_stream(demuxer_t *demux,
+                                               unsigned int id)
+{
   int stream_id=avi_stream_id(id);
 
 
