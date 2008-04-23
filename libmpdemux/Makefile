@@ -70,4 +70,4 @@ include ../mpcommon.mak
 
 demux_lavf.o mp_taglists.o .depend: CFLAGS += -I../libavcodec
 
-dep depend: CFLAGS += $(EXTRAXX_INC)
+.depend: CFLAGS += $(EXTRAXX_INC)
