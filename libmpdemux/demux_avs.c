@@ -299,7 +299,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         
         //sh_video->format = get_mmioFOURCC(AVS->video_info);
         sh_video->format = mmioFOURCC('Y', 'V', '1', '2');
-        sh_video->fps = (float) ((float) AVS->video_info->fps_numerator / (float) AVS->video_info->fps_denominator);
+        sh_video->fps = (double) AVS->video_info->fps_numerator / (double) AVS->video_info->fps_denominator;
         sh_video->frametime = 1.0 / sh_video->fps;
         
         sh_video->bih = malloc(sizeof(BITMAPINFOHEADER) + (256 * 4));
