@@ -42,8 +42,6 @@ static struct vf_priv_s {
   NULL
 };
 
-extern float screen_size_xy;
-
 //===========================================================================//
 
 void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam);
@@ -297,7 +295,7 @@ static int config(struct vf_instance* vf,
     }
 
     if (!opts->screen_size_x && !opts->screen_size_y
-        && !(screen_size_xy >= 0.001)) {
+        && !(opts->screen_size_xy >= 0.001)) {
 	// Compute new d_width and d_height, preserving aspect
 	// while ensuring that both are >= output size in pixels.
 	if (vf->priv->h * d_width > vf->priv->w * d_height) {

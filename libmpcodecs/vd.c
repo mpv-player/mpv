@@ -111,7 +111,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #include "libvo/video_out.h"
 
 // libvo opts:
-float screen_size_xy=0;
 float movie_aspect=-1.0;
 int vo_flags=0;
 int vd_use_slices=1;
@@ -260,15 +259,15 @@ csp_again:
     // check source format aspect, calculate prescale ::atmos
     screen_size_x=sh->disp_w;
     screen_size_y=sh->disp_h;
-    if(screen_size_xy>=0.001){
-     if(screen_size_xy<=8){
+    if(opts->screen_size_xy>=0.001){
+     if(opts->screen_size_xy<=8){
        // -xy means x+y scale
-       screen_size_x*=screen_size_xy;
-       screen_size_y*=screen_size_xy;
+       screen_size_x*=opts->screen_size_xy;
+       screen_size_y*=opts->screen_size_xy;
      } else {
        // -xy means forced width while keeping correct aspect
-       screen_size_x=screen_size_xy;
-       screen_size_y=screen_size_xy*sh->disp_h/sh->disp_w;
+       screen_size_x=opts->screen_size_xy;
+       screen_size_y=opts->screen_size_xy*sh->disp_h/sh->disp_w;
      }
     }
     if(sh->aspect>0.01){
@@ -277,7 +276,7 @@ csp_again:
       mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
       w=(int)((float)screen_size_y*sh->aspect); w+=w%2; // round
       // we don't like horizontal downscale || user forced width:
-      if(w<screen_size_x || screen_size_xy>8){
+      if(w<screen_size_x || opts->screen_size_xy>8){
         screen_size_y=(int)((float)screen_size_x*(1.0/sh->aspect));
         screen_size_y+=screen_size_y%2; // round
       } else screen_size_x=w; // keep new width
