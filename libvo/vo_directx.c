@@ -87,8 +87,6 @@ static float window_aspect;
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO) = NULL;
 static RECT last_rect = {0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE};
 
-extern int vidmode;
-
 /*****************************************************************************
  * DirectDraw GUIDs.
  * Defining them here allows us to get rid of the dxguid library during

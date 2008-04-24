@@ -111,7 +111,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #include "libvo/video_out.h"
 
 // libvo opts:
-int vidmode=0;
 int softzoom=0;
 int flip=-1;
 int opt_screen_size_x=0;
@@ -255,7 +254,7 @@ csp_again:
   if(opt_screen_size_x||opt_screen_size_y){
     screen_size_x = opt_screen_size_x;
     screen_size_y = opt_screen_size_y;
-    if(!vidmode){
+    if(!opts->vidmode){
      if(!screen_size_x) screen_size_x=SCREEN_SIZE_X;
      if(!screen_size_y) screen_size_y=SCREEN_SIZE_Y;
      if(screen_size_x<=8) screen_size_x*=sh->disp_w;
@@ -292,7 +291,7 @@ csp_again:
   }
 
   vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN:0)
-      | (vidmode ? VOFLAG_MODESWITCHING:0)
+      | (opts->vidmode ? VOFLAG_MODESWITCHING:0)
       | (softzoom ? VOFLAG_SWSCALE:0)
       | (flip ? VOFLAG_FLIPPING:0);
 

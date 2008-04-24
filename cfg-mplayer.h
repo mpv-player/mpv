@@ -25,7 +25,6 @@ extern char *vo_geometry;
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;
-extern int vidmode;
 
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
@@ -175,8 +174,8 @@ const m_option_t mplayer_opts[]={
 	{"monitoraspect", &force_monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9.0, NULL},
 	{"monitorpixelaspect", &monitor_pixel_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 9.0, NULL},
 	// video mode switching: (x11,xv,dga)
-        {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-        {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+        OPT_FLAG_ON("vm", vidmode, 0),
+        OPT_FLAG_OFF("novm", vidmode, 0),
 	// start in fullscreen mode:
 	OPT_FLAG_ON("fs", fullscreen, 0),
 	OPT_FLAG_OFF("nofs", fullscreen, 0),
