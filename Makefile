@@ -489,12 +489,15 @@ all:	recurse $(ALL_PRG)
 recurse:
 	for part in $(PARTS); do $(MAKE) -C $$part; done
 
+# Hack to keep .depend from being generated at the top level unnecessarily.
+DEPS = foo
+
+include mpcommon.mak
+
 DEPS = $(SRCS_COMMON:.c=.d) $(SRCS_MPLAYER:.c=.d) $(SRCS_MENCODER:.c=.d)
 $(DEPS) recurse: help_mp.h version.h codecs.conf.h
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part .depend; done
-
-include mpcommon.mak
 
 CFLAGS := $(subst -I..,-I.,$(CFLAGS))
 
