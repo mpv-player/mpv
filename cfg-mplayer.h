@@ -25,7 +25,6 @@ extern char *vo_geometry;
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;
-extern int fullscreen;
 extern int vidmode;
 
 extern char *ao_outputfilename;
@@ -179,8 +178,8 @@ const m_option_t mplayer_opts[]={
         {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	// start in fullscreen mode:
-	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	OPT_FLAG_ON("fs", fullscreen, 0),
+	OPT_FLAG_OFF("nofs", fullscreen, 0),
 	// set fullscreen switch method (workaround for buggy WMs)
 	{"fsmode", "-fsmode is obsolete, avoid it and use -fstype instead.\nIf you really want it, try -fsmode-dontuse, but don't report bugs!\n", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
 	{"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},

@@ -8,6 +8,7 @@ typedef struct MPOpts {
     int vo_ontop;
     int vo_screenwidth;
     int vo_screenheight;
+    int fullscreen;
     int vo_dbpp;
     int correct_pts;
     int loop_times;

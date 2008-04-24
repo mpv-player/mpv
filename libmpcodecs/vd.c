@@ -5,6 +5,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "options.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -110,7 +111,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #include "libvo/video_out.h"
 
 // libvo opts:
-int fullscreen=0;
 int vidmode=0;
 int softzoom=0;
 int flip=-1;
@@ -291,7 +291,7 @@ csp_again:
     }
   }
 
-  vocfg_flags = (fullscreen ? VOFLAG_FULLSCREEN:0)
+  vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN:0)
       | (vidmode ? VOFLAG_MODESWITCHING:0)
       | (softzoom ? VOFLAG_SWSCALE:0)
       | (flip ? VOFLAG_FLIPPING:0);

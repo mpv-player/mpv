@@ -37,7 +37,6 @@ extern int stream_cache_size;
 extern int autosync;
 
 // libmpcodecs:
-extern int fullscreen;
 extern int flip;
 
 extern int frame_dropping;
