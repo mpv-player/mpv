@@ -1,4 +1,3 @@
-
 #include "config.h"
 #include "options.h"
 
@@ -63,7 +62,6 @@ int get_video_quality_max(sh_video_t *sh_video)
             return ret;
         }
     }
-//  mp_msg(MSGT_DECVIDEO,MSGL_INFO,"[PP] Sorry, postprocessing is not available\n");
     return 0;
 }
 
@@ -94,11 +92,10 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
             return (1);
     }
     /* try software control */
-    if (mpvdec)
-        if (mpvdec->
-            control(sh_video, VDCTRL_SET_EQUALIZER, item, (int *) value)
+    if (mpvdec &&
+        mpvdec->control(sh_video, VDCTRL_SET_EQUALIZER, item, (int *) value)
             == CONTROL_OK)
-            return 1;
+        return 1;
     mp_msg(MSGT_DECVIDEO, MSGL_V, MSGTR_VideoAttributeNotSupportedByVO_VD,
            item);
     return 0;
@@ -222,10 +219,8 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
         stringset_add(selected, sh_video->codec->name); // tagging it
         // ok, it matches all rules, let's find the driver!
         for (i = 0; mpcodecs_vd_drivers[i] != NULL; i++)
-//          if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
-            if (!strcmp
-                (mpcodecs_vd_drivers[i]->info->short_name,
-                 sh_video->codec->drv))
+            if (!strcmp(mpcodecs_vd_drivers[i]->info->short_name,
+                        sh_video->codec->drv))
                 break;
         mpvdec = mpcodecs_vd_drivers[i];
 #ifdef DYNAMIC_PLUGINS
@@ -312,10 +307,10 @@ int init_best_video_codec(sh_video_t *sh_video, char **video_codec_list,
 {
     char *vc_l_default[2] = { "", (char *) NULL };
     stringset_t selected;
-// hack:
+    // hack:
     if (!video_codec_list)
         video_codec_list = vc_l_default;
-// Go through the codec.conf and find the best codec...
+    // Go through the codec.conf and find the best codec...
     sh_video->initialized = 0;
     stringset_init(&selected);
     while (!sh_video->initialized && *video_codec_list) {
