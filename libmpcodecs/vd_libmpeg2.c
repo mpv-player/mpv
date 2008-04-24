@@ -9,7 +9,7 @@
 
 //#undef MPEG12_POSTPROC
 
-static vd_info_t info = 
+static const vd_info_t info =
 {
 	"MPEG 1/2 Video decoder libmpeg2-v0.4.0b",
 	"libmpeg2",

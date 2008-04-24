@@ -13,7 +13,7 @@
 #include "vd_internal.h"
 #include "loader/wine/windef.h"
 
-static vd_info_t info = {
+static const vd_info_t info = {
 	"RealVideo decoder",
 	"realvid",
 	"Alex Beregszaszi",

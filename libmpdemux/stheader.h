@@ -85,7 +85,7 @@ typedef struct sh_video {
   unsigned int outfmtidx;
   struct vf_instance *vfilter;          // the video filter chain, used for this video stream
   int output_flags;       // query_format() results for output filters+vo
-  struct vd_functions *vd_driver;
+  const struct vd_functions *vd_driver;
   int vf_initialized;
 #ifdef DYNAMIC_PLUGINS
   void *dec_handle;

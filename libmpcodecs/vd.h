@@ -10,7 +10,7 @@ typedef mp_codec_info_t vd_info_t;
 /* interface of video decoder drivers */
 typedef struct vd_functions
 {
-	vd_info_t *info;
+        const vd_info_t *info;
         int (*init)(sh_video_t *sh);
         void (*uninit)(sh_video_t *sh);
         int (*control)(sh_video_t *sh,int cmd,void* arg, ...);
@@ -18,7 +18,7 @@ typedef struct vd_functions
 } vd_functions_t;
 
 // NULL terminated array of all drivers
-extern vd_functions_t* mpcodecs_vd_drivers[];
+extern const vd_functions_t * const mpcodecs_vd_drivers[];
 
 #define VDCTRL_QUERY_FORMAT 3 /* test for availabilty of a format */
 #define VDCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */

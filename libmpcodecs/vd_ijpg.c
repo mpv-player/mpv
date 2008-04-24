@@ -16,7 +16,7 @@
 
 #include "vd_internal.h"
 
-static vd_info_t info = {
+static const vd_info_t info = {
 	"JPEG Images decoder",
 	"ijpg",
 	"Pontscho",

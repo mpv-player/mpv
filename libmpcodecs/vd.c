@@ -47,7 +47,7 @@ extern vd_functions_t mpcodecs_vd_qtvideo;
  * decoder, add it to libavcodec, except for wrappers around external
  * libraries and decoders requiring binary support. */
 
-vd_functions_t *mpcodecs_vd_drivers[] = {
+const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_null,
 #ifdef USE_LIBAVCODEC
     &mpcodecs_vd_ffmpeg,

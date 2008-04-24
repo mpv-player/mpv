@@ -18,7 +18,7 @@
 #include "loader/ldt_keeper.h"
 #endif
 
-static vd_info_t info = {
+static const vd_info_t info = {
 	"Quicktime Video decoder",
 	"qtvideo",
 	"A'rpi",

@@ -53,7 +53,7 @@ int get_video_quality_max(sh_video_t *sh_video)
             return ret;
         }
     }
-    struct vd_functions *vd = sh_video->vd_driver;
+    const struct vd_functions *vd = sh_video->vd_driver;
     if (vd) {
         int ret = vd->control(sh_video, VDCTRL_QUERY_MAX_PP_LEVEL, NULL);
         if (ret > 0) {
@@ -72,7 +72,7 @@ void set_video_quality(sh_video_t *sh_video, int quality)
         if (ret == CONTROL_TRUE)
             return;             // success
     }
-    struct vd_functions *vd = sh_video->vd_driver;
+    const struct vd_functions *vd = sh_video->vd_driver;
     if (vd)
         vd->control(sh_video, VDCTRL_SET_PP_LEVEL, (void *) (&quality));
 }
@@ -92,7 +92,7 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
             return (1);
     }
     /* try software control */
-    struct vd_functions *vd = sh_video->vd_driver;
+    const struct vd_functions *vd = sh_video->vd_driver;
     if (vd &&
         vd->control(sh_video, VDCTRL_SET_EQUALIZER, item, (int *) value)
             == CONTROL_OK)
@@ -118,7 +118,7 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
         }
     }
     /* try software control */
-    struct vd_functions *vd = sh_video->vd_driver;
+    const struct vd_functions *vd = sh_video->vd_driver;
     if (vd)
         return vd->control(sh_video, VDCTRL_GET_EQUALIZER, item, value);
     return 0;
@@ -140,14 +140,14 @@ int set_rectangle(sh_video_t *sh_video, int param, int value)
 
 void resync_video_stream(sh_video_t *sh_video)
 {
-    struct vd_functions *vd = sh_video->vd_driver;
+    const struct vd_functions *vd = sh_video->vd_driver;
     if (vd)
         vd->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
 }
 
 int get_current_video_decoder_lag(sh_video_t *sh_video)
 {
-    struct vd_functions *vd = sh_video->vd_driver;
+    const struct vd_functions *vd = sh_video->vd_driver;
     if (!vd)
         return -1;
     int ret = vd->control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, NULL);
@@ -283,7 +283,7 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
         }
 
         // init()
-        struct vd_functions *vd = sh_video->vd_driver;
+        const struct vd_functions *vd = sh_video->vd_driver;
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_OpeningVideoDecoder,
                vd->info->short_name, vd->info->name);
         // clear vf init error, it is no longer relevant
