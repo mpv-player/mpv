@@ -6180,7 +6180,12 @@ if test "$_faad_internal" = yes ; then
   _def_faad_internal="#define USE_FAAD_INTERNAL 1"
   _faad=yes
   _res_comment="internal floating-point"
-  test "$_faad_fixed" = yes && _res_comment="internal fixed-point"
+  if test "$_faad_fixed" = yes ; then
+    # The FIXED_POINT implementation of FAAD2 improves performance
+    # on some platforms, especially for SBR files.
+    CFLAGS="$CFLAGS -DFIXED_POINT"
+    _res_comment="internal fixed-point"
+  fi
 elif test "$_faad_external" = yes ; then
   _faad=yes
   _ld_extra="$_ld_extra -lfaad"
@@ -7805,7 +7810,6 @@ LIBMAD = $_mad
 LIBVORBIS = $_vorbis
 LIBTHEORA = $_theora
 FAAD_INTERNAL = $_faad_internal
-FAAD_FIXED = $_faad_fixed
 LIBSMBCLIENT = $_smbsupport
 XMMS_PLUGINS = $_xmms
 MACOSX_FINDER_SUPPORT = $_macosx_finder_support

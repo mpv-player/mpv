@@ -43,8 +43,4 @@ SRCS_COMMON = bits.c \
 
 CFLAGS  = -D_GNU_SOURCE
 
-# The FIXED_POINT implementation of FAAD2 improves performance
-# on some platforms, especially for SBR files.
-CFLAGS-$(FAAD_FIXED)  += -DFIXED_POINT
-
 include ../mpcommon.mak
