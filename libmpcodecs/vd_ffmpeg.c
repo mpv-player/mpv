@@ -64,7 +64,7 @@ static enum PixelFormat get_format(struct AVCodecContext * avctx,
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_render_slice(struct AVCodecContext *s,
-                	AVFrame *src, int offset[4],
+                            const AVFrame *src, int offset[4],
                 	int y, int type, int height);
 #endif
 
@@ -442,7 +442,7 @@ static void uninit(sh_video_t *sh){
 }
 
 static void draw_slice(struct AVCodecContext *s,
-                	AVFrame *src, int offset[4],
+                       const AVFrame *src, int offset[4],
                 	int y, int type, int height){
     sh_video_t * sh = s->opaque;
     uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
@@ -758,7 +758,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
        || sh->format == mmioFOURCC('R', 'V', '4', '0'))
     {
         dp_hdr_t *hdr= (dp_hdr_t*)data;
-        uint32_t *offsets = (uint32_t*)(data + hdr->chunktab);
+        uint32_t *offsets = (uint32_t*)((char *)data + hdr->chunktab);
         uint8_t *offstab = av_malloc((hdr->chunks+1) * 8);
         uint8_t *buf = data;
         int chunks = hdr->chunks;
@@ -766,7 +766,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
         buf[0] = chunks;
         memcpy(offstab, offsets, (chunks + 1) * 8);
-        memmove(buf + 1 + (chunks + 1) * 8, data + sizeof(dp_hdr_t), dlen);
+        memmove(buf + 1 + (chunks + 1) * 8, (char *)data + sizeof(dp_hdr_t), dlen);
         memcpy(buf + 1, offstab, (chunks + 1) * 8);
         av_free(offstab);
     }
@@ -1051,7 +1051,7 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
 }
 
 static void mc_render_slice(struct AVCodecContext *s,
-                	AVFrame *src, int offset[4],
+                            const AVFrame *src, int offset[4],
                 	int y, int type, int height){
 int width= s->width;
 sh_video_t * sh = s->opaque;
