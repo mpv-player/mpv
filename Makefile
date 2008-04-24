@@ -59,6 +59,97 @@ SRCS_COMMON = asxparser.c \
               libaf/format.c \
               libaf/reorder_ch.c \
               libaf/window.c \
+              libmpcodecs/ad.c \
+              libmpcodecs/ad_alaw.c \
+              libmpcodecs/ad_dk3adpcm.c \
+              libmpcodecs/ad_dvdpcm.c \
+              libmpcodecs/ad_hwac3.c \
+              libmpcodecs/ad_hwmpa.c \
+              libmpcodecs/ad_imaadpcm.c \
+              libmpcodecs/ad_msadpcm.c \
+              libmpcodecs/ad_msgsm.c \
+              libmpcodecs/ad_pcm.c \
+              libmpcodecs/dec_audio.c \
+              libmpcodecs/dec_video.c \
+              libmpcodecs/img_format.c \
+              libmpcodecs/mp_image.c \
+              libmpcodecs/native/nuppelvideo.c \
+              libmpcodecs/native/rtjpegn.c \
+              libmpcodecs/native/xa_gsm.c \
+              libmpcodecs/pullup.c \
+              libmpcodecs/vd.c \
+              libmpcodecs/vd_hmblck.c \
+              libmpcodecs/vd_lzo.c \
+              libmpcodecs/vd_mpegpes.c \
+              libmpcodecs/vd_mtga.c \
+              libmpcodecs/vd_null.c \
+              libmpcodecs/vd_nuv.c \
+              libmpcodecs/vd_raw.c \
+              libmpcodecs/vd_sgi.c \
+              libmpcodecs/vf.c \
+              libmpcodecs/vf_1bpp.c \
+              libmpcodecs/vf_2xsai.c \
+              libmpcodecs/vf_blackframe.c \
+              libmpcodecs/vf_boxblur.c \
+              libmpcodecs/vf_crop.c \
+              libmpcodecs/vf_cropdetect.c \
+              libmpcodecs/vf_decimate.c \
+              libmpcodecs/vf_delogo.c \
+              libmpcodecs/vf_denoise3d.c \
+              libmpcodecs/vf_detc.c \
+              libmpcodecs/vf_dint.c \
+              libmpcodecs/vf_divtc.c \
+              libmpcodecs/vf_down3dright.c \
+              libmpcodecs/vf_dsize.c \
+              libmpcodecs/vf_dvbscale.c \
+              libmpcodecs/vf_eq.c \
+              libmpcodecs/vf_eq2.c \
+              libmpcodecs/vf_expand.c \
+              libmpcodecs/vf_field.c \
+              libmpcodecs/vf_fil.c \
+              libmpcodecs/vf_filmdint.c \
+              libmpcodecs/vf_flip.c \
+              libmpcodecs/vf_format.c \
+              libmpcodecs/vf_framestep.c \
+              libmpcodecs/vf_halfpack.c \
+              libmpcodecs/vf_harddup.c \
+              libmpcodecs/vf_hqdn3d.c \
+              libmpcodecs/vf_hue.c \
+              libmpcodecs/vf_il.c \
+              libmpcodecs/vf_ilpack.c \
+              libmpcodecs/vf_ivtc.c \
+              libmpcodecs/vf_kerndeint.c \
+              libmpcodecs/vf_mirror.c \
+              libmpcodecs/vf_noformat.c \
+              libmpcodecs/vf_noise.c \
+              libmpcodecs/vf_ow.c \
+              libmpcodecs/vf_palette.c \
+              libmpcodecs/vf_perspective.c \
+              libmpcodecs/vf_phase.c \
+              libmpcodecs/vf_pp7.c \
+              libmpcodecs/vf_pullup.c \
+              libmpcodecs/vf_rectangle.c \
+              libmpcodecs/vf_remove_logo.c \
+              libmpcodecs/vf_rgb2bgr.c \
+              libmpcodecs/vf_rgbtest.c \
+              libmpcodecs/vf_rotate.c \
+              libmpcodecs/vf_sab.c \
+              libmpcodecs/vf_scale.c \
+              libmpcodecs/vf_smartblur.c \
+              libmpcodecs/vf_softpulldown.c \
+              libmpcodecs/vf_softskip.c \
+              libmpcodecs/vf_swapuv.c \
+              libmpcodecs/vf_telecine.c \
+              libmpcodecs/vf_test.c \
+              libmpcodecs/vf_tfields.c \
+              libmpcodecs/vf_tile.c \
+              libmpcodecs/vf_tinterlace.c \
+              libmpcodecs/vf_unsharp.c \
+              libmpcodecs/vf_vo.c \
+              libmpcodecs/vf_yadif.c \
+              libmpcodecs/vf_yuvcsp.c \
+              libmpcodecs/vf_yuy2.c \
+              libmpcodecs/vf_yvu9.c \
               libvo/aclib.c \
               libvo/osd.c \
               libvo/sub.c \
@@ -66,10 +157,14 @@ SRCS_COMMON = asxparser.c \
               osdep/$(TIMER) \
 
 SRCS_COMMON-$(BITMAP_FONT)           += libvo/font_load.c
+SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
 SRCS_COMMON-$(FREETYPE)              += libvo/font_load_ft.c
+SRCS_COMMON-$(HAVE_POSIX_SELECT)     += libmpcodecs/vf_bmovl.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
+SRCS_COMMON-$(JPEG)                  += libmpcodecs/vd_ijpg.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
+SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c
 SRCS_COMMON-$(LIBASS)                += libass/ass.c \
                                         libass/ass_bitmap.c \
                                         libass/ass_cache.c \
@@ -79,10 +174,35 @@ SRCS_COMMON-$(LIBASS)                += libass/ass.c \
                                         libass/ass_mp.c \
                                         libass/ass_render.c \
                                         libass/ass_utils.c \
+                                        libmpcodecs/vf_ass.c \
 
-SRCS_COMMON-$(LIBAVCODEC)            += libaf/af_lavcresample.c
-SRCS_COMMON-$(LIBAVCODEC_A)          += libaf/af_lavcac3enc.c
+SRCS_COMMON-$(LIBAVCODEC)            += libaf/af_lavcresample.c \
+                                        libmpcodecs/ad_ffmpeg.c \
+                                        libmpcodecs/vd_ffmpeg.c \
+                                        libmpcodecs/vf_lavc.c \
+                                        libmpcodecs/vf_lavcdeint.c \
+                                        libmpcodecs/vf_screenshot.c \
+
+# These filters use private headers and do not work with shared libavcodec.
+SRCS_COMMON-$(LIBAVCODEC_A)          += libaf/af_lavcac3enc.c \
+                                        libmpcodecs/vf_fspp.c \
+                                        libmpcodecs/vf_geq.c \
+                                        libmpcodecs/vf_mcdeint.c \
+                                        libmpcodecs/vf_qp.c \
+                                        libmpcodecs/vf_spp.c \
+                                        libmpcodecs/vf_uspp.c \
+
+SRCS_COMMON-$(LIBDCA)                += libmpcodecs/ad_libdca.c
+SRCS_COMMON-$(LIBDV)                 += libmpcodecs/ad_libdv.c \
+                                        libmpcodecs/vd_libdv.c
+SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
+SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c
+SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
+SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
+SRCS_COMMON-$(LIBVORBIS)             += libmpcodecs/ad_libvorbis.c
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
+SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c
+SRCS_COMMON-$(MUSEPACK)              += libmpcodecs/ad_mpc.c
 SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
 SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
 SRCS_COMMON-$(NEED_MMAP)             += osdep/mmap-os2.c
@@ -91,6 +211,12 @@ SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
 SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
 SRCS_COMMON-$(NEED_SWAB)             += osdep/swab.c
 SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
+SRCS_COMMON-$(PNG)                   += libmpcodecs/vd_mpng.c
+SRCS_COMMON-$(QTX_CODECS)            += libmpcodecs/ad_qtaudio.c \
+                                        libmpcodecs/vd_qtvideo.c
+SRCS_COMMON-$(REAL_CODECS)           += libmpcodecs/ad_realaud.c \
+                                        libmpcodecs/vd_realvid.c
+SRCS_COMMON-$(SPEEX)                 += libmpcodecs/ad_speex.c
 SRCS_COMMON-$(TREMOR_INTERNAL)       += tremor/bitwise.c \
                                         tremor/block.c \
                                         tremor/codebook.c \
@@ -107,6 +233,19 @@ SRCS_COMMON-$(TREMOR_INTERNAL)       += tremor/bitwise.c \
                                         tremor/window.c \
 
 SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
+SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
+                                        libmpcodecs/ad_dmo.c \
+                                        libmpcodecs/ad_dshow.c \
+                                        libmpcodecs/ad_twin.c \
+                                        libmpcodecs/vd_dmo.c \
+                                        libmpcodecs/vd_dshow.c \
+                                        libmpcodecs/vd_vfw.c \
+                                        libmpcodecs/vd_vfwex.c \
+
+SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
+SRCS_COMMON-$(XVID4)                 += libmpcodecs/vd_xvid4.c
+SRCS_COMMON-$(ZORAN)                 += libmpcodecs/vd_zrmjpeg.c \
+                                        libmpcodecs/vf_zrmjpeg.c
 
 SRCS_MPLAYER = mplayer.c \
                m_property.c \
@@ -191,9 +330,24 @@ SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
                 parser-mecmd.c \
                 xvid_vbr.c \
+                libmpcodecs/ae.c \
+                libmpcodecs/ae_pcm.c \
+                libmpcodecs/ve.c \
+                libmpcodecs/ve_raw.c \
 
-COMMON_LIBS = libmpcodecs/libmpcodecs.a \
-              libmpdemux/libmpdemux.a \
+SRCS_MENCODER-$(FAAC)             += libmpcodecs/ae_faac.c
+SRCS_MENCODER-$(LIBAVCODEC)       += libmpcodecs/ae_lavc.c libmpcodecs/ve_lavc.c
+SRCS_MENCODER-$(LIBDV)            += libmpcodecs/ve_libdv.c
+SRCS_MENCODER-$(LIBLZO)           += libmpcodecs/ve_nuv.c
+SRCS_MENCODER-$(MP3LAME)          += libmpcodecs/ae_lame.c
+SRCS_MENCODER-$(QTX_CODECS)       += libmpcodecs/ve_qtvideo.c
+SRCS_MENCODER-$(TOOLAME)          += libmpcodecs/ae_toolame.c
+SRCS_MENCODER-$(TWOLAME)          += libmpcodecs/ae_twolame.c
+SRCS_MENCODER-$(WIN32DLL)         += libmpcodecs/ve_vfw.c
+SRCS_MENCODER-$(X264)             += libmpcodecs/ve_x264.c
+SRCS_MENCODER-$(XVID4)            += libmpcodecs/ve_xvid4.c
+
+COMMON_LIBS = libmpdemux/libmpdemux.a \
               stream/stream.a \
               libswscale/libswscale.a \
 
@@ -211,8 +365,7 @@ COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
 
-LIBS_MENCODER = libmpcodecs/libmpencoders.a \
-                libmpdemux/libmpmux.a \
+LIBS_MENCODER = libmpdemux/libmpmux.a \
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
@@ -237,7 +390,6 @@ PARTS = dvdread \
         libavutil \
         libdvdcss \
         libfaad2 \
-        libmpcodecs \
         libmpdemux \
         libmpeg2 \
         libpostproc \
@@ -261,6 +413,8 @@ DIRS =  gui \
         libao2 \
         libass \
         libmenu \
+        libmpcodecs \
+        libmpcodecs/native \
         libvo \
         osdep \
         tremor \
@@ -286,9 +440,6 @@ $(part)/$(part).a:
 endef
 
 $(foreach part,$(PARTS),$(eval $(RECURSIVE_RULE)))
-
-libmpcodecs/libmpencoders.a:
-	$(MAKE) -C libmpcodecs libmpencoders.a
 
 libmpdemux/libmpmux.a:
 	$(MAKE) -C libmpdemux libmpmux.a
