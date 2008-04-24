@@ -490,7 +490,7 @@ recurse:
 	for part in $(PARTS); do $(MAKE) -C $$part; done
 
 DEPS = $(SRCS_COMMON:.c=.d) $(SRCS_MPLAYER:.c=.d) $(SRCS_MENCODER:.c=.d)
-$(DEPS): help_mp.h version.h codecs.conf.h
+$(DEPS) recurse: help_mp.h version.h codecs.conf.h
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part .depend; done
 
