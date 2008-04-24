@@ -6,7 +6,7 @@ extern "C" {
 #include <limits.h>
 #include <math.h>
 #include "stheader.h"
-#include "base64.h"
+#include "libavutil/base64.h"
 }
 
 #ifdef USE_LIBAVCODEC
