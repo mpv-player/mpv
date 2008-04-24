@@ -239,8 +239,6 @@ void vo_destroy(struct vo *vo);
 // NULL terminated array of all drivers
 extern const struct vo_driver *video_out_drivers[];
 
-extern int vo_flags;
-
 extern int xinerama_screen;
 extern int xinerama_x;
 extern int xinerama_y;

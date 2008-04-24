@@ -24,8 +24,6 @@
 #include "x11_common.h"
 #endif
 
-//int vo_flags=0;
-
 int xinerama_screen = -1;
 int xinerama_x;
 int xinerama_y;

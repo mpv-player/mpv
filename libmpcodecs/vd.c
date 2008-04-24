@@ -104,7 +104,6 @@ vd_functions_t *mpcodecs_vd_drivers[] = {
 #include "libvo/video_out.h"
 
 // libvo opts:
-int vo_flags = 0;
 int vd_use_slices = 1;
 
 /** global variables for gamma, brightness, contrast, saturation and hue 
@@ -178,7 +177,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
                 continue;
             }
             j = i;
-            vo_flags = flags;
+            sh->output_flags = flags;
             if (flags & VFCAP_CSP_SUPPORTED_BY_HW)
                 break;
         } else if (!palette
@@ -242,9 +241,9 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
             if (!(sh->codec->outflags[j] & CODECS_FLAG_NOFLIP))
                 opts->flip = 1;
     }
-    if (vo_flags & VFCAP_FLIPPED)
+    if (sh->output_flags & VFCAP_FLIPPED)
         opts->flip ^= 1;
-    if (opts->flip && !(vo_flags & VFCAP_FLIP)) {
+    if (opts->flip && !(sh->output_flags & VFCAP_FLIP)) {
         // we need to flip, but no flipping filter avail.
         vf_add_before_vo(&vf, "flip", NULL);
         sh->vfilter = vf;

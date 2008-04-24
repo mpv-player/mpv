@@ -2123,7 +2123,7 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
     //============================== SLEEP: ===================================
 
     // flag 256 means: libvo driver does its timing (dvb card)
-    if (*time_frame > 0.001 && !(vo_flags&256))
+    if (*time_frame > 0.001 && !(mpctx->sh_video->output_flags&256))
 	*time_frame = timing_sleep(*time_frame);
     return frame_time_remaining;
 }
@@ -3551,7 +3551,7 @@ if(!reinit_video_chain(mpctx)) {
   }
 }
 
-   if(vo_flags & 0x08 && vo_spudec)
+   if(mpctx->sh_video->output_flags & 0x08 && vo_spudec)
       spudec_set_hw_spu(vo_spudec,mpctx->video_out);
 
 #ifdef HAVE_FREETYPE
