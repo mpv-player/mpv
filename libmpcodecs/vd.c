@@ -132,8 +132,6 @@ int vo_gamma_contrast = 1000;
 int vo_gamma_saturation = 1000;
 int vo_gamma_hue = 1000;
 
-extern vd_functions_t* mpvdec; // FIXME!
-
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
     struct MPOpts *opts = sh->opts;
     int i,j;
@@ -182,7 +180,7 @@ csp_again:
 	if((flags&VFCAP_CSP_SUPPORTED_BY_HW) || (flags&VFCAP_CSP_SUPPORTED && j<0)){
 	    // check (query) if codec really support this outfmt...
 	    sh->outfmtidx=j; // pass index to the control() function this way
-	    if(mpvdec->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)==CONTROL_FALSE){
+	    if(sh->vd_driver->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)==CONTROL_FALSE){
 		mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: codec query_format(%s) returned FALSE\n",vo_format_name(out_fmt));
 		continue;
 	    }
@@ -190,7 +188,7 @@ csp_again:
 	} else
 	    if(!palette && !(flags&(VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_CSP_SUPPORTED)) && (out_fmt==IMGFMT_RGB8||out_fmt==IMGFMT_BGR8)){
 	    sh->outfmtidx=j; // pass index to the control() function this way
-	    if(mpvdec->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)!=CONTROL_FALSE)
+	    if(sh->vd_driver->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)!=CONTROL_FALSE)
 		palette=1;
 	}
     }

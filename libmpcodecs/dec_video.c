@@ -43,8 +43,6 @@ int field_dominance = -1;
 
 int divx_quality = 0;
 
-vd_functions_t *mpvdec = NULL;
-
 int get_video_quality_max(sh_video_t *sh_video)
 {
     vf_instance_t *vf = sh_video->vfilter;
@@ -55,8 +53,9 @@ int get_video_quality_max(sh_video_t *sh_video)
             return ret;
         }
     }
-    if (mpvdec) {
-        int ret = mpvdec->control(sh_video, VDCTRL_QUERY_MAX_PP_LEVEL, NULL);
+    struct vd_functions *vd = sh_video->vd_driver;
+    if (vd) {
+        int ret = vd->control(sh_video, VDCTRL_QUERY_MAX_PP_LEVEL, NULL);
         if (ret > 0) {
             mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_UsingCodecPP, ret);
             return ret;
@@ -73,8 +72,9 @@ void set_video_quality(sh_video_t *sh_video, int quality)
         if (ret == CONTROL_TRUE)
             return;             // success
     }
-    if (mpvdec)
-        mpvdec->control(sh_video, VDCTRL_SET_PP_LEVEL, (void *) (&quality));
+    struct vd_functions *vd = sh_video->vd_driver;
+    if (vd)
+        vd->control(sh_video, VDCTRL_SET_PP_LEVEL, (void *) (&quality));
 }
 
 int set_video_colors(sh_video_t *sh_video, const char *item, int value)
@@ -92,8 +92,9 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
             return (1);
     }
     /* try software control */
-    if (mpvdec &&
-        mpvdec->control(sh_video, VDCTRL_SET_EQUALIZER, item, (int *) value)
+    struct vd_functions *vd = sh_video->vd_driver;
+    if (vd &&
+        vd->control(sh_video, VDCTRL_SET_EQUALIZER, item, (int *) value)
             == CONTROL_OK)
         return 1;
     mp_msg(MSGT_DECVIDEO, MSGL_V, MSGTR_VideoAttributeNotSupportedByVO_VD,
@@ -117,8 +118,9 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
         }
     }
     /* try software control */
-    if (mpvdec)
-        return mpvdec->control(sh_video, VDCTRL_GET_EQUALIZER, item, value);
+    struct vd_functions *vd = sh_video->vd_driver;
+    if (vd)
+        return vd->control(sh_video, VDCTRL_GET_EQUALIZER, item, value);
     return 0;
 }
 
@@ -138,17 +140,17 @@ int set_rectangle(sh_video_t *sh_video, int param, int value)
 
 void resync_video_stream(sh_video_t *sh_video)
 {
-    if (mpvdec)
-        mpvdec->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
+    struct vd_functions *vd = sh_video->vd_driver;
+    if (vd)
+        vd->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
 }
 
 int get_current_video_decoder_lag(sh_video_t *sh_video)
 {
-    int ret;
-
-    if (!mpvdec)
+    struct vd_functions *vd = sh_video->vd_driver;
+    if (!vd)
         return -1;
-    ret = mpvdec->control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, NULL);
+    int ret = vd->control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, NULL);
     if (ret >= 10)
         return ret - 10;
     return -1;
@@ -159,7 +161,7 @@ void uninit_video(sh_video_t *sh_video)
     if (!sh_video->initialized)
         return;
     mp_msg(MSGT_DECVIDEO, MSGL_V, MSGTR_UninitVideoStr, sh_video->codec->drv);
-    mpvdec->uninit(sh_video);
+    sh_video->vd_driver->uninit(sh_video);
 #ifdef DYNAMIC_PLUGINS
     if (sh_video->dec_handle)
         dlclose(sh_video->dec_handle);
@@ -222,9 +224,9 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
             if (!strcmp(mpcodecs_vd_drivers[i]->info->short_name,
                         sh_video->codec->drv))
                 break;
-        mpvdec = mpcodecs_vd_drivers[i];
+        sh_video->vd_driver = mpcodecs_vd_drivers[i];
 #ifdef DYNAMIC_PLUGINS
-        if (!mpvdec) {
+        if (!sh_video->vd_driver) {
             /* try to open shared decoder plugin */
             int buf_len;
             char *buf;
@@ -253,13 +255,13 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
             if (strcmp(info_sym->short_name, sh_video->codec->drv))
                 break;
             free(buf);
-            mpvdec = funcs_sym;
+            sh_video->vd_driver = funcs_sym;
             mp_msg(MSGT_DECVIDEO, MSGL_V,
                    "Using external decoder plugin (%s/mplayer/vd_%s.so)!\n",
                    MPLAYER_LIBDIR, sh_video->codec->drv);
         }
 #endif
-        if (!mpvdec) {          // driver not available (==compiled in)
+        if (!sh_video->vd_driver) {    // driver not available (==compiled in)
             mp_msg(MSGT_DECVIDEO, MSGL_WARN,
                    MSGTR_VideoCodecFamilyNotAvailableStr,
                    sh_video->codec->name, sh_video->codec->drv);
@@ -279,13 +281,15 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
             sh_video->bih->biWidth = sh_video->disp_w;
             sh_video->bih->biHeight = sh_video->disp_h;
         }
+
         // init()
+        struct vd_functions *vd = sh_video->vd_driver;
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_OpeningVideoDecoder,
-               mpvdec->info->short_name, mpvdec->info->name);
+               vd->info->short_name, vd->info->name);
         // clear vf init error, it is no longer relevant
         if (sh_video->vf_initialized < 0)
             sh_video->vf_initialized = 0;
-        if (!mpvdec->init(sh_video)) {
+        if (!vd->init(sh_video)) {
             mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_VDecoderInitFailed);
             sh_video->disp_w = orig_w;
             sh_video->disp_h = orig_h;
@@ -402,7 +406,7 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
         }
     }
 
-    mpi = mpvdec->decode(sh_video, start, in_size, drop_frame);
+    mpi = sh_video->vd_driver->decode(sh_video, start, in_size, drop_frame);
 
     //------------------------ frame decoded. --------------------
 

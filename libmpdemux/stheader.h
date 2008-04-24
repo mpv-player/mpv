@@ -84,6 +84,7 @@ typedef struct sh_video {
   // output driver/filters: (set by libmpcodecs core)
   unsigned int outfmtidx;
   struct vf_instance *vfilter;          // the video filter chain, used for this video stream
+  struct vd_functions *vd_driver;
   int vf_initialized;
 #ifdef DYNAMIC_PLUGINS
   void *dec_handle;
