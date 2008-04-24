@@ -29,6 +29,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "options.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -66,9 +67,6 @@ static const struct vf_priv_s {
 	unsigned char* dirty_rows;
 } vf_priv_dflt;
 
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
-
 extern ass_track_t* ass_track;
 extern float sub_delay;
 extern int sub_visibility;
@@ -77,12 +75,13 @@ static int config(struct vf_instance* vf,
 	int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
+	struct MPOpts *opts = vf->opts;
 	if (outfmt == IMGFMT_IF09) return 0;
 
 	vf->priv->outh = height + ass_top_margin + ass_bottom_margin;
 	vf->priv->outw = width;
 
-	if(!opt_screen_size_x && !opt_screen_size_y){
+	if (!opts->screen_size_x && !opts->screen_size_y) {
 		d_width = d_width * vf->priv->outw / width;
 		d_height = d_height * vf->priv->outh / height;
 	} 

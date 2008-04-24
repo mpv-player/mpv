@@ -7,6 +7,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "options.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -43,9 +44,6 @@ static struct vf_priv_s {
   0,
   0
 };
-
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
 
 //===========================================================================//
 #ifdef OSD_SUPPORT
@@ -189,7 +187,9 @@ static void draw_osd(struct vf_instance* vf_,int w,int h){
 
 static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
+	unsigned int flags, unsigned int outfmt)
+{
+    struct MPOpts *opts = vf->opts;
     if(outfmt == IMGFMT_MPEGPES) {
       vf->priv->passthrough = 1;
       return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
@@ -225,7 +225,7 @@ static int config(struct vf_instance* vf,
     if(vf->priv->exp_y<0 || vf->priv->exp_y+height>vf->priv->exp_h) vf->priv->exp_y=(vf->priv->exp_h-height)/2;
     vf->priv->fb_ptr=NULL;
 
-    if(!opt_screen_size_x && !opt_screen_size_y){
+    if(!opts->screen_size_x && !opts->screen_size_y){
 	d_width=d_width*vf->priv->exp_w/width;
 	d_height=d_height*vf->priv->exp_h/height;
     }

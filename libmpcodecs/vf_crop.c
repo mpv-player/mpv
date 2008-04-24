@@ -5,6 +5,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "options.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -21,14 +22,12 @@ static const struct vf_priv_s {
   -1,-1
 };
 
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
-
 //===========================================================================//
 
 static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
+    struct MPOpts *opts = vf->opts;
     // calculate the missing parameters:
     if(vf->priv->crop_w<=0 || vf->priv->crop_w>width) vf->priv->crop_w=width;
     if(vf->priv->crop_h<=0 || vf->priv->crop_h>height) vf->priv->crop_h=height;
@@ -61,7 +60,7 @@ static int config(struct vf_instance* vf,
 	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_CropBadPositionWidthHeight);
 	return 0;
     }
-    if(!opt_screen_size_x && !opt_screen_size_y){
+    if(!opts->screen_size_x && !opts->screen_size_y){
 	d_width=d_width*vf->priv->crop_w/width;
 	d_height=d_height*vf->priv->crop_h/height;
     }

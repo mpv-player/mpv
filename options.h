@@ -6,6 +6,8 @@ typedef struct MPOpts {
     char **audio_driver_list;
     int fixed_vo;
     int vo_ontop;
+    int screen_size_x;
+    int screen_size_y;
     int vo_screenwidth;
     int vo_screenheight;
     int vidmode;

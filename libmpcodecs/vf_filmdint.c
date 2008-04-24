@@ -6,6 +6,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "cpudetect.h"
+#include "options.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -78,9 +79,6 @@ struct vf_priv_s {
 #define PPR { 2000, 2000, 0, 2000 }
 static const struct frame_stats ppzs = {PPZ,PPZ,PPZ,PPZ,PPZ,PPZ,PPZ,0,0,9999};
 static const struct frame_stats pprs = {PPR,PPR,PPR,PPR,PPR,PPR,PPR,0,0,9999};
-
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
 
 #ifndef MIN
 #define        MIN(a,b) (((a)<(b))?(a):(b))
@@ -1337,6 +1335,7 @@ static int config(struct vf_instance* vf,
 		  int width, int height, int d_width, int d_height,
 		  unsigned int flags, unsigned int outfmt)
 {
+    struct MPOpts *opts = vf->opts;
     unsigned long cxm = 0;
     unsigned long cym = 0;
     struct vf_priv_s *p = vf->priv;
@@ -1371,7 +1370,7 @@ static int config(struct vf_instance* vf,
     if (p->crop_x + p->w > width ) p->crop_x = 0;
     if (p->crop_y + p->h > height) p->crop_y = 0;
 
-    if(!opt_screen_size_x && !opt_screen_size_y){
+    if(!opts->screen_size_x && !opts->screen_size_y){
 	d_width = d_width * p->w/width;
 	d_height = d_height * p->h/height;
     }

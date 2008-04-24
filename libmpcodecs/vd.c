@@ -111,8 +111,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #include "libvo/video_out.h"
 
 // libvo opts:
-int opt_screen_size_x=0;
-int opt_screen_size_y=0;
 float screen_size_xy=0;
 float movie_aspect=-1.0;
 int vo_flags=0;
@@ -249,9 +247,9 @@ csp_again:
   else if(sh->stream_aspect!=0.0) sh->aspect = sh->stream_aspect;
 //  if(!sh->aspect) sh->aspect=1.0;
 
-  if(opt_screen_size_x||opt_screen_size_y){
-    screen_size_x = opt_screen_size_x;
-    screen_size_y = opt_screen_size_y;
+  if(opts->screen_size_x||opts->screen_size_y){
+    screen_size_x = opts->screen_size_x;
+    screen_size_y = opts->screen_size_y;
     if(!opts->vidmode){
      if(!screen_size_x) screen_size_x=SCREEN_SIZE_X;
      if(!screen_size_y) screen_size_y=SCREEN_SIZE_Y;

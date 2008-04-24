@@ -23,9 +23,6 @@ extern float vo_panscanrange;
 /* only used at startup (setting these values from configfile) */
 extern char *vo_geometry;
 
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
-
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
 
@@ -163,8 +160,8 @@ const m_option_t mplayer_opts[]={
 #endif
 
 	// force window width/height or resolution (with -vm)
-	{"x", &opt_screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
-	{"y", &opt_screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	OPT_INTRANGE("x", screen_size_x, 0, 0, 4096),
+	OPT_INTRANGE("y", screen_size_y, 0, 0, 4096),
 	// set screen dimensions (when not detectable or virtual!=visible)
         OPT_INTRANGE("screenw", vo_screenwidth, CONF_OLD, 0, 4096),
         OPT_INTRANGE("screenh", vo_screenheight, CONF_OLD, 0, 4096),
