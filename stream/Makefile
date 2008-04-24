@@ -16,6 +16,7 @@ SRCS_COMMON-$(DVBIN)             += dvb_tune.c stream_dvb.c
 SRCS_COMMON-$(DVDNAV)            += stream_dvdnav.c
 SRCS_COMMON-$(DVDREAD)           += stream_dvd.c stream_dvd_common.c
 SRCS_COMMON-$(FTP)               += stream_ftp.c
+SRCS_COMMON-$(LIBNEMESI)         += stream_nemesi.c
 SRCS_COMMON-$(LIBSMBCLIENT)      += stream_smb.c
 SRCS_COMMON-$(MPLAYER_NETWORK)   += stream_netstream.c     \
                                     asf_mmst_streaming.c   \
@@ -42,8 +43,6 @@ SRCS_COMMON-$(NATIVE_RTSP)       += stream_rtsp.c          \
                                     librtsp/rtsp.c         \
                                     librtsp/rtsp_rtp.c     \
                                     librtsp/rtsp_session.c \
-
-SRCS_COMMON-$(LIBNEMESI)         += stream_nemesi.c
 
 SRCS_COMMON-$(PVR)               += stream_pvr.c
 SRCS_COMMON-$(RADIO)             += stream_radio.c
