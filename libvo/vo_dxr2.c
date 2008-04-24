@@ -29,7 +29,6 @@
 
 
 extern float monitor_aspect;
-extern float movie_aspect;
 
 int dxr2_fd = -1;
 

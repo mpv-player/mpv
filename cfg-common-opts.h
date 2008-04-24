@@ -227,8 +227,8 @@
 	{"ssf", scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
         OPT_FLAG_ON("zoom", softzoom, 0),
         OPT_FLAG_OFF("nozoom", softzoom, 0),
-	{"aspect", &movie_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
-	{"noaspect", &movie_aspect, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+        OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.2, 3.0),
+        OPT_FLAG_CONSTANTS("noaspect", movie_aspect, 0, 0, 0),
         OPT_FLOATRANGE("xy", screen_size_xy, 0, 0.001, 4096),
 
         OPT_FLAG_CONSTANTS("flip", flip, 0, -1, 1),

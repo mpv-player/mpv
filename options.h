@@ -21,6 +21,7 @@ typedef struct MPOpts {
     int sub_id;
     float playback_speed;
     int softzoom;
+    float movie_aspect;
     float screen_size_xy;
     int flip;
     struct lavc_param {

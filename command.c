@@ -2413,9 +2413,9 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 
 	case MP_CMD_SWITCH_RATIO:
 	    if (cmd->nargs == 0 || cmd->args[0].v.f == -1)
-		movie_aspect = (float) sh_video->disp_w / sh_video->disp_h;
+                opts->movie_aspect = (float) sh_video->disp_w / sh_video->disp_h;
 	    else
-		movie_aspect = cmd->args[0].v.f;
+                opts->movie_aspect = cmd->args[0].v.f;
 	    mpcodecs_config_vo(sh_video, sh_video->disp_w, sh_video->disp_h, 0);
 	    break;
 

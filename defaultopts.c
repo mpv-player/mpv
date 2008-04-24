@@ -14,6 +14,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .video_id = -1,
         .sub_id = -2,
         .playback_speed = 1.,
+        .movie_aspect = -1.,
         .flip = -1,
         .lavc_param = (struct lavc_param){
             .workaround_bugs = 1, // autodetect

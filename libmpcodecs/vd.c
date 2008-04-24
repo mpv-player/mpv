@@ -111,7 +111,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #include "libvo/video_out.h"
 
 // libvo opts:
-float movie_aspect=-1.0;
 int vo_flags=0;
 int vd_use_slices=1;
 
@@ -242,7 +241,7 @@ csp_again:
 
     // time to do aspect ratio corrections...
 
-  if(movie_aspect>-1.0) sh->aspect = movie_aspect; // cmdline overrides autodetect
+  if(opts->movie_aspect>-1.0) sh->aspect = opts->movie_aspect; // cmdline overrides autodetect
   else if(sh->stream_aspect!=0.0) sh->aspect = sh->stream_aspect;
 //  if(!sh->aspect) sh->aspect=1.0;
 

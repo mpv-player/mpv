@@ -71,7 +71,6 @@ static int get_image_done = 0;
 
 static int vo_quartz_fs; // we are in fullscreen
 extern float monitor_aspect;
-extern float movie_aspect;
 static float old_movie_aspect;
 
 static int winLevel = 1;
