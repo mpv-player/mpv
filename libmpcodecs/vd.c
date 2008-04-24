@@ -103,9 +103,6 @@ vd_functions_t *mpcodecs_vd_drivers[] = {
 
 #include "libvo/video_out.h"
 
-// libvo opts:
-int vd_use_slices = 1;
-
 /** global variables for gamma, brightness, contrast, saturation and hue 
     modified by mplayer.c and gui/mplayer/gtk/eq.c:
     ranges -100 - 100

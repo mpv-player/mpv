@@ -242,8 +242,8 @@
 	{"tskeepbroken", &ts_keep_broken, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 	// draw by slices or whole frame (useful with libmpeg2/libavcodec)
-	{"slices", &vd_use_slices, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noslices", &vd_use_slices, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+        OPT_FLAG_ON("slices", vd_use_slices, 0),
+        OPT_FLAG_OFF("noslices", vd_use_slices, 0),
 	{"field-dominance", &field_dominance, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
 
 #ifdef USE_LIBAVCODEC

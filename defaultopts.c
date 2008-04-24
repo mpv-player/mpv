@@ -16,6 +16,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .playback_speed = 1.,
         .movie_aspect = -1.,
         .flip = -1,
+        .vd_use_slices = 1,
         .lavc_param = (struct lavc_param){
             .workaround_bugs = 1, // autodetect
             .error_resilience = 2,

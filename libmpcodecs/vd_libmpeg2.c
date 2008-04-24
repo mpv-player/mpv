@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "config.h"
-
+#include "options.h"
 #include "mp_msg.h"
 
 #include "vd_internal.h"
@@ -214,7 +214,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    }
             mpeg2_skip(mpeg2dec, 0); //mpeg2skip skips frames until set again to 0
 
-	    use_callback = (!framedrop && vd_use_slices &&
+	    use_callback = (!framedrop && sh->opts->vd_use_slices &&
 	    		    (info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME)) ?
 			    MP_IMGFLAG_DRAW_CALLBACK:0;
 
