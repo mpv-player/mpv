@@ -7,12 +7,7 @@
 #include "help_mp.h"
 #include "options.h"
 
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #include "codec-cfg.h"
-//#include "mp_image.h"
 
 #include "img_format.h"
 
@@ -23,8 +18,6 @@
 
 #include "vd.h"
 #include "vf.h"
-
-//#include "vd_internal.h"
 
 extern vd_functions_t mpcodecs_vd_null;
 extern vd_functions_t mpcodecs_vd_ffmpeg;
@@ -148,8 +141,6 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_VoConfigRequest, w, h,
            vo_format_name(preferred_outfmt));
 
-//    if(!vf) return 1; // temp hack
-
     if (get_video_quality_max(sh) <= 0 && divx_quality) {
         // user wants postprocess but no pp filter yet:
         sh->vfilter = vf = vf_open_filter(opts, vf, "pp", NULL);
@@ -178,7 +169,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         if ((flags & VFCAP_CSP_SUPPORTED_BY_HW)
             || (flags & VFCAP_CSP_SUPPORTED && j < 0)) {
             // check (query) if codec really support this outfmt...
-            sh->outfmtidx = j;  // pass index to the control() function this way
+            sh->outfmtidx = j; // pass index to the control() function this way
             if (sh->vd_driver->control(sh, VDCTRL_QUERY_FORMAT, &out_fmt) ==
                 CONTROL_FALSE) {
                 mp_msg(MSGT_CPLAYER, MSGL_DBG2,
@@ -194,7 +185,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
                    && !(flags &
                         (VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_CSP_SUPPORTED))
                    && (out_fmt == IMGFMT_RGB8 || out_fmt == IMGFMT_BGR8)) {
-            sh->outfmtidx = j;  // pass index to the control() function this way
+            sh->outfmtidx = j; // pass index to the control() function this way
             if (sh->vd_driver->control(sh, VDCTRL_QUERY_FORMAT, &out_fmt) !=
                 CONTROL_FALSE)
                 palette = 1;
@@ -211,9 +202,11 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
             palette = -1;
             vf = vf_open_filter(opts, vf, "palette", NULL);
             goto csp_again;
-        } else {                // sws failed, if the last filter (vf_vo) support MPEGPES try to append vf_lavc
+        } else {
+            // sws failed, if the last filter (vf_vo) support MPEGPES try
+            // to append vf_lavc
             vf_instance_t *vo, *vp = NULL, *ve;
-            // Remove the scale filter if we added it ourself
+            // Remove the scale filter if we added it ourselves
             if (vf == sc) {
                 ve = vf;
                 vf = vf->next;
@@ -262,7 +255,6 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         sh->aspect = opts->movie_aspect;        // cmdline overrides autodetect
     else if (sh->stream_aspect != 0.0)
         sh->aspect = sh->stream_aspect;
-//  if(!sh->aspect) sh->aspect=1.0;
 
     if (opts->screen_size_x || opts->screen_size_y) {
         screen_size_x = opts->screen_size_x;
@@ -328,7 +320,6 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (vf_config_wrapper
         (vf, sh->disp_w, sh->disp_h, screen_size_x, screen_size_y, vocfg_flags,
          out_fmt) == 0) {
-//                      "MPlayer",out_fmt)){
         mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_CannotInitVO);
         sh->vf_initialized = -1;
         return 0;
