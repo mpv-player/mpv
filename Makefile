@@ -711,4 +711,6 @@ toolsclean:
 	rm -f $(TOOLS) TOOLS/fastmem*-* TOOLS/netstream$(EXESUF)
 	rm -f TOOLS/bmovl-test$(EXESUF) TOOLS/vfw2menc$(EXESUF) $(REAL_TARGETS)
 
+-include $(DEPS)
+
 .PHONY: all doxygen *install* recurse strip tools
