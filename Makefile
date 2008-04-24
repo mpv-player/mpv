@@ -268,6 +268,45 @@ SRCS_COMMON-$(LIBDVDCSS_INTERNAL)    += libdvdcss/css.c \
                                         libdvdcss/libdvdcss.c \
                                         #libdvdcss/bsdi_ioctl \
 
+SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
+                                        libfaad2/cfft.c \
+                                        libfaad2/common.c \
+                                        libfaad2/decoder.c \
+                                        libfaad2/drc.c \
+                                        libfaad2/drm_dec.c \
+                                        libfaad2/error.c \
+                                        libfaad2/filtbank.c \
+                                        libfaad2/hcr.c \
+                                        libfaad2/huffman.c \
+                                        libfaad2/ic_predict.c \
+                                        libfaad2/is.c \
+                                        libfaad2/lt_predict.c \
+                                        libfaad2/mdct.c \
+                                        libfaad2/mp4.c \
+                                        libfaad2/ms.c \
+                                        libfaad2/output.c \
+                                        libfaad2/pns.c \
+                                        libfaad2/ps_dec.c \
+                                        libfaad2/ps_syntax.c  \
+                                        libfaad2/pulse.c \
+                                        libfaad2/rvlc.c \
+                                        libfaad2/sbr_dct.c \
+                                        libfaad2/sbr_dec.c \
+                                        libfaad2/sbr_e_nf.c \
+                                        libfaad2/sbr_fbt.c \
+                                        libfaad2/sbr_hfadj.c \
+                                        libfaad2/sbr_hfgen.c \
+                                        libfaad2/sbr_huff.c \
+                                        libfaad2/sbr_qmf.c \
+                                        libfaad2/sbr_syntax.c \
+                                        libfaad2/sbr_tf_grid.c \
+                                        libfaad2/specrec.c \
+                                        libfaad2/ssr.c \
+                                        libfaad2/ssr_fb.c \
+                                        libfaad2/ssr_ipqf.c \
+                                        libfaad2/syntax.c \
+                                        libfaad2/tns.c \
+
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
@@ -488,7 +527,6 @@ COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
 COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
-COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
 COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/dvdread.a
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
@@ -514,7 +552,6 @@ PARTS = dvdread \
         libavcodec \
         libavformat \
         libavutil \
-        libfaad2 \
         libmpeg2 \
         libpostproc \
         libswscale \
@@ -536,6 +573,7 @@ DIRS =  gui \
         libao2 \
         libass \
         libdvdcss \
+        libfaad2 \
         libmenu \
         libmpcodecs \
         libmpcodecs/native \
@@ -597,6 +635,7 @@ osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 	$(WINDRES) -o $@ $<
 
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\"
+libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
 
 libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Ilibavcodec
 
