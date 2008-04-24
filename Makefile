@@ -261,6 +261,13 @@ SRCS_COMMON-$(LIBDCA)                += libmpcodecs/ad_libdca.c
 SRCS_COMMON-$(LIBDV)                 += libmpcodecs/ad_libdv.c \
                                         libmpcodecs/vd_libdv.c \
                                         libmpdemux/demux_rawdv.c
+SRCS_COMMON-$(DVDCSS_INTERNAL)       += libdvdcss/css.c \
+                                        libdvdcss/device.c \
+                                        libdvdcss/error.c \
+                                        libdvdcss/ioctl.c \
+                                        libdvdcss/libdvdcss.c \
+                                        #libdvdcss/bsdi_ioctl \
+
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
@@ -483,7 +490,6 @@ COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
 COMMON_LIBS-$(FAAD_INTERNAL)      += libfaad2/libfaad2.a
 COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/dvdread.a
-COMMON_LIBS-$(DVDCSS_INTERNAL)    += libdvdcss/libdvdcss.a
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
 
@@ -508,7 +514,6 @@ PARTS = dvdread \
         libavcodec \
         libavformat \
         libavutil \
-        libdvdcss \
         libfaad2 \
         libmpeg2 \
         libpostproc \
@@ -530,6 +535,7 @@ DIRS =  gui \
         libaf \
         libao2 \
         libass \
+        libdvdcss \
         libmenu \
         libmpcodecs \
         libmpcodecs/native \
@@ -589,6 +595,8 @@ codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
 
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 	$(WINDRES) -o $@ $<
+
+libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\"
 
 libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Ilibavcodec
 
@@ -755,7 +763,6 @@ fastmemcpybench realcodecs: CFLAGS += -g
 # FIXME: netstream linking is a mess that should be fixed properly some day.
 # It does not work with either GUI, LIVE555, libavformat, cdparanoia enabled.
 NETSTREAM_DEPS = dvdread/libdvdread.a \
-                 libdvdcss/libdvdcss.a \
                  libavutil/libavutil.a \
                  m_option.o \
                  m_struct.o \
