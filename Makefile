@@ -163,6 +163,9 @@ SRCS_COMMON = asxparser.c \
               stream/stream_null.c \
               stream/url.c \
 
+SRCS_COMMON-$(AUDIO_INPUT)-$(ALSA1X) += stream/ai_alsa1x.c
+SRCS_COMMON-$(AUDIO_INPUT)-$(ALSA9)  += stream/ai_alsa.c
+SRCS_COMMON-$(AUDIO_INPUT)-$(OSS)    += stream/ai_oss.c
 SRCS_COMMON-$(BITMAP_FONT)           += libvo/font_load.c
 SRCS_COMMON-$(CDDA)                  += stream/stream_cdda.c \
                                         stream/cdinfo.c
@@ -304,11 +307,6 @@ SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
 SRCS_COMMON-$(XVID4)                 += libmpcodecs/vd_xvid4.c
 SRCS_COMMON-$(ZORAN)                 += libmpcodecs/vd_zrmjpeg.c \
                                         libmpcodecs/vf_zrmjpeg.c
-ifeq ($(AUDIO_INPUT),yes)
-SRCS_COMMON-$(ALSA1X)                += stream/ai_alsa1x.c
-SRCS_COMMON-$(ALSA9)                 += stream/ai_alsa.c
-SRCS_COMMON-$(OSS)                   += stream/ai_oss.c
-endif
 
 
 SRCS_MPLAYER = mplayer.c \
