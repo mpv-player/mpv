@@ -155,10 +155,26 @@ SRCS_COMMON = asxparser.c \
               libvo/sub.c \
               osdep/$(GETCH) \
               osdep/$(TIMER) \
+              stream/open.c \
+              stream/stream.c \
+              stream/stream_cue.c \
+              stream/stream_file.c \
+              stream/stream_mf.c \
+              stream/stream_null.c \
+              stream/url.c \
 
 SRCS_COMMON-$(BITMAP_FONT)           += libvo/font_load.c
+SRCS_COMMON-$(CDDA)                  += stream/stream_cdda.c \
+                                        stream/cdinfo.c
+SRCS_COMMON-$(CDDB)                  += stream/stream_cddb.c
+SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
+                                        stream/stream_dvb.c
+SRCS_COMMON-$(DVDNAV)                += stream/stream_dvdnav.c
+SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
+                                        stream/stream_dvd_common.c
 SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
 SRCS_COMMON-$(FREETYPE)              += libvo/font_load_ft.c
+SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(HAVE_POSIX_SELECT)     += libmpcodecs/vf_bmovl.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
@@ -197,12 +213,40 @@ SRCS_COMMON-$(LIBDV)                 += libmpcodecs/ad_libdv.c \
                                         libmpcodecs/vd_libdv.c
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c
+SRCS_COMMON-$(LIBNEMESI)             += stream/stream_nemesi.c
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
+SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIBVORBIS)             += libmpcodecs/ad_libvorbis.c
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
 SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c
+SRCS_COMMON-$(MPLAYER_NETWORK)       += stream/stream_netstream.c \
+                                        stream/asf_mmst_streaming.c \
+                                        stream/asf_streaming.c \
+                                        stream/cookies.c \
+                                        stream/http.c \
+                                        stream/network.c \
+                                        stream/pnm.c \
+                                        stream/rtp.c \
+                                        stream/udp.c \
+                                        stream/tcp.c \
+                                        stream/stream_rtp.c \
+                                        stream/stream_udp.c \
+                                        stream/realrtsp/asmrp.c \
+                                        stream/realrtsp/real.c \
+                                        stream/realrtsp/rmff.c \
+                                        stream/realrtsp/sdpplin.c \
+                                        stream/realrtsp/xbuffer.c \
+
 SRCS_COMMON-$(MUSEPACK)              += libmpcodecs/ad_mpc.c
+SRCS_COMMON-$(NATIVE_RTSP)           += stream/stream_rtsp.c \
+                                        stream/freesdp/common.c \
+                                        stream/freesdp/errorlist.c \
+                                        stream/freesdp/parser.c \
+                                        stream/librtsp/rtsp.c \
+                                        stream/librtsp/rtsp_rtp.c \
+                                        stream/librtsp/rtsp_session.c \
+
 SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
 SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
 SRCS_COMMON-$(NEED_MMAP)             += osdep/mmap-os2.c
@@ -212,11 +256,16 @@ SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
 SRCS_COMMON-$(NEED_SWAB)             += osdep/swab.c
 SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
 SRCS_COMMON-$(PNG)                   += libmpcodecs/vd_mpng.c
+SRCS_COMMON-$(PVR)                   += stream/stream_pvr.c
 SRCS_COMMON-$(QTX_CODECS)            += libmpcodecs/ad_qtaudio.c \
                                         libmpcodecs/vd_qtvideo.c
+SRCS_COMMON-$(RADIO)                 += stream/stream_radio.c
+SRCS_COMMON-$(RADIO_CAPTURE)         += stream/audio_in.c
 SRCS_COMMON-$(REAL_CODECS)           += libmpcodecs/ad_realaud.c \
                                         libmpcodecs/vd_realvid.c
 SRCS_COMMON-$(SPEEX)                 += libmpcodecs/ad_speex.c
+SRCS_COMMON-$(STREAM_CACHE)          += stream/cache2.c
+SRCS_COMMON-$(STREAMING_LIVE555)     += stream/stream_livedotcom.c
 SRCS_COMMON-$(TREMOR_INTERNAL)       += tremor/bitwise.c \
                                         tremor/block.c \
                                         tremor/codebook.c \
@@ -232,7 +281,16 @@ SRCS_COMMON-$(TREMOR_INTERNAL)       += tremor/bitwise.c \
                                         tremor/synthesis.c \
                                         tremor/window.c \
 
+SRCS_COMMON-$(TV)                    += stream/stream_tv.c stream/tv.c \
+                                        stream/frequencies.c stream/tvi_dummy.c
+SRCS_COMMON-$(TV_BSDBT848)           += stream/tvi_bsdbt848.c
+SRCS_COMMON-$(TV_DSHOW)              += stream/tvi_dshow.c
+SRCS_COMMON-$(TV_TELETEXT)           += stream/tvi_vbi.c
+SRCS_COMMON-$(TV_V4L1)               += stream/tvi_v4l.c  stream/audio_in.c
+SRCS_COMMON-$(TV_V4L2)               += stream/tvi_v4l2.c stream/audio_in.c
 SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
+SRCS_COMMON-$(VCD)                   += stream/stream_vcd.c
+SRCS_COMMON-$(VSTREAM)               += stream/stream_vstream.c
 SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         libmpcodecs/ad_dmo.c \
                                         libmpcodecs/ad_dshow.c \
@@ -246,6 +304,12 @@ SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
 SRCS_COMMON-$(XVID4)                 += libmpcodecs/vd_xvid4.c
 SRCS_COMMON-$(ZORAN)                 += libmpcodecs/vd_zrmjpeg.c \
                                         libmpcodecs/vf_zrmjpeg.c
+ifeq ($(AUDIO_INPUT),yes)
+SRCS_COMMON-$(ALSA1X)                += stream/ai_alsa1x.c
+SRCS_COMMON-$(ALSA9)                 += stream/ai_alsa.c
+SRCS_COMMON-$(OSS)                   += stream/ai_oss.c
+endif
+
 
 SRCS_MPLAYER = mplayer.c \
                m_property.c \
@@ -348,7 +412,6 @@ SRCS_MENCODER-$(X264)             += libmpcodecs/ve_x264.c
 SRCS_MENCODER-$(XVID4)            += libmpcodecs/ve_xvid4.c
 
 COMMON_LIBS = libmpdemux/libmpdemux.a \
-              stream/stream.a \
               libswscale/libswscale.a \
 
 COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
@@ -395,7 +458,6 @@ PARTS = dvdread \
         libpostproc \
         libswscale \
         mp3lib \
-        stream \
         vidix \
 
 ifdef ARCH_X86
@@ -417,6 +479,10 @@ DIRS =  gui \
         libmpcodecs/native \
         libvo \
         osdep \
+        stream \
+        stream/freesdp \
+        stream/librtsp \
+        stream/realrtsp \
         tremor \
         TOOLS \
 
@@ -630,7 +696,6 @@ fastmemcpybench realcodecs: CFLAGS += -g
 # FIXME: netstream linking is a mess that should be fixed properly some day.
 # It does not work with either GUI, LIVE555, libavformat, cdparanoia enabled.
 NETSTREAM_DEPS = libmpdemux/libmpdemux.a \
-                 stream/stream.a \
                  dvdread/libdvdread.a \
                  libdvdcss/libdvdcss.a \
                  libavutil/libavutil.a \
