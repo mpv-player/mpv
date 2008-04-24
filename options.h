@@ -18,6 +18,8 @@ typedef struct MPOpts {
     int video_id;
     int sub_id;
     float playback_speed;
+    int softzoom;
+    int flip;
     struct lavc_param {
         int workaround_bugs;
         int error_resilience;

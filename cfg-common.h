@@ -10,8 +10,6 @@ extern int mp_msg_module;
 // codec/filter opts: (defined at libmpcodecs/vd.c)
 extern float screen_size_xy;
 extern float movie_aspect;
-extern int softzoom;
-extern int flip;
 
 /* defined in codec-cfg.c */
 extern char * codecs_file;

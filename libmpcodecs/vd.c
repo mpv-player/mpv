@@ -111,8 +111,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #include "libvo/video_out.h"
 
 // libvo opts:
-int softzoom=0;
-int flip=-1;
 int opt_screen_size_x=0;
 int opt_screen_size_y=0;
 float screen_size_xy=0;
@@ -232,14 +230,14 @@ csp_again:
     sh->vfilter=vf;
 
     // autodetect flipping
-    if(flip==-1){
-	flip=0;
+    if(opts->flip==-1){
+	opts->flip=0;
 	if(sh->codec->outflags[j]&CODECS_FLAG_FLIP)
 	    if(!(sh->codec->outflags[j]&CODECS_FLAG_NOFLIP))
-		flip=1;
+		opts->flip=1;
     }
-    if(vo_flags&VFCAP_FLIPPED) flip^=1;
-    if(flip && !(vo_flags&VFCAP_FLIP)){
+    if(vo_flags&VFCAP_FLIPPED) opts->flip^=1;
+    if(opts->flip && !(vo_flags&VFCAP_FLIP)){
 	// we need to flip, but no flipping filter avail.
 	vf_add_before_vo(&vf, "flip", NULL);
 	sh->vfilter = vf;
@@ -292,8 +290,8 @@ csp_again:
 
   vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN:0)
       | (opts->vidmode ? VOFLAG_MODESWITCHING:0)
-      | (softzoom ? VOFLAG_SWSCALE:0)
-      | (flip ? VOFLAG_FLIPPING:0);
+      | (opts->softzoom ? VOFLAG_SWSCALE:0)
+      | (opts->flip ? VOFLAG_FLIPPING:0);
 
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER,MSGL_V,"VO Config (%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
