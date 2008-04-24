@@ -6,6 +6,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "options.h"
 
 #include "libavutil/common.h"
 #include "libavutil/intreadwrite.h"
@@ -47,6 +48,7 @@ typedef struct {
     int ip_count;
     int b_count;
     AVRational last_sample_aspect_ratio;
+    int lowres;
 } vd_ffmpeg_ctx;
 
 //#ifdef USE_LIBPOSTPROC
@@ -68,46 +70,27 @@ static void mc_render_slice(struct AVCodecContext *s,
                 	int y, int type, int height);
 #endif
 
-static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
-static int lavc_param_error_resilience=2;
-static int lavc_param_error_concealment=3;
-static int lavc_param_gray=0;
-static int lavc_param_vstats=0;
-static int lavc_param_idct_algo=0;
-static int lavc_param_debug=0;
-static int lavc_param_vismv=0;
-static int lavc_param_skip_top=0;
-static int lavc_param_skip_bottom=0;
-static int lavc_param_fast=0;
-static int lavc_param_lowres=0;
-static char *lavc_param_lowres_str=NULL;
-static char *lavc_param_skip_loop_filter_str = NULL;
-static char *lavc_param_skip_idct_str = NULL;
-static char *lavc_param_skip_frame_str = NULL;
-static int lavc_param_threads=1;
-static int lavc_param_bitexact=0;
-
 const m_option_t lavc_decode_opts_conf[]={
-	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
-	{"er", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
-	{"idct", &lavc_param_idct_algo, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-	{"ec", &lavc_param_error_concealment, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
-	{"vismv", &lavc_param_vismv, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
-	{"st", &lavc_param_skip_top, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
-	{"sb", &lavc_param_skip_bottom, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
+    OPT_INTRANGE("bug", lavc_param.workaround_bugs, 0, -1, 999999),
+    OPT_INTRANGE("er", lavc_param.error_resilience, 0, 0, 99),
+    OPT_FLAG_ON("gray", lavc_param.gray, 0),
+    OPT_INTRANGE("idct", lavc_param.idct_algo, 0, 0, 99),
+    OPT_INTRANGE("ec", lavc_param.error_concealment, 0, 0, 99),
+    OPT_FLAG_ON("vstats", lavc_param.vstats, 0),
+    OPT_INTRANGE("debug", lavc_param.debug, 0, 0, 9999999),
+    OPT_INTRANGE("vismv", lavc_param.vismv, 0, 0, 9999999),
+    OPT_INTRANGE("st", lavc_param.skip_top, 0, 0, 999),
+    OPT_INTRANGE("sb", lavc_param.skip_bottom, 0, 0, 999),
 #ifdef CODEC_FLAG2_FAST
-        {"fast", &lavc_param_fast, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG2_FAST, NULL},
+    OPT_FLAG_CONSTANTS("fast", lavc_param.fast, 0, 0, CODEC_FLAG2_FAST),
 #endif
-	{"lowres", &lavc_param_lowres_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"skiploopfilter", &lavc_param_skip_loop_filter_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"skipidct", &lavc_param_skip_idct_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"skipframe", &lavc_param_skip_frame_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-        {"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
-        {"bitexact", &lavc_param_bitexact, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_BITEXACT, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
+    OPT_STRING("lowres", lavc_param.lowres_str, 0),
+    OPT_STRING("skiploopfilter", lavc_param.skip_loop_filter_str, 0),
+    OPT_STRING("skipidct", lavc_param.skip_idct_str, 0),
+    OPT_STRING("skipframe", lavc_param.skip_frame_str, 0),
+    OPT_INTRANGE("threads", lavc_param.threads, 0, 1, 8),
+    OPT_FLAG_CONSTANTS("bitexact", lavc_param.bitexact, 0, 0, CODEC_FLAG_BITEXACT),
+    {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 static enum AVDiscard str2AVDiscard(char *str) {
@@ -217,11 +200,12 @@ void mp_msp_av_log_callback(void* ptr, int level, const char* fmt, va_list vl)
 
 // init driver
 static int init(sh_video_t *sh){
+    struct lavc_param *lavc_param = &sh->opts->lavc_param;
     AVCodecContext *avctx;
     vd_ffmpeg_ctx *ctx;
     AVCodec *lavc_codec;
     int lowres_w=0;
-    int do_vis_debug= lavc_param_vismv || (lavc_param_debug&(FF_DEBUG_VIS_MB_TYPE|FF_DEBUG_VIS_QP));
+    int do_vis_debug= lavc_param->vismv || (lavc_param->debug&(FF_DEBUG_VIS_MB_TYPE|FF_DEBUG_VIS_QP));
 
     if(!avcodec_initialized){
       avcodec_init();
@@ -282,36 +266,36 @@ static int init(sh_video_t *sh){
 #ifdef CODEC_FLAG_NOT_TRUNCATED
     avctx->flags|= CODEC_FLAG_NOT_TRUNCATED;
 #endif
-    avctx->flags|= lavc_param_bitexact;
+    avctx->flags|= lavc_param->bitexact;
     
     avctx->width = sh->disp_w;
     avctx->height= sh->disp_h;
-    avctx->workaround_bugs= lavc_param_workaround_bugs;
-    avctx->error_resilience= lavc_param_error_resilience;
-    if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
+    avctx->workaround_bugs= lavc_param->workaround_bugs;
+    avctx->error_resilience= lavc_param->error_resilience;
+    if(lavc_param->gray) avctx->flags|= CODEC_FLAG_GRAY;
 #ifdef CODEC_FLAG2_FAST
-    avctx->flags2|= lavc_param_fast;
+    avctx->flags2|= lavc_param->fast;
 #endif
     avctx->codec_tag= sh->format;
     avctx->stream_codec_tag= sh->video.fccHandler;
-    avctx->idct_algo= lavc_param_idct_algo;
-    avctx->error_concealment= lavc_param_error_concealment;
-    avctx->debug= lavc_param_debug;
-    if (lavc_param_debug)
+    avctx->idct_algo= lavc_param->idct_algo;
+    avctx->error_concealment= lavc_param->error_concealment;
+    avctx->debug= lavc_param->debug;
+    if (lavc_param->debug)
         av_log_set_level(AV_LOG_DEBUG);
-    avctx->debug_mv= lavc_param_vismv;
-    avctx->skip_top   = lavc_param_skip_top;
-    avctx->skip_bottom= lavc_param_skip_bottom;
-    if(lavc_param_lowres_str != NULL)
+    avctx->debug_mv= lavc_param->vismv;
+    avctx->skip_top   = lavc_param->skip_top;
+    avctx->skip_bottom= lavc_param->skip_bottom;
+    if(lavc_param->lowres_str != NULL)
     {
-        sscanf(lavc_param_lowres_str, "%d,%d", &lavc_param_lowres, &lowres_w);
-        if(lavc_param_lowres < 1 || lavc_param_lowres > 16 || (lowres_w > 0 && avctx->width < lowres_w))
-            lavc_param_lowres = 0;
-        avctx->lowres = lavc_param_lowres;
+        sscanf(lavc_param->lowres_str, "%d,%d", &ctx->lowres, &lowres_w);
+        if(ctx->lowres < 1 || ctx->lowres > 16 || (lowres_w > 0 && avctx->width < lowres_w))
+            ctx->lowres = 0;
+        avctx->lowres = ctx->lowres;
     }
-    avctx->skip_loop_filter = str2AVDiscard(lavc_param_skip_loop_filter_str);
-    avctx->skip_idct = str2AVDiscard(lavc_param_skip_idct_str);
-    avctx->skip_frame = str2AVDiscard(lavc_param_skip_frame_str);
+    avctx->skip_loop_filter = str2AVDiscard(lavc_param->skip_loop_filter_str);
+    avctx->skip_idct = str2AVDiscard(lavc_param->skip_idct_str);
+    avctx->skip_frame = str2AVDiscard(lavc_param->skip_frame_str);
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     switch (sh->format) {
     case mmioFOURCC('S','V','Q','3'):
@@ -398,8 +382,8 @@ static int init(sh_video_t *sh){
     if(sh->bih)
 	avctx->bits_per_sample= sh->bih->biBitCount;
 
-    if(lavc_param_threads > 1)
-        avcodec_thread_init(avctx, lavc_param_threads);
+    if(lavc_param->threads > 1)
+        avcodec_thread_init(avctx, lavc_param->threads);
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
@@ -415,7 +399,7 @@ static void uninit(sh_video_t *sh){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
     
-    if(lavc_param_vstats){
+    if(sh->opts->lavc_param.vstats){
         int i;
         for(i=1; i<32; i++){
             mp_msg(MSGT_DECVIDEO, MSGL_INFO,"QP: %d, count: %d\n", i, ctx->qp_stat[i]);
@@ -449,7 +433,8 @@ static void draw_slice(struct AVCodecContext *s,
 #if 0
     int start=0, i;
     int width= s->width;
-    int skip_stride= ((width<<lavc_param_lowres)+15)>>4;
+    vd_ffmpeg_ctx *ctx = sh->context;
+    int skip_stride= ((width << ctx->lowres)+15)>>4;
     uint8_t *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_frame->age;
     if(s->pict_type!=B_TYPE){
@@ -487,8 +472,8 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
     // if sh->ImageDesc is non-NULL, it means we decode QuickTime(tm) video.
     // use dimensions from BIH to avoid black borders at the right and bottom.
     if (sh->bih && sh->ImageDesc) {
-	width = sh->bih->biWidth>>lavc_param_lowres;
-	height = sh->bih->biHeight>>lavc_param_lowres;
+	width = sh->bih->biWidth >> ctx->lowres;
+	height = sh->bih->biHeight >> ctx->lowres;
     }
     
      // it is possible another vo buffers to be used after vo config()
@@ -729,6 +714,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVFrame *pic= ctx->pic;
     AVCodecContext *avctx = ctx->avctx;
+    struct lavc_param *lavc_param = &sh->opts->lavc_param;
     mp_image_t* mpi=NULL;
     int dr1= ctx->do_dr1;
 
@@ -780,7 +766,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
 //printf("repeat: %d\n", pic->repeat_pict);
 //-- vstats generation
-    while(lavc_param_vstats){ // always one time loop
+    while(lavc_param->vstats){ // always one time loop
         static FILE *fvstats=NULL;
         char filename[20];
         static long long int all_len=0;
@@ -799,7 +785,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
             fvstats = fopen(filename,"w");
             if(!fvstats) {
                 perror("fopen");
-                lavc_param_vstats=0; // disable block
+                lavc_param->vstats=0; // disable block
                 break;
                 /*exit(1);*/
             }
@@ -808,8 +794,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	// average MB quantizer
 	{
 	    int x, y;
-	    int w = ((avctx->width  << lavc_param_lowres)+15) >> 4;
-	    int h = ((avctx->height << lavc_param_lowres)+15) >> 4;
+	    int w = ((avctx->width  << ctx->lowres)+15) >> 4;
+	    int h = ((avctx->height << ctx->lowres)+15) >> 4;
 	    int8_t *q = pic->qscale_table;
 	    for( y = 0; y < h; y++ ) {
 		for( x = 0; x < w; x++ )

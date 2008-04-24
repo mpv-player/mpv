@@ -16,6 +16,25 @@ typedef struct MPOpts {
     int video_id;
     int sub_id;
     float playback_speed;
+    struct lavc_param {
+        int workaround_bugs;
+        int error_resilience;
+        int error_concealment;
+        int gray;
+        int vstats;
+        int idct_algo;
+        int debug;
+        int vismv;
+        int skip_top;
+        int skip_bottom;
+        int fast;
+        char *lowres_str;
+        char *skip_loop_filter_str;
+        char *skip_idct_str;
+        char *skip_frame_str;
+        int threads;
+        int bitexact;
+    } lavc_param;
 } MPOpts;
 
 #endif
