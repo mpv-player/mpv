@@ -34,6 +34,9 @@ distclean:: clean
 %.d: %.c
 	$(MPDEPEND_CMD) > $@
 
+%.d: %.cpp
+	$(MPDEPEND_CMD_CXX) > $@
+
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
