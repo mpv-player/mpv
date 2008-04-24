@@ -92,7 +92,7 @@ struct MPOpts;
 #define SEEK_FACTOR   (1 << 1)
 
 // Holds one packet/frame/whatever
-typedef struct demux_packet_st {
+typedef struct demux_packet {
   int len;
   double pts;
   double endpts;
@@ -101,8 +101,8 @@ typedef struct demux_packet_st {
   unsigned char* buffer;
   int flags; // keyframe, etc
   int refcount;   //refcounter for the master packet, if 0, buffer can be free()d
-  struct demux_packet_st* master; //pointer to the master packet if this one is a cloned one
-  struct demux_packet_st* next;
+  struct demux_packet *master; //pointer to the master packet if this one is a cloned one
+  struct demux_packet *next;
 } demux_packet_t;
 
 typedef struct demux_stream {
@@ -123,7 +123,7 @@ typedef struct demux_stream {
   demux_packet_t *last;   // append new packets from input stream to here
   demux_packet_t *current;// needed for refcounting of the buffer
   int id;                 // stream ID  (for multiple audio/video streams)
-  struct demuxer_st *demuxer; // parent demuxer structure (stream handler)
+  struct demuxer *demuxer; // parent demuxer structure (stream handler)
 // ---- asf -----
   demux_packet_t *asf_packet;  // read asf fragments here
   int asf_seq;
@@ -133,7 +133,7 @@ typedef struct demux_stream {
   void* sh;
 } demux_stream_t;
 
-typedef struct demuxer_info_st {
+typedef struct demuxer_info {
   char *name;
   char *author;
   char *encoder;
@@ -145,12 +145,12 @@ typedef struct demuxer_info_st {
 #define MAX_V_STREAMS 256
 #define MAX_S_STREAMS 32
 
-struct demuxer_st;
+struct demuxer;
 
 /**
  * Demuxer description structure
  */
-typedef struct demuxers_desc_st {
+typedef struct demuxer_desc {
   const char *info; ///< What is it (long name and/or description)
   const char *name; ///< Demuxer name, used with -demuxer switch
   const char *shortdesc; ///< Description printed at demuxer detection
@@ -161,26 +161,26 @@ typedef struct demuxers_desc_st {
   int safe_check; ///< If 1 detection is safe and fast, do it before file extension check
 
   /// Check if can demux the file, return DEMUXER_TYPE_xxx on success
-  int (*check_file)(struct demuxer_st *demuxer); ///< Mandatory if safe_check == 1, else optional 
+  int (*check_file)(struct demuxer *demuxer); ///< Mandatory if safe_check == 1, else optional
   /// Get packets from file, return 0 on eof
-  int (*fill_buffer)(struct demuxer_st *demuxer, demux_stream_t *ds); ///< Mandatory
+  int (*fill_buffer)(struct demuxer *demuxer, demux_stream_t *ds); ///< Mandatory
   /// Open the demuxer, return demuxer on success, NULL on failure
-  struct demuxer_st* (*open)(struct demuxer_st *demuxer); ///< Optional
+  struct demuxer* (*open)(struct demuxer *demuxer); ///< Optional
   /// Close the demuxer
-  void (*close)(struct demuxer_st *demuxer); ///< Optional
+  void (*close)(struct demuxer *demuxer); ///< Optional
   // Seek
-  void (*seek)(struct demuxer_st *demuxer, float rel_seek_secs, float audio_delay, int flags); ///< Optional
+  void (*seek)(struct demuxer *demuxer, float rel_seek_secs, float audio_delay, int flags); ///< Optional
   // Control
-  int (*control)(struct demuxer_st *demuxer, int cmd, void *arg); ///< Optional
+  int (*control)(struct demuxer *demuxer, int cmd, void *arg); ///< Optional
 } demuxer_desc_t;
 
-typedef struct demux_chapter_s
+typedef struct demux_chapter
 {
   uint64_t start, end;
   char* name;
 } demux_chapter_t;
 
-typedef struct demux_attachment_s
+typedef struct demux_attachment
 {
   char* name;
   char* type;
@@ -188,7 +188,7 @@ typedef struct demux_attachment_s
   unsigned int data_size;
 } demux_attachment_t;
 
-typedef struct demuxer_st {
+typedef struct demuxer {
   const demuxer_desc_t *desc;  ///< Demuxer description structure
   off_t filepos; // input stream current pos.
   off_t movi_start;
@@ -301,7 +301,7 @@ static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
   return realloc(ptr, nmemb * size);
 }
 
-demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id);
+demux_stream_t* new_demuxer_stream(struct demuxer *demuxer,int id);
 demuxer_t* new_demuxer(struct MPOpts *opts, stream_t *stream,int type,int a_id,int v_id,int s_id,char *filename);
 void free_demuxer_stream(demux_stream_t *ds);
 void free_demuxer(demuxer_t *demuxer);

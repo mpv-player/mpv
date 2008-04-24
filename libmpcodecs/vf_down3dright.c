@@ -78,7 +78,7 @@ static void toright(unsigned char *dst[3], unsigned char *src[3],
 	}
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
 
@@ -95,7 +95,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return vf_next_put_image(vf,dmpi, pts);
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance* vf,
 		  int width, int height, int d_width, int d_height,
 		  unsigned int flags, unsigned int outfmt)
 {
@@ -105,7 +105,7 @@ static int config(struct vf_instance_s* vf,
 }
 
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+static int query_format(struct vf_instance* vf, unsigned int fmt)
 {
 	/* FIXME - really any YUV 4:2:0 input format should work */
 	switch (fmt) {
@@ -117,7 +117,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	return 0;
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance* vf)
 {
 	free(vf->priv);
 }

@@ -11,7 +11,7 @@ typedef struct sh_audio {
   struct MPOpts *opts;
   int aid;
   struct demux_stream *ds;
-  struct codecs_st *codec;
+  struct codecs *codec;
   unsigned int format;
   int initialized;
   float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
@@ -37,8 +37,8 @@ typedef struct sh_audio {
   int a_out_buffer_len;
   int a_out_buffer_size;
 //  void* audio_out;        // the audio_out handle, used for this audio stream
-  struct af_stream_s *afilter;          // the audio filter stream
-  struct ad_functions_s* ad_driver;
+  struct af_stream *afilter;          // the audio filter stream
+  struct ad_functions *ad_driver;
 #ifdef DYNAMIC_PLUGINS
   void *dec_handle;
 #endif
@@ -59,7 +59,7 @@ typedef struct sh_video {
   struct MPOpts *opts;
   int vid;
   struct demux_stream *ds;
-  struct codecs_st *codec;
+  struct codecs *codec;
   unsigned int format;
   int initialized;
   float timer;		  // absolute time in video stream, since last start/seek
@@ -83,7 +83,7 @@ typedef struct sh_video {
   int disp_w,disp_h;      // display size (filled by fileformat parser)
   // output driver/filters: (set by libmpcodecs core)
   unsigned int outfmtidx;
-  struct vf_instance_s *vfilter;          // the video filter chain, used for this video stream
+  struct vf_instance *vfilter;          // the video filter chain, used for this video stream
   int vf_initialized;
 #ifdef DYNAMIC_PLUGINS
   void *dec_handle;

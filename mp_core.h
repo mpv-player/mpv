@@ -46,8 +46,8 @@ typedef struct MPContext {
     int eof;
     int play_tree_step;
 
-    struct stream_st *stream;
-    struct demuxer_st *demuxer;
+    struct stream *stream;
+    struct demuxer *demuxer;
     struct sh_audio *sh_audio;
     struct sh_video *sh_video;
     struct demux_stream *d_audio;
@@ -94,7 +94,7 @@ typedef struct MPContext {
     int was_paused;
 
 #ifdef USE_DVDNAV
-    struct mp_image_s *nav_smpi; ///< last decoded dvdnav video image
+    struct mp_image *nav_smpi; ///< last decoded dvdnav video image
     unsigned char *nav_buffer;   ///< last read dvdnav video frame
     unsigned char *nav_start;    ///< pointer to last read video buffer
     int            nav_in_size;  ///< last read size
@@ -108,8 +108,8 @@ extern int file_filter;
 // These appear in options list
 extern int forced_subs_only;
 
-
-int build_afilter_chain(struct MPContext *mpctx, struct sh_audio *sh_audio, struct ao_data_s *ao_data);
+struct ao_data;
+int build_afilter_chain(struct MPContext *mpctx, struct sh_audio *sh_audio, struct ao_data *ao_data);
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 void init_vo_spudec(struct MPContext *mpctx);

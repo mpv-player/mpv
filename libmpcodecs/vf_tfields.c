@@ -300,9 +300,9 @@ static void qpel_4tap_C(unsigned char *d, unsigned char *s, int w, int h, int ds
 static void (*qpel_li)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
 static void (*qpel_4tap)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
 
-static int continue_buffered_image(struct vf_instance_s *);
+static int continue_buffered_image(struct vf_instance *);
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
 {
 	vf->priv->buffered_mpi = mpi;
 	vf->priv->buffered_pts = pts;
@@ -310,7 +310,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	return continue_buffered_image(vf);
 }
 
-static int continue_buffered_image(struct vf_instance_s *vf)
+static int continue_buffered_image(struct vf_instance *vf)
 {
         struct MPOpts *opts = vf->opts;
 	int i=vf->priv->buffered_i;
@@ -431,7 +431,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 }
 
 #if 0
-static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+static int query_format(struct vf_instance* vf, unsigned int fmt)
 {
 	/* FIXME - figure out which other formats work */
 	switch (fmt) {
@@ -444,7 +444,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 }
 #endif
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
@@ -460,7 +460,7 @@ static int config(struct vf_instance_s* vf,
 	return 0;
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance* vf)
 {
 	free(vf->priv);
 }

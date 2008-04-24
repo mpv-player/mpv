@@ -151,7 +151,7 @@ vf_info_t* info;
     const char *name;    // short name of the filter, must be FILTERNAME
     const char *author;  // name and email/url of the author(s)
     const char *comment; // comment, url to papers describing algo etc.
-    int (*open)(struct vf_instance_s* vf,char* args);
+    int (*open)(struct vf_instance* vf,char* args);
                          // pointer to the open() function:
 
 Sample:
@@ -200,7 +200,7 @@ NOTE: All these are optional, their function pointer is either NULL or points
 to a default implementation. If you implement them, don't forget to set
 vf->FUNCNAME in your open() !
 
-    int (*query_format)(struct vf_instance_s* vf,
+    int (*query_format)(struct vf_instance* vf,
         unsigned int fmt);
 
 The query_format() function is called one or more times before the config(),
@@ -214,7 +214,7 @@ next filter will accept at least one of your possible output colorspaces!
 
 Sample:
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance* vf, unsigned int fmt){
     switch(fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
@@ -229,7 +229,7 @@ For the more complex case, when you have an N->M colorspace mapping matrix,
 see vf_scale or vf_rgb2bgr for examples.
 
 
-    int (*config)(struct vf_instance_s* vf,
+    int (*config)(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
         unsigned int flags, unsigned int outfmt);
 
@@ -254,7 +254,7 @@ Its parameters are already well-known from libvo:
 
 Sample:
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
         unsigned int flags, unsigned int outfmt){
     // use d_width/d_height if not set by user:
@@ -266,12 +266,12 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,outfmt);
 }
 
-    void (*uninit)(struct vf_instance_s* vf);
+    void (*uninit)(struct vf_instance* vf);
 
 Okey, uninit() is the simplest, it's called at the end. You can free your
 private buffers etc here.
 
-    int (*put_image)(struct vf_instance_s* vf,
+    int (*put_image)(struct vf_instance* vf,
         mp_image_t *mpi);
 
 Ah, put_image(). This is the main filter function, it should convert/filter/
@@ -328,7 +328,7 @@ image:
 
 Ok, the rest is for advanced functionality only:
 
-    int (*control)(struct vf_instance_s* vf,
+    int (*control)(struct vf_instance* vf,
         int request, void* data);
 
 You can control the filter at runtime from MPlayer/MEncoder/dec_video:
@@ -340,7 +340,7 @@ You can control the filter at runtime from MPlayer/MEncoder/dec_video:
 #define VFCTRL_CHANGE_RECTANGLE 9 /* Change the rectangle boundaries */
 
 
-    void (*get_image)(struct vf_instance_s* vf,
+    void (*get_image)(struct vf_instance* vf,
         mp_image_t *mpi);
 
 This is for direct rendering support, works the same way as in libvo drivers.
@@ -357,7 +357,7 @@ order, while put_image is called for display) so the only safe place to save
 it is in the mpi struct itself: mpi->priv=(void*)dmpi;
 
 
-    void (*draw_slice)(struct vf_instance_s* vf,
+    void (*draw_slice)(struct vf_instance* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y);
 
 It's the good old draw_slice callback, already known from libvo.

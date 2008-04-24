@@ -40,7 +40,7 @@ struct vf_priv_s {
 
 //===========================================================================//
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance* vf,
 		  int width, int height, int d_width, int d_height,
 		  unsigned int flags, unsigned int outfmt)
 {
@@ -121,7 +121,7 @@ static void scale_image(struct vf_priv_s* priv, mp_image_t *mpi)
     sws_scale_ordered(priv->ctx, mpi->planes, mpi->stride, 0, priv->dh, dst, dst_stride);
 }
 
-static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
+static void start_slice(struct vf_instance* vf, mp_image_t *mpi){
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	mpi->type, mpi->flags, mpi->width, mpi->height);
     if (vf->priv->shot) {
@@ -132,7 +132,7 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
     
 }
 
-static void draw_slice(struct vf_instance_s* vf,
+static void draw_slice(struct vf_instance* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     if (vf->priv->store_slices) {
 	uint8_t *dst[3];
@@ -146,7 +146,7 @@ static void draw_slice(struct vf_instance_s* vf,
     vf_next_draw_slice(vf,src,stride,w,h,x,y);
 }
 
-static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static void get_image(struct vf_instance* vf, mp_image_t *mpi){
     // FIXME: should vf.c really call get_image when using slices??
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
       return;
@@ -168,7 +168,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mpi->priv=(void*)vf->dmpi;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
 {
     mp_image_t *dmpi = (mp_image_t *)mpi->priv;
     
@@ -229,7 +229,7 @@ int control (vf_instance_t *vf, int request, void *data)
 
 //===========================================================================//
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+static int query_format(struct vf_instance* vf, unsigned int fmt)
 {
     switch(fmt){
     case IMGFMT_YV12:

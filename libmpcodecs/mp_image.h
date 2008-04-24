@@ -75,7 +75,7 @@
 #define MP_IMGFIELD_BOTTOM 0x10
 #define MP_IMGFIELD_INTERLACED 0x20
 
-typedef struct mp_image_s {
+typedef struct mp_image {
     unsigned short flags;
     unsigned char type;
     unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8

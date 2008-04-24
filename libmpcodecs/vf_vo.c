@@ -31,9 +31,9 @@ struct vf_priv_s {
 };
 #define video_out (vf->priv->vo)
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt); /* forward declaration */
+static int query_format(struct vf_instance* vf, unsigned int fmt); /* forward declaration */
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
 
@@ -71,7 +71,7 @@ static int config(struct vf_instance_s* vf,
     return 1;
 }
 
-static int control(struct vf_instance_s* vf, int request, void* data)
+static int control(struct vf_instance* vf, int request, void* data)
 {
     switch(request){
     case VFCTRL_GET_DEINTERLACE:
@@ -150,7 +150,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
     return CONTROL_UNKNOWN;
 }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance* vf, unsigned int fmt){
     int flags = vo_control(video_out, VOCTRL_QUERY_FORMAT, &fmt);
     // draw_slice() accepts stride, draw_frame() doesn't:
     if(flags)
@@ -159,13 +159,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return flags;
 }
 
-static void get_image(struct vf_instance_s* vf,
+static void get_image(struct vf_instance* vf,
         mp_image_t *mpi){
     if(vo_directrendering && video_out->config_ok)
 	vo_control(video_out, VOCTRL_GET_IMAGE, mpi);
 }
 
-static int put_image(struct vf_instance_s* vf,
+static int put_image(struct vf_instance* vf,
         mp_image_t *mpi, double pts){
   if(!video_out->config_ok) return 0; // vo not configured?
   // record pts (potentially modified by filters) for main loop
@@ -184,19 +184,19 @@ static int put_image(struct vf_instance_s* vf,
   return 1;
 }
 
-static void start_slice(struct vf_instance_s* vf,
+static void start_slice(struct vf_instance* vf,
 		       mp_image_t *mpi) {
     if(!video_out->config_ok) return; // vo not configured?
     vo_control(video_out, VOCTRL_START_SLICE,mpi);
 }
 
-static void draw_slice(struct vf_instance_s* vf,
+static void draw_slice(struct vf_instance* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     if(!video_out->config_ok) return; // vo not configured?
     vo_draw_slice(video_out, src,stride,w,h,x,y);
 }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance* vf)
 {
     if (vf->priv) {
 #ifdef USE_ASS

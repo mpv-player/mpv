@@ -373,7 +373,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
 #endif
 }
 
-static int config(struct vf_instance_s* vf,
+static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
         int i, j;
@@ -391,9 +391,9 @@ static int config(struct vf_instance_s* vf,
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static int continue_buffered_image(struct vf_instance_s *vf);
+static int continue_buffered_image(struct vf_instance *vf);
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
+static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
     int tff;
 
     if(vf->priv->parity < 0) {
@@ -420,7 +420,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
         return continue_buffered_image(vf);
 }
 
-static int continue_buffered_image(struct vf_instance_s *vf)
+static int continue_buffered_image(struct vf_instance *vf)
 {
     struct MPOpts *opts = vf->opts;
     mp_image_t *mpi = vf->priv->buffered_mpi;
@@ -451,7 +451,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
     return ret;
 }
 
-static void uninit(struct vf_instance_s* vf){
+static void uninit(struct vf_instance* vf){
     int i;
     if(!vf->priv) return;
 
@@ -465,7 +465,7 @@ static void uninit(struct vf_instance_s* vf){
 }
 
 //===========================================================================//
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+static int query_format(struct vf_instance* vf, unsigned int fmt){
     switch(fmt){
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
@@ -477,7 +477,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static int control(struct vf_instance_s* vf, int request, void* data){
+static int control(struct vf_instance* vf, int request, void* data){
     switch (request){
       case VFCTRL_GET_DEINTERLACE:
         *(int*)data = vf->priv->do_deinterlace;

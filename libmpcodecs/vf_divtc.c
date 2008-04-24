@@ -239,7 +239,7 @@ static int match(struct vf_priv_s *p, int *diffs,
    return m;
    }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
+static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
    {
    mp_image_t *dmpi, *tmpi=0;
    int n, m, f, newphase;
@@ -550,7 +550,7 @@ static int analyze(struct vf_priv_s *p)
    return 1;
    }
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt)
+static int query_format(struct vf_instance* vf, unsigned int fmt)
    {
    switch(fmt)
       {
@@ -565,7 +565,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
    return 0;
    }
 
-static void uninit(struct vf_instance_s* vf)
+static void uninit(struct vf_instance* vf)
    {
    if(vf->priv)
       {
