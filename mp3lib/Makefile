@@ -15,5 +15,5 @@ include ../mpcommon.mak
 
 decode_i586.o: CFLAGS += -fomit-frame-pointer
 
-%: %.c $(LIBNAME_COMMON) ../libvo/aclib.o ../mp_msg-mencoder.o ../cpudetect.o ../osdep/$(GETCH:.c=.o)
+%: %.c $(LIBNAME_COMMON) ../libvo/aclib.o ../mp_msg-mencoder.o ../cpudetect.o ../mp_fifo.o ../osdep/$(TIMER) ../osdep/$(GETCH)
 	$(CC) $(CFLAGS) -o $@ $^ -ltermcap -lm
