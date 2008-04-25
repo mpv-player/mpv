@@ -893,7 +893,7 @@ default: {
       char* vf_args[] = { "osd", "1", NULL };
       sh_video->vfilter=vf_open_filter(&opts, sh_video->vfilter,"expand",vf_args);
     }
-    sh_video->vfilter=append_filters(sh_video->vfilter);
+    sh_video->vfilter=append_filters(sh_video->vfilter, opts.vf_settings);
 
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
     init_best_video_codec(sh_video,video_codec_list,video_fm_list);

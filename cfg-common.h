@@ -223,7 +223,6 @@ extern int    mf_w;
 extern int    mf_h;
 extern double mf_fps;
 extern char * mf_type;
-extern m_obj_settings_t* vf_settings;
 extern m_obj_list_t vf_obj_list;
 
 const m_option_t mfopts_conf[]={

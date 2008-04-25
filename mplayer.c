@@ -2170,9 +2170,9 @@ int reinit_video_chain(struct MPContext *mpctx)
   if(ass_enabled) {
     int i;
     int insert = 1;
-    if (vf_settings)
-      for (i = 0; vf_settings[i].name; ++i)
-        if (strcmp(vf_settings[i].name, "ass") == 0) {
+    if (opts->vf_settings)
+      for (i = 0; opts->vf_settings[i].name; ++i)
+        if (strcmp(opts->vf_settings[i].name, "ass") == 0) {
           insert = 0;
           break;
         }
@@ -2189,7 +2189,7 @@ int reinit_video_chain(struct MPContext *mpctx)
   }
 #endif
 
-  sh_video->vfilter=(void*)append_filters(sh_video->vfilter);
+  sh_video->vfilter=(void*)append_filters(sh_video->vfilter, opts->vf_settings);
 
 #ifdef USE_ASS
   if (ass_enabled)

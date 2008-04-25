@@ -28,6 +28,7 @@ typedef struct MPOpts {
     int video_id;
     int sub_id;
     float playback_speed;
+    struct m_obj_settings *vf_settings;
     int softzoom;
     float movie_aspect;
     float screen_size_xy;

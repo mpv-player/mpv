@@ -195,7 +195,6 @@ static const vf_info_t* const filter_list[]={
 };
 
 // For the vf option
-m_obj_settings_t* vf_settings = NULL;
 const m_obj_list_t vf_obj_list = {
   (void**)filter_list,
   M_ST_OFF(vf_info_t,name),
@@ -692,7 +691,9 @@ void vf_next_draw_slice(struct vf_instance* vf,unsigned char** src, int * stride
 
 //============================================================================
 
-vf_instance_t* append_filters(vf_instance_t* last){
+vf_instance_t *append_filters(vf_instance_t* last,
+                              struct m_obj_settings *vf_settings)
+{
   struct MPOpts *opts = last->opts;
   vf_instance_t* vf;
   int i; 

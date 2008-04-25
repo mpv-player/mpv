@@ -118,7 +118,8 @@ int vf_next_query_format(struct vf_instance* vf, unsigned int fmt);
 int vf_next_put_image(struct vf_instance* vf,mp_image_t *mpi, double pts);
 void vf_next_draw_slice (struct vf_instance* vf, unsigned char** src, int* stride, int w,int h, int x, int y);
 
-vf_instance_t* append_filters(vf_instance_t* last);
+struct m_obj_settings;
+vf_instance_t* append_filters(vf_instance_t* last, struct m_obj_settings *vf_settings);
 
 void vf_uninit_filter(vf_instance_t* vf);
 void vf_uninit_filter_chain(vf_instance_t* vf);
