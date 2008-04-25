@@ -70,5 +70,5 @@ int main(int argc,char* argv[]){
   printf("CPU usage at normal playback: %5.2f %%\n",time1*0.0001f/length);
   
   fclose(mp3file);
-  
+  return 0;
 }
