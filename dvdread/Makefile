@@ -14,6 +14,6 @@ SRCS_COMMON = cmd_print.c \
 
 CFLAGS = -D__USE_UNIX98 -D_GNU_SOURCE
 
-CFLAGS-$(DVDCSS_INTERNAL) += -I../libdvdcss -DHAVE_DVDCSS_DVDCSS_H
+CFLAGS-$(LIBDVDCSS_INTERNAL) += -I../libdvdcss -DHAVE_DVDCSS_DVDCSS_H
 
 include ../mpcommon.mak
