@@ -566,7 +566,7 @@ PARTS = liba52 \
         mp3lib \
         vidix \
 
-ifdef ARCH_X86
+ifeq ($(WIN32DLL),yes)
 PARTS += loader
 endif
 
