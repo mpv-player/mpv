@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include "talloc.h"
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
@@ -67,7 +68,7 @@ m_config_new(void *optstruct) {
   };
   int i;
 
-  config = calloc(1,sizeof(m_config_t));
+  config = talloc_zero(NULL, m_config_t);
   config->lvl = 1; // 0 Is the defaults
   if(!initialized) {
     initialized = 1;
@@ -75,57 +76,26 @@ m_config_new(void *optstruct) {
     profile_opt_type.parse = parse_profile;
     profile_opt_type.set = set_profile;
   }
-  config->self_opts = malloc(sizeof(ref_opts));
-  memcpy(config->self_opts,ref_opts,sizeof(ref_opts));
-  for(i = 0 ; config->self_opts[i].name ; i++)
-    config->self_opts[i].priv = config;
-  m_config_register_options(config,config->self_opts);
+  m_option_t *self_opts = talloc_memdup(config, ref_opts, sizeof(ref_opts));
+  for (i = 0; self_opts[i].name; i++)
+      self_opts[i].priv = config;
+  m_config_register_options(config, self_opts);
   config->optstruct = optstruct;
 
   return config;
 }
 
-void
-m_config_free(m_config_t* config) {
-  m_config_option_t *i = config->opts, *ct;
-  m_config_save_slot_t *sl,*st;
-  m_profile_t *p,*pn;
-  int j;
-
-#ifdef MP_DEBUG
-  assert(config != NULL);
-#endif
-  
-  while(i) {
-    if (i->flags & M_CFG_OPT_ALIAS)
-      sl = NULL;
-    else
-      sl = i->slots;
-    while(sl) {
-      m_option_free(i->opt,sl->data);
-      st = sl->prev;
-      free(sl);
-      sl = st;
+void m_config_free(m_config_t* config)
+{
+    m_config_option_t *opt;
+    for (opt = config->opts; opt; opt = opt->next) {
+        if (opt->flags & M_CFG_OPT_ALIAS)
+            continue;
+        m_config_save_slot_t *sl;
+        for (sl = opt->slots; sl; sl = sl->prev)
+            m_option_free(opt->opt, sl->data);
     }
-    if(i->name != i->opt->name)
-      free(i->name);
-    ct = i->next;
-    free(i);
-    i = ct;
-  }
-  for(p = config->profiles ; p ; p = pn) {
-    pn = p->next;
-    free(p->name);
-    if(p->desc) free(p->desc);
-    for(j = 0 ; j < p->num_opts ; j++) {
-      free(p->opts[2*j]);
-      if(p->opts[2*j+1]) free(p->opts[2*j+1]);
-    }
-    free(p->opts);
-    free(p);
-  }
-  free(config->self_opts);
-  free(config);  
+    talloc_free(config);
 }
 
 void
@@ -154,7 +124,8 @@ m_config_push(m_config_t* config) {
     m_option_save(config, co->opt, co->slots->data);
     
     // Allocate a new slot    
-    slot = calloc(1,sizeof(m_config_save_slot_t) + co->opt->type->size);
+    slot = talloc_zero_size(co, sizeof(m_config_save_slot_t) +
+                                co->opt->type->size);
     slot->lvl = config->lvl;
     slot->prev = co->slots;
     co->slots = slot;
@@ -191,7 +162,7 @@ m_config_pop(m_config_t* config) {
       m_option_free(co->opt,co->slots->data);
       slot = co->slots;
       co->slots = slot->prev;
-      free(slot);
+      talloc_free(slot);
       pop++;
     }
     if(pop) // We removed some ctx -> set the previous value
@@ -214,14 +185,12 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
 #endif
 
   // Allocate a new entry for this option
-  co = calloc(1,sizeof(m_config_option_t) + arg->type->size);
+  co = talloc_zero_size(config, sizeof(m_config_option_t) + arg->type->size);
   co->opt = arg;
 
   // Fill in the full name
   if(prefix && strlen(prefix) > 0) {
-    int l = strlen(prefix) + 1 + strlen(arg->name) + 1;
-    co->name = malloc(l);
-    sprintf(co->name,"%s:%s",prefix,arg->name);
+      co->name = talloc_asprintf(co, "%s:%s", prefix, arg->name);
   } else
     co->name = arg->name;
 
@@ -248,7 +217,8 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
     }
     if(!(co->flags & M_CFG_OPT_ALIAS)) {
     // Allocate a slot for the defaults
-    sl = calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
+        sl = talloc_zero_size(co, sizeof(m_config_save_slot_t) +
+                                  arg->type->size);
     m_option_save(config, arg, sl->data);
     // Hack to avoid too much trouble with dynamically allocated data :
     // We always use a dynamic version
@@ -258,7 +228,8 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
     }
     sl->lvl = 0;
     sl->prev = NULL;
-    co->slots = calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
+    co->slots = talloc_zero_size(co, sizeof(m_config_save_slot_t) +
+                                     arg->type->size);
     co->slots->prev = sl;
     co->slots->lvl = config->lvl;
     m_option_copy(co->opt,co->slots->data,sl->data);
@@ -480,8 +451,8 @@ m_profile_t*
 m_config_add_profile(m_config_t* config, char* name) {
   m_profile_t* p = m_config_get_profile(config,name);
   if(p) return p;
-  p = calloc(1,sizeof(m_profile_t));
-  p->name = strdup(name);
+  p = talloc_zero(config, m_profile_t);
+  p->name = talloc_strdup(p, name);
   p->next = config->profiles;
   config->profiles = p;
   return p;
@@ -489,8 +460,8 @@ m_config_add_profile(m_config_t* config, char* name) {
 
 void
 m_profile_set_desc(m_profile_t* p, char* desc) {
-  if(p->desc) free(p->desc);
-  p->desc = desc ? strdup(desc) : NULL;
+    talloc_free(p->desc);
+    p->desc = talloc_strdup(p, desc);
 }
 
 int
@@ -498,10 +469,9 @@ m_config_set_profile_option(m_config_t* config, m_profile_t* p,
 			    char* name, char* val) {
   int i = m_config_check_option(config,name,val);
   if(i < 0) return i;
-  if(p->opts) p->opts = realloc(p->opts,2*(p->num_opts+2)*sizeof(char*));
-  else p->opts = malloc(2*(p->num_opts+2)*sizeof(char*));
-  p->opts[p->num_opts*2] = strdup(name);
-  p->opts[p->num_opts*2+1] = val ? strdup(val) : NULL;
+  p->opts = talloc_realloc(p, p->opts, char *, 2*(p->num_opts+2));
+  p->opts[p->num_opts*2] = talloc_strdup(p, name);
+  p->opts[p->num_opts*2+1] = talloc_strdup(p, val);
   p->num_opts++;
   p->opts[p->num_opts*2] = p->opts[p->num_opts*2+1] = NULL;
   return 1;

@@ -76,8 +76,6 @@ typedef struct m_config {
   m_profile_t* profiles;
   /// Depth when recursively including profiles.
   int profile_depth;
-  /// Options defined by the config itself.
-  struct m_option* self_opts;
 
   void *optstruct; // struct mpopts or other
 } m_config_t;
