@@ -1,6 +1,3 @@
-
-//gcc test2.c -O2 -I.. -L. ../libvo/aclib.c -lMP3 -lm -o test2
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
