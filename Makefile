@@ -219,6 +219,16 @@ SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
 SRCS_COMMON-$(DVDNAV)                += stream/stream_dvdnav.c
 SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
                                         stream/stream_dvd_common.c
+SRCS_COMMON-$(DVDREAD_INTERNAL)      += dvdread/cmd_print.c \
+                                        dvdread/dvd_input.c \
+                                        dvdread/dvd_reader.c \
+                                        dvdread/dvd_udf.c \
+                                        dvdread/ifo_print.c \
+                                        dvdread/ifo_read.c \
+                                        dvdread/md5.c \
+                                        dvdread/nav_print.c \
+                                        dvdread/nav_read.c \
+
 SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
 SRCS_COMMON-$(FREETYPE)              += libvo/font_load_ft.c
 SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
@@ -527,7 +537,6 @@ COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
 COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
-COMMON_LIBS-$(DVDREAD_INTERNAL)   += dvdread/dvdread.a
 
 LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
 
@@ -547,8 +556,7 @@ INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
-PARTS = dvdread \
-        liba52 \
+PARTS = liba52 \
         libavcodec \
         libavformat \
         libavutil \
@@ -562,7 +570,8 @@ ifdef ARCH_X86
 PARTS += loader
 endif
 
-DIRS =  gui \
+DIRS =  dvdread \
+        gui \
         gui/mplayer \
         gui/mplayer/gtk \
         gui/skin \
@@ -634,6 +643,10 @@ codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 	$(WINDRES) -o $@ $<
 
+dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE
+ifeq ($(LIBDVDCSS_INTERNAL),yes)
+dvdread/%.o dvdread/%.d: CFLAGS += -Ilibdvdcss -DHAVE_DVDCSS_DVDCSS_H
+endif
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\"
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
 
@@ -801,8 +814,7 @@ fastmemcpybench realcodecs: CFLAGS += -g
 
 # FIXME: netstream linking is a mess that should be fixed properly some day.
 # It does not work with either GUI, LIVE555, libavformat, cdparanoia enabled.
-NETSTREAM_DEPS = dvdread/libdvdread.a \
-                 libavutil/libavutil.a \
+NETSTREAM_DEPS = libavutil/libavutil.a \
                  m_option.o \
                  m_struct.o \
                  $(TOOLS_COMMON_LIBS)
