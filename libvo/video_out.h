@@ -256,15 +256,6 @@ extern int vo_keepaspect;
 extern int vo_rootwin;
 extern int vo_border;
 
-extern int vo_gamma_gamma;
-extern int vo_gamma_brightness;
-extern int vo_gamma_saturation;
-extern int vo_gamma_contrast;
-extern int vo_gamma_hue;
-extern int vo_gamma_red_intensity;
-extern int vo_gamma_green_intensity;
-extern int vo_gamma_blue_intensity;
-
 extern int vo_nomouse_input;
 
 extern int vo_pts;

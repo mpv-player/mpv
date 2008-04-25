@@ -103,17 +103,6 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 
 #include "libvo/video_out.h"
 
-/** global variables for gamma, brightness, contrast, saturation and hue 
-    modified by mplayer.c and gui/mplayer/gtk/eq.c:
-    ranges -100 - 100
-    1000 if the vo default should be used
-*/
-int vo_gamma_gamma = 1000;
-int vo_gamma_brightness = 1000;
-int vo_gamma_contrast = 1000;
-int vo_gamma_saturation = 1000;
-int vo_gamma_hue = 1000;
-
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
                        unsigned int preferred_outfmt)
 {
@@ -323,16 +312,16 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
 
     sh->vf_initialized = 1;
 
-    if (vo_gamma_gamma != 1000)
-        set_video_colors(sh, "gamma", vo_gamma_gamma);
-    if (vo_gamma_brightness != 1000)
-        set_video_colors(sh, "brightness", vo_gamma_brightness);
-    if (vo_gamma_contrast != 1000)
-        set_video_colors(sh, "contrast", vo_gamma_contrast);
-    if (vo_gamma_saturation != 1000)
-        set_video_colors(sh, "saturation", vo_gamma_saturation);
-    if (vo_gamma_hue != 1000)
-        set_video_colors(sh, "hue", vo_gamma_hue);
+    if (opts->vo_gamma_gamma != 1000)
+        set_video_colors(sh, "gamma", opts->vo_gamma_gamma);
+    if (opts->vo_gamma_brightness != 1000)
+        set_video_colors(sh, "brightness", opts->vo_gamma_brightness);
+    if (opts->vo_gamma_contrast != 1000)
+        set_video_colors(sh, "contrast", opts->vo_gamma_contrast);
+    if (opts->vo_gamma_saturation != 1000)
+        set_video_colors(sh, "saturation", opts->vo_gamma_saturation);
+    if (opts->vo_gamma_hue != 1000)
+        set_video_colors(sh, "hue", opts->vo_gamma_hue);
 
     return 1;
 }

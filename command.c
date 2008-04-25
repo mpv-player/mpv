@@ -1127,7 +1127,8 @@ static int mp_property_framedropping(m_option_t *prop, int action,
 static int mp_property_gamma(m_option_t *prop, int action, void *arg,
 			     MPContext *mpctx)
 {
-    int *gamma = prop->priv, r, val;
+    int *gamma = (int *)((char *)&mpctx->opts + (int)prop->priv);
+    int r, val;
 
     if (!mpctx->sh_video)
 	return M_PROPERTY_UNAVAILABLE;
@@ -2026,15 +2027,15 @@ static const m_option_t mp_properties[] = {
     { "framedropping", mp_property_framedropping, CONF_TYPE_INT,
      M_OPT_RANGE, 0, 2, NULL },
     { "gamma", mp_property_gamma, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, &vo_gamma_gamma },
+      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_gamma)},
     { "brightness", mp_property_gamma, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, &vo_gamma_brightness },
+      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_brightness) },
     { "contrast", mp_property_gamma, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, &vo_gamma_contrast },
+      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_contrast) },
     { "saturation", mp_property_gamma, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, &vo_gamma_saturation },
+      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_saturation) },
     { "hue", mp_property_gamma, CONF_TYPE_INT,
-     M_OPT_RANGE, -100, 100, &vo_gamma_hue },
+      M_OPT_RANGE, -100, 100, (void *)offsetof(struct MPOpts, vo_gamma_hue) },
     { "panscan", mp_property_panscan, CONF_TYPE_FLOAT,
      M_OPT_RANGE, 0, 1, NULL },
     { "vsync", mp_property_vsync, CONF_TYPE_FLAG,

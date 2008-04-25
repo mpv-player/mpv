@@ -211,10 +211,10 @@ const m_option_t mplayer_opts[]={
 
 	{"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, -2, 32, NULL},
 
-	{"brightness",&vo_gamma_brightness, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
-	{"saturation",&vo_gamma_saturation, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
-	{"contrast",&vo_gamma_contrast, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
-	{"hue",&vo_gamma_hue, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
+	OPT_INTRANGE("brightness", vo_gamma_brightness, 0, -100, 100),
+	OPT_INTRANGE("saturation", vo_gamma_saturation, 0, -100, 100),
+	OPT_INTRANGE("contrast", vo_gamma_contrast, 0, -100, 100),
+	OPT_INTRANGE("hue", vo_gamma_hue, 0, -100, 100),
 	{"keepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nokeepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 

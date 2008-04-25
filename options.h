@@ -13,6 +13,14 @@ typedef struct MPOpts {
     int vidmode;
     int fullscreen;
     int vo_dbpp;
+
+    // ranges -100 - 100, 1000 if the vo default should be used
+    int vo_gamma_gamma;
+    int vo_gamma_brightness;
+    int vo_gamma_contrast;
+    int vo_gamma_saturation;
+    int vo_gamma_hue;
+
     int correct_pts;
     int loop_times;
     int user_correct_pts;
