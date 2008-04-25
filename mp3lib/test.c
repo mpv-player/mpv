@@ -12,7 +12,6 @@
 #include "config.h"
 #include "mp3lib/mp3.h"
 #include "cpudetect.h"
-extern CpuCaps gCpuCaps;
 
 static inline unsigned int GetTimer(){
   struct timeval tv;
