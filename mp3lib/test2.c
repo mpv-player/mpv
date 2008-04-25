@@ -27,7 +27,6 @@ static unsigned char buffer[BUFFLEN];
 int main(int argc,char* argv[]){
   int len;
   int total=0;
-  float length;
   int r;
   int audio_fd;
   
