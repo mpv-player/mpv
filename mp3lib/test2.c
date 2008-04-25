@@ -68,5 +68,5 @@ int main(int argc,char* argv[]){
   }
   
   fclose(mp3file);
-  
+  return 0;
 }
