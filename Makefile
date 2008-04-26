@@ -779,7 +779,14 @@ ifdef ARCH_X86
 TOOLS += TOOLS/modify_reg$(EXESUF)
 endif
 
+ALLTOOLS = $(TOOLS) \
+           TOOLS/bmovl-test$(EXESUF) \
+           TOOLS/vfw2menc$(EXESUF) \
+           TOOLS/vivodump$(EXESUF) \
+           TOOLS/netstream$(EXESUF) \
+
 tools: $(TOOLS)
+alltools: $(ALLTOOLS)
 
 TOOLS_COMMON_LIBS = mp_msg.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
               -ltermcap -lm
@@ -825,8 +832,7 @@ TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 toolsclean:
-	rm -f $(TOOLS) TOOLS/fastmem*-* TOOLS/netstream$(EXESUF)
-	rm -f TOOLS/bmovl-test$(EXESUF) TOOLS/vfw2menc$(EXESUF) $(REAL_TARGETS)
+	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
 -include $(DEPS)
 
