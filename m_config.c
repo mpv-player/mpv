@@ -61,7 +61,7 @@ m_config_t *m_config_new(void *optstruct,
   m_config_t* config;
   static int initialized = 0;
   static m_option_type_t profile_opt_type;
-  static m_option_t ref_opts[] = {
+  static const m_option_t ref_opts[] = {
     { "profile", NULL, &profile_opt_type, CONF_NOSAVE, 0, 0, NULL },
     { "show-profile", show_profile, CONF_TYPE_PRINT_FUNC, CONF_NOCFG, 0, 0, NULL },
     { "list-options", list_options, CONF_TYPE_PRINT_FUNC, CONF_NOCFG, 0, 0, NULL },

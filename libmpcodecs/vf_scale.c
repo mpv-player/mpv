@@ -46,7 +46,7 @@ static struct vf_priv_s {
 
 void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam);
 
-static unsigned int outfmt_list[]={
+static const unsigned int outfmt_list[]={
 // YUV:
     IMGFMT_444P,
     IMGFMT_422P,
@@ -612,7 +612,7 @@ struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, 
 }
 
 /// An example of presets usage
-static struct size_preset {
+static const struct size_preset {
   char* name;
   int w, h;
 } vf_size_presets_defs[] = {
@@ -627,21 +627,21 @@ static struct size_preset {
 };
 
 #define ST_OFF(f) M_ST_OFF(struct size_preset,f)
-static m_option_t vf_size_preset_fields[] = {
+static const m_option_t vf_size_preset_fields[] = {
   {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
   {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
-static m_struct_t vf_size_preset = {
+static const m_struct_t vf_size_preset = {
   "scale_size_preset",
   sizeof(struct size_preset),
   NULL,
   vf_size_preset_fields
 };
 
-static m_struct_t vf_opts;
-static m_obj_presets_t size_preset = {
+static const m_struct_t vf_opts;
+static const m_obj_presets_t size_preset = {
   &vf_size_preset, // Input struct desc
   &vf_opts, // Output struct desc
   vf_size_presets_defs, // The list of presets
@@ -651,7 +651,7 @@ static m_obj_presets_t size_preset = {
 /// Now the options
 #undef ST_OFF
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
-static m_option_t vf_opts_fields[] = {
+static const m_option_t vf_opts_fields[] = {
   {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
   {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
   {"interlaced", ST_OFF(interlaced), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
@@ -666,7 +666,7 @@ static m_option_t vf_opts_fields[] = {
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
-static m_struct_t vf_opts = {
+static const m_struct_t vf_opts = {
   "scale",
   sizeof(struct vf_priv_s),
   &vf_priv_dflt,

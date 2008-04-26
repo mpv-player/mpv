@@ -65,7 +65,7 @@ static int config(struct vf_instance* vf,
                 i,
                 0
             };
-            static const char *const_names[]={
+            const char * const const_names[]={
                 "PI",
                 "E",
                 "known",
