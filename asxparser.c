@@ -14,8 +14,6 @@
 #include "mp_msg.h"
 #include "m_config.h"
 
-extern m_config_t* mconfig;
-
 ////// List utils
 
 void
@@ -109,8 +107,10 @@ asx_attrib_to_enum(const char* val,char** valid_vals) {
 #define asx_warning_body_parse_error(p,e) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"At line %d : error while parsing %s body",p->line,e)
 
 ASX_Parser_t*
-asx_parser_new(void) {
+asx_parser_new(struct m_config *mconfig)
+{
   ASX_Parser_t* parser = calloc(1,sizeof(ASX_Parser_t));
+  parser->mconfig = mconfig;
   return parser;
 }
 
@@ -426,7 +426,7 @@ asx_parse_param(ASX_Parser_t* parser, char** attribs, play_tree_t* pt) {
     return;
   }
   val = asx_get_attrib("VALUE",attribs);
-  if(m_config_get_option(mconfig,name) == NULL) {
+  if(m_config_get_option(parser->mconfig,name) == NULL) {
     mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Found unknown param in asx: %s",name);
     if(val)
       mp_msg(MSGT_PLAYTREE,MSGL_WARN,"=%s\n",val);
@@ -494,7 +494,7 @@ asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Adding playlist %s to element entryref\n",href);
 
-  ptp = play_tree_parser_new(stream,parser->deep+1);
+  ptp = play_tree_parser_new(stream, parser->mconfig, parser->deep+1);
 
   pt = play_tree_parser_get_play_tree(ptp, 1);
 
@@ -611,11 +611,11 @@ asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) {
 
 
 play_tree_t*
-asx_parser_build_tree(char* buffer,int deep) {
+asx_parser_build_tree(struct m_config *mconfig, char* buffer,int deep) {
   char *element,*asx_body,**asx_attribs,*body = NULL, **attribs;
   int r;
   play_tree_t *asx,*entry,*list = NULL;
-  ASX_Parser_t* parser = asx_parser_new();
+  ASX_Parser_t* parser = asx_parser_new(mconfig);
 
   parser->line = 1;
   parser->deep = deep;

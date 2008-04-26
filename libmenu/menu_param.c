@@ -94,7 +94,7 @@ static int parse_args(menu_t* menu,char* args) {
   list_entry_t* m = NULL;
   int r;
   m_option_t* opt;
-  ASX_Parser_t* parser = asx_parser_new();
+  ASX_Parser_t* parser = asx_parser_new(menu->mconfig);
   
 
   while(1) {

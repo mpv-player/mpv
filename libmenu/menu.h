@@ -13,6 +13,7 @@ struct m_struct_st;
 
 struct  menu_s {
   struct MPContext *ctx;
+  struct m_config *mconfig;
   void (*draw)(menu_t* menu,mp_image_t* mpi);
   void (*read_cmd)(menu_t* menu,int cmd);
   int (*read_key)(menu_t* menu,int cmd);
@@ -52,7 +53,7 @@ typedef struct menu_info_s {
 #define MENU_CMD_CLICK 11
 
 /// Global init/uninit
-int menu_init(struct MPContext *mpctx, char* cfg_file);
+int menu_init(struct MPContext *mpctx, struct m_config *mconfig, char* cfg_file);
 void menu_uninit(void);
 
 /// Open a menu defined in the config file

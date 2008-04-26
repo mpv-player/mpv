@@ -96,7 +96,8 @@ typedef struct m_config {
 /** \ingroup Config
  */
 m_config_t*
-m_config_new(void *optstruct);
+m_config_new(void *optstruct,
+             int includefunc(struct m_option *conf, char *filename));
 
 /// Free a config object.
 void

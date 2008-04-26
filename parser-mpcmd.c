@@ -33,7 +33,9 @@ static int mode = 0;
 // #define UNSET_GLOBAL (mode = GLOBAL)
 
 
-static int is_entry_option(char *opt, char *param, play_tree_t** ret) {
+static int is_entry_option(struct m_config *mconfig, char *opt, char *param,
+                           play_tree_t** ret)
+{
   play_tree_t* entry = NULL;
 
   *ret = NULL;
@@ -42,7 +44,7 @@ static int is_entry_option(char *opt, char *param, play_tree_t** ret) {
     if(!param)
       return M_OPT_MISSING_PARAM;
 
-    entry = parse_playlist_file(param);
+    entry = parse_playlist_file(mconfig, param);
     if(!entry)
       return -1;
     else {
@@ -174,7 +176,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  const m_option_t* mp_opt = NULL;
 	  play_tree_t* entry = NULL;
 
-	  tmp = is_entry_option(opt,(i+1<argc) ? argv[i + 1] : NULL,&entry);
+	  tmp = is_entry_option(config, opt,(i+1<argc) ? argv[i + 1] : NULL,&entry);
 	  if(tmp > 0)  { // It's an entry
 	    if(entry) {
 	      add_entry(&last_parent,&last_entry,entry);

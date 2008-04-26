@@ -134,17 +134,11 @@ extern int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t
 #include "parser-cfg.h"
 #include "parser-mpcmd.h"
 
-m_config_t* mconfig;
-
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
 
 static int cfg_inc_verbose(m_option_t *conf){ ++verbose; return 0;}
-
-static int cfg_include(m_option_t *conf, char *filename){
-	return m_config_parse_config_file(mconfig, filename);
-}
 
 #include "get_path.h"
 
@@ -685,8 +679,8 @@ void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc){
   current_module="exit_player";
 
 // free mplayer config
-  if(mconfig)
-    m_config_free(mconfig);
+  if(mpctx->mconfig)
+    m_config_free(mpctx->mconfig);
   
   if(mpctx->playtree)
     play_tree_free(mpctx->playtree, 1);
@@ -790,6 +784,11 @@ static void exit_sighandler(int x){
 extern void mp_input_register_options(m_config_t* cfg);
 
 #include "cfg-mplayer.h"
+
+static int cfg_include(m_option_t *conf, char *filename)
+{
+    return m_config_parse_config_file(conf->priv, filename);
+}
 
 static void parse_cfgfiles(struct MPContext *mpctx, m_config_t* conf)
 {
@@ -955,7 +954,7 @@ static int playtree_add_playlist(struct MPContext *mpctx, play_tree_t* entry)
 #ifdef HAVE_NEW_GUI
   if (use_gui) {
     if (entry) {
-      import_playtree_playlist_into_gui(entry, mconfig);
+      import_playtree_playlist_into_gui(entry, mpctx->mconfig);
       play_tree_free_list(entry,1);
     }
   } else
@@ -2575,12 +2574,12 @@ int gui_no_filename=0;
   struct MPOpts *opts = &mpctx->opts;
   set_default_mplayer_options(opts);
   // Create the config context and register the options
-  mconfig = m_config_new(opts);
-  m_config_register_options(mconfig,mplayer_opts);
-  mp_input_register_options(mconfig);
+  mpctx->mconfig = m_config_new(opts, cfg_include);
+  m_config_register_options(mpctx->mconfig,mplayer_opts);
+  mp_input_register_options(mpctx->mconfig);
 
   // Preparse the command line
-  m_config_preparse_command_line(mconfig,argc,argv);
+  m_config_preparse_command_line(mpctx->mconfig,argc,argv);
 
   print_version();
 #if defined(WIN32) && defined(USE_WIN32DLL)
@@ -2606,19 +2605,19 @@ int gui_no_filename=0;
           use_gui=1;
   }
 
-    parse_cfgfiles(mpctx, mconfig);
+    parse_cfgfiles(mpctx, mpctx->mconfig);
 
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) cfg_read();
 #endif
 
-    mpctx->playtree = m_config_parse_mp_command_line(mconfig, argc, argv);
+    mpctx->playtree = m_config_parse_mp_command_line(mpctx->mconfig, argc, argv);
     if(mpctx->playtree == NULL)
       opt_exit = 1;
     else {
     mpctx->playtree = play_tree_cleanup(mpctx->playtree);
     if(mpctx->playtree) {
-      mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree,mconfig);
+      mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree,mpctx->mconfig);
       if(mpctx->playtree_iter) {  
 	if(play_tree_iter_step(mpctx->playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY) {
 	  play_tree_iter_free(mpctx->playtree_iter);
@@ -2681,7 +2680,7 @@ int gui_no_filename=0;
           play_tree_add_bpf(mpctx->playtree, cwd);
       }      
       // Import initital playtree into GUI.
-      import_initial_playtree_into_gui(mpctx->playtree, mconfig, enqueue);
+      import_initial_playtree_into_gui(mpctx->playtree, mpctx->mconfig, enqueue);
     }
 #endif /* HAVE_NEW_GUI */
 
@@ -2880,14 +2879,14 @@ stream_set_interrupt_callback(mp_input_check_interrupt);
 
 #ifdef HAVE_MENU
  if(use_menu) {
-   if(menu_cfg && menu_init(mpctx, menu_cfg))
+     if(menu_cfg && menu_init(mpctx, mpctx->mconfig, menu_cfg))
      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);
    else {
      menu_cfg = get_path("menu.conf");
-     if(menu_init(mpctx, menu_cfg))
+     if(menu_init(mpctx, mpctx->mconfig, menu_cfg))
        mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);
      else {
-       if(menu_init(mpctx, MPLAYER_CONFDIR "/menu.conf"))
+         if(menu_init(mpctx, mpctx->mconfig, MPLAYER_CONFDIR "/menu.conf"))
          mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, MPLAYER_CONFDIR"/menu.conf");
        else {
          mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitFailed);
@@ -2949,15 +2948,15 @@ play_next_file:
   { int i; for (i = 0; i < SUB_SOURCES; i++) mpctx->global_sub_indices[i] = -1; }
 
   if (filename) {
-    load_per_protocol_config (mconfig, filename);
-    load_per_extension_config (mconfig, filename);
-    load_per_file_config (mconfig, filename);
+    load_per_protocol_config (mpctx->mconfig, filename);
+    load_per_extension_config (mpctx->mconfig, filename);
+    load_per_file_config (mpctx->mconfig, filename);
   }
 
   if (opts->video_driver_list)
-    load_per_output_config (mconfig, PROFILE_CFG_VO, opts->video_driver_list[0]);
+    load_per_output_config (mpctx->mconfig, PROFILE_CFG_VO, opts->video_driver_list[0]);
   if (opts->audio_driver_list)
-    load_per_output_config (mconfig, PROFILE_CFG_AO, opts->audio_driver_list[0]);
+    load_per_output_config (mpctx->mconfig, PROFILE_CFG_AO, opts->audio_driver_list[0]);
 
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
@@ -2996,7 +2995,7 @@ if(!noconsolecontrols && !slave_mode){
         play_tree_set_child( mpctx->playtree,entry );
         if(mpctx->playtree)
 	 {
-	  mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree,mconfig);
+	  mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree,mpctx->mconfig);
 	  if(mpctx->playtree_iter)
 	   {
 	    if(play_tree_iter_step(mpctx->playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY)
@@ -3027,7 +3026,7 @@ while (player_idle_mode && !filename) {
             // The entry is added to the main playtree after the switch().
             break;
         case MP_CMD_LOADLIST:
-            entry = parse_playlist_file(cmd->args[0].v.s);
+            entry = parse_playlist_file(mpctx->mconfig, cmd->args[0].v.s);
             break;
         case MP_CMD_QUIT:
             exit_player_with_rc(mpctx, MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
@@ -3051,7 +3050,7 @@ while (player_idle_mode && !filename) {
         play_tree_set_child(mpctx->playtree, entry);
 
         /* Make iterator start at the top the of tree. */
-        mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree, mconfig);
+        mpctx->playtree_iter = play_tree_iter_new(mpctx->playtree, mpctx->mconfig);
         if (!mpctx->playtree_iter) continue;
 
         // find the first real item in the tree
@@ -3164,7 +3163,7 @@ if (edl_output_filename) {
     current_module="handle_playlist";
     mp_msg(MSGT_CPLAYER,MSGL_V,"Parsing playlist %s...\n",
 	    filename_recode(filename));
-    entry = parse_playtree(mpctx->stream,0);
+    entry = parse_playtree(mpctx->stream, mpctx->mconfig, 0);
     mpctx->eof=playtree_add_playlist(mpctx, entry);
     goto goto_next_file;
   }

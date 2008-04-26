@@ -14,10 +14,12 @@ struct ASX_Parser_t {
   int ret_stack_size;
   char* last_body;
   int deep;
+  struct m_config *mconfig;
 };
-  
+
+struct m_config;
 ASX_Parser_t*
-asx_parser_new(void);
+asx_parser_new(struct m_config *mconfig);
 
 void
 asx_parser_free(ASX_Parser_t* parser);

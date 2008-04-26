@@ -98,7 +98,7 @@ static int parse_args(menu_t* menu,char* args) {
   char *element,*body, **attribs, *name;
   list_entry_t* m = NULL;
   int r;
-  ASX_Parser_t* parser = asx_parser_new();
+  ASX_Parser_t* parser = asx_parser_new(menu->mconfig);
 
   while(1) {
     r = asx_get_element(parser,&args,&element,&body,&attribs);

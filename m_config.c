@@ -55,8 +55,9 @@ static void m_option_set(const m_config_t *config, const m_option_t *opt,
 
 
 
-m_config_t*
-m_config_new(void *optstruct) {
+m_config_t *m_config_new(void *optstruct,
+                         int includefunc(m_option_t *conf, char *filename))
+{
   m_config_t* config;
   static int initialized = 0;
   static m_option_type_t profile_opt_type;
@@ -80,6 +81,12 @@ m_config_new(void *optstruct) {
   for (i = 0; self_opts[i].name; i++)
       self_opts[i].priv = config;
   m_config_register_options(config, self_opts);
+  if (includefunc) {
+      struct m_option *p = talloc_ptrtype(config, p);
+      *p = (struct m_option){"include", includefunc, CONF_TYPE_FUNC_PARAM,
+                             CONF_NOSAVE, 0, 0, config};
+      m_config_add_option(config, p, NULL);
+  }
   config->optstruct = optstruct;
 
   return config;

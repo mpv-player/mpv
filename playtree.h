@@ -227,8 +227,9 @@ play_tree_iter_get_file(play_tree_iter_t* iter, int d);
 /// Create a playtree from a playlist file.
 /** \ingroup PlaytreeParser
  */
+struct m_config;
 play_tree_t*
-parse_playtree(struct stream *stream, int forced);
+parse_playtree(struct stream *stream, struct m_config *mconfig, int forced);
 
 /// Clean a tree by destroying all empty elements.
 play_tree_t*
@@ -238,7 +239,7 @@ play_tree_cleanup(play_tree_t* pt);
 /** \ingroup PlaytreeParser
  */
 play_tree_t*
-parse_playlist_file(char* file);
+parse_playlist_file(struct m_config *mconfig, char* file);
 
 /// \defgroup PtAPI Playtree highlevel API
 /// \ingroup Playtree

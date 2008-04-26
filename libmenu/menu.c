@@ -71,6 +71,7 @@ double menu_mouse_y = -1.0;
 int menu_mouse_pos_updated = 0;
 
 static struct MPContext *menu_ctx = NULL;
+static struct m_config *menu_mconfig = NULL;
 static menu_def_t* menu_list = NULL;
 static int menu_count = 0;
 static menu_cmd_bindings_t *cmd_bindings = NULL;
@@ -85,11 +86,12 @@ menu_cmd_bindings_t *get_cmd_bindings(const char *name) {
   return NULL;
 }
 
-static int menu_parse_config(char* buffer) {
+static int menu_parse_config(char* buffer, struct m_config *mconfig)
+{
   char *element,*body, **attribs, *name;
   menu_info_t* minfo = NULL;
   int r,i;
-  ASX_Parser_t* parser = asx_parser_new();
+  ASX_Parser_t* parser = asx_parser_new(mconfig);
 
   while(1) {
     r = asx_get_element(parser,&buffer,&element,&body,&attribs);
@@ -211,7 +213,9 @@ static int menu_parse_config(char* buffer) {
 #define BUF_STEP 1024
 #define BUF_MIN 128
 #define BUF_MAX BUF_STEP*1024
-int menu_init(struct MPContext *mpctx, char* cfg_file) {
+int menu_init(struct MPContext *mpctx, struct m_config *mconfig,
+              char* cfg_file)
+{
   char* buffer = NULL;
   int bl = BUF_STEP, br = 0;
   int f, fd;
@@ -250,7 +254,8 @@ int menu_init(struct MPContext *mpctx, char* cfg_file) {
   close(fd);
 
   menu_ctx = mpctx;
-  f = menu_parse_config(buffer);
+  menu_mconfig = mconfig;
+  f = menu_parse_config(buffer, mconfig);
   free(buffer);
   return f;
 }
@@ -311,6 +316,7 @@ menu_t* menu_open(char *name) {
   m->priv_st = &(menu_list[i].type->priv_st);
   m->priv = m_struct_copy(m->priv_st,menu_list[i].cfg);
   m->ctx = menu_ctx;
+  m->mconfig = menu_mconfig;
   m->type = &menu_list[i];
   if(menu_list[i].type->open(m,menu_list[i].args))
     return m;

@@ -419,7 +419,7 @@ audio_encoder_t *aencoder = NULL;
 
   // Create the config context and register the options
   set_default_mencoder_options(&opts);
-  mconfig = m_config_new(&opts);
+  mconfig = m_config_new(&opts, cfg_include);
   m_config_register_options(mconfig,mencoder_opts);
 
   // Preparse the command line

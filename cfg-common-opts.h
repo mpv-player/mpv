@@ -9,7 +9,6 @@
 #ifdef USE_ICONV
 	{"msgcharset", &mp_msg_charset, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
-	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL},
 #ifdef WIN32
 	{"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
