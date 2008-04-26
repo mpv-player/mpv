@@ -809,17 +809,12 @@ const m_option_type_t m_option_type_func_full = {
 /////////////// Func
 
 #undef VAL
-#define VAL(x) (*(int*)(x))
 
 static int parse_func(const m_option_t* opt,const char *name, char *param, void* dst, int src) {
-  if(dst)
-    VAL(dst) += 1;
   return 0;
 }
 
 static void set_func(const m_option_t* opt,void* dst, void* src) {
-  int i;
-  for(i = 0 ; i < VAL(src) ; i++)
     ((m_opt_func_t) opt->p)(opt);
 }
 
