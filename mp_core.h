@@ -47,6 +47,7 @@ typedef struct MPContext {
     char *filename; // currently playing file
     int eof;
     int play_tree_step;
+    unsigned int initialized_flags;  // which subsystems have been initialized
 
     struct stream *stream;
     struct demuxer *demuxer;

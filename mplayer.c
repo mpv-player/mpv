@@ -327,7 +327,6 @@ short edl_decision = 0; ///< 1 when an EDL operation has been made.
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode.
 int use_filedir_conf;
 
-static unsigned int initialized_flags=0;
 #include "mpcommon.h"
 #include "command.h"
 
@@ -546,12 +545,12 @@ static void mp_dvdnav_context_free(MPContext *ctx){
 #endif
 
 void uninit_player(struct MPContext *mpctx, unsigned int mask){
-  mask=initialized_flags&mask;
+  mask=mpctx->initialized_flags&mask;
 
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n*** uninit(0x%X)\n",mask);
 
   if(mask&INITIALIZED_ACODEC){
-    initialized_flags&=~INITIALIZED_ACODEC;
+    mpctx->initialized_flags&=~INITIALIZED_ACODEC;
     current_module="uninit_acodec";
     if(mpctx->sh_audio) uninit_audio(mpctx->sh_audio);
 #ifdef HAVE_NEW_GUI
@@ -562,7 +561,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
   }
 
   if(mask&INITIALIZED_VCODEC){
-    initialized_flags&=~INITIALIZED_VCODEC;
+    mpctx->initialized_flags&=~INITIALIZED_VCODEC;
     current_module="uninit_vcodec";
     if(mpctx->sh_video) uninit_video(mpctx->sh_video);
     mpctx->sh_video=NULL;
@@ -572,7 +571,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
   }
  
   if(mask&INITIALIZED_DEMUXER){
-    initialized_flags&=~INITIALIZED_DEMUXER;
+    mpctx->initialized_flags&=~INITIALIZED_DEMUXER;
     current_module="free_demuxer";
     if(mpctx->demuxer){
 	mpctx->stream=mpctx->demuxer->stream;
@@ -583,14 +582,14 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
 
   // kill the cache process:
   if(mask&INITIALIZED_STREAM){
-    initialized_flags&=~INITIALIZED_STREAM;
+    mpctx->initialized_flags&=~INITIALIZED_STREAM;
     current_module="uninit_stream";
     if(mpctx->stream) free_stream(mpctx->stream);
     mpctx->stream=NULL;
   }
 
   if(mask&INITIALIZED_VO){
-    initialized_flags&=~INITIALIZED_VO;
+    mpctx->initialized_flags&=~INITIALIZED_VO;
     current_module="uninit_vo";
     vo_destroy(mpctx->video_out);
     mpctx->video_out=NULL;
@@ -601,7 +600,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
 
   // Must be after libvo uninit, as few vo drivers (svgalib) have tty code.
   if(mask&INITIALIZED_GETCH2){
-    initialized_flags&=~INITIALIZED_GETCH2;
+    mpctx->initialized_flags&=~INITIALIZED_GETCH2;
     current_module="uninit_getch2";
     mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n[[[uninit getch2]]]\n");
   // restore terminal:
@@ -609,21 +608,21 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
   }
 
   if(mask&INITIALIZED_VOBSUB){
-    initialized_flags&=~INITIALIZED_VOBSUB;
+    mpctx->initialized_flags&=~INITIALIZED_VOBSUB;
     current_module="uninit_vobsub";
     if(vo_vobsub) vobsub_close(vo_vobsub);
     vo_vobsub=NULL;
   }
 
   if (mask&INITIALIZED_SPUDEC){
-    initialized_flags&=~INITIALIZED_SPUDEC;
+    mpctx->initialized_flags&=~INITIALIZED_SPUDEC;
     current_module="uninit_spudec";
     spudec_free(vo_spudec);
     vo_spudec=NULL;
   }
 
   if(mask&INITIALIZED_AO){
-    initialized_flags&=~INITIALIZED_AO;
+    mpctx->initialized_flags&=~INITIALIZED_AO;
     current_module="uninit_ao";
     if (mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
     mpctx->audio_out->uninit(mpctx->eof?0:1); mpctx->audio_out=NULL;
@@ -631,14 +630,14 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
 
 #ifdef HAVE_NEW_GUI
   if(mask&INITIALIZED_GUI){
-    initialized_flags&=~INITIALIZED_GUI;
+    mpctx->initialized_flags&=~INITIALIZED_GUI;
     current_module="uninit_gui";
     guiDone();
   }
 #endif
 
   if(mask&INITIALIZED_INPUT){
-    initialized_flags&=~INITIALIZED_INPUT;
+    mpctx->initialized_flags&=~INITIALIZED_INPUT;
     current_module="uninit_input";
     mp_input_uninit();
 #ifdef HAVE_MENU
@@ -715,7 +714,6 @@ static void exit_sighandler(int x){
   if (!crash_debug || x != SIGTRAP)
 #endif
   ++sig_count;
-  if(initialized_flags==0 && sig_count>1) exit(1);
   if(sig_count==5)
     {
       /* We're crashing bad and can't uninit cleanly :( 
@@ -1053,7 +1051,7 @@ void init_vo_spudec(struct MPContext *mpctx)
 {
   if (vo_spudec)
     spudec_free(vo_spudec);
-  initialized_flags &= ~INITIALIZED_SPUDEC;
+  mpctx->initialized_flags &= ~INITIALIZED_SPUDEC;
   vo_spudec = NULL;
   if (spudec_ifo) {
     unsigned int palette[16], width, height;
@@ -1106,7 +1104,7 @@ void init_vo_spudec(struct MPContext *mpctx)
   }
 
   if (vo_spudec!=NULL)
-    initialized_flags|=INITIALIZED_SPUDEC;
+    mpctx->initialized_flags|=INITIALIZED_SPUDEC;
 }
 
 /*
@@ -1564,7 +1562,7 @@ if(mpctx->sh_audio){
     mpctx->d_audio->id = -2;
     return;
   } else
-    initialized_flags|=INITIALIZED_ACODEC;
+    mpctx->initialized_flags|=INITIALIZED_ACODEC;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 
@@ -1598,7 +1596,7 @@ if(mpctx->sh_audio){
     return;
   } else {
     // SUCCESS:
-    initialized_flags|=INITIALIZED_AO;
+    mpctx->initialized_flags|=INITIALIZED_AO;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
       mpctx->audio_out->info->short_name,
       ao_data.samplerate, ao_data.channels,
@@ -2132,7 +2130,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     sh_video_t * const sh_video = mpctx->sh_video;
     double ar=-1.0;
     //================== Init VIDEO (codec & libvo) ==========================
-    if(opts->fixed_vo || !(initialized_flags&INITIALIZED_VO)){
+    if(opts->fixed_vo || !(mpctx->initialized_flags&INITIALIZED_VO)){
     current_module="preinit_libvo";
 
     //shouldn't we set dvideo->id=-2 when we fail?
@@ -2141,7 +2139,7 @@ int reinit_video_chain(struct MPContext *mpctx)
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
       goto err_out;
     }
-    initialized_flags|=INITIALIZED_VO;
+    mpctx->initialized_flags|=INITIALIZED_VO;
   }
 
   if(stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
@@ -2205,7 +2203,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     goto err_out;
   }
 
-  initialized_flags|=INITIALIZED_VCODEC;
+  mpctx->initialized_flags|=INITIALIZED_VCODEC;
 
   if (sh_video->codec)
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
@@ -2896,7 +2894,7 @@ stream_set_interrupt_callback(mp_input_check_interrupt);
  }
 #endif
   
-initialized_flags|=INITIALIZED_INPUT;
+mpctx->initialized_flags|=INITIALIZED_INPUT;
 current_module = NULL;
 
   /// Catch signals
@@ -2933,7 +2931,7 @@ current_module = NULL;
   if(use_gui){
        guiInit();
        guiGetEvent(guiSetContext, mpctx);
-       initialized_flags|=INITIALIZED_GUI;
+       mpctx->initialized_flags|=INITIALIZED_GUI;
        guiGetEvent( guiCEvent,(char *)((gui_no_filename) ? 0 : 1) );
   }
 #endif
@@ -2960,11 +2958,11 @@ play_next_file:
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
 if(!noconsolecontrols && !slave_mode){
-  if(initialized_flags&INITIALIZED_GETCH2)
+  if(mpctx->initialized_flags&INITIALIZED_GETCH2)
     mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_Getch2InitializedTwice);
   else
     getch2_enable();  // prepare stdin for hotkeys...
-  initialized_flags|=INITIALIZED_GETCH2;
+  mpctx->initialized_flags|=INITIALIZED_GETCH2;
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n[[[init getch2]]]\n");
 }
 
@@ -3119,7 +3117,7 @@ if (edl_output_filename) {
       free(buf);
     }
     if(vo_vobsub){
-      initialized_flags|=INITIALIZED_VOBSUB;
+      mpctx->initialized_flags|=INITIALIZED_VOBSUB;
       vobsub_set_from_lang(vo_vobsub, dvdsub_lang);
       // check if vobsub requested only to display forced subtitles
       forced_subs_only=vobsub_get_forced_subs_flag(vo_vobsub);
@@ -3150,7 +3148,7 @@ if (edl_output_filename) {
       mpctx->eof = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY);
     goto goto_next_file;
   }
-  initialized_flags|=INITIALIZED_STREAM;
+  mpctx->initialized_flags|=INITIALIZED_STREAM;
 
 #ifdef HAVE_NEW_GUI
   if ( use_gui ) guiGetEvent( guiSetStream,(char *)mpctx->stream );
@@ -3313,7 +3311,7 @@ if(dvd_chapter>1) {
     seek(mpctx, pts, SEEK_ABSOLUTE);
 }
 
-initialized_flags|=INITIALIZED_DEMUXER;
+mpctx->initialized_flags|=INITIALIZED_DEMUXER;
 
 if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_DVDNAV) {
   int i;
