@@ -69,7 +69,7 @@ static int adpcm_index[16] =
 // sign extend a 4-bit value
 #define SE_4BIT(x)  if (x & 0x8) x -= 0x10;
 
-static ad_info_t info = 
+static const ad_info_t info =
 {
 	"IMA ADPCM audio decoder",
 	"imaadpcm",

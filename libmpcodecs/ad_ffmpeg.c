@@ -11,7 +11,7 @@
 
 #include "mpbswap.h"
 
-static ad_info_t info = 
+static const ad_info_t info =
 {
 	"FFmpeg/libavcodec audio decoders",
 	"ffmpeg",

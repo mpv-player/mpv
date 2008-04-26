@@ -20,7 +20,7 @@
 #include "loader/ldt_keeper.h"
 #endif
 
-static ad_info_t info =  {
+static const ad_info_t info = {
 	"QuickTime Audio Decoder",
 	"qtaudio",
 	"A'rpi",
