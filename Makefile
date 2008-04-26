@@ -606,7 +606,7 @@ DEPS = foo
 
 include mpcommon.mak
 
-DEPS = $(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER) $(SRCS_MENCODER)))
+DEPS = $(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER)))
 $(DEPS) recurse: help_mp.h version.h codecs.conf.h
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part .depend; done
