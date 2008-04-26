@@ -28,9 +28,7 @@ install:
 
 dep depend:
 
-clean:
+clean distclean:
 	rm -f *.o *~ mga_vid_test tdfx_vid_test
-
-distclean: clean
 
 .PHONY: all install dep depend *clean
