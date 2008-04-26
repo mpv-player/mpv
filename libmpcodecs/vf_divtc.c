@@ -206,7 +206,7 @@ static int imgop(int(*planeop)(unsigned char *, unsigned char *,
 static int match(struct vf_priv_s *p, int *diffs,
 		 int phase1, int phase2, double *strength)
    {
-   static const int pattern1[]={ -4,  1, 1, 1, 1 },
+   const int pattern1[]={ -4,  1, 1, 1, 1 },
       pattern2[]={ -2, -3, 4, 4, -3 }, *pattern;
    int f, m, n, t[5];
 
