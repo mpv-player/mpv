@@ -318,7 +318,25 @@ SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
                                         libfaad2/tns.c \
 
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
-SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c
+SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c \
+                                        libmpeg2/alloc.c \
+                                        libmpeg2/cpu_accel.c\
+                                        libmpeg2/cpu_state.c \
+                                        libmpeg2/decode.c \
+                                        libmpeg2/header.c \
+                                        libmpeg2/idct.c \
+                                        libmpeg2/motion_comp.c \
+                                        libmpeg2/slice.c
+SRCS_COMMON-$(LIBMPEG2)-$(ARCH_ALPHA)   += libmpeg2/idct_alpha.c \
+                                           libmpeg2/motion_comp_alpha.c
+SRCS_COMMON-$(LIBMPEG2)-$(ARCH_ARMV4L)  += libmpeg2/motion_comp_arm.c \
+                                           libmpeg2/motion_comp_arm_s.S \
+                                           libmpeg2/motion_comp_iwmmxt.c
+SRCS_COMMON-$(LIBMPEG2)-$(HAVE_ALTIVEC) += libmpeg2/idct_altivec.c \
+                                           libmpeg2/motion_comp_altivec.c
+SRCS_COMMON-$(LIBMPEG2)-$(HAVE_MMX)     += libmpeg2/idct_mmx.c \
+                                           libmpeg2/motion_comp_mmx.c
+SRCS_COMMON-$(LIBMPEG2)-$(HAVE_VIS)     += libmpeg2/motion_comp_vis.c
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
                                         stream/stream_nemesi.c
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
@@ -557,7 +575,6 @@ COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
 COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
 COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
-COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
@@ -579,7 +596,6 @@ PARTS = liba52 \
         libavcodec \
         libavformat \
         libavutil \
-        libmpeg2 \
         libpostproc \
         libswscale \
         mp3lib \
@@ -605,6 +621,7 @@ DIRS =  dvdread \
         libmpcodecs \
         libmpcodecs/native \
         libmpdemux \
+        libmpeg2 \
         libvo \
         osdep \
         stream \
