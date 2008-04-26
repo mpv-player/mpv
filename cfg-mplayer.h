@@ -347,7 +347,7 @@ const m_option_t mplayer_opts[]={
 	{"nomouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"doubleclick-time", &doubleclick_time, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
 #ifdef USE_TV
-	{"tvscan", tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"tvscan", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif /* USE_TV */
@@ -360,7 +360,7 @@ const m_option_t mplayer_opts[]={
 	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
 	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
 
-	{"vd", vd_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"vd", (void *) vd_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

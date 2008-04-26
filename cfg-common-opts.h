@@ -3,7 +3,7 @@
 	{"noquiet", &quiet, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"really-quiet", &verbose, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
 	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, CONF_GLOBAL|CONF_NOSAVE, 0, 0, NULL},
-	{"msglevel", msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+        {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 	{"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 #ifdef USE_ICONV
@@ -12,7 +12,7 @@
 #ifdef WIN32
 	{"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-	{"noconfig", noconfig_opts, CONF_TYPE_SUBCONFIG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 0, NULL},
+	{"noconfig", (void *) noconfig_opts, CONF_TYPE_SUBCONFIG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 0, NULL},
 
 // ------------------------- stream options --------------------
 
@@ -139,25 +139,25 @@
 	{ "extbased", &extension_parsing, CONF_TYPE_FLAG, 0, 0, 1, NULL },
 	{ "noextbased", &extension_parsing, CONF_TYPE_FLAG, 0, 1, 0, NULL },
 
-        {"mf", mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
+        {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef USE_RADIO
 	{"radio", radioopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"radio", "MPlayer was compiled without Radio interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif /* USE_RADIO */
 #ifdef USE_TV
-	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"tv", (void *) tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"tv", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif /* USE_TV */
 #ifdef HAVE_PVR
-	{"pvr", pvropts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"pvr", (void *) pvropts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"pvr", "MPlayer was compiled without V4L2/PVR interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif /* HAVE_PVR */
-	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"vivo", (void *) vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #ifdef HAS_DVBIN_SUPPORT
-	{"dvbin", dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"dvbin", (void *) dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
 // ------------------------- a-v sync options --------------------
@@ -199,7 +199,7 @@
         OPT_FLAG_CONSTANTS("nosound", audio_id, 0, -1, -2),
 
 	{"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-	{"af-adv", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"af-adv", (void *) audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
 	{"vop", "-vop has been removed, use -vf instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
         OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
@@ -223,7 +223,7 @@
 
 	// scaling:
 	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
-	{"ssf", scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
         OPT_FLAG_ON("zoom", softzoom, 0),
         OPT_FLAG_OFF("nozoom", softzoom, 0),
         OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.2, 3.0),
@@ -246,10 +246,10 @@
 	{"field-dominance", &field_dominance, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
 
 #ifdef USE_LIBAVCODEC
-	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 #ifdef USE_LIBAVFORMAT
-        {"lavfdopts",  lavfdopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+        {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	{"xvidopts", xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

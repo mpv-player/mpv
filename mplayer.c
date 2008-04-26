@@ -306,7 +306,7 @@ char* current_module=NULL; // for debugging
 #include "libmenu/menu.h"
 extern void vf_menu_pause_update(struct vf_instance* vf);
 extern vf_info_t vf_info_menu;
-static vf_info_t* libmenu_vfs[] = {
+static const vf_info_t* const libmenu_vfs[] = {
   &vf_info_menu,
   NULL
 };
@@ -341,7 +341,7 @@ const void *mpctx_get_video_out(MPContext *mpctx)
     return mpctx->video_out;
 }
 
-void *mpctx_get_audio_out(MPContext *mpctx)
+const void *mpctx_get_audio_out(MPContext *mpctx)
 {
     return mpctx->audio_out;
 }

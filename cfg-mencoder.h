@@ -184,11 +184,11 @@ const m_option_t mencoder_opts[]={
 	{"xsize", "-xsize has been removed, use -vf crop=w:h:x:y for cropping.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
 	// output audio/video codec selection
-	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
-	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+	{"oac", (void *) oac_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+	{"ovc", (void *) ovc_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 
 	// output file format
-	{"of", of_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+	{"of", (void *) of_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 
 	// override audio format tag in output file
 	{"fafmttag", &force_audiofmttag, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL},
@@ -215,7 +215,7 @@ const m_option_t mencoder_opts[]={
 	{"noodml", &write_odml, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	
 	// info header strings
-	{"info", info_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+	{"info", (void *) info_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 
 #ifdef HAVE_MP3LAME
 	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
