@@ -762,8 +762,6 @@ static void set_func_param(const m_option_t* opt, void* dst, void* src) {
   
   if(!s) return;
 
-  // Revert if needed
-  if(opt->priv) ((m_opt_default_func_t)opt->priv)(opt,opt->name);
   for( ; s != NULL ; s = s->next)
     ((m_opt_func_param_t) opt->p)(opt,s->param);
 }
@@ -821,7 +819,6 @@ static int parse_func(const m_option_t* opt,const char *name, char *param, void*
 
 static void set_func(const m_option_t* opt,void* dst, void* src) {
   int i;
-  if(opt->priv) ((m_opt_default_func_t)opt->priv)(opt,opt->name);
   for(i = 0 ; i < VAL(src) ; i++)
     ((m_opt_func_t) opt->p)(opt);
 }
