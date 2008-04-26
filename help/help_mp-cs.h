@@ -396,7 +396,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "chyba konfiguračního souboru"
 #define MSGTR_ErrorParsingCommandLine "chyba při zpracovávání příkazového řádku"
 #define MSGTR_VideoStreamRequired "Videoproud je povinný!\n"
-#define MSGTR_ForcingInputFPS "Vstupní fps bude interpretováno jako %5.2f\n"
+#define MSGTR_ForcingInputFPS "Vstupní fps bude interpretováno jako %5.3f\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Výstupní formát souboru RAWVIDEO nepodporuje zvuk - vypínám ho.\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Tento demuxer zatím nepodporuje -nosound.\n"
 #define MSGTR_MemAllocFailed "Alokace paměti selhala.\n"
@@ -589,7 +589,7 @@ static char help_text[]=
 #define MSGTR_FormatNotRecognized "======= Bohužel, formát tohoto souboru nebyl rozpoznán/není podporován =======\n"\
                                   "==== Pokud je soubor AVI, ASF nebo MPEG proud, kontaktujte prosím autora! ====\n"
 #define MSGTR_SettingProcessPriority "Nastavuji prioritu procesu: %s\n"
-#define MSGTR_FilefmtFourccSizeFpsFtime "[V] fmtsouboru:%d  fourcc:0x%X  velikost:%dx%d  fps:%5.2f  fčas:=%6.4f\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] fmtsouboru:%d  fourcc:0x%X  velikost:%dx%d  fps:%5.3f  fčas:=%6.4f\n"
 #define MSGTR_CannotInitializeMuxer "Nelze inicializovat muxer."
 #define MSGTR_MissingVideoStream "Nebyl nalezen video proud.\n"
 #define MSGTR_MissingAudioStream "Nebyl nalezen audio proud -> bez zvuku.\n"

@@ -388,7 +388,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "błąd pliku konfiguracyjnego"
 #define MSGTR_ErrorParsingCommandLine "błąd w przetwarzaniu wiersza poleceń"
 #define MSGTR_VideoStreamRequired "Wymagany jest strumień video!\n"
-#define MSGTR_ForcingInputFPS "Wejściowa wartość FPS zostanie zinterpretowana jako %5.2f.\n"
+#define MSGTR_ForcingInputFPS "Wejściowa wartość FPS zostanie zinterpretowana jako %5.3f.\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Wyjściowy format RAWVIDEO nie obsługuje dźwięku - wyłączam dźwięk.\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Ten demuxer jeszcze nie obsługuje opcji -nosound.\n"
 #define MSGTR_MemAllocFailed "Alokacja pamięci nie powiodła się.\n"

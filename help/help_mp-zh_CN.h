@@ -405,7 +405,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "配置文件错误"
 #define MSGTR_ErrorParsingCommandLine "解析命令行错误"
 #define MSGTR_VideoStreamRequired "视频流是必须的!\n"
-#define MSGTR_ForcingInputFPS "输入帧率将被替换为 %5.2f。\n"
+#define MSGTR_ForcingInputFPS "输入帧率将被替换为 %5.3f。\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "RAWVIDEO 输出文件格式不支持音频 - 停用音频。\n"
 #define MSGTR_DemuxerDoesntSupportNosound "目前此分路器还不支持 -nosound。\n"
 #define MSGTR_MemAllocFailed "内存分配失败。\n"
@@ -598,7 +598,7 @@ static char help_text[]=
 #define MSGTR_FormatNotRecognized "============= 抱歉, 此文件格式无法辨认或支持 ===============\n"\
 				  "===     如果此文件是一个 AVI, ASF 或 MPEG 流, 请联系作者!    ===\n"
 #define MSGTR_SettingProcessPriority "设置进程优先级: %s\n"
-#define MSGTR_FilefmtFourccSizeFpsFtime "[V] 文件格式:%d  fourcc:0x%X  大小:%dx%d  帧速:%5.2f  帧时间:=%6.4f\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] 文件格式:%d  fourcc:0x%X  大小:%dx%d  帧速:%5.3f  帧时间:=%6.4f\n"
 #define MSGTR_CannotInitializeMuxer "不能初始化muxer。"
 #define MSGTR_MissingVideoStream "未找到视频流。\n"
 #define MSGTR_MissingAudioStream "未找到音频流...  -> 没声音。\n"

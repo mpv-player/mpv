@@ -327,7 +327,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "konfigurationsfilsfel"
 #define MSGTR_ErrorParsingCommandLine "fel vid tolkning av cmdline"
 #define MSGTR_VideoStreamRequired "Videoström är obligatoriskt!\n"
-#define MSGTR_ForcingInputFPS "'input fps' kommer att bli tolkad som %5.2f istället\n"
+#define MSGTR_ForcingInputFPS "'input fps' kommer att bli tolkad som %5.3f istället\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Ut-filformat RAWVIDEO stödjer inte audio - deaktiverar audio\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Denna demuxer stödjer inte -nosound ännu.\n"
 #define MSGTR_MemAllocFailed "minnesallokering misslyckades"

@@ -411,7 +411,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "config file error"
 #define MSGTR_ErrorParsingCommandLine "error parsing command line"
 #define MSGTR_VideoStreamRequired "Video stream is mandatory!\n"
-#define MSGTR_ForcingInputFPS "Input fps will be interpreted as %5.2f instead.\n"
+#define MSGTR_ForcingInputFPS "Input fps will be interpreted as %5.3f instead.\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Output file format RAWVIDEO does not support audio - disabling audio.\n"
 #define MSGTR_DemuxerDoesntSupportNosound "This demuxer doesn't support -nosound yet.\n"
 #define MSGTR_MemAllocFailed "Memory allocation failed.\n"
@@ -604,7 +604,7 @@ static char help_text[]=
 #define MSGTR_FormatNotRecognized "============ Sorry, this file format is not recognized/supported =============\n"\
 				  "=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n"
 #define MSGTR_SettingProcessPriority "Setting process priority: %s\n"
-#define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.3f  ftime:=%6.4f\n"
 #define MSGTR_CannotInitializeMuxer "Cannot initialize muxer."
 #define MSGTR_MissingVideoStream "No video stream found.\n"
 #define MSGTR_MissingAudioStream "No audio stream found -> no sound.\n"

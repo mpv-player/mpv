@@ -1,4 +1,5 @@
 SRCS_COMMON          += $(SRCS_COMMON-yes)
+SRCS_COMMON          += $(SRCS_COMMON-yes-yes)
 SRCS_MPLAYER         += $(SRCS_MPLAYER-yes)
 SRCS_MENCODER        += $(SRCS_MENCODER-yes)
 
@@ -32,6 +33,9 @@ distclean:: clean
 
 %.d: %.c
 	$(MPDEPEND_CMD) > $@
+
+%.d: %.cpp
+	$(MPDEPEND_CMD_CXX) > $@
 
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<

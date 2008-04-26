@@ -6180,7 +6180,12 @@ if test "$_faad_internal" = yes ; then
   _def_faad_internal="#define USE_FAAD_INTERNAL 1"
   _faad=yes
   _res_comment="internal floating-point"
-  test "$_faad_fixed" = yes && _res_comment="internal fixed-point"
+  if test "$_faad_fixed" = yes ; then
+    # The FIXED_POINT implementation of FAAD2 improves performance
+    # on some platforms, especially for SBR files.
+    CFLAGS="$CFLAGS -DFIXED_POINT"
+    _res_comment="internal fixed-point"
+  fi
 elif test "$_faad_external" = yes ; then
   _faad=yes
   _ld_extra="$_ld_extra -lfaad"
@@ -7778,7 +7783,7 @@ PVR = $_pvr
 VCD = $_vcd
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
-DVDCSS_INTERNAL = $_libdvdcss_internal
+LIBDVDCSS_INTERNAL = $_libdvdcss_internal
 DVDNAV = $_dvdnav
 WIN32DLL = $_win32dll
 WIN32_EMULATION = $_win32_emulation
@@ -7804,7 +7809,6 @@ LIBMAD = $_mad
 LIBVORBIS = $_vorbis
 LIBTHEORA = $_theora
 FAAD_INTERNAL = $_faad_internal
-FAAD_FIXED = $_faad_fixed
 LIBSMBCLIENT = $_smbsupport
 XMMS_PLUGINS = $_xmms
 MACOSX_FINDER_SUPPORT = $_macosx_finder_support
@@ -7898,6 +7902,7 @@ HAVE_XVMC = $_xvmc
 DEPEND_CMD   = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,\$^) | sed "s,[0-9a-z._-]*: \(\$(SRC_DIR)/\)*\([a-z0-9]*/\)[^/]* ,\\2&,"
 
 MPDEPEND_CMD = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,$^) | sed "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&,"
+MPDEPEND_CMD_CXX = \$(CC) -MM \$(CXXFLAGS) \$(filter-out %.h,$^) | sed "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&,"
 
 EOF
 

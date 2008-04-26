@@ -382,7 +382,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "chyba konfiguračného súboru"
 #define MSGTR_ErrorParsingCommandLine "chyba pri spracovávaní príkazového riadku"
 #define MSGTR_VideoStreamRequired "Video prúd je povinný!\n"
-#define MSGTR_ForcingInputFPS "vstupné fps bude interpretované ako %5.2f\n"
+#define MSGTR_ForcingInputFPS "vstupné fps bude interpretované ako %5.3f\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Výstupný formát súboru RAWVIDEO nepodporuje zvuk - vypínam ho\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Tento demuxer zatiaľ nepodporuje -nosound.\n"
 #define MSGTR_MemAllocFailed "Alokácia pamäte zlyhala\n"

@@ -1,8 +1,6 @@
-
-//gcc test2.c -O2 -I.. -L. ../libvo/aclib.c -lMP3 -lm -o test2
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -26,7 +24,6 @@ static unsigned char buffer[BUFFLEN];
 int main(int argc,char* argv[]){
   int len;
   int total=0;
-  float length;
   int r;
   int audio_fd;
   
@@ -68,5 +65,5 @@ int main(int argc,char* argv[]){
   }
   
   fclose(mp3file);
-  
+  return 0;
 }
