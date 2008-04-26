@@ -242,7 +242,6 @@ int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
-char* filename=NULL; //"MI2-Trailer.avi";
 int forced_subs_only=0;
 int file_filter=1;
 
@@ -442,7 +441,7 @@ char *get_metadata(struct MPContext *mpctx, metadata_t type)
   {
   case META_NAME:
   {
-    return strdup (mp_basename2 (filename));
+    return strdup (mp_basename2 (mpctx->filename));
   }
     
   case META_VIDEO_CODEC:
@@ -854,7 +853,7 @@ static void load_per_extension_config (m_config_t* conf, const char *const file)
     m_profile_t *p;
 
     /* does filename actually have an extension ? */
-    str = strrchr (filename, '.');
+    str = strrchr (file, '.');
     if (!str)
         return;
 
@@ -949,7 +948,7 @@ static int libmpdemux_was_interrupted(struct MPContext *mpctx, int eof)
 
 static int playtree_add_playlist(struct MPContext *mpctx, play_tree_t* entry)
 {
-  play_tree_add_bpf(entry,filename);
+  play_tree_add_bpf(entry,mpctx->filename);
 
 #ifdef HAVE_NEW_GUI
   if (use_gui) {
@@ -2623,18 +2622,18 @@ int gui_no_filename=0;
 	  play_tree_iter_free(mpctx->playtree_iter);
 	  mpctx->playtree_iter = NULL;
 	}
-	filename = play_tree_iter_get_file(mpctx->playtree_iter,1);
+	mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter,1);
       }
     }
     }
 	
 #if defined(WIN32) && defined(HAVE_NEW_GUI)
     void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
-    if(runningmplayer && filename && use_gui){
+    if(runningmplayer && mpctx->filename && use_gui){
         COPYDATASTRUCT csData;
         char file[MAX_PATH];
-        char *filepart = filename;
-        if(GetFullPathName(filename, MAX_PATH, file, &filepart)){
+        char *filepart = mpctx->filename;
+        if(GetFullPathName(mpctx->filename, MAX_PATH, file, &filepart)){
             csData.dwData = 0;
             csData.cbData = strlen(file)*2;
             csData.lpData = file;
@@ -2771,7 +2770,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
         exit_player_with_rc(mpctx, NULL, 1);
     }
 
-    if(!filename && !player_idle_mode){
+    if(!mpctx->filename && !player_idle_mode){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
@@ -2947,10 +2946,10 @@ play_next_file:
   mpctx->global_sub_size = 0;
   { int i; for (i = 0; i < SUB_SOURCES; i++) mpctx->global_sub_indices[i] = -1; }
 
-  if (filename) {
-    load_per_protocol_config (mpctx->mconfig, filename);
-    load_per_extension_config (mpctx->mconfig, filename);
-    load_per_file_config (mpctx->mconfig, filename);
+  if (mpctx->filename) {
+    load_per_protocol_config (mpctx->mconfig, mpctx->filename);
+    load_per_extension_config (mpctx->mconfig, mpctx->filename);
+    load_per_file_config (mpctx->mconfig, mpctx->filename);
   }
 
   if (opts->video_driver_list)
@@ -3003,14 +3002,14 @@ if(!noconsolecontrols && !slave_mode){
 	      play_tree_iter_free(mpctx->playtree_iter);
 	      mpctx->playtree_iter = NULL;
 	     }
-	    filename = play_tree_iter_get_file(mpctx->playtree_iter,1);
+	    mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter,1);
 	   }
          }
        } 
     }
 #endif /* HAVE_NEW_GUI */
 
-while (player_idle_mode && !filename) {
+while (player_idle_mode && !mpctx->filename) {
     play_tree_t * entry = NULL;
     mp_cmd_t * cmd;
     while (!(cmd = mp_input_get_cmd(0,1,0))) { // wait for command
@@ -3060,14 +3059,14 @@ while (player_idle_mode && !filename) {
             mpctx->playtree_iter = NULL;
             continue; // wait for next command
         }
-        filename = play_tree_iter_get_file(mpctx->playtree_iter, 1);
+        mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter, 1);
     }
 }
 //---------------------------------------------------------------------------
 
-    if(filename)
+    if(mpctx->filename)
 	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing,
-		filename_recode(filename));
+		filename_recode(mpctx->filename));
 
 if (edl_filename) {
     if (edl_records) free_edl(edl_records);
@@ -3090,9 +3089,9 @@ if (edl_output_filename) {
       if(vo_vobsub==NULL)
         mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,
 		filename_recode(vobsub_name));
-    } else if (sub_auto && filename){
+    } else if (sub_auto && mpctx->filename){
       /* try to autodetect vobsub from movie filename ::atmos */
-      char *buf = strdup(filename), *psub;
+      char *buf = strdup(mpctx->filename), *psub;
       char *pdot = strrchr(buf, '.');
       char *pslash = strrchr(buf, '/');
 #ifdef WIN32
@@ -3146,7 +3145,7 @@ if (edl_output_filename) {
   mpctx->sh_video=NULL;
 
   current_module="open_stream";
-  mpctx->stream = open_stream(filename, opts, &mpctx->file_format);
+  mpctx->stream = open_stream(mpctx->filename, opts, &mpctx->file_format);
   if(!mpctx->stream) { // error...
       mpctx->eof = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY);
     goto goto_next_file;
@@ -3167,7 +3166,7 @@ if (edl_output_filename) {
     // Handle playlist
     current_module="handle_playlist";
     mp_msg(MSGT_CPLAYER,MSGL_V,"Parsing playlist %s...\n",
-	    filename_recode(filename));
+	    filename_recode(mpctx->filename));
     entry = parse_playtree(mpctx->stream, mpctx->mconfig, 0);
     mpctx->eof=playtree_add_playlist(mpctx, entry);
     goto goto_next_file;
@@ -3247,7 +3246,7 @@ if(stream_cache_size>0){
 //============ Open DEMUXERS --- DETECT file type =======================
 current_module="demux_open";
 
-mpctx->demuxer=demux_open(opts, mpctx->stream,mpctx->file_format,opts->audio_id,opts->video_id,opts->sub_id,filename);
+mpctx->demuxer=demux_open(opts, mpctx->stream,mpctx->file_format,opts->audio_id,opts->video_id,opts->sub_id,mpctx->filename);
 
 // HACK to get MOV Reference Files working
 
@@ -3268,18 +3267,18 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
     if ((strlen(bname)>10) && !strncmp(bname,"qt",2) && !strncmp(bname+3,"gateQT",6))
         continue;
 
-    if (!strncmp(bname,mp_basename(filename),strlen(bname))) // ignoring self-reference
+    if (!strncmp(bname,mp_basename(mpctx->filename),strlen(bname))) // ignoring self-reference
         continue;
 
     entry = play_tree_new();
     
-    if (filename && !strcmp(mp_basename(playlist_entry),playlist_entry)) // add reference path of current file
+    if (mpctx->filename && !strcmp(mp_basename(playlist_entry),playlist_entry)) // add reference path of current file
     {
-      temp=malloc((strlen(filename)-strlen(mp_basename(filename))+strlen(playlist_entry)+1));
+      temp=malloc((strlen(mpctx->filename)-strlen(mp_basename(mpctx->filename))+strlen(playlist_entry)+1));
       if (temp)
       {
-	strncpy(temp, filename, strlen(filename)-strlen(mp_basename(filename)));
-	temp[strlen(filename)-strlen(mp_basename(filename))]='\0';
+	strncpy(temp, mpctx->filename, strlen(mpctx->filename)-strlen(mp_basename(mpctx->filename)));
+	temp[strlen(mpctx->filename)-strlen(mp_basename(mpctx->filename))]='\0';
 	strcat(temp, playlist_entry);
 	play_tree_add_file(entry,temp);
 	mp_msg(MSGT_CPLAYER,MSGL_V,"Resolving reference to %s.\n",temp);
@@ -3464,7 +3463,7 @@ if(mpctx->sh_video) {
   } 
   if(sub_auto) { // auto load sub file ...
     char *psub = get_path( "sub/" );
-    char **tmp = sub_filenames((psub ? psub : ""), filename);
+    char **tmp = sub_filenames((psub ? psub : ""), mpctx->filename);
     int i = 0;
     free(psub); // release the buffer created by get_path() above
     while (tmp[i]) {
@@ -3520,7 +3519,7 @@ if (mpctx->global_sub_size) {
 }
 
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_FILENAME=%s\n",
-	  filename_recode(filename));
+	  filename_recode(mpctx->filename));
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_DEMUXER=%s\n", mpctx->demuxer->desc->name);
   if (mpctx->sh_video) {
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
@@ -4020,8 +4019,8 @@ if(mpctx->eof == PT_NEXT_ENTRY || mpctx->eof == PT_PREV_ENTRY) {
 if(mpctx->eof == 0) mpctx->eof = 1;
 
 while(mpctx->playtree_iter != NULL) {
-    filename = play_tree_iter_get_file(mpctx->playtree_iter,mpctx->eof);
-    if(filename == NULL) {
+    mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter,mpctx->eof);
+    if(mpctx->filename == NULL) {
         if(play_tree_iter_step(mpctx->playtree_iter,mpctx->eof,0) != PLAY_TREE_ITER_ENTRY) {
             play_tree_iter_free(mpctx->playtree_iter);
             mpctx->playtree_iter = NULL;
@@ -4040,7 +4039,7 @@ if(use_gui && !mpctx->playtree_iter) {
 #endif
 
 if(use_gui || mpctx->playtree_iter != NULL || player_idle_mode){
-    if(!mpctx->playtree_iter) filename = NULL;
+    if(!mpctx->playtree_iter) mpctx->filename = NULL;
     mpctx->eof = 0;
     goto play_next_file;
 }

@@ -128,7 +128,7 @@ static int sub_source(MPContext *mpctx)
  * which need to be fixed while watching the movie.
  */
 
-static void log_sub(void)
+static void log_sub(struct MPContext *mpctx)
 {
     char *fname;
     FILE *f;
@@ -144,14 +144,14 @@ static void log_sub(void)
     if (subdata->sub_uses_time) {
 	fprintf(f,
 		"N: %s S: %02ld:%02ld:%02ld.%02ld E: %02ld:%02ld:%02ld.%02ld\n",
-		filename, vo_sub_last->start / 360000,
+                mpctx->filename, vo_sub_last->start / 360000,
 		(vo_sub_last->start / 6000) % 60,
 		(vo_sub_last->start / 100) % 60, vo_sub_last->start % 100,
 		vo_sub_last->end / 360000, (vo_sub_last->end / 6000) % 60,
 		(vo_sub_last->end / 100) % 60, vo_sub_last->end % 100);
     } else {
-	fprintf(f, "N: %s S: %ld E: %ld\n", filename, vo_sub_last->start,
-		vo_sub_last->end);
+        fprintf(f, "N: %s S: %ld E: %ld\n", mpctx->filename,
+                vo_sub_last->start, vo_sub_last->end);
     }
     for (i = 0; i < vo_sub_last->lines; i++) {
 	fprintf(f, "%s\n", vo_sub_last->text[i]);
@@ -221,7 +221,7 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
 static int mp_property_path(m_option_t *prop, int action, void *arg,
 			    MPContext *mpctx)
 {
-    return m_property_string_ro(prop, action, arg, filename);
+    return m_property_string_ro(prop, action, arg, mpctx->filename);
 }
 
 /// filename without path (RO)
@@ -229,12 +229,13 @@ static int mp_property_filename(m_option_t *prop, int action, void *arg,
 				MPContext *mpctx)
 {
     char *f;
-    if (!filename)
+    if (!mpctx->filename)
 	return M_PROPERTY_UNAVAILABLE;
-    if (((f = strrchr(filename, '/')) || (f = strrchr(filename, '\\'))) && f[1])
+    if (((f = strrchr(mpctx->filename, '/'))
+         || (f = strrchr(mpctx->filename, '\\'))) && f[1])
 	f++;
     else
-	f = filename;
+        f = mpctx->filename;
     return m_property_string_ro(prop, action, arg, f);
 }
 
@@ -2537,7 +2538,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	    break;
 
 	case MP_CMD_SUB_LOG:
-	    log_sub();
+            log_sub(mpctx);
 	    break;
 
 	case MP_CMD_OSD:{

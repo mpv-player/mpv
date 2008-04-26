@@ -44,6 +44,7 @@ typedef struct MPContext {
     const ao_functions_t *audio_out;
     struct play_tree *playtree;
     struct play_tree_iter *playtree_iter;
+    char *filename; // currently playing file
     int eof;
     int play_tree_step;
 

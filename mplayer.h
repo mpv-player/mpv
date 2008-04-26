@@ -30,8 +30,6 @@ extern float  sub_delay;
 extern float  sub_fps;
 extern int    sub_auto;
 
-extern char * filename;
-
 extern int stream_cache_size;
 extern int autosync;
 

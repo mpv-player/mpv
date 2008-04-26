@@ -31,7 +31,6 @@
 
 int menu_keepdir = 0;
 char *menu_chroot = NULL;
-extern char *filename;
 
 struct list_entry_s {
   struct list_entry p;
