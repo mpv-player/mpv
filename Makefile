@@ -836,4 +836,4 @@ toolsclean:
 
 -include $(DEPS)
 
-.PHONY: all doxygen *install* recurse strip tools
+.PHONY: all doxygen *install* recurse strip *tools
