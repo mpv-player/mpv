@@ -496,7 +496,28 @@ SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
 SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(LIRC)         += input/lirc.c
 
-SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c
+SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c \
+                                 vidix/vidixlib.c \
+                                 vidix/drivers.c \
+                                 vidix/dha.c \
+                                 vidix/mtrr.c \
+                                 vidix/pci.c \
+                                 vidix/pci_names.c \
+                                 vidix/pci_dev_ids.c\
+
+SRCS_MPLAYER-$(VIDIX_CYBERBLADE)        += vidix/cyberblade_vid.c
+SRCS_MPLAYER-$(VIDIX_IVTV)              += vidix/ivtv_vid.c
+SRCS_MPLAYER-$(VIDIX_MACH64)            += vidix/mach64_vid.c
+SRCS_MPLAYER-$(VIDIX_MGA)               += vidix/mga_vid.c
+SRCS_MPLAYER-$(VIDIX_MGA_CRTC2)         += vidix/mga_crtc2_vid.c
+SRCS_MPLAYER-$(VIDIX_NVIDIA)            += vidix/nvidia_vid.c
+SRCS_MPLAYER-$(VIDIX_PM2)               += vidix/pm2_vid.c
+SRCS_MPLAYER-$(VIDIX_PM3)               += vidix/pm3_vid.c
+SRCS_MPLAYER-$(VIDIX_RADEON)            += vidix/radeon_vid.c
+SRCS_MPLAYER-$(VIDIX_RAGE128)           += vidix/rage128_vid.c
+SRCS_MPLAYER-$(VIDIX_S3)                += vidix/s3_vid.c
+SRCS_MPLAYER-$(VIDIX_SIS)               += vidix/sis_vid.c vidix/sis_bridge.c
+SRCS_MPLAYER-$(VIDIX_UNICHROME)         += vidix/unichrome_vid.c
 
 OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
 
@@ -538,8 +559,6 @@ COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
 COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
 
-LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
-
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
@@ -565,9 +584,6 @@ PARTS = liba52 \
         libswscale \
         mp3lib \
 
-ifeq ($(VIDIX),yes)
-PARTS += vidix
-endif
 ifeq ($(WIN32DLL),yes)
 PARTS += loader
 endif
@@ -597,6 +613,7 @@ DIRS =  dvdread \
         stream/realrtsp \
         tremor \
         TOOLS \
+        vidix \
 
 all:	recurse $(ALL_PRG)
 
@@ -653,6 +670,14 @@ libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
 
 libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Ilibavcodec
+
+VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
+                  vidix/pci_names.h vidix/pci_vendors.h
+
+$(VIDIX_PCI_FILES): vidix/pci.db
+	LC_ALL=C awk -f vidix/pci_db2c.awk $< $(VIDIX_PCIDB)
+
+vidix/%.o vidix/%.d: $(VIDIX_PCI_FILES)
 
 install: install-dirs $(INSTALL_TARGETS)
 
@@ -713,7 +738,7 @@ uninstall:
 clean:: toolsclean
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
-	  codecs.conf.h help_mp.h version.h TAGS tags
+	  codecs.conf.h help_mp.h version.h TAGS tags $(VIDIX_PCI_FILES)
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 
