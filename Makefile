@@ -564,8 +564,10 @@ PARTS = liba52 \
         libpostproc \
         libswscale \
         mp3lib \
-        vidix \
 
+ifeq ($(VIDIX),yes)
+PARTS += vidix
+endif
 ifeq ($(WIN32DLL),yes)
 PARTS += loader
 endif
