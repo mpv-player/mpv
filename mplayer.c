@@ -3158,6 +3158,11 @@ if (edl_output_filename) {
 #endif
 
   if(mpctx->file_format == DEMUXER_TYPE_PLAYLIST) {
+      mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nThis looks like a playlist, but "
+             "playlist support will not be used automatically.\n"
+             "MPlayer's playlist code is unsafe and should only be used with "
+             "trusted sources.\nPlayback will probably fail.\n\n");
+#if 0
     play_tree_t* entry;
     // Handle playlist
     current_module="handle_playlist";
@@ -3166,6 +3171,7 @@ if (edl_output_filename) {
     entry = parse_playtree(mpctx->stream, mpctx->mconfig, 0);
     mpctx->eof=playtree_add_playlist(mpctx, entry);
     goto goto_next_file;
+#endif
   }
   mpctx->stream->start_pos+=seek_to_byte;
 
