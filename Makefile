@@ -354,7 +354,16 @@ SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIBVORBIS)             += libmpcodecs/ad_libvorbis.c \
                                         libmpdemux/demux_ogg.c
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
-SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c
+SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32) += mp3lib/decode_i586.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOW)     += mp3lib/dct36_3dnow.c \
+                                                          mp3lib/dct64_3dnow.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOWEX)   += mp3lib/dct36_k7.c \
+                                                          mp3lib/dct64_k7.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)       += mp3lib/dct64_mmx.c
+SRCS_COMMON-$(MP3LIB)-$(HAVE_ALTIVEC) += mp3lib/dct64_altivec.c
+SRCS_COMMON-$(MP3LIB)-$(HAVE_MMX)     += mp3lib/decode_mmx.c
+SRCS_COMMON-$(MP3LIB)-$(HAVE_SSE)     += mp3lib/dct64_sse.c
 SRCS_COMMON-$(MPLAYER_NETWORK)       += stream/stream_netstream.c \
                                         stream/asf_mmst_streaming.c \
                                         stream/asf_streaming.c \
@@ -581,7 +590,6 @@ COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
 COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
 COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
 COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
-COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
@@ -604,7 +612,6 @@ PARTS = libavcodec \
         libavutil \
         libpostproc \
         libswscale \
-        mp3lib \
 
 ifeq ($(WIN32DLL),yes)
 PARTS += loader
@@ -630,6 +637,7 @@ DIRS =  dvdread \
         libmpdemux \
         libmpeg2 \
         libvo \
+        mp3lib \
         osdep \
         stream \
         stream/freesdp \
@@ -695,6 +703,8 @@ libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
 
 libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Ilibavcodec
 
+mp3lib/decode_i586.o: CFLAGS += -fomit-frame-pointer
+
 VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
                   vidix/pci_names.h vidix/pci_vendors.h
 
@@ -704,6 +714,9 @@ $(VIDIX_PCI_FILES): vidix/pci.db
 vidix/%.o vidix/%.d: $(VIDIX_PCI_FILES)
 
 liba52/test: liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
+
+mp3lib/test:  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
+mp3lib/test2: mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
 
 install: install-dirs $(INSTALL_TARGETS)
 
