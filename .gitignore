@@ -3,6 +3,7 @@
 *.d
 .depend
 
+/ffmpeg
 /config.h
 /config.mak
 /configure.log

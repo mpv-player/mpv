@@ -494,19 +494,19 @@ _libavutil_so=auto
 _libavcodec_a=auto
 _libamr_nb=auto
 _libamr_wb=auto
-_libavdecoders_all=`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
+_libavdecoders_all=`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavdecoders=` echo $_libavdecoders_all | sed -e s/LIBFAAD_DECODER// -e s/MPEG4AAC_DECODER//  -e s/LIBA52_DECODER// -e s/LIBGSM_DECODER// -e s/LIBGSM_MS_DECODER// -e s/LIBVORBIS_DECODER// `
-_libavencoders_all=`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
+_libavencoders_all=`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavencoders=` echo $_libavencoders_all | sed -e s/LIBGSM_ENCODER// -e s/LIBGSM_MS_ENCODER// -e s/LIBTHEORA_ENCODER// -e s/LIBVORBIS_ENCODER// `
-_libavparsers_all=`sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
+_libavparsers_all=`sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavparsers=$_libavparsers_all
-_libavbsfs_all=`sed -n 's/^[^#]*BSF.*(.*, *\(.*\)).*/\1_bsf/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
+_libavbsfs_all=`sed -n 's/^[^#]*BSF.*(.*, *\(.*\)).*/\1_bsf/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavbsfs=$_libavbsfs_all
-_libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*(.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
+_libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*(.*, *\(.*\)).*/\1_demuxer/p' ffmpeg/libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavdemuxers=`echo $_libavdemuxers_all | sed -e s/REDIR_DEMUXER// -e s/RTSP_DEMUXER// -e s/SDP_DEMUXER// -e s/LIBNUT_DEMUXER// -e s/AVISYNTH_DEMUXER// `
-_libavmuxers_all=`sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
+_libavmuxers_all=`sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' ffmpeg/libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavmuxers=`echo $_libavmuxers_all | sed -e s/RTP_MUXER// `
-_libavprotocols_all=`sed -n 's/^[^#]*PROTOCOL.*(.*, *\(.*\)).*/\1_protocol/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
+_libavprotocols_all=`sed -n 's/^[^#]*PROTOCOL.*(.*, *\(.*\)).*/\1_protocol/p' ffmpeg/libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavcodec_so=auto
 _libavformat_a=auto
 _libavformat_so=auto
@@ -6404,7 +6404,7 @@ echores "$_live"
 
 echocheck "FFmpeg libavutil"
 if test "$_libavutil_a" = auto ; then
-  if test -d libavutil ; then
+  if test -d ffmpeg/libavutil ; then
     _libavutil_a=yes
     _res_comment="static"
   else
@@ -6444,7 +6444,7 @@ echores "$_libavutil"
 echocheck "FFmpeg libavcodec"
 if test "$_libavcodec_a" = auto ; then
   _libavcodec_a=no
-  if test -d libavcodec && test -f libavcodec/utils.c ; then
+  if test -d ffmpeg/libavcodec && test -f ffmpeg/libavcodec/utils.c ; then
     _libavcodec_a="yes"
     _res_comment="static"
   fi
@@ -6488,7 +6488,7 @@ echores "$_libavcodec"
 echocheck "FFmpeg libavformat"
 if test "$_libavformat_a" = auto ; then
   _libavformat_a=no
-  if test -d libavformat && test -f libavformat/utils.c ; then
+  if test -d ffmpeg/libavformat && test -f ffmpeg/libavformat/utils.c ; then
     _libavformat_a=yes
     _res_comment="static"
   fi
@@ -6524,7 +6524,7 @@ echores "$_libavformat"
 echocheck "FFmpeg libpostproc"
 if test "$_libpostproc_a" = auto ; then
   _libpostproc_a=no
-  if test -d libpostproc && test -f libpostproc/postprocess.h ; then
+  if test -d ffmpeg/libpostproc && test -f ffmpeg/libpostproc/postprocess.h ; then
     _libpostproc_a='yes'
     _res_comment="static"
   fi
@@ -7626,9 +7626,6 @@ if test "$_dvdread_internal" = yes || test "$_faad_internal" = yes ; then
   CFLAGS="$CFLAGS -DHAVE_CONFIG_H"
 fi
 
-CFLAGS="-I. -I.. -I../libavutil $CFLAGS"
-CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
-
 cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
@@ -7636,6 +7633,10 @@ if test "$cc_vendor" = "gnu" ; then
   cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
   cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
 fi
+
+CFLAGS_FFMPEG="-I../.. $CFLAGS"
+CFLAGS="-I. -I../ffmpeg -I.. -I../ffmpeg/libavutil $CFLAGS"
+CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
 cc_check -mno-omit-leaf-frame-pointer && CFLAG_NO_OMIT_LEAF_FRAME_POINTER="-mno-omit-leaf-frame-pointer"
 
@@ -7696,6 +7697,7 @@ INSTALL = $_install
 EXTRA_INC = $_inc_extra
 EXTRAXX_INC = $_inc_extra $_inc_extraxx
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
+FFMPEG_OFLAGS = $CFLAGS_FFMPEG \$(EXTRA_INC)
 CFLAG_NO_OMIT_LEAF_FRAME_POINTER = $CFLAG_NO_OMIT_LEAF_FRAME_POINTER
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
 CFLAG_STACKREALIGN = $_stackrealign
@@ -8654,6 +8656,9 @@ EOF
 
 # Do not overwrite an unchanged config.h to avoid superfluous rebuilds.
 cmp -s "$TMPH" config.h || mv -f "$TMPH" config.h
+
+cp -p config.h ffmpeg/config.h
+sed -e 's/OPTFLAGS/MPLAYER_OPTFLAGS/' -e 's/FFMPEG_OFLAGS/OPTFLAGS/' config.mak >ffmpeg/config.mak
 
 #############################################################################
 

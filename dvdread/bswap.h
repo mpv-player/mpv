@@ -1,7 +1,7 @@
 #ifndef DVDREAD_BSWAP_H
 #define DVDREAD_BSWAP_H
 
-#include "../libavutil/bswap.h"
+#include "libavutil/bswap.h"
 
 #ifdef WORDS_BIGENDIAN
 #define B2N_16(x)

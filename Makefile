@@ -588,10 +588,10 @@ SRCS_MENCODER-$(XVID4)            += libmpcodecs/ve_xvid4.c
 
 COMMON_LIBS = libswscale/libswscale.a \
 
-COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
-COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
-COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
-COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
+COMMON_LIBS-$(LIBAVFORMAT_A)      += ffmpeg/libavformat/libavformat.a
+COMMON_LIBS-$(LIBAVCODEC_A)       += ffmpeg/libavcodec/libavcodec.a
+COMMON_LIBS-$(LIBAVUTIL_A)        += ffmpeg/libavutil/libavutil.a
+COMMON_LIBS-$(LIBPOSTPROC_A)      += ffmpeg/libpostproc/libpostproc.a
 COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
@@ -610,10 +610,10 @@ INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
-PARTS = libavcodec \
-        libavformat \
-        libavutil \
-        libpostproc \
+PARTS = ffmpeg/libavcodec \
+        ffmpeg/libavformat \
+        ffmpeg/libavutil \
+        ffmpeg/libpostproc \
         libswscale \
 
 ifeq ($(WIN32DLL),yes)
@@ -681,7 +681,7 @@ mencoder$(EXESUF): $(MENCODER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
-	$(HOST_CC) -O -I. -DCODECS2HTML $< -o $@
+	$(HOST_CC) -O -I. -Iffmpeg -DCODECS2HTML $< -o $@
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
@@ -704,7 +704,7 @@ endif
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\"
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
 
-libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Ilibavcodec
+libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Iffmpeg/libavcodec
 
 mp3lib/decode_i586.o: CFLAGS += -fomit-frame-pointer
 

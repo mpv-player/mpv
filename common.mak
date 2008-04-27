@@ -13,7 +13,7 @@ ALLFFLIBS = avcodec avdevice avfilter avformat avutil postproc swscale
 
 CFLAGS = -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
          -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) \
-         $(addprefix -I$(SRC_PATH)/lib,$(ALLFFLIBS)) $(OPTFLAGS)
+         $(addprefix -I$(SRC_PATH)/ffmpeg/lib,$(ALLFFLIBS)) $(OPTFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
