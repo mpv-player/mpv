@@ -1,0 +1,16 @@
+*.o
+*.a
+*.d
+.depend
+
+/config.h
+/config.mak
+/configure.log
+/help_mp.h
+/mencoder
+/mplayer
+/version.h
+/codecs.conf.h
+/codec-cfg
+/codec-cfg-test
+/codecs2html
