@@ -238,7 +238,15 @@ SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
 SRCS_COMMON-$(JPEG)                  += libmpcodecs/vd_ijpg.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
-SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c
+SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c \
+                                        liba52/crc.c \
+                                        liba52/resample.c \
+                                        liba52/bit_allocate.c \
+                                        liba52/bitstream.c \
+                                        liba52/downmix.c \
+                                        liba52/imdct.c \
+                                        liba52/parse.c \
+
 SRCS_COMMON-$(LIBASS)                += libass/ass.c \
                                         libass/ass_bitmap.c \
                                         libass/ass_cache.c \
@@ -574,7 +582,6 @@ COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
 COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
 COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
 COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
-COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
@@ -592,8 +599,7 @@ INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
-PARTS = liba52 \
-        libavcodec \
+PARTS = libavcodec \
         libavformat \
         libavutil \
         libpostproc \
@@ -612,6 +618,7 @@ DIRS =  dvdread \
         gui/wm \
         gui/win32 \
         input \
+        liba52 \
         libaf \
         libao2 \
         libass \
@@ -695,6 +702,8 @@ $(VIDIX_PCI_FILES): vidix/pci.db
 	LC_ALL=C awk -f vidix/pci_db2c.awk $< $(VIDIX_PCIDB)
 
 vidix/%.o vidix/%.d: $(VIDIX_PCI_FILES)
+
+liba52/test: liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
 install: install-dirs $(INSTALL_TARGETS)
 
