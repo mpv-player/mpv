@@ -13,4 +13,3 @@ SRCS_COMMON = crc.c \
 include ../mpcommon.mak
 
 test: test.c ../cpudetect.o $(LIBNAME_COMMON)
-	$(CC) $(CFLAGS) -o $@ $^
