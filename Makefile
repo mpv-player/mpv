@@ -404,6 +404,7 @@ SRCS_COMMON-$(PNG)                   += libmpcodecs/vd_mpng.c
 SRCS_COMMON-$(PVR)                   += stream/stream_pvr.c
 SRCS_COMMON-$(QTX_CODECS)            += libmpcodecs/ad_qtaudio.c \
                                         libmpcodecs/vd_qtvideo.c
+SRCS_COMMON-$(QTX_EMULATION)         += loader/wrapper.S
 SRCS_COMMON-$(RADIO)                 += stream/stream_radio.c
 SRCS_COMMON-$(RADIO_CAPTURE)         += stream/audio_in.c
 SRCS_COMMON-$(REAL_CODECS)           += libmpcodecs/ad_realaud.c \
@@ -439,6 +440,16 @@ SRCS_COMMON-$(TV_V4L2)               += stream/tvi_v4l2.c stream/audio_in.c
 SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
 SRCS_COMMON-$(VCD)                   += stream/stream_vcd.c
 SRCS_COMMON-$(VSTREAM)               += stream/stream_vstream.c
+SRCS_COMMON-$(WIN32_EMULATION)       += loader/elfdll.c \
+                                        loader/ext.c \
+                                        loader/ldt_keeper.c \
+                                        loader/module.c \
+                                        loader/pe_image.c \
+                                        loader/pe_resource.c \
+                                        loader/registry.c \
+                                        loader/resource.c \
+                                        loader/win32.c \
+
 SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         libmpcodecs/ad_dmo.c \
                                         libmpcodecs/ad_dshow.c \
@@ -448,6 +459,23 @@ SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         libmpcodecs/vd_vfw.c \
                                         libmpcodecs/vd_vfwex.c \
                                         libmpdemux/demux_avs.c \
+                                        loader/afl.c \
+                                        loader/driver.c \
+                                        loader/vfl.c \
+                                        loader/dshow/DS_AudioDecoder.c \
+                                        loader/dshow/DS_Filter.c \
+                                        loader/dshow/DS_VideoDecoder.c \
+                                        loader/dshow/allocator.c \
+                                        loader/dshow/cmediasample.c \
+                                        loader/dshow/guids.c \
+                                        loader/dshow/inputpin.c \
+                                        loader/dshow/mediatype.c \
+                                        loader/dshow/outputpin.c \
+                                        loader/dmo/DMO_AudioDecoder.c \
+                                        loader/dmo/DMO_VideoDecoder.c   \
+                                        loader/dmo/buffer.c   \
+                                        loader/dmo/dmo.c  \
+                                        loader/dmo/dmo_guids.c \
 
 SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
 SRCS_COMMON-$(XMMS_PLUGINS)          += libmpdemux/demux_xmms.c
@@ -589,7 +617,6 @@ COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
 COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
 COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
 COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
-COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
@@ -613,10 +640,6 @@ PARTS = libavcodec \
         libpostproc \
         libswscale \
 
-ifeq ($(WIN32DLL),yes)
-PARTS += loader
-endif
-
 DIRS =  dvdread \
         gui \
         gui/mplayer \
@@ -637,6 +660,9 @@ DIRS =  dvdread \
         libmpdemux \
         libmpeg2 \
         libvo \
+        loader \
+        loader/dshow \
+        loader/dmo \
         mp3lib \
         osdep \
         stream \
@@ -705,6 +731,10 @@ libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
 
 libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Ilibavcodec
 
+loader/% loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAG_NO_OMIT_LEAF_FRAME_POINTER)
+#loader/%.o loader/%.d: CFLAGS += -Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
+loader/win32.o loader/win32.d: CFLAGS += $(CFLAG_STACKREALIGN)
+
 mp3lib/decode_i586.o: CFLAGS += -fomit-frame-pointer
 
 VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
@@ -719,6 +749,12 @@ VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
 $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
 liba52/test: liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
+
+LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o cpudetect.o mp_msg.o mp_fifo.o osdep/mmap_anon.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
+
+loader/qtx/list loader/qtx/qtxload: CFLAGS += -g
+loader/qtx/list: loader/qtx/list.c $(LOADER_TEST_OBJS)
+loader/qtx/qtxload: loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
 
 mp3lib/test:  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
 mp3lib/test2: mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
