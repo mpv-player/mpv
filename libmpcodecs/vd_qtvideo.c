@@ -28,7 +28,7 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(qtvideo)
 
-#include "bswap.h"
+#include "mpbswap.h"
 
 #ifndef HAVE_QUICKTIME
 #include "loader/qtx/qtxsdk/components.h"

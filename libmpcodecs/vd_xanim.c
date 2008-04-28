@@ -37,7 +37,7 @@ LIBVD_EXTERN(xanim)
 #include <errno.h> /* strerror, errno */
 
 #include "mp_msg.h"
-#include "bswap.h"
+#include "mpbswap.h"
 
 #include "osdep/timer.h"
 

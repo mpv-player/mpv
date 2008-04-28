@@ -14,7 +14,7 @@
 #include "loader/wine/windef.h"
 
 #include "ad_internal.h"
-#include "bswap.h"
+#include "mpbswap.h"
 
 #ifdef WIN32_LOADER
 #include "loader/ldt_keeper.h"
