@@ -93,7 +93,7 @@ typedef struct mkv_track
 
   int default_track;
 
-  void *private_data;
+  unsigned char *private_data;
   unsigned int private_size;
 
   /* stuff for realmedia */
@@ -187,9 +187,10 @@ typedef struct mkv_demuxer
  * \param nelem current number of elements in array
  * \param elsize size of one array element
  */
-static void grow_array(void **array, int nelem, size_t elsize) {
+static void *grow_array(void *array, int nelem, size_t elsize) {
   if (!(nelem & 31))
-    *array = realloc(*array, (nelem + 32) * elsize);
+    array = realloc(array, (nelem + 32) * elsize);
+  return array;
 }
 
 static mkv_track_t *
@@ -214,8 +215,9 @@ add_cluster_position (mkv_demuxer_t *mkv_d, uint64_t position)
     if (mkv_d->cluster_positions[i] == position)
       return;
 
-  grow_array(&mkv_d->cluster_positions, mkv_d->num_cluster_pos,
-             sizeof(uint64_t));
+  mkv_d->cluster_positions = grow_array(mkv_d->cluster_positions,
+                                        mkv_d->num_cluster_pos,
+                                        sizeof(uint64_t));
   mkv_d->cluster_positions[mkv_d->num_cluster_pos++] = position;
 }
 
@@ -1232,7 +1234,8 @@ demux_mkv_read_cues (demuxer_t *demuxer)
       if (time != EBML_UINT_INVALID && track != EBML_UINT_INVALID
           && pos != EBML_UINT_INVALID)
         {
-          grow_array(&mkv_d->indexes, mkv_d->num_indexes, sizeof(mkv_index_t));
+          mkv_d->indexes = grow_array(mkv_d->indexes, mkv_d->num_indexes,
+                                      sizeof(mkv_index_t));
           mkv_d->indexes[mkv_d->num_indexes].tnum = track;
           mkv_d->indexes[mkv_d->num_indexes].timecode = time;
           mkv_d->indexes[mkv_d->num_indexes].filepos =mkv_d->segment_start+pos;
@@ -1393,7 +1396,6 @@ demux_mkv_read_tags (demuxer_t *demuxer)
 static int
 demux_mkv_read_attachments (demuxer_t *demuxer)
 {
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   stream_t *s = demuxer->stream;
   uint64_t length, l;
   int il;
@@ -2120,13 +2122,13 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
 
       if (track->a_formattag == mmioFOURCC('f', 'L', 'a', 'C'))
         {
-          ptr = (unsigned char *)track->private_data;
+          ptr = track->private_data;
           size = track->private_size;
         }
       else
         {
           sh_a->format = mmioFOURCC('f', 'L', 'a', 'C');
-          ptr = (unsigned char *) track->private_data
+          ptr = track->private_data
             + sizeof (WAVEFORMATEX);
           size = track->private_size - sizeof (WAVEFORMATEX);
         }
@@ -2226,27 +2228,6 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
     }
 
   return 0;
-}
-
-static void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags);
-
-/** \brief Given a matroska track number and type, find the id that mplayer would ask for.
- *  \param d The demuxer for which the subtitle id should be returned.
- *  \param num The matroska track number we are looking up.
- *  \param type The track type.
- */
-static int demux_mkv_reverse_id(mkv_demuxer_t *d, int num, int type)
-{
-  int i, id;
-  
-  for (i=0, id=0; i < d->num_tracks; i++)
-    if (d->tracks[i] != NULL && d->tracks[i]->type == type) {
-      if (d->tracks[i]->tnum == num)
-        return id;
-      id++;
-    }
-  
-  return -1;
 }
 
 static int
@@ -2690,7 +2671,7 @@ handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
   memcpy (dp->buffer + REALHEADER_SIZE + isize, buffer, (chunks+1)*8);
 #endif
 
-  hdr = dp->buffer;
+  hdr = (uint32_t *) dp->buffer;
   *hdr++ = chunks;                 // number of chunks
   *hdr++ = timestamp;              // timestamp from packet header
   *hdr++ = isize;                  // length of actual data
