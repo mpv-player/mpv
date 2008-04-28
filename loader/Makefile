@@ -37,7 +37,7 @@ CFLAGS+=-fno-omit-frame-pointer $(CFLAG_NO_OMIT_LEAF_FRAME_POINTER)
 win32.o: CFLAGS += $(CFLAG_STACKREALIGN)
 
 TEST_OBJS    = $(LIBNAME_COMMON) ../cpudetect.o ../mp_msg.o ../mp_fifo.o ../osdep/$(GETCH) ../osdep/$(TIMER)
-TEST_LDFLAGS = -ltermcap -ldl -lm -lpthread -g
+TEST_LDFLAGS = -ltermcap -lm -g
 
 qtx/qtxload: qtx/qtxload.c $(TEST_OBJS)
 	$(CC) -o $@ $^ $(TEST_LDFLAGS)
