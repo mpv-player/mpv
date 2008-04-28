@@ -2,6 +2,7 @@
 #define MPLAYER_M_OPTION_H
 
 #include <string.h>
+#include <stddef.h>
 
 /// \defgroup Options
 /// m_option allows to parse, print and copy data of various types.
