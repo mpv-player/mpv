@@ -903,6 +903,6 @@ TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
 toolsclean:
 	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
-#-include $(DEPS)
+-include $(DEPS)
 
 .PHONY: all doxygen *install* recurse strip *tools
