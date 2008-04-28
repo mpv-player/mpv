@@ -30,7 +30,7 @@
 static double relative_time, startup_time;
 static double timebase_ratio;
 
-const char *timer_name = "Darwin accurate";
+const char timer_name[] = "Darwin accurate";
 
 
 
