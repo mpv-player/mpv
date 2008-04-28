@@ -30,7 +30,7 @@
 
 #include "a52.h"
 #include "mm_accel.h"
-#include "../cpudetect.h"
+#include "cpudetect.h"
 
 static a52_state_t *state;
 static uint8_t buf[3840];

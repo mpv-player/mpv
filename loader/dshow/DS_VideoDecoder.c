@@ -30,9 +30,9 @@ static SampleProcUserData sampleProcData;
 
 #include "DS_VideoDecoder.h"
 
-#include "../wine/winerror.h"
+#include "wine/winerror.h"
 #ifdef WIN32_LOADER
-#include "../ldt_keeper.h"
+#include "ldt_keeper.h"
 #endif
 
 #include <unistd.h>

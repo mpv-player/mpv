@@ -9,7 +9,7 @@
 #include "dshow/interfaces.h"
 #include "registry.h"
 #ifdef WIN32_LOADER
-#include "../ldt_keeper.h"
+#include "ldt_keeper.h"
 #endif
 
 #include "dshow/libwin32.h"
@@ -33,7 +33,7 @@ struct DMO_VideoDecoder
 
 //#include "DMO_VideoDecoder.h"
 
-#include "../wine/winerror.h"
+#include "wine/winerror.h"
 
 #include <unistd.h>
 #include <fcntl.h>
