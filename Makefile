@@ -688,8 +688,6 @@ $(DEPS) recurse: help_mp.h version.h codecs.conf.h
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part .depend; done
 
-CFLAGS := $(subst -I..,-I.,$(CFLAGS))
-
 define RECURSIVE_RULE
 $(part)/$(part).a:
 	$(MAKE) -C $(part)
