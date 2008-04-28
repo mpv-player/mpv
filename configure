@@ -7626,7 +7626,7 @@ if test "$_dvdread_internal" = yes || test "$_faad_internal" = yes ; then
   CFLAGS="$CFLAGS -DHAVE_CONFIG_H"
 fi
 
-CFLAGS="-I. -I.. -I../libavutil $CFLAGS"
+CFLAGS="-I. -Ilibavutil $CFLAGS"
 CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
 cat > $TMPC << EOF
