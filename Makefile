@@ -713,7 +713,10 @@ VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
 $(VIDIX_PCI_FILES): vidix/pci.db
 	LC_ALL=C awk -f vidix/pci_db2c.awk $< $(VIDIX_PCIDB)
 
-vidix/%.o vidix/%.d: $(VIDIX_PCI_FILES)
+VIDIX_DEPS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.d))
+VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
+
+$(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
 liba52/test: liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
@@ -900,6 +903,6 @@ TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
 toolsclean:
 	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
--include $(DEPS)
+#-include $(DEPS)
 
 .PHONY: all doxygen *install* recurse strip *tools
