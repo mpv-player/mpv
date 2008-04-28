@@ -41,4 +41,4 @@ $(LIBNAME_COMMON) $(LIBNAME_MPLAYER) $(LIBNAME_MENCODER):
 ALLHEADERS = $(wildcard *.h)
 checkheaders: $(ALLHEADERS:.h=.ho)
 
-.PHONY: libs *clean dep depend
+.PHONY: checkheaders libs *clean dep depend
