@@ -10,19 +10,6 @@ OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
 
 CFLAGS += $(CFLAGS-yes) $(OPTFLAGS)
 
-LIBS-$(MPLAYER)  += $(LIBNAME_MPLAYER)
-LIBS-$(MENCODER) += $(LIBNAME_MENCODER)
-LIBS              = $(LIBNAME_COMMON) $(LIBS-yes)
-
-libs: $(LIBS)
-
-$(LIBNAME_COMMON):   $(OBJS_COMMON)
-$(LIBNAME_MPLAYER):  $(OBJS_MPLAYER)
-$(LIBNAME_MENCODER): $(OBJS_MENCODER)
-$(LIBNAME_COMMON) $(LIBNAME_MPLAYER) $(LIBNAME_MENCODER):
-	$(AR) r $@ $^
-	$(RANLIB) $@
-
 %.d: %.c
 	$(MPDEPEND_CMD) > $@
 
@@ -41,4 +28,4 @@ $(LIBNAME_COMMON) $(LIBNAME_MPLAYER) $(LIBNAME_MENCODER):
 ALLHEADERS = $(wildcard *.h)
 checkheaders: $(ALLHEADERS:.h=.ho)
 
-.PHONY: checkheaders libs *clean dep depend
+.PHONY: checkheaders *clean dep depend
