@@ -42,8 +42,8 @@ int main(int argc, char *argv[]){
     ComponentParameters *params;
     ComponentDescription desc;
     void *globals=NULL;
-    unsigned int esp=0;
-    int i;
+    //unsigned int esp=0;
+    //int i;
 
     mp_msg_init();
     //mp_msg_set_level(10);
