@@ -656,6 +656,7 @@ static inline void dump_ImageDescription(void* xxx){
     printf("=========================================================\n");
 }
 
+#if 0
 static inline void dump_Rect(char* title,Rect *r){
     printf("%s: %d;%d - %d;%d\n",title,
         (int)r->top,(int)r->left,(int)r->bottom,(int)r->right);
@@ -743,5 +744,6 @@ static inline void dump_CodecDecompressParams(void* xxx){
 
 
 }
+#endif
 
 #endif /* MPLAYER_COMPONENTS_H */
