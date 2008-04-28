@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
     desc.componentFlags=0;
     desc.componentFlagsMask=0;
     
-    printf("Count = %d\n",CountComponents(&desc));
+    printf("Count = %ld\n",CountComponents(&desc));
     
     Restore_LDT_Keeper();
     exit(0);
