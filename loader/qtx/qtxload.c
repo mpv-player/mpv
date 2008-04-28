@@ -4,6 +4,7 @@
 
 #include "qtxsdk/components.h"
 #include "qtxsdk/select.h"
+#include "ldt_keeper.h"
 #include "mp_msg.h"
 
 /* ilyen egy sima komponens */
