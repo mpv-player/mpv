@@ -40,10 +40,10 @@ TEST_OBJS    = $(LIBNAME_COMMON) ../cpudetect.o ../mp_msg.o ../mp_fifo.o ../osde
 TEST_LDFLAGS = -ltermcap -lm -g
 
 qtx/qtxload: qtx/qtxload.c $(TEST_OBJS)
-	$(CC) -o $@ $^ $(TEST_LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $^ $(TEST_LDFLAGS)
 
 qtx/list: qtx/list.c  $(TEST_OBJS)
-	$(CC) -o $@ $^ $(TEST_LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $^ $(TEST_LDFLAGS)
 
 clean::
 	rm -f dshow/*.o dshow/*.a dshow/*~
