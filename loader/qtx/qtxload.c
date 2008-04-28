@@ -122,8 +122,7 @@ int main(int argc, char *argv[]){
 
 //    for(i=0;i<0x00001837;i++)
 //	if(x_table[i]) printf("x_table[0x%X] = %p\n",i,x_table[i]);
-    
-    Restore_LDT_Keeper();
+
     exit(0);
     //return 0;
 }
