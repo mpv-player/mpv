@@ -640,7 +640,8 @@ PARTS = libavcodec \
         libpostproc \
         libswscale \
 
-DIRS =  dvdread \
+DIRS =  . \
+        dvdread \
         gui \
         gui/mplayer \
         gui/mplayer/gtk \
@@ -810,14 +811,14 @@ uninstall:
 	  fi ; \
 	done
 
-clean:: toolsclean
+clean: toolsclean
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
 	  codecs.conf.h help_mp.h version.h TAGS tags $(VIDIX_PCI_FILES)
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 
-distclean:: doxygen_clean
+distclean: clean doxygen_clean
 	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
 	-rm -f configure.log config.mak config.h
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))

@@ -23,12 +23,6 @@ $(LIBNAME_COMMON) $(LIBNAME_MPLAYER) $(LIBNAME_MENCODER):
 	$(AR) r $@ $^
 	$(RANLIB) $@
 
-clean::
-	rm -f *.o *.a *.ho *~
-
-distclean:: clean
-	rm -f *.d test test2
-
 %.d: %.c
 	$(MPDEPEND_CMD) > $@
 
