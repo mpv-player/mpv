@@ -39,10 +39,7 @@ win32.o: CFLAGS += $(CFLAG_STACKREALIGN)
 TEST_OBJS    = $(LIBNAME_COMMON) ../cpudetect.o ../mp_msg.o ../mp_fifo.o ../osdep/mmap_anon.o ../osdep/$(GETCH) ../osdep/$(TIMER)
 TEST_LDFLAGS = -ltermcap -lm -g
 
-qtx/qtxload: qtx/qtxload.c $(TEST_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(TEST_LDFLAGS)
-
-qtx/list: qtx/list.c  $(TEST_OBJS)
+qtx/%: qtx/%.c $(TEST_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(TEST_LDFLAGS)
 
 clean::
