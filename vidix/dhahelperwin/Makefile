@@ -33,9 +33,7 @@ dhahelper.sys: temp.exp dhahelper.o dhahelper-rc.o
 		-lntoskrnl
 	strip $@
 
-clean:
+clean distclean:
 	rm -f *.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp
-
-distclean: clean
 
 .PHONY: all clean distclean

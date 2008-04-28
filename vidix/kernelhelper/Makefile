@@ -15,9 +15,7 @@ install: dhahelper.o
 
 dep depend:
 
-clean:
+clean distclean:
 	rm -f *.o *~ test
-
-distclean: clean
 
 .PHONY: all install dep depend *clean

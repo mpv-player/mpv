@@ -240,7 +240,15 @@ SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += osdep/mmap_anon.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c
 SRCS_COMMON-$(JPEG)                  += libmpcodecs/vd_ijpg.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
-SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c
+SRCS_COMMON-$(LIBA52)                += libmpcodecs/ad_liba52.c \
+                                        liba52/crc.c \
+                                        liba52/resample.c \
+                                        liba52/bit_allocate.c \
+                                        liba52/bitstream.c \
+                                        liba52/downmix.c \
+                                        liba52/imdct.c \
+                                        liba52/parse.c \
+
 SRCS_COMMON-$(LIBASS)                += libass/ass.c \
                                         libass/ass_bitmap.c \
                                         libass/ass_cache.c \
@@ -320,7 +328,25 @@ SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
                                         libfaad2/tns.c \
 
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
-SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c
+SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c \
+                                        libmpeg2/alloc.c \
+                                        libmpeg2/cpu_accel.c\
+                                        libmpeg2/cpu_state.c \
+                                        libmpeg2/decode.c \
+                                        libmpeg2/header.c \
+                                        libmpeg2/idct.c \
+                                        libmpeg2/motion_comp.c \
+                                        libmpeg2/slice.c
+SRCS_COMMON-$(LIBMPEG2)-$(ARCH_ALPHA)   += libmpeg2/idct_alpha.c \
+                                           libmpeg2/motion_comp_alpha.c
+SRCS_COMMON-$(LIBMPEG2)-$(ARCH_ARMV4L)  += libmpeg2/motion_comp_arm.c \
+                                           libmpeg2/motion_comp_arm_s.S \
+                                           libmpeg2/motion_comp_iwmmxt.c
+SRCS_COMMON-$(LIBMPEG2)-$(HAVE_ALTIVEC) += libmpeg2/idct_altivec.c \
+                                           libmpeg2/motion_comp_altivec.c
+SRCS_COMMON-$(LIBMPEG2)-$(HAVE_MMX)     += libmpeg2/idct_mmx.c \
+                                           libmpeg2/motion_comp_mmx.c
+SRCS_COMMON-$(LIBMPEG2)-$(HAVE_VIS)     += libmpeg2/motion_comp_vis.c
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
                                         stream/stream_nemesi.c
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
@@ -330,7 +356,16 @@ SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIBVORBIS)             += libmpcodecs/ad_libvorbis.c \
                                         libmpdemux/demux_ogg.c
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
-SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c
+SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32) += mp3lib/decode_i586.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOW)     += mp3lib/dct36_3dnow.c \
+                                                          mp3lib/dct64_3dnow.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOWEX)   += mp3lib/dct36_k7.c \
+                                                          mp3lib/dct64_k7.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)       += mp3lib/dct64_mmx.c
+SRCS_COMMON-$(MP3LIB)-$(HAVE_ALTIVEC) += mp3lib/dct64_altivec.c
+SRCS_COMMON-$(MP3LIB)-$(HAVE_MMX)     += mp3lib/decode_mmx.c
+SRCS_COMMON-$(MP3LIB)-$(HAVE_SSE)     += mp3lib/dct64_sse.c
 SRCS_COMMON-$(MPLAYER_NETWORK)       += stream/stream_netstream.c \
                                         stream/asf_mmst_streaming.c \
                                         stream/asf_streaming.c \
@@ -499,7 +534,28 @@ SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
 SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(LIRC)         += input/lirc.c
 
-SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c
+SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c \
+                                 vidix/vidixlib.c \
+                                 vidix/drivers.c \
+                                 vidix/dha.c \
+                                 vidix/mtrr.c \
+                                 vidix/pci.c \
+                                 vidix/pci_names.c \
+                                 vidix/pci_dev_ids.c\
+
+SRCS_MPLAYER-$(VIDIX_CYBERBLADE)        += vidix/cyberblade_vid.c
+SRCS_MPLAYER-$(VIDIX_IVTV)              += vidix/ivtv_vid.c
+SRCS_MPLAYER-$(VIDIX_MACH64)            += vidix/mach64_vid.c
+SRCS_MPLAYER-$(VIDIX_MGA)               += vidix/mga_vid.c
+SRCS_MPLAYER-$(VIDIX_MGA_CRTC2)         += vidix/mga_crtc2_vid.c
+SRCS_MPLAYER-$(VIDIX_NVIDIA)            += vidix/nvidia_vid.c
+SRCS_MPLAYER-$(VIDIX_PM2)               += vidix/pm2_vid.c
+SRCS_MPLAYER-$(VIDIX_PM3)               += vidix/pm3_vid.c
+SRCS_MPLAYER-$(VIDIX_RADEON)            += vidix/radeon_vid.c
+SRCS_MPLAYER-$(VIDIX_RAGE128)           += vidix/rage128_vid.c
+SRCS_MPLAYER-$(VIDIX_S3)                += vidix/s3_vid.c
+SRCS_MPLAYER-$(VIDIX_SIS)               += vidix/sis_vid.c vidix/sis_bridge.c
+SRCS_MPLAYER-$(VIDIX_UNICHROME)         += vidix/unichrome_vid.c
 
 OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
 
@@ -523,7 +579,7 @@ SRCS_MENCODER-$(LIBAVFORMAT)      += libmpdemux/muxer_lavf.c
 SRCS_MENCODER-$(LIBDV)            += libmpcodecs/ve_libdv.c
 SRCS_MENCODER-$(LIBLZO)           += libmpcodecs/ve_nuv.c
 SRCS_MENCODER-$(MP3LAME)          += libmpcodecs/ae_lame.c
-SRCS_MENCODER-$(QTX_CODECS)       += libmpcodecs/ve_qtvideo.c
+SRCS_MENCODER-$(QTX_CODECS_WIN32) += libmpcodecs/ve_qtvideo.c
 SRCS_MENCODER-$(TOOLAME)          += libmpcodecs/ae_toolame.c
 SRCS_MENCODER-$(TWOLAME)          += libmpcodecs/ae_twolame.c
 SRCS_MENCODER-$(WIN32DLL)         += libmpcodecs/ve_vfw.c
@@ -537,11 +593,6 @@ COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
 COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
 COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
 COMMON_LIBS-$(WIN32DLL)           += loader/loader.a
-COMMON_LIBS-$(MP3LIB)             += mp3lib/mp3lib.a
-COMMON_LIBS-$(LIBA52)             += liba52/liba52.a
-COMMON_LIBS-$(LIBMPEG2)           += libmpeg2/libmpeg2.a
-
-LIBS_MPLAYER-$(VIDIX)             += vidix/vidix.a
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
@@ -559,15 +610,11 @@ INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
-PARTS = liba52 \
-        libavcodec \
+PARTS = libavcodec \
         libavformat \
         libavutil \
-        libmpeg2 \
         libpostproc \
         libswscale \
-        mp3lib \
-        vidix \
 
 ifeq ($(WIN32DLL),yes)
 PARTS += loader
@@ -581,6 +628,7 @@ DIRS =  dvdread \
         gui/wm \
         gui/win32 \
         input \
+        liba52 \
         libaf \
         libao2 \
         libass \
@@ -590,7 +638,9 @@ DIRS =  dvdread \
         libmpcodecs \
         libmpcodecs/native \
         libmpdemux \
+        libmpeg2 \
         libvo \
+        mp3lib \
         osdep \
         stream \
         stream/freesdp \
@@ -598,6 +648,7 @@ DIRS =  dvdread \
         stream/realrtsp \
         tremor \
         TOOLS \
+        vidix \
 
 all:	recurse $(ALL_PRG)
 
@@ -609,7 +660,7 @@ DEPS = foo
 
 include mpcommon.mak
 
-DEPS = $(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER) $(SRCS_MENCODER)))
+DEPS = $(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER)))
 $(DEPS) recurse: help_mp.h version.h codecs.conf.h
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part .depend; done
@@ -654,6 +705,21 @@ libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
 
 libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Ilibavcodec
+
+mp3lib/decode_i586.o: CFLAGS += -fomit-frame-pointer
+
+VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
+                  vidix/pci_names.h vidix/pci_vendors.h
+
+$(VIDIX_PCI_FILES): vidix/pci.db
+	LC_ALL=C awk -f vidix/pci_db2c.awk $< $(VIDIX_PCIDB)
+
+vidix/%.o vidix/%.d: $(VIDIX_PCI_FILES)
+
+liba52/test: liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
+
+mp3lib/test:  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
+mp3lib/test2: mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
 
 install: install-dirs $(INSTALL_TARGETS)
 
@@ -714,7 +780,7 @@ uninstall:
 clean:: toolsclean
 	-rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
 	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
-	  codecs.conf.h help_mp.h version.h TAGS tags
+	  codecs.conf.h help_mp.h version.h TAGS tags $(VIDIX_PCI_FILES)
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 
@@ -780,7 +846,14 @@ ifdef ARCH_X86
 TOOLS += TOOLS/modify_reg$(EXESUF)
 endif
 
+ALLTOOLS = $(TOOLS) \
+           TOOLS/bmovl-test$(EXESUF) \
+           TOOLS/vfw2menc$(EXESUF) \
+           TOOLS/vivodump$(EXESUF) \
+           TOOLS/netstream$(EXESUF) \
+
 tools: $(TOOLS)
+alltools: $(ALLTOOLS)
 
 TOOLS_COMMON_LIBS = mp_msg.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
               -ltermcap -lm
@@ -826,9 +899,8 @@ TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 toolsclean:
-	rm -f $(TOOLS) TOOLS/fastmem*-* TOOLS/netstream$(EXESUF)
-	rm -f TOOLS/bmovl-test$(EXESUF) TOOLS/vfw2menc$(EXESUF) $(REAL_TARGETS)
+	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
 -include $(DEPS)
 
-.PHONY: all doxygen *install* recurse strip tools
+.PHONY: all doxygen *install* recurse strip *tools

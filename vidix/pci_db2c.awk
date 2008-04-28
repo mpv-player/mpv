@@ -33,11 +33,11 @@ BEGIN {
     }
     in_file = ARGV[1];
     with_pci_db = ARGV[2];
-    vendor_file = "pci_vendors.h";
-    ids_file = "pci_ids.h"
-    name_file = "pci_names.c"
-    name_h_file = "pci_names.h"
-    dev_ids_file = "pci_dev_ids.c"
+    vendor_file = "vidix/pci_vendors.h";
+    ids_file = "vidix/pci_ids.h"
+    name_file = "vidix/pci_names.c"
+    name_h_file = "vidix/pci_names.h"
+    dev_ids_file = "vidix/pci_dev_ids.c"
     line=0;
 # print out head lines
     print_head(vendor_file);
