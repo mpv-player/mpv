@@ -647,7 +647,7 @@ DIRS =  dvdread \
         TOOLS \
         vidix \
 
-all:	recurse $(ALL_PRG)
+all: $(ALL_PRG)
 
 recurse:
 	for part in $(PARTS); do $(MAKE) -C $$part; done
@@ -670,6 +670,8 @@ $(part)/$(part).a:
 endef
 
 $(foreach part,$(PARTS),$(eval $(RECURSIVE_RULE)))
+
+$(OBJS): recurse
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
