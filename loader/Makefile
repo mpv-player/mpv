@@ -39,9 +39,6 @@ win32.o: CFLAGS += $(CFLAG_STACKREALIGN)
 TEST_OBJS    = $(LIBNAME_COMMON) ../cpudetect.o ../mp_msg.o ../mp_fifo.o ../osdep/libosdep.a
 TEST_LDFLAGS = -ltermcap -ldl -lm -lpthread -g
 
-dshow/test: dshow/test.c ../get_path.o $(TEST_OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(TEST_LDFLAGS) -lstdc++
-
 qtx/qtxload: qtx/qtxload.c $(TEST_OBJS)
 	$(CC) -o $@ $^ $(TEST_LDFLAGS)
 
