@@ -678,9 +678,6 @@ all: $(ALL_PRG)
 recurse:
 	for part in $(PARTS); do $(MAKE) -C $$part; done
 
-# Hack to keep .depend from being generated at the top level unnecessarily.
-DEPS = foo
-
 include mpcommon.mak
 
 DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
