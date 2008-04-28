@@ -7,7 +7,6 @@ void InitTimer(void);
 unsigned int GetTimer(void);
 unsigned int GetTimerMS(void);
 //int uGetTimer();
-float GetRelativeTime(void);
 
 int usec_sleep(int usec_delay);
 

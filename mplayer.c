@@ -369,6 +369,14 @@ int mpctx_get_osd_function(MPContext *mpctx)
     return mpctx->osd_function;
 }
 
+static float get_relative_time(struct MPContext *mpctx)
+{
+    unsigned int new_time = GetTimer();
+    unsigned int delta = new_time - mpctx->last_time;
+    mpctx->last_time = new_time;
+    return delta * 0.000001;
+}
+
 static int is_valid_metadata_type(struct MPContext *mpctx, metadata_t type) {
   switch (type)
   {
@@ -1758,7 +1766,7 @@ static int generate_video_frame(struct MPContext *mpctx)
     int rtc_fd = -1;
 #endif
 
-static float timing_sleep(float time_frame)
+static float timing_sleep(struct MPContext *mpctx, float time_frame)
 {
 #ifdef HAVE_RTC
     if (rtc_fd >= 0){
@@ -1768,7 +1776,7 @@ static float timing_sleep(float time_frame)
 	    unsigned long rtc_ts;
 	    if (read(rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
 		mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_LinuxRTCReadError, strerror(errno));
-    	    time_frame -= GetRelativeTime();
+            time_frame -= get_relative_time(mpctx);
 	}
     } else
 #endif
@@ -1779,14 +1787,14 @@ static float timing_sleep(float time_frame)
 	current_module = "sleep_timer";
 	while (time_frame > margin) {
 	    usec_sleep(1000000 * (time_frame - margin));
-	    time_frame -= GetRelativeTime();
+            time_frame -= get_relative_time(mpctx);
 	}
 	if (softsleep){
 	    current_module = "sleep_soft";
 	    if (time_frame < 0)
 		mp_msg(MSGT_AVSYNC, MSGL_WARN, MSGTR_SoftsleepUnderflow);
 	    while (time_frame > 0)
-		time_frame-=GetRelativeTime(); // burn the CPU
+                time_frame -= get_relative_time(mpctx); // burn the CPU
 	}
     }
     return time_frame;
@@ -2073,7 +2081,7 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
     int frame_time_remaining = 0;
     current_module="calc_sleep_time";
 
-    *time_frame -= GetRelativeTime(); // reset timer
+    *time_frame -= get_relative_time(mpctx); // reset timer
 
     if (mpctx->sh_audio && !mpctx->d_audio->eof) {
 	float delay = mpctx->audio_out->get_delay();
@@ -2120,7 +2128,7 @@ static int sleep_until_update(struct MPContext *mpctx, float *time_frame,
 
     // flag 256 means: libvo driver does its timing (dvb card)
     if (*time_frame > 0.001 && !(mpctx->sh_video->output_flags&256))
-	*time_frame = timing_sleep(*time_frame);
+	*time_frame = timing_sleep(mpctx, *time_frame);
     return frame_time_remaining;
 }
 
@@ -2372,7 +2380,7 @@ static void pause_loop(struct MPContext *mpctx)
         mpctx->audio_out->resume();	// resume audio
     if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);	// resume video
-    (void)GetRelativeTime();	// ignore time that passed during pause
+    (void)get_relative_time(mpctx);	// ignore time that passed during pause
 #ifdef HAVE_NEW_GUI
     if (use_gui) {
 	if (guiIntfStruct.Playing == guiSetStop)
@@ -3682,6 +3690,8 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
     mp_dvdnav_cell_has_changed(mpctx->stream,1);
 }
 #endif
+
+ get_relative_time(mpctx); // reset current delta
 
 while(!mpctx->eof){
     float aq_sleep_time=0;

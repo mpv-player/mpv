@@ -70,6 +70,11 @@ typedef struct MPContext {
     // by the audio CPU usage meter.
     double delay;
 
+    // Timestamp from the last time some timing functions read the
+    // current time, in (occasionally wrapping) microseconds. Used
+    // to turn a new time value to a delta from last time.
+    unsigned int last_time;
+
     // Used to communicate the parameters of a seek between parts
     float rel_seek_secs;
     int abs_seek_pos;

@@ -46,21 +46,8 @@ unsigned int GetTimerMS(void){
   return (tv.tv_sec*1000+tv.tv_usec/1000);
 }  
 
-static unsigned int RelativeTime=0;
-
-// Returns time spent between now and last call in seconds
-float GetRelativeTime(void){
-unsigned int t,r;
-  t=GetTimer();
-//  t*=16;printf("time=%ud\n",t);
-  r=t-RelativeTime;
-  RelativeTime=t;
-  return (float)r * 0.000001F;
-}
-
 // Initialize timer, must be called at least once at start
 void InitTimer(void){
-  GetRelativeTime();
 }
 
 

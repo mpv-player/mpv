@@ -25,16 +25,5 @@ int usec_sleep(int usec_delay){
   return 0;
 }
 
-static DWORD RelativeTime = 0;
-
-float GetRelativeTime(){
-  DWORD t, r;
-  t = GetTimer();
-  r = t - RelativeTime;
-  RelativeTime = t;
-  return (float) r *0.000001F;
-}
-
 void InitTimer(){
-  GetRelativeTime();
 }
