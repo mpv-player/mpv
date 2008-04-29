@@ -698,6 +698,28 @@ $(DEPS) recurse: help_mp.h version.h codecs.conf.h
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
+# rebuild at every config.h/config.mak change:
+version.h: config.h config.mak
+	./version.sh `$(CC) -dumpversion`
+
+help_mp.h: help/help_mp-en.h $(HELP_FILE)
+	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
+	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
+	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
+	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
+ifeq ($(CHARSET),)
+	@echo '#include "$(HELP_FILE)"' >> help_mp.h
+else
+	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
+endif
+	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
+
+ifneq ($(HELP_FILE),help/help_mp-en.h)
+	@echo "Adding untranslated messages to help_mp.h"
+	@echo '// untranslated messages from the English master file:' >> help_mp.h
+	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
+endif
+
 define RECURSIVE_RULE
 $(part)/$(part).a:
 	$(MAKE) -C $(part)
@@ -847,33 +869,11 @@ config.mak: configure
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
 
-# rebuild at every config.h/config.mak change:
-version.h: config.h config.mak
-	./version.sh `$(CC) -dumpversion`
-
 doxygen:
 	doxygen DOCS/tech/Doxyfile
 
 doxygen_clean:
 	-rm -rf DOCS/tech/doxygen
-
-help_mp.h: help/help_mp-en.h $(HELP_FILE)
-	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
-	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
-	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
-	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
-ifeq ($(CHARSET),)
-	@echo '#include "$(HELP_FILE)"' >> help_mp.h
-else
-	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
-endif
-	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
-
-ifneq ($(HELP_FILE),help/help_mp-en.h)
-	@echo "Adding untranslated messages to help_mp.h"
-	@echo '// untranslated messages from the English master file:' >> help_mp.h
-	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
-endif
 
 
 TOOLS = TOOLS/alaw-gen$(EXESUF) \
