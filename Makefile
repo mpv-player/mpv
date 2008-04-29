@@ -636,8 +636,6 @@ OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)) )
 OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
 OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
 
-CFLAGS += $(CFLAGS-yes) $(OPTFLAGS)
-
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
