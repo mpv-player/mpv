@@ -137,7 +137,7 @@ void xv_setup_colorkeyhandling(struct vo *vo, const char *ck_method_str, const c
 int xv_test_ck( void * arg );
 int xv_test_ckm( void * arg );
 
- extern void vo_x11_putkey(int key);
+void vo_x11_putkey(struct vo *vo, int key);
 
 #ifdef HAVE_XF86VM
 void vo_vm_switch(struct vo *vo, uint32_t, uint32_t, int*, int*);

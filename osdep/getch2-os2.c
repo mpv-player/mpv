@@ -164,13 +164,13 @@ static int getch2_internal( void )
     return -1;
 }
 
-void getch2( void )
+void getch2(struct mp_fifo *fifo)
 {
     int key;
 
     key = getch2_internal();
     if( key != -1 )
-        mplayer_put_key( key );
+        mplayer_put_key(fifo, key);
 }
 
 void getch2_enable( void )

@@ -225,7 +225,8 @@ int mp_input_check_interrupt(int time) {
   return 0;
 }
 // Needed by getch2
-void mplayer_put_key(int code)
+struct mp_fifo;
+void mplayer_put_key(struct mp_fifo *fifo, int code)
 {
 }
 

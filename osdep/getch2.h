@@ -22,7 +22,8 @@ extern void getch2_enable(void);
 extern void getch2_disable(void);
 
 /* Read a character or a special key code (see keycodes.h) */
-extern void getch2(void);
+struct mp_fifo;
+extern void getch2(struct mp_fifo *fifo);
 
 /* slave cmd function for Windows and OS/2 */
 extern int mp_input_slave_cmd_func(int fd,char* dest,int size);

@@ -3074,7 +3074,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	    break;
 
 	case MP_CMD_KEYDOWN_EVENTS:
-	    mplayer_put_key(cmd->args[0].v.i);
+	    mplayer_put_key(mpctx->key_fifo, cmd->args[0].v.i);
 	    break;
 
 	case MP_CMD_SET_MOUSE_POS:{

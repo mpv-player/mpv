@@ -39,6 +39,7 @@ typedef struct MPContext {
     struct MPOpts opts;
     struct m_config *mconfig;
     struct vo_x11_state *x11_state;
+    struct mp_fifo *key_fifo;
     int osd_show_percentage;
     int osd_function;
     const ao_functions_t *audio_out;

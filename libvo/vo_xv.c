@@ -718,8 +718,9 @@ static void uninit(struct vo *vo)
 
 static int x11_fd_callback(void *ctx, int fd)
 {
-    check_events(ctx);
-    return mplayer_get_key(NULL, 0);
+    struct vo *vo = ctx;
+    check_events(vo);
+    return mplayer_get_key(vo->key_fifo, 0);
 }
 
 static int preinit(struct vo *vo, const char *arg)

@@ -691,6 +691,7 @@ void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc){
   if(mpctx->playtree)
     play_tree_free(mpctx->playtree, 1);
 
+  talloc_free(mpctx->key_fifo);
 
   if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
   if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,how);
@@ -2143,7 +2144,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     //shouldn't we set dvideo->id=-2 when we fail?
     //if((mpctx->video_out->preinit(vo_subdevice))!=0){
-    if(!(mpctx->video_out=init_best_video_out(opts, mpctx->x11_state))){
+    if(!(mpctx->video_out=init_best_video_out(opts, mpctx->x11_state, mpctx->key_fifo))){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
       goto err_out;
     }
@@ -2536,8 +2537,8 @@ static int seek(MPContext *mpctx, double amount, int style)
 
 static int read_keys(void *ctx, int fd)
 {
-    getch2();
-    return mplayer_get_key(NULL, 0);
+    getch2(ctx);
+    return mplayer_get_key(ctx, 0);
 }
 
 
@@ -2633,6 +2634,7 @@ int gui_no_filename=0;
       }
     }
     }
+    mpctx->key_fifo = mp_fifo_create();
 	
 #if defined(WIN32) && defined(HAVE_NEW_GUI)
     void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
@@ -2875,11 +2877,11 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 // Init input system
 current_module = "init_input";
 mp_input_init(use_gui);
- mp_input_add_key_fd(-1,0,mplayer_get_key,NULL, NULL);
+ mp_input_add_key_fd(-1,0,mplayer_get_key,NULL, mpctx->key_fifo);
 if(slave_mode)
   mp_input_add_cmd_fd(0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
 else if(!noconsolecontrols)
-    mp_input_add_key_fd(0, 1, read_keys, NULL, NULL);
+    mp_input_add_key_fd(0, 1, read_keys, NULL, mpctx->key_fifo);
 // Set the libstream interrupt callback
 stream_set_interrupt_callback(mp_input_check_interrupt);
 

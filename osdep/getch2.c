@@ -135,7 +135,7 @@ void get_screen_size(void){
 #endif
 }
 
-void getch2(void)
+void getch2(struct mp_fifo *fifo)
 {
     int retval = read(0, &getch2_buf[getch2_len], BUF_LEN-getch2_len);
     if (retval < 1)
@@ -244,7 +244,7 @@ void getch2(void)
         getch2_len -= len;
         for (i = 0; i < getch2_len; i++)
             getch2_buf[i] = getch2_buf[len+i];
-        mplayer_put_key(code);
+        mplayer_put_key(fifo, code);
     }
 }
 
