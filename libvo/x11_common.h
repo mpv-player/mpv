@@ -86,7 +86,7 @@ extern Window mRootWin;
 extern int mScreen;
 extern int mLocalDisplay;
 
-void vo_x11_init_state(struct vo_x11_state *s);
+struct vo_x11_state *vo_x11_init_state(void);
 int vo_init(struct vo *vo);
 void vo_uninit(struct vo_x11_state *x11);
 extern void vo_x11_decoration(struct vo *vo, int d );

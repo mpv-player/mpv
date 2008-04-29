@@ -2575,8 +2575,7 @@ int gui_no_filename=0;
   mp_msg_init();
 
 #ifdef HAVE_X11
-  mpctx->x11_state = talloc_ptrtype(NULL, mpctx->x11_state);
-  vo_x11_init_state(mpctx->x11_state);
+  mpctx->x11_state = vo_x11_init_state();
 #endif
   struct MPOpts *opts = &mpctx->opts;
   set_default_mplayer_options(opts);

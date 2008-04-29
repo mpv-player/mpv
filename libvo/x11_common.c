@@ -9,6 +9,7 @@
 #include "mp_msg.h"
 #include "mp_fifo.h"
 #include "x11_common.h"
+#include "talloc.h"
 
 #ifdef X11_FULLSCREEN
 
@@ -531,6 +532,7 @@ void vo_uninit(struct vo_x11_state *x11)
     XCloseDisplay(x11->display);
     x11->depthonscreen = 0;
     x11->display = NULL;
+    talloc_free(x11);
 }
 
 #include "osdep/keycodes.h"
@@ -2536,8 +2538,9 @@ void xv_setup_colorkeyhandling(struct vo *vo, const char *ck_method_str,
 
 #endif
 
-void vo_x11_init_state(struct vo_x11_state *s)
+struct vo_x11_state *vo_x11_init_state(void)
 {
+    struct vo_x11_state *s = talloc_ptrtype(NULL, s);
     *s = (struct vo_x11_state){
         .xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR },
         .olddecor = MWM_DECOR_ALL,
@@ -2545,4 +2548,5 @@ void vo_x11_init_state(struct vo_x11_state *s)
                     MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
         .old_gravity = NorthWestGravity,
     };
+    return s;
 }
