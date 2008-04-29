@@ -689,7 +689,7 @@ dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
 define RECURSIVE_RULE
-$(part)/$(part).a:
+$(part)/$(notdir $(part)).a:
 	$(MAKE) -C $(part)
 endef
 
