@@ -61,7 +61,6 @@ static int isFullscreen;
 static int isOntop;
 static int isRootwin;
 extern float monitor_aspect;
-extern float movie_aspect;
 static float old_movie_aspect;
 extern int enable_mouse_movements;
 
@@ -358,7 +357,7 @@ static int preinit(const char *arg)
     return 0;
 }
 
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
 	switch (request)
 	{
