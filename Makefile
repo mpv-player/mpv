@@ -924,7 +924,7 @@ ALLTOOLS = $(TOOLS) \
 tools: $(TOOLS)
 alltools: $(ALLTOOLS)
 
-TOOLS_COMMON_LIBS = mp_msg.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
+TOOLS_COMMON_LIBS = mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
               -ltermcap -lm
 
 TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
