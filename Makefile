@@ -829,7 +829,7 @@ distclean: clean doxygen_clean
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) \
-           codec-cfg$(EXESUF) codecs2html$(EXESUF) codec-cfg-test$(EXESUF)
+           codec-cfg$(EXESUF) codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
            cpuinfo$(EXESUF) TAGS tags
 
 strip:
