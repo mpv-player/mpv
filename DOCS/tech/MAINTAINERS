@@ -3,13 +3,13 @@ MPlayer code and documentation maintainers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 NOTE: This file (should) contain the up-to-date list of the maintainers of
-each part/module of the mplayer CVS / source tree, including docs & homepage.
+each part/module of the mplayer svn / source tree, including docs & homepage.
 You should NOT commit non-trivial changes without the agreement by the
 maintainer of the given part. The job of the maintainer is commenting,
 refusing or accepting patches, suggestions.
 If you're listed here as maintainer of one or more parts, but you don't want
 it to be so, tell us and you will be removed... this list has been created
-based on maillist/cvs activity. It may be wrong.
+based on maillist/svn activity. It may be wrong.
 
 Always send the patches (first read DOCS/tech/patches.txt), comments to
 the mplayer-dev-eng mailing list!!!
