@@ -37,6 +37,6 @@
 
 int mp_input_joystick_init(char* dev);
 
-int mp_input_joystick_read(int fd);
+int mp_input_joystick_read(void *ctx, int fd);
 
 #endif /* MPLAYER_JOYSTICK_H */

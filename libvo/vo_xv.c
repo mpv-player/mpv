@@ -44,6 +44,7 @@ Buffer allocation:
 #include "subopt-helper.h"
 
 #include "input/input.h"
+#include "mp_fifo.h"
 
 #ifdef HAVE_NEW_GUI
 #include "gui/interface.h"
@@ -710,14 +711,15 @@ static void uninit(struct vo *vo)
         vo_vm_close(vo);
 #endif
     if (ctx->event_fd_registered)
-        mp_input_rm_event_fd(ConnectionNumber(vo->x11->display));
+        mp_input_rm_key_fd(ConnectionNumber(vo->x11->display));
     // uninit() shouldn't get called unless initialization went past vo_init()
     vo_x11_uninit(vo);
 }
 
-static void x11_fd_callback(void *ctx)
+static int x11_fd_callback(void *ctx, int fd)
 {
-    return check_events(ctx);
+    check_events(ctx);
+    return mplayer_get_key(NULL, 0);
 }
 
 static int preinit(struct vo *vo, const char *arg)
@@ -841,7 +843,8 @@ static int preinit(struct vo *vo, const char *arg)
 
     ctx->fo = XvListImageFormats(x11->display, x11->xv_port, (int *) &ctx->formats);
 
-    mp_input_add_event_fd(ConnectionNumber(x11->display), x11_fd_callback, vo);
+    mp_input_add_key_fd(ConnectionNumber(x11->display), 1, x11_fd_callback,
+                        NULL, vo);
     ctx->event_fd_registered = 1;
     return 0;
 

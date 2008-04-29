@@ -512,7 +512,6 @@ typedef struct mp_input_fd {
   unsigned dead : 1;
   unsigned got_cmd : 1;
   unsigned no_select : 1;
-  unsigned no_readfunc_retval : 1;
   // These fields are for the cmd fds.
   char* buffer;
   int pos,size;
@@ -669,7 +668,9 @@ mp_input_rm_key_fd(int fd) {
 }
 
 int
-mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t close_func) {
+mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func,
+                    mp_close_func_t close_func, void *ctx)
+{
   if(num_key_fd == MP_MAX_KEY_FD) {
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
     return 0;
@@ -683,39 +684,12 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
       .fd = fd,
       .read_func = read_func,
       .close_func = close_func,
-      .no_select = !select
-  };
-  num_key_fd++;
-
-  return 1;
-}
-
-int
-mp_input_add_event_fd(int fd, void (*read_func)(void *ctx), void *ctx)
-{
-  if(num_key_fd == MP_MAX_KEY_FD) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
-    return 0;
-  }
-  if (fd < 0) {
-    mp_msg(MSGT_INPUT, MSGL_ERR, "Invalid fd %i in mp_input_add_event_fd", fd);
-    return 0;
-  }
-
-  key_fds[num_key_fd] = (struct mp_input_fd){
-      .fd = fd,
-      .read_func = read_func,
+      .no_select = !select,
       .ctx = ctx,
-      .no_readfunc_retval = 1,
   };
   num_key_fd++;
 
   return 1;
-}
-
-void mp_input_rm_event_fd(int fd)
-{
-    mp_input_rm_key_fd(fd);
 }
 
 int mp_input_parse_and_queue_cmds(const char *str) {
@@ -1226,17 +1200,8 @@ static mp_cmd_t *read_events(int time, int paused)
 	    continue;
 #endif
 
-	int code;
-	if (key_fds[i].no_readfunc_retval) {   // getch2 handler special-cased for now
-	    ((void (*)(void *))key_fds[i].read_func)(key_fds[i].ctx);
-	    if (cmd_queue_length)
-		return NULL;
-	    code = mplayer_get_key(0);
-	    if (code < 0)
-		code = MP_INPUT_NOTHING;
-	}
-	else
-	    code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].fd);
+	int code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].ctx,
+                                                         key_fds[i].fd);
 	if (code >= 0) {
 	    mp_cmd_t *ret = interpret_key(code, paused);
 	    if (ret)
@@ -1730,7 +1695,7 @@ mp_input_init(int use_gui) {
     if(fd < 0)
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitJoystick);
     else
-      mp_input_add_key_fd(fd,1,mp_input_joystick_read,(mp_close_func_t)close);
+        mp_input_add_key_fd(fd,1,mp_input_joystick_read,(mp_close_func_t)close,NULL);
   }
 #endif
 
@@ -1755,7 +1720,7 @@ mp_input_init(int use_gui) {
     if(mp_input_ar_init() < 0)
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
     else
-      mp_input_add_key_fd(-1,0,mp_input_ar_read,mp_input_ar_close);
+        mp_input_add_key_fd(-1,0,mp_input_ar_read,mp_input_ar_close, NULL);
   }
 #endif
 

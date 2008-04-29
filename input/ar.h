@@ -36,7 +36,7 @@
 #define AR_VDOWN     (AR_BASE + 9)
 
 int mp_input_ar_init(void);
-int mp_input_ar_read(int fd);
+int mp_input_ar_read(void *ctx, int fd);
 void mp_input_ar_close(int fd);
 
 #endif /* MPLAYER_AR_H */

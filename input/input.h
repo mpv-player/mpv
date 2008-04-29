@@ -206,7 +206,7 @@ typedef struct mp_key_name {
 // the next key code or command.
 
 // These functions should return the key code or one of the error codes
-typedef int (*mp_key_func_t)(int fd);
+typedef int (*mp_key_func_t)(void *ctx, int fd);
 // These functions should act like read but they must use our error code (if needed ;-)
 typedef int (*mp_cmd_func_t)(int fd,char* dest,int size);
 // These are used to close the driver
@@ -234,15 +234,11 @@ mp_input_rm_cmd_fd(int fd);
 // The args are the same as for the key's drivers. If you don't use any valid fd you MUST
 // give a read_func.
 int
-mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t close_func);
+mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t close_func, void *ctx);
 
 // As for the cmd one you usually don't need this function.
 void
 mp_input_rm_key_fd(int fd);
-
-int mp_input_add_event_fd(int fd, void (*read_func)(void *ctx), void *ctx);
-
-void mp_input_rm_event_fd(int fd);
 
 /// Get input key from its name.
 int mp_input_get_key_from_name(const char *name);

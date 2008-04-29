@@ -73,7 +73,7 @@ int mp_input_joystick_init(char* dev) {
   return fd;
 }
 
-int mp_input_joystick_read(int fd) {
+int mp_input_joystick_read(void *ctx, int fd) {
   struct js_event ev;
   int l=0;
 

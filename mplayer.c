@@ -2534,9 +2534,10 @@ static int seek(MPContext *mpctx, double amount, int style)
 }
 
 
-static void read_keys(void *ctx)
+static int read_keys(void *ctx, int fd)
 {
     getch2();
+    return mplayer_get_key(NULL, 0);
 }
 
 
@@ -2874,11 +2875,11 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 // Init input system
 current_module = "init_input";
 mp_input_init(use_gui);
-  mp_input_add_key_fd(-1,0,mplayer_get_key,NULL);
+ mp_input_add_key_fd(-1,0,mplayer_get_key,NULL, NULL);
 if(slave_mode)
   mp_input_add_cmd_fd(0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
 else if(!noconsolecontrols)
-    mp_input_add_event_fd(0, read_keys, NULL);
+    mp_input_add_key_fd(0, 1, read_keys, NULL, NULL);
 // Set the libstream interrupt callback
 stream_set_interrupt_callback(mp_input_check_interrupt);
 

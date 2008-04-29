@@ -23,7 +23,8 @@ static void mplayer_put_key_internal(int code){
   key_fifo_write=(key_fifo_write+1)%key_fifo_size;
 }
 
-int mplayer_get_key(int fd){
+int mplayer_get_key(void *ctx, int fd)
+{
   int key;
 //  printf("mplayer_get_key(%d)\n",fd);
   if (key_fifo_data == NULL)

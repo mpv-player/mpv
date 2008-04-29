@@ -321,7 +321,7 @@ int is_mplayer_front()
     return 0;
 }
 
-int mp_input_ar_read(int fd)
+int mp_input_ar_read(void *ctx, int fd)
 {
     int i, down = 0;
     int ret = MP_INPUT_NOTHING;
@@ -445,7 +445,7 @@ int main(void)
     }
 
     while (1) {
-        switch ((ret = mp_input_ar_read(0)) & ~MP_KEY_DOWN) {
+        switch ((ret = mp_input_ar_read(NULL, 0)) & ~MP_KEY_DOWN) {
             case AR_PLAY:       printf(" - AR_PLAY."); break;
             case AR_PLAY_HOLD:  printf(" - AR_PLAY_HOLD."); break;
             case AR_NEXT:       printf(" - AR_NEXT."); break;
