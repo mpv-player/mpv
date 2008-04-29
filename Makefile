@@ -652,6 +652,17 @@ DIRS =  . \
         libaf \
         libao2 \
         libass \
+        libavcodec \
+        libavcodec/alpha \
+        libavcodec/armv4l \
+        libavcodec/bfin \
+        libavcodec/i386 \
+        libavcodec/mlib \
+        libavcodec/ppc \
+        libavcodec/sh4 \
+        libavcodec/sparc \
+        libavformat \
+        libavutil \
         libdvdcss \
         libfaad2 \
         libmenu \
@@ -659,6 +670,8 @@ DIRS =  . \
         libmpcodecs/native \
         libmpdemux \
         libmpeg2 \
+        libpostproc \
+        libswscale \
         libvo \
         loader \
         loader/dshow \
@@ -809,12 +822,10 @@ uninstall:
 	done
 
 clean: toolsclean
-	for part in $(PARTS); do $(MAKE) -C $$part clean; done
-	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.ho /*~, $(addsuffix $(suffix),$(dir))))
+	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
 distclean: clean doxygen_clean
-	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) \
