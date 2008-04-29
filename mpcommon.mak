@@ -1,6 +1,4 @@
-SRCS_COMMON          += $(SRCS_COMMON-yes)
-SRCS_COMMON          += $(SRCS_COMMON-yes-yes)
-SRCS_COMMON          += $(SRCS_COMMON-yes-yes-yes)
+SRCS_COMMON          += $(SRCS_COMMON-yes) $(SRCS_COMMON-yes-yes) $(SRCS_COMMON-yes-yes-yes)
 SRCS_MPLAYER         += $(SRCS_MPLAYER-yes)
 SRCS_MENCODER        += $(SRCS_MENCODER-yes)
 
