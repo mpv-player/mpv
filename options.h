@@ -24,6 +24,8 @@ typedef struct MPOpts {
     int loop_times;
     int correct_pts;
     int user_correct_pts;
+    int key_fifo_size;
+    int doubleclick_time;
     int audio_id;
     int video_id;
     int sub_id;

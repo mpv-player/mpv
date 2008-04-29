@@ -2634,7 +2634,7 @@ int gui_no_filename=0;
       }
     }
     }
-    mpctx->key_fifo = mp_fifo_create();
+    mpctx->key_fifo = mp_fifo_create(opts);
 	
 #if defined(WIN32) && defined(HAVE_NEW_GUI)
     void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");

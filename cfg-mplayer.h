@@ -10,9 +10,6 @@
 #include "cfg-common.h"
 #include "options.h"
 
-extern int key_fifo_size;
-extern unsigned doubleclick_time;
-
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
 extern char *dfb_params;
@@ -340,12 +337,12 @@ const m_option_t mplayer_opts[]={
 	{"idle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
 	{"noidle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 1, 0, NULL},
 	{"use-stdin", "-use-stdin has been renamed to -noconsolecontrols, use that instead.", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"key-fifo-size", &key_fifo_size, CONF_TYPE_INT, CONF_RANGE, 2, 65000, NULL},
+	OPT_INTRANGE("key-fifo-size", key_fifo_size, 0, 2, 65000),
 	{"noconsolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"consolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"mouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nomouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
-	{"doubleclick-time", &doubleclick_time, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
+	OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
 #ifdef USE_TV
 	{"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else

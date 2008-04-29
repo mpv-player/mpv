@@ -4,10 +4,11 @@
 #include "input/mouse.h"
 #include "mp_fifo.h"
 #include "talloc.h"
+#include "options.h"
 
 
-int key_fifo_size = 7;
 struct mp_fifo {
+    struct MPOpts *opts;
     int *data;
     int readpos;
     int writepos;
@@ -16,10 +17,11 @@ struct mp_fifo {
     int last_key[2];
 };
 
-struct mp_fifo *mp_fifo_create(void)
+struct mp_fifo *mp_fifo_create(struct MPOpts *opts)
 {
     struct mp_fifo *fifo = talloc_zero(NULL, struct mp_fifo);
-    fifo->size = key_fifo_size;
+    fifo->opts = opts;
+    fifo->size = opts->key_fifo_size;
     fifo->data = talloc_array_ptrtype(fifo, fifo->data, fifo->size);
     return fifo;
 }
@@ -48,9 +50,6 @@ int mplayer_get_key(void *ctx, int fd)
     return key;
 }
 
-
-unsigned doubleclick_time = 300;
-
 static void put_double(struct mp_fifo *fifo, int code)
 {
   if (code >= MOUSE_BTN0 && code <= MOUSE_BTN9)
@@ -60,6 +59,7 @@ static void put_double(struct mp_fifo *fifo, int code)
 void mplayer_put_key(struct mp_fifo *fifo, int code)
 {
     unsigned now = GetTimerMS();
+    int doubleclick_time = fifo->opts->doubleclick_time;
     // ignore system-doubleclick if we generate these events ourselves
     if (doubleclick_time
         && (code & ~MP_KEY_DOWN) >= MOUSE_BTN0_DBL

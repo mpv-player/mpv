@@ -15,6 +15,8 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .vo_gamma_hue = 1000,
         .loop_times = -1,
         .user_correct_pts = -1,
+        .key_fifo_size = 7,
+        .doubleclick_time = 300,
         .audio_id = -1,
         .video_id = -1,
         .sub_id = -2,
