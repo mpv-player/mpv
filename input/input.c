@@ -1164,10 +1164,6 @@ static mp_cmd_t *read_events(int time, int paused)
 {
     int i;
     int got_cmd = 0;
-    mp_cmd_t *autorepeat_cmd;
-#ifdef HAVE_POSIX_SELECT
-    fd_set fds;
-#endif
     for (i = 0; i < num_key_fd; i++)
 	if (key_fds[i].dead) {
 	    mp_input_rm_key_fd(key_fds[i].fd);
@@ -1181,6 +1177,7 @@ static mp_cmd_t *read_events(int time, int paused)
 	else if (cmd_fds[i].got_cmd)
 	    got_cmd = 1;
 #ifdef HAVE_POSIX_SELECT
+    fd_set fds;
     FD_ZERO(&fds);
     if (!got_cmd) {
 	int max_fd = 0, num_fd = 0;
@@ -1224,12 +1221,12 @@ static mp_cmd_t *read_events(int time, int paused)
 
 
     for (i = 0; i < num_key_fd; i++) {
-	int code;
 #ifdef HAVE_POSIX_SELECT
 	if (!key_fds[i].no_select && !FD_ISSET(key_fds[i].fd, &fds))
 	    continue;
 #endif
 
+	int code;
 	if (key_fds[i].no_readfunc_retval) {   // getch2 handler special-cased for now
 	    ((void (*)(void *))key_fds[i].read_func)(key_fds[i].ctx);
 	    if (cmd_queue_length)
@@ -1254,19 +1251,18 @@ static mp_cmd_t *read_events(int time, int paused)
 	    key_fds[i].dead = 1;
 	}
     }
-    autorepeat_cmd = check_autorepeat(paused);
+    mp_cmd_t *autorepeat_cmd = check_autorepeat(paused);
     if (autorepeat_cmd)
 	return autorepeat_cmd;
 
     for (i = 0; i < num_cmd_fd; i++) {
-	char *cmd;
-	int r;
 #ifdef HAVE_POSIX_SELECT
 	if (!cmd_fds[i].no_select && !FD_ISSET(cmd_fds[i].fd, &fds) &&
 	    !cmd_fds[i].got_cmd)
 	    continue;
 #endif
-	r = mp_input_read_cmd(&cmd_fds[i], &cmd);
+	char *cmd;
+	int r = mp_input_read_cmd(&cmd_fds[i], &cmd);
 	if (r >= 0) {
 	    mp_cmd_t *ret = mp_input_parse_cmd(cmd);
 	    free(cmd);
