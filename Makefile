@@ -811,14 +811,15 @@ uninstall:
 clean: toolsclean
 	for part in $(PARTS); do $(MAKE) -C $$part clean; done
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.ho /*~, $(addsuffix $(suffix),$(dir))))
-	rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
-	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
-	  codecs.conf.h help_mp.h version.h TAGS tags $(VIDIX_PCI_FILES)
+	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
 distclean: clean doxygen_clean
 	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
-	rm -f configure.log config.mak config.h
+	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
+           version.h $(VIDIX_PCI_FILES) \
+           codec-cfg$(EXESUF) codecs2html$(EXESUF) codec-cfg-test$(EXESUF)
+           cpuinfo$(EXESUF) TAGS tags
 
 strip:
 	strip -s $(ALL_PRG)
