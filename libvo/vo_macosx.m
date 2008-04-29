@@ -24,6 +24,7 @@
 #include "input/mouse.h"
 
 #include "osdep/keycodes.h"
+#include "mp_fifo.h"
 
 //Cocoa
 NSDistantObject *mplayerosxProxy;
@@ -78,8 +79,6 @@ static vo_info_t info =
 };
 
 LIBVO_EXTERN(macosx)
-
-extern void mplayer_put_key(int code);
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
 {
