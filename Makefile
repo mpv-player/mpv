@@ -628,6 +628,16 @@ ALL_PRG      += $(ALL_PRG-yes)
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
 
+SRCS_COMMON    += $(SRCS_COMMON-yes) $(SRCS_COMMON-yes-yes) $(SRCS_COMMON-yes-yes-yes)
+SRCS_MENCODER  += $(SRCS_MENCODER-yes)
+SRCS_MPLAYER   += $(SRCS_MPLAYER-yes)
+
+OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)) )
+OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
+OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
+
+CFLAGS += $(CFLAGS-yes) $(OPTFLAGS)
+
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
@@ -691,7 +701,20 @@ all: $(ALL_PRG)
 recurse:
 	for part in $(PARTS); do $(MAKE) -C $$part; done
 
-include mpcommon.mak
+%.d: %.c
+	$(MPDEPEND_CMD) > $@
+
+%.d: %.cpp
+	$(MPDEPEND_CMD_CXX) > $@
+
+%.d: %.m
+	$(MPDEPEND_CMD) > $@
+
+%.ho: %.h
+	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
+
+%.o: %.m
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
 $(DEPS) recurse: help_mp.h version.h codecs.conf.h
@@ -863,6 +886,9 @@ TAGS:
 tags:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs ctags -a
 
+ALLHEADERS = $(wildcard *.h)
+checkheaders: $(ALLHEADERS:.h=.ho)
+
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"
@@ -947,3 +973,4 @@ toolsclean:
 -include $(DEPS)
 
 .PHONY: all doxygen *install* recurse strip *tools
+.PHONY: checkheaders *clean dep depend
