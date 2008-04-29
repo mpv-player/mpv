@@ -847,8 +847,8 @@ config.mak: configure
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
 
-# rebuild at every config.h/config.mak/Makefile change:
-version.h: config.h config.mak Makefile
+# rebuild at every config.h/config.mak change:
+version.h: config.h config.mak
 	./version.sh `$(CC) -dumpversion`
 
 doxygen:
