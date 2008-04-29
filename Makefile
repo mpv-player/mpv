@@ -706,8 +706,6 @@ codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
 
-codec-cfg.o: codecs.conf.h
-
 codecs2html$(EXESUF): mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
 
