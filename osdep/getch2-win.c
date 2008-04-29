@@ -10,6 +10,8 @@
 #include "keycodes.h"
 #include "input/input.h"
 #include "mp_fifo.h"
+#include "getch2.h"
+
 // HACK, stdin is used as something else below
 #undef stdin
 

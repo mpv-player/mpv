@@ -35,6 +35,8 @@
 #include <sys/shm.h>
 #endif
 
+#include "shmem.h"
+
 #if defined(MAP_ANONYMOUS) && !defined(MAP_ANON)
 #define MAP_ANON MAP_ANONYMOUS
 #endif
