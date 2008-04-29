@@ -4,6 +4,8 @@
 
 #include "qtxsdk/components.h"
 #include "qtxsdk/select.h"
+#include "ldt_keeper.h"
+#include "mp_msg.h"
 
 /* ilyen egy sima komponens */
 ComponentResult ComponentDummy(
@@ -42,8 +44,8 @@ int main(int argc, char *argv[]){
     ComponentParameters *params;
     ComponentDescription desc;
     void *globals=NULL;
-    unsigned int esp=0;
-    int i;
+    //unsigned int esp=0;
+    //int i;
 
     mp_msg_init();
     //mp_msg_set_level(10);
@@ -120,8 +122,7 @@ int main(int argc, char *argv[]){
 
 //    for(i=0;i<0x00001837;i++)
 //	if(x_table[i]) printf("x_table[0x%X] = %p\n",i,x_table[i]);
-    
-    Restore_LDT_Keeper();
+
     exit(0);
     //return 0;
 }

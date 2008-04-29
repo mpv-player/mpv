@@ -12,7 +12,7 @@ vpath %.S $(SRC_DIR)
 ALLFFLIBS = avcodec avdevice avfilter avformat avutil postproc swscale
 
 CFLAGS = -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
-         -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) \
+         -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) -I$(SRC_PATH)/ffmpeg\
          $(addprefix -I$(SRC_PATH)/ffmpeg/lib,$(ALLFFLIBS)) $(OPTFLAGS)
 
 %.o: %.c

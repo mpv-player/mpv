@@ -8,6 +8,7 @@
 
 #include "qtxsdk/components.h"
 #include "qtxsdk/select.h"
+#include "ldt_keeper.h"
 
 char* get_path(const char* x){  return strdup(x);}
 void* LoadLibraryA(char* name);
@@ -51,8 +52,7 @@ int main(int argc, char *argv[]){
     desc.componentFlags=0;
     desc.componentFlagsMask=0;
     
-    printf("Count = %d\n",CountComponents(&desc));
-    
-    Restore_LDT_Keeper();
+    printf("Count = %ld\n",CountComponents(&desc));
+
     exit(0);
 }

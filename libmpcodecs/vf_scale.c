@@ -12,7 +12,7 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "fmt-conversion.h"
-#include "bswap.h"
+#include "mpbswap.h"
 
 #include "libswscale/swscale.h"
 #include "vf_scale.h"

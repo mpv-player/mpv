@@ -7635,7 +7635,7 @@ if test "$cc_vendor" = "gnu" ; then
 fi
 
 CFLAGS_FFMPEG="-I../.. $CFLAGS"
-CFLAGS="-I. -I../ffmpeg -I.. -I../ffmpeg/libavutil $CFLAGS"
+CFLAGS="-I. -Iffmpeg -Iffmpeg/libavutil $CFLAGS"
 CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
 cc_check -mno-omit-leaf-frame-pointer && CFLAG_NO_OMIT_LEAF_FRAME_POINTER="-mno-omit-leaf-frame-pointer"

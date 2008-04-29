@@ -53,15 +53,13 @@ int usec_sleep(int usec_delay)
 /* current time in microseconds */
 unsigned int GetTimer()
 {
-  return (unsigned int)((mach_absolute_time() * timebase_ratio)
-			* 1e6);
+  return (unsigned int)(uint64_t)(mach_absolute_time() * timebase_ratio * 1e6);
 }
 
 /* current time in milliseconds */
 unsigned int GetTimerMS()
 {
-  return (unsigned int)((mach_absolute_time() * timebase_ratio)
-                        * 1e3);
+  return (unsigned int)(uint64_t)(mach_absolute_time() * timebase_ratio * 1e3);
 }
 
 /* initialize timer, must be called at least once at start */
