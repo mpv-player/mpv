@@ -504,7 +504,10 @@ static const mp_cmd_bind_t gui_def_cmd_binds[] = {
 
 typedef struct mp_input_fd {
   int fd;
-  void* read_func;
+  union {
+      mp_key_func_t key;
+      mp_cmd_func_t cmd;
+  } read_func;
   mp_close_func_t close_func;
   void *ctx;
   unsigned eof : 1;
@@ -620,7 +623,7 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
 
   cmd_fds[num_cmd_fd] = (struct mp_input_fd){
       .fd = fd,
-      .read_func = read_func ? read_func : mp_input_default_cmd_func,
+      .read_func.cmd = read_func ? read_func : mp_input_default_cmd_func,
       .close_func = close_func,
       .no_select = !select
   };
@@ -682,7 +685,7 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func,
 
   key_fds[num_key_fd] = (struct mp_input_fd){
       .fd = fd,
-      .read_func = read_func,
+      .read_func.key = read_func,
       .close_func = close_func,
       .no_select = !select,
       .ctx = ctx,
@@ -870,7 +873,8 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
   
   // Get some data if needed/possible
   while (!mp_fd->got_cmd && !mp_fd->eof && (mp_fd->size - mp_fd->pos > 1) ) {
-    int r = ((mp_cmd_func_t)mp_fd->read_func)(mp_fd->fd,mp_fd->buffer+mp_fd->pos,mp_fd->size - 1 - mp_fd->pos);
+    int r = mp_fd->read_func.cmd(mp_fd->fd, mp_fd->buffer+mp_fd->pos,
+                                 mp_fd->size - 1 - mp_fd->pos);
     // Error ?
     if(r < 0) {
       switch(r) {
@@ -1200,8 +1204,7 @@ static mp_cmd_t *read_events(int time, int paused)
 	    continue;
 #endif
 
-	int code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].ctx,
-                                                         key_fds[i].fd);
+	int code = key_fds[i].read_func.key(key_fds[i].ctx, key_fds[i].fd);
 	if (code >= 0) {
 	    mp_cmd_t *ret = interpret_key(code, paused);
 	    if (ret)
