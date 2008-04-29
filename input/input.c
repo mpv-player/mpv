@@ -17,7 +17,6 @@
 #include <assert.h>
 #endif
 #include "mp_fifo.h"
-#include "osdep/getch2.h"
 #include "osdep/keycodes.h"
 #include "osdep/timer.h"
 #include "libavutil/avstring.h"
