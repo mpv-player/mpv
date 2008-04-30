@@ -229,10 +229,13 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
         m_option_save(config, arg, sl->data);
         // Hack to avoid too much trouble with dynamically allocated data :
         // We always use a dynamic version
-        if ((arg->type->flags & M_OPT_TYPE_DYNAMIC) && arg->p
-            && (*(void**)arg->p)) {
-            *(void**)arg->p = NULL;
-            m_option_set(config, arg, sl->data);
+        if ((arg->type->flags & M_OPT_TYPE_DYNAMIC)) {
+            char **hackptr = arg->new ? (char*)config->optstruct + arg->offset
+                                      : arg->p;
+            if (hackptr && *hackptr) {
+                *hackptr = NULL;
+                m_option_set(config, arg, sl->data);
+            }
         }
         sl->lvl = 0;
         sl->prev = NULL;
