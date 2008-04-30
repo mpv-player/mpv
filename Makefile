@@ -802,7 +802,7 @@ liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:
 
 libvo/aspecttest$(EXESUF): libvo/aspecttest.c libvo/aspect.o libvo/geometry.o mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
-LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o cpudetect.o mp_msg.o mp_fifo.o osdep/mmap_anon.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
+LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/mmap_anon.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
 loader/qtx/list$(EXESUF): loader/qtx/list.c $(LOADER_TEST_OBJS)
