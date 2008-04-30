@@ -4,7 +4,6 @@
 #include <inttypes.h>
 
 #include "loader/wine/mmreg.h"
-#include "loader/wine/avifmt.h"
 #include "loader/wine/vfw.h"
 
 #include "stream/stream.h"
