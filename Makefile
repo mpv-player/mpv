@@ -798,16 +798,16 @@ VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
 
 $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
-liba52/test: liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
+liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
 LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o cpudetect.o mp_msg.o mp_fifo.o osdep/mmap_anon.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
-loader/qtx/list loader/qtx/qtxload: CFLAGS += -g
-loader/qtx/list: loader/qtx/list.c $(LOADER_TEST_OBJS)
-loader/qtx/qtxload: loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
+loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
+loader/qtx/list$(EXESUF): loader/qtx/list.c $(LOADER_TEST_OBJS)
+loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
 
-mp3lib/test:  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
-mp3lib/test2: mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
+mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
+mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
 
 install: install-dirs $(INSTALL_TARGETS)
 
