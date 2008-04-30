@@ -593,7 +593,6 @@ static int use_ar = 1;
 static char* js_dev = NULL;
 
 static char* in_file = NULL;
-static int in_file_fd = -1;
 
 static int print_key_list(m_option_t* cfg);
 static int print_cmd_list(m_option_t* cfg);
@@ -1755,7 +1754,7 @@ struct input_ctx *mp_input_init(int use_gui)
     if(stat(in_file,&st))
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantStatFile,in_file,strerror(errno));
     else {
-      in_file_fd = open(in_file,S_ISFIFO(st.st_mode) ? O_RDWR : O_RDONLY);
+      int in_file_fd = open(in_file,S_ISFIFO(st.st_mode) ? O_RDWR : O_RDONLY);
       if(in_file_fd >= 0)
 	mp_input_add_cmd_fd(in_file_fd,1,NULL,(mp_close_func_t)close);
       else
