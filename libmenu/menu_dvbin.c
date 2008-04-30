@@ -215,8 +215,8 @@ static void read_cmd(menu_t* menu, int cmd)
 			if(c)
 			{
 				if(mpriv->auto_close)
-					mp_input_queue_cmd (mp_input_parse_cmd ("menu hide"));
-				mp_input_queue_cmd(c);
+                                    mp_input_queue_cmd(menu->input_ctx, mp_input_parse_cmd ("menu hide"));
+				mp_input_queue_cmd(menu->input_ctx, c);
 			}
 		}
   	}

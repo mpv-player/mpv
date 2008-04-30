@@ -55,21 +55,21 @@ static void read_cmd(menu_t* menu,int cmd) {
   switch(cmd) {
   case MENU_CMD_RIGHT:
     if(mpriv->p.current->right) {
-      mp_input_parse_and_queue_cmds(mpriv->p.current->right);
+      mp_input_parse_and_queue_cmds(menu->input_ctx, mpriv->p.current->right);
       break;
     } // fallback on ok if right is not defined
   case MENU_CMD_OK:
     if (mpriv->p.current->ok)
-      mp_input_parse_and_queue_cmds(mpriv->p.current->ok);
+      mp_input_parse_and_queue_cmds(menu->input_ctx, mpriv->p.current->ok);
     break;
   case MENU_CMD_LEFT:
     if(mpriv->p.current->left) {
-      mp_input_parse_and_queue_cmds(mpriv->p.current->left);
+      mp_input_parse_and_queue_cmds(menu->input_ctx, mpriv->p.current->left);
       break;
     } // fallback on cancel if left is not defined
   case MENU_CMD_CANCEL:
     if(mpriv->p.current->cancel) {
-      mp_input_parse_and_queue_cmds(mpriv->p.current->cancel);
+      mp_input_parse_and_queue_cmds(menu->input_ctx, mpriv->p.current->cancel);
       break;
     }
   default:

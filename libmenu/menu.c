@@ -72,6 +72,7 @@ int menu_mouse_pos_updated = 0;
 
 static struct MPContext *menu_ctx = NULL;
 static struct m_config *menu_mconfig = NULL;
+static struct input_ctx *menu_input = NULL;
 static menu_def_t* menu_list = NULL;
 static int menu_count = 0;
 static menu_cmd_bindings_t *cmd_bindings = NULL;
@@ -214,7 +215,7 @@ static int menu_parse_config(char* buffer, struct m_config *mconfig)
 #define BUF_MIN 128
 #define BUF_MAX BUF_STEP*1024
 int menu_init(struct MPContext *mpctx, struct m_config *mconfig,
-              char* cfg_file)
+              struct input_ctx *input_ctx, char* cfg_file)
 {
   char* buffer = NULL;
   int bl = BUF_STEP, br = 0;
@@ -255,6 +256,7 @@ int menu_init(struct MPContext *mpctx, struct m_config *mconfig,
 
   menu_ctx = mpctx;
   menu_mconfig = mconfig;
+  menu_input = input_ctx;
   f = menu_parse_config(buffer, mconfig);
   free(buffer);
   return f;
@@ -291,7 +293,8 @@ int menu_dflt_read_key(menu_t* menu,int cmd) {
     for (i = 0; i < bindings->binding_num; ++i) {
       if (bindings->bindings[i].key == cmd) {
         if (bindings->bindings[i].cmd)
-          mp_input_parse_and_queue_cmds(bindings->bindings[i].cmd);
+          mp_input_parse_and_queue_cmds(menu->input_ctx,
+                                        bindings->bindings[i].cmd);
         return 1;
       }
     }
@@ -317,6 +320,7 @@ menu_t* menu_open(char *name) {
   m->priv = m_struct_copy(m->priv_st,menu_list[i].cfg);
   m->ctx = menu_ctx;
   m->mconfig = menu_mconfig;
+  m->input_ctx = menu_input;
   m->type = &menu_list[i];
   if(menu_list[i].type->open(m,menu_list[i].args))
     return m;

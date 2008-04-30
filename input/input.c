@@ -568,6 +568,9 @@ struct input_ctx {
 
     mp_input_fd_t key_fds[MP_MAX_KEY_FD];
     unsigned int num_key_fd;
+
+    mp_cmd_t *cmd_queue[CMD_QUEUE_SIZE];
+    unsigned int cmd_queue_length, cmd_queue_start, cmd_queue_end;
 };
 
 
@@ -580,8 +583,6 @@ int async_quit_request;
 
 static mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
 static unsigned int num_cmd_fd = 0;
-static mp_cmd_t* cmd_queue[CMD_QUEUE_SIZE];
-static unsigned int cmd_queue_length = 0,cmd_queue_start = 0, cmd_queue_end = 0;
 
 static unsigned int ar_delay = 100, ar_rate = 8;
 
@@ -715,7 +716,8 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
   return 1;
 }
 
-int mp_input_parse_and_queue_cmds(const char *str) {
+int mp_input_parse_and_queue_cmds(struct input_ctx *ictx, const char *str)
+{
     int cmd_num = 0;
 
     while (*str == '\n' || *str == '\r' || *str == ' ')
@@ -727,7 +729,7 @@ int mp_input_parse_and_queue_cmds(const char *str) {
         av_strlcpy(cmdbuf, str, len+1);
         cmd = mp_input_parse_cmd(cmdbuf);
         if (cmd) {
-            mp_input_queue_cmd(cmd);
+            mp_input_queue_cmd(ictx, cmd);
             ++cmd_num;
         }
         str += len;
@@ -1278,28 +1280,28 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 }
 
 
-int
-mp_input_queue_cmd(mp_cmd_t* cmd) {
-  if(!cmd || cmd_queue_length  >= CMD_QUEUE_SIZE)
+int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t* cmd)
+{
+  if (!cmd || ictx->cmd_queue_length  >= CMD_QUEUE_SIZE)
     return 0;
-  cmd_queue[cmd_queue_end] = cmd;
-  cmd_queue_end = (cmd_queue_end + 1) % CMD_QUEUE_SIZE;
-  cmd_queue_length++;
+  ictx->cmd_queue[ictx->cmd_queue_end] = cmd;
+  ictx->cmd_queue_end = (ictx->cmd_queue_end + 1) % CMD_QUEUE_SIZE;
+  ictx->cmd_queue_length++;
   return 1;
 }
 
-static mp_cmd_t *get_queued_cmd(int peek_only)
+static mp_cmd_t *get_queued_cmd(struct input_ctx *ictx, int peek_only)
 {
   mp_cmd_t* ret;
 
-  if(cmd_queue_length == 0)
+  if (ictx->cmd_queue_length == 0)
     return NULL;
 
-  ret = cmd_queue[cmd_queue_start];
+  ret = ictx->cmd_queue[ictx->cmd_queue_start];
   
   if (!peek_only) {  
-  cmd_queue_length--;
-  cmd_queue_start = (cmd_queue_start + 1) % CMD_QUEUE_SIZE;
+      ictx->cmd_queue_length--;
+      ictx->cmd_queue_start = (ictx->cmd_queue_start + 1) % CMD_QUEUE_SIZE;
   }
   
   return ret;
@@ -1320,13 +1322,13 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int paused,
     return mp_input_parse_cmd("quit 1");
   while(1) {
     from_queue = 1;
-    ret = get_queued_cmd(peek_only);
+    ret = get_queued_cmd(ictx, peek_only);
     if(ret) break;
     from_queue = 0;
     ret = read_events(ictx, time, paused);
     if (!ret) {
 	from_queue = 1;
-	ret = get_queued_cmd(peek_only);
+	ret = get_queued_cmd(ictx, peek_only);
     }
     break;
   }
@@ -1336,14 +1338,14 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int paused,
     if(cf->filter(ret,paused,cf->ctx)) {
       if (peek_only && from_queue)
         // The filter ate the cmd, so we remove it from queue
-        ret = get_queued_cmd(0);
+          ret = get_queued_cmd(ictx, 0);
       mp_cmd_free(ret);
       return NULL;
     }
   }
 
   if (!from_queue && peek_only)
-    mp_input_queue_cmd(ret);
+      mp_input_queue_cmd(ictx, ret);
 
   return ret;
 }

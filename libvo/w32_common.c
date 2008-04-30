@@ -137,7 +137,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 char cmd_str[40];
                 snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i",
                         GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-                mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
+                mp_input_queue_cmd(global_vo->input_ctx, mp_input_parse_cmd(cmd_str));
             }
             break;
         case WM_MOUSEWHEEL:

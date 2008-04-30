@@ -1009,7 +1009,7 @@ static int control(uint32_t request, void *data)
                 	snprintf(cmdstr, sizeof(cmdstr), "set_mouse_pos %i %i",
 			         (int)(vo_fs ? p.x : (p.x - textureFrame.origin.x)),
 			         (int)(vo_fs ? [self frame].size.height - p.y: (NSMaxY(textureFrame) - p.y)));
-                	mp_input_queue_cmd(mp_input_parse_cmd(cmdstr));
+                	mp_input_queue_cmd(global_vo->input_ctx, mp_input_parse_cmd(cmdstr));
 		}
 	}
 }

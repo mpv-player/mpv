@@ -141,9 +141,9 @@ static void read_cmd (menu_t* menu, int cmd)
     case MENU_CMD_OK: {
       char cmdbuf[26];
       sprintf(cmdbuf, "seek_chapter %d 1", menu->priv->p.current->cid);
-      mp_input_queue_cmd(mp_input_parse_cmd(cmdbuf));
+      mp_input_queue_cmd(menu->input_ctx, mp_input_parse_cmd(cmdbuf));
       if (menu->priv->auto_close)
-        mp_input_queue_cmd(mp_input_parse_cmd("menu hide"));
+          mp_input_queue_cmd(menu->input_ctx, mp_input_parse_cmd("menu hide"));
       break;
     }
     default:

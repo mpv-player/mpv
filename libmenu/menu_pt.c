@@ -86,7 +86,7 @@ static void read_cmd(menu_t* menu,int cmd) {
     }
     c = mp_input_parse_cmd(str);
     if(c)
-      mp_input_queue_cmd(c);
+        mp_input_queue_cmd(menu->input_ctx, c);
     else
       mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_FailedToBuildCommand,str);
   } break;

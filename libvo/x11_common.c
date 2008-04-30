@@ -1063,7 +1063,8 @@ int vo_x11_check_events(struct vo *vo)
                 {
                     char cmd_str[40];
                     sprintf(cmd_str,"set_mouse_pos %i %i",Event.xmotion.x, Event.xmotion.y);
-                    mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
+                    mp_input_queue_cmd(vo->input_ctx,
+                                       mp_input_parse_cmd(cmd_str));
                 }
 
                 if (x11->vo_mouse_autohide)

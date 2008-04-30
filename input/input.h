@@ -238,8 +238,7 @@ int mp_input_get_key_from_name(const char *name);
 // This function can be used to put a command in the system again. It's used by libmpdemux
 // when it performs a blocking operation to resend the command it received to the main
 // loop.
-int
-mp_input_queue_cmd(mp_cmd_t* cmd);
+int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t* cmd);
 
 // This function retrieves the next available command waiting no more than time msec.
 // If pause is true, the next input will always return a pause command.
@@ -253,7 +252,7 @@ mp_input_parse_cmd(char* str);
  * Parse and queue commands separated by '\n'.
  * @return count of commands new queued.
  */
-int mp_input_parse_and_queue_cmds(const char *str);
+int mp_input_parse_and_queue_cmds(struct input_ctx *ictx, const char *str);
 
 /// These filters allow you to process the command before MPlayer.
 /// If a filter returns a true value mp_input_get_cmd will return NULL.

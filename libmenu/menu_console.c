@@ -403,7 +403,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 	run_shell_cmd(menu,c->args[0].v.s);
 	break;
       default: // Send the other commands to mplayer
-	mp_input_queue_cmd(c);
+          mp_input_queue_cmd(menu->input_ctx, c);
       }
     }
     return;
