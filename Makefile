@@ -719,8 +719,11 @@ $(DEPS) recurse: help_mp.h version.h codecs.conf.h
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
-# rebuild at every config.h/config.mak change:
-version.h: config.h config.mak
+# rebuild version.h each time the working copy is updated
+ifeq ($(wildcard .svn/entries),.svn/entries)
+version.h: .svn/entries
+endif
+version.h:
 	./version.sh `$(CC) -dumpversion`
 
 help_mp.h: help/help_mp-en.h $(HELP_FILE)
