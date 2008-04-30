@@ -625,7 +625,7 @@ static const m_option_t mp_input_opts[] = {
 
 static int default_cmd_func(int fd,char* buf, int l);
 
-static char *get_key_name(int key);
+static char *get_key_name(int key, char buffer[12]);
 
 
 int
@@ -1037,6 +1037,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys,
 {
   char* cmd = NULL;
   mp_cmd_t* ret;
+  char key_buf[12];
 
   if (ictx->cmd_binds)
     cmd = find_bind_for_key(ictx->cmd_binds, n, keys);
@@ -1046,11 +1047,12 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys,
     cmd = find_bind_for_key(def_cmd_binds,n,keys);
 
   if(cmd == NULL) {
-    mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_NoBindFound, get_key_name(keys[0]));
+      mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_NoBindFound, get_key_name(keys[0],
+                                                                  key_buf));
     if(n > 1) {
       int s;
       for(s=1; s < n; s++)
-	mp_msg(MSGT_INPUT,MSGL_WARN,"-%s", get_key_name(keys[s]));
+          mp_msg(MSGT_INPUT,MSGL_WARN,"-%s", get_key_name(keys[s], key_buf));
     }
     mp_msg(MSGT_INPUT,MSGL_WARN,"                         \n");
     return NULL;
@@ -1059,11 +1061,12 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys,
   ret =  mp_input_parse_cmd(cmd);
   if(!ret) {
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrInvalidCommandForKey,
-           get_key_name(ictx->key_down[0]));
+           get_key_name(ictx->key_down[0], key_buf));
     if (ictx->num_key_down > 1) {
       unsigned int s;
       for(s=1; s < ictx->num_key_down; s++)
-	mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(ictx->key_down[s]));
+          mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(ictx->key_down[s],
+                                                         key_buf));
     }
     mp_msg(MSGT_INPUT,MSGL_ERR," : %s             \n",cmd);
   }
@@ -1383,9 +1386,7 @@ mp_cmd_clone(mp_cmd_t* cmd) {
   return ret;
 }
 
-static char key_str[12];
-
-static char *get_key_name(int key)
+static char *get_key_name(int key, char buffer[12])
 {
   int i;
 
@@ -1395,13 +1396,13 @@ static char *get_key_name(int key)
   }
   
   if(isascii(key)) {
-    snprintf(key_str,12,"%c",(char)key);
-    return key_str;
+    snprintf(buffer, 12, "%c",(char)key);
+    return buffer;
   }
 
   // Print the hex key code
-  snprintf(key_str,12,"%#-8x",key);
-  return key_str;
+  snprintf(buffer, 12, "%#-8x",key);
+  return buffer;
 
 }
 
@@ -1610,9 +1611,10 @@ static int parse_config(struct input_ctx *ictx, char *file)
       // Found new line
       if(iter[0] == '\n' || iter[0] == '\r') {
 	int i;
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrNoCmdForKey, get_key_name(keys[0]));
+        char key_buf[12];
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrNoCmdForKey, get_key_name(keys[0], key_buf));
 	for(i = 1; keys[i] != 0 ; i++)
-	  mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(keys[i]));
+            mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(keys[i], key_buf));
 	mp_msg(MSGT_INPUT,MSGL_ERR,"\n");
 	keys[0] = 0;
 	if(iter > buffer) {
