@@ -34,7 +34,7 @@ int bufptr=0;
 int bitcnt=0;
 unsigned char buf=0;
 
-unsigned int x_get_bits(int n){
+static unsigned int x_get_bits(int n){
     unsigned int x=0;
     while(n-->0){
 	if(!bitcnt){
@@ -59,7 +59,7 @@ int width=320;
 int height=240;
 
 /* most is hardcoded. should extend to handle all h263 streams */
-int h263_decode_picture_header(unsigned char *b_ptr)
+static int h263_decode_picture_header(unsigned char *b_ptr)
 {
     int i;
         

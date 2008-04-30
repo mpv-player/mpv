@@ -53,7 +53,7 @@ static void remove_key(long handle, const char* name) {
     save_registry();
 }
 
-void parse_key(char *raw, HKEY *root, char *path, char *key) {
+static void parse_key(char *raw, HKEY *root, char *path, char *key) {
     char *tmpkey, *start;
     tmpkey = strrchr(raw, '\\');
     if (tmpkey == raw || tmpkey == NULL) {

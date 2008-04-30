@@ -74,7 +74,7 @@ static int mga_init(){
 #endif
 
 // Returns current time in microseconds
-unsigned int GetTimer(){
+static unsigned int GetTimer(){
   struct timeval tv;
   struct timezone tz;
 //  float s;

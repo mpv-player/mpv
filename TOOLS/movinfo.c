@@ -22,7 +22,7 @@
 
 #undef NO_SPECIAL
 
-char *atom2human_type(int type)
+static char *atom2human_type(int type)
 {
 switch (type)
 {
@@ -57,13 +57,13 @@ int stream = S_NONE;
 int v_stream = 0;
 int a_stream = 0;
 
-unsigned int read_dword(FILE *f){
+static unsigned int read_dword(FILE *f){
  unsigned char atom_size_b[4];
  if(fread(&atom_size_b,4,1,f)<=0) return -1;
  return (atom_size_b[0]<<24)|(atom_size_b[1]<<16)|(atom_size_b[2]<<8)|atom_size_b[3];
 }
 
-void video_stream_info(FILE *f, int len)
+static void video_stream_info(FILE *f, int len)
 {
   int orig_pos = ftell(f);
   unsigned char data[len-8];
@@ -79,7 +79,7 @@ void video_stream_info(FILE *f, int len)
   fseek(f,orig_pos,SEEK_SET);
 }
 
-void audio_stream_info(FILE *f, int len)
+static void audio_stream_info(FILE *f, int len)
 {
   int orig_pos = ftell(f);
   unsigned char data[len-8];
@@ -98,7 +98,7 @@ void audio_stream_info(FILE *f, int len)
   fseek(f,orig_pos,SEEK_SET);
 }
 
-void userdata_info(FILE *f, int len, int pos, int level)
+static void userdata_info(FILE *f, int len, int pos, int level)
 {
   int orig_pos = pos; /*ftell(f);*/
   unsigned int atom_size = 1;
@@ -153,7 +153,7 @@ void userdata_info(FILE *f, int len, int pos, int level)
 
 int time_scale = 0;
 
-void lschunks(FILE *f,int level,unsigned int endpos){
+static void lschunks(FILE *f,int level,unsigned int endpos){
  unsigned int atom_size;
  unsigned int atom_type;
  int pos;
