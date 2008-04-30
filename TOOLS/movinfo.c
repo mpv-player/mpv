@@ -98,6 +98,7 @@ static void audio_stream_info(FILE *f, int len)
   fseek(f,orig_pos,SEEK_SET);
 }
 
+#if 0
 static void userdata_info(FILE *f, int len, int pos, int level)
 {
   int orig_pos = pos; /*ftell(f);*/
@@ -150,6 +151,7 @@ static void userdata_info(FILE *f, int len, int pos, int level)
   }
   fseek(f,orig_pos,SEEK_SET);
 }
+#endif
 
 int time_scale = 0;
 
