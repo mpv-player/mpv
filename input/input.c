@@ -748,7 +748,6 @@ mp_input_parse_cmd(char* str) {
   int i,l;
   int pausing = 0;
   char *ptr,*e;
-  mp_cmd_t *cmd;
   const mp_cmd_t *cmd_def;
 
 #ifdef MP_DEBUG
@@ -790,10 +789,12 @@ mp_input_parse_cmd(char* str) {
 
   cmd_def = &mp_cmds[i];
 
-  cmd = calloc(1, sizeof(mp_cmd_t));
-  cmd->id = cmd_def->id;
-  cmd->name = strdup(cmd_def->name);
-  cmd->pausing = pausing;
+  mp_cmd_t *cmd = talloc_ptrtype(NULL, cmd);
+  *cmd = (mp_cmd_t){
+      .id = cmd_def->id,
+      .name = talloc_strdup(cmd, cmd_def->name),
+      .pausing = pausing,
+  };
 
   ptr = str;
 
@@ -849,9 +850,7 @@ mp_input_parse_cmd(char* str) {
 	ptr2 = e + 1;
         l--;
       }
-      cmd->args[i].v.s = malloc(l+1);
-      strncpy(cmd->args[i].v.s,start,l);
-      cmd->args[i].v.s[l] = '\0';
+      cmd->args[i].v.s = talloc_strndup(cmd, start, l);
       if(term != ' ') ptr += l+2;
     } break;
     case -1:
@@ -873,7 +872,7 @@ mp_input_parse_cmd(char* str) {
   for( ; i < MP_CMD_MAX_ARGS && cmd_def->args[i].type != -1 ; i++) {
     memcpy(&cmd->args[i],&cmd_def->args[i],sizeof(mp_cmd_arg_t));
     if(cmd_def->args[i].type == MP_CMD_ARG_STRING && cmd_def->args[i].v.s != NULL)
-      cmd->args[i].v.s = strdup(cmd_def->args[i].v.s);
+        cmd->args[i].v.s = talloc_strdup(cmd, cmd_def->args[i].v.s);
   }
 
   if(i < MP_CMD_MAX_ARGS)
@@ -1356,20 +1355,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int paused,
 
 void
 mp_cmd_free(mp_cmd_t* cmd) {
-  int i;
-//#ifdef MP_DEBUG
-//  assert(cmd != NULL);
-//#endif
-  if ( !cmd ) return;
-
-  if(cmd->name)
-    free(cmd->name);
-  
-  for(i=0; i < MP_CMD_MAX_ARGS && cmd->args[i].type != -1; i++) {
-    if(cmd->args[i].type == MP_CMD_ARG_STRING && cmd->args[i].v.s != NULL)
-      free(cmd->args[i].v.s);
-  }
-  free(cmd);
+    talloc_free(cmd);
 }
 
 mp_cmd_t*
@@ -1380,13 +1366,11 @@ mp_cmd_clone(mp_cmd_t* cmd) {
   assert(cmd != NULL);
 #endif
 
-  ret = malloc(sizeof(mp_cmd_t));
-  memcpy(ret,cmd,sizeof(mp_cmd_t));
-  if(cmd->name)
-    ret->name = strdup(cmd->name);
+  ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
+  ret->name = talloc_strdup(ret, cmd->name);
   for(i = 0;  i < MP_CMD_MAX_ARGS && cmd->args[i].type != -1; i++) {
     if(cmd->args[i].type == MP_CMD_ARG_STRING && cmd->args[i].v.s != NULL)
-      ret->args[i].v.s = strdup(cmd->args[i].v.s);
+        ret->args[i].v.s = talloc_strdup(ret, cmd->args[i].v.s);
   }
 
   return ret;
