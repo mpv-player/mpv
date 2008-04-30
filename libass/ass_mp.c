@@ -242,7 +242,10 @@ void ass_configure_fonts(ass_renderer_t* priv) {
 	else if (font_fontconfig >= 0 && font_name) family = strdup(font_name);
 	else family = 0;
 
-	ass_set_fonts(priv, path, family);
+	if (font_fontconfig >= 0)
+		ass_set_fonts(priv, path, family);
+	else
+		ass_set_fonts_nofc(priv, path, family);
 
 	free(dir);
 	free(path);

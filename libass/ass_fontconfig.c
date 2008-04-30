@@ -40,8 +40,6 @@
 #include <fontconfig/fcfreetype.h>
 #endif
 
-extern int font_fontconfig;
-
 struct fc_instance_s {
 #ifdef HAVE_FONTCONFIG
 	FcConfig* config;
@@ -155,7 +153,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 			uint32_t code)
 {
 	char* res = 0;
-	if (font_fontconfig < 0) {
+	if (!priv->config) {
 		*index = priv->index_default;
 		return priv->path_default;
 	}
@@ -319,16 +317,17 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
  * \param path default font path
  * \return pointer to fontconfig private data
 */ 
-fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path)
+fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path, int fc)
 {
 	int rc;
 	fc_instance_t* priv = calloc(1, sizeof(fc_instance_t));
 	const char* dir = library->fonts_dir;
 	int i;
 	
-	if (font_fontconfig < 0) {
+	if (!fc) {
 		mp_msg(MSGT_ASS, MSGL_WARN,
 		       MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed);
+		priv->config = NULL;
 		priv->path_default = strdup(path);
 		priv->index_default = 0;
 		return priv;

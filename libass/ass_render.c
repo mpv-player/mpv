@@ -2083,7 +2083,7 @@ void ass_set_line_spacing(ass_renderer_t* priv, double line_spacing)
 	priv->settings.line_spacing = line_spacing;
 }
 
-int ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* default_family)
+static int ass_set_fonts_(ass_renderer_t* priv, const char* default_font, const char* default_family, int fc)
 {
 	if (priv->settings.default_font)
 		free(priv->settings.default_font);
@@ -2095,9 +2095,19 @@ int ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* de
 
 	if (priv->fontconfig_priv)
 		fontconfig_done(priv->fontconfig_priv);
-	priv->fontconfig_priv = fontconfig_init(priv->library, priv->ftlibrary, default_family, default_font);
+	priv->fontconfig_priv = fontconfig_init(priv->library, priv->ftlibrary, default_family, default_font, fc);
 
 	return !!priv->fontconfig_priv;
+}
+
+int ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* default_family)
+{
+	return ass_set_fonts_(priv, default_font, default_family, 1);
+}
+
+int ass_set_fonts_nofc(ass_renderer_t* priv, const char* default_font, const char* default_family)
+{
+	return ass_set_fonts_(priv, default_font, default_family, 0);
 }
 
 /**

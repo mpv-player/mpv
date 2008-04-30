@@ -94,6 +94,11 @@ void ass_set_line_spacing(ass_renderer_t* priv, double line_spacing);
 int  ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* default_family);
 
 /**
+ * \brief set font lookup defaults, don't use fontconfig even if it is available
+ */
+int  ass_set_fonts_nofc(ass_renderer_t* priv, const char* default_font, const char* default_family);
+
+/**
  * \brief render a frame, producing a list of ass_image_t
  * \param priv library
  * \param track subtitle track
