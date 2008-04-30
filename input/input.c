@@ -569,6 +569,9 @@ struct input_ctx {
     mp_input_fd_t key_fds[MP_MAX_KEY_FD];
     unsigned int num_key_fd;
 
+    mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
+    unsigned int num_cmd_fd;
+
     mp_cmd_t *cmd_queue[CMD_QUEUE_SIZE];
     unsigned int cmd_queue_length, cmd_queue_start, cmd_queue_end;
 };
@@ -580,9 +583,6 @@ static mp_cmd_filter_t* cmd_filters = NULL;
 int (*mp_input_key_cb)(int code) = NULL;
 
 int async_quit_request;
-
-static mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
-static unsigned int num_cmd_fd = 0;
 
 static unsigned int ar_delay = 100, ar_rate = 8;
 
@@ -629,9 +629,10 @@ static int default_cmd_func(int fd,char* buf, int l);
 static char *get_key_name(int key, char buffer[12]);
 
 
-int
-mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t close_func) {
-  if(num_cmd_fd == MP_MAX_CMD_FD) {
+int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
+                        mp_cmd_func_t read_func, mp_close_func_t close_func)
+{
+  if (ictx->num_cmd_fd == MP_MAX_CMD_FD) {
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds,fd);
     return 0;
   }
@@ -640,35 +641,37 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
     return 0;
   }
 
-  cmd_fds[num_cmd_fd] = (struct mp_input_fd){
+  ictx->cmd_fds[ictx->num_cmd_fd] = (struct mp_input_fd){
       .fd = fd,
       .read_func.cmd = read_func ? read_func : default_cmd_func,
       .close_func = close_func,
       .no_select = !select
   };
-  num_cmd_fd++;
+  ictx->num_cmd_fd++;
 
   return 1;
 }
 
-void
-mp_input_rm_cmd_fd(int fd) {
+void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd)
+{
+    struct mp_input_fd *cmd_fds = ictx->cmd_fds;
   unsigned int i;
 
-  for(i = 0; i < num_cmd_fd; i++) {
+  for (i = 0; i < ictx->num_cmd_fd; i++) {
     if(cmd_fds[i].fd == fd)
       break;
   }
-  if(i == num_cmd_fd)
+  if (i == ictx->num_cmd_fd)
     return;
   if(cmd_fds[i].close_func)
     cmd_fds[i].close_func(cmd_fds[i].fd);
   if(cmd_fds[i].buffer)
     free(cmd_fds[i].buffer);
 
-  if(i + 1 < num_cmd_fd)
-    memmove(&cmd_fds[i],&cmd_fds[i+1],(num_cmd_fd - i - 1)*sizeof(mp_input_fd_t));
-  num_cmd_fd--;
+  if (i + 1 < ictx->num_cmd_fd)
+      memmove(&cmd_fds[i], &cmd_fds[i+1],
+              (ictx->num_cmd_fd - i - 1) * sizeof(mp_input_fd_t));
+  ictx->num_cmd_fd--;
 }
 
 void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
@@ -1174,14 +1177,15 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
     int i;
     int got_cmd = 0;
     struct mp_input_fd *key_fds = ictx->key_fds;
+    struct mp_input_fd *cmd_fds = ictx->cmd_fds;
     for (i = 0; i < ictx->num_key_fd; i++)
 	if (key_fds[i].dead) {
 	    mp_input_rm_key_fd(ictx, key_fds[i].fd);
 	    i--;
 	}
-    for (i = 0; i < num_cmd_fd; i++)
+    for (i = 0; i < ictx->num_cmd_fd; i++)
 	if (cmd_fds[i].dead || cmd_fds[i].eof) {
-	    mp_input_rm_cmd_fd(cmd_fds[i].fd);
+	    mp_input_rm_cmd_fd(ictx, cmd_fds[i].fd);
 	    i--;
 	}
 	else if (cmd_fds[i].got_cmd)
@@ -1199,7 +1203,7 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 	    FD_SET(key_fds[i].fd, &fds);
 	    num_fd++;
 	}
-	for (i = 0; i < num_cmd_fd; i++) {
+	for (i = 0; i < ictx->num_cmd_fd; i++) {
 	    if (cmd_fds[i].no_select)
 		continue;
 	    if (cmd_fds[i].fd > max_fd)
@@ -1255,7 +1259,7 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
     if (autorepeat_cmd)
 	return autorepeat_cmd;
 
-    for (i = 0; i < num_cmd_fd; i++) {
+    for (i = 0; i < ictx->num_cmd_fd; i++) {
 #ifdef HAVE_POSIX_SELECT
 	if (!cmd_fds[i].no_select && !FD_ISSET(cmd_fds[i].fd, &fds) &&
 	    !cmd_fds[i].got_cmd)
@@ -1737,7 +1741,8 @@ struct input_ctx *mp_input_init(int use_gui)
   if(use_lirc) {
     int fd = mp_input_lirc_init();
     if(fd > 0)
-      mp_input_add_cmd_fd(fd,0,mp_input_lirc_read,mp_input_lirc_close);
+        mp_input_add_cmd_fd(ictx, fd, 0, mp_input_lirc_read,
+                            mp_input_lirc_close);
   }
 #endif
 
@@ -1745,7 +1750,7 @@ struct input_ctx *mp_input_init(int use_gui)
   if(use_lircc) {
     int fd = lircc_init("mplayer", NULL);
     if(fd >= 0)
-      mp_input_add_cmd_fd(fd,1,NULL,(mp_close_func_t)lircc_cleanup);
+        mp_input_add_cmd_fd(ictx, fd, 1, NULL, (mp_close_func_t)lircc_cleanup);
   }
 #endif
 
@@ -1766,7 +1771,8 @@ struct input_ctx *mp_input_init(int use_gui)
     else {
       int in_file_fd = open(in_file,S_ISFIFO(st.st_mode) ? O_RDWR : O_RDONLY);
       if(in_file_fd >= 0)
-	mp_input_add_cmd_fd(in_file_fd,1,NULL,(mp_close_func_t)close);
+          mp_input_add_cmd_fd(ictx, in_file_fd, 1, NULL,
+                              (mp_close_func_t)close);
       else
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantOpenFile,in_file,strerror(errno));
     }
@@ -1786,9 +1792,9 @@ void mp_input_uninit(struct input_ctx *ictx)
           ictx->key_fds[i].close_func(ictx->key_fds[i].fd);
   }
 
-  for(i=0; i < num_cmd_fd; i++) {
-    if(cmd_fds[i].close_func)
-      cmd_fds[i].close_func(cmd_fds[i].fd);
+  for (i = 0; i < ictx->num_cmd_fd; i++) {
+      if (ictx->cmd_fds[i].close_func)
+          ictx->cmd_fds[i].close_func(ictx->cmd_fds[i].fd);
   }
   talloc_free(ictx);
 }

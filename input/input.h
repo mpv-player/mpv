@@ -216,12 +216,11 @@ typedef int (*mp_input_cmd_filter)(mp_cmd_t* cmd, int paused, void* ctx);
 // fd will be used.
 // The last arg can be NULL if nothing is needed to close the driver. The close
 // function can be used
-int
-mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t close_func);
+int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
+                        mp_cmd_func_t read_func, mp_close_func_t close_func);
 
 // This removes a cmd driver, you usually don't need to use it.
-void
-mp_input_rm_cmd_fd(int fd);
+void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd);
 
 // The args are the same as for the key's drivers. If you don't use any valid fd you MUST
 // give a read_func.
