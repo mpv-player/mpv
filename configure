@@ -5490,6 +5490,7 @@ if test "$_libdvdcss_internal" = yes ; then
     _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
     _ld_extra="$_ld_extra -framework IOKit"
   fi
+  _libdvdcss_dvdread_flags="-Ilibdvdcss -DHAVE_DVDCSS_DVDCSS_H"
   _inputmodules="libdvdcss(internal) $_inputmodules"
   _largefiles=yes
 else
@@ -7788,6 +7789,7 @@ VCD = $_vcd
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
 LIBDVDCSS_INTERNAL = $_libdvdcss_internal
+LIBDVDCSS_DVDREAD_FLAGS = $_libdvdcss_dvdread_flags
 DVDNAV = $_dvdnav
 WIN32DLL = $_win32dll
 WIN32_EMULATION = $_win32_emulation

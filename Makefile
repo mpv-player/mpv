@@ -771,10 +771,7 @@ codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 	$(WINDRES) -o $@ $<
 
-dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE
-ifeq ($(LIBDVDCSS_INTERNAL),yes)
-dvdread/%.o dvdread/%.d: CFLAGS += -Ilibdvdcss -DHAVE_DVDCSS_DVDCSS_H
-endif
+dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE $(LIBDVDCSS_DVDREAD_FLAGS)
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\"
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
 
