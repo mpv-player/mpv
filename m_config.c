@@ -223,24 +223,25 @@ m_config_add_option(m_config_t *config, const m_option_t *arg, const char* prefi
       }
     }
     if(!(co->flags & M_CFG_OPT_ALIAS)) {
-    // Allocate a slot for the defaults
+        // Allocate a slot for the defaults
         sl = talloc_zero_size(co, sizeof(m_config_save_slot_t) +
-                                  arg->type->size);
-    m_option_save(config, arg, sl->data);
-    // Hack to avoid too much trouble with dynamically allocated data :
-    // We always use a dynamic version
-    if((arg->type->flags & M_OPT_TYPE_DYNAMIC) && arg->p && (*(void**)arg->p)) {
-      *(void**)arg->p = NULL;
-      m_option_set(config, arg, sl->data);
-    }
-    sl->lvl = 0;
-    sl->prev = NULL;
-    co->slots = talloc_zero_size(co, sizeof(m_config_save_slot_t) +
+                              arg->type->size);
+        m_option_save(config, arg, sl->data);
+        // Hack to avoid too much trouble with dynamically allocated data :
+        // We always use a dynamic version
+        if ((arg->type->flags & M_OPT_TYPE_DYNAMIC) && arg->p
+            && (*(void**)arg->p)) {
+            *(void**)arg->p = NULL;
+            m_option_set(config, arg, sl->data);
+        }
+        sl->lvl = 0;
+        sl->prev = NULL;
+        co->slots = talloc_zero_size(co, sizeof(m_config_save_slot_t) +
                                      arg->type->size);
-    co->slots->prev = sl;
-    co->slots->lvl = config->lvl;
-    m_option_copy(co->opt,co->slots->data,sl->data);
-    } // !M_OPT_ALIAS
+        co->slots->prev = sl;
+        co->slots->lvl = config->lvl;
+        m_option_copy(co->opt, co->slots->data, sl->data);
+    }
   }
   co->next = config->opts;
   config->opts = co;
