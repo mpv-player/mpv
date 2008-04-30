@@ -874,11 +874,11 @@ uninstall:
 	  fi ; \
 	done
 
-clean: toolsclean
+clean:
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
-distclean: clean doxygen_clean testsclean
+distclean: clean doxygen_clean testsclean toolsclean
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) \
