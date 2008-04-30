@@ -39,6 +39,16 @@
 
 #include "ar.h"
 
+typedef struct mp_cmd_bind {
+  int input[MP_MAX_KEY_DOWN+1];
+  char* cmd;
+} mp_cmd_bind_t;
+
+typedef struct mp_key_name {
+  int key;
+  char* name;
+} mp_key_name_t;
+
 /// This array defines all known commands.
 /// The first field is an id used to recognize the command without too many strcmp.
 /// The second is obviously the command name.

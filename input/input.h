@@ -194,16 +194,6 @@ typedef struct mp_cmd {
 } mp_cmd_t;
 
 
-typedef struct mp_cmd_bind {
-  int input[MP_MAX_KEY_DOWN+1];
-  char* cmd;
-} mp_cmd_bind_t;
-
-typedef struct mp_key_name {
-  int key;
-  char* name;
-} mp_key_name_t;
-
 // These typedefs are for the drivers. They are the functions used to retrieve
 // the next key code or command.
 
