@@ -356,14 +356,14 @@ SRCS_COMMON-$(LIBVORBIS)             += libmpcodecs/ad_libvorbis.c \
 SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
 SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c
 SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32) += mp3lib/decode_i586.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOW)     += mp3lib/dct36_3dnow.c \
-                                                          mp3lib/dct64_3dnow.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOWEX)   += mp3lib/dct36_k7.c \
-                                                          mp3lib/dct64_k7.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)       += mp3lib/dct64_mmx.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOW)    += mp3lib/dct36_3dnow.c \
+                                                         mp3lib/dct64_3dnow.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOWEX)  += mp3lib/dct36_k7.c \
+                                                         mp3lib/dct64_k7.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)      += mp3lib/dct64_mmx.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_ALTIVEC) += mp3lib/dct64_altivec.c
-SRCS_COMMON-$(MP3LIB)-$(HAVE_MMX)     += mp3lib/decode_mmx.c
-SRCS_COMMON-$(MP3LIB)-$(HAVE_SSE)     += mp3lib/dct64_sse.c
+SRCS_COMMON-$(MP3LIB)-$(HAVE_MMX)    += mp3lib/decode_mmx.c
+SRCS_COMMON-$(MP3LIB)-$(HAVE_SSE)    += mp3lib/dct64_sse.c
 SRCS_COMMON-$(MPLAYER_NETWORK)       += stream/stream_netstream.c \
                                         stream/asf_mmst_streaming.c \
                                         stream/asf_streaming.c \
@@ -483,7 +483,6 @@ SRCS_COMMON-$(XVID4)                 += libmpcodecs/vd_xvid4.c
 SRCS_COMMON-$(ZORAN)                 += libmpcodecs/vd_zrmjpeg.c \
                                         libmpcodecs/vf_zrmjpeg.c
 
-
 SRCS_MPLAYER = mplayer.c \
                m_property.c \
                mp_fifo.c \
@@ -557,7 +556,7 @@ SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
                                 libmenu/vf_menu.c \
 
 SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
-SRCS_MPLAYER-$(LIRC)         += input/lirc.c
+SRCS_MPLAYER-$(LIRC)          += input/lirc.c
 
 SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c \
                                  vidix/vidixlib.c \
@@ -568,19 +567,19 @@ SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c \
                                  vidix/pci_names.c \
                                  vidix/pci_dev_ids.c\
 
-SRCS_MPLAYER-$(VIDIX_CYBERBLADE)        += vidix/cyberblade_vid.c
-SRCS_MPLAYER-$(VIDIX_IVTV)              += vidix/ivtv_vid.c
-SRCS_MPLAYER-$(VIDIX_MACH64)            += vidix/mach64_vid.c
-SRCS_MPLAYER-$(VIDIX_MGA)               += vidix/mga_vid.c
-SRCS_MPLAYER-$(VIDIX_MGA_CRTC2)         += vidix/mga_crtc2_vid.c
-SRCS_MPLAYER-$(VIDIX_NVIDIA)            += vidix/nvidia_vid.c
-SRCS_MPLAYER-$(VIDIX_PM2)               += vidix/pm2_vid.c
-SRCS_MPLAYER-$(VIDIX_PM3)               += vidix/pm3_vid.c
-SRCS_MPLAYER-$(VIDIX_RADEON)            += vidix/radeon_vid.c
-SRCS_MPLAYER-$(VIDIX_RAGE128)           += vidix/rage128_vid.c
-SRCS_MPLAYER-$(VIDIX_S3)                += vidix/s3_vid.c
-SRCS_MPLAYER-$(VIDIX_SIS)               += vidix/sis_vid.c vidix/sis_bridge.c
-SRCS_MPLAYER-$(VIDIX_UNICHROME)         += vidix/unichrome_vid.c
+SRCS_MPLAYER-$(VIDIX_CYBERBLADE)    += vidix/cyberblade_vid.c
+SRCS_MPLAYER-$(VIDIX_IVTV)          += vidix/ivtv_vid.c
+SRCS_MPLAYER-$(VIDIX_MACH64)        += vidix/mach64_vid.c
+SRCS_MPLAYER-$(VIDIX_MGA)           += vidix/mga_vid.c
+SRCS_MPLAYER-$(VIDIX_MGA_CRTC2)     += vidix/mga_crtc2_vid.c
+SRCS_MPLAYER-$(VIDIX_NVIDIA)        += vidix/nvidia_vid.c
+SRCS_MPLAYER-$(VIDIX_PM2)           += vidix/pm2_vid.c
+SRCS_MPLAYER-$(VIDIX_PM3)           += vidix/pm3_vid.c
+SRCS_MPLAYER-$(VIDIX_RADEON)        += vidix/radeon_vid.c
+SRCS_MPLAYER-$(VIDIX_RAGE128)       += vidix/rage128_vid.c
+SRCS_MPLAYER-$(VIDIX_S3)            += vidix/s3_vid.c
+SRCS_MPLAYER-$(VIDIX_SIS)           += vidix/sis_vid.c vidix/sis_bridge.c
+SRCS_MPLAYER-$(VIDIX_UNICHROME)     += vidix/unichrome_vid.c
 
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
