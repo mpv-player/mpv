@@ -187,12 +187,6 @@ draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca
     unlink(tmpfname);
 }
 
-static void
-fast_memcpy(void *a, void *b, int s)
-{ //FIXME
-    memcpy(a, b, s);
-}
-
 int
 main(int argc, char **argv)
 {

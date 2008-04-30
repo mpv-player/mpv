@@ -929,7 +929,8 @@ TOOLS_COMMON_LIBS = mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
 TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
 
 TOOLS/subrip$(EXESUF): TOOLS/subrip.c vobsub.o spudec.o unrar_exec.o \
-  libswscale/libswscale.a libavutil/libavutil.a $(TOOLS_COMMON_LIBS)
+  libvo/aclib.o libswscale/libswscale.a libavutil/libavutil.a \
+  $(TOOLS_COMMON_LIBS)
 
 TOOLS/vfw2menc$(EXESUF): TOOLS/vfw2menc.c -lwinmm -lole32
 
