@@ -1924,9 +1924,9 @@ static int mp_property_teletext_mode(m_option_t *prop, int action, void *arg,
         return result;
 
     if(tvh->functions->control(tvh->priv, prop->priv, &val)==TVI_CONTROL_TRUE && val)
-        mp_input_set_section("teletext");
+        mp_input_set_section(mpctx->input, "teletext");
     else
-        mp_input_set_section("tv");
+        mp_input_set_section(mpctx->input, "tv");
     return M_PROPERTY_OK;
 }
 

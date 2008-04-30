@@ -542,14 +542,17 @@ struct input_ctx {
     short ar_state;
     mp_cmd_t *ar_cmd;
     unsigned int last_ar;
+
+    // List of command binding sections
+    mp_cmd_bind_section_t *cmd_bind_sections;
+    // Name of currently used command section
+    char *section;
+    // The command binds of current section
+    mp_cmd_bind_t *cmd_binds;
+    mp_cmd_bind_t *cmd_binds_default;
 };
 
 
-// These are the user defined binds
-static mp_cmd_bind_section_t* cmd_binds_section = NULL;
-static char* section = NULL;
-static mp_cmd_bind_t* cmd_binds = NULL;
-static mp_cmd_bind_t* cmd_binds_default = NULL;
 static mp_cmd_filter_t* cmd_filters = NULL;
 
 // Callback to allow the menu filter to grab the incoming keys
@@ -995,9 +998,10 @@ mp_input_find_bind_for_key(const mp_cmd_bind_t* binds, int n,int* keys) {
   return binds[j].cmd;
 }
 
-static mp_cmd_bind_section_t*
-mp_input_get_bind_section(char *section) {
-  mp_cmd_bind_section_t* bind_section = cmd_binds_section;
+static mp_cmd_bind_section_t *mp_input_get_bind_section(struct input_ctx *ictx,
+                                                        char *section)
+{
+  mp_cmd_bind_section_t *bind_section = ictx->cmd_bind_sections;
 
   if (section==NULL) section="default";
   while (bind_section) {
@@ -1009,8 +1013,8 @@ mp_input_get_bind_section(char *section) {
     bind_section->next=malloc(sizeof(mp_cmd_bind_section_t));
     bind_section=bind_section->next;
   } else {
-    cmd_binds_section=malloc(sizeof(mp_cmd_bind_section_t));
-    bind_section=cmd_binds_section;
+    ictx->cmd_bind_sections = malloc(sizeof(mp_cmd_bind_section_t));
+    bind_section = ictx->cmd_bind_sections;
   }
   bind_section->cmd_binds=NULL;
   bind_section->section=strdup(section);
@@ -1018,15 +1022,16 @@ mp_input_get_bind_section(char *section) {
   return bind_section;
 }
 
-static mp_cmd_t*
-mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
+static mp_cmd_t *mp_input_get_cmd_from_keys(struct input_ctx *ictx,
+                                            int n, int *keys, int paused)
+{
   char* cmd = NULL;
   mp_cmd_t* ret;
 
-  if(cmd_binds)
-    cmd = mp_input_find_bind_for_key(cmd_binds,n,keys);
-  if(cmd_binds_default && cmd == NULL)
-    cmd = mp_input_find_bind_for_key(cmd_binds_default,n,keys);
+  if (ictx->cmd_binds)
+    cmd = mp_input_find_bind_for_key(ictx->cmd_binds, n, keys);
+  if (ictx->cmd_binds_default && cmd == NULL)
+    cmd = mp_input_find_bind_for_key(ictx->cmd_binds_default, n, keys);
   if(cmd == NULL)
     cmd = mp_input_find_bind_for_key(def_cmd_binds,n,keys);
 
@@ -1104,7 +1109,9 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code, int paused)
       last_key_down = 1;
     } 
     // We ignore key from last combination
-    ret = last_key_down ? mp_input_get_cmd_from_keys(num_key_down,key_down,paused) : NULL;
+    ret = last_key_down ?
+        mp_input_get_cmd_from_keys(ictx, num_key_down, key_down, paused)
+        : NULL;
     // Remove the key
     if(j+1 < num_key_down)
       memmove(&key_down[j],&key_down[j+1],(num_key_down-(j+1))*sizeof(int));
@@ -1126,7 +1133,8 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx, int paused)
     unsigned int t = GetTimer();
     // First time : wait delay
     if (ictx->ar_state == 0 && (t - last_key_down) >= ar_delay*1000) {
-      ictx->ar_cmd = mp_input_get_cmd_from_keys(num_key_down,key_down,paused);      
+        ictx->ar_cmd = mp_input_get_cmd_from_keys(ictx, num_key_down,
+                                                  key_down, paused);      
       if (!ictx->ar_cmd) {
 	ictx->ar_state = -1;
 	return NULL;
@@ -1431,8 +1439,9 @@ mp_input_get_input_from_name(char* name,int* keys) {
 #define BS_MAX 256
 #define SPACE_CHAR " \n\r\t"
 
-void
-mp_input_bind_keys(const int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
+void mp_input_bind_keys(struct input_ctx *ictx,
+                        const int keys[MP_MAX_KEY_DOWN+1], char* cmd)
+{
   int i = 0,j;
   mp_cmd_bind_t* bind = NULL;
   mp_cmd_bind_section_t* bind_section = NULL;
@@ -1451,7 +1460,7 @@ mp_input_bind_keys(const int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
     for(  ; cmd[0] != '\0' && strchr(SPACE_CHAR,cmd[0]) != NULL ; cmd++)
       /* NOTHING */;
   }
-  bind_section=mp_input_get_bind_section(section);
+  bind_section = mp_input_get_bind_section(ictx, section);
 
   if(bind_section->cmd_binds) {
     for(i = 0; bind_section->cmd_binds[i].cmd != NULL ; i++) {
@@ -1475,11 +1484,11 @@ mp_input_bind_keys(const int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
   memcpy(bind->input,keys,(MP_MAX_KEY_DOWN+1)*sizeof(int));
 }
 
-void
-mp_input_add_binds(const mp_cmd_bind_t* list) {
+void mp_input_add_binds(struct input_ctx *ictx, const mp_cmd_bind_t* list)
+{
   int i;
   for(i = 0 ; list[i].cmd ; i++)
-    mp_input_bind_keys(list[i].input,list[i].cmd);
+      mp_input_bind_keys(ictx, list[i].input,list[i].cmd);
 }
 
 static void
@@ -1496,8 +1505,8 @@ mp_input_free_binds(mp_cmd_bind_t* binds) {
 
 }
   
-static int
-mp_input_parse_config(char *file) {
+static int mp_input_parse_config(struct input_ctx *ictx, char *file)
+{
   int fd;
   int bs = 0,r,eof = 0,comments = 0;
   char *iter,*end;
@@ -1629,7 +1638,7 @@ mp_input_parse_config(char *file) {
 	strncpy(cmd,iter,end-iter);
 	cmd[end-iter] = '\0';
 	//printf("Set bind %d => %s\n",keys[0],cmd);
-	mp_input_bind_keys(keys,cmd);
+	mp_input_bind_keys(ictx, keys,cmd);
 	n_binds++;
       }
       keys[0] = 0;
@@ -1643,28 +1652,33 @@ mp_input_parse_config(char *file) {
   }
   mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrWhyHere);
   close(fd);
-  mp_input_set_section(NULL);
+  mp_input_set_section(ictx, NULL);
   return 0;
 }
 
-void
-mp_input_set_section(char *name) {
-  mp_cmd_bind_section_t* bind_section = NULL;
+void mp_input_set_section(struct input_ctx *ictx, char *name)
+{
+    mp_cmd_bind_section_t* bind_section = NULL;
 
-  cmd_binds=NULL;
-  cmd_binds_default=NULL;
-  if(section) free(section);
-  if(name) section=strdup(name); else section=strdup("default");
-  if((bind_section=mp_input_get_bind_section(section)))
-    cmd_binds=bind_section->cmd_binds;
-  if(strcmp(section,"default")==0) return;
-  if((bind_section=mp_input_get_bind_section(NULL)))
-    cmd_binds_default=bind_section->cmd_binds;
+    ictx->cmd_binds = NULL;
+    ictx->cmd_binds_default = NULL;
+    if (ictx->section)
+        free(ictx->section);
+    if (name)
+        ictx->section = strdup(name);
+    else
+        ictx->section = strdup("default");
+    if ((bind_section = mp_input_get_bind_section(ictx, ictx->section)))
+        ictx->cmd_binds = bind_section->cmd_binds;
+    if (strcmp(ictx->section, "default") == 0)
+        return;
+    if ((bind_section = mp_input_get_bind_section(ictx, NULL)))
+        ictx->cmd_binds_default = bind_section->cmd_binds;
 }
 
-char*
-mp_input_get_section(void) {
-  return section;
+char *mp_input_get_section(struct input_ctx *ictx)
+{
+    return ictx->section;
 }
 
 struct input_ctx *mp_input_init(int use_gui)
@@ -1678,14 +1692,14 @@ struct input_ctx *mp_input_init(int use_gui)
 
 #ifdef HAVE_NEW_GUI  
   if(use_gui)
-    mp_input_add_binds(gui_def_cmd_binds);
+      mp_input_add_binds(ictx, gui_def_cmd_binds);
 #endif
   
   file = config_file[0] != '/' ? get_path(config_file) : config_file;
   if(!file)
     return ictx;
   
-  if( !mp_input_parse_config(file)) {
+  if (!mp_input_parse_config(ictx, file)) {
     // free file if it was allocated by get_path(),
     // before it gets overwritten
     if( file != config_file)
@@ -1694,7 +1708,7 @@ struct input_ctx *mp_input_init(int use_gui)
     }
     // Try global conf dir
     file = MPLAYER_CONFDIR "/input.conf";
-    if(! mp_input_parse_config(file))
+    if (!mp_input_parse_config(ictx, file))
       mp_msg(MSGT_INPUT,MSGL_V,"Falling back on default (hardcoded) input config\n");
   }
   else
@@ -1768,14 +1782,13 @@ void mp_input_uninit(struct input_ctx *ictx)
     if(cmd_fds[i].close_func)
       cmd_fds[i].close_func(cmd_fds[i].fd);
   }
-  while (cmd_binds_section) {
-    mp_input_free_binds(cmd_binds_section->cmd_binds);
-    free(cmd_binds_section->section);
-    bind_section=cmd_binds_section->next;
-    free(cmd_binds_section);
-    cmd_binds_section=bind_section;
+  while (ictx->cmd_bind_sections) {
+    mp_input_free_binds(ictx->cmd_bind_sections->cmd_binds);
+    free(ictx->cmd_bind_sections->section);
+    bind_section=ictx->cmd_bind_sections->next;
+    free(ictx->cmd_bind_sections);
+    ictx->cmd_bind_sections=bind_section;
   }
-  cmd_binds_section=NULL;
   talloc_free(ictx);
 }
 

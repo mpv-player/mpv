@@ -3655,9 +3655,9 @@ if ( use_gui ) {
 }
 #endif
 
-mp_input_set_section(NULL);
+ mp_input_set_section(mpctx->input, NULL);
 //TODO: add desired (stream-based) sections here
-if (mpctx->stream->type==STREAMTYPE_TV) mp_input_set_section("tv");
+ if (mpctx->stream->type==STREAMTYPE_TV) mp_input_set_section(mpctx->input, "tv");
 
 //==================== START PLAYING =======================
 
