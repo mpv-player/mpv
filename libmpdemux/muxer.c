@@ -6,8 +6,6 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "version.h"
-
 #include "aviheader.h"
 #include "ms_hdr.h"
 

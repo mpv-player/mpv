@@ -20,7 +20,6 @@
 #include "libvo/font_load.h"
 
 #include "input/input.h"
-#include "version.h"
 
 
 

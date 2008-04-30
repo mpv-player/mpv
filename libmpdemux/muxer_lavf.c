@@ -5,7 +5,6 @@
 #include <inttypes.h>
 #include <limits.h>
 #include "config.h"
-#include "version.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
