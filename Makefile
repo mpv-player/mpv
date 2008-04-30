@@ -815,6 +815,9 @@ TESTS = liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
 
 tests: $(TESTS)
 
+testsclean:
+	rm -f $(TESTS)
+
 install: install-dirs $(INSTALL_TARGETS)
 
 install-dirs:
@@ -875,10 +878,10 @@ clean: toolsclean
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
-distclean: clean doxygen_clean
+distclean: clean doxygen_clean testsclean
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
-           version.h $(VIDIX_PCI_FILES) $(TESTS) \
+           version.h $(VIDIX_PCI_FILES) \
            codec-cfg$(EXESUF) codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
            cpuinfo$(EXESUF) TAGS tags
 
