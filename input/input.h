@@ -171,6 +171,8 @@
 #define MP_MAX_KEY_DOWN 32
 #endif
 
+struct input_ctx;
+
 typedef union mp_cmd_arg_value {
   int i;
   float f;
@@ -252,7 +254,7 @@ mp_input_queue_cmd(mp_cmd_t* cmd);
 // This function retrieves the next available command waiting no more than time msec.
 // If pause is true, the next input will always return a pause command.
 mp_cmd_t*
-mp_input_get_cmd(int time, int paused, int peek_only);
+mp_input_get_cmd(struct input_ctx *ictx, int time, int paused, int peek_only);
 
 mp_cmd_t*
 mp_input_parse_cmd(char* str);
@@ -286,15 +288,13 @@ char*
 mp_input_get_section(void);
 
 // When you create a new driver you should add it in these 2 functions.
-void
-mp_input_init(int use_gui);
+struct input_ctx *mp_input_init(int use_gui);
 
-void
-mp_input_uninit(void);
+void mp_input_uninit(struct input_ctx *ictx);
 
 // Interruptible usleep:  (used by libmpdemux)
 int
-mp_input_check_interrupt(int time);
+mp_input_check_interrupt(struct input_ctx *ictx, int time);
 
 extern int async_quit_request;
 

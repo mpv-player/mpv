@@ -25,6 +25,7 @@
 #include "m_config.h"
 #include "m_option.h"
 #include "get_path.h"
+#include "talloc.h"
 
 #include "joystick.h"
 
@@ -536,6 +537,14 @@ struct mp_cmd_bind_section {
   mp_cmd_bind_section_t* next;
 };
 
+struct input_ctx {
+    // Autorepeat stuff
+    short ar_state;
+    mp_cmd_t *ar_cmd;
+    unsigned int last_ar;
+};
+
+
 // These are the user defined binds
 static mp_cmd_bind_section_t* cmd_binds_section = NULL;
 static char* section = NULL;
@@ -559,10 +568,7 @@ static unsigned int cmd_queue_length = 0,cmd_queue_start = 0, cmd_queue_end = 0;
 static int key_down[MP_MAX_KEY_DOWN];
 static unsigned int num_key_down = 0, last_key_down = 0;
 
-// Autorepeat stuff
-static short ar_state = -1;
-static mp_cmd_t* ar_cmd = NULL;
-static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
+static unsigned int ar_delay = 100, ar_rate = 8;
 
 static int use_joystick = 1, use_lirc = 1, use_lircc = 1;
 static char* config_file = "input.conf";
@@ -1049,8 +1055,7 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
 }
 
 
-static mp_cmd_t*
-interpret_key(int code, int paused)
+static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code, int paused)
 {
   unsigned int j;
   mp_cmd_t* ret;
@@ -1079,7 +1084,7 @@ interpret_key(int code, int paused)
       key_down[num_key_down] = code;
       num_key_down++;
       last_key_down = GetTimer();
-      ar_state = 0;
+      ictx->ar_state = 0;
       return NULL;
     }
     // key released
@@ -1105,40 +1110,41 @@ interpret_key(int code, int paused)
       memmove(&key_down[j],&key_down[j+1],(num_key_down-(j+1))*sizeof(int));
     num_key_down--;
     last_key_down = 0;
-    ar_state = -1;
-    if(ar_cmd) {
-      mp_cmd_free(ar_cmd);
-      ar_cmd = NULL;
+    ictx->ar_state = -1;
+    if (ictx->ar_cmd) {
+      mp_cmd_free(ictx->ar_cmd);
+      ictx->ar_cmd = NULL;
     }
     return ret;
 }
 
-static mp_cmd_t *check_autorepeat(int paused)
+static mp_cmd_t *check_autorepeat(struct input_ctx *ictx, int paused)
 {
   // No input : autorepeat ?
-  if(ar_rate > 0 && ar_state >=0 && num_key_down > 0 && ! (key_down[num_key_down-1] & MP_NO_REPEAT_KEY)) {
+  if (ar_rate > 0 && ictx->ar_state >=0 && num_key_down > 0
+      && !(key_down[num_key_down-1] & MP_NO_REPEAT_KEY)) {
     unsigned int t = GetTimer();
     // First time : wait delay
-    if(ar_state == 0 && (t - last_key_down) >= ar_delay*1000) {
-      ar_cmd = mp_input_get_cmd_from_keys(num_key_down,key_down,paused);      
-      if(!ar_cmd) {
-	ar_state = -1;
+    if (ictx->ar_state == 0 && (t - last_key_down) >= ar_delay*1000) {
+      ictx->ar_cmd = mp_input_get_cmd_from_keys(num_key_down,key_down,paused);      
+      if (!ictx->ar_cmd) {
+	ictx->ar_state = -1;
 	return NULL;
       }
-      ar_state = 1;
-      last_ar = t;
-      return mp_cmd_clone(ar_cmd);
+      ictx->ar_state = 1;
+      ictx->last_ar = t;
+      return mp_cmd_clone(ictx->ar_cmd);
       // Then send rate / sec event
-    } else if(ar_state == 1 && (t -last_ar) >= 1000000/ar_rate) {
-      last_ar = t;
-      return mp_cmd_clone(ar_cmd);
+    } else if (ictx->ar_state == 1 && (t -ictx->last_ar) >= 1000000/ar_rate) {
+      ictx->last_ar = t;
+      return mp_cmd_clone(ictx->ar_cmd);
     }
   }
   return NULL;
 }
 
 
-static mp_cmd_t *read_events(int time, int paused)
+static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 {
     int i;
     int got_cmd = 0;
@@ -1206,7 +1212,7 @@ static mp_cmd_t *read_events(int time, int paused)
 
 	int code = key_fds[i].read_func.key(key_fds[i].ctx, key_fds[i].fd);
 	if (code >= 0) {
-	    mp_cmd_t *ret = interpret_key(code, paused);
+	    mp_cmd_t *ret = interpret_key(ictx, code, paused);
 	    if (ret)
 		return ret;
 	}
@@ -1219,7 +1225,7 @@ static mp_cmd_t *read_events(int time, int paused)
 	    key_fds[i].dead = 1;
 	}
     }
-    mp_cmd_t *autorepeat_cmd = check_autorepeat(paused);
+    mp_cmd_t *autorepeat_cmd = check_autorepeat(ictx, paused);
     if (autorepeat_cmd)
 	return autorepeat_cmd;
 
@@ -1279,8 +1285,9 @@ mp_input_get_queued_cmd(int peek_only) {
  * \param peek_only when set, the returned command stays in the queue.
  * Do not free the returned cmd whe you set this!
  */
-mp_cmd_t*
-mp_input_get_cmd(int time, int paused, int peek_only) {
+mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int paused,
+                           int peek_only)
+{
   mp_cmd_t* ret = NULL;
   mp_cmd_filter_t* cf;
   int from_queue;
@@ -1292,7 +1299,7 @@ mp_input_get_cmd(int time, int paused, int peek_only) {
     ret = mp_input_get_queued_cmd(peek_only);
     if(ret) break;
     from_queue = 0;
-    ret = read_events(time, paused);
+    ret = read_events(ictx, time, paused);
     if (!ret) {
 	from_queue = 1;
 	ret = mp_input_get_queued_cmd(peek_only);
@@ -1660,8 +1667,13 @@ mp_input_get_section(void) {
   return section;
 }
 
-void
-mp_input_init(int use_gui) {
+struct input_ctx *mp_input_init(int use_gui)
+{
+    struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
+    *ictx = (struct input_ctx){
+        .ar_state = -1,
+    };
+
   char* file;
 
 #ifdef HAVE_NEW_GUI  
@@ -1671,7 +1683,7 @@ mp_input_init(int use_gui) {
   
   file = config_file[0] != '/' ? get_path(config_file) : config_file;
   if(!file)
-    return;
+    return ictx;
   
   if( !mp_input_parse_config(file)) {
     // free file if it was allocated by get_path(),
@@ -1739,11 +1751,11 @@ mp_input_init(int use_gui) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantOpenFile,in_file,strerror(errno));
     }
   }
-
+  return ictx;
 }
 
-void
-mp_input_uninit(void) {
+void mp_input_uninit(struct input_ctx *ictx)
+{
   unsigned int i;
   mp_cmd_bind_section_t* bind_section;
 
@@ -1764,6 +1776,7 @@ mp_input_uninit(void) {
     cmd_binds_section=bind_section;
   }
   cmd_binds_section=NULL;
+  talloc_free(ictx);
 }
 
 void
@@ -1810,10 +1823,10 @@ static int mp_input_print_cmd_list(m_option_t* cfg) {
   exit(0);
 }
 
-int
-mp_input_check_interrupt(int time) {
+int mp_input_check_interrupt(struct input_ctx *ictx, int time)
+{
   mp_cmd_t* cmd;
-  if((cmd = mp_input_get_cmd(time,0,1)) == NULL)
+  if ((cmd = mp_input_get_cmd(ictx, time, 0, 1)) == NULL)
     return 0;
   switch(cmd->id) {
   case MP_CMD_QUIT:
@@ -1824,7 +1837,7 @@ mp_input_check_interrupt(int time) {
     return 1;
   }
   // remove the cmd from the queue
-  cmd = mp_input_get_cmd(time,0,0);
+  cmd = mp_input_get_cmd(ictx, time, 0, 0);
   mp_cmd_free(cmd);
   return 0;
 }

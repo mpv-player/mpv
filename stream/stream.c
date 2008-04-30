@@ -34,7 +34,9 @@
 
 //#include "vcd_read_bincue.h"
 
-static int (*stream_check_interrupt_cb)(int time) = NULL;
+struct input_ctx;
+static int (*stream_check_interrupt_cb)(struct input_ctx *ctx, int time);
+static struct input_ctx *stream_check_interrupt_ctx;
 
 extern const stream_info_t stream_info_vcd;
 extern const stream_info_t stream_info_cdda;
@@ -454,11 +456,14 @@ stream_t* new_ds_stream(demux_stream_t *ds) {
   return s;
 }
 
-void stream_set_interrupt_callback(int (*cb)(int)) {
+void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
+                                   struct input_ctx *ctx)
+{
     stream_check_interrupt_cb = cb;
+    stream_check_interrupt_ctx = ctx;
 }
 
 int stream_check_interrupt(int time) {
     if(!stream_check_interrupt_cb) return 0;
-    return stream_check_interrupt_cb(time);
+    return stream_check_interrupt_cb(stream_check_interrupt_ctx, time);
 }

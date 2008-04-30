@@ -647,7 +647,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
   if(mask&INITIALIZED_INPUT){
     mpctx->initialized_flags&=~INITIALIZED_INPUT;
     current_module="uninit_input";
-    mp_input_uninit();
+    mp_input_uninit(mpctx->input);
 #ifdef HAVE_MENU
     if (use_menu)
       menu_uninit();
@@ -931,7 +931,7 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
 static int libmpdemux_was_interrupted(struct MPContext *mpctx, int eof)
 {
   mp_cmd_t* cmd;
-  if((cmd = mp_input_get_cmd(0,0,0)) != NULL) {
+  if((cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
        switch(cmd->id) {
        case MP_CMD_QUIT:
 	 exit_player_with_rc(mpctx, MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
@@ -2349,10 +2349,10 @@ static void pause_loop(struct MPContext *mpctx)
     if (mpctx->audio_out && mpctx->sh_audio)
 	mpctx->audio_out->pause();	// pause audio, keep data if possible
 
-    while ( (cmd = mp_input_get_cmd(20, 1, 1)) == NULL
+    while ( (cmd = mp_input_get_cmd(mpctx->input, 20, 1, 1)) == NULL
             || cmd->id == MP_CMD_SET_MOUSE_POS) {
 	if (cmd) {
-	  cmd = mp_input_get_cmd(0,1,0);
+	  cmd = mp_input_get_cmd(mpctx->input, 0,1,0);
 	  mp_cmd_free(cmd);
 	  continue;
 	}
@@ -2373,7 +2373,7 @@ static void pause_loop(struct MPContext *mpctx)
 	usec_sleep(20000);
     }
     if (cmd && cmd->id == MP_CMD_PAUSE) {
-	cmd = mp_input_get_cmd(0,1,0);
+	cmd = mp_input_get_cmd(mpctx->input, 0,1,0);
 	mp_cmd_free(cmd);
     }
     mpctx->osd_function=OSD_PLAY;
@@ -2875,14 +2875,14 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
 // Init input system
 current_module = "init_input";
-mp_input_init(use_gui);
+mpctx->input = mp_input_init(use_gui);
  mp_input_add_key_fd(-1,0,mplayer_get_key,NULL, mpctx->key_fifo);
 if(slave_mode)
   mp_input_add_cmd_fd(0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
 else if(!noconsolecontrols)
     mp_input_add_key_fd(0, 1, read_keys, NULL, mpctx->key_fifo);
 // Set the libstream interrupt callback
-stream_set_interrupt_callback(mp_input_check_interrupt);
+stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
 
 #ifdef HAVE_MENU
  if(use_menu) {
@@ -2987,7 +2987,7 @@ if(!noconsolecontrols && !slave_mode){
 	usec_sleep(20000);
 	guiEventHandling();
 	guiGetEvent( guiReDraw,NULL );
-	if ( (cmd = mp_input_get_cmd(0,0,0)) != NULL) {
+	if ( (cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
 	  guiGetEvent(guiIEvent, (char *)cmd->id);
 	  mp_cmd_free(cmd);
 	}
@@ -3020,7 +3020,7 @@ if(!noconsolecontrols && !slave_mode){
 while (player_idle_mode && !mpctx->filename) {
     play_tree_t * entry = NULL;
     mp_cmd_t * cmd;
-    while (!(cmd = mp_input_get_cmd(0,1,0))) { // wait for command
+    while (!(cmd = mp_input_get_cmd(mpctx->input, 0,1,0))) { // wait for command
         if (mpctx->video_out)
 	    vo_check_events(mpctx->video_out);
         usec_sleep(20000);
@@ -3873,7 +3873,7 @@ if(step_sec>0) {
 {
   mp_cmd_t* cmd;
   int brk_cmd = 0;
-  while( !brk_cmd && (cmd = mp_input_get_cmd(0,0,0)) != NULL) {
+  while( !brk_cmd && (cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
       brk_cmd = run_command(mpctx, cmd);
       mp_cmd_free(cmd);
       if (brk_cmd == 2)

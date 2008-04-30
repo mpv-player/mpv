@@ -300,7 +300,9 @@ stream_t* open_stream_full(char* filename,int mode, struct MPOpts *options, int*
 stream_t* open_output_stream(char* filename,struct MPOpts *options);
 /// Set the callback to be used by libstream to check for user
 /// interruption during long blocking operations (cache filling, etc).
-void stream_set_interrupt_callback(int (*cb)(int));
+struct input_ctx;
+void stream_set_interrupt_callback(int (*cb)(struct input_ctx*, int),
+                                   struct input_ctx *ctx);
 /// Call the interrupt checking callback if there is one.
 int stream_check_interrupt(int time);
 
