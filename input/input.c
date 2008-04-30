@@ -553,6 +553,11 @@ struct input_ctx {
     mp_cmd_t *ar_cmd;
     unsigned int last_ar;
 
+    // these are the keys currently down
+    int key_down[MP_MAX_KEY_DOWN];
+    unsigned int num_key_down;
+    unsigned int last_key_down;
+
     // List of command binding sections
     mp_cmd_bind_section_t *cmd_bind_sections;
     // Name of currently used command section
@@ -576,10 +581,6 @@ static mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
 static unsigned int num_cmd_fd = 0;
 static mp_cmd_t* cmd_queue[CMD_QUEUE_SIZE];
 static unsigned int cmd_queue_length = 0,cmd_queue_start = 0, cmd_queue_end = 0;
-
-// this is the key currently down
-static int key_down[MP_MAX_KEY_DOWN];
-static unsigned int num_key_down = 0, last_key_down = 0;
 
 static unsigned int ar_delay = 100, ar_rate = 8;
 
@@ -1055,11 +1056,12 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys,
   if (strcmp(cmd, "ignore") == 0) return NULL;
   ret =  mp_input_parse_cmd(cmd);
   if(!ret) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrInvalidCommandForKey, get_key_name(key_down[0]));
-    if(  num_key_down > 1) {
+    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrInvalidCommandForKey,
+           get_key_name(ictx->key_down[0]));
+    if (ictx->num_key_down > 1) {
       unsigned int s;
-      for(s=1; s < num_key_down; s++)
-	mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(key_down[s]));
+      for(s=1; s < ictx->num_key_down; s++)
+	mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(ictx->key_down[s]));
     }
     mp_msg(MSGT_INPUT,MSGL_ERR," : %s             \n",cmd);
   }
@@ -1081,49 +1083,50 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code, int paused)
   }
 
     if(code & MP_KEY_DOWN) {
-      if(num_key_down > MP_MAX_KEY_DOWN) {
+      if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
 	return NULL;
       }
       code &= ~MP_KEY_DOWN;
       // Check if we don't already have this key as pushed
-      for(j = 0; j < num_key_down; j++) { 
-	if(key_down[j] == code)
+      for (j = 0; j < ictx->num_key_down; j++) {
+	if (ictx->key_down[j] == code)
 	  break;
       }
-      if(j != num_key_down)
+      if (j != ictx->num_key_down)
 	return NULL;
-      key_down[num_key_down] = code;
-      num_key_down++;
-      last_key_down = GetTimer();
+      ictx->key_down[ictx->num_key_down] = code;
+      ictx->num_key_down++;
+      ictx->last_key_down = GetTimer();
       ictx->ar_state = 0;
       return NULL;
     }
     // key released
     // Check if the key is in the down key, driver which can't send push event
     // send only release event
-    for(j = 0; j < num_key_down; j++) { 
-      if(key_down[j] == code)
+    for (j = 0; j < ictx->num_key_down; j++) {
+      if (ictx->key_down[j] == code)
 	break;
     }
-    if(j == num_key_down) { // key was not in the down keys : add it
-      if(num_key_down > MP_MAX_KEY_DOWN) {
+    if (j == ictx->num_key_down) { // key was not in the down keys : add it
+      if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
 	return NULL;
       }
-      key_down[num_key_down] = code;
-      num_key_down++;
-      last_key_down = 1;
+      ictx->key_down[ictx->num_key_down] = code;
+      ictx->num_key_down++;
+      ictx->last_key_down = 1;
     } 
     // We ignore key from last combination
-    ret = last_key_down ?
-        get_cmd_from_keys(ictx, num_key_down, key_down, paused)
+    ret = ictx->last_key_down ?
+        get_cmd_from_keys(ictx, ictx->num_key_down, ictx->key_down, paused)
         : NULL;
     // Remove the key
-    if(j+1 < num_key_down)
-      memmove(&key_down[j],&key_down[j+1],(num_key_down-(j+1))*sizeof(int));
-    num_key_down--;
-    last_key_down = 0;
+    if (j+1 < ictx->num_key_down)
+      memmove(&ictx->key_down[j], &ictx->key_down[j+1],
+              (ictx->num_key_down-(j+1))*sizeof(int));
+    ictx->num_key_down--;
+    ictx->last_key_down = 0;
     ictx->ar_state = -1;
     if (ictx->ar_cmd) {
       mp_cmd_free(ictx->ar_cmd);
@@ -1135,13 +1138,13 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code, int paused)
 static mp_cmd_t *check_autorepeat(struct input_ctx *ictx, int paused)
 {
   // No input : autorepeat ?
-  if (ar_rate > 0 && ictx->ar_state >=0 && num_key_down > 0
-      && !(key_down[num_key_down-1] & MP_NO_REPEAT_KEY)) {
+  if (ar_rate > 0 && ictx->ar_state >=0 && ictx->num_key_down > 0
+      && !(ictx->key_down[ictx->num_key_down-1] & MP_NO_REPEAT_KEY)) {
     unsigned int t = GetTimer();
     // First time : wait delay
-    if (ictx->ar_state == 0 && (t - last_key_down) >= ar_delay*1000) {
-        ictx->ar_cmd = get_cmd_from_keys(ictx, num_key_down,
-                                         key_down, paused);      
+    if (ictx->ar_state == 0 && (t - ictx->last_key_down) >= ar_delay*1000) {
+        ictx->ar_cmd = get_cmd_from_keys(ictx, ictx->num_key_down,
+                                         ictx->key_down, paused);
       if (!ictx->ar_cmd) {
 	ictx->ar_state = -1;
 	return NULL;
