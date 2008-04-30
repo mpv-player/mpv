@@ -225,12 +225,12 @@ mp_input_rm_cmd_fd(int fd);
 
 // The args are the same as for the key's drivers. If you don't use any valid fd you MUST
 // give a read_func.
-int
-mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t close_func, void *ctx);
+int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
+                        mp_key_func_t read_func, mp_close_func_t close_func,
+                        void *ctx);
 
 // As for the cmd one you usually don't need this function.
-void
-mp_input_rm_key_fd(int fd);
+void mp_input_rm_key_fd(struct input_ctx *ictx, int fd);
 
 /// Get input key from its name.
 int mp_input_get_key_from_name(const char *name);

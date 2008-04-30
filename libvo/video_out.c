@@ -294,11 +294,18 @@ void list_video_out(void)
 }
 
 struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
-                               struct mp_fifo *key_fifo)
+                               struct mp_fifo *key_fifo,
+                               struct input_ctx *input_ctx)
 {
     char **vo_list = opts->video_driver_list;
     int i;
     struct vo *vo = talloc_ptrtype(NULL, vo);
+    struct vo initial_values = {
+        .opts = opts,
+        .x11 = x11,
+        .key_fifo = key_fifo,
+        .input_ctx = input_ctx,
+    };
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0])
         while (vo_list[0][0]) {
@@ -317,8 +324,7 @@ struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
                 const vo_info_t *info = video_driver->info;
                 if (!strcmp(info->short_name, name)) {
                     // name matches, try it
-                    *vo = (struct vo){.opts = opts, .x11 = x11,
-                                      .key_fifo = key_fifo};
+                    *vo = initial_values;
                     vo->driver = video_driver;
                     if (!vo_preinit(vo, vo_subdevice)) {
                         free(name);
@@ -336,7 +342,7 @@ struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
     vo_subdevice = NULL;
     for (i = 0; video_out_drivers[i]; i++) {
         const struct vo_driver *video_driver = video_out_drivers[i];
-        *vo = (struct vo){.opts = opts, .x11 = x11, key_fifo = key_fifo};
+        *vo = initial_values;
         vo->driver = video_driver;
         if (!vo_preinit(vo, vo_subdevice))
             return vo; // success!

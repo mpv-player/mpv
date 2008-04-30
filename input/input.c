@@ -565,6 +565,9 @@ struct input_ctx {
     // The command binds of current section
     mp_cmd_bind_t *cmd_binds;
     mp_cmd_bind_t *cmd_binds_default;
+
+    mp_input_fd_t key_fds[MP_MAX_KEY_FD];
+    unsigned int num_key_fd;
 };
 
 
@@ -575,8 +578,6 @@ int (*mp_input_key_cb)(int code) = NULL;
 
 int async_quit_request;
 
-static mp_input_fd_t key_fds[MP_MAX_KEY_FD];
-static unsigned int num_key_fd = 0;
 static mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
 static unsigned int num_cmd_fd = 0;
 static mp_cmd_t* cmd_queue[CMD_QUEUE_SIZE];
@@ -669,29 +670,31 @@ mp_input_rm_cmd_fd(int fd) {
   num_cmd_fd--;
 }
 
-void
-mp_input_rm_key_fd(int fd) {
+void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
+{
+    struct mp_input_fd *key_fds = ictx->key_fds;
   unsigned int i;
 
-  for(i = 0; i < num_key_fd; i++) {
+  for (i = 0; i < ictx->num_key_fd; i++) {
     if(key_fds[i].fd == fd)
       break;
   }
-  if(i == num_key_fd)
+  if (i == ictx->num_key_fd)
     return;
   if(key_fds[i].close_func)
     key_fds[i].close_func(key_fds[i].fd);
 
-  if(i + 1 < num_key_fd)
-    memmove(&key_fds[i],&key_fds[i+1],(num_key_fd - i - 1)*sizeof(mp_input_fd_t));
-  num_key_fd--;
+  if(i + 1 < ictx->num_key_fd)
+      memmove(&key_fds[i], &key_fds[i+1],
+              (ictx->num_key_fd - i - 1) * sizeof(mp_input_fd_t));
+  ictx->num_key_fd--;
 }
 
-int
-mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func,
-                    mp_close_func_t close_func, void *ctx)
+int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
+                        mp_key_func_t read_func, mp_close_func_t close_func,
+                        void *ctx)
 {
-  if(num_key_fd == MP_MAX_KEY_FD) {
+  if (ictx->num_key_fd == MP_MAX_KEY_FD) {
     mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
     return 0;
   }
@@ -700,14 +703,14 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func,
     return 0;
   }
 
-  key_fds[num_key_fd] = (struct mp_input_fd){
+  ictx->key_fds[ictx->num_key_fd] = (struct mp_input_fd){
       .fd = fd,
       .read_func.key = read_func,
       .close_func = close_func,
       .no_select = !select,
       .ctx = ctx,
   };
-  num_key_fd++;
+  ictx->num_key_fd++;
 
   return 1;
 }
@@ -1165,9 +1168,10 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 {
     int i;
     int got_cmd = 0;
-    for (i = 0; i < num_key_fd; i++)
+    struct mp_input_fd *key_fds = ictx->key_fds;
+    for (i = 0; i < ictx->num_key_fd; i++)
 	if (key_fds[i].dead) {
-	    mp_input_rm_key_fd(key_fds[i].fd);
+	    mp_input_rm_key_fd(ictx, key_fds[i].fd);
 	    i--;
 	}
     for (i = 0; i < num_cmd_fd; i++)
@@ -1182,7 +1186,7 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
     FD_ZERO(&fds);
     if (!got_cmd) {
 	int max_fd = 0, num_fd = 0;
-	for (i = 0; i < num_key_fd; i++) {
+	for (i = 0; i < ictx->num_key_fd; i++) {
 	    if (key_fds[i].no_select)
 		continue;
 	    if (key_fds[i].fd > max_fd)
@@ -1221,7 +1225,7 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 #endif
 
 
-    for (i = 0; i < num_key_fd; i++) {
+    for (i = 0; i < ictx->num_key_fd; i++) {
 #ifdef HAVE_POSIX_SELECT
 	if (!key_fds[i].no_select && !FD_ISSET(key_fds[i].fd, &fds))
 	    continue;
@@ -1720,7 +1724,8 @@ struct input_ctx *mp_input_init(int use_gui)
     if(fd < 0)
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitJoystick);
     else
-        mp_input_add_key_fd(fd,1,mp_input_joystick_read,(mp_close_func_t)close,NULL);
+        mp_input_add_key_fd(ictx, fd, 1, mp_input_joystick_read,
+                            (mp_close_func_t)close,NULL);
   }
 #endif
 
@@ -1745,7 +1750,8 @@ struct input_ctx *mp_input_init(int use_gui)
     if(mp_input_ar_init() < 0)
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
     else
-        mp_input_add_key_fd(-1,0,mp_input_ar_read,mp_input_ar_close, NULL);
+        mp_input_add_key_fd(ictx, -1, 0, mp_input_ar_read, mp_input_ar_close,
+                            NULL);
   }
 #endif
 
@@ -1771,9 +1777,9 @@ void mp_input_uninit(struct input_ctx *ictx)
 
   unsigned int i;
 
-  for(i=0; i < num_key_fd; i++) {
-    if(key_fds[i].close_func)
-      key_fds[i].close_func(key_fds[i].fd);
+  for (i=0; i < ictx->num_key_fd; i++) {
+      if (ictx->key_fds[i].close_func)
+          ictx->key_fds[i].close_func(ictx->key_fds[i].fd);
   }
 
   for(i=0; i < num_cmd_fd; i++) {

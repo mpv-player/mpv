@@ -2141,7 +2141,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     //shouldn't we set dvideo->id=-2 when we fail?
     //if((mpctx->video_out->preinit(vo_subdevice))!=0){
-    if(!(mpctx->video_out=init_best_video_out(opts, mpctx->x11_state, mpctx->key_fifo))){
+    if(!(mpctx->video_out=init_best_video_out(opts, mpctx->x11_state, mpctx->key_fifo, mpctx->input))){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorInitializingVODevice);
       goto err_out;
     }
@@ -2873,11 +2873,11 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 // Init input system
 current_module = "init_input";
 mpctx->input = mp_input_init(use_gui);
- mp_input_add_key_fd(-1,0,mplayer_get_key,NULL, mpctx->key_fifo);
+ mp_input_add_key_fd(mpctx->input, -1,0,mplayer_get_key,NULL, mpctx->key_fifo);
 if(slave_mode)
   mp_input_add_cmd_fd(0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);
 else if(!noconsolecontrols)
-    mp_input_add_key_fd(0, 1, read_keys, NULL, mpctx->key_fifo);
+    mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->key_fifo);
 // Set the libstream interrupt callback
 stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
 
