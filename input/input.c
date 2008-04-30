@@ -1770,6 +1770,9 @@ struct input_ctx *mp_input_init(int use_gui)
 
 void mp_input_uninit(struct input_ctx *ictx)
 {
+    if (!ictx)
+        return;
+
   unsigned int i;
   mp_cmd_bind_section_t* bind_section;
 

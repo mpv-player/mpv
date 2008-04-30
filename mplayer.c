@@ -644,16 +644,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
   }
 #endif
 
-  if(mask&INITIALIZED_INPUT){
-    mpctx->initialized_flags&=~INITIALIZED_INPUT;
-    current_module="uninit_input";
-    mp_input_uninit(mpctx->input);
-#ifdef HAVE_MENU
-    if (use_menu)
-      menu_uninit();
-#endif
-  }
-
   current_module=NULL;
 }
 
@@ -666,6 +656,13 @@ void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc){
   if ( !use_gui )
 #endif
   vo_uninit(mpctx->x11_state);	// Close the X11 connection (if any is open).
+#endif
+
+    current_module="uninit_input";
+    mp_input_uninit(mpctx->input);
+#ifdef HAVE_MENU
+    if (use_menu)
+      menu_uninit();
 #endif
 
 #ifdef HAVE_FREETYPE
@@ -2904,7 +2901,6 @@ stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
  }
 #endif
   
-mpctx->initialized_flags|=INITIALIZED_INPUT;
 current_module = NULL;
 
   /// Catch signals
@@ -3944,7 +3940,7 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->eof);
 if(mpctx->dvbin_reopen)
 {
   mpctx->eof = 0;
-  uninit_player(mpctx, INITIALIZED_ALL-(INITIALIZED_GUI|INITIALIZED_STREAM|INITIALIZED_INPUT|INITIALIZED_GETCH2|(opts->fixed_vo?INITIALIZED_VO:0)));
+  uninit_player(mpctx, INITIALIZED_ALL-(INITIALIZED_GUI|INITIALIZED_STREAM|INITIALIZED_GETCH2|(opts->fixed_vo?INITIALIZED_VO:0)));
   cache_uninit(mpctx->stream);
   mpctx->dvbin_reopen = 0;
   goto goto_enable_cache;
@@ -3982,7 +3978,7 @@ if(benchmark){
 }
 
 // time to uninit all, except global stuff:
-uninit_player(mpctx, INITIALIZED_ALL-(INITIALIZED_GUI+INITIALIZED_INPUT+(opts->fixed_vo?INITIALIZED_VO:0)));
+uninit_player(mpctx, INITIALIZED_ALL-(INITIALIZED_GUI+(opts->fixed_vo?INITIALIZED_VO:0)));
 
 if(mpctx->set_of_sub_size > 0) {
     current_module="sub_free";
