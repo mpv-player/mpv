@@ -26,6 +26,7 @@
 #include "m_option.h"
 #include "get_path.h"
 #include "talloc.h"
+#include "options.h"
 
 #include "joystick.h"
 
@@ -552,6 +553,9 @@ struct input_ctx {
     short ar_state;
     mp_cmd_t *ar_cmd;
     unsigned int last_ar;
+    // Autorepeat config
+    unsigned int ar_delay;
+    unsigned int ar_rate;
 
     // these are the keys currently down
     int key_down[MP_MAX_KEY_DOWN];
@@ -584,43 +588,31 @@ int (*mp_input_key_cb)(int code) = NULL;
 
 int async_quit_request;
 
-static unsigned int ar_delay = 100, ar_rate = 8;
-
-static int use_joystick = 1, use_lirc = 1, use_lircc = 1;
-static char* config_file = "input.conf";
-
-/* Apple Remote */
-static int use_ar = 1;
-
-static char* js_dev = NULL;
-
-static char* in_file = NULL;
-
 static int print_key_list(m_option_t* cfg);
 static int print_cmd_list(m_option_t* cfg);
 
 // Our command line options
 static const m_option_t input_conf[] = {
-  { "conf", &config_file, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
-  { "ar-delay", &ar_delay, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
-  { "ar-rate", &ar_rate, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
+    OPT_STRING("conf", input.config_file, CONF_GLOBAL),
+    OPT_INT("ar-delay",input.ar_delay, CONF_GLOBAL),
+    OPT_INT("ar-rate", input.ar_rate, CONF_GLOBAL),
   { "keylist", print_key_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
   { "cmdlist", print_cmd_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
-  { "js-dev", &js_dev, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
-  { "file", &in_file, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
+    OPT_STRING("js-dev", input.js_dev, CONF_GLOBAL),
+    OPT_STRING("file", input.in_file, CONF_GLOBAL),
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 static const m_option_t mp_input_opts[] = {
   { "input", &input_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-  { "nojoystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
-  { "joystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
-  { "nolirc", &use_lirc, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
-  { "lirc", &use_lirc, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
-  { "nolircc", &use_lircc, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
-  { "lircc", &use_lircc, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
-  { "noar", &use_ar, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
-  { "ar", &use_ar, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
+    OPT_FLAG_OFF("nojoystick", input.use_joystick,  CONF_GLOBAL),
+    OPT_FLAG_ON("joystick", input.use_joystick, CONF_GLOBAL),
+    OPT_FLAG_OFF("nolirc", input.use_lirc, CONF_GLOBAL),
+    OPT_FLAG_ON("lirc", input.use_lirc, CONF_GLOBAL),
+    OPT_FLAG_OFF("nolircc", input.use_lircc, CONF_GLOBAL),
+    OPT_FLAG_ON("lircc", input.use_lircc, CONF_GLOBAL),
+    OPT_FLAG_OFF("noar", input.use_ar, CONF_GLOBAL),
+    OPT_FLAG_ON("ar", input.use_ar, CONF_GLOBAL),
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1147,11 +1139,12 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code, int paused)
 static mp_cmd_t *check_autorepeat(struct input_ctx *ictx, int paused)
 {
   // No input : autorepeat ?
-  if (ar_rate > 0 && ictx->ar_state >=0 && ictx->num_key_down > 0
+  if (ictx->ar_rate > 0 && ictx->ar_state >=0 && ictx->num_key_down > 0
       && !(ictx->key_down[ictx->num_key_down-1] & MP_NO_REPEAT_KEY)) {
     unsigned int t = GetTimer();
     // First time : wait delay
-    if (ictx->ar_state == 0 && (t - ictx->last_key_down) >= ar_delay*1000) {
+    if (ictx->ar_state == 0
+        && (t - ictx->last_key_down) >= ictx->ar_delay*1000) {
         ictx->ar_cmd = get_cmd_from_keys(ictx, ictx->num_key_down,
                                          ictx->key_down, paused);
       if (!ictx->ar_cmd) {
@@ -1162,7 +1155,8 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx, int paused)
       ictx->last_ar = t;
       return mp_cmd_clone(ictx->ar_cmd);
       // Then send rate / sec event
-    } else if (ictx->ar_state == 1 && (t -ictx->last_ar) >= 1000000/ar_rate) {
+    } else if (ictx->ar_state == 1
+               && (t -ictx->last_ar) >= 1000000 / ictx->ar_rate) {
       ictx->last_ar = t;
       return mp_cmd_clone(ictx->ar_cmd);
     }
@@ -1673,11 +1667,13 @@ char *mp_input_get_section(struct input_ctx *ictx)
     return ictx->section;
 }
 
-struct input_ctx *mp_input_init(int use_gui)
+struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
 {
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){
         .ar_state = -1,
+        .ar_delay = input_conf->ar_delay,
+        .ar_rate = input_conf->ar_rate,
     };
 
   char* file;
@@ -1687,6 +1683,7 @@ struct input_ctx *mp_input_init(int use_gui)
       add_binds(ictx, gui_def_cmd_binds);
 #endif
   
+  char *config_file = input_conf->config_file;
   file = config_file[0] != '/' ? get_path(config_file) : config_file;
   if(!file)
     return ictx;
@@ -1711,8 +1708,8 @@ struct input_ctx *mp_input_init(int use_gui)
   }
 
 #ifdef HAVE_JOYSTICK
-  if(use_joystick) {
-    int fd = mp_input_joystick_init(js_dev);
+  if (input_conf->use_joystick) {
+    int fd = mp_input_joystick_init(input_conf->js_dev);
     if(fd < 0)
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitJoystick);
     else
@@ -1722,7 +1719,7 @@ struct input_ctx *mp_input_init(int use_gui)
 #endif
 
 #ifdef HAVE_LIRC
-  if(use_lirc) {
+  if (input_conf->use_lirc) {
     int fd = mp_input_lirc_init();
     if(fd > 0)
         mp_input_add_cmd_fd(ictx, fd, 0, mp_input_lirc_read,
@@ -1731,7 +1728,7 @@ struct input_ctx *mp_input_init(int use_gui)
 #endif
 
 #ifdef HAVE_LIRCC
-  if(use_lircc) {
+  if (input_conf->use_lircc) {
     int fd = lircc_init("mplayer", NULL);
     if(fd >= 0)
         mp_input_add_cmd_fd(ictx, fd, 1, NULL, (mp_close_func_t)lircc_cleanup);
@@ -1739,7 +1736,7 @@ struct input_ctx *mp_input_init(int use_gui)
 #endif
 
 #ifdef HAVE_APPLE_REMOTE
-  if(use_ar) {
+  if (input_conf->use_ar) {
     if(mp_input_ar_init() < 0)
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
     else
@@ -1748,17 +1745,19 @@ struct input_ctx *mp_input_init(int use_gui)
   }
 #endif
 
-  if(in_file) {
+  if (input_conf->in_file) {
     struct stat st;
-    if(stat(in_file,&st))
-      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantStatFile,in_file,strerror(errno));
+    if (stat(input_conf->in_file, &st))
+      mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrCantStatFile, input_conf->in_file, strerror(errno));
     else {
-      int in_file_fd = open(in_file,S_ISFIFO(st.st_mode) ? O_RDWR : O_RDONLY);
+      int in_file_fd = open(input_conf->in_file,
+                            S_ISFIFO(st.st_mode) ? O_RDWR : O_RDONLY);
       if(in_file_fd >= 0)
           mp_input_add_cmd_fd(ictx, in_file_fd, 1, NULL,
                               (mp_close_func_t)close);
       else
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantOpenFile,in_file,strerror(errno));
+	mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrCantOpenFile,
+               input_conf->in_file, strerror(errno));
     }
   }
   return ictx;

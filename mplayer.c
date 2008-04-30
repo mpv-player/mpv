@@ -2872,7 +2872,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
 // Init input system
 current_module = "init_input";
-mpctx->input = mp_input_init(use_gui);
+ mpctx->input = mp_input_init(&opts->input, use_gui);
  mp_input_add_key_fd(mpctx->input, -1,0,mplayer_get_key,NULL, mpctx->key_fifo);
 if(slave_mode)
     mp_input_add_cmd_fd(mpctx->input, 0,USE_SELECT,MP_INPUT_SLAVE_CMD_FUNC,NULL);

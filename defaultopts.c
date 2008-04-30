@@ -30,6 +30,15 @@ void set_default_mplayer_options(struct MPOpts *opts)
             .error_concealment = 3,
             .threads = 1,
         },
+        .input = (struct input_conf){
+             .config_file = "input.conf",
+             .ar_delay = 100,
+             .ar_rate = 8,
+             .use_joystick = 1,
+             .use_lirc = 1,
+             .use_lircc = 1,
+             .use_ar = 1,
+         }
     };
 }
 

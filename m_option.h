@@ -503,6 +503,7 @@ m_option_free(const m_option_t* opt,void* dst) {
 #define OPT_FLAG_OFF(optname, varname, flags) {optname, NULL, &m_option_type_flag, flags, 1, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_FLAG_CONSTANTS(optname, varname, flags, offvalue, value) {optname, NULL, &m_option_type_flag, flags, offvalue, value, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_STRINGLIST(optname, varname, flags) {optname, NULL, &m_option_type_string_list, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
+#define OPT_INT(optname, varname, flags) {optname, NULL, &m_option_type_int, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_INTRANGE(optname, varname, flags, min, max) {optname, NULL, &m_option_type_int, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_FLOATRANGE(optname, varname, flags, min, max) {optname, NULL, &m_option_type_float, (flags)|CONF_RANGE, min, max, NULL, 1, offsetof(struct MPOpts, varname)}
 #define OPT_STRING(optname, varname, flags) {optname, NULL, &m_option_type_string, flags, 0, 0, NULL, 1, offsetof(struct MPOpts, varname)}

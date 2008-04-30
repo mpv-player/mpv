@@ -55,6 +55,17 @@ typedef struct MPOpts {
         int threads;
         int bitexact;
     } lavc_param;
+    struct input_conf {
+        char *config_file;
+        unsigned int ar_delay;
+        unsigned int ar_rate;
+        char *js_dev;
+        char *in_file;
+        int use_joystick;
+        int use_lirc;
+        int use_lircc;
+        int use_ar; // apple remote
+    } input;
 } MPOpts;
 
 #endif
