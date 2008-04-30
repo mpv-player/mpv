@@ -631,6 +631,14 @@ ALL_PRG      += $(ALL_PRG-yes)
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
 
+SRCS_COMMON    += $(SRCS_COMMON-yes) $(SRCS_COMMON-yes-yes) $(SRCS_COMMON-yes-yes-yes)
+SRCS_MENCODER  += $(SRCS_MENCODER-yes)
+SRCS_MPLAYER   += $(SRCS_MPLAYER-yes)
+
+OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)) )
+OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
+OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
+
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
 INSTALL_TARGETS-$(GUI)      += install-gui
@@ -655,6 +663,17 @@ DIRS =  . \
         libaf \
         libao2 \
         libass \
+        ffmpeg/libavcodec \
+        ffmpeg/libavcodec/alpha \
+        ffmpeg/libavcodec/armv4l \
+        ffmpeg/libavcodec/bfin \
+        ffmpeg/libavcodec/i386 \
+        ffmpeg/libavcodec/mlib \
+        ffmpeg/libavcodec/ppc \
+        ffmpeg/libavcodec/sh4 \
+        ffmpeg/libavcodec/sparc \
+        ffmpeg/libavformat \
+        ffmpeg/libavutil \
         libdvdcss \
         libfaad2 \
         libmenu \
@@ -662,6 +681,8 @@ DIRS =  . \
         libmpcodecs/native \
         libmpdemux \
         libmpeg2 \
+        ffmpeg/libpostproc \
+        libswscale \
         libvo \
         loader \
         loader/dshow \
@@ -681,12 +702,47 @@ all: $(ALL_PRG)
 recurse:
 	for part in $(PARTS); do $(MAKE) -C $$part; done
 
-include mpcommon.mak
+%.d: %.c
+	$(MPDEPEND_CMD) > $@
+
+%.d: %.cpp
+	$(MPDEPEND_CMD_CXX) > $@
+
+%.d: %.m
+	$(MPDEPEND_CMD) > $@
+
+%.ho: %.h
+	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
+
+%.o: %.m
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
 $(DEPS) recurse: help_mp.h version.h codecs.conf.h
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
+
+# rebuild at every config.h/config.mak change:
+version.h: config.h config.mak
+	./version.sh `$(CC) -dumpversion`
+
+help_mp.h: help/help_mp-en.h $(HELP_FILE)
+	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
+	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
+	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
+	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
+ifeq ($(CHARSET),)
+	@echo '#include "$(HELP_FILE)"' >> help_mp.h
+else
+	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
+endif
+	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
+
+ifneq ($(HELP_FILE),help/help_mp-en.h)
+	@echo "Adding untranslated messages to help_mp.h"
+	@echo '// untranslated messages from the English master file:' >> help_mp.h
+	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
+endif
 
 define RECURSIVE_RULE
 $(part)/$(notdir $(part)).a:
@@ -708,8 +764,6 @@ codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
-
-codec-cfg.o: codecs.conf.h
 
 codecs2html$(EXESUF): mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
@@ -814,16 +868,15 @@ uninstall:
 	done
 
 clean: toolsclean
-	for part in $(PARTS); do $(MAKE) -C $$part clean; done
-	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.ho /*~, $(addsuffix $(suffix),$(dir))))
-	rm -f mplayer$(EXESUF) mencoder$(EXESUF) codec-cfg$(EXESUF) \
-	  codecs2html$(EXESUF) codec-cfg-test$(EXESUF) cpuinfo$(EXESUF) \
-	  codecs.conf.h help_mp.h version.h TAGS tags $(VIDIX_PCI_FILES)
+	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
+	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
 distclean: clean doxygen_clean
-	for part in $(PARTS); do $(MAKE) -C $$part distclean; done
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
-	rm -f configure.log config.mak config.h
+	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
+           version.h $(VIDIX_PCI_FILES) \
+           codec-cfg$(EXESUF) codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
+           cpuinfo$(EXESUF) TAGS tags
 
 strip:
 	strip -s $(ALL_PRG)
@@ -834,39 +887,20 @@ TAGS:
 tags:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs ctags -a
 
+ALLHEADERS = $(wildcard *.h)
+checkheaders: $(ALLHEADERS:.h=.ho)
+
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
 
-# rebuild at every config.h/config.mak/Makefile change:
-version.h: config.h config.mak Makefile
-	./version.sh `$(CC) -dumpversion`
-
 doxygen:
 	doxygen DOCS/tech/Doxyfile
 
 doxygen_clean:
 	-rm -rf DOCS/tech/doxygen
-
-help_mp.h: help/help_mp-en.h $(HELP_FILE)
-	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
-	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
-	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
-	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
-ifeq ($(CHARSET),)
-	@echo '#include "$(HELP_FILE)"' >> help_mp.h
-else
-	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
-endif
-	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
-
-ifneq ($(HELP_FILE),help/help_mp-en.h)
-	@echo "Adding untranslated messages to help_mp.h"
-	@echo '// untranslated messages from the English master file:' >> help_mp.h
-	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
-endif
 
 
 TOOLS = TOOLS/alaw-gen$(EXESUF) \
@@ -891,7 +925,7 @@ ALLTOOLS = $(TOOLS) \
 tools: $(TOOLS)
 alltools: $(ALLTOOLS)
 
-TOOLS_COMMON_LIBS = mp_msg.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
+TOOLS_COMMON_LIBS = mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
               -ltermcap -lm
 
 TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
@@ -940,3 +974,4 @@ toolsclean:
 -include $(DEPS)
 
 .PHONY: all doxygen *install* recurse strip *tools
+.PHONY: checkheaders *clean dep depend
