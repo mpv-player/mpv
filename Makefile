@@ -582,8 +582,6 @@ SRCS_MPLAYER-$(VIDIX_S3)                += vidix/s3_vid.c
 SRCS_MPLAYER-$(VIDIX_SIS)               += vidix/sis_vid.c vidix/sis_bridge.c
 SRCS_MPLAYER-$(VIDIX_UNICHROME)         += vidix/unichrome_vid.c
 
-OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
-
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
                 parser-mecmd.c \
@@ -611,30 +609,29 @@ SRCS_MENCODER-$(WIN32DLL)         += libmpcodecs/ve_vfw.c
 SRCS_MENCODER-$(X264)             += libmpcodecs/ve_x264.c
 SRCS_MENCODER-$(XVID4)            += libmpcodecs/ve_xvid4.c
 
-COMMON_LIBS = libswscale/libswscale.a \
+SRCS_COMMON   += $(SRCS_COMMON-yes) $(SRCS_COMMON-yes-yes) $(SRCS_COMMON-yes-yes-yes)
+SRCS_MENCODER += $(SRCS_MENCODER-yes)
+SRCS_MPLAYER  += $(SRCS_MPLAYER-yes)
 
 COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
 COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
 COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
 COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
+COMMON_LIBS  = libswscale/libswscale.a
+COMMON_LIBS += $(COMMON_LIBS-yes)
 
-ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
-ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
-
-COMMON_LIBS  += $(COMMON_LIBS-yes)
-OBJS_MPLAYER += $(OBJS_MPLAYER-yes)
-ALL_PRG      += $(ALL_PRG-yes)
+OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)))
+OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)))
+OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)))
+OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
+OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
 
-SRCS_COMMON    += $(SRCS_COMMON-yes) $(SRCS_COMMON-yes-yes) $(SRCS_COMMON-yes-yes-yes)
-SRCS_MENCODER  += $(SRCS_MENCODER-yes)
-SRCS_MPLAYER   += $(SRCS_MPLAYER-yes)
-
-OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)) )
-OBJS_MENCODER  += $(addsuffix .o, $(basename $(SRCS_MENCODER)) )
-OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)) )
+ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
+ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
+ALL_PRG             += $(ALL_PRG-yes)
 
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
