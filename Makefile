@@ -694,7 +694,7 @@ DIRS =  . \
         TOOLS \
         vidix \
 
-all: $(ALL_PRG)
+all: recurse $(ALL_PRG)
 
 recurse:
 	for part in $(PARTS); do $(MAKE) -C $$part; done
@@ -753,8 +753,6 @@ $(part)/$(part).a:
 endef
 
 $(foreach part,$(PARTS),$(eval $(RECURSIVE_RULE)))
-
-$(OBJS): recurse
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
