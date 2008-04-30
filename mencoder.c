@@ -219,11 +219,6 @@ void vo_draw_osd(struct vo *vo) { abort(); }
 void vo_flip_page(struct vo *vo) { abort(); }
 void vo_check_events(struct vo *vo) { abort(); }
 
-// Needed by libmpdemux.
-int mp_input_check_interrupt(int time) {
-  usec_sleep(time);
-  return 0;
-}
 // Needed by getch2
 struct mp_fifo;
 void mplayer_put_key(struct mp_fifo *fifo, int code)
