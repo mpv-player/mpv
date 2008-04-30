@@ -811,6 +811,12 @@ loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
 mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
 mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
 
+TESTS = liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
+        loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF) \
+        mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF)
+
+tests: $(TESTS)
+
 install: install-dirs $(INSTALL_TARGETS)
 
 install-dirs:
@@ -874,7 +880,7 @@ clean: toolsclean
 distclean: clean doxygen_clean
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
-           version.h $(VIDIX_PCI_FILES) \
+           version.h $(VIDIX_PCI_FILES) $(TESTS) \
            codec-cfg$(EXESUF) codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
            cpuinfo$(EXESUF) TAGS tags
 
@@ -975,4 +981,4 @@ toolsclean:
 -include $(DEPS)
 
 .PHONY: all doxygen *install* recurse strip *tools
-.PHONY: checkheaders *clean dep depend
+.PHONY: checkheaders *clean dep depend tests
