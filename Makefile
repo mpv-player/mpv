@@ -794,18 +794,20 @@ VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
 
 $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
+TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
+
 liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
-libvo/aspecttest$(EXESUF): libvo/aspecttest.c libvo/aspect.o libvo/geometry.o mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
+libvo/aspecttest$(EXESUF): libvo/aspecttest.c libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
 
-LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/mmap_anon.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
+LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o osdep/mmap_anon.o cpudetect.o $(TEST_OBJS)
 
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
 loader/qtx/list$(EXESUF): loader/qtx/list.c $(LOADER_TEST_OBJS)
 loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
 
-mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
-mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) -ltermcap -lm
+mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
+mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 
 TESTS = liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
         loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF) \
@@ -927,19 +929,16 @@ ALLTOOLS = $(TOOLS) \
 tools: $(TOOLS)
 alltools: $(ALLTOOLS)
 
-TOOLS_COMMON_LIBS = mp_msg-mencoder.o mp_fifo.o osdep/$(TIMER) osdep/$(GETCH) \
-              -ltermcap -lm
-
 TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
 
 TOOLS/subrip$(EXESUF): TOOLS/subrip.c vobsub.o spudec.o unrar_exec.o \
   libvo/aclib.o libswscale/libswscale.a libavutil/libavutil.a \
-  $(TOOLS_COMMON_LIBS)
+  $(TEST_OBJS)
 
 TOOLS/vfw2menc$(EXESUF): TOOLS/vfw2menc.c -lwinmm -lole32
 
 #FIXME: Linking is broken, help welcome.
-TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c $(TOOLS_COMMON_LIBS)
+TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c $(TEST_OBJS)
 
 fastmemcpybench: TOOLS/fastmemcpybench.c
 	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
@@ -966,7 +965,7 @@ fastmemcpybench realcodecs: CFLAGS += -g
 NETSTREAM_DEPS = libavutil/libavutil.a \
                  m_option.o \
                  m_struct.o \
-                 $(TOOLS_COMMON_LIBS)
+                 $(TEST_OBJS)
 
 TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^
