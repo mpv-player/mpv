@@ -1017,14 +1017,14 @@ static mp_cmd_bind_section_t *get_bind_section(struct input_ctx *ictx,
     bind_section=bind_section->next;
   }
   if(bind_section) {
-    bind_section->next=malloc(sizeof(mp_cmd_bind_section_t));
+      bind_section->next = talloc_ptrtype(ictx, bind_section->next);
     bind_section=bind_section->next;
   } else {
-    ictx->cmd_bind_sections = malloc(sizeof(mp_cmd_bind_section_t));
+      ictx->cmd_bind_sections = talloc_ptrtype(ictx, ictx->cmd_bind_sections);
     bind_section = ictx->cmd_bind_sections;
   }
   bind_section->cmd_binds=NULL;
-  bind_section->section=strdup(section);
+  bind_section->section = talloc_strdup(bind_section, section);
   bind_section->next=NULL;
   return bind_section;
 }
@@ -1480,13 +1480,15 @@ static void bind_keys(struct input_ctx *ictx,
   }
   
   if(!bind) {
-    bind_section->cmd_binds = realloc(bind_section->cmd_binds,(i+2)*sizeof(mp_cmd_bind_t));
+      bind_section->cmd_binds = talloc_realloc(bind_section,
+                                               bind_section->cmd_binds,
+                                               mp_cmd_bind_t, i + 2);
     memset(&bind_section->cmd_binds[i],0,2*sizeof(mp_cmd_bind_t));
     bind = &bind_section->cmd_binds[i];
   }
   if(bind->cmd)
-    free(bind->cmd);
-  bind->cmd = strdup(cmd);
+      talloc_free(bind->cmd);
+  bind->cmd = talloc_strdup(bind_section->cmd_binds, cmd);
   memcpy(bind->input,keys,(MP_MAX_KEY_DOWN+1)*sizeof(int));
 }
 
@@ -1497,20 +1499,6 @@ static void add_binds(struct input_ctx *ictx, const mp_cmd_bind_t* list)
       bind_keys(ictx, list[i].input,list[i].cmd);
 }
 
-static void free_binds(mp_cmd_bind_t* binds)
-{
-  int i;
-
-  if(!binds)
-    return;
-
-  for(i = 0; binds[i].cmd != NULL; i++)
-    free(binds[i].cmd);
-
-  free(binds);
-
-}
-  
 static int parse_config(struct input_ctx *ictx, char *file)
 {
   int fd;
@@ -1669,11 +1657,11 @@ void mp_input_set_section(struct input_ctx *ictx, char *name)
     ictx->cmd_binds = NULL;
     ictx->cmd_binds_default = NULL;
     if (ictx->section)
-        free(ictx->section);
+        talloc_free(ictx->section);
     if (name)
-        ictx->section = strdup(name);
+        ictx->section = talloc_strdup(ictx, name);
     else
-        ictx->section = strdup("default");
+        ictx->section = talloc_strdup(ictx, "default");
     if ((bind_section = get_bind_section(ictx, ictx->section)))
         ictx->cmd_binds = bind_section->cmd_binds;
     if (strcmp(ictx->section, "default") == 0)
@@ -1780,7 +1768,6 @@ void mp_input_uninit(struct input_ctx *ictx)
         return;
 
   unsigned int i;
-  mp_cmd_bind_section_t* bind_section;
 
   for(i=0; i < num_key_fd; i++) {
     if(key_fds[i].close_func)
@@ -1790,13 +1777,6 @@ void mp_input_uninit(struct input_ctx *ictx)
   for(i=0; i < num_cmd_fd; i++) {
     if(cmd_fds[i].close_func)
       cmd_fds[i].close_func(cmd_fds[i].fd);
-  }
-  while (ictx->cmd_bind_sections) {
-    free_binds(ictx->cmd_bind_sections->cmd_binds);
-    free(ictx->cmd_bind_sections->section);
-    bind_section=ictx->cmd_bind_sections->next;
-    free(ictx->cmd_bind_sections);
-    ictx->cmd_bind_sections=bind_section;
   }
   talloc_free(ictx);
 }
