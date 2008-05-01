@@ -81,6 +81,26 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 		goto error;
 	
 	FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)family);
+
+	// In SSA/ASS fonts are sometimes referenced by their "full name",
+	// which is usually a concatenation of family name and font
+	// style (ex. Ottawa Bold). Full name is available from
+	// FontConfig pattern element FC_FULLNAME, but it is never
+	// used for font matching.
+	// Therefore, I'm removing words from the end of the name one
+	// by one, and adding shortened names to the pattern. It seems
+	// that the first value (full name in this case) has
+	// precedence in matching.
+	// An alternative approach could be to reimplement FcFontSort
+	// using FC_FULLNAME instead of FC_FAMILY.
+	if (strchr(family, ' ')) {
+		char *p, *s = strdup(family);
+		while (p = strrchr(s, ' ')) {
+			*p = '\0';
+			FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
+		}
+		free(s);
+	}
 	FcPatternAddBool(pat, FC_OUTLINE, FcTrue);
 	FcPatternAddInteger(pat, FC_SLANT, italic);
 	FcPatternAddInteger(pat, FC_WEIGHT, bold);
