@@ -10,9 +10,12 @@ typedef struct MPOpts {
     int screen_size_y;
     int vo_screenwidth;
     int vo_screenheight;
+    float force_monitor_aspect;
+    float monitor_pixel_aspect;
     int vidmode;
     int fullscreen;
     int vo_dbpp;
+    float vo_panscanrange;
 
     // ranges -100 - 100, 1000 if the vo default should be used
     int vo_gamma_gamma;

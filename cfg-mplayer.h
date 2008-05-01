@@ -16,7 +16,6 @@ extern char *dfb_params;
 
 extern char *lirc_configfile;
 
-extern float vo_panscanrange;
 /* only used at startup (setting these values from configfile) */
 extern char *vo_geometry;
 
@@ -43,10 +42,6 @@ extern m_option_t dxr2_opts[];
 extern char * skinName;
 extern int guiWinID;
 
-
-/* from libvo/aspect.c */
-extern float force_monitor_aspect;
-extern float monitor_pixel_aspect;
 
 extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
@@ -165,8 +160,8 @@ const m_option_t mplayer_opts[]={
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - useful for 16:9 TV-out
-	{"monitoraspect", &force_monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9.0, NULL},
-	{"monitorpixelaspect", &monitor_pixel_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 9.0, NULL},
+        OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
+        OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
 	// video mode switching: (x11,xv,dga)
         OPT_FLAG_ON("vm", vidmode, 0),
         OPT_FLAG_OFF("novm", vidmode, 0),
@@ -186,7 +181,7 @@ const m_option_t mplayer_opts[]={
 	{"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"novsync", &vo_vsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
-	{"panscanrange", &vo_panscanrange, CONF_TYPE_FLOAT, CONF_RANGE, -19.0, 99.0, NULL},
+        OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),
 
 	{"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nograbpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 1, 0, NULL},

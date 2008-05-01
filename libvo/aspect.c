@@ -5,6 +5,7 @@
 //#ifndef ASPECT_TEST
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "options.h"
 //#endif
 
 //#define ASPECT_DEBUG
@@ -13,12 +14,7 @@
 #include <stdio.h>
 #endif
 
-float vo_panscanrange = 1.0;
-
 #include "video_out.h"
-
-float force_monitor_aspect=0;
-float monitor_pixel_aspect=1;
 
 void aspect_save_orig(struct vo *vo, int orgw, int orgh)
 {
@@ -43,12 +39,13 @@ void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
 #ifdef ASPECT_DEBUG
   printf("aspect_save_screenres %dx%d \n",scrw,scrh);
 #endif
+    struct MPOpts *opts = vo->opts;
     vo->aspdat.scrw = scrw;
     vo->aspdat.scrh = scrh;
-  if (force_monitor_aspect)
-        vo->monitor_aspect = force_monitor_aspect;
-  else
-        vo->monitor_aspect = monitor_pixel_aspect * scrw / scrh;
+    if (opts->force_monitor_aspect)
+        vo->monitor_aspect = opts->force_monitor_aspect;
+    else
+        vo->monitor_aspect = opts->monitor_pixel_aspect * scrw / scrh;
 }
 
 /* aspect is called with the source resolution and the
@@ -116,15 +113,16 @@ void panscan_calc(struct vo *vo)
 {
  int fwidth,fheight;
  int vo_panscan_area;
+    struct MPOpts *opts = vo->opts;
 
- if (vo_panscanrange > 0) {
+    if (opts->vo_panscanrange > 0) {
         aspect(vo, &fwidth, &fheight, A_ZOOM);
         vo_panscan_area = (vo->aspdat.scrh - fheight);
         if (!vo_panscan_area)
             vo_panscan_area = vo->aspdat.scrw - fwidth;
-   vo_panscan_area *= vo_panscanrange;
+        vo_panscan_area *= opts->vo_panscanrange;
     } else
-        vo_panscan_area = -vo_panscanrange * vo->aspdat.scrh;
+        vo_panscan_area = -opts->vo_panscanrange * vo->aspdat.scrh;
 
     vo->panscan_amount = vo_fs ? vo_panscan : 0;
     vo->panscan_x = vo_panscan_area * vo->panscan_amount * vo->aspdat.asp;
