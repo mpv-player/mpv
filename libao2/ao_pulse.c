@@ -114,11 +114,11 @@ static const struct format_map_s {
     int mp_format;
     pa_sample_format_t pa_format;
 } format_maps[] = {
-    {AF_FORMAT_U8, PA_SAMPLE_U8},
     {AF_FORMAT_S16_LE, PA_SAMPLE_S16LE},
     {AF_FORMAT_S16_BE, PA_SAMPLE_S16BE},
     {AF_FORMAT_FLOAT_LE, PA_SAMPLE_FLOAT32LE},
     {AF_FORMAT_FLOAT_BE, PA_SAMPLE_FLOAT32BE},
+    {AF_FORMAT_U8, PA_SAMPLE_U8},
     {AF_FORMAT_MU_LAW, PA_SAMPLE_ULAW},
     {AF_FORMAT_A_LAW, PA_SAMPLE_ALAW},
     {AF_FORMAT_UNKNOWN, 0}
@@ -143,17 +143,18 @@ static int init(int rate_hz, int channels, int format, int flags) {
     ss.rate = rate_hz;
 
     ao_data.samplerate = rate_hz;
-    ao_data.format = format;
     ao_data.channels = channels;
 
     fmt_map = format_maps;
     while (fmt_map->mp_format != format) {
         if (fmt_map->mp_format == AF_FORMAT_UNKNOWN) {
-            mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Unsupported sample spec\n");
-            goto fail;
+            mp_msg(MSGT_AO, MSGL_V, "AO: [pulse] Unsupported format, using default\n");
+            fmt_map = format_maps;
+            break;
         }
         fmt_map++;
     }
+    ao_data.format = fmt_map->mp_format;
     ss.format = fmt_map->pa_format;
 
     if (!pa_sample_spec_valid(&ss)) {
