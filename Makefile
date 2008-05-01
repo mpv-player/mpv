@@ -376,6 +376,7 @@ SRCS_COMMON-$(MPLAYER_NETWORK)       += stream/stream_netstream.c \
                                         stream/tcp.c \
                                         stream/stream_rtp.c \
                                         stream/stream_udp.c \
+                                        stream/librtsp/rtsp.c \
                                         stream/realrtsp/asmrp.c \
                                         stream/realrtsp/real.c \
                                         stream/realrtsp/rmff.c \
