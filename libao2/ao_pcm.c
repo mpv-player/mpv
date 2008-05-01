@@ -86,10 +86,6 @@ static int init(int rate,int channels,int format,int flags){
 	    strdup(ao_pcm_waveheader?"audiodump.wav":"audiodump.pcm");
 	}
 
-	/* bits is only equal to format if (format == 8) or (format == 16);
-	   this means that the following "if" is a kludge and should
-	   really be a switch to be correct in all cases */
-
 	bits=8;
 	switch(format){
 	case AF_FORMAT_S32_BE:
