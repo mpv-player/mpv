@@ -36,6 +36,7 @@ static int fast = 0;
 #define WAV_ID_FMT  0x20746d66 /* "fmt " */
 #define WAV_ID_DATA 0x61746164 /* "data" */
 #define WAV_ID_PCM  0x0001
+#define WAV_ID_FLOAT_PCM  0x0003
 
 struct WaveHeader
 {
@@ -91,6 +92,16 @@ static int init(int rate,int channels,int format,int flags){
 
 	bits=8;
 	switch(format){
+	case AF_FORMAT_S32_BE:
+	    format=AF_FORMAT_S32_LE;
+	case AF_FORMAT_S32_LE:
+	    bits=32;
+	    break;
+	case AF_FORMAT_FLOAT_BE:
+	    format=AF_FORMAT_FLOAT_LE;
+	case AF_FORMAT_FLOAT_LE:
+	    bits=32;
+	    break;
 	case AF_FORMAT_S8:
 	    format=AF_FORMAT_U8;
 	case AF_FORMAT_U8:
@@ -115,7 +126,7 @@ static int init(int rate,int channels,int format,int flags){
 	wavhdr.wave = le2me_32(WAV_ID_WAVE);
 	wavhdr.fmt = le2me_32(WAV_ID_FMT);
 	wavhdr.fmt_length = le2me_32(16);
-	wavhdr.fmt_tag = le2me_16(WAV_ID_PCM);
+	wavhdr.fmt_tag = le2me_16(format == AF_FORMAT_FLOAT_LE ? WAV_ID_FLOAT_PCM : WAV_ID_PCM);
 	wavhdr.channels = le2me_16(ao_data.channels);
 	wavhdr.sample_rate = le2me_32(ao_data.samplerate);
 	wavhdr.bytes_per_second = le2me_32(ao_data.bps);
