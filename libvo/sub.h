@@ -50,14 +50,6 @@ typedef struct mp_osd_obj_s {
 } mp_osd_obj_t;
 
 
-#if 0
-
-// disable subtitles:
-static inline void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-}
-
-#else
-
 #include "subreader.h"
 
 extern sub_data* subdata; //currently used subtitles
@@ -133,7 +125,5 @@ unsigned utf8_get_char(const char **str);
 #include <inttypes.h>
 void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey);
 #endif
-
-#endif /* 0 */
 
 #endif /* MPLAYER_SUB_H */
