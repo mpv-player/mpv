@@ -690,10 +690,7 @@ DIRS =  . \
         TOOLS \
         vidix \
 
-all: recurse $(ALL_PRG)
-
-recurse:
-	for part in $(PARTS); do $(MAKE) -C $$part; done
+all: $(ALL_PRG)
 
 %.d: %.c
 	$(MPDEPEND_CMD) > $@
@@ -744,7 +741,7 @@ ifneq ($(HELP_FILE),help/help_mp-en.h)
 endif
 
 define RECURSIVE_RULE
-$(part)/$(part).a:
+$(part)/$(part).a: recurse
 	$(MAKE) -C $(part)
 endef
 
