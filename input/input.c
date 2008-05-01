@@ -658,7 +658,7 @@ void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd)
   if(cmd_fds[i].close_func)
     cmd_fds[i].close_func(cmd_fds[i].fd);
   if(cmd_fds[i].buffer)
-    free(cmd_fds[i].buffer);
+    talloc_free(cmd_fds[i].buffer);
 
   if (i + 1 < ictx->num_cmd_fd)
       memmove(&cmd_fds[i], &cmd_fds[i+1],
@@ -720,7 +720,7 @@ int mp_input_parse_and_queue_cmds(struct input_ctx *ictx, const char *str)
     while (*str) {
         mp_cmd_t *cmd;
         size_t len = strcspn(str, "\r\n");
-        char *cmdbuf = malloc(len+1);
+        char *cmdbuf = talloc_size(NULL, len+1);
         av_strlcpy(cmdbuf, str, len+1);
         cmd = mp_input_parse_cmd(cmdbuf);
         if (cmd) {
@@ -730,7 +730,7 @@ int mp_input_parse_and_queue_cmds(struct input_ctx *ictx, const char *str)
         str += len;
         while (*str == '\n' || *str == '\r' || *str == ' ')
             ++str;
-        free(cmdbuf);
+        talloc_free(cmdbuf);
     }
     return cmd_num;
 }
@@ -882,7 +882,7 @@ static int read_cmd(mp_input_fd_t* mp_fd, char** ret)
 
   // Allocate the buffer if it doesn't exist
   if(!mp_fd->buffer) {
-    mp_fd->buffer = malloc(MP_CMD_MAX_SIZE);
+    mp_fd->buffer = talloc_size(NULL, MP_CMD_MAX_SIZE);
     mp_fd->pos = 0;
     mp_fd->size = MP_CMD_MAX_SIZE;
   } 
@@ -937,16 +937,12 @@ static int read_cmd(mp_input_fd_t* mp_fd, char** ret)
     l = end - mp_fd->buffer;
 
     // Not dropping : put the cmd in ret
-    if (!mp_fd->drop) {
-      (*ret) = malloc(l+1);
-      strncpy((*ret),mp_fd->buffer,l);
-      (*ret)[l] = '\0';
-    } else { // Remove the dropping flag
+    if (!mp_fd->drop)
+        *ret = talloc_strndup(NULL, mp_fd->buffer, l);
+    else
       mp_fd->drop = 0;
-    }
-    if( mp_fd->pos - (l+1) > 0)
-      memmove(mp_fd->buffer,end+1,mp_fd->pos-(l+1));
     mp_fd->pos -= l+1;
+    memmove(mp_fd->buffer, end+1, mp_fd->pos);
   }
    
   if(*ret)
@@ -976,7 +972,7 @@ static int default_cmd_func(int fd,char* buf, int l)
 
 void
 mp_input_add_cmd_filter(mp_input_cmd_filter func, void* ctx) {
-  mp_cmd_filter_t* filter = malloc(sizeof(mp_cmd_filter_t))/*, *prev*/;
+    mp_cmd_filter_t *filter = talloc_ptrtype(NULL, filter);
 
   filter->filter = func;
   filter->ctx = ctx;
@@ -1262,7 +1258,7 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 	int r = read_cmd(&cmd_fds[i], &cmd);
 	if (r >= 0) {
 	    mp_cmd_t *ret = mp_input_parse_cmd(cmd);
-	    free(cmd);
+	    talloc_free(cmd);
 	    if (ret)
 		return ret;
 	}
