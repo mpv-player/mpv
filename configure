@@ -433,9 +433,6 @@ Advanced options:
   --enable-crash-debug      enable automatic gdb attach on crash [disable]
   --enable-dynamic-plugins  enable dynamic A/V plugins [disable]
 
-Hazardous options AKA "DO NOT REPORT ANY BUGS!"
-  --disable-gcc-check   disable gcc version checking [enable]
-
 Use these options if autodetection fails (Options marked with (*) accept
 multiple paths separated by ':'):
   --extra-libs=FLAGS          extra linker flags
@@ -484,7 +481,6 @@ _windres=windres
 _cc=cc
 _ar=ar
 test "$CC" && _cc="$CC"
-_gcc_check=yes
 _as=auto
 _runtime_cpudetection=no
 _cross_compile=auto
@@ -806,8 +802,6 @@ for ac_option do
   --disable-debug)
     _debug=
     ;;
-  --enable-gcc-check)   _gcc_check=yes  ;;
-  --disable-gcc-check)  _gcc_check=no   ;;
   --enable-runtime-cpudetection)    _runtime_cpudetection=yes   ;;
   --disable-runtime-cpudetection)   _runtime_cpudetection=no    ;;
   --enable-cross-compile)           _cross_compile=yes          ;;
@@ -1409,7 +1403,6 @@ else
 fi
 
 # Checking CC version...
-if test "$_gcc_check" = yes ; then
  # Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
  if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
   echocheck "$_cc version"
@@ -1488,30 +1481,7 @@ bugs!
 EOF
     die "Bad gcc version"
   fi
-else
-cat <<EOF
 
-******************************************************************************
-
-Hmm. You really want to compile MPlayer with an *UNSUPPORTED* C compiler?
-Ok. You know. Do it.
-
-DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* compiler's fault!
-Get ready for mysterious crashes, no-picture bugs, strange noises... REALLY!
-Lame which is used by mencoder produces weird errors, too.
-
-If you have any problem, install a GCC 2.95.x or 3.x version and try again.
-If the problem _still_ exists, then read DOCS/HTML/en/bugreports.html !
-
-  *** DO NOT SEND BUG REPORTS OR COMPLAIN it's *YOUR* compiler's fault! ***
-
-******************************************************************************
-
-EOF
-
-read _answer
-
-fi
 echocheck "host cc"
 test "$_host_cc" || _host_cc=$_cc
 echores $_host_cc 
