@@ -78,7 +78,16 @@ static int init(sh_video_t *sh){
        accel |= MPEG2_ACCEL_X86_SSE2;
     if(gCpuCaps.hasAltiVec)
        accel |= MPEG2_ACCEL_PPC_ALTIVEC;
-    #ifdef HAVE_VIS
+    #ifdef ARCH_ALPHA
+       accel |= MPEG2_ACCEL_ALPHA;
+    #elif ARCH_ARM
+       accel |= MPEG2_ACCEL_ARM;
+    #endif
+    #ifdef HAVE_IWMMXT
+       accel |= MPEG2_ACCEL_ARM_IWMMXT;
+    #elif HAVE_MVI
+       accel |= MPEG2_ACCEL_ALPHA_MVI;
+    #elif HAVE_VIS
        accel |= MPEG2_ACCEL_SPARC_VIS;
     #endif
     mpeg2_accel(accel);
