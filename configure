@@ -2408,41 +2408,40 @@ if ppc ; then
 
     _altivec_gcc_flags=''
 
-        echocheck "GCC altivec support"
+    echocheck "GCC altivec support"
         
-        p=''
-        cat > $TMPC << EOF
+    p=''
+    cat > $TMPC << EOF
 int main(void) {
     return 0;
 }
 EOF
-        FSF_flags='-maltivec -mabi=altivec'
-        Darwin_flags='-faltivec'
+    FSF_flags='-maltivec -mabi=altivec'
+    Darwin_flags='-faltivec'
 
-        # check for Darwin-style flags first, since
-        # gcc-3.3 (August Update from Apple) on MacOS 10.2.8
-        # accepts but ignores FSF-style flags...
+    # check for Darwin-style flags first, since gcc-3.3 (August Update
+    # from Apple) on MacOS 10.2.8 accepts but ignores FSF-style flags...
 
-        if test -z "$p"; then
-            cc_check $Darwin_flags && p='Darwin'
-        fi
-        if test -z "$p"; then
-            cc_check $FSF_flags && p='FSF'
-        fi
+    if test -z "$p"; then
+        cc_check $Darwin_flags && p='Darwin'
+    fi
+    if test -z "$p"; then
+        cc_check $FSF_flags && p='FSF'
+    fi
 
-        case $p in
-            FSF) _altivec_gcc_flags="$FSF_flags" _altivec=yes ;;
-            Darwin) _altivec_gcc_flags="$Darwin_flags" _altivec=yes ;;
-            *) _altivec=no ;;
-        esac
+    case $p in
+        FSF) _altivec_gcc_flags="$FSF_flags" _altivec=yes ;;
+        Darwin) _altivec_gcc_flags="$Darwin_flags" _altivec=yes ;;
+        *) _altivec=no ;;
+    esac
 
-        if test -z "$p"; then
-            p=none
-        else
-            p="$p-style ($_altivec_gcc_flags)"
-        fi
+    if test -z "$p"; then
+        p=none
+    else
+        p="$p-style ($_altivec_gcc_flags)"
+    fi
 
-        echores "$p"
+    echores "$p"
 
     # check if <altivec.h> should be included
     echocheck "altivec.h"
