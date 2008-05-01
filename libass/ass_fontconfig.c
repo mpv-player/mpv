@@ -40,8 +40,6 @@
 #include <fontconfig/fcfreetype.h>
 #endif
 
-extern int font_fontconfig;
-
 struct fc_instance_s {
 #ifdef HAVE_FONTCONFIG
 	FcConfig* config;
@@ -83,6 +81,26 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 		goto error;
 	
 	FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)family);
+
+	// In SSA/ASS fonts are sometimes referenced by their "full name",
+	// which is usually a concatenation of family name and font
+	// style (ex. Ottawa Bold). Full name is available from
+	// FontConfig pattern element FC_FULLNAME, but it is never
+	// used for font matching.
+	// Therefore, I'm removing words from the end of the name one
+	// by one, and adding shortened names to the pattern. It seems
+	// that the first value (full name in this case) has
+	// precedence in matching.
+	// An alternative approach could be to reimplement FcFontSort
+	// using FC_FULLNAME instead of FC_FAMILY.
+	if (strchr(family, ' ')) {
+		char *p, *s = strdup(family);
+		while (p = strrchr(s, ' ')) {
+			*p = '\0';
+			FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
+		}
+		free(s);
+	}
 	FcPatternAddBool(pat, FC_OUTLINE, FcTrue);
 	FcPatternAddInteger(pat, FC_SLANT, italic);
 	FcPatternAddInteger(pat, FC_WEIGHT, bold);
@@ -126,9 +144,12 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (result != FcResultMatch)
 		goto error;
 
-	if (strcasecmp((const char*)val_s, family) != 0)
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
-				(const char*)val_s, family);
+	if (strcasecmp((const char*)val_s, family) != 0) {
+		result = FcPatternGetString(rpat, FC_FULLNAME, 0, &val_s);
+		if (result != FcResultMatch || strcasecmp((const char*)val_s, family) != 0)
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
+			       (const char*)val_s, family);
+	}
 
 	result = FcPatternGetString(rpat, FC_FILE, 0, &val_s);
 	if (result != FcResultMatch)
@@ -155,7 +176,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 			uint32_t code)
 {
 	char* res = 0;
-	if (font_fontconfig < 0) {
+	if (!priv->config) {
 		*index = priv->index_default;
 		return priv->path_default;
 	}
@@ -319,16 +340,17 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
  * \param path default font path
  * \return pointer to fontconfig private data
 */ 
-fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path)
+fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path, int fc)
 {
 	int rc;
 	fc_instance_t* priv = calloc(1, sizeof(fc_instance_t));
 	const char* dir = library->fonts_dir;
 	int i;
 	
-	if (font_fontconfig < 0) {
+	if (!fc) {
 		mp_msg(MSGT_ASS, MSGL_WARN,
 		       MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed);
+		priv->config = NULL;
 		priv->path_default = strdup(path);
 		priv->index_default = 0;
 		return priv;

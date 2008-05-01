@@ -89,7 +89,7 @@ unsigned char buffer[8192];
 
 int i;
 
-char* chunk_type(unsigned char* guid){
+static char* chunk_type(unsigned char* guid){
   switch(*((unsigned int*)guid)){
     case 0xF8699E40: return "guid_audio_stream";
     case 0xBC19EFC0: return "guid_video_stream";
@@ -105,7 +105,7 @@ char* chunk_type(unsigned char* guid){
   return NULL;
 }
 
-void print_wave_header(WAVEFORMATEX *h){
+static void print_wave_header(WAVEFORMATEX *h){
 
   printf("======= WAVE Format =======\n");
   
@@ -135,7 +135,7 @@ void print_wave_header(WAVEFORMATEX *h){
 
 }
 
-void print_video_header(BITMAPINFOHEADER *h){
+static void print_video_header(BITMAPINFOHEADER *h){
   printf("======= VIDEO Format ======\n");
 	printf("  biSize %ld\n", h->biSize);
 	printf("  biWidth %ld\n", h->biWidth);

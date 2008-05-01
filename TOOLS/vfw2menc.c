@@ -33,6 +33,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <getopt.h>
 #include <windows.h>
@@ -59,7 +60,7 @@ enum
     MODE_VIEW
 };
 
-int save_settings(HDRVR hDriver, const char *filename)
+static int save_settings(HDRVR hDriver, const char *filename)
 {
     FILE *fd = NULL;
     DWORD cb = (DWORD) SendDriverMessage(hDriver, ICM_GETSTATE, 0, 0);
@@ -99,7 +100,7 @@ int save_settings(HDRVR hDriver, const char *filename)
     return 0;
 }
 
-int load_settings(HDRVR hDriver, const char *filename)
+static int load_settings(HDRVR hDriver, const char *filename)
 {
     struct stat info;
     FILE *fd = NULL;
@@ -150,7 +151,7 @@ static struct option long_options[] =
     { 0, 0, 0, 0 }
 };
 
-void help(const char *progname)
+static void help(const char *progname)
 {
     printf("VFW to mencoder v"VERSION" - Copyright 2007 - Gianluigi Tiesi <sherpya@netfarm.it>\n");
     printf("This program is Free Software\n\n");

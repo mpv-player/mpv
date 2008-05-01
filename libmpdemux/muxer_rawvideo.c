@@ -6,8 +6,6 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "version.h"
-
 //#include "stream/stream.h"
 //#include "demuxer.h"
 //#include "stheader.h"

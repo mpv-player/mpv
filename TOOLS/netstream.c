@@ -181,7 +181,7 @@ static int net_stream_close(client_t* cl) {
   return 1;
 }
 
-int handle_client(client_t* cl,mp_net_stream_packet_t* pack) {
+static int handle_client(client_t* cl,mp_net_stream_packet_t* pack) {
 
   if(!pack)
     return 0;

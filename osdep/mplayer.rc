@@ -4,7 +4,7 @@
    and add resfile.o to OBJS_MPLAYER in Makefile*/
 
 #include <winver.h>   
-#include "../version.h"
+#include "version.h"
 
 1 VERSIONINFO
 FILEVERSION 0,0,9,0
@@ -35,5 +35,5 @@ FILETYPE VFT_APP
     }
 }
 
-IDI_ICON1 ICON DISCARDABLE  "../etc/mplayer.ico"
+IDI_ICON1 ICON DISCARDABLE  "etc/mplayer.ico"
 
