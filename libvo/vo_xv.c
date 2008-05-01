@@ -107,7 +107,8 @@ static void draw_alpha_yv12(void *p, int x0, int y0, int w, int h,
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo->dwidth + vo_panscan_x);
+    x0 += ctx->image_width * (vo->panscan_x >> 1)
+                           / (vo->dwidth + vo->panscan_x);
     vo_draw_alpha_yv12(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
@@ -121,7 +122,8 @@ static void draw_alpha_yuy2(void *p, int x0, int y0, int w, int h,
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo->dwidth + vo_panscan_x);
+    x0 += ctx->image_width * (vo->panscan_x >> 1)
+                           / (vo->dwidth + vo->panscan_x);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
@@ -135,7 +137,8 @@ static void draw_alpha_uyvy(void *p, int x0, int y0, int w, int h,
 {
     struct vo *vo = p;
     struct xvctx *ctx = vo->priv;
-    x0 += ctx->image_width * (vo_panscan_x >> 1) / (vo->dwidth + vo_panscan_x);
+    x0 += ctx->image_width * (vo->panscan_x >> 1)
+                           / (vo->dwidth + vo->panscan_x);
     vo_draw_alpha_yuy2(w, h, src, srca, stride,
                        ctx->xvimage[ctx->current_buf]->data +
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
@@ -156,7 +159,7 @@ static void calc_drwXY(struct vo *vo, uint32_t *drwX, uint32_t *drwY) {
     struct MPOpts *opts = vo->opts;
   *drwX = *drwY = 0;
   if (vo_fs) {
-    aspect(&vo->dwidth, &vo->dheight, A_ZOOM);
+    aspect(vo, &vo->dwidth, &vo->dheight, A_ZOOM);
     vo->dwidth = FFMIN(vo->dwidth, opts->vo_screenwidth);
     vo->dheight = FFMIN(vo->dheight, opts->vo_screenheight);
     *drwX = (opts->vo_screenwidth - vo->dwidth) / 2;
@@ -252,7 +255,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             hint.y = (opts->vo_screenheight - modeline_height) / 2;
             hint.width = modeline_width;
             hint.height = modeline_height;
-            aspect_save_screenres(modeline_width, modeline_height);
+            aspect_save_screenres(vo, modeline_width, modeline_height);
         } else
 #warning This "else" makes no sense
 #endif
@@ -298,7 +301,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                              &drwBorderWidth, &drwDepth);
                 if (vo->dwidth <= 0) vo->dwidth = d_width;
                 if (vo->dheight <= 0) vo->dheight = d_height;
-                aspect_save_prescale(vo->dwidth, vo->dheight);
+                aspect_save_prescale(vo, vo->dwidth, vo->dheight);
             }
         } else
         {
@@ -362,16 +365,16 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     set_gamma_correction();
 #endif
 
-    aspect(&vo->dwidth, &vo->dheight, A_NOZOOM);
+    aspect(vo, &vo->dwidth, &vo->dheight, A_NOZOOM);
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
     calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
 
-    panscan_calc();
+    panscan_calc(vo);
     
-    vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
-                        ctx->drwY - (vo_panscan_y >> 1),
-                        vo->dwidth + vo_panscan_x - 1,
-                        vo->dheight + vo_panscan_y - 1);
+    vo_xv_draw_colorkey(vo, ctx->drwX - (vo->panscan_x >> 1),
+                        ctx->drwY - (vo->panscan_y >> 1),
+                        vo->dwidth + vo->panscan_x - 1,
+                        vo->dheight + vo->panscan_y - 1);
 
     mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
            ctx->drwY, vo->dwidth, vo->dheight);
@@ -456,18 +459,18 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     {
         XvShmPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc,
                       xvi, 0, 0, ctx->image_width,
-                      ctx->image_height, ctx->drwX - (vo_panscan_x >> 1),
-                      ctx->drwY - (vo_panscan_y >> 1), vo->dwidth + vo_panscan_x,
-                      vo->dheight + vo_panscan_y,
+                      ctx->image_height, ctx->drwX - (vo->panscan_x >> 1),
+                      ctx->drwY - (vo->panscan_y >> 1), vo->dwidth + vo->panscan_x,
+                      vo->dheight + vo->panscan_y,
                       False);
     } else
 #endif
     {
         XvPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc,
                    xvi, 0, 0, ctx->image_width, ctx->image_height,
-                   ctx->drwX - (vo_panscan_x >> 1), ctx->drwY - (vo_panscan_y >> 1),
-                   vo->dwidth + vo_panscan_x,
-                   vo->dheight + vo_panscan_y);
+                   ctx->drwX - (vo->panscan_x >> 1), ctx->drwY - (vo->panscan_y >> 1),
+                   vo->dwidth + vo->panscan_x,
+                   vo->dheight + vo->panscan_y);
     }
 }
 
@@ -491,10 +494,10 @@ static void check_events(struct vo *vo)
 
     if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
     {
-	vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
-			    ctx->drwY - (vo_panscan_y >> 1),
-			    vo->dwidth + vo_panscan_x - 1,
-			    vo->dheight + vo_panscan_y - 1);
+	vo_xv_draw_colorkey(vo, ctx->drwX - (vo->panscan_x >> 1),
+			    ctx->drwY - (vo->panscan_y >> 1),
+			    vo->dwidth + vo->panscan_x - 1,
+			    vo->dheight + vo->panscan_y - 1);
     }
 
     if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && ctx->is_paused)
@@ -513,7 +516,7 @@ static void draw_osd(struct vo *vo)
     struct xvctx *ctx = vo->priv;
 
     osd_draw_text(ctx->image_width -
-                  ctx->image_width * vo_panscan_x / (vo->dwidth + vo_panscan_x),
+                  ctx->image_width * vo->panscan_x / (vo->dwidth + vo->panscan_x),
                   ctx->image_height, ctx->draw_alpha_fnc, vo);
 }
 
@@ -880,23 +883,23 @@ static int control(struct vo *vo, uint32_t request, void *data)
             vo_x11_fullscreen(vo);
             /* indended, fallthrough to update panscan on fullscreen/windowed switch */
         case VOCTRL_SET_PANSCAN:
-            if ((vo_fs && (vo_panscan != vo_panscan_amount))
-                || (!vo_fs && vo_panscan_amount))
+            if ((vo_fs && (vo_panscan != vo->panscan_amount))
+                || (!vo_fs && vo->panscan_amount))
             {
-                int old_y = vo_panscan_y;
+                int old_y = vo->panscan_y;
 
-                panscan_calc();
+                panscan_calc(vo);
 
-                if (old_y != vo_panscan_y)
+                if (old_y != vo->panscan_y)
                 {
                     vo_x11_clearwindow_part(vo, x11->window,
-                                            vo->dwidth + vo_panscan_x - 1,
-                                            vo->dheight + vo_panscan_y - 1,
+                                            vo->dwidth + vo->panscan_x - 1,
+                                            vo->dheight + vo->panscan_y - 1,
                                             1);
-		    vo_xv_draw_colorkey(vo, ctx->drwX - (vo_panscan_x >> 1),
-					ctx->drwY - (vo_panscan_y >> 1),
-					vo->dwidth + vo_panscan_x - 1,
-					vo->dheight + vo_panscan_y - 1);
+		    vo_xv_draw_colorkey(vo, ctx->drwX - (vo->panscan_x >> 1),
+					ctx->drwY - (vo->panscan_y >> 1),
+					vo->dwidth + vo->panscan_x - 1,
+					vo->dheight + vo->panscan_y - 1);
                     flip_page(vo);
                 }
             }

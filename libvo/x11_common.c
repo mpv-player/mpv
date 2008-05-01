@@ -375,7 +375,7 @@ void update_xinerama_info(struct vo *vo) {
         XFree(screens);
     }
 #endif
-    aspect_save_screenres(opts->vo_screenwidth, opts->vo_screenheight);
+    aspect_save_screenres(vo, opts->vo_screenwidth, opts->vo_screenheight);
 }
 
 int vo_init(struct vo *vo)

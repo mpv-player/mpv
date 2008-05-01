@@ -356,12 +356,12 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      char *title, uint32_t format)
 {
     struct MPOpts *opts = vo->opts;
-    panscan_init();
-    aspect_save_orig(width, height);
-    aspect_save_prescale(d_width, d_height);
+    panscan_init(vo);
+    aspect_save_orig(vo, width, height);
+    aspect_save_prescale(vo, d_width, d_height);
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
-        aspect(&d_width, &d_height, A_NOZOOM);
+        aspect(vo, &d_width, &d_height, A_NOZOOM);
         vo->dx = (int)(opts->vo_screenwidth - d_width) / 2;
         vo->dy = (int)(opts->vo_screenheight - d_height) / 2;
         geometry(&vo->dx, &vo->dy, &d_width, &d_height,

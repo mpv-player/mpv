@@ -70,7 +70,6 @@ static int EnterMoviesDone = 0;
 static int get_image_done = 0;
 
 static int vo_quartz_fs; // we are in fullscreen
-extern float monitor_aspect;
 static float old_movie_aspect;
 
 static int winLevel = 1;

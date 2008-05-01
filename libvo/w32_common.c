@@ -77,7 +77,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
               xborder = (r2.right - r2.left) - (r.right - r.left);
               yborder = (r2.bottom - r2.top) - (r.bottom - r.top);
               wpos->cx -= xborder; wpos->cy -= yborder;
-              aspect_fit(&wpos->cx, &wpos->cy, wpos->cx, wpos->cy);
+              aspect_fit(global_vo, &wpos->cx, &wpos->cy, wpos->cx, wpos->cy);
               wpos->cx += xborder; wpos->cy += yborder;
             }
             return 0;

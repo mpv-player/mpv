@@ -300,7 +300,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 {
 	int tmp1, tmp2, size;
 	em8300_register_t reg;
-	extern float monitor_aspect;
 
 	/* Softzoom turned on, downscale */
 	/* This activates the subpicture processor, you can safely disable this and still send */

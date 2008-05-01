@@ -28,7 +28,7 @@
 #include <dxr2ioctl.h>
 
 
-extern float monitor_aspect;
+#include "aspect.h"
 
 int dxr2_fd = -1;
 

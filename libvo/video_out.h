@@ -221,6 +221,20 @@ struct vo {
     int dy;
     int dwidth;
     int dheight;
+
+    int panscan_x;
+    int panscan_y;
+    float panscan_amount;
+    float monitor_aspect;
+    struct aspect_data {
+        int orgw; // real width
+        int orgh; // real height
+        int prew; // prescaled width
+        int preh; // prescaled height
+        int scrw; // horizontal resolution
+        int scrh; // vertical resolution
+        float asp;
+    } aspdat;
 };
 
 struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
