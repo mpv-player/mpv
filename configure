@@ -2408,7 +2408,6 @@ if ppc ; then
 
     _altivec_gcc_flags=''
 
-    if test "$_altivec" = yes -o "$_runtime_cpudetection" = yes ; then
         echocheck "GCC altivec support"
         
         p=''
@@ -2444,7 +2443,6 @@ EOF
         fi
 
         echores "$p"
-    fi
 
     # check if <altivec.h> should be included
     echocheck "altivec.h"
