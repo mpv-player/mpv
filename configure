@@ -2500,7 +2500,6 @@ EOF
 
     _def_altivec_h='#undef HAVE_ALTIVEC_H'
 
-    if test "$_altivec" = yes ; then
         echocheck "altivec.h"
         cat > $TMPC << EOF
 #include <altivec.h>
@@ -2512,7 +2511,6 @@ EOF
              _def_altivec_h='#define HAVE_ALTIVEC_H 1'
          fi
          echores "$_have_altivec_h"
-    fi
 
     # disable runtime cpudetection if 
     # - we cannot generate altivec code
