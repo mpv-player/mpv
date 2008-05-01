@@ -144,9 +144,12 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (result != FcResultMatch)
 		goto error;
 
-	if (strcasecmp((const char*)val_s, family) != 0)
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
-				(const char*)val_s, family);
+	if (strcasecmp((const char*)val_s, family) != 0) {
+		result = FcPatternGetString(rpat, FC_FULLNAME, 0, &val_s);
+		if (result != FcResultMatch || strcasecmp((const char*)val_s, family) != 0)
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
+			       (const char*)val_s, family);
+	}
 
 	result = FcPatternGetString(rpat, FC_FILE, 0, &val_s);
 	if (result != FcResultMatch)
