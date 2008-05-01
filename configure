@@ -1422,15 +1422,15 @@ if test "$_gcc_check" = yes ; then
   case $cc_version in
     '')
       cc_version="v. ?.??, bad"
-      cc_verc_fail=yes
+      cc_fail=yes
       ;;
     10.1)
       cc_version="$cc_version, ok"
-      cc_verc_fail=no
+      cc_fail=no
       ;;
     *)
       cc_version="$cc_version, bad"
-      cc_verc_fail=yes
+      cc_fail=yes
       ;;
   esac
   echores "$cc_version"
@@ -1446,28 +1446,28 @@ if test "$_gcc_check" = yes ; then
   case $cc_version in
     '')
       cc_version="v. ?.??, bad"
-      cc_verc_fail=yes
+      cc_fail=yes
       ;;
     2.95.[2-9]|2.95.[2-9][-.]*|[3-4].*)
       _cc_major=`echo $cc_version | cut -d '.' -f 1`
       _cc_minor=`echo $cc_version | cut -d '.' -f 2`
       _cc_mini=`echo $cc_version | cut -d '.' -f 3`
       cc_version="$cc_version, ok"
-      cc_verc_fail=no
+      cc_fail=no
       ;;
     'not found')
-      cc_verc_fail=yes
+      cc_fail=yes
       ;;
     *)
       cc_version="$cc_version, bad"
-      cc_verc_fail=yes
+      cc_fail=yes
       ;;
   esac
   echores "$cc_version"
-  test "$cc_verc_fail" = "no" && break
+  test "$cc_fail" = "no" && break
  done 
  fi # icc
-  if test "$cc_verc_fail" = yes ; then
+  if test "$cc_fail" = yes ; then
     cat <<EOF
 
 *** Please downgrade/upgrade C compiler to version gcc-2.95, 3.x or 4.x! ***
