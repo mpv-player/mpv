@@ -1403,8 +1403,8 @@ else
 fi
 
 # Checking CC version...
- # Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
- if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
+# Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
+if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
   echocheck "$_cc version"
   cc_vendor=intel
   cc_name=`$_cc -V 2>&1 | _head 1 | cut -d ',' -f 1`
@@ -1427,39 +1427,39 @@ fi
       ;;
   esac
   echores "$cc_version"
- else
- for _cc in "$_cc" gcc cc ; do
-  echocheck "$_cc version"
-  cc_vendor=gnu
-  cc_name=`$_cc -v 2>&1 | _tail 1 | cut -d ' ' -f 1`
-  cc_version=`$_cc -dumpversion 2>&1`
-  if test "$?" -gt 0; then
-    cc_version="not found"
-  fi
-  case $cc_version in
-    '')
-      cc_version="v. ?.??, bad"
-      cc_fail=yes
-      ;;
-    2.95.[2-9]|2.95.[2-9][-.]*|[3-4].*)
-      _cc_major=`echo $cc_version | cut -d '.' -f 1`
-      _cc_minor=`echo $cc_version | cut -d '.' -f 2`
-      _cc_mini=`echo $cc_version | cut -d '.' -f 3`
-      cc_version="$cc_version, ok"
-      cc_fail=no
-      ;;
-    'not found')
-      cc_fail=yes
-      ;;
-    *)
-      cc_version="$cc_version, bad"
-      cc_fail=yes
-      ;;
-  esac
-  echores "$cc_version"
-  test "$cc_fail" = "no" && break
- done 
- fi # icc
+else
+  for _cc in "$_cc" gcc cc ; do
+    echocheck "$_cc version"
+    cc_vendor=gnu
+    cc_name=`$_cc -v 2>&1 | _tail 1 | cut -d ' ' -f 1`
+    cc_version=`$_cc -dumpversion 2>&1`
+    if test "$?" -gt 0; then
+      cc_version="not found"
+    fi
+    case $cc_version in
+      '')
+        cc_version="v. ?.??, bad"
+        cc_fail=yes
+        ;;
+      2.95.[2-9]|2.95.[2-9][-.]*|[3-4].*)
+        _cc_major=`echo $cc_version | cut -d '.' -f 1`
+        _cc_minor=`echo $cc_version | cut -d '.' -f 2`
+        _cc_mini=`echo $cc_version | cut -d '.' -f 3`
+        cc_version="$cc_version, ok"
+        cc_fail=no
+        ;;
+      'not found')
+        cc_fail=yes
+        ;;
+      *)
+        cc_version="$cc_version, bad"
+        cc_fail=yes
+        ;;
+    esac
+    echores "$cc_version"
+    test "$cc_fail" = "no" && break
+  done
+fi # icc
 test "$cc_fail" = yes && die "unsupported compiler version"
 
 echocheck "host cc"
