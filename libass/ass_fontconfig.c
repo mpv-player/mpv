@@ -67,7 +67,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	FcResult result;
 	FcPattern *pat = 0, *rpat;
 	int r_index;
-	FcChar8 *r_family, *r_style, *r_file;
+	FcChar8 *r_family, *r_style, *r_file, *r_fullname;
 	FcBool r_outline;
 	FcCharSet* r_charset;
 	FcFontSet* fset = 0;
@@ -147,15 +147,16 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 
 	result = FcPatternGetString(rpat, FC_FAMILY, 0, &r_family);
 	if (result != FcResultMatch)
-		goto error;
+		r_family = NULL;
 
-	if (strcasecmp((const char*)r_family, family) != 0) {
-		result = FcPatternGetString(rpat, FC_FULLNAME, 0, &r_family);
-		if (result != FcResultMatch || strcasecmp((const char*)r_family, family) != 0)
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
-			       (const char*)r_family, family);
-	}
+	result = FcPatternGetString(rpat, FC_FULLNAME, 0, &r_fullname);
+	if (result != FcResultMatch)
+		r_fullname = NULL;
 
+	if (!(r_family && strcasecmp((const char*)r_family, family) == 0) &&
+	    !(r_fullname && strcasecmp((const char*)r_fullname, family) == 0))
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
+		       (const char*)(r_family ? r_family : r_fullname), family);
  error:
 	if (pat) FcPatternDestroy(pat);
 	if (fset) FcFontSetDestroy(fset);
