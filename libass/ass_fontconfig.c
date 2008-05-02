@@ -140,6 +140,11 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 		goto error;
 	*index = r_index;
 
+	result = FcPatternGetString(rpat, FC_FILE, 0, &r_file);
+	if (result != FcResultMatch)
+		goto error;
+	retval = strdup((const char*)r_file);
+
 	result = FcPatternGetString(rpat, FC_FAMILY, 0, &r_family);
 	if (result != FcResultMatch)
 		goto error;
@@ -151,11 +156,6 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 			       (const char*)r_family, family);
 	}
 
-	result = FcPatternGetString(rpat, FC_FILE, 0, &r_file);
-	if (result != FcResultMatch)
-		goto error;
-	
-	retval = strdup((const char*)r_file);
  error:
 	if (pat) FcPatternDestroy(pat);
 	if (fset) FcFontSetDestroy(fset);
