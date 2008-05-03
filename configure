@@ -1464,7 +1464,7 @@ test "$cc_fail" = yes && die "unsupported compiler version"
 
 echocheck "host cc"
 test "$_host_cc" || _host_cc=$_cc
-echores $_host_cc 
+echores $_host_cc
 
 echocheck "cross compilation"
 if test $_cross_compile = auto ; then
@@ -1759,7 +1759,7 @@ EOF
       if ! cc_check -march=$proc $cpuopt=$proc; then
         if cc_check -march=i586 $cpuopt=i686; then
           proc=i586-i686
-        else 
+        else
           proc=i586
 	fi
       fi
@@ -1815,11 +1815,11 @@ EOF
       if test "$host_arch" = "i586-i686"; then
         _march="-march=i586"
         _mcpu="$cpuopt=i686"
-      else      
+      else
         _march="-march=$host_arch"
         _mcpu="$cpuopt=$host_arch"
       fi
-    
+
       proc="$host_arch"
 
       case "$proc" in
@@ -1926,7 +1926,7 @@ EOF
       cc_check $_mcpu || _mcpu=""
       cc_check $_march $_mcpu || _march=""
     fi
-    
+
     _optimizing=""
 
     echores "$proc"
@@ -1941,7 +1941,7 @@ EOF
 	karch=`uname -m`
 	case "`echo $karch`" in
 	    sun4) proc=v7 ;;
-	    sun4c) proc=v7 ;; 
+	    sun4c) proc=v7 ;;
 	    sun4d) proc=v8 ;;
 	    sun4m) proc=v8 ;;
 	    sun4u) proc=ultrasparc _vis='yes' ;;
@@ -2105,7 +2105,7 @@ EOF
     _target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
     _march=''
-    
+
     echocheck "CPU type"
     cat > $TMPC << EOF
 int main(void) {
@@ -2128,7 +2128,7 @@ EOF
         2-1307) proc="ev68";  _mvi="1";;
     esac
     echores "$proc"
-    
+
     echocheck "GCC & CPU optimization abilities"
     if test "$proc" = "ev68" ; then
       cc_check -mcpu=$proc || proc=ev67
@@ -2138,7 +2138,7 @@ EOF
     fi
     _mcpu="-mcpu=$proc"
     echores "$proc"
-    
+
     _optimizing="$proc"
     ;;
 
@@ -2403,13 +2403,13 @@ echores $_asmalign_pot
 
 #FIXME: This should happen before the check for CFLAGS..
 if ppc ; then
-    
+
     # check if altivec is supported by the compiler, and how to enable it
 
     _altivec_gcc_flags=''
 
     echocheck "GCC altivec support"
-        
+
     p=''
     cat > $TMPC << EOF
 int main(void) { return 0; }
@@ -2453,7 +2453,7 @@ EOF
         && _def_altivec_h='#define HAVE_ALTIVEC_H 1'
     echores "$_have_altivec_h"
 
-    # disable runtime cpudetection if 
+    # disable runtime cpudetection if
     # - we cannot generate altivec code
     # - altivec is disabled by the user
 
@@ -2816,7 +2816,7 @@ elif cc_check $_ld_sock -lresolv ; then
 else
   _res_comment="trying inet_aton next"
   echores "no"
-  
+
   echocheck "inet_aton()"
   cat > $TMPC << EOF
 #include <sys/types.h>
@@ -2886,14 +2886,14 @@ fi
 echocheck "int_fastXY_t in inttypes.h"
 cat > $TMPC << EOF
 #include <inttypes.h>
-int main(void) { 
+int main(void) {
 volatile int_fast16_t v= 0;
 return v; }
 EOF
 _fast_inttypes=no
 cc_check && _fast_inttypes=yes
 if test "$_fast_inttypes" = no ; then
-  _def_fast_inttypes='  
+  _def_fast_inttypes='
     typedef signed char int_fast8_t;
     typedef signed int  int_fast16_t;
     typedef signed int  int_fast32_t;
@@ -3529,7 +3529,7 @@ int main(void) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false);
 }
 EOF
-  if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then 
+  if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then
     _ld_extra="$_ld_extra -framework Carbon -framework QuickTime -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
     _coreaudio=yes
     _def_coreaudio='#define HAVE_COREAUDIO 1'
@@ -3577,7 +3577,7 @@ if test "$_macosx_finder_support" = yes; then
 else
   _def_macosx_finder_support='#undef MACOSX_FINDER_SUPPORT'
   _macosx_finder_support=no
-fi 
+fi
 echores "$_macosx_finder_support"
 
 echocheck "Mac OS X Bundle file locations"
@@ -3589,7 +3589,7 @@ if test "$_macosx_bundle" = yes; then
 else
   _def_macosx_bundle='#undef MACOSX_BUNDLE'
   _macosx_bundle=no
-fi 
+fi
 echores "$_macosx_bundle"
 
 echocheck "Apple Remote"
@@ -3978,7 +3978,7 @@ if test "$_xv" = yes && test "$_xvmc" != no ; then
 #include <X11/Xlib.h>
 #include <X11/extensions/Xvlib.h>
 #include <X11/extensions/XvMClib.h>
-int main(void) { 
+int main(void) {
   (void) XvMCQueryExtension(0,0,0);
   (void) XvMCCreateContext(0,0,0,0,0,0,0);
   return 0; }
@@ -4163,7 +4163,7 @@ if test "$_gl" = yes ; then
   _def_gl='#define HAVE_GL 1'
   _vosrc="$_vosrc vo_gl.c vo_gl2.c gl_common.c"
   if test "$_gl_win32" = yes ; then
-    _def_gl_win32='#define GL_WIN32 1' 
+    _def_gl_win32='#define GL_WIN32 1'
     _vosrc="$_vosrc w32_common.c"
     _res_comment="win32 version"
   fi
@@ -4903,7 +4903,7 @@ if test "$_ivtv" = auto ; then
 #include <linux/videodev2.h>
 #include <linux/ivtv.h>
 #include <sys/ioctl.h>
-int main(void) { 
+int main(void) {
 struct ivtv_cfg_stop_decode sd;
 struct ivtv_cfg_start_decode sd1;
 ioctl (0, IVTV_IOC_START_DECODE, &sd1);
@@ -5006,7 +5006,7 @@ EOF
        _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
      fi
     _def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/mixer"'
-  fi  
+  fi
 else
   _def_ossaudio='#undef USE_OSS_AUDIO'
   _def_ossaudio_devdsp='#define PATH_DEV_DSP ""'
@@ -5881,7 +5881,7 @@ if test "$_theora" = auto ; then
 #include <theora/theora.h>
 #include <string.h>
 int main(void) {
-  /* theora is in flux, make sure that all interface routines and 
+  /* theora is in flux, make sure that all interface routines and
    * datatypes exist and work the way we expect it, so we don't break
    * mplayer */
   ogg_packet op;
@@ -5894,7 +5894,7 @@ int main(void) {
 
   theora_info_init (&inf);
   theora_comment_init (&tc);
- 
+
   return 0;
 
   /* we don't want to execute this kind of nonsense; just for making sure
@@ -6024,7 +6024,7 @@ echores "$_musepack"
 echocheck "FAAC (AAC encoder) support"
 if test "$_faac" = auto ; then
   cat > $TMPC <<EOF
-#include <inttypes.h> 
+#include <inttypes.h>
 #include <faac.h>
 int main(void) { unsigned long x, y; faacEncOpen(48000, 2, &x, &y); return 0; }
 EOF
@@ -6543,7 +6543,7 @@ EOF
     cc_check $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" && _xvid=yes && break
   done
 fi
-  
+
 if test "$_xvid" = yes ; then
   _def_xvid='#define HAVE_XVID4 1'
   _codecmodules="xvid $_codecmodules"
@@ -6814,7 +6814,7 @@ $_def_ioctl_bt848_h_name
 int main(void) {
  ioctl(0, METEORSINPUT, 0);
  ioctl(0, TVTUNER_GETFREQ, 0);
- return 0; 
+ return 0;
 }
 EOF
       cc_check && _tv_bsdbt848=yes
@@ -6837,10 +6837,10 @@ if test "$_tv_dshow" = auto ; then
   if test "$_tv" = yes && win32 ; then
     cat > $TMPC <<EOF
 #include <ole2.h>
-int main(void) { 
+int main(void) {
     void* p;
     CoCreateInstance((GUID*)&GUID_NULL, NULL, CLSCTX_INPROC_SERVER, &GUID_NULL, &p);
-    return 0; 
+    return 0;
 }
 EOF
     cc_check -lole32 -luuid && _tv_dshow=yes
@@ -7087,8 +7087,8 @@ short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B
                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
 int main(void) { return (int)ascii_name; }
 EOF
-  if cc_check ; then 
-    if strings $TMPEXE | grep -l MPlayerBigEndian >/dev/null ; then 
+  if cc_check ; then
+    if strings $TMPEXE | grep -l MPlayerBigEndian >/dev/null ; then
       _big_endian=yes
     else
       _big_endian=no
@@ -7374,7 +7374,7 @@ else
 fi
 
 
-# Dynamic linking flags 
+# Dynamic linking flags
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
 freebsd || netbsd || openbsd || dragonfly || bsdos && _ld_dl_dynamic='-rdynamic'
@@ -8570,7 +8570,7 @@ EOF
 echo ${_echo_n} "    Manual pages: $MAN_LANG ${_echo_c}"
 test "$LANGUAGES" = en && echo ${_echo_n} " (no localization selected, use --language=all)${_echo_c}"
 echo
-  
+
 cat << EOF
 
   Enabled optional drivers:
