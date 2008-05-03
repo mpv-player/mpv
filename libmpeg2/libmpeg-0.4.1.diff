@@ -175,6 +175,17 @@
  	    for (j = 0; j < 64; j++)
  		decoder->quantizer_prescale[index][i][j] =
  		    k * mpeg2dec->quantizer_matrix[index][j];
+--- libmpeg2/idct.c	(revision 26652)
++++ libmpeg2/idct.c	(working copy)
+@@ -250,7 +254,7 @@
+ 	mpeg2_idct_mmx_init ();
+     } else
+ #endif
+-#ifdef ARCH_PPC
++#ifdef HAVE_ALTIVEC
+     if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_altivec;
+ 	mpeg2_idct_add = mpeg2_idct_add_altivec;
 --- libmpeg2/idct_mmx.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/idct_mmx.c	2006-06-16 20:12:50.000000000 +0200
 @@ -23,7 +27,7 @@
@@ -188,6 +199,15 @@
  
 --- libmpeg2/motion_comp.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/motion_comp.c	2006-06-16 20:12:50.000000000 +0200
+@@ -46,7 +46,7 @@
+ 	mpeg2_mc = mpeg2_mc_mmx;
+     else
+ #endif
+-#ifdef ARCH_PPC
++#ifdef HAVE_ALTIVEC
+     if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
+ 	mpeg2_mc = mpeg2_mc_altivec;
+     else
 @@ -67,6 +61,13 @@
  	mpeg2_mc = mpeg2_mc_vis;
      else

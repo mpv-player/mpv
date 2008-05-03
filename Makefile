@@ -340,7 +340,7 @@ SRCS_COMMON-$(LIBMPEG2)-$(ARCH_ALPHA)   += libmpeg2/idct_alpha.c \
 SRCS_COMMON-$(LIBMPEG2)-$(ARCH_ARMV4L)  += libmpeg2/motion_comp_arm.c \
                                            libmpeg2/motion_comp_arm_s.S \
                                            libmpeg2/motion_comp_iwmmxt.c
-SRCS_COMMON-$(LIBMPEG2)-$(ARCH_POWERPC) += libmpeg2/idct_altivec.c \
+SRCS_COMMON-$(LIBMPEG2)-$(HAVE_ALTIVEC) += libmpeg2/idct_altivec.c \
                                            libmpeg2/motion_comp_altivec.c
 SRCS_COMMON-$(LIBMPEG2)-$(HAVE_MMX)     += libmpeg2/idct_mmx.c \
                                            libmpeg2/motion_comp_mmx.c
