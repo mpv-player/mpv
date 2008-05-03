@@ -6734,7 +6734,7 @@ EOF
   fi
 else
   _def_mp3lame='#undef HAVE_MP3LAME'
-  _libavencoders=`echo $_libavencoders | sed -e s/MP3LAME_ENCODER// `
+  _libavencoders=`echo $_libavencoders | sed -e s/LIBMP3LAME_ENCODER// `
 fi
 echores "$_mp3lame"
 
