@@ -1554,7 +1554,7 @@ if x86 && test "$_runtime_cpudetection" = no ; then
       cat > $TMPC <<EOF
 #include <signal.h>
 void catch() { exit(1); }
-int main(void){
+int main(void) {
   signal(SIGILL, catch);
   __asm__ __volatile__ ("$3":::"memory");return(0);
 }
@@ -2412,9 +2412,7 @@ if ppc ; then
         
     p=''
     cat > $TMPC << EOF
-int main(void) {
-    return 0;
-}
+int main(void) { return 0; }
 EOF
     FSF_flags='-maltivec -mabi=altivec'
     Darwin_flags='-faltivec'
@@ -2482,9 +2480,7 @@ if arm ; then
   echocheck "ARMv5TE (Enhanced DSP Extensions)"
   if test $_armv5te = "auto" ; then
     cat > $TMPC << EOF
-int main(void) {
-    __asm__ __volatile__ ("qadd r0, r0, r0");
-}
+int main(void) { __asm__ __volatile__ ("qadd r0, r0, r0"); }
 EOF
     _armv5te=no
     cc_check && _armv5te=yes
@@ -2504,9 +2500,7 @@ EOF
   echocheck "iWMMXt (Intel XScale SIMD instructions)"
   if test $_iwmmxt = "auto" ; then
     cat > $TMPC << EOF
-int main(void) {
-    __asm__ __volatile__ ("wunpckelub wr6, wr4");
-}
+int main(void) { __asm__ __volatile__ ("wunpckelub wr6, wr4"); }
 EOF
     _iwmmxt=no
     cc_check && _iwmmxt=yes
@@ -2650,7 +2644,7 @@ echores "$_runtime_cpudetection"
 
 echocheck "restrict keyword"
 for restrict_keyword in restrict __restrict __restrict__ ; do
-  echo "void foo(char * $restrict_keyword p); int main(void){}" > $TMPC
+  echo "void foo(char * $restrict_keyword p); int main(void) {}" > $TMPC
   if cc_check; then
     _def_restrict_keyword=$restrict_keyword
     break;
@@ -2944,7 +2938,7 @@ echocheck "memalign()"
 # XXX restrict to x86 ? extend to other CPUs/cacheline sizes ?
 cat > $TMPC << EOF
 #include <malloc.h>
-int main (void) { (void) memalign(64, sizeof(char)); return 0; }
+int main(void) { (void) memalign(64, sizeof(char)); return 0; }
 EOF
 _memalign=no
 cc_check && _memalign=yes
@@ -3267,10 +3261,10 @@ fi #if hpux
 if sunos; then
 echocheck "userspace SCSI headers (Solaris)"
 cat > $TMPC << EOF
-#   include <unistd.h>
-#   include <stropts.h>
-#   include <sys/scsi/scsi_types.h>
-#   include <sys/scsi/impl/uscsi.h>
+#include <unistd.h>
+#include <stropts.h>
+#include <sys/scsi/scsi_types.h>
+#include <sys/scsi/impl/uscsi.h>
 int main(void) { return 0; }
 EOF
 _sol_scsi_h=no
@@ -3351,7 +3345,7 @@ echores "$_shm"
 echocheck "strsep()"
 cat > $TMPC << EOF
 #include <string.h>
-int main (void) { char *s = "Hello, world!"; (void) strsep(&s, ","); return 0; }
+int main(void) { char *s = "Hello, world!"; (void) strsep(&s, ","); return 0; }
 EOF
 _strsep=no
 cc_check && _strsep=yes
@@ -3455,7 +3449,7 @@ echores "$_glob"
 echocheck "setenv()"
 cat > $TMPC << EOF
 #include <stdlib.h>
-int main (void){ setenv("","",0); return 0; }
+int main(void) { setenv("","",0); return 0; }
 EOF
 _setenv=no
 cc_check && _setenv=yes
@@ -3473,15 +3467,15 @@ if sunos; then
 echocheck "sysi86()"
 cat > $TMPC << EOF
 #include <sys/sysi86.h>
-int main (void) { sysi86(0); return 0; }
+int main(void) { sysi86(0); return 0; }
 EOF
 _sysi86=no
 cc_check && _sysi86=yes
 if test "$_sysi86" = yes ; then
   _def_sysi86='#define HAVE_SYSI86 1'
   cat > $TMPC << EOF
-  #include <sys/sysi86.h>
-  int main (void) { int sysi86(int, void*); sysi86(0); return 0; }
+#include <sys/sysi86.h>
+int main(void) { int sysi86(int, void*); sysi86(0); return 0; }
 EOF
   cc_check && _def_sysi86_iv='#define HAVE_SYSI86_iv 1'
 else
@@ -3604,7 +3598,7 @@ if test "$_apple_remote" = auto ; then
   cat > $TMPC <<EOF
 #include <stdio.h>
 #include <IOKit/IOCFPlugIn.h>
-int main (int argc, const char * argv[])
+int main(int argc, const char * argv[])
 {
   io_iterator_t hidObjectIterator = (io_iterator_t)NULL;
   CFMutableDictionaryRef hidMatchDictionary;
@@ -3725,7 +3719,6 @@ cat > $TMPC << EOF
 int main(void) {
 struct vis_identifier ident;
 struct fbgattr attr;
-
 ioctl(0, VIS_GETIDENTIFIER, &ident);
 ioctl(0, FBIOGATTR, &attr);
 }
@@ -3905,10 +3898,7 @@ if test "$_xss" = auto ; then
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/scrnsaver.h>
-int main(void) {
-    XScreenSaverSuspend(NULL, True);
-    return 0;
-}
+int main(void) { XScreenSaverSuspend(NULL, True); return 0; }
 EOF
   _xss=no
   cc_check -lXss && _xss=yes
@@ -3931,17 +3921,13 @@ if test "$_x11" = yes ; then
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/dpms.h>
-int main(void) {
-  (void) DPMSQueryExtension(0, 0, 0);
-}
+int main(void) { (void) DPMSQueryExtension(0, 0, 0); }
 EOF
   cc_check -lXdpms && _xdpms3=yes
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/dpms.h>
-int main(void) {
-  (void) DPMSQueryExtension(0, 0, 0);
-}
+int main(void) { (void) DPMSQueryExtension(0, 0, 0); }
 EOF
   cc_check -lXext && _xdpms4=yes
 fi
@@ -4085,7 +4071,7 @@ if test "$_dga2" = auto && test "$_x11" = yes ; then
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
-int main (void) { (void) XDGASetViewport(0, 0, 0, 0, 0); return 0; }
+int main(void) { (void) XDGASetViewport(0, 0, 0, 0, 0); return 0; }
 EOF
   _dga2=no
   cc_check -lXxf86dga && _dga2=yes
@@ -4094,7 +4080,7 @@ if test "$_dga1" = auto && test "$_dga2" = no && test "$_vm" = yes ; then
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
-int main (void) { (void) XF86DGASetViewPort(0, 0, 0, 0); return 0; }
+int main(void) { (void) XF86DGASetViewPort(0, 0, 0, 0); return 0; }
 EOF
   _dga1=no
   cc_check -lXxf86dga -lXxf86vm && _dga1=yes
@@ -4473,7 +4459,6 @@ cat >$TMPC << EOF
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
-
 #include <ost/dmx.h>
 #include <ost/frontend.h>
 #include <ost/sec.h>
@@ -4504,7 +4489,6 @@ cat >$TMPC << EOF
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
-
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
 #include <linux/dvb/video.h>
@@ -4588,9 +4572,7 @@ cat > $TMPC << EOF
 #include <setjmp.h>
 #include <string.h>
 #include <jpeglib.h>
-int main(void) {
-  return 0;
-}
+int main(void) { return 0; }
 EOF
     if cc_check -ljpeg $_ld_lm ; then
       if tmp_run ; then
@@ -4638,9 +4620,7 @@ if test "$_gif" = auto ; then
   _gif=no
 cat > $TMPC << EOF
 #include <gif_lib.h>
-int main(void) {
-  return 0;
-}
+int main(void) { return 0; }
 EOF
   for _ld_gif in "-lungif" "-lgif" ; do
     cc_check $_ld_gif && tmp_run && _gif=yes && break
@@ -5446,10 +5426,7 @@ if test "$_cdparanoia" = auto ; then
 #include <cdda_interface.h>
 #include <cdda_paranoia.h>
 // This need a better test. How ?
-int main(void) {
-    void *test = cdda_verbose_set;
-    return test == (void *)1;
-}
+int main(void) { void *test = cdda_verbose_set; return test == (void *)1; }
 EOF
     _cdparanoia=no
     for _inc_tmp in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
@@ -5472,12 +5449,10 @@ if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
 #include <cdio/version.h>
 #include <cdio/cdda.h>
 #include <cdio/paranoia.h>
-int main(void)
-{
+int main(void) {
     void *test = cdda_verbose_set;
     printf("%s\n", CDIO_VERSION);
     return test == (void *)1;
-    
 }
 EOF
         _libcdio=no
@@ -5550,8 +5525,7 @@ if test "$_freetype" = auto ; then
 #if ((FREETYPE_MAJOR < 2) || ((FREETYPE_MINOR == 0) && (FREETYPE_PATCH < 9)))
 #error "Need FreeType 2.0.9 or newer"
 #endif
-int main(void)
-{
+int main(void) {
     FT_Library library;
     FT_Int major=-1,minor=-1,patch=-1;
     int err=FT_Init_FreeType(&library);
@@ -5594,15 +5568,13 @@ if test "$_fontconfig" = auto ; then
         cat > $TMPC << EOF
 #include <stdio.h>
 #include <fontconfig/fontconfig.h>
-int main(void)
-{
+int main(void) {
     int err = FcInit();
     if(err == FcFalse){
         printf("Couldn't initialize fontconfig lib\n");
         exit(err);
     }
     return 0;
-    
 }
 EOF
   _fontconfig=no
@@ -5663,8 +5635,7 @@ if test "$_fribidi" = auto ; then
 /* workaround for fribidi 0.10.4 and below */
 #define FRIBIDI_CHARSET_UTF8 FRIBIDI_CHAR_SET_UTF8
 #include <fribidi/fribidi.h>
-int main(void)
-{
+int main(void) {
     if(fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8) {
        printf("Fribidi headers are not consistents with the library!\n");
        exit(1);
@@ -5692,8 +5663,7 @@ echocheck "ENCA"
 if test "$_enca" = auto ; then
     cat > $TMPC << EOF
 #include <enca.h>
-int main(void)
-{
+int main(void) {
     const char **langs;
     size_t langcnt;
     langs = enca_get_languages(&langcnt);
@@ -5891,11 +5861,7 @@ if test "$_speex" = auto ; then
   _speex=no
   cat > $TMPC << EOF
 #include <speex/speex.h>
-int main(void) {
-  SpeexBits bits;
-  void *dec;
-  speex_decode_int(dec, &bits, dec);
-}
+int main(void) { SpeexBits bits; void *dec; speex_decode_int(dec, &bits, dec); }
 EOF
   cc_check -lspeex $_ld_lm && _speex=yes
 fi
@@ -5915,8 +5881,7 @@ if test "$_theora" = auto ; then
     cat > $TMPC << EOF
 #include <theora/theora.h>
 #include <string.h>
-int main(void) 
-{ 
+int main(void) {
   /* theora is in flux, make sure that all interface routines and 
    * datatypes exist and work the way we expect it, so we don't break
    * mplayer */
@@ -6109,7 +6074,8 @@ elif test "$_faad_internal" = no && test "$_faad_external" = auto ; then
 #ifndef FAAD_MIN_STREAMSIZE
 #error Too old version
 #endif
-int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); faacDecInit(0, 0, 0, 0, 0); return 0; }
+int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo;
+    testhand = faacDecOpen(); faacDecInit(0, 0, 0, 0, 0); return 0; }
 EOF
   cc_check -lfaad $_ld_lm && _faad_external=yes
 fi
@@ -6700,7 +6666,9 @@ _def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
 _def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
 cat > $TMPC <<EOF
 #include <lame/lame.h>
-int main(void) { lame_version_t lv; (void) lame_init(); get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor); return 0; }
+int main(void) { lame_version_t lv; (void) lame_init();
+    get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor);
+    return 0; }
 EOF
 # Note: libmp3lame usually depends on vorbis
 cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
@@ -6790,10 +6758,7 @@ if freebsd || netbsd || openbsd || dragonfly || bsdos ; then
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <$file>
-int main(void) {
- ioctl(0, TVTUNER_GETFREQ, 0);
- return 0;
-}
+int main(void) { ioctl(0, TVTUNER_GETFREQ, 0); return 0; }
 EOF
     if cc_check ; then
      _ioctl_bt848_h=yes
@@ -6817,10 +6782,7 @@ EOF
     cat > $TMPC <<EOF
 #include <sys/types.h>
 #include <$file>
-int main(void) { 
- ioctl(0, METEORSINPUT, 0);
- return 0; 
-}
+int main(void) { ioctl(0, METEORSINPUT, 0); return 0; }
 EOF
     if cc_check ; then
      _ioctl_meteor_h=yes
@@ -6850,7 +6812,7 @@ $_def_ioctl_bt848_h_name
 #ifdef IOCTL_BT848_H_NAME
 #include IOCTL_BT848_H_NAME
 #endif
-int main(void){
+int main(void) {
  ioctl(0, METEORSINPUT, 0);
  ioctl(0, TVTUNER_GETFREQ, 0);
  return 0; 
@@ -7038,10 +7000,7 @@ $_def_ioctl_bt848_h_name
 #ifdef IOCTL_BT848_H_NAME
 #include IOCTL_BT848_H_NAME
 #endif
-int main(void){
- ioctl(0, RADIO_GETFREQ, 0);
- return 0; 
-}
+int main(void) { ioctl(0, RADIO_GETFREQ, 0); return 0; }
 EOF
     cc_check && _radio_bsdbt848=yes
 echores "$_radio_bsdbt848"
@@ -7127,9 +7086,7 @@ if test "$_big_endian" = auto ; then
   cat > $TMPC <<EOF
 short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
-int main(void){
-  return (int)ascii_name;
-} 
+int main(void) { return (int)ascii_name; }
 EOF
   if cc_check ; then 
     if strings $TMPEXE | grep -l MPlayerBigEndian >/dev/null ; then 
