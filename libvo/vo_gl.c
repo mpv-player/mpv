@@ -669,8 +669,6 @@ static uint32_t get_image(mp_image_t *mpi) {
     return VO_FALSE;
   }
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
-  if (mpi->type == MP_IMGTYPE_IP || mpi->type == MP_IMGTYPE_IPB)
-    return VO_FALSE; // we can not provide readable buffers
   if (!gl_buffer)
     GenBuffers(1, &gl_buffer);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
