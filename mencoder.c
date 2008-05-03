@@ -545,7 +545,7 @@ if (frameno_filename) {
       // try default:
        vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
        if(!vo_font)
-       vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
+         vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
   }
 #endif
 #ifdef HAVE_FONTCONFIG
