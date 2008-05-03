@@ -892,7 +892,7 @@ TAGS:
 tags:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs ctags -a
 
-ALLHEADERS = $(wildcard *.h)
+ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 checkheaders: $(ALLHEADERS:.h=.ho)
 
 # ./configure must be rerun if it changed
