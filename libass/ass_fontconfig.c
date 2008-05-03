@@ -446,7 +446,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 	return priv->path_default;
 }
 
-fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path)
+fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path, int fc)
 {
 	fc_instance_t* priv;
 
