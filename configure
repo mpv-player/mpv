@@ -491,17 +491,17 @@ _libavcodec_a=auto
 _libamr_nb=auto
 _libamr_wb=auto
 _libavdecoders_all=`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
-_libavdecoders=` echo $_libavdecoders_all | sed -e s/LIBFAAD_DECODER// -e s/MPEG4AAC_DECODER//  -e s/LIBA52_DECODER// -e s/LIBGSM_DECODER// -e s/LIBGSM_MS_DECODER// -e s/LIBVORBIS_DECODER// -e s/LIBDIRAC_DECODER// -e s/LIBSCHROEDINGER_DECODER// `
+_libavdecoders=` echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER// `
 _libavencoders_all=`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
-_libavencoders=` echo $_libavencoders_all | sed -e s/LIBGSM_ENCODER// -e s/LIBGSM_MS_ENCODER// -e s/LIBTHEORA_ENCODER// -e s/LIBVORBIS_ENCODER// -e s/LIBDIRAC_ENCODER// -e s/LIBSCHROEDINGER_ENCODER// `
+_libavencoders=` echo $_libavencoders_all | sed 's/ LIB[A-Z0-9_]*_ENCODER//g'`
 _libavparsers_all=`sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavparsers=$_libavparsers_all
 _libavbsfs_all=`sed -n 's/^[^#]*BSF.*(.*, *\(.*\)).*/\1_bsf/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavbsfs=$_libavbsfs_all
 _libavdemuxers_all=`sed -n 's/^[^#]*DEMUX.*(.*, *\(.*\)).*/\1_demuxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
-_libavdemuxers=`echo $_libavdemuxers_all | sed -e s/REDIR_DEMUXER// -e s/RTSP_DEMUXER// -e s/SDP_DEMUXER// -e s/LIBNUT_DEMUXER// -e s/AVISYNTH_DEMUXER// `
+_libavdemuxers=`echo $_libavdemuxers_all | sed -e 's/ LIB[A-Z0-9_]*_DEMUXER//g' -e s/REDIR_DEMUXER// -e s/RTSP_DEMUXER// -e s/SDP_DEMUXER// -e s/AVISYNTH_DEMUXER// `
 _libavmuxers_all=`sed -n 's/^[^#]*_MUX.*(.*, *\(.*\)).*/\1_muxer/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
-_libavmuxers=`echo $_libavmuxers_all | sed -e s/RTP_MUXER// `
+_libavmuxers=`echo $_libavmuxers_all | sed -e 's/ LIB[A-Z0-9_]*_MUXER//g' -e s/RTP_MUXER// `
 _libavprotocols_all=`sed -n 's/^[^#]*PROTOCOL.*(.*, *\(.*\)).*/\1_protocol/p' libavformat/allformats.c | tr '[a-z]' '[A-Z]'`
 _libavcodec_so=auto
 _libavformat_a=auto
@@ -6083,7 +6083,6 @@ if test "$_faac" = yes ; then
 else
   _def_faac="#undef HAVE_FAAC"
   _nocodecmodules="faac $_nocodecmodules"
-  _libavencoders=`echo $_libavencoders | sed -e s/LIBFAAC_ENCODER// `
 fi
 echores "$_faac (in libavcodec: $_lavc_faac)"
 
@@ -6511,11 +6510,11 @@ if test "$_libamr_nb" = yes ; then
   _ld_extra="$_ld_extra -lamrnb"
   _def_libamr='#define CONFIG_LIBAMR 1'
   _def_libamr_nb='#define CONFIG_LIBAMR_NB 1'
+  _libavdecoders="$_libavdecoders LIBAMR_NB_DECODER"
+  _libavencoders="$_libavencoders LIBAMR_NB_ENCODER"
   _codecmodules="libamr_nb $_codecmodules"
 else
   _def_libamr_nb='#undef CONFIG_LIBAMR_NB'
-  _libavdecoders=`echo $_libavdecoders | sed -e s/LIBAMR_NB_DECODER// `
-  _libavencoders=`echo $_libavencoders | sed -e s/LIBAMR_NB_ENCODER// `
   _nocodecmodules="libamr_nb $_nocodecmodules"
 fi
 echores "$_libamr_nb"
@@ -6539,11 +6538,11 @@ if test "$_libamr_wb" = yes ; then
   _ld_extra="$_ld_extra -lamrwb"
   _def_libamr='#define CONFIG_LIBAMR 1'
   _def_libamr_wb='#define CONFIG_LIBAMR_WB 1'
+  _libavdecoders="$_libavdecoders LIBAMR_WB_DECODER"
+  _libavencoders="$_libavencoders LIBAMR_WB_ENCODER"
   _codecmodules="libamr_wb $_codecmodules"
 else
   _def_libamr_wb='#undef CONFIG_LIBAMR_WB'
-  _libavdecoders=`echo $_libavdecoders | sed -e s/LIBAMR_WB_DECODER// `
-  _libavencoders=`echo $_libavencoders | sed -e s/LIBAMR_WB_ENCODER// `
   _nocodecmodules="libamr_wb $_nocodecmodules"
 fi
 echores "$_libamr_wb"
@@ -6586,7 +6585,6 @@ if test "$_xvid" = yes ; then
 else
   _def_xvid='#undef HAVE_XVID4'
   _nocodecmodules="xvid $_nocodecmodules"
-  _libavencoders=`echo $_libavencoders | sed -e s/LIBXVID_ENCODER// `
 fi
 echores "$_xvid"
 
@@ -6599,10 +6597,10 @@ EOF
   if cc_check ; then
     _lavc_xvid=yes
     _def_lavc_xvid='#define CONFIG_LIBXVID 1'
+    _libavencoders="$_libavencoders LIBXVID_ENCODER"
   else
     _lavc_xvid=no
     _def_lavc_xvid='#undef CONFIG_LIBXVID'
-    _libavencoders=`echo $_libavencoders | sed -e s/LIBXVID_ENCODER// `
   fi
   echores "$_lavc_xvid"
 fi
@@ -6631,6 +6629,7 @@ if test "$_x264" = yes ; then
     _lavc_x264=yes
     _def_lavc_x264='#define CONFIG_LIBX264 1'
     _libs_mplayer="$_libs_mplayer $_ld_x264"
+    _libavencoders="$_libavencoders LIBX264_ENCODER"
   else
     _lavc_x264=no
     _def_lavc_x264='#undef CONFIG_LIBX264'
@@ -6640,7 +6639,6 @@ else
   _def_x264='#undef HAVE_X264'
   _def_lavc_x264='#undef CONFIG_LIBX264'
   _nocodecmodules="x264 $_nocodecmodules"
-  _libavencoders=`echo $_libavencoders | sed -e s/LIBX264_ENCODER// `
 fi
 echores "$_x264 (in libavcodec: $_lavc_x264)"
 
@@ -6663,7 +6661,6 @@ if test "$_libnut" = yes ; then
   _ld_extra="$_ld_extra -lnut"
 else
   _def_libnut='#undef HAVE_LIBNUT'
-  _libavmuxers=`echo $_libavmuxers | sed -e s/LIBNUT_MUXER// `
 fi
 echores "$_libnut"
 
@@ -6724,6 +6721,7 @@ EOF
   if echo $_libavencoders | grep -q MP3LAME ; then
     _lavc_mp3lame=yes
     _def_lavc_mp3lame="#define CONFIG_LIBMP3LAME 1"
+    _libavencoders="$_libavencoders LIBMP3LAME_ENCODER"
     _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
   else
     _lavc_mp3lame=no
@@ -6731,7 +6729,6 @@ EOF
   fi
 else
   _def_mp3lame='#undef HAVE_MP3LAME'
-  _libavencoders=`echo $_libavencoders | sed -e s/LIBMP3LAME_ENCODER// `
 fi
 echores "$_mp3lame"
 
