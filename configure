@@ -3598,8 +3598,7 @@ if test "$_apple_remote" = auto ; then
   cat > $TMPC <<EOF
 #include <stdio.h>
 #include <IOKit/IOCFPlugIn.h>
-int main(int argc, const char * argv[])
-{
+int main(void) {
   io_iterator_t hidObjectIterator = (io_iterator_t)NULL;
   CFMutableDictionaryRef hidMatchDictionary;
   IOReturn ioReturnValue;
@@ -4734,7 +4733,7 @@ fi
 if test "$_sdl" = auto || test "$_sdl" = yes ; then
   cat > $TMPC << EOF
 #include <SDL.h>
-int main(int argc, char *argv[]) {
+int main(void) {
   SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE);
   return 0;
 }
