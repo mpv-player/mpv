@@ -1419,7 +1419,6 @@ if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
       ;;
     10.1)
       cc_version="$cc_version, ok"
-      cc_fail=no
       ;;
     *)
       cc_version="$cc_version, bad"
@@ -1428,36 +1427,26 @@ if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
   esac
   echores "$cc_version"
 else
-  for _cc in "$_cc" gcc cc ; do
+  for _cc in "$_cc" cc gcc ; do
+    cc_name_tmp=`$_cc -v 2>&1 | _tail 1 | cut -d ' ' -f 1`
+    if test "$cc_name_tmp" = "gcc"; then
+    cc_name=$cc_name_tmp
     echocheck "$_cc version"
     cc_vendor=gnu
-    cc_name=`$_cc -v 2>&1 | _tail 1 | cut -d ' ' -f 1`
     cc_version=`$_cc -dumpversion 2>&1`
-    if test "$?" -gt 0; then
-      cc_version="not found"
-    fi
     case $cc_version in
-      '')
-        cc_version="v. ?.??, bad"
-        cc_fail=yes
-        ;;
-      2.95.[2-9]|2.95.[2-9][-.]*|[3-4].*)
-        _cc_major=`echo $cc_version | cut -d '.' -f 1`
-        _cc_minor=`echo $cc_version | cut -d '.' -f 2`
-        _cc_mini=`echo $cc_version | cut -d '.' -f 3`
-        cc_version="$cc_version, ok"
-        cc_fail=no
-        ;;
-      'not found')
+      2.96*)
         cc_fail=yes
         ;;
       *)
-        cc_version="$cc_version, bad"
-        cc_fail=yes
+        _cc_major=`echo $cc_version | cut -d '.' -f 1`
+        _cc_minor=`echo $cc_version | cut -d '.' -f 2`
+        _cc_mini=`echo $cc_version | cut -d '.' -f 3`
         ;;
     esac
     echores "$cc_version"
-    test "$cc_fail" = "no" && break
+    break
+    fi
   done
 fi # icc
 test "$cc_fail" = yes && die "unsupported compiler version"
