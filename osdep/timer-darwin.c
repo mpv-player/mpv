@@ -27,7 +27,7 @@
 #include "timer.h"
 
 /* global variables */
-static double relative_time, startup_time;
+static double relative_time;
 static double timebase_ratio;
 
 const char *timer_name = "Darwin accurate";
@@ -54,13 +54,13 @@ int usec_sleep(int usec_delay)
 /* current time in microseconds */
 unsigned int GetTimer()
 {
-  return (unsigned int)(uint64_t)((mach_absolute_time() * timebase_ratio - startup_time) * 1e6);
+  return (unsigned int)(uint64_t)(mach_absolute_time() * timebase_ratio * 1e6);
 }
 
 /* current time in milliseconds */
 unsigned int GetTimerMS()
 {
-  return (unsigned int)(uint64_t)((mach_absolute_time() * timebase_ratio - startup_time) * 1e3);
+  return (unsigned int)(uint64_t)(mach_absolute_time() * timebase_ratio * 1e3);
 }
 
 /* time spent between now and last call in seconds */
@@ -85,8 +85,7 @@ void InitTimer()
   timebase_ratio = (double)timebase.numer / (double)timebase.denom 
     * (double)1e-9;
     
-  relative_time = startup_time = 
-    (double)(mach_absolute_time() * timebase_ratio);
+  relative_time = (double)(mach_absolute_time() * timebase_ratio);
 }
 
 #if 0
