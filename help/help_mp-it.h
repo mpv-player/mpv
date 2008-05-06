@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <see AUTHORS for email address>
 
-// Updated to help_mp-en.h r26067
+// Updated to help_mp-en.h r26649
 
 // ========================= MPlayer help ===========================
 
@@ -2016,7 +2016,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningFont "[ass] Errore aprendo il font: %s, %d\n"
 
 // ass_fontconfig.c
-#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: La famiglia dei font scelta non è quella richiesta: '%s' != '%s'\n"
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: Il font selezionato non è quello richiesto: '%s' != '%s'\n"
 #define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Uso la famiglia di default dei font: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Uso il font di default: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: Uso la famiglia dei font 'Arial': (%s, %d, %d) -> %s, %d\n"
@@ -2047,7 +2047,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Attenzione! L'evento altezza è cambiato!  \n"
 
 // ass_font.c
-#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glifo 0x%X non trovato, riseleziono il font per (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glifo 0x%X non trovato, seleziono un altro font per (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] Glifo 0x%X non trovato nel font per (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Errore aprendo il font in memoria: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] font face senza alcuna mappa caratteri\n"
