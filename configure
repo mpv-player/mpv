@@ -6579,17 +6579,10 @@ fi
 if test "$_x264" = yes ; then
   _def_x264='#define HAVE_X264 1'
   _codecmodules="x264 $_codecmodules"
-  if echo $_libavencoders | grep -q X264 ; then
-    _lavc_x264=yes
     _def_lavc_x264='#define CONFIG_LIBX264 1'
     _libs_mplayer="$_libs_mplayer $_ld_x264"
     _libavencoders="$_libavencoders LIBX264_ENCODER"
-  else
-    _lavc_x264=no
-    _def_lavc_x264='#undef CONFIG_LIBX264'
-  fi
 else
-  _lavc_x264=no
   _def_x264='#undef HAVE_X264'
   _def_lavc_x264='#undef CONFIG_LIBX264'
   _nocodecmodules="x264 $_nocodecmodules"
@@ -7768,7 +7761,7 @@ CONFIG_LIBAMR_WB=$_libamr_wb
 CONFIG_LIBFAAC=$_lavc_faac
 CONFIG_LIBMP3LAME=$_lavc_mp3lame
 CONFIG_LIBVORBIS=$_libvorbis
-CONFIG_LIBX264=$_lavc_x264
+CONFIG_LIBX264=$_x264
 CONFIG_LIBXVID=$_lavc_xvid
 CONFIG_MLIB = $_mlib
 # Prevent building libavcodec/imgresample.c with conflicting symbols
