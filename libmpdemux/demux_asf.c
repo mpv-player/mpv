@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -501,6 +502,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 		  p++;
                   //printf("  group part: %d bytes\n",len2);
                   if(len2 > len - 1) break; // Not enough data
+                  assert(len2 > 0 && len2 <= asf->packetsize);
                   demux_asf_read_packet(demux,p,len2,streamno,seq,x,duration,-1,keyframe);
                   p+=len2;
 		  len-=len2+1;
@@ -513,8 +515,10 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
               default:
                 // NO GROUPING:
                 //printf("fragment offset: %d  \n",sh->x);
-                if (!asf->asf_is_dvr_ms || asf->found_first_key_frame)
+                if (!asf->asf_is_dvr_ms || asf->found_first_key_frame) {
+                    assert(len > 0 && len <= asf->packetsize);
                     demux_asf_read_packet(demux,p,len,streamno,seq,time2,duration,x,keyframe);
+                }
                 p+=len;
                 break;
 	      }

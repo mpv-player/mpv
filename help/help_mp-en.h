@@ -2034,7 +2034,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningFont "[ass] Error opening font: %s, %d\n"
 
 // ass_fontconfig.c
-#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: Selected font family is not the requested one: '%s' != '%s'\n"
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: Selected font is not the requested one: '%s' != '%s'\n"
 #define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Using default font family: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Using default font: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: Using 'Arial' font family: (%s, %d, %d) -> %s, %d\n"
@@ -2065,7 +2065,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Warning! Event height has changed!  \n"
 
 // ass_font.c
-#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X not found, reselecting font for (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X not found, selecting one more font for (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] Glyph 0x%X not found in font for (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Error opening memory font: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] font face with no charmaps\n"

@@ -378,6 +378,7 @@ SRCS_COMMON-$(MPLAYER_NETWORK)       += stream/stream_netstream.c \
                                         stream/tcp.c \
                                         stream/stream_rtp.c \
                                         stream/stream_udp.c \
+                                        stream/librtsp/rtsp.c \
                                         stream/realrtsp/asmrp.c \
                                         stream/realrtsp/real.c \
                                         stream/realrtsp/rmff.c \
@@ -693,10 +694,7 @@ DIRS =  . \
         TOOLS \
         vidix \
 
-all: recurse $(ALL_PRG)
-
-recurse:
-	for part in $(PARTS); do $(MAKE) -C $$part; done
+all: $(ALL_PRG)
 
 %.d: %.c
 	$(MPDEPEND_CMD) > $@
@@ -747,7 +745,7 @@ ifneq ($(HELP_FILE),help/help_mp-en.h)
 endif
 
 define RECURSIVE_RULE
-$(part)/$(notdir $(part)).a:
+$(part)/$(notdir $(part)).a: recurse
 	$(MAKE) -C $(part)
 endef
 
@@ -897,7 +895,7 @@ TAGS:
 tags:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs ctags -a
 
-ALLHEADERS = $(wildcard *.h)
+ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 checkheaders: $(ALLHEADERS:.h=.ho)
 
 # ./configure must be rerun if it changed

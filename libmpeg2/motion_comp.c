@@ -46,7 +46,7 @@ void mpeg2_mc_init (uint32_t accel)
 	mpeg2_mc = mpeg2_mc_mmx;
     else
 #endif
-#ifdef ARCH_PPC
+#ifdef HAVE_ALTIVEC
     if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
 	mpeg2_mc = mpeg2_mc_altivec;
     else

@@ -1,4 +1,4 @@
-.\" synced with r26460
+.\" synced with r26674
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -156,8 +156,8 @@ architetture di CPU, controlla la documentazione).
 Visualizza la maggior parte dei file del tipo MPEG/\:VOB, AVI,
 ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, Ogg/\:OGM, MKV, VIVO, FLI, NuppelVideo,
 yuv4mpeg, FILM e RoQ, supportato da molti codec nativi o binari.
-Puoi guardare Video CD, SVCD, DVD, 3ivx, DivX 3/4/5 ed addirittura film in
-formato WMV.
+Puoi guardare VCD, SVCD, DVD, 3ivx, DivX 3/4/5, WMV ed addirittura filmati
+con codifica H.264.
 .PP
 MPlayer supporta un'ampia gamma di driver di uscita video ed audio.
 Funziona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
@@ -3920,8 +3920,10 @@ Disabilitarlo può incrementare la velocità.
 .
 .TP
 .B "gl2\ \ \ \ "
-Driver di uscita video OpenGL, seconda generazione.
-Supporta OSD e video più grandi della dimensione massima della texture.
+Driver alternativo di uscita video OpenGL.
+Supporta video più grandi della dimensione massima della texture, ma manca di
+molte funzionalità avanzate e ottimizzazioni rispetto al driver gl e
+difficilmente verrà sviluppato ulteriormente.
 .PD 0
 .RSs
 .IPs (no)glfinish

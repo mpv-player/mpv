@@ -31,6 +31,8 @@
 #ifndef MPLAYER_RTSP_SESSION_H
 #define MPLAYER_RTSP_SESSION_H
 
+#include <stdint.h>
+
 typedef struct rtsp_session_s rtsp_session_t;
 
 rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,

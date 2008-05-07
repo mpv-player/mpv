@@ -21,6 +21,7 @@
 #ifndef MPLAYER_RTSP_RTP_H
 #define MPLAYER_RTSP_RTP_H
 
+#include <sys/types.h>
 #include "rtsp.h"
 
 #define MAX_PREVIEW_SIZE 4096

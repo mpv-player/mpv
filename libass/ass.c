@@ -482,6 +482,12 @@ static int process_style(ass_track_t* track, char *str)
 		style->Name = strdup("Default");
 	if (!style->FontName)
 		style->FontName = strdup("Arial");
+	// skip '@' at the start of the font name
+	if (*style->FontName == '@') {
+		p = style->FontName;
+		style->FontName = strdup(p + 1);
+		free(p);
+	}
 	free(format);
 	return 0;
 	

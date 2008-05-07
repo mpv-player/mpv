@@ -47,7 +47,7 @@ static void state_restore_mmx (cpu_state_t * state)
 }
 #endif
 
-#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
+#ifdef ARCH_PPC
 #if defined(__APPLE_CC__)	/* apple */
 #define LI(a,b) "li r" #a "," #b "\n\t"
 #define STVX0(a,b,c) "stvx v" #a ",0,r" #c "\n\t"

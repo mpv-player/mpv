@@ -66,10 +66,10 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	FcBool rc;
 	FcResult result;
 	FcPattern *pat = 0, *rpat;
-	int val_i;
-	FcChar8* val_s;
-	FcBool val_b;
-	FcCharSet* val_cs;
+	int r_index, r_slant, r_weight;
+	FcChar8 *r_family, *r_style, *r_file, *r_fullname;
+	FcBool r_outline, r_embolden;
+	FcCharSet* r_charset;
 	FcFontSet* fset = 0;
 	int curf;
 	char* retval = 0;
@@ -116,17 +116,17 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	for (curf = 0; curf < fset->nfont; ++curf) {
 		rpat = fset->fonts[curf];
 		
-		result = FcPatternGetBool(rpat, FC_OUTLINE, 0, &val_b);
+		result = FcPatternGetBool(rpat, FC_OUTLINE, 0, &r_outline);
 		if (result != FcResultMatch)
 			continue;
-		if (val_b != FcTrue)
+		if (r_outline != FcTrue)
 			continue;
 		if (!code)
 			break;
-		result = FcPatternGetCharSet(rpat, FC_CHARSET, 0, &val_cs);
+		result = FcPatternGetCharSet(rpat, FC_CHARSET, 0, &r_charset);
 		if (result != FcResultMatch)
 			continue;
-		if (FcCharSetHasChar(val_cs, code))
+		if (FcCharSetHasChar(r_charset, code))
 			break;
 	}
 
@@ -135,27 +135,50 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 
 	rpat = fset->fonts[curf];
 	
-	result = FcPatternGetInteger(rpat, FC_INDEX, 0, &val_i);
+	result = FcPatternGetInteger(rpat, FC_INDEX, 0, &r_index);
 	if (result != FcResultMatch)
 		goto error;
-	*index = val_i;
+	*index = r_index;
 
-	result = FcPatternGetString(rpat, FC_FAMILY, 0, &val_s);
+	result = FcPatternGetString(rpat, FC_FILE, 0, &r_file);
 	if (result != FcResultMatch)
 		goto error;
+	retval = strdup((const char*)r_file);
 
-	if (strcasecmp((const char*)val_s, family) != 0) {
-		result = FcPatternGetString(rpat, FC_FULLNAME, 0, &val_s);
-		if (result != FcResultMatch || strcasecmp((const char*)val_s, family) != 0)
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
-			       (const char*)val_s, family);
-	}
-
-	result = FcPatternGetString(rpat, FC_FILE, 0, &val_s);
+	result = FcPatternGetString(rpat, FC_FAMILY, 0, &r_family);
 	if (result != FcResultMatch)
-		goto error;
-	
-	retval = strdup((const char*)val_s);
+		r_family = NULL;
+
+	result = FcPatternGetString(rpat, FC_FULLNAME, 0, &r_fullname);
+	if (result != FcResultMatch)
+		r_fullname = NULL;
+
+	if (!(r_family && strcasecmp((const char*)r_family, family) == 0) &&
+	    !(r_fullname && strcasecmp((const char*)r_fullname, family) == 0))
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
+		       (const char*)(r_family ? r_family : r_fullname), family);
+
+	result = FcPatternGetString(rpat, FC_STYLE, 0, &r_style);
+	if (result != FcResultMatch)
+		r_style = NULL;
+
+	result = FcPatternGetInteger(rpat, FC_SLANT, 0, &r_slant);
+	if (result != FcResultMatch)
+		r_slant = 0;
+
+	result = FcPatternGetInteger(rpat, FC_WEIGHT, 0, &r_weight);
+	if (result != FcResultMatch)
+		r_weight = 0;
+
+	result = FcPatternGetBool(rpat, FC_EMBOLDEN, 0, &r_embolden);
+	if (result != FcResultMatch)
+		r_embolden = 0;
+
+	mp_msg(MSGT_ASS, MSGL_V, "[ass] Font info: family '%s', style '%s', fullname '%s',"
+	       " slant %d, weight %d%s\n",
+	       (const char*)r_family, (const char*)r_style, (const char*)r_fullname,
+	       r_slant, r_weight, r_embolden ? ", embolden" : "");
+
  error:
 	if (pat) FcPatternDestroy(pat);
 	if (fset) FcFontSetDestroy(fset);
@@ -423,7 +446,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 	return priv->path_default;
 }
 
-fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path)
+fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path, int fc)
 {
 	fc_instance_t* priv;
 

@@ -192,8 +192,8 @@ default as it offers better speed.
 <para>
 <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
 is a library for creating H.264 video streams.
-It is not 100% complete, but currently it has at least some kind
-of support for most of the H.264 features which impact quality.
+It is not 100% complete, but supports most of H.264's features which impact
+quality.
 There are also many advanced features in the H.264 specification
 which have nothing to do with video quality per se; many of these
 are not yet implemented in <systemitem class="library">x264</systemitem>.
@@ -303,17 +303,17 @@ H.264 decoding, you might keep an eye on
   and <systemitem class="library">x264</systemitem>?</title>
 
 <para>
-If you have the subversion client installed, the latest x264
+If you have the GIT client installed, the latest x264
 sources can be gotten with this command:
-<screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
+<screen>git clone git://git.videolan.org/x264.git</screen>
 <application>MPlayer</application> sources are updated whenever
 an <systemitem class="library">x264</systemitem> API change
 occurs, so it is always suggested to use
-<application>MPlayer</application> from Subversion as well.
+<application>MPlayer</application> from GIT as well.
 Perhaps this situation will change when and if an
 <systemitem class="library">x264</systemitem> "release" occurs.
 Meanwhile, <systemitem class="library">x264</systemitem> should
-be considered very unstable, in the sense that its programming
+be considered a bit unstable, in the sense that its programming
 interface is subject to change.
 </para>
 
