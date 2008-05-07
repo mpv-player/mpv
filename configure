@@ -6651,7 +6651,6 @@ int main(void) { lame_version_t lv; (void) lame_init();
     get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor);
     return 0; }
 EOF
-# Note: libmp3lame usually depends on vorbis
 cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
 if test "$_mp3lame" = yes ; then
   _def_mp3lame="#define HAVE_MP3LAME"
