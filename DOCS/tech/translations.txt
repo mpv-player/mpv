@@ -91,7 +91,7 @@ incomplete, please let us know, we'll fix it. Patches are more than welcome,
 of course. Do not, however, change the translation first, please get your
 update into the English version first.
 
-If you have Subversion write access and commit a translation update file,
+If you have Subversion write access and commit a translation update,
 use something like "synced with rXXX" as first line of the commit message
 so that it is possible to tell with a glance at the Subversion log or ViewVC
 if the translation is outdated and which revision of the English master file
