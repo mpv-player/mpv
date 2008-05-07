@@ -28,7 +28,7 @@ translating.
 
 Furthermore, if you take over an unmaintained translation, bring the existing
 parts up-to-date before translating new ones.  Outdated information is worse
-than missing information. For console messages and the XML documentation 
+than missing information. For console messages and the XML documentation,
 missing parts are automatically replaced by the English versions.
 
 Translations of MPlayer documentation consist of 3 parts in descending
@@ -55,11 +55,12 @@ TOOLS/mphelp_check.py is a small tool to check translated files. It will report
 conflicting arguments, strings not present in the master file and (optionally)
 strings missing from the translation. Running it as
 
-  mphelp_check.py help_mp-en.h help_mp-XX.h
+  TOOLS/mphelp_check.py help/help_mp-en.h help/help_mp-XX.h
 
 will output errors to the screen, just substitute XX with your language code.
+Adding the -missing option to the command line as in
 
-  mphelp_check.py -missing help_mp-en.h help_mp-XX.h
+  TOOLS/mphelp_check.py -missing help/help_mp-en.h help/help_mp-XX.h
 
 will additionally print untranslated messages to the screen.
 
@@ -101,4 +102,4 @@ adapting parts that changed in the English master file, leave the sync
 tag as it is.
 
 If you make changes to the XML documentation, doublecheck that the
-documentation still builds by running make.
+documentation still builds by running 'make' in the DOCS/xml/ subdirectory.
