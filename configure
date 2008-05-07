@@ -6587,7 +6587,7 @@ else
   _def_lavc_x264='#undef CONFIG_LIBX264'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
-echores "$_x264 (in libavcodec: $_lavc_x264)"
+echores "$_x264"
 
 
 echocheck "libnut"
