@@ -63,29 +63,29 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
 
     if (sh_audio->format == 0x2001)
     {
-    length = dts_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
-    if(length >= 12)
-    {
-      if(isdts != 1)
+      length = dts_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
+      if(length >= 12)
       {
-        mp_msg(MSGT_DECAUDIO, MSGL_STATUS, "hwac3: switched to DTS, %d bps, %d Hz\n", bit_rate, sample_rate);
-        isdts = 1;
+        if(isdts != 1)
+        {
+          mp_msg(MSGT_DECAUDIO, MSGL_STATUS, "hwac3: switched to DTS, %d bps, %d Hz\n", bit_rate, sample_rate);
+          isdts = 1;
+        }
+        break;
       }
-      break;
-    }
     }
     else
     {
-    length = a52_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
-    if(length >= 7 && length <= 3840) 
-    {
-      if(isdts != 0)
+      length = a52_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
+      if(length >= 7 && length <= 3840) 
       {
-        mp_msg(MSGT_DECAUDIO, MSGL_STATUS, "hwac3: switched to AC3, %d bps, %d Hz\n", bit_rate, sample_rate);
-        isdts = 0;
+        if(isdts != 0)
+        {
+          mp_msg(MSGT_DECAUDIO, MSGL_STATUS, "hwac3: switched to AC3, %d bps, %d Hz\n", bit_rate, sample_rate);
+          isdts = 0;
+        }
+        break; /* we're done.*/
       }
-      break; /* we're done.*/
-    }
     }
     /* bad file => resync*/
     memcpy(sh_audio->a_in_buffer, sh_audio->a_in_buffer + 1, 11);
