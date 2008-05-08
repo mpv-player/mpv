@@ -73,6 +73,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	FcFontSet* fset = 0;
 	int curf;
 	char* retval = 0;
+	int family_cnt;
 	
 	*index = 0;
 
@@ -93,11 +94,13 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	// precedence in matching.
 	// An alternative approach could be to reimplement FcFontSort
 	// using FC_FULLNAME instead of FC_FAMILY.
+	family_cnt = 1;
 	if (strchr(family, ' ')) {
 		char *p, *s = strdup(family);
 		while (p = strrchr(s, ' ')) {
 			*p = '\0';
 			FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
+			++ family_cnt;
 		}
 		free(s);
 	}
@@ -114,16 +117,16 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	fset = FcFontSort(priv->config, pat, FcTrue, NULL, &result);
 
 	for (curf = 0; curf < fset->nfont; ++curf) {
-		rpat = fset->fonts[curf];
-		
-		result = FcPatternGetBool(rpat, FC_OUTLINE, 0, &r_outline);
+		FcPattern* curp = fset->fonts[curf];
+
+		result = FcPatternGetBool(curp, FC_OUTLINE, 0, &r_outline);
 		if (result != FcResultMatch)
 			continue;
 		if (r_outline != FcTrue)
 			continue;
 		if (!code)
 			break;
-		result = FcPatternGetCharSet(rpat, FC_CHARSET, 0, &r_charset);
+		result = FcPatternGetCharSet(curp, FC_CHARSET, 0, &r_charset);
 		if (result != FcResultMatch)
 			continue;
 		if (FcCharSetHasChar(r_charset, code))
@@ -133,8 +136,16 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (curf >= fset->nfont)
 		goto error;
 
-	rpat = fset->fonts[curf];
-	
+	// Remove all extra family names from original pattern.
+	// After this, FcFontRenderPrepare will select the most relevant family
+	// name in case there are more than one of them.
+	for (; family_cnt > 1; --family_cnt)
+		FcPatternRemove(pat, FC_FAMILY, family_cnt - 1);
+
+	rpat = FcFontRenderPrepare(priv->config, pat, fset->fonts[curf]);
+	if (!rpat)
+		goto error;
+
 	result = FcPatternGetInteger(rpat, FC_INDEX, 0, &r_index);
 	if (result != FcResultMatch)
 		goto error;
@@ -181,6 +192,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 
  error:
 	if (pat) FcPatternDestroy(pat);
+	if (rpat) FcPatternDestroy(rpat);
 	if (fset) FcFontSetDestroy(fset);
 	return retval;
 }
