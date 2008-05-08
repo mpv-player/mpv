@@ -61,6 +61,8 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
       sh_audio->a_in_buffer[sh_audio->a_in_buffer_len++] = c;
     }
 
+    if (sh_audio->format == 0x2001)
+    {
     length = dts_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
     if(length >= 12)
     {
@@ -71,6 +73,9 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
       }
       break;
     }
+    }
+    else
+    {
     length = a52_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
     if(length >= 7 && length <= 3840) 
     {
@@ -80,6 +85,7 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
         isdts = 0;
       }
       break; /* we're done.*/
+    }
     }
     /* bad file => resync*/
     memcpy(sh_audio->a_in_buffer, sh_audio->a_in_buffer + 1, 11);
