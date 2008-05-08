@@ -50,6 +50,16 @@ struct fc_instance_s {
 };
 
 #ifdef HAVE_FONTCONFIG
+
+// 4yo fontconfig does not have these.
+// They are only needed for debug output, anyway.
+#ifndef FC_FULLNAME
+#define FC_FULLNAME "fullname"
+#endif
+#ifndef FC_EMBOLDEN
+#define FC_EMBOLDEN "embolden"
+#endif
+
 /**
  * \brief Low-level font selection.
  * \param priv private data
