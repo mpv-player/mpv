@@ -8,6 +8,16 @@ in order to be useful. Otherwise they quickly get outdated and become
 obsolete, useless cruft. That said, we would be happy if you could
 maintain a new documentation translation.
 
+Experience shows that translations work best when done by teams. Not only
+can the workload be shared, but there is also the chance to review the
+translation. So if possible try to find more people to help out with
+translating.
+
+Furthermore, if you take over an unmaintained translation, bring the existing
+parts up-to-date before translating new ones.  Outdated information is worse
+than missing information. For console messages and the XML documentation,
+missing parts are automatically replaced by the English versions.
+
 Documentation related discussions happen on the MPlayer-DOCS mailing list,
 while documentation translation related discussions happen on the
 MPlayer-translations mailing list. If you want to maintain a translation
@@ -21,16 +31,6 @@ http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations
 Send updates and patches to this mailing list or directly to the translation
 coordination maintainer, see DOCS/tech/MAINTAINERS for details.
 
-Experience shows that translations work best when done by teams. Not only
-can the workload be shared, but there is also the chance to review the
-translation. So if possible try to find more people to help out with
-translating.
-
-Furthermore, if you take over an unmaintained translation, bring the existing
-parts up-to-date before translating new ones.  Outdated information is worse
-than missing information. For console messages and the XML documentation,
-missing parts are automatically replaced by the English versions.
-
 Translations of MPlayer documentation consist of 3 parts in descending
 order of importance:
 
@@ -39,6 +39,31 @@ order of importance:
 3) XML documentation
 
 Please note that only doing 1) or 1) + 2) is perfectly fine.
+
+
+general:
+~~~~~~~~
+
+Please note that the help_mp files and the XML documentation are both encoded
+in UTF-8. Editing these files in a program which uses a different encoding
+will result in breaking console messages and HTML.
+
+Translations are for documentation what porting is for code. Many more eyes
+see it and get to find mistakes. If you stumble over mistakes, inaccuracies,
+clumsy wording, spelling/grammar errors or if you notice that something is
+incomplete, please let us know, we'll fix it. Patches are more than welcome,
+of course. Do not, however, change the translation first, please get your
+update into the English version first.
+
+If you have Subversion write access and commit a translation update, use
+something like "synced with rXXX" as first line of the commit message so
+that it is possible to tell with a glance at the Subversion log or ViewVC
+if the translation is outdated and which revision of the English master
+file it is equivalent to.
+
+If you make (spelling/wording/consistency/etc) changes to a file without
+adapting parts that changed in the English master file, leave the sync
+tag as it is.
 
 
 console messages:
@@ -83,31 +108,6 @@ If no messages are missing, please add a line similar to
 to the file header, replacing XXX with the revision of help_mp-en.h that your
 translation is in sync with. This way we can easily tell if the translation
 is up to date or not.
-
-
-general:
-~~~~~~~~
-
-Please note that the help_mp files and the XML documentation are both encoded
-in UTF-8. Editing these files in a program which uses a different encoding
-will result in breaking console messages and HTML.
-
-Translations are for documentation what porting is for code. Many more eyes
-see it and get to find mistakes. If you stumble over mistakes, inaccuracies,
-clumsy wording, spelling/grammar errors or if you notice that something is
-incomplete, please let us know, we'll fix it. Patches are more than welcome,
-of course. Do not, however, change the translation first, please get your
-update into the English version first.
-
-If you have Subversion write access and commit a translation update,
-use something like "synced with rXXX" as first line of the commit message
-so that it is possible to tell with a glance at the Subversion log or ViewVC
-if the translation is outdated and which revision of the English master file
-it is equivalent to.
-
-If you make (spelling/wording/consistency/etc) changes to a file without
-adapting parts that changed in the English master file, leave the sync
-tag as it is.
 
 
 XML documentation:
