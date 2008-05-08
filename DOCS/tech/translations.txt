@@ -40,6 +40,10 @@ order of importance:
 
 Please note that only doing 1) or 1) + 2) is perfectly fine.
 
+
+console messages:
+~~~~~~~~~~~~~~~~~
+
 You can find the latest versions of the help_mp-XX.h files in Subversion or
 here:
 
@@ -80,6 +84,10 @@ to the file header, replacing XXX with the revision of help_mp-en.h that your
 translation is in sync with. This way we can easily tell if the translation
 is up to date or not.
 
+
+general:
+~~~~~~~~
+
 Please note that the help_mp files and the XML documentation are both encoded
 in UTF-8. Editing these files in a program which uses a different encoding
 will result in breaking console messages and HTML.
@@ -100,6 +108,10 @@ it is equivalent to.
 If you make (spelling/wording/consistency/etc) changes to a file without
 adapting parts that changed in the English master file, leave the sync
 tag as it is.
+
+
+XML documentation:
+~~~~~~~~~~~~~~~~~~
 
 If you make changes to the XML documentation, doublecheck that the
 documentation still builds by running 'make' in the DOCS/xml/ subdirectory.
