@@ -736,7 +736,6 @@ endif
 	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
 
 ifneq ($(HELP_FILE),help/help_mp-en.h)
-	@echo "Adding untranslated messages to help_mp.h"
 	@echo '// untranslated messages from the English master file:' >> help_mp.h
 	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
 endif
