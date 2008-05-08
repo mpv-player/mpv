@@ -38,8 +38,12 @@ order of importance:
 2) man page
 3) XML documentation
 
-Please note that only doing 1) or 1) + 2) is perfectly fine.
+Not all parts are available in all languages. Keeping existing parts up-to-date
+should have precedence over adding newly translated content. It is perfectly
+acceptable to work on only a subset of these parts, but please follow the above
+order of importance nonetheless.
 
+Now on to some more detailed instructions...
 
 general:
 ~~~~~~~~
