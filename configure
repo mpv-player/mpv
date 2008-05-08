@@ -6026,11 +6026,11 @@ if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
   if echo $_libavencoders | grep -q FAAC ; then
     _lavc_faac=yes
-    _def_lavc_faac="#define CONFIG_LIBFAAC 1"
+    _def_faac_lavc="#define CONFIG_LIBFAAC 1"
     _libs_mplayer="$_libs_mplayer $_ld_faac"
   else
     _lavc_faac=no
-    _def_lavc_faac="#undef CONFIG_LIBFAAC"
+    _def_faac_lavc="#undef CONFIG_LIBFAAC"
   fi
   _codecmodules="faac $_codecmodules"
 else
@@ -6550,11 +6550,11 @@ int main(void) { xvid_plugin_2pass2_t s; s.vbv_size=0; return 0; }
 EOF
   if cc_check ; then
     _lavc_xvid=yes
-    _def_lavc_xvid='#define CONFIG_LIBXVID 1'
+    _def_xvid_lavc='#define CONFIG_LIBXVID 1'
     _libavencoders="$_libavencoders LIBXVID_ENCODER"
   else
     _lavc_xvid=no
-    _def_lavc_xvid='#undef CONFIG_LIBXVID'
+    _def_xvid_lavc='#undef CONFIG_LIBXVID'
   fi
   echores "$_lavc_xvid"
 fi
@@ -6579,12 +6579,12 @@ fi
 if test "$_x264" = yes ; then
   _def_x264='#define HAVE_X264 1'
   _codecmodules="x264 $_codecmodules"
-    _def_lavc_x264='#define CONFIG_LIBX264 1'
+    _def_x264_lavc='#define CONFIG_LIBX264 1'
     _libs_mplayer="$_libs_mplayer $_ld_x264"
     _libavencoders="$_libavencoders LIBX264_ENCODER"
 else
   _def_x264='#undef HAVE_X264'
-  _def_lavc_x264='#undef CONFIG_LIBX264'
+  _def_x264_lavc='#undef CONFIG_LIBX264'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
 echores "$_x264"
@@ -6668,12 +6668,12 @@ EOF
   cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
   if echo $_libavencoders | grep -q MP3LAME ; then
     _lavc_mp3lame=yes
-    _def_lavc_mp3lame="#define CONFIG_LIBMP3LAME 1"
+    _def_mp3lame_lavc="#define CONFIG_LIBMP3LAME 1"
     _libavencoders="$_libavencoders LIBMP3LAME_ENCODER"
     _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
   else
     _lavc_mp3lame=no
-    _def_lavc_mp3lame="#undef CONFIG_LIBMP3LAME"
+    _def_mp3lame_lavc="#undef CONFIG_LIBMP3LAME"
   fi
 else
   _def_mp3lame='#undef HAVE_MP3LAME'
@@ -8150,10 +8150,10 @@ $_def_libamr_wb
 `ff_config_enable "$_libavprotocols_all" "$_libavprotocols"`
 `ff_config_enable "$_libavbsfs_all" "$_libavbsfs"`
 
-$_def_lavc_faac
-$_def_lavc_xvid
-$_def_lavc_mp3lame
-$_def_lavc_x264
+$_def_faac_lavc
+$_def_mp3lame_lavc
+$_def_x264_lavc
+$_def_xvid_lavc
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
