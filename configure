@@ -6025,11 +6025,11 @@ fi
 if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
   if echo $_libavencoders | grep -q FAAC ; then
-    _lavc_faac=yes
+    _faac_lavc=yes
     _def_faac_lavc="#define CONFIG_LIBFAAC 1"
     _libs_mplayer="$_libs_mplayer $_ld_faac"
   else
-    _lavc_faac=no
+    _faac_lavc=no
     _def_faac_lavc="#undef CONFIG_LIBFAAC"
   fi
   _codecmodules="faac $_codecmodules"
@@ -6037,7 +6037,7 @@ else
   _def_faac="#undef HAVE_FAAC"
   _nocodecmodules="faac $_nocodecmodules"
 fi
-echores "$_faac (in libavcodec: $_lavc_faac)"
+echores "$_faac (in libavcodec: $_faac_lavc)"
 
 
 echocheck "FAAD2 (AAC) support"
@@ -6549,14 +6549,14 @@ if test "$_xvid" = yes ; then
 int main(void) { xvid_plugin_2pass2_t s; s.vbv_size=0; return 0; }
 EOF
   if cc_check ; then
-    _lavc_xvid=yes
+    _xvid_lavc=yes
     _def_xvid_lavc='#define CONFIG_LIBXVID 1'
     _libavencoders="$_libavencoders LIBXVID_ENCODER"
   else
-    _lavc_xvid=no
+    _xvid_lavc=no
     _def_xvid_lavc='#undef CONFIG_LIBXVID'
   fi
-  echores "$_lavc_xvid"
+  echores "$_xvid_lavc"
 fi
 
 
@@ -6667,12 +6667,12 @@ int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
   cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
   if echo $_libavencoders | grep -q MP3LAME ; then
-    _lavc_mp3lame=yes
+    _mp3lame_lavc=yes
     _def_mp3lame_lavc="#define CONFIG_LIBMP3LAME 1"
     _libavencoders="$_libavencoders LIBMP3LAME_ENCODER"
     _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
   else
-    _lavc_mp3lame=no
+    _mp3lame_lavc=no
     _def_mp3lame_lavc="#undef CONFIG_LIBMP3LAME"
   fi
 else
@@ -7757,11 +7757,11 @@ CONFIG_MUXERS=$_mencoder
 CONFIG_LIBAMR=$_libamr
 CONFIG_LIBAMR_NB=$_libamr_nb
 CONFIG_LIBAMR_WB=$_libamr_wb
-CONFIG_LIBFAAC=$_lavc_faac
-CONFIG_LIBMP3LAME=$_lavc_mp3lame
+CONFIG_LIBFAAC=$_faac_lavc
+CONFIG_LIBMP3LAME=$_mp3lame_lavc
 CONFIG_LIBVORBIS=$_libvorbis
 CONFIG_LIBX264=$_x264
-CONFIG_LIBXVID=$_lavc_xvid
+CONFIG_LIBXVID=$_xvid_lavc
 CONFIG_MLIB = $_mlib
 # Prevent building libavcodec/imgresample.c with conflicting symbols
 CONFIG_SWSCALE=yes
