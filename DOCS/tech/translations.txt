@@ -34,6 +34,7 @@ coordination maintainer, see DOCS/tech/MAINTAINERS for details.
 Translations of MPlayer documentation consist of 3 parts in descending
 order of importance:
 
+0) homepage
 1) console messages (help/help_mp-XX.h)
 2) man page
 3) XML documentation
@@ -68,6 +69,22 @@ file it is equivalent to.
 If you make (spelling/wording/consistency/etc) changes to a file without
 adapting parts that changed in the English master file, leave the sync
 tag as it is.
+
+
+homepage:
+~~~~~~~~~
+
+Get the homepage from Subversion with
+
+  svn checkout svn://svn.mplayerhq.hu/homepage/trunk/ homepage
+
+or browse the sources online at
+
+http://svn.mplayerhq.hu/homepage/trunk/
+
+The homepage uses design template files that are combined with the content
+files to form the final HTML pages. To build the HTML pages, type 'make' in
+the root of the homepage source directory.
 
 
 console messages:
