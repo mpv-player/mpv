@@ -167,7 +167,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (!(r_family && strcasecmp((const char*)r_family, family) == 0) &&
 	    !(r_fullname && strcasecmp((const char*)r_fullname, family) == 0))
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
-		       (const char*)(r_family ? r_family : r_fullname), family);
+		       (const char*)(r_fullname ? r_fullname : r_family), family);
 
 	result = FcPatternGetString(rpat, FC_STYLE, 0, &r_style);
 	if (result != FcResultMatch)
