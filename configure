@@ -311,6 +311,7 @@ Codecs:
   --disable-ladspa          disable LADSPA plugin support [autodetect]
   --disable-libdv           disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad             disable libmad (MPEG audio) support [autodetect]
+  --disable-mp3lame         disable LAME MP3 encoding support [autodetect]
   --disable-toolame         disable Toolame (MPEG layer 2) encoding [autodetect]
   --disable-twolame         disable Twolame (MPEG layer 2) encoding [autodetect]
   --enable-xmms             enable XMMS input plugin support [disabled]
@@ -553,6 +554,7 @@ _openal=auto
 _libcdio=auto
 _liblzo=auto
 _mad=auto
+_mp3lame=auto
 _toolame=auto
 _twolame=auto
 _tremor_internal=yes
@@ -890,6 +892,8 @@ for ac_option do
   --disable-openal)	_openal=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
+  --enable-mp3lame)	_mp3lame=yes	;;
+  --disable-mp3lame)	_mp3lame=no	;;
   --enable-toolame)	_toolame=yes	;;
   --disable-toolame)	_toolame=no	;;
   --enable-twolame)	_twolame=yes	;;
@@ -6642,9 +6646,10 @@ echores "$_zr"
 if test "$_mencoder" != no ; then
 
 echocheck "libmp3lame (for mencoder)"
-_mp3lame=no
 _def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
 _def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
+if test "$_mp3lame" = auto ; then
+_mp3lame=no
 cat > $TMPC <<EOF
 #include <lame/lame.h>
 int main(void) { lame_version_t lv; (void) lame_init();
@@ -6652,6 +6657,7 @@ int main(void) { lame_version_t lv; (void) lame_init();
     return 0; }
 EOF
 cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
+fi
 if test "$_mp3lame" = yes ; then
   _def_mp3lame="#define HAVE_MP3LAME"
   _ld_mp3lame=-lmp3lame
