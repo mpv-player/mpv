@@ -12,8 +12,7 @@ vpath %.S $(SRC_DIR)
 ALLFFLIBS = avcodec avdevice avfilter avformat avutil postproc swscale
 
 CFLAGS = -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
-         -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) \
-         $(addprefix -I$(SRC_PATH)/lib,$(ALLFFLIBS)) $(OPTFLAGS)
+         -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) $(OPTFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
@@ -32,6 +31,8 @@ CFLAGS = -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
 
 %.d: %.cpp
 	$(DEPEND_CMD) > $@
+
+%$(EXESUF): %.c
 
 install: install-libs install-headers
 
@@ -70,11 +71,14 @@ LIBSUFFIXES   = *.a *.lib *.so *.so.* *.dylib *.dll *.def *.dll.a *.exp *.map
 DISTCLEANSUFFIXES = *.d
 
 define RULES
-$(SUBDIR)%: $(SUBDIR)%.o $(LIBNAME)
-	$(CC) $(FFLDFLAGS) -o $$@ $$^ $(FFEXTRALIBS)
+$(SUBDIR)%$(EXESUF): $(SUBDIR)%.o
+	$(CC) $(FFLDFLAGS) -o $$@ $$^ $(SUBDIR)$(LIBNAME) $(FFEXTRALIBS)
 
-$(SUBDIR)%-test$(EXESUF): $(SUBDIR)%.c $(LIBNAME)
-	$(CC) $(CFLAGS) $(FFLDFLAGS) -DTEST -o $$@ $$^ $(FFEXTRALIBS)
+$(SUBDIR)%-test.o: $(SUBDIR)%.c
+	$(CC) $(CFLAGS) -DTEST -c -o $$@ $$^
+
+$(SUBDIR)%-test.o: $(SUBDIR)%-test.c
+	$(CC) $(CFLAGS) -DTEST -c -o $$@ $$^
 
 clean::
 	rm -f $(TESTS) $(addprefix $(SUBDIR),$(CLEANFILES) $(CLEANSUFFIXES) $(LIBSUFFIXES)) \
@@ -86,9 +90,6 @@ distclean:: clean
 endef
 
 $(eval $(RULES))
-
-# Clear DIRS variable so that it is not used in other subdirectories.
-DIRS =
 
 tests: $(TESTS)
 
