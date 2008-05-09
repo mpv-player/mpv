@@ -6,6 +6,9 @@
 
 include config.mak
 
+
+###### variable declarations #######
+
 COMMON_LDFLAGS += $(EXTRA_LIB)\
                   $(EXTRALIBS) \
 
@@ -691,6 +694,10 @@ PARTS = libavcodec \
         libpostproc \
         libswscale \
 
+
+
+###### generic rules #######
+
 all: $(ALL_PRG)
 
 %.d: %.c
@@ -772,6 +779,10 @@ ifneq ($(HELP_FILE),help/help_mp-en.h)
 	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
 endif
 
+
+
+###### dependency declarations / specific CFLAGS ######
+
 codec-cfg.d: codecs.conf.h
 mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d: version.h
 DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
@@ -798,6 +809,9 @@ VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
 
 $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
+
+
+###### installation rules #######
 
 install: install-dirs $(INSTALL_TARGETS)
 
@@ -880,6 +894,9 @@ TAGS:
 tags:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs ctags -a
 
+
+
+###### tests / tools #######
 
 TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
