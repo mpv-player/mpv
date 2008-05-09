@@ -1,4 +1,4 @@
-.\" synced with r26460
+.\" synced with r26674
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -48,7 +48,7 @@ mencoder \- Encodeur vidéo
 .na
 .nh
 .B mplayer
-[options] [fichier||liste de lecture |\-]
+[options] [fichier|URL|liste de lecture |\-]
 .
 .br
 .B mplayer
@@ -73,12 +73,12 @@ vcd://piste[/périphérique]
 .
 .br
 .B mplayer
-tv://[canal][/identifiant de l'entrée]
+tv://[chaîne][/identifiant de l'entrée]
 [options]
 .
 .br
 .B mplayer
-radio://[canal|fréquence][/capture]
+radio://[chaîne|fréquence][/capture]
 [options]
 .
 .br
@@ -108,8 +108,8 @@ cue://fichier[:piste]
 .
 .br
 .B mplayer
-[file mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb] ://
-[utilisateur:motdepasse@]URL[:port] [options]
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
+[utilisateur:mot_de_passe@]URL[:port] [options]
 .
 .br
 .B mplayer
@@ -133,7 +133,7 @@ tivo://hôte/[list|llist|fsid]
 .br
 .B mencoder
 [options] fichier
-[fichier|URL|\-] [\-o fichier | file://fichier | smb://[user:pass@]host/filepath] 
+[fichier|URL|\-] [\-o fichier | file://fichier | smb://[utilisateur:mot_de_passe@]hôte/chemin/vers/le/fichier] 
 .
 .br
 .B mencoder
@@ -153,8 +153,8 @@ Unices et processeurs non\-x86, voir la documentation).
 Il joue la plupart des formats MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV,
 RM, QT/\:MOV/\:MP4, Ogg/\:OGM, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM
 et RoQ, gérés par plusieurs codecs natifs et par des codecs binaires.
-Vous pouvez regarder des Vidéos CD, SVCD, DVD, 3ivx, DivX 3/4/5 et
-même des films WMV.
+Vous pouvez regarder des films VCD, SVCD, DVD, 3ivx, DivX 3/4/5, WMV et
+même H.264.
 .PP
 Un autre gros atout de MPlayer est la grande variété de pilotes de
 sortie audio et vidéos gérés.
@@ -3950,9 +3950,10 @@ Sa désactivation peut économiser un peu de temps processeur.
 .
 .TP
 .B "gl2\ \ \ \ "
-Pilote de sortie vidéo OpenGL, seconde génération.
-Gère l'OSD et les vidéos de taille supérieure à la taille maximum d'une
-texture.
+Variante du pilote de sortie vidéo OpenGL.
+Gère les vidéos de taille supérieure à la taille maximale d'une texture,
+mais n'offre ni les fonctionnalités avancées, ni optimisations du pilote
+de sortie vidéo gl et a très peu de chances d'être amélioré à l'avenir.
 .PD 0
 .RSs
 .IPs (no)glfinish
