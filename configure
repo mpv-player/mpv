@@ -6571,14 +6571,14 @@ int main(void) { xvid_plugin_2pass2_t s; s.vbv_size=0; return 0; }
 EOF
   cc_check && _xvid_lavc=yes
 fi
-  if test "$_xvid_lavc" = yes ; then
-    _def_xvid_lavc='#define CONFIG_LIBXVID 1'
-    _libavencoders="$_libavencoders LIBXVID_ENCODER"
-  else
-    _xvid_lavc=no
-    _def_xvid_lavc='#undef CONFIG_LIBXVID'
-  fi
-  echores "$_xvid_lavc"
+if test "$_xvid_lavc" = yes ; then
+  _def_xvid_lavc='#define CONFIG_LIBXVID 1'
+  _libavencoders="$_libavencoders LIBXVID_ENCODER"
+else
+  _xvid_lavc=no
+  _def_xvid_lavc='#undef CONFIG_LIBXVID'
+fi
+echores "$_xvid_lavc"
 
 
 echocheck "x264"
@@ -6671,14 +6671,14 @@ echocheck "libmp3lame (for mencoder)"
 _def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
 _def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
 if test "$_mp3lame" = auto ; then
-_mp3lame=no
-cat > $TMPC <<EOF
+  _mp3lame=no
+  cat > $TMPC <<EOF
 #include <lame/lame.h>
 int main(void) { lame_version_t lv; (void) lame_init();
     get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor);
     return 0; }
 EOF
-cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
+  cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
 fi
 if test "$_mp3lame" = yes ; then
   _def_mp3lame="#define HAVE_MP3LAME"
