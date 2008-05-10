@@ -80,6 +80,7 @@ static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
 static int many_fmts;
+static int ati_hack;
 static int use_glFinish;
 static int swap_interval;
 static GLenum gl_target;
@@ -672,6 +673,8 @@ static uint32_t get_image(mp_image_t *mpi) {
   if (!gl_buffer)
     GenBuffers(1, &gl_buffer);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
+  if (ati_hack)
+    mpi->width = (mpi->width + 63) & ~63;
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   if (mpi->stride[0] * mpi->height > gl_buffersize) {
     BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->height,
@@ -789,6 +792,7 @@ static opt_t subopts[] = {
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
   {"lscale",       OPT_ARG_INT,  &lscale,       (opt_test_f)int_non_neg},
   {"cscale",       OPT_ARG_INT,  &cscale,       (opt_test_f)int_non_neg},
+  {"ati-hack",     OPT_ARG_BOOL, &ati_hack,     NULL},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {"swapinterval", OPT_ARG_INT,  &swap_interval,NULL},
   {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
@@ -811,6 +815,7 @@ static int preinit(const char *arg)
     cscale = 0;
     use_rectangle = 0;
     use_glFinish = 0;
+    ati_hack = 0;
     swap_interval = 1;
     slice_height = 0;
     custom_prog = NULL;
@@ -835,6 +840,8 @@ static int preinit(const char *arg)
               "    0: use power-of-two textures\n"
               "    1: use texture_rectangle\n"
               "    2: use texture_non_power_of_two\n"
+              "  ati-hack\n"
+              "    Workaround ATI bug with PBOs\n"
               "  glfinish\n"
               "    Call glFinish() before swapping buffers\n"
               "  swapinterval=<n>\n"
