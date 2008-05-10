@@ -61,8 +61,14 @@ m_option_t lavfopts_conf[] = {
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+static muxer_t *priv_data; // This should be transmitted to mp_open() through the filename
+                           // when thread saftey is needed but mplayer == no threads and
+                           // especially not multiple muxers being inited at once so theres
+                           // no point in the extra complexity, a static is simpler.
+
 static int mp_open(URLContext *h, const char *filename, int flags)
 {
+        h->priv_data= priv_data;
 	return 0;
 }
 
@@ -388,13 +394,12 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
             av_strlcpy(priv->oc->comment  , info_comment,   sizeof(priv->oc->comment  ));
 	register_protocol(&mp_protocol);
 
+        priv_data= muxer;
 	if(url_fopen(&priv->oc->pb, mp_filename, URL_WRONLY))
 	{
 		mp_msg(MSGT_MUXER, MSGL_FATAL, "Could not open outfile\n");
 		goto fail;
         }
-	
-	((URLContext*)(priv->oc->pb->opaque))->priv_data= muxer;
 	
 	muxer->priv = (void *) priv;
 	muxer->cont_new_stream = &lavf_new_stream;
