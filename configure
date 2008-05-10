@@ -2479,8 +2479,6 @@ EOF
     # if altivec is enabled, make sure the correct flags turn up in CFLAGS
 
     if test "$_altivec" = yes ; then
-        #FIXME: _mcpu is used for CFLAGS, this needs to be set earlier
-        #_mcpu="$_mcpu $_altivec_gcc_flags"
         CFLAGS="$CFLAGS $_altivec_gcc_flags"
     fi
 fi
