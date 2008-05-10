@@ -10,6 +10,7 @@
 
 #include "aviheader.h"
 #include "ms_hdr.h"
+#include "av_opts.h"
 
 #include "stream/stream.h"
 #include "muxer.h"
@@ -50,6 +51,7 @@ static int mux_rate= 0;
 static int mux_packet_size= 0;
 static float mux_preload= 0.5;
 static float mux_max_delay= 0.7;
+static char *mux_avopt = NULL;
 
 m_option_t lavfopts_conf[] = {
 	{"format", &(conf_format), CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -57,6 +59,7 @@ m_option_t lavfopts_conf[] = {
 	{"packetsize", &mux_packet_size, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"preload", &mux_preload, CONF_TYPE_FLOAT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"delay", &mux_max_delay, CONF_TYPE_FLOAT, CONF_RANGE, 0, INT_MAX, NULL},
+        {"o", &mux_avopt, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -392,6 +395,14 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
             av_strlcpy(priv->oc->copyright, info_copyright, sizeof(priv->oc->copyright));
         if (info_comment)
             av_strlcpy(priv->oc->comment  , info_comment,   sizeof(priv->oc->comment  ));
+
+        if(mux_avopt){
+            if(parse_avopts(priv->oc, mux_avopt) < 0){
+                mp_msg(MSGT_MUXER,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", mux_avopt);
+                goto fail;
+            }
+        }
+
 	register_protocol(&mp_protocol);
 
         priv_data= muxer;
