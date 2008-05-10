@@ -14,6 +14,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "av_opts.h"
 
 #include "codec-cfg.h"
 #include "stream/stream.h"
@@ -157,6 +158,7 @@ char *lavc_param_acodec = "mp2";
 int lavc_param_atag = 0;
 int lavc_param_abitrate = 224;
 int lavc_param_audio_global_header= 0;
+static char *lavc_param_avopt = NULL;
 
 #include "m_option.h"
 
@@ -302,6 +304,7 @@ m_option_t lavcopts_conf[]={
 	{"refs", &lavc_param_refs, CONF_TYPE_INT, CONF_RANGE, 1, 16, NULL},
         {"b_sensitivity", &lavc_param_b_sensitivity, CONF_TYPE_INT, CONF_RANGE, 1, INT_MAX, NULL},
 	{"level", &lavc_param_level, CONF_TYPE_INT, CONF_RANGE, INT_MIN, INT_MAX, NULL},
+        {"o", &lavc_param_avopt, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -577,6 +580,13 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->refs = lavc_param_refs;
     lavc_venc_context->b_sensitivity = lavc_param_b_sensitivity;
     lavc_venc_context->level = lavc_param_level;
+
+    if(lavc_param_avopt){
+        if(parse_avopts(lavc_venc_context, lavc_param_avopt) < 0){
+            mp_msg(MSGT_MENCODER,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", lavc_param_avopt);
+            return 0;
+        }
+    }
 
     mux_v->imgfmt = lavc_param_format;
     switch(lavc_param_format)
