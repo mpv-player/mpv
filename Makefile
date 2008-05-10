@@ -747,7 +747,7 @@ codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
 	$(CC) -I. -DTESTING codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap -o $@
 
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
-	$(WINDRES) -o $@ $<
+	$(WINDRES) -I. -o $@ $<
 
 # ./configure must be rerun if it changed
 config.mak: configure
