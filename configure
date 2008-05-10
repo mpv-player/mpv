@@ -2413,12 +2413,9 @@ echores $_asmalign_pot
 #FIXME: This should happen before the check for CFLAGS..
 if test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ; then
 
-    # check if altivec is supported by the compiler, and how to enable it
-
-    _altivec_gcc_flags=''
-
+    # check if AltiVec is supported by the compiler, and how to enable it
     echocheck "GCC altivec support"
-
+    _altivec_gcc_flags=''
     p=''
     cat > $TMPC << EOF
 int main(void) { return 0; }
@@ -2428,26 +2425,22 @@ EOF
 
     # check for Darwin-style flags first, since gcc-3.3 (August Update
     # from Apple) on MacOS 10.2.8 accepts but ignores FSF-style flags...
-
     if test -z "$p"; then
         cc_check $Darwin_flags && p='Darwin'
     fi
     if test -z "$p"; then
         cc_check $FSF_flags && p='FSF'
     fi
-
     case $p in
         FSF) _altivec_gcc_flags="$FSF_flags" _altivec=yes ;;
         Darwin) _altivec_gcc_flags="$Darwin_flags" _altivec=yes ;;
         *) _altivec=no ;;
     esac
-
     if test -z "$p"; then
         p=none
     else
         p="$p-style ($_altivec_gcc_flags)"
     fi
-
     echores "$p"
 
     # check if <altivec.h> should be included
@@ -2462,22 +2455,18 @@ EOF
         && _def_altivec_h='#define HAVE_ALTIVEC_H 1'
     echores "$_have_altivec_h"
 
-    # disable runtime cpudetection if
-    # - we cannot generate altivec code
-    # - altivec is disabled by the user
-
+    # Disable runtime cpudetection if we cannot generate AltiVec code or
+    # AltiVec is disabled by the user.
     if test "$_runtime_cpudetection" = yes -a "$_altivec" = no ; then
         _runtime_cpudetection=no
     fi
 
-    # show that we are optimizing for altivec (if enabled and supported)
-
+    # Show that we are optimizing for AltiVec (if enabled and supported).
     if test "$_runtime_cpudetection" = no -a "$_altivec" = yes ; then
 	_optimizing="$_optimizing altivec"
     fi
 
-    # if altivec is enabled, make sure the correct flags turn up in CFLAGS
-
+    # If AltiVec is enabled, make sure the correct flags turn up in CFLAGS.
     if test "$_altivec" = yes ; then
         CFLAGS="$CFLAGS $_altivec_gcc_flags"
     fi
