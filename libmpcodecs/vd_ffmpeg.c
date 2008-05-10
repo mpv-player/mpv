@@ -114,22 +114,15 @@ const m_option_t lavc_decode_opts_conf[]={
 };
 
 static enum AVDiscard str2AVDiscard(char *str) {
-  if (!str)
+    if (!str)                               return AVDISCARD_DEFAULT;
+    if (strcasecmp(str, "none"   ) == 0)    return AVDISCARD_NONE;
+    if (strcasecmp(str, "default") == 0)    return AVDISCARD_DEFAULT;
+    if (strcasecmp(str, "nonref" ) == 0)    return AVDISCARD_NONREF;
+    if (strcasecmp(str, "bidir"  ) == 0)    return AVDISCARD_BIDIR;
+    if (strcasecmp(str, "nonkey" ) == 0)    return AVDISCARD_NONKEY;
+    if (strcasecmp(str, "all"    ) == 0)    return AVDISCARD_ALL;
+    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Unknown discard value %s\n", str);
     return AVDISCARD_DEFAULT;
-  if (strcasecmp(str, "none") == 0)
-    return AVDISCARD_NONE;
-  if (strcasecmp(str, "default") == 0)
-    return AVDISCARD_DEFAULT;
-  if (strcasecmp(str, "nonref") == 0)
-    return AVDISCARD_NONREF;
-  if (strcasecmp(str, "bidir") == 0)
-    return AVDISCARD_BIDIR;
-  if (strcasecmp(str, "nonkey") == 0)
-    return AVDISCARD_NONKEY;
-  if (strcasecmp(str, "all") == 0)
-    return AVDISCARD_ALL;
-  mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Unknown discard value %s\n", str);
-  return AVDISCARD_DEFAULT;
 }
 
 // to set/get/query special features/parameters
