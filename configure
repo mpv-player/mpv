@@ -2411,7 +2411,7 @@ echores $_asmalign_pot
 
 
 #FIXME: This should happen before the check for CFLAGS..
-if ppc ; then
+if test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ; then
 
     # check if altivec is supported by the compiler, and how to enable it
 
