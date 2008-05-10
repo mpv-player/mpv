@@ -6,6 +6,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "av_opts.h"
 
 #include "libavutil/common.h"
 #include "libavutil/intreadwrite.h"
@@ -86,6 +87,7 @@ static char *lavc_param_skip_idct_str = NULL;
 static char *lavc_param_skip_frame_str = NULL;
 static int lavc_param_threads=1;
 static int lavc_param_bitexact=0;
+static char *lavc_avopt = NULL;
 
 const m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
@@ -107,6 +109,7 @@ const m_option_t lavc_decode_opts_conf[]={
 	{"skipframe", &lavc_param_skip_frame_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
         {"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
         {"bitexact", &lavc_param_bitexact, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_BITEXACT, NULL},
+        {"o", &lavc_avopt, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -312,6 +315,15 @@ static int init(sh_video_t *sh){
     avctx->skip_loop_filter = str2AVDiscard(lavc_param_skip_loop_filter_str);
     avctx->skip_idct = str2AVDiscard(lavc_param_skip_idct_str);
     avctx->skip_frame = str2AVDiscard(lavc_param_skip_frame_str);
+
+    if(lavc_avopt){
+        if(parse_avopts(avctx, lavc_avopt) < 0){
+            mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", lavc_avopt);
+            uninit(sh);
+            return 0;
+        }
+    }
+
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     switch (sh->format) {
     case mmioFOURCC('S','V','Q','3'):
