@@ -688,6 +688,9 @@ void exit_player_with_rc(const char* how, int rc){
 
   if (mpctx->user_muted && !mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
   uninit_player(INITIALIZED_ALL);
+#ifdef WIN32
+  timeEndPeriod(1);
+#endif
 #ifdef HAVE_X11
 #ifdef HAVE_NEW_GUI
   if ( !use_gui )
@@ -2627,6 +2630,8 @@ int gui_no_filename=0;
 #endif
 
 #ifdef WIN32
+	// request 1ms timer resolution
+	timeBeginPeriod(1);
 	if(proc_priority){
 		int i;
         	for(i=0; priority_presets_defs[i].name; i++){
