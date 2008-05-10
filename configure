@@ -2457,19 +2457,15 @@ EOF
 
     # Disable runtime cpudetection if we cannot generate AltiVec code or
     # AltiVec is disabled by the user.
-    if test "$_runtime_cpudetection" = yes -a "$_altivec" = no ; then
-        _runtime_cpudetection=no
-    fi
+    test "$_runtime_cpudetection" = yes && test "$_altivec" = no \
+        && _runtime_cpudetection=no
 
     # Show that we are optimizing for AltiVec (if enabled and supported).
-    if test "$_runtime_cpudetection" = no -a "$_altivec" = yes ; then
-	_optimizing="$_optimizing altivec"
-    fi
+    test "$_runtime_cpudetection" = no && test "$_altivec" = yes \
+        && _optimizing="$_optimizing altivec"
 
     # If AltiVec is enabled, make sure the correct flags turn up in CFLAGS.
-    if test "$_altivec" = yes ; then
-        CFLAGS="$CFLAGS $_altivec_gcc_flags"
-    fi
+    test "$_altivec" = yes && CFLAGS="$CFLAGS $_altivec_gcc_flags"
 fi
 
 if arm ; then
