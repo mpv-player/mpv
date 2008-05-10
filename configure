@@ -2418,11 +2418,9 @@ if test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ; then
     cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
-    # check for Darwin-style flags first, since gcc-3.3 (August Update
-    # from Apple) on MacOS 10.2.8 accepts but ignores FSF-style flags...
-    cc_check -faltivec && _altivec_gcc_flags=-faltivec \
-        || cc_check -maltivec -mabi=altivec \
+    cc_check -maltivec -mabi=altivec \
         && _altivec_gcc_flags="-maltivec -mabi=altivec" \
+        || cc_check -faltivec && _altivec_gcc_flags=-faltivec \
         || _altivec=no
     echores "$_altivec_gcc_flags"
 
