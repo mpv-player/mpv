@@ -2416,7 +2416,7 @@ if test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ; then
     # check if AltiVec is supported by the compiler, and how to enable it
     echocheck "GCC altivec support"
     _altivec_gcc_flags=''
-    p=''
+    p='none'
     cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
@@ -2425,23 +2425,14 @@ EOF
 
     # check for Darwin-style flags first, since gcc-3.3 (August Update
     # from Apple) on MacOS 10.2.8 accepts but ignores FSF-style flags...
-    if test -z "$p"; then
-        cc_check $Darwin_flags && p='Darwin'
-    fi
-    if test -z "$p"; then
-        cc_check $FSF_flags && p='FSF'
-    fi
+    cc_check $Darwin_flags && p='Darwin' \
+        || cc_check $FSF_flags && p='FSF'
     case $p in
         FSF) _altivec_gcc_flags="$FSF_flags" _altivec=yes ;;
         Darwin) _altivec_gcc_flags="$Darwin_flags" _altivec=yes ;;
         *) _altivec=no ;;
     esac
-    if test -z "$p"; then
-        p=none
-    else
-        p="$p-style ($_altivec_gcc_flags)"
-    fi
-    echores "$p"
+    echores "$p-style ($_altivec_gcc_flags)"
 
     # check if <altivec.h> should be included
     echocheck "altivec.h"
