@@ -309,7 +309,7 @@ sources can be gotten with this command:
 <application>MPlayer</application> sources are updated whenever
 an <systemitem class="library">x264</systemitem> API change
 occurs, so it is always suggested to use
-<application>MPlayer</application> from GIT as well.
+<application>MPlayer</application> from Subversion as well.
 Perhaps this situation will change when and if an
 <systemitem class="library">x264</systemitem> "release" occurs.
 Meanwhile, <systemitem class="library">x264</systemitem> should
