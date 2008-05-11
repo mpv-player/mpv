@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26146 -->
+<!-- synced with r26729 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -193,8 +193,8 @@ mivel jobb a sebessége.
 <para>
 Az <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
 egy függvénykönyvtár a H.264 videó folyamok létrehozásához.
-Még nincs kész 100%-ig, de valamilyen szinten már támogatja a
-H.264 legtöbb minőségjavító tulajdonságát.
+Még nincs kész 100%-ig, de támogatja a H.264 legtöbb minőségjavító
+tulajdonságát.
 Van számos fejlett tulajdonság a H.264 specifikációjában, aminek
 semmi köze a videó minőségéhez; ezek többsége még nincs implementálva
 az <systemitem class="library">x264</systemitem>-ben.
@@ -305,16 +305,16 @@ H.264 dekódolójában, tartsd figyelemmel az
   és az <systemitem class="library">x264</systemitem>-gyel videót kódolni?</title>
 
 <para>
-Ha van feltelepítve subversion kliensed, a legújabb x264
+Ha van feltelepítve GIT kliensed, a legújabb x264
 forrást letöltheted ezzel a paranccsal:
-<screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
+<screen>git clone git://git.videolan.org/x264.git</screen>
 Az <application>MPlayer</application> forrás mindig frissül, ha
 egy <systemitem class="library">x264</systemitem> API változás
 jelenik meg, így javasolt az <application>MPlayer</application>
 Subversion verziójának használata.
 Talán ez a szituáció változni fog ha egy
 <systemitem class="library">x264</systemitem> "kiadás" megjelenik.
-Addig az <systemitem class="library">x264</systemitem> nagyon
+Addig az <systemitem class="library">x264</systemitem> egy kicsit
 instabilként kezelendő, figyelembe véve, hogy a programozási
 felülete is változik.
 </para>

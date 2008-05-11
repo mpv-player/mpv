@@ -1,4 +1,4 @@
-.\" Synced with r26460
+.\" Synced with r26674
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 04. 21." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 05. 11." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -153,8 +153,8 @@ lásd a dokumentációt).
 Lejátsza a legtöbb MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, Ogg/\:OGM,
 MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM és RoQ fájlt, számos natív és bináris
 codec-et támogat.
-Tudsz nézni vele Video CD-t, SVCD-t, DVD-t, 3ivx-et, DivX 3/4/5-öt és még WMV
-filmeket is.
+Tudsz nézni vele VCD-t, SVCD-t, DVD-t, 3ivx-et, DivX 3/4/5-öt, WMV-t és még
+H.264 filmeket is.
 .PP
 Az MPlayer a videó és audió kimeneti vezérlõk széles skáláját támogatja.
 Van X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
@@ -3772,8 +3772,10 @@ A kikapcsolása növeli a sebességet.
 .
 .TP
 .B "gl2\ \ \ \ "
-OpenGL kimeneti videó vezérlõ, második generáció.
-Támogatja az OSD-t és a maximum textúra méretnél nagyobb videókat.
+Az OpenGL videó kimeneti vezérlõ variánsa.
+Támogatja a maximális textúra méretnél nagyobb videókat, de hiányzik belõle
+a gl vezérlõ több fejlettebb funkciója és optimalizációja és valószínûleg
+nem lesz továbbfejlesztve.
 .PD 0
 .RSs
 .IPs (no)glfinish
