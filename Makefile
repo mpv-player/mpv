@@ -288,7 +288,6 @@ SRCS_COMMON-$(LIBDVDCSS_INTERNAL)    += libdvdcss/css.c \
                                         libdvdcss/error.c \
                                         libdvdcss/ioctl.c \
                                         libdvdcss/libdvdcss.c \
-                                        #libdvdcss/bsdi_ioctl \
 
 SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
                                         libfaad2/cfft.c \
