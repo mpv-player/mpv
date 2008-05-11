@@ -64,10 +64,11 @@ m_option_t lavfopts_conf[] = {
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-static muxer_t *priv_data; // This should be transmitted to mp_open() through the filename
-                           // when thread saftey is needed but mplayer == no threads and
-                           // especially not multiple muxers being inited at once so theres
-                           // no point in the extra complexity, a static is simpler.
+/* This should be transmitted to mp_open() through the filename when
+ * thread safety is needed but MPlayer == no threads and especially
+ * not multiple muxers being initialized at once so there is no
+ * point in the extra complexity, a static is simpler. */
+static muxer_t *priv_data;
 
 static int mp_open(URLContext *h, const char *filename, int flags)
 {
@@ -136,21 +137,21 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 
 	if(!muxer || (type != MUXER_TYPE_VIDEO && type != MUXER_TYPE_AUDIO))
 	{
-		mp_msg(MSGT_MUXER, MSGL_ERR, "UNKNOW TYPE %d\n", type);
+		mp_msg(MSGT_MUXER, MSGL_ERR, "UNKNOWN TYPE %d\n", type);
 		return NULL;
 	}
 	
 	stream = calloc(1, sizeof(muxer_stream_t));
 	if(!stream)
 	{
-		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not alloc muxer_stream, EXIT\n");
+		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not allocate muxer_stream, EXIT.\n");
 		return NULL;
 	}
 	muxer->streams[muxer->avih.dwStreams] = stream;
 	stream->b_buffer = malloc(2048);
 	if(!stream->b_buffer)
 	{
-		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not alloc b_buffer, EXIT\n");
+		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not allocate b_buffer, EXIT.\n");
 		free(stream);
 		return NULL;
 	}
@@ -169,7 +170,7 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 	spriv->avstream = av_new_stream(priv->oc, 1);
 	if(!spriv->avstream) 
 	{
-		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not alloc avstream, EXIT\n");
+		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not allocate avstream, EXIT.\n");
 		return NULL;
 	}
 	spriv->avstream->stream_copy = 1;
@@ -232,7 +233,7 @@ static void fix_parameters(muxer_stream_t *stream)
 				memcpy(ctx->extradata, stream->wf+1, ctx->extradata_size);
 			}
 			else
-				mp_msg(MSGT_MUXER, MSGL_ERR, "MUXER_LAVF(audio stream) error! couldn't allocate %d bytes for extradata\n",
+				mp_msg(MSGT_MUXER, MSGL_ERR, "MUXER_LAVF(audio stream) error! Could not allocate %d bytes for extradata.\n",
 					stream->wf->cbSize);
 		}
 	}
@@ -257,7 +258,7 @@ static void fix_parameters(muxer_stream_t *stream)
 				memcpy(ctx->extradata, stream->bih+1, ctx->extradata_size);
 			else
 			{
-				mp_msg(MSGT_MUXER, MSGL_ERR, "MUXER_LAVF(video stream) error! couldn't allocate %d bytes for extradata\n",
+				mp_msg(MSGT_MUXER, MSGL_ERR, "MUXER_LAVF(video stream) error! Could not allocate %d bytes for extradata.\n",
 					ctx->extradata_size);
 				ctx->extradata_size = 0;
 			}
@@ -290,7 +291,7 @@ static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags, 
 	
 	if(av_interleaved_write_frame(priv->oc, &pkt) != 0) //av_write_frame(priv->oc, &pkt)
 	{
-		mp_msg(MSGT_MUXER, MSGL_ERR, "Error while writing frame\n");
+		mp_msg(MSGT_MUXER, MSGL_ERR, "Error while writing frame.\n");
 	}
 	}
 	
@@ -349,7 +350,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 	mp_msg(MSGT_MUXER, MSGL_WARN, "** MUXER_LAVF *****************************************************************\n");
 	mp_msg(MSGT_MUXER, MSGL_WARN,
 "REMEMBER: MEncoder's libavformat muxing is presently broken and can generate\n"
-"INCORRECT files in the presence of B frames. Moreover, due to bugs MPlayer\n"
+"INCORRECT files in the presence of B-frames. Moreover, due to bugs MPlayer\n"
 "will play these INCORRECT files as if nothing were wrong!\n"
 "*******************************************************************************\n");
 	
@@ -360,7 +361,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 	priv->oc = av_alloc_format_context();
 	if(!priv->oc) 
 	{
-		mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't get format context\n");
+		mp_msg(MSGT_MUXER, MSGL_FATAL, "Could not get format context.\n");
 		goto fail;
 	}
 
@@ -370,7 +371,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 		fmt = guess_format(NULL, out_filename, NULL);
 	if(! fmt)
 	{
-		mp_msg(MSGT_MUXER, MSGL_FATAL, "CAN'T GET SPECIFIED FORMAT\n");
+		mp_msg(MSGT_MUXER, MSGL_FATAL, "Cannot get specified format.\n");
 		goto fail;
 	}
 	priv->oc->oformat = fmt;
@@ -378,7 +379,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 	
 	if(av_set_parameters(priv->oc, NULL) < 0) 
 	{
-		mp_msg(MSGT_MUXER, MSGL_FATAL, "Invalid output format parameters\n");
+		mp_msg(MSGT_MUXER, MSGL_FATAL, "invalid output format parameters\n");
 		goto fail;
 	}
 	priv->oc->packet_size= mux_packet_size;
@@ -398,7 +399,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 
         if(mux_avopt){
             if(parse_avopts(priv->oc, mux_avopt) < 0){
-                mp_msg(MSGT_MUXER,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", mux_avopt);
+                mp_msg(MSGT_MUXER,MSGL_ERR, "Your options /%s/ look like gibberish to me pal.\n", mux_avopt);
                 goto fail;
             }
         }
@@ -408,7 +409,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
         priv_data= muxer;
 	if(url_fopen(&priv->oc->pb, mp_filename, URL_WRONLY))
 	{
-		mp_msg(MSGT_MUXER, MSGL_FATAL, "Could not open outfile\n");
+		mp_msg(MSGT_MUXER, MSGL_FATAL, "Could not open outfile.\n");
 		goto fail;
         }
 	
@@ -418,7 +419,7 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 	muxer->cont_write_header = &write_header;
 	muxer->cont_write_index = &write_trailer;
 	muxer->fix_stream_parameters = &fix_parameters;
-	mp_msg(MSGT_MUXER, MSGL_INFO, "OK, exit\n");
+	mp_msg(MSGT_MUXER, MSGL_INFO, "OK, exit.\n");
 	return 1;
 	
 fail:
