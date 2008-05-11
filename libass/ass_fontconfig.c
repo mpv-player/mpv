@@ -105,13 +105,15 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	// An alternative approach could be to reimplement FcFontSort
 	// using FC_FULLNAME instead of FC_FAMILY.
 	family_cnt = 1;
-	if (strchr(family, ' ')) {
-		char *p, *s = strdup(family);
-		while (p = strrchr(s, ' ')) {
-			*p = '\0';
-			FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
-			++ family_cnt;
-		}
+	{
+		char* s = strdup(family);
+		char* p = s + strlen(s);
+		while (--p > s)
+			if (*p == ' ' || *p == '-') {
+				*p = '\0';
+				FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
+				++ family_cnt;
+			}
 		free(s);
 	}
 	FcPatternAddBool(pat, FC_OUTLINE, FcTrue);
