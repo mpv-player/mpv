@@ -116,6 +116,7 @@ static int config(struct vf_instance_s* vf,
     int vo_flags;
     int int_sws_flags=0;
     int round_w=0, round_h=0;
+    int i;
     SwsFilter *srcFilter, *dstFilter;
     enum PixelFormat dfmt, sfmt;
     
@@ -252,7 +253,6 @@ static int config(struct vf_instance_s* vf,
     switch(best){
     case IMGFMT_RGB8: {
       /* set 332 palette for 8 bpp */
-	int i;
 	vf->priv->palette=malloc(4*256);
 	for(i=0; i<256; i++){
 	    vf->priv->palette[4*i+0]=4*(i>>6)*21;
@@ -263,7 +263,6 @@ static int config(struct vf_instance_s* vf,
 	break; }
     case IMGFMT_BGR8: {
       /* set 332 palette for 8 bpp */
-	int i;
 	vf->priv->palette=malloc(4*256);
 	for(i=0; i<256; i++){
 	    vf->priv->palette[4*i+0]=4*(i&3)*21;
@@ -274,7 +273,6 @@ static int config(struct vf_instance_s* vf,
 	break; }
     case IMGFMT_BGR4: 
     case IMGFMT_BG4B: {
-	int i;
 	vf->priv->palette=malloc(4*16);
 	for(i=0; i<16; i++){
 	    vf->priv->palette[4*i+0]=4*(i&1)*63;
@@ -285,7 +283,6 @@ static int config(struct vf_instance_s* vf,
 	break; }
     case IMGFMT_RGB4: 
     case IMGFMT_RG4B: {
-	int i;
 	vf->priv->palette=malloc(4*16);
 	for(i=0; i<16; i++){
 	    vf->priv->palette[4*i+0]=4*(i>>3)*63;
