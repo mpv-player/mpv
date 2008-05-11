@@ -75,7 +75,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 {
 	FcBool rc;
 	FcResult result;
-	FcPattern *pat = 0, *rpat;
+	FcPattern *pat = 0, *rpat = 0;
 	int r_index, r_slant, r_weight;
 	FcChar8 *r_family, *r_style, *r_file, *r_fullname;
 	FcBool r_outline, r_embolden;
