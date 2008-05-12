@@ -1,7 +1,10 @@
 /*
  * VIDIX driver for SiS chipsets.
  * Video bridge detection for SiS 300 and 310/325 series.
+ *
  * Copyright (C) 2003 Jake Page, Sugar Media.
+ * Based on SiS Xv driver
+ * Copyright 2002-2003 by Thomas Winischhofer, Vienna, Austria.
  *
  * This file is part of MPlayer.
  *
@@ -18,9 +21,6 @@
  * You should have received a copy of the GNU General Public License
  * along with MPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Based on SiS Xv driver
- * Copyright 2002-2003 by Thomas Winischhofer, Vienna, Austria.
  */
 
 #include <stdio.h>

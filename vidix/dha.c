@@ -2,6 +2,20 @@
  * VIDIX Direct Hardware Access (DHA).
  * Copyright (C) 2002 Nick Kurshev
  *
+ * 1996/10/27   - Robin Cutshaw (robin@xfree86.org)
+ *                XFree86 3.3.3 implementation
+ * 1999         - Øyvind Aabling.
+ *                Modified for GATOS/win/gfxdump.
+ *
+ * 2002         - library implementation by Nick Kurshev
+ *              - dhahelper and some changes by Alex Beregszaszi
+ *
+ * supported OSes: SVR4, UnixWare, SCO, Solaris,
+ *                 FreeBSD, NetBSD, 386BSD, BSDI BSD/386,
+ *                 Linux, Mach/386, ISC
+ *                 DOS (WATCOM 9.5 compiler), Win9x (with mapdev.vxd)
+ * original location: www.linuxvideo.org/gatos
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -17,20 +31,6 @@
  * You should have received a copy of the GNU General Public License
  * along with MPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- *   1996/10/27	- Robin Cutshaw (robin@xfree86.org)
- *		  XFree86 3.3.3 implementation
- *   1999	- Øyvind Aabling.
- *   		  Modified for GATOS/win/gfxdump.
- *		  
- *   2002	- library implementation by Nick Kurshev
- *		- dhahelper and some changes by Alex Beregszaszi
- *   
- *   Supported O/S's:	SVR4, UnixWare, SCO, Solaris,
- *			FreeBSD, NetBSD, 386BSD, BSDI BSD/386,
- *			Linux, Mach/386, ISC
- *			DOS (WATCOM 9.5 compiler), Win9x (with mapdev.vxd)
- *   Original location: www.linuxvideo.org/gatos
  */
 
 #include "config.h"

@@ -1,6 +1,12 @@
 /*
  * VIDIX driver for Matrox chipsets.
+ *
  * Copyright (C) 2002 Alex Beregszaszi
+ * Original sources from Aaron Holtzman (C) 1999.
+ * module skeleton based on gutted agpgart module by Jeff Hartmann
+ *   <slicer@ionet.net>
+ * YUY2 support and double buffering added by A'rpi/ESP-team
+ * brightness/contrast support by Nick Kurshev/Dariush Pietrzak (eyck)
  *
  * This file is part of MPlayer.
  *
@@ -17,15 +23,9 @@
  * You should have received a copy of the GNU General Public License
  * along with MPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Original sources from Aaron Holtzman (C) 1999.
- * Module skeleton based on gutted agpgart module by Jeff Hartmann 
- *   <slicer@ionet.net>
- * YUY2 support added by A'rpi/ESP-team
-     double buffering added by A'rpi/ESP-team
- * Brightness/contrast support by Nick Kurshev/Dariush Pietrzak (eyck)
- *
- * TODO:
+ */
+
+/* TODO:
  *   - fix memory size detection (current reading pci userconfig isn't
  *     working as requested - returns the max avail. ram on arch?)
  *   - translate all non-english comments to english

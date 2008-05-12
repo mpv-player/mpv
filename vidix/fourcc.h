@@ -1,5 +1,9 @@
 /*
  * VIDIX FourCC.
+ *
+ * This interface is based on v4l2, fbvid.h, mga_vid.h projects
+ * and personally my ideas.
+ *
  * Copyright (C) 2002 Nick Kurshev
  *
  * This file is part of MPlayer.
@@ -17,9 +21,6 @@
  * You should have received a copy of the GNU General Public License
  * along with MPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * This interface is based on v4l2, fbvid.h, mga_vid.h projects
- * and personally my ideas.
  */
 
 #ifndef MPLAYER_FOURCC_H

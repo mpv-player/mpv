@@ -1,6 +1,10 @@
 /*
  * VIDIX driver for SiS chipsets.
+ * Based on SiS Xv driver
+ *
  * Copyright (C) 2003 Jake Page, Sugar Media.
+ * Copyright 2002-2003 by Thomas Winischhofer, Vienna, Austria.
+ * 2003/10/08 integrated into mplayer/vidix architecture -- Alex Beregszaszi
  *
  * This file is part of MPlayer.
  *
@@ -17,10 +21,6 @@
  * You should have received a copy of the GNU General Public License
  * along with MPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Based on SiS Xv driver
- * Copyright 2002-2003 by Thomas Winischhofer, Vienna, Austria.
- * 2003/10/08 integrated into mplayer/vidix architecture -- Alex Beregszaszi
  */
 
 #include <errno.h>

@@ -1,8 +1,8 @@
 /*
- *  SiS graphics misc definitions
+ * SiS graphics misc definitions
  *
- *  Taken from SiS Xv driver:
- *  Copyright (C) 2002-2003 by Thomas Winischhofer, Vienna, Austria
+ * Taken from SiS Xv driver:
+ * Copyright (C) 2002-2003 by Thomas Winischhofer, Vienna, Austria
  *
  * This file is part of MPlayer.
  *

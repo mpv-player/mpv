@@ -5,6 +5,8 @@
  *
  * Copyright (C) 2002 Alastair M. Robinson
  * http://www.blackfiveservices.co.uk/EPIAVidix.shtml
+ * based on Permedia 3 driver by Måns Rullgård
+ * thanks to Gilles Frattini for bugfixes
  *
  * This file is part of MPlayer.
  *
@@ -21,9 +23,6 @@
  * You should have received a copy of the GNU General Public License
  * along with MPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Based on Permedia 3 driver by Måns Rullgård
- * Thanks to Gilles Frattini for bugfixes.
  */
 
 /* To Do:

@@ -1,8 +1,8 @@
 /*
- *  SiS register definitions and access macros
- *  From SiS X11 driver
+ * SiS register definitions and access macros
+ * From SiS X11 driver
  *
- *  Copyright (C) 2001-2003 by Thomas Winischhofer, Vienna, Austria
+ * Copyright (C) 2001-2003 by Thomas Winischhofer, Vienna, Austria
  *
  * This file is part of MPlayer.
  *
