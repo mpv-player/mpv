@@ -1,5 +1,8 @@
 /*
  * VIDIX driver for VIA Cyberblade/i1 chipsets.
+ * Brightness/Contrast controls disabled for the time being - they were
+ * seriously degrading picture quality, especially with TV-Out.
+ *
  * Copyright (C) 2002 Alastair M. Robinson
  * http://www.blackfiveservices.co.uk/EPIAVidix.shtml
  *
@@ -21,16 +24,9 @@
  *
  * Based on Permedia 3 driver by Måns Rullgård
  * Thanks to Gilles Frattini for bugfixes.
- *
- * Changes:
- *   18/01/03
- *     MMIO is no longer used, sidestepping cache issues on EPIA-800
- *     TV-Out modes are now better supported - this should be the end
- *       of the magenta stripes :)
- *     Brightness/Contrast controls disabled for the time being - they were
- *       seriously degrading picture quality, especially with TV-Out.
- *
- * To Do:
+ */
+
+/* To Do:
  *   Implement Hue/Saturation controls
  *   Support / Test multiple frames
  *   Test colour-key code more extensively

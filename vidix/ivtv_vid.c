@@ -18,18 +18,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-    09.05.2007 Lutz Koschorreck
-    First version: Tested with ivtv-0.10.1, xine-ui-0.99.5, xine-lib-1.1.6
-    20.05.2007 Lutz Koschorreck
-    Some Scaling and zooming problems fixed. By default the vidix driver now 
-    controlls the setting of alphablending. So there is no need to use
-    ivtvfbctl anymore. To disable this feature set the following environment
-    variable:VIDIXIVTVALPHA=disable. Special thanx to Ian Armstrong.
-    23.07.2007 Lutz Koschorreck
-    Support for 2.6.22 kernel added. PCI scan added.
-    07.10.2007 Lutz Koschorreck
-    Restore old alpha value correctly. Fix capability struct values. 
 **/
 
 #include <errno.h>

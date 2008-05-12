@@ -1,6 +1,10 @@
 /*
  * VIDIX driver for VIA CLE266/Unichrome chipsets.
+ *
  * Copyright (C) 2004 Timothy Lee
+ * Thanks to Gilles Frattini for bugfixes
+ * Doxygen documentation by Benjamin Zores <ben@geexbox.org>
+ * h/w revision detection by Timothy Lee <timothy.lee@siriushk.com>
  *
  * This file is part of MPlayer.
  *
@@ -17,16 +21,6 @@
  * You should have received a copy of the GNU General Public License
  * along with MPlayer; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Thanks to Gilles Frattini for bugfixes
- * 
- * Changes:
- *   2004-03-10
- *     Initial version
- *   2004-10-09
- *     Added Doxygen documentation (Benjamin Zores <ben@geexbox.org>)
- *   2004-11-08
- *     Added h/w revision detection (Timothy Lee <timothy.lee@siriushk.com>)
  */
 
 #include <errno.h>
