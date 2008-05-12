@@ -20,13 +20,6 @@
  *
  * This file is based on sources from
  *   GATOS (gatos.sf.net) and X11 (www.xfree86.org)
- *
- * Changes:
- *  - 31.12.2002
- *    added support for fglrx drivers by Marcel Naziri (zwobbl@zwobbl.de)
- *  - 6.04.2004
- *    fixes to allow compiling vidix without X11 (broken in original patch)
- *  - PowerPC support by Alex Beregszaszi
  */
 
 #include <errno.h>
