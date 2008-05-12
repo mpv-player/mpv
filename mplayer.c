@@ -3482,11 +3482,6 @@ if (mpctx->global_sub_size) {
       dvdsub_id = demuxer_default_sub_track(mpctx->demuxer);
     if (dvdsub_id >= 0)
       mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id;
-/*
-  } else if (mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
-    // if nothing else works, get subs from the demuxer.
-    mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX];
-*/
   }
   // rather than duplicate code, use the SUB_SELECT handler to init the right one.
   mpctx->global_sub_pos--;
