@@ -3464,10 +3464,7 @@ if(mpctx->sh_video) {
 if (mpctx->global_sub_size) {
   // find the best sub to use
   int vobsub_index_id = vobsub_get_index_by_id(vo_vobsub, vobsub_id);
-  if (dvdsub_id < 0 && dvdsub_lang)
-    dvdsub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
-  if (dvdsub_id < 0)
-    dvdsub_id = demuxer_default_sub_track(mpctx->demuxer);
+  mpctx->global_sub_pos = -1; // no subs by default
   if (vobsub_index_id >= 0) {
     // if user asks for a vobsub id, use that first.
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] + vobsub_index_id;
@@ -3477,14 +3474,19 @@ if (mpctx->global_sub_size) {
   } else if (mpctx->global_sub_indices[SUB_SOURCE_SUBS] >= 0) {
     // if there are text subs to use, use those.  (autosubs come last here)
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_SUBS];
+  } else if (dvdsub_id < 0 && mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
+    // finally select subs by language and container hints
+    if (dvdsub_id < 0 && dvdsub_lang)
+      dvdsub_id = demuxer_sub_track_by_lang(mpctx->demuxer, dvdsub_lang);
+    if (dvdsub_id < 0)
+      dvdsub_id = demuxer_default_sub_track(mpctx->demuxer);
+    if (dvdsub_id >= 0)
+      mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id;
 /*
   } else if (mpctx->global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
     // if nothing else works, get subs from the demuxer.
     mpctx->global_sub_pos = mpctx->global_sub_indices[SUB_SOURCE_DEMUX];
 */
-  } else {
-    // nothing worth doing automatically.
-    mpctx->global_sub_pos = -1;
   }
   // rather than duplicate code, use the SUB_SELECT handler to init the right one.
   mpctx->global_sub_pos--;
