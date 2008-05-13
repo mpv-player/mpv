@@ -638,7 +638,7 @@ ALL_PRG             += $(ALL_PRG-yes)
 
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
-INSTALL_TARGETS-$(GUI)      += install-gui
+INSTALL_TARGETS-$(GUI_GTK)  += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 DIRS =  . \
