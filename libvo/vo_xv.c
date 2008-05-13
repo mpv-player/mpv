@@ -724,11 +724,13 @@ static int preinit(const char *arg)
     unsigned int i;
     strarg_t ck_src_arg = { 0, NULL };
     strarg_t ck_method_arg = { 0, NULL };
+    int xv_adaptor = -1;
 
     opt_t subopts[] =
     {  
       /* name         arg type     arg var         test */
       {  "port",      OPT_ARG_INT, &xv_port,       (opt_test_f)int_pos },
+      {  "adaptor",   OPT_ARG_INT, &xv_adaptor,    (opt_test_f)int_non_neg },
       {  "ck",        OPT_ARG_STR, &ck_src_arg,    xv_test_ck },
       {  "ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm },
       {  NULL }
@@ -799,6 +801,10 @@ static int preinit(const char *arg)
 
     for (i = 0; i < adaptors && xv_port == 0; i++)
     {
+        /* check if adaptor number has been specified */
+        if (xv_adaptor != -1 && xv_adaptor != i)
+          continue;
+      
         if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask))
         {
             for (xv_p = ai[i].base_id;
@@ -806,6 +812,8 @@ static int preinit(const char *arg)
                 if (!XvGrabPort(mDisplay, xv_p, CurrentTime))
                 {
                     xv_port = xv_p;
+                    mp_msg(MSGT_VO, MSGL_INFO,
+                           MSGTR_LIBVO_XV_Adaptor, i, ai[i].name);
                     break;
                 } else
                 {
