@@ -7724,7 +7724,7 @@ Windows Media Video, version 2 (AKA WMV8)
 .
 .TP
 .B vqmin=<1\-31>
-minimum quantizer (pass 1/2)
+minimum quantizer
 .RSs
 .IPs 1
 Not recommended (much larger file, little quality difference and weird side
@@ -7782,7 +7782,7 @@ effect.
 .
 .TP
 .B vqmax=<1\-31>
-Maximum quantizer (pass 1/2), 10\-31 should be a sane range (default: 31).
+Maximum quantizer, 10\-31 should be a sane range (default: 31).
 .
 .TP
 .B mbqmin=<1\-31>
@@ -7795,7 +7795,7 @@ obsolete, use vqmax
 .TP
 .B vqdiff=<1\-31>
 maximum quantizer difference between consecutive I- or P-frames
-(pass 1/2) (default: 3)
+(default: 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -8062,7 +8062,7 @@ always on.
 .
 .TP
 .B vbitrate=<value>
-Specify bitrate (pass 1/2) (default: 800).
+Specify bitrate (default: 800).
 .br
 .I WARNING:
 1kbit = 1000 bits
@@ -8088,17 +8088,17 @@ be problems if vrc_(min|max)rate is used.
 .
 .TP
 .B vrc_maxrate=<value>
-maximum bitrate in kbit/\:sec (pass 1/2)
+maximum bitrate in kbit/\:sec
 (default: 0, unlimited)
 .
 .TP
 .B vrc_minrate=<value>
-minimum bitrate in kbit/\:sec (pass 1/2)
+minimum bitrate in kbit/\:sec
 (default: 0, unlimited)
 .
 .TP
 .B vrc_buf_size=<value>
-buffer size in kbit (pass 1/2).
+buffer size in kbit
 For MPEG-1/2 this also sets the vbv buffer size, use 327 for VCD,
 917 for SVCD and 1835 for DVD.
 .
@@ -8123,19 +8123,19 @@ with support for Xvid 1.1 or higher).
 .
 .TP
 .B vb_qfactor=<\-31.0\-31.0>
-quantizer factor between B- and non-B-frames (pass 1/2) (default: 1.25)
+quantizer factor between B- and non-B-frames (default: 1.25)
 .
 .TP
 .B vi_qfactor=<\-31.0\-31.0>
-quantizer factor between I- and non-I-frames (pass 1/2) (default: 0.8)
+quantizer factor between I- and non-I-frames (default: 0.8)
 .
 .TP
 .B vb_qoffset=<\-31.0\-31.0>
-quantizer offset between B- and non-B-frames (pass 1/2) (default: 1.25)
+quantizer offset between B- and non-B-frames (default: 1.25)
 .
 .TP
 .B vi_qoffset=<\-31.0\-31.0>
-(pass 1/2) (default: 0.0)
+(default: 0.0)
 .br
 if v{b|i}_qfactor > 0
 .br
@@ -8171,7 +8171,7 @@ the quantizer more over time (slower change).
 .
 .TP
 .B vqcomp=<0.0\-1.0>
-Quantizer compression, vrc_eq depends upon this (pass 1/2) (default: 0.5).
+Quantizer compression, vrc_eq depends upon this (default: 0.5).
 For instance, assuming the default rate control equation is used,
 if vqcomp=1.0, the ratecontrol allocates to each frame the number of bits
 needed to encode them all at the same QP.
@@ -8183,7 +8183,7 @@ Perceptual quality will be optimal somewhere in between these two extremes.
 .
 .TP
 .B vrc_eq=<equation>
-main ratecontrol equation (pass 1/2)
+main ratecontrol equation
 .RE
 .RSs
 .IPs "1\ \ \ \ "
@@ -8256,7 +8256,7 @@ is 1 if a==b, 0 otherwise
 .
 .TP
 .B vrc_override=<options>
-User specified quality for specific parts (ending, credits, ...) (pass 1/2).
+User specified quality for specific parts (ending, credits, ...).
 The options are <start-frame>, <end-frame>, <quality>[/<start-frame>,
 <end-frame>, <quality>[/...]]:
 .PD 0
@@ -8278,7 +8278,7 @@ initial buffer occupancy, as a fraction of vrc_buf_size (default: 0.9)
 .
 .TP
 .B vqsquish=<0|1>
-Specify how to keep the quantizer between qmin and qmax (pass 1/2).
+Specify how to keep the quantizer between qmin and qmax.
 .PD 0
 .RSs
 .IPs 0
