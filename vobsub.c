@@ -1343,7 +1343,7 @@ void vobsub_seek(void * vobhandle, float pts)
 {
   vobsub_t * vob = (vobsub_t *)vobhandle;
   packet_queue_t * queue;
-  int seek_pts100 = (int)pts * 90000;
+  int seek_pts100 = pts * 90000;
 
   if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
     /* do not seek if we don't know the id */
