@@ -1,29 +1,30 @@
 /*
- *     Radio support
- * 
- *     Initially wrote by Vladimir Voroshilov <voroshil@univer.omsk.su>.
- *     Based on tv.c and tvi_v4l2.c code.
+ * radio support
  *
- *     This program is free software; you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation; either version 2 of the License, or
- *     (at your option) any later version.
+ * Abilities:
+ * * Listening v4l compatible radio cards using line-in or
+ *   similar cable
+ * * Grabbing audio data using -ao pcm or -dumpaudio
+ *   (must be compiled with --enable-radio-capture).
  *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
+ * Initially written by Vladimir Voroshilov <voroshil@univer.omsk.su>.
+ * Based on tv.c and tvi_v4l2.c code.
  *
- *     You should have received a copy of the GNU General Public License
- *     along with this program; if not, write to the Free Software
- *     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * This file is part of MPlayer.
  *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     Abilities:
- *     * Listening v4l compatible radio cards using line-in or
- *       similar cable
- *     * Grabbing audio data using -ao pcm or -dumpaudio
- *       (must be compiled with --enable-radio-capture).
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "config.h"
 
