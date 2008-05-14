@@ -90,7 +90,7 @@ decoder module. MPlayer has a module named "dshow" that handles data
 encoded by the codec. See -vfm help / -afm help for the available module list.
 
 The "dll" keyword specifies which Win32/XAnim/Real/Quicktime binary
-module needs to be loaded. Its also used to specify which FFmpeg codec
+module needs to be loaded. It's also used to specify which FFmpeg codec
 to load. The list of FFmpeg codecs can be found in libavcodec/allcodecs.c.
 
 The "guid" keyword identifies a 16-byte Microsoft GUID that some media
