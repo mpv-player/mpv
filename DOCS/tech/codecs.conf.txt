@@ -89,10 +89,9 @@ The "driver" keyword associates this codec with an internal MPlayer
 decoder module. MPlayer has a module named "dshow" that handles data
 encoded by the codec. See -vfm help / -afm help for the available module list.
 
-The "dll" keyword specifies which Win32/XAnim/Real binary module needs to be
-loaded in order to handle the specific media type. This keyword is usually
-only used in conjunction with the dshow, vfw, acm, xanim and real drivers since
-they all manage communication with binary-only modules.
+The "dll" keyword specifies which Win32/XAnim/Real/Quicktime binary
+module needs to be loaded. Its also used to specify which FFmpeg codec
+to load. The list of FFmpeg codecs can be found in libavcodec/allcodecs.c.
 
 The "guid" keyword identifies a 16-byte Microsoft GUID that some media
 files use to identify codecs. Used only for win32 dshow and DMO codecs.
