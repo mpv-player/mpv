@@ -1284,6 +1284,20 @@ vobsub_set_from_lang(void *vobhandle, unsigned char * lang)
 static void vobsub_queue_reseek(packet_queue_t *queue, unsigned int pts100) {
     int reseek_count = 0;
     unsigned int lastpts = 0;
+
+    if (queue->current_index > 0
+            && (queue->packets[queue->current_index].pts100 == UINT_MAX
+            || queue->packets[queue->current_index].pts100 > pts100)) {
+      // possible pts seek previous, try to check it.
+      int i = 1;
+      while (queue->current_index >= i
+              && queue->packets[queue->current_index-i].pts100 == UINT_MAX)
+          ++i;
+      if (queue->current_index >= i
+              && queue->packets[queue->current_index-i].pts100 > pts100)
+        // pts seek previous confirmed, reseek from beginning
+        queue->current_index = 0;
+    }
     while (queue->current_index < queue->packets_size
             && queue->packets[queue->current_index].pts100 <= pts100) {
       lastpts = queue->packets[queue->current_index].pts100;
@@ -1343,7 +1357,7 @@ void vobsub_seek(void * vobhandle, float pts)
 {
   vobsub_t * vob = (vobsub_t *)vobhandle;
   packet_queue_t * queue;
-  int seek_pts100 = (int)pts * 90000;
+  int seek_pts100 = pts * 90000;
 
   if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
     /* do not seek if we don't know the id */

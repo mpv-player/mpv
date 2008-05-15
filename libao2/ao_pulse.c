@@ -15,10 +15,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with MPlayer; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <string.h>
 
 #include <pulse/pulseaudio.h>
@@ -116,10 +117,14 @@ static const struct format_map_s {
 } format_maps[] = {
     {AF_FORMAT_S16_LE, PA_SAMPLE_S16LE},
     {AF_FORMAT_S16_BE, PA_SAMPLE_S16BE},
+#ifdef PA_SAMPLE_S32NE
     {AF_FORMAT_S32_LE, PA_SAMPLE_S32LE},
     {AF_FORMAT_S32_BE, PA_SAMPLE_S32BE},
+#endif
+#ifdef PA_SAMPLE_FLOAT32NE
     {AF_FORMAT_FLOAT_LE, PA_SAMPLE_FLOAT32LE},
     {AF_FORMAT_FLOAT_BE, PA_SAMPLE_FLOAT32BE},
+#endif
     {AF_FORMAT_U8, PA_SAMPLE_U8},
     {AF_FORMAT_MU_LAW, PA_SAMPLE_ULAW},
     {AF_FORMAT_A_LAW, PA_SAMPLE_ALAW},

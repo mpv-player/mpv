@@ -1,6 +1,9 @@
 /*
  * VIDIX driver for ATI Mach64 and 3DRage chipsets.
+ *
  * Copyright (C) 2002 Nick Kurshev
+ * This file is based on sources from
+ *  GATOS (gatos.sf.net) and X11 (www.xfree86.org)
  *
  * This file is part of MPlayer.
  *
@@ -14,12 +17,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with MPlayer; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * This file is based on sources from
- *  GATOS (gatos.sf.net) and X11 (www.xfree86.org)
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <errno.h>

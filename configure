@@ -286,7 +286,9 @@ Codecs:
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
   --disable-xvid            disable XviD [autodetect]
+  --disable-xvid-lavc       disable XviD in libavcodec [autodetect]
   --disable-x264            disable x264 [autodetect]
+  --disable-x264-lavc       disable x264 in libavcodec [autodetect]
   --disable-libnut          disable libnut [autodetect]
   --disable-libavutil_a     disable static libavutil [autodetect]
   --disable-libavcodec_a    disable static libavcodec [autodetect]
@@ -308,9 +310,12 @@ Codecs:
   --disable-faad-internal   disable internal FAAD2 (AAC) [autodetect]
   --enable-faad-fixed       enable fixed-point mode in internal FAAD2 [disabled]
   --disable-faac            disable support for FAAC (AAC encoder) [autodetect]
+  --disable-faac-lavc       disable support for FAAC in libavcodec [autodetect]
   --disable-ladspa          disable LADSPA plugin support [autodetect]
   --disable-libdv           disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad             disable libmad (MPEG audio) support [autodetect]
+  --disable-mp3lame         disable LAME MP3 encoding support [autodetect]
+  --disable-mp3lame-lavc    disable LAME in libavcodec [autodetect]
   --disable-toolame         disable Toolame (MPEG layer 2) encoding [autodetect]
   --disable-twolame         disable Twolame (MPEG layer 2) encoding [autodetect]
   --enable-xmms             enable XMMS input plugin support [disabled]
@@ -553,6 +558,8 @@ _openal=auto
 _libcdio=auto
 _liblzo=auto
 _mad=auto
+_mp3lame=auto
+_mp3lame_lavc=auto
 _toolame=auto
 _twolame=auto
 _tremor_internal=yes
@@ -569,6 +576,7 @@ _faad_internal=auto
 _faad_external=auto
 _faad_fixed=no
 _faac=auto
+_faac_lavc=auto
 _ladspa=auto
 _xmms=no
 _dvdnav=auto
@@ -615,7 +623,9 @@ _vidix_external=auto
 _vidix_pcidb=yes
 _joystick=no
 _xvid=auto
+_xvid_lavc=auto
 _x264=auto
+_x264_lavc=auto
 _libnut=auto
 _lirc=auto
 _lircc=auto
@@ -890,6 +900,10 @@ for ac_option do
   --disable-openal)	_openal=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
+  --enable-mp3lame)	_mp3lame=yes	;;
+  --disable-mp3lame)	_mp3lame=no	;;
+  --enable-mp3lame-lavc)	_mp3lame_lavc=yes	;;
+  --disable-mp3lame-lavc)	_mp3lame_lavc=no	;;
   --enable-toolame)	_toolame=yes	;;
   --disable-toolame)	_toolame=no	;;
   --enable-twolame)	_twolame=yes	;;
@@ -928,6 +942,8 @@ for ac_option do
   --disable-faad-fixed)	_faad_fixed=no	;;
   --enable-faac)	_faac=yes	;;
   --disable-faac)	_faac=no	;;
+  --enable-faac-lavc)	_faac_lavc=yes	;;
+  --disable-faac-lavc)	_faac_lavc=no	;;
   --enable-ladspa)	_ladspa=yes	;;
   --disable-ladspa)	_ladspa=no		;;
   --enable-xmms)	_xmms=yes	;;
@@ -1010,8 +1026,12 @@ for ac_option do
   --disable-joystick)	_joystick=no	;;
   --enable-xvid)	_xvid=yes	;;
   --disable-xvid)	_xvid=no	;;
+  --enable-xvid-lavc)	_xvid_lavc=yes	;;
+  --disable-xvid-lavc)	_xvid_lavc=no	;;
   --enable-x264)        _x264=yes       ;;
   --disable-x264)       _x264=no        ;;
+  --enable-x264-lavc)   _x264_lavc=yes  ;;
+  --disable-x264-lavc)  _x264_lavc=no   ;;
   --enable-libnut)	_libnut=yes	;;
   --disable-libnut)	_libnut=no	;;
   --enable-libavutil_a)		_libavutil_a=yes	;;
@@ -2391,44 +2411,18 @@ echores $_asmalign_pot
 
 
 #FIXME: This should happen before the check for CFLAGS..
-if ppc ; then
+if test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ; then
 
-    # check if altivec is supported by the compiler, and how to enable it
-
-    _altivec_gcc_flags=''
-
-    echocheck "GCC altivec support"
-
-    p=''
+    # check if AltiVec is supported by the compiler, and how to enable it
+    echocheck "GCC AltiVec flags"
     cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
-    FSF_flags='-maltivec -mabi=altivec'
-    Darwin_flags='-faltivec'
-
-    # check for Darwin-style flags first, since gcc-3.3 (August Update
-    # from Apple) on MacOS 10.2.8 accepts but ignores FSF-style flags...
-
-    if test -z "$p"; then
-        cc_check $Darwin_flags && p='Darwin'
-    fi
-    if test -z "$p"; then
-        cc_check $FSF_flags && p='FSF'
-    fi
-
-    case $p in
-        FSF) _altivec_gcc_flags="$FSF_flags" _altivec=yes ;;
-        Darwin) _altivec_gcc_flags="$Darwin_flags" _altivec=yes ;;
-        *) _altivec=no ;;
-    esac
-
-    if test -z "$p"; then
-        p=none
-    else
-        p="$p-style ($_altivec_gcc_flags)"
-    fi
-
-    echores "$p"
+    cc_check -maltivec -mabi=altivec \
+        && _altivec_gcc_flags="-maltivec -mabi=altivec" \
+        || cc_check -faltivec && _altivec_gcc_flags=-faltivec \
+        || _altivec=no
+    echores "$_altivec_gcc_flags"
 
     # check if <altivec.h> should be included
     echocheck "altivec.h"
@@ -2442,27 +2436,17 @@ EOF
         && _def_altivec_h='#define HAVE_ALTIVEC_H 1'
     echores "$_have_altivec_h"
 
-    # disable runtime cpudetection if
-    # - we cannot generate altivec code
-    # - altivec is disabled by the user
+    # Disable runtime cpudetection if we cannot generate AltiVec code or
+    # AltiVec is disabled by the user.
+    test "$_runtime_cpudetection" = yes && test "$_altivec" = no \
+        && _runtime_cpudetection=no
 
-    if test "$_runtime_cpudetection" = yes -a "$_altivec" = no ; then
-        _runtime_cpudetection=no
-    fi
+    # Show that we are optimizing for AltiVec (if enabled and supported).
+    test "$_runtime_cpudetection" = no && test "$_altivec" = yes \
+        && _optimizing="$_optimizing altivec"
 
-    # show that we are optimizing for altivec (if enabled and supported)
-
-    if test "$_runtime_cpudetection" = no -a "$_altivec" = yes ; then
-	_optimizing="$_optimizing altivec"
-    fi
-
-    # if altivec is enabled, make sure the correct flags turn up in CFLAGS
-
-    if test "$_altivec" = yes ; then
-        #FIXME: _mcpu is used for CFLAGS, this needs to be set earlier
-        #_mcpu="$_mcpu $_altivec_gcc_flags"
-        CFLAGS="$CFLAGS $_altivec_gcc_flags"
-    fi
+    # If AltiVec is enabled, make sure the correct flags turn up in CFLAGS.
+    test "$_altivec" = yes && CFLAGS="$CFLAGS $_altivec_gcc_flags"
 fi
 
 if arm ; then
@@ -6024,20 +6008,21 @@ EOF
 fi
 if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
-  if echo $_libavencoders | grep -q FAAC ; then
-    _lavc_faac=yes
-    _def_lavc_faac="#define CONFIG_LIBFAAC 1"
+  test "$_faac_lavc" = auto && _faac_lavc=yes
+  if test "$_faac_lavc" = yes ; then
+    _def_faac_lavc="#define CONFIG_LIBFAAC 1"
     _libs_mplayer="$_libs_mplayer $_ld_faac"
-  else
-    _lavc_faac=no
-    _def_lavc_faac="#undef CONFIG_LIBFAAC"
+    _libavencoders="$_libavencoders LIBFAAC_ENCODER"
   fi
   _codecmodules="faac $_codecmodules"
 else
+  _faac_lavc=no
   _def_faac="#undef HAVE_FAAC"
+  _def_faac_lavc="#undef CONFIG_LIBFAAC"
   _nocodecmodules="faac $_nocodecmodules"
 fi
-echores "$_faac (in libavcodec: $_lavc_faac)"
+_res_comment="in libavcodec: $_faac_lavc"
+echores "$_faac"
 
 
 echocheck "FAAD2 (AAC) support"
@@ -6542,22 +6527,22 @@ else
 fi
 echores "$_xvid"
 
-if test "$_xvid" = yes ; then
-  echocheck "XviD two pass plugin"
+echocheck "XviD two pass plugin"
+if test "$_xvid" = yes && test "$_xvid_lavc" = auto ; then
   cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_plugin_2pass2_t s; s.vbv_size=0; return 0; }
 EOF
-  if cc_check ; then
-    _lavc_xvid=yes
-    _def_lavc_xvid='#define CONFIG_LIBXVID 1'
-    _libavencoders="$_libavencoders LIBXVID_ENCODER"
-  else
-    _lavc_xvid=no
-    _def_lavc_xvid='#undef CONFIG_LIBXVID'
-  fi
-  echores "$_lavc_xvid"
+  cc_check && _xvid_lavc=yes
 fi
+if test "$_xvid_lavc" = yes ; then
+  _def_xvid_lavc='#define CONFIG_LIBXVID 1'
+  _libavencoders="$_libavencoders LIBXVID_ENCODER"
+else
+  _xvid_lavc=no
+  _def_xvid_lavc='#undef CONFIG_LIBXVID'
+fi
+echores "$_xvid_lavc"
 
 
 echocheck "x264"
@@ -6579,15 +6564,20 @@ fi
 if test "$_x264" = yes ; then
   _def_x264='#define HAVE_X264 1'
   _codecmodules="x264 $_codecmodules"
-    _def_lavc_x264='#define CONFIG_LIBX264 1'
+  test "$_x264_lavc" = auto && _x264_lavc=yes
+  if test "$_x264_lavc" = yes ; then
+    _def_x264_lavc='#define CONFIG_LIBX264 1'
     _libs_mplayer="$_libs_mplayer $_ld_x264"
     _libavencoders="$_libavencoders LIBX264_ENCODER"
+  fi
 else
+  _x264_lavc=no
   _def_x264='#undef HAVE_X264'
-  _def_lavc_x264='#undef CONFIG_LIBX264'
+  _def_x264_lavc='#undef CONFIG_LIBX264'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
-echores "$_x264 (in libavcodec: $_lavc_x264)"
+_res_comment="in libavcodec: $_x264_lavc"
+echores "$_x264"
 
 
 echocheck "libnut"
@@ -6642,17 +6632,18 @@ echores "$_zr"
 if test "$_mencoder" != no ; then
 
 echocheck "libmp3lame (for mencoder)"
-_mp3lame=no
 _def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
 _def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
-cat > $TMPC <<EOF
+if test "$_mp3lame" = auto ; then
+  _mp3lame=no
+  cat > $TMPC <<EOF
 #include <lame/lame.h>
 int main(void) { lame_version_t lv; (void) lame_init();
     get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor);
     return 0; }
 EOF
-# Note: libmp3lame usually depends on vorbis
-cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
+  cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
+fi
 if test "$_mp3lame" = yes ; then
   _def_mp3lame="#define HAVE_MP3LAME"
   _ld_mp3lame=-lmp3lame
@@ -6667,18 +6658,18 @@ EOF
 int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
   cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
-  if echo $_libavencoders | grep -q MP3LAME ; then
-    _lavc_mp3lame=yes
-    _def_lavc_mp3lame="#define CONFIG_LIBMP3LAME 1"
+  test "$_mp3lame_lavc" = auto && _mp3lame_lavc=yes
+  if test "$_mp3lame_lavc" = yes ; then
+    _def_mp3lame_lavc="#define CONFIG_LIBMP3LAME 1"
     _libavencoders="$_libavencoders LIBMP3LAME_ENCODER"
     _libs_mplayer="$_libs_mplayer $_ld_mp3lame"
-  else
-    _lavc_mp3lame=no
-    _def_lavc_mp3lame="#undef CONFIG_LIBMP3LAME"
   fi
 else
+  _mp3lame_lavc=no
   _def_mp3lame='#undef HAVE_MP3LAME'
+  _def_mp3lame_lavc="#undef CONFIG_LIBMP3LAME"
 fi
+_res_comment="in libavcodec: $_mp3lame_lavc"
 echores "$_mp3lame"
 
 fi
@@ -7509,7 +7500,7 @@ if test "$cc_vendor" = "gnu" ; then
 fi
 
 CFLAGS_FFMPEG="-I../.. $CFLAGS"
-CFLAGS="-I. -Iffmpeg -Iffmpeg/libavutil $CFLAGS"
+CFLAGS="-I. -Iffmpeg $CFLAGS"
 CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
 cc_check -mno-omit-leaf-frame-pointer && CFLAG_NO_OMIT_LEAF_FRAME_POINTER="-mno-omit-leaf-frame-pointer"
@@ -7759,11 +7750,11 @@ CONFIG_MUXERS=$_mencoder
 CONFIG_LIBAMR=$_libamr
 CONFIG_LIBAMR_NB=$_libamr_nb
 CONFIG_LIBAMR_WB=$_libamr_wb
-CONFIG_LIBFAAC=$_lavc_faac
-CONFIG_LIBMP3LAME=$_lavc_mp3lame
+CONFIG_LIBFAAC=$_faac_lavc
+CONFIG_LIBMP3LAME=$_mp3lame_lavc
 CONFIG_LIBVORBIS=$_libvorbis
-CONFIG_LIBX264=$_x264
-CONFIG_LIBXVID=$_lavc_xvid
+CONFIG_LIBX264=$_x264_lavc
+CONFIG_LIBXVID=$_xvid_lavc
 CONFIG_MLIB = $_mlib
 # Prevent building libavcodec/imgresample.c with conflicting symbols
 CONFIG_SWSCALE=yes
@@ -8152,10 +8143,10 @@ $_def_libamr_wb
 `ff_config_enable "$_libavprotocols_all" "$_libavprotocols"`
 `ff_config_enable "$_libavbsfs_all" "$_libavbsfs"`
 
-$_def_lavc_faac
-$_def_lavc_xvid
-$_def_lavc_mp3lame
-$_def_lavc_x264
+$_def_faac_lavc
+$_def_mp3lame_lavc
+$_def_x264_lavc
+$_def_xvid_lavc
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib

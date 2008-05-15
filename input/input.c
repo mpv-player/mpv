@@ -1218,7 +1218,7 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 	}
     }
 #else
-    if (!got_cmd)
+    if (!got_cmd && time)
 	usec_sleep(time * 1000);
 #endif
 

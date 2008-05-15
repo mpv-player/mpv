@@ -1,6 +1,9 @@
 /*
  * VIDIX driver for nVidia chipsets.
+ *
  * Copyright (C) 2003-2004 Sascha Sommer
+ * This file is based on sources from RIVATV (rivatv.sf.net)
+ * Multi buffer support and TNT2 fixes by Dmitry Baryshkov.
  *
  * This file is part of MPlayer.
  *
@@ -14,12 +17,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with MPlayer; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * This file is based on sources from RIVATV (rivatv.sf.net)
- * Multi buffer support and TNT2 fixes by Dmitry Baryshkov.
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <errno.h>

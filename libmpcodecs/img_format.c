@@ -4,7 +4,7 @@
 
 const char *vo_format_name(int format)
 {
-    static char unknow_format[20];
+    static char unknown_format[20];
     switch(format)
     {
 	case IMGFMT_RGB1: return("RGB 1-bit");
@@ -68,6 +68,6 @@ const char *vo_format_name(int format)
 	case IMGFMT_XVMC_MOCO_MPEG2: return("MPEG1/2 Motion Compensation");
 	case IMGFMT_XVMC_IDCT_MPEG2: return("MPEG1/2 Motion Compensation and IDCT");
     }
-    snprintf(unknow_format,20,"Unknown 0x%04x",format);
-    return unknow_format;
+    snprintf(unknown_format,20,"Unknown 0x%04x",format);
+    return unknown_format;
 }

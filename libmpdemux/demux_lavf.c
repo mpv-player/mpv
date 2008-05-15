@@ -1,20 +1,22 @@
 /*
-    Copyright (C) 2004 Michael Niedermayer <michaelni@gmx.at>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-*/
+ * Copyright (C) 2004 Michael Niedermayer <michaelni@gmx.at>
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 // #include <stdio.h>
 #include <stdlib.h>
@@ -25,6 +27,7 @@
 #include "options.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "av_opts.h"
 
 #include "stream/stream.h"
 #include "demuxer.h"
@@ -47,12 +50,14 @@ static unsigned int opt_analyzeduration = 0;
 static char *opt_format;
 static char *opt_cryptokey;
 extern int ts_prog;
+static char *opt_avopt = NULL;
 
 const m_option_t lavfdopts_conf[] = {
 	{"probesize", &(opt_probesize), CONF_TYPE_INT, CONF_RANGE, 32, INT_MAX, NULL},
 	{"format",    &(opt_format),    CONF_TYPE_STRING,       0,  0,       0, NULL},
 	{"analyzeduration",    &(opt_analyzeduration),    CONF_TYPE_INT,       CONF_RANGE,  0,       INT_MAX, NULL},
 	{"cryptokey", &(opt_cryptokey), CONF_TYPE_STRING,       0,  0,       0, NULL},
+        {"o",                  &opt_avopt,                CONF_TYPE_STRING,    0,           0,             0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -432,6 +437,13 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     if(opt_analyzeduration) {
         opt = av_set_int(avfc, "analyzeduration", opt_analyzeduration * AV_TIME_BASE);
         if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option analyzeduration to %u\n", opt_analyzeduration);
+    }
+
+    if(opt_avopt){
+        if(parse_avopts(avfc, opt_avopt) < 0){
+            mp_msg(MSGT_HEADER,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", opt_avopt);
+            return NULL;
+        }
     }
 
     if(demuxer->stream->url)

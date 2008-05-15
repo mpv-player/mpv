@@ -5504,7 +5504,7 @@ mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
 mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xsvcd -vf \
     scale=480:576,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
     vcodec=mpeg2video:mbd=2:keyint=15:vrc_buf_size=917:vrc_minrate=600:\
-vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 25 \
+vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224:aspect=16/9 -ofps 25 \
     -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
   </screen>
 </para>
@@ -5519,7 +5519,7 @@ vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 25 \
 mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xsvcd  -vf \
     scale=480:480,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
     vcodec=mpeg2video:mbd=2:keyint=18:vrc_buf_size=917:vrc_minrate=600:\
-vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 30000/1001 \
+vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224:aspect=16/9 -ofps 30000/1001 \
     -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
 </screen>
 </para>
@@ -5534,7 +5534,7 @@ vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 30000/1001 \
 mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xvcd -vf \
     scale=352:288,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
     vcodec=mpeg1video:keyint=15:vrc_buf_size=327:vrc_minrate=1152:\
-vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 25 \
+vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224:aspect=16/9 -ofps 25 \
     -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
 </screen>
 </para>
@@ -5549,7 +5549,7 @@ vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 25 \
 mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xvcd -vf \
     scale=352:240,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
     vcodec=mpeg1video:keyint=18:vrc_buf_size=327:vrc_minrate=1152:\
-vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 30000/1001 \
+vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224:aspect=16/9 -ofps 30000/1001 \
     -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
 </screen>
 </para>

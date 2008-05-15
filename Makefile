@@ -6,6 +6,9 @@
 
 include config.mak
 
+
+###### variable declarations #######
+
 COMMON_LDFLAGS += $(EXTRA_LIB)\
                   $(EXTRALIBS) \
 
@@ -260,7 +263,8 @@ SRCS_COMMON-$(LIBASS)                += libass/ass.c \
                                         libass/ass_utils.c \
                                         libmpcodecs/vf_ass.c \
 
-SRCS_COMMON-$(LIBAVCODEC)            += libaf/af_lavcresample.c \
+SRCS_COMMON-$(LIBAVCODEC)            += av_opts.c \
+                                        libaf/af_lavcresample.c \
                                         libmpcodecs/ad_ffmpeg.c \
                                         libmpcodecs/vd_ffmpeg.c \
                                         libmpcodecs/vf_lavc.c \
@@ -286,7 +290,6 @@ SRCS_COMMON-$(LIBDVDCSS_INTERNAL)    += libdvdcss/css.c \
                                         libdvdcss/error.c \
                                         libdvdcss/ioctl.c \
                                         libdvdcss/libdvdcss.c \
-                                        #libdvdcss/bsdi_ioctl \
 
 SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
                                         libfaad2/cfft.c \
@@ -638,14 +641,8 @@ ALL_PRG             += $(ALL_PRG-yes)
 
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
-INSTALL_TARGETS-$(GUI)      += install-gui
+INSTALL_TARGETS-$(GUI_GTK)  += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
-
-PARTS = ffmpeg/libavcodec \
-        ffmpeg/libavformat \
-        ffmpeg/libavutil \
-        ffmpeg/libpostproc \
-        libswscale \
 
 DIRS =  . \
         dvdread \
@@ -694,6 +691,16 @@ DIRS =  . \
         TOOLS \
         vidix \
 
+PARTS = ffmpeg/libavcodec \
+        ffmpeg/libavformat \
+        ffmpeg/libavutil \
+        ffmpeg/libpostproc \
+        libswscale \
+
+
+
+###### generic rules #######
+
 all: $(ALL_PRG)
 
 %.d: %.c
@@ -705,44 +712,17 @@ all: $(ALL_PRG)
 %.d: %.m
 	$(MPDEPEND_CMD) > $@
 
-%.ho: %.h
-	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
-
 %.o: %.m
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-codec-cfg.d: codecs.conf.h
-mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d: version.h
-DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
-$(DEPS): help_mp.h
+%.ho: %.h
+	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
+
+ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
+checkheaders: $(ALLHEADERS:.h=.ho)
 
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
-
-# rebuild version.h each time the working copy is updated
-ifeq ($(wildcard .svn/entries),.svn/entries)
-version.h: .svn/entries
-endif
-version.h:
-	./version.sh `$(CC) -dumpversion`
-
-help_mp.h: help/help_mp-en.h $(HELP_FILE)
-	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
-	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
-	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
-	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
-ifeq ($(CHARSET),)
-	@echo '#include "$(HELP_FILE)"' >> help_mp.h
-else
-	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
-endif
-	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
-
-ifneq ($(HELP_FILE),help/help_mp-en.h)
-	@echo "Adding untranslated messages to help_mp.h"
-	@echo '// untranslated messages from the English master file:' >> help_mp.h
-	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
-endif
 
 define RECURSIVE_RULE
 $(part)/$(notdir $(part)).a: recurse
@@ -770,13 +750,50 @@ codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
 	$(CC) -I. -DTESTING codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap -o $@
 
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
-	$(WINDRES) -o $@ $<
+	$(WINDRES) -I. -o $@ $<
+
+# ./configure must be rerun if it changed
+config.mak: configure
+	@echo "############################################################"
+	@echo "####### Please run ./configure again - it's changed! #######"
+	@echo "############################################################"
+
+# rebuild version.h each time the working copy is updated
+ifeq ($(wildcard .svn/entries),.svn/entries)
+version.h: .svn/entries
+endif
+version.h:
+	./version.sh `$(CC) -dumpversion`
+
+help_mp.h: help/help_mp-en.h $(HELP_FILE)
+	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
+	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
+	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
+	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
+ifeq ($(CHARSET),)
+	@echo '#include "$(HELP_FILE)"' >> help_mp.h
+else
+	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
+endif
+	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
+
+ifneq ($(HELP_FILE),help/help_mp-en.h)
+	@echo '// untranslated messages from the English master file:' >> help_mp.h
+	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
+endif
+
+
+
+###### dependency declarations / specific CFLAGS ######
+
+codec-cfg.d: codecs.conf.h
+mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d: version.h
+DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
+$(DEPS): help_mp.h
 
 dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE $(LIBDVDCSS_DVDREAD_FLAGS)
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\"
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
-
-libmpdemux/demux_lavf.o libmpdemux/demux_lavf.d libmpdemux/mp_taglists.o libmpdemux/mp_taglists.d: CFLAGS += -Iffmpeg/libavcodec
 
 loader/% loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAG_NO_OMIT_LEAF_FRAME_POINTER)
 #loader/%.o loader/%.d: CFLAGS += -Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
@@ -795,29 +812,9 @@ VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
 
 $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
-TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
-liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
-libvo/aspecttest$(EXESUF): libvo/aspecttest.c libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
-
-LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o osdep/mmap_anon.o cpudetect.o $(TEST_OBJS)
-
-loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
-loader/qtx/list$(EXESUF): loader/qtx/list.c $(LOADER_TEST_OBJS)
-loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
-
-mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
-mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
-
-TESTS = liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
-        loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF) \
-        mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF)
-
-tests: $(TESTS)
-
-testsclean:
-	rm -f $(TESTS)
+###### installation rules #######
 
 install: install-dirs $(INSTALL_TARGETS)
 
@@ -886,6 +883,11 @@ distclean: clean doxygen_clean testsclean toolsclean
            codec-cfg$(EXESUF) codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
            cpuinfo$(EXESUF) TAGS tags
 
+doxygen:
+	doxygen DOCS/tech/Doxyfile
+
+doxygen_clean:
+	-rm -rf DOCS/tech/doxygen
 strip:
 	strip -s $(ALL_PRG)
 
@@ -895,21 +897,33 @@ TAGS:
 tags:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs ctags -a
 
-ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
-checkheaders: $(ALLHEADERS:.h=.ho)
 
-# ./configure must be rerun if it changed
-config.mak: configure
-	@echo "############################################################"
-	@echo "####### Please run ./configure again - it's changed! #######"
-	@echo "############################################################"
 
-doxygen:
-	doxygen DOCS/tech/Doxyfile
+###### tests / tools #######
 
-doxygen_clean:
-	-rm -rf DOCS/tech/doxygen
+TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
+liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
+
+libvo/aspecttest$(EXESUF): libvo/aspecttest.c libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
+
+LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o osdep/mmap_anon.o cpudetect.o $(TEST_OBJS)
+
+loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
+loader/qtx/list$(EXESUF): loader/qtx/list.c $(LOADER_TEST_OBJS)
+loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
+
+mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
+mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
+
+TESTS = liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
+        loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF) \
+        mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF)
+
+tests: $(TESTS)
+
+testsclean:
+	rm -f $(TESTS)
 
 TOOLS = TOOLS/alaw-gen$(EXESUF) \
         TOOLS/asfinfo$(EXESUF) \

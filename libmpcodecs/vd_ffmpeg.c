@@ -7,6 +7,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "options.h"
+#include "av_opts.h"
 
 #include "libavutil/common.h"
 #include "libavutil/intreadwrite.h"
@@ -90,26 +91,20 @@ const m_option_t lavc_decode_opts_conf[]={
     OPT_STRING("skipframe", lavc_param.skip_frame_str, 0),
     OPT_INTRANGE("threads", lavc_param.threads, 0, 1, 8),
     OPT_FLAG_CONSTANTS("bitexact", lavc_param.bitexact, 0, 0, CODEC_FLAG_BITEXACT),
+    OPT_STRING("o", lavc_param.avopt, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 static enum AVDiscard str2AVDiscard(char *str) {
-  if (!str)
+    if (!str)                               return AVDISCARD_DEFAULT;
+    if (strcasecmp(str, "none"   ) == 0)    return AVDISCARD_NONE;
+    if (strcasecmp(str, "default") == 0)    return AVDISCARD_DEFAULT;
+    if (strcasecmp(str, "nonref" ) == 0)    return AVDISCARD_NONREF;
+    if (strcasecmp(str, "bidir"  ) == 0)    return AVDISCARD_BIDIR;
+    if (strcasecmp(str, "nonkey" ) == 0)    return AVDISCARD_NONKEY;
+    if (strcasecmp(str, "all"    ) == 0)    return AVDISCARD_ALL;
+    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Unknown discard value %s\n", str);
     return AVDISCARD_DEFAULT;
-  if (strcasecmp(str, "none") == 0)
-    return AVDISCARD_NONE;
-  if (strcasecmp(str, "default") == 0)
-    return AVDISCARD_DEFAULT;
-  if (strcasecmp(str, "nonref") == 0)
-    return AVDISCARD_NONREF;
-  if (strcasecmp(str, "bidir") == 0)
-    return AVDISCARD_BIDIR;
-  if (strcasecmp(str, "nonkey") == 0)
-    return AVDISCARD_NONKEY;
-  if (strcasecmp(str, "all") == 0)
-    return AVDISCARD_ALL;
-  mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Unknown discard value %s\n", str);
-  return AVDISCARD_DEFAULT;
 }
 
 // to set/get/query special features/parameters
@@ -296,6 +291,15 @@ static int init(sh_video_t *sh){
     avctx->skip_loop_filter = str2AVDiscard(lavc_param->skip_loop_filter_str);
     avctx->skip_idct = str2AVDiscard(lavc_param->skip_idct_str);
     avctx->skip_frame = str2AVDiscard(lavc_param->skip_frame_str);
+
+    if(lavc_param->avopt){
+        if(parse_avopts(avctx, lavc_param->avopt) < 0){
+            mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", lavc_param->avopt);
+            uninit(sh);
+            return 0;
+        }
+    }
+
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     switch (sh->format) {
     case mmioFOURCC('S','V','Q','3'):

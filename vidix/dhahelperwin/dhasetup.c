@@ -1,24 +1,28 @@
-/*  dhasetup - dhahelper setup program
+/*
+ * dhasetup - dhahelper setup program
  *
- *  Copyright (c) 2004 - 2007 Sascha Sommer (MPlayer)
+ * Copyright (c) 2004 - 2007 Sascha Sommer (MPlayer)
  *
- *  Some parts from dhasetup.c source code <http://svn.tilp.info/cgi-bin/viewcvs.cgi/libticables/trunk/src/win32/dha/>
+ * some parts from dhasetup.c source code
+ * http://svn.tilp.info/cgi-bin/viewcvs.cgi/libticables/trunk/src/win32/dha/
  *
- *  Copyright (C) 2007 Romain Lievin (tilp)
+ * Copyright (C) 2007 Romain Lievin (tilp)
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * This file is part of MPlayer.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <windows.h>

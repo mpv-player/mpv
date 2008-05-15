@@ -1,5 +1,6 @@
-/******************************************************************************
- * dhahelper.c: direct hardware access under Windows NT/2000/XP
+/*
+ * direct hardware access under Windows NT/2000/XP
+ *
  * Copyright (c) 2004 Sascha Sommer <saschasommer@freenet.de>.
  *
  * This file is part of MPlayer.
@@ -14,10 +15,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with MPlayer; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *****************************************************************************/
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef MPLAYER_DHAHELPER_H
 #define MPLAYER_DHAHELPER_H

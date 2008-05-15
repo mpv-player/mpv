@@ -1,36 +1,25 @@
-/**
-    VIDIX driver for Hauppauge PVR 350.
-
-    Copyright 2007 Lutz Koschorreck.
-
-    Based on genfb_vid.c and ivtv_xv.c
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-    09.05.2007 Lutz Koschorreck
-    First version: Tested with ivtv-0.10.1, xine-ui-0.99.5, xine-lib-1.1.6
-    20.05.2007 Lutz Koschorreck
-    Some Scaling and zooming problems fixed. By default the vidix driver now 
-    controlls the setting of alphablending. So there is no need to use
-    ivtvfbctl anymore. To disable this feature set the following environment
-    variable:VIDIXIVTVALPHA=disable. Special thanx to Ian Armstrong.
-    23.07.2007 Lutz Koschorreck
-    Support for 2.6.22 kernel added. PCI scan added.
-    07.10.2007 Lutz Koschorreck
-    Restore old alpha value correctly. Fix capability struct values. 
-**/
+/*
+ * VIDIX driver for Hauppauge PVR 350
+ *
+ * Copyright 2007 Lutz Koschorreck
+ * Based on genfb_vid.c and ivtv_xv.c
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <errno.h>
 #include <stdio.h>

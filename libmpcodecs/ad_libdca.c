@@ -1,6 +1,7 @@
 /*
- * ad_libdca.c : DTS Coherent Acoustics stream decoder using libdca
+ * DTS Coherent Acoustics stream decoder using libdca
  * This file is partially based on dtsdec.c r9036 from FFmpeg and ad_liba52.c
+ *
  * Copyright (C) 2007 Roberto Togni
  *
  * This file is part of MPlayer.
@@ -15,10 +16,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with MPlayer; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <stdio.h>

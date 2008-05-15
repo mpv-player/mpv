@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r26067 (2008. 03. 01.)
+// Sync'ed with help_mp-en.h r26649 (2008. 05. 11.)
 
 // ========================= MPlayer help ===========================
 
@@ -2033,7 +2033,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningFont "[ass] Hiba a betűtípus megnyitásakor: %s, %d\n"
 
 // ass_fontconfig.c
-#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: A kiválasztott betűtípus család nem a kért: '%s' != '%s'\n"
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: A kiválasztott betűtípus nem a kért: '%s' != '%s'\n"
 #define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Alapértelmezett betűtípus család használata: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Alapértelmezett betűtípus használata: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: 'Arial' betűtípus család használata: (%s, %d, %d) -> %s, %d\n"
@@ -2064,7 +2064,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Figyelem! Esemény magassága megváltozott!  \n"
 
 // ass_font.c
-#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] 0x%X jel nem található, betűtípus újraválasztása ehhez: (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] 0x%X jel nem található, még egy betűtípus választása ehhez: (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] 0x%X jel nem található a betűtípusban ehhez: (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Hiba a betűtípus memóriában történő megnyitásakor: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] betűtípus leírás karaktertábla nélkül\n"

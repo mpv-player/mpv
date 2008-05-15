@@ -57,6 +57,7 @@ static int use_sleep;
 static int first_frame;//draw colorkey on first frame
 static int use_queue;
 static int xv_port_request = 0;
+static int xv_adaptor = -1; 
 static int bob_deinterlace;
 static int top_field_first;
 
@@ -282,6 +283,9 @@ XvMCSurfaceInfo * mc_surf_list;
       printf("vo_xvmc: Querying %d adaptors\n",num_adaptors); }
    for(i=0; i<num_adaptors; i++)
    {
+      /* check if adaptor number has been specified */
+      if (xv_adaptor != -1 && xv_adaptor != i)
+         continue;
       if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) {
          printf("vo_xvmc: Quering adaptor #%d\n",i); }
       if( ai[i].type == 0 ) continue;// we need at least dummy type!
@@ -318,6 +322,7 @@ XvMCSurfaceInfo * mc_surf_list;
                      printf("vo_xvmc: Fail to grab port %ld\n",p); }
 	          continue;
 	       }
+	       printf("vo_xvmc: Using Xv Adaptor #%d (%s)\n", i, ai[i].name);
 	       printf("vo_xvmc: Port %ld grabed\n",p);
 	       xv_port = p;
 	    }
@@ -371,6 +376,7 @@ opt_t subopts [] =
 {  
   /* name         arg type      arg var           test */
   {  "port",      OPT_ARG_INT,  &xv_port_request, (opt_test_f)int_pos },
+  {  "adaptor",   OPT_ARG_INT,  &xv_adaptor,      (opt_test_f)int_non_neg },
   {  "ck",        OPT_ARG_STR,  &ck_src_arg,      xv_test_ck },
   {  "ck-method", OPT_ARG_STR,  &ck_method_arg,   xv_test_ckm },
   {  "benchmark", OPT_ARG_BOOL, &benchmark,       NULL },

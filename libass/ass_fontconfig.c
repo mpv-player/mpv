@@ -1,22 +1,24 @@
 // -*- c-basic-offset: 8; indent-tabs-mode: t -*-
 // vim:ts=8:sw=8:noet:ai:
 /*
-  Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-*/
+ * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
+ *
+ * This file is part of libass.
+ *
+ * libass is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * libass is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with libass; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "config.h"
 
@@ -50,6 +52,16 @@ struct fc_instance_s {
 };
 
 #ifdef HAVE_FONTCONFIG
+
+// 4yo fontconfig does not have these.
+// They are only needed for debug output, anyway.
+#ifndef FC_FULLNAME
+#define FC_FULLNAME "fullname"
+#endif
+#ifndef FC_EMBOLDEN
+#define FC_EMBOLDEN "embolden"
+#endif
+
 /**
  * \brief Low-level font selection.
  * \param priv private data
@@ -65,7 +77,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 {
 	FcBool rc;
 	FcResult result;
-	FcPattern *pat = 0, *rpat;
+	FcPattern *pat = 0, *rpat = 0;
 	int r_index, r_slant, r_weight;
 	FcChar8 *r_family, *r_style, *r_file, *r_fullname;
 	FcBool r_outline, r_embolden;
@@ -73,6 +85,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	FcFontSet* fset = 0;
 	int curf;
 	char* retval = 0;
+	int family_cnt;
 	
 	*index = 0;
 
@@ -93,12 +106,16 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	// precedence in matching.
 	// An alternative approach could be to reimplement FcFontSort
 	// using FC_FULLNAME instead of FC_FAMILY.
-	if (strchr(family, ' ')) {
-		char *p, *s = strdup(family);
-		while (p = strrchr(s, ' ')) {
-			*p = '\0';
-			FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
-		}
+	family_cnt = 1;
+	{
+		char* s = strdup(family);
+		char* p = s + strlen(s);
+		while (--p > s)
+			if (*p == ' ' || *p == '-') {
+				*p = '\0';
+				FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
+				++ family_cnt;
+			}
 		free(s);
 	}
 	FcPatternAddBool(pat, FC_OUTLINE, FcTrue);
@@ -114,16 +131,16 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	fset = FcFontSort(priv->config, pat, FcTrue, NULL, &result);
 
 	for (curf = 0; curf < fset->nfont; ++curf) {
-		rpat = fset->fonts[curf];
-		
-		result = FcPatternGetBool(rpat, FC_OUTLINE, 0, &r_outline);
+		FcPattern* curp = fset->fonts[curf];
+
+		result = FcPatternGetBool(curp, FC_OUTLINE, 0, &r_outline);
 		if (result != FcResultMatch)
 			continue;
 		if (r_outline != FcTrue)
 			continue;
 		if (!code)
 			break;
-		result = FcPatternGetCharSet(rpat, FC_CHARSET, 0, &r_charset);
+		result = FcPatternGetCharSet(curp, FC_CHARSET, 0, &r_charset);
 		if (result != FcResultMatch)
 			continue;
 		if (FcCharSetHasChar(r_charset, code))
@@ -133,8 +150,16 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (curf >= fset->nfont)
 		goto error;
 
-	rpat = fset->fonts[curf];
-	
+	// Remove all extra family names from original pattern.
+	// After this, FcFontRenderPrepare will select the most relevant family
+	// name in case there are more than one of them.
+	for (; family_cnt > 1; --family_cnt)
+		FcPatternRemove(pat, FC_FAMILY, family_cnt - 1);
+
+	rpat = FcFontRenderPrepare(priv->config, pat, fset->fonts[curf]);
+	if (!rpat)
+		goto error;
+
 	result = FcPatternGetInteger(rpat, FC_INDEX, 0, &r_index);
 	if (result != FcResultMatch)
 		goto error;
@@ -156,7 +181,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (!(r_family && strcasecmp((const char*)r_family, family) == 0) &&
 	    !(r_fullname && strcasecmp((const char*)r_fullname, family) == 0))
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
-		       (const char*)(r_family ? r_family : r_fullname), family);
+		       (const char*)(r_fullname ? r_fullname : r_family), family);
 
 	result = FcPatternGetString(rpat, FC_STYLE, 0, &r_style);
 	if (result != FcResultMatch)
@@ -181,6 +206,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 
  error:
 	if (pat) FcPatternDestroy(pat);
+	if (rpat) FcPatternDestroy(rpat);
 	if (fset) FcFontSetDestroy(fset);
 	return retval;
 }

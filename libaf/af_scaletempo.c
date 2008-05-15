@@ -1,5 +1,17 @@
 /*
  * scaletempo audio filter
+ *
+ * scale tempo while maintaining pitch
+ * (WSOLA technique with cross correlation)
+ * inspired by SoundTouch library by Olli Parviainen
+ *
+ * basic algorithm
+ *   - produce 'stride' output samples per loop
+ *   - consume stride*scale input samples per loop
+ *
+ * to produce smoother transitions between strides, blend next overlap
+ * samples from last stride with correlated samples of current input
+ *
  * Copyright (c) 2007 Robert Juliano
  *
  * This file is part of MPlayer.
@@ -14,21 +26,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with MPlayer; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * scale tempo while maintaining pitch
- * (WSOLA technique with cross correlation)
- * inspired by SoundTouch library by Olli Parviainen
- *
- * basic algorithm
- *   - produce 'stride' output samples per loop
- *   - consume stride*scale input samples per loop
- *
- * to produce smoother transitions between strides, blend next overlap
- * samples from last stride with correlated samples of current input
- *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <stdlib.h>

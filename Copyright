@@ -142,3 +142,11 @@ Homepage:   https://savannah.nongnu.org/projects/freesdp/
 Directory:  stream/freesdp/
 Copyright:  2001-2003 Federico Montesino Pouzols <fedemp@suidzer0.org>
 License:    GNU General Public License
+
+Name:       MJPEG Tools
+Version:    post 2001-12-03 release or CVS snapshot
+Homepage:   http://mjpeg.sourceforge.net/
+Directory:  libmpdemux/yuv4mpeg*
+Copyright:  2001 Matthew J. Marjanovic <maddog@mir.com>
+            2001 Andrew Stevens <andrew.stevens@philips.com>
+License:    GNU General Public License

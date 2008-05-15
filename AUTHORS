@@ -133,6 +133,7 @@ Biurrun, Diego (DonDiego) <diego@biurrun.de>
     * skin review part I
     * patch review
     * build system overhaul
+    * shiny new non-recursive build
 
 Blomenkamp, Marcus <Marcus.Blomenkamp@epost.de>
     * VIDIX patches (Rage128, Radeon 7000)

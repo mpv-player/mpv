@@ -1,5 +1,6 @@
 /*
- * Get path to config dir/file.
+ * AVOption parsing helper
+ * Copyright (C) 2008 Michael Niedermayer
  *
  * This file is part of MPlayer.
  *
@@ -18,10 +19,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_GET_PATH_H
-#define MPLAYER_GET_PATH_H
+#include <stdlib.h>
+#include <string.h>
+#include "libavcodec/opt.h"
 
-char *get_path(const char *filename);
-void set_path_env();
+int parse_avopts(void *v, char *str){
+    char *start;
+    start= str= strdup(str);
 
-#endif /* MPLAYER_GET_PATH_H */
+    while(str && *str){
+        char *next_opt, *arg;
+
+        next_opt= strchr(str, ',');
+        if(next_opt) *next_opt++= 0;
+
+        arg     = strchr(str, '=');
+        if(arg)      *arg++= 0;
+
+        if(!av_set_string(v, str, arg)){
+            free(start);
+            return -1;
+        }
+        str= next_opt;
+    }
+
+    free(start);
+    return 0;
+}

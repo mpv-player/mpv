@@ -736,11 +736,13 @@ static int preinit(struct vo *vo, const char *arg)
     struct xvctx *ctx = talloc_zero(vo, struct xvctx);
     vo->priv = ctx;
     struct vo_x11_state *x11 = vo->x11;
+    int xv_adaptor = -1;
 
     opt_t subopts[] =
     {  
       /* name         arg type     arg var         test */
       {  "port",      OPT_ARG_INT, &ctx->xv_port,       (opt_test_f)int_pos },
+      {  "adaptor",   OPT_ARG_INT, &xv_adaptor,    (opt_test_f)int_non_neg },
       {  "ck",        OPT_ARG_STR, &ck_src_arg,    xv_test_ck },
       {  "ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm },
       {  NULL }
@@ -812,6 +814,10 @@ static int preinit(struct vo *vo, const char *arg)
 
     for (i = 0; i < ctx->adaptors && x11->xv_port == 0; i++)
     {
+        /* check if adaptor number has been specified */
+        if (xv_adaptor != -1 && xv_adaptor != i)
+          continue;
+
         if ((ctx->ai[i].type & XvInputMask) && (ctx->ai[i].type & XvImageMask))
         {
             for (xv_p = ctx->ai[i].base_id;
@@ -819,6 +825,8 @@ static int preinit(struct vo *vo, const char *arg)
                 if (!XvGrabPort(x11->display, xv_p, CurrentTime))
                 {
                     x11->xv_port = xv_p;
+                    mp_msg(MSGT_VO, MSGL_INFO,
+                           MSGTR_LIBVO_XV_Adaptor, i, ctx->ai[i].name);
                     break;
                 } else
                 {

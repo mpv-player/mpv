@@ -57,6 +57,7 @@ typedef struct MPOpts {
         char *skip_frame_str;
         int threads;
         int bitexact;
+        char *avopt;
     } lavc_param;
     struct input_conf {
         char *config_file;

@@ -1,6 +1,9 @@
 /*
  * VIDIX driver for S3 chipsets.
+ *
  * Copyright (C) 2004 Reza Jelveh
+ * Thanks to Alex Deucher for Support
+ * Trio/Virge support by Michael Kostylev
  *
  * This file is part of MPlayer.
  *
@@ -14,14 +17,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with MPlayer; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Thanks to Alex Deucher for Support
- * 
- * Trio/Virge support by Michael Kostylev
- *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <errno.h>

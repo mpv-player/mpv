@@ -28,7 +28,7 @@ MPlayer (1.0)
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
-    * H.264 PAFF decoding
+    * H.264 speedup and PAFF decoding
     * Nellymoser audio codec
     * VC-1/WMV3 MMX optimizations
 

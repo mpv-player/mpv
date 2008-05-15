@@ -16,6 +16,7 @@
 #ifdef HAVE_NEW_GUI
 #include "gui/interface.h"
 #endif
+#include "fastmemcpy.h"
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 
@@ -80,6 +81,8 @@ static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
 static int many_fmts;
+static int ati_hack;
+static int force_pbo;
 static int use_glFinish;
 static int swap_interval;
 static GLenum gl_target;
@@ -672,6 +675,8 @@ static uint32_t get_image(mp_image_t *mpi) {
   if (!gl_buffer)
     GenBuffers(1, &gl_buffer);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
+  if (ati_hack)
+    mpi->width = (mpi->width + 63) & ~63;
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   if (mpi->stride[0] * mpi->height > gl_buffersize) {
     BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->height,
@@ -704,10 +709,24 @@ static uint32_t get_image(mp_image_t *mpi) {
 
 static uint32_t draw_image(mp_image_t *mpi) {
   int slice = slice_height;
-  int stride[3] = {mpi->stride[0], mpi->stride[1], mpi->stride[2]};
-  unsigned char *planes[3] = {mpi->planes[0], mpi->planes[1], mpi->planes[2]};
+  int stride[3];
+  unsigned char *planes[3];
+  mp_image_t mpi2 = *mpi;
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
     return VO_TRUE;
+  mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
+  mpi2.width = mpi2.w; mpi2.height = mpi2.h;
+  if (force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !gl_bufferptr && get_image(&mpi2) == VO_TRUE) {
+    int bpp = mpi->imgfmt == IMGFMT_YV12 ? 1 : mpi->bpp;
+    memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bpp, mpi->h, mpi2.stride[0], mpi->stride[0]);
+    if (mpi->imgfmt == IMGFMT_YV12) {
+      memcpy_pic(mpi2.planes[1], mpi->planes[1], mpi->w >> 1, mpi->h >> 1, mpi2.stride[1], mpi->stride[1]);
+      memcpy_pic(mpi2.planes[2], mpi->planes[2], mpi->w >> 1, mpi->h >> 1, mpi2.stride[2], mpi->stride[2]);
+    }
+    mpi = &mpi2;
+  }
+  stride[0] = mpi->stride[0]; stride[1] = mpi->stride[1]; stride[2] = mpi->stride[2];
+  planes[0] = mpi->planes[0]; planes[1] = mpi->planes[1]; planes[2] = mpi->planes[2];
   mpi_flipped = (stride[0] < 0);
   if (mpi->flags & MP_IMGFLAG_DIRECT) {
     intptr_t base = (intptr_t)planes[0];
@@ -789,6 +808,8 @@ static opt_t subopts[] = {
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
   {"lscale",       OPT_ARG_INT,  &lscale,       (opt_test_f)int_non_neg},
   {"cscale",       OPT_ARG_INT,  &cscale,       (opt_test_f)int_non_neg},
+  {"ati-hack",     OPT_ARG_BOOL, &ati_hack,     NULL},
+  {"force-pbo",    OPT_ARG_BOOL, &force_pbo,    NULL},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {"swapinterval", OPT_ARG_INT,  &swap_interval,NULL},
   {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
@@ -811,6 +832,8 @@ static int preinit(const char *arg)
     cscale = 0;
     use_rectangle = 0;
     use_glFinish = 0;
+    ati_hack = 0;
+    force_pbo = 0;
     swap_interval = 1;
     slice_height = 0;
     custom_prog = NULL;
@@ -835,6 +858,10 @@ static int preinit(const char *arg)
               "    0: use power-of-two textures\n"
               "    1: use texture_rectangle\n"
               "    2: use texture_non_power_of_two\n"
+              "  ati-hack\n"
+              "    Workaround ATI bug with PBOs\n"
+              "  force-pbo\n"
+              "    Force use of PBO even if this involves an extra memcpy\n"
               "  glfinish\n"
               "    Call glFinish() before swapping buffers\n"
               "  swapinterval=<n>\n"

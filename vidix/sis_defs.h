@@ -1,8 +1,8 @@
 /*
- *  SiS graphics misc definitions
+ * SiS graphics misc definitions
  *
- *  Taken from SiS Xv driver:
- *  Copyright (C) 2002-2003 by Thomas Winischhofer, Vienna, Austria
+ * Taken from SiS Xv driver:
+ * Copyright (C) 2002-2003 by Thomas Winischhofer, Vienna, Austria
  *
  * This file is part of MPlayer.
  *
@@ -16,9 +16,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with MPlayer; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef MPLAYER_SIS_DEFS_H
