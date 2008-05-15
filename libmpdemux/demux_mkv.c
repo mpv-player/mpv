@@ -2233,25 +2233,6 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
 
 static void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags);
 
-/** \brief Given a matroska track number and type, find the id that mplayer would ask for.
- *  \param d The demuxer for which the subtitle id should be returned.
- *  \param num The matroska track number we are looking up.
- *  \param type The track type.
- */
-static int demux_mkv_reverse_id(mkv_demuxer_t *d, int num, int type)
-{
-  int i, id;
-  
-  for (i=0, id=0; i < d->num_tracks; i++)
-    if (d->tracks[i] != NULL && d->tracks[i]->type == type) {
-      if (d->tracks[i]->tnum == num)
-        return id;
-      id++;
-    }
-  
-  return -1;
-}
-
 static int
 demux_mkv_open (demuxer_t *demuxer)
 {
