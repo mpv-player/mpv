@@ -31,6 +31,7 @@
 #include <ws2tcpip.h>
 #endif
 
+#include "stream.h"
 #include "tcp.h"
 
 /* IPv6 options */
