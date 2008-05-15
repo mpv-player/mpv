@@ -1398,7 +1398,6 @@ demux_mkv_read_tags (demuxer_t *demuxer)
 static int
 demux_mkv_read_attachments (demuxer_t *demuxer)
 {
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   stream_t *s = demuxer->stream;
   uint64_t length, l;
   int il;
