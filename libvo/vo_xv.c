@@ -70,7 +70,6 @@ static const vo_info_t info = {
 #include <X11/extensions/Xvlib.h>
 
 struct xvctx {
-    unsigned int xv_port;
     XvAdaptorInfo *ai;
     XvImageFormatValues *fo;
     unsigned int formats, adaptors, xv_format;
@@ -741,7 +740,7 @@ static int preinit(struct vo *vo, const char *arg)
     opt_t subopts[] =
     {  
       /* name         arg type     arg var         test */
-      {  "port",      OPT_ARG_INT, &ctx->xv_port,       (opt_test_f)int_pos },
+      {  "port",      OPT_ARG_INT, &x11->xv_port,       (opt_test_f)int_pos },
       {  "adaptor",   OPT_ARG_INT, &xv_adaptor,    (opt_test_f)int_non_neg },
       {  "ck",        OPT_ARG_STR, &ck_src_arg,    xv_test_ck },
       {  "ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm },
