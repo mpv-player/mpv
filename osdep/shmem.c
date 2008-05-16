@@ -82,7 +82,7 @@ while(1){
     return p;
 #else
     mp_msg(MSGT_OSDEP, MSGL_FATAL, "shmem: no SHM support was compiled in!\n");
-    return(NULL);
+    return NULL;
 #endif
     }
   default:

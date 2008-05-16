@@ -68,7 +68,7 @@ unsigned long previous_sub_end;
 #endif
 
 static int eol(char p) {
-	return (p=='\r' || p=='\n' || p=='\0');
+	return p=='\r' || p=='\n' || p=='\0';
 }
 
 /* Remove leading and trailing space */

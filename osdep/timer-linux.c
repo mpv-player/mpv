@@ -34,7 +34,7 @@ unsigned int GetTimer(void){
 //  float s;
   gettimeofday(&tv,NULL);
 //  s=tv.tv_usec;s*=0.000001;s+=tv.tv_sec;
-  return (tv.tv_sec*1000000+tv.tv_usec);
+  return tv.tv_sec * 1000000 + tv.tv_usec;
 }  
 
 // Returns current time in milliseconds
@@ -43,7 +43,7 @@ unsigned int GetTimerMS(void){
 //  float s;
   gettimeofday(&tv,NULL);
 //  s=tv.tv_usec;s*=0.000001;s+=tv.tv_sec;
-  return (tv.tv_sec*1000+tv.tv_usec/1000);
+  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }  
 
 static unsigned int RelativeTime=0;

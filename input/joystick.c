@@ -120,9 +120,9 @@ int mp_input_joystick_read(int fd) {
     btns &= ~(1 << ev.number);
     btns |= (ev.value << ev.number);
     if(ev.value == 1)
-      return ((JOY_BTN0+ev.number) | MP_KEY_DOWN);
+      return (JOY_BTN0 + ev.number) | MP_KEY_DOWN;
     else
-      return (JOY_BTN0+ev.number); 
+      return JOY_BTN0 + ev.number;
   } else if(ev.type & JS_EVENT_AXIS) {
     if(ev.value < -JOY_AXIS_DELTA && axis[ev.number] != -1) {
       axis[ev.number] = -1;

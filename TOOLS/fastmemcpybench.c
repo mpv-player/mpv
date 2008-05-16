@@ -34,7 +34,7 @@ static int mga_init(){
 	if(f == -1)
 	{
 		fprintf(stderr,"Couldn't open /dev/mga_vid\n"); 
-		return(-1);
+		return -1;
 	}
 
 	mga_vid_config.num_frames=1;
@@ -80,7 +80,7 @@ static unsigned int GetTimer(){
 //  float s;
   gettimeofday(&tv,&tz);
 //  s=tv.tv_usec;s*=0.000001;s+=tv.tv_sec;
-  return (tv.tv_sec*1000000+tv.tv_usec);
+  return tv.tv_sec * 1000000 + tv.tv_usec;
 }  
 
 static inline unsigned long long int read_tsc( void )

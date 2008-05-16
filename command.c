@@ -1899,7 +1899,7 @@ static int mp_property_teletext_common(m_option_t * prop, int action, void *arg,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-    return (result==TVI_CONTROL_TRUE?M_PROPERTY_OK:M_PROPERTY_ERROR);
+    return result == TVI_CONTROL_TRUE ? M_PROPERTY_OK : M_PROPERTY_ERROR;
 }
 
 static int mp_property_teletext_mode(m_option_t * prop, int action, void *arg,

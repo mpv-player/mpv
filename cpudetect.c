@@ -79,7 +79,7 @@ static int has_cpuid(void)
                           : "cc" 
                           );
 
-	return (a!=c);
+	return a != c;
 }
 #endif
 

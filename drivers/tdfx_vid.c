@@ -258,12 +258,12 @@ static int agp_move(tdfx_vid_agp_move_t* m) {
   u32 src_h,src_l;
 
   if(!(agp_mem||map_start))
-    return (-EAGAIN);
+    return -EAGAIN;
 
   if(m->move2 > 3) {
     printk(KERN_DEBUG "tdfx_vid: AGP move invalid destination %d\n",
 	   m->move2);
-    return (-EAGAIN);
+    return -EAGAIN;
   }
 
   if(map_start)
@@ -511,7 +511,7 @@ static int tdfx_vid_set_yuv(unsigned long arg) {
 
   if(copy_from_user(&yuv,(tdfx_vid_yuv_t*)arg,sizeof(tdfx_vid_yuv_t))) {
     printk(KERN_DEBUG "tdfx_vid:failed copy from userspace\n");
-    return(-EFAULT); 
+    return -EFAULT;
   }
   banshee_make_room(2);
   tdfx_outl(YUVBASEADDRESS,yuv.base & 0x01FFFFFF);
@@ -530,7 +530,7 @@ static int tdfx_vid_get_yuv(unsigned long arg) {
 
   if(copy_to_user((tdfx_vid_yuv_t*)arg,&yuv,sizeof(tdfx_vid_yuv_t))) {
       printk(KERN_INFO "tdfx_vid:failed copy to userspace\n");
-      return(-EFAULT); 
+      return -EFAULT;
   }
 
   return 0;
@@ -544,14 +544,14 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
 
   if(copy_from_user(&ov,(tdfx_vid_overlay_t*)arg,sizeof(tdfx_vid_overlay_t))) {
     printk(KERN_DEBUG "tdfx_vid:failed copy from userspace\n");
-    return(-EFAULT); 
+    return -EFAULT;
   }
 
   if(ov.dst_y < 0) {
     int shift;
     if(-ov.dst_y >= ov.src_height) {
       printk(KERN_DEBUG "tdfx_vid: Overlay outside of the screen ????\n");
-      return(-EFAULT);
+      return -EFAULT;
     }
     shift = (-ov.dst_y)/(double)ov.dst_height*ov.src_height;
     ov.src[0] += shift*ov.src_stride;
@@ -564,7 +564,7 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
     int shift;
     if(-ov.dst_x >= ov.src_width) {
       printk(KERN_DEBUG "tdfx_vid: Overlay outside of the screen ????\n");
-      return(-EFAULT);
+      return -EFAULT;
     }
     shift = (-ov.dst_x)/(double)ov.dst_width*ov.src_width;
     shift = ((shift+3)/2)*2;
@@ -592,7 +592,7 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
     break;
   default:
     printk(KERN_DEBUG "tdfx_vid: Invalid overlay fmt 0x%x\n",ov.format);
-    return (-EFAULT); 
+    return -EFAULT;
   }
 
   // YUV422 need 4 bytes aligned stride and address
@@ -600,11 +600,11 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
       ov.format == TDFX_VID_FORMAT_UYVY)) {
     if((ov.src_stride & ~0x3) != ov.src_stride) {
       printk(KERN_DEBUG "tdfx_vid: YUV need a 4 bytes aligned stride %d\n",ov.src_stride);
-      return(-EFAULT);
+      return -EFAULT;
     }
     if((ov.src[0] & ~0x3) != ov.src[0] || (ov.src[1] & ~0x3) != ov.src[1]){
       printk(KERN_DEBUG "tdfx_vid: YUV need a 4 bytes aligned address 0x%x 0x%x\n",ov.src[0],ov.src[1]);
-      return(-EFAULT);
+      return -EFAULT;
     }
   }
 
@@ -622,7 +622,7 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
   if(ov.dst_x >= screen_w || ov.dst_y >= screen_h ||
      disp_h <= 0 || disp_h > screen_h || disp_w <= 0 || disp_w > screen_w) {
     printk(KERN_DEBUG "tdfx_vid: Invalid overlay dimension and/or position\n");
-    return (-EFAULT); 
+    return -EFAULT;
   }
   // Setup the vidproc
   // H scaling
@@ -702,7 +702,7 @@ static int tdfx_vid_overlay_on(void) {
   //return 0;
   if(vidcfg & (1<<8)) { // Overlay is already on
     //printk(KERN_DEBUG "tdfx_vid: Overlay is already on.\n");
-    return (-EFAULT); 
+    return -EFAULT;
   }
   vidcfg |= (1<<8);
   tdfx_outl(VIDPROCCFG,vidcfg);
@@ -719,7 +719,7 @@ static int tdfx_vid_overlay_off(void) {
   }
 
   printk(KERN_DEBUG "tdfx_vid: Overlay is already off.\n");
-  return (-EFAULT); 
+  return -EFAULT;
 }
 
 
@@ -734,34 +734,34 @@ static int tdfx_vid_ioctl(struct inode *inode, struct file *file, unsigned int c
   case TDFX_VID_AGP_MOVE:
     if(copy_from_user(&move,(tdfx_vid_agp_move_t*)arg,sizeof(tdfx_vid_agp_move_t))) {
       printk(KERN_INFO "tdfx_vid:failed copy from userspace\n");
-      return(-EFAULT); 
+      return -EFAULT;
     }
     return agp_move(&move);
   case TDFX_VID_BUMP0:
     if(copy_from_user(&int16,(u16*)arg,sizeof(u16))) {
       printk(KERN_INFO "tdfx_vid:failed copy from userspace\n");
-      return(-EFAULT); 
+      return -EFAULT;
     }
     return bump_fifo(int16);
   case TDFX_VID_BLIT:
     if(copy_from_user(&blit,(tdfx_vid_blit_t*)arg,sizeof(tdfx_vid_blit_t))) {
       printk(KERN_INFO "tdfx_vid:failed copy from userspace\n");
-      return(-EFAULT); 
+      return -EFAULT;
     }
     if(!tdfx_vid_blit(&blit)) {
       printk(KERN_INFO "tdfx_vid: Blit failed\n");
-      return(-EFAULT); 
+      return -EFAULT;
     }
     return 0;
   case TDFX_VID_GET_CONFIG:
     if(copy_from_user(&cfg,(tdfx_vid_config_t*)arg,sizeof(tdfx_vid_config_t))) {
       printk(KERN_INFO "tdfx_vid:failed copy from userspace\n");
-      return(-EFAULT); 
+      return -EFAULT;
     }
     tdfx_vid_get_config(&cfg);
     if(copy_to_user((tdfx_vid_config_t*)arg,&cfg,sizeof(tdfx_vid_config_t))) {
       printk(KERN_INFO "tdfx_vid:failed copy to userspace\n");
-      return(-EFAULT); 
+      return -EFAULT;
     }
     return 0;
   case TDFX_VID_SET_YUV:
@@ -776,7 +776,7 @@ static int tdfx_vid_ioctl(struct inode *inode, struct file *file, unsigned int c
     return tdfx_vid_overlay_off();
   default:
     printk(KERN_ERR "tdfx_vid: Invalid ioctl %d\n",cmd);
-    return (-EINVAL);
+    return -EINVAL;
   } 
   return 0;
 }
@@ -846,13 +846,13 @@ static struct page *tdfx_vid_nopage(struct vm_area_struct *vma,
 
   if(n >= agp_mem->page_count) {
     printk(KERN_DEBUG "tdfx_vid: Too far away\n");
-    return ((struct page *)0UL);
+    return (struct page *)0UL;
   }
   phys = agp_mem->memory[n] & ~(0x00000fff);
   page = virt_to_page(phys_to_virt(phys));
   if(!page) {
     printk(KERN_DEBUG "tdfx_vid: Can't get the page\n");
-    return ((struct page *)0UL);
+    return (struct page *)0UL;
   }
   return page;
 }
@@ -877,7 +877,7 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
   if(map_start) { // Ok we map directly in the physcal ram
     if(size*PAGE_SIZE > map_max) {
       printk(KERN_ERR "tdfx_vid: Not enouth mem\n");
-      return(-EAGAIN);
+      return -EAGAIN;
     }
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,3)
     if(remap_page_range(vma, vma->vm_start,map_start,
@@ -888,26 +888,26 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
 #endif
       {
 	printk(KERN_ERR "tdfx_vid: error mapping video memory\n");
-	return(-EAGAIN);
+	return -EAGAIN;
       }
     printk(KERN_INFO "Physical mem 0x%lx mapped in userspace\n",map_start);
     return 0;
   }
 
   if(agp_mem)
-    return(-EAGAIN);
+    return -EAGAIN;
 
   agp_mem = drm_agp->allocate_memory(size,AGP_NORMAL_MEMORY);
   if(!agp_mem) {
     printk(KERN_ERR "Failed to allocate AGP memory\n");
-    return(-ENOMEM);
+    return -ENOMEM;
   }
 
   if(drm_agp->bind_memory(agp_mem,0)) {
     printk(KERN_ERR "Failed to bind the AGP memory\n");
     drm_agp->free_memory(agp_mem);
     agp_mem = NULL;
-    return(-ENOMEM);
+    return -ENOMEM;
   }
 
   printk(KERN_INFO "%d pages of AGP mem allocated (%ld/%ld bytes) :)))\n",
@@ -924,7 +924,7 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
 #endif
       {
 	printk(KERN_ERR "tdfx_vid: error mapping video memory\n");
-	return(-EAGAIN);
+	return -EAGAIN;
       }
   } else {
     // Never swap it out
@@ -971,14 +971,14 @@ static int tdfx_vid_open(struct inode *inode, struct file *file)
 #endif
 
 	if(minor != 0)
-	 return(-ENXIO);
+	 return -ENXIO;
 
 	if(tdfx_vid_in_use == 1) 
-		return(-EBUSY);
+		return -EBUSY;
 
 	tdfx_vid_in_use = 1;
 	MOD_INC_USE_COUNT;
-	return(0);
+	return 0;
 }
 
 #if LINUX_VERSION_CODE >= 0x020400
@@ -1033,7 +1033,7 @@ int init_module(void)
 
   
 
-  return (0);
+  return 0;
 
 }
 

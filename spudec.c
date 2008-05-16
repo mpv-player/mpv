@@ -497,7 +497,7 @@ static void spudec_decode(spudec_handle_t *this, int pts100)
 int spudec_changed(void * this)
 {
     spudec_handle_t * spu = (spudec_handle_t*)this;
-    return (spu->spu_changed || spu->now_pts > spu->end_pts);
+    return spu->spu_changed || spu->now_pts > spu->end_pts;
 }
 
 void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pts100)

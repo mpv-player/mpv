@@ -26,28 +26,28 @@ static char *atom2human_type(int type)
 {
 switch (type)
 {
-  case 0x766F6F6D: return ("Information sections"); /* moov */
-  case 0x6468766D: return ("Movie header"); /* mvhd */
-  case 0x6169646D: return ("Media stream"); /* mdia */
-  case 0x64686D76: return ("Video media header"); /* vmhd */
-  case 0x64686D73: return ("Sound media header"); /* smhd */
-  case 0x6468646D: return ("Media header"); /* mdhd */
-  case 0x666E696D: return ("Media information"); /* minf */
-  case 0x726C6468: return ("Handler reference"); /* hdlr */
-  case 0x6B617274: return ("New track (stream)"); /* trak */
-  case 0x75716D72: return ("rmqu");
-  case 0x65657266: return ("free");
-  case 0x64686B74: return ("Track header"); /* tkhd */
-  case 0x61746475: return ("User data"); /* udta */
-  case 0x7461646D: return ("Movie data"); /* mdat */
-  case 0x6C627473: return ("Sample information table"); /* stbl */
-  case 0x64737473: return ("Sample description"); /* stsd */
-  case 0x6F637473: return ("Chunk offset table"); /* stco */
-  case 0x73747473: return ("Sample time table"); /* stts */
-  case 0x63737473: return ("Sample->Chunk mapping table"); /* stsc */
-  case 0x7A737473: return ("Sample size table"); /* stsz */
+  case 0x766F6F6D: return "Information sections"; /* moov */
+  case 0x6468766D: return "Movie header"; /* mvhd */
+  case 0x6169646D: return "Media stream"; /* mdia */
+  case 0x64686D76: return "Video media header"; /* vmhd */
+  case 0x64686D73: return "Sound media header"; /* smhd */
+  case 0x6468646D: return "Media header"; /* mdhd */
+  case 0x666E696D: return "Media information"; /* minf */
+  case 0x726C6468: return "Handler reference"; /* hdlr */
+  case 0x6B617274: return "New track (stream)"; /* trak */
+  case 0x75716D72: return "rmqu";
+  case 0x65657266: return "free";
+  case 0x64686B74: return "Track header"; /* tkhd */
+  case 0x61746475: return "User data"; /* udta */
+  case 0x7461646D: return "Movie data"; /* mdat */
+  case 0x6C627473: return "Sample information table"; /* stbl */
+  case 0x64737473: return "Sample description"; /* stsd */
+  case 0x6F637473: return "Chunk offset table"; /* stco */
+  case 0x73747473: return "Sample time table"; /* stts */
+  case 0x63737473: return "Sample->Chunk mapping table"; /* stsc */
+  case 0x7A737473: return "Sample size table"; /* stsz */
 }
-    return("unknown");
+    return "unknown";
 }
 
 #define S_NONE 0

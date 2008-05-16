@@ -1565,7 +1565,7 @@ if x86 && test "$_runtime_cpudetection" = no ; then
 void catch() { exit(1); }
 int main(void) {
   signal(SIGILL, catch);
-  __asm__ __volatile__ ("$3":::"memory");return(0);
+  __asm__ __volatile__ ("$3":::"memory"); return 0;
 }
 EOF
 
@@ -4512,7 +4512,7 @@ cat > $TMPC << EOF
 int main(void) {
   printf("png.h : %s\n", PNG_LIBPNG_VER_STRING);
   printf("libpng: %s\n", png_libpng_ver);
-  return (strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver));
+  return strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver);
 }
 EOF
     if cc_check -lpng -lz $_ld_lm ; then

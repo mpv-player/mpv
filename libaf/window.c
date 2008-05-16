@@ -157,7 +157,7 @@ static FLOAT_TYPE besselizero(FLOAT_TYPE x)
     sum += u;
     n++;
   } while (u >= BIZ_EPSILON * sum);
-  return(sum);
+  return sum;
 }
 
 /*
