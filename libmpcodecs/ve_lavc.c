@@ -782,7 +782,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
             pic->top_field_first= lavc_param_top;
     }
 
-    return (encode_frame(vf, pic, pts) >= 0);
+    return encode_frame(vf, pic, pts) >= 0;
 }
 
 static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){

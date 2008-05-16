@@ -172,7 +172,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
     }
     else {
         /* Skip the frame */
-        return(0);
+        return 0;
     }
 }
 
@@ -237,7 +237,7 @@ static int parse_int(char **s, int *rt, int def_val)
         }
         else if (**s != '\0') {
             /* Error, we got some wrong char */
-            return(1);
+            return 1;
         }
     }
     else {
@@ -245,7 +245,7 @@ static int parse_int(char **s, int *rt, int def_val)
     }
 
     *rt = t;
-    return(0);
+    return 0;
 
 }
 
@@ -263,7 +263,7 @@ static int open(vf_instance_t *vf, char* args)
     /* Private data */
     vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
     if (p == NULL) {
-        return(0);
+        return 0;
     }
 
     if (args == NULL) {
@@ -280,7 +280,7 @@ static int open(vf_instance_t *vf, char* args)
 
     if (er) {
         mp_msg(MSGT_VFILTER, MSGL_ERR, MSGTR_MPCODECS_ErrorParsingArgument);
-        return(0);
+        return 0;
     }
     /* Load some default */
     if ((p->xytile <= 0) || (p->xytile > p->xtile * p->ytile)) {

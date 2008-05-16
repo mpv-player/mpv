@@ -122,7 +122,7 @@ static int encode_lame(audio_encoder_t *encoder, uint8_t *dest, void *src, int l
     else
         n = lame_encode_buffer_interleaved(lame,(short *)src, len/4, dest, max_size);
 
-    return (n < 0 ? 0 : n);
+    return n < 0 ? 0 : n;
 }
 
 

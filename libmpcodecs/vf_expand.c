@@ -421,7 +421,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-  return (vf_next_query_format(vf,fmt));
+  return vf_next_query_format(vf,fmt);
 }
 
 static int open(vf_instance_t *vf, char* args){

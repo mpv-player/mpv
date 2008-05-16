@@ -149,7 +149,7 @@ static int config(struct vf_instance_s* vf,
     compressor=FindNextComponent(NULL,&cdesc);
     if(!compressor){
 	mp_msg(MSGT_MENCODER,MSGL_ERR,"Cannot find requested component\n");
-	return(0);
+	return 0;
     }
     mp_msg(MSGT_MENCODER,MSGL_DBG2,"Found it! ID = %p\n",compressor);
 

@@ -427,5 +427,5 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	   (sh->disp_w != transform_out[3] || sh->disp_h != transform_out[4]))
 	    initialized = 0;
 	
-	return (result?NULL:mpi);
+	return result ? NULL : mpi;
 }

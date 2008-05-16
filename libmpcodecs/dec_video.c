@@ -88,7 +88,7 @@ int set_video_colors(sh_video_t *sh_video,const char *item,int value)
     {
 	int ret = vf->control(vf, VFCTRL_SET_EQUALIZER, &data);
 	if (ret == CONTROL_TRUE)
-	    return(1);
+	    return 1;
     }
     /* try software control */
     if(mpvdec)
@@ -111,7 +111,7 @@ int get_video_colors(sh_video_t *sh_video,const char *item,int *value)
         int ret = vf->control(vf, VFCTRL_GET_EQUALIZER, &data);
 	if (ret == CONTROL_TRUE){
 	    *value = data.value;
-	    return(1);
+	    return 1;
 	}
     }
     /* try software control */
@@ -129,7 +129,7 @@ int set_rectangle(sh_video_t *sh_video,int param,int value)
     {
         int ret = vf->control(vf, VFCTRL_CHANGE_RECTANGLE, data);
 	if (ret)
-	    return(1);
+	    return 1;
     }
     return 0;
 }

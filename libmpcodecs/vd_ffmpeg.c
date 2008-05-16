@@ -228,7 +228,7 @@ static int init(sh_video_t *sh){
 
     ctx = sh->context = malloc(sizeof(vd_ffmpeg_ctx));
     if (!ctx)
-	return(0);
+	return 0;
     memset(ctx, 0, sizeof(vd_ffmpeg_ctx));
     
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);

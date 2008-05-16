@@ -232,7 +232,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 {
     switch(fmt) {
     case IMGFMT_I420:
-        return (VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW);
+        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     case IMGFMT_YV12:
     case IMGFMT_422P:
     case IMGFMT_444P:

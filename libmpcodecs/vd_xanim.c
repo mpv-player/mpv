@@ -211,7 +211,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
 	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed to dlopen %s while %s\n", filename, error);
 	else
 	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed to dlopen %s\n", filename);
-	return(0);
+	return 0;
     }
 
     what_the = dlsym(priv->file_handler, "What_The");
@@ -219,7 +219,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: failed to init %s while %s\n", filename, error);
 	dlclose(priv->file_handler);
-	return(0);
+	return 0;
     }
 	
     mod_hdr = what_the();
@@ -227,7 +227,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: initializer function failed in %s\n", filename);
 	dlclose(priv->file_handler);
-	return(0);
+	return 0;
     }
     
     mp_msg(MSGT_DECVIDEO, MSGL_V, "=== XAnim Codec ===\n");
@@ -245,7 +245,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
 	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported api revision (%d) in %s\n",
 	    mod_hdr->api_rev, filename);
 	dlclose(priv->file_handler);
-	return(0);
+	return 0;
     }
 
     func = mod_hdr->funcs;
@@ -253,7 +253,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: function table error in %s\n", filename);
 	dlclose(priv->file_handler);
-	return(0);
+	return 0;
     }
     
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Exported functions by codec: [functable: %p entries: %d]\n",
@@ -281,7 +281,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
 	    priv->dec_func = (void *)func[i].dec_func;
 	}
     }
-    return(1);
+    return 1;
 }
 
 static int xacodec_query(sh_video_t *sh, XA_CODEC_HDR *codec_hdr)
@@ -295,7 +295,7 @@ static int xacodec_query(sh_video_t *sh, XA_CODEC_HDR *codec_hdr)
     {
 	codec_hdr->decoder = priv->dec_func;
 	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "We got decoder's address at init! %p\n", codec_hdr->decoder);
-	return(1);
+	return 1;
     }
 #endif
 
@@ -306,16 +306,16 @@ static int xacodec_query(sh_video_t *sh, XA_CODEC_HDR *codec_hdr)
 	    priv->dec_func = (void *)codec_hdr->decoder;
 	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Codec is supported: found decoder for %s at %p\n",
 		codec_hdr->description, codec_hdr->decoder);
-	    return(1);
+	    return 1;
 	case CODEC_UNSUPPORTED:
 	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "Codec (%s) is unsupported by dll\n",
 		codec_hdr->description);
-	    return(0);
+	    return 0;
 	case CODEC_UNKNOWN:
 	default:
 	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "Codec (%s) is unknown by dll\n",
 		codec_hdr->description);
-	    return(0);
+	    return 0;
     }
 }
 
@@ -475,7 +475,7 @@ void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
 {
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
 	    image_type, dith_type);
-    return((void*)XA_YUV_2x2_clr);
+    return (void*)XA_YUV_2x2_clr;
 }
 
 /* -------------------- whole YUV frame converters ------------------------- */
@@ -581,7 +581,7 @@ void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned in
 void *XA_YUV1611_Func(unsigned int image_type)
 {
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "XA_YUV1611_Func('image_type: %d')", image_type);
-    return((void *)XA_YUV1611_Convert);
+    return (void *)XA_YUV1611_Convert;
 }
 
 /* --------------- YUV 2x2 1x1 1x1 (4:2:0 aka YV12) [3ivX,H263] ------------ */
@@ -619,7 +619,7 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
 void *XA_YUV221111_Func(unsigned int image_type)
 {
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "XA_YUV221111_Func('image_type: %d')\n",image_type);
-    return((void *)XA_YUV221111_Convert);
+    return (void *)XA_YUV221111_Convert;
 }
 
 /* *** EOF XANIM *** */
@@ -657,7 +657,7 @@ static int init(sh_video_t *sh)
 
     snprintf(dll, 1024, "%s/%s", def_path, sh->codec->dll);
     if (xacodec_load(sh, dll) == 0)
-	return(0);
+	return 0;
 
     codec_hdr.xapi_rev = XAVID_API_REV;
     codec_hdr.anim_hdr = malloc(4096);
@@ -690,13 +690,13 @@ static int init(sh_video_t *sh)
 	default:
 	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported image out format (%s)\n",
 		vo_format_name(sh->codec->outfmt[sh->outfmtidx]));
-	    return(0);
+	    return 0;
     }
     mp_msg(MSGT_DECVIDEO, MSGL_INFO, "xacodec: querying for input %dx%d %dbit [fourcc: %4x] (%s)...\n",
 	codec_hdr.x, codec_hdr.y, codec_hdr.depth, codec_hdr.compression, codec_hdr.description);
 
     if (xacodec_query(sh, &codec_hdr) == 0)
-	return(0);
+	return 0;
 
 //    free(codec_hdr.anim_hdr);
 
@@ -705,7 +705,7 @@ static int init(sh_video_t *sh)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: memory allocation error: %s\n",
 	    strerror(errno));
-	return(0);
+	return 0;
     }
     priv->decinfo->cmd = 0;
     priv->decinfo->skip_flag = 0;
@@ -721,7 +721,7 @@ static int init(sh_video_t *sh)
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "decinfo->extra, filled by codec: %p [%s]\n",
 	&priv->decinfo->extra, (char *)priv->decinfo->extra);
 
-    return(1);
+    return 1;
 }
 
 // uninit driver
