@@ -35,7 +35,7 @@ static int alsa_rate = SND_PCM_RATE_CONTINUOUS;
 /* to set/get/query special features/parameters */
 static int control(int cmd, void *arg)
 {
-    return(CONTROL_UNKNOWN);
+    return CONTROL_UNKNOWN;
 }
 
 /*
@@ -62,7 +62,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     if ((cards = snd_cards()) < 0)
     {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_SoundCardNotFound);
-	return(0);
+	return 0;
     }
 
     ao_data.format = format;
@@ -112,7 +112,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    break;
 	case -1:
 	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_InvalidFormatReq,af_fmt2str_short(format));
-	    return(0);
+	    return 0;
 	default:
 	    break;
     }
@@ -164,13 +164,13 @@ static int init(int rate_hz, int channels, int format, int flags)
     if ((err = snd_pcm_open(&alsa_handler, 0, 0, SND_PCM_OPEN_PLAYBACK)) < 0)
     {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PlayBackError, snd_strerror(err));
-	return(0);
+	return 0;
     }
 
     if ((err = snd_pcm_info(alsa_handler, &info)) < 0)
     {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PcmInfoError, snd_strerror(err));
-	return(0);
+	return 0;
     }
 
     mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_ALSA5_SoundcardsFound,
@@ -183,7 +183,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	if ((err = snd_pcm_channel_info(alsa_handler, &chninfo)) < 0)
 	{
 	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PcmChanInfoError, snd_strerror(err));
-	    return(0);
+	    return 0;
 	}
 
 #ifndef __QNX__
@@ -207,7 +207,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     if ((err = snd_pcm_channel_params(alsa_handler, &params)) < 0)
     {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_CantSetParms, snd_strerror(err));
-	return(0);
+	return 0;
     }
 
     memset(&setup, 0, sizeof(setup));
@@ -220,19 +220,19 @@ static int init(int rate_hz, int channels, int format, int flags)
     if ((err = snd_pcm_channel_setup(alsa_handler, &setup)) < 0)
     {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_CantSetChan, snd_strerror(err));
-	return(0);
+	return 0;
     }
 
     if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_ChanPrepareError, snd_strerror(err));
-	return(0);
+	return 0;
     }
 
     mp_msg(MSGT_AO, MSGL_INFO, "AUDIO: %d Hz/%d channels/%d bps/%d bytes buffer/%s\n",
 	ao_data.samplerate, ao_data.channels, ao_data.bps, ao_data.buffersize,
 	snd_pcm_get_format_name(alsa_format.format));
-    return(1);
+    return 1;
 }
 
 /* close audio device */
@@ -321,7 +321,7 @@ static int play(void* data, int len, int flags)
     int got_len;
     
     if (!len)
-	return(0);
+	return 0;
     
     if ((got_len = snd_pcm_write(alsa_handler, data, len)) < 0)
     {
@@ -331,20 +331,20 @@ static int play(void* data, int len, int flags)
 	    if ((got_len = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
 	    {
 		mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PlaybackPrepareError, snd_strerror(got_len));
-		return(0);
+		return 0;
 	    }
 	    if ((got_len = snd_pcm_write(alsa_handler, data, len)) < 0)
 	    {
 		mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_WriteErrorAfterReset,
 		    snd_strerror(got_len));
-		return(0);
+		return 0;
 	    }
-	    return(got_len); /* 2nd write was ok */
+	    return got_len; /* 2nd write was ok */
 	}
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_OutPutError, snd_strerror(got_len));
-	return(0);
+	return 0;
     }
-    return(got_len);
+    return got_len;
 }
 
 /* how many byes are free in the buffer */
@@ -355,9 +355,9 @@ static int get_space(void)
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
 
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
-	return(0); /* error occurred */
+	return 0; /* error occurred */
     else
-	return(ch_stat.free);
+	return ch_stat.free;
 }
 
 /* delay in seconds between first and last sample in buffer */
@@ -368,7 +368,7 @@ static float get_delay(void)
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
     
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
-	return((float)ao_data.buffersize/(float)ao_data.bps); /* error occurred */
+	return (float)ao_data.buffersize/(float)ao_data.bps; /* error occurred */
     else
-	return((float)ch_stat.count/(float)ao_data.bps);
+	return (float)ch_stat.count/(float)ao_data.bps;
 }
