@@ -120,7 +120,7 @@ static int cue_getTrackinfo(char *Line, tTrack *track)
     if(strncmp(&Line[11], "MODE2/2352", 10)==0) track->mode = MODE2_2352;
     if(strncmp(&Line[11], "MODE2/2336", 10)==0) track->mode = MODE2_2336;
   }
-  else return(1);
+  else return 1;
 
   /* Get the track indexes */
   while(1) {
@@ -150,7 +150,7 @@ static int cue_getTrackinfo(char *Line, tTrack *track)
     else mp_msg (MSGT_OPEN,MSGL_INFO,
                  MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine, Line);
   }
-  return(0);
+  return 0;
 }
 
 

@@ -213,7 +213,7 @@ int read_rtp_from_server(int fd, char *buffer, int length) {
 		mp_msg(MSGT_NETWORK, MSGL_ERR, "Got empty packet from RTP cache!?\n");
 	}
 	
-	return(length);
+	return length;
 }
 
 static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData) {
@@ -251,5 +251,5 @@ static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData) {
 
   //  mp_msg(MSGT_NETWORK,MSGL_DBG2,"Reading rtp: v=%x p=%x x=%x cc=%x m=%x pt=%x seq=%x ts=%x lgth=%d\n",rh->b.v,rh->b.p,rh->b.x,rh->b.cc,rh->b.m,rh->b.pt,rh->b.sequence,rh->timestamp,lengthPacket);
 
-  return(0);
+  return 0;
 }

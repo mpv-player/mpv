@@ -259,7 +259,7 @@ cddb_discid(int tot_trks) {
 	}
 	t = ((cdtoc[tot_trks].min * 60) + cdtoc[tot_trks].sec) -
 		((cdtoc[0].min * 60) + cdtoc[0].sec);
-	return ((n % 0xff) << 24 | t << 8 | tot_trks);
+	return (n % 0xff) << 24 | t << 8 | tot_trks;
 }
 
 

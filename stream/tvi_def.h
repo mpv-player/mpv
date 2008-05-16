@@ -34,12 +34,12 @@ static tvi_handle_t *new_handle(void)
     tvi_handle_t *h = (tvi_handle_t *)malloc(sizeof(tvi_handle_t));
 
     if (!h)
-	return(NULL);
+	return NULL;
     h->priv = (priv_t *)malloc(sizeof(priv_t));
     if (!h->priv)
     {
 	free(h);
-	return(NULL);
+	return NULL;
     }
     memset(h->priv, 0, sizeof(priv_t));
     h->functions = &functions;
@@ -49,7 +49,7 @@ static tvi_handle_t *new_handle(void)
     h->norm = -1;
     h->channel = -1;
     h->scan = NULL;
-    return(h);
+    return h;
 }
 
 static void free_handle(tvi_handle_t *h)

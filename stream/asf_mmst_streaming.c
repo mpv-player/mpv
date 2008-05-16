@@ -266,7 +266,7 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
 
      //	mp_msg(MSGT_NETWORK,MSGL_INFO,"get header packet finished\n");
 
-	return (header_len);
+	return header_len;
 
       } 
 
