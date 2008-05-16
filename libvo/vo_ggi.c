@@ -141,17 +141,17 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     if (ggiSetMode(ggi_conf.vis, &mode) < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set display mode\n");
-        return (-1);
+        return -1;
     }
     if (ggiGetMode(ggi_conf.vis, &mode) < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get display mode\n");
-        return (-1);
+        return -1;
     }
     if ((mode.graphtype == GT_INVALID)
        || (mode.graphtype == GT_AUTO))
     {
         mp_msg(MSGT_VO, MSGL_ERR, "[ggi] not supported depth/bpp\n");
-        return (-1);
+        return -1;
     }
 
 #if 0
@@ -221,7 +221,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     } else {
         mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] Unknown image format: %s\n",
                vo_format_name(ggi_conf.srcformat));
-        return (-1);
+        return -1;
     }
 
     mp_msg(MSGT_VO, MSGL_INFO, "[ggi] input: %dx%dx%d, output: %dx%dx%d\n",
@@ -235,7 +235,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     ggi_conf.flushregion.x2 = vo_dwidth;
     ggi_conf.flushregion.y2 = vo_dheight;
 
-    return (0);
+    return 0;
 }
 
 static uint32_t get_image(mp_image_t *mpi)
@@ -244,19 +244,19 @@ static uint32_t get_image(mp_image_t *mpi)
     if (!((IMGFMT_IS_BGR(mpi->imgfmt)) &&
         (IMGFMT_BGR_DEPTH(mpi->imgfmt) == vo_dbpp)))
     {
-        return (VO_FALSE);
+        return VO_FALSE;
     }
 
     if (!((IMGFMT_IS_RGB(mpi->imgfmt)) &&
         (IMGFMT_RGB_DEPTH(mpi->imgfmt) == vo_dbpp)))
     {
-        return (VO_FALSE);
+        return VO_FALSE;
     }
 
     if (!((mpi->width == ggi_conf.srcwidth) &&
         (mpi->height == ggi_conf.srcheight)))
     {
-        return (VO_FALSE);
+        return VO_FALSE;
     }
 
     mpi->planes[1] = mpi->planes[2] = NULL;
@@ -272,7 +272,7 @@ static uint32_t get_image(mp_image_t *mpi)
     }
 #endif
 
-    return (VO_TRUE);
+    return VO_TRUE;
 }
 
 
@@ -286,7 +286,7 @@ static int draw_frame(uint8_t *src[])
     ggi_conf.flushregion.x2 = vo_dwidth;
     ggi_conf.flushregion.y2 = vo_dheight;
 
-    return (0);
+    return 0;
 }
 
 static void draw_osd(void)
@@ -346,7 +346,7 @@ static int draw_slice(uint8_t *src[], int stride[],
         ggi_conf.flushregion.y2 = vo_dy + y + h;
     }
 
-    return (1);
+    return 1;
 }
 
 static int query_format(uint32_t format)
@@ -386,19 +386,19 @@ static int query_format(uint32_t format)
             return vfcap;
         }
     }
-    return (0);
+    return 0;
 }
 
 static int preinit(const char *arg)
 {
     if (ggiInit() != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to initialize GGI\n");
-        return (-1);
+        return -1;
     }
 #ifdef HAVE_GGIWMH
     if (ggiWmhInit() < 0) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to initialize libggiwmh\n");
-        return (-1);
+        return -1;
     }
 #endif
 
@@ -419,7 +419,7 @@ static int preinit(const char *arg)
         mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to open '%s' output\n",
                (ggi_conf.driver == NULL) ? "default" : ggi_conf.driver);
         ggiExit();
-        return (-1);
+        return -1;
     }
     ggi_conf.drawvis = ggi_conf.vis;
 

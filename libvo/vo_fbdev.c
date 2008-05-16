@@ -1038,7 +1038,7 @@ static int query_format(uint32_t format)
 		return 0;
 #ifdef CONFIG_VIDIX
 	if(vidix_name)
-		return (vidix_query_fourcc(format));
+		return vidix_query_fourcc(format);
 #endif
 	if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
 		int bpp = format & 0xff;
@@ -1140,8 +1140,8 @@ static int preinit(const char *vo_subdevice)
 	    fb_dev_name = strdup(vo_subdevice);
 	}
     }
-    if(!pre_init_err) return (pre_init_err=(fb_preinit(0)?0:-1));
-    return(-1);
+    if(!pre_init_err) return pre_init_err = (fb_preinit(0) ? 0 : -1);
+    return -1;
 }
 
 static uint32_t get_image(mp_image_t *mpi)
@@ -1155,12 +1155,12 @@ static uint32_t get_image(mp_image_t *mpi)
 	(mpi->width != in_width) ||
 	(mpi->height != in_height)
        )
-    return(VO_FALSE);
+    return VO_FALSE;
 
     mpi->planes[0] = center;
     mpi->stride[0] = fb_line_len;
     mpi->flags |= MP_IMGFLAG_DIRECT;
-    return(VO_TRUE);
+    return VO_TRUE;
 }
 
 static int control(uint32_t request, void *data, ...)

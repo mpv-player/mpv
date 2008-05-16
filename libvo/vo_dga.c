@@ -119,11 +119,11 @@ static int vd_EnableMode(int depth, int bitspp,
 static int vd_ModeEqual(int depth, int bitspp,
                         int rmask, int gmask, int bmask, int index)
 {
-    return ((vo_dga_modes[index].vdm_depth == depth &&
+    return  (vo_dga_modes[index].vdm_depth == depth &&
              vo_dga_modes[index].vdm_bitspp == bitspp &&
              vo_dga_modes[index].vdm_rmask == rmask &&
              vo_dga_modes[index].vdm_gmask == gmask &&
-             vo_dga_modes[index].vdm_bmask == bmask) ? 1 : 0);
+             vo_dga_modes[index].vdm_bmask == bmask) ? 1 : 0;
 }
 
 
@@ -964,7 +964,7 @@ static uint32_t get_image(mp_image_t * mpi)
         || (mpi->type == MP_IMGTYPE_STATIC && vo_dga_nr_video_buffers > 1)
         || (mpi->type == MP_IMGTYPE_IP && vo_dga_nr_video_buffers < 2)
         || (mpi->type == MP_IMGTYPE_IPB))
-        return (VO_FALSE);
+        return VO_FALSE;
 
     if ((mpi->flags & MP_IMGFLAG_ACCEPT_STRIDE) ||
         (mpi->flags & MP_IMGFLAG_ACCEPT_WIDTH &&
@@ -978,10 +978,10 @@ static uint32_t get_image(mp_image_t * mpi)
         mpi->width =
             (vo_dga_bytes_per_line + vo_dga_vp_skip) / (mpi->bpp / 8);
         mpi->flags |= MP_IMGFLAG_DIRECT;
-        return (VO_TRUE);
+        return VO_TRUE;
     }
 
-    return (VO_FALSE);
+    return VO_FALSE;
 }
 
 static int control(uint32_t request, void *data, ...)

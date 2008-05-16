@@ -460,7 +460,7 @@ static int query_format(uint32_t format)
     if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         mp_msg(MSGT_VO,MSGL_DBG3, "vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
 #ifdef CONFIG_VIDIX
-    if(vidix_name)return(vidix_query_fourcc(format));
+    if(vidix_name) return vidix_query_fourcc(format);
 #endif
     if (format == IMGFMT_MPEGPES)
 	return 0;

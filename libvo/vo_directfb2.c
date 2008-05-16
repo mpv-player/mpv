@@ -1429,7 +1429,7 @@ static int control(uint32_t request, void *data, ...)
 	value = va_arg(ap, int);
         va_end(ap);
     
-	return(directfb_set_video_eq(data, value));
+	return directfb_set_video_eq(data, value);
       }
     case VOCTRL_GET_EQUALIZER:
       {
@@ -1440,7 +1440,7 @@ static int control(uint32_t request, void *data, ...)
         value = va_arg(ap, int*);
         va_end(ap);
     
-	return(directfb_get_video_eq(data, value));
+	return directfb_get_video_eq(data, value);
       }
   };
   return VO_NOTIMPL;

@@ -378,7 +378,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if (vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
-    return (0);
+    return 0;
 }
 
 static void check_events(void)
@@ -418,7 +418,7 @@ static int draw_slice(uint8_t * src[], int stride[],
     UNUSED(y);
     mp_msg(MSGT_VO, MSGL_FATAL,
            "[xvidix] error: didn't used vidix draw_slice!\n");
-    return (-1);
+    return -1;
 }
 
 static int draw_frame(uint8_t * src[])
@@ -426,12 +426,12 @@ static int draw_frame(uint8_t * src[])
     UNUSED(src);
     mp_msg(MSGT_VO, MSGL_FATAL,
            "[xvidix] error: didn't used vidix draw_frame!\n");
-    return (-1);
+    return -1;
 }
 
 static int query_format(uint32_t format)
 {
-    return (vidix_query_fourcc(format));
+    return vidix_query_fourcc(format);
 }
 
 static void uninit(void)
@@ -462,12 +462,12 @@ static int preinit(const char *arg)
     }
 
     if (!vo_init())
-        return (-1);
+        return -1;
 
     if (vidix_preinit(vidix_name, &video_out_xvidix) != 0)
-        return (1);
+        return 1;
 
-    return (0);
+    return 0;
 }
 
 static int control(uint32_t request, void *data, ...)

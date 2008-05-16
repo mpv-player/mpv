@@ -256,7 +256,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_h
     ShowWindow(hWnd,SW_SHOW);
     if(vo_fs)ShowWindow(hWndFS,SW_SHOW);
     
-    return(0);
+    return 0;
 }
 
 static void check_events(void){
@@ -288,17 +288,17 @@ static int draw_slice(uint8_t *src[], int stride[],int w, int h, int x, int y){
     UNUSED(x);
     UNUSED(y);
     mp_msg(MSGT_VO, MSGL_FATAL, "[winvidix] error: didn't use vidix draw_slice!\n");
-    return(-1);
+    return -1;
 }
 
 static int draw_frame(uint8_t *src[]){
     UNUSED(src);
     mp_msg(MSGT_VO, MSGL_FATAL, "[winvidix] error: didn't use vidix draw_frame!\n");
-    return(-1);
+    return -1;
 }
 
 static int query_format(uint32_t format){
-  return(vidix_query_fourcc(format));
+  return vidix_query_fourcc(format);
 }
 
 static void uninit(void){
@@ -324,9 +324,9 @@ static int preinit(const char *arg){
     }
 
     if (vidix_preinit(vidix_name, &video_out_winvidix) != 0)
-	return(1);
+	return 1;
 
-    return(0);
+    return 0;
 }
 
 static int control(uint32_t request, void *data, ...){

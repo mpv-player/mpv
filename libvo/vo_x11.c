@@ -667,7 +667,7 @@ static uint32_t get_image(mp_image_t * mpi)
         || (mpi->flags & MP_IMGFLAG_PLANAR)
         || (mpi->flags & MP_IMGFLAG_YUV) || (mpi->width != image_width)
         || (mpi->height != image_height))
-        return (VO_FALSE);
+        return VO_FALSE;
 
     if (Flip_Flag)
     {
@@ -680,7 +680,7 @@ static uint32_t get_image(mp_image_t * mpi)
     }
     mpi->flags |= MP_IMGFLAG_DIRECT;
 
-    return (VO_TRUE);
+    return VO_TRUE;
 }
 
 static int query_format(uint32_t format)
@@ -753,9 +753,9 @@ static int control(uint32_t request, void *data, ...)
     switch (request)
     {
         case VOCTRL_PAUSE:
-            return (int_pause = 1);
+            return int_pause = 1;
         case VOCTRL_RESUME:
-            return (int_pause = 0);
+            return int_pause = 0;
         case VOCTRL_QUERY_FORMAT:
             return query_format(*((uint32_t *) data));
         case VOCTRL_GUISUPPORT:

@@ -332,7 +332,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
   panscan_calc();
 
-  return(0);
+  return 0;
 }
 
 static void check_events(void)

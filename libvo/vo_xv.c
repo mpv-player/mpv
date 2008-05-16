@@ -852,9 +852,9 @@ static int control(uint32_t request, void *data, ...)
     switch (request)
     {
         case VOCTRL_PAUSE:
-            return (int_pause = 1);
+            return int_pause = 1;
         case VOCTRL_RESUME:
-            return (int_pause = 0);
+            return int_pause = 0;
         case VOCTRL_QUERY_FORMAT:
             return query_format(*((uint32_t *) data));
         case VOCTRL_GET_IMAGE:
@@ -902,7 +902,7 @@ static int control(uint32_t request, void *data, ...)
 
                 va_end(ap);
 
-                return (vo_xv_set_eq(xv_port, data, value));
+                return vo_xv_set_eq(xv_port, data, value);
             }
         case VOCTRL_GET_EQUALIZER:
             {
@@ -914,7 +914,7 @@ static int control(uint32_t request, void *data, ...)
 
                 va_end(ap);
 
-                return (vo_xv_get_eq(xv_port, data, value));
+                return vo_xv_get_eq(xv_port, data, value);
             }
         case VOCTRL_ONTOP:
             vo_x11_ontop();

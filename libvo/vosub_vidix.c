@@ -318,17 +318,17 @@ uint32_t vidix_query_fourcc(uint32_t format)
 
 int vidix_grkey_support(void)
 {
-    return(vidix_fourcc.flags & VID_CAP_COLORKEY);
+    return vidix_fourcc.flags & VID_CAP_COLORKEY;
 }
 
 int vidix_grkey_get(vidix_grkey_t *gr_key)
 {
-    return(vdlGetGrKeys(vidix_handler, gr_key));
+    return vdlGetGrKeys(vidix_handler, gr_key);
 }
 
 int vidix_grkey_set(const vidix_grkey_t *gr_key)
 {
-    return(vdlSetGrKeys(vidix_handler, gr_key));
+    return vdlSetGrKeys(vidix_handler, gr_key);
 }
 
 

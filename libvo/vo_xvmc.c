@@ -1410,7 +1410,7 @@ static int control(uint32_t request, void *data, ... )
          value = va_arg(ap, int);
          va_end(ap);
 
-         return(vo_xv_set_eq(xv_port, data, value));
+         return vo_xv_set_eq(xv_port, data, value);
       }
 
       case VOCTRL_GET_EQUALIZER:
@@ -1422,7 +1422,7 @@ static int control(uint32_t request, void *data, ... )
          value = va_arg(ap, int*);
          va_end(ap);
 
-         return(vo_xv_get_eq(xv_port, data, value));
+         return vo_xv_get_eq(xv_port, data, value);
       }
       case VOCTRL_UPDATE_SCREENINFO:
          update_xinerama_info();

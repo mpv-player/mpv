@@ -279,11 +279,11 @@ static int x11_get_property(Atom type, Atom ** args, unsigned long *nitems)
     int format;
     unsigned long bytesafter;
 
-    return (Success ==
+    return  Success ==
             XGetWindowProperty(mDisplay, mRootWin, type, 0, 16384, False,
                                AnyPropertyType, &type, &format, nitems,
                                &bytesafter, (unsigned char **) args)
-            && *nitems > 0);
+            && *nitems > 0;
 }
 
 static int vo_wm_detect(void)
@@ -2102,10 +2102,10 @@ int vo_xv_set_eq(uint32_t xv_port, char *name, int value)
                     (port_value + 100) * (port_max - port_min) / 200 +
                     port_min;
                 XvSetPortAttribute(mDisplay, xv_port, xv_atom, port_value);
-                return (VO_TRUE);
+                return VO_TRUE;
             }
         }
-    return (VO_FALSE);
+    return VO_FALSE;
 }
 
 int vo_xv_get_eq(uint32_t xv_port, char *name, int *value)
@@ -2168,10 +2168,10 @@ int vo_xv_get_eq(uint32_t xv_port, char *name, int *value)
 
                 mp_dbg(MSGT_VO, MSGL_V, "xv_get_eq called! (%s, %d)\n",
                        name, *value);
-                return (VO_TRUE);
+                return VO_TRUE;
             }
         }
-    return (VO_FALSE);
+    return VO_FALSE;
 }
 
 /** \brief contains flags changing the execution of the colorkeying code */

@@ -574,7 +574,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 #endif    
 
   vga_setdisplaystart(0);
-  return (0);
+  return 0;
 }
 
 static int draw_slice(uint8_t *image[],int stride[],
@@ -723,7 +723,7 @@ int page;
 
   if(!IMGFMT_IS_BGR(mpi->imgfmt) && !IMGFMT_IS_RGB(mpi->imgfmt) ){ 
     assert(0);//should never happen
-    return(VO_FALSE);
+    return VO_FALSE;
   }
   
   if (
@@ -731,7 +731,7 @@ int page;
    (mpi->flags & MP_IMGFLAG_PLANAR) ||
    (mpi->flags & MP_IMGFLAG_YUV)
       )
-    return(VO_FALSE);
+    return VO_FALSE;
 
 //reading from video memory is horribly slow
   if( !(mpi->flags & MP_IMGFLAG_READABLE) && vo_directrendering &&
@@ -749,9 +749,9 @@ int page;
       mpi->priv=(void *)page;
       if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: direct render allocated! page=%d\n",page);
-      return(VO_TRUE);
+      return VO_TRUE;
     }
   }
 
-  return(VO_FALSE);
+  return VO_FALSE;
 }
