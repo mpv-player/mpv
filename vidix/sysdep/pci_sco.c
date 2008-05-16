@@ -42,7 +42,7 @@ static __inline__ int enable_os_io(void)
 #else
     sysi86(SI86V86, V86SC_IOPL, PS_IOPL);
 #endif
-    return(0);
+    return 0;
 }
 
 static __inline__ int disable_os_io(void)
@@ -52,5 +52,5 @@ static __inline__ int disable_os_io(void)
 #else
     sysi86(SI86V86, V86SC_IOPL, 0);
 #endif
-    return(0);
+    return 0;
 }

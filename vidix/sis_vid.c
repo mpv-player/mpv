@@ -190,7 +190,7 @@ static uint8_t getvideoreg(uint8_t reg)
 {
     uint8_t ret;
     inSISIDXREG(SISVID, reg, ret);
-    return (ret);
+    return ret;
 }
 
 static void setvideoreg(uint8_t reg, uint8_t data)
@@ -220,7 +220,7 @@ static void setsrregmask(uint8_t reg, uint8_t data, uint8_t mask)
 static uint8_t vblank_active_CRT1(void)
 {
     /* this may be too simplistic? */
-    return (inSISREG(SISINPSTAT) & 0x08);
+    return inSISREG(SISINPSTAT) & 0x08;
 }
 
 static uint8_t vblank_active_CRT2(void)
@@ -231,7 +231,7 @@ static uint8_t vblank_active_CRT2(void)
     } else {
 	inSISIDXREG(SISPART1, Index_CRT2_FC_VR, ret);
     }
-    return ((ret & 0x02) ^ 0x02);
+    return (ret & 0x02) ^ 0x02;
 }
 
 static int find_chip(unsigned chip_id)
@@ -344,13 +344,13 @@ static int sis_init(void)
 
     if (!sis_probed) {
 	printf("[SiS] driver was not probed but is being initialized\n");
-	return (EINTR);
+	return EINTR;
     }
 
     if (enable_app_io() != 0)
     {
       printf("[SiS] can't enable register I/O\n");
-      return(EINTR);
+      return EINTR;
     }
 
     /* JCP: this is WRONG.  Need to coordinate w/ sisfb to use correct mem */

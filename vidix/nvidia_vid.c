@@ -458,7 +458,7 @@ static unsigned long rivatv_fbsize_nv03 (struct rivatv_chip *chip){
 		if (((VID_RD32 (chip->PMC, 0) & 0xF0) == 0x20)
 		    && ((VID_RD32 (chip->PMC, 0) & 0x0F) >= 0x02)) {
 			/* SDRAM 128 ZX. */
-			return ((1 << (VID_RD32 (chip->PFB, 0) & 0x03)) * 1024 * 1024);
+			return (1 << (VID_RD32 (chip->PFB, 0) & 0x03)) * 1024 * 1024;
 		}
 		else {
 			return 1024 * 1024 * 8;

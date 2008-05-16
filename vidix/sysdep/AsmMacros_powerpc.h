@@ -90,21 +90,21 @@ static __inline__ unsigned char inb(short port)
 {
 	unsigned char val;
 	val = *((unsigned char *)(ioBase + port)); eieio();
-	return(val);
+	return val;
 }
 
 static __inline__ unsigned short inw(short port)
 {
 	unsigned short val;
 	val = *((unsigned short *)(ioBase + port)); eieio();
-	return(val);
+	return val;
 }
 
 static __inline__ unsigned long inl(short port)
 {
 	unsigned long val;
 	val = *((unsigned long *)(ioBase + port)); eieio();
-	return(val);
+	return val;
 }
 
 #define intr_disable()

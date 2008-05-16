@@ -42,15 +42,15 @@ static __inline__ int enable_os_io(void)
 #if !defined(USE_I386_IOPL)
     if ((io_fd = open("/dev/io", O_RDWR, 0)) < 0) {
 	perror("/dev/io");
-	return(errno);
+	return errno;
     }
 #else
     if (i386_iopl(1) < 0) {
 	perror("i386_iopl");
-	return(errno);
+	return errno;
     }
 #endif /* USE_I386_IOPL */
-    return(0);
+    return 0;
 }
 
 static __inline__ int disable_os_io(void)
@@ -60,8 +60,8 @@ static __inline__ int disable_os_io(void)
 #else
     if (i386_iopl(0) < 0) {
 	perror("i386_iopl");
-	return(errno);
+	return errno;
     }
 #endif /* NetBSD1_1 */
-    return(0);
+    return 0;
 }

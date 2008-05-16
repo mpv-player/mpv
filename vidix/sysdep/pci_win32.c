@@ -44,10 +44,10 @@ static __inline__ int enable_os_io(void)
       hDriver = CreateFile("\\\\.\\DHAHELPER",GENERIC_READ | GENERIC_WRITE,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
       if(!DeviceIoControl(hDriver, IOCTL_DHAHELPER_ENABLEDIRECTIO, NULL,0, NULL, 0, &dwBytesReturned, NULL)){
         fprintf(stderr,"Unable to enable directio please install dhahelper.sys.\n");
-        return(1);       
+        return 1;
       }
     }
-    return(0);
+    return 0;
 }
 
 static __inline__ int disable_os_io(void)
@@ -57,5 +57,5 @@ static __inline__ int disable_os_io(void)
       DeviceIoControl(hDriver, IOCTL_DHAHELPER_DISABLEDIRECTIO, NULL,0, NULL, 0, &dwBytesReturned, NULL);
       CloseHandle(hDriver);
     }
-    return(0);
+    return 0;
 }

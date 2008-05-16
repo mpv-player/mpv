@@ -107,7 +107,7 @@ static __inline__ unsigned long
 static swapl(unsigned long val)
 {
 	unsigned char *p = (unsigned char *)&val;
-	return ((p[3] << 24) | (p[2] << 16) | (p[1] << 8) | (p[0] << 0));
+	return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | (p[0] << 0);
 }
  
  
@@ -534,7 +534,7 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
  
     ret = enable_os_io();
     if (ret != 0)
-	return(ret);
+	return ret;
 
     if((pcr._configtype = pci_config_type()) == 0xFFFF) return ENODEV;
  
@@ -713,17 +713,17 @@ int pci_config_read(unsigned char bus, unsigned char dev, unsigned char func,
     if (len != 4)
     {
 	fprintf(stderr,"pci_config_read: Reading non-dword not supported!\n");
-	return(ENOTSUP);
+	return ENOTSUP;
     }
     
     ret = enable_os_io();
     if (ret != 0)
-	return(ret);
+	return ret;
     ret = pci_config_read_long(bus, dev, func, cmd);
     disable_os_io();
 
     *val = ret;
-    return(0);
+    return 0;
 }
 
 int enable_app_io( void )

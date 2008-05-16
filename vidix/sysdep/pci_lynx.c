@@ -61,7 +61,7 @@ static __inline__ unsigned long
 static swapl(unsigned long val)
 {
 	unsigned char *p = (unsigned char *)&val;
-	return ((p[3] << 24) | (p[2] << 16) | (p[1] << 8) | (p[0] << 0));
+	return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | (p[0] << 0);
 }
  
  

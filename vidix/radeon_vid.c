@@ -548,7 +548,7 @@ static inline uint32_t INREG (uint32_t addr) {
 static __inline__ uint32_t INPLL(uint32_t addr)
 {
 	OUTREG8(CLOCK_CNTL_INDEX, addr & 0x0000001f);
-	return (INREG(CLOCK_CNTL_DATA));
+	return INREG(CLOCK_CNTL_DATA);
 }
 
 #define OUTPLL(addr,val)	OUTREG8(CLOCK_CNTL_INDEX, (addr & 0x0000001f) | 0x00000080); \
@@ -3407,13 +3407,13 @@ static int set_gr_key( void )
 static int radeon_get_gkey(vidix_grkey_t *grkey)
 {
     memcpy(grkey, &radeon_grkey, sizeof(vidix_grkey_t));
-    return(0);
+    return 0;
 }
 
 static int radeon_set_gkey(const vidix_grkey_t *grkey)
 {
     memcpy(&radeon_grkey, grkey, sizeof(vidix_grkey_t));
-    return (set_gr_key());
+    return set_gr_key();
 }
 
 #ifdef RAGE128

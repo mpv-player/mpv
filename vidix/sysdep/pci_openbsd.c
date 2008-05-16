@@ -36,14 +36,14 @@ static __inline__ int enable_os_io(void)
 {
     if (i386_iopl(1) < 0) {
 	perror("i386_iopl");
-	return(errno);
+	return errno;
     }
-    return(0);
+    return 0;
 }
 
 static __inline__ int disable_os_io(void)
 {
  /* Nothing to do */
-    return(0);
+    return 0;
 }
 #endif
