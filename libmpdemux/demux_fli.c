@@ -95,7 +95,7 @@ static demuxer_t* demux_open_fli(demuxer_t* demuxer){
 	magic_number);
     free(header);
     free(frames);
-    return(NULL);    
+    return NULL;
   }
 
   // fetch the number of frames

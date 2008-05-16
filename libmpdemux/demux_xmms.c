@@ -75,8 +75,8 @@ static void disk_flush(int time) {
 }
 
 static int disk_free(void) { // vqf plugin sends more than it should
-    return (XMMS_PACKETSIZE-xmms_audiopos<XMMS_PACKETSIZE/4 ?
-                            0:XMMS_PACKETSIZE-xmms_audiopos-XMMS_PACKETSIZE/4);
+    return XMMS_PACKETSIZE - xmms_audiopos < XMMS_PACKETSIZE / 4 ?
+               0 : XMMS_PACKETSIZE - xmms_audiopos - XMMS_PACKETSIZE / 4;
 }
 
 static int disk_playing(void) {

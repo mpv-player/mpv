@@ -1236,7 +1236,7 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
             }
         }
 
-        return (ris != STREAM_UNSUPPORTED ? chapter : -1);
+        return ris != STREAM_UNSUPPORTED ? chapter : -1;
     } else {  //chapters structure is set in the demuxer
         total = demuxer->num_chapters;
 

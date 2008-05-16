@@ -132,15 +132,15 @@ static inline AVS_Value avs_new_value_array(AVS_Value * v0, int size)
 static inline int avs_is_error(AVS_Value v) { return v.type == 'e'; }
 static inline int avs_is_clip(AVS_Value v) { return v.type == 'c'; }
 static inline int avs_is_string(AVS_Value v) { return v.type == 's'; }
-static inline int avs_has_video(const AVS_VideoInfo * p) { return (p->width!=0); }
-static inline int avs_has_audio(const AVS_VideoInfo * p) { return (p->audio_samples_per_second!=0); }
+static inline int avs_has_video(const AVS_VideoInfo * p) { return p->width != 0; }
+static inline int avs_has_audio(const AVS_VideoInfo * p) { return p->audio_samples_per_second != 0; }
 
 static inline const char * avs_as_string(AVS_Value v)
 { return avs_is_error(v) || avs_is_string(v) ? v.d.string : 0; }
 
 /* Color spaces */
 static inline int avs_is_rgb(const AVS_VideoInfo * p)
-{ return (p->pixel_type&AVS_CS_BGR); }
+{ return p->pixel_type & AVS_CS_BGR; }
 
 static inline int avs_is_rgb24(const AVS_VideoInfo * p)
 { return (p->pixel_type&AVS_CS_BGR24)==AVS_CS_BGR24; } // Clear out additional properties
@@ -149,7 +149,7 @@ static inline int avs_is_rgb32(const AVS_VideoInfo * p)
 { return (p->pixel_type & AVS_CS_BGR32) == AVS_CS_BGR32 ; }
 
 static inline int avs_is_yuy(const AVS_VideoInfo * p)
-{ return (p->pixel_type&AVS_CS_YUV ); }
+{ return p->pixel_type & AVS_CS_YUV; }
 
 static inline int avs_is_yuy2(const AVS_VideoInfo * p)
 { return (p->pixel_type & AVS_CS_YUY2) == AVS_CS_YUY2; }  
