@@ -859,10 +859,7 @@ uninstall:
 	rm -f $(prefix)/share/pixmaps/mplayer.xpm
 	rm -f $(prefix)/share/applications/mplayer.desktop
 	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
-	for lang in $(MAN_LANG); do \
-	    rm -f $(MANDIR)/$$lang/man1/mplayer.1    \
-	          $(MANDIR)/$$lang/man1/mencoder.1 ; \
-	done
+	rm -f $(foreach lang,$(MAN_LANG),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
 
 clean:
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
