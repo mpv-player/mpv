@@ -813,13 +813,13 @@ $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
 ###### installation rules #######
 
-install: install-dirs $(INSTALL_TARGETS)
+install: $(INSTALL_TARGETS)
 
 install-dirs:
 	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -d $(CONFDIR)
 
-install-%: %$(EXESUF)
+install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
 install-mplayer-man: $(foreach lang,$(MAN_LANG_ALL),install-mplayer-man-$(lang))
