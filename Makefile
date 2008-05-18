@@ -855,11 +855,11 @@ install-gui:
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
 
 uninstall:
-	-rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	-rm -f $(BINDIR)/mencoder$(EXESUF)
-	-rm -f $(MANDIR)/man1/mencoder.1 $(MANDIR)/man1/mplayer.1
-	-rm -f $(prefix)/share/pixmaps/mplayer.xpm
-	-rm -f $(prefix)/share/applications/mplayer.desktop
+	rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
+	rm -f $(BINDIR)/mencoder$(EXESUF)
+	rm -f $(MANDIR)/man1/mencoder.1 $(MANDIR)/man1/mplayer.1
+	rm -f $(prefix)/share/pixmaps/mplayer.xpm
+	rm -f $(prefix)/share/applications/mplayer.desktop
 	for lang in $(MAN_LANG); do \
 	  if test "$$lang" != "en"; then \
 	    rm -f $(MANDIR)/$$lang/man1/mplayer.1    \
