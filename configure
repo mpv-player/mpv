@@ -2596,7 +2596,7 @@ for lang in $LANGUAGES ; do
     MAN_LANG_ALL="$lang $MAN_LANG_ALL"
   fi
 done
-MAN_LANG="$(echo $MAN_LANG_ALL | sed 's/en //')"
+MAN_LANG="$(echo $MAN_LANG_ALL | sed 's/en//')"
 _doc_lang=$_language
 test -d DOCS/xml/$_doc_lang || _doc_lang=en
 echores "using $_language (man pages: $MAN_LANG_ALL)"
