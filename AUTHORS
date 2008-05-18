@@ -846,6 +846,7 @@ Zores, Benjamin (ben) <ben@geexbox.org>
     * IVTV h/w MPEG decoder ao/vo driver.
     * split of stream layer from libmpdemux to stream.
     * VIDIX core and drivers.
+    * Linux AppleIR remote support.
 
 ________________
 The codecs, libs
