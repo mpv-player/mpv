@@ -7330,12 +7330,7 @@ else
   _def_charset="#undef MSG_CHARSET"
 fi
 
-if test "$_charset" = "UTF-8" ; then
-  # hack to disable conversion in the Makefile
-  _charset=""
-fi
-
-if test "$_charset" ; then
+if test "$_charset" != "UTF-8" ; then
 echocheck "iconv program"
 iconv -f UTF-8 -t $_charset ${_mp_help} > /dev/null 2>> "$TMPLOG"
 if test "$?" -ne 0 ; then

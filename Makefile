@@ -765,7 +765,7 @@ help_mp.h: help/help_mp-en.h $(HELP_FILE)
 	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
 	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
 	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
-ifeq ($(CHARSET),)
+ifeq ($(CHARSET),UTF-8)
 	@echo '#include "$(HELP_FILE)"' >> help_mp.h
 else
 	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
