@@ -761,18 +761,18 @@ version.h:
 	./version.sh `$(CC) -dumpversion`
 
 help_mp.h: help/help_mp-en.h $(HELP_FILE)
-	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
-	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
-	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
-	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
+	@echo '// WARNING! This is a generated file. Do NOT edit.' > $@
+	@echo '// See the help/ subdir for the editable files.' >> $@
+	@echo '#ifndef MPLAYER_HELP_MP_H' >> $@
+	@echo '#define MPLAYER_HELP_MP_H' >> $@
 ifeq ($(CHARSET),UTF-8)
-	@echo '#include "$(HELP_FILE)"' >> help_mp.h
+	@echo '#include "$(HELP_FILE)"' >> $@
 else
-	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
+	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> $@
 endif
-	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
-	@echo '// untranslated messages from the English master file:' >> help_mp.h
-	help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
+	@echo '#endif /* MPLAYER_HELP_MP_H */' >> $@
+	@echo '// untranslated messages from the English master file:' >> $@
+	help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> $@
 
 
 
