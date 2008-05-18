@@ -817,7 +817,6 @@ install: install-dirs $(INSTALL_TARGETS)
 
 install-dirs:
 	$(INSTALL) -d $(BINDIR)
-	$(INSTALL) -d $(DATADIR)
 	$(INSTALL) -d $(CONFDIR)
 
 install-%: %$(EXESUF)
