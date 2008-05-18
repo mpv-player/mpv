@@ -849,8 +849,6 @@ install-mencoder: mencoder$(EXESUF)
 install-gui:
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
 	$(INSTALL) -d $(DATADIR)/skins
-	@echo "*** Download skin(s) at http://www.mplayerhq.hu/design7/dload.html"
-	@echo "*** for GUI, and extract to $(DATADIR)/skins/"
 	$(INSTALL) -d $(prefix)/share/pixmaps
 	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
 	$(INSTALL) -d $(prefix)/share/applications
