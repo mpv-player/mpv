@@ -634,12 +634,10 @@ MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
-ALL_PRG             += $(ALL_PRG-yes)
 
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
 INSTALL_TARGETS-$(GUI)      += install-gui
-INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 DIRS =  . \
         dvdread \
@@ -698,7 +696,7 @@ PARTS = libavcodec \
 
 ###### generic rules #######
 
-all: $(ALL_PRG)
+all: $(ALL_PRG-yes)
 
 %.d: %.c
 	$(MPDEPEND_CMD) > $@
@@ -813,7 +811,7 @@ $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
 ###### installation rules #######
 
-install: $(INSTALL_TARGETS)
+install: $(INSTALL_TARGETS-yes)
 
 install-dirs:
 	$(INSTALL) -d $(BINDIR)
@@ -880,7 +878,7 @@ doxygen:
 doxygen_clean:
 	-rm -rf DOCS/tech/doxygen
 strip:
-	strip -s $(ALL_PRG)
+	strip -s $(ALL_PRG-yes)
 
 TAGS:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs etags -a
