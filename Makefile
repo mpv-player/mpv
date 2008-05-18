@@ -819,6 +819,7 @@ install-dirs:
 	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -d $(DATADIR)
 	$(INSTALL) -d $(MANDIR)/man1
+	$(INSTALL) -d $(foreach lang,$(MAN_LANG),$(MANDIR)/$(lang)/man1)
 	$(INSTALL) -d $(CONFDIR)
 
 install-%: %$(EXESUF)
@@ -829,7 +830,6 @@ install-mplayer-man:
 		if test "$$lang" = en ; then \
 			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/ ; \
 		else \
-			$(INSTALL) -d $(MANDIR)/$$lang/man1 ; \
 			$(INSTALL) -c -m 644 DOCS/man/$$lang/mplayer.1 $(MANDIR)/$$lang/man1/ ; \
 		fi ; \
 	done
