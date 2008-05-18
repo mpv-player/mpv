@@ -10126,6 +10126,27 @@ Use a different quantizer for chroma as compared to luma.
 Useful values are in the range <\-2\-2> (default: 0).
 .
 .TP
+.B aq_mode=<0\-2>
+Defines how adaptive quantization (AQ) distributes bits:
+.PD 0
+.RSs
+.IPs 0
+disabled
+.IPs 1
+Avoid moving bits between frames.
+.IPs 2
+Move bits between frames (by default).
+.RE
+.PD 1
+.
+.TP
+.B aq_strength=<positive float value>
+Controls how much adaptive quantization (AQ) reduces blocking and blurring
+in flat and textured areas (default: 1.0).
+A value of 0.5 will lead to weak AQ and less details, when a value of 1.5
+will lead to strong AQ and more details.
+.
+.TP
 .B cqm=<flat|jvt|<filename>>
 Either uses a predefined custom quantization matrix or loads a JM format
 matrix file.
