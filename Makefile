@@ -846,7 +846,7 @@ install-mencoder: mencoder$(EXESUF)
 		fi ; \
 	done
 
-install-gui:
+install-gui: install-mplayer
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
 	$(INSTALL) -d $(DATADIR)/skins
 	$(INSTALL) -d $(prefix)/share/pixmaps
