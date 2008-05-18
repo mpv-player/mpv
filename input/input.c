@@ -566,7 +566,11 @@ static int use_joystick = 1, use_lirc = 1, use_lircc = 1;
 static char* config_file = "input.conf";
 
 /* Apple Remote */
+#ifdef HAVE_APPLE_REMOTE
+static int use_ar = 1;
+#elif HAVE_APPLE_IR
 static int use_ar = 0;
+#endif
 
 static char* js_dev = NULL;
 static char* ar_dev = NULL;
