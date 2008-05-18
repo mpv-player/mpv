@@ -858,11 +858,10 @@ uninstall:
 	rm -f $(MANDIR)/man1/mencoder.1 $(MANDIR)/man1/mplayer.1
 	rm -f $(prefix)/share/pixmaps/mplayer.xpm
 	rm -f $(prefix)/share/applications/mplayer.desktop
+	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
 	for lang in $(MAN_LANG); do \
-	  if test "$$lang" != "en"; then \
 	    rm -f $(MANDIR)/$$lang/man1/mplayer.1    \
 	          $(MANDIR)/$$lang/man1/mencoder.1 ; \
-	  fi ; \
 	done
 
 clean:
