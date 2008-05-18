@@ -818,8 +818,6 @@ install: install-dirs $(INSTALL_TARGETS)
 install-dirs:
 	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -d $(DATADIR)
-	$(INSTALL) -d $(MANDIR)/man1
-	$(INSTALL) -d $(foreach lang,$(MAN_LANG),$(MANDIR)/$(lang)/man1)
 	$(INSTALL) -d $(CONFDIR)
 
 install-%: %$(EXESUF)
@@ -829,6 +827,7 @@ install-mplayer-man: $(foreach lang,$(MAN_LANG_ALL),install-mplayer-man-$(lang))
 install-mencoder-man: $(foreach lang,$(MAN_LANG_ALL),install-mencoder-man-$(lang))
 
 install-mplayer-man-en:
+	$(INSTALL) -d $(MANDIR)/man1
 	$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
 
 install-mencoder-man-en: install-mplayer-man-en
@@ -836,6 +835,7 @@ install-mencoder-man-en: install-mplayer-man-en
 
 define MPLAYER_MAN_RULE
 install-mplayer-man-$(lang):
+	$(INSTALL) -d $(MANDIR)/$(lang)/man1
 	$(INSTALL) -c -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
 
