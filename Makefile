@@ -825,23 +825,27 @@ install-dirs:
 install-%: %$(EXESUF)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-mplayer-man:
-	for lang in $(MAN_LANG); do \
-		if test "$$lang" = en ; then \
-			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/ ; \
-		else \
-			$(INSTALL) -c -m 644 DOCS/man/$$lang/mplayer.1 $(MANDIR)/$$lang/man1/ ; \
-		fi ; \
-	done
+install-mplayer-man: $(foreach lang,$(MAN_LANG_ALL),install-mplayer-man-$(lang))
+install-mencoder-man: $(foreach lang,$(MAN_LANG_ALL),install-mencoder-man-$(lang))
 
-install-mencoder-man: install-mplayer-man
-	for lang in $(MAN_LANG); do \
-		if test "$$lang" = en ; then \
-			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
-		else \
-			cd $(MANDIR)/$$lang/man1 && ln -sf mplayer.1 mencoder.1 ; \
-		fi ; \
-	done
+install-mplayer-man-en:
+	$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
+
+install-mencoder-man-en: install-mplayer-man-en
+	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
+
+define MPLAYER_MAN_RULE
+install-mplayer-man-$(lang):
+	$(INSTALL) -c -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
+endef
+
+define MENCODER_MAN_RULE
+install-mencoder-man-$(lang): install-mplayer-man-$(lang)
+	cd $(MANDIR)/$(lang)/man1 && ln -sf mplayer.1 mencoder.1
+endef
+
+$(foreach lang,$(MAN_LANG),$(eval $(MPLAYER_MAN_RULE)))
+$(foreach lang,$(MAN_LANG),$(eval $(MENCODER_MAN_RULE)))
 
 install-gui: install-mplayer
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
