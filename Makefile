@@ -863,8 +863,7 @@ uninstall:
 	for lang in $(MAN_LANG); do \
 	  if test "$$lang" != "en"; then \
 	    rm -f $(MANDIR)/$$lang/man1/mplayer.1    \
-	          $(MANDIR)/$$lang/man1/mencoder.1   \
-	          $(MANDIR)/$$lang/man1/gmplayer.1 ; \
+	          $(MANDIR)/$$lang/man1/mencoder.1 ; \
 	  fi ; \
 	done
 
