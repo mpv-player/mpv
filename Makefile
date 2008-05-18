@@ -874,8 +874,6 @@ doxygen:
 
 doxygen_clean:
 	-rm -rf DOCS/tech/doxygen
-strip:
-	strip -s $(ALL_PRG-yes)
 
 TAGS:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs etags -a
@@ -979,5 +977,5 @@ toolsclean:
 
 -include $(DEPS)
 
-.PHONY: all doxygen *install* recurse strip *tools
+.PHONY: all doxygen *install* recurse *tools
 .PHONY: checkheaders *clean dep depend tests
