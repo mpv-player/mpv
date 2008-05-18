@@ -821,7 +821,6 @@ install-dirs:
 	$(INSTALL) -d $(DATADIR)
 	$(INSTALL) -d $(MANDIR)/man1
 	$(INSTALL) -d $(CONFDIR)
-	if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 
 install-%: %$(EXESUF)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
