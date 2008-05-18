@@ -7739,6 +7739,7 @@ TARGET_CPU=$iproc
 `echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/'`
 
 # --- GUI stuff ---
+GUI = $_gui
 GUI_GTK = $_gui_gtk
 GUI_WIN32 = $_gui_win32
 

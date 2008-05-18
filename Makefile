@@ -511,8 +511,8 @@ SRCS_MPLAYER = mplayer.c \
 
 SRCS_MPLAYER-$(APPLE_IR)     += input/appleir.c
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
+SRCS_MPLAYER-$(GUI)          += gui/bitmap.c
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
-                                gui/bitmap.c \
                                 gui/cfg.c \
                                 gui/interface.c \
                                 gui/mplayer/gui_common.c \
@@ -538,8 +538,7 @@ SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
                                 gui/wm/ws.c \
                                 gui/wm/wsxdnd.c \
 
-SRCS_MPLAYER-$(GUI_WIN32)    += gui/bitmap.c \
-                                gui/win32/dialogs.c \
+SRCS_MPLAYER-$(GUI_WIN32)    += gui/win32/dialogs.c \
                                 gui/win32/gui.c \
                                 gui/win32/interface.c \
                                 gui/win32/playlist.c \
@@ -639,7 +638,7 @@ ALL_PRG             += $(ALL_PRG-yes)
 
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
-INSTALL_TARGETS-$(GUI_GTK)  += install-gui
+INSTALL_TARGETS-$(GUI)      += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
 DIRS =  . \
