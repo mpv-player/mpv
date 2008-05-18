@@ -569,6 +569,7 @@ static char* config_file = "input.conf";
 static int use_ar = 1;
 
 static char* js_dev = NULL;
+static char* ar_dev = NULL;
 
 static char* in_file = NULL;
 static int in_file_fd = -1;
@@ -579,6 +580,7 @@ static int mp_input_print_cmd_list(m_option_t* cfg);
 // Our command line options
 static m_option_t input_conf[] = {
   { "conf", &config_file, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
+  { "ar-dev", &ar_dev, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
   { "ar-delay", &ar_delay, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
   { "ar-rate", &ar_rate, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
   { "keylist", mp_input_print_key_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
@@ -1760,6 +1762,16 @@ mp_input_init(int use_gui) {
   }
 #endif
 
+#ifdef HAVE_APPLE_IR
+  if(use_ar) {
+    int fd = mp_input_appleir_init(ar_dev);
+    if(fd < 0)
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
+    else
+      mp_input_add_key_fd(fd,1,mp_input_appleir_read,(mp_close_func_t)close);
+  }
+#endif
+  
   if(in_file) {
     struct stat st;
     if(stat(in_file,&st))

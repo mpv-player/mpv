@@ -35,8 +35,13 @@
 #define AR_VUP       (AR_BASE + 8)
 #define AR_VDOWN     (AR_BASE + 9)
 
+/* MacOSX Driver */
 int mp_input_ar_init(void);
 int mp_input_ar_read(int fd);
 void mp_input_ar_close(int fd);
+
+/* Linux Driver */
+int mp_input_appleir_init(char* dev);
+int mp_input_appleir_read(int fd);
 
 #endif /* MPLAYER_AR_H */

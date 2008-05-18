@@ -1296,6 +1296,12 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: warning init event, we have lost sync with driver.\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick warning unknown event type %d\n"
 
+// appleir.c
+
+#define MSGTR_INPUT_APPLE_IR_Init "Initializing Apple IR on %s\n"
+#define MSGTR_INPUT_APPLE_IR_Detect "Detected Apple IR on %s\n"
+#define MSGTR_INPUT_APPLE_IR_CantOpen "Can't open Apple IR device: %s\n"
+
 // input.c
 
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Too many command file descriptors, cannot register file descriptor %d.\n"

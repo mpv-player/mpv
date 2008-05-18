@@ -229,6 +229,7 @@ Optional features:
   --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
   --enable-joystick      enable joystick support [disable]
   --enable-apple-remote  enable Apple Remote input (Mac OS X only) [autodetect]
+  --enable-apple-ir      enable Apple IR Remote input (Linux only) [autodetect]
   --disable-vm           disable X video mode extensions [autodetect]
   --disable-xf86keysym   disable support for multimedia keys [autodetect]
   --enable-radio         enable radio interface [disable]
@@ -630,6 +631,7 @@ _libnut=auto
 _lirc=auto
 _lircc=auto
 _apple_remote=auto
+_apple_ir=auto
 _gui=no
 _gtk1=no
 _termcap=auto
@@ -1073,6 +1075,8 @@ for ac_option do
   --disable-lircc)	_lircc=no	;;
   --enable-apple-remote) _apple_remote=yes ;;
   --disable-apple-remote) _apple_remote=no ;;
+  --enable-apple-ir)    _apple_ir=yes   ;;
+  --disable-apple-ir)   _apple_ir=no    ;;
   --enable-gui)		_gui=yes	;;
   --disable-gui)	_gui=no		;;
   --enable-gtk1)	_gtk1=yes	;;
@@ -3604,6 +3608,27 @@ echores "$_apple_remote"
 
 fi #if darwin
 
+if linux; then
+
+echocheck "Apple IR"
+if test "$_apple_ir" = auto ; then
+  _apple_ir=no
+  cat > $TMPC <<EOF
+#include <linux/input.h>
+int main(void) {
+  struct input_event ev;
+  return 0;
+}
+EOF
+  cc_check && tmp_run && _apple_ir=yes
+fi
+if test "$_apple_ir" = yes ; then
+  _def_apple_ir='#define HAVE_APPLE_IR 1'
+else
+  _def_apple_ir='#undef HAVE_APPLE_IR'
+fi
+echores "$_apple_ir"
+fi #if linux
 
 echocheck "pkg-config"
 _pkg_config=pkg-config
@@ -7640,6 +7665,7 @@ LADSPA = $_ladspa
 JOYSTICK = $_joystick
 LIRC = $_lirc
 APPLE_REMOTE = $_apple_remote
+APPLE_IR = $_apple_ir
 TV = $_tv
 TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
@@ -8049,6 +8075,9 @@ $_def_lirc
 
 /* Apple Remote (remote control, see http://docs.info.apple.com/article.html?artnum=302504) support: */
 $_def_apple_remote
+
+/* Apple IR Remote (Linux remote control driver) */
+$_def_apple_ir
 
 /* Support for maemo (http://www.maemo.org) */
 $_def_maemo

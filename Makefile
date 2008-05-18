@@ -510,6 +510,7 @@ SRCS_MPLAYER = mplayer.c \
                $(addprefix libvo/,$(VO_SRCS)) \
 
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
+SRCS_MPLAYER-$(APPLE_IR)     += input/appleir.c
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
                                 gui/bitmap.c \
                                 gui/cfg.c \
