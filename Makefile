@@ -823,7 +823,7 @@ install-dirs:
 	$(INSTALL) -d $(CONFDIR)
 	if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 
-install-mplayer: mplayer$(EXESUF)
+install-%: %$(EXESUF)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
 install-mplayer-man:
@@ -835,9 +835,6 @@ install-mplayer-man:
 			$(INSTALL) -c -m 644 DOCS/man/$$lang/mplayer.1 $(MANDIR)/$$lang/man1/ ; \
 		fi ; \
 	done
-
-install-mencoder: mencoder$(EXESUF)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
 install-mencoder-man:
 	for lang in $(MAN_LANG); do \
