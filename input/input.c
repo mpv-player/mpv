@@ -568,7 +568,7 @@ static char* config_file = "input.conf";
 /* Apple Remote */
 #ifdef HAVE_APPLE_REMOTE
 static int use_ar = 1;
-#elif HAVE_APPLE_IR
+#else
 static int use_ar = 0;
 #endif
 
