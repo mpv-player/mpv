@@ -814,8 +814,7 @@ $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 install: $(INSTALL_TARGETS-yes)
 
 install-dirs:
-	$(INSTALL) -d $(BINDIR)
-	$(INSTALL) -d $(CONFDIR)
+	$(INSTALL) -d $(BINDIR) $(CONFDIR)
 
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
@@ -846,10 +845,8 @@ $(foreach lang,$(MAN_LANG),$(eval $(MENCODER_MAN_RULE)))
 
 install-gui: install-mplayer
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	$(INSTALL) -d $(DATADIR)/skins
-	$(INSTALL) -d $(prefix)/share/pixmaps
+	$(INSTALL) -d $(DATADIR)/skins $(prefix)/share/pixmaps $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
-	$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
 
 uninstall:
