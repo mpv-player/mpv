@@ -6,6 +6,9 @@
 #
 # Example: help_diff.sh help_mp-hu.h < help_mp-en.h > missing.h
 
+# Processing the master file, nothing to do.
+test $1 = "help/help_mp-en.h" && exit 0
+
 curr=""
 
 while read -r line; do
