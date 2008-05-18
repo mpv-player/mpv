@@ -638,7 +638,7 @@ ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 ALL_PRG             += $(ALL_PRG-yes)
 
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
-INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man install-mencoder-man
+INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
 INSTALL_TARGETS-$(GUI_GTK)  += install-gui
 INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
 
@@ -835,7 +835,7 @@ install-mplayer-man:
 		fi ; \
 	done
 
-install-mencoder-man:
+install-mencoder-man: install-mplayer-man
 	for lang in $(MAN_LANG); do \
 		if test "$$lang" = en ; then \
 			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
