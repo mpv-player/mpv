@@ -2424,7 +2424,7 @@ int main(void) { return 0; }
 EOF
     cc_check -maltivec -mabi=altivec \
         && _altivec_gcc_flags="-maltivec -mabi=altivec" \
-        || ( cc_check -faltivec && _altivec_gcc_flags=-faltivec ) \
+        || { cc_check -faltivec && _altivec_gcc_flags=-faltivec ; } \
         || _altivec=no
     echores "$_altivec_gcc_flags"
 
