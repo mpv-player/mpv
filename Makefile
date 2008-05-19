@@ -765,14 +765,13 @@ help_mp.h: help/help_mp-en.h $(HELP_FILE)
 	@echo '// See the help/ subdir for the editable files.' >> $@
 	@echo '#ifndef MPLAYER_HELP_MP_H' >> $@
 	@echo '#define MPLAYER_HELP_MP_H' >> $@
-ifeq ($(CHARSET),UTF-8)
-	@echo '#include "$(HELP_FILE)"' >> $@
-else
-	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> $@
-endif
+	@cat "$(HELP_FILE)" >> $@
 	@echo '// untranslated messages from the English master file:' >> $@
 	help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> $@
 	@echo '#endif /* MPLAYER_HELP_MP_H */' >> $@
+ifneq ($(CHARSET),UTF-8)
+	iconv -f UTF-8 -t $(CHARSET) $@ > $@.tmp; mv $@.tmp $@
+endif
 
 
 
