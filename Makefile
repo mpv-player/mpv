@@ -770,9 +770,9 @@ ifeq ($(CHARSET),UTF-8)
 else
 	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> $@
 endif
-	@echo '#endif /* MPLAYER_HELP_MP_H */' >> $@
 	@echo '// untranslated messages from the English master file:' >> $@
 	help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> $@
+	@echo '#endif /* MPLAYER_HELP_MP_H */' >> $@
 
 
 
