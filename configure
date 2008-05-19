@@ -2425,7 +2425,7 @@ EOF
     cc_check -maltivec -mabi=altivec \
         && _altivec_gcc_flags="-maltivec -mabi=altivec" \
         || { cc_check -faltivec && _altivec_gcc_flags=-faltivec ; } \
-        || _altivec=no
+        || { _altivec=no && _altivec_gcc_flags="none, AltiVec disabled" ; }
     echores "$_altivec_gcc_flags"
 
     # check if <altivec.h> should be included
