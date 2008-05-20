@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include <linux/types.h>
 #include <linux/input.h>
 
 #include "mp_msg.h"
