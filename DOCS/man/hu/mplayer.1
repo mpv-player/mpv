@@ -1,4 +1,4 @@
-.\" Synced with r26674
+.\" Synced with r26806
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 05. 11." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 05. 20." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -948,6 +948,8 @@ A rendelkezésre álló parancsok listája:
 Az alapértelmezett ~/\:.mplayer/\:input.conf -tól eltérõ bemeneti
 konfigurációs fájl megadása.
 Ha nincs elérési út megadva, a ~/\:.mplayer/\:<fájlnév> a feltételezett.
+.IPs ar-dev=<eszköz>
+Az Apple IR távirányítóhoz használt eszköz (alapértelmezetten automatikus detektálás, csak Linux-on).
 .IPs ar-delay
 Egy gomb automatikus ismétlése elõtti késleltetés miliszekundumban (0: kikapcsolás).
 .IPs ar-rate
@@ -1051,6 +1053,10 @@ Joystick támogatás kikapcsolása.
 .TP
 .B \-nolirc
 LIRC támogatás kikapcsolása.
+.
+.TP
+.B \-noar
+Kikapcsolja az AppleIR távirányító támogatását.
 .
 .TP
 .B \-nomouseinput
@@ -1565,10 +1571,10 @@ Automatikusan visszavált IPv4-ra, amennyiben szükséges.
 .
 .TP
 .B \-psprobe <bájt pozíció>
-MPEG-PS folyam lejátszásakor ezzel az opcióval megadhatod, hogy az
-MPlayer hány bájtot vizsgáljon át a használt videó codec azonosításához.
-Ez az opció a H264 folyamokat tartalmazó EVO fájlok lejátszásához
-szükséges.
+MPEG-PS vagy MPEG-PES folyam lejátszásakor ezzel az opcióval megadhatod,
+hogy az MPlayer hány bájtot vizsgáljon át a használt videó codec
+azonosításához.
+Ez az opció a H264 folyamokat tartalmazó EVO vagy VDR fájlok lejátszásához szükséges.
 .
 .TP
 .B \-pvr <opció1:opció2:...> (csak PVR)
@@ -3356,6 +3362,8 @@ A használt színkulcsról és annak megjelenítésérõl a \-v opcióval ad
 információkat az MPlayer, keresd az [xv common] tag-gel kezdõdõ sorokat.
 .PD 0
 .RSs
+.IPs adaptor=<szám>
+Kiválasztja a megadott XVideo adaptort (lásd az xvinfo ereményét).
 .IPs port=<szám>
 Adott XVideo port kiválasztása.
 .IPs ck=<cur|use|set>
@@ -3404,6 +3412,8 @@ Videó kimeneti vezérlõ ami az XFree86 4.x XvMC (X Video Motion Compensation)
 kiterjesztését használja az MPEG-1/2 és VCR2 dekódolás gyorsításához.
 .PD 0
 .RSs
+.IPs adaptor=<szám>
+Kiválasztja a megadott XVideo adaptort (lásd az xvinfo eredményét).
 .IPs port=<szám>
 Adott XVideo port kiválasztása.
 .IPs (no)benchmark
@@ -4476,6 +4486,8 @@ Ez nem hiba, hanem a nem teljes felbontású dekódolás mellékhatásai.
 Ha a <w> is meg van adva, a lowres dekódolás csak akkor lesz használva, ha a
 videó szélessége nagyobb vagy egyenlõ mint <w>.
 .RE
+.IPs "o\ \ \ \ "
+FIXME: nem dokumentált
 .IPs "sb=<szám> (csak MPEG-2)"
 Kihagyja a megadott számú makroblokk sort a tetején.
 .IPs "st=<szám> (csak MPEG-2)"
@@ -7739,7 +7751,7 @@ Windows Media Video, 2-es verzió (WMV8)
 .
 .TP
 .B vqmin=<1\-31>
-minimális kvantáló (pass 1/2)
+minimális kvantáló
 .RSs
 .IPs 1
 Nem javasolt (sokkal nagyobb fájl, csekély minõségbeli különbség és ijesztõ
@@ -7798,7 +7810,7 @@ Az 1 nem javasolt (lásd a vqmin-t a részletekért).
 .
 .TP
 .B vqmax=<1\-31>
-Maximális kvantáló (1/2. lépés), 10\-31 közötti ésszerû érték (alapértelmezett: 31).
+Maximális kvantáló, 10\-31 közötti ésszerû érték (alapértelmezett: 31).
 .
 .TP
 .B mbqmin=<1\-31>
@@ -7810,7 +7822,7 @@ idejétmúlt, használd a vqmax-ot
 .
 .TP
 .B vqdiff=<1\-31>
-maximális kvantáló különbség az egymást követõ I- vagy P-kockáknál (1/2. lépés)
+maximális kvantáló különbség az egymást követõ I- vagy P-kockáknál
 (alapértelmezett: 3)
 .
 .TP
@@ -8078,7 +8090,7 @@ Nem okoz teljesítménybeli romlást, így nyugodtan bekapcsolva maradhat.
 .
 .TP
 .B vbitrate=<érték>
-Bitráta megadása (1/2. lépés) (alapértelmezett: 800).
+Bitráta megadása (alapértelmezett: 800).
 .br
 .I FIGYELMEZTETÉS:
 1kbit = 1000 bit
@@ -8104,17 +8116,17 @@ problémák lehetnek, ha vrc_(min|max)rate is használva van.
 .
 .TP
 .B vrc_maxrate=<érték>
-maximális bitráta kbit/\:sec-ben (1/2. lépés)
+maximális bitráta kbit/\:sec-ben
 (alapértelmezett: 0, határtalan)
 .
 .TP
 .B vrc_minrate=<érték>
-minimális bitráta kbit/\:sec-ben (1/2. lépés)
+minimális bitráta kbit/\:sec-ben
 (alapértelmezett: 0, határtalan)
 .
 .TP
 .B vrc_buf_size=<érték>
-buffer méret kbit-ben (1/2. lépés).
+buffer méret kbit-ben
 MPEG-1/2-nél ez a vbv buffer méretét is beállítja, használj 327-et
 a VCD-hez, 917-et az SVCD-hez és 1835-at a DVD-hez.
 .
@@ -8139,19 +8151,19 @@ támogatásával fordított MEncoder kell hozzá).
 .
 .TP
 .B vb_qfactor=<\-31.0\-31.0>
-kvantálási faktor a B- és nem-B-kockák között (1/2. lépés) (alapértelmezett: 1.25)
+kvantálási faktor a B- és nem-B-kockák között (alapértelmezett: 1.25)
 .
 .TP
 .B vi_qfactor=<\-31.0\-31.0>
-kvantálási faktor az I- és nem-I-kockák között (1/2. lépés) (alapértelmezett: 0.8)
+kvantálási faktor az I- és nem-I-kockák között (alapértelmezett: 0.8)
 .
 .TP
 .B vb_qoffset=<\-31.0\-31.0>
-kvantálási lépés B- és nem-B-kockák között (1/2. lépés) (alapértelmezett: 1.25)
+kvantálási lépés B- és nem-B-kockák között (alapértelmezett: 1.25)
 .
 .TP
 .B vi_qoffset=<\-31.0\-31.0>
-(1/2. lépés) (alapértelmezett: 0.0)
+(alapértelmezett: 0.0)
 .br
 ha v{b|i}_qfactor > 0
 .br
@@ -8187,7 +8199,7 @@ idõt ad a kvantálónak (lassabb váltás).
 .
 .TP
 .B vqcomp=<0.0\-1.0>
-Kvantálási tömörítés, a vrc_eq függ ettõl (1/2. lépés) (alapértelmezett: 0.5).
+Kvantálási tömörítés, a vrc_eq függ ettõl (alapértelmezett: 0.5).
 Például feltéve, hogy az alapértelmezett rate control egyenletet használjuk,
 ha a vqcomp=1.0, a ratecontrol minden kockához annyi számú bitet foglal le,
 amennyi szükséges az azonos QP melletti kódolásukhoz.
@@ -8199,7 +8211,7 @@ A látható minõség valahol ezen két szélsõséges eset között lesz optimális.
 .
 .TP
 .B vrc_eq=<egyenlet>
-fõ ratecontrol egyenlet (1/2. lépés)
+fõ ratecontrol egyenlet
 .RE
 .RSs
 .IPs "1\ \ \ \ "
@@ -8272,7 +8284,7 @@ maximum / minimum
 .
 .TP
 .B vrc_override=<opciók>
-Felhasználó által megadott minõség a megadott részekhez (befejezés, feliratok, ...) (1/2. lépés).
+Felhasználó által megadott minõség a megadott részekhez (befejezés, feliratok, ...).
 Az opciók <kezdõ-kocka>, <záró-kocka>, <minõség>[/<kezdõ-kocka>,
 <záró-kocka>, <minõség>[/...]]:
 .PD 0
@@ -8294,7 +8306,7 @@ kezdeti buffer feltöltés, a vrc_buf_size egy részeként (alapértelmezett: 0.9)
 .
 .TP
 .B vqsquish=<0|1>
-Itt adható meg hogy hogyan maradjon a kvantáló a qmin és qmax között (1/2. lépés).
+Itt adható meg hogy hogyan maradjon a kvantáló a qmin és qmax között.
 .PD 0
 .RSs
 .IPs 0
@@ -9056,6 +9068,10 @@ FIXME: Ezt még dokumentálni kell.
 .TP
 .B skip_threshold=<0\-1000000>
 FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B "o\ \ \ \ \ \ "
+FIXME: nem dokumentált
 .
 .
 .SS nuv (\-nuvopts)
@@ -10130,6 +10146,27 @@ Különbözõ kvantálót használ a színtelítettséghez és a fényerõhöz.
 A használható értékek <\-2\-2> (alapértelmezett: 0).
 .
 .TP
+.B aq_mode=<0\-2>
+Definiálja, hogy az adaptív kvantálás (AQ) hogyan ossza el a biteket:
+.PD 0
+.RSs
+.IPs 0
+letiltva
+.IPs 1
+Nem mozgatja a biteket a kockák között.
+.IPs 2
+Mozgatja a biteket a kockák között (alapértelmezett).
+.RE
+.PD 1
+.
+.TP
+.B aq_strength=<pozitív lebegõpontos szám>
+Megadja, hogy az adaptív kvantálás (AQ) mennyire csökkentse a blokkosodást
+és az elmosódást a sík és textúrázott területeken (alapértelmezett: 1.0).
+A 0.5-ös érték gyenge AQ-t eredményez és kevesebb részlethez, míg az 1.5-ös
+erõs AQ-t és nagyobb részletességet.
+.
+.TP
 .B cqm=<flat|jvt|<fájlnév>>
 Vagy egy elõre definiált saját kvantálást használ vagy betölt egy JM formátumú
 mátrix fájlt.
@@ -10432,8 +10469,12 @@ A folyam tulajdonságainak megállapításához maximálisan analizálndó hossz másodpe
 Kényszeríti a megadott libavformat demuxer-t.
 .
 .TP
+.B "o\ \ \ \ \ \ "
+FIXME: nem dokumentált
+.
+.TP
 .B probesize=<érték>
-A detektálási folyamatban használt adat maximális mennyisége.
+A detektálási folyamatban a próbálkozáshoz használt adat maximális mennyisége.
 MPEG-TS esetén ez az érték az átvizsgálandó TS csomagok számát
 adja meg.
 .
@@ -10501,9 +10542,14 @@ MPEG[12] implementációkba történõ muxálásánál az alapértelmezett értékek:
 .
 .TP
 .B preload=<különbség>
-Jelenleg csak az MPEG[12]-nél van értelme: Kezdeti különbség másodpercben
-a kimenet referencia idõzítõje (SCR) és a dekódolási idõbélyeg (DTS) között
-bármelyik jelenlévõ folyamnál (késleltetés demux-ból dekódolásba).
+Jelenleg csak az MPEG[12]-nél van értelme: Kezdeti különbség
+másodpercben a kimenet referencia idõzítõje (SCR) és a dekódolási
+idõbélyeg (DTS) között bármelyik jelenlévõ folyamnál
+(késleltetés demux-ból dekódolásba).
+.
+.TP
+.B "o\ \ \ \ \ \ "
+FIXME: nem dokumentált
 .
 .
 .

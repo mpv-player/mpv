@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r26649 (2008. 05. 11.)
+// Sync'ed with help_mp-en.h r26795 (2008. 05. 20.)
 
 // ========================= MPlayer help ===========================
 
@@ -1295,6 +1295,12 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_WarnLostSync "Botkormány: figyelmeztető init esemény, elvesztettük a szinkront a vezérlővel.\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Botkormány ismeretlen figyelmeztető esemény típus: %d\n"
 
+// appleir.c
+
+#define MSGTR_INPUT_APPLE_IR_Init "Apple IR inicializálása %s eszközön.\n"
+#define MSGTR_INPUT_APPLE_IR_Detect "Apple IR megtalálva %s eszközön.\n"
+#define MSGTR_INPUT_APPLE_IR_CantOpen "Nem nyitható meg az Apple IR eszköz: %s\n"
+
 // input.c
 
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Túl sok parancs fájl leíró, nem sikerült a(z) %d fájl leíró regisztálása.\n"
@@ -1953,6 +1959,7 @@ static char help_text[]=
 "[VO_XV] majd olvasd el a DOCS/HTML/hu/video.html#xv fájlt!\n"\
 "[VO_XV] Lásd az 'mplayer -vo help'-et más (nem-xv) videó kimeneti vezérlőkért.\n"\
 "[VO_XV] Próbáld ki a -vo x11 -et.\n"
+#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] Xv Adaptor #%d (%s) használata\n"
 
 
 // loader/ldt_keeper.c
