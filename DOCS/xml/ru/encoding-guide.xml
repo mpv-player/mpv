@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25308 -->
+<!-- synced with r26711 -->
 <chapter id="encoding-guide">
 <title>Кодирование с <application>MEncoder</application></title>
 
@@ -1943,7 +1943,7 @@ mkvmerge -o <replaceable>выходной_файл.mkv</replaceable> <replaceabl
 <formalpara>
 <title>Замечание о числах.</title>
 <para>
-Многие документы, включая указанное выше руководство, ссылаются
+Многие документы, включая указанную выше статью, ссылаются
 на количество полей в секунду 59.94 для NTSC видео и 
 соответствующие кадровые частоты 29.97 (для подверженного 
 телесину и чересстрочного видео) и 23.976 (для построчного).
@@ -2034,7 +2034,9 @@ DVD плееры читают флаг, включенный в видеопот
 рипы или тонко настроить 
 <systemitem class="library">libavcodec</systemitem> для 
 достижения максимального качества, не входит в рамки данного 
-раздела.
+раздела; обратитесь к другим разделам
+<link linkend="encoding-guide">Руководства по кодированию
+с MEncoder</link>.
 </para></listitem>
 <listitem><para>
 Есть несколько сносок, специфичных для данного руководства, 
@@ -2392,6 +2394,24 @@ mencoder dvd://1 -oac copy -vf pullup,softskip \
   --></screen>
 </para></listitem>
 <listitem><para>
+  <option>-vf filmdint</option> похожа на
+  <option>-vf pullup</option>: оба фильтра пытаются сопоставить пару полей
+  для формирования полного кадра. Однако <option>filmdint</option> будет
+  производить деинтерлейсинг одиночных полей, которым не может найти пару,
+  в то время как <option>pullup</option> попросту их отбросит.
+  Вдобавок фильтры имеют различные алгоритмы анализа, и filmdint
+  имеет тенденцию к более частому нахождению соответствий.
+  Какой фильтр будет лучше работать зависит от исходного видео и
+  личного вкуса; не бойтесь экспериментировать с тонкой настройкой
+  опций фильтров, если у вас возникли проблемы с любым из них (подробности
+  смотрите на странице руководства man). Для большинства качественного
+  исходного видео, однако, оба фильтра работают достаточно хорошо,
+  так что начинать работать можно с любым из них.
+  <screen>
+mencoder dvd://1 -oac copy -vf filmdint -ovc lavc -ofps 24000/1001<!--
+  --></screen>
+</para></listitem>
+<listitem><para>
   Более старый метод заключается не в применении обратного телесина к
   телесиненным частям, а, наоборот, в телесине не подверженных телесину частей и
   последующем применении обратного телесина ко всему видео. Звучит запутанно? 
@@ -2402,18 +2422,6 @@ mencoder dvd://1 -oac copy -vf pullup,softskip \
   <screen>
 mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
   </screen>
-</para></listitem>
-<listitem><para>
-  Лично я не использовал <option>-vf filmdint</option>, но вот что сказал 
-  Д Ричарт Фелкер III (D Richard Felker III):
-
-  <blockquote><para>С ним все в порядке, но имхо он слишком часто пытается
-     сделать деинтерлейс iвместо обратного телесина (в точности как аппаратные
-     DVD проигрыватели &amp; построчное TV), что в результате дает мерзкое
-     мерцание и другие артефакты. Если собираетесь его использовать, потребуется
-     как минимум потратить немного времени для тонкой настройки опций и
-     просмотра результата, чтобы убедиться, что он не испорчен.
-  </para></blockquote>
 </para></listitem>
 </itemizedlist>
 </sect3>
@@ -5649,7 +5657,7 @@ mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
 mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xsvcd -vf \
     scale=480:576,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
     vcodec=mpeg2video:mbd=2:keyint=15:vrc_buf_size=917:vrc_minrate=600:\
-vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 25 \
+vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224:aspect=16/9 -ofps 25 \
     -o <replaceable>фильм.mpg</replaceable> <replaceable>фильм.avi</replaceable>
 </screen>
 </para>
@@ -5664,7 +5672,7 @@ vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 25 \
 mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xsvcd  -vf \
     scale=480:480,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
     vcodec=mpeg2video:mbd=2:keyint=18:vrc_buf_size=917:vrc_minrate=600:\
-vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 30000/1001 \
+vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224:aspect=16/9 -ofps 30000/1001 \
     -o <replaceable>фильм.mpg</replaceable> <replaceable>фильм.avi</replaceable>
 </screen>
 </para>
@@ -5678,7 +5686,7 @@ vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 30000/1001 \
 mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xvcd -vf \
     scale=352:288,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
     vcodec=mpeg1video:keyint=15:vrc_buf_size=327:vrc_minrate=1152:\
-vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 25 \
+vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224:aspect=16/9 -ofps 25 \
     -o <replaceable>фильм.mpg</replaceable> <replaceable>фильм.avi</replaceable>
 </screen>
 </para>
@@ -5692,7 +5700,7 @@ vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 25 \
 mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xvcd -vf \
     scale=352:240,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
     vcodec=mpeg1video:keyint=18:vrc_buf_size=327:vrc_minrate=1152:\
-vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 30000/1001 \
+vbitrate=1152:vrc_maxrate=1152:acodec=mp2:abitrate=224:aspect=16/9 -ofps 30000/1001 \
     -o <replaceable>фильм.mpg</replaceable> <replaceable>фильм.avi</replaceable>
 </screen>
 </para>
