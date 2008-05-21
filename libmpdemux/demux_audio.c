@@ -293,7 +293,8 @@ static int demux_audio_open(demuxer_t* demuxer) {
       }
     } else if( hdr[0] == 'f' && hdr[1] == 'L' && hdr[2] == 'a' && hdr[3] == 'C' ) {
       frmt = fLaC;
-      break;
+      if (!mp3_hdrs || mp3_hdrs->cons_hdrs < 3)
+        break;
     }
     // Add here some other audio format detection
     if(step < HDR_SIZE)
