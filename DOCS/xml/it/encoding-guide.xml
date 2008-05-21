@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 38% synced with r22753 (row 2069) -->
+<!-- 41% synced with r22753 (row 2212) -->
 <chapter id="encoding-guide">
 <title>La codifica con <application>MEncoder</application></title>
 
@@ -978,9 +978,6 @@ perciÃ² potresti voler comunque effettuare il ridimensionamento.
 <title>Scegliere la risoluzione e il bitrate</title>
 
 <para>
-Other parameters such as scaling, cropping, etc. will
-<emphasis role="bold">not</emphasis> alter the file size unless you
-change the bitrate as well!.
 A meno che tu non stia per codificare con quantizzazione costante devi
 impostare un bitrate.
 La logica del bitrate Ã¨ abbastanza semplice.
@@ -1900,7 +1897,7 @@ campo dopo l'altro.
 <title>Come scoprire il tipo di video che possiedi</title>
 
 <sect3 id="menc-feat-telecine-ident-progressive">
-<title>Progressivo</title>
+<title>Progressiva</title>
 
 <para>
 Il video progressivo Ã¨ stato originariamente filmato a 24000/1001 fps, e
@@ -2067,21 +2064,22 @@ il pattern del telecine.
 <!-- ********** -->
 
 <sect2 id="menc-feat-telecine-encode">
-<title>How to encode each category</title>
+<title>Come codificare ciascuna categoria</title>
 <para>
-As I mentioned in the beginning, example <application>MEncoder</application>
-lines below are <emphasis role="bold">not</emphasis> meant to actually be used;
-they only demonstrate the minimum parameters to properly encode each category.
+Come menzionato all'inizio, le linee di esempio qui sotto per
+<application>MEncoder</application> <emphasis role="bold">non</emphasis> sono
+pensate per essere usate davvero; dimostrano solamente i parametri minimi per
+codificare correttamente ciascuna categoria.
 </para>
 
 
 <sect3 id="menc-feat-telecine-encode-progressive">
-<title>Progressive</title>
+<title>Progressivo</title>
 <para>
-Progressive video requires no special filtering to encode. The only
-parameter you need to be sure to use is <option>-ofps 24000/1001</option>.
-Otherwise, <application>MEncoder</application>
-will try to encode at 30000/1001 fps and will duplicate frames.
+Il video progressivo non richiede particolari filtri per la codifica. L'unico
+parametri che devi assicurarti di sare è <option>-ofps 24000/1001</option>.
+Se non lo usi, <application>MEncoder</application> cercherà di codificare a
+30000/1001 fps e duplicherà i fotogrammi.
 </para>
 
 <para>
@@ -2089,108 +2087,105 @@ will try to encode at 30000/1001 fps and will duplicate frames.
 </para>
 
 <para>
-It is often the case, however, that a video that looks progressive
-actually has very short parts of telecine mixed in. Unless you are
-sure, it is safest to treat the video as
-<link linkend="menc-feat-telecine-encode-mixedpt">mixed progressive and telecine</link>.
-The performance loss is small
+Spesso e volentieri capita che un video che sembra progressivo contenga anche
+alcune brevi parti di telecine miscelate. A meno che tu non sia sicuro,
+conviene trattare il video come 
+<link linkend="menc-feat-telecine-encode-mixedpt">progressivo e telecine miscelati</link>.
+Il calo di prestazioni è piccolo
 <link linkend="menc-feat-telecine-footnotes">[3]</link>.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-encode-telecined">
-<title>Telecined</title>
+<title>Telecine</title>
 
 <para>
-Telecine can be reversed to retrieve the original 24000/1001 content,
-using a process called inverse-telecine.
-<application>MPlayer</application> contains several filters to
-accomplish this; the best filter, <option>pullup</option>, is described
-in the <link linkend="menc-feat-telecine-encode-mixedpt">mixed
-progressive and telecine</link> section.
+Il telecine può essere __reversed__ per ricavare il contenuto originario a
+24000/1001 usando un processo conosciuto come telecine-inverso.
+<application>MPlayer</application> include vari filtri per ottenere ciò;
+il filtro migliore, <option>pullup</option>, è descritto nella sezione
+<link linkend="menc-feat-telecine-encode-mixedpt">progressivo e telecine
+miscelati</link>.
 </para>
 </sect3>
 
 
 <sect3 id="menc-feat-telecine-encode-interlaced">
-<title>Interlaced</title>
+<title>Interlacciato</title>
 
 <para>
-For most practical cases it is not possible to retrieve a complete
-progressive video from interlaced content. The only way to do so
-without losing half of the vertical resolution is to double the
-framerate and try to "guess" what ought to make up the
-corresponding lines for each field (this has drawbacks - see method 3).
+Nella maggior parte dei casi reali non è possibile ricavare un video
+progressivo completo da contenuto interlacciato. L'unico modo di farlo senza
+perdere metà della risoluzione verticale è raddoppiare il framerate e provare
+ad "indovinare" quello che forma le linee corrispondenti per ogni campo
+(questo ha delle controindicazioni - vedi il metodo 3).
 </para>
 
 <orderedlist>
 <listitem><para>
-  Encode the video in interlaced form. Normally, interlacing wreaks
-  havoc with the encoder's ability to compress well, but
-  <systemitem class="library">libavcodec</systemitem> has two
-  parameters specifically for dealing with storing interlaced video a
-  bit better: <option> ildct</option> and <option>ilme</option>. Also,
-  using <option>mbd=2</option> is strongly recommended
-  <link linkend="menc-feat-telecine-footnotes">[2] </link> because it
-  will encode macroblocks as non-interlaced in places where there is
-  no motion. Note that <option>-ofps</option> is NOT needed here.
+  Codifica il video in forma interlacciata. Normalmente l'interlacciatura fa a
+  pugni con l'abilità del codificatore di comprimere bene, ma
+  <systemitem class="library">libavcodec</systemitem> ha due parametri
+  appositamente per gestire un pochino meglio il video interlacciato:
+  <option>ildct</option> e <option>ilme</option>. Inoltre viene caldamente
+  consigliato l'utilizzo di <option>mbd=2</option>
+  <link linkend="menc-feat-telecine-footnotes">[2] </link> poiché
+  codificherà i macroblocchi come non interlacciati in posti dove non c'è
+  movimento. Nota che <option>-ofps</option> qui NON serve.
   <screen>mencoder dvd://1 -oac copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
 </para></listitem>
 <listitem><para>
-  Use a deinterlacing filter before encoding. There are several of
-  these filters available to choose from, each with its own advantages
-  and disadvantages. Consult <option>mplayer -pphelp</option> and
-  <option>mplayer -vf help</option> to see what is available
-  (grep for "deint"), read Michael's Niedermayer
-  <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing filters comparison</ulink>,
-  and search the
-  <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
-  MPlayer mailing lists</ulink> to find many discussions about the
-  various filters.
-  Again, the framerate is not changing, so no
-  <option>-ofps</option>. Also, deinterlacing should be done after
-  cropping <link linkend="menc-feat-telecine-footnotes">[1]</link> and
-  before scaling.
+  Usa un filtro di de-interlacciatura prima della codifica. Ci sono vari filtri
+  disponibili tra cui scegliere, ognuno dei quali con i suoi pro e i suoi
+  contro. Controlla <option>mplayer -pphelp</option> e
+  <option>mplayer -vf help</option> per vedere cosa c'è disponibile
+  (fa in grep per "deint"), leggi il <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">confronto tra filtri di deinterlacciatura
+  (Deinterlacing filters comparison)</ulink> di Michael Niedermayer, e cerca
+  nelle <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
+  mailing list di MPlayer</ulink> per trovare discussioni riguardanti i vari
+  filtri.
+  Di nuovo il framerate non cambia, indi niente <option>-ofps</option>.
+  Inoltre, la deinterlacciatura dovrebbe essere eseguita dopo il ritaglio
+  <link linkend="menc-feat-telecine-footnotes">[1]</link> e prima del
+  ridimensionamento.
   <screen>mencoder dvd://1 -oac copy -vf yadif -ovc lavc</screen>
 </para></listitem>
 <listitem><para>
-  Unfortunately, this option is buggy with
-  <application>MEncoder</application>; it ought to work well with
-  <application>MEncoder G2</application>, but that is not here yet. You
-  might experience crahes. Anyway, the purpose of <option> -vf
-  tfields</option> is to create a full frame out of each field, which
-  makes the framerate 60000/1001. The advantage of this approach is that no
-  data is ever lost; however, since each frame comes from only one
-  field, the missing lines have to be interpolated somehow. There are
-  no very good methods of generating the missing data, and so the
-  result will look a bit similar to when using some deinterlacing
-  filters. Generating the missing lines creates other issues, as well,
-  simply because the amount of data doubles. So, higher encoding
-  bitrates are required to maintain quality, and more CPU power is
-  used for both encoding and decoding. tfields has several different
-  options for how to create the missing lines of each frame. If you
-  use this method, then Reference the manual, and chose whichever
-  option looks best for your material. Note that when using
-  <option>tfields</option> you
-  <emphasis role="bold">have to</emphasis> specify both
-  <option>-fps</option> and <option>-ofps</option> to be twice the
-  framerate of your original source.
+  Sfortunatamente, quest'opzione non funziona bene con
+  <application>MEncoder</application>; dovrebbe funzionar bene con
+  <application>MEncoder G2</application>, ma ancora non esiste. Puoi subire
+  dei crash. Tuttavia l'obiettivo di <option>-vf tfields</option> è di
+  generare un fotogramma completo da ogni campo, portando il framerate a
+  60000/1001. Il vantaggio di questo approccio è che non viene mai perso alcun
+  dato; d'altro canto, dato che ogni fotogramma deriva da un solo campo, le
+  righe mancanti devono essere interpolate in qualche modo. Non ci sono metodi
+  veramente validi per ricreare i dati mancanti, quindi il risultato apparirà
+  molto simile a quando vengono usati dei filtri di deinterlacciatura.
+  La generazione delle righe che mancano è foriera di altri problemi,
+  solamente per il fatto che i dati sono raddoppiati. Conseguentemente per
+  mantenere la qualità si rendono necessari bitrate più elevati e viene usata
+  una maggior potenza di CPU sia per la codifica che la decodifica.
+  tfields ha varie opzioni su come generare le righe mancanti di ogni
+  fotogramma. Se usi questo metodo, fai riferimento al manuale, e scegli
+  l'opzione che può andar meglio per il tuo materiale sorgente. Fai attenzione
+  che usando <option>tfields</option> <emphasis role="bold">devi</emphasis>
+  specificare sia <option>-fps</option> che <option>-ofps</option> pari al
+  doppio della sorgente originaria.
   <screen>
 mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
     -fps 60000/1001 -ofps 60000/1001<!--
   --></screen>
 </para></listitem>
 <listitem><para>
-  If you plan on downscaling dramatically, you can extract and encode
-  only one of the two fields. Of course, you will lose half the vertical
-  resolution, but if you plan on downscaling to at most 1/2 of the
-  original, the loss will not matter much. The result will be a
-  progressive 30000/1001 frames per second file. The procedure is to use
-  <option>-vf field</option>, then crop
-  <link linkend="menc-feat-telecine-footnotes">[1]</link> and scale
-  appropriately. Remember that you will have to adjust the scale to
-  compensate for the vertical resolution being halved.
+  Se conti di ridurre drasticamente le dimensioni puoi estrarre e decodificare
+  sono uno dei due campi. Perderai di sicuro metà della risoluzione verticale,
+  ma se pensi di ridurla almeno a 1/2 dell'originale, la perdità non sarà poi
+  molta. Il risultato sarà un file progressivo a 30000/1001 fotogrammi per
+  secondo. La procedura è utilizzare <option>-vf field</option>, poi crop
+  <link linkend="menc-feat-telecine-footnotes">[1]</link> e scale in modo
+  corretto. Ricorda che dovrai correggere scale per compensare la risoluzione
+  verticale dimezzata.
   <screen>mencoder dvd://1 -oac copy -vf field=0 -ovc lavc</screen>
 </para></listitem>
 </orderedlist>
@@ -2198,19 +2193,18 @@ mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
 
 
 <sect3 id="menc-feat-telecine-encode-mixedpt">
-<title>Mixed progressive and telecine</title>
+<title>Progressivo e telecine miscelati</title>
 
 <para>
-In order to turn mixed progressive and telecine video into entirely
-progressive video, the telecined parts have to be
-inverse-telecined. There are three ways to accomplish this,
-described below. Note that you should
-<emphasis role="bold">always</emphasis> inverse-telecine before any
-rescaling; unless you really know what you are doing,
-inverse-telecine before cropping, too
-<link linkend="menc-feat-telecine-footnotes">[1]</link>.
-<option>-ofps 24000/1001</option> is needed here because the output video
-will be 24000/1001 frames per second.
+Per poter portare un video progressivo e telecine miscelati in un video
+completamente progressivo, le parti in telecine devono essere passate in
+telecine inverso. Ci son tre modi per ottenere ciò, e sono descritti qui sotto.
+Nota che dovresti <emphasis role="bold">sempre</emphasis> effettuare il
+telecine inverso prima di ogni ridimensionamento; a meno che tu non sappia
+davvero cosa tu stia facendo, effettua il telecine inverso anche prima di fare
+il taglio (crop) <link linkend="menc-feat-telecine-footnotes">[1]</link>.
+In questo caso serve <option>-ofps 24000/1001</option> perché il video in
+uscita sarà a 24000/1001 fotogrammi al secondo.
 </para>
 
 <itemizedlist>
