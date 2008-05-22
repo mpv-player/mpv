@@ -351,12 +351,15 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 	FcPattern* pattern;
 	FcFontSet* fset;
 	FcBool res;
+	int face_index, num_faces = 1;
 
-	rc = FT_New_Memory_Face(ftlibrary, (unsigned char*)data, data_size, 0, &face);
+	for (face_index = 0; face_index < num_faces; ++face_index) {
+	rc = FT_New_Memory_Face(ftlibrary, (unsigned char*)data, data_size, face_index, &face);
 	if (rc) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, name);
 		return;
 	}
+	num_faces = face->num_faces;
 
 	pattern = FcFreeTypeQueryFace(face, (unsigned char*)name, 0, FcConfigGetBlanks(priv->config));
 	if (!pattern) {
@@ -380,6 +383,7 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 	}
 
 	FT_Done_Face(face);
+	}
 #endif
 }
 
