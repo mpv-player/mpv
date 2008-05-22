@@ -870,8 +870,10 @@ static int preinit(const char *arg)
 static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
-    case VOCTRL_PAUSE: return int_pause = 1;
-    case VOCTRL_RESUME: return int_pause = 0;
+    case VOCTRL_PAUSE:
+    case VOCTRL_RESUME:
+      int_pause = (request == VOCTRL_PAUSE);
+      return VO_TRUE;
     case VOCTRL_QUERY_FORMAT:
       return query_format(*((uint32_t*)data));
     case VOCTRL_GUISUPPORT:
