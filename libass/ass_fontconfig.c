@@ -150,11 +150,13 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (curf >= fset->nfont)
 		goto error;
 
+#if (FC_VERSION >= 20297)
 	// Remove all extra family names from original pattern.
 	// After this, FcFontRenderPrepare will select the most relevant family
 	// name in case there are more than one of them.
 	for (; family_cnt > 1; --family_cnt)
 		FcPatternRemove(pat, FC_FAMILY, family_cnt - 1);
+#endif
 
 	rpat = FcFontRenderPrepare(priv->config, pat, fset->fonts[curf]);
 	if (!rpat)
