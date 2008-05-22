@@ -8,11 +8,11 @@
 
 <para>
 <application>MPlayer</application> utilise un ordre de lecture complexe.
-Il consiste en les options globales écrites en premier, par exemple
+Les options globales sont écrites en premier, par exemple
 
 <screen>mplayer -vfm 5</screen>
 
-et les options écrites après les noms de fichier, qui s'appliquent
+et les options écrites après les noms de fichier s'appliquent
 uniquement au nom de fichier/URL/autre donné, par exemple
 
 <screen>mplayer -vfm 5 <replaceable>film1.avi</replaceable> <replaceable>film2.avi</replaceable> -vfm 4</screen>
@@ -386,8 +386,8 @@ depuis le réseau:
 <sect2 id="streaming-save">
 <title>Sauvegarder du contenu flux</title>
 <para>
-Une fois que vous avez réussi à faire <application>MPlayer</application> lire
-votre flux internet favorit, vous pouvez utiliser l'option
+Une fois que vous avez réussi à faire lire
+votre flux internet favorit par <application>MPlayer</application>, vous pouvez utiliser l'option
 <option>-dumpstream</option> pour sauvegarder le flux dans un fichier.
 Par exemple:
 <screen>
@@ -579,15 +579,15 @@ explication.
 Les DVDs ont habituellement l'audio surround encodé en format AC-3 (Dolby Digital) ou DTS
 (Digital Theater System). Certains équipements audio moderne sont capables de
 décoder ces formats de façon interne. <application>MPlayer</application> peut être
-configuré pour relayer les données audio sans le décodé. Cela ne marchera que si
-vous avez you have une connectique S/PDIF (Sony/Philips Digital Interface) sur
+configuré pour relayer les données audio sans les décoder. Cela ne marchera que si
+vous avez une connectique S/PDIF (Sony/Philips Digital Interface) sur
 votre carte son.
 </para>
 
 <para>
 Si votre équipement audio peux décoder AC-3 et DTS, vous pouvez sans risque activer
 le passthrough pour les deux formats. Autrement, activez le passthrough pour le seul format
-votre équipement supporte.
+que votre équipement supporte.
 </para>
 
 <itemizedlist>
@@ -853,11 +853,11 @@ trouver la bonne valeur. Par exemple:
 
 
 <sect3 id="advaudio-channels-copying">
-<title>Copié/Déplacé le canal</title>
+<title>Copier/Déplacer le canal</title>
 
 <para>
 Le filtre <option>channels</option> peut déplacer n'importe lequel ou tous les canaux.
-Parametré toutes les sous-options pour le filtre <option>channels</option>
+Parametrer toutes les sous-options pour le filtre <option>channels</option>
 peut être compliqué et prend peu d'attention.
 
 <orderedlist spacing="compact">

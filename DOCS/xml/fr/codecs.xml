@@ -262,7 +262,7 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
   <application>MPlayer</application> utilise le décodeur H264 de
   <systemitem class="library">libavcodec</systemitem>.
   <systemitem class="library">libavcodec</systemitem> a eu
-  un décodeur H.264  un minimum utilisable environ juillet 2004,
+  un décodeur H.264 un minimum utilisable aux environs de juillet 2004,
   cependant des changements et améliorations majeurs ont été implémentés depuis cette date,
   à la fois en terme de fonctionalités supportées et d'utilisation du processeur.
   Pour être sûr de soi, c'est toujours une bonne idée d'utiliser une version récente extraite
@@ -302,7 +302,7 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
   Ceci installe libx264.a dans /usr/local/lib et x264.h est placé dans
   /usr/local/include.
 
-  Avec la bibliothèqye <systemitem class="library">x264</systemitem> et l'en-tête
+  Avec la bibliothèque <systemitem class="library">x264</systemitem> et l'en-tête
   aux emplacements standards, construire
   <application>MPlayer</application> avec le support
   <systemitem class="library">x264</systemitem> est facile.
@@ -490,7 +490,7 @@ RedHat sur <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 <sect2 id="amr">
 <title>codecs AMR</title>
 <para>
-Le dodec de voix Adaptive Multi-Rate est utilisé dans les téléphones mobiles de
+Le codec de voix Adaptive Multi-Rate est utilisé dans les téléphones mobiles de
 troisième génération (3G).
 L'implémentation de référence est disponible depuis
 <ulink url="http://www.3gpp.org">Projet d'Association sur la 3ème Génération</ulink>

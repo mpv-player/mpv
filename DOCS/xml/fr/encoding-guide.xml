@@ -143,7 +143,7 @@
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">pulldown PAL 2:2:2:2:2:2:2:2:2:2:2:3</emphasis>:
-  Toutes les 12 images sont affichées pour la durée de 3 trames au lieu de deux. Cela
+  Toutes les 12 images, une image est affichées pour la durée de 3 trames au lieu de deux. Cela
   permet d'éviter le problème de l'accélération de 4% mais rend le processus bien plus
   difficile à inverser. Cette technique est généralement utilisée dans les productions
   musicales où l'accélération de 4% endommagerait sérieusement la qualité musicale.
@@ -156,7 +156,7 @@
   trames par seconde pour maintenir la vitesse d'affichage NTSC.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Pulldown NTSC 2:2</emphasis>: Utilisé pour montré 
+  <emphasis role="bold">Pulldown NTSC 2:2</emphasis>: Utilisé pour montrer 
   du 30 images par secondes sur du NTSC. Joli, comme le pulldown PAL 2:2.
 </para></listitem>
 </itemizedlist>
@@ -890,7 +890,7 @@
   conserver l'entrelacement, vous devrez vous abstenir de redimensionner.
   Sans redimensionner, pour utiliser des dimensions multiples de 16,
   il vous faudra recadrer plus petit que l'image. Ne pas recadrer plus grand que l'image
-  parce que car les bandes noires sont nuisibles à la compression.
+  parce que les bandes noires sont nuisibles à la compression.
 </para>
 
 <para>
@@ -938,7 +938,7 @@
   devez sélectionner un débit.
   Le concept de débit (bitrate) est assez simple.
   C'est un nombre (moyen) de bits par seconde qui sera utilisé pour stocker votre film.
-  Normalement, le débit est mesuré en kilobits (1000 bits) par seconde.
+  Normalement, le débit est mesuré en kilobits (1000bits) par seconde.
   La taille de votre film sur le disque dur correspond au débit multiplié par sa
   durée plus une petite quantité pour l'"en-tête" (surcoût, voir par exemple la section sur
   <link linkend="menc-feat-dvd-mpeg4-muxing-avi-limitations">les conteneurs AVI</link>).
@@ -1118,7 +1118,7 @@
   l'encodage le plus proche possible du DVD source. Le recadrage est souvent
   nécessaire (comme expliqué plus haut), mais évitez de redimensionner l'image.
   Bien qu'il soit parfois préférable de réduire la taille de l'image plutôt que d'utiliser
-  un quantificateur plus élevé, nous voulons éviter tout ceci:souvenez-vous que
+  un quantificateur plus élevé, nous voulons éviter tout ceci.  Souvenez-vous que
   nous avons décidé au départ d'échanger des bits pour de la qualité.
 </para>
 
@@ -1330,7 +1330,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <para>
   Néanmoins, les nouveaux codecs qui sont en développement peuvent souffrir
   de bugs qui n'ont pas encore été repérés et qui peuvent saboter un encodage.
-  Ce malheureusement parfois le prix à payer pour l'utilisation de
+  Ceci est malheureusement parfois le prix à payer pour l'utilisation de
   technologies de pointe.
 </para>
 <para>
@@ -1402,8 +1402,8 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Prenez quelques échantillons de sources brutes et comparez les
   différentes options et codecs pour en trouver un qui vous convienne
   le mieux.
-  Le meilleur codec est celui que vous maîtrisez et celui qui vous semble
-  le plus joli à vous yeux
+  Le meilleur codec est celui que vous maîtrisez et qui vous semble
+  le plus joli à vos yeux
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
   <para>Le même encodage peut apparaître différement sur le moniteur de
   quelqu'un d'autre ou lorsqu'il est lu par un autre décodeur, donc armez
@@ -1732,7 +1732,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Sur un DVD, la vidéo n'est jamais vraiment stockée à 60000/1001 trames par seconde.
   Si la vidéo est d'origine en 60000/1001, chaque paire de trames est alors combinée
   pour former une image, ce qui donne 30000/1001 images par seconde. Les lecteurs de
-  DVD de salon lisent alors les fanions incorporé au flux vidéo pour déterminer
+  DVD de salon lisent alors les drapeaux incorporés au flux vidéo pour déterminer
   si la première ligne à afficher doit être paire ou impaire.
 </para>
 
@@ -2017,7 +2017,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   <screen>mencoder dvd://1 -oac copy -vf pp=lb -ovc lavc</screen>
   </para></listitem>
 <listitem><para>
-  Malheureusement, cette option est un boguée dans
+  Malheureusement, cette option est boguée dans
   <application>MEncoder</application> ; cela devrait bien marcher avec
   <application>MEncoder G2</application>, mais on n'en est pas encore là. Vous
   risquez de subir des plantages. Peu importe, l'option <option>-vf tfields</option>
@@ -4923,9 +4923,9 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </sect3>
 
 <sect3 id="menc-feat-vcd-dvd-a-v-sync">
-<title>Maintaining A/V sync</title>
+<title>Maintient de la synchronisation A/V</title>
 <para>
-  Afin de maintenir la synchronization audio/video lors de l'encodage,
+  Afin de maintenir la synchronisation audio/video lors de l'encodage,
   <application>MEncoder</application> doit dupliquer ou effacer des images.
   Cela marche plutôt bien lor du multiplexage dans un fichier AVI
   mais il est pratiquement garanti d'échouer à maintenir la synchronisation A/V

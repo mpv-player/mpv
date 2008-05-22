@@ -10,7 +10,7 @@ Veuillez le lire d'abord et revenir ensuite ici pour le reste des détails.
 </para>
 
 <para>
-Dans ce chapitre je vous serez guidé à travers étapes de configuration et de
+Dans ce chapitre, vous serez guidé à travers étapes de configuration et de
 compilation de <application>MPlayer</application>.
 Ce n'est pas facile, mais pas vraiment difficile non plus.
 Si vous observez un comportement différent de celui de ces explications,
@@ -270,7 +270,7 @@ supportant plusieurs encodages.
 Décompressez le fichier que vous avez téléchargé dans le répertoire
 <filename class="directory">~/.mplayer</filename> ou dans
 <filename class="directory">$PREFIX/share/mplayer</filename>.
-Ensuite, renommez ou créez un mien symbolique de l'un des répertoires ainsi créés vers
+Ensuite, renommez ou créez un lien symbolique de l'un des répertoires ainsi créés vers
 le sous-repertoire 
 <filename class="directory">font</filename>. Exemple :
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
@@ -371,7 +371,7 @@ Vous pouvez rendre ce réglagle permanant en ajoutant la seconde commande au fic
 	le secteur avant de le démarrer semble régler le problème dans la plupart des cas.
 	Avec certaines configurations matérielles (confirmé par l'utilisation de lecteurs DVD ne supportant pas
 	le DMA avec une carte-mère basée sur le chipset ALi1541), l'utilisation du timer RTC rend la lecture
-	irrégulière (NdT: skippy). Il est recommandé d'utiliser la troisième méthode dans ce cas.
+	saccadée (NdT: skippy). Il est recommandé d'utiliser la troisième méthode dans ce cas.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">La troisième méthode de synchro</emphasis> est activée par l'option
