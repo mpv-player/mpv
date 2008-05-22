@@ -354,35 +354,35 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 	int face_index, num_faces = 1;
 
 	for (face_index = 0; face_index < num_faces; ++face_index) {
-	rc = FT_New_Memory_Face(ftlibrary, (unsigned char*)data, data_size, face_index, &face);
-	if (rc) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, name);
-		return;
-	}
-	num_faces = face->num_faces;
+		rc = FT_New_Memory_Face(ftlibrary, (unsigned char*)data, data_size, face_index, &face);
+		if (rc) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, name);
+			return;
+		}
+		num_faces = face->num_faces;
 
-	pattern = FcFreeTypeQueryFace(face, (unsigned char*)name, 0, FcConfigGetBlanks(priv->config));
-	if (!pattern) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFreeTypeQueryFace");
+		pattern = FcFreeTypeQueryFace(face, (unsigned char*)name, 0, FcConfigGetBlanks(priv->config));
+		if (!pattern) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFreeTypeQueryFace");
+			FT_Done_Face(face);
+			return;
+		}
+
+		fset = FcConfigGetFonts(priv->config, FcSetSystem); // somehow it failes when asked for FcSetApplication
+		if (!fset) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcConfigGetFonts");
+			FT_Done_Face(face);
+			return;
+		}
+
+		res = FcFontSetAdd(fset, pattern);
+		if (!res) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFontSetAdd");
+			FT_Done_Face(face);
+			return;
+		}
+
 		FT_Done_Face(face);
-		return;
-	}
-
-	fset = FcConfigGetFonts(priv->config, FcSetSystem); // somehow it failes when asked for FcSetApplication
-	if (!fset) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcConfigGetFonts");
-		FT_Done_Face(face);
-		return;
-	}
-
-	res = FcFontSetAdd(fset, pattern);
-	if (!res) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFontSetAdd");
-		FT_Done_Face(face);
-		return;
-	}
-
-	FT_Done_Face(face);
 	}
 #endif
 }
