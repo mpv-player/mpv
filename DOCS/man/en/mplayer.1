@@ -3600,16 +3600,25 @@ the maximum texture size of your OpenGL implementation.
 Intended to work even with the most basic OpenGL implementations,
 but also makes use of newer extensions, which allow support for more
 colorspaces and direct rendering.
-Please use \-dr if it works with your OpenGL implementation,
-since for higher resolutions this provides a
-.B big
-speedup.
+For optimal speed try something similar to
+.br
+\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+.br
 The code performs very few checks, so if a feature does not work, this
 might be because it is not supported by your card/OpenGL implementation
 even if you do not get any error message.
 Use glxinfo or a similar tool to display the supported OpenGL extensions.
 .PD 0
 .RSs
+.IPs (no)ati\-hack
+ATI drivers may give a corrupted image when PBOs are used (when using \-dr
+or force\-pbo).
+This option fixes this, at the expense of using a bit more memory.
+.IPs (no)force\-pbo
+Always uses PBOs to transfer textures even if this involves an extra copy.
+Currently this gives a little extra speed with NVidia drivers and a lot more
+speed with ATI drivers.
+May need \-noslices and the ati\-hack suboption to work correctly.
 .IPs (no)scaled-osd
 Changes the way the OSD behaves when the size of the
 window changes (default: disabled).
