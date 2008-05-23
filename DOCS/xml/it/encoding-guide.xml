@@ -1897,7 +1897,7 @@ campo dopo l'altro.
 <title>Come scoprire il tipo di video che possiedi</title>
 
 <sect3 id="menc-feat-telecine-ident-progressive">
-<title>Progressiva</title>
+<title>Progressivo</title>
 
 <para>
 Il video progressivo √® stato originariamente filmato a 24000/1001 fps, e
@@ -2077,9 +2077,9 @@ codificare correttamente ciascuna categoria.
 <title>Progressivo</title>
 <para>
 Il video progressivo non richiede particolari filtri per la codifica. L'unico
-parametri che devi assicurarti di sare Ë <option>-ofps 24000/1001</option>.
-Se non lo usi, <application>MEncoder</application> cercher‡ di codificare a
-30000/1001 fps e duplicher‡ i fotogrammi.
+parametrioche devi assicurarti di usare √® <option>-ofps 24000/1001</option>.
+Se non lo usi, <application>MEncoder</application> cercher√† di codificare a
+30000/1001 fps e duplicher√† i fotogrammi.
 </para>
 
 <para>
@@ -2091,7 +2091,7 @@ Spesso e volentieri capita che un video che sembra progressivo contenga anche
 alcune brevi parti di telecine miscelate. A meno che tu non sia sicuro,
 conviene trattare il video come 
 <link linkend="menc-feat-telecine-encode-mixedpt">progressivo e telecine miscelati</link>.
-Il calo di prestazioni Ë piccolo
+Il calo di prestazioni √® piccolo
 <link linkend="menc-feat-telecine-footnotes">[3]</link>.
 </para>
 </sect3>
@@ -2101,10 +2101,10 @@ Il calo di prestazioni Ë piccolo
 <title>Telecine</title>
 
 <para>
-Il telecine puÚ essere __reversed__ per ricavare il contenuto originario a
+Il telecine pu√≤ essere invertito per ricavare il contenuto originario a
 24000/1001 usando un processo conosciuto come telecine-inverso.
-<application>MPlayer</application> include vari filtri per ottenere ciÚ;
-il filtro migliore, <option>pullup</option>, Ë descritto nella sezione
+<application>MPlayer</application> include vari filtri per ottenere ci√≤;
+il filtro migliore, <option>pullup</option>, √® descritto nella sezione
 <link linkend="menc-feat-telecine-encode-mixedpt">progressivo e telecine
 miscelati</link>.
 </para>
@@ -2115,9 +2115,9 @@ miscelati</link>.
 <title>Interlacciato</title>
 
 <para>
-Nella maggior parte dei casi reali non Ë possibile ricavare un video
+Nella maggior parte dei casi reali non √® possibile ricavare un video
 progressivo completo da contenuto interlacciato. L'unico modo di farlo senza
-perdere met‡ della risoluzione verticale Ë raddoppiare il framerate e provare
+perdere met√† della risoluzione verticale √® raddoppiare il framerate e provare
 ad "indovinare" quello che forma le linee corrispondenti per ogni campo
 (questo ha delle controindicazioni - vedi il metodo 3).
 </para>
@@ -2125,13 +2125,13 @@ ad "indovinare" quello che forma le linee corrispondenti per ogni campo
 <orderedlist>
 <listitem><para>
   Codifica il video in forma interlacciata. Normalmente l'interlacciatura fa a
-  pugni con l'abilit‡ del codificatore di comprimere bene, ma
+  pugni con l'abilit√† del codificatore di comprimere bene, ma
   <systemitem class="library">libavcodec</systemitem> ha due parametri
   appositamente per gestire un pochino meglio il video interlacciato:
   <option>ildct</option> e <option>ilme</option>. Inoltre viene caldamente
   consigliato l'utilizzo di <option>mbd=2</option>
-  <link linkend="menc-feat-telecine-footnotes">[2] </link> poichÈ
-  codificher‡ i macroblocchi come non interlacciati in posti dove non c'Ë
+  <link linkend="menc-feat-telecine-footnotes">[2] </link> poich√©
+  codificher√† i macroblocchi come non interlacciati in posti dove non c'√®
   movimento. Nota che <option>-ofps</option> qui NON serve.
   <screen>mencoder dvd://1 -oac copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
 </para></listitem>
@@ -2139,7 +2139,7 @@ ad "indovinare" quello che forma le linee corrispondenti per ogni campo
   Usa un filtro di de-interlacciatura prima della codifica. Ci sono vari filtri
   disponibili tra cui scegliere, ognuno dei quali con i suoi pro e i suoi
   contro. Controlla <option>mplayer -pphelp</option> e
-  <option>mplayer -vf help</option> per vedere cosa c'Ë disponibile
+  <option>mplayer -vf help</option> per vedere cosa c'√® disponibile
   (fa in grep per "deint"), leggi il <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">confronto tra filtri di deinterlacciatura
   (Deinterlacing filters comparison)</ulink> di Michael Niedermayer, e cerca
   nelle <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
@@ -2155,20 +2155,20 @@ ad "indovinare" quello che forma le linee corrispondenti per ogni campo
   Sfortunatamente, quest'opzione non funziona bene con
   <application>MEncoder</application>; dovrebbe funzionar bene con
   <application>MEncoder G2</application>, ma ancora non esiste. Puoi subire
-  dei crash. Tuttavia l'obiettivo di <option>-vf tfields</option> Ë di
+  dei crash. Tuttavia l'obiettivo di <option>-vf tfields</option> √® di
   generare un fotogramma completo da ogni campo, portando il framerate a
-  60000/1001. Il vantaggio di questo approccio Ë che non viene mai perso alcun
+  60000/1001. Il vantaggio di questo approccio √® che non viene mai perso alcun
   dato; d'altro canto, dato che ogni fotogramma deriva da un solo campo, le
   righe mancanti devono essere interpolate in qualche modo. Non ci sono metodi
-  veramente validi per ricreare i dati mancanti, quindi il risultato apparir‡
+  veramente validi per ricreare i dati mancanti, quindi il risultato apparir√†
   molto simile a quando vengono usati dei filtri di deinterlacciatura.
-  La generazione delle righe che mancano Ë foriera di altri problemi,
+  La generazione delle righe che mancano √® foriera di altri problemi,
   solamente per il fatto che i dati sono raddoppiati. Conseguentemente per
-  mantenere la qualit‡ si rendono necessari bitrate pi˘ elevati e viene usata
+  mantenere la qualit√† si rendono necessari bitrate pi√π elevati e viene usata
   una maggior potenza di CPU sia per la codifica che la decodifica.
   tfields ha varie opzioni su come generare le righe mancanti di ogni
   fotogramma. Se usi questo metodo, fai riferimento al manuale, e scegli
-  l'opzione che puÚ andar meglio per il tuo materiale sorgente. Fai attenzione
+  l'opzione che pu√≤ andar meglio per il tuo materiale sorgente. Fai attenzione
   che usando <option>tfields</option> <emphasis role="bold">devi</emphasis>
   specificare sia <option>-fps</option> che <option>-ofps</option> pari al
   doppio della sorgente originaria.
@@ -2179,10 +2179,10 @@ mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
 </para></listitem>
 <listitem><para>
   Se conti di ridurre drasticamente le dimensioni puoi estrarre e decodificare
-  sono uno dei due campi. Perderai di sicuro met‡ della risoluzione verticale,
-  ma se pensi di ridurla almeno a 1/2 dell'originale, la perdit‡ non sar‡ poi
-  molta. Il risultato sar‡ un file progressivo a 30000/1001 fotogrammi per
-  secondo. La procedura Ë utilizzare <option>-vf field</option>, poi crop
+  sono uno dei due campi. Perderai di sicuro met√† della risoluzione verticale,
+  ma se pensi di ridurla almeno a 1/2 dell'originale, la perdit√† non sar√† poi
+  molta. Il risultato sar√† un file progressivo a 30000/1001 fotogrammi per
+  secondo. La procedura √® utilizzare <option>-vf field</option>, poi crop
   <link linkend="menc-feat-telecine-footnotes">[1]</link> e scale in modo
   corretto. Ricorda che dovrai correggere scale per compensare la risoluzione
   verticale dimezzata.
@@ -2198,13 +2198,13 @@ mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
 <para>
 Per poter portare un video progressivo e telecine miscelati in un video
 completamente progressivo, le parti in telecine devono essere passate in
-telecine inverso. Ci son tre modi per ottenere ciÚ, e sono descritti qui sotto.
+telecine inverso. Ci son tre modi per ottenere ci√≤, e sono descritti qui sotto.
 Nota che dovresti <emphasis role="bold">sempre</emphasis> effettuare il
 telecine inverso prima di ogni ridimensionamento; a meno che tu non sappia
-davvero cosa tu stia facendo, effettua il telecine inverso anche prima di fare
-il taglio (crop) <link linkend="menc-feat-telecine-footnotes">[1]</link>.
-In questo caso serve <option>-ofps 24000/1001</option> perchÈ il video in
-uscita sar‡ a 24000/1001 fotogrammi al secondo.
+davvero cosa tu stia facendo, applica il telecine inverso anche prima del ritaglio (crop)
+<link linkend="menc-feat-telecine-footnotes">[1]</link>.
+In questo caso serve <option>-ofps 24000/1001</option> perch√© il video in
+uscita sar√† a 24000/1001 fotogrammi al secondo.
 </para>
 
 <itemizedlist>
