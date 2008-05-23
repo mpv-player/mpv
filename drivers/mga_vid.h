@@ -33,27 +33,33 @@ uint8_t  colkey_blue;
 uint32_t format;
 uint32_t frame_size;
 uint32_t num_frames;
+uint32_t capabilities;
 } mga_vid_config_t;
 
+/* supported FOURCCs */
 #define MGA_VID_FORMAT_YV12 0x32315659
 #define MGA_VID_FORMAT_IYUV (('I'<<24)|('Y'<<16)|('U'<<8)|'V')
 #define MGA_VID_FORMAT_I420 (('I'<<24)|('4'<<16)|('2'<<8)|'0')
 #define MGA_VID_FORMAT_YUY2 (('Y'<<24)|('U'<<16)|('Y'<<8)|'2')
 #define MGA_VID_FORMAT_UYVY (('U'<<24)|('Y'<<16)|('V'<<8)|'Y')
 
-#define MGA_VID_CONFIG    _IOR('J', 1, mga_vid_config_t)
-#define MGA_VID_ON        _IO ('J', 2)
-#define MGA_VID_OFF       _IO ('J', 3)
-#define MGA_VID_FSEL _IOR('J', 4, int)
-#define MGA_VID_GET_LUMA _IOR('J', 5, int)
-#define MGA_VID_SET_LUMA _IOR('J', 6, int)
+/* ioctl commands */
+#define MGA_VID_GET_VERSION  _IOR ('J', 1, uint32_t)
+#define MGA_VID_CONFIG       _IOWR('J', 2, mga_vid_config_t)
+#define MGA_VID_ON           _IO  ('J', 3)
+#define MGA_VID_OFF          _IO  ('J', 4)
+#define MGA_VID_FSEL         _IOW ('J', 5, uint32_t)
+#define MGA_VID_GET_LUMA     _IOR ('J', 6, uint32_t)
+#define MGA_VID_SET_LUMA     _IOW ('J', 7, uint32_t)
 
+/* card identifiers */
 #define MGA_G200 0x1234
 #define MGA_G400 0x5678
 // currently unused, G450 are mapped to MGA_G400
 // #define MGA_G450 0x9ABC
 #define MGA_G550 0xDEF0
 
-#define MGA_VID_VERSION 0x0201
+/* version of the mga_vid_config struct */
+#define MGA_VID_VERSION 0x0202
 
 #endif /* MGA_VID_H */
