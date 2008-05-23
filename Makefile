@@ -719,12 +719,10 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
-define RECURSIVE_RULE
-$(part)/$(part).a: recurse
-	$(MAKE) -C $(part)
-endef
+ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(part).a)
 
-$(foreach part,$(PARTS),$(eval $(RECURSIVE_RULE)))
+$(ALLPARTLIBS): recurse
+	$(MAKE) -C $(@D)
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
