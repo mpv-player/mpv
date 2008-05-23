@@ -449,6 +449,7 @@ static int mga_uninit(){
 
 static int preinit(const char *vo_subdevice)
 {
+	uint32_t ver;
   const char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 	sws_rgb2rgb_init(get_sws_cpuflags());
 
@@ -457,6 +458,16 @@ static int preinit(const char *vo_subdevice)
 	{
 		perror("open");
 		mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_CouldntOpen,devname);
+		return -1;
+	}
+	
+	// check whether the mga_vid driver has the same
+	// version as we expect
+	
+	ioctl(f,MGA_VID_GET_VERSION,&ver);
+	if(MGA_VID_VERSION != ver)
+	{
+		mp_msg(MSGT_VO, MSGL_ERR, MGSTR_LIBVO_MGA_mgavidVersionMissmatch, ver, MGA_VID_VERSION);
 		return -1;
 	}
 
