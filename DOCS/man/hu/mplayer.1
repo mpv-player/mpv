@@ -1,4 +1,4 @@
-.\" Synced with r26806
+.\" Synced with r26853
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 05. 20." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 05. 23." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -3615,11 +3615,11 @@ A videó méretének kisebbnek kell lennie, mint az OpenGL implementációd maximum
 textúra mérete.
 A szándékok szerint a legegyszerûbb OpenGL implementációkkal is mûködik, de
 használhat újabb kiterjesztéseket is, melyek engedélyezik több színtér és a
-DirectRendering támogatását.
-Kérjük használd a \-dr kapcsolót, ha mûködik az OpenGL implementációddal, mivel
-nagyobb felbontásoknál ez
-.B sokkal
-gyorsabb.
+direct rendering támogatását.
+Az optimális sebességhez próbálj ki valami ehhez hasonlót
+.br
+\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+.br
 A kód nagyon kevés ellenõrzést végez, így ha egy tulajdonság nem elérhetõ, az
 azért lehet, mert a kártyád/OpenGL implementációd nem támogatja, akkor sem, ha
 hibaüzenetet nem kapsz.
@@ -3627,6 +3627,16 @@ Használd a glxinfo-t vagy valami hasonló eszközt a támogatott OpenGL
 kiterjesztések megtekintéséhez.
 .PD 0
 .RSs
+.IPs (no)ati\-hack
+Az ATI vezérlõk hibás képet adhatnak ha PBO-kat használsz (\-dr vagy
+force\-pbo használata).
+Ez az opció javítja ezt, egy kicsivel nagyobb memória használat mellett.
+.IPs (no)force\-pbo
+Mindig PBO-kat használ a textúrák átviteléhez, akkor is, ha ez egy plusz
+másolást igényel.
+Jelenleg ez egy kis extra sebességet ad az NVidia vezérlõkkel és sokkal
+gyorsabb az ATI vezérlõkkel.
+Szükség lehet a \-noslices és az ati\-hack alopciókra a megfelelõ mûködéshez.
 .IPs (no)scaled-osd
 Az OSD viselkedésének megváltoztatása, amikor az ablakméret módosul
 (alapértelmezett: letiltva).
