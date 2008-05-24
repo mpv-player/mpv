@@ -3172,6 +3172,10 @@ if(stream_dump_type==5){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
     exit_player(MSGTR_Exit_error);
   }
+  if (dvd_chapter > 1) {
+    int chapter = dvd_chapter - 1;
+    stream_control(mpctx->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
+  }
   while(!mpctx->stream->eof){
       len=stream_read(mpctx->stream,buf,4096);
       if(len>0) {
