@@ -895,15 +895,9 @@ static void get_yuv2rgb_coeffs(gl_conversion_params_t *params,
 #define GMAP_SIZE (1024)
 /**
  * \brief generate a 3D YUV -> RGB map
+ * \param params struct containing parameters like brightness, gamma, ...
  * \param map where to store map. Must provide space for (size + 2)^3 elements
  * \param size size of the map, excluding border
- * \param brightness desired brightness adjustment for conversion
- * \param contrast desired contrast adjustment for conversion
- * \param uvcos desired hue/saturation adjustment for conversion
- * \param uvsin desired hue/saturation adjustment for conversion
- * \param rgamma desired red gamma adjustment for conversion
- * \param ggamma desired green gamma adjustment for conversion
- * \param bgamma desired blue gamma adjustment for conversion
  */
 static void gen_yuv2rgb_map(gl_conversion_params_t *params, unsigned char *map, int size) {
   int i, j, k;
@@ -954,15 +948,9 @@ static void gen_yuv2rgb_map(gl_conversion_params_t *params, unsigned char *map, 
 #define LOOKUP_3DRES 32
 /**
  * \brief creates and initializes helper textures needed for yuv conversion
+ * \param params struct containing parameters like brightness, gamma, ...
  * \param texu contains next free texture unit number
  * \param texs texture unit ids for the conversion are stored in this array
- * \param brightness desired brightness adjustment for conversion
- * \param contrast desired contrast adjustment for conversion
- * \param uvcos desired hue/saturation adjustment for conversion
- * \param uvsin desired hue/saturation adjustment for conversion
- * \param rgamma desired red gamma adjustment for conversion
- * \param ggamma desired green gamma adjustment for conversion
- * \param bgamma desired blue gamma adjustment for conversion
  */
 static void create_conv_textures(gl_conversion_params_t *params, int *texu, char *texs) {
   unsigned char *lookup_data = NULL;
@@ -1028,6 +1016,7 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
  * \param rect if rectangular (pixel) adressing should be used for in_tex
  * \param texw width of the in_tex texture
  * \param texh height of the in_tex texture
+ * \param strength strength of filter effect if the scaler does some kind of filtering
  */
 static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                     char in_tex, char out_comp, int rect, int texw, int texh,
@@ -1154,12 +1143,8 @@ int loadGPUProgram(GLenum target, char *prog) {
 
 /**
  * \brief setup a fragment program that will do YUV->RGB conversion
- * \param brightness brightness adjustment offset
- * \param contrast contrast adjustment factor
- * \param uvcos used for saturation and hue adjustment
- * \param uvsin used for saturation and hue adjustment
- * \param lookup use fragment program that uses texture unit 4 to
- *               do additional conversion via lookup.
+ * \param parms struct containing parameters like conversion and scaler type,
+ *              brightness, ...
  */
 static void glSetupYUVFragprog(gl_conversion_params_t *params) {
   int type = params->type;
@@ -1263,15 +1248,8 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma) {
 
 /**
  * \brief setup YUV->RGB conversion
- * \param target texture target for Y, U and V textures (e.g. GL_TEXTURE_2D)
- * \param type YUV conversion type
- * \param brightness brightness adjustment offset
- * \param contrast contrast adjustment factor
- * \param hue hue adjustment angle
- * \param saturation saturation adjustment factor
- * \param rgamma gamma value for red channel
- * \param ggamma gamma value for green channel
- * \param bgamma gamma value for blue channel
+ * \param parms struct containing parameters like conversion and scaler type,
+ *              brightness, ...
  * \ingroup glconversion
  */
 void glSetupYUVConversion(gl_conversion_params_t *params) {
