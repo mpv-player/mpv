@@ -263,11 +263,21 @@ int loadGPUProgram(GLenum target, char *prog);
 //! extract chrominance scaler out of type
 #define YUV_CHROM_SCALER(t) ((t >> YUV_CHROM_SCALER_SHIFT) & YUV_SCALER_MASK)
 /** \} */
-void glSetupYUVConversion(GLenum target, int type,
-                          float brightness, float contrast,
-                          float hue, float saturation,
-                          float rgamma, float ggamma, float bgamma,
-                          int texw, int texh);
+typedef struct {
+  GLenum target;
+  int type;
+  float brightness;
+  float contrast;
+  float hue;
+  float saturation;
+  float rgamma;
+  float ggamma;
+  float bgamma;
+  int texw;
+  int texh;
+} gl_conversion_params_t;
+
+void glSetupYUVConversion(gl_conversion_params_t *params);
 void glEnableYUVConversion(GLenum target, int type);
 void glDisableYUVConversion(GLenum target, int type);
 
