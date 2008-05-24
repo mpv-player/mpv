@@ -7,6 +7,7 @@
 #define READ_USLEEP_TIME 10000
 #define FILL_USLEEP_TIME 50000
 #define PREFILL_SLEEP_TIME 200
+#define CONTROL_SLEEP_TIME 0
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,6 +58,11 @@ typedef struct {
 //  int fifo_flag;  // 1 if we should use FIFO to notice cache about buffer reads.
   // callback
   stream_t* stream;
+  volatile int control;
+  volatile unsigned control_uint_arg;
+  volatile double control_double_arg;
+  volatile int control_res;
+  volatile off_t control_new_pos;
 } cache_vars_t;
 
 static int min_fill=0;
@@ -189,6 +195,31 @@ int cache_fill(cache_vars_t* s){
   
   return len;
   
+}
+
+static void cache_execute_control(cache_vars_t *s) {
+  if (s->control == -1) return;
+  switch (s->control) {
+    case STREAM_CTRL_GET_TIME_LENGTH:
+    case STREAM_CTRL_GET_CURRENT_TIME:
+    case STREAM_CTRL_SEEK_TO_TIME:
+    case STREAM_CTRL_GET_ASPECT_RATIO:
+      s->control_res = s->stream->control(s->stream, s->control, &s->control_double_arg);
+      break;
+    case STREAM_CTRL_SEEK_TO_CHAPTER:
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+    case STREAM_CTRL_GET_CURRENT_CHAPTER:
+    case STREAM_CTRL_GET_NUM_ANGLES:
+    case STREAM_CTRL_GET_ANGLE:
+    case STREAM_CTRL_SET_ANGLE:
+      s->control_res = s->stream->control(s->stream, s->control, &s->control_uint_arg);
+      break;
+    default:
+      s->control_res = STREAM_UNSUPPORTED;
+      break;
+  }
+  s->control_new_pos = s->stream->pos;
+  s->control = -1;
 }
 
 cache_vars_t* cache_init(int size,int sector){
@@ -331,6 +362,7 @@ static void ThreadProc( void *s ){
     if(!cache_fill((cache_vars_t*)s)){
 	 usec_sleep(FILL_USLEEP_TIME); // idle
     }
+    cache_execute_control((cache_vars_t*)s);
 //	 cache_stats(s->cache_data);
   }
 }
@@ -383,4 +415,52 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
 
   mp_msg(MSGT_CACHE,MSGL_V,"cache_stream_seek: WARNING! Can't seek to 0x%"PRIX64" !\n",(int64_t)(pos+newpos));
   return 0;
+}
+
+int cache_do_control(stream_t *stream, int cmd, void *arg) {
+  cache_vars_t* s = stream->cache_data;
+  switch (cmd) {
+    case STREAM_CTRL_SEEK_TO_TIME:
+      s->control_double_arg = *(double *)arg;
+      s->control = cmd;
+      break;
+    case STREAM_CTRL_SEEK_TO_CHAPTER:
+    case STREAM_CTRL_SET_ANGLE:
+      s->control_uint_arg = *(unsigned *)arg;
+      s->control = cmd;
+      break;
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+    case STREAM_CTRL_GET_CURRENT_CHAPTER:
+// the core might call these every frame, they are too slow for this...
+//    case STREAM_CTRL_GET_TIME_LENGTH:
+//    case STREAM_CTRL_GET_CURRENT_TIME:
+    case STREAM_CTRL_GET_ASPECT_RATIO:
+    case STREAM_CTRL_GET_NUM_ANGLES:
+    case STREAM_CTRL_GET_ANGLE:
+      s->control = cmd;
+      break;
+    default:
+      return STREAM_UNSUPPORTED;
+  }
+  while (s->control != -1)
+    usec_sleep(CONTROL_SLEEP_TIME);
+  switch (cmd) {
+    case STREAM_CTRL_GET_TIME_LENGTH:
+    case STREAM_CTRL_GET_CURRENT_TIME:
+    case STREAM_CTRL_GET_ASPECT_RATIO:
+      *(double *)arg = s->control_double_arg;
+      break;
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+    case STREAM_CTRL_GET_CURRENT_CHAPTER:
+    case STREAM_CTRL_GET_NUM_ANGLES:
+    case STREAM_CTRL_GET_ANGLE:
+      *(unsigned *)arg = s->control_uint_arg;
+      break;
+    case STREAM_CTRL_SEEK_TO_CHAPTER:
+    case STREAM_CTRL_SEEK_TO_TIME:
+    case STREAM_CTRL_SET_ANGLE:
+      stream->pos = s->read_filepos = s->control_new_pos;
+      break;
+  }
+  return s->control_res;
 }

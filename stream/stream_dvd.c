@@ -41,7 +41,6 @@
 #include "libmpdemux/demuxer.h"
 #include "libavutil/intreadwrite.h"
 
-extern int stream_cache_size;
 extern char* dvd_device;
 int dvd_angle=1;
 int dvd_speed=0; /* 0 => don't touch speed */
@@ -708,7 +707,6 @@ static int control(stream_t *stream,int cmd,void* arg)
         case STREAM_CTRL_SEEK_TO_CHAPTER:
         {
             int r;
-            if(stream_cache_size > 0) return STREAM_UNSUPPORTED;
             r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title-1, *((unsigned int *)arg));
             if(! r) return STREAM_UNSUPPORTED;
 
@@ -716,14 +714,12 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_GET_CURRENT_CHAPTER:
         {
-            if(stream_cache_size > 0) return STREAM_UNSUPPORTED;
             *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title-1, d->cur_cell);
             return 1;
         }
         case STREAM_CTRL_GET_CURRENT_TIME:
         {
             double tm;
-            if(stream_cache_size > 0) return STREAM_UNSUPPORTED;
             tm = dvd_get_current_time(stream, 0);
             if(tm != -1) {
               *((double *)arg) = tm;
@@ -733,7 +729,6 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_SEEK_TO_TIME:
         {
-            if(stream_cache_size > 0) return STREAM_UNSUPPORTED;
             if(dvd_seek_to_time(stream, d->vts_file, *((double*)arg)))
               return 1;
             break;
@@ -1062,8 +1057,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     *file_format = DEMUXER_TYPE_MPEG_PS;
     mp_msg(MSGT_DVD,MSGL_V,"DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
     stream->priv = (void*)d;
-    if(stream_cache_size > 0)
-      mp_msg(MSGT_DVD,MSGL_INFO,"[stream_dvd] Warning! the cache is enabled. Seeking won't work correctly\n");
     return STREAM_OK;
 
 fail:
