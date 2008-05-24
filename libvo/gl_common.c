@@ -768,7 +768,7 @@ static const char *unsharp_filt_template =
   "TEX b.g, coord2.zwzw, texture[%c], %s;"
   "DP3 b, b, {0.25, 0.25, 0.25};"
   "SUB b.r, a.r, b.r;"
-  "MAD yuv.%c, b.r, %s, a.r;";
+  "MAD yuv.%c, b.r, {%f}, a.r;";
 
 static const char *unsharp_filt_template2 =
   "PARAM dcoord%c = {%f, %f, %f, %f};"
@@ -792,7 +792,7 @@ static const char *unsharp_filt_template2 =
   "TEX b.g, coord2.zwzw, texture[%c], %s;"
   "DP4 b.r, b, {-0.1171875, -0.1171875, -0.1171875, -0.09765625};"
   "MAD b.r, a.r, {0.859375}, b.r;"
-  "MAD yuv.%c, b.r, %s, a.r;";
+  "MAD yuv.%c, b.r, {%f}, a.r;";
 
 static const char *yuv_prog_template =
   "PARAM ycoef = {%.4f, %.4f, %.4f};"
@@ -1030,7 +1030,8 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
  * \param texh height of the in_tex texture
  */
 static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
-                    char in_tex, char out_comp, int rect, int texw, int texh) {
+                    char in_tex, char out_comp, int rect, int texw, int texh,
+                    double strength) {
   const char *ttype = rect ? "RECT" : "2D";
   const float ptw = rect ? 1.0 : 1.0 / texw;
   const float pth = rect ? 1.0 : 1.0 / texh;
@@ -1076,7 +1077,7 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                out_comp, 0.5 * ptw, 0.5 * pth, 0.5 * ptw, -0.5 * pth,
                in_tex, out_comp, in_tex, out_comp, in_tex,
                in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
-               in_tex, ttype, out_comp, "{0.5}");
+               in_tex, ttype, out_comp, strength);
       break;
     case YUV_SCALER_UNSHARP2:
       snprintf(*prog_pos, *remain, unsharp_filt_template2,
@@ -1086,7 +1087,7 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                in_tex, ttype, in_tex, ttype, in_tex, ttype, in_tex, ttype,
                in_tex, ttype, in_tex, out_comp, in_tex, out_comp,
                in_tex, ttype, in_tex, ttype, in_tex, ttype,
-               in_tex, ttype, out_comp, "{0.5}");
+               in_tex, ttype, out_comp, strength);
       break;
   }
   *remain -= strlen(*prog_pos);
@@ -1203,11 +1204,11 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
   prog_pos    = yuv_prog + sizeof(prog_hdr) - 1;
   prog_remain = MAX_PROGSZ - sizeof(prog_hdr);
   add_scaler(YUV_LUM_SCALER(type), &prog_pos, &prog_remain, lum_scale_texs,
-             '0', 'r', rect, texw, texh);
+             '0', 'r', rect, texw, texh, params->filter_strength);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
-             '1', 'g', rect, texw / 2, texh / 2);
+             '1', 'g', rect, texw / 2, texh / 2, params->filter_strength);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
-             '2', 'b', rect, texw / 2, texh / 2);
+             '2', 'b', rect, texw / 2, texh / 2, params->filter_strength);
   get_yuv2rgb_coeffs(params,
           &ry, &ru, &rv, &rc, &gy, &gu, &gv, &gc, &by, &bu, &bv, &bc);
   switch (YUV_CONVERSION(type)) {

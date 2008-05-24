@@ -74,6 +74,7 @@ static int use_aspect;
 static int use_yuv;
 static int lscale;
 static int cscale;
+static float filter_strength;
 static int yuvconvtype;
 static int use_rectangle;
 static int err_shown;
@@ -181,7 +182,7 @@ static void update_yuvconv(void) {
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
   gl_conversion_params_t params = {gl_target, yuvconvtype,
       bri, cont, hue, sat, rgamma, ggamma, bgamma,
-      texture_width, texture_height};
+      texture_width, texture_height, filter_strength};
   glSetupYUVConversion(&params);
   if (custom_prog) {
     FILE *f = fopen(custom_prog, "r");
@@ -809,6 +810,7 @@ static opt_t subopts[] = {
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
   {"lscale",       OPT_ARG_INT,  &lscale,       (opt_test_f)int_non_neg},
   {"cscale",       OPT_ARG_INT,  &cscale,       (opt_test_f)int_non_neg},
+  {"filter-strength", OPT_ARG_FLOAT, &filter_strength, NULL},
   {"ati-hack",     OPT_ARG_BOOL, &ati_hack,     NULL},
   {"force-pbo",    OPT_ARG_BOOL, &force_pbo,    NULL},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
@@ -831,6 +833,7 @@ static int preinit(const char *arg)
     use_yuv = 0;
     lscale = 0;
     cscale = 0;
+    filter_strength = 0.5;
     use_rectangle = 0;
     use_glFinish = 0;
     ati_hack = 0;

@@ -275,6 +275,7 @@ typedef struct {
   float bgamma;
   int texw;
   int texh;
+  float filter_strength;
 } gl_conversion_params_t;
 
 void glSetupYUVConversion(gl_conversion_params_t *params);
