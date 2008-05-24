@@ -179,9 +179,10 @@ static void update_yuvconv(void) {
   float rgamma = exp(log(8.0) * eq_rgamma / 100.0);
   float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
-  glSetupYUVConversion(gl_target, yuvconvtype, bri, cont, hue, sat,
-                       rgamma, ggamma, bgamma,
-                       texture_width, texture_height);
+  gl_conversion_params_t params = {gl_target, yuvconvtype,
+      bri, cont, hue, sat, rgamma, ggamma, bgamma,
+      texture_width, texture_height};
+  glSetupYUVConversion(&params);
   if (custom_prog) {
     FILE *f = fopen(custom_prog, "r");
     if (!f)

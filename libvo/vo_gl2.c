@@ -561,6 +561,9 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   glDisable(GL_CULL_FACE);
   glEnable (GL_TEXTURE_2D);
   if (image_format == IMGFMT_YV12) {
+    gl_conversion_params_t params = {GL_TEXTURE_2D, use_yuv,
+          0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+          texture_width, texture_height};
     switch (use_yuv) {
       case YUV_CONVERSION_FRAGMENT_LOOKUP:
         glGenTextures(1, &lookupTex);
@@ -578,8 +581,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
         BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
         break;
     }
-    glSetupYUVConversion(GL_TEXTURE_2D, use_yuv, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-                         texture_width, texture_height);
+    glSetupYUVConversion(&params);
   }
 
   gl_set_antialias(0);
