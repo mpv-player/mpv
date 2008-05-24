@@ -875,12 +875,12 @@ static void get_yuv2rgb_coeffs(gl_conversion_params_t *params,
   *ry = 1.164 * params->contrast;
   *gy = 1.164 * params->contrast;
   *by = 1.164 * params->contrast;
-  *ru = 0 * uvcos + 1.596 * uvsin;
-  *rv = 0 * uvsin + 1.596 * uvcos;
+  *ru =  0     * uvcos +  1.596 * uvsin;
+  *rv =  0     * uvsin +  1.596 * uvcos;
   *gu = -0.391 * uvcos + -0.813 * uvsin;
   *gv = -0.391 * uvsin + -0.813 * uvcos;
-  *bu = 2.018 * uvcos + 0 * uvsin;
-  *bv = 2.018 * uvsin + 0 * uvcos;
+  *bu =  2.018 * uvcos +  0     * uvsin;
+  *bv =  2.018 * uvsin +  0     * uvcos;
   *rc = (-16 * *ry + (-128) * *ru + (-128) * *rv) / 255.0 + params->brightness;
   *gc = (-16 * *gy + (-128) * *gu + (-128) * *gv) / 255.0 + params->brightness;
   *bc = (-16 * *by + (-128) * *bu + (-128) * *bv) / 255.0 + params->brightness;
