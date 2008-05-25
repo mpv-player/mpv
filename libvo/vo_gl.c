@@ -589,9 +589,7 @@ static void draw_osd(void)
   }
 }
 
-static void
-flip_page(void)
-{
+static void do_render(void) {
 //  glEnable(GL_TEXTURE_2D);
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
 
@@ -635,7 +633,10 @@ flip_page(void)
       glPopMatrix();
     BindTexture(gl_target, 0);
   }
+}
 
+static void flip_page(void) {
+  do_render();
   if (use_glFinish)
   glFinish();
   if (vo_doublebuffering)
