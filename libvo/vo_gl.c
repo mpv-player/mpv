@@ -637,15 +637,15 @@ static void do_render(void) {
 
 static void flip_page(void) {
   do_render();
-  if (use_glFinish)
-  glFinish();
-  if (vo_doublebuffering)
+  if (vo_doublebuffering) {
+    if (use_glFinish) glFinish();
     swapGlBuffers();
-  else if (!use_glFinish)
-    glFlush();
- 
-  if (vo_fs && use_aspect && vo_doublebuffering)
-    glClear(GL_COLOR_BUFFER_BIT);
+    if (vo_fs && use_aspect)
+      glClear(GL_COLOR_BUFFER_BIT);
+  } else {
+    if (use_glFinish) glFinish();
+    else glFlush();
+  }
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
