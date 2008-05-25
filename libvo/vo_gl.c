@@ -117,6 +117,8 @@ static int ass_border_x, ass_border_y;
 
 static unsigned int slice_height = 1;
 
+static void redraw(void);
+
 static void resize(int x,int y){
   mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n",x,y);
   if (WinID >= 0) {
@@ -154,7 +156,7 @@ static void resize(int x,int y){
   vo_osd_changed(OSDTYPE_OSD);
   }
   glClear(GL_COLOR_BUFFER_BIT);
-  flip_page();
+  redraw();
 }
 
 static void texSize(int w, int h, int *texw, int *texh) {
@@ -505,7 +507,7 @@ static void check_events(void)
 {
     int e=vo_check_events();
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
-    if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
+    if(e&VO_EVENT_EXPOSE && int_pause) redraw();
 }
 
 /**
@@ -577,6 +579,8 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   osdtexCnt++;
 }
 
+static void do_render_osd(void);
+
 static void draw_osd(void)
 {
   if (!use_osd) return;
@@ -587,6 +591,7 @@ static void draw_osd(void)
     osd_h = (scaled_osd) ? image_height : vo_dheight;
     vo_draw_text(osd_w, osd_h, create_osd_texture);
   }
+  if (vo_doublebuffering) do_render_osd();
 }
 
 static void do_render(void) {
@@ -603,7 +608,9 @@ static void do_render(void) {
             mpi_flipped ^ vo_flipped);
   if (image_format == IMGFMT_YV12)
     glDisableYUVConversion(gl_target, yuvconvtype);
+}
 
+static void do_render_osd(void) {
   if (osdtexCnt > 0 || eosdDispList) {
     // set special rendering parameters
     if (!scaled_osd) {
@@ -636,16 +643,22 @@ static void do_render(void) {
 }
 
 static void flip_page(void) {
-  do_render();
   if (vo_doublebuffering) {
     if (use_glFinish) glFinish();
     swapGlBuffers();
     if (vo_fs && use_aspect)
       glClear(GL_COLOR_BUFFER_BIT);
   } else {
+    do_render();
+    do_render_osd();
     if (use_glFinish) glFinish();
     else glFlush();
   }
+}
+
+static void redraw(void) {
+  if (vo_doublebuffering) { do_render(); do_render_osd(); }
+  flip_page();
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
@@ -716,7 +729,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
   unsigned char *planes[3];
   mp_image_t mpi2 = *mpi;
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-    return VO_TRUE;
+    goto skip_upload;
   mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
   mpi2.width = mpi2.w; mpi2.height = mpi2.h;
   if (force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !gl_bufferptr && get_image(&mpi2) == VO_TRUE) {
@@ -756,6 +769,8 @@ static uint32_t draw_image(mp_image_t *mpi) {
   }
   if (mpi->flags & MP_IMGFLAG_DIRECT)
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+skip_upload:
+  if (vo_doublebuffering) do_render();
   return VO_TRUE;
 }
 
