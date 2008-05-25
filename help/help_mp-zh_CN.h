@@ -1,4 +1,4 @@
-//Synced with help_mp-en.h r26067 （MSGTR_Exit_SIGILL_RTCpuSel）
+// Synced with help_mp-en.h r26863 （MSGTR_EdlOutOfMem）
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -37,7 +37,7 @@ static char help_text[]=
 " -playlist <文件> 指定播放列表文件\n"
 " -vid x -aid y    选择播放视频流（x）和音频流（y）\n"
 " -fps x -srate y  改变视频帧率为 x（fps），音频采样率为 y（Hz）\n"
-" -pp <质量>       启用后期处理过滤器/滤镜（详见于手册相关页面）\n"
+" -pp <质量>       启用后期处理过滤器（详见于手册相关页面）\n"
 " -framedrop       启用丢帧（用于运行慢的机器）\n"
 "\n"
 "基本控制键：      （完整列表见手册相关页面，也请查阅 input.conf）\n"
@@ -137,58 +137,58 @@ static char help_text[]=
 #define MSGTR_PlaylistLoadUnable "\n无法装载播放列表 %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- “非法指令”导致 MPlayer 崩溃。\n"\
-"  这可能是我们的新代码中运行时 CPU-检测的一个错误...\n"\
+"  这可能是我们新的实时 CPU 侦测代码中的一个缺陷...\n"\
 "  请阅读 DOCS/zh/bugreports.html。\n"
 #define MSGTR_Exit_SIGILL \
 "- “非法指令”导致 MPlayer 崩溃。\n"\
-"  这通常发生在现在你所运行之上的 CPU 不同于\n"\
-"  编译/优化时的 CPU 所造成的。\n"\
-"  证实它！\n"
+"  这通常是在你运行 MPlayer 的 CPU 与其\n"\
+"  编译/优化时所针对的 CPU 不同时发生。\n"\
+"  检查是否如此！\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- 过度使用 CPU/FPU/RAM 导致 MPlayer 崩溃。\n"\
-"  使用 --enable-debug 重新编译 MPlayer 并用调试程序“gdb”反跟踪和\n"\
-"  反汇编。具体细节看 DOCS/zh/bugreports.html#crash。\n"
+"- 不合理使用 CPU/FPU/RAM 导致 MPlayer 崩溃。\n"\
+"  使用 --enable-debug 重新编译 MPlayer 并建立“gdb”反跟踪和\n"\
+"  反汇编输出。具体细节见 DOCS/zh/bugreports.html#crash。\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer 崩溃了。这不应该发生。\n"\
-"  这可能是 MPlayer 代码中 _或者_ 你的驱动中 _或者_ 你的 gcc 版本中的一个\n"\
-"  错误。如你觉得这是 MPlayer 的错误，请阅读 DOCS/zh/bugreports.html\n"\
-"  并遵循上面的步骤报告错误。除非你在报告一个可能的错误时候提供我们\n"\
-"  所需要的信息, 否则我们不能也不会帮助你。\n"
-#define MSGTR_LoadingConfig "正在装载配置文件 '%s'\n"
-#define MSGTR_LoadingProtocolProfile "加载协议的相关配置集‘%s’\n"
-#define MSGTR_LoadingExtensionProfile "加载扩展组件的相关配置集‘%s’\n"
-#define MSGTR_AddedSubtitleFile "字幕: 添加字幕文件 (%d): %s\n"
-#define MSGTR_RemovedSubtitleFile "字幕: 删除字幕文件 (%d): %s\n"
-#define MSGTR_ErrorOpeningOutputFile "打开写入文件 [%s] 失败!\n"
-#define MSGTR_CommandLine "命令行: "
-#define MSGTR_RTCDeviceNotOpenable "打开 %s 失败: %s (此文件应该能被用户读取。)\n"
-#define MSGTR_LinuxRTCInitErrorIrqpSet "Linux RTC 初始化错误在 ioctl (rtc_irqp_set %lu): %s\n"
-#define MSGTR_IncreaseRTCMaxUserFreq "试图添加 \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" 到你的系统启动脚本。\n"
-#define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC 初始化错误在 ioctl (rtc_pie_on): %s\n"
+"  这可能是 MPlayer 或者 你的驱动中 或者 你的 gcc 版本中的一个缺陷。\n"\
+"  如你觉得这是 MPlayer 的问题，请阅读 DOCS/zh/bugreports.html\n"\
+"  并遵循其中的指示去做。除非你在报告一个潜在的缺陷时候提供我们\n"\
+"  所需要的信息，否则我们不能也不会帮助你。\n"
+#define MSGTR_LoadingConfig "正在加载配置 '%s'\n"
+#define MSGTR_LoadingProtocolProfile "加载协议相关的配置集‘%s’\n"
+#define MSGTR_LoadingExtensionProfile "加载扩展组件相关的配置集‘%s’\n"
+#define MSGTR_AddedSubtitleFile "字幕：添加字幕文件（%d）：%s\n"
+#define MSGTR_RemovedSubtitleFile "字幕：移除字幕文件（%d）： %s\n"
+#define MSGTR_ErrorOpeningOutputFile "以写入方式打开文件 [%s] 失败！\n"
+#define MSGTR_CommandLine "命令行："
+#define MSGTR_RTCDeviceNotOpenable "打开 %s 失败：%s（用户应当有权限读取该设备。）\n"
+#define MSGTR_LinuxRTCInitErrorIrqpSet "ioctl (rtc_irqp_set %lu) 中出现 Linux RTC 初始化错误：%s\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "尝试添加 \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" 到你的系统启动脚本中。\n"
+#define MSGTR_LinuxRTCInitErrorPieOn "ioctl (rtc_pie_on) 中出现 Linux RTC 初始化错误：%s\n"
 #define MSGTR_UsingTimingType "正在使用 %s 计时。\n"
 #define MSGTR_NoIdleAndGui "GMPLayer 不能使用选项 -idle。\n"
-#define MSGTR_MenuInitialized "菜单已初始化: %s\n"
+#define MSGTR_MenuInitialized "菜单已初始化：%s\n"
 #define MSGTR_MenuInitFailed "菜单初始化失败。\n"
-#define MSGTR_Getch2InitializedTwice "警告: getch2_init 被调用两次!\n"
-#define MSGTR_DumpstreamFdUnavailable "无法转储此流 - 没有可用的文件描述符。\n"
+#define MSGTR_Getch2InitializedTwice "警告：getch2_init 被两次调用！\n"
+#define MSGTR_DumpstreamFdUnavailable "无法导出该数据流 - 没有可用的文件描述符。\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "不能用根菜单 %s 打开 libmenu 视频过滤器。\n"
-#define MSGTR_AudioFilterChainPreinitError "音频过滤器链预启动错误!\n"
-#define MSGTR_LinuxRTCReadError "Linux RTC 读取错误: %s\n"
-#define MSGTR_SoftsleepUnderflow "警告! Softsleep 向下溢出!\n"
-#define MSGTR_DvdnavNullEvent "DVDNAV 事件为空?!\n"
-#define MSGTR_DvdnavHighlightEventBroken "DVDNAV 事件: 高亮事件损坏\n"
-#define MSGTR_DvdnavEvent "DVDNAV 事件: %s\n"
-#define MSGTR_DvdnavHighlightHide "DVDNAV 事件: 高亮隐藏\n"
-#define MSGTR_DvdnavStillFrame "######################################## DVDNAV 事件: 静止帧: %d秒\n"
-#define MSGTR_DvdnavNavStop "DVDNAV 事件: Nav停止\n"
-#define MSGTR_DvdnavNavNOP "DVDNAV 事件: Nav无操作\n"
-#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV 事件: Nav SPU 流改变: 物理: %d/%d/%d 逻辑: %d\n"
-#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV 事件: Nav SPU 流改变: 物理: %d 逻辑: %d\n"
-#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV 事件: Nav 音频流改变: 物理: %d 逻辑: %d\n"
-#define MSGTR_DvdnavNavVTSChange "DVDNAV 事件: Nav VTS 改变\n"
-#define MSGTR_DvdnavNavCellChange "DVDNAV 事件: Nav Cell 改变\n"
-#define MSGTR_DvdnavNavSpuClutChange "DVDNAV 事件: Nav SPU CLUT 改变\n"
-#define MSGTR_DvdnavNavSeekDone "DVDNAV 事件: Nav 搜寻完成\n"
+#define MSGTR_AudioFilterChainPreinitError "音频过滤器链预初始化错误！\n"
+#define MSGTR_LinuxRTCReadError "Linux RTC 读取错误：%s\n"
+#define MSGTR_SoftsleepUnderflow "警告！Softsleep 数值下溢！\n"
+#define MSGTR_DvdnavNullEvent "DVDNAV 事件为空？！\n"
+#define MSGTR_DvdnavHighlightEventBroken "DVDNAV 事件：重要事件损坏\n"
+#define MSGTR_DvdnavEvent "DVDNAV 事件：%s\n"
+#define MSGTR_DvdnavHighlightHide "DVDNAV 事件：重要事件隐藏\n"
+#define MSGTR_DvdnavStillFrame "######################################## DVDNAV 事件：静止帧：%d 秒\n"
+#define MSGTR_DvdnavNavStop "DVDNAV 事件：Nav 停止\n"
+#define MSGTR_DvdnavNavNOP "DVDNAV 事件：Nav 无操作\n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV 事件：Nav SPU 数据流切换：物理位置：%d/%d/%d 逻辑位置：%d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV 事件：Nav SPU 数据流切换：物理位置：%d 逻辑位置：%d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV 事件：Nav 音频流切换：物理位置：%d 逻辑位置：%d\n"
+#define MSGTR_DvdnavNavVTSChange "DVDNAV 事件：Nav VTS 切换\n"
+#define MSGTR_DvdnavNavCellChange "DVDNAV 事件：Nav Cell 切换\n"
+#define MSGTR_DvdnavNavSpuClutChange "DVDNAV 事件：Nav SPU CLUT 切换\n"
+#define MSGTR_DvdnavNavSeekDone "DVDNAV 事件：Nav 定位完成\n"
 #define MSGTR_MenuCall "菜单调用\n"
 
 #define MSGTR_EdlOutOfMem "不能分配足够的内存来保持 EDL 数据。\n"
@@ -1290,6 +1290,12 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_WarnLostSync "操纵杆: 警告初始事件, 失去了和驱动的同步。\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "操作杆警告未知事件类型%d\n"
 
+// appleir.c
+
+#define MSGTR_INPUT_APPLE_IR_Init "在设备 %s 上初始化 Apple IR\n"
+#define MSGTR_INPUT_APPLE_IR_Detect "在设备 %s 上侦测到 Apple IR\n"
+#define MSGTR_INPUT_APPLE_IR_CantOpen "无法打开 Apple IR 设备：%s\n"
+
 // input.c
 
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "命令文件描述符太多, 不能注册文件描述符 %d。\n"
@@ -1700,6 +1706,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] 你的 mga_vid 驱动版本与 MPlayer 的版本不兼容!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] 打不开: %s\n"
 #define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] 原分辨率至少有一维大于 1023x1023。请用软件或用 -lavdopts lowres=1 重新缩放\n"
+#define MGSTR_LIBVO_MGA_mgavidVersionMissmatch "[MGA] mga_vid 驱动的版本号（%u）与 MPlayer 编译时植入的不符（%u）\n"
 
 // libvo/vesa_lvo.c
 
@@ -1948,6 +1955,7 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
 "[VO_XV] 请参见 'mplayer -vo help' 找其它 (非-xv) 视频输出驱动。\n"\
 "[VO_XV] 试试 -vo x11.\n"
+#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] 使用 Xv 转换器 #%d（%s）\n"
 
 
 // loader/ldt_keeper.c
@@ -2028,7 +2036,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningFont "[ass] 打开字体出错: %s, %d\n"
 
 // ass_fontconfig.c
-#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: 选中的字体家族不是要求的: '%s' != '%s'\n"
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig：所选字体不是所要求使用的：'%s' != '%s'\n"
 #define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: 使用缺省字体家族: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: 使用缺省字体: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: 使用 'Arial' 字体家族: (%s, %d, %d) -> %s, %d\n"
@@ -2059,7 +2067,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] 警告! 事件高度(height) 已改变!  \n"
 
 // ass_font.c
-#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] 字形 0x%X 未找到, 重新选择字体 (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] 字形 0x%X 未找到，为 (%s, %d, %d) 选择另一种字体\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] 字形 0x%X 未在字体中找到 (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] 打开内存字体出错: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] 字体缺少字符映射表\n"
