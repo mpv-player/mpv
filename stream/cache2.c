@@ -63,6 +63,7 @@ typedef struct {
   volatile double control_double_arg;
   volatile int control_res;
   volatile off_t control_new_pos;
+  volatile double stream_time_length;
 } cache_vars_t;
 
 static int min_fill=0;
@@ -198,9 +199,17 @@ int cache_fill(cache_vars_t* s){
 }
 
 static void cache_execute_control(cache_vars_t *s) {
+  static unsigned last;
+  if (GetTimerMS() - last > 99) {
+    double len;
+    if (s->stream->control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) == STREAM_OK)
+      s->stream_time_length = len;
+    else
+      s->stream_time_length = 0;
+    last = GetTimerMS();
+  }
   if (s->control == -1) return;
   switch (s->control) {
-    case STREAM_CTRL_GET_TIME_LENGTH:
     case STREAM_CTRL_GET_CURRENT_TIME:
     case STREAM_CTRL_SEEK_TO_TIME:
     case STREAM_CTRL_GET_ASPECT_RATIO:
@@ -432,7 +441,9 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
 // the core might call these every frame, they are too slow for this...
-//    case STREAM_CTRL_GET_TIME_LENGTH:
+    case STREAM_CTRL_GET_TIME_LENGTH:
+      *(double *)arg = s->stream_time_length;
+      return s->stream_time_length ? STREAM_OK : STREAM_UNSUPPORTED;
 //    case STREAM_CTRL_GET_CURRENT_TIME:
     case STREAM_CTRL_GET_ASPECT_RATIO:
     case STREAM_CTRL_GET_NUM_ANGLES:
