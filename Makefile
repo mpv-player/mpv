@@ -876,7 +876,7 @@ codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
 	$(CC) -I. -DCODECS2HTML $^ -o $@
 
 codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h codec-cfg.h $(TEST_OBJS)
-	$(CC) -I. -DTESTING -o $@ $< $(TEST_OBJS)
+	$(CC) -I. -DTESTING -o $@ $^
 
 liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
