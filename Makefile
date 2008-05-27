@@ -894,7 +894,8 @@ loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
 mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 
-TESTS = liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
+TESTS = codec-cfg-test$(EXESUF) \
+        liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
         loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF) \
         mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF)
 
