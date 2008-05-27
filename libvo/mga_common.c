@@ -467,7 +467,7 @@ static int preinit(const char *vo_subdevice)
 	ioctl(f,MGA_VID_GET_VERSION,&ver);
 	if(MGA_VID_VERSION != ver)
 	{
-		mp_msg(MSGT_VO, MSGL_ERR, MGSTR_LIBVO_MGA_mgavidVersionMissmatch, ver, MGA_VID_VERSION);
+		mp_msg(MSGT_VO, MSGL_ERR, MGSTR_LIBVO_MGA_mgavidVersionMismatch, ver, MGA_VID_VERSION);
 		return -1;
 	}
 
