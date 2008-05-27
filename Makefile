@@ -878,8 +878,8 @@ tags:
 
 TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
-codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h $(TEST_OBJS)
-	$(CC) -I. -DTESTING -o $@ codec-cfg.c $(TEST_OBJS)
+codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h codec-cfg.h $(TEST_OBJS)
+	$(CC) -I. -DTESTING -o $@ $< $(TEST_OBJS)
 
 liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
