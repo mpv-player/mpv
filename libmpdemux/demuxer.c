@@ -269,6 +269,7 @@ sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundAudioStream,id);
         demuxer->a_streams[id] = sh;
         sh->aid = aid;
+        sh->ds = demuxer->audio;
         // set some defaults
         sh->samplesize=2;
         sh->sample_format=AF_FORMAT_S16_NE;
@@ -303,6 +304,7 @@ sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid){
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundVideoStream,id);
         demuxer->v_streams[id] = sh;
         sh->vid = vid;
+        sh->ds = demuxer->video;
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
     }
     return demuxer->v_streams[id];
