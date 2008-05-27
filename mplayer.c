@@ -3998,6 +3998,9 @@ if(mpctx->eof == PT_NEXT_ENTRY || mpctx->eof == PT_PREV_ENTRY) {
             mpctx->playtree_iter = NULL;
         }
     }
+} else if (mpctx->eof == PT_STOP) {
+    play_tree_iter_free(mpctx->playtree_iter);
+    mpctx->playtree_iter = NULL;
 } else { // NEXT PREV SRC
     mpctx->eof = mpctx->eof == PT_PREV_SRC ? -1 : 1;
 }

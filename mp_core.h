@@ -39,6 +39,7 @@
 #define PT_PREV_SRC -2
 #define PT_UP_NEXT 3
 #define PT_UP_PREV -3
+#define PT_STOP 4
 
 
 typedef struct MPContext {

@@ -2621,6 +2621,11 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    }
 	    break;
 
+	case MP_CMD_STOP:
+	    mpctx->eof = PT_STOP;
+	    brk_cmd = 1;
+	    break;
+
 #ifdef USE_RADIO
 	case MP_CMD_RADIO_STEP_CHANNEL:
 	    if (mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {

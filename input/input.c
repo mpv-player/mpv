@@ -64,6 +64,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SPEED_MULT, "speed_mult", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_SPEED_SET, "speed_set", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_QUIT, "quit", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_STOP, "stop", 0, { {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
   { MP_CMD_FRAME_STEP, "frame_step", 0, { {-1,{0}} } },
   { MP_CMD_PLAY_TREE_STEP, "pt_step",1, { { MP_CMD_ARG_INT ,{0}}, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
@@ -473,6 +474,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { '!', 0 }, "seek_chapter -1" },
   { { '@', 0 }, "seek_chapter 1" },
   { { 'A', 0 }, "switch_angle 1" },
+  { { 'U', 0 }, "stop" },
 
   { { 0 }, NULL }
 };
