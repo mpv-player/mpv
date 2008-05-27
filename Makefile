@@ -790,9 +790,6 @@ VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
 $(VIDIX_PCI_FILES): vidix/pci.db
 	LC_ALL=C awk -f vidix/pci_db2c.awk $< $(VIDIX_PCIDB)
 
-# Make sure that the awk processes do not step on each other's toes.
-.NOTPARALLEL: $(VIDIX_PCI_FILES)
-
 VIDIX_DEPS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.d))
 VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
 
