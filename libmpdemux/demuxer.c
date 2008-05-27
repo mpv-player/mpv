@@ -265,10 +265,9 @@ sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
     if(demuxer->a_streams[id]){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_AudioStreamRedefined,id);
     } else {
-        sh_audio_t *sh;
+        sh_audio_t *sh = calloc(1, sizeof(sh_audio_t));
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundAudioStream,id);
-        demuxer->a_streams[id]=calloc(1, sizeof(sh_audio_t));
-        sh = demuxer->a_streams[id];
+        demuxer->a_streams[id] = sh;
         // set some defaults
         sh->samplesize=2;
         sh->sample_format=AF_FORMAT_S16_NE;
