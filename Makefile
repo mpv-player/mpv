@@ -864,7 +864,7 @@ doxygen:
 	doxygen DOCS/tech/Doxyfile
 
 doxygen_clean:
-	-rm -rf DOCS/tech/doxygen
+	rm -rf DOCS/tech/doxygen
 
 TAGS:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs etags -a
