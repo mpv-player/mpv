@@ -739,9 +739,6 @@ codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 codecs2html$(EXESUF): mp_msg-mencoder.o
 	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
 
-codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg-mencoder.o osdep/getch2.o
-	$(CC) -I. -DTESTING codec-cfg.c mp_msg-mencoder.o osdep/getch2.o -ltermcap -o $@
-
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 	$(WINDRES) -I. -o $@ $<
 
@@ -880,6 +877,9 @@ tags:
 ###### tests / tools #######
 
 TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
+
+codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h $(TEST_OBJS)
+	$(CC) -I. -DTESTING -o $@ codec-cfg.c $(TEST_OBJS)
 
 liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
