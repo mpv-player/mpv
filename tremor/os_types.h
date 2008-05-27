@@ -32,11 +32,11 @@
 #define _ogg_realloc realloc
 #define _ogg_free    free
 
-   #include <inttypes.h>
-   typedef int64_t ogg_int64_t;
-   typedef int32_t ogg_int32_t;
-   typedef uint32_t ogg_uint32_t;
-   typedef uint16_t ogg_uint16_t;
-   typedef int16_t ogg_int16_t;
+#include <inttypes.h>
+typedef int64_t  ogg_int64_t;
+typedef int32_t  ogg_int32_t;
+typedef int16_t  ogg_int16_t;
+typedef uint32_t ogg_uint32_t;
+typedef uint16_t ogg_uint16_t;
 
 #endif  /* _OS_TYPES_H */
