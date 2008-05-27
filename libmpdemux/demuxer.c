@@ -121,9 +121,6 @@ const demuxer_desc_t* const demuxer_list[] = {
   &demuxer_desc_mpeg_gxf,
   &demuxer_desc_mpeg4_es,
   &demuxer_desc_h264_es,
-#ifdef MUSEPACK
-  &demuxer_desc_mpc,
-#endif
   &demuxer_desc_audio,
   &demuxer_desc_mpeg_ty,
 #ifdef STREAMING_LIVE555
@@ -134,6 +131,9 @@ const demuxer_desc_t* const demuxer_list[] = {
 #endif
 #ifdef USE_LIBAVFORMAT
   &demuxer_desc_lavf,
+#endif
+#ifdef MUSEPACK
+  &demuxer_desc_mpc,
 #endif
 #ifdef HAVE_LIBDV095
   &demuxer_desc_rawdv,
