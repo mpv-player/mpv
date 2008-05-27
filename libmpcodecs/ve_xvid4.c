@@ -1,5 +1,5 @@
 /*
- * - XviD 1.x decoder module for mplayer/mencoder -
+ * - Xvid 1.x decoder module for mplayer/mencoder -
  *
  * Copyright(C) 2003      Marco Belli <elcabesa@inwind.it>
  *              2003-2004 Edouard Gomez <ed.gomez@free.fr>
@@ -96,7 +96,7 @@ typedef const struct
 	unsigned int flags;          ///< flags for allowed options/dxn note the definitions for PROFILE_S and PROFILE_AS
 } profile_t;
 
-// Code taken from XviD VfW source for profile support
+// Code taken from Xvid VfW source for profile support
 
 /* default vbv_occupancy is (64/170)*vbv_buffer_size */
 
@@ -390,7 +390,7 @@ config(struct vf_instance_s* vf,
 
 	/* Message the FourCC type */
 	mp_msg(MSGT_MENCODER, MSGL_INFO,
-	       "videocodec: XviD (%dx%d fourcc=%x [%.4s])\n",
+	       "videocodec: Xvid (%dx%d fourcc=%x [%.4s])\n",
 	       width, height, mod->mux->bih->biCompression,
 	       (char *)&mod->mux->bih->biCompression);
 
@@ -398,7 +398,7 @@ config(struct vf_instance_s* vf,
 	mod->pixels = mod->mux->bih->biWidth*mod->mux->bih->biHeight;
 
 	/*--------------------------------------------------------------------
-	 * Dispatch all module settings to XviD structures
+	 * Dispatch all module settings to Xvid structures
 	 *------------------------------------------------------------------*/
 
 	mod->d_width = d_width;
@@ -617,7 +617,7 @@ vf_open(vf_instance_t *vf, char* args)
 	mod->mux->bih->biBitCount = 12;
 	mod->mux->bih->biCompression = mmioFOURCC('X','V','I','D');
 
-	/* Retrieve information about the host XviD library */
+	/* Retrieve information about the host Xvid library */
 	memset(&xvid_gbl_info, 0, sizeof(xvid_gbl_info_t));
 	xvid_gbl_info.version = XVID_VERSION;
 
@@ -1515,7 +1515,7 @@ static const char *errorstring(int err)
  ****************************************************************************/
 
 vf_info_t ve_info_xvid = {
-	"XviD 1.0 encoder",
+	"Xvid 1.0 encoder",
 	"xvid",
 	"Marco Belli <elcabesa@inwind.it>, Edouard Gomez <ed.gomez@free.fr>",
 	"No comment",

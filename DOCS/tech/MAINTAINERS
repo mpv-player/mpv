@@ -134,7 +134,7 @@ streams:
 
 codec support:
     * FFmpeg: Michael Niedermayer
-    * XviD: Ivan Kalvachev
+    * Xvid: Ivan Kalvachev
     * x264: Loren Merritt
     * musepack, speex: Reimar Döffinger
 
