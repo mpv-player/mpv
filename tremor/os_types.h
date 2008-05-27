@@ -39,4 +39,61 @@ typedef int16_t  ogg_int16_t;
 typedef uint32_t ogg_uint32_t;
 typedef uint16_t ogg_uint16_t;
 
+#if 0
+
+#ifdef _WIN32 
+
+#  ifndef __GNUC__
+   /* MSVC/Borland */
+   typedef __int64 ogg_int64_t;
+   typedef __int32 ogg_int32_t;
+   typedef unsigned __int32 ogg_uint32_t;
+   typedef __int16 ogg_int16_t;
+#  else
+   /* Cygwin */
+   #include <_G_config.h>
+   typedef _G_int64_t ogg_int64_t;
+   typedef _G_int32_t ogg_int32_t;
+   typedef _G_uint32_t ogg_uint32_t;
+   typedef _G_int16_t ogg_int16_t;
+#  endif
+
+#elif defined(__MACOS__)
+
+#  include <sys/types.h>
+   typedef SInt16 ogg_int16_t;
+   typedef SInt32 ogg_int32_t;
+   typedef UInt32 ogg_uint32_t;
+   typedef SInt64 ogg_int64_t;
+
+#elif defined(__MACOSX__) /* MacOS X Framework build */
+
+#  include <sys/types.h>
+   typedef int16_t ogg_int16_t;
+   typedef int32_t ogg_int32_t;
+   typedef u_int32_t ogg_uint32_t;
+   typedef int64_t ogg_int64_t;
+
+#elif defined(__BEOS__)
+
+   /* Be */
+#  include <inttypes.h>
+
+#elif defined (__EMX__)
+
+   /* OS/2 GCC */
+   typedef short ogg_int16_t;
+   typedef int ogg_int32_t;
+   typedef unsigned int ogg_uint32_t;
+   typedef long long ogg_int64_t;
+
+#else
+
+#  include <sys/types.h>
+#  include "config_types.h"
+
+#endif
+
+#endif /* 0 */
+
 #endif  /* _OS_TYPES_H */
