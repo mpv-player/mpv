@@ -850,7 +850,8 @@ clean:
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
-distclean: clean doxygen_clean testsclean toolsclean
+distclean: clean testsclean toolsclean
+	rm -rf DOCS/tech/doxygen
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) \
@@ -858,9 +859,6 @@ distclean: clean doxygen_clean testsclean toolsclean
 
 doxygen:
 	doxygen DOCS/tech/Doxyfile
-
-doxygen_clean:
-	rm -rf DOCS/tech/doxygen
 
 TAGS:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs etags -a
