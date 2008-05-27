@@ -12,9 +12,9 @@ test $1 = "help/help_mp-en.h" && exit 0
 curr=""
 
 while read -r line; do
-	if echo "$line" | grep '^#define' > /dev/null 2>&1; then
+	if echo "$line" | grep -q '^#define' ; then
 		curr=`printf "%s\n" "$line" | cut -d ' ' -f 2`
-		if grep "^#define $curr[	 ]" $1 > /dev/null 2>&1; then
+		if grep -q "^#define $curr[	 ]" $1 ; then
 			curr=""
 		fi
 	else
