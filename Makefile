@@ -743,17 +743,7 @@ config.mak: configure
 	@echo "############################################################"
 
 help_mp.h: help/help_mp-en.h $(HELP_FILE)
-	@echo '// WARNING! This is a generated file. Do NOT edit.' > $@
-	@echo '// See the help/ subdir for the editable files.' >> $@
-	@echo '#ifndef MPLAYER_HELP_MP_H' >> $@
-	@echo '#define MPLAYER_HELP_MP_H' >> $@
-	@cat "$(HELP_FILE)" >> $@
-	@echo '// untranslated messages from the English master file:' >> $@
-	help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> $@
-	@echo '#endif /* MPLAYER_HELP_MP_H */' >> $@
-ifneq ($(CHARSET),UTF-8)
-	iconv -f UTF-8 -t $(CHARSET) $@ > $@.tmp; mv $@.tmp $@
-endif
+	help/help_create.sh $(HELP_FILE) $(CHARSET)
 
 # rebuild version.h each time the working copy is updated
 ifeq ($(wildcard .svn/entries),.svn/entries)
