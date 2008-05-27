@@ -268,6 +268,7 @@ sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
         sh_audio_t *sh = calloc(1, sizeof(sh_audio_t));
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundAudioStream,id);
         demuxer->a_streams[id] = sh;
+        sh->aid = aid;
         // set some defaults
         sh->samplesize=2;
         sh->sample_format=AF_FORMAT_S16_NE;
@@ -275,7 +276,6 @@ sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
         sh->pts=MP_NOPTS_VALUE;
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
     }
-    ((sh_audio_t *)demuxer->a_streams[id])->aid = aid;
     return demuxer->a_streams[id];
 }
 
@@ -299,11 +299,12 @@ sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid){
     if(demuxer->v_streams[id]){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_VideoStreamRedefined,id);
     } else {
+        sh_video_t *sh = calloc(1, sizeof(sh_video_t));
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundVideoStream,id);
-        demuxer->v_streams[id]=calloc(1, sizeof(sh_video_t));
+        demuxer->v_streams[id] = sh;
+        sh->vid = vid;
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
     }
-    ((sh_video_t *)demuxer->v_streams[id])->vid = vid;
     return demuxer->v_streams[id];
 }
 
