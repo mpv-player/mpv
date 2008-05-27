@@ -923,6 +923,9 @@ ALLTOOLS = $(TOOLS) \
 tools: $(TOOLS)
 alltools: $(ALLTOOLS)
 
+toolsclean:
+	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
+
 TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
 
 TOOLS/subrip$(EXESUF): TOOLS/subrip.c vobsub.o spudec.o unrar_exec.o \
@@ -963,9 +966,6 @@ NETSTREAM_DEPS = libavutil/libavutil.a \
 
 TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^
-
-toolsclean:
-	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
 -include $(DEPS)
 
