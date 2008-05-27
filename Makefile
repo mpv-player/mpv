@@ -797,7 +797,7 @@ $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
 
 
-###### installation rules #######
+###### installation / clean / generic rules #######
 
 install: $(INSTALL_TARGETS-yes)
 
