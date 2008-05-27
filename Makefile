@@ -737,7 +737,7 @@ codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
 
 codecs2html$(EXESUF): mp_msg-mencoder.o
-	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
+	$(CC) -I. -DCODECS2HTML codec-cfg.c $^ -o $@
 
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 	$(WINDRES) -I. -o $@ $<
