@@ -736,11 +736,11 @@ codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
 
-codecs2html$(EXESUF): mp_msg.o
+codecs2html$(EXESUF): mp_msg-mencoder.o
 	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
 
-codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
-	$(CC) -I. -DTESTING codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap -o $@
+codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg-mencoder.o osdep/getch2.o
+	$(CC) -I. -DTESTING codec-cfg.c mp_msg-mencoder.o osdep/getch2.o -ltermcap -o $@
 
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 	$(WINDRES) -I. -o $@ $<
