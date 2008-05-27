@@ -875,8 +875,8 @@ tags:
 
 TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
-codecs2html$(EXESUF): mp_msg-mencoder.o
-	$(CC) -I. -DCODECS2HTML codec-cfg.c $^ -o $@
+codecs2html$(EXESUF): codec-cfg.c mp_msg-mencoder.o
+	$(CC) -I. -DCODECS2HTML $^ -o $@
 
 codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h codec-cfg.h $(TEST_OBJS)
 	$(CC) -I. -DTESTING -o $@ $< $(TEST_OBJS)
