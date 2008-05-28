@@ -289,6 +289,7 @@ static int agp_move(tdfx_vid_agp_move_t* m) {
   return 0;
 }
 
+#if 0
 static void setup_fifo(u32 offset,ssize_t pages) {
   long addr = agp_info.aper_base + offset;
   u32 size = pages | 0x700; // fifo on, in agp mem, disable hole cnt
@@ -307,6 +308,7 @@ static void setup_fifo(u32 offset,ssize_t pages) {
   banshee_wait_idle();
   
 }
+#endif
 
 static int bump_fifo(u16 size) {
 
