@@ -840,7 +840,7 @@ clean:
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
-distclean: clean testsclean toolsclean
+distclean: clean testsclean toolsclean driversclean
 	rm -rf DOCS/tech/doxygen
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
@@ -957,7 +957,41 @@ NETSTREAM_DEPS = libavutil/libavutil.a \
 TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^
 
+
+
+###### drivers #######
+
+KERNEL_INC = /lib/modules/`uname -r`/build/include
+KERNEL_VERSION = $(shell grep RELEASE $(KERNEL_INC)/linux/version.h | cut -d'"' -f2)
+KERNEL_CFLAGS = -O2 -D__KERNEL__ -DMODULE -Wall -I$(KERNEL_INC) -include $(KERNEL_INC)/linux/modversions.h
+KERNEL_OBJS = $(addprefix drivers/, mga_vid.o tdfx_vid.o radeon_vid.o rage128_vid.o)
+MODULES_DIR = /lib/modules/$(KERNEL_VERSION)/misc
+
+drivers: $(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test
+
+$(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test: CFLAGS = $(KERNEL_CFLAGS)
+drivers/mga_vid.o: drivers/mga_vid.c drivers/mga_vid.h
+drivers/tdfx_vid.o: drivers/tdfx_vid.c drivers/3dfx.h
+drivers/radeon_vid.o drivers/rage128_vid.o: CFLAGS += -fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math
+drivers/radeon_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
+drivers/rage128_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
+	$(CC) $(CFLAGS) -DRAGE128 -c $< -o $@
+
+install-drivers:
+	-mkdir -p $(MODULES_DIR)
+	install -m 644 $(KERNEL_OBJS) $(MODULES_DIR)
+	depmod -a
+	-mknod /dev/mga_vid    c 178 0
+	-mknod /dev/tdfx_vid   c 178 0
+	-mknod /dev/radeon_vid c 178 0
+	-ln -s /dev/radeon_vid /dev/rage128_vid
+
+driversclean:
+	rm -f drivers/*.o drivers/*~ drivers/mga_vid_test drivers/tdfx_vid_test
+
+
+
 -include $(DEPS)
 
-.PHONY: all doxygen *install* recurse *tools
+.PHONY: all doxygen *install* recurse *tools drivers
 .PHONY: checkheaders *clean dep depend tests
