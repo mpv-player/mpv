@@ -122,7 +122,7 @@ during the first pass. However, sometimes it is beneficial to watch
 the first-pass file before beginning the second pass to make sure
 nothing went wrong in the encoding.
 
-Next, an example using Xvid instead of libavcodec:
+Next, an example using XviD instead of libavcodec:
 
   Encoding from an existing AVI file
   500 kbit/sec MPEG-4 video

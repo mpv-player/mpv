@@ -1,5 +1,5 @@
 /*
- * - Xvid 1.x decoder module for mplayer/mencoder -
+ * - XviD 1.x decoder module for mplayer/mencoder -
  *
  * Copyright(C) 2003      Marco Belli <elcabesa@inwind.it>
  *              2003-2004 Edouard Gomez <ed.gomez@free.fr>
@@ -170,7 +170,7 @@ static int init(sh_video_t *sh)
 
 	/* Get a decoder instance */
 	if(xvid_decore(0, XVID_DEC_CREATE, &dec_p, NULL)<0) {
-		mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Xvid init failed\n");
+		mp_msg(MSGT_DECVIDEO, MSGL_ERR, "XviD init failed\n");
 		return 0;
 	}
 
@@ -380,7 +380,7 @@ static float stats2aspect(xvid_dec_stats_t *stats)
 
 static vd_info_t info = 
 {
-	"Xvid 1.0 decoder",
+	"XviD 1.0 decoder",
 	"xvid",
 	"Marco Belli <elcabesa@inwind.it>, Edouard Gomez <ed.gomez@free.fr>",
 	"Marco Belli <elcabesa@inwind.it>, Edouard Gomez <ed.gomez@free.fr>",
