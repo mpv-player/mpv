@@ -14,8 +14,7 @@ tdfx_vid.o: tdfx_vid.c 3dfx.h
 radeon_vid.o: radeon_vid.c radeon.h radeon_vid.h
 rage128_vid.o: radeon_vid.c radeon.h radeon_vid.h
 	$(CC) $(CFLAGS) -DRAGE128 -c $< -o $@
-radeon_vid.o rage128_vid.o:
-  CFLAGS += -fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math
+radeon_vid.o rage128_vid.o: CFLAGS += -fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math
 
 install:
 	-mkdir -p $(MDIR)
