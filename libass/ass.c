@@ -848,7 +848,7 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 		size_t rc;
 		int clear = 0;
 		
-		outbuf = malloc(size);
+		outbuf = malloc(osize);
 		ip = data;
 		op = outbuf;
 		
