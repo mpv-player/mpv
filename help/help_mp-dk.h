@@ -223,7 +223,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Kunne ikke åbne netværksadressen '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer er ikke blevet kompileret med SMB læse-understøttelse\n"
 
-#define MSGTR_CantOpenDVD "Kunne ikke åbne DVD drev: %s\n"
+#define MSGTR_CantOpenDVD "Kunne ikke åbne DVD drev: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Der er %d titler på denne DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ugyldig DVD-titel: %d\n"
 #define MSGTR_DVDnumChapters "Der er %d kapitler i denne DVD-titel.\n"

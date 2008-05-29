@@ -228,7 +228,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Impossível abrir da \"lan\": '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer não foi compilado com suporte a leitura de SMB\n"
 
-#define MSGTR_CantOpenDVD "Impossível abrir dispositivo de DVD: %s\n"
+#define MSGTR_CantOpenDVD "Impossível abrir dispositivo de DVD: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Existem %d títulos neste DVD.\n"
 #define MSGTR_DVDinvalidTitle "Número do título do DVD inválido: %d\n"
 #define MSGTR_DVDnumChapters "Existem %d capítulos neste título de DVD.\n"

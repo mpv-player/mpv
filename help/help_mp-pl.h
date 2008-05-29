@@ -513,7 +513,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Nie mogę otworzyć z sieci lokalnej (LAN): '%s'\n"
 #define MSGTR_SMBNotCompiled "Brak wkompilowanej obsługi zasobów SMB.\n"
 
-#define MSGTR_CantOpenDVD "Nie znaleziono DVD: %s\n"
+#define MSGTR_CantOpenDVD "Nie znaleziono DVD: %s (%s)\n"
 
 // stream_dvd.c
 #define MSGTR_NoDVDSupport "MPlayer został skompilowany bez obsługi DVD support, wychodzę.\n"

@@ -211,7 +211,7 @@ static char help_text[]=
 
 #define MSGTR_SMBFileNotFound "Nu pot deschide de pe LAN: '%s'\n"
 
-#define MSGTR_CantOpenDVD "Nu pot deschide DVD-ul: %s\n"
+#define MSGTR_CantOpenDVD "Nu pot deschide DVD-ul: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Sunt %d titluri pe acest DVD.\n"
 #define MSGTR_DVDinvalidTitle "Numãrul titlului DVD greºit: %d\n"
 #define MSGTR_DVDnumChapters "Sunt %d capitole în acest titlu.\n"

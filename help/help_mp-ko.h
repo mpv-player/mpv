@@ -221,7 +221,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "lan으로 부터 열 수 없습니다.: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer가 SMB읽기를 할 수 있도록 컴파일되지 않았습니다.\n"
 
-#define MSGTR_CantOpenDVD "DVD 장치를 열 수 없습니다.: %s\n"
+#define MSGTR_CantOpenDVD "DVD 장치를 열 수 없습니다.: %s (%s)\n"
 #define MSGTR_DVDnumTitles "이 DVD에는 %d개의 타이틀이 있습니다.\n"
 #define MSGTR_DVDinvalidTitle "유효하지 않은 DVD 타이틀 번호입니다.: %d\n"
 #define MSGTR_DVDnumChapters "이 DVD 타이틀에는 %d개의 챕터가 있습니다.\n"

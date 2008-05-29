@@ -522,7 +522,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "打不開局域網内的: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer 没有編譯成支持 SMB 的讀取。\n"
 
-#define MSGTR_CantOpenDVD "打不開 DVD 設備: %s\n"
+#define MSGTR_CantOpenDVD "打不開 DVD 設備: %s (%s)\n"
 
 // stream_dvd.c
 #define MSGTR_DVDspeedCantOpen "不能以寫方式打開DVD設備, 改變DVD速度需要寫方式。\n"

@@ -441,7 +441,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Kunde inte öppna från LAN: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer var inte kompilerad med SMB-lässtöd.\n"
 
-#define MSGTR_CantOpenDVD "Kunde inte öppna DVD-enhet: %s\n"
+#define MSGTR_CantOpenDVD "Kunde inte öppna DVD-enhet: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Det är %d titlar på denna DVD.\n"
 #define MSGTR_DVDinvalidTitle "Icke godkänt DVD-titelnummer: %d\n"
 #define MSGTR_DVDnumChapters "Der är %d kapitel på denna DVD-titel.\n"

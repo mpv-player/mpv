@@ -506,7 +506,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Nemôžem otvoriť z LAN: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer mebol skompilovaný s podporou čítania z SMB\n"
 
-#define MSGTR_CantOpenDVD "Nejde otvoriť DVD zariadenie: %s\n"
+#define MSGTR_CantOpenDVD "Nejde otvoriť DVD zariadenie: %s (%s)\n"
 #define MSGTR_NoDVDSupport "MPlayer bol skompilovaný bez podpory DVD, koniec\n"
 #define MSGTR_DVDnumTitles "Na tomto DVD je %d titulov.\n"
 #define MSGTR_DVDinvalidTitle "Neplatné číslo DVD titulu: %d\n"

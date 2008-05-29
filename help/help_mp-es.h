@@ -546,7 +546,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "No se puede abrir desde la RED: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer no fue compilado con soporte de lectura de SMB.\n"
 
-#define MSGTR_CantOpenDVD "No se puede abrir el dispositivo de DVD: %s\n"
+#define MSGTR_CantOpenDVD "No se puede abrir el dispositivo de DVD: %s (%s)\n"
 
 // stream_dvd.c
 #define MSGTR_DVDspeedCantOpen "No se ha podido abrir el dispositivo de DVD para escritura, cambiar la velocidad del DVD requiere acceso de escritura\n"

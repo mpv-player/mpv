@@ -546,7 +546,7 @@ static char help_text[]=
 #define MSGTR_DVDlimitSpeed "Limitazione della velocità del DVD a %dKB/s... "
 #define MSGTR_DVDlimitFail "non riuscita\n"
 #define MSGTR_DVDlimitOk "riuscita\n"
-#define MSGTR_CantOpenDVD "Impossibile aprire il dispositivo DVD: %s\n"
+#define MSGTR_CantOpenDVD "Impossibile aprire il dispositivo DVD: %s (%s)\n"
 #define MSGTR_NoDVDSupport "MPlayer è stato compilato senza il supporto per DVD, esco\n" 
 #define MSGTR_DVDnumTitles "Ci sono %d titolo/i su questo DVD.\n"
 #define MSGTR_DVDinvalidTitle "Numero del titolo del DVD non valido: %d\n"

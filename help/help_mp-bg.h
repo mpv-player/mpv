@@ -155,7 +155,7 @@ static char help_text[]=
 #define MSGTR_MenuInitialized "Менюто е инициализирано: %s\n"
 #define MSGTR_MenuInitFailed "Менюто не може да бъде инициализирано.\n"
 #define MSGTR_Getch2InitializedTwice "Внимание: Функцията getch2_init е извикана двукратно!\n"
-#define MSGTR_DumpstreamFdUnavailable "Потока не може да бъде извлечен - няма наличен 'fd'.\n"
+#define MSGTR_DumpstreamFdUnavailable "Потока не може да бъде извлечен - няма наличен 'fd'. (%s)\n"
 #define MSGTR_FallingBackOnPlaylist "Повторен опит за обработка на playlist %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Видео филтъра libmenu не може да бъде отворен без root меню %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Грешка при предварителна инициализация на аудио филтрите!\n"

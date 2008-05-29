@@ -98,7 +98,7 @@ static char help_text[]=
 #define MSGTR_ConnToServer "Koblet til server: %s\n"
 #define MSGTR_FileNotFound "Finner ikke filen: '%s'\n"
 
-#define MSGTR_CantOpenDVD "Kan ikke åpne DVD enhet: %s\n"
+#define MSGTR_CantOpenDVD "Kan ikke åpne DVD enhet: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Det er %d titler på denne DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ugyldig DVD tittelnummer: %d\n"
 #define MSGTR_DVDnumChapters "Det er %d kapitler i denne DVD tittelen.\n"
