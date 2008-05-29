@@ -855,7 +855,7 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 			rc = iconv(icdsc, &ip, &ileft, &op, &oleft);
 			if (rc == (size_t)(-1)) {
 				if (errno == E2BIG) {
-					int offset = op - outbuf;
+					size_t offset = op - outbuf;
 					outbuf = (char*)realloc(outbuf, osize + size);
 					op = outbuf + offset;
 					osize += size;
