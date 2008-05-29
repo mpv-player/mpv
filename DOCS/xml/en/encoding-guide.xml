@@ -2158,7 +2158,7 @@ corresponding lines for each field (this has drawbacks - see method 3).
   these filters available to choose from, each with its own advantages
   and disadvantages. Consult <option>mplayer -pphelp</option> and
   <option>mplayer -vf help</option> to see what is available
-  (grep for "deint"), read Michael's Niedermayer
+  (grep for "deint"), read Michael Niedermayer's
   <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing filters comparison</ulink>,
   and search the
   <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
