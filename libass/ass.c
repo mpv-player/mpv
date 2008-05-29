@@ -846,13 +846,19 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 		char* ip;
 		char* op;
 		size_t rc;
+		int clear = 0;
 		
 		outbuf = malloc(size);
 		ip = data;
 		op = outbuf;
 		
-		while (ileft) {
-			rc = iconv(icdsc, &ip, &ileft, &op, &oleft);
+		while (1) {
+			if (ileft)
+				rc = iconv(icdsc, &ip, &ileft, &op, &oleft);
+			else {// clear the conversion state and leave
+				clear = 1;
+				rc = iconv(icdsc, NULL, NULL, &op, &oleft);
+			}
 			if (rc == (size_t)(-1)) {
 				if (errno == E2BIG) {
 					size_t offset = op - outbuf;
@@ -864,7 +870,9 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 					mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorRecodingFile);
 					return NULL;
 				}
-			}
+			} else
+				if (clear)
+					break;
 		}
 		outbuf[osize - oleft - 1] = 0;
 	}
