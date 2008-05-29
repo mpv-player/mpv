@@ -977,7 +977,7 @@ drivers/radeon_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
 drivers/rage128_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
 	$(CC) $(CFLAGS) -DRAGE128 -c $< -o $@
 
-install-drivers:
+install-drivers: drivers
 	-mkdir -p $(MODULES_DIR)
 	install -m 644 $(KERNEL_OBJS) $(MODULES_DIR)
 	depmod -a
