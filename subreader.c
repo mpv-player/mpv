@@ -1133,6 +1133,11 @@ subtitle* subcp_recode (subtitle *sub)
 			free(ot);
 			continue;
 		}
+		// In some stateful encodings, we must clear the state to handle the last character
+		if (iconv(icdsc, NULL, NULL,
+			  &op, &oleft) == (size_t)(-1)) {
+			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line, can't clear encoding state.\n");
+		}
 		*op='\0' ;
 		free (sub->text[l]);
 		sub->text[l] = ot;
