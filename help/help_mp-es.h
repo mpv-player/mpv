@@ -174,7 +174,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Fallo en inicialización del menú.\n"
 #define MSGTR_Getch2InitializedTwice "ADVERTENCIA: getch2_init llamada dos veces!\n"
 #define MSGTR_DumpstreamFdUnavailable "No puedo volcar este stream - no está disponible 'fd'.\n"
-#define MSGTR_FallingBackOnPlaylist "No pude procesar el playlist %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "No puedo abrir filtro de video libmenu con el menú principal %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Error en pre-inicialización de cadena de filtros de audio!\n"
 #define MSGTR_LinuxRTCReadError "Error de lectura de Linux RTC: %s\n"
@@ -1184,8 +1183,6 @@ static char help_text[]=
 "[AO_ALSA]   device=<nombre-dispositivo>\n"\
 "[AO_ALSA]     Establece el dispositivo (cambiar , por . y : por =)\n"
 #define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d canales no están soportados.\n"
-#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] No se puede leer la configuración de ALSA: %s\n"
-#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] No se puede copiar la configuración: %s\n"
 #define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] La apertura en modo sin bloqueo ha fallado, intentando abrir en modo bloqueo.\n"
 #define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Error de apertura en la reproducción: %s\n"
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Error estableciendo el modo bloqueo %s.\n"
@@ -1967,7 +1964,6 @@ static char help_text[]=
 #define MSGTR_RADIO_CaptureStarting "[radio] Empezando con la captura.\n"
 #define MSGTR_RADIO_ClearBufferFailed "[radio] Fallo al limpiar el buffer: %s\n"
 #define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Llamada fallida a stream_enable_cache: %s\n"
-#define MSGTR_RADIO_DriverUnknownId "[radio] Id de driver desconocido: %d\n"
 #define MSGTR_RADIO_DriverUnknownStr "[radio] Nombre de driver desconocido: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] Utilizando interfaz de radio V4Lv2.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Utilizando interfaz de radio V4Lv1.\n"
@@ -2030,7 +2026,6 @@ static char help_text[]=
 #define MSGTR_LIBASS_EmptyEvent "[ass] Evento vacío!\n"
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] MAX_GLYPHS alcanzado: evento %d, comienzo = %llu, duración = %llu\n Texto = %s\n"
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] ¡Aviso! ¡El tamaño del evento ha cambiado!  \n"
-#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] Demasiados eventos simultáneos!\n"
 
 // ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glifo 0x%X no encontrado, seleccionando la fuente para (%s, %d, %d)\n"

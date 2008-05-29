@@ -156,7 +156,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Menyinitiering misslyckades.\n"
 #define MSGTR_Getch2InitializedTwice "VARNING: getch2_init anropad dubbelt!\n"
 #define MSGTR_DumpstreamFdUnavailable "Kan inte dumpa denna ström - ingen 'fd' tillgänglig.\n"
-#define MSGTR_FallingBackOnPlaylist "Faller tillbaka med att försöka tolka spellista %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Kan inte öppna 'libmenu video filter' med rotmeny %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Fel vid förinitiering av audiofilter!\n"
 #define MSGTR_LinuxRTCReadError "'Linux RTC' läsfel: %s\n"

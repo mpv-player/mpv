@@ -158,7 +158,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Zlyhala inicializácia menu.\n"
 #define MSGTR_Getch2InitializedTwice "VAROVANIE: getch2_init je volaná dvakrát!\n"
 #define MSGTR_DumpstreamFdUnavailable "Nemôžem uložiť (dump) tento prúd - nie je dostupný žiaden deskriptor súboru.\n"
-#define MSGTR_FallingBackOnPlaylist "Ustupujem od pokusu o spracovanie playlistu %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Nemôžem otvoriť video filter libmenu s koreňovým menu %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Chyba pri predinicializácii reťazca audio filtrov!\n"
 #define MSGTR_LinuxRTCReadError "Chyba pri čítaní z Linuxových RTC: %s\n"

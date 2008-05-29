@@ -162,7 +162,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "菜單初始化失敗。\n"
 #define MSGTR_Getch2InitializedTwice "警告: getch2_init 被調用兩次!\n"
 #define MSGTR_DumpstreamFdUnavailable "無法轉儲此流 - 没有可用的文件描述符。\n"
-#define MSGTR_FallingBackOnPlaylist "回退到試着解析播放列表 %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "不能用根菜單 %s 打開 libmenu 視頻過濾器。\n"
 #define MSGTR_AudioFilterChainPreinitError "音頻過濾器鏈預啟動錯誤!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC 讀取錯誤: %s\n"
@@ -1189,8 +1188,6 @@ static char help_text[]=
 "[AO_ALSA]   device=<device-name>\n"\
 "[AO_ALSA]     設置設備 (change , to . and : to =)\n"
 #define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d 聲道不被支持。\n"
-#define MSGTR_AO_ALSA_CannotReadAlsaConfiguration "[AO_ALSA] 不能讀取 ALSA 配置: %s\n"
-#define MSGTR_AO_ALSA_CannotCopyConfiguration "[AO_ALSA] 不能拷貝配置: %s\n"
 #define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] 打開 nonblock-模式 失敗, 試着打開 block-模式。\n"
 #define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] 回放打開錯誤: %s\n"
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] 錯誤設置 block-模式 %s。\n"
@@ -1955,7 +1952,6 @@ static char help_text[]=
 #define MSGTR_RADIO_CaptureStarting "[radio] 開始捕獲。\n"
 #define MSGTR_RADIO_ClearBufferFailed "[radio] 清空緩衝失敗: %s\n"
 #define MSGTR_RADIO_StreamEnableCacheFailed "[radio] 調用 stream_enable_cache 失敗: %s\n"
-#define MSGTR_RADIO_DriverUnknownId "[radio] 未知驅動號: %d\n"
 #define MSGTR_RADIO_DriverUnknownStr "[radio] 未知驅動名: %s\n"
 #define MSGTR_RADIO_DriverV4L2 "[radio] 使用 V4Lv2 廣播接口。\n"
 #define MSGTR_RADIO_DriverV4L "[radio] 使用 V4Lv1 廣播接口。\n"
@@ -2018,7 +2014,6 @@ static char help_text[]=
 #define MSGTR_LIBASS_EmptyEvent "[ass] 空事件!\n"
 #define MSGTR_LIBASS_MAX_GLYPHS_Reached "[ass] 達到了字形最大值: 事件 %d, 開始 = %llu, 時長 = %llu\n 文本 = %s\n"
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] 警告! 事件高度(height) 已改變!  \n"
-#define MSGTR_LIBASS_TooManySimultaneousEvents "[ass] 過多同時的事件!\n"
 
 // ass_font.c
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] 字形 0x%X 未找到, 重新選擇字體 (%s, %d, %d)\n"

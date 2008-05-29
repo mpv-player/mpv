@@ -153,7 +153,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Menu initialisatie mislukt.\n"
 #define MSGTR_Getch2InitializedTwice "WAARSCHUWING: getch2_init is twee maal opgeroepen!\n"
 #define MSGTR_DumpstreamFdUnavailable "Deze stream can niet opgeslagen worde - geen bestandsomschrijving (file descriptor) beschikbaar.\n"
-#define MSGTR_FallingBackOnPlaylist "De afspeellijst %s wordt opnieuw ingelezen ...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Kan de libmenu video filter niet openen met het root menu %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Er is een fout opgetreden bijde pre-initialisatie van de audio filter!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC leesfout: %s\n"
