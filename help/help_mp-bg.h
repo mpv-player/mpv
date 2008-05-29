@@ -155,7 +155,7 @@ static char help_text[]=
 #define MSGTR_MenuInitialized "Менюто е инициализирано: %s\n"
 #define MSGTR_MenuInitFailed "Менюто не може да бъде инициализирано.\n"
 #define MSGTR_Getch2InitializedTwice "Внимание: Функцията getch2_init е извикана двукратно!\n"
-#define MSGTR_DumpstreamFdUnavailable "Потока не може да бъде извлечен - няма наличен 'fd'. (%s)\n"
+#define MSGTR_DumpstreamFdUnavailable "Потока не може да бъде извлечен - няма наличен 'fd'.\n"
 #define MSGTR_FallingBackOnPlaylist "Повторен опит за обработка на playlist %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Видео филтъра libmenu не може да бъде отворен без root меню %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Грешка при предварителна инициализация на аудио филтрите!\n"
@@ -445,7 +445,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "'%s' не може да бъде отворен през LAN\n"
 #define MSGTR_SMBNotCompiled "MPlayer не е компилиран със поддръжка на четене от SMB.\n"
 
-#define MSGTR_CantOpenDVD "Не може да бъде отворено DVD устройство: %s\n"
+#define MSGTR_CantOpenDVD "Не може да бъде отворено DVD устройство: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Има %d заглавия на това DVD.\n"
 #define MSGTR_DVDinvalidTitle "Невалиден номер на DVD заглавие: %d\n"
 #define MSGTR_DVDnumChapters "Има %d раздела в това DVD заглавие.\n"

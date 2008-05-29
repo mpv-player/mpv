@@ -1706,7 +1706,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] 你的 mga_vid 驱动版本与 MPlayer 的版本不兼容!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] 打不开: %s\n"
 #define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] 原分辨率至少有一维大于 1023x1023。请用软件或用 -lavdopts lowres=1 重新缩放\n"
-#define MGSTR_LIBVO_MGA_mgavidVersionMissmatch "[MGA] mga_vid 驱动的版本号（%u）与 MPlayer 编译时植入的不符（%u）\n"
+#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] mga_vid 驱动的版本号（%u）与 MPlayer 编译时植入的不符（%u）\n"
 
 // libvo/vesa_lvo.c
 
