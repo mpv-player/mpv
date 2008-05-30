@@ -56,10 +56,10 @@ static inline vector_s16_t my_vec_mergel (vector_s16_t const A,
 #define vec_mergel my_vec_mergel
 #endif
 
-#if defined(__APPLE_CC__)	/* apple */
-#define VEC_S16(a,b,c,d,e,f,g,h) (vector_s16_t) (a, b, c, d, e, f, g, h)
-#else			/* gnu */
+#ifdef HAVE_ALTIVEC_H	/* gnu */
 #define VEC_S16(a,b,c,d,e,f,g,h) {a, b, c, d, e, f, g, h}
+#else			/* apple */
+#define VEC_S16(a,b,c,d,e,f,g,h) (vector_s16_t) (a, b, c, d, e, f, g, h)
 #endif
 
 static const vector_s16_t constants ATTR_ALIGN(16) =

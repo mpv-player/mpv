@@ -50,20 +50,6 @@
 +#endif /* ARCH_X86 || ARCH_X86_64 */
  
  #if defined(ARCH_PPC) || defined(ARCH_SPARC)
-@@ -166,10 +168,10 @@
- 
-     canjump = 1;
- 
--#ifdef HAVE_ALTIVEC_H	/* gnu */
--#define VAND(a,b,c) "vand " #a "," #b "," #c "\n\t"
--#else			/* apple */
-+#if defined(__APPLE_CC__)	/* apple */
- #define VAND(a,b,c) "vand v" #a ",v" #b ",v" #c "\n\t"
-+#else			/* gnu */
-+#define VAND(a,b,c) "vand " #a "," #b "," #c "\n\t"
- #endif
-     asm volatile ("mtspr 256, %0\n\t"
- 		  VAND (0, 0, 0)
 @@ -212,7 +241,7 @@
  
      accel = 0;
