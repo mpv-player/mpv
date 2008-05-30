@@ -604,7 +604,7 @@ and needs a bit of manual setup. Download
 and copy it to the <filename class="directory">vidix/dhahelperwin</filename>
 directory in your <application>MPlayer</application> source tree.
 Open a console and change to that directory. Then type
-<screen>gcc -o dhasetup.exe dhasetup.c</screen>
+<screen>make dhasetup.exe</screen>
 and execute
 <screen>dhasetup.exe install</screen>
 as Administrator. After that you will have to reboot.
