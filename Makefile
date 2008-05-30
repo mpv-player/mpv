@@ -1002,9 +1002,39 @@ install-dhahelper: vidix/dhahelper/dhahelper.o
 dhahelperclean:
 	rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
 
+dhahelperwin: vidix/dhahelperwin/dhasetup.exe vidix/dhahelperwin/dhahelper.sys
+
+vidix/dhahelperwin/dhasetup.exe: vidix/dhahelperwin/dhasetup.c
+	$(CC) -o $@ $<
+
+vidix/dhahelperwin/dhahelper.o: vidix/dhahelperwin/dhahelper.c vidix/dhahelperwin/dhahelper.h
+	$(CC) -Wall -Os -c $< -o $@
+
+vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/dhahelper.rc vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
+	$(WINDRES) -I. $< $@
+
+vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
+	$(CC) -Wl,--base-file,$@ -Wl,--entry,_DriverEntry@8 -nostartfiles \
+            -nostdlib -o vidix/dhahelperwin/junk.tmp $^ -lntoskrnl
+	-rm -f vidix/dhahelperwin/junk.tmp
+
+vidix/dhahelperwin/temp.exp: vidix/dhahelperwin/base.tmp
+	dlltool --dllname vidix/dhahelperwin/dhahelper.sys --base-file $< --output-exp $@
+
+vidix/dhahelperwin/dhahelper.sys: vidix/dhahelperwin/temp.exp vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
+	$(CC) -Wl,--subsystem,native -Wl,--image-base,0x10000 \
+            -Wl,--file-alignment,0x1000 -Wl,--section-alignment,0x1000 \
+            -Wl,--entry,_DriverEntry@8 -Wl,$< -mdll -nostartfiles -nostdlib \
+            -o $@ vidix/dhahelperwin/dhahelper.o \
+            vidix/dhahelperwin/dhahelper-rc.o -lntoskrnl
+	strip $@
+
+dhahelperwinclean:
+	rm -f $(addprefix vidix/dhahelperwin/,*.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp)
+
 
 
 -include $(DEPS)
 
-.PHONY: all doxygen *install* recurse *tools drivers
+.PHONY: all doxygen *install* recurse *tools drivers dhahelper*
 .PHONY: checkheaders *clean dep depend tests
