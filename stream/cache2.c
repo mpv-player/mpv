@@ -200,6 +200,13 @@ int cache_fill(cache_vars_t* s){
 
 static void cache_execute_control(cache_vars_t *s) {
   static unsigned last;
+  if (!s->stream->control) {
+    s->stream_time_length = 0;
+    s->control_new_pos = 0;
+    s->control_res = STREAM_UNSUPPORTED;
+    s->control = -1;
+    return;
+  }
   if (GetTimerMS() - last > 99) {
     double len;
     if (s->stream->control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) == STREAM_OK)
