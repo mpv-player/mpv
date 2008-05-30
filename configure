@@ -2437,8 +2437,18 @@ EOF
 int main(void) { return 0; }
 EOF
     cc_check $_altivec_gcc_flags && _have_altivec_h=yes \
+        && inc_altivec_h="#include <altivec.h>" \
         && _def_altivec_h='#define HAVE_ALTIVEC_H 1'
     echores "$_have_altivec_h"
+
+    # check if the compiler supports braces for vector declarations
+    cat > $TMPC << EOF
+$inc_altivec_h
+#define AVV(x...) {x}
+int main (void) { (vector int) AVV(1); return 0; }
+EOF
+    cc_check $_altivec_gcc_flags &&
+        _def_altivec_vector_braces='#define HAVE_ALTIVEC_VECTOR_BRACES 1'
 
     # Disable runtime cpudetection if we cannot generate AltiVec code or
     # AltiVec is disabled by the user.
@@ -8488,6 +8498,7 @@ $_def_gethostbyname2
 `ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE"`
 
 $_def_altivec_h	// enables usage of altivec.h
+$_def_altivec_vector_braces
 
 /* libvo options */
 #define SCREEN_SIZE_X 1
