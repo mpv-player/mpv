@@ -989,6 +989,19 @@ install-drivers: drivers
 driversclean:
 	rm -f drivers/*.o drivers/*~ drivers/mga_vid_test drivers/tdfx_vid_test
 
+dhahelper: vidix/dhahelper/dhahelper.o vidix/dhahelper/test
+
+vidix/dhahelper/dhahelper.o vidix/dhahelper/test: CFLAGS = $(KERNEL_CFLAGS)
+vidix/dhahelper/dhahelper.o: vidix/dhahelper/dhahelper.c vidix/dhahelper/dhahelper.h
+
+install-dhahelper: vidix/dhahelper/dhahelper.o
+	-mkdir -p $(MODULES_DIR)
+	install -m 644 $< $(MODULES_DIR)
+	depmod -a
+
+dhahelperclean:
+	rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
+
 
 
 -include $(DEPS)
