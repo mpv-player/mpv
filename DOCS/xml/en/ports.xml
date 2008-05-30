@@ -603,10 +603,8 @@ and needs a bit of manual setup. Download
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (with MTRR support)</ulink>
 and copy it to the <filename class="directory">vidix/dhahelperwin</filename>
 directory in your <application>MPlayer</application> source tree.
-Open a console and change to that directory. Then type
-<screen>make dhasetup.exe</screen>
-and execute
-<screen>dhasetup.exe install</screen>
+Open a console and type
+<screen>make install-dhahelperwin</screen>
 as Administrator. After that you will have to reboot.
 </para>
 

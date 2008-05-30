@@ -1029,6 +1029,9 @@ vidix/dhahelperwin/dhahelper.sys: vidix/dhahelperwin/temp.exp vidix/dhahelperwin
             vidix/dhahelperwin/dhahelper-rc.o -lntoskrnl
 	strip $@
 
+install-dhahelperwin:
+	vidix/dhahelperwin/dhasetup.exe install
+
 dhahelperwinclean:
 	rm -f $(addprefix vidix/dhahelperwin/,*.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp)
 
