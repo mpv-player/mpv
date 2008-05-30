@@ -2422,24 +2422,30 @@ if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; th
     cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
-    cc_check -maltivec -mabi=altivec \
-        && _altivec_gcc_flags="-maltivec -mabi=altivec" \
-        || { cc_check -faltivec && _altivec_gcc_flags=-faltivec ; } \
-        || { _altivec=no && _altivec_gcc_flags="none, AltiVec disabled" ; }
-    echores "$_altivec_gcc_flags"
-
+    if $(cc_check -maltivec -mabi=altivec) ; then
+    _altivec_gcc_flags="-maltivec -mabi=altivec"
     # check if <altivec.h> should be included
-    echocheck "altivec.h"
     _def_altivec_h='#undef HAVE_ALTIVEC_H'
-    _have_altivec_h=no
     cat > $TMPC << EOF
 #include <altivec.h>
 int main(void) { return 0; }
 EOF
-    cc_check $_altivec_gcc_flags && _have_altivec_h=yes \
-        && inc_altivec_h="#include <altivec.h>" \
-        && _def_altivec_h='#define HAVE_ALTIVEC_H 1'
-    echores "$_have_altivec_h"
+        if $(cc_check $_altivec_gcc_flags) ; then
+            _def_altivec_h='#define HAVE_ALTIVEC_H 1'
+            inc_altivec_h='#include <altivec.h>'
+        else
+        cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+            if $(cc_check -faltivec) ; then
+                _altivec_gcc_flags="-faltivec"
+            else
+                _altivec=no
+                _altivec_gcc_flags="none, AltiVec disabled"
+            fi
+        fi
+    fi
+    echores "$_altivec_gcc_flags"
 
     # check if the compiler supports braces for vector declarations
     cat > $TMPC << EOF
