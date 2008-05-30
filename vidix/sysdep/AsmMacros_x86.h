@@ -70,7 +70,7 @@
 
 #ifdef CONFIG_DHAHELPER
 #include <sys/ioctl.h>
-#include "../kernelhelper/dhahelper.h"
+#include "kernelhelper/dhahelper.h"
 
 extern int dhahelper_fd;
 extern int dhahelper_initialized;
