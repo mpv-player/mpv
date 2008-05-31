@@ -21,13 +21,14 @@ $ make install
 From within the MPlayer source tree run
 $ ./configure --disable-dvdread-internal
 followed by your preferred parameters.
+Be warned that you *MUST* disable MPlayer's internal copy of dvdread or something
+- most likely - won't work as expected (if at all).
 After configure is run it should say that support for dvdnav and dvdread was
 enabled. If not, investigate the dvdnav and dvdread sections in configure.log
 and try to understand what went wrong. If you can't solve the problem yourself
 post the two sections to mplayer-users.
 
-Notice: Animated menus are working, but still menus and still scenes are not
-yet supported. Also, audio and subtitle language selection by means of menus
-doesn't work yet. Nonetheless they can be switched as usual at any time during
+Notice: Audio and subtitle language selection by means of menus doesn't work yet.
+Nonetheless they can be switched as usual at any time during
 playback by pressing '#' and 'j' (or the keys you chose to override those two
 bindings).
