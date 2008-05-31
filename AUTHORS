@@ -335,7 +335,7 @@ Gritsenko, Andriy N. (AG_LS) <andrej@lucky.net>
 Guyomarch, Rémi (rguyom) <rguyom@pobox.com>
     * various fixes
     * unsharp video filter
-    * XviD encoding support
+    * Xvid encoding support
 
 Hall, Julian <jules@meridiandigital.co.uk>
     * black frame detection filter (vf_blackframe)
@@ -642,7 +642,7 @@ Poettering, Lennart <mzzcynlre@0pointer.de>
 
 Poirier, Guillaume (poirierg) <poirierg@gmail.com>
     * French documentation translation and synchronization
-    * XviD documentation
+    * Xvid documentation
     * libavcodec turbo mode
     * lots of updates of MEncoder's documentation
     * code fixes to support GCC-4.0
@@ -751,7 +751,7 @@ Svoboda, Jiří (zar) <Jiri.Svoboda@seznam.cz>
 
 Swain, Robert <robert.swain@gmail.com>
     * CQM support and turbo multipass mode in x264 interface
-    * Profile support in XviD interface
+    * Profile support in Xvid interface
 
 Syrjälä, Ville <syrjala@sci.fi>
     * -vo dfbmga driver (G400 DVDMax-like feature using dfb 0.9.14)

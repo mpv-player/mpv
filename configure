@@ -286,8 +286,8 @@ Codecs:
   --disable-qtx             disable QuickTime codecs support [enabled]
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
-  --disable-xvid            disable XviD [autodetect]
-  --disable-xvid-lavc       disable XviD in libavcodec [autodetect]
+  --disable-xvid            disable Xvid [autodetect]
+  --disable-xvid-lavc       disable Xvid in libavcodec [autodetect]
   --disable-x264            disable x264 [autodetect]
   --disable-x264-lavc       disable x264 in libavcodec [autodetect]
   --disable-libnut          disable libnut [autodetect]
@@ -6549,7 +6549,7 @@ fi
 echores "$_libdv"
 
 
-echocheck "XviD"
+echocheck "Xvid"
 if test "$_xvid" = auto ; then
   _xvid=no
   cat > $TMPC << EOF
@@ -6570,7 +6570,7 @@ else
 fi
 echores "$_xvid"
 
-echocheck "XviD two pass plugin"
+echocheck "Xvid two pass plugin"
 if test "$_xvid" = yes && test "$_xvid_lavc" = auto ; then
   cat > $TMPC << EOF
 #include <xvid.h>
@@ -7952,7 +7952,7 @@ $_def_hpux_scsi_h
    -cache <kilobytes> */
 $_def_stream_cache
 
-/* Define if you are using XviD library */
+/* Define if you are using Xvid library */
 $_def_xvid
 
 /* Define if you are using the X.264 library */
