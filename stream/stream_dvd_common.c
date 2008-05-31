@@ -1,3 +1,4 @@
+#include "config.h"
 #include <inttypes.h>
 #ifdef USE_DVDREAD_INTERNAL
 #include <dvdread/ifo_types.h>
