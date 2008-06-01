@@ -7548,7 +7548,7 @@ if test "$_dvdnav" = auto ; then
     _dvdnav=no
     echores "disabled due to the usage of the internal copy of dvdread. Append --disable-dvdread-internal"
   else
-  $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
+    $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
   fi
 fi
 if test "$_dvdnav" = auto ; then
