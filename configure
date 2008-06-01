@@ -5373,8 +5373,6 @@ elif test "$_dvdread" = auto ; then
 #include <dvdread/nav_read.h>
 int main(void) { return 0; }
 EOF
-    cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
-      -ldvdread $_ld_dl && _dvdread=yes && _res_comment="external"
   fi
   if test "$_dvdread" = no ; then
     _dvdreadconfig="dvdread-config"
