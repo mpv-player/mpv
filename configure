@@ -5367,14 +5367,13 @@ elif test "$_dvdread" = auto ; then
   if test "$_dl" = yes; then
     cat > $TMPC << EOF
 #include <inttypes.h>
-#include <dvdread/dvd_reader.h>
-#include <dvdread/ifo_types.h>
-#include <dvdread/ifo_read.h>
-#include <dvdread/nav_read.h>
+#include <libdvdread/dvd_reader.h>
+#include <libdvdread/ifo_types.h>
+#include <libdvdread/ifo_read.h>
+#include <libdvdread/nav_read.h>
 int main(void) { return 0; }
 EOF
   fi
-  if test "$_dvdread" = no ; then
     _dvdreadconfig="dvdread-config"
     _dvdreadcflags=`$_dvdreadconfig --cflags`
     _dvdreadlibs=`$_dvdreadconfig --libs`
@@ -5385,7 +5384,6 @@ EOF
       _ld_extra="$_ld_extra $_dvdreadlibs"
       _res_comment="external"
     fi
-  fi
 fi
 
 if test "$_dvdread_internal" = yes; then
