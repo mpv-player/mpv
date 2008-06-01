@@ -7544,7 +7544,12 @@ cc_check -mno-omit-leaf-frame-pointer && CFLAG_NO_OMIT_LEAF_FRAME_POINTER="-mno-
 # to use its own copy of the library)
 echocheck "DVD support (libdvdnav)"
 if test "$_dvdnav" = auto ; then
+  if test "$_dvdread_internal" = yes ; then
+    _dvdnav=no
+    echores "disabled due to the usage of the internal copy of dvdread. Append --disable-dvdread-internal"
+  else
   $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
+  fi
 fi
 if test "$_dvdnav" = auto ; then
   cat > $TMPC <<EOF
