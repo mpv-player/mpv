@@ -5374,16 +5374,16 @@ elif test "$_dvdread" = auto ; then
 int main(void) { return 0; }
 EOF
   fi
-    _dvdreadconfig="dvdread-config"
-    _dvdreadcflags=`$_dvdreadconfig --cflags`
-    _dvdreadlibs=`$_dvdreadconfig --libs`
-    if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
-      $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
-      _dvdread=yes
-      _inc_extra="$_inc_extra $_dvdreadcflags"
-      _ld_extra="$_ld_extra $_dvdreadlibs"
-      _res_comment="external"
-    fi
+  _dvdreadconfig="dvdread-config"
+  _dvdreadcflags=`$_dvdreadconfig --cflags`
+  _dvdreadlibs=`$_dvdreadconfig --libs`
+  if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
+    $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
+    _dvdread=yes
+    _inc_extra="$_inc_extra $_dvdreadcflags"
+    _ld_extra="$_ld_extra $_dvdreadlibs"
+    _res_comment="external"
+  fi
 fi
 
 if test "$_dvdread_internal" = yes; then
