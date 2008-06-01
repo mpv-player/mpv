@@ -128,14 +128,17 @@ static int init(sh_audio_t *sh_audio)
   }
   if(ac3dts_fillbuff(sh_audio) < 0)
   {
+    a52_free(a52_state);
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "AC3/DTS sync failed\n");
     return 0;
   }
+  sh_audio->context = a52_state;
   return 1;
 }
 
 static void uninit(sh_audio_t *sh)
 {
+  a52_free(sh->context);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
