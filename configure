@@ -7582,7 +7582,6 @@ cat > config.mak << EOF
 LANG = C
 MAN_LANG = $MAN_LANG
 MAN_LANG_ALL = $MAN_LANG_ALL
-TARGET_OS = $system_name
 
 DESTDIR =
 prefix = \$(DESTDIR)$_prefix
