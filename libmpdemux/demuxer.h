@@ -369,6 +369,7 @@ static inline int avi_stream_id(unsigned int id){
 }
 
 demuxer_t* demux_open(stream_t *stream,int file_format,int aid,int vid,int sid,char* filename);
+void demux_flush(demuxer_t *demuxer);
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags);
 demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd);
 

@@ -943,6 +943,12 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
 }
 
 
+void demux_flush(demuxer_t *demuxer) {
+    ds_free_packs(demuxer->video);
+    ds_free_packs(demuxer->audio);
+    ds_free_packs(demuxer->sub);
+}
+
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
@@ -963,11 +969,9 @@ if(!demuxer->seekable){
     return 0;
 }
 
+    demux_flush(demuxer);
     // clear demux buffers:
-    if(sh_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}
-    ds_free_packs(d_video);
-    ds_free_packs(demuxer->sub);
-    
+    if(sh_audio) sh_audio->a_buffer_len=0;
     demuxer->stream->eof=0; // clear eof flag
     demuxer->video->eof=0;
     demuxer->audio->eof=0;
@@ -1197,14 +1201,7 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
             chapter += current;
         }
 
-        if(demuxer->video->sh)
-            ds_free_packs(demuxer->video);
-
-        if(demuxer->audio->sh)
-            ds_free_packs(demuxer->audio);
-
-        if(demuxer->sub->id >= 0)
-            ds_free_packs(demuxer->sub);
+        demux_flush(demuxer);
 
         ris = stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
         if(ris != STREAM_UNSUPPORTED)
@@ -1369,14 +1366,7 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle) {
     angles = demuxer_angles_count(demuxer);
     if((angles < 1) || (angle > angles)) return -1;
 
-    if(demuxer->video->sh)
-        ds_free_packs(demuxer->video);
-
-    if(demuxer->audio->sh)
-        ds_free_packs(demuxer->audio);
-
-    if(demuxer->sub->id >= 0)
-        ds_free_packs(demuxer->sub);
+    demux_flush(demuxer);
 
     ris = stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
     if(ris == STREAM_UNSUPPORTED) return -1;
