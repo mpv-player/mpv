@@ -3139,13 +3139,8 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 	ts_dump_streams(demuxer->priv);
 	reset_fifos(demuxer, sh_audio != NULL, sh_video != NULL, demuxer->sub->id > 0);
 
+	demux_flush(demuxer);
 
-	if(sh_audio != NULL)
-		ds_free_packs(d_audio);
-	if(sh_video != NULL)
-		ds_free_packs(d_video);
-	if(demuxer->sub->id > 0)
-		ds_free_packs(d_sub);
 
 
 	video_stats = (sh_video != NULL);
