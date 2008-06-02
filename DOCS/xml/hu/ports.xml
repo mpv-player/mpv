@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25771 -->
+<!-- synced with r26936 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -602,12 +602,10 @@ van és egy kis kézi állítgatás kell hozzá. Töltsd le a
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> vagy
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (MTRR támogatással)</ulink>
 fájlt és másold be a <filename class="directory">vidix/dhahelperwin</filename> könyvtárba
-az <application>MPlayer</application> forrás fádban. Nyisd meg a konzolt
-és válts át erre a könyvtárra, majd írd be
-<screen>gcc -o dhasetup.exe dhasetup.c</screen>
-és futtasd
-<screen>dhasetup.exe install</screen>
-Adminisztrátorként. Ezután újra kell indítanod a gépet.
+az <application>MPlayer</application> forrás fádban.
+Nyisd meg a konzolt és írd be:
+<screen>make install-dhahelperwin</screen>
+adminisztrátorként. Ezután újra kell indítanod a gépet.
 </para>
 
 <para>

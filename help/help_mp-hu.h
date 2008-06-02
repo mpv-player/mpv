@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r26795 (2008. 05. 20.)
+// Sync'ed with help_mp-en.h r26911 (2008. 06. 02.)
 
 // ========================= MPlayer help ===========================
 
@@ -1710,7 +1710,8 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Hibás kimeneti formátum %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Az mga_vid vezérlőd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nem nyitható meg: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] A forrás felbontás legalább egy dimenzióban nagyobb, mint 1023x1023. Kérlek méretezd át szoftveresen vagy használd a -lavdopts lowres=1-t\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] A forrás felbontása legalább egy dimenzióban nagyobb, mint 1023x1023. Méretezd át szoftveresen vagy használd a -lavdopts lowres=1-t\n"
+#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] különbség a kernel (%u) és az MPlayer (%u) mga_vid verziói között\n"
 
 // libvo/vesa_lvo.c
 
