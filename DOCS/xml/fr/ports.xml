@@ -62,7 +62,7 @@ depuis sa <ulink url="http://www.debian-multimedia.org/">page web</ulink>.
 <para>
 Dominik Mierzejewski maintient les paquets RPM officiels de
 <application>MPlayer</application> pour Fedora Core.
-Ils sont disponibles sur le <ulink url="http://rpm.greysector.net/mplayer/">dépot Livna</ulink>.
+Ils sont disponibles sur le <ulink url="http://rpm.greysector.net/mplayer/">dépôt Livna</ulink>.
 </para>
 
 <para>
@@ -222,7 +222,7 @@ installé.
  qui ont construit MPlayer avec le support mediaLib ont reporté une
  forte coloration verte sur les vidéo encodées et décodées avec
  libavcodec.
- Si vous le désirez, vous pouver activer mediaLib avec:
+ Si vous le désirez, vous pouvez activer mediaLib avec:
  <screen>./configure --enable-mlib</screen>
  Ceci est à vos risques et périls. Les utilisateurs x86 ne doivent
  <emphasis role="bold">jamais</emphasis> utiliser mediaLib, puisque cela
@@ -318,7 +318,7 @@ suivante : <ulink url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_i
  </para></listitem>
 
 <listitem><para>
-A cause de bogues dans Solaris 8, il se peut que vous ne pouviez pas lire
+A cause de bogues dans Solaris 8, il se peut que vous ne puissiez pas lire
 de disques DVD plus gros que 4 Go:
 </para>
 
@@ -365,7 +365,7 @@ l'endroit où il est:
 Soit vous pouvez utilisez l'installation par défaut livrée avec IRIX 6.5,
 auquel cas vous devrez éditer le <filename>Makefile</filename>
 manuellement.
-Changez la lignes suivante :
+Changez la ligne suivante :
 <programlisting>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 </programlisting>
@@ -373,7 +373,7 @@ par:
 <programlisting>
   $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
 </programlisting>
-Finalement lancez la construction et l'installation.
+Finalement, lancez la construction et l'installation.
 </para>
 </sect2>
 
@@ -398,7 +398,7 @@ GCC sont boguées.
 Pour la fonctionnalité OpenGL vous aurez besoin d'installer Mesa et les
 pilotes de sortie vidéo gl et gl2 devraient marcher, la vitesse pouvant en
 être très affecté, dépendamment de la vitesse du CPU.
-Un bon substitut au pauvre système son natif de HP-UX est GNU esound.
+Une bonne alternative au pauvre système son natif de HP-UX est GNU esound.
 </para>
 
 <para>
@@ -867,12 +867,12 @@ Et, configurez:
 </para>
 
 <para>
-Si vous configurez pour un CPU G4 ou au-dessus avec le support AltiVec,
-faire comme suit:
+Si vous configurez pour un CPU G4 (ou plus récent) avec le support AltiVec,
+faites comme suit :
 <screen>
 ./configure --disable-gl --disable-x11
 </screen>
-Si vous configurez pour un G3 sans le support AltiVec, faire comme suit:
+Si vous configurez pour un G3 sans le support AltiVec, faites comme suit :
 <screen>
 ./configure --disable-gl --disable-x11 --disable-altivec
 </screen>
