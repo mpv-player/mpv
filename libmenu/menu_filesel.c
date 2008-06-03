@@ -242,7 +242,7 @@ static int open_dir(menu_t* menu,char* args) {
     if(dp->d_name[0] == '.' && strcmp(dp->d_name,"..") != 0)
       continue;
     if (menu_chroot && !strcmp (dp->d_name,"..")) {
-      int len = strlen (menu_chroot);
+      size_t len = strlen (menu_chroot);
       if ((strlen (mpriv->dir) == len || strlen (mpriv->dir) == len + 1)
           && !strncmp (mpriv->dir, menu_chroot, len))
         continue;
