@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25308 -->
+<!-- synced with r26920 -->
 <chapter id="encoding-guide">
 <title>L'encodage avec <application>MEncoder</application></title>
 
@@ -1689,7 +1689,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <formalpara>
 <title>Une note à propos des nombres</title>
 <para>
-  Beaucoup de documents renvoient à un
+  Beaucoup de documents, incluant l'article pointé par le lien précédent, renvoient à un
   nombre de trames par secondes pour la vidéo NTSC de 59.94 ce qui correspond à
   29.97 images complètes par secondes (pour le télécine et l'entrelacé) et à 23.976 (pour
   le progressif). Pour simplifier, certains documents arrondissent même à 60, 30 et 24.
@@ -1767,7 +1767,9 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Elles représentent juste le minimum requis pour encoder la vidéo qui s'y rapportent.
   La meilleure méthode pour faire un bon encodage de DVD ou procéder à des réglages avancés de
 <systemitem class="library">libavcodec</systemitem> pour atteindre une qualité optimum sont des
-  questions en dehors des propos de ce guide.
+  questions en dehors des propos de cette section.
+  Référez-vous aux autres sections contenues dans
+  <link linkend="encoding-guide">L'encodage avec  <application>MPlayer</application></link>.
   </para></listitem>
 <listitem><para>
   Il y a quelques notes en bas de page spécifiques à ce guide, elles sont liées comme ceci :
@@ -1991,7 +1993,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Encodez la vidéo sous forme entrelacée. Normalement, l'entrelacement
   ruine la capacité de compression de l'encodeur, mais <systemitem class="library">libavcodec</systemitem>
   possède deux paramètres spécialement définis pour gérer le stockage de la vidéo entrelacée de manière
-  plus satisfaisante: <option> ildct</option> et <option>ilme</option>. Aussi,
+  plus satisfaisante: <option>ildct</option> et <option>ilme</option>. Aussi,
   l'utilisation de <option>mbd=2</option> est-elle fortement recommandée <link linkend="menc-feat-telecine-footnotes">[2] </link>
   car cela encodera les macroblocs non-entrelacés à des endroits où il n'y
   a pas de mouvements. Notez que <option>-ofps</option> n'est <emphasis>pas</emphasis> nécessaire ici.
@@ -2079,10 +2081,28 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   disponible pour encoder le téléciné et le &quot;Mélange de progressive et télécinée&quot;.
 
   <screen>mencoder dvd://1 -oac copy -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
-  </para>
-
-
-  </listitem>
+  </para></listitem>
+  <listitem><para>
+      <option>-vf filmdint</option> est similaire à 
+      <option>-vf pullup</option> :  les deux filtres tentent d'appairer deux
+      demi-trames pour construire une trame complète.
+      Néanmoins, <option>filmdint</option> desentrelacera les demi-trames
+      orphelines tandis que <option>pullup</option> les éliminera.
+      De plus, les deux filtres ont des codes de détection différents et
+      <option>filmdint</option> peut avoir tendence à faire correspondre les
+      demi-trames un peu moins souvent.
+      Le contenu video à traiter et votre sensibilité personnelle fera qu'un
+      filtre fonctionnera mieux qu'un autre.
+      Sentez-vous libre d'ajuster les options des filtres si vous rencontrez
+      des problèmes avec l'un d'eux (consultez le manuel pour plus de
+      détails).
+      Pour la plupart des supports vidéo de qualité, les deux filtres
+      fonctionnent plutôt bien : débuter avec l'un ou l'autre ne fera pas
+      grande différence.
+      <screen>
+        mencoder dvd://1 -oac copy -vf filmdint -ovc lavc -ofps 24000/1001<!--
+                                                                              --></screen>
+</para></listitem>
   <listitem><para>
   Une méthode plus ancienne consiste à, au lieu de téléciner-inverse les passages télécinés,
   téléciner les parties non-télécinées
@@ -2096,17 +2116,6 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   </para>
   </listitem>
 
-<listitem><para>
-  Je n'ai pas moi-même utilisé <option>-vf filmdint</option>, mais voilà ce que
-  D Richard Felker III en dit:
- 
-  <blockquote><para>Il est correct, mais à mon avis, il essaie de désentrelacer plutôt
-  que de téléciner-inverse trop souvent (tout comme les lecteurs DVD de salon
-   &amp; les TVs progressive) ce qui donne des clignotements affreux et d'autre
-  artefacts. Si vous prévoyer l'utiliser, vous aurez au minimum besoin de passer
-  du temps à affiner les options et à regarder le résultat en sortie pour vous assurer
-  que cela n'esquinte pas tout.</para></blockquote>
-  </para></listitem>
 </itemizedlist>
 </sect3>
 
@@ -5241,7 +5250,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xsvcd -vf \
   scale=480:576,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
   vcodec=mpeg2video:mbd=2:keyint=15:vrc_buf_size=917:vrc_minrate=600:\
-  vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 25 \
+  vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224:aspect=16/9 -ofps 25 \
   -o <replaceable>film.mpg</replaceable> <replaceable>film.avi</replaceable>
   </screen>
 </para>
@@ -5254,7 +5263,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xsvcd  -vf \
   scale=480:480,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
   vcodec=mpeg2video:mbd=2:keyint=18:vrc_buf_size=917:vrc_minrate=600:\
-  vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 30000/1001 \
+  vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224:aspect=16/9 -ofps 30000/1001 \
   -o <replaceable>film.mpg</replaceable> <replaceable>film.avi</replaceable>
   </screen>
 </para>
@@ -5267,7 +5276,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xvcd -vf \
   scale=352:288,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
   vcodec=mpeg1video:keyint=15:vrc_buf_size=327:vrc_minrate=1152:vbitrate=1152:\
-  vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 25 \
+  vrc_maxrate=1152:acodec=mp2:abitrate=224:aspect=16/9 -ofps 25 \
   -o <replaceable>film.mpg</replaceable> <replaceable>film.avi</replaceable>
   </screen>
 </para>
@@ -5280,7 +5289,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xvcd -vf \
   scale=352:240,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
   vcodec=mpeg1video:keyint=18:vrc_buf_size=327:vrc_minrate=1152:vbitrate=1152:\
-  vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 30000/1001 \
+  vrc_maxrate=1152:acodec=mp2:abitrate=224:aspect=16/9 -ofps 30000/1001 \
   -o <replaceable>film.mpg</replaceable> <replaceable>film.avi</replaceable>
   </screen>
 </para>
