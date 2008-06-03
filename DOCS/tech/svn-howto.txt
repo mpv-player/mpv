@@ -305,6 +305,7 @@ II. POLICY / RULES:
      - verbosity changes from default (info) level
      - changes to "historical" parts of docs and web pages
      - use of internal or external libraries
+     - reverting commits from other developers
 
 
 13. Try to keep important discussions and requests (also) on the mplayer-dev-eng
