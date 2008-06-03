@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20417 -->
+<!-- synced with r26936 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
 <sect1 id="linux">
 <title>Linux</title>
+
 <para>
 La plateforme principale de développement est Linux sur x86, bien que
 <application>MPlayer</application> fonctionne sur de nombreux autres ports
 Linux.
 Des binaires de <application>MPlayer</application> sont disponibles depuis
-de nombreuses sources.
-Par contre, <emphasis role="bold">aucun de ces paquets n'est supporté</emphasis>.
+de nombreuses sources.  Par contre, <emphasis role="bold">aucun de ces paquets n'est supporté</emphasis>.
 Rapportez les problèmes à leurs auteurs, pas à nous.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="debian">
 <title>Paquets Debian</title>
+
 <para>
 Pour construire le paquet Debian, lancez la commande suivante dans le
 répertoire source de <application>MPlayer</application>:
@@ -51,13 +54,15 @@ depuis sa <ulink url="http://www.debian-multimedia.org/">page web</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="rpm">
 <title>Paquets RPM</title>
+
 <para>
-Dominik Mierzejewski a créé et maintient des paquets RPM officiels de
-<application>MPlayer</application> pour Red Hat et Fedora Core.
-Ils sont disponibles  sur son
-<ulink url="http://rpm.greysector.net/mplayer/">repository</ulink>.
+Dominik Mierzejewski maintient les paquets RPM officiels de
+<application>MPlayer</application> pour Fedora Core.
+Ils sont disponibles sur le <ulink url="http://rpm.greysector.net/mplayer/">dépot Livna</ulink>.
 </para>
 
 <para>
@@ -71,8 +76,11 @@ Vous pouvez obtenir des RPMs fonctionnels sur
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="arm">
 <title>ARM</title>
+
 <para>
 <application>MPlayer</application> fonctionne sur les PDAs Linux avec un
 CPU ARM c-a-d Sharp Zaurus, Compaq Ipaq. La manière
@@ -91,8 +99,13 @@ Si vous avez besoin d'une GUI, vous pouvez utiliser xmms-embedded.
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="bsd">
 <title>*BSD</title>
+
 <para>
 <application>MPlayer</application> fonctionne sur toutes les variations
 de BSD connues.
@@ -120,9 +133,11 @@ vous devrez recompiler le noyau avec "<envar>option USER_LDT</envar>"
 (à moins d'utiliser FreeBSD-CURRENT, où c'est le cas par défaut).
 </para>
 
+<!-- ********** -->
 
 <sect2 id="freebsd">
 <title>FreeBSD</title>
+
 <para>
 Si votre CPU à SSE, recompilez votre noyau avec
 "<envar>options CPU_ENABLE_SSE</envar>" (FreeBSD-STABLE ou patches noyau
@@ -132,6 +147,7 @@ requis).
 
 <sect2 id="openbsd">
 <title>OpenBSD</title>
+
 <para>
 À cause des limitations dans les différentes versions de gas (relocation
 contre MMX), vous aurez besoin de compiler en deux étapes:
@@ -140,18 +156,26 @@ D'abord assurez-vous que le non-natif est en premier dans votre
 assurez-vous que la version native est utilisée et faites
 <command>gmake</command>.
 </para>
+
 <para>
 Depuis OpenBSD 3.4 le hack ci-dessus n'est plus nécessaire.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="darwin">
 <title>Darwin</title>
+
 <para>
 Voir la section <link linkend="macos">Mac OS</link>.
 </para>
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="unix">
 <title>Unix Commercial</title>
@@ -164,8 +188,11 @@ ont tendances à être différent de ceux trouvé sur les Unix libres, vous devr
 peut-être faire quelques ajustements manuels pour que le build fonctionne.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="solaris">
 <title>Solaris</title>
+
 <para>
 <application>MPlayer</application> devrait fonctionner sous Solaris 2.6
 ou supérieur.
@@ -188,18 +215,17 @@ installé.
 
 <para><emphasis role="bold">Attention :</emphasis></para>
  <itemizedlist>
- <listitem><para><emphasis role="bold">mediaLib</emphasis> est
- <emphasis role="bold">actuellement désactivé</emphasis> par défaut dans
- <application>MPlayer</application>. Les utilisateurs SPARC
+ <listitem><para>
+   <emphasis role="bold">mediaLib</emphasis> est
+   <emphasis role="bold">actuellement désactivé</emphasis> par défaut dans
+   <application>MPlayer</application> pour cause d'inconsistance. Les utilisateurs SPARC
  qui ont construit MPlayer avec le support mediaLib ont reporté une
  forte coloration verte sur les vidéo encodées et décodées avec
  libavcodec.
  Si vous le désirez, vous pouver activer mediaLib avec:
- <screen>
- $ ./configure --enable-mlib
- </screen>
+ <screen>./configure --enable-mlib</screen>
  Ceci est à vos risques et périls. Les utilisateurs x86 ne doivent
- <emphasis role="bold">pas</emphasis> utiliser mediaLib, cela
+ <emphasis role="bold">jamais</emphasis> utiliser mediaLib, puisque cela
  déteriorerait les performances de MPlayer de manière importante.
  </para></listitem>
  </itemizedlist>
@@ -211,8 +237,8 @@ make natif de Solaris ne fonctionnera pas.
 Message d'erreur typique si vous utilisez le make de Solaris au lieu de
 celui de GNU:
 <screen>
-   % /usr/ccs/bin/make
-   make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
+% /usr/ccs/bin/make
+make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
 </screen>
 </para>
 
@@ -288,11 +314,8 @@ antérieures à Solaris Nevada b31. Ceci a été réparé par Sun pour
 Solaris Nevada b32 mais pas encore pour Solaris 10. Le Projet MPlayer
 a averti Sun de ce problème. Un patch pour Solaris 10 est actuellement en
 développement. Plus d'information sont disponibles à l'adresse
-suivante :
-<ulink
-url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
- </para>
-</listitem>
+suivante : <ulink url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
+ </para></listitem>
 
 <listitem><para>
 A cause de bogues dans Solaris 8, il se peut que vous ne pouviez pas lire
@@ -324,39 +347,41 @@ Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc)
 </itemizedlist>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="irix">
 <title>IRIX</title>
+
 <para>
 Vous pouvez soit essayer d'installer le programme d'installation GNU, et
 (si vous ne l'avez pas mis dans votre chemin par défaut) précisez ensuite
 l'endroit où il est:
-<screen>./configure --with-install=<replaceable>/chemin/et/nom/de/l'installation</replaceable></screen>
+<screen>
+  ./configure --with-install=<replaceable>/chemin/et/nom/de/l'installation</replaceable>
+</screen>
 </para>
 
 <para>
 Soit vous pouvez utilisez l'installation par défaut livrée avec IRIX 6.5,
 auquel cas vous devrez éditer le <filename>Makefile</filename>
 manuellement.
-Changez les deux lignes suivantes:
+Changez la lignes suivante :
 <programlisting>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-
-  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 </programlisting>
 par:
 <programlisting>
   $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-
-  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
-Et ensuite faites (depuis le rép. source de <application>MPlayer</application>):
-<screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
-finalement lancez la construction et l'installation.
+Finalement lancez la construction et l'installation.
 </para>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="hp-ux">
 <title>HP UX</title>
+
 <para>
 Joe Page héberge un
 <ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOWTO</ulink>
@@ -379,7 +404,6 @@ Un bon substitut au pauvre système son natif de HP-UX est GNU esound.
 <para>
 Créer le périphérique DVD
 scanne le bus SCSI avec:
-</para>
 
 <screen>
 # ioscan -fn
@@ -397,32 +421,21 @@ ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE  
 ...
 </screen>
 
-<para>
 La sortie d'écran montre un lecteur DVD-ROM Pioneer à l'adresse SCSI 2.
 L'instance de la carte pour le chemin hardware 8/16 est 1.
 </para>
 
 <para>
 Créer un lien depuis le prériphérique brut vers le périphérique DVD.
-</para>
-
 <screen>
-# ln -s /dev/rdsk/c<replaceable>&lt;SCSI bus instance&gt;</replaceable>t
-<replaceable>&lt;SCSI target ID&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable>
-/dev/<replaceable>&lt;device&gt;</replaceable>
+ln -s /dev/rdsk/c<replaceable>&lt;SCSI bus instance&gt;</replaceable>t<replaceable>&lt;SCSI target ID&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable> /dev/<replaceable>&lt;device&gt;</replaceable>
 </screen>
-
-<para>
 Exemple:
+<screen>ln -s /dev/rdsk/c1t2d0 /dev/dvd</screen>
 </para>
-
-<screen>
-# ln -s /dev/rdsk/c1t2d0 /dev/dvd
-</screen>
 
 <para>
 Ci-dessous sont exposées les solutions pour certains problèmes communs:
-</para>
 
 <itemizedlist>
 <listitem>
@@ -484,8 +497,11 @@ suffisante ou non.)
 
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="aix">
 <title>AIX</title>
+
 <para>
 <application>MPlayer</application> se compile parfaitement sous AIX 5.1,
 5.2 et 5.3, en utilisant GCC 3.3 ou plus.
@@ -516,12 +532,12 @@ Les architectures suivantes ont été testé:
 <para>
 Les architectures suivantes n'ont pas été testé, mais devraient quand
 même marcher:
-</para>
 <itemizedlist>
 <listitem><para>POWER</para></listitem>
 <listitem><para>POWER2</para></listitem>
 <listitem><para>POWER5</para></listitem>
 </itemizedlist>
+</para>
 
 <para>
 Le son à travers les Services Ultimedia n'est pas supporté, comme Ultimedia a
@@ -537,10 +553,9 @@ role="bold">MPlayer ne produit pas de son sous AIX 5.2 et 5.3.</emphasis>
 <itemizedlist>
 <listitem>
 <para>
-Si vous rencontrez ce message d'erreur de
-<filename>configure</filename> :
+Si vous rencontrez ce message d'erreur de <filename>configure</filename> :
 <screen>
-$./configure
+$ ./configure
 ...
 Checking for iconv program ... no
 No working iconv program found, use
@@ -559,6 +574,10 @@ $ ./configure --charset=noconv
 </itemizedlist>
 </sect2>
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="windows">
 <title>Windows</title>
@@ -598,63 +617,41 @@ Ajoutez <option>-fs</option> pour le mode plein écran.
   pour compiler le pilote de sortie vidéo DirectX. De plus vous devez
   avoir DirectX 7 ou supérieur pour que ce pilote fonctionne.</para>
 
-<para><link linkend="vidix">VIDIX</link> fonctionne maintenant sous Windows
-  avec <option>-vo winvidix</option>, bien que ce soit toujours expérimental
-  et que cela requiert une configuration manuelle. Téléchargez
+<para>
+<link linkend="vidix">VIDIX</link> fonctionne maintenant sous Windows avec
+<option>-vo winvidix</option>, bien que ce soit toujours expérimental
+et que cela requiert une configuration manuelle. Téléchargez
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> ou
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (avec support des MTRR)</ulink>
   et copiez le dans le répertoire
   <filename class="directory">libdha/dhahelperwin</filename> de votre arborescence
   <application>MPlayer</application>.
-  Ouvrez une console et placez-vous dans ce répertoire. Ensuite tapez
-
-  <screen>gcc -o dhasetup.exe dhasetup.c</screen>
-
-  et exécutez
-
-  <screen>dhasetup.exe install</screen>
-
-  en tant qu'Administrateur. Ensuite vous devez rebooter. Lorsque c'est
-  fait, copiez les fichiers <systemitem class="library">.so</systemitem>
-  de <filename class="directory">vidix/drivers</filename> dans le répertoire
-  <filename class="directory">mplayer/vidix</filename> relatif à votre
-  <filename>mplayer.exe</filename>.</para>
+  Ouvrez une console et tapez
+  <screen>make install-dhahelperwin</screen>
+  en tant qu'Administrateur. Ensuite vous devez rebooter.
+</para>
 
 <para>Pour de meilleurs résultats <application>MPlayer</application> devrait
-  utiliser une palette que votre carte graphique supporte de façon matérielle.
-  Malheureusement, de nombreux pilotes graphiques Windows renvoient certaines
-  palettes alors que la carte ne le supporte pas. Pour le vérifier, essayez
-
-  <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>palette</replaceable> <replaceable>film</replaceable></screen>
+utiliser une palette que votre carte graphique supporte de façon matérielle.
+Malheureusement, de nombreux pilotes graphiques Windows renvoient certaines palettes alors que la carte ne le supporte pas. Pour le vérifier, essayez
+<screen>
+mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>palette</replaceable> <replaceable>film</replaceable>
+</screen>
 
   où <replaceable>palette</replaceable> peut être n'importe quelle palette
   affichée par l'option <option>-vf format=fmt=help</option>. Si vous
   trouvez une palette que votre carte gère particulièrement mal,
   <option>-vf noformat=<replaceable>palette</replaceable></option>
   l'empèchera d'être utilisée. Ajouter cela à votre fichier de conf pour
-  ne plus l'utiliser de façon permanente.</para>
-
-
-  <para>
-   There are special codec packages for Windows available on our
-   <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>
-   to allow playing formats for which there is no native support yet.
-   Put the codecs somewhere in your path or pass
-   <option>--codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
-   (alternatively
-   <option>--codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>
-   only on <application>Cygwin</application>) to <filename>configure</filename>.
-   We have had some reports that Real DLLs need to be writable by the user
-   running <application>MPlayer</application>, but only on some systems (NT4).
-   Try making them writable if you have problems.</para>
-
+  ne plus l'utiliser de façon permanente.
+</para>
 
 <para>
 Il y a des paquetages de codec spécial pour Windows disponible sur notre
 <ulink url="http://www.mplayerhq.hu/design7/codecs.html">page de codecs</ulink>
 pour permettre de jouer les formats qui ne sont pas encore nativement
 supportés.
-Placez les codecs quelque part dans votre patch ou passez
+Placez les codecs quelque part dans votre path ou passez
 <option>--codecsdir=<replaceable>c:/chemin/de/vos/codecs</replaceable></option>
 (éventuellement
 <option>--codecsdir=<replaceable>/chemin/de/vos/codecs</replaceable></option>
@@ -666,40 +663,31 @@ accessibles en écriture pour l'utilisateur ayant lancé
 Essayez de les rendre accessibles en écriture si vous avez des problèmes.
 </para>
 
-<para>Vous pouvez lire des VCDs en jouant les fichiers
+<para>
+  Vous pouvez lire des VCDs en jouant les fichiers
   <filename>.DAT</filename> ou <filename>.MPG</filename> que Windows affiche
   sur les VCDs. Cela fonctionne tout simplement comme cela (changez la lettre
-  de votre lecteur de CD-ROM):</para>
-
+  de votre lecteur de CD-ROM):
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
-
-<para>Les DVDs fonctionnent également, ajustez <option>-dvd-device</option>
-  à la lettre de votre lecteur DVD-ROM:</para>
-
+Vous pouvez aussi lire une piste VCD directement en utilisant :
+<screen> mplayer vcd://<replaceable>&lt;track&gt;</replaceable> -cdrom-device <replaceable>d:</replaceable></screen>
+Les DVDs fonctionnent également, ajustez <option>-dvd-device</option> à la lettre de votre lecteur DVD-ROM :
 <screen>mplayer dvd://<replaceable>&lt;titre&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
-
-<para>La console <application>Cygwin</application>/<application>MinGW</application>
-  est plutôt lente. Il semble que rediriger la sortie
-  ou utiliser l'option <option>-quiet</option> améliore les performances. Le
-  rendu direct (<option>-dr</option>) peut également aider.
-  Si la lecture est erratique, essayez
-  <option>-autosync 100</option>. Si certaines de ces options vous sont utiles,
-  vous pouvez les placer dans votre fichier de config.</para>
-
-<note>
-
-<para>Sous Windows la détection CPU en cours d'execution (runtime CPU detection)
-désactive le support SSE en raison de plantages récurrent et dur à tracer liés au SSE.
-Si vous souhaitez avoir le support SSE sous Windows, vous devrez compiler sans
-runtime CPU detection.
+La console <application>Cygwin</application>/<application>MinGW</application>
+est plutôt lente. Il semble que rediriger la sortie ou utiliser l'option
+<option>-quiet</option> améliore les performances. Le rendu direct
+(<option>-dr</option>) peut également aider.  Si la lecture est erratique,
+essayez <option>-autosync 100</option>. Si certaines de ces options vous sont
+utiles, vous pouvez les placer dans votre fichier de config.
 </para>
 
+<note>
 <para>Si vous avez un Pentium 4 et que vous expériencez un plantage lors de l'utilisation
 des codecs RealPlayer vous pourriez vouloir désactiver le support hyperthreading.
 </para>
-
 </note>
 
+<!-- ********** -->
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
@@ -722,6 +710,7 @@ peuvent être trouvés sur le
 
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="mingw">
 <title><application>MinGW</application></title>
@@ -747,9 +736,11 @@ et les librairies nécessaires sont disponibles sur
 MinGW HOWTO</ulink>.</para>
 
 </sect2>
-
-
 </sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="macos">
 <title>Mac OS</title>
@@ -809,8 +800,12 @@ Vous pouvez ensuite lancer le script
 avec MacPorts):
 <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
+
+<!-- ********** -->
+
 <sect2 id="osx_gui">
 <title>MPlayer OS X GUI</title>
+
 <para>
 Vous pouvez obtenir un GUI natif et un binaire pré-compilé de
 <application>MPlayer</application> pour Mac OS X depuis le projet
@@ -852,37 +847,33 @@ mettre en place quelque chose comme ceci:
 <screen>
 MPlayer_repertoire_source
    |
-   |---&gt;main           (source SVN de MPlayer)
+   |--->main           (source SVN de MPlayer)
    |
-   |---&gt;main_noaltivec (source SVN de MPlayer configuré avec --disable-altivec)
+   |--->main_noaltivec (source SVN de MPlayer configuré avec --disable-altivec)
    |
-   |---&gt;mplayerosx     (source SVN MPlayerOSX)
+   \--->mplayerosx     (source SVN MPlayerOSX)
 </screen>
-
 Premièrement vous avez besoin de compiler main et main_noaltivec.
 </para>
 
 <para>
-Ensuite, réglez une variable globale:
-
+  Pour assurer une rétro compatibilité maximum, commencez par créer la variable d'environnement suivante :
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
 
 <para>
-Et, configure:
+Et, configurez:
 </para>
 
 <para>
 Si vous configurez pour un CPU G4 ou au-dessus avec le support AltiVec,
 faire comme suit:
 <screen>
-./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+./configure --disable-gl --disable-x11
 </screen>
-Si vous configurez pour un G3, faire comme suit:
-
+Si vous configurez pour un G3 sans le support AltiVec, faire comme suit:
 <screen>
-./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
---disable-altivec
+./configure --disable-gl --disable-x11 --disable-altivec
 </screen>
 Vous pourriez avoir besoin d'éditer <filename>config.mak</filename> et
 changer le
@@ -892,14 +883,9 @@ changer le
 
 <para>
 Continuez avec
-<screen>
-make
-</screen>
+<screen>make</screen>
 ensuite placez vous dans le répertoire mplayerosx et tapez
-
-<screen>
-make dist
-</screen>
+<screen>make dist</screen>
 Cela créera une archive compressée <systemitem>.dmg</systemitem> avec le binaire
 prêt à l'emploi.
 </para>
@@ -912,6 +898,10 @@ du tout en fonction.
 </sect2>
 </sect1>
 
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="exotic_platforms">
 <title>Plateformes Exotiques</title>
 
@@ -923,8 +913,11 @@ Pour les instructions de build vous devriez vous référer à la documentation
 spécifique du système.
 </para>
 
+<!-- ********** -->
+
 <sect2 id="qnx">
 <title>QNX</title>
+
 <para>
 Vous aurez besoin de télécharger et installer SDL pour QNX. Puis de lancer
 <application>MPlayer</application> avec les options <option>-vo sdl:driver=photon</option> et
@@ -937,6 +930,8 @@ La sortie de <option>-vo x11</option> sera encore plus lente que sous Linux,
 très lente.
 </para>
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
