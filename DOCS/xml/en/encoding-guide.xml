@@ -2250,7 +2250,7 @@ mencoder dvd://1 -oac copy -vf pullup,softskip
   fields to form a complete frame. <option>filmdint</option> will
   deinterlace individual fields that it cannot match, however, whereas
   <option>pullup</option> will simply drop them. Also, the two filters
-  have separate detection code, and filmdint may tend to match fields a
+  have separate detection code, and <option>filmdint</option> may tend to match fields a
   bit less often. Which filter works better may depend on the input
   video and personal taste; feel free to experiment with fine-tuning
   the filters' options if you encounter problems with either one (see
