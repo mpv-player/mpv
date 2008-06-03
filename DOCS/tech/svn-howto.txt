@@ -306,6 +306,9 @@ II. POLICY / RULES:
      - changes to "historical" parts of docs and web pages
      - use of internal or external libraries
      - reverting commits from other developers
+     - mixing functional and cosmetic changes
+     - making the spelling of words consistant without actually correcting
+       any spelling errors.
 
 
 13. Try to keep important discussions and requests (also) on the mplayer-dev-eng
