@@ -307,7 +307,7 @@ II. POLICY / RULES:
      - use of internal or external libraries
      - reverting commits from other developers
      - mixing functional and cosmetic changes
-     - making the spelling of words consistant without actually correcting
+     - making the spelling of words consistent without actually correcting
        any spelling errors.
 
 
