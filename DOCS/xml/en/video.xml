@@ -2407,32 +2407,6 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
 
 <!-- ********** -->
 
-<sect2 id="tv-out_matrox_cable">
-<title>Building a Matrox TV-out cable</title>
-<para>
-No one takes any responsibility, nor guarantee for any damage caused
-by this documentation.
-</para>
-
-<formalpara><title>Cable for G400</title>
-<para>
-The CRTC2 connector's fourth pin is the composite video signal. The
-ground are the sixth, seventh and eighth pins. (info contributed
-from Balázs Rácz)
-</para>
-</formalpara>
-
-<formalpara><title>Cable for G450</title>
-<para>
-The CRTC2 connector's first pin is the composite video signal. The
-ground are the fifth, sixth, seventh, and fifteenth (5, 6, 7, 15)
-pins. (info contributed from Balázs Kerekes)
-</para>
-</formalpara>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="tv-out_matrox_g450">
 <title>Matrox G450/G550 cards</title>
 
@@ -2459,6 +2433,32 @@ recommended for G400, see the section above.
 The necessary kernel patch and the detailed HOWTO is downloadable from
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="tv-out_matrox_cable">
+<title>Building a Matrox TV-out cable</title>
+<para>
+No one takes any responsibility, nor guarantee for any damage caused
+by this documentation.
+</para>
+
+<formalpara><title>Cable for G400</title>
+<para>
+The CRTC2 connector's fourth pin is the composite video signal. The
+ground are the sixth, seventh and eighth pins. (info contributed
+from Balázs Rácz)
+</para>
+</formalpara>
+
+<formalpara><title>Cable for G450</title>
+<para>
+The CRTC2 connector's first pin is the composite video signal. The
+ground are the fifth, sixth, seventh, and fifteenth (5, 6, 7, 15)
+pins. (info contributed from Balázs Kerekes)
+</para>
+</formalpara>
 </sect2>
 
 <!-- ********** -->
