@@ -171,7 +171,7 @@ MPlayer possède un affichage sur écran (OnScreenDisplay) pour les
 informations, de belles et grandes polices lissées et des effets
 visuels pour confirmer les contrôles au clavier. Les polices
 européennes/\:ISO8859\-1,2 (Hongroise, Anglaise, Tchèque, etc),
-Cyrillique et Coréenne sont gérés ainsi que 11 formats de
+Cyrillique et Coréenne sont gérées ainsi que 11 formats de
 sous-titres (MicroDVD, SubRip, OGM, SubViewer, Sami, VPlayer, RT,
 SSA, AQTitle, JACOsub, PJS et le nôtre: MPsub) et les sous-titres
 DVD (SPU streams, VobSub et Closed Captions).
@@ -181,7 +181,7 @@ DVD (SPU streams, VobSub et Closed Captions).
 des vidéos jouables par MPlayer (voir ci-dessus) dans d'autres formats jouables
 par MPlayer (voir ci-dessous).
 Il encode en MPEG-4 (DivX/Xvid), un des codecs libavcodec, et en
-PCM/\:MP3/\:VBRMP3 audio en 1, 2 ou 3 passes.
+PCM/\:MP3/\:VBRMP3 audio en 1, 2 ou 3 passe(s).
 Il permet également de copier des flux de données (stream), possède un
 puissant système de plugins (découpage, expansion, retournement, postprocess,
 rotation, redimensionnement, bruit, conversion RGB/\:YUV) et bien plus.
@@ -231,9 +231,9 @@ Ré-initialise la vitesse de lecture à la normale.
 .IPs "< et >"
 Recule/\:avance dans la liste de lecture (playlist).
 .IPs "ENTER"
-avance dans la liste de lecture, même après la fin
+Avance dans la liste de lecture, même après la fin
 .IPs "ORIG et FIN"
-Va à au prochain/\:précédent arbre de lecture (playtree) dans la liste des
+Va au prochain/\:précédent arbre de lecture (playtree) dans la liste des
 pères.
 .IPs "INSER et SUPPR (liste de lecture ASX uniquement)"
 Va à la prochaine/\:précédente source de rechange.
@@ -264,9 +264,8 @@ Alterne entre les pistes vidéos disponibles.
 Alterne entre les pistes audio disponibles.
 .IPs "TAB (MPEG-TS et libavformat  uniquement)"
 Alterne entre les différents programmes disponibles.
-Cycle through the available programs.
 .IPs "f\ \ \ \ "
-Bascule en plein-écran.
+Bascule en mode plein-écran.
 .IPs "T\ \ \ \ "
 Bascule en mode toujours visible.
 .IPs "w et e"
@@ -275,14 +274,14 @@ Réduit/\:augmente l'intervalle pan (horizontal) et scan.
 Alterne entre les états OSD: aucun / déplacement /
 déplacement + chrono / déplacement + chrono + durée totale
 .IPs "d\ \ \ \ "
-alterne entre les modes de sauts de trame: aucun / saut d'affichage / saut de
+Alterne entre les modes de sauts de trame: aucun / saut d'affichage / saut de
 décodage (voir \-framedrop et \-hardframedrop)
 .IPs "v\ \ \ \ "
 Bascule l'affichage des sous-titres.
 .IPs "j\ \ \ \ "
 Alterne entre les différents sous-titres disponibles.
 .IPs "y et g"
-Choisit le sous-titre après/avant dans la liste des sous-titres.
+Choisit le sous-titre suivant/précédent dans la liste des sous-titres.
 .IPs "F\ \ \ \ "
 Bascule l'affichage des "sous-titres forcés".
 .IPs "a\ \ \ \ "
@@ -292,7 +291,7 @@ Ajuste le décalage des sous-titres de +/\- 0.1 secondes.
 .IPs "r et t"
 Translate les sous-titres vers le haut/bas.
 .IPs i (mode \-edlout uniquement)
-Créé une marque EDL.
+Crée une marque EDL.
 .IPs "s (\-vf screenshot uniquement)"
 Réalise une capture d'écran.
 .IPs "S (\-vf screenshot uniquement)"
@@ -300,11 +299,11 @@ Amorce/arrête la capture d'écran.
 .IPs "I\ \ \ \ "
 Affiche le nom de fichier dans l'OSD.
 .IPs "! and @"
-Saute au début du chapitre précédant/suivant.
+Saute au début du chapitre précédent/suivant.
 .IPs "D (\-vo xvmc, \-vf yadif et \-vf kerndeint uniquement)"
 Active/désactive le désentrelacement.
 .IPs "A"
-Bascule entre les angles du DVD disponibles.
+Bascule entre les angles disponibles du DVD.
 .RE
 .PD 1
 .PP
@@ -321,7 +320,7 @@ Ajuste le contraste.
 .IPs "3 et 4"
 Ajuste la luminosité.
 .IPs "5 et 6"
-Ajuste la couleur.
+Ajuste la teinte.
 .IPs "7 et 8"
 Ajuste la saturation.
 .RE
@@ -378,8 +377,8 @@ Navigue en arrière/\:avant d'une minute.
 .
 .PP
 .RS
-(Les touches suivantes ne sont valides uniquement si MPlayer a été
-compilé avec le support de la GUI et ont une priorité supérieure à celles
+(Les touches suivantes sont valides uniquement si MPlayer a été
+compilé avec le support de la GUI et si elles ont une priorité supérieure à celles
 définies plus haut dans ce document.)
 .RE
 .PP
@@ -405,14 +404,14 @@ Ouvre la fenêtre de préférences.
 .PP
 .RS
 (Les touches suivantes ne sont valides que si MPlayer a été
-compilé avec le support de l'entrée TV ou DVB et ont une priorité
+compilé avec le support de l'entrée TV ou DVB et si elles ont une priorité
 supérieure à celles définies plus haut dans ce document.)
 .RE
 .PP
 .PD 0
 .RS
 .IPs "h et k"
-Sélectionne le canal précédent/\:prochain.
+Sélectionne le canal précédent/\:suivant.
 .IPs n
 Change de norme.
 .IPs u
@@ -431,7 +430,7 @@ navigation dans les menus).
 .IPs "touche 8"
 Bouton haut.
 .IPs "touche 2"
-Bouton du bas.
+Bouton bas.
 .IPs "touche 4"
 Bouton gauche.
 .IPs "touche 6"
@@ -439,7 +438,7 @@ Bouton droit.
 .IPs "touche 5"
 Retourne au menu principal.
 .IPs "touche 7"
-Retourne au menu le plus près (dans l'ordre: chapitre->titre->racine).
+Retourne au menu le plus proche (dans l'ordre: chapitre->titre->racine).
 .IPs "touche ENTRÉE"
 Confirme le choix.
 .RE
@@ -456,9 +455,9 @@ le télétexte de la TV.)
 .PD 0
 .RS
 .IPs "X\ \ \ \ "
-Bascule entre le télétexte activé ou désactivé.
+Active/\:désactive le télétexte.
 .IPs "Q at W"
-Aller à la page télétexte suivante/précédente.
+Va à la page télétexte suivante/précédente.
 .RE
 .PD 1
 .PP
@@ -485,7 +484,7 @@ Navigue en arrière/\:avant de 10 secondes.
 .IPs "haut et bas"
 Navigue en avant/\:arrière d'une minute.
 .IPs "bouton 1"
-pause
+Met en pause.
 .IPs "bouton 2"
 Alterne entre les états de l'OSD\ : rien / navigation / navigation + temps
 écoulé / navigation + temps écoulé + temps total.
@@ -505,7 +504,7 @@ Chaque option a son opposé, par ex.\& l'inverse de l'option
 \-fs est \-nofs.
 .PP
 Si une option est documentée comme (XXX uniquement), cela veut dire
-qu'elle ne fonctionnera uniquement si vous activez l'option XXX ou
+qu'elle fonctionnera uniquement si vous activez l'option XXX ou
 que XXX a été compilé dans MPlayer.
 .PP
 .I NOTE\ :
@@ -542,7 +541,7 @@ Les options du fichier utilisateur ont priorité sur les options du fichier
 global, et les options données sur la ligne de commande ont priorité sur tous
 les fichiers.
 La syntaxe des fichiers de configuration est 'option=<valeur>', tout ce qui
-suit un '#' est considéré comme commentaire.
+suit un '#' est considéré comme un commentaire.
 Les options qui nécessitent des valeurs peuvent être activées en les
 initialisant à 'yes' ou '1' ou désactivées en les initialisant à 'no'
 ou '0'.
@@ -575,7 +574,7 @@ vf=eq2=1.0:\-0.8
 .I "EXEMPLE DE FICHIER DE CONFIGURATION MENCODER :"
 .sp 1
 .nf
-# Fait MEncoder écrire dans un certain fichier par défaut.
+# Fait écrire MEncoder dans un certain fichier par défaut.
 o=encoded.avi
 # Les 4 lignes suivantes permettant à mencoder tv:// de capturer immédiatement.
 oac=pcm=yes
@@ -661,7 +660,7 @@ lavcopts=mbd=2:trell=yes:v4mv=yes
 .TP
 .B \-codecs\-file <nomfichier> (voir aussi \-afm, \-ac, \-vfm et \-vc)
 Change le chemin de recherche standard et utilise le fichier donné en
-paramètre au lieu du fichier codecs.conf inclus dans MPlayer
+paramètre au lieu du fichier codecs.conf inclus dans MPlayer.
 .
 .TP
 .B \-include <fichier de configuration>
@@ -673,7 +672,7 @@ Affiche toutes les options disponibles.
 .
 .TP
 .B \-msgcharset <charset>
-Convertit les messages consoles à la l'ensemble de caractères spécifié
+Convertit les messages consoles à l'ensemble de caractères spécifié
 (par défaut\ : auto-détection).
 Le texte sera alors dans l'encodage défini par l'option du script configure
 \-\-charset.
@@ -681,8 +680,8 @@ La valeur "noconv" permet de désactiver toute conversion (par ex. en
 cas de problèmes avec iconv)\ ;
 .br
 .I NOTE\ :
-Ceci n'aura d'effet qu'après la ligne de commande aura été analysée,
-La variable d'environnment MPLAYER_CHARSET vous permettra de ne plus subir
+Ceci n'aura d'effet qu'après que la ligne de commande aura été analysée,
+la variable d'environnment MPLAYER_CHARSET vous permettra de ne plus subir
 la troncature des premières lignes affichées.
 .
 .TP
@@ -697,7 +696,7 @@ Le module 'all' change le niveau de verbosité de tous les modules
 Tapez '\-msglevel help' pour avoir la liste de tous les modules.
 .br
 NOTE\ :
-Certains messages sont affichés avant que la ligne de commande est
+Certains messages sont affichés avant que la ligne de commande ne soit
 analysée et ne sont par conséquent pas affectés par \-msglevel.
 Pour contrôler ces messages, vous devez utiliser la variable d'environnement
 MPLAYER_VERBOSE, voir sa description plus bas pour plus de détails.
@@ -711,15 +710,14 @@ complètement silencieux
 messages fatals
 .IPs " 1"
 messages d'erreurs
-error messages
 .IPs " 2"
 messages d'avertissement
 .IPs " 3"
-quelques conseils
+messages de conseil
 .IPs " 4"
 messages informatifs
 .IPs " 5"
-messages de status (par défaut)
+messages de statut (par défaut)
 .IPs " 6"
 messages verbeux
 .IPs " 7"
@@ -733,14 +731,14 @@ niveau de debug 4
 .
 .TP
 .B \-msgmodule
-Préfixe les messages console du nom du module concerné.
+Préfixe les messages console avec le nom du module concerné.
 .
 .TP
 .B \-noconfig <options>
 Ne tient pas compte des fichiers de configuration donnés.
 .br
 .I NOTE\ :
-Si les options \-include ou \-use\-filedir\-conf sont donnés en ligne de commande,
+Si les options \-include ou \-use\-filedir\-conf sont données en ligne de commande,
 elles seront honorées.
 .sp 1
 Les options disponibles sont\ :
@@ -759,15 +757,15 @@ la configuration de l'utilisateur
 .
 .TP
 .B "\-quiet\ "
-Avec cette option, la ligne d'état (c-a-d A:   0.7 V:   0.6 A-V:  0.068 ...) ne
+Avec cette option, la ligne d'état (c-à-d A:   0.7 V:   0.6 A-V:  0.068 ...) ne
 sera pas affichée.
 Cela est particulièrement utile sur les terminaux lents ou endommagés qui ne
-gèrent pas les retours chariot (c-a-d \\r).
+gèrent pas les retours chariot (c-à-d \\r).
 .
 .TP
 .B \-priority <prio> (Windows uniquement)
 Définit le niveau de priorité de MPlayer suivant les priorités prédéfinies
-de disponibles sous Windows.
+disponibles sous Windows.
 Valeurs possibles de <prio>\ :
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
@@ -788,14 +786,14 @@ Affiche encore moins de messages d'état que \-quiet.
 Supprime aussi les boîtes de dialogue d'erreur de l'interface graphique.
 .
 .B \-show\-profile <profile>
-Affiche la description et le contenu du profil donné..
+Affiche la description et le contenu du profil donné.
 .
 .B \-use\-filedir\-conf
 Recherche un fichier de configuration spécifique au fichier joué
 dans le même répertoire que ce dernier.
 .br
 .I ATTENTION\ :
-Peut Ãªtre dagereux si jouÃ© deuis des mÃ©ias dans lequel vous ne
+Peut être dangereux si joué depuis des média en lesquels vous ne
 pouvez avoir confiance.
 .
 .TP
@@ -827,12 +825,12 @@ On peut souvent améliorer la lecture d'une vidéo possédant un débit binaire
 vidéo irrégulier, mais qui peut-être lue avec \-nosound, en initialisant
 cette option à une valeur entière supérieure à 1.
 Plus cette valeur sera élevée, plus le débit sera proche de \-nosound.
-Essayez \-autosync 30 pour faire disparaître les problèmes avec les drivers
+Essayez \-autosync 30 pour faire disparaître les problèmes avec les pilotes
 audio qui ne possèdent pas une mesure de décalage audio parfaite.
 Avec cette valeur, si de larges écarts de synchro A/V se produisent, il ne
 mettront qu'une seconde ou deux pour disparaître.
 Ce temps de réaction devrait être le seul effet de bord si cette option est
-activée, pour tous les drivers audio.
+activée, pour tous les pilotes audio.
 .
 .TP
 .B \-benchmark
@@ -865,7 +863,7 @@ uniquement.
 Bascule MPlayer dans un mode expérimental où les timestamps des trames vidéos
 sont calculées différemment, et où les filtres qui ajoutent des trames ou modifient
 les timestamps sont supportés.
-Les timestamps plus précises se ressentent par exemple lorsque vous regardez avec
+Les timestamps plus précis se ressentent par exemple lorsque vous regardez avec
 l'option \-ass une vidéo dont les sous-titres sont synchronisés avec un changement
 de scène.
 Sans l'option \-correct\-pts le timing des sous-titres est typiquement décalé de
@@ -891,7 +889,7 @@ MOUSE_BTN0\-MOUSE_BTN0_DBL.
 .
 .TP
 .B \-edlout <nomfichier>
-Créé un nouveau fichier et y écrit les commandes d'édition de la liste
+Crée un nouveau fichier et y écrit les commandes d'édition de la liste
 de décision (EDL).
 Durant la lecture, la touche 'i' permet de marquer le début ou la fin d'un
 bloc à sauter.
@@ -906,8 +904,8 @@ lieu de les jouer immédiatement.
 .
 .TP
 .B \-fixed\-vo
-Force l'initialistation d'une seule fenêtre vidéo pour la lecture d'une
-série de de fichiers.
+Force l'initialisation d'une seule fenêtre vidéo pour la lecture d'une
+série de fichiers.
 Actuellement les pilotes suivants fonctionnent avec fixed-vo: gl, gl2, mga,
 svga, x11, xmga, xv, xvidix et dfbmga.
 .
@@ -916,9 +914,9 @@ svga, x11, xmga, xv, xvidix et dfbmga.
 Saute l'affichage de certaines trames pour maintenir la synchro A/V sur
 les machines lentes.
 Les filtres vidéo ne sont pas appliqués sur de telles trames.
-Pour les trames-B même leur décodage est complètement désactivé.
+Pour les trames-B, leur décodage est même complètement désactivé.
 Notez que le décodeur libmpeg2 est particulièrement sujet à plantage
-lorsque cette option est utilisée, ainsi vous devriez peut-être utiliser à
+lorsque cette option est utilisée, ainsi devriez-vous peut-être utiliser à
 la place "\-vc ffmpeg12,".
 .
 .TP
@@ -939,24 +937,24 @@ Mène à des distorsions d'image!
 .
 .TP
 .B \-heartbeat\-cmd
-Commande exécutée via system() - càd via le shell - toutes les 30 secondes
+Commande exécutée via system() - c-à-d via le shell - toutes les 30 secondes
 lors de la lecture.
 .sp 1
 .I NOTE\ :
 MPlayer utilise cette commande sans aucune sorte de vérification, il est
 donc de votre responsablité qu'elle ne pose pas de problème de sécurité
-(càd que vous devriez spécifier le chemin absolu, surtout si "." est dans
+(c-à-d que vous devriez spécifier le chemin absolu, surtout si "." est dans
 le chemin de recherche $PATH, comme c'est le cas sous Windows).
 .sp 1
-Ceci peut être "détourné" pour désactiver un reposeur d'écran ne gérant par
+Ceci peut être "détourné" pour désactiver un économiseur d'écran ne gérant par
 l'API de X prévu à cet effet.
 Si cela vous semble un peu trop compliqué, demandez à l'auteur du programme
-de reposeur d'écran de gérer l'API de X dédiée.
+d'économiseur d'écran de gérer l'API de X dédiée.
 .sp 1
 .I EXEMPLE pour xscreensaver:
 mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
 .sp 1
-.I EXEMPLE pour le reposeur d'écran de gnome:
+.I EXEMPLE pour l'économiseur d'écran de gnome:
 mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .RE
 .PD 1
@@ -989,39 +987,39 @@ système de contrôle.
 Les chemins sont relatifs à ~/.mplayer/.
 .br
 .I NOTE:
-La répétition automatique n'est pour l'instant géré que par les joysticks.
+La répétition automatique n'est pour l'instant gérée que par les joysticks.
 .sp 1
 Les commandes disponibles sont:
 .sp 1
 .PD 0
 .RSs
 .IPs conf=<nom_fichier>
-Défini le fichier de configuration pour les évènements d'entrée (input) au
+Définit le fichier de configuration pour les évènements d'entrée (input) au
 lieu de ~/\:.mplayer/\:input.conf par défaut.
-Si vous ne donnez pas le chemin absolu, il sera cherché à
+Si vous ne donnez pas de chemin absolu, il sera cherché à
 ~/\:.mplayer/\:<nom_fichier>.
 .IPs ar-dev=<peripherique>
 Périphérique à utiliser pour contrôler la télécommande Apple IR
 (auto-détecté par défaut, Linux uniquement).
 .IPs ar-delay
-Temps en milli-secondes avant de démarrer la répétition automatique
+Temps en millisecondes avant de démarrer la répétition automatique
 d'une touche
 (0 pour désactiver).
 .IPs ar-rate
 Combien de frappes par seconde pendant la répétition automatique.
 .IPs keylist
-Afficher toutes les touches pouvant être attachées.
+Affiche toutes les touches pouvant être attachées.
 .IPs cmdlist
-Afficher toutes les commandes pouvant être attachées.
+Affiche toutes les commandes pouvant être attachées.
 .IPs js-dev
-Spécifier le périphérique joystick à utiliser (par défaut\ :
+Spécifie le périphérique joystick à utiliser (par défaut\ :
 /dev/\:input/\:js0).
 .IPs file=<nom_fichier>
 Lit les commandes depuis un fichier donné.
 Utile surtout avec une FIFO.
 .br
 .I NOTE:
-Quand le fichier indiqué est un FIFO MPlayer ouvre chaque extrémité
+Quand le fichier indiqué est une FIFO, MPlayer ouvre chaque extrémité
 donc vous pouvez avoir plusieurs \'echo "seek 10" > mp_pipe\' et le pipe
 restera valide.
 .RE
