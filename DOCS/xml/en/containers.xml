@@ -512,10 +512,6 @@ shorten and many others. You can find them at the
 For this feature you need to have <application>XMMS</application> and compile
 <application>MPlayer</application> with
 <filename>./configure --enable-xmms</filename>.
-If that does not work, you might need to set the <application>XMMS</application>
-plugin and library path explicitly by way of the
-<option>--with-xmmsplugindir</option> and <option>--with-xmmslibdir</option>
-options.
 </para>
 </sect2>
 </sect1>
