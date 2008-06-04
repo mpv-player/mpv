@@ -61,13 +61,12 @@ is a lot of valuable information to be found there.
 
 <para>
 <application>MPlayer</application> is a movie player for Linux (runs on
-many other Unices, and <emphasis role="bold">non-x86</emphasis> CPUs, see
-<xref linkend="ports"/>).
+many other Unices, and non-x86 CPUs, see <xref linkend="ports"/>).
 It plays most MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM,
 NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska files, supported by
 many native, XAnim, RealPlayer, and Win32 DLL codecs. You can watch
-<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
-and <emphasis role="bold">MPEG-4 (DivX)</emphasis> movies too. Another big
+VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora,
+and MPEG-4 (DivX) movies too. Another big
 feature of <application>MPlayer</application> is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, but you can use GGI and SDL (and this way all
@@ -77,8 +76,7 @@ scaling, so you can enjoy movies in fullscreen.
 <application>MPlayer</application> supports displaying through some
 hardware MPEG decoder boards, such as the <link linkend="dvb">DVB</link> and
 <link linkend="dxr3">DXR3/Hollywood+</link>. And what about the nice big
-antialiased shaded subtitles
-(<emphasis role="bold">14 supported types</emphasis>)
+antialiased shaded subtitles (14 supported types)
 with European/ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic, Korean
 fonts, and the onscreen display (OSD)?
 </para>
@@ -98,13 +96,11 @@ video and audio manipulation.
 <application>MEncoder</application> (<application>MPlayer</application>'s Movie
 Encoder) is a simple movie encoder, designed to encode
 <application>MPlayer</application>-playable movies
-(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA
 to other <application>MPlayer</application>-playable formats (see below).
-It can encode with various codecs, like
-<emphasis role="bold">MPEG-4 (DivX4)</emphasis>
+It can encode with various codecs, like MPEG-4 (DivX4)
 (one or two passes), <systemitem class="library">libavcodec</systemitem>,
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
-audio.
+PCM/MP3/VBR MP3 audio.
 </para>
 
 <itemizedlist>
@@ -118,7 +114,7 @@ audio.
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
 </para></listitem>
 <listitem><para>
-  Video encoding from <emphasis role="bold">V4L compatible TV tuners</emphasis>
+  Video encoding from V4L compatible TV tuners
 </para></listitem>
 <listitem><para>
   Encoding/multiplexing to interleaved AVI files with proper index
@@ -130,10 +126,7 @@ audio.
   1, 2 or 3 pass encoding
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">VBR</emphasis> MP3 audio
-  <important><para>
-  VBR MP3 audio doesn't always play nicely on windows players!
-  </para></important>
+  VBR MP3 audio
 </para></listitem>
 <listitem><para>
   PCM audio
@@ -154,7 +147,7 @@ audio.
   rotate, scale, rgb/yuv conversion)
 </para></listitem>
 <listitem><para>
-  Can encode DVD/VOBsub <emphasis role="bold">AND</emphasis> text subtitles
+  Can encode DVD/VOBsub and text subtitles
   into the output file
 </para></listitem>
 <listitem><para>
