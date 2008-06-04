@@ -174,9 +174,7 @@ default as it offers better speed.
   <filename class="directory">/usr/local/include/</filename>.
 </para></step>
 <step><para>
-  Recompile <application>MPlayer</application> with
-  <option>--with-xvidlibdir=<replaceable>/path/to/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>.
+  Recompile <application>MPlayer</application>.
 </para></step>
 </procedure>
 </sect2>
