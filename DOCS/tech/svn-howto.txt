@@ -36,8 +36,8 @@ I. BASICS:
 
 0. Get Subversion:
 
-  The MPlayer project server runs Subversion 1.2.3. For optimal compatibility
-  you should use version 1.2.3 or later.
+  The MPlayer project server runs Subversion 1.4. For optimal compatibility
+  you should use version 1.4 or later.
 
 
 1. Checking out the source tree:
