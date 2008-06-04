@@ -195,7 +195,7 @@ xv support, but the card itself is very slow, so you better sell it.
 <para>
 There is now a native framebuffer driver for S3 Virge cards similar to
 tdfxfb. Set up your framebuffer (e.g. append
-"<option>vga=792 video=vesa:mtrr</option>" to your kernel comand line) and use
+"<option>vga=792 video=vesa:mtrr</option>" to your kernel command line) and use
 <option>-vo s3fb</option> (<option>-vf yuy2</option> and <option>-dr</option>
 will also help).
 </para>
@@ -838,7 +838,7 @@ framebuffer, and don't ask for it, since it's not an
 
 <para>
 <systemitem>mga_vid</systemitem> is a combination of a video output driver and
-a Linux kernel module that utilitizes the Matrox G200/G400/G450/G550 video
+a Linux kernel module that utilizes the Matrox G200/G400/G450/G550 video
 scaler/overlay unit to perform YUV->RGB colorspace conversion and arbitrary
 video scaling.
 <systemitem>mga_vid</systemitem> has hardware VSYNC support with triple
@@ -1857,7 +1857,7 @@ have <command>scan</command> compile it for you.
 </para>
 
 <para>
-If you have more than one card type (e.g. Satellitar, Terrestrial, Cable and ATSC)
+If you have more than one card type (e.g. Satellite, Terrestrial, Cable and ATSC)
 you can save your channels files as
 <filename>~/.mplayer/channels.conf.sat</filename>,
 <filename>~/.mplayer/channels.conf.ter</filename>,
@@ -2245,7 +2245,7 @@ mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
 <para>
 Extra occurrences of <option>-zrcrop</option> invoke
 <emphasis>cinerama</emphasis> mode, i.e. you can distribute the movie over
-several TV's or beamers to create a larger screen.
+several TVs or beamers to create a larger screen.
 Suppose you have two beamers. The left one is connected to your
 Buz at <filename>/dev/video1</filename> and the right one is connected to
 your DC10+ at <filename>/dev/video0</filename>. The movie has a resolution
@@ -2337,7 +2337,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
     <emphasis role="bold">SLOW</emphasis>, and has
     <emphasis role="bold">Macrovision</emphasis> copy protection enabled
     (you can "workaround" Macrovision using this
-    <ulink url="http://avifile.sf.net/mgamacro.pl">perl script</ulink>).
+    <ulink url="http://avifile.sf.net/mgamacro.pl">Perl script</ulink>).
     </para>
   </listitem>
 </varlistentry>

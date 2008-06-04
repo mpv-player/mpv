@@ -68,7 +68,7 @@ from <ulink url="http://rpm.livna.org/">Livna repository</ulink>.
 <para>
 Mandrake/Mandriva RPM packages are available from the
 <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SuSE used to include a crippled version of <application>MPlayer</application>
+SUSE used to include a crippled version of <application>MPlayer</application>
 in their distribution. They have removed it in their latest releases. You can
 get working RPMs from
 <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
@@ -325,12 +325,12 @@ you may not be able to play DVD discs larger than 4 GB:
 </para></listitem>
 
 <listitem><para>
-  A similar bug is present in the hsfs(7FS) filesystem code (AKA ISO9660),
+  A similar bug is present in the hsfs(7FS) file system code (AKA ISO9660),
   hsfs may not not support partitions/disks larger than 4GB, all data is
   accessed modulo 4GB
   (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
   The hsfs problem can be fixed by installing
-  patch 109764-04 (sparc) / 109765-04 (x86).
+  patch 109764-04 (SPARC) / 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
 </listitem>
@@ -768,7 +768,7 @@ Later examples will be based on MacPorts.
 
 <para>
 For instance, to compile <application>MPlayer</application> with OSD support:
-<screen>sudo port install pkgconfig</screen>
+<screen>sudo port install pkg-config</screen>
 This will install <application>pkg-config</application>, which is a system for
 managing library compile/link flags.
 <application>MPlayer</application>'s <systemitem>configure</systemitem> script

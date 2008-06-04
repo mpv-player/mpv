@@ -62,15 +62,15 @@ is a lot of valuable information to be found there.
 <para>
 <application>MPlayer</application> is a movie player for Linux (runs on
 many other Unices, and non-x86 CPUs, see <xref linkend="ports"/>).
-It plays most MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM,
+It plays most MPEG, VOB, AVI, Ogg/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM,
 NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska files, supported by
 many native, XAnim, RealPlayer, and Win32 DLL codecs. You can watch
-VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora,
-and MPEG-4 (DivX) movies too. Another big
+Video CD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora,
+and MPEG-4 (DivX) movies, too. Another big
 feature of <application>MPlayer</application> is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, but you can use GGI and SDL (and this way all
-their drivers) and some lowlevel card-specific drivers (for Matrox, 3Dfx and
+their drivers) and some low level card-specific drivers (for Matrox, 3Dfx and
 Radeon, Mach64, Permedia3) too! Most of them support software or hardware
 scaling, so you can enjoy movies in fullscreen.
 <application>MPlayer</application> supports displaying through some
@@ -106,7 +106,7 @@ PCM/MP3/VBR MP3 audio.
 <itemizedlist>
 <title><application>MEncoder</application> features</title>
 <listitem><para>
-  Encoding from the wide range of fileformats and decoders of
+  Encoding from the wide range of file formats and decoders of
   <application>MPlayer</application>
 </para></listitem>
 <listitem><para>
@@ -135,7 +135,7 @@ PCM/MP3/VBR MP3 audio.
   Stream copying
 </para></listitem>
 <listitem><para>
-  Input A/V synchronizing (PTS-based, can be disabled with
+  Input A/V synchronizing (pts-based, can be disabled with
   <option>-mc 0</option> option)
 </para></listitem>
 <listitem><para>
@@ -144,7 +144,7 @@ PCM/MP3/VBR MP3 audio.
 </para></listitem>
 <listitem><para>
   Using our very powerful filter system (crop, expand, flip, postprocess,
-  rotate, scale, rgb/yuv conversion)
+  rotate, scale, RGB/YUV conversion)
 </para></listitem>
 <listitem><para>
   Can encode DVD/VOBsub and text subtitles

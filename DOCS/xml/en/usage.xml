@@ -291,7 +291,7 @@ ENTER pt_step 1 1<!--
 <title>Control from LIRC</title>
 
 <para>
-Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
+Linux Infrared Remote Control - use an easy to build home-brewed IR-receiver,
 an (almost) arbitrary remote control and control your Linux box with it!
 More about it on the <ulink url="http://www.lirc.org">LIRC homepage</ulink>.
 </para>
@@ -421,7 +421,7 @@ will save the content streamed from
 <replaceable>http://217.71.208.37:8006</replaceable> into
 <replaceable>stream.asf</replaceable>.
 This works with all protocols supported by
-<application>MPlayer</application>, like MMS, RSTP, and so forth.
+<application>MPlayer</application>, like MMS, RTSP, and so forth.
 </para>
 </sect2>
 </sect1>

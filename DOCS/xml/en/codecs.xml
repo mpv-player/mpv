@@ -281,7 +281,7 @@ but if you are interested in a brief overview, you may want to read
 <systemitem class="library">libavcodec</systemitem> has had at
 least minimally usable H.264 decoding since around July 2004,
 however major changes and improvements have been implemented since
-that time, both in terms of more functionalities supported and in
+that time, both in terms of more functionality supported and in
 terms of improved CPU usage.
 Just to be certain, it is always a good idea to use a recent Subversion
 checkout.
@@ -382,7 +382,7 @@ satisfied the requirements for <systemitem class="library">x264</systemitem>.
   Voxware audio (using DirectShow DLL)
 </para></listitem>
 <listitem><para>
-  alaw and ulaw, various gsm, adpcm and pcm formats and other simple old
+  alaw and ulaw, various GSM, ADPCM and PCM formats and other simple old
   audio codecs
 </para></listitem>
 <listitem><para>

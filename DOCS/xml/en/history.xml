@@ -106,7 +106,7 @@ audio), even more stable than ever, and so on. It's a MUST!
 <para>
 Hmm. Release again. Tons of new features, beta GUI version,
 bugs fixed, new vo and ao drivers, ported to many systems, including
-opensource DivX codecs and much more. Try it!
+open source DivX codecs and much more. Try it!
 </para>
 </listitem>
 
@@ -115,7 +115,7 @@ opensource DivX codecs and much more. Try it!
 <emphasis role="bold"><application>MPlayer</application> 0.60 "The RTFMCounter"</emphasis>: Jan 3, 2002
 </para>
 <para>
-MOV/VIVO/RM/FLI/NUV fileformats support, native CRAM, Cinepak,
+MOV/VIVO/RM/FLI/NUV file formats support, native CRAM, Cinepak,
 ADPCM codecs, and support for XAnim's binary codecs; DVD subtitles support,
 first release of <application>MEncoder</application>, TV grabbing, cache,
 liba52, countless fixes.

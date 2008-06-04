@@ -83,7 +83,7 @@ functional.
 </para>
 
 <para>
-One important feature of MPGs is that they have a field to describe the
+One important feature of MPEG files is that they have a field to describe the
 aspect ratio of the video stream within. For example SVCDs have 480x480
 resolution video, and in the header that field is set to 4:3, so that it is
 played at 640x480. AVI files often lack this field, so they have to be
@@ -319,8 +319,8 @@ Return to Castle Wolfenstein.
 <title>OGG/OGM files</title>
 
 <para>
-This is a new fileformat from
-<ulink url="http://www.xiph.org">Xiphophorus</ulink>.
+This is a new file format from the
+<ulink url="http://www.xiph.org">Xiph.Org Foundation</ulink>.
 It can contain any video or audio codec, CBR or VBR. You'll need
 <systemitem class="library">libogg</systemitem> and
 <systemitem class="library">libvorbis</systemitem> installed before
@@ -503,7 +503,7 @@ options to <application>cdparanoia</application>.
 <para>
 <application>MPlayer</application> can use <application>XMMS</application> input
 plugins to play many file formats. There are plugins for SNES game tunes, SID
-tunes (from Commodore 64), many Amiga formats, .xm, .it, VQF, musepack, Bonk,
+tunes (from Commodore 64), many Amiga formats, .xm, .it, VQF, Musepack, Bonk,
 shorten and many others. You can find them at the
 <ulink url="http://www.xmms.org/plugins.php?category=input">XMMS input plugin page</ulink>.
 </para>
