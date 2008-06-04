@@ -2403,13 +2403,16 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
   </listitem>
 </varlistentry>
 </variablelist>
+</sect2>
 
-<formalpara><title>Building a Matrox TV-out cable</title>
+<!-- ********** -->
+
+<sect2 id="tv-out_matrox_cable">
+<title>Building a Matrox TV-out cable</title>
 <para>
 No one takes any responsibility, nor guarantee for any damage caused
 by this documentation.
 </para>
-</formalpara>
 
 <formalpara><title>Cable for G400</title>
 <para>
