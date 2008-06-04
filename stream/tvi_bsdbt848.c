@@ -227,18 +227,18 @@ static int control(priv_t *priv, int cmd, void *arg)
 
     case TVI_CONTROL_IS_TUNER:
         if(priv->tunerready == FALSE) return TVI_CONTROL_FALSE;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_TUN_GET_FREQ:
         {
         if(ioctl(priv->tunerfd, TVTUNER_GETFREQ, &priv->tunerfreq) < 0)
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "TVTUNER_GETFREQ", strerror(errno));
-            return(TVI_CONTROL_FALSE);
+            return TVI_CONTROL_FALSE;
             }
 
         *(int *)arg = priv->tunerfreq;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
     
     case TVI_CONTROL_TUN_SET_FREQ:
@@ -248,10 +248,10 @@ static int control(priv_t *priv, int cmd, void *arg)
         if(ioctl(priv->tunerfd, TVTUNER_SETFREQ, &priv->tunerfreq) < 0) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "TVTUNER_SETFREQ", strerror(errno));
-            return(0);
+            return 0;
             }
 
-        return(TVI_CONTROL_TRUE);        
+        return TVI_CONTROL_TRUE;
         }
     case TVI_CONTROL_TUN_GET_SIGNAL:
         {
@@ -259,10 +259,10 @@ static int control(priv_t *priv, int cmd, void *arg)
         if(ioctl(priv->tunerfd, TVTUNER_GETSTATUS, &status) < 0)
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "GETSTATUS", strerror(errno));
-            return(0);
+            return 0;
             }
         *(int*)arg=(status & 0x02)? 100 : 0;
-        return (TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
 
     case TVI_CONTROL_TUN_GET_TUNER:
@@ -275,11 +275,11 @@ static int control(priv_t *priv, int cmd, void *arg)
         if(ioctl(priv->btfd, METEORGINPUT, &priv->input) < 0)
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORGINPUT", strerror(errno));
-            return(TVI_CONTROL_FALSE);
+            return TVI_CONTROL_FALSE;
             }
 
         *(int *)arg = priv->input;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
     
     case TVI_CONTROL_SPC_SET_INPUT:
@@ -289,27 +289,27 @@ static int control(priv_t *priv, int cmd, void *arg)
         if(ioctl(priv->btfd, METEORSINPUT, &priv->input) < 0) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSINPUT", strerror(errno));
-            return(0);
+            return 0;
             }
 
-        return(TVI_CONTROL_TRUE);        
+        return TVI_CONTROL_TRUE;
         }
 
 /* Audio Controls */
 
     case TVI_CONTROL_IS_AUDIO:
         if(priv->dspready == FALSE) return TVI_CONTROL_FALSE;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_AUD_GET_FORMAT:
         {
         *(int *)arg = AF_FORMAT_S16_LE;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
     case TVI_CONTROL_AUD_GET_CHANNELS:
         {
         *(int *)arg = 2;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
     case TVI_CONTROL_AUD_SET_SAMPLERATE:
         {
@@ -318,7 +318,7 @@ static int control(priv_t *priv, int cmd, void *arg)
            if(ioctl(priv->dspfd, SNDCTL_DSP_SPEED, &dspspeed) == -1) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848InvalidAudioRate, strerror(errno));
-            return(TVI_CONTROL_FALSE);
+            return TVI_CONTROL_FALSE;
             }
 
         priv->dspspeed = dspspeed;
@@ -328,24 +328,24 @@ static int control(priv_t *priv, int cmd, void *arg)
         priv->dsprate = priv->dspspeed * priv->dspsamplesize/8*
                                 (priv->dspstereo+1);
 
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
     case TVI_CONTROL_AUD_GET_SAMPLERATE:
         {
         *(int *)arg = priv->dspspeed;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
     case TVI_CONTROL_AUD_GET_SAMPLESIZE:
         {
         *(int *)arg = priv->dspsamplesize/8;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
 
 /* Video Controls */
 
     case TVI_CONTROL_IS_VIDEO:
         if(priv->videoready == FALSE) return TVI_CONTROL_FALSE;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_TUN_SET_NORM:
         {
@@ -406,20 +406,20 @@ static int control(priv_t *priv, int cmd, void *arg)
         if(ioctl(priv->btfd, METEORSFMT, &priv->iformat) < 0) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFMT", strerror(errno));
-            return(TVI_CONTROL_FALSE);
+            return TVI_CONTROL_FALSE;
             }
     
         if(ioctl(priv->btfd, METEORSETGEO, &priv->geom) < 0) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSETGEO", strerror(errno));
-            return(0);
+            return 0;
             }
 
 	tmp_fps = priv->fps;
         if(ioctl(priv->btfd, METEORSFPS, &tmp_fps) < 0) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFPS", strerror(errno));
-            return(0);
+            return 0;
             }
 
 #ifdef BT848_SAUDIO
@@ -430,20 +430,20 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    }
 #endif
 
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
     
     case TVI_CONTROL_VID_GET_FORMAT:
         *(int *)arg = IMGFMT_UYVY;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_VID_SET_FORMAT:
         {
         int req_fmt = *(int *)arg;
 
-        if(req_fmt != IMGFMT_UYVY) return(TVI_CONTROL_FALSE);
+        if(req_fmt != IMGFMT_UYVY) return TVI_CONTROL_FALSE;
 
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
         }
     case TVI_CONTROL_VID_SET_WIDTH:
         priv->geom.columns = *(int *)arg;
@@ -456,14 +456,14 @@ static int control(priv_t *priv, int cmd, void *arg)
         if(ioctl(priv->btfd, METEORSETGEO, &priv->geom) < 0) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorSettingWidth, strerror(errno));
-            return(0);
+            return 0;
             }
 
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_VID_GET_WIDTH:
         *(int *)arg = priv->geom.columns;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_VID_SET_HEIGHT:
         priv->geom.rows = *(int *)arg;
@@ -481,18 +481,18 @@ static int control(priv_t *priv, int cmd, void *arg)
         if(ioctl(priv->btfd, METEORSETGEO, &priv->geom) < 0) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorSettingWidth, strerror(errno));
-            return(0);
+            return 0;
             }
 
-        return(TVI_CONTROL_TRUE);        
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_VID_GET_HEIGHT:
         *(int *)arg = priv->geom.rows;
-        return(TVI_CONTROL_TRUE);        
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_VID_GET_FPS:
         *(float *)arg = priv->fps;
-        return(TVI_CONTROL_TRUE);        
+        return TVI_CONTROL_TRUE;
 
 /*
     case TVI_CONTROL_VID_SET_FPS:
@@ -503,22 +503,22 @@ static int control(priv_t *priv, int cmd, void *arg)
         if(ioctl(priv->btfd, METEORSFPS, &priv->fps) < 0) 
             {
             mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFPS", strerror(errno));
-            return(0);
+            return 0;
             }
 
-        return(TVI_CONTROL_TRUE);        
+        return TVI_CONTROL_TRUE;
 */
 
     case TVI_CONTROL_VID_CHK_WIDTH:
     case TVI_CONTROL_VID_CHK_HEIGHT:
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_IMMEDIATE:
         priv->immediatemode = TRUE;
-        return(TVI_CONTROL_TRUE);
+        return TVI_CONTROL_TRUE;
     }
 
-    return(TVI_CONTROL_UNKNOWN);
+    return TVI_CONTROL_UNKNOWN;
 }
 
 static int init(priv_t *priv)
@@ -660,7 +660,7 @@ if((priv->dspready == TRUE) &&
     priv->dspready = FALSE;
     }
 
-return(1);
+return 1;
 }
 
 /* that's the real start, we'got the format parameters (checked with control) */
@@ -671,7 +671,7 @@ struct timeval curtime;
 int marg;
 
 fprintf(stderr,"START\n");
-if(priv->videoready == FALSE) return(0);
+if(priv->videoready == FALSE) return 0;
 
 signal(SIGUSR1, processframe);
 signal(SIGALRM, processframe);
@@ -681,7 +681,7 @@ marg = SIGUSR1;
 if(ioctl(priv->btfd, METEORSSIGNAL, &marg) < 0) 
     {
     mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSSIGNAL", strerror(errno));
-    return(0);
+    return 0;
     }
 
 read(priv->dspfd, &tmp, 2);
@@ -695,24 +695,24 @@ marg = METEOR_CAP_CONTINOUS;
 if(ioctl(priv->btfd, METEORCAPTUR, &marg) < 0) 
     {
     mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORCAPTUR", strerror(errno));
-    return(0);
+    return 0;
     }
 
-return(1);
+return 1;
 }
 
 static int uninit(priv_t *priv)
 {
 int marg;
 
-if(priv->videoready == FALSE) return(0);
+if(priv->videoready == FALSE) return 0;
 
 marg = METEOR_SIG_MODE_MASK;
 
 if(ioctl( priv->btfd, METEORSSIGNAL, &marg) < 0 ) 
     {
     mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSSIGNAL", strerror(errno));
-    return(0);
+    return 0;
     }
 
 marg = METEOR_CAP_STOP_CONT;
@@ -720,7 +720,7 @@ marg = METEOR_CAP_STOP_CONT;
 if(ioctl(priv->btfd, METEORCAPTUR, &marg) < 0 ) 
     {
     mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848UnableToStopCapture, strerror(errno));
-    return(0);
+    return 0;
     }
 
 close(priv->btfd);
@@ -731,7 +731,7 @@ priv->btfd = -1;
 
 priv->dspready = priv->videoready = FALSE;
 
-return(1);
+return 1;
 }
 
 
@@ -739,7 +739,7 @@ static double grabimmediate_video_frame(priv_t *priv, char *buffer, int len)
 {
 sigset_t sa_mask;
 
-if(priv->videoready == FALSE) return(0);
+if(priv->videoready == FALSE) return 0;
 
 alarm(1);
 sigfillset(&sa_mask);
@@ -754,7 +754,7 @@ memcpy(buffer, priv->livebuf, len);
 /* PTS = 0, show the frame NOW, this routine is only used in playback mode
     without audio capture .. */
 
-return(0); 
+return 0; 
 }
 
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
@@ -762,7 +762,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 double timestamp=0;
 sigset_t sa_mask;
 
-if(priv->videoready == FALSE) return(0);
+if(priv->videoready == FALSE) return 0;
 
 if(priv->immediatemode == TRUE) 
     {
@@ -784,12 +784,12 @@ priv->framebuf[priv->curbufframe].dirty = TRUE;
 priv->curbufframe++;
 if(priv->curbufframe >= RINGSIZE) priv->curbufframe = 0;
 
-return(timestamp-priv->starttime);
+return timestamp-priv->starttime;
 }
 
 static int get_video_framesize(priv_t *priv)
 {
-return(priv->geom.columns*priv->geom.rows*16/8);
+return priv->geom.columns * priv->geom.rows * 16 / 8;
 }
 
 static double grab_audio_frame(priv_t *priv, char *buffer, int len)
@@ -839,7 +839,7 @@ else
         }
     }
 
-return(priv->dspbytesread * 1.0 / priv->dsprate);
+return priv->dspbytesread * 1.0 / priv->dsprate;
 }
 
 static int get_audio_framesize(priv_t *priv)
@@ -855,7 +855,7 @@ if(priv->dspready == FALSE) return 0;
 if(ioctl(priv->dspfd, AUDIO_GETINFO, &auinf) < 0) 
     {
     mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "AUDIO_GETINFO", strerror(errno));
-    return(TVI_CONTROL_FALSE);
+    return TVI_CONTROL_FALSE;
     }
 else
     bytesavail = auinf.record.seek; /* *priv->dspsamplesize; */
@@ -863,7 +863,7 @@ else
 if(ioctl(priv->dspfd, FIONREAD, &bytesavail) < 0) 
     {
     mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "FIONREAD", strerror(errno));
-    return(TVI_CONTROL_FALSE);
+    return TVI_CONTROL_FALSE;
     }
 #endif
 
@@ -872,7 +872,7 @@ if(ioctl(priv->dspfd, FIONREAD, &bytesavail) < 0)
 
 if(bytesavail == 0) return FRAGSIZE;
 
-return(bytesavail);
+return bytesavail;
 }
 
 static int getinput(int innumber)

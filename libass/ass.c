@@ -163,7 +163,7 @@ static void rskip_spaces(char** str, char* limit) {
 static int lookup_style(ass_track_t* track, char* name) {
 	int i;
 	if (*name == '*') ++name; // FIXME: what does '*' really mean ?
-	for (i=0; i<track->n_styles; ++i) {
+	for (i = track->n_styles - 1; i >= 0; --i) {
 		// FIXME: mb strcasecmp ?
 		if (strcmp(track->styles[i].Name, name) == 0)
 			return i;
@@ -846,16 +846,22 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 		char* ip;
 		char* op;
 		size_t rc;
+		int clear = 0;
 		
-		outbuf = malloc(size);
+		outbuf = malloc(osize);
 		ip = data;
 		op = outbuf;
 		
-		while (ileft) {
-			rc = iconv(icdsc, &ip, &ileft, &op, &oleft);
+		while (1) {
+			if (ileft)
+				rc = iconv(icdsc, &ip, &ileft, &op, &oleft);
+			else {// clear the conversion state and leave
+				clear = 1;
+				rc = iconv(icdsc, NULL, NULL, &op, &oleft);
+			}
 			if (rc == (size_t)(-1)) {
 				if (errno == E2BIG) {
-					int offset = op - outbuf;
+					size_t offset = op - outbuf;
 					outbuf = (char*)realloc(outbuf, osize + size);
 					op = outbuf + offset;
 					osize += size;
@@ -864,7 +870,9 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 					mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorRecodingFile);
 					return NULL;
 				}
-			}
+			} else
+				if (clear)
+					break;
 		}
 		outbuf[osize - oleft - 1] = 0;
 	}

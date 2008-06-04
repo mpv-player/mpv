@@ -147,7 +147,7 @@ static int open(vf_instance_t *vf, char* args)
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
         if (p == NULL) {
-            return(0);
+            return 0;
         }
 
         if (args != NULL) {
@@ -172,7 +172,7 @@ static int open(vf_instance_t *vf, char* args)
                     p->frame_step = atoi(args);
                     if (p->frame_step <= 0) {
                         mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_ErrorParsingArgument);
-                        return(0);
+                        return 0;
                     }
                 }
             }

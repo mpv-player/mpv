@@ -86,7 +86,7 @@ static unsigned hashmap_hash(void* buf, size_t len)
 
 static int hashmap_key_compare(void* a, void* b, size_t size)
 {
-	return (memcmp(a, b, size) == 0);
+	return memcmp(a, b, size) == 0;
 }
 
 static void hashmap_item_dtor(void* key, size_t key_size, void* value, size_t value_size)

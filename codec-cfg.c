@@ -1177,8 +1177,10 @@ next:
 		    printf("info='%s'\n",c->info);
 		    printf("comment='%s'\n",c->comment);
 		    printf("dll='%s'\n",c->dll);
-		    printf("flags=%X  driver=%d status=%d cpuflags=%d\n",
-				    c->flags, c->driver, c->status, c->cpuflags);
+		    /* printf("flags=%X  driver=%d status=%d cpuflags=%d\n",
+		              c->flags, c->driver, c->status, c->cpuflags); */
+		    printf("flags=%X status=%d cpuflags=%d\n",
+				    c->flags, c->status, c->cpuflags);
 
 		    for(j=0;j<CODECS_MAX_FOURCC;j++){
 		      if(c->fourcc[j]!=0xFFFFFFFF){

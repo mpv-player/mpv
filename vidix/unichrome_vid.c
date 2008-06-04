@@ -651,7 +651,7 @@ static int
 unichrome_get_gkey (vidix_grkey_t * grkey)
 {
   memcpy (grkey, &uc_grkey, sizeof (vidix_grkey_t));
-  return (0);
+  return 0;
 }
 
 /**
@@ -687,7 +687,7 @@ unichrome_set_gkey (const vidix_grkey_t * grkey)
 
   /* Execute the changes */
   VIDEO_OUT (vio, V_COMPOSE_MODE, dwCompose | V1_COMMAND_FIRE);
-  return (0);
+  return 0;
 }
 
 /**

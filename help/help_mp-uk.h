@@ -215,7 +215,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Помилка відкриття з мережі: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer не має вкомпільованої підтримки SMB\n"
 
-#define MSGTR_CantOpenDVD "Не зміг відкрити DVD: %s\n"
+#define MSGTR_CantOpenDVD "Не зміг відкрити DVD: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Є %d доріжок з титрами на цьому DVD.\n"
 #define MSGTR_DVDinvalidTitle "Неприпустимий номер доріжки титрів на DVD: %d\n"
 #define MSGTR_DVDnumChapters "Є %d розділів на цій доріжці з DVD титрами.\n"

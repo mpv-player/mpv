@@ -340,7 +340,7 @@ Le nom vient du fait que cette méthode encode le fichier
 Le premier encodage (du mode deux passes) crée quelques
 fichiers temporaires (<filename>*.log</filename>) avec
 une taille de quelques méga-octets, ne les détruisez pas
-tout de suite (vous pouvez effacer l'AVI ou redirigez le
+tout de suite (vous pouvez effacer l'AVI ou rediriger le
 flux vidéo vers <filename>/dev/null</filename>).
 Lors de la seconde passe, le fichier de sortie est créé, en
 utilisant les données bitrate des fichiers temporaires.

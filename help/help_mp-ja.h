@@ -168,7 +168,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "ローカルエリアネットワークから開くことが出来ませんでした: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer はSMB reading support を無効にしてコンパイルされています\n"
 
-#define MSGTR_CantOpenDVD "DVDデバイスを開くことが出来ませんでした: %s\n"
+#define MSGTR_CantOpenDVD "DVDデバイスを開くことが出来ませんでした: %s (%s)\n"
 #define MSGTR_DVDnumTitles "このDVDには %d タイトル記録されています.\n"
 #define MSGTR_DVDinvalidTitle "不正な DVD タイトル番号です: %d\n"
 #define MSGTR_DVDnumChapters "このDVDは %d キャプターあります.\n"

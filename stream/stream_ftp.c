@@ -81,7 +81,7 @@ static int fd_can_read(int fd,int timeout) {
   tv.tv_sec = timeout;
   tv.tv_usec = 0;
   
-  return (select(fd+1, &fds, NULL, NULL, &tv) > 0);
+  return select(fd+1, &fds, NULL, NULL, &tv) > 0;
 }
 
 /*

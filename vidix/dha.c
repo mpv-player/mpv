@@ -80,7 +80,7 @@
 #endif
 
 #ifdef CONFIG_DHAHELPER
-#include "kernelhelper/dhahelper.h"
+#include "dhahelper/dhahelper.h"
 #endif
 
 #ifdef CONFIG_SVGAHELPER

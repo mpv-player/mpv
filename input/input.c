@@ -75,6 +75,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SPEED_MULT, "speed_mult", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_SPEED_SET, "speed_set", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_QUIT, "quit", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_STOP, "stop", 0, { {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
   { MP_CMD_FRAME_STEP, "frame_step", 0, { {-1,{0}} } },
   { MP_CMD_PLAY_TREE_STEP, "pt_step",1, { { MP_CMD_ARG_INT ,{0}}, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
@@ -484,6 +485,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { '!', 0 }, "seek_chapter -1" },
   { { '@', 0 }, "seek_chapter 1" },
   { { 'A', 0 }, "switch_angle 1" },
+  { { 'U', 0 }, "stop" },
 
   { { 0 }, NULL }
 };
@@ -599,6 +601,7 @@ static const m_option_t input_conf[] = {
   { "keylist", print_key_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
   { "cmdlist", print_cmd_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
     OPT_STRING("js-dev", input.js_dev, CONF_GLOBAL),
+    OPT_STRING("ar-dev", input.ar_dev, CONF_GLOBAL),
     OPT_STRING("file", input.in_file, CONF_GLOBAL),
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -1741,6 +1744,17 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   }
 #endif
 
+#ifdef HAVE_APPLE_IR
+  if (input_conf->use_ar) {
+    int fd = mp_input_appleir_init(input_conf->ar_dev);
+    if(fd < 0)
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
+    else
+        mp_input_add_key_fd(ictx, fd, 1, mp_input_appleir_read,
+                            (mp_close_func_t)close, NULL);
+  }
+#endif
+  
   if (input_conf->in_file) {
     struct stat st;
     if (stat(input_conf->in_file, &st))

@@ -22,71 +22,6 @@
  union magic {
    struct {
      ogg_int32_t hi;
---- os_types.h	2005-01-04 16:29:02.000000000 +0100
-+++ os_types.h	2005-01-05 10:39:07.000000000 +0100
-@@ -32,57 +32,11 @@
- #define _ogg_realloc realloc
- #define _ogg_free    free
- 
--#ifdef _WIN32 
--
--#  ifndef __GNUC__
--   /* MSVC/Borland */
--   typedef __int64 ogg_int64_t;
--   typedef __int32 ogg_int32_t;
--   typedef unsigned __int32 ogg_uint32_t;
--   typedef __int16 ogg_int16_t;
--#  else
--   /* Cygwin */
--   #include <_G_config.h>
--   typedef _G_int64_t ogg_int64_t;
--   typedef _G_int32_t ogg_int32_t;
--   typedef _G_uint32_t ogg_uint32_t;
--   typedef _G_int16_t ogg_int16_t;
--#  endif
--
--#elif defined(__MACOS__)
--
--#  include <sys/types.h>
--   typedef SInt16 ogg_int16_t;
--   typedef SInt32 ogg_int32_t;
--   typedef UInt32 ogg_uint32_t;
--   typedef SInt64 ogg_int64_t;
--
--#elif defined(__MACOSX__) /* MacOS X Framework build */
--
--#  include <sys/types.h>
--   typedef int16_t ogg_int16_t;
--   typedef int32_t ogg_int32_t;
--   typedef u_int32_t ogg_uint32_t;
-+   #include <inttypes.h>
-    typedef int64_t ogg_int64_t;
--
--#elif defined(__BEOS__)
--
--   /* Be */
--#  include <inttypes.h>
--
--#elif defined (__EMX__)
--
--   /* OS/2 GCC */
--   typedef short ogg_int16_t;
--   typedef int ogg_int32_t;
--   typedef unsigned int ogg_uint32_t;
--   typedef long long ogg_int64_t;
--
--#else
--
--#  include <sys/types.h>
--#  include "config_types.h"
--
--#endif
-+   typedef int32_t ogg_int32_t;
-+   typedef uint32_t ogg_uint32_t;
-+   typedef uint16_t ogg_uint16_t;
-+   typedef int16_t ogg_int16_t;
- 
- #endif  /* _OS_TYPES_H */
 --- sharedbook.c	30 Dec 2004 12:09:20 -0000	1.1
 +++ sharedbook.c	18 Aug 2005 16:13:54 -0000
 @@ -208,7 +211,7 @@
@@ -206,3 +141,28 @@
  #ifndef M_PI
  #  define M_PI (3.1415926536f)
  #endif
+--- os_types.h	2008-05-27 14:59:21.000000000 +0200
++++ os_types.h	2008-05-27 15:00:50.000000000 +0200
+@@ -32,6 +32,15 @@
+ #define _ogg_realloc realloc
+ #define _ogg_free    free
+ 
++#include <inttypes.h>
++typedef int64_t  ogg_int64_t;
++typedef int32_t  ogg_int32_t;
++typedef int16_t  ogg_int16_t;
++typedef uint32_t ogg_uint32_t;
++typedef uint16_t ogg_uint16_t;
++
++#if 0
++
+ #ifdef _WIN32 
+ 
+ #  ifndef __GNUC__
+@@ -85,4 +94,6 @@
+ 
+ #endif
+ 
++#endif /* 0 */
++
+ #endif  /* _OS_TYPES_H */

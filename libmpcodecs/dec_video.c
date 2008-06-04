@@ -89,7 +89,7 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
     if (vf) {
         int ret = vf->control(vf, VFCTRL_SET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE)
-            return (1);
+            return 1;
     }
     /* try software control */
     const struct vd_functions *vd = sh_video->vd_driver;
@@ -114,7 +114,7 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
         int ret = vf->control(vf, VFCTRL_GET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE) {
             *value = data.value;
-            return (1);
+            return 1;
         }
     }
     /* try software control */
@@ -133,7 +133,7 @@ int set_rectangle(sh_video_t *sh_video, int param, int value)
     if (vf) {
         int ret = vf->control(vf, VFCTRL_CHANGE_RECTANGLE, data);
         if (ret)
-            return (1);
+            return 1;
     }
     return 0;
 }

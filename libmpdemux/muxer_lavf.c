@@ -32,6 +32,8 @@ extern char *info_copyright;
 extern char *info_sourceform;
 extern char *info_comment;
 
+#define BIO_BUFFER_SIZE 32768
+
 typedef struct {
 	//AVInputFormat *avif;
 	AVFormatContext *oc;
@@ -39,6 +41,7 @@ typedef struct {
 	int audio_streams;
 	int video_streams;
 	int64_t last_pts;
+	uint8_t buffer[BIO_BUFFER_SIZE];
 } muxer_priv_t;
 
 typedef struct {
@@ -64,39 +67,15 @@ m_option_t lavfopts_conf[] = {
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-/* This should be transmitted to mp_open() through the filename when
- * thread safety is needed but MPlayer == no threads and especially
- * not multiple muxers being initialized at once so there is no
- * point in the extra complexity, a static is simpler. */
-static muxer_t *priv_data;
-
-static int mp_open(URLContext *h, const char *filename, int flags)
+static int mp_write(void *opaque, uint8_t *buf, int size)
 {
-        h->priv_data= priv_data;
-	return 0;
-}
-
-static int mp_close(URLContext *h)
-{
-	return 0;
-}
-
-
-static int mp_read(URLContext *h, unsigned char *buf, int size)
-{
-	mp_msg(MSGT_MUXER, MSGL_WARN, "READ %d\n", size);
-	return -1;
-}
-
-static int mp_write(URLContext *h, unsigned char *buf, int size)
-{
-	muxer_t *muxer = (muxer_t*)h->priv_data;
+	muxer_t *muxer = opaque;
 	return stream_write_buffer(muxer->stream, buf, size);
 }
 
-static offset_t mp_seek(URLContext *h, offset_t pos, int whence)
+static offset_t mp_seek(void *opaque, offset_t pos, int whence)
 {
-	muxer_t *muxer = (muxer_t*)h->priv_data;
+	muxer_t *muxer = opaque;
 	if(whence == SEEK_CUR)
 	{
 		off_t cur = stream_tell(muxer->stream);
@@ -117,16 +96,6 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence)
 	return 0;
 }
 
-
-static URLProtocol mp_protocol = {
-	"menc",
-	mp_open,
-	mp_read,
-	mp_write,
-	mp_seek,
-	mp_close,
-	NULL
-};
 
 static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 {
@@ -321,7 +290,7 @@ static void write_trailer(muxer_t *muxer)
 		av_freep(&(priv->oc->streams[i]));
 	}
 
-	url_fclose(priv->oc->pb);
+	av_freep(&priv->oc->pb);
 
 	av_free(priv->oc);
 }
@@ -338,7 +307,6 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 {
 	muxer_priv_t *priv;
 	AVOutputFormat *fmt = NULL;
-	char mp_filename[256] = "menc://stream.dummy";
 
 	av_register_all();
 
@@ -404,14 +372,9 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
             }
         }
 
-	register_protocol(&mp_protocol);
-
-        priv_data= muxer;
-	if(url_fopen(&priv->oc->pb, mp_filename, URL_WRONLY))
-	{
-		mp_msg(MSGT_MUXER, MSGL_FATAL, "Could not open outfile.\n");
-		goto fail;
-        }
+	priv->oc->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 1, muxer, NULL, mp_write, mp_seek);
+	if ((muxer->stream->flags & STREAM_SEEK) != STREAM_SEEK)
+            priv->oc->pb->is_streamed = 1;
 	
 	muxer->priv = (void *) priv;
 	muxer->cont_new_stream = &lavf_new_stream;

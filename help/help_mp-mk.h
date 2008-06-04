@@ -222,7 +222,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Не може да отвори од локалната мрежа: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer не е компајлиран со подршка за SMB читање\n"
 
-#define MSGTR_CantOpenDVD "Не можеше да се отвори DVD уредот: %s\n"
+#define MSGTR_CantOpenDVD "Не можеше да се отвори DVD уредот: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Има %d наслови на ова DVD.\n"
 #define MSGTR_DVDinvalidTitle "Невалиден DVD број на насловот: %d\n"
 #define MSGTR_DVDnumChapters "Има %d поглавја на овој DVD наслов.\n"

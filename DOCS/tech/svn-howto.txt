@@ -36,8 +36,8 @@ I. BASICS:
 
 0. Get Subversion:
 
-  The MPlayer project server runs Subversion 1.2.3. For optimal compatibility
-  you should use version 1.2.3 or later.
+  The MPlayer project server runs Subversion 1.4. For optimal compatibility
+  you should use version 1.4 or later.
 
 
 1. Checking out the source tree:
@@ -305,6 +305,10 @@ II. POLICY / RULES:
      - verbosity changes from default (info) level
      - changes to "historical" parts of docs and web pages
      - use of internal or external libraries
+     - reverting commits from other developers
+     - mixing functional and cosmetic changes
+     - making the spelling of words consistent without actually correcting
+       any spelling errors.
 
 
 13. Try to keep important discussions and requests (also) on the mplayer-dev-eng

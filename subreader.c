@@ -68,7 +68,7 @@ unsigned long previous_sub_end;
 #endif
 
 static int eol(char p) {
-	return (p=='\r' || p=='\n' || p=='\0');
+	return p=='\r' || p=='\n' || p=='\0';
 }
 
 /* Remove leading and trailing space */
@@ -1132,6 +1132,11 @@ subtitle* subcp_recode (subtitle *sub)
 			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line.\n");
 			free(ot);
 			continue;
+		}
+		// In some stateful encodings, we must clear the state to handle the last character
+		if (iconv(icdsc, NULL, NULL,
+			  &op, &oleft) == (size_t)(-1)) {
+			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line, can't clear encoding state.\n");
 		}
 		*op='\0' ;
 		free (sub->text[l]);

@@ -21,8 +21,8 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef RTJPEGN_H
-#define RTJPEGN_H
+#ifndef MPLAYER_RTJPEGN_H
+#define MPLAYER_RTJPEGN_H
 
 #include <stdint.h>
 
@@ -58,4 +58,4 @@ extern void RTjpeg_yuvrgb16(__u8 *buf, __u8 *rgb, int stride);
 extern void RTjpeg_yuvrgb24(__u8 *buf, __u8 *rgb, int stride);
 extern void RTjpeg_yuvrgb32(__u8 *buf, __u8 *rgb, int stride);
 
-#endif /* RTJPEGN_H */
+#endif /* MPLAYER_RTJPEGN_H */

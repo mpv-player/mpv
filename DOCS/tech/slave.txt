@@ -267,6 +267,9 @@ step_property <property> [value] [direction]
     not given or zero. The direction is reversed if direction is less
     than zero.
 
+stop
+    Stop playback.
+
 sub_alignment [value]
     Toggle/set subtitle alignment.
         0 top alignment

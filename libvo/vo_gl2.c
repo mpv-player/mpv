@@ -561,6 +561,9 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   glDisable(GL_CULL_FACE);
   glEnable (GL_TEXTURE_2D);
   if (image_format == IMGFMT_YV12) {
+    gl_conversion_params_t params = {GL_TEXTURE_2D, use_yuv,
+          0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+          texture_width, texture_height};
     switch (use_yuv) {
       case YUV_CONVERSION_FRAGMENT_LOOKUP:
         glGenTextures(1, &lookupTex);
@@ -578,8 +581,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
         BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
         break;
     }
-    glSetupYUVConversion(GL_TEXTURE_2D, use_yuv, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-                         texture_width, texture_height);
+    glSetupYUVConversion(&params);
   }
 
   gl_set_antialias(0);
@@ -870,8 +872,10 @@ static int preinit(const char *arg)
 static int control(uint32_t request, void *data)
 {
   switch (request) {
-    case VOCTRL_PAUSE: return (int_pause=1);
-    case VOCTRL_RESUME: return (int_pause=0);
+    case VOCTRL_PAUSE:
+    case VOCTRL_RESUME:
+      int_pause = (request == VOCTRL_PAUSE);
+      return VO_TRUE;
     case VOCTRL_QUERY_FORMAT:
       return query_format(*((uint32_t*)data));
     case VOCTRL_GUISUPPORT:

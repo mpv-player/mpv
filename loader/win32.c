@@ -1273,8 +1273,8 @@ static int critsecs_get_pos(CRITICAL_SECTION *cs_win)
 
     for (i=0; i < CRITSECS_LIST_MAX; i++)
 	if (critsecs_list[i].cs_win == cs_win)
-	    return(i);
-    return(-1);
+	    return i;
+    return -1;
 }
 
 static int critsecs_get_unused(void)
@@ -1283,8 +1283,8 @@ static int critsecs_get_unused(void)
 
     for (i=0; i < CRITSECS_LIST_MAX; i++)
 	if (critsecs_list[i].cs_win == NULL)
-	    return(i);
-    return(-1);
+	    return i;
+    return -1;
 }
 
 struct CRITSECT *critsecs_get_unix(CRITICAL_SECTION *cs_win)
@@ -1293,8 +1293,8 @@ struct CRITSECT *critsecs_get_unix(CRITICAL_SECTION *cs_win)
 
     for (i=0; i < CRITSECS_LIST_MAX; i++)
 	if (critsecs_list[i].cs_win == cs_win && critsecs_list[i].cs_unix)
-	    return(critsecs_list[i].cs_unix);
-    return(NULL);
+	    return critsecs_list[i].cs_unix;
+    return NULL;
 }
 #endif
 

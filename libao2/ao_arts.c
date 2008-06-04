@@ -37,7 +37,7 @@ LIBAO_EXTERN(arts)
 
 static int control(int cmd, void *arg)
 {
-	return(CONTROL_UNKNOWN);
+	return CONTROL_UNKNOWN;
 }
 
 static int init(int rate_hz, int channels, int format, int flags)

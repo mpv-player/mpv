@@ -165,7 +165,7 @@ static int write_tga( char *file, int bpp, int dx, int dy, uint8_t *buf, int str
     if (er) {
         fprintf(stderr, "Error writing file [%s]\n", file);
     }
-    return(er);
+    return er;
 }
 
 static uint32_t draw_image(mp_image_t* mpi)

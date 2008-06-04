@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r26067
+// Synced with help_mp-en.h: r26795
 
 // ========================= MPlayer help ===========================
 
@@ -1387,7 +1387,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Внимание! Высота события изменилась!  \n"
 
 // ass_font.c
-#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Глиф 0x%X не найден, выбираю шрифт заново для (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Глиф 0x%X не найден, выбираю еще один шрифт для (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] В шрифте не найден глиф 0x%X для (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Ошибка открытия шрифта в памяти: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] шрифт без таблиц символов\n"
@@ -1407,6 +1407,12 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_LoosingBytes "Джойстик: Потеряно %d байт(а/ов) данных\n"
 #define MSGTR_INPUT_JOYSTICK_WarnLostSync "Джойстик: предупреждение о событии инициализации,\nотеряна синхронизация с драйвером.\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Джойстик: предупреждение о неизвестном типе события %d\n"
+
+// appleir.c
+
+#define MSGTR_INPUT_APPLE_IR_Init "Инициализация Apple IR на %s\n"
+#define MSGTR_INPUT_APPLE_IR_Detect "Обнаружен Apple IR на %s\n"
+#define MSGTR_INPUT_APPLE_IR_CantOpen "Невозможно открыть устройство Apple IR: %s\n"
 
 // input.c
 
@@ -2066,6 +2072,7 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/ru/video.html#xv!\n"\
 "[VO_XV] Другие (не-xv) драйверы ищите в выводе 'mplayer -vo help'.\n"\
 "[VO_XV] Попробуйте -vo x11.\n"
+#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] Использую Xv Адаптер #%d (%s)\n"
 
 //tv.c
 #define MSGTR_TV_BogusNormParameter "tv.c: norm_from_string(%s): Неизвестный параметр norm, устанавливается %s.\n"

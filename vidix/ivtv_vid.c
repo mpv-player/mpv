@@ -267,7 +267,7 @@ int ivtv_probe(int verbose,int force __attribute__ ((unused)))
 	
 	if(ivtv_verbose)
 		printf(IVTV_MSG"Can't find chip\n");
-	return(ENXIO);
+	return ENXIO;
 
 card_found:
 
@@ -283,7 +283,7 @@ card_found:
 		if(ioctl(fbdev, FBIOGET_VSCREENINFO, &vinfo) < 0) {
 			printf(IVTV_MSG"Unable to read screen info\n");
 			close(fbdev);
-			return(ENXIO);
+			return ENXIO;
 		} else {
 			fb_width = vinfo.xres;
 			fb_height = vinfo.yres;
@@ -299,7 +299,7 @@ card_found:
 		}
 	} else {
 		printf(IVTV_MSG"Failed to open /dev/fb%u\n", fb_number);
-		return(ENXIO);
+		return ENXIO;
 	}
 
 	/* Try to find YUV device */
@@ -318,7 +318,7 @@ card_found:
 				printf(IVTV_MSG"YUV device not found: /dev/video%u\n", yuv_device);
 		}
 	} while(yuv_device-- > yuv_device_number);
-	return(ENXIO);
+	return ENXIO;
 
 yuv_found:
 	if(0 == alpha_disable) {
@@ -327,7 +327,7 @@ yuv_found:
 			printf(IVTV_MSG"Unable to read fb state\n");
 			close(yuvdev);
 			close(fbdev);
-			return(ENXIO);
+			return ENXIO;
 		} else {
 			if(ivtv_verbose) {
 				printf(IVTV_MSG"old alpha : %ld\n",fb_state_old.alpha);
@@ -343,7 +343,7 @@ yuv_found:
 			printf(IVTV_MSG"Unable to read fb state\n");
 			close(yuvdev);
 			close(fbdev);
-			return(ENXIO);
+			return ENXIO;
 		} else {
 			if(ivtv_verbose) {
 				printf(IVTV_MSG"old alpha : %d\n",format_old.fmt.win.global_alpha);
@@ -354,7 +354,7 @@ yuv_found:
 #endif
 	}
 	probed = 1;
-	return(0);
+	return 0;
 }
 
 int ivtv_init(const char *args __attribute__ ((unused)))
@@ -365,15 +365,15 @@ int ivtv_init(const char *args __attribute__ ((unused)))
 	if (!probed) {
 		if(ivtv_verbose)
 			printf(IVTV_MSG"Driver was not probed but is being initialized\n");
-		return(EINTR);
+		return EINTR;
 	}
 	outbuf = malloc((IVTVMAXHEIGHT * IVTVMAXWIDTH) + (IVTVMAXHEIGHT * IVTVMAXWIDTH / 2));
 	if(NULL == outbuf) {
 		if(ivtv_verbose)
 			printf(IVTV_MSG"Not enough memory availabe!\n");
-		return(EINTR);
+		return EINTR;
 	}
-	return(0);
+	return 0;
 }
 
 void ivtv_destroy(void)
@@ -395,7 +395,7 @@ int ivtv_get_caps(vidix_capability_t *to)
 	if(ivtv_verbose)
 		printf(IVTV_MSG"GetCap\n");
 	memcpy(to, &ivtv_cap, sizeof(vidix_capability_t));
-	return(0);
+	return 0;
 }
 
 int ivtv_query_fourcc(vidix_fourcc_t *to)
@@ -415,13 +415,13 @@ int ivtv_query_fourcc(vidix_fourcc_t *to)
 	
 	if(!supports) {
 		to->depth = to->flags = 0;
-		return(ENOTSUP);
+		return ENOTSUP;
 	}
 	to->depth = VID_DEPTH_12BPP |
 		VID_DEPTH_15BPP | VID_DEPTH_16BPP |
 		VID_DEPTH_24BPP | VID_DEPTH_32BPP;
 	to->flags = 0;
-	return(0);
+	return 0;
 }
 
 int ivtv_config_playback(vidix_playback_t *info)
@@ -452,7 +452,7 @@ int ivtv_config_playback(vidix_playback_t *info)
 	if(ivtv_verbose)
 		printf(IVTV_MSG"frame_size: %d, dga_addr: %p\n",
 	info->frame_size, info->dga_addr);
-	return(0);
+	return 0;
 }
 
 int ivtv_playback_on(void)
@@ -473,7 +473,7 @@ int ivtv_playback_on(void)
 		}
 #endif
 	}
-	return(0);
+	return 0;
 }
 
 int ivtv_playback_off(void)
@@ -494,7 +494,7 @@ int ivtv_playback_off(void)
 		}
 #endif
 	}
-	return(0);
+	return 0;
 }
 
 int ivtv_frame_sel(unsigned int frame)
@@ -548,7 +548,7 @@ int ivtv_frame_sel(unsigned int frame)
 #endif
 		printf("Ioctl IVTV_IOC_DMA_FRAME returned failed Error\n");
 	}
-	return(0);
+	return 0;
 }
 
 VDXDriver ivtv_drv = {

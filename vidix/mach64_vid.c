@@ -991,7 +991,7 @@ static int mach64_set_eq( const vidix_video_eq_t * eq)
 static int mach64_get_gkeys(vidix_grkey_t *grkey)
 {
     memcpy(grkey, &mach64_grkey, sizeof(vidix_grkey_t));
-    return(0);
+    return 0;
 }
 
 static int mach64_set_gkeys(const vidix_grkey_t *grkey)
@@ -1056,7 +1056,7 @@ static int mach64_set_gkeys(const vidix_grkey_t *grkey)
     else
     	OUTREG(OVERLAY_KEY_CNTL,VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_TRUE|CMP_MIX_AND);
 
-    return(0);
+    return 0;
 }
 
 VDXDriver mach64_drv = {

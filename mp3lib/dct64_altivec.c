@@ -27,10 +27,10 @@
 #define WORD_s2 0x18,0x19,0x1a,0x1b
 #define WORD_s3 0x1c,0x1d,0x1e,0x1f
 
-#ifdef __APPLE_CC__
-#define AVV(x...) (x)
-#else
+#ifdef HAVE_ALTIVEC_VECTOR_BRACES
 #define AVV(x...) {x}
+#else
+#define AVV(x...) (x)
 #endif
 
 #define vcprm(a,b,c,d) (const vector unsigned char)AVV(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)

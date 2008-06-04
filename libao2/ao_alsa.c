@@ -232,7 +232,7 @@ static int control(int cmd, void *arg)
     }
     
   } //end switch
-  return(CONTROL_UNKNOWN);
+  return CONTROL_UNKNOWN;
 }
 
 static void parse_device (char *dest, const char *src, int len)
@@ -498,11 +498,11 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_OpenInNonblockModeFailed);
 	    if ((err = try_open_device(alsa_device, 0, format == AF_FORMAT_AC3)) < 0) {
 	      mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PlaybackOpenError, snd_strerror(err));
-	      return(0);
+	      return 0;
 	    }
 	  } else {
 	    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PlaybackOpenError, snd_strerror(err));
-	    return(0);
+	    return 0;
 	  }
 	}
 
@@ -520,7 +520,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	{
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToGetInitialParameters,
 		 snd_strerror(err));
-	  return(0);
+	  return 0;
 	}
     
       err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,
@@ -528,7 +528,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if (err < 0) {
 	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetAccessType, 
 	       snd_strerror(err));
-	return (0);
+	return 0;
       }
 
       /* workaround for nonsupported formats
@@ -547,7 +547,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	{
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetFormat,
 		 snd_strerror(err));
-	  return(0);
+	  return 0;
 	}
 
       if ((err = snd_pcm_hw_params_set_channels_near(alsa_handler, alsa_hwparams,
@@ -555,7 +555,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	{
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetChannels,
 		 snd_strerror(err));
-	  return(0);
+	  return 0;
 	}
 
       /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
@@ -566,7 +566,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	{
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToDisableResampling,
 		 snd_strerror(err));
-	  return(0);
+	  return 0;
 	}
 #endif
 
@@ -575,7 +575,7 @@ static int init(int rate_hz, int channels, int format, int flags)
         {
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetSamplerate2,
 		 snd_strerror(err));
-	  return(0);
+	  return 0;
         }
 
       bytes_per_sample = snd_pcm_format_physical_width(alsa_format) / 8;
@@ -592,7 +592,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  {
 	    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_UnableToSetBufferTimeNear,
 		   snd_strerror(err));
-	    return(0);
+	    return 0;
 	  } else
 	    alsa_buffer_time = err;
 
@@ -711,7 +711,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     } // end switch alsa_handler (spdif)
     alsa_can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
-    return(1);
+    return 1;
 } // end init
 
 
@@ -837,7 +837,7 @@ static int play(void* data, int len, int flags)
 	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_TryingToResetSoundcard);
 	if ((res = snd_pcm_prepare(alsa_handler)) < 0) {
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmPrepareError, snd_strerror(res));
-	  return(0);
+	  return 0;
 	  break;
 	}
       }
@@ -857,13 +857,13 @@ static int get_space(void)
     if ((ret = snd_pcm_status(alsa_handler, status)) < 0)
     {
 	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_CannotGetPcmStatus, snd_strerror(ret));
-	return(0);
+	return 0;
     }
     
     ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
     if (ret > ao_data.buffersize)  // Buffer underrun?
 	ret = ao_data.buffersize;
-    return(ret);
+    return ret;
 }
 
 /* delay in seconds between first and last sample in buffer */
@@ -884,6 +884,6 @@ static float get_delay(void)
     }
     return (float)delay / (float)ao_data.samplerate;
   } else {
-    return(0);
+    return 0;
   }
 }

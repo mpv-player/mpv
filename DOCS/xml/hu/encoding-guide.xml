@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26711 -->
+<!-- synced with r26925 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2134,7 +2134,7 @@ felépítéséhez (ennek vannak hátrányai - lásd a 3. módszert).
   választhatsz, mindegyiknek megvan a maga előnye és hátránya.
   Lásd az <option>mplayer -pphelp</option> és az
   <option>mplayer -vf help</option> kimenetét, hogy megtudd, mit
-  használhatsz (grep-pelj a "deint"-re), olvasd el Michael's Niedermayer
+  használhatsz (grep-pelj a "deint"-re), olvasd el Michael Niedermayer
   <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing szűrő összehasonlítását</ulink>,
   és keress az
   <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">

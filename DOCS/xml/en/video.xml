@@ -854,15 +854,14 @@ For a Linux 2.6.x version of this driver check out
 <procedure>
 <title>Installation:</title>
 <step><para>
-  To use it, you first have to compile <filename>mga_vid.o</filename>:
+  To use it, you first have to compile <filename>drivers/mga_vid.o</filename>:
   <screen>
-cd drivers
-make<!--
+make drivers<!--
 --></screen>
 </para></step>
 <step><para>
   Then run (as <systemitem class="username">root</systemitem>)
-  <screen>make install</screen>
+  <screen>make install-drivers</screen>
   which should install the module and create the device node for you.
   Load the driver with
   <screen>insmod mga_vid.o</screen>
@@ -941,14 +940,13 @@ the following instructions.
 <procedure>
 <title>Installing the tdfx_vid.o kernel module:</title>
 <step><para>
-  Compile <filename>tdfx_vid.o</filename>:
+  Compile <filename>drivers/tdfx_vid.o</filename>:
   <screen>
-cd drivers
-make</screen>
+make drivers</screen>
 </para></step>
 <step><para>
   Then run (as <systemitem class="username">root</systemitem>)
-  <screen>make install</screen>
+  <screen>make install-drivers</screen>
   which should install the module and create the device node for you.
   Load the driver with
   <screen>insmod tdfx_vid.o</screen>

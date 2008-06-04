@@ -6,7 +6,7 @@
 
 #include <windows.h>
 #include <ddk/ntddk.h>
-#include "../dhahelperwin/dhahelper.h"
+#include "dhahelperwin/dhahelper.h"
 
 /*
   This is the request structure that applications use

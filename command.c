@@ -1908,7 +1908,7 @@ static int mp_property_teletext_common(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-    return (result==TVI_CONTROL_TRUE?M_PROPERTY_OK:M_PROPERTY_ERROR);
+    return result == TVI_CONTROL_TRUE ? M_PROPERTY_OK : M_PROPERTY_ERROR;
 }
 
 static int mp_property_teletext_mode(m_option_t *prop, int action, void *arg,
@@ -2627,6 +2627,11 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		}
 		brk_cmd = 1;
 	    }
+	    break;
+
+	case MP_CMD_STOP:
+	    mpctx->eof = PT_STOP;
+	    brk_cmd = 1;
 	    break;
 
 #ifdef USE_RADIO

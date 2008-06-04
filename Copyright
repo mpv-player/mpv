@@ -150,3 +150,12 @@ Directory:  libmpdemux/yuv4mpeg*
 Copyright:  2001 Matthew J. Marjanovic <maddog@mir.com>
             2001 Andrew Stevens <andrew.stevens@philips.com>
 License:    GNU General Public License
+
+Name:       NuppelVideo / RTJPEG
+Version:    0.52a + patches
+Homepage:   http://web.archive.org/web/20050305195413/http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/
+Directory:  libmpcodecs/native/rtjpegn.[ch] libmpdemux/nuppelvideo.h
+Copyright:  1998 Justin Schoeman (justin@suntiger.ee.up.ac.za)
+            1998, 1999 Joerg Walter <trouble@moes.pmnet.uni-oldenburg.de>
+            1999 Wim Taymans <wim.taymans@tvd.be>
+License:    GNU General Public License version 2

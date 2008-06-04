@@ -238,7 +238,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
   {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "Not a FILM file\n");
     free(film_data);
-    return(NULL);    
+    return NULL;
   }
 
   // get the header size, which implicitly points past the header and
@@ -428,7 +428,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
     default:
       mp_msg(MSGT_DEMUX, MSGL_ERR, "Unrecognized FILM header chunk: %08X\n",
         chunk_type);
-      return(NULL);    
+      return NULL;
       break;
     }
   }

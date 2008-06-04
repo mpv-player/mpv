@@ -512,9 +512,10 @@ SRCS_MPLAYER = mplayer.c \
                libvo/vo_yuv4mpeg.c \
                $(addprefix libvo/,$(VO_SRCS)) \
 
+SRCS_MPLAYER-$(APPLE_IR)     += input/appleir.c
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
+SRCS_MPLAYER-$(GUI)          += gui/bitmap.c
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
-                                gui/bitmap.c \
                                 gui/cfg.c \
                                 gui/interface.c \
                                 gui/mplayer/gui_common.c \
@@ -540,8 +541,7 @@ SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
                                 gui/wm/ws.c \
                                 gui/wm/wsxdnd.c \
 
-SRCS_MPLAYER-$(GUI_WIN32)    += gui/bitmap.c \
-                                gui/win32/dialogs.c \
+SRCS_MPLAYER-$(GUI_WIN32)    += gui/win32/dialogs.c \
                                 gui/win32/gui.c \
                                 gui/win32/interface.c \
                                 gui/win32/playlist.c \
@@ -637,12 +637,10 @@ MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
-ALL_PRG             += $(ALL_PRG-yes)
 
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
-INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mplayer-man
-INSTALL_TARGETS-$(GUI_GTK)  += install-gui
-INSTALL_TARGETS             += $(INSTALL_TARGETS-yes)
+INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
+INSTALL_TARGETS-$(GUI)      += install-gui
 
 DIRS =  . \
         dvdread \
@@ -701,7 +699,7 @@ PARTS = ffmpeg/libavcodec \
 
 ###### generic rules #######
 
-all: $(ALL_PRG)
+all: $(ALL_PRG-yes)
 
 %.d: %.c
 	$(MPDEPEND_CMD) > $@
@@ -724,12 +722,10 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
-define RECURSIVE_RULE
-$(part)/$(notdir $(part)).a: recurse
-	$(MAKE) -C $(part)
-endef
+ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(notdir $(part)).a)
 
-$(foreach part,$(PARTS),$(eval $(RECURSIVE_RULE)))
+$(ALLPARTLIBS): recurse
+	$(MAKE) -C $(@D)
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
@@ -738,25 +734,19 @@ mencoder$(EXESUF): $(MENCODER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
-	$(HOST_CC) -O -I. -Iffmpeg -DCODECS2HTML $< -o $@
+	$(HOST_CC) -O -I. -Iffmpeg -DCODECS2HTML -o $@ $<
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
-
-codecs2html$(EXESUF): mp_msg.o
-	$(CC) -DCODECS2HTML codec-cfg.c $^ -o $@
-
-codec-cfg-test$(EXESUF): codecs.conf.h codec-cfg.h mp_msg.o osdep/getch2.o
-	$(CC) -I. -DTESTING codec-cfg.c mp_msg.o osdep/getch2.o -ltermcap -o $@
-
-osdep/mplayer-rc.o: osdep/mplayer.rc version.h
-	$(WINDRES) -I. -o $@ $<
 
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
+
+help_mp.h: help/help_mp-en.h $(HELP_FILE)
+	help/help_create.sh $(HELP_FILE) $(CHARSET)
 
 # rebuild version.h each time the working copy is updated
 ifeq ($(wildcard .svn/entries),.svn/entries)
@@ -765,22 +755,8 @@ endif
 version.h:
 	./version.sh `$(CC) -dumpversion`
 
-help_mp.h: help/help_mp-en.h $(HELP_FILE)
-	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
-	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
-	@echo '#ifndef MPLAYER_HELP_MP_H' >> help_mp.h
-	@echo '#define MPLAYER_HELP_MP_H' >> help_mp.h
-ifeq ($(CHARSET),)
-	@echo '#include "$(HELP_FILE)"' >> help_mp.h
-else
-	iconv -f UTF-8 -t $(CHARSET) "$(HELP_FILE)" >> help_mp.h
-endif
-	@echo '#endif /* MPLAYER_HELP_MP_H */' >> help_mp.h
-
-ifneq ($(HELP_FILE),help/help_mp-en.h)
-	@echo '// untranslated messages from the English master file:' >> help_mp.h
-	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
-endif
+osdep/mplayer-rc.o: osdep/mplayer.rc version.h
+	$(WINDRES) -I. -o $@ $<
 
 
 
@@ -814,82 +790,68 @@ $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 
 
 
-###### installation rules #######
+###### installation / clean / generic rules #######
 
-install: install-dirs $(INSTALL_TARGETS)
+install: $(INSTALL_TARGETS-yes)
 
 install-dirs:
-	$(INSTALL) -d $(BINDIR)
-	$(INSTALL) -d $(DATADIR)
+	$(INSTALL) -d $(BINDIR) $(CONFDIR)
+
+install-%: %$(EXESUF) install-dirs
+	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
+
+install-mplayer-man: $(foreach lang,$(MAN_LANG_ALL),install-mplayer-man-$(lang))
+install-mencoder-man: $(foreach lang,$(MAN_LANG_ALL),install-mencoder-man-$(lang))
+
+install-mplayer-man-en:
 	$(INSTALL) -d $(MANDIR)/man1
-	$(INSTALL) -d $(CONFDIR)
-	if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
+	$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
 
-install-mplayer: mplayer$(EXESUF)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) mplayer$(EXESUF) $(BINDIR)
+install-mencoder-man-en: install-mplayer-man-en
+	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
 
-install-mplayer-man:
-	for lang in $(MAN_LANG); do \
-		if test "$$lang" = en ; then \
-			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/ ; \
-		else \
-			$(INSTALL) -d $(MANDIR)/$$lang/man1 ; \
-			$(INSTALL) -c -m 644 DOCS/man/$$lang/mplayer.1 $(MANDIR)/$$lang/man1/ ; \
-		fi ; \
-	done
+define MPLAYER_MAN_RULE
+install-mplayer-man-$(lang):
+	$(INSTALL) -d $(MANDIR)/$(lang)/man1
+	$(INSTALL) -c -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
+endef
 
-install-mencoder: mencoder$(EXESUF)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) mencoder$(EXESUF) $(BINDIR)
-	for lang in $(MAN_LANG); do \
-		if test "$$lang" = en ; then \
-			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
-		else \
-			cd $(MANDIR)/$$lang/man1 && ln -sf mplayer.1 mencoder.1 ; \
-		fi ; \
-	done
+define MENCODER_MAN_RULE
+install-mencoder-man-$(lang): install-mplayer-man-$(lang)
+	cd $(MANDIR)/$(lang)/man1 && ln -sf mplayer.1 mencoder.1
+endef
 
-install-gui:
+$(foreach lang,$(MAN_LANG),$(eval $(MPLAYER_MAN_RULE)))
+$(foreach lang,$(MAN_LANG),$(eval $(MENCODER_MAN_RULE)))
+
+install-gui: install-mplayer
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	$(INSTALL) -d $(DATADIR)/skins
-	@echo "*** Download skin(s) at http://www.mplayerhq.hu/design7/dload.html"
-	@echo "*** for GUI, and extract to $(DATADIR)/skins/"
-	$(INSTALL) -d $(prefix)/share/pixmaps
+	$(INSTALL) -d $(DATADIR)/skins $(prefix)/share/pixmaps $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
-	$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
 
 uninstall:
-	-rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	-rm -f $(BINDIR)/mencoder$(EXESUF)
-	-rm -f $(MANDIR)/man1/mencoder.1 $(MANDIR)/man1/mplayer.1
-	-rm -f $(prefix)/share/pixmaps/mplayer.xpm
-	-rm -f $(prefix)/share/applications/mplayer.desktop
-	for lang in $(MAN_LANG); do \
-	  if test "$$lang" != "en"; then \
-	    rm -f $(MANDIR)/$$lang/man1/mplayer.1    \
-	          $(MANDIR)/$$lang/man1/mencoder.1   \
-	          $(MANDIR)/$$lang/man1/gmplayer.1 ; \
-	  fi ; \
-	done
+	rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
+	rm -f $(BINDIR)/mencoder$(EXESUF)
+	rm -f $(MANDIR)/man1/mencoder.1 $(MANDIR)/man1/mplayer.1
+	rm -f $(prefix)/share/pixmaps/mplayer.xpm
+	rm -f $(prefix)/share/applications/mplayer.desktop
+	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
+	rm -f $(foreach lang,$(MAN_LANG),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
 
 clean:
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
-distclean: clean doxygen_clean testsclean toolsclean
+distclean: clean testsclean toolsclean driversclean
+	rm -rf DOCS/tech/doxygen
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) \
-           codec-cfg$(EXESUF) codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
-           cpuinfo$(EXESUF) TAGS tags
+           codec-cfg$(EXESUF) cpuinfo$(EXESUF) TAGS tags
 
 doxygen:
 	doxygen DOCS/tech/Doxyfile
-
-doxygen_clean:
-	-rm -rf DOCS/tech/doxygen
-strip:
-	strip -s $(ALL_PRG)
 
 TAGS:
 	rm -f $@; ( find -name '*.[chS]' -print ) | xargs etags -a
@@ -902,6 +864,12 @@ tags:
 ###### tests / tools #######
 
 TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
+
+codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
+	$(CC) -I. -DCODECS2HTML -o $@ $^
+
+codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h codec-cfg.h $(TEST_OBJS)
+	$(CC) -I. -DTESTING -o $@ $^
 
 liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
 
@@ -916,7 +884,8 @@ loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
 mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 
-TESTS = liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
+TESTS = codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
+        liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
         loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF) \
         mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF)
 
@@ -946,6 +915,9 @@ ALLTOOLS = $(TOOLS) \
 
 tools: $(TOOLS)
 alltools: $(ALLTOOLS)
+
+toolsclean:
+	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
 TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
 
@@ -988,10 +960,87 @@ NETSTREAM_DEPS = libavutil/libavutil.a \
 TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-toolsclean:
-	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
+
+
+###### drivers #######
+
+KERNEL_INC = /lib/modules/`uname -r`/build/include
+KERNEL_VERSION = $(shell grep RELEASE $(KERNEL_INC)/linux/version.h | cut -d'"' -f2)
+KERNEL_CFLAGS = -O2 -D__KERNEL__ -DMODULE -Wall -I$(KERNEL_INC) -include $(KERNEL_INC)/linux/modversions.h
+KERNEL_OBJS = $(addprefix drivers/, mga_vid.o tdfx_vid.o radeon_vid.o rage128_vid.o)
+MODULES_DIR = /lib/modules/$(KERNEL_VERSION)/misc
+
+drivers: $(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test
+
+$(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test: CFLAGS = $(KERNEL_CFLAGS)
+drivers/mga_vid.o: drivers/mga_vid.c drivers/mga_vid.h
+drivers/tdfx_vid.o: drivers/tdfx_vid.c drivers/3dfx.h
+drivers/radeon_vid.o drivers/rage128_vid.o: CFLAGS += -fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math
+drivers/radeon_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
+drivers/rage128_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
+	$(CC) $(CFLAGS) -DRAGE128 -c $< -o $@
+
+install-drivers: drivers
+	-mkdir -p $(MODULES_DIR)
+	install -m 644 $(KERNEL_OBJS) $(MODULES_DIR)
+	depmod -a
+	-mknod /dev/mga_vid    c 178 0
+	-mknod /dev/tdfx_vid   c 178 0
+	-mknod /dev/radeon_vid c 178 0
+	-ln -s /dev/radeon_vid /dev/rage128_vid
+
+driversclean:
+	rm -f drivers/*.o drivers/*~ drivers/mga_vid_test drivers/tdfx_vid_test
+
+dhahelper: vidix/dhahelper/dhahelper.o vidix/dhahelper/test
+
+vidix/dhahelper/dhahelper.o vidix/dhahelper/test: CFLAGS = $(KERNEL_CFLAGS)
+vidix/dhahelper/dhahelper.o: vidix/dhahelper/dhahelper.c vidix/dhahelper/dhahelper.h
+
+install-dhahelper: vidix/dhahelper/dhahelper.o
+	-mkdir -p $(MODULES_DIR)
+	install -m 644 $< $(MODULES_DIR)
+	depmod -a
+
+dhahelperclean:
+	rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
+
+dhahelperwin: vidix/dhahelperwin/dhasetup.exe vidix/dhahelperwin/dhahelper.sys
+
+vidix/dhahelperwin/dhasetup.exe: vidix/dhahelperwin/dhasetup.c
+	$(CC) -o $@ $<
+
+vidix/dhahelperwin/dhahelper.o: vidix/dhahelperwin/dhahelper.c vidix/dhahelperwin/dhahelper.h
+	$(CC) -Wall -Os -c $< -o $@
+
+vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/dhahelper.rc vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
+	$(WINDRES) -I. $< $@
+
+vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
+	$(CC) -Wl,--base-file,$@ -Wl,--entry,_DriverEntry@8 -nostartfiles \
+            -nostdlib -o vidix/dhahelperwin/junk.tmp $^ -lntoskrnl
+	-rm -f vidix/dhahelperwin/junk.tmp
+
+vidix/dhahelperwin/temp.exp: vidix/dhahelperwin/base.tmp
+	dlltool --dllname vidix/dhahelperwin/dhahelper.sys --base-file $< --output-exp $@
+
+vidix/dhahelperwin/dhahelper.sys: vidix/dhahelperwin/temp.exp vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
+	$(CC) -Wl,--subsystem,native -Wl,--image-base,0x10000 \
+            -Wl,--file-alignment,0x1000 -Wl,--section-alignment,0x1000 \
+            -Wl,--entry,_DriverEntry@8 -Wl,$< -mdll -nostartfiles -nostdlib \
+            -o $@ vidix/dhahelperwin/dhahelper.o \
+            vidix/dhahelperwin/dhahelper-rc.o -lntoskrnl
+	strip $@
+
+install-dhahelperwin:
+	vidix/dhahelperwin/dhasetup.exe install
+
+dhahelperwinclean:
+	rm -f $(addprefix vidix/dhahelperwin/,*.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp)
+
+
 
 -include $(DEPS)
 
-.PHONY: all doxygen *install* recurse strip *tools
+.PHONY: all doxygen *install* recurse *tools drivers dhahelper*
 .PHONY: checkheaders *clean dep depend tests

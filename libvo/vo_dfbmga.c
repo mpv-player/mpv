@@ -917,11 +917,11 @@ query_format( uint32_t format )
                return 0;
      }
 
-     return (VFCAP_HWSCALE_UP |
+     return  VFCAP_HWSCALE_UP |
              VFCAP_HWSCALE_DOWN |
              VFCAP_CSP_SUPPORTED_BY_HW |
              VFCAP_CSP_SUPPORTED |
-             VFCAP_OSD);
+             VFCAP_OSD;
 }
 
 static void

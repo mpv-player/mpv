@@ -364,7 +364,7 @@ static int mga_frame_select(unsigned int frame)
 #endif
     }
 
-    return(0);
+    return 0;
 }
 
 
@@ -665,7 +665,7 @@ static int mga_config_playback(vidix_playback_t *config)
     if ((sw < 4) || (sh < 4) || (dw < 4) || (dh < 4))
     {
         printf("[mga] Invalid src/dest dimensions\n");
-        return(EINVAL);
+        return EINVAL;
     }
 
     //FIXME check that window is valid and inside desktop
@@ -685,7 +685,7 @@ static int mga_config_playback(vidix_playback_t *config)
 	    break;
 	default:
 	    printf("[mga] Unsupported pixel format: %x\n", config->fourcc);
-	    return(ENOTSUP);
+	    return ENOTSUP;
     }
 
     config->offsets[0] = 0;
@@ -707,7 +707,7 @@ static int mga_config_playback(vidix_playback_t *config)
     if (mga_src_base < 0)
     {
     	printf("[mga] not enough memory for frames!\n");
-    	return(EFAULT);
+    	return EFAULT;
     }
     mga_src_base &= (~0xFFFF); /* 64k boundary */
     if (mga_verbose > 1) printf("[mga] YUV buffer base: %#x\n", mga_src_base);
@@ -1043,7 +1043,7 @@ switch(config->fourcc){
 #endif /* CRTC2 */
 
     mga_vid_write_regs(0);
-    return(0);
+    return 0;
 }
 
 static int mga_playback_on(void)
@@ -1062,7 +1062,7 @@ static int mga_playback_on(void)
 #endif
     mga_next_frame=0;
 
-    return(0);
+    return 0;
 }
 
 static int mga_playback_off(void)
@@ -1078,7 +1078,7 @@ static int mga_playback_off(void)
     regs.besglobctl &= ~(1<<6); /* UYVY format selected */
     mga_vid_write_regs(0);
 
-    return(0);
+    return 0;
 }
 
 static int mga_probe(int verbose,int force)
@@ -1097,7 +1097,7 @@ static int mga_probe(int verbose,int force)
 	if (err)
 	{
 	    printf("[mga] Error occurred during pci scan: %s\n", strerror(err));
-	    return(err);
+	    return err;
 	}
 
 	if (mga_verbose)
@@ -1142,7 +1142,7 @@ static int mga_probe(int verbose,int force)
 	if (is_g400 == -1)
 	{
 		if (verbose) printf("[mga] Can't find chip\n");
-		return(ENXIO);
+		return ENXIO;
 	}
 
 card_found:
@@ -1151,7 +1151,7 @@ card_found:
 
 	mga_cap.device_id = pci_info.device; /* set device id in capabilites */
 
-	return(0);
+	return 0;
 }
 
 static int mga_init(void)
@@ -1171,7 +1171,7 @@ static int mga_init(void)
     if (!probed)
     {
 	printf("[mga] driver was not probed but is being initializing\n");
-	return(EINTR);
+	return EINTR;
     }
 
 #ifdef MGA_PCICONFIG_MEMDETECT
@@ -1226,7 +1226,7 @@ static int mga_init(void)
 	if ((mga_ram_size < 4) || (mga_ram_size > 64))
 	{
 	    printf("[mga] invalid RAMSIZE: %d MB\n", mga_ram_size);
-	    return(EINVAL);
+	    return EINVAL;
 	}
     }
 
@@ -1264,7 +1264,7 @@ static int mga_init(void)
 	mga_irq=-1;
 #endif
 
-    return(0);
+    return 0;
 }
 
 static void mga_destroy(void)
@@ -1304,33 +1304,33 @@ static int mga_query_fourcc(vidix_fourcc_t *to)
 	    break;
 	default:
 	    to->depth = to->flags = 0;
-	    return(ENOTSUP);
+	    return ENOTSUP;
     }
     
     to->depth = VID_DEPTH_12BPP |
 		VID_DEPTH_15BPP | VID_DEPTH_16BPP |
 		VID_DEPTH_24BPP | VID_DEPTH_32BPP;
     to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK | VID_CAP_COLORKEY;
-    return(0);
+    return 0;
 }
 
 static int mga_get_caps(vidix_capability_t *to)
 {
     memcpy(to, &mga_cap, sizeof(vidix_capability_t));
-    return(0);
+    return 0;
 }
 
 static int mga_get_gkeys(vidix_grkey_t *grkey)
 {
     memcpy(grkey, &mga_grkey, sizeof(vidix_grkey_t));
-    return(0);
+    return 0;
 }
 
 static int mga_set_gkeys(const vidix_grkey_t *grkey)
 {
     memcpy(&mga_grkey, grkey, sizeof(vidix_grkey_t));
     mga_vid_write_regs(0);
-    return(0);
+    return 0;
 }
 
 static int mga_set_eq( const vidix_video_eq_t * eq)
@@ -1339,12 +1339,12 @@ static int mga_set_eq( const vidix_video_eq_t * eq)
     if (!is_g400)
     {
 	if (mga_verbose) printf("[mga] equalizer isn't supported with G200\n");
-	return(ENOTSUP);
+	return ENOTSUP;
     }
 
     // only brightness&contrast are supported:
     if(!(eq->cap & (VEQ_CAP_BRIGHTNESS|VEQ_CAP_CONTRAST)))
-	return(ENOTSUP);
+	return ENOTSUP;
     
     //regs.beslumactl = readl(mga_mmio_base + BESLUMACTL);
     if (eq->cap & VEQ_CAP_BRIGHTNESS) { 
@@ -1357,7 +1357,7 @@ static int mga_set_eq( const vidix_video_eq_t * eq)
     }
     writel(regs.beslumactl,mga_mmio_base + BESLUMACTL);
 
-    return(0);
+    return 0;
 }
 
 static int mga_get_eq( vidix_video_eq_t * eq)
@@ -1366,7 +1366,7 @@ static int mga_get_eq( vidix_video_eq_t * eq)
     if (!is_g400)
     {
 	if (mga_verbose) printf("[mga] equalizer isn't supported with G200\n");
-	return(ENOTSUP);
+	return ENOTSUP;
     }
 
     eq->brightness = (signed short int)(regs.beslumactl >> 16) * 1000 / 128;
@@ -1375,7 +1375,7 @@ static int mga_get_eq( vidix_video_eq_t * eq)
     
     printf("MGA GET_EQ: br=%d c=%d  \n",eq->brightness,eq->contrast);
 
-    return(0);
+    return 0;
 }
 
 #ifndef CRTC2

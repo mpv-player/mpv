@@ -122,9 +122,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_mpeg_gxf,
     &demuxer_desc_mpeg4_es,
     &demuxer_desc_h264_es,
-#ifdef MUSEPACK
-    &demuxer_desc_mpc,
-#endif
     &demuxer_desc_audio,
     &demuxer_desc_mpeg_ty,
 #ifdef STREAMING_LIVE555
@@ -135,6 +132,9 @@ const demuxer_desc_t *const demuxer_list[] = {
 #endif
 #ifdef USE_LIBAVFORMAT
     &demuxer_desc_lavf,
+#endif
+#ifdef MUSEPACK
+  &demuxer_desc_mpc,
 #endif
 #ifdef HAVE_LIBDV095
     &demuxer_desc_rawdv,
@@ -277,10 +277,11 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
     if (demuxer->a_streams[id]) {
         mp_msg(MSGT_DEMUXER, MSGL_WARN, MSGTR_AudioStreamRedefined, id);
     } else {
-        sh_audio_t *sh;
         mp_msg(MSGT_DEMUXER, MSGL_V, MSGTR_FoundAudioStream, id);
-        demuxer->a_streams[id] = calloc(1, sizeof(sh_audio_t));
-        sh = demuxer->a_streams[id];
+        sh_audio_t *sh = calloc(1, sizeof(sh_audio_t));
+        demuxer->a_streams[id] = sh;
+        sh->aid = aid;
+        sh->ds = demuxer->audio;
         // set some defaults
         sh->samplesize = 2;
         sh->sample_format = AF_FORMAT_S16_NE;
@@ -289,7 +290,6 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
         sh->opts = demuxer->opts;
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
     }
-    ((sh_audio_t *) demuxer->a_streams[id])->aid = aid;
     return demuxer->a_streams[id];
 }
 
@@ -318,10 +318,11 @@ sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
         mp_msg(MSGT_DEMUXER, MSGL_V, MSGTR_FoundVideoStream, id);
         sh_video_t *sh = calloc(1, sizeof *sh);
         demuxer->v_streams[id] = sh;
+        sh->vid = vid;
+        sh->ds = demuxer->video;
         sh->opts = demuxer->opts;
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
     }
-    ((sh_video_t *) demuxer->v_streams[id])->vid = vid;
     return demuxer->v_streams[id];
 }
 
@@ -1049,6 +1050,13 @@ demuxer_t *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
 }
 
 
+void demux_flush(demuxer_t *demuxer)
+{
+    ds_free_packs(demuxer->video);
+    ds_free_packs(demuxer->audio);
+    ds_free_packs(demuxer->sub);
+}
+
 int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
                int flags)
 {
@@ -1071,12 +1079,9 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
         return 0;
     }
     // clear demux buffers:
-    if (sh_audio) {
-        ds_free_packs(d_audio);
+    demux_flush(demuxer);
+    if (sh_audio)
         sh_audio->a_buffer_len = 0;
-    }
-    ds_free_packs(d_video);
-    ds_free_packs(demuxer->sub);
 
     demuxer->stream->eof = 0;
     demuxer->video->eof = 0;
@@ -1337,14 +1342,7 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode,
             chapter += current;
         }
 
-        if (demuxer->video->sh)
-            ds_free_packs(demuxer->video);
-
-        if (demuxer->audio->sh)
-            ds_free_packs(demuxer->audio);
-
-        if (demuxer->sub->id >= 0)
-            ds_free_packs(demuxer->sub);
+        demux_flush(demuxer);
 
         ris =
             stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_CHAPTER,
@@ -1526,14 +1524,7 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     if ((angles < 1) || (angle > angles))
         return -1;
 
-    if (demuxer->video->sh)
-        ds_free_packs(demuxer->video);
-
-    if (demuxer->audio->sh)
-        ds_free_packs(demuxer->audio);
-
-    if (demuxer->sub->id >= 0)
-        ds_free_packs(demuxer->sub);
+    demux_flush(demuxer);
 
     ris = stream_control(demuxer->stream, STREAM_CTRL_SET_ANGLE, &angle);
     if (ris == STREAM_UNSUPPORTED)

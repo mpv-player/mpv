@@ -1,4 +1,6 @@
 #include <stddef.h>
+
+#include "config.h"
 #include "defaultopts.h"
 #include "options.h"
 
@@ -39,7 +41,11 @@ void set_default_mplayer_options(struct MPOpts *opts)
              .use_joystick = 1,
              .use_lirc = 1,
              .use_lircc = 1,
+#ifdef HAVE_APPLE_REMOTE
              .use_ar = 1,
+#else
+             .use_ar = 0,
+#endif
          }
     };
 }

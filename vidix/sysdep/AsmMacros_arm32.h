@@ -84,20 +84,20 @@ static __inline__ void outl(short port,int val)
 
 static __inline__ unsigned int inb(short port)
 {
-	 if ((unsigned short)port >= 0x400) return((unsigned int)-1);
-	return(*(volatile unsigned char*)(((unsigned short)(port))+IOPortBase));
+	if ((unsigned short)port >= 0x400) return (unsigned int)-1;
+	return *(volatile unsigned char*)(((unsigned short)(port))+IOPortBase);
 }
 
 static __inline__ unsigned int inw(short port)
 {
-	 if ((unsigned short)port >= 0x400) return((unsigned int)-1);
-	return(*(volatile unsigned short*)(((unsigned short)(port))+IOPortBase));
+	if ((unsigned short)port >= 0x400) return (unsigned int)-1;
+	return *(volatile unsigned short*)(((unsigned short)(port))+IOPortBase);
 }
 
 static __inline__ unsigned int inl(short port)
 {
-	 if ((unsigned short)port >= 0x400) return((unsigned int)-1);
-	return(*(volatile unsigned long*)(((unsigned short)(port))+IOPortBase));
+	if ((unsigned short)port >= 0x400) return (unsigned int)-1;
+	return *(volatile unsigned long*)(((unsigned short)(port))+IOPortBase);
 }
 
 #define intr_disable()

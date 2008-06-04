@@ -189,7 +189,7 @@ static int open(vf_instance_t *vf, char* args){
 	if (!strcasecmp(args,"bgr32")) vf->priv->fmt=IMGFMT_BGR32; else
 	{
 	    mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_UnknownFormatName, args);
-	    return(0);
+	    return 0;
 	}
     }
     return 1;

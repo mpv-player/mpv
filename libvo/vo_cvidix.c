@@ -134,7 +134,7 @@ static int draw_frame(uint8_t *src[]){
 }
 
 static int query_format(uint32_t format){
-  return(vidix_query_fourcc(format));
+  return vidix_query_fourcc(format);
 }
 
 static void uninit(void){

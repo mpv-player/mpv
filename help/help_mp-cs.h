@@ -529,7 +529,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Nemohu otevřít soubor ze sítě: '%s'\n"
 #define MSGTR_SMBNotCompiled "MPlayer nebyl přeložen s podporou čtení SMB.\n"
 
-#define MSGTR_CantOpenDVD "Nelze otevřít DVD zařízení: %s\n"
+#define MSGTR_CantOpenDVD "Nelze otevřít DVD zařízení: %s (%s)\n"
 
 // stream_dvd.c
 #define MSGTR_DVDspeedCantOpen "Nemohu otevřít DVD zařízení pro zápis, změna DVD rychlosti vyžaduje právo zápisu.\n"

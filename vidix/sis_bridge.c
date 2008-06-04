@@ -56,7 +56,7 @@ static int sis_do_sense(int tempbl, int tempbh, int tempcl, int tempch)
     inSISIDXREG(SISPART4, 0x03, temp);
     temp ^= 0x0e;
     temp &= tempch;
-    return (temp == tempch);
+    return temp == tempch;
 }
 
 

@@ -364,7 +364,7 @@ static int mga_init(int width,int height,unsigned int format){
             mga_vid_config.format=MGA_VID_FORMAT_UYVY; break;
         default: 
             mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_InvalidOutputFormat,format);
-            return (-1);
+            return -1;
         }
 
 	mga_vid_config.src_width = width;
@@ -382,7 +382,7 @@ static int mga_init(int width,int height,unsigned int format){
 	if(width > 1024 && height > 1024)
 	{
 		mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
-		return (-1);
+		return -1;
 	} else if(height <= 1024)
 	{
 		// try whether we have a G550
@@ -393,7 +393,7 @@ static int mga_init(int width,int height,unsigned int format){
 			{
 				// we don't have a G550, so our resolution is too high
 				mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
-				return (-1);
+				return -1;
 			} else {
 				// there is a deeper problem
 				// we have a G550, but still couldn't configure mga_vid
@@ -445,6 +445,7 @@ static int mga_uninit(){
 
 static int preinit(const char *vo_subdevice)
 {
+	uint32_t ver;
   const char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 	sws_rgb2rgb_init(get_sws_cpuflags());
 
@@ -453,7 +454,17 @@ static int preinit(const char *vo_subdevice)
 	{
 		perror("open");
 		mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_MGA_CouldntOpen,devname);
-		return(-1);
+		return -1;
+	}
+	
+	// check whether the mga_vid driver has the same
+	// version as we expect
+	
+	ioctl(f,MGA_VID_GET_VERSION,&ver);
+	if(MGA_VID_VERSION != ver)
+	{
+		mp_msg(MSGT_VO, MSGL_ERR, MGSTR_LIBVO_MGA_mgavidVersionMismatch, ver, MGA_VID_VERSION);
+		return -1;
 	}
 
 #ifdef VO_XMGA

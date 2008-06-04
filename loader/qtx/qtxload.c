@@ -17,7 +17,7 @@ ComponentResult ComponentDummy(
 	params, globals, ComponentDispatch);
     printf(" Dummy: global datas: %p\n", *globals);
     printf(" Dummy: returning 0\n");
-    return(0);
+    return 0;
 }
 
 char *get_path(const char* x){  return strdup(x);}

@@ -96,7 +96,7 @@ static __inline__ int enable_os_io(void)
     if (svgahelper_fd > 0)
     {
 	svgahelper_initialized = 1;
-	return(0);
+	return 0;
     }
     svgahelper_initialized = -1;
 #endif
@@ -106,7 +106,7 @@ static __inline__ int enable_os_io(void)
     if (dhahelper_fd > 0)
     {
 	dhahelper_initialized = 1;
-	return(0);
+	return 0;
     }
     dhahelper_initialized = -1;
 #endif
@@ -115,9 +115,9 @@ static __inline__ int enable_os_io(void)
 /* should be fixed? */
 #else    
     if (iopl(3) != 0)
-	return(errno);
+	return errno;
 #endif    
-    return(0);
+    return 0;
 }
 
 static __inline__ int disable_os_io(void)
@@ -136,9 +136,9 @@ static __inline__ int disable_os_io(void)
 /* should be fixed? */
 #else    
     if (iopl(0) != 0)
-	return(errno);
+	return errno;
 #endif    
-    return(0);
+    return 0;
 }
 
 #if (defined(__powerpc__) || defined(__sparc__) || defined(__sparc64__) \

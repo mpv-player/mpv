@@ -56,5 +56,5 @@ int main(int argc, char *argv[])
 	ioctl(fd, DHAHELPER_MEMORY, &mem);
     }
 
-    return(0);
+    return 0;
 }

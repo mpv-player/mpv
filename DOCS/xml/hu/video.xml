@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26073 -->
+<!-- synced with r26914 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -862,15 +862,14 @@ Ezen vezérlő Linux 2.6.x alatti verziója itt található:
 <procedure>
 <title>Telepítés:</title>
 <step><para>
-  A használatához először <filename>mga_vid.o</filename>-t kell forgatnod:
+  A használatához először le kell fordítanod a <filename>drivers/mga_vid.o</filename> fájt:
   <screen>
-cd drivers
-make<!--
+make drivers<!--
 --></screen>
 </para></step>
 <step><para>
   Ezután futtasd (<systemitem class="username">root</systemitem>-ként) a
-  <screen>make install</screen>
+  <screen>make install-drivers</screen>
   parancsot, ami telepíti a modult és létrehozza az eszköz node-ját neked.
   Töltsd be a vezérlőt
   <screen>insmod mga_vid.o</screen>
@@ -950,14 +949,13 @@ az alábbi utasítások alapján.
 <procedure>
 <title>A tdfx_vid.o kernel modul telepítése:</title>
 <step><para>
-  Fordítsd le a <filename>tdfx_vid.o</filename> fájlt:
+  Fordítsd le a <filename>drivers/tdfx_vid.o</filename> fájlt:
   <screen>
-cd drivers
-make</screen>
+make drivers</screen>
 </para></step>
 <step><para>
   Ezután futtasd (<systemitem class="username">root</systemitem>-ként) a
-  <screen>make install</screen>
+  <screen>make install-drivers</screen>
   parancsot, ami telepíti a modult és létrehozza az eszköz node-ját neked.
   Töltsd be a vezérlőt
   <screen>insmod tdfx_vid.o</screen>

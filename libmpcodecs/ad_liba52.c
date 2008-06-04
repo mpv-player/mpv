@@ -253,6 +253,7 @@ while(sh_audio->channels>0){
 
 static void uninit(sh_audio_t *sh)
 {
+  a52_free(a52_state);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)

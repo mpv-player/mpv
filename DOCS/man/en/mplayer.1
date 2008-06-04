@@ -232,6 +232,8 @@ Pressing once will pause movie, every consecutive press will play one frame
 and then go into pause mode again (any other key unpauses).
 .IPs "q / ESC"
 Stop playing and quit.
+.IPs "U\ \ \ \ "
+Stop playing (and quit if \-idle is not used).
 .IPs "+ and \-"
 Adjust audio delay by +/\- 0.1 seconds.
 .IPs "/ and *"
@@ -823,7 +825,7 @@ xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
 .TP
-.B \-correct\-pts (experimental)
+.B \-correct\-pts (EXPERIMENTAL)
 Switches MPlayer to an experimental mode where timestamps for video frames
 are calculated differently and video filters which add new frames or
 modify timestamps of existing ones are supported.
@@ -903,14 +905,14 @@ to ensure it does not cause security problems (e.g.\& make sure to use full
 paths if "." is in your path like on Windows).
 .sp 1
 This can be "misused" to disable screensavers that do not support the proper
-X API for this.
-If you think this is too complicated ask the author of the screensaver program
-to support the proper X APIs for this.
+X API.
+If you think this is too complicated, ask the author of the screensaver
+program to support the proper X APIs.
 .sp 1
 .I EXAMPLE for xscreensaver:
 mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
 .sp 1
-.I EXAMPLE for gnome screensaver:
+.I EXAMPLE for GNOME screensaver:
 mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .RE
 .PD 1
@@ -950,6 +952,8 @@ Available commands are:
 Specify input configuration file other than the default
 ~/\:.mplayer/\:input.conf.
 ~/\:.mplayer/\:<filename> is assumed if no full path is given.
+.IPs ar-dev=<device>
+Device to be used for Apple IR Remote (default is autodetected, Linux only).
 .IPs ar-delay
 Delay in milliseconds before we start to autorepeat a key (0 to disable).
 .IPs ar-rate
@@ -1050,6 +1054,10 @@ Turns off joystick support.
 .TP
 .B \-nolirc
 Turns off LIRC support.
+.
+.TP
+.B \-noar
+Turns off AppleIR remote support.
 .
 .TP
 .B \-nomouseinput
@@ -3594,16 +3602,25 @@ the maximum texture size of your OpenGL implementation.
 Intended to work even with the most basic OpenGL implementations,
 but also makes use of newer extensions, which allow support for more
 colorspaces and direct rendering.
-Please use \-dr if it works with your OpenGL implementation,
-since for higher resolutions this provides a
-.B big
-speedup.
+For optimal speed try something similar to
+.br
+\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+.br
 The code performs very few checks, so if a feature does not work, this
 might be because it is not supported by your card/OpenGL implementation
 even if you do not get any error message.
 Use glxinfo or a similar tool to display the supported OpenGL extensions.
 .PD 0
 .RSs
+.IPs (no)ati\-hack
+ATI drivers may give a corrupted image when PBOs are used (when using \-dr
+or force\-pbo).
+This option fixes this, at the expense of using a bit more memory.
+.IPs (no)force\-pbo
+Always uses PBOs to transfer textures even if this involves an extra copy.
+Currently this gives a little extra speed with NVidia drivers and a lot more
+speed with ATI drivers.
+May need \-noslices and the ati\-hack suboption to work correctly.
 .IPs (no)scaled-osd
 Changes the way the OSD behaves when the size of the
 window changes (default: disabled).
@@ -5362,7 +5379,7 @@ Scales pitch without altering tempo.
 Add \'[ speed_mult 0.9438743126816935\' and \'] speed_mult 1.059463094352953\'
 to your input.conf to step by musical semi-tones.
 .I WARNING:
-Looses synch with video.
+Loses sync with video.
 .IPs both
 Scale both tempo and pitch
 .IPs none
@@ -10118,6 +10135,27 @@ filtering noise away with video filters like denoise3d or hqdn3d.
 .B chroma_qp_offset=<\-12\-12>
 Use a different quantizer for chroma as compared to luma.
 Useful values are in the range <\-2\-2> (default: 0).
+.
+.TP
+.B aq_mode=<0\-2>
+Defines how adaptive quantization (AQ) distributes bits:
+.PD 0
+.RSs
+.IPs 0
+disabled
+.IPs 1
+Avoid moving bits between frames.
+.IPs 2
+Move bits between frames (by default).
+.RE
+.PD 1
+.
+.TP
+.B aq_strength=<positive float value>
+Controls how much adaptive quantization (AQ) reduces blocking and blurring
+in flat and textured areas (default: 1.0).
+A value of 0.5 will lead to weak AQ and less details, when a value of 1.5
+will lead to strong AQ and more details.
 .
 .TP
 .B cqm=<flat|jvt|<filename>>

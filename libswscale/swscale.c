@@ -1848,8 +1848,8 @@ static int gray16swap(SwsContext *c, uint8_t* src[], int srcStride[], int srcSli
     int y=      srcSliceY;
     int height= srcSliceH;
     int i, j;
-    uint16_t *srcPtr= src[0];
-    uint16_t *dstPtr= dst[0] + dstStride[0]*y/2;
+    uint16_t *srcPtr= (uint16_t*)src[0];
+    uint16_t *dstPtr= (uint16_t*)(dst[0] + dstStride[0]*y/2);
     for (i=0; i<height; i++)
     {
         for (j=0; j<length; j++) dstPtr[j] = bswap_16(srcPtr[j]);
@@ -2390,9 +2390,9 @@ SwsContext *sws_getContext(int srcW, int srcH, int srcFormat, int dstW, int dstH
     if (flags&SWS_PRINT_INFO)
     {
 #ifdef DITHER1XBPP
-        char *dither= " dithered";
+        const char *dither= " dithered";
 #else
-        char *dither= "";
+        const char *dither= "";
 #endif
         if (flags&SWS_FAST_BILINEAR)
             av_log(c, AV_LOG_INFO, "FAST_BILINEAR scaler, ");
@@ -2542,7 +2542,7 @@ int sws_scale(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
             int v= av_clip_uint8(((RV*r + GV*g + BV*b)>>RGB2YUV_SHIFT) + 128);
             pal[i]= y + (u<<8) + (v<<16);
         }
-        src2[1]= pal;
+        src2[1]= (uint8_t*)pal;
     }
 
     // copy strides, so they can safely be modified

@@ -196,7 +196,7 @@ static int init(sh_video_t *sh){
     prev=FindNextComponent(NULL,&desc);
     if(!prev){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Cannot find requested component\n");
-	return(0);
+	return 0;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Found it! ID = %p\n",prev);
 
@@ -278,7 +278,7 @@ static int init(sh_video_t *sh){
 	    break;
 	default:
 	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Unknown requested csp\n");
-	    return(0);    
+	    return 0;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"imgfmt: %s qt_imgfmt: %.4s\n", vo_format_name(imgfmt), (char *)&qt_imgfmt);
     sh->context = (void *)qt_imgfmt;

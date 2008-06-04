@@ -229,6 +229,7 @@ Optional features:
   --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
   --enable-joystick      enable joystick support [disable]
   --enable-apple-remote  enable Apple Remote input (Mac OS X only) [autodetect]
+  --enable-apple-ir      enable Apple IR Remote input (Linux only) [autodetect]
   --disable-vm           disable X video mode extensions [autodetect]
   --disable-xf86keysym   disable support for multimedia keys [autodetect]
   --enable-radio         enable radio interface [disable]
@@ -285,8 +286,8 @@ Codecs:
   --disable-qtx             disable QuickTime codecs support [enabled]
   --disable-xanim           disable XAnim codecs support [enabled]
   --disable-real            disable RealPlayer codecs support [enabled]
-  --disable-xvid            disable XviD [autodetect]
-  --disable-xvid-lavc       disable XviD in libavcodec [autodetect]
+  --disable-xvid            disable Xvid [autodetect]
+  --disable-xvid-lavc       disable Xvid in libavcodec [autodetect]
   --disable-x264            disable x264 [autodetect]
   --disable-x264-lavc       disable x264 in libavcodec [autodetect]
   --disable-libnut          disable libnut [autodetect]
@@ -630,6 +631,7 @@ _libnut=auto
 _lirc=auto
 _lircc=auto
 _apple_remote=auto
+_apple_ir=auto
 _gui=no
 _gtk1=no
 _termcap=auto
@@ -1073,6 +1075,8 @@ for ac_option do
   --disable-lircc)	_lircc=no	;;
   --enable-apple-remote) _apple_remote=yes ;;
   --disable-apple-remote) _apple_remote=no ;;
+  --enable-apple-ir)    _apple_ir=yes   ;;
+  --disable-apple-ir)   _apple_ir=no    ;;
   --enable-gui)		_gui=yes	;;
   --disable-gui)	_gui=no		;;
   --enable-gtk1)	_gtk1=yes	;;
@@ -1565,7 +1569,7 @@ if x86 && test "$_runtime_cpudetection" = no ; then
 void catch() { exit(1); }
 int main(void) {
   signal(SIGILL, catch);
-  __asm__ __volatile__ ("$3":::"memory");return(0);
+  __asm__ __volatile__ ("$3":::"memory"); return 0;
 }
 EOF
 
@@ -2411,30 +2415,46 @@ echores $_asmalign_pot
 
 
 #FIXME: This should happen before the check for CFLAGS..
-if test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ; then
+if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; then
 
     # check if AltiVec is supported by the compiler, and how to enable it
     echocheck "GCC AltiVec flags"
     cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
-    cc_check -maltivec -mabi=altivec \
-        && _altivec_gcc_flags="-maltivec -mabi=altivec" \
-        || cc_check -faltivec && _altivec_gcc_flags=-faltivec \
-        || _altivec=no
-    echores "$_altivec_gcc_flags"
-
+    if $(cc_check -maltivec -mabi=altivec) ; then
+    _altivec_gcc_flags="-maltivec -mabi=altivec"
     # check if <altivec.h> should be included
-    echocheck "altivec.h"
     _def_altivec_h='#undef HAVE_ALTIVEC_H'
-    _have_altivec_h=no
     cat > $TMPC << EOF
 #include <altivec.h>
 int main(void) { return 0; }
 EOF
-    cc_check $_altivec_gcc_flags && _have_altivec_h=yes \
-        && _def_altivec_h='#define HAVE_ALTIVEC_H 1'
-    echores "$_have_altivec_h"
+        if $(cc_check $_altivec_gcc_flags) ; then
+            _def_altivec_h='#define HAVE_ALTIVEC_H 1'
+            inc_altivec_h='#include <altivec.h>'
+        else
+        cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+            if $(cc_check -faltivec) ; then
+                _altivec_gcc_flags="-faltivec"
+            else
+                _altivec=no
+                _altivec_gcc_flags="none, AltiVec disabled"
+            fi
+        fi
+    fi
+    echores "$_altivec_gcc_flags"
+
+    # check if the compiler supports braces for vector declarations
+    cat > $TMPC << EOF
+$inc_altivec_h
+#define AVV(x...) {x}
+int main (void) { (vector int) AVV(1); return 0; }
+EOF
+    cc_check $_altivec_gcc_flags &&
+        _def_altivec_vector_braces='#define HAVE_ALTIVEC_VECTOR_BRACES 1'
 
     # Disable runtime cpudetection if we cannot generate AltiVec code or
     # AltiVec is disabled by the user.
@@ -2589,12 +2609,13 @@ _mp_help="help/help_mp-${_language}.h"
 test -f $_mp_help || die "$_mp_help not found"
 for lang in $LANGUAGES ; do
   if test -f "DOCS/man/$lang/mplayer.1" ; then
-    MAN_LANG="$lang $MAN_LANG"
+    MAN_LANG_ALL="$lang $MAN_LANG_ALL"
   fi
 done
+MAN_LANG="$(echo $MAN_LANG_ALL | sed 's/en//')"
 _doc_lang=$_language
 test -d DOCS/xml/$_doc_lang || _doc_lang=en
-echores "using $_language (man pages: $MAN_LANG)"
+echores "using $_language (man pages: $MAN_LANG_ALL)"
 
 
 echocheck "enable sighandler"
@@ -3604,6 +3625,28 @@ echores "$_apple_remote"
 
 fi #if darwin
 
+if linux; then
+
+echocheck "Apple IR"
+if test "$_apple_ir" = auto ; then
+  _apple_ir=no
+  cat > $TMPC <<EOF
+#include <linux/types.h>
+#include <linux/input.h>
+int main(void) {
+  struct input_event ev;
+  return 0;
+}
+EOF
+  cc_check && tmp_run && _apple_ir=yes
+fi
+if test "$_apple_ir" = yes ; then
+  _def_apple_ir='#define HAVE_APPLE_IR 1'
+else
+  _def_apple_ir='#undef HAVE_APPLE_IR'
+fi
+echores "$_apple_ir"
+fi #if linux
 
 echocheck "pkg-config"
 _pkg_config=pkg-config
@@ -4512,7 +4555,7 @@ cat > $TMPC << EOF
 int main(void) {
   printf("png.h : %s\n", PNG_LIBPNG_VER_STRING);
   printf("libpng: %s\n", png_libpng_ver);
-  return (strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver));
+  return strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver);
 }
 EOF
     if cc_check -lpng -lz $_ld_lm ; then
@@ -5324,26 +5367,22 @@ elif test "$_dvdread" = auto ; then
   if test "$_dl" = yes; then
     cat > $TMPC << EOF
 #include <inttypes.h>
-#include <dvdread/dvd_reader.h>
-#include <dvdread/ifo_types.h>
-#include <dvdread/ifo_read.h>
-#include <dvdread/nav_read.h>
+#include <libdvdread/dvd_reader.h>
+#include <libdvdread/ifo_types.h>
+#include <libdvdread/ifo_read.h>
+#include <libdvdread/nav_read.h>
 int main(void) { return 0; }
 EOF
-    cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
-      -ldvdread $_ld_dl && _dvdread=yes && _res_comment="external"
   fi
-  if test "$_dvdread" = no ; then
-    _dvdreadconfig="dvdread-config"
-    _dvdreadcflags=`$_dvdreadconfig --cflags`
-    _dvdreadlibs=`$_dvdreadconfig --libs`
-    if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
-      $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
-      _dvdread=yes
-      _inc_extra="$_inc_extra $_dvdreadcflags"
-      _ld_extra="$_ld_extra $_dvdreadlibs"
-      _res_comment="external"
-    fi
+  _dvdreadconfig="dvdread-config"
+  _dvdreadcflags=`$_dvdreadconfig --cflags`
+  _dvdreadlibs=`$_dvdreadconfig --libs`
+  if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
+    $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
+    _dvdread=yes
+    _inc_extra="$_inc_extra $_dvdreadcflags"
+    _ld_extra="$_ld_extra $_dvdreadlibs"
+    _res_comment="external"
   fi
 fi
 
@@ -6506,7 +6545,7 @@ fi
 echores "$_libdv"
 
 
-echocheck "XviD"
+echocheck "Xvid"
 if test "$_xvid" = auto ; then
   _xvid=no
   cat > $TMPC << EOF
@@ -6527,7 +6566,7 @@ else
 fi
 echores "$_xvid"
 
-echocheck "XviD two pass plugin"
+echocheck "Xvid two pass plugin"
 if test "$_xvid" = yes && test "$_xvid_lavc" = auto ; then
   cat > $TMPC << EOF
 #include <xvid.h>
@@ -7304,12 +7343,7 @@ else
   _def_charset="#undef MSG_CHARSET"
 fi
 
-if test "$_charset" = "UTF-8" ; then
-  # hack to disable conversion in the Makefile
-  _charset=""
-fi
-
-if test "$_charset" ; then
+if test "$_charset" != "UTF-8" ; then
 echocheck "iconv program"
 iconv -f UTF-8 -t $_charset ${_mp_help} > /dev/null 2>> "$TMPLOG"
 if test "$?" -ne 0 ; then
@@ -7510,7 +7544,12 @@ cc_check -mno-omit-leaf-frame-pointer && CFLAG_NO_OMIT_LEAF_FRAME_POINTER="-mno-
 # to use its own copy of the library)
 echocheck "DVD support (libdvdnav)"
 if test "$_dvdnav" = auto ; then
-  $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
+  if test "$_dvdread_internal" = yes ; then
+    _dvdnav=no
+    echores "disabled due to the usage of the internal copy of dvdread. Append --disable-dvdread-internal"
+  else
+    $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
+  fi
 fi
 if test "$_dvdnav" = auto ; then
   cat > $TMPC <<EOF
@@ -7540,9 +7579,12 @@ echo "Creating config.mak"
 cat > config.mak << EOF
 # -------- Generated by configure -----------
 
-LANG = C
+# Ensure that locale settings do not interfere with shell commands.
+LC_ALL = C
+
 MAN_LANG = $MAN_LANG
-TARGET_OS = $system_name
+MAN_LANG_ALL = $MAN_LANG_ALL
+
 DESTDIR =
 prefix = \$(DESTDIR)$_prefix
 BINDIR = \$(DESTDIR)$_bindir
@@ -7550,8 +7592,7 @@ DATADIR = \$(DESTDIR)$_datadir
 MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 LIBDIR = \$(DESTDIR)$_libdir
-# FFmpeg uses libdir instead of LIBDIR
-libdir = \$(LIBDIR)
+
 AR = $_ar
 CC = $_cc
 CXX = $_cc
@@ -7559,6 +7600,8 @@ HOST_CC = $_host_cc
 RANLIB = $_ranlib
 WINDRES = $_windres
 INSTALL = $_install
+INSTALLSTRIP = $_install_strip
+
 EXTRA_INC = $_inc_extra
 EXTRAXX_INC = $_inc_extra $_inc_extraxx
 CFLAGS = $CFLAGS \$(EXTRA_INC)
@@ -7567,49 +7610,38 @@ FFMPEG_OFLAGS = $CFLAGS_FFMPEG \$(EXTRA_INC)
 CFLAG_NO_OMIT_LEAF_FRAME_POINTER = $CFLAG_NO_OMIT_LEAF_FRAME_POINTER
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
 CFLAG_STACKREALIGN = $_stackrealign
+LIBDVDCSS_DVDREAD_FLAGS = $_libdvdcss_dvdread_flags
 ASFLAGS = $ASFLAGS
-INSTALLSTRIP = $_install_strip
-CHARSET = $_charset
-HELP_FILE = $_mp_help
-
-EXESUF = $_exesuf
-
-MPLAYER_NETWORK = $_network
-FTP = $_ftp
-STREAMING_LIVE555 = $_live
-LIBNEMESI = $_nemesi
-NATIVE_RTSP = $_native_rtsp
-VSTREAM = $_vstream
-STREAM_CACHE = $_stream_cache
-DVBIN = $_dvbin
-VIDIX = $_vidix
-VIDIX_INTERNAL = $_vidix_internal
-VIDIX_EXTERNAL = $_vidix_external
-VIDIX_PCIDB = $_vidix_pcidb_val
-CONFIG_POSTPROC = yes
-MP3LAME = $_mp3lame
-LIBMENU = $_menu
-LIBMENU_DVBIN = $_menu_dvbin
-
-MP3LIB = $_mp3lib
-LIBA52 = $_liba52
-LIBMPEG2 = $_libmpeg2
-TREMOR_INTERNAL = $_tremor_internal
-TREMOR_LOW = $_tremor_low
-FAAD = $_faad
-
-SPEEX = $_speex
-MUSEPACK = $_musepack
-
-UNRAR_EXEC = $_unrar_exec
-PNG = $_png
-JPEG = $_jpeg
-GIF = $_gif
 
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
 EXTRALIBS_MPLAYER = $_libs_mplayer
 EXTRALIBS_MENCODER = $_libs_mencoder
+
+CHARSET = $_charset
+HELP_FILE = $_mp_help
+
+EXESUF = $_exesuf
+
+$_target_arch
+$_target_arch_x86
+`echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/'`
+
+GETCH = $_getch
+TIMER = $_timer
+
+AO_SRCS = $_aosrc
+VO_SRCS = $_vosrc
+
+MENCODER = $_mencoder
+MPLAYER = $_mplayer
+
+#internal libraries
+LIBA52 = $_liba52
+LIBMPEG2 = $_libmpeg2
+MP3LIB = $_mp3lib
+TREMOR_INTERNAL = $_tremor_internal
+TREMOR_LOW = $_tremor_low
 
 HAVE_SYS_MMAN_H = $_mman
 HAVE_POSIX_SELECT = $_posix_select
@@ -7623,76 +7655,84 @@ NEED_STRSEP  = $_need_strsep
 NEED_SWAB    = $_need_swab
 NEED_VSSCANF = $_need_vsscanf
 
-GETCH = $_getch
-TIMER = $_timer
-
-PE_EXECUTABLE = $_pe_executable
-
 # audio output
 OSS = $_ossaudio
-ALSA = $_alsa
-ALSA5 = $_alsa5
 ALSA9 = $_alsa9
 ALSA1X = $_alsa1x
 
-LADSPA = $_ladspa
-
-# input/demuxer/codecs
-JOYSTICK = $_joystick
-LIRC = $_lirc
+# features
+APPLE_IR = $_apple_ir
 APPLE_REMOTE = $_apple_remote
-TV = $_tv
-TV_V4L  = $_tv_v4l
-TV_V4L1 = $_tv_v4l1
-TV_V4L2 = $_tv_v4l2
-TV_DSHOW = $_tv_dshow
-TV_BSDBT848 = $_tv_bsdbt848
-TV_TELETEXT = $_tv_teletext
 AUDIO_INPUT = $_audio_input
-PVR = $_pvr
-VCD = $_vcd
+BITMAP_FONT = $_bitmap_font
+CDDA = $_cdda
+CDDB = $_cddb
+COREAUDIO = $_coreaudio
+COREVIDEO = $_corevideo
+DVBIN = $_dvbin
+DVDNAV = $_dvdnav
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
+FAAC=$_faac
+FAAD = $_faad
+FAAD_INTERNAL = $_faad_internal
+FREETYPE = $_freetype
+FTP = $_ftp
+GIF = $_gif
+GUI = $_gui
+GUI_GTK = $_gui_gtk
+GUI_WIN32 = $_gui_win32
+JOYSTICK = $_joystick
+JPEG = $_jpeg
+LADSPA = $_ladspa
+LIBASS = $_ass
+LIBDCA = $_libdca
+LIBDV = $_libdv
 LIBDVDCSS_INTERNAL = $_libdvdcss_internal
-LIBDVDCSS_DVDREAD_FLAGS = $_libdvdcss_dvdread_flags
-DVDNAV = $_dvdnav
-WIN32DLL = $_win32dll
-WIN32_EMULATION = $_win32_emulation
+LIBLZO = $_liblzo
+LIBMAD = $_mad
+LIBMENU = $_menu
+LIBMENU_DVBIN = $_menu_dvbin
+LIBNEMESI = $_nemesi
+LIBNUT = $_libnut
+LIBSMBCLIENT = $_smbsupport
+LIBTHEORA = $_theora
+LIBVORBIS = $_vorbis
+LIRC = $_lirc
+MACOSX_BUNDLE = $_macosx_bundle
+MACOSX_FINDER_SUPPORT = $_macosx_finder_support
+MP3LAME = $_mp3lame
+MPLAYER_NETWORK = $_network
+MUSEPACK = $_musepack
+NATIVE_RTSP = $_native_rtsp
+PE_EXECUTABLE = $_pe_executable
+PNG = $_png
+PVR = $_pvr
 QTX_CODECS = $_qtx
 QTX_CODECS_WIN32 = $_qtx_codecs_win32
 QTX_EMULATION = $_qtx_emulation
-REAL_CODECS = $_real
-XANIM_CODECS = $_xanim
-ZORAN = $_zr
-LIBLZO = $_liblzo
-LIBDV = $_libdv
-XVID4 = $_xvid
-X264 = $_x264
-LIBNUT = $_libnut
-LIBDCA = $_libdca
-MPLAYER = $_mplayer
-MENCODER = $_mencoder
-CDDA = $_cdda
-CDDB = $_cddb
-BITMAP_FONT = $_bitmap_font
-FREETYPE = $_freetype
-LIBASS = $_ass
-LIBMAD = $_mad
-LIBVORBIS = $_vorbis
-LIBTHEORA = $_theora
-FAAD_INTERNAL = $_faad_internal
-LIBSMBCLIENT = $_smbsupport
-XMMS_PLUGINS = $_xmms
-MACOSX_FINDER_SUPPORT = $_macosx_finder_support
-MACOSX_BUNDLE = $_macosx_bundle
-COREAUDIO = $_coreaudio
-COREVIDEO = $_corevideo
 QUARTZ = $_quartz
-TOOLAME=$_toolame
-TWOLAME=$_twolame
-FAAC=$_faac
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
+REAL_CODECS = $_real
+SPEEX = $_speex
+STREAMING_LIVE555 = $_live
+STREAM_CACHE = $_stream_cache
+TOOLAME=$_toolame
+TV = $_tv
+TV_BSDBT848 = $_tv_bsdbt848
+TV_DSHOW = $_tv_dshow
+TV_TELETEXT = $_tv_teletext
+TV_V4L  = $_tv_v4l
+TV_V4L1 = $_tv_v4l1
+TV_V4L2 = $_tv_v4l2
+TWOLAME=$_twolame
+UNRAR_EXEC = $_unrar_exec
+VCD = $_vcd
+VIDIX = $_vidix
+VIDIX_EXTERNAL = $_vidix_external
+VIDIX_INTERNAL = $_vidix_internal
+VIDIX_PCIDB = $_vidix_pcidb_val
 VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
 VIDIX_IVTV=$_vidix_drv_ivtv
 VIDIX_MACH64=$_vidix_drv_mach64
@@ -7706,22 +7746,14 @@ VIDIX_RAGE128=$_vidix_drv_rage128
 VIDIX_S3=$_vidix_drv_s3
 VIDIX_SIS=$_vidix_drv_sis
 VIDIX_UNICHROME=$_vidix_drv_unichrome
-
-# --- Some stuff for autoconfigure ----
-$_target_arch
-$_target_arch_x86
-TARGET_CPU=$iproc
-`echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/'`
-
-# --- GUI stuff ---
-GUI_GTK = $_gui_gtk
-GUI_WIN32 = $_gui_win32
-
-# --- libvo stuff ---
-VO_SRCS = $_vosrc
-
-# --- libao2 stuff ---
-AO_SRCS = $_aosrc
+VSTREAM = $_vstream
+WIN32DLL = $_win32dll
+WIN32_EMULATION = $_win32_emulation
+X264 = $_x264
+XANIM_CODECS = $_xanim
+XMMS_PLUGINS = $_xmms
+XVID4 = $_xvid
+ZORAN = $_zr
 
 # FFmpeg
 LIBAVUTIL = $_libavutil
@@ -7756,6 +7788,7 @@ CONFIG_LIBVORBIS=$_libvorbis
 CONFIG_LIBX264=$_x264_lavc
 CONFIG_LIBXVID=$_xvid_lavc
 CONFIG_MLIB = $_mlib
+CONFIG_POSTPROC = yes
 # Prevent building libavcodec/imgresample.c with conflicting symbols
 CONFIG_SWSCALE=yes
 CONFIG_ZLIB=$_zlib
@@ -7912,7 +7945,7 @@ $_def_hpux_scsi_h
    -cache <kilobytes> */
 $_def_stream_cache
 
-/* Define if you are using XviD library */
+/* Define if you are using Xvid library */
 $_def_xvid
 
 /* Define if you are using the X.264 library */
@@ -8050,6 +8083,9 @@ $_def_lirc
 
 /* Apple Remote (remote control, see http://docs.info.apple.com/article.html?artnum=302504) support: */
 $_def_apple_remote
+
+/* Apple IR Remote (Linux remote control driver) */
+$_def_apple_ir
 
 /* Support for maemo (http://www.maemo.org) */
 $_def_maemo
@@ -8461,6 +8497,7 @@ $_def_gethostbyname2
 `ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE"`
 
 $_def_altivec_h	// enables usage of altivec.h
+$_def_altivec_vector_braces
 
 /* libvo options */
 #define SCREEN_SIZE_X 1
@@ -8544,7 +8581,7 @@ Config files successfully generated by ./configure $_configuration !
     Messages/GUI: $_language
 EOF
 
-echo ${_echo_n} "    Manual pages: $MAN_LANG ${_echo_c}"
+echo ${_echo_n} "    Manual pages: $MAN_LANG_ALL ${_echo_c}"
 test "$LANGUAGES" = en && echo ${_echo_n} " (no localization selected, use --language=all)${_echo_c}"
 echo
 

@@ -601,7 +601,7 @@ static tvi_handle_t *tv_begin(tv_param_t* tv_param)
         mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_NoSuchDriver, tv_param->driver);
     else
         mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_DriverAutoDetectionFailed);
-    return(NULL);
+    return NULL;
 }
 
 static int tv_uninit(tvi_handle_t *tvh)
@@ -804,7 +804,7 @@ int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
 	    mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_UnknownColorOption, opt);
     }
 
-    return(TVI_CONTROL_UNKNOWN);
+    return TVI_CONTROL_UNKNOWN;
 }
 
 int tv_get_color_options(tvi_handle_t *tvh, int opt, int* value)
@@ -825,7 +825,7 @@ int tv_get_color_options(tvi_handle_t *tvh, int opt, int* value)
 	    mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TV_UnknownColorOption, opt);
     }
 
-    return(TVI_CONTROL_UNKNOWN);
+    return TVI_CONTROL_UNKNOWN;
 }
 
 int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq)
@@ -836,7 +836,7 @@ int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq)
 	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_CurrentFrequency,
 	    *freq, (float)*freq/16);
     }
-    return(1);
+    return 1;
 }
 
 int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
@@ -853,7 +853,7 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 	    freq, (float)freq/16);
     }
     tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
-    return(1);
+    return 1;
 }
 
 int tv_get_signal(tvi_handle_t *tvh)
@@ -910,7 +910,7 @@ int tv_step_channel_real(tvi_handle_t *tvh, int direction)
 	    tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
 	}
     }
-    return(1);
+    return 1;
 }
 
 int tv_step_channel(tvi_handle_t *tvh, int direction) {
@@ -938,7 +938,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction) {
 			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
 		}
 	} else tv_step_channel_real(tvh, direction);
-	return(1);
+	return 1;
 }
 
 int tv_set_channel_real(tvi_handle_t *tvh, char *channel) {
@@ -961,7 +961,7 @@ int tv_set_channel_real(tvi_handle_t *tvh, char *channel) {
 		break;
 	    }
 	}
-	return(1);
+	return 1;
 }
 
 int tv_set_channel(tvi_handle_t *tvh, char *channel) {
@@ -979,7 +979,7 @@ int tv_set_channel(tvi_handle_t *tvh, char *channel) {
 				tv_channel_current->name, (float)tv_channel_current->freq/1000);
 		tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 	} else tv_set_channel_real(tvh, channel);
-	return(1);
+	return 1;
 }
 
 int tv_last_channel(tvi_handle_t *tvh) {
@@ -1013,7 +1013,7 @@ int tv_last_channel(tvi_handle_t *tvh) {
 		    }
 		}
 	}
-	return(1);
+	return 1;
 }
 
 int tv_step_norm(tvi_handle_t *tvh)
@@ -1029,12 +1029,12 @@ int tv_step_norm(tvi_handle_t *tvh)
     }
   }
     tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
-    return(1);
+    return 1;
 }
 
 int tv_step_chanlist(tvi_handle_t *tvh)
 {
-    return(1);
+    return 1;
 }
 
 int tv_set_norm(tvi_handle_t *tvh, char* norm)
@@ -1047,7 +1047,7 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
 	return 0;
     }
     tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
-    return(1);
+    return 1;
 }
 
 demuxer_desc_t demuxer_desc_tv = {

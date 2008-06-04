@@ -336,47 +336,47 @@ static char *fourcc_format_name(int format)
 {
     switch(format)
     {
-	case IMGFMT_RGB8: return("RGB 8-bit");
-	case IMGFMT_RGB15: return("RGB 15-bit");
-	case IMGFMT_RGB16: return("RGB 16-bit");
-	case IMGFMT_RGB24: return("RGB 24-bit");
-	case IMGFMT_RGB32: return("RGB 32-bit");
-	case IMGFMT_BGR8: return("BGR 8-bit");
-	case IMGFMT_BGR15: return("BGR 15-bit");
-	case IMGFMT_BGR16: return("BGR 16-bit");
-	case IMGFMT_BGR24: return("BGR 24-bit");
-	case IMGFMT_BGR32: return("BGR 32-bit");
-	case IMGFMT_YVU9: return("Planar YVU9");
-	case IMGFMT_IF09: return("Planar IF09");
-	case IMGFMT_YV12: return("Planar YV12");
-	case IMGFMT_I420: return("Planar I420");
-	case IMGFMT_IYUV: return("Planar IYUV");
-	case IMGFMT_CLPL: return("Planar CLPL");
-	case IMGFMT_Y800: return("Planar Y800");
-	case IMGFMT_Y8: return("Planar Y8");
-	case IMGFMT_IUYV: return("Packed IUYV");
-	case IMGFMT_IY41: return("Packed IY41");
-	case IMGFMT_IYU1: return("Packed IYU1");
-	case IMGFMT_IYU2: return("Packed IYU2");
-	case IMGFMT_UYNV: return("Packed UYNV");
-	case IMGFMT_cyuv: return("Packed CYUV");
-	case IMGFMT_Y422: return("Packed Y422");
-	case IMGFMT_YUY2: return("Packed YUY2");
-	case IMGFMT_YUNV: return("Packed YUNV");
-	case IMGFMT_UYVY: return("Packed UYVY");
-//	case IMGFMT_YVYU: return("Packed YVYU");
-	case IMGFMT_Y41P: return("Packed Y41P");
-	case IMGFMT_Y211: return("Packed Y211");
-	case IMGFMT_Y41T: return("Packed Y41T");
-	case IMGFMT_Y42T: return("Packed Y42T");
-	case IMGFMT_V422: return("Packed V422");
-	case IMGFMT_V655: return("Packed V655");
-	case IMGFMT_CLJR: return("Packed CLJR");
-	case IMGFMT_YUVP: return("Packed YUVP");
-	case IMGFMT_UYVP: return("Packed UYVP");
-	case IMGFMT_MPEGPES: return("Mpeg PES");
+	case IMGFMT_RGB8: return "RGB 8-bit";
+	case IMGFMT_RGB15: return "RGB 15-bit";
+	case IMGFMT_RGB16: return "RGB 16-bit";
+	case IMGFMT_RGB24: return "RGB 24-bit";
+	case IMGFMT_RGB32: return "RGB 32-bit";
+	case IMGFMT_BGR8: return "BGR 8-bit";
+	case IMGFMT_BGR15: return "BGR 15-bit";
+	case IMGFMT_BGR16: return "BGR 16-bit";
+	case IMGFMT_BGR24: return "BGR 24-bit";
+	case IMGFMT_BGR32: return "BGR 32-bit";
+	case IMGFMT_YVU9: return "Planar YVU9";
+	case IMGFMT_IF09: return "Planar IF09";
+	case IMGFMT_YV12: return "Planar YV12";
+	case IMGFMT_I420: return "Planar I420";
+	case IMGFMT_IYUV: return "Planar IYUV";
+	case IMGFMT_CLPL: return "Planar CLPL";
+	case IMGFMT_Y800: return "Planar Y800";
+	case IMGFMT_Y8: return "Planar Y8";
+	case IMGFMT_IUYV: return "Packed IUYV";
+	case IMGFMT_IY41: return "Packed IY41";
+	case IMGFMT_IYU1: return "Packed IYU1";
+	case IMGFMT_IYU2: return "Packed IYU2";
+	case IMGFMT_UYNV: return "Packed UYNV";
+	case IMGFMT_cyuv: return "Packed CYUV";
+	case IMGFMT_Y422: return "Packed Y422";
+	case IMGFMT_YUY2: return "Packed YUY2";
+	case IMGFMT_YUNV: return "Packed YUNV";
+	case IMGFMT_UYVY: return "Packed UYVY";
+//	case IMGFMT_YVYU: return "Packed YVYU";
+	case IMGFMT_Y41P: return "Packed Y41P";
+	case IMGFMT_Y211: return "Packed Y211";
+	case IMGFMT_Y41T: return "Packed Y41T";
+	case IMGFMT_Y42T: return "Packed Y42T";
+	case IMGFMT_V422: return "Packed V422";
+	case IMGFMT_V655: return "Packed V655";
+	case IMGFMT_CLJR: return "Packed CLJR";
+	case IMGFMT_YUVP: return "Packed YUVP";
+	case IMGFMT_UYVP: return "Packed UYVP";
+	case IMGFMT_MPEGPES: return "Mpeg PES";
     }
-    return("Unknown");
+    return "Unknown";
 }
 
 
@@ -1110,14 +1110,14 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 			if(copy_from_user(&frame,(int *) arg,sizeof(int)))
 			{
 				printk(RVID_MSG"FSEL failed copy from userspace\n");
-				return(-EFAULT);
+				return -EFAULT;
 			}
 			radeon_vid_frame_sel(frame);
 		break;
 
 	        default:
 			printk(RVID_MSG"Invalid ioctl\n");
-			return (-EINVAL);
+			return -EINVAL;
 	}
 
 	return 0;
@@ -1405,10 +1405,10 @@ static int radeon_vid_mmap(struct file *file, struct vm_area_struct *vma)
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
 		printk(RVID_MSG"error mapping video memory\n");
-		return(-EAGAIN);
+		return -EAGAIN;
 	}
 
-	return(0);
+	return 0;
 }
 
 static int radeon_vid_release(struct inode *inode, struct file *file)
@@ -1430,14 +1430,14 @@ static int radeon_vid_open(struct inode *inode, struct file *file)
 	int minor = MINOR(inode->i_rdev);
 
 	if(minor != 0)
-	 return(-ENXIO);
+	 return -ENXIO;
 
 	if(radeon_vid_in_use == 1) 
-		return(-EBUSY);
+		return -EBUSY;
 
 	radeon_vid_in_use = 1;
 	MOD_INC_USE_COUNT;
-	return(0);
+	return 0;
 }
 
 #if LINUX_VERSION_CODE >= 0x020400
@@ -1523,7 +1523,7 @@ static int __init radeon_vid_initialize(void)
 		printk(RVID_MSG"MTRR set to ON\n");
 	}
 #endif /* CONFIG_MTRR */
-	return(0);
+	return 0;
 }
 
 int __init init_module(void)

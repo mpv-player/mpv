@@ -2158,7 +2158,7 @@ corresponding lines for each field (this has drawbacks - see method 3).
   these filters available to choose from, each with its own advantages
   and disadvantages. Consult <option>mplayer -pphelp</option> and
   <option>mplayer -vf help</option> to see what is available
-  (grep for "deint"), read Michael's Niedermayer
+  (grep for "deint"), read Michael Niedermayer's
   <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">Deinterlacing filters comparison</ulink>,
   and search the
   <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">
@@ -2250,7 +2250,7 @@ mencoder dvd://1 -oac copy -vf pullup,softskip
   fields to form a complete frame. <option>filmdint</option> will
   deinterlace individual fields that it cannot match, however, whereas
   <option>pullup</option> will simply drop them. Also, the two filters
-  have separate detection code, and filmdint may tend to match fields a
+  have separate detection code, and <option>filmdint</option> may tend to match fields a
   bit less often. Which filter works better may depend on the input
   video and personal taste; feel free to experiment with fine-tuning
   the filters' options if you encounter problems with either one (see

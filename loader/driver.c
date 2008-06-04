@@ -158,7 +158,7 @@ HDRVR DrvOpen(LPARAM lParam2)
 
     hDriver = (NPDRVR) malloc(sizeof(DRVR));
     if (!hDriver)
-	return ((HDRVR) 0);
+	return (HDRVR) 0;
     memset((void*)hDriver, 0, sizeof(DRVR));
 
 #ifdef WIN32_LOADER
@@ -171,7 +171,7 @@ HDRVR DrvOpen(LPARAM lParam2)
     {
 	printf("Can't open library %s\n", filename);
 	DrvClose((HDRVR)hDriver);
-	return ((HDRVR) 0);
+	return (HDRVR) 0;
     }
 
     hDriver->DriverProc = (DRIVERPROC) GetProcAddress(hDriver->hDriverModule,
@@ -180,7 +180,7 @@ HDRVR DrvOpen(LPARAM lParam2)
     {
 	printf("Library %s is not a valid VfW/ACM codec\n", filename);
 	DrvClose((HDRVR)hDriver);
-	return ((HDRVR) 0);
+	return (HDRVR) 0;
     }
 
     TRACE("DriverProc == %X\n", hDriver->DriverProc);

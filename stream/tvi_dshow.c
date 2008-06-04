@@ -2413,7 +2413,7 @@ static double grab_video_frame(priv_t * priv, char *buffer, int len)
 static int get_video_framesize(priv_t * priv)
 {
 //      if(!priv->pmtVideo) return 1; //no video       
-//      return(priv->pmtVideo->lSampleSize);
+//      return priv->pmtVideo->lSampleSize;
     if (!priv->chains[0]->rbuf)
 	return 1;		//no video       
 mp_msg(MSGT_TV,MSGL_DBG3,"geT_video_framesize: %d\n",priv->chains[0]->rbuf->blocksize);
@@ -2657,7 +2657,7 @@ static int start(priv_t * priv)
     mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Graph is started.\n");
     priv->state = 1;
 
-    return (1);
+    return 1;
 }
 
 /**
@@ -3012,7 +3012,7 @@ static int uninit(priv_t * priv)
 {
     int i;
     if (!priv)
-	return (1);
+	return 1;
     //Debug
     if (priv->dwRegister) {
         RemoveFromRot(priv->dwRegister);
@@ -3050,7 +3050,7 @@ static int uninit(priv_t * priv)
         priv->chains[i] = NULL;
     }
     CoUninitialize();
-    return (1);
+    return 1;
 }
 
 /**
@@ -3069,7 +3069,7 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param)
 
     h = new_handle();
     if (!h)
-	return (NULL);
+	return NULL;
 
     priv = h->priv;
 
@@ -3210,9 +3210,9 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    DisplayMediaType("VID_GET_FORMAT", priv->chains[0]->pmt);
 	    if (priv->fcc) {
 		*(int *) arg = priv->fcc;
-		return (TVI_CONTROL_TRUE);
+		return TVI_CONTROL_TRUE;
 	    } else
-		return (TVI_CONTROL_FALSE);
+		return TVI_CONTROL_FALSE;
 	}
     case TVI_CONTROL_VID_SET_WIDTH:
 	{
@@ -3242,13 +3242,13 @@ static int control(priv_t * priv, int cmd, void *arg)
 
 	    priv->width = width;
 
-	    return (TVI_CONTROL_TRUE);
+	    return TVI_CONTROL_TRUE;
 	}
     case TVI_CONTROL_VID_GET_WIDTH:
 	{
 	    if (priv->width) {
 		*(int *) arg = priv->width;
-		return (TVI_CONTROL_TRUE);
+		return TVI_CONTROL_TRUE;
 	    } else
 		return TVI_CONTROL_FALSE;
 	}
@@ -3265,7 +3265,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 
 	    if (width % pCaps->OutputGranularityX)
 		return TVI_CONTROL_FALSE;
-	    return (TVI_CONTROL_TRUE);
+	    return TVI_CONTROL_TRUE;
 	}
     case TVI_CONTROL_VID_SET_HEIGHT:
 	{
@@ -3298,13 +3298,13 @@ static int control(priv_t * priv, int cmd, void *arg)
 		     Vhdr->bmiHeader.biHeight) >> 3;
 
 	    priv->height = height;
-	    return (TVI_CONTROL_TRUE);
+	    return TVI_CONTROL_TRUE;
 	}
     case TVI_CONTROL_VID_GET_HEIGHT:
 	{
 	    if (priv->height) {
 		*(int *) arg = priv->height;
-		return (TVI_CONTROL_TRUE);
+		return TVI_CONTROL_TRUE;
 	    } else
 		return TVI_CONTROL_FALSE;
 	}
@@ -3322,7 +3322,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (height % pCaps->OutputGranularityY)
 		return TVI_CONTROL_FALSE;
 
-	    return (TVI_CONTROL_TRUE);
+	    return TVI_CONTROL_TRUE;
 	}
     case TVI_CONTROL_IS_AUDIO:
 	if (!priv->chains[1]->pmt)
@@ -3399,7 +3399,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (!priv->pTVTuner)
 		return TVI_CONTROL_FALSE;
 
-	    return (TVI_CONTROL_TRUE);
+	    return TVI_CONTROL_TRUE;
 	}
     case TVI_CONTROL_TUN_SET_NORM:
 	{
@@ -3420,9 +3420,9 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    hr = OLE_CALL_ARGS(pVD, put_TVFormat, lAnalogFormat);
 	    OLE_RELEASE_SAFE(pVD);
 	    if (FAILED(hr))
-		return (TVI_CONTROL_FALSE);
+		return TVI_CONTROL_FALSE;
 	    else
-		return (TVI_CONTROL_TRUE);
+		return TVI_CONTROL_TRUE;
 	}
     case TVI_CONTROL_TUN_GET_NORM:
 	{
@@ -3450,7 +3450,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 		    return TVI_CONTROL_TRUE;
 		}
 	    }
-	    return (TVI_CONTROL_FALSE);
+	    return TVI_CONTROL_FALSE;
 	}
     case TVI_CONTROL_SPC_GET_NORMID:
 	{
@@ -3539,5 +3539,5 @@ static int control(priv_t * priv, int cmd, void *arg)
         return teletext_control(priv->priv_vbi,cmd,arg);
 #endif
     }
-    return (TVI_CONTROL_UNKNOWN);
+    return TVI_CONTROL_UNKNOWN;
 }

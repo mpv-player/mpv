@@ -1207,27 +1207,27 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
  			if(copy_from_user(&card->config,(mga_vid_config_t*) arg,sizeof(mga_vid_config_t)))
 			{
 				printk(KERN_ERR "mga_vid: failed copy from userspace\n");
-				return(-EFAULT);
+				return -EFAULT;
 			}
 			if(card->config.version != MGA_VID_VERSION){
 				printk(KERN_ERR "mga_vid: incompatible version! driver: %X  requested: %X\n",MGA_VID_VERSION,card->config.version);
-				return(-EFAULT);
+				return -EFAULT;
 			}
 
 			if(card->config.frame_size==0 || card->config.frame_size>1024*768*2){
 				printk(KERN_ERR "mga_vid: illegal frame_size: %d\n",card->config.frame_size);
-				return(-EFAULT);
+				return -EFAULT;
 			}
 
 			if(card->config.num_frames<1 || card->config.num_frames>4){
 				printk(KERN_ERR "mga_vid: illegal num_frames: %d\n",card->config.num_frames);
-				return(-EFAULT);
+				return -EFAULT;
 			}
 			
 			card->src_base = (card->ram_size * 0x100000 - card->config.num_frames * card->config.frame_size - card->top_reserved);
 			if(card->src_base<0){
 				printk(KERN_ERR "mga_vid: not enough memory for frames!\n");
-				return(-EFAULT);
+				return -EFAULT;
 			}
 			card->src_base &= (~0xFFFF); // 64k boundary
 #ifdef MP_DEBUG
@@ -1244,7 +1244,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			if (copy_to_user((mga_vid_config_t *) arg, &card->config, sizeof(mga_vid_config_t)))
 			{
 				printk(KERN_ERR "mga_vid: failed copy to userspace\n");
-				return(-EFAULT);
+				return -EFAULT;
 			}
 
 			result = mga_vid_set_config(card);	
@@ -1285,7 +1285,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			if(copy_from_user(&frame,(int *) arg,sizeof(int)))
 			{
 				printk(KERN_ERR "mga_vid: FSEL failed copy from userspace\n");
-				return(-EFAULT);
+				return -EFAULT;
 			}
 
 			mga_vid_frame_sel(card, frame);
@@ -1300,7 +1300,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			{
 				printk(KERN_ERR "mga_vid: failed copy %p to userspace %p\n",
 					   &tmp, (uint32_t *) arg);
-				return(-EFAULT);
+				return -EFAULT;
 			}
 		break;
 			
@@ -1314,7 +1314,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			
 	        default:
 			printk(KERN_ERR "mga_vid: Invalid ioctl\n");
-			return (-EINVAL);
+			return -EINVAL;
 	}
        
 	return 0;
@@ -1464,17 +1464,17 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 	if(!card->configured)
 	{
 		printk(KERN_ERR "mga_vid: card is not configured, cannot mmap\n");
-		return(-EAGAIN);
+		return -EAGAIN;
 	}
 
 	if(remap_page_range(vma->vm_start, card->mem_base + card->src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
 		printk(KERN_ERR "mga_vid: error mapping video memory\n");
-		return(-EAGAIN);
+		return -EAGAIN;
 	}
 
-	return(0);
+	return 0;
 }
 
 static int mga_vid_release(struct inode *inode, struct file *file)
@@ -1517,7 +1517,7 @@ static int mga_vid_open(struct inode *inode, struct file *file)
 
 		// we don't have that many cards
 		if(minor >= mga_cards_num)
-		 return(-ENXIO);
+		 return -ENXIO;
 
 		file->private_data = mga_cards[minor];
 #ifdef MP_DEBUG
@@ -1533,11 +1533,11 @@ static int mga_vid_open(struct inode *inode, struct file *file)
 	card = (mga_card_t *) file->private_data;
 
 	if(card->vid_in_use == 1) 
-		return(-EBUSY);
+		return -EBUSY;
 
 	card->vid_in_use = 1;
 	MOD_INC_USE_COUNT;
-	return(0);
+	return 0;
 }
 
 #if LINUX_VERSION_CODE >= 0x020400
@@ -1735,7 +1735,7 @@ static int mga_vid_initialize(void)
 	}
 #endif
 
-	return(0);
+	return 0;
 }
 
 int init_module(void)

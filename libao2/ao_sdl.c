@@ -231,7 +231,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 	/* Open the audio device and start playing sound! */
 	if(SDL_OpenAudio(&aspec, &obtained) < 0) {
         	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_SDL_CantOpenAudio, SDL_GetError());
-        	return(0);
+        	return 0;
 	} 
 
 	/* did we got what we wanted ? */

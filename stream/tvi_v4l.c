@@ -221,18 +221,18 @@ static int palette2depth(int palette)
     {
         /* component */
         case VIDEO_PALETTE_RGB555:
-            return(15);
+            return 15;
         case VIDEO_PALETTE_RGB565:
-            return(16);
+            return 16;
         case VIDEO_PALETTE_RGB24:
-            return(24);
+            return 24;
         case VIDEO_PALETTE_RGB32:
-            return(32);
+            return 32;
         /* planar */
         case VIDEO_PALETTE_YUV411P:
         case VIDEO_PALETTE_YUV420P:
         case VIDEO_PALETTE_YUV410P:
-            return(12);
+            return 12;
         /* packed */
         case VIDEO_PALETTE_YUV422P:
         case VIDEO_PALETTE_YUV422:
@@ -240,9 +240,9 @@ static int palette2depth(int palette)
         case VIDEO_PALETTE_UYVY:
         case VIDEO_PALETTE_YUV420:
         case VIDEO_PALETTE_YUV411:
-            return(16);
+            return 16;
     }
-    return(-1);
+    return -1;
 }
 
 static int format2palette(int format)
@@ -250,22 +250,22 @@ static int format2palette(int format)
     switch(format)
     {
         case IMGFMT_BGR15:
-            return(VIDEO_PALETTE_RGB555);
+            return VIDEO_PALETTE_RGB555;
         case IMGFMT_BGR16:
-            return(VIDEO_PALETTE_RGB565);
+            return VIDEO_PALETTE_RGB565;
         case IMGFMT_BGR24:
-            return(VIDEO_PALETTE_RGB24);
+            return VIDEO_PALETTE_RGB24;
         case IMGFMT_BGR32:
-            return(VIDEO_PALETTE_RGB32);
+            return VIDEO_PALETTE_RGB32;
         case IMGFMT_YV12:
         case IMGFMT_I420:
-            return(VIDEO_PALETTE_YUV420P);
+            return VIDEO_PALETTE_YUV420P;
         case IMGFMT_YUY2:
-            return(VIDEO_PALETTE_YUV422);
+            return VIDEO_PALETTE_YUV422;
     case IMGFMT_UYVY:
-       return(VIDEO_PALETTE_UYVY);
+       return VIDEO_PALETTE_UYVY;
     }
-    return(-1);
+    return -1;
 }
 
 // sets and sanitizes audio buffer/block sizes
@@ -296,7 +296,7 @@ static tvi_handle_t *tvi_init_v4l(tv_param_t* tv_param)
 
     h = new_handle();
     if (!h)
-        return(NULL);
+        return NULL;
 
     priv = h->priv;
 
@@ -316,11 +316,11 @@ static tvi_handle_t *tvi_init_v4l(tv_param_t* tv_param)
     /* allocation failed */
     if (!priv->video_device) {
         free_handle(h);
-        return(NULL);
+        return NULL;
     }
 
     priv->tv_param=tv_param;
-    return(h);
+    return h;
 }
 
 /* retrieves info about audio channels from the BTTV */
@@ -658,7 +658,7 @@ static int init(priv_t *priv)
         setup_audio_buffer_sizes(priv);
     }
 
-    return(1);
+    return 1;
 
 malloc_failed:
     if (priv->channels)
@@ -668,7 +668,7 @@ malloc_failed:
 err:
     if (priv->video_fd != -1)
         close(priv->video_fd);
-    return(0);
+    return 0;
 }
 
 static int uninit(priv_t *priv)
@@ -751,7 +751,7 @@ static int uninit(priv_t *priv)
             free(priv->audio_skew_buffer);
     }
 
-    return(1);
+    return 1;
 }
 
 static int get_capture_buffer_size(priv_t *priv)
@@ -908,7 +908,7 @@ static int start(priv_t *priv)
     if (ioctl(priv->video_fd, VIDIOCGPICT, &priv->picture) == -1)
     {
         mp_msg(MSGT_TV, MSGL_ERR, "ioctl get picture failed: %s\n", strerror(errno));
-        return(0);
+        return 0;
     }
 
     priv->picture.palette = format2palette(priv->format);
@@ -999,7 +999,7 @@ static int start(priv_t *priv)
         if (ioctl(priv->video_fd, VIDIOCSPLAYMODE, &pmode) == -1)
         {
             mp_msg(MSGT_TV, MSGL_ERR, "ioctl set play mode failed: %s\n", strerror(errno));
-//          return(0);
+//          return 0;
         }
     }
 #endif
@@ -1009,7 +1009,7 @@ static int start(priv_t *priv)
     if (ioctl(priv->video_fd, VIDIOCCAPTURE, &one) == -1)
     {
         mp_msg(MSGT_TV, MSGL_ERR, "FATAL: ioctl ccapture failed: %s\n", strerror(errno));
-        return(0);
+        return 0;
     }
 #endif
 
@@ -1130,7 +1130,7 @@ static int start(priv_t *priv)
     pthread_mutex_init(&priv->video_buffer_mutex, NULL);
     /* we'll launch the video capture later, when a first request for a frame arrives */
 
-    return(1);
+    return 1;
 }
 
 
@@ -1144,22 +1144,22 @@ static int control(priv_t *priv, int cmd, void *arg)
         case TVI_CONTROL_IS_VIDEO:
         {
             if (priv->capability.type & VID_TYPE_CAPTURE)
-                return(TVI_CONTROL_TRUE);
-            return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_TRUE;
+            return TVI_CONTROL_FALSE;
         }
         case TVI_CONTROL_IS_AUDIO:
-            if (priv->tv_param->force_audio) return(TVI_CONTROL_TRUE);
+            if (priv->tv_param->force_audio) return TVI_CONTROL_TRUE;
             if (priv->channels[priv->act_channel].flags & VIDEO_VC_AUDIO)
             {
-                return(TVI_CONTROL_TRUE);
+                return TVI_CONTROL_TRUE;
             }
-            return(TVI_CONTROL_FALSE);
+            return TVI_CONTROL_FALSE;
         case TVI_CONTROL_IS_TUNER:
         {
 //          if (priv->capability.type & VID_TYPE_TUNER)
             if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER)
-                return(TVI_CONTROL_TRUE);
-            return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_TRUE;
+            return TVI_CONTROL_FALSE;
         }
 
         /* ========== VIDEO controls =========== */
@@ -1181,7 +1181,7 @@ static int control(priv_t *priv, int cmd, void *arg)
                 *(int *)arg = output_fmt;
                 mp_msg(MSGT_TV, MSGL_V, "Output format: %s\n", vo_format_name(output_fmt));
             }
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_VID_SET_FORMAT:
             priv->format = *(int *)arg;
@@ -1193,16 +1193,16 @@ static int control(priv_t *priv, int cmd, void *arg)
                 priv->format &= ~IMGFMT_RGB_MASK;
                 priv->format |= IMGFMT_BGR;
             }
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_GET_PLANES:
             *(int *)arg = 1; /* FIXME, also not needed at this time */
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_GET_BITS:
             *(int *)arg = palette2depth(format2palette(priv->format));
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_GET_WIDTH:
             *(int *)arg = priv->width;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_CHK_WIDTH:
         {
             int req_width = *(int *)arg;
@@ -1210,15 +1210,15 @@ static int control(priv_t *priv, int cmd, void *arg)
             mp_msg(MSGT_TV, MSGL_V, "Requested width: %d\n", req_width);
             if ((req_width >= priv->capability.minwidth) &&
                 (req_width <= priv->capability.maxwidth))
-                return(TVI_CONTROL_TRUE);
-            return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_TRUE;
+            return TVI_CONTROL_FALSE;
         }
         case TVI_CONTROL_VID_SET_WIDTH:
             priv->width = *(int *)arg;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_GET_HEIGHT:
             *(int *)arg = priv->height;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_CHK_HEIGHT:
         {
             int req_height = *(int *)arg;
@@ -1226,26 +1226,26 @@ static int control(priv_t *priv, int cmd, void *arg)
             mp_msg(MSGT_TV, MSGL_V, "Requested height: %d\n", req_height);
             if ((req_height >= priv->capability.minheight) &&
                 (req_height <= priv->capability.maxheight))
-                return(TVI_CONTROL_TRUE);
-            return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_TRUE;
+            return TVI_CONTROL_FALSE;
         }
         case TVI_CONTROL_VID_SET_HEIGHT:
             priv->height = *(int *)arg;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_GET_PICTURE:
             if (ioctl(priv->video_fd, VIDIOCGPICT, &priv->picture) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl get picture failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_SET_PICTURE:
             if (ioctl(priv->video_fd, VIDIOCSPICT, &priv->picture) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl set picture failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_VID_SET_BRIGHTNESS:
             priv->picture.brightness = (327*(*(int *)arg+100)) + 68;
             return control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
@@ -1276,7 +1276,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             return 1;
         case TVI_CONTROL_VID_GET_FPS:
             *(float *)arg=priv->fps;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
 
         /* ========== TUNER controls =========== */
         case TVI_CONTROL_TUN_GET_FREQ:
@@ -1286,14 +1286,14 @@ static int control(priv_t *priv, int cmd, void *arg)
             if (ioctl(priv->video_fd, VIDIOCGFREQ, &freq) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl get freq failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
 
             /* tuner uses khz not mhz ! */
 //          if (priv->tuner.flags & VIDEO_TUNER_LOW)
 //              freq /= 1000;
             *(unsigned long *)arg = freq;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_TUN_SET_FREQ:
         {
@@ -1314,7 +1314,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             if (ioctl(priv->video_fd, VIDIOCSFREQ, &freq) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl set freq failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
             usleep(100000); // wait to suppress noise during switching
 
@@ -1323,28 +1323,28 @@ static int control(priv_t *priv, int cmd, void *arg)
                 ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
             }
 
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_TUN_GET_TUNER:
         {
             if (ioctl(priv->video_fd, VIDIOCGTUNER, &priv->tuner) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl get tuner failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
 
             mp_msg(MSGT_TV, MSGL_V, "Tuner (%s) range: %lu -> %lu\n", priv->tuner.name,
                 priv->tuner.rangelow, priv->tuner.rangehigh);
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_TUN_SET_TUNER:
         {
             if (ioctl(priv->video_fd, VIDIOCSTUNER, &priv->tuner) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl set tuner failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_TUN_SET_NORM:
         {
@@ -1356,7 +1356,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
             if(!supported_norms[norm_index].name) {
                 mp_msg(MSGT_TV, MSGL_ERR, "Unknown norm!\n");
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
 
             if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER) {
@@ -1366,7 +1366,7 @@ static int control(priv_t *priv, int cmd, void *arg)
                 if(!(priv->tuner.flags & supported_norms[norm_index].tuner_flags))
                 {
                     mp_msg(MSGT_TV, MSGL_ERR, "Tuner isn't capable to set norm!\n");
-                    return(TVI_CONTROL_FALSE);
+                    return TVI_CONTROL_FALSE;
                 }
 
                 prev_mode = priv->tuner.mode;
@@ -1375,7 +1375,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
                 if (control(priv, TVI_CONTROL_TUN_SET_TUNER, &priv->tuner) != TVI_CONTROL_TRUE) {
                     // norm setting failed, but maybe it's only because it's fixed
-                    if (priv->tuner.mode != prev_mode) return(TVI_CONTROL_FALSE); // no it really failed
+                    if (priv->tuner.mode != prev_mode) return TVI_CONTROL_FALSE; // no it really failed
                 }
 
             }
@@ -1385,12 +1385,12 @@ static int control(priv_t *priv, int cmd, void *arg)
             if (ioctl(priv->video_fd, VIDIOCSCHAN, &priv->channels[priv->act_channel]) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl set chan failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
 
             if (ioctl(priv->video_fd, VIDIOCGCAP, &priv->capability) == -1) {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl get capabilites failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
 
             priv->fps = supported_norms[norm_index].fps;
@@ -1403,51 +1403,51 @@ static int control(priv_t *priv, int cmd, void *arg)
                 priv->width = priv->capability.maxwidth;
             }
 
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_TUN_GET_NORM:
         {
             *(int *)arg = priv->tuner.mode;
 
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_TUN_GET_SIGNAL:
         {
             if (ioctl(priv->video_fd, VIDIOCGTUNER, &priv->tuner) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl get tuner failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
             *(int*)arg=100*(priv->tuner.signal>>8)/255;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
 
         /* ========== AUDIO controls =========== */
         case TVI_CONTROL_AUD_GET_FORMAT:
         {
             *(int *)arg = AF_FORMAT_S16_LE;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_AUD_GET_CHANNELS:
         {
             *(int *)arg = priv->audio_in.channels;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_AUD_GET_SAMPLERATE:
         {
             *(int *)arg = priv->audio_in.samplerate;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_AUD_GET_SAMPLESIZE:
         {
             *(int *)arg = priv->audio_in.bytes_per_sample;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         case TVI_CONTROL_AUD_SET_SAMPLERATE:
         {
             if (audio_in_set_samplerate(&priv->audio_in, *(int *)arg) < 0) return TVI_CONTROL_FALSE;
             setup_audio_buffer_sizes(priv);
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
         /* ========== SPECIFIC controls =========== */
         case TVI_CONTROL_SPC_GET_INPUT:
@@ -1466,9 +1466,9 @@ static int control(priv_t *priv, int cmd, void *arg)
             if (ioctl(priv->video_fd, VIDIOCGCHAN, &priv->channels[i]) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl get channel failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
 
         case TVI_CONTROL_SPC_SET_INPUT:
@@ -1481,7 +1481,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "Invalid input requested: %d, valid: 0-%d\n",
                        req_chan, priv->capability.channels - 1);
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
 
             for (i = 0; i < priv->capability.channels; i++)
@@ -1493,7 +1493,7 @@ static int control(priv_t *priv, int cmd, void *arg)
             if (ioctl(priv->video_fd, VIDIOCSCHAN, &chan) == -1)
             {
                 mp_msg(MSGT_TV, MSGL_ERR, "ioctl set chan failed: %s\n", strerror(errno));
-                return(TVI_CONTROL_FALSE);
+                return TVI_CONTROL_FALSE;
             }
             mp_msg(MSGT_TV, MSGL_INFO, "Using input '%s'\n", chan.name);
 
@@ -1506,10 +1506,10 @@ static int control(priv_t *priv, int cmd, void *arg)
 
             /* update local channel list */
             control(priv, TVI_CONTROL_SPC_GET_INPUT, &req_chan);
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         case TVI_CONTROL_IMMEDIATE:
             priv->immediate_mode = 1;
-            return(TVI_CONTROL_TRUE);
+            return TVI_CONTROL_TRUE;
         }
 #ifdef HAVE_TV_TELETEXT
         case TVI_CONTROL_VBI_INIT:
@@ -1534,7 +1534,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 #endif
     }
 
-    return(TVI_CONTROL_UNKNOWN);
+    return TVI_CONTROL_UNKNOWN;
 }
 
 static int set_mute(priv_t* priv,int value)
@@ -1810,7 +1810,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 
 static int get_video_framesize(priv_t *priv)
 {
-    return(priv->bytesperline * priv->height);
+    return priv->bytesperline * priv->height;
 }
 
 static void *audio_grabber(void *data)
@@ -1910,5 +1910,5 @@ static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 
 static int get_audio_framesize(priv_t *priv)
 {
-    return(priv->audio_in.blocksize);
+    return priv->audio_in.blocksize;
 }

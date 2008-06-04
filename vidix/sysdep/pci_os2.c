@@ -44,7 +44,7 @@ static __inline__ int enable_os_io(void)
 	   (ULONG)0) != 0) {
 		fprintf(stderr,"Error opening fastio$ driver...\n");
 		fprintf(stderr,"Please install xf86sup.sys in config.sys!\n");
-		return(42);
+		return 42;
 	}
 	callgate[0] = callgate[1] = 0;
  
@@ -57,7 +57,7 @@ static __inline__ int enable_os_io(void)
 		fprintf(stderr,"xf86-OS/2: EnableIOPorts failed, rc=%d, dlen=%d; emergency exit\n",
 			rc,dlen);
 		DosClose(hfd);
-		return(42);
+		return 42;
 	}
  
 /* Calling callgate with function 13 sets IOPL for the program */
@@ -68,11 +68,11 @@ static __inline__ int enable_os_io(void)
 			: "eax","ebx","ecx","edx","cc");
  
         DosClose(hfd);
-	return(0);
+	return 0;
 }
 
 static __inline__ int disable_os_io(void)
 {
 /* Nothing to do */
-        return(0);
+        return 0;
 }

@@ -3200,6 +3200,10 @@ if(stream_dump_type==5){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
     exit_player(mpctx, MSGTR_Exit_error);
   }
+  if (dvd_chapter > 1) {
+    int chapter = dvd_chapter - 1;
+    stream_control(mpctx->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
+  }
   while(!mpctx->stream->eof){
       len=stream_read(mpctx->stream,buf,4096);
       if(len>0) {
@@ -3722,7 +3726,9 @@ if (mpctx->sh_audio)
 if(!mpctx->sh_video) {
   // handle audio-only case:
   double a_pos=0;
-  if(!quiet || end_at.type == END_AT_TIME )
+  // sh_audio can be NULL due to video stream switching
+  // TODO: handle this better
+  if(!quiet || end_at.type == END_AT_TIME && mpctx->sh_audio)
     a_pos = playing_audio_pts(mpctx);
 
   if(!quiet)
@@ -4022,6 +4028,9 @@ if(mpctx->eof == PT_NEXT_ENTRY || mpctx->eof == PT_PREV_ENTRY) {
             mpctx->playtree_iter = NULL;
         }
     }
+} else if (mpctx->eof == PT_STOP) {
+    play_tree_iter_free(mpctx->playtree_iter);
+    mpctx->playtree_iter = NULL;
 } else { // NEXT PREV SRC
     mpctx->eof = mpctx->eof == PT_PREV_SRC ? -1 : 1;
 }

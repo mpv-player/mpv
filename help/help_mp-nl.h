@@ -153,7 +153,6 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Menu initialisatie mislukt.\n"
 #define MSGTR_Getch2InitializedTwice "WAARSCHUWING: getch2_init is twee maal opgeroepen!\n"
 #define MSGTR_DumpstreamFdUnavailable "Deze stream can niet opgeslagen worde - geen bestandsomschrijving (file descriptor) beschikbaar.\n"
-#define MSGTR_FallingBackOnPlaylist "De afspeellijst %s wordt opnieuw ingelezen ...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Kan de libmenu video filter niet openen met het root menu %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Er is een fout opgetreden bijde pre-initialisatie van de audio filter!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC leesfout: %s\n"
@@ -429,7 +428,7 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Kon netwerkbestand '%s' niet openen\n"
 #define MSGTR_SMBNotCompiled "MPlayer werd niet gecompileerd met SMB leesondersteuning\n"
 
-#define MSGTR_CantOpenDVD "Kon DVD device niet openen: %s\n"
+#define MSGTR_CantOpenDVD "Kon DVD device niet openen: %s (%s)\n"
 #define MSGTR_DVDnumTitles "Er zijn %d titels op deze DVD.\n"
 #define MSGTR_DVDinvalidTitle "Foutieve DVD titelnummer: %d\n"
 #define MSGTR_DVDnumChapters "Er zijn %d hoofdstukken in deze DVD titel.\n"

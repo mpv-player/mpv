@@ -238,7 +238,7 @@ static vidix_grkey_t cyberblade_grkey;
 static int cyberblade_get_gkeys(vidix_grkey_t *grkey)
 {
 	memcpy(grkey, &cyberblade_grkey, sizeof(vidix_grkey_t));
-	return(0);
+	return 0;
 }
 
 static int cyberblade_set_gkeys(const vidix_grkey_t *grkey)
@@ -272,7 +272,7 @@ static int cyberblade_set_gkeys(const vidix_grkey_t *grkey)
 		SROUTB(0x56, 0x00); /* Colour Key Mask */
 	}
 	SROUTB(0x11,protect);
-	return(0);
+	return 0;
 }
 
 

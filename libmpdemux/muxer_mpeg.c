@@ -231,27 +231,25 @@ static void fix_audio_sys_header(muxer_priv_t *priv, uint8_t id, uint8_t newid, 
 
 static inline int is_mpeg1(uint32_t x)
 {
-	return (
+	return
 		(x == 0x10000001) ||
 		(x == mmioFOURCC('m','p','g','1')) ||
-		(x == mmioFOURCC('M','P','G','1'))
-	);
+		(x == mmioFOURCC('M','P','G','1'));
 }
 
 static inline int is_mpeg2(uint32_t x)
 {
-	return (
+	return
 		(x == 0x10000002) ||
 		(x == mmioFOURCC('m','p','g','2')) ||
 		(x == mmioFOURCC('M','P','G','2')) ||
 		(x == mmioFOURCC('m','p','e','g')) ||
-		(x == mmioFOURCC('M','P','E','G'))
-	);
+		(x == mmioFOURCC('M','P','E','G'));
 }
 
 static inline int is_mpeg4(uint32_t x)
 {
-	return (
+	return
 		(x == 0x10000004) ||
 		(x == mmioFOURCC('d','i','v','x')) ||
 		(x == mmioFOURCC('D','I','V','X')) ||
@@ -265,8 +263,7 @@ static inline int is_mpeg4(uint32_t x)
 		(x == mmioFOURCC('F', 'M','P','4')) ||
 		(x == mmioFOURCC('f', 'm','p','4')) ||
 		(x == mmioFOURCC('D', 'X','5','0')) ||
-		(x == mmioFOURCC('d', 'x','5','0'))
-	);
+		(x == mmioFOURCC('d', 'x','5','0'));
 }
 
 //from unrarlib.c
@@ -666,7 +663,7 @@ static int write_mpeg_psm(muxer_t *muxer, char *buff)
 
 static int psm_is_late(muxer_priv_t *priv)
 {
-	return (!priv->data_size || (priv->scr >= priv->last_psm_scr + 27000000ULL));
+	return !priv->data_size || (priv->scr >= priv->last_psm_scr + 27000000ULL);
 }
 
 static int write_mpeg_pes_header(muxer_headers_t *h, uint8_t *pes_id, uint8_t *buff, uint16_t plen, int stuffing_len, int mux_type)

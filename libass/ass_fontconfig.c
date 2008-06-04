@@ -150,11 +150,13 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (curf >= fset->nfont)
 		goto error;
 
+#if (FC_VERSION >= 20297)
 	// Remove all extra family names from original pattern.
 	// After this, FcFontRenderPrepare will select the most relevant family
 	// name in case there are more than one of them.
 	for (; family_cnt > 1; --family_cnt)
 		FcPatternRemove(pat, FC_FAMILY, family_cnt - 1);
+#endif
 
 	rpat = FcFontRenderPrepare(priv->config, pat, fset->fonts[curf]);
 	if (!rpat)
@@ -349,35 +351,39 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 	FcPattern* pattern;
 	FcFontSet* fset;
 	FcBool res;
+	int face_index, num_faces = 1;
 
-	rc = FT_New_Memory_Face(ftlibrary, (unsigned char*)data, data_size, 0, &face);
-	if (rc) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, name);
-		return;
-	}
+	for (face_index = 0; face_index < num_faces; ++face_index) {
+		rc = FT_New_Memory_Face(ftlibrary, (unsigned char*)data, data_size, face_index, &face);
+		if (rc) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorOpeningMemoryFont, name);
+			return;
+		}
+		num_faces = face->num_faces;
 
-	pattern = FcFreeTypeQueryFace(face, (unsigned char*)name, 0, FcConfigGetBlanks(priv->config));
-	if (!pattern) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFreeTypeQueryFace");
+		pattern = FcFreeTypeQueryFace(face, (unsigned char*)name, 0, FcConfigGetBlanks(priv->config));
+		if (!pattern) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFreeTypeQueryFace");
+			FT_Done_Face(face);
+			return;
+		}
+
+		fset = FcConfigGetFonts(priv->config, FcSetSystem); // somehow it failes when asked for FcSetApplication
+		if (!fset) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcConfigGetFonts");
+			FT_Done_Face(face);
+			return;
+		}
+
+		res = FcFontSetAdd(fset, pattern);
+		if (!res) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFontSetAdd");
+			FT_Done_Face(face);
+			return;
+		}
+
 		FT_Done_Face(face);
-		return;
 	}
-
-	fset = FcConfigGetFonts(priv->config, FcSetSystem); // somehow it failes when asked for FcSetApplication
-	if (!fset) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcConfigGetFonts");
-		FT_Done_Face(face);
-		return;
-	}
-
-	res = FcFontSetAdd(fset, pattern);
-	if (!res) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FunctionCallFailed, "FcFontSetAdd");
-		FT_Done_Face(face);
-		return;
-	}
-
-	FT_Done_Face(face);
 #endif
 }
 

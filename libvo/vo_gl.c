@@ -74,6 +74,7 @@ static int use_aspect;
 static int use_yuv;
 static int lscale;
 static int cscale;
+static float filter_strength;
 static int yuvconvtype;
 static int use_rectangle;
 static int err_shown;
@@ -116,6 +117,8 @@ static int ass_border_x, ass_border_y;
 
 static unsigned int slice_height = 1;
 
+static void redraw(void);
+
 static void resize(int x,int y){
   mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n",x,y);
   if (WinID >= 0) {
@@ -153,7 +156,7 @@ static void resize(int x,int y){
   vo_osd_changed(OSDTYPE_OSD);
   }
   glClear(GL_COLOR_BUFFER_BIT);
-  flip_page();
+  redraw();
 }
 
 static void texSize(int w, int h, int *texw, int *texh) {
@@ -179,9 +182,10 @@ static void update_yuvconv(void) {
   float rgamma = exp(log(8.0) * eq_rgamma / 100.0);
   float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
-  glSetupYUVConversion(gl_target, yuvconvtype, bri, cont, hue, sat,
-                       rgamma, ggamma, bgamma,
-                       texture_width, texture_height);
+  gl_conversion_params_t params = {gl_target, yuvconvtype,
+      bri, cont, hue, sat, rgamma, ggamma, bgamma,
+      texture_width, texture_height, filter_strength};
+  glSetupYUVConversion(&params);
   if (custom_prog) {
     FILE *f = fopen(custom_prog, "r");
     if (!f)
@@ -503,7 +507,7 @@ static void check_events(void)
 {
     int e=vo_check_events();
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
-    if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
+    if(e&VO_EVENT_EXPOSE && int_pause) redraw();
 }
 
 /**
@@ -575,6 +579,8 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   osdtexCnt++;
 }
 
+static void do_render_osd(void);
+
 static void draw_osd(void)
 {
   if (!use_osd) return;
@@ -585,11 +591,10 @@ static void draw_osd(void)
     osd_h = (scaled_osd) ? image_height : vo_dheight;
     vo_draw_text(osd_w, osd_h, create_osd_texture);
   }
+  if (vo_doublebuffering) do_render_osd();
 }
 
-static void
-flip_page(void)
-{
+static void do_render(void) {
 //  glEnable(GL_TEXTURE_2D);
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
 
@@ -603,7 +608,9 @@ flip_page(void)
             mpi_flipped ^ vo_flipped);
   if (image_format == IMGFMT_YV12)
     glDisableYUVConversion(gl_target, yuvconvtype);
+}
 
+static void do_render_osd(void) {
   if (osdtexCnt > 0 || eosdDispList) {
     // set special rendering parameters
     if (!scaled_osd) {
@@ -633,16 +640,25 @@ flip_page(void)
       glPopMatrix();
     BindTexture(gl_target, 0);
   }
+}
 
-  if (use_glFinish)
-  glFinish();
-  if (vo_doublebuffering)
+static void flip_page(void) {
+  if (vo_doublebuffering) {
+    if (use_glFinish) glFinish();
     swapGlBuffers();
-  else if (!use_glFinish)
-    glFlush();
- 
-  if (vo_fs && use_aspect && vo_doublebuffering)
-    glClear(GL_COLOR_BUFFER_BIT);
+    if (vo_fs && use_aspect)
+      glClear(GL_COLOR_BUFFER_BIT);
+  } else {
+    do_render();
+    do_render_osd();
+    if (use_glFinish) glFinish();
+    else glFlush();
+  }
+}
+
+static void redraw(void) {
+  if (vo_doublebuffering) { do_render(); do_render_osd(); }
+  flip_page();
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
@@ -713,7 +729,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
   unsigned char *planes[3];
   mp_image_t mpi2 = *mpi;
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-    return VO_TRUE;
+    goto skip_upload;
   mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
   mpi2.width = mpi2.w; mpi2.height = mpi2.h;
   if (force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !gl_bufferptr && get_image(&mpi2) == VO_TRUE) {
@@ -753,6 +769,8 @@ static uint32_t draw_image(mp_image_t *mpi) {
   }
   if (mpi->flags & MP_IMGFLAG_DIRECT)
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+skip_upload:
+  if (vo_doublebuffering) do_render();
   return VO_TRUE;
 }
 
@@ -808,6 +826,7 @@ static opt_t subopts[] = {
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
   {"lscale",       OPT_ARG_INT,  &lscale,       (opt_test_f)int_non_neg},
   {"cscale",       OPT_ARG_INT,  &cscale,       (opt_test_f)int_non_neg},
+  {"filter-strength", OPT_ARG_FLOAT, &filter_strength, NULL},
   {"ati-hack",     OPT_ARG_BOOL, &ati_hack,     NULL},
   {"force-pbo",    OPT_ARG_BOOL, &force_pbo,    NULL},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
@@ -830,6 +849,7 @@ static int preinit(const char *arg)
     use_yuv = 0;
     lscale = 0;
     cscale = 0;
+    filter_strength = 0.5;
     use_rectangle = 0;
     use_glFinish = 0;
     ati_hack = 0;
@@ -912,11 +932,33 @@ static int preinit(const char *arg)
     return 0;
 }
 
+#define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))
+#define MASK_NOT_COMBINERS (~((1 << YUV_CONVERSION_NONE) | (1 << YUV_CONVERSION_COMBINERS) | (1 << YUV_CONVERSION_COMBINERS_ATI)))
+#define MASK_GAMMA_SUPPORT (MASK_NOT_COMBINERS & ~(1 << YUV_CONVERSION_FRAGMENT))
+
+static const struct {
+  const char *name;
+  int *value;
+  int supportmask;
+} eq_map[] = {
+  {"brightness",  &eq_bri,    MASK_NOT_COMBINERS},
+  {"contrast",    &eq_cont,   MASK_NOT_COMBINERS},
+  {"saturation",  &eq_sat,    MASK_ALL_YUV      },
+  {"hue",         &eq_hue,    MASK_ALL_YUV      },
+  {"gamma",       &eq_rgamma, MASK_GAMMA_SUPPORT},
+  {"red_gamma",   &eq_rgamma, MASK_GAMMA_SUPPORT},
+  {"green_gamma", &eq_ggamma, MASK_GAMMA_SUPPORT},
+  {"blue_gamma",  &eq_bgamma, MASK_GAMMA_SUPPORT},
+  {NULL,          NULL,       0                 }
+};
+
 static int control(uint32_t request, void *data)
 {
   switch (request) {
-  case VOCTRL_PAUSE: return (int_pause=1);
-  case VOCTRL_RESUME: return (int_pause=0);
+  case VOCTRL_PAUSE:
+  case VOCTRL_RESUME:
+    int_pause = (request == VOCTRL_PAUSE);
+    return VO_TRUE;
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
@@ -967,66 +1009,24 @@ static int control(uint32_t request, void *data)
   case VOCTRL_GET_EQUALIZER:
     if (image_format == IMGFMT_YV12) {
       struct voctrl_get_equalizer_args *args = data;
-      if (strcasecmp(args->name, "brightness") == 0) {
-        *args->valueptr = eq_bri;
-        if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
-      } else if (strcasecmp(args->name, "contrast") == 0) {
-        *args->valueptr = eq_cont;
-        if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
-      } else if (strcasecmp(args->name, "saturation") == 0) {
-        *args->valueptr = eq_sat;
-      } else if (strcasecmp(args->name, "hue") == 0) {
-        *args->valueptr = eq_hue;
-      } else if (strcasecmp(args->name, "gamma") ==  0) {
-        *args->valueptr = eq_rgamma;
-        if (use_yuv == YUV_CONVERSION_COMBINERS ||
-            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(args->name, "red_gamma") ==  0) {
-        *args->valueptr = eq_rgamma;
-        if (use_yuv == YUV_CONVERSION_COMBINERS ||
-            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(args->name, "green_gamma") ==  0) {
-        *args->valueptr = eq_ggamma;
-        if (use_yuv == YUV_CONVERSION_COMBINERS ||
-            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(args->name, "blue_gamma") ==  0) {
-        *args->valueptr = eq_bgamma;
-        if (use_yuv == YUV_CONVERSION_COMBINERS ||
-            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      }
+      int i;
+      for (i = 0; eq_map[i].name; i++)
+        if (strcmp(args->name, eq_map[i].name) == 0) break;
+      if (!(eq_map[i].supportmask & (1 << use_yuv)))
+        break;
+      *args->valueptr = *eq_map[i].value;
       return VO_TRUE;
     }
     break;
   case VOCTRL_SET_EQUALIZER:
     if (image_format == IMGFMT_YV12) {
       struct voctrl_set_equalizer_args *args = data;
-      if (strcasecmp(args->name, "brightness") == 0) {
-        eq_bri = args->value;
-        if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
-      } else if (strcasecmp(args->name, "contrast") == 0) {
-        eq_cont = args->value;
-        if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
-      } else if (strcasecmp(args->name, "saturation") == 0) {
-        eq_sat = args->value;
-      } else if (strcasecmp(args->name, "hue") == 0) {
-        eq_hue = args->value;
-      } else if (strcasecmp(args->name, "gamma") ==  0) {
-        eq_rgamma = eq_ggamma = eq_bgamma = args->value;
-        if (use_yuv == YUV_CONVERSION_COMBINERS ||
-            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(args->name, "red_gamma") ==  0) {
-        eq_rgamma = args->value;
-        if (use_yuv == YUV_CONVERSION_COMBINERS ||
-            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(args->name, "green_gamma") ==  0) {
-        eq_ggamma = args->value;
-        if (use_yuv == YUV_CONVERSION_COMBINERS ||
-            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      } else if (strcasecmp(args->name, "blue_gamma") ==  0) {
-        eq_bgamma = args->value;
-        if (use_yuv == YUV_CONVERSION_COMBINERS ||
-            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
-      }
+      int i;
+      for (i = 0; eq_map[i].name; i++)
+        if (strcmp(args->name, eq_map[i].name) == 0) break;
+      if (!(eq_map[i].supportmask & (1 << use_yuv)))
+        break;
+      *eq_map[i].value = args->value;
       update_yuvconv();
       return VO_TRUE;
     }

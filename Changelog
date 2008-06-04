@@ -46,6 +46,7 @@ MPlayer (1.0)
       common API
     * grayscale decoding/encoding with FFmpeg disabled where it slowed down
       the color case
+    * Linux AppleIR remote support.
 
     Ports:
     * small crash with vo_macosx fixed

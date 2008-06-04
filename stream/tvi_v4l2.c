@@ -1016,7 +1016,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 #endif
     }
     mp_msg(MSGT_TV, MSGL_V, "%s: unknown control: %d\n", info.short_name, cmd);
-    return(TVI_CONTROL_UNKNOWN);
+    return TVI_CONTROL_UNKNOWN;
 }
 
 
@@ -1976,5 +1976,5 @@ out:
 
 static int get_audio_framesize(priv_t *priv)
 {
-    return(priv->audio_in.blocksize);
+    return priv->audio_in.blocksize;
 }

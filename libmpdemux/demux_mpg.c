@@ -158,9 +158,7 @@ static float read_first_mpeg_pts_at_position(demuxer_t* demuxer, off_t stream_po
   if(found == 3) pts = found_pts3;
 
   //clean up from searching of first pts;
-  ds_free_packs(demuxer->audio);
-  ds_free_packs(demuxer->video);
-  ds_free_packs(demuxer->sub);
+  demux_flush(demuxer);
 
   return pts;
 }
@@ -981,9 +979,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
         //prepare another seek because we are off by more than 0.5s
 	if(mpg_d) {
         newpos += (newpts - mpg_d->last_pts) * (newpos - oldpos) / (mpg_d->last_pts - oldpts);
-        ds_free_packs(d_audio);
-        ds_free_packs(d_video);
-        ds_free_packs(demuxer->sub);
+        demux_flush(demuxer);
         demuxer->stream->eof=0; // clear eof flag
         d_video->eof=0;
         d_audio->eof=0;
