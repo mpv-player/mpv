@@ -825,7 +825,7 @@ xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
 .TP
-.B \-correct\-pts (experimental)
+.B \-correct\-pts (EXPERIMENTAL)
 Switches MPlayer to an experimental mode where timestamps for video frames
 are calculated differently and video filters which add new frames or
 modify timestamps of existing ones are supported.
@@ -905,14 +905,14 @@ to ensure it does not cause security problems (e.g.\& make sure to use full
 paths if "." is in your path like on Windows).
 .sp 1
 This can be "misused" to disable screensavers that do not support the proper
-X API for this.
-If you think this is too complicated ask the author of the screensaver program
-to support the proper X APIs for this.
+X API.
+If you think this is too complicated, ask the author of the screensaver
+program to support the proper X APIs.
 .sp 1
 .I EXAMPLE for xscreensaver:
 mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
 .sp 1
-.I EXAMPLE for gnome screensaver:
+.I EXAMPLE for GNOME screensaver:
 mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .RE
 .PD 1
@@ -5379,7 +5379,7 @@ Scales pitch without altering tempo.
 Add \'[ speed_mult 0.9438743126816935\' and \'] speed_mult 1.059463094352953\'
 to your input.conf to step by musical semi-tones.
 .I WARNING:
-Looses synch with video.
+Loses sync with video.
 .IPs both
 Scale both tempo and pitch
 .IPs none
