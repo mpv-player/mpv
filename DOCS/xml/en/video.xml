@@ -193,7 +193,7 @@ xv support, but the card itself is very slow, so you better sell it.
 </para>
 
 <para>
-There is now a native framebuffer driver for S3 Virge cards similiar to 
+There is now a native framebuffer driver for S3 Virge cards similar to
 tdfxfb. Set up your framebuffer (e.g. append
 "<option>vga=792 video=vesa:mtrr</option>" to your kernel comand line) and use
 <option>-vo s3fb</option> (<option>-vf yuy2</option> and <option>-dr</option>
@@ -2347,43 +2347,22 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
     <para>
     Using the <emphasis role="bold">matroxfb modules</emphasis> in the 2.4
     kernels. 2.2 kernels don't have the TV-out feature in them, thus unusable
-    for this. You have to enable ALL matroxfb-specific feature during
+    for this. You have to enable ALL matroxfb-specific features during
     compilation (except MultiHead), and compile them into
     <emphasis role="bold">modules</emphasis>!
-    You'll also need I2C enabled.
+    You'll also need to enable I2C and put the tools
+    <application>matroxset</application>, <application>fbset</application>
+    and <application>con2fb</application> in your path.
     </para>
 
     <procedure>
     <step><para>
-      Enter <filename class="directory">TVout</filename> and type
-      <command>./compile.sh</command>. Install
-      <filename>TVout/matroxset/matroxset</filename>
-      somewhere into your <envar>PATH</envar>.
+      Then load the <systemitem>matroxfb_Ti3026, matroxfb_maven, i2c-matroxfb,
+      matroxfb_crtc2</systemitem> modules into your kernel. Your text-mode
+      console will enter into framebuffer mode (no way back!).
     </para></step>
     <step><para>
-      If you don't have <command>fbset</command> installed, put
-      <filename>TVout/fbset/fbset</filename>
-      somewhere into your <envar>PATH</envar>.
-    </para></step>
-    <step><para>
-      If you don't have <command>con2fb</command> installed, put
-      <filename>TVout/con2fb/con2fb</filename>
-      somewhere into your <envar>PATH</envar>.
-    </para></step>
-    <step><para>
-      Then enter into the <filename class="directory">TVout/</filename>
-      directory in the <application>MPlayer</application> source, and execute
-      <filename>./modules</filename> as root. Your text-mode console will
-      enter into framebuffer mode (no way back!).
-    </para></step>
-    <step><para>
-      Next, EDIT and run the <filename>./matroxtv</filename> script. This will
-      present you to a very simple menu. Press <keycap>2</keycap> and
-      <keycap>Enter</keycap>. Now you should have the same picture on your
-      monitor, and TV. If the TV (PAL by default)
-      picture has some weird stripes on it, the script wasn't able to set the
-      resolution correctly (to 640x512 by default). Try other resolutions
-      from the menu and/or experiment with fbset.
+      Next, set up your monitor and TV to your liking using the above tools.
     </para></step>
     <step><para>
       Yoh. Next task is to make the cursor on tty1 (or whatever) to
