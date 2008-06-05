@@ -412,9 +412,8 @@ static int open_fs(menu_t* menu, char* args) {
           path = malloc(st.st_size+1);
           path[st.st_size] = '\0';
           if ((read(path_fp, path, st.st_size) == st.st_size) && path[0] == '/'
-              && !stat(path, &st) && S_ISDIR(st.st_mode)){
+              && !stat(path, &st) && S_ISDIR(st.st_mode))
             freepath = path;
-          }
           else {
             free(path);
             path = NULL;
