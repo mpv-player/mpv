@@ -898,7 +898,9 @@ TOOLS = TOOLS/alaw-gen$(EXESUF) \
         TOOLS/compare$(EXESUF) \
         TOOLS/dump_mp4$(EXESUF) \
         TOOLS/movinfo$(EXESUF) \
+        TOOLS/netstream$(EXESUF) \
         TOOLS/subrip$(EXESUF) \
+        TOOLS/vivodump$(EXESUF) \
 
 ifdef ARCH_X86
 TOOLS += TOOLS/modify_reg$(EXESUF)
@@ -907,8 +909,6 @@ endif
 ALLTOOLS = $(TOOLS) \
            TOOLS/bmovl-test$(EXESUF) \
            TOOLS/vfw2menc$(EXESUF) \
-           TOOLS/vivodump$(EXESUF) \
-           TOOLS/netstream$(EXESUF) \
 
 tools: $(TOOLS)
 alltools: $(ALLTOOLS)
@@ -924,8 +924,13 @@ TOOLS/subrip$(EXESUF): TOOLS/subrip.c vobsub.o spudec.o unrar_exec.o \
 
 TOOLS/vfw2menc$(EXESUF): TOOLS/vfw2menc.c -lwinmm -lole32
 
-#FIXME: Linking is broken, help welcome.
-TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c $(TEST_OBJS)
+mplayer-nomain.o: mplayer.c
+	$(CC) $(CFLAGS) -DDISABLE_MAIN -c -o $@ $<
+
+TOOLS/netstream$(EXESUF): TOOLS/netstream.c $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
+TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
+TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF):
+	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS_MENCODER) $(COMMON_LDFLAGS)
 
 fastmemcpybench: TOOLS/fastmemcpybench.c
 	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
@@ -946,16 +951,6 @@ fastmemcpybench realcodecs: CFLAGS += -g
 
 %.so.6.0: %.o
 	ld -shared -o $@ $< -ldl -lc
-
-# FIXME: netstream linking is a mess that should be fixed properly some day.
-# It does not work with either GUI, LIVE555, libavformat, cdparanoia enabled.
-NETSTREAM_DEPS = libavutil/libavutil.a \
-                 m_option.o \
-                 m_struct.o \
-                 $(TEST_OBJS)
-
-TOOLS/netstream$(EXESUF): TOOLS/netstream.o $(NETSTREAM_DEPS)
-	$(CC) $(CFLAGS) -o $@ $^
 
 
 

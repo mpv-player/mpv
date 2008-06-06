@@ -2537,6 +2537,9 @@ static int seek(MPContext *mpctx, double amount, int style)
     return 0;
 }
 
+/* This preprocessor directive is a hack to generate a mplayer-nomain.o object
+ * file for some tools to link against. */
+#ifndef DISABLE_MAIN
 int main(int argc,char* argv[]){
 
 
@@ -4038,3 +4041,4 @@ exit_player_with_rc(MSGTR_Exit_eof, 0);
 
 return 1;
 }
+#endif /* DISABLE_MAIN */
