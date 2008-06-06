@@ -1,44 +1,38 @@
 /*
+ * Mac OS X audio output driver
  *
- *  ao_macosx.c
+ * original copyright (C) Timothy J. Wood - Aug 2000
+ * ported to MPlayer libao2 by Dan Christiansen
  *
- *      Original Copyright (C) Timothy J. Wood - Aug 2000
+ * The S/PDIF part of the code is based on the auhal audio output
+ * module from VideoLAN:
+ * Copyright (c) 2006 Derk-Jan Hartman <hartman at videolan dot org>
  *
- *      The S/PDIF part of the code is based on the auhal audio output
- *      module from VideoLAN:
- *      Copyright (c) 2006 Derk-Jan Hartman <hartman at videolan dot org>
+ * This file is part of MPlayer.
  *
- *  This file is part of libao, a cross-platform library.  See
- *  README for a history of this source code.
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- *  libao is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *  libao is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with libao; if not, write to the Free Software Foundation, Inc.,
- *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License along
+ * along with MPlayer; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
  * The MacOS X CoreAudio framework doesn't mesh as simply as some
  * simpler frameworks do.  This is due to the fact that CoreAudio pulls
  * audio samples rather than having them pushed at it (which is nice
- * when you are wanting to do good buffering of audio). 
- */
-
-/* Change log:
- * 
- * 14/5-2003: Ported to MPlayer libao2 by Dan Christiansen
+ * when you are wanting to do good buffering of audio).
  *
- *            AC-3 and MPEG audio passthrough is possible, but I don't have
- *            access to a sound card that supports it.
+ * AC-3 and MPEG audio passthrough is possible, but has never been tested
+ * due to lack of a soundcard that supports it.
  */
 
 #include <CoreServices/CoreServices.h>
