@@ -391,7 +391,7 @@ static void clos(menu_t* menu) {
 }
 
 static int open_fs(menu_t* menu, char* args) {
-  char *path = mpriv->path, *freepath = NULL;
+  char *path = mpriv->path;
   int r = 0;
   char wd[PATH_MAX+1], b[PATH_MAX+1];
   args = NULL; // Warning kill
@@ -411,10 +411,8 @@ static int open_fs(menu_t* menu, char* args) {
         if (!fstat (path_fp, &st) && (st.st_size > 0)) {
           path = malloc(st.st_size+1);
           path[st.st_size] = '\0';
-          if ((read(path_fp, path, st.st_size) == st.st_size) && path[0] == '/'
-              && !stat(path, &st) && S_ISDIR(st.st_mode))
-            freepath = path;
-          else {
+          if (!((read(path_fp, path, st.st_size) == st.st_size) && path[0] == '/'
+              && !stat(path, &st) && S_ISDIR(st.st_mode))) {
             free(path);
             path = NULL;
           }
@@ -467,9 +465,6 @@ static int open_fs(menu_t* menu, char* args) {
   }
   r = open_dir(menu,path);
 
-  if (freepath)
-    free(freepath);
-  
   return r;
 }
   
