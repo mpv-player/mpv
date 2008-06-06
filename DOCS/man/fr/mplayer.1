@@ -1,4 +1,4 @@
-.\" synced with r26762
+.\" synced with r26806
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -10693,6 +10693,28 @@ Ceci est dû à la limite de la longueur de la ligne de commande.
 Dans ce cas, il est recommandé d'utiliser de mettre les listes dans un
 fichier de CQM au format JM, et de le charger comme précisé plus haut.
 .RE
+.
+.TP
+.B aq_mode=<0\-2>
+Ajuste comment la quantification adaptative (AQ) distribue les bits:
+.PD 0
+.RSs
+.IPs 0
+désactivé
+.IPs 1
+Évite de déplacer des bits entre les trames.
+.IPs 2
+Déplace des bits entre les trames (par défaut).
+.RE
+.PD 1
+.
+.TP
+.B aq_strength=<valeur flottante positive>
+Contrôle à quel point la quantification adaptative (AQ) peut réduire les
+effets de "blocking" et de flou dans les zones uniformes ou texturées (par
+défaut\ : 1.0).
+Une valeur de 0.5 conduira à une faible AQ, et moins de détails, tandis
+qu'une valeur de 1.5 conduira à une forte AQ, et plus de détails.
 .
 .TP
 .B cqm=<flat|jvt|<nom_fichier>>
