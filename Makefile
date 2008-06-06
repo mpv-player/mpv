@@ -753,7 +753,7 @@ version.h:
 	./version.sh `$(CC) -dumpversion`
 
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
-	$(WINDRES) -I. -o $@ $<
+	$(WINDRES) -I. $< $@
 
 
 
