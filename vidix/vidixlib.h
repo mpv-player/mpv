@@ -85,7 +85,7 @@ unsigned   vdlGetVersion( void );
 			   verbose - specifies verbose level
 			   returns !0 if ok else NULL.
 			   */
-VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose);
+VDL_HANDLE vdlOpen(const char *name,unsigned cap,int verbose);
 			/* Closes stream and corresponded driver. */
 void	  vdlClose(VDL_HANDLE ctx);
 
