@@ -36,10 +36,6 @@
 #ifndef MPLAYER_VIDIXLIB_H
 #define MPLAYER_VIDIXLIB_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "vidix.h"
 
 typedef struct VDXDriver {
@@ -134,9 +130,5 @@ int	  vdlSetOemEffect(VDL_HANDLE, const vidix_oem_fx_t * );
 
 			/* Returns 0 if ok else errno */
 int	  vdlPlaybackCopyFrame(VDL_HANDLE, const vidix_dma_t * );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* MPLAYER_VIDIXLIB_H */

@@ -36,10 +36,6 @@
 #ifndef MPLAYER_VIDIX_H
 #define MPLAYER_VIDIX_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define PROBE_NORMAL    0 /* normal probing */
 #define PROBE_FORCE     1 /* ignore device_id but recognize device if it's known */
   
@@ -308,9 +304,5 @@ typedef struct vidix_oem_fx_s
   int value;   	        /* current value of effect on get; required on set */
   char *name[80];	/* effect name to display */
 } vidix_oem_fx_t;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* MPLAYER_VIDIX_H */

@@ -36,10 +36,6 @@
 #ifndef MPLAYER_DHA_H
 #define MPLAYER_DHA_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifndef DEV_SVGA
 #define DEV_SVGA "/dev/svga"
 #endif
@@ -91,9 +87,5 @@ extern void    unmap_phys_mem(void *ptr, unsigned long size);
 #define MTRR_TYPE_WRPROT     5
 #define MTRR_TYPE_WRBACK     6
 extern int	mtrr_set_type(unsigned base,unsigned size,int type);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* MPLAYER_DHA_H */

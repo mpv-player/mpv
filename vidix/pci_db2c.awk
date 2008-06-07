@@ -145,9 +145,6 @@ function print_head( out_file)
 
 function print_name_struct(out_file)
 {
-   print "#ifdef __cplusplus" >out_file
-   print "extern \"C\" {" >out_file
-   print "#endif" >out_file
    print "">out_file
    print "struct device_id_s" >out_file
    print "{" >out_file
@@ -164,9 +161,6 @@ function print_name_struct(out_file)
    print "extern const char *pci_vendor_name(unsigned short id);">out_file
    print "extern const char *pci_device_name(unsigned short vendor_id, unsigned short device_id);">out_file
    print "">out_file
-   print "#ifdef __cplusplus" >out_file
-   print "}" >out_file
-   print "#endif" >out_file
    return
 }
 
