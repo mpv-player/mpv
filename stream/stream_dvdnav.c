@@ -32,6 +32,7 @@ typedef enum {
   NAV_FLAG_SPU_SET              = 1 << 7,  /* spu_clut is valid */
   NAV_FLAG_STREAM_CHANGE        = 1 << 8,  /* title, chapter, audio or SPU */
   NAV_FLAG_AUDIO_CHANGE         = 1 << 9,  /* audio stream change event */
+  NAV_FLAG_SPU_CHANGE           = 1 << 10, /* spu stream change event */
 } dvdnav_state_t;
 
 typedef struct {
@@ -334,6 +335,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
           mp_msg(MSGT_CPLAYER,MSGL_INFO, "DVDNAV, switched to title: %d\r\n", vts_event->new_vtsN);
           priv->state |= NAV_FLAG_CELL_CHANGED;
           priv->state |= NAV_FLAG_AUDIO_CHANGE;
+          priv->state |= NAV_FLAG_SPU_CHANGE;
           priv->state &= ~NAV_FLAG_WAIT_SKIP;
           priv->state &= ~NAV_FLAG_WAIT;
           s->end_pos = 0;
@@ -351,6 +353,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
         case DVDNAV_CELL_CHANGE: {
           priv->state |= NAV_FLAG_CELL_CHANGED;
           priv->state |= NAV_FLAG_AUDIO_CHANGE;
+          priv->state |= NAV_FLAG_SPU_CHANGE;
           priv->state &= ~NAV_FLAG_WAIT_SKIP;
           priv->state &= ~NAV_FLAG_WAIT;
           if (priv->state & NAV_FLAG_WAIT_READ_AUTO)
@@ -365,6 +368,9 @@ static int fill_buffer(stream_t *s, char *but, int len)
         break;
         case DVDNAV_AUDIO_STREAM_CHANGE:
           priv->state |= NAV_FLAG_AUDIO_CHANGE;
+        break;
+        case DVDNAV_SPU_STREAM_CHANGE:
+          priv->state |= NAV_FLAG_SPU_CHANGE;
         break;
       }
   }
@@ -927,6 +933,24 @@ int mp_dvdnav_audio_has_changed (stream_t *stream, int clear) {
   if (clear)
     priv->state &= ~NAV_FLAG_AUDIO_CHANGE;
 
+  return 1;
+}
+
+/**
+ * \brief Check if SPU has changed
+ * \param stream: - stream pointer
+ * \param clear : - if true, then clear spu change flag
+ * \return 1 if spu has changed
+ */
+int mp_dvdnav_spu_has_changed (stream_t *stream, int clear) {
+  dvdnav_priv_t *priv =  stream->priv;
+
+  if (!(priv->state & NAV_FLAG_SPU_CHANGE))
+    return 0;
+
+  if (clear)
+    priv->state &= ~NAV_FLAG_SPU_CHANGE;
+  
   return 1;
 }
 
