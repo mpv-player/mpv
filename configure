@@ -339,8 +339,7 @@ Codecs:
   --enable-muxer=MUXER      enable specified FFmpeg muxer
 
 Video output:
-  --disable-vidix-internal disable internal VIDIX [for x86 *nix]
-  --disable-vidix-external disable external VIDIX [for x86 *nix]
+  --disable-vidix          disable VIDIX [for x86 *nix]
   --with-vidix-drivers[=*] list of VIDIX drivers to be compiled in
                            Available: cyberblade,ivtv,mach64,mga,mga_crtc2,
                            nvidia,pm2,pm3,radeon,rage128,s3,sis,unichrome
@@ -619,8 +618,7 @@ _pvr=auto
 _network=yes
 _winsock2=auto
 _smbsupport=auto
-_vidix_internal=auto
-_vidix_external=auto
+_vidix=auto
 _vidix_pcidb=yes
 _joystick=no
 _xvid=auto
@@ -1016,10 +1014,8 @@ for ac_option do
   --disable-winsock2)	_winsock2=no	;;
   --enable-smb)		_smbsupport=yes	;;
   --disable-smb)	_smbsupport=no	;;
-  --enable-vidix-internal)	_vidix_internal=yes	;;
-  --disable-vidix-internal)	_vidix_internal=no	;;
-  --enable-vidix-external)	_vidix_external=yes	;;
-  --disable-vidix-external)	_vidix_external=no	;;
+  --enable-vidix)	_vidix=yes	;;
+  --disable-vidix)	_vidix=no	;;
   --with-vidix-drivers=*)
     _vidix_drivers=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -4193,7 +4189,6 @@ echores "$_gl"
 
 
 echocheck "VIDIX"
-_vidix=no
 _def_vidix='#undef CONFIG_VIDIX'
 _def_vidix_drv_cyberblade='#undef CONFIG_VIDIX_DRV_CYBERBLADE'
 _vidix_drv_cyberblade=no
@@ -4223,24 +4218,11 @@ _def_vidix_drv_sis='#undef CONFIG_VIDIX_DRV_SIS'
 _vidix_drv_sis=no
 _def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
 _vidix_drv_unichrome=no
-if test "$_vidix_internal" = auto ; then
-  _vidix_internal=no
+if test "$_vidix" = auto ; then
+  _vidix=no
   x86 && (linux || freebsd || netbsd || openbsd || dragonfly || sunos || win32) \
-    && _vidix_internal=yes
-  (ppc || alpha) && linux && _vidix_internal=yes
-fi
-if test "$_vidix_internal" = yes; then
-  _res_comment="internal"
-  _vidix_external=no
-  _vidix=yes
-elif test "$_vidix_external" = auto; then
- _vidix_external=no
- cat > $TMPC <<EOF
-#include <vidix/vidix.h>
-int main(void) { return 0; }
-EOF
-  cc_check -lvidix && _vidix_external=yes && _res_comment="external" \
-                   && _vidix=yes
+    && _vidix=yes
+  (ppc || alpha) && linux && _vidix=yes
 fi
 echores "$_vidix"
 
@@ -4261,13 +4243,6 @@ if test "$_vidix" = yes ; then
   done
 else
   _novomodules="cvidix $_novomodules"
-fi
-
-if test "$_vidix_internal" = yes ; then
-  _def_vidix_pfx="#define MP_VIDIX_PFX \"$_libdir\" \"/mplayer/vidix/\" "
-elif test "$_vidix_external" = yes ; then
-  _libs_mplayer="$_libs_mplayer -lvidix"
-  _def_vidix_pfx='#define MP_VIDIX_PFX "" '
 fi
 
 if test "$_vidix" = yes && win32; then
@@ -7729,8 +7704,6 @@ TWOLAME=$_twolame
 UNRAR_EXEC = $_unrar_exec
 VCD = $_vcd
 VIDIX = $_vidix
-VIDIX_EXTERNAL = $_vidix_external
-VIDIX_INTERNAL = $_vidix_internal
 VIDIX_PCIDB = $_vidix_pcidb_val
 VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
 VIDIX_IVTV=$_vidix_drv_ivtv
