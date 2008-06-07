@@ -823,6 +823,7 @@ void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
   hl->sy = hlev.sy;
   hl->ex = hlev.ex;
   hl->ey = hlev.ey;
+  hl->palette = hlev.palette;
 }
 
 void mp_dvdnav_switch_title (stream_t *stream, int title) {

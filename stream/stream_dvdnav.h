@@ -13,6 +13,7 @@ typedef struct {
 typedef struct {
   uint16_t sx, sy;
   uint16_t ex, ey;
+  uint32_t palette;
 } nav_highlight_t;
 
 int dvdnav_number_of_subs(stream_t *stream);
