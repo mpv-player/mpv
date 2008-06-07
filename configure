@@ -4241,6 +4241,15 @@ if test "$_vidix" = yes ; then
     eval _vidix_drv_${driver}=yes
     eval _def_vidix_drv_${driver}=\"\#define CONFIG_VIDIX_DRV_${uc_driver} 1\"
   done
+
+  echocheck "VIDIX PCI device name database"
+  echores "$_vidix_pcidb"
+  if test "$_vidix_pcidb" = yes ; then
+    _vidix_pcidb_val=1
+  else
+    _vidix_pcidb_val=0
+  fi
+
 else
   _novomodules="cvidix $_novomodules"
 fi
@@ -4257,14 +4266,6 @@ if test "$_vidix" = yes && test "$_x11" = yes; then
   _vomodules="xvidix $_vomodules"
 else
   _novomodules="xvidix $_novomodules"
-fi
-
-echocheck "VIDIX PCI device name database"
-echores "$_vidix_pcidb"
-if test "$_vidix_pcidb" = yes ; then
-  _vidix_pcidb_val=1
-else
-  _vidix_pcidb_val=0
 fi
 
 echocheck "/dev/mga_vid"
