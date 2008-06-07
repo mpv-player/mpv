@@ -778,7 +778,7 @@ VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
                   vidix/pci_names.h vidix/pci_vendors.h
 
 $(VIDIX_PCI_FILES): vidix/pci.db vidix/pci_db2c.awk
-	LC_ALL=C awk -f vidix/pci_db2c.awk $< $(VIDIX_PCIDB)
+	awk -f vidix/pci_db2c.awk $< $(VIDIX_PCIDB)
 
 VIDIX_DEPS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.d))
 VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
