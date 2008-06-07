@@ -826,7 +826,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 
 #ifdef USE_DVDNAV
 	    else if (mpctx->stream->type == STREAMTYPE_DVDNAV)
-		dvdnav_lang_from_aid(mpctx->stream, audio_id, lang);
+		mp_dvdnav_lang_from_aid(mpctx->stream, audio_id, lang);
 #endif
 	    *(char **) arg = malloc(64);
 	    snprintf(*(char **) arg, 64, "(%d) %s", audio_id, lang);
@@ -1342,7 +1342,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
 	    if (vo_spudec && dvdsub_id >= 0) {
 		unsigned char lang[3];
-		if (dvdnav_lang_from_sid(mpctx->stream, dvdsub_id, lang)) {
+		if (mp_dvdnav_lang_from_sid(mpctx->stream, dvdsub_id, lang)) {
 		    snprintf(*(char **) arg, 63, "(%d) %s", dvdsub_id, lang);
 		    return M_PROPERTY_OK;
 		}

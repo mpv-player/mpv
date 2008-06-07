@@ -3212,12 +3212,12 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 #ifdef USE_DVDNAV
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
-  if(audio_id==-1) audio_id=dvdnav_aid_from_lang(mpctx->stream,audio_lang);
+  if(audio_id==-1) audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,audio_lang);
   if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=-1;
-  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
+  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=mp_dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
   // setup global sub numbering
   mpctx->global_sub_indices[SUB_SOURCE_DEMUX] = mpctx->global_sub_size; // the global # of the first demux-specific sub.
-  mpctx->global_sub_size += dvdnav_number_of_subs(mpctx->stream);
+  mpctx->global_sub_size += mp_dvdnav_number_of_subs(mpctx->stream);
   current_module=NULL;
 }
 #endif

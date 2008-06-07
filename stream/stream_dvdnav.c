@@ -682,12 +682,12 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
 }
 
 /**
- * \brief dvdnav_aid_from_lang() returns the audio id corresponding to the language code 'lang'
+ * \brief mp_dvdnav_aid_from_lang() returns the audio id corresponding to the language code 'lang'
  * \param stream: - stream pointer
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
  * \return -1 on error, current subtitle id if successful
  */
-int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
+int mp_dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv = stream->priv;
   int k;
   uint8_t format, lg;
@@ -722,13 +722,13 @@ int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
 }
 
 /**
- * \brief dvdnav_lang_from_aid() assigns to buf the language corresponding to audio id 'aid'
+ * \brief mp_dvdnav_lang_from_aid() assigns to buf the language corresponding to audio id 'aid'
  * \param stream: - stream pointer
  * \param sid: physical subtitle id
  * \param buf: buffer to contain the 2-chars language string
  * \return 0 on error, 1 if successful
  */
-int dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
+int mp_dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
   uint8_t lg;
   uint16_t lang;
   dvdnav_priv_t * priv = stream->priv;
@@ -747,12 +747,12 @@ int dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
 
 
 /**
- * \brief dvdnav_sid_from_lang() returns the subtitle id corresponding to the language code 'lang'
+ * \brief mp_dvdnav_sid_from_lang() returns the subtitle id corresponding to the language code 'lang'
  * \param stream: - stream pointer
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
  * \return -1 on error, current subtitle id if successful
  */
-int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
+int mp_dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv = stream->priv;
   uint8_t lg, k;
   uint16_t lang, lcode;
@@ -774,13 +774,13 @@ int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
 }
 
 /**
- * \brief dvdnav_lang_from_sid() assigns to buf the language corresponding to subtitle id 'sid'
+ * \brief mp_dvdnav_lang_from_sid() assigns to buf the language corresponding to subtitle id 'sid'
  * \param stream: - stream pointer
  * \param sid: physical subtitle id
  * \param buf: buffer to contain the 2-chars language string
  * \return 0 on error, 1 if successful
  */
-int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
+int mp_dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
     uint8_t lg;
     uint16_t lang;
     dvdnav_priv_t *priv = stream->priv;
@@ -795,11 +795,11 @@ int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
 }
 
 /**
- * \brief dvdnav_number_of_subs() returns the count of available subtitles
+ * \brief mp_dvdnav_number_of_subs() returns the count of available subtitles
  * \param stream: - stream pointer
  * \return 0 on error, something meaningful otherwise
  */
-int dvdnav_number_of_subs(stream_t *stream) {
+int mp_dvdnav_number_of_subs(stream_t *stream) {
   dvdnav_priv_t * priv = stream->priv;
   uint8_t lg, k, n=0;
 
