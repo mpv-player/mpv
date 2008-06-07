@@ -639,11 +639,6 @@ int vidix_preinit(const char *drvname,vo_functions_t *server)
   int err;
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vosub_vidix: vidix_preinit(%s) was called\n",drvname); }
-	if(vdlGetVersion() != VIDIX_VERSION)
-	{
-	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary);
-	  return -1;
-	}
 
 	vidix_handler = vdlOpen(drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
 				TYPE_OUTPUT,

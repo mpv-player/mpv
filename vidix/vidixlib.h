@@ -74,9 +74,6 @@ typedef struct VDXContext {
 
 typedef VDXContext * VDL_HANDLE;
 
-			/* returns library version */
-unsigned   vdlGetVersion( void );
-
 			/* Opens corresponded video driver and returns handle
 			   of associated stream.
 			   path - specifies path where drivers are located.

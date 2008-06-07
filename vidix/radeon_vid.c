@@ -1297,8 +1297,6 @@ static int radeon_init(void)
 {
   int err;
 
-  if(verbosity > 0) printf("[radeon_vid] version %d\n", VIDIX_VERSION);
-
   if(!probed) 
   {
     printf(RADEON_MSG" Driver was not probed but is being initializing\n");

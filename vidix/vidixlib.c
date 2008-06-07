@@ -44,11 +44,6 @@
 #include "libavutil/common.h"
 #include "mpbswap.h"
 
-extern unsigned int  vdlGetVersion( void )
-{
-   return VIDIX_VERSION;
-}
-
 VDL_HANDLE vdlOpen(const char *name,unsigned cap,int verbose)
 {
   VDXContext *ctx;

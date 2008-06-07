@@ -40,8 +40,6 @@
 extern "C" {
 #endif
 
-#define VIDIX_VERSION 100
-
 #define PROBE_NORMAL    0 /* normal probing */
 #define PROBE_FORCE     1 /* ignore device_id but recognize device if it's known */
   
