@@ -212,7 +212,7 @@ static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,in
     return 0;
 }
 
-uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled);
     return -1;
@@ -230,13 +230,13 @@ static uint32_t  vidix_draw_image(mp_image_t *mpi){
     return VO_TRUE;
 }
 
-uint32_t vidix_draw_frame(uint8_t *image[])
+static uint32_t vidix_draw_frame(uint8_t *image[])
 {
   mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled);
   return -1;
 }
 
-void     vidix_flip_page(void)
+static void     vidix_flip_page(void)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vosub_vidix: vidix_flip_page() was called\n"); }
@@ -297,7 +297,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     }
 }
 
-void     vidix_draw_osd(void)
+static void     vidix_draw_osd(void)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vosub_vidix: vidix_draw_osd() was called\n"); }

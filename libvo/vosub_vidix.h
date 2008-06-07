@@ -27,11 +27,6 @@ void     vidix_term( void );
 uint32_t vidix_control(uint32_t request, void *data, ...);
 uint32_t vidix_query_fourcc(uint32_t fourcc);
 
-uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y);
-uint32_t vidix_draw_frame(uint8_t *src[]);
-void     vidix_flip_page(void);
-void     vidix_draw_osd(void);
-
 #include "vidix/vidix.h"
 /* graphic keys */
 int vidix_grkey_support(void);
