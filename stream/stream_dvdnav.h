@@ -17,6 +17,7 @@ typedef struct {
 } nav_highlight_t;
 
 int mp_dvdnav_number_of_subs(stream_t *stream);
+int mp_dvdnav_aid_from_audio_num(stream_t *stream, int audio_num);
 int mp_dvdnav_aid_from_lang(stream_t *stream, unsigned char *language);
 int mp_dvdnav_lang_from_aid(stream_t *stream, int id, unsigned char *buf);
 int mp_dvdnav_sid_from_lang(stream_t *stream, unsigned char *language);
