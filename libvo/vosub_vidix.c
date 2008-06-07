@@ -644,15 +644,10 @@ int vidix_preinit(const char *drvname,vo_functions_t *server)
 	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary);
 	  return -1;
 	}
-#ifndef __MINGW32__
+
 	vidix_handler = vdlOpen(drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
 				TYPE_OUTPUT,
 				verbose);
-#else
-	vidix_handler = vdlOpen(drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
-				TYPE_OUTPUT,
-				verbose);
-#endif              
               
 	if(vidix_handler == NULL)
 	{
