@@ -287,7 +287,7 @@ ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mp
 
 <para>
 Fonts should have an appropriate <filename>font.desc</filename> file
-which maps unicode font positions to the actual code page of the
+which maps Unicode font positions to the actual code page of the
 subtitle text. Another solution is to have UTF-8-encoded subtitles
 and use the <option>-utf8</option> option or give the subtitles
 file the same name as your video file with a <filename>.utf</filename>
@@ -301,7 +301,7 @@ extension and have it in the same directory as the video file.
 <title>OSD menu</title>
 
 <para>
-<application>MPlayer</application> has a completely user definiable
+<application>MPlayer</application> has a completely user-definable
 OSD Menu interface.
 </para>
 
@@ -368,7 +368,7 @@ There are three timing methods in <application>MPlayer</application>.
   but a properly set up kernel is required.
   If you are running kernel 2.4.19pre8 or later you can adjust the maximum RTC
   frequency for normal users through the <systemitem class="systemname">/proc
-  </systemitem> filesystem. Use one of the following two commands to
+  </systemitem> file system. Use one of the following two commands to
   enable RTC for normal users:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
   <screen>sysctl dev/rtc/max-user-freq=1024</screen>

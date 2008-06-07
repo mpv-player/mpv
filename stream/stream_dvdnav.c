@@ -25,12 +25,14 @@ typedef enum {
   NAV_FLAG_EOF                  = 1 << 0,  /* end of stream has been reached */
   NAV_FLAG_WAIT                 = 1 << 1,  /* wait event */
   NAV_FLAG_WAIT_SKIP            = 1 << 2,  /* wait skip disable */
-  NAV_FLAG_CELL_CHANGED         = 1 << 3,  /* cell change event */
+  NAV_FLAG_CELL_CHANGE          = 1 << 3,  /* cell change event */
   NAV_FLAG_WAIT_READ_AUTO       = 1 << 4,  /* wait read auto mode */
   NAV_FLAG_WAIT_READ            = 1 << 5,  /* suspend read from stream */
   NAV_FLAG_VTS_DOMAIN           = 1 << 6,  /* vts domain */
   NAV_FLAG_SPU_SET              = 1 << 7,  /* spu_clut is valid */
   NAV_FLAG_STREAM_CHANGE        = 1 << 8,  /* title, chapter, audio or SPU */
+  NAV_FLAG_AUDIO_CHANGE         = 1 << 9,  /* audio stream change event */
+  NAV_FLAG_SPU_CHANGE           = 1 << 10, /* spu stream change event */
 } dvdnav_state_t;
 
 typedef struct {
@@ -331,7 +333,9 @@ static int fill_buffer(stream_t *s, char *but, int len)
           int tit = 0, part = 0;
           dvdnav_vts_change_event_t *vts_event = (dvdnav_vts_change_event_t *)s->buffer;
           mp_msg(MSGT_CPLAYER,MSGL_INFO, "DVDNAV, switched to title: %d\r\n", vts_event->new_vtsN);
-          priv->state |= NAV_FLAG_CELL_CHANGED;
+          priv->state |= NAV_FLAG_CELL_CHANGE;
+          priv->state |= NAV_FLAG_AUDIO_CHANGE;
+          priv->state |= NAV_FLAG_SPU_CHANGE;
           priv->state &= ~NAV_FLAG_WAIT_SKIP;
           priv->state &= ~NAV_FLAG_WAIT;
           s->end_pos = 0;
@@ -347,7 +351,9 @@ static int fill_buffer(stream_t *s, char *but, int len)
           break;
         }
         case DVDNAV_CELL_CHANGE: {
-          priv->state |= NAV_FLAG_CELL_CHANGED;
+          priv->state |= NAV_FLAG_CELL_CHANGE;
+          priv->state |= NAV_FLAG_AUDIO_CHANGE;
+          priv->state |= NAV_FLAG_SPU_CHANGE;
           priv->state &= ~NAV_FLAG_WAIT_SKIP;
           priv->state &= ~NAV_FLAG_WAIT;
           if (priv->state & NAV_FLAG_WAIT_READ_AUTO)
@@ -359,6 +365,12 @@ static int fill_buffer(stream_t *s, char *but, int len)
           }
           dvdnav_get_highlight (priv, 1);
         }
+        break;
+        case DVDNAV_AUDIO_STREAM_CHANGE:
+          priv->state |= NAV_FLAG_AUDIO_CHANGE;
+        break;
+        case DVDNAV_SPU_STREAM_CHANGE:
+          priv->state |= NAV_FLAG_SPU_CHANGE;
         break;
       }
   }
@@ -669,16 +681,58 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
   priv->mousey = y;
 }
 
+static int mp_dvdnav_get_aid_from_format (stream_t *stream, int index, uint8_t lg) {
+  dvdnav_priv_t * priv = stream->priv;
+  uint8_t format;
+  
+  format = dvdnav_audio_stream_format(priv->dvdnav, lg);
+  switch(format) {
+  case DVDNAV_FORMAT_AC3:
+    return (index + 128);
+  case DVDNAV_FORMAT_DTS:
+    return (index + 136);
+  case DVDNAV_FORMAT_LPCM:
+    return (index + 160);
+  case DVDNAV_FORMAT_MPEGAUDIO:
+    return index;
+  default:
+    return -1;
+  }
+
+  return -1;
+}
+
 /**
- * \brief dvdnav_aid_from_lang() returns the audio id corresponding to the language code 'lang'
+ * \brief mp_dvdnav_aid_from_audio_num() returns the audio id corresponding to the logical number
+ * \param stream: - stream pointer
+ * \param audio_num: - logical number
+ * \return -1 on error, current subtitle id if successful
+ */
+int mp_dvdnav_aid_from_audio_num(stream_t *stream, int audio_num) {
+  dvdnav_priv_t * priv = stream->priv;
+  int k;
+  uint8_t lg;
+
+  for(k=0; k<32; k++) {
+    lg = dvdnav_get_audio_logical_stream(priv->dvdnav, k);
+    if (lg == 0xff) continue;
+    if (lg != audio_num) continue;
+
+    return mp_dvdnav_get_aid_from_format (stream, k, lg);
+  }
+  return -1;
+}
+
+/**
+ * \brief mp_dvdnav_aid_from_lang() returns the audio id corresponding to the language code 'lang'
  * \param stream: - stream pointer
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
  * \return -1 on error, current subtitle id if successful
  */
-int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
+int mp_dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv = stream->priv;
   int k;
-  uint8_t format, lg;
+  uint8_t lg;
   uint16_t lang, lcode;;
 
   while(language && strlen(language)>=2) {
@@ -687,21 +741,8 @@ int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
       lg = dvdnav_get_audio_logical_stream(priv->dvdnav, k);
       if(lg == 0xff) continue;
       lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
-      if(lang != 0xFFFF && lang == lcode) {
-        format = dvdnav_audio_stream_format(priv->dvdnav, lg);
-        switch(format) {
-          case DVDNAV_FORMAT_AC3:
-            return k+128;
-          case DVDNAV_FORMAT_DTS:
-            return k+136;
-          case DVDNAV_FORMAT_LPCM:
-            return k+160;
-          case DVDNAV_FORMAT_MPEGAUDIO:
-            return k;
-          default:
-            return -1;
-        }
-      }
+      if(lang != 0xFFFF && lang == lcode)
+        return mp_dvdnav_get_aid_from_format (stream, k, lg);
     }
     language += 2;
     while(language[0]==',' || language[0]==' ') ++language;
@@ -710,13 +751,13 @@ int dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
 }
 
 /**
- * \brief dvdnav_lang_from_aid() assigns to buf the language corresponding to audio id 'aid'
+ * \brief mp_dvdnav_lang_from_aid() assigns to buf the language corresponding to audio id 'aid'
  * \param stream: - stream pointer
  * \param sid: physical subtitle id
  * \param buf: buffer to contain the 2-chars language string
  * \return 0 on error, 1 if successful
  */
-int dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
+int mp_dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
   uint8_t lg;
   uint16_t lang;
   dvdnav_priv_t * priv = stream->priv;
@@ -735,12 +776,12 @@ int dvdnav_lang_from_aid(stream_t *stream, int aid, unsigned char *buf) {
 
 
 /**
- * \brief dvdnav_sid_from_lang() returns the subtitle id corresponding to the language code 'lang'
+ * \brief mp_dvdnav_sid_from_lang() returns the subtitle id corresponding to the language code 'lang'
  * \param stream: - stream pointer
  * \param lang: 2-characters language code[s], eventually separated by spaces of commas
  * \return -1 on error, current subtitle id if successful
  */
-int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
+int mp_dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv = stream->priv;
   uint8_t lg, k;
   uint16_t lang, lcode;
@@ -762,13 +803,13 @@ int dvdnav_sid_from_lang(stream_t *stream, unsigned char *language) {
 }
 
 /**
- * \brief dvdnav_lang_from_sid() assigns to buf the language corresponding to subtitle id 'sid'
+ * \brief mp_dvdnav_lang_from_sid() assigns to buf the language corresponding to subtitle id 'sid'
  * \param stream: - stream pointer
  * \param sid: physical subtitle id
  * \param buf: buffer to contain the 2-chars language string
  * \return 0 on error, 1 if successful
  */
-int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
+int mp_dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
     uint8_t lg;
     uint16_t lang;
     dvdnav_priv_t *priv = stream->priv;
@@ -783,11 +824,11 @@ int dvdnav_lang_from_sid(stream_t *stream, int sid, unsigned char *buf) {
 }
 
 /**
- * \brief dvdnav_number_of_subs() returns the count of available subtitles
+ * \brief mp_dvdnav_number_of_subs() returns the count of available subtitles
  * \param stream: - stream pointer
  * \return 0 on error, something meaningful otherwise
  */
-int dvdnav_number_of_subs(stream_t *stream) {
+int mp_dvdnav_number_of_subs(stream_t *stream) {
   dvdnav_priv_t * priv = stream->priv;
   uint8_t lg, k, n=0;
 
@@ -823,6 +864,7 @@ void mp_dvdnav_get_highlight (stream_t *stream, nav_highlight_t *hl) {
   hl->sy = hlev.sy;
   hl->ex = hlev.ex;
   hl->ey = hlev.ey;
+  hl->palette = hlev.palette;
 }
 
 void mp_dvdnav_switch_title (stream_t *stream, int title) {
@@ -896,12 +938,48 @@ void mp_dvdnav_read_wait (stream_t *stream, int mode, int automode) {
  */
 int mp_dvdnav_cell_has_changed (stream_t *stream, int clear) {
   dvdnav_priv_t *priv = stream->priv;
-  if (!(priv->state & NAV_FLAG_CELL_CHANGED))
+  if (!(priv->state & NAV_FLAG_CELL_CHANGE))
     return 0;
   if (clear) {
-    priv->state &= ~NAV_FLAG_CELL_CHANGED;
+    priv->state &= ~NAV_FLAG_CELL_CHANGE;
     priv->state |= NAV_FLAG_STREAM_CHANGE;
   }
+  return 1;
+}
+
+/**
+ * \brief Check if audio has changed
+ * \param stream: - stream pointer
+ * \param clear : - if true, then clear audio change flag
+ * \return 1 if audio has changed
+ */
+int mp_dvdnav_audio_has_changed (stream_t *stream, int clear) {
+  dvdnav_priv_t *priv = stream->priv;
+
+  if (!(priv->state & NAV_FLAG_AUDIO_CHANGE))
+    return 0;
+
+  if (clear)
+    priv->state &= ~NAV_FLAG_AUDIO_CHANGE;
+
+  return 1;
+}
+
+/**
+ * \brief Check if SPU has changed
+ * \param stream: - stream pointer
+ * \param clear : - if true, then clear spu change flag
+ * \return 1 if spu has changed
+ */
+int mp_dvdnav_spu_has_changed (stream_t *stream, int clear) {
+  dvdnav_priv_t *priv =  stream->priv;
+
+  if (!(priv->state & NAV_FLAG_SPU_CHANGE))
+    return 0;
+
+  if (clear)
+    priv->state &= ~NAV_FLAG_SPU_CHANGE;
+  
   return 1;
 }
 

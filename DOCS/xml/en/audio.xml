@@ -24,7 +24,7 @@ efficient as <application>MPlayer</application>'s.
 
 <para>
 Using <application>MPlayer</application> with a properly written audio
-driver will never result in A/V desyncs related to the audio, except
+driver will never result in A/V desynchronisation related to the audio, except
 only with very badly created files (check the man page for workarounds).
 </para>
 

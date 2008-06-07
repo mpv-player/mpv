@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r26460
+.\" sync with en/mplayer.1 r26909
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -162,7 +162,7 @@ tivo://主机/[list|llist|fsid]
 通过许多原生的和可执行的编解码器的支持, 它能播放绝大部分的 MPEG/\:VOB, AVI, 
 ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, Ogg/\:OGM, MKV, VIVO, FLI, NuppelVideo, 
 yuv4mpeg, FILM 和 RoQ 文件。
-你还能观看 VCD, SVCD, DVD, 3ivx, DivX 3/4/5, 甚至 WMV 电影。
+你还能观看 VCD、SVCD、DVD、3ivx、DivX 3/4/5、WMV 甚至 H.264 格式的电影。
 .PP
 MPlayer 广泛地支持音视频输出驱动。
 它不仅可以使用 X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, 
@@ -235,6 +235,8 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 按一下暂停回放, 每按一下就播放一帧(直到按其它键取消步进)。
 .IPs "q / ESC"
 停止播放和退出。
+.IPs "U\ \ \ \ "
+暂停播放（并且当未使用 \-idle 时退出）。
 .IPs "+ 和 \-"
 调整音频延迟增加/减少 0.1 秒。
 .IPs "/ 和 *"
@@ -900,6 +902,8 @@ mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .IPs conf=<文件名>
 指定输入配置文件而不是默认的 ~/\:.mplayer/\:input.conf。
 如果没有给出完全路径名, 将假设是 ~/\:.mplayer/\:<文件名>。
+.IPs ar-dev=<设备>
+用作为苹果 IR 遥控器的设置（默认值是自动侦测，仅用于 Linux）。
 .IPs ar-delay
 在开始自动重复一个键之前等待多少毫秒 (0 代表停用)。
 .IPs ar-rate
@@ -996,6 +1000,10 @@ n 大小的 FIFO 能容纳 (n\-1) 缓冲事件。
 .TP
 .B \-nolirc
 关闭支持 LIRC。
+.
+.TP
+.B \-noar
+关闭对于苹果 IR 遥控器的支持。
 .
 .TP
 .B \-nomouseinput
@@ -1463,9 +1471,9 @@ IPv4 自动地作为备用。
 .
 .TP
 .B \-psprobe <字节所在位置>
-当播放MPEG-PS流时，此选项让你设定你希望MPlayer查看多少字节以确认所要
-使用的视频编/解码器。 
-在播放含有H.264流的EVO文件时需要此选项。
+当播放 MPEG-PS 或 MPEG-PES 流时，此选项让你设定你希望 MPlayer 查看多少字节以确认
+所要使用的视频编/解码器。 
+在播放含有 H.264 流的 EVO 或 VDR 文件时需要此选项。
 .
 .TP
 .B \-pvr <选项1:选项2:...> (仅适用于 PVR)
@@ -3125,6 +3133,8 @@ ggi 和 gl2 的都支持此功能。
 的 \-v 选项并注意开头有标签 [xv common] 的行。
 .PD 0
 .RSs
+.IPs adaptor=<数值>
+选择一个特定的 XVideo 适配器（请检查 xvinfo 的结果）。
 .IPs port=<数值>
 选择指定的 XVideo 端口。
 .IPs ck=<cur|use|set>
@@ -3358,14 +3368,23 @@ OpenGL 视频输出驱动, 简版。
 视频尺寸一定小于 OpenGL 实现的最大纹理尺寸。
 瞄准能与甚至最基本的 OpenGL 实现一起工作, 
 但也利用较新的扩展, 允许支持更多的色彩空间和直接渲染。
-既然能对高清晰度提供
-.B 大
-的提速, 请使用 \-dr 如果你的 OpenGL 实现能一同工作。
+要获取最佳的速度，请尝试类似于
+.br
+\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+.br
+的选项。
 此代码执行极少的检测, 所以如果某个特性不工作, 
 可能是因为你的卡或 OpenGL 实现不支持, 尽管连任何错误消息都没给你。
 使用 glxinfo 或类似的工具以显示支持的 OpenGL 扩展。
 .PD 0
 .RSs
+.IPs (no)ati\-hack
+当使用了 PBO 时（当使用了 \-dr 或强制使用 \-pbo 时），AIT 驱动可能输出损坏的图像。
+该选项修正这一问题，代价是多使用了一点内存。
+.IPs (no)force\-pbo
+总是使用 PBO 传输纹理，即使这需要额外的复制操作。
+当前该选项对于 NVidia 驱动能提升一点速度，而对于 ATI 驱动则是大大提升。
+可能需要 \-noslices 和 ati\-hack 子选项以使其正常工作。
 .IPs (no)scaled-osd
 当窗口大小改变时, 改变 OSD 的行为方式 (默认是: 停用)。
 启用时, 行为就像其他的视频输出驱动, 对固定大小的字体更好。
@@ -3499,8 +3518,9 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 .
 .TP
 .B "gl2\ \ \ \ "
-OpenGL 视频输出驱动, 第二代。
-支持 OSD 和大于最大纹理尺寸的视频。
+OpenGL 视频输出驱动的修改版。
+支持大于最大纹理尺寸的视频，但是缺少许多 GL 驱动的高级功能和优化选项，并且以后也
+不大可能扩展功能。
 .PD 0
 .RSs
 .IPs (no)glfinish
@@ -4164,6 +4184,8 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 如果 <宽度> 指定了, 就使用了低分辨率解码, 
 只要视频的宽度宽过(is major than)或等于 <宽度>。
 .RE
+.IPs "o\ \ \ \ "
+FIXME：没有说明文档
 .IPs "sb=<数值> (仅用于 MPEG-2)"
 跳过宏块底部的制定行数。
 .IPs "st=<数值> (仅用于 MPEG-2)"
@@ -7236,7 +7258,7 @@ Windows Media Video, version 2（也就是WMV8）
 .
 .TP
 .B vqmin=<1\-31>
-最低量化参数（第1/2阶段编码）
+最低量化参数
 .RSs
 .IPs 1
 不推荐（文件大很多，质量差别不大，而且有奇怪的副作用：msmpeg4、h263的质量会很差，
@@ -7286,7 +7308,7 @@ Lavc很少会使用低于vqmin值的量化参数。
 .
 .TP
 .B vqmax=<1\-31>
-最大量化参数（第1/2阶段编码），10\-31应该是一个合理的范围（默认值：31）。
+最大量化参数，10\-31应该是一个合理的范围（默认值：31）。
 .
 .TP
 .B mbqmin=<1\-31>
@@ -7298,7 +7320,7 @@ Lavc很少会使用低于vqmin值的量化参数。
 .
 .TP
 .B vqdiff=<1\-31>
-连续的I或P帧之间最大的量化参数差别（第1/2阶段编码）（默认值：3）
+连续的I或P帧之间最大的量化参数差别（默认值：3）
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -7541,7 +7563,7 @@ huffyuv：
 .
 .TP
 .B vbitrate=<value>
-指定比特率（第1/2阶段编码）（默认值：800）。
+指定比特率（默认值：800）。
 .br
 .I 警告：
 1kbit = 1000 bits
@@ -7567,17 +7589,17 @@ vratetol在第二阶段编码中不应设得太大，否则当设置了vrc_(min|
 .
 .TP
 .B vrc_maxrate=<value>
-最大比特率，单位为kbit/\:sec（第1/2阶段编码）
+最大比特率，单位为kbit/\:sec
 （默认值：0，无限制）
 .
 .TP
 .B vrc_minrate=<value>
-最小比特率，单位为kbit/\:sec（第1/2阶段编码）
+最小比特率，单位为kbit/\:sec
 （默认值：0，无限制）
 .
 .TP
 .B vrc_buf_size=<value>
-缓冲大小，单位为kbit（第1/2阶段编码）。
+缓冲大小，单位为kbit。
 在MPEG-1/2中该选项同时设置了vbv缓冲的大小，对于VCD请使用327，对于SVCD使用917，而
 DVD使用1835。
 .
@@ -7601,19 +7623,19 @@ DVD使用1835。
 .
 .TP
 .B vb_qfactor=<\-31.0\-31.0>
-B帧和非B帧间的量化参数因数（第1/2阶段编码）（默认值1.25）
+B帧和非B帧间的量化参数因数（默认值1.25）
 .
 .TP
 .B vi_qfactor=<\-31.0\-31.0>
-I帧和非I帧间的量化参数因数（第1/2阶段编码）（默认值0.8）
+I帧和非I帧间的量化参数因数（默认值0.8）
 .
 .TP
 .B vb_qoffset=<\-31.0\-31.0>
-B帧和非B帧间的量化参数偏移量（第1/2阶段编码）（默认值1.25）
+B帧和非B帧间的量化参数偏移量（默认值1.25）
 .
 .TP
 .B vi_qoffset=<\-31.0\-31.0>
-（第1/2阶段编码）（默认值0.0）
+（默认值0.0）
 .br
 如果v{b|i}_qfactor > 0
 .br
@@ -7648,7 +7670,7 @@ lmin= <I/P帧量化参数>:lmax= <I/P帧量化参数>:vb_qfactor= <B帧量化参
 .
 .TP
 .B vqcomp=<0.0\-1.0>
-量化参数压缩，vrc_eq选项依赖于该选项（第1/2阶段编码）（默认值：0.5）。
+量化参数压缩，vrc_eq选项依赖于该选项（默认值：0.5）。
 例如，假设使用了默认的码率控制方程式，如果vqcomp=1.0，那么码率控制过程中将分配给
 每个帧足够的比特数，以使它们在同一个量化参数下编码。
 如果vqcomp=0.0，那么码率控制中将分配给每个帧相同的比特数，也就是严格的CBR模式。
@@ -7658,7 +7680,7 @@ lmin= <I/P帧量化参数>:lmax= <I/P帧量化参数>:vb_qfactor= <B帧量化参
 .
 .TP
 .B vrc_eq=<equation>
-主码率控制方程式（第1/2阶段编码）
+主码率控制方程式
 .RE
 .RSs
 .IPs "1\ \ \ \ "
@@ -7731,7 +7753,7 @@ B帧中的平均非内部纹理复杂度
 .
 .TP
 .B vrc_override=<options>
-用户指定的针于影片特定部分（尾声、演职员表……）的质量值（第1/2阶段编码）。
+用户指定的针于影片特定部分（尾声、演职员表……）的质量值。
 选项有<start-frame>、<end-frame>、<quality>[/<start-frame>,
 <end-frame>, <quality>[/...]]：
 .PD 0
@@ -7753,7 +7775,7 @@ B帧中的平均非内部纹理复杂度
 .
 .TP
 .B vqsquish=<0|1>
-指定如何使量化参数保持在qmin和qmax之间（第1/2阶段编码）。
+指定如何使量化参数保持在qmin和qmax之间。
 .PD 0
 .RSs
 .IPs 0
@@ -8480,6 +8502,10 @@ FIXME：为这个选项写说明文档。
 .TP
 .B skip_threshold=<0\-1000000>
 FIXME：为这个选项写说明文档。
+.
+.TP
+.B "o\ \ \ \ \ \ "
+FIXME：没有说明文档
 .
 .
 .SS nuv（\-nuvopts）
@@ -9440,6 +9466,25 @@ denoise3d或hqdn3d之类的视频滤镜来滤除噪声。
 有用值的范围是<\-2\-2>（默认值：0）。
 .
 .TP
+.B aq_mode=<0\-2>
+定议自适应量化模式（AQ）如何分配比特：
+.PD 0
+.RSs
+.IPs 0
+禁用
+.IPs 1
+避免在帧间转移比特。
+.IPs 2
+在帧间转移比特（依据默认方式）。
+.RE
+.PD 1
+.
+.TP
+.B aq_strength=<positive float value>
+控制自适应量化模式（AQ）在平坦和有纹理的区域能减少多少块效应和模糊（默认值：1.0）。
+值为 0.5 将导致较弱的 AQ 和较少的细节，而值为 1.5 则能产生较强的 AQ 和更多的细节。
+.
+.TP
 .B cqm=<flat|jvt|<filename>>
 要么使用一个预先定义好的自定义量化矩阵，要么加一个JM格式的矩阵文件。
 .PD 0
@@ -9714,6 +9759,10 @@ PAL至NTSC的电视图像化处理
 强制使用一个特定的 libav 格式库的分离器。
 .
 .TP
+.B "o\ \ \ \ \ \ "
+FIXME：没有说明文档
+.
+.TP
 .B probesize=<value>
 在侦测阶段所探测的最大数据量。
 在MPEG-TS的情况下，这个值指定了所扫描TS包的最大个数。
@@ -9784,6 +9833,10 @@ Sony 数字视频容器格式
 .B preload=<distance>
 当前只对MPEG[12]有意义：单位为秒，对于任意出现的流，输出流参照计时器（SCR）和解
 码时间戳（DTS）间的初始差距（流分离至解码间的延迟）。
+.
+.TP
+.B "o\ \ \ \ \ \ "
+FIXME：没有说明文档
 .
 .
 .

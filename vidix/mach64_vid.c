@@ -476,7 +476,6 @@ static int mach64_init(void)
     printf("[mach64] Driver was not probed but is being initializing\n");
     return EINTR;
   }
-  if(verbosity > 0) printf("[mach64] version %d\n", VIDIX_VERSION);
   
   if((mach64_mmio_base = map_phys_mem(pci_info.base2,0x1000))==(void *)-1) return ENOMEM;
   mach64_wait_for_idle();

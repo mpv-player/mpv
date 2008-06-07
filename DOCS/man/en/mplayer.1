@@ -7376,7 +7376,7 @@ You can specify codec specific encoding parameters using the following
 syntax:
 .
 .TP
-.B \-<codec>opts <option1[=value],option2,...>
+.B \-<codec>opts <option1[=value1]:option2[=value2]:...>
 .
 .PP
 Where <codec> may be: lavc, xvidenc, lame, toolame, twolame,
@@ -10692,6 +10692,12 @@ FIXME: Document this.
 .TP
 .B VIDIX_CRT
 FIXME: Document this.
+.
+.TP
+.B VIDIXIVTVALPHA
+Set this to 'disable' in order to stop the VIDIX driver from controlling
+alphablending settings.
+You can then manipulate it yourself with 'ivtvfbctl'.
 .
 .SS osdep:
 .

@@ -68,7 +68,6 @@ static long pci_config_read_long(
           int func, 
           unsigned cmd)
 {
-    unsigned long config_cmd;
     pcic_t p;
     
     p.address = cmd;

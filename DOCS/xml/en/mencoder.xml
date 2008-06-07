@@ -300,7 +300,7 @@ You can use the <option>-chapter</option> option for this purpose.
 For example, <option>-chapter</option> <replaceable>1-4</replaceable>
 will only encode chapters 1 through 4 from the DVD.
 This is especially useful if you will be making a 1400 MB encode
-targetted for two CDs, since you can ensure the split occurs exactly
+targeted for two CDs, since you can ensure the split occurs exactly
 at a chapter boundary rather than in the middle of a scene.
 </para>
 
@@ -478,7 +478,7 @@ all passes are run with target bitrates that do not differ very much.
 <title>Rescaling movies</title>
 
 <para>
-Often the need to resize movie images' size emerges. Its reasons can be
+Often the need to resize movie images emerges. The reasons can be
 many: decreasing file size, network bandwidth, etc. Most people even do
 rescaling when converting DVDs or SVCDs to DivX AVI. If you wish to rescale,
 read the <link linkend="aspect">Preserving aspect ratio</link> section.

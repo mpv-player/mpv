@@ -1107,14 +1107,14 @@ menu entries.
 <varlistentry>
   <term><emphasis role="bold">evLoadSubtitle</emphasis></term>
   <listitem><para>
-  Loads a subtitle file (with the fileselector)
+  Loads a subtitle file (with the file selector).
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoadAudioFile</emphasis></term>
   <listitem><para>
-  Loads an audio file (with the fileselector)
+  Loads an audio file (with the file selector).
   </para></listitem>
 </varlistentry>
 

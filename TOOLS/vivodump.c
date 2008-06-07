@@ -10,6 +10,7 @@
 #include "libmpdemux/muxer.h"
 #include "libmpdemux/demuxer.h"
 
+/* linking hacks */
 char *info_name;
 char *info_artist;
 char *info_genre;
@@ -17,6 +18,10 @@ char *info_subject;
 char *info_copyright;
 char *info_sourceform;
 char *info_comment;
+
+char* out_filename = NULL;
+char* force_fourcc=NULL;
+char* passtmpfile="divx2pass.log";
 
 static const short h263_format[8][2] = {
     { 0, 0 },

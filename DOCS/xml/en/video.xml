@@ -193,9 +193,9 @@ xv support, but the card itself is very slow, so you better sell it.
 </para>
 
 <para>
-There is now a native framebuffer driver for S3 Virge cards similiar to 
+There is now a native framebuffer driver for S3 Virge cards similar to
 tdfxfb. Set up your framebuffer (e.g. append
-"<option>vga=792 video=vesa:mtrr</option>" to your kernel comand line) and use
+"<option>vga=792 video=vesa:mtrr</option>" to your kernel command line) and use
 <option>-vo s3fb</option> (<option>-vf yuy2</option> and <option>-dr</option>
 will also help).
 </para>
@@ -838,7 +838,7 @@ framebuffer, and don't ask for it, since it's not an
 
 <para>
 <systemitem>mga_vid</systemitem> is a combination of a video output driver and
-a Linux kernel module that utilitizes the Matrox G200/G400/G450/G550 video
+a Linux kernel module that utilizes the Matrox G200/G400/G450/G550 video
 scaler/overlay unit to perform YUV->RGB colorspace conversion and arbitrary
 video scaling.
 <systemitem>mga_vid</systemitem> has hardware VSYNC support with triple
@@ -1567,13 +1567,10 @@ Alternatively, you can use a special kernel module, like this:
   <filename class="directory">svgalib_helper</filename> dir, as root.
 </para></step>
 <step><para>
-  Move the <filename class="directory">svgalib_helper</filename> directory to
-  the <filename class="directory">vidix</filename> subdirectory of the
-  <application>MPlayer</application> source tree.
-</para></step>
-<step><para>
-  Remove the comment before the CFLAGS line containing the "svgalib_helper"
-  string from <filename class="directory">vidix/Makefile</filename>.
+  Then run <filename>configure</filename> again and pass the parameter
+  <option>--enable-svgalib_helper</option> as well as
+  <option>--with-extraincdir=/path/to/svgalib_helper/sources</option>,
+  adjusted to wherever you extracted svgalib_helper sources.
 </para></step>
 <step><para>
   Recompile.
@@ -1857,7 +1854,7 @@ have <command>scan</command> compile it for you.
 </para>
 
 <para>
-If you have more than one card type (e.g. Satellitar, Terrestrial, Cable and ATSC)
+If you have more than one card type (e.g. Satellite, Terrestrial, Cable and ATSC)
 you can save your channels files as
 <filename>~/.mplayer/channels.conf.sat</filename>,
 <filename>~/.mplayer/channels.conf.ter</filename>,
@@ -2245,7 +2242,7 @@ mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
 <para>
 Extra occurrences of <option>-zrcrop</option> invoke
 <emphasis>cinerama</emphasis> mode, i.e. you can distribute the movie over
-several TV's or beamers to create a larger screen.
+several TVs or beamers to create a larger screen.
 Suppose you have two beamers. The left one is connected to your
 Buz at <filename>/dev/video1</filename> and the right one is connected to
 your DC10+ at <filename>/dev/video0</filename>. The movie has a resolution
@@ -2337,7 +2334,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
     <emphasis role="bold">SLOW</emphasis>, and has
     <emphasis role="bold">Macrovision</emphasis> copy protection enabled
     (you can "workaround" Macrovision using this
-    <ulink url="http://avifile.sf.net/mgamacro.pl">perl script</ulink>).
+    <ulink url="http://avifile.sf.net/mgamacro.pl">Perl script</ulink>).
     </para>
   </listitem>
 </varlistentry>
@@ -2347,43 +2344,22 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
     <para>
     Using the <emphasis role="bold">matroxfb modules</emphasis> in the 2.4
     kernels. 2.2 kernels don't have the TV-out feature in them, thus unusable
-    for this. You have to enable ALL matroxfb-specific feature during
+    for this. You have to enable ALL matroxfb-specific features during
     compilation (except MultiHead), and compile them into
     <emphasis role="bold">modules</emphasis>!
-    You'll also need I2C enabled.
+    You'll also need to enable I2C and put the tools
+    <application>matroxset</application>, <application>fbset</application>
+    and <application>con2fb</application> in your path.
     </para>
 
     <procedure>
     <step><para>
-      Enter <filename class="directory">TVout</filename> and type
-      <command>./compile.sh</command>. Install
-      <filename>TVout/matroxset/matroxset</filename>
-      somewhere into your <envar>PATH</envar>.
+      Then load the <systemitem>matroxfb_Ti3026, matroxfb_maven, i2c-matroxfb,
+      matroxfb_crtc2</systemitem> modules into your kernel. Your text-mode
+      console will enter into framebuffer mode (no way back!).
     </para></step>
     <step><para>
-      If you don't have <command>fbset</command> installed, put
-      <filename>TVout/fbset/fbset</filename>
-      somewhere into your <envar>PATH</envar>.
-    </para></step>
-    <step><para>
-      If you don't have <command>con2fb</command> installed, put
-      <filename>TVout/con2fb/con2fb</filename>
-      somewhere into your <envar>PATH</envar>.
-    </para></step>
-    <step><para>
-      Then enter into the <filename class="directory">TVout/</filename>
-      directory in the <application>MPlayer</application> source, and execute
-      <filename>./modules</filename> as root. Your text-mode console will
-      enter into framebuffer mode (no way back!).
-    </para></step>
-    <step><para>
-      Next, EDIT and run the <filename>./matroxtv</filename> script. This will
-      present you to a very simple menu. Press <keycap>2</keycap> and
-      <keycap>Enter</keycap>. Now you should have the same picture on your
-      monitor, and TV. If the TV (PAL by default)
-      picture has some weird stripes on it, the script wasn't able to set the
-      resolution correctly (to 640x512 by default). Try other resolutions
-      from the menu and/or experiment with fbset.
+      Next, set up your monitor and TV to your liking using the above tools.
     </para></step>
     <step><para>
       Yoh. Next task is to make the cursor on tty1 (or whatever) to
@@ -2424,29 +2400,6 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
   </listitem>
 </varlistentry>
 </variablelist>
-
-<formalpara><title>Building a Matrox TV-out cable</title>
-<para>
-No one takes any responsibility, nor guarantee for any damage caused
-by this documentation.
-</para>
-</formalpara>
-
-<formalpara><title>Cable for G400</title>
-<para>
-The CRTC2 connector's fourth pin is the composite video signal. The
-ground are the sixth, seventh and eighth pins. (info contributed
-from Balázs Rácz)
-</para>
-</formalpara>
-
-<formalpara><title>Cable for G450</title>
-<para>
-The CRTC2 connector's first pin is the composite video signal. The
-ground are the fifth, sixth, seventh, and fifteenth (5, 6, 7, 15)
-pins. (info contributed from Balázs Kerekes)
-</para>
-</formalpara>
 </sect2>
 
 <!-- ********** -->
@@ -2477,6 +2430,32 @@ recommended for G400, see the section above.
 The necessary kernel patch and the detailed HOWTO is downloadable from
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="tv-out_matrox_cable">
+<title>Building a Matrox TV-out cable</title>
+<para>
+No one takes any responsibility, nor guarantee for any damage caused
+by this documentation.
+</para>
+
+<formalpara><title>Cable for G400</title>
+<para>
+The CRTC2 connector's fourth pin is the composite video signal. The
+ground are the sixth, seventh and eighth pins. (info contributed
+from Balázs Rácz)
+</para>
+</formalpara>
+
+<formalpara><title>Cable for G450</title>
+<para>
+The CRTC2 connector's first pin is the composite video signal. The
+ground are the fifth, sixth, seventh, and fifteenth (5, 6, 7, 15)
+pins. (info contributed from Balázs Kerekes)
+</para>
+</formalpara>
 </sect2>
 
 <!-- ********** -->

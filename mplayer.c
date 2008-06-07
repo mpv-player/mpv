@@ -2542,6 +2542,9 @@ static int read_keys(void *ctx, int fd)
 }
 
 
+/* This preprocessor directive is a hack to generate a mplayer-nomain.o object
+ * file for some tools to link against. */
+#ifndef DISABLE_MAIN
 int main(int argc,char* argv[]){
 
 
@@ -3237,12 +3240,12 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 #ifdef USE_DVDNAV
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
-  if(opts->audio_id==-1) opts->audio_id=dvdnav_aid_from_lang(mpctx->stream,audio_lang);
+  if(opts->audio_id==-1) opts->audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,audio_lang);
   if(dvdsub_lang && opts->sub_id==-2) opts->sub_id=-1;
-  if(dvdsub_lang && opts->sub_id==-1) opts->sub_id=dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
+  if(dvdsub_lang && opts->sub_id==-1) opts->sub_id=mp_dvdnav_sid_from_lang(mpctx->stream,dvdsub_lang);
   // setup global sub numbering
   mpctx->global_sub_indices[SUB_SOURCE_DEMUX] = mpctx->global_sub_size; // the global # of the first demux-specific sub.
-  mpctx->global_sub_size += dvdnav_number_of_subs(mpctx->stream);
+  mpctx->global_sub_size += mp_dvdnav_number_of_subs(mpctx->stream);
   current_module=NULL;
 }
 #endif
@@ -4068,3 +4071,4 @@ exit_player_with_rc(mpctx, MSGTR_Exit_eof, 0);
 
 return 1;
 }
+#endif /* DISABLE_MAIN */

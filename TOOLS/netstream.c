@@ -46,16 +46,18 @@
 /// Netstream packets def and some helpers
 #include "stream/netstream.h"
 
+// linking hacks
+char *info_name;
+char *info_artist;
+char *info_genre;
+char *info_subject;
+char *info_copyright;
+char *info_sourceform;
+char *info_comment;
 
-//Set some standard variables
-char* dvdsub_lang=NULL;
-char* audio_lang=NULL;
-int sub_justify=0;
-int identify=0;
-int dvdsub_id=0;
-int audio_id=0;
-int video_id=0;
-void af_fmt2str() {};
+char* out_filename = NULL;
+char* force_fourcc=NULL;
+char* passtmpfile="divx2pass.log";
 
 #ifdef __MINGW32__
 #define usleep sleep
@@ -367,46 +369,3 @@ int main(void) {
   }
   return main_loop(listen_fd);
 }
-
-
-
-//---- For libmpdemux
-
-float stream_cache_seek_min_percent=50.0;
-float stream_cache_min_percent=20.0;
-
-#include <libmpdemux/demuxer.h>
-#include <libmpdemux/stheader.h>
-
-// audio stream skip/resync functions requires only for seeking.
-// (they should be implemented in the audio codec layer)
-void skip_audio_frame(sh_audio_t *sh_audio){
-  sh_audio=NULL;
-}
-void resync_audio_stream(sh_audio_t *sh_audio){
-  sh_audio=NULL;
-}
-
-int mp_input_check_interrupt(int time){
-    if(time) usleep(time);
-    return 0;
-}
-
-// for libdvdread:
-#include "get_path.c"
-
-// linking hacks
-int stream_cache_size=0;
-int index_mode=0;
-
-// for demux_ogg:
-void* vo_sub=NULL;
-int vo_osd_changed(int new_value){ new_value++; return 0;}
-int   subcc_enabled=0;
-
-float sub_fps=0;
-int sub_utf8=0;
-int   suboverlap_enabled = 1;
-float sub_delay=0;
-
-//---------------

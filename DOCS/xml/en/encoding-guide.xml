@@ -457,7 +457,7 @@ the other for the blue-yellow axis).
 Even if your movie width and height are not multiples of 16, the
 encoder will use enough 16x16 macroblocks to cover the whole picture
 area, and the extra space will go to waste.
-So in the interests of maximizing quality at a fixed filesize, it is
+So in the interests of maximizing quality at a fixed file size, it is
 a bad idea to use dimensions that are not multiples of 16.
 </para>
 
@@ -1212,7 +1212,7 @@ Again, it is a matter of putting those bits to better use: why waste them
 encoding noise when you can just add that noise back in during playback?
 Increasing the parameters for <option>hqdn3d</option> will further
 improve compressibility, but if you increase the values too much, you
-risk degrading the image visibily. The suggested values above
+risk degrading the image visibly. The suggested values above
 (<option>2:1:2</option>) are quite conservative; you should feel free to
 experiment with higher values and observe the results for yourself.
 </para>
@@ -1558,7 +1558,7 @@ to get proper sync.
 
 <para>
 You need to have <application>MEncoder</application> process the sound.
-You can for example copy the orignal soundtrack during the encode with
+You can for example copy the original soundtrack during the encode with
 <option>-oac copy</option> or convert it to a "light" 4 kHz mono WAV
 PCM with <option>-oac pcm -channels 1 -srate 4000</option>.
 Otherwise, in some cases, it will generate a video file that will not sync
@@ -1571,11 +1571,11 @@ cut audio at these points.
 However <application>MPlayer</application> cannot do that, so if you
 demux the AC-3 audio and encode it with a separate app (or dump it to PCM with
 <application>MPlayer</application>), the splices will be left incorrect
-and the only way to correct them is to drop/dup video frames at the
+and the only way to correct them is to drop/duplicate video frames at the
 splice.
 As long as <application>MEncoder</application> sees the audio when it is
 encoding the video, it can do this dropping/duping (which is usually OK
-since it takes place at full black/scenechange), but if
+since it takes place at full black/scene change), but if
 <application>MEncoder</application> cannot see the audio, it will just
 process all frames as-is and they will not fit the final audio stream when
 you for example merge your audio and video track into a Matroska file.
@@ -1830,7 +1830,7 @@ numbers to 60, 30, and 24.
 <para>
 Strictly speaking, all those numbers are approximations. Black and
 white NTSC video was exactly 60 fields per second, but 60000/1001
-was later chosen to accomodate color data while remaining compatible
+was later chosen to accommodate color data while remaining compatible
 with contemporary black and white televisions. Digital NTSC video
 (such as on a DVD) is also 60000/1001 fields per second. From this,
 interlaced and telecined video are derived to be 30000/1001 frames
@@ -2413,7 +2413,7 @@ duration/location of each type.
   It is safe to use <option>pullup</option> (along with <option>softskip
   </option>) on progressive video, and is usually a good idea unless
   the source has been definitively verified to be entirely progressive.
-  The performace loss is small for most cases. On a bare-minimum encode,
+  The performance loss is small for most cases. On a bare-minimum encode,
   <option>pullup</option> causes <application>MEncoder</application> to
   be 50% slower. Adding sound processing and advanced <option>lavcopts
   </option> overshadows that difference, bringing the performance
@@ -2877,7 +2877,7 @@ That would probably be nice, but unfortunately hard to implement as different
 encoding options yield different quality results depending on the source
 material. That is because compression depends on the visual properties of the
 video in question.
-For example, anime and live action have very different properties and
+For example, Anime and live action have very different properties and
 thus require different options to obtain optimum encoding.
 The good news is that some options should never be left out, like
 <option>mbd=2</option>, <option>trell</option>, and <option>v4mv</option>.
@@ -2917,7 +2917,7 @@ See below for a detailed description of common encoding options.
   Experiment with values of 0 (default), 2 (hadamard), 3 (dct), and 6 (rate
   distortion).
   0 is fastest, and sufficient for precmp.
-  For cmp and subcmp, 2 is good for anime, and 3 is good for live action.
+  For cmp and subcmp, 2 is good for Anime, and 3 is good for live action.
   6 may or may not be slightly better, but is slow.
 </para></listitem>
 <listitem><para>
@@ -2961,7 +2961,7 @@ See below for a detailed description of common encoding options.
   when the change in a block is less than the threshold you specify, and in
   such a case, to just  encode the block as "no change".
   This saves bits and perhaps speeds up encoding. vlelim=-4 and vcelim=9
-  seem to be good for live movies, but seem not to help with anime;
+  seem to be good for live movies, but seem not to help with Anime;
   when encoding animation, you should probably leave them unchanged.
 </para></listitem>
 <listitem><para>
@@ -2970,7 +2970,7 @@ See below for a detailed description of common encoding options.
   therefore this option comes with an overhead as more information will be
   stored in the encoded file.
   The compression gain/loss depends on the movie, but it is usually not very
-  effective on anime.
+  effective on Anime.
   qpel always incurs a significant cost in CPU decode time (+25% in
   practice).
 </para></listitem>
@@ -3235,7 +3235,7 @@ this parameter (refer to the man page for the possible values) as
 different functions can have a large impact on quality depending on the
 source material. For example, if you find
 <systemitem class="library">libavcodec</systemitem> produces too much
-blocky artifacting, you could try selecting the experimental NSSE as
+blocky artifacts, you could try selecting the experimental NSSE as
 comparison function via <option>*cmp=10</option>.
 </para>
 
@@ -3376,7 +3376,7 @@ the following section puzzles you.
 <listitem><para>
   <emphasis role="bold">hq_ac</emphasis>
   Activates a better coefficient cost estimation method, which slightly
-  reduces filesize by around 0.15 to 0.19% (which corresponds to less
+  reduces file size by around 0.15 to 0.19% (which corresponds to less
   than 0.01dB PSNR increase), while having a negligible impact on speed.
   It is therefore recommended to always leave it on.
 </para></listitem>
@@ -3409,7 +3409,7 @@ the following section puzzles you.
   information into account, whereas <option>me_quality</option>
   alone only uses luma (grayscale).
   This slows down encoding by 5-10% but improves visual quality
-  quite a bit by reducing blocking effects and reduces filesize by
+  quite a bit by reducing blocking effects and reduces file size by
   around 1.3%.
   If you are looking for speed, you should disable this option before
   starting to consider reducing <option>me_quality</option>.
@@ -3703,7 +3703,7 @@ The following table shows what each profile supports.
   <entry>X</entry>
 </row>
 <row>
-  <entry>Quaterpixel</entry>
+  <entry>Quarterpixel</entry>
   <entry></entry>
   <entry></entry>
   <entry></entry>
@@ -3986,7 +3986,7 @@ random differences in the achieved bitrate.
   quality: You will probably lose well under 0.1dB PSNR, which
   should be much too small of a difference to see.
   However, different values of <option>frameref</option> can
-  occasionally affect frametype decision.
+  occasionally affect frame type decision.
   Most likely, these are rare outlying cases, but if you want to
   be pretty sure, consider whether your video has either
   fullscreen repetitive flashing patterns or very large temporary
@@ -4070,7 +4070,7 @@ random differences in the achieved bitrate.
   The speed penalty of adaptive B-frames is currently rather modest,
   but so is the potential quality gain.
   It usually does not hurt, however.
-  Note that this only affects speed and frametype decision on the
+  Note that this only affects speed and frame type decision on the
   first pass.
   <option>b_adapt</option> and <option>b_bias</option> have no
   effect on subsequent passes.
@@ -4149,7 +4149,7 @@ random differences in the achieved bitrate.
   which, in isolation, requires about 2500kbps in order to look decent.
   Immediately following it is a much less demanding 60-second scene
   that looks good at 300kbps. Suppose you ask for 1400kbps on the theory
-  that this is enough to accomodate both scenes. Single pass ratecontrol
+  that this is enough to accommodate both scenes. Single pass ratecontrol
   will make a couple of "mistakes" in such a case. First of all, it
   will target 1400kbps in both segments. The first segment may end up
   heavily overquantized, causing it to look unacceptably and unreasonably
@@ -4196,7 +4196,7 @@ random differences in the achieved bitrate.
   pass will both read the statistics from the previous pass, and write
   its own statistics. An additional pass following this one will have
   a very good base from which to make highly accurate predictions of
-  framesizes at a chosen quantizer. In practice, the overall quality
+  frame sizes at a chosen quantizer. In practice, the overall quality
   gain from this is usually close to zero, and quite possibly a third
   pass will result in slightly worse global PSNR than the pass before
   it. In typical usage, three passes help if you get either bad bitrate
@@ -4296,7 +4296,7 @@ random differences in the achieved bitrate.
   If your H.264 encodes look too blurry or smeared, try playing with
   <option>-vf noise</option> when you play your encoded movie.
   <option>-vf noise=8a:4a</option> should conceal most mild
-  artifacting.
+  artifacts.
   It will almost certainly look better than the results you
   would have gotten just by fiddling with the deblocking filter.
   </para>
@@ -4457,7 +4457,7 @@ if a codec fails or gives wrong output.
 </row>
 <row>
   <entry>m3jpeg32.dll</entry>
-  <entry>Morgan Motion JPEG Codec (MJPG)</entry>
+  <entry>Morgan Motion JPEG Codec (MJPEG)</entry>
   <entry>1cd13fff5960aa2aae43790242c323b1</entry>
   <entry></entry>
 </row>
@@ -4828,7 +4828,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   <screen>mplayer narnia.avi -dumpaudio -dumpfile narnia.aac
 mplayer narnia.avi -dumpvideo -dumpfile narnia.h264</screen>
 
-  The filenames are important; <application>mp4creator</application>
+  The file names are important; <application>mp4creator</application>
   requires that AAC audio streams be named <systemitem>.aac</systemitem>
   and H.264 video streams be named <systemitem>.h264</systemitem>.
 </para>
@@ -5076,7 +5076,7 @@ The GOP size is set using the <option>keyint</option> option.
 
 <para>
 VCD video is required to be CBR at 1152 kbps.
-This highly limiting constraint also comes along with an extremly low vbv
+This highly limiting constraint also comes along with an extremely low vbv
 buffer size of 327 kilobits.
 SVCD allows varying video bitrates up to 2500 kbps, and a somewhat less 
 restrictive vbv buffer size of 917 kilobits is allowed.
@@ -5126,7 +5126,7 @@ DVD (with timestamps on every frame, if possible):
 DVD with NTSC Pullup:
 <screen>-of mpeg -mpegopts format=dvd:tsaf:telecine -ofps 24000/1001</screen>
 This allows 24000/1001 fps progressive content to be encoded at 30000/1001 
-fps whilst maintaing DVD-compliance.
+fps whilst maintaining DVD-compliance.
 </para>
 
 

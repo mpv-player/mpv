@@ -831,7 +831,7 @@ What about DVD navigation/menus?
 architectural limitations that prevent proper handling of still images and
 interactive content. If you want to have fancy menus, you will have to use
 another player like <application>xine</application>,
-<application>vlc</application> or <application>Ogle</application>.
+<application>VLC</application> or <application>Ogle</application>.
 If you want to see DVD navigation in <application>MPlayer</application> you
 will have to implement it yourself, but be aware that it is a major
 undertaking.

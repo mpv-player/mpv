@@ -213,7 +213,7 @@ static int vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,int h,i
     return 0;
 }
 
-int vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled);
     return -1;
@@ -231,13 +231,13 @@ static uint32_t  vidix_draw_image(mp_image_t *mpi){
     return VO_TRUE;
 }
 
-int vidix_draw_frame(uint8_t *image[])
+static int vidix_draw_frame(uint8_t *image[])
 {
   mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled);
   return -1;
 }
 
-void     vidix_flip_page(void)
+static void     vidix_flip_page(void)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vosub_vidix: vidix_flip_page() was called\n"); }
@@ -298,7 +298,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     }
 }
 
-void     vidix_draw_osd(void)
+static void     vidix_draw_osd(void)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vosub_vidix: vidix_draw_osd() was called\n"); }
@@ -631,22 +631,10 @@ int vidix_preinit(const char *drvname, struct vo_old_functions *server)
   int err;
   if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
     mp_msg(MSGT_VO,MSGL_DBG2, "vosub_vidix: vidix_preinit(%s) was called\n",drvname); }
-	if(vdlGetVersion() != VIDIX_VERSION)
-	{
-	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary);
-	  return -1;
-	}
-#ifndef __MINGW32__
-	vidix_handler = vdlOpen(MP_VIDIX_PFX,
-				drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
+
+	vidix_handler = vdlOpen(drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
 				TYPE_OUTPUT,
 				verbose);
-#else
-	vidix_handler = vdlOpen(get_path("vidix/"),
-				drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
-				TYPE_OUTPUT,
-				verbose);
-#endif              
               
 	if(vidix_handler == NULL)
 	{
