@@ -40,6 +40,10 @@
 extern "C" {
 #endif
 
+#ifndef DEV_SVGA
+#define DEV_SVGA "/dev/svga"
+#endif
+
 #define MAX_DEV_PER_VENDOR_CFG1 64
 #define MAX_PCI_DEVICES_PER_BUS 32
 #define MAX_PCI_DEVICES         64
