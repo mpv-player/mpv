@@ -774,6 +774,8 @@ loader/win32.o loader/win32.d: CFLAGS += $(CFLAG_STACKREALIGN)
 
 mp3lib/decode_i586.o: CFLAGS += -fomit-frame-pointer
 
+vidix/%: CFLAGS += $(SVGALIB_CFLAGS)
+
 VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
                   vidix/pci_names.h vidix/pci_vendors.h
 

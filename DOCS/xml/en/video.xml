@@ -1567,13 +1567,10 @@ Alternatively, you can use a special kernel module, like this:
   <filename class="directory">svgalib_helper</filename> dir, as root.
 </para></step>
 <step><para>
-  Move the <filename class="directory">svgalib_helper</filename> directory to
-  the <filename class="directory">vidix</filename> subdirectory of the
-  <application>MPlayer</application> source tree.
-</para></step>
-<step><para>
-  Remove the comment before the CFLAGS line containing the "svgalib_helper"
-  string from <filename class="directory">vidix/Makefile</filename>.
+  Then run <filename>configure</filename> again and pass the parameter
+  <option>--enable-svgalib_helper</option> as well as
+  <option>--with-extraincdir=/path/to/svgalib_helper/sources</option>,
+  adjusted to wherever you extracted svgalib_helper sources.
 </para></step>
 <step><para>
   Recompile.
