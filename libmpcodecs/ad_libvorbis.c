@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include "ad_internal.h"
+#include "libaf/reorder_ch.h"
 
 static ad_info_t info = 
 {
@@ -316,6 +317,12 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 //          if (!samples) break; // why? how?
 	}
 
+	if (len > 0 && ov->vi.channels >= 5) {
+	  reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_VORBIS_DEFAULT,
+	                      AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+	                      ov->vi.channels, len / sh->samplesize,
+	                      sh->samplesize);
+	}
 
 
   return len;
