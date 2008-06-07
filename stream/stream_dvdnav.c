@@ -25,7 +25,7 @@ typedef enum {
   NAV_FLAG_EOF                  = 1 << 0,  /* end of stream has been reached */
   NAV_FLAG_WAIT                 = 1 << 1,  /* wait event */
   NAV_FLAG_WAIT_SKIP            = 1 << 2,  /* wait skip disable */
-  NAV_FLAG_CELL_CHANGED         = 1 << 3,  /* cell change event */
+  NAV_FLAG_CELL_CHANGE          = 1 << 3,  /* cell change event */
   NAV_FLAG_WAIT_READ_AUTO       = 1 << 4,  /* wait read auto mode */
   NAV_FLAG_WAIT_READ            = 1 << 5,  /* suspend read from stream */
   NAV_FLAG_VTS_DOMAIN           = 1 << 6,  /* vts domain */
@@ -333,7 +333,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
           int tit = 0, part = 0;
           dvdnav_vts_change_event_t *vts_event = (dvdnav_vts_change_event_t *)s->buffer;
           mp_msg(MSGT_CPLAYER,MSGL_INFO, "DVDNAV, switched to title: %d\r\n", vts_event->new_vtsN);
-          priv->state |= NAV_FLAG_CELL_CHANGED;
+          priv->state |= NAV_FLAG_CELL_CHANGE;
           priv->state |= NAV_FLAG_AUDIO_CHANGE;
           priv->state |= NAV_FLAG_SPU_CHANGE;
           priv->state &= ~NAV_FLAG_WAIT_SKIP;
@@ -351,7 +351,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
           break;
         }
         case DVDNAV_CELL_CHANGE: {
-          priv->state |= NAV_FLAG_CELL_CHANGED;
+          priv->state |= NAV_FLAG_CELL_CHANGE;
           priv->state |= NAV_FLAG_AUDIO_CHANGE;
           priv->state |= NAV_FLAG_SPU_CHANGE;
           priv->state &= ~NAV_FLAG_WAIT_SKIP;
@@ -909,10 +909,10 @@ void mp_dvdnav_read_wait (stream_t *stream, int mode, int automode) {
  */
 int mp_dvdnav_cell_has_changed (stream_t *stream, int clear) {
   dvdnav_priv_t *priv = stream->priv;
-  if (!(priv->state & NAV_FLAG_CELL_CHANGED))
+  if (!(priv->state & NAV_FLAG_CELL_CHANGE))
     return 0;
   if (clear) {
-    priv->state &= ~NAV_FLAG_CELL_CHANGED;
+    priv->state &= ~NAV_FLAG_CELL_CHANGE;
     priv->state |= NAV_FLAG_STREAM_CHANGE;
   }
   return 1;
