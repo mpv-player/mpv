@@ -681,6 +681,27 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
   priv->mousey = y;
 }
 
+static int mp_dvdnav_get_aid_from_format (stream_t *stream, int index, uint8_t lg) {
+  dvdnav_priv_t * priv = stream->priv;
+  uint8_t format;
+  
+  format = dvdnav_audio_stream_format(priv->dvdnav, lg);
+  switch(format) {
+  case DVDNAV_FORMAT_AC3:
+    return (index + 128);
+  case DVDNAV_FORMAT_DTS:
+    return (index + 136);
+  case DVDNAV_FORMAT_LPCM:
+    return (index + 160);
+  case DVDNAV_FORMAT_MPEGAUDIO:
+    return index;
+  default:
+    return -1;
+  }
+
+  return -1;
+}
+
 /**
  * \brief mp_dvdnav_aid_from_audio_num() returns the audio id corresponding to the logical number
  * \param stream: - stream pointer
@@ -690,25 +711,14 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
 int mp_dvdnav_aid_from_audio_num(stream_t *stream, int audio_num) {
   dvdnav_priv_t * priv = stream->priv;
   int k;
-  uint8_t format, lg;
+  uint8_t lg;
 
   for(k=0; k<32; k++) {
     lg = dvdnav_get_audio_logical_stream(priv->dvdnav, k);
     if (lg == 0xff) continue;
     if (lg != audio_num) continue;
-    format = dvdnav_audio_stream_format(priv->dvdnav, lg);
-    switch(format) {
-      case DVDNAV_FORMAT_AC3:
-        return k+128;
-      case DVDNAV_FORMAT_DTS:
-        return k+136;
-      case DVDNAV_FORMAT_LPCM:
-        return k+160;
-      case DVDNAV_FORMAT_MPEGAUDIO:
-        return k;
-      default:
-        return -1;
-    }
+
+    return mp_dvdnav_get_aid_from_format (stream, k, lg);
   }
   return -1;
 }
@@ -722,7 +732,7 @@ int mp_dvdnav_aid_from_audio_num(stream_t *stream, int audio_num) {
 int mp_dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv = stream->priv;
   int k;
-  uint8_t format, lg;
+  uint8_t lg;
   uint16_t lang, lcode;;
 
   while(language && strlen(language)>=2) {
@@ -731,21 +741,8 @@ int mp_dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
       lg = dvdnav_get_audio_logical_stream(priv->dvdnav, k);
       if(lg == 0xff) continue;
       lang = dvdnav_audio_stream_to_lang(priv->dvdnav, lg);
-      if(lang != 0xFFFF && lang == lcode) {
-        format = dvdnav_audio_stream_format(priv->dvdnav, lg);
-        switch(format) {
-          case DVDNAV_FORMAT_AC3:
-            return k+128;
-          case DVDNAV_FORMAT_DTS:
-            return k+136;
-          case DVDNAV_FORMAT_LPCM:
-            return k+160;
-          case DVDNAV_FORMAT_MPEGAUDIO:
-            return k;
-          default:
-            return -1;
-        }
-      }
+      if(lang != 0xFFFF && lang == lcode)
+        return mp_dvdnav_get_aid_from_format (stream, k, lg);
     }
     language += 2;
     while(language[0]==',' || language[0]==' ') ++language;
