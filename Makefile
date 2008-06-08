@@ -995,6 +995,7 @@ install-dhahelper: vidix/dhahelper/dhahelper.o
 	-mkdir -p $(MODULES_DIR)
 	install -m 644 $< $(MODULES_DIR)
 	depmod -a
+	-mknod /dev/dhahelper c 180 0
 
 dhahelperclean:
 	rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
