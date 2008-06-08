@@ -86,7 +86,7 @@ static int pci_get_vendor(
 {
     return pci_config_read_long(bus, dev, func, 0);
 }
-#endif
+#endif /* CONFIG_SVGAHELPER */
 
 static __inline__ int enable_os_io(void)
 {
@@ -210,4 +210,4 @@ static long pci_config_read_long(
     }
     return retval;
 }
-#endif
+#endif /* defined(CONFIG_PCI_LINUX_PROC) */

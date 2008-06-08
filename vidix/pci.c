@@ -159,7 +159,7 @@ int pciconfig_write(
 	}
 	return PCIBIOS_SUCCESSFUL;
 }
-#endif
+#endif /* defined(Lynx) && defined(__powerpc__) */
  
 #if !defined(__powerpc__)
 struct pci_config_reg {
@@ -437,7 +437,7 @@ struct pci_config_reg {
     unsigned short _configtype;   /* config type found                   */
     unsigned long _cardnum;       /* config type 2 - private card number */
 };
-#endif
+#endif /* !defined(__powerpc__) */
 
 #define MAX_DEV_PER_VENDOR_CFG1 64
 #define MAX_PCI_DEVICES_PER_BUS 32
@@ -489,7 +489,7 @@ static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 #else
 #include "sysdep/pci_x86.c"
 #endif
-#endif
+#endif /*CONFIG_SVGAHELPER */
  
 static pciinfo_t *pci_lst;
  
