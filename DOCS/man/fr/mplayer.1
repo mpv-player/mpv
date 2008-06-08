@@ -1,4 +1,4 @@
-.\" synced with r26806
+.\" synced with r26853
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -3783,10 +3783,10 @@ d'un texture permise par votre implémentation d'OpenGL.
 Faite pour fonctionner même avec l'implémentation la plus simple
 l'OpenGL, mais utilise des extensions récentes, permettant de gérer
 plus d'espaces de couleur et de direct rendering.
-Veuillez utiliser \-dr si cela fonctionne avec votre implémentation
-OpenGL, car pour de hautes résolutions, cela permet un affichage
-.B beaucoup
-plus rapide.
+Pour une rapidité optimale, essayez quelquechose qui ressemble à
+.br
+\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+.br
 Le code vérifie très peu de choses, donc si une fonction ne marche
 pas, c'est peut-être parceque votre carte ou votre implémentation de
 OpenGL ne la gère pas, même si aucun message d'erreur s'affiche.
@@ -3794,6 +3794,18 @@ Utilisez glxinfo ou un outil similaire pour afficher les extensions
 d'OpenGL gérées.
 .PD 0
 .RSs
+.IPs (no)ati\-hack
+Les pilotes ATI peuvent afficher une image corrompue lorsque les PBO
+sont utilisés (quand les options \-dr ou force\-pbo sont activées).
+Cette option corrige ce problème, au frais d'une consommation mémoire un
+peu plus élevée.
+.IPs (no)force\-pbo
+Utilise toujours les PBOs pour transférer les textures, même si cela
+provoque une copie en plus.
+Est à l'heure actuelle un peu plus rapide avec les pilotes NVidia et bien
+plus rapide avec les pilotes ATI.
+Il se peut que vous ayez à utiliser les options \-noslices et la sous-option
+ati\-hack pour que tout fonctionne correctement.
 .IPs (no)scaled-osd
 Change le comportement de l'OSD quand la taille de la fenêtre vidéo change
 (par défaut\ : désactivé).
