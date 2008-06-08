@@ -1,14 +1,29 @@
 /*
-    Direct Hardware Access kernel helper
-    
-    (C) 2002 Alex Beregszaszi <alex@fsn.hu>
-    
+ * Direct Hardware Access (DHA) kernel helper
+ *
+ * Copyright (C) 2002 Alex Beregszaszi <alex@fsn.hu>
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+/*
     Accessing hardware from userspace as USER (no root needed!)
 
     Tested on 2.2.x (2.2.19) and 2.4.x (2.4.3,2.4.17).
-    
-    License: GPL
-    
+
     WARNING! THIS MODULE VIOLATES SEVERAL SECURITY LINES! DON'T USE IT
     ON PRODUCTION SYSTEMS, ONLY AT HOME, ON A "SINGLE-USER" SYSTEM.
     NO WARRANTY!
