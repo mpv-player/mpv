@@ -654,8 +654,8 @@ int vidix_preinit(const char *drvname,vo_functions_t *server)
 		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability,strerror(err));
 		return -1;
 	}
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SUB_VIDIX_Description, vidix_cap.name);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SUB_VIDIX_Author, vidix_cap.author);
+	mp_msg(MSGT_VO,MSGL_V, "[VO_SUB_VIDIX] Description: %s.\n", vidix_cap.name);
+	mp_msg(MSGT_VO,MSGL_V, "[VO_SUB_VIDIX] Author: %s.\n", vidix_cap.author);
 	/* we are able to tune up this stuff depend on fourcc format */
 	server->draw_slice=vidix_draw_slice;
 	server->draw_frame=vidix_draw_frame;
