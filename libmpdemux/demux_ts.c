@@ -3127,7 +3127,6 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 {
 	demux_stream_t *d_audio=demuxer->audio;
 	demux_stream_t *d_video=demuxer->video;
-	demux_stream_t *d_sub=demuxer->sub;
 	sh_audio_t *sh_audio=d_audio->sh;
 	sh_video_t *sh_video=d_video->sh;
 	ts_priv_t * priv = (ts_priv_t*) demuxer->priv;
