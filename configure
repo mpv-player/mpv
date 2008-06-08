@@ -344,6 +344,7 @@ Video output:
                            Available: cyberblade,ivtv,mach64,mga,mga_crtc2,
                            nvidia,pm2,pm3,radeon,rage128,s3,sis,unichrome
   --disable-vidix-pcidb    disable VIDIX PCI device name database
+  --enable-dhahelper       enable VIDIX dhahelper support
   --enable-svgalib_helper  enable VIDIX svgalib_helper support
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-dga2            enable DGA 2 support [autodetect]
@@ -621,6 +622,7 @@ _winsock2=auto
 _smbsupport=auto
 _vidix=auto
 _vidix_pcidb=yes
+_dhahelper=no
 _svgalib_helper=no
 _joystick=no
 _xvid=auto
@@ -1022,6 +1024,8 @@ for ac_option do
     _vidix_drivers=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --disable-vidix-pcidb)        _vidix_pcidb=no         ;;
+  --enable-dhahelper)	_dhahelper=yes	;;
+  --disable-dhahelper)	_dhahelper=no	;;
   --enable-svgalib_helper)	_svgalib_helper=yes	;;
   --disable-svgalib_helper)	_svgalib_helper=no	;;
   --enable-joystick)	_joystick=yes	;;
@@ -4253,6 +4257,10 @@ if test "$_vidix" = yes ; then
   else
     _vidix_pcidb_val=0
   fi
+
+  echocheck "VIDIX dhahelper support"
+  test "$_dhahelper" = yes && cflag_dhahelper=-DCONFIG_DHAHELPER
+  echores "$_dhahelper"
 
   echocheck "VIDIX svgalib_helper support"
   test "$_svgalib_helper" = yes && cflag_svgalib_helper=-DCONFIG_SVGAHELPER
@@ -7594,6 +7602,7 @@ CFLAG_NO_OMIT_LEAF_FRAME_POINTER = $CFLAG_NO_OMIT_LEAF_FRAME_POINTER
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
 CFLAG_STACKREALIGN = $_stackrealign
 LIBDVDCSS_DVDREAD_FLAGS = $_libdvdcss_dvdread_flags
+CFLAG_DHAHELPER = $cflag_dhahelper
 CFLAG_SVGALIB_HELPER = $cflag_svgalib_helper
 ASFLAGS = $ASFLAGS
 
