@@ -28,7 +28,7 @@
 
 #include <windows.h>
 #include <ddk/ntddk.h>
-#include "dhahelperwin/dhahelper.h"
+#include "vidix/dhahelperwin/dhahelper.h"
 
 static HANDLE hDriver;
 extern int IsWinNT();

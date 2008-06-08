@@ -70,7 +70,7 @@
 
 #ifdef CONFIG_DHAHELPER
 #include <sys/ioctl.h>
-#include "dhahelper/dhahelper.h"
+#include "vidix/dhahelper/dhahelper.h"
 
 extern int dhahelper_fd;
 extern int dhahelper_initialized;
