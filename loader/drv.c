@@ -24,7 +24,7 @@
 #ifdef WIN32_LOADER
 #include "ldt_keeper.h"
 #endif
-#include "driver.h"
+#include "drv.h"
 #ifndef __MINGW32__
 #include "ext.h"
 #endif

@@ -464,7 +464,7 @@ SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         libmpcodecs/vd_vfwex.c \
                                         libmpdemux/demux_avs.c \
                                         loader/afl.c \
-                                        loader/driver.c \
+                                        loader/drv.c \
                                         loader/vfl.c \
                                         loader/dshow/DS_AudioDecoder.c \
                                         loader/dshow/DS_Filter.c \

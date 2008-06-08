@@ -45,7 +45,7 @@
 #include "wine/elfdll.h"
 #endif
 #include "win32.h"
-#include "driver.h"
+#include "drv.h"
 
 #ifdef EMU_QTX_API
 #include "wrapper.h"

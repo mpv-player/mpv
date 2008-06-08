@@ -21,7 +21,7 @@
 #include "wine/winestring.h"
 #include "wine/driver.h"
 #include "wine/avifmt.h"
-#include "driver.h"
+#include "drv.h"
 
 #define OpenDriverA DrvOpen
 #define CloseDriver DrvClose
