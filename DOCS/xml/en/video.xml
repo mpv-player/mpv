@@ -848,7 +848,12 @@ with Linux 2.4.x.
 
 <para>
 For a Linux 2.6.x version of this driver check out
-<ulink url="http://attila.kinali.ch/mga/"/>.
+<ulink url="http://attila.kinali.ch/mga/"/> or have a look at the external
+Subversion repository of mga_vid which can be checked out via
+
+<screen>
+svn checkout svn://svn.mplayerhq.hu/mga_vid
+</screen>
 </para>
 
 <procedure>
