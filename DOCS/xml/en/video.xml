@@ -1544,7 +1544,8 @@ to enable driver autodetection.
 Since VIDIX requires direct hardware access you can either run it as root
 or set the SUID bit on the <application>MPlayer</application> binary
 (<emphasis role="bold">Warning: This is a security risk!</emphasis>).
-Alternatively, you can use a special kernel module, like this:
+Alternatively, if you are running Linux kernel 2.4.x, you can use a
+special kernel module, like this:
 </para>
 
 <procedure>
