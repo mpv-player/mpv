@@ -584,8 +584,8 @@ if(stream->type==STREAMTYPE_DVD){
 
 #ifdef USE_DVDNAV
 if(stream->type==STREAMTYPE_DVDNAV){
-  if(audio_lang && audio_id==-1) audio_id=dvdnav_aid_from_lang(stream,audio_lang);
-  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=dvdnav_sid_from_lang(stream,dvdsub_lang);
+  if(audio_lang && audio_id==-1) audio_id=mp_dvdnav_aid_from_lang(stream,audio_lang);
+  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=mp_dvdnav_sid_from_lang(stream,dvdsub_lang);
 }
 #endif
 
