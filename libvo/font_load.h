@@ -16,7 +16,7 @@ typedef struct {
 #endif
 } raw_file;
 
-typedef struct {
+typedef struct font_desc {
 #ifdef HAVE_FREETYPE
     int dynamic;
 #endif
