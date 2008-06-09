@@ -1536,6 +1536,10 @@ about it to the developers. The right way is to use VIDIX without arguments
 to enable driver autodetection.
 </para>
 
+
+<sect2 id="svgalib_helper">
+<title>svgalib_helper</title>
+
 <para>
 Since VIDIX requires direct hardware access you can either run it as root
 or set the SUID bit on the <application>MPlayer</application> binary
@@ -1576,6 +1580,7 @@ Alternatively, you can use a special kernel module, like this:
   Recompile.
 </para></step>
 </procedure>
+</sect2>
 
 
 <sect2 id="vidix-ati">
