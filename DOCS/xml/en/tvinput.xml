@@ -193,7 +193,8 @@ to a hardware limitation.
 <title>Teletext</title>
 
 <para>
-Teletext is currently available only in MPlayer for v4l and v4l2 drivers.
+  Teletext is currently available only in <application>MPlayer</application>
+  for v4l and v4l2 drivers.
 </para>
 
 <sect2 id="tv-teletext-implementation-notes">
