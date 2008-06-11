@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r17322 -->
+<!-- synced with r24604 -->
 <chapter id="tv">
 <title>TV</title>
 
@@ -13,36 +13,44 @@ description des options TV et des contrôles clavier.
 
 </para>
 
+<!-- ********** -->
 
 <sect2 id="tv-compilation">
 <title>Compilation</title>
 
 <procedure>
 <step><para>
-  D'abord, vous devez recompiler. <filename>./configure</filename> autodétectera
-  les entêtes v4l du noyau et l'existence des entrées
-  <filename>/dev/video*</filename>. Si elles existent, le support TV sera activé
+  D'abord, vous devez recompiler.
+  <filename>./configure</filename> autodétectera les entêtes v4l du noyau et
+l'existence des entrées <filename>/dev/video*</filename>.
+Si elles existent, le support TV sera activé
   (voir le résultat de <filename>./configure</filename>).
   </para></step>
 <step><para>
-  Assurez-vous que votre tuner fonctionne avec d'autres logiciels TV pour Linux.
-  par exemple <application>XawTV</application>.
+  Assurez-vous que votre tuner fonctionne avec d'autres logiciels TV pour
+Linux.
+Par exemple avec <application>XawTV</application>.
   </para></step>
 </procedure>
 </sect2>
 
+<!-- ********** -->
+
 <sect2 id="tv-tips">
 <title>Astuces d'utilisation</title>
+
 <para>
 La liste complète des options est disponible sur la page de man. Voici juste
-quelques astuces:
-</para>
+quelques astuces&nbsp;:
+
 <itemizedlist>
 <listitem>
 <para>
-Utilisez l'option <option>channels</option>. Un exemple:
+Utilisez l'option <option>channels</option>.
+Exemple&nbsp;:
 <screen>-tv channels=26-MTV1,23-TV2</screen>
-Explication: en utilisant cette option, seuls les canaux 26 et 23 seront
+Explication&nbsp;:
+En utilisant cette option, seuls les canaux 26 et 23 seront
 utilisables, et il y a un joli texte OSD lors des changements de canaux
 affichant le nom du nouveau.
 Les espaces dans le nom du canal doivent être remplacés par le caractère
@@ -102,7 +110,7 @@ Regardez la charge CPU.
 Elle ne devrait pas dépasser la limite des 90% la plupart du temps.
 Si vous avez un gros tampon, <application>MEncoder</application> peut
 survivre à une surcharge pendant quelques secondes mais pas plus.
-Il vaut mieux désactiver l'économiseur d'écran OpenGL et les trucs
+Il vaut mieux désactiver les économiseurs d'écran 3D OpenGL et les trucs
 similaires.
 </para>
 </listitem>
@@ -129,7 +137,7 @@ défaut (palette YV12).
 Dans les versions précédentes de <application>MPlayer</application>/
 <application>MEncoder</application> il était nécessaire de spécifier le
 format de sortie.
-Ce problème devrait être résolu dans la version actuelle et
+Ce problème devrait être résolu dans les versions actuelles et
 <option>outfmt</option> n'est plus requis, et la valeur par défaut convient
 dans la plupart des cas.
 Par exemple, si vous capturez en DivX en utilisant
@@ -174,8 +182,10 @@ l'option "full duplex" dans le menu des préférences du serveur de son.
 </para>
 </listitem>
 </itemizedlist>
+</para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="tv-examples">
 <title>Exemples</title>
@@ -184,17 +194,16 @@ l'option "full duplex" dans le menu des préférences du serveur de son.
 <para>
 Sortie muette, vers AAlib :)
 <screen>
-mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://<!--
---></screen>
+mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://</screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Entrée depuis V4L standard:
+  Entrée depuis V4L standard&nbsp;:
 <screen>
-mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://<!--
---></screen>
+mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 \
+  -vo xv tv://</screen>
 </para>
 </informalexample>
 
@@ -208,10 +217,10 @@ L'audio est compressée à un débit constant de 64kbps, en utilisant le codec
 LAME.
 Cette combinaison est adaptée pour capturer des films.
 <screen>
-     mencoder -tv driver=v4l:width=768:height=576 \
-     -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
-     -oac mp3lame -lameopts cbr:br=64 \
-     -vf crop=720:544:24:16,pp=lb -o <replaceable>sortie.avi</replaceable> tv://
+mencoder -tv driver=v4l:width=768:height=576 -oac mp3lame -lameopts cbr:br=64\
+  -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
+  -vf crop=720:544:24:16,pp=lb \
+  -o <replaceable>output.avi</replaceable> tv://
 </screen>
 </para>
 </informalexample>
@@ -225,10 +234,11 @@ un débit plus bas au détriment de la qualité.
 Cela peut être utilisé pour capturer des longues séries TV, quand la qualité
 n'est pas très importante.
 <screen>
-     mencoder -tv driver=v4l:width=768:height=576 \
-     -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
-     -oac mp3lame -lameopts cbr:br=48 \
-      -vf crop=720:540:24:18,pp=lb,scale=384:288 -sws 1 -o <replaceable>output.avi</replaceable> tv://
+mencoder -tv driver=v4l:width=768:height=576 \
+  -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
+  -oac mp3lame -lameopts cbr:br=48 -sws 1 \
+  -o <replaceable>output.avi</replaceable>\
+  -vf crop=720:540:24:18,pp=lb,scale=384:288 tv://
 </screen>
 Il est également possible de spécifier des dimensions d'images plus petites
 dans l'option <option>-tv</option> et d'omettre le zoom logiciel mais cette
@@ -238,6 +248,103 @@ Les chipsets bt8x8 peuvent faire une moyenne de pixels uniquement dans la
 direction horizontale à cause d'une limitation matérielle.
 </para>
 </informalexample>
+</sect2>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="tv-teletext">
+<title>Télétexte</title>
+
+<para>
+Le Télétexte n'est actuellement disponible dans
+<application>MPlayer</application> que pour les drivers v4l et v4l2.
+</para>
+
+<sect2 id="tv-teletext-implementation-notes">
+<title>Notes d'implantation</title>
+
+<para>
+<application>MPlayer</application> gère les textes, graphiques et
+ liens classiquess.
+ Malheureusement, les pages colorisées ne sont pas encore complètement
+ gérées&nbsp;:  toutes les pages sont affichées en niveau de gris.
+ Les sous-titres (dénommés Closed Captions (CC)) sont aussi  supportées.
+</para>
+
+<para>
+<application>MPlayer</application> commence à mettre en cache toutes les
+pages Télétexte dès qu'il commence à recevoir du signal TV.  Ainsi, vous
+n'avez pas besoin d'attendre jusqu'à ce que la page requise soit chargée.
+</para>
+
+<para>
+  Note&nbsp;: Utiliser le Télétexte avec l'option <option>-vo xv</option>
+  génère des couleurs bizarres.
+</para>
+</sect2>
+
+<sect2 id="tv-teletext-usage">
+<title>Using teletext</title>
+
+<para>
+Pour pouvoir décoder le tététexte, vous devez spécifier le périphérique VBI
+d'où vous souhaitez extraire les données (normalement
+<filename>/dev/vbi0</filename> pour Linux).  Ceci peut être fait en
+spécifiant <option>tdevice</option> dans votre fichier de configuration
+comme indiqué ci-dessous&nbsp;:
+<screen>tv=tdevice=/dev/vbi0</screen>
+</para>
+
+<para>
+Vous pouvez avoir besoin de spécifier le code de la langue pour
+le Télétexte dans votre pays.  La liste des codes est disponible avec
+l'option&nbsp;:
+<screen>tv=tdevice=/dev/vbi0:tlang=<replaceable>-1</replaceable></screen>
+
+Voici un exemple pour du Russe&nbsp;:
+<screen>tv=tdevice=/dev/vbi0:tlang=<replaceable>33</replaceable></screen>
+</para>
+</sect2>
+
+<sect2 id="tv-teletext-hotkeys">
+<title>Raccourcis clavier pour le Télétexte</title>
+    
+<informaltable frame="all">
+  <tgroup cols="2">
+    <thead>
+      <row>
+        <entry>Touche</entry>
+        <entry>Description</entry>
+      </row>
+    </thead>
+    <tbody>
+      <row>
+        <entry>X</entry>
+        <entry>Bascule l'affichage du Télétexte on/off</entry>
+      </row>
+      <row>
+        <entry>C</entry>
+        <entry>Parcourir les modes de rendu du Télétexte (opaque,
+transparent, opaque inversé, transparent inversé)</entry>
+      </row>
+      <row>
+        <entry>Gauche/Droite</entry>
+        <entry>Aller à la page Télétexte précédente/suivante</entry>
+      </row>
+      <row>
+        <entry>Bas/Haut</entry>
+        <entry>Aller à la sous-page Télétexte précédente/suivante</entry>
+      </row>
+      <row>
+        <entry>Chiffres</entry>
+        <entry>Numéro de page où aller</entry>
+      </row>
+    </tbody>
+  </tgroup>
+</informaltable>
 </sect2>
 </sect1>
 </chapter>
