@@ -1,4 +1,4 @@
-.\" synced with r26853
+.\" synced with r26997
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -859,7 +859,7 @@ xvidix, xover, xv (voir \-vo xv:ck), xvmc (voir \-vo xv:ck) et directx
 uniquement.
 .
 .TP
-.B \-correct\-pts (expérimental)
+.B \-correct\-pts (EXPÉRIMENTAL)
 Bascule MPlayer dans un mode expérimental où les timestamps des trames vidéos
 sont calculées différemment, et où les filtres qui ajoutent des trames ou modifient
 les timestamps sont supportés.
@@ -954,7 +954,7 @@ d'économiseur d'écran de gérer l'API de X dédiée.
 .I EXEMPLE pour xscreensaver:
 mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
 .sp 1
-.I EXEMPLE pour l'économiseur d'écran de gnome:
+.I EXEMPLE pour l'économiseur d'écran de GNOME\ :
 mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .RE
 .PD 1
@@ -7783,7 +7783,7 @@ Vous pouvez définir les options d'encodage spécifiques aux codecs en suivant
 la syntaxe ci-dessous\ :
 .
 .TP
-.B \-<codec>opts <option1[=valeur],option2,...>
+.B \-<codec>opts <option1[=valeur1]:option2[=valeur2]:...>
 .
 .PP
 Où <codec> peut être: lavc, xvidenc, lame, toolame, twolame,
@@ -11288,6 +11288,12 @@ FIXME: Documente ceci.
 .TP
 .B VIDIX_CRT
 FIXME: Documente ceci.
+.
+.TP
+.B VIDIXIVTVALPHA
+Définissez cette variable à 'disable' pour empêcher le pilote VIDIX
+de contrôler la transparence (alphablending).
+Vous pouvez ensuite la contrôler avec 'ivtvfbctl'.
 .
 .SS osdep:
 .
