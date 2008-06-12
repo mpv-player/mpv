@@ -224,6 +224,7 @@ static demuxer_t* demux_open_rtp(demuxer_t* demuxer)
                 sh_audio_t* sh_audio = new_sh_audio(demuxer,0);
                 WAVEFORMATEX* wf;
                 demux_stream_t* d_audio = demuxer->audio;
+                demuxer->audio->id = 0;
 
                 mp_msg(MSGT_DEMUX, MSGL_INFO, "Detected as AUDIO stream...\n");
 
