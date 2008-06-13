@@ -6243,6 +6243,7 @@ echocheck "Nemesi Streaming Media libraries"
 if test "$_nemesi" = auto  && test "$_network" = yes ; then
     _nemesi=no
     if $_pkg_config libnemesi --atleast-version=0.6.3 ; then
+        _inc_extra="$_inc_extra `$_pkg_config --cflags libnemesi`"
         _ld_extra="$_ld_extra `$_pkg_config --libs libnemesi`"
         _nemesi=yes
     fi
