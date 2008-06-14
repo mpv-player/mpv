@@ -1193,6 +1193,14 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 
 	switch(cmd) 
 	{
+		case MGA_VID_GET_VERSION:
+			tmp = MGA_VID_VERSION;
+			if (copy_to_user((uint32_t *) arg, &tmp, sizeof(uint32_t))) {
+				printk(KERN_ERR "mga_vid: failed copy %p to userspace %p\n", &tmp, (uint32_t *) arg);
+				return (-EFAULT);
+			}
+			break;
+
 		case MGA_VID_CONFIG:
 			//FIXME remove
 //			printk(KERN_DEBUG "mga_vid: vcount = %d\n",readl(card->mmio_base + VCOUNT));
