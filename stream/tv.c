@@ -254,6 +254,7 @@ static void parse_channels(tvi_handle_t *tvh)
     tv_channel_list->next=NULL;
     tv_channel_list->prev=NULL;
     tv_channel_current = tv_channel_list;
+    tv_channel_current->norm = tvh->norm;
 
     while (*channels) {
         char* tmp = *(channels++);
@@ -299,6 +300,12 @@ static void parse_channels(tvi_handle_t *tvh)
             if ( sep[0] == '-' ) tv_channel_current->freq -= i * 100;
             sep[0] = '\0';
           }
+
+          sep = strchr(tv_channel_current->name, '=');
+          if ( sep ) {
+            tv_channel_current->norm = norm_from_string(tvh, sep+1);
+            sep[0] = '\0';
+          }
         }
 
         /*mp_msg(MSGT_TV, MSGL_INFO, "-- Detected channel %s - %s (%5.3f)\n",
@@ -310,6 +317,7 @@ static void parse_channels(tvi_handle_t *tvh)
         tv_channel_current->next->prev = tv_channel_current;
         tv_channel_current->next->next = NULL;
         tv_channel_current = tv_channel_current->next;
+        tv_channel_current->norm = tvh->norm;
     }
     if (tv_channel_current->prev)
         tv_channel_current->prev->next = NULL;
@@ -376,12 +384,9 @@ static int open_tv(tvi_handle_t *tvh)
 #ifdef HAVE_TV_DSHOW
     || (!strcmp(tvh->tv_param->driver, "dshow") && tvh->tv_param->normid >= 0)
 #endif
-    ) {
-	mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNormId, tvh->tv_param->normid);
-	if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->tv_param->normid) != TVI_CONTROL_TRUE) {
-	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
-	}
-    } else
+    )
+	tv_set_norm_i(tvh, tvh->tv_param->normid);
+    else
 #endif
     tv_set_norm(tvh,tvh->tv_param->norm);
 
@@ -500,6 +505,7 @@ static int open_tv(tvi_handle_t *tvh)
 
 	mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_SelectedChannel3, tv_channel_current->number,
 			tv_channel_current->name, (float)tv_channel_current->freq/1000);
+	tv_set_norm_i(tvh, tv_channel_current->norm);
 	tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 	tv_channel_last = tv_channel_current;
     } else {
@@ -922,6 +928,8 @@ int tv_step_channel(tvi_handle_t *tvh, int direction) {
 				tv_channel_current = tv_channel_current->next;
 			else
 				tv_channel_current = tv_channel_list;
+				
+				tv_set_norm_i(tvh, tv_channel_current->norm);
 				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 				mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_SelectedChannel3,
 			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
@@ -933,6 +941,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction) {
 			else
 				while (tv_channel_current->next)
 					tv_channel_current = tv_channel_current->next;
+				tv_set_norm_i(tvh, tv_channel_current->norm);
 				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 				mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_SelectedChannel3,
 			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
@@ -977,6 +986,7 @@ int tv_set_channel(tvi_handle_t *tvh, char *channel) {
 				tv_channel_current = tv_channel_current->next;
 		mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_SelectedChannel3, tv_channel_current->number,
 				tv_channel_current->name, (float)tv_channel_current->freq/1000);
+		tv_set_norm_i(tvh, tv_channel_current->norm);
 		tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 	} else tv_set_channel_real(tvh, channel);
 	return 1;
@@ -994,6 +1004,7 @@ int tv_last_channel(tvi_handle_t *tvh) {
 
 		mp_msg(MSGT_TV, MSGL_INFO, MSGTR_TV_SelectedChannel3, tv_channel_current->number,
 				tv_channel_current->name, (float)tv_channel_current->freq/1000);
+		tv_set_norm_i(tvh, tv_channel_current->norm);
 		tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 	} else {
 		int i;
@@ -1048,6 +1059,20 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
     }
     tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
     return 1;
+}
+
+int tv_set_norm_i(tvi_handle_t *tvh, int norm)
+{
+   tvh->norm = norm;
+
+   mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNormId, norm);
+   if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
+      mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
+      return 0;
+   }
+
+   tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+   return(1);
 }
 
 demuxer_desc_t demuxer_desc_tv = {
