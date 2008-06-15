@@ -54,10 +54,6 @@ static char help_text[]=
 "\n";
 #endif
 
-// libmpcodecs/ad_dvdpcm.c:
-#define MSGTR_SamplesWanted "Samples of this format are needed to improve support. Please contact the developers.\n"
-
-
 // ========================= MPlayer messages ===========================
 
 // mplayer.c:
@@ -530,191 +526,8 @@ static char help_text[]=
 #define MSGTR_PropertyListHeader "\n Name                 Type            Min        Max\n\n"
 #define MSGTR_TotalProperties "\nTotal: %d properties\n"
 
-// open.c, stream.c:
-#define MSGTR_CdDevNotfound "CD-ROM Device '%s' not found.\n"
-#define MSGTR_ErrTrackSelect "Error selecting VCD track."
-#define MSGTR_ReadSTDIN "Reading from stdin...\n"
-#define MSGTR_UnableOpenURL "Unable to open URL: %s\n"
-#define MSGTR_ConnToServer "Connected to server: %s\n"
-#define MSGTR_FileNotFound "File not found: '%s'\n"
-
-#define MSGTR_SMBInitError "Cannot init the libsmbclient library: %d\n"
-#define MSGTR_SMBFileNotFound "Could not open from LAN: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support.\n"
-
-#define MSGTR_CantOpenDVD "Couldn't open DVD device: %s (%s)\n"
-
-// stream_dvd.c
-#define MSGTR_DVDspeedCantOpen "Couldn't open DVD device for writing, changing DVD speed needs write access.\n"
-#define MSGTR_DVDrestoreSpeed "Restoring DVD speed... "
-#define MSGTR_DVDlimitSpeed "Limiting DVD speed to %dKB/s... "
-#define MSGTR_DVDlimitFail "failed\n"
-#define MSGTR_DVDlimitOk "successful\n"
-#define MSGTR_NoDVDSupport "MPlayer was compiled without DVD support, exiting.\n"
-#define MSGTR_DVDnumTitles "There are %d titles on this DVD.\n"
-#define MSGTR_DVDinvalidTitle "Invalid DVD title number: %d\n"
-#define MSGTR_DVDnumChapters "There are %d chapters in this DVD title.\n"
-#define MSGTR_DVDinvalidChapter "Invalid DVD chapter number: %d\n"
-#define MSGTR_DVDinvalidChapterRange "Invalid chapter range specification %s\n"
-#define MSGTR_DVDinvalidLastChapter "Invalid DVD last chapter number: %d\n"
-#define MSGTR_DVDnumAngles "There are %d angles in this DVD title.\n"
-#define MSGTR_DVDinvalidAngle "Invalid DVD angle number: %d\n"
-#define MSGTR_DVDnoIFO "Cannot open the IFO file for DVD title %d.\n"
-#define MSGTR_DVDnoVMG "Can't open VMG info!\n"
-#define MSGTR_DVDnoVOBs "Cannot open title VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDnoMatchingAudio "No matching DVD audio language found!\n"
-#define MSGTR_DVDaudioChannel "Selected DVD audio channel: %d language: %c%c\n"
-#define MSGTR_DVDaudioStreamInfo "audio stream: %d format: %s (%s) language: %s aid: %d.\n"
-#define MSGTR_DVDnumAudioChannels "number of audio channels on disk: %d.\n"
-#define MSGTR_DVDnoMatchingSubtitle "No matching DVD subtitle language found!\n"
-#define MSGTR_DVDsubtitleChannel "Selected DVD subtitle channel: %d language: %c%c\n"
-#define MSGTR_DVDsubtitleLanguage "subtitle ( sid ): %d language: %s\n"
-#define MSGTR_DVDnumSubtitles "number of subtitles on disk: %d\n"
-
-// muxer.c, muxer_*.c:
-#define MSGTR_TooManyStreams "Too many streams!"
-#define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer supports only one audio stream!\n"
-#define MSGTR_IgnoringVideoStream "Ignoring video stream!\n"
-#define MSGTR_UnknownStreamType "Warning, unknown stream type: %d\n"
-#define MSGTR_WarningLenIsntDivisible "Warning, len isn't divisible by samplesize!\n"
-#define MSGTR_MuxbufMallocErr "Muxer frame buffer cannot allocate memory!\n"
-#define MSGTR_MuxbufReallocErr "Muxer frame buffer cannot reallocate memory!\n"
-#define MSGTR_MuxbufSending "Muxer frame buffer sending %d frame(s) to the muxer.\n"
-#define MSGTR_WritingHeader "Writing header...\n"
-#define MSGTR_WritingTrailer "Writing index...\n"
-
-// demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "WARNING: Audio stream header %d redefined.\n"
-#define MSGTR_VideoStreamRedefined "WARNING: Video stream header %d redefined.\n"
-#define MSGTR_TooManyAudioInBuffer "\nToo many audio packets in the buffer: (%d in %d bytes).\n"
-#define MSGTR_TooManyVideoInBuffer "\nToo many video packets in the buffer: (%d in %d bytes).\n"
-#define MSGTR_MaybeNI "Maybe you are playing a non-interleaved stream/file or the codec failed?\n" \
-		      "For AVI files, try to force non-interleaved mode with the -ni option.\n"
-#define MSGTR_WorkAroundBlockAlignHeaderBug "AVI: Working around CBR-MP3 nBlockAlign header bug!\n"
-#define MSGTR_SwitchToNi "\nBadly interleaved AVI file detected - switching to -ni mode...\n"
-#define MSGTR_InvalidAudioStreamNosound "AVI: invalid audio stream ID: %d - ignoring (nosound)\n"
-#define MSGTR_InvalidAudioStreamUsingDefault "AVI: invalid video stream ID: %d - ignoring (using default)\n"
-#define MSGTR_ON2AviFormat "ON2 AVI format"
-#define MSGTR_Detected_XXX_FileFormat "%s file format detected.\n"
-#define MSGTR_DetectedAudiofile "Audio file detected.\n"
-#define MSGTR_NotSystemStream "Not MPEG System Stream format... (maybe Transport Stream?)\n"
-#define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? Contact the author, it may be a bug :(\n"
-#define MSGTR_FormatNotRecognized "============ Sorry, this file format is not recognized/supported =============\n"\
-				  "=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n"
-#define MSGTR_SettingProcessPriority "Setting process priority: %s\n"
-#define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.3f  ftime:=%6.4f\n"
-#define MSGTR_CannotInitializeMuxer "Cannot initialize muxer."
-#define MSGTR_MissingVideoStream "No video stream found.\n"
-#define MSGTR_MissingAudioStream "No audio stream found -> no sound.\n"
-#define MSGTR_MissingVideoStreamBug "Missing video stream!? Contact the author, it may be a bug :(\n"
-
-#define MSGTR_DoesntContainSelectedStream "demux: File doesn't contain the selected audio or video stream.\n"
-
-#define MSGTR_NI_Forced "Forced"
-#define MSGTR_NI_Detected "Detected"
-#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI file format.\n"
-
-#define MSGTR_UsingNINI "Using NON-INTERLEAVED broken AVI file format.\n"
-#define MSGTR_CouldntDetFNo "Could not determine number of frames (for absolute seek).\n"
-#define MSGTR_CantSeekRawAVI "Cannot seek in raw AVI streams. (Index required, try with the -idx switch.)\n"
-#define MSGTR_CantSeekFile "Cannot seek in this file.\n"
-
-#define MSGTR_MOVcomprhdr "MOV: Compressed headers support requires ZLIB!\n"
-#define MSGTR_MOVvariableFourCC "MOV: WARNING: Variable FourCC detected!?\n"
-#define MSGTR_MOVtooManyTrk "MOV: WARNING: too many tracks"
-#define MSGTR_FoundAudioStream "==> Found audio stream: %d\n"
-#define MSGTR_FoundVideoStream "==> Found video stream: %d\n"
-#define MSGTR_DetectedTV "TV detected! ;-)\n"
-#define MSGTR_ErrorOpeningOGGDemuxer "Unable to open the Ogg demuxer.\n"
-#define MSGTR_ASFSearchingForAudioStream "ASF: Searching for audio stream (id:%d).\n"
-#define MSGTR_CannotOpenAudioStream "Cannot open audio stream: %s\n"
-#define MSGTR_CannotOpenSubtitlesStream "Cannot open subtitle stream: %s\n"
-#define MSGTR_OpeningAudioDemuxerFailed "Failed to open audio demuxer: %s\n"
-#define MSGTR_OpeningSubtitlesDemuxerFailed "Failed to open subtitle demuxer: %s\n"
-#define MSGTR_TVInputNotSeekable "TV input is not seekable! (Seeking will probably be for changing channels ;)\n"
-#define MSGTR_DemuxerInfoChanged "Demuxer info %s changed to %s\n"
-#define MSGTR_ClipInfo "Clip info:\n"
-
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC content detected, switching framerate.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressive NTSC content detected, switching framerate.\n"
-
-#define MSGTR_CacheFill "\rCache fill: %5.2f%% (%"PRId64" bytes)   "
-#define MSGTR_NoBindFound "No bind found for key '%s'."
-#define MSGTR_FailedToOpen "Failed to open %s.\n"
-
-#define MSGTR_VideoID "[%s] Video stream found, -vid %d\n"
-#define MSGTR_AudioID "[%s] Audio stream found, -aid %d\n"
-#define MSGTR_SubtitleID "[%s] Subtitle stream found, -sid %d\n"
-
-// dec_video.c & dec_audio.c:
-#define MSGTR_CantOpenCodec "Could not open codec.\n"
-#define MSGTR_CantCloseCodec "Could not close codec.\n"
-
-#define MSGTR_MissingDLLcodec "ERROR: Could not open required DirectShow codec %s.\n"
-#define MSGTR_ACMiniterror "Could not load/initialize Win32/ACM audio codec (missing DLL file?).\n"
-#define MSGTR_MissingLAVCcodec "Cannot find codec '%s' in libavcodec...\n"
-
-#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF while searching for sequence header.\n"
-#define MSGTR_CannotReadMpegSequHdr "FATAL: Cannot read sequence header.\n"
-#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Cannot read sequence header extension.\n"
-#define MSGTR_BadMpegSequHdr "MPEG: bad sequence header\n"
-#define MSGTR_BadMpegSequHdrEx "MPEG: bad sequence header extension\n"
-
-#define MSGTR_ShMemAllocFail "Cannot allocate shared memory.\n"
-#define MSGTR_CantAllocAudioBuf "Cannot allocate audio out buffer.\n"
-
-#define MSGTR_UnknownAudio "Unknown/missing audio format -> no sound\n"
-
-#define MSGTR_UsingExternalPP "[PP] Using external postprocessing filter, max q = %d.\n"
-#define MSGTR_UsingCodecPP "[PP] Using codec's postprocessing, max q = %d.\n"
-#define MSGTR_VideoAttributeNotSupportedByVO_VD "Video attribute '%s' is not supported by selected vo & vd.\n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "Requested video codec family [%s] (vfm=%s) not available.\nEnable it at compilation.\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "Requested audio codec family [%s] (afm=%s) not available.\nEnable it at compilation.\n"
-#define MSGTR_OpeningVideoDecoder "Opening video decoder: [%s] %s\n"
-#define MSGTR_SelectedVideoCodec "Selected video codec: [%s] vfm: %s (%s)\n"
-#define MSGTR_OpeningAudioDecoder "Opening audio decoder: [%s] %s\n"
-#define MSGTR_SelectedAudioCodec "Selected audio codec: [%s] afm: %s (%s)\n"
-#define MSGTR_BuildingAudioFilterChain "Building audio filter chain for %dHz/%dch/%s -> %dHz/%dch/%s...\n"
-#define MSGTR_UninitVideoStr "Uninit video: %s\n"
-#define MSGTR_UninitAudioStr "Uninit audio: %s\n"
-#define MSGTR_VDecoderInitFailed "VDecoder init failed :(\n"
-#define MSGTR_ADecoderInitFailed "ADecoder init failed :(\n"
-#define MSGTR_ADecoderPreinitFailed "ADecoder preinit failed :(\n"
-#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Allocating %d bytes for input buffer.\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allocating %d + %d = %d bytes for output buffer.\n"
-
-// LIRC:
-#define MSGTR_SettingUpLIRC "Setting up LIRC support...\n"
-#define MSGTR_LIRCopenfailed "Failed to open LIRC support. You will not be able to use your remote control.\n"
-#define MSGTR_LIRCcfgerr "Failed to read LIRC config file %s.\n"
-
-// vf.c
-#define MSGTR_CouldNotFindVideoFilter "Couldn't find video filter '%s'.\n"
-#define MSGTR_CouldNotOpenVideoFilter "Couldn't open video filter '%s'.\n"
-#define MSGTR_OpeningVideoFilter "Opening video filter: "
-#define MSGTR_CannotFindColorspace "Cannot find matching colorspace, even by inserting 'scale' :(\n"
-
-// vd.c
-#define MSGTR_CodecDidNotSet "VDec: Codec did not set sh->disp_w and sh->disp_h, trying workaround.\n"
-#define MSGTR_VoConfigRequest "VDec: vo config request - %d x %d (preferred colorspace: %s)\n"
-#define MSGTR_UsingXAsOutputCspNoY "VDec: using %s as output csp (no %d)\n"
-#define MSGTR_CouldNotFindColorspace "Could not find matching colorspace - retrying with -vf scale...\n"
-#define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
-#define MSGTR_MovieAspectUndefined "Movie-Aspect is undefined - no prescaling applied.\n"
-
-// vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "You need to upgrade/install the binary codecs package.\nGo to http://www.mplayerhq.hu/dload.html\n"
-#define MSGTR_DShowInitOK "INFO: Win32/DShow video codec init OK.\n"
-#define MSGTR_DMOInitOK "INFO: Win32/DMO video codec init OK.\n"
-
-// x11_common.c
-#define MSGTR_EwmhFullscreenStateFailed "\nX11: Couldn't send EWMH fullscreen event!\n"
-#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Could not find XScreenSaver window.\n"
-#define MSGTR_SelectedVideoMode "XF86VM: Selected video mode %dx%d for image size %dx%d.\n"
-
-#define MSGTR_InsertingAfVolume "[Mixer] No hardware mixing, inserting volume filter.\n"
-#define MSGTR_NoVolume "[Mixer] No volume control available.\n"
-#define MSGTR_NoBalance "[Mixer] No balance control available.\n"
+// loader/ldt_keeper.c
+#define MSGTR_LOADER_DYLD_Warning "WARNING: Attempting to use DLL codecs but environment variable\n         DYLD_BIND_AT_LAUNCH not set. This will likely crash.\n"
 
 
 // ====================== GUI messages/buttons ========================
@@ -1030,40 +843,19 @@ static char help_text[]=
 #define MSGTR_VO_NoValueSpecified "No value specified."
 #define MSGTR_VO_UnknownSuboptions "unknown suboption(s)"
 
-// vo_aa.c
-#define MSGTR_VO_AA_HelpHeader "\n\nHere are the aalib vo_aa suboptions:\n"
-#define MSGTR_VO_AA_AdditionalOptions "Additional options vo_aa provides:\n" \
-"  help        print this help message\n" \
-"  osdcolor    set OSD color\n  subcolor    set subtitle color\n" \
-"        the color parameters are:\n           0 : normal\n" \
-"           1 : dim\n           2 : bold\n           3 : boldfont\n" \
-"           4 : reverse\n           5 : special\n\n\n"
+// aspect.c
+#define MSGTR_LIBVO_ASPECT_NoSuitableNewResFound "[ASPECT] Warning: No suitable new res found!\n"
+#define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] Error: No new size found that fits into res!\n"
 
-// vo_jpeg.c
-#define MSGTR_VO_JPEG_ProgressiveJPEG "Progressive JPEG enabled."
-#define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG disabled."
-#define MSGTR_VO_JPEG_BaselineJPEG "Baseline JPEG enabled."
-#define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline JPEG disabled."
-
-// vo_pnm.c
-#define MSGTR_VO_PNM_ASCIIMode "ASCII mode enabled."
-#define MSGTR_VO_PNM_RawMode "Raw mode enabled."
-#define MSGTR_VO_PNM_PPMType "Will write PPM files."
-#define MSGTR_VO_PNM_PGMType "Will write PGM files."
-#define MSGTR_VO_PNM_PGMYUVType "Will write PGMYUV files."
-
-// vo_yuv4mpeg.c
-#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "Interlaced mode requires image height to be divisible by 4."
-#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Unable to allocate line buffer for interlaced mode."
-#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Input not RGB, can't separate chrominance by fields!"
-#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Image width must be divisible by 2."
-#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Not enough memory to allocate RGB framebuffer."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Can't get memory or file handle to write \"%s\"!"
-#define MSGTR_VO_YUV4MPEG_OutFileWriteError "Error writing image to output!"
-#define MSGTR_VO_YUV4MPEG_UnknownSubDev "Unknown subdevice: %s"
-#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Using interlaced output mode, top-field first."
-#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Using interlaced output mode, bottom-field first."
-#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Using (default) progressive frame mode."
+// font_load_ft.c
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "New_Face failed. Maybe the font path is wrong.\nPlease supply the text font file (~/.mplayer/subfont.ttf).\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "New_Memory_Face failed..\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "subtitle font: load_sub_face failed.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "subtitle font: prepare_charset failed.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Cannot prepare subtitle font.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Cannot prepare OSD font.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Cannot generate tables.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType failed.\n"
 
 // sub.c
 #define MSGTR_VO_SUB_Seekbar "Seekbar"
@@ -1080,8 +872,277 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Hue "Hue"
 #define MSGTR_VO_SUB_Balance "Balance"
 
+// vo_3dfx.c
+#define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Only 16bpp supported!"
+#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visual ID is  %lx.\n"
+#define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] Unable to open /dev/3dfx.\n"
+#define MSGTR_LIBVO_3DFX_Error "[VO_3DFX] Error: %d.\n"
+#define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] Couldn't map 3dfx memory areas: %p,%p,%d.\n"
+#define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Initialized: %p.\n"
+#define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Unknown subdevice: %s.\n"
+
+// vo_aa.c
+#define MSGTR_VO_AA_HelpHeader "\n\nHere are the aalib vo_aa suboptions:\n"
+#define MSGTR_VO_AA_AdditionalOptions "Additional options vo_aa provides:\n" \
+"  help        print this help message\n" \
+"  osdcolor    set OSD color\n  subcolor    set subtitle color\n" \
+"        the color parameters are:\n           0 : normal\n" \
+"           1 : dim\n           2 : bold\n           3 : boldfont\n" \
+"           4 : reverse\n           5 : special\n\n\n"
+
+// vo_dxr3.c
+#define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Unable to load new SPU palette!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] Unable to set playmode!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] Unable to set subpicture mode!\n"
+#define MSGTR_LIBVO_DXR3_UnableToGetTVNorm "[VO_DXR3] Unable to get TV norm!\n"
+#define MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate "[VO_DXR3] Auto-selected TV norm by framerate: "
+#define MSGTR_LIBVO_DXR3_UnableToSetTVNorm "[VO_DXR3] Unable to set TV norm!\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForNTSC "[VO_DXR3] Setting up for NTSC.\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] Setting up for PAL/SECAM.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] Setting aspect ratio to 4:3.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] Setting aspect ratio to 16:9.\n"
+#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] out of memory\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] Unable to allocate keycolor!\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] Unable to allocate exact keycolor, using closest match (0x%lx).\n"
+#define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] Uninitializing.\n"
+#define MSGTR_LIBVO_DXR3_FailedRestoringTVNorm "[VO_DXR3] Failed restoring TV norm!\n"
+#define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] Enabling prebuffering.\n"
+#define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] Using new sync engine.\n"
+#define MSGTR_LIBVO_DXR3_UsingOverlay "[VO_DXR3] Using overlay.\n"
+#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Error: Overlay requires compiling with X11 libs/headers installed.\n"
+#define MSGTR_LIBVO_DXR3_WillSetTVNormTo "[VO_DXR3] Will set TV norm to: "
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "auto-adjust to movie framerate (PAL/PAL-60)"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "auto-adjust to movie framerate (PAL/NTSC)"
+#define MSGTR_LIBVO_DXR3_UseCurrentNorm "Use current norm."
+#define MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm "Unknown norm supplied. Use current norm."
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying "[VO_DXR3] Error opening %s for writing, trying /dev/em8300 instead.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingMV "[VO_DXR3] Error opening %s for writing, trying /dev/em8300_mv instead.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWell "[VO_DXR3] Error opening /dev/em8300 for writing as well!\nBailing out.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellMV "[VO_DXR3] Error opening /dev/em8300_mv for writing as well!\nBailing out.\n"
+#define MSGTR_LIBVO_DXR3_Opened "[VO_DXR3] Opened: %s.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP "[VO_DXR3] Error opening %s for writing, trying /dev/em8300_sp instead.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP "[VO_DXR3] Error opening /dev/em8300_sp for writing as well!\nBailing out.\n"
+#define MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup "[VO_DXR3] Unable to open display during overlay hack setup!\n"
+#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Unable to init X11!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] Failed setting overlay attribute.\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] Failed setting overlay screen!\nExiting.\n"
+#define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] Failed enabling overlay!\nExiting.\n"
+#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] Failed resizing overlay window!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayBcs "[VO_DXR3] Failed setting overlay bcs!\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayYOffsetValues "[VO_DXR3] Failed getting overlay Y-offset values!\nExiting.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXOffsetValues "[VO_DXR3] Failed getting overlay X-offset values!\nExiting.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection "[VO_DXR3] Failed getting overlay X scale correction!\nExiting.\n"
+#define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Yoffset: %d.\n"
+#define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] Xoffset: %d.\n"
+#define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Xcorrection: %d.\n"
+#define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Failed to set signal mix!\n"
+
+// vo_jpeg.c
+#define MSGTR_VO_JPEG_ProgressiveJPEG "Progressive JPEG enabled."
+#define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG disabled."
+#define MSGTR_VO_JPEG_BaselineJPEG "Baseline JPEG enabled."
+#define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline JPEG disabled."
+
+// vo_mga.c
+#define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): resized to %dx%d.\n"
+#define MSGTR_LIBVO_MGA_Uninit "[VO] uninit!\n"
+
+// mga_common.c
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] error in mga_vid_config ioctl (wrong mga_vid.o version?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Could not get luma values from the kernel module!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Could not set luma values from the kernel module!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Screen width/height unknown!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] invalid output format %0X\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Your mga_vid driver version is incompatible with this MPlayer version!\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Couldn't open: %s\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Source resolution exceeds 1023x1023 in at least one dimension.\n[MGA] Rescale in software or use -lavdopts lowres=1.\n"
+#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] mismatch between kernel (%u) and MPlayer (%u) mga_vid driver versions\n"
+
+// vo_null.c
+#define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Unknown subdevice: %s.\n"
+
+// vo_png.c
+#define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] Warning: compression level set to 0, compression disabled!\n"
+#define MSGTR_LIBVO_PNG_Warning2 "[VO_PNG] Info: Use -vo png:z=<n> to set compression level from 0 to 9.\n"
+#define MSGTR_LIBVO_PNG_Warning3 "[VO_PNG] Info: (0 = no compression, 1 = fastest, lowest - 9 best, slowest compression)\n"
+#define MSGTR_LIBVO_PNG_ErrorOpeningForWriting "\n[VO_PNG] Error opening '%s' for writing!\n"
+#define MSGTR_LIBVO_PNG_ErrorInCreatePng "[VO_PNG] Error in create_png.\n"
+
+// vo_pnm.c
+#define MSGTR_VO_PNM_ASCIIMode "ASCII mode enabled."
+#define MSGTR_VO_PNM_RawMode "Raw mode enabled."
+#define MSGTR_VO_PNM_PPMType "Will write PPM files."
+#define MSGTR_VO_PNM_PGMType "Will write PGM files."
+#define MSGTR_VO_PNM_PGMYUVType "Will write PGMYUV files."
+
+// vo_sdl.c
+#define MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput "[VO_SDL] Couldn't get any acceptable SDL Mode for output.\n"
+#define MSGTR_LIBVO_SDL_SetVideoModeFailed "[VO_SDL] set_video_mode: SDL_SetVideoMode failed: %s.\n"
+#define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode failed: %s.\n"
+#define MSGTR_LIBVO_SDL_MappingI420ToIYUV "[VO_SDL] Mapping I420 to IYUV.\n"
+#define MSGTR_LIBVO_SDL_UnsupportedImageFormat "[VO_SDL] Unsupported image format (0x%X).\n"
+#define MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom "[VO_SDL] Info - please use -vm or -zoom to switch to the best resolution.\n"
+#define MSGTR_LIBVO_SDL_FailedToSetVideoMode "[VO_SDL] Failed to set video mode: %s.\n"
+#define MSGTR_LIBVO_SDL_CouldntCreateAYUVOverlay "[VO_SDL] Couldn't create a YUV overlay: %s.\n"
+#define MSGTR_LIBVO_SDL_CouldntCreateARGBSurface "[VO_SDL] Couldn't create an RGB surface: %s.\n"
+#define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Using depth/colorspace conversion, this will slow things down (%ibpp -> %ibpp).\n"
+#define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Unsupported image format in draw_slice, contact MPlayer developers!\n"
+#define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit failed: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] SDL initialization failed: %s.\n"
+#define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Using driver: %s.\n"
+
+// vo_svga.c
+#define MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable "[VO_SVGA] Forced vid_mode %d (%s) not available.\n"
+#define MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall "[VO_SVGA] Forced vid_mode %d (%s) too small.\n"
+#define MSGTR_LIBVO_SVGA_Vidmode "[VO_SVGA] Vid_mode: %d, %dx%d %dbpp.\n"
+#define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) failed.\n"
+#define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] Video mode is linear and memcpy could be used for image transfer.\n"
+#define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] Video mode has hardware acceleration and put_image could be used.\n"
+#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLikeToKnow "[VO_SVGA] If it works for you I would like to know.\n[VO_SVGA] (send log with `mplayer test.avi -v -v -v -v &> svga.log`). Thx!\n"
+#define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] Video mode has %d page(s).\n"
+#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Centering image. Starting at (%d,%d)\n"
+#define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Using VIDIX. w=%i h=%i  mw=%i mh=%i\n"
+
+// vo_tdfx_vid.c
+#define MSGTR_LIBVO_TDFXVID_Move "[VO_TDXVID] Move %d(%d) x %d => %d.\n"
+#define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP move failed to clear the screen.\n"
+#define MSGTR_LIBVO_TDFXVID_BlitFailed "[VO_TDFXVID] Blit failed.\n"
+#define MSGTR_LIBVO_TDFXVID_NonNativeOverlayFormatNeedConversion "[VO_TDFXVID] Non-native overlay format needs conversion.\n"
+#define MSGTR_LIBVO_TDFXVID_UnsupportedInputFormat "[VO_TDFXVID] Unsupported input format 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlaySetupFailed "[VO_TDFXVID] Overlay setup failed.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayOnFailed "[VO_TDFXVID] Overlay on failed.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayReady "[VO_TDFXVID] Overlay ready: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
+#define MSGTR_LIBVO_TDFXVID_TextureBlitReady "[VO_TDFXVID] Texture blit ready: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayOffFailed "[VO_TDFXVID] Overlay off failed\n"
+#define MSGTR_LIBVO_TDFXVID_CantOpen "[VO_TDFXVID] Can't open %s: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg "[VO_TDFXVID] Can't get current configuration: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_MemmapFailed "[VO_TDFXVID] Memmap failed !!!!!\n"
+#define MSGTR_LIBVO_TDFXVID_GetImageTodo "Get image todo.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailed "[VO_TDFXVID] AGP move failed.\n"
+#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] Set YUV failed.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP move failed on Y plane.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP move failed on U plane.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP move failed on V plane.\n"
+#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] unknown format: 0x%x.\n"
+
+// vo_tdfxfb.c
+#define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Can't open %s: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Problem with FBITGET_FSCREENINFO ioctl: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Problem with FBITGET_VSCREENINFO ioctl: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] This driver only supports the 3Dfx Banshee, Voodoo3 and Voodoo 5.\n"
+#define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] %d bpp output is not supported.\n"
+#define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] Couldn't map memory areas: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] %d bpp output is not supported (This should never have happened).\n"
+#define MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl "[VO_TDFXFB] Eik! Something's wrong with control().\n"
+#define MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay "[VO_TDFXFB] Not enough video memory to play this movie. Try at a lower resolution.\n"
+#define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] Screen is %dx%d at %d bpp, in is %dx%d at %d bpp, norm is %dx%d.\n"
+
+// vo_tga.c
+#define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] Unknown subdevice: %s.\n"
+
+// vo_vesa.c
+#define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fatal error occurred! Can't continue.\n"
+#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] unknown subdevice: '%s'.\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] You have too little video memory for this mode:\n[VO_VESA] Required: %08lX present: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] You have to specify the capabilities of the monitor. Not changing refresh rate.\n"
+#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] The mode does not fit the monitor limits. Not changing refresh rate.\n"
+#define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Detected internal fatal error: init is called before preinit.\n"
+#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] The -flip option is not supported.\n"
+#define MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound "[VO_VESA] Possible reason: No VBE2 BIOS found.\n"
+#define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] Found VESA VBE BIOS Version %x.%x Revision: %x.\n"
+#define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] Video memory: %u Kb.\n"
+#define MSGTR_LIBVO_VESA_Capabilites "[VO_VESA] VESA Capabilities: %s %s %s %s %s.\n"
+#define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] !!! OEM info will be printed below !!!\n"
+#define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] You should see 5 OEM related lines below; If not, you've broken vm86.\n"
+#define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM info: %s.\n"
+#define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM Revision: %x.\n"
+#define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM vendor: %s.\n"
+#define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM Product Name: %s.\n"
+#define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM Product Rev: %s.\n"
+#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] Hint: For working TV-Out you should have plugged in the TV connector\n"\
+"[VO_VESA] before booting since VESA BIOS initializes itself only during POST.\n"
+#define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] Using VESA mode (%u) = %x [%ux%u@%u]\n"
+#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] Can't initialize software scaler.\n"
+#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] Can't use DGA. Force bank switching mode. :(\n"
+#define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] Using DGA (physical resources: %08lXh, %08lXh)"
+#define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] Can't use double buffering: not enough video memory.\n"
+#define MSGTR_LIBVO_VESA_CantFindNeitherDga "[VO_VESA] Can find neither DGA nor relocatable window frame.\n"
+#define MSGTR_LIBVO_VESA_YouveForcedDga "[VO_VESA] You've forced DGA. Exiting\n"
+#define MSGTR_LIBVO_VESA_CantFindValidWindowAddress "[VO_VESA] Can't find valid window address.\n"
+#define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] Using bank switching mode (physical resources: %08lXh, %08lXh).\n"
+#define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] Can't allocate temporary buffer.\n"
+#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] Sorry, unsupported mode -- try -x 640 -zoom.\n"
+#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] Oh you really have a picture on the TV!\n"
+#define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] Can't initialize Linux Video Overlay.\n"
+#define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] Using video overlay: %s.\n"
+#define MSGTR_LIBVO_VESA_CantInitializeVidixDriver "[VO_VESA] Can't initialize VIDIX driver.\n"
+#define MSGTR_LIBVO_VESA_UsingVidix "[VO_VESA] Using VIDIX.\n"
+#define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] Can't find mode for: %ux%u@%u.\n"
+#define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] VESA initialization complete.\n"
+
+// vesa_lvo.c
+#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] This branch is no longer supported.\n[VESA_LVO] Please use -vo vesa:vidix instead.\n"
+#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] Couldn't open: '%s'\n"
+#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Invalid output format: %s(%0X)\n"
+#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] Your fb_vid driver version is incompatible with this MPlayer version!\n"
+
+// vo_x11.c
+#define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] draw_frame() called!!!!!!\n"
+
 // vo_xv.c
+#define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() called!!!!!!\n"
+#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] Shared memory not supported\nReverting to normal Xv.\n"
+#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] Sorry, Xv not supported by this X11 version/driver\n[VO_XV] ******** Try with  -vo x11  or  -vo sdl  *********\n"
+#define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed  "[VO_XV] XvQueryAdaptors failed.\n"
+#define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] Invalid port parameter, overriding with port 0.\n"
+#define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] Could not grab port %i.\n"
+#define MSGTR_LIBVO_XV_CouldNotFindFreePort "[VO_XV] Could not find free Xvideo port - maybe another process is already\n"\
+"[VO_XV] using it. Close all video applications, and try again. If that does\n"\
+"[VO_XV] not help, see 'mplayer -vo help' for other (non-xv) video out drivers.\n"
+#define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] It seems there is no Xvideo support for your video card available.\n"\
+"[VO_XV] Run 'xvinfo' to verify its Xv support and read\n"\
+"[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
+"[VO_XV] See 'mplayer -vo help' for other (non-xv) video out drivers.\n"\
+"[VO_XV] Try -vo x11.\n"
 #define MSGTR_VO_XV_ImagedimTooHigh "Source image dimensions are too high: %ux%u (maximum is %ux%u)\n"
+
+// vo_yuv4mpeg.c
+#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "Interlaced mode requires image height to be divisible by 4."
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Unable to allocate line buffer for interlaced mode."
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Input not RGB, can't separate chrominance by fields!"
+#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Image width must be divisible by 2."
+#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Not enough memory to allocate RGB framebuffer."
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Can't get memory or file handle to write \"%s\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileWriteError "Error writing image to output!"
+#define MSGTR_VO_YUV4MPEG_UnknownSubDev "Unknown subdevice: %s"
+#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Using interlaced output mode, top-field first."
+#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Using interlaced output mode, bottom-field first."
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Using (default) progressive frame mode."
+
+// vosub_vidix.c
+#define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] Can't start playback: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] Can't stop playback: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Interleaved UV for YUV410P not supported.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_slice() was called.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_frame() was called.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] Unsupported FourCC for this VIDIX driver: %x (%s).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] Video server has unsupported resolution (%dx%d), supported: %dx%d-%dx%d.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] Video server has unsupported color depth by vidix (%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] VIDIX driver can't upscale image (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] VIDIX driver can't downscale image (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] Can't configure playback: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] You have the wrong version of the VIDIX library.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] Couldn't find working VIDIX driver.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Couldn't get capability: %s.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Couldn't send EWMH fullscreen event!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Could not find XScreenSaver window.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: Selected video mode %dx%d for image size %dx%d.\n"
+
+#define MSGTR_InsertingAfVolume "[Mixer] No hardware mixing, inserting volume filter.\n"
+#define MSGTR_NoVolume "[Mixer] No volume control available.\n"
+#define MSGTR_NoBalance "[Mixer] No balance control available.\n"
 
 // old vo drivers that have been replaced
 #define MSGTR_VO_PGM_HasBeenReplaced "The pgm video output driver has been replaced by -vo pnm:pgmyuv.\n"
@@ -1311,43 +1372,88 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Can't open %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Can't init Apple Remote.\n"
 
+// lirc.c:
+#define MSGTR_SettingUpLIRC "Setting up LIRC support...\n"
+#define MSGTR_LIRCopenfailed "Failed to open LIRC support. You will not be able to use your remote control.\n"
+#define MSGTR_LIRCcfgerr "Failed to read LIRC config file %s.\n"
+
 
 // ========================== LIBMPDEMUX ===================================
 
-// url.c
-#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "String appears to be already escaped in url_escape %c%c1%c2\n"
+// muxer.c, muxer_*.c:
+#define MSGTR_TooManyStreams "Too many streams!"
+#define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer supports only one audio stream!\n"
+#define MSGTR_IgnoringVideoStream "Ignoring video stream!\n"
+#define MSGTR_UnknownStreamType "Warning, unknown stream type: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Warning, len isn't divisible by samplesize!\n"
+#define MSGTR_MuxbufMallocErr "Muxer frame buffer cannot allocate memory!\n"
+#define MSGTR_MuxbufReallocErr "Muxer frame buffer cannot reallocate memory!\n"
+#define MSGTR_MuxbufSending "Muxer frame buffer sending %d frame(s) to the muxer.\n"
+#define MSGTR_WritingHeader "Writing header...\n"
+#define MSGTR_WritingTrailer "Writing index...\n"
 
-// ai_alsa1x.c
-#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Cannot set samplerate.\n"
-#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Cannot set buffer time.\n"
-#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Cannot set period time.\n"
+// demuxer.c, demux_*.c:
+#define MSGTR_AudioStreamRedefined "WARNING: Audio stream header %d redefined.\n"
+#define MSGTR_VideoStreamRedefined "WARNING: Video stream header %d redefined.\n"
+#define MSGTR_TooManyAudioInBuffer "\nToo many audio packets in the buffer: (%d in %d bytes).\n"
+#define MSGTR_TooManyVideoInBuffer "\nToo many video packets in the buffer: (%d in %d bytes).\n"
+#define MSGTR_MaybeNI "Maybe you are playing a non-interleaved stream/file or the codec failed?\n" \
+		      "For AVI files, try to force non-interleaved mode with the -ni option.\n"
+#define MSGTR_WorkAroundBlockAlignHeaderBug "AVI: Working around CBR-MP3 nBlockAlign header bug!\n"
+#define MSGTR_SwitchToNi "\nBadly interleaved AVI file detected - switching to -ni mode...\n"
+#define MSGTR_InvalidAudioStreamNosound "AVI: invalid audio stream ID: %d - ignoring (nosound)\n"
+#define MSGTR_InvalidAudioStreamUsingDefault "AVI: invalid video stream ID: %d - ignoring (using default)\n"
+#define MSGTR_ON2AviFormat "ON2 AVI format"
+#define MSGTR_Detected_XXX_FileFormat "%s file format detected.\n"
+#define MSGTR_DetectedAudiofile "Audio file detected.\n"
+#define MSGTR_NotSystemStream "Not MPEG System Stream format... (maybe Transport Stream?)\n"
+#define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? Contact the author, it may be a bug :(\n"
+#define MSGTR_FormatNotRecognized "============ Sorry, this file format is not recognized/supported =============\n"\
+				  "=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n"
+#define MSGTR_SettingProcessPriority "Setting process priority: %s\n"
+#define MSGTR_FilefmtFourccSizeFpsFtime "[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.3f  ftime:=%6.4f\n"
+#define MSGTR_CannotInitializeMuxer "Cannot initialize muxer."
+#define MSGTR_MissingVideoStream "No video stream found.\n"
+#define MSGTR_MissingAudioStream "No audio stream found -> no sound.\n"
+#define MSGTR_MissingVideoStreamBug "Missing video stream!? Contact the author, it may be a bug :(\n"
 
-// ai_alsa1x.c / ai_alsa.c
-#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Broken configuration for this PCM: no configurations available.\n"
-#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Access type not available.\n"
-#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Sample format not available.\n"
-#define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Channel count not available - reverting to default: %d\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Unable to install hardware paramameters: %s"
-#define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Can't use period equal to buffer size (%u == %lu)\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Unable to install software parameters:\n"
-#define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Error opening audio: %s\n"
-#define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "ALSA status error: %s"
-#define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (at least %.3f ms long)\n"
-#define MSGTR_MPDEMUX_AIALSA_AlsaStatus "ALSA Status:\n"
-#define MSGTR_MPDEMUX_AIALSA_AlsaXRUNPrepareError "ALSA xrun: prepare error: %s"
-#define MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError "ALSA read/write error"
+#define MSGTR_DoesntContainSelectedStream "demux: File doesn't contain the selected audio or video stream.\n"
 
-// ai_oss.c
-#define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Unable to set channel count: %d\n"
-#define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Unable to set stereo: %d\n"
-#define MSGTR_MPDEMUX_AIOSS_Unable2Open "Unable to open '%s': %s\n"
-#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "unsupported format\n"
-#define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Unable to set audio format."
-#define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Unable to set samplerate: %d\n"
-#define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Unable to set trigger: %d\n"
-#define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Unable to get block size!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "Audio block size is zero, setting to %d!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "Audio block size too low, setting to %d!\n"
+#define MSGTR_NI_Forced "Forced"
+#define MSGTR_NI_Detected "Detected"
+#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI file format.\n"
+
+#define MSGTR_UsingNINI "Using NON-INTERLEAVED broken AVI file format.\n"
+#define MSGTR_CouldntDetFNo "Could not determine number of frames (for absolute seek).\n"
+#define MSGTR_CantSeekRawAVI "Cannot seek in raw AVI streams. (Index required, try with the -idx switch.)\n"
+#define MSGTR_CantSeekFile "Cannot seek in this file.\n"
+
+#define MSGTR_MOVcomprhdr "MOV: Compressed headers support requires ZLIB!\n"
+#define MSGTR_MOVvariableFourCC "MOV: WARNING: Variable FourCC detected!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: WARNING: too many tracks"
+#define MSGTR_FoundAudioStream "==> Found audio stream: %d\n"
+#define MSGTR_FoundVideoStream "==> Found video stream: %d\n"
+#define MSGTR_DetectedTV "TV detected! ;-)\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "Unable to open the Ogg demuxer.\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: Searching for audio stream (id:%d).\n"
+#define MSGTR_CannotOpenAudioStream "Cannot open audio stream: %s\n"
+#define MSGTR_CannotOpenSubtitlesStream "Cannot open subtitle stream: %s\n"
+#define MSGTR_OpeningAudioDemuxerFailed "Failed to open audio demuxer: %s\n"
+#define MSGTR_OpeningSubtitlesDemuxerFailed "Failed to open subtitle demuxer: %s\n"
+#define MSGTR_TVInputNotSeekable "TV input is not seekable! (Seeking will probably be for changing channels ;)\n"
+#define MSGTR_DemuxerInfoChanged "Demuxer info %s changed to %s\n"
+#define MSGTR_ClipInfo "Clip info:\n"
+
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC content detected, switching framerate.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressive NTSC content detected, switching framerate.\n"
+
+#define MSGTR_CacheFill "\rCache fill: %5.2f%% (%"PRId64" bytes)   "
+#define MSGTR_NoBindFound "No bind found for key '%s'."
+#define MSGTR_FailedToOpen "Failed to open %s.\n"
+
+#define MSGTR_VideoID "[%s] Video stream found, -vid %d\n"
+#define MSGTR_AudioID "[%s] Audio stream found, -aid %d\n"
+#define MSGTR_SubtitleID "[%s] Subtitle stream found, -sid %d\n"
 
 // asfheader.c
 #define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: header size bigger than 1 MB (%d)!\nPlease contact MPlayer authors, and upload/send this file.\n"
@@ -1359,64 +1465,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Invalid length in ASF header!\n"
 #define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "DRM License URL: %s\n"
 #define MSGTR_MPDEMUX_ASFHDR_DRMProtected "This file has been encumbered with DRM encryption, it will not play in MPlayer!\n"
-
-// asf_mmst_streaming.c
-#define MSGTR_MPDEMUX_MMST_WriteError "write error\n"
-#define MSGTR_MPDEMUX_MMST_EOFAlert "\nAlert! EOF\n"
-#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "pre-header read failed\n"
-#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Invalid header size, giving up.\n"
-#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Header data read failed.\n"
-#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "packet_len read failed.\n"
-#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Invalid RTSP packet size, giving up.\n"
-#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Command data read failed.\n"
-#define MSGTR_MPDEMUX_MMST_HeaderObject "header object\n"
-#define MSGTR_MPDEMUX_MMST_DataObject "data object\n"
-#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "file object, packet length = %d (%d)\n"
-#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "stream object, stream ID: %d\n"
-#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Too many IDs, stream skipped."
-#define MSGTR_MPDEMUX_MMST_UnknownObject "unknown object\n"
-#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Media data read failed.\n"
-#define MSGTR_MPDEMUX_MMST_MissingSignature "missing signature\n"
-#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Everything done. Thank you for downloading a media file containing proprietary and patented technology.\n"
-#define MSGTR_MPDEMUX_MMST_UnknownCmd "unknown command %02x\n"
-#define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet error : %s\n"
-#define MSGTR_MPDEMUX_MMST_Connected "Connected\n"
-
-// asf_streaming.c
-#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, stream_chunck size is too small: %d\n"
-#define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "size_confirm mismatch!: %d %d\n"
-#define MSGTR_MPDEMUX_ASF_WarnDropHeader "Warning: drop header ????\n"
-#define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Error while parsing chunk header\n"
-#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Didn't get a header as first chunk !!!!\n"
-#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Error: Can't allocate %d bytes buffer.\n"
-#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Error while reading network stream.\n"
-#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Error: Chunk is too small.\n"
-#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Error: Subchunk number is invalid.\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "Bandwidth too small, file cannot be played!\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "Bandwidth too small, deselected audio stream.\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "Bandwidth too small, deselected video stream.\n"
-#define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Invalid length in ASF header!\n"
-#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Error while reading chunk header.\n"
-#define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Error: chunk_size > packet_size\n"
-#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Error while reading chunk.\n"
-#define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Redirector\n"
-#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "invalid proxy URL\n"
-#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "unknown ASF stream type\n"
-#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Failed to parse HTTP response.\n"
-#define MSGTR_MPDEMUX_ASF_ServerReturn "Server returned %d:%s\n"
-#define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF HTTP PARSE WARNING : Pragma %s cut from %d bytes to %d\n"
-#define MSGTR_MPDEMUX_ASF_SocketWriteError "socket write error: %s\n"
-#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Failed to parse header.\n"
-#define MSGTR_MPDEMUX_ASF_NoStreamFound "No stream found.\n"
-#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "unknown ASF streaming type\n"
-#define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
-#define MSGTR_MPDEMUX_ASF_StreamingFailed "Failed, exiting.\n"
-
-// audio_in.c
-#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nError reading audio: %s\n"
-#define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Recovered from cross-run, some frames may be left out!\n"
-#define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Fatal error, cannot recover!\n"
-#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nNot enough audio samples!\n"
 
 // aviheader.c
 #define MSGTR_MPDEMUX_AVIHDR_EmptyList "** empty list?!\n"
@@ -1442,76 +1490,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Generated index table for %d chunks!\n"
 #define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Couldn't write index file %s: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Saved index file: %s\n"
-
-// cache2.c
-#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rThis stream is non-cacheable.\n"
-#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos differs!!! Report this bug...\n"
-
-// cdda.c
-#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Can't open CDDA device.\n"
-#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Can't open disc.\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Found audio CD with %ld tracks.\n"
-
-// cddb.c
-#define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Failed to read TOC.\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Failed to open %s device.\n"
-#define MSGTR_MPDEMUX_CDDB_NotAValidURL "not a valid URL\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Failed to send the HTTP request.\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Failed to read the HTTP response.\n"
-#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Not Found.\n"
-#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "unknown error code\n"
-#define MSGTR_MPDEMUX_CDDB_NoCacheFound "No cache found.\n"
-#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Not all the xmcd file has been read.\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Failed to create directory %s.\n"
-#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Not all of the xmcd file has been written.\n"
-#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Invalid xmcd database file returned.\n"
-#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "unexpected FIXME\n"
-#define MSGTR_MPDEMUX_CDDB_UnhandledCode "unhandled code\n"
-#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Unable to find end of line.\n"
-#define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Parse OK, found: %s\n"
-#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album not found.\n"
-#define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Server returns: Command syntax error\n"
-#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "No sites information available.\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Failed to get the protocol level.\n"
-#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "No CD in the drive.\n"
-
-// cue_read.c
-#define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Unexpected cuefile line: %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] bin filename tested: %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Couldn't find the bin file - giving up.\n"
-#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Using bin file %s.\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] unknown mode for binfile. Should not happen. Aborting.\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Cannot open %s.\n"
-#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Error reading from  %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Error getting size of bin file.\n"
-#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "track %02d:  format=%d  %02d:%02d:%02d\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] unexpected end of bin file\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Couldn't read %d bytes of payload.\n"
-#define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, filename=%s, track=%d, available tracks: %d -> %d\n"
-
-// network.c
-#define MSGTR_MPDEMUX_NW_UnknownAF "Unknown address family %d\n"
-#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "Resolving %s for %s...\n"
-#define MSGTR_MPDEMUX_NW_CantResolv "Couldn't resolve name for %s: %s\n"
-#define MSGTR_MPDEMUX_NW_ConnectingToServer "Connecting to server %s[%s]: %d...\n"
-#define MSGTR_MPDEMUX_NW_CantConnect2Server "Failed to connect to server with %s\n"
-#define MSGTR_MPDEMUX_NW_SelectFailed "Select failed.\n"
-#define MSGTR_MPDEMUX_NW_ConnTimeout "connection timeout\n"
-#define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt failed: %s\n"
-#define MSGTR_MPDEMUX_NW_ConnectError "connect error: %s\n"
-#define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "Invalid proxy setting... Trying without proxy.\n"
-#define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Could not resolve remote hostname for AF_INET. Trying without proxy.\n"
-#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Error while sending HTTP request: Didn't send all the request.\n"
-#define MSGTR_MPDEMUX_NW_ReadFailed "Read failed.\n"
-#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response read 0 (i.e. EOF).\n"
-#define MSGTR_MPDEMUX_NW_AuthFailed "Authentication failed. Please use the -user and -passwd options to provide your\n"\
-"username/password for a list of URLs, or form an URL like:\n"\
-"http://username:password@hostname/file\n"
-#define MSGTR_MPDEMUX_NW_AuthRequiredFor "Authentication required for %s\n"
-#define MSGTR_MPDEMUX_NW_AuthRequired "Authentication required.\n"
-#define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "No password provided, trying blank password.\n"
-#define MSGTR_MPDEMUX_NW_ErrServerReturned "Server returns %d: %s\n"
-#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache size set to %d KBytes\n"
 
 // demux_audio.c
 #define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audio demuxer: unknown format %d.\n"
@@ -1611,8 +1589,61 @@ static char help_text[]=
 
 // ========================== LIBMPCODECS ===================================
 
+// dec_video.c & dec_audio.c:
+#define MSGTR_CantOpenCodec "Could not open codec.\n"
+#define MSGTR_CantCloseCodec "Could not close codec.\n"
+
+#define MSGTR_MissingDLLcodec "ERROR: Could not open required DirectShow codec %s.\n"
+#define MSGTR_ACMiniterror "Could not load/initialize Win32/ACM audio codec (missing DLL file?).\n"
+#define MSGTR_MissingLAVCcodec "Cannot find codec '%s' in libavcodec...\n"
+
+#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF while searching for sequence header.\n"
+#define MSGTR_CannotReadMpegSequHdr "FATAL: Cannot read sequence header.\n"
+#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Cannot read sequence header extension.\n"
+#define MSGTR_BadMpegSequHdr "MPEG: bad sequence header\n"
+#define MSGTR_BadMpegSequHdrEx "MPEG: bad sequence header extension\n"
+
+#define MSGTR_ShMemAllocFail "Cannot allocate shared memory.\n"
+#define MSGTR_CantAllocAudioBuf "Cannot allocate audio out buffer.\n"
+
+#define MSGTR_UnknownAudio "Unknown/missing audio format -> no sound\n"
+
+#define MSGTR_UsingExternalPP "[PP] Using external postprocessing filter, max q = %d.\n"
+#define MSGTR_UsingCodecPP "[PP] Using codec's postprocessing, max q = %d.\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Video attribute '%s' is not supported by selected vo & vd.\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Requested video codec family [%s] (vfm=%s) not available.\nEnable it at compilation.\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Requested audio codec family [%s] (afm=%s) not available.\nEnable it at compilation.\n"
+#define MSGTR_OpeningVideoDecoder "Opening video decoder: [%s] %s\n"
+#define MSGTR_SelectedVideoCodec "Selected video codec: [%s] vfm: %s (%s)\n"
+#define MSGTR_OpeningAudioDecoder "Opening audio decoder: [%s] %s\n"
+#define MSGTR_SelectedAudioCodec "Selected audio codec: [%s] afm: %s (%s)\n"
+#define MSGTR_BuildingAudioFilterChain "Building audio filter chain for %dHz/%dch/%s -> %dHz/%dch/%s...\n"
+#define MSGTR_UninitVideoStr "Uninit video: %s\n"
+#define MSGTR_UninitAudioStr "Uninit audio: %s\n"
+#define MSGTR_VDecoderInitFailed "VDecoder init failed :(\n"
+#define MSGTR_ADecoderInitFailed "ADecoder init failed :(\n"
+#define MSGTR_ADecoderPreinitFailed "ADecoder preinit failed :(\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Allocating %d bytes for input buffer.\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allocating %d + %d = %d bytes for output buffer.\n"
+
+// ad_dvdpcm.c:
+#define MSGTR_SamplesWanted "Samples of this format are needed to improve support. Please contact the developers.\n"
+
 // libmpcodecs/ad_libdv.c
 #define MSGTR_MPCODECS_AudioFramesizeDiffers "[AD_LIBDV] Warning! Audio framesize differs! read=%d  hdr=%d.\n"
+
+// vd.c
+#define MSGTR_CodecDidNotSet "VDec: Codec did not set sh->disp_w and sh->disp_h, trying workaround.\n"
+#define MSGTR_VoConfigRequest "VDec: vo config request - %d x %d (preferred colorspace: %s)\n"
+#define MSGTR_UsingXAsOutputCspNoY "VDec: using %s as output csp (no %d)\n"
+#define MSGTR_CouldNotFindColorspace "Could not find matching colorspace - retrying with -vf scale...\n"
+#define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
+#define MSGTR_MovieAspectUndefined "Movie-Aspect is undefined - no prescaling applied.\n"
+
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "You need to upgrade/install the binary codecs package.\nGo to http://www.mplayerhq.hu/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Win32/DShow video codec init OK.\n"
+#define MSGTR_DMOInitOK "INFO: Win32/DMO video codec init OK.\n"
 
 // libmpcodecs/vd_dmo.c vd_dshow.c vd_vfw.c
 #define MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec "[VD_DMO] Couldn't allocate image for cinepak codec.\n"
@@ -1636,6 +1667,12 @@ static char help_text[]=
 // libmpcodecs/ve_raw.c
 #define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] Raw output with FourCC [%x] not supported!\n"
 #define MSGTR_MPCODECS_NoVfwCodecSpecified "[VE_RAW] Required VfW codec not specified!!\n"
+
+// vf.c
+#define MSGTR_CouldNotFindVideoFilter "Couldn't find video filter '%s'.\n"
+#define MSGTR_CouldNotOpenVideoFilter "Couldn't open video filter '%s'.\n"
+#define MSGTR_OpeningVideoFilter "Opening video filter: "
+#define MSGTR_CannotFindColorspace "Cannot find matching colorspace, even by inserting 'scale' :(\n"
 
 // libmpcodecs/vf_crop.c
 #define MSGTR_MPCODECS_CropBadPositionWidthHeight "[CROP] Bad position/width/height - cropped area outside of the original!\n"
@@ -1663,298 +1700,6 @@ static char help_text[]=
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s not supported by next filter/vo :(\n"
-
-
-// ================================== LIBVO ====================================
-
-// mga_common.c
-#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] error in mga_vid_config ioctl (wrong mga_vid.o version?)"
-#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Could not get luma values from the kernel module!\n"
-#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Could not set luma values from the kernel module!\n"
-#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Screen width/height unknown!\n"
-#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] invalid output format %0X\n"
-#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Your mga_vid driver version is incompatible with this MPlayer version!\n"
-#define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Couldn't open: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Source resolution exceeds 1023x1023 in at least one dimension.\n[MGA] Rescale in software or use -lavdopts lowres=1.\n"
-#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] mismatch between kernel (%u) and MPlayer (%u) mga_vid driver versions\n"
-
-// libvo/vesa_lvo.c
-#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] This branch is no longer supported.\n[VESA_LVO] Please use -vo vesa:vidix instead.\n"
-#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] Couldn't open: '%s'\n"
-#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Invalid output format: %s(%0X)\n"
-#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] Your fb_vid driver version is incompatible with this MPlayer version!\n"
-
-// libvo/vo_3dfx.c
-#define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Only 16bpp supported!"
-#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visual ID is  %lx.\n"
-#define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] Unable to open /dev/3dfx.\n"
-#define MSGTR_LIBVO_3DFX_Error "[VO_3DFX] Error: %d.\n"
-#define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] Couldn't map 3dfx memory areas: %p,%p,%d.\n"
-#define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Initialized: %p.\n"
-#define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Unknown subdevice: %s.\n"
-
-// libvo/aspect.c
-#define MSGTR_LIBVO_ASPECT_NoSuitableNewResFound "[ASPECT] Warning: No suitable new res found!\n"
-#define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] Error: No new size found that fits into res!\n"
-
-// libvo/vo_dxr3.c
-#define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Unable to load new SPU palette!\n"
-#define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] Unable to set playmode!\n"
-#define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] Unable to set subpicture mode!\n"
-#define MSGTR_LIBVO_DXR3_UnableToGetTVNorm "[VO_DXR3] Unable to get TV norm!\n"
-#define MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate "[VO_DXR3] Auto-selected TV norm by framerate: "
-#define MSGTR_LIBVO_DXR3_UnableToSetTVNorm "[VO_DXR3] Unable to set TV norm!\n"
-#define MSGTR_LIBVO_DXR3_SettingUpForNTSC "[VO_DXR3] Setting up for NTSC.\n"
-#define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] Setting up for PAL/SECAM.\n"
-#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] Setting aspect ratio to 4:3.\n"
-#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] Setting aspect ratio to 16:9.\n"
-#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] out of memory\n"
-#define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] Unable to allocate keycolor!\n"
-#define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] Unable to allocate exact keycolor, using closest match (0x%lx).\n"
-#define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] Uninitializing.\n"
-#define MSGTR_LIBVO_DXR3_FailedRestoringTVNorm "[VO_DXR3] Failed restoring TV norm!\n"
-#define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] Enabling prebuffering.\n"
-#define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] Using new sync engine.\n"
-#define MSGTR_LIBVO_DXR3_UsingOverlay "[VO_DXR3] Using overlay.\n"
-#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Error: Overlay requires compiling with X11 libs/headers installed.\n"
-#define MSGTR_LIBVO_DXR3_WillSetTVNormTo "[VO_DXR3] Will set TV norm to: "
-#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "auto-adjust to movie framerate (PAL/PAL-60)"
-#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "auto-adjust to movie framerate (PAL/NTSC)"
-#define MSGTR_LIBVO_DXR3_UseCurrentNorm "Use current norm."
-#define MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm "Unknown norm supplied. Use current norm."
-#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying "[VO_DXR3] Error opening %s for writing, trying /dev/em8300 instead.\n"
-#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingMV "[VO_DXR3] Error opening %s for writing, trying /dev/em8300_mv instead.\n"
-#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWell "[VO_DXR3] Error opening /dev/em8300 for writing as well!\nBailing out.\n"
-#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellMV "[VO_DXR3] Error opening /dev/em8300_mv for writing as well!\nBailing out.\n"
-#define MSGTR_LIBVO_DXR3_Opened "[VO_DXR3] Opened: %s.\n"
-#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP "[VO_DXR3] Error opening %s for writing, trying /dev/em8300_sp instead.\n"
-#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP "[VO_DXR3] Error opening /dev/em8300_sp for writing as well!\nBailing out.\n"
-#define MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup "[VO_DXR3] Unable to open display during overlay hack setup!\n"
-#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Unable to init X11!\n"
-#define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] Failed setting overlay attribute.\n"
-#define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] Failed setting overlay screen!\nExiting.\n"
-#define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] Failed enabling overlay!\nExiting.\n"
-#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] Failed resizing overlay window!\n"
-#define MSGTR_LIBVO_DXR3_FailedSettingOverlayBcs "[VO_DXR3] Failed setting overlay bcs!\n"
-#define MSGTR_LIBVO_DXR3_FailedGettingOverlayYOffsetValues "[VO_DXR3] Failed getting overlay Y-offset values!\nExiting.\n"
-#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXOffsetValues "[VO_DXR3] Failed getting overlay X-offset values!\nExiting.\n"
-#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection "[VO_DXR3] Failed getting overlay X scale correction!\nExiting.\n"
-#define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Yoffset: %d.\n"
-#define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] Xoffset: %d.\n"
-#define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Xcorrection: %d.\n"
-#define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Failed to set signal mix!\n"
-
-// libvo/font_load_ft.c
-#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "New_Face failed. Maybe the font path is wrong.\nPlease supply the text font file (~/.mplayer/subfont.ttf).\n"
-#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "New_Memory_Face failed..\n"
-#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "subtitle font: load_sub_face failed.\n"
-#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "subtitle font: prepare_charset failed.\n"
-#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Cannot prepare subtitle font.\n"
-#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Cannot prepare OSD font.\n"
-#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Cannot generate tables.\n"
-#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType failed.\n"
-
-// libvo/vo_mga.c
-#define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): resized to %dx%d.\n"
-#define MSGTR_LIBVO_MGA_Uninit "[VO] uninit!\n"
-
-// libvo/vo_null.c
-#define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Unknown subdevice: %s.\n"
-
-// libvo/vo_png.c
-#define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] Warning: compression level set to 0, compression disabled!\n"
-#define MSGTR_LIBVO_PNG_Warning2 "[VO_PNG] Info: Use -vo png:z=<n> to set compression level from 0 to 9.\n"
-#define MSGTR_LIBVO_PNG_Warning3 "[VO_PNG] Info: (0 = no compression, 1 = fastest, lowest - 9 best, slowest compression)\n"
-#define MSGTR_LIBVO_PNG_ErrorOpeningForWriting "\n[VO_PNG] Error opening '%s' for writing!\n"
-#define MSGTR_LIBVO_PNG_ErrorInCreatePng "[VO_PNG] Error in create_png.\n"
-
-// libvo/vo_sdl.c
-#define MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput "[VO_SDL] Couldn't get any acceptable SDL Mode for output.\n"
-#define MSGTR_LIBVO_SDL_SetVideoModeFailed "[VO_SDL] set_video_mode: SDL_SetVideoMode failed: %s.\n"
-#define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode failed: %s.\n"
-#define MSGTR_LIBVO_SDL_MappingI420ToIYUV "[VO_SDL] Mapping I420 to IYUV.\n"
-#define MSGTR_LIBVO_SDL_UnsupportedImageFormat "[VO_SDL] Unsupported image format (0x%X).\n"
-#define MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom "[VO_SDL] Info - please use -vm or -zoom to switch to the best resolution.\n"
-#define MSGTR_LIBVO_SDL_FailedToSetVideoMode "[VO_SDL] Failed to set video mode: %s.\n"
-#define MSGTR_LIBVO_SDL_CouldntCreateAYUVOverlay "[VO_SDL] Couldn't create a YUV overlay: %s.\n"
-#define MSGTR_LIBVO_SDL_CouldntCreateARGBSurface "[VO_SDL] Couldn't create an RGB surface: %s.\n"
-#define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Using depth/colorspace conversion, this will slow things down (%ibpp -> %ibpp).\n"
-#define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Unsupported image format in draw_slice, contact MPlayer developers!\n"
-#define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit failed: %s.\n"
-#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] SDL initialization failed: %s.\n"
-#define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Using driver: %s.\n"
-
-// libvo/vobsub_vidix.c
-#define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] Can't start playback: %s\n"
-#define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] Can't stop playback: %s\n"
-#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Interleaved UV for YUV410P not supported.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_slice() was called.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_frame() was called.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] Unsupported FourCC for this VIDIX driver: %x (%s).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] Video server has unsupported resolution (%dx%d), supported: %dx%d-%dx%d.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] Video server has unsupported color depth by vidix (%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] VIDIX driver can't upscale image (%d%d -> %d%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] VIDIX driver can't downscale image (%d%d -> %d%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] Can't configure playback: %s.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] You have the wrong version of the VIDIX library.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] Couldn't find working VIDIX driver.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Couldn't get capability: %s.\n"
-
-// libvo/vo_svga.c
-#define MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable "[VO_SVGA] Forced vid_mode %d (%s) not available.\n"
-#define MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall "[VO_SVGA] Forced vid_mode %d (%s) too small.\n"
-#define MSGTR_LIBVO_SVGA_Vidmode "[VO_SVGA] Vid_mode: %d, %dx%d %dbpp.\n"
-#define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) failed.\n"
-#define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] Video mode is linear and memcpy could be used for image transfer.\n"
-#define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] Video mode has hardware acceleration and put_image could be used.\n"
-#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLikeToKnow "[VO_SVGA] If it works for you I would like to know.\n[VO_SVGA] (send log with `mplayer test.avi -v -v -v -v &> svga.log`). Thx!\n"
-#define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] Video mode has %d page(s).\n"
-#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Centering image. Starting at (%d,%d)\n"
-#define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Using VIDIX. w=%i h=%i  mw=%i mh=%i\n"
-
-// libvo/vo_tdfxfb.c
-#define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Can't open %s: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Problem with FBITGET_FSCREENINFO ioctl: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Problem with FBITGET_VSCREENINFO ioctl: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] This driver only supports the 3Dfx Banshee, Voodoo3 and Voodoo 5.\n"
-#define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] %d bpp output is not supported.\n"
-#define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] Couldn't map memory areas: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] %d bpp output is not supported (This should never have happened).\n"
-#define MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl "[VO_TDFXFB] Eik! Something's wrong with control().\n"
-#define MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay "[VO_TDFXFB] Not enough video memory to play this movie. Try at a lower resolution.\n"
-#define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] Screen is %dx%d at %d bpp, in is %dx%d at %d bpp, norm is %dx%d.\n"
-
-// libvo/vo_tdfx_vid.c
-#define MSGTR_LIBVO_TDFXVID_Move "[VO_TDXVID] Move %d(%d) x %d => %d.\n"
-#define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP move failed to clear the screen.\n"
-#define MSGTR_LIBVO_TDFXVID_BlitFailed "[VO_TDFXVID] Blit failed.\n"
-#define MSGTR_LIBVO_TDFXVID_NonNativeOverlayFormatNeedConversion "[VO_TDFXVID] Non-native overlay format needs conversion.\n"
-#define MSGTR_LIBVO_TDFXVID_UnsupportedInputFormat "[VO_TDFXVID] Unsupported input format 0x%x.\n"
-#define MSGTR_LIBVO_TDFXVID_OverlaySetupFailed "[VO_TDFXVID] Overlay setup failed.\n"
-#define MSGTR_LIBVO_TDFXVID_OverlayOnFailed "[VO_TDFXVID] Overlay on failed.\n"
-#define MSGTR_LIBVO_TDFXVID_OverlayReady "[VO_TDFXVID] Overlay ready: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
-#define MSGTR_LIBVO_TDFXVID_TextureBlitReady "[VO_TDFXVID] Texture blit ready: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
-#define MSGTR_LIBVO_TDFXVID_OverlayOffFailed "[VO_TDFXVID] Overlay off failed\n"
-#define MSGTR_LIBVO_TDFXVID_CantOpen "[VO_TDFXVID] Can't open %s: %s.\n"
-#define MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg "[VO_TDFXVID] Can't get current configuration: %s.\n"
-#define MSGTR_LIBVO_TDFXVID_MemmapFailed "[VO_TDFXVID] Memmap failed !!!!!\n"
-#define MSGTR_LIBVO_TDFXVID_GetImageTodo "Get image todo.\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailed "[VO_TDFXVID] AGP move failed.\n"
-#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] Set YUV failed.\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP move failed on Y plane.\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP move failed on U plane.\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP move failed on V plane.\n"
-#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] unknown format: 0x%x.\n"
-
-// libvo/vo_tga.c
-#define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] Unknown subdevice: %s.\n"
-
-// libvo/vo_vesa.c
-#define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fatal error occurred! Can't continue.\n"
-#define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] unknown subdevice: '%s'.\n"
-#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] You have too little video memory for this mode:\n[VO_VESA] Required: %08lX present: %08lX.\n"
-#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] You have to specify the capabilities of the monitor. Not changing refresh rate.\n"
-#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] The mode does not fit the monitor limits. Not changing refresh rate.\n"
-#define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Detected internal fatal error: init is called before preinit.\n"
-#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] The -flip option is not supported.\n"
-#define MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound "[VO_VESA] Possible reason: No VBE2 BIOS found.\n"
-#define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] Found VESA VBE BIOS Version %x.%x Revision: %x.\n"
-#define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] Video memory: %u Kb.\n"
-#define MSGTR_LIBVO_VESA_Capabilites "[VO_VESA] VESA Capabilities: %s %s %s %s %s.\n"
-#define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] !!! OEM info will be printed below !!!\n"
-#define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] You should see 5 OEM related lines below; If not, you've broken vm86.\n"
-#define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM info: %s.\n"
-#define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM Revision: %x.\n"
-#define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM vendor: %s.\n"
-#define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM Product Name: %s.\n"
-#define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM Product Rev: %s.\n"
-#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] Hint: For working TV-Out you should have plugged in the TV connector\n"\
-"[VO_VESA] before booting since VESA BIOS initializes itself only during POST.\n"
-#define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] Using VESA mode (%u) = %x [%ux%u@%u]\n"
-#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] Can't initialize software scaler.\n"
-#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] Can't use DGA. Force bank switching mode. :(\n"
-#define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] Using DGA (physical resources: %08lXh, %08lXh)"
-#define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] Can't use double buffering: not enough video memory.\n"
-#define MSGTR_LIBVO_VESA_CantFindNeitherDga "[VO_VESA] Can find neither DGA nor relocatable window frame.\n"
-#define MSGTR_LIBVO_VESA_YouveForcedDga "[VO_VESA] You've forced DGA. Exiting\n"
-#define MSGTR_LIBVO_VESA_CantFindValidWindowAddress "[VO_VESA] Can't find valid window address.\n"
-#define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] Using bank switching mode (physical resources: %08lXh, %08lXh).\n"
-#define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] Can't allocate temporary buffer.\n"
-#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] Sorry, unsupported mode -- try -x 640 -zoom.\n"
-#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] Oh you really have a picture on the TV!\n"
-#define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] Can't initialize Linux Video Overlay.\n"
-#define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] Using video overlay: %s.\n"
-#define MSGTR_LIBVO_VESA_CantInitializeVidixDriver "[VO_VESA] Can't initialize VIDIX driver.\n"
-#define MSGTR_LIBVO_VESA_UsingVidix "[VO_VESA] Using VIDIX.\n"
-#define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] Can't find mode for: %ux%u@%u.\n"
-#define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] VESA initialization complete.\n"
-
-// libvo/vo_x11.c
-#define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] draw_frame() called!!!!!!\n"
-
-// libvo/vo_xv.c
-#define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() called!!!!!!\n"
-#define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] Shared memory not supported\nReverting to normal Xv.\n"
-#define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] Sorry, Xv not supported by this X11 version/driver\n[VO_XV] ******** Try with  -vo x11  or  -vo sdl  *********\n"
-#define MSGTR_LIBVO_XV_XvQueryAdaptorsFailed  "[VO_XV] XvQueryAdaptors failed.\n"
-#define MSGTR_LIBVO_XV_InvalidPortParameter "[VO_XV] Invalid port parameter, overriding with port 0.\n"
-#define MSGTR_LIBVO_XV_CouldNotGrabPort "[VO_XV] Could not grab port %i.\n"
-#define MSGTR_LIBVO_XV_CouldNotFindFreePort "[VO_XV] Could not find free Xvideo port - maybe another process is already\n"\
-"[VO_XV] using it. Close all video applications, and try again. If that does\n"\
-"[VO_XV] not help, see 'mplayer -vo help' for other (non-xv) video out drivers.\n"
-#define MSGTR_LIBVO_XV_NoXvideoSupport "[VO_XV] It seems there is no Xvideo support for your video card available.\n"\
-"[VO_XV] Run 'xvinfo' to verify its Xv support and read\n"\
-"[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
-"[VO_XV] See 'mplayer -vo help' for other (non-xv) video out drivers.\n"\
-"[VO_XV] Try -vo x11.\n"
-
-
-// loader/ldt_keeper.c
-#define MSGTR_LOADER_DYLD_Warning "WARNING: Attempting to use DLL codecs but environment variable\n         DYLD_BIND_AT_LAUNCH not set. This will likely crash.\n"
-
-// stream/stream_radio.c
-#define MSGTR_RADIO_ChannelNamesDetected "[radio] Radio channel names detected.\n"
-#define MSGTR_RADIO_FreqRange "[radio] Allowed frequency range is %.2f-%.2f MHz.\n"
-#define MSGTR_RADIO_WrongFreqForChannel "[radio] Wrong frequency for channel %s\n"
-#define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Wrong channel number: %.2f\n"
-#define MSGTR_RADIO_WrongChannelNumberInt "[radio] Wrong channel number: %d\n"
-#define MSGTR_RADIO_WrongChannelName "[radio] Wrong channel name: %s\n"
-#define MSGTR_RADIO_FreqParameterDetected "[radio] Radio frequency parameter detected.\n"
-#define MSGTR_RADIO_DoneParsingChannels "[radio] Done parsing channels.\n"
-#define MSGTR_RADIO_GetTunerFailed "[radio] Warning: ioctl get tuner failed: %s. Setting frac to %d.\n"
-#define MSGTR_RADIO_NotRadioDevice "[radio] %s is no radio device!\n"
-#define MSGTR_RADIO_TunerCapLowYes "[radio] tuner is low:yes frac=%d\n"
-#define MSGTR_RADIO_TunerCapLowNo "[radio] tuner is low:no frac=%d\n"
-#define MSGTR_RADIO_SetFreqFailed "[radio] ioctl set frequency 0x%x (%.2f) failed: %s\n"
-#define MSGTR_RADIO_GetFreqFailed "[radio] ioctl get frequency failed: %s\n"
-#define MSGTR_RADIO_SetMuteFailed "[radio] ioctl set mute failed: %s\n"
-#define MSGTR_RADIO_QueryControlFailed "[radio] ioctl query control failed: %s\n"
-#define MSGTR_RADIO_GetVolumeFailed "[radio] ioctl get volume failed: %s\n"
-#define MSGTR_RADIO_SetVolumeFailed "[radio] ioctl set volume failed: %s\n"
-#define MSGTR_RADIO_DroppingFrame "\n[radio] too bad - dropping audio frame (%d bytes)!\n"
-#define MSGTR_RADIO_BufferEmpty "[radio] grab_audio_frame: buffer empty, waiting for %d data bytes.\n"
-#define MSGTR_RADIO_AudioInitFailed "[radio] audio_in_init failed: %s\n"
-#define MSGTR_RADIO_AudioBuffer "[radio] Audio capture - buffer=%d bytes (block=%d bytes).\n"
-#define MSGTR_RADIO_AllocateBufferFailed "[radio] cannot allocate audio buffer (block=%d,buf=%d): %s\n"
-#define MSGTR_RADIO_CurrentFreq "[radio] Current frequency: %.2f\n"
-#define MSGTR_RADIO_SelectedChannel "[radio] Selected channel: %d - %s (freq: %.2f)\n"
-#define MSGTR_RADIO_ChangeChannelNoChannelList "[radio] Can not change channel: no channel list given.\n"
-#define MSGTR_RADIO_UnableOpenDevice "[radio] Unable to open '%s': %s\n"
-#define MSGTR_RADIO_RadioDevice "[radio] Radio fd: %d, %s\n"
-#define MSGTR_RADIO_InitFracFailed "[radio] init_frac failed.\n"
-#define MSGTR_RADIO_WrongFreq "[radio] Wrong frequency: %.2f\n"
-#define MSGTR_RADIO_UsingFreq "[radio] Using frequency: %.2f.\n"
-#define MSGTR_RADIO_AudioInInitFailed "[radio] audio_in_init failed.\n"
-#define MSGTR_RADIO_BufferString "[radio] %s: in buffer=%d dropped=%d\n"
-#define MSGTR_RADIO_AudioInSetupFailed "[radio] audio_in_setup call failed: %s\n"
-#define MSGTR_RADIO_CaptureStarting "[radio] Starting capture stuff.\n"
-#define MSGTR_RADIO_ClearBufferFailed "[radio] Clearing buffer failed: %s\n"
-#define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Call to stream_enable_cache failed: %s\n"
-#define MSGTR_RADIO_DriverUnknownStr "[radio] Unknown driver name: %s\n"
-#define MSGTR_RADIO_DriverV4L2 "[radio] Using V4Lv2 radio interface.\n"
-#define MSGTR_RADIO_DriverV4L "[radio] Using V4Lv1 radio interface.\n"
-#define MSGTR_RADIO_DriverBSDBT848 "[radio] Using *BSD BT848 radio interface.\n"
-#define MSGTR_RADIO_AvailableDrivers "[radio] Available drivers: "
 
 
 // ================================== LIBASS ====================================
@@ -2022,6 +1767,254 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Error opening memory font: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] font face with no charmaps\n"
 #define MSGTR_LIBASS_NoCharmapAutodetected "[ass] no charmap autodetected, trying the first one\n"
+
+
+// ================================== stream ====================================
+
+// ai_alsa1x.c
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Cannot set samplerate.\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Cannot set buffer time.\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Cannot set period time.\n"
+
+// ai_alsa1x.c / ai_alsa.c
+#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Broken configuration for this PCM: no configurations available.\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Access type not available.\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Sample format not available.\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Channel count not available - reverting to default: %d\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Unable to install hardware paramameters: %s"
+#define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Can't use period equal to buffer size (%u == %lu)\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Unable to install software parameters:\n"
+#define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Error opening audio: %s\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "ALSA status error: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (at least %.3f ms long)\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatus "ALSA Status:\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUNPrepareError "ALSA xrun: prepare error: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError "ALSA read/write error"
+
+// ai_oss.c
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Unable to set channel count: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Unable to set stereo: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2Open "Unable to open '%s': %s\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "unsupported format\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Unable to set audio format."
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Unable to set samplerate: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Unable to set trigger: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Unable to get block size!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "Audio block size is zero, setting to %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "Audio block size too low, setting to %d!\n"
+
+// asf_mmst_streaming.c
+#define MSGTR_MPDEMUX_MMST_WriteError "write error\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\nAlert! EOF\n"
+#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "pre-header read failed\n"
+#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Invalid header size, giving up.\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Header data read failed.\n"
+#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "packet_len read failed.\n"
+#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Invalid RTSP packet size, giving up.\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Command data read failed.\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "header object\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "data object\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "file object, packet length = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "stream object, stream ID: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Too many IDs, stream skipped."
+#define MSGTR_MPDEMUX_MMST_UnknownObject "unknown object\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Media data read failed.\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "missing signature\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Everything done. Thank you for downloading a media file containing proprietary and patented technology.\n"
+#define MSGTR_MPDEMUX_MMST_UnknownCmd "unknown command %02x\n"
+#define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet error : %s\n"
+#define MSGTR_MPDEMUX_MMST_Connected "Connected\n"
+
+// asf_streaming.c
+#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, stream_chunck size is too small: %d\n"
+#define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "size_confirm mismatch!: %d %d\n"
+#define MSGTR_MPDEMUX_ASF_WarnDropHeader "Warning: drop header ????\n"
+#define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Error while parsing chunk header\n"
+#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Didn't get a header as first chunk !!!!\n"
+#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Error: Can't allocate %d bytes buffer.\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Error while reading network stream.\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Error: Chunk is too small.\n"
+#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Error: Subchunk number is invalid.\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "Bandwidth too small, file cannot be played!\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "Bandwidth too small, deselected audio stream.\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "Bandwidth too small, deselected video stream.\n"
+#define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Invalid length in ASF header!\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Error while reading chunk header.\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Error: chunk_size > packet_size\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Error while reading chunk.\n"
+#define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Redirector\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "invalid proxy URL\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "unknown ASF stream type\n"
+#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Failed to parse HTTP response.\n"
+#define MSGTR_MPDEMUX_ASF_ServerReturn "Server returned %d:%s\n"
+#define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF HTTP PARSE WARNING : Pragma %s cut from %d bytes to %d\n"
+#define MSGTR_MPDEMUX_ASF_SocketWriteError "socket write error: %s\n"
+#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Failed to parse header.\n"
+#define MSGTR_MPDEMUX_ASF_NoStreamFound "No stream found.\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "unknown ASF streaming type\n"
+#define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "Failed, exiting.\n"
+
+// audio_in.c
+#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nError reading audio: %s\n"
+#define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Recovered from cross-run, some frames may be left out!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Fatal error, cannot recover!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nNot enough audio samples!\n"
+
+// cache2.c
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rThis stream is non-cacheable.\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos differs!!! Report this bug...\n"
+
+// network.c
+#define MSGTR_MPDEMUX_NW_UnknownAF "Unknown address family %d\n"
+#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "Resolving %s for %s...\n"
+#define MSGTR_MPDEMUX_NW_CantResolv "Couldn't resolve name for %s: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectingToServer "Connecting to server %s[%s]: %d...\n"
+#define MSGTR_MPDEMUX_NW_CantConnect2Server "Failed to connect to server with %s\n"
+#define MSGTR_MPDEMUX_NW_SelectFailed "Select failed.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "connection timeout\n"
+#define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt failed: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "connect error: %s\n"
+#define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "Invalid proxy setting... Trying without proxy.\n"
+#define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Could not resolve remote hostname for AF_INET. Trying without proxy.\n"
+#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Error while sending HTTP request: Didn't send all the request.\n"
+#define MSGTR_MPDEMUX_NW_ReadFailed "Read failed.\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response read 0 (i.e. EOF).\n"
+#define MSGTR_MPDEMUX_NW_AuthFailed "Authentication failed. Please use the -user and -passwd options to provide your\n"\
+"username/password for a list of URLs, or form an URL like:\n"\
+"http://username:password@hostname/file\n"
+#define MSGTR_MPDEMUX_NW_AuthRequiredFor "Authentication required for %s\n"
+#define MSGTR_MPDEMUX_NW_AuthRequired "Authentication required.\n"
+#define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "No password provided, trying blank password.\n"
+#define MSGTR_MPDEMUX_NW_ErrServerReturned "Server returns %d: %s\n"
+#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache size set to %d KBytes\n"
+
+// open.c, stream.c:
+#define MSGTR_CdDevNotfound "CD-ROM Device '%s' not found.\n"
+#define MSGTR_ErrTrackSelect "Error selecting VCD track."
+#define MSGTR_ReadSTDIN "Reading from stdin...\n"
+#define MSGTR_UnableOpenURL "Unable to open URL: %s\n"
+#define MSGTR_ConnToServer "Connected to server: %s\n"
+#define MSGTR_FileNotFound "File not found: '%s'\n"
+
+#define MSGTR_SMBInitError "Cannot init the libsmbclient library: %d\n"
+#define MSGTR_SMBFileNotFound "Could not open from LAN: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support.\n"
+
+#define MSGTR_CantOpenDVD "Couldn't open DVD device: %s (%s)\n"
+
+// stream_cdda.c
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Can't open CDDA device.\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Can't open disc.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Found audio CD with %ld tracks.\n"
+
+// stream_cddb.c
+#define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Failed to read TOC.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Failed to open %s device.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "not a valid URL\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Failed to send the HTTP request.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Failed to read the HTTP response.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Not Found.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "unknown error code\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "No cache found.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Not all the xmcd file has been read.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Failed to create directory %s.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Not all of the xmcd file has been written.\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Invalid xmcd database file returned.\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "unexpected FIXME\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "unhandled code\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Unable to find end of line.\n"
+#define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Parse OK, found: %s\n"
+#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album not found.\n"
+#define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Server returns: Command syntax error\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "No sites information available.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Failed to get the protocol level.\n"
+#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "No CD in the drive.\n"
+
+// stream_cue.c
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Unexpected cuefile line: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] bin filename tested: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Couldn't find the bin file - giving up.\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Using bin file %s.\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] unknown mode for binfile. Should not happen. Aborting.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Cannot open %s.\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Error reading from  %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Error getting size of bin file.\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "track %02d:  format=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] unexpected end of bin file\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Couldn't read %d bytes of payload.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, filename=%s, track=%d, available tracks: %d -> %d\n"
+
+// stream_dvd.c
+#define MSGTR_DVDspeedCantOpen "Couldn't open DVD device for writing, changing DVD speed needs write access.\n"
+#define MSGTR_DVDrestoreSpeed "Restoring DVD speed... "
+#define MSGTR_DVDlimitSpeed "Limiting DVD speed to %dKB/s... "
+#define MSGTR_DVDlimitFail "failed\n"
+#define MSGTR_DVDlimitOk "successful\n"
+#define MSGTR_NoDVDSupport "MPlayer was compiled without DVD support, exiting.\n"
+#define MSGTR_DVDnumTitles "There are %d titles on this DVD.\n"
+#define MSGTR_DVDinvalidTitle "Invalid DVD title number: %d\n"
+#define MSGTR_DVDnumChapters "There are %d chapters in this DVD title.\n"
+#define MSGTR_DVDinvalidChapter "Invalid DVD chapter number: %d\n"
+#define MSGTR_DVDinvalidChapterRange "Invalid chapter range specification %s\n"
+#define MSGTR_DVDinvalidLastChapter "Invalid DVD last chapter number: %d\n"
+#define MSGTR_DVDnumAngles "There are %d angles in this DVD title.\n"
+#define MSGTR_DVDinvalidAngle "Invalid DVD angle number: %d\n"
+#define MSGTR_DVDnoIFO "Cannot open the IFO file for DVD title %d.\n"
+#define MSGTR_DVDnoVMG "Can't open VMG info!\n"
+#define MSGTR_DVDnoVOBs "Cannot open title VOBS (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoMatchingAudio "No matching DVD audio language found!\n"
+#define MSGTR_DVDaudioChannel "Selected DVD audio channel: %d language: %c%c\n"
+#define MSGTR_DVDaudioStreamInfo "audio stream: %d format: %s (%s) language: %s aid: %d.\n"
+#define MSGTR_DVDnumAudioChannels "number of audio channels on disk: %d.\n"
+#define MSGTR_DVDnoMatchingSubtitle "No matching DVD subtitle language found!\n"
+#define MSGTR_DVDsubtitleChannel "Selected DVD subtitle channel: %d language: %c%c\n"
+#define MSGTR_DVDsubtitleLanguage "subtitle ( sid ): %d language: %s\n"
+#define MSGTR_DVDnumSubtitles "number of subtitles on disk: %d\n"
+
+// stream_radio.c
+#define MSGTR_RADIO_ChannelNamesDetected "[radio] Radio channel names detected.\n"
+#define MSGTR_RADIO_FreqRange "[radio] Allowed frequency range is %.2f-%.2f MHz.\n"
+#define MSGTR_RADIO_WrongFreqForChannel "[radio] Wrong frequency for channel %s\n"
+#define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Wrong channel number: %.2f\n"
+#define MSGTR_RADIO_WrongChannelNumberInt "[radio] Wrong channel number: %d\n"
+#define MSGTR_RADIO_WrongChannelName "[radio] Wrong channel name: %s\n"
+#define MSGTR_RADIO_FreqParameterDetected "[radio] Radio frequency parameter detected.\n"
+#define MSGTR_RADIO_DoneParsingChannels "[radio] Done parsing channels.\n"
+#define MSGTR_RADIO_GetTunerFailed "[radio] Warning: ioctl get tuner failed: %s. Setting frac to %d.\n"
+#define MSGTR_RADIO_NotRadioDevice "[radio] %s is no radio device!\n"
+#define MSGTR_RADIO_TunerCapLowYes "[radio] tuner is low:yes frac=%d\n"
+#define MSGTR_RADIO_TunerCapLowNo "[radio] tuner is low:no frac=%d\n"
+#define MSGTR_RADIO_SetFreqFailed "[radio] ioctl set frequency 0x%x (%.2f) failed: %s\n"
+#define MSGTR_RADIO_GetFreqFailed "[radio] ioctl get frequency failed: %s\n"
+#define MSGTR_RADIO_SetMuteFailed "[radio] ioctl set mute failed: %s\n"
+#define MSGTR_RADIO_QueryControlFailed "[radio] ioctl query control failed: %s\n"
+#define MSGTR_RADIO_GetVolumeFailed "[radio] ioctl get volume failed: %s\n"
+#define MSGTR_RADIO_SetVolumeFailed "[radio] ioctl set volume failed: %s\n"
+#define MSGTR_RADIO_DroppingFrame "\n[radio] too bad - dropping audio frame (%d bytes)!\n"
+#define MSGTR_RADIO_BufferEmpty "[radio] grab_audio_frame: buffer empty, waiting for %d data bytes.\n"
+#define MSGTR_RADIO_AudioInitFailed "[radio] audio_in_init failed: %s\n"
+#define MSGTR_RADIO_AudioBuffer "[radio] Audio capture - buffer=%d bytes (block=%d bytes).\n"
+#define MSGTR_RADIO_AllocateBufferFailed "[radio] cannot allocate audio buffer (block=%d,buf=%d): %s\n"
+#define MSGTR_RADIO_CurrentFreq "[radio] Current frequency: %.2f\n"
+#define MSGTR_RADIO_SelectedChannel "[radio] Selected channel: %d - %s (freq: %.2f)\n"
+#define MSGTR_RADIO_ChangeChannelNoChannelList "[radio] Can not change channel: no channel list given.\n"
+#define MSGTR_RADIO_UnableOpenDevice "[radio] Unable to open '%s': %s\n"
+#define MSGTR_RADIO_RadioDevice "[radio] Radio fd: %d, %s\n"
+#define MSGTR_RADIO_InitFracFailed "[radio] init_frac failed.\n"
+#define MSGTR_RADIO_WrongFreq "[radio] Wrong frequency: %.2f\n"
+#define MSGTR_RADIO_UsingFreq "[radio] Using frequency: %.2f.\n"
+#define MSGTR_RADIO_AudioInInitFailed "[radio] audio_in_init failed.\n"
+#define MSGTR_RADIO_BufferString "[radio] %s: in buffer=%d dropped=%d\n"
+#define MSGTR_RADIO_AudioInSetupFailed "[radio] audio_in_setup call failed: %s\n"
+#define MSGTR_RADIO_CaptureStarting "[radio] Starting capture stuff.\n"
+#define MSGTR_RADIO_ClearBufferFailed "[radio] Clearing buffer failed: %s\n"
+#define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Call to stream_enable_cache failed: %s\n"
+#define MSGTR_RADIO_DriverUnknownStr "[radio] Unknown driver name: %s\n"
+#define MSGTR_RADIO_DriverV4L2 "[radio] Using V4Lv2 radio interface.\n"
+#define MSGTR_RADIO_DriverV4L "[radio] Using V4Lv1 radio interface.\n"
+#define MSGTR_RADIO_DriverBSDBT848 "[radio] Using *BSD BT848 radio interface.\n"
+#define MSGTR_RADIO_AvailableDrivers "[radio] Available drivers: "
 
 //tv.c
 #define MSGTR_TV_BogusNormParameter "tv.c: norm_from_string(%s): Bogus norm parameter, setting %s.\n"
@@ -2120,3 +2113,6 @@ static char help_text[]=
 #define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: Unable to find video capture device\n"
 #define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Unable to find audio capture device\n"
 #define MSGTR_TVI_DS_GetActualMediatypeFailed "tvi_dshow: Unable to get actual mediatype (Error:0x%x). Assuming equal to requested.\n"
+
+// url.c
+#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "String appears to be already escaped in url_escape %c%c1%c2\n"
