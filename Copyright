@@ -159,3 +159,10 @@ Copyright:  1998 Justin Schoeman (justin@suntiger.ee.up.ac.za)
             1998, 1999 Joerg Walter <trouble@moes.pmnet.uni-oldenburg.de>
             1999 Wim Taymans <wim.taymans@tvd.be>
 License:    GNU General Public License version 2
+
+Name:       ReactOS
+Version:    r25937
+Homepage:   http://www.reactos.org/
+Directory:  vidix/dhahelperwin/ntverp.h vidix/dhahelperwin/common.ver
+Copyright:  Alex Ionescu (alex.ionescu@reactos.org)
+License:    GNU General Public License
