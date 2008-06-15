@@ -719,8 +719,6 @@ static char help_text[]=
 
 // ====================== GUI messages/buttons ========================
 
-#ifdef HAVE_NEW_GUI
-
 // --- labels ---
 #define MSGTR_About "About"
 #define MSGTR_FileSelect "Select file..."
@@ -1011,8 +1009,6 @@ static char help_text[]=
 // wsxdnd.c
 #define MSGTR_WS_NotAFile "This does not seem to be a file...\n"
 #define MSGTR_WS_DDNothing "D&D: Nothing returned!\n"
-
-#endif
 
 
 // ======================= video output drivers ========================
