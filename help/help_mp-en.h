@@ -1239,7 +1239,6 @@ static char help_text[]=
 #define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] Cannot get pcm status: %s\n"
 
 // ao_plugin.c
-
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] invalid plugin: %s\n"
 
 
