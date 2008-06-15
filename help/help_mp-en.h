@@ -23,8 +23,8 @@ static char help_text[]=
 #endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  play DVD title from device instead of plain file\n"
-" -alang/-slang    select DVD audio/subtitle language (by 2-char country code)\n"
 #endif
+" -alang/-slang    select DVD audio/subtitle language (by 2-char country code)\n"
 " -ss <position>   seek to given (seconds or hh:mm:ss) position\n"
 " -nosound         do not play sound\n"
 " -fs              fullscreen playback (or -vm, -zoom, details in the man page)\n"
