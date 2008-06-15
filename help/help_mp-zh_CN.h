@@ -1953,7 +1953,6 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
 "[VO_XV] 请参见 'mplayer -vo help' 找其它 (非-xv) 视频输出驱动。\n"\
 "[VO_XV] 试试 -vo x11.\n"
-#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] 使用 Xv 转换器 #%d（%s）\n"
 
 
 // loader/ldt_keeper.c

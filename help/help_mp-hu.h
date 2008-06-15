@@ -1958,7 +1958,6 @@ static char help_text[]=
 "[VO_XV] majd olvasd el a DOCS/HTML/hu/video.html#xv fájlt!\n"\
 "[VO_XV] Lásd az 'mplayer -vo help'-et más (nem-xv) videó kimeneti vezérlőkért.\n"\
 "[VO_XV] Próbáld ki a -vo x11 -et.\n"
-#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] Xv Adaptor #%d (%s) használata\n"
 
 
 // loader/ldt_keeper.c
