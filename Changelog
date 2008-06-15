@@ -8,11 +8,21 @@ MPlayer (1.0)
     * Apple's raw YUV2 in MOV
     * LATM over LOAS AAC decoding via internal libfaad2
     * Video game codecs: BFI video
+    * AVOptions support for libavcodec based decoders
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
     * support for wavpack in matroska
     * demux_lavf permits program switching
+    * AVOption support for lavf demuxing
+    * prefer lavf musepack demuxer over libmpdemux
+    * prefer lavf mov demuxer over libmpdemux
+    * support -slang in lavf demuxer
+    * support nosound switching in lavf demuxer
+    * support libass in lavf demuxer
+    * support vobsub in lavf demuxer
+    * support mov subtitle format
+    * support for attachments in lavf demuxer
 
     Filters:
     * vf_ow new overcomplete wavelet denoiser
@@ -25,18 +35,28 @@ MPlayer (1.0)
     * fix teletext on some systems
     * dvd streams can switch angles
     * dvd still menus are now supported via dvdnav://
+    * Ability to specify TV standard for each channel 
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
     * H.264 speedup and PAFF decoding
     * Nellymoser audio codec
     * VC-1/WMV3 MMX optimizations
+    * VP3 decoder speedup
+
+    libmpeg2:
+    * Enable Alpha/ARM optimizations in libmpeg2
+    * SSE2-optimized IDCT routines from upstream libmpeg2.
 
     Drivers:
     * Replace PolypAudio by PulseAudio (-ao pulse)
+    * Add force-pbo suboption for faster output in vo_gl
 
     MEncoder:
     * Ogg muxing using -of lavf -o done.ogg
+    * check for system wide config file in mencoder
+    * AVOption support for lavc encoders.
+    * AVOption support for lavf muxing.
 
     Others:
     * many compiler warning fixes
@@ -47,6 +67,9 @@ MPlayer (1.0)
     * grayscale decoding/encoding with FFmpeg disabled where it slowed down
       the color case
     * Linux AppleIR remote support.
+    * Add options to disable some or all config files.
+    * support for DOS-style file:///x:/path paths
+    * some new slave commands (check DOCS/tech/slave.txt)
 
     Ports:
     * small crash with vo_macosx fixed
