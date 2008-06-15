@@ -12,7 +12,6 @@
 
 // ========================= MPlayer help ===========================
 
-#ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
 "Usage:   mplayer [options] [url|path/]filename\n"
 "\n"
@@ -52,7 +51,7 @@ static char help_text[]=
 "\n"
 " * * * SEE THE MAN PAGE FOR DETAILS, FURTHER (ADVANCED) OPTIONS AND KEYS * * *\n"
 "\n";
-#endif
+
 
 // libmpcodecs/ad_dvdpcm.c:
 #define MSGTR_SamplesWanted "Samples of this format are needed to improve support. Please contact the developers.\n"

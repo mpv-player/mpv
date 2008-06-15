@@ -39,8 +39,6 @@
 #include "version.h"
 
 #include "mp_msg.h"
-
-#define HELP_MP_DEFINE_STATIC
 #include "help_mp.h"
 
 #include "m_option.h"
