@@ -5957,6 +5957,27 @@ else
 fi
 echores "$_liba52"
 
+echocheck "internal libmpeg2 support"
+if test "$_libmpeg2" = auto ; then
+  _libmpeg2=yes
+  if alpha && test cc_vendor=gnu; then
+    case $cc_version in
+      2*|3.0*|3.1*) # cannot compile MVI instructions
+        _libmpeg2=no
+        _res_comment="broken gcc"
+        ;;
+    esac
+  fi
+fi
+if test "$_libmpeg2" = yes ; then
+  _def_libmpeg2='#define USE_LIBMPEG2 1'
+  _codecmodules="libmpeg2 $_codecmodules"
+else
+  _def_libmpeg2='#undef USE_LIBMPEG2'
+  _nocodecmodules="libmpeg2 $_nocodecmodules"
+fi
+echores "$_libmpeg2"
+
 echocheck "libdca support"
 if test "$_libdca" = auto ; then
   _libdca=no
@@ -5978,27 +5999,6 @@ else
   _nocodecmodules="libdca $_nocodecmodules"
 fi
 echores "$_libdca"
-
-echocheck "internal libmpeg2 support"
-if test "$_libmpeg2" = auto ; then
-  _libmpeg2=yes
-  if alpha && test cc_vendor=gnu; then
-    case $cc_version in
-      2*|3.0*|3.1*) # cannot compile MVI instructions
-        _libmpeg2=no
-        _res_comment="broken gcc"
-        ;;
-    esac
-  fi
-fi
-if test "$_libmpeg2" = yes ; then
-  _def_libmpeg2='#define USE_LIBMPEG2 1'
-  _codecmodules="libmpeg2 $_codecmodules"
-else
-  _def_libmpeg2='#undef USE_LIBMPEG2'
-  _nocodecmodules="libmpeg2 $_nocodecmodules"
-fi
-echores "$_libmpeg2"
 
 echocheck "libmpcdec (musepack, version >= 1.2.1 required)"
 if test "$_musepack" = auto ; then
