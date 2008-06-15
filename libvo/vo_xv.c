@@ -812,8 +812,9 @@ static int preinit(const char *arg)
                 if (!XvGrabPort(mDisplay, xv_p, CurrentTime))
                 {
                     xv_port = xv_p;
-                    mp_msg(MSGT_VO, MSGL_INFO,
-                           MSGTR_LIBVO_XV_Adaptor, i, ai[i].name);
+                    mp_msg(MSGT_VO, MSGL_V,
+                           "[VO_XV] Using Xv Adapter #%d (%s)\n",
+                           i, ai[i].name);
                     break;
                 } else
                 {

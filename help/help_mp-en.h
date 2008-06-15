@@ -1959,7 +1959,6 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
 "[VO_XV] See 'mplayer -vo help' for other (non-xv) video out drivers.\n"\
 "[VO_XV] Try -vo x11.\n"
-#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] Using Xv Adaptor #%d (%s)\n"
 
 
 // loader/ldt_keeper.c
