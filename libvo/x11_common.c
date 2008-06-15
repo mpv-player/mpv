@@ -1615,7 +1615,7 @@ static int xss_suspend(Bool suspend)
     if (XScreenSaverQueryExtension(mDisplay, &event, &error) != True ||
         XScreenSaverQueryVersion(mDisplay, &major, &minor) != True)
         return 0;
-    if (major < 1 || major == 1 && minor < 1)
+    if (major < 1 || (major == 1 && minor < 1))
         return 0;
     XScreenSaverSuspend(mDisplay, suspend);
     return 1;
