@@ -229,7 +229,7 @@ static char help_text[]=
 #define MSGTR_SubSourceVobsub "vobsub"
 #define MSGTR_SubSourceDemux "embedded"
 
-// osd bar names
+// OSD bar names
 #define MSGTR_Volume "Volume"
 #define MSGTR_Panscan "Panscan"
 #define MSGTR_Gamma "Gamma"
@@ -787,7 +787,7 @@ static char help_text[]=
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "skin config file read error (%s)\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
-// --- gtk menus
+// --- GTK menus
 #define MSGTR_MENU_AboutMPlayer "About MPlayer"
 #define MSGTR_MENU_Open "Open..."
 #define MSGTR_MENU_PlayFile "Play file..."
@@ -1015,7 +1015,7 @@ static char help_text[]=
 #endif
 
 
-// ======================= VO Video Output drivers ========================
+// ======================= video output drivers ========================
 
 #define MSGTR_VOincompCodec "The selected video_out device is incompatible with this codec.\n"\
                 "Try appending the scale filter to your filter list,\n"\
@@ -1087,15 +1087,12 @@ static char help_text[]=
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "Source image dimensions are too high: %ux%u (maximum is %ux%u)\n"
 
-// Old vo drivers that have been replaced
-
+// old vo drivers that have been replaced
 #define MSGTR_VO_PGM_HasBeenReplaced "The pgm video output driver has been replaced by -vo pnm:pgmyuv.\n"
 #define MSGTR_VO_MD5_HasBeenReplaced "The md5 video output driver has been replaced by -vo md5sum.\n"
 
 
-// ======================= AO Audio Output drivers ========================
-
-// libao2 
+// ======================= audio output drivers ========================
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed "audio_out: alsa9 and alsa1x modules were removed, use -ao alsa instead.\n"
@@ -1131,9 +1128,6 @@ static char help_text[]=
 // ao_mpegpes.c
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB audio set mixer failed: %s.\n"
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz not supported, try to resample.\n"
-
-// ao_null.c
-// This one desn't even  have any mp_msg nor printf's?? [CHECK]
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Samplerate: %iHz Channels: %s Format %s\n"
@@ -1254,9 +1248,9 @@ static char help_text[]=
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] invalid plugin: %s\n"
 
 
-// ======================= AF Audio Filters ================================
+// ======================= audio filters ================================
 
-// libaf 
+// af_scaletempo.c
 #define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
@@ -1562,10 +1556,9 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_XMMS_WaitForStart "Waiting for the XMMS plugin to start playback of '%s'...\n"
 
 
-// ========================== LIBMPMENU ===================================
+// ========================== LIBMENU ===================================
 
 // common
-
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
 
 // libmenu/menu.c
@@ -1677,10 +1670,9 @@ static char help_text[]=
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s not supported by next filter/vo :(\n"
 
 
-// ================================== LIBMPVO ====================================
+// ================================== LIBVO ====================================
 
 // mga_common.c
-
 #define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] error in mga_vid_config ioctl (wrong mga_vid.o version?)"
 #define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Could not get luma values from the kernel module!\n"
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Could not set luma values from the kernel module!\n"
