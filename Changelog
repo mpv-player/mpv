@@ -3,25 +3,25 @@ MPlayer (1.0)
   rc3:
     Decoders:
     * Nellymoser audio decoding via lavc
-    * Support for X8 frame (fixes "J-type picture is not supported" for WMV2)
-    * Support for DTS WAV/DTS-CD passthrough by ad_hwac3
+    * support for X8 frame (fixes "J-type picture is not supported" for WMV2)
+    * support for DTS WAV/DTS-CD passthrough by ad_hwac3
     * Apple's raw YUV2 in MOV
     * LATM over LOAS AAC decoding via internal libfaad2
-    * Video game codecs: BFI video
-    * AVOptions support for libavcodec based decoders
+    * video game codecs: BFI video
+    * AVOption support for libavcodec-based decoders
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
-    * support for wavpack in matroska
+    * support for wavpack in Matroska
     * demux_lavf permits program switching
     * AVOption support for lavf demuxing
     * prefer lavf musepack demuxer over libmpdemux
-    * prefer lavf mov demuxer over libmpdemux
+    * prefer lavf MOV demuxer over libmpdemux
     * support -slang in lavf demuxer
     * support nosound switching in lavf demuxer
     * support libass in lavf demuxer
-    * support vobsub in lavf demuxer
-    * support mov subtitle format
+    * support VOBsub in lavf demuxer
+    * support MOV subtitle format
     * support for attachments in lavf demuxer
 
     Filters:
@@ -31,11 +31,11 @@ MPlayer (1.0)
     * fix multi-channel reordering
 
     Streaming:
-    * tv:// support for win32
+    * tv:// support for Windows
     * fix teletext on some systems
-    * dvd streams can switch angles
-    * dvd still menus are now supported via dvdnav://
-    * Ability to specify TV standard for each channel 
+    * DVD streams can switch angles
+    * DVD still menus are now supported via dvdnav://
+    * allow specifying the TV standard for each channel
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
@@ -45,37 +45,36 @@ MPlayer (1.0)
     * VP3 decoder speedup
 
     libmpeg2:
-    * Enable Alpha/ARM optimizations in libmpeg2
-    * SSE2-optimized IDCT routines from upstream libmpeg2.
+    * enable Alpha/ARM optimizations in libmpeg2
+    * SSE2-optimized IDCT routines from upstream libmpeg2
 
     Drivers:
-    * Replace PolypAudio by PulseAudio (-ao pulse)
-    * Add force-pbo suboption for faster output in vo_gl
+    * replace PolypAudio by PulseAudio (-ao pulse)
+    * add force-pbo suboption for faster output in vo_gl
 
     MEncoder:
     * Ogg muxing using -of lavf -o done.ogg
-    * check for system wide config file in mencoder
-    * AVOption support for lavc encoders.
-    * AVOption support for lavf muxing.
+    * check for system-wide configuration file in MEncoder
+    * AVOption support for lavc encoders
+    * AVOption support for lavf muxers
 
     Others:
     * many compiler warning fixes
-    * Basic support for Closed Captioning Roll-up mode
+    * basic support for Closed Captioning roll-up mode
     * reworked screensaver disabling support, most users will need to use
-      -heartbeat-cmd due to screensaver authors being unable to design a
-      common API
+      -heartbeat-cmd due to screensaver authors failing to design a common API
     * grayscale decoding/encoding with FFmpeg disabled where it slowed down
       the color case
-    * Linux AppleIR remote support.
-    * Add options to disable some or all config files.
+    * Linux AppleIR remote support
+    * add options to disable some or all configuration files
     * support for DOS-style file:///x:/path paths
     * some new slave commands (check DOCS/tech/slave.txt)
 
     Ports:
     * small crash with vo_macosx fixed
     * AC3/DTS passthrough for ao_macosx
-    * Fix frozen OSD on Mac OS X
-    * vo_gl now works with -wid and nvidia drivers on Windows (this is a hack)
+    * fix frozen OSD on Mac OS X
+    * vo_gl now works with -wid and nVidia drivers on Windows (this is a hack)
 
   rc2try2:
 
@@ -567,7 +566,7 @@ MPlayer (1.0)
     * support for file:// syntax
     * -fb option removed, use the device suboption of -vo fbdev/fbdev2 instead
     * full gcc 4 support
-    * TOOLS/vobshift.py: vobsub time-adjust tool
+    * TOOLS/vobshift.py: VOBsub time-adjust tool
     * TOOLS/psnr-video.sh: computes PSNR between two existing video files
     * fixed auto-insertion of lavc encoder (for DXR2/3 and DVB)
     * new option: -idle, to make MPlayer wait for input commands when
