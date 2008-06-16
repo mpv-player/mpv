@@ -151,12 +151,14 @@ const demuxer_desc_t* const demuxer_list[] = {
   NULL
 };
 
-void free_demuxer_stream(demux_stream_t *ds){
+void free_demuxer_stream(demux_stream_t *ds)
+{
     ds_free_packs(ds);
     free(ds);
 }
 
-demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
+demux_stream_t *new_demuxer_stream(struct demuxer_st *demuxer, int id)
+{
   demux_stream_t* ds=malloc(sizeof(demux_stream_t));
   ds->buffer_pos=ds->buffer_size=0;
   ds->buffer=NULL;
@@ -201,7 +203,9 @@ static const demuxer_desc_t* get_demuxer_desc_from_type(int file_format)
 }
 
 
-demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char *filename){
+demuxer_t *new_demuxer(stream_t *stream, int type, int a_id, int v_id,
+                       int s_id, char *filename)
+{
   demuxer_t *d=malloc(sizeof(demuxer_t));
   memset(d,0,sizeof(demuxer_t));
   d->stream=stream;
@@ -228,7 +232,8 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char
 
 extern int dvdsub_id;
 
-sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid) {
+sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
+{
   if (id > MAX_S_STREAMS - 1 || id < 0) {
     mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested sub stream id overflow (%d > %d)\n",
            id, MAX_S_STREAMS);
@@ -245,7 +250,8 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid) {
   return demuxer->s_streams[id];
 }
 
-void free_sh_sub(sh_sub_t *sh) {
+void free_sh_sub(sh_sub_t *sh)
+{
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
 #ifdef USE_ASS
@@ -255,7 +261,8 @@ void free_sh_sub(sh_sub_t *sh) {
     free(sh);
 }
 
-sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
+sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
+{
     if(id > MAX_A_STREAMS-1 || id < 0)
     {
 	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
@@ -280,7 +287,8 @@ sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
     return demuxer->a_streams[id];
 }
 
-void free_sh_audio(demuxer_t *demuxer, int id) {
+void free_sh_audio(demuxer_t *demuxer, int id)
+{
     sh_audio_t *sh = demuxer->a_streams[id];
     demuxer->a_streams[id] = NULL;
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_audio at %p\n",sh);
@@ -290,7 +298,8 @@ void free_sh_audio(demuxer_t *demuxer, int id) {
     free(sh);
 }
 
-sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid){
+sh_video_t* new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
+{
     if(id > MAX_V_STREAMS-1 || id < 0)
     {
 	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
@@ -310,13 +319,15 @@ sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid){
     return demuxer->v_streams[id];
 }
 
-void free_sh_video(sh_video_t* sh){
+void free_sh_video(sh_video_t *sh)
+{
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_video at %p\n",sh);
     free(sh->bih);
     free(sh);
 }
 
-void free_demuxer(demuxer_t *demuxer){
+void free_demuxer(demuxer_t *demuxer)
+{
     int i;
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing demuxer at %p\n",demuxer);
     if(demuxer->desc->close)
@@ -359,7 +370,8 @@ skip_streamfree:
 }
 
 
-void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
+void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
+{
     // append packet to DS stream:
     ++ds->packs;
     ds->bytes+=dp->len;
@@ -376,7 +388,9 @@ void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
         dp->len,dp->pts,(unsigned int)dp->pos,ds->demuxer->audio->packs,ds->demuxer->video->packs);
 }
 
-void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len, double pts, off_t pos, int flags) {
+void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,
+                    double pts, off_t pos, int flags)
+{
     demux_packet_t* dp=new_demux_packet(len);
     len = stream_read(stream,dp->buffer,len);
     resize_demux_packet(dp, len);
@@ -391,7 +405,8 @@ void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len, double pts, o
 //     0 = EOF or no stream found or invalid type
 //     1 = successfully read a packet
 
-int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
+int demux_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
+{
   // Note: parameter 'ds' can be NULL!
   return demux->desc->fill_buffer(demux, ds);
 }
@@ -400,7 +415,8 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 //     0 = EOF
 //     1 = successful
 #define MAX_ACUMULATED_PACKETS 64
-int ds_fill_buffer(demux_stream_t *ds){
+int ds_fill_buffer(demux_stream_t *ds)
+{
   demuxer_t *demux=ds->demuxer;
   if(ds->current) free_demux_packet(ds->current);
   ds->current=NULL;
@@ -466,7 +482,8 @@ int ds_fill_buffer(demux_stream_t *ds){
   return 0;
 }
 
-int demux_read_data(demux_stream_t *ds,unsigned char* mem,int len){
+int demux_read_data(demux_stream_t *ds, unsigned char *mem, int len)
+{
 int x;
 int bytes=0;
 while(len>0){
@@ -491,7 +508,8 @@ return bytes;
  * \return whether pattern was found
  */
 int demux_pattern_3(demux_stream_t *ds, unsigned char *mem, int maxlen,
-                    int *read, uint32_t pattern) {
+                    int *read, uint32_t pattern)
+{
   register uint32_t head = 0xffffff00;
   register uint32_t pat = pattern & 0xffffff00;
   int total_len = 0;
@@ -518,7 +536,8 @@ int demux_pattern_3(demux_stream_t *ds, unsigned char *mem, int maxlen,
   return total_len >= 3 && head == pat;
 }
 
-void ds_free_packs(demux_stream_t *ds){
+void ds_free_packs(demux_stream_t *ds)
+{
   demux_packet_t *dp=ds->first;
   while(dp){
     demux_packet_t *dn=dp->next;
@@ -541,7 +560,8 @@ void ds_free_packs(demux_stream_t *ds){
   ds->pts=0; ds->pts_bytes=0;
 }
 
-int ds_get_packet(demux_stream_t *ds,unsigned char **start){
+int ds_get_packet(demux_stream_t *ds, unsigned char **start)
+{
     int len;
     if(ds->buffer_pos>=ds->buffer_size){
 	if(!ds_fill_buffer(ds)){
@@ -576,7 +596,8 @@ int ds_get_packet_pts(demux_stream_t *ds,unsigned char **start, double *pts)
     return len;
 }
 
-int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start){
+int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
+{
     int len;
     if(ds->buffer_pos>=ds->buffer_size){
 	*start = NULL;
@@ -686,8 +707,9 @@ int user_correct_pts=-1;
 */
 
 static demuxer_t* demux_open_stream(stream_t *stream, int file_format,
-                    int force, int audio_id, int video_id, int dvdsub_id,
-                    char* filename) {
+                                    int force, int audio_id, int video_id,
+                                    int dvdsub_id, char *filename)
+{
 demuxer_t *demuxer=NULL;
 
 sh_video_t *sh_video=NULL;
@@ -847,7 +869,9 @@ extern int hr_mp3_seek;
 extern float stream_cache_min_percent;
 extern float stream_cache_seek_min_percent;
 
-demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int dvdsub_id,char* filename){
+demuxer_t *demux_open(stream_t *vs, int file_format, int audio_id,
+                      int video_id, int dvdsub_id, char *filename)
+{
   stream_t *as = NULL,*ss = NULL;
   demuxer_t *vd,*ad = NULL,*sd = NULL;
   demuxer_t *res;
@@ -933,13 +957,16 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
 }
 
 
-void demux_flush(demuxer_t *demuxer) {
+void demux_flush(demuxer_t *demuxer)
+{
     ds_free_packs(demuxer->video);
     ds_free_packs(demuxer->audio);
     ds_free_packs(demuxer->sub);
 }
 
-int demux_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
+int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
+               int flags)
+{
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
@@ -1042,7 +1069,8 @@ int demux_info_print(demuxer_t *demuxer)
     return 0;
 }
 
-char* demux_info_get(demuxer_t *demuxer, const char *opt) {
+char *demux_info_get(demuxer_t *demuxer, const char *opt)
+{
   int i;
   char **info = demuxer->info;
 
@@ -1054,7 +1082,8 @@ char* demux_info_get(demuxer_t *demuxer, const char *opt) {
   return NULL;
 }
 
-int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
+int demux_control(demuxer_t *demuxer, int cmd, void *arg)
+{
 
     if (demuxer->desc->control)
       return demuxer->desc->control(demuxer,cmd,arg);
@@ -1064,7 +1093,8 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 
 
 
-double demuxer_get_time_length(demuxer_t *demuxer){
+double demuxer_get_time_length(demuxer_t *demuxer)
+{
     double get_time_ans;
     sh_video_t *sh_video = demuxer->video->sh;
     sh_audio_t *sh_audio = demuxer->audio->sh;
@@ -1089,7 +1119,8 @@ double demuxer_get_time_length(demuxer_t *demuxer){
  *        0 otherwise
  * \return the current play time
  */
-int demuxer_get_current_time(demuxer_t *demuxer){
+int demuxer_get_current_time(demuxer_t *demuxer)
+{
     double get_time_ans = 0;
     sh_video_t *sh_video = demuxer->video->sh;
     if(demuxer->stream_pts != MP_NOPTS_VALUE)
@@ -1098,7 +1129,8 @@ int demuxer_get_current_time(demuxer_t *demuxer){
     return (int) get_time_ans;
 }
 
-int demuxer_get_percent_pos(demuxer_t *demuxer){     
+int demuxer_get_percent_pos(demuxer_t *demuxer)
+{
     int ans = 0;
     int res = demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans);
     int len = (demuxer->movi_end - demuxer->movi_start) / 100;
@@ -1113,7 +1145,8 @@ int demuxer_get_percent_pos(demuxer_t *demuxer){
     return ans;
 }
 
-int demuxer_switch_audio(demuxer_t *demuxer, int index){     
+int demuxer_switch_audio(demuxer_t *demuxer, int index)
+{
     int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index);
     if (res == DEMUXER_CTRL_NOTIMPL)
       index = demuxer->audio->id;
@@ -1124,7 +1157,8 @@ int demuxer_switch_audio(demuxer_t *demuxer, int index){
     return index;
 }
 
-int demuxer_switch_video(demuxer_t *demuxer, int index){
+int demuxer_switch_video(demuxer_t *demuxer, int index)
+{
     int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index);
     if (res == DEMUXER_CTRL_NOTIMPL)
       index = demuxer->video->id;
@@ -1136,7 +1170,8 @@ int demuxer_switch_video(demuxer_t *demuxer, int index){
 }
 
 int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
-                           const char* type, const void* data, size_t size) {
+                           const char* type, const void* data, size_t size)
+{
     if (!(demuxer->num_attachments & 31))
         demuxer->attachments = realloc(demuxer->attachments, (demuxer->num_attachments + 32) * sizeof(demux_attachment_t));
 
@@ -1149,7 +1184,9 @@ int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
     return demuxer->num_attachments ++;
 }
 
-int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end){
+int demuxer_add_chapter(demuxer_t *demuxer, const char *name, uint64_t start,
+                        uint64_t end)
+{
     if (demuxer->chapters == NULL)
         demuxer->chapters = malloc (32*sizeof(*demuxer->chapters));
     else if (!(demuxer->num_chapters % 32))
@@ -1174,7 +1211,10 @@ int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, ui
  * \return -1 on error, current chapter if successful
  */
 
-int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts, int *num_chapters, char **chapter_name) {
+int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode,
+                         float *seek_pts, int *num_chapters,
+                         char **chapter_name)
+{
     int ris;
     int current, total;
     sh_video_t *sh_video = demuxer->video->sh;
@@ -1258,7 +1298,8 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
     }
 }
 
-int demuxer_get_current_chapter(demuxer_t *demuxer) {
+int demuxer_get_current_chapter(demuxer_t *demuxer)
+{
     int chapter = -1;
     if (!demuxer->num_chapters || !demuxer->chapters) {
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_CHAPTER,
@@ -1278,7 +1319,8 @@ int demuxer_get_current_chapter(demuxer_t *demuxer) {
     return chapter;
 }
 
-char *demuxer_chapter_name(demuxer_t *demuxer, int chapter) {
+char *demuxer_chapter_name(demuxer_t *demuxer, int chapter)
+{
     if (demuxer->num_chapters && demuxer->chapters) {
         if (chapter >=0 && chapter < demuxer->num_chapters &&
                 demuxer->chapters[chapter].name)
@@ -1287,7 +1329,8 @@ char *demuxer_chapter_name(demuxer_t *demuxer, int chapter) {
     return NULL;
 }
 
-char *demuxer_chapter_display_name(demuxer_t *demuxer, int chapter) {
+char *demuxer_chapter_display_name(demuxer_t *demuxer, int chapter)
+{
     char *chapter_name = demuxer_chapter_name(demuxer, chapter);
     if (chapter_name) {
         char *tmp = malloc(strlen(chapter_name) + 14);
@@ -1306,7 +1349,8 @@ char *demuxer_chapter_display_name(demuxer_t *demuxer, int chapter) {
     }
 }
 
-float demuxer_chapter_time(demuxer_t *demuxer, int chapter, float *end) {
+float demuxer_chapter_time(demuxer_t *demuxer, int chapter, float *end)
+{
     if (demuxer->num_chapters && demuxer->chapters && chapter >= 0
             && chapter < demuxer->num_chapters) {
         if (end)
@@ -1316,7 +1360,8 @@ float demuxer_chapter_time(demuxer_t *demuxer, int chapter, float *end) {
     return -1.0;
 }
 
-int demuxer_chapter_count(demuxer_t *demuxer) {
+int demuxer_chapter_count(demuxer_t *demuxer)
+{
     if (!demuxer->num_chapters || !demuxer->chapters) {
         int num_chapters = 0;
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS,
@@ -1328,7 +1373,8 @@ int demuxer_chapter_count(demuxer_t *demuxer) {
         return demuxer->num_chapters;
 }
 
-int demuxer_angles_count(demuxer_t *demuxer) {
+int demuxer_angles_count(demuxer_t *demuxer)
+{
     int ris, angles=-1;
 
     ris = stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_ANGLES, &angles);
@@ -1336,7 +1382,8 @@ int demuxer_angles_count(demuxer_t *demuxer) {
     return angles;
 }
 
-int demuxer_get_current_angle(demuxer_t *demuxer) {
+int demuxer_get_current_angle(demuxer_t *demuxer)
+{
     int ris, curr_angle=-1;
     ris = stream_control(demuxer->stream, STREAM_CTRL_GET_ANGLE, &curr_angle);
     if(ris == STREAM_UNSUPPORTED) return -1;
@@ -1344,7 +1391,8 @@ int demuxer_get_current_angle(demuxer_t *demuxer) {
 }
 
 
-int demuxer_set_angle(demuxer_t *demuxer, int angle) {
+int demuxer_set_angle(demuxer_t *demuxer, int angle)
+{
     int ris, angles=-1;
     sh_video_t *sh_video = demuxer->video->sh;
     sh_audio_t *sh_audio = demuxer->audio->sh;
