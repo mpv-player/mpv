@@ -265,9 +265,9 @@ void free_sh_sub(sh_sub_t *sh)
 sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
 {
     if (id > MAX_A_STREAMS-1 || id < 0) {
-	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
-	    id, MAX_A_STREAMS);
-	return NULL;
+        mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
+            id, MAX_A_STREAMS);
+        return NULL;
     }
     if (demuxer->a_streams[id])
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_AudioStreamRedefined,id);
@@ -301,9 +301,9 @@ void free_sh_audio(demuxer_t *demuxer, int id)
 sh_video_t* new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
 {
     if (id > MAX_V_STREAMS - 1 || id < 0) {
-	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
-	    id, MAX_V_STREAMS);
-	return NULL;
+        mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
+            id, MAX_V_STREAMS);
+        return NULL;
     }
     if (demuxer->v_streams[id])
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_VideoStreamRedefined,id);
@@ -351,7 +351,7 @@ void free_demuxer(demuxer_t *demuxer)
 skip_streamfree:
     if (demuxer->info) {
       for (i = 0; demuxer->info[i] != NULL; i++)
-	free(demuxer->info[i]);
+        free(demuxer->info[i]);
       free(demuxer->info);
     }
     free(demuxer->filename);
@@ -581,11 +581,11 @@ int ds_get_packet(demux_stream_t *ds, unsigned char **start)
 {
     int len;
     if (ds->buffer_pos >= ds->buffer_size) {
-	if (!ds_fill_buffer(ds)) {
+        if (!ds_fill_buffer(ds)) {
             // EOF
             *start = NULL;
             return -1;
-	}
+        }
     }
     len=ds->buffer_size-ds->buffer_pos;
     *start = &ds->buffer[ds->buffer_pos];
@@ -598,15 +598,15 @@ int ds_get_packet_pts(demux_stream_t *ds,unsigned char **start, double *pts)
     int len;
     *pts = MP_NOPTS_VALUE;
     if (ds->buffer_pos >= ds->buffer_size) {
-	if (!ds_fill_buffer(ds)) {
+        if (!ds_fill_buffer(ds)) {
             // EOF
             *start = NULL;
             return -1;
-	}
+        }
     }
     // Return pts unless this read starts from the middle of a packet
     if (!ds->buffer_pos)
-	*pts = ds->current->pts;
+        *pts = ds->current->pts;
     len=ds->buffer_size-ds->buffer_pos;
     *start = &ds->buffer[ds->buffer_pos];
     ds->buffer_pos+=len;
@@ -617,7 +617,7 @@ int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
 {
     int len;
     if(ds->buffer_pos >= ds->buffer_size){
-	*start = NULL;
+        *start = NULL;
         if (!ds->packs)
             return -1;  // no sub
         if (!ds_fill_buffer(ds))
@@ -921,10 +921,10 @@ demuxer_t *demux_open(stream_t *vs, int file_format, int audio_id,
     }
     if (audio_stream_cache) {
       if (!stream_enable_cache(as,audio_stream_cache * 1024,audio_stream_cache * 1024 * (stream_cache_min_percent / 100.0),
-			      audio_stream_cache * 1024 * (stream_cache_seek_min_percent / 100.0))) {
-	free_stream(as);
-	mp_msg(MSGT_DEMUXER,MSGL_ERR,"Can't enable audio stream cache\n");
-	return NULL;
+                              audio_stream_cache * 1024 * (stream_cache_seek_min_percent / 100.0))) {
+        free_stream(as);
+        mp_msg(MSGT_DEMUXER,MSGL_ERR,"Can't enable audio stream cache\n");
+        return NULL;
       }
     }
   }
@@ -1000,13 +1000,13 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
 
 if (!demuxer->seekable) {
     if (demuxer->file_format == DEMUXER_TYPE_AVI)
-	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekRawAVI);
+        mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekRawAVI);
 #ifdef USE_TV
     else if (demuxer->file_format == DEMUXER_TYPE_TV)
-	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_TVInputNotSeekable);
+        mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_TVInputNotSeekable);
 #endif
     else
-	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekFile);
+        mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekFile);
     return 0;
 }
 
@@ -1061,10 +1061,10 @@ int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
         if (!strcasecmp(opt, info[2 * n])) {
             mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_DemuxerInfoChanged, opt,
                    param);
-	    free(info[2*n+1]);
-	    info[2*n+1] = strdup(param);
-	    return 0;
-	  }
+            free(info[2*n+1]);
+            info[2*n+1] = strdup(param);
+            return 0;
+          }
       }
 
     info = demuxer->info = (char**)realloc(info,(2*(n+2))*sizeof(char*));
