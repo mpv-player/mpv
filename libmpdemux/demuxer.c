@@ -393,7 +393,6 @@ void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len, double pts, o
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
-//  printf("demux->type=%d\n",demux->type);
   return demux->desc->fill_buffer(demux, ds);
 }
 
