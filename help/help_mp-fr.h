@@ -1828,8 +1828,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] Vous avez une mauvaise version de la lib VIDIX.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] Impossible de trouver un pilote VIDIX qui marche.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Obtention de la capabilité impossible : %s.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_Description "[VO_SUB_VIDIX] Description : %s.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_Author "[VO_SUB_VIDIX] Auteur : %s.\n"
 
 // libvo/vo_svga.c
 
@@ -1945,7 +1943,6 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
 "[VO_XV] Voir 'mplayer -vo help' pour autres pilotes sortie vidéo (non xv).\n"\
 "[VO_XV] Essayez -vo x11.\n"
-#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] Utilise l'adaptateur Xv #%d (%s)\n"
 
 
 // loader/ldt_keeper.c

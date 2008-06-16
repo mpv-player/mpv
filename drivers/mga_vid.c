@@ -11,20 +11,20 @@
  * brightness/contrast introduced by eyck
  * multiple card support by Attila Kinali <attila@kinali.ch>
  *
- * This file is part of MPlayer.
+ * This file is part of mga_vid.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * mga_vid is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mga_vid is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * with mga_vid; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
@@ -1193,6 +1193,14 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 
 	switch(cmd) 
 	{
+		case MGA_VID_GET_VERSION:
+			tmp = MGA_VID_VERSION;
+			if (copy_to_user((uint32_t *) arg, &tmp, sizeof(uint32_t))) {
+				printk(KERN_ERR "mga_vid: failed copy %p to userspace %p\n", &tmp, (uint32_t *) arg);
+				return (-EFAULT);
+			}
+			break;
+
 		case MGA_VID_CONFIG:
 			//FIXME remove
 //			printk(KERN_DEBUG "mga_vid: vcount = %d\n",readl(card->mmio_base + VCOUNT));

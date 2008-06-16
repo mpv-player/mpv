@@ -62,15 +62,11 @@
 #ifndef MPLAYER_ASMMACROS_X86_H
 #define MPLAYER_ASMMACROS_X86_H
 
-//#if defined (WINNT)
-//#error This stuff is not ported on your system
-//#else
-
 #include "config.h"
 
 #ifdef CONFIG_DHAHELPER
 #include <sys/ioctl.h>
-#include "dhahelper/dhahelper.h"
+#include "vidix/dhahelper/dhahelper.h"
 
 extern int dhahelper_fd;
 extern int dhahelper_initialized;
@@ -342,7 +338,5 @@ static __inline__ void intr_enable()
 #endif
   __asm__ __volatile__("sti");
 }
-
-//#endif
 
 #endif /* MPLAYER_ASMMACROS_X86_H */

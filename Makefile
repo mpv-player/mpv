@@ -466,7 +466,7 @@ SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
                                         libmpcodecs/vd_vfwex.c \
                                         libmpdemux/demux_avs.c \
                                         loader/afl.c \
-                                        loader/driver.c \
+                                        loader/drv.c \
                                         loader/vfl.c \
                                         loader/dshow/DS_AudioDecoder.c \
                                         loader/dshow/DS_Filter.c \
@@ -777,7 +777,7 @@ loader/win32.o loader/win32.d: CFLAGS += $(CFLAG_STACKREALIGN)
 
 mp3lib/decode_i586.o: CFLAGS += -fomit-frame-pointer
 
-vidix/%: CFLAGS += $(SVGALIB_CFLAGS)
+vidix/%: CFLAGS += $(CFLAG_DHAHELPER) $(CFLAG_SVGALIB_HELPER)
 
 VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
                   vidix/pci_names.h vidix/pci_vendors.h
@@ -998,6 +998,7 @@ install-dhahelper: vidix/dhahelper/dhahelper.o
 	-mkdir -p $(MODULES_DIR)
 	install -m 644 $< $(MODULES_DIR)
 	depmod -a
+	-mknod /dev/dhahelper c 180 0
 
 dhahelperclean:
 	rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test

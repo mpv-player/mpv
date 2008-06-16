@@ -37,7 +37,7 @@
 #ifndef __MINGW32__
 #include "ext.h"
 #endif
-#include "driver.h"
+#include "drv.h"
 
 #include <stdio.h>
 #include <stdlib.h>

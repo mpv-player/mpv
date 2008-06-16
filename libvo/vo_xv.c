@@ -824,8 +824,9 @@ static int preinit(struct vo *vo, const char *arg)
                 if (!XvGrabPort(x11->display, xv_p, CurrentTime))
                 {
                     x11->xv_port = xv_p;
-                    mp_msg(MSGT_VO, MSGL_INFO,
-                           MSGTR_LIBVO_XV_Adaptor, i, ctx->ai[i].name);
+                    mp_msg(MSGT_VO, MSGL_V,
+                           "[VO_XV] Using Xv Adapter #%d (%s)\n",
+                           i, ctx->ai[i].name);
                     break;
                 } else
                 {

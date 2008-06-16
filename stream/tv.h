@@ -119,6 +119,7 @@ typedef struct tv_channels_s {
     int index;
     char number[5];
     char name[20];
+    int norm;
     int   freq;
     struct tv_channels_s *next;
     struct tv_channels_s *prev;

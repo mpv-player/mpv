@@ -848,7 +848,12 @@ with Linux 2.4.x.
 
 <para>
 For a Linux 2.6.x version of this driver check out
-<ulink url="http://attila.kinali.ch/mga/"/>.
+<ulink url="http://attila.kinali.ch/mga/"/> or have a look at the external
+Subversion repository of mga_vid which can be checked out via
+
+<screen>
+svn checkout svn://svn.mplayerhq.hu/mga_vid
+</screen>
 </para>
 
 <procedure>
@@ -1536,11 +1541,16 @@ about it to the developers. The right way is to use VIDIX without arguments
 to enable driver autodetection.
 </para>
 
+
+<sect2 id="svgalib_helper">
+<title>svgalib_helper</title>
+
 <para>
 Since VIDIX requires direct hardware access you can either run it as root
 or set the SUID bit on the <application>MPlayer</application> binary
 (<emphasis role="bold">Warning: This is a security risk!</emphasis>).
-Alternatively, you can use a special kernel module, like this:
+Alternatively, if you are running Linux kernel 2.4.x, you can use a
+special kernel module, like this:
 </para>
 
 <procedure>
@@ -1576,6 +1586,7 @@ Alternatively, you can use a special kernel module, like this:
   Recompile.
 </para></step>
 </procedure>
+</sect2>
 
 
 <sect2 id="vidix-ati">

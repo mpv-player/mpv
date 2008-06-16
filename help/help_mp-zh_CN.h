@@ -1838,8 +1838,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] VIDIX 库版本错误。\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] 无法找到能工作的 VIDIX 驱动。\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] 无法获得兼容性: %s。\n"
-#define MSGTR_LIBVO_SUB_VIDIX_Description "[VO_SUB_VIDIX] 描述: %s。\n"
-#define MSGTR_LIBVO_SUB_VIDIX_Author "[VO_SUB_VIDIX] 作者: %s。\n"
 
 // libvo/vo_svga.c
 
@@ -1955,7 +1953,6 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
 "[VO_XV] 请参见 'mplayer -vo help' 找其它 (非-xv) 视频输出驱动。\n"\
 "[VO_XV] 试试 -vo x11.\n"
-#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] 使用 Xv 转换器 #%d（%s）\n"
 
 
 // loader/ldt_keeper.c

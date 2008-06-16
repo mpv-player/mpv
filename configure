@@ -344,6 +344,7 @@ Video output:
                            Available: cyberblade,ivtv,mach64,mga,mga_crtc2,
                            nvidia,pm2,pm3,radeon,rage128,s3,sis,unichrome
   --disable-vidix-pcidb    disable VIDIX PCI device name database
+  --enable-dhahelper       enable VIDIX dhahelper support
   --enable-svgalib_helper  enable VIDIX svgalib_helper support
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-dga2            enable DGA 2 support [autodetect]
@@ -621,6 +622,7 @@ _winsock2=auto
 _smbsupport=auto
 _vidix=auto
 _vidix_pcidb=yes
+_dhahelper=no
 _svgalib_helper=no
 _joystick=no
 _xvid=auto
@@ -1022,6 +1024,8 @@ for ac_option do
     _vidix_drivers=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --disable-vidix-pcidb)        _vidix_pcidb=no         ;;
+  --enable-dhahelper)	_dhahelper=yes	;;
+  --disable-dhahelper)	_dhahelper=no	;;
   --enable-svgalib_helper)	_svgalib_helper=yes	;;
   --disable-svgalib_helper)	_svgalib_helper=no	;;
   --enable-joystick)	_joystick=yes	;;
@@ -4254,6 +4258,10 @@ if test "$_vidix" = yes ; then
     _vidix_pcidb_val=0
   fi
 
+  echocheck "VIDIX dhahelper support"
+  test "$_dhahelper" = yes && cflag_dhahelper=-DCONFIG_DHAHELPER
+  echores "$_dhahelper"
+
   echocheck "VIDIX svgalib_helper support"
   test "$_svgalib_helper" = yes && cflag_svgalib_helper=-DCONFIG_SVGAHELPER
   echores "$_svgalib_helper"
@@ -5949,6 +5957,27 @@ else
 fi
 echores "$_liba52"
 
+echocheck "internal libmpeg2 support"
+if test "$_libmpeg2" = auto ; then
+  _libmpeg2=yes
+  if alpha && test cc_vendor=gnu; then
+    case $cc_version in
+      2*|3.0*|3.1*) # cannot compile MVI instructions
+        _libmpeg2=no
+        _res_comment="broken gcc"
+        ;;
+    esac
+  fi
+fi
+if test "$_libmpeg2" = yes ; then
+  _def_libmpeg2='#define USE_LIBMPEG2 1'
+  _codecmodules="libmpeg2 $_codecmodules"
+else
+  _def_libmpeg2='#undef USE_LIBMPEG2'
+  _nocodecmodules="libmpeg2 $_nocodecmodules"
+fi
+echores "$_libmpeg2"
+
 echocheck "libdca support"
 if test "$_libdca" = auto ; then
   _libdca=no
@@ -5970,27 +5999,6 @@ else
   _nocodecmodules="libdca $_nocodecmodules"
 fi
 echores "$_libdca"
-
-echocheck "internal libmpeg2 support"
-if test "$_libmpeg2" = auto ; then
-  _libmpeg2=yes
-  if alpha && test cc_vendor=gnu; then
-    case $cc_version in
-      2*|3.0*|3.1*) # cannot compile MVI instructions
-        _libmpeg2=no
-        _res_comment="broken gcc"
-        ;;
-    esac
-  fi
-fi
-if test "$_libmpeg2" = yes ; then
-  _def_libmpeg2='#define USE_LIBMPEG2 1'
-  _codecmodules="libmpeg2 $_codecmodules"
-else
-  _def_libmpeg2='#undef USE_LIBMPEG2'
-  _nocodecmodules="libmpeg2 $_nocodecmodules"
-fi
-echores "$_libmpeg2"
 
 echocheck "libmpcdec (musepack, version >= 1.2.1 required)"
 if test "$_musepack" = auto ; then
@@ -6235,6 +6243,7 @@ echocheck "Nemesi Streaming Media libraries"
 if test "$_nemesi" = auto  && test "$_network" = yes ; then
     _nemesi=no
     if $_pkg_config libnemesi --atleast-version=0.6.3 ; then
+        _inc_extra="$_inc_extra `$_pkg_config --cflags libnemesi`"
         _ld_extra="$_ld_extra `$_pkg_config --libs libnemesi`"
         _nemesi=yes
     fi
@@ -6573,7 +6582,7 @@ if test "$_x264" = auto ; then
   cat > $TMPC << EOF
 #include <inttypes.h>
 #include <x264.h>
-#if X264_BUILD < 53
+#if X264_BUILD < 59
 #error We do not support old versions of x264. Get the latest from SVN.
 #endif
 int main(void) { x264_encoder_open((void*)0); return 0; }
@@ -7595,6 +7604,7 @@ CFLAG_NO_OMIT_LEAF_FRAME_POINTER = $CFLAG_NO_OMIT_LEAF_FRAME_POINTER
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
 CFLAG_STACKREALIGN = $_stackrealign
 LIBDVDCSS_DVDREAD_FLAGS = $_libdvdcss_dvdread_flags
+CFLAG_DHAHELPER = $cflag_dhahelper
 CFLAG_SVGALIB_HELPER = $cflag_svgalib_helper
 ASFLAGS = $ASFLAGS
 

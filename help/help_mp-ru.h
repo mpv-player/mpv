@@ -1955,8 +1955,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] У Вас неверная версия библиотеки VIDIX.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] Не могу найти работающий драйвер VIDIX.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Не могу получить возможность: %s.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_Description "[VO_SUB_VIDIX] Описание: %s.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_Author "[VO_SUB_VIDIX] Автор: %s.\n"
 
 // libvo/vo_svga.c
 
@@ -2072,7 +2070,6 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/ru/video.html#xv!\n"\
 "[VO_XV] Другие (не-xv) драйверы ищите в выводе 'mplayer -vo help'.\n"\
 "[VO_XV] Попробуйте -vo x11.\n"
-#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] Использую Xv Адаптер #%d (%s)\n"
 
 //tv.c
 #define MSGTR_TV_BogusNormParameter "tv.c: norm_from_string(%s): Неизвестный параметр norm, устанавливается %s.\n"
