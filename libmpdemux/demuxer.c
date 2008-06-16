@@ -458,7 +458,7 @@ int ds_fill_buffer(demux_stream_t *ds)
       ds->first=p->next;
       if(!ds->first) ds->last=NULL;
       --ds->packs;
-      return 1; //ds->buffer_size;
+      return 1;
     }
     if(demux->audio->packs>=MAX_PACKS || demux->audio->bytes>=MAX_PACK_BYTES){
       mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_TooManyAudioInBuffer,demux->audio->packs,demux->audio->bytes);
