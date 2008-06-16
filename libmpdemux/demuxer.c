@@ -449,9 +449,9 @@ int ds_fill_buffer(demux_stream_t *ds)
             demux_packet_t *p = ds->first;
 #if 0
             if (demux->reference_clock != MP_NOPTS_VALUE) {
-                if ((p->pts != MP_NOPTS_VALUE)
-                    && (p->pts > demux->reference_clock)
-                    && (ds->packs < MAX_ACUMULATED_PACKETS)) {
+                if (   p->pts != MP_NOPTS_VALUE
+                    && p->pts >  demux->reference_clock
+                    && ds->packs < MAX_ACUMULATED_PACKETS) {
                     if (demux_fill_buffer(demux, ds))
                         continue;
                 }
