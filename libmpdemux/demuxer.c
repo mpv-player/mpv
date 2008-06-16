@@ -952,8 +952,7 @@ demuxer_t *demux_open(stream_t *vs, int file_format, int audio_id,
     if (!ad) {
       mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningAudioDemuxerFailed,audio_stream);
       free_stream(as);
-    }
-    else if (ad->audio->sh && ((sh_audio_t*)ad->audio->sh)->format == 0x55) // MP3
+    } else if (ad->audio->sh && ((sh_audio_t*)ad->audio->sh)->format == 0x55) // MP3
       hr_mp3_seek=1; // Enable high res seeking
   }
   if (ss) {
