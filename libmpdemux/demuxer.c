@@ -166,18 +166,18 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   ds->pos=0;
   ds->dpos=0;
   ds->pack_no=0;
-//---------------
+
   ds->packs=0;
   ds->bytes=0;
   ds->first=ds->last=ds->current=NULL;
   ds->id=id;
   ds->demuxer=demuxer;
-//----------------
+
   ds->asf_seq=-1;
   ds->asf_packet=NULL;
-//----------------
+
   ds->ss_mul=ds->ss_div=0;
-//----------------
+
   ds->sh=NULL;
   return ds;
 }
@@ -360,10 +360,6 @@ skip_streamfree:
 
 
 void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
-//    demux_packet_t* dp=new_demux_packet(len);
-//    stream_read(stream,dp->buffer,len);
-//    dp->pts=pts; //(float)pts/90000.0f;
-//    dp->pos=pos;
     // append packet to DS stream:
     ++ds->packs;
     ds->bytes+=dp->len;
@@ -384,7 +380,7 @@ void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len, double pts, o
     demux_packet_t* dp=new_demux_packet(len);
     len = stream_read(stream,dp->buffer,len);
     resize_demux_packet(dp, len);
-    dp->pts=pts; //(float)pts/90000.0f;
+    dp->pts = pts;
     dp->pos=pos;
     dp->flags=flags;
     // append packet to DS stream:
@@ -693,9 +689,6 @@ int user_correct_pts=-1;
 static demuxer_t* demux_open_stream(stream_t *stream, int file_format,
                     int force, int audio_id, int video_id, int dvdsub_id,
                     char* filename) {
-
-//int file_format=(*file_format_ptr);
-
 demuxer_t *demuxer=NULL;
 
 sh_video_t *sh_video=NULL;
@@ -703,8 +696,6 @@ sh_video_t *sh_video=NULL;
 const demuxer_desc_t *demuxer_desc;
 int fformat = 0;
 int i;
-
-//printf("demux_open(%p,%d,%d,%d,%d)  \n",stream,file_format,audio_id,video_id,dvdsub_id);
 
 // If somebody requested a demuxer check it
 if (file_format) {
@@ -972,15 +963,11 @@ if(!demuxer->seekable){
     demux_flush(demuxer);
     // clear demux buffers:
     if(sh_audio) sh_audio->a_buffer_len=0;
-    demuxer->stream->eof=0; // clear eof flag
+    demuxer->stream->eof = 0;
     demuxer->video->eof=0;
     demuxer->audio->eof=0;
 
-#if 0
-    if(sh_audio) sh_audio->timer=sh_video->timer;
-#else
     if(sh_video) sh_video->timer=0; // !!!!!!
-#endif
 
     if(flags & SEEK_ABSOLUTE)
       pts = 0.0f;
