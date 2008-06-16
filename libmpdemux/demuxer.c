@@ -78,7 +78,7 @@ extern const demuxer_desc_t demuxer_desc_nut;
  * demuxer, add it to libavformat, except for wrappers around external
  * libraries and demuxers requiring binary support. */
 
-const demuxer_desc_t* const demuxer_list[] = {
+const demuxer_desc_t *const demuxer_list[] = {
   &demuxer_desc_rawaudio,
   &demuxer_desc_rawvideo,
 #ifdef USE_TV
@@ -159,7 +159,7 @@ void free_demuxer_stream(demux_stream_t *ds)
 
 demux_stream_t *new_demuxer_stream(struct demuxer_st *demuxer, int id)
 {
-  demux_stream_t* ds=malloc(sizeof(demux_stream_t));
+  demux_stream_t *ds = malloc(sizeof(demux_stream_t));
   ds->buffer_pos=ds->buffer_size=0;
   ds->buffer=NULL;
   ds->pts=0;
@@ -191,7 +191,7 @@ demux_stream_t *new_demuxer_stream(struct demuxer_st *demuxer, int id)
  * @param file_format    type of the demuxer
  * @return               structure for the demuxer, NULL if not found
  */
-static const demuxer_desc_t* get_demuxer_desc_from_type(int file_format)
+static const demuxer_desc_t *get_demuxer_desc_from_type(int file_format)
 {
   int i;
 
@@ -262,7 +262,7 @@ void free_sh_sub(sh_sub_t *sh)
     free(sh);
 }
 
-sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
+sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
 {
     if (id > MAX_A_STREAMS-1 || id < 0) {
         mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
@@ -298,7 +298,7 @@ void free_sh_audio(demuxer_t *demuxer, int id)
     free(sh);
 }
 
-sh_video_t* new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
+sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
 {
     if (id > MAX_V_STREAMS - 1 || id < 0) {
         mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
@@ -631,7 +631,7 @@ int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
 
 double ds_get_next_pts(demux_stream_t *ds)
 {
-  demuxer_t* demux = ds->demuxer;
+  demuxer_t *demux = ds->demuxer;
   while (!ds->first) {
     if(demux->audio->packs >= MAX_PACKS || demux->audio->bytes >= MAX_PACK_BYTES){
       mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_TooManyAudioInBuffer,demux->audio->packs,demux->audio->bytes);
@@ -726,7 +726,7 @@ int user_correct_pts=-1;
   (ex: tv,mf).
 */
 
-static demuxer_t* demux_open_stream(stream_t *stream, int file_format,
+static demuxer_t *demux_open_stream(stream_t *stream, int file_format,
                                     int force, int audio_id, int video_id,
                                     int dvdsub_id, char *filename)
 {
@@ -879,8 +879,8 @@ int biComp=le2me_32(sh_video->bih->biCompression);
 return demuxer;
 }
 
-char* audio_stream = NULL;
-char* sub_stream = NULL;
+char *audio_stream = NULL;
+char *sub_stream   = NULL;
 int audio_stream_cache = 0;
 
 char *demuxer_name = NULL; // parameter from -demuxer
@@ -1196,8 +1196,8 @@ int demuxer_switch_video(demuxer_t *demuxer, int index)
     return index;
 }
 
-int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
-                           const char* type, const void* data, size_t size)
+int demuxer_add_attachment(demuxer_t *demuxer, const char *name,
+                           const char *type, const void *data, size_t size)
 {
     if (!(demuxer->num_attachments & 31))
         demuxer->attachments = realloc(demuxer->attachments, (demuxer->num_attachments + 32) * sizeof(demux_attachment_t));
@@ -1300,7 +1300,7 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode,
             now = (sh_video ? sh_video->pts : (sh_audio ? sh_audio->pts : 0.)) * 1000 + .5;
 
             for (current = total - 1; current >= 0; --current) {
-                demux_chapter_t* chapter = demuxer->chapters + current;
+                demux_chapter_t *chapter = demuxer->chapters + current;
                 if (chapter->start <= now)
                     break;
             }
@@ -1450,13 +1450,13 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     return angle;
 }
 
-int demuxer_audio_track_by_lang(demuxer_t* d, char* lang)
+int demuxer_audio_track_by_lang(demuxer_t *d, char *lang)
 {
     int i, len;
     lang += strspn(lang, ",");
     while ((len = strcspn(lang, ",")) > 0) {
         for (i = 0; i < MAX_A_STREAMS; ++i) {
-            sh_audio_t* sh = d->a_streams[i];
+            sh_audio_t *sh = d->a_streams[i];
             if (sh && sh->lang && strncmp(sh->lang, lang, len) == 0)
                 return sh->aid;
         }
@@ -1466,13 +1466,13 @@ int demuxer_audio_track_by_lang(demuxer_t* d, char* lang)
     return -1;
 }
 
-int demuxer_sub_track_by_lang(demuxer_t* d, char* lang)
+int demuxer_sub_track_by_lang(demuxer_t *d, char *lang)
 {
     int i, len;
     lang += strspn(lang, ",");
     while ((len = strcspn(lang, ",")) > 0) {
         for (i = 0; i < MAX_S_STREAMS; ++i) {
-            sh_sub_t* sh = d->s_streams[i];
+            sh_sub_t *sh = d->s_streams[i];
             if (sh && sh->lang && strncmp(sh->lang, lang, len) == 0)
                 return sh->sid;
         }
@@ -1482,27 +1482,27 @@ int demuxer_sub_track_by_lang(demuxer_t* d, char* lang)
     return -1;
 }
 
-int demuxer_default_audio_track(demuxer_t* d)
+int demuxer_default_audio_track(demuxer_t *d)
 {
     int i;
     for (i = 0; i < MAX_A_STREAMS; ++i) {
-        sh_audio_t* sh = d->a_streams[i];
+        sh_audio_t *sh = d->a_streams[i];
         if (sh && sh->default_track)
             return sh->aid;
     }
     for (i = 0; i < MAX_A_STREAMS; ++i) {
-        sh_audio_t* sh = d->a_streams[i];
+        sh_audio_t *sh = d->a_streams[i];
         if (sh)
             return sh->aid;
     }
     return -1;
 }
 
-int demuxer_default_sub_track(demuxer_t* d)
+int demuxer_default_sub_track(demuxer_t *d)
 {
     int i;
     for (i = 0; i < MAX_S_STREAMS; ++i) {
-        sh_sub_t* sh = d->s_streams[i];
+        sh_sub_t *sh = d->s_streams[i];
         if (sh && sh->default_track)
             return sh->sid;
     }
