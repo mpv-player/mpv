@@ -3179,7 +3179,7 @@ if(stream_dump_type==5){
     int chapter = dvd_chapter - 1;
     stream_control(mpctx->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
   }
-  while(!mpctx->stream->eof){
+  while(!mpctx->stream->eof && !async_quit_request){
       len=stream_read(mpctx->stream,buf,4096);
       if(len>0) {
         if(fwrite(buf,len,1,f) != 1) {
