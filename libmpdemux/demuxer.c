@@ -506,7 +506,9 @@ while (len > 0) {
         x = len;
     if (mem)
         fast_memcpy(mem + bytes, &ds->buffer[ds->buffer_pos], x);
-    bytes+=x;len-=x;ds->buffer_pos+=x;
+    bytes += x;
+    len -= x;
+    ds->buffer_pos += x;
   }
 }
 return bytes;
@@ -571,7 +573,8 @@ void ds_free_packs(demux_stream_t *ds)
   ds->current=NULL;
   ds->buffer=NULL;
   ds->buffer_pos=ds->buffer_size;
-  ds->pts=0; ds->pts_bytes=0;
+  ds->pts = 0;
+  ds->pts_bytes = 0;
 }
 
 int ds_get_packet(demux_stream_t *ds, unsigned char **start)
@@ -898,8 +901,7 @@ demuxer_t *demux_open(stream_t *vs, int file_format, int audio_id,
   int afmt =DEMUXER_TYPE_UNKNOWN,sfmt = DEMUXER_TYPE_UNKNOWN ;
   int demuxer_type;
   int audio_demuxer_type = 0, sub_demuxer_type = 0;
-  int demuxer_force = 0, audio_demuxer_force = 0,
-      sub_demuxer_force = 0;
+  int demuxer_force = 0, audio_demuxer_force = 0, sub_demuxer_force = 0;
 
   if ((demuxer_type = get_demuxer_type_from_name(demuxer_name, &demuxer_force)) < 0) {
     mp_msg(MSGT_DEMUXER,MSGL_ERR,"-demuxer %s does not exist.\n",demuxer_name);
