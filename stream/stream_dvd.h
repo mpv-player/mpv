@@ -1,6 +1,7 @@
 #ifndef MPLAYER_STREAM_DVD_H
 #define MPLAYER_STREAM_DVD_H
 
+#include "config.h"
 #include <stdint.h>
 #ifdef USE_DVDREAD_INTERNAL
 #include "dvdread/dvd_reader.h"
