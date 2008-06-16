@@ -477,6 +477,13 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 //    if(avfc->track       ) demux_info_add(demuxer, "track"    , avfc->track    );
     if(avfc->genre    [0]) demux_info_add(demuxer, "genre"    , avfc->genre    );
 
+    for(i=0; i < avfc->nb_chapters; i++) {
+        AVChapter *c = avfc->chapters[i];
+        uint64_t start = av_rescale_q(c->start, c->time_base, (AVRational){1,1000});
+        uint64_t end   = av_rescale_q(c->end, c->time_base, (AVRational){1,1000});
+        demuxer_add_chapter(demuxer, c->title, start, end);
+    }
+
     if(avfc->nb_programs) {
         int p, start=0, found=0;
 
