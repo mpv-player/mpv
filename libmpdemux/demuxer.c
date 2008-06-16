@@ -1295,7 +1295,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, const char *name, uint64_t start,
 
     demuxer->chapters[demuxer->num_chapters].start = start;
     demuxer->chapters[demuxer->num_chapters].end = end;
-    demuxer->chapters[demuxer->num_chapters].name = strdup(name);
+    demuxer->chapters[demuxer->num_chapters].name = strdup(name ? name : MSGTR_Unknown);
 
     return demuxer->num_chapters++;
 }
