@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include <inttypes.h>
+#include <string.h>
 
 #ifdef USE_FASTMEMCPY
 #if defined(HAVE_MMX) || defined(HAVE_MMX2) || defined(HAVE_3DNOW) \
