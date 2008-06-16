@@ -1066,7 +1066,7 @@ int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
 	    return 0;
 	  }
       }
-    
+
     info = demuxer->info = (char**)realloc(info,(2*(n+2))*sizeof(char*));
     info[2*n] = strdup(opt);
     info[2*n+1] = strdup(param);
@@ -1132,7 +1132,7 @@ double demuxer_get_time_length(demuxer_t *demuxer)
       else if (sh_audio && sh_audio->i_bps)
         get_time_ans = (double)(demuxer->movi_end-demuxer->movi_start)/sh_audio->i_bps;
       else
-        get_time_ans=0;     
+        get_time_ans=0;
     }
     return get_time_ans;
 }
@@ -1228,7 +1228,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, const char *name, uint64_t start,
 }
 
 /**
- * \brief demuxer_seek_chapter() seeks to a chapter in two possible ways: 
+ * \brief demuxer_seek_chapter() seeks to a chapter in two possible ways:
  *        either using the demuxer->chapters structure set by the demuxer
  *        or asking help to the stream layer (e.g. dvd)
  * \param chapter - chapter number wished - 0-based
@@ -1365,7 +1365,7 @@ char *demuxer_chapter_display_name(demuxer_t *demuxer, int chapter)
     if (chapter_name) {
         char *tmp = malloc(strlen(chapter_name) + 14);
         snprintf(tmp, 63, "(%d) %s", chapter + 1, chapter_name);
-        free(chapter_name); 
+        free(chapter_name);
         return tmp;
     } else {
         int chapter_num = demuxer_chapter_count(demuxer);
