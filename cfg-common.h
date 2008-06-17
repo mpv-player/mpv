@@ -1,7 +1,10 @@
 #ifndef MPLAYER_CFG_COMMON_H
 #define MPLAYER_CFG_COMMON_H
 
+#include <sys/types.h>
 #include "config.h"
+#include "m_config.h"
+#include "m_option.h"
 
 extern char *mp_msg_charset;
 extern int mp_msg_color;
