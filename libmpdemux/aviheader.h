@@ -1,7 +1,9 @@
 #ifndef MPLAYER_AVIHEADER_H
 #define MPLAYER_AVIHEADER_H
 
-//#include "config.h"	/* get correct definition WORDS_BIGENDIAN */
+#include <sys/types.h>
+#include <stdint.h>
+#include "config.h"	/* get correct definition of WORDS_BIGENDIAN */
 #include "libavutil/common.h"
 #include "mpbswap.h"
 
