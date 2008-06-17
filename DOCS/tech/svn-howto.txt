@@ -104,7 +104,7 @@ I. BASICS:
 
   For cosmetics-only commits you should get (almost) empty output from
 
-    svn diff --diff-cmd diff -x '-duwbB' <filename(s)>
+    svn diff --diff-cmd diff -x '-duwbBE' <filename(s)>
 
   Also check the output of
 
