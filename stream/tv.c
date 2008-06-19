@@ -323,6 +323,34 @@ static void parse_channels(tvi_handle_t *tvh)
         tv_channel_current->prev->next = NULL;
     free(tv_channel_current);
 }
+
+int tv_set_norm(tvi_handle_t *tvh, char* norm)
+{
+    tvh->norm = norm_from_string(tvh, norm);
+
+    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, norm);
+    if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
+	return 0;
+    }
+    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+    return 1;
+}
+
+int tv_set_norm_i(tvi_handle_t *tvh, int norm)
+{
+   tvh->norm = norm;
+
+   mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNormId, norm);
+   if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
+      mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
+      return 0;
+   }
+
+   tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
+   return(1);
+}
+
 static int open_tv(tvi_handle_t *tvh)
 {
     int i;
@@ -1046,33 +1074,6 @@ int tv_step_norm(tvi_handle_t *tvh)
 int tv_step_chanlist(tvi_handle_t *tvh)
 {
     return 1;
-}
-
-int tv_set_norm(tvi_handle_t *tvh, char* norm)
-{
-    tvh->norm = norm_from_string(tvh, norm);
-
-    mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNorm, norm);
-    if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
-	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
-	return 0;
-    }
-    tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
-    return 1;
-}
-
-int tv_set_norm_i(tvi_handle_t *tvh, int norm)
-{
-   tvh->norm = norm;
-
-   mp_msg(MSGT_TV, MSGL_V, MSGTR_TV_SelectedNormId, norm);
-   if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
-      mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_CannotSetNorm);
-      return 0;
-   }
-
-   tvh->functions->control(tvh->priv,TV_VBI_CONTROL_RESET,tvh->tv_param);
-   return(1);
 }
 
 demuxer_desc_t demuxer_desc_tv = {
