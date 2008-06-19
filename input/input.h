@@ -112,6 +112,16 @@ typedef enum {
   MP_CMD_SWITCH_TITLE,
   MP_CMD_STOP,
 
+  /// DVDNAV commands
+  MP_CMD_DVDNAV_UP = 1000,
+  MP_CMD_DVDNAV_DOWN,
+  MP_CMD_DVDNAV_LEFT,
+  MP_CMD_DVDNAV_RIGHT,
+  MP_CMD_DVDNAV_MENU,
+  MP_CMD_DVDNAV_SELECT,
+  MP_CMD_DVDNAV_PREVMENU,
+  MP_CMD_DVDNAV_MOUSECLICK,
+  
   /// GUI commands
   MP_CMD_GUI_EVENTS = 5000,
   MP_CMD_GUI_LOADFILE,
@@ -132,15 +142,6 @@ typedef enum {
   MP_CMD_CEXIT,
   MP_CMD_CHIDE,
 } mp_command_type;
-
-#define MP_CMD_DVDNAV_UP        1
-#define MP_CMD_DVDNAV_DOWN      2
-#define MP_CMD_DVDNAV_LEFT      3
-#define MP_CMD_DVDNAV_RIGHT     4
-#define MP_CMD_DVDNAV_MENU      5
-#define MP_CMD_DVDNAV_SELECT    6
-#define MP_CMD_DVDNAV_PREVMENU  7
-#define MP_CMD_DVDNAV_MOUSECLICK  8
 
 // The arg types
 #define MP_CMD_ARG_INT 0

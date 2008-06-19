@@ -171,7 +171,7 @@ static const mp_cmd_t mp_cmds[] = {
 #endif
 
 #ifdef USE_DVDNAV
-  { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
 #endif
 
 #ifdef HAVE_MENU
@@ -347,14 +347,14 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { {  MOUSE_BTN6, 0 }, "volume -1" },
   
 #ifdef USE_DVDNAV
-  { { KEY_KP8, 0 }, "dvdnav 1" },   // up
-  { { KEY_KP2, 0 }, "dvdnav 2" },   // down
-  { { KEY_KP4, 0 }, "dvdnav 3" },   // left
-  { { KEY_KP6, 0 }, "dvdnav 4" },   // right
-  { { KEY_KP5, 0 }, "dvdnav 5" },   // menu
-  { { KEY_KPENTER, 0 }, "dvdnav 6" },   // select
-  { { MOUSE_BTN0, 0 }, "dvdnav 8" },   //select
-  { { KEY_KP7, 0 }, "dvdnav 7" },   // previous menu
+  { { KEY_KP8, 0 }, "dvdnav up" },   // up
+  { { KEY_KP2, 0 }, "dvdnav down" },   // down
+  { { KEY_KP4, 0 }, "dvdnav left" },   // left
+  { { KEY_KP6, 0 }, "dvdnav right" },   // right
+  { { KEY_KP5, 0 }, "dvdnav menu" },   // menu
+  { { KEY_KPENTER, 0 }, "dvdnav select" },   // select
+  { { MOUSE_BTN0, 0 }, "dvdnav mouse" },   //select
+  { { KEY_KP7, 0 }, "dvdnav prev" },   // previous menu
 #endif
 
   { { KEY_RIGHT, 0 }, "seek 10" },

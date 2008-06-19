@@ -2281,6 +2281,22 @@ static int set_property_command(MPContext * mpctx, mp_cmd_t * cmd)
     return 1;
 }
 
+#ifdef USE_DVDNAV
+static const struct {
+  const char *name;
+  const mp_command_type cmd;
+} mp_dvdnav_bindings[] = {
+  { "up",       MP_CMD_DVDNAV_UP              },
+  { "down",     MP_CMD_DVDNAV_DOWN            },
+  { "left",     MP_CMD_DVDNAV_LEFT            },
+  { "right",    MP_CMD_DVDNAV_RIGHT           },
+  { "menu",     MP_CMD_DVDNAV_MENU            },
+  { "select",   MP_CMD_DVDNAV_SELECT          },
+  { "prev",     MP_CMD_DVDNAV_PREVMENU        },
+  { "mouse",    MP_CMD_DVDNAV_MOUSECLICK      },
+  { NULL,       0                             }
+};
+#endif
 
 int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 {
@@ -3105,10 +3121,18 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 #ifdef USE_DVDNAV
 	case MP_CMD_DVDNAV:{
 		int button = -1;
+		int i;
+		mp_command_type command = 0;
 		if (mpctx->stream->type != STREAMTYPE_DVDNAV)
 		    break;
 
-		mp_dvdnav_handle_input(mpctx->stream,cmd->args[0].v.i,&button);
+		for (i = 0; mp_dvdnav_bindings[i].name; i++)
+		  if (cmd->args[0].v.s &&
+		      !strcasecmp (cmd->args[0].v.s,
+		                   mp_dvdnav_bindings[i].name))
+		    command = mp_dvdnav_bindings[i].cmd;
+
+		mp_dvdnav_handle_input(mpctx->stream,command,&button);
 		if (osd_level > 1 && button > 0)
 		    set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				"Selected button number %d", button);

@@ -66,14 +66,16 @@ change_rectangle <val1> <val2>
 dvb_set_channel <channel_number> <card_number>
     Set DVB channel.
 
-dvdnav <button>
+dvdnav <button_name>
     Press the given dvdnav button.
-        1 up
-        2 down
-        3 left
-        4 right
-        5 menu
-        6 select
+        up
+        down
+        left
+        right
+        menu
+        select
+        prev
+        mouse
 
 edl_mark
     Write the current position into the EDL file.
