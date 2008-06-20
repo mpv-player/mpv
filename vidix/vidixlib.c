@@ -39,7 +39,7 @@
 #include <string.h>
 
 #include "config.h"
-#include "vidixlib.h"
+#include "vidix.h"
 #include "drivers.h"
 #include "libavutil/common.h"
 #include "mpbswap.h"

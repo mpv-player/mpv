@@ -27,7 +27,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "vidix/vidixlib.h"
+#include "vidix/vidix.h"
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
