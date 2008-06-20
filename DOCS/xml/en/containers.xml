@@ -391,7 +391,8 @@ Read more on the <ulink url="http://www.matroska.org/">official site</ulink>.
 <para>
 NUT is the container format developed by <application>MPlayer</application> and
 <application>FFmpeg</application> folks. Both projects support it.
-Read more on the <ulink url="http://www.nut.hu/">official site</ulink>.
+Read more on the <ulink url="http://www.nut-container.org/">official
+site</ulink>.
 </para>
 </sect2>
 
