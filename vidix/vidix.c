@@ -177,18 +177,3 @@ int 	  vdlPlaybackSetDeint(VDL_HANDLE ctx, const vidix_deinterlace_t * d)
 {
   return ctx->drv->set_deint ? ctx->drv->set_deint (d) : ENOSYS;
 }
-
-int	  vdlQueryNumOemEffects(VDL_HANDLE ctx, unsigned * number )
-{
-  return ctx->drv->get_num_fx ? ctx->drv->get_num_fx (number) : ENOSYS;
-}
-
-int	  vdlGetOemEffect(VDL_HANDLE ctx, vidix_oem_fx_t * f)
-{
-  return ctx->drv->get_fx ? ctx->drv->get_fx (f) : ENOSYS;
-}
-
-int	  vdlSetOemEffect(VDL_HANDLE ctx, const vidix_oem_fx_t * f)
-{
-  return ctx->drv->set_fx ? ctx->drv->set_fx (f) : ENOSYS;
-}

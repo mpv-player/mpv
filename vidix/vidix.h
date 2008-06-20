@@ -325,9 +325,6 @@ typedef struct VDXDriver {
   int (*copy_frame)( const vidix_dma_t * );
   int (*get_gkey)( vidix_grkey_t * );
   int (*set_gkey)( const vidix_grkey_t * );
-  int (*get_num_fx)( unsigned * );
-  int (*get_fx)( vidix_oem_fx_t * );
-  int (*set_fx)( const vidix_oem_fx_t * );
 } VDXDriver;
 
 typedef struct VDXContext {
@@ -391,14 +388,5 @@ int vdlPlaybackSetDeint (VDL_HANDLE, const vidix_deinterlace_t *);
 
 /* Returns 0 if ok else errno */
 int vdlQueryNumOemEffects (VDL_HANDLE, unsigned *number);
-
-/* Returns 0 if ok else errno */
-int vdlGetOemEffect (VDL_HANDLE, vidix_oem_fx_t *);
-
-/* Returns 0 if ok else errno */
-int vdlSetOemEffect (VDL_HANDLE, const vidix_oem_fx_t *);
-
-/* Returns 0 if ok else errno */
-int vdlPlaybackCopyFrame (VDL_HANDLE, const vidix_dma_t *);
 
 #endif /* MPLAYER_VIDIX_H */
