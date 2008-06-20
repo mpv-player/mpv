@@ -336,8 +336,6 @@ typedef struct VDXContext {
 /*                              PUBLIC API                                 */
 /***************************************************************************/
 
-typedef VDXContext *VDL_HANDLE;
-
 /* Opens corresponded video driver and returns handle of associated stream.
  *   path - specifies path where drivers are located.
  *   name - specifies prefered driver name (can be NULL).
@@ -345,48 +343,48 @@ typedef VDXContext *VDL_HANDLE;
  *   verbose - specifies verbose level
  * returns handle if ok else NULL.
  */
-VDL_HANDLE vdlOpen (const char *name,unsigned cap,int verbose);
+VDXContext *vdlOpen (const char *name,unsigned cap,int verbose);
 
 /* Closes stream and corresponded driver. */
-void vdlClose (VDL_HANDLE ctx);
+void vdlClose (VDXContext *ctx);
 
 /* Queries driver capabilities. Return 0 if ok else errno */
-int vdlGetCapability (VDL_HANDLE, vidix_capability_t *);
+int vdlGetCapability (VDXContext *, vidix_capability_t *);
 
 /* Queries support for given fourcc. Returns 0 if ok else errno */
-int vdlQueryFourcc (VDL_HANDLE, vidix_fourcc_t *);
+int vdlQueryFourcc (VDXContext *, vidix_fourcc_t *);
 
 /* Returns 0 if ok else errno */
-int vdlConfigPlayback (VDL_HANDLE, vidix_playback_t *);
+int vdlConfigPlayback (VDXContext *, vidix_playback_t *);
 
 /* Returns 0 if ok else errno */
-int vdlPlaybackOn (VDL_HANDLE);
+int vdlPlaybackOn (VDXContext *);
 
 /* Returns 0 if ok else errno */
-int vdlPlaybackOff (VDL_HANDLE);
+int vdlPlaybackOff (VDXContext *);
 
 /* Returns 0 if ok else errno */
-int vdlPlaybackFrameSelect (VDL_HANDLE, unsigned frame_idx);
+int vdlPlaybackFrameSelect (VDXContext *, unsigned frame_idx);
 
 /* Returns 0 if ok else errno */
-int vdlGetGrKeys (VDL_HANDLE, vidix_grkey_t *);
+int vdlGetGrKeys (VDXContext *, vidix_grkey_t *);
 
 /* Returns 0 if ok else errno */
-int vdlSetGrKeys (VDL_HANDLE, const vidix_grkey_t *);
+int vdlSetGrKeys (VDXContext *, const vidix_grkey_t *);
 
 /* Returns 0 if ok else errno */
-int vdlPlaybackGetEq (VDL_HANDLE, vidix_video_eq_t *);
+int vdlPlaybackGetEq (VDXContext *, vidix_video_eq_t *);
 
 /* Returns 0 if ok else errno */
-int vdlPlaybackSetEq (VDL_HANDLE, const vidix_video_eq_t *);
+int vdlPlaybackSetEq (VDXContext *, const vidix_video_eq_t *);
 
 /* Returns 0 if ok else errno */
-int vdlPlaybackGetDeint (VDL_HANDLE, vidix_deinterlace_t *);
+int vdlPlaybackGetDeint (VDXContext *, vidix_deinterlace_t *);
 
 /* Returns 0 if ok else errno */
-int vdlPlaybackSetDeint (VDL_HANDLE, const vidix_deinterlace_t *);
+int vdlPlaybackSetDeint (VDXContext *, const vidix_deinterlace_t *);
 
 /* Returns 0 if ok else errno */
-int vdlQueryNumOemEffects (VDL_HANDLE, unsigned *number);
+int vdlQueryNumOemEffects (VDXContext *, unsigned *number);
 
 #endif /* MPLAYER_VIDIX_H */
