@@ -2294,6 +2294,19 @@ static const struct {
   { "select",   MP_CMD_DVDNAV_SELECT          },
   { "prev",     MP_CMD_DVDNAV_PREVMENU        },
   { "mouse",    MP_CMD_DVDNAV_MOUSECLICK      },
+
+  /*
+   * keep old dvdnav sub-command options for a while in order not to
+   *  break slave-mode API too suddenly.
+   */
+  { "1",        MP_CMD_DVDNAV_UP              },
+  { "2",        MP_CMD_DVDNAV_DOWN            },
+  { "3",        MP_CMD_DVDNAV_LEFT            },
+  { "4",        MP_CMD_DVDNAV_RIGHT           },
+  { "5",        MP_CMD_DVDNAV_MENU            },
+  { "6",        MP_CMD_DVDNAV_SELECT          },
+  { "7",        MP_CMD_DVDNAV_PREVMENU        },
+  { "8",        MP_CMD_DVDNAV_MOUSECLICK      },
   { NULL,       0                             }
 };
 #endif
