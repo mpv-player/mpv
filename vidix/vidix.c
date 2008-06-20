@@ -113,7 +113,7 @@ static uint32_t normalize_fourcc(uint32_t fourcc)
   if((fourcc & MPLAYER_IMGFMT_RGB_MASK) == (MPLAYER_IMGFMT_RGB|0) ||
      (fourcc & MPLAYER_IMGFMT_RGB_MASK) == (MPLAYER_IMGFMT_BGR|0))
 	return bswap_32(fourcc);
-  else  return fourcc;
+  return fourcc;
 }
 
 int  vdlQueryFourcc(VDL_HANDLE ctx,vidix_fourcc_t *f)
