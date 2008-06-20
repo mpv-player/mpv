@@ -32,11 +32,13 @@ struct list_entry_s {
 struct menu_priv_s {
   menu_list_priv_t p;
   char* title;
+  int auto_close;
 };
 
 static struct menu_priv_s cfg_dflt = {
   MENU_LIST_PRIV_DFLT,
-  "Jump to"
+  "Jump to",
+  0
 };
 
 #define ST_OFF(m) M_ST_OFF(struct menu_priv_s,m)
@@ -44,6 +46,7 @@ static struct menu_priv_s cfg_dflt = {
 static m_option_t cfg_fields[] = {
   MENU_LIST_PRIV_FIELDS,
   { "title", ST_OFF(title),  CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "auto-close", ST_OFF(auto_close), CONF_TYPE_FLAG, 0, 0, 1, NULL },
   { NULL, NULL, NULL, 0,0,0,NULL }
 };
 
@@ -85,8 +88,11 @@ static void read_cmd(menu_t* menu,int cmd) {
       snprintf(str,15,"pt_step %d",d);
     }
     c = mp_input_parse_cmd(str);
-    if(c)
+    if(c) {
+      if(mpriv->auto_close)
+        mp_input_queue_cmd(mp_input_parse_cmd("menu hide"));
       mp_input_queue_cmd(c);
+    }
     else
       mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_FailedToBuildCommand,str);
   } break;
