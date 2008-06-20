@@ -521,7 +521,6 @@ SRCS_MPLAYER = mplayer.c \
                libvo/video_out.c \
                libvo/vo_mpegpes.c \
                libvo/vo_null.c \
-               libvo/vo_yuv4mpeg.c \
                $(addprefix libvo/,$(VO_SRCS)) \
 
 SRCS_MPLAYER-$(APPLE_IR)     += input/appleir.c

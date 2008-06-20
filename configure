@@ -385,6 +385,7 @@ Video output:
   --disable-tga            disable Targa video output [enable]
   --disable-pnm		   disable PNM video output [enable]
   --disable-md5sum	   disable md5sum video output [enable]
+  --disable-yuv4mpeg	   disable md5sum video output [enable]
 
 Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
@@ -533,6 +534,7 @@ _png=auto
 _jpeg=auto
 _pnm=yes
 _md5sum=yes
+_yuv4mpeg=yes
 _gif=auto
 _gl=auto
 _ggi=auto
@@ -852,6 +854,8 @@ for ac_option do
   --disable-pnm)	_pnm=no		;;
   --enable-md5sum)	_md5sum=yes	;;
   --disable-md5sum)	_md5sum=no	;;
+  --enable-yuv4mpeg)	_yuv4mpeg=yes	;;
+  --disable-yuv4mpeg)	_yuv4mpeg=no	;;
   --enable-gif)	_gif=yes	;;
   --disable-gif)	_gif=no		;;
   --enable-gl)		_gl=yes		;;
@@ -3777,6 +3781,18 @@ else
   _novomodules="md5sum $_novomodules"
 fi
 echores "$_md5sum"
+
+
+echocheck "yuv4mpeg support"
+if test "$_yuv4mpeg" = yes; then
+  _def_yuv4mpeg="#define HAVE_YUV4MPEG"
+  _vosrc="$_vosrc vo_yuv4mpeg.c"
+  _vomodules="yuv4mpeg $_vomodules"
+else
+  _def_yuv4mpeg="#undef HAVE_YUV4MPEG"
+  _novomodules="yuv4mpeg $_novomodules"
+fi
+echores "$_yuv4mpeg"
 
 
 echocheck "bl"
@@ -8368,6 +8384,9 @@ $_def_pnm
 
 /* enable md5sum support */
 $_def_md5sum
+
+/* enable yuv4mpeg support */
+$_def_yuv4mpeg
 
 /* enable GIF support */
 $_def_gif
