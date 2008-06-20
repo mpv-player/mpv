@@ -91,8 +91,9 @@ L'encodage est aussi possible dans certains formats, et est géré par
 </para>
 
 <para>
-Pour avoir une liste complète des codecs <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
-et <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>
+Pour avoir une liste complète des codecs
+<ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC6">video</ulink> et
+<ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC7">audio</ulink>
 supportés, veuillez vous reporter à la page web de FFmpeg.
 </para>
 
