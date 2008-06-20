@@ -385,7 +385,7 @@ Video output:
   --disable-tga            disable Targa video output [enable]
   --disable-pnm		   disable PNM video output [enable]
   --disable-md5sum	   disable md5sum video output [enable]
-  --disable-yuv4mpeg	   disable md5sum video output [enable]
+  --disable-yuv4mpeg	   disable yuv4mpeg video output [enable]
 
 Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
