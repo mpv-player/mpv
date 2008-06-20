@@ -577,7 +577,7 @@ SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(LIRC)          += input/lirc.c
 
 SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c \
-                                 vidix/vidixlib.c \
+                                 vidix/vidix.c \
                                  vidix/drivers.c \
                                  vidix/dha.c \
                                  vidix/mtrr.c \
