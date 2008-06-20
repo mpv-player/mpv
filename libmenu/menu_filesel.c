@@ -82,7 +82,7 @@ static void free_entry(list_entry_t* entry) {
   free(entry);
 }
 
-static char* replace_path(char* title , char* dir) {
+static char* replace_path(char* title , char* dir , int escape) {
   char *p = strstr(title,"%p");
   if(p) {
     int tl = strlen(title);
@@ -90,18 +90,29 @@ static char* replace_path(char* title , char* dir) {
     int t1l = p-title; 
     int l = tl - 2 + dl;
     char *r, *n, *d = dir;
-    char term = *(p-1);
 
+    if (escape) {
     do {
-      if (*d == '\\' || *d == term)
+      if (*d == '\\')
         l++;
+      else if (*d == '\'') /* ' -> \'\\\'\' */
+        l+=7;
     } while (*d++);
+    }
     r = malloc(l + 1);
     n = r + t1l;
     memcpy(r,title,t1l);
     do {
-      if (*dir == '\\' || *dir == term)
+      if (escape) {
+      if (*dir == '\\')
         *n++ = '\\';
+      else if (*dir == '\'') { /* ' -> \'\\\'\' */
+        *n++ = '\\'; *n++ = '\'';
+        *n++ = '\\'; *n++ = '\\';
+        *n++ = '\\'; *n++ = '\'';
+        *n++ = '\\';
+      }
+      }
     } while ((*n++ = *dir++));
     if(tl - t1l - 2 > 0)
       strcpy(n-1,p+2);
@@ -219,7 +230,7 @@ static int open_dir(menu_t* menu,char* args) {
     free(mpriv->p.title);
   p = strstr(mpriv->title,"%p");
 
-  mpriv->p.title = replace_path(mpriv->title,mpriv->dir);
+  mpriv->p.title = replace_path(mpriv->title,mpriv->dir,0);
 
   if ((dirp = opendir (mpriv->dir)) == NULL){
     mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_OpendirError, strerror(errno));
@@ -351,7 +362,7 @@ static void read_cmd(menu_t* menu,int cmd) {
       char *str;
       char *action = mpriv->p.current->d ? mpriv->dir_action:mpriv->file_action;
       sprintf(filename,"%s%s",mpriv->dir,mpriv->p.current->p.txt);
-      str = replace_path(action, filename);
+      str = replace_path(action, filename,1);
       mp_input_parse_and_queue_cmds(str);
       if (str != action)
 	free(str);
@@ -362,7 +373,7 @@ static void read_cmd(menu_t* menu,int cmd) {
     char filename[fname_len];
     char *str;
     sprintf(filename,"%s%s",mpriv->dir,mpriv->p.current->p.txt);
-    str = replace_path(action, filename);
+    str = replace_path(action, filename,1);
     mp_input_parse_and_queue_cmds(str);
     if(str != action)
       free(str);
