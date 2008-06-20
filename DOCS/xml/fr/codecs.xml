@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20876 -->
+<!-- synced with r27102 -->
 <chapter id="codecs">
 <title>Codecs Supportés</title>
 
@@ -14,7 +14,7 @@ sont disponibles dans la
 </para>
 
 <para>
-Les plus importants d'entre eux:
+Les plus importants d'entre eux&nbsp;:
 </para>
 
 <itemizedlist>
@@ -64,7 +64,7 @@ Les plus importants d'entre eux:
   décodeur natif pour HuffYUV
   </para></listitem>
 <listitem><para>
-  vieux et simples formats variés similaires à RLE
+  vieux formats simples de type RLE
   </para></listitem>
 </itemizedlist>
 
@@ -73,6 +73,8 @@ Si vous avez un codec Win32 non listé ici qui n'est pas encore
 supporté, veuillez lire <link linkend="codec-importing">Comment importer des codecs</link>
 et aidez-nous à en ajouter le support.
 </para>
+
+<!-- ********** -->
 
 <sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
@@ -102,8 +104,10 @@ supportés, veuillez vous reporter à la page web de FFmpeg.
 <systemitem class="library">libavcodec</systemitem>.
 Lancez juste <filename>./configure</filename> et compilez.
  </para>
-
 </sect2>
+
+
+<!-- ********** -->
 
 <sect2 id="xvid">
 <title>Xvid</title>
@@ -114,7 +118,7 @@ de codec video conforme au MPEG-4 ASP, qui possède des fonctionnalités
 d'encodage en 2 passes et un support complet du MPEG-4 ASP, rendant la chose
 beaucoup plus efficace que le bien connu codec DivX.
 Il donne une très bonne qualité video et obtient de bonnes performances grâce 
-à une optimisation pour les processeurs les plus modernes.
+à de nombreuses optimisations pour les processeurs modernes.
 </para>
 <para>
 Cela a commencé comme un fork du codec OpenDivX.
@@ -133,7 +137,8 @@ offre une vitesse supérieure.
 <procedure>
 <title>Installer <systemitem class="library">Xvid</systemitem></title>
 <para>
-  Comme la plupart des logiciels open source, il est disponible en deux parfums:
+  Comme la plupart des logiciels open source, il est disponible en deux
+parfums&nbsp;:
   <ulink url="http://www.xvid.org/downloads.html">versions officielle</ulink>
   et la version CVS.
   La version CVS est habituellement suffisament stable pour être utilisée, puisqu'elle bénéficie des
@@ -142,7 +147,8 @@ offre une vitesse supérieure.
   <systemitem class="library">Xvid</systemitem>
   avec <application>MEncoder</application> (vous avez besoin au minimum de
   <application>autoconf</application> 2.50,
-  <application>automake</application> et <application>libtool</application>):
+  <application>automake</application> et
+<application>libtool</application>)&nbsp;:
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
@@ -159,7 +165,7 @@ offre une vitesse supérieure.
 <step><para>
   <screen>./configure</screen>
   Vous pouvez avoir à ajouter des options (examinez la sortie de
-  <screen>./configure --help</screen>).
+  <command>./configure --help</command>).
   </para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
@@ -170,13 +176,12 @@ offre une vitesse supérieure.
   <filename class="directory">/usr/local/include/</filename>.
   </para></step>
 <step><para>
-  Recompilez <application>MPlayer</application> avec
-  <option>--with-xvidlibdir=<replaceable>/chemin/vers/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/chemin/vers/</replaceable>xvid.h</option>.
+  Recompilez <application>MPlayer</application>.
   </para></step>
 </procedure>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="codec-x264">
 <title>x264</title>
@@ -196,13 +201,15 @@ offre une vitesse supérieure.
 <title>Fonctionnalités de l'encodeur</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Références multiples</para></listitem>
-  <listitem><para>Intra: Tout les types de macrobloc (16x16, 8x8, et 4x4 avec
+  <listitem><para>Intra&nbsp;: Tout les types de macrobloc (16x16, 8x8, et 4x4
+avec
     toutes les prédictions)</para></listitem>
-  <listitem><para>Inter P: Toutes les partitions (de 16x16 jusqu'à
+  <listitem><para>Inter P&nbsp;: Toutes les partitions (de 16x16 jusqu'à
   4x4)</para></listitem>
-  <listitem><para>Inter B: Les partitions de 16x16 jusqu'à 8x8
+  <listitem><para>Inter B&nbsp;: Les partitions de 16x16 jusqu'à 8x8
     (incluant SKIP/DIRECT)</para></listitem>
-  <listitem><para>Control Débit: quantificateur constant, débit constant,
+  <listitem><para>Control Débit&nbsp;: quantificateur constant, débit
+constant,
     ABR simple ou multi-passe, VBV optionnel</para></listitem>
   <listitem><para>Détection de changement de scène</para></listitem>
   <listitem><para>Placement d'image B adaptatif</para></listitem>
@@ -212,6 +219,7 @@ offre une vitesse supérieure.
   <listitem><para>Mode sans perte</para></listitem>
   <listitem><para>Matrices de quantification personnalisées</para></listitem>
   <listitem><para>Encodage parallèle en multiples tranches</para></listitem>
+  <listitem><para>Entrelacement</para></listitem>
 </itemizedlist>
 
 </sect3>
@@ -231,7 +239,8 @@ offre une vitesse supérieure.
   5%-30% de débit en moins.
   Concrètement, le résultat dépendra de la source d'encodage et de l'efficacité
   de l'encodeur.
-  Les gains apportés par H.264 ne sont pas gratuits: Décoder un flux H.264
+  Les gains apportés par H.264 ne sont pas gratuits&nbsp;: Décoder un flux
+H.264
   augmente considérablement les besoins en processeur et mémoire.
   Par exemple, sur un Athlon 1733 MHz, une vidéo H.264 en résolution DVD à 1500kbps
   demande environ 35% du processeur pour décoder.
@@ -252,7 +261,8 @@ offre une vitesse supérieure.
 <para>
   Ce document n'a pas pour but d'expliquer H.264 en détail,
   mais si vous êtes intéressé par une brêve vue d'ensemble, vous voudrez peut-être lire (en anglais)
-  <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard:
+  <ulink url="http://www.fastvdo.com/spie04/spie04-h264OverviewPaper.pdf">The
+H.264/AVC Advanced Video Coding Standard:
 Overview and Introduction to the Fidelity Range Extensions</ulink>.
 </para>
 </sect3>
@@ -281,11 +291,11 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
 <title>Comment puis-je encoder des vidéos avec <application>MEncoder</application> et
 <systemitem class="library">x264</systemitem>?</title>
 <para>
-  Si vous avez le client Subversion installé, les dernières sources de x264
-  peuvent être récupérées avec cette commande:
-  <screen>
-    svn co svn://svn.videolan.org/x264/trunk x264</screen>
-  Les sources de <application>MPlayer</application> sont mises à jour lorsque survient
+  Si vous avez un client GIT installé, les dernières sources de x264
+  peuvent être récupérées avec cette commande&nbsp;:
+  <screen>git clone git://git.videolan.org/x264.git</screen>
+  Les sources de <application>MPlayer</application> sont mises à jour lorsque
+  survient
   un changement de l'interface de programmation de <systemitem class="library">x264</systemitem>,
   donc il est toujours conseillé d'utiliser la version Subversion de
   <application>MPlayer</application>.
@@ -297,7 +307,7 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
 </para>
 <para>
   <systemitem class="library">x264</systemitem> est construit et
-  installé de façon standard:
+  installé de façon standard&nbsp;:
   <screen>
     ./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
   Ceci installe libx264.a dans /usr/local/lib et x264.h est placé dans
@@ -307,7 +317,7 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
   aux emplacements standards, construire
   <application>MPlayer</application> avec le support
   <systemitem class="library">x264</systemitem> est facile.
-  il suffit de lancer le standard:
+  il suffit de lancer le classique&nbsp;:
   <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
   Le script <filename>./configure</filename> détectera automatiquement que vous satisfaisez
   aux conditions requises pour le <systemitem class="library">x264</systemitem>.
@@ -322,7 +332,7 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
 <title>Codecs audio</title>
 
 <itemizedlist>
-<title>Les plus importants d'entre eux:</title>
+<title>Les plus importants d'entre eux&nbsp;:</title>
 <listitem><para>
   MPEG layer 1/2/3 (MP1/2/3) audio (code <emphasis role="bold">natif</emphasis>,
   avec optimisation MMX/SSE/3DNow!)
@@ -330,7 +340,9 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
 <listitem><para>
   Windows Media Audio 7 et 8 (alias WMAv1 et WMAv2) (code
   <emphasis role="bold">natif</emphasis>, avec
-  <systemitem class="library">libavcodec</systemitem>)
+  <link linkend="ffmpeg">
+    <systemitem class="library">libavcodec</systemitem>
+  </link>)
   </para></listitem>
 <listitem><para>
   Windows Media Audio 9 (WMAv3) (en utilisant la DLL DMO)
@@ -349,10 +361,10 @@ Overview and Introduction to the Fidelity Range Extensions</ulink>.
   codec audio Ogg Vorbis (librairie <emphasis role="bold">native</emphasis>)
   </para></listitem>
 <listitem><para>
-  RealAudio: DNET (AC-3 bas débit), Cook, Sipro et ATRAC3
+  RealAudio&nbsp;: DNET (AC-3 bas débit), Cook, Sipro et ATRAC3
   </para></listitem>
 <listitem><para>
-  QuickTime: codecs audio Qualcomm et QDesign
+  QuickTime&nbsp;: codecs audio Qualcomm et QDesign
   </para></listitem>
 <listitem><para>
   VIVO audio (g723, Vivo Siren)
@@ -423,18 +435,22 @@ pas OSS) et DXR3/Hollywood + les cartes décodeurs MPEG.
 
 
 <sect2 id="libmad">
-<title>Support libmad</title>
+  <title>Support <systemitem class="library">libmad</systemitem></title>
 
 <para>
-<ulink url="http://www.underbit.com/products/mad/">libmad</ulink> est une librairie
-multi-plateforme de décodage MPEG audio en nombre entier (24bit PCM interne) uniquement.
+<ulink url="http://www.underbit.com/products/mad/">
+<systemitem class="library">libmad</systemitem></ulink> est une librairie
+multi-plateforme de décodage MPEG audio en nombre entier (24&nbsp;bits PCM
+interne) uniquement.
 Elle ne gère pas très bien les fichiers endommagés, et elle a parfois des problèmes
 pour le déplacement, mais elle peut mieux se comporter que mp3lib sur des
 plateformes sans unité à virgule flottante (tel que <link linkend="arm">ARM</link>).
 </para>
 
 <para>
-Si vous avez une installation fonctionnelle de libmad, <filename>./configure</filename>
+Si vous avez une installation fonctionnelle de
+<systemitem class="library">libmad</systemitem>,
+<filename>./configure</filename>
 le signalera et compilera le support du décodage du son MPEG audio via
 <systemitem class="library">libmad</systemitem> automatiquement.
 </para>
@@ -468,10 +484,11 @@ Un décodeur open source appelé FAAD est disponible sur
 Si vous utilisez gcc 3.2 qui ne peut pas compiler notre FAAD interne ou si vous
 voulez utiliser une librairie externe pour d'autres raisons, téléchargez la
 depuis la
-<ulink url="http://www.audiocoding.com/modules/mydownloads/">page de téléchargements</ulink>
+<ulink url="http://www.audiocoding.com/downloads.html">page de
+téléchargements</ulink>
 et passez <option>--enable-faad-external</option> à <filename>./configure</filename>.
 Vous n'avez pas besoin de tout faad2 pour décoder les fichiers AAC, libfaad suffit.
-Construisez comme ceci:
+Construisez comme ceci&nbsp;:
 <screen>
 cd faad2/
 sh bootstrap
@@ -484,9 +501,11 @@ Les binaires ne sont pas disponibles sur audiocoding.com, mais vous pouvez
 obtenir les paquets Debian sur la
 <ulink url="http://www.debian-multimedia.org/">page web de Christian Marillat</ulink>,
 les RPMs Mandrake/Mandriva sur le <ulink url="http://plf.zarb.org">P.L.F</ulink> et les RPMS
-RedHat sur <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
+Fedora sur <ulink url="http://rpm.livna.org/">Livna</ulink>.
 </para>
 </sect2>
+
+<!-- ********** -->
 
 <sect2 id="amr">
 <title>codecs AMR</title>
@@ -498,28 +517,18 @@ L'implémentation de référence est disponible depuis
 (gratuit pour un usage privé).
 </para>
 <para>
-Pour activer le support, télécharger les sources pour les codecs
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
-et
-<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>,
-mettez les dans le répertoire là où vous avez dézippé le source de
-<application>MPlayer</application> et lancez les commandes suivantes:
-<screen>
-unzip 26104-610.zip
-unzip 26104-610_ANSI_C_source_code.zip
-mv c-code libavcodec/amr_float
-unzip 26204-600.zip
-unzip 26204-600_ANSI-C_source_code.zip
-mv c-code libavcodec/amrwb_float
-</screen>
-Après ça, suivez la <link linkend="features">procédure dinstallation</link>.
-habituelle de <application>MPlayer</application>
+  Pour activer le support, téléchargez et installez les bibliothèques pour
+  <ulink url="http://www.penguin.cz/~utx/amr">AMR-NB et AMR-WB</ulink> en
+  suivant les instructions de cette page.  Ensuite, recompilez
+  <application>MPlayer</application>.
 </para>
 </sect2>
 
 </sect1>
 
-<!-- ********** -->
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 
 <sect1 id="codec-importing">
 <title>Comment importer les codecs Win32</title>
@@ -532,7 +541,8 @@ habituelle de <application>MPlayer</application>
 <para>
 VFW (Video for Windows) est une ancienne API vidéo pour windows. Ses codecs
 portent l'extension <filename>.DLL</filename> ou (rarement) <filename>.DRV</filename>.
-Si <application>MPlayer</application> n'arrive pas à lire votre AVI et renvoie :
+Si <application>MPlayer</application> n'arrive pas à lire votre AVI et
+renvoie&nbsp;:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
 </para>
 
@@ -540,20 +550,21 @@ Si <application>MPlayer</application> n'arrive pas à lire votre AVI et renvoie 
 Cela signifie que votre AVI est encodé avec un codec qui a le HFYU fourcc (HFYU = codec
 HuffYUV, DIV3 = DivX Low Motion, etc...). Maintenant que vous savez cela, vous
 devez déterminer quelle DLL Windows utilise pour lire ce fichier. Dans votre
-cas, le fichier <filename>system.ini</filename> fournit cette information à une ligne comme:
+cas, le fichier <filename>system.ini</filename> fournit cette information à
+une ligne comme&nbsp;:
 <programlisting>VIDC.HFYU=huffyuv.dll</programlisting>
 </para>
 
 <para>
 Vous avez donc besoin du fichier <filename>huffyuv.dll</filename>. Notez
-que les codecs audio sont spécifiés par le préfixe MSACM :
+que les codecs audio sont spécifiés par le préfixe MSACM&nbsp;:
 <programlisting>msacm.l3acm=L3codeca.acm</programlisting>
 </para>
 
 <para>
 C'est le codec MP3. Maintenant que vous avez toutes les informations nécessaires
 (fourcc, fichier codec, fichier AVI). Demandez le support de votre codec par
-mail, et envoyez ces fichiers sur le site FTP :
+mail, et envoyez ces fichiers sur le site FTP&nbsp;:
 <systemitem role="url">
 ftp://upload.mplayerhq.hu/MPlayer/incoming/[nomcodec]/
 </systemitem>
@@ -572,7 +583,8 @@ méthode DirectShow ci-dessous.
 
 <para>
 DirectShow est la plus récente interface de programmation vidéo, encore pire
-que sa prédécesseur. Les choses snot encore plus difficiles avec DirectShow puisque
+que sa prédécesseur. Les choses sont encore plus difficiles avec DirectShow
+puisque
 <itemizedlist>
 <listitem><para>
   <filename>system.ini</filename> ne contient pas les informations nécessaires qui sont
@@ -585,7 +597,7 @@ que sa prédécesseur. Les choses snot encore plus difficiles avec DirectShow pu
 </para>
 
 <procedure>
-<title>Nouvelle Méthode:</title>
+<title>Nouvelle Méthode&nbsp;:</title>
 <para>
 En utilisant <application>Microsoft GraphEdit</application> (rapide)
 </para>
@@ -625,7 +637,7 @@ Si il n'y a pas d'entrée <systemitem>Filename</systemitem> et que
 </note>
 
 <procedure>
-<title>Ancienne Méthode:</title>
+<title>Ancienne Méthode&nbsp;:</title>
 <para>
 Respirez à fond et commencez à fouiller dans la base de registre...
 </para>
@@ -634,7 +646,7 @@ Respirez à fond et commencez à fouiller dans la base de registre...
   </para></step>
 <step><para>
   Pressez <keycap>Ctrl</keycap>+<keycap>F</keycap>, décochez les deux premières
-  cases, et cochez la troisième. Entrez le fourcc du codec. (par ex.:
+  cases, et cochez la troisième. Entrez le fourcc du codec. (par ex.&nbsp;:
   <userinput>TM20</userinput>).
   </para></step>
 <step><para>
@@ -648,7 +660,7 @@ Respirez à fond et commencez à fouiller dans la base de registre...
   <guimenu>File</guimenu> -&gt; <guisubmenu>Properties</guisubmenu> -&gt;
   <guimenuitem>Advanced</guimenuitem>.
   Si rien n'apparaît, pas de chance. Essayez de le deviner. (par ex.
-  cherchez : TrueMotion)
+  cherchez TrueMotion)
   </para></step>
 <step><para>
   Si le GUID apparaît dans la base de registre, vous devriez voir un champ
@@ -668,7 +680,7 @@ Vous aurez des mauvaises occurrences, mais finirez par obtenir la bonne...
 <para>
 Nous avons désormais toutes les informations nécessaires (fourcc, GUID, fichier
 codec, fichier AVI), demandez le support de votre codec par mail, et envoyez
-ces fichiers sur le FTP :
+ces fichiers sur le FTP&nbsp;:
 <systemitem
 role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[nomcodec]/
 </systemitem>
