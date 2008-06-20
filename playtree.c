@@ -710,8 +710,9 @@ play_tree_iter_up_step(play_tree_iter_t* iter, int d,int with_nodes) {
   iter->tree = iter->tree->parent;
 
   // Pop subtree params
-  if(iter->config) {
+  if(iter->config && iter->entry_pushed > 0) {
     m_config_pop(iter->config);
+    iter->entry_pushed = 0;
     if(iter->mode == PLAY_TREE_ITER_RND)
       iter->tree->flags |= PLAY_TREE_RND_PLAYED;
   }
