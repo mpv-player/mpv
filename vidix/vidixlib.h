@@ -68,67 +68,66 @@ typedef struct VDXContext {
   /* might be filled in by much more info later on */
 } VDXContext;
 
-typedef VDXContext * VDL_HANDLE;
+typedef VDXContext *VDL_HANDLE;
 
-			/* Opens corresponded video driver and returns handle
-			   of associated stream.
-			   path - specifies path where drivers are located.
-			   name - specifies prefered driver name (can be NULL).
-			   cap  - specifies driver capability (TYPE_* constants).
-			   verbose - specifies verbose level
-			   returns !0 if ok else NULL.
-			   */
-VDL_HANDLE vdlOpen(const char *name,unsigned cap,int verbose);
-			/* Closes stream and corresponded driver. */
-void	  vdlClose(VDL_HANDLE ctx);
+/* Opens corresponded video driver and returns handle of associated stream.
+ *   path - specifies path where drivers are located.
+ *   name - specifies prefered driver name (can be NULL).
+ *   cap  - specifies driver capability (TYPE_* constants).
+ *   verbose - specifies verbose level
+ * returns handle if ok else NULL.
+ */
+VDL_HANDLE vdlOpen (const char *name,unsigned cap,int verbose);
 
-			/* Queries driver capabilities. Return 0 if ok else errno */
-int	  vdlGetCapability(VDL_HANDLE, vidix_capability_t *);
+/* Closes stream and corresponded driver. */
+void vdlClose (VDL_HANDLE ctx);
 
-			/* Queries support for given fourcc. Returns 0 if ok else errno */
-int	  vdlQueryFourcc(VDL_HANDLE,vidix_fourcc_t *);
+/* Queries driver capabilities. Return 0 if ok else errno */
+int vdlGetCapability (VDL_HANDLE, vidix_capability_t *);
 
-			/* Returns 0 if ok else errno */
-int	  vdlConfigPlayback(VDL_HANDLE, vidix_playback_t *);
+/* Queries support for given fourcc. Returns 0 if ok else errno */
+int vdlQueryFourcc (VDL_HANDLE, vidix_fourcc_t *);
 
-			/* Returns 0 if ok else errno */
-int 	  vdlPlaybackOn(VDL_HANDLE);
+/* Returns 0 if ok else errno */
+int vdlConfigPlayback (VDL_HANDLE, vidix_playback_t *);
 
-			/* Returns 0 if ok else errno */
-int 	  vdlPlaybackOff(VDL_HANDLE);
+/* Returns 0 if ok else errno */
+int vdlPlaybackOn (VDL_HANDLE);
 
-			/* Returns 0 if ok else errno */
-int 	  vdlPlaybackFrameSelect(VDL_HANDLE, unsigned frame_idx );
+/* Returns 0 if ok else errno */
+int vdlPlaybackOff (VDL_HANDLE);
 
-			/* Returns 0 if ok else errno */
-int 	  vdlGetGrKeys(VDL_HANDLE, vidix_grkey_t * );
+/* Returns 0 if ok else errno */
+int vdlPlaybackFrameSelect (VDL_HANDLE, unsigned frame_idx);
 
-			/* Returns 0 if ok else errno */
-int 	  vdlSetGrKeys(VDL_HANDLE, const vidix_grkey_t * );
+/* Returns 0 if ok else errno */
+int vdlGetGrKeys (VDL_HANDLE, vidix_grkey_t *);
 
-			/* Returns 0 if ok else errno */
-int 	  vdlPlaybackGetEq(VDL_HANDLE, vidix_video_eq_t * );
+/* Returns 0 if ok else errno */
+int vdlSetGrKeys (VDL_HANDLE, const vidix_grkey_t *);
 
-			/* Returns 0 if ok else errno */
-int 	  vdlPlaybackSetEq(VDL_HANDLE, const vidix_video_eq_t * );
+/* Returns 0 if ok else errno */
+int vdlPlaybackGetEq (VDL_HANDLE, vidix_video_eq_t *);
 
-			/* Returns 0 if ok else errno */
-int	  vdlPlaybackGetDeint(VDL_HANDLE, vidix_deinterlace_t * );
+/* Returns 0 if ok else errno */
+int vdlPlaybackSetEq (VDL_HANDLE, const vidix_video_eq_t *);
 
-			/* Returns 0 if ok else errno */
-int 	  vdlPlaybackSetDeint(VDL_HANDLE, const vidix_deinterlace_t * );
+/* Returns 0 if ok else errno */
+int vdlPlaybackGetDeint (VDL_HANDLE, vidix_deinterlace_t *);
 
-			/* Returns 0 if ok else errno */
-int	  vdlQueryNumOemEffects(VDL_HANDLE, unsigned * number );
+/* Returns 0 if ok else errno */
+int vdlPlaybackSetDeint (VDL_HANDLE, const vidix_deinterlace_t *);
 
-			/* Returns 0 if ok else errno */
-int	  vdlGetOemEffect(VDL_HANDLE, vidix_oem_fx_t * );
+/* Returns 0 if ok else errno */
+int vdlQueryNumOemEffects (VDL_HANDLE, unsigned *number);
 
-			/* Returns 0 if ok else errno */
-int	  vdlSetOemEffect(VDL_HANDLE, const vidix_oem_fx_t * );
+/* Returns 0 if ok else errno */
+int vdlGetOemEffect (VDL_HANDLE, vidix_oem_fx_t *);
 
+/* Returns 0 if ok else errno */
+int vdlSetOemEffect (VDL_HANDLE, const vidix_oem_fx_t *);
 
-			/* Returns 0 if ok else errno */
-int	  vdlPlaybackCopyFrame(VDL_HANDLE, const vidix_dma_t * );
+/* Returns 0 if ok else errno */
+int vdlPlaybackCopyFrame (VDL_HANDLE, const vidix_dma_t *);
 
 #endif /* MPLAYER_VIDIXLIB_H */
