@@ -1153,6 +1153,10 @@ static char help_text[]=
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed "audio_out: alsa9 and alsa1x modules were removed, use -ao alsa instead.\n"
+#define MSGTR_AO_TryingPreferredAudioDriver "Trying preferred audio driver '%.*s', options '%s'\n"
+#define MSGTR_AO_NoSuchDriver "No such audio driver '%.*s'\n"
+#define MSGTR_AO_FailedInit "Failed to initialize audio driver '%s'\n"
+#define MSGTR_AO_TryingEveryKnown "Trying every known audio driver...\n"
 
 // ao_oss.c
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Can't open mixer device %s: %s\n"
