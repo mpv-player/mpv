@@ -7555,7 +7555,7 @@ echocheck "DVD support (libdvdnav)"
 if test "$_dvdnav" = auto ; then
   if test "$_dvdread_internal" = yes ; then
     _dvdnav=no
-    echores "disabled due to the usage of the internal copy of dvdread. Append --disable-dvdread-internal"
+    _res_comment="Disabled in favor of the internal copy of dvdread. Append --disable-dvdread-internal."
   else
     $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
   fi
