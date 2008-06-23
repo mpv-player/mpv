@@ -49,13 +49,14 @@ typedef struct mp_osd_obj_s {
     unsigned char *bitmap_buffer;
 } mp_osd_obj_t;
 
+struct osd_state {
+    unsigned char osd_text[64];
+};
 
 #include "subreader.h"
 
 extern sub_data* subdata; //currently used subtitles
 extern subtitle* vo_sub;
-
-extern unsigned char* vo_osd_text;
 
 extern void* vo_osd_teletext_page;
 extern int vo_osd_teletext_half;
@@ -108,14 +109,19 @@ extern float spu_gaussvar;
 //extern void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 //extern void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 //extern void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
-extern void osd_draw_text(int dxs,int dys,void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx);
-extern void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h));
+void osd_draw_text(struct osd_state *osd, int dxs, int dys,
+                   void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h,
+                                      unsigned char* src, unsigned char *srca,
+                                      int stride),
+                   void *ctx);
+void osd_remove_text(struct osd_state *osd, int dxs, int dys,
+                     void (*remove)(int x0, int y0, int w, int h));
 
-void vo_init_osd(void);
-int vo_update_osd(int dxs,int dys);
+struct osd_state *osd_create(void);
+int osd_update(struct osd_state *osd, int dxs, int dys);
 int vo_osd_changed(int new_value);
 int vo_osd_check_range_update(int,int,int,int);
-void free_osd_list(void);
+void osd_free(struct osd_state *osd);
 
 extern int vo_osd_changed_flag;
 
@@ -124,6 +130,11 @@ unsigned utf8_get_char(const char **str);
 #ifdef USE_DVDNAV
 #include <inttypes.h>
 void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey);
+#endif
+
+
+#ifdef IS_OLD_VO
+#define vo_remove_text(...) osd_remove_text(global_osd, __VA_ARGS__)
 #endif
 
 #endif /* MPLAYER_SUB_H */

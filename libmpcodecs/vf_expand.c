@@ -28,12 +28,13 @@
 static struct vf_priv_s {
     int exp_w,exp_h;
     int exp_x,exp_y;
-    int osd;
+    int osd_enabled;
     double aspect;
     int round;
     unsigned char* fb_ptr;
     int passthrough;
     int first_slice;
+    struct osd_state *osd;
 } const vf_priv_dflt = {
   -1,-1,
   -1,-1,
@@ -172,10 +173,10 @@ static void draw_osd(struct vf_instance* vf_,int w,int h){
 		remove_func_2(vf->priv->exp_x+w,vf->priv->exp_y,vf->priv->exp_w-w-vf->priv->exp_x,h);
 	} else {
 	    // partial clear:
-	    vo_remove_text(vf->priv->exp_w,vf->priv->exp_h,remove_func);
+	    osd_remove_text(vf->priv->osd, vf->priv->exp_w,vf->priv->exp_h,remove_func);
 	}
     }
-    osd_draw_text(vf->priv->exp_w,vf->priv->exp_h,draw_func, NULL);
+    osd_draw_text(vf->priv->osd, vf->priv->exp_w,vf->priv->exp_h,draw_func, NULL);
     // save buffer pointer for double buffering detection - yes, i know it's
     // ugly method, but note that codecs with DR support does the same...
     if(vf->dmpi)
@@ -241,9 +242,9 @@ static int config(struct vf_instance* vf,
 static void get_image(struct vf_instance* vf, mp_image_t *mpi){
 //    if(mpi->type==MP_IMGTYPE_IPB) return; // not yet working
 #ifdef OSD_SUPPORT
-    if(vf->priv->osd && (mpi->flags&MP_IMGFLAG_PRESERVE)){
+    if(vf->priv->osd_enabled && (mpi->flags&MP_IMGFLAG_PRESERVE)){
 	// check if we have to render osd!
-	vo_update_osd(vf->priv->exp_w, vf->priv->exp_h);
+	osd_update(vf->priv->osd, vf->priv->exp_w, vf->priv->exp_h);
 	if(vo_osd_check_range_update(vf->priv->exp_x,vf->priv->exp_y,
 	    vf->priv->exp_x+mpi->w,vf->priv->exp_y+mpi->h)) return;
     }
@@ -368,7 +369,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
 	if(!vf->dmpi) { mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_FunWhydowegetNULL); return 0; }
 	mpi->priv=NULL;
 #ifdef OSD_SUPPORT
-	if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
+	if(vf->priv->osd_enabled) draw_osd(vf,mpi->w,mpi->h);
 #endif
 	// we've used DR, so we're ready...
 	if(!(mpi->flags&MP_IMGFLAG_PLANAR))
@@ -403,7 +404,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
 	vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
     }
 #ifdef OSD_SUPPORT
-    if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
+    if(vf->priv->osd_enabled) draw_osd(vf,mpi->w,mpi->h);
 #endif
     return vf_next_put_image(vf,vf->dmpi, pts);
 }
@@ -413,8 +414,11 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
 static int control(struct vf_instance* vf, int request, void* data){
 #ifdef OSD_SUPPORT
     switch(request){
+    case VFCTRL_SET_OSD_OBJ:
+        vf->priv->osd = data;
+        break;
     case VFCTRL_DRAW_OSD:
-	if(vf->priv->osd) return CONTROL_TRUE;
+	if(vf->priv->osd_enabled) return CONTROL_TRUE;
     }
 #endif
     return vf_next_control(vf,request,data);
@@ -437,7 +441,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->exp_h,
     vf->priv->exp_x,
     vf->priv->exp_y,
-    vf->priv->osd,
+    vf->priv->osd_enabled,
     vf->priv->aspect,
     vf->priv->round);
     return 1;
@@ -449,7 +453,7 @@ static const m_option_t vf_opts_fields[] = {
   {"h", ST_OFF(exp_h), CONF_TYPE_INT, 0, 0 ,0, NULL},
   {"x", ST_OFF(exp_x), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
   {"y", ST_OFF(exp_y), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
-  {"osd", ST_OFF(osd), CONF_TYPE_FLAG, 0 , 0, 1, NULL},
+  {"osd", ST_OFF(osd_enabled), CONF_TYPE_FLAG, 0 , 0, 1, NULL},
   {"aspect", ST_OFF(aspect), CONF_TYPE_DOUBLE, M_OPT_MIN, 0, 0, NULL},
   {"round", ST_OFF(round), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }

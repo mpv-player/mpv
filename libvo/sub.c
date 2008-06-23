@@ -19,6 +19,7 @@
 #include "osdep/timer.h"
 #endif
 
+#include "talloc.h"
 #include "mplayer.h"
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -72,7 +73,6 @@ char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "",
 font_desc_t* vo_font=NULL;
 font_desc_t* sub_font=NULL;
 
-unsigned char* vo_osd_text=NULL;
 #ifdef HAVE_TV_TELETEXT
 void* vo_osd_teletext_page=NULL;
 int vo_osd_teletext_half = 0;
@@ -181,8 +181,10 @@ no_utf8:
   return c;
 }
 
-inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
-	const char *cp=vo_osd_text;
+inline static void vo_update_text_osd(struct osd_state *osd, mp_osd_obj_t* obj,
+                                      int dxs, int dys)
+{
+	const char *cp = osd->osd_text;
 	int x=20;
 	int h=0;
 	int font;
@@ -203,7 +205,7 @@ inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
 
 	alloc_buf(obj);
 
-	cp=vo_osd_text;
+	cp = osd->osd_text;
 	x = obj->x;
         while (*cp){
           uint16_t c=utf8_get_char(&cp);
@@ -1050,7 +1052,8 @@ static mp_osd_obj_t* new_osd_obj(int type){
     return osd;
 }
 
-void free_osd_list(void){
+void osd_free(struct osd_state *osd)
+{
     mp_osd_obj_t* obj=vo_osd_list;
     while(obj){
 	mp_osd_obj_t* next=obj->next;
@@ -1060,11 +1063,13 @@ void free_osd_list(void){
 	obj=next;
     }
     vo_osd_list=NULL;
+    talloc_free(osd);
 }
 
 #define FONT_LOAD_DEFER 6
 
-int vo_update_osd(int dxs,int dys){
+int osd_update(struct osd_state *osd, int dxs, int dys)
+{
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
 #ifdef HAVE_FREETYPE    
@@ -1142,8 +1147,8 @@ int vo_update_osd(int dxs,int dys){
 		obj->flags&=~OSDFLAG_VISIBLE;
 	    break;
 	case OSDTYPE_OSD:
-	    if(vo_font && vo_osd_text && vo_osd_text[0]){
-		vo_update_text_osd(obj,dxs,dys); // update bbox
+	    if(vo_font && osd->osd_text[0]){
+		vo_update_text_osd(osd, obj, dxs, dys); // update bbox
 		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
 	    } else
 		obj->flags&=~OSDFLAG_VISIBLE;
@@ -1183,12 +1188,15 @@ int vo_update_osd(int dxs,int dys){
     return chg;
 }
 
-void vo_init_osd(void){
+struct osd_state *osd_create(void)
+{
+    struct osd_state *osd = talloc_ptrtype(NULL, osd);
+    *osd = (struct osd_state){
+    };
     if(!draw_alpha_init_flag){
 	draw_alpha_init_flag=1;
 	vo_draw_alpha_init();
     }
-    if(vo_osd_list) free_osd_list();
     // temp hack, should be moved to mplayer/mencoder later
     new_osd_obj(OSDTYPE_OSD);
     new_osd_obj(OSDTYPE_SUBTITLE);
@@ -1203,13 +1211,16 @@ void vo_init_osd(void){
 #ifdef HAVE_FREETYPE
     force_load_font = 1;
 #endif
+    return osd;
 }
 
 int vo_osd_changed_flag=0;
 
-void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h)){
+void osd_remove_text(struct osd_state *osd, int dxs, int dys,
+                    void (*remove)(int x0, int y0, int w, int h))
+{
     mp_osd_obj_t* obj=vo_osd_list;
-    vo_update_osd(dxs,dys);
+    osd_update(osd, dxs, dys);
     while(obj){
       if(((obj->flags&OSDFLAG_CHANGED) || (obj->flags&OSDFLAG_VISIBLE)) && 
          (obj->flags&OSDFLAG_OLD_BBOX)){
@@ -1225,10 +1236,14 @@ void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h)){
     }
 }
 
-void osd_draw_text(int dxs,int dys,void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
+void osd_draw_text(struct osd_state *osd, int dxs, int dys,
+                   void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h,
+                                      unsigned char* src, unsigned char *srca,
+                                      int stride),
+                   void *ctx)
 {
     mp_osd_obj_t* obj=vo_osd_list;
-    vo_update_osd(dxs,dys);
+    osd_update(osd, dxs, dys);
     while(obj){
       if(obj->flags&OSDFLAG_VISIBLE){
 	vo_osd_changed_flag=obj->flags&OSDFLAG_CHANGED;	// temp hack

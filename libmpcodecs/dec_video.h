@@ -3,6 +3,8 @@
 
 #include "libmpdemux/stheader.h"
 
+struct osd_state;
+
 // dec_video.c:
 extern void vfm_help(void);
 
@@ -10,7 +12,8 @@ extern int init_best_video_codec(sh_video_t *sh_video,char** video_codec_list,ch
 extern void uninit_video(sh_video_t *sh_video);
 
 extern void *decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame, double pts);
-extern int filter_video(sh_video_t *sh_video, void *frame, double pts);
+extern int filter_video(sh_video_t *sh_video, void *frame, double pts,
+                        struct osd_state *osd);
 
 extern int get_video_quality_max(sh_video_t *sh_video);
 extern void set_video_quality(sh_video_t *sh_video,int quality);

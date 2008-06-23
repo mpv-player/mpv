@@ -94,6 +94,7 @@
 #include "defaultopts.h"
 
 MPOpts opts;
+struct osd_state *osd;
 
 int vo_doublebuffering=0;
 int vo_directrendering=0;
@@ -215,7 +216,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
 int vo_control(struct vo *vo, uint32_t request, void *data) { abort(); }
 int vo_draw_frame(struct vo *vo, uint8_t *src[]) { abort(); }
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y) { abort(); }
-void vo_draw_osd(struct vo *vo) { abort(); }
+void vo_draw_osd(struct vo *vo, struct osd_state *osd) { abort(); }
 void vo_flip_page(struct vo *vo) { abort(); }
 void vo_check_events(struct vo *vo) { abort(); }
 
@@ -552,7 +553,7 @@ if (frameno_filename) {
   }
 #endif
 
-  vo_init_osd();
+  osd = osd_create();
 
   /* HACK, for some weird reason, push() has to be called twice,
      otherwise options are not saved correctly */
@@ -1344,9 +1345,10 @@ case VCODEC_FRAMENO:
     break;
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
+    sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ, osd);
     {void *decoded_frame = decode_video(sh_video,frame_data.start,frame_data.in_size,
       skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), MP_NOPTS_VALUE);
-    blit_frame = decoded_frame && filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE);}
+      blit_frame = decoded_frame && filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE, osd);}
     
     if (sh_video->vf_initialized < 0) mencoder_exit(1, NULL);
     
@@ -1706,10 +1708,12 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
         if (sh_video->pts >= end_pts) done = 1;
 
         if (vfilter) {
+            sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
+                                       osd);
             int softskip = (vfilter->control(vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) == CONTROL_TRUE);
             void *decoded_frame = decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip, MP_NOPTS_VALUE);
 	    if (decoded_frame)
-		filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE);
+		filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE, osd);
         }
 
         if (print_info) mp_msg(MSGT_MENCODER, MSGL_STATUS,

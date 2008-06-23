@@ -86,6 +86,8 @@ static struct SwsContext *sws=NULL;
 int aaopt_osdcolor = AA_SPECIAL;
 int aaopt_subcolor = AA_SPECIAL;
 
+static unsigned char vo_osd_text[64];
+
 void
 resize(void){
     /* 
@@ -182,15 +184,10 @@ osdpercent(int duration, int deko, int min, int max, int val, const char * desc,
 static void
 printosdtext(void)
 {
-  if(osd_text_length > 0 && !vo_osd_text) {
-    memset(c->textbuffer,' ',osd_text_length);
-    memset(c->attrbuffer,0,osd_text_length);
-    osd_text_length = 0;
-  }
     /* 
      * places the mplayer status osd
      */
-  if (vo_osd_text && vo_osd_text[0] != 0) {
+  if (vo_osd_text[0] != 0) {
     int len;
     if(vo_osd_text[0] < 32) {
       len = strlen(sub_osd_names_short[vo_osd_text[0]]) + strlen(vo_osd_text+1) + 2;
@@ -534,18 +531,18 @@ static void clear_alpha(int x0,int y0, int w,int h) {
 
 static void
 draw_osd(void){
-    char * vo_osd_text_save;
+    char vo_osd_text_save;
     int vo_osd_progbar_type_save;
 
     printosdprogbar();
     /* let vo_draw_text only write subtitle */
-    vo_osd_text_save=vo_osd_text; /* we have to save the osd_text */
-    vo_osd_text=NULL;
+    vo_osd_text_save = global_osd->osd_text[0];
+    global_osd->osd_text[0] = 0;
     vo_osd_progbar_type_save=vo_osd_progbar_type;
     vo_osd_progbar_type=-1;
     vo_remove_text(aa_scrwidth(c), aa_scrheight(c),clear_alpha);
     vo_draw_text(aa_scrwidth(c), aa_scrheight(c), draw_alpha);
-    vo_osd_text=vo_osd_text_save;
+    global_osd->osd_text[0] = vo_osd_text_save;
     vo_osd_progbar_type=vo_osd_progbar_type_save;
 }
 

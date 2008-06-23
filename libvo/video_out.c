@@ -256,11 +256,11 @@ int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int
     return vo->driver->draw_slice(vo, src, stride, w, h, x, y);
 }
 
-void vo_draw_osd(struct vo *vo)
+void vo_draw_osd(struct vo *vo, struct osd_state *osd)
 {
     if (!vo->config_ok)
         return;
-    vo->driver->draw_osd(vo);
+    vo->driver->draw_osd(vo, osd);
 }
 
 void vo_flip_page(struct vo *vo)

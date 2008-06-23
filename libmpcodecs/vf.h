@@ -88,6 +88,9 @@ typedef struct vf_seteq_s
 #define VFCTRL_GET_PTS         17 /* Return last pts value that reached vf_vo*/
 #define VFCTRL_SET_DEINTERLACE 18 /* Set deinterlacing status */
 #define VFCTRL_GET_DEINTERLACE 19 /* Get deinterlacing status */
+/* Hack to make the OSD state object available to vf_expand which accesses
+ * the OSD state outside of normal OSD draw time. */
+#define VFCTRL_SET_OSD_OBJ 20
 
 #include "vfcap.h"
 

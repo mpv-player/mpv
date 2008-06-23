@@ -676,7 +676,7 @@ void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc){
   vo_font = NULL;
   done_freetype();
 #endif
-  free_osd_list();
+  osd_free(mpctx->osd);
 
 #ifdef USE_ASS
   ass_library_done(ass_library);
@@ -1494,16 +1494,13 @@ void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,d
 static void update_osd_msg(struct MPContext *mpctx)
 {
     mp_osd_msg_t *msg;
-    static char osd_text[64] = "";
-    static char osd_text_timer[64];
-    
-    // we need some mem for vo_osd_text
-    vo_osd_text = (unsigned char*)osd_text;
+    struct osd_state *osd = mpctx->osd;
+    char osd_text_timer[64];
     
     // Look if we have a msg
     if((msg = get_osd_msg(mpctx))) {
-        if(strcmp(osd_text,msg->msg)) {
-            strncpy((char*)osd_text, msg->msg, 63);
+        if (strcmp(osd->osd_text, msg->msg)) {
+            strncpy(osd->osd_text, msg->msg, 63);
             if(mpctx->sh_video) vo_osd_changed(OSDTYPE_OSD); else 
             if(term_osd) mp_msg(MSGT_CPLAYER,MSGL_STATUS,"%s%s\n",term_osd_esc,msg->msg);
         }
@@ -1542,16 +1539,16 @@ static void update_osd_msg(struct MPContext *mpctx)
         if(mpctx->osd_show_percentage)
             mpctx->osd_show_percentage--;
         
-        if(strcmp(osd_text,osd_text_timer)) {
-            strncpy(osd_text, osd_text_timer, 63);
+        if (strcmp(osd->osd_text, osd_text_timer)) {
+            strncpy(osd->osd_text, osd_text_timer, 63);
             vo_osd_changed(OSDTYPE_OSD);
         }
         return;
     }
         
     // Clear the term osd line
-    if(term_osd && osd_text[0]) {
-        osd_text[0] = 0;
+    if (term_osd && osd->osd_text[0]) {
+        osd->osd_text[0] = 0;
         printf("%s\n",term_osd_esc);
     }
 }
@@ -1753,7 +1750,8 @@ static int generate_video_frame(struct MPContext *mpctx)
 	    update_teletext(sh_video, mpctx->demuxer, 0);
 	    update_osd_msg(mpctx);
 	    current_module = "filter video";
-	    if (filter_video(sh_video, decoded_frame, sh_video->pts))
+	    if (filter_video(sh_video, decoded_frame, sh_video->pts,
+                             mpctx->osd))
 		break;
 	} else if (drop_frame)
 	    return -1;
@@ -2248,6 +2246,8 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
     //--------------------  Decode a frame: -----------------------
     double frame_time;
     *blit_frame = 0; // Don't blit if we hit EOF
+    sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
+                               mpctx->osd); // hack for vf_expand
     if (!opts->correct_pts) {
 	unsigned char* start=NULL;
 	void *decoded_frame = NULL;
@@ -2294,7 +2294,8 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
 #endif
 	current_module = "filter_video";
 	*blit_frame = (decoded_frame && filter_video(sh_video, decoded_frame,
-						    sh_video->pts));
+                                                     sh_video->pts,
+                                                     mpctx->osd));
     }
     else {
 	int res = generate_video_frame(mpctx);
@@ -2832,7 +2833,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   }
 #endif
 
-  vo_init_osd();
+  mpctx->osd = osd_create();
 
 #ifdef USE_ASS
   ass_library = ass_init();

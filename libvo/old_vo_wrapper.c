@@ -23,6 +23,7 @@
 #include "sub.h"
 
 struct vo *global_vo;
+struct osd_state *global_osd;
 
 int old_vo_preinit(struct vo *vo, const char *arg)
 {
@@ -59,8 +60,9 @@ int old_vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[],
 }
 
 
-void old_vo_draw_osd(struct vo *vo)
+void old_vo_draw_osd(struct vo *vo, struct osd_state *osd)
 {
+    global_osd = osd;
     vo->driver->old_functions->draw_osd();
 }
 
@@ -94,6 +96,10 @@ static void draw_alpha_wrapper(void *ctx, int x0, int y0, int w, int h,
 
 void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
-    osd_draw_text(dxs, dys, draw_alpha_wrapper, draw_alpha);
+    osd_draw_text(global_osd, dxs, dys, draw_alpha_wrapper, draw_alpha);
 }
 
+int vo_update_osd(int dxs, int dys)
+{
+    return osd_update(global_osd, dxs, dys);
+}

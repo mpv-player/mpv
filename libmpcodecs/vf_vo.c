@@ -86,7 +86,7 @@ static int control(struct vf_instance* vf, int request, void* data)
     }
     case VFCTRL_DRAW_OSD:
 	if(!video_out->config_ok) return CONTROL_FALSE; // vo not configured?
-	vo_draw_osd(video_out);
+	vo_draw_osd(video_out, data);
 	return CONTROL_TRUE;
     case VFCTRL_FLIP_PAGE:
     {

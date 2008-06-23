@@ -117,6 +117,7 @@ typedef struct vo_info_s
 } vo_info_t;
 
 struct vo;
+struct osd_state;
 
 struct vo_driver {
 	// Driver uses new API
@@ -173,7 +174,7 @@ struct vo_driver {
    	/*
          * Draws OSD to the screen buffer
          */
-        void (*draw_osd)(struct vo *vo);
+        void (*draw_osd)(struct vo *vo, struct osd_state *osd);
 
         /*
          * Blit/Flip buffer to the screen. Must be called after each frame!
@@ -248,7 +249,7 @@ void list_video_out(void);
 int vo_control(struct vo *vo, uint32_t request, void *data);
 int vo_draw_frame(struct vo *vo, uint8_t *src[]);
 int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
-void vo_draw_osd(struct vo *vo);
+void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo);
 void vo_check_events(struct vo *vo);
 void vo_destroy(struct vo *vo);

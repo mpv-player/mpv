@@ -446,7 +446,8 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
     return mpi;
 }
 
-int filter_video(sh_video_t *sh_video, void *frame, double pts)
+int filter_video(sh_video_t *sh_video, void *frame, double pts,
+                 struct osd_state *osd)
 {
     mp_image_t *mpi = frame;
     unsigned int t2 = GetTimer();
@@ -454,7 +455,7 @@ int filter_video(sh_video_t *sh_video, void *frame, double pts)
     // apply video filters and call the leaf vo/ve
     int ret = vf->put_image(vf, mpi, pts);
     if (ret > 0) {
-        vf->control(vf, VFCTRL_DRAW_OSD, NULL);
+        vf->control(vf, VFCTRL_DRAW_OSD, osd);
 #ifdef USE_ASS
         vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
 #endif

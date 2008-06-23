@@ -510,11 +510,11 @@ static void check_events(struct vo *vo)
     }
 }
 
-static void draw_osd(struct vo *vo)
+static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct xvctx *ctx = vo->priv;
 
-    osd_draw_text(ctx->image_width -
+    osd_draw_text(osd, ctx->image_width -
                   ctx->image_width * vo->panscan_x / (vo->dwidth + vo->panscan_x),
                   ctx->image_height, ctx->draw_alpha_fnc, vo);
 }
