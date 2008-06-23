@@ -2154,7 +2154,7 @@ int reinit_video_chain(struct MPContext *mpctx)
   current_module="init_video_filters";
   {
     char* vf_arg[] = { "_oldargs_", (char*)mpctx->video_out , NULL };
-    sh_video->vfilter=(void*)vf_open_filter(opts, NULL,"vo",vf_arg);
+    sh_video->vfilter = vf_open_filter(opts, NULL,"vo",vf_arg);
   }
 #ifdef HAVE_MENU
   if(use_menu) {
@@ -2166,7 +2166,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     }
   }
   if(vf_menu)
-    sh_video->vfilter=(void*)vf_menu;
+    sh_video->vfilter = vf_menu;
 #endif
 
 #ifdef USE_ASS
@@ -2185,18 +2185,18 @@ int reinit_video_chain(struct MPContext *mpctx)
       char* vf_arg[] = {"auto", "1", NULL};
       vf_instance_t* vf_ass = vf_open_plugin(opts, libass_vfs,sh_video->vfilter,"ass",vf_arg);
       if (vf_ass)
-        sh_video->vfilter=(void*)vf_ass;
+        sh_video->vfilter = vf_ass;
       else
         mp_msg(MSGT_CPLAYER,MSGL_ERR, "ASS: cannot add video filter\n");
     }
   }
 #endif
 
-  sh_video->vfilter=(void*)append_filters(sh_video->vfilter, opts->vf_settings);
+  sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
 
 #ifdef USE_ASS
   if (ass_enabled)
-    ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
+    sh_video->vfilter->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
 #endif
 
   current_module="init_video_codec";
@@ -2301,8 +2301,8 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
 	int res = generate_video_frame(mpctx);
 	if (!res)
 	    return -1;
-	((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
-					    VFCTRL_GET_PTS, &sh_video->pts);
+	sh_video->vfilter->control(sh_video->vfilter, VFCTRL_GET_PTS,
+                                   &sh_video->pts);
 	if (sh_video->pts == MP_NOPTS_VALUE) {
 	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts after filters MISSING\n");
 	    sh_video->pts = sh_video->last_pts;

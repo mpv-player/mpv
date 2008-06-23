@@ -1347,7 +1347,7 @@ default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ, osd);
     {void *decoded_frame = decode_video(sh_video,frame_data.start,frame_data.in_size,
-      skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), MP_NOPTS_VALUE);
+      skip_flag>0 && (!sh_video->vfilter || sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), MP_NOPTS_VALUE);
       blit_frame = decoded_frame && filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE, osd);}
     
     if (sh_video->vf_initialized < 0) mencoder_exit(1, NULL);
@@ -1367,7 +1367,7 @@ default:
         // Eventually this entire block should probably be removed.
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
-	    if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
+	    if (!encode_duplicates || !sh_video->vfilter || sh_video->vfilter->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
 	      muxer_write_chunk(mux_v,0,0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 	} else {
 	    // skipping allowed -> skip it and distriubute timer error:
@@ -1386,7 +1386,7 @@ if(skip_flag<0){
 	if(!quiet) mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
-	if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
+	if (!encode_duplicates || !sh_video->vfilter || sh_video->vfilter->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
 	    muxer_write_chunk(mux_v,0,0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 	++skip_flag;
     }
@@ -1550,10 +1550,10 @@ if (!interrupted && filelist[++curfile].name != 0) {
 /*TODO emit frmaes delayed by decoder lag*/
 if(sh_video && sh_video->vfilter){
 	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_FlushingVideoFrames);
-	if (!((vf_instance_t *)sh_video->vfilter)->fmt.have_configured)
+	if (!sh_video->vfilter->fmt.have_configured)
 		mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_FiltersHaveNotBeenConfiguredEmptyFile);
 	else
-		((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
+		sh_video->vfilter->control(sh_video->vfilter,
     	                                              VFCTRL_FLUSH_FRAMES, 0);
 }
 
