@@ -733,8 +733,8 @@ static uint32_t draw_image(mp_image_t *mpi) {
   mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
   mpi2.width = mpi2.w; mpi2.height = mpi2.h;
   if (force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !gl_bufferptr && get_image(&mpi2) == VO_TRUE) {
-    int bpp = mpi->imgfmt == IMGFMT_YV12 ? 1 : mpi->bpp;
-    memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bpp, mpi->h, mpi2.stride[0], mpi->stride[0]);
+    int bpp = mpi->imgfmt == IMGFMT_YV12 ? 8 : mpi->bpp;
+    memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bpp / 8, mpi->h, mpi2.stride[0], mpi->stride[0]);
     if (mpi->imgfmt == IMGFMT_YV12) {
       memcpy_pic(mpi2.planes[1], mpi->planes[1], mpi->w >> 1, mpi->h >> 1, mpi2.stride[1], mpi->stride[1]);
       memcpy_pic(mpi2.planes[2], mpi->planes[2], mpi->w >> 1, mpi->h >> 1, mpi2.stride[2], mpi->stride[2]);

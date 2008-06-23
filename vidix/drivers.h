@@ -22,7 +22,7 @@
 #ifndef MPLAYER_DRIVERS_H
 #define MPLAYER_DRIVERS_H
 
-#include "vidixlib.h"
+#include "vidix.h"
 
 void vidix_register_all_drivers (void);
 

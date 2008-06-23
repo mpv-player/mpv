@@ -31,7 +31,7 @@
 #include "mp_msg.h"
 
 #include "vosub_vidix.h"
-#include "vidix/vidixlib.h"
+#include "vidix/vidix.h"
 
 #ifdef HAVE_NEW_GUI
 #include "gui/interface.h"

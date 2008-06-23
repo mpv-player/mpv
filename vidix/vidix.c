@@ -39,12 +39,12 @@
 #include <string.h>
 
 #include "config.h"
-#include "vidixlib.h"
+#include "vidix.h"
 #include "drivers.h"
 #include "libavutil/common.h"
 #include "mpbswap.h"
 
-VDL_HANDLE vdlOpen(const char *name,unsigned cap,int verbose)
+VDXContext *vdlOpen(const char *name,unsigned cap,int verbose)
 {
   VDXContext *ctx;
 
@@ -90,7 +90,7 @@ VDL_HANDLE vdlOpen(const char *name,unsigned cap,int verbose)
   return ctx;
 }
 
-void vdlClose(VDL_HANDLE ctx)
+void vdlClose(VDXContext *ctx)
 {
   if (ctx->drv->destroy)
     ctx->drv->destroy ();
@@ -99,7 +99,7 @@ void vdlClose(VDL_HANDLE ctx)
   free (ctx);
 }
 
-int  vdlGetCapability(VDL_HANDLE ctx, vidix_capability_t *cap)
+int  vdlGetCapability(VDXContext *ctx, vidix_capability_t *cap)
 {
   return ctx->drv->get_caps (cap);
 }
@@ -108,87 +108,72 @@ int  vdlGetCapability(VDL_HANDLE ctx, vidix_capability_t *cap)
 #define MPLAYER_IMGFMT_BGR (('B'<<24)|('G'<<16)|('R'<<8))
 #define MPLAYER_IMGFMT_RGB_MASK 0xFFFFFF00
 
-static uint32_t normalize_fourcc(uint32_t fourcc)
+static uint32_t normalize_fourcc (uint32_t fourcc)
 {
   if((fourcc & MPLAYER_IMGFMT_RGB_MASK) == (MPLAYER_IMGFMT_RGB|0) ||
      (fourcc & MPLAYER_IMGFMT_RGB_MASK) == (MPLAYER_IMGFMT_BGR|0))
 	return bswap_32(fourcc);
-  else  return fourcc;
+  return fourcc;
 }
 
-int  vdlQueryFourcc(VDL_HANDLE ctx,vidix_fourcc_t *f)
+int vdlQueryFourcc (VDXContext *ctx, vidix_fourcc_t *f)
 {
   f->fourcc = normalize_fourcc(f->fourcc);
   return ctx->drv->query_fourcc (f);
 }
 
-int  vdlConfigPlayback(VDL_HANDLE ctx,vidix_playback_t *p)
+int vdlConfigPlayback (VDXContext *ctx, vidix_playback_t *p)
 {
   p->fourcc = normalize_fourcc(p->fourcc);
   return ctx->drv->config_playback (p);
 }
 
-int  vdlPlaybackOn(VDL_HANDLE ctx)
+int vdlPlaybackOn (VDXContext *ctx)
 {
   return ctx->drv->playback_on ();
 }
 
-int  vdlPlaybackOff(VDL_HANDLE ctx)
+int vdlPlaybackOff (VDXContext *ctx)
 {
   return ctx->drv->playback_off ();
 }
 
-int  vdlPlaybackFrameSelect(VDL_HANDLE ctx, unsigned frame_idx )
+int vdlPlaybackFrameSelect (VDXContext *ctx, unsigned frame_idx)
 {
   return ctx->drv->frame_sel ? ctx->drv->frame_sel (frame_idx) : ENOSYS;
 }
 
-int  vdlPlaybackGetEq(VDL_HANDLE ctx, vidix_video_eq_t * e)
+int vdlPlaybackGetEq (VDXContext *ctx, vidix_video_eq_t *e)
 {
   return ctx->drv->get_eq ? ctx->drv->get_eq (e) : ENOSYS;
 }
 
-int  vdlPlaybackSetEq(VDL_HANDLE ctx, const vidix_video_eq_t * e)
+int vdlPlaybackSetEq (VDXContext *ctx, const vidix_video_eq_t *e)
 {
   return ctx->drv->set_eq ? ctx->drv->set_eq (e) : ENOSYS;
 }
 
-int  vdlPlaybackCopyFrame(VDL_HANDLE ctx, const vidix_dma_t * f)
+int vdlPlaybackCopyFrame (VDXContext *ctx, const vidix_dma_t *f)
 {
   return ctx->drv->copy_frame ? ctx->drv->copy_frame (f) : ENOSYS;
 }
 
-int 	  vdlGetGrKeys(VDL_HANDLE ctx, vidix_grkey_t * k)
+int vdlGetGrKeys (VDXContext *ctx, vidix_grkey_t *k)
 {
   return ctx->drv->get_gkey ? ctx->drv->get_gkey (k) : ENOSYS;
 }
 
-int 	  vdlSetGrKeys(VDL_HANDLE ctx, const vidix_grkey_t * k)
+int vdlSetGrKeys (VDXContext *ctx, const vidix_grkey_t *k)
 {
   return ctx->drv->set_gkey ? ctx->drv->set_gkey (k) : ENOSYS;
 }
 
-int	  vdlPlaybackGetDeint(VDL_HANDLE ctx, vidix_deinterlace_t * d)
+int vdlPlaybackGetDeint (VDXContext *ctx, vidix_deinterlace_t *d)
 {
   return ctx->drv->get_deint ? ctx->drv->get_deint (d) : ENOSYS;
 }
 
-int 	  vdlPlaybackSetDeint(VDL_HANDLE ctx, const vidix_deinterlace_t * d)
+int vdlPlaybackSetDeint (VDXContext *ctx, const vidix_deinterlace_t *d)
 {
   return ctx->drv->set_deint ? ctx->drv->set_deint (d) : ENOSYS;
-}
-
-int	  vdlQueryNumOemEffects(VDL_HANDLE ctx, unsigned * number )
-{
-  return ctx->drv->get_num_fx ? ctx->drv->get_num_fx (number) : ENOSYS;
-}
-
-int	  vdlGetOemEffect(VDL_HANDLE ctx, vidix_oem_fx_t * f)
-{
-  return ctx->drv->get_fx ? ctx->drv->get_fx (f) : ENOSYS;
-}
-
-int	  vdlSetOemEffect(VDL_HANDLE ctx, const vidix_oem_fx_t * f)
-{
-  return ctx->drv->set_fx ? ctx->drv->set_fx (f) : ENOSYS;
 }

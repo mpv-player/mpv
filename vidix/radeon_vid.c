@@ -37,7 +37,6 @@
 #include "pci_ids.h"
 #include "pci_names.h"
 #include "vidix.h"
-#include "vidixlib.h"
 #include "fourcc.h"
 #include "dha.h"
 #include "radeon.h"

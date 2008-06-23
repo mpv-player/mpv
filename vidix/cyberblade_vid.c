@@ -40,7 +40,6 @@
 
 #include "config.h"
 #include "vidix.h"
-#include "vidixlib.h"
 #include "fourcc.h"
 #include "dha.h"
 #include "pci_ids.h"

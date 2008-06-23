@@ -27,7 +27,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "vidix/vidixlib.h"
+#include "vidix/vidix.h"
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
@@ -40,7 +40,7 @@
 
 #define NUM_FRAMES VID_PLAY_MAXFRAMES /* Temporary: driver will overwrite it */
 
-static VDL_HANDLE vidix_handler = NULL;
+static VDXContext *vidix_handler = NULL;
 static uint8_t *vidix_mem = NULL;
 static uint8_t next_frame;
 static unsigned image_Bpp,image_height,image_width,src_format,forced_fourcc=0;

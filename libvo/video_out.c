@@ -209,7 +209,9 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_xvmc,
 #endif
 	&video_out_mpegpes,
+#ifdef HAVE_YUV4MPEG
 	&video_out_yuv4mpeg,
+#endif
 #ifdef HAVE_PNG
 	&video_out_png,
 #endif

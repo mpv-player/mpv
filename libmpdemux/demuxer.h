@@ -1,6 +1,7 @@
 #ifndef MPLAYER_DEMUXER_H
 #define MPLAYER_DEMUXER_H
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>

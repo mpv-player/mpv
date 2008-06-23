@@ -305,4 +305,86 @@ typedef struct vidix_oem_fx_s
   char *name[80];	/* effect name to display */
 } vidix_oem_fx_t;
 
+typedef struct VDXDriver {
+  const char *name;
+  struct VDXDriver *next;
+  int (* probe) (int verbose, int force);
+  int (* get_caps) (vidix_capability_t *cap);
+  int (*query_fourcc)(vidix_fourcc_t *);
+  int (*init)(void);
+  void (*destroy)(void);
+  int (*config_playback)(vidix_playback_t *);
+  int (*playback_on)( void );
+  int (*playback_off)( void );
+  /* Functions below can be missed in driver ;) */
+  int (*frame_sel)( unsigned frame_idx );
+  int (*get_eq)( vidix_video_eq_t * );
+  int (*set_eq)( const vidix_video_eq_t * );
+  int (*get_deint)( vidix_deinterlace_t * );
+  int (*set_deint)( const vidix_deinterlace_t * );
+  int (*copy_frame)( const vidix_dma_t * );
+  int (*get_gkey)( vidix_grkey_t * );
+  int (*set_gkey)( const vidix_grkey_t * );
+} VDXDriver;
+
+typedef struct VDXContext {
+  VDXDriver *drv;
+  /* might be filled in by much more info later on */
+} VDXContext;
+
+/***************************************************************************/
+/*                              PUBLIC API                                 */
+/***************************************************************************/
+
+/* Opens corresponded video driver and returns handle of associated stream.
+ *   path - specifies path where drivers are located.
+ *   name - specifies prefered driver name (can be NULL).
+ *   cap  - specifies driver capability (TYPE_* constants).
+ *   verbose - specifies verbose level
+ * returns handle if ok else NULL.
+ */
+VDXContext *vdlOpen (const char *name,unsigned cap,int verbose);
+
+/* Closes stream and corresponded driver. */
+void vdlClose (VDXContext *ctx);
+
+/* Queries driver capabilities. Return 0 if ok else errno */
+int vdlGetCapability (VDXContext *, vidix_capability_t *);
+
+/* Queries support for given fourcc. Returns 0 if ok else errno */
+int vdlQueryFourcc (VDXContext *, vidix_fourcc_t *);
+
+/* Returns 0 if ok else errno */
+int vdlConfigPlayback (VDXContext *, vidix_playback_t *);
+
+/* Returns 0 if ok else errno */
+int vdlPlaybackOn (VDXContext *);
+
+/* Returns 0 if ok else errno */
+int vdlPlaybackOff (VDXContext *);
+
+/* Returns 0 if ok else errno */
+int vdlPlaybackFrameSelect (VDXContext *, unsigned frame_idx);
+
+/* Returns 0 if ok else errno */
+int vdlGetGrKeys (VDXContext *, vidix_grkey_t *);
+
+/* Returns 0 if ok else errno */
+int vdlSetGrKeys (VDXContext *, const vidix_grkey_t *);
+
+/* Returns 0 if ok else errno */
+int vdlPlaybackGetEq (VDXContext *, vidix_video_eq_t *);
+
+/* Returns 0 if ok else errno */
+int vdlPlaybackSetEq (VDXContext *, const vidix_video_eq_t *);
+
+/* Returns 0 if ok else errno */
+int vdlPlaybackGetDeint (VDXContext *, vidix_deinterlace_t *);
+
+/* Returns 0 if ok else errno */
+int vdlPlaybackSetDeint (VDXContext *, const vidix_deinterlace_t *);
+
+/* Returns 0 if ok else errno */
+int vdlQueryNumOemEffects (VDXContext *, unsigned *number);
+
 #endif /* MPLAYER_VIDIX_H */

@@ -23,7 +23,7 @@
 #include "mp_msg.h"
 
 #include "vosub_vidix.h"
-#include "vidix/vidixlib.h"
+#include "vidix/vidix.h"
 
 
 static const vo_info_t info = {

@@ -97,8 +97,8 @@ supported in <application>MEncoder</application>.
 
 <para>
 For a complete list of supported 
-<ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
-and <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>
+<ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC6">video</ulink>
+and <ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC7">audio</ulink>
 codecs please visit the FFmpeg homepage.
 </para>
 
