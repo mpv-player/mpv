@@ -423,6 +423,7 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	for (i = 0; i < library->num_fontdata; ++i)
 		process_fontdata(priv, library, ftlibrary, i);
 
+	if (dir) {
 	if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
 	{
 		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_UpdatingFontCache);
@@ -460,6 +461,7 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	rc = FcConfigAppFontAddDir(priv->config, (const FcChar8*)dir);
 	if (!rc) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcConfigAppFontAddDirFailed);
+	}
 	}
 
 	priv->family_default = family ? strdup(family) : 0;
