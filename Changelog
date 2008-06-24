@@ -7,7 +7,7 @@ MPlayer (1.0)
     * support for DTS WAV/DTS-CD passthrough by ad_hwac3
     * Apple's raw YUV2 in MOV
     * LATM over LOAS AAC decoding via internal libfaad2
-    * video game codecs: BFI video
+    * video game codecs: BFI video, PSX STR files
     * AVOption support for libavcodec-based decoders
 
     Demuxers:

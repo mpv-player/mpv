@@ -62,6 +62,7 @@ static struct {
         { "ape", DEMUXER_TYPE_LAVF },
         { "apl", DEMUXER_TYPE_LAVF },
         { "mac", DEMUXER_TYPE_LAVF },
+        { "str", DEMUXER_TYPE_LAVF },
 
 // At least the following are hacks against broken autodetection
 // that should not be there
