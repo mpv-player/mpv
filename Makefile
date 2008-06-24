@@ -743,6 +743,7 @@ libswscale/libswscale.a: libswscale/*.[chS]
 
 $(ALLPARTLIBS):
 	$(MAKE) -C $(@D)
+	touch $@
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
