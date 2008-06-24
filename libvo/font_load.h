@@ -62,7 +62,6 @@ typedef struct font_desc {
 } font_desc_t;
 
 extern font_desc_t* vo_font;
-extern font_desc_t* sub_font;
 
 #ifdef HAVE_FREETYPE
 

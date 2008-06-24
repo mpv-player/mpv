@@ -670,8 +670,8 @@ void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc){
 
 #ifdef HAVE_FREETYPE
   current_module="uninit_font";
-  if (sub_font && sub_font != vo_font) free_font_desc(sub_font);
-  sub_font = NULL;
+  if (mpctx->osd->sub_font && mpctx->osd->sub_font != vo_font) free_font_desc(mpctx->osd->sub_font);
+  mpctx->osd->sub_font = NULL;
   if (vo_font) free_font_desc(vo_font);
   vo_font = NULL;
   done_freetype();
@@ -2804,6 +2804,8 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
 //------ load global data first ------
 
+  mpctx->osd = osd_create();
+
 // check font
 #ifdef HAVE_FREETYPE
   init_freetype();
@@ -2825,15 +2827,13 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
        vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
   }
   if (sub_font_name)
-    sub_font = read_font_desc(sub_font_name, font_factor, verbose>1);
+    mpctx->osd->sub_font = read_font_desc(sub_font_name, font_factor, verbose>1);
   else
-    sub_font = vo_font;
+    mpctx->osd->sub_font = vo_font;
 #endif
 #ifdef HAVE_FONTCONFIG
   }
 #endif
-
-  mpctx->osd = osd_create();
 
 #ifdef USE_ASS
   ass_library = ass_init();

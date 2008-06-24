@@ -51,6 +51,7 @@ typedef struct mp_osd_obj_s {
 
 struct osd_state {
     unsigned char osd_text[64];
+    struct font_desc *sub_font;
 };
 
 #include "subreader.h"

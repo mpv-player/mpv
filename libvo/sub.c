@@ -71,7 +71,6 @@ char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "",
 
 //static int vo_font_loaded=-1;
 font_desc_t* vo_font=NULL;
-font_desc_t* sub_font=NULL;
 
 #ifdef HAVE_TV_TELETEXT
 void* vo_osd_teletext_page=NULL;
@@ -643,7 +642,7 @@ subtitle* vo_sub=NULL;
 
 // vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 
-inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
+inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,int dxs,int dys){
    unsigned char *t;
    int c,i,j,l,x,y,font,prevc,counter;
    int k;
@@ -652,10 +651,11 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    int xmin=dxs,xmax=0;
    int h,lasth;
    int xtblc, utblc;
+   struct font_desc *sub_font = osd->sub_font;
    
    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
 
-   if(!vo_sub || !sub_font || !sub_visibility || (sub_font->font[40]<0)){
+   if(!vo_sub || !osd->sub_font || !sub_visibility || (sub_font->font[40]<0)){
        obj->flags&=~OSDFLAG_VISIBLE;
        return;
    }
@@ -1099,20 +1099,20 @@ int osd_update(struct osd_state *osd, int dxs, int dys)
 	force_load_font = 0;
         load_font_ft(dxs, dys, &vo_font, font_name, osd_font_scale_factor);
 	if (sub_font_name)
-	    load_font_ft(dxs, dys, &sub_font, sub_font_name, text_font_scale_factor);
+	    load_font_ft(dxs, dys, &osd->sub_font, sub_font_name, text_font_scale_factor);
 	else
-	    load_font_ft(dxs, dys, &sub_font, font_name, text_font_scale_factor);
+	    load_font_ft(dxs, dys, &osd->sub_font, font_name, text_font_scale_factor);
 	prev_dxs = dxs;
 	prev_dys = dys;
 	defer_counter = 0;
     } else {
        if (!vo_font) 
            load_font_ft(dxs, dys, &vo_font, font_name, osd_font_scale_factor);
-       if (!sub_font) {
+       if (!osd->sub_font) {
            if (sub_font_name)
-               load_font_ft(dxs, dys, &sub_font, sub_font_name, text_font_scale_factor);
+               load_font_ft(dxs, dys, &osd->sub_font, sub_font_name, text_font_scale_factor);
            else
-               load_font_ft(dxs, dys, &sub_font, font_name, text_font_scale_factor);
+               load_font_ft(dxs, dys, &osd->sub_font, font_name, text_font_scale_factor);
        }
     }
 #endif
@@ -1128,7 +1128,7 @@ int osd_update(struct osd_state *osd, int dxs, int dys)
            break;
 #endif
 	case OSDTYPE_SUBTITLE:
-	    vo_update_text_sub(obj,dxs,dys);
+	    vo_update_text_sub(osd, obj,dxs,dys);
 	    break;
 #ifdef HAVE_TV_TELETEXT
 	case OSDTYPE_TELETEXT:
@@ -1190,7 +1190,7 @@ int osd_update(struct osd_state *osd, int dxs, int dys)
 
 struct osd_state *osd_create(void)
 {
-    struct osd_state *osd = talloc_ptrtype(NULL, osd);
+    struct osd_state *osd = talloc_zero(NULL, struct osd_state);
     *osd = (struct osd_state){
     };
     if(!draw_alpha_init_flag){
