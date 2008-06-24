@@ -735,7 +735,13 @@ dep depend: $(DEPS)
 
 ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(part).a)
 
-$(ALLPARTLIBS): recurse
+libavutil/libavutil.a: libavutil/*.[ch]
+libavcodec/libavcodec.a: libavcodec/*.[ch] libavcodec/*/*.[chS]
+libavformat/libavformat.a: libavformat/*.[ch]
+libpostproc/libpostproc.a: libpostproc/*.[ch]
+libswscale/libswscale.a: libswscale/*.[chS]
+
+$(ALLPARTLIBS):
 	$(MAKE) -C $(@D)
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
@@ -1051,5 +1057,5 @@ dhahelperwinclean:
 
 -include $(DEPS)
 
-.PHONY: all doxygen *install* recurse *tools drivers dhahelper*
+.PHONY: all doxygen *install* *tools drivers dhahelper*
 .PHONY: checkheaders *clean dep depend tests
