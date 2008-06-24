@@ -7,8 +7,10 @@ MPlayer (1.0)
     * support for DTS WAV/DTS-CD passthrough by ad_hwac3
     * Apple's raw YUV2 in MOV
     * LATM over LOAS AAC decoding via internal libfaad2
-    * video game codecs: BFI video, PSX STR files
+    * video game codecs: BFI video, Playstation MDEC video, ADPCM XA audio,
+      EA Maxis XA ADPCM audio, RL2 video, Beam Software SIFF video, V.Flash PTX video
     * AVOption support for libavcodec-based decoders
+    * image decoders: Sun rasterfile, PCX image
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
@@ -23,6 +25,7 @@ MPlayer (1.0)
     * support VOBsub in lavf demuxer
     * support MOV subtitle format
     * support for attachments in lavf demuxer
+    * support for chapters in lavf demuxer
 
     Filters:
     * vf_ow new overcomplete wavelet denoiser
