@@ -3643,6 +3643,7 @@ if test "$_apple_ir" = auto ; then
 #include <linux/input.h>
 int main(void) {
   struct input_event ev;
+  struct input_id id;
   return 0;
 }
 EOF
