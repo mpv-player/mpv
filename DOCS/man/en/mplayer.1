@@ -5494,8 +5494,12 @@ Use 2 to get only even dimensions (needed for 4:2:2 video).
 .
 .TP
 .B rectangle[=w:h:x:y]
-The plugin responds to the input.conf directive 'change_rectangle'
-that takes two parameters.
+Draws a rectangle of the requested width and height at the specified
+coordinates over the image and prints current rectangle parameters
+to the console.
+This can be used to find optimal cropping parameters.
+If you bind the input.conf directive 'change_rectangle' to keystrokes,
+you can move and resize the rectangle on the fly.
 .PD 0
 .RSs
 .IPs <w>,<h>
