@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r24423
+// In sync with r24772
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -2158,3 +2158,48 @@ static char help_text[]=
 #define MSGTR_TV_TTSupportedLanguages "Unterstützte Videotextsprachen:\n"
 #define MSGTR_TV_TTSelectedLanguage "Gewählte Standardvideotextsprache: %s\n"
 
+//tvi_dshow.c
+#define MSGTR_TVI_DS_UnableConnectInputVideoDecoder  "Kann vorhandenen Input nicht mit Videodecoder verbinden. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableConnectInputAudioDecoder  "Kann vorhandenen Input nicht mit Audiodecoder verbinden. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectVideoFormat "tvi_dshow: Kann Videoformat nicht auswählen. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectAudioFormat "tvi_dshow: Kann Audioformat nicht auswählen. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetMediaControlInterface "tvi_dshow: Bekomme IMediaControl-Interface nicht. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableStartGraph "tvi_dshow: Kann Graph nicht starten! Fehler:0x%x\n"
+#define MSGTR_TVI_DS_DeviceNotFound "tvi_dshow: Gerät #%d nicht gefunden.\n"
+#define MSGTR_TVI_DS_UnableGetDeviceName "tvi_dshow: Kann Namen für Gerät #%d nicht ermitteln.\n"
+#define MSGTR_TVI_DS_UsingDevice "tvi_dshow: Benutze Gerät #%d: %s\n"
+#define MSGTR_TVI_DS_DeviceName  "tvi_dshow: Gerät #%d: %s\n"
+#define MSGTR_TVI_DS_DirectGetFreqFailed "tvi_dshow: Kann Frequenz nicht direkt ermitteln. Im Betriebssystem eingebaute\nKanaltabelle wird benutzt.\n"
+#define MSGTR_TVI_DS_DirectSetFreqFailed "tvi_dshow: Kann Frequenz nicht direkt setzen. Im Betriebssystem eingebaute\nKanaltabelle wird benutzt.\n"
+#define MSGTR_TVI_DS_SupportedNorms "tvi_dshow: unterstützte Normen:"
+#define MSGTR_TVI_DS_AvailableVideoInputs "tvi_dshow: verfügbare Video-Inputs:"
+#define MSGTR_TVI_DS_AvailableAudioInputs "tvi_dshow: verfügbare Audio-Inputs:"
+//following phrase will be printed near the selected audio/video input
+#define MSGTR_TVI_DS_InputSelected "(gewählt)"
+#define MSGTR_TVI_DS_UnableExtractFreqTable "tvi_dshow: Kann Frequenztabelle nicht von kstvtune.ax laden\n"
+#define MSGTR_TVI_DS_WrongDeviceParam "tvi_dshow: Falscher Geräteparameter: %s\n"
+#define MSGTR_TVI_DS_WrongDeviceIndex "tvi_dshow: Falscher Geräteindex: %d\n"
+#define MSGTR_TVI_DS_WrongADeviceParam "tvi_dshow: Falscher adevice-Parameter: %s\n"
+#define MSGTR_TVI_DS_WrongADeviceIndex "tvi_dshow: Falscher adevice-Index: %d\n"
+
+#define MSGTR_TVI_DS_SamplerateNotsupported "tvi_dshow: Samplerate %d wird vom Gerät nicht unterstützt. Verwende\nerste verfügbare.\n"
+#define MSGTR_TVI_DS_VideoAdjustigNotSupported "tvi_dshow: Anpassen von Helligkeit/Farbton/Sättigung wird vom Gerät nicht\nunterstützt\n"
+
+#define MSGTR_TVI_DS_ChangingWidthHeightNotSupported "tvi_dshow: Änderung von Videobreite/-höhe wird vom Gerät nicht unterstützt.\n"
+#define MSGTR_TVI_DS_SelectingInputNotSupported  "tvi_dshow: Wahl der Capture-Quelle wird vom Gerät nicht unterstützt.\n"
+#define MSGTR_TVI_DS_FreqTableLoaded "tvi_dshow: Frequenztabelle des Systems (%s) für Land-ID=%d (Kanäle:%d) geladen.\n"
+#define MSGTR_TVI_DS_ErrorParsingAudioFormatStruct "tvi_dshow: Kann Struktur für Audioformat nicht parsen.\n"
+#define MSGTR_TVI_DS_ErrorParsingVideoFormatStruct "tvi_dshow: Kann Struktur für Videoformat nicht parsen.\n"
+#define MSGTR_TVI_DS_UnableSetAudioMode "tvi_dshow: Kann Audiomodus %d nicht setzen. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnsupportedMediaType "tvi_dshow: Nichtunterstützten Medientyp an %s übergeben\n"
+#define MSGTR_TVI_DS_UnableGetsupportedVideoFormats "tvi_dshow: Kann vom Video-Pin unterstützte Medienformate nicht ermitteln.\nFehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetsupportedAudioFormats "tvi_dshow: Kann vom Audio-Pin unterstützte Medienformate nicht ermitteln.\nFehler:0x%x Deaktiviere Ton.\n"
+#define MSGTR_TVI_DS_UnableFindNearestChannel "tvi_dshow: Kann nächstgelegenen Kanal in Systemfrequenztabelle nicht finden\n"
+#define MSGTR_TVI_DS_UnableToSetChannel "tvi_dshow: Kann nicht auf nächstgelegenen Kanal aus der Systemfrequenztabelle\nwechseln. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableTerminateVPPin "tvi_dshow: Kann VideoPort-Pin mit keinem Filter des Graphen terminieren. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVideoSubGraph "tvi_dshow: Kann Videokette des Capture-Graphen nicht erstellen. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildAudioSubGraph "tvi_dshow: Kann Audiokette des Capture-Graphen nicht erstellen. Fehler:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVBISubGraph "tvi_dshow: Kann VBI-Kette des Capture-Graphen nicht erstellen. Fehler:0x%x\n""
+#define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Initialisierung des Directshow-Graph fehlgeschlagen.\n"
+#define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: Kein Gerät für Videoerfassung gefunden\n"
+#define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Kein Gerät für Audioerfassung gefunden\n"
