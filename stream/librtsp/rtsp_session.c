@@ -31,12 +31,15 @@
 #include <sys/types.h>
 #include "config.h"
 #ifndef HAVE_WINSOCK2
+#define closesocket close
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #else
 #include <winsock2.h>
 #endif
+
+
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
