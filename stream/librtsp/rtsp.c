@@ -575,14 +575,22 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
 //rtsp_t *rtsp_connect(const char *mrl, const char *user_agent) {
 rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *user_agent) {
 
-  rtsp_t *s=malloc(sizeof(rtsp_t));
+  rtsp_t *s;
   int i;
-  
+
+  if (fd < 0) {
+    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: failed to connect to '%s'\n", host);
+    return NULL;
+  }
+
+  s = malloc(sizeof(rtsp_t));
+
   for (i=0; i<MAX_FIELDS; i++) {
     s->answers[i]=NULL;
     s->scheduled[i]=NULL;
   }
 
+  s->s = fd;
   s->server=NULL;
   s->server_state=0;
   s->server_caps=0;
@@ -605,13 +613,6 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
     s->param++;
   //mp_msg(MSGT_OPEN, MSGL_INFO, "path=%s\n", s->path);
   //mp_msg(MSGT_OPEN, MSGL_INFO, "param=%s\n", s->param ? s->param : "NULL");
-  s->s = fd;
-
-  if (s->s < 0) {
-    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: failed to connect to '%s'\n", s->host);
-    rtsp_close(s);
-    return NULL;
-  }
 
   s->server_state=RTSP_CONNECTED;
 
@@ -630,29 +631,6 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
   return s;
 }
 
-
-/*
- * closes an rtsp connection 
- */
-
-void rtsp_close(rtsp_t *s) {
-
-  if (s->server_state)
-  {
-    if (s->server_state == RTSP_PLAYING)
-      rtsp_request_teardown (s, NULL);
-    closesocket (s->s);
-  }
-
-  if (s->path) free(s->path);
-  if (s->host) free(s->host);
-  if (s->mrl) free(s->mrl);
-  if (s->session) free(s->session);
-  if (s->user_agent) free(s->user_agent);
-  rtsp_free_answers(s);
-  rtsp_unschedule_all(s);
-  free(s);  
-}
 
 /*
  * search in answers for tags. returns a pointer to the content

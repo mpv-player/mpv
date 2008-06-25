@@ -66,7 +66,6 @@ void rtsp_add_to_payload(char **payload, const char *string);
 void rtsp_free_answers(rtsp_t *this);
 
 int      rtsp_read (rtsp_t *this, char *data, int len);
-void     rtsp_close (rtsp_t *this);
 
 void  rtsp_set_session(rtsp_t *s, const char *id);
 char *rtsp_get_session(rtsp_t *s);
