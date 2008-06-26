@@ -1830,6 +1830,7 @@ static mp_image_t * mp_dvdnav_copy_mpi(mp_image_t *to_mpi,
 }
 
 static void mp_dvdnav_reset_stream (MPContext *ctx) {
+    struct MPOpts *opts = &ctx->opts;
     if (ctx->sh_video) {
         /// clear video pts
         ctx->d_video->pts = 0.0f;
@@ -1863,7 +1864,8 @@ static void mp_dvdnav_reset_stream (MPContext *ctx) {
 }
 
 /// Restore last decoded DVDNAV (still frame)
-static mp_image_t *mp_dvdnav_restore_smpi(int *in_size,
+static mp_image_t *mp_dvdnav_restore_smpi(struct MPContext *mpctx,
+                                          int *in_size,
                                           unsigned char **start,
                                           mp_image_t *decoded_frame)
 {
@@ -1907,7 +1909,7 @@ static mp_image_t *mp_dvdnav_restore_smpi(int *in_size,
 }
 
 /// Save last decoded DVDNAV (still frame)
-static void mp_dvdnav_save_smpi(int in_size,
+static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
                                 unsigned char *start,
                                 mp_image_t *decoded_frame)
 {
@@ -2282,7 +2284,8 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
 	update_osd_msg(mpctx);
 	current_module = "decode_video";
 #ifdef USE_DVDNAV
-	decoded_frame = mp_dvdnav_restore_smpi(&in_size,&start,decoded_frame);
+	decoded_frame = mp_dvdnav_restore_smpi(mpctx, &in_size,&start,
+                                               decoded_frame);
 	/// still frame has been reached, no need to decode
 	if (in_size > 0 && !decoded_frame)
 #endif
@@ -2290,7 +2293,7 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
 				     sh_video->pts);
 #ifdef USE_DVDNAV
 	/// save back last still frame for future display
-	mp_dvdnav_save_smpi(in_size,start,decoded_frame);
+        mp_dvdnav_save_smpi(mpctx, in_size, start, decoded_frame);
 #endif
 	current_module = "filter_video";
 	*blit_frame = (decoded_frame && filter_video(sh_video, decoded_frame,
