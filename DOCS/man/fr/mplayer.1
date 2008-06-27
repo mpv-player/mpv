@@ -1,4 +1,4 @@
-.\" synced with r27057
+.\" synced with r27132
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -5780,8 +5780,13 @@ Prenez 2 pour avoir des dimensions paires (obligatoire pour les vidéos
 .
 .TP
 .B rectangle[=l:h:x:y]
-Ce plugin répond à la directive 'change_rectangle' de input.conf qui prend
-deux paramètres.
+Dessine, par-dessus l'image, un rectangle de la largeur et hauteur demandée,
+aux coordonnées données, et affiche les paramètres courants de rectangle sur
+la console.
+Peut être utilisé pour affiner la recherche des paramètre de découpage (cropping)
+optimals.
+Si vous associiez la directive input.conf 'change_rectangle' à une touche, vous
+pourriez alors déplacer et re-dimentionner le rectangle à la volée.
 .PD 0
 .RSs
 .IPs <l>,<h>
