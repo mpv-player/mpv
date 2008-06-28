@@ -42,7 +42,9 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <inttypes.h>
-
+#ifdef HAVE_WINSOCK2
+#include <winsock2.h>
+#endif
 #include "mp_msg.h"
 #include "rtsp.h"
 #include "rtsp_session.h"
