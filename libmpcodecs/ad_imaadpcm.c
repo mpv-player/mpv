@@ -58,14 +58,13 @@ static const int8_t adpcm_index[16] =
 
 // useful macros
 // clamp a number between 0 and 88
-#define CLAMP_0_TO_88(x)  if (x < 0) x = 0; else if (x > 88) x = 88;
+#define CLAMP_0_TO_88(x) x = av_clip(x, 0, 88);
 // clamp a number within a signed 16-bit range
-#define CLAMP_S16(x)  if (x < -32768) x = -32768; \
-  else if (x > 32767) x = 32767;
+#define CLAMP_S16(x) x = av_clip_int16(x);
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
 // sign extend a 16-bit value
-#define SE_16BIT(x)  if (x & 0x8000) x -= 0x10000;
+#define SE_16BIT(x) x = (int16_t)x;
 // sign extend a 4-bit value
 #define SE_4BIT(x)  if (x & 0x8) x -= 0x10;
 
