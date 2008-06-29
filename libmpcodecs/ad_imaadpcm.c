@@ -132,24 +132,17 @@ static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
 
 static void decode_nibbles(unsigned short *output,
   int output_size, int channels,
-  int predictor_l, int index_l,
-  int predictor_r, int index_r)
+  int predictor[2], int index[2])
 {
   int step[2];
-  int predictor[2];
-  int index[2];
   int diff;
   int i;
   int sign;
   int delta;
   int channel_number = 0;
 
-  step[0] = adpcm_step[index_l];
-  step[1] = adpcm_step[index_r];
-  predictor[0] = predictor_l;
-  predictor[1] = predictor_r;
-  index[0] = index_l;
-  index[1] = index_r;
+  step[0] = adpcm_step[index[0]];
+  step[1] = adpcm_step[index[1]];
 
   for (i = 0; i < output_size; i++)
   {
@@ -223,8 +216,7 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
 
   decode_nibbles(output,
     QT_IMA_ADPCM_SAMPLES_PER_BLOCK * channels, channels,
-    initial_predictor[0], initial_index[0],
-    initial_predictor[1], initial_index[1]);
+    initial_predictor, initial_index);
 
   return QT_IMA_ADPCM_SAMPLES_PER_BLOCK * channels;
 }
@@ -291,8 +283,7 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
   decode_nibbles(output,
     (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2,
     channels,
-    predictor[0], index[0],
-    predictor[1], index[1]);
+    predictor, index);
 
   return (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2;
 }
@@ -326,8 +317,7 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
   decode_nibbles(&output[channels],
     (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2 - channels,
     channels,
-    predictor[0], index[0],
-    predictor[1], index[1]);
+    predictor, index);
 
   return (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2 - channels;
 }
