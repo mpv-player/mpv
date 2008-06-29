@@ -57,7 +57,7 @@ static char help_text[]=
 
 // ========================= MPlayer Ausgaben ===========================
 
-// mplayer.c: 
+// mplayer.c:
 #define MSGTR_Exiting "\nBeenden...\n"
 #define MSGTR_ExitingHow "\nBeenden... (%s)\n"
 #define MSGTR_Exit_quit "Ende"
@@ -770,7 +770,7 @@ static char help_text[]=
 #define MSGTR_UNKNOWNWINDOWTYPE "Unbekannten Fenstertyp gefunden ..."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[Skin] Fehler in Skin-Konfigurationsdatei in Zeile %d: %s" 
+#define MSGTR_SKIN_ERRORMESSAGE "[Skin] Fehler in Skin-Konfigurationsdatei in Zeile %d: %s"
 #define MSGTR_SKIN_WARNING1 "[Skin] Warnung: in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"section\" nicht gefunden"
 #define MSGTR_SKIN_WARNING2 "[Skin] Warnung: in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"subsection\" nicht gefunden."
 #define MSGTR_SKIN_WARNING3 "[skin] Warnung: in Skin-Konfigurationsdatei in Zeile %d:\nDiese Untersektion wird vom Widget nicht unterstützt (%s)."
