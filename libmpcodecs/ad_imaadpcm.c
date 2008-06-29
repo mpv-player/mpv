@@ -50,10 +50,9 @@ static const int16_t adpcm_step[89] =
   15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
 };
 
-static const int8_t adpcm_index[16] =
+static const int8_t adpcm_index[8] =
 {
   -1, -1, -1, -1, 2, 4, 6, 8,
-  -1, -1, -1, -1, 2, 4, 6, 8
 };
 
 // useful macros
@@ -144,12 +143,12 @@ static void decode_nibbles(unsigned short *output,
   for (i = 0; i < output_size; i++)
   {
     delta = output[i];
+    sign = delta & 8;
+    delta = delta & 7;
 
     index[channel_number] += adpcm_index[delta];
     CLAMP_0_TO_88(index[channel_number]);
 
-    sign = delta & 8;
-    delta = delta & 7;
     delta = 2 * delta + 1;
     if (sign) delta = -delta;
 
