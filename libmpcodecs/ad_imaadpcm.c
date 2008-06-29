@@ -37,7 +37,7 @@
 #define LE_32(x) (le2me_32(*(unsigned int *)(x)))
 
 // pertinent tables for IMA ADPCM
-static int adpcm_step[89] =
+static const int adpcm_step[89] =
 {
   7, 8, 9, 10, 11, 12, 13, 14, 16, 17,
   19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
@@ -50,7 +50,7 @@ static int adpcm_step[89] =
   15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
 };
 
-static int adpcm_index[16] =
+static const int adpcm_index[16] =
 {
   -1, -1, -1, -1, 2, 4, 6, 8,
   -1, -1, -1, -1, 2, 4, 6, 8
