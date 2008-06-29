@@ -63,8 +63,6 @@ static const int8_t adpcm_index[16] =
 #define CLAMP_S16(x) x = av_clip_int16(x);
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
-// sign extend a 16-bit value
-#define SE_16BIT(x) x = (int16_t)x;
 // sign extend a 4-bit value
 #define SE_4BIT(x)  if (x & 0x8) x -= 0x10;
 
@@ -185,11 +183,10 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
     return -1;
 
   for (i = 0; i < channels; i++) {
-    initial_index[i] = initial_predictor[i] = BE_16(&input[i * QT_IMA_ADPCM_BLOCK_SIZE]);
+    initial_index[i] = initial_predictor[i] = (int16_t)BE_16(&input[i * QT_IMA_ADPCM_BLOCK_SIZE]);
 
     // mask, sign-extend, and clamp the predictor portion
-    initial_predictor[i] &= 0xFF80;
-    SE_16BIT(initial_predictor[i]);
+    initial_predictor[i] &= ~0x7F;
     CLAMP_S16(initial_predictor[i]);
 
     // mask and clamp the index portion
@@ -236,8 +233,7 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
     return -1;
 
   for (i = 0; i < channels; i++) {
-    predictor[i] = LE_16(&input[i * 4]);
-    SE_16BIT(predictor[i]);
+    predictor[i] = (int16_t)LE_16(&input[i * 4]);
     index[i] = input[i * 4 + 2];
   }
 
@@ -301,8 +297,7 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
 
   for (i = 0; i < channels; i++) {
     // the first predictor value goes straight to the output
-    predictor[i] = output[i] = LE_16(&input[i * 4]);
-    SE_16BIT(predictor[i]);
+    predictor[i] = output[i] = (int16_t)LE_16(&input[i * 4]);
     index[i] = input[i * 4 + 2];
   }
 
