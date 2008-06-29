@@ -184,42 +184,25 @@ static void decode_nibbles(unsigned short *output,
 static int qt_ima_adpcm_decode_block(unsigned short *output,
   unsigned char *input, int channels, int block_size)
 {
-  int initial_predictor_l = 0;
-  int initial_predictor_r = 0;
-  int initial_index_l = 0;
-  int initial_index_r = 0;
+  int initial_predictor[2];
+  int initial_index[2];
   int i;
 
   if (channels > 1) channels = 2;
   if (block_size < channels * QT_IMA_ADPCM_BLOCK_SIZE)
     return -1;
 
-  initial_predictor_l = BE_16(&input[0]);
-  initial_index_l = initial_predictor_l;
-
-  // mask, sign-extend, and clamp the predictor portion
-  initial_predictor_l &= 0xFF80;
-  SE_16BIT(initial_predictor_l);
-  CLAMP_S16(initial_predictor_l);
-
-  // mask and clamp the index portion
-  initial_index_l &= 0x7F;
-  CLAMP_0_TO_88(initial_index_l);
-
-  // handle stereo
-  if (channels > 1)
-  {
-    initial_predictor_r = BE_16(&input[QT_IMA_ADPCM_BLOCK_SIZE]);
-    initial_index_r = initial_predictor_r;
+  for (i = 0; i < channels; i++) {
+    initial_index[i] = initial_predictor[i] = BE_16(&input[i * QT_IMA_ADPCM_BLOCK_SIZE]);
 
     // mask, sign-extend, and clamp the predictor portion
-    initial_predictor_r &= 0xFF80;
-    SE_16BIT(initial_predictor_r);
-    CLAMP_S16(initial_predictor_r);
+    initial_predictor[i] &= 0xFF80;
+    SE_16BIT(initial_predictor[i]);
+    CLAMP_S16(initial_predictor[i]);
 
     // mask and clamp the index portion
-    initial_index_r &= 0x7F;
-    CLAMP_0_TO_88(initial_index_r);
+    initial_index[i] &= 0x7F;
+    CLAMP_0_TO_88(initial_index[i]);
   }
 
   // break apart all of the nibbles in the block
@@ -240,8 +223,8 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
 
   decode_nibbles(output,
     QT_IMA_ADPCM_SAMPLES_PER_BLOCK * channels, channels,
-    initial_predictor_l, initial_index_l,
-    initial_predictor_r, initial_index_r);
+    initial_predictor[0], initial_index[0],
+    initial_predictor[1], initial_index[1]);
 
   return QT_IMA_ADPCM_SAMPLES_PER_BLOCK * channels;
 }
@@ -249,10 +232,8 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
 static int ms_ima_adpcm_decode_block(unsigned short *output,
   unsigned char *input, int channels, int block_size)
 {
-  int predictor_l = 0;
-  int predictor_r = 0;
-  int index_l = 0;
-  int index_r = 0;
+  int predictor[2];
+  int index[2];
   int i;
   int channel_counter;
   int channel_index;
@@ -263,14 +244,10 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
   if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
     return -1;
 
-  predictor_l = LE_16(&input[0]);
-  SE_16BIT(predictor_l);
-  index_l = input[2];
-  if (channels == 2)
-  {
-    predictor_r = LE_16(&input[4]);
-    SE_16BIT(predictor_r);
-    index_r = input[6];
+  for (i = 0; i < channels; i++) {
+    predictor[i] = LE_16(&input[i * 4]);
+    SE_16BIT(predictor[i]);
+    index[i] = input[i * 4 + 2];
   }
 
   if (channels == 1)
@@ -314,8 +291,8 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
   decode_nibbles(output,
     (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2,
     channels,
-    predictor_l, index_l,
-    predictor_r, index_r);
+    predictor[0], index[0],
+    predictor[1], index[1]);
 
   return (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2;
 }
@@ -325,24 +302,18 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
 {
   int i;
   int output_ptr;
-  int predictor_l = 0;
-  int predictor_r = 0;
-  int index_l = 0;
-  int index_r = 0;
+  int predictor[2];
+  int index[2];
 
   if (channels > 1) channels = 2;
   if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
     return -1;
 
-  // the first predictor value goes straight to the output
-  predictor_l = output[0] = LE_16(&input[0]);
-  SE_16BIT(predictor_l);
-  index_l = input[2];
-  if (channels == 2)
-  {
-    predictor_r = output[1] = LE_16(&input[4]);
-    SE_16BIT(predictor_r);
-    index_r = input[6];
+  for (i = 0; i < channels; i++) {
+    // the first predictor value goes straight to the output
+    predictor[i] = output[i] = LE_16(&input[i * 4]);
+    SE_16BIT(predictor[i]);
+    index[i] = input[i * 4 + 2];
   }
 
   output_ptr = channels;
@@ -355,8 +326,8 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
   decode_nibbles(&output[channels],
     (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2 - channels,
     channels,
-    predictor_l, index_l,
-    predictor_r, index_r);
+    predictor[0], index[0],
+    predictor[1], index[1]);
 
   return (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2 - channels;
 }
