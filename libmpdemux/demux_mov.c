@@ -928,10 +928,6 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 		int hdr_ptr = 76;  // the byte just after depth
 		unsigned char *palette_map;
 
-		depth = trak->stdata[75] | (trak->stdata[74] << 8);
-		if (trak->fourcc == mmioFOURCC('r', 'a', 'w', ' ')) {
-		    sh->format = IMGFMT_RGB | depth;
-		} else
 		    sh->format=trak->fourcc;
 
 		// crude video delay from editlist0 hack ::atm
@@ -949,6 +945,11 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 		  trak->stdata_len);
 		  return 0;
 		}
+
+		depth = trak->stdata[75] | (trak->stdata[74] << 8);
+		if (trak->fourcc == mmioFOURCC('r', 'a', 'w', ' '))
+		    sh->format = IMGFMT_RGB | depth;
+
 //  stdata[]:
 //	8   short	version
 //	10  short	revision
