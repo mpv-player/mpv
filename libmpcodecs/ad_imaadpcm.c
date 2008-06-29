@@ -190,6 +190,10 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
   int initial_index_r = 0;
   int i;
 
+  if (channels > 1) channels = 2;
+  if (block_size < channels * QT_IMA_ADPCM_BLOCK_SIZE)
+    return -1;
+
   initial_predictor_l = BE_16(&input[0]);
   initial_index_l = initial_predictor_l;
 
@@ -254,6 +258,10 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
   int channel_index;
   int channel_index_l;
   int channel_index_r;
+
+  if (channels > 1) channels = 2;
+  if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
+    return -1;
 
   predictor_l = LE_16(&input[0]);
   SE_16BIT(predictor_l);
@@ -321,6 +329,10 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
   int predictor_r = 0;
   int index_l = 0;
   int index_r = 0;
+
+  if (channels > 1) channels = 2;
+  if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
+    return -1;
 
   // the first predictor value goes straight to the output
   predictor_l = output[0] = LE_16(&input[0]);
