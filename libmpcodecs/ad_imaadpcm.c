@@ -182,7 +182,7 @@ static void decode_nibbles(unsigned short *output,
 }
 
 static int qt_ima_adpcm_decode_block(unsigned short *output,
-  unsigned char *input, int channels)
+  unsigned char *input, int channels, int block_size)
 {
   int initial_predictor_l = 0;
   int initial_predictor_r = 0;
@@ -351,26 +351,20 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
+  int res = -1;
+  int (*decode_func)(unsigned short *output, unsigned char *input, int channels, int block_size) = qt_ima_adpcm_decode_block;
   if (demux_read_data(sh_audio->ds, sh_audio->a_in_buffer,
     sh_audio->ds->ss_mul) != 
     sh_audio->ds->ss_mul) 
     return -1;
 
   if ((sh_audio->format == 0x11) || (sh_audio->format == 0x1100736d))
-  {
-    return 2 * ms_ima_adpcm_decode_block(
-      (unsigned short*)buf, sh_audio->a_in_buffer, sh_audio->wf->nChannels,
-      sh_audio->ds->ss_mul);
-  }
+    decode_func = ms_ima_adpcm_decode_block;
   else if (sh_audio->format == 0x61)
-  {
-    return 2 * dk4_ima_adpcm_decode_block(
-      (unsigned short*)buf, sh_audio->a_in_buffer, sh_audio->wf->nChannels,
-      sh_audio->ds->ss_mul);
-  }
-  else
-  {
-    return 2 * qt_ima_adpcm_decode_block(
-      (unsigned short*)buf, sh_audio->a_in_buffer, sh_audio->wf->nChannels);
-  }
+    decode_func = dk4_ima_adpcm_decode_block;
+
+  res = decode_func((unsigned short*)buf, sh_audio->a_in_buffer,
+                    sh_audio->wf->nChannels, sh_audio->ds->ss_mul);
+  if (res < 0) return res;
+  else return 2 * res;
 }
