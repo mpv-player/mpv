@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r24772
+// In sync with r24892
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -1815,6 +1815,17 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] X-Koorektur: %d.\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Konnte Signal-Mix nicht setzen!\n"
 
+// libvo/font_load_ft.c
+
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "New_Face fehlgeschlagen. Vielleicht ist der Pfad zu den Schriften falsch?\nBitte stelle eine Text-Schriftdatei zur Verfügung (~/.mplayer/subfont.ttf).\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "New_Memory_Face fehlgeschlagen..\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "subtitle font: load_sub_face fehlgeschlagen.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "subtitle font: prepare_charset fehlgeschlagen.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Kann Untertitelschriftdatei nicht vorbereiten.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Kann OSD-Schrift nicht vorbereiten.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Kann Tabellen nicht generieren..\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType fehlgeschlagen.\n"
+
 // libvo/vo_mga.c
 
 #define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): Größe geändert auf %dx%d.\n"
@@ -2157,6 +2168,7 @@ static char help_text[]=
 #define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Kann Aufnahme nicht stoppen. Fehler: %s\n"
 #define MSGTR_TV_TTSupportedLanguages "Unterstützte Videotextsprachen:\n"
 #define MSGTR_TV_TTSelectedLanguage "Gewählte Standardvideotextsprache: %s\n"
+#define MSGTR_TV_ScannerNotAvailableWithoutTuner "Kanal-Scanner ist ohne Tuner nicht verfügbar.\n"
 
 //tvi_dshow.c
 #define MSGTR_TVI_DS_UnableConnectInputVideoDecoder  "Kann vorhandenen Input nicht mit Videodecoder verbinden. Fehler:0x%x\n"
