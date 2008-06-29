@@ -5,12 +5,6 @@
 #include "stream.h"
 
 typedef struct {
-  int event;             /* event number fromd dvdnav_events.h */
-  void * details;        /* event details */
-  int len;               /* bytes in details */
-} dvdnav_event_t;
-
-typedef struct {
   uint16_t sx, sy;
   uint16_t ex, ey;
   uint32_t palette;
