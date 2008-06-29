@@ -150,16 +150,10 @@ static void decode_nibbles(unsigned short *output,
 
     sign = delta & 8;
     delta = delta & 7;
+    delta = 2 * delta + 1;
+    if (sign) delta = -delta;
 
-    diff = step[channel_number] >> 3;
-    if (delta & 4) diff += step[channel_number];
-    if (delta & 2) diff += step[channel_number] >> 1;
-    if (delta & 1) diff += step[channel_number] >> 2;
-
-    if (sign)
-      predictor[channel_number] -= diff;
-    else
-      predictor[channel_number] += diff;
+    predictor[channel_number] += (delta * step[channel_number]) >> 3;
 
     CLAMP_S16(predictor[channel_number]);
     output[i] = predictor[channel_number];
