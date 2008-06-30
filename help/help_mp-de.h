@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r26795
+// In sync with r27063
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -1751,7 +1751,9 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] ungültiges Ausgabeformat %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Die Treiberversion von mga_vid ist mit dieser MPlayer-Version nicht kompatibel!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Konnte %s nicht öffnen\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Auflösung der Quelle ist in mindestens einer Dimension größer als 1023x1023. Bitte skaliere in Software um oder verwende -lavdopts lowres=1\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Auflösung der Quelle ist in mindestens einer Dimension größer als 1023x1023.\n[MGA] Bitte skaliere in Software oder verwende -lavdopts lowres=1.\n"
+#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] Unterschiedliche Versionen des mga_vid-Treibers des Kernels (%u) und MPlayer (%u).\n"
+
 
 // libvo/vesa_lvo.c
 
@@ -2019,7 +2021,6 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/de/video.html#xv!\n"\
 "[VO_XV] Siehe 'mplayer -vo help' für andere (nicht-xv) Videoausgabetreiber.\n"\
 "[VO_XV] Probiere -vo x11.\n"
-#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] Verwende Xv-Adapter #%d (%s)\n"
 
 // loader/ldt_keeper.c
 
