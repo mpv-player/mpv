@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r24807
+.\" In sync with r25134
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -259,7 +259,7 @@ Ton-Stummschaltung.
 Wechselt zwischen den verfügbaren Videospuren.
 .IPs "# (nur bei DVD, MPEG, Matroska, AVI und libavformat)"
 Wechselt zwischen den verfügbaren Audiospuren.
-.IPs "TAB (nur bei MPEG-TS)"
+.IPs "TAB (nur bei MPEG-TS und libavformat)"
 Wechselt zwischen den verfügbaren MPEG-Programmen.
 .IPs "f\ \ \ \ "
 Ändert Vollbild-Wiedergabe (ein/\:aus, siehe auch \-fs).
@@ -978,7 +978,7 @@ Chroot auf das angegebene Verzeichnis für den Datei-Auswahldialog
 .I BEISPIEL:
 .PD 0
 .RSs
-.IPs "\-menu\-chroot=/home"
+.IPs "\-menu\-chroot /home"
 Wird den Datei-Auswahldialog auf /\:home und darunter beschränken (z.B.\&
 wird kein Zugriff auf / möglich sein, auf /home/benutzer_name jedoch schon).
 .RE
@@ -2783,8 +2783,21 @@ Audioausgabe über NAS
 Nativer Mac OS X-Audioausgabetreiber.
 .
 .TP
-.B openal
+.B "openal\ "
 Experimenteller OpenAL-Audioausgabetreiber
+.
+.TP
+.B "pulse\ \ "
+PulseAudio-Audioausgabetreiber
+.PD 0
+.RSs
+.IPs "[<Host>][:<Ausgabesenke>]"
+Gib den Host und optional die zu verwendende Ausgabesenke an.
+Leere Angabe von <Host> verwendet eine lokale Verbindung.
+Verwendung von "localhost" als <Host> verwendet Netzwerkverbindungen
+(höchstwahrscheinlich nicht, was du willst).
+.RE
+.PD 1
 .
 .TP
 .B sgi (nur bei SGI)
@@ -3742,7 +3755,7 @@ Nur gültig für yuv-Modi 2, 3, 4 und 6.
 .RSss
 0: Benutze einfache lineare Filterung (Standard).
 .br
-1: Benutze bikubische Filterung (bessere Qualität).
+1: Benutze bikubische B-Spline-Filterung (bessere Qualität).
 Benötigt eine zusätzliche Textureinheit.
 Ältere Karten werden dies für Chrominanz zumindest im Vollbildmodus nicht
 verarbeiten können.
@@ -5400,6 +5413,85 @@ in den endgültigen Audiostream gemixt werden.
 Sei dir im klaren darüber, dass dieser Filter dein Signal in Mono umwandelt.
 Funktioniert gut für Tracks mit zwei Kanälen; mach dir nicht die Mühe, es auf
 etwas anderes als 2-Kanal-Stereo anzuwenden.
+.TP
+.B scaletempo[=Option1:Option2:...]
+Skaliert die Audiogeschwindigkeit, ohne die Tonhöhe zu verändern.
+Optional wird auf die Wiedergabegeschwindigkeit synchronisiert (Standard).
+.br
+Dies funktioniert, indem \'stride\' ms Audio bei normaler
+Geschwindigkeit dann \'stride*scale\' ms des eingehenden Audios
+verbraucht.
+Es puzzelt die Stücke wieder zusammen, indem 'overlap'% der Schrittweite mit
+dem Audio des vorigen Schrittes überblendet werden.
+Optional wird eine kurze statistische Analyse der nächsten \'search\' ms Audio
+durchgeführt, um die beste Überlappungsposition zu bestimmen.
+.PD 0
+.RSs
+.IPs scale=<Wert>
+Nomineller Wert, um die die Geschwindigkeit skaliert werden soll.
+Skaliert um diese Menge zusätzlich zur Geschwindigkeit.
+(Standard: 1.0)
+.IPs stride=<Wert>
+Länge eines Schrittes in Millisekunden.
+Zu hohe Werte verursachen merkliche Sprünge bei hohen Skalierungswerten und
+ein Echo bei niedrigen.
+Sehr niedrige Werte werden die Tonhöhe verändern.
+Erhöhen des Wertes verbessert die Performance.
+(Standard: 60)
+.IPs overlap=<Prozent>
+Prozentsatz, um den sich die Schritte überlappen.
+Verringerung erhöht Performance.
+(Standard: .20)
+.IPs search=<Wert>
+Länge in Millisekunden, um die für die beste Überlappungsposition gesucht wird.
+Verringerung erhöht Performance sehr.
+Auf langsamen Systemen wirst du diesen Wert sehr niedrig setzen wollen.
+(Standard: 14)
+.IPs speed=<tempo|pitch|both|none>
+Bestimme die Antwort auf Geschwindigkeitsveränderungen.
+.RSss
+.IPs tempo
+Skaliert das Tempo synchron zur Geschwindigkeit (Standard).
+.IPs pitch
+Kehrt die Wirkung des Filters um.
+Skaliert Tonhöhe, ohne das Tempo zu verändern.
+Füge \'[ speed_mult 0.9438743126816935\' und \'] speed_mult 1.059463094352953\'
+deiner input.conf hinzu, um Schrittweite auf Halbtöne zu setzen.
+.I WARNUNG:
+Verliert Synchronisation mit Video.
+.IPs both
+Skaliert sowohl Tempo als auch Tonhöhe.
+.IPs none
+Ignoriere Tempoveränderungen.
+.RE
+.RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af scaletempo \-speed 1.2 media.ogg"
+Würde die Datei bei 1.2-fachem der normalen Geschwindigkeit wiedergeben, Audio
+auf normaler Tonhöhe.
+Änderung der Wiedergabegeschwindigkeit würde Anpassung der
+Audiogeschwindigkeit veranlassen, so dass diese passt.
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=none \-speed 1.2 media.ogg"
+Würde die Datei bei 1.2-fachem der normalen Geschwindigkeit wiedergeben, Audio
+auf normaler Tonhöhe, aber Änderung der Wiedergabegeschwindigkeit hätte keinen
+Effekt auf das Audiotempo.
+.IPs "mplayer \-af scaletempo=stride=30:overlap=.50:search=10 media.ogg"
+Würde die Qualitäts- und Performanceparameter anpassen.
+.IPs "mplayer \-af format=floatne,scaletempo media.ogg"
+Würde dafür sorgen, dass scaletempo Code mit Fließkommazahlen verwendet.
+Möglicherweise schneller auf manchen Plattformen.
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=pitch audio.ogg"
+Würde die Datei bei 1.2-fachem der normalen Geschwindigkeit wiedergeben, Audio
+auf normaler Tonhöhe.
+Änderung der Wiedergabegeschwindigkeit würde die Tonhöhe ändern und Audiotempo
+bei 1.2-fachem lassen.
+.RE
+.PD 1
+.
 .
 .
 .
@@ -6127,7 +6219,7 @@ Hochpräzise und -qualitative Version des Denoise3d-Filters.
 Parameter und Gebrauch sind dieselben.
 .
 .TP
-.B ow[=Tiefe:Helligkeitsstärke:Farbtonstärke]
+.B ow[=Tiefe[:Helligkeitsstärke[:Farbtonstärke]]]
 Overcomplete Wavelet Denoiser.
 .PD 0
 .RSs
