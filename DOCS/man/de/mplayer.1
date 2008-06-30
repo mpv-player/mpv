@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r24656
+.\" In sync with r24719
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1766,7 +1766,7 @@ RTSP-Stream vom Server an einen bestimmten Client weiterleiten möchtest.
 .
 .TP
 .B \-rtsp\-destination
-Wird zusammen mit 'rtsp://'-DLLs benutzt, um zu erzwingen, dass die 
+Wird zusammen mit 'rtsp://'-DLLs benutzt, um zu erzwingen, dass die
 Ziel-IP-Adresse gebunden wird.
 Diese Option kann nützlich sein bei einem RTSP-Server, der RTP-Pakete nicht an
 die richtige Schnittstelle schickt.
@@ -3552,7 +3552,7 @@ Benutze für die Videoausgabe den Kernel-Framebuffer.
 .RSs
 .IPs <Gerät>
 Wähle explizit das zu benutzende fbdev-Gerät (z.B.\& /dev/\:fb0) oder das
-VIDIX-Subdevice, falls der Gerätename mit 'vidix' beginnt 
+VIDIX-Subdevice, falls der Gerätename mit 'vidix' beginnt
 (z.B.\& 'vidixsis_vid' beim SIS-Treiber).
 .RE
 .PD 1
@@ -5105,7 +5105,7 @@ hoch ist.
 .PD 1
 .
 .TP
-.B pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...] 
+.B pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...]
 Mischt Kanäle beliebig.
 Im Prinzip eine Kombination der Filter volume und channels, der benutzt werden
 kann, viele Kanäle auf nur wenige herunterzumischen, z.B.\& Stereo nach Mono
@@ -8020,7 +8020,7 @@ von B-Frames vermeidet (Standard: 40).
 Geringere Empfindlichkeit führt zu mehr B-Frames.
 Der Gebrauch von mehr B-Frames verbessert PSNR normalerweise, zu viele B-Frames
 jedoch können die Qualität in hochbewegten Szenen stören.
-Wenn es nicht gerade einen extrem hohen Anteil Bewegung gibt, kann 
+Wenn es nicht gerade einen extrem hohen Anteil Bewegung gibt, kann
 b_sensitivity sicher auf einen Wert unter dem Standardwert verringert werden;
 10 ist in den meisten Fällen ein brauchbarer Wert.
 .
@@ -10370,7 +10370,7 @@ entsprechende Anzahl Threads zu wählen.
 Bewirkt, dass SPS und PPS nur einmal bei Beginn des Bitstreams erscheinen
 (Standard: deaktiviert).
 Manche Wiedergabegeräte, wie die PSP, benötigen diese Option.
-Das Standardverhalten veranlasst, dass SPS und PPS vor jedem IDR-Frame 
+Das Standardverhalten veranlasst, dass SPS und PPS vor jedem IDR-Frame
 wiederholt werden.
 .
 .TP
