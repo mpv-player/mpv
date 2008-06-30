@@ -336,13 +336,23 @@ static int amode2v4l(int amode)
 }
 
 
+/*
+** Get current FPS.
+*/
+static double getfps(priv_t *priv)
+{
+    if (priv->tv_param->fps > 0)
+        return priv->tv_param->fps;
+    if (priv->standard.frameperiod.denominator && priv->standard.frameperiod.numerator)
+        return (double)priv->standard.frameperiod.denominator / priv->standard.frameperiod.numerator;
+    return 25.0;
+}
+
 // sets and sanitizes audio buffer/block sizes
 static void setup_audio_buffer_sizes(priv_t *priv)
 {
     int bytes_per_sample = priv->audio_in.bytes_per_sample;
-    double fps = (double)priv->standard.frameperiod.denominator /
-        priv->standard.frameperiod.numerator;
-    int seconds = priv->video_buffer_size_max/fps;
+    int seconds = priv->video_buffer_size_max/getfps(priv);
 
     if (seconds < 5) seconds = 5;
     if (seconds > 500) seconds = 500;
@@ -701,6 +711,10 @@ static int control(priv_t *priv, int cmd, void *arg)
         priv->immediate_mode = 1;
         return TVI_CONTROL_TRUE;
     case TVI_CONTROL_VID_GET_FPS:
+        if (!priv->standard.frameperiod.denominator || !priv->standard.frameperiod.numerator) {
+            mp_msg(MSGT_TV, MSGL_ERR, "%s: Cannot get fps\n", info.short_name);
+            return TVI_CONTROL_FALSE;
+        }
         *(float *)arg = (float)priv->standard.frameperiod.denominator /
             priv->standard.frameperiod.numerator;
         mp_msg(MSGT_TV, MSGL_V, "%s: get fps: %f\n", info.short_name,
@@ -1089,11 +1103,7 @@ static int uninit(priv_t *priv)
         struct v4l2_buffer buf;
 
         /* get performance */
-        frames = 1 + (priv->curr_frame - priv->first_frame +
-                      priv->standard.frameperiod.numerator * 500000 /
-                      priv->standard.frameperiod.denominator) *
-            priv->standard.frameperiod.denominator /
-            priv->standard.frameperiod.numerator / 1000000;
+        frames = 1 + lrintf((double)(priv->curr_frame - priv->first_frame) / (1e6 * getfps(priv)));
         dropped = frames - priv->frames;
 
         /* turn off streaming */
