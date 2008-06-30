@@ -448,6 +448,18 @@ static int getstd(priv_t *priv)
     int i=0;
 
     if (ioctl(priv->video_fd, VIDIOC_G_STD, &id) < 0) {
+        struct v4l2_streamparm      parm;
+
+        parm.type=V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        if(ioctl(priv->video_fd, VIDIOC_G_PARM, &parm) >= 0) {
+            mp_msg(MSGT_TV, MSGL_WARN, "%s: your device driver does not support VIDIOC_G_STD ioctl,"
+                   " VIDIOC_G_PARM was used instead.\n", info.short_name);
+            priv->standard.index=0;
+            priv->standard.id=0;
+            priv->standard.frameperiod=parm.parm.capture.timeperframe;
+            return 0;
+        }
+
         mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl get standard failed: %s\n",
                info.short_name, strerror(errno));
         return -1;
