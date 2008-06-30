@@ -1,4 +1,4 @@
-.\" synced with r27132
+.\" synced with r27169
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -5628,7 +5628,7 @@ optionnellement synchronisé avec la vitesse de lecture (par défaut).
 .br
 Cela fonctionne en jouant \'stride\' ms de son à vitesse normale
 puis \'stride*scale\' ms de son d'entrée.
-Les échantillons sont ensuite joints en combinant 'overlap'% de
+Les échantillons sont ensuite joints en combinant \'overlap\'% de
 stride avec les échantillons du stride précédent.
 Optionnellement, il détermine statistiquement sur les \'search\' ms de son
 à venir la meilleure position d'overlap.
@@ -5656,7 +5656,7 @@ valeur.
 Défini la réponse à un changement de vitesse.
 .RSss
 .IPs tempo
-Ajuste le tempo pour rester synchronisé (par défaut)
+Ajuste le tempo pour rester synchronisé (par défaut).
 .IPs pitch
 Inverse l'effet de ce filtre.
 Ajuste le ton sans changer le tempo.
