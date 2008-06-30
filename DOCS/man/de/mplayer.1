@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r24719
+.\" In sync with r24746
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -3808,15 +3808,15 @@ Nützlich für Benchmarking-Zwecke.
 .TP
 .B "aa\ \ \ \ \ "
 ASCII-Art-Videoausgabetreiber, der auf einer Textkonsole funktioniert.
-Du bekommst eine Liste mit allen Optionen und ihren Erläuterungen mit
-.I mplayer \-vo aa:help
+Du bekommst eine Liste mit allen Optionen und ihren Erläuterungen
+mit 'mplayer \-vo aa:help'.
 .br
 .I ANMERKUNG:
 Dieser Treiber kann nicht richtig mit \-aspect umgehen.
 .br
 .I TIPP:
-Wahrscheinlich muß \-monitorpixelaspect spezifiert werden. Versuche
-.I mplayer \-vo aa \-monitorpixelaspect 0.5.
+Wahrscheinlich muß \-monitorpixelaspect spezifiert werden.
+Versuche 'mplayer \-vo aa \-monitorpixelaspect 0.5'.
 .
 .TP
 .B "caca\ \ \ "
@@ -4561,7 +4561,7 @@ für mögliche Werte).
 Überspringt die Dekodierung von Bildern komplett.
 Hoher Geschwindigkeitsgewinn, aber ruckelige Bewegungen und manchmal
 schlimme Artefakte (siehe skiploopfilter für mögliche Werte).
-.IPs "threads=<1\-8> (nur bei MPEG-1/2)"
+.IPs "threads=<1\-8> (nur bei MPEG-1/2 und H.264)"
 Anzahl der für die Decodierung zu benutzenden Threads (Standard: 1).
 .IPs vismv=<Wert>
 Visualisiere Motion-Vectors.
@@ -6104,6 +6104,21 @@ zeitliche Farbstärke (Standard: Helligkeit_r*Farbwert_r/Helligkeit_z)
 .B hqdn3d[=Helligkeit_r:Farbwert_r:Helligkeit_z:Farbwert_z]"
 Hochpräzise und -qualitative Version des Denoise3d-Filters.
 Parameter und Gebrauch sind dieselben.
+.
+.TP
+.B ow[=Tiefe:Helligkeitsstärke:Farbtonstärke]
+Overcomplete Wavelet Denoiser.
+.PD 0
+.RSs
+.IPs <Tiefe>
+Größere Tiefenwerte werden Komponenten mit niedrigerer Frequenz stärker
+entstören, das Filtern jedoch verlangsamen (Standard: 8).
+.IPs <Helligkeitsstärke>
+Helligkeitsstärke (Standard: 1.0)
+.IPs <Farbtonstärke>
+Farbtonstärke (Standard: 1.0)
+.RE
+.PD 1
 .
 .TP
 .B eq[=Helligkeit:Kontrast] (VERALTET)
