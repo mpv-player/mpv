@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r27066
+// In sync with r27071
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 
@@ -23,8 +23,8 @@ static char help_text[]=
 #endif
 #ifdef USE_DVDREAD
 " dvd://<titelnr>  Spiele DVD-Titel direkt vom Gerät anstelle einer Datei\n"
-" -alang/-slang    Wähle DVD Audio/Untertitel Sprache (2-Zeichen-Ländercode)\n"
 #endif
+" -alang/-slang    Wähle DVD Audio/Untertitel Sprache (2-Zeichen-Ländercode)\n"
 " -ss <Position>   Spiele ab Position (Sekunden oder hh:mm:ss)\n"
 " -nosound         Ohne Ton abspielen\n"
 " -fs              Im Vollbildmodus abspielen (oder -vm, -zoom, siehe Manpage)\n"
@@ -736,8 +736,6 @@ static char help_text[]=
 
 // ====================== GUI-Nachrichten/-Buttons ========================
 
-#ifdef HAVE_NEW_GUI
-
 // --- labels ---
 #define MSGTR_About "Über..."
 #define MSGTR_FileSelect "Wähle Datei..."
@@ -1030,7 +1028,6 @@ static char help_text[]=
 #define MSGTR_WS_NotAFile "Dies scheint keine Datei zu sein...\n"
 #define MSGTR_WS_DDNothing "D&D: Nichts zurückgegeben!\n"
 
-#endif
 
 
 // ======================= Videoausgabetreiber ========================
