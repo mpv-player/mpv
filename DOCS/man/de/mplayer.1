@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r25752
+.\" In sync with r26017
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -526,6 +526,10 @@ Die systemweite Konfigurationsdatei 'mplayer.conf' liegt in deinem
 Konfigurationsverzeichnis (z.B.\& /etc/\:mplayer oder
 /usr/\:local/\:etc/\:mplayer), die benutzerspezifische Datei ist
 \'~/\:.mplayer/\:config'.
+Die Konfigurationsdatei für MEncoder ist 'mencoder.conf' in deinem
+Konfigurationsverzeichnis (z.B.\& /etc/\:mplayer oder
+/usr/\:local/\:etc/\:mplayer), die benutzerspezifische
+ist '~/\:.mplayer/\:mencoder.conf'.
 Benutzerspezifische Einstellungen haben Vorrang vor den systemweiten,
 und Optionen auf der Kommandozeile überschreiben die beiden anderen.
 Die Syntax der Konfigurationsdateien lautet 'Option=<Wert>'
@@ -620,11 +624,11 @@ mouse-movements=yes
 profile-desc="Profil für .flv-Dateien"
 flip=yes
 
-[vo.x11]
-option=param
+[vo.pnm]
+outdir=/tmp
 
 [ao.alsa]
-option=param
+device=spdif
 .fi
 .PP
 .I "BEISPIEL-PROFIL FÜR MENCODER:"
@@ -879,7 +883,7 @@ Momentan funktionieren die folgenden Treiber mit \-fixed\-vo: gl, gl2, mga,
 svga, x11, xmga, xv, xvidix und dfbmga.
 .
 .TP
-.B \-framedrop (siehe auch \-hardframedrop)
+.B \-framedrop (siehe auch \-hardframedrop, nur mit -no-correct-pts)
 Verwirft einige Frames, ohne sie anzuzeigen, um auf langsamen Systemen
 die A/\:V-Synchronisation beizubehalten.
 Videofilter werden auf diese Frames nicht angewendet.
@@ -897,10 +901,12 @@ Funktioniert nicht als Option in einer Konfigurationsdatei.
 Zeigt eine kurze Zusammenfassung der Optionen an.
 .
 .TP
-.B \-hardframedrop
+.B \-hardframedrop (funktioniert nur mit -no-correct-pts)
 Noch rabiateres Verwerfen von Frames (verhindert evtl. korrekte
 Decodierung).
 Führt zu Bildstörungen!
+Beachte, dass vor allem der libmpeg2-Decoder mit dieser Einstellung abstürzen
+kann, ziehe also Benutzung von "\-vc ffmpeg12," in Betracht.
 .
 .TP
 .B \-heartbeat\-cmd
@@ -2663,9 +2669,9 @@ bewegen und die Zeile löschen (Standard: ^[[A\\r^[[K).
 Weist MPlayer an, die Untertiteldatei als Unicode zu behandeln.
 .
 .TP
-.B \-unrarexec <Pfad zum unrar-Programm> (momentan nicht von MingW unterstützt)
+.B \-unrarexec <Pfad zum unrar-Programm> (unter MingW nicht unterstützt)
 Gib den Pfad zum unrar-Programm an, damit MPlayer es für den Zugriff auf
-rar-komprimierte vobsub-Dateien verwenden kann (Standard: nicht gesetzt, also
+rar-komprimierte VOBsub-Dateien verwenden kann (Standard: nicht gesetzt, also
 ist dieses Feature deaktiviert).
 Der Pfad muss den Dateinamen des Programms beinhalten, z.B.\&
 /usr/local/bin/unrar.
@@ -3315,7 +3321,7 @@ Wird nicht von allen Videoausgabetreibern unterstützt.
 .TP
 .B \-screenh <Pixel>
 Gib die horizontale Bildauflösung für Videoausgabetreiber an, die die
-Bildschirmauflösung nicht kennen, wie fbdev, x11 und TV-Ausgang.
+Bildschirmauflösung nicht kennen, wie fbdev, x11 und TV-Ausgabe.
 .
 .TP
 .B \-screenw <Pixel>
@@ -3746,8 +3752,8 @@ Deaktiviert sieht es mit FreeType-Schriftarten besser aus und benutzt im
 Vollbildmodus die Ränder.
 Funktioniert momentan nicht mit ass-Untertiteln (siehe \-ass), du kannst sie
 statt dessen jedoch ohne OpenGL-Unterstützung mit \-vf ass darstellen lassen.
-.IPs osdcolor=<0xRRGGBB>
-Farbe für das OSD (Standard: 0xffffff, entspricht weiß).
+.IPs osdcolor=<0xAARRGGBB>
+Farbe für das OSD (Standard: 0x00ffffff, entspricht nicht-transparentem weiß).
 .IPs rectangle=<0,1,2>
 Wähle einen bestimmten Typ für rechtwinklige Texturen aus.
 Dies spart Grafikspeicher, ist aber oft langsamer (Standard: 0).
@@ -3834,6 +3840,14 @@ verarbeiten können.
 2: Benutze kubische Filterung in horizontaler, lineare Filterung in vertikaler
 Richtung.
 Funktioniert auf ein paar mehr Karten als Methode 1.
+.br
+3: Das gleiche wie 1, verwendet aber keine Lookup-Textur.
+Ist auf manchen Karten möglicherweise schneller.
+.br
+4: Verwende experimentelle unscharfe Maskierung mit 3x3-Unterstützung und einer
+Stärke von 0.5.
+5: Verwende experimentelle unscharfe Maskierung mit 5x5-Unterstützung und einer
+Stärke von 0.5.
 .RE
 .IPs cscale=<n>
 Wählt die zu benutzende Skalierungsmethode für Chrominanzskalierung.
@@ -4119,7 +4133,7 @@ Gibt die TV-Norm an.
 4: PAL-60
 .br
 5: NTSC
-.REss
+.RE
 .IPs <0\-3>
 Gibt die Gerätenummer an, wenn mehr als eine em8300-Karte vorhanden ist.
 .RE
@@ -4133,9 +4147,9 @@ iTVC15) oder Conexant CX23416 (iCompression iTVC16) MPEG Decoder-Chip
 Siehe auch den Videofilter lavc.
 .PD 0
 .RSs
-.IPs Gerät
+.IPs <Gerät>
 Wählt den zu verwendenden MPEG-Decoder explizit (Standard: /dev/video16).
-.IPs Ausgabe
+.IPs <Ausgabe>
 Wählt die für das Videosignal zu verwendende TV-Out-Ausgabe.
 .RE
 .PD 1
@@ -4147,10 +4161,10 @@ Hardware-MPEG-Decoder.
 Siehe auch lavc-Videofilter.
 .PD 0
 .RSs
-.IPs device
+.IPs <Gerät>
 Wähle den Gerätenamen des zu verwendenden MPEG-Decoders explizit
 (Standard: /dev/video16).
-.IPs output
+.IPs <Ausgabe>
 Wähle die für das Videosignal zu verwendende TV-Out-Ausgabe explizit.
 .RE
 .PD 1
