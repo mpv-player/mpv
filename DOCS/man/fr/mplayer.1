@@ -1,4 +1,4 @@
-.\" synced with r27169
+.\" synced with r27179
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -133,7 +133,7 @@ tivo://hôte/[list|llist|fsid]
 .br
 .B mencoder
 [options] fichier
-[fichier|URL|\-] [\-o fichier | file://fichier | smb://[utilisateur:mot_de_passe@]hôte/chemin/vers/le/fichier] 
+[fichier|URL|\-] [\-o fichier | file://fichier | smb://[utilisateur:mot_de_passe@]hôte/chemin/vers/le/fichier]
 .
 .br
 .B mencoder
@@ -160,7 +160,7 @@ Un autre gros atout de MPlayer est la grande variété de pilotes de
 sortie audio et vidéos gérés.
 Il fonctionne avec X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
 DirectFB, Quartz, Mac OS X CoreVideo, mais vous pouvez aussi utiliser
-GGI, SDL (et de cette façon tous leurs drivers), VESA (sur n'importe 
+GGI, SDL (et de cette façon tous leurs drivers), VESA (sur n'importe
 quelle carte compatible VESA, même sans X11), quelques drivers spécifiques à
 certaines cartes (pour Matrox, 3dfx et ATI) et certaines cartes de
 décompression MPEG, telles que les Siemens DVB, Hauppauge PVR (IVTV), DXR2 et DXR3/\:Hollywood+.
@@ -1690,7 +1690,7 @@ cbr: Taux binaire constant.
 .IPs vpeak=<valeur>
 Spécifie le taux binaire maximum d'encodage vidéo (utile uniquement dans le
 cas du mode VBR).
-La valeur par défaut est de 9.6 Mbps. 
+La valeur par défaut est de 9.6 Mbps.
 .IPs fmt=<valeur>
 Détermine le format MPEG utilisé pour l'encodage\ :
 .RSss
@@ -2915,7 +2915,7 @@ pilote de sortie audio natif de Mac OS X
 Pilote de sortie audio OpenAL expérimental.
 .
 .TP
-+.B "pulse\ \ "
+.B "pulse\ \ "
 Pilote de sortie audio PulseAudio
 .PD 0
 .RSs
@@ -5131,7 +5131,7 @@ canaux, pour que ce filtre puisse alors coder les N canaux en AC-3.
 .PD 0
 .RSs
 .IPs <vers_spdif>
-Sort au flux AC-3 brut si égal à 0 ou non spécifié, sort 
+Sort au flux AC-3 brut si égal à 0 ou non spécifié, sort
 transit vers S/PDIF quand <vers_spdif> est différent de 0.
 .IPs <débit>
 Le débit de codage du flux AC-3.
@@ -6299,7 +6299,7 @@ rend l'image plus lisse mais plus floue
 .
 .TP
 .B pp7[=qp[:mode]]
-Variante du filtre spp, similaire à pp=6 avec 7 points de DCT 
+Variante du filtre spp, similaire à pp=6 avec 7 points de DCT
 où uniquement l'échantillon du centre est utilisé après la IDCT.
 .RSs
 .IPs <qp>
@@ -7013,7 +7013,7 @@ Si non-nul, le mode deghosting est utilisé.
 Ceci est destiné aux vidéos ayant été désentrelacées en fusionnant les champs
 ensemble au lieu d'en jeter un.
 Le deghosting amplifie les artefacts de compression des champs fusionnés,
-et la valeur du paramètre est celle du seuil pour exclure les pixels 
+et la valeur du paramètre est celle du seuil pour exclure les pixels
 du filtre deghosting s'il diffère moins que ce seuil de la trame
 précédente.
 En mode 2-passes, une valeur négative peut être donnée pour que le filtre
@@ -7164,7 +7164,7 @@ Utilisez \-field\-dominance à la place.
 0: sort une trame pour chaque trame d'entrée
 1: sort une trame pour chaque champ d'entrée
 2: comme 0 mais ne vérifie pas l'entrelacement spatial
-3: comme 3 mais ne vérifie pas l'entrelacement spatial 
+3: comme 3 mais ne vérifie pas l'entrelacement spatial
 .IPs <dominance de champ> (DEPRECATED/À ÉVITER)
 cf tfields
 .br
@@ -8296,7 +8296,7 @@ intervalle de recherche de l'estimation de mouvement
 .B mbd=<0\-2> (voir aussi *cmp, qpel)
 Algorithme de décision de macro-block (mode haute qualité), encode chaque
 macro-block dans tous les modes et choisit le meilleur.
-C'est lent mais permet d'améliorer la qualité visuelle et réduire la taille 
+C'est lent mais permet d'améliorer la qualité visuelle et réduire la taille
 du fichier.
 Quand mbd est mis à 1 ou 2, la valeur de de mbcmp est ignoré quand les
 macro-blocks sont comparés entre eux (la valeur de mbcmp reste utilisée dans
@@ -9188,7 +9188,7 @@ somme des différences absolues, rapide (par défaut)
 .IPs "1 (SSE)"
 somme des erreurs au carré
 .IPs "2 (SATD)"
-somme des différences absolues de la transformée de Hadamard 
+somme des différences absolues de la transformée de Hadamard
 .IPs "3 (DCT)"
 somme des différences absolues de la transformée DCT
 .IPs "4 (PSNR)"
@@ -9207,7 +9207,7 @@ somme des différences verticales absolues au carré
 somme des différences au carré préservant le bruit
 .IPs "11 (W53)"
 ondelette 5/3, utilisé par Snow
-+.IPs "12 (W97)"
+.IPs "12 (W97)"
 ondelette 9/7, utilisé par Snow
 .IPs "+256\ "
 Utilise également le chroma, ne fonctionne pour le moment pas (correctement)
@@ -9815,7 +9815,7 @@ Définit le type de quantum à utiliser.
 conserver plus de détails.
 À faible débit binaire, H.263 adoucit plus les traits de l'image et donnera une
 image où les macro-blocs se verront moins.
-Si vous utilisez vos propres matrices de quantification, vous 
+Si vous utilisez vos propres matrices de quantification, vous
 .B devez
 utiliser la quantification MPEG.
 .
@@ -11117,9 +11117,10 @@ de tampons "buffer underflows".
 .
 .TP
 .B packetsize=<taille>
-Size, expressed in bytes, of the unitary packet for the chosen format.
-+When muxing to MPEG[12] implementations the default values are: 
-+2324 for [S]VCD, 2048 for all others formats.
+Taille, exprimée en octets, du paquet unitaire du format donné.
+Lorsque le format de sortie est l'une des implémentations de MPEG[12],
+les valeurs par défaut sont\ :
+2324 pour [S]VCD, et 2048 pour tous les autres formats.
 .
 .TP
 .B preload=<distance>
