@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r27065
+// In sync with r27066
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 
@@ -222,7 +222,7 @@ static char help_text[]=
 #define MSGTR_OSDChapter "Kapitel: (%d) %s"
 #define MSGTR_OSDAngle "Winkel: %d/%d"
 
-// property values
+// Werte für Eigenschaften
 #define MSGTR_Enabled "aktiviert"
 #define MSGTR_EnabledEdl "aktiviert (EDL)"
 #define MSGTR_Disabled "deaktiviert"
@@ -235,7 +235,7 @@ static char help_text[]=
 #define MSGTR_SubSourceVobsub "vobsub"
 #define MSGTR_SubSourceDemux "eingebettet"
 
-// osd bar names
+// Balkennamen für OSD
 #define MSGTR_Volume "Lautstärke"
 #define MSGTR_Panscan "Panscan"
 #define MSGTR_Gamma "Gamma"
@@ -245,7 +245,7 @@ static char help_text[]=
 #define MSGTR_Hue "Farbton"
 #define MSGTR_Balance "Balance"
 
-// property state
+// Eigenschaftenzustände
 #define MSGTR_LoopStatus "Endloswiederholung: %s"
 #define MSGTR_MuteStatus "Stumm: %s"
 #define MSGTR_AVDelayStatus "A/V-Verzögerung: %s"
@@ -734,7 +734,7 @@ static char help_text[]=
 #define MSGTR_NoBalance "[Mixer] Keine Regelung für Balance verfügbar.\n"
 
 
-// ====================== GUI messages/buttons ========================
+// ====================== GUI-Nachrichten/-Buttons ========================
 
 #ifdef HAVE_NEW_GUI
 
@@ -804,7 +804,7 @@ static char help_text[]=
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin-Konfigurationsdatei: Lesefehler (%s)\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
-// --- gtk menus
+// --- GTK-Menüs
 #define MSGTR_MENU_AboutMPlayer "Über MPlayer"
 #define MSGTR_MENU_Open "Öffnen..."
 #define MSGTR_MENU_PlayFile "Spiele Datei..."
@@ -1033,7 +1033,7 @@ static char help_text[]=
 #endif
 
 
-// ======================= VO Videoausgabetreiber ========================
+// ======================= Videoausgabetreiber ========================
 
 #define MSGTR_VOincompCodec \
 "Der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"\
@@ -1113,15 +1113,12 @@ static char help_text[]=
 // vo_xv.c
 #define MSGTR_VO_XV_ImagedimTooHigh "Dimensionen des Quellbildes sind zu groß: %ux%u (Maximalgröße ist %ux%u)\n"
 
-// Old vo drivers that have been replaced
-
+// alte Videoausgabetreiber, die ersetzt wurden
 #define MSGTR_VO_PGM_HasBeenReplaced "Der pgm-Videoausgabetreiber wurde ersetzt durch -vo pnm:pgmyuv.\n"
 #define MSGTR_VO_MD5_HasBeenReplaced "Der md5-Videoausgabetreiber wurde ersetzt durch -vo md5sum.\n"
 
 
-// ======================= AO Audio Output drivers ========================
-
-// libao2
+// ======================= Audioausgabetreiber ========================
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed \
@@ -1159,9 +1156,6 @@ static char help_text[]=
 // ao_mpegpes.c
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Setzen des DVB-Audiomixers fehlgeschlagen: %s\n"
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz nicht unterstützt, versuche Resampling.\n"
-
-// ao_null.c
-// Der hier hat weder mp_msg noch printf's?? [CHECK]
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Datei: %s (%s)\nPCM: Samplerate: %iHz Kanäle: %s Format %s\n"
@@ -1289,9 +1283,9 @@ static char help_text[]=
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] ungültiges Plugin: %s\n"
 
 
-// ======================= AF Audio Filters ================================
+// ======================= Audiofilter ================================
 
-// libaf
+// af_scaletempo.c
 #define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
@@ -1602,7 +1596,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_XMMS_WaitForStart "Warte auf die Wiedergabe des XMMS-Plugins von '%s'...\n"
 
 
-// ========================== LIBMPMENU ===================================
+// ========================== LIBMENU ===================================
 
 // common
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Kein Eintrag in der Menüdefinition gefunden.\n"
@@ -1718,7 +1712,7 @@ static char help_text[]=
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s vom nächsten Filter/vo nicht unterstützt :(\n"
 
 
-// ================================== LIBMPVO ====================================
+// ================================== LIBVO ====================================
 
 // mga_common.c
 #define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] Fehler im ioctl von mga_vid_config (falsche mga_vid.o-Version?)"
