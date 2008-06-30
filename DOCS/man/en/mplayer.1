@@ -5342,7 +5342,7 @@ speed (default).
 .br
 This works by playing \'stride\' ms of audio at normal speed then
 consuming \'stride*scale\' ms of input audio.
-It pieces the strides together by blending 'overlap'% of stride with
+It pieces the strides together by blending \'overlap\'% of stride with
 audio following the previous stride.
 It optionally performs a short statistical analysis on the next \'search\'
 ms of audio to determine the best overlap position.
@@ -5372,7 +5372,7 @@ On slow systems, you will probably want to set this very low.
 Set response to speed change.
 .RSss
 .IPs tempo
-Scale tempo in sync with speed (default)
+Scale tempo in sync with speed (default).
 .IPs pitch
 Reverses effect of filter.
 Scales pitch without altering tempo.
@@ -5381,9 +5381,9 @@ to your input.conf to step by musical semi-tones.
 .I WARNING:
 Loses sync with video.
 .IPs both
-Scale both tempo and pitch
+Scale both tempo and pitch.
 .IPs none
-Ignore speed changes
+Ignore speed changes.
 .RE
 .RE
 .sp 1
