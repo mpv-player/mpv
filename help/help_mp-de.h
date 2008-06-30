@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r25158
+// In sync with r26795
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -156,6 +156,8 @@ static char help_text[]=
 "  Wir können und werden dir nicht helfen, wenn du nicht alle dort aufgeführten\n"\
 "  Informationen zur Verfügung stellst.\n"
 #define MSGTR_LoadingConfig "Lade Konfiguration '%s'\n"
+#define MSGTR_LoadingProtocolProfile "Lade protokolleigenes Profil '%s'\n"
+#define MSGTR_LoadingExtensionProfile "Lade erweiterungseigenes Profil '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: Untertiteldatei (%d) hinzugefügt: %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB: Untertiteldatei (%d) entfernt: %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Fehler beim Öffnen von Datei [%s] zum Schreiben!\n"
@@ -217,6 +219,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Geschwindigkeit: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDChapter "Kapitel: (%d) %s"
+#define MSGTR_OSDAngle "Winkel: %d/%d"
 
 // property values
 #define MSGTR_Enabled "aktiviert"
@@ -956,6 +959,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "Thailändische Schriftzeichen (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Kyrillisch Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Slavisch / Zentraleuropäisch Windows (CP1250)"
+#define MSGTR_PREFERENCES_FontEncoding23 "Arabisch Windows (CP1256)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Keine automatische Skalierung"
 #define MSGTR_PREFERENCES_FontPropWidth "Proportional zur Breite des Films"
 #define MSGTR_PREFERENCES_FontPropHeight "Proportional zur Höhe des Films"
@@ -1325,6 +1329,12 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick: %d Byte Daten verloren.\n"
 #define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: Warnung: Initialisierungsereignis, Synchronisierung mit Treiber verloren.\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick: Warnung: Unbekannter Ereignistyp %d.\n"
+
+// appleir.c
+
+#define MSGTR_INPUT_APPLE_IR_Init "Initialisiere Apple-Fernbedienung auf %s\n"
+#define MSGTR_INPUT_APPLE_IR_Detect "Apple-Fernbedienung auf %s erkannt\n"
+#define MSGTR_INPUT_APPLE_IR_CantOpen "Kann Gerät für Apple-Fernbedienung nicht öffnen: %s\n"
 
 // input.c
 
@@ -2009,6 +2019,7 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/de/video.html#xv!\n"\
 "[VO_XV] Siehe 'mplayer -vo help' für andere (nicht-xv) Videoausgabetreiber.\n"\
 "[VO_XV] Probiere -vo x11.\n"
+#define MSGTR_LIBVO_XV_Adaptor "[VO_XV] Verwende Xv-Adapter #%d (%s)\n"
 
 // loader/ldt_keeper.c
 
@@ -2064,6 +2075,7 @@ static char help_text[]=
 // ass_bitmap.c
 #define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] Fehler %d in FT_Glyph_To_Bitmap\n"
 #define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Nichtunterstützter Pixelmodus: %d\n"
+#define MSGTR_LIBASS_GlyphBBoxTooLarge "[ass] Umgebender Rahmen für Glyph zu groß: %dx%dpx\n"
 
 // ass.c
 #define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Warnung: kein Style mit Namen '%s' gefunden, verwende '%s'\n"
@@ -2087,7 +2099,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_ErrorOpeningFont "[ass] Fehler beim Öffnen der Schrift: %s, %d\n"
 
 // ass_fontconfig.c
-#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: Die gewählte Schriftfamilie ist nicht die angeforderte: '%s' != '%s'\n"
+#define MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne "[ass] fontconfig: Die gewählte Schrift ist nicht die angeforderte: '%s' != '%s'\n"
 #define MSGTR_LIBASS_UsingDefaultFontFamily "[ass] fontconfig_select: Verwende Standardschriftfamilie: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingDefaultFont "[ass] fontconfig_select: Verwende Standardschrift: (%s, %d, %d) -> %s, %d\n"
 #define MSGTR_LIBASS_UsingArialFontFamily "[ass] fontconfig_select: Verwende 'Arial'-Schriftfamilie: (%s, %d, %d) -> %s, %d\n"
@@ -2118,7 +2130,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_EventHeightHasChanged "[ass] Warnung! Ereignishöhe geändert!  \n"
 
 // ass_font.c
-#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X nicht gefunden, wähle Schrift erneut für (%s, %d, %d)\n"
+#define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glyph 0x%X nicht gefunden, wähle weitere Schrift für (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] Glyph 0x%X in Schrift für (%s, %d, %d) nicht gefunden\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Fehler beim Öffnen der Schrift im Speicher: %s\n"
 #define MSGTR_LIBASS_NoCharmaps "[ass] Schriftfläche ohne Zeichentabelle\n"
