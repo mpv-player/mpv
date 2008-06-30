@@ -4,8 +4,9 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r27063
+// In sync with r27065
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
+
 
 // ========================= MPlayer help ===========================
 
@@ -54,6 +55,7 @@ static char help_text[]=
 
 // libmpcodecs/ad_dvdpcm.c:
 #define MSGTR_SamplesWanted "Beispiele für dieses Format werden gebraucht, um die Unterstützung zu verbessern. Bitte kontaktiere die Entwickler.\n"
+
 
 // ========================= MPlayer Ausgaben ===========================
 
@@ -209,7 +211,6 @@ static char help_text[]=
 #define MSGTR_MPEndposNoSizeBased "Die Option -endpos unterstützt für MPlayer noch keine Größenangaben.\n"
 
 // mplayer.c OSD
-
 #define MSGTR_OSDenabled "aktiviert"
 #define MSGTR_OSDdisabled "deaktiviert"
 #define MSGTR_OSDAudio "Ton: %s"
@@ -263,7 +264,6 @@ static char help_text[]=
 #define MSGTR_SubForcedOnlyStatus "Erzwungene Untertitel: %s"
 
 // mencoder.c:
-
 #define MSGTR_UsingPass3ControlFile "Verwende Pass 3 Kontrolldatei: %s\n"
 #define MSGTR_MissingFilename "\nDateiname nicht angegeben.\n\n"
 #define MSGTR_CannotOpenFile_Device "Kann Datei/Gerät nicht öffnen.\n"
@@ -733,6 +733,7 @@ static char help_text[]=
 #define MSGTR_NoVolume "[Mixer] Keine Lautstärkeregelung verfügbar.\n"
 #define MSGTR_NoBalance "[Mixer] Keine Regelung für Balance verfügbar.\n"
 
+
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
@@ -997,28 +998,23 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_Warning "Warnung!"
 
 // bitmap.c
-
 #define MSGTR_NotEnoughMemoryC32To1 "[c32to1] Für das Bild ist nicht genügend Speicher vorhanden.\n"
 #define MSGTR_NotEnoughMemoryC1To32 "[c1to32] Für das Bild ist nicht genügend Speicher vorhanden.\n"
 
 // cfg.c
-
 #define MSGTR_ConfigFileReadError "[cfg] Fehler beim Lesen der Konfigurationsdatei ...\n"
 #define MSGTR_UnableToSaveOption "[cfg] Kann die Option '%s' nicht speichern.\n"
 
 // interface.c
-
 #define MSGTR_DeletingSubtitles "[GUI] Lösche Untertitel.\n"
 #define MSGTR_LoadingSubtitles "[GUI] Lade Untertitel: %s\n"
 #define MSGTR_AddingVideoFilter "[GUI] Füge Videofilter %s hinzu.\n"
 #define MSGTR_RemovingVideoFilter "[GUI] Entferne Videofilter: %s\n"
 
 // mw.c
-
 #define MSGTR_NotAFile "Dies scheint keine Datei zu sein: %s !\n"
 
 // ws.c
-
 #define MSGTR_WS_CouldNotOpenDisplay "[ws] Konnte das Display nicht öffnen.\n"
 #define MSGTR_WS_RemoteDisplay "[ws] Ferngesteuertes Display, deaktiviere XMITSHM.\n"
 #define MSGTR_WS_NoXshm "[ws] Sorry, dein System unterstützt die Shared-Memory-Erweiterung von X nicht.\n"
@@ -1031,13 +1027,13 @@ static char help_text[]=
 #define MSGTR_WS_DpmsNotEnabled "Konnte DPMS nicht aktivieren.\n"
 
 // wsxdnd.c
-
 #define MSGTR_WS_NotAFile "Dies scheint keine Datei zu sein...\n"
 #define MSGTR_WS_DDNothing "D&D: Nichts zurückgegeben!\n"
 
 #endif
 
- // ======================= VO Videoausgabetreiber ========================
+
+// ======================= VO Videoausgabetreiber ========================
 
 #define MSGTR_VOincompCodec \
 "Der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"\
@@ -1058,7 +1054,6 @@ static char help_text[]=
 #define MSGTR_VO_UnknownSuboptions "unbekannte Unteroption(en)"
 
 // vo_aa.c
-
 #define MSGTR_VO_AA_HelpHeader "\n\nDies sind die Unteroptionen von aalib vo_aa:\n"
 #define MSGTR_VO_AA_AdditionalOptions \
 "Zusätzlich von vo_aa bereitgestellte Optionen:\n" \
@@ -1073,7 +1068,7 @@ static char help_text[]=
 "           4 : reverse\n" \
 "           5 : special\n\n\n"
 
- // vo_jpeg.c
+// vo_jpeg.c
 #define MSGTR_VO_JPEG_ProgressiveJPEG "Progressives JPEG aktiviert."
 #define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressives JPEG deaktiviert."
 #define MSGTR_VO_JPEG_BaselineJPEG "Baseline-JPEG aktiviert."
@@ -1122,6 +1117,7 @@ static char help_text[]=
 
 #define MSGTR_VO_PGM_HasBeenReplaced "Der pgm-Videoausgabetreiber wurde ersetzt durch -vo pnm:pgmyuv.\n"
 #define MSGTR_VO_MD5_HasBeenReplaced "Der md5-Videoausgabetreiber wurde ersetzt durch -vo md5sum.\n"
+
 
 // ======================= AO Audio Output drivers ========================
 
@@ -1290,8 +1286,8 @@ static char help_text[]=
 #define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] Kann pcm-Status nicht ermitteln: %s\n"
 
 // ao_plugin.c
-
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] ungültiges Plugin: %s\n"
+
 
 // ======================= AF Audio Filters ================================
 
@@ -1299,7 +1295,6 @@ static char help_text[]=
 #define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
-
 #define MSGTR_AF_LADSPA_AvailableLabels "verfügbare Label in"
 #define MSGTR_AF_LADSPA_WarnNoInputs "WARNUNG! Dieses LADSPA-Plugin hat keine Audio-Inputs.\n  Das eingehende Audiosignal wird verlorengehen."
 #define MSGTR_AF_LADSPA_ErrMultiChannel "Multichannel-Plugins (>2) werden (noch) nicht unterstützt.\n  Benutze nur Mono- und Stereo-Plugins."
@@ -1319,10 +1314,10 @@ static char help_text[]=
 
 #define MSGTR_AF_FORMAT_UnknownFormat "unbekanntes Format "
 
+
 // ========================== INPUT =========================================
 
 // joystick.c
-
 #define MSGTR_INPUT_JOYSTICK_Opening "Öffne Joystick-Gerätedatei '%s'.\n"
 #define MSGTR_INPUT_JOYSTICK_CantOpen "Konnte Joystick-Gerätedatei '%s' nicht öffnen: %s\n"
 #define MSGTR_INPUT_JOYSTICK_ErrReading "Fehler beim Lesen von Joystick-Gerätedatei: %s\n"
@@ -1331,13 +1326,11 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick: Warnung: Unbekannter Ereignistyp %d.\n"
 
 // appleir.c
-
 #define MSGTR_INPUT_APPLE_IR_Init "Initialisiere Apple-Fernbedienung auf %s\n"
 #define MSGTR_INPUT_APPLE_IR_Detect "Apple-Fernbedienung auf %s erkannt\n"
 #define MSGTR_INPUT_APPLE_IR_CantOpen "Kann Gerät für Apple-Fernbedienung nicht öffnen: %s\n"
 
 // input.c
-
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Zu viele Kommandodateideskriptoren, konnte Deskriptor %d nicht registrieren.\n"
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Zu viele Tastendateidesktriptoren, konnte Deskriptor %d nicht registrieren.\n"
 #define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Kommando %s: Argument %d ist keine Integerzahl.\n"
@@ -1365,20 +1358,18 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Konnte Datei '%s' nicht öffnen: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Konnte Apple Remote Fernbedienung nicht initialisieren.\n"
 
+
 // ========================== LIBMPDEMUX ===================================
 
 // url.c
-
 #define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "Zeichenkette scheint bereits im URL-Format %c%c1%c2 'escaped' zu sein.\n"
 
 // ai_alsa1x.c
-
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Konnte Samplingrate nicht setzen.\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Konnte Pufferzeit nicht setzen.\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Konnte Periode nicht setzen.\n"
 
 // ai_alsa.c
-
 #define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Kaputte Konfiguration für diesen PCM-Kanal: Keine Konfiguration verfügbar.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Zugriffstyp nicht verfügbar.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Sampleformat nicht verfügbar.\n"
@@ -1394,7 +1385,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError "ALSA-Ein/Ausgabefehler."
 
 // ai_oss.c
-
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Konnte Kanalzahl nicht setzen: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Konnte Stereo nicht setzen: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2Open "Konnte '%s' nicht öffnen: %s\n"
@@ -1407,7 +1397,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "Blockgröße des Tons ist zu klein, setze auf %d!\n"
 
 // asfheader.c
-
 #define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB \
 "FATAL: Dateikopf größer als 1 MB (%d)!\n" \
 "Setze dich mit den MPlayer-Autoren in Verbindung und sende oder \n" \
@@ -1422,7 +1411,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_DRMProtected "Diese Datei wurde mit DRM-Verschlüsselung versehen, MPlayer wird sie nicht abspielen!\n"
 
 // asf_mmst_streaming.c
-
 #define MSGTR_MPDEMUX_MMST_WriteError "Schreibfehler\n"
 #define MSGTR_MPDEMUX_MMST_EOFAlert "\nAchtung! Dateiende.\n"
 #define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "Konnte 'pre-header' nicht lesen.\n"
@@ -1445,7 +1433,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MMST_Connected "Verbunden.\n"
 
 // asf_streaming.c
-
 #define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, stream_chunk-Größe ist zu klein: %d\n"
 #define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "size_confirm passt nicht!: %d %d\n"
 #define MSGTR_MPDEMUX_ASF_WarnDropHeader "Warnung: 'header' verloren ????\n"
@@ -1476,14 +1463,12 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_StreamingFailed "Fehlgeschlagen, beende.\n"
 
 // audio_in.c
-
 #define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nFehler beim Lesen des Tons: %s\n"
 #define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Es gab einen 'cross-run', einige Frames könnten fehlen!\n"
 #define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Fataler Fehler, Rettung nicht möglich!\n"
 #define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nNicht genug Tonsamples!\n"
 
 // aviheader.c
-
 #define MSGTR_MPDEMUX_AVIHDR_EmptyList "** leere Liste?!\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Film von 0x%X - 0x%X gefunden.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "'bih' gefunden, %u Byte von %d.\n"
@@ -1509,18 +1494,15 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Indexdatei '%s' gespeichert.\n"
 
 // cache2.c
-
 #define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rDieser Datenstrom lässt sich nicht zwischenspeichern.\n"
 #define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!!Unterschied in read_filepos!!! Melde diesen Fehler...\n"
 
 // cdda.c
-
 #define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Kann CDDA-Gerät nicht öffnen.\n"
 #define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Kann CD nicht öffnen.\n"
 #define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Musik-CD mit %ld Titeln gefunden.\n"
 
 // cddb.c
-
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Konnte Inhaltsverzeichnis der CD nicht lesen.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Konnte Gerät '%s' nicht öffnen.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAValidURL "ungültige URL\n"
@@ -1544,7 +1526,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CDDB_NoCDInDrive "Keine CD im Laufwerk.\n"
 
 // cue_read.c
-
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Unerwartete Zeile in der Cue-Datei: %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] Zugehörige Bin-Datei unter dem Namen '%s' nicht gefunden.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Konnte Bin-Datei nicht finden. Gebe auf.\n"
@@ -1559,7 +1540,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open: Dateiname='%s', Titel=%d, verfügbare Titel: %d -> %d\n"
 
 // network.c
-
 #define MSGTR_MPDEMUX_NW_UnknownAF "Unbekannte Adressfamilie %d\n"
 #define MSGTR_MPDEMUX_NW_ResolvingHostForAF "Löse %s auf für %s...\n"
 #define MSGTR_MPDEMUX_NW_CantResolv "Konnte Namen für %s nicht auflösen: %s\n"
@@ -1585,11 +1565,9 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache-Größe auf %d KByte gesetzt.\n"
 
 // demux_audio.c
-
 #define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audiodemuxer: unbekanntes Format %d.\n"
 
 // demux_demuxers.c
-
 #define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer-Fehler: schlechter Demuxer: weder vd noch ad oder sd.\n"
 
 // demux_mkv.c
@@ -1616,19 +1594,17 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst "\n[mkv] Warnung: Zu viele anzuzeigende Sublines, überspringe nach den ersten %i.\n"
 
 // demux_nuv.c
-
 #define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "Datei enthält keine Videoblöcke.\n"
 
 // demux_xmms.c
-
 #define MSGTR_MPDEMUX_XMMS_FoundPlugin "Plugin gefunden: %s (%s).\n"
 #define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Plugin geschlossen: %s.\n"
 #define MSGTR_MPDEMUX_XMMS_WaitForStart "Warte auf die Wiedergabe des XMMS-Plugins von '%s'...\n"
 
+
 // ========================== LIBMPMENU ===================================
 
 // common
-
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Kein Eintrag in der Menüdefinition gefunden.\n"
 
 // libmenu/menu.c
@@ -1682,6 +1658,7 @@ static char help_text[]=
 // libmenu/vf_menu.c
 #define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] Unbekannter Befehl: '%s'.\n"
 #define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] Konnte folgendes Menü nicht öffnen: '%s'.\n"
+
 
 // ========================== LIBMPCODECS ===================================
 
@@ -1740,10 +1717,10 @@ static char help_text[]=
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s vom nächsten Filter/vo nicht unterstützt :(\n"
 
+
 // ================================== LIBMPVO ====================================
 
 // mga_common.c
-
 #define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] Fehler im ioctl von mga_vid_config (falsche mga_vid.o-Version?)"
 #define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Konnte die Helligkeitswerte vom Kernelmodul nicht ermitteln!\n"
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Konnte die Helligkeitswerte vom Kernelmodul nicht setzen!\n"
@@ -1756,14 +1733,12 @@ static char help_text[]=
 
 
 // libvo/vesa_lvo.c
-
 #define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Dieser Zweig wird nicht länger unterstützt.\n[VESA_LVO] Benutze stattdessen bitte -vo vesa:vidix.\n"
 #define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] Konnte nicht öffnen: '%s'\n"
 #define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Ungültiges Ausgabeformat: %s(%0X)\n"
 #define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] Die fb_vid-Treiberversion ist mit dieser MPlayer-Version nicht kompatibel!\n"
 
 // libvo/vo_3dfx.c
-
 #define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Nur 16bpp unterstützt!"
 #define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visuelle ID ist  %lx.\n"
 #define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] Kann /dev/3dfx nicht öffnen.\n"
@@ -1777,7 +1752,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] Fehler: Keine neue Größe gefunden, die in die Auflösung passt!\n"
 
 // libvo/vo_dxr3.c
-
 #define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Kann neue SPU-Palette nicht laden!\n"
 #define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] Kann Wiedergabemodus nicht setzen!\n"
 #define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] Kann Subbild-Modus nicht setzen!\n"
@@ -1833,7 +1807,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Konnte Signal-Mix nicht setzen!\n"
 
 // libvo/font_load_ft.c
-
 #define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "New_Face fehlgeschlagen. Vielleicht ist der Pfad zu den Schriften falsch?\nBitte stelle eine Text-Schriftdatei zur Verfügung (~/.mplayer/subfont.ttf).\n"
 #define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "New_Memory_Face fehlgeschlagen..\n"
 #define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "subtitle font: load_sub_face fehlgeschlagen.\n"
@@ -1844,16 +1817,13 @@ static char help_text[]=
 #define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "FT_Done_FreeType fehlgeschlagen.\n"
 
 // libvo/vo_mga.c
-
 #define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): Größe geändert auf %dx%d.\n"
 #define MSGTR_LIBVO_MGA_Uninit "[VO] Deinitialisierung!\n"
 
 // libvo/vo_null.c
-
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Unbekanntes Subgerät: %s.\n"
 
 // libvo/vo_png.c
-
 #define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] Warnung: Kompressionslevel auf 0 gesetzt, Kompression deaktiviert!\n"
 #define MSGTR_LIBVO_PNG_Warning2 "[VO_PNG] Info: Benutze -vo png:z=<n>, um Kompressionslevel von 0 bis 9 zu setzen.\n"
 #define MSGTR_LIBVO_PNG_Warning3 "[VO_PNG] Info: (0 = keine Kompression, 1 = am schnellsten, wenigsten - 9 beste, langsamste Kompression)\n"
@@ -1861,7 +1831,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_PNG_ErrorInCreatePng "[VO_PNG] Fehler in create_png.\n"
 
 // libvo/vo_sdl.c
-
 #define MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput "[VO_SDL] Konnte keinen akzeptierbaren SDL-Modus für die Ausgabe ermitteln.\n"
 #define MSGTR_LIBVO_SDL_SetVideoModeFailed "[VO_SDL] set_video_mode: SDL_SetVideoMode fehlgeschlagen: %s.\n"
 #define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode fehlgeschlagen: %s.\n"
@@ -1882,7 +1851,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Benutze Treiber: %s.\n"
 
 // libvo/vobsub_vidix.c
-
 #define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] Kann Wiedergabe nicht starten: %s\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] Kann Wiedergabe nicht anhalten: %s\n"
 #define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Interleaved UV für YUV410P nicht unterstützt.\n"
@@ -1899,7 +1867,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Konnte Fähigkeit nicht ermitteln: %s.\n"
 
 // libvo/vo_svga.c
-
 #define MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable "[VO_SVGA] Erzwungener vid_mode %d (%s) nicht verfügbar.\n"
 #define MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall "[VO_SVGA] Erzwungener vid_mode %d (%s) zu klein.\n"
 #define MSGTR_LIBVO_SVGA_Vidmode "[VO_SVGA] Vid_mode: %d, %dx%d %dbpp.\n"
@@ -1916,7 +1883,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Benutze VIDIX. b=%i h=%i  mb=%i mh=%i\n"
 
 // libvo/vo_tdfxfb.c
-
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Konnte %s nicht öffnen: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Problem mit FBITGET_FSCREENINFO ioctl: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Problem mit FBITGET_VSCREENINFO ioctl: %s.\n"
@@ -1931,7 +1897,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] Bildschirm ist %dx%d bei %d bpp, Input ist %dx%d bei %d bpp, Norm ist %dx%d.\n"
 
 // libvo/vo_tdfx_vid.c
-
 #define MSGTR_LIBVO_TDFXVID_Move "[VO_TDXVID] Verschiebe %d(%d) x %d => %d.\n"
 #define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP-Verschiebung konnte Bildschirm nicht löschen.\n"
 #define MSGTR_LIBVO_TDFXVID_BlitFailed "[VO_TDFXVID] Blit fehlgeschlagen.\n"
@@ -1954,11 +1919,9 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] unbekanntes Format: 0x%x.\n"
 
 // libvo/vo_tga.c
-
 #define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] Unbekanntes Subgerät: %s.\n"
 
 // libvo/vo_vesa.c
-
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fataler Fehler aufgetreten! Kann nicht fortfahren.\n"
 #define MSGTR_LIBVO_VESA_UnknownSubdevice "[VO_VESA] unbekanntes Subgerät: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Du hast zu wenig Videospeicher für diesen Modus:\n[VO_VESA] Benötigt: %08lX vorhanden: %08lX.\n"
@@ -2001,11 +1964,9 @@ static char help_text[]=
 #define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] VESA-Initialisierung abgeschlossen.\n"
 
 // libvo/vo_x11.c
-
 #define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] draw_frame() aufgerufen!!!!!!\n"
 
 // libvo/vo_xv.c
-
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() aufgerufen!!!!!!\n"
 #define MSGTR_LIBVO_XV_SharedMemoryNotSupported "[VO_XV] Shared Memory nicht unterstützt\nGreife auf normalen Xv zurück.\n"
 #define MSGTR_LIBVO_XV_XvNotSupportedByX11 "[VO_XV] Sorry, Xv von dieser X11-Version/diesem Treiber nicht unterstützt\n[VO_XV] *********** Probiere mit  -vo x11  oder  -vo sdl  ***************\n"
@@ -2023,11 +1984,9 @@ static char help_text[]=
 "[VO_XV] Probiere -vo x11.\n"
 
 // loader/ldt_keeper.c
-
 #define MSGTR_LOADER_DYLD_Warning "WARNUNG: Versuche, DLL-Codecs zu verwenden, die Umgebungsvariable\n         DYLD_BIND_AT_LAUNCH ist aber nicht gesetzt. Dies führt wahrscheinlich\n         zu einem Absturz.\n"
 
 // stream/stream_radio.c
-
 #define MSGTR_RADIO_ChannelNamesDetected "[Radio] Radiokanalnamen erkannt.\n"
 #define MSGTR_RADIO_FreqRange "[Radio] Erlaubter Frequenzbereich ist %.2f-%.2f MHz.\n"
 #define MSGTR_RADIO_WrongFreqForChannel "[Radio] Falsche Frequenz für Kanal %s\n"
@@ -2071,6 +2030,7 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverBSDBT848 "[Radio] Benutze *BSD BT848-Radioschnittstelle.\n"
 #define MSGTR_RADIO_AvailableDrivers "[Radio] Verfügbare Treiber: "
 
+
 // ================================== LIBASS ====================================
 
 // ass_bitmap.c
@@ -2095,7 +2055,7 @@ static char help_text[]=
 #define MSGTR_LIBASS_FailedToCreateDirectory "[ass] Fehler beim Erstellen des Verzeichnisses %s\n"
 #define MSGTR_LIBASS_NotADirectory "[ass] Kein Verzeichnis: %s\n"
 
-// // ass_cache.c
+// ass_cache.c
 #define MSGTR_LIBASS_TooManyFonts "[ass] Zu viele Schriften\n"
 #define MSGTR_LIBASS_ErrorOpeningFont "[ass] Fehler beim Öffnen der Schrift: %s, %d\n"
 
