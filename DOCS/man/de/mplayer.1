@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r24746
+.\" In sync with r24807
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -2018,6 +2018,28 @@ Nützlich, wenn der Videotext keine lateinischen Buchstaben verwendet, die
 Sprachcodes aus irgendwelchen Gründen aber nicht via Typ-28-Pakete
 übertragen werden.
 Setze diese Option auf \-1 für eine Liste der unterstützten Sprachcodes.
+.IPs "hidden_video_renderer (nur bei dshow)"
+Terminiere Stream mit Videorenderer anstelle mit Null-Renderer
+(Standard: aus).
+Nützlich, wenn Video einfriert, der Ton jedoch nicht.
+.I ANMERKUNG:
+Funktioniert möglicherweise nicht mit der Kombination \-vo directx und \-vf
+crop.
+.IPs "hidden_vp_renderer (nur bei dshow)"
+Terminiere den VideoPort-Pin-Stream mit dem Videorenderer anstatt ihn vom
+Graph zu entfernen (Standard: aus).
+Nützlich, wenn deine Karte einen VideoPort-Pin hat und das Video ruckelt.
+.I ANMERKUNG:
+Funktioniert möglicherweise nicht mit der Kombination \-vo directx und \-vf
+crop.
+.IPs "system_clock (nur bei dshow)"
+Verwende die Systemuhr als Synchronisationsquelle anstall der Standarduhr des
+Graphen (normalerweise die Uhr von einer der Live-Quellen im Graph).
+.IPs "normalize_audio_chunks (nur bei dshow)"
+Erstelle Audiostücke von der Dauer gleich der eines Videoframes (Standard:
+aus).
+Manche Soundkarten produzieren Audiostücke von 0.5 Sekunden Länge, was
+zusammen mit immediatemode=0 zu ruckelndem Video führt.
 .RE
 .
 .TP
@@ -2762,8 +2784,7 @@ Nativer Mac OS X-Audioausgabetreiber.
 .
 .TP
 .B openal
-Experimenteller und unvollständiger (Downmix zu Mono)
-OpenAL-Audioausgabetreiber
+Experimenteller OpenAL-Audioausgabetreiber
 .
 .TP
 .B sgi (nur bei SGI)
@@ -10631,6 +10652,12 @@ Gib einen speziellen libavformat-Demuxer an.
 Maximale Datenmenge, die während der Erkennungsphase untersucht wird.
 Im Falle von MPEG-TS gibt dieser Wert die maximale Anzahl der zu scannenden
 TS-Pakete an.
+.
+.TP
+.B cryptokey=<Hex-String>
+Verschlüsselungsschlüssel, den der Demuxer verwenden soll.
+Dies sind die binären Rohdaten des Schlüssels in eine hexadezimale
+Zeichenkette konvertiert.
 .
 .
 .
