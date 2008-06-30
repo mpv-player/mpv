@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r25134
+.\" In sync with r25379
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -445,7 +445,7 @@ zu steuern.)
 .PP
 .PD 0
 .RS
-.IPs "X"
+.IPs "X\ \ \ \ "
 Schaltet Videotext an/\:aus.
 .IPs "Q und W"
 Gehe zur nächsten/\:vorigen Videotextseite.
@@ -883,8 +883,8 @@ Gibt außerdem detailliertere Informationen über IDs und die Sprachen von
 Untertiteln und Audiospuren.
 In manchen Fällen erhältst du mehr Informationen durch Benutzung von \-msglevel
 identify=6.
-Zum Beispiel listet es für eine DVD die zeitliche Länge jedes Titels sowie die
-Disc-ID.
+Zum Beispiel listet es für eine DVD die Kapitel die zeitliche Länge jedes
+Titels sowie die Disc-ID.
 Das Wrapper-Script TOOLS/\:midentify unterdrückt die anderen Ausgaben von
 MPlayer
 und führt (hoffentlich) Shell-Escaping für die Dateinamen aus.
@@ -2095,6 +2095,10 @@ Schaltet das Zeichnen von SSA/ASS-Untertiteln ein.
 Mit dieser Option wird libass für externe SSA/ASS-Untertitel und
 Matroska-Spuren verwendet.
 Du möchtest vielleicht auch \-embeddedfonts verwenden.
+.br
+.I ANMERKUNG:
+Wenn fontconfig eincompiliert wurde, schaltet \-ass automatisch \-fontconfig
+ein, wenn dies nicht mit \-nofontconfig anders angegeben wurde.
 .
 .TP
 .B \-ass\-border\-color <Wert>
@@ -2130,20 +2134,22 @@ SSA/ASS-Renderer verwendet werden soll.
 .TP
 .B \-ass\-hinting <Typ>
 Setze den Typ für das Hinting.
+<Typ> kann sein:
 .PD 0
 .RSs
-.IPs <Typ>
-0: Kein Hinting.
-.br
-1: Autohinter von FreeType, light-Modus.
-.br
-2: Autohinter von FreeType, normaler Modus.
-.br
-3: Nativer Hinter der Schrift.
-.br
-0\-3 + 4: Das gleiche, Hinting wird jedoch nur durchgeführt, wenn das OSD auf
+.IPs 0
+kein Hinting
+.IPs 1
+Autohinter von FreeType, light-Modus
+.IPs 2
+Autohinter von FreeType, normaler Modus
+.IPs 3
+nativer Hinter der Schrift
+.IPs "0-3 + 4"
+Das gleiche, Hinting wird jedoch nur durchgeführt, wenn das OSD auf
 Bildschirmauflösung gezeichnet wird und daher nicht skaliert wird.
-.br
+.RE
+.RSs
 Der Standardwert ist 7 (benutze nativen Hinter für unskaliertes OSD und sonst
 kein Hinting).
 .RE
@@ -2276,6 +2282,10 @@ Bei fontconfig gibt diese Option den fontconfig-Schriftnamen an.
 .TP
 .B \-fontconfig (nur bei fontconfig)
 Ermöglicht die Benutzung von Schriften, die von fontconfig verwaltet werden.
+.br
+.I ANMERKUNG:
+\-ass schaltet dies automatisch ein, wenn dies nicht explizit mit
+\-nofontconfig überschrieben wird.
 .
 .TP
 .B \-forcedsubsonly
@@ -2793,9 +2803,8 @@ PulseAudio-Audioausgabetreiber
 .RSs
 .IPs "[<Host>][:<Ausgabesenke>]"
 Gib den Host und optional die zu verwendende Ausgabesenke an.
-Leere Angabe von <Host> verwendet eine lokale Verbindung.
-Verwendung von "localhost" als <Host> verwendet Netzwerkverbindungen
-(höchstwahrscheinlich nicht, was du willst).
+Leere Angabe von <Host> verwendet eine lokale Verbindung, "localhost" verwendet
+Netzwerkverbindungen (höchstwahrscheinlich nicht, was du willst).
 .RE
 .PD 1
 .
@@ -5061,9 +5070,6 @@ Beachte, dass bei der Wiedergabe eines Mediums mit nur zwei Känalen die Kanäle
 Würde die Anzahl der Kanäle auf 6 setzen und 4 Routen aufsetzen, die den Kanal
 0 nach Kanal 0 und 3 kopieren.
 Kanäle 4 und 5 werden keinen Ton enthalten.
-.IPs "mplayer \-af channels=6:6:0:4:1:0:2:1:3:2:4:3:5:5 media.avi"
-Sollte dafür sorgen, dass die 6-Kanal-Ausgabe mit ffcda (DTS) mit ALSA
-richtig funktioniert.
 .RE
 .PD 1
 .
@@ -11261,6 +11267,18 @@ mplayer \-vo zr \-vf scale=352:288 Datei.avi
 .nf
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg Datei.avi
 .fi
+.
+.PP
+.B Wiedergabe von DTS-CD mit Passthrough:
+.nf
+mplayer \-ac hwdts \-rawaudio format=0x2001 \-cdrom\-Gerät /dev/cdrom cdda://
+.fi
+.br
+Du kannst auch \-afm hwac3 anstelle von \-ac hwdts verwenden.
+Passe '/dev/cdrom' entsprechend dem CD-ROM-Gerät deines Systems an.
+Wenn dein externer Receiver Decodierung von raw-DTS-Streams unterstützt,
+kannst du diese direkt via cdda:// abspielen, ohne format, hwac3 oder hwdts
+angeben zu müssen.
 .
 .PP
 .B Spiele eine 6-kanalige AAC-Datei mit nur zwei Lautsprechern ab:
