@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r24892
+// In sync with r25158
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 // ========================= MPlayer help ===========================
@@ -227,6 +227,9 @@ static char help_text[]=
 #define MSGTR_Bottom "unten"
 #define MSGTR_Center "mittig"
 #define MSGTR_Top "oben"
+#define MSGTR_SubSourceFile "Datei"
+#define MSGTR_SubSourceVobsub "vobsub"
+#define MSGTR_SubSourceDemux "eingebettet"
 
 // osd bar names
 #define MSGTR_Volume "Lautstärke"
@@ -248,6 +251,7 @@ static char help_text[]=
 #define MSGTR_FramedroppingStatus "Framedropping: %s"
 #define MSGTR_VSyncStatus "VSync: %s"
 #define MSGTR_SubSelectStatus "Untertitel: %s"
+#define MSGTR_SubSourceStatus "Untertitelquelle: %s"
 #define MSGTR_SubPosStatus "Untertitelposition: %s/100"
 #define MSGTR_SubAlignStatus "Untertitelausrichtung: %s"
 #define MSGTR_SubDelayStatus "Untertitelverzögerung: %s"
@@ -1288,6 +1292,7 @@ static char help_text[]=
 // ======================= AF Audio Filters ================================
 
 // libaf
+#define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c
 
@@ -2215,3 +2220,4 @@ static char help_text[]=
 #define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Initialisierung des Directshow-Graph fehlgeschlagen.\n"
 #define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: Kein Gerät für Videoerfassung gefunden\n"
 #define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: Kein Gerät für Audioerfassung gefunden\n"
+#define MSGTR_TVI_DS_GetActualMediatypeFailed "tvi_dshow: Kann eigentlichen Medientyp nicht ermitteln (Fehler:0x%x).\nNehme an, dieser entspricht dem angeforderten.\n"
