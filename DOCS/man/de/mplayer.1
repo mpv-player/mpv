@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r25379
+.\" In sync with r25752
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -34,7 +34,7 @@
 .\" Titel
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "01.06.2007" "Das MPlayer Projekt"
+.TH MPlayer 1 "01.01.2008" "Das MPlayer Projekt"
 .
 .SH NAME
 mplayer  \- Movie Player
@@ -299,6 +299,8 @@ Zeige den Dateinamen im OSD.
 Spult zum Anfang des vorigen/nächsten Kapitels.
 .IPs "D (nur bei \-vo xvmc, \-vf yadif, \-vf kerndeint)"
 Aktiviere/deaktiviere Deinterlacer.
+.IPs "A"
+Springe bei DVD durch die verschiedenen Perspektiven.
 .RE
 .PD 1
 .PP
@@ -600,6 +602,31 @@ Um das Profil abzuschließen, beginne ein neues oder benutze den
 Profilnamen 'default', um mit normalen Optionen fortzufahren.
 .fi
 .PP
+.I "BEISPIEL-PROFIL FÜR MPLAYER:"
+.sp 1
+.nf
+
+[protocol.dvd]
+profile-desc="Profil für dvd://-Streams"
+vf=pp=hb/vb/dr/al/fd
+alang=de
+
+[protocol.dvdnav]
+profile-desc="Profil für dvdnav://-Streams"
+profile=protocol.dvd
+mouse-movements=yes
+
+[extension.flv]
+profile-desc="Profil für .flv-Dateien"
+flip=yes
+
+[vo.x11]
+option=param
+
+[ao.alsa]
+option=param
+.fi
+.PP
 .I "BEISPIEL-PROFIL FÜR MENCODER:"
 .sp 1
 .nf
@@ -876,6 +903,30 @@ Decodierung).
 Führt zu Bildstörungen!
 .
 .TP
+.B \-heartbeat\-cmd
+Befehl, der während der Wiedergabe alle 30 Sekunden via system() - z.B.\& in
+der Shell - ausgeführt wird.
+.sp 1
+.I ANMERKUNG:
+MPlayer verwendet diesen Befehl ohne jegliche Überprüfung, es ist in deiner
+Verantwortung sicherzustellen, dass dies keine Sicherheitsrisiken birgt
+(stelle z.B.\& sicher, dass der volle Pfad verwendet wird, wenn wie unter
+Windows "." in deinem Pfad ist).
+.sp 1
+Dies kann "missbraucht" werden, um Bildschirmschoner zu deaktiveren, die
+hierfür die passende X-API nicht unterstützen.
+Wenn du meinst, dass dies zu kompliziert ist, bitte den Autor deines
+Bildschirmschonerprogramms darum, die X-API entsprechend zu unterstützen.
+.sp 1
+.I BEISPIEL für xscreensaver:
+mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" Datei
+.sp 1
+.I BEISPIEL für gnome-Bildschirmschoner:
+mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" Datei
+.RE
+.PD 1
+.
+.TP
 .B \-identify
 Kurzschreibweise für \-msglevel identify=4.
 Zeigt Dateiparameter in einem einfach einzulesenden Format an.
@@ -1045,8 +1096,10 @@ Folgende Erweiterungen werden unterstützt:
 .RSs
 .IPs ${NAME}
 Erweitere um den Wert der Eigenschaft NAME.
-.IPs $(NAME:TEXT)
+.IPs ?(NAME:TEXT)
 Erweitere TEXT nur, wenn die Eigenschaft NAME verfügbar ist.
+.IPs ?(!NAME:TEXT)
+Erweitere TEXT nur, wenn die Eigenschaft NAME nicht verfügbar ist.
 .RE
 .
 .TP
@@ -1380,11 +1433,9 @@ bevor aufgegeben wird (Standard: 30).
 .
 .TP
 .B \-dvd\-device <Pfad\ zum\ Gerät> (nur bei DVD)
-Gibt das DVD-Gerät an (Standard: /dev/\:dvd).
+Gib das DVD-Gerät oder .iso-Dateinamen an (Standard: /dev/\:dvd).
 Du kannst auch ein Verzeichnis angeben, das die zuvor direkt von DVD kopierten
 Dateien enthält (z.B.\& von vobcopy).
-Beachte, dass die Benutzung von \-dumpstream normalerweise ein besserer Weg
-ist, DVD-Titel zu kopieren (siehe Beispiele).
 .
 .TP
 .B \-dvd\-speed <Faktor oder Geschwindigkeit in KB/s> (nur bei DVD)
@@ -2122,12 +2173,14 @@ SSA/ASS-Renderer verwendet werden soll.
 .
 .TP
 .B \-ass\-force\-style <[Style.]Param=Wert[,...]>
-Überschreibe eine Stilparameter.
+Überschreibe Stil- oder Skriptinfo-Parameter.
 .sp
 .I EXAMPLE:
 .PD 0
 .RSs
 \-ass\-force\-style FontName=Arial,Default.Bold=1
+.br
+\-ass\-force\-style PlayResY=768
 .RE
 .PD 1
 .
@@ -2610,6 +2663,14 @@ bewegen und die Zeile löschen (Standard: ^[[A\\r^[[K).
 Weist MPlayer an, die Untertiteldatei als Unicode zu behandeln.
 .
 .TP
+.B \-unrarexec <Pfad zum unrar-Programm> (momentan nicht von MingW unterstützt)
+Gib den Pfad zum unrar-Programm an, damit MPlayer es für den Zugriff auf
+rar-komprimierte vobsub-Dateien verwenden kann (Standard: nicht gesetzt, also
+ist dieses Feature deaktiviert).
+Der Pfad muss den Dateinamen des Programms beinhalten, z.B.\&
+/usr/local/bin/unrar.
+.
+.TP
 .B "\-utf8 \ \ "
 Weist MPlayer an, die Untertiteldatei als UTF-8 zu behandeln.
 .
@@ -2862,6 +2923,7 @@ schreibt, wenn keine DVB-Karte installiert ist.
 .RSs
 .IPs card=<1\-4>
 DVB-Karte, die benutzt werden soll, wenn mehr als eine Karte verfügbar ist.
+Wird keine Karte angegeben, sucht MPlayer die erste verfügbare Karte.
 .IPs file=<Dateiname>
 Ausgabedateiname
 .RE
@@ -4101,8 +4163,8 @@ schreibt, falls keine DVB-Karte installiert ist.
 .RSs
 .IPs card=<1\-4>
 Gibt die Gerätenummer an, wenn mehr als eine DVB-Ausgabekarte vorhanden ist
-(nur bei
-V3 API, wie bei den Treibern der 1.x.y-Serie).
+(nur bei V3 API, wie bei den Treibern der 1.x.y-Serie).
+Wird keine Karte angegeben, sucht MPlayer die erste verfügbare Karte.
 .IPs <Dateiname>
 Ausgabedateiname (Standard: ./grab.mpg).
 .RE
@@ -4939,6 +5001,39 @@ log2 der Anzahl der Polyphase-Einträge
 .IPs <Abschluss>
 Abschlussfrequenz (0.0\-1.0), Standardwert wird abhängig von der Filterlänge
 gesetzt.
+.RE
+.PD 1
+.
+.TP
+.B lavcac3enc[=tospdif[:Bitrate[:minchn]]]
+Encodiere Multichannel-Audio mit libavcodec während der Wiedergabe zu AC-3.
+Unterstützt 16-Bit native-endian Eingabeformat, maximal 6 Kanäle.
+Die Ausgabe ist big-endian, wenn ein raw-AC-3-Stream ausgegeben wird, und
+native-endian, wenn nach S/PDIF ausgegeben wird.
+Die Samplerate der Ausgabe dieses Filters ist die der Eingabe.
+Wenn die Eingabesamplerate 48kHz, 44.1kHz, oder 32kHz beträgt, verwendet
+sie dieser Filter direkt.
+Ansonsten wird vorher automatisch ein Resampling-Filter eingefügt, der die
+Samplerate der Ein- und Ausgabe auf 48kHz bringt.
+Du musst '\-channels N' angeben, damit der Decoder den Ton in n Kanäle
+decodiert.
+Dann kann der Filter die n-kanalige Eingabe zu AC-3 encodieren.
+.br
+.PD 0
+.RSs
+.IPs <tospdif>
+Gib raw-AC-3-Stream aus wenn null oder nicht gesetzt, gib sonst für Passthrough
+auf S/PDIF aus, wenn <tospdif> auf ungleich null gesetzt ist.
+.IPs <Bitrate>
+Die Bitrate, mit der der AC-3-Stream encodiert werden soll.
+Setze dies auf 384 oder 384000, um 384kbits zu erhalten.
+Gültige Werte: 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256,
+               320, 384, 448, 512, 576, 640
+Die Standardbitrate hängt von der Anzahl der Eingabekanäle ab:
+1ch: 96,  2ch: 192,  3ch: 224,  4ch: 384,  5ch: 448,  6ch: 448
+.IPs <minchn>
+Wenn die Zahl für die Eingabekanäle kleiner als <minchn> ist, wird der Filter
+sich selbst entfernen (Standard: 5).
 .RE
 .PD 1
 .
@@ -11225,6 +11320,12 @@ mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .fi
 .
 .PP
+.B Spiele eine DVD mit dvdnav vom Pfad /dev/sr1:
+.nf
+mplayer dvdnav:////dev/sr1
+.fi
+.
+.PP
 .B Streaming per HTTP:
 .nf
 mplayer http://mplayer.hq/example.avi
@@ -11377,7 +11478,7 @@ erstellt.
 MPlayer wurde ursprünglich von Arpad Gereöffy geschrieben.
 Siehe Datei AUTHORS für eine Liste einiger der vielen anderen Beitragenden.
 .PP
-MPlayer is (C) 2000\-2007 The MPlayer Team
+MPlayer is (C) 2000\-2008 The MPlayer Team
 .PP
 Diese Manpage wurde zum größten Teil von Gabucino, Diego Biurrun und
 Jonas Jermann geschrieben und von Moritz Bunkus und Sebastian Krämer
