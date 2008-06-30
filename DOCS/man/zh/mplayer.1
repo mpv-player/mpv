@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r26909
+.\" sync with en/mplayer.1 r27132
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -794,7 +794,7 @@ xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 .
 .TP
-.B \-correct\-pts（用于试验）
+.B \-correct\-pts（处于测试阶段）
 切换 MPlayer 到试验模式, 
 其中视频帧的时戳计算不同, 且支持视频过滤器添加新的帧或修改已有的时戳。
 可以看到更精确的时戳, 例如通过 \-ass 选项修改播放字幕与镜头同步。
@@ -802,7 +802,7 @@ xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 此选项不能与某些分路器和编解码器一起正常工作。
 .
 .TP
-.B \-crash\-debug (调试代码)
+.B \-crash\-debug（调试代码）
 一旦崩溃或 SIGTRAP 自动联上 gdb 调试程序。
 此支持必须已编译进配置 \-\-enable\-crash\-debug。
 .
@@ -862,13 +862,13 @@ xv, xvidix 和 dfbmga。
 MPlayer 执行此命令时不加以检查，所以你有责任确保该命令不造成任何安全问题（例
 如，如果“.”就像在 Windows 中那样是在你的路径中，则确保使用完整路径）。
 .sp 1
-该选项可能被“误用”于禁用不支持正确的 X API 的屏幕保护程序。
-如果你觉得这太复杂了，请要求屏幕保护程序的作者提供对于正确 X API 的支持。
+该选项可能被“误用”以禁用不提供对于适当的 X API 接口的支持的屏幕保护程序。
+如果你觉得这太复杂了，请要求屏幕保护程序的作者提供对于适当的 X API 的支持。
 .sp 1
 .I 用于 xscreensaver 的示例：
 mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
 .sp 1
-.I 用于 gnome screensaver 的示例：
+.I 用于 GNOME screensaver 的示例：
 mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .RE
 .PD 1
@@ -1561,7 +1561,8 @@ dvd:   DVD compatible stream (DVD 可兼容流)
 允许的最小频率（默认值：87.50）
 .IPs "freq_max=<value>（仅适用于*BSD BT848）"
 允许的最大频率（默认值：108.00）
-.IPs channels=<频率>\-<名称>,<频率>\-<名称>,...
+.IPs
+channels=<频率>\-<名称>[=<常规值>],<频率>\-<名称>[=<常规值>],...
 设置频道列表。
 在名称中用“_”代替空格（或使用引号）。
 频道名字就会以OSD方式显示出来，而从命令radio_step_channel和radio_set_channel
@@ -5129,7 +5130,11 @@ Completely empties the filter list.
 .
 .TP
 .B rectangle[=w:h:x:y]
-该插件响应 input.conf 中的两参数指令‘change_rectangle’。
+在图像之上于指定坐标画一个所要求宽度和高度的矩形，并且将当前矩形的参数输出至
+控制台窗口。
+该选项可用来找到最优的切割参数。
+如果你将 input.conf 中的指令‘change_rectangle’与按键绑定，那么你可以实时
+移动和调整矩阵。
 .PD 0
 .RSs
 .IPs <w>,<h>
@@ -6898,7 +6903,7 @@ h参数值。
 你可以使用以下的句法指定特定编解码器专用的参数：
 .
 .TP
-.B \-<codec>opts <option1[=value],option2,...>
+.B \-<codec>opts <option1[=value1]:option2[=value2]:...>
 .
 .PP
 这里<codec>可以是：lavc、xvidenc、lame、toolame、twolame、nuv、xvfw、faac、
@@ -9978,6 +9983,11 @@ FIXME: 待解释。
 .TP
 .B VIDIX_CRT
 FIXME: 待解释。
+.
+.TP
+.B VIDIXIVTVALPHA
+将该选项设为‘disable’可以阻止 VIDIX 驱动控制阿尔法混合的参数。
+然后你就可以自己使用‘ivtvfbctl’操作这一参数。
 .
 .SS osdep:
 .
