@@ -4,7 +4,8 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r27071
+// In sync with r27123
+// TODO: cosmetic commit 27072
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
 
@@ -1121,6 +1122,10 @@ static char help_text[]=
 #define MSGTR_AO_ALSA9_1x_Removed \
 "audio_out: Die Module alsa9 und alsa1x wurden entfernt, benutze stattdessen \n" \
 "-ao alsa.\n"
+#define MSGTR_AO_TryingPreferredAudioDriver "Probiere bevorzugten Audiotreiber '%.*s', Optionen '%s'\n"
+#define MSGTR_AO_NoSuchDriver "Kein Audiotreiber '%.*s'\n"
+#define MSGTR_AO_FailedInit "Konnte Audiotreiber '%s' nicht initialisieren\n"
+#define MSGTR_AO_TryingEveryKnown "Probiere jeden bekannten Audiotreiber...\n"
 
 // ao_oss.c
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Kann Mixer %s: %s nicht öffnen.\n"
