@@ -31,12 +31,15 @@
 #include <sys/types.h>
 #include "config.h"
 #ifndef HAVE_WINSOCK2
+#define closesocket close
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #else
 #include <winsock2.h>
 #endif
+
+
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -72,6 +75,29 @@ struct rtsp_session_s {
   struct real_rtsp_session_t* real_session;
   struct rtp_rtsp_session_t* rtp_session;
 };
+
+/*
+ * closes an rtsp connection 
+ */
+
+static void rtsp_close(rtsp_t *s) {
+
+  if (s->server_state)
+  {
+    if (s->server_state == RTSP_PLAYING)
+      rtsp_request_teardown (s, NULL);
+    closesocket (s->s);
+  }
+
+  if (s->path) free(s->path);
+  if (s->host) free(s->host);
+  if (s->mrl) free(s->mrl);
+  if (s->session) free(s->session);
+  if (s->user_agent) free(s->user_agent);
+  rtsp_free_answers(s);
+  rtsp_unschedule_all(s);
+  free(s);  
+}
 
 //rtsp_session_t *rtsp_session_start(char *mrl) {
 rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,

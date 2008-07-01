@@ -83,8 +83,9 @@ fonts, and the onscreen display (OSD)?
 
 <para>
 The player is rock solid playing damaged MPEG files (useful for some VCDs),
-and it plays bad AVI files which are unplayable with the famous windows
-media player. Even AVI files without index chunk are playable, and you can
+and it plays bad AVI files which are unplayable with the famous
+<application>Windows Media Player</application>.
+Even AVI files without index chunk are playable, and you can
 temporarily rebuild their indexes with the <option>-idx</option> option, or
 permanently with <application>MEncoder</application>, thus enabling
 seeking!  As you see, stability and quality are the most important things,

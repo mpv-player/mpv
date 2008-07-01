@@ -37,7 +37,7 @@
 #define LE_32(x) (le2me_32(*(unsigned int *)(x)))
 
 // pertinent tables for IMA ADPCM
-static int adpcm_step[89] =
+static const int16_t adpcm_step[89] =
 {
   7, 8, 9, 10, 11, 12, 13, 14, 16, 17,
   19, 21, 23, 25, 28, 31, 34, 37, 41, 45,
@@ -50,22 +50,18 @@ static int adpcm_step[89] =
   15289, 16818, 18500, 20350, 22385, 24623, 27086, 29794, 32767
 };
 
-static int adpcm_index[16] =
+static const int8_t adpcm_index[8] =
 {
   -1, -1, -1, -1, 2, 4, 6, 8,
-  -1, -1, -1, -1, 2, 4, 6, 8
 };
 
 // useful macros
 // clamp a number between 0 and 88
-#define CLAMP_0_TO_88(x)  if (x < 0) x = 0; else if (x > 88) x = 88;
+#define CLAMP_0_TO_88(x) x = av_clip(x, 0, 88);
 // clamp a number within a signed 16-bit range
-#define CLAMP_S16(x)  if (x < -32768) x = -32768; \
-  else if (x > 32767) x = 32767;
+#define CLAMP_S16(x) x = av_clip_int16(x);
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
-// sign extend a 16-bit value
-#define SE_16BIT(x)  if (x & 0x8000) x -= 0x10000;
 // sign extend a 4-bit value
 #define SE_4BIT(x)  if (x & 0x8) x -= 0x10;
 
@@ -132,44 +128,31 @@ static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
 
 static void decode_nibbles(unsigned short *output,
   int output_size, int channels,
-  int predictor_l, int index_l,
-  int predictor_r, int index_r)
+  int predictor[2], int index[2])
 {
   int step[2];
-  int predictor[2];
-  int index[2];
   int diff;
   int i;
   int sign;
   int delta;
   int channel_number = 0;
 
-  step[0] = adpcm_step[index_l];
-  step[1] = adpcm_step[index_r];
-  predictor[0] = predictor_l;
-  predictor[1] = predictor_r;
-  index[0] = index_l;
-  index[1] = index_r;
+  step[0] = adpcm_step[index[0]];
+  step[1] = adpcm_step[index[1]];
 
   for (i = 0; i < output_size; i++)
   {
     delta = output[i];
+    sign = delta & 8;
+    delta = delta & 7;
 
     index[channel_number] += adpcm_index[delta];
     CLAMP_0_TO_88(index[channel_number]);
 
-    sign = delta & 8;
-    delta = delta & 7;
+    delta = 2 * delta + 1;
+    if (sign) delta = -delta;
 
-    diff = step[channel_number] >> 3;
-    if (delta & 4) diff += step[channel_number];
-    if (delta & 2) diff += step[channel_number] >> 1;
-    if (delta & 1) diff += step[channel_number] >> 2;
-
-    if (sign)
-      predictor[channel_number] -= diff;
-    else
-      predictor[channel_number] += diff;
+    predictor[channel_number] += (delta * step[channel_number]) >> 3;
 
     CLAMP_S16(predictor[channel_number]);
     output[i] = predictor[channel_number];
@@ -182,40 +165,26 @@ static void decode_nibbles(unsigned short *output,
 }
 
 static int qt_ima_adpcm_decode_block(unsigned short *output,
-  unsigned char *input, int channels)
+  unsigned char *input, int channels, int block_size)
 {
-  int initial_predictor_l = 0;
-  int initial_predictor_r = 0;
-  int initial_index_l = 0;
-  int initial_index_r = 0;
+  int initial_predictor[2];
+  int initial_index[2];
   int i;
 
-  initial_predictor_l = BE_16(&input[0]);
-  initial_index_l = initial_predictor_l;
+  if (channels > 1) channels = 2;
+  if (block_size < channels * QT_IMA_ADPCM_BLOCK_SIZE)
+    return -1;
 
-  // mask, sign-extend, and clamp the predictor portion
-  initial_predictor_l &= 0xFF80;
-  SE_16BIT(initial_predictor_l);
-  CLAMP_S16(initial_predictor_l);
-
-  // mask and clamp the index portion
-  initial_index_l &= 0x7F;
-  CLAMP_0_TO_88(initial_index_l);
-
-  // handle stereo
-  if (channels > 1)
-  {
-    initial_predictor_r = BE_16(&input[QT_IMA_ADPCM_BLOCK_SIZE]);
-    initial_index_r = initial_predictor_r;
+  for (i = 0; i < channels; i++) {
+    initial_index[i] = initial_predictor[i] = (int16_t)BE_16(&input[i * QT_IMA_ADPCM_BLOCK_SIZE]);
 
     // mask, sign-extend, and clamp the predictor portion
-    initial_predictor_r &= 0xFF80;
-    SE_16BIT(initial_predictor_r);
-    CLAMP_S16(initial_predictor_r);
+    initial_predictor[i] &= ~0x7F;
+    CLAMP_S16(initial_predictor[i]);
 
     // mask and clamp the index portion
-    initial_index_r &= 0x7F;
-    CLAMP_0_TO_88(initial_index_r);
+    initial_index[i] &= 0x7F;
+    CLAMP_0_TO_88(initial_index[i]);
   }
 
   // break apart all of the nibbles in the block
@@ -236,8 +205,7 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
 
   decode_nibbles(output,
     QT_IMA_ADPCM_SAMPLES_PER_BLOCK * channels, channels,
-    initial_predictor_l, initial_index_l,
-    initial_predictor_r, initial_index_r);
+    initial_predictor, initial_index);
 
   return QT_IMA_ADPCM_SAMPLES_PER_BLOCK * channels;
 }
@@ -245,24 +213,21 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
 static int ms_ima_adpcm_decode_block(unsigned short *output,
   unsigned char *input, int channels, int block_size)
 {
-  int predictor_l = 0;
-  int predictor_r = 0;
-  int index_l = 0;
-  int index_r = 0;
+  int predictor[2];
+  int index[2];
   int i;
   int channel_counter;
   int channel_index;
   int channel_index_l;
   int channel_index_r;
 
-  predictor_l = LE_16(&input[0]);
-  SE_16BIT(predictor_l);
-  index_l = input[2];
-  if (channels == 2)
-  {
-    predictor_r = LE_16(&input[4]);
-    SE_16BIT(predictor_r);
-    index_r = input[6];
+  if (channels > 1) channels = 2;
+  if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
+    return -1;
+
+  for (i = 0; i < channels; i++) {
+    predictor[i] = (int16_t)LE_16(&input[i * 4]);
+    index[i] = input[i * 4 + 2];
   }
 
   if (channels == 1)
@@ -306,8 +271,7 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
   decode_nibbles(output,
     (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2,
     channels,
-    predictor_l, index_l,
-    predictor_r, index_r);
+    predictor, index);
 
   return (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2;
 }
@@ -317,20 +281,17 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
 {
   int i;
   int output_ptr;
-  int predictor_l = 0;
-  int predictor_r = 0;
-  int index_l = 0;
-  int index_r = 0;
+  int predictor[2];
+  int index[2];
 
-  // the first predictor value goes straight to the output
-  predictor_l = output[0] = LE_16(&input[0]);
-  SE_16BIT(predictor_l);
-  index_l = input[2];
-  if (channels == 2)
-  {
-    predictor_r = output[1] = LE_16(&input[4]);
-    SE_16BIT(predictor_r);
-    index_r = input[6];
+  if (channels > 1) channels = 2;
+  if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
+    return -1;
+
+  for (i = 0; i < channels; i++) {
+    // the first predictor value goes straight to the output
+    predictor[i] = output[i] = (int16_t)LE_16(&input[i * 4]);
+    index[i] = input[i * 4 + 2];
   }
 
   output_ptr = channels;
@@ -343,34 +304,27 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
   decode_nibbles(&output[channels],
     (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2 - channels,
     channels,
-    predictor_l, index_l,
-    predictor_r, index_r);
+    predictor, index);
 
   return (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2 - channels;
 }
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
+  int res = -1;
+  int (*decode_func)(unsigned short *output, unsigned char *input, int channels, int block_size) = qt_ima_adpcm_decode_block;
   if (demux_read_data(sh_audio->ds, sh_audio->a_in_buffer,
     sh_audio->ds->ss_mul) != 
     sh_audio->ds->ss_mul) 
     return -1;
 
   if ((sh_audio->format == 0x11) || (sh_audio->format == 0x1100736d))
-  {
-    return 2 * ms_ima_adpcm_decode_block(
-      (unsigned short*)buf, sh_audio->a_in_buffer, sh_audio->wf->nChannels,
-      sh_audio->ds->ss_mul);
-  }
+    decode_func = ms_ima_adpcm_decode_block;
   else if (sh_audio->format == 0x61)
-  {
-    return 2 * dk4_ima_adpcm_decode_block(
-      (unsigned short*)buf, sh_audio->a_in_buffer, sh_audio->wf->nChannels,
-      sh_audio->ds->ss_mul);
-  }
-  else
-  {
-    return 2 * qt_ima_adpcm_decode_block(
-      (unsigned short*)buf, sh_audio->a_in_buffer, sh_audio->wf->nChannels);
-  }
+    decode_func = dk4_ima_adpcm_decode_block;
+
+  res = decode_func((unsigned short*)buf, sh_audio->a_in_buffer,
+                    sh_audio->wf->nChannels, sh_audio->ds->ss_mul);
+  if (res < 0) return res;
+  else return 2 * res;
 }

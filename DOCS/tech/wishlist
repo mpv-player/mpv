@@ -46,6 +46,8 @@ Small improvements:
 
  * ability to cycle switch_aspect
 
+ * ability to rename vo_jpeg,vo_gif,vo_png output filename
+
 Cleanup:
 
  * integrate dvdnav into mplayer structure
@@ -133,7 +135,7 @@ Enhancements:
 
  * rotate/position osd
 
- * support all image formats in mf:// (tiff, jpeg2000)
+ * support all image formats in mf:// (psd, jpeg2000)
 
  * make -noborder work with all video outputs
 

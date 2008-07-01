@@ -738,8 +738,9 @@ dep depend: $(DEPS)
 
 ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(notdir $(part)).a)
 
-$(ALLPARTLIBS): recurse
+$(ALLPARTLIBS): ffmpeg/libavutil/*.[ch] ffmpeg/libavcodec/*.[ch] ffmpeg/libavcodec/*/*.[chS] ffmpeg/libavformat/*.[ch] ffmpeg/libpostproc/*.[ch] libswscale/*.[chS] libvo/fastmemcpy.h config.h
 	$(MAKE) -C $(@D)
+	touch $@
 
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
@@ -1054,5 +1055,5 @@ dhahelperwinclean:
 
 -include $(DEPS)
 
-.PHONY: all doxygen *install* recurse *tools drivers dhahelper*
+.PHONY: all doxygen *install* *tools drivers dhahelper*
 .PHONY: checkheaders *clean dep depend tests

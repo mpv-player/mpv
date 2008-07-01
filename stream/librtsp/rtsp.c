@@ -33,14 +33,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "config.h"
-#ifndef HAVE_WINSOCK2
-#define closesocket close
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#else
-#include <winsock2.h>
-#endif
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -50,7 +42,9 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <inttypes.h>
-
+#ifdef HAVE_WINSOCK2
+#include <winsock2.h>
+#endif
 #include "mp_msg.h"
 #include "rtsp.h"
 #include "rtsp_session.h"
@@ -59,56 +53,6 @@
 /*
 #define LOG
 */
-
-#define BUF_SIZE 4096
-#define HEADER_SIZE 1024
-#define MAX_FIELDS 256
-
-struct rtsp_s {
-
-  int           s;
-
-  char         *host;
-  int           port;
-  char         *path;
-  char         *param;
-  char         *mrl;
-  char         *user_agent;
-
-  char         *server;
-  unsigned int  server_state;
-  uint32_t      server_caps;
-  
-  unsigned int  cseq;
-  char         *session;
-
-  char        *answers[MAX_FIELDS];   /* data of last message */
-  char        *scheduled[MAX_FIELDS]; /* will be sent with next message */
-};
-
-/*
- * constants
- */
-
-#define RTSP_PROTOCOL_VERSION "RTSP/1.0"
-
-/* server states */
-#define RTSP_CONNECTED 1
-#define RTSP_INIT      2
-#define RTSP_READY     4
-#define RTSP_PLAYING   8
-#define RTSP_RECORDING 16
-
-/* server capabilities */
-#define RTSP_OPTIONS       0x001
-#define RTSP_DESCRIBE      0x002
-#define RTSP_ANNOUNCE      0x004
-#define RTSP_SETUP         0x008
-#define RTSP_GET_PARAMETER 0x010
-#define RTSP_SET_PARAMETER 0x020
-#define RTSP_TEARDOWN      0x040
-#define RTSP_PLAY          0x080
-#define RTSP_RECORD        0x100
 
 /*
  * network utilities
@@ -575,14 +519,22 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
 //rtsp_t *rtsp_connect(const char *mrl, const char *user_agent) {
 rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *user_agent) {
 
-  rtsp_t *s=malloc(sizeof(rtsp_t));
+  rtsp_t *s;
   int i;
-  
+
+  if (fd < 0) {
+    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: failed to connect to '%s'\n", host);
+    return NULL;
+  }
+
+  s = malloc(sizeof(rtsp_t));
+
   for (i=0; i<MAX_FIELDS; i++) {
     s->answers[i]=NULL;
     s->scheduled[i]=NULL;
   }
 
+  s->s = fd;
   s->server=NULL;
   s->server_state=0;
   s->server_caps=0;
@@ -605,13 +557,6 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
     s->param++;
   //mp_msg(MSGT_OPEN, MSGL_INFO, "path=%s\n", s->path);
   //mp_msg(MSGT_OPEN, MSGL_INFO, "param=%s\n", s->param ? s->param : "NULL");
-  s->s = fd;
-
-  if (s->s < 0) {
-    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: failed to connect to '%s'\n", s->host);
-    rtsp_close(s);
-    return NULL;
-  }
 
   s->server_state=RTSP_CONNECTED;
 
@@ -630,29 +575,6 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
   return s;
 }
 
-
-/*
- * closes an rtsp connection 
- */
-
-void rtsp_close(rtsp_t *s) {
-
-  if (s->server_state)
-  {
-    if (s->server_state == RTSP_PLAYING)
-      rtsp_request_teardown (s, NULL);
-    closesocket (s->s);
-  }
-
-  if (s->path) free(s->path);
-  if (s->host) free(s->host);
-  if (s->mrl) free(s->mrl);
-  if (s->session) free(s->session);
-  if (s->user_agent) free(s->user_agent);
-  rtsp_free_answers(s);
-  rtsp_unschedule_all(s);
-  free(s);  
-}
 
 /*
  * search in answers for tags. returns a pointer to the content

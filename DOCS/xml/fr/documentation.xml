@@ -60,14 +60,13 @@ il y a beaucoup d'informations intéressantes à y trouver.
 
 <para>
 <application>MPlayer</application> est un lecteur de vidéos pour GNU/Linux
-(fonctionne sur de nombreux autres Un*x, et processeurs
-<emphasis role="bold">non-x86</emphasis>, voir la section <xref linkend="ports"/>).
+(fonctionne sur de nombreux autres Un*x, et processeurs non-x86, voir la
+section <xref linkend="ports"/>).
 Il lit la majorité des fichiers MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV,
 QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska supportés
 par de nombreux codecs natifs, XAnim, RealPlayer et les DLLs Win32.
-Vous pouvez regarder les <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx,
-RealMedia, Sorenson, Theora</emphasis>, ainsi que les vidéos au format
-<emphasis role="bold">MPEG-4 (DivX)</emphasis>.
+Vous pouvez regarder les VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson,
+Theora, ainsi que les vidéos au format MPEG-4 (DivX).
 L'autre point fort de <application>MPlayer</application> est la grande
 variété de pilotes de sortie supportée.
 Il fonctionne avec X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
@@ -79,8 +78,8 @@ matériel, vous pouvez donc apprécier les films en plein écran.
 <application>MPlayer</application> supporte la décompression matérielle
 fournie par certaines cartes MPEG, telles que la <link linkend="dvb">DVB</link>
 et la <link linkend="dxr3">DXR3/Hollywood+</link>.
-Et que dire de ces superbes sous-titres ombrés et lissés (<emphasis role="bold">14
-types supportés</emphasis>) avec des polices européennes/ISO 8859-1,2
+Et que dire de ces superbes sous-titres ombrés et lissés (14
+types supportés) avec des polices européennes/ISO 8859-1,2
 (Hongrois, Anglais, Tchèque, etc.), Cyrilliques, Coréennes, ainsi que de
 l'Affichage Sur Ecran (ou OSD = On Screen Display) ?
 </para>
@@ -103,12 +102,12 @@ vidéo et audio.
 <application>MEncoder</application> (Le Movie Encoder de
 <application>MPlayer</application>) est un simple encodeur de vidéos, conçu
 pour encoder des vidéos jouables par <application>MPlayer</application>
-(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+(AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA)
 dans d'autres formats jouables par <application>MPlayer</application>
 (voir plus bas).
-Il peut encoder avec des codecs variés comme <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
+Il peut encoder avec des codecs variés comme MPEG-4 (DivX4)
 (1 ou 2 passes),<systemitem class="library">libavcodec</systemitem>,
-audio <emphasis role="bold">PCM/MP3/MP3 VBR</emphasis>.
+audio PCM/MP3/MP3 VBR.
 </para>
 
 
@@ -121,10 +120,10 @@ et de décodeurs de <application>MPlayer</application></para></listitem>
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> de FFmpeg
 </para></listitem>
 <listitem><para>
-  Encodage vidéo depuis <emphasis role="bold">les tuners TV compatibles V4L</emphasis>
+  Encodage vidéo depuis les tuners TV compatibles V4L
 </para></listitem>
 <listitem><para>
-  Encodage/multiplexage vers fichiers AVI intercalés avec index propre
+  Encodage/multiplexage vers fichiers AVI entrelacés avec index propre
 </para></listitem>
 <listitem><para>
   Création de fichiers à partir de flux audio externes
@@ -133,10 +132,7 @@ et de décodeurs de <application>MPlayer</application></para></listitem>
   Encodage 1, 2 ou 3 passes
 </para></listitem>
 <listitem><para>
-  MP3 audio <emphasis role="bold">VBR</emphasis>
-  <important><para>
-  L'audio MP3 VBR peut ne pas toujours être bien lu par les lecteurs Windows!
-  </para></important>
+  MP3 audio VBR
 </para></listitem>
 <listitem><para>
   PCM audio
@@ -150,14 +146,14 @@ et de décodeurs de <application>MPlayer</application></para></listitem>
 </para></listitem>
 <listitem><para>
   Correction FPS avec l'option <option>-ofps</option> (utile
-  pour l'encodage d'un VOB 29.97fps en AVI 24fps)
+  pour l'encodage d'un VOB 30000/1001&nbsp;fps en AVI 24000/1001&nbsp;fps)
 </para></listitem>
 <listitem><para>
   Utilise notre très puissant système de plugins (crop, expand,
   flip, postprocess, rotate, scale, conversion rgb/yuv)
 </para></listitem>
 <listitem><para>
-  Peut encoder les sous-titres DVD/VOBsub <emphasis role="bold">ET</emphasis>
+  Peut encoder les sous-titres DVD/VOBsub et
   le texte des sous-titres dans le fichier de destination
 </para></listitem>
 <listitem><para>

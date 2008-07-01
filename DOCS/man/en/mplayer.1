@@ -872,7 +872,7 @@ Currently the following drivers are fixed-vo compliant: gl, gl2, mga, svga, x11,
 xmga, xv, xvidix and dfbmga.
 .
 .TP
-.B \-framedrop (also see \-hardframedrop, experimental without \-no\-correct\-pts)
+.B \-framedrop (also see \-hardframedrop, experimental without \-nocorrect\-pts)
 Skip displaying some frames to maintain A/V sync on slow systems.
 Video filters are not applied to such frames.
 For B-frames even decoding is skipped completely.
@@ -888,10 +888,10 @@ Does not work as a config-file option.
 Show short summary of options.
 .
 .TP
-.B \-hardframedrop (experimental without \-no\-correct\-pts)
+.B \-hardframedrop (experimental without \-nocorrect\-pts)
 More intense frame dropping (breaks decoding).
 Leads to image distortion!
-Note that especially the libmpeg2 decoder may crash with this, 
+Note that especially the libmpeg2 decoder may crash with this,
 so consider using "\-vc ffmpeg12,".
 .
 .TP
@@ -2006,7 +2006,7 @@ Will help if video freezes but audio does not.
 .I NOTE:
 May not work with \-vo directx and \-vf crop combination.
 .IPs "hidden_vp_renderer (dshow only)"
-Terminate VideoPort pin stream with video renderer 
+Terminate VideoPort pin stream with video renderer
 instead of removing it from the graph (default: off).
 Useful if your card has a VideoPort pin and video is choppy.
 .I NOTE:
@@ -5342,7 +5342,7 @@ speed (default).
 .br
 This works by playing \'stride\' ms of audio at normal speed then
 consuming \'stride*scale\' ms of input audio.
-It pieces the strides together by blending 'overlap'% of stride with
+It pieces the strides together by blending \'overlap\'% of stride with
 audio following the previous stride.
 It optionally performs a short statistical analysis on the next \'search\'
 ms of audio to determine the best overlap position.
@@ -5372,7 +5372,7 @@ On slow systems, you will probably want to set this very low.
 Set response to speed change.
 .RSss
 .IPs tempo
-Scale tempo in sync with speed (default)
+Scale tempo in sync with speed (default).
 .IPs pitch
 Reverses effect of filter.
 Scales pitch without altering tempo.
@@ -5381,9 +5381,9 @@ to your input.conf to step by musical semi-tones.
 .I WARNING:
 Loses sync with video.
 .IPs both
-Scale both tempo and pitch
+Scale both tempo and pitch.
 .IPs none
-Ignore speed changes
+Ignore speed changes.
 .RE
 .RE
 .sp 1
@@ -5494,8 +5494,12 @@ Use 2 to get only even dimensions (needed for 4:2:2 video).
 .
 .TP
 .B rectangle[=w:h:x:y]
-The plugin responds to the input.conf directive 'change_rectangle'
-that takes two parameters.
+Draws a rectangle of the requested width and height at the specified
+coordinates over the image and prints current rectangle parameters
+to the console.
+This can be used to find optimal cropping parameters.
+If you bind the input.conf directive 'change_rectangle' to keystrokes,
+you can move and resize the rectangle on the fly.
 .PD 0
 .RSs
 .IPs <w>,<h>

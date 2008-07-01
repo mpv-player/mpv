@@ -129,6 +129,8 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 		goto error;
 
 	fset = FcFontSort(priv->config, pat, FcTrue, NULL, &result);
+	if (!fset)
+		goto error;
 
 	for (curf = 0; curf < fset->nfont; ++curf) {
 		FcPattern* curp = fset->fonts[curf];
@@ -423,43 +425,46 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	for (i = 0; i < library->num_fontdata; ++i)
 		process_fontdata(priv, library, ftlibrary, i);
 
-	if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
-	{
-		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_UpdatingFontCache);
-		if (FcGetVersion() >= 20390 && FcGetVersion() < 20400)
-			mp_msg(MSGT_ASS, MSGL_WARN,
-			       MSGTR_LIBASS_BetaVersionsOfFontconfigAreNotSupported);
-		// FontConfig >= 2.4.0 updates cache automatically in FcConfigAppFontAddDir()
-		if (FcGetVersion() < 20390) {
-			FcFontSet* fcs;
-			FcStrSet* fss;
-			fcs = FcFontSetCreate();
-			fss = FcStrSetCreate();
-			rc = FcStrSetAdd(fss, (const FcChar8*)dir);
-			if (!rc) {
-				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcStrSetAddFailed);
-				goto ErrorFontCache;
+	if (dir) {
+		if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
+			{
+				mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_UpdatingFontCache);
+				if (FcGetVersion() >= 20390 && FcGetVersion() < 20400)
+					mp_msg(MSGT_ASS, MSGL_WARN,
+					       MSGTR_LIBASS_BetaVersionsOfFontconfigAreNotSupported);
+				// FontConfig >= 2.4.0 updates cache automatically in FcConfigAppFontAddDir()
+				if (FcGetVersion() < 20390) {
+					FcFontSet* fcs;
+					FcStrSet* fss;
+					fcs = FcFontSetCreate();
+					fss = FcStrSetCreate();
+					rc = FcStrSetAdd(fss, (const FcChar8*)dir);
+					if (!rc) {
+						mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcStrSetAddFailed);
+						goto ErrorFontCache;
+					}
+
+					rc = FcDirScan(fcs, fss, NULL, FcConfigGetBlanks(priv->config),
+						       (const FcChar8 *)dir, FcFalse);
+					if (!rc) {
+						mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcDirScanFailed);
+						goto ErrorFontCache;
+					}
+
+					rc = FcDirSave(fcs, fss, (const FcChar8 *)dir);
+					if (!rc) {
+						mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcDirSave);
+						goto ErrorFontCache;
+					}
+				ErrorFontCache:
+					;
+				}
 			}
 
-			rc = FcDirScan(fcs, fss, NULL, FcConfigGetBlanks(priv->config), (const FcChar8 *)dir, FcFalse);
-			if (!rc) {
-				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcDirScanFailed);
-				goto ErrorFontCache;
-			}
-
-			rc = FcDirSave(fcs, fss, (const FcChar8 *)dir);
-			if (!rc) {
-				mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcDirSave);
-				goto ErrorFontCache;
-			}
-		ErrorFontCache:
-			;
+		rc = FcConfigAppFontAddDir(priv->config, (const FcChar8*)dir);
+		if (!rc) {
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcConfigAppFontAddDirFailed);
 		}
-	}
-
-	rc = FcConfigAppFontAddDir(priv->config, (const FcChar8*)dir);
-	if (!rc) {
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FcConfigAppFontAddDirFailed);
 	}
 
 	priv->family_default = family ? strdup(family) : 0;
