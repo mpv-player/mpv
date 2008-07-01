@@ -735,13 +735,7 @@ dep depend: $(DEPS)
 
 ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(part).a)
 
-libavutil/libavutil.a: libavutil/*.[ch]
-libavcodec/libavcodec.a: libavcodec/*.[ch] libavcodec/*/*.[chS]
-libavformat/libavformat.a: libavformat/*.[ch]
-libpostproc/libpostproc.a: libpostproc/*.[ch]
-libswscale/libswscale.a: libswscale/*.[chS]
-
-$(ALLPARTLIBS):
+$(ALLPARTLIBS): libavutil/*.[ch] libavcodec/*.[ch] libavcodec/*/*.[chS] libavformat/*.[ch] libpostproc/*.[ch] libswscale/*.[chS] libvo/fastmemcpy.h config.h
 	$(MAKE) -C $(@D)
 	touch $@
 
