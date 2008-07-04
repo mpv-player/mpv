@@ -692,7 +692,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     GenBuffers(1, &gl_buffer);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
   if (ati_hack)
-    mpi->width = (mpi->width + 63) & ~63;
+    mpi->width = (mpi->width + 255) & ~255;
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   if (mpi->stride[0] * mpi->height > gl_buffersize) {
     BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->height,
