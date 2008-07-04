@@ -944,9 +944,9 @@ TOOLS/vfw2menc$(EXESUF): TOOLS/vfw2menc.c -lwinmm -lole32
 mplayer-nomain.o: mplayer.c
 	$(CC) $(CFLAGS) -DDISABLE_MAIN -c -o $@ $<
 
-TOOLS/netstream$(EXESUF): TOOLS/netstream.c $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
-TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
-TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF):
+TOOLS/netstream$(EXESUF): TOOLS/netstream.c
+TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c
+TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF): $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
 	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS_MENCODER) $(COMMON_LDFLAGS)
 
 fastmemcpybench: TOOLS/fastmemcpybench.c
