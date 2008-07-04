@@ -1091,8 +1091,6 @@ ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
         return STREAM_UNSUPPORTED;
 
     mp_msg(MSGT_DVD, MSGL_INFO, ".IFO detected. Redirecting to dvd://\n");
-    if (!dvd_device)
-        dvd_device = strdup(dirname (stream->url));
 
     filename = strdup(basename(stream->url));
 
