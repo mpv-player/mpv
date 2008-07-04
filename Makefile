@@ -432,7 +432,7 @@ SRCS_COMMON-$(SPEEX)                 += libmpcodecs/ad_speex.c
 SRCS_COMMON-$(STREAM_CACHE)          += stream/cache2.c
 SRCS_COMMON-$(STREAMING_LIVE555)     += libmpdemux/demux_rtp.cpp \
                                         libmpdemux/demux_rtp_codec.cpp \
-                                        stream/stream_livedotcom.c \
+                                        stream/stream_live555.c \
 
 SRCS_COMMON-$(TREMOR_INTERNAL)       += tremor/bitwise.c \
                                         tremor/block.c \
