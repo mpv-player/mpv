@@ -1079,12 +1079,11 @@ fail:
   return STREAM_UNSUPPORTED;
 }
 
-static int
-ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+static int ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
     char *ext;
     char* filename;
-    struct stream_priv_s *dvd_priv;
+    struct stream_priv_s *spriv;
 
     ext = strrchr (stream->url, '.');
     if (!ext || strcasecmp (ext + 1, "ifo"))
@@ -1094,20 +1093,20 @@ ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 
     filename = strdup(basename(stream->url));
 
-    dvd_priv=calloc(1, sizeof(struct stream_priv_s));
-    dvd_priv->device = strdup(dirname(stream->url));
+    spriv=calloc(1, sizeof(struct stream_priv_s));
+    spriv->device = strdup(dirname(stream->url));
     if(!strncasecmp(filename,"vts_",4))
     {
-        if(sscanf(filename+3, "_%02d_", &dvd_priv->title)!=1)
-            dvd_priv->title=1;
+        if(sscanf(filename+3, "_%02d_", &spriv->title)!=1)
+            spriv->title=1;
     }else
-        dvd_priv->title=1;
+        spriv->title=1;
 
     free(filename);
     free(stream->url);
     stream->url=strdup("dvd://");
 
-    return open_s(stream, mode, dvd_priv, file_format);
+    return open_s(stream, mode, spriv, file_format);
 }
 
 const stream_info_t stream_info_dvd = {
