@@ -770,6 +770,8 @@ version.h:
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 	$(WINDRES) -I. $< $@
 
+%(EXESUF): %.c
+
 
 
 ###### dependency declarations / specific CFLAGS ######
@@ -885,18 +887,15 @@ codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
 codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h codec-cfg.h $(TEST_OBJS)
 	$(CC) -I. -DTESTING -o $@ $^
 
-liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o)) -lm
+liba52/test$(EXESUF): cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o)) -lm
 
-libvo/aspecttest$(EXESUF): libvo/aspecttest.c libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
+libvo/aspecttest$(EXESUF): libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
 
 LOADER_TEST_OBJS = $(filter loader/%,$(SRCS_COMMON:.c=.o)) libmpdemux/aviprint.o osdep/mmap_anon.o cpudetect.o $(TEST_OBJS)
 
 loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
-loader/qtx/list$(EXESUF): loader/qtx/list.c $(LOADER_TEST_OBJS)
-loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
+loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): $(LOADER_TEST_OBJS)
 
-mp3lib/test$(EXESUF):  mp3lib/test.c
-mp3lib/test2$(EXESUF): mp3lib/test2.c
 mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF): $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 
 TESTS = codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
@@ -937,13 +936,13 @@ alltools: $(ALLTOOLS)
 toolsclean:
 	rm -f $(ALLTOOLS) TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
-TOOLS/bmovl-test$(EXESUF): TOOLS/bmovl-test.c -lSDL_image
+TOOLS/bmovl-test$(EXESUF): -lSDL_image
 
-TOOLS/subrip$(EXESUF): TOOLS/subrip.c vobsub.o spudec.o unrar_exec.o \
+TOOLS/subrip$(EXESUF): vobsub.o spudec.o unrar_exec.o \
   libvo/aclib.o libswscale/libswscale.a libavutil/libavutil.a \
   $(TEST_OBJS)
 
-TOOLS/vfw2menc$(EXESUF): TOOLS/vfw2menc.c -lwinmm -lole32
+TOOLS/vfw2menc$(EXESUF): -lwinmm -lole32
 
 mplayer-nomain.o: mplayer.c
 	$(CC) $(CFLAGS) -DDISABLE_MAIN -c -o $@ $<
