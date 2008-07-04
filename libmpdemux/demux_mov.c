@@ -657,6 +657,10 @@ static int gen_sh_audio(sh_audio_t* sh, mov_track_t* trak, int timescale) {
 //      36  char[]  	atom data (len=size-8)
 
 // TODO: fix parsing for files using version 2.
+		if (trak->stdata_len < 26) {
+		  mp_msg(MSGT_DEMUX, MSGL_WARN, "MOV: broken (too small) sound atom!\n");
+		  return 0;
+		}
 		version=char2short(trak->stdata,8);
 		if (version > 1)
 		  mp_msg(MSGT_DEMUX, MSGL_WARN, "MOV: version %d sound atom may not parse correctly!\n", version);

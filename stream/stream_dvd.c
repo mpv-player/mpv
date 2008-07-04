@@ -42,6 +42,7 @@
 #include "libavutil/intreadwrite.h"
 
 extern char* dvd_device;
+static char* dvd_device_current;
 int dvd_angle=1;
 int dvd_speed=0; /* 0 => don't touch speed */
 
@@ -138,14 +139,17 @@ const char * const dvd_audio_stream_channels[6] = { "mono", "stereo", "unknown",
 
 static struct stream_priv_s {
   int title;
+  char* device;
 } stream_priv_dflts = {
-  1
+  1,
+  NULL
 };
 
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
 /// URL definition
 static const m_option_t stream_opts_fields[] = {
   { "hostname", ST_OFF(title), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL },
+  { "filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0 ,0, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 static const struct m_struct_st stream_opts = {
@@ -484,7 +488,7 @@ void dvd_close(dvd_priv_t *d) {
   DVDClose(d->dvd);
   dvd_chapter = 1;
   dvd_last_chapter = 0;
-  dvd_set_speed(dvd_device, -1); /* -1 => restore default */
+  dvd_set_speed(dvd_device_current, -1); /* -1 => restore default */
 }
 
 static int fill_buffer(stream_t *s, char *but, int len)
@@ -781,13 +785,18 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     /**
      * Open the disc.
      */
-    if(!dvd_device) dvd_device=strdup(DEFAULT_DVD_DEVICE);
-    dvd_set_speed(dvd_device, dvd_speed);
+    if(p->device)
+      dvd_device_current = p->device;
+    else if(dvd_device)
+      dvd_device_current = dvd_device;
+    else
+      dvd_device_current = strdup(DEFAULT_DVD_DEVICE);
+    dvd_set_speed(dvd_device_current, dvd_speed);
 #if defined(__APPLE__) || defined(__DARWIN__)
     /* Dynamic DVD drive selection on Darwin */
-    if(!strcmp(dvd_device, "/dev/rdiskN")) {
+    if(!strcmp(dvd_device_current, "/dev/rdiskN")) {
       int i;
-      size_t len = strlen(dvd_device)+1;
+      size_t len = strlen(dvd_device_current)+1;
       char *temp_device = malloc(len);
 
       for (i = 1; i < 10; i++) {
@@ -817,9 +826,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     } else
 #endif /* defined(__APPLE__) || defined(__DARWIN__) */
     {
-        dvd = DVDOpen(dvd_device);
+        dvd = DVDOpen(dvd_device_current);
         if(!dvd) {
-          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device, strerror(errno));
+          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device_current, strerror(errno));
           m_struct_free(&stream_opts,opts);
           return STREAM_UNSUPPORTED;
         }
@@ -1070,36 +1079,34 @@ fail:
   return STREAM_UNSUPPORTED;
 }
 
-static int
-ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+static int ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
     char *ext;
     char* filename;
-    struct stream_priv_s *dvd_priv;
+    struct stream_priv_s *spriv;
 
     ext = strrchr (stream->url, '.');
     if (!ext || strcasecmp (ext + 1, "ifo"))
         return STREAM_UNSUPPORTED;
 
     mp_msg(MSGT_DVD, MSGL_INFO, ".IFO detected. Redirecting to dvd://\n");
-    if (!dvd_device)
-        dvd_device = strdup(dirname (stream->url));
 
     filename = strdup(basename(stream->url));
 
-    dvd_priv=calloc(1, sizeof(struct stream_priv_s));
+    spriv=calloc(1, sizeof(struct stream_priv_s));
+    spriv->device = strdup(dirname(stream->url));
     if(!strncasecmp(filename,"vts_",4))
     {
-        if(sscanf(filename+3, "_%02d_", &dvd_priv->title)!=1)
-            dvd_priv->title=1;
+        if(sscanf(filename+3, "_%02d_", &spriv->title)!=1)
+            spriv->title=1;
     }else
-        dvd_priv->title=1;
+        spriv->title=1;
 
     free(filename);
     free(stream->url);
     stream->url=strdup("dvd://");
 
-    return open_s(stream, mode, dvd_priv, file_format);
+    return open_s(stream, mode, spriv, file_format);
 }
 
 const stream_info_t stream_info_dvd = {

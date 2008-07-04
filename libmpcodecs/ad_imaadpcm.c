@@ -131,7 +131,6 @@ static void decode_nibbles(unsigned short *output,
   int predictor[2], int index[2])
 {
   int step[2];
-  int diff;
   int i;
   int sign;
   int delta;
