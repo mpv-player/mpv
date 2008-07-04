@@ -895,8 +895,9 @@ loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF): CFLAGS += -g
 loader/qtx/list$(EXESUF): loader/qtx/list.c $(LOADER_TEST_OBJS)
 loader/qtx/qtxload$(EXESUF): loader/qtx/qtxload.c $(LOADER_TEST_OBJS)
 
-mp3lib/test$(EXESUF):  mp3lib/test.c  $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
-mp3lib/test2$(EXESUF): mp3lib/test2.c $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
+mp3lib/test$(EXESUF):  mp3lib/test.c
+mp3lib/test2$(EXESUF): mp3lib/test2.c
+mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF): $(filter mp3lib/%,$(SRCS_COMMON:.c=.o)) libvo/aclib.o cpudetect.o $(TEST_OBJS)
 
 TESTS = codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
         liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
