@@ -901,8 +901,11 @@ mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF): $(filter mp3lib/%,$(SRCS_COMMON:.c=.
 
 TESTS = codecs2html$(EXESUF) codec-cfg-test$(EXESUF) \
         liba52/test$(EXESUF) libvo/aspecttest$(EXESUF) \
-        loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF) \
         mp3lib/test$(EXESUF) mp3lib/test2$(EXESUF)
+
+ifdef ARCH_X86
+TESTS += loader/qtx/list$(EXESUF) loader/qtx/qtxload$(EXESUF)
+endif
 
 tests: $(TESTS)
 
