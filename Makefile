@@ -885,7 +885,7 @@ codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
 codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h codec-cfg.h $(TEST_OBJS)
 	$(CC) -I. -DTESTING -o $@ $^
 
-liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o))
+liba52/test$(EXESUF): liba52/test.c cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o)) -lm
 
 libvo/aspecttest$(EXESUF): libvo/aspecttest.c libvo/aspect.o libvo/geometry.o $(TEST_OBJS)
 
