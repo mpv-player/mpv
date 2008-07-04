@@ -1095,6 +1095,7 @@ ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
     filename = strdup(basename(stream->url));
 
     dvd_priv=calloc(1, sizeof(struct stream_priv_s));
+    dvd_priv->device = strdup(dirname(stream->url));
     if(!strncasecmp(filename,"vts_",4))
     {
         if(sscanf(filename+3, "_%02d_", &dvd_priv->title)!=1)
