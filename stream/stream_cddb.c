@@ -719,6 +719,8 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	cddb_data.disc_id = cddb_discid(cddb_data.tracks);
 	cddb_data.anonymous = 1;	// Don't send user info by default
 
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CDDB_DISCID=%08lx\n", cddb_data.disc_id);
+
 	// Check if there is a CD in the drive
 	// FIXME: That's not really a good way to check
 	if( cddb_data.disc_id==0 ) {
