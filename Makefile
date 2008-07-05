@@ -734,8 +734,8 @@ dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
 ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(part).a)
-
-$(ALLPARTLIBS): libavutil/*.[ch] libavcodec/*.[ch] libavcodec/*/*.[chS] libavformat/*.[ch] libpostproc/*.[ch] libswscale/*.[chS] libvo/fastmemcpy.h config.h
+FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[chS] libavcodec/*/*.[chS])
+$(ALLPARTLIBS): $(FFMPEGFILES) libvo/fastmemcpy.h config.h
 	$(MAKE) -C $(@D)
 	touch $@
 
