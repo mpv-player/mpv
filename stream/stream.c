@@ -381,8 +381,10 @@ void stream_reset(stream_t *s){
 
 int stream_control(stream_t *s, int cmd, void *arg){
   if(!s->control) return STREAM_UNSUPPORTED;
+#ifdef USE_STREAM_CACHE
   if (s->cache_pid)
     return cache_do_control(s, cmd, arg);
+#endif
   return s->control(s, cmd, arg);
 }
 
