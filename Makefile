@@ -709,7 +709,7 @@ PARTS = libavcodec \
         libpostproc \
         libswscale \
 
-ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(part).a)
+FFMPEGLIBS  = $(foreach part, $(PARTS), $(part)/$(part).a)
 FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[chS] libavcodec/*/*.[chS])
 
 
@@ -738,7 +738,7 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
-$(ALLPARTLIBS): $(FFMPEGFILES) libvo/fastmemcpy.h config.h
+$(FFMPEGLIBS): $(FFMPEGFILES) libvo/fastmemcpy.h config.h
 	$(MAKE) -C $(@D)
 	touch $@
 
