@@ -645,6 +645,7 @@ OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
+DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
@@ -700,11 +701,16 @@ DIRS =  . \
         TOOLS \
         vidix \
 
+ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
+
 PARTS = libavcodec \
         libavformat \
         libavutil \
         libpostproc \
         libswscale \
+
+ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(part).a)
+FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[chS] libavcodec/*/*.[chS])
 
 
 
@@ -727,14 +733,11 @@ all: $(ALL_PRG-yes)
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
-ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 checkheaders: $(ALLHEADERS:.h=.ho)
 
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
-ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(part).a)
-FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[chS] libavcodec/*/*.[chS])
 $(ALLPARTLIBS): $(FFMPEGFILES) libvo/fastmemcpy.h config.h
 	$(MAKE) -C $(@D)
 	touch $@
@@ -778,7 +781,6 @@ osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 
 codec-cfg.d: codecs.conf.h
 mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d: version.h
-DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
 $(DEPS): help_mp.h
 
 dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE $(LIBDVDCSS_DVDREAD_FLAGS)
