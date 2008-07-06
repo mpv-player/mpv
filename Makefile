@@ -773,8 +773,6 @@ endif
 version.h:
 	./version.sh `$(CC) -dumpversion`
 
-osdep/mplayer-rc.o: version.h
-
 %(EXESUF): %.c
 
 
@@ -782,7 +780,7 @@ osdep/mplayer-rc.o: version.h
 ###### dependency declarations / specific CFLAGS ######
 
 codec-cfg.d: codecs.conf.h
-mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d: version.h
+mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d osdep/mplayer-rc.o: version.h
 $(DEPS): help_mp.h
 
 dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE $(LIBDVDCSS_DVDREAD_FLAGS)
