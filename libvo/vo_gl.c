@@ -690,6 +690,9 @@ static uint32_t get_image(mp_image_t *mpi) {
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
   if (ati_hack) {
     int s = 1;
+    // for unexplainable reasons, with width < 512 chroma tends to be messed up
+    // (after ca. 2/3 the previous line repeats all over)
+    if (mpi->width < 512) return VO_FALSE;
     while (s < mpi->width) s *= 2;
     mpi->width = s;
   }
