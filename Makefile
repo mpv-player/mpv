@@ -861,7 +861,7 @@ clean:
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
-distclean: clean testsclean toolsclean driversclean
+distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
 	rm -rf DOCS/tech/doxygen
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
