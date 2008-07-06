@@ -733,6 +733,9 @@ all: $(ALL_PRG-yes)
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
+%-rc.o: %.rc
+	$(WINDRES) -I. $< $@
+
 checkheaders: $(ALLHEADERS:.h=.ho)
 
 dep depend: $(DEPS)
@@ -771,7 +774,6 @@ version.h:
 	./version.sh `$(CC) -dumpversion`
 
 osdep/mplayer-rc.o: osdep/mplayer.rc version.h
-	$(WINDRES) -I. $< $@
 
 %(EXESUF): %.c
 
@@ -1028,7 +1030,6 @@ vidix/dhahelperwin/dhahelper.o: vidix/dhahelperwin/dhahelper.c vidix/dhahelperwi
 	$(CC) -Wall -Os -c $< -o $@
 
 vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/dhahelper.rc vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
-	$(WINDRES) -I. $< $@
 
 vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
 	$(CC) -Wl,--base-file,$@ -Wl,--entry,_DriverEntry@8 -nostartfiles \
