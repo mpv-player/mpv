@@ -755,7 +755,7 @@ codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) -O -I. -DCODECS2HTML -o $@ $<
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
-	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
+	./$^ > $@
 
 # ./configure must be rerun if it changed
 config.mak: configure
