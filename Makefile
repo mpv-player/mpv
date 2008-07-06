@@ -982,10 +982,11 @@ KERNEL_VERSION = $(shell grep RELEASE $(KERNEL_INC)/linux/version.h | cut -d'"' 
 KERNEL_CFLAGS = -O2 -D__KERNEL__ -DMODULE -Wall -I$(KERNEL_INC) -include $(KERNEL_INC)/linux/modversions.h
 KERNEL_OBJS = $(addprefix drivers/, mga_vid.o tdfx_vid.o radeon_vid.o rage128_vid.o)
 MODULES_DIR = /lib/modules/$(KERNEL_VERSION)/misc
+DRIVER_OBJS = $(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test
 
-drivers: $(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test
+drivers: $(DRIVER_OBJS)
 
-$(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test: CFLAGS = $(KERNEL_CFLAGS)
+$(DRIVER_OBJS): CFLAGS = $(KERNEL_CFLAGS)
 drivers/mga_vid.o: drivers/mga_vid.c drivers/mga_vid.h
 drivers/tdfx_vid.o: drivers/tdfx_vid.c drivers/3dfx.h
 drivers/radeon_vid.o drivers/rage128_vid.o: CFLAGS += -fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math
@@ -993,7 +994,7 @@ drivers/radeon_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
 drivers/rage128_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
 	$(CC) $(CFLAGS) -DRAGE128 -c $< -o $@
 
-install-drivers: drivers
+install-drivers: $(DRIVER_OBJS)
 	-mkdir -p $(MODULES_DIR)
 	install -m 644 $(KERNEL_OBJS) $(MODULES_DIR)
 	depmod -a
@@ -1003,7 +1004,7 @@ install-drivers: drivers
 	-ln -s /dev/radeon_vid /dev/rage128_vid
 
 driversclean:
-	rm -f drivers/*.o drivers/*~ drivers/mga_vid_test drivers/tdfx_vid_test
+	rm -f $(DRIVER_OBJS) drivers/*~
 
 dhahelper: vidix/dhahelper/dhahelper.o vidix/dhahelper/test
 
