@@ -773,7 +773,7 @@ endif
 version.h:
 	./version.sh `$(CC) -dumpversion`
 
-osdep/mplayer-rc.o: osdep/mplayer.rc version.h
+osdep/mplayer-rc.o: version.h
 
 %(EXESUF): %.c
 
@@ -1029,7 +1029,7 @@ vidix/dhahelperwin/dhasetup.exe: vidix/dhahelperwin/dhasetup.c
 vidix/dhahelperwin/dhahelper.o: vidix/dhahelperwin/dhahelper.c vidix/dhahelperwin/dhahelper.h
 	$(CC) -Wall -Os -c $< -o $@
 
-vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/dhahelper.rc vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
+vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
 
 vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
 	$(CC) -Wl,--base-file,$@ -Wl,--entry,_DriverEntry@8 -nostartfiles \
