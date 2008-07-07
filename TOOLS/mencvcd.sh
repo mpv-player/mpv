@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Version:          0.2.2
 #
