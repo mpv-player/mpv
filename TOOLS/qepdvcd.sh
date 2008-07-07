@@ -234,7 +234,7 @@ else
 	SUBTITLESTRING="$SUBFILENAME"
 fi
 
-if [ $SPLIT == "0" ]; then
+if [ $SPLIT = "0" ]; then
 	CICLES=0
 	TIMESTRING=""
 else

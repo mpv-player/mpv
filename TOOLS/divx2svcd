@@ -185,7 +185,7 @@ case $1 in
 	;;
 	*)
 		input=`echo $1 |sed 's/\\ / /'`
-		if [ "$input" == "`basename "$input"`" ]; then
+		if [ "$input" = "`basename "$input"`" ]; then
 		        input="`pwd`/$1"
 		fi
 		nev=`basename "$input" .avi`
@@ -222,14 +222,14 @@ while [ "$1"x != "x" ]; do
 done
 
 #checking for cd-recording device
-if [ "$burning" == 1 ]; then
+if [ "$burning" = 1 ]; then
 echo -n "Searching for cdrecorder device... "
 
-if [ `uname -r |cut -d '.' -f 2` == 4 ]; then
+if [ `uname -r |cut -d '.' -f 2` = 4 ]; then
 	#linux 2.4.x
 	dev="dev=$dev4"
 	echo "$dev4"
-elif [ `uname -r |cut -d '.' -f 2` == 6 ]; then
+elif [ `uname -r |cut -d '.' -f 2` = 6 ]; then
 	#linux 2.6.x
 	if [ -e /dev/cdrecorder ]; then
 		dev='dev=/dev/cdrecorder'
@@ -262,7 +262,7 @@ exit 1
 else #checking for version >= 2.01a14
 	echo -n "Checking for cdrecord version >= 2.01a14... "
 	$cdrbin cuefile=a 2>&1 |grep 'Bad Option' >/dev/null 2>&1
-	if [ "$?" == 0 ]; then
+	if [ "$?" = 0 ]; then
 	cat <<EOF
 ERROR: Can't find cdrecord version >= 2.01a14. You can download it at
 ftp://ftp.berlios.de/pub/cdrecord/alpha/cdrtools-2.01a20.tar.gz
@@ -281,7 +281,7 @@ else
 	subopts=''
 fi
 
-if [ "x$subopts" == "x" ]; then
+if [ "x$subopts" = "x" ]; then
 	subs=''
 else
 	subs='-sub '
@@ -310,7 +310,7 @@ else
 fi
 
 #finish displaying informations
-if [ "$burning" == 1 ]; then
+if [ "$burning" = 1 ]; then
 #asking for cd
 cat <<EOF
 
@@ -328,7 +328,7 @@ fi
 mencoder -ofps 25 -oac lavc "$input" -ovc lavc -lavcopts vcodec=mpeg2video:vbitrate=$bitrate:acodec=mp2:abitrate=128:keyint=25:aspect=4/3:$paraopts -o "${nev}2.avi" -srate 44100 -of mpeg -channels 2 $vfopts $subs "$subopts"
 
 videosize=`$ls -l "${nev}2.avi"|tr -s ' '|cut -d ' ' -f5`
-if ! [ `echo $(( $cdsize*1048576 < $videosize ))` == "1" ]; then
+if ! [ `echo $(( $cdsize*1048576 < $videosize ))` = "1" ]; then
 	#video is smaller, than $cdsize
 	mv ${nev}2.avi ${nev}00.mpg
 else
@@ -348,7 +348,7 @@ do
 	#creating images
 	vcdimager -t svcd -c "$nev2.cue" -b "$nev2.bin" "$i"
 	#burning if needs
-	if [ "$burning" == 1 ]; then
+	if [ "$burning" = 1 ]; then
 		if [ "$firstcd" != 1 ]; then
 			cat <<EOF
 
@@ -362,7 +362,7 @@ EOF
 		$cdrbin -v -dao $dev speed=12 gracetime=2 driveropts=burnfree -eject cuefile="$nev2.cue"
 	fi
 	#cleaning if needs
-	if [ "$cleaning" == 1 ]; then
+	if [ "$cleaning" = 1 ]; then
 		rm -f "$nev2.cue" "$nev2.bin"
 	fi
 done
