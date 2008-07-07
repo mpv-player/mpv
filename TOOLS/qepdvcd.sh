@@ -43,7 +43,7 @@ RATIOY=3
 
 OPTIONS="INPUTFILENAME TARGET ENCQ ABPS VBPS NORM SPLIT TOLERANCE OUTNAME"
 
-function usage()
+usage()
 {
 echo ""
 echo "usage $MYNAME inputfile [options]"
@@ -65,7 +65,7 @@ echo "http://www.mplayerhq.hu/DOCS/HTML/en/menc-feat-vcd-dvd.html"
 echo ""
 }
 
-function test_needed()
+test_needed()
 {
 
 for i in mencoder; do
@@ -77,7 +77,7 @@ done
 
 }
 
-function test_sugested()
+test_sugested()
 {
 
 for i in vcdimager cdrecord; do

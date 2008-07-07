@@ -79,7 +79,7 @@ EOF
 ###preparing###
 #help
 
-function usage()
+usage()
 {
 	cat <<EOF
 Usage: `basename $0` input_avi [options]
