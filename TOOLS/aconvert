@@ -3,7 +3,7 @@
 # Author: Jonas Jermann
 # Description: A hack to allow mencoder to encode from an audio only file
 
-if [[ $1 = "" ]]; then
+if [ "$1" = "" ]; then
     echo "Usage: $0 <\"input file\"> <\"output file\"> <\"options\">"
     exit 0
 fi
