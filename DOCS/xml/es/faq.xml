@@ -1120,7 +1120,7 @@ Lea la sección <link linkend="mencoder"><application>MEncoder</application></li
 ¿Como puedo crear un VCD?
 </para></question>
 <answer><para>
-Pruebe el script <filename>mencvcd</filename> del subdirectorio <filename class="directory">TOOLS</filename>. 
+Pruebe el script <filename>mencvcd.sh</filename> del subdirectorio <filename class="directory">TOOLS</filename>.
 Con él puede codificar DVDs u otras peliculas al formato VCD o SVCD e incluso
 grabarlo directamente a CD.
 </para></answer>

@@ -230,7 +230,7 @@ popd
 rm -rf $RPM_BUILD_ROOT doc
 
 make install DESTDIR=$RPM_BUILD_ROOT STRIPBINARIES=no
-install -pm 755 TOOLS/midentify $RPM_BUILD_ROOT%{_bindir}/
+install -pm 755 TOOLS/midentify.sh $RPM_BUILD_ROOT%{_bindir}/
 
 # Clean up documentation
 mkdir doc
@@ -291,7 +291,7 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/mplayer/mplayer.conf
 %config(noreplace) %{_sysconfdir}/mplayer/input.conf
 %config(noreplace) %{_sysconfdir}/mplayer/menu.conf
-%{_bindir}/midentify
+%{_bindir}/midentify.sh
 %{_bindir}/mplayer
 %dir %{codecsdir}/
 %dir %{_datadir}/mplayer/

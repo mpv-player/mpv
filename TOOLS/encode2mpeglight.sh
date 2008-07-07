@@ -9,32 +9,32 @@
 #
 # Purpose:          Convert anything MPlayer can play to AVI/VCD/SVCD/DVD MPEG
 #
-#   encode2mpeglight is free software; you can redistribute it and/or modify
+#   encode2mpeglight.sh is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation; either version 2 of the License.
 
-#   encode2mpeglight is distributed in the hope that it will be useful,
+#   encode2mpeglight.sh is distributed in the hope that it will be useful,
 #   but WITHOUT ANY WARRANTY; without even the implied warranty of
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
 
 #   You should have received a copy of the GNU General Public License
-#   along with encode2mpeglight; if not, write to the Free Software
+#   along with encode2mpeglight.sh; if not, write to the Free Software
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 
 ###############################################################################
-#   encode2mpeglight is a program that can create VCD/SVCD/DVD MPEGs
+#   encode2mpeglight.sh is a program that can create VCD/SVCD/DVD MPEGs
 #   and eventually extract VobSub subtitles from a DVD using only
 #   MEncoder/MPlayer.
 #
-#   encode2mpeglight is a stripped release of encode2mpeg and therefore the
+#   encode2mpeglight.sh is a stripped release of encode2mpeg and therefore the
 #   code is redundant in several places, with many variables defined and
 #   used for no apparent reason. This cannot be avoided easily.
 #   A command line like:
-#     encode2mpeglight <encode2mpeglight options>
+#     encode2mpeglight.sh <encode2mpeglight.sh options>
 #   will produce almost the same results as:
-#     encode2mpeg -mpeg -mpegonly <encode2mpeglight options>
+#     encode2mpeg -mpeg -mpegonly <encode2mpeglight.sh options>
 #
 #   If you need more features like:
 #     - two or more audio streams, chapters, subtitles, menu
@@ -42,7 +42,7 @@
 #     - creation of MPEG-4 avi and subtitles for a hardware player
 #   and more, consider to use the full release (http://encode2mpeg.sf.net)
 #
-#   encode2mpeglight is mainly tested with the stable release of MPlayer,
+#   encode2mpeglight.sh is mainly tested with the stable release of MPlayer,
 #   I try to make it work with SVN too, but due to the "unstable" nature of
 #   SVN, bugs may suddenly appear. If you find any, please report them to me.
 ###############################################################################
@@ -268,7 +268,7 @@ tmpgenc_inter=$tmpgenc_inter,23,25,26,27,28,21,22,23,24,26,27,28,30,22,23,24,26,
 TXTSUBDEF=( languageId nolang delay 0 font arial.ttf size 28 bottom-margin 30 characterset ISO8859-1 movie-height-reduction 0 fps default )
 AVISUBDEF=( format SubViewer name-extension null fileformat unix version-number off delay 0 fps default suffix default )
 
-#### encode2mpeglight defauls
+#### encode2mpeglight.sh defauls
 mpeg=1
 encode=7:2:2
 

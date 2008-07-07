@@ -974,7 +974,7 @@ mplayer dvd://5 -dumpstream -dumpfile <replaceable>dvd_dump.vob</replaceable>
 Как автоматически создавать (S)VCD?
 </para></question>
 <answer><para>
-Попробуйте скрипт <filename>mencvcd</filename> из каталога 
+Попробуйте скрипт <filename>mencvcd.sh</filename> из каталога
 <filename class="directory">TOOLS</filename>. С его помощью вы можете перекодировать
 DVD или другие фильмы в VCD или SVCD формат и даже записывать их на CD.
 </para></answer>
@@ -1236,7 +1236,7 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replac
 Как перекодировать звуковой файл (без видео)?
 </para></question>
 <answer><para>
-Используйте <filename>aconvert</filename> из подкаталога 
+Используйте <filename>aconvert.sh</filename> из подкаталога
 <filename class="directory">TOOLS</filename>
 дерева каталогов MPlayer.
 </para></answer>

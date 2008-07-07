@@ -1016,7 +1016,7 @@ farà il dump del quinto titolo del DVD sul file
 Come posso creare automaticamente dei (S)VCD?
 </para></question>
 <answer><para>
-Prova lo script <filename>mencvcd</filename> dalla sottodirectory
+Prova lo script <filename>mencvcd.sh</filename> dalla sottodirectory
 <filename class="directory">TOOLS</filename>.
 Con quello puoi codificare DVD, o altri film, nel formato VCD o SVCD e anche
 scriverli direttamente su CD.
@@ -1286,7 +1286,7 @@ ed è supportato da tutti i riproduttori decenti.
 Come posso codificare un file solo audio?
 </para></question>
 <answer><para>
-Usa <filename>aconvert</filename> dalla sottodirectory
+Usa <filename>aconvert.sh</filename> dalla sottodirectory
 <filename class="directory">TOOLS</filename> dei sorgenti di MPlayer.
 </para></answer>
 </qandaentry>
