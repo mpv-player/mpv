@@ -7542,6 +7542,7 @@ cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
 if test "$cc_vendor" = "gnu" ; then
+  cc_check -std=gnu99 && CFLAGS="-std=gnu99 $CFLAGS"
   cc_check -Wdeclaration-after-statement && CFLAGS="-Wdeclaration-after-statement $CFLAGS"
   cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
   cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
