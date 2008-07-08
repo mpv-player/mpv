@@ -1,4 +1,4 @@
-.\" synced with r26674
+.\" synced with r27236
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -66,7 +66,7 @@ mencoder \- codificatore di film
 .
 .br
 .B mplayer
-[dvd|dvdnav]://[titolo|[titolo_iniziale]\-titolo_finale]
+[dvd|dvdnav]://[titolo|[titolo_iniziale]\-titolo_finale][/dispositivo]
 [opzioni]
 .
 .br
@@ -249,6 +249,8 @@ solo un fotogramma per poi tornare in modalità di pausa (qualsiasi altro tasto
 continua).
 .IPs "q / ESC"
 Smette di riprodurre ed esce.
+.IPs "U\ \ \ \ "
+Ferma la riproduzione (ed esce se non è specificata \-idle).
 .IPs "+ e \-"
 Regola il ritardo audio di +/\- 0.1 secondi.
 .IPs "/ e *"
@@ -852,7 +854,7 @@ Supportato solo dai driver di uscita cvidix, fbdev, svga, vesa, winvidix,
 xmga, xvidix, xover, xv (vedi \-vo xv:ck), xvmc (vedi \-vo xv:ck) e directx.
 .
 .TP
-.B \-correct\-pts (sperimentale)
+.B \-correct\-pts (SPERIMENTALE)
 Esegue MPlayer in una modalità sperimentale dove i timestamp per i fotogrammi
 video vengono calcolati diversamente e sono supportati i filtri video che
 aggiungono nuovi fotogrammi o modificano i timestamp di quelli presenti.
@@ -903,7 +905,7 @@ Attualmente i seguenti driver funzionano con fixed-vo: gl, gl2, mga, svga, x11,
 xmga, xv, xvidix e dfbmga.
 .
 .TP
-.B \-framedrop (vedi anche \-hardframedrop, sperimentale se non con \-no\-correct\-pts)
+.B \-framedrop (vedi anche \-hardframedrop, sperimentale se non con \-nocorrect\-pts)
 Elimina la visualizzazione di alcuni fotogrammi per mantenere il sincronismo
 A/V con sistemi lenti.
 I filtri video non vengono applicati a questi fotogrammi.
@@ -921,7 +923,7 @@ Non funziona come opzione nel file di configurazione.
 Visualizza un breve elenco delle opzioni.
 .
 .TP
-.B \-hardframedrop (sperimentale se non con \-no\-correct\-pts)
+.B \-hardframedrop (sperimentale se non con \-nocorrect\-pts)
 Scarto ancora più intenso di fotogrammi (rovina la decodifica).
 Porta a distorsione delle immagini!
 Nota che nello specifico il decodificatore libmpeg2 può andare in crash,
@@ -938,14 +940,14 @@ assicurarti che non causi problemi di sicurezza (per es.\& assicurati di usare
 percorsi assoluti se "." e nella tua PATH come in Windows).
 .sp 1
 Questo può essere usato (male) per disabilitare salvaschermi che non usano le
-corrette API di X per ciò.
+corrette API di X.
 Se pensi sia troppo complicato, chiedi all'autore del salvaschermo di supportare
-le API di X adeguate per farlo.
+le API di X adeguate.
 .sp 1
 .I ESEMPIO per xscreensaver:
 mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
 .sp 1
-.I ESEMPIO per il salvaschermo di gnome:
+.I ESEMPIO per il salvaschermo di GNOME:
 mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 .RE
 .PD 1
@@ -1072,6 +1074,10 @@ Visualizza il menu principale alla partenza di MPlayer.
 Permette ad MPlayer di ricevere eventi del puntatore riportati dal driver di
 uscita video (attualmente sono supportati solo derivati di X11).
 Necessario per selezionare i bottoni nei menu dei DVD.
+.
+.TP
+.B \-noar
+Disabilita la gestione del telecomando AppleIR.
 .
 .TP
 .B \-noconsolecontrols
@@ -1623,10 +1629,11 @@ Passa automaticamente a IPv4 se necessario.
 .
 .TP
 .B \-psprobe <posizione in byte>
-Riproducendo un flusso MPEG-PS, questa opzione ti permette di specificare
-quanti byte del flusso vuoi che MPlayer legga per poter identificare il codec
-video usato.
-Questa opzione è necessaria per riprodurre file EVO contenenti flussi H.264.
+Riproducendo un flusso MPEG-PS o MPEG-PES, questa opzione ti permette di
+specificare quanti byte del flusso vuoi che MPlayer legga per poter
+identificare il codec video usato.
+Questa opzione è necessaria per riprodurre file EVO o VDR contenenti flussi
+H.264.
 .
 .TP
 .B \-pvr <opzione1:opzione2:...> (solo PVR)
@@ -1961,7 +1968,7 @@ Vedi l'output su console per una lista delle norme TV disponibili.
 Regola il sintonizzatore sul canale <valore>.
 .IPs chanlist=<valore>
 disponibili: europe-east, europe-west, us-bcast, us-cable, etc
-.IPs channels=<canale>\-<nomecanale>,<canale>\-<nomecanale>,...
+.IPs channels=<canale>\-<nome>[=<norma>],<canale>\-<nome>[=<norma>],...
 Imposta la lista dei canali.
 Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
 I nomi dei canali verranno scritti usando l'OSD e i comandi slave tv_step_channel,
@@ -3748,10 +3755,10 @@ texture della vostra implementazione OpenGL.
 Studiato per funzionare anche con l'implementazione OpenGl più basilare,
 ma usa pure estensioni recenti e nuove, che permettono di usare più spazi
 colore e il rendering diretto.
-Per favore utilizza \-dr se funziona con la tua implementazione OpenGL, dato
-che per alte risoluzioni porta a un
-.B grande
-aumento di velocità.
+Per una velocità ottimale prova ad usare qualcosa simile a
+.br
+\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+.br
 Questa parte di codice implementa pochi controlli percio' se una
 caratteristica non funziona potrebbe non essere supportata dalla
 tua scheda o dalla tua implementazione OpenGL anche se non viene
@@ -3760,6 +3767,17 @@ Utilizza glxinfo oppure uno strumento simile per visualizzare le estensioni
 supportate dalla vostra implementazione OpenGL.
 .PD 0
 .RSs
+.IPs (no)ati\-hack
+I driver ATI possono fornire un immagine corrotta quando si usano i PBO (usando
+\-dr o force\-pbo).
+Questa opzione corregge questo comportamento, utilizzando un po' più di memoria.
+.IPs (no)force\-pbo
+Usa sempre i PBO per trasferire le texture, anche se ciò implica un'ulteriore
+copia.
+Attualmente incrementa di poco la velocità con i driver NVidia e molto con i
+driver ATI.
+Per funzionare correttamente può aver bisogno delle sotto-opzioni \-noslices e
+di ati\-hack.
 .IPs (no)scaled-osd
 Cambia il modo in cui l'OSD si comporta quando cambia la dimensione della
 finestra (default: disabilitato).
@@ -4649,6 +4667,8 @@ a risoluzione completa.
 Se <l> viene specificato la decodifica a bassa risoluzione verrà usata solo
 se la larghezza del video è maggiore od uguale a <l>.
 .RE
+.IPs "o\ \ \ \ "
+FIXME: Da documentare.
 .IPs "sb=<numero> (solo MPEG-2)"
 Salta il numero indicato di righe di macroblocchi in basso.
 .IPs "st=<numero> (solo MPEG-2)"
@@ -5546,6 +5566,7 @@ Questo filtro non è testato, forse anche inutilizzabile.
 .B "gate\ \ \ "
 Filtro noise gate (limite rumore) simile al filtro audio comp.
 Questo filtro non è testato, forse anche inutilizzabile.
+.
 .TP
 .B karaoke
 Semplice filtro di rimozione della voce che sfrutta il fatto che la voce sia
@@ -5554,6 +5575,83 @@ finale.
 Attenti che questo filtro convertirà il vostro segnale in mono.
 Funziona bene con tracce a due canali, non perder tempo ad usarlo
 su qualcosa che non sia stereo a due canali.
+.
+.TP
+.B scaletempo[=opzione1:opzione2:...]
+Riproporziona il tempo dell'audio senza modificare il picco, opzionalmente
+in sincronia con la velocità di riproduzione (default).
+.br
+Questo funziona riproducendo \'stride\' ms di audio alla velocità normale, e
+poi consumando \'stride*proporzione\' ms dell'audio in ingresso.
+Lega tra loro gli stride miscelando \'overlap\'% di uno stride
+con l'audio che segue lo stride precedente.
+Facoltativamente esegue una breve analisi statistica sui \'search\' ms di
+audio successivi, per determinare il miglior punto per la sovrapposizione.
+.PD 0
+.RSs
+.IPs scale=<valore>
+Valore nominale di riproporzione tempo.
+Riproporziona questo valore sommato alla velocità.
+(default: 1.0)
+.IPs stride=<valore>
+Lunghezza in millisecondi di ogni stride da emettere.
+Un valore troppo alto causerà salti evidenti per valori di scale alti e un'eco
+per valori di scale bassi.
+Valori molto bassi modificherano il picco.
+Valori più alti aumentano la resa.
+(default: 60)
+.IPs overlap=<percentuale>
+Percentuale di stride da sovrapporre.
+Valori più bassi aumentano la resa.
+(default: .20)
+.IPs search=<valore>
+Lunghezza in millisecondi per cercare il miglior punto per la sovrapposizione.
+Valori più bassi aumentano decisamente la resa.
+Su sistemi lenti, la vorrai impostare probabilmente molto corta.
+(default: 14)
+.IPs speed=<tempo|pitch|both|none>
+Imposta la risposta al cambio di velocità.
+.RSss
+.IPs tempo
+Riproporziona il tempo in sincronia con la velocità (default).
+.IPs pitch
+Inverte l'effetto del filtro.
+Riproporziona il picco senza modificare il tempo.
+Aggiungi \'[ speed_mult 0.9438743126816935\' e
+\'] speed_mult 1.059463094352953\' al tuo file input.conf per spostarti di
+semitoni musicali.
+.I ATTENZIONE:
+Perde sincronia col video.
+.IPs both
+Riproporziona sia il tempo che il picco.
+.IPs none
+Ignora il cambio di velocità.
+.RE
+.RE
+.sp 1
+.RS
+.I ESEMPI:
+.RE
+.RSs
+.IPs "mplayer \-af scaletempo \-speed 1.2 media.ogg"
+Riproduce media a 1.2x la normale velocità, con audio al picco normale.
+Cambiando la velocità di riproduzione, modifica il tempo audio affinché
+corrisponda.
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=none \-speed 1.2 media.ogg"
+Riproduce media a 1.2x la normale velocità, con audio al picco normale,
+ma la modifica della velocità di riproduzione non ha alcun effetto sul tempo
+audio.
+.IPs "mplayer \-af scaletempo=stride=30:overlap=.50:search=10 media.ogg"
+Modifica i parametri di qualità e di resa.
+.IPs "mplayer \-af format=floatne,scaletempo media.ogg"
+Fa in modo che scaletempo usi codice a virgola mobile.
+Forse più veloce su alcune piattaforme.
+.IPs "mplayer \-af scaletempo=scale=1.2:speed=pitch audio.ogg"
+Riproduce media a 1.2x la normale velocità, con audio al picco normale.
+Cambiando la velocità di riproduzione, modifica il picco, lasciando il tempo
+audio a 1.2x.
+.RE
+.PD 1
 .
 .
 .
@@ -5650,8 +5748,12 @@ Con molti codec video conviene utilizzare 16 quando si effettua la codifica.
 .
 .TP
 .B rectangle[=w:h:x:y]
-Il plugin risponde alla direttiva 'change_rectangle' di input.conf che
-ha due parametri.
+Disegna un rettangolo delle dimensioni richieste alle coordinate indicate
+sopra all'immagine ed emette sulla console i valori correnti del rettangolo
+stesso.
+Questo può essere usato per trovare i migliori parametri per il taglio (crop).
+Se colleghi la direttiva 'change_rectangle' di input.conf a qualche tasto,
+puoi spostare e ridimensionare il rettangolo al volo.
 .PD 0
 .RSs
 .IPs <w>,<h>
@@ -7619,7 +7721,7 @@ Puoi specificare opzioni specifiche dei codec di codifica usando la
 sintassi seguente:
 .
 .TP
-.B \-<codec>opts <opzione1[=valore,opzione2,...>
+.B \-<codec>opts <opzione1[=valore1]:opzione2[=valore2]:...>
 .RE
 .
 .PP
@@ -7993,7 +8095,7 @@ Windows Media Video, versione 2 (conosciuto anche come WMV8)
 .
 .TP
 .B vqmin=<1\-31>
-valore minimo di quantizzazione (passo 1/2)
+valore minimo di quantizzazione
 .RSs
 .IPs 1
 Non raccomandato (file molto grandi, una piccola differenza di qualità e
@@ -8058,7 +8160,7 @@ indefinito.
 .
 .TP
 .B vqmax=<1\-31>
-Valore massimo di quantizzazione (passo 1/2), 10\-31 dovrebbe essere un
+Valore massimo di quantizzazione, 10\-31 dovrebbe essere un
 buon valore (default: 31).
 .
 .TP
@@ -8072,7 +8174,7 @@ obsoleto, utilizza vqmax
 .TP
 .B vqdiff=<1\-31>
 valore massimo di differenza di quantizzazione tra fotogrammi consecutivi I o P
-(passo 1/2) (default: 3)
+(default: 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -8363,7 +8465,7 @@ attivo.
 .
 .TP
 .B vbitrate=<valore>
-Specifica il bitrate (passo 1/2) (default: 800).
+Specifica il bitrate (default: 800).
 .br
 .I ATTENZIONE:
 1kbit = 1000 bit
@@ -8389,17 +8491,17 @@ problemi se si utilizza vrc_(min|max)rate.
 .
 .TP
 .B vrc_maxrate=<valore>
-valore massimo del bitrate in kbit/\:sec (passo 1/2)
+valore massimo del bitrate in kbit/\:sec
 (default: 0, illimitato)
 .
 .TP
 .B vrc_minrate=<valore>
-valore minimo del bitrate in kbit/\:sec (passo 1/2)
+valore minimo del bitrate in kbit/\:sec
 (default: 0, illimitato)
 .
 .TP
 .B vrc_buf_size=<valore>
-dimensione del buffer in kbit (passo 1/2).
+dimensione del buffer in kbit
 Per MPEG-1/2 questo regola anche la dimensione del vbv (video buffer
 verifier), utilizza 327 per i VCD, 917 per i SVCD e 1835 per i DVD.
 .
@@ -8425,19 +8527,19 @@ uguale a 1.1).
 .
 .TP
 .B vb_qfactor=<\-31.0\-31.0>
-fattore di quantizzazione tra fotogrammi B e non B (passo 1/2) (default: 1.25)
+fattore di quantizzazione tra fotogrammi B e non B (default: 1.25)
 .
 .TP
 .B vi_qfactor=<\-31.0\-31.0>
-fattore di quantizzazione tra fotogrammi I e non I (passo 1/2) (default: 0.8)
+fattore di quantizzazione tra fotogrammi I e non I (default: 0.8)
 .
 .TP
 .B vb_qoffset=<\-31.0\-31.0>
-scostamento di quantizzazione tra fotogrammi B e non B (passo 1/2) (default: 1.25)
+scostamento di quantizzazione tra fotogrammi B e non B (default: 1.25)
 .
 .TP
 .B vi_qoffset=<\-31.0\-31.0>
-(passo 1/2) (default: 0.0)
+(default: 0.0)
 .br
 se v{b|i}_qfactor > 0
 .br
@@ -8474,7 +8576,7 @@ medieranno la quantizzazione maggiormente nel tempo (cambiamenti più lenti).
 .
 .TP
 .B vqcomp=<valore>
-Compressione della quantizzazione, vrc_eq dipende da questo (passo 1/2) (default: 0.5).
+Compressione della quantizzazione, vrc_eq dipende da questo (default: 0.5).
 Per esempio, supponendo che sia utilizzata l'equazione di default del rate control,
 se si utilizza vqcomp=1.0 il controllo della dimensione del file alloca per ogni
 fotogramma la quantità di bit necessari a codificarlo con lo stesso QP.
@@ -8487,7 +8589,6 @@ La miglior qualità percepita sarà ottimale tra questi due valori.
 .TP
 .B vrc_eq=<equazione>
 equazione principale per il controllo della dimensione del file (ratecontrol)
-(passo 1/2)
 .RE
 .RSs
 .IPs "1\ \ \ \ "
@@ -8561,7 +8662,7 @@ massimo / minimo
 .TP
 .B vrc_override=<opzioni>
 Utilizza la qualità specificata per alcuni pezzi particolari
-(finale, riconoscimenti, ...) (passo 1/2).
+(finale, riconoscimenti, ...).
 Le opzioni sono <fotogramma iniziale>, <fotogramma finale>, <qualità>
 [/<fotogramma iniziale>, <fotogramma finale>, <qualità>[/...]]:
 .PD 0
@@ -8584,7 +8685,7 @@ vrc_buf_size (default: 0.9)
 .
 .TP
 .B vqsquish=<0|1>
-Specifica come mantenere la quantizzazione tra qmin e qmax (passo 1/2).
+Specifica come mantenere la quantizzazione tra qmin e qmax.
 .PD 0
 .RSs
 .IPs 0
@@ -9356,6 +9457,10 @@ FIXME: Da documentare.
 .
 .TP
 .B skip_threshold=<0\-1000000>
+FIXME: Da documentare.
+.
+.TP
+.B "o\ \ \ \ \ \ "
 FIXME: Da documentare.
 .
 .
@@ -10495,6 +10600,27 @@ per la luminanza.
 Valori utili sono nella gamma <\-2\-2> (default: 0).
 .
 .TP
+.B aq_mode=<0\-2>
+Definisce il modo in cui la quantizzazione adattiva (AQ) distribuisce i bit:
+.PD 0
+.RSs
+.IPs 0
+disabilitato
+.IPs 1
+Evita di distribuire i bit tra fotogrammi.
+.IPs 2
+Distribuisce i bit tra fotogrammi (default).
+.RE
+.PD 1
+.
+.TP
+.B aq_strength=<valore positivo a virgola mobile>
+Controlla quanto la quantizzazione adattiva (AQ) possa ridurre artefatti con
+blocchi e sfocature in aree piane e con texture (default: 1.0).
+Un valore di 0.5 indebolirà AQ e fornirà meno dettagli, mentre un valore di 1.5
+porterà un'AQ più forte e maggiori dettagli.
+.
+.TP
 .B cqm=<flat|jvt|<nomefile>>
 Usa una matrice di quantizzazione personalizzata predefinita o ne carica una
 da un file in formato JS.
@@ -10801,6 +10927,10 @@ Durata massima in secondi per analizzare le proprietà del flusso.
 Forza uno specifico demuxer di libavformat.
 .
 .TP
+.B "o\ \ \ \ \ \ "
+FIXME: Da documentare.
+.
+.TP
 .B probesize=<valore>
 Massima dimensione dei dati da testare durante la fase di rilevazione.
 Nel caso di MPEG-TS questo valore indentifica il massimo numero di pacchetti
@@ -10863,6 +10993,10 @@ Formato contenitore Sony Digital Video
 Valore nominale del flusso multiplexato, in bit per secondo;
 attualmente significativo solo per MPEG[12].
 A volte è necessario aumentarlo per evitare errori di 'buffer underflows'.
+.
+.TP
+.B "o\ \ \ \ \ \ "
+FIXME: Da documentare.
 .
 .TP
 .B packetsize=<dimensione>
@@ -11030,6 +11164,12 @@ FIXME: Da documentare.
 .TP
 .B VIDIX_CRT
 FIXME: Da documentare.
+.
+.TP
+.B VIDIXIVTVALPHA
+Impostala a 'disable' per impedire al driver VIDIX il controllo delle
+impostazioni di alphablending.
+Può poi essere gestito attraverso 'ivtvfbctl'.
 .
 .SS osdep:
 .
