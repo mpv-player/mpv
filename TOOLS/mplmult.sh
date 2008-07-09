@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # example how to output video on multiple windows in sync.
 # might be even more useful in combination with vo ggi
 # to distribute the video arbitrarily

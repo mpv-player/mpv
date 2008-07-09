@@ -1008,7 +1008,7 @@ zrzuci piątą pozycję DVD do pliku <replaceable>zrzut_dvd.vob</replaceable>.
 Jak mogę tworzyć automatycznie (S)VCD?
 </para></question>
 <answer><para>
-Wypróbuj skrypt <filename>mencvcd</filename> z podkatalogu
+Wypróbuj skrypt <filename>mencvcd.sh</filename> z podkatalogu
 <filename class="directory">TOOLS</filename>.
 Korzystając z niego, możesz kodować DVD lub inne filmy do formatu VCD lub SVCD,
 a nawet wypalać bezpośrednio na CD.
@@ -1282,7 +1282,7 @@ a jest obsługiwany przez wszystkie sensowne odtwarzacze.
 Jak mogę kodować plik zawierający tylko dźwięk?
 </para></question>
 <answer><para>
-Użyj <filename>aconvert</filename> z podkatalogu
+Użyj <filename>aconvert.sh</filename> z podkatalogu
 <filename class="directory">TOOLS</filename> w drzewie źródeł
 <application>MPlayera</application>.
 </para></answer>

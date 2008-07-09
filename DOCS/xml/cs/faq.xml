@@ -997,7 +997,7 @@ nahraje 5. titul z DVD do souboru
 Jak vytvořím (S)VCD automaticky?
 </para></question>
 <answer><para>
-Zkuste skript <filename>mencvcd</filename> z podadresáře
+Zkuste skript <filename>mencvcd.sh</filename> z podadresáře
 <filename class="directory">TOOLS</filename>.
 Pomocí něj můžete enkódovat DVD nebo jiné filmy do VCD
 nebo SVCD formátu a dokonce je vypálit přímo na CD.
@@ -1262,7 +1262,7 @@ a je podporován všemi dobrými přehrávači.
 Jak mohu enkódovat soubor jen se zvukem?
 </para></question>
 <answer><para>
-Použijte <filename>aconvert</filename> z podadresáře
+Použijte <filename>aconvert.sh</filename> z podadresáře
 <filename class="directory">TOOLS</filename>
 ve zdrojových kódech MPlayeru.
 </para></answer>

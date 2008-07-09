@@ -25,24 +25,24 @@ Description:  Examples of custom fragment program for OpenGL video out driver
 Usage:        mplayer -vo gl:yuv=4:customprog=edgedetect.fp
 
 
-midentify
+midentify.sh
 
 Author:       Tobias Diedrich
 
 Description:  Runs 'mplayer -identify' for all arguments while preventing
               video window flashing.
 
-Usage:        midentify file1 [file2 ...]
+Usage:        midentify.sh file1 [file2 ...]
 
 
-mpconsole
+mpconsole.sh
 
 Author:       Rich Felker
 
 Description:  Script to run MPlayer on the console (fbdev/mga_vid/etc.) without
               the console text and/or flashing cursor getting in the way.
 
-Usage:        mpconsole [mplayer options]
+Usage:        mpconsole.sh [mplayer options]
 
 
 mplmult.sh
@@ -90,25 +90,25 @@ Usage:        wma2ogg [options] <-f FILE1 | -f FILE2 ... | -a>
 MEncoder scripts in the TOOLS dir
 ---------------------------------
 
-divx2svcd
+divx2svcd.sh
 
 Author:       Miklos Vajna
 
 Description:  A simple utility that creates an SVCD from a video in an AVI
               container.
 
-Usage:        divx2svcd <input_avi> [options]
-              see 'divx2svcd -h' for more info
+Usage:        divx2svcd.sh <input_avi> [options]
+              see 'divx2svcd.sh -h' for more info
 
 
-mencvcd
+mencvcd.sh
 
 Author:       Jürgen Hammelmann
 
 Description:  Converts DVD (or anything else that MPlayer plays) to (S)VCD
 
-Usage:        mencvcd <basename> [mencvcd options] [mplayer options]
-              see 'mencvcd -h' for more info
+Usage:        mencvcd.sh <basename> [mencvcd.sh options] [mplayer options]
+              see 'mencvcd.sh -h' for more info
 
 Note:         Requires MPlayer, mjpegtools, VCDImager, cdrdao, and optionally
               LAME, tooLAME and SoX.
@@ -143,14 +143,14 @@ Usage:        --help       show help
               --dvd-device device to pull the video off (default: /dev/dvd)
 
 
-aconvert
+aconvert.sh
 
 Author:       Jonas Jermann
 
 Description:  A hack to allow MEncoder to read respectively encode from audio
               only files.
 
-Usage:        aconvert <"input file"> <"output file"> <"options">
+Usage:        aconvert.sh <"input file"> <"output file"> <"options">
               If no options are specified the following is assumed:
               -oac lavc -lavcopts acodec=mp3:abitrate=192
 
@@ -173,17 +173,17 @@ Note:         You will need vcdimager/cdrecord to master/burn the resulting
 
 
 
-encode2mpeglight
+encode2mpeglight.sh
 
 Author:       Giacomo Comes
 
 Description:  Convert anything MPlayer can play to VCD/SVCD/DVD MPEG.
 
-Usage:        encode2mpeglight -o <NAME> -n <NORM> [options] <source>
+Usage:        encode2mpeglight.sh -o <NAME> -n <NORM> [options] <source>
               For help and documentation run:
-                encode2mpeglight -h
-                encode2mpeglight -l
-                encode2mpeglight -doc
+                encode2mpeglight.sh -h
+                encode2mpeglight.sh -l
+                encode2mpeglight.sh -doc
 
 Note:         This script uses only MEncode/MPlayer. Check the final log
               file for informations/warnings about the encoding process.

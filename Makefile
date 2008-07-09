@@ -648,6 +648,7 @@ OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 
 MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
+DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
@@ -703,11 +704,16 @@ DIRS =  . \
         TOOLS \
         vidix \
 
+ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
+
 PARTS = ffmpeg/libavcodec \
         ffmpeg/libavformat \
         ffmpeg/libavutil \
         ffmpeg/libpostproc \
         libswscale \
+
+FFMPEGLIBS  = $(foreach part, $(PARTS), $(part)/$(notdir $(part)).a)
+FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[chS] ffmpeg/libavcodec/*/*.[chS])
 
 
 
@@ -730,15 +736,15 @@ all: $(ALL_PRG-yes)
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
-ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
+%-rc.o: %.rc
+	$(WINDRES) -I. $< $@
+
 checkheaders: $(ALLHEADERS:.h=.ho)
 
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
-ALLPARTLIBS = $(foreach part, $(PARTS), $(part)/$(notdir $(part)).a)
-
-$(ALLPARTLIBS): ffmpeg/libavutil/*.[ch] ffmpeg/libavcodec/*.[ch] ffmpeg/libavcodec/*/*.[chS] ffmpeg/libavformat/*.[ch] ffmpeg/libpostproc/*.[ch] libswscale/*.[chS] libvo/fastmemcpy.h config.h
+$(FFMPEGLIBS): $(FFMPEGFILES) libvo/fastmemcpy.h config.h
 	$(MAKE) -C $(@D)
 	touch $@
 
@@ -752,7 +758,7 @@ codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) -O -I. -Iffmpeg -DCODECS2HTML -o $@ $<
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
-	./codec-cfg$(EXESUF) ./etc/codecs.conf > $@
+	./$^ > $@
 
 # ./configure must be rerun if it changed
 config.mak: configure
@@ -770,9 +776,6 @@ endif
 version.h:
 	./version.sh `$(CC) -dumpversion`
 
-osdep/mplayer-rc.o: osdep/mplayer.rc version.h
-	$(WINDRES) -I. $< $@
-
 %(EXESUF): %.c
 
 
@@ -780,8 +783,7 @@ osdep/mplayer-rc.o: osdep/mplayer.rc version.h
 ###### dependency declarations / specific CFLAGS ######
 
 codec-cfg.d: codecs.conf.h
-mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d: version.h
-DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
+mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d osdep/mplayer-rc.o: version.h
 $(DEPS): help_mp.h
 
 dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE $(LIBDVDCSS_DVDREAD_FLAGS)
@@ -862,7 +864,7 @@ clean:
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
 	rm -f mplayer$(EXESUF) mencoder$(EXESUF)
 
-distclean: clean testsclean toolsclean driversclean
+distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
 	rm -rf DOCS/tech/doxygen
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
@@ -941,9 +943,8 @@ toolsclean:
 
 TOOLS/bmovl-test$(EXESUF): -lSDL_image
 
-TOOLS/subrip$(EXESUF): vobsub.o spudec.o unrar_exec.o \
-  libvo/aclib.o libswscale/libswscale.a libavutil/libavutil.a \
-  $(TEST_OBJS)
+TOOLS/subrip$(EXESUF): vobsub.o spudec.o unrar_exec.o libvo/aclib.o \
+    libswscale/libswscale.a libavutil/libavutil.a $(TEST_OBJS)
 
 TOOLS/vfw2menc$(EXESUF): -lwinmm -lole32
 
@@ -984,10 +985,11 @@ KERNEL_VERSION = $(shell grep RELEASE $(KERNEL_INC)/linux/version.h | cut -d'"' 
 KERNEL_CFLAGS = -O2 -D__KERNEL__ -DMODULE -Wall -I$(KERNEL_INC) -include $(KERNEL_INC)/linux/modversions.h
 KERNEL_OBJS = $(addprefix drivers/, mga_vid.o tdfx_vid.o radeon_vid.o rage128_vid.o)
 MODULES_DIR = /lib/modules/$(KERNEL_VERSION)/misc
+DRIVER_OBJS = $(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test
 
-drivers: $(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test
+drivers: $(DRIVER_OBJS)
 
-$(KERNEL_OBJS) drivers/mga_vid_test drivers/tdfx_vid_test: CFLAGS = $(KERNEL_CFLAGS)
+$(DRIVER_OBJS): CFLAGS = $(KERNEL_CFLAGS)
 drivers/mga_vid.o: drivers/mga_vid.c drivers/mga_vid.h
 drivers/tdfx_vid.o: drivers/tdfx_vid.c drivers/3dfx.h
 drivers/radeon_vid.o drivers/rage128_vid.o: CFLAGS += -fomit-frame-pointer -fno-strict-aliasing -fno-common -ffast-math
@@ -995,7 +997,7 @@ drivers/radeon_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
 drivers/rage128_vid.o: drivers/radeon_vid.c drivers/radeon.h drivers/radeon_vid.h
 	$(CC) $(CFLAGS) -DRAGE128 -c $< -o $@
 
-install-drivers: drivers
+install-drivers: $(DRIVER_OBJS)
 	-mkdir -p $(MODULES_DIR)
 	install -m 644 $(KERNEL_OBJS) $(MODULES_DIR)
 	depmod -a
@@ -1005,7 +1007,7 @@ install-drivers: drivers
 	-ln -s /dev/radeon_vid /dev/rage128_vid
 
 driversclean:
-	rm -f drivers/*.o drivers/*~ drivers/mga_vid_test drivers/tdfx_vid_test
+	rm -f $(DRIVER_OBJS) drivers/*~
 
 dhahelper: vidix/dhahelper/dhahelper.o vidix/dhahelper/test
 
@@ -1029,8 +1031,7 @@ vidix/dhahelperwin/dhasetup.exe: vidix/dhahelperwin/dhasetup.c
 vidix/dhahelperwin/dhahelper.o: vidix/dhahelperwin/dhahelper.c vidix/dhahelperwin/dhahelper.h
 	$(CC) -Wall -Os -c $< -o $@
 
-vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/dhahelper.rc vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
-	$(WINDRES) -I. $< $@
+vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/common.ver vidix/dhahelperwin/ntverp.h
 
 vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
 	$(CC) -Wl,--base-file,$@ -Wl,--entry,_DriverEntry@8 -nostartfiles \

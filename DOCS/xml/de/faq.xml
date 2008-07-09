@@ -1245,7 +1245,7 @@ Starte Wiedergabe...<!--
         </question>
         <answer>
           <para>
-            Probiere das Script <filename>mencvcd</filename> aus dem Unterverzeichnis <filename class="directory">TOOLS</filename>.
+            Probiere das Script <filename>mencvcd.sh</filename> aus dem Unterverzeichnis <filename class="directory">TOOLS</filename>.
             Damit kannst du DVDs oder andere Filme automatisch ins VCD- oder SVCD-Format encodieren
             und sogar direkt auf CD brennen.
           </para>
@@ -1554,7 +1554,7 @@ rm encode<!--
         </question>
         <answer>
           <para>
-            Benutze <filename>aconvert</filename> vom Unterverzeichnis
+            Benutze <filename>aconvert.sh</filename> vom Unterverzeichnis
             <filename class="directory">TOOLS</filename> im MPlayer-Sourcenbaum.
           </para>
         </answer>

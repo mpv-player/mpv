@@ -688,14 +688,17 @@ static uint32_t get_image(mp_image_t *mpi) {
     return VO_FALSE;
   }
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
-  if (!gl_buffer)
-    GenBuffers(1, &gl_buffer);
-  BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
   if (ati_hack) {
     int s = 1;
+    // for unexplainable reasons, with width < 512 chroma tends to be messed up
+    // (after ca. 2/3 the previous line repeats all over)
+    if (mpi->width < 512) return VO_FALSE;
     while (s < mpi->width) s *= 2;
     mpi->width = s;
   }
+  if (!gl_buffer)
+    GenBuffers(1, &gl_buffer);
+  BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   if (mpi->stride[0] * mpi->height > gl_buffersize) {
     BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->height,

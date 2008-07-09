@@ -790,7 +790,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     else if(dvd_device)
       dvd_device_current = dvd_device;
     else
-      dvd_device_current = strdup(DEFAULT_DVD_DEVICE);
+      dvd_device_current = DEFAULT_DVD_DEVICE;
     dvd_set_speed(dvd_device_current, dvd_speed);
 #if defined(__APPLE__) || defined(__DARWIN__)
     /* Dynamic DVD drive selection on Darwin */

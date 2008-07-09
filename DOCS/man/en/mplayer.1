@@ -61,7 +61,7 @@ mencoder \- movie encoder
 .
 .br
 .B mplayer
-[dvd|dvdnav]://[title|[start_title]\-end_title]
+[dvd|dvdnav]://[title|[start_title]\-end_title][/device]
 [options]
 .
 .br
@@ -927,7 +927,7 @@ In some cases you can get more information by using \-msglevel identify=6.
 For example, for a DVD it will list the chapters and time length of each title,
 as well as a disk ID.
 Combine this with \-frames 0 to suppress all output.
-The wrapper script TOOLS/\:midentify suppresses the other MPlayer output and
+The wrapper script TOOLS/\:midentify.sh suppresses the other MPlayer output and
 (hopefully) shellescapes the filenames.
 .
 .TP
@@ -1038,6 +1038,10 @@ output driver (currently only derivatives of X11 are supported).
 Necessary to select the buttons in DVD menus.
 .
 .TP
+.B \-noar
+Turns off AppleIR remote support.
+.
+.TP
 .B \-noconsolecontrols
 Prevent MPlayer from reading key events from standard input.
 Useful when reading data from standard input.
@@ -1054,10 +1058,6 @@ Turns off joystick support.
 .TP
 .B \-nolirc
 Turns off LIRC support.
-.
-.TP
-.B \-noar
-Turns off AppleIR remote support.
 .
 .TP
 .B \-nomouseinput
@@ -10528,6 +10528,10 @@ currently it is meaningful only for MPEG[12].
 Sometimes raising it is necessary in order to avoid "buffer underflows".
 .
 .TP
+.B "o\ \ \ \ \ \ "
+FIXME: undocumented
+.
+.TP
 .B packetsize=<size>
 Size, expressed in bytes, of the unitary packet for the chosen format.
 When muxing to MPEG[12] implementations the default values are:
@@ -10539,10 +10543,6 @@ Currently only meaningful for MPEG[12]: Initial distance,
 in seconds, between the reference timer of the output stream (SCR)
 and the decoding timestamp (DTS) for any stream present
 (demux to decode delay).
-.
-.TP
-.B "o\ \ \ \ \ \ "
-FIXME: undocumented
 .
 .
 .

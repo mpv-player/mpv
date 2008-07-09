@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Helper script to ease comparing the PSNR between two video files
 # Copyleft 2005 by Matthias Wieser
 # Copyleft 2005 by Ivo

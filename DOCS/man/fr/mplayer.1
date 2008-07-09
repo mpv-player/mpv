@@ -1,4 +1,4 @@
-.\" synced with r27182
+.\" synced with r27236
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -63,7 +63,7 @@ mencoder \- Encodeur vidéo
 .
 .br
 .B mplayer
-[dvd|dvdnav]://[titre|[titre_de_début]\-titre_de_fin ]
+[dvd|dvdnav]://[titre|[titre_de_début]\-titre_de_fin ][/périphérique]
 [options]
 .
 .br
@@ -970,7 +970,7 @@ Dans certains cas, vous aurez encore plus d'informations en utilisant
 Par exemple, pour les DVDs, cela listera la durée de chaque titre et de
 chaque chapitre, tout comme le numéro d'identifiant du DVD.
 Ajoutez l'option \-frames 0 pour supprimer toute sortie console superflue.
-Le script TOOLS/\:midentify supprime le reste de l'affichage et (espérons-le)
+Le script TOOLS/\:midentify.sh supprime le reste de l'affichage et (espérons-le)
 formate les noms de fichiers pour le shell.
 .
 .TP
@@ -1094,6 +1094,10 @@ pour le moment).
 Utilisé pour sélectioner les boutons des menus DVDs.
 .
 .TP
+.B \-noar
+Désactive la gestion de la télécommande AppleIR.
+.
+.TP
 .B \-noconsolecontrols
 Empêche MPlayer de réagir aux commandes clavier depuis l'entrée
 standard.
@@ -1114,10 +1118,6 @@ Activé par défaut, si il a été compilé pour.
 .TP
 .B \-nolirc
 Désactive la gestion de LIRC.
-.
-.TP
-.B \-noar
-Désactive la gestion de la télécommande AppleIR.
 .
 .TP
 .B \-nomouseinput
@@ -11116,6 +11116,10 @@ Il arrive qu'il faille augmenter ce paramètre pour éviter des débordements
 de tampons "buffer underflows".
 .
 .TP
+.B "o\ \ \ \ \ \ "
+FIXME: non documenté
+.
+.TP
 .B packetsize=<taille>
 Taille, exprimée en octets, du paquet unitaire du format donné.
 Lorsque le format de sortie est l'une des implémentations de MPEG[12],
@@ -11128,10 +11132,6 @@ N'a de sens pour le moment que pour MPEG[12]: Distance maximale
 permise, en secondes, entre la référence temporelle du flux de sortie
 (SCR) et le timestamp de décodage (DTS) pour tout flux présent (délais
 entre le démultiplexage et le décodage).
-.
-.TP
-.B "o\ \ \ \ \ \ "
-FIXME: non documenté
 .
 .
 .

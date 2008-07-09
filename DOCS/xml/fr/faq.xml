@@ -929,7 +929,7 @@ déchargera le 5ème titre du DVD dans un fichier
 Comment puis-je créer des (S)VCDs automatiquement?
 </para></question>
 <answer><para>
-Essayez le script <filename>mencvcd</filename> du sous-répertoire
+Essayez le script <filename>mencvcd.sh</filename> du sous-répertoire
 <filename class="directory">TOOLS</filename>. Avec lui vous pourrez encoder des DVDs
 ou d'autres films en format VCD ou SVCD et même les graver directement sur un CD.
 </para></answer>
@@ -1180,7 +1180,7 @@ fonctionalitiés, et il est supporté par tous les lecteurs digne de ce nom.
 Comment puis-je encoder un fichier seulement audio?
 </para></question>
 <answer><para>
-Utilisez <filename>aconvert</filename> du sous-répertoire
+Utilisez <filename>aconvert.sh</filename> du sous-répertoire
 <filename class="directory">TOOLS</filename>
 qui se situe dans l'arbre source de MPlayer.
 </para></answer>

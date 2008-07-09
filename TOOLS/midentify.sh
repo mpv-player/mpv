@@ -8,7 +8,7 @@
 # Licensed under GNU GPL.
 
 if [ -z "$1" ]; then
-	echo "Usage: midentify <file> [<file> ...]"
+	echo "Usage: midentify.sh <file> [<file> ...]"
 	exit 1
 fi
 

@@ -88,12 +88,6 @@ untested special converters
 
 #define RET 0xC3 //near return opcode for X86
 
-#ifdef MP_DEBUG
-#define ASSERT(x) assert(x);
-#else
-#define ASSERT(x) ;
-#endif
-
 #ifdef M_PI
 #define PI M_PI
 #else
@@ -1060,7 +1054,7 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
         else if (flags&SWS_BILINEAR)     sizeFactor=  2.0;
         else {
             sizeFactor= 0.0; //GCC warning killer
-            ASSERT(0)
+            assert(0);
         }
 
         if (xInc1 <= 1.0)       filterSizeInSrc= sizeFactor; // upscale
@@ -1145,7 +1139,7 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
                 }
                 else {
                     coeff= 0.0; //GCC warning killer
-                    ASSERT(0)
+                    assert(0);
                 }
 
                 filter[i*filterSize + j]= coeff;
@@ -1158,11 +1152,11 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
     /* apply src & dst Filter to filter -> filter2
        av_free(filter);
     */
-    ASSERT(filterSize>0)
+    assert(filterSize>0);
     filter2Size= filterSize;
     if (srcFilter) filter2Size+= srcFilter->length - 1;
     if (dstFilter) filter2Size+= dstFilter->length - 1;
-    ASSERT(filter2Size>0)
+    assert(filter2Size>0);
     filter2= av_malloc(filter2Size*dstW*sizeof(double));
 
     for (i=0; i<dstW; i++)
@@ -1177,7 +1171,7 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
         if (srcFilter) outVec= sws_getConvVec(srcFilter, &scaleFilter);
         else           outVec= &scaleFilter;
 
-        ASSERT(outVec->length == filter2Size)
+        assert(outVec->length == filter2Size);
         //FIXME dstFilter
 
         for (j=0; j<outVec->length; j++)
@@ -1252,9 +1246,9 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
             filterAlign= 1;
     }
 
-    ASSERT(minFilterSize > 0)
+    assert(minFilterSize > 0);
     filterSize= (minFilterSize +(filterAlign-1)) & (~(filterAlign-1));
-    ASSERT(filterSize > 0)
+    assert(filterSize > 0);
     filter= av_malloc(filterSize*dstW*sizeof(double));
     if (filterSize >= MAX_FILTER_SIZE)
         return -1;
@@ -1731,62 +1725,62 @@ static int yvu9toyv12Wrapper(SwsContext *c, uint8_t* src[], int srcStride[], int
 }
 
 /* unscaled copy like stuff (assumes nearly identical formats) */
-static int simpleCopy(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
-                      int srcSliceH, uint8_t* dst[], int dstStride[]){
-
-    if (isPacked(c->srcFormat))
+static int packedCopy(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
+                      int srcSliceH, uint8_t* dst[], int dstStride[])
+{
+    if (dstStride[0]==srcStride[0] && srcStride[0] > 0)
+        memcpy(dst[0] + dstStride[0]*srcSliceY, src[0], srcSliceH*dstStride[0]);
+    else
     {
-        if (dstStride[0]==srcStride[0] && srcStride[0] > 0)
-            memcpy(dst[0] + dstStride[0]*srcSliceY, src[0], srcSliceH*dstStride[0]);
-        else
+        int i;
+        uint8_t *srcPtr= src[0];
+        uint8_t *dstPtr= dst[0] + dstStride[0]*srcSliceY;
+        int length=0;
+
+        /* universal length finder */
+        while(length+c->srcW <= FFABS(dstStride[0])
+           && length+c->srcW <= FFABS(srcStride[0])) length+= c->srcW;
+        assert(length!=0);
+
+        for (i=0; i<srcSliceH; i++)
         {
-            int i;
-            uint8_t *srcPtr= src[0];
-            uint8_t *dstPtr= dst[0] + dstStride[0]*srcSliceY;
-            int length=0;
-
-            /* universal length finder */
-            while(length+c->srcW <= FFABS(dstStride[0])
-               && length+c->srcW <= FFABS(srcStride[0])) length+= c->srcW;
-            ASSERT(length!=0);
-
-            for (i=0; i<srcSliceH; i++)
-            {
-                memcpy(dstPtr, srcPtr, length);
-                srcPtr+= srcStride[0];
-                dstPtr+= dstStride[0];
-            }
+            memcpy(dstPtr, srcPtr, length);
+            srcPtr+= srcStride[0];
+            dstPtr+= dstStride[0];
         }
     }
-    else
-    { /* Planar YUV or gray */
-        int plane;
-        for (plane=0; plane<3; plane++)
-        {
-            int length= plane==0 ? c->srcW  : -((-c->srcW  )>>c->chrDstHSubSample);
-            int y=      plane==0 ? srcSliceY: -((-srcSliceY)>>c->chrDstVSubSample);
-            int height= plane==0 ? srcSliceH: -((-srcSliceH)>>c->chrDstVSubSample);
+    return srcSliceH;
+}
 
-            if ((isGray(c->srcFormat) || isGray(c->dstFormat)) && plane>0)
-            {
-                if (!isGray(c->dstFormat))
-                    memset(dst[plane], 128, dstStride[plane]*height);
-            }
+static int planarCopy(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
+                      int srcSliceH, uint8_t* dst[], int dstStride[])
+{
+    int plane;
+    for (plane=0; plane<3; plane++)
+    {
+        int length= plane==0 ? c->srcW  : -((-c->srcW  )>>c->chrDstHSubSample);
+        int y=      plane==0 ? srcSliceY: -((-srcSliceY)>>c->chrDstVSubSample);
+        int height= plane==0 ? srcSliceH: -((-srcSliceH)>>c->chrDstVSubSample);
+
+        if ((isGray(c->srcFormat) || isGray(c->dstFormat)) && plane>0)
+        {
+            if (!isGray(c->dstFormat))
+                memset(dst[plane], 128, dstStride[plane]*height);
+        }
+        else
+        {
+            if (dstStride[plane]==srcStride[plane] && srcStride[plane] > 0)
+                memcpy(dst[plane] + dstStride[plane]*y, src[plane], height*dstStride[plane]);
             else
             {
-                if (dstStride[plane]==srcStride[plane] && srcStride[plane] > 0)
-                    memcpy(dst[plane] + dstStride[plane]*y, src[plane], height*dstStride[plane]);
-                else
+                int i;
+                uint8_t *srcPtr= src[plane];
+                uint8_t *dstPtr= dst[plane] + dstStride[plane]*y;
+                for (i=0; i<height; i++)
                 {
-                    int i;
-                    uint8_t *srcPtr= src[plane];
-                    uint8_t *dstPtr= dst[plane] + dstStride[plane]*y;
-                    for (i=0; i<height; i++)
-                    {
-                        memcpy(dstPtr, srcPtr, length);
-                        srcPtr+= srcStride[plane];
-                        dstPtr+= dstStride[plane];
-                    }
+                    memcpy(dstPtr, srcPtr, length);
+                    srcPtr+= srcStride[plane];
+                    dstPtr+= dstStride[plane];
                 }
             }
         }
@@ -2208,7 +2202,10 @@ SwsContext *sws_getContext(int srcW, int srcH, int srcFormat, int dstW, int dstH
             || (isPlanarYUV(srcFormat) && isGray(dstFormat))
             || (isPlanarYUV(dstFormat) && isGray(srcFormat)))
         {
-            c->swScale= simpleCopy;
+            if (isPacked(c->srcFormat))
+                c->swScale= packedCopy;
+            else /* Planar YUV or gray */
+                c->swScale= planarCopy;
         }
 
         /* gray16{le,be} conversions */
@@ -2385,7 +2382,7 @@ SwsContext *sws_getContext(int srcW, int srcH, int srcFormat, int dstW, int dstH
 
     assert(2*VOFW == VOF);
 
-    ASSERT(c->chrDstH <= dstH)
+    assert(c->chrDstH <= dstH);
 
     if (flags&SWS_PRINT_INFO)
     {

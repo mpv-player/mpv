@@ -991,7 +991,7 @@ fájlba.
 Hogy tudok automatikusan (S)VCD-t készíteni?
 </para></question>
 <answer><para>
-Használd a <filename>mencvcd</filename> szkriptet a
+Használd a <filename>mencvcd.sh</filename> szkriptet a
 <filename class="directory">TOOLS</filename> alkönyvtárból.
 Ezzel DVD-ket és más filmeket tudsz VCD vagy SVCD formátumba
 kódolni és még közvetlenül CD-re is írhatod őket.
@@ -1259,7 +1259,7 @@ funkcionalitásában és minden illedelmes lejátszó támogatja.
 Hogyan tudok elkódolni egy csak audiót tartalmazó fájlt?
 </para></question>
 <answer><para>
-Használd az <filename>aconvert</filename>-et a 
+Használd az <filename>aconvert.sh</filename>-et a
 <filename class="directory">TOOLS</filename>
 alkönyvtárból az MPlayer forrás fájában.
 </para></answer>

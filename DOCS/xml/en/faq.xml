@@ -991,7 +991,7 @@ will dump the 5th title of the DVD into the file
 How can I create (S)VCDs automatically?
 </para></question>
 <answer><para>
-Try the <filename>mencvcd</filename> script from the
+Try the <filename>mencvcd.sh</filename> script from the
 <filename class="directory">TOOLS</filename> subdirectory.
 With it you can encode DVDs or other movies to VCD or SVCD format
 and even burn them directly to CD.
@@ -1259,7 +1259,7 @@ terms of functionality, and is supported by all decent players.
 How can I encode an audio only file?
 </para></question>
 <answer><para>
-Use <filename>aconvert</filename> from the
+Use <filename>aconvert.sh</filename> from the
 <filename class="directory">TOOLS</filename>
 subdirectory in the MPlayer source tree.
 </para></answer>

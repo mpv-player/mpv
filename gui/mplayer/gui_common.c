@@ -50,7 +50,7 @@
 
 extern unsigned int GetTimerMS( void );
 
-inline void TranslateFilename( int c,char * tmp,size_t tmplen )
+static inline void TranslateFilename( int c,char * tmp,size_t tmplen )
 {
  int i;
  char * p;

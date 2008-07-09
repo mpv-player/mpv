@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Version:          0.2.2
 #
@@ -92,7 +92,7 @@ VCDMODE=2
 SVCDMODE=5
 ################################################################################
 
-function usage() {
+usage() {
    echo "Usage: $HOWCALLED <basename> [$HOWCALLED options] [mplayer options]"
    echo
    echo "   <basename> is used as basename of the resulting mpg/bin files."

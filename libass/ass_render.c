@@ -679,11 +679,11 @@ static void reset_render_context(void);
  * \param pwr multiplier for some tag effects (comes from \t tags)
  */
 static char* parse_tag(char* p, double pwr) {
-#define skip_all(x) if (*p == (x)) ++p; else { \
-	while ((*p != (x)) && (*p != '}') && (*p != 0)) {++p;} }
+#define skip_to(x) while ((*p != (x)) && (*p != '}') && (*p != 0)) { ++p;}
 #define skip(x) if (*p == (x)) ++p; else { return p; }
 	
-	skip_all('\\');
+	skip_to('\\');
+	skip('\\');
 	if ((*p == '}') || (*p == 0))
 		return p;
 
@@ -787,7 +787,7 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "fn")) {
 		char* start = p;
 		char* family;
-		skip_all('\\');
+		skip_to('\\');
 		if (p > start) {
 			family = malloc(p - start + 1);
 			strncpy(family, start, p - start);
@@ -928,7 +928,8 @@ static char* parse_tag(char* p, double pwr) {
 		}
 		while (*p == '\\')
 			p = parse_tag(p, k); // maybe k*pwr ? no, specs forbid nested \t's 
-		skip_all(')'); // FIXME: better skip(')'), but much more tags support required
+		skip_to(')'); // in case there is some unknown tag or a comment
+		skip(')');
 	} else if (mystrcmp(&p, "clip")) {
 		int x0, y0, x1, y1;
 		int res = 1;
@@ -1031,7 +1032,7 @@ static char* parse_tag(char* p, double pwr) {
 	return p;
 
 #undef skip
-#undef skip_all
+#undef skip_to
 }
 
 /**
