@@ -591,24 +591,24 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   // find content header
   pos = find_asf_guid(hdr, asf_stream_group_guid, 0, hdr_len);
   if (pos >= 0) {
+        int max_streams = (hdr_len - pos - 2) / 6;
         uint16_t stream_id, i;
         uint32_t max_bitrate;
         char *ptr = &hdr[pos];
         mp_msg(MSGT_HEADER,MSGL_V,"============ ASF Stream group == START ===\n");
+        if(max_streams <= 0) goto len_err_out;
         stream_count = AV_RL16(ptr);
         ptr += sizeof(uint16_t);
-        if (ptr > &hdr[hdr_len]) goto len_err_out;
+        if(stream_count > max_streams) stream_count = max_streams;
         if(stream_count > 0)
               streams = malloc(2*stream_count*sizeof(uint32_t));
         mp_msg(MSGT_HEADER,MSGL_V," stream count=[0x%x][%u]\n", stream_count, stream_count );
         for( i=0 ; i<stream_count ; i++ ) {
           stream_id = AV_RL16(ptr);
           ptr += sizeof(uint16_t);
-          if (ptr > &hdr[hdr_len]) goto len_err_out;
           memcpy(&max_bitrate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
           max_bitrate = le2me_32(max_bitrate);
           ptr += sizeof(uint32_t);
-          if (ptr > &hdr[hdr_len]) goto len_err_out;
           mp_msg(MSGT_HEADER,MSGL_V,"   stream id=[0x%x][%u]\n", stream_id, stream_id );
           mp_msg(MSGT_HEADER,MSGL_V,"   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
           streams[2*i] = stream_id;
