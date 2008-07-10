@@ -391,19 +391,15 @@ static int demux_audio_open(demuxer_t* demuxer) {
     sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
     l -= 16;
     if (l > 0) {
-    w->cbSize = stream_read_word_le(s);
+    w->cbSize = FFMAX(stream_read_word_le(s), 0);
     l -= 2;
-     if (w->cbSize > 0) {
       if (l < w->cbSize) {
         mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] truncated extradata (%d < %d)\n",
 	l,w->cbSize);
-        stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),l);
-        l = 0;
-      } else {
+        l = w->cbSize;
+      }
         stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),w->cbSize);
         l -= w->cbSize;
-      }
-     }
     }
 
     if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_wave_header(w, MSGL_V);
