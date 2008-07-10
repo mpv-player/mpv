@@ -390,7 +390,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
     w->cbSize = 0;
     sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
     l -= 16;
-    if (l > 0) {
+    if (l >= 2) {
       w->cbSize = FFMAX(stream_read_word_le(s), 0);
       l -= 2;
       if (l < w->cbSize) {
