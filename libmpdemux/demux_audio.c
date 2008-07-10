@@ -396,7 +396,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
       if (l < w->cbSize) {
         mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] truncated extradata (%d < %d)\n",
                l,w->cbSize);
-        l = w->cbSize;
+        w->cbSize = l;
       }
       stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),w->cbSize);
       l -= w->cbSize;
