@@ -33,9 +33,7 @@
 #define QT_IMA_ADPCM_SAMPLES_PER_BLOCK 64
 
 #define BE_16(x) (be2me_16(*(unsigned short *)(x)))
-#define BE_32(x) (be2me_32(*(unsigned int *)(x)))
 #define LE_16(x) (le2me_16(*(unsigned short *)(x)))
-#define LE_32(x) (le2me_32(*(unsigned int *)(x)))
 
 // pertinent tables for IMA ADPCM
 static const int16_t adpcm_step[89] =
@@ -63,8 +61,6 @@ static const int8_t adpcm_index[8] =
 #define CLAMP_S16(x) x = av_clip_int16(x);
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
-// sign extend a 4-bit value
-#define SE_4BIT(x)  if (x & 0x8) x -= 0x10;
 
 static ad_info_t info = 
 {
