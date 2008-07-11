@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "libavutil/common.h"
 #include "mpbswap.h"
 #include "ad_internal.h"
 
@@ -47,10 +48,9 @@ static const int ms_adapt_coeff2[] =
 #define LE_16(x) ((x)[0]+(256*((x)[1])))
 
 // clamp a number between 0 and 88
-#define CLAMP_0_TO_88(x)  if (x < 0) x = 0; else if (x > 88) x = 88;
+#define CLAMP_0_TO_88(x) x = av_clip(x, 0, 88);
 // clamp a number within a signed 16-bit range
-#define CLAMP_S16(x)  if (x < -32768) x = -32768; \
-  else if (x > 32767) x = 32767;
+#define CLAMP_S16(x) x = av_clip_int16(x);
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
 // sign extend a 16-bit value
