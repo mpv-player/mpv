@@ -1114,6 +1114,7 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 
 		sh->disp_w=trak->stdata[25]|(trak->stdata[24]<<8);
 		sh->disp_h=trak->stdata[27]|(trak->stdata[26]<<8);
+		if(trak->tkdata_len>81) {
 		// if image size is zero, fallback to display size
 		if(!sh->disp_w && !sh->disp_h) {
 		  sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
@@ -1122,6 +1123,7 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 		  // codec and display width differ... use display one for aspect
 		  sh->aspect=trak->tkdata[77]|(trak->tkdata[76]<<8);
 		  sh->aspect/=trak->tkdata[81]|(trak->tkdata[80]<<8);
+		}
 		}
 		
 		if(depth>32+8) mp_msg(MSGT_DEMUX, MSGL_INFO,"*** depth = 0x%X\n",depth);
