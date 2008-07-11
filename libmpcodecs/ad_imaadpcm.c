@@ -321,6 +321,5 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 
   res = decode_func((unsigned short*)buf, sh_audio->a_in_buffer,
                     sh_audio->wf->nChannels, sh_audio->ds->ss_mul);
-  if (res < 0) return res;
-  else return 2 * res;
+  return res < 0 ? res : 2 * res;
 }
