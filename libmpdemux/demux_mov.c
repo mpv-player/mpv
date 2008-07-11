@@ -772,6 +772,7 @@ static int gen_sh_audio(sh_audio_t* sh, mov_track_t* trak, int timescale) {
 		}
 		if (trak->stdata_len >= 36 + adjust) {
 		    int atom_len = char2int(trak->stdata,28+adjust);
+		    if (atom_len < 0 || atom_len > trak->stdata_len - 28 - adjust) atom_len = trak->stdata_len - 28 - adjust;
 		    switch(char2int(trak->stdata,32+adjust)) { // atom type
 		      case MOV_FOURCC('e','s','d','s'): {
 			mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
