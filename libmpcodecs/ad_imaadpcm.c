@@ -167,7 +167,7 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
   int initial_index[2];
   int i;
 
-  if (channels > 1) channels = 2;
+  if (channels != 1) channels = 2;
   if (block_size < channels * QT_IMA_ADPCM_BLOCK_SIZE)
     return -1;
 
@@ -217,7 +217,7 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
   int channel_index_l;
   int channel_index_r;
 
-  if (channels > 1) channels = 2;
+  if (channels != 1) channels = 2;
   if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
     return -1;
 
@@ -280,7 +280,7 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
   int predictor[2];
   int index[2];
 
-  if (channels > 1) channels = 2;
+  if (channels != 1) channels = 2;
   if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
     return -1;
 
