@@ -107,6 +107,10 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int snibble;  // signed nibble
   int predictor;
 
+  if (channels != 1) channels = 2;
+  if (block_size < 7 * channels)
+    return -1;
+
   // fetch the header information, in stereo if both channels are present
   if (input[stream_ptr] > 6)
     mp_msg(MSGT_DECAUDIO, MSGL_WARN,
@@ -197,12 +201,14 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
+  int res;
   if (demux_read_data(sh_audio->ds, sh_audio->a_in_buffer,
     sh_audio->ds->ss_mul) != 
     sh_audio->ds->ss_mul) 
       return -1; /* EOF */
 
-  return 2 * ms_adpcm_decode_block(
+  res = ms_adpcm_decode_block(
     (unsigned short*)buf, sh_audio->a_in_buffer,
     sh_audio->wf->nChannels, sh_audio->wf->nBlockAlign);
+  return res < 0 ? res : 2 * res;
 }
