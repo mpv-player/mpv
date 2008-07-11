@@ -26,18 +26,18 @@ static ad_info_t info =
 
 LIBAD_EXTERN(msadpcm)
 
-static int ms_adapt_table[] =
+static const int ms_adapt_table[] =
 {
   230, 230, 230, 230, 307, 409, 512, 614,
   768, 614, 512, 409, 307, 230, 230, 230
 };
 
-static int ms_adapt_coeff1[] =
+static const int ms_adapt_coeff1[] =
 {
   256, 512, 0, 192, 240, 460, 392
 };
 
-static int ms_adapt_coeff2[] =
+static const int ms_adapt_coeff2[] =
 {
   0, -256, 0, 64, 0, -208, -232
 };
