@@ -171,6 +171,9 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
     upper_nibble ^= 1;
     SE_4BIT(snibble);
 
+    // should this really be a division and not a shift?
+    // coefficients were originally scaled by for, which might have
+    // been an optimization for 8-bit CPUs _if_ a shift is correct
     predictor = (
       ((sample1[current_channel] * coeff1[current_channel]) +
        (sample2[current_channel] * coeff2[current_channel])) / 64) +
