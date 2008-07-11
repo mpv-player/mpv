@@ -13,6 +13,7 @@
 
 #include "config.h"
 #include "libavutil/common.h"
+#include "libavutil/intreadwrite.h"
 #include "mpbswap.h"
 #include "ad_internal.h"
 
@@ -45,7 +46,7 @@ static const int ms_adapt_coeff2[] =
 
 #define MS_ADPCM_PREAMBLE_SIZE 6
 
-#define LE_16(x) ((x)[0]+(256*((x)[1])))
+#define LE_16(x) ((int16_t)AV_RL16(x))
 
 // clamp a number between 0 and 88
 #define CLAMP_0_TO_88(x) x = av_clip(x, 0, 88);
@@ -53,8 +54,6 @@ static const int ms_adapt_coeff2[] =
 #define CLAMP_S16(x) x = av_clip_int16(x);
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
-// sign extend a 16-bit value
-#define SE_16BIT(x)  if (x & 0x8000) x -= 0x10000;
 // sign extend a 4-bit value
 #define SE_4BIT(x)  if (x & 0x8) x -= 0x10;
 
@@ -129,32 +128,26 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
 
   idelta[0] = LE_16(&input[stream_ptr]);
   stream_ptr += 2;
-  SE_16BIT(idelta[0]);
   if (channels == 2)
   {
     idelta[1] = LE_16(&input[stream_ptr]);
     stream_ptr += 2;
-    SE_16BIT(idelta[1]);
   }
 
   sample1[0] = LE_16(&input[stream_ptr]);
   stream_ptr += 2;
-  SE_16BIT(sample1[0]);
   if (channels == 2)
   {
     sample1[1] = LE_16(&input[stream_ptr]);
     stream_ptr += 2;
-    SE_16BIT(sample1[1]);
   }
 
   sample2[0] = LE_16(&input[stream_ptr]);
   stream_ptr += 2;
-  SE_16BIT(sample2[0]);
   if (channels == 2)
   {
     sample2[1] = LE_16(&input[stream_ptr]);
     stream_ptr += 2;
-    SE_16BIT(sample2[1]);
   }
 
   if (channels == 1)
