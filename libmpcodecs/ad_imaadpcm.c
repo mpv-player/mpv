@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "config.h"
 #include "libavutil/common.h"
