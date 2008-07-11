@@ -34,14 +34,14 @@ static const int ms_adapt_table[] =
   768, 614, 512, 409, 307, 230, 230, 230
 };
 
-static const int ms_adapt_coeff1[] =
+static const int8_t ms_adapt_coeff1[] =
 {
-  256, 512, 0, 192, 240, 460, 392
+  64, 128, 0, 48, 60, 115, 98
 };
 
-static const int ms_adapt_coeff2[] =
+static const int8_t ms_adapt_coeff2[] =
 {
-  0, -256, 0, 64, 0, -208, -232
+  0, -64, 0, 16, 0, -52, -58
 };
 
 #define MS_ADPCM_PREAMBLE_SIZE 6
@@ -173,7 +173,7 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
 
     predictor = (
       ((sample1[current_channel] * coeff1[current_channel]) +
-       (sample2[current_channel] * coeff2[current_channel])) / 256) +
+       (sample2[current_channel] * coeff2[current_channel])) / 64) +
       (snibble * idelta[current_channel]);
     CLAMP_S16(predictor);
     sample2[current_channel] = sample1[current_channel];
