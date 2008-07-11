@@ -454,7 +454,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     priv->pb = av_alloc_put_byte(priv->buffer, BIO_BUFFER_SIZE, 0,
                                  demuxer->stream, mp_read, NULL, mp_seek);
-    priv->pb->is_streamed = !demuxer->stream->end_pos || (s->flags & STREAM_SEEK) != STREAM_SEEK;
+    priv->pb->is_streamed = !demuxer->stream->end_pos || (demuxer->stream->flags & STREAM_SEEK) != STREAM_SEEK;
 
     if(av_open_input_stream(&avfc, priv->pb, mp_filename, priv->avif, &ap)<0){
         mp_msg(MSGT_HEADER,MSGL_ERR,"LAVF_header: av_open_input_stream() failed\n");
