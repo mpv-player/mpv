@@ -34,7 +34,7 @@ static const int ms_adapt_table[] =
   768, 614, 512, 409, 307, 230, 230, 230
 };
 
-static const int8_t ms_adapt_coeff1[] =
+static const uint8_t ms_adapt_coeff1[] =
 {
   64, 128, 0, 48, 60, 115, 98
 };
