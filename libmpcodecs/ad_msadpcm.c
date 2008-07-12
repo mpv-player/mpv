@@ -91,10 +91,21 @@ static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
   return CONTROL_UNKNOWN;
 }
 
+static inline int check_coeff(uint8_t c) {
+  if (c > 6) {
+    mp_msg(MSGT_DECAUDIO, MSGL_WARN,
+      "MS ADPCM: coefficient (%d) out of range (should be [0..6])\n",
+      c);
+    c = 6;
+  }
+  return c;
+}
+
 static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int channels, int block_size)
 {
   int current_channel = 0;
+  int coeff_idx;
   int idelta[2];
   int sample1[2];
   int sample2[2];
@@ -112,21 +123,15 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
     return -1;
 
   // fetch the header information, in stereo if both channels are present
-  if (input[stream_ptr] > 6)
-    mp_msg(MSGT_DECAUDIO, MSGL_WARN,
-      "MS ADPCM: coefficient (%d) out of range (should be [0..6])\n",
-      input[stream_ptr]);
-  coeff1[0] = ms_adapt_coeff1[input[stream_ptr]];
-  coeff2[0] = ms_adapt_coeff2[input[stream_ptr]];
+  coeff_idx = check_coeff(input[stream_ptr]);
+  coeff1[0] = ms_adapt_coeff1[coeff_idx];
+  coeff2[0] = ms_adapt_coeff2[coeff_idx];
   stream_ptr++;
   if (channels == 2)
   {
-    if (input[stream_ptr] > 6)
-     mp_msg(MSGT_DECAUDIO, MSGL_WARN,
-       "MS ADPCM: coefficient (%d) out of range (should be [0..6])\n",
-       input[stream_ptr]);
-    coeff1[1] = ms_adapt_coeff1[input[stream_ptr]];
-    coeff2[1] = ms_adapt_coeff2[input[stream_ptr]];
+    coeff_idx = check_coeff(input[stream_ptr]);
+    coeff1[1] = ms_adapt_coeff1[coeff_idx];
+    coeff2[1] = ms_adapt_coeff2[coeff_idx];
     stream_ptr++;
   }
 
