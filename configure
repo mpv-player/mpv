@@ -2459,7 +2459,7 @@ EOF
     cat > $TMPC << EOF
 $inc_altivec_h
 #define AVV(x...) {x}
-int main (void) { (vector int) AVV(1); return 0; }
+int main(void) { (vector int) AVV(1); return 0; }
 EOF
     cc_check $_altivec_gcc_flags &&
         _def_altivec_vector_braces='#define HAVE_ALTIVEC_VECTOR_BRACES 1'
