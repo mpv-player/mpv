@@ -391,7 +391,8 @@ static int demux_audio_open(demuxer_t* demuxer) {
     sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
     l -= 16;
     if (l >= 2) {
-      w->cbSize = FFMAX(stream_read_word_le(s), 0);
+      w->cbSize = stream_read_word_le(s);
+      if (w->cbSize < 0) w->cbSize = 0;
       l -= 2;
       if (l < w->cbSize) {
         mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] truncated extradata (%d < %d)\n",
