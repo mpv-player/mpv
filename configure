@@ -2410,7 +2410,7 @@ echocheck ".align is a power of two"
 if test "$_asmalign_pot" = auto ; then
 _asmalign_pot=no
 cat > $TMPC << EOF
-main(void) { asm (".align 3"); }
+int main(void) { asm (".align 3"); }
 EOF
 cc_check && _asmalign_pot=yes
 fi
