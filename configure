@@ -5383,7 +5383,6 @@ elif test "$_dvdread" = auto ; then
 int main(void) { return 0; }
 EOF
   fi
-  _dvdreadconfig="dvdread-config"
   _dvdreadcflags=`$_dvdreadconfig --cflags`
   _dvdreadlibs=`$_dvdreadconfig --libs`
   if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
