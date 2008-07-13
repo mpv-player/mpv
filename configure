@@ -6484,7 +6484,7 @@ echocheck "libamr narrowband"
 if test "$_libamr_nb" = auto ; then
   _libamr_nb=no
   cat > $TMPC << EOF
-#include <amrnb/interf_dec.h>
+#include <amrnb/sp_dec.h>
 int main(void) { Speech_Decode_Frame_init(); return 0; }
 EOF
   cc_check -lamrnb && _libamr_nb=yes
