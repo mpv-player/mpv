@@ -329,7 +329,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
     sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
     free(mp3_found);
     mp3_found = NULL;
-    if(s->end_pos) {
+    if(s->end_pos && (s->flags & STREAM_SEEK) == STREAM_SEEK) {
       char tag[4];
       stream_seek(s,s->end_pos-128);
       stream_read(s,tag,3);
@@ -390,20 +390,17 @@ static int demux_audio_open(demuxer_t* demuxer) {
     w->cbSize = 0;
     sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
     l -= 16;
-    if (l > 0) {
-    w->cbSize = stream_read_word_le(s);
-    l -= 2;
-     if (w->cbSize > 0) {
+    if (l >= 2) {
+      w->cbSize = stream_read_word_le(s);
+      if (w->cbSize < 0) w->cbSize = 0;
+      l -= 2;
       if (l < w->cbSize) {
         mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] truncated extradata (%d < %d)\n",
-	l,w->cbSize);
-        stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),l);
-        l = 0;
-      } else {
-        stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),w->cbSize);
-        l -= w->cbSize;
+               l,w->cbSize);
+        w->cbSize = l;
       }
-     }
+      stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),w->cbSize);
+      l -= w->cbSize;
     }
 
     if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_wave_header(w, MSGL_V);

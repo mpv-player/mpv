@@ -169,8 +169,8 @@ void mov_build_index(mov_track_t* trak,int timescale){
     i=trak->chunkmap_size;
     while(i>0){
 	--i;
-	j=FFMAX(trak->chunkmap[i].first, 0);
-	for(;j<last;j++){
+	j=trak->chunkmap[i].first;
+	for(;j>=0 && j<last;j++){
 	    trak->chunks[j].desc=trak->chunkmap[i].sdid;
 	    trak->chunks[j].size=trak->chunkmap[i].spc;
 	}
@@ -205,9 +205,9 @@ void mov_build_index(mov_track_t* trak,int timescale){
 
     // workaround for fixed-size video frames (dv and uncompressed)
     if(!trak->samples_size && trak->type!=MOV_TRAK_AUDIO){
-	trak->samples_size=s;
 	trak->samples=calloc(s, sizeof(mov_sample_t));
-	for(i=0;i<s;i++)
+	trak->samples_size=trak->samples ? s : 0;
+	for(i=0;i<trak->samples_size;i++)
 	    trak->samples[i].size=trak->samplesize;
 	trak->samplesize=0;
     }
@@ -224,8 +224,8 @@ void mov_build_index(mov_track_t* trak,int timescale){
       mp_msg(MSGT_DEMUX, MSGL_WARN,
              "MOV: durmap or chunkmap bigger than sample count (%i vs %i)\n",
              s, trak->samples_size);
-      trak->samples_size = s;
       trak->samples = realloc_struct(trak->samples, s, sizeof(mov_sample_t));
+      trak->samples_size = trak->samples ? s : 0;
     }
 
     // calc pts:
@@ -772,6 +772,7 @@ static int gen_sh_audio(sh_audio_t* sh, mov_track_t* trak, int timescale) {
 		}
 		if (trak->stdata_len >= 36 + adjust) {
 		    int atom_len = char2int(trak->stdata,28+adjust);
+		    if (atom_len < 0 || atom_len > trak->stdata_len - 28 - adjust) atom_len = trak->stdata_len - 28 - adjust;
 		    switch(char2int(trak->stdata,32+adjust)) { // atom type
 		      case MOV_FOURCC('e','s','d','s'): {
 			mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
@@ -1113,14 +1114,16 @@ static int gen_sh_video(sh_video_t* sh, mov_track_t* trak, int timescale) {
 
 		sh->disp_w=trak->stdata[25]|(trak->stdata[24]<<8);
 		sh->disp_h=trak->stdata[27]|(trak->stdata[26]<<8);
-		// if image size is zero, fallback to display size
-		if(!sh->disp_w && !sh->disp_h) {
-		  sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
-		  sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
-		} else if(sh->disp_w!=(trak->tkdata[77]|(trak->tkdata[76]<<8))){
-		  // codec and display width differ... use display one for aspect
-		  sh->aspect=trak->tkdata[77]|(trak->tkdata[76]<<8);
-		  sh->aspect/=trak->tkdata[81]|(trak->tkdata[80]<<8);
+		if(trak->tkdata_len>81) {
+		  // if image size is zero, fallback to display size
+		  if(!sh->disp_w && !sh->disp_h) {
+		    sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
+		    sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
+		  } else if(sh->disp_w!=(trak->tkdata[77]|(trak->tkdata[76]<<8))){
+		    // codec and display width differ... use display one for aspect
+		    sh->aspect=trak->tkdata[77]|(trak->tkdata[76]<<8);
+		    sh->aspect/=trak->tkdata[81]|(trak->tkdata[80]<<8);
+		  }
 		}
 		
 		if(depth>32+8) mp_msg(MSGT_DEMUX, MSGL_INFO,"*** depth = 0x%X\n",depth);
@@ -1748,8 +1751,8 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              "MOV: %*sSample duration table! (%d blocks)\n", level, "",
              len);
       trak->durmap = calloc(len, sizeof(mov_durmap_t));
-      trak->durmap_size = len;
-      for (i = 0; i < len; i++) {
+      trak->durmap_size = trak->durmap ? 0 : len;
+      for (i = 0; i < trak->durmap_size; i++) {
         trak->durmap[i].num = stream_read_dword(demuxer->stream);
         trak->durmap[i].dur = stream_read_dword(demuxer->stream);
         pts += trak->durmap[i].num * trak->durmap[i].dur;
@@ -1769,9 +1772,9 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              "MOV: %*sSample->Chunk mapping table!  (%d blocks) (ver:%d,flags:%d)\n", level, "",
              len, ver, flags);
       // read data:
-      trak->chunkmap_size = len;
       trak->chunkmap = calloc(len, sizeof(mov_chunkmap_t));
-      for (i = 0; i < len; i++) {
+      trak->chunkmap_size = trak->chunkmap ? len : 0;
+      for (i = 0; i < trak->chunkmap_size; i++) {
         trak->chunkmap[i].first = stream_read_dword(demuxer->stream) - 1;
         trak->chunkmap[i].spc = stream_read_dword(demuxer->stream);
         trak->chunkmap[i].sdid = stream_read_dword(demuxer->stream);
@@ -1793,7 +1796,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
         // variable samplesize
         trak->samples = realloc_struct(trak->samples, entries, sizeof(mov_sample_t));
         trak->samples_size = entries;
-        for (i = 0; i < entries; i++)
+        for (i = 0; i < trak->samples_size; i++)
           trak->samples[i].size = stream_read_dword(demuxer->stream);
       }
       break;
@@ -1808,10 +1811,10 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       // extend array if needed:
       if (len > trak->chunks_size) {
         trak->chunks = realloc_struct(trak->chunks, len, sizeof(mov_chunk_t));
-        trak->chunks_size = len;
+        trak->chunks_size = trak->chunks ? len : 0;
       }
       // read elements:
-      for(i = 0; i < len; i++)
+      for(i = 0; i < trak->chunks_size; i++)
         trak->chunks[i].pos = stream_read_dword(demuxer->stream);
       break;
     }
@@ -1825,10 +1828,10 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       // extend array if needed:
       if (len > trak->chunks_size) {
         trak->chunks = realloc_struct(trak->chunks, len, sizeof(mov_chunk_t));
-        trak->chunks_size = len;
+        trak->chunks_size = trak->chunks ? len : 0;
       }
       // read elements:
-      for (i = 0; i < len; i++) {
+      for (i = 0; i < trak->chunks_size; i++) {
 #ifndef	_LARGEFILE_SOURCE
         if (stream_read_dword(demuxer->stream) != 0)
           mp_msg(MSGT_DEMUX, MSGL_WARN, "Chunk %d has got 64bit address, but you've MPlayer compiled without LARGEFILE support!\n", i);
@@ -1848,9 +1851,9 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       mp_msg(MSGT_DEMUX, MSGL_V,
              "MOV: %*sSyncing samples (keyframes) table! (%d entries) (ver:%d,flags:%d)\n", level, "",
              entries, ver, flags);
-      trak->keyframes_size = entries;
       trak->keyframes = calloc(entries, sizeof(unsigned int));
-      for (i = 0; i < entries; i++)
+      trak->keyframes_size = trak->keyframes ? entries : 0;
+      for (i = 0; i < trak->keyframes_size; i++)
         trak->keyframes[i] = stream_read_dword(demuxer->stream) - 1;
       break;
     }
@@ -1884,9 +1887,9 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              "MOV: %*sEdit list table (%d entries) (ver:%d,flags:%d)\n", level, "",
              entries, ver, flags);
 #if 1
-      trak->editlist_size = entries;
       trak->editlist = calloc(trak->editlist_size, sizeof(mov_editlist_t));
-      for (i = 0; i < entries; i++) {
+      trak->editlist_size = trak->editlist ? entries : 0;
+      for (i = 0; i < trak->editlist_size; i++) {
         int dur = stream_read_dword(demuxer->stream);
         int mt = stream_read_dword(demuxer->stream);
         int mr = stream_read_dword(demuxer->stream); // 16.16fp

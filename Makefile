@@ -777,6 +777,7 @@ version.h:
 	./version.sh `$(CC) -dumpversion`
 
 %(EXESUF): %.c
+%.o: %.d
 
 
 

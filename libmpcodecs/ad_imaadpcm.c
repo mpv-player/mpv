@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "config.h"
 #include "libavutil/common.h"
@@ -32,9 +33,7 @@
 #define QT_IMA_ADPCM_SAMPLES_PER_BLOCK 64
 
 #define BE_16(x) (be2me_16(*(unsigned short *)(x)))
-#define BE_32(x) (be2me_32(*(unsigned int *)(x)))
 #define LE_16(x) (le2me_16(*(unsigned short *)(x)))
-#define LE_32(x) (le2me_32(*(unsigned int *)(x)))
 
 // pertinent tables for IMA ADPCM
 static const int16_t adpcm_step[89] =
@@ -62,8 +61,6 @@ static const int8_t adpcm_index[8] =
 #define CLAMP_S16(x) x = av_clip_int16(x);
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
-// sign extend a 4-bit value
-#define SE_4BIT(x)  if (x & 0x8) x -= 0x10;
 
 static const ad_info_t info =
 {
@@ -170,7 +167,7 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
   int initial_index[2];
   int i;
 
-  if (channels > 1) channels = 2;
+  if (channels != 1) channels = 2;
   if (block_size < channels * QT_IMA_ADPCM_BLOCK_SIZE)
     return -1;
 
@@ -220,7 +217,7 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
   int channel_index_l;
   int channel_index_r;
 
-  if (channels > 1) channels = 2;
+  if (channels != 1) channels = 2;
   if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
     return -1;
 
@@ -283,7 +280,7 @@ static int dk4_ima_adpcm_decode_block(unsigned short *output,
   int predictor[2];
   int index[2];
 
-  if (channels > 1) channels = 2;
+  if (channels != 1) channels = 2;
   if (block_size < MS_IMA_ADPCM_PREAMBLE_SIZE * channels)
     return -1;
 
@@ -324,6 +321,5 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 
   res = decode_func((unsigned short*)buf, sh_audio->a_in_buffer,
                     sh_audio->wf->nChannels, sh_audio->ds->ss_mul);
-  if (res < 0) return res;
-  else return 2 * res;
+  return res < 0 ? res : 2 * res;
 }

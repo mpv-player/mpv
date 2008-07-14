@@ -2410,7 +2410,7 @@ echocheck ".align is a power of two"
 if test "$_asmalign_pot" = auto ; then
 _asmalign_pot=no
 cat > $TMPC << EOF
-main(void) { asm (".align 3"); }
+int main(void) { asm (".align 3"); }
 EOF
 cc_check && _asmalign_pot=yes
 fi
@@ -2459,7 +2459,7 @@ EOF
     cat > $TMPC << EOF
 $inc_altivec_h
 #define AVV(x...) {x}
-int main (void) { (vector int) AVV(1); return 0; }
+int main(void) { (vector int) AVV(1); return 0; }
 EOF
     cc_check $_altivec_gcc_flags &&
         _def_altivec_vector_braces='#define HAVE_ALTIVEC_VECTOR_BRACES 1'
@@ -6483,7 +6483,7 @@ echocheck "libamr narrowband"
 if test "$_libamr_nb" = auto ; then
   _libamr_nb=no
   cat > $TMPC << EOF
-#include <amrnb/interf_dec.h>
+#include <amrnb/sp_dec.h>
 int main(void) { Speech_Decode_Frame_init(); return 0; }
 EOF
   cc_check -lamrnb && _libamr_nb=yes
@@ -7816,8 +7816,8 @@ HAVE_XVMC = $_xvmc
 
 DEPEND_CMD   = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,\$^) | sed "s,[0-9a-z._-]*: \(\$(SRC_DIR)/\)*\([a-z0-9]*/\)[^/]* ,\\2&,"
 
-MPDEPEND_CMD = \$(CC) -MM \$(CFLAGS) \$(filter-out %.h,$^) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
-MPDEPEND_CMD_CXX = \$(CC) -MM \$(CXXFLAGS) \$(filter-out %.h,$^) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&," -e "s,\(.*\)\.o: ,\1.d &,"
+MPDEPEND_CMD     = \$(CC) -MM \$(CFLAGS)   \$(filter-out %.h,$^) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&,"
+MPDEPEND_CMD_CXX = \$(CC) -MM \$(CXXFLAGS) \$(filter-out %.h,$^) | sed -e "s,[0-9a-z._-]*: \([a-z0-9/]*/\)[^/]* ,\1&,"
 
 EOF
 

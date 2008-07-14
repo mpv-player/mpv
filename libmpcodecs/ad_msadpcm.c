@@ -12,6 +12,8 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "libavutil/common.h"
+#include "libavutil/intreadwrite.h"
 #include "mpbswap.h"
 #include "ad_internal.h"
 
@@ -26,39 +28,32 @@ static const ad_info_t info =
 
 LIBAD_EXTERN(msadpcm)
 
-static int ms_adapt_table[] =
+static const int ms_adapt_table[] =
 {
   230, 230, 230, 230, 307, 409, 512, 614,
   768, 614, 512, 409, 307, 230, 230, 230
 };
 
-static int ms_adapt_coeff1[] =
+static const uint8_t ms_adapt_coeff1[] =
 {
-  256, 512, 0, 192, 240, 460, 392
+  64, 128, 0, 48, 60, 115, 98
 };
 
-static int ms_adapt_coeff2[] =
+static const int8_t ms_adapt_coeff2[] =
 {
-  0, -256, 0, 64, 0, -208, -232
+  0, -64, 0, 16, 0, -52, -58
 };
 
 #define MS_ADPCM_PREAMBLE_SIZE 6
 
-#define LE_16(x) ((x)[0]+(256*((x)[1])))
-//#define LE_16(x) (le2me_16((x)[1]+(256*((x)[0]))))
-//#define LE_16(x) (le2me_16(*(unsigned short *)(x)))
-//#define LE_32(x) (le2me_32(*(unsigned int *)(x)))
+#define LE_16(x) ((int16_t)AV_RL16(x))
 
-// useful macros
 // clamp a number between 0 and 88
-#define CLAMP_0_TO_88(x)  if (x < 0) x = 0; else if (x > 88) x = 88;
+#define CLAMP_0_TO_88(x) x = av_clip(x, 0, 88);
 // clamp a number within a signed 16-bit range
-#define CLAMP_S16(x)  if (x < -32768) x = -32768; \
-  else if (x > 32767) x = 32767;
+#define CLAMP_S16(x) x = av_clip_int16(x);
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
-// sign extend a 16-bit value
-#define SE_16BIT(x)  if (x & 0x8000) x -= 0x10000;
 // sign extend a 4-bit value
 #define SE_4BIT(x)  if (x & 0x8) x -= 0x10;
 
@@ -96,10 +91,21 @@ static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
   return CONTROL_UNKNOWN;
 }
 
+static inline int check_coeff(uint8_t c) {
+  if (c > 6) {
+    mp_msg(MSGT_DECAUDIO, MSGL_WARN,
+      "MS ADPCM: coefficient (%d) out of range (should be [0..6])\n",
+      c);
+    c = 6;
+  }
+  return c;
+}
+
 static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int channels, int block_size)
 {
   int current_channel = 0;
+  int coeff_idx;
   int idelta[2];
   int sample1[2];
   int sample2[2];
@@ -112,53 +118,45 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int snibble;  // signed nibble
   int predictor;
 
+  if (channels != 1) channels = 2;
+  if (block_size < 7 * channels)
+    return -1;
+
   // fetch the header information, in stereo if both channels are present
-  if (input[stream_ptr] > 6)
-    mp_msg(MSGT_DECAUDIO, MSGL_WARN,
-      "MS ADPCM: coefficient (%d) out of range (should be [0..6])\n",
-      input[stream_ptr]);
-  coeff1[0] = ms_adapt_coeff1[input[stream_ptr]];
-  coeff2[0] = ms_adapt_coeff2[input[stream_ptr]];
+  coeff_idx = check_coeff(input[stream_ptr]);
+  coeff1[0] = ms_adapt_coeff1[coeff_idx];
+  coeff2[0] = ms_adapt_coeff2[coeff_idx];
   stream_ptr++;
   if (channels == 2)
   {
-    if (input[stream_ptr] > 6)
-     mp_msg(MSGT_DECAUDIO, MSGL_WARN,
-       "MS ADPCM: coefficient (%d) out of range (should be [0..6])\n",
-       input[stream_ptr]);
-    coeff1[1] = ms_adapt_coeff1[input[stream_ptr]];
-    coeff2[1] = ms_adapt_coeff2[input[stream_ptr]];
+    coeff_idx = check_coeff(input[stream_ptr]);
+    coeff1[1] = ms_adapt_coeff1[coeff_idx];
+    coeff2[1] = ms_adapt_coeff2[coeff_idx];
     stream_ptr++;
   }
 
   idelta[0] = LE_16(&input[stream_ptr]);
   stream_ptr += 2;
-  SE_16BIT(idelta[0]);
   if (channels == 2)
   {
     idelta[1] = LE_16(&input[stream_ptr]);
     stream_ptr += 2;
-    SE_16BIT(idelta[1]);
   }
 
   sample1[0] = LE_16(&input[stream_ptr]);
   stream_ptr += 2;
-  SE_16BIT(sample1[0]);
   if (channels == 2)
   {
     sample1[1] = LE_16(&input[stream_ptr]);
     stream_ptr += 2;
-    SE_16BIT(sample1[1]);
   }
 
   sample2[0] = LE_16(&input[stream_ptr]);
   stream_ptr += 2;
-  SE_16BIT(sample2[0]);
   if (channels == 2)
   {
     sample2[1] = LE_16(&input[stream_ptr]);
     stream_ptr += 2;
-    SE_16BIT(sample2[1]);
   }
 
   if (channels == 1)
@@ -182,9 +180,12 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
     upper_nibble ^= 1;
     SE_4BIT(snibble);
 
+    // should this really be a division and not a shift?
+    // coefficients were originally scaled by for, which might have
+    // been an optimization for 8-bit CPUs _if_ a shift is correct
     predictor = (
       ((sample1[current_channel] * coeff1[current_channel]) +
-       (sample2[current_channel] * coeff2[current_channel])) / 256) +
+       (sample2[current_channel] * coeff2[current_channel])) / 64) +
       (snibble * idelta[current_channel]);
     CLAMP_S16(predictor);
     sample2[current_channel] = sample1[current_channel];
@@ -205,12 +206,14 @@ static int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
+  int res;
   if (demux_read_data(sh_audio->ds, sh_audio->a_in_buffer,
     sh_audio->ds->ss_mul) != 
     sh_audio->ds->ss_mul) 
       return -1; /* EOF */
 
-  return 2 * ms_adpcm_decode_block(
+  res = ms_adpcm_decode_block(
     (unsigned short*)buf, sh_audio->a_in_buffer,
     sh_audio->wf->nChannels, sh_audio->wf->nBlockAlign);
+  return res < 0 ? res : 2 * res;
 }
