@@ -423,7 +423,7 @@ int decode_audio(sh_audio_t *sh_audio, int minlen)
     // Indicates that a filter seems to be buffering large amounts of data
     int huge_filter_buffer = 0;
     // Decoded audio must be cut at boundaries of this many bytes
-    int unitsize = sh_audio->channels * sh_audio->samplesize;
+    int unitsize = sh_audio->channels * sh_audio->samplesize * 16;
 
     /* Filter output size will be about filter_multiplier times input size.
      * If some filter buffers audio in big blocks this might only hold
