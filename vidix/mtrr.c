@@ -39,7 +39,7 @@
 
 int	mtrr_set_type(unsigned base,unsigned size,int type)
 {
-#ifdef linux
+#ifdef __linux__
     FILE * mtrr_fd;
     char * stype;
     switch(type)

@@ -9,11 +9,11 @@
 #include "stream.h"
 #include "libavutil/intreadwrite.h"
 //=================== VideoCD ==========================
-#if	defined(linux) || defined(sun) || defined(__bsdi__)
+#if	defined(__linux__) || defined(sun) || defined(__bsdi__)
 
 typedef struct mp_vcd_priv_st mp_vcd_priv_t;
 
-#if	defined(linux)
+#if	defined(__linux__)
 #include <linux/cdrom.h>
 #elif	defined(sun)
 #include <sys/cdio.h>
@@ -128,7 +128,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd){
 }
 
 static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
-#if	defined(linux) || defined(__bsdi__)
+#if	defined(__linux__) || defined(__bsdi__)
   memcpy(vcd->buf,&vcd->entry.cdte_addr.msf,sizeof(struct cdrom_msf));
   if(ioctl(vcd->fd,CDROMREADRAW,vcd->buf)==-1) return 0; // EOF?
   memcpy(mem,&vcd->buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);
@@ -225,7 +225,7 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
 }
 #endif	/*sun*/
 
-#else /* linux || sun || __bsdi__ */
+#else /* __linux__ || sun || __bsdi__ */
 
 #error vcd is not yet supported on this arch...
 

@@ -61,7 +61,7 @@
 #endif
 #include "AsmMacros.h"
 /* OS depended stuff */
-#if defined (linux)
+#if defined (__linux__)
 #include "sysdep/pci_linux.c"
 #elif defined (__FreeBSD__) || defined (__FreeBSD_kernel__) || defined(__DragonFly__)
 #include "sysdep/pci_freebsd.c"

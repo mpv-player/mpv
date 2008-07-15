@@ -62,7 +62,7 @@
 #ifndef MPLAYER_ASMMACROS_ALPHA_H
 #define MPLAYER_ASMMACROS_ALPHA_H
 
-#if defined (linux)
+#if defined (__linux__)
 #include <sys/io.h>
 #elif defined (__FreeBSD__)
 #include <sys/types.h>

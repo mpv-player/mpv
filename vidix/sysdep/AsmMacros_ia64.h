@@ -62,7 +62,7 @@
 #ifndef MPLAYER_ASMMACROS_IA64_H
 #define MPLAYER_ASMMACROS_IA64_H
 
-#if defined(linux)
+#if defined(__linux__)
 #include <sys/io.h>
 #else
 #error This stuff is not ported on your system
