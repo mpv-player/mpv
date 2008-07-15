@@ -5687,6 +5687,7 @@ echores "$_fribidi"
 echocheck "ENCA"
 if test "$_enca" = auto ; then
     cat > $TMPC << EOF
+#include <sys/types.h>
 #include <enca.h>
 int main(void) {
     const char **langs;
@@ -6026,6 +6027,7 @@ echocheck "libmpcdec (musepack, version >= 1.2.1 required)"
 if test "$_musepack" = auto ; then
   _musepack=no
   cat > $TMPC << EOF
+#include <stddef.h>
 #include <mpcdec/mpcdec.h>
 int main(void) {
   mpc_streaminfo info;
