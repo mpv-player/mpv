@@ -5197,6 +5197,7 @@ echocheck "ALSA audio"
 if test "$_alsa" != no ; then
   _alsa=no
   cat > $TMPC << EOF
+#include <sys/time.h>
 #include <sys/asoundlib.h>
 #if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 5))
 #error "alsa version != 0.5.x"
@@ -5206,6 +5207,7 @@ EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.5.x'
 
   cat > $TMPC << EOF
+#include <sys/time.h>
 #include <sys/asoundlib.h>
 #if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 9))
 #error "alsa version != 0.9.x"
@@ -5214,6 +5216,7 @@ int main(void) { return 0; }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.9.x-sys'
   cat > $TMPC << EOF
+#include <sys/time.h>
 #include <alsa/asoundlib.h>
 #if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 9))
 #error "alsa version != 0.9.x"
@@ -5223,6 +5226,7 @@ EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.9.x-alsa'
 
   cat > $TMPC << EOF
+#include <sys/time.h>
 #include <sys/asoundlib.h>
 #if !((SND_LIB_MAJOR == 1) && (SND_LIB_MINOR == 0))
 #error "alsa version != 1.0.x"
@@ -5231,6 +5235,7 @@ int main(void) { return 0; }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='1.0.x-sys'
   cat > $TMPC << EOF
+#include <sys/time.h>
 #include <alsa/asoundlib.h>
 #if !((SND_LIB_MAJOR == 1) && (SND_LIB_MINOR == 0))
 #error "alsa version != 1.0.x"
