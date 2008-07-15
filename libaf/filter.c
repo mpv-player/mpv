@@ -25,8 +25,8 @@
    w filter taps
    x input signal must be a circular buffer which is indexed backwards 
 */
-inline FLOAT_TYPE af_filter_fir(register unsigned int n, FLOAT_TYPE* w,
-                                FLOAT_TYPE* x)
+inline FLOAT_TYPE af_filter_fir(register unsigned int n, const FLOAT_TYPE* w,
+                                const FLOAT_TYPE* x)
 {
   register FLOAT_TYPE y; // Output
   y = 0.0; 
@@ -48,11 +48,11 @@ inline FLOAT_TYPE af_filter_fir(register unsigned int n, FLOAT_TYPE* w,
    s  output buffer stride
 */
 FLOAT_TYPE* af_filter_pfir(unsigned int n, unsigned int d, unsigned int xi,
-                           FLOAT_TYPE** w, FLOAT_TYPE** x, FLOAT_TYPE* y,
+                           const FLOAT_TYPE** w, const FLOAT_TYPE** x, FLOAT_TYPE* y,
                            unsigned int s)
 {
-  register FLOAT_TYPE* xt = *x + xi;
-  register FLOAT_TYPE* wt = *w;
+  register const FLOAT_TYPE* xt = *x + xi;
+  register const FLOAT_TYPE* wt = *w;
   register int    nt = 2*n;
   while(d-- > 0){
     *y = af_filter_fir(n,wt,xt);
@@ -69,7 +69,7 @@ FLOAT_TYPE* af_filter_pfir(unsigned int n, unsigned int d, unsigned int xi,
    filter. xq must be n*2 by k big, s is the index for in.
 */
 int af_filter_updatepq(unsigned int n, unsigned int d, unsigned int xi,
-                       FLOAT_TYPE** xq, FLOAT_TYPE* in, unsigned int s)
+                       FLOAT_TYPE** xq, const FLOAT_TYPE* in, unsigned int s)
 {
   register FLOAT_TYPE* txq = *xq + xi;
   register int nt = n*2;
@@ -99,7 +99,7 @@ int af_filter_updatepq(unsigned int n, unsigned int d, unsigned int xi,
    
    returns 0 if OK, -1 if fail
 */
-int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, FLOAT_TYPE* fc,
+int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
                          unsigned int flags, FLOAT_TYPE opt)
 {
   unsigned int	o   = n & 1;          	// Indicator for odd filter length
@@ -238,7 +238,7 @@ int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, FLOAT_TYPE* fc,
 
    returns 0 if OK, -1 if fail
 */
-int af_filter_design_pfir(unsigned int n, unsigned int k, FLOAT_TYPE* w,
+int af_filter_design_pfir(unsigned int n, unsigned int k, const FLOAT_TYPE* w,
                           FLOAT_TYPE** pw, FLOAT_TYPE g, unsigned int flags)
 {
   int l = (int)n/k;	// Length of individual FIR filters
@@ -316,7 +316,7 @@ static void af_filter_prewarp(FLOAT_TYPE* a, FLOAT_TYPE fc, FLOAT_TYPE fs)
    Return: On return, set coef z-domain coefficients and k to the gain
    required to maintain overall gain = 1.0;
 */
-static void af_filter_bilinear(FLOAT_TYPE* a, FLOAT_TYPE* b, FLOAT_TYPE* k,
+static void af_filter_bilinear(const FLOAT_TYPE* a, const FLOAT_TYPE* b, FLOAT_TYPE* k,
                                FLOAT_TYPE fs, FLOAT_TYPE *coef)
 {
   FLOAT_TYPE ad, bd;
@@ -417,7 +417,7 @@ static void af_filter_bilinear(FLOAT_TYPE* a, FLOAT_TYPE* b, FLOAT_TYPE* k,
 
    return -1 if fail 0 if success.
 */
-int af_filter_szxform(FLOAT_TYPE* a, FLOAT_TYPE* b, FLOAT_TYPE Q, FLOAT_TYPE fc,
+int af_filter_szxform(const FLOAT_TYPE* a, const FLOAT_TYPE* b, FLOAT_TYPE Q, FLOAT_TYPE fc,
                       FLOAT_TYPE fs, FLOAT_TYPE *k, FLOAT_TYPE *coef)
 {
   FLOAT_TYPE at[3];
