@@ -3016,8 +3016,9 @@ fi
 
 echocheck "dynamic loader"
 cat > $TMPC << EOF
+#include <stddef.h>
 #include <dlfcn.h>
-int main(void) { dlopen(0, 0); dlclose(0); dlsym(0, 0); return 0; }
+int main(void) { dlopen(NULL, 0); dlclose(NULL); dlsym(NULL, NULL); return 0; }
 EOF
 _dl=no
 for _ld_tmp in "" "-ldl" ; do
