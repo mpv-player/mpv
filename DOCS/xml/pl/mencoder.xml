@@ -241,7 +241,7 @@ może zostać prawidłowo odtworzony przez odtwarzacze inne niż
 <application>MPlayer</application>.
 </para>
 
-<example>
+<example id="encode_to_macromedia_flash_format">
 <title>kodowanie do formatu Macromedia Flash</title>
 <para>
 Tworzenie zbioru Macromedia Flash video, nadającego się do odtwarzania

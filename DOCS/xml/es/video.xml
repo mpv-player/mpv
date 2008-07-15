@@ -668,7 +668,7 @@ en la (si está presente) banda negra.
 </varlistentry>
 </variablelist>
 
-<table>
+<table id="teclas_sdl">
 <title>Teclas solo para SDL</title>
 <tgroup cols="2">
 <thead>
