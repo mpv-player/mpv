@@ -3285,8 +3285,9 @@ fi #if sunos
 echocheck "termcap"
 if test "$_termcap" = auto ; then
   cat > $TMPC <<EOF
+#include <stddef.h>
 #include <term.h>
-int main(void) { tgetent(); return 0; }
+int main(void) { tgetent(NULL, NULL); return 0; }
 EOF
   _termcap=no
   for _ld_tmp in "-lncurses" "-ltinfo" "-ltermcap"; do
