@@ -1573,6 +1573,7 @@ if x86 && test "$_runtime_cpudetection" = no ; then
     if test "$1" = kernel_check ; then
       echocheck "kernel support of $2"
       cat > $TMPC <<EOF
+#include <stdlib.h>
 #include <signal.h>
 void catch() { exit(1); }
 int main(void) {
@@ -3283,6 +3284,7 @@ fi #if sunos
 echocheck "termcap"
 if test "$_termcap" = auto ; then
   cat > $TMPC <<EOF
+#include <term.h>
 int main(void) { tgetent(); return 0; }
 EOF
   _termcap=no
@@ -5586,6 +5588,7 @@ echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
         cat > $TMPC << EOF
 #include <stdio.h>
+#include <stdlib.h>
 #include <fontconfig/fontconfig.h>
 int main(void) {
     int err = FcInit();
