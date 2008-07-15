@@ -2411,7 +2411,7 @@ echocheck ".align is a power of two"
 if test "$_asmalign_pot" = auto ; then
 _asmalign_pot=no
 cat > $TMPC << EOF
-int main(void) { asm (".align 3"); }
+int main(void) { asm (".align 3"); return 0; }
 EOF
 cc_check && _asmalign_pot=yes
 fi
@@ -2482,7 +2482,7 @@ if arm ; then
   echocheck "ARMv5TE (Enhanced DSP Extensions)"
   if test $_armv5te = "auto" ; then
     cat > $TMPC << EOF
-int main(void) { __asm__ __volatile__ ("qadd r0, r0, r0"); }
+int main(void) { __asm__ __volatile__ ("qadd r0, r0, r0"); return 0; }
 EOF
     _armv5te=no
     cc_check && _armv5te=yes
@@ -2492,7 +2492,7 @@ EOF
   echocheck "ARMv6 (SIMD instructions)"
   if test $_armv6 = "auto" ; then
     cat > $TMPC << EOF
-int main(void) { __asm__ __volatile__ ("sadd16 r0, r0, r0"); }
+int main(void) { __asm__ __volatile__ ("sadd16 r0, r0, r0"); return 0; }
 EOF
     _armv6=no
     cc_check && _armv6=yes
@@ -2502,7 +2502,7 @@ EOF
   echocheck "iWMMXt (Intel XScale SIMD instructions)"
   if test $_iwmmxt = "auto" ; then
     cat > $TMPC << EOF
-int main(void) { __asm__ __volatile__ ("wunpckelub wr6, wr4"); }
+int main(void) { __asm__ __volatile__ ("wunpckelub wr6, wr4"); return 0; }
 EOF
     _iwmmxt=no
     cc_check && _iwmmxt=yes
@@ -2647,7 +2647,7 @@ echores "$_runtime_cpudetection"
 
 echocheck "restrict keyword"
 for restrict_keyword in restrict __restrict __restrict__ ; do
-  echo "void foo(char * $restrict_keyword p); int main(void) {}" > $TMPC
+  echo "void foo(char * $restrict_keyword p); int main(void) { return 0; }" > $TMPC
   if cc_check; then
     _def_restrict_keyword=$restrict_keyword
     break;
@@ -3125,6 +3125,7 @@ int main(void) {
     if (iconv_close(icdsc) == -1)
       ;
   }
+  return 0;
 }
 EOF
   _iconv=no
@@ -3531,6 +3532,7 @@ int main(void) {
     EnterMovies();
     ExitMovies();
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false);
+    return 0;
 }
 EOF
   if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then
@@ -3555,7 +3557,7 @@ EOF
 cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
 #include <QuartzCore/CoreVideo.h>
-int main(void) {}
+int main(void) { return 0; }
 EOF
 	if cc_check -framework Carbon -framework QuartzCore -framework OpenGL; then
 		_vosrc="$_vosrc vo_macosx.m"
@@ -3747,6 +3749,7 @@ struct vis_identifier ident;
 struct fbgattr attr;
 ioctl(0, VIS_GETIDENTIFIER, &ident);
 ioctl(0, FBIOGATTR, &attr);
+return 0;
 }
 EOF
   _xvr100=no
@@ -3959,13 +3962,13 @@ if test "$_x11" = yes ; then
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/dpms.h>
-int main(void) { (void) DPMSQueryExtension(0, 0, 0); }
+int main(void) { (void) DPMSQueryExtension(0, 0, 0); return 0; }
 EOF
   cc_check -lXdpms && _xdpms3=yes
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/dpms.h>
-int main(void) { (void) DPMSQueryExtension(0, 0, 0); }
+int main(void) { (void) DPMSQueryExtension(0, 0, 0); return 0; }
 EOF
   cc_check -lXext && _xdpms4=yes
 fi
@@ -5883,7 +5886,7 @@ if test "$_speex" = auto ; then
   _speex=no
   cat > $TMPC << EOF
 #include <speex/speex.h>
-int main(void) { SpeexBits bits; void *dec; speex_decode_int(dec, &bits, dec); }
+int main(void) { SpeexBits bits; void *dec; speex_decode_int(dec, &bits, dec); return 0; }
 EOF
   cc_check -lspeex $_ld_lm && _speex=yes
 fi
@@ -6029,6 +6032,7 @@ int main(void) {
   mpc_decoder decoder;
   mpc_decoder_set_streaminfo(&decoder, &info);
   mpc_decoder_decode_frame(&decoder, NULL, 0, NULL);
+  return 0;
 }
 EOF
   cc_check -lmpcdec $_ld_lm && _musepack=yes
@@ -6286,7 +6290,7 @@ if test "$_live" = auto  && test "$_network" = yes ; then
 #if (LIVEMEDIA_LIBRARY_VERSION_INT < 1141257600)
 #error Please upgrade to version 2006.03.03 or later of the "LIVE555 Streaming Media" libraries - available from <www.live555.com/liveMedia/>
 #endif
-int main(void) {}
+int main(void) { return 0; }
 EOF
 
   _live=no
@@ -7181,7 +7185,7 @@ if test "$_inet6" = auto ; then
 #else
 #include <ws2tcpip.h>
 #endif
-int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); }
+int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); return 0; }
 EOF
   _inet6=no
   if cc_check $_ld_sock ; then
@@ -7202,7 +7206,7 @@ cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-int main(void) { gethostbyname2("", AF_INET); }
+int main(void) { gethostbyname2("", AF_INET); return 0; }
 EOF
   _gethostbyname2=no
   if cc_check ; then
