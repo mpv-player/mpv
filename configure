@@ -192,6 +192,8 @@ case `echo -n` in
 esac
 
 msg_langs=`echo help/help_mp-??.h help/help_mp-??_??.h | sed -e "s:help/help_mp-\(..\).h:\1:g" -e "s:help/help_mp-\(.....\).h:\1:g"`
+man_langs=`echo DOCS/man/??/mplayer.1 | sed -e "s:DOCS/man/\(..\)/mplayer.1:\1:g"`
+doc_langs=`echo DOCS/xml/??/ DOCS/xml/??_??/ | sed -e "s:DOCS/xml/\(..\)/:\1:g" -e "s:DOCS/xml/\(.._..\)/:\1:g"`
 
 show_help(){
 cat << EOF
