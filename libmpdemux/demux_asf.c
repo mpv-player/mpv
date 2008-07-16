@@ -50,9 +50,12 @@ static inline int check_varlen(uint8_t *ptr, uint8_t *endptr, int len) {
 }
 
 static void asf_descrambling(unsigned char **src,unsigned len, struct asf_priv* asf){
-  unsigned char *dst=malloc(len);
+  unsigned char *dst;
   unsigned char *s2=*src;
   unsigned i=0,x,y;
+  if (len > UINT_MAX - FF_INPUT_BUFFER_PADDING_SIZE)
+	return;
+  dst = malloc(len + FF_INPUT_BUFFER_PADDING_SIZE);
   while(len>=asf->scrambling_h*asf->scrambling_w*asf->scrambling_b+i){
 //    mp_msg(MSGT_DEMUX,MSGL_DBG4,"descrambling! (w=%d  b=%d)\n",w,asf_scrambling_b);
 	//i+=asf_scrambling_h*asf_scrambling_w;
