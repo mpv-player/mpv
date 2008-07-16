@@ -14,12 +14,6 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#ifdef USE_LIBAVCODEC
-#include "libavcodec/avcodec.h"
-#else
-#define FF_INPUT_BUFFER_PADDING_SIZE 8
-#endif
-
 /* parameters ! */
 int vivo_param_version = -1;
 char *vivo_param_acodec = NULL;

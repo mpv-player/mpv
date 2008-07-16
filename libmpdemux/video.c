@@ -22,12 +22,6 @@
 /* sub_cc (closed captions)*/
 #include "sub_cc.h"
 
-#ifdef USE_LIBAVCODEC
-#include "libavcodec/avcodec.h"
-#else
-#define FF_INPUT_BUFFER_PADDING_SIZE 8
-#endif
-
 /* biCompression constant */
 #define BI_RGB        0L
 
