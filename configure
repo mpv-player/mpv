@@ -2602,7 +2602,7 @@ echores "$_langinfo"
 echocheck "language"
 test -z "$_language" && _language=$LINGUAS
 _language=`echo $_language | tr , " "`
-echo $_language | grep all > /dev/null || LANGUAGES="$_language en"
+echo $_language | grep -q all || LANGUAGES="$_language en"
 for lang in $_language ; do
   test "$lang" = all && lang=en
   if test -f "help/help_mp-${lang}.h" ; then
@@ -6670,7 +6670,7 @@ echocheck "zr"
 if test "$_zr" = auto ; then
   #36067's seem to identify themselves as 36057PQC's, so the line
   #below should work for 36067's and 36057's.
-  if grep -e "Multimedia video controller: Zoran Corporation ZR36057" /proc/pci > /dev/null 2>&1; then
+  if grep -q -s -e "Multimedia video controller: Zoran Corporation ZR36057" /proc/pci ; then
     _zr=yes
   else
     _zr=no
@@ -7125,7 +7125,7 @@ short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B
 int main(void) { return (int)ascii_name; }
 EOF
   if cc_check ; then
-    if strings $TMPEXE | grep -l MPlayerBigEndian >/dev/null ; then
+    if strings $TMPEXE | grep -q -l MPlayerBigEndian ; then
       _big_endian=yes
     else
       _big_endian=no
@@ -7238,7 +7238,7 @@ if test "$_gui" = yes ; then
 
   # Required libraries
   if test "$_libavcodec" != yes ||
-      ! echo $_libavdecoders | grep PNG_DECODER >/dev/null 2>&1 ; then
+      ! echo $_libavdecoders | grep -q PNG_DECODER ; then
     die "The GUI requires libavcodec with PNG support (needs zlib)."
   fi
   test "$_freetype" = no && test "$_bitmap_font" = no && \
@@ -7842,7 +7842,7 @@ ff_config_enable () {
 _nprefix=$3;
 test -z "$_nprefix" && _nprefix='CONFIG'
 for part in $1; do
-  if ` echo $2 | grep -E "(^| )$part($| )" > /dev/null `; then
+  if ` echo $2 | grep -q -E "(^| )$part($| )" `; then
     echo "#define ${_nprefix}_$part 1"
     echo "#define ENABLE_$part 1"
   else
