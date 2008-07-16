@@ -191,7 +191,7 @@ case `echo -n` in
   *)	_echo_n='-n '	_echo_c=	;;	# BSD echo
 esac
 
-LANGUAGES=`echo help/help_mp-??.h help/help_mp-??_??.h | sed "s:help/help_mp-\(..\).h:\1:g" | sed "s:help/help_mp-\(.....\).h:\1:g"`
+LANGUAGES=`echo help/help_mp-??.h help/help_mp-??_??.h | sed -e "s:help/help_mp-\(..\).h:\1:g" -e "s:help/help_mp-\(.....\).h:\1:g"`
 
 show_help(){
 cat << EOF
