@@ -2615,7 +2615,6 @@ for lang in $_language ; do
 done
 test -z "$_language" && _language=en
 _mp_help="help/help_mp-${_language}.h"
-test -f $_mp_help || die "$_mp_help not found"
 for lang in $msg_langs ; do
   if test -f "DOCS/man/$lang/mplayer.1" ; then
     MAN_LANG_ALL="$lang $MAN_LANG_ALL"
