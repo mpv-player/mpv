@@ -2601,7 +2601,7 @@ echores "$_langinfo"
 
 echocheck "language"
 test -z "$_language" && _language=$LINGUAS
-_language=`echo $_language | sed 's/,/ /g'`
+_language=`echo $_language | tr , " "`
 echo $_language | grep all > /dev/null || LANGUAGES="$_language en"
 for lang in $_language ; do
   test "$lang" = all && lang=en
