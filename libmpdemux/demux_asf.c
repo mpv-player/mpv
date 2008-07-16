@@ -488,6 +488,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
               }
               if(len<0 || (p+len)>p_end){
                 mp_msg(MSGT_DEMUX,MSGL_V,"ASF_parser: warning! segment len=%d\n",len);
+                len = p_end - p;
               }
               mp_dbg(MSGT_DEMUX,MSGL_DBG4,"  seg #%d: streamno=%d  seq=%d  type=%02X  len=%d\n",seg,streamno,seq,rlen,len);
 
