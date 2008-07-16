@@ -1751,7 +1751,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              "MOV: %*sSample duration table! (%d blocks)\n", level, "",
              len);
       trak->durmap = calloc(len, sizeof(mov_durmap_t));
-      trak->durmap_size = trak->durmap ? 0 : len;
+      trak->durmap_size = trak->durmap ? len : 0;
       for (i = 0; i < trak->durmap_size; i++) {
         trak->durmap[i].num = stream_read_dword(demuxer->stream);
         trak->durmap[i].dur = stream_read_dword(demuxer->stream);
