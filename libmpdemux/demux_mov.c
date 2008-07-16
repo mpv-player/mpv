@@ -1887,7 +1887,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              "MOV: %*sEdit list table (%d entries) (ver:%d,flags:%d)\n", level, "",
              entries, ver, flags);
 #if 1
-      trak->editlist = calloc(trak->editlist_size, sizeof(mov_editlist_t));
+      trak->editlist = calloc(entries, sizeof(mov_editlist_t));
       trak->editlist_size = trak->editlist ? entries : 0;
       for (i = 0; i < trak->editlist_size; i++) {
         int dur = stream_read_dword(demuxer->stream);
