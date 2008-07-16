@@ -417,7 +417,7 @@ Miscellaneous options:
                          translated man pages, the first language is used for
                          messages and the GUI (the environment variable
                          \$LINGUAS is also honored) [en]
-                         (Available: $msg_langs all)
+                         (Available: all $msg_langs)
   --with-install=PATH    path to a custom install program
 
 Advanced options:
