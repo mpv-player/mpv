@@ -2619,15 +2619,15 @@ else
   done
   man_langs=$tmp_man_langs
   doc_langs=$tmp_man_langs
-for lang in $_language ; do
-  if test -f "help/help_mp-${lang}.h" ; then
-    msg_lang=$lang
-    break
-  else
-    echo ${_echo_n} "$lang not found, ${_echo_c}"
-    _language=`echo $_language | sed "s/$lang *//"`
-  fi
-done
+  for lang in $_language ; do
+    if test -f "help/help_mp-${lang}.h" ; then
+      msg_lang=$lang
+      break
+    else
+      echo ${_echo_n} "$lang not found, ${_echo_c}"
+      _language=`echo $_language | sed "s/$lang *//"`
+    fi
+  done
 fi
 test -z "$doc_langs" && doc_langs=en
 test -z "$man_langs" && man_langs=en
