@@ -5205,6 +5205,10 @@ fi
 echores "$_openal"
 
 echocheck "ALSA audio"
+if test "$_alloca" != yes ; then
+  _alsa=no
+  _res_comment="alloca missing"
+fi
 if test "$_alsa" != no ; then
   _alsa=no
   cat > $TMPC << EOF

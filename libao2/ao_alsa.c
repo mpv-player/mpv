@@ -19,6 +19,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
+#include <alloca.h>
 
 #include "config.h"
 #include "subopt-helper.h"
