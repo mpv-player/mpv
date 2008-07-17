@@ -378,10 +378,10 @@ static int demux_vivo_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
       } else {
         // append data to it!
         demux_packet_t* dp=ds->asf_packet;
-        if(dp->len + len + FF_INPUT_BUFFER_PADDING_SIZE < 0)
+        if(dp->len + len + MP_INPUT_BUFFER_PADDING_SIZE < 0)
 	    return 0;
-        dp->buffer=realloc(dp->buffer,dp->len+len+FF_INPUT_BUFFER_PADDING_SIZE);
-        memset(dp->buffer+dp->len+len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+        dp->buffer=realloc(dp->buffer,dp->len+len+MP_INPUT_BUFFER_PADDING_SIZE);
+        memset(dp->buffer+dp->len+len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
         //memcpy(dp->buffer+dp->len,data,len);
 	stream_read(demux->stream,dp->buffer+dp->len,len);
         mp_dbg(MSGT_DEMUX,MSGL_DBG4,"data appended! %d+%d\n",dp->len,len);

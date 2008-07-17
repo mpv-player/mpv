@@ -27,6 +27,13 @@
 #include "libass/ass_mp.h"
 #endif
 
+#ifdef USE_LIBAVCODEC
+#include "libavcodec/avcodec.h"
+#if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE
+#error MP_INPUT_BUFFER_PADDING_SIZE is too small!
+#endif
+#endif
+
 extern void resync_video_stream(sh_video_t *sh_video);
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 
