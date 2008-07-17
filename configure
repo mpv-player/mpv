@@ -7487,8 +7487,8 @@ echores "$_lircc"
 
 if arm; then
 # Detect maemo development platform libraries availability (http://www.maemo.org),
-# they are used when run on Nokia 770
-echocheck "maemo (Nokia 770)"
+# they are used when run on Nokia 770|8x0
+echocheck "maemo (Nokia 770|8x0)"
 if test "$_maemo" = auto ; then
   _maemo=no
   cat > $TMPC << EOF
