@@ -2634,7 +2634,7 @@ test -z "$man_langs" && man_langs=en
 test -z "$doc_lang" && doc_lang=$(echo $doc_langs | cut -f1 -d" ")
 test -z "$man_lang" && man_lang=$(echo $man_langs | cut -f1 -d" ")
 test -z "$msg_lang" && msg_lang=en
-_mp_help="help/help_mp-${_msg_lang}.h"
+_mp_help="help/help_mp-${msg_lang}.h"
 echores "messages: $msg_lang - man pages: $man_langs - documentation: $doc_langs"
 
 
