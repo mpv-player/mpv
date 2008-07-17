@@ -819,8 +819,8 @@ install-dirs:
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-mplayer-man: $(foreach lang,$(MAN_LANG_ALL),install-mplayer-man-$(lang))
-install-mencoder-man: $(foreach lang,$(MAN_LANG_ALL),install-mencoder-man-$(lang))
+install-mplayer-man: $(foreach lang,$(MAN_LANG),install-mplayer-man-$(lang))
+install-mencoder-man: $(foreach lang,$(MAN_LANG),install-mencoder-man-$(lang))
 
 install-mplayer-man-en:
 	$(INSTALL) -d $(MANDIR)/man1
@@ -840,8 +840,8 @@ install-mencoder-man-$(lang): install-mplayer-man-$(lang)
 	cd $(MANDIR)/$(lang)/man1 && ln -sf mplayer.1 mencoder.1
 endef
 
-$(foreach lang,$(MAN_LANG),$(eval $(MPLAYER_MAN_RULE)))
-$(foreach lang,$(MAN_LANG),$(eval $(MENCODER_MAN_RULE)))
+$(foreach lang,$(MAN_LANG_ALL),$(eval $(MPLAYER_MAN_RULE)))
+$(foreach lang,$(MAN_LANG_ALL),$(eval $(MENCODER_MAN_RULE)))
 
 install-gui: install-mplayer
 	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
