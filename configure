@@ -2623,8 +2623,8 @@ for lang in $msg_langs ; do
   fi
 done
 MAN_LANG="$(echo $MAN_LANG_ALL | sed 's/en//')"
-_doc_lang=$_language
-test -d DOCS/xml/$_doc_lang || _doc_lang=en
+doc_lang=$_language
+test -d DOCS/xml/$doc_lang || doc_lang=en
 echores "using $_language (man pages: $MAN_LANG_ALL)"
 
 
@@ -8635,7 +8635,7 @@ EOF
 
 
 if test "$_mtrr" = yes ; then
-  echo "Please check mtrr settings at /proc/mtrr (see DOCS/HTML/$_doc_lang/video.html#mtrr)"
+  echo "Please check mtrr settings at /proc/mtrr (see DOCS/HTML/$doc_lang/video.html#mtrr)"
   echo
 fi
 
@@ -8662,7 +8662,7 @@ If you used one of these options (except --enable-gui and similar ones that
 turn on internal features) and experience a compilation or linking failure,
 make sure you have passed the necessary compiler/linker flags to configure.
 
-If you suspect a bug, please read DOCS/HTML/$_doc_lang/bugreports.html.
+If you suspect a bug, please read DOCS/HTML/$doc_lang/bugreports.html.
 
 EOF
 
