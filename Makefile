@@ -819,8 +819,8 @@ install-dirs:
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-mplayer-man: $(foreach lang,$(MAN_LANG),install-mplayer-man-$(lang))
-install-mencoder-man: $(foreach lang,$(MAN_LANG),install-mencoder-man-$(lang))
+install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
+install-mencoder-man: $(foreach lang,$(MAN_LANGS),install-mencoder-man-$(lang))
 
 install-mplayer-man-en:
 	$(INSTALL) -d $(MANDIR)/man1
@@ -856,7 +856,7 @@ uninstall:
 	rm -f $(prefix)/share/pixmaps/mplayer.xpm
 	rm -f $(prefix)/share/applications/mplayer.desktop
 	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
-	rm -f $(foreach lang,$(MAN_LANG),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
+	rm -f $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
 
 clean:
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
