@@ -1069,7 +1069,7 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-__attribute__((gnu_inline)) inline void startplay(gui_t *gui)
+static void startplay(gui_t *gui)
 {
     handlemsg(gui->mainwindow, evDropFile);
 }
