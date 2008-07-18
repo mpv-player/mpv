@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25146 -->
+<!-- synced with r26990 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -427,7 +427,7 @@ Ez el fogja menteni a
 <replaceable>http://217.71.208.37:8006</replaceable> szerveren stream-elt
 tartalmat a <replaceable>stream.asf</replaceable> fájlba.
 Ez működik az <application>MPlayer</application> által támogatott
-összes protokollal, mint MMS, RSTP és így tovább.
+összes protokollal, mint MMS, RTSP és így tovább.
 </para>
 </sect2>
 </sect1>

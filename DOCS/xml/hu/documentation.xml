@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25566 -->
+<!-- synced with r27211 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -48,11 +48,9 @@ olvasd el a <xref linkend="faq"/>-t, vagy greppelj a file-okban. A legtöbb
 kérdésre fogsz választ találni, amire pedig nem, az nagy valószínűséggel már
 megválaszolásra került valamelyik
 <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">levelezési listán</ulink>.
-<!-- FIXME: This refers to nonexistent links
 Nézd meg az
-<ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archivumot</ulink>,
+<ulink url="https://lists.mplayerhq.hu/mailman/listinfo">archivumot</ulink>,
 mert rengeteg értékes információt tartalmaz.
--->
 </para>
 </preface>
 
@@ -61,17 +59,16 @@ mert rengeteg értékes információt tartalmaz.
 
 <para>
 Az <application>MPlayer</application> egy Linuxon működő videolejátszó (fut
-számos más Unix-on és akár <emphasis role="bold">nem-x86</emphasis> processzorokon
-is, lásd <xref linkend="ports"/>).
-Le tudja játszani a legtöbb MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4,
+számos más Unix-on és nem-x86 processzorokon is, lásd <xref linkend="ports"/>).
+Le tudja játszani a legtöbb MPEG, VOB, AVI, Ogg/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4,
 FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, és Matroska file-t, és ezekhez
 felsorakoztat jónéhány natív, XAnim, RealPlayer és Win32 DLL codecet. Nézhetsz vele 
-<emphasis role="bold">VideoCD-t, SVCD-t, DVD-t, 3ivx, RealMedia, Sorenson, Theora</emphasis>
-és <emphasis role="bold">MPEG-4 (DivX)</emphasis> filmet is. Az <application>MPlayer</application>
+Video CD-t, SVCD-t, DVD-t, 3ivx, RealMedia, Sorenson, Theora
+és MPEG-4 (DivX) filmet is. Az <application>MPlayer</application>
 másik nagy előnye a megjelenítési módok széles választékában rejlik.
 Működik X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, sőt SDL-lel vagy GGI-vel is (beleértve ezáltal
-az SDL/GGI drivereit is), és néhány alacsonyszintű kártyaspecifikus vezérlő
+az SDL/GGI drivereit is), és néhány alacsony szintű kártyaspecifikus vezérlő
 (Matrox, 3dfx, Radeon, Mach64, Permedia3) is használható!
 Legtöbbjük támogat szoftveres vagy hardveres nagyítást, így a teljesképernyős
 mód is elérhető. Az <application>MPlayer</application> támogat továbbá hardveres
@@ -79,14 +76,14 @@ MPEG kártyákkal történő dekódolást/megjelenítést, így például a
 <link linkend="dvb">DVB</link> és <link linkend="dxr3">DXR3/Hollywood+</link>
 kártyákon!
 És még nem is szóltam a szép, élsímított, árnyékolt feliratozásról
-(<emphasis role="bold">14 támogatott típus!</emphasis>),
-ami támogat európai/ISO-88592-1,2 (magyar, angol, cseh, stb), cirill és koreai
-fontokat, valamint az OSD-ről!
+(14 támogatott típus!), ami támogat európai/ISO-88592-1,2 (magyar, angol, cseh,
+stb), cirill és koreai fontokat, valamint az OSD-ről!
 </para>
 
 <para>
 A lejátszó sziklaszilárdan játszik le hibás MPEG file-okat (hasznos néhány
-VCD-nél), és minden olyan hibás AVI-t, amit a csodás Windows Media Player nem.
+VCD-nél), és minden olyan hibás AVI-t, amit a csodás
+<application>Windows Media Player</application> nem.
 Még az index chunk nélküli AVI-k is lejátszhatók, sőt az indexet ideiglenesen
 fel is lehet építeni az <option>-idx</option> opcióval (vagy véglegesen a
 <application>MEncoder</application>rel), így tekerni is lehet bennük! Amint
@@ -99,13 +96,12 @@ videó-audió szerkesztéshez.
 A <application>MEncoder</application> (<application>MPlayer's</application> Movie
 Encoder) egy egyszerű film kódoló, az <application>MPlayer</application> által
 ismert formátumok
-(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+(AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA)
 más <application>MPlayer</application> által lejátszható formátumokba való
 átalakításához (lásd lejjebb).
-Sokféle codec-kel tud kódolni, például <emphasis role="bold">MPEG-4 (DivX4)</emphasis>-gyel
+Sokféle codec-kel tud kódolni, például MPEG-4-gyel (DivX4)
 (egy vagy két menetes), a <systemitem class="library">libavcodec</systemitem>-et
-alkotó codec-ekkel, audiót tekintve pedig
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> a választék.
+alkotó codec-ekkel, audiót tekintve pedig PCM/MP3/VBR MP3 a választék.
 </para>
 
 <itemizedlist>
@@ -119,7 +115,7 @@ alkotó codec-ekkel, audiót tekintve pedig
   által támogatott összes formátumba tud tömöríteni
 </para></listitem>
 <listitem><para>
-  Videó grabbelés <emphasis role="bold">V4L kompatibilis TV tunerekről</emphasis>
+  Videó grabbelés V4L kompatibilis TV tunerekről
 </para></listitem>
 <listitem><para>
   Helyes index-szel rendelkező AVI fájlok kódolása/multiplexelése
@@ -131,7 +127,7 @@ alkotó codec-ekkel, audiót tekintve pedig
   1, 2 vagy 3 menetes kódolás
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">VBR</emphasis> MP3 audió
+  VBR MP3 audió
   <important><para>
   a VBR-es MP3-akat nem minden Windows rendszerre elérhető lejátszó kezeli helyesen!
   </para></important>
@@ -143,7 +139,7 @@ alkotó codec-ekkel, audiót tekintve pedig
   Stream másolás
 </para></listitem>
 <listitem><para>
-  Bemeneti file A/V szinkronizálása (PTS-alapú, az
+  Bemeneti file A/V szinkronizálása (pts-alapú, az
   <option>-mc 0</option> opcióval kikapcsolható)
 </para></listitem>
 <listitem><para>

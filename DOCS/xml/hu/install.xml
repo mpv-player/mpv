@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24087 -->
+<!-- synced with r26990 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -288,7 +288,7 @@ ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mp
 
 <para>
 A betűtípusoknak rendelkezniük kell egy megfelelő <filename>font.desc</filename>
-fájllal, ami leképezi a unicode betűpozíciókat az aktuális felirat szöveg
+fájllal, ami leképezi a Unicode betűpozíciókat az aktuális felirat szöveg
 kódlapjára. A másik megoldás UTF-8 kódolású feliratok használata és a
 <option>-utf8</option> kapcsoló megadása vagy add meg a felirat
 fájl neveként ugyan azt a nevet, mint a videó fájlé, de <filename>.utf</filename>
@@ -368,7 +368,7 @@ Három fajta időzítési eljárás van az <application>MPlayer</application>ben
   kapcsoló engedélyezi, de megfelelően beállított kernel kell hozzá.
   Ha 2.4.19pre8 vagy későbbi kernelt használsz, beállíthatod a maximum
   RTC frekvenciát a sima felhasználóknak a <systemitem class="systemname">/proc
-  </systemitem> fájlrendszer segítségével. Használd az alábbi két parancs
+  </systemitem> fájl rendszer segítségével. Használd az alábbi két parancs
   valamelyikét az RTC normál felhasználók számára történő engedélyezéséhez:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
   <screen>sysctl dev/rtc/max-user-freq=1024</screen>

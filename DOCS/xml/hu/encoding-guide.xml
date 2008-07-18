@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26925 -->
+<!-- synced with r26990 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -438,7 +438,7 @@ tengelyen, a másik a kék-sárga tengelyen).
 Ha a film szélessége és magassága nem 16 többszöröse, a kódoló akkor is
 elegendő 16x16-os makroblokkot fog használni, hogy lefedje a teljes
 képet, a maradék hely veszendőbe megy.
-Így ha a minőség maximalizálása a cél egy fix fájlmérettel, akkor
+Így ha a minőség maximalizálása a cél egy fix fájl mérettel, akkor
 eléggé rossz ötlet nem 16 valamelyik többszörösét használni méretként.
 </para>
 
@@ -1185,8 +1185,8 @@ Az egyetlen dolog, amit szeretnél, a videó nagyon könnyű zajszűrőn törté
 bitek jobb felhasználásáról van szó: miért vesztegessük el őket a zaj
 kódolására, ha ezt a zajt lejátszás közben is hozzá tudod adni? A
 <option>hqdn3d</option> paramétereinek növelésével még jobb tömörítettséget
-érhetsz el, de ha túl magasra állítod az értékeket, rontod a kép
-láthatóságát.
+érhetsz el, de ha túl magasra állítod az értékeket, akkor láthatóan rontod
+a kép minőségét.
 A fent javasolt értékek (<option>2:1:2</option>) eléggé konzervatívak;
 kísérletezz szabadon nagyobb értékekkel és ellenőrizd az eredményeket magad.
 </para>
@@ -1548,7 +1548,7 @@ PCM-be az <application>MPlayer</application>rel), a szeletek hibásan maradnak
 benne és csak képkocka eldobással/duplázással lehet javítani.
 Amíg a <application>MEncoder</application> látja az audiót a videó kódolása
 közben, meg tudja csinálni ezt az eldobást/duplázást (ami általában rendben
-van, mert teljesen sötét/jelentetváltásos helyeken történik), de ha a
+van, mert teljesen sötét/jelentet váltásos helyeken történik), de ha a
 <application>MEncoder</application> nem látja az audiót, csak feldolgoz
 minden képkockát úgy ahogy van és nem fog illeszkedni a végső audió folyamhoz
 ha például összeilleszted az audió és a videó sávodat egy Matroska fájlba.
@@ -2226,7 +2226,7 @@ mencoder dvd://1 -oac copy -vf pullup,softskip
   mezőpárokat, hogy azok egy komplett képkockát adjanak. A <option>filmdint</option>
   deinterlace-lni fogja az egyedi mezőket, amelyeket nem tud egyeztetni,
   míg a <option>pullup</option> egyszerűen csak eldobja őket. A két szűrő
-  különböző detektáló kódot alkalmaz és a filmdint néha túl kevés mezőt
+  különböző detektáló kódot alkalmaz és a <option>filmdint</option> néha túl kevés mezőt
   egyeztet. Az, hogy melyik szűrő a jobb, a bemeneti videótól és az egyéni
   ízléstől függ; kísérletezz szabadon a szűrők opcióinak finomhangolásával,
   ha valamelyikkel problémád van (lásd a man oldalt a részletekért).
@@ -2384,7 +2384,7 @@ Az időtartam/hely alapján kell döntened.
   <para>
   Bátran használhatod a <option>pullup</option>-ot (a <option>softskip</option>pel
   együtt) a progresszív videókon és ez általában jó ötlet, hacsak a forrás
-  nem egyértelműen teljesen progresszív. A teljesítményveszteség kicsi az
+  nem egyértelműen teljesen progresszív. A teljesítmény veszteség kicsi az
   esetek többségében. Nagyon ritka kódolási esetekben a <option>pullup</option>
   a <application>MEncoder</application> 50%-os lassulását okozhatja.
   A zenefeldolgozás hozzáadása és a fejlett <option>lavcopts</option>
@@ -2849,7 +2849,7 @@ Ez szép is lenne, de sajnos nehezen megvalósítható, mert a különböző
 kódolási opciók különböző minőséget eredményeznek, mely függ a forrás
 anyagtól is.
 Ez azért van, mert a tömörítés függ a szóbanforgó videó vizuális tulajdonságaitól.
-Például az anime és az élő felvétel két nagyon különböző anyag és
+Például az Anime és az élő felvétel két nagyon különböző anyag és
 így különböző opciókat követelnek meg az optimális kódoláshoz.
 A jó hír, hogy néhány opciót soha sem lehet elhagyni, mint például az
 <option>mbd=2</option>, <option>trell</option> és <option>v4mv</option>.
@@ -2889,7 +2889,7 @@ Olvass tovább a gyakori kódolási opciók leírásához.
   Kísérletezz a 0 (alapértelmezett), 2 (hadamard), 3 (dct) és 6 (ráta
   torzítás) értékekkel!
   0 a leggyorsabb és és elegendő a precmp-hez.
-  A cmp-hez és subcmp-hez 2 jó, ha anime és 3 ha élő akció.
+  A cmp-hez és subcmp-hez 2 jó, ha Anime és 3 ha élő akció.
   A 6 vagy jobb vagy nem, de mindenképpen lassabb.
 </para></listitem>
 <listitem><para>
@@ -2934,7 +2934,7 @@ Olvass tovább a gyakori kódolási opciók leírásához.
   általad megadott küszöb és ebben az esetben egyszerűen "változtatás nélkül"
   kerül elkódolásra a blokk.
   Ez biteket ment meg és talán gyorsít is a kódoláson. A vlelim=-4 és
-  vcelim=9 látszólag jók az élő filmekhez, de nem segítenek az anime-nál;
+  vcelim=9 látszólag jók az élő filmekhez, de nem segítenek az Anime-nál;
   ha animációt kódolsz, inkább hagyd őket változatlanul.
 </para></listitem>
 <listitem><para>
@@ -2942,7 +2942,7 @@ Olvass tovább a gyakori kódolási opciók leírásához.
   Az MPEG-4 fél pixeles precíziót használ a mozgáskereséshez alapértelmezésként,
   ezért ez az opció plusz terhelést hoz, mivel több információ tárolódik az
   elkódolt fájlban. A tömörítési nyereség/veszteség a filmtől függ, de
-  általában nem hatékony anime-oknál.
+  általában nem hatékony Anime-oknál.
   A qpel mindig jelentős dekódolási CPU idő igénnyel jár (+25% a gyakorlatban).
 </para></listitem>
 <listitem><para>
@@ -3341,7 +3341,7 @@ ha a következő rész túl zavarosnak tűnik.
 <listitem><para>
   <emphasis role="bold">hq_ac</emphasis>
   Bekapcsol egy jobb együttható kölcségbecslő módszert, ami kissé
-  csökkenti a fájlméretet, kb. 0,15-0,19% között (ami kevesebb, mint
+  csökkenti a fájl méretet, kb. 0,15-0,19% között (ami kevesebb, mint
   0,01dB-es PSNR növekedésnek felel meg), miközben jelentéktelen
   hatása van a sebességre. Ezért ajánlott mindig bekapcsolva hagyni.
 </para></listitem>
@@ -3374,7 +3374,7 @@ ha a következő rész túl zavarosnak tűnik.
   csak a luma-t (grayscale) használja.
   Ez 5-10%-kal lassítja a kódolást, de eléggé javítja a vizuális
   minőséget a blokkosodási effektusok csökkentésével és csökkenti
-  a fájlméretet kb. 1,3%-kal.
+  a fájl méretet kb. 1,3%-kal.
   Ha a sebesség érdekel, kapcsold ki ezt az opciót, mielőtt
   elkezdenél töprengeni a <option>me_quality</option> csökkentésén.
 </para></listitem>
@@ -3666,7 +3666,7 @@ A következő táblázat megmutatja, hogy melyik profil mit támogat.
   <entry>X</entry>
 </row>
 <row>
-  <entry>Quaterpixel</entry>
+  <entry>Quarterpixel</entry>
   <entry></entry>
   <entry></entry>
   <entry></entry>
@@ -3950,7 +3950,7 @@ elért bitráta különbségből adódik.
   valószínűleg jóval kevesebb, mint 0.1dB PSNR-t veszítesz, ami
   túl kicsi különbség ahhoz, hogy észrevedd.
   Bár a <option>frameref</option> különböző értékei alkalmanként
-  befolyásolhatják a frametype döntéseket.
+  befolyásolhatják a képkocka típus döntéseket.
   Ezek legtöbbször ritka, szélsőséges esetek, de ha teljesen biztos
   akarsz lenni, gondolkozz el rajta, hogy van-e a videódban teljes
   képernyős ismétlődő, csillogó minta vagy nagyon nagy ideiglenes
@@ -4419,7 +4419,7 @@ opciókat, ha a codec hibázik vagy rossz kimenetet ad.
 </row>
 <row>
   <entry>m3jpeg32.dll</entry>
-  <entry>Morgan Motion JPEG Codec (MJPG)</entry>
+  <entry>Morgan Motion JPEG Codec (MJPEG)</entry>
   <entry>1cd13fff5960aa2aae43790242c323b1</entry>
   <entry></entry>
 </row>
@@ -4792,7 +4792,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   <screen>mplayer narnia.avi -dumpaudio -dumpfile narnia.aac
 mplayer narnia.avi -dumpvideo -dumpfile narnia.h264</screen>
 
-  A fájlnevek fontosak; az <application>mp4creator</application>
+  A fájl nevek fontosak; az <application>mp4creator</application>
   <systemitem>.aac</systemitem> kiterjesztésű AAC audió folyamot és
   <systemitem>.h264</systemitem> kiterjesztésű H.264 videó folyamot vár.
 </para>
