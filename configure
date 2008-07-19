@@ -7623,6 +7623,9 @@ cat > config.mak << EOF
 # Ensure that locale settings do not interfere with shell commands.
 export LC_ALL = C
 
+DOC_LANG = $doc_lang
+DOC_LANGS = $doc_langs
+DOC_LANG_ALL = $doc_lang_all
 MAN_LANG = $man_lang
 MAN_LANGS = $man_langs
 MAN_LANG_ALL = $man_lang_all
