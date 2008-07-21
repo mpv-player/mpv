@@ -90,7 +90,7 @@ se inserta en el archivo de destino... y ¡ya está todo hecho!
 </para></step>
 </procedure>
 
-<example>
+<example id="example_3_pass">
 <title>Ejemplo de codificación en 3-pasadas</title>
 <para>
 <screen>rm frameno.avi</screen>
@@ -448,7 +448,7 @@ archivos <filename>.idx</filename> y <filename>.sub</filename> ya existen.
 Debería borrarlos antes de comenzar.
 </para>
 
-<example>
+<example id="copiando_dos_subtitulos_dvd_mientras_codificacion">
 <title>Copiando dos subtítulos desde un DVD mientras se hace la
 codificación en 3-pasadas</title>
 <screen>
@@ -459,7 +459,7 @@ mencoder dvd://1 -oac copy -ovc divx4 -pass 2 -vobsubout subtitles -vobsuboutind
 --></screen>
 </example>
 
-<example>
+<example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Copiando un subtítulo francés desde un archivo MPEG</title>
 <screen>
 rm subtitles.idx subtitles.sub

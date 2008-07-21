@@ -990,6 +990,9 @@ Specifica il file di configurazione dell'input se diverso da quello di default
 ~/\:.mplayer/\:input.conf.
 Se il parametro è senza percorso completo viene considerato
 ~/\:.mplayer/\:<nomefile>.
+.IPs ar-dev=<dispositivo>
+Dispositivo da usare per il telecomando Apple IR (solo Linux, rilevato
+automaticamente di default).
 .IPs ar-delay
 Ritardo in msec prima di cominciare ad autoripetere un tasto (0 per disabilitare)
 .IPs ar-rate
@@ -3499,6 +3502,8 @@ esegui MPlayer con l'opzione \-v e dai un'occhiata alle linee segnate
 con [xv common] all'inizio.
 .PD 0
 .RSs
+.IPs adaptor=<numero>
+Seleziona un adattatore XVideo specifico (vedi l'emissione di xvinfo).
 .IPs port=<numero>
 Seleziona una porta XVideo specifica.
 .IPs ck=<cur|use|set>
@@ -3548,6 +3553,8 @@ Video Motion Compensation) di XFree86 4.x. per velocizzare la decodifica
 dei formati MPEG-1/2 e VCR2.
 .PD 0
 .RSs
+.IPs adaptor=<numero>
+Seleziona un adattatore XVideo specifico (vedi l'emissione di xvinfo).
 .IPs port=<numero>
 Seleziona una porta XVideo specifica.
 .IPs (no)benchmark

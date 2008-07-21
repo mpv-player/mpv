@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26914 -->
+<!-- synced with r27044 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -198,7 +198,7 @@ van xv támogatás, de maga a kártya túl lassú, így jobb, ha eladod.
 <para>
 Már van natív framebuffer vezérlő az S3 Virge kártyákhoz, hasonlóan a tdfxfb-hez.
 Állítsd be a framebuffer-ed (pl. add hozzá a
-"<option>vga=792 video=vesa:mtrr</option>" opciót a kernel parancssorához) és használd
+"<option>vga=792 video=vesa:mtrr</option>" opciót a kernel parancs sorához) és használd
 a <option>-vo s3fb</option> opciót (<option>-vf yuy2</option> és <option>-dr</option>
 szintén segíthet).
 </para>
@@ -856,7 +856,12 @@ buffereléssel. Működik mind a framebuffer konzolon, mind X alatt, de csak
 
 <para>
 Ezen vezérlő Linux 2.6.x alatti verziója itt található:
-<ulink url="http://attila.kinali.ch/mga/"/>.
+<ulink url="http://attila.kinali.ch/mga/"/> vagy nézz rá az mga_vid külső
+Subversion repository-jára, melyet checkout-olhatsz így:
+
+<screen>
+svn checkout svn://svn.mplayerhq.hu/mga_vid
+</screen>
 </para>
 
 <procedure>
@@ -1545,11 +1550,16 @@ kérjük jelezd ezt a fejlesztőknek is. A helyes módszer a VIDIX argumentumok
 nélküli használata, és így az automatikus detektálás engedélyezése.
 </para>
 
+
+<sect2 id="svgalib_helper">
+<title>svgalib_helper</title>
+
 <para>
 Mivel a VIDIX-nek direkt hardver elérés kell, futtathatod root-ként vagy
 beállíthatod a SUID bit-et az <application>MPlayer</application> binárisán
 (<emphasis role="bold">Figyelem: Ez biztonsági kockázatot jelent!</emphasis>).
-Alternatívaként használhatsz egy speciális kernel modult, így:
+Alternatívaként, ha 2.4.x-es Linux kernelt futtatsz, használhatsz egy
+speciális kernel modult, így:
 </para>
 
 <procedure>
@@ -1574,18 +1584,17 @@ Alternatívaként használhatsz egy speciális kernel modult, így:
   <filename class="directory">svgalib_helper</filename> könyvtárban rootként.
 </para></step>
 <step><para>
-  Mozgasd át az <filename class="directory">svgalib_helper</filename> könyvtárat
-  a <filename class="directory">vidix</filename> alkönyvtárba az
-  <application>MPlayer</application> forrásfájában.
-</para></step>
-<step><para>
-  Töröld a megjegyzést az "svgalib_helper"-t tartalmazó CFLAGS sor elől a
-  <filename class="directory">vidix/Makefile</filename>-ban.
+  Ezután futtasd le a <filename>configure</filename>-t újra és add meg neki a
+  <option>--enable-svgalib_helper</option> és a
+  <option>--with-extraincdir=/eleresi/ut/svgalib_helper/forrasahoz</option>
+  paramétereket, az svgalib_helper kicsomagolt forrását tartalmazó könyvtárnak
+  megfelelően.
 </para></step>
 <step><para>
   Forgass újra.
-  </para></step>
+</para></step>
 </procedure>
+</sect2>
 
 
 <sect2 id="vidix-ati">
@@ -2348,7 +2357,7 @@ a Matrox G450/G550 TV-kimenet utasításaiért lásd a következő részt!
     <option>-vo x11 -fs -zoom</option> kapcsolókat, de
     <emphasis role="bold">LASSÚ</emphasis> lesz,
     és <emphasis role="bold">Macrovision</emphasis> másolásvédelem van rajta
-    (ezzel a <ulink url="http://avifile.sf.net/mgamacro.pl">perl script</ulink>-tel
+    (ezzel a <ulink url="http://avifile.sf.net/mgamacro.pl">Perl script</ulink>-tel
     "megkerülheted" a Macrovisiont).
     </para>
   </listitem>
@@ -2362,40 +2371,19 @@ a Matrox G450/G550 TV-kimenet utasításaiért lásd a következő részt!
     használhatatlanok erre. Engedélyezned kell az ÖSSZES matroxfb-specifikus
     tulajdonságot a fordítás alatt (kivéve a MultiHead-et) és
     <emphasis role="bold">modulokba</emphasis> kell fordítanod!
-    Az engedélyezett I2C-re is szükséged lesz.
+    Az I2C-t is engedélyezned kell és a
+    <application>matroxset</application>, <application>fbset</application>
+    és <application>con2fb</application> eszközöknek az elérési úton kell lenniük.
     </para>
 
     <procedure>
     <step><para>
-      Lépj be a <filename class="directory">TVout</filename>-ba és írd be:
-      <command>./compile.sh</command>. Telepítsd a
-      <filename>TVout/matroxset/matroxset</filename>-et
-      valahova a <envar>PATH</envar>-odon belülre.
+      Majd töltsd be a <systemitem>matroxfb_Ti3026, matroxfb_maven, i2c-matroxfb,
+      matroxfb_crtc2</systemitem> modulokat a kerneledbe. A szöveges-módú
+      konzolod framebuffer módba vált (nincs visszaút!).
     </para></step>
     <step><para>
-      Ha nincs telepítve <command>fbset</command>-ed, tedd a
-      <filename>TVout/fbset/fbset</filename>-et
-      valahova a <envar>PATH</envar>-odba.
-    </para></step>
-    <step><para>
-      Ha nincs <command>con2fb</command>-ed telepítve, tedd a
-      <filename>TVout/con2fb/con2fb</filename>-t
-      valahova a <envar>PATH</envar>-odba.
-    </para></step>
-    <step><para>
-      Majd lépj be a <filename class="directory">TVout/</filename>
-      könyvtárba az <application>MPlayer</application> forrásában és
-      futtasd le a <filename>./modules</filename>-t root-ként. A
-      szöveges módú konzolod átvált framebuffer módba (nincs visszaút!).
-    </para></step>
-    <step><para>
-      Ezután ÍRD ÁT és futtasd a <filename>./matroxtv</filename> script-et. Ez
-      egy roppant egyszerű menüt kínál neked. Nyomd meg a <keycap>2</keycap>-est
-      és az <keycap>Enter</keycap>-t. Most már ugyan azt a képet kell látnod
-      a monitorodon és a TV-n. ha a TV (PAL alapértelmezettként)
-      képén furcsa csíkok vannak, a script nem tudta beállítani jól a
-      felbontást (640x512-ra alapesetben). Próbálj meg másik felbontást
-      a menüből és/vagy kísérletezz az fbset-tel.
+      Ezután állítsd be a monitorod és a TV-t a kedvednek megfelelően a fenti eszközökkel.
     </para></step>
     <step><para>
       Yoh. A következő dolog, hogy a kurzort eltűntesd a tty1-ről (vagy
@@ -2436,29 +2424,6 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable
   </listitem>
 </varlistentry>
 </variablelist>
-
-<formalpara><title>Matrox TV-kimeneti kábel készítése</title>
-<para>
-Senki sem vállal ezért semmilyen felelősséget, sem garanciát bármilyen,
-ezen leírásból származó kárért.
-</para>
-</formalpara>
-
-<formalpara><title>Kábel a G400-hoz</title>
-<para>
-A CRTC2 csatlakozójának negyedik pin-je a kompozit videó jel. A
-földelés a hatodik, hetedik és nyolcadik pin. (az infót Rácz Balázs
-adta)
-</para>
-</formalpara>
-
-<formalpara><title>Kábel a G450-hez</title>
-<para>
-A CRTC2 csatlakozójának első pin-je a kompozit videó jel. A
-földelés az ötödik, hatodik, hetedik és tizenötödik (5, 6, 7, 15)
-pin. (az infót Kerekes Balázs adta)
-</para>
-</formalpara>
 </sect2>
 
 <!-- ********** -->
@@ -2488,6 +2453,32 @@ javasolt a G400-on, lásd a fenti részt.
 A szükséges kernel javítás és a bővebb HOWTO letölthető:
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="tv-out_matrox_cable">
+<title>Matrox TV-kimeneti kábel készítése</title>
+<para>
+Senki sem vállal ezért semmilyen felelősséget, sem garanciát bármilyen,
+ezen leírásból származó kárért.
+</para>
+
+<formalpara><title>Kábel a G400-hoz</title>
+<para>
+A CRTC2 csatlakozójának negyedik pin-je a kompozit videó jel. A
+földelés a hatodik, hetedik és nyolcadik pin. (az infót Rácz Balázs
+adta)
+</para>
+</formalpara>
+
+<formalpara><title>Kábel a G450-hez</title>
+<para>
+A CRTC2 csatlakozójának első pin-je a kompozit videó jel. A
+földelés az ötödik, hatodik, hetedik és tizenötödik (5, 6, 7, 15)
+pin. (az infót Kerekes Balázs adta)
+</para>
+</formalpara>
 </sect2>
 
 <!-- ********** -->

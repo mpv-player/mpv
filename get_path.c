@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "mp_msg.h"
+#include "get_path.h"
 
 #ifdef MACOSX_BUNDLE
 #include <CoreFoundation/CoreFoundation.h>

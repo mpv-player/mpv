@@ -33,12 +33,6 @@ Video codecs: (supported by RealPlayer8 for Linux)
 #include "demuxer.h"
 #include "stheader.h"
 
-#ifdef USE_LIBAVCODEC
-#include "libavcodec/avcodec.h"
-#else
-#define FF_INPUT_BUFFER_PADDING_SIZE 8
-#endif
-
 //#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
 
 #define MKTAG(a, b, c, d) (a | (b << 8) | (c << 16) | (d << 24))
@@ -940,8 +934,8 @@ got_video:
 			    // increase buffer size, this should not happen!
 			    mp_msg(MSGT_DEMUX,MSGL_WARN, "chunktab buffer too small!!!!!\n");
 			    dp->len=dp_hdr->chunktab+8*(4+dp_hdr->chunks);
-			    dp->buffer=realloc(dp->buffer,dp->len+FF_INPUT_BUFFER_PADDING_SIZE);
-			    memset(dp->buffer + dp->len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+			    dp->buffer=realloc(dp->buffer,dp->len+MP_INPUT_BUFFER_PADDING_SIZE);
+			    memset(dp->buffer + dp->len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
 			    // re-calc pointers:
 			    dp_hdr=(dp_hdr_t*)dp->buffer;
 			    dp_data=dp->buffer+sizeof(dp_hdr_t);

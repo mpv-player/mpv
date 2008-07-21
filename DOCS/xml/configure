@@ -152,7 +152,7 @@ else
   echo "Found docbookx.dtd at $_dtd"
 fi
 
-for lang in `grep 'SUBDIRS =' Makefile|cut -d= -f2`; do
+for lang in `grep 'DOC_LANGS =' ../../config.mak|cut -d= -f2`; do
   cat > $lang/main.xml << EOF
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!-- **************************************************

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24346 -->
+<!-- synced with r26990 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -226,11 +226,11 @@ Egy Video CD (VCD) CD-ROM XA szektorokból áll, pl. CD-ROM 2-es módban
 <itemizedlist>
 <listitem><para>
   Az első sáv 2-es módban, 2-es formátumban van, ami azt jelenti, hogy L2
-  hibajavítást használ. A sáv ISO-9660 fájlrendszert tartalmaz 2048
-  bájt/szektorral. Ez a fájlrendszer VCD metaadat információkat tartalmaz,
+  hibajavítást használ. A sáv ISO-9660 fájl rendszert tartalmaz 2048
+  bájt/szektorral. Ez a fájl rendszer VCD metaadat információkat tartalmaz,
   valamint gyakran a menükben alkalmazott képkockákat. A menük MPEG
   szegmensei is ezen az első sávon tárolhatóak, de az MPEG-eket fel kell
-  osztani 150 szektoros csonkokra. Az ISO-9660 fájlrendszer tartalmazhat
+  osztani 150 szektoros csonkokra. Az ISO-9660 fájl rendszer tartalmazhat
   egyéb fájlokat vagy programokat, amik a VCD működése szempontjából nem
   lényegesek.
 </para></listitem>
@@ -241,7 +241,7 @@ Egy Video CD (VCD) CD-ROM XA szektorokból áll, pl. CD-ROM 2-es módban
   Ezek 2-es mód 1-es formátumban vannak, így több adatot tárolnak
   szektoronként némi hibajavítás elveszítése árán. Lehet CD-DA sáv is a
   VCD-n az első sáv után. Némelyik operációs rendszeren van egy kis csalás,
-  amivel ezek a nem-ISO-9660 sávok megjelennek a fájlrendszerben. Más
+  amivel ezek a nem-ISO-9660 sávok megjelennek a fájl rendszerben. Más
   operációs rendszereken, például GNU/Linux-on ez nem így van (még). Itt
   az MPEG adat <emphasis role="bold">nem mountolható</emphasis>. Mivel a
   legtöbb film ilyen típusú sávon belül van, először próbáld ki a
@@ -250,7 +250,7 @@ Egy Video CD (VCD) CD-ROM XA szektorokból áll, pl. CD-ROM 2-es módban
 
 <listitem><para>
   Léteznek olyan VCD lemezek is, melyeken nincs meg az első sáv (egy sáv és
-  egyáltalán nincs fájlrendszer). Ezek szintén lejátszhatóak, de nem lehet
+  egyáltalán nincs fájl rendszer). Ezek szintén lejátszhatóak, de nem lehet
   őket becsatolni.
 </para></listitem>
 
@@ -274,7 +274,7 @@ elérést az alkalmazásoknak). Linux alatt nem tudod átmásolni vagy lejátsza
 az ilyen fájlokat (szemét van bennük). Windows alatt lehetséges, mivel az
 iso9660 vezérlője a sávok nyers olvasását emulálja ebben a fájlban. A .DAT
 fájlok lejátszásához szükséged lesz egy kernel vezérlőre, ami a PowerDVD
-Linuxos verziójában található. Ez egy módosított iso9660 fájlrendszer vezérlőt
+Linuxos verziójában található. Ez egy módosított iso9660 fájl rendszer vezérlőt
 (<filename>vcdfs/isofs-2.4.X.o</filename>) tartalmaz, ami képes a nyers sáv
 emulációra ezen ál .DAT fájlon keresztül. Ha az ő vezérlőjük segítségével
 csatolod be a lemezt, át tudod másolni és le tudod játszani a .DAT fájlt az

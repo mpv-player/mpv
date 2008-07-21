@@ -235,7 +235,7 @@ AVI容器是<application>MEncoder</application>的基本容器格式，也就是
 <application>MPlayer</application>之外的播放器中播放。
 </para>
 
-<example>
+<example id="encode_to_macromedia_flash_format">
 <title>编码为Macromedia Flash格式</title>
 <para>
 生成Macromedia Flash视频，以便在安装有Macromedia Flash插件的网页浏览器中播放：

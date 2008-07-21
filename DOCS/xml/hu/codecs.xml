@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26729 -->
+<!-- synced with r27102 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -96,8 +96,8 @@ lehetséges pár formátumba, melyeket támogat is a
 
 <para>
 Az összes támogatott
-<ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">videó</ulink>
-és <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audió</ulink>
+<ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC6">videó</ulink>
+és <ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC7">audió</ulink>
 codec-ek listájáért látogasd meg az FFmpeg weboldalát.
 </para>
 
@@ -174,10 +174,7 @@ mivel jobb a sebessége.
   <filename class="directory">/usr/local/include/</filename>könyvtárba.
 </para></step>
 <step><para>
-  Fordítsd újra az <application>MPlayer</application>t a
-  <option>--with-xvidlibdir=<replaceable>/eleresi/ut/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/eleresi/ut/</replaceable>xvid.h</option>
-  kapcsolókkal.
+  Fordítsd újra az <application>MPlayer</application>t.
 </para></step>
 </procedure>
 </sect2>
@@ -386,7 +383,7 @@ eleget teszel az <systemitem class="library">x264</systemitem> követelményeine
   Voxware audió (DirectShow DLL használatával)
 </para></listitem>
 <listitem><para>
-  alaw és ulaw, számos gsm, adpcm és pcm formátum és más, egyszerű, régi
+  alaw és ulaw, számos GSM, ADPCM és PCM formátum és más, egyszerű, régi
   audió codec
 </para></listitem>
 <listitem><para>

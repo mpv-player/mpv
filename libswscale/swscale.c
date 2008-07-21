@@ -932,6 +932,7 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
     int minFilterSize;
     double *filter=NULL;
     double *filter2=NULL;
+    int ret= -1;
 #if defined(ARCH_X86)
     if (flags & SWS_CPU_CAPS_MMX)
         asm volatile("emms\n\t"::: "memory"); //FIXME this should not be required but it IS (even for non-MMX versions)
@@ -1144,7 +1145,7 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
 
         if (outVec != &scaleFilter) sws_freeVec(outVec);
     }
-    av_free(filter); filter=NULL;
+    av_freep(&filter);
 
     /* try to reduce the filter-size (step1 find size and shift left) */
     // Assume it is near normalized (*0.5 or *2.0 is OK but * 0.001 is not).
@@ -1211,8 +1212,8 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
     filterSize= (minFilterSize +(filterAlign-1)) & (~(filterAlign-1));
     assert(filterSize > 0);
     filter= av_malloc(filterSize*dstW*sizeof(double));
-    if (filterSize >= MAX_FILTER_SIZE)
-        return -1;
+    if (filterSize >= MAX_FILTER_SIZE || !filter)
+        goto error;
     *outFilterSize= filterSize;
 
     if (flags&SWS_PRINT_INFO)
@@ -1228,7 +1229,6 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
             else               filter[i*filterSize + j]= filter2[i*filter2Size + j];
         }
     }
-    av_free(filter2); filter2=NULL;
 
 
     //FIXME try to align filterpos if possible
@@ -1296,8 +1296,11 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
         (*outFilter)[j + i]= (*outFilter)[j + i - (*outFilterSize)];
     }
 
+    ret=0;
+error:
     av_free(filter);
-    return 0;
+    av_free(filter2);
+    return ret;
 }
 
 #ifdef COMPILE_MMX2
@@ -2013,6 +2016,24 @@ SwsContext *sws_getContext(int srcW, int srcH, int srcFormat, int dstW, int dstH
         av_log(NULL, AV_LOG_ERROR, "swScaler: %s is not supported as output pixel format\n", sws_format_name(dstFormat));
         return NULL;
     }
+
+    i= flags & ( SWS_POINT
+                |SWS_AREA
+                |SWS_BILINEAR
+                |SWS_FAST_BILINEAR
+                |SWS_BICUBIC
+                |SWS_X
+                |SWS_GAUSS
+                |SWS_LANCZOS
+                |SWS_SINC
+                |SWS_SPLINE
+                |SWS_BICUBLIN);
+    if(!i || (i & (i-1)))
+    {
+        av_log(NULL, AV_LOG_ERROR, "swScaler: Exactly one scaler algorithm must be choosen\n");
+        return NULL;
+    }
+
 
     /* sanity check */
     if (srcW<4 || srcH<1 || dstW<8 || dstH<1) //FIXME check if these are enough and try to lowwer them after fixing the relevant parts of the code
@@ -2803,8 +2824,7 @@ void sws_printVec(SwsVector *a){
 
 void sws_freeVec(SwsVector *a){
     if (!a) return;
-    av_free(a->coeff);
-    a->coeff=NULL;
+    av_freep(&a->coeff);
     a->length=0;
     av_free(a);
 }
@@ -2827,48 +2847,30 @@ void sws_freeContext(SwsContext *c){
     if (c->lumPixBuf)
     {
         for (i=0; i<c->vLumBufSize; i++)
-        {
-            av_free(c->lumPixBuf[i]);
-            c->lumPixBuf[i]=NULL;
-        }
-        av_free(c->lumPixBuf);
-        c->lumPixBuf=NULL;
+            av_freep(&c->lumPixBuf[i]);
+        av_freep(&c->lumPixBuf);
     }
 
     if (c->chrPixBuf)
     {
         for (i=0; i<c->vChrBufSize; i++)
-        {
-            av_free(c->chrPixBuf[i]);
-            c->chrPixBuf[i]=NULL;
-        }
-        av_free(c->chrPixBuf);
-        c->chrPixBuf=NULL;
+            av_freep(&c->chrPixBuf[i]);
+        av_freep(&c->chrPixBuf);
     }
 
-    av_free(c->vLumFilter);
-    c->vLumFilter = NULL;
-    av_free(c->vChrFilter);
-    c->vChrFilter = NULL;
-    av_free(c->hLumFilter);
-    c->hLumFilter = NULL;
-    av_free(c->hChrFilter);
-    c->hChrFilter = NULL;
+    av_freep(&c->vLumFilter);
+    av_freep(&c->vChrFilter);
+    av_freep(&c->hLumFilter);
+    av_freep(&c->hChrFilter);
 #ifdef HAVE_ALTIVEC
-    av_free(c->vYCoeffsBank);
-    c->vYCoeffsBank = NULL;
-    av_free(c->vCCoeffsBank);
-    c->vCCoeffsBank = NULL;
+    av_freep(&c->vYCoeffsBank);
+    av_freep(&c->vCCoeffsBank);
 #endif
 
-    av_free(c->vLumFilterPos);
-    c->vLumFilterPos = NULL;
-    av_free(c->vChrFilterPos);
-    c->vChrFilterPos = NULL;
-    av_free(c->hLumFilterPos);
-    c->hLumFilterPos = NULL;
-    av_free(c->hChrFilterPos);
-    c->hChrFilterPos = NULL;
+    av_freep(&c->vLumFilterPos);
+    av_freep(&c->vChrFilterPos);
+    av_freep(&c->hLumFilterPos);
+    av_freep(&c->hChrFilterPos);
 
 #if defined(ARCH_X86) && defined(CONFIG_GPL)
 #ifdef MAP_ANONYMOUS
@@ -2882,16 +2884,11 @@ void sws_freeContext(SwsContext *c){
     c->funnyUVCode=NULL;
 #endif /* defined(ARCH_X86) */
 
-    av_free(c->lumMmx2Filter);
-    c->lumMmx2Filter=NULL;
-    av_free(c->chrMmx2Filter);
-    c->chrMmx2Filter=NULL;
-    av_free(c->lumMmx2FilterPos);
-    c->lumMmx2FilterPos=NULL;
-    av_free(c->chrMmx2FilterPos);
-    c->chrMmx2FilterPos=NULL;
-    av_free(c->yuvTable);
-    c->yuvTable=NULL;
+    av_freep(&c->lumMmx2Filter);
+    av_freep(&c->chrMmx2Filter);
+    av_freep(&c->lumMmx2FilterPos);
+    av_freep(&c->chrMmx2FilterPos);
+    av_freep(&c->yuvTable);
 
     av_free(c);
 }

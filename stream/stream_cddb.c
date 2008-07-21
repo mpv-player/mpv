@@ -390,7 +390,7 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 	
 	sprintf( file_name, "%s%08lx", cddb_data->cache_dir, cddb_data->disc_id );
 	
-	file_fd = creat(file_name, S_IREAD|S_IWRITE);
+	file_fd = creat(file_name, S_IRUSR|S_IWUSR);
 	if( file_fd<0 ) {
 		perror("create");
 		return -1;

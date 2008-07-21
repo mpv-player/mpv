@@ -123,7 +123,7 @@ usando la opción <option>-input <replaceable>conf</replaceable></option>
 (ruta relativa a <filename>$HOME/.mplayer</filename>).
 </para>
 
-<example>
+<example id="input_control_file">
 <title>Un archivo de control simple</title>
 <programlisting>
 ##

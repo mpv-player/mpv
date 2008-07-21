@@ -1,4 +1,4 @@
-.\" Synced with r26909
+.\" Synced with r27236
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 06. 02." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 07. 18." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -63,7 +63,7 @@ mencoder \- film kódoló
 .
 .br
 .B mplayer
-[dvd|dvdnav]://[sáv|[kezdõ_sáv]\-vég_sáv]
+[dvd|dvdnav]://[sáv|[kezdõ_sáv]\-vég_sáv][/eszköz]
 [opciók]
 .
 .br
@@ -825,7 +825,7 @@ Csak a cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix, xover, xv
 meghajtók támogatják.
 .
 .TP
-.B \-correct\-pts (kísérleti)
+.B \-correct\-pts (KÍSÉRLETI)
 Átváltja az MPlayert egy kísérleti módba, melyben a videó kockák idõbélyege
 másképp lesz kiszámítva és támogatottak lesznek azok a szûrõk, melyek új kockákat
 szúrnak be vagy a meglévõek idõbélyegét módosítják.
@@ -872,7 +872,7 @@ Jelenleg a következõ meghajtók támogatják a fixed-vo-t: gl, gl2, mga, svga, x11,
 xmga, xv, xvidix és dfbmga.
 .
 .TP
-.B \-framedrop (lásd még \-hardframedrop, \-no\-correct\-pts nélkül csak kísérleti jelleggel)
+.B \-framedrop (lásd még \-hardframedrop, \-nocorrect\-pts nélkül csak kísérleti jelleggel)
 Néhány képkocka megjelenítésének hanyagolása, hogy lassú rendszereken is
 megfelelõ legyen az A/V szinkron. A videó szûrõk nem vonatkoznak ezekre
 a képkockákra.
@@ -889,7 +889,7 @@ Nem mûködik konfig-fájl opcióként.
 Rövid segítõ szöveg kiírása.
 .
 .TP
-.B \-hardframedrop (\-no\-correct\-pts nélkül csak kísérleti jelleggel)
+.B \-hardframedrop (\-nocorrect\-pts nélkül csak kísérleti jelleggel)
 Intenzívebb képkockaeldobás (a dekódolási minõség rovására).
 Torz képekhez vezet!
 Figyelj rá, hogy különösen a libmpeg2 dekódolóval ez összeomolhat,
@@ -905,15 +905,15 @@ Az MPlayer ezt a parancsot ellenõrzés nélkül használja, a te felelõsséged,
 hogy ne okozzon biztonsági problémát (pl.\& gyõzõdj meg róla, hogy teljes elérési
 utakat használsz, ha a "." benne van az elérési utadban, mint Windows alatt).
 .sp 1
-Ezt "ki lehet használni" az olyan képernyõvédõ letiltásához, amely nem támogatja
-ehhez a megfelelõ X API-t.
-Ha úgy gondolod, hogy ez túl komplikált, kérd meg a képernyõvédõ szerzõjét, hogy
-támogassa a szükséges X API-kat.
+Ezt "ki lehet használni" az olyan képernyõvédõ letiltásához, amely nem
+támogatja ehhez a megfelelõ X API-kat.
+Ha úgy gondolod, hogy ez túl komplikált, kérd meg a képernyõvédõ
+szerzõjét, hogy támogassa a szükséges X API-kat.
 .sp 1
 .I PÉLDA az xscreensaver-hez:
 mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" fájl
 .sp 1
-.I PÉLDA a gnome képernyõvédõjéhez:
+.I PÉLDA a GNOME képernyõvédõjéhez:
 mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" fájl
 .RE
 .PD 1
@@ -1039,6 +1039,10 @@ támogatottak).
 Szükséges a dvd menükben a gombok kiválasztásához.
 .
 .TP
+.B \-noar
+Kikapcsolja az AppleIR távirányító támogatását.
+.
+.TP
 .B \-noconsolecontrols
 Megtiltja az MPlayernek a billentyûzet események olvasását a standard
 input-ról. Hasznos, ha a standard input-ról olvasol be adatot.
@@ -1055,10 +1059,6 @@ Joystick támogatás kikapcsolása.
 .TP
 .B \-nolirc
 LIRC támogatás kikapcsolása.
-.
-.TP
-.B \-noar
-Kikapcsolja az AppleIR távirányító támogatását.
 .
 .TP
 .B \-nomouseinput
@@ -1901,7 +1901,7 @@ Lásd a konzol kimenetet az elérhetõ TV normák listájához.
 Beállítja a tunert az <érték> csatornára.
 .IPs chanlist=<érték>
 elérhetõ: europe-east, europe-west, us-bcast, us-cable, stb.
-.IPs channels=<csatorna>\-<név>,<csatorna>\-<név>,...
+.IPs channels=<csatorna>\-<név>[=<norma>],<csatorna>\-<név>[=<norma>],...
 Csatornák neveinek beállítása.
 .I MEGJEGYZÉS:
 Ha a <csatorna> 1000-nél nagyobb egész, frekvenciaként lesz értelmezve (kHz-ben)
@@ -5371,7 +5371,7 @@ a lejátszás sebességéhez igazítva (alapértelmezett).
 Ez az audió \'átlépõ\' ms-einek normál sebességû lejátszásával történik,
 ehhez \'átlépés*módosítás\' ms bemeneti audiót használ fel.
 Az elõzõ lépés utáni audióból összegyûjti a lépéseket a lépések egyesített
-'átfedés'%-aival.
+\'átfedés\'%-aival.
 Opcionálisan egy rövid statisztikai analízist is lefuttat az audió következõ
 \'keresési\' ms-éig a legjobb átfedési pozíció meghatározásához.
 .PD 0
@@ -5400,7 +5400,7 @@ Lassú rendszereken valószínûleg alacsony értéket kell használnod.
 Beállítja a választ a sebesség változására.
 .RSss
 .IPs tempo
-A tempót a sebességgel szinkronban módosítja (alapértelmezett)
+A tempót a sebességgel szinkronban módosítja (alapértelmezett).
 .IPs pitch
 Megfordítja a szûrõ hatását.
 Módosítja a hangmagasságot a tempó módosítása nélkül.
@@ -5409,9 +5409,9 @@ az input.conf-odba a zenei félhangokhoz.
 .I FIGYELMEZTETÉS:
 Elveszti a szinkronizációt a videóval.
 .IPs both
-Módosítja mind a tempót, mind a hangmagasságot
+Módosítja mind a tempót, mind a hangmagasságot.
 .IPs none
-Figyelmen kívül hagyja a sebességváltozásokat
+Figyelmen kívül hagyja a sebességváltozásokat.
 .RE
 .RE
 .sp 1
@@ -5523,8 +5523,11 @@ Használj 2-t csak a páros dimenziókhoz (4:2:2 videónál szükséges).
 .
 .TP
 .B rectangle[=w:h:x:y]
-Ez a szûrõ az input.conf 'change_rectangle' direktívájának megfelelõje,
-melynek két paramétere van.
+Kirajzol egy téglalapot a megadott szélességgel és magassággal a megadott
+koordinátákon a kép fölé és kiírja a téglalap adatait a konzolra.
+Ez az optimális vágási paraméterek megtalálásában segíthet.
+Ha az input.conf 'change_rectangle' direktívájához hozzárendelsz gombokat,
+menet közben mozgathatod és átméretezheted a téglalapot.
 .PD 0
 .RSs
 .IPs <w>,<h>
@@ -7398,7 +7401,7 @@ A kimeneti fájlokban lévõ feliratok indexének megadása (alapértelmezett: 0).
 A codec specifikus kódolási paramétereket a következõ szintaxissal adhatod meg:
 .
 .TP
-.B \-<codec>opts <opció1[=érték],opció2,...>
+.B \-<codec>opts <opció1[=érték1]:opció2[=érték2]:...>
 .
 .PP
 Ahol a <codec> lehet: lavc, xvidenc, lame, toolame, twolame,
@@ -10547,6 +10550,10 @@ jelenleg csak MPEG[12] esetén van értelme.
 Néha szükséges növelni a "buffer alulcsordulás" elkerüléséhez.
 .
 .TP
+.B "o\ \ \ \ \ \ "
+FIXME: nem dokumentált
+.
+.TP
 .B packetsize=<méret>
 A kiválasztott formátum egységes csomagmérete, bájtokban kifejezve.
 MPEG[12] implementációkba történõ muxálásánál az alapértelmezett értékek:
@@ -10558,10 +10565,6 @@ Jelenleg csak az MPEG[12]-nél van értelme: Kezdeti különbség
 másodpercben a kimenet referencia idõzítõje (SCR) és a dekódolási
 idõbélyeg (DTS) között bármelyik jelenlévõ folyamnál
 (késleltetés demux-ból dekódolásba).
-.
-.TP
-.B "o\ \ \ \ \ \ "
-FIXME: nem dokumentált
 .
 .
 .
@@ -10715,6 +10718,12 @@ FIXME: Ezt még dokumentálni kell.
 .TP
 .B VIDIX_CRT
 FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B VIDIXIVTVALPHA
+Ha ennek az értéke 'disable', a VIDIX vezérlõ nem fogja változtatni az
+alphablending beállításait.
+Te továbbra is tudod módosítani õket az 'ivtvfbctl' paranccsal.
 .
 .SS osdep:
 .

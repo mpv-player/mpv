@@ -92,6 +92,8 @@ struct MPOpts;
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)
 
+#define MP_INPUT_BUFFER_PADDING_SIZE 8
+
 // Holds one packet/frame/whatever
 typedef struct demux_packet {
   int len;
@@ -240,7 +242,7 @@ static inline demux_packet_t* new_demux_packet(int len){
   dp->refcount=1;
   dp->master=NULL;
   dp->buffer=NULL;
-  if (len > 0 && (dp->buffer = (unsigned char *)malloc(len + 8)))
+  if (len > 0 && (dp->buffer = (unsigned char *)malloc(len + MP_INPUT_BUFFER_PADDING_SIZE)))
     memset(dp->buffer + len, 0, 8);
   else
     dp->len = 0;

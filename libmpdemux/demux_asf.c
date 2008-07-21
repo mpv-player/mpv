@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -50,9 +51,12 @@ static inline int check_varlen(uint8_t *ptr, uint8_t *endptr, int len) {
 }
 
 static void asf_descrambling(unsigned char **src,unsigned len, struct asf_priv* asf){
-  unsigned char *dst=malloc(len);
+  unsigned char *dst;
   unsigned char *s2=*src;
   unsigned i=0,x,y;
+  if (len > UINT_MAX - MP_INPUT_BUFFER_PADDING_SIZE)
+	return;
+  dst = malloc(len + MP_INPUT_BUFFER_PADDING_SIZE);
   while(len>=asf->scrambling_h*asf->scrambling_w*asf->scrambling_b+i){
 //    mp_msg(MSGT_DEMUX,MSGL_DBG4,"descrambling! (w=%d  b=%d)\n",w,asf_scrambling_b);
 	//i+=asf_scrambling_h*asf_scrambling_w;
@@ -79,19 +83,12 @@ static void init_priv (struct asf_priv* asf){
   asf->vid_ext_frame_index=-1;
 }
 
-#ifdef USE_LIBAVCODEC
-#include "libavcodec/avcodec.h"
-#else
-#define FF_INPUT_BUFFER_PADDING_SIZE 8
-#endif
-
-
 static void demux_asf_append_to_packet(demux_packet_t* dp,unsigned char *data,int len,int offs)
 {
   if(dp->len!=offs && offs!=-1) mp_msg(MSGT_DEMUX,MSGL_V,"warning! fragment.len=%d BUT next fragment offset=%d  \n",dp->len,offs);
-  dp->buffer=realloc(dp->buffer,dp->len+len+FF_INPUT_BUFFER_PADDING_SIZE);
+  dp->buffer=realloc(dp->buffer,dp->len+len+MP_INPUT_BUFFER_PADDING_SIZE);
   fast_memcpy(dp->buffer+dp->len,data,len);
-  memset(dp->buffer+dp->len+len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+  memset(dp->buffer+dp->len+len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
   mp_dbg(MSGT_DEMUX,MSGL_DBG4,"data appended! %d+%d\n",dp->len,len);
   dp->len+=len;
 }
@@ -488,6 +485,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
               }
               if(len<0 || (p+len)>p_end){
                 mp_msg(MSGT_DEMUX,MSGL_V,"ASF_parser: warning! segment len=%d\n",len);
+                len = p_end - p;
               }
               mp_dbg(MSGT_DEMUX,MSGL_DBG4,"  seg #%d: streamno=%d  seq=%d  type=%02X  len=%d\n",seg,streamno,seq,rlen,len);
 

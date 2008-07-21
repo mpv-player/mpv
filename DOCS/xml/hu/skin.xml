@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r21612 -->
+<!-- synced with r26990 -->
 <appendix id="skin">
 <title><application>MPlayer</application> skin formátum</title>
 
@@ -1107,14 +1107,14 @@ Az alábbi üzeneteket generálják a gombok, potméterek és menüpontok.
 <varlistentry>
   <term><emphasis role="bold">evLoadSubtitle</emphasis></term>
   <listitem><para>
-  Felirat fájl betöltése (a fájlválasztóval)
+  Felirat fájl betöltése (a fájl választóval)
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evLoadAudioFile</emphasis></term>
   <listitem><para>
-  Audió fájl betöltése (a fájlválasztóval)
+  Audió fájl betöltése (a fájl választóval)
   </para></listitem>
 </varlistentry>
 

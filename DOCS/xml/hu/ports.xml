@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26936 -->
+<!-- synced with r26990 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -68,7 +68,7 @@ a <ulink url="http://rpm.livna.org/">Livna repository</ulink>-ban.
 <para>
 A Mandrake/Mandriva RPM csomagok a
 <ulink url="http://plf.zarb.org/">P.L.F.</ulink> oldalán találhatóak.
-A SuSE régen az <application>MPlayer</application> egy csonkított verzióját tartalmazta,
+A SUSE régen az <application>MPlayer</application> egy csonkított verzióját tartalmazta,
 de az utóbbi kiadásokból már kiszedték. SuSE-val működő csomagok a
 <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>
 oldalon találhatóak.
@@ -324,11 +324,11 @@ hogy le tudsz játszani 4 GB-nál nagyobb DVD lemezt:
 </para></listitem>
 
 <listitem><para>
-  Egy hasonló hiba van a hsfs(7FS) fájlrendszer kódjában is (alias ISO9660),
+  Egy hasonló hiba van a hsfs(7FS) fájl rendszer kódjában is (alias ISO9660),
   a hsfs nem támogatja a 4 GB-nál nagyobb partíciókat/lemezeket, minden adat
   modulo 4GB-vel lesz elérve
   (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
-  Ez a hiba a 109764-04 (sparc) / 109765-04
+  Ez a hiba a 109764-04 (SPARC) / 109765-04
   (x86) jelzésű patch-ek telepítése után megszűnik.
 </para></listitem>
 </itemizedlist>
@@ -768,7 +768,7 @@ A későbbi példák mind MacPorts-on alapszanak.
 
 <para>
 Például az <application>MPlayer</application> lefordítása OSD támogatással:
-<screen>sudo port install pkgconfig</screen>
+<screen>sudo port install pkg-config</screen>
 Ez telepíti a <application>pkg-config</application>-ot, ami a függvénykönyvtárak
 fordítási/szerkesztési flag-jeinek kezelését végző rendszer.
 Az <application>MPlayer</application> <systemitem>configure</systemitem> script-je

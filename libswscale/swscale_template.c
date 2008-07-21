@@ -181,6 +181,24 @@
     "add                   $8, %%"REG_a"  \n\t"\
     "jnc                   1b             \n\t"
 
+#define YSCALEYUV2YV121_ACCURATE \
+    "mov %2, %%"REG_a"                    \n\t"\
+    "pcmpeqw %%mm7, %%mm7                 \n\t"\
+    "psrlw                 $15, %%mm7     \n\t"\
+    "psllw                  $6, %%mm7     \n\t"\
+    ASMALIGN(4) /* FIXME Unroll? */\
+    "1:                                   \n\t"\
+    "movq  (%0, %%"REG_a", 2), %%mm0      \n\t"\
+    "movq 8(%0, %%"REG_a", 2), %%mm1      \n\t"\
+    "paddw              %%mm7, %%mm0      \n\t"\
+    "paddw              %%mm7, %%mm1      \n\t"\
+    "psraw                 $7, %%mm0      \n\t"\
+    "psraw                 $7, %%mm1      \n\t"\
+    "packuswb           %%mm1, %%mm0      \n\t"\
+    MOVNTQ(%%mm0, (%1, %%REGa))\
+    "add                   $8, %%"REG_a"  \n\t"\
+    "jnc                   1b             \n\t"
+
 /*
     :: "m" (-lumFilterSize), "m" (-chrFilterSize),
        "m" (lumMmxFilter+lumFilterSize*4), "m" (chrMmxFilter+chrFilterSize*4),
@@ -969,38 +987,40 @@ yuv2nv12XinC(lumFilter, lumSrc, lumFilterSize,
              dest, uDest, dstW, chrDstW, dstFormat);
 }
 
-static inline void RENAME(yuv2yuv1)(int16_t *lumSrc, int16_t *chrSrc,
+static inline void RENAME(yuv2yuv1)(SwsContext *c, int16_t *lumSrc, int16_t *chrSrc,
                                     uint8_t *dest, uint8_t *uDest, uint8_t *vDest, long dstW, long chrDstW)
 {
 #ifdef HAVE_MMX
-    if (uDest)
-    {
-        asm volatile(
-            YSCALEYUV2YV121
-            :: "r" (chrSrc + chrDstW), "r" (uDest + chrDstW),
-            "g" (-chrDstW)
-            : "%"REG_a
-        );
+    long p= uDest ? 3 : 1;
+    uint8_t *src[3]= {lumSrc + dstW, chrSrc + chrDstW, chrSrc + VOFW + chrDstW};
+    uint8_t *dst[3]= {dest, uDest, vDest};
+    long counter[3] = {dstW, chrDstW, chrDstW};
 
-        asm volatile(
-            YSCALEYUV2YV121
-            :: "r" (chrSrc + VOFW + chrDstW), "r" (vDest + chrDstW),
-            "g" (-chrDstW)
-            : "%"REG_a
-        );
+    if (c->flags & SWS_ACCURATE_RND){
+        while(p--){
+            asm volatile(
+                YSCALEYUV2YV121_ACCURATE
+                :: "r" (src[p]), "r" (dst[p] + counter[p]),
+                "g" (-counter[p])
+                : "%"REG_a
+            );
+        }
+    }else{
+        while(p--){
+            asm volatile(
+                YSCALEYUV2YV121
+                :: "r" (src[p]), "r" (dst[p] + counter[p]),
+                "g" (-counter[p])
+                : "%"REG_a
+            );
+        }
     }
 
-    asm volatile(
-        YSCALEYUV2YV121
-        :: "r" (lumSrc + dstW), "r" (dest + dstW),
-        "g" (-dstW)
-        : "%"REG_a
-    );
 #else
     int i;
     for (i=0; i<dstW; i++)
     {
-        int val= lumSrc[i]>>7;
+        int val= (lumSrc[i]+64)>>7;
 
         if (val&256){
             if (val<0) val=0;
@@ -1013,8 +1033,8 @@ static inline void RENAME(yuv2yuv1)(int16_t *lumSrc, int16_t *chrSrc,
     if (uDest)
         for (i=0; i<chrDstW; i++)
         {
-            int u=chrSrc[i]>>7;
-            int v=chrSrc[i + VOFW]>>7;
+            int u=(chrSrc[i       ]+64)>>7;
+            int v=(chrSrc[i + VOFW]+64)>>7;
 
             if ((u|v)&256){
                 if (u<0)        u=0;
@@ -3187,7 +3207,7 @@ static int RENAME(swScale)(SwsContext *c, uint8_t* src[], int srcStride[], int s
                 {
                     int16_t *lumBuf = lumPixBuf[0];
                     int16_t *chrBuf= chrPixBuf[0];
-                    RENAME(yuv2yuv1)(lumBuf, chrBuf, dest, uDest, vDest, dstW, chrDstW);
+                    RENAME(yuv2yuv1)(c, lumBuf, chrBuf, dest, uDest, vDest, dstW, chrDstW);
                 }
                 else //General YV12
                 {

@@ -106,7 +106,7 @@ núcleo 2.4.x es recomendado.
 </sect2>
 
 
-<sect2>
+<sect2 id="seccion_codecs">
 <title>Codecs</title>
 
 <itemizedlist>
@@ -415,7 +415,7 @@ funciona con los siguientes controladores:
 </sect2>
 
 
-<sect2>
+<sect2 id="caracteristicas">
 <title>Características</title>
 
 <itemizedlist>
@@ -778,7 +778,7 @@ Hay muchas maneras de conseguirlo:
   <command>konwert</command> o <command>iconv</command>.
   </para><para>
   
-  <table>
+  <table id="algunas_urls">
   <title>Algunas URLs</title>
   <tgroup cols="2">
   <thead>

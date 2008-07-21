@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24056 -->
+<!-- synced with r27107 -->
 <chapter id="containers">
 <title>Konténerek</title>
 
@@ -83,7 +83,7 @@ jelenti, hogy egy MPEG fájlt szabványos fájl eszközökkel (például
 </para>
 
 <para>
-Az MPG-k egyik legfontosabb tulajdonsága, hogy van egy mezőjük, mely a
+Az MPEG-ek egyik legfontosabb tulajdonsága, hogy van egy mezőjük, mely a
 videó folyam képarányát írja le. Például az SVCD-knek 480x480 felbontású
 videójuk van, a fejlécben ilyenkor ez a mező 4:3 arányra van állítva, ezért
 játszódnak le 640x480-ban. Az AVI fájlokból gyakran hiányzik ez a mező,
@@ -321,8 +321,8 @@ a Return to Castle Wolfenstein.
 <title>OGG/OGM fájlok</title>
 
 <para>
-Ez egy új fájlformátum a
-<ulink url="http://www.xiph.org">Xiphophorus</ulink>-tól.
+Ez egy új fájl formátum a
+<ulink url="http://www.xiph.org">Xiph.Org Alapítvány</ulink>tól.
 Bármilyen videó és audió codec-et tartalmazhat, CBR vagy VBR. El kell végezned
 a <systemitem class="library">libogg</systemitem> és a
 <systemitem class="library">libvorbis</systemitem> telepítését az
@@ -395,7 +395,7 @@ További infók a <ulink url="http://www.matroska.org/">hivatalos weboldalukon</
 <para>
 A NUT az <application>MPlayer</application>es és az <application>FFmpeg</application>es
 emberkék által kifejlesztett konténer formátum. Mindkét projekt támogatja.
-További infókat a <ulink url="http://www.nut.hu/">hivatalos weboldalon</ulink> olvashatsz.
+További infókat a <ulink url="http://www.nut-container.org/">hivatalos weboldalon</ulink> olvashatsz.
 </para>
 </sect2>
 
@@ -508,7 +508,7 @@ kapcsolókat adhatsz tovább a <application>cdparanoia</application>-nak.
 <para>
 Az <application>MPlayer</application> fel tudja használni az <application>XMMS</application>
 bemeneti plugin-jeit több fájl formátum lejátszásához. Van plugin SNES játék hangok, SID
-hangok (Commodore 64), sok Amiga formátum, .xm, .it, VQF, musepack, Bonk,
+hangok (Commodore 64), sok Amiga formátum, .xm, .it, VQF, Musepack, Bonk,
 és számos egyéb lejátszásához. Megtalálhatóak az
 <ulink url="http://www.xmms.org/plugins.php?category=input">XMMS bemeneti plugin oldalán</ulink>.
 </para>
@@ -517,10 +517,6 @@ hangok (Commodore 64), sok Amiga formátum, .xm, .it, VQF, musepack, Bonk,
 Ehhez a képességhez <application>XMMS</application> és
 <filename>./configure --enable-xmms</filename> kapcsolóval fordított
 <application>MPlayer</application> kell.
-Ha ez nem működik, pontosan meg kell adnod az <application>XMMS</application>
-plugin és függvénykönyvtár elérési útvonalát a
-<option>--with-xmmsplugindir</option> és <option>--with-xmmslibdir</option>
-kapcsolókkal.
 </para>
 </sect2>
 </sect1>
