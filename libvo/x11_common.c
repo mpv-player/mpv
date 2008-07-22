@@ -1562,7 +1562,7 @@ void vo_x11_fullscreen(void)
 
     if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
     {
-        vo_x11_decoration(mDisplay, vo_window, (vo_fs) ? 0 : 1);
+        vo_x11_decoration(mDisplay, vo_window, vo_border && !vo_fs);
         vo_x11_sizehint(x, y, w, h, 0);
         vo_x11_setlayer(mDisplay, vo_window, vo_fs);
 
