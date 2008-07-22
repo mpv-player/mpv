@@ -188,6 +188,26 @@ appear to default to defining a standard charset. This breaks our documentation
 translations, which are written in different encodings.
 
 The second VirtualHost is necessary for the DNS round-robin address.
+To check whether this VirtualHost works, you can add a temporary entry into
+your /etc/hosts file:
+
+1.2.3.4 www.mplayerhq.hu
+
+Replace the IP address by the real IP address of your mirror. Do not forget to
+remove the entry after you finish testing.
+
+
+Webserver checklist
+~~~~~~~~~~~~~~~~~~~
+
+After setting up the web server, please verify that the following things work
+both for your mirror address (www#.mplayerhq.hu) and the DNS round-robin
+address (www.mplayerhq.hu):
+
+- The virtual host is reachable by its address.
+- The subdirectories MPlayer, DOCS and homepage work.
+- The man pages and documentation are served with the correct content-type.
+  Try Russian or Chinese, you will notice breakage immediately.
 
 
 Setting up an FTP server
@@ -206,3 +226,4 @@ All official mirror admins are required to subscribe to the mplayer-mirror
 mailinglist. It's used to coordinate the efforts and distribute information
 among all admins. It is also very low traffic. Please use the webinterface
 on http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mirror to subscribe.
+Please do not top-post on this mailing list.
