@@ -296,10 +296,10 @@ static void my_draw_bitmap(struct vf_instance* vf, unsigned char* bitmap, int bi
 	dstv = vf->priv->planes[2] + dst_x + dst_y * vf->priv->outw;
 	for (i = 0; i < bitmap_h; ++i) {
 		for (j = 0; j < bitmap_w; ++j) {
-			unsigned k = ((unsigned)src[j]) * opacity / 255;
-			dsty[j] = (k*y + (255-k)*dsty[j]) / 255;
-			dstu[j] = (k*u + (255-k)*dstu[j]) / 255;
-			dstv[j] = (k*v + (255-k)*dstv[j]) / 255;
+			unsigned k = (src[j] * opacity + 255) >> 8;
+			dsty[j] = (k*y + (255-k)*dsty[j] + 255) >> 8;
+			dstu[j] = (k*u + (255-k)*dstu[j] + 255) >> 8;
+			dstv[j] = (k*v + (255-k)*dstv[j] + 255) >> 8;
 		}
 		src += stride;
 		dsty += dmpi->stride[0];
