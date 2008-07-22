@@ -292,6 +292,9 @@ Codecs:
   --disable-xvid-lavc       disable Xvid in libavcodec [autodetect]
   --disable-x264            disable x264 [autodetect]
   --disable-x264-lavc       disable x264 in libavcodec [autodetect]
+  --disable-libdirac-lavc   disable Dirac in libavcodec [autodetect]
+  --disable-libschroedinger-lavc   disable Dirac in libavcodec (Schroedinger
+                                   decoder) [autodetect]
   --disable-libnut          disable libnut [autodetect]
   --disable-libavutil_a     disable static libavutil [autodetect]
   --disable-libavcodec_a    disable static libavcodec [autodetect]
@@ -633,6 +636,8 @@ _xvid=auto
 _xvid_lavc=auto
 _x264=auto
 _x264_lavc=auto
+_libdirac_lavc=auto
+_libschroedinger_lavc=auto
 _libnut=auto
 _lirc=auto
 _lircc=auto
@@ -1044,6 +1049,10 @@ for ac_option do
   --disable-x264)       _x264=no        ;;
   --enable-x264-lavc)   _x264_lavc=yes  ;;
   --disable-x264-lavc)  _x264_lavc=no   ;;
+  --enable-libdirac-lavc)   _libdirac_lavc=yes  ;;
+  --disable-libdirac-lavc)  _libdirac_lavc=no   ;;
+  --enable-libschroedinger-lavc)   _libschroedinger_lavc=yes  ;;
+  --disable-libschroedinger-lavc)  _libschroedinger_lavc=no   ;;
   --enable-libnut)	_libnut=yes	;;
   --disable-libnut)	_libnut=no	;;
   --enable-libavutil_a)		_libavutil_a=yes	;;
@@ -6659,6 +6668,79 @@ _res_comment="in libavcodec: $_x264_lavc"
 echores "$_x264"
 
 
+echocheck "libdirac"
+if test "$_libdirac_lavc" = auto; then
+  _libdirac_lavc=no
+  if test "$_libavcodec_a" != yes; then
+    _res_comment="libavcodec (static) is required by libdirac, sorry"
+  else
+    cat > $TMPC << EOF
+#include <libdirac_encoder/dirac_encoder.h>
+#include <libdirac_decoder/dirac_parser.h>
+int main(void)
+{
+    dirac_encoder_context_t enc_ctx;
+    dirac_decoder_t *dec_handle;
+    dirac_encoder_context_init(&enc_ctx, VIDEO_FORMAT_SD_576I50);
+    dec_handle = dirac_decoder_init(0);
+    if (dec_handle)
+        dirac_decoder_close(dec_handle);
+    return 0;
+}
+EOF
+    if $_pkg_config --exists dirac ; then
+      _inc_dirac=`$_pkg_config --silence-errors --cflags dirac`
+      _ld_dirac=`$_pkg_config --silence-errors --libs dirac`
+      cc_check $_inc_dirac $_ld_dirac      &&
+      _libdirac_lavc=yes                   &&
+      _inc_extra="$_inc_extra $_inc_dirac" &&
+      _ld_extra="$_ld_extra $_ld_dirac"
+    fi
+  fi
+fi
+if test "$_libdirac_lavc" = yes ; then
+  _def_libdirac_lavc='#define CONFIG_LIBDIRAC 1'
+  _libavencoders="$_libavencoders LIBDIRAC_ENCODER"
+  _libavdecoders="$_libavdecoders LIBDIRAC_DECODER"
+  _codecmodules="libdirac $_codecmodules"
+else
+  _def_libdirac_lavc='#undef CONFIG_LIBDIRAC'
+  _nocodecmodules="libdirac $_nocodecmodules"
+fi
+echores "$_libdirac_lavc"
+
+
+echocheck "libschroedinger"
+if test "$_libschroedinger_lavc" = auto ; then
+  _libschroedinger_lavc=no
+  if test "$_libavcodec_a" != yes; then
+    _res_comment="libavcodec (static) is required by libschroedinger, sorry"
+  else
+    cat > $TMPC << EOF
+#include <schroedinger/schro.h>
+int main(void) { schro_init(); return 0; }
+EOF
+    if $_pkg_config --exists schroedinger-1.0 ; then
+      _inc_schroedinger=`$_pkg_config --silence-errors --cflags schroedinger-1.0`
+      _ld_schroedinger=`$_pkg_config --silence-errors --libs schroedinger-1.0`
+      cc_check $_inc_schroedinger $_ld_schroedinger &&
+      _libschroedinger_lavc=yes                     &&
+      _inc_extra="$_inc_extra $_inc_schroedinger"   &&
+      _ld_extra="$_ld_extra $_ld_schroedinger"
+    fi
+  fi
+fi
+if test "$_libschroedinger_lavc" = yes ; then
+  _def_libschroedinger_lavc='#define CONFIG_LIBSCHROEDINGER 1'
+  _libavencoders="$_libavencoders LIBSCHROEDINGER_ENCODER"
+  _libavdecoders="$_libavdecoders LIBSCHROEDINGER_DECODER"
+  _codecmodules="libschroedinger $_codecmodules"
+else
+  _def_libschroedinger_lavc='#undef CONFIG_LIBSCHROEDINGER'
+  _nocodecmodules="libschroedinger $_nocodecmodules"
+fi
+echores "$_libschroedinger_lavc"
+
 echocheck "libnut"
 if test "$_libnut" = auto ; then
   cat > $TMPC << EOF
@@ -7826,8 +7908,10 @@ CONFIG_MUXERS=$_mencoder
 CONFIG_LIBAMR=$_libamr
 CONFIG_LIBAMR_NB=$_libamr_nb
 CONFIG_LIBAMR_WB=$_libamr_wb
+CONFIG_LIBDIRAC=$_libdirac_lavc
 CONFIG_LIBFAAC=$_faac_lavc
 CONFIG_LIBMP3LAME=$_mp3lame_lavc
+CONFIG_LIBSCHROEDINGER=$_libschroedinger_lavc
 CONFIG_LIBVORBIS=$_libvorbis
 CONFIG_LIBX264=$_x264_lavc
 CONFIG_LIBXVID=$_xvid_lavc
@@ -8223,8 +8307,10 @@ $_def_libamr_wb
 `ff_config_enable "$_libavprotocols_all" "$_libavprotocols"`
 `ff_config_enable "$_libavbsfs_all" "$_libavbsfs"`
 
+$_def_libdirac_lavc
 $_def_faac_lavc
 $_def_mp3lame_lavc
+$_def_libschroedinger_lavc
 $_def_x264_lavc
 $_def_xvid_lavc
 
