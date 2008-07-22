@@ -889,11 +889,9 @@ static int control(uint32_t request, void *data, ...)
         initGl(vo_dwidth, vo_dheight);
       resize(&vo_dwidth, &vo_dheight);
       return VO_TRUE;
-#ifdef GL_WIN32
     case VOCTRL_BORDER:
-      vo_w32_border();
+      vo_border();
       return VO_TRUE;
-#endif
     case VOCTRL_GET_PANSCAN:
       return VO_TRUE;
     case VOCTRL_SET_PANSCAN:

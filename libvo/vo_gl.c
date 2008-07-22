@@ -999,12 +999,10 @@ static int control(uint32_t request, void *data, ...)
     vo_fullscreen();
     resize(vo_dwidth, vo_dheight);
     return VO_TRUE;
-#ifdef GL_WIN32
   case VOCTRL_BORDER:
-    vo_w32_border();
+    vo_border();
     resize(vo_dwidth, vo_dheight);
     return VO_TRUE;
-#endif
   case VOCTRL_GET_PANSCAN:
     if (!use_aspect) return VO_NOTIMPL;
     return VO_TRUE;

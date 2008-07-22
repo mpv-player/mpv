@@ -293,6 +293,7 @@ void glDisableYUVConversion(GLenum target, int type);
 /** \} */
 
 #ifdef GL_WIN32
+#define vo_border() vo_w32_border()
 #define vo_check_events() vo_w32_check_events()
 #define vo_fullscreen() vo_w32_fullscreen()
 #define vo_ontop() vo_w32_ontop()
@@ -300,6 +301,7 @@ void glDisableYUVConversion(GLenum target, int type);
 int setGlWindow(int *vinfo, HGLRC *context, HWND win);
 void releaseGlContext(int *vinfo, HGLRC *context);
 #else
+#define vo_border() vo_x11_border()
 #define vo_check_events() vo_x11_check_events(mDisplay)
 #define vo_fullscreen() vo_x11_fullscreen()
 #define vo_ontop() vo_x11_ontop()

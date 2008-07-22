@@ -61,6 +61,7 @@ extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
 	int img_width, int img_height, int use_fs);
 extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
 extern void vo_x11_ontop(void);
+extern void vo_x11_border(void);
 extern void vo_x11_ewmh_fullscreen( int action );
 
 #endif

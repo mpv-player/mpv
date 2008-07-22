@@ -1588,6 +1588,12 @@ void vo_x11_ontop(void)
     vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 }
 
+void vo_x11_border(void)
+{
+    vo_border = !vo_border;
+    vo_x11_decoration(mDisplay, vo_window, vo_border && !vo_fs);
+}
+
 /*
  * XScreensaver stuff
  */
