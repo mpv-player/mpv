@@ -66,7 +66,10 @@ static const struct vf_priv_s {
 	ass_renderer_t* ass_priv;
 
 	unsigned char* planes[3];
-	unsigned char* dirty_rows;
+	struct line_limits {
+		uint16_t start;
+		uint16_t end;
+	} *line_limits;
 } vf_priv_dflt;
 
 extern ass_track_t* ass_track;
@@ -90,7 +93,7 @@ static int config(struct vf_instance* vf,
 
 	vf->priv->planes[1] = malloc(vf->priv->outw * vf->priv->outh);
 	vf->priv->planes[2] = malloc(vf->priv->outw * vf->priv->outh);
-	vf->priv->dirty_rows = malloc(vf->priv->outh);
+	vf->priv->line_limits = malloc((vf->priv->outh + 1) / 2 * sizeof(*vf->priv->line_limits));
 	
 	if (vf->priv->ass_priv) {
 		ass_configure(vf->priv->ass_priv, vf->priv->outw, vf->priv->outh, 0);
@@ -204,46 +207,49 @@ static int prepare_image(struct vf_instance* vf, mp_image_t *mpi)
 	return 0;
 }
 
+static void update_limits(struct vf_instance *vf, int starty, int endy,
+			  int startx, int endx)
+{
+	starty >>= 1;
+	endy = (endy + 1) >> 1;
+	startx >>= 1;
+	endx = (endx + 1) >> 1;
+	for (int i = starty; i < endy; i++) {
+		struct line_limits *ll = vf->priv->line_limits + i;
+		if (startx < ll->start)
+			ll->start = startx;
+		if (endx > ll->end)
+			ll->end = endx;
+	}
+}
+
 /**
  * \brief Copy specified rows from render_context.dmpi to render_context.planes, upsampling to 4:4:4
  */
-static void copy_from_image(struct vf_instance* vf, int first_row, int last_row)
+static void copy_from_image(struct vf_instance* vf)
 {
 	int pl;
-	int i, j, k;
-	unsigned char val;
-	int chroma_rows;
-
-	first_row -= (first_row % 2);
-	last_row += (last_row % 2);
-	chroma_rows = (last_row - first_row) / 2;
 
 	for (pl = 1; pl < 3; ++pl) {
 		int dst_stride = vf->priv->outw;
 		int src_stride = vf->dmpi->stride[pl];
 		
-		unsigned char* src = vf->dmpi->planes[pl] + (first_row/2) * src_stride;
-		unsigned char* dst = vf->priv->planes[pl] + first_row * dst_stride;
-		unsigned char* dst_next = dst + dst_stride;
-		for(i = 0; i < chroma_rows; ++i)
-		{
-			if ((vf->priv->dirty_rows[first_row + i*2] == 0) ||
-				(vf->priv->dirty_rows[first_row + i*2 + 1] == 0)) {
-				for (j = 0, k = 0; j < vf->dmpi->chroma_width; ++j, k+=2) {
-					val = *(src + j);
-					*(dst + k) = val;
-					*(dst + k + 1) = val;
-					*(dst_next + k) = val;
-					*(dst_next + k + 1) = val;
-				}
+		unsigned char* src = vf->dmpi->planes[pl];
+		unsigned char* dst = vf->priv->planes[pl];
+		for (int i = 0; i < (vf->priv->outh + 1) / 2; i++) {
+			struct line_limits *ll = vf->priv->line_limits + i;
+			unsigned char* dst_next = dst + dst_stride;
+			for (int j = ll->start; j < ll->end; j++) {
+				unsigned char val = src[j];
+				dst[j << 1] = val;
+				dst[(j << 1) + 1] = val;
+				dst_next[j << 1] = val;
+				dst_next[(j << 1) + 1] = val;
 			}
 			src += src_stride;
 			dst = dst_next + dst_stride;
-			dst_next = dst + dst_stride;
 		}
 	}
-	for (i = first_row; i < last_row; ++i)
-		vf->priv->dirty_rows[i] = 1;
 }
 
 /**
@@ -252,7 +258,7 @@ static void copy_from_image(struct vf_instance* vf, int first_row, int last_row)
 static void copy_to_image(struct vf_instance* vf)
 {
 	int pl;
-	int i, j, k;
+	int i, j;
 	for (pl = 1; pl < 3; ++pl) {
 		int dst_stride = vf->dmpi->stride[pl];
 		int src_stride = vf->priv->outw;
@@ -260,18 +266,14 @@ static void copy_to_image(struct vf_instance* vf)
 		unsigned char* dst = vf->dmpi->planes[pl];
 		unsigned char* src = vf->priv->planes[pl];
 		unsigned char* src_next = vf->priv->planes[pl] + src_stride;
-		for(i = 0; i < vf->dmpi->chroma_height; ++i)
-		{
-			if ((vf->priv->dirty_rows[i*2] == 1)) {
-				assert(vf->priv->dirty_rows[i*2 + 1] == 1);
-				for (j = 0, k = 0; j < vf->dmpi->chroma_width; ++j, k+=2) {
-					unsigned val = 0;
-					val += *(src + k);
-					val += *(src + k + 1);
-					val += *(src_next + k);
-					val += *(src_next + k + 1);
-					*(dst + j) = val >> 2;
-				}
+		for (i = 0; i < vf->dmpi->chroma_height; ++i) {
+			for (j = vf->priv->line_limits[i].start; j < vf->priv->line_limits[i].end; j++) {
+				unsigned val = 0;
+				val += src[j << 1];
+				val += src[(j << 1) + 1];
+				val += src_next[j << 1];
+				val += src_next[(j << 1) + 1];
+				dst[j] = val >> 2;
 			}
 			dst += dst_stride;
 			src = src_next + src_stride;
@@ -311,9 +313,12 @@ static void my_draw_bitmap(struct vf_instance* vf, unsigned char* bitmap, int bi
 static int render_frame(struct vf_instance* vf, mp_image_t *mpi, const ass_image_t* img)
 {
 	if (img) {
-		memset(vf->priv->dirty_rows, 0, vf->priv->outh); // reset dirty rows
+		for (int i = 0; i < (vf->priv->outh + 1) / 2; i++)
+			vf->priv->line_limits[i] = (struct line_limits){65535, 0};
+		for (const ass_image_t *im = img; im; im = im->next)
+			update_limits(vf, im->dst_y, im->dst_y + im->h, im->dst_x, im->dst_x + im->w);
+		copy_from_image(vf);
 		while (img) {
-			copy_from_image(vf, img->dst_y, img->dst_y + img->h);
 			my_draw_bitmap(vf, img->bitmap, img->w, img->h, img->stride,
 					img->dst_x, img->dst_y, img->color);
 			img = img->next;
@@ -365,12 +370,9 @@ static void uninit(struct vf_instance* vf)
 {
 	if (vf->priv->ass_priv)
 		ass_renderer_done(vf->priv->ass_priv);
-	if (vf->priv->planes[1])
-		free(vf->priv->planes[1]);
-	if (vf->priv->planes[2])
-		free(vf->priv->planes[2]);
-	if (vf->priv->dirty_rows)
-		free(vf->priv->dirty_rows);
+	free(vf->priv->planes[1]);
+	free(vf->priv->planes[2]);
+	free(vf->priv->line_limits);
 }
 
 static const unsigned int fmt_list[]={
