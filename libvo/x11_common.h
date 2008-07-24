@@ -108,6 +108,7 @@ void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
 	int img_width, int img_height, int use_fs);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 void vo_x11_ontop(struct vo *vo);
+extern void vo_x11_border(struct vo *vo);
 void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action);
 
 #endif

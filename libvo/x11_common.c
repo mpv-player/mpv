@@ -1289,6 +1289,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     hint.flags = PPosition | PSize;
     XSetStandardProperties(mDisplay, x11->window, title, title, None, NULL, 0, &hint);
     vo_x11_sizehint(vo, x, y, width, height, 0);
+    if (!vo_border) vo_x11_decoration(vo, 0);
     // map window
     XMapWindow(mDisplay, x11->window);
     XClearWindow(mDisplay, x11->window);
@@ -1546,7 +1547,7 @@ void vo_x11_fullscreen(struct vo *vo)
 
     if ( ! (x11->fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
     {
-        vo_x11_decoration(vo, (vo_fs) ? 0 : 1);
+        vo_x11_decoration(vo, vo_border && !vo_fs);
         vo_x11_sizehint(vo, x, y, w, h, 0);
         vo_x11_setlayer(vo, x11->window, vo_fs);
 
@@ -1570,6 +1571,12 @@ void vo_x11_ontop(struct vo *vo)
     opts->vo_ontop = !opts->vo_ontop;
 
     vo_x11_setlayer(vo, vo->x11->window, opts->vo_ontop);
+}
+
+void vo_x11_border(struct vo *vo)
+{
+    vo_border = !vo_border;
+    vo_x11_decoration(vo, vo_border && !vo_fs);
 }
 
 /*
