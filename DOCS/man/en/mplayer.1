@@ -3236,7 +3236,7 @@ This tells MPlayer to attach to an existing window.
 Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
 .
 .TP
-.B \-xineramascreen <\-2\-...> (X11 only)
+.B \-xineramascreen <\-2\-...>
 In Xinerama configurations (i.e.\& a single desktop that spans across multiple
 displays) this option tells MPlayer which screen to display the movie on.
 A value of \-2 means fullscreen across the whole virtual display (in this case
@@ -3245,6 +3245,9 @@ fullscreen on the display the window currently is on.
 The initial position set via the \-geometry option is relative to the
 specified screen.
 Will usually only work with "\-fstype \-fullscreen" or "\-fstype none".
+This option is not suitable to only set the startup screen (and not also the
+fullscreen screen), \-geometry is the best that is available for that purpose
+currently.
 .
 .TP
 .B \-zrbw (\-vo zr only)
