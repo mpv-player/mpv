@@ -48,7 +48,7 @@ Requirements
 ~~~~~~~~~~~~
 The requirements for any (official) mirror are:
 1) rsync installed and some way to run the sync script periodicaly (eg cron)
-2) subscribing to the mplayer-mirror mailinglist (see below)
+2) subscribing to the mplayer-mirror mailing list (see below)
 
 The requirements for a full website mirror are:
 1) 500MB of free disk space (for the ftp and homepage directories).
@@ -219,11 +219,11 @@ subdirectory named 'MPlayer' (notice the capitals) that contains the
 downloadable files.
 
 
-Mailinglist
-~~~~~~~~~~~
+Mailing list
+~~~~~~~~~~~~
 
 All official mirror admins are required to subscribe to the mplayer-mirror
-mailinglist. It's used to coordinate the efforts and distribute information
+mailing list. It's used to coordinate the efforts and distribute information
 among all admins. It is also very low traffic. Please use the webinterface
 on http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mirror to subscribe.
 Please do not top-post on this mailing list.
