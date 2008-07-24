@@ -213,10 +213,14 @@ address (www.mplayerhq.hu):
 Setting up an FTP server
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Any FTP server will do. We use vsftpd, it's fast and secure. You should have
-the same directory layout as we do on our server, so there should be a
-subdirectory named 'MPlayer' (notice the capitals) that contains the
-downloadable files.
+Any FTP server will do. We use vsftpd, it is fast and secure. The setup is
+similar to the web server setup. The FTP server should listen on both its mirror
+address (ftp#.mplayerhq.hu) and the DNS round-robin address (ftp.mplayerhq.hu).
+All our mirrors are public, so you should allow anonymous access.
+
+You should have the same directory layout as we do on our server, so there
+should be a subdirectory named 'MPlayer' (notice the capitals) that contains
+the downloadable files.
 
 
 Mailing list
