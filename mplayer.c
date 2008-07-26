@@ -2556,9 +2556,8 @@ int i;
 
 int gui_no_filename=0;
 
-  srand((int) time(NULL)); 
-
   InitTimer();
+  srand(GetTimerMS());
   
   mp_msg_init();
 
