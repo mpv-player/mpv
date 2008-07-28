@@ -7616,10 +7616,6 @@ fi
 if amigaos ; then
   CFLAGS="$CFLAGS -DNEWLIB -D__USE_INLINE__"
 fi
-if hpux ; then
-  # use flag for HPUX missing setenv()
-  CFLAGS="$CFLAGS -DHPUX"
-fi
 # Thread support
 if linux ; then
   CFLAGS="$CFLAGS -D_REENTRANT"
