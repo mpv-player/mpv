@@ -1409,9 +1409,6 @@ if os2 ; then
   _exesuf=".exe"
   _getch=getch2-os2.c
   _need_shmem=no
-  _ar="emxomfar -p256"
-  _ranlib="echo ignoring ranlib"
-  _ld_extra="$_ld_extra -Zomf -Zstack 16384 -Zbin-files -Zargs-wild -lmmpm2"
 fi
 
 for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
@@ -7630,6 +7627,14 @@ echores "$_dvdnav"
 
 
 #############################################################################
+
+# On OS/2 nm supports only a.out. So the -Zomf compiler option to generate
+# the OMF format needs to come after the 'extern symbol prefix' check, which
+# uses nm.
+if os2 ; then
+  _ld_extra="$_ld_extra -Zomf -Zstack 16384 -Zbin-files -Zargs-wild"
+fi
+
 # linker paths should be the same for mencoder and mplayer
 _ld_tmp=""
 for I in $_libs_mplayer ; do
@@ -7662,10 +7667,6 @@ elif freebsd || netbsd || openbsd || bsdos ; then
 fi
 if cygwin ; then
   CFLAGS="$CFLAGS -D__CYGWIN__"
-fi
-if os2 ; then
-  CFLAGS="$CFLAGS -Zomf"
-  ASFLAGS="$ASFLAGS -Zomf"
 fi
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
@@ -7733,7 +7734,6 @@ CFLAG_STACKREALIGN = $_stackrealign
 LIBDVDCSS_DVDREAD_FLAGS = $_libdvdcss_dvdread_flags
 CFLAG_DHAHELPER = $cflag_dhahelper
 CFLAG_SVGALIB_HELPER = $cflag_svgalib_helper
-ASFLAGS = $ASFLAGS
 
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
