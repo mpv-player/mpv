@@ -783,9 +783,9 @@ codec-cfg.d: codecs.conf.h
 mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d osdep/mplayer-rc.o: version.h
 $(DEPS): help_mp.h
 
-dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE $(LIBDVDCSS_DVDREAD_FLAGS)
+dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(LIBDVDCSS_DVDREAD_FLAGS)
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\"
-libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE
+libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE -DHAVE_CONFIG_H
 
 loader/% loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAG_NO_OMIT_LEAF_FRAME_POINTER)
 #loader/%.o loader/%.d: CFLAGS += -Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT

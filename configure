@@ -7639,11 +7639,6 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
-# Make sure config.h gets included.
-if test "$_dvdread_internal" = yes || test "$_faad_internal" = yes ; then
-  CFLAGS="$CFLAGS -DHAVE_CONFIG_H"
-fi
-
 CFLAGS="-I. $CFLAGS"
 CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
