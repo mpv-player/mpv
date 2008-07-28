@@ -7593,6 +7593,41 @@ fi
 echores "$_maemo"
 fi
 
+#this must be the last test to be performed or the ones following it will likely fail
+#because libdvdnavmini is intentionally not linked against libdvdread (to permit mplayer
+# to use its own copy of the library)
+echocheck "DVD support (libdvdnav)"
+if test "$_dvdnav" = auto ; then
+  if test "$_dvdread_internal" = yes ; then
+    _dvdnav=no
+    _res_comment="Disabled in favor of the internal copy of dvdread. Append --disable-dvdread-internal."
+  else
+    $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
+  fi
+fi
+if test "$_dvdnav" = auto ; then
+  cat > $TMPC <<EOF
+#include <inttypes.h>
+#include <dvdnav/dvdnav.h>
+int main(void) { dvdnav_t *dvd=0; return 0; }
+EOF
+  _dvdnav=no
+  _dvdnavdir=`$_dvdnavconfig --cflags`
+  _dvdnavlibs=`$_dvdnavconfig --libs`
+  cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
+fi
+if test "$_dvdnav" = yes ; then
+  _largefiles=yes
+  _def_dvdnav='#define USE_DVDNAV 1'
+  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
+  _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+  _inputmodules="dvdnav $_inputmodules"
+else
+  _def_dvdnav='#undef USE_DVDNAV'
+  _noinputmodules="dvdnav $_noinputmodules"
+fi
+echores "$_dvdnav"
+
 # linker paths should be the same for mencoder and mplayer
 _ld_tmp=""
 for I in $_libs_mplayer ; do
@@ -7653,41 +7688,6 @@ if test "$cc_vendor" = "gnu" ; then
 fi
 
 cc_check -mno-omit-leaf-frame-pointer && CFLAG_NO_OMIT_LEAF_FRAME_POINTER="-mno-omit-leaf-frame-pointer"
-
-#this must be the last test to be performed or the ones following it will likely fail
-#because libdvdnavmini is intentionally not linked against libdvdread (to permit mplayer
-# to use its own copy of the library)
-echocheck "DVD support (libdvdnav)"
-if test "$_dvdnav" = auto ; then
-  if test "$_dvdread_internal" = yes ; then
-    _dvdnav=no
-    _res_comment="Disabled in favor of the internal copy of dvdread. Append --disable-dvdread-internal."
-  else
-    $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
-  fi
-fi
-if test "$_dvdnav" = auto ; then
-  cat > $TMPC <<EOF
-#include <inttypes.h>
-#include <dvdnav/dvdnav.h>
-int main(void) { dvdnav_t *dvd=0; return 0; }
-EOF
-  _dvdnav=no
-  _dvdnavdir=`$_dvdnavconfig --cflags`
-  _dvdnavlibs=`$_dvdnavconfig --libs`
-  cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
-fi
-if test "$_dvdnav" = yes ; then
-  _largefiles=yes
-  _def_dvdnav='#define USE_DVDNAV 1'
-  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
-  _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
-  _inputmodules="dvdnav $_inputmodules"
-else
-  _def_dvdnav='#undef USE_DVDNAV'
-  _noinputmodules="dvdnav $_noinputmodules"
-fi
-echores "$_dvdnav"
 
 #############################################################################
 echo "Creating config.mak"
