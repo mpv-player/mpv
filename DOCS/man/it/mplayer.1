@@ -1,4 +1,4 @@
-.\" synced with r27337
+.\" synced with r27348
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -3374,7 +3374,7 @@ Utile per 'incastrare' MPlayer in un browser (p.es.\& con l'estensione
 plugger).
 .
 .TP
-.B \-xineramascreen <\-2\-...> (solo X11)
+.B \-xineramascreen <\-2\-...>
 In configurazioni con Xinerama (p.es.\& un singolo desktop che si espande su
 monitor multipli) questa opzione indica a MPlayer su quale schermo deve
 visualizzare il filmato.
@@ -3385,6 +3385,10 @@ la finestra.
 La posizione iniziale selezionata con l'opzione \-geometry è relativa allo
 schermo specificato.
 Funzionerà solitamente solo con "\-fstype \-fullscreen" o "\-fstype none".
+Non conviene usare quest'opzione solo per impostare la schermata di avvio
+(e neanche per la modalità a tutto schermo), per far questo la miglior opzione
+attualmente disponibilie è \-geometry.
+Supportata dai driver di uscita video gl, gl2, x11, ed xv.
 .
 .TP
 .B \-zrbw (solo \-vo zr)
