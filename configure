@@ -7665,9 +7665,6 @@ elif freebsd || netbsd || openbsd || bsdos ; then
   # FIXME bsd needs this so maybe other OS'es
   CFLAGS="$CFLAGS -D_THREAD_SAFE"
 fi
-if cygwin ; then
-  CFLAGS="$CFLAGS -D__CYGWIN__"
-fi
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
   CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
