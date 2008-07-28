@@ -78,6 +78,7 @@ static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_THP,               MKTAG('T', 'H', 'P', 'V')},
     { CODEC_ID_TIERTEXSEQVIDEO,   MKTAG('T', 'S', 'E', 'Q')},
     { CODEC_ID_TXD,               MKTAG('T', 'X', 'D', 'V')},
+    { CODEC_ID_VP6A,              MKTAG('V', 'P', '6', 'A')},
     { CODEC_ID_VMDVIDEO,          MKTAG('V', 'M', 'D', 'V')},
     { CODEC_ID_WS_VQA,            MKTAG('V', 'Q', 'A', 'V')},
     { CODEC_ID_XAN_WC3,           MKTAG('W', 'C', '3', 'V')},
