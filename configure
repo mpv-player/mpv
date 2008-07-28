@@ -7628,6 +7628,8 @@ else
 fi
 echores "$_dvdnav"
 
+
+#############################################################################
 # linker paths should be the same for mencoder and mplayer
 _ld_tmp=""
 for I in $_libs_mplayer ; do
