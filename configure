@@ -5463,6 +5463,12 @@ if test "$_libdvdcss_internal" = yes ; then
   elif darwin ; then
     _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
     _ld_extra="$_ld_extra -framework IOKit"
+  elif cygwin ; then
+    CFLAGS="$CFLAGS -DSYS_CYGWIN"
+  elif beos ; then
+    CFLAGS="$CFLAGS -DSYS_BEOS"
+  elif os2 ; then
+    CFLAGS="$CFLAGS -DSYS_OS2"
   fi
   _libdvdcss_dvdread_flags="-Ilibdvdcss -DHAVE_DVDCSS_DVDCSS_H"
   _inputmodules="libdvdcss(internal) $_inputmodules"
@@ -7634,9 +7640,6 @@ if test "$_largefiles" = yes || freebsd ; then
   if test "$_dvdread" = yes || test "$_libdvdcss_internal" = yes ; then
     # dvdread support requires this (for off64_t)
     CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
-    cygwin && CFLAGS="$CFLAGS -DSYS_CYGWIN"
-    beos && CFLAGS="$CFLAGS -DSYS_BEOS"
-    os2 && CFLAGS="$CFLAGS -DSYS_OS2"
   fi
 fi
 
