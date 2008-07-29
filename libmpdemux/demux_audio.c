@@ -685,7 +685,7 @@ static int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
 const demuxer_desc_t demuxer_desc_audio = {
   "Audio demuxer",
   "audio",
-  "Audio file",
+  "Audio only",
   "?",
   "Audio only files",
   DEMUXER_TYPE_AUDIO,
