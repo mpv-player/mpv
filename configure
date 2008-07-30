@@ -2866,11 +2866,13 @@ fi
 
 
 echocheck "socklen_t"
-cat > $TMPC << EOF
-#include <sys/socket.h>
+for header in "sys/socket.h" "ws2tcpip.h" ; do
+  cat > $TMPC << EOF
+#include <$header>
 int main(void) { socklen_t v = 0; return v; }
 EOF
-cc_check && _socklen_t=yes
+  cc_check && _socklen_t=yes && break
+done
 if test "$_socklen_t" = yes ; then
   _def_socklen_t='#define HAVE_SOCKLEN_T 1'
 else
