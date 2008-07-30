@@ -6852,9 +6852,7 @@ echores "$_mp3lame"
 fi
 
 echocheck "mencoder"
-_mencoder_flag='#undef HAVE_MENCODER'
 if test "$_mencoder" = yes ; then
-  _mencoder_flag='#define HAVE_MENCODER'
   _def_muxers='#define CONFIG_MUXERS 1'
 else
   # mpeg1video for vf_lavc, snow for vf_uspp and vf_mcdeint
@@ -8090,9 +8088,6 @@ $_def_libnut
 
 /* Define to include support for libdv-0.9.5 */
 $_def_libdv
-
-/* If build mencoder */
-$_mencoder_flag
 
 /* Indicates if libmp3lame is available
    Note: for mencoder */
