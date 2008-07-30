@@ -8189,14 +8189,6 @@ $_def_sysi86_iv
 /* Define this if your system has pthreads */
 $_def_pthreads
 
-/* Define this if you enabled thread support for libavcodec */
-$_def_threads
-#ifdef HAVE_THREADS
-#define ENABLE_THREADS 1
-#else
-#define ENABLE_THREADS 0
-#endif
-
 /* LIRC (remote control, see www.lirc.org) support: */
 $_def_lirc
 
@@ -8224,11 +8216,6 @@ $_def_dvdnav
 /* maximum alignment used by libmpeg2 */
 #define ATTRIBUTE_ALIGNED_MAX 16
 
-/* Define this to enable image postprocessing in libavcodec (requires a FAST CPU!) */
-$_def_libpostproc
-$_def_libpostproc_a
-$_def_libpostproc_so
-
 /* Win32 DLL support */
 $_def_win32dll
 #define WIN32_PATH "$_win32codecsdir"
@@ -8243,6 +8230,22 @@ $_def_quicktime
 
 /* Build our Win32-loader */
 $_def_win32_loader
+
+/* FFmpeg */
+#define HAVE_SOCKLEN_T 1
+
+/* Define this to enable image postprocessing in libavcodec (requires a FAST CPU!) */
+$_def_libpostproc
+$_def_libpostproc_a
+$_def_libpostproc_so
+
+/* Define this if you enabled thread support for libavcodec */
+$_def_threads
+#ifdef HAVE_THREADS
+#define ENABLE_THREADS 1
+#else
+#define ENABLE_THREADS 0
+#endif
 
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
@@ -8277,8 +8280,6 @@ $_def_muxers
 #ifndef MP_DEBUG
 #define HAVE_EBP_AVAILABLE 1
 #endif
-
-#define HAVE_SOCKLEN_T 1
 
 #define CONFIG_GPL 1
 #define ENABLE_SMALL 0
