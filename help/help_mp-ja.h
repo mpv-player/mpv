@@ -15,7 +15,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>   play VCD (Video CD) track from device instead of plain file\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titleno>   play DVD title from device instead of plain file\n"
 " -alang/-slang    DVDの 音声/サブタイトル 言語設定 (2文字のカントリーコードで指定)\n"
 #endif

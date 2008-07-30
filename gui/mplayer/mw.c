@@ -136,7 +136,7 @@ void mplEventHandling( int msg,float param )
 	guiIntfStruct.StreamType=STREAMTYPE_VCD;
 	goto play;
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    case evPlayDVD:
         guiIntfStruct.DVD.current_title=1;
         guiIntfStruct.DVD.current_chapter=1;
@@ -181,7 +181,7 @@ play:
 		}
 	       break;
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
           case STREAMTYPE_DVD:
 	       gtkSet( gtkClearStruct,0,(void *)(guiALL - guiDVD - guiFilenames) );
 	       if ( !dvd_device ) dvd_device=gstrdup( DEFAULT_DVD_DEVICE );
@@ -199,7 +199,7 @@ play:
 	guiIntfStruct.NewPlay=1;
         mplPlay();
         break;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    case evSetDVDSubtitle:
         dvdsub_id=iparam;
         goto play_dvd_2;
@@ -356,7 +356,7 @@ set_volume:
 	  default: movie_aspect=-1;
 	 }
 	wsClearWindow( appMPlayer.subWindow );
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 	if ( guiIntfStruct.StreamType == STREAMTYPE_DVD || guiIntfStruct.StreamType == STREAMTYPE_VCD ) goto play_dvd_2;
 	 else 
 #endif

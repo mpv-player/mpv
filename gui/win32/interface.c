@@ -32,7 +32,7 @@
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
 #include "input/input.h"
@@ -151,7 +151,7 @@ static void guiSetEvent(int event)
         case evPause:
             mplPause();
             break;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
         case evPlayDVD:
         {
             static char dvdname[MAX_PATH];
@@ -273,7 +273,7 @@ static void guiSetEvent(int event)
         {
             switch(guiIntfStruct.StreamType)
             {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
                 case STREAMTYPE_DVD:
                 {
                     guiIntfStruct.Title = guiIntfStruct.DVD.current_title;
@@ -337,7 +337,7 @@ void mplNext(void)
     if(guiIntfStruct.Playing == 2) return;
     switch(guiIntfStruct.StreamType)
     {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
         case STREAMTYPE_DVD:
             if(guiIntfStruct.DVD.current_chapter == (guiIntfStruct.DVD.chapters - 1))
                 return;
@@ -359,7 +359,7 @@ void mplPrev(void)
     if(guiIntfStruct.Playing == 2) return;
     switch(guiIntfStruct.StreamType)
     {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
         case STREAMTYPE_DVD:
             if(guiIntfStruct.DVD.current_chapter == 1)
                 return;
@@ -405,7 +405,7 @@ void mplEnd( void )
     guiIntfStruct.Position = 0;
     guiIntfStruct.AudioType = 0;
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
     guiIntfStruct.DVD.current_title = 1;
     guiIntfStruct.DVD.current_chapter = 1;
     guiIntfStruct.DVD.current_angle = 1;
@@ -521,7 +521,7 @@ void guiDone(void)
 int guiGetEvent(int type, char *arg)
 {
     stream_t *stream = (stream_t *) arg;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
     dvd_priv_t *dvdp = (dvd_priv_t *) arg;
 #endif
     if(!mygui || !mygui->skin) return 0;
@@ -549,7 +549,7 @@ int guiGetEvent(int type, char *arg)
             {
                 case STREAMTYPE_PLAYLIST:
                     break;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
                 case STREAMTYPE_DVD:
                 {
                     char tmp[512];
@@ -614,7 +614,7 @@ int guiGetEvent(int type, char *arg)
             guiIntfStruct.StreamType = stream->type;
             switch(stream->type)
             {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
                 case STREAMTYPE_DVD:
                     guiGetEvent(guiSetDVD, (char *) stream->priv);
                     break;
@@ -622,7 +622,7 @@ int guiGetEvent(int type, char *arg)
             }
             break;
         }
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
         case guiSetDVD:
         {
             guiIntfStruct.DVD.titles = dvdp->vmg_file->tt_srpt->nr_of_srpts;

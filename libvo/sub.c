@@ -8,7 +8,7 @@
 #include <malloc.h>
 #endif
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 #include "stream/stream.h"
 #include "stream/stream_dvdnav.h"
 #define OSD_NAV_BOX_ALPHA 0x7f
@@ -89,7 +89,7 @@ int sub_visibility=1;
 int sub_bg_color=0; /* subtitles background color */
 int sub_bg_alpha=0;
 int sub_justify=0;
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 static nav_highlight_t nav_hl;
 #endif
 
@@ -216,7 +216,7 @@ inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
         }
 }
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey) {
   nav_hl.sx = sx;
   nav_hl.sy = sy;
@@ -1115,7 +1115,7 @@ int vo_update_osd(int dxs,int dys){
         int vis=obj->flags&OSDFLAG_VISIBLE;
 	obj->flags&=~OSDFLAG_BBOX;
 	switch(obj->type){
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
         case OSDTYPE_DVDNAV:
            vo_update_nav(obj,dxs,dys);
            break;
@@ -1192,7 +1192,7 @@ void vo_init_osd(void){
     new_osd_obj(OSDTYPE_SUBTITLE);
     new_osd_obj(OSDTYPE_PROGBAR);
     new_osd_obj(OSDTYPE_SPU);
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
     new_osd_obj(OSDTYPE_DVDNAV);
 #endif
 #if HAVE_TV_TELETEXT
@@ -1233,7 +1233,7 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	case OSDTYPE_SPU:
 	    vo_draw_spudec_sub(obj, draw_alpha); // FIXME
 	    break;
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
         case OSDTYPE_DVDNAV:
 #endif
 #ifdef HAVE_TV_TELETEXT

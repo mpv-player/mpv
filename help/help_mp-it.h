@@ -16,7 +16,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  legge (S)VCD (Super Video CD) (dispositivo raw, non montato)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titleno>  legge titolo/traccia DVD dal dispositivo anziché da file\n"
 " -alang/-slang    sceglie lingua audio/sottotitoli DVD (cod naz. 2 caratteri)\n"
 #endif

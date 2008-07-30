@@ -18,7 +18,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  播放 (S)VCD 軌迹號 (原始設備, 無需安挂)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titleno>  從設備而不是普通文件上播放 DVD 標題號\n"
 " -alang/-slang    選擇 DVD 音軌/字幕的語言(使用兩字符的國家代號)\n"
 #endif

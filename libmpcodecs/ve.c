@@ -23,12 +23,12 @@ extern vf_info_t ve_info_x264;
  * libraries and encoders requiring binary support. */
 
 static vf_info_t* encoder_list[]={
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
     &ve_info_lavc,
 #endif
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     &ve_info_vfw,
-#ifdef USE_QTX_CODECS_WIN32
+#ifdef CONFIG_QTX_CODECS_WIN32
     &ve_info_qtvideo,
 #endif
 #endif
@@ -39,7 +39,7 @@ static vf_info_t* encoder_list[]={
 #ifdef HAVE_XVID4
     &ve_info_xvid,
 #endif
-#ifdef USE_LIBLZO
+#ifdef CONFIG_LIBLZO
     &ve_info_nuv,
 #endif
 #ifdef HAVE_X264

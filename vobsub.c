@@ -20,7 +20,7 @@
 #include "vobsub.h"
 #include "spudec.h"
 #include "mp_msg.h"
-#ifdef USE_UNRAR_EXEC
+#ifdef CONFIG_UNRAR_EXEC
 #include "unrar_exec.h"
 #endif
 #include "libavutil/common.h"
@@ -34,7 +34,7 @@ static int vobsubid = -2;
  * RAR stream handling
  * The RAR file must have the same basename as the file to open
  **********************************************************************/
-#ifdef USE_UNRAR_EXEC
+#ifdef CONFIG_UNRAR_EXEC
 typedef struct {
     FILE *file;
     unsigned char *data;

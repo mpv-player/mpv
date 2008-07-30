@@ -500,7 +500,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   if (dp == NULL) return NULL;
     }
 
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
   extern AVCodecParserContext * h264parserctx;
   int consumed, poutbuf_size = 1;
   const uint8_t *poutbuf = NULL;
@@ -531,7 +531,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   if (headersize == 1) // amr
     dp->buffer[0] =
         ((AMRAudioSource*)bufferQueue->readSource())->lastFrameHeader();
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
     } else {
       bufferQueue->dp = dp = bufferQueue->nextpacket;
       bufferQueue->nextpacket = NULL;

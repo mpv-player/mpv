@@ -140,7 +140,7 @@ char *get_path(const char *filename){
 	return buff;
 }
 
-#if defined(WIN32) && defined(USE_WIN32DLL)
+#if defined(WIN32) && defined(CONFIG_WIN32DLL)
 void set_path_env()
 {
 	/*make our codec dirs available for LoadLibraryA()*/
@@ -150,10 +150,10 @@ void set_path_env()
 #ifdef __CYGWIN__
 	cygwin_conv_to_full_win32_path(WIN32_PATH,win32path);
 	strcpy(tmppath,win32path);
-#ifdef USE_REALCODECS
+#ifdef CONFIG_REALCODECS
 	cygwin_conv_to_full_win32_path(REALCODEC_PATH,realpath);
 	sprintf(tmppath,"%s;%s",win32path,realpath);
-#endif /*USE_REALCODECS*/
+#endif /*CONFIG_REALCODECS*/
 #else /*__CYGWIN__*/
 	/* Expand to absolute path unless it's already absolute */
 	if (!strstr(WIN32_PATH,":") && WIN32_PATH[0] != '\\'){
@@ -162,7 +162,7 @@ void set_path_env()
 	}
 	else strcpy(win32path,WIN32_PATH);
 	strcpy(tmppath,win32path);
-#ifdef USE_REALCODECS
+#ifdef CONFIG_REALCODECS
 	/* Expand to absolute path unless it's already absolute */
 	if (!strstr(REALCODEC_PATH,":") && REALCODEC_PATH[0] != '\\'){
 		GetModuleFileNameA(NULL, realpath, MAX_PATH);
@@ -170,10 +170,10 @@ void set_path_env()
 	}
 	else strcpy(realpath,REALCODEC_PATH);
 	sprintf(tmppath,"%s;%s",win32path,realpath);
-#endif /*USE_REALCODECS*/
+#endif /*CONFIG_REALCODECS*/
 #endif /*__CYGWIN__*/
 	mp_msg(MSGT_WIN32, MSGL_V,"Setting PATH to %s\n",tmppath);
 	if (!SetEnvironmentVariableA("PATH", tmppath))
 		mp_msg(MSGT_WIN32, MSGL_WARN, "Cannot set PATH!");
 }
-#endif /*WIN32 && USE_WIN32DLL*/
+#endif /*WIN32 && CONFIG_WIN32DLL*/

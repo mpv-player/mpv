@@ -42,13 +42,13 @@ const m_option_t ovc_conf[]={
 	"   copy     - frame copy, without re-encoding. Doesn't work with filters.\n"
 	"   frameno  - special audio-only file for 3-pass encoding, see DOCS.\n"
 	"   raw      - uncompressed video. Use fourcc option to set format explicitly.\n"
-#ifdef USE_LIBLZO
+#ifdef CONFIG_LIBLZO
 	"   nuv      - nuppel video\n"
 #endif
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	"   lavc     - libavcodec codecs - best quality!\n"
 #endif
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	"   vfw      - VfW DLLs, read DOCS/HTML/en/encoding-guide.html.\n"
 	"   qtvideo  - QuickTime DLLs, currently only SVQ1/3 are supported.\n"
 #endif
@@ -73,11 +73,11 @@ const m_option_t oac_conf[]={
 #else
 	{"mp3lame", "MPlayer was compiled without libmp3lame support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif /* HAVE_MP3LAME */
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	{"lavc", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_LAVC, NULL},
 #else
 	{"lavc", "MPlayer was compiled without libavcodec. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* USE_LIBAVCODEC */
+#endif /* CONFIG_LIBAVCODEC */
 #ifdef HAVE_TOOLAME
 	{"toolame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_TOOLAME, NULL},
 #else
@@ -99,7 +99,7 @@ const m_option_t oac_conf[]={
 #ifdef HAVE_MP3LAME
 	"   mp3lame  - cbr/abr/vbr MP3 using libmp3lame\n"
 #endif
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	"   lavc     - FFmpeg audio encoder (MP2, AC3, ...)\n"
 #endif
 #ifdef HAVE_TOOLAME
@@ -138,7 +138,7 @@ const m_option_t info_conf[]={
 const m_option_t of_conf[]={
 	{"avi", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_AVI, NULL},
 	{"mpeg", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_MPEG, NULL},
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
 	{"lavf", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_LAVF, NULL},
 #endif
 	{"rawvideo", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_RAWVIDEO, NULL},
@@ -146,7 +146,7 @@ const m_option_t of_conf[]={
 	{"help", "\nAvailable output formats:\n"
 	"   avi      - Microsoft Audio/Video Interleaved\n"
 	"   mpeg     - MPEG-1/2 system stream format\n"
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
 	"   lavf     - FFmpeg libavformat muxers\n"
 #endif
 	"   rawvideo - (video only, one stream only) raw stream, no muxing\n"
@@ -220,11 +220,11 @@ const m_option_t mencoder_opts[]={
 #ifdef HAVE_MP3LAME
 	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	{"lavcopts", lavcopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"lavcopts", "MPlayer was compiled without libavcodec. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* USE_LIBAVCODEC */
+#endif /* CONFIG_LIBAVCODEC */
 #ifdef HAVE_TOOLAME
 	{"toolameopts", toolameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
@@ -240,7 +240,7 @@ const m_option_t mencoder_opts[]={
 #else
 	{"faacopts", "MPlayer was compiled without libfaac. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif /* HAVE_FAAC */
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	{"xvfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
@@ -250,11 +250,11 @@ const m_option_t mencoder_opts[]={
 	{"x264encopts", &x264enc_set_param, CONF_TYPE_FUNC_PARAM, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
-#ifdef USE_LIBLZO
+#ifdef CONFIG_LIBLZO
 	{"nuvopts",  nuvopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 	{"mpegopts",  mpegopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
 	{"lavfopts",  lavfopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif	
 

@@ -105,7 +105,7 @@ typedef struct {
   int forced_subs_only;
   unsigned char* extradata; // extra header data passed from demuxer
   int extradata_len;
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
   ass_track_t* ass_track;  // for SSA/ASS streams (type == 'a')
 #endif
   char* lang; // track language

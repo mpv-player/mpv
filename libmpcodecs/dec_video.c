@@ -416,7 +416,7 @@ int filter_video(sh_video_t *sh_video, void *frame, double pts)
     int ret = vf->put_image(vf, mpi, pts);
     if (ret > 0) {
 	vf->control(vf, VFCTRL_DRAW_OSD, NULL);
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 	vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
 #endif
     }

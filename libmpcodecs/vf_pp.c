@@ -17,7 +17,7 @@
 #include "vf.h"
 #include "libpostproc/postprocess.h"
 
-#ifdef USE_LIBPOSTPROC_A
+#ifdef CONFIG_LIBPOSTPROC_A
 #define EMU_OLD
 #include "libpostproc/postprocess_internal.h"
 #endif

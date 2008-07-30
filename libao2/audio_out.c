@@ -48,7 +48,7 @@ const ao_functions_t* const audio_out_drivers[] =
 #ifdef HAVE_COREAUDIO
         &audio_out_macosx,
 #endif
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
         &audio_out_oss,
 #endif
 #if defined (HAVE_ALSA1X) || defined (HAVE_ALSA9)
@@ -57,23 +57,23 @@ const ao_functions_t* const audio_out_drivers[] =
 #ifdef HAVE_ALSA5
         &audio_out_alsa5,
 #endif
-#ifdef USE_SGI_AUDIO
+#ifdef CONFIG_SGI_AUDIO
         &audio_out_sgi,
 #endif
-#ifdef USE_SUN_AUDIO
+#ifdef CONFIG_SUN_AUDIO
         &audio_out_sun,
 #endif
 // wrappers:
-#ifdef USE_ARTS
+#ifdef CONFIG_ARTS
         &audio_out_arts,
 #endif
-#ifdef USE_ESD
+#ifdef CONFIG_ESD
         &audio_out_esd,
 #endif
-#ifdef USE_PULSE
+#ifdef CONFIG_PULSE
         &audio_out_pulse,
 #endif
-#ifdef USE_JACK
+#ifdef CONFIG_JACK
         &audio_out_jack,
 #endif
 #ifdef HAVE_NAS
@@ -82,7 +82,7 @@ const ao_functions_t* const audio_out_drivers[] =
 #ifdef HAVE_SDL
         &audio_out_sdl,
 #endif
-#ifdef USE_OPENAL
+#ifdef CONFIG_OPENAL
         &audio_out_openal,
 #endif
         &audio_out_mpegpes,

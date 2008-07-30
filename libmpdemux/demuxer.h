@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "stream/stream.h"
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 #include "libass/ass_types.h"
 #endif
 

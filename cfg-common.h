@@ -60,7 +60,7 @@ extern off_t ps_probe;
 
 
 
-#ifdef USE_RADIO
+#ifdef CONFIG_RADIO
 const m_option_t radioopts_conf[]={
     {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"driver", &stream_radio_defaults.driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
@@ -75,9 +75,9 @@ const m_option_t radioopts_conf[]={
     {"achannels", &stream_radio_defaults.achannels, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif /* USE_RADIO */
+#endif /* CONFIG_RADIO */
 
-#ifdef USE_TV
+#ifdef CONFIG_TV
 const m_option_t tvopts_conf[]={
 	{"on", "-tv on has been removed, use tv:// instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"immediatemode", &stream_tv_defaults.immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
@@ -143,7 +143,7 @@ const m_option_t tvopts_conf[]={
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif /* USE_TV */
+#endif /* CONFIG_TV */
 
 #ifdef HAVE_PVR
 extern int pvr_param_aspect_ratio;

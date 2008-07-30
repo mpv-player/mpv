@@ -28,10 +28,10 @@
 #include "vobsub.h"
 #include "spudec.h"
 #include "get_path.h"
-#ifdef USE_TV
+#ifdef CONFIG_TV
 #include "stream/tv.h"
 #endif
-#ifdef USE_RADIO
+#ifdef CONFIG_RADIO
 #include "stream/stream_radio.h"
 #endif
 #ifdef HAVE_PVR
@@ -40,13 +40,13 @@
 #ifdef HAS_DVBIN_SUPPORT
 #include "stream/dvbin.h"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 #include "stream/stream_dvdnav.h"
 #endif
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 #endif
@@ -813,7 +813,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
             sh_audio_t* sh = mpctx->sh_audio;
             if (sh && sh->lang)
                 av_strlcpy(lang, sh->lang, 40);
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 	    else if (mpctx->stream->type == STREAMTYPE_DVD) {
 		int code = dvd_lang_from_aid(mpctx->stream, audio_id);
 		if (code) {
@@ -824,7 +824,7 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 	    }
 #endif
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 	    else if (mpctx->stream->type == STREAMTYPE_DVDNAV)
 		mp_dvdnav_lang_from_aid(mpctx->stream, audio_id, lang);
 #endif
@@ -1162,7 +1162,7 @@ static int mp_property_gamma(m_option_t * prop, int action, void *arg,
 	return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-#ifdef USE_TV
+#ifdef CONFIG_TV
     if (mpctx->demuxer->type == DEMUXER_TYPE_TV) {
 	int l = strlen(prop->name);
 	char tv_prop[3 + l + 1];
@@ -1322,7 +1322,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	sub_name = 0;
 	if (subdata)
 	    sub_name = subdata->filename;
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 	if (ass_track && ass_track->name)
 	    sub_name = ass_track->name;
 #endif
@@ -1338,7 +1338,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 		     strlen(tmp) < 20 ? tmp : tmp + strlen(tmp) - 19);
 	    return M_PROPERTY_OK;
 	}
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 	if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
 	    if (vo_spudec && dvdsub_id >= 0) {
 		unsigned char lang[3];
@@ -1367,7 +1367,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 		     vobsub_id, language ? language : MSGTR_Unknown);
 	    return M_PROPERTY_OK;
 	}
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 	if (vo_spudec && mpctx->stream->type == STREAMTYPE_DVD
 	    && dvdsub_id >= 0) {
 	    char lang[3];
@@ -1430,7 +1430,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	    reset_spu = 1;
 	d_sub->id = -2;
     }
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     ass_track = 0;
 #endif
 
@@ -1439,7 +1439,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
     } else if (source == SUB_SOURCE_SUBS) {
 	mpctx->set_of_sub_pos =
 	    mpctx->global_sub_pos - mpctx->global_sub_indices[SUB_SOURCE_SUBS];
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 	if (ass_enabled && mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos])
 	    ass_track = mpctx->set_of_ass_tracks[mpctx->set_of_sub_pos];
 	else
@@ -1469,7 +1469,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 		sh_sub_t *sh = d_sub->sh;
 		if (sh->type == 'v')
 		    init_vo_spudec();
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 		else if (ass_enabled)
 		    ass_track = sh->ass_track;
 #endif
@@ -1479,7 +1479,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 	    }
 	}
     }
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
     if (vo_spudec
 	&& (mpctx->stream->type == STREAMTYPE_DVD
 	    || mpctx->stream->type == STREAMTYPE_DVDNAV)
@@ -1729,7 +1729,7 @@ static int mp_property_sub_visibility(m_option_t * prop, int action,
     }
 }
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 /// Use margins for libass subtitles (RW)
 static int mp_property_ass_use_margins(m_option_t * prop, int action,
 				      void *arg, MPContext * mpctx)
@@ -1783,7 +1783,7 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
             if (!arg)
                 return M_PROPERTY_ERROR;
             M_PROPERTY_CLAMP(prop, *(float *) arg);
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
             if (ass_enabled) {
                 ass_font_scale = *(float *) arg;
                 ass_force_reload = 1;
@@ -1794,7 +1794,7 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
             return M_PROPERTY_OK;
         case M_PROPERTY_STEP_UP:
         case M_PROPERTY_STEP_DOWN:
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
             if (ass_enabled) {
                 ass_font_scale += (arg ? *(float *) arg : 0.1)*
                   (action == M_PROPERTY_STEP_UP ? 1.0 : -1.0);
@@ -1808,7 +1808,7 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
             force_load_font = 1;
             return M_PROPERTY_OK;
         default:
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
             if (ass_enabled)
                 return m_property_float_ro(prop, action, arg, ass_font_scale);
             else
@@ -1824,7 +1824,7 @@ static int mp_property_sub_scale(m_option_t * prop, int action, void *arg,
 /// \ingroup Properties
 ///@{
 
-#ifdef USE_TV
+#ifdef CONFIG_TV
 
 /// TV color settings (RW)
 static int mp_property_tv_color(m_option_t * prop, int action, void *arg,
@@ -2076,12 +2076,12 @@ static const m_option_t mp_properties[] = {
     { "sub_scale", mp_property_sub_scale, CONF_TYPE_FLOAT,
      M_OPT_RANGE, 0, 100, NULL },
 #endif
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     { "ass_use_margins", mp_property_ass_use_margins, CONF_TYPE_FLAG,
      M_OPT_RANGE, 0, 1, NULL },
 #endif
 
-#ifdef USE_TV
+#ifdef CONFIG_TV
     { "tv_brightness", mp_property_tv_color, CONF_TYPE_INT,
      M_OPT_RANGE, -100, 100, (void *) TV_COLOR_BRIGHTNESS },
     { "tv_contrast", mp_property_tv_color, CONF_TYPE_INT,
@@ -2208,10 +2208,10 @@ static struct {
 #ifdef HAVE_FREETYPE
     { "sub_scale", MP_CMD_SUB_SCALE, 0, 0, -1, MSGTR_SubScale},
 #endif
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     { "ass_use_margins", MP_CMD_ASS_USE_MARGINS, 1, 0, -1, NULL },
 #endif
-#ifdef USE_TV
+#ifdef CONFIG_TV
     { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, MSGTR_Brightness },
     { "tv_hue", MP_CMD_TV_SET_HUE, 0, OSD_HUE, -1, MSGTR_Hue },
     { "tv_saturation", MP_CMD_TV_SET_SATURATION, 0, OSD_SATURATION, -1, MSGTR_Saturation },
@@ -2281,7 +2281,7 @@ static int set_property_command(MPContext * mpctx, mp_cmd_t * cmd)
     return 1;
 }
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 static const struct {
   const char *name;
   const mp_command_type cmd;
@@ -2546,7 +2546,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    if (sh_video) {
 		int movement = cmd->args[0].v.i;
 		step_sub(subdata, sh_video->pts, movement);
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 		if (ass_track)
 		    sub_delay +=
 			ass_step_sub(ass_track,
@@ -2655,7 +2655,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    brk_cmd = 1;
 	    break;
 
-#ifdef USE_RADIO
+#ifdef CONFIG_RADIO
 	case MP_CMD_RADIO_STEP_CHANNEL:
 	    if (mpctx->demuxer->stream->type == STREAMTYPE_RADIO) {
 		int v = cmd->args[0].v.i;
@@ -2695,7 +2695,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 #endif
 
-#ifdef USE_TV
+#ifdef CONFIG_TV
 	case MP_CMD_TV_START_SCAN:
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_start_scan((tvi_handle_t *) (mpctx->demuxer->priv),1);
@@ -2856,7 +2856,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 	}
 #endif /* HAVE_TV_TELETEXT */
-#endif				/* USE_TV */
+#endif /* CONFIG_TV */
 
 	case MP_CMD_SUB_LOAD:
 	    if (sh_video) {
@@ -3111,7 +3111,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		pointer_x = cmd->args[0].v.i;
 		pointer_y = cmd->args[1].v.i;
 		rescale_input_coordinates(pointer_x, pointer_y, &dx, &dy);
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 		if (mpctx->stream->type == STREAMTYPE_DVDNAV
 		    && dx > 0.0 && dy > 0.0) {
 		    int button = -1;
@@ -3131,7 +3131,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    }
 	    break;
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 	case MP_CMD_DVDNAV:{
 		int button = -1;
 		int i;

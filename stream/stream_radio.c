@@ -66,7 +66,7 @@
 #include "stream_radio.h"
 #include "libavutil/avstring.h"
 
-#ifdef USE_RADIO_CAPTURE
+#ifdef CONFIG_RADIO_CAPTURE
 #include "audio_in.h"
 
 #ifdef HAVE_SYS_SOUNDCARD_H
@@ -117,7 +117,7 @@ typedef struct radio_priv_s {
     float rangehigh;                       ///< highest tunable frequency in MHz
     const struct radio_driver_s*     driver;
     int                 old_snd_volume;
-#ifdef USE_RADIO_CAPTURE
+#ifdef CONFIG_RADIO_CAPTURE
     volatile int        do_capture;        ///< is capture enabled
     audio_in_t          audio_in;
     unsigned char*      audio_ringbuffer;
@@ -156,7 +156,7 @@ static const struct m_struct_st stream_opts = {
 };
 
 static void close_s(struct stream_st * stream);
-#ifdef USE_RADIO_CAPTURE
+#ifdef CONFIG_RADIO_CAPTURE
 static int clear_buffer(radio_priv_t* priv);
 #endif
 
@@ -665,7 +665,7 @@ static inline int set_frequency(radio_priv_t* priv,float frequency){
     if(priv->driver->set_frequency(priv,frequency)!=STREAM_OK)
         return STREAM_ERROR;
 	
-#ifdef USE_RADIO_CAPTURE
+#ifdef CONFIG_RADIO_CAPTURE
     if(clear_buffer(priv)!=STREAM_OK){
         mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_ClearBufferFailed,strerror(errno));
         return  STREAM_ERROR;
@@ -684,7 +684,7 @@ static inline int get_volume(radio_priv_t* priv,int* volume){
 }
 
 
-#ifndef USE_RADIO_CAPTURE
+#ifndef CONFIG_RADIO_CAPTURE
 /*****************************************************************
  * \brief stub, if capture disabled at compile-time
  * \return STREAM_OK
@@ -737,7 +737,7 @@ static int read_chunk(audio_in_t *ai, unsigned char *buffer)
         }
         return ret;
 #endif
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
     case AUDIO_IN_OSS:
     {
         int bt=0;
@@ -858,7 +858,7 @@ static int init_audio(radio_priv_t *priv)
         mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AudioInSetupFailed, strerror(errno));
         return STREAM_ERROR;
     }
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
     if(is_oss)
         ioctl(priv->audio_in.oss.audio_fd, SNDCTL_DSP_NONBLOCK, 0);
 #endif
@@ -890,7 +890,7 @@ static int init_audio(radio_priv_t *priv)
 
     return STREAM_OK;
 }
-#endif //USE_RADIO_CAPTURE
+#endif /* CONFIG_RADIO_CAPTURE */
 
 /*-------------------------------------------------------------------------
  for call from mplayer.c
@@ -1062,7 +1062,7 @@ char* radio_get_channel_name(struct stream_st *stream){
 static int fill_buffer_s(struct stream_st *s, char* buffer, int max_len){
     int len=max_len;
 
-#ifdef USE_RADIO_CAPTURE
+#ifdef CONFIG_RADIO_CAPTURE
     radio_priv_t* priv=(radio_priv_t*)s->priv;
 
     if (priv->do_capture){
@@ -1115,7 +1115,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
     priv->radio_param=opts;
 
-#ifdef USE_RADIO_CAPTURE
+#ifdef CONFIG_RADIO_CAPTURE
     if (priv->radio_param->capture && strncmp("capture",priv->radio_param->capture,7)==0)
         priv->do_capture=1;
     else
@@ -1199,7 +1199,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         return STREAM_ERROR;
     }
 
-#if defined(USE_RADIO_CAPTURE) && defined(USE_STREAM_CACHE)
+#if defined(CONFIG_RADIO_CAPTURE) && defined(CONFIG_STREAM_CACHE)
     if(priv->do_capture){
         //5 second cache
         if(!stream_enable_cache(stream,5*priv->audio_in.samplerate*priv->audio_in.channels*
@@ -1225,7 +1225,7 @@ static void close_s(struct stream_st * stream){
     radio_channels_t * tmp;
     if (!priv) return;
 
-#ifdef USE_RADIO_CAPTURE
+#ifdef CONFIG_RADIO_CAPTURE
     if(priv->audio_ringbuffer){
         free(priv->audio_ringbuffer);
         priv->audio_ringbuffer=NULL;

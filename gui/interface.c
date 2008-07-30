@@ -51,7 +51,7 @@
 
 extern af_cfg_t af_cfg;
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 #include <iconv.h>
 #endif
 
@@ -60,7 +60,7 @@ extern af_cfg_t af_cfg;
 #include "libmpdemux/stheader.h"
 #include "libmpcodecs/dec_video.h"
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
 
@@ -192,7 +192,7 @@ void guiInit( void )
  else if ( stream_cache_size == 0 ) gtkCacheOn = 0;
  if ( autosync && autosync != gtkAutoSync ) { gtkAutoSyncOn=1; gtkAutoSync=autosync; }
    
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
  gtkASS.enabled = ass_enabled;
  gtkASS.use_margins = ass_use_margins;
  gtkASS.top_margin = ass_top_margin;
@@ -370,7 +370,7 @@ void guiDone( void )
    gui_sub_pos_x=appMPlayer.subWindow.X; gui_sub_pos_y=appMPlayer.subWindow.Y;
   }
  
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
  ass_enabled = gtkASS.enabled;
  ass_use_margins = gtkASS.use_margins;
  ass_top_margin = gtkASS.top_margin;
@@ -528,7 +528,7 @@ int guiGetEvent( int type,char * arg )
   mixer_t *mixer = NULL;
 
  stream_t * stream = (stream_t *) arg;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
  dvd_priv_t * dvdp = (dvd_priv_t *) arg;
 #endif 
 
@@ -592,7 +592,7 @@ int guiGetEvent( int type,char * arg )
             wsMoveWindow( &appMPlayer.mainWindow,0,0, vo_dheight);
          }
 	break;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    case guiSetDVD:
         guiIntfStruct.DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
         guiIntfStruct.DVD.chapters=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_ptts;
@@ -611,7 +611,7 @@ int guiGetEvent( int type,char * arg )
 	guiIntfStruct.StreamType=stream->type;
 	switch( stream->type )
 	 {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 	  case STREAMTYPE_DVD: 
 	       guiGetEvent( guiSetDVD,(char *)stream->priv );
 	       break;
@@ -708,7 +708,7 @@ int guiGetEvent( int type,char * arg )
 // -- subtitle
 #ifdef HAVE_DXR3
 	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	 && !gtkVfLAVC
 #endif
 	 )
@@ -752,7 +752,7 @@ int guiGetEvent( int type,char * arg )
 	       }
 	       break;
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
  	  case STREAMTYPE_DVD:
 	       {
 	        char tmp[512];
@@ -796,14 +796,14 @@ int guiGetEvent( int type,char * arg )
 	}
 
 #ifdef HAVE_DXR3
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	remove_vf( "lavc" );
 #endif
 	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) )
 	 {
 	  if ( ( guiIntfStruct.StreamType != STREAMTYPE_DVD)&&( guiIntfStruct.StreamType != STREAMTYPE_VCD ) )
 	   {
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	    if ( gtkVfLAVC ) add_vf( "lavc" );
 #endif
 	   }
@@ -827,7 +827,7 @@ int guiGetEvent( int type,char * arg )
 	  greplace(&af_cfg.list, "extrastereo", name);
 	  free(name);
 	 }
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"oss",3 ) )
 	 {
 	  char *tmp;
@@ -870,7 +870,7 @@ int guiGetEvent( int type,char * arg )
 	  free(tmp);
 	 }
 #endif
-#ifdef USE_ESD
+#ifdef CONFIG_ESD
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"esd",3 ) )
 	 {
 	  char *tmp;
@@ -903,7 +903,7 @@ int guiGetEvent( int type,char * arg )
         guiIntfStruct.FilenameChanged=0;
         guiIntfStruct.NewPlay=0;
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
         ass_enabled = gtkASS.enabled;
         ass_use_margins = gtkASS.use_margins;
         ass_top_margin = gtkASS.top_margin;
@@ -1107,7 +1107,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	guiLoadFont();
 	return NULL;
 #endif
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
    case gtkSetSubEncoding:
 	gfree( (void **)&sub_cp );
 	sub_cp=gstrdup( (char *)vparam );
@@ -1122,7 +1122,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	  gfree( (void **)&guiIntfStruct.AudioFile );
 	  gtkSet( gtkDelPl,0,NULL );
 	 }
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 	if ( (unsigned int)vparam & guiDVD ) memset( &guiIntfStruct.DVD,0,sizeof( guiDVDStruct ) );
 #endif
 #ifdef HAVE_VCD

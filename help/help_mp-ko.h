@@ -13,7 +13,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  (S)VCD (Super Video CD) 트랙 재생 (장치로부터, 마운트 없이)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titleno>  일반 파일이 아닌 장치로부터 DVD 타이틀 재생\n"
 " -alang/-slang    DVD 오디오/자막 언어 선택 (두 글자의 국가 코드)\n"
 #endif

@@ -63,7 +63,7 @@ extern int    gui_main_pos_y;
 extern int    gui_sub_pos_x;
 extern int    gui_sub_pos_y;
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 typedef struct {
     int enabled;
     int use_margins;

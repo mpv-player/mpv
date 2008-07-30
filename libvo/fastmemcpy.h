@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include <string.h>
 
-#ifdef USE_FASTMEMCPY
+#ifdef CONFIG_FASTMEMCPY
 #if defined(HAVE_MMX) || defined(HAVE_MMX2) || defined(HAVE_3DNOW) \
 /*    || defined(HAVE_SSE) || defined(HAVE_SSE2) */
 #include <stddef.h>
@@ -36,7 +36,7 @@ extern void * mem2agpcpy(void * to, const void * from, size_t len);
 #define fast_memcpy(a,b,c) memcpy(a,b,c)
 #endif
 
-#else /* USE_FASTMEMCPY */
+#else /* CONFIG_FASTMEMCPY */
 #define mem2agpcpy(a,b,c) memcpy(a,b,c)
 #define fast_memcpy(a,b,c) memcpy(a,b,c)
 #endif

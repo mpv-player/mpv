@@ -15,7 +15,7 @@ static char help_text[]=
 " vcd://<č_stopy>  přehraje (S)VCD (Super Video CD) stopu (z nepřipojeného\n"
 "                  zařízení)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<č_tit>    přehraje DVD titul ze zařízení (mechaniky), místo ze souboru\n"
 " -alang/-slang    zvolí jazyk zvuku/titulků na DVD (dvouznakový kód země)\n"
 #endif

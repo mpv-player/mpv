@@ -2,9 +2,9 @@
 
 #include "config.h"
 
-//#define USE_TERMCAP
+//#define CONFIG_TERMCAP
 #if !defined(__OS2__) && !defined(__MORPHOS__)
-#define USE_IOCTL
+#define CONFIG_IOCTL
 #endif
 
 #define MAX_KEYS 64
@@ -15,7 +15,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#ifdef USE_IOCTL
+#ifdef CONFIG_IOCTL
 #include <sys/ioctl.h>
 #endif
 
@@ -28,7 +28,7 @@
 #endif
 #endif
 
-#if defined(USE_LANGINFO) && defined(USE_ICONV)
+#if defined(CONFIG_LANGINFO) && defined(CONFIG_ICONV)
 #include <locale.h>
 #include <langinfo.h>
 #endif
@@ -56,7 +56,7 @@ typedef struct {
 static keycode_st getch2_keys[MAX_KEYS];
 static int getch2_key_db=0;
 
-#ifdef USE_TERMCAP
+#ifdef CONFIG_TERMCAP
 
 #if 0
 #include <termcap.h>
@@ -125,7 +125,7 @@ int load_termcap(char *termtype){
 #endif
 
 void get_screen_size(void){
-#ifdef USE_IOCTL
+#ifdef CONFIG_IOCTL
   struct winsize ws;
   if (ioctl(0, TIOCGWINSZ, &ws) < 0 || !ws.ws_row || !ws.ws_col) return;
 /*  printf("Using IOCTL\n"); */
@@ -270,11 +270,11 @@ void getch2_disable(void){
     getch2_status=0;
 }
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 char* get_term_charset(void)
 {
     char* charset = NULL;
-#ifdef USE_LANGINFO
+#ifdef CONFIG_LANGINFO
     setlocale(LC_CTYPE, "");
     charset = nl_langinfo(CODESET);
     setlocale(LC_CTYPE, "C");

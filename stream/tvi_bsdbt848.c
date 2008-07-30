@@ -39,7 +39,7 @@
 #include <errno.h>
 
 #include <sys/param.h>
-#ifdef USE_SUN_AUDIO
+#ifdef CONFIG_SUN_AUDIO
 #include <sys/audioio.h>
 #endif
 
@@ -206,7 +206,7 @@ static tvi_handle_t *tvi_init_bsdbt848(tv_param_t* tv_param)
 
     /* set audio device name */
     if (!tv_param->adevice)
-#ifdef USE_SUN_AUDIO
+#ifdef CONFIG_SUN_AUDIO
         priv->dspdev = strdup("/dev/sound");
 #else
         priv->dspdev = strdup("/dev/dsp");
@@ -845,13 +845,13 @@ return priv->dspbytesread * 1.0 / priv->dsprate;
 static int get_audio_framesize(priv_t *priv)
 {
 int bytesavail;
-#ifdef USE_SUN_AUDIO
+#ifdef CONFIG_SUN_AUDIO
 struct audio_info auinf;
 #endif
 
 if(priv->dspready == FALSE) return 0;
 
-#ifdef USE_SUN_AUDIO
+#ifdef CONFIG_SUN_AUDIO
 if(ioctl(priv->dspfd, AUDIO_GETINFO, &auinf) < 0) 
     {
     mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "AUDIO_GETINFO", strerror(errno));

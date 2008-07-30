@@ -83,7 +83,7 @@ typedef struct MPContext {
     int set_of_sub_pos;
     int set_of_sub_size;
     int global_sub_indices[SUB_SOURCES];
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     // set_of_ass_tracks[i] contains subtitles from set_of_subtitles[i]
     // parsed by libass or NULL if format unsupported
     ass_track_t* set_of_ass_tracks[MAX_SUBTITLE_FILES];
@@ -99,7 +99,7 @@ typedef struct MPContext {
 
     int was_paused;
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
     struct mp_image_s *nav_smpi; ///< last decoded dvdnav video image
     unsigned char *nav_buffer;   ///< last read dvdnav video frame
     unsigned char *nav_start;    ///< pointer to last read video buffer

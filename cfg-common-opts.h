@@ -11,7 +11,7 @@
 	{"msglevel", msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 	{"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 	{"msgcharset", &mp_msg_charset, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL},
@@ -22,18 +22,18 @@
 
 // ------------------------- stream options --------------------
 
-#ifdef USE_STREAM_CACHE
+#ifdef CONFIG_STREAM_CACHE
 	{"cache", &stream_cache_size, CONF_TYPE_INT, CONF_RANGE, 32, 1048576, NULL},
 	{"nocache", &stream_cache_size, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"cache-min", &stream_cache_min_percent, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
 	{"cache-seek-min", &stream_cache_seek_min_percent, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
 #else
 	{"cache", "MPlayer was compiled without cache2 support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* USE_STREAM_CACHE */
+#endif /* CONFIG_STREAM_CACHE */
 	{"vcd", "-vcd N has been removed, use vcd://N instead.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL},
 	{"cuefile", "-cuefile has been removed, use cue://filename:N where N is the track number.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 	{"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"dvd", "-dvd N has been removed, use dvd://N instead.\n" , CONF_TYPE_PRINT, 0, 0, 0, NULL},
@@ -43,7 +43,7 @@
 	{"dvd-device", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"dvd-speed", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"dvd", "MPlayer was compiled without libdvdread support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* USE_DVDREAD */
+#endif /* CONFIG_DVDREAD */
 	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
@@ -146,16 +146,16 @@
 	{ "noextbased", &extension_parsing, CONF_TYPE_FLAG, 0, 1, 0, NULL },
 
         {"mf", mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
-#ifdef USE_RADIO
+#ifdef CONFIG_RADIO
 	{"radio", radioopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"radio", "MPlayer was compiled without Radio interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif /* USE_RADIO */
-#ifdef USE_TV
+#endif /* CONFIG_RADIO */
+#ifdef CONFIG_TV
 	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
 	{"tv", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif /* USE_TV */
+#endif /* CONFIG_TV */
 #ifdef HAVE_PVR
 	{"pvr", pvropts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
@@ -189,14 +189,14 @@
 	{"ignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-#ifdef USE_LIBA52
+#ifdef CONFIG_LIBA52
         {"a52drc", &a52_drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
 #endif
 
 // ------------------------- codec/vfilter options --------------------
 
 	// MP3-only: select stereo/left/right
-#ifdef USE_FAKE_MONO
+#ifdef CONFIG_FAKE_MONO
 	{"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 #endif
 
@@ -220,10 +220,10 @@
 	{"vc", &video_codec_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
 	// postprocessing:
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	{"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
-#ifdef USE_LIBPOSTPROC
+#ifdef CONFIG_LIBPOSTPROC
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
@@ -251,10 +251,10 @@
 	{"noslices", &vd_use_slices, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"field-dominance", &field_dominance, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
 
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
         {"lavfdopts",  lavfdopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
@@ -264,7 +264,7 @@
 // ------------------------- subtitles options --------------------
 
 	{"sub", &sub_name, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-#ifdef USE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 	{"fribidi-charset", &fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"flip-hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noflip-hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -276,8 +276,8 @@
 	{"noflip-hebrew", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"flip-hebrew-commas", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"noflip-hebrew-commas", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* USE_FRIBIDI */
-#ifdef USE_ICONV
+#endif /* CONFIG_FRIBIDI */
+#ifdef CONFIG_ICONV
 	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif	
 	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
@@ -317,7 +317,7 @@
  	{"subfont-outline", &subtitle_font_thickness, CONF_TYPE_FLOAT, CONF_RANGE, 0, 8, NULL},
  	{"subfont-autoscale", &subtitle_autoscale, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 #endif
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 	{"ass", &ass_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noass", &ass_enabled, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"ass-font-scale", &ass_font_scale, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},

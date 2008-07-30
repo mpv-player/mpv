@@ -12,7 +12,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>   speel VCD (Video CD) track van cdrom in plaats van standaard bestand\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titelnr>   speel DVD titel/track van device in plaats van gewoon bestand\n"
 " -alang/-slang    selecteer DVD audio/ondertitelingstaal (door middel van 2-karakter landcode)\n"
 #endif

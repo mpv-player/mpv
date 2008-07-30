@@ -13,7 +13,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<spårnr>      spela (S)VCD (Super Video CD) spår (rå enhet, ingen montering)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titlenr>     spela DVD titel från enhet istället för ifrån en enkel fil\n"
 " -alang/-slang       välj DVD audio/textningsspråk (m.h.a. ett 2-teckens landskod)\n"
 #endif

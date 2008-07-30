@@ -13,7 +13,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<номер треку> грати VCD (video cd) трек з пристрою замість файлу\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<номер титрів> грати DVD титри/трек з пристрою замість файлу\n"
 " -alang/-slang   вибрати мову DVD аудіо/субтитрів (двосимвольний код країни)\n"
 #endif

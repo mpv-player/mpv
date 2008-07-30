@@ -3,7 +3,7 @@
 
 #include "config.h"
 #include <stdint.h>
-#ifdef USE_DVDREAD_INTERNAL
+#ifdef CONFIG_DVDREAD_INTERNAL
 #include "dvdread/dvd_reader.h"
 #include "dvdread/ifo_types.h"
 #include "dvdread/ifo_read.h"

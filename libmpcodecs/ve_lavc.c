@@ -162,7 +162,7 @@ static char *lavc_param_avopt = NULL;
 
 #include "m_option.h"
 
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 m_option_t lavcopts_conf[]={
 	{"acodec", &lavc_param_acodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"abitrate", &lavc_param_abitrate, CONF_TYPE_INT, CONF_RANGE, 1, 1000000, NULL},

@@ -48,7 +48,7 @@
 #include "qtpalette.h"
 #include "parse_mp4.h" // .MP4 specific stuff
 
-#ifdef HAVE_ZLIB
+#ifdef CONFIG_ZLIB
 #include <zlib.h>
 #endif
 
@@ -1395,7 +1395,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    trak=NULL;
 	    break;
 	}
-#ifndef HAVE_ZLIB
+#ifndef CONFIG_ZLIB
 	case MOV_FOURCC('c','m','o','v'): {
 	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
 	    return;
@@ -2026,7 +2026,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 			char2int(trak->stdata,12)==MOV_FOURCC('z','l','i','b') 
 		    ){
 			int newlen=stream_read_dword(demuxer->stream);
-#ifdef HAVE_ZLIB
+#ifdef CONFIG_ZLIB
 			// unzip:
 			z_stream zstrm;
 			int zret;

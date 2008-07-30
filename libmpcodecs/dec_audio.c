@@ -27,7 +27,7 @@
 #include <dlfcn.h>
 #endif
 
-#ifdef USE_FAKE_MONO
+#ifdef CONFIG_FAKE_MONO
 int fakemono = 0;
 #endif
 

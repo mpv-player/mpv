@@ -46,15 +46,15 @@ extern ad_functions_t mpcodecs_ad_libdca;
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
 //  &mpcodecs_ad_null,
-#ifdef USE_MP3LIB
+#ifdef CONFIG_MP3LIB
   &mpcodecs_ad_mp3lib,
 #endif
-#ifdef USE_LIBA52
+#ifdef CONFIG_LIBA52
   &mpcodecs_ad_liba52,
   &mpcodecs_ad_hwac3,
 #endif
   &mpcodecs_ad_hwmpa,
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
   &mpcodecs_ad_ffmpeg,
 #endif
   &mpcodecs_ad_pcm,
@@ -64,13 +64,13 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_msadpcm,
   &mpcodecs_ad_dk3adpcm,
   &mpcodecs_ad_msgsm,
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
   &mpcodecs_ad_dshow,
   &mpcodecs_ad_dmo,
   &mpcodecs_ad_acm,
   &mpcodecs_ad_twin,
 #endif
-#ifdef USE_QTX_CODECS
+#ifdef CONFIG_QTX_CODECS
   &mpcodecs_ad_qtaudio,
 #endif
 #ifdef HAVE_FAAD
@@ -82,10 +82,10 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #ifdef HAVE_SPEEX
   &mpcodecs_ad_speex,
 #endif
-#ifdef USE_LIBMAD
+#ifdef CONFIG_LIBMAD
   &mpcodecs_ad_libmad,
 #endif
-#ifdef USE_REALCODECS
+#ifdef CONFIG_REALCODECS
   &mpcodecs_ad_realaud,
 #endif
 #ifdef HAVE_LIBDV095
@@ -94,7 +94,7 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #ifdef HAVE_MUSEPACK
   &mpcodecs_ad_libmusepack,
 #endif
-#ifdef USE_LIBDCA
+#ifdef CONFIG_LIBDCA
   &mpcodecs_ad_libdca,
 #endif
   NULL

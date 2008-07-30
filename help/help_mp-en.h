@@ -22,7 +22,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  play (S)VCD (Super Video CD) track (raw device, no mount)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titleno>  play DVD title from device instead of plain file\n"
 #endif
 " -alang/-slang    select DVD audio/subtitle language (by 2-char country code)\n"

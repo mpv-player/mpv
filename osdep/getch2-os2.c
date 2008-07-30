@@ -32,7 +32,7 @@
 #include "input/input.h"
 #include "mp_fifo.h"
 
-#if defined( USE_LANGINFO ) && defined( USE_ICONV )
+#if defined(CONFIG_LANGINFO) && defined(CONFIG_ICONV)
 #include <locale.h>
 #include <langinfo.h>
 #endif
@@ -182,12 +182,12 @@ void getch2_disable( void )
     getch2_status = 0;
 }
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 char *get_term_charset( void )
 {
     char *charset = NULL;
 
-#ifdef USE_LANGINFO
+#ifdef CONFIG_LANGINFO
     setlocale( LC_CTYPE, "");
     charset = nl_langinfo( CODESET );
     setlocale( LC_CTYPE, "C");

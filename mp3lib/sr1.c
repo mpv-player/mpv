@@ -400,7 +400,7 @@ void (*dct64_MMX_func)(short *, short *, real *);
 #include "cpudetect.h"
 
 // Init decoder tables.  Call first, once!
-#ifdef USE_FAKE_MONO
+#ifdef CONFIG_FAKE_MONO
 void MP3_Init(int fakemono){
 #else
 void MP3_Init(){
@@ -475,7 +475,7 @@ void MP3_Init(){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using generic C decore!\n");
     }
 
-#ifdef USE_FAKE_MONO
+#ifdef CONFIG_FAKE_MONO
     if (fakemono == 1)
         fr.synth=synth_1to1_l;
     else if (fakemono == 2)

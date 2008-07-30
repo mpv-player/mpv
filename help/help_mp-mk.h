@@ -14,7 +14,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>   пушта VCD (Video CD) од уред наместо од датотека\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titleno>   пушта DVD наслови од уред наместо од датотека\n"
 " -alang/-slang    избира јазик на DVD аудио/превод (од 2-char код на државата)\n"
 #endif

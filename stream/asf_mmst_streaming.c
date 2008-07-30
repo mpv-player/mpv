@@ -45,13 +45,13 @@
 #include <winsock2.h>
 #endif
 
-#ifndef USE_SETLOCALE
-#undef USE_ICONV
+#ifndef CONFIG_SETLOCALE
+#undef CONFIG_ICONV
 #endif
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 #include <iconv.h>
-#ifdef USE_LANGINFO
+#ifdef CONFIG_LANGINFO
 #include <langinfo.h>
 #endif
 #endif
@@ -143,13 +143,13 @@ static void send_command (int s, int command, uint32_t switches,
   }
 }
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 static iconv_t url_conv;
 #endif
 
 static void string_utf16(char *dest, char *src, int len) {
     int i;
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
     size_t len1, len2;
     char *ip, *op;
 
@@ -172,7 +172,7 @@ static void string_utf16(char *dest, char *src, int len) {
 	/* trailing zeroes */
 	dest[i*2] = 0;
 	dest[i*2+1] = 0;
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
     }
 #endif
 }
@@ -575,8 +575,8 @@ int asf_mmst_streaming_start(stream_t *stream)
   * */
 
   /* prepare for the url encoding conversion */
-#ifdef USE_ICONV
-#ifdef USE_LANGINFO
+#ifdef CONFIG_ICONV
+#ifdef CONFIG_LANGINFO
   url_conv = iconv_open("UTF-16LE",nl_langinfo(CODESET));
 #else
   url_conv = iconv_open("UTF-16LE", NULL);
@@ -690,7 +690,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   packet_length1 = packet_length;
   mp_msg(MSGT_NETWORK,MSGL_INFO,"mmst packet_length = %d\n", packet_length);
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
   if (url_conv != (iconv_t)(-1))
     iconv_close(url_conv);
 #endif

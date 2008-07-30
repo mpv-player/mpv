@@ -45,7 +45,7 @@
 int    gtkEnableAudioEqualizer = 0;
 
 int    gtkVfPP = 0;
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
  int    gtkVfLAVC = 0;
 #endif
 
@@ -53,7 +53,7 @@ int    gtkAONorm = 0;
 int    gtkAOSurround = 0;
 int    gtkAOExtraStereo = 0;
 float  gtkAOExtraStereoMul = 1.0;
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
 char * gtkAOOSSMixer;
 char * gtkAOOSSMixerChannel;
 char * gtkAOOSSDevice;
@@ -66,7 +66,7 @@ char * gtkAOALSADevice;
 #ifdef HAVE_SDL
 char * gtkAOSDLDriver;
 #endif
-#ifdef USE_ESD
+#ifdef CONFIG_ESD
 char * gtkAOESDDevice;
 #endif
 
@@ -93,7 +93,7 @@ int    gui_main_pos_y = -2;
 int    gui_sub_pos_x = -1;
 int    gui_sub_pos_y = -1;
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 gtkASS_t gtkASS;
 #endif
 // ---
@@ -124,7 +124,7 @@ static const m_option_t gui_opts[] =
 
  { "vf_pp",&gtkVfPP,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_autoq",&auto_quality,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
  { "vf_lavc",&gtkVfLAVC,CONF_TYPE_FLAG,0,0,1,NULL },
 #endif
 
@@ -134,7 +134,7 @@ static const m_option_t gui_opts[] =
  { "ao_surround",&gtkAOSurround,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo",&gtkAOExtraStereo,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo_coefficient",&gtkAOExtraStereoMul,CONF_TYPE_FLOAT,CONF_RANGE,-10,10,NULL },
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
  { "ao_oss_mixer",&gtkAOOSSMixer,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_oss_mixer_channel",&gtkAOOSSMixerChannel,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_oss_device",&gtkAOOSSDevice,CONF_TYPE_STRING,0,0,0,NULL },
@@ -147,7 +147,7 @@ static const m_option_t gui_opts[] =
 #ifdef HAVE_SDL
  { "ao_sdl_subdriver",&gtkAOSDLDriver,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
-#ifdef USE_ESD
+#ifdef CONFIG_ESD
  { "ao_esd_device",&gtkAOESDDevice,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
 
@@ -157,7 +157,7 @@ static const m_option_t gui_opts[] =
  { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
  { "sub_auto_load",&sub_auto,CONF_TYPE_FLAG,0,0,1,NULL },
  { "sub_unicode",&sub_unicode,CONF_TYPE_FLAG,0,0,1,NULL },
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
  { "ass_enabled",&ass_enabled,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ass_use_margins",&ass_use_margins,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ass_top_margin",&ass_top_margin,CONF_TYPE_INT,CONF_RANGE,0,512,NULL },
@@ -165,7 +165,7 @@ static const m_option_t gui_opts[] =
 #endif
  { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
  { "sub_overlap",&suboverlap_enabled,CONF_TYPE_FLAG,0,0,0,NULL },
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
  { "sub_cp",&sub_cp,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
  { "font_factor",&font_factor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },

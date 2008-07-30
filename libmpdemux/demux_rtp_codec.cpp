@@ -9,7 +9,7 @@ extern "C" {
 #include "libavutil/base64.h"
 }
 
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 AVCodecParserContext * h264parserctx;
 #endif
 
@@ -116,7 +116,7 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
       = parseH264ConfigStr(subsession->fmtp_spropparametersets(), configLen);
     sh_video->bih = bih = insertVideoExtradata(bih, configData, configLen);
     delete[] configData;
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
     avcodec_register_all();
     h264parserctx = av_parser_init(CODEC_ID_H264);
 #endif

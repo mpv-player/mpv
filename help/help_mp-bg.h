@@ -15,7 +15,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<пътечка>   пуска (S)VCD (Super Video CD) пътечка (без монтиране!)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<номер>     пуска DVD заглавие от устройство, вместо от файл\n"
 " -alang/-slang     избор на език за DVD аудиo/субтитри (чрез 2-буквен код)\n"
 #endif

@@ -220,7 +220,7 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
 
 }
 
-#ifdef USE_FAKE_MONO
+#ifdef CONFIG_FAKE_MONO
 static int synth_1to1_l(real *bandPtr,int channel,unsigned char *out,int *pnt)
 {
   int i,ret;

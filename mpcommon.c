@@ -15,7 +15,7 @@
 
 double sub_last_pts = -303;
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 ass_track_t* ass_track = 0; // current track to render
@@ -116,7 +116,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                 len = FFMIN(len - 2, AV_RB16(packet));
                 packet += 2;
             }
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
             if (ass_enabled) {
                 sh_sub_t* sh = d_dvdsub->sh;
                 ass_track = sh ? sh->ass_track : NULL;

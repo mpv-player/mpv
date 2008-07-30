@@ -10,7 +10,7 @@
 
 #include "libvo/video_out.h"
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 extern ass_track_t* ass_track;
@@ -24,7 +24,7 @@ extern float sub_delay;
 struct vf_priv_s {
     double pts;
     const vo_functions_t *vo;
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     ass_renderer_t* ass_priv;
     int prev_visibility;
 #endif
@@ -65,7 +65,7 @@ static int config(struct vf_instance_s* vf,
     if(config_video_out(video_out,width,height,d_width,d_height,flags,"MPlayer",outfmt))
 	return 0;
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     if (vf->priv->ass_priv)
 	ass_configure(vf->priv->ass_priv, width, height, !!(vf->default_caps & VFCAP_EOSD_UNSCALED));
 #endif
@@ -111,7 +111,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
 	return (video_out->control(VOCTRL_GET_EQUALIZER, eq->item, &eq->value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
     }
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     case VFCTRL_INIT_EOSD:
     {
         vf->priv->ass_priv = ass_renderer_init((ass_library_t*)data);
@@ -203,7 +203,7 @@ static void draw_slice(struct vf_instance_s* vf,
 static void uninit(struct vf_instance_s* vf)
 {
     if (vf->priv) {
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
         if (vf->priv->ass_priv)
             ass_renderer_done(vf->priv->ass_priv);
 #endif

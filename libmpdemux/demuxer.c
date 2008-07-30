@@ -22,12 +22,12 @@
 
 #include "libaf/af_format.h"
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 #endif
 
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 #include "libavcodec/avcodec.h"
 #if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE
 #error MP_INPUT_BUFFER_PADDING_SIZE is too small!
@@ -88,11 +88,11 @@ extern const demuxer_desc_t demuxer_desc_nut;
 const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_rawaudio,
     &demuxer_desc_rawvideo,
-#ifdef USE_TV
+#ifdef CONFIG_TV
     &demuxer_desc_tv,
 #endif
     &demuxer_desc_mf,
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
     &demuxer_desc_lavf_preferred,
 #endif
     &demuxer_desc_avi,
@@ -116,7 +116,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef HAVE_OGGVORBIS
     &demuxer_desc_ogg,
 #endif
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     &demuxer_desc_avs,
 #endif
     &demuxer_desc_pva,
@@ -136,7 +136,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef LIBNEMESI
     &demuxer_desc_rtp_nemesi,
 #endif
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
     &demuxer_desc_lavf,
 #endif
 #ifdef MUSEPACK
@@ -264,7 +264,7 @@ void free_sh_sub(sh_sub_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     if (sh->ass_track)
         ass_free_track(sh->ass_track);
 #endif
@@ -906,7 +906,7 @@ static demuxer_t *demux_open_stream(stream_t *stream, int file_format,
                sh_video->fps, sh_video->i_bps * 0.008f,
                sh_video->i_bps / 1024.0f);
     }
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     if (ass_enabled && ass_library) {
         for (i = 0; i < MAX_S_STREAMS; ++i) {
             sh_sub_t *sh = demuxer->s_streams[i];
@@ -1066,7 +1066,7 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
     if (!demuxer->seekable) {
         if (demuxer->file_format == DEMUXER_TYPE_AVI)
             mp_msg(MSGT_SEEK, MSGL_WARN, MSGTR_CantSeekRawAVI);
-#ifdef USE_TV
+#ifdef CONFIG_TV
         else if (demuxer->file_format == DEMUXER_TYPE_TV)
             mp_msg(MSGT_SEEK, MSGL_WARN, MSGTR_TVInputNotSeekable);
 #endif

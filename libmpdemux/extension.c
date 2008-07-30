@@ -52,7 +52,7 @@ static struct {
         { "nsv", DEMUXER_TYPE_NSV },
         { "nsa", DEMUXER_TYPE_NSV },
         { "mpc", DEMUXER_TYPE_MPC },
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
         { "avs", DEMUXER_TYPE_AVS },
 #endif
 	{ "302", DEMUXER_TYPE_LAVF },

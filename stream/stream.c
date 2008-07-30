@@ -88,10 +88,10 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef HAS_DVBIN_SUPPORT
   &stream_info_dvb,
 #endif
-#ifdef USE_TV
+#ifdef CONFIG_TV
   &stream_info_tv,
 #endif
-#ifdef USE_RADIO
+#ifdef CONFIG_RADIO
   &stream_info_radio,
 #endif
 #ifdef HAVE_PVR
@@ -107,11 +107,11 @@ static const stream_info_t* const auto_open_streams[] = {
   &stream_info_smb,
 #endif
   &stream_info_cue,
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
   &stream_info_ifo,
   &stream_info_dvd,
 #endif
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
   &stream_info_dvdnav,
 #endif
 
@@ -381,7 +381,7 @@ void stream_reset(stream_t *s){
 
 int stream_control(stream_t *s, int cmd, void *arg){
   if(!s->control) return STREAM_UNSUPPORTED;
-#ifdef USE_STREAM_CACHE
+#ifdef CONFIG_STREAM_CACHE
   if (s->cache_pid)
     return cache_do_control(s, cmd, arg);
 #endif
@@ -431,7 +431,7 @@ stream_t* new_stream(int fd,int type){
 
 void free_stream(stream_t *s){
 //  printf("\n*** free_stream() called ***\n");
-#ifdef USE_STREAM_CACHE
+#ifdef CONFIG_STREAM_CACHE
   if(s->cache_pid) {
     cache_uninit(s);
   }

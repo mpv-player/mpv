@@ -18,7 +18,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<sávszám>  (S)VCD (Super Video CD) sáv lejátszás (nyers, nincs mount)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titleno>  a megadott DVD sáv lejátszása, fájl helyett\n"
 #endif
 " -alang/-slang    DVD audio/felirat nyelv kiválasztása (2 betűs országkóddal)\n"

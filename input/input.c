@@ -51,7 +51,7 @@
 /// is the default value wich is used for optional arguments
 
 static const mp_cmd_t mp_cmds[] = {
-#ifdef USE_RADIO
+#ifdef CONFIG_RADIO
   { MP_CMD_RADIO_STEP_CHANNEL, "radio_step_channel", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
   { MP_CMD_RADIO_SET_CHANNEL, "radio_set_channel", 1, { { MP_CMD_ARG_STRING, {0}}, {-1,{0}}  }},
   { MP_CMD_RADIO_SET_FREQ, "radio_set_freq", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
@@ -99,7 +99,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_FILE, "sub_file", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } },
   { MP_CMD_SUB_LOG, "sub_log", 0, { {-1,{0}} } },
   { MP_CMD_SUB_SCALE, "sub_scale",1, { {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
   { MP_CMD_ASS_USE_MARGINS, "ass_use_margins", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
 #endif
   { MP_CMD_GET_PERCENT_POS, "get_percent_pos", 0, { {-1,{0}} } },
@@ -122,7 +122,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_SWITCH_AUDIO, "switch_audio", 0, { { MP_CMD_ARG_INT,{-1} }, {-1,{0}} } },
   { MP_CMD_SWITCH_ANGLE, "switch_angle", 0, { { MP_CMD_ARG_INT,{-1} }, {-1,{0}} } },
   { MP_CMD_SWITCH_TITLE, "switch_title", 0, { { MP_CMD_ARG_INT,{-1} }, {-1,{0}} } },
-#ifdef USE_TV
+#ifdef CONFIG_TV
   { MP_CMD_TV_START_SCAN, "tv_start_scan", 0,  { {-1,{0}} }},
   { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
   { MP_CMD_TV_STEP_NORM, "tv_step_norm",0, { {-1,{0}} }  },
@@ -170,7 +170,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_GUI_SKINBROWSER, "gui_skinbrowser", 0, { {-1,{0}} } },
 #endif
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
   { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
 #endif
 
@@ -346,7 +346,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { {  MOUSE_BTN5, 0 }, "volume 1" },
   { {  MOUSE_BTN6, 0 }, "volume -1" },
   
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
   { { KEY_KP8, 0 }, "dvdnav up" },   // up
   { { KEY_KP2, 0 }, "dvdnav down" },   // down
   { { KEY_KP4, 0 }, "dvdnav left" },   // left
@@ -415,7 +415,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { '_', 0 }, "step_property switch_video" },
   { { KEY_TAB, 0 }, "step_property switch_program" },
   { { 'i', 0 }, "edl_mark" },
-#ifdef USE_TV
+#ifdef CONFIG_TV
   { { 'h', 0 }, "tv_step_channel 1" },
   { { 'k', 0 }, "tv_step_channel -1" },
   { { 'n', 0 }, "tv_step_norm" },
