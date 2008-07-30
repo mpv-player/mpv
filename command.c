@@ -50,7 +50,7 @@
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 #endif
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
 #include "m_struct.h"
 #include "libmenu/menu.h"
 #endif
@@ -3124,7 +3124,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 				    "Selected button number %d", button);
 		}
 #endif
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
 		if (use_menu && dx >= 0.0 && dy >= 0.0)
 		    menu_update_mouse_pos(dx, dy);
 #endif

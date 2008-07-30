@@ -335,7 +335,7 @@ char* current_module=NULL; // for debugging
 
 // ---
 
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
 #include "m_struct.h"
 #include "libmenu/menu.h"
 extern void vf_menu_pause_update(struct vf_instance_s* vf);
@@ -600,7 +600,7 @@ void uninit_player(unsigned int mask){
     current_module="uninit_vcodec";
     if(mpctx->sh_video) uninit_video(mpctx->sh_video);
     mpctx->sh_video=NULL;
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
     vf_menu=NULL;
 #endif
   }
@@ -675,7 +675,7 @@ void uninit_player(unsigned int mask){
     initialized_flags&=~INITIALIZED_INPUT;
     current_module="uninit_input";
     mp_input_uninit();
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
     if (use_menu)
       menu_uninit();
 #endif
@@ -2162,7 +2162,7 @@ int reinit_video_chain(void) {
     char* vf_arg[] = { "_oldargs_", (char*)mpctx->video_out , NULL };
     sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",vf_arg);
   }
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
   if(use_menu) {
     char* vf_arg[] = { "_oldargs_", menu_root, NULL };
     vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",vf_arg);
@@ -2369,7 +2369,7 @@ static void pause_loop(void)
 		break;
 	}
 #endif
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
 	if (vf_menu)
 	    vf_menu_pause_update(vf_menu);
 #endif
@@ -2867,7 +2867,7 @@ else if(!noconsolecontrols)
 // Set the libstream interrupt callback
 stream_set_interrupt_callback(mp_input_check_interrupt);
 
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
  if(use_menu) {
    if(menu_cfg && menu_init(mpctx, menu_cfg))
      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);

@@ -174,7 +174,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
 #endif
 
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
   { MP_CMD_MENU, "menu",1,  { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_SET_MENU, "set_menu",1,  { {MP_CMD_ARG_STRING, {0}},  {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_CHELP, "help", 0, { {-1,{0}} } },

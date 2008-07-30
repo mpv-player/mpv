@@ -7256,10 +7256,10 @@ echores "$_byte_order"
 
 echocheck "OSD menu"
 if test "$_menu" = yes ; then
-    _def_menu='#define HAVE_MENU 1'
+    _def_menu='#define CONFIG_MENU 1'
     test $_dvbin = "yes" && _menu_dvbin=yes
 else
-_def_menu='#undef HAVE_MENU'
+_def_menu='#undef CONFIG_MENU'
     _menu_dvbin=no
 fi
 echores "$_menu"

@@ -251,7 +251,7 @@ const m_option_t mplayer_opts[]={
 #endif
 	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 	{"osd-duration", &osd_duration, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
 	{"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"menu-root", &menu_root, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
@@ -268,7 +268,7 @@ const m_option_t mplayer_opts[]={
 #endif /* CONFIG_FRIBIDI */
 #else
 	{"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
-#endif /* HAVE_MENU */
+#endif /* CONFIG_MENU */
 
 	// these should be moved to -common, and supported in MEncoder
 	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
