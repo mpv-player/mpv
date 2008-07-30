@@ -2864,6 +2864,21 @@ if test "$_use_aton" = yes; then
   _def_use_aton='#define USE_ATON 1'
 fi
 
+
+echocheck "socklen_t"
+cat > $TMPC << EOF
+#include <sys/socket.h>
+int main(void) { socklen_t v = 0; return v; }
+EOF
+cc_check && _socklen_t=yes
+if test "$_socklen_t" = yes ; then
+  _def_socklen_t='#define HAVE_SOCKLEN_T 1'
+else
+  _def_socklen_t='#undef HAVE_SOCKLEN_T'
+fi
+echores "$_socklen_t"
+
+
 echocheck "network"
 # FIXME network check
 if test "$_network" = yes ; then
@@ -8232,8 +8247,6 @@ $_def_quicktime
 $_def_win32_loader
 
 /* FFmpeg */
-#define HAVE_SOCKLEN_T 1
-
 /* Define this to enable image postprocessing in libavcodec (requires a FAST CPU!) */
 $_def_libpostproc
 $_def_libpostproc_a
@@ -8574,6 +8587,12 @@ $_def_winsock2
 
 /* define this to use inet_aton() instead of inet_pton() */
 $_def_use_aton
+
+/* socklen_t support */
+$_def_socklen_t
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
 
 /* enables / disables cdparanoia support */
 $_def_cdparanoia
