@@ -56,7 +56,7 @@
 #include "input/input.h"
 #include "input/mouse.h"
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #include "mplayer.h"
 #endif
@@ -956,7 +956,7 @@ GC vo_gc = NULL;
 GC f_gc = NULL;
 XSizeHints vo_hint;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 void vo_setwindow(Window w, GC g)
 {
     vo_window = w;
@@ -975,7 +975,7 @@ void vo_x11_uninit(void)
         XFreeGC(mDisplay, f_gc);
         f_gc = NULL;
     }
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     /* destroy window only if it's not controlled by the GUI */
     if (!use_gui)
 #endif
@@ -1031,7 +1031,7 @@ int vo_x11_check_events(Display * mydisplay)
     while (XPending(mydisplay))
     {
         XNextEvent(mydisplay, &Event);
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
         if (use_gui)
         {
             guiGetEvent(0, (char *) &Event);
@@ -1075,7 +1075,7 @@ int vo_x11_check_events(Display * mydisplay)
                 {
                     int key;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
                     if ( use_gui ) { break; }
 #endif
 
@@ -1113,7 +1113,7 @@ int vo_x11_check_events(Display * mydisplay)
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
                 // Ignore mouse button 1-3 under GUI.
                 if (use_gui && (Event.xbutton.button >= 1)
                     && (Event.xbutton.button <= 3))
@@ -1129,7 +1129,7 @@ int vo_x11_check_events(Display * mydisplay)
                     mouse_waiting_hide = 1;
                     mouse_timer = GetTimerMS();
                 }
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
                 // Ignore mouse button 1-3 under GUI.
                 if (use_gui && (Event.xbutton.button >= 1)
                     && (Event.xbutton.button <= 3))
@@ -1807,7 +1807,7 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
 
 void vo_vm_close(Display * dpy)
 {
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (vidmodes != NULL && vo_window != None)
 #else
     if (vidmodes != NULL)

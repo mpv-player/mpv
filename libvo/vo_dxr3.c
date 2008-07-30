@@ -32,7 +32,7 @@
 #include "aspect.h"
 #include "spuenc.h"
 #include "sub.h"
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 #ifdef HAVE_X11
@@ -487,7 +487,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		vo_dy = (vo_screenheight - d_height) / 2;
 		vo_dwidth = d_width;
 		vo_dheight = d_height;
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 		if (use_gui) {
 			guiGetEvent(guiSetShVideo, 0);
 			XSetWindowBackground(mDisplay, vo_window, KEY_COLOR);
@@ -704,12 +704,12 @@ static void uninit(void)
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OFF);
 		overlay_release(overlay_data);
 		
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 		if (!use_gui) {
 #endif
 			vo_x11_uninit();
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 		}
 #endif
 	}
@@ -886,14 +886,14 @@ static int preinit(const char *arg)
 		
 		/* Initialize overlay and X11 */
 		overlay_data = overlay_init(fd_control);
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 		if (!use_gui) {
 #endif
 			if (!vo_init()) {
 				mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_DXR3_UnableToInitX11);
 				return -1;
 			}
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 		}
 #endif
 	}

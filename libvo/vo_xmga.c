@@ -43,7 +43,7 @@ static unsigned int timer = 0;
 static unsigned int timerd = 0;
 #endif
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 
@@ -171,7 +171,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     initialized = 1;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (use_gui)
         guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize the window
     else

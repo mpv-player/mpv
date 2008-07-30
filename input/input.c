@@ -159,7 +159,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_TELETEXT_GO_LINK, "teletext_go_link", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
 #endif
 
-#ifdef HAVE_NEW_GUI  
+#ifdef CONFIG_GUI
   { MP_CMD_GUI_LOADFILE, "gui_loadfile", 0, { {-1,{0}} } },
   { MP_CMD_GUI_LOADSUBTITLE, "gui_loadsubtitle", 0, { {-1,{0}} } },
   { MP_CMD_GUI_ABOUT, "gui_about", 0, { {-1,{0}} } },
@@ -480,7 +480,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
 };
 
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 static const mp_cmd_bind_t gui_def_cmd_binds[] = {
 
   { { 'l', 0 }, "gui_loadfile" },
@@ -1705,7 +1705,7 @@ void
 mp_input_init(int use_gui) {
   char* file;
 
-#ifdef HAVE_NEW_GUI  
+#ifdef CONFIG_GUI
   if(use_gui)
     mp_input_add_binds(gui_def_cmd_binds);
 #endif

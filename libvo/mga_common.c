@@ -317,7 +317,7 @@ static int control(uint32_t request, void *data, ...)
       return VO_TRUE;
 #endif
 
-#if defined( VO_XMGA ) && defined( HAVE_NEW_GUI )
+#if defined(VO_XMGA) && defined(CONFIG_GUI)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
 #endif

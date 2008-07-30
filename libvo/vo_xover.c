@@ -32,7 +32,7 @@
 #include "aspect.h"
 #include "mp_msg.h"
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 
@@ -258,7 +258,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   vo_dy += xinerama_y;
   vo_dwidth=d_width; vo_dheight=d_height;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   if(use_gui) guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
   else
     {
@@ -308,7 +308,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	 
       if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
       vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &mGCV);
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     }
 #endif
 

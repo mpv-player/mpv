@@ -782,7 +782,7 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
 	     !strncmp( ao_driver[0],"esd",3 ) ||
 	     !strncmp( ao_driver[0],"sdl",3 ) )
 	  gtk_widget_set_sensitive( AConfig,TRUE );
-#ifndef HAVE_GTK2_GUI
+#ifndef CONFIG_GTK2
         if ( !strncmp( ao_driver[0],"arts",4 ) )
           gtkMessageBox(GTK_MB_WARNING|GTK_MB_SIMPLE, MSGTR_PREFERENCES_ArtsBroken);
 #endif

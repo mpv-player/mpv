@@ -307,7 +307,7 @@ const m_option_t mplayer_opts[]={
 	{"gui", "The -gui option will only work as the first command line argument.\n", CONF_TYPE_PRINT, 0, 0, 0, (void *)1},
 	{"nogui", "The -nogui option will only work as the first command line argument.\n", CONF_TYPE_PRINT, 0, 0, 0, (void *)1},
       
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 	{"skin", &skinName, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"enqueue", &enqueue, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noenqueue", &enqueue, CONF_TYPE_FLAG, 0, 1, 0, NULL},

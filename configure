@@ -7410,8 +7410,8 @@ if test "$_gtk1" = no ; then
       _libs_mplayer="$_libs_mplayer `$_pkg_config glib-2.0 --libs 2>/dev/null`"
       echores "$_glib"
 
-      _def_gui='#define HAVE_NEW_GUI 1'
-      _def_gtk2_gui='#define HAVE_GTK2_GUI 1'
+      _def_gui='#define CONFIG_GUI 1'
+      _def_gtk2='#define CONFIG_GTK2 1'
     else
       _gtk1=yes
       echo "GLIB-2 devel packages were not found, trying GTK 1.2"
@@ -7454,20 +7454,20 @@ if test "$_gtk1" = yes ; then
   _libs_mplayer="$_libs_mplayer `$_glibconfig --libs 2>&1`"
   echores "$_glib (using $_glibconfig)"
 
-  _def_gui='#define HAVE_NEW_GUI 1'
-  _def_gtk2_gui='#undef HAVE_GTK2_GUI'
+  _def_gui='#define CONFIG_GUI 1'
+  _def_gtk2='#undef CONFIG_GTK2'
 fi
 
 else #if ! win32
   _gui_win32=yes
   _libs_mplayer="$_libs_mplayer -lcomdlg32 -lcomctl32 -lshell32 -lkernel32"
-  _def_gui='#define HAVE_NEW_GUI 1'
-  _def_gtk2_gui='#undef HAVE_GTK2_GUI'
+  _def_gui='#define CONFIG_GUI 1'
+  _def_gtk2='#undef CONFIG_GTK2'
 fi #if ! win32
 
 else #if test "$_gui"
-  _def_gui='#undef HAVE_NEW_GUI'
-  _def_gtk2_gui='#undef HAVE_GTK2_GUI'
+  _def_gui='#undef CONFIG_GUI'
+  _def_gtk2='#undef CONFIG_GTK2'
 fi #if test "$_gui"
 # --------------- GUI specific tests end -------------------
 
@@ -8345,7 +8345,7 @@ $_def_unrar_exec
 
 /* gui support, please do not edit this option */
 $_def_gui
-$_def_gtk2_gui
+$_def_gtk2
 
 /* Audio output drivers */
 $_def_ossaudio

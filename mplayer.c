@@ -76,7 +76,7 @@
 
 #include "cpudetect.h"
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 
@@ -224,7 +224,7 @@ float playback_speed=1.0;
 
 int use_gui=0;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 int enqueue=0;
 #endif
 
@@ -588,7 +588,7 @@ void uninit_player(unsigned int mask){
     initialized_flags&=~INITIALIZED_ACODEC;
     current_module="uninit_acodec";
     if(mpctx->sh_audio) uninit_audio(mpctx->sh_audio);
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (use_gui) guiGetEvent(guiSetAfilter, (char *)NULL);
 #endif
     mpctx->sh_audio=NULL;
@@ -663,7 +663,7 @@ void uninit_player(unsigned int mask){
     mpctx->audio_out->uninit(mpctx->eof?0:1); mpctx->audio_out=NULL;
   }
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   if(mask&INITIALIZED_GUI){
     initialized_flags&=~INITIALIZED_GUI;
     current_module="uninit_gui";
@@ -692,7 +692,7 @@ void exit_player_with_rc(const char* how, int rc){
   timeEndPeriod(1);
 #endif
 #ifdef HAVE_X11
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   if ( !use_gui )
 #endif
   vo_uninit();	// Close the X11 connection (if any is open).
@@ -980,7 +980,7 @@ static int playtree_add_playlist(play_tree_t* entry)
 {
   play_tree_add_bpf(entry,filename);
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   if (use_gui) {
     if (entry) {
       import_playtree_playlist_into_gui(entry, mconfig);
@@ -1296,7 +1296,7 @@ int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
   int result;
   if (!sh_audio)
   {
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (use_gui) guiGetEvent(guiSetAfilter, (char *)NULL);
 #endif
     mpctx->mixer.afilter = NULL;
@@ -1320,7 +1320,7 @@ int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
   result =  init_audio_filters(sh_audio, new_srate,
            &ao_data->samplerate, &ao_data->channels, &ao_data->format);
   mpctx->mixer.afilter = sh_audio->afilter;
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   if (use_gui) guiGetEvent(guiSetAfilter, (char *)sh_audio->afilter);
 #endif
   return result;
@@ -2342,7 +2342,7 @@ static void pause_loop(void)
 	    mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
     }
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (use_gui)
 	guiGetEvent(guiCEvent, (char *)guiSetPause);
 #endif
@@ -2361,7 +2361,7 @@ static void pause_loop(void)
 	}
 	if (mpctx->sh_video && mpctx->video_out && vo_config_count)
 	    mpctx->video_out->check_events();
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 	if (use_gui) {
 	    guiEventHandling();
 	    guiGetEvent(guiReDraw, NULL);
@@ -2385,7 +2385,7 @@ static void pause_loop(void)
     if (mpctx->video_out && mpctx->sh_video && vo_config_count)
         mpctx->video_out->control(VOCTRL_RESUME, NULL);	// resume video
     (void)GetRelativeTime();	// ignore time that passed during pause
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (use_gui) {
 	if (guiIntfStruct.Playing == guiSetStop)
 	    mpctx->eof = 1;
@@ -2595,7 +2595,7 @@ int gui_no_filename=0;
 
     parse_cfgfiles(mconfig);
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if ( use_gui ) cfg_read();
 #endif
 
@@ -2616,7 +2616,7 @@ int gui_no_filename=0;
     }
     }
 	
-#if defined(WIN32) && defined(HAVE_NEW_GUI)
+#if defined(WIN32) && defined(CONFIG_GUI)
     void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
     if(runningmplayer && filename && use_gui){
         COPYDATASTRUCT csData;
@@ -2645,7 +2645,7 @@ int gui_no_filename=0;
 		SetPriorityClass(GetCurrentProcess(), priority_presets_defs[i].prio);
 	}
 #endif	
-#ifndef HAVE_NEW_GUI
+#ifndef CONFIG_GUI
     if(use_gui){
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoGui);
       use_gui=0;
@@ -2672,7 +2672,7 @@ int gui_no_filename=0;
       // Import initital playtree into GUI.
       import_initial_playtree_into_gui(mpctx->playtree, mconfig, enqueue);
     }
-#endif /* HAVE_NEW_GUI */
+#endif /* CONFIG_GUI */
 
     if(video_driver_list && strcmp(video_driver_list[0],"help")==0){
       list_video_out();
@@ -2840,7 +2840,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 	    mp_msg(MSGT_CPLAYER, MSGL_V, MSGTR_UsingRTCTiming, irqp);
     }
   }
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 // breaks DGA and SVGAlib and VESA drivers:  --A'rpi
 // and now ? -- Pontscho
     if(use_gui) setuid( getuid() ); // strongly test, please check this.
@@ -2920,7 +2920,7 @@ current_module = NULL;
 #endif
 #endif
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   if(use_gui){
        guiInit();
        guiGetEvent(guiSetContext, mpctx);
@@ -2960,7 +2960,7 @@ if(!noconsolecontrols && !slave_mode){
 }
 
 // =================== GUI idle loop (STOP state) ===========================
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if ( use_gui ) {
       mpctx->file_format=DEMUXER_TYPE_UNKNOWN;
       guiGetEvent( guiSetDefaults,0 );
@@ -2998,7 +2998,7 @@ if(!noconsolecontrols && !slave_mode){
          }
        } 
     }
-#endif /* HAVE_NEW_GUI */
+#endif /* CONFIG_GUI */
 
 while (player_idle_mode && !filename) {
     play_tree_t * entry = NULL;
@@ -3142,7 +3142,7 @@ if (edl_output_filename) {
   }
   initialized_flags|=INITIALIZED_STREAM;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   if ( use_gui ) guiGetEvent( guiSetStream,(char *)mpctx->stream );
 #endif
 
@@ -3622,7 +3622,7 @@ if(force_fps && mpctx->sh_video){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_FPSforced,mpctx->sh_video->fps,mpctx->sh_video->frametime);
 }
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 if ( use_gui ) {
     if ( mpctx->sh_audio ) guiIntfStruct.AudioType=mpctx->sh_audio->channels; else guiIntfStruct.AudioType=0;
     if ( !mpctx->sh_video && mpctx->sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
@@ -3738,7 +3738,7 @@ if(!mpctx->sh_video) {
 //    current_module="draw_osd";
 //    if(vo_config_count) mpctx->video_out->draw_osd();
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if(use_gui) guiEventHandling();
 #endif
 
@@ -3887,7 +3887,7 @@ if(rel_seek_secs || abs_seek_pos){
   edl_decision = 0;
 }
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
       if(use_gui){
         guiEventHandling();
 	if(mpctx->demuxer->file_format==DEMUXER_TYPE_AVI && mpctx->sh_video && mpctx->sh_video->video.dwLength>2){
@@ -3912,7 +3912,7 @@ if(rel_seek_secs || abs_seek_pos){
 	 }
 #endif
       }
-#endif /* HAVE_NEW_GUI */
+#endif /* CONFIG_GUI */
 
 } // while(!mpctx->eof)
 
@@ -4020,7 +4020,7 @@ while(mpctx->playtree_iter != NULL) {
         break;
 }
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 if(use_gui && !mpctx->playtree_iter) {
 #ifdef CONFIG_DVDREAD
     if(!guiIntfStruct.DiskChanged)

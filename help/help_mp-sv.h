@@ -563,7 +563,7 @@ static char help_text[]=
 
 // ====================== GUI messages/buttons ========================
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 
 // --- labels ---
 #define MSGTR_About "Om"

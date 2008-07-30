@@ -17,7 +17,7 @@
 
 #include "gl_common.h"
 #include "aspect.h"
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 
@@ -542,7 +542,7 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 }
 #endif
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
   guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
   return 0;
@@ -616,7 +616,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   int_pause = 0;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   if (use_gui) {
     if (config_glx_gui(d_width, d_height) == -1)
       return -1;

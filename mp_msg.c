@@ -12,11 +12,11 @@ extern char* get_term_charset(void);
 #endif
 
 #if defined(FOR_MENCODER)
-#undef HAVE_NEW_GUI
+#undef CONFIG_GUI
 int use_gui;
 #endif
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 #include "mp_msg.h"
@@ -179,7 +179,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
     tmp[MSGSIZE_MAX-2] = '\n';
     tmp[MSGSIZE_MAX-1] = 0;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if(use_gui)
         guiMessageBox(lev, tmp);
 #endif
