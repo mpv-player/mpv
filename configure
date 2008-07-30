@@ -8166,9 +8166,6 @@ $_def_kstat
 
 /* Define this if you have zlib */
 $_def_zlib
-#ifdef HAVE_ZLIB
-#define CONFIG_ZLIB 1
-#endif
 
 /* Define this if you have shm support */
 $_def_shm
