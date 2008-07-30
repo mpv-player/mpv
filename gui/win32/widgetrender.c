@@ -162,7 +162,7 @@ static char *generatetextfromlabel(widget *item)
 
     if(guiIntfStruct.StreamType == 0)
         stringreplace(text, "$T", "f");
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
     else if(guiIntfStruct.StreamType == STREAMTYPE_DVD || guiIntfStruct.StreamType == STREAMTYPE_DVDNAV)
         stringreplace(text, "$T", "d");
 #endif

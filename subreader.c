@@ -26,11 +26,11 @@
 
 #define ERR ((void *) -1)
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 #include <iconv.h>
 char *sub_cp=NULL;
 #endif
-#ifdef USE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 #include <fribidi/fribidi.h>
 char *fribidi_charset = NULL;   ///character set that will be passed to FriBiDi
 int flip_hebrew = 1;            ///flip subtitles using fribidi
@@ -52,14 +52,14 @@ int sub_match_fuzziness=0; // level of sub name matching fuzziness
 
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
-#ifdef USE_SORTSUB
+#ifdef CONFIG_SORTSUB
 /* 
    Some subtitling formats, namely AQT and Subrip09, define the end of a
    subtitle as the beginning of the following. Since currently we read one
    subtitle at time, for these format we keep two global *subtitle,
    previous_aqt_sub and previous_subrip09_sub, pointing to previous subtitle,
    so we can change its end when we read current subtitle starting time.
-   When USE_SORTSUB is defined, we use a single global unsigned long, 
+   When CONFIG_SORTSUB is defined, we use a single global unsigned long,
    previous_sub_end, for both (and even future) formats, to store the end of
    the previous sub: it is initialized to 0 in sub_read_file and eventually
    modified by sub_read_aqt_line or sub_read_subrip09_line.
@@ -702,7 +702,7 @@ static subtitle *sub_read_line_mpsub(stream_t *st, subtitle *current) {
 	return NULL; // we should have returned before if it's OK
 }
 
-#ifndef USE_SORTSUB
+#ifndef CONFIG_SORTSUB
 //we don't need this if we use previous_sub_end
 subtitle *previous_aqt_sub = NULL;
 #endif
@@ -720,7 +720,7 @@ static subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
 		break;
     }
     
-#ifdef USE_SORTSUB
+#ifdef CONFIG_SORTSUB
     previous_sub_end = (current->start) ? current->start - 1 : 0; 
 #else
     if (previous_aqt_sub != NULL) 
@@ -748,7 +748,7 @@ static subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
     current->lines=i+1;
 
     if (!strlen(current->text[0]) && !strlen(current->text[1])) {
-#ifdef USE_SORTSUB
+#ifdef CONFIG_SORTSUB
 	previous_sub_end = 0;
 #else
 	// void subtitle -> end of previous marked and exit
@@ -760,7 +760,7 @@ static subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
     return current;
 }
 
-#ifndef USE_SORTSUB
+#ifndef CONFIG_SORTSUB
 subtitle *previous_subrip09_sub = NULL;
 #endif
 
@@ -780,7 +780,7 @@ static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
 
     current->start = a1*360000+a2*6000+a3*100;
     
-#ifdef USE_SORTSUB
+#ifdef CONFIG_SORTSUB
     previous_sub_end = (current->start) ? current->start - 1 : 0; 
 #else
     if (previous_subrip09_sub != NULL) 
@@ -804,7 +804,7 @@ static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
     current->lines=i+1;
 
     if (!strlen(current->text[0]) && (i==0)) {
-#ifdef USE_SORTSUB
+#ifdef CONFIG_SORTSUB
 	previous_sub_end = 0;
 #else
 	// void subtitle -> end of previous marked and exit
@@ -1071,7 +1071,7 @@ int sub_utf8_prev=0;
 extern float sub_delay;
 extern float sub_fps;
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 static iconv_t icdsc = (iconv_t)(-1);
 
 void	subcp_open (stream_t *st)
@@ -1146,7 +1146,7 @@ subtitle* subcp_recode (subtitle *sub)
 }
 #endif
 
-#ifdef USE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 #ifndef max
 #define max(a,b)  (((a)>(b))?(a):(b))
 #endif
@@ -1369,7 +1369,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     stream_reset(fd);
     stream_seek(fd,0);
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
     sub_utf8_prev=sub_utf8;
     {
 	    int l,k;
@@ -1389,14 +1389,14 @@ sub_data* sub_read_file (char *filename, float fps) {
     sub_num=0;n_max=32;
     first=malloc(n_max*sizeof(subtitle));
     if(!first){
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 	  subcp_close();
           sub_utf8=sub_utf8_prev;
 #endif
 	    return NULL;
     }
     
-#ifdef USE_SORTSUB
+#ifdef CONFIG_SORTSUB
     sub = malloc(sizeof(subtitle));
     //This is to deal with those formats (AQT & Subrip) which define the end of a subtitle
     //as the beginning of the following
@@ -1407,21 +1407,21 @@ sub_data* sub_read_file (char *filename, float fps) {
             n_max+=16;
             first=realloc(first,n_max*sizeof(subtitle));
         }
-#ifndef USE_SORTSUB
+#ifndef CONFIG_SORTSUB
 	sub = &first[sub_num];
 #endif	
 	memset(sub, '\0', sizeof(subtitle));
         sub=srp->read(fd,sub);
         if(!sub) break;   // EOF
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
 #endif
-#ifdef USE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8);
 #endif
 	if ( sub == ERR )
 	 {
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
           subcp_close();
 #endif
     	  if ( first ) free(first);
@@ -1429,7 +1429,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 	 }
         // Apply any post processing that needs recoding first
         if ((sub!=ERR) && !sub_no_text_pp && srp->post) srp->post(sub);
-#ifdef USE_SORTSUB
+#ifdef CONFIG_SORTSUB
 	if(!sub_num || (first[sub_num - 1].start <= sub->start)){
 	    first[sub_num].start = sub->start;
   	    first[sub_num].end   = sub->end;
@@ -1474,7 +1474,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     
     free_stream(fd);
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
     subcp_close();
 #endif
 
@@ -1876,7 +1876,7 @@ char** sub_filenames(const char* path, char *fname)
 
 		// does it end with a subtitle extension?
 		found = 0;
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 #ifdef HAVE_ENCA
 		for (i = ((sub_cp && strncasecmp(sub_cp, "enca", 4) != 0) ? 3 : 0); sub_exts[i]; i++) {
 #else
@@ -1931,7 +1931,7 @@ char** sub_filenames(const char* path, char *fname)
 
 		    if (prio) {
 			prio += prio;
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 			if (i<3){ // prefer UTF-8 coded
 			    prio++;
 			}

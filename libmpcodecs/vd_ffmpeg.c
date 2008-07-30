@@ -52,7 +52,7 @@ typedef struct {
     int lowres;
 } vd_ffmpeg_ctx;
 
-//#ifdef USE_LIBPOSTPROC
+//#ifdef CONFIG_LIBPOSTPROC
 //unsigned int lavc_pp=0;
 //#endif
 

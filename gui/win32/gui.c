@@ -407,7 +407,7 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 case ID_NTRACK:
                     handlemsg(hWnd, evNext);
                     break;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
                 case ID_CHAPTERSEL:
                     display_chapterselwindow(gui);
                     break;
@@ -1005,7 +1005,7 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                             sprintf(searchpath, "%sVIDEO_TS", device + pos);
                             if(GetFileAttributes(searchpath) != INVALID_FILE_ATTRIBUTES)
                             {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
                                 if (dvd_device) free(dvd_device);
                                 dvd_device = strdup(device + pos);
                                 dvd_title = dvd_chapter = dvd_angle = 1;
@@ -1211,7 +1211,7 @@ static void create_submenu(gui_t *gui)
     AppendMenu(gui->submenu, MF_STRING | MF_POPUP, (UINT) gui->aspectmenu, "Aspect Ratio");
     AppendMenu(gui->submenu, MF_STRING | MF_POPUP, (UINT) gui->subtitlemenu, "Subtitle Options");
     AppendMenu(gui->submenu, MF_STRING | MF_POPUP, (UINT) gui->dvdmenu, "DVD Options");
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
     AppendMenu(gui->dvdmenu, MF_STRING | MF_GRAYED, ID_CHAPTERSEL, "Select Title/Chapter...");
 #endif
     AppendMenu(gui->subtitlemenu, MF_STRING, IDSUB_TOGGLE, "Subtitle Visibility On/Off");

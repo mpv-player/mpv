@@ -382,16 +382,10 @@ void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias)
 #define WORD_s2 0x18,0x19,0x1a,0x1b
 #define WORD_s3 0x1c,0x1d,0x1e,0x1f
 
-#ifdef HAVE_ALTIVEC_VECTOR_BRACES
-#define AVV(x...) {x}
-#else
-#define AVV(x...) (x)
-#endif
+#define vcprm(a,b,c,d) (const vector unsigned char){WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d}
+#define vcii(a,b,c,d) (const vector float){FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d}
 
-#define vcprm(a,b,c,d) (const vector unsigned char)AVV(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
-#define vcii(a,b,c,d) (const vector float)AVV(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
-
-#define FOUROF(a) AVV(a,a,a,a)
+#define FOUROF(a) {a,a,a,a}
 
 // vcprmle is used to keep the same index as in the SSE version.
 // it's the same as vcprm, with the index inversed

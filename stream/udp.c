@@ -92,11 +92,11 @@ udp_open_socket (URL_t *url)
   else
   {
 #ifndef HAVE_WINSOCK2
-#ifdef USE_ATON
+#ifdef CONFIG_ATON
     inet_aton (url->hostname, &server_address.sin_addr);
 #else
     inet_pton (AF_INET, url->hostname, &server_address.sin_addr);
-#endif /* USE_ATON */
+#endif /* CONFIG_ATON */
 #else
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 #endif /* HAVE_WINSOCK2 */

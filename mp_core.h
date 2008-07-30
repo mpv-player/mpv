@@ -104,7 +104,7 @@ typedef struct MPContext {
 
     int was_paused;
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
     struct mp_image *nav_smpi; ///< last decoded dvdnav video image
     unsigned char *nav_buffer;   ///< last read dvdnav video frame
     unsigned char *nav_start;    ///< pointer to last read video buffer

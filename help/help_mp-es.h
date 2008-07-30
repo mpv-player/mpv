@@ -25,7 +25,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<numpista>      Reproducir pista de (S)VCD (Super Video CD) (acceso directo al dispositivo, no montado)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<número>        Reproducir título o pista de DVD desde un dispositivo en vez de un archivo regular.\n"
 " -alang <lengua>      Seleccionar lengua para el audio del DVD (con código de país de dos caracteres. p. ej. 'es').\n"
 " -alang <lengua>      Seleccionar lengua para los subtítulos del DVD.\n"

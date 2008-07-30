@@ -19,7 +19,7 @@ for DLL to know too much about its environment.
 #include "config.h"
 #include "mangle.h"
 
-#ifdef USE_QTX_CODECS
+#ifdef CONFIG_QTX_CODECS
 #define QTX
 #endif
 #define REALPLAYER

@@ -63,7 +63,7 @@
 #include "../pixmaps/empty.xpm"
 #include "../pixmaps/loadeaf.xpm"
 #include "../pixmaps/title.xpm"
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 #include "../pixmaps/dvd.xpm"
 #include "../pixmaps/playdvd.xpm"
 #include "../pixmaps/chapter.xpm"
@@ -377,7 +377,7 @@ static Languages_t Languages[] =
          };
 #undef lng
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 static char * ChannelTypes[] =
 	{ "Dolby Digital","","Mpeg1","Mpeg2","PCM","","Digital Theatre System" };
 static char * ChannelNumbers[] =
@@ -424,7 +424,7 @@ GtkWidget * create_PopUpMenu( void )
 #ifdef HAVE_VCD
     AddMenuItem( window1, (const char*)playvcd_xpm, SubMenu,MSGTR_MENU_PlayVCD, evPlayVCD );
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
     AddMenuItem( window1, (const char*)playdvd_xpm, SubMenu,MSGTR_MENU_PlayDVD, evPlayDVD );
 #endif
     AddMenuItem( window1, (const char*)url_xpm, SubMenu,MSGTR_MENU_PlayURL, evSetURL );
@@ -467,7 +467,7 @@ GtkWidget * create_PopUpMenu( void )
        gtk_widget_set_sensitive( MenuItem,FALSE );
       }
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    DVDSubMenu=AddSubMenu( window1, (const char*)dvd_xpm, Menu,MSGTR_MENU_DVD );
     AddMenuItem( window1, (const char*)playdvd_xpm, DVDSubMenu,MSGTR_MENU_PlayDisc"    ", evPlayDVD );
 //    AddMenuItem( DVDSubMenu,MSGTR_MENU_ShowDVDMenu, evNone );

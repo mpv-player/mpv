@@ -77,15 +77,15 @@
 
 #include "osdep/timer.h"
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 #include "stream/stream_dvdnav.h"
 #endif
 
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 #include "libavcodec/avcodec.h"
 #endif
 
@@ -104,7 +104,7 @@ int forced_subs_only=0;
 
 // cache2:
 int stream_cache_size=-1;
-#ifdef USE_STREAM_CACHE
+#ifdef CONFIG_STREAM_CACHE
 extern int cache_fill_status;
 
 float stream_cache_min_percent=20.0;
@@ -226,7 +226,7 @@ void mplayer_put_key(struct mp_fifo *fifo, int code)
 {
 }
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 #endif
@@ -293,7 +293,7 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
 
 #include "cfg-mencoder.h"
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 #include "spudec.h"
 #endif
 #include "vobsub.h"
@@ -457,9 +457,9 @@ audio_encoder_t *aencoder = NULL;
 #endif
 #endif
 
-#if defined(WIN32) && defined(USE_WIN32DLL)
+#if defined(WIN32) && defined(CONFIG_WIN32DLL)
   set_path_env();
-#endif /*WIN32 && USE_WIN32DLL*/
+#endif /*WIN32 && CONFIG_WIN32DLL*/
   
   InitTimer();
 
@@ -576,14 +576,14 @@ play_next_file:
 
   mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_OpenedStream, file_format, (int)(stream->start_pos), (int)(stream->end_pos));
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
   if(audio_lang && opts.audio_id==-1) opts.audio_id=dvd_aid_from_lang(stream,audio_lang);
   if(dvdsub_lang && opts.sub_id==-2) opts.sub_id=dvd_sid_from_lang(stream,dvdsub_lang);
 }
 #endif
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 if(stream->type==STREAMTYPE_DVDNAV){
   if(audio_lang && opts.audio_id==-1) opts.audio_id=mp_dvdnav_aid_from_lang(stream,audio_lang);
   if(dvdsub_lang && opts.sub_id==-2) opts.sub_id=mp_dvdnav_sid_from_lang(stream,dvdsub_lang);
@@ -715,7 +715,7 @@ if (vobsub_out) {
     if (spudec_ifo && vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, opts.sub_id, tmp) >= 0)
 	vobsub_writer = vobsub_out_open(vobsub_out, palette, sh_video->disp_w, sh_video->disp_h,
 					vobsub_out_id?vobsub_out_id:(char *)tmp, vobsub_out_index);
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
     if (vobsub_writer == NULL) {
 	char tmp[3];
 	if (vobsub_out_id == NULL && stream->type == STREAMTYPE_DVD) {
@@ -741,7 +741,7 @@ if (spudec_ifo) {
   if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
     vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
 }
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 if (vo_spudec==NULL) {
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
 			    sh_video->disp_w, sh_video->disp_h);
@@ -780,7 +780,7 @@ mux_v->buffer=malloc(mux_v->buffer_size);
 mux_v->source=sh_video;
 
 mux_v->h.dwSampleSize=0; // VBR
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
 {
     double fps = force_ofps?force_ofps:sh_video->fps*opts.playback_speed;
     AVRational q= av_d2q(fps, fps*1001+2);
@@ -1501,7 +1501,7 @@ if(sh_audio && !demuxer2){
     }
         fflush(stdout);
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 // DVD sub:
  if(vobsub_writer){
      unsigned char* packet=NULL;

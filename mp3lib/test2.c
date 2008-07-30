@@ -33,7 +33,7 @@ int main(int argc,char* argv[]){
   GetCpuCaps(&gCpuCaps);
 
   // MPEG Audio:
-#ifdef USE_FAKE_MONO
+#ifdef CONFIG_FAKE_MONO
   MP3_Init(0);
 #else
   MP3_Init();

@@ -26,7 +26,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<曲目号>   播放 (S)VCD（超级VCD）曲目（无格式设备，无需装载）\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<标题号>   从设备而不是从普通文件上播放 DVD 标题\n"
 #endif
 " -alang/-slang    选择 DVD 音频/字幕的语言（使用两字符的国家代号）\n"

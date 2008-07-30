@@ -11,8 +11,6 @@
 #include <unistd.h>
 
 #include "config.h"
-#ifdef USE_LIBA52
-
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "mpbswap.h"
@@ -541,4 +539,3 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
 
   return nr_samples * 2 * 2;
 }
-#endif

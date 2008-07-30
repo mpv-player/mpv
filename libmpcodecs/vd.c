@@ -49,13 +49,13 @@ extern const vd_functions_t mpcodecs_vd_qtvideo;
 
 const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_null,
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
     &mpcodecs_vd_ffmpeg,
 #endif
 #ifdef HAVE_OGGTHEORA
     &mpcodecs_vd_theora,
 #endif
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     &mpcodecs_vd_dshow,
     &mpcodecs_vd_dmo,
     &mpcodecs_vd_vfw,
@@ -65,7 +65,7 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_raw,
     &mpcodecs_vd_hmblck,
     &mpcodecs_vd_nuv,
-#ifdef USE_XANIM
+#ifdef CONFIG_XANIM
     &mpcodecs_vd_xanim,
 #endif
 #ifdef HAVE_PNG
@@ -76,14 +76,14 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 #endif
     &mpcodecs_vd_mtga,
     &mpcodecs_vd_sgi,
-#ifdef USE_LIBMPEG2
+#ifdef CONFIG_LIBMPEG2
     &mpcodecs_vd_libmpeg2,
 #endif
     &mpcodecs_vd_mpegpes,
 #ifdef HAVE_ZR
     &mpcodecs_vd_zrmjpeg,
 #endif
-#ifdef USE_REALCODECS
+#ifdef CONFIG_REALCODECS
     &mpcodecs_vd_realvid,
 #endif
 #ifdef HAVE_XVID4
@@ -92,7 +92,7 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 #ifdef HAVE_LIBDV095
     &mpcodecs_vd_libdv,
 #endif
-#ifdef USE_QTX_CODECS
+#ifdef CONFIG_QTX_CODECS
     &mpcodecs_vd_qtvideo,
 #endif
     /* Please do not add any new decoders here. If you want to implement a new

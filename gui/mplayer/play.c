@@ -104,7 +104,7 @@ void mplEnd( void )
      guiIntfStruct.AudioType=0;
      guiIntfStruct.NoWindow=False;
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
      guiIntfStruct.DVD.current_title=1;
      guiIntfStruct.DVD.current_chapter=1;
      guiIntfStruct.DVD.current_angle=1;
@@ -292,7 +292,7 @@ void mplCurr( void )
  if ( guiIntfStruct.Playing == 2 ) return;
  switch ( guiIntfStruct.StreamType )
   {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    case STREAMTYPE_DVD:
 	break;
 #endif
@@ -322,7 +322,7 @@ void mplPrev( void )
  if ( guiIntfStruct.Playing == 2 ) return;
  switch ( guiIntfStruct.StreamType )
   {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    case STREAMTYPE_DVD:
 	if ( --guiIntfStruct.DVD.current_chapter == 0 )
 	 {
@@ -358,7 +358,7 @@ void mplNext( void )
  if ( guiIntfStruct.Playing == 2 ) return;
  switch ( guiIntfStruct.StreamType )
   {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    case STREAMTYPE_DVD:
 	if ( guiIntfStruct.DVD.current_chapter++ == guiIntfStruct.DVD.chapters )
 	 {

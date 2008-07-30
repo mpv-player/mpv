@@ -778,7 +778,7 @@ void display_skinbrowser(gui_t* gui)
    UpdateWindow(hWnd);
 }
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 static LRESULT CALLBACK TitleChapterWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
     static HWND title;

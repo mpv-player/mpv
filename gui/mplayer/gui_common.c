@@ -71,7 +71,7 @@ static inline void TranslateFilename( int c,char * tmp,size_t tmplen )
             if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
            } else av_strlcpy( tmp,MSGTR_NoFileLoaded,tmplen );
           break;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    case STREAMTYPE_DVD:
           if ( guiIntfStruct.DVD.current_chapter ) snprintf(tmp,tmplen,MSGTR_Chapter,guiIntfStruct.DVD.current_chapter );
             else av_strlcat( tmp,MSGTR_NoChapter,tmplen );
@@ -178,7 +178,7 @@ calclengthmmmmss:
              case STREAMTYPE_VCD:    av_strlcat( trbuf,"v",sizeof( trbuf ) ); break;
 #endif
              case STREAMTYPE_STREAM: av_strlcat( trbuf,"u",sizeof( trbuf ) ); break;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
              case STREAMTYPE_DVD:    av_strlcat( trbuf,"d",sizeof( trbuf ) ); break;
 #endif
              default:                av_strlcat( trbuf," ",sizeof( trbuf ) ); break;

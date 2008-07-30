@@ -50,7 +50,7 @@ static unsigned long (*rvyuv_custom_message)(cmsg_data_t* ,void*);
 static unsigned long (*rvyuv_free)(void*);
 static unsigned long (*rvyuv_init)(void*, void*); // initdata,context
 static unsigned long (*rvyuv_transform)(char*, char*,transform_in_t*,unsigned int*,void*);
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 static unsigned long WINAPI (*wrvyuv_custom_message)(cmsg_data_t* ,void*);
 static unsigned long WINAPI (*wrvyuv_free)(void*);
 static unsigned long WINAPI (*wrvyuv_init)(void*, void*); // initdata,context
@@ -61,7 +61,7 @@ static void *rv_handle=NULL;
 static int initialized=0;
 static uint8_t *buffer = NULL;
 static int bufsz = 0;
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
 #endif
 
@@ -143,7 +143,7 @@ static int load_syms_linux(char *path) {
 }
 #endif
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 
 #ifdef WIN32_LOADER
 #include "loader/ldt_keeper.h"
@@ -283,7 +283,7 @@ static int init(sh_video_t *sh){
 #ifdef HAVE_LIBDL       
 	if(strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	    if (!load_syms_windows(sh->codec->dll))
 #endif
 	{
@@ -297,7 +297,7 @@ static int init(sh_video_t *sh){
 //	if((sh->format!=0x30335652) && !mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
 	// init codec:
 	sh->context=NULL;
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	if (dll_type == 1)
 	    result=(*wrvyuv_init)(&init_data, &sh->context);
 	else
@@ -324,7 +324,7 @@ static int init(sh_video_t *sh){
 	    if (extrahdr_size-8 > cmsg_cnt)
 	        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"realvideo: %u bytes of unknown extradata remaining.\n",extrahdr_size-8-cmsg_cnt);
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	    if (dll_type == 1)
 		(*wrvyuv_custom_message)(&cmsg_data,sh->context);
 	    else
@@ -337,7 +337,7 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	if (dll_type == 1)
 	{
 	    if (wrvyuv_free) wrvyuv_free(sh->context);
@@ -345,7 +345,7 @@ static void uninit(sh_video_t *sh){
 #endif
 	if(rvyuv_free) rvyuv_free(sh->context);
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	if (dll_type == 1)
 	{
 	    if (rv_handle) FreeLibrary(rv_handle);
@@ -397,7 +397,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    if (!buffer) return 0;
 	}
 	
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	if (dll_type == 1)
 	    result=(*wrvyuv_transform)(dp_data, buffer, &transform_in,
 		transform_out, sh->context);

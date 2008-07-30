@@ -22,7 +22,7 @@ static char help_text[]=
 " vcd://<tracknr>  Spiele einen (S)VCD-Titel (Super Video CD) ab\n"
 "                  ( direkter Gerätezugriff, kein mount! )\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titelnr>  Spiele DVD-Titel direkt vom Gerät anstelle einer Datei\n"
 #endif
 " -alang/-slang    Wähle DVD Audio/Untertitel Sprache (2-Zeichen-Ländercode)\n"

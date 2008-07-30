@@ -1,5 +1,5 @@
 #include "config.h"
-#ifdef USE_FASTMEMCPY
+#ifdef CONFIG_FASTMEMCPY
 
 /*
   aclib - advanced C library ;)
@@ -180,5 +180,4 @@ void * mem2agpcpy(void * to, const void * from, size_t len)
 	return to;
 }
 
-#endif /* use fastmemcpy */
-
+#endif /* CONFIG_FASTMEMCPY */

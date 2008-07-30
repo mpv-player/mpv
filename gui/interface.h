@@ -24,7 +24,7 @@
 #include "libvo/font_load.h"
 #include "cfg.h"
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
  #include "stream/stream.h"
 #endif
 
@@ -51,7 +51,7 @@ typedef struct
  char codecdll[128];
 } guiVideoStruct;
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 typedef struct
 {
  int titles;
@@ -83,7 +83,7 @@ typedef struct
    int    DiskChanged;
    int    NewPlay;
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
    guiDVDStruct         DVD;
    int			Title;
    int			Angle;

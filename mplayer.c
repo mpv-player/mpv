@@ -107,10 +107,10 @@ char *heartbeat_cmd;
 #endif /* __linux__ */
 #endif /* HAVE_RTC */
 
-#ifdef USE_TV
+#ifdef CONFIG_TV
 #include "stream/tv.h"
 #endif
-#ifdef USE_RADIO
+#ifdef CONFIG_RADIO
 #include "stream/stream_radio.h"
 #endif
 
@@ -159,11 +159,11 @@ static int max_framesize=0;
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 #include "stream/stream_dvdnav.h"
 #endif
 
@@ -247,7 +247,7 @@ int file_filter=1;
 
 // cache2:
        int stream_cache_size=-1;
-#ifdef USE_STREAM_CACHE
+#ifdef CONFIG_STREAM_CACHE
 extern int cache_fill_status;
 
 float stream_cache_min_percent=20.0;
@@ -290,7 +290,7 @@ char *vobsub_name=NULL;
 int   subcc_enabled=0;
 int suboverlap_enabled = 1;
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 #endif
@@ -541,7 +541,7 @@ char *get_metadata(struct MPContext *mpctx, metadata_t type)
 /// step size of mixer changes
 int volstep = 3;
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 static void mp_dvdnav_context_free(MPContext *ctx){
     if (ctx->nav_smpi) free_mp_image(ctx->nav_smpi);
     ctx->nav_smpi = NULL;
@@ -601,7 +601,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     current_module="uninit_vo";
     vo_destroy(mpctx->video_out);
     mpctx->video_out=NULL;
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
     mp_dvdnav_context_free(mpctx);
 #endif
   }
@@ -678,7 +678,7 @@ void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc){
 #endif
   osd_free(mpctx->osd);
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
   ass_library_done(ass_library);
 #endif
 
@@ -993,7 +993,7 @@ static int playtree_add_playlist(struct MPContext *mpctx, play_tree_t* entry)
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr)
 {
     sub_data *subd;
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     ass_track_t *asst = 0;
 #endif
 
@@ -1002,9 +1002,9 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
     }
 
     subd = sub_read_file(filename, fps);
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     if (ass_enabled)
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
         asst = ass_read_file(ass_library, filename, sub_cp);
 #else
         asst = ass_read_file(ass_library, filename, 0);
@@ -1019,7 +1019,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
         mp_msg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR, MSGTR_CantLoadSub,
 		filename_recode(filename));
     
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     if (!asst && !subd) return;
     mpctx->set_of_ass_tracks[mpctx->set_of_sub_size] = asst;
 #else
@@ -1069,7 +1069,7 @@ void init_vo_spudec(struct MPContext *mpctx)
       vo_spudec=spudec_new_scaled(palette, width, height);
   }
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
   if (vo_spudec==NULL && mpctx->stream->type==STREAMTYPE_DVD) {
     current_module="spudec_init_dvdread";
     vo_spudec=spudec_new_scaled(((dvd_priv_t *)(mpctx->stream->priv))->cur_pgc->palette,
@@ -1077,7 +1077,7 @@ void init_vo_spudec(struct MPContext *mpctx)
   }
 #endif
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
   if (vo_spudec==NULL && mpctx->stream->type==STREAMTYPE_DVDNAV) {
     unsigned int *palette = mp_dvdnav_get_spu_clut(mpctx->stream);
     current_module="spudec_init_dvdnav";
@@ -1241,7 +1241,7 @@ static void print_status(struct MPContext *mpctx, float a_pos, float a_v, float 
   if (sh_video) 
     saddf(line, &pos, width, "%d %d ", drop_frame_cnt, output_quality);
 
-#ifdef USE_STREAM_CACHE
+#ifdef CONFIG_STREAM_CACHE
   // cache stats
   if (stream_cache_size > 0)
     saddf(line, &pos, width, "%d%% ", cache_fill_status);
@@ -1799,7 +1799,7 @@ static float timing_sleep(struct MPContext *mpctx, float time_frame)
     return time_frame;
 }
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 #ifndef FF_B_TYPE
 #define FF_B_TYPE 3
 #endif
@@ -1928,7 +1928,7 @@ static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
     if (decoded_frame && mpctx->nav_smpi != decoded_frame)
         mpctx->nav_smpi = mp_dvdnav_copy_mpi(mpctx->nav_smpi,decoded_frame);
 }
-#endif /* USE_DVDNAV */
+#endif /* CONFIG_DVDNAV */
 
 static void adjust_sync_and_print_status(struct MPContext *mpctx,
                                          int between_frames,
@@ -2171,7 +2171,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     sh_video->vfilter = vf_menu;
 #endif
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
   if(ass_enabled) {
     int i;
     int insert = 1;
@@ -2196,7 +2196,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 
   sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
   if (ass_enabled)
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
 #endif
@@ -2260,7 +2260,7 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
 	frame_time = sh_video->next_frame_time;
 	in_size = video_read_frame(sh_video, &sh_video->next_frame_time,
 				   &start, force_fps);
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 	/// wait, still frame or EOF
 	if (mpctx->stream->type == STREAMTYPE_DVDNAV && in_size < 0) {
 	    if (mp_dvdnav_is_eof(mpctx->stream)) return -1;
@@ -2283,7 +2283,7 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
 	update_teletext(sh_video, mpctx->demuxer, 0);
 	update_osd_msg(mpctx);
 	current_module = "decode_video";
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 	decoded_frame = mp_dvdnav_restore_smpi(mpctx, &in_size,&start,
                                                decoded_frame);
 	/// still frame has been reached, no need to decode
@@ -2291,7 +2291,7 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
 #endif
 	decoded_frame = decode_video(sh_video, start, in_size, drop_frame,
 				     sh_video->pts);
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 	/// save back last still frame for future display
         mp_dvdnav_save_smpi(mpctx, in_size, start, decoded_frame);
 #endif
@@ -2565,8 +2565,6 @@ int i;
 
 int gui_no_filename=0;
 
-  srand((int) time(NULL)); 
-
     struct MPContext *mpctx = &(struct MPContext){
         .osd_function = OSD_PLAY,
         .begin_skip = MP_NOPTS_VALUE,
@@ -2578,6 +2576,7 @@ int gui_no_filename=0;
     };
 
   InitTimer();
+  srand(GetTimerMS());
   
   mp_msg_init();
 
@@ -2595,11 +2594,11 @@ int gui_no_filename=0;
   m_config_preparse_command_line(mpctx->mconfig,argc,argv);
 
   print_version();
-#if defined(WIN32) && defined(USE_WIN32DLL)
+#if defined(WIN32) && defined(CONFIG_WIN32DLL)
   set_path_env();
-#endif /*WIN32 && USE_WIN32DLL*/
+#endif /*WIN32 && CONFIG_WIN32DLL*/
 
-#ifdef USE_TV
+#ifdef CONFIG_TV
   stream_tv_defaults.immediate = 1;
 #endif
 
@@ -2838,7 +2837,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   }
 #endif
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
   ass_library = ass_init();
 #endif
 
@@ -2876,7 +2875,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       mp_msg(MSGT_CPLAYER, MSGL_V, "Using %s timing\n",
 	     softsleep?"software":timer_name);
 
-#ifdef USE_TERMCAP
+#ifdef CONFIG_TERMCAP
   if ( !use_gui ) load_termcap(NULL); // load key-codes
 #endif
 
@@ -3228,7 +3227,7 @@ if(stream_dump_type==5){
   exit_player_with_rc(mpctx, MSGTR_Exit_eof, 0);
 }
 
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 if(mpctx->stream->type==STREAMTYPE_DVD){
   current_module="dvd lang->id";
   if(opts->audio_id==-1) opts->audio_id=dvd_aid_from_lang(mpctx->stream,audio_lang);
@@ -3241,7 +3240,7 @@ if(mpctx->stream->type==STREAMTYPE_DVD){
 }
 #endif
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 if(mpctx->stream->type==STREAMTYPE_DVDNAV){
   current_module="dvdnav lang->id";
   if(opts->audio_id==-1) opts->audio_id=mp_dvdnav_aid_from_lang(mpctx->stream,audio_lang);
@@ -3350,7 +3349,7 @@ if (mpctx->stream->type != STREAMTYPE_DVD && mpctx->stream->type != STREAMTYPE_D
 if (mpctx->global_sub_size <= mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id)
   mpctx->global_sub_size = mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts->sub_id + 1;
 
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 if (ass_enabled && ass_library) {
   for (i = 0; i < mpctx->demuxer->num_attachments; ++i) {
     demux_attachment_t* att = mpctx->demuxer->attachments + i;
@@ -3696,7 +3695,7 @@ if (end_at.type == END_AT_SIZE) {
     end_at.type = END_AT_NONE;
 }
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
 mp_dvdnav_context_free(mpctx);
 if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
     mp_dvdnav_read_wait(mpctx->stream, 0, 1);
@@ -3845,7 +3844,7 @@ if(auto_quality>0){
 
 } // end if(mpctx->sh_video)
 
-#ifdef USE_DVDNAV
+#ifdef CONFIG_DVDNAV
  if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
    nav_highlight_t hl;
    mp_dvdnav_get_highlight (mpctx->stream, &hl);
@@ -3939,7 +3938,7 @@ if(mpctx->rel_seek_secs || mpctx->abs_seek_pos){
 	if(guiIntfStruct.Playing==0) break; // STOP
 	if(guiIntfStruct.Playing==2) mpctx->osd_function=OSD_PAUSE;
         if ( guiIntfStruct.DiskChanged || guiIntfStruct.NewPlay ) goto goto_next_file;
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
         if ( mpctx->stream->type == STREAMTYPE_DVD )
 	 {
 	  dvd_priv_t * dvdp = mpctx->stream->priv;
@@ -4001,7 +4000,7 @@ if(mpctx->set_of_sub_size > 0) {
     current_module="sub_free";
     for(i = 0; i < mpctx->set_of_sub_size; ++i) {
         sub_free(mpctx->set_of_subtitles[i]);
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
         if(mpctx->set_of_ass_tracks[i])
             ass_free_track( mpctx->set_of_ass_tracks[i] );
 #endif
@@ -4010,7 +4009,7 @@ if(mpctx->set_of_sub_size > 0) {
 }
 vo_sub_last = vo_sub=NULL;
 subdata=NULL;
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 ass_track = NULL;
 if(ass_library)
     ass_clear_fonts(ass_library);
@@ -4057,7 +4056,7 @@ while(mpctx->playtree_iter != NULL) {
 
 #ifdef HAVE_NEW_GUI
 if(use_gui && !mpctx->playtree_iter) {
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
     if(!guiIntfStruct.DiskChanged)
 #endif
         mplEnd();

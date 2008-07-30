@@ -108,7 +108,7 @@ static const vf_info_t* const filter_list[]={
 #endif
     &vf_info_crop,
     &vf_info_expand,
-#ifdef USE_LIBPOSTPROC
+#ifdef CONFIG_LIBPOSTPROC
     &vf_info_pp,
 #endif
     &vf_info_scale,
@@ -123,7 +123,7 @@ static const vf_info_t* const filter_list[]={
     &vf_info_mirror,
     &vf_info_palette,
     &vf_info_pp7,
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
     &vf_info_lavc,
     &vf_info_lavcdeint,
     &vf_info_screenshot,
@@ -170,7 +170,7 @@ static const vf_info_t* const filter_list[]={
     &vf_info_delogo,
     &vf_info_remove_logo,
     &vf_info_hue,
-#ifdef USE_LIBAVCODEC_A
+#ifdef CONFIG_LIBAVCODEC_A
     &vf_info_spp,
     &vf_info_uspp,
     &vf_info_fspp,
@@ -185,7 +185,7 @@ static const vf_info_t* const filter_list[]={
     &vf_info_divtc,
     &vf_info_harddup,
     &vf_info_softskip,
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
     &vf_info_ass,
 #endif
     &vf_info_yadif,

@@ -47,7 +47,7 @@ static unsigned long (*raOpenCodec2)(void*, void*);
 static unsigned long (*raSetFlavor)(void*,unsigned long);
 static void  (*raSetDLLAccessPath)(char*);
 static void  (*raSetPwd)(char*,char*);
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 static unsigned long WINAPI (*wraCloseCodec)(void*);
 static unsigned long WINAPI (*wraDecode)(void*, char*,unsigned long,char*,unsigned int*,long);
 static unsigned long WINAPI (*wraFreeDecoder)(void*);
@@ -147,7 +147,7 @@ static int load_syms_linux(char *path)
 }
 #endif    
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 
 #ifdef WIN32_LOADER
 #include "loader/ldt_keeper.h"
@@ -214,7 +214,7 @@ static int preinit(sh_audio_t *sh){
 #ifdef HAVE_LIBDL       
     if (strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	if (!load_syms_windows(sh->codec->dll))
 #endif
     {
@@ -224,7 +224,7 @@ static int preinit(sh_audio_t *sh){
 	return 0;
     }
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
   if((raSetDLLAccessPath && dll_type == 0) || (wraSetDLLAccessPath && dll_type == 1)){
 #else
   if(raSetDLLAccessPath){
@@ -237,7 +237,7 @@ static int preinit(sh_audio_t *sh){
         path[strlen(path)]='/';
       }
       path[strlen(path)+1]=0;
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     if (dll_type == 1)
     {
       int i;
@@ -250,7 +250,7 @@ static int preinit(sh_audio_t *sh){
       raSetDLLAccessPath(path);
   }
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     if (dll_type == 1){
       if(wraOpenCodec2)
 	result=wraOpenCodec2(&sh->context,REALCODEC_PATH "\\");
@@ -284,7 +284,7 @@ static int preinit(sh_audio_t *sh){
 	sh->wf->cbSize, // codec data length
 	(char*)(sh->wf+1) // extras
     };
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     wra_init_t winit_data={
 	sh->wf->nSamplesPerSec,
 	sh->wf->wBitsPerSample,
@@ -296,7 +296,7 @@ static int preinit(sh_audio_t *sh){
 	(char*)(sh->wf+1) // extras
     };
 #endif
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     if (dll_type == 1)
 	result=wraInitDecoder(sh->context,&winit_data);
     else
@@ -310,13 +310,13 @@ static int preinit(sh_audio_t *sh){
 //    printf("initdecoder ok (result: %x)\n", result);
   }
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     if((raSetPwd && dll_type == 0) || (wraSetPwd && dll_type == 1)){
 #else
     if(raSetPwd){
 #endif
 	// used by 'SIPR'
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
 	if (dll_type == 1)
 	    wraSetPwd(sh->context,"Ardubancel Quazanga");
 	else
@@ -337,7 +337,7 @@ static int preinit(sh_audio_t *sh){
         flavor = 2;
     mp_msg(MSGT_DECAUDIO,MSGL_V,"Got sipr flavor %d from bitrate %d\n",flavor, sh->wf->nAvgBytesPerSec);
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     if (dll_type == 1)
 	result=wraSetFlavor(sh->context,flavor);
     else
@@ -371,7 +371,7 @@ static int init(sh_audio_t *sh_audio){
 static void uninit(sh_audio_t *sh){
   // uninit the decoder etc...
   // again: you don't have to free() a_in_buffer here! it's done by the core.
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     if (dll_type == 1)
     {
 	if (wraFreeDecoder) wraFreeDecoder(sh->context);
@@ -383,7 +383,7 @@ static void uninit(sh_audio_t *sh){
     if (raCloseCodec) raCloseCodec(sh->context);
 
 
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     if (dll_type == 1)
     {
 	if (rv_handle) FreeLibrary(rv_handle);
@@ -407,7 +407,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       sh->a_in_buffer_len=sh->wf->nBlockAlign;
   }
   
-#ifdef USE_WIN32DLL
+#ifdef CONFIG_WIN32DLL
     if (dll_type == 1)
       result=wraDecode(sh->context, sh->a_in_buffer+sh->a_in_buffer_size-sh->a_in_buffer_len, sh->wf->nBlockAlign,
        buf, &len, -1);

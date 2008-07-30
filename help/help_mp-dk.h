@@ -16,7 +16,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<spor>  afspil et VCD (Video CD) spor fra et drev i stedet for en fil\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<titelnr> afspil DVD titel fra et drev i stedet for en fil\n"
 " -alang/-slang   vælg sprog til lyd og undertekster (vha. landekode på 2 tegn)\n"
 #endif

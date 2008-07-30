@@ -15,7 +15,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<numer_ścieżki>  odtwórz ścieżkę (S)VCD (Super Video CD) (bezpośrednio, bez montowania)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<tytuł>    odtwórz tytuł DVD z urządzenia zamiast pliku\n"
 " -alang/-slang    wybierz język napisów/ścieżki dźwiękowej (dwuliterowy kod kraju)\n"
 #endif

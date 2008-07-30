@@ -19,11 +19,11 @@
 + * instructions via assembly. However, it is regarded as duplicated work
 + * in MPlayer, so that we enforce using MPlayer's implementation.
 + */
-+#define USE_MPLAYER_CPUDETECT
++#define MPLAYER_CPUDETECT
 +
  static inline uint32_t arch_accel (void)
  {
-+#if !defined(USE_MPLAYER_CPUDETECT)
++#if !defined(MPLAYER_CPUDETECT)
      uint32_t eax, ebx, ecx, edx;
      int AMD;
      uint32_t caps;
@@ -31,7 +31,7 @@
  	caps |= MPEG2_ACCEL_X86_MMXEXT;
  
      return caps;
-+#else /* USE_MPLAYER_CPUDETECT: Use MPlayer's CPU capability property. */
++#else /* MPLAYER_CPUDETECT: Use MPlayer's CPU capability property. */
 +    caps = 0;
 +    if (gCpuCaps.hasMMX)
 +        caps |= MPEG2_ACCEL_X86_MMX;
@@ -44,7 +44,7 @@
 +
 +    return caps;
 +
-+#endif /* USE_MPLAYER_CPUDETECT */
++#endif /* MPLAYER_CPUDETECT */
  }
 -#endif /* ARCH_X86 */
 +#endif /* ARCH_X86 || ARCH_X86_64 */

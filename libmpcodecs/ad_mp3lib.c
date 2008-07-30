@@ -39,7 +39,7 @@ static int init(sh_audio_t *sh)
   // MPEG Audio:
   dec_audio_sh=sh; // save sh_audio for the callback:
 //  MP3_Init(fakemono,mplayer_accel,&mplayer_audio_read); // TODO!!!
-#ifdef USE_FAKE_MONO
+#ifdef CONFIG_FAKE_MONO
   MP3_Init(fakemono);
 #else
   MP3_Init();

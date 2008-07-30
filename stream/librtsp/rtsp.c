@@ -41,10 +41,11 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <inttypes.h>
 #ifdef HAVE_WINSOCK2
 #include <winsock2.h>
+#else
+#include <sys/socket.h>
 #endif
 #include "mp_msg.h"
 #include "rtsp.h"

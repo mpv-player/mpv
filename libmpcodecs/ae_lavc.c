@@ -25,7 +25,7 @@ extern int  lavc_param_atag;
 extern int  lavc_param_audio_global_header;
 extern int  avcodec_initialized;
 static int compressed_frame_size = 0;
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
 #include "libavformat/avformat.h"
 extern const struct AVCodecTag *mp_wav_taglists[];
 #endif
@@ -133,7 +133,7 @@ static int get_frame_size(audio_encoder_t *encoder)
         return sz;
 }
 
-#ifndef USE_LIBAVFORMAT
+#ifndef CONFIG_LIBAVFORMAT
 static uint32_t lavc_find_atag(char *codec)
 {
 	if(codec == NULL)
@@ -184,7 +184,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 	}
 	if(lavc_param_atag == 0)
 	{
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
 		lavc_param_atag = av_codec_get_tag(mp_wav_taglists, lavc_acodec->id);
 #else
 		lavc_param_atag = lavc_find_atag(lavc_param_acodec);

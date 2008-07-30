@@ -87,7 +87,7 @@ const mime_struct_t mime_type_table[] = {
 	// NullSoft Streaming Video
 	{ "video/nsv", DEMUXER_TYPE_NSV},
 	{ "misc/ultravox", DEMUXER_TYPE_NSV},
-#ifdef USE_LIBAVFORMAT
+#ifdef CONFIG_LIBAVFORMAT
 	// Flash Video
 	{ "video/x-flv", DEMUXER_TYPE_LAVF},
 #endif

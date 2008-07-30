@@ -1,7 +1,7 @@
 /* MP3 Player Library 2.0      (C) 1999 A'rpi/Astral&ESP-team  */
 
 /* decoder level: */
-#ifdef USE_FAKE_MONO
+#ifdef CONFIG_FAKE_MONO
 extern void MP3_Init(int fakemono);
 #else
 extern void MP3_Init();

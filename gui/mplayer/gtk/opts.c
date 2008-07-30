@@ -133,11 +133,11 @@ static GtkWidget     * RBFontNoAutoScale, * RBFontAutoScaleWidth, * RBFontAutoSc
 //static GtkWidget     * AutoScale;
 #endif
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
 static GtkWidget     * CBSubEncoding, * ESubEncoding;
 #endif
 
-#if defined( HAVE_FREETYPE ) || defined( USE_ICONV )
+#if defined(HAVE_FREETYPE) || defined(CONFIG_ICONV)
 static struct 
 {
  char * name;
@@ -188,7 +188,7 @@ static int    old_video_driver = 0;
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
-#if defined( HAVE_FREETYPE ) || defined( USE_ICONV )
+#if defined(HAVE_FREETYPE) || defined(CONFIG_ICONV)
 static void prEntry( GtkContainer * container,gpointer user_data );
 #endif
 
@@ -284,7 +284,7 @@ void ShowPreferences( void )
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ),gtkSubDumpMPSub );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDumpSrt ),gtkSubDumpSrt );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSubUnicode ),sub_unicode );
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBUseASS ),gtkASS.enabled );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBASSUseMargins ),gtkASS.use_margins );
  gtk_spin_button_set_value( (GtkSpinButton *)SBASSTopMargin,(gdouble)gtkASS.top_margin );
@@ -312,7 +312,7 @@ void ShowPreferences( void )
  if ( guiIntfStruct.Subtitlename ) gtk_entry_set_text( GTK_ENTRY( ESubtitleName ),guiIntfStruct.Subtitlename );
 #endif
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
  if ( sub_cp )
   {
    int i;
@@ -421,7 +421,7 @@ void ShowPreferences( void )
   else gtk_entry_set_text( GTK_ENTRY( prECDRomDevice ),DEFAULT_CDROM_DEVICE );
 
 // -- disables
-#ifndef USE_ASS
+#ifndef CONFIG_ASS
  gtk_widget_set_sensitive( CBUseASS,FALSE );
  gtk_widget_set_sensitive( CBASSUseMargins,FALSE );
  gtk_widget_set_sensitive( SBASSTopMargin,FALSE );
@@ -442,7 +442,7 @@ void ShowPreferences( void )
 #endif
  gtk_signal_connect( GTK_OBJECT( CBCache ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)8);
  gtk_signal_connect( GTK_OBJECT( CBAutoSync ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)9);
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
  gtk_signal_connect( GTK_OBJECT( CBUseASS ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)10);
 #endif
 
@@ -460,7 +460,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( HSFontOSDScale ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)9 );
  gtk_signal_connect( GTK_OBJECT( EFontEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),(void *)0 );
 #endif
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
  gtk_signal_connect( GTK_OBJECT( ESubEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),(void *)1 );
 #endif
  gtk_signal_connect( GTK_OBJECT( HSPPQuality ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)10 );
@@ -492,7 +492,7 @@ void HidePreferences( void )
 #endif
 }
 
-#if defined( HAVE_FREETYPE ) || defined( USE_ICONV )
+#if defined(HAVE_FREETYPE) || defined(CONFIG_ICONV)
 static void prEntry( GtkContainer * container,gpointer user_data )
 {	
  const char * comment;
@@ -508,7 +508,7 @@ static void prEntry( GtkContainer * container,gpointer user_data )
 	if ( lEncoding[i].comment ) gtkSet( gtkSetFontEncoding,0,lEncoding[i].name );
 	break;
 #endif
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
    case 1: // sub encoding
         comment=gtk_entry_get_text( GTK_ENTRY( ESubEncoding ) );
         for ( i=0;lEncoding[i].name;i++ )
@@ -563,7 +563,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkSubDumpMPSub=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ) );
 	gtkSubDumpSrt=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpSrt ) );
 	sub_unicode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSubUnicode ) );
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
 	gtkASS.enabled=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBUseASS ) );
 	gtkASS.use_margins=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBASSUseMargins ) );
 	gtkASS.top_margin=gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( SBASSTopMargin ) );
@@ -751,7 +751,7 @@ static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBAutoSync ) ) ) gtk_widget_set_sensitive( SBAutoSync,TRUE );
 	 else gtk_widget_set_sensitive( SBAutoSync,FALSE );
 	break;
-#ifdef USE_ASS
+#ifdef CONFIG_ASS
    case 10:
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBUseASS ) ) )
 	 {
@@ -1030,7 +1030,7 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_SUB_FPS,NULL );
     gtk_table_attach( GTK_TABLE( table1 ),label,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
   label=AddLabel( MSGTR_PREFERENCES_FontEncoding,NULL );
     gtk_table_attach( GTK_TABLE( table1 ),label,0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 #endif
@@ -1051,7 +1051,7 @@ GtkWidget * create_Preferences( void )
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( HSSubFPS ),TRUE );
     gtk_table_attach( GTK_TABLE( table1 ),HSSubFPS,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-#ifdef USE_ICONV
+#ifdef CONFIG_ICONV
   CBSubEncoding=gtk_combo_new();
   gtk_widget_set_name( CBSubEncoding,"CBSubEncoding" );
   gtk_widget_show( CBSubEncoding );
@@ -1373,7 +1373,7 @@ GtkWidget * create_Preferences( void )
   return Preferences;
 }
 
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
 GList *appendOSSDevices(GList *l) {
   // careful! the current implementation allows only string constants!
   l = g_list_append(l, (gpointer)"/dev/dsp");
@@ -1462,7 +1462,7 @@ GList *appendSDLDevices(GList *l) {
 }
 #endif
 
-#ifdef USE_ESD
+#ifdef CONFIG_ESD
 GList *appendESDDevices(GList *l) {
   l = g_list_append(l, (gpointer)"Enter Remote IP");
   l = g_list_append(l, (gpointer)"Use Software Mixer");
@@ -1503,7 +1503,7 @@ void ShowAudioConfig() {
   if (AudioConfig) gtkActive(AudioConfig);
   else AudioConfig = create_AudioConfig();
 
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
   if (strncmp(ao_driver[0], "oss", 3) == 0) {
     setGtkEntryText(CEAudioDevice, gtkAOOSSDevice);
     setGtkEntryText(CEAudioMixer, gtkAOOSSMixer);
@@ -1522,7 +1522,7 @@ void ShowAudioConfig() {
     setGtkEntryText(CEAudioDevice, gtkAOSDLDriver);
   }
 #endif
-#ifdef USE_ESD
+#ifdef CONFIG_ESD
   if (strncmp(ao_driver[0], "esd", 3) == 0) {
     setGtkEntryText(CEAudioDevice, gtkAOESDDevice);
   }
@@ -1542,7 +1542,7 @@ void HideAudioConfig() {
 static void audioButton(GtkButton *button, gpointer user_data) {
   switch( (int)user_data ) {
     case 1:
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
       if (strncmp(ao_driver[0], "oss", 3) == 0) {
         gfree(&gtkAOOSSDevice);
         gtkAOOSSDevice = gstrdup(getGtkEntryText(CEAudioDevice));
@@ -1568,7 +1568,7 @@ static void audioButton(GtkButton *button, gpointer user_data) {
         gtkAOSDLDriver = gstrdup(getGtkEntryText(CEAudioDevice));
       }
 #endif
-#ifdef USE_ESD
+#ifdef CONFIG_ESD
       if (strncmp(ao_driver[0], "esd", 3) == 0) {
         gfree(&gtkAOESDDevice);
         gtkAOESDDevice = gstrdup(getGtkEntryText(CEAudioDevice));
@@ -1612,7 +1612,7 @@ GtkWidget *create_AudioConfig() {
   CBAudioDevice = AddComboBox(NULL);
   gtk_table_attach(GTK_TABLE(table), CBAudioDevice, 1, 2, 0, 1, (GtkAttachOptions)(GTK_EXPAND | GTK_FILL), (GtkAttachOptions)(0), 0, 0);
   items = g_list_append(items,(gpointer)MSGTR_PREFERENCES_DriverDefault);
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
   if (strncmp(ao_driver[0], "oss", 3) == 0)
     items = appendOSSDevices(items);
 #endif
@@ -1624,7 +1624,7 @@ GtkWidget *create_AudioConfig() {
   if (strncmp(ao_driver[0], "sdl", 3) == 0)
     items = appendSDLDevices(items);
 #endif
-#ifdef USE_ESD
+#ifdef CONFIG_ESD
   if (strncmp(ao_driver[0], "esd", 3) == 0)
     items = appendESDDevices(items);
 #endif
@@ -1642,7 +1642,7 @@ GtkWidget *create_AudioConfig() {
   CBAudioMixer = AddComboBox(NULL);
   gtk_table_attach(GTK_TABLE(table), CBAudioMixer, 1, 2, 1, 2, (GtkAttachOptions)(GTK_EXPAND | GTK_FILL), (GtkAttachOptions)(0), 0, 0);
   items = g_list_append(items, (gpointer)MSGTR_PREFERENCES_DriverDefault);
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
   if (strncmp(ao_driver[0], "oss", 3) == 0)
     items = appendOSSMixers(items);
 #endif
@@ -1664,7 +1664,7 @@ GtkWidget *create_AudioConfig() {
   CBAudioMixerChannel = AddComboBox(NULL);
   gtk_table_attach(GTK_TABLE(table), CBAudioMixerChannel, 1, 2, 2, 3, (GtkAttachOptions)(GTK_EXPAND | GTK_FILL), (GtkAttachOptions)(0), 0, 0);
   items = g_list_append(items, (gpointer)MSGTR_PREFERENCES_DriverDefault);
-#ifdef USE_OSS_AUDIO
+#ifdef CONFIG_OSS_AUDIO
   if (strncmp(ao_driver[0], "oss", 3) == 0)
     items = appendOSSMixerChannels(items);
 #endif
@@ -1707,7 +1707,7 @@ static GtkWidget * DXR3Config;
 static GtkWidget * CBDevice;
 static GtkWidget * CEDXR3Device;
 static GtkWidget * RBVNone;
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
  static GtkWidget * RBVLavc;
 #endif
 static GtkWidget * dxr3BOk;
@@ -1723,7 +1723,7 @@ void ShowDXR3Config( void )
  gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),gtkDXR3Device );
 
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVNone ),TRUE );
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
  if ( gtkVfLAVC ) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVLavc ),TRUE );
 #endif
 
@@ -1745,7 +1745,7 @@ static void dxr3Button( GtkButton * button,gpointer user_data )
  {
   case 0: // Ok
        gfree( (void **)&gtkDXR3Device ); gtkDXR3Device=strdup( gtk_entry_get_text( GTK_ENTRY( CEDXR3Device ) ) );
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
        gtkVfLAVC=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBVLavc ) );
 #endif
   case 1: // Cancel
@@ -1800,7 +1800,7 @@ GtkWidget * create_DXR3Config( void )
  gtk_widget_show( CEDXR3Device );
  gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),"/dev/em8300" );
 
-#ifdef USE_LIBAVCODEC
+#ifdef CONFIG_LIBAVCODEC
  AddHSeparator( vbox2 );
  vbox3=AddVBox( vbox2,0 );
  AddLabel( MSGTR_PREFERENCES_DXR3_VENC,vbox3 );

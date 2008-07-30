@@ -116,7 +116,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	memset(&server_address, 0, sizeof(server_address));
 	
 #ifndef HAVE_WINSOCK2
-#ifdef USE_ATON
+#ifdef CONFIG_ATON
 	if (inet_aton(host, our_s_addr)!=1)
 #else
 	if (inet_pton(af, host, our_s_addr)!=1)
@@ -164,7 +164,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 			return TCP_ERROR_FATAL;
 	}
 
-#if defined(USE_ATON) || defined(HAVE_WINSOCK2)
+#if defined(CONFIG_ATON) || defined(HAVE_WINSOCK2)
 	strncpy( buf, inet_ntoa( *((struct in_addr*)our_s_addr) ), 255);
 #else
 	inet_ntop(af, our_s_addr, buf, 255);

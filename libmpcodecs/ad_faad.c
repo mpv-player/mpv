@@ -23,7 +23,7 @@ static const ad_info_t info =
 
 LIBAD_EXTERN(faad)
 
-#ifndef USE_FAAD_INTERNAL
+#ifndef CONFIG_FAAD_INTERNAL
 #include <faad.h>
 #else
 #include "libfaad2/faad.h"

@@ -17,7 +17,7 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<n°piste>  lit piste (S)VCD (Super Video CD) (périf. brut, non-monté)\n"
 #endif
-#ifdef USE_DVDREAD
+#ifdef CONFIG_DVDREAD
 " dvd://<n°titre>  lit titre DVD du périf. plutôt que d'un fichier\n"
 " -alang/-slang    langue audio/sous-titres du DVD (code pays 2 lettres)\n"
 #endif
