@@ -8540,9 +8540,6 @@ $_def_enca
 
 /* liblzo support */
 $_def_liblzo
-#ifdef USE_LIBLZO
-#define CONFIG_LZO 1
-#endif
 
 /* libmad support */
 $_def_mad
