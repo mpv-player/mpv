@@ -194,14 +194,17 @@
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
  	mpeg2_mc = mpeg2_mc_altivec;
      else
-@@ -67,6 +61,13 @@
+@@ -61,6 +61,16 @@
  	mpeg2_mc = mpeg2_mc_vis;
      else
  #endif
 +#ifdef ARCH_ARM
++#ifdef HAVE_IWMMXT
 +    if (accel & MPEG2_ACCEL_ARM_IWMMXT)
 +	mpeg2_mc = mpeg2_mc_iwmmxt;
-+    else if (accel & MPEG2_ACCEL_ARM)
++    else
++#endif
++    if (accel & MPEG2_ACCEL_ARM)
 +	mpeg2_mc = mpeg2_mc_arm;
 +    else
 +#endif
