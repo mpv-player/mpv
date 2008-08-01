@@ -1027,7 +1027,7 @@ void add_subtitles(char *filename, float fps, int noerr)
     subd = sub_read_file(filename, fps);
 #ifdef CONFIG_ASS
     if (ass_enabled)
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
         asst = ass_read_file(ass_library, filename, sub_cp);
 #else
         asst = ass_read_file(ass_library, filename, 0);
@@ -2850,7 +2850,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       mp_msg(MSGT_CPLAYER, MSGL_V, "Using %s timing\n",
 	     softsleep?"software":timer_name);
 
-#ifdef CONFIG_TERMCAP
+#ifdef HAVE_TERMCAP
   if ( !use_gui ) load_termcap(NULL); // load key-codes
 #endif
 

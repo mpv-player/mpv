@@ -16,7 +16,7 @@
 #include <math.h>
 #include <string.h>
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 #include <iconv.h>
 #endif
 
@@ -716,7 +716,7 @@ static int generate_tables(font_desc_t *desc, double thickness, double radius)
     return 0;
 }
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 /* decode from 'encoding' to unicode */
 static FT_ULong decode_char(iconv_t *cd, char c) {
     FT_ULong o;
@@ -1009,7 +1009,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
     }
     desc->face_cnt++;
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
     if (unicode) {
 	charset_size = prepare_charset_unicode(face, my_charset, my_charcodes);
     } else {

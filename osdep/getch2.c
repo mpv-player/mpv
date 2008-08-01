@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-//#define CONFIG_TERMCAP
+//#define HAVE_TERMCAP
 #if !defined(__OS2__) && !defined(__MORPHOS__)
 #define CONFIG_IOCTL
 #endif
@@ -28,7 +28,7 @@
 #endif
 #endif
 
-#if defined(CONFIG_LANGINFO) && defined(CONFIG_ICONV)
+#if defined(HAVE_LANGINFO) && defined(HAVE_ICONV)
 #include <locale.h>
 #include <langinfo.h>
 #endif
@@ -56,7 +56,7 @@ typedef struct {
 static keycode_st getch2_keys[MAX_KEYS];
 static int getch2_key_db=0;
 
-#ifdef CONFIG_TERMCAP
+#ifdef HAVE_TERMCAP
 
 #if 0
 #include <termcap.h>
@@ -270,11 +270,11 @@ void getch2_disable(void){
     getch2_status=0;
 }
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 char* get_term_charset(void)
 {
     char* charset = NULL;
-#ifdef CONFIG_LANGINFO
+#ifdef HAVE_LANGINFO
     setlocale(LC_CTYPE, "");
     charset = nl_langinfo(CODESET);
     setlocale(LC_CTYPE, "C");

@@ -51,7 +51,7 @@
 
 extern af_cfg_t af_cfg;
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 #include <iconv.h>
 #endif
 
@@ -1107,7 +1107,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	guiLoadFont();
 	return NULL;
 #endif
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
    case gtkSetSubEncoding:
 	gfree( (void **)&sub_cp );
 	sub_cp=gstrdup( (char *)vparam );

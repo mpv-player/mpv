@@ -65,7 +65,7 @@ extern char* sub_font_name;
 extern float text_font_scale_factor;
 extern int subtitle_autoscale;
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 extern char* sub_cp;
 #else
 static char* sub_cp = 0;

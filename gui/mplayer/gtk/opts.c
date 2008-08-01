@@ -133,11 +133,11 @@ static GtkWidget     * RBFontNoAutoScale, * RBFontAutoScaleWidth, * RBFontAutoSc
 //static GtkWidget     * AutoScale;
 #endif
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 static GtkWidget     * CBSubEncoding, * ESubEncoding;
 #endif
 
-#if defined(HAVE_FREETYPE) || defined(CONFIG_ICONV)
+#if defined(HAVE_FREETYPE) || defined(HAVE_ICONV)
 static struct 
 {
  char * name;
@@ -188,7 +188,7 @@ static int    old_video_driver = 0;
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
-#if defined(HAVE_FREETYPE) || defined(CONFIG_ICONV)
+#if defined(HAVE_FREETYPE) || defined(HAVE_ICONV)
 static void prEntry( GtkContainer * container,gpointer user_data );
 #endif
 
@@ -312,7 +312,7 @@ void ShowPreferences( void )
  if ( guiIntfStruct.Subtitlename ) gtk_entry_set_text( GTK_ENTRY( ESubtitleName ),guiIntfStruct.Subtitlename );
 #endif
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
  if ( sub_cp )
   {
    int i;
@@ -460,7 +460,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( HSFontOSDScale ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)9 );
  gtk_signal_connect( GTK_OBJECT( EFontEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),(void *)0 );
 #endif
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
  gtk_signal_connect( GTK_OBJECT( ESubEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),(void *)1 );
 #endif
  gtk_signal_connect( GTK_OBJECT( HSPPQuality ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)10 );
@@ -492,7 +492,7 @@ void HidePreferences( void )
 #endif
 }
 
-#if defined(HAVE_FREETYPE) || defined(CONFIG_ICONV)
+#if defined(HAVE_FREETYPE) || defined(HAVE_ICONV)
 static void prEntry( GtkContainer * container,gpointer user_data )
 {	
  const char * comment;
@@ -508,7 +508,7 @@ static void prEntry( GtkContainer * container,gpointer user_data )
 	if ( lEncoding[i].comment ) gtkSet( gtkSetFontEncoding,0,lEncoding[i].name );
 	break;
 #endif
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
    case 1: // sub encoding
         comment=gtk_entry_get_text( GTK_ENTRY( ESubEncoding ) );
         for ( i=0;lEncoding[i].name;i++ )
@@ -1030,7 +1030,7 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_SUB_FPS,NULL );
     gtk_table_attach( GTK_TABLE( table1 ),label,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
   label=AddLabel( MSGTR_PREFERENCES_FontEncoding,NULL );
     gtk_table_attach( GTK_TABLE( table1 ),label,0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 #endif
@@ -1051,7 +1051,7 @@ GtkWidget * create_Preferences( void )
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( HSSubFPS ),TRUE );
     gtk_table_attach( GTK_TABLE( table1 ),HSSubFPS,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
   CBSubEncoding=gtk_combo_new();
   gtk_widget_set_name( CBSubEncoding,"CBSubEncoding" );
   gtk_widget_show( CBSubEncoding );

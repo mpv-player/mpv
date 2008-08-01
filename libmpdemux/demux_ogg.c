@@ -196,7 +196,7 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
 
   mp_msg(MSGT_DEMUX,MSGL_DBG2,"Ogg sub lines: %d  first: '%s'\n",
       ogg_sub.lines, ogg_sub.text[0]);
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
   subcp_recode(&ogg_sub);
 #endif
   vo_sub = &ogg_sub;
@@ -745,7 +745,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   sh_audio_t* sh_a;
   sh_video_t* sh_v;
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
   subcp_open(NULL);
 #endif
 
@@ -1486,7 +1486,7 @@ static void demux_close_ogg(demuxer_t* demuxer) {
   if(!ogg_d)
     return;
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
   subcp_close();
 #endif
 

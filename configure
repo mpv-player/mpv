@@ -2598,9 +2598,9 @@ EOF
   cc_check && _langinfo=yes
 fi
 if test "$_langinfo" = yes ; then
-  _def_langinfo='#define CONFIG_LANGINFO 1'
+  _def_langinfo='#define HAVE_LANGINFO 1'
 else
-  _def_langinfo='#undef CONFIG_LANGINFO'
+  _def_langinfo='#undef HAVE_LANGINFO'
 fi
 echores "$_langinfo"
 
@@ -2859,9 +2859,9 @@ EOF
   echores "$_use_aton"
 fi
 
-_def_use_aton='#undef CONFIG_ATON'
+_def_use_aton='#undef HAVE_ATON'
 if test "$_use_aton" = yes; then
-  _def_use_aton='#define CONFIG_ATON 1'
+  _def_use_aton='#define HAVE_ATON 1'
 fi
 
 
@@ -3169,9 +3169,9 @@ EOF
   done
 fi
 if test "$_iconv" = yes ; then
-  _def_iconv='#define CONFIG_ICONV 1'
+  _def_iconv='#define HAVE_ICONV 1'
 else
-  _def_iconv='#undef CONFIG_ICONV'
+  _def_iconv='#undef HAVE_ICONV'
 fi
 echores "$_iconv"
 
@@ -3330,10 +3330,10 @@ EOF
   done
 fi
 if test "$_termcap" = yes ; then
-  _def_termcap='#define CONFIG_TERMCAP 1'
+  _def_termcap='#define HAVE_TERMCAP 1'
   _res_comment="using $_ld_tmp"
 else
-  _def_termcap='#undef CONFIG_TERMCAP'
+  _def_termcap='#undef HAVE_TERMCAP'
 fi
 echores "$_termcap"
 
@@ -5725,11 +5725,11 @@ EOF
     fi
 fi
 if test "$_fribidi" = yes ; then
-    _def_fribidi='#define CONFIG_FRIBIDI'
+    _def_fribidi='#define HAVE_FRIBIDI'
     _inc_extra="$_inc_extra `$_fribidiconfig --cflags`"
     _ld_extra="$_ld_extra `$_fribidiconfig --libs`"
 else
-    _def_fribidi='#undef CONFIG_FRIBIDI'
+    _def_fribidi='#undef HAVE_FRIBIDI'
 fi
 echores "$_fribidi"
 

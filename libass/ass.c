@@ -32,7 +32,7 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 #include <iconv.h>
 #endif
 
@@ -810,7 +810,7 @@ void ass_process_chunk(ass_track_t* track, char *data, int size, long long timec
 	free(str);
 }
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 /** \brief recode buffer to utf-8
  * constraint: codepage != 0
  * \param data pointer to text buffer
@@ -991,7 +991,7 @@ ass_track_t* ass_read_memory(ass_library_t* library, char* buf, size_t bufsize, 
 	if (!buf)
 		return 0;
 	
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 	if (codepage)
 		buf = sub_recode(buf, bufsize, codepage);
 	if (!buf)
@@ -1017,7 +1017,7 @@ char* read_file_recode(char* fname, char* codepage, int* size)
 	buf = read_file(fname, &bufsize);
 	if (!buf)
 		return 0;
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 	if (codepage) {
 		 char* tmpbuf = sub_recode(buf, bufsize, codepage);
 		 free(buf);
@@ -1071,7 +1071,7 @@ int ass_read_styles(ass_track_t* track, char* fname, char* codepage)
 	buf = read_file(fname, &sz);
 	if (!buf)
 		return 1;
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 	if (codepage) {
 		char* tmpbuf;
 		tmpbuf = sub_recode(buf, sz, codepage);
