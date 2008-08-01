@@ -2866,6 +2866,7 @@ fi
 
 
 echocheck "socklen_t"
+_socklen_t=no
 for header in "sys/socket.h" "ws2tcpip.h" ; do
   cat > $TMPC << EOF
 #include <$header>
