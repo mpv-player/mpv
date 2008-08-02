@@ -58,7 +58,7 @@
 #include "input/input.h"
 #include "input/mouse.h"
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #include "mplayer.h"
 #endif
@@ -943,7 +943,7 @@ void vo_x11_uninit(struct vo *vo)
         XFreeGC(vo->x11->display, x11->f_gc);
         x11->f_gc = NULL;
     }
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     /* destroy window only if it's not controlled by the GUI */
     if (!use_gui)
 #endif
@@ -998,7 +998,7 @@ int vo_x11_check_events(struct vo *vo)
     while (XPending(display))
     {
         XNextEvent(display, &Event);
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
         if (use_gui)
         {
             guiGetEvent(0, (char *) &Event);
@@ -1042,7 +1042,7 @@ int vo_x11_check_events(struct vo *vo)
                 {
                     int key;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
                     if ( use_gui ) { break; }
 #endif
 
@@ -1081,7 +1081,7 @@ int vo_x11_check_events(struct vo *vo)
                     x11->mouse_waiting_hide = 1;
                     x11->mouse_timer = GetTimerMS();
                 }
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
                 // Ignore mouse button 1-3 under GUI.
                 if (use_gui && (Event.xbutton.button >= 1)
                     && (Event.xbutton.button <= 3))
@@ -1098,7 +1098,7 @@ int vo_x11_check_events(struct vo *vo)
                     x11->mouse_waiting_hide = 1;
                     x11->mouse_timer = GetTimerMS();
                 }
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
                 // Ignore mouse button 1-3 under GUI.
                 if (use_gui && (Event.xbutton.button >= 1)
                     && (Event.xbutton.button <= 3))
@@ -1797,7 +1797,7 @@ void vo_vm_close(struct vo *vo)
 {
     Display *dpy = vo->x11->display;
     struct MPOpts *opts = vo->opts;
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (vidmodes != NULL && vo->x11->vo_window != None)
 #else
     if (vidmodes != NULL)

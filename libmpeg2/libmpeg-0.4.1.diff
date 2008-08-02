@@ -194,14 +194,17 @@
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
  	mpeg2_mc = mpeg2_mc_altivec;
      else
-@@ -67,6 +61,13 @@
+@@ -61,6 +61,16 @@
  	mpeg2_mc = mpeg2_mc_vis;
      else
  #endif
 +#ifdef ARCH_ARM
++#ifdef HAVE_IWMMXT
 +    if (accel & MPEG2_ACCEL_ARM_IWMMXT)
 +	mpeg2_mc = mpeg2_mc_iwmmxt;
-+    else if (accel & MPEG2_ACCEL_ARM)
++    else
++#endif
++    if (accel & MPEG2_ACCEL_ARM)
 +	mpeg2_mc = mpeg2_mc_arm;
 +    else
 +#endif
@@ -336,20 +339,6 @@
  /* work around gcc <3.3 vec_mergel bug */
  static inline vector_s16_t my_vec_mergel (vector_s16_t const A,
  					  vector_s16_t const B)
-@@ -56,10 +56,10 @@
- #define vec_mergel my_vec_mergel
- #endif
- 
--#ifdef HAVE_ALTIVEC_H	/* gnu */
--#define VEC_S16(a,b,c,d,e,f,g,h) {a, b, c, d, e, f, g, h}
--#else			/* apple */
-+#if defined(__APPLE_CC__)	/* apple */
- #define VEC_S16(a,b,c,d,e,f,g,h) (vector_s16_t) (a, b, c, d, e, f, g, h)
-+#else			/* gnu */
-+#define VEC_S16(a,b,c,d,e,f,g,h) {a, b, c, d, e, f, g, h}
- #endif
- 
- static const vector_s16_t constants ATTR_ALIGN(16) =
 Index: libmpeg2/motion_comp_arm.c
 ===================================================================
 --- libmpeg2/motion_comp_arm.c	(revision 0)

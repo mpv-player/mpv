@@ -51,11 +51,11 @@
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 #endif
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
 #include "m_struct.h"
 #include "libmenu/menu.h"
 #endif
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 
@@ -977,7 +977,7 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
 	    return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 	if (use_gui)
 	    guiGetEvent(guiIEvent, (char *) MP_CMD_GUI_FULLSCREEN);
 	else
@@ -2492,7 +2492,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		int n = cmd->args[0].v.i == 0 ? 1 : cmd->args[0].v.i;
 		int force = cmd->args[1].v.i;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 		if (use_gui) {
 		    int i = 0;
 		    if (n > 0)
@@ -3132,7 +3132,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 				    "Selected button number %d", button);
 		}
 #endif
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
 		if (use_menu && dx >= 0.0 && dy >= 0.0)
 		    menu_update_mouse_pos(dx, dy);
 #endif
@@ -3168,7 +3168,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #endif
 
 	default:
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 	    if ((use_gui) && (cmd->id > MP_CMD_GUI_EVENTS))
 		guiGetEvent(guiIEvent, (char *) cmd->id);
 	    else

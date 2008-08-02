@@ -883,7 +883,7 @@ void list_codecs(int audioflag){
 /*
  * Fake out GUI references when building the codecs2html utility.
  */
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 void gtkMessageBox( int type,char * str ) { return; }
 int use_gui = 0;
 #endif

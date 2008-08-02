@@ -170,7 +170,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_TELETEXT_GO_LINK, "teletext_go_link", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
 #endif
 
-#ifdef HAVE_NEW_GUI  
+#ifdef CONFIG_GUI
   { MP_CMD_GUI_LOADFILE, "gui_loadfile", 0, { {-1,{0}} } },
   { MP_CMD_GUI_LOADSUBTITLE, "gui_loadsubtitle", 0, { {-1,{0}} } },
   { MP_CMD_GUI_ABOUT, "gui_about", 0, { {-1,{0}} } },
@@ -185,7 +185,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
 #endif
 
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
   { MP_CMD_MENU, "menu",1,  { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_SET_MENU, "set_menu",1,  { {MP_CMD_ARG_STRING, {0}},  {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_CHELP, "help", 0, { {-1,{0}} } },
@@ -491,7 +491,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
 };
 
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 static const mp_cmd_bind_t gui_def_cmd_binds[] = {
 
   { { 'l', 0 }, "gui_loadfile" },
@@ -1677,7 +1677,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
 
   char* file;
 
-#ifdef HAVE_NEW_GUI  
+#ifdef CONFIG_GUI
   if(use_gui)
       add_binds(ictx, gui_def_cmd_binds);
 #endif

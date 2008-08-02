@@ -165,7 +165,7 @@ static const m_option_t gui_opts[] =
 #endif
  { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
  { "sub_overlap",&suboverlap_enabled,CONF_TYPE_FLAG,0,0,0,NULL },
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
  { "sub_cp",&sub_cp,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
  { "font_factor",&font_factor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },

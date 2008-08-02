@@ -32,17 +32,17 @@ static vf_info_t* encoder_list[]={
     &ve_info_qtvideo,
 #endif
 #endif
-#ifdef HAVE_LIBDV095
+#ifdef CONFIG_LIBDV095
     &ve_info_libdv,
 #endif
     &ve_info_raw,
-#ifdef HAVE_XVID4
+#ifdef CONFIG_XVID4
     &ve_info_xvid,
 #endif
 #ifdef CONFIG_LIBLZO
     &ve_info_nuv,
 #endif
-#ifdef HAVE_X264
+#ifdef CONFIG_X264
     &ve_info_x264,
 #endif
     /* Please do not add any new encoders here. If you want to implement a new

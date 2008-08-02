@@ -31,7 +31,7 @@
 
 #include "subopt-helper.h"
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 
@@ -645,7 +645,7 @@ skip_surface_allocation:
    if( flags&VOFLAG_MODESWITCHING ) vm = 1;
 #endif
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
    if(use_gui)
       guiGetEvent( guiSetShVideo,0 ); // let the GUI to setup/resize our window
    else

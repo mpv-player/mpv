@@ -135,17 +135,17 @@ const m_option_t mplayer_opts[]={
 	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver.\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
-#if defined(HAVE_FBDEV)||defined(HAVE_VESA) 
+#if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
        {"monitor-hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
        {"monitor-vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
        {"monitor-dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 #endif 
 
-#ifdef HAVE_FBDEV
+#ifdef CONFIG_FBDEV
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-#ifdef HAVE_DIRECTFB
+#ifdef CONFIG_DIRECTFB
 #if DIRECTFBVERSION > 912
 	{"dfbopts", "-dfbopts has been removed. Use -vf directfb:dfbopts=... instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
@@ -216,7 +216,7 @@ const m_option_t mplayer_opts[]={
 	{"vaa_dr", "-vaa_dr has been removed, use -dr.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"vaa_nodr", "-vaa_nodr has been removed, use -nodr.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
-#ifdef HAVE_AA
+#ifdef CONFIG_AA
 	// -vo aa
 	{"aa*", "-aa* has been removed. Use -vo aa:suboption instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
@@ -241,7 +241,7 @@ const m_option_t mplayer_opts[]={
 #endif
 	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 	{"osd-duration", &osd_duration, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
-#ifdef HAVE_MENU
+#ifdef CONFIG_MENU
 	{"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"menu-root", &menu_root, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
@@ -249,16 +249,16 @@ const m_option_t mplayer_opts[]={
 	{"menu-startup", &menu_startup, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"menu-keepdir", &menu_keepdir, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"menu-chroot", &menu_chroot, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef CONFIG_FRIBIDI
+#ifdef HAVE_FRIBIDI
 	{"menu-fribidi-charset", &menu_fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"menu-flip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"menu-noflip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"menu-flip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"menu-noflip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif /* CONFIG_FRIBIDI */
+#endif /* HAVE_FRIBIDI */
 #else
 	{"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
-#endif /* HAVE_MENU */
+#endif /* CONFIG_MENU */
 
 	// these should be moved to -common, and supported in MEncoder
 	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -297,7 +297,7 @@ const m_option_t mplayer_opts[]={
 	{"gui", "The -gui option will only work as the first command line argument.\n", CONF_TYPE_PRINT, 0, 0, 0, (void *)1},
 	{"nogui", "The -nogui option will only work as the first command line argument.\n", CONF_TYPE_PRINT, 0, 0, 0, (void *)1},
       
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 	{"skin", &skinName, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"enqueue", &enqueue, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noenqueue", &enqueue, CONF_TYPE_FLAG, 0, 1, 0, NULL},

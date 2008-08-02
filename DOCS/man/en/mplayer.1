@@ -8196,24 +8196,14 @@ the quantizer more over time (slower change).
 .TP
 .B vqcomp=<0.0\-1.0>
 Quantizer compression, vrc_eq depends upon this (default: 0.5).
-For instance, assuming the default rate control equation is used,
-if vqcomp=1.0, the ratecontrol allocates to each frame the number of bits
-needed to encode them all at the same QP.
-If vqcomp=0.0, the ratecontrol allocates the same number of bits to each
-frame, i.e. strict CBR.
 .I NOTE:
-Those are extreme settings and should never be used.
-Perceptual quality will be optimal somewhere in between these two extremes.
+Perceptual quality will be optimal somewhere in between the range's extremes.
 .
 .TP
 .B vrc_eq=<equation>
 main ratecontrol equation
 .RE
 .RSs
-.IPs "1\ \ \ \ "
-constant bitrate
-.IPs "tex\ \ "
-constant quality
 .IPs 1+(tex/\:avgTex-1)*qComp
 approximately the equation of the old ratecontrol code
 .IPs tex^qComp

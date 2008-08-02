@@ -2598,9 +2598,9 @@ EOF
   cc_check && _langinfo=yes
 fi
 if test "$_langinfo" = yes ; then
-  _def_langinfo='#define CONFIG_LANGINFO 1'
+  _def_langinfo='#define HAVE_LANGINFO 1'
 else
-  _def_langinfo='#undef CONFIG_LANGINFO'
+  _def_langinfo='#undef HAVE_LANGINFO'
 fi
 echores "$_langinfo"
 
@@ -2859,18 +2859,21 @@ EOF
   echores "$_use_aton"
 fi
 
-_def_use_aton='#undef CONFIG_ATON'
+_def_use_aton='#undef HAVE_ATON'
 if test "$_use_aton" = yes; then
-  _def_use_aton='#define CONFIG_ATON 1'
+  _def_use_aton='#define HAVE_ATON 1'
 fi
 
 
 echocheck "socklen_t"
-cat > $TMPC << EOF
-#include <sys/socket.h>
+_socklen_t=no
+for header in "sys/socket.h" "ws2tcpip.h" ; do
+  cat > $TMPC << EOF
+#include <$header>
 int main(void) { socklen_t v = 0; return v; }
 EOF
-cc_check && _socklen_t=yes
+  cc_check && _socklen_t=yes && break
+done
 if test "$_socklen_t" = yes ; then
   _def_socklen_t='#define HAVE_SOCKLEN_T 1'
 else
@@ -3166,9 +3169,9 @@ EOF
   done
 fi
 if test "$_iconv" = yes ; then
-  _def_iconv='#define CONFIG_ICONV 1'
+  _def_iconv='#define HAVE_ICONV 1'
 else
-  _def_iconv='#undef CONFIG_ICONV'
+  _def_iconv='#undef HAVE_ICONV'
 fi
 echores "$_iconv"
 
@@ -3327,10 +3330,10 @@ EOF
   done
 fi
 if test "$_termcap" = yes ; then
-  _def_termcap='#define CONFIG_TERMCAP 1'
+  _def_termcap='#define HAVE_TERMCAP 1'
   _res_comment="using $_ld_tmp"
 else
-  _def_termcap='#undef CONFIG_TERMCAP'
+  _def_termcap='#undef HAVE_TERMCAP'
 fi
 echores "$_termcap"
 
@@ -3739,33 +3742,33 @@ echores "$_smbsupport"
 
 echocheck "tdfxfb"
 if test "$_tdfxfb" = yes ; then
-  _def_tdfxfb='#define HAVE_TDFXFB 1'
+  _def_tdfxfb='#define CONFIG_TDFXFB 1'
   _vosrc="$_vosrc vo_tdfxfb.c"
   _vomodules="tdfxfb $_vomodules"
 else
-  _def_tdfxfb='#undef HAVE_TDFXFB'
+  _def_tdfxfb='#undef CONFIG_TDFXFB'
   _novomodules="tdfxfb $_novomodules"
 fi
 echores "$_tdfxfb"
 
 echocheck "s3fb"
 if test "$_s3fb" = yes ; then
-  _def_s3fb='#define HAVE_S3FB 1'
+  _def_s3fb='#define CONFIG_S3FB 1'
   _vosrc="$_vosrc vo_s3fb.c"
   _vomodules="s3fb $_vomodules"
 else
-  _def_s3fb='#undef HAVE_S3FB'
+  _def_s3fb='#undef CONFIG_S3FB'
   _novomodules="s3fb $_novomodules"
 fi
 echores "$_s3fb"
 
 echocheck "tdfxvid"
 if test "$_tdfxvid" = yes ; then
-  _def_tdfxvid='#define HAVE_TDFX_VID 1'
+  _def_tdfxvid='#define CONFIG_TDFX_VID 1'
   _vosrc="$_vosrc vo_tdfx_vid.c"
   _vomodules="tdfx_vid $_vomodules"
 else
-  _def_tdfxvid='#undef HAVE_TDFX_VID'
+  _def_tdfxvid='#undef CONFIG_TDFX_VID'
   _novomodules="tdfx_vid $_novomodules"
 fi
 echores "$_tdfxvid"
@@ -3788,22 +3791,22 @@ EOF
   cc_check && _xvr100=yes
 fi
 if test "$_xvr100" = yes ; then
-  _def_xvr100='#define HAVE_XVR100 1'
+  _def_xvr100='#define CONFIG_XVR100 1'
   _vosrc="$_vosrc vo_xvr100.c"
   _vomodules="xvr100 $_vomodules"
 else
-  _def_tdfxvid='#undef HAVE_XVR100'
+  _def_tdfxvid='#undef CONFIG_XVR100'
   _novomodules="xvr100 $_novomodules"
 fi
 echores "$_xvr100"
 
 echocheck "tga"
 if test "$_tga" = yes ; then
-  _def_tga='#define HAVE_TGA 1'
+  _def_tga='#define CONFIG_TGA 1'
   _vosrc="$_vosrc vo_tga.c"
   _vomodules="tga $_vomodules"
 else
-  _def_tga='#undef HAVE_TGA'
+  _def_tga='#undef CONFIG_TGA'
   _novomodules="tga $_novomodules"
 fi
 echores "$_tga"
@@ -3811,11 +3814,11 @@ echores "$_tga"
 
 echocheck "md5sum support"
 if test "$_md5sum" = yes; then
-  _def_md5sum="#define HAVE_MD5SUM"
+  _def_md5sum="#define CONFIG_MD5SUM"
   _vosrc="$_vosrc vo_md5sum.c"
   _vomodules="md5sum $_vomodules"
 else
-  _def_md5sum="#undef HAVE_MD5SUM"
+  _def_md5sum="#undef CONFIG_MD5SUM"
   _novomodules="md5sum $_novomodules"
 fi
 echores "$_md5sum"
@@ -3823,11 +3826,11 @@ echores "$_md5sum"
 
 echocheck "yuv4mpeg support"
 if test "$_yuv4mpeg" = yes; then
-  _def_yuv4mpeg="#define HAVE_YUV4MPEG"
+  _def_yuv4mpeg="#define CONFIG_YUV4MPEG"
   _vosrc="$_vosrc vo_yuv4mpeg.c"
   _vomodules="yuv4mpeg $_vomodules"
 else
-  _def_yuv4mpeg="#undef HAVE_YUV4MPEG"
+  _def_yuv4mpeg="#undef CONFIG_YUV4MPEG"
   _novomodules="yuv4mpeg $_novomodules"
 fi
 echores "$_yuv4mpeg"
@@ -3835,11 +3838,11 @@ echores "$_yuv4mpeg"
 
 echocheck "bl"
 if test "$_bl" = yes ; then
-  _def_bl='#define HAVE_BL 1'
+  _def_bl='#define CONFIG_BL 1'
   _vosrc="$_vosrc vo_bl.c"
   _vomodules="bl $_vomodules"
 else
-  _def_bl='#undef HAVE_BL'
+  _def_bl='#undef CONFIG_BL'
   _novomodules="bl $_novomodules"
 fi
 echores "$_bl"
@@ -3893,21 +3896,21 @@ fi
 echores "$_directfb"
 
 if test "$_directfb" = yes ; then
-  _def_directfb='#define HAVE_DIRECTFB 1'
+  _def_directfb='#define CONFIG_DIRECTFB 1'
   _vosrc="$_vosrc vo_directfb2.c"
   _vomodules="directfb $_vomodules"
   _libs_mplayer="$_libs_mplayer -ldirectfb"
 else
-  _def_directfb='#undef HAVE_DIRECTFB'
+  _def_directfb='#undef CONFIG_DIRECTFB'
   _novomodules="directfb $_novomodules"
 fi
 if test "$_dfbmga" = yes; then
   _vosrc="$_vosrc vo_dfbmga.c"
   _vomodules="dfbmga $_vomodules"
-  _def_dfbmga='#define HAVE_DFBMGA 1'
+  _def_dfbmga='#define CONFIG_DFBMGA 1'
 else
   _novomodules="dfbmga $_novomodules"
-  _def_dfbmga='#undef HAVE_DFBMGA'
+  _def_dfbmga='#undef CONFIG_DFBMGA'
 fi
 
 
@@ -4185,11 +4188,11 @@ echores "$_dga"
 
 echocheck "3dfx"
 if test "$_3dfx" = yes && test "$_dga" = yes ; then
-  _def_3dfx='#define HAVE_3DFX 1'
+  _def_3dfx='#define CONFIG_3DFX 1'
   _vosrc="$_vosrc vo_3dfx.c"
   _vomodules="3dfx $_vomodules"
 else
-  _def_3dfx='#undef HAVE_3DFX'
+  _def_3dfx='#undef CONFIG_3DFX'
   _novomodules="3dfx $_novomodules"
 fi
 echores "$_3dfx"
@@ -4234,7 +4237,7 @@ else
   _gl=no
 fi
 if test "$_gl" = yes ; then
-  _def_gl='#define HAVE_GL 1'
+  _def_gl='#define CONFIG_GL 1'
   _vosrc="$_vosrc vo_gl.c vo_gl2.c gl_common.c"
   if test "$_gl_win32" = yes ; then
     _def_gl_win32='#define GL_WIN32 1'
@@ -4243,7 +4246,7 @@ if test "$_gl" = yes ; then
   fi
   _vomodules="opengl $_vomodules"
 else
-  _def_gl='#undef HAVE_GL'
+  _def_gl='#undef CONFIG_GL'
   _def_gl_win32='#undef GL_WIN32'
   _novomodules="opengl $_novomodules"
 fi
@@ -4344,11 +4347,11 @@ if test "$_mga" = auto ; then
   test -c /dev/mga_vid && _mga=yes
 fi
 if test "$_mga" = yes ; then
-  _def_mga='#define HAVE_MGA 1'
+  _def_mga='#define CONFIG_MGA 1'
   _vosrc="$_vosrc vo_mga.c"
   _vomodules="mga $_vomodules"
 else
-  _def_mga='#undef HAVE_MGA'
+  _def_mga='#undef CONFIG_MGA'
   _novomodules="mga $_novomodules"
 fi
 echores "$_mga"
@@ -4360,11 +4363,11 @@ if test "$_xmga" = auto ; then
   test "$_x11" = yes && test "$_mga" = yes && _xmga=yes
 fi
 if test "$_xmga" = yes ; then
-  _def_xmga='#define HAVE_XMGA 1'
+  _def_xmga='#define CONFIG_XMGA 1'
   _vosrc="$_vosrc vo_xmga.c"
   _vomodules="xmga $_vomodules"
 else
-  _def_xmga='#undef HAVE_XMGA'
+  _def_xmga='#undef CONFIG_XMGA'
   _novomodules="xmga $_novomodules"
 fi
 echores "$_xmga"
@@ -4380,12 +4383,12 @@ EOF
   cc_check -lggi && _ggi=yes
 fi
 if test "$_ggi" = yes ; then
-  _def_ggi='#define HAVE_GGI 1'
+  _def_ggi='#define CONFIG_GGI 1'
   _libs_mplayer="$_libs_mplayer -lggi"
   _vosrc="$_vosrc vo_ggi.c"
   _vomodules="ggi $_vomodules"
 else
-  _def_ggi='#undef HAVE_GGI'
+  _def_ggi='#undef CONFIG_GGI'
   _novomodules="ggi $_novomodules"
 fi
 echores "$_ggi"
@@ -4403,11 +4406,11 @@ fi
 # needed to get right output on obscure combination
 # like --disable-ggi --enable-ggiwmh
 if test "$_ggi" = yes && test "$_ggiwmh" = yes ; then
-  _def_ggiwmh='#define HAVE_GGIWMH 1'
+  _def_ggiwmh='#define CONFIG_GGIWMH 1'
   _libs_mplayer="$_libs_mplayer -lggiwmh"
 else
   _ggiwmh=no
-  _def_ggiwmh='#undef HAVE_GGIWMH'
+  _def_ggiwmh='#undef CONFIG_GGIWMH'
 fi
 echores "$_ggiwmh"
 
@@ -4433,14 +4436,14 @@ EOF
   done
 fi
 if test "$_aa" = yes ; then
-  _def_aa='#define HAVE_AA 1'
+  _def_aa='#define CONFIG_AA 1'
   if cygwin ; then
     _libs_mplayer="$_libs_mplayer `aalib-config --libs | cut -d " " -f 2,5,6`"
   fi
   _vosrc="$_vosrc vo_aa.c"
   _vomodules="aa $_vomodules"
 else
-  _def_aa='#undef HAVE_AA'
+  _def_aa='#undef CONFIG_AA'
   _novomodules="aa $_novomodules"
 fi
 echores "$_aa"
@@ -4461,13 +4464,13 @@ EOF
   fi
 fi
 if test "$_caca" = yes ; then
-  _def_caca='#define HAVE_CACA 1'
+  _def_caca='#define CONFIG_CACA 1'
   _inc_extra="$_inc_extra `caca-config --cflags`"
   _libs_mplayer="$_libs_mplayer `caca-config --libs`"
   _vosrc="$_vosrc vo_caca.c"
   _vomodules="caca $_vomodules"
 else
-  _def_caca='#undef HAVE_CACA'
+  _def_caca='#undef CONFIG_CACA'
   _novomodules="caca $_novomodules"
 fi
 echores "$_caca"
@@ -4483,12 +4486,12 @@ EOF
   cc_check -lvga $_ld_lm && _svga=yes
 fi
 if test "$_svga" = yes ; then
-  _def_svga='#define HAVE_SVGALIB 1'
+  _def_svga='#define CONFIG_SVGALIB 1'
   _libs_mplayer="$_libs_mplayer -lvga"
   _vosrc="$_vosrc vo_svga.c"
   _vomodules="svga $_vomodules"
 else
-  _def_svga='#undef HAVE_SVGALIB'
+  _def_svga='#undef CONFIG_SVGALIB'
   _novomodules="svga $_novomodules"
 fi
 echores "$_svga"
@@ -4500,11 +4503,11 @@ if test "$_fbdev" = auto ; then
   linux && _fbdev=yes
 fi
 if test "$_fbdev" = yes ; then
-  _def_fbdev='#define HAVE_FBDEV 1'
+  _def_fbdev='#define CONFIG_FBDEV 1'
   _vosrc="$_vosrc vo_fbdev.c vo_fbdev2.c"
   _vomodules="fbdev $_vomodules"
 else
-  _def_fbdev='#undef HAVE_FBDEV'
+  _def_fbdev='#undef CONFIG_FBDEV'
   _novomodules="fbdev $_novomodules"
 fi
 echores "$_fbdev"
@@ -4767,12 +4770,12 @@ EOF
   cc_check -lvbe -llrmi && _vesa=yes
 fi
 if test "$_vesa" = yes ; then
-  _def_vesa='#define HAVE_VESA 1'
+  _def_vesa='#define CONFIG_VESA 1'
   _libs_mplayer="$_libs_mplayer -lvbe -llrmi"
   _vosrc="$_vosrc vo_vesa.c vesa_lvo.c gtf.c"
   _vomodules="vesa $_vomodules"
 else
-  _def_vesa='#undef HAVE_VESA'
+  _def_vesa='#undef CONFIG_VESA'
   _novomodules="vesa $_novomodules"
 fi
 echores "$_vesa"
@@ -5722,11 +5725,11 @@ EOF
     fi
 fi
 if test "$_fribidi" = yes ; then
-    _def_fribidi='#define CONFIG_FRIBIDI'
+    _def_fribidi='#define HAVE_FRIBIDI'
     _inc_extra="$_inc_extra `$_fribidiconfig --cflags`"
     _ld_extra="$_ld_extra `$_fribidiconfig --libs`"
 else
-    _def_fribidi='#undef CONFIG_FRIBIDI'
+    _def_fribidi='#undef HAVE_FRIBIDI'
 fi
 echores "$_fribidi"
 
@@ -5846,11 +5849,11 @@ EOF
   cc_check -ltwolame $_ld_lm && _twolame=yes
 fi
 if test "$_twolame" = yes ; then
-  _def_twolame='#define HAVE_TWOLAME 1'
+  _def_twolame='#define CONFIG_TWOLAME 1'
   _libs_mencoder="$_libs_mencoder -ltwolame"
   _codecmodules="twolame $_codecmodules"
 else
-  _def_twolame='#undef HAVE_TWOLAME'
+  _def_twolame='#undef CONFIG_TWOLAME'
   _nocodecmodules="twolame $_nocodecmodules"
 fi
 echores "$_twolame"
@@ -5869,11 +5872,11 @@ EOF
 fi
 fi
 if test "$_toolame" = yes ; then
-  _def_toolame='#define HAVE_TOOLAME 1'
+  _def_toolame='#define CONFIG_TOOLAME 1'
   _libs_mencoder="$_libs_mencoder -ltoolame"
   _codecmodules="toolame $_codecmodules"
 else
-  _def_toolame='#undef HAVE_TOOLAME'
+  _def_toolame='#undef CONFIG_TOOLAME'
   _nocodecmodules="toolame $_nocodecmodules"
 fi
 if test "$_toolamedir" ; then
@@ -5902,7 +5905,7 @@ EOF
 fi
 if test "$_tremor_internal" = yes ; then
   _vorbis=yes
-  _def_vorbis='#define HAVE_OGGVORBIS 1'
+  _def_vorbis='#define CONFIG_OGGVORBIS 1'
   _def_tremor='#define TREMOR 1'
   _codecmodules="tremor(internal) $_codecmodules"
   _res_comment="internal Tremor"
@@ -5912,14 +5915,14 @@ if test "$_tremor_internal" = yes ; then
   fi
 elif test "$_tremor_external" = yes ; then
   _vorbis=yes
-  _def_vorbis='#define HAVE_OGGVORBIS 1'
+  _def_vorbis='#define CONFIG_OGGVORBIS 1'
   _def_tremor='#define TREMOR 1'
   _codecmodules="tremor(external) $_codecmodules"
   _res_comment="external Tremor"
   _ld_extra="$_ld_extra -logg -lvorbisidec"
 elif test "$_libvorbis" = yes ; then
   _vorbis=yes
-  _def_vorbis='#define HAVE_OGGVORBIS 1'
+  _def_vorbis='#define CONFIG_OGGVORBIS 1'
   _codecmodules="libvorbis $_codecmodules"
   _res_comment="libvorbis"
   _ld_extra="$_ld_extra -lvorbis -logg"
@@ -5939,11 +5942,11 @@ EOF
   cc_check -lspeex $_ld_lm && _speex=yes
 fi
 if test "$_speex" = yes ; then
-  _def_speex='#define HAVE_SPEEX 1'
+  _def_speex='#define CONFIG_SPEEX 1'
   _ld_extra="$_ld_extra -lspeex"
   _codecmodules="speex $_codecmodules"
 else
-  _def_speex='#undef HAVE_SPEEX'
+  _def_speex='#undef CONFIG_SPEEX'
   _nocodecmodules="speex $_nocodecmodules"
 fi
 echores "$_speex"
@@ -5996,13 +5999,13 @@ EOF
   fi
 fi
 if test "$_theora" = yes ; then
-  _def_theora='#define HAVE_OGGTHEORA 1'
+  _def_theora='#define CONFIG_OGGTHEORA 1'
   _codecmodules="libtheora $_codecmodules"
   # when --enable-theora is forced, we'd better provide a probably sane
   # $_ld_theora than nothing
   test -z "$_ld_theora" && _ld_extra="$_ld_extra -ltheora -logg"
 else
-  _def_theora='#undef HAVE_OGGTHEORA'
+  _def_theora='#undef CONFIG_OGGTHEORA'
   _nocodecmodules="libtheora $_nocodecmodules"
 fi
 echores "$_theora"
@@ -6087,11 +6090,11 @@ EOF
   cc_check -lmpcdec $_ld_lm && _musepack=yes
 fi
 if test "$_musepack" = yes ; then
-  _def_musepack='#define HAVE_MUSEPACK 1'
+  _def_musepack='#define CONFIG_MUSEPACK 1'
   _ld_extra="$_ld_extra -lmpcdec"
   _codecmodules="musepack $_codecmodules"
 else
-  _def_musepack='#undef HAVE_MUSEPACK'
+  _def_musepack='#undef CONFIG_MUSEPACK'
   _nocodecmodules="musepack $_nocodecmodules"
 fi
 echores "$_musepack"
@@ -6110,7 +6113,7 @@ EOF
   done
 fi
 if test "$_faac" = yes ; then
-  _def_faac="#define HAVE_FAAC 1"
+  _def_faac="#define CONFIG_FAAC 1"
   test "$_faac_lavc" = auto && _faac_lavc=yes
   if test "$_faac_lavc" = yes ; then
     _def_faac_lavc="#define CONFIG_LIBFAAC 1"
@@ -6120,7 +6123,7 @@ if test "$_faac" = yes ; then
   _codecmodules="faac $_codecmodules"
 else
   _faac_lavc=no
-  _def_faac="#undef HAVE_FAAC"
+  _def_faac="#undef CONFIG_FAAC"
   _def_faac_lavc="#undef CONFIG_LIBFAAC"
   _nocodecmodules="faac $_nocodecmodules"
 fi
@@ -6175,10 +6178,10 @@ else
 fi
 
 if test "$_faad" = yes ; then
-  _def_faad='#define HAVE_FAAD 1'
+  _def_faad='#define CONFIG_FAAD 1'
   _codecmodules="faad2 $_codecmodules"
 else
-  _def_faad='#undef HAVE_FAAD'
+  _def_faad='#undef CONFIG_FAAD'
   _nocodecmodules="faad2 $_nocodecmodules"
 fi
 echores "$_faad"
@@ -6600,11 +6603,11 @@ EOF
   cc_check -ldv $_ld_pthread $_ld_lm && _libdv=yes
 fi
 if test "$_libdv" = yes ; then
-  _def_libdv='#define HAVE_LIBDV095 1'
+  _def_libdv='#define CONFIG_LIBDV095 1'
   _ld_extra="$_ld_extra -ldv"
   _codecmodules="libdv $_codecmodules"
 else
-  _def_libdv='#undef HAVE_LIBDV095'
+  _def_libdv='#undef CONFIG_LIBDV095'
   _nocodecmodules="libdv $_nocodecmodules"
 fi
 echores "$_libdv"
@@ -6623,10 +6626,10 @@ EOF
 fi
 
 if test "$_xvid" = yes ; then
-  _def_xvid='#define HAVE_XVID4 1'
+  _def_xvid='#define CONFIG_XVID4 1'
   _codecmodules="xvid $_codecmodules"
 else
-  _def_xvid='#undef HAVE_XVID4'
+  _def_xvid='#undef CONFIG_XVID4'
   _nocodecmodules="xvid $_nocodecmodules"
 fi
 echores "$_xvid"
@@ -6666,7 +6669,7 @@ EOF
 fi
 
 if test "$_x264" = yes ; then
-  _def_x264='#define HAVE_X264 1'
+  _def_x264='#define CONFIG_X264 1'
   _codecmodules="x264 $_codecmodules"
   test "$_x264_lavc" = auto && _x264_lavc=yes
   if test "$_x264_lavc" = yes ; then
@@ -6676,7 +6679,7 @@ if test "$_x264" = yes ; then
   fi
 else
   _x264_lavc=no
-  _def_x264='#undef HAVE_X264'
+  _def_x264='#undef CONFIG_X264'
   _def_x264_lavc='#undef CONFIG_LIBX264'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
@@ -6771,10 +6774,10 @@ EOF
 fi
 
 if test "$_libnut" = yes ; then
-  _def_libnut='#define HAVE_LIBNUT 1'
+  _def_libnut='#define CONFIG_LIBNUT 1'
   _ld_extra="$_ld_extra -lnut"
 else
-  _def_libnut='#undef HAVE_LIBNUT'
+  _def_libnut='#undef CONFIG_LIBNUT'
 fi
 echores "$_libnut"
 
@@ -6809,8 +6812,8 @@ echores "$_zr"
 if test "$_mencoder" != no ; then
 
 echocheck "libmp3lame (for mencoder)"
-_def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
-_def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
+_def_mp3lame_preset='#undef CONFIG_MP3LAME_PRESET'
+_def_mp3lame_preset_medium='#undef CONFIG_MP3LAME_PRESET_MEDIUM'
 if test "$_mp3lame" = auto ; then
   _mp3lame=no
   cat > $TMPC <<EOF
@@ -6822,19 +6825,19 @@ EOF
   cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
 fi
 if test "$_mp3lame" = yes ; then
-  _def_mp3lame="#define HAVE_MP3LAME"
+  _def_mp3lame="#define CONFIG_MP3LAME"
   _ld_mp3lame=-lmp3lame
   _libs_mencoder="$_libs_mencoder $_ld_mp3lame"
   cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, STANDARD_FAST); return 0; }
 EOF
-  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset="#define HAVE_MP3LAME_PRESET"
+  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET"
   cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
-  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
+  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM"
   test "$_mp3lame_lavc" = auto && _mp3lame_lavc=yes
   if test "$_mp3lame_lavc" = yes ; then
     _def_mp3lame_lavc="#define CONFIG_LIBMP3LAME 1"
@@ -6843,7 +6846,7 @@ EOF
   fi
 else
   _mp3lame_lavc=no
-  _def_mp3lame='#undef HAVE_MP3LAME'
+  _def_mp3lame='#undef CONFIG_MP3LAME'
   _def_mp3lame_lavc="#undef CONFIG_LIBMP3LAME"
 fi
 _res_comment="in libavcodec: $_mp3lame_lavc"
@@ -6852,9 +6855,7 @@ echores "$_mp3lame"
 fi
 
 echocheck "mencoder"
-_mencoder_flag='#undef HAVE_MENCODER'
 if test "$_mencoder" = yes ; then
-  _mencoder_flag='#define HAVE_MENCODER'
   _def_muxers='#define CONFIG_MUXERS 1'
 else
   # mpeg1video for vf_lavc, snow for vf_uspp and vf_mcdeint
@@ -7258,10 +7259,10 @@ echores "$_byte_order"
 
 echocheck "OSD menu"
 if test "$_menu" = yes ; then
-    _def_menu='#define HAVE_MENU 1'
+    _def_menu='#define CONFIG_MENU 1'
     test $_dvbin = "yes" && _menu_dvbin=yes
 else
-_def_menu='#undef HAVE_MENU'
+_def_menu='#undef CONFIG_MENU'
     _menu_dvbin=no
 fi
 echores "$_menu"
@@ -7410,8 +7411,8 @@ if test "$_gtk1" = no ; then
       _libs_mplayer="$_libs_mplayer `$_pkg_config glib-2.0 --libs 2>/dev/null`"
       echores "$_glib"
 
-      _def_gui='#define HAVE_NEW_GUI 1'
-      _def_gtk2_gui='#define HAVE_GTK2_GUI 1'
+      _def_gui='#define CONFIG_GUI 1'
+      _def_gtk2='#define CONFIG_GTK2 1'
     else
       _gtk1=yes
       echo "GLIB-2 devel packages were not found, trying GTK 1.2"
@@ -7454,20 +7455,20 @@ if test "$_gtk1" = yes ; then
   _libs_mplayer="$_libs_mplayer `$_glibconfig --libs 2>&1`"
   echores "$_glib (using $_glibconfig)"
 
-  _def_gui='#define HAVE_NEW_GUI 1'
-  _def_gtk2_gui='#undef HAVE_GTK2_GUI'
+  _def_gui='#define CONFIG_GUI 1'
+  _def_gtk2='#undef CONFIG_GTK2'
 fi
 
 else #if ! win32
   _gui_win32=yes
   _libs_mplayer="$_libs_mplayer -lcomdlg32 -lcomctl32 -lshell32 -lkernel32"
-  _def_gui='#define HAVE_NEW_GUI 1'
-  _def_gtk2_gui='#undef HAVE_GTK2_GUI'
+  _def_gui='#define CONFIG_GUI 1'
+  _def_gtk2='#undef CONFIG_GTK2'
 fi #if ! win32
 
 else #if test "$_gui"
-  _def_gui='#undef HAVE_NEW_GUI'
-  _def_gtk2_gui='#undef HAVE_GTK2_GUI'
+  _def_gui='#undef CONFIG_GUI'
+  _def_gtk2='#undef CONFIG_GTK2'
 fi #if test "$_gui"
 # --------------- GUI specific tests end -------------------
 
@@ -8092,9 +8093,6 @@ $_def_libnut
 /* Define to include support for libdv-0.9.5 */
 $_def_libdv
 
-/* If build mencoder */
-$_mencoder_flag
-
 /* Indicates if libmp3lame is available
    Note: for mencoder */
 $_def_mp3lame
@@ -8346,7 +8344,7 @@ $_def_unrar_exec
 
 /* gui support, please do not edit this option */
 $_def_gui
-$_def_gtk2_gui
+$_def_gtk2
 
 /* Audio output drivers */
 $_def_ossaudio
@@ -8586,6 +8584,7 @@ $_def_use_aton
 /* socklen_t support */
 $_def_socklen_t
 #ifndef HAVE_SOCKLEN_T
+#define HAVE_SOCKLEN_T 1
 typedef int socklen_t;
 #endif
 
@@ -8689,7 +8688,7 @@ $_def_twolame
 /* used by GUI: */
 $_def_xshape
 
-#if defined(HAVE_GL) || defined(HAVE_X11) || defined(HAVE_XV)
+#if defined(CONFIG_GL) || defined(HAVE_X11) || defined(HAVE_XV)
 #define X11_FULLSCREEN 1
 #endif
 

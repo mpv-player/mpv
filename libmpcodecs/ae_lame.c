@@ -33,7 +33,7 @@ static int lame_param_free_format = 0; //disabled
 static int lame_param_br_min = 0; //not specified
 static int lame_param_br_max = 0; //not specified
 
-#ifdef HAVE_MP3LAME_PRESET
+#ifdef CONFIG_MP3LAME_PRESET
 int lame_param_fast=0; // unset
 static char* lame_param_preset=NULL; // unset
 static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_name );
@@ -57,7 +57,7 @@ m_option_t lameopts_conf[]={
 	{"free", &lame_param_free_format, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"br_min", &lame_param_br_min, CONF_TYPE_INT, CONF_RANGE, 0, 1024, NULL},
 	{"br_max", &lame_param_br_max, CONF_TYPE_INT, CONF_RANGE, 0, 1024, NULL},
-#ifdef HAVE_MP3LAME_PRESET
+#ifdef CONFIG_MP3LAME_PRESET
 	{"fast", &lame_param_fast, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"preset", &lame_param_preset, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #else
@@ -178,7 +178,7 @@ int mpae_init_lame(audio_encoder_t *encoder)
     }
     if(lame_param_lowpassfreq>=-1) lame_set_lowpassfreq(lame,lame_param_lowpassfreq);
     if(lame_param_highpassfreq>=-1) lame_set_highpassfreq(lame,lame_param_highpassfreq);
-#ifdef HAVE_MP3LAME_PRESET
+#ifdef CONFIG_MP3LAME_PRESET
     if(lame_param_preset != NULL) {
         mp_msg(MSGT_MENCODER, MSGL_V, MSGTR_LamePresetEquals,lame_param_preset);
         if(lame_presets_set(lame,lame_param_fast, (lame_param_vbr==0), lame_param_preset) < 0)
@@ -202,7 +202,7 @@ int mpae_init_lame(audio_encoder_t *encoder)
     return 1;
 }
 
-#ifdef HAVE_MP3LAME_PRESET
+#ifdef CONFIG_MP3LAME_PRESET
 /* lame_presets_set 
    taken out of presets_set in lame-3.93.1/frontend/parse.c and modified */
 static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_name )
@@ -253,7 +253,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
         preset_name = "256";
     }
 
-#ifdef HAVE_MP3LAME_PRESET_MEDIUM
+#ifdef CONFIG_MP3LAME_PRESET_MEDIUM
     if (strcmp(preset_name, "medium") == 0) {
         if (fast > 0)
            lame_set_preset(gfp, MEDIUM_FAST);

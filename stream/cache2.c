@@ -369,7 +369,7 @@ static void ThreadProc( void *s ){
 #endif
 #endif
   
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
   use_gui = 0; // mp_msg may not use gui stuff in forked code
 #endif
 // cache thread mainloop:

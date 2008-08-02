@@ -33,7 +33,7 @@
 #include "vosub_vidix.h"
 #include "vidix/vidix.h"
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 
@@ -273,7 +273,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
     mp_msg(MSGT_VO, MSGL_V, "Using colorkey: %x\n", colorkey);
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (use_gui)
         guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize the window
     else
@@ -341,7 +341,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         if (vo_gc != None)
             XFreeGC(mDisplay, vo_gc);
         vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &mGCV);
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     }
 #endif
 

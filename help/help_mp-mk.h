@@ -333,7 +333,7 @@ static char help_text[]=
 
 // ====================== GUI пораки/копчиња ========================
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 
 // --- лабели ---
 #define MSGTR_About "За"

@@ -46,7 +46,7 @@ Buffer allocation:
 #include "input/input.h"
 #include "mp_fifo.h"
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
 
@@ -221,7 +221,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (!ctx->xv_format)
         return -1;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (use_gui)
         guiGetEvent(guiSetShVideo, 0);  // let the GUI to setup/resize our window
     else

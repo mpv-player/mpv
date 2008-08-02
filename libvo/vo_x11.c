@@ -44,7 +44,7 @@ int XShmGetEventBase(Display *);
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 #include "gui/interface.h"
 #include "mplayer.h"
 #endif
@@ -369,7 +369,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     aspect = ((1 << 16) * d_width + d_height / 2) / d_height;
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
     if (use_gui)
         guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize the window
     else

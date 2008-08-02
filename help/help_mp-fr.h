@@ -709,7 +709,7 @@ static char help_text[]=
 
 // ====================== messages/boutons GUI ========================
 
-#ifdef HAVE_NEW_GUI
+#ifdef CONFIG_GUI
 
 // --- labels ---
 #define MSGTR_About "À propos..."

@@ -26,11 +26,11 @@
 
 #define ERR ((void *) -1)
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 #include <iconv.h>
 char *sub_cp=NULL;
 #endif
-#ifdef CONFIG_FRIBIDI
+#ifdef HAVE_FRIBIDI
 #include <fribidi/fribidi.h>
 char *fribidi_charset = NULL;   ///character set that will be passed to FriBiDi
 int flip_hebrew = 1;            ///flip subtitles using fribidi
@@ -1071,7 +1071,7 @@ int sub_utf8_prev=0;
 extern float sub_delay;
 extern float sub_fps;
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 static iconv_t icdsc = (iconv_t)(-1);
 
 void	subcp_open (stream_t *st)
@@ -1146,7 +1146,7 @@ subtitle* subcp_recode (subtitle *sub)
 }
 #endif
 
-#ifdef CONFIG_FRIBIDI
+#ifdef HAVE_FRIBIDI
 #ifndef max
 #define max(a,b)  (((a)>(b))?(a):(b))
 #endif
@@ -1369,7 +1369,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     stream_reset(fd);
     stream_seek(fd,0);
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
     sub_utf8_prev=sub_utf8;
     {
 	    int l,k;
@@ -1389,7 +1389,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     sub_num=0;n_max=32;
     first=malloc(n_max*sizeof(subtitle));
     if(!first){
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 	  subcp_close();
           sub_utf8=sub_utf8_prev;
 #endif
@@ -1413,15 +1413,15 @@ sub_data* sub_read_file (char *filename, float fps) {
 	memset(sub, '\0', sizeof(subtitle));
         sub=srp->read(fd,sub);
         if(!sub) break;   // EOF
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
 #endif
-#ifdef CONFIG_FRIBIDI
+#ifdef HAVE_FRIBIDI
 	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8);
 #endif
 	if ( sub == ERR )
 	 {
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
           subcp_close();
 #endif
     	  if ( first ) free(first);
@@ -1474,7 +1474,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     
     free_stream(fd);
 
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
     subcp_close();
 #endif
 
@@ -1876,7 +1876,7 @@ char** sub_filenames(const char* path, char *fname)
 
 		// does it end with a subtitle extension?
 		found = 0;
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 #ifdef HAVE_ENCA
 		for (i = ((sub_cp && strncasecmp(sub_cp, "enca", 4) != 0) ? 3 : 0); sub_exts[i]; i++) {
 #else
@@ -1931,7 +1931,7 @@ char** sub_filenames(const char* path, char *fname)
 
 		    if (prio) {
 			prio += prio;
-#ifdef CONFIG_ICONV
+#ifdef HAVE_ICONV
 			if (i<3){ // prefer UTF-8 coded
 			    prio++;
 			}

@@ -413,7 +413,7 @@ static void render_txt(char *txt)
   }
 }
 
-#ifdef CONFIG_FRIBIDI
+#ifdef HAVE_FRIBIDI
 #include <fribidi/fribidi.h>
 #include "libavutil/common.h"
 char *menu_fribidi_charset = NULL;
@@ -469,7 +469,7 @@ void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
     return;
   }
 
-#ifdef CONFIG_FRIBIDI
+#ifdef HAVE_FRIBIDI
   txt = menu_fribidi(txt);
 #endif
   render_txt(txt);
@@ -503,7 +503,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
     return;
   }
 
-#ifdef CONFIG_FRIBIDI
+#ifdef HAVE_FRIBIDI
   txt = menu_fribidi(txt);
 #endif
   render_txt(txt);

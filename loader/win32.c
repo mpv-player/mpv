@@ -75,9 +75,7 @@ for DLL to know too much about its environment.
 #endif
 #include "osdep/mmap_anon.h"
 
-#if HAVE_VSSCANF
-int vsscanf( const char *str, const char *format, va_list ap);
-#else
+#ifndef HAVE_VSSCANF
 /* system has no vsscanf.  try to provide one */
 static int vsscanf( const char *str, const char *format, va_list ap)
 {
