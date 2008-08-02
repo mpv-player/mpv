@@ -5849,11 +5849,11 @@ EOF
   cc_check -ltwolame $_ld_lm && _twolame=yes
 fi
 if test "$_twolame" = yes ; then
-  _def_twolame='#define HAVE_TWOLAME 1'
+  _def_twolame='#define CONFIG_TWOLAME 1'
   _libs_mencoder="$_libs_mencoder -ltwolame"
   _codecmodules="twolame $_codecmodules"
 else
-  _def_twolame='#undef HAVE_TWOLAME'
+  _def_twolame='#undef CONFIG_TWOLAME'
   _nocodecmodules="twolame $_nocodecmodules"
 fi
 echores "$_twolame"
@@ -5872,11 +5872,11 @@ EOF
 fi
 fi
 if test "$_toolame" = yes ; then
-  _def_toolame='#define HAVE_TOOLAME 1'
+  _def_toolame='#define CONFIG_TOOLAME 1'
   _libs_mencoder="$_libs_mencoder -ltoolame"
   _codecmodules="toolame $_codecmodules"
 else
-  _def_toolame='#undef HAVE_TOOLAME'
+  _def_toolame='#undef CONFIG_TOOLAME'
   _nocodecmodules="toolame $_nocodecmodules"
 fi
 if test "$_toolamedir" ; then
@@ -5905,7 +5905,7 @@ EOF
 fi
 if test "$_tremor_internal" = yes ; then
   _vorbis=yes
-  _def_vorbis='#define HAVE_OGGVORBIS 1'
+  _def_vorbis='#define CONFIG_OGGVORBIS 1'
   _def_tremor='#define TREMOR 1'
   _codecmodules="tremor(internal) $_codecmodules"
   _res_comment="internal Tremor"
@@ -5915,14 +5915,14 @@ if test "$_tremor_internal" = yes ; then
   fi
 elif test "$_tremor_external" = yes ; then
   _vorbis=yes
-  _def_vorbis='#define HAVE_OGGVORBIS 1'
+  _def_vorbis='#define CONFIG_OGGVORBIS 1'
   _def_tremor='#define TREMOR 1'
   _codecmodules="tremor(external) $_codecmodules"
   _res_comment="external Tremor"
   _ld_extra="$_ld_extra -logg -lvorbisidec"
 elif test "$_libvorbis" = yes ; then
   _vorbis=yes
-  _def_vorbis='#define HAVE_OGGVORBIS 1'
+  _def_vorbis='#define CONFIG_OGGVORBIS 1'
   _codecmodules="libvorbis $_codecmodules"
   _res_comment="libvorbis"
   _ld_extra="$_ld_extra -lvorbis -logg"
@@ -5942,11 +5942,11 @@ EOF
   cc_check -lspeex $_ld_lm && _speex=yes
 fi
 if test "$_speex" = yes ; then
-  _def_speex='#define HAVE_SPEEX 1'
+  _def_speex='#define CONFIG_SPEEX 1'
   _ld_extra="$_ld_extra -lspeex"
   _codecmodules="speex $_codecmodules"
 else
-  _def_speex='#undef HAVE_SPEEX'
+  _def_speex='#undef CONFIG_SPEEX'
   _nocodecmodules="speex $_nocodecmodules"
 fi
 echores "$_speex"
@@ -5999,13 +5999,13 @@ EOF
   fi
 fi
 if test "$_theora" = yes ; then
-  _def_theora='#define HAVE_OGGTHEORA 1'
+  _def_theora='#define CONFIG_OGGTHEORA 1'
   _codecmodules="libtheora $_codecmodules"
   # when --enable-theora is forced, we'd better provide a probably sane
   # $_ld_theora than nothing
   test -z "$_ld_theora" && _ld_extra="$_ld_extra -ltheora -logg"
 else
-  _def_theora='#undef HAVE_OGGTHEORA'
+  _def_theora='#undef CONFIG_OGGTHEORA'
   _nocodecmodules="libtheora $_nocodecmodules"
 fi
 echores "$_theora"
@@ -6090,11 +6090,11 @@ EOF
   cc_check -lmpcdec $_ld_lm && _musepack=yes
 fi
 if test "$_musepack" = yes ; then
-  _def_musepack='#define HAVE_MUSEPACK 1'
+  _def_musepack='#define CONFIG_MUSEPACK 1'
   _ld_extra="$_ld_extra -lmpcdec"
   _codecmodules="musepack $_codecmodules"
 else
-  _def_musepack='#undef HAVE_MUSEPACK'
+  _def_musepack='#undef CONFIG_MUSEPACK'
   _nocodecmodules="musepack $_nocodecmodules"
 fi
 echores "$_musepack"
@@ -6113,7 +6113,7 @@ EOF
   done
 fi
 if test "$_faac" = yes ; then
-  _def_faac="#define HAVE_FAAC 1"
+  _def_faac="#define CONFIG_FAAC 1"
   test "$_faac_lavc" = auto && _faac_lavc=yes
   if test "$_faac_lavc" = yes ; then
     _def_faac_lavc="#define CONFIG_LIBFAAC 1"
@@ -6123,7 +6123,7 @@ if test "$_faac" = yes ; then
   _codecmodules="faac $_codecmodules"
 else
   _faac_lavc=no
-  _def_faac="#undef HAVE_FAAC"
+  _def_faac="#undef CONFIG_FAAC"
   _def_faac_lavc="#undef CONFIG_LIBFAAC"
   _nocodecmodules="faac $_nocodecmodules"
 fi
@@ -6178,10 +6178,10 @@ else
 fi
 
 if test "$_faad" = yes ; then
-  _def_faad='#define HAVE_FAAD 1'
+  _def_faad='#define CONFIG_FAAD 1'
   _codecmodules="faad2 $_codecmodules"
 else
-  _def_faad='#undef HAVE_FAAD'
+  _def_faad='#undef CONFIG_FAAD'
   _nocodecmodules="faad2 $_nocodecmodules"
 fi
 echores "$_faad"
@@ -6603,11 +6603,11 @@ EOF
   cc_check -ldv $_ld_pthread $_ld_lm && _libdv=yes
 fi
 if test "$_libdv" = yes ; then
-  _def_libdv='#define HAVE_LIBDV095 1'
+  _def_libdv='#define CONFIG_LIBDV095 1'
   _ld_extra="$_ld_extra -ldv"
   _codecmodules="libdv $_codecmodules"
 else
-  _def_libdv='#undef HAVE_LIBDV095'
+  _def_libdv='#undef CONFIG_LIBDV095'
   _nocodecmodules="libdv $_nocodecmodules"
 fi
 echores "$_libdv"
@@ -6626,10 +6626,10 @@ EOF
 fi
 
 if test "$_xvid" = yes ; then
-  _def_xvid='#define HAVE_XVID4 1'
+  _def_xvid='#define CONFIG_XVID4 1'
   _codecmodules="xvid $_codecmodules"
 else
-  _def_xvid='#undef HAVE_XVID4'
+  _def_xvid='#undef CONFIG_XVID4'
   _nocodecmodules="xvid $_nocodecmodules"
 fi
 echores "$_xvid"
@@ -6669,7 +6669,7 @@ EOF
 fi
 
 if test "$_x264" = yes ; then
-  _def_x264='#define HAVE_X264 1'
+  _def_x264='#define CONFIG_X264 1'
   _codecmodules="x264 $_codecmodules"
   test "$_x264_lavc" = auto && _x264_lavc=yes
   if test "$_x264_lavc" = yes ; then
@@ -6679,7 +6679,7 @@ if test "$_x264" = yes ; then
   fi
 else
   _x264_lavc=no
-  _def_x264='#undef HAVE_X264'
+  _def_x264='#undef CONFIG_X264'
   _def_x264_lavc='#undef CONFIG_LIBX264'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
@@ -6774,10 +6774,10 @@ EOF
 fi
 
 if test "$_libnut" = yes ; then
-  _def_libnut='#define HAVE_LIBNUT 1'
+  _def_libnut='#define CONFIG_LIBNUT 1'
   _ld_extra="$_ld_extra -lnut"
 else
-  _def_libnut='#undef HAVE_LIBNUT'
+  _def_libnut='#undef CONFIG_LIBNUT'
 fi
 echores "$_libnut"
 
@@ -6812,8 +6812,8 @@ echores "$_zr"
 if test "$_mencoder" != no ; then
 
 echocheck "libmp3lame (for mencoder)"
-_def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
-_def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
+_def_mp3lame_preset='#undef CONFIG_MP3LAME_PRESET'
+_def_mp3lame_preset_medium='#undef CONFIG_MP3LAME_PRESET_MEDIUM'
 if test "$_mp3lame" = auto ; then
   _mp3lame=no
   cat > $TMPC <<EOF
@@ -6825,19 +6825,19 @@ EOF
   cc_check -lmp3lame $_ld_lm && tmp_run && _mp3lame=yes
 fi
 if test "$_mp3lame" = yes ; then
-  _def_mp3lame="#define HAVE_MP3LAME"
+  _def_mp3lame="#define CONFIG_MP3LAME"
   _ld_mp3lame=-lmp3lame
   _libs_mencoder="$_libs_mencoder $_ld_mp3lame"
   cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, STANDARD_FAST); return 0; }
 EOF
-  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset="#define HAVE_MP3LAME_PRESET"
+  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset="#define CONFIG_MP3LAME_PRESET"
   cat > $TMPC << EOF
 #include <lame/lame.h>
 int main(void) { lame_set_preset(NULL, MEDIUM_FAST); return 0; }
 EOF
-  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
+  cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define CONFIG_MP3LAME_PRESET_MEDIUM"
   test "$_mp3lame_lavc" = auto && _mp3lame_lavc=yes
   if test "$_mp3lame_lavc" = yes ; then
     _def_mp3lame_lavc="#define CONFIG_LIBMP3LAME 1"
@@ -6846,7 +6846,7 @@ EOF
   fi
 else
   _mp3lame_lavc=no
-  _def_mp3lame='#undef HAVE_MP3LAME'
+  _def_mp3lame='#undef CONFIG_MP3LAME'
   _def_mp3lame_lavc="#undef CONFIG_LIBMP3LAME"
 fi
 _res_comment="in libavcodec: $_mp3lame_lavc"

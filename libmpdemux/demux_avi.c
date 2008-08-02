@@ -828,7 +828,7 @@ static demuxer_t* demux_open_hack_avi(demuxer_t *demuxer)
    if(!demuxer) return NULL; // failed to open
    sh_a = demuxer->audio->sh;
    if(demuxer->audio->id != -2 && sh_a) {
-#ifdef HAVE_OGGVORBIS
+#ifdef CONFIG_OGGVORBIS
     // support for Ogg-in-AVI:
     if(sh_a->format == 0xFFFE)
       demuxer = init_avi_with_ogg(demuxer);

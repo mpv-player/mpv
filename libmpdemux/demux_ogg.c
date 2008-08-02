@@ -27,7 +27,7 @@
 #include <vorbis/codec.h>
 #endif
 
-#ifdef HAVE_OGGTHEORA
+#ifdef CONFIG_OGGTHEORA
 #include <theora/theora.h>
 extern int _ilog (unsigned int); /* defined in many places in theora/lib/ */
 #endif
@@ -38,7 +38,7 @@ extern int _ilog (unsigned int); /* defined in many places in theora/lib/ */
  * without using theora_granule_time with the theora_state of the stream.
  * This is duplicated in `vd_theora.c'; put this in a common header?
  */
-#ifdef HAVE_OGGTHEORA
+#ifdef CONFIG_OGGTHEORA
 typedef struct theora_struct_st {
     theora_state st;
     theora_comment cc;
@@ -266,7 +266,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,fl
     }
   } else if (os->speex) {
     // whole packet (default)
-# ifdef HAVE_OGGTHEORA
+# ifdef CONFIG_OGGTHEORA
   } else if (os->theora) {
      /* we pass complete packets to theora, mustn't strip the header! */
      os->lastsize = 1;
@@ -292,7 +292,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,fl
 	pack->granulepos = os->lastpos;
 	*pts = (double)os->lastpos / (double)os->samplerate;
      }
-#endif /* HAVE_OGGTHEORA */
+#endif /* CONFIG_OGGTHEORA */
   } else if (os->flac) {
      /* we pass complete packets to flac, mustn't strip the header! */
      if (os->flac == 2 && pack->packet[0] != 0xff)
@@ -838,7 +838,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (Speex), -aid %d\n",ogg_d->num_sub,n_audio-1);
 
       // check for Theora
-#   ifdef HAVE_OGGTHEORA
+#   ifdef CONFIG_OGGTHEORA
     } else if (pack.bytes >= 7 && !strncmp (&pack.packet[1], "theora", 6)) {
 	int errorCode = 0;
 	theora_info inf;
@@ -884,7 +884,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	}
 	theora_comment_clear(&cc);
 	theora_info_clear(&inf);
-#   endif /* HAVE_OGGTHEORA */
+#   endif /* CONFIG_OGGTHEORA */
     } else if (pack.bytes >= 4 && !strncmp (&pack.packet[0], "fLaC", 4)) {
 	sh_a = new_sh_audio_aid(demuxer,ogg_d->num_sub, n_audio);
 	sh_a->format =  mmioFOURCC('f', 'L', 'a', 'C');

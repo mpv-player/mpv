@@ -73,13 +73,13 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #ifdef CONFIG_QTX_CODECS
   &mpcodecs_ad_qtaudio,
 #endif
-#ifdef HAVE_FAAD
+#ifdef CONFIG_FAAD
   &mpcodecs_ad_faad,
 #endif
-#ifdef HAVE_OGGVORBIS
+#ifdef CONFIG_OGGVORBIS
   &mpcodecs_ad_libvorbis,
 #endif
-#ifdef HAVE_SPEEX
+#ifdef CONFIG_SPEEX
   &mpcodecs_ad_speex,
 #endif
 #ifdef CONFIG_LIBMAD
@@ -88,10 +88,10 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #ifdef CONFIG_REALCODECS
   &mpcodecs_ad_realaud,
 #endif
-#ifdef HAVE_LIBDV095
+#ifdef CONFIG_LIBDV095
   &mpcodecs_ad_libdv,
 #endif
-#ifdef HAVE_MUSEPACK
+#ifdef CONFIG_MUSEPACK
   &mpcodecs_ad_libmusepack,
 #endif
 #ifdef CONFIG_LIBDCA

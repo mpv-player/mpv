@@ -257,7 +257,7 @@
 #ifdef CONFIG_LIBAVFORMAT
         {"lavfdopts",  lavfdopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
-#ifdef HAVE_XVID4
+#ifdef CONFIG_XVID4
 	{"xvidopts", xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 	{"codecs-file", &codecs_file, CONF_TYPE_STRING, 0, 0, 0, NULL},

@@ -113,7 +113,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef HAVE_GIF
     &demuxer_desc_gif,
 #endif
-#ifdef HAVE_OGGVORBIS
+#ifdef CONFIG_OGGVORBIS
     &demuxer_desc_ogg,
 #endif
 #ifdef CONFIG_WIN32DLL
@@ -142,11 +142,11 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef MUSEPACK
     &demuxer_desc_mpc,
 #endif
-#ifdef HAVE_LIBDV095
+#ifdef CONFIG_LIBDV095
     &demuxer_desc_rawdv,
 #endif
     &demuxer_desc_aac,
-#ifdef HAVE_LIBNUT
+#ifdef CONFIG_LIBNUT
     &demuxer_desc_nut,
 #endif
 #ifdef HAVE_XMMS
