@@ -55,7 +55,7 @@ const m_option_t ovc_conf[]={
 #ifdef HAVE_LIBDV095
 	"   libdv    - DV encoding with libdv v0.9.5\n"
 #endif
-#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
+#ifdef HAVE_XVID4
 	"   xvid     - XviD encoding\n"
 #endif
 #ifdef HAVE_X264
@@ -243,7 +243,7 @@ const m_option_t mencoder_opts[]={
 #ifdef CONFIG_WIN32DLL
 	{"xvfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
-#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
+#ifdef HAVE_XVID4
 	{"xvidencopts", xvidencopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #if defined(HAVE_X264)
