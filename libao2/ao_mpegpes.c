@@ -10,10 +10,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_DVB_HEAD
-#define HAVE_DVB 1
-#endif
-
 #ifdef HAVE_DVB
 #include <sys/poll.h>
 #include <sys/ioctl.h>

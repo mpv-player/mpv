@@ -4566,7 +4566,8 @@ EOF
 fi
 echores "$_dvbhead"
 if test "$_dvbhead" = yes ; then
-  _def_dvb='#define HAVE_DVB_HEAD 1'
+  _def_dvb='#define HAVE_DVB 1'
+  _def_dvb_head='#define HAVE_DVB_HEAD 1'
   _def_dvb_in='#define HAS_DVBIN_SUPPORT 1'
   _aomodules="mpegpes(dvb) $_aomodules"
   _vomodules="mpegpes(dvb) $_vomodules"
@@ -4574,6 +4575,7 @@ fi
 
 if test "$_dvbhead" = no && test "$_dvb" = no ; then
   _def_dvb='#undef HAVE_DVB'
+  _def_dvb_head='#undef HAVE_DVB_HEAD'
   _def_dvb_in='#undef HAS_DVBIN_SUPPORT '
   _aomodules="mpegpes(file) $_aomodules"
   _vomodules="mpegpes(file) $_vomodules"
@@ -8673,6 +8675,7 @@ $_def_dxr3
 $_def_ivtv
 $_def_v4l2
 $_def_dvb
+$_def_dvb_head
 $_def_dvb_in
 $_def_svga
 $_def_vesa

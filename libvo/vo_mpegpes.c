@@ -23,9 +23,7 @@
 #include <unistd.h>
 
 #include "mp_msg.h"
-#ifdef HAVE_DVB_HEAD
-#define HAVE_DVB 1
-#endif
+
 #ifdef HAVE_DVB
 #ifndef HAVE_DVB_HEAD
 #include <sys/poll.h>
