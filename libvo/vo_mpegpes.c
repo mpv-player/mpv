@@ -67,9 +67,9 @@ extern int vo_mpegpes_fd2;
 static const vo_info_t info = 
 {
 #ifdef HAVE_DVB
-	"Mpeg-PES to DVB card",
+	"MPEG-PES to DVB card",
 #else
-	"Mpeg-PES file",
+	"MPEG-PES file",
 #endif
 	"mpegpes",
 	"A'rpi",

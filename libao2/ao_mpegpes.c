@@ -52,7 +52,7 @@ static ao_info_t info =
 #ifdef HAVE_DVB
 	"DVB audio output",
 #else
-	"Mpeg-PES audio output",
+	"MPEG-PES audio output",
 #endif
 	"mpegpes",
 	"A'rpi",
