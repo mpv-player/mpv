@@ -28,7 +28,7 @@ struct vf_priv_s {
 
 static int set_format(struct vf_instance_s *vf, unsigned int fmt) {
     if (!force_fourcc)
-    mux_v->bih->biCompression = fmt;
+        mux_v->bih->biCompression = fmt;
     
     mux_v->bih->biPlanes = 1;
     if (IMGFMT_IS_RGB(fmt)) {
