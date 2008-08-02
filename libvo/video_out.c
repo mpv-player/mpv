@@ -115,13 +115,13 @@ extern vo_functions_t video_out_md5sum;
 
 const vo_functions_t* const video_out_drivers[] =
 {
-#ifdef HAVE_XVR100
+#ifdef CONFIG_XVR100
         &video_out_xvr100,
 #endif
-#ifdef HAVE_TDFX_VID
+#ifdef CONFIG_TDFX_VID
         &video_out_tdfx_vid,
 #endif
-#ifdef HAVE_DIRECTX
+#ifdef CONFIG_DIRECTX
         &video_out_directx,
 #endif
 #ifdef HAVE_COREVIDEO
@@ -130,19 +130,19 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef HAVE_QUARTZ
 	&video_out_quartz,
 #endif
-#ifdef HAVE_XMGA
+#ifdef CONFIG_XMGA
         &video_out_xmga,
 #endif
-#ifdef HAVE_MGA
+#ifdef CONFIG_MGA
         &video_out_mga,
 #endif
-#ifdef HAVE_TDFXFB
+#ifdef CONFIG_TDFXFB
         &video_out_tdfxfb,
 #endif
-#ifdef HAVE_S3FB
+#ifdef CONFIG_S3FB
         &video_out_s3fb,
 #endif
-#ifdef HAVE_3DFX
+#ifdef CONFIG_3DFX
         &video_out_3dfx,
 #endif
 #ifdef HAVE_XV
@@ -152,30 +152,30 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_x11,
         &video_out_xover,
 #endif
-#ifdef HAVE_GL
+#ifdef CONFIG_GL
 	        &video_out_gl,
         &video_out_gl2,
 #endif
 #ifdef HAVE_DGA
         &video_out_dga,
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
         &video_out_sdl,
 #endif
-#ifdef HAVE_GGI
+#ifdef CONFIG_GGI
 	&video_out_ggi,
 #endif
-#ifdef HAVE_FBDEV
+#ifdef CONFIG_FBDEV
 	&video_out_fbdev,
 	&video_out_fbdev2,
 #endif
-#ifdef HAVE_SVGALIB
+#ifdef CONFIG_SVGALIB
 	&video_out_svga,
 #endif
-#ifdef HAVE_AA
+#ifdef CONFIG_AA
 	&video_out_aa,
 #endif
-#ifdef HAVE_CACA
+#ifdef CONFIG_CACA
 	&video_out_caca,
 #endif
 #ifdef HAVE_DXR2
@@ -194,16 +194,16 @@ const vo_functions_t* const video_out_drivers[] =
 	&video_out_zr,
 	&video_out_zr2,
 #endif
-#ifdef HAVE_BL
+#ifdef CONFIG_BL
 	&video_out_bl,
 #endif
-#ifdef HAVE_VESA
+#ifdef CONFIG_VESA
 	&video_out_vesa,
 #endif
-#ifdef HAVE_DIRECTFB
+#ifdef CONFIG_DIRECTFB
 	&video_out_directfb,
 #endif
-#ifdef HAVE_DFBMGA
+#ifdef CONFIG_DFBMGA
         &video_out_dfbmga,
 #endif
 #ifdef CONFIG_VIDIX
@@ -221,7 +221,7 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_xvmc,
 #endif
 	&video_out_mpegpes,
-#ifdef HAVE_YUV4MPEG
+#ifdef CONFIG_YUV4MPEG
 	&video_out_yuv4mpeg,
 #endif
 #ifdef HAVE_PNG
@@ -233,13 +233,13 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef HAVE_GIF
 	&video_out_gif89a,
 #endif
-#ifdef HAVE_TGA
+#ifdef CONFIG_TGA
         &video_out_tga,
 #endif
 #ifdef HAVE_PNM
     &video_out_pnm,
 #endif
-#ifdef HAVE_MD5SUM
+#ifdef CONFIG_MD5SUM
     &video_out_md5sum,
 #endif
         NULL
@@ -320,7 +320,7 @@ int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
   return vo->config(width, height, d_width, d_height, flags, title, format);
 }
 
-#if defined(HAVE_FBDEV)||defined(HAVE_VESA)  
+#if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
 /* Borrowed from vo_fbdev.c 
 Monitor ranges related functions*/
 

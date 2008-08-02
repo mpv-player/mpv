@@ -29,7 +29,7 @@
 
 #include <ggi/ggi.h>
 
-#ifdef HAVE_GGIWMH
+#ifdef CONFIG_GGIWMH
 #include <ggi/wmh.h>
 #endif
 
@@ -70,7 +70,7 @@ static struct ggi_conf_s {
 } ggi_conf;
 
 
-#ifdef HAVE_GGIWMH
+#ifdef CONFIG_GGIWMH
 static void window_ontop(void)
 {
     mp_msg(MSGT_VO, MSGL_V, "[ggi] debug: window_ontop() called\n");
@@ -161,7 +161,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 #endif
 
 
-#ifdef HAVE_GGIWMH
+#ifdef CONFIG_GGIWMH
     ggiWmhSetTitle(ggi_conf.vis, title);
     if (vo_ontop) window_ontop();
 #endif
@@ -395,7 +395,7 @@ static int preinit(const char *arg)
         mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to initialize GGI\n");
         return -1;
     }
-#ifdef HAVE_GGIWMH
+#ifdef CONFIG_GGIWMH
     if (ggiWmhInit() < 0) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to initialize libggiwmh\n");
         return -1;
@@ -424,7 +424,7 @@ static int preinit(const char *arg)
     ggi_conf.drawvis = ggi_conf.vis;
 
 
-#ifdef HAVE_GGIWMH
+#ifdef CONFIG_GGIWMH
     ggiWmhAttach(ggi_conf.vis);
 #endif
 
@@ -440,7 +440,7 @@ static void uninit(void)
     if (ggi_conf.driver)
         free(ggi_conf.driver);
 
-#ifdef HAVE_GGIWMH
+#ifdef CONFIG_GGIWMH
     ggiWmhDetach(ggi_conf.vis);
     ggiWmhExit();
 #endif
@@ -459,7 +459,7 @@ static int control(uint32_t request, void *data, ...)
         return query_format(*((uint32_t *) data));
     case VOCTRL_GET_IMAGE:
         return get_image(data);
-#ifdef HAVE_GGIWMH
+#ifdef CONFIG_GGIWMH
     case VOCTRL_ONTOP:
         vo_ontop = (!(vo_ontop));
         window_ontop();

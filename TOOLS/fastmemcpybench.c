@@ -20,7 +20,7 @@
 //#define ARR_SIZE 100000
 #define ARR_SIZE (1024*768*2)
 
-#ifdef HAVE_MGA
+#ifdef CONFIG_MGA
 
 #include "drivers/mga_vid.h"
 
@@ -98,7 +98,7 @@ int main( void )
   unsigned char * marr1,*marr2;
   int i;
   unsigned int t;
-#ifdef HAVE_MGA
+#ifdef CONFIG_MGA
   mga_init();
   marr1 = &frame[3];
 #else

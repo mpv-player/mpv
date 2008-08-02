@@ -145,17 +145,17 @@ const m_option_t mplayer_opts[]={
 	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver.\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
-#if defined(HAVE_FBDEV)||defined(HAVE_VESA) 
+#if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
        {"monitor-hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
        {"monitor-vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
        {"monitor-dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 #endif 
 
-#ifdef HAVE_FBDEV
+#ifdef CONFIG_FBDEV
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-#ifdef HAVE_DIRECTFB
+#ifdef CONFIG_DIRECTFB
 #if DIRECTFBVERSION > 912
 	{"dfbopts", "-dfbopts has been removed. Use -vf directfb:dfbopts=... instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
@@ -226,7 +226,7 @@ const m_option_t mplayer_opts[]={
 	{"vaa_dr", "-vaa_dr has been removed, use -dr.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"vaa_nodr", "-vaa_nodr has been removed, use -nodr.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
-#ifdef HAVE_AA
+#ifdef CONFIG_AA
 	// -vo aa
 	{"aa*", "-aa* has been removed. Use -vo aa:suboption instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
