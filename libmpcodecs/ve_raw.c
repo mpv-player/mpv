@@ -27,6 +27,7 @@ struct vf_priv_s {
 #define mux_v (vf->priv->mux)
 
 static int set_format(struct vf_instance_s *vf, unsigned int fmt) {
+    if (!force_fourcc)
     mux_v->bih->biCompression = fmt;
     
     mux_v->bih->biPlanes = 1;
