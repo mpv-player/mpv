@@ -382,6 +382,7 @@ Video output:
   --enable-3dfx            enable obsolete /dev/3dfx video output [disable]
   --enable-tdfxfb          enable tdfxfb video output [disable]
   --enable-s3fb            enable s3fb (S3 ViRGE) video output [disable]
+  --enable-wii             enable Nintendo Wii/GameCube video output [disable]
   --enable-directfb        enable DirectFB video output [autodetect]
   --enable-zr              enable ZR360[56]7/ZR36060 video output [autodetect]
   --enable-bl		   enable Blinkenlights video output [disable]
@@ -649,6 +650,7 @@ _termcap=auto
 _termios=auto
 _3dfx=no
 _s3fb=no
+_wii=no
 _tdfxfb=no
 _tdfxvid=no
 _xvr100=auto
@@ -1108,6 +1110,8 @@ for ac_option do
   --disable-3dfx)	_3dfx=no	;;
   --enable-s3fb)	_s3fb=yes	;;
   --disable-s3fb)	_s3fb=no	;;
+  --enable-wii) 	_wii=yes	;;
+  --disable-wii)	_wii=no		;;
   --enable-tdfxfb)	_tdfxfb=yes	;;
   --disable-tdfxfb)	_tdfxfb=no	;;
   --disable-tdfxvid)	_tdfxvid=no	;;
@@ -3761,6 +3765,17 @@ else
   _novomodules="s3fb $_novomodules"
 fi
 echores "$_s3fb"
+
+echocheck "wii"
+if test "$_wii" = yes ; then
+  _def_wii='#define CONFIG_WII 1'
+  _vosrc="$_vosrc vo_wii.c"
+  _vomodules="wii $_vomodules"
+else
+  _def_wii='#undef CONFIG_WII'
+  _novomodules="wii $_novomodules"
+fi
+echores "$_wii"
 
 echocheck "tdfxvid"
 if test "$_tdfxvid" = yes ; then
@@ -8659,6 +8674,7 @@ $_def_ggi
 $_def_ggiwmh
 $_def_3dfx
 $_def_s3fb
+$_def_wii
 $_def_tdfxfb
 $_def_tdfxvid
 $_def_xvr100

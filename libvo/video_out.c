@@ -79,6 +79,7 @@ extern vo_functions_t video_out_sdl;
 extern vo_functions_t video_out_3dfx;
 extern vo_functions_t video_out_tdfxfb;
 extern vo_functions_t video_out_s3fb;
+extern vo_functions_t video_out_wii;
 extern vo_functions_t video_out_null;
 extern vo_functions_t video_out_zr;
 extern vo_functions_t video_out_zr2;
@@ -141,6 +142,9 @@ const vo_functions_t* const video_out_drivers[] =
 #endif
 #ifdef CONFIG_S3FB
         &video_out_s3fb,
+#endif
+#ifdef CONFIG_WII
+        &video_out_wii,
 #endif
 #ifdef CONFIG_3DFX
         &video_out_3dfx,
