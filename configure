@@ -266,8 +266,8 @@ Optional features:
   --disable-enca         disable ENCA charset oracle library [autodetect]
   --disable-macosx       disable Mac OS X specific features [autodetect]
   --disable-maemo        disable maemo specific features [autodetect]
-  --enable-macosx-finder-support  enable Mac OS X Finder invocation
-                                  parameter parsing [disabled]
+  --enable-macosx-finder enable Mac OS X Finder invocation parameter
+                         parsing [disabled]
   --enable-macosx-bundle enable Mac OS X bundle file locations [autodetect]
   --disable-inet6        disable IPv6 support [autodetect]
   --disable-gethostbyname2  gethostbyname2 part of the C library [autodetect]
@@ -675,7 +675,7 @@ _menu=no
 _qtx=auto
 _macosx=auto
 _maemo=auto
-_macosx_finder_support=no
+_macosx_finder=no
 _macosx_bundle=auto
 _sortsub=yes
 _freetypeconfig='freetype-config'
@@ -1184,8 +1184,8 @@ for ac_option do
 
   --enable-macosx) _macosx=yes ;;
   --disable-macosx) _macosx=no ;;
-  --enable-macosx-finder-support) _macosx_finder_support=yes ;;
-  --disable-macosx-finder-support) _macosx_finder_support=no ;;
+  --enable-macosx-finder) _macosx_finder=yes ;;
+  --disable-macosx-finder) _macosx_finder=no ;;
   --enable-macosx-bundle) _macosx_bundle=yes;;
   --disable-macosx-bundle) _macosx_bundle=no;;
 
@@ -3609,21 +3609,21 @@ fi
 echores "$_macosx"
 
 echocheck "Mac OS X Finder Support"
-if test "$_macosx_finder_support" = auto ; then
-  _macosx_finder_support=$_macosx
+if test "$_macosx_finder" = auto ; then
+  _macosx_finder=$_macosx
 fi
-if test "$_macosx_finder_support" = yes; then
-  _def_macosx_finder_support='#define MACOSX_FINDER_SUPPORT 1'
-  _macosx_finder_support=yes
+if test "$_macosx_finder" = yes; then
+  _def_macosx_finder='#define MACOSX_FINDER 1'
+  _macosx_finder=yes
 else
-  _def_macosx_finder_support='#undef MACOSX_FINDER_SUPPORT'
-  _macosx_finder_support=no
+  _def_macosx_finder='#undef MACOSX_FINDER'
+  _macosx_finder=no
 fi
-echores "$_macosx_finder_support"
+echores "$_macosx_finder"
 
 echocheck "Mac OS X Bundle file locations"
 if test "$_macosx_bundle" = auto ; then
-  _macosx_bundle=$_macosx_finder_support
+  _macosx_bundle=$_macosx_finder
 fi
 if test "$_macosx_bundle" = yes; then
   _def_macosx_bundle='#define MACOSX_BUNDLE 1'
@@ -7838,7 +7838,7 @@ LIBTHEORA = $_theora
 LIBVORBIS = $_vorbis
 LIRC = $_lirc
 MACOSX_BUNDLE = $_macosx_bundle
-MACOSX_FINDER_SUPPORT = $_macosx_finder_support
+MACOSX_FINDER = $_macosx_finder
 MP3LAME = $_mp3lame
 MPLAYER_NETWORK = $_network
 MUSEPACK = $_musepack
@@ -8234,7 +8234,7 @@ $_def_win32dll
 #define WIN32_PATH "$_win32codecsdir"
 
 /* Mac OS X specific features */
-$_def_macosx_finder_support
+$_def_macosx_finder
 $_def_macosx_bundle
 $_def_coreaudio
 $_def_corevideo
