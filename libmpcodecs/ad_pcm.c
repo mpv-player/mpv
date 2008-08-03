@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "talloc.h"
 #include "config.h"
 #include "ad_internal.h"
 #include "libaf/af_format.h"
@@ -14,6 +15,11 @@ static const ad_info_t info =
 	"Nick Kurshev",
 	"A'rpi",
 	""
+};
+
+struct ad_pcm_context {
+    unsigned char *packet_ptr;
+    int packet_len;
 };
 
 LIBAD_EXTERN(pcm)
@@ -91,6 +97,7 @@ static int init(sh_audio_t *sh_audio)
   }
   if (!sh_audio->samplesize) // this would cause MPlayer to hang later
     sh_audio->samplesize = 2;
+  sh_audio->context = talloc_zero(NULL, struct ad_pcm_context);
   return 1;
 }
 
@@ -102,6 +109,7 @@ static int preinit(sh_audio_t *sh)
 
 static void uninit(sh_audio_t *sh)
 {
+    talloc_free(sh->context);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
@@ -121,12 +129,37 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
   unsigned len = sh_audio->channels*sh_audio->samplesize;
-  len = (minlen + len - 1) / len * len;
-  if (len > maxlen)
+  minlen = (minlen + len - 1) / len * len;
+  if (minlen > maxlen)
       // if someone needs hundreds of channels adjust audio_out_minsize
       // based on channels in preinit()
       return -1;
-  len=demux_read_data(sh_audio->ds,buf,len);
+
+  len = 0;
+  struct ad_pcm_context *ctx = sh_audio->context;
+  while (len < minlen) {
+      if (ctx->packet_len == 0) {
+          double pts;
+          int plen = ds_get_packet_pts(sh_audio->ds, &ctx->packet_ptr, &pts);
+          if (plen < 0)
+              break;
+          ctx->packet_len = plen;
+          if (pts != MP_NOPTS_VALUE) {
+              sh_audio->pts = pts;
+              sh_audio->pts_bytes = 0;
+          }
+      }
+      int from_stored = ctx->packet_len;
+      if (from_stored > minlen - len)
+          from_stored = minlen - len;
+      memcpy(buf + len, ctx->packet_ptr, from_stored);
+      ctx->packet_len -= from_stored;
+      ctx->packet_ptr += from_stored;
+      sh_audio->pts_bytes += from_stored;
+      len += from_stored;
+  }
+  if (len == 0)
+      len = -1;  // The loop above only exits at error/EOF
   if (len > 0 && sh_audio->channels >= 5) {
     reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,
                         AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
