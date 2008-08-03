@@ -626,7 +626,7 @@ _tv_teletext=auto
 _pvr=auto
 _network=yes
 _winsock2=auto
-_smbsupport=auto
+_smb=auto
 _vidix=auto
 _vidix_pcidb=yes
 _dhahelper=no
@@ -1027,8 +1027,8 @@ for ac_option do
   --disable-network)	_network=no	;;
   --enable-winsock2)	_winsock2=yes	;;
   --disable-winsock2)	_winsock2=no	;;
-  --enable-smb)		_smbsupport=yes	;;
-  --disable-smb)	_smbsupport=no	;;
+  --enable-smb)		_smb=yes	;;
+  --disable-smb)	_smb=no	;;
   --enable-vidix)	_vidix=yes	;;
   --disable-vidix)	_vidix=no	;;
   --with-vidix-drivers=*)
@@ -3710,29 +3710,29 @@ fi
 
 
 echocheck "Samba support (libsmbclient)"
-if test "$_smbsupport" = yes; then
+if test "$_smb" = yes; then
   _ld_extra="$_ld_extra -lsmbclient"
 fi
-if test "$_smbsupport" = auto; then
-    _smbsupport=no
+if test "$_smb" = auto; then
+    _smb=no
     cat > $TMPC << EOF
 #include <libsmbclient.h>
 int main(void) { smbc_opendir("smb://"); return 0; }
 EOF
   for _ld_tmp in "-lsmbclient" "-lsmbclient $_ld_dl" "-lsmbclient $_ld_dl -lnsl" "-lsmbclient $_ld_dl -lssl -lnsl" ; do
     cc_check $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" && \
-      _smbsupport=yes && break
+      _smb=yes && break
   done
 fi
 
-if test "$_smbsupport" = yes; then
-    _def_smbsupport="#define LIBSMBCLIENT"
+if test "$_smb" = yes; then
+    _def_smb="#define LIBSMBCLIENT"
     _inputmodules="smb $_inputmodules"
 else
-    _def_smbsupport="#undef LIBSMBCLIENT"
+    _def_smb="#undef LIBSMBCLIENT"
     _noinputmodules="smb $_noinputmodules"
 fi
-echores "$_smbsupport"
+echores "$_smb"
 
 
 #########
@@ -7833,7 +7833,7 @@ LIBMENU = $_menu
 LIBMENU_DVBIN = $_menu_dvbin
 LIBNEMESI = $_nemesi
 LIBNUT = $_libnut
-LIBSMBCLIENT = $_smbsupport
+LIBSMBCLIENT = $_smb
 LIBTHEORA = $_theora
 LIBVORBIS = $_vorbis
 LIRC = $_lirc
@@ -8488,7 +8488,7 @@ $_def_mkstemp
 $_def_nanosleep
 
 /* SMB support */
-$_def_smbsupport
+$_def_smb
 
 /* termcap flag for getch2.c */
 $_def_termcap
