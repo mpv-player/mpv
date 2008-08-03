@@ -7,7 +7,7 @@
 #include "libvo/video_out.h"
 #include "spudec.h"
 #include "vobsub.h"
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 #include "stream/tv.h"
 #endif
 #include "libavutil/intreadwrite.h"
@@ -165,7 +165,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
 
 void update_teletext(sh_video_t *sh_video, demuxer_t *demuxer, int reset)
 {
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     tvi_handle_t* tvh=demuxer->priv;
     int page_changed;
 

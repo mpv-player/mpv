@@ -77,7 +77,7 @@ typedef struct {
     /* video */
     char                        *video_dev;
     int                         video_fd;
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     char                        *vbi_dev;
     int                         vbi_fd;
     int                         vbi_bufsize;
@@ -580,7 +580,7 @@ static int get_control(priv_t *priv, struct v4l2_control *control, int val_signe
     return TVI_CONTROL_TRUE;
 }
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 static int vbi_init(priv_t* priv,char* device)
 {
     int vbi_fd=0;
@@ -703,7 +703,7 @@ static void *vbi_grabber(void *data)
     free(buf);
     return NULL;
 }
-#endif //HAVE_TV_TELETEXT
+#endif /* CONFIG_TV_TELETEXT */
 
 static int control(priv_t *priv, int cmd, void *arg)
 {
@@ -1019,7 +1019,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         if (audio_in_set_samplerate(&priv->audio_in, *(int*)arg) < 0) return TVI_CONTROL_FALSE;
 //        setup_audio_buffer_sizes(priv);
         return TVI_CONTROL_TRUE;
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     case TVI_CONTROL_VBI_INIT:
     {
         void* ptr;
@@ -1086,7 +1086,7 @@ static int uninit(priv_t *priv)
 {
     int i, frames, dropped = 0;
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     priv->vbi_shutdown=1;
     if(priv->vbi_grabber_thread)
         pthread_join(priv->vbi_grabber_thread, NULL);
@@ -1540,7 +1540,7 @@ static int start(priv_t *priv)
         }
     }
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     /* start vbi thread */
     if(priv->priv_vbi){
         priv->vbi_shutdown = 0;

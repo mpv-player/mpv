@@ -40,7 +40,7 @@ menu_info_t* menu_info_list[] = {
   &menu_info_filesel,
   &menu_info_txt,
   &menu_info_console,
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
   &menu_info_dvbsel,
 #endif  
   &menu_info_pref,

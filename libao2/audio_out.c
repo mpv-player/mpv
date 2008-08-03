@@ -79,20 +79,20 @@ const ao_functions_t* const audio_out_drivers[] =
 #ifdef HAVE_NAS
         &audio_out_nas,
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
         &audio_out_sdl,
 #endif
 #ifdef CONFIG_OPENAL
         &audio_out_openal,
 #endif
         &audio_out_mpegpes,
-#ifdef HAVE_DXR2
+#ifdef CONFIG_DXR2
         &audio_out_dxr2,
 #endif
-#ifdef HAVE_IVTV
+#ifdef CONFIG_IVTV
         &audio_out_ivtv,
 #endif
-#ifdef HAVE_V4L2_DECODER
+#ifdef CONFIG_V4L2_DECODER
         &audio_out_v4l2,
 #endif
         &audio_out_null,

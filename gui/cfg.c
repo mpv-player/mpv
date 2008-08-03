@@ -63,7 +63,7 @@ char * gtkAOALSAMixer;
 char * gtkAOALSAMixerChannel;
 char * gtkAOALSADevice;
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
 char * gtkAOSDLDriver;
 #endif
 #ifdef CONFIG_ESD
@@ -76,7 +76,7 @@ int    gtkCacheSize = 2048;
 int    gtkAutoSyncOn = 0;
 int    gtkAutoSync = 0;
 
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
  char * gtkDXR3Device;
 #endif
 
@@ -111,7 +111,7 @@ static const m_option_t gui_opts[] =
  { "vo_panscan",&vo_panscan,CONF_TYPE_FLOAT,CONF_RANGE,0.0,1.0,NULL },
  { "vo_doublebuffering",&vo_doublebuffering,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vo_direct_render",&vo_directrendering,CONF_TYPE_FLAG,0,0,1,NULL },
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
  { "vo_dxr3_device",&gtkDXR3Device,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
 
@@ -144,7 +144,7 @@ static const m_option_t gui_opts[] =
  { "ao_alsa_mixer_channel",&gtkAOALSAMixerChannel,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_alsa_device",&gtkAOALSADevice,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
  { "ao_sdl_subdriver",&gtkAOSDLDriver,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
 #ifdef CONFIG_ESD

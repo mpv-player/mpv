@@ -2306,7 +2306,7 @@ static int get_audio_framesize(priv_t * priv)
     return priv->chains[1]->rbuf->blocksize;
 }
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
 {
     if(!priv || !ptsp)
@@ -2352,7 +2352,7 @@ static void vbi_grabber(priv_t* priv)
     }
     free(buf);
 }
-#endif //HAVE_TV_TELETEXT
+#endif /* CONFIG_TV_TELETEXT */
 
 /**
  * \brief fills given buffer with video data (usually one frame)
@@ -2397,7 +2397,7 @@ static double grab_video_frame(priv_t * priv, char *buffer, int len)
       rb->count--;
     LeaveCriticalSection(rb->pMutex);
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     vbi_grabber(priv);
 #endif
     return pts;
@@ -2588,7 +2588,7 @@ static HRESULT build_audio_chain(priv_t *priv)
  */
 static HRESULT build_vbi_chain(priv_t *priv)
 {
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     HRESULT hr;
 
     if(priv->chains[2]->rbuf)
@@ -2944,7 +2944,7 @@ static int init(priv_t * priv)
             OLE_QUERYINTERFACE(priv->pBuilder,IID_IBaseFilter,pBF);
             OLE_CALL_ARGS(pBF,SetSyncSource,rc);
         }
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
        if(vbi_get_props(priv,&(priv->tsp))!=TVI_CONTROL_TRUE)
            break;
 #endif
@@ -3017,7 +3017,7 @@ static int uninit(priv_t * priv)
     if (priv->dwRegister) {
         RemoveFromRot(priv->dwRegister);
     }
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     teletext_control(priv->priv_vbi,TV_VBI_CONTROL_STOP,(void*)1);
 #endif
     //stop audio grabber thread
@@ -3524,7 +3524,7 @@ static int control(priv_t * priv, int cmd, void *arg)
     case TVI_CONTROL_IMMEDIATE:
 	priv->immediate_mode = 1;
 	return TVI_CONTROL_TRUE;
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     case TVI_CONTROL_VBI_INIT:
     {
         void* ptr;

@@ -77,7 +77,7 @@ static inline void TranslateFilename( int c,char * tmp,size_t tmplen )
             else av_strlcat( tmp,MSGTR_NoChapter,tmplen );
           break;
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
    case STREAMTYPE_VCD:
         snprintf( tmp,tmplen,MSGTR_VCDTrack,guiIntfStruct.Track );
 	break;
@@ -174,7 +174,7 @@ calclengthmmmmss:
            switch ( guiIntfStruct.StreamType )
             {
              case STREAMTYPE_FILE:   av_strlcat( trbuf,"f",sizeof( trbuf ) ); break;
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
              case STREAMTYPE_VCD:    av_strlcat( trbuf,"v",sizeof( trbuf ) ); break;
 #endif
              case STREAMTYPE_STREAM: av_strlcat( trbuf,"u",sizeof( trbuf ) ); break;

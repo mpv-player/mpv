@@ -288,7 +288,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 				ptr->cr =FEC_2_3;
 			else if(! strcmp(cr, "FEC_3_4"))
 				ptr->cr =FEC_3_4;
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 			else if(! strcmp(cr, "FEC_4_5"))
 				ptr->cr =FEC_4_5;
 			else if(! strcmp(cr, "FEC_6_7"))
@@ -358,7 +358,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 				ptr->cr_lp =FEC_2_3;
 			else if(! strcmp(tmp_lcr, "FEC_3_4"))
 				ptr->cr_lp =FEC_3_4;
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 			else if(! strcmp(tmp_lcr, "FEC_4_5"))
 				ptr->cr_lp =FEC_4_5;
 			else if(! strcmp(tmp_lcr, "FEC_6_7"))
@@ -381,7 +381,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 				ptr->hier = HIERARCHY_2;
 			else if(! strcmp(tmp_hier, "HIERARCHY_4"))
 				ptr->hier = HIERARCHY_4;
-#ifdef HAVE_DVB_HEAD				
+#ifdef CONFIG_DVB_HEAD
 			else if(! strcmp(tmp_hier, "HIERARCHY_AUTO"))
 				ptr->hier = HIERARCHY_AUTO;
 #endif
@@ -611,7 +611,7 @@ static void dvbin_close(stream_t *stream)
 	close(priv->dvr_fd);
 
 	close(priv->fe_fd);
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
 	close(priv->sec_fd);
 #endif
 

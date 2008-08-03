@@ -65,7 +65,7 @@ extern const stream_info_t stream_info_ifo;
 extern const stream_info_t stream_info_dvd;
 
 static const stream_info_t* const auto_open_streams[] = {
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
   &stream_info_vcd,
 #endif
 #ifdef HAVE_CDDA
@@ -85,7 +85,7 @@ static const stream_info_t* const auto_open_streams[] = {
   &stream_info_udp,
   &stream_info_http2,
 #endif
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
   &stream_info_dvb,
 #endif
 #ifdef CONFIG_TV
@@ -94,7 +94,7 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_RADIO
   &stream_info_radio,
 #endif
-#ifdef HAVE_PVR
+#ifdef CONFIG_PVR
   &stream_info_pvr,
 #endif
 #ifdef HAVE_FTP

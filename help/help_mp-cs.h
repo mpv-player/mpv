@@ -11,7 +11,7 @@ static char help_text[]=
 "Základní volby: (úplný seznam najdete v manuálové stránce)\n"
 " -vo <rozhraní>   vybere výstupní video rozhraní (seznam: -vo help)\n"
 " -ao <rozhraní>   vybere výstupní audio rozhraní (seznam: -ao help)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<č_stopy>  přehraje (S)VCD (Super Video CD) stopu (z nepřipojeného\n"
 "                  zařízení)\n"
 #endif

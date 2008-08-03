@@ -10,7 +10,7 @@ static char help_text[]=
 "Grundläggande argument: (komplett lista återfinns i `man mplayer`)\n"
 " -vo <drv[:enhet]>   välj video-ut drivrutin & enhet ('-vo help' för lista)\n"
 " -ao <drv[:enhet]>   välj audio-ut drivrutin & enhet ('-ao help' för lista)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<spårnr>      spela (S)VCD (Super Video CD) spår (rå enhet, ingen montering)\n"
 #endif
 #ifdef CONFIG_DVDREAD

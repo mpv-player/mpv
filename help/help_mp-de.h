@@ -18,7 +18,7 @@ static char help_text[]=
 "Basisoptionen: (siehe Manpage für eine vollständige Liste aller Optionen!)\n"
 " -vo <drv>        Wähle Videoausgabetreiber ('-vo help' für eine Liste)\n"
 " -ao <drv>        Wähle Audioausgabetreiber ('-ao help' für eine Liste)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<tracknr>  Spiele einen (S)VCD-Titel (Super Video CD) ab\n"
 "                  ( direkter Gerätezugriff, kein mount! )\n"
 #endif

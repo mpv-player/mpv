@@ -4537,8 +4537,8 @@ EOF
 fi
 echores "$_dvb"
 if test "$_dvb" = yes ; then
-  _def_dvb='#define HAVE_DVB 1'
-  _def_dvb_in='#define HAS_DVBIN_SUPPORT 1'
+  _def_dvb='#define CONFIG_DVB 1'
+  _def_dvbin='#define CONFIG_DVBIN 1'
   _aomodules="mpegpes(dvb) $_aomodules"
   _vomodules="mpegpes(dvb) $_vomodules"
 fi
@@ -4566,17 +4566,18 @@ EOF
 fi
 echores "$_dvbhead"
 if test "$_dvbhead" = yes ; then
-  _def_dvb='#define HAVE_DVB 1'
-  _def_dvb_head='#define HAVE_DVB_HEAD 1'
-  _def_dvb_in='#define HAS_DVBIN_SUPPORT 1'
+  _def_dvb='#define CONFIG_DVB 1'
+  _def_dvb_head='#define CONFIG_DVB_HEAD 1'
+  _def_dvbin='#define CONFIG_DVBIN 1'
   _aomodules="mpegpes(dvb) $_aomodules"
   _vomodules="mpegpes(dvb) $_vomodules"
 fi
 
 if test "$_dvbhead" = no && test "$_dvb" = no ; then
-  _def_dvb='#undef HAVE_DVB'
+  _def_dvb='#undef CONFIG_DVB'
+  _def_dvb_head='#undef CONFIG_DVB_HEAD'
   _def_dvb_head='#undef HAVE_DVB_HEAD'
-  _def_dvb_in='#undef HAS_DVBIN_SUPPORT '
+  _def_dvbin='#undef CONFIG_DVBIN '
   _aomodules="mpegpes(file) $_aomodules"
   _vomodules="mpegpes(file) $_vomodules"
 fi
@@ -4821,7 +4822,7 @@ EOF
   fi
 fi
 if test "$_sdl" = yes ; then
-  _def_sdl='#define HAVE_SDL 1'
+  _def_sdl='#define CONFIG_SDL 1'
   if cygwin ; then
     _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/`"
     _inc_extra="$_inc_extra `$_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/`"
@@ -4838,7 +4839,7 @@ if test "$_sdl" = yes ; then
   _aomodules="sdl $_aomodules"
   _res_comment="using $_sdlconfig"
 else
-  _def_sdl='#undef HAVE_SDL'
+  _def_sdl='#undef CONFIG_SDL'
   _novomodules="sdl $_novomodules"
   _noaomodules="sdl $_noaomodules"
 fi
@@ -4929,13 +4930,13 @@ EOF
   done
 fi
 if test "$_dxr2" = yes; then
-  _def_dxr2='#define HAVE_DXR2 1'
+  _def_dxr2='#define CONFIG_DXR2 1'
   _vosrc="$_vosrc vo_dxr2.c"
   _aosrc="$_aosrc ao_dxr2.c"
   _aomodules="dxr2 $_aomodules"
   _vomodules="dxr2 $_vomodules"
 else
-  _def_dxr2='#undef HAVE_DXR2'
+  _def_dxr2='#undef CONFIG_DXR2'
   _noaomodules="dxr2 $_noaomodules"
   _novomodules="dxr2 $_novomodules"
 fi
@@ -4951,11 +4952,11 @@ EOF
   cc_check && _dxr3=yes
 fi
 if test "$_dxr3" = yes ; then
-  _def_dxr3='#define HAVE_DXR3 1'
+  _def_dxr3='#define CONFIG_DXR3 1'
   _vosrc="$_vosrc vo_dxr3.c"
   _vomodules="dxr3 $_vomodules"
 else
-  _def_dxr3='#undef HAVE_DXR3'
+  _def_dxr3='#undef CONFIG_DXR3'
   _novomodules="dxr3 $_novomodules"
 fi
 echores "$_dxr3"
@@ -4981,13 +4982,13 @@ EOF
   cc_check && _ivtv=yes
 fi
 if test "$_ivtv" = yes ; then
-  _def_ivtv='#define HAVE_IVTV 1'
+  _def_ivtv='#define CONFIG_IVTV 1'
   _vosrc="$_vosrc vo_ivtv.c"
   _vomodules="ivtv $_vomodules"
   _aosrc="$_aosrc ao_ivtv.c"
   _aomodules="ivtv $_aomodules"
 else
-  _def_ivtv='#undef HAVE_IVTV'
+  _def_ivtv='#undef CONFIG_IVTV'
   _novomodules="ivtv $_novomodules"
   _noaomodules="ivtv $_noaomodules"
 fi
@@ -5016,13 +5017,13 @@ EOF
   cc_check && _v4l2=yes
 fi
 if test "$_v4l2" = yes ; then
-  _def_v4l2='#define HAVE_V4L2_DECODER 1'
+  _def_v4l2='#define CONFIG_V4L2_DECODER 1'
   _vosrc="$_vosrc vo_v4l2.c"
   _vomodules="v4l2 $_vomodules"
   _aosrc="$_aosrc ao_v4l2.c"
   _aomodules="v4l2 $_aomodules"
 else
-  _def_v4l2='#undef HAVE_V4L2_DECODER'
+  _def_v4l2='#undef CONFIG_V4L2_DECODER'
   _novomodules="v4l2 $_novomodules"
   _noaomodules="v4l2 $_noaomodules"
 fi
@@ -5399,10 +5400,10 @@ fi #if irix
 echocheck "VCD support"
 if linux || freebsd || netbsd || dragonfly || bsdos || darwin || sunos || mingw32; then
   _inputmodules="vcd $_inputmodules"
-  _def_vcd='#define HAVE_VCD 1'
+  _def_vcd='#define CONFIG_VCD 1'
   _vcd="yes"
 else
-  _def_vcd='#undef HAVE_VCD'
+  _def_vcd='#undef CONFIG_VCD'
   _noinputmodules="vcd $_noinputmodules"
   _res_comment="not supported on this OS"
   _vcd="no"
@@ -6796,16 +6797,16 @@ if test "$_zr" = auto ; then
 fi
 if test "$_zr" = yes ; then
   if test "$_libavcodec_a" = yes ; then
-    _def_zr='#define HAVE_ZR 1'
+    _def_zr='#define CONFIG_ZR 1'
     _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
     _vomodules="zr zr2 $_vomodules"
   else
     _res_comment="libavcodec (static) is required by zr, sorry"
     _novomodules="zr $_novomodules"
-    _def_zr='#undef HAVE_ZR'
+    _def_zr='#undef CONFIG_ZR'
   fi
 else
-  _def_zr='#undef HAVE_ZR'
+  _def_zr='#undef CONFIG_ZR'
   _novomodules="zr zr2 $_novomodules"
 fi
 echores "$_zr"
@@ -6974,10 +6975,10 @@ EOF
     fi
   fi
   if test "$_tv_bsdbt848" = yes ; then
-    _def_tv_bsdbt848='#define HAVE_TV_BSDBT848 1'
+    _def_tv_bsdbt848='#define CONFIG_TV_BSDBT848 1'
     _inputmodules="tv-bsdbt848 $_inputmodules"
   else
-    _def_tv_bsdbt848='#undef HAVE_TV_BSDBT848'
+    _def_tv_bsdbt848='#undef CONFIG_TV_BSDBT848'
     _noinputmodules="tv-bsdbt848 $_noinputmodules"
   fi
   echores "$_tv_bsdbt848"
@@ -7001,11 +7002,11 @@ EOF
 fi
 if test "$_tv_dshow" = yes ; then
   _inputmodules="tv-dshow $_inputmodules"
-  _def_tv_dshow='#define HAVE_TV_DSHOW 1'
+  _def_tv_dshow='#define CONFIG_TV_DSHOW 1'
   _ld_extra="$_ld_extra -lole32 -luuid"
 else
   _noinputmodules="tv-dshow $_noinputmodules"
-  _def_tv_dshow='#undef HAVE_TV_DSHOW'
+  _def_tv_dshow='#undef CONFIG_TV_DSHOW'
 fi
 echores "$_tv_dshow"
 
@@ -7025,12 +7026,12 @@ fi
 if test "$_tv_v4l1" = yes ; then
   _audio_input=yes
   _tv_v4l=yes
-  _def_tv_v4l='#define HAVE_TV_V4L 1'
-  _def_tv_v4l1='#define HAVE_TV_V4L1 1'
+  _def_tv_v4l='#define CONFIG_TV_V4L 1'
+  _def_tv_v4l1='#define CONFIG_TV_V4L1 1'
   _inputmodules="tv-v4l $_inputmodules"
 else
   _noinputmodules="tv-v4l1 $_noinputmodules"
-  _def_tv_v4l='#undef HAVE_TV_V4L'
+  _def_tv_v4l='#undef CONFIG_TV_V4L'
 fi
 echores "$_tv_v4l1"
 
@@ -7051,12 +7052,12 @@ fi
 if test "$_tv_v4l2" = yes ; then
   _audio_input=yes
   _tv_v4l=yes
-  _def_tv_v4l='#define HAVE_TV_V4L 1'
-  _def_tv_v4l2='#define HAVE_TV_V4L2 1'
+  _def_tv_v4l='#define CONFIG_TV_V4L 1'
+  _def_tv_v4l2='#define CONFIG_TV_V4L2 1'
   _inputmodules="tv-v4l2 $_inputmodules"
 else
   _noinputmodules="tv-v4l2 $_noinputmodules"
-  _def_tv_v4l2='#undef HAVE_TV_V4L2'
+  _def_tv_v4l2='#undef CONFIG_TV_V4L2'
 fi
 echores "$_tv_v4l2"
 
@@ -7071,11 +7072,11 @@ if test "$_tv_teletext" = auto ; then
   fi
 fi
 if test "$_tv_teletext" = yes ; then
-  _def_tv_teletext='#define HAVE_TV_TELETEXT 1'
+  _def_tv_teletext='#define CONFIG_TV_TELETEXT 1'
   _inputmodules="tv-teletext $_inputmodules"
 else
   _noinputmodules="tv-teletext $_noinputmodules"
-  _def_tv_teletext='#undef HAVE_TV_TELETEXT'
+  _def_tv_teletext='#undef CONFIG_TV_TELETEXT'
 fi
 echores "$_tv_teletext"
 
@@ -7117,9 +7118,9 @@ EOF
   fi
 fi
 if test "$_radio_v4l2" = yes ; then
-  _def_radio_v4l2='#define HAVE_RADIO_V4L2 1'
+  _def_radio_v4l2='#define CONFIG_RADIO_V4L2 1'
 else
-  _def_radio_v4l2='#undef HAVE_RADIO_V4L2'
+  _def_radio_v4l2='#undef CONFIG_RADIO_V4L2'
 fi
 echores "$_radio_v4l2"
 
@@ -7136,9 +7137,9 @@ EOF
   fi
 fi
 if test "$_radio_v4l" = yes ; then
-  _def_radio_v4l='#define HAVE_RADIO_V4L 1'
+  _def_radio_v4l='#define CONFIG_RADIO_V4L 1'
 else
-  _def_radio_v4l='#undef HAVE_RADIO_V4L'
+  _def_radio_v4l='#undef CONFIG_RADIO_V4L'
 fi
 echores "$_radio_v4l"
 
@@ -7159,9 +7160,9 @@ echores "$_radio_bsdbt848"
 fi #if freebsd || netbsd || openbsd || dragonfly || bsdos && _radio && _radio_bsdbt848
 
 if test "$_radio_bsdbt848" = yes ; then
-  _def_radio_bsdbt848='#define HAVE_RADIO_BSDBT848 1'
+  _def_radio_bsdbt848='#define CONFIG_RADIO_BSDBT848 1'
 else
-  _def_radio_bsdbt848='#undef HAVE_RADIO_BSDBT848'
+  _def_radio_bsdbt848='#undef CONFIG_RADIO_BSDBT848'
 fi
 
 if test "$_radio_v4l" = no && test "$_radio_v4l2" = no && \
@@ -7184,11 +7185,11 @@ EOF
  fi
 fi
 if test "$_pvr" = yes ; then
-  _def_pvr='#define HAVE_PVR 1'
+  _def_pvr='#define CONFIG_PVR 1'
   _inputmodules="pvr $_inputmodules"
 else
   _noinputmodules="pvr $_noinputmodules"
-  _def_pvr='#undef HAVE_PVR'
+  _def_pvr='#undef CONFIG_PVR'
 fi
 echores "$_pvr"
 
@@ -8676,7 +8677,7 @@ $_def_ivtv
 $_def_v4l2
 $_def_dvb
 $_def_dvb_head
-$_def_dvb_in
+$_def_dvbin
 $_def_svga
 $_def_vesa
 $_def_xss

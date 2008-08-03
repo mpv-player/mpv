@@ -178,19 +178,19 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef CONFIG_CACA
 	&video_out_caca,
 #endif
-#ifdef HAVE_DXR2
+#ifdef CONFIG_DXR2
 	&video_out_dxr2,
 #endif
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 	&video_out_dxr3,
 #endif
-#ifdef HAVE_IVTV
+#ifdef CONFIG_IVTV
         &video_out_ivtv,
 #endif
-#ifdef HAVE_V4L2_DECODER
+#ifdef CONFIG_V4L2_DECODER
         &video_out_v4l2,
 #endif
-#ifdef HAVE_ZR
+#ifdef CONFIG_ZR
 	&video_out_zr,
 	&video_out_zr2,
 #endif

@@ -86,7 +86,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_libmpeg2,
 #endif
         &mpcodecs_vd_mpegpes,
-#ifdef HAVE_ZR
+#ifdef CONFIG_ZR
         &mpcodecs_vd_zrmjpeg,
 #endif
 #ifdef CONFIG_REALCODECS

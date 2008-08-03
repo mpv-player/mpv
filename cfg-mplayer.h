@@ -231,12 +231,12 @@ const m_option_t mplayer_opts[]={
 	{"aa*", "-aa* has been removed. Use -vo aa:suboption instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 
-#ifdef HAVE_ZR
+#ifdef CONFIG_ZR
 	// -vo zr
 	{"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0, &vo_zr_revertoption },
 #endif
 
-#ifdef HAVE_DXR2
+#ifdef CONFIG_DXR2
 	{"dxr2", &dxr2_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 

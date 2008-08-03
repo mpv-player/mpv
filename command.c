@@ -34,10 +34,10 @@
 #ifdef CONFIG_RADIO
 #include "stream/stream_radio.h"
 #endif
-#ifdef HAVE_PVR
+#ifdef CONFIG_PVR
 #include "stream/pvr.h"
 #endif
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #endif
 #ifdef CONFIG_DVDREAD
@@ -1860,7 +1860,7 @@ static int mp_property_tv_color(m_option_t * prop, int action, void *arg,
 
 #endif
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 static int mp_property_teletext_common(m_option_t * prop, int action, void *arg,
                   MPContext * mpctx)
 {
@@ -1941,7 +1941,7 @@ static int mp_property_teletext_page(m_option_t * prop, int action, void *arg,
 }
 
 
-#endif /* HAVE_TV_TELETEXT */
+#endif /* CONFIG_TV_TELETEXT */
 
 ///@}
 
@@ -2092,7 +2092,7 @@ static const m_option_t mp_properties[] = {
      M_OPT_RANGE, -100, 100, (void *) TV_COLOR_HUE },
 #endif
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     { "teletext_page", mp_property_teletext_page, CONF_TYPE_INT,
      M_OPT_RANGE, 100, 899,  (void*)TV_VBI_CONTROL_GET_PAGE },
     { "teletext_subpage", mp_property_teletext_common, CONF_TYPE_INT,
@@ -2704,28 +2704,28 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_set_freq((tvi_handle_t *) (mpctx->demuxer->priv),
 			    cmd->args[0].v.f * 16.0);
-#ifdef HAVE_PVR
+#ifdef CONFIG_PVR
             else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
               pvr_set_freq (mpctx->stream, ROUND (cmd->args[0].v.f));
               set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
                            pvr_get_current_channelname (mpctx->stream),
                            pvr_get_current_stationname (mpctx->stream));
             }
-#endif /* HAVE_PVR */
+#endif /* CONFIG_PVR */
 	    break;
 
 	case MP_CMD_TV_STEP_FREQ:
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_step_freq((tvi_handle_t *) (mpctx->demuxer->priv),
 			    cmd->args[0].v.f * 16.0);
-#ifdef HAVE_PVR
+#ifdef CONFIG_PVR
             else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
               pvr_force_freq_step (mpctx->stream, ROUND (cmd->args[0].v.f));
               set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: f %d",
                            pvr_get_current_channelname (mpctx->stream),
                            pvr_get_current_frequency (mpctx->stream));
             }
-#endif /* HAVE_PVR */
+#endif /* CONFIG_PVR */
 	    break;
 
 	case MP_CMD_TV_SET_NORM:
@@ -2752,7 +2752,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			//vo_osd_changed(OSDTYPE_SUBTITLE);
 		    }
 		}
-#ifdef HAVE_PVR
+#ifdef CONFIG_PVR
                 else if (mpctx->stream &&
                          mpctx->stream->type == STREAMTYPE_PVR) {
                   pvr_set_channel_step (mpctx->stream, cmd->args[0].v.i);
@@ -2760,9 +2760,9 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
                                pvr_get_current_channelname (mpctx->stream),
                                pvr_get_current_stationname (mpctx->stream));
                 }
-#endif /* HAVE_PVR */
+#endif /* CONFIG_PVR */
 	    }
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 	    if (mpctx->stream->type == STREAMTYPE_DVB) {
 		    int dir;
 		    int v = cmd->args[0].v.i;
@@ -2777,7 +2777,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    if (dvb_step_channel(mpctx->stream, dir))
 			mpctx->eof = mpctx->dvbin_reopen = 1;
 	    }
-#endif				/* HAS_DVBIN_SUPPORT */
+#endif /* CONFIG_DVBIN */
 	    break;
 
 	case MP_CMD_TV_SET_CHANNEL:
@@ -2790,17 +2790,17 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    //vo_osd_changed(OSDTYPE_SUBTITLE);
 		}
 	    }
-#ifdef HAVE_PVR
+#ifdef CONFIG_PVR
             else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
               pvr_set_channel (mpctx->stream, cmd->args[0].v.s);
               set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
                            pvr_get_current_channelname (mpctx->stream),
                            pvr_get_current_stationname (mpctx->stream));
             }
-#endif /* HAVE_PVR */
+#endif /* CONFIG_PVR */
 	    break;
 
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 	case MP_CMD_DVB_SET_CHANNEL:
 	    if (mpctx->stream->type == STREAMTYPE_DVB) {
 			mpctx->last_dvb_step = 1;
@@ -2810,7 +2810,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			mpctx->eof = mpctx->dvbin_reopen = 1;
 	    }
 	    break;
-#endif				/* HAS_DVBIN_SUPPORT     */
+#endif /* CONFIG_DVBIN */
 
 	case MP_CMD_TV_LAST_CHANNEL:
 	    if (mpctx->file_format == DEMUXER_TYPE_TV) {
@@ -2821,14 +2821,14 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		    //vo_osd_changed(OSDTYPE_SUBTITLE);
 		}
 	    }
-#ifdef HAVE_PVR
+#ifdef CONFIG_PVR
             else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
               pvr_set_lastchannel (mpctx->stream);
               set_osd_msg (OSD_MSG_TV_CHANNEL, 1, osd_duration, "%s: %s",
                            pvr_get_current_channelname (mpctx->stream),
                            pvr_get_current_stationname (mpctx->stream));
             }
-#endif /* HAVE_PVR */
+#endif /* CONFIG_PVR */
 	    break;
 
 	case MP_CMD_TV_STEP_NORM:
@@ -2840,7 +2840,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    if (mpctx->file_format == DEMUXER_TYPE_TV)
 		tv_step_chanlist((tvi_handle_t *) (mpctx->demuxer->priv));
 	    break;
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 	case MP_CMD_TV_TELETEXT_ADD_DEC:
 	{
 	    tvi_handle_t* tvh=(tvi_handle_t *)(mpctx->demuxer->priv);
@@ -2855,7 +2855,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		tvh->functions->control(tvh->priv,TV_VBI_CONTROL_GO_LINK,&(cmd->args[0].v.i));
 	    break;
 	}
-#endif /* HAVE_TV_TELETEXT */
+#endif /* CONFIG_TV_TELETEXT */
 #endif /* CONFIG_TV */
 
 	case MP_CMD_SUB_LOAD:

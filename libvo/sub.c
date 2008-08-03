@@ -14,7 +14,7 @@
 #define OSD_NAV_BOX_ALPHA 0x7f
 #endif
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 #include "stream/tv.h"
 #include "osdep/timer.h"
 #endif
@@ -73,7 +73,7 @@ font_desc_t* vo_font=NULL;
 font_desc_t* sub_font=NULL;
 
 unsigned char* vo_osd_text=NULL;
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 void* vo_osd_teletext_page=NULL;
 int vo_osd_teletext_half = 0;
 int vo_osd_teletext_mode=0;
@@ -242,7 +242,7 @@ inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
 }
 #endif
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 // renders char to a big per-object buffer where alpha and bitmap are separated
 static void tt_draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsigned char* src, int stride,int fg,int bg,int alpha)
 {
@@ -1123,7 +1123,7 @@ int vo_update_osd(int dxs,int dys){
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(obj,dxs,dys);
 	    break;
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 	case OSDTYPE_TELETEXT:
 	    vo_update_text_teletext(obj,dxs,dys);
 	    break;
@@ -1195,7 +1195,7 @@ void vo_init_osd(void){
 #ifdef CONFIG_DVDNAV
     new_osd_obj(OSDTYPE_DVDNAV);
 #endif
-#if HAVE_TV_TELETEXT
+#if CONFIG_TV_TELETEXT
     new_osd_obj(OSDTYPE_TELETEXT);
 #endif
 #ifdef HAVE_FREETYPE
@@ -1236,7 +1236,7 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 #ifdef CONFIG_DVDNAV
         case OSDTYPE_DVDNAV:
 #endif
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 	case OSDTYPE_TELETEXT:
 #endif
 	case OSDTYPE_OSD:

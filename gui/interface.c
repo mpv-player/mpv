@@ -185,7 +185,7 @@ void guiInit( void )
  guiIntfStruct.StreamType=-1;
 
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
  if ( !gtkDXR3Device ) gtkDXR3Device=strdup( "/dev/em8300-0" );
 #endif
  if ( stream_cache_size > 0 ) { gtkCacheOn=1; gtkCacheSize=stream_cache_size; }
@@ -616,7 +616,7 @@ int guiGetEvent( int type,char * arg )
 	       guiGetEvent( guiSetDVD,(char *)stream->priv );
 	       break;
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 	  case STREAMTYPE_VCD: 
 	       {
 	        int i;
@@ -706,7 +706,7 @@ int guiGetEvent( int type,char * arg )
 	     }
 	 }
 // -- subtitle
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS
 #ifdef CONFIG_LIBAVCODEC
 	 && !gtkVfLAVC
@@ -743,7 +743,7 @@ int guiGetEvent( int type,char * arg )
          {
 	  case STREAMTYPE_PLAYLIST:
 	       break;
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 	  case STREAMTYPE_VCD:
 	       {
 	        char tmp[512];
@@ -795,7 +795,7 @@ int guiGetEvent( int type,char * arg )
 	   }
 	}
 
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 #ifdef CONFIG_LIBAVCODEC
 	remove_vf( "lavc" );
 #endif
@@ -857,7 +857,7 @@ int guiGetEvent( int type,char * arg )
 	  free(tmp);
 	 }
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"sdl",3 ) )
 	 {
 	  char *tmp;
@@ -1125,7 +1125,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 #ifdef CONFIG_DVDREAD
 	if ( (unsigned int)vparam & guiDVD ) memset( &guiIntfStruct.DVD,0,sizeof( guiDVDStruct ) );
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 	if ( (unsigned int)vparam & guiVCD ) guiIntfStruct.VCDTracks=0;
 #endif
 	return NULL;

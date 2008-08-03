@@ -112,7 +112,7 @@ char *heartbeat_cmd;
 #include "stream/stream_radio.h"
 #endif
 
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #include "stream/cache2.h"
 #endif
@@ -198,7 +198,7 @@ static MPContext mpctx_s = {
     .set_of_sub_pos = -1,
     .file_format = DEMUXER_TYPE_UNKNOWN,
     .loop_times = -1,
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
     .last_dvb_step = 1,
 #endif
 };
@@ -1143,7 +1143,7 @@ void init_vo_spudec(void) {
  * make it all work is to use the builtin SDL-bootstrap code, which 
  * will be done automatically by replacing our main() if we include SDL.h.
  */
-#if defined(__APPLE__) && defined(HAVE_SDL)
+#if defined(__APPLE__) && defined(CONFIG_SDL)
 #include <SDL.h>
 #endif
 
@@ -3410,7 +3410,7 @@ if(mpctx->sh_video){
 
 if(!mpctx->sh_video && !mpctx->sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NoStreamFound);
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 	if(mpctx->stream->type == STREAMTYPE_DVB)
 	{
 		int dir;
@@ -3918,7 +3918,7 @@ if(rel_seek_secs || abs_seek_pos){
 
 mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->eof);
 
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 if(mpctx->dvbin_reopen)
 {
   mpctx->eof = 0;

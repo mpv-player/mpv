@@ -14,7 +14,7 @@ static char help_text[]=
 "Options de base :  (liste complète dans la page de man)\n"
 " -vo <pil[:pér]>  pilote et périph. vidéo de sortie ('-vo help' pour liste)\n"
 " -ao <pil[:pér]>  pilote et périph. audio de sortie ('-ao help' pour liste)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<n°piste>  lit piste (S)VCD (Super Video CD) (périf. brut, non-monté)\n"
 #endif
 #ifdef CONFIG_DVDREAD

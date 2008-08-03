@@ -23,7 +23,7 @@ static char help_text[]=
 "基本选项：        （完整列表参见手册页）\n"
 " -vo <drv>        选择视频输出驱动程序（查看驱动程序列表用“-vo help”）\n"
 " -ao <drv>        选择音频输出驱动程序（查看驱动程序列表用“-ao help”）\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<曲目号>   播放 (S)VCD（超级VCD）曲目（无格式设备，无需装载）\n"
 #endif
 #ifdef CONFIG_DVDREAD

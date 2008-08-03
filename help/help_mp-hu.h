@@ -15,7 +15,7 @@ static char help_text[]=
 "Alapvető opciók: (az összes opció listájához lásd a man lapot)\n"
 " -vo <drv>        kimeneti videó meghajtó kiválasztása (lista: '-vo help')\n"
 " -ao <drv>        kimeneti audió meghajtó kiválasztása (lista: '-ao help')\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<sávszám>  (S)VCD (Super Video CD) sáv lejátszás (nyers, nincs mount)\n"
 #endif
 #ifdef CONFIG_DVDREAD

@@ -326,7 +326,7 @@ static int preinit(const char *arg)
 	
 	if(!shared_buffer)
 	{
-		#if !defined (MACOSX_FINDER_SUPPORT) || !defined (HAVE_SDL)
+		#if !defined (MACOSX_FINDER_SUPPORT) || !defined (CONFIG_SDL)
 		//this chunk of code is heavily based off SDL_macosx.m from SDL 
 		//it uses an Apple private function to request foreground operation
 		void CPSEnableForegroundOperation(ProcessSerialNumber* psn);
@@ -913,7 +913,7 @@ static int control(uint32_t request, void *data, ...)
 	// Without SDL's bootstrap code (include SDL.h in mplayer.c),
 	// on Leopard, we got trouble to get the play window auto focused
 	// when app is actived. Following code fix this problem.
-#ifndef HAVE_SDL
+#ifndef CONFIG_SDL
 	if (isLeopardOrLater && [event type] == NSAppKitDefined
 			&& [event subtype] == NSApplicationActivatedEventType) {
 		[window makeMainWindow];

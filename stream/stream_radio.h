@@ -9,7 +9,7 @@
 typedef struct radio_param_s{
     /** name of radio device file */
     char*   device;
-#ifdef HAVE_RADIO_BSDBT848
+#ifdef CONFIG_RADIO_BSDBT848
     /** minimal allowed frequency */
     float   freq_min;
     /** maximal allowed frequency */

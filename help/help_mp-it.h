@@ -13,7 +13,7 @@ static char help_text[]=
 "Opzioni di base: (vedi la pagina man per la lista completa)\n"
 " -vo <drv[:dev]>  sceglie driver di uscita video ('-vo help' lista)\n"
 " -ao <drv[:dev]>  sceglie driver di uscita audio ('-ao help' lista)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<trackno>  legge (S)VCD (Super Video CD) (dispositivo raw, non montato)\n"
 #endif
 #ifdef CONFIG_DVDREAD

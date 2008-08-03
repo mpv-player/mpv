@@ -35,21 +35,21 @@
 #include <errno.h>
 #include <unistd.h>
 
-#ifdef HAVE_RADIO_BSDBT848
+#ifdef CONFIG_RADIO_BSDBT848
 #include <sys/param.h>
 #ifdef IOCTL_BT848_H_NAME
 #include IOCTL_BT848_H_NAME
 #endif
 
-#else // HAVE_RADIO_BSDBT848
+#else /* CONFIG_RADIO_BSDBT848 */
 
 #include <linux/types.h>
 
-#ifdef HAVE_RADIO_V4L2
+#ifdef CONFIG_RADIO_V4L2
 #include <linux/videodev2.h>
 #endif
 
-#ifdef HAVE_RADIO_V4L
+#ifdef CONFIG_RADIO_V4L
 #include <linux/videodev.h>
 #warning  "V4L is deprecated and will be removed in future"
 #endif
@@ -91,7 +91,7 @@ typedef struct radio_channels_s {
 
 /// default values for options
 radio_param_t stream_radio_defaults={
-#ifdef HAVE_RADIO_BSDBT848
+#ifdef CONFIG_RADIO_BSDBT848
     "/dev/tuner0", //device
     87.50,         //freq_min
     108.00,        //freq_max
@@ -252,7 +252,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
     return STREAM_OK;
 }
 
-#ifdef HAVE_RADIO_V4L2
+#ifdef CONFIG_RADIO_V4L2
 /*****************************************************************
  * \brief get fraction value for using in set_frequency and get_frequency
  * \return STREAM_OK if success, STREAM_ERROR otherwise
@@ -409,8 +409,8 @@ static const radio_driver_t radio_driver_v4l2={
     set_frequency_v4l2,
     get_frequency_v4l2
 };
-#endif //HAVE_RADIO_V4L2
-#ifdef HAVE_RADIO_V4L
+#endif /* CONFIG_RADIO_V4L2 */
+#ifdef CONFIG_RADIO_V4L
 /*****************************************************************
  * \brief get fraction value for using in set_frequency and get_frequency
  * \return STREAM_OK if success, STREAM_ERROR otherwise
@@ -540,8 +540,8 @@ static const radio_driver_t radio_driver_v4l={
     set_frequency_v4l,
     get_frequency_v4l
 };
-#endif //HAVE_RADIO_V4L
-#ifdef HAVE_RADIO_BSDBT848
+#endif /* CONFIG_RADIO_V4L */
+#ifdef CONFIG_RADIO_BSDBT848
 
 /*****************************************************************
  * \brief get fraction value for using in set_frequency and get_frequency
@@ -652,7 +652,7 @@ static const radio_driver_t radio_driver_bsdbt848={
     set_frequency_bsdbt848,
     get_frequency_bsdbt848
 };
-#endif //HAVE_RADIO_BSDBT848
+#endif /* CONFIG_RADIO_BSDBT848 */
 
 static inline int init_frac(radio_priv_t* priv){ 
     return priv->driver->init_frac(priv);
@@ -1080,13 +1080,13 @@ static int fill_buffer_s(struct stream_st *s, char* buffer, int max_len){
  when no driver explicitly specified first available will be used
  */
 static const radio_driver_t* radio_drivers[]={
-#ifdef HAVE_RADIO_BSDBT848
+#ifdef CONFIG_RADIO_BSDBT848
     &radio_driver_bsdbt848,
 #endif
-#ifdef HAVE_RADIO_V4L2
+#ifdef CONFIG_RADIO_V4L2
     &radio_driver_v4l2,
 #endif
-#ifdef HAVE_RADIO_V4L
+#ifdef CONFIG_RADIO_V4L
     &radio_driver_v4l,
 #endif
     0

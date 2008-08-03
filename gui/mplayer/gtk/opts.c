@@ -178,7 +178,7 @@ static char * ao_driver[3];
 static char * vo_driver[3];
 static int    old_video_driver = 0;
 
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
  void ShowDXR3Config( void );
  void HideDXR3Config( void );
 #endif
@@ -271,7 +271,7 @@ void ShowPreferences( void )
   gtk_clist_select_row( GTK_CLIST( CLVDrivers ),old_video_driver,0 );
   gtk_clist_get_text( GTK_CLIST( CLVDrivers ),old_video_driver,0,(char **)&vo_driver );
   gtk_widget_set_sensitive( VConfig,FALSE );
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
   if ( !gstrcmp( vo_driver[0],"dxr3" ) ) gtk_widget_set_sensitive( VConfig,TRUE );
 #endif
  }
@@ -487,7 +487,7 @@ void HidePreferences( void )
  gtk_widget_destroy( Preferences );
  Preferences=NULL;
  HideAudioConfig();
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
  HideDXR3Config();
 #endif
 }
@@ -649,7 +649,7 @@ void prButton( GtkButton * button,gpointer user_data )
    case bVconfig:
 	if ( !vo_driver[0] ) break;
         gtk_widget_set_sensitive( VConfig,FALSE );
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 	if ( !gstrcmp( vo_driver[0],"dxr3" ) ) { ShowDXR3Config(); gtk_widget_set_sensitive( VConfig,TRUE ); }
 #endif
 	break;
@@ -790,7 +790,7 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
    case 1: // video driver 
 	gtk_clist_get_text( GTK_CLIST( CLVDrivers ),row,0,(char **)&vo_driver ); 
 	gtk_widget_set_sensitive( VConfig,FALSE );
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 	if ( !gstrcmp( vo_driver[0],"dxr3" ) ) gtk_widget_set_sensitive( VConfig,TRUE );
 #endif
 	break;
@@ -1388,7 +1388,7 @@ GList *appendOSSDevices(GList *l) {
     l = g_list_append(l, (gpointer)"/dev/dsp2");
     l = g_list_append(l, (gpointer)"/dev/dsp3");
   }
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
   l = g_list_append(l, (gpointer)"/dev/em8300_ma");
   l = g_list_append(l, (gpointer)"/dev/em8300_ma-0");
   l = g_list_append(l, (gpointer)"/dev/em8300_ma-1");
@@ -1450,7 +1450,7 @@ GList *appendALSAMixerChannels(GList *l) {
 }
 #endif
 
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
 GList *appendSDLDevices(GList *l) {
   l = g_list_append(l, (gpointer)"alsa");
   l = g_list_append(l, (gpointer)"arts");
@@ -1517,7 +1517,7 @@ void ShowAudioConfig() {
     setGtkEntryText(CEAudioMixerChannel, gtkAOALSAMixerChannel);
   }
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
   if (strncmp(ao_driver[0], "sdl", 3) == 0) {
     setGtkEntryText(CEAudioDevice, gtkAOSDLDriver);
   }
@@ -1562,7 +1562,7 @@ static void audioButton(GtkButton *button, gpointer user_data) {
         gtkAOALSAMixerChannel = gstrdup(getGtkEntryText(CEAudioMixerChannel));
       }
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
       if (strncmp(ao_driver[0], "sdl", 3) == 0) {
         gfree(&gtkAOSDLDriver);
         gtkAOSDLDriver = gstrdup(getGtkEntryText(CEAudioDevice));
@@ -1620,7 +1620,7 @@ GtkWidget *create_AudioConfig() {
   if (strncmp(ao_driver[0], "alsa", 4) == 0)
     items = appendALSADevices(items);
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
   if (strncmp(ao_driver[0], "sdl", 3) == 0)
     items = appendSDLDevices(items);
 #endif
@@ -1700,7 +1700,7 @@ GtkWidget *create_AudioConfig() {
   return AudioConfig;
 }
 
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 // --- dxr3 config box
 
 static GtkWidget * DXR3Config;

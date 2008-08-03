@@ -14,7 +14,7 @@
 #define LOF1 (9750*1000UL)
 #define LOF2 (10600*1000UL)
 
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 	#include <linux/dvb/dmx.h>
 	#include <linux/dvb/frontend.h>
 	#include <linux/dvb/version.h>

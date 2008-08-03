@@ -296,7 +296,7 @@ void mplCurr( void )
    case STREAMTYPE_DVD:
 	break;
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
    case STREAMTYPE_VCD:
 	break;
 #endif
@@ -332,7 +332,7 @@ void mplPrev( void )
 	guiIntfStruct.Track=guiIntfStruct.DVD.current_title;
 	break;
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
    case STREAMTYPE_VCD:
 	if ( --guiIntfStruct.Track == 0 ) { guiIntfStruct.Track=1; stop=1; }
 	break;
@@ -368,7 +368,7 @@ void mplNext( void )
 	guiIntfStruct.Track=guiIntfStruct.DVD.current_title;
 	break;
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
    case STREAMTYPE_VCD:
 	if ( ++guiIntfStruct.Track > guiIntfStruct.VCDTracks ) { guiIntfStruct.Track=guiIntfStruct.VCDTracks; stop=1; }
 	break;

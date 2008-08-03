@@ -72,7 +72,7 @@
 #include "../pixmaps/tonguebla.xpm"
 #include "../pixmaps/empty1px.xpm"
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 #include "../pixmaps/vcd.xpm"
 #include "../pixmaps/playvcd.xpm"
 #endif
@@ -421,7 +421,7 @@ GtkWidget * create_PopUpMenu( void )
   AddSeparator( Menu );
    SubMenu=AddSubMenu( window1, (const char*)open_xpm, Menu,MSGTR_MENU_Open );
     AddMenuItem( window1, (const char*)file2_xpm, SubMenu,MSGTR_MENU_PlayFile"    ", evLoadPlay );
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
     AddMenuItem( window1, (const char*)playvcd_xpm, SubMenu,MSGTR_MENU_PlayVCD, evPlayVCD );
 #endif
 #ifdef CONFIG_DVDREAD
@@ -446,7 +446,7 @@ GtkWidget * create_PopUpMenu( void )
 //    AddMenuItem( SubMenu,MSGTR_MENU_NormalSize"      ", evNormalSize );
 //    AddMenuItem( SubMenu,MSGTR_MENU_DoubleSize, evDoubleSize );
 //    AddMenuItem( SubMenu,MSGTR_MENU_FullScreen, evFullScreen );
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
    VCDSubMenu=AddSubMenu( window1, (const char*)vcd_xpm, Menu,MSGTR_MENU_VCD );
     AddMenuItem( window1, (const char*)playvcd_xpm, VCDSubMenu,MSGTR_MENU_PlayDisc,evPlayVCD );
     AddSeparator( VCDSubMenu );
