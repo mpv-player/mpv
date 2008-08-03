@@ -4576,7 +4576,6 @@ fi
 if test "$_dvbhead" = no && test "$_dvb" = no ; then
   _def_dvb='#undef CONFIG_DVB'
   _def_dvb_head='#undef CONFIG_DVB_HEAD'
-  _def_dvb_head='#undef HAVE_DVB_HEAD'
   _def_dvbin='#undef CONFIG_DVBIN '
   _aomodules="mpegpes(file) $_aomodules"
   _vomodules="mpegpes(file) $_vomodules"
