@@ -70,7 +70,7 @@ extern Window     vo_window;
 extern GC         vo_gc;
 extern XSizeHints vo_hint;
 
-#ifdef HAVE_XV
+#ifdef CONFIG_XV
 //XvPortID xv_port;
 extern unsigned int xv_port;
 
@@ -114,7 +114,7 @@ int xv_test_ckm( void * arg );
 void saver_off( Display * );
 void saver_on( Display * );
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
 void vo_vm_switch(uint32_t, uint32_t, int*, int*);
 void vo_vm_close(Display*);
 #endif

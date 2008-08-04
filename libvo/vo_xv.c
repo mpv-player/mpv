@@ -174,7 +174,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     unsigned long xswamask;
     int depth;
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
     int vm = 0;
     unsigned int modeline_width, modeline_height;
     static uint32_t vm_width;
@@ -198,7 +198,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     int_pause = 0;
     visible_buf = -1;
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
     if (flags & VOFLAG_MODESWITCHING)
         vm = 1;
 #endif
@@ -234,7 +234,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         hint.y = vo_dy;
         hint.width = d_width;
         hint.height = d_height;
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
         if (vm)
         {
             if ((d_width == 0) && (d_height == 0))
@@ -308,7 +308,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             XFreeGC(mDisplay, vo_gc);
         vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
         XSync(mDisplay, False);
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
         if (vm)
         {
             /* Grab the mouse pointer in our window */
@@ -710,7 +710,7 @@ static void uninit(void)
     }
     for (i = 0; i < num_buffers; i++)
         deallocate_xvimage(i);
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
     vo_vm_close(mDisplay);
 #endif
     mp_input_rm_event_fd(ConnectionNumber(mDisplay));

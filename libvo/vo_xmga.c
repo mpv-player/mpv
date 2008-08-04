@@ -29,7 +29,7 @@
 #include <X11/Xutil.h>
 #include <errno.h>
 
-#ifdef HAVE_XINERAMA
+#ifdef CONFIG_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
 

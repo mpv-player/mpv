@@ -35,7 +35,7 @@
 #ifdef CONFIG_GUI
 #include "gui/interface.h"
 #endif
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 #include "x11_common.h"
 #endif
 #include "libavutil/avstring.h"
@@ -152,7 +152,7 @@ static int overlay_signalmode(overlay_t *o, int mode);
 /* End overlay.h */
 
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 #define KEY_COLOR 0x80a040
 static XWindowAttributes xwin_attribs;
 static overlay_t *overlay_data;
@@ -178,7 +178,7 @@ static int control(uint32_t request, void *data, ...)
 			return VO_ERROR;
 		}
 		return VO_TRUE;
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	case VOCTRL_ONTOP:
 		vo_x11_ontop();
 		return VO_TRUE;
@@ -469,7 +469,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
 #endif
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	if (dxr3_overlay) {
 		XVisualInfo vinfo;
 		XSetWindowAttributes xswa;
@@ -645,7 +645,7 @@ static int draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	if (dxr3_overlay) {
 		int event = vo_x11_check_events(mDisplay);
 		if (event & VO_EVENT_RESIZE) {
@@ -699,7 +699,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int
 static void uninit(void)
 {
 	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_Uninitializing);
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	if (dxr3_overlay) {
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OFF);
 		overlay_release(overlay_data);
@@ -757,7 +757,7 @@ static int preinit(const char *arg)
 			mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_UsingNewSyncEngine);
 			dxr3_newsync = 1;
 		} else if (!strncmp("overlay", arg, 7) && !dxr3_overlay) {
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 			mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_UsingOverlay);
 			dxr3_overlay = 1;
 #else
@@ -857,7 +857,7 @@ static int preinit(const char *arg)
 	}
 	strcpy(fds_name, devname);
 	
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	if (dxr3_overlay) {
 	
 		/* Fucked up hack needed to enable overlay.

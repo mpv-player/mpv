@@ -149,10 +149,10 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef CONFIG_3DFX
         &video_out_3dfx,
 #endif
-#ifdef HAVE_XV
+#ifdef CONFIG_XV
         &video_out_xv,
 #endif
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
         &video_out_x11,
         &video_out_xover,
 #endif
@@ -160,7 +160,7 @@ const vo_functions_t* const video_out_drivers[] =
 	        &video_out_gl,
         &video_out_gl2,
 #endif
-#ifdef HAVE_DGA
+#ifdef CONFIG_DGA
         &video_out_dga,
 #endif
 #ifdef CONFIG_SDL
@@ -211,7 +211,7 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_dfbmga,
 #endif
 #ifdef CONFIG_VIDIX
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	&video_out_xvidix,
 #endif
 #ifdef WIN32

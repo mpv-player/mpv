@@ -48,15 +48,15 @@
 #include "wsxdnd.h"
 
 #include <X11/extensions/XShm.h>
-#ifdef HAVE_XSHAPE
+#ifdef CONFIG_XSHAPE
 #include <X11/extensions/shape.h>
 #endif
 
-#ifdef HAVE_XINERAMA
+#ifdef CONFIG_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
 #include <X11/extensions/xf86vmode.h>
 #endif
 
@@ -235,7 +235,7 @@ wsXDNDInitialize();
    mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_WS_NoXshm );
    wsUseXShm=0;
   }
-#ifdef HAVE_XSHAPE
+#ifdef CONFIG_XSHAPE
   if ( !XShapeQueryExtension( wsDisplay,&eventbase,&errorbase ) )
    {
     mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_WS_NoXshape );
@@ -249,7 +249,7 @@ wsXDNDInitialize();
 
  wsScreen=DefaultScreen( wsDisplay );
  wsRootWin=RootWindow( wsDisplay,wsScreen );
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
     {
       int clock;
       XF86VidModeModeLine modeline;
@@ -278,7 +278,7 @@ wsXDNDInitialize();
    int minor,major,shp;
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Screen depth: %d\n",wsDepthOnScreen );
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  size: %dx%d\n",wsMaxX,wsMaxY );
-#ifdef HAVE_XINERAMA
+#ifdef CONFIG_XINERAMA
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  origin: +%d+%d\n",wsOrgX,wsOrgY );
 #endif
    mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  red mask: 0x%x\n",wsRedMask );
@@ -289,7 +289,7 @@ wsXDNDInitialize();
      XShmQueryVersion( wsDisplay,&major,&minor,&shp );
      mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws] XShm version is %d.%d\n",major,minor );
     }
-   #ifdef HAVE_XSHAPE
+   #ifdef CONFIG_XSHAPE
     if ( wsUseXShape )
      {
       XShapeQueryVersion( wsDisplay,&major,&minor );
@@ -1220,7 +1220,7 @@ static int timeout_save=0;
 void wsScreenSaverOn( Display *mDisplay )
 {
  int nothing;
-#ifdef HAVE_XDPMS
+#ifdef CONFIG_XDPMS
  if ( dpms_disabled )
   {
    if ( DPMSQueryExtension( mDisplay,&nothing,&nothing ) )
@@ -1250,7 +1250,7 @@ void wsScreenSaverOn( Display *mDisplay )
 void wsScreenSaverOff( Display * mDisplay )
 {
  int interval,prefer_blank,allow_exp,nothing;
-#ifdef HAVE_XDPMS
+#ifdef CONFIG_XDPMS
  if ( DPMSQueryExtension( mDisplay,&nothing,&nothing ) )
   {
    BOOL onoff;
@@ -1273,7 +1273,7 @@ void wsScreenSaverOff( Display * mDisplay )
 
 void wsSetShape( wsTWindow * win,char * data )
 {
-#ifdef HAVE_XSHAPE
+#ifdef CONFIG_XSHAPE
  if ( !wsUseXShape ) return;
  if ( data )
   {

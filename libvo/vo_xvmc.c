@@ -38,7 +38,7 @@
 #include "libavutil/common.h"
 
 //no chance for xinerama to be supported in the near future
-#undef HAVE_XINERAMA
+#undef CONFIG_XINERAMA
 
 #undef NDEBUG 
 #include <assert.h>
@@ -463,7 +463,7 @@ XSetWindowAttributes xswa;
 XWindowAttributes attribs;
 unsigned long xswamask;
 int depth;
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
 int vm=0;
 unsigned int modeline_width, modeline_height;
 static uint32_t vm_width;
@@ -641,7 +641,7 @@ skip_surface_allocation:
 
    vo_mouse_autohide = 1;
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
    if( flags&VOFLAG_MODESWITCHING ) vm = 1;
 #endif
 
@@ -655,7 +655,7 @@ skip_surface_allocation:
       hint.y = vo_dy;
       hint.width = d_width;
       hint.height = d_height;
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
       if ( vm )
       {
 	 if ((d_width==0) && (d_height==0))
@@ -707,7 +707,7 @@ skip_surface_allocation:
       if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
       vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &xgcv);
       XSync(mDisplay, False);
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
       if ( vm )
       {
       /* Grab the mouse pointer in our window */
@@ -1153,7 +1153,7 @@ static void uninit(void){
       printf("vo_xvmc: uninit called\n"); }
    xvmc_free();
  //from vo_xv
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
    vo_vm_close(mDisplay);
 #endif
    vo_x11_uninit();

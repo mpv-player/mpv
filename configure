@@ -3971,12 +3971,12 @@ EOF
   done
 fi
 if test "$_x11" = yes ; then
-  _def_x11='#define HAVE_X11 1'
+  _def_x11='#define CONFIG_X11 1'
   _vosrc="$_vosrc x11_common.c vo_x11.c vo_xover.c"
   _vomodules="x11 xover $_vomodules"
 else
   _x11=no
-  _def_x11='#undef HAVE_X11'
+  _def_x11='#undef CONFIG_X11'
   _novomodules="x11 $_novomodules"
   _res_comment="check if the dev(el) packages are installed"
   # disable stuff that depends on X
@@ -3995,10 +3995,10 @@ EOF
   cc_check -lXss && _xss=yes
 fi
 if test "$_xss" = yes ; then
-  _def_xss='#define HAVE_XSS 1'
+  _def_xss='#define CONFIG_XSS 1'
   _libs_mplayer="$_libs_mplayer -lXss"
 else
-  _def_xss='#undef HAVE_XSS'
+  _def_xss='#undef CONFIG_XSS'
 fi
 echores "$_xss"
 
@@ -4023,16 +4023,16 @@ EOF
   cc_check -lXext && _xdpms4=yes
 fi
 if test "$_xdpms4" = yes ; then
-  _def_xdpms='#define HAVE_XDPMS 1'
+  _def_xdpms='#define CONFIG_XDPMS 1'
   _res_comment="using Xdpms 4"
   echores "yes"
 elif test "$_xdpms3" = yes ; then
-  _def_xdpms='#define HAVE_XDPMS 1'
+  _def_xdpms='#define CONFIG_XDPMS 1'
   _libs_mplayer="$_libs_mplayer -lXdpms"
   _res_comment="using Xdpms 3"
   echores "yes"
 else
-  _def_xdpms='#undef HAVE_XDPMS'
+  _def_xdpms='#undef CONFIG_XDPMS'
   echores "no"
 fi
 
@@ -4052,12 +4052,12 @@ EOF
 fi
 
 if test "$_xv" = yes ; then
-  _def_xv='#define HAVE_XV 1'
+  _def_xv='#define CONFIG_XV 1'
   _libs_mplayer="$_libs_mplayer -lXv"
   _vosrc="$_vosrc vo_xv.c"
   _vomodules="xv $_vomodules"
 else
-  _def_xv='#undef HAVE_XV'
+  _def_xv='#undef CONFIG_XV'
   _novomodules="xv $_novomodules"
 fi
 echores "$_xv"
@@ -4105,10 +4105,10 @@ EOF
 fi
 
 if test "$_xinerama" = yes ; then
-  _def_xinerama='#define HAVE_XINERAMA 1'
+  _def_xinerama='#define CONFIG_XINERAMA 1'
   _libs_mplayer="$_libs_mplayer -lXinerama"
 else
-  _def_xinerama='#undef HAVE_XINERAMA'
+  _def_xinerama='#undef CONFIG_XINERAMA'
 fi
 echores "$_xinerama"
 
@@ -4129,10 +4129,10 @@ EOF
   cc_check -lXxf86vm && _vm=yes
 fi
 if test "$_vm" = yes ; then
-  _def_vm='#define HAVE_XF86VM 1'
+  _def_vm='#define CONFIG_XF86VM 1'
   _libs_mplayer="$_libs_mplayer -lXxf86vm"
 else
-  _def_vm='#undef HAVE_XF86VM'
+  _def_vm='#undef CONFIG_XF86VM'
 fi
 echores "$_vm"
 
@@ -4151,9 +4151,9 @@ EOF
   cc_check && _xf86keysym=yes
 fi
 if test "$_xf86keysym" = yes ; then
-  _def_xf86keysym='#define HAVE_XF86XK 1'
+  _def_xf86keysym='#define CONFIG_XF86XK 1'
 else
-  _def_xf86keysym='#undef HAVE_XF86XK'
+  _def_xf86keysym='#undef CONFIG_XF86XK'
 fi
 echores "$_xf86keysym"
 
@@ -4178,20 +4178,20 @@ EOF
 fi
 
 _dga=no
-_def_dga='#undef HAVE_DGA'
-_def_dga1='#undef HAVE_DGA1'
-_def_dga2='#undef HAVE_DGA2'
+_def_dga='#undef CONFIG_DGA'
+_def_dga1='#undef CONFIG_DGA1'
+_def_dga2='#undef CONFIG_DGA2'
 if test "$_dga1" = yes ; then
   _dga=yes
-  _def_dga1='#define HAVE_DGA1 1'
+  _def_dga1='#define CONFIG_DGA1 1'
   _res_comment="using DGA 1.0"
 elif test "$_dga2" = yes ; then
   _dga=yes
-  _def_dga2='#define HAVE_DGA2 1'
+  _def_dga2='#define CONFIG_DGA2 1'
   _res_comment="using DGA 2.0"
 fi
 if test "$_dga" = yes ; then
-  _def_dga='#define HAVE_DGA 1'
+  _def_dga='#define CONFIG_DGA 1'
   _libs_mplayer="$_libs_mplayer -lXxf86dga"
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
@@ -7404,7 +7404,7 @@ EOF
     cc_check -lXext && _xshape=yes
   fi
   if test "$_xshape" = yes ; then
-    _def_xshape='#define HAVE_XSHAPE 1'
+    _def_xshape='#define CONFIG_XSHAPE 1'
   else
     die "The GUI requires the X11 extension XShape (which was not found)."
   fi
@@ -8706,7 +8706,7 @@ $_def_twolame
 /* used by GUI: */
 $_def_xshape
 
-#if defined(CONFIG_GL) || defined(HAVE_X11) || defined(HAVE_XV)
+#if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
 #define X11_FULLSCREEN 1
 #endif
 

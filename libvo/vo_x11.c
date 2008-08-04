@@ -11,7 +11,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
 #include <X11/extensions/xf86vmode.h>
 #endif
 #include <errno.h>
@@ -317,7 +317,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     unsigned long xswamask;
     const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
     unsigned int modeline_width, modeline_height;
     static uint32_t vm_width;
     static uint32_t vm_height;
@@ -375,7 +375,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     else
 #endif
     {
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
         if (vm)
         {
             if ((d_width == 0) && (d_height == 0))
@@ -405,7 +405,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         xswa.colormap = theCmap;
         xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
         if (vm)
         {
             xswa.override_redirect = True;
@@ -452,7 +452,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                                                ButtonReleaseMask |
                                                PointerMotionMask)));
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
         if (vm)
         {
             /* Grab the mouse pointer in our window */
@@ -725,7 +725,7 @@ static void uninit(void)
 
     freeMyXImage();
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
     vo_vm_close(mDisplay);
 #endif
 

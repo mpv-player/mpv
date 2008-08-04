@@ -58,7 +58,7 @@
 #include "libvo/font_load.h"
 #include "libvo/sub.h"
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 #include "libvo/x11_common.h"
 #endif
 
@@ -691,7 +691,7 @@ void exit_player_with_rc(const char* how, int rc){
 #ifdef WIN32
   timeEndPeriod(1);
 #endif
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 #ifdef CONFIG_GUI
   if ( !use_gui )
 #endif
@@ -2734,7 +2734,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       printf("\n");
       opt_exit = 1;
     }
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
     if(vo_fstype_list && strcmp(vo_fstype_list[0],"help")==0){
       fstype_help();
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
@@ -3745,7 +3745,7 @@ if(!mpctx->sh_video) {
     current_module="vo_check_events";
     if (vo_config_count) mpctx->video_out->check_events();
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
     if (stop_xscreensaver) {
 	current_module = "stop_xscreensaver";
 	xscreensaver_heartbeat();

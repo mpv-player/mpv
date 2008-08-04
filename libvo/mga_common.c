@@ -512,7 +512,7 @@ static void set_window( void ){
 	 vo_dwidth=drwWidth; vo_dheight=drwHeight;
 
 #ifdef VO_XMGA
-#ifdef HAVE_XINERAMA
+#ifdef CONFIG_XINERAMA
 		 if(XineramaIsActive(mDisplay))
 		 {
 		 	XineramaScreenInfo *screens;
