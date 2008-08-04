@@ -450,10 +450,11 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
 static int mp_property_angle(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
-    int angle;
+    int angle = -1;
     int angles;
     char *angle_name = NULL;
 
+    if (mpctx->demuxer)
     angle = demuxer_get_current_angle(mpctx->demuxer);
     if (angle < 0)
         return M_PROPERTY_UNAVAILABLE;
