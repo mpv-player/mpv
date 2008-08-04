@@ -379,12 +379,13 @@ static int mp_property_time_pos(m_option_t * prop, int action,
 static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
-    int chapter;
+    int chapter = -1;
     float next_pts = 0;
     int chapter_num;
     int step_all;
     char *chapter_name = NULL;
 
+    if (mpctx->demuxer)
     chapter = demuxer_get_current_chapter(mpctx->demuxer);
     if (chapter < 0)
         return M_PROPERTY_UNAVAILABLE;
