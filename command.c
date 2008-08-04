@@ -835,6 +835,8 @@ static int mp_property_audio(m_option_t * prop, int action, void *arg,
 
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_SET:
+	if (!mpctx->demuxer)
+	    return M_PROPERTY_UNAVAILABLE;
 	if (action == M_PROPERTY_SET && arg)
 	    tmp = *((int *) arg);
 	else
