@@ -58,7 +58,7 @@ char * gtkAOOSSMixer;
 char * gtkAOOSSMixerChannel;
 char * gtkAOOSSDevice;
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
 char * gtkAOALSAMixer;
 char * gtkAOALSAMixerChannel;
 char * gtkAOALSADevice;
@@ -139,7 +139,7 @@ static const m_option_t gui_opts[] =
  { "ao_oss_mixer_channel",&gtkAOOSSMixerChannel,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_oss_device",&gtkAOOSSDevice,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
  { "ao_alsa_mixer",&gtkAOALSAMixer,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_alsa_mixer_channel",&gtkAOALSAMixerChannel,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_alsa_device",&gtkAOALSADevice,CONF_TYPE_STRING,0,0,0,NULL },

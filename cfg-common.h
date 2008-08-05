@@ -119,9 +119,9 @@ const m_option_t tvopts_conf[]={
 	{"mjpeg", &stream_tv_defaults.mjpeg, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"decimation", &stream_tv_defaults.decimation, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
 	{"quality", &stream_tv_defaults.quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
 	{"alsa", &stream_tv_defaults.alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif /* defined(HAVE_ALSA9) || defined(HAVE_ALSA1X) */
+#endif /* defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X) */
 #endif /* defined(CONFIG_TV_V4L) || defined(CONFIG_TV_V4L2) */
 	{"adevice", &stream_tv_defaults.adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #ifdef CONFIG_TV_TELETEXT

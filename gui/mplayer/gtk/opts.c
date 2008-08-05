@@ -1423,7 +1423,7 @@ GList *appendOSSMixerChannels(GList *l) {
 }
 #endif
 
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
 GList *appendALSADevices(GList *l) {
   l = g_list_append(l, (gpointer)"default");
   l = g_list_append(l, (gpointer)"hw=0.0");
@@ -1510,7 +1510,7 @@ void ShowAudioConfig() {
     setGtkEntryText(CEAudioMixerChannel, gtkAOOSSMixerChannel);
   }
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
   if (strncmp(ao_driver[0], "alsa", 4) == 0) {
     setGtkEntryText(CEAudioDevice, gtkAOALSADevice);
     setGtkEntryText(CEAudioMixer, gtkAOALSAMixer);
@@ -1552,7 +1552,7 @@ static void audioButton(GtkButton *button, gpointer user_data) {
         gtkAOOSSMixerChannel = gstrdup(getGtkEntryText(CEAudioMixerChannel));
       }
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
       if (strncmp(ao_driver[0], "alsa", 4) == 0) {
         gfree(&gtkAOALSADevice);
         gtkAOALSADevice = gstrdup(getGtkEntryText(CEAudioDevice));
@@ -1616,7 +1616,7 @@ GtkWidget *create_AudioConfig() {
   if (strncmp(ao_driver[0], "oss", 3) == 0)
     items = appendOSSDevices(items);
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
   if (strncmp(ao_driver[0], "alsa", 4) == 0)
     items = appendALSADevices(items);
 #endif
@@ -1646,7 +1646,7 @@ GtkWidget *create_AudioConfig() {
   if (strncmp(ao_driver[0], "oss", 3) == 0)
     items = appendOSSMixers(items);
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
   if (strncmp(ao_driver[0], "alsa", 4) == 0)
     items = appendALSAMixers(items);
 #endif
@@ -1668,7 +1668,7 @@ GtkWidget *create_AudioConfig() {
   if (strncmp(ao_driver[0], "oss", 3) == 0)
     items = appendOSSMixerChannels(items);
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
   if (strncmp(ao_driver[0], "alsa", 4) == 0)
     items = appendALSAMixerChannels(items);
 #endif

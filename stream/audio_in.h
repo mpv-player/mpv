@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
 #include <alsa/asoundlib.h>
 
 typedef struct {
@@ -43,7 +43,7 @@ typedef struct
     int bytes_per_sample;
     int samplesize;
     
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
     ai_alsa_t alsa;
 #endif
 #ifdef CONFIG_OSS_AUDIO
@@ -60,7 +60,7 @@ int audio_in_uninit(audio_in_t *ai);
 int audio_in_start_capture(audio_in_t *ai);
 int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer);
 
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
 int ai_alsa_setup(audio_in_t *ai);
 int ai_alsa_init(audio_in_t *ai);
 int ai_alsa_xrun(audio_in_t *ai);

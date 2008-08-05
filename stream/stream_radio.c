@@ -715,7 +715,7 @@ static int read_chunk(audio_in_t *ai, unsigned char *buffer)
     int ret;
 
     switch (ai->type) {
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
     case AUDIO_IN_ALSA:
         //device opened in non-blocking mode
         ret = snd_pcm_readi(ai->alsa.handle, buffer, ai->alsa.chunk_size);
@@ -836,7 +836,7 @@ static int init_audio(radio_priv_t *priv)
 
     priv->do_capture=1;
     mp_msg(MSGT_RADIO,MSGL_V,MSGTR_RADIO_CaptureStarting);
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
     while ((tmp = strrchr(priv->radio_param->adevice, '='))){
         tmp[0] = ':';
         //adevice option looks like ALSA device name. Switching to ALSA
@@ -862,7 +862,7 @@ static int init_audio(radio_priv_t *priv)
     if(is_oss)
         ioctl(priv->audio_in.oss.audio_fd, SNDCTL_DSP_NONBLOCK, 0);
 #endif
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
     if(!is_oss)
         snd_pcm_nonblock(priv->audio_in.alsa.handle,1);
 #endif

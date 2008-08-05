@@ -4873,12 +4873,12 @@ EOF
   cc_check -lwinmm && _win32waveout=yes
 fi
 if test "$_win32waveout" = yes ; then
-  _def_win32waveout='#define HAVE_WIN32WAVEOUT 1'
+  _def_win32waveout='#define CONFIG_WIN32WAVEOUT 1'
   _libs_mplayer="$_libs_mplayer -lwinmm"
   _aosrc="$_aosrc ao_win32.c"
   _aomodules="win32 $_aomodules"
 else
-  _def_win32waveout='#undef HAVE_WIN32WAVEOUT'
+  _def_win32waveout='#undef CONFIG_WIN32WAVEOUT'
   _noaomodules="win32 $_noaomodules"
 fi
 echores "$_win32waveout"
@@ -4895,14 +4895,14 @@ EOF
   cc_check -lgdi32 && _directx=yes
 fi
 if test "$_directx" = yes ; then
-  _def_directx='#define HAVE_DIRECTX 1'
+  _def_directx='#define CONFIG_DIRECTX 1'
   _libs_mplayer="$_libs_mplayer -lgdi32"
   _vosrc="$_vosrc vo_directx.c"
   _vomodules="directx $_vomodules"
   _aosrc="$_aosrc ao_dsound.c"
   _aomodules="dsound $_aomodules"
 else
-  _def_directx='#undef HAVE_DIRECTX'
+  _def_directx='#undef CONFIG_DIRECTX'
   _novomodules="directx $_novomodules"
   _noaomodules="dsound $_noaomodules"
 fi
@@ -4921,13 +4921,13 @@ EOF
   cc_check $_ld_lm -laudio -lXt && _nas=yes
 fi
 if test "$_nas" = yes ; then
-  _def_nas='#define HAVE_NAS 1'
+  _def_nas='#define CONFIG_NAS 1'
   _libs_mplayer="$_libs_mplayer -laudio -lXt"
   _aosrc="$_aosrc ao_nas.c"
   _aomodules="nas $_aomodules"
 else
   _noaomodules="nas $_noaomodules"
-  _def_nas='#undef HAVE_NAS'
+  _def_nas='#undef CONFIG_NAS'
 fi
 echores "$_nas"
 
@@ -5151,11 +5151,11 @@ if test "$_esd" = yes ; then
 #include <esd.h>
 int main(void) { return esd_get_latency(0); }
 EOF
-  cc_check `esd-config --libs` `esd-config --cflags` && _esd_latency=yes && _def_esd_latency='#define HAVE_ESD_LATENCY'
+  cc_check `esd-config --libs` `esd-config --cflags` && _esd_latency=yes && _def_esd_latency='#define CONFIG_ESD_LATENCY'
   echores "$_esd_latency"
 else
   _def_esd='#undef CONFIG_ESD'
-  _def_esd_latency='#undef HAVE_ESD_LATENCY'
+  _def_esd_latency='#undef CONFIG_ESD_LATENCY'
   _noaomodules="esd $_noaomodules"
 fi
 
@@ -5298,9 +5298,9 @@ int main(void) { return 0; }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='1.0.x-alsa'
 fi
-_def_alsa5='#undef HAVE_ALSA5'
-_def_alsa9='#undef HAVE_ALSA9'
-_def_alsa1x='#undef HAVE_ALSA1X'
+_def_alsa5='#undef CONFIG_ALSA5'
+_def_alsa9='#undef CONFIG_ALSA9'
+_def_alsa1x='#undef CONFIG_ALSA1X'
 _def_sys_asoundlib_h='#undef HAVE_SYS_ASOUNDLIB_H'
 _def_alsa_asoundlib_h='#undef HAVE_ALSA_ASOUNDLIB_H'
 if test "$_alsaver" ; then
@@ -5309,35 +5309,35 @@ if test "$_alsaver" ; then
     _alsa5=yes
     _aosrc="$_aosrc ao_alsa5.c"
     _aomodules="alsa5 $_aomodules"
-    _def_alsa5='#define HAVE_ALSA5 1'
+    _def_alsa5='#define CONFIG_ALSA5 1'
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.5.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-sys' ; then
     _alsa9=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
-    _def_alsa9='#define HAVE_ALSA9 1'
+    _def_alsa9='#define CONFIG_ALSA9 1'
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.9.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-alsa' ; then
     _alsa9=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
-    _def_alsa9='#define HAVE_ALSA9 1'
+    _def_alsa9='#define CONFIG_ALSA9 1'
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.9.x and alsa/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-sys' ; then
     _alsa1x=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
-    _def_alsa1x="#define HAVE_ALSA1X 1"
+    _def_alsa1x="#define CONFIG_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 1.0.x and sys/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-alsa' ; then
     _alsa1x=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
-    _def_alsa1x="#define HAVE_ALSA1X 1"
+    _def_alsa1x="#define CONFIG_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     _res_comment="using alsa 1.0.x and alsa/asoundlib.h"
   else

@@ -216,7 +216,7 @@ static int init(int rate_hz, int channels, int format, int flags)
      * latency is number of samples @ 44.1khz stereo 16 bit
      * adjust according to rate_hz & bytes_per_sample
      */
-#ifdef HAVE_ESD_LATENCY
+#ifdef CONFIG_ESD_LATENCY
     esd_latency = esd_get_latency(esd_fd);
 #else
     esd_latency = ((channels == 1 ? 2 : 1) * ESD_DEFAULT_RATE * 
