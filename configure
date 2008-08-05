@@ -4635,12 +4635,12 @@ EOF
 fi
 echores "$_png"
 if test "$_png" = yes ; then
-  _def_png='#define HAVE_PNG 1'
+  _def_png='#define CONFIG_PNG 1'
   _ld_extra="$_ld_extra -lpng -lz"
   _vosrc="$_vosrc vo_png.c"
   _vomodules="png $_vomodules"
 else
-  _def_png='#undef HAVE_PNG'
+  _def_png='#undef CONFIG_PNG'
   _novomodules="png $_novomodules"
 fi
 
@@ -4664,12 +4664,12 @@ fi
 echores "$_jpeg"
 
 if test "$_jpeg" = yes ; then
-  _def_jpeg='#define HAVE_JPEG 1'
+  _def_jpeg='#define CONFIG_JPEG 1'
   _vosrc="$_vosrc vo_jpeg.c"
   _vomodules="jpeg $_vomodules"
   _ld_extra="$_ld_extra -ljpeg"
 else
-  _def_jpeg='#undef HAVE_JPEG'
+  _def_jpeg='#undef CONFIG_JPEG'
   _novomodules="jpeg $_novomodules"
 fi
 
@@ -4677,11 +4677,11 @@ fi
 
 echocheck "PNM support"
 if test "$_pnm" = yes; then
-  _def_pnm="#define HAVE_PNM"
+  _def_pnm="#define CONFIG_PNM"
   _vosrc="$_vosrc vo_pnm.c"
   _vomodules="pnm $_vomodules"
 else
-  _def_pnm="#undef HAVE_PNM"
+  _def_pnm="#undef CONFIG_PNM"
   _novomodules="pnm $_novomodules"
 fi
 echores "$_pnm"
@@ -4723,12 +4723,12 @@ if test "$_force_gif" = yes && test "$_gif" = no ; then
 fi
 
 if test "$_gif" = yes ; then
-  _def_gif='#define HAVE_GIF 1'
+  _def_gif='#define CONFIG_GIF 1'
   _vosrc="$_vosrc vo_gif89a.c"
   _codecmodules="gif $_codecmodules"
   _vomodules="gif89a $_vomodules"
   _res_comment="old version, some encoding functions disabled"
-  _def_gif_4='#undef HAVE_GIF_4'
+  _def_gif_4='#undef CONFIG_GIF_4'
   _ld_extra="$_ld_extra $_ld_gif"
 
   cat > $TMPC << EOF
@@ -4743,12 +4743,12 @@ int main(void) {
 }
 EOF
   if cc_check "$_ld_gif" && tmp_run ; then
-    _def_gif_4='#define HAVE_GIF_4 1'
+    _def_gif_4='#define CONFIG_GIF_4 1'
     _res_comment=""
   fi
 else
-  _def_gif='#undef HAVE_GIF'
-  _def_gif_4='#undef HAVE_GIF_4'
+  _def_gif='#undef CONFIG_GIF'
+  _def_gif_4='#undef CONFIG_GIF_4'
   _novomodules="gif89a $_novomodules"
   _nocodecmodules="gif $_nocodecmodules"
 fi
@@ -4757,7 +4757,7 @@ echores "$_gif"
 
 case "$_gif" in yes*)
   echocheck "broken giflib workaround"
-  _def_gif_tvt_hack='#define HAVE_GIF_TVT_HACK 1'
+  _def_gif_tvt_hack='#define CONFIG_GIF_TVT_HACK 1'
 
   cat > $TMPC << EOF
 #include <gif_lib.h>
@@ -4768,7 +4768,7 @@ int main(void) {
 }
 EOF
   if cc_check "$_ld_gif" && tmp_run ; then
-    _def_gif_tvt_hack='#undef HAVE_GIF_TVT_HACK'
+    _def_gif_tvt_hack='#undef CONFIG_GIF_TVT_HACK'
     echores "disabled"
   else
     echores "enabled"

@@ -74,10 +74,10 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef CONFIG_XANIM
         &mpcodecs_vd_xanim,
 #endif
-#ifdef HAVE_PNG
+#ifdef CONFIG_PNG
         &mpcodecs_vd_mpng,
 #endif
-#ifdef HAVE_JPEG
+#ifdef CONFIG_JPEG
 	&mpcodecs_vd_ijpg,
 #endif
 	&mpcodecs_vd_mtga,

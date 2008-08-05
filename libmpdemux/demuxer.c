@@ -110,7 +110,7 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_fli,
     &demuxer_desc_film,
     &demuxer_desc_roq,
-#ifdef HAVE_GIF
+#ifdef CONFIG_GIF
     &demuxer_desc_gif,
 #endif
 #ifdef CONFIG_OGGVORBIS

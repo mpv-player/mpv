@@ -157,7 +157,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		uint32_t d_height, uint32_t flags, char *title,
 		uint32_t format)
 {
-#ifdef HAVE_GIF_4
+#ifdef CONFIG_GIF_4
 	// these are control blocks for the gif looping extension.
 	char LB1[] = "NETSCAPE2.0";
 	char LB2[] = { 1, 0, 0 };
@@ -190,7 +190,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	// earlier versions of libungif.  i don't know exactly which,
 	// but certainly in all those before v4.  if you have problems,
 	// you need to upgrade your gif library.
-#ifdef HAVE_GIF_4
+#ifdef CONFIG_GIF_4
 	EGifSetGifVersion("89a");
 #else
 	mp_msg(MSGT_VO, MSGL_ERR, "GIF89a: Your version of libungif needs to be upgraded.\n");
@@ -232,7 +232,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 	// set the initial width and height info.
 	EGifPutScreenDesc(new_gif, s_width, s_height, 256, 0, reduce_cmap);
-#ifdef HAVE_GIF_4
+#ifdef CONFIG_GIF_4
 	// version 3 of libungif does not support multiple control blocks.
 	// looping requires multiple control blocks.
 	// therefore, looping is only enabled for v4 and up.

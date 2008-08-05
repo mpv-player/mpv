@@ -128,11 +128,11 @@ const m_option_t mplayer_opts[]={
 #endif
 
 	// -vo png only:
-#ifdef HAVE_PNG
+#ifdef CONFIG_PNG
 	{"z", "-z has been removed. Use -vo png:z=<0-9> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 	// -vo jpeg only:
-#ifdef HAVE_JPEG
+#ifdef CONFIG_JPEG
 	{"jpeg", "-jpeg has been removed. Use -vo jpeg:<options> instead.\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif

@@ -228,19 +228,19 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef CONFIG_YUV4MPEG
 	&video_out_yuv4mpeg,
 #endif
-#ifdef HAVE_PNG
+#ifdef CONFIG_PNG
 	&video_out_png,
 #endif	
-#ifdef HAVE_JPEG
+#ifdef CONFIG_JPEG
 	&video_out_jpeg,
 #endif
-#ifdef HAVE_GIF
+#ifdef CONFIG_GIF
 	&video_out_gif89a,
 #endif
 #ifdef CONFIG_TGA
         &video_out_tga,
 #endif
-#ifdef HAVE_PNM
+#ifdef CONFIG_PNM
     &video_out_pnm,
 #endif
 #ifdef CONFIG_MD5SUM
