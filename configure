@@ -30,9 +30,9 @@
 # _feature=no
 # cc_check && _feature=yes
 # if test "$_feature" = yes ; then
-#   _def_feature='#define HAVE_FEATURE 1'
+#   _def_feature='#define CONFIG_FEATURE 1'
 # else
-#   _def_feature='#undef HAVE_FEATURE'
+#   _def_feature='#undef CONFIG_FEATURE'
 # fi
 # echores "$_feature"
 #
