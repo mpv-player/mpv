@@ -5298,6 +5298,7 @@ int main(void) { return 0; }
 EOF
   cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='1.0.x-alsa'
 fi
+_def_alsa='#undef CONFIG_ALSA'
 _def_alsa5='#undef CONFIG_ALSA5'
 _def_alsa9='#undef CONFIG_ALSA9'
 _def_alsa1x='#undef CONFIG_ALSA1X'
@@ -5316,6 +5317,7 @@ if test "$_alsaver" ; then
     _alsa9=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
+    _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa9='#define CONFIG_ALSA9 1'
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.9.x and sys/asoundlib.h"
@@ -5323,6 +5325,7 @@ if test "$_alsaver" ; then
     _alsa9=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
+    _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa9='#define CONFIG_ALSA9 1'
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.9.x and alsa/asoundlib.h"
@@ -5330,6 +5333,7 @@ if test "$_alsaver" ; then
     _alsa1x=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
+    _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa1x="#define CONFIG_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 1.0.x and sys/asoundlib.h"
@@ -5337,6 +5341,7 @@ if test "$_alsaver" ; then
     _alsa1x=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
+    _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa1x="#define CONFIG_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     _res_comment="using alsa 1.0.x and alsa/asoundlib.h"
@@ -8366,6 +8371,7 @@ $_def_gtk2
 $_def_ossaudio
 $_def_ossaudio_devdsp
 $_def_ossaudio_devmixer
+$_def_alsa
 $_def_alsa5
 $_def_alsa9
 $_def_alsa1x

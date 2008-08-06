@@ -842,7 +842,7 @@ int guiGetEvent( int type,char * arg )
 	  free(tmp);
 	 }
 #endif
-#if defined(CONFIG_ALSA9) || defined (CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"alsa",4 ) )
 	 {
 	  char *tmp;

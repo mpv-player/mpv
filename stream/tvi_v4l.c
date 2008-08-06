@@ -627,7 +627,7 @@ static int init(priv_t *priv)
     /* audio init */
     if (!priv->tv_param->noaudio) {
 
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
         if (priv->tv_param->alsa)
             audio_in_init(&priv->audio_in, AUDIO_IN_ALSA);
         else

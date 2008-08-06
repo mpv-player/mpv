@@ -23,7 +23,7 @@ int audio_in_init(audio_in_t *ai, int type)
     ai->samplesize = -1;
 
     switch (ai->type) {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
 	ai->alsa.handle = NULL;
 	ai->alsa.log = NULL;
@@ -45,7 +45,7 @@ int audio_in_setup(audio_in_t *ai)
 {
     
     switch (ai->type) {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
 	if (ai_alsa_init(ai) < 0) return -1;
 	ai->setup = 1;
@@ -65,7 +65,7 @@ int audio_in_setup(audio_in_t *ai)
 int audio_in_set_samplerate(audio_in_t *ai, int rate)
 {
     switch (ai->type) {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
 	ai->req_samplerate = rate;
 	if (!ai->setup) return 0;
@@ -87,7 +87,7 @@ int audio_in_set_samplerate(audio_in_t *ai, int rate)
 int audio_in_set_channels(audio_in_t *ai, int channels)
 {
     switch (ai->type) {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
 	ai->req_channels = channels;
 	if (!ai->setup) return 0;
@@ -108,12 +108,12 @@ int audio_in_set_channels(audio_in_t *ai, int channels)
 
 int audio_in_set_device(audio_in_t *ai, char *device)
 {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
     int i;
 #endif
     if (ai->setup) return -1;
     switch (ai->type) {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
 	if (ai->alsa.device) free(ai->alsa.device);
 	ai->alsa.device = strdup(device);
@@ -138,7 +138,7 @@ int audio_in_uninit(audio_in_t *ai)
 {
     if (ai->setup) {
 	switch (ai->type) {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
 	case AUDIO_IN_ALSA:
 	    if (ai->alsa.log)
 		snd_output_close(ai->alsa.log);
@@ -162,7 +162,7 @@ int audio_in_uninit(audio_in_t *ai)
 int audio_in_start_capture(audio_in_t *ai)
 {
     switch (ai->type) {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
 	return snd_pcm_start(ai->alsa.handle);
 #endif
@@ -180,7 +180,7 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
     int ret;
     
     switch (ai->type) {
-#if defined(CONFIG_ALSA9) || defined(CONFIG_ALSA1X)
+#ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
 	ret = snd_pcm_readi(ai->alsa.handle, buffer, ai->alsa.chunk_size);
 	if (ret != ai->alsa.chunk_size) {
