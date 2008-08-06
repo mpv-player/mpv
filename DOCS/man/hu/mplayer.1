@@ -1,4 +1,4 @@
-.\" Synced with r27236
+.\" Synced with r27407
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 07. 18." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 08. 06." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -2903,7 +2903,6 @@ Csak az fbdev, dga, svga, vesa videó kimenet támogatja.
 Ablakkerettel és dekorációkkal játsza le a filmet.
 Mivel alapértelmezésként ez be van kapcsolva, használd a \-noborder opciót
 a szabványos ablak dekorációk kikapcsolásához.
-A directx videó kimeneti vezérlõ támogatja.
 .
 .TP
 .B \-brightness <\-100\-100>
@@ -3251,7 +3250,7 @@ hasznos ha böngészõbe akarod integrálni az MPlayert (pl.\& a plugger
 kiterjesztéssel).
 .
 .TP
-.B \-xineramascreen <\-2\-...> (csak X11)
+.B \-xineramascreen <\-2\-...>
 Xinerama konfigurációkban (tehát amikor egy desktop több kijelzõn látható),
 ezzel az opcióval adható meg hogy melyik kijelzõn történjen a lejátszás.
 A \-2 érték teljes képernyõt jelent az egész virtuális képernyõn (ebben az
@@ -3261,6 +3260,9 @@ A kezdeti pozíció a \-geometry opcióval állítható be a megadott képernyõhöz
 relatívan.
 Általában a "\-fstype \-fullscreen" vagy "\-fstype none" opciókkal együtt
 mûködik.
+Ez az opció nem alkalmas csak a kezdõ képernyõ beállítására (sem a teljes
+képernyõére), jelenleg a \-geometry a legalkalmasabb erre a célra.
+A gl, gl2, x11 és az xv videó kimeneti vezérlõ támogatja.
 .
 .TP
 .B \-zrbw (csak \-vo zr)
@@ -3952,6 +3954,10 @@ ami sokkal gyorsabb mint az YV12 ezen a kártyán.
 Explicit kiválasztja a használandó fbdev eszköz nevét (alapértelmezett: /dev/\:fb0).
 .RE
 .PD 1
+.
+.TP
+.B wii (csak Linux)
+Nintendo Wii/GameCube specifikus videó kimeneti vezérlõ.
 .
 .TP
 .B 3dfx (csak Linux)
@@ -8215,24 +8221,14 @@ idõt ad a kvantálónak (lassabb váltás).
 .TP
 .B vqcomp=<0.0\-1.0>
 Kvantálási tömörítés, a vrc_eq függ ettõl (alapértelmezett: 0.5).
-Például feltéve, hogy az alapértelmezett rate control egyenletet használjuk,
-ha a vqcomp=1.0, a ratecontrol minden kockához annyi számú bitet foglal le,
-amennyi szükséges az azonos QP melletti kódolásukhoz.
-Ha a vqcomp=0.0, a ratecontrol minden kockához ugyanannyi számú bitet foglal le,
-pl. szigorú CBR.
 .I MEGJEGYZÉS:
-Ezek extrém beállítások és nem ajánlott õket használni.
-A látható minõség valahol ezen két szélsõséges eset között lesz optimális.
+A látható minõség valahol a két szélsõérték között lesz optimális.
 .
 .TP
 .B vrc_eq=<egyenlet>
 fõ ratecontrol egyenlet
 .RE
 .RSs
-.IPs "1\ \ \ \ "
-konstans bitráta
-.IPs "tex\ \ "
-konstans minõség
 .IPs 1+(tex/\:avgTex-1)*qComp
 körülbelül a régi ratecontrol kódjának megfelelõ egyenlet
 .IPs tex^qComp
