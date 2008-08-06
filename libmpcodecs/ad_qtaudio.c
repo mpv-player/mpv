@@ -5,7 +5,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_QUICKTIME
+#ifdef CONFIG_QUICKTIME
 #include <QuickTime/QuickTimeComponents.h>
 #endif
 
@@ -30,7 +30,7 @@ static ad_info_t info =  {
 
 LIBAD_EXTERN(qtaudio)
 
-#ifndef HAVE_QUICKTIME
+#ifndef CONFIG_QUICKTIME
 typedef struct OpaqueSoundConverter*    SoundConverter;
 typedef unsigned long                   OSType;
 typedef unsigned long                   UnsignedFixed;
@@ -164,7 +164,7 @@ static int loader_init()
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"loader_init DONE???\n");
 	return 0;
 }
-#endif /* #ifndef HAVE_QUICKTIME */
+#endif /* #ifndef CONFIG_QUICKTIME */
 
 static SoundConverter			   myConverter = NULL;
 static SoundComponentData		   InputFormatInfo,OutputFormatInfo;
@@ -180,7 +180,7 @@ static int preinit(sh_audio_t *sh){
     unsigned long WantedBufferSize=0; //the size you want your buffers to be
 
 
-#ifdef HAVE_QUICKTIME
+#ifdef CONFIG_QUICKTIME
     EnterMovies();
 #else
     if(loader_init()) return 0; // failed to load DLL
@@ -280,7 +280,7 @@ static void uninit(sh_audio_t *sh){
 //    FreeLibrary( qtime_qts );
 //    qtime_qts = NULL;
 //    printf("qt dll loader uninit done\n");
-#ifdef HAVE_QUICKTIME
+#ifdef CONFIG_QUICKTIME
     ExitMovies();
 #endif
 }

@@ -25,7 +25,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_QUICKTIME
+#ifdef CONFIG_QUICKTIME
 #include <QuickTime/QuickTime.h>
 #include <QuickTime/ImageCompression.h>
 #include <QuickTime/ImageCodec.h>

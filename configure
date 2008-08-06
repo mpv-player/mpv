@@ -3577,21 +3577,21 @@ EOF
   if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then
     _ld_extra="$_ld_extra -framework Carbon -framework QuickTime -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
     _coreaudio=yes
-    _def_coreaudio='#define HAVE_COREAUDIO 1'
+    _def_coreaudio='#define CONFIG_COREAUDIO 1'
     _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
-    _def_quartz='#define HAVE_QUARTZ 1'
+    _def_quartz='#define CONFIG_QUARTZ 1'
     _vosrc="$_vosrc vo_quartz.c"
     _vomodules="quartz $_vomodules"
-    _def_quicktime='#define HAVE_QUICKTIME 1'
+    _def_quicktime='#define CONFIG_QUICKTIME 1'
   else
     _macosx=no
     _coreaudio=no
-    _def_coreaudio='#undef HAVE_COREAUDIO'
+    _def_coreaudio='#undef CONFIG_COREAUDIO'
     _noaomodules="macosx $_noaomodules"
-    _def_quartz='#undef HAVE_QUARTZ'
+    _def_quartz='#undef CONFIG_QUARTZ'
     _novomodules="quartz $_novomodules"
-    _def_quicktime='#undef HAVE_QUICKTIME'
+    _def_quicktime='#undef CONFIG_QUICKTIME'
   fi
 cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
@@ -3602,11 +3602,11 @@ EOF
 		_vosrc="$_vosrc vo_macosx.m"
 		_vomodules="macosx $_vomodules"
 		_ld_extra="$_ld_extra -framework Cocoa -framework QuartzCore -framework OpenGL"
-		_def_corevideo='#define HAVE_COREVIDEO 1'
+		_def_corevideo='#define CONFIG_COREVIDEO 1'
 		_corevideo=yes
 	else
 		_novomodules="macosx $_novomodules"
-		_def_corevideo='#undef HAVE_COREVIDEO'
+		_def_corevideo='#undef CONFIG_COREVIDEO'
 		_corevideo=no
 	fi
 fi
@@ -3667,10 +3667,10 @@ EOF
   cc_check -framework IOKit && tmp_run && _apple_remote=yes
 fi
 if test "$_apple_remote" = yes ; then
-  _def_apple_remote='#define HAVE_APPLE_REMOTE 1'
+  _def_apple_remote='#define CONFIG_APPLE_REMOTE 1'
   _ld_extra="$_ld_extra -framework IOKit"
 else
-  _def_apple_remote='#undef HAVE_APPLE_REMOTE'
+  _def_apple_remote='#undef CONFIG_APPLE_REMOTE'
 fi
 echores "$_apple_remote"
 
@@ -3693,9 +3693,9 @@ EOF
   cc_check && tmp_run && _apple_ir=yes
 fi
 if test "$_apple_ir" = yes ; then
-  _def_apple_ir='#define HAVE_APPLE_IR 1'
+  _def_apple_ir='#define CONFIG_APPLE_IR 1'
 else
-  _def_apple_ir='#undef HAVE_APPLE_IR'
+  _def_apple_ir='#undef CONFIG_APPLE_IR'
 fi
 echores "$_apple_ir"
 fi #if linux

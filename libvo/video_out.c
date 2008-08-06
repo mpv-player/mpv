@@ -125,10 +125,10 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef CONFIG_DIRECTX
         &video_out_directx,
 #endif
-#ifdef HAVE_COREVIDEO
+#ifdef CONFIG_COREVIDEO
 	&video_out_macosx,
 #endif
-#ifdef HAVE_QUARTZ
+#ifdef CONFIG_QUARTZ
 	&video_out_quartz,
 #endif
 #ifdef CONFIG_XMGA
