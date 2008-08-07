@@ -371,7 +371,7 @@ SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIBVORBIS)             += libmpcodecs/ad_libvorbis.c \
                                         libmpdemux/demux_ogg.c
-SRCS_COMMON-$(MACOSX_FINDER_SUPPORT) += osdep/macosx_finder_args.c
+SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.c
 SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c
 SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32) += mp3lib/decode_i586.c
 SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOW)    += mp3lib/dct36_3dnow.c \

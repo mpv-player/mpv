@@ -326,7 +326,7 @@ static int preinit(const char *arg)
 	
 	if(!shared_buffer)
 	{
-		#if !defined (MACOSX_FINDER_SUPPORT) || !defined (CONFIG_SDL)
+		#if !defined (MACOSX_FINDER) || !defined (CONFIG_SDL)
 		//this chunk of code is heavily based off SDL_macosx.m from SDL 
 		//it uses an Apple private function to request foreground operation
 		void CPSEnableForegroundOperation(ProcessSerialNumber* psn);
