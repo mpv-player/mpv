@@ -247,6 +247,45 @@ SRCS_COMMON-$(DVDREAD_INTERNAL)      += dvdread/cmd_print.c \
                                         dvdread/nav_read.c \
 
 SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
+SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
+                                        libfaad2/cfft.c \
+                                        libfaad2/common.c \
+                                        libfaad2/decoder.c \
+                                        libfaad2/drc.c \
+                                        libfaad2/drm_dec.c \
+                                        libfaad2/error.c \
+                                        libfaad2/filtbank.c \
+                                        libfaad2/hcr.c \
+                                        libfaad2/huffman.c \
+                                        libfaad2/ic_predict.c \
+                                        libfaad2/is.c \
+                                        libfaad2/lt_predict.c \
+                                        libfaad2/mdct.c \
+                                        libfaad2/mp4.c \
+                                        libfaad2/ms.c \
+                                        libfaad2/output.c \
+                                        libfaad2/pns.c \
+                                        libfaad2/ps_dec.c \
+                                        libfaad2/ps_syntax.c  \
+                                        libfaad2/pulse.c \
+                                        libfaad2/rvlc.c \
+                                        libfaad2/sbr_dct.c \
+                                        libfaad2/sbr_dec.c \
+                                        libfaad2/sbr_e_nf.c \
+                                        libfaad2/sbr_fbt.c \
+                                        libfaad2/sbr_hfadj.c \
+                                        libfaad2/sbr_hfgen.c \
+                                        libfaad2/sbr_huff.c \
+                                        libfaad2/sbr_qmf.c \
+                                        libfaad2/sbr_syntax.c \
+                                        libfaad2/sbr_tf_grid.c \
+                                        libfaad2/specrec.c \
+                                        libfaad2/ssr.c \
+                                        libfaad2/ssr_fb.c \
+                                        libfaad2/ssr_ipqf.c \
+                                        libfaad2/syntax.c \
+                                        libfaad2/tns.c \
+
 SRCS_COMMON-$(FREETYPE)              += libvo/font_load_ft.c
 SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
@@ -304,45 +343,6 @@ SRCS_COMMON-$(LIBDVDCSS_INTERNAL)    += libdvdcss/css.c \
                                         libdvdcss/ioctl.c \
                                         libdvdcss/libdvdcss.c \
 
-SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
-                                        libfaad2/cfft.c \
-                                        libfaad2/common.c \
-                                        libfaad2/decoder.c \
-                                        libfaad2/drc.c \
-                                        libfaad2/drm_dec.c \
-                                        libfaad2/error.c \
-                                        libfaad2/filtbank.c \
-                                        libfaad2/hcr.c \
-                                        libfaad2/huffman.c \
-                                        libfaad2/ic_predict.c \
-                                        libfaad2/is.c \
-                                        libfaad2/lt_predict.c \
-                                        libfaad2/mdct.c \
-                                        libfaad2/mp4.c \
-                                        libfaad2/ms.c \
-                                        libfaad2/output.c \
-                                        libfaad2/pns.c \
-                                        libfaad2/ps_dec.c \
-                                        libfaad2/ps_syntax.c  \
-                                        libfaad2/pulse.c \
-                                        libfaad2/rvlc.c \
-                                        libfaad2/sbr_dct.c \
-                                        libfaad2/sbr_dec.c \
-                                        libfaad2/sbr_e_nf.c \
-                                        libfaad2/sbr_fbt.c \
-                                        libfaad2/sbr_hfadj.c \
-                                        libfaad2/sbr_hfgen.c \
-                                        libfaad2/sbr_huff.c \
-                                        libfaad2/sbr_qmf.c \
-                                        libfaad2/sbr_syntax.c \
-                                        libfaad2/sbr_tf_grid.c \
-                                        libfaad2/specrec.c \
-                                        libfaad2/ssr.c \
-                                        libfaad2/ssr_fb.c \
-                                        libfaad2/ssr_ipqf.c \
-                                        libfaad2/syntax.c \
-                                        libfaad2/tns.c \
-
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
 SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c \
                                         libmpeg2/alloc.c \
@@ -371,6 +371,9 @@ SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
 SRCS_COMMON-$(LIBVORBIS)             += libmpcodecs/ad_libvorbis.c \
                                         libmpdemux/demux_ogg.c
+SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
+                                        libmpdemux/demux_rtp_codec.cpp \
+                                        stream/stream_live555.c \
 SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.c
 SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c
 SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32) += mp3lib/decode_i586.c
@@ -382,6 +385,24 @@ SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)      += mp3lib/dct64_mmx.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_ALTIVEC) += mp3lib/dct64_altivec.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_MMX)    += mp3lib/decode_mmx.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_SSE)    += mp3lib/dct64_sse.c
+SRCS_COMMON-$(MUSEPACK)              += libmpcodecs/ad_mpc.c \
+                                        libmpdemux/demux_mpc.c
+SRCS_COMMON-$(NATIVE_RTSP)           += stream/stream_rtsp.c \
+                                        stream/freesdp/common.c \
+                                        stream/freesdp/errorlist.c \
+                                        stream/freesdp/parser.c \
+                                        stream/librtsp/rtsp.c \
+                                        stream/librtsp/rtsp_rtp.c \
+                                        stream/librtsp/rtsp_session.c \
+
+SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
+SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
+SRCS_COMMON-$(NEED_MMAP)             += osdep/mmap-os2.c
+SRCS_COMMON-$(NEED_SETENV)           += osdep/setenv.c
+SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
+SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
+SRCS_COMMON-$(NEED_SWAB)             += osdep/swab.c
+SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
 SRCS_COMMON-$(NETWORK)               += stream/stream_netstream.c \
                                         stream/asf_mmst_streaming.c \
                                         stream/asf_streaming.c \
@@ -401,24 +422,6 @@ SRCS_COMMON-$(NETWORK)               += stream/stream_netstream.c \
                                         stream/realrtsp/sdpplin.c \
                                         stream/realrtsp/xbuffer.c \
 
-SRCS_COMMON-$(MUSEPACK)              += libmpcodecs/ad_mpc.c \
-                                        libmpdemux/demux_mpc.c
-SRCS_COMMON-$(NATIVE_RTSP)           += stream/stream_rtsp.c \
-                                        stream/freesdp/common.c \
-                                        stream/freesdp/errorlist.c \
-                                        stream/freesdp/parser.c \
-                                        stream/librtsp/rtsp.c \
-                                        stream/librtsp/rtsp_rtp.c \
-                                        stream/librtsp/rtsp_session.c \
-
-SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
-SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
-SRCS_COMMON-$(NEED_MMAP)             += osdep/mmap-os2.c
-SRCS_COMMON-$(NEED_SETENV)           += osdep/setenv.c
-SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
-SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
-SRCS_COMMON-$(NEED_SWAB)             += osdep/swab.c
-SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
 SRCS_COMMON-$(PNG)                   += libmpcodecs/vd_mpng.c
 SRCS_COMMON-$(PVR)                   += stream/stream_pvr.c
 SRCS_COMMON-$(QTX_CODECS)            += libmpcodecs/ad_qtaudio.c \
@@ -430,9 +433,6 @@ SRCS_COMMON-$(REAL_CODECS)           += libmpcodecs/ad_realaud.c \
                                         libmpcodecs/vd_realvid.c
 SRCS_COMMON-$(SPEEX)                 += libmpcodecs/ad_speex.c
 SRCS_COMMON-$(STREAM_CACHE)          += stream/cache2.c
-SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
-                                        libmpdemux/demux_rtp_codec.cpp \
-                                        stream/stream_live555.c \
 
 SRCS_COMMON-$(TREMOR_INTERNAL)       += tremor/bitwise.c \
                                         tremor/block.c \
@@ -643,16 +643,16 @@ OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)))
 OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mplayer-rc.o
 OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
 
-MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 MENCODER_DEPS = $(OBJS_MENCODER) $(OBJS_COMMON) $(COMMON_LIBS)
+MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
 DEPS = $(filter-out %.S,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON) $(SRCS_MPLAYER:.m=.d) $(SRCS_MENCODER))))
 
 ALL_PRG-$(MPLAYER)  += mplayer$(EXESUF)
 ALL_PRG-$(MENCODER) += mencoder$(EXESUF)
 
-INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
-INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
 INSTALL_TARGETS-$(GUI)      += install-gui
+INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
+INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 
 DIRS =  . \
         dvdread \
@@ -727,11 +727,11 @@ all: $(ALL_PRG-yes)
 %.d: %.m
 	$(MPDEPEND_CMD) > $@
 
-%.o: %.m
-	$(CC) $(CFLAGS) -c -o $@ $<
-
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
+
+%.o: %.m
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
@@ -745,11 +745,11 @@ $(FFMPEGLIBS): $(FFMPEGFILES) libvo/fastmemcpy.h config.h
 	$(MAKE) -C $(@D)
 	touch $@
 
-mplayer$(EXESUF): $(MPLAYER_DEPS)
-	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
-
 mencoder$(EXESUF): $(MENCODER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MENCODER)
+
+mplayer$(EXESUF): $(MPLAYER_DEPS)
+	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
 
 codec-cfg$(EXESUF): codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) -O -I. -DCODECS2HTML -o $@ $<
@@ -780,7 +780,7 @@ version.h:
 ###### dependency declarations / specific CFLAGS ######
 
 codec-cfg.d: codecs.conf.h
-mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d stream/network.d stream/stream_cddb.d osdep/mplayer-rc.o: version.h
+mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d osdep/mplayer-rc.o stream/network.d stream/stream_cddb.d: version.h
 $(DEPS): help_mp.h
 
 dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(LIBDVDCSS_DVDREAD_FLAGS)
@@ -818,15 +818,26 @@ install-dirs:
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
+install-gui: install-mplayer
+	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
+	$(INSTALL) -d $(DATADIR)/skins $(prefix)/share/pixmaps $(prefix)/share/applications
+	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
+	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
+
 install-mencoder-man: $(foreach lang,$(MAN_LANGS),install-mencoder-man-$(lang))
+install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
+
+install-mencoder-man-en: install-mplayer-man-en
+	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
 
 install-mplayer-man-en:
 	$(INSTALL) -d $(MANDIR)/man1
 	$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
 
-install-mencoder-man-en: install-mplayer-man-en
-	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
+define MENCODER_MAN_RULE
+install-mencoder-man-$(lang): install-mplayer-man-$(lang)
+	cd $(MANDIR)/$(lang)/man1 && ln -sf mplayer.1 mencoder.1
+endef
 
 define MPLAYER_MAN_RULE
 install-mplayer-man-$(lang):
@@ -834,19 +845,8 @@ install-mplayer-man-$(lang):
 	$(INSTALL) -c -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
 
-define MENCODER_MAN_RULE
-install-mencoder-man-$(lang): install-mplayer-man-$(lang)
-	cd $(MANDIR)/$(lang)/man1 && ln -sf mplayer.1 mencoder.1
-endef
-
-$(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MENCODER_MAN_RULE)))
-
-install-gui: install-mplayer
-	-ln -sf mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
-	$(INSTALL) -d $(DATADIR)/skins $(prefix)/share/pixmaps $(prefix)/share/applications
-	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
-	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
+$(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
 
 uninstall:
 	rm -f $(BINDIR)/mplayer$(EXESUF) $(BINDIR)/gmplayer$(EXESUF)
@@ -883,11 +883,11 @@ tags:
 
 TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
-codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
-	$(CC) -I. -DCODECS2HTML -o $@ $^
-
 codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h codec-cfg.h $(TEST_OBJS)
 	$(CC) -I. -DTESTING -o $@ $^
+
+codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
+	$(CC) -I. -DCODECS2HTML -o $@ $^
 
 liba52/test$(EXESUF): cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o)) -lm
 
