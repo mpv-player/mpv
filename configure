@@ -3173,9 +3173,9 @@ EOF
   done
 fi
 if test "$_iconv" = yes ; then
-  _def_iconv='#define HAVE_ICONV 1'
+  _def_iconv='#define CONFIG_ICONV 1'
 else
-  _def_iconv='#undef HAVE_ICONV'
+  _def_iconv='#undef CONFIG_ICONV'
 fi
 echores "$_iconv"
 
@@ -5647,11 +5647,11 @@ EOF
     fi
 fi
 if test "$_freetype" = yes ; then
-    _def_freetype='#define HAVE_FREETYPE'
+    _def_freetype='#define CONFIG_FREETYPE'
     _inc_extra="$_inc_extra `$_freetypeconfig --cflags`"
     _ld_extra="$_ld_extra `$_freetypeconfig --libs`"
 else
-    _def_freetype='#undef HAVE_FREETYPE'
+    _def_freetype='#undef CONFIG_FREETYPE'
 fi
 echores "$_freetype"
 
@@ -5687,9 +5687,9 @@ EOF
   fi
 fi
 if test "$_fontconfig" = yes ; then
-    _def_fontconfig='#define HAVE_FONTCONFIG'
+    _def_fontconfig='#define CONFIG_FONTCONFIG'
 else
-    _def_fontconfig='#undef HAVE_FONTCONFIG'
+    _def_fontconfig='#undef CONFIG_FONTCONFIG'
 fi
 echores "$_fontconfig"
 
@@ -5747,11 +5747,11 @@ EOF
     fi
 fi
 if test "$_fribidi" = yes ; then
-    _def_fribidi='#define HAVE_FRIBIDI'
+    _def_fribidi='#define CONFIG_FRIBIDI'
     _inc_extra="$_inc_extra `$_fribidiconfig --cflags`"
     _ld_extra="$_ld_extra `$_fribidiconfig --libs`"
 else
-    _def_fribidi='#undef HAVE_FRIBIDI'
+    _def_fribidi='#undef CONFIG_FRIBIDI'
 fi
 echores "$_fribidi"
 
@@ -5772,10 +5772,10 @@ EOF
     cc_check -lenca $_ld_lm && _enca=yes
 fi
     if test "$_enca" = yes ; then
-	_def_enca='#define HAVE_ENCA 1'
+	_def_enca='#define CONFIG_ENCA 1'
 	_ld_extra="$_ld_extra -lenca"
     else
-	_def_enca='#undef HAVE_ENCA'
+	_def_enca='#undef CONFIG_ENCA'
     fi
 echores "$_enca"
 

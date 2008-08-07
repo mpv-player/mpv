@@ -530,10 +530,10 @@ if (frameno_filename) {
 #endif	
 
 // check font
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
   init_freetype();
 #endif
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
   if(font_fontconfig <= 0)
   {
 #endif
@@ -548,7 +548,7 @@ if (frameno_filename) {
          vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
   }
 #endif
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
   }
 #endif
 

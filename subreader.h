@@ -71,7 +71,7 @@ subtitle* subcp_recode (subtitle *sub);
 struct stream_st;
 void subcp_open (struct stream_st *st); /* for demux_ogg.c */
 void subcp_close (void); /* for demux_ogg.c */
-#ifdef HAVE_ENCA
+#ifdef CONFIG_ENCA
 const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback);
 const char* guess_cp(struct stream_st *st, const char *preferred_language, const char *fallback);
 #endif

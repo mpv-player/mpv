@@ -116,7 +116,7 @@ int fsLastAudioFilterSelected = -1;
 
 char * fsFontFileNames[][2] =
          {
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
 	   { "True Type fonts (*.ttf)",					   "*.ttf" },
 	   { "Type1 fonts (*.pfb)",					   "*.pfb" },
 	   { "All fonts",						   "*.ttf,*.pfb" },

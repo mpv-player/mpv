@@ -698,7 +698,7 @@ void exit_player_with_rc(const char* how, int rc){
   vo_uninit();	// Close the X11 connection (if any is open).
 #endif
 
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
   current_module="uninit_font";
   if (sub_font && sub_font != vo_font) free_font_desc(sub_font);
   sub_font = NULL;
@@ -1027,7 +1027,7 @@ void add_subtitles(char *filename, float fps, int noerr)
     subd = sub_read_file(filename, fps);
 #ifdef CONFIG_ASS
     if (ass_enabled)
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
         asst = ass_read_file(ass_library, filename, sub_cp);
 #else
         asst = ass_read_file(ass_library, filename, 0);
@@ -2782,10 +2782,10 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 //------ load global data first ------
 
 // check font
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
   init_freetype();
 #endif
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
   if(font_fontconfig <= 0)
   {
 #endif
@@ -2806,7 +2806,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   else
     sub_font = vo_font;
 #endif
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
   }
 #endif
 
@@ -3543,7 +3543,7 @@ if(!reinit_video_chain()) {
    if(vo_flags & 0x08 && vo_spudec)
       spudec_set_hw_spu(vo_spudec,mpctx->video_out);
 
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
    force_load_font = 1;
 #endif
 

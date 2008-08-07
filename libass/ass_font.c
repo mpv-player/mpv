@@ -284,7 +284,7 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 			break;
 	}
 
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 	if (index == 0) {
 		int face_idx;
 		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_LIBASS_GlyphNotFoundReselectingFont,

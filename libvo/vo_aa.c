@@ -247,7 +247,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
       vo_font->pic_b[0]=malloc(sizeof(raw_file));
       memset(vo_font->pic_b[0],0,sizeof(raw_file));
 
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
       vo_font->dynamic = 0;
 #endif
 

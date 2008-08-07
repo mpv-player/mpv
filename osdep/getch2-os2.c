@@ -32,7 +32,7 @@
 #include "input/input.h"
 #include "mp_fifo.h"
 
-#if defined(HAVE_LANGINFO) && defined(HAVE_ICONV)
+#if defined(HAVE_LANGINFO) && defined(CONFIG_ICONV)
 #include <locale.h>
 #include <langinfo.h>
 #endif
@@ -182,7 +182,7 @@ void getch2_disable( void )
     getch2_status = 0;
 }
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 char *get_term_charset( void )
 {
     char *charset = NULL;

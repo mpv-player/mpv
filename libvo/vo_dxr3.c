@@ -429,7 +429,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
 
 #ifdef SPU_SUPPORT
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
 	if (ioval == EM8300_ASPECTRATIO_16_9) {
 		s_width *= d_height*1.78/s_height*(d_width*1.0/d_height)/2.35;
 	} else {

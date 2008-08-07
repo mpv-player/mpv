@@ -37,13 +37,13 @@
 #include "ass_library.h"
 #include "ass_fontconfig.h"
 
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 #include <fontconfig/fontconfig.h>
 #include <fontconfig/fcfreetype.h>
 #endif
 
 struct fc_instance_s {
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 	FcConfig* config;
 #endif
 	char* family_default;
@@ -51,7 +51,7 @@ struct fc_instance_s {
 	int index_default;
 };
 
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 
 // 4yo fontconfig does not have these.
 // They are only needed for debug output, anyway.
@@ -474,7 +474,7 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	return priv;
 }
 
-#else // HAVE_FONTCONFIG
+#else /* CONFIG_FONTCONFIG */
 
 char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
 			uint32_t code)

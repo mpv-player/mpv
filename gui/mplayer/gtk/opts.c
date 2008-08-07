@@ -122,7 +122,7 @@ static GtkWidget * HSFPS;
 static GtkAdjustment * HSExtraStereoMuladj, * HSAudioDelayadj, * HSPanscanadj, * HSSubDelayadj;
 static GtkAdjustment * HSSubPositionadj, * HSSubFPSadj, * HSPPQualityadj, * HSFPSadj;
 
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
 static GtkWidget     * HSFontFactor;
 static GtkAdjustment * HSFontFactoradj;
 #else
@@ -133,11 +133,11 @@ static GtkWidget     * RBFontNoAutoScale, * RBFontAutoScaleWidth, * RBFontAutoSc
 //static GtkWidget     * AutoScale;
 #endif
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 static GtkWidget     * CBSubEncoding, * ESubEncoding;
 #endif
 
-#if defined(HAVE_FREETYPE) || defined(HAVE_ICONV)
+#if defined(CONFIG_FREETYPE) || defined(CONFIG_ICONV)
 static struct 
 {
  char * name;
@@ -188,7 +188,7 @@ static int    old_video_driver = 0;
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
-#if defined(HAVE_FREETYPE) || defined(HAVE_ICONV)
+#if defined(CONFIG_FREETYPE) || defined(CONFIG_ICONV)
 static void prEntry( GtkContainer * container,gpointer user_data );
 #endif
 
@@ -312,7 +312,7 @@ void ShowPreferences( void )
  if ( guiIntfStruct.Subtitlename ) gtk_entry_set_text( GTK_ENTRY( ESubtitleName ),guiIntfStruct.Subtitlename );
 #endif
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
  if ( sub_cp )
   {
    int i;
@@ -326,7 +326,7 @@ void ShowPreferences( void )
 // --- 4. page
  // font ...
  if ( font_name ) gtk_entry_set_text( GTK_ENTRY( prEFontName ),font_name );
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
  gtk_adjustment_set_value( HSFontFactoradj,font_factor );
 #else
  gtk_adjustment_set_value( HSFontBluradj,( subtitle_font_radius / 8.0f ) * 100.0f );
@@ -434,7 +434,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( CBSoftwareMixer ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)1 );
  gtk_signal_connect( GTK_OBJECT( CBAudioEqualizer ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)2 );
  gtk_signal_connect( GTK_OBJECT( CBShowVideoWindow ),"toggled",GTK_SIGNAL_FUNC( prToggled ), (void*)3 );
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
  gtk_signal_connect( GTK_OBJECT( RBFontNoAutoScale ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)4 );
  gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleHeight ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)5 );
  gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleWidth ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)6 );
@@ -451,7 +451,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( HSPanscan ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)2 );
  gtk_signal_connect( GTK_OBJECT( HSSubDelay ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)3 );
  gtk_signal_connect( GTK_OBJECT( HSSubPosition ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)4 );
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
  gtk_signal_connect( GTK_OBJECT( HSFontFactor ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)5 );
 #else
  gtk_signal_connect( GTK_OBJECT( HSFontBlur ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)6 );
@@ -460,7 +460,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( HSFontOSDScale ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)9 );
  gtk_signal_connect( GTK_OBJECT( EFontEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),(void *)0 );
 #endif
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
  gtk_signal_connect( GTK_OBJECT( ESubEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),(void *)1 );
 #endif
  gtk_signal_connect( GTK_OBJECT( HSPPQuality ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)10 );
@@ -492,7 +492,7 @@ void HidePreferences( void )
 #endif
 }
 
-#if defined(HAVE_FREETYPE) || defined(HAVE_ICONV)
+#if defined(CONFIG_FREETYPE) || defined(CONFIG_ICONV)
 static void prEntry( GtkContainer * container,gpointer user_data )
 {	
  const char * comment;
@@ -500,7 +500,7 @@ static void prEntry( GtkContainer * container,gpointer user_data )
 
  switch( (int)user_data )
   {
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
    case 0: // font encoding
         comment=gtk_entry_get_text( GTK_ENTRY( EFontEncoding ) );
         for ( i=0;lEncoding[i].name;i++ )
@@ -508,7 +508,7 @@ static void prEntry( GtkContainer * container,gpointer user_data )
 	if ( lEncoding[i].comment ) gtkSet( gtkSetFontEncoding,0,lEncoding[i].name );
 	break;
 #endif
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
    case 1: // sub encoding
         comment=gtk_entry_get_text( GTK_ENTRY( ESubEncoding ) );
         for ( i=0;lEncoding[i].name;i++ )
@@ -580,7 +580,7 @@ void prButton( GtkButton * button,gpointer user_data )
 
         // --- 4. page
 	guiSetFilename( font_name,gtk_entry_get_text( GTK_ENTRY( prEFontName ) ) );
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
 	gtkSet( gtkSetFontFactor,HSFontFactoradj->value,NULL );
 #else
 	gtkSet( gtkSetFontBlur,HSFontBluradj->value,NULL );
@@ -684,7 +684,7 @@ static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer u
    case 4: // sub position
         sub_pos=(int)HSSubPositionadj->value;
 	break;
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
    case 5: // font factor
         gtkSet( gtkSetFontFactor,HSFontFactoradj->value,NULL );
 	break;
@@ -827,7 +827,7 @@ GtkWidget * create_Preferences( void )
   GtkWidget * vbox603;
   GtkWidget * hbox6;
   GtkWidget * hbuttonbox5;
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
   GtkWidget * hbox7;
 #endif
   GtkWidget * vbox601;
@@ -1030,7 +1030,7 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_SUB_FPS,NULL );
     gtk_table_attach( GTK_TABLE( table1 ),label,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
   label=AddLabel( MSGTR_PREFERENCES_FontEncoding,NULL );
     gtk_table_attach( GTK_TABLE( table1 ),label,0,1,3,4,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 #endif
@@ -1051,7 +1051,7 @@ GtkWidget * create_Preferences( void )
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( HSSubFPS ),TRUE );
     gtk_table_attach( GTK_TABLE( table1 ),HSSubFPS,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
   CBSubEncoding=gtk_combo_new();
   gtk_widget_set_name( CBSubEncoding,"CBSubEncoding" );
   gtk_widget_show( CBSubEncoding );
@@ -1117,7 +1117,7 @@ GtkWidget * create_Preferences( void )
     gtk_container_set_border_width( GTK_CONTAINER( hbuttonbox5 ),3 );
   BLoadFont=AddButton( MSGTR_Browse,hbuttonbox5 );
 
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
   hbox7=AddHBox( vbox603,1 );
   AddLabel( MSGTR_PREFERENCES_FontFactor,hbox7 );
   HSFontFactoradj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,10,0.05,0,0 ) );

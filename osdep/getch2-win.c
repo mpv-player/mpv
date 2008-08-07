@@ -142,7 +142,7 @@ void getch2_disable(){
     getch2_status=0;
 }
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 static const struct {
     unsigned cp;
     char* alias;

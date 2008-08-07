@@ -28,7 +28,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 #include <fontconfig/fontconfig.h>
 #endif
 

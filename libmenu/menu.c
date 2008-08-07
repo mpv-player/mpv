@@ -215,7 +215,7 @@ int menu_init(struct MPContext *mpctx, char* cfg_file) {
   char* buffer = NULL;
   int bl = BUF_STEP, br = 0;
   int f, fd;
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
   if(vo_font == NULL)
     return 0;
 #endif
@@ -403,7 +403,7 @@ static void render_txt(char *txt)
   }
 }
 
-#ifdef HAVE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 #include <fribidi/fribidi.h>
 #include "libavutil/common.h"
 char *menu_fribidi_charset = NULL;
@@ -459,7 +459,7 @@ void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
     return;
   }
 
-#ifdef HAVE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
   txt = menu_fribidi(txt);
 #endif
   render_txt(txt);
@@ -493,7 +493,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
     return;
   }
 
-#ifdef HAVE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
   txt = menu_fribidi(txt);
 #endif
   render_txt(txt);

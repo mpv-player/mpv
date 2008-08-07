@@ -1,7 +1,7 @@
 #ifndef MPLAYER_FONT_LOAD_H
 #define MPLAYER_FONT_LOAD_H
 
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #endif
@@ -10,14 +10,14 @@ typedef struct {
     unsigned char *bmp;
     unsigned char *pal;
     int w,h,c;
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
     int charwidth,charheight,pen,baseline,padding;
     int current_count, current_alloc;
 #endif
 } raw_file;
 
 typedef struct font_desc {
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
     int dynamic;
 #endif
     char *name;
@@ -34,7 +34,7 @@ typedef struct font_desc {
     short width[65536];
     int freetype;
 
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
     int face_cnt;
     
     FT_Face faces[16];
@@ -64,7 +64,7 @@ typedef struct font_desc {
 extern font_desc_t* vo_font;
 extern font_desc_t* sub_font;
 
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
 
 extern char *subtitle_font_encoding;
 extern float text_font_scale_factor;

@@ -1065,11 +1065,11 @@ void free_osd_list(void){
 int vo_update_osd(int dxs,int dys){
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
-#ifdef HAVE_FREETYPE    
+#ifdef CONFIG_FREETYPE
     static int defer_counter = 0, prev_dxs = 0, prev_dys = 0;
 #endif
 
-#ifdef HAVE_FREETYPE    
+#ifdef CONFIG_FREETYPE
     // here is the right place to get screen dimensions
     if (((dxs != vo_image_width)
 	   && (subtitle_autoscale == 2 || subtitle_autoscale == 3))
@@ -1198,7 +1198,7 @@ void vo_init_osd(void){
 #if CONFIG_TV_TELETEXT
     new_osd_obj(OSDTYPE_TELETEXT);
 #endif
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
     force_load_font = 1;
 #endif
 }

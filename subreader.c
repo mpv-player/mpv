@@ -20,17 +20,17 @@
 #include "subreader.h"
 #include "stream/stream.h"
 
-#ifdef HAVE_ENCA
+#ifdef CONFIG_ENCA
 #include <enca.h>
 #endif
 
 #define ERR ((void *) -1)
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 #include <iconv.h>
 char *sub_cp=NULL;
 #endif
-#ifdef HAVE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 #include <fribidi/fribidi.h>
 char *fribidi_charset = NULL;   ///character set that will be passed to FriBiDi
 int flip_hebrew = 1;            ///flip subtitles using fribidi
@@ -1071,7 +1071,7 @@ int sub_utf8_prev=0;
 extern float sub_delay;
 extern float sub_fps;
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 static iconv_t icdsc = (iconv_t)(-1);
 
 void	subcp_open (stream_t *st)
@@ -1080,7 +1080,7 @@ void	subcp_open (stream_t *st)
 
 	if (sub_cp){
 		const char *cp_tmp = sub_cp;
-#ifdef HAVE_ENCA
+#ifdef CONFIG_ENCA
 		char enca_lang[3], enca_fallback[100];
 		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
 		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
@@ -1146,7 +1146,7 @@ subtitle* subcp_recode (subtitle *sub)
 }
 #endif
 
-#ifdef HAVE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 #ifndef max
 #define max(a,b)  (((a)>(b))?(a):(b))
 #endif
@@ -1270,7 +1270,7 @@ struct subreader {
     const char *name;
 };
 
-#ifdef HAVE_ENCA
+#ifdef CONFIG_ENCA
 const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback)
 {
     const char **languages;
@@ -1369,7 +1369,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     stream_reset(fd);
     stream_seek(fd,0);
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
     sub_utf8_prev=sub_utf8;
     {
 	    int l,k;
@@ -1389,7 +1389,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     sub_num=0;n_max=32;
     first=malloc(n_max*sizeof(subtitle));
     if(!first){
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 	  subcp_close();
           sub_utf8=sub_utf8_prev;
 #endif
@@ -1413,15 +1413,15 @@ sub_data* sub_read_file (char *filename, float fps) {
 	memset(sub, '\0', sizeof(subtitle));
         sub=srp->read(fd,sub);
         if(!sub) break;   // EOF
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
 #endif
-#ifdef HAVE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 	if (sub!=ERR) sub=sub_fribidi(sub,sub_utf8);
 #endif
 	if ( sub == ERR )
 	 {
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
           subcp_close();
 #endif
     	  if ( first ) free(first);
@@ -1474,7 +1474,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     
     free_stream(fd);
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
     subcp_close();
 #endif
 
@@ -1876,8 +1876,8 @@ char** sub_filenames(const char* path, char *fname)
 
 		// does it end with a subtitle extension?
 		found = 0;
-#ifdef HAVE_ICONV
-#ifdef HAVE_ENCA
+#ifdef CONFIG_ICONV
+#ifdef CONFIG_ENCA
 		for (i = ((sub_cp && strncasecmp(sub_cp, "enca", 4) != 0) ? 3 : 0); sub_exts[i]; i++) {
 #else
 		for (i = (sub_cp ? 3 : 0); sub_exts[i]; i++) {
@@ -1931,7 +1931,7 @@ char** sub_filenames(const char* path, char *fname)
 
 		    if (prio) {
 			prio += prio;
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 			if (i<3){ // prefer UTF-8 coded
 			    prio++;
 			}

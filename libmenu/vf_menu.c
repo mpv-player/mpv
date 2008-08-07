@@ -202,7 +202,7 @@ static void uninit(vf_instance_t *vf) {
 
 static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height,
 		  unsigned int flags, unsigned int outfmt) { 
-#ifdef HAVE_FREETYPE    
+#ifdef CONFIG_FREETYPE
   // here is the right place to get screen dimensions
   if (force_load_font) {
     force_load_font = 0;

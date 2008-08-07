@@ -11,7 +11,7 @@
 	{"msglevel", msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 	{"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 	{"msgcharset", &mp_msg_charset, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL},
@@ -264,7 +264,7 @@
 // ------------------------- subtitles options --------------------
 
 	{"sub", &sub_name, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-#ifdef HAVE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 	{"fribidi-charset", &fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"flip-hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noflip-hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -276,8 +276,8 @@
 	{"noflip-hebrew", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"flip-hebrew-commas", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"noflip-hebrew-commas", "MPlayer was compiled without FriBiDi support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* HAVE_FRIBIDI */
-#ifdef HAVE_ICONV
+#endif /* CONFIG_FRIBIDI */
+#ifdef CONFIG_ICONV
 	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif	
 	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
@@ -309,7 +309,7 @@
 	{"spualign", &spu_alignment, CONF_TYPE_INT, CONF_RANGE, -1, 2, NULL},
 	{"spuaa", &spu_aamode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	{"spugauss", &spu_gaussvar, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 3.0, NULL},
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
 	{"subfont-encoding", &subtitle_font_encoding, CONF_TYPE_STRING, 0, 0, 0, NULL},
  	{"subfont-text-scale", &text_font_scale_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},
  	{"subfont-osd-scale", &osd_font_scale_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},
@@ -334,12 +334,12 @@
 	{"ass-styles", &ass_styles_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"ass-hinting", &ass_hinting, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
 #endif
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 	{"fontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, -1, 1, NULL},
 	{"nofontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, 1, -1, NULL},
 #else
 	{"fontconfig", "MPlayer was compiled without fontconfig support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"nofontconfig", "MPlayer was compiled without fontconfig support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* HAVE_FONTCONFIG */
+#endif /* CONFIG_FONTCONFIG */
 
 #endif /* MPLAYER_CFG_COMMON_OPTS_H */
