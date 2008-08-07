@@ -130,10 +130,10 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_h264_es,
     &demuxer_desc_audio,
     &demuxer_desc_mpeg_ty,
-#ifdef STREAMING_LIVE555
+#ifdef CONFIG_LIVE555
     &demuxer_desc_rtp,
 #endif
-#ifdef LIBNEMESI
+#ifdef CONFIG_LIBNEMESI
     &demuxer_desc_rtp_nemesi,
 #endif
 #ifdef CONFIG_LIBAVFORMAT

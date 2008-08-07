@@ -38,7 +38,7 @@ typedef struct {
 //  void* audio_out;        // the audio_out handle, used for this audio stream
   struct af_stream_s *afilter;          // the audio filter stream
   struct ad_functions_s* ad_driver;
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
   void *dec_handle;
 #endif
   // win32-compatible codec parameters:
@@ -83,7 +83,7 @@ typedef struct {
   unsigned int outfmtidx;
   struct vf_instance_s *vfilter;          // the video filter chain, used for this video stream
   int vf_initialized;
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
   void *dec_handle;
 #endif
   // win32-compatible codec parameters:

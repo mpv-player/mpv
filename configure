@@ -2641,9 +2641,9 @@ echores "messages: $msg_lang - man pages: $man_langs - documentation: $doc_langs
 
 echocheck "enable sighandler"
 if test "$_sighandler" = yes ; then
-  _def_sighandler='#define ENABLE_SIGHANDLER 1'
+  _def_sighandler='#define CONFIG_SIGHANDLER 1'
 else
-  _def_sighandler='#undef ENABLE_SIGHANDLER'
+  _def_sighandler='#undef CONFIG_SIGHANDLER'
 fi
 echores "$_sighandler"
 
@@ -2882,12 +2882,12 @@ echores "$_socklen_t"
 echocheck "network"
 # FIXME network check
 if test "$_network" = yes ; then
-  _def_network='#define MPLAYER_NETWORK 1'
+  _def_network='#define CONFIG_NETWORK 1'
   _ld_extra="$_ld_extra $_ld_sock"
   _inputmodules="network $_inputmodules"
 else
   _noinputmodules="network $_noinputmodules"
-  _def_network='#undef MPLAYER_NETWORK'
+  _def_network='#undef CONFIG_NETWORK'
   _ftp=no
 fi
 echores "$_network"
@@ -3067,9 +3067,9 @@ if test "$_dl" = no ; then
   _dynamic_plugins=no
 fi
 if test "$_dynamic_plugins" = yes ; then
-  _def_dynamic_plugins='#define DYNAMIC_PLUGINS 1'
+  _def_dynamic_plugins='#define CONFIG_DYNAMIC_PLUGINS 1'
 else
-  _def_dynamic_plugins='#undef DYNAMIC_PLUGINS'
+  _def_dynamic_plugins='#undef CONFIG_DYNAMIC_PLUGINS'
 fi
 echores "$_dynamic_plugins"
 
@@ -3610,10 +3610,10 @@ if test "$_macosx_finder" = auto ; then
   _macosx_finder=$_macosx
 fi
 if test "$_macosx_finder" = yes; then
-  _def_macosx_finder='#define MACOSX_FINDER 1'
+  _def_macosx_finder='#define CONFIG_MACOSX_FINDER 1'
   _macosx_finder=yes
 else
-  _def_macosx_finder='#undef MACOSX_FINDER'
+  _def_macosx_finder='#undef CONFIG_MACOSX_FINDER'
   _macosx_finder=no
 fi
 echores "$_macosx_finder"
@@ -3623,9 +3623,9 @@ if test "$_macosx_bundle" = auto ; then
   _macosx_bundle=$_macosx_finder
 fi
 if test "$_macosx_bundle" = yes; then
-  _def_macosx_bundle='#define MACOSX_BUNDLE 1'
+  _def_macosx_bundle='#define CONFIG_MACOSX_BUNDLE 1'
 else
-  _def_macosx_bundle='#undef MACOSX_BUNDLE'
+  _def_macosx_bundle='#undef CONFIG_MACOSX_BUNDLE'
   _macosx_bundle=no
 fi
 echores "$_macosx_bundle"
@@ -3723,10 +3723,10 @@ EOF
 fi
 
 if test "$_smb" = yes; then
-    _def_smb="#define LIBSMBCLIENT"
+    _def_smb="#define CONFIG_LIBSMBCLIENT"
     _inputmodules="smb $_inputmodules"
 else
-    _def_smb="#undef LIBSMBCLIENT"
+    _def_smb="#undef CONFIG_LIBSMBCLIENT"
     _noinputmodules="smb $_noinputmodules"
 fi
 echores "$_smb"
@@ -5921,7 +5921,7 @@ fi
 if test "$_tremor_internal" = yes ; then
   _vorbis=yes
   _def_vorbis='#define CONFIG_OGGVORBIS 1'
-  _def_tremor='#define TREMOR 1'
+  _def_tremor='#define CONFIG_TREMOR 1'
   _codecmodules="tremor(internal) $_codecmodules"
   _res_comment="internal Tremor"
   if test "$_tremor_low" = yes ; then
@@ -5931,7 +5931,7 @@ if test "$_tremor_internal" = yes ; then
 elif test "$_tremor_external" = yes ; then
   _vorbis=yes
   _def_vorbis='#define CONFIG_OGGVORBIS 1'
-  _def_tremor='#define TREMOR 1'
+  _def_tremor='#define CONFIG_TREMOR 1'
   _codecmodules="tremor(external) $_codecmodules"
   _res_comment="external Tremor"
   _ld_extra="$_ld_extra -logg -lvorbisidec"
@@ -6340,12 +6340,12 @@ if test "$_nemesi" = auto  && test "$_network" = yes ; then
 fi
 if test "$_nemesi" = yes; then
     _native_rtsp=no
-    _def_nemesi='#define LIBNEMESI 1'
+    _def_nemesi='#define CONFIG_LIBNEMESI 1'
     _inputmodules="nemesi $_inputmodules"
 else
     _native_rtsp="$_network"
     _nemesi=no
-    _def_nemesi='#undef LIBNEMESI'
+    _def_nemesi='#undef CONFIG_LIBNEMESI'
     _noinputmodules="nemesi $_noinputmodules"
 fi
 echores "$_nemesi"
@@ -6383,19 +6383,19 @@ EOF
 fi
 if test "$_live" = yes && test "$_network" = yes; then
   _res_comment="using $_livelibdir"
-  _def_live='#define STREAMING_LIVE555 1'
+  _def_live='#define CONFIG_LIVE555 1'
  _inputmodules="live555 $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes; then
   _res_comment="using distribution version"
   _live="yes"
-  _def_live='#define STREAMING_LIVE555 1'
+  _def_live='#define CONFIG_LIVE555 1'
   _ld_extra="$_ld_extra -lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
   _inc_extraxx="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
              -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  _inputmodules="live555 $_inputmodules"
 else
   _live=no
-  _def_live='#undef STREAMING_LIVE555'
+  _def_live='#undef CONFIG_LIVE555'
   _noinputmodules="live555 $_noinputmodules"
 fi
 echores "$_live"
@@ -7516,9 +7516,9 @@ fi
 
 echocheck "automatic gdb attach"
 if test "$_crash_debug" = yes ; then
-  _def_crash_debug='#define CRASH_DEBUG 1'
+  _def_crash_debug='#define CONFIG_CRASH_DEBUG 1'
 else
-  _def_crash_debug='#undef CRASH_DEBUG'
+  _def_crash_debug='#undef CONFIG_CRASH_DEBUG'
   _crash_debug=no
 fi
 echores "$_crash_debug"
@@ -7849,12 +7849,13 @@ LIBSMBCLIENT = $_smb
 LIBTHEORA = $_theora
 LIBVORBIS = $_vorbis
 LIRC = $_lirc
+LIVE555 = $_live
 MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FINDER = $_macosx_finder
 MP3LAME = $_mp3lame
-MPLAYER_NETWORK = $_network
 MUSEPACK = $_musepack
 NATIVE_RTSP = $_native_rtsp
+NETWORK = $_network
 PE_EXECUTABLE = $_pe_executable
 PNG = $_png
 PVR = $_pvr
@@ -7866,7 +7867,6 @@ RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 REAL_CODECS = $_real
 SPEEX = $_speex
-STREAMING_LIVE555 = $_live
 STREAM_CACHE = $_stream_cache
 TOOLAME=$_toolame
 TV = $_tv

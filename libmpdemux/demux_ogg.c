@@ -19,7 +19,7 @@
 #define FOURCC_SPEEX  mmioFOURCC('s', 'p', 'x', ' ')
 #define FOURCC_THEORA mmioFOURCC('t', 'h', 'e', 'o')
 
-#ifdef TREMOR
+#ifdef CONFIG_TREMOR
 #include <tremor/ogg.h>
 #include <tremor/ivorbiscodec.h>
 #else

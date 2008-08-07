@@ -28,7 +28,7 @@
 
 #include "dec_video.h"
 
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
 #include <dlfcn.h>
 #endif
 
@@ -155,7 +155,7 @@ void uninit_video(sh_video_t *sh_video){
     if(!sh_video->initialized) return;
     mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_UninitVideoStr,sh_video->codec->drv);
     mpvdec->uninit(sh_video);
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
     if (sh_video->dec_handle)
 	dlclose(sh_video->dec_handle);
 #endif
@@ -205,7 +205,7 @@ static int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status,
 //	    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
 	    if(!strcmp(mpcodecs_vd_drivers[i]->info->short_name,sh_video->codec->drv)) break;
 	mpvdec=mpcodecs_vd_drivers[i];
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
 	if (!mpvdec)
 	{
 	    /* try to open shared decoder plugin */

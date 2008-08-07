@@ -382,7 +382,7 @@ SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)      += mp3lib/dct64_mmx.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_ALTIVEC) += mp3lib/dct64_altivec.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_MMX)    += mp3lib/decode_mmx.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_SSE)    += mp3lib/dct64_sse.c
-SRCS_COMMON-$(MPLAYER_NETWORK)       += stream/stream_netstream.c \
+SRCS_COMMON-$(NETWORK)               += stream/stream_netstream.c \
                                         stream/asf_mmst_streaming.c \
                                         stream/asf_streaming.c \
                                         stream/cookies.c \
@@ -430,7 +430,7 @@ SRCS_COMMON-$(REAL_CODECS)           += libmpcodecs/ad_realaud.c \
                                         libmpcodecs/vd_realvid.c
 SRCS_COMMON-$(SPEEX)                 += libmpcodecs/ad_speex.c
 SRCS_COMMON-$(STREAM_CACHE)          += stream/cache2.c
-SRCS_COMMON-$(STREAMING_LIVE555)     += libmpdemux/demux_rtp.cpp \
+SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
                                         libmpdemux/demux_rtp_codec.cpp \
                                         stream/stream_live555.c \
 

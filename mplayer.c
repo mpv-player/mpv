@@ -740,14 +740,14 @@ static void child_sighandler(int x){
 }
 #endif
 
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
 static char *prog_path;
 static int crash_debug = 0;
 #endif
 
 static void exit_sighandler(int x){
   static int sig_count=0;
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
   if (!crash_debug || x != SIGTRAP)
 #endif
   ++sig_count;
@@ -791,7 +791,7 @@ static void exit_sighandler(int x){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGSEGV_SIGFPE);
   default:
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGCRASH);
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
       if (crash_debug) {
         int gdb_pid;
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forking...\n");
@@ -2895,7 +2895,7 @@ current_module = NULL;
   signal(SIGCHLD,child_sighandler);
 #endif
 
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
   prog_path = argv[0];
 #endif
   //========= Catch terminate signals: ================
@@ -2907,14 +2907,14 @@ current_module = NULL;
 
   signal(SIGQUIT,exit_sighandler); // Quit from keyboard
   signal(SIGPIPE,exit_sighandler); // Some window managers cause this
-#ifdef ENABLE_SIGHANDLER
+#ifdef CONFIG_SIGHANDLER
   // fatal errors:
   signal(SIGBUS,exit_sighandler);  // bus error
   signal(SIGSEGV,exit_sighandler); // segfault
   signal(SIGILL,exit_sighandler);  // illegal instruction
   signal(SIGFPE,exit_sighandler);  // floating point exc.
   signal(SIGABRT,exit_sighandler); // abort()
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
   if (crash_debug)
     signal(SIGTRAP,exit_sighandler);
 #endif

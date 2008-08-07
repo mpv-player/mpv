@@ -51,7 +51,7 @@
         {"dvdkey", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"csslib", "libcss is obsolete. Try libdvdread instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
-#ifdef MPLAYER_NETWORK
+#ifdef CONFIG_NETWORK
 	{"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
@@ -74,25 +74,25 @@
 	{"passwd", "MPlayer was compiled without streaming (network) support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"bandwidth", "MPlayer was compiled without streaming (network) support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"user-agent", "MPlayer was compiled without streaming (network) support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* MPLAYER_NETWORK */
+#endif /* CONFIG_NETWORK */
 
-#ifdef STREAMING_LIVE555
+#ifdef CONFIG_LIVE555
         {"sdp", "-sdp has been removed, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
         {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#elif defined (LIBNEMESI)
+#elif defined (CONFIG_LIBNEMESI)
         {"rtsp-stream-over-tcp", &rtsp_transport_tcp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"rtsp-stream-over-sctp", &rtsp_transport_sctp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
 	{"rtsp-stream-over-tcp", "-rtsp-stream-over-tcp requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* STREAMING_LIVE555 */
-#ifdef MPLAYER_NETWORK
+#endif /* CONFIG_LIVE555 */
+#ifdef CONFIG_NETWORK
         {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},	
         {"rtsp-destination", &rtsp_destination, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
 #else
         {"rtsp-port", "MPlayer was compiled without network support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"rtsp-destination", "MPlayer was compiled without network support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* MPLAYER_NETWORK */
+#endif /* CONFIG_NETWORK */
   
 // ------------------------- demuxer options --------------------
 

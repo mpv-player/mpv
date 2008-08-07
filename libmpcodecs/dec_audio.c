@@ -23,7 +23,7 @@
 #include <malloc.h>
 #endif
 
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
 #include <dlfcn.h>
 #endif
 
@@ -167,7 +167,7 @@ static int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm,
 		 sh_audio->codec->drv))
 		break;
 	mpadec = mpcodecs_ad_drivers[i];
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
 	if (!mpadec) {
 	    /* try to open shared decoder plugin */
 	    int buf_len;
@@ -297,7 +297,7 @@ void uninit_audio(sh_audio_t *sh_audio)
 	mp_msg(MSGT_DECAUDIO, MSGL_V, MSGTR_UninitAudioStr,
 	       sh_audio->codec->drv);
 	sh_audio->ad_driver->uninit(sh_audio);
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
 	if (sh_audio->dec_handle)
 	    dlclose(sh_audio->dec_handle);
 #endif

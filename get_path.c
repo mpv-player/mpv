@@ -13,7 +13,7 @@
 #include "mp_msg.h"
 #include "get_path.h"
 
-#ifdef MACOSX_BUNDLE
+#ifdef CONFIG_MACOSX_BUNDLE
 #include <CoreFoundation/CoreFoundation.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -38,7 +38,7 @@ char *get_path(const char *filename){
 	static char *config_dir = "/.mplayer";
 #endif
 	int len;
-#ifdef MACOSX_BUNDLE
+#ifdef CONFIG_MACOSX_BUNDLE
 	struct stat dummy;
 	CFIndex maxlen=256;
 	CFURLRef res_url_ref=NULL;
@@ -96,7 +96,7 @@ char *get_path(const char *filename){
 		sprintf(buff, "%s%s/%s", homedir, config_dir, filename);
 	}
 
-#ifdef MACOSX_BUNDLE
+#ifdef CONFIG_MACOSX_BUNDLE
 	if (stat(buff, &dummy)) {
 
 		res_url_ref=CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
