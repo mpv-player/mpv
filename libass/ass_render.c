@@ -888,6 +888,7 @@ static char* parse_tag(char* p, double pwr) {
 		render_context.org_x = v1;
 		render_context.org_y = v2;
 		render_context.have_origin = 1;
+		render_context.detect_collisions = 0;
 	} else if (mystrcmp(&p, "t")) {
 		double v[3];
 		int v1, v2;
