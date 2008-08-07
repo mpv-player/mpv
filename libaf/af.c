@@ -60,7 +60,7 @@ static af_info_t* filter_list[]={
 #endif
    &af_info_sweep,
    &af_info_hrtf,
-#ifdef HAVE_LADSPA
+#ifdef CONFIG_LADSPA
    &af_info_ladspa,
 #endif
    &af_info_center,

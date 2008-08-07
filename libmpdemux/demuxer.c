@@ -149,7 +149,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_LIBNUT
     &demuxer_desc_nut,
 #endif
-#ifdef HAVE_XMMS
+#ifdef CONFIG_XMMS
     &demuxer_desc_xmms,
 #endif
     /* Please do not add any new demuxers here. If you want to implement a new

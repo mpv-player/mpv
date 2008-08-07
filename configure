@@ -5566,40 +5566,40 @@ EOF
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _cdda='yes'
-    _def_libcdio='#define HAVE_LIBCDIO'
+    _def_libcdio='#define CONFIG_LIBCDIO'
     _def_havelibcdio='yes'
 else
     if test "$_cdparanoia" = yes ; then
        _res_comment="using cdparanoia"
     fi
-    _def_libcdio='#undef HAVE_LIBCDIO'
+    _def_libcdio='#undef CONFIG_LIBCDIO'
     _def_havelibcdio='no'
 fi
 echores "$_libcdio"
 
 if test "$_cdda" = yes ; then
     test $_cddb = auto && test $_network = yes && _cddb=yes
-    _def_cdparanoia='#define HAVE_CDDA'
+    _def_cdparanoia='#define CONFIG_CDDA'
     _inputmodules="cdda $_inputmodules"
 else
-    _def_cdparanoia='#undef HAVE_CDDA'
+    _def_cdparanoia='#undef CONFIG_CDDA'
     _noinputmodules="cdda $_noinputmodules"
 fi
 
 if test "$_cddb" = yes ; then
-    _def_cddb='#define HAVE_CDDB'
+    _def_cddb='#define CONFIG_CDDB'
     _inputmodules="cddb $_inputmodules"
 else
     _cddb=no
-    _def_cddb='#undef HAVE_CDDB'
+    _def_cddb='#undef CONFIG_CDDB'
     _noinputmodules="cddb $_noinputmodules"
 fi
 
 echocheck "bitmap font support"
 if test "$_bitmap_font" = yes ; then
-  _def_bitmap_font="#define HAVE_BITMAP_FONT 1"
+  _def_bitmap_font="#define CONFIG_BITMAP_FONT 1"
 else
-  _def_bitmap_font="#undef HAVE_BITMAP_FONT"
+  _def_bitmap_font="#undef CONFIG_BITMAP_FONT"
 fi
 echores "$_bitmap_font"
 
@@ -6223,9 +6223,9 @@ EOF
   cc_check && _ladspa=yes
 fi
 if test "$_ladspa" = yes; then
-  _def_ladspa="#define HAVE_LADSPA"
+  _def_ladspa="#define CONFIG_LADSPA"
 else
-  _def_ladspa="#undef HAVE_LADSPA"
+  _def_ladspa="#undef CONFIG_LADSPA"
 fi
 echores "$_ladspa"
 
@@ -7224,11 +7224,11 @@ echores "$_select"
 
 echocheck "ftp"
 if ! beos && test "$_ftp" = yes ; then
-  _def_ftp='#define HAVE_FTP 1'
+  _def_ftp='#define CONFIG_FTP 1'
   _inputmodules="ftp $_inputmodules"
 else
   _noinputmodules="ftp $_noinputmodules"
-  _def_ftp='#undef HAVE_FTP'
+  _def_ftp='#undef CONFIG_FTP'
 fi
 echores "$_ftp"
 
@@ -7243,12 +7243,12 @@ EOF
   cc_check -lvstream-client && _vstream=yes
 fi
 if test "$_vstream" = yes ; then
-  _def_vstream='#define HAVE_VSTREAM 1'
+  _def_vstream='#define CONFIG_VSTREAM 1'
   _inputmodules="vstream $_inputmodules"
   _ld_extra="$_ld_extra -lvstream-client"
 else
   _noinputmodules="vstream $_noinputmodules"
-  _def_vstream='#undef HAVE_VSTREAM'
+  _def_vstream='#undef CONFIG_VSTREAM'
 fi
 echores "$_vstream"
 
@@ -7309,14 +7309,14 @@ if test "$_xmms" = yes ; then
       _xmmslibdir=/usr/lib
   fi
 
-  _def_xmms='#define HAVE_XMMS 1'
+  _def_xmms='#define CONFIG_XMMS 1'
   if darwin ; then
      _ld_extra="$_ld_extra ${_xmmslibdir}/libxmms.dylib"
   else
      _ld_extra="$_ld_extra ${_xmmslibdir}/libxmms.so.1 -export-dynamic"
   fi
 else
-  _def_xmms='#undef HAVE_XMMS'
+  _def_xmms='#undef CONFIG_XMMS'
 fi
 echores "$_xmms"
 
@@ -7560,11 +7560,11 @@ test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'
 
 
 echocheck "joystick"
-_def_joystick='#undef HAVE_JOYSTICK'
+_def_joystick='#undef CONFIG_JOYSTICK'
 if test "$_joystick" = yes ; then
   if linux ; then
     # TODO add some check
-    _def_joystick='#define HAVE_JOYSTICK 1'
+    _def_joystick='#define CONFIG_JOYSTICK 1'
   else
     _joystick="no"
     _res_comment="unsupported under $system_name"
@@ -7582,10 +7582,10 @@ EOF
   cc_check -llirc_client && _lirc=yes
 fi
 if test "$_lirc" = yes ; then
-  _def_lirc='#define HAVE_LIRC 1'
+  _def_lirc='#define CONFIG_LIRC 1'
   _ld_extra="$_ld_extra -llirc_client"
 else
-  _def_lirc='#undef HAVE_LIRC'
+  _def_lirc='#undef CONFIG_LIRC'
 fi
 echores "$_lirc"
 
@@ -7599,10 +7599,10 @@ EOF
   cc_check -llircc && _lircc=yes
 fi
 if test "$_lircc" = yes ; then
-  _def_lircc='#define HAVE_LIRCC 1'
+  _def_lircc='#define CONFIG_LIRCC 1'
   _ld_extra="$_ld_extra -llircc"
 else
-  _def_lircc='#undef HAVE_LIRCC'
+  _def_lircc='#undef CONFIG_LIRCC'
 fi
 echores "$_lircc"
 
@@ -7619,11 +7619,11 @@ EOF
   cc_check `$_pkg_config --cflags --libs libosso 2>/dev/null` && _maemo=yes
 fi
 if test "$_maemo" = yes ; then
-  _def_maemo='#define HAVE_MAEMO 1'
+  _def_maemo='#define CONFIG_MAEMO 1'
   _inc_extra="$_inc_extra `$_pkg_config --cflags libosso`"
   _ld_extra="$_ld_extra `$_pkg_config --libs libosso` -lXsp"
 else
-  _def_maemo='#undef HAVE_MAEMO'
+  _def_maemo='#undef CONFIG_MAEMO'
 fi
 echores "$_maemo"
 fi

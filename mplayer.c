@@ -2789,7 +2789,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   if(font_fontconfig <= 0)
   {
 #endif
-#ifdef HAVE_BITMAP_FONT
+#ifdef CONFIG_BITMAP_FONT
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
        if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,

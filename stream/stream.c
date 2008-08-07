@@ -68,7 +68,7 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_VCD
   &stream_info_vcd,
 #endif
-#ifdef HAVE_CDDA
+#ifdef CONFIG_CDDA
   &stream_info_cdda,
 #endif
 #ifdef MPLAYER_NETWORK
@@ -97,10 +97,10 @@ static const stream_info_t* const auto_open_streams[] = {
 #ifdef CONFIG_PVR
   &stream_info_pvr,
 #endif
-#ifdef HAVE_FTP
+#ifdef CONFIG_FTP
   &stream_info_ftp,
 #endif
-#ifdef HAVE_VSTREAM
+#ifdef CONFIG_VSTREAM
   &stream_info_vstream,
 #endif
 #ifdef LIBSMBCLIENT

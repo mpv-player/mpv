@@ -147,7 +147,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   struct cdda_params* p = (struct cdda_params*)opts;
   int mode = p->paranoia_mode;
   int offset = p->toc_offset;
-#ifndef HAVE_LIBCDIO
+#ifndef CONFIG_LIBCDIO
   cdrom_drive* cdd = NULL;
 #else
   cdrom_drive_t* cdd = NULL;
@@ -171,7 +171,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
       p->device = strdup(DEFAULT_CDROM_DEVICE);
   }
 
-#ifdef HAVE_CDDB
+#ifdef CONFIG_CDDB
   // cdd_identify returns -1 if it cannot read the TOC,
   // in which case there is no point in calling cddb_resolve
   if(cdd_identify(p->device) >= 0 && strncmp(st->url,"cddb",4) == 0) {
@@ -183,7 +183,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   }
 #endif
   
-#ifndef HAVE_LIBCDIO
+#ifndef CONFIG_LIBCDIO
   if(p->generic_dev)
     cdd = cdda_identify_scsi(p->generic_dev,p->device,0,NULL);
   else
@@ -205,7 +205,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 
   if(p->sector_size) {
     cdd->nsectors = p->sector_size;
-#ifndef HAVE_LIBCDIO
+#ifndef CONFIG_LIBCDIO
     cdd->bigbuff = p->sector_size * CD_FRAMESIZE_RAW;
 #endif
   }
@@ -283,7 +283,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   
   if(p->no_skip)
     mode |= PARANOIA_MODE_NEVERSKIP;
-#ifndef HAVE_LIBCDIO
+#ifndef CONFIG_LIBCDIO
   paranoia_modeset(cdd, mode);
 
   if(p->search_overlap >= 0)
@@ -298,7 +298,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   paranoia_seek(priv->cdp,priv->start_sector,SEEK_SET);
   priv->sector = priv->start_sector;
 
-#ifdef HAVE_CDDB
+#ifdef CONFIG_CDDB
   if(cddb_info) {
     cd_info_free(cd_info);
     priv->cd_info = cddb_info;
@@ -324,7 +324,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   return STREAM_OK;
 }
 
-#ifndef HAVE_LIBCDIO
+#ifndef CONFIG_LIBCDIO
 static void cdparanoia_callback(long inpos, int function) {
 #else
 static void cdparanoia_callback(long int inpos, paranoia_cb_mode_t function) {
@@ -438,7 +438,7 @@ const stream_info_t stream_info_cdda = {
   "",
   open_cdda,
   { "cdda",
-#ifdef HAVE_CDDB
+#ifdef CONFIG_CDDB
     "cddb",
 #endif
     NULL },

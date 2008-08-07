@@ -29,11 +29,11 @@
 
 #include "joystick.h"
 
-#ifdef HAVE_LIRC
+#ifdef CONFIG_LIRC
 #include "lirc.h"
 #endif
 
-#ifdef HAVE_LIRCC
+#ifdef CONFIG_LIRCC
 #include <lirc/lircc.h>
 #endif
 
@@ -426,7 +426,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { 'W', 0 }, "step_property teletext_page 1" },
   { { 'Q', 0 }, "step_property teletext_page -1" },
 #endif
-#ifdef HAVE_JOYSTICK
+#ifdef CONFIG_JOYSTICK
   { { JOY_AXIS0_PLUS, 0 }, "seek 10" },
   { { JOY_AXIS0_MINUS, 0 }, "seek -10" },
   { { JOY_AXIS1_MINUS, 0 }, "seek 60" },
@@ -1733,7 +1733,7 @@ mp_input_init(int use_gui) {
       free(file);
   }
 
-#ifdef HAVE_JOYSTICK
+#ifdef CONFIG_JOYSTICK
   if(use_joystick) {
     int fd = mp_input_joystick_init(js_dev);
     if(fd < 0)
@@ -1743,7 +1743,7 @@ mp_input_init(int use_gui) {
   }
 #endif
 
-#ifdef HAVE_LIRC
+#ifdef CONFIG_LIRC
   if(use_lirc) {
     int fd = mp_input_lirc_init();
     if(fd > 0)
@@ -1751,7 +1751,7 @@ mp_input_init(int use_gui) {
   }
 #endif
 
-#ifdef HAVE_LIRCC
+#ifdef CONFIG_LIRCC
   if(use_lircc) {
     int fd = lircc_init("mplayer", NULL);
     if(fd >= 0)
