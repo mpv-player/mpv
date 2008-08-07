@@ -149,7 +149,7 @@ typedef struct render_context_s {
 		EVENT_HSCROLL, // "Banner" transition effect, text_width is unlimited
 		EVENT_VSCROLL // "Scroll up", "Scroll down" transition effects
 		} evt_type;
-	int pos_x, pos_y; // position
+	double pos_x, pos_y; // position
 	int org_x, org_y; // origin
 	char have_origin; // origin is explicitly defined; if 0, get_base_point() is used
 	double scale_x, scale_y;
@@ -456,19 +456,19 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 /**
  * \brief Mapping between script and screen coordinates
  */
-static int x2scr(int x) {
+static int x2scr(double x) {
 	return x*frame_context.orig_width_nocrop / frame_context.track->PlayResX +
 		FFMAX(global_settings->left_margin, 0);
 }
 /**
  * \brief Mapping between script and screen coordinates
  */
-static int y2scr(int y) {
+static int y2scr(double y) {
 	return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY +
 		FFMAX(global_settings->top_margin, 0);
 }
 // the same for toptitles
-static int y2scr_top(int y) {
+static int y2scr_top(double y) {
 	if (global_settings->use_margins)
 		return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY;
 	else
@@ -476,7 +476,7 @@ static int y2scr_top(int y) {
 			FFMAX(global_settings->top_margin, 0);
 }
 // the same for subtitles
-static int y2scr_sub(int y) {
+static int y2scr_sub(double y) {
 	if (global_settings->use_margins)
 		return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY +
 			FFMAX(global_settings->top_margin, 0) +
@@ -727,7 +727,7 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "move")) {
 		int x1, x2, y1, y2;
 		long long t1, t2, delta_t, t;
-		int x, y;
+		double x, y;
 		double k;
 		skip('(');
 		x1 = strtol(p, &p, 10);
@@ -1935,7 +1935,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	if (render_context.evt_type == EVENT_POSITIONED) {
 		int base_x = 0;
 		int base_y = 0;
-		mp_msg(MSGT_ASS, MSGL_DBG2, "positioned event at %d, %d\n", render_context.pos_x, render_context.pos_y);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "positioned event at %f, %f\n", render_context.pos_x, render_context.pos_y);
 		get_base_point(bbox, alignment, &base_x, &base_y);
 		device_x = x2scr(render_context.pos_x) - base_x;
 		device_y = y2scr(render_context.pos_y) - base_y;
