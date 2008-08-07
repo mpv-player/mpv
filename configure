@@ -7791,7 +7791,6 @@ LIBA52 = $_liba52
 LIBMPEG2 = $_libmpeg2
 MP3LIB = $_mp3lib
 TREMOR_INTERNAL = $_tremor_internal
-TREMOR_LOW = $_tremor_low
 
 HAVE_SYS_MMAN_H = $_mman
 HAVE_POSIX_SELECT = $_posix_select
