@@ -5,7 +5,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 #include <iconv.h>
 #include <errno.h>
 extern char* get_term_charset(void);
@@ -29,7 +29,7 @@ int mp_msg_level_all = MSGL_STATUS;
 int verbose = 0;
 int mp_msg_color = 0;
 int mp_msg_module = 0;
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 char *mp_msg_charset = NULL;
 static char *old_charset = NULL;
 static iconv_t msgiconv;
@@ -37,7 +37,7 @@ static iconv_t msgiconv;
 
 const char* filename_recode(const char* filename)
 {
-#if !defined(HAVE_ICONV) || !defined(MSG_CHARSET)
+#if !defined(CONFIG_ICONV) || !defined(MSG_CHARSET)
     return filename;
 #else
     static iconv_t inv_msgiconv = (iconv_t)(-1);
@@ -73,7 +73,7 @@ void mp_msg_init(void){
         verbose = atoi(env);
     for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
     mp_msg_levels[MSGT_IDENTIFY] = -1; // no -identify output by default
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
     mp_msg_charset = getenv("MPLAYER_CHARSET");
     if (!mp_msg_charset)
       mp_msg_charset = get_term_charset();
@@ -184,7 +184,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
         guiMessageBox(lev, tmp);
 #endif
 
-#if defined(HAVE_ICONV) && defined(MSG_CHARSET)
+#if defined(CONFIG_ICONV) && defined(MSG_CHARSET)
     if (mp_msg_charset && strcasecmp(mp_msg_charset, "noconv")) {
       char tmp2[MSGSIZE_MAX];
       size_t inlen = strlen(tmp), outlen = MSGSIZE_MAX;

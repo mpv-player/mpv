@@ -20,7 +20,7 @@
 #include "help_mp.h"
 
 #include "osdep/shmem.h"
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 #include "x11_common.h"
 #endif
 
@@ -67,6 +67,7 @@ extern struct vo_driver video_out_sdl;
 extern struct vo_driver video_out_3dfx;
 extern struct vo_driver video_out_tdfxfb;
 extern struct vo_driver video_out_s3fb;
+extern struct vo_driver video_out_wii;
 extern struct vo_driver video_out_null;
 extern struct vo_driver video_out_zr;
 extern struct vo_driver video_out_zr2;
@@ -112,10 +113,10 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_DIRECTX
         &video_out_directx,
 #endif
-#ifdef HAVE_COREVIDEO
+#ifdef CONFIG_COREVIDEO
 	&video_out_macosx,
 #endif
-#ifdef HAVE_QUARTZ
+#ifdef CONFIG_QUARTZ
 	&video_out_quartz,
 #endif
 #ifdef CONFIG_XMGA
@@ -130,13 +131,16 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_S3FB
         &video_out_s3fb,
 #endif
+#ifdef CONFIG_WII
+        &video_out_wii,
+#endif
 #ifdef CONFIG_3DFX
         &video_out_3dfx,
 #endif
-#ifdef HAVE_XV
+#ifdef CONFIG_XV
         &video_out_xv,
 #endif
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
         &video_out_x11,
         &video_out_xover,
 #endif
@@ -144,7 +148,7 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_gl,
         &video_out_gl2,
 #endif
-#ifdef HAVE_DGA
+#ifdef CONFIG_DGA
         &video_out_dga,
 #endif
 #ifdef CONFIG_SDL
@@ -166,19 +170,19 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_CACA
 	&video_out_caca,
 #endif
-#ifdef HAVE_DXR2
+#ifdef CONFIG_DXR2
 	&video_out_dxr2,
 #endif
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 	&video_out_dxr3,
 #endif
-#ifdef HAVE_IVTV
+#ifdef CONFIG_IVTV
         &video_out_ivtv,
 #endif
-#ifdef HAVE_V4L2_DECODER
+#ifdef CONFIG_V4L2_DECODER
         &video_out_v4l2,
 #endif
-#ifdef HAVE_ZR
+#ifdef CONFIG_ZR
 	&video_out_zr,
 	&video_out_zr2,
 #endif
@@ -195,7 +199,7 @@ const struct vo_driver *video_out_drivers[] =
         &video_out_dfbmga,
 #endif
 #ifdef CONFIG_VIDIX
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	&video_out_xvidix,
 #endif
 #ifdef WIN32
@@ -212,19 +216,19 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_YUV4MPEG
 	&video_out_yuv4mpeg,
 #endif
-#ifdef HAVE_PNG
+#ifdef CONFIG_PNG
 	&video_out_png,
 #endif
-#ifdef HAVE_JPEG
+#ifdef CONFIG_JPEG
 	&video_out_jpeg,
 #endif
-#ifdef HAVE_GIF
+#ifdef CONFIG_GIF
 	&video_out_gif89a,
 #endif
 #ifdef CONFIG_TGA
         &video_out_tga,
 #endif
-#ifdef HAVE_PNM
+#ifdef CONFIG_PNM
     &video_out_pnm,
 #endif
 #ifdef CONFIG_MD5SUM

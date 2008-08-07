@@ -804,7 +804,7 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
             char device[MAX_PATH];
             char searchpath[MAX_PATH];
             char searchpath2[MAX_PATH];
-#ifdef HAVE_LIBCDIO
+#ifdef CONFIG_LIBCDIO
             char searchpath3[MAX_PATH];
 #endif
             int len, pos = 0, cdromdrive = 0;
@@ -826,14 +826,14 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                     mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] checking %s for CD/VCD/SVCD/DVDs\n", device + pos);
                     sprintf(searchpath, "%sVIDEO_TS", device + pos);
                     sprintf(searchpath2, "%sMpegav", device + pos);
-#ifdef HAVE_LIBCDIO
+#ifdef CONFIG_LIBCDIO
                     sprintf(searchpath3, "%sTrack01.cda", device + pos);
 #endif
                     if(GetFileAttributes(searchpath) != INVALID_FILE_ATTRIBUTES)
                         flags |= MF_ENABLED;
                     else if(GetFileAttributes(searchpath2) != INVALID_FILE_ATTRIBUTES)
                         flags |= MF_ENABLED;
-#ifdef HAVE_LIBCDIO
+#ifdef CONFIG_LIBCDIO
                     else if(GetFileAttributes(searchpath3) != INVALID_FILE_ATTRIBUTES)
                         flags |= MF_ENABLED;
 #endif
@@ -1015,7 +1015,7 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                             sprintf(searchpath, "%sTrack01.cda", device + pos);
                             if(GetFileAttributes(searchpath) != INVALID_FILE_ATTRIBUTES)
                             {
-#ifdef HAVE_LIBCDIO
+#ifdef CONFIG_LIBCDIO
                                 if (cdrom_device) free(cdrom_device);
                                 cdrom_device = strdup(device + pos);
                                 /* mplayer doesn't seem to like the trailing \ after the device name */

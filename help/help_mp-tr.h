@@ -13,7 +13,7 @@ static char help_text[]=
 "Genel seçenekler: (Tüm seçenekler için man sayfalarına bakınız)\n"
 " -vo <sürücü>          video çıkış sürücüsünü seçer ('-vo help' ile listeyi görebilirsiniz)\n"
 " -ao <sürücü>          ses çıkış sürücüsü seçer ('-ao help' ile listeyi görebilirsiniz)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<parçano>    (S)VCD (Süper Video CD) parça numarasını oynatır (sade aygıtı kullan, sisteme takma)\n"
 #endif
 #ifdef CONFIG_DVDREAD

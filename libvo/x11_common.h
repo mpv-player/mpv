@@ -140,7 +140,7 @@ int xv_test_ckm( void * arg );
 
 void vo_x11_putkey(struct vo *vo, int key);
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
 void vo_vm_switch(struct vo *vo, uint32_t, uint32_t, int*, int*);
 void vo_vm_close(struct vo *vo);
 #endif

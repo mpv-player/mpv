@@ -128,7 +128,7 @@ void mplEventHandling( int msg,float param )
         mp_property_do("sub",M_PROPERTY_SET,&iparam,guiIntfStruct.mpcontext); 
 	break;
 
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
    case evSetVCDTrack:
         guiIntfStruct.Track=iparam;
    case evPlayVCD:
@@ -165,7 +165,7 @@ play:
 	  case STREAMTYPE_FILE:
 	       gtkSet( gtkClearStruct,0,(void *)(guiALL - guiFilenames) );
 	       break;
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
           case STREAMTYPE_VCD:
 	       gtkSet( gtkClearStruct,0,(void *)(guiALL - guiVCD - guiFilenames) );
 	       if ( !cdrom_device ) cdrom_device=gstrdup( DEFAULT_CDROM_DEVICE );

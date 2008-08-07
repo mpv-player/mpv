@@ -39,22 +39,22 @@ extern ao_functions_t audio_out_pss;
 const ao_functions_t* const audio_out_drivers[] =
 {
 // native:
-#ifdef HAVE_DIRECTX
+#ifdef CONFIG_DIRECTX
         &audio_out_dsound,
 #endif
-#ifdef HAVE_WIN32WAVEOUT
+#ifdef CONFIG_WIN32WAVEOUT
         &audio_out_win32,
 #endif
-#ifdef HAVE_COREAUDIO
+#ifdef CONFIG_COREAUDIO
         &audio_out_macosx,
 #endif
 #ifdef CONFIG_OSS_AUDIO
         &audio_out_oss,
 #endif
-#if defined (HAVE_ALSA1X) || defined (HAVE_ALSA9)
+#ifdef CONFIG_ALSA
         &audio_out_alsa,
 #endif
-#ifdef HAVE_ALSA5
+#ifdef CONFIG_ALSA5
         &audio_out_alsa5,
 #endif
 #ifdef CONFIG_SGI_AUDIO
@@ -76,23 +76,23 @@ const ao_functions_t* const audio_out_drivers[] =
 #ifdef CONFIG_JACK
         &audio_out_jack,
 #endif
-#ifdef HAVE_NAS
+#ifdef CONFIG_NAS
         &audio_out_nas,
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
         &audio_out_sdl,
 #endif
 #ifdef CONFIG_OPENAL
         &audio_out_openal,
 #endif
         &audio_out_mpegpes,
-#ifdef HAVE_DXR2
+#ifdef CONFIG_DXR2
         &audio_out_dxr2,
 #endif
-#ifdef HAVE_IVTV
+#ifdef CONFIG_IVTV
         &audio_out_ivtv,
 #endif
-#ifdef HAVE_V4L2_DECODER
+#ifdef CONFIG_V4L2_DECODER
         &audio_out_v4l2,
 #endif
         &audio_out_null,

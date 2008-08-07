@@ -10,7 +10,7 @@ static char help_text[]=
 "Опції:\n"
 " -vo <drv[:dev]> вибір драйвера і пристрою відео виводу (список див. з '-vo help')\n"
 " -ao <drv[:dev]> вибір драйвера і пристрою аудіо виводу (список див. з '-ao help')\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<номер треку> грати VCD (video cd) трек з пристрою замість файлу\n"
 #endif
 #ifdef CONFIG_DVDREAD

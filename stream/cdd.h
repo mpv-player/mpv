@@ -2,7 +2,7 @@
 #define MPLAYER_CDD_H
 
 #include "config.h"
-#ifndef HAVE_LIBCDIO
+#ifndef CONFIG_LIBCDIO
 #include <cdda_interface.h>
 #include <cdda_paranoia.h>
 #else
@@ -54,7 +54,7 @@ typedef struct {
 } cd_info_t;
 
 typedef struct {
-#ifndef HAVE_LIBCDIO
+#ifndef CONFIG_LIBCDIO
 	cdrom_drive* cd;
 	cdrom_paranoia* cdp;
 #else

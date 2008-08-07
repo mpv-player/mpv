@@ -14,7 +14,7 @@ static char help_text[]=
 "                 ('-vo help' para listar)\n"
 " -ao <drv[:dev]> seleciona o driver de saída de audio & dispositivo\n"
 "                 ('-vo help' para listar)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<numtrilha> reproduz trilha de VCD (Video CD) do dispositivo em vez de um\n"
 "                 arquivo\n"
 #endif

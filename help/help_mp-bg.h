@@ -12,7 +12,7 @@ static char help_text[]=
 "Основни опции:   (пълният списък е в ръководството - 'man mplayer')\n"
 " -vo <дрв[:устр]>  избор на видео драйвер & устройство ('-vo help' дава списък)\n"
 " -ao <дрв[:устр]>  избор на звуков драйвер & устройство ('-ao help' дава списък)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<пътечка>   пуска (S)VCD (Super Video CD) пътечка (без монтиране!)\n"
 #endif
 #ifdef CONFIG_DVDREAD

@@ -60,7 +60,7 @@
 #include "libvo/font_load.h"
 #include "libvo/sub.h"
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 #include "libvo/x11_common.h"
 #endif
 
@@ -114,7 +114,7 @@ char *heartbeat_cmd;
 #include "stream/stream_radio.h"
 #endif
 
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #include "stream/cache2.h"
 #endif
@@ -654,7 +654,7 @@ void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc){
 #ifdef WIN32
   timeEndPeriod(1);
 #endif
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 #ifdef CONFIG_GUI
   if ( !use_gui )
 #endif
@@ -668,7 +668,7 @@ void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc){
       menu_uninit();
 #endif
 
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
   current_module="uninit_font";
   if (mpctx->osd && mpctx->osd->sub_font != vo_font)
       free_font_desc(mpctx->osd->sub_font);
@@ -712,14 +712,14 @@ static void child_sighandler(int x){
 }
 #endif
 
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
 static char *prog_path;
 static int crash_debug = 0;
 #endif
 
 static void exit_sighandler(int x){
   static int sig_count=0;
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
   if (!crash_debug || x != SIGTRAP)
 #endif
   ++sig_count;
@@ -762,7 +762,7 @@ static void exit_sighandler(int x){
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGSEGV_SIGFPE);
   default:
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGCRASH);
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
       if (crash_debug) {
         int gdb_pid;
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Forking...\n");
@@ -1004,7 +1004,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
     subd = sub_read_file(filename, fps);
 #ifdef CONFIG_ASS
     if (ass_enabled)
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
         asst = ass_read_file(ass_library, filename, sub_cp);
 #else
         asst = ass_read_file(ass_library, filename, 0);
@@ -1121,7 +1121,7 @@ void init_vo_spudec(struct MPContext *mpctx)
  * make it all work is to use the builtin SDL-bootstrap code, which 
  * will be done automatically by replacing our main() if we include SDL.h.
  */
-#if defined(__APPLE__) && defined(HAVE_SDL)
+#if defined(__APPLE__) && defined(CONFIG_SDL)
 #include <SDL.h>
 #endif
 
@@ -2580,7 +2580,7 @@ int gui_no_filename=0;
   
   mp_msg_init();
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
   mpctx->x11_state = vo_x11_init_state();
 #endif
   struct MPOpts *opts = &mpctx->opts;
@@ -2759,7 +2759,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       printf("\n");
       opt_exit = 1;
     }
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
     if(vo_fstype_list && strcmp(vo_fstype_list[0],"help")==0){
       fstype_help();
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
@@ -2809,14 +2809,14 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   mpctx->osd = osd_create();
 
 // check font
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
   init_freetype();
 #endif
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
   if(font_fontconfig <= 0)
   {
 #endif
-#ifdef HAVE_BITMAP_FONT
+#ifdef CONFIG_BITMAP_FONT
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
        if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,
@@ -2833,7 +2833,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   else
     mpctx->osd->sub_font = vo_font;
 #endif
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
   }
 #endif
 
@@ -2920,7 +2920,7 @@ current_module = NULL;
   signal(SIGCHLD,child_sighandler);
 #endif
 
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
   prog_path = argv[0];
 #endif
   //========= Catch terminate signals: ================
@@ -2932,14 +2932,14 @@ current_module = NULL;
 
   signal(SIGQUIT,exit_sighandler); // Quit from keyboard
   signal(SIGPIPE,exit_sighandler); // Some window managers cause this
-#ifdef ENABLE_SIGHANDLER
+#ifdef CONFIG_SIGHANDLER
   // fatal errors:
   signal(SIGBUS,exit_sighandler);  // bus error
   signal(SIGSEGV,exit_sighandler); // segfault
   signal(SIGILL,exit_sighandler);  // illegal instruction
   signal(SIGFPE,exit_sighandler);  // floating point exc.
   signal(SIGABRT,exit_sighandler); // abort()
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
   if (crash_debug)
     signal(SIGTRAP,exit_sighandler);
 #endif
@@ -3442,7 +3442,7 @@ if(mpctx->sh_video){
 
 if(!mpctx->sh_video && !mpctx->sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NoStreamFound);
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 	if(mpctx->stream->type == STREAMTYPE_DVB)
 	{
 		int dir;
@@ -3575,7 +3575,7 @@ if(!reinit_video_chain(mpctx)) {
    if(mpctx->sh_video->output_flags & 0x08 && vo_spudec)
       spudec_set_hw_spu(vo_spudec,mpctx->video_out);
 
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
    force_load_font = 1;
 #endif
 
@@ -3779,7 +3779,7 @@ if(!mpctx->sh_video) {
     current_module="vo_check_events";
     vo_check_events(mpctx->video_out);
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
     if (stop_xscreensaver) {
 	current_module = "stop_xscreensaver";
 	xscreensaver_heartbeat(mpctx->x11_state);
@@ -3952,7 +3952,7 @@ if(mpctx->rel_seek_secs || mpctx->abs_seek_pos){
 
 mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->eof);
 
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
 if(mpctx->dvbin_reopen)
 {
   mpctx->eof = 0;

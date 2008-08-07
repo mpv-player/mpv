@@ -9,7 +9,7 @@ static char help_text[]=
 "Basis-opties: (volledige lijst in de man-pagina's)\n"
 " -vo <drv[:dev]>  selecteer video uitvoer driver & device (zie '-vo help' voor lijst)\n"
 " -ao <drv[:dev]>  selecteer audio uitvoer driver & device (zie '-ao help' voor lijst)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<trackno>   speel VCD (Video CD) track van cdrom in plaats van standaard bestand\n"
 #endif
 #ifdef CONFIG_DVDREAD

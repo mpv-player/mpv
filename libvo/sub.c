@@ -14,7 +14,7 @@
 #define OSD_NAV_BOX_ALPHA 0x7f
 #endif
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 #include "stream/tv.h"
 #include "osdep/timer.h"
 #endif
@@ -72,7 +72,7 @@ char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "",
 //static int vo_font_loaded=-1;
 font_desc_t* vo_font=NULL;
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 void* vo_osd_teletext_page=NULL;
 int vo_osd_teletext_half = 0;
 int vo_osd_teletext_mode=0;
@@ -245,7 +245,7 @@ inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
 }
 #endif
 
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 // renders char to a big per-object buffer where alpha and bitmap are separated
 static void tt_draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsigned char* src, int stride,int fg,int bg,int alpha)
 {
@@ -1072,11 +1072,11 @@ int osd_update(struct osd_state *osd, int dxs, int dys)
 {
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
-#ifdef HAVE_FREETYPE    
+#ifdef CONFIG_FREETYPE
     static int defer_counter = 0, prev_dxs = 0, prev_dys = 0;
 #endif
 
-#ifdef HAVE_FREETYPE    
+#ifdef CONFIG_FREETYPE
     // here is the right place to get screen dimensions
     if (((dxs != vo_image_width)
 	   && (subtitle_autoscale == 2 || subtitle_autoscale == 3))
@@ -1130,7 +1130,7 @@ int osd_update(struct osd_state *osd, int dxs, int dys)
 	case OSDTYPE_SUBTITLE:
 	    vo_update_text_sub(osd, obj,dxs,dys);
 	    break;
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 	case OSDTYPE_TELETEXT:
 	    vo_update_text_teletext(obj,dxs,dys);
 	    break;
@@ -1205,10 +1205,10 @@ struct osd_state *osd_create(void)
 #ifdef CONFIG_DVDNAV
     new_osd_obj(OSDTYPE_DVDNAV);
 #endif
-#if HAVE_TV_TELETEXT
+#if CONFIG_TV_TELETEXT
     new_osd_obj(OSDTYPE_TELETEXT);
 #endif
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
     force_load_font = 1;
 #endif
     return osd;
@@ -1254,7 +1254,7 @@ void osd_draw_text(struct osd_state *osd, int dxs, int dys,
 #ifdef CONFIG_DVDNAV
         case OSDTYPE_DVDNAV:
 #endif
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
 	case OSDTYPE_TELETEXT:
 #endif
 	case OSDTYPE_OSD:

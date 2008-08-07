@@ -13,7 +13,7 @@ static char help_text[]=
 "Basale indstillinger (se manualen for en komplet liste):\n"
 " -vo <drv[:enhed]> vælg videodriver og enhed (detaljer, se '-vo help')\n"
 " -ao <drv[:enhed]> vælg lyddriver og enhed (detaljer, se '-ao help')\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<spor>  afspil et VCD (Video CD) spor fra et drev i stedet for en fil\n"
 #endif
 #ifdef CONFIG_DVDREAD

@@ -16,7 +16,7 @@
 #include <math.h>
 #include <string.h>
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 #include <iconv.h>
 #endif
 
@@ -24,7 +24,7 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 #include <fontconfig/fontconfig.h>
 #endif
 
@@ -716,7 +716,7 @@ static int generate_tables(font_desc_t *desc, double thickness, double radius)
     return 0;
 }
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 /* decode from 'encoding' to unicode */
 static FT_ULong decode_char(iconv_t *cd, char c) {
     FT_ULong o;
@@ -1009,7 +1009,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
     }
     desc->face_cnt++;
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
     if (unicode) {
 	charset_size = prepare_charset_unicode(face, my_charset, my_charcodes);
     } else {
@@ -1124,7 +1124,7 @@ int done_freetype(void)
 
 void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_name, float font_scale_factor)
 {
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
     FcPattern *fc_pattern;
     FcPattern *fc_pattern2;
     FcChar8 *s;
@@ -1139,7 +1139,7 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
 
     if (vo_font) free_font_desc(vo_font);
 
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
     if (font_fontconfig > 0)
     {
 	if (!font_name)

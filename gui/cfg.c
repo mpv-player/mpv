@@ -58,12 +58,12 @@ char * gtkAOOSSMixer;
 char * gtkAOOSSMixerChannel;
 char * gtkAOOSSDevice;
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#ifdef CONFIG_ALSA
 char * gtkAOALSAMixer;
 char * gtkAOALSAMixerChannel;
 char * gtkAOALSADevice;
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
 char * gtkAOSDLDriver;
 #endif
 #ifdef CONFIG_ESD
@@ -76,7 +76,7 @@ int    gtkCacheSize = 2048;
 int    gtkAutoSyncOn = 0;
 int    gtkAutoSync = 0;
 
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
  char * gtkDXR3Device;
 #endif
 
@@ -111,7 +111,7 @@ static const m_option_t gui_opts[] =
  { "vo_panscan",&vo_panscan,CONF_TYPE_FLOAT,CONF_RANGE,0.0,1.0,NULL },
  { "vo_doublebuffering",&vo_doublebuffering,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vo_direct_render",&vo_directrendering,CONF_TYPE_FLAG,0,0,1,NULL },
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
  { "vo_dxr3_device",&gtkDXR3Device,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
 
@@ -139,12 +139,12 @@ static const m_option_t gui_opts[] =
  { "ao_oss_mixer_channel",&gtkAOOSSMixerChannel,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_oss_device",&gtkAOOSSDevice,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#ifdef CONFIG_ALSA
  { "ao_alsa_mixer",&gtkAOALSAMixer,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_alsa_mixer_channel",&gtkAOALSAMixerChannel,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_alsa_device",&gtkAOALSADevice,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
  { "ao_sdl_subdriver",&gtkAOSDLDriver,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
 #ifdef CONFIG_ESD
@@ -165,12 +165,12 @@ static const m_option_t gui_opts[] =
 #endif
  { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
  { "sub_overlap",&suboverlap_enabled,CONF_TYPE_FLAG,0,0,0,NULL },
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
  { "sub_cp",&sub_cp,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
  { "font_factor",&font_factor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },
  { "font_name",&font_name,CONF_TYPE_STRING,0,0,0,NULL },
-#ifdef HAVE_FREETYPE 
+#ifdef CONFIG_FREETYPE
  { "font_encoding",&subtitle_font_encoding,CONF_TYPE_STRING,0,0,0,NULL },
  { "font_text_scale",&text_font_scale_factor,CONF_TYPE_FLOAT,CONF_RANGE,0,100,NULL },
  { "font_osd_scale",&osd_font_scale_factor,CONF_TYPE_FLOAT,CONF_RANGE,0,100,NULL },

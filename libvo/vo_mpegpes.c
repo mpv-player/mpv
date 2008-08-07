@@ -23,9 +23,7 @@
 #include <unistd.h>
 
 #include "mp_msg.h"
-#ifdef HAVE_DVB_HEAD
-#define HAVE_DVB 1
-#endif
+
 #ifdef HAVE_DVB
 #ifndef HAVE_DVB_HEAD
 #include <sys/poll.h>
@@ -67,9 +65,9 @@ extern int vo_mpegpes_fd2;
 static const vo_info_t info = 
 {
 #ifdef HAVE_DVB
-	"Mpeg-PES to DVB card",
+	"MPEG-PES to DVB card",
 #else
-	"Mpeg-PES file",
+	"MPEG-PES file",
 #endif
 	"mpegpes",
 	"A'rpi",

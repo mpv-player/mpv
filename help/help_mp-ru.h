@@ -13,7 +13,7 @@ static char help_text[]=
 "Базовые опции: (полный список см. на man-странице)\n"
 " -vo <drv[:dev]> выбор драйвера и устройства видеовывода (список см. с '-vo help')\n"
 " -ao <drv[:dev]> выбор драйвера и устройства аудиовывода (список см. с '-ao help')\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<номер трека> играть дорожку (S)VCD (Super Video CD) (указывайте устройство,\n                 не монтируйте его)\n"
 #endif
 #ifdef CONFIG_DVDREAD

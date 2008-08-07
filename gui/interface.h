@@ -90,7 +90,7 @@ typedef struct
    int			Chapter;
 #endif
 
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
    int    VCDTracks;
 #endif
 

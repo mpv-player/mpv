@@ -41,7 +41,7 @@
 #include "dha.h"
 #include "radeon.h"
 
-#if !defined(RAGE128) && defined(HAVE_X11)
+#if !defined(RAGE128) && defined(CONFIG_X11)
 #include <X11/Xlib.h>
 static uint32_t firegl_shift = 0;
 #endif
@@ -1168,7 +1168,7 @@ static vidix_capability_t def_cap =
     { 0, 0, 0, 0}
 };
 
-#if !defined(RAGE128) && defined(HAVE_X11)
+#if !defined(RAGE128) && defined(CONFIG_X11)
 static void probe_fireGL_driver(void) {
   Display *dp = XOpenDisplay ((void*)0);
   int n = 0;
@@ -1243,7 +1243,7 @@ static int radeon_probe(int verbose, int force)
 #endif
 	    besr.chip_flags=R_100|R_OVL_SHIFT;
 	}
-#if !defined(RAGE128) && defined(HAVE_X11)
+#if !defined(RAGE128) && defined(CONFIG_X11)
         probe_fireGL_driver();
 #endif
 	if(idx != -1) besr.chip_flags=ati_card_ids[idx].flags;
@@ -3098,7 +3098,7 @@ static int radeon_config_playback(vidix_playback_t *info)
   for(;nfr>0; nfr--)
   {
       radeon_overlay_off = radeon_video_size - info->frame_size*nfr;
-#if !defined (RAGE128) && defined(HAVE_X11)
+#if !defined (RAGE128) && defined(CONFIG_X11)
       radeon_overlay_off -= firegl_shift;
 #endif
       radeon_overlay_off &= 0xffff0000;
@@ -3110,7 +3110,7 @@ static int radeon_config_playback(vidix_playback_t *info)
    for(;nfr>0; nfr--)
    {
       radeon_overlay_off = radeon_video_size - info->frame_size*nfr;
-#if !defined (RAGE128) && defined(HAVE_X11)
+#if !defined (RAGE128) && defined(CONFIG_X11)
       radeon_overlay_off -= firegl_shift;
 #endif
       radeon_overlay_off &= 0xffff0000;

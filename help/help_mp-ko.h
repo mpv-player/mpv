@@ -10,7 +10,7 @@ static char help_text[]=
 "기본 선택사항: (전체 목록은 man 페이지 참조)\n"
 " -vo <drv[:dev]>  비디오 출력 드라이버 및 장치 선택 (목록보기는 '-vo help')\n"
 " -ao <drv[:dev]>  오디오 출력 드라이버 및 장치 선택 (목록보기는 '-ao help')\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<trackno>  (S)VCD (Super Video CD) 트랙 재생 (장치로부터, 마운트 없이)\n"
 #endif
 #ifdef CONFIG_DVDREAD

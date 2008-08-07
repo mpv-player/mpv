@@ -32,7 +32,7 @@
 #include "ass_mp.h"
 #include "ass_library.h"
 
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 #include <fontconfig/fontconfig.h>
 #endif
 
@@ -55,7 +55,7 @@ char* ass_border_color = NULL;
 char* ass_styles_file = NULL;
 int ass_hinting = ASS_HINTING_NATIVE + 4; // native hinting for unscaled osd
 
-#ifdef HAVE_FONTCONFIG
+#ifdef CONFIG_FONTCONFIG
 extern int font_fontconfig;
 #else
 static int font_fontconfig = -1;
@@ -65,7 +65,7 @@ extern char* sub_font_name;
 extern float text_font_scale_factor;
 extern int subtitle_autoscale;
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 extern char* sub_cp;
 #else
 static char* sub_cp = 0;

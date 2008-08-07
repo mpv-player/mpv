@@ -51,7 +51,7 @@
 
 extern af_cfg_t af_cfg;
 
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
 #include <iconv.h>
 #endif
 
@@ -185,7 +185,7 @@ void guiInit( void )
  guiIntfStruct.StreamType=-1;
 
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
  if ( !gtkDXR3Device ) gtkDXR3Device=strdup( "/dev/em8300-0" );
 #endif
  if ( stream_cache_size > 0 ) { gtkCacheOn=1; gtkCacheSize=stream_cache_size; }
@@ -400,7 +400,7 @@ extern m_obj_settings_t * vf_settings;
 
 void guiLoadFont( void )
 {
-#ifdef HAVE_FREETYPE
+#ifdef CONFIG_FREETYPE
   load_font_ft(vo_image_width, vo_image_height, &vo_font, font_name, osd_font_scale_factor);
 #else
  if ( vo_font )
@@ -616,7 +616,7 @@ int guiGetEvent( int type,char * arg )
 	       guiGetEvent( guiSetDVD,(char *)stream->priv );
 	       break;
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 	  case STREAMTYPE_VCD: 
 	       {
 	        int i;
@@ -706,7 +706,7 @@ int guiGetEvent( int type,char * arg )
 	     }
 	 }
 // -- subtitle
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS
 #ifdef CONFIG_LIBAVCODEC
 	 && !gtkVfLAVC
@@ -743,7 +743,7 @@ int guiGetEvent( int type,char * arg )
          {
 	  case STREAMTYPE_PLAYLIST:
 	       break;
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 	  case STREAMTYPE_VCD:
 	       {
 	        char tmp[512];
@@ -795,7 +795,7 @@ int guiGetEvent( int type,char * arg )
 	   }
 	}
 
-#ifdef HAVE_DXR3
+#ifdef CONFIG_DXR3
 #ifdef CONFIG_LIBAVCODEC
 	remove_vf( "lavc" );
 #endif
@@ -842,7 +842,7 @@ int guiGetEvent( int type,char * arg )
 	  free(tmp);
 	 }
 #endif
-#if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
+#ifdef CONFIG_ALSA
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"alsa",4 ) )
 	 {
 	  char *tmp;
@@ -857,7 +857,7 @@ int guiGetEvent( int type,char * arg )
 	  free(tmp);
 	 }
 #endif
-#ifdef HAVE_SDL
+#ifdef CONFIG_SDL
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"sdl",3 ) )
 	 {
 	  char *tmp;
@@ -1075,7 +1075,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
          } else { url_item->next=NULL; URLList=url_item; }
         return NULL;
 // --- subtitle
-#ifndef HAVE_FREETYPE
+#ifndef CONFIG_FREETYPE
    case gtkSetFontFactor:
         font_factor=fparam;
 	guiLoadFont();
@@ -1107,7 +1107,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	guiLoadFont();
 	return NULL;
 #endif
-#ifdef HAVE_ICONV
+#ifdef CONFIG_ICONV
    case gtkSetSubEncoding:
 	gfree( (void **)&sub_cp );
 	sub_cp=gstrdup( (char *)vparam );
@@ -1125,7 +1125,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 #ifdef CONFIG_DVDREAD
 	if ( (unsigned int)vparam & guiDVD ) memset( &guiIntfStruct.DVD,0,sizeof( guiDVDStruct ) );
 #endif
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 	if ( (unsigned int)vparam & guiVCD ) guiIntfStruct.VCDTracks=0;
 #endif
 	return NULL;

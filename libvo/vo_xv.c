@@ -231,7 +231,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         hint.y = vo->dy;
         hint.width = d_width;
         hint.height = d_height;
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
         unsigned int modeline_width, modeline_height;
         uint32_t vm_width;
         uint32_t vm_height;
@@ -313,7 +313,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
             XFreeGC(x11->display, x11->vo_gc);
         x11->vo_gc = XCreateGC(x11->display, x11->window, 0L, &xgcv);
         XSync(x11->display, False);
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
         if (vm)
         {
             /* Grab the mouse pointer in our window */
@@ -708,7 +708,7 @@ static void uninit(struct vo *vo)
     }
     for (i = 0; i < ctx->num_buffers; i++)
         deallocate_xvimage(vo, i);
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
     if (ctx->mode_switched)
         vo_vm_close(vo);
 #endif

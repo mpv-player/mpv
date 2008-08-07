@@ -10,10 +10,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_DVB_HEAD
-#define HAVE_DVB 1
-#endif
-
 #ifdef HAVE_DVB
 #include <sys/poll.h>
 #include <sys/ioctl.h>
@@ -52,7 +48,7 @@ static ao_info_t info =
 #ifdef HAVE_DVB
 	"DVB audio output",
 #else
-	"Mpeg-PES audio output",
+	"MPEG-PES audio output",
 #endif
 	"mpegpes",
 	"A'rpi",

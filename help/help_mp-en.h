@@ -19,7 +19,7 @@ static char help_text[]=
 "Basic options: (complete list in the man page)\n"
 " -vo <drv>        select video output driver ('-vo help' for a list)\n"
 " -ao <drv>        select audio output driver ('-ao help' for a list)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<trackno>  play (S)VCD (Super Video CD) track (raw device, no mount)\n"
 #endif
 #ifdef CONFIG_DVDREAD

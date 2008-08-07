@@ -18,7 +18,7 @@ static char help_text[]=
 " -ao <drv[:dev]>  alege driver-ul ºi device-ul de ieºire audio\n"
 "                  ('-ao help' pentru listã)\n"
 
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<nrpistã>  ruleazã pista VCD (Video CD) de pe device în loc de fiºier\n"
 #endif
 

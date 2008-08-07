@@ -65,7 +65,7 @@
 #define STREAM_CTRL_GET_ANGLE 10
 #define STREAM_CTRL_SET_ANGLE 11
 
-#ifdef MPLAYER_NETWORK
+#ifdef CONFIG_NETWORK
 #include "network.h"
 #endif
 
@@ -113,7 +113,7 @@ typedef struct stream {
   void* priv; // used for DVD, TV, RTSP etc
   char* url;  // strdup() of filename/url
   struct MPOpts *opts;
-#ifdef MPLAYER_NETWORK
+#ifdef CONFIG_NETWORK
   streaming_ctrl_t *streaming_ctrl;
 #endif
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];

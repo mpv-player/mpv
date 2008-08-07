@@ -11,7 +11,7 @@
 struct MPOpts;
 
 #define MAX_PACKS 4096
-#ifdef HAVE_TV_BSDBT848
+#ifdef CONFIG_TV_BSDBT848
 #define MAX_PACK_BYTES 0x2000000
 #else
 #define MAX_PACK_BYTES 0x800000

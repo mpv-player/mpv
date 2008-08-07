@@ -24,7 +24,7 @@
 #include <X11/Xutil.h>
 //#include <X11/keysym.h>
 
-#ifdef HAVE_XINERAMA
+#ifdef CONFIG_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
 
@@ -111,7 +111,7 @@ static void set_window(int force_update)
 
   vo_dwidth=drwWidth; vo_dheight=drwHeight;
 
-#ifdef HAVE_XINERAMA
+#ifdef CONFIG_XINERAMA
   if (XineramaIsActive(mDisplay))
     {
       XineramaScreenInfo *screens;

@@ -12,7 +12,7 @@ static char help_text[]=
 "基本的なオプション: (man page に全て網羅されています)\n"
 " -vo <drv[:dev]>  映像出力ドライバ及びデバイスを選択します ('-vo help'で一覧表示されます)\n"
 " -ao <drv[:dev]>  音声出力ドライバ及びデバイスを選択します ('-ao help'で一覧表示されます)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<trackno>   play VCD (Video CD) track from device instead of plain file\n"
 #endif
 #ifdef CONFIG_DVDREAD

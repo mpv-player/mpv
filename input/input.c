@@ -30,11 +30,11 @@
 
 #include "joystick.h"
 
-#ifdef HAVE_LIRC
+#ifdef CONFIG_LIRC
 #include "lirc.h"
 #endif
 
-#ifdef HAVE_LIRCC
+#ifdef CONFIG_LIRCC
 #include <lirc/lircc.h>
 #endif
 
@@ -149,7 +149,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_SET_SATURATION, "tv_set_saturation", 1,  { { MP_CMD_ARG_INT ,{0}}, { MP_CMD_ARG_INT,{1} }, {-1,{0}} }},
 #endif
   { MP_CMD_SUB_FORCED_ONLY, "forced_subs_only",  0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
-#ifdef HAS_DVBIN_SUPPORT
+#ifdef CONFIG_DVBIN
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", 2, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}}}},
 #endif
   { MP_CMD_SWITCH_RATIO, "switch_ratio", 0, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
@@ -165,7 +165,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_LOADLIST, "loadlist", 1, { {MP_CMD_ARG_STRING, {0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_RUN, "run", 1, { {MP_CMD_ARG_STRING,{0}}, {-1,{0}} } },
   { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", 2, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}}}},
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
   { MP_CMD_TV_TELETEXT_ADD_DEC, "teletext_add_dec", 1, { {MP_CMD_ARG_STRING,{0}}, {-1,{0}} } },
   { MP_CMD_TV_TELETEXT_GO_LINK, "teletext_go_link", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
 #endif
@@ -432,12 +432,12 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { 'n', 0 }, "tv_step_norm" },
   { { 'u', 0 }, "tv_step_chanlist" },
 #endif
-#ifdef HAVE_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
   { { 'X', 0 }, "step_property teletext_mode 1" },
   { { 'W', 0 }, "step_property teletext_page 1" },
   { { 'Q', 0 }, "step_property teletext_page -1" },
 #endif
-#ifdef HAVE_JOYSTICK
+#ifdef CONFIG_JOYSTICK
   { { JOY_AXIS0_PLUS, 0 }, "seek 10" },
   { { JOY_AXIS0_MINUS, 0 }, "seek -10" },
   { { JOY_AXIS1_MINUS, 0 }, "seek 60" },
@@ -447,7 +447,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { JOY_BTN2, 0 }, "volume 1"},
   { { JOY_BTN3, 0 }, "volume -1"},
 #endif
-#ifdef HAVE_APPLE_REMOTE
+#ifdef CONFIG_APPLE_REMOTE
   { { AR_PLAY, 0}, "pause" },
   { { AR_PLAY_HOLD, 0}, "quit" },
   { { AR_NEXT, 0 }, "seek 30" },
@@ -1706,7 +1706,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
       free(file);
   }
 
-#ifdef HAVE_JOYSTICK
+#ifdef CONFIG_JOYSTICK
   if (input_conf->use_joystick) {
     int fd = mp_input_joystick_init(input_conf->js_dev);
     if(fd < 0)
@@ -1717,7 +1717,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   }
 #endif
 
-#ifdef HAVE_LIRC
+#ifdef CONFIG_LIRC
   if (input_conf->use_lirc) {
     int fd = mp_input_lirc_init();
     if(fd > 0)
@@ -1726,7 +1726,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   }
 #endif
 
-#ifdef HAVE_LIRCC
+#ifdef CONFIG_LIRCC
   if (input_conf->use_lircc) {
     int fd = lircc_init("mplayer", NULL);
     if(fd >= 0)
@@ -1734,7 +1734,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   }
 #endif
 
-#ifdef HAVE_APPLE_REMOTE
+#ifdef CONFIG_APPLE_REMOTE
   if (input_conf->use_ar) {
     if(mp_input_ar_init() < 0)
       mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
@@ -1744,7 +1744,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   }
 #endif
 
-#ifdef HAVE_APPLE_IR
+#ifdef CONFIG_APPLE_IR
   if (input_conf->use_ar) {
     int fd = mp_input_appleir_init(input_conf->ar_dev);
     if(fd < 0)

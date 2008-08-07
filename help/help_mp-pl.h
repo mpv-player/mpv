@@ -12,7 +12,7 @@ static char help_text[]=
 "Podstawowe opcje: (pełna lista dostępna na stronie man)\n"
 " -vo <drv>        podaj wyjściowy sterownik video (lista: '-vo help')\n"
 " -ao <drv>        podaj wyjściowy sterownik audio (lista: '-ao help')\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<numer_ścieżki>  odtwórz ścieżkę (S)VCD (Super Video CD) (bezpośrednio, bez montowania)\n"
 #endif
 #ifdef CONFIG_DVDREAD

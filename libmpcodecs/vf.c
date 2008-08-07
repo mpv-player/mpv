@@ -128,7 +128,7 @@ static const vf_info_t* const filter_list[]={
     &vf_info_lavcdeint,
     &vf_info_screenshot,
 #endif
-#ifdef HAVE_ZR
+#ifdef CONFIG_ZR
     &vf_info_zrmjpeg,
 #endif
     &vf_info_dvbscale,

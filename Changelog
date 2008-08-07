@@ -54,6 +54,7 @@ MPlayer (1.0)
     Drivers:
     * replace PolypAudio by PulseAudio (-ao pulse)
     * add force-pbo suboption for faster output in vo_gl
+    * add Nintendo Wii/GameCube video driver (-vo wii)
 
     MEncoder:
     * Ogg muxing using -of lavf -o done.ogg

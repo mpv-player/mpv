@@ -41,7 +41,7 @@
 #include "access_mpcontext.h"
 #include "gui.h"
 #include "dialogs.h"
-#ifdef HAVE_LIBCDIO
+#ifdef CONFIG_LIBCDIO
 #include <cdio/cdio.h>
 #endif
 
@@ -173,7 +173,7 @@ static void guiSetEvent(int event)
             break;
         }
 #endif
-#ifdef HAVE_LIBCDIO
+#ifdef CONFIG_LIBCDIO
         case evPlayCD:
         {
             int i;

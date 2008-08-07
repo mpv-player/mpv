@@ -39,7 +39,7 @@ typedef struct sh_audio {
 //  void* audio_out;        // the audio_out handle, used for this audio stream
   struct af_stream *afilter;          // the audio filter stream
   struct ad_functions *ad_driver;
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
   void *dec_handle;
 #endif
   // win32-compatible codec parameters:
@@ -87,7 +87,7 @@ typedef struct sh_video {
   int output_flags;       // query_format() results for output filters+vo
   const struct vd_functions *vd_driver;
   int vf_initialized;
-#ifdef DYNAMIC_PLUGINS
+#ifdef CONFIG_DYNAMIC_PLUGINS
   void *dec_handle;
 #endif
   // win32-compatible codec parameters:

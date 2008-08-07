@@ -13,7 +13,7 @@ static char help_text[]=
 "Základné prepínače: (Kompletný zoznam nájdete v man stránke)\n"
 " -vo <drv[:dev]> výber výstup. video ovládača&zariadenia (-vo help pre zoznam)\n"
 " -ao <drv[:dev]> výber výstup. audio ovládača&zariadenia (-ao help pre zoznam)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<trackno>  prehrať VCD (video cd) stopu zo zariadenia namiesto zo súboru\n"
 #endif
 #ifdef CONFIG_DVDREAD

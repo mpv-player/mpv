@@ -111,7 +111,7 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_fli,
     &demuxer_desc_film,
     &demuxer_desc_roq,
-#ifdef HAVE_GIF
+#ifdef CONFIG_GIF
     &demuxer_desc_gif,
 #endif
 #ifdef CONFIG_OGGVORBIS
@@ -131,16 +131,16 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_h264_es,
     &demuxer_desc_audio,
     &demuxer_desc_mpeg_ty,
-#ifdef STREAMING_LIVE555
+#ifdef CONFIG_LIVE555
     &demuxer_desc_rtp,
 #endif
-#ifdef LIBNEMESI
+#ifdef CONFIG_LIBNEMESI
     &demuxer_desc_rtp_nemesi,
 #endif
 #ifdef CONFIG_LIBAVFORMAT
     &demuxer_desc_lavf,
 #endif
-#ifdef MUSEPACK
+#ifdef CONFIG_MUSEPACK
     &demuxer_desc_mpc,
 #endif
 #ifdef CONFIG_LIBDV095
@@ -150,7 +150,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_LIBNUT
     &demuxer_desc_nut,
 #endif
-#ifdef HAVE_XMMS
+#ifdef CONFIG_XMMS
     &demuxer_desc_xmms,
 #endif
     /* Please do not add any new demuxers here. If you want to implement a new

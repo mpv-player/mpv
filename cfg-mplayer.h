@@ -113,16 +113,16 @@ const m_option_t mplayer_opts[]={
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 
 	// -vo png only:
-#ifdef HAVE_PNG
+#ifdef CONFIG_PNG
 	{"z", "-z has been removed. Use -vo png:z=<0-9> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 	// -vo jpeg only:
-#ifdef HAVE_JPEG
+#ifdef CONFIG_JPEG
 	{"jpeg", "-jpeg has been removed. Use -vo jpeg:<options> instead.\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
@@ -189,7 +189,7 @@ const m_option_t mplayer_opts[]={
     {"adapter", &vo_adapter_num, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
     {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 	// x11,xv,xmga,xvidix
 	{"icelayer", "-icelayer has been removed. Use -fstype layer:<number> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"stop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -221,12 +221,12 @@ const m_option_t mplayer_opts[]={
 	{"aa*", "-aa* has been removed. Use -vo aa:suboption instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 
-#ifdef HAVE_ZR
+#ifdef CONFIG_ZR
 	// -vo zr
 	{"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0, &vo_zr_revertoption },
 #endif
 
-#ifdef HAVE_DXR2
+#ifdef CONFIG_DXR2
 	{"dxr2", &dxr2_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
@@ -235,7 +235,7 @@ const m_option_t mplayer_opts[]={
 
 	{"use-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nouse-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
-#ifdef CRASH_DEBUG
+#ifdef CONFIG_CRASH_DEBUG
 	{"crash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nocrash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 #endif
@@ -249,13 +249,13 @@ const m_option_t mplayer_opts[]={
 	{"menu-startup", &menu_startup, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"menu-keepdir", &menu_keepdir, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"menu-chroot", &menu_chroot, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef HAVE_FRIBIDI
+#ifdef CONFIG_FRIBIDI
 	{"menu-fribidi-charset", &menu_fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"menu-flip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"menu-noflip-hebrew", &menu_flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"menu-flip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"menu-noflip-hebrew-commas", &menu_fribidi_flip_commas, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif /* HAVE_FRIBIDI */
+#endif /* CONFIG_FRIBIDI */
 #else
 	{"menu", "OSD menu support was not compiled in.\n", CONF_TYPE_PRINT,0, 0, 0, NULL},
 #endif /* CONFIG_MENU */
@@ -290,7 +290,7 @@ const m_option_t mplayer_opts[]={
 	{"dumpjacosub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 8, NULL},
 	{"dumpsami", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 9, NULL},
 
-#ifdef HAVE_LIRC
+#ifdef CONFIG_LIRC
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 

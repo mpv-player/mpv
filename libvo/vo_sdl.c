@@ -70,7 +70,7 @@
 #include "aspect.h"
 #include "libmpcodecs/vfcap.h"
 
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
 #include <X11/Xlib.h>
 #include "x11_common.h"
 #endif
@@ -1189,7 +1189,7 @@ static void check_events (void)
 				}
 
 				else if ( keypressed == SDLK_n ) {
-#ifdef HAVE_X11					
+#ifdef CONFIG_X11
 					aspect(&priv->dstwidth, &priv->dstheight,A_NOZOOM);
 #endif					
 					if (priv->surface->w != priv->dstwidth || priv->surface->h != priv->dstheight) {
@@ -1523,7 +1523,7 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
     struct sdl_priv_s *priv = &sdl_priv;
     if(priv->X) {
 		if( mp_msg_test(MSGT_VO,MSGL_V) ) {
@@ -1599,7 +1599,7 @@ static int preinit(const char *arg)
     mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_UsingDriver, priv->driver);
 
     priv->X = 0;
-#ifdef HAVE_X11
+#ifdef CONFIG_X11
     if(vo_init()) {
 		if( mp_msg_test(MSGT_VO,MSGL_V) ) {
 			mp_msg(MSGT_VO,MSGL_V, "SDL: deactivating XScreensaver/DPMS\n"); }

@@ -28,27 +28,27 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-#ifdef HAVE_XSS
+#ifdef CONFIG_XSS
 #include <X11/extensions/scrnsaver.h>
 #endif
 
-#ifdef HAVE_XDPMS
+#ifdef CONFIG_XDPMS
 #include <X11/extensions/dpms.h>
 #endif
 
-#ifdef HAVE_XINERAMA
+#ifdef CONFIG_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
 #include <X11/extensions/xf86vmode.h>
 #endif
 
-#ifdef HAVE_XF86XK
+#ifdef CONFIG_XF86XK
 #include <X11/XF86keysym.h>
 #endif
 
-#ifdef HAVE_XV
+#ifdef CONFIG_XV
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
@@ -82,7 +82,7 @@ char **vo_fstype_list;
 /* 1 means that the WM is metacity (broken as hell) */
 int metacity_hack = 0;
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
 XF86VidModeModeInfo **vidmodes = NULL;
 XF86VidModeModeLine modeline;
 #endif
@@ -344,7 +344,7 @@ void update_xinerama_info(struct vo *vo) {
     struct MPOpts *opts = vo->opts;
     int screen = xinerama_screen;
     xinerama_x = xinerama_y = 0;
-#ifdef HAVE_XINERAMA
+#ifdef CONFIG_XINERAMA
     if (screen >= -1 && XineramaIsActive(vo->x11->display))
     {
         XineramaScreenInfo *screens;
@@ -427,7 +427,7 @@ int vo_init(struct vo *vo)
 
     init_atoms(vo->x11);
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
     {
         int clock;
 
@@ -1600,7 +1600,7 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11)
 
 static int xss_suspend(Display *mDisplay, Bool suspend)
 {
-#ifndef HAVE_XSS
+#ifndef CONFIG_XSS
     return 0;
 #else
     int event, error, major, minor;
@@ -1626,7 +1626,7 @@ static void saver_on(Display * mDisplay)
     screensaver_off = 0;
     if (xss_suspend(mDisplay, False))
         return;
-#ifdef HAVE_XDPMS
+#ifdef CONFIG_XDPMS
     if (dpms_disabled)
     {
         int nothing;
@@ -1667,7 +1667,7 @@ static void saver_off(Display * mDisplay)
     screensaver_off = 1;
     if (xss_suspend(mDisplay, True))
         return;
-#ifdef HAVE_XDPMS
+#ifdef CONFIG_XDPMS
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
     {
         BOOL onoff;
@@ -1739,7 +1739,7 @@ void vo_x11_selectinput_witherr(Display * display, Window w,
     }
 }
 
-#ifdef HAVE_XF86VM
+#ifdef CONFIG_XF86VM
 void vo_vm_switch(struct vo *vo, uint32_t X, uint32_t Y, int *modeline_width,
                   int *modeline_height)
 {
@@ -2035,7 +2035,7 @@ uint32_t vo_x11_get_equalizer(char *name, int *value)
     return VO_TRUE;
 }
 
-#ifdef HAVE_XV
+#ifdef CONFIG_XV
 int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, char *name, int value)
 {
     XvAttribute *attributes;

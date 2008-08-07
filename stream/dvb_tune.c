@@ -34,7 +34,7 @@
 #include <errno.h>
 #include "config.h"
 
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 	#include <linux/dvb/dmx.h>
 	#include <linux/dvb/frontend.h>
 #else
@@ -50,7 +50,7 @@
 
 int dvb_get_tuner_type(int fe_fd)
 {
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
   struct dvb_frontend_info fe_info;
 #else
   FrontendInfo fe_info;
@@ -98,7 +98,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 	int i;
 	char frontend_dev[32], dvr_dev[32], demux_dev[32], sec_dev[32];
 
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 	sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
 	sprintf(dvr_dev, "/dev/dvb/adapter%d/dvr0", n);
 	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", n);
@@ -114,7 +114,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", frontend_dev, errno);
 		return 0;
 	}
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 	priv->sec_fd=0;
 #else
 	priv->sec_fd = open(sec_dev, O_RDWR);
@@ -159,7 +159,7 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 	int i;
 	char demux_dev[32];
 
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", priv->card);
 #else
 	sprintf(demux_dev, "/dev/ost/demux%d", priv->card);
@@ -202,7 +202,7 @@ int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype)
 	pesFilterParams.pid     = pid;
 	pesFilterParams.input   = DMX_IN_FRONTEND;
 	pesFilterParams.output  = DMX_OUT_TS_TAP;
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 	pesFilterParams.pes_type = pestype;
 #else
 	pesFilterParams.pesType = pestype;
@@ -268,7 +268,7 @@ int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int to
 }
 
 
-#ifndef HAVE_DVB_HEAD
+#ifndef CONFIG_DVB_HEAD
 static int SecGetStatus (int fd, struct secStatus *state)
 {
     if(ioctl(fd, SEC_GET_STATUS, state) < 0)
@@ -331,7 +331,7 @@ static void print_status(fe_status_t festatus)
 {
 	mp_msg(MSGT_DEMUX, MSGL_V, "FE_STATUS:");
 	if (festatus & FE_HAS_SIGNAL) mp_msg(MSGT_DEMUX, MSGL_V," FE_HAS_SIGNAL");
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 	if (festatus & FE_TIMEDOUT) mp_msg(MSGT_DEMUX, MSGL_V, " FE_TIMEDOUT");
 #else
 	if (festatus & FE_HAS_POWER) mp_msg(MSGT_DEMUX, MSGL_V, " FE_HAS_POWER");
@@ -346,7 +346,7 @@ static void print_status(fe_status_t festatus)
 }
 
 
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 static int check_status(int fd_frontend, int tmout)
 {
 	int32_t strength;
@@ -500,7 +500,7 @@ static int check_status(int fd_frontend, int tmout)
 }
 #endif
 
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
 
 struct diseqc_cmd {
    struct dvb_diseqc_master_cmd cmd;
@@ -585,7 +585,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
   int res, hi_lo, dfd;
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
   struct dvb_frontend_parameters feparams;
   struct dvb_frontend_info fe_info;
 #else
@@ -608,14 +608,14 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
   }
 
 
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
   mp_msg(MSGT_DEMUX, MSGL_V, "Using DVB card \"%s\"\n", fe_info.name);
 #endif
 
   switch(fe_info.type)
   {
     case FE_OFDM:
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
       if (freq < 1000000) freq*=1000UL;
       feparams.frequency=freq;
       feparams.inversion=specInv;
@@ -646,7 +646,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
         // this must be an absolute frequency
         if (freq < SLOF)
         {
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
           freq = feparams.frequency=(freq-LOF1);
 #else
           freq = feparams.Frequency=(freq-LOF1);
@@ -655,7 +655,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
         }
         else
         {
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
           freq = feparams.frequency=(freq-LOF2);
 #else
           freq = feparams.Frequency=(freq-LOF2);
@@ -666,14 +666,14 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       else
       {
         // this is an L-Band frequency
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
        feparams.frequency=freq;
 #else
        feparams.Frequency=freq;
 #endif
       }
 
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
       feparams.inversion=specInv;
       feparams.u.qpsk.symbol_rate=srate;
       feparams.u.qpsk.fec_inner=HP_CodeRate;
@@ -697,7 +697,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       break;
     case FE_QAM:
       mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-C to %d, srate=%d\n",freq,srate);
-#ifdef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB_HEAD
       feparams.frequency=freq;
       feparams.inversion=specInv;
       feparams.u.qam.symbol_rate = srate;
@@ -724,7 +724,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
   }
   usleep(100000);
 
-#ifndef HAVE_DVB_HEAD
+#ifndef CONFIG_DVB_HEAD
   if (fd_sec) SecGetStatus(fd_sec, &sec_state);
   while(1)
   {

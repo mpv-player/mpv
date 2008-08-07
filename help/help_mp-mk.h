@@ -11,7 +11,7 @@ static char help_text[]=
 "Основни Опции: (комплетна листа на man страницата)\n"
 " -vo <drv[:dev]>  избира излезен видео драјвер и уред ('-vo help' за листа)\n"
 " -ao <drv[:dev]>  избира излезен аудио драјвер и уред ('-ao help' за листа)\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<trackno>   пушта VCD (Video CD) од уред наместо од датотека\n"
 #endif
 #ifdef CONFIG_DVDREAD

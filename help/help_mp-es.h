@@ -22,7 +22,7 @@ static char help_text[]=
 "Opciones básicas: ('man mplayer' para una lista completa)\n"
 " -vo <driver[:disp]>  Seleccionar driver de salida de video y dispositivo ('-vo help' para obtener una lista).\n"
 " -ao <driver[:disp]>  Seleccionar driver de salida de audio y dispositivo ('-ao help' para obtener una lista).\n"
-#ifdef HAVE_VCD
+#ifdef CONFIG_VCD
 " vcd://<numpista>      Reproducir pista de (S)VCD (Super Video CD) (acceso directo al dispositivo, no montado)\n"
 #endif
 #ifdef CONFIG_DVDREAD
