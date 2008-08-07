@@ -159,13 +159,6 @@ arm() {
   esac
 }
 
-sh3() {
-  case "$host_arch" in
-    sh3) return 0;;
-    *) return 1;;
-  esac
-}
-
 # Use this before starting a check
 echocheck() {
   echo "============ Checking for $@ ============" >> "$TMPLOG"
@@ -1283,7 +1276,7 @@ if test -z "$_target" ; then
   # host's CPU/instruction set
    host_arch=`uname -p 2>&1`
    case "$host_arch" in
-   i386|sparc|ppc|alpha|arm|sh3|mips|vax)
+   i386|sparc|ppc|alpha|arm|mips|vax)
      ;;
    powerpc) # Darwin returns 'powerpc'
      host_arch=ppc
@@ -1312,7 +1305,7 @@ if test -z "$_target" ; then
       sparc64) host_arch=sparc64 ;;
       parisc*|hppa*|9000*) host_arch=hppa ;;
       arm*|zaurus|cats) host_arch=arm ;;
-      sh3) host_arch=sh3 ;;
+      sh3|sh4|sh4a) host_arch=sh ;;
       s390) host_arch=s390 ;;
       s390x) host_arch=s390x ;;
       mips*) host_arch=mips ;;
@@ -1639,7 +1632,7 @@ EOF
 fi
 
 
-_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM ARMV4L SH3 POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
+_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM ARMV4L SH POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _arch='X86 X86_32'
@@ -2012,13 +2005,13 @@ EOF
     _optimizing=''
     ;;
 
-  sh3)
-    _arch='SH3'
-    _target_arch='ARCH_SH3 = yes'
-    iproc='sh3'
+  sh)
+    _arch='SH'
+    _target_arch='ARCH_SH = yes'
+    iproc='sh'
     proc=''
-    _march='-m3'
-    _mcpu='-ml'
+    _march=''
+    _mcpu=''
     _optimizing=''
     ;;
 
