@@ -150,7 +150,7 @@ typedef struct render_context_s {
 		EVENT_VSCROLL // "Scroll up", "Scroll down" transition effects
 		} evt_type;
 	double pos_x, pos_y; // position
-	int org_x, org_y; // origin
+	double org_x, org_y; // origin
 	char have_origin; // origin is explicitly defined; if 0, get_base_point() is used
 	double scale_x, scale_y;
 	double hspacing; // distance between letters, in pixels
