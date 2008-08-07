@@ -2655,6 +2655,10 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_STOP:
+	    // Go back to the starting point.
+	    while (play_tree_iter_up_step
+		   (mpctx->playtree_iter, 0, 1) != PLAY_TREE_ITER_END)
+		/* NOP */ ;
 	    mpctx->eof = PT_STOP;
 	    brk_cmd = 1;
 	    break;
