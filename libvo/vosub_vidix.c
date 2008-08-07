@@ -212,6 +212,34 @@ static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,in
     return 0;
 }
 
+static uint32_t vidix_draw_slice_nv12(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    int i;
+
+    /* Plane Y */
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += dstrides.y*y + x;
+    src = image[0];
+    for(i=0;i<h;i++){
+        memcpy(dest,src,w);
+        src+=stride[0];
+        dest += dstrides.y;
+    }
+
+    /* Plane UV */
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.u;
+    dest += dstrides.u*y/2 + x;
+    src = image[1];
+    for(i=0;i<h/2;i++){
+        memcpy(dest,src,w);
+        src+=stride[1];
+        dest+=dstrides.u;
+    }
+    return 0;
+}
+
 static uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled);
@@ -254,6 +282,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     lvo_mem = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
     apitch = vidix_play.dest.pitch.y-1;
     switch(vidix_play.fourcc){
+    case IMGFMT_NV12:
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
     case IMGFMT_I420:
@@ -449,6 +478,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 
 	switch(format)
 	{
+	    case IMGFMT_NV12:
 	    case IMGFMT_YV12:
 	    case IMGFMT_I420:
 	    case IMGFMT_IYUV:
@@ -495,6 +525,8 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		 vo_server->draw_slice = vidix_draw_slice_420;
 	    else if (src_format == IMGFMT_YVU9 || src_format == IMGFMT_IF09)
 		 vo_server->draw_slice = vidix_draw_slice_410;
+	    else if (src_format == IMGFMT_NV12)
+		 vo_server->draw_slice = vidix_draw_slice_nv12;
 	    else vo_server->draw_slice = vidix_draw_slice_packed;
 	}
 	return 0;
