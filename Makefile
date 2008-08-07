@@ -782,17 +782,17 @@ codec-cfg.d: codecs.conf.h
 mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d osdep/mplayer-rc.o stream/network.d stream/stream_cddb.d: version.h
 $(DEPS): help_mp.h
 
-dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(LIBDVDCSS_DVDREAD_FLAGS)
+dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\"
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE -DHAVE_CONFIG_H
 
-loader/% loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAG_NO_OMIT_LEAF_FRAME_POINTER)
+loader/% loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAGS_NO_OMIT_LEAF_FRAME_POINTER)
 #loader/%.o loader/%.d: CFLAGS += -Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
-loader/win32.o loader/win32.d: CFLAGS += $(CFLAG_STACKREALIGN)
+loader/win32.o loader/win32.d: CFLAGS += $(CFLAGS_STACKREALIGN)
 
 mp3lib/decode_i586.o: CFLAGS += -fomit-frame-pointer
 
-vidix/%: CFLAGS += $(CFLAG_DHAHELPER) $(CFLAG_SVGALIB_HELPER)
+vidix/%: CFLAGS += $(CFLAGS_DHAHELPER) $(CFLAGS_SVGALIB_HELPER)
 
 VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
                   vidix/pci_names.h vidix/pci_vendors.h

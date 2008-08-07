@@ -2325,10 +2325,10 @@ cat > $TMPC << EOF
 __attribute__((noinline)) static int foo3(int i1, int i2, int i3) { return i3; }
 int main(void) { return foo3(1,2,3) == 3 ? 0 : 1; }
 EOF
-  cc_check -O4 -mstackrealign && tmp_run && _stackrealign=-mstackrealign
-  test -z "$_stackrealign" && cc_check -O4 -mstackrealign -fno-unit-at-a-time \
-    && tmp_run && _stackrealign="-mstackrealign -fno-unit-at-a-time"
-  test -n "$_stackrealign" && echores "yes" || echores "no"
+  cc_check -O4 -mstackrealign && tmp_run && cflags_stackrealign=-mstackrealign
+  test -z "$cflags_stackrealign" && cc_check -O4 -mstackrealign -fno-unit-at-a-time \
+    && tmp_run && cflags_stackrealign="-mstackrealign -fno-unit-at-a-time"
+  test -n "$cflags_stackrealign" && echores "yes" || echores "no"
 fi # if darwin && test "$cc_vendor" = "gnu" ; then
 
 
@@ -4324,11 +4324,11 @@ if test "$_vidix" = yes ; then
   fi
 
   echocheck "VIDIX dhahelper support"
-  test "$_dhahelper" = yes && cflag_dhahelper=-DCONFIG_DHAHELPER
+  test "$_dhahelper" = yes && cflags_dhahelper=-DCONFIG_DHAHELPER
   echores "$_dhahelper"
 
   echocheck "VIDIX svgalib_helper support"
-  test "$_svgalib_helper" = yes && cflag_svgalib_helper=-DCONFIG_SVGAHELPER
+  test "$_svgalib_helper" = yes && cflags_svgalib_helper=-DCONFIG_SVGAHELPER
   echores "$_svgalib_helper"
 
 else
@@ -5500,7 +5500,7 @@ if test "$_libdvdcss_internal" = yes ; then
   elif os2 ; then
     CFLAGS="$CFLAGS -DSYS_OS2"
   fi
-  _libdvdcss_dvdread_flags="-Ilibdvdcss -DHAVE_DVDCSS_DVDCSS_H"
+  cflags_libdvdcss_dvdread="-Ilibdvdcss -DHAVE_DVDCSS_DVDCSS_H"
   _inputmodules="libdvdcss(internal) $_inputmodules"
   _largefiles=yes
 else
@@ -7718,7 +7718,7 @@ if test "$cc_vendor" = "gnu" ; then
   cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
 fi
 
-cc_check -mno-omit-leaf-frame-pointer && CFLAG_NO_OMIT_LEAF_FRAME_POINTER="-mno-omit-leaf-frame-pointer"
+cc_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
 
 #############################################################################
 echo "Creating config.mak"
@@ -7756,12 +7756,12 @@ EXTRA_INC = $_inc_extra
 EXTRAXX_INC = $_inc_extra $_inc_extraxx
 CFLAGS = $CFLAGS \$(EXTRA_INC)
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
-CFLAG_NO_OMIT_LEAF_FRAME_POINTER = $CFLAG_NO_OMIT_LEAF_FRAME_POINTER
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
-CFLAG_STACKREALIGN = $_stackrealign
-LIBDVDCSS_DVDREAD_FLAGS = $_libdvdcss_dvdread_flags
-CFLAG_DHAHELPER = $cflag_dhahelper
-CFLAG_SVGALIB_HELPER = $cflag_svgalib_helper
+CFLAGS_DHAHELPER = $cflags_dhahelper
+CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
+CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
+CFLAGS_STACKREALIGN = $cflags_stackrealign
+CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
 
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
