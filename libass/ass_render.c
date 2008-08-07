@@ -1072,7 +1072,7 @@ static unsigned get_next_char(char** str)
 			p += 2;
 			*str = p;
 			return '\n';
-		} else if (*(p+1) == 'n') {
+		} else if ((*(p+1) == 'n') || (*(p+1) == 'h')) {
 			p += 2;
 			*str = p;
 			return ' ';
