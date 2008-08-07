@@ -5494,11 +5494,11 @@ if test "$_libdvdcss_internal" = yes ; then
     _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
     _ld_extra="$_ld_extra -framework IOKit"
   elif cygwin ; then
-    CFLAGS="$CFLAGS -DSYS_CYGWIN"
+    cflags_libdvdcss="-DSYS_CYGWIN"
   elif beos ; then
-    CFLAGS="$CFLAGS -DSYS_BEOS"
+    cflags_libdvdcss="-DSYS_BEOS"
   elif os2 ; then
-    CFLAGS="$CFLAGS -DSYS_OS2"
+    cflags_libdvdcss="-DSYS_OS2"
   fi
   cflags_libdvdcss_dvdread="-Ilibdvdcss -DHAVE_DVDCSS_DVDCSS_H"
   _inputmodules="libdvdcss(internal) $_inputmodules"
@@ -5925,7 +5925,7 @@ if test "$_tremor_internal" = yes ; then
   _codecmodules="tremor(internal) $_codecmodules"
   _res_comment="internal Tremor"
   if test "$_tremor_low" = yes ; then
-    CFLAGS="$CFLAGS -D_LOW_ACCURACY_"
+    cflags_tremor_low="-D_LOW_ACCURACY_"
     _res_comment="internal low accuracy Tremor"
   fi
 elif test "$_tremor_external" = yes ; then
@@ -6181,7 +6181,7 @@ if test "$_faad_internal" = yes ; then
   if test "$_faad_fixed" = yes ; then
     # The FIXED_POINT implementation of FAAD2 improves performance
     # on some platforms, especially for SBR files.
-    CFLAGS="$CFLAGS -DFIXED_POINT"
+    cflags_faad_fixed="-DFIXED_POINT"
     _res_comment="internal fixed-point"
   fi
 elif test "$_faad_external" = yes ; then
@@ -7758,10 +7758,13 @@ CFLAGS = $CFLAGS \$(EXTRA_INC)
 OPTFLAGS = $CFLAGS \$(EXTRA_INC)
 CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
 CFLAGS_DHAHELPER = $cflags_dhahelper
+CFLAGS_FAAD_FIXED = $cflags_faad_fixed
+CFLAGS_LIBDVDCSS = $cflags_libdvdcss
 CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
 CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
 CFLAGS_STACKREALIGN = $cflags_stackrealign
 CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
+CFLAGS_TREMOR_LOW = $cflags_tremor_low
 
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
