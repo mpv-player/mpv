@@ -139,7 +139,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_LIBAVFORMAT
     &demuxer_desc_lavf,
 #endif
-#ifdef MUSEPACK
+#ifdef CONFIG_MUSEPACK
     &demuxer_desc_mpc,
 #endif
 #ifdef CONFIG_LIBDV095
