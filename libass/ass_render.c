@@ -161,6 +161,7 @@ typedef struct render_context_s {
 	uint32_t fade; // alpha from \fad
 	char be; // blur edges
 	int shadow;
+	int drawing_mode; // not implemented; when != 0 text is discarded, except for style override tags
 
 	effect_t effect_type;
 	int effect_timing;
@@ -1028,6 +1029,13 @@ static char* parse_tag(char* p, double pwr) {
 			render_context.shadow = val;
 		else
 			render_context.shadow = render_context.style->Shadow;
+	} else if (mystrcmp(&p, "pbo")) {
+		(void)strtol(p, &p, 10); // ignored
+	} else if (mystrcmp(&p, "p")) {
+		int val;
+		if (!mystrtoi(&p, 10, &val))
+			val = 0;
+		render_context.drawing_mode = !!val;
 	}
 
 	return p;
@@ -1203,6 +1211,7 @@ static void init_render_context(ass_event_t* event)
 	render_context.clip_y1 = frame_context.track->PlayResY;
 	render_context.detect_collisions = 1;
 	render_context.fade = 0;
+	render_context.drawing_mode = 0;
 	render_context.effect_type = EF_NONE;
 	render_context.effect_timing = 0;
 	render_context.effect_skip_timing = 0;
@@ -1750,7 +1759,9 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	while (1) {
 		// get next char, executing style override
 		// this affects render_context
-		code = get_next_char(&p);
+		do {
+			code = get_next_char(&p);
+		} while (code && render_context.drawing_mode); // skip everything in drawing mode
 		
 		// face could have been changed in get_next_char
 		if (!render_context.font) {
