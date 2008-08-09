@@ -3229,7 +3229,7 @@ Corrige le basculement en mode plein-écran sur OpenBox 1.x.
 .
 .TP
 .B \-geometry x[%][:y[%]] ou [WxH][+x+y]
-Ajuste la position d'origine sur l'écran de la sortie.
+Ajuste la position d'origine sur l'écran de sortie.
 Les variables x et y sont en pixels mesurés à partir du coin supérieur droit
 de l'écran jusqu'au coin supérieur droit de la vidéo affichée, cependant si
 un signe pourcentage est indiqué après la variable, cette valeur est alors
@@ -3417,7 +3417,7 @@ Utile pour intégrer MPlayer dans un navigateur (avec l'extension plugger
 par exemple).
 .
 .TP
-.B \-xineramascreen <\-2\-...> (X11 uniquement)
+.B \-xineramascreen <\-2\-...>
 Dans les configurations xinerama (c'est à dire un bureau unique s'étendant sur
 plusieurs écrans, cette option dit à MPlayer sur quel écran afficher le film.
 La valeur \-2 signifie plein écran sur la totalité de l'écran virtuel, (dans ce
@@ -3427,6 +3427,9 @@ La position initiale définie par l'option \-geometry est relative à l'écran
 défini.
 Fontionnera généralement uniquement avec  "\-fstype \-fullscreen" ou
 "\-fstype none".
+Cette option ne convient pour définir l'écran de démarrage (de même pour
+l'écran en mode plein écran), \-geometry est plus approprié.
+Géré par les pilotes de sortie vidéo gl, gl2, x11, et xv.
 .
 .TP
 .B \-zrbw (\-vo zr uniquement)
@@ -8655,25 +8658,14 @@ plus les quantum seront semblables d'une trame à l'autre
 .B vqcomp=<0.0\-1.0>
 Compression quantum, vrc_eq dépend de cette option (passe 1/2)
 (par défaut\ : 0.5).
-Par exemple, en prenant l'équation de contrôle de flux (rate control) par
-défaut, si vqcomp=1.0, le contrôle de flux alloue à chaque trame le nombre
-de bits nécessaire pour qu'elles soient toutes encodées avec le même quantum
-(que cela soit nécessaire ou non).
-Si vqcomp=0.0, le contrôle de flux alloue à chaque trame le même nombre de
-bits, c-à-d un encodage à débit binaire strictement constant.
 .I NOTE\ :
-Ceci sont des exemples extrêmes et ne devraient jamais être utilisées.
-La qualité subjective étant optimale pour des valeurs entre ces deux extrêmes.
+La qualité subjective sera optimale pour des valeurs entre ces deux extrêmes.
 .
 .TP
 .B vrc_eq=<équation>
 équation principale de contrôle de débit (passe 1/2)
 .RE
 .RSs
-.IPs "1\ \ \ \ "
-constant bitrate
-.IPs "tex\ \ "
-qualité constante
 .IPs 1+(tex/\:avgTex-1)*qComp
 approximativement l'équation de l'ancien code de contrôle de débit
 .IPs tex^qComp
