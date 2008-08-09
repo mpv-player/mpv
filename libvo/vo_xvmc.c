@@ -131,8 +131,6 @@ const LIBVO_EXTERN(xvmc);
 
 //shm stuff from vo_xv
 #ifdef HAVE_SHM
-/* since it doesn't seem to be defined on some platforms */
-int XShmGetEventBase(Display*);
 static XShmSegmentInfo Shminfo;
 static int Shmem_Flag;
 #endif

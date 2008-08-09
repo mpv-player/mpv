@@ -29,9 +29,6 @@ static int Shmem_Flag;
 static XShmSegmentInfo Shminfo[1];
 static int gXErrorFlag;
 static int CompletionType = -1;
-
-/* since it doesn't seem to be defined on some platforms */
-int XShmGetEventBase(Display *);
 #endif
 
 #include "sub.h"
