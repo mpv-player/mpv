@@ -2640,7 +2640,7 @@ int gui_no_filename=0;
         		if(strcasecmp(priority_presets_defs[i].name, proc_priority) == 0)
 				break;
 		}
-		mp_msg(MSGT_CPLAYER,MSGL_STATUS,"Setting process priority: %s\n",
+		mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_SettingProcessPriority,
 				priority_presets_defs[i].name);
 		SetPriorityClass(GetCurrentProcess(), priority_presets_defs[i].prio);
 	}
