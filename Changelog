@@ -55,6 +55,7 @@ MPlayer (1.0)
     * replace PolypAudio by PulseAudio (-ao pulse)
     * add force-pbo suboption for faster output in vo_gl
     * add Nintendo Wii/GameCube video driver (-vo wii)
+    * VIDIX driver for SuperH Mobile VEU hardware block.
 
     MEncoder:
     * Ogg muxing using -of lavf -o done.ogg
@@ -79,6 +80,7 @@ MPlayer (1.0)
     * AC3/DTS passthrough for ao_macosx
     * fix frozen OSD on Mac OS X
     * vo_gl now works with -wid and nVidia drivers on Windows (this is a hack)
+    * VIDIX on SuperH.
 
   rc2try2:
 
