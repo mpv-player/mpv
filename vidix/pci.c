@@ -484,7 +484,7 @@ static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 #include "sysdep/pci_arm32.c"
 #elif defined(__powerpc__)
 #include "sysdep/pci_powerpc.c"
-#elif defined(__x86_64__)
+#elif defined(__x86_64__) || defined(__sh__)
 /* Nothing here right now */
 #else
 #include "sysdep/pci_x86.c"
@@ -628,7 +628,7 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
     } while (++pcr._pcibusidx < pcr._pcinumbus);
     }
 
-#if !defined(__alpha__) && !defined(__powerpc__)
+#if !defined(__alpha__) && !defined(__powerpc__) && !defined(__sh__)
     /* Now try pci config 2 probe (deprecated) */
  
     if ((pcr._configtype == 2) || do_mode2_scan) {
@@ -689,7 +689,7 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
     outb(PCI_MODE2_ENABLE_REG, 0x00);
     }
  
-#endif /* !__alpha__ && !__powerpc__ */
+#endif /* !__alpha__ && !__powerpc__ && !__sh__ */
  
     disable_os_io();
  
