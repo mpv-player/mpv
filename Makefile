@@ -595,6 +595,7 @@ SRCS_MPLAYER-$(VIDIX_PM3)           += vidix/pm3_vid.c
 SRCS_MPLAYER-$(VIDIX_RADEON)        += vidix/radeon_vid.c
 SRCS_MPLAYER-$(VIDIX_RAGE128)       += vidix/rage128_vid.c
 SRCS_MPLAYER-$(VIDIX_S3)            += vidix/s3_vid.c
+SRCS_MPLAYER-$(VIDIX_SH_VEU)        += vidix/sh_veu_vid.c
 SRCS_MPLAYER-$(VIDIX_SIS)           += vidix/sis_vid.c vidix/sis_bridge.c
 SRCS_MPLAYER-$(VIDIX_UNICHROME)     += vidix/unichrome_vid.c
 

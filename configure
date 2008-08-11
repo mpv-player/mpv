@@ -4287,6 +4287,8 @@ _def_vidix_drv_rage128='#undef CONFIG_VIDIX_DRV_RAGE128'
 _vidix_drv_rage128=no
 _def_vidix_drv_s3='#undef CONFIG_VIDIX_DRV_S3'
 _vidix_drv_s3=no
+_def_vidix_drv_sh_veu='#undef CONFIG_VIDIX_DRV_SH_VEU'
+_vidix_drv_sh_veu=no
 _def_vidix_drv_sis='#undef CONFIG_VIDIX_DRV_SIS'
 _vidix_drv_sis=no
 _def_vidix_drv_unichrome='#undef CONFIG_VIDIX_DRV_UNICHROME'
@@ -4303,11 +4305,12 @@ if test "$_vidix" = yes ; then
   _def_vidix='#define CONFIG_VIDIX 1'
   _vosrc="$_vosrc vo_cvidix.c"
   _vomodules="cvidix $_vomodules"
-  test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sis unichrome"
+  test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sh_veu sis unichrome"
   test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
 
-  # some vidix drivers are meant to work on x86 only, discard them elsewhere
+  # some vidix drivers are architecture and os specific, discard them elsewhere
   x86 || _vidix_drivers=`echo $_vidix_drivers | sed -e s/cyberblade// -e s/sis// -e s/unichrome// -e s/s3//`
+  (test $host_arch = "sh" && linux) || _vidix_drivers=`echo $_vidix_drivers | sed s/sh_veu//`
 
   for driver in $_vidix_drivers ; do
     uc_driver=`echo $driver | tr '[a-z]' '[A-Z]'`
@@ -7894,6 +7897,7 @@ VIDIX_PM3=$_vidix_drv_pm3
 VIDIX_RADEON=$_vidix_drv_radeon
 VIDIX_RAGE128=$_vidix_drv_rage128
 VIDIX_S3=$_vidix_drv_s3
+VIDIX_SH_VEU=$_vidix_drv_sh_veu
 VIDIX_SIS=$_vidix_drv_sis
 VIDIX_UNICHROME=$_vidix_drv_unichrome
 VSTREAM = $_vstream
@@ -8621,6 +8625,7 @@ $_def_vidix_drv_pm3
 $_def_vidix_drv_radeon
 $_def_vidix_drv_rage128
 $_def_vidix_drv_s3
+$_def_vidix_drv_sh_veu
 $_def_vidix_drv_sis
 $_def_vidix_drv_unichrome
 $_def_vidix_pfx

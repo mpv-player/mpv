@@ -43,6 +43,7 @@ extern VDXDriver pm3_drv;
 extern VDXDriver radeon_drv;
 extern VDXDriver rage128_drv;
 extern VDXDriver s3_drv;
+extern VDXDriver sh_veu_drv;
 extern VDXDriver sis_drv;
 extern VDXDriver unichrome_drv;
 
@@ -91,6 +92,9 @@ void vidix_register_all_drivers (void)
 #endif
 #ifdef CONFIG_VIDIX_DRV_S3
   vidix_register_driver (&s3_drv);
+#endif
+#ifdef CONFIG_VIDIX_DRV_SH_VEU
+  vidix_register_driver (&sh_veu_drv);
 #endif
 #ifdef CONFIG_VIDIX_DRV_SIS
   vidix_register_driver (&sis_drv);
