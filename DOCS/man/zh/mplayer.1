@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r27132
+.\" sync with en/mplayer.1 r27348
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -73,7 +73,7 @@ mencoder \- 影视编解码器
 .
 .br
 .B mplayer
-[dvd|dvdnav]://[标题|[开始标题]\-结束标题]
+[dvd|dvdnav]://[标题|[开始标题]\-结束标题][/设备]
 [选项]
 .
 .br
@@ -835,7 +835,7 @@ MOUSE_BTN0\-MOUSE_BTN0_DBL。
 xv, xvidix 和 dfbmga。
 .
 .TP
-.B \-framedrop（也请参见 \-hardframedrop，未指定 -no-correct-pts 时只可用于实验）
+.B \-framedrop（也请参见 \-hardframedrop，未使用 \-nocorrect\-pts 时只可用于实验）
 跳过显示一些帧从而在慢的机器上保持 A/V 同步。
 视频滤镜不会应用到这些帧上。对于 B-帧 甚至解码也完全跳过。
 .
@@ -849,7 +849,7 @@ xv, xvidix 和 dfbmga。
 显示简短的选项概要。
 .
 .TP
-.B \-hardframedrop（未指定 -no-correct-pts 时只可用于实验）
+.B \-hardframedrop（未使用 \-nocorrect\-pts 时只可用于实验）
 更加密集的丢帧（中断解码过程）。将导致图像失真！
 注意，libmpeg2 解码器尤其可能在使用该选项后崩溃，所以请考虑使用
 “\-vc ffmpeg12,”。
@@ -986,6 +986,10 @@ n 大小的 FIFO 能容纳 (n\-1) 缓冲事件。
 必须选择 DVD 菜单中的按钮。
 .
 .TP
+.B \-noar
+关闭对于 AppleIR 的支持。
+.
+.TP
 .B \-noconsolecontrols
 阻止 MPlayer 读取标准输入的键盘事件。
 读取标准输入的数据时有用。命令行中发现 \- 会自动启用。
@@ -1000,10 +1004,6 @@ n 大小的 FIFO 能容纳 (n\-1) 缓冲事件。
 .TP
 .B \-nolirc
 关闭支持 LIRC。
-.
-.TP
-.B \-noar
-关闭对于苹果 IR 遥控器的支持。
 .
 .TP
 .B \-nomouseinput
@@ -2701,7 +2701,6 @@ If not specified mplayer will search the first usable card.
 .B \-border
 使用窗口边框和装饰来播放电影。
 既然默认是启用, 使用 \-noborder 停用标准的窗口装饰。
-被 directx 视频输出驱动支持。
 .
 .TP
 .B \-brightness <\-100\-100>
@@ -3035,13 +3034,19 @@ ggi 和 gl2 的都支持此功能。
 把 MPlayer 嵌入浏览器(比如 plugger 扩展)时有用。
 .
 .TP
-.B \-xineramascreen <\-2\-...> (仅用于 X11)
+.B \-xineramascreen <\-2\-...>
 在 Xinerama 配置中(就是一个单一桌面展开在多个显示器上), 
 此选项告诉 MPlayer 把电影显示在哪个屏幕上。
 值 \-2 表示全屏幕展开到整个虚拟的显示屏幕上（在这种情况下将完全忽略Xinerama的信
 息），\-1 表示在目前窗口所在的显示屏上全屏幕。
 通过 \-geometry 选项设置的初始位置是相对于指定屏幕的。
 通常只能与 "\-fstype \-fullscreen" 或 "\-fstype none" 一起工作。
+该选项不适用于仅仅设置启动屏幕（也不适用于设置全屏屏幕），\-geometry 是目前可用
+于此目前的最好选项。
+This option is not suitable to only set the startup screen (and not also the
+fullscreen screen), \-geometry is the best that is available for that purpose
+currently.
+Supported by the gl, gl2, x11, and xv video output drivers.
 .
 .TP
 .B \-zrbw (仅用于 \-vo zr)
@@ -4983,7 +4988,7 @@ unsigned long long counter   /*用于保持同步, 更新每次
 .br
 该过滤器的工作方式是以正常速度播放 \'stride\' ms 的音频，而消耗的是 
 \'stride*scale\' ms 的输入音频。
-通过把一个跨度域内的 'overlap'% 的内容，与紧接着前一个跨度域的音频混合在一起，把各个
+通过把一个跨度域内的 \'overlap\'% 的内容，与紧接着前一个跨度域的音频混合在一起，把各个
 跨度域拼接在一起。
 也可以让该选项对后 \'search\' ms 的音频作一个短小的统计性分析，以判定最佳的重叠位置。
 .PD 0
@@ -5011,7 +5016,7 @@ unsigned long long counter   /*用于保持同步, 更新每次
 设置播放速度改变时的反应。
 .RSss
 .IPs tempo
-改变音频节奏以使其与播放速度同步（默认值）
+改变音频节奏以使其与播放速度同步（默认值）。
 .IPs pitch
 抵消过滤器产生的效果。
 改变声音间隔而不改变音频节奏。
@@ -5020,9 +5025,9 @@ unsigned long long counter   /*用于保持同步, 更新每次
 .I 警告：
 与视频的同步变差。
 .IPs both
-同时改变节奏和间隔
+同时改变节奏和间隔。
 .IPs none
-忽略速度的改变
+忽略速度的改变。
 .RE
 .RE
 .sp 1
@@ -9829,6 +9834,10 @@ Sony 数字视频容器格式
 有时需要提高这个值以防止“缓冲下溢”。
 .
 .TP
+.B "o\ \ \ \ \ \ "
+FIXME：无说明文档
+.
+.TP
 .B packetsize=<size>
 所选格式单个数据包的大小，以字节为单位表示。
 当将流合并至MPEG[12]的实现格式时，默认值为：
@@ -9839,9 +9848,6 @@ Sony 数字视频容器格式
 当前只对MPEG[12]有意义：单位为秒，对于任意出现的流，输出流参照计时器（SCR）和解
 码时间戳（DTS）间的初始差距（流分离至解码间的延迟）。
 .
-.TP
-.B "o\ \ \ \ \ \ "
-FIXME：没有说明文档
 .
 .
 .
