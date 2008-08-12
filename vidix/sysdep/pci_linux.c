@@ -36,6 +36,10 @@ int iopl();
 #endif
 #endif
 
+#ifdef __sh__
+#define iopl(x) 1
+#endif
+
 #include "config.h"
 
 #ifdef CONFIG_DHAHELPER
@@ -141,7 +145,7 @@ static __inline__ int disable_os_io(void)
 }
 
 #if (defined(__powerpc__) || defined(__sparc__) || defined(__sparc64__) \
-    || defined(__x86_64__)) && defined(__linux__) && !defined(CONFIG_SVGAHELPER)
+    || defined(__x86_64__) || defined(__sh__)) && defined(__linux__) && !defined(CONFIG_SVGAHELPER)
 #define CONFIG_PCI_LINUX_PROC
 #endif
 

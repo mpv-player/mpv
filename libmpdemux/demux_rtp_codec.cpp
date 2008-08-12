@@ -198,6 +198,7 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
   sh_audio->wf = wf;
   demux_stream_t* d_audio = demuxer->audio;
   d_audio->sh = sh_audio; sh_audio->ds = d_audio;
+  d_audio->id = sh_audio->aid;
   
   wf->nChannels = subsession->numChannels();
 
