@@ -39,7 +39,7 @@ extern int auto_quality;
 
 extern int vobsub_id;
 
-static inline void exit_player(const char *how)
+static inline void exit_player_bad(const char *how)
 {
     if (how)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Deprecated exit call: %s", how);
