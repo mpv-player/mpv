@@ -283,6 +283,9 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui);
 
 void mp_input_uninit(struct input_ctx *ictx);
 
+struct m_config;
+void mp_input_register_options(struct m_config *cfg);
+
 // Interruptible usleep:  (used by libmpdemux)
 int
 mp_input_check_interrupt(struct input_ctx *ictx, int time);

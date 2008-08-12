@@ -143,12 +143,6 @@ static int cfg_inc_verbose(m_option_t *conf){ ++verbose; return 0;}
 #include "get_path.h"
 
 //**************************************************************************//
-//             XScreensaver
-//**************************************************************************//
-
-void xscreensaver_heartbeat(struct vo_x11_state *);
-
-//**************************************************************************//
 //**************************************************************************//
 //             Input media streaming & demultiplexer:
 //**************************************************************************//
@@ -786,8 +780,6 @@ static void exit_sighandler(int x){
   getch2_disable();
   exit(1);
 }
-
-extern void mp_input_register_options(m_config_t* cfg);
 
 #include "cfg-mplayer.h"
 
