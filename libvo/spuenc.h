@@ -41,6 +41,5 @@ typedef struct {
 } encodedata;
 
 void pixbuf_encode_rle(int x, int y, int w, int h, char *inbuf, int stride, encodedata *ed);
-void pixbuf_delete(pixbuf* pb);
 
 #endif /* MPLAYER_SPUENC_H */
