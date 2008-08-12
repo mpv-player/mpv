@@ -88,7 +88,7 @@ int aaopt_subcolor = AA_SPECIAL;
 
 static unsigned char vo_osd_text[64];
 
-void
+static void
 resize(void){
     /* 
      * this function is called by aa lib if windows resizes

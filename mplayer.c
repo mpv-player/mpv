@@ -2396,7 +2396,7 @@ static void pause_loop(struct MPContext *mpctx)
 #endif
 }
 
-void print_version(void){
+static void print_version(void){
   mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", MP_TITLE);
 
 /* Test for CPU capabilities (and corresponding OS support) for optimizing */

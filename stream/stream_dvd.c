@@ -324,7 +324,7 @@ static int dvd_next_cell(dvd_priv_t *d) {
   return next_cell;
 }
 
-int dvd_read_sector(dvd_priv_t *d,unsigned char* data) {
+static int dvd_read_sector(dvd_priv_t *d,unsigned char* data) {
   int len;
 
   if(d->packs_left==0) {
@@ -443,7 +443,7 @@ read_next:
   return d->cur_pack-1;
 }
 
-void dvd_seek(dvd_priv_t *d,int pos) {
+static void dvd_seek(dvd_priv_t *d,int pos) {
   d->packs_left=-1;
   d->cur_pack=pos;
 
@@ -481,7 +481,7 @@ void dvd_seek(dvd_priv_t *d,int pos) {
   d->angle_seek=1;
 }
 
-void dvd_close(dvd_priv_t *d) {
+static void dvd_close(dvd_priv_t *d) {
   ifoClose(d->vts_file);
   ifoClose(d->vmg_file);
   DVDCloseFile(d->title);

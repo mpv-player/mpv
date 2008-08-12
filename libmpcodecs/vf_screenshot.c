@@ -205,7 +205,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
     return vf_next_put_image(vf, dmpi, pts);
 }
 
-int control (vf_instance_t *vf, int request, void *data)
+static int control (vf_instance_t *vf, int request, void *data)
 {
     /** data contains an integer argument
      * 0: take screenshot with the next frame

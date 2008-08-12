@@ -79,7 +79,7 @@ static menu_cmd_bindings_t *cmd_bindings = NULL;
 static int cmd_bindings_num = 0;
 
 
-menu_cmd_bindings_t *get_cmd_bindings(const char *name) {
+static menu_cmd_bindings_t *get_cmd_bindings(const char *name) {
   int i;
   for (i = 0; i < cmd_bindings_num; ++i)
     if (!strcasecmp(cmd_bindings[i].name, name))
@@ -718,7 +718,7 @@ int menu_text_num_lines(char* txt, int max_width) {
   return l;
 }
   
-char* menu_text_get_next_line(char* txt, int max_width) {
+static char* menu_text_get_next_line(char* txt, int max_width) {
   int i = 0;
   render_txt(txt);
   while (*txt) {

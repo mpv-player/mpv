@@ -136,7 +136,7 @@ static const unsigned char RTjpeg_chrom_quant_tbl[64] = {
 /* Block to Stream (encoding)                         */
 /*                                                    */
 
-int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
+static int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
 {
  register int ci, co=1;
  register __s16 ZZvalue;
@@ -306,7 +306,7 @@ fprintf(stdout, "\n\n");
 /* Stream to Block  (decoding)                        */
 /*                                                    */
 
-int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
+static int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
 {
  int ci;
  register int co;
@@ -450,7 +450,7 @@ fprintf(stdout, "\n\n");
 
 #else
 
-int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
+static int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
 {
  register int ci, co=1, tmp;
  register __s16 ZZvalue;
@@ -509,7 +509,7 @@ int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
  return (int)co;
 }
 
-int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
+static int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
 {
  int ci=1, co=1, tmp;
  register int i;
@@ -542,7 +542,7 @@ int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
 #endif
 
 #if defined(MMX)
-void RTjpeg_quant_init(void)
+static void RTjpeg_quant_init(void)
 {
  int i;
  __s16 *qtbl;
@@ -557,7 +557,7 @@ void RTjpeg_quant_init(void)
 static mmx_t RTjpeg_ones={0x0001000100010001LL};
 static mmx_t RTjpeg_half={0x7fff7fff7fff7fffLL};
 
-void RTjpeg_quant(__s16 *block, __s32 *qtbl)
+static void RTjpeg_quant(__s16 *block, __s32 *qtbl)
 {
  int i;
  mmx_t *bl, *ql;
@@ -594,11 +594,11 @@ void RTjpeg_quant(__s16 *block, __s32 *qtbl)
  }
 }
 #else
-void RTjpeg_quant_init(void)
+static void RTjpeg_quant_init(void)
 {
 }
 
-void RTjpeg_quant(__s16 *block, __s32 *qtbl)
+static void RTjpeg_quant(__s16 *block, __s32 *qtbl)
 {
  int i;
  
@@ -629,7 +629,7 @@ static mmx_t RTjpeg_zero ={0x0000000000000000LL};
 #define D_MULTIPLY(var,const)  ((__s32) ((var) * (const)))
 #endif
 
-void RTjpeg_dct_init(void)
+static void RTjpeg_dct_init(void)
 {
  int i;
  
@@ -640,7 +640,7 @@ void RTjpeg_dct_init(void)
  }
 }
 
-void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
+static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 {
 #ifndef MMX
   __s32 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -1557,7 +1557,7 @@ void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 #define RL(x) ((x)>235) ? 235 : (((x)<16) ? 16 : (x))
 #define MULTIPLY(var,const)  (((__s32) ((var) * (const)) + 128)>>8)
 
-void RTjpeg_idct_init(void)
+static void RTjpeg_idct_init(void)
 {
  int i;
  
@@ -1568,7 +1568,7 @@ void RTjpeg_idct_init(void)
  }
 }
 
-void RTjpeg_idct(__u8 *odata, __s16 *data, int rskip)
+static void RTjpeg_idct(__u8 *odata, __s16 *data, int rskip)
 {
 #ifdef MMX
 
@@ -2705,7 +2705,7 @@ Initialise all the cache-aliged data blocks
 
 */
 
-void RTjpeg_init_data(void)
+static void RTjpeg_init_data(void)
 {
  unsigned long dptr;
  
@@ -3143,7 +3143,7 @@ void RTjpeg_init_mcompress(void)
 
 #ifdef MMX
 
-int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
+static int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
 {
  int i;
  mmx_t *mold=(mmx_t *)old;
@@ -3189,7 +3189,7 @@ int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
 }
 
 #else
-int RTjpeg_bcomp(__s16 *old, __u16 *mask)
+static int RTjpeg_bcomp(__s16 *old, __u16 *mask)
 {
  int i;
 
@@ -3414,10 +3414,6 @@ int RTjpeg_mcompress8(__s8 *sp, unsigned char *bp, __u16 lmask)
 #endif
  return (sp-sb);
 }
-
-void RTjpeg_color_init(void)
-{
-}  
 
 #define KcrR 76284
 #define KcrG 53281

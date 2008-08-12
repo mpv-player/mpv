@@ -2010,7 +2010,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
  * \brief deallocate image list
  * \param img list pointer
  */
-void ass_free_images(ass_image_t* img)
+static void ass_free_images(ass_image_t* img)
 {
 	while (img) {
 		ass_image_t* next = img->next;
@@ -2318,7 +2318,7 @@ static void fix_collisions(event_images_t* imgs, int cnt)
  * \param i2 second image
  * \return 0 if identical, 1 if different positions, 2 if different content
  */
-int ass_image_compare(ass_image_t *i1, ass_image_t *i2)
+static int ass_image_compare(ass_image_t *i1, ass_image_t *i2)
 {
 	if (i1->w != i2->w) return 2;
 	if (i1->h != i2->h) return 2;
@@ -2336,7 +2336,7 @@ int ass_image_compare(ass_image_t *i1, ass_image_t *i2)
  * \param priv library handle
  * \return 0 if identical, 1 if different positions, 2 if different content
  */
-int ass_detect_change(ass_renderer_t *priv)
+static int ass_detect_change(ass_renderer_t *priv)
 {
 	ass_image_t* img, *img2;
 	int diff;
