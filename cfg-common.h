@@ -171,7 +171,6 @@ const m_option_t pvropts_conf[]={
 #endif /* CONFIG_PVR */
 
 #ifdef CONFIG_DVBIN
-#include "stream/dvbin.h"
 extern const m_config_t dvbin_opts_conf[];
 #endif
 
