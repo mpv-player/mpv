@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "mpcommon.h"
 #include "options.h"
 #include "stream/stream.h"
 #include "libmpdemux/demuxer.h"

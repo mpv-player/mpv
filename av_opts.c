@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "av_opts.h"
 #include "libavcodec/opt.h"
 
 int parse_avopts(void *v, char *str){

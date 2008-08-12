@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "cache2.h"
 #include "osdep/timer.h"
 #ifdef WIN32
 #include <windows.h>

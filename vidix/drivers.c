@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include "drivers.h"
 #include "config.h"
 #include "vidix.h"
 #include "libavutil/common.h"
