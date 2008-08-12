@@ -1152,7 +1152,6 @@ static char help_text[]=
 // ======================= audio output drivers ========================
 
 // audio_out.c
-#define MSGTR_AO_ALSA9_1x_Removed "audio_out: alsa9 and alsa1x modules were removed, use -ao alsa instead.\n"
 #define MSGTR_AO_TryingPreferredAudioDriver "Trying preferred audio driver '%.*s', options '%s'\n"
 #define MSGTR_AO_NoSuchDriver "No such audio driver '%.*s'\n"
 #define MSGTR_AO_FailedInit "Failed to initialize audio driver '%s'\n"
