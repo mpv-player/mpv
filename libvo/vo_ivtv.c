@@ -108,7 +108,7 @@ ivtv_reset (int blank_screen)
 }
 
 int
-ivtv_write (unsigned char *data, int len)
+ivtv_write (const unsigned char *data, int len)
 {
   if (ivtv_fd < 0)
     return 0;

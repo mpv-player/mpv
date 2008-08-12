@@ -172,7 +172,7 @@ static void draw_osd(void)
 }
 
 
-static int my_write(unsigned char* data,int len){
+static int my_write(const unsigned char* data,int len){
     int orig_len = len;
 #ifdef HAVE_DVB
 #define NFD   2
