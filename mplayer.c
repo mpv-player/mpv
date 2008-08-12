@@ -46,6 +46,8 @@
 
 #include "m_option.h"
 #include "m_config.h"
+#include "mplayer.h"
+#include "access_mpcontext.h"
 #include "m_property.h"
 
 #include "cfg-mplayer-def.h"
