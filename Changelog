@@ -28,7 +28,7 @@ MPlayer (1.0)
     * support MOV subtitle format
     * support for attachments in lavf demuxer
     * support for chapters in lavf demuxer
-    * Flac speedup in lavf demuxer
+    * FLAC speedup in lavf demuxer
 
     Filters:
     * vf_ow new overcomplete wavelet denoiser
@@ -56,7 +56,6 @@ MPlayer (1.0)
     libmpeg2:
     * enable Alpha/ARM optimizations in libmpeg2
     * SSE2-optimized IDCT routines from upstream libmpeg2
-    * synced with upstream
 
     Drivers:
     * replace PolypAudio by PulseAudio (-ao pulse)
@@ -89,7 +88,7 @@ MPlayer (1.0)
     * fix frozen OSD on Mac OS X
     * vo_gl now works with -wid and nVidia drivers on Windows (this is a hack)
     * VIDIX on SuperH.
-    * intentionally break gcc 3.3 on mac os x, please use 4.x
+    * workarounds for AltiVec on Apple gcc 3.3 on Mac OS X dropped
 
   rc2try2:
 
