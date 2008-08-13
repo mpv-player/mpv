@@ -96,7 +96,7 @@ int load_termcap(char *termtype){
   screen_height=tgetnum("li");
   if(screen_width<1 || screen_width>255) screen_width=80;
   if(screen_height<1 || screen_height>255) screen_height=24;
-  erase_to_end_of_line= tgetstr("cd",&term_p);
+  erase_to_end_of_line= tgetstr("ce",&term_p);
 
   termcap_add("kP",KEY_PGUP);
   termcap_add("kN",KEY_PGDWN);
