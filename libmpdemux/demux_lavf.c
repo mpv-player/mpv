@@ -97,6 +97,7 @@ static int mp_read(void *opaque, uint8_t *buf, int size) {
 
 static offset_t mp_seek(void *opaque, offset_t pos, int whence) {
     stream_t *stream = opaque;
+    offset_t current_pos;
     mp_msg(MSGT_HEADER,MSGL_DBG2,"mp_seek(%p, %d, %d)\n", stream, (int)pos, whence);
     if(whence == SEEK_CUR)
         pos +=stream_tell(stream);
@@ -113,8 +114,12 @@ static offset_t mp_seek(void *opaque, offset_t pos, int whence) {
         return -1;
     if(pos<stream->end_pos && stream->eof)
         stream_reset(stream);
-    if(stream_seek(stream, pos)==0)
+    current_pos = stream_tell(stream);
+    if(stream_seek(stream, pos)==0) {
+        stream_reset(stream);
+        stream_seek(stream, current_pos);
         return -1;
+    }
 
     return pos - stream->start_pos;
 }
