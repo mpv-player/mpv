@@ -22,6 +22,8 @@
 #include "libavformat/riff.h"
 
 static const AVCodecTag mp_wav_tags[] = {
+    { CODEC_ID_RA_144,            MKTAG('1', '4', '_', '4')},
+    { CODEC_ID_RA_288,            MKTAG('2', '8', '_', '8')},
     { CODEC_ID_ADPCM_4XM,         MKTAG('4', 'X', 'M', 'A')},
     { CODEC_ID_ADPCM_EA,          MKTAG('A', 'D', 'E', 'A')},
     { CODEC_ID_ADPCM_EA_MAXIS_XA, MKTAG('A', 'D', 'X', 'A')},
@@ -75,6 +77,10 @@ static const AVCodecTag mp_bmp_tags[] = {
     { CODEC_ID_MOTIONPIXELS,      MKTAG('M', 'V', 'I', '1')},
     { CODEC_ID_RL2,               MKTAG('R', 'L', '2', 'V')},
     { CODEC_ID_ROQ,               MKTAG('R', 'o', 'Q', 'V')},
+    { CODEC_ID_RV10,              MKTAG('R', 'V', '1', '0')},
+    { CODEC_ID_RV20,              MKTAG('R', 'V', '2', '0')},
+    { CODEC_ID_RV30,              MKTAG('R', 'V', '3', '0')},
+    { CODEC_ID_RV40,              MKTAG('R', 'V', '4', '0')},
     { CODEC_ID_THP,               MKTAG('T', 'H', 'P', 'V')},
     { CODEC_ID_TIERTEXSEQVIDEO,   MKTAG('T', 'S', 'E', 'Q')},
     { CODEC_ID_TXD,               MKTAG('T', 'X', 'D', 'V')},
