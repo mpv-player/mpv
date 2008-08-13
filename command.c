@@ -2513,12 +2513,12 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 			    play_tree_iter_new_copy(mpctx->playtree_iter);
 			if (play_tree_iter_step(i, n, 0) ==
 			    PLAY_TREE_ITER_ENTRY)
-			    mpctx->eof =
+			    mpctx->stop_play =
 				(n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
 			play_tree_iter_free(i);
 		    } else
-			mpctx->eof = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
-		    if (mpctx->eof)
+			mpctx->stop_play = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
+		    if (mpctx->stop_play)
 			mpctx->play_tree_step = n;
 		    brk_cmd = 1;
 		}
@@ -2533,10 +2533,10 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    play_tree_iter_t *i =
 			play_tree_iter_new_copy(mpctx->playtree_iter);
 		    if (play_tree_iter_up_step(i, n, 0) == PLAY_TREE_ITER_ENTRY)
-			mpctx->eof = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
+			mpctx->stop_play = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
 		    play_tree_iter_free(i);
 		} else
-		    mpctx->eof = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
+		    mpctx->stop_play = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
 		brk_cmd = 1;
 	    }
 	    break;
@@ -2547,9 +2547,9 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		if (v > 0
 		    && mpctx->playtree_iter->file <
 		    mpctx->playtree_iter->num_files)
-		    mpctx->eof = PT_NEXT_SRC;
+		    mpctx->stop_play = PT_NEXT_SRC;
 		else if (v < 0 && mpctx->playtree_iter->file > 1)
-		    mpctx->eof = PT_PREV_SRC;
+		    mpctx->stop_play = PT_PREV_SRC;
 	    }
 	    brk_cmd = 1;
 	    break;
@@ -2632,7 +2632,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    play_tree_free_list(mpctx->playtree->child, 1);
 		    play_tree_set_child(mpctx->playtree, e);
 		    play_tree_iter_step(mpctx->playtree_iter, 0, 0);
-		    mpctx->eof = PT_NEXT_SRC;
+		    mpctx->stop_play = PT_NEXT_SRC;
 		}
 		brk_cmd = 1;
 	    }
@@ -2655,7 +2655,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 			play_tree_free_list(mpctx->playtree->child, 1);
 			play_tree_set_child(mpctx->playtree, e);
 			play_tree_iter_step(mpctx->playtree_iter, 0, 0);
-			mpctx->eof = PT_NEXT_SRC;
+			mpctx->stop_play = PT_NEXT_SRC;
 		    }
 		}
 		brk_cmd = 1;
@@ -2667,7 +2667,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	    while (play_tree_iter_up_step
 		   (mpctx->playtree_iter, 0, 1) != PLAY_TREE_ITER_END)
 		/* NOP */ ;
-	    mpctx->eof = PT_STOP;
+	    mpctx->stop_play = PT_STOP;
 	    brk_cmd = 1;
 	    break;
 
@@ -2790,8 +2790,10 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 			dir = DVB_CHANNEL_LOWER;
 
 
-		    if (dvb_step_channel(mpctx->stream, dir))
-			mpctx->eof = mpctx->dvbin_reopen = 1;
+		    if (dvb_step_channel(mpctx->stream, dir)) {
+                        mpctx->stop_play = PT_NEXT_ENTRY;
+                        mpctx->dvbin_reopen = 1;
+                    }
 	    }
 #endif /* CONFIG_DVBIN */
 	    break;
@@ -2821,9 +2823,11 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	    if (mpctx->stream->type == STREAMTYPE_DVB) {
 			mpctx->last_dvb_step = 1;
 
-		    if (dvb_set_channel
-			(mpctx->stream, cmd->args[1].v.i, cmd->args[0].v.i))
-			mpctx->eof = mpctx->dvbin_reopen = 1;
+		    if (dvb_set_channel(mpctx->stream, cmd->args[1].v.i,
+                                        cmd->args[0].v.i)) {
+                        mpctx->stop_play = PT_NEXT_ENTRY;
+                        mpctx->dvbin_reopen = 1;
+                    }
 	    }
 	    break;
 #endif /* CONFIG_DVBIN */

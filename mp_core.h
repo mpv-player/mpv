@@ -26,13 +26,17 @@
 #define SUB_SOURCES 3
 
 
-#define PT_NEXT_ENTRY 1
-#define PT_PREV_ENTRY -1
-#define PT_NEXT_SRC 2
-#define PT_PREV_SRC -2
-#define PT_UP_NEXT 3
-#define PT_UP_PREV -3
-#define PT_STOP 4
+enum stop_play_reason {
+    KEEP_PLAYING = 0,  // must be 0, numeric values of others do not matter
+    AT_END_OF_FILE,
+    PT_NEXT_ENTRY,
+    PT_PREV_ENTRY,
+    PT_NEXT_SRC,
+    PT_PREV_SRC,
+    PT_UP_NEXT,
+    PT_UP_PREV,
+    PT_STOP,
+};
 
 
 typedef struct MPContext {
@@ -48,7 +52,7 @@ typedef struct MPContext {
     struct play_tree *playtree;
     struct play_tree_iter *playtree_iter;
     char *filename; // currently playing file
-    int eof;
+    enum stop_play_reason stop_play;
     int play_tree_step;
     unsigned int initialized_flags;  // which subsystems have been initialized
 

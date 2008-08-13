@@ -629,7 +629,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     mpctx->initialized_flags&=~INITIALIZED_AO;
     current_module="uninit_ao";
     if (mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
-    mpctx->audio_out->uninit(mpctx->eof?0:1); mpctx->audio_out=NULL;
+    mpctx->audio_out->uninit(mpctx->stop_play != AT_END_OF_FILE);
+    mpctx->audio_out=NULL;
   }
 
 #ifdef CONFIG_GUI
@@ -922,7 +923,7 @@ static void load_per_file_config (m_config_t* conf, const char *const file)
  * cache filling) if the operation fails we use this function to check
  * if it was interrupted by the user.
  * The function returns a new value for eof. */
-static int libmpdemux_was_interrupted(struct MPContext *mpctx, int eof)
+static int libmpdemux_was_interrupted(struct MPContext *mpctx, int stop_play)
 {
   mp_cmd_t* cmd;
   if((cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
@@ -930,19 +931,19 @@ static int libmpdemux_was_interrupted(struct MPContext *mpctx, int eof)
        case MP_CMD_QUIT:
 	 exit_player_with_rc(mpctx, MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
        case MP_CMD_PLAY_TREE_STEP: {
-	 eof = (cmd->args[0].v.i > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
+	 stop_play = (cmd->args[0].v.i > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
 	 mpctx->play_tree_step = (cmd->args[0].v.i == 0) ? 1 : cmd->args[0].v.i;
        } break;
        case MP_CMD_PLAY_TREE_UP_STEP: {
-	 eof = (cmd->args[0].v.i > 0) ? PT_UP_NEXT : PT_UP_PREV;
+	 stop_play = (cmd->args[0].v.i > 0) ? PT_UP_NEXT : PT_UP_PREV;
        } break;	  
        case MP_CMD_PLAY_ALT_SRC_STEP: {
-	 eof = (cmd->args[0].v.i > 0) ?  PT_NEXT_SRC : PT_PREV_SRC;
+	 stop_play = (cmd->args[0].v.i > 0) ?  PT_NEXT_SRC : PT_PREV_SRC;
        } break;
        }
        mp_cmd_free(cmd);
   }
-  return eof;
+  return stop_play;
 }
 
 #define mp_basename(s) (strrchr(s,'\\')==NULL?(mp_basename2(s)):(strrchr(s,'\\')+1))
@@ -3157,7 +3158,7 @@ if (edl_output_filename) {
   current_module="open_stream";
   mpctx->stream = open_stream(mpctx->filename, opts, &mpctx->file_format);
   if(!mpctx->stream) { // error...
-      mpctx->eof = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY);
+      mpctx->stop_play = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY);
     goto goto_next_file;
   }
   mpctx->initialized_flags|=INITIALIZED_STREAM;
@@ -3254,7 +3255,7 @@ if(stream_cache_size>0){
   if(!stream_enable_cache(mpctx->stream,stream_cache_size*1024,
                           stream_cache_size*1024*(stream_cache_min_percent / 100.0),
                           stream_cache_size*1024*(stream_cache_seek_min_percent / 100.0)))
-      if((mpctx->eof = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY))) goto goto_next_file;
+      if((mpctx->stop_play = libmpdemux_was_interrupted(mpctx, PT_NEXT_ENTRY))) goto goto_next_file;
 }
 
 //============ Open DEMUXERS --- DETECT file type =======================
@@ -3314,7 +3315,7 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
   {
     entry = play_tree_new();
     play_tree_set_child(entry,list);
-    mpctx->eof=playtree_add_playlist(mpctx, entry);
+    mpctx->stop_play = playtree_add_playlist(mpctx, entry);
     goto goto_next_file;
   }
 }
@@ -3446,8 +3447,10 @@ if(!mpctx->sh_video && !mpctx->sh_audio){
 		else
 			dir = DVB_CHANNEL_LOWER;
 			
-		if(dvb_step_channel(mpctx->stream, dir))
-			mpctx->eof = mpctx->dvbin_reopen = 1;
+		if(dvb_step_channel(mpctx->stream, dir)) {
+                    mpctx->stop_play = PT_NEXT_ENTRY;
+                    mpctx->dvbin_reopen = 1;
+                }
 	}
 #endif	
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
@@ -3676,7 +3679,7 @@ total_frame_cnt=0; drop_frame_cnt=0; // fix for multifile fps benchmark
 play_n_frames=play_n_frames_mf;
 
 if(play_n_frames==0){
-  mpctx->eof=PT_NEXT_ENTRY; goto goto_next_file;
+  mpctx->stop_play=PT_NEXT_ENTRY; goto goto_next_file;
 }
 
 if (seek_to_sec) {
@@ -3699,7 +3702,7 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
 
  get_relative_time(mpctx); // reset current delta
 
-while(!mpctx->eof){
+while(!mpctx->stop_play){
     float aq_sleep_time=0;
 
 if(dvd_last_chapter>0) {
@@ -3720,7 +3723,7 @@ if (mpctx->sh_audio)
     if (!fill_audio_out_buffers(mpctx))
 	// at eof, all audio at least written to ao
 	if (!mpctx->sh_video)
-	    mpctx->eof = PT_NEXT_ENTRY;
+	    mpctx->stop_play = AT_END_OF_FILE;
 
 
 if(!mpctx->sh_video) {
@@ -3735,7 +3738,7 @@ if(!mpctx->sh_video) {
       print_status(mpctx, a_pos, 0, 0);
 
   if(end_at.type == END_AT_TIME && end_at.pos < a_pos)
-    mpctx->eof = PT_NEXT_ENTRY;
+    mpctx->stop_play = PT_NEXT_ENTRY;
   update_osd_msg(mpctx);
 
 } else {
@@ -3750,10 +3753,11 @@ if(!mpctx->sh_video) {
       mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
       if (mpctx->sh_video->vf_initialized < 0) {
 	  mp_msg(MSGT_CPLAYER,MSGL_FATAL, MSGTR_NotInitializeVOPorVO);
-	  mpctx->eof = 1; goto goto_next_file;
+	  mpctx->stop_play = PT_NEXT_ENTRY;
+          goto goto_next_file;
       }
       if (frame_time < 0)
-	  mpctx->eof = 1;
+	  mpctx->stop_play = AT_END_OF_FILE;
       else {
 	  // might return with !eof && !blit_frame if !correct_pts
 	  mpctx->num_buffered_frames += blit_frame;
@@ -3827,14 +3831,14 @@ if(auto_quality>0){
 
  if (play_n_frames >= 0 && !frame_time_remaining && blit_frame) {
      --play_n_frames;
-     if (play_n_frames <= 0) mpctx->eof = PT_NEXT_ENTRY;
+     if (play_n_frames <= 0) mpctx->stop_play = PT_NEXT_ENTRY;
  }
 
 
 // FIXME: add size based support for -endpos
  if (end_at.type == END_AT_TIME &&
          !frame_time_remaining && end_at.pos <= mpctx->sh_video->pts)
-     mpctx->eof = PT_NEXT_ENTRY;
+     mpctx->stop_play = PT_NEXT_ENTRY;
 
 } // end if(mpctx->sh_video)
 
@@ -3889,13 +3893,13 @@ if(step_sec>0) {
   mpctx->was_paused = 0;
 
   /* Looping. */
-  if(mpctx->eof==1 && opts->loop_times>=0) {
-    mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d, eof = %d\n", opts->loop_times,mpctx->eof);
+  if(mpctx->stop_play==AT_END_OF_FILE && opts->loop_times>=0) {
+    mp_msg(MSGT_CPLAYER,MSGL_V,"loop_times = %d\n", opts->loop_times);
 
     if(opts->loop_times>1) opts->loop_times--; else
     if(opts->loop_times==1) opts->loop_times=-1;
     play_n_frames=play_n_frames_mf;
-    mpctx->eof=0;
+    mpctx->stop_play=0;
     mpctx->abs_seek_pos=SEEK_ABSOLUTE; mpctx->rel_seek_secs=seek_to_sec;
     loop_seek = 1;
   }
@@ -3942,14 +3946,14 @@ if(mpctx->rel_seek_secs || mpctx->abs_seek_pos){
       }
 #endif /* CONFIG_GUI */
 
-} // while(!mpctx->eof)
+} // while(!mpctx->stop_play)
 
-mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->eof);
+mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",mpctx->stop_play);
 
 #ifdef CONFIG_DVBIN
 if(mpctx->dvbin_reopen)
 {
-  mpctx->eof = 0;
+  mpctx->stop_play = 0;
   uninit_player(mpctx, INITIALIZED_ALL-(INITIALIZED_GUI|INITIALIZED_STREAM|INITIALIZED_GETCH2|(opts->fixed_vo?INITIALIZED_VO:0)));
   cache_uninit(mpctx->stream);
   mpctx->dvbin_reopen = 0;
@@ -4009,38 +4013,36 @@ if(ass_library)
     ass_clear_fonts(ass_library);
 #endif
 
-if(mpctx->eof == PT_NEXT_ENTRY || mpctx->eof == PT_PREV_ENTRY) {
-    mpctx->eof = mpctx->eof == PT_NEXT_ENTRY ? 1 : -1;
-    if(play_tree_iter_step(mpctx->playtree_iter,mpctx->play_tree_step,0) == PLAY_TREE_ITER_ENTRY) {
-        mpctx->eof = 1;
-    } else {
+ if (!mpctx->stop_play)  // In case some goto jumped here...
+     mpctx->stop_play = PT_NEXT_ENTRY;
+
+int playtree_direction = 1;
+
+if(mpctx->stop_play == PT_NEXT_ENTRY || mpctx->stop_play == PT_PREV_ENTRY) {
+    if(play_tree_iter_step(mpctx->playtree_iter,mpctx->play_tree_step,0) != PLAY_TREE_ITER_ENTRY) {
         play_tree_iter_free(mpctx->playtree_iter);
         mpctx->playtree_iter = NULL;
     }
     mpctx->play_tree_step = 1;
-} else if(mpctx->eof == PT_UP_NEXT || mpctx->eof == PT_UP_PREV) {
-    mpctx->eof = mpctx->eof == PT_UP_NEXT ? 1 : -1;
+} else if(mpctx->stop_play == PT_UP_NEXT || mpctx->stop_play == PT_UP_PREV) {
+    int direction = mpctx->stop_play == PT_UP_NEXT ? 1 : -1;
     if(mpctx->playtree_iter) {
-        if(play_tree_iter_up_step(mpctx->playtree_iter,mpctx->eof,0) == PLAY_TREE_ITER_ENTRY) {
-            mpctx->eof = 1;
-        } else {
+        if(play_tree_iter_up_step(mpctx->playtree_iter,direction,0) != PLAY_TREE_ITER_ENTRY) {
             play_tree_iter_free(mpctx->playtree_iter);
             mpctx->playtree_iter = NULL;
         }
     }
-} else if (mpctx->eof == PT_STOP) {
+} else if (mpctx->stop_play == PT_STOP) {
     play_tree_iter_free(mpctx->playtree_iter);
     mpctx->playtree_iter = NULL;
 } else { // NEXT PREV SRC
-    mpctx->eof = mpctx->eof == PT_PREV_SRC ? -1 : 1;
+    playtree_direction = mpctx->stop_play == PT_PREV_SRC ? -1 : 1;
 }
 
-if(mpctx->eof == 0) mpctx->eof = 1;
-
 while(mpctx->playtree_iter != NULL) {
-    mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter,mpctx->eof);
+    mpctx->filename = play_tree_iter_get_file(mpctx->playtree_iter, playtree_direction);
     if(mpctx->filename == NULL) {
-        if(play_tree_iter_step(mpctx->playtree_iter,mpctx->eof,0) != PLAY_TREE_ITER_ENTRY) {
+        if(play_tree_iter_step(mpctx->playtree_iter, playtree_direction, 0) != PLAY_TREE_ITER_ENTRY) {
             play_tree_iter_free(mpctx->playtree_iter);
             mpctx->playtree_iter = NULL;
         };
@@ -4059,7 +4061,7 @@ if(use_gui && !mpctx->playtree_iter) {
 
 if(use_gui || mpctx->playtree_iter != NULL || player_idle_mode){
     if(!mpctx->playtree_iter) mpctx->filename = NULL;
-    mpctx->eof = 0;
+    mpctx->stop_play = 0;
     goto play_next_file;
 }
 
