@@ -24,8 +24,8 @@
 
 #include "mp_msg.h"
 
-#ifdef HAVE_DVB
-#ifndef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB
+#ifndef CONFIG_DVB_HEAD
 #include <sys/poll.h>
 
 #include <sys/ioctl.h>
@@ -64,7 +64,7 @@ extern int vo_mpegpes_fd2;
 
 static const vo_info_t info = 
 {
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
 	"MPEG-PES to DVB card",
 #else
 	"MPEG-PES file",
@@ -79,7 +79,7 @@ const LIBVO_EXTERN (mpegpes)
 static int
 config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format)
 {
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
     switch(s_height){
     case 288:
     case 576:
@@ -95,7 +95,7 @@ config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uin
 }
 
 static int preinit(const char *arg){
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
     int card = -1;
     char vo_file[30], ao_file[30], *tmp;
     
@@ -128,7 +128,7 @@ static int preinit(const char *arg){
           mp_msg(MSGT_VO,MSGL_INFO, "Couldn't find a usable dvb video device, exiting\n");
           return -1;
         }
-#ifndef HAVE_DVB_HEAD
+#ifndef CONFIG_DVB_HEAD
 	mp_msg(MSGT_VO,MSGL_INFO, "Opening /dev/ost/video+audio\n");
 	sprintf(vo_file, "/dev/ost/video");
 	sprintf(ao_file, "/dev/ost/audio");
@@ -174,7 +174,7 @@ static void draw_osd(void)
 
 static int my_write(unsigned char* data,int len){
     int orig_len = len;
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
 #define NFD   2
     struct pollfd pfd[NFD];
 

@@ -10,7 +10,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
 #include <sys/poll.h>
 #include <sys/ioctl.h>
 #endif
@@ -25,8 +25,8 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#ifdef HAVE_DVB
-#ifndef HAVE_DVB_HEAD
+#ifdef CONFIG_DVB
+#ifndef CONFIG_DVB_HEAD
 #include <ost/audio.h>
 audioMixer_t dvb_mixer={255,255};
 #else
@@ -45,7 +45,7 @@ int vo_mpegpes_fd2 = -1;
 
 static ao_info_t info = 
 {
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
 	"DVB audio output",
 #else
 	"MPEG-PES audio output",
@@ -60,7 +60,7 @@ LIBAO_EXTERN(mpegpes)
 
 // to set/get/query special features/parameters
 static int control(int cmd,void *arg){
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
     switch(cmd){
 	case AOCONTROL_GET_VOLUME:
 	  if(vo_mpegpes_fd2>=0){
@@ -92,11 +92,11 @@ static int control(int cmd,void *arg){
 static int freq=0;
 static int freq_id=0;
 
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
 static int init_device(int card)
 {
 	char ao_file[30];
-#ifndef HAVE_DVB_HEAD
+#ifndef CONFIG_DVB_HEAD
 	mp_msg(MSGT_VO,MSGL_INFO, "Opening /dev/ost/audio\n");
 	sprintf(ao_file, "/dev/ost/audio");
 #else
@@ -171,7 +171,7 @@ static int preinit(const char *arg)
 	}
 	card--;
 
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
 	if(!ao_file)
 		return init_device(card);
 #else	
@@ -190,7 +190,7 @@ static int preinit(const char *arg)
 
 static int my_ao_write(unsigned char* data,int len){
     int orig_len = len;
-#ifdef HAVE_DVB
+#ifdef CONFIG_DVB
 #define NFD   1
     struct pollfd pfd[NFD];
 
