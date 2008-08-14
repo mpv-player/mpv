@@ -741,7 +741,7 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
-$(FFMPEGLIBS): $(FFMPEGFILES) libvo/fastmemcpy.h config.h
+$(FFMPEGLIBS): $(FFMPEGFILES) config.h
 	$(MAKE) -C $(@D)
 	touch $@
 
