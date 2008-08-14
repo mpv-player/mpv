@@ -26,7 +26,7 @@
 
 #ifdef CONFIG_DVB
 #ifndef CONFIG_DVB_HEAD
-#include <sys/poll.h>
+#include <poll.h>
 
 #include <sys/ioctl.h>
 #include <stdio.h>
@@ -41,7 +41,7 @@
 #else
 #define true 1
 #define false 0
-#include <sys/poll.h>
+#include <poll.h>
 
 #include <sys/ioctl.h>
 #include <stdio.h>

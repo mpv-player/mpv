@@ -4529,7 +4529,7 @@ echocheck "DVB"
 if test "$_dvb" = auto ; then
   _dvb=no
 cat >$TMPC << EOF
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <time.h>
@@ -4559,7 +4559,7 @@ if test "$_dvbhead" = auto ; then
   _dvbhead=no
 
 cat >$TMPC << EOF
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <time.h>

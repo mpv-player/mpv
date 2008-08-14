@@ -11,7 +11,7 @@
 #include "config.h"
 
 #ifdef CONFIG_DVB
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #endif
 
