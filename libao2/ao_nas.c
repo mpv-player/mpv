@@ -574,6 +574,29 @@ static int play(void* data,int len,int flags)
 	if (len == 0)
 		return 0;
 
+	if (len < ao_data.outburst) {
+		unsigned tempbufsz = ao_data.outburst;
+		void *tempbuf = malloc(tempbufsz);
+
+		memset(tempbuf, 0, tempbufsz);
+		memcpy(tempbuf, data, len);
+
+		play(tempbuf, ao_data.outburst, flags);
+
+		if (nas_data->state != AuStateStart) {
+			mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: play(): Starting flow.\n");
+			nas_data->expect_underrun = 1;
+			nas_data->state = AuStateStart;
+			AuStartFlow(nas_data->aud, nas_data->flow, &as);
+			if (as != AuSuccess)
+				nas_print_error(nas_data->aud, "play(): AuStartFlow", as);
+		}
+
+		free(tempbuf);
+
+		return len;
+	}
+
 	pthread_mutex_lock(&nas_data->buffer_mutex);
 	maxbursts = (nas_data->client_buffer_size -
 		     nas_data->client_buffer_used) / ao_data.outburst;
