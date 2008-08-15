@@ -7629,6 +7629,21 @@ Read the source for full details.
 .PD 1
 .
 .TP
+.B o=<key>=<value>[,<key>=<value>[,...]]
+Pass AVOptions to libavcodec
+Note, a patch to make the o= unneeded and pass all unknown options through
+the AVOption system is welcome.
+.sp 1
+.RS
+.I EXAMPLE:
+.RE
+.RSs
+.PD 0
+.IPs o=bt=100k
+.PD 1
+.RE
+.
+.TP
 .B acodec=<value>
 audio codec (default: mp2)
 .PD 0
