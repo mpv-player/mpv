@@ -431,6 +431,7 @@ Advanced options:
   --enable-altivec          enable AltiVec (PowerPC) [autodetect]
   --enable-armv5te          enable DSP extensions (ARM) [autodetect]
   --enable-armv6            enable ARMv6 (ARM) [autodetect]
+  --enable-armvfp           enable ARM VFP (ARM) [autodetect]
   --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
   --disable-fastmemcpy      disable 3DNow!/SSE/MMX optimized memcpy [enable]
   --enable-big-endian       force byte order to big-endian [autodetect]
@@ -479,6 +480,7 @@ _cmov=auto
 _fast_cmov=auto
 _armv5te=auto
 _armv6=auto
+_armvfp=auto
 _iwmmxt=auto
 _mtrr=auto
 _altivec=auto
@@ -1221,6 +1223,8 @@ for ac_option do
   --disable-armv5te) _armv5te=no ;;
   --enable-armv6) _armv6=yes ;;
   --disable-armv6) _armv6=no ;;
+  --enable-armvfp) _armvfp=yes ;;
+  --disable-armvfp) _armvfp=no ;;
   --enable-iwmmxt) _iwmmxt=yes ;;
   --disable-iwmmxt) _iwmmxt=no ;;
   --enable-mmx)	_mmx=yes ;;
@@ -2502,6 +2506,16 @@ EOF
   fi
   echores "$_armv6"
 
+  echocheck "ARM VFP"
+  if test $_armvfp = "auto" ; then
+    cat > $TMPC << EOF
+int main(void) { __asm__ __volatile__ ("fadds s0, s0, s0"); return 0; }
+EOF
+    _armvfp=no
+    cc_check && _armvfp=yes
+  fi
+  echores "$_armvfp"
+
   echocheck "iWMMXt (Intel XScale SIMD instructions)"
   if test $_iwmmxt = "auto" ; then
     cat > $TMPC << EOF
@@ -2513,7 +2527,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 IWMMXT MLIB MMI SH4 VIS MVI'
+_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 ARMVFP IWMMXT MLIB MMI SH4 VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2526,6 +2540,7 @@ test "$_cmov"      = yes && _cpuexts="CMOV $_cpuexts"
 test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
 test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
 test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
+test "$_armvfp"    = yes && _cpuexts="ARMVFP $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
 test "$_mvi"       = yes && _cpuexts="MVI $_cpuexts"
