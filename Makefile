@@ -1056,12 +1056,9 @@ dhahelperwinclean:
 
 
 
-# Do not include dependencies when they are about to be removed anyway
-# or if SKIP_DEPS was set to "yes" on the command line.
+# Do not include dependencies when they are about to be removed anyway.
 ifneq ($(MAKECMDGOALS),distclean)
-ifneq ($(SKIP_DEPS),yes)
 -include $(DEPS)
-endif
 endif
 
 .PHONY: all doxygen *install* *tools drivers dhahelper*
