@@ -1,8 +1,8 @@
 /* libdvdcss.c: DVD reading library.
  *
- * Authors: Stéphane Borel <stef@via.ecp.fr>
+ * Authors: StÃ©phane Borel <stef@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
- *          Håkan Hjort <d95hjort@dtek.chalmers.se>
+ *          HÃ¥kan Hjort <d95hjort@dtek.chalmers.se>
  *
  * Copyright (C) 1998-2002 VideoLAN
  * $Id$
@@ -374,6 +374,10 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
             print_debug( dvdcss,
                          "could not get disc key" );
         }
+    }
+    else
+    {
+        memset( dvdcss->css.p_disc_key, 0, KEY_SIZE );
     }
 
     /* If the cache is enabled, write the cache directory tag */
@@ -793,3 +797,15 @@ LIBDVDCSS_EXPORT int dvdcss_title ( dvdcss_t dvdcss, int i_block )
     return _dvdcss_title( dvdcss, i_block );
 }
 
+/**
+ * \brief Return 1 if the DVD is scrambled, 0 otherwise.
+ *
+ * \param dvdcss a \e libdvdcss instance.
+ * \return 1 if the DVD is scrambled, 0 otherwise.
+ *
+ * This function returns whether the DVD is scrambled.
+ */
+LIBDVDCSS_EXPORT int dvdcss_is_scrambled ( dvdcss_t dvdcss )
+{
+    return dvdcss->b_scrambled;
+}

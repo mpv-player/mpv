@@ -1,6 +1,6 @@
 /**
  * \file dvdcss.h
- * \author Stéphane Borel <stef@via.ecp.fr>
+ * \author StÃ©phane Borel <stef@via.ecp.fr>
  * \author Samuel Hocevar <sam@zoy.org>
  * \brief The \e libdvdcss public header.
  *
@@ -87,6 +87,8 @@ LIBDVDCSS_EXPORT int      dvdcss_readv ( dvdcss_t,
                                int i_blocks,
                                int i_flags );
 LIBDVDCSS_EXPORT char *   dvdcss_error ( dvdcss_t );
+
+LIBDVDCSS_EXPORT int      dvdcss_is_scrambled ( dvdcss_t );
 
 
 /*

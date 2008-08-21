@@ -4,8 +4,8 @@
  * Copyright (C) 1999-2003 VideoLAN
  * $Id$
  *
- * Authors: Stéphane Borel <stef@via.ecp.fr>
- *          Håkan Hjort <d95hjort@dtek.chalmers.se>
+ * Authors: StÃ©phane Borel <stef@via.ecp.fr>
+ *          HÃ¥kan Hjort <d95hjort@dtek.chalmers.se>
  *
  * based on:
  *  - css-auth by Derek Fawcus <derek@spider.com>
@@ -325,6 +325,7 @@ int _dvdcss_disckey( dvdcss_t dvdcss )
                                  "cracking title keys instead" );
 
             /* Fallback, but not to DISC as the disc key might be faulty */
+            memset( p_disc_key, 0, KEY_SIZE );
             dvdcss->i_method = DVDCSS_METHOD_TITLE;
             break;
 

@@ -4,9 +4,9 @@
  * Copyright (C) 1998-2002 VideoLAN
  * $Id$
  *
- * Authors: Stéphane Borel <stef@via.ecp.fr>
+ * Authors: StÃ©phane Borel <stef@via.ecp.fr>
  *          Samuel Hocevar <sam@zoy.org>
- *          Håkan Hjort <d95hjort@dtek.chalmers.se>
+ *          HÃ¥kan Hjort <d95hjort@dtek.chalmers.se>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
