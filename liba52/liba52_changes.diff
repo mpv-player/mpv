@@ -290,7 +290,7 @@
  {
      switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
  
-@@ -653,3 +685,1137 @@
+@@ -653,3 +685,1104 @@
  	goto mix_31to21;
      }
  }
@@ -621,39 +621,6 @@
 +	:: "r" (samples+256)
 +	: "%"REG_S
 +	);
-+}
-+
-+/*
-+ I hope dest and src will be at least 8 byte aligned and size
-+ will devide on 8 without remain
-+ Note: untested and unused.
-+*/
-+static void copy_MMX(void *dest,const void *src,unsigned size)
-+{
-+  unsigned i;
-+  size /= 64;
-+	for(i=0;i<size;i++)
-+	{
-+	    __asm __volatile(
-+		"movq	%0,   %%mm0\n\t"
-+		"movq	8%0,  %%mm1\n\t"
-+		"movq	16%0, %%mm2\n\t"
-+		"movq	24%0, %%mm3\n\t"
-+		"movq	32%0, %%mm4\n\t"
-+		"movq	40%0, %%mm5\n\t"
-+		"movq	48%0, %%mm6\n\t"
-+		"movq	56%0, %%mm7\n\t"
-+		"movq	%%mm0, %1\n\t"
-+		"movq	%%mm1, 8%1\n\t"
-+		"movq	%%mm2, 16%1\n\t"
-+		"movq	%%mm3, 24%1\n\t"
-+		"movq	%%mm4, 32%1\n\t"
-+		"movq	%%mm5, 40%1\n\t"
-+		"movq	%%mm6, 48%1\n\t"
-+		"movq	%%mm7, 56%1\n\t"
-+		:
-+		:"m"(src),"m"(dest));
-+	}
 +}
 +
 +static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,
