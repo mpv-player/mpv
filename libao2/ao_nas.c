@@ -116,8 +116,8 @@ struct ao_nas_data {
 	unsigned int state;
 	int expect_underrun;
 
-	void *client_buffer;
-	void *server_buffer;
+	char *client_buffer;
+	char *server_buffer;
 	unsigned int client_buffer_size;
 	unsigned int client_buffer_used;
 	unsigned int server_buffer_size;
@@ -139,7 +139,7 @@ static void nas_print_error(AuServer *aud, const char *prefix, AuStatus as)
 	mp_msg(MSGT_AO, MSGL_ERR, "ao_nas: %s: returned status %d (%s)\n", prefix, as, s);
 }
 
-static int nas_readBuffer(struct ao_nas_data *nas_data, int num)
+static int nas_readBuffer(struct ao_nas_data *nas_data, unsigned int num)
 {
 	AuStatus as;
 
@@ -187,7 +187,7 @@ static int nas_readBuffer(struct ao_nas_data *nas_data, int num)
 	return num;
 }
 
-static int nas_writeBuffer(struct ao_nas_data *nas_data, void *data, int len)
+static int nas_writeBuffer(struct ao_nas_data *nas_data, void *data, unsigned int len)
 {
 	pthread_mutex_lock(&nas_data->buffer_mutex);
 	mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: nas_writeBuffer(): len=%d client=%d/%d server=%d/%d\n",
@@ -260,7 +260,7 @@ static AuBool nas_event_handler(AuServer *aud, AuEvent *ev, AuEventHandlerRec *h
 		nas_state(event->prev_state),
 		nas_state(event->cur_state),
 		nas_reason(event->reason),
-		event->num_bytes,
+		(int)event->num_bytes,
 		nas_data->expect_underrun);
 
 	if (event->num_bytes > INT_MAX) {
@@ -301,7 +301,7 @@ static AuBool nas_event_handler(AuServer *aud, AuEvent *ev, AuEventHandlerRec *h
 		}
 		mp_msg(MSGT_AO, MSGL_DBG2,
 			"ao_nas: Can't refill buffer, stopping flow.\n");
-		AuStopFlow(nas_data->aud, nas_data->flow, NULL);
+		AuStopFlow(aud, nas_data->flow, NULL);
 		break;
 	default:
 		break;
@@ -361,7 +361,7 @@ static int control(int cmd, void *arg)
 		vol->right = (float)nas_data->gain/AU_FIXED_POINT_SCALE*50;
 		vol->left = vol->right;
 
-		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_GET_VOLUME: %08x\n", nas_data->gain);
+		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_GET_VOLUME: %.2f\n", vol->right);
 		retval = CONTROL_OK;
 		break;
 
@@ -372,7 +372,7 @@ static int control(int cmd, void *arg)
 		 * so i take the mean of both values.
 		 */
 		nas_data->gain = AU_FIXED_POINT_SCALE*((vol->left+vol->right)/2)/50;
-		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_SET_VOLUME: %08x\n", nas_data->gain);
+		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: AOCONTROL_SET_VOLUME: %.2f\n", (vol->left+vol->right)/2);
 
 		aep.parameters[AuParmsMultiplyConstantConstant]=nas_data->gain;
 		aep.flow = nas_data->flow;
@@ -401,6 +401,8 @@ static int init(int rate,int channels,int format,int flags)
 	int bytes_per_sample = channels * AuSizeofFormat(auformat);
 	int buffer_size;
 	char *server;
+
+	(void)flags; /* shut up 'unused parameter' warning */
 
 	nas_data=malloc(sizeof(struct ao_nas_data));
 	memset(nas_data, 0, sizeof(struct ao_nas_data));
