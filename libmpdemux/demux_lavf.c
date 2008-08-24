@@ -343,6 +343,10 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             sh_video->fps=av_q2d(st->r_frame_rate);
             sh_video->frametime=1/av_q2d(st->r_frame_rate);
             sh_video->format=bih->biCompression;
+            if(st->sample_aspect_ratio.num)
+                sh_video->aspect = codec->width  * st->sample_aspect_ratio.num
+                         / (float)(codec->height * st->sample_aspect_ratio.den);
+            else
             sh_video->aspect=codec->width * codec->sample_aspect_ratio.num
                                / (float)(codec->height * codec->sample_aspect_ratio.den);
             sh_video->i_bps=codec->bit_rate/8;
