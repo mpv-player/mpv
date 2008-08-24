@@ -41,6 +41,7 @@
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
 
+/* NAS_FRAG_SIZE must be a power-of-two value */
 #define NAS_FRAG_SIZE 4096
 
 static char *nas_event_types[] = {
@@ -566,7 +567,7 @@ static int get_space(void)
 // return: number of bytes played
 static int play(void* data,int len,int flags)
 {
-	int maxbursts, playbursts, writelen;
+	int written, maxbursts = 0, playbursts = 0;
 	AuStatus as;
 
 	mp_msg(MSGT_AO, MSGL_DBG3,
@@ -576,41 +577,27 @@ static int play(void* data,int len,int flags)
 	if (len == 0)
 		return 0;
 
-	if (len < ao_data.outburst) {
-		unsigned tempbufsz = ao_data.outburst;
-		void *tempbuf = malloc(tempbufsz);
-
-		memset(tempbuf, 0, tempbufsz);
-		memcpy(tempbuf, data, len);
-
-		play(tempbuf, ao_data.outburst, flags);
-
-		if (nas_data->state != AuStateStart) {
-			mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: play(): Starting flow.\n");
-			nas_data->expect_underrun = 1;
-			nas_data->state = AuStateStart;
-			AuStartFlow(nas_data->aud, nas_data->flow, &as);
-			if (as != AuSuccess)
-				nas_print_error(nas_data->aud, "play(): AuStartFlow", as);
-		}
-
-		free(tempbuf);
-
-		return len;
+	if (!(flags & AOPLAY_FINAL_CHUNK)) {
+		pthread_mutex_lock(&nas_data->buffer_mutex);
+		maxbursts = (nas_data->client_buffer_size -
+			     nas_data->client_buffer_used) / ao_data.outburst;
+		playbursts = len / ao_data.outburst;
+		len = (playbursts > maxbursts ? maxbursts : playbursts) *
+			   ao_data.outburst;
+		pthread_mutex_unlock(&nas_data->buffer_mutex);
 	}
 
-	pthread_mutex_lock(&nas_data->buffer_mutex);
-	maxbursts = (nas_data->client_buffer_size -
-		     nas_data->client_buffer_used) / ao_data.outburst;
-	playbursts = len / ao_data.outburst;
-	writelen = (playbursts > maxbursts ? maxbursts : playbursts) *
-		   ao_data.outburst;
-	pthread_mutex_unlock(&nas_data->buffer_mutex);
-
-	writelen = nas_writeBuffer(nas_data, data, writelen);
+	/*
+	 * If AOPLAY_FINAL_CHUNK is set, we did not actually check len fits
+	 * into the available buffer space, but mplayer.c shouldn't give us
+	 * more to play than we report to it by get_space(), so this should be
+	 * fine.
+	 */
+	written = nas_writeBuffer(nas_data, data, len);
 
 	if (nas_data->state != AuStateStart &&
-	    maxbursts == playbursts) {
+	    (maxbursts == playbursts ||
+	     flags & AOPLAY_FINAL_CHUNK)) {
 		mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: play(): Starting flow.\n");
 		nas_data->expect_underrun = 1;
 		AuStartFlow(nas_data->aud, nas_data->flow, &as);
@@ -618,7 +605,7 @@ static int play(void* data,int len,int flags)
 			nas_print_error(nas_data->aud, "play(): AuStartFlow", as);
 	}
 
-	return writelen;
+	return written;
 }
 
 // return: delay in seconds between first and last sample in buffer
