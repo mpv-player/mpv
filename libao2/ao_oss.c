@@ -166,7 +166,7 @@ static int control(int cmd,void *arg){
 	{
 	    int format;
 	    if (!ioctl(audio_fd, SNDCTL_DSP_GETFMTS, &format))
-		if (format & (int)arg)
+		if ((unsigned int)format & (unsigned long)arg)
 	    	    return CONTROL_TRUE;
 	    return CONTROL_FALSE;
 	}
