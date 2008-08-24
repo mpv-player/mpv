@@ -347,8 +347,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 sh_video->aspect = codec->width  * st->sample_aspect_ratio.num
                          / (float)(codec->height * st->sample_aspect_ratio.den);
             else
-            sh_video->aspect=codec->width * codec->sample_aspect_ratio.num
-                               / (float)(codec->height * codec->sample_aspect_ratio.den);
+                sh_video->aspect=codec->width  * codec->sample_aspect_ratio.num
+                       / (float)(codec->height * codec->sample_aspect_ratio.den);
             sh_video->i_bps=codec->bit_rate/8;
             mp_msg(MSGT_DEMUX,MSGL_DBG2,"aspect= %d*%d/(%d*%d)\n",
                 codec->width, codec->sample_aspect_ratio.num,
