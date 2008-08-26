@@ -27,9 +27,9 @@
 
 /* code from ffmpeg/libavcodec */
 #if defined(__GNUC__) && (__GNUC__ > 3 || __GNUC_ == 3 && __GNUC_MINOR__ > 0)
-#    define always_inline __attribute__((always_inline)) inline
+#    define av_always_inline __attribute__((always_inline)) inline
 #else
-#    define always_inline inline
+#    define av_always_inline inline
 #endif
 
 #if defined(__sparc__) || defined(hpux)
@@ -47,7 +47,7 @@
 #    define unaligned32(a) (*(uint32_t*)(a))
 #else
 #    ifdef __GNUC__
-static always_inline uint32_t unaligned32(const void *v) {
+static av_always_inline uint32_t unaligned32(const void *v) {
     struct Unaligned {
 	uint32_t i;
     } __attribute__((packed));
@@ -86,7 +86,7 @@ static inline uint32_t unaligned32(const void *v) {
 #	else
 
 #	define swab32(x) __generic_swab32(x)
-	static always_inline const uint32_t __generic_swab32(uint32_t x)
+	static av_always_inline const uint32_t __generic_swab32(uint32_t x)
 	{
 		return ((((uint8_t*)&x)[0] << 24) | (((uint8_t*)&x)[1] << 16) |
 		 (((uint8_t*)&x)[2] << 8)  | (((uint8_t*)&x)[3]));
