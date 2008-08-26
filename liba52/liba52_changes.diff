@@ -75,17 +75,11 @@
  
 --- liba52/bitstream.h	2006-06-12 15:05:07.000000000 +0200
 +++ liba52/bitstream.h	2006-06-05 02:23:02.000000000 +0200
-@@ -21,6 +25,48 @@
+@@ -21,6 +25,42 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
 +/* code from ffmpeg/libavcodec */
-+#if defined(__GNUC__) && (__GNUC__ > 3 || __GNUC_ == 3 && __GNUC_MINOR__ > 0)
-+#    define av_always_inline __attribute__((always_inline)) inline
-+#else
-+#    define av_always_inline inline
-+#endif
-+
 +#if defined(__sparc__) || defined(hpux)
 +/*
 + * the alt bitstream reader performs unaligned memory accesses; that doesn't work
@@ -101,7 +95,7 @@
 +#    define unaligned32(a) (*(uint32_t*)(a))
 +#else
 +#    ifdef __GNUC__
-+static av_always_inline uint32_t unaligned32(const void *v) {
++static inline uint32_t unaligned32(const void *v) {
 +    struct Unaligned {
 +	uint32_t i;
 +    } __attribute__((packed));
@@ -142,7 +136,7 @@
 - (((uint8_t*)&x)[2] << 8)  | (((uint8_t*)&x)[3]))
 -
 +#	define swab32(x) __generic_swab32(x)
-+	static av_always_inline const uint32_t __generic_swab32(uint32_t x)
++	static inline const uint32_t __generic_swab32(uint32_t x)
 +	{
 +		return ((((uint8_t*)&x)[0] << 24) | (((uint8_t*)&x)[1] << 16) |
 +		 (((uint8_t*)&x)[2] << 8)  | (((uint8_t*)&x)[3]));
