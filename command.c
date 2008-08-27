@@ -1356,6 +1356,7 @@ static int mp_property_sub(m_option_t * prop, int action, void *arg,
 
 	if ((mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA
              || mpctx->demuxer->type == DEMUXER_TYPE_LAVF
+             || mpctx->demuxer->type == DEMUXER_TYPE_LAVF_PREFERRED
              || mpctx->demuxer->type == DEMUXER_TYPE_OGG)
              && d_sub && d_sub->sh && dvdsub_id >= 0) {
             const char* lang = ((sh_sub_t*)d_sub->sh)->lang;

@@ -755,7 +755,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
 
-    if(sh->ds->demuxer->type != DEMUXER_TYPE_LAVF)
+    if(sh->ds->demuxer->type != DEMUXER_TYPE_LAVF &&
+       sh->ds->demuxer->type != DEMUXER_TYPE_LAVF_PREFERRED)
     if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
        || sh->format == mmioFOURCC('R', 'V', '1', '3')
        || sh->format == mmioFOURCC('R', 'V', '2', '0')
