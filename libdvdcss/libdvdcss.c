@@ -1,10 +1,10 @@
 /* libdvdcss.c: DVD reading library.
  *
  * Authors: Stéphane Borel <stef@via.ecp.fr>
- *          Samuel Hocevar <sam@zoy.org>
+ *          Sam Hocevar <sam@zoy.org>
  *          Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
- * Copyright (C) 1998-2002 VideoLAN
+ * Copyright (C) 1998-2008 VideoLAN
  * $Id$
  *
  * This program is free software; you can redistribute it and/or modify
@@ -371,8 +371,7 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
 
         if( i_ret < 0 )
         {
-            print_debug( dvdcss,
-                         "could not get disc key" );
+            print_debug( dvdcss, "could not get disc key" );
         }
     }
     else
@@ -474,7 +473,7 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
             {
                 char psz_tmp[16 + 1];
                 sprintf( psz_tmp,
-                         "%.2"PRIx8"%.2"PRIx8"%.2"PRIx8"%.2"PRIx8"%.2"PRIx8"%.2"PRIx8"%.2"PRIx8"%.2"PRIx8"",
+                         "%.2x%.2x%.2x%.2x%.2x%.2x%.2x%.2x",
                          psz_serial[0], psz_serial[1], psz_serial[2],
                          psz_serial[3], psz_serial[4], psz_serial[5],
                          psz_serial[6], psz_serial[7] );
@@ -490,7 +489,7 @@ LIBDVDCSS_EXPORT dvdcss_t dvdcss_open ( char *psz_target )
              psz_key[0] = '-';
              for( i = 0; i < KEY_SIZE; i++ )
              {
-                 sprintf( &psz_key[1+i*2], "%.2"PRIx8, dvdcss->css.p_disc_key[i] );
+                 sprintf( &psz_key[1+i*2], "%.2x", dvdcss->css.p_disc_key[i] );
              }
              psz_key[1 + KEY_SIZE * 2] = '\0';
         }
@@ -809,3 +808,4 @@ LIBDVDCSS_EXPORT int dvdcss_is_scrambled ( dvdcss_t dvdcss )
 {
     return dvdcss->b_scrambled;
 }
+

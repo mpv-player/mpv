@@ -5,7 +5,7 @@
  * $Id$
  *
  * Authors: Stéphane Borel <stef@via.ecp.fr>
- *          Samuel Hocevar <sam@zoy.org>
+ *          Sam Hocevar <sam@zoy.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

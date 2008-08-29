@@ -42,10 +42,10 @@ Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
 License:    GNU General Public License
 
 Name:       libdvdcss
-Version:    Subversion r212 (post 1.2.9 release)
+Version:    1.2.10
 Homepage:   http://developers.videolan.org/libdvdcss/
 Directory:  libdvdcss
-Copyright:  1998-2006 VideoLAN
+Copyright:  1998-2008 VideoLAN
 License:    GNU General Public License
 
 Name:       libdvdread

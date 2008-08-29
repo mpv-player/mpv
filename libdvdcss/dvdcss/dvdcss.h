@@ -1,7 +1,7 @@
 /**
  * \file dvdcss.h
  * \author Stéphane Borel <stef@via.ecp.fr>
- * \author Samuel Hocevar <sam@zoy.org>
+ * \author Sam Hocevar <sam@zoy.org>
  * \brief The \e libdvdcss public header.
  *
  * This header contains the public types and functions that applications
@@ -9,7 +9,7 @@
  */
 
 /*
- * Copyright (C) 1998-2002 VideoLAN
+ * Copyright (C) 1998-2008 VideoLAN
  * $Id$
  *
  * This program is free software; you can redistribute it and/or modify

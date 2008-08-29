@@ -81,6 +81,7 @@ MPlayer (1.0)
     * support for DOS-style file:///x:/path paths
     * some new slave commands (check DOCS/tech/slave.txt)
     * misc fixes to libass
+    * libdvdcss updated to 1.2.10, now same as upstream version
 
     Ports:
     * small crash with vo_macosx fixed

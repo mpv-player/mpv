@@ -5,7 +5,7 @@
  * $Id$
  *
  * Authors: Markus Kuespert <ltlBeBoy@beosmail.com>
- *          Samuel Hocevar <sam@zoy.org>
+ *          Sam Hocevar <sam@zoy.org>
  *          Jon Lech Johansen <jon-vl@nanocrew.net>
  *          Håkan Hjort <d95hjort@dtek.chalmers.se>
  *          Eugenio Jarosiewicz <ej0@cise.ufl.edu>
