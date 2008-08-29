@@ -42,8 +42,8 @@
 #include "rtsp.h"
 #include "rtsp_rtp.h"
 #include "rtsp_session.h"
-#include "../freesdp/common.h"
-#include "../freesdp/parser.h"
+#include "stream/freesdp/common.h"
+#include "stream/freesdp/parser.h"
 
 #define RTSP_DEFAULT_PORT 31336
 #define MAX_LENGTH 256
