@@ -35,6 +35,7 @@ known issues:
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <math.h>
 #ifdef HAVE_SYS_SYSINFO_H
 #include <sys/sysinfo.h>
 #endif

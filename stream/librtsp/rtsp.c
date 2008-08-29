@@ -42,7 +42,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <inttypes.h>
-#ifdef HAVE_WINSOCK2
+#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #else
 #include <sys/socket.h>
@@ -72,7 +72,7 @@ static int write_stream(int s, const char *buf, int len) {
     if (n > 0)
       total += n;
     else if (n < 0) {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
       if ((timeout>0) && ((errno == EAGAIN) || (errno == EINPROGRESS))) {
 #else
       if ((timeout>0) && ((errno == EAGAIN) || (WSAGetLastError() == WSAEINPROGRESS))) {

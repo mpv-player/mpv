@@ -14,7 +14,7 @@
 
 #include "config.h"
 
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #define closesocket close
 #else
 #include <winsock2.h>
@@ -410,7 +410,7 @@ stream_t* new_stream(int fd,int type){
   if(s==NULL) return NULL;
   memset(s,0,sizeof(stream_t));
 
-#ifdef HAVE_WINSOCK2
+#ifdef HAVE_WINSOCK2_H
   {
     WSADATA wsdata;
     int temp = WSAStartup(0x0202, &wsdata); // there might be a better place for this (-> later)
@@ -445,7 +445,7 @@ void free_stream(stream_t *s){
       closesocket(s->fd);
     else close(s->fd);
   }
-#ifdef HAVE_WINSOCK2
+#ifdef HAVE_WINSOCK2_H
   mp_msg(MSGT_STREAM,MSGL_V,"WINSOCK2 uninit\n");
   WSACleanup(); // there might be a better place for this (-> later)
 #endif

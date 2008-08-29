@@ -30,7 +30,7 @@
 
 #include <sys/types.h>
 #include "config.h"
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #define closesocket close
 #include <sys/socket.h>
 #include <netinet/in.h>

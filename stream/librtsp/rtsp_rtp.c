@@ -28,7 +28,7 @@
 
 #include "config.h"
 
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -250,7 +250,7 @@ rtcp_connect (int client_port, int server_port, const char* server_hostname)
   
   if (bind (s, (struct sockaddr *) &sin, sizeof (sin)))
   {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
     if (errno != EINPROGRESS)
 #else
     if (WSAGetLastError() != WSAEINPROGRESS)
@@ -296,7 +296,7 @@ rtp_connect (char *hostname, int port)
   if (!hostname || !strcmp (hostname, "0.0.0.0"))
     sin.sin_addr.s_addr = htonl (INADDR_ANY);
   else
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #ifdef HAVE_ATON
     inet_aton (hostname, &sin.sin_addr);
 #else
@@ -331,7 +331,7 @@ rtp_connect (char *hostname, int port)
   /* datagram socket */
   if (bind (s, (struct sockaddr *) &sin, sizeof (sin)))
   {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
     if (errno != EINPROGRESS)
 #else
     if (WSAGetLastError() != WSAEINPROGRESS)
@@ -385,7 +385,7 @@ is_multicast_address (char *addr)
   
   sin.sin_family = AF_INET;
 
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #ifdef HAVE_ATON
     inet_aton (addr, &sin.sin_addr);
 #else

@@ -42,7 +42,7 @@
 #include <inttypes.h>
 #include <errno.h>
 
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #define closesocket close
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -90,7 +90,7 @@ static const struct m_struct_st stream_opts = {
 //// When the cache is running we need a lock as
 //// fill_buffer is called from another proccess
 static int lock_fd(int fd) {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
   struct flock lock;
 
   memset(&lock,0,sizeof(struct flock));
@@ -113,7 +113,7 @@ printf("FIXME? should lock here\n");
 }
 
 static int unlock_fd(int fd) {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
   struct flock lock;
 
   memset(&lock,0,sizeof(struct flock));

@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #define closesocket close
 #else
 #include <winsock2.h>

@@ -239,7 +239,7 @@ Optional features:
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-network      disable networking [enable]
-  --enable-winsock2      enable winsock2 [autodetect]
+  --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-live          enable LIVE555 Streaming Media [autodetect]
   --enable-nemesi        enable Nemesi Streaming Media [autodetect]
@@ -621,7 +621,7 @@ _tv_dshow=auto
 _tv_teletext=auto
 _pvr=auto
 _network=yes
-_winsock2=auto
+_winsock2_h=auto
 _smb=auto
 _vidix=auto
 _vidix_pcidb=yes
@@ -1022,8 +1022,8 @@ for ac_option do
   --disable-fastmemcpy)	_fastmemcpy=no	;;
   --enable-network)	_network=yes	;;
   --disable-network)	_network=no	;;
-  --enable-winsock2)	_winsock2=yes	;;
-  --disable-winsock2)	_winsock2=no	;;
+  --enable-winsock2_h)	_winsock2_h=yes	;;
+  --disable-winsock2_h)	_winsock2_h=no	;;
   --enable-smb)		_smb=yes	;;
   --disable-smb)	_smb=no	;;
   --enable-vidix)	_vidix=yes	;;
@@ -2802,23 +2802,23 @@ _socklib=no
 for _ld_tmp in "" "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
   cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && _socklib=yes && break
 done
-if test $_winsock2 = auto && ! cygwin ; then
-  _winsock2=no
+if test $_winsock2_h = auto && ! cygwin ; then
+  _winsock2_h=no
   cat > $TMPC << EOF
 #include <winsock2.h>
 int main(void) { (void) gethostbyname(0); return 0; }
 EOF
-  cc_check -lws2_32 && _ld_sock="-lws2_32" && _winsock2=yes
+  cc_check -lws2_32 && _ld_sock="-lws2_32" && _winsock2_h=yes
 fi
 test "$_ld_sock" && _res_comment="using $_ld_sock"
 echores "$_socklib"
 
 
-if test $_winsock2 = yes ; then
+if test $_winsock2_h = yes ; then
   _ld_sock="-lws2_32"
-  _def_winsock2='#define HAVE_WINSOCK2 1'
+  _def_winsock2_h='#define HAVE_WINSOCK2_H 1'
 else
-  _def_winsock2='#undef HAVE_WINSOCK2'
+  _def_winsock2_h='#undef HAVE_WINSOCK2_H'
 fi
 
 
@@ -2830,7 +2830,7 @@ cat > $TMPC << EOF
 #include <arpa/inet.h>
 int main(void) { (void) inet_pton(0, 0, 0); return 0; }
 EOF
-if test "$_winsock2" = yes ; then
+if test "$_winsock2_h" = yes ; then
     _res_comment="using winsock2 functions instead"
     echores "no"
 elif cc_check $_ld_sock ; then
@@ -8630,7 +8630,7 @@ $_def_ftp
 $_def_vstream
 
 /* enable winsock2 instead of Unix functions*/
-$_def_winsock2
+$_def_winsock2_h
 
 /* define this to use inet_aton() instead of inet_pton() */
 $_def_use_aton

@@ -31,7 +31,7 @@
 #include <sys/time.h>
 #include <ctype.h>
 
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -74,7 +74,7 @@ udp_open_socket (URL_t *url)
 
   if (isalpha (url->hostname[0]))
   {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
     hp = (struct hostent *) gethostbyname (url->hostname);
     if (!hp)
     {
@@ -87,11 +87,11 @@ udp_open_socket (URL_t *url)
             (void *) hp->h_addr_list[0], hp->h_length);
 #else
     server_address.sin_addr.s_addr = htonl (INADDR_ANY);
-#endif /* HAVE_WINSOCK2 */
+#endif /* HAVE_WINSOCK2_H */
   }
   else
   {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #ifdef HAVE_ATON
     inet_aton (url->hostname, &server_address.sin_addr);
 #else
@@ -99,7 +99,7 @@ udp_open_socket (URL_t *url)
 #endif /* HAVE_ATON */
 #else
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-#endif /* HAVE_WINSOCK2 */
+#endif /* HAVE_WINSOCK2_H */
   }
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons (url->port);
@@ -110,11 +110,11 @@ udp_open_socket (URL_t *url)
   if (bind (socket_server_fd, (struct sockaddr *) &server_address,
             sizeof (server_address)) == -1)
   {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
     if (errno != EINPROGRESS)
 #else
     if (WSAGetLastError () != WSAEINPROGRESS)
-#endif /* HAVE_WINSOCK2 */
+#endif /* HAVE_WINSOCK2_H */
     {
       mp_msg (MSGT_NETWORK, MSGL_ERR, "Failed to connect to server\n");
       closesocket (socket_server_fd);
@@ -122,7 +122,7 @@ udp_open_socket (URL_t *url)
     }
   }
 	
-#ifdef HAVE_WINSOCK2
+#ifdef HAVE_WINSOCK2_H
   if (isalpha (url->hostname[0]))
   {
     hp = (struct hostent *) gethostbyname (url->hostname);
@@ -141,7 +141,7 @@ udp_open_socket (URL_t *url)
     unsigned int addr = inet_addr (url->hostname);
     memcpy ((void *) &server_address.sin_addr, (void *) &addr, sizeof (addr));
   }
-#endif /* HAVE_WINSOCK2 */
+#endif /* HAVE_WINSOCK2_H */
 
   /* Increase the socket rx buffer size to maximum -- this is UDP */
   rxsockbufsz = 240 * 1024;

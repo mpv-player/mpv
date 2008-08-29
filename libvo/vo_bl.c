@@ -34,7 +34,7 @@
 
 #include "config.h"
 
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
 #define closesocket close
 #include <netdb.h>
 #include <sys/socket.h>
