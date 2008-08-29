@@ -35,17 +35,9 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <inttypes.h>
-#ifndef HAVE_WINSOCK2_H
-#define closesocket close
-#include <sys/socket.h>
-//#include <netinet/in.h>
-//#include <netdb.h>
-#else
-#include <winsock2.h>
-#endif
 
 #include "libavutil/intreadwrite.h"
-
+#include "network.h"
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
 #include "help_mp.h"

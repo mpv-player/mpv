@@ -29,17 +29,6 @@
  */
 
 #include <sys/types.h>
-#include "config.h"
-#ifndef HAVE_WINSOCK2_H
-#define closesocket close
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#else
-#include <winsock2.h>
-#endif
-
-
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -47,10 +36,12 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "config.h"
 #include "mp_msg.h"
 #include "rtsp.h"
 #include "rtsp_rtp.h"
 #include "rtsp_session.h"
+#include "stream/network.h"
 #include "stream/url.h"
 #include "stream/rtp.h"
 #include "stream/realrtsp/real.h"
