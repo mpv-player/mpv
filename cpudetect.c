@@ -51,7 +51,6 @@ CpuCaps gCpuCaps;
 
 static void check_os_katmai_support( void );
 
-#if 1
 // return TRUE if cpuid supported
 static int has_cpuid(void)
 {
@@ -81,7 +80,6 @@ static int has_cpuid(void)
 
 	return a != c;
 }
-#endif
 
 static void
 do_cpuid(unsigned int ax, unsigned int *p)
