@@ -2894,6 +2894,23 @@ fi
 echores "$_socklen_t"
 
 
+echocheck "closesocket()"
+_closesocket=no
+for header in "arpa/inet.h" "winsock2.h" ; do
+  cat > $TMPC << EOF
+#include <$header>
+int main(void) { closesocket(); return 0; }
+EOF
+  cc_check && _closesocket=yes && break
+done
+if test "$_closesocket" = yes ; then
+  _def_closesocket='#define HAVE_CLOSESOCKET 1'
+else
+  _def_closesocket='#undef HAVE_CLOSESOCKET'
+fi
+echores "$_closesocket"
+
+
 echocheck "network"
 # FIXME network check
 if test "$_network" = yes ; then
@@ -8624,6 +8641,9 @@ $_def_socklen_t
 #define HAVE_SOCKLEN_T 1
 typedef int socklen_t;
 #endif
+
+/* closesocket() support */
+$_def_closesocket
 
 /* enables / disables cdparanoia support */
 $_def_cdparanoia
