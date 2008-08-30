@@ -4,15 +4,15 @@
 #include "config.h"
 #include <stdint.h>
 #ifdef CONFIG_DVDREAD_INTERNAL
-#include "dvdread/dvd_reader.h"
-#include "dvdread/ifo_types.h"
-#include "dvdread/ifo_read.h"
-#include "dvdread/nav_read.h"
+#include "libdvdread/dvd_reader.h"
+#include "libdvdread/ifo_types.h"
+#include "libdvdread/ifo_read.h"
+#include "libdvdread/nav_read.h"
 #else
-#include <libdvdread/dvd_reader.h>
-#include <libdvdread/ifo_types.h>
-#include <libdvdread/ifo_read.h>
-#include <libdvdread/nav_read.h>
+#include <dvdread/dvd_reader.h>
+#include <dvdread/ifo_types.h>
+#include <dvdread/ifo_read.h>
+#include <dvdread/nav_read.h>
 #endif
 #include "stream.h"
 

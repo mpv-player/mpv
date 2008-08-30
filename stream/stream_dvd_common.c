@@ -1,9 +1,9 @@
 #include "config.h"
 #include <inttypes.h>
 #ifdef CONFIG_DVDREAD_INTERNAL
-#include <dvdread/ifo_types.h>
+#include "libdvdread/ifo_types.h"
 #else
-#include <libdvdread/ifo_types.h>
+#include <dvdread/ifo_types.h>
 #endif
 #include "stream_dvd_common.h"
 

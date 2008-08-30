@@ -25,7 +25,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <dvdread/dvd_reader.h>
+#include <libdvdread/dvd_reader.h>
 
 #if defined(__BEOS__)
 #if !defined(_INTTYPES_H_) && !defined(_INTTYPES_H) && !defined(_STDINT_H_) && !defined(_STDINT_H)

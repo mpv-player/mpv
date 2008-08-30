@@ -51,7 +51,7 @@ License:    GNU General Public License
 Name:       libdvdread
 Version:    0.9.7 + patches
 Homepage:   http://www.dtek.chalmers.se/groups/dvd/development.shtml
-Directory:  dvdread
+Directory:  libdvdread
 Copyright:  1998, 1999 Eric Smith <eric@brouhaha.com>
             1999 Christian Wolff for convergence integrated media
             2000-2001 Billy Biggs <vektor@dumbterm.net>,
