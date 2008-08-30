@@ -860,6 +860,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     }
     if (mp_msg_test(MSGT_IDENTIFY, MSGL_V))
     {
+      char volid[32];
       unsigned char discid [16]; ///< disk ID, a 128 bit MD5 sum
       int vts_no;   ///< video title set number
       for (vts_no = 1; vts_no <= vmg_file->vts_atrt->nr_of_vtss; vts_no++)
@@ -872,6 +873,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
           mp_msg(MSGT_IDENTIFY, MSGL_V, "%02X", discid[i]);
         mp_msg(MSGT_IDENTIFY, MSGL_V, "\n");
       }
+      if (DVDUDFVolumeInfo(dvd, volid, sizeof(volid), NULL, 0) >= 0)
+        mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_DVD_VOLUME_ID=%s\n", volid);
     }
     /**
      * Make sure our title number is valid.
