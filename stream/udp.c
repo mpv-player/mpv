@@ -31,8 +31,18 @@
 #include <sys/time.h>
 #include <ctype.h>
 
+#ifndef HAVE_WINSOCK2_H
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#define closesocket close
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
 #include "mp_msg.h"
-#include "network.h"
 #include "url.h"
 #include "udp.h"
 

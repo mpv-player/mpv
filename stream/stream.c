@@ -13,10 +13,17 @@
 #include <strings.h>
 
 #include "config.h"
+
+#ifndef HAVE_WINSOCK2_H
+#define closesocket close
+#else
+#include <winsock2.h>
+#endif
+
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "osdep/shmem.h"
-#include "network.h"
+
 #include "stream.h"
 #include "libmpdemux/demuxer.h"
 

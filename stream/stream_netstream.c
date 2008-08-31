@@ -42,6 +42,15 @@
 #include <inttypes.h>
 #include <errno.h>
 
+#ifndef HAVE_WINSOCK2_H
+#define closesocket close
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#else
+#include <winsock2.h>
+#endif
+
 #include "mp_msg.h"
 #include "stream.h"
 #include "help_mp.h"

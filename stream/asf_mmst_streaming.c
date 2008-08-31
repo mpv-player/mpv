@@ -39,6 +39,12 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
+#ifndef HAVE_WINSOCK2_H
+#define closesocket close
+#else
+#include <winsock2.h>
+#endif
+
 #ifndef CONFIG_SETLOCALE
 #undef CONFIG_ICONV
 #endif

@@ -17,10 +17,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#define closesocket close
-#else
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #endif
 
 #include "url.h"

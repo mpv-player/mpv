@@ -8,6 +8,13 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+
+#ifndef HAVE_WINSOCK2_H
+#define closesocket close
+#else
+#include <winsock2.h>
+#endif
+
 #include "url.h"
 #include "http.h"
 #include "libmpdemux/asf.h"

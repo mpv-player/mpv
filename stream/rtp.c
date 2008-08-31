@@ -12,9 +12,17 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
-#include <errno.h>
 #include "config.h"
-#include "network.h"
+#ifndef HAVE_WINSOCK2_H
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#define closesocket close
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+#include <errno.h>
 #include "stream.h"
 
 /* MPEG-2 TS RTP stack */
