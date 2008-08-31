@@ -2896,13 +2896,11 @@ echores "$_socklen_t"
 
 echocheck "closesocket()"
 _closesocket=no
-for header in "arpa/inet.h" "winsock2.h" ; do
-  cat > $TMPC << EOF
-#include <$header>
+cat > $TMPC << EOF
+#include <winsock2.h>
 int main(void) { closesocket(~0); return 0; }
 EOF
-  cc_check $_ld_sock && _closesocket=yes && break
-done
+cc_check $_ld_sock && _closesocket=yes
 if test "$_closesocket" = yes ; then
   _def_closesocket='#define HAVE_CLOSESOCKET 1'
 else
