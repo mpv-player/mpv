@@ -2899,9 +2899,9 @@ _closesocket=no
 for header in "arpa/inet.h" "winsock2.h" ; do
   cat > $TMPC << EOF
 #include <$header>
-int main(void) { closesocket(); return 0; }
+int main(void) { closesocket(~0); return 0; }
 EOF
-  cc_check && _closesocket=yes && break
+  cc_check $_ld_sock && _closesocket=yes && break
 done
 if test "$_closesocket" = yes ; then
   _def_closesocket='#define HAVE_CLOSESOCKET 1'
