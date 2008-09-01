@@ -305,7 +305,7 @@ Codecs:
   --disable-libvorbis       disable libvorbis support [autodetect]
   --disable-speex           disable Speex support [autodetect]
   --enable-theora           enable OggTheora libraries [autodetect]
-  --enable-faad-external    enable external FAAD2 (AAC) [autodetect]
+  --enable-faad             enable external FAAD2 (AAC) [autodetect]
   --disable-faad-internal   disable internal FAAD2 (AAC) [autodetect]
   --enable-faad-fixed       enable fixed-point mode in internal FAAD2 [disabled]
   --disable-faac            disable support for FAAC (AAC encoder) [autodetect]
@@ -577,8 +577,8 @@ _mp3lib=yes
 _liba52=yes
 _libdca=auto
 _libmpeg2=auto
+_faad=auto
 _faad_internal=auto
-_faad_external=auto
 _faad_fixed=no
 _faac=auto
 _faac_lavc=auto
@@ -946,10 +946,10 @@ for ac_option do
   --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-musepack)	_musepack=yes	;;
   --disable-musepack)	_musepack=no	;;
+  --enable-faad)	_faad=yes	;;
+  --disable-faad)	_faad=no	;;
   --enable-faad-internal)	_faad_internal=yes	;;
   --disable-faad-internal)	_faad_internal=no	;;
-  --enable-faad-external)	_faad_external=yes	;;
-  --disable-faad-external)	_faad_external=no	;;
   --enable-faad-fixed)	_faad_fixed=yes	;;
   --disable-faad-fixed)	_faad_fixed=no	;;
   --enable-faac)	_faac=yes	;;
@@ -6188,17 +6188,16 @@ if test "$_faad_internal" = auto ; then
         _res_comment="broken gcc"
         ;;
       *)
-        _faad_external=no
+        _faad=yes
         _faad_internal=yes
         ;;
     esac
   else
-    _faad_external=no
+    _faad=yes
     _faad_internal=yes
   fi
 fi
-if test "$_faad_external" = auto ; then
-  _faad_external=no
+if test "$_faad" = auto ; then
   cat > $TMPC << EOF
 #include <faad.h>
 #ifndef FAAD_MIN_STREAMSIZE
@@ -6207,14 +6206,13 @@ if test "$_faad_external" = auto ; then
 int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo;
     testhand = faacDecOpen(); faacDecInit(0, 0, 0, 0, 0); return 0; }
 EOF
-  cc_check -lfaad $_ld_lm && _faad_external=yes
+  cc_check -lfaad $_ld_lm && _faad=yes
 fi
 
 _def_faad='#undef CONFIG_FAAD'
 _def_faad_internal="#undef CONFIG_FAAD_INTERNAL"
 if test "$_faad_internal" = yes ; then
   _def_faad_internal="#define CONFIG_FAAD_INTERNAL 1"
-  _faad=yes
   _res_comment="internal floating-point"
   if test "$_faad_fixed" = yes ; then
     # The FIXED_POINT implementation of FAAD2 improves performance
@@ -6222,17 +6220,15 @@ if test "$_faad_internal" = yes ; then
     cflags_faad_fixed="-DFIXED_POINT"
     _res_comment="internal fixed-point"
   fi
-elif test "$_faad_external" = yes ; then
-  _faad=yes
+elif test "$_faad" = yes ; then
   _ld_extra="$_ld_extra -lfaad"
-else
-  _faad=no
 fi
 
 if test "$_faad" = yes ; then
   _def_faad='#define CONFIG_FAAD 1'
   _codecmodules="faad2 $_codecmodules"
 else
+  _faad=no
   _nocodecmodules="faad2 $_nocodecmodules"
 fi
 echores "$_faad"
