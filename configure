@@ -301,7 +301,7 @@ Codecs:
                                     in libavcodec [enabled]
   --disable-tremor-internal disable internal Tremor [enabled]
   --enable-tremor-low       enable lower accuracy internal Tremor [disabled]
-  --enable-tremor-external  enable external Tremor [autodetect]
+  --enable-tremor           enable external Tremor [autodetect]
   --disable-libvorbis       disable libvorbis support [autodetect]
   --disable-speex           disable Speex support [autodetect]
   --enable-theora           enable OggTheora libraries [autodetect]
@@ -567,9 +567,9 @@ _mp3lame=auto
 _mp3lame_lavc=auto
 _toolame=auto
 _twolame=auto
+_tremor=auto
 _tremor_internal=yes
 _tremor_low=no
-_tremor_external=auto
 _libvorbis=auto
 _speex=auto
 _theora=auto
@@ -928,12 +928,12 @@ for ac_option do
   --disable-libvorbis)	_libvorbis=no	;;
   --enable-speex)	_speex=yes	;;
   --disable-speex)	_speex=no	;;
+  --enable-tremor)	_tremor=yes	;;
+  --disable-tremor)	_tremor=no	;;
   --enable-tremor-internal)	_tremor_internal=yes	;;
   --disable-tremor-internal)	_tremor_internal=no	;;
   --enable-tremor-low)	_tremor_low=yes	;;
   --disable-tremor-low)	_tremor_low=no	;;
-  --enable-tremor-external)	_tremor_external=yes	;;
-  --disable-tremor-external)	_tremor_external=no	;;
   --enable-theora)	_theora=yes	;;
   --disable-theora)	_theora=no	;;
   --enable-mp3lib)	_mp3lib=yes	;;
@@ -5935,13 +5935,13 @@ echores "$_toolame"
 echocheck "OggVorbis support"
 if test "$_tremor_internal" = yes; then
   _libvorbis=no
-elif test "$_tremor_external" = auto; then
-  _tremor_external=no
+elif test "$_tremor" = auto; then
+  _tremor=no
   cat > $TMPC << EOF
 #include <tremor/ivorbiscodec.h>
 int main(void) { vorbis_packet_blocksize(0,0); return 0; }
 EOF
-  cc_check -logg -lvorbisidec $_ld_lm && _tremor_external=yes && _libvorbis=no
+  cc_check -logg -lvorbisidec $_ld_lm && _tremor=yes && _libvorbis=no
 fi
 if test "$_libvorbis" = auto; then
   _libvorbis=no
@@ -5961,7 +5961,7 @@ if test "$_tremor_internal" = yes ; then
     cflags_tremor_low="-D_LOW_ACCURACY_"
     _res_comment="internal low accuracy Tremor"
   fi
-elif test "$_tremor_external" = yes ; then
+elif test "$_tremor" = yes ; then
   _vorbis=yes
   _def_vorbis='#define CONFIG_OGGVORBIS 1'
   _def_tremor='#define CONFIG_TREMOR 1'
