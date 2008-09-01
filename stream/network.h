@@ -22,6 +22,10 @@
 #include "url.h"
 #include "http.h"
 
+#ifndef HAVE_CLOSESOCKET
+#define closesocket close
+#endif
+
 #define BUFFER_SIZE		2048
 
 typedef struct {

@@ -19,9 +19,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#ifndef HAVE_WINSOCK2_H
-#define closesocket close
-#else
+#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif

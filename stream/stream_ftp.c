@@ -11,12 +11,12 @@
 #include <errno.h>
 #ifndef HAVE_WINSOCK2_H
 #include <sys/socket.h>
-#define closesocket close
 #else
 #include <winsock2.h>
 #endif
 
 #include "mp_msg.h"
+#include "network.h"
 #include "stream.h"
 #include "help_mp.h"
 #include "m_option.h"

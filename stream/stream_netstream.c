@@ -43,7 +43,6 @@
 #include <errno.h>
 
 #ifndef HAVE_WINSOCK2_H
-#define closesocket close
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -59,6 +58,7 @@
 #include "libavutil/common.h"
 #include "mpbswap.h"
 
+#include "network.h"
 #include "netstream.h"
 #include "tcp.h"
 
