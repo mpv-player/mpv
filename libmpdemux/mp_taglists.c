@@ -33,6 +33,7 @@ static const AVCodecTag mp_wav_tags[] = {
     { CODEC_ID_AMR_NB,            MKTAG('n', 'b',   0,   0)},
     { CODEC_ID_COOK,              MKTAG('c', 'o', 'o', 'k')},
     { CODEC_ID_DSICINAUDIO,       MKTAG('D', 'C', 'I', 'A')},
+    { CODEC_ID_EAC3,              MKTAG('E', 'A', 'C', '3')},
     { CODEC_ID_INTERPLAY_DPCM,    MKTAG('I', 'N', 'P', 'A')},
     { CODEC_ID_MLP,               MKTAG('M', 'L', 'P', ' ')},
     { CODEC_ID_MUSEPACK7,         MKTAG('M', 'P', 'C', ' ')},
