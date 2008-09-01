@@ -35,7 +35,6 @@
 #include "config.h"
 
 #ifndef HAVE_WINSOCK2_H
-#define closesocket close
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -48,6 +47,10 @@
 #include "mp_msg.h"
 #include "m_option.h"
 #include "fastmemcpy.h"
+
+#ifndef HAVE_CLOSESOCKET
+#define closesocket close
+#endif
 
 static const vo_info_t info = 
 {
