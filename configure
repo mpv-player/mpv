@@ -6188,13 +6188,16 @@ if test "$_faad_internal" = auto ; then
         _res_comment="broken gcc"
         ;;
       *)
+        _faad_external=no
         _faad_internal=yes
         ;;
     esac
   else
+    _faad_external=no
     _faad_internal=yes
   fi
-elif test "$_faad_internal" = no && test "$_faad_external" = auto ; then
+fi
+if test "$_faad_external" = auto ; then
   _faad_external=no
   cat > $TMPC << EOF
 #include <faad.h>
