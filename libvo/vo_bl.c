@@ -34,23 +34,15 @@
 
 #include "config.h"
 
-#ifndef HAVE_WINSOCK2_H
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#else
-#include <winsock2.h>
-#endif
 
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "mp_msg.h"
 #include "m_option.h"
 #include "fastmemcpy.h"
-
-#ifndef HAVE_CLOSESOCKET
-#define closesocket close
-#endif
 
 static const vo_info_t info = 
 {
@@ -190,7 +182,7 @@ static int udp_init(bl_host_t *h) {
 	if (connect(h->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 		mp_msg(MSGT_VO, MSGL_ERR, "couldn't connect socket for %s\n", 
 				h->name);
-		closesocket(h->fd);
+		close(h->fd);
 		return 1;
 	}
 	return 0;
@@ -202,7 +194,7 @@ static void udp_send(bl_host_t *h) {
 }
 
 static void udp_close(bl_host_t *h) {
-	closesocket(h->fd);
+	close(h->fd);
 }
 
 #define NO_BLS 3
