@@ -6210,6 +6210,8 @@ EOF
   cc_check -lfaad $_ld_lm && _faad_external=yes
 fi
 
+_def_faad='#undef CONFIG_FAAD'
+_def_faad_internal="#undef CONFIG_FAAD_INTERNAL"
 if test "$_faad_internal" = yes ; then
   _def_faad_internal="#define CONFIG_FAAD_INTERNAL 1"
   _faad=yes
@@ -6224,7 +6226,6 @@ elif test "$_faad_external" = yes ; then
   _faad=yes
   _ld_extra="$_ld_extra -lfaad"
 else
-  _def_faad_internal="#undef CONFIG_FAAD_INTERNAL"
   _faad=no
 fi
 
@@ -6232,7 +6233,6 @@ if test "$_faad" = yes ; then
   _def_faad='#define CONFIG_FAAD 1'
   _codecmodules="faad2 $_codecmodules"
 else
-  _def_faad='#undef CONFIG_FAAD'
   _nocodecmodules="faad2 $_nocodecmodules"
 fi
 echores "$_faad"
