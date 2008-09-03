@@ -239,7 +239,7 @@ Optional features:
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-network      disable networking [enable]
-  --enable-winsock2      enable winsock2 [autodetect]
+  --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-live          enable LIVE555 Streaming Media [autodetect]
   --enable-nemesi        enable Nemesi Streaming Media [autodetect]
@@ -275,8 +275,8 @@ Codecs:
   --enable-gif		    enable GIF support [autodetect]
   --enable-png		    enable PNG input/output support [autodetect]
   --enable-jpeg		    enable JPEG input/output support [autodetect]
-  --enable-libcdio	    enable external libcdio [autodetect]
-  --enable-liblzo	    enable external liblzo [autodetect]
+  --enable-libcdio	    enable libcdio support [autodetect]
+  --enable-liblzo	    enable liblzo support [autodetect]
   --disable-win32dll        disable Win32 DLL support [enabled]
   --disable-qtx             disable QuickTime codecs support [enabled]
   --disable-xanim           disable XAnim codecs support [enabled]
@@ -301,11 +301,11 @@ Codecs:
                                     in libavcodec [enabled]
   --disable-tremor-internal disable internal Tremor [enabled]
   --enable-tremor-low       enable lower accuracy internal Tremor [disabled]
-  --enable-tremor-external  enable external Tremor [autodetect]
+  --enable-tremor           enable external Tremor [autodetect]
   --disable-libvorbis       disable libvorbis support [autodetect]
   --disable-speex           disable Speex support [autodetect]
   --enable-theora           enable OggTheora libraries [autodetect]
-  --enable-faad-external    enable external FAAD2 (AAC) [autodetect]
+  --enable-faad             enable external FAAD2 (AAC) [autodetect]
   --disable-faad-internal   disable internal FAAD2 (AAC) [autodetect]
   --enable-faad-fixed       enable fixed-point mode in internal FAAD2 [disabled]
   --disable-faac            disable support for FAAC (AAC encoder) [autodetect]
@@ -431,6 +431,7 @@ Advanced options:
   --enable-altivec          enable AltiVec (PowerPC) [autodetect]
   --enable-armv5te          enable DSP extensions (ARM) [autodetect]
   --enable-armv6            enable ARMv6 (ARM) [autodetect]
+  --enable-armvfp           enable ARM VFP (ARM) [autodetect]
   --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
   --disable-fastmemcpy      disable 3DNow!/SSE/MMX optimized memcpy [enable]
   --enable-big-endian       force byte order to big-endian [autodetect]
@@ -479,6 +480,7 @@ _cmov=auto
 _fast_cmov=auto
 _armv5te=auto
 _armv6=auto
+_armvfp=auto
 _iwmmxt=auto
 _mtrr=auto
 _altivec=auto
@@ -565,9 +567,9 @@ _mp3lame=auto
 _mp3lame_lavc=auto
 _toolame=auto
 _twolame=auto
+_tremor=auto
 _tremor_internal=yes
 _tremor_low=no
-_tremor_external=auto
 _libvorbis=auto
 _speex=auto
 _theora=auto
@@ -575,8 +577,8 @@ _mp3lib=yes
 _liba52=yes
 _libdca=auto
 _libmpeg2=auto
+_faad=auto
 _faad_internal=auto
-_faad_external=auto
 _faad_fixed=no
 _faac=auto
 _faac_lavc=auto
@@ -619,7 +621,7 @@ _tv_dshow=auto
 _tv_teletext=auto
 _pvr=auto
 _network=yes
-_winsock2=auto
+_winsock2_h=auto
 _smb=auto
 _vidix=auto
 _vidix_pcidb=yes
@@ -926,12 +928,12 @@ for ac_option do
   --disable-libvorbis)	_libvorbis=no	;;
   --enable-speex)	_speex=yes	;;
   --disable-speex)	_speex=no	;;
+  --enable-tremor)	_tremor=yes	;;
+  --disable-tremor)	_tremor=no	;;
   --enable-tremor-internal)	_tremor_internal=yes	;;
   --disable-tremor-internal)	_tremor_internal=no	;;
   --enable-tremor-low)	_tremor_low=yes	;;
   --disable-tremor-low)	_tremor_low=no	;;
-  --enable-tremor-external)	_tremor_external=yes	;;
-  --disable-tremor-external)	_tremor_external=no	;;
   --enable-theora)	_theora=yes	;;
   --disable-theora)	_theora=no	;;
   --enable-mp3lib)	_mp3lib=yes	;;
@@ -944,10 +946,10 @@ for ac_option do
   --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-musepack)	_musepack=yes	;;
   --disable-musepack)	_musepack=no	;;
+  --enable-faad)	_faad=yes	;;
+  --disable-faad)	_faad=no	;;
   --enable-faad-internal)	_faad_internal=yes	;;
   --disable-faad-internal)	_faad_internal=no	;;
-  --enable-faad-external)	_faad_external=yes	;;
-  --disable-faad-external)	_faad_external=no	;;
   --enable-faad-fixed)	_faad_fixed=yes	;;
   --disable-faad-fixed)	_faad_fixed=no	;;
   --enable-faac)	_faac=yes	;;
@@ -1020,8 +1022,8 @@ for ac_option do
   --disable-fastmemcpy)	_fastmemcpy=no	;;
   --enable-network)	_network=yes	;;
   --disable-network)	_network=no	;;
-  --enable-winsock2)	_winsock2=yes	;;
-  --disable-winsock2)	_winsock2=no	;;
+  --enable-winsock2_h)	_winsock2_h=yes	;;
+  --disable-winsock2_h)	_winsock2_h=no	;;
   --enable-smb)		_smb=yes	;;
   --disable-smb)	_smb=no	;;
   --enable-vidix)	_vidix=yes	;;
@@ -1221,6 +1223,8 @@ for ac_option do
   --disable-armv5te) _armv5te=no ;;
   --enable-armv6) _armv6=yes ;;
   --disable-armv6) _armv6=no ;;
+  --enable-armvfp) _armvfp=yes ;;
+  --disable-armvfp) _armvfp=no ;;
   --enable-iwmmxt) _iwmmxt=yes ;;
   --disable-iwmmxt) _iwmmxt=no ;;
   --enable-mmx)	_mmx=yes ;;
@@ -2502,6 +2506,16 @@ EOF
   fi
   echores "$_armv6"
 
+  echocheck "ARM VFP"
+  if test $_armvfp = "auto" ; then
+    cat > $TMPC << EOF
+int main(void) { __asm__ __volatile__ ("fadds s0, s0, s0"); return 0; }
+EOF
+    _armvfp=no
+    cc_check && _armvfp=yes
+  fi
+  echores "$_armvfp"
+
   echocheck "iWMMXt (Intel XScale SIMD instructions)"
   if test $_iwmmxt = "auto" ; then
     cat > $TMPC << EOF
@@ -2513,7 +2527,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 IWMMXT MLIB MMI SH4 VIS MVI'
+_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV ARMV5TE ARMV6 ARMVFP IWMMXT MLIB MMI SH4 VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2526,6 +2540,7 @@ test "$_cmov"      = yes && _cpuexts="CMOV $_cpuexts"
 test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
 test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
 test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
+test "$_armvfp"    = yes && _cpuexts="ARMVFP $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
 test "$_mvi"       = yes && _cpuexts="MVI $_cpuexts"
@@ -2787,23 +2802,23 @@ _socklib=no
 for _ld_tmp in "" "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
   cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && _socklib=yes && break
 done
-if test $_winsock2 = auto && ! cygwin ; then
-  _winsock2=no
+if test $_winsock2_h = auto && ! cygwin ; then
+  _winsock2_h=no
   cat > $TMPC << EOF
 #include <winsock2.h>
 int main(void) { (void) gethostbyname(0); return 0; }
 EOF
-  cc_check -lws2_32 && _ld_sock="-lws2_32" && _winsock2=yes
+  cc_check -lws2_32 && _ld_sock="-lws2_32" && _winsock2_h=yes
 fi
 test "$_ld_sock" && _res_comment="using $_ld_sock"
 echores "$_socklib"
 
 
-if test $_winsock2 = yes ; then
+if test $_winsock2_h = yes ; then
   _ld_sock="-lws2_32"
-  _def_winsock2='#define HAVE_WINSOCK2 1'
+  _def_winsock2_h='#define HAVE_WINSOCK2_H 1'
 else
-  _def_winsock2='#undef HAVE_WINSOCK2'
+  _def_winsock2_h='#undef HAVE_WINSOCK2_H'
 fi
 
 
@@ -2815,7 +2830,7 @@ cat > $TMPC << EOF
 #include <arpa/inet.h>
 int main(void) { (void) inet_pton(0, 0, 0); return 0; }
 EOF
-if test "$_winsock2" = yes ; then
+if test "$_winsock2_h" = yes ; then
     _res_comment="using winsock2 functions instead"
     echores "no"
 elif cc_check $_ld_sock ; then
@@ -2877,6 +2892,21 @@ else
   _def_socklen_t='#undef HAVE_SOCKLEN_T'
 fi
 echores "$_socklen_t"
+
+
+echocheck "closesocket()"
+_closesocket=no
+cat > $TMPC << EOF
+#include <winsock2.h>
+int main(void) { closesocket(~0); return 0; }
+EOF
+cc_check $_ld_sock && _closesocket=yes
+if test "$_closesocket" = yes ; then
+  _def_closesocket='#define HAVE_CLOSESOCKET 1'
+else
+  _def_closesocket='#undef HAVE_CLOSESOCKET'
+fi
+echores "$_closesocket"
 
 
 echocheck "network"
@@ -4529,7 +4559,7 @@ echocheck "DVB"
 if test "$_dvb" = auto ; then
   _dvb=no
 cat >$TMPC << EOF
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <time.h>
@@ -4559,7 +4589,7 @@ if test "$_dvbhead" = auto ; then
   _dvbhead=no
 
 cat >$TMPC << EOF
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <time.h>
@@ -5443,10 +5473,10 @@ elif test "$_dvdread" = auto ; then
   if test "$_dl" = yes; then
     cat > $TMPC << EOF
 #include <inttypes.h>
-#include <libdvdread/dvd_reader.h>
-#include <libdvdread/ifo_types.h>
-#include <libdvdread/ifo_read.h>
-#include <libdvdread/nav_read.h>
+#include <dvdread/dvd_reader.h>
+#include <dvdread/ifo_types.h>
+#include <dvdread/ifo_read.h>
+#include <dvdread/nav_read.h>
 int main(void) { return 0; }
 EOF
   fi
@@ -5905,13 +5935,13 @@ echores "$_toolame"
 echocheck "OggVorbis support"
 if test "$_tremor_internal" = yes; then
   _libvorbis=no
-elif test "$_tremor_external" = auto; then
-  _tremor_external=no
+elif test "$_tremor" = auto; then
+  _tremor=no
   cat > $TMPC << EOF
 #include <tremor/ivorbiscodec.h>
 int main(void) { vorbis_packet_blocksize(0,0); return 0; }
 EOF
-  cc_check -logg -lvorbisidec $_ld_lm && _tremor_external=yes && _libvorbis=no
+  cc_check -logg -lvorbisidec $_ld_lm && _tremor=yes && _libvorbis=no
 fi
 if test "$_libvorbis" = auto; then
   _libvorbis=no
@@ -5931,7 +5961,7 @@ if test "$_tremor_internal" = yes ; then
     cflags_tremor_low="-D_LOW_ACCURACY_"
     _res_comment="internal low accuracy Tremor"
   fi
-elif test "$_tremor_external" = yes ; then
+elif test "$_tremor" = yes ; then
   _vorbis=yes
   _def_vorbis='#define CONFIG_OGGVORBIS 1'
   _def_tremor='#define CONFIG_TREMOR 1'
@@ -6158,14 +6188,16 @@ if test "$_faad_internal" = auto ; then
         _res_comment="broken gcc"
         ;;
       *)
+        _faad=yes
         _faad_internal=yes
         ;;
     esac
   else
+    _faad=yes
     _faad_internal=yes
   fi
-elif test "$_faad_internal" = no && test "$_faad_external" = auto ; then
-  _faad_external=no
+fi
+if test "$_faad" = auto ; then
   cat > $TMPC << EOF
 #include <faad.h>
 #ifndef FAAD_MIN_STREAMSIZE
@@ -6174,12 +6206,13 @@ elif test "$_faad_internal" = no && test "$_faad_external" = auto ; then
 int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo;
     testhand = faacDecOpen(); faacDecInit(0, 0, 0, 0, 0); return 0; }
 EOF
-  cc_check -lfaad $_ld_lm && _faad_external=yes
+  cc_check -lfaad $_ld_lm && _faad=yes
 fi
 
+_def_faad='#undef CONFIG_FAAD'
+_def_faad_internal="#undef CONFIG_FAAD_INTERNAL"
 if test "$_faad_internal" = yes ; then
   _def_faad_internal="#define CONFIG_FAAD_INTERNAL 1"
-  _faad=yes
   _res_comment="internal floating-point"
   if test "$_faad_fixed" = yes ; then
     # The FIXED_POINT implementation of FAAD2 improves performance
@@ -6187,19 +6220,15 @@ if test "$_faad_internal" = yes ; then
     cflags_faad_fixed="-DFIXED_POINT"
     _res_comment="internal fixed-point"
   fi
-elif test "$_faad_external" = yes ; then
-  _faad=yes
+elif test "$_faad" = yes ; then
   _ld_extra="$_ld_extra -lfaad"
-else
-  _def_faad_internal="#undef CONFIG_FAAD_INTERNAL"
-  _faad=no
 fi
 
 if test "$_faad" = yes ; then
   _def_faad='#define CONFIG_FAAD 1'
   _codecmodules="faad2 $_codecmodules"
 else
-  _def_faad='#undef CONFIG_FAAD'
+  _faad=no
   _nocodecmodules="faad2 $_nocodecmodules"
 fi
 echores "$_faad"
@@ -8599,7 +8628,7 @@ $_def_ftp
 $_def_vstream
 
 /* enable winsock2 instead of Unix functions*/
-$_def_winsock2
+$_def_winsock2_h
 
 /* define this to use inet_aton() instead of inet_pton() */
 $_def_use_aton
@@ -8610,6 +8639,9 @@ $_def_socklen_t
 #define HAVE_SOCKLEN_T 1
 typedef int socklen_t;
 #endif
+
+/* closesocket() support */
+$_def_closesocket
 
 /* enables / disables cdparanoia support */
 $_def_cdparanoia

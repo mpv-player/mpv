@@ -30,8 +30,7 @@
 
 #include <sys/types.h>
 #include "config.h"
-#ifndef HAVE_WINSOCK2
-#define closesocket close
+#ifndef HAVE_WINSOCK2_H
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -48,15 +47,16 @@
 #include <inttypes.h>
 
 #include "mp_msg.h"
-#include "../url.h"
-#include "../rtp.h"
 #include "rtsp.h"
 #include "rtsp_rtp.h"
 #include "rtsp_session.h"
-#include "../realrtsp/real.h"
-#include "../realrtsp/rmff.h"
-#include "../realrtsp/asmrp.h"
-#include "../realrtsp/xbuffer.h"
+#include "stream/network.h"
+#include "stream/url.h"
+#include "stream/rtp.h"
+#include "stream/realrtsp/real.h"
+#include "stream/realrtsp/rmff.h"
+#include "stream/realrtsp/asmrp.h"
+#include "stream/realrtsp/xbuffer.h"
 
 /*
 #define LOG

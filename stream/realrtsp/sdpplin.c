@@ -27,7 +27,7 @@
  */
  
 #include "config.h"
-#include "../librtsp/rtsp.h"
+#include "stream/librtsp/rtsp.h"
 #include "sdpplin.h"
 #include "xbuffer.h"
 #include "mp_msg.h"

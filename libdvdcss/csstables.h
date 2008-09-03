@@ -4,7 +4,7 @@
  * Copyright (C) 1999-2001 VideoLAN
  * $Id$
  *
- * Author: Stéphane Borel <stef@via.ecp.fr>
+ * Author: StÃ©phane Borel <stef@via.ecp.fr>
  *
  * based on:
  *  - css-auth by Derek Fawcus <derek@spider.com>

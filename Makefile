@@ -238,15 +238,15 @@ SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
 SRCS_COMMON-$(DVDNAV)                += stream/stream_dvdnav.c
 SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
                                         stream/stream_dvd_common.c
-SRCS_COMMON-$(DVDREAD_INTERNAL)      += dvdread/cmd_print.c \
-                                        dvdread/dvd_input.c \
-                                        dvdread/dvd_reader.c \
-                                        dvdread/dvd_udf.c \
-                                        dvdread/ifo_print.c \
-                                        dvdread/ifo_read.c \
-                                        dvdread/md5.c \
-                                        dvdread/nav_print.c \
-                                        dvdread/nav_read.c \
+SRCS_COMMON-$(DVDREAD_INTERNAL)      += libdvdread/cmd_print.c \
+                                        libdvdread/dvd_input.c \
+                                        libdvdread/dvd_reader.c \
+                                        libdvdread/dvd_udf.c \
+                                        libdvdread/ifo_print.c \
+                                        libdvdread/ifo_read.c \
+                                        libdvdread/md5.c \
+                                        libdvdread/nav_print.c \
+                                        libdvdread/nav_read.c \
 
 SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
 SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
@@ -658,7 +658,6 @@ INSTALL_TARGETS-$(MENCODER) += install-mencoder install-mencoder-man
 INSTALL_TARGETS-$(MPLAYER)  += install-mplayer  install-mplayer-man
 
 DIRS =  . \
-        dvdread \
         gui \
         gui/mplayer \
         gui/mplayer/gtk \
@@ -682,6 +681,7 @@ DIRS =  . \
         ffmpeg/libavformat \
         ffmpeg/libavutil \
         libdvdcss \
+        libdvdread \
         libfaad2 \
         libmenu \
         libmpcodecs \
@@ -744,7 +744,7 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
 
-$(FFMPEGLIBS): $(FFMPEGFILES) libvo/fastmemcpy.h config.h
+$(FFMPEGLIBS): $(FFMPEGFILES) config.h
 	$(MAKE) -C $(@D)
 	touch $@
 
@@ -786,8 +786,8 @@ codec-cfg.d: codecs.conf.h
 mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d osdep/mplayer-rc.o stream/network.d stream/stream_cddb.d: version.h
 $(DEPS): help_mp.h
 
-dvdread/%.o dvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\" $(CFLAGS_LIBDVDCSS)
+libdvdread/%.o libdvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_FAAD_FIXED)
 
 loader/% loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAGS_NO_OMIT_LEAF_FRAME_POINTER)
@@ -1059,12 +1059,9 @@ dhahelperwinclean:
 
 
 
-# Do not include dependencies when they are about to be removed anyway
-# or if SKIP_DEPS was set to "yes" on the command line.
+# Do not include dependencies when they are about to be removed anyway.
 ifneq ($(MAKECMDGOALS),distclean)
-ifneq ($(SKIP_DEPS),yes)
 -include $(DEPS)
-endif
 endif
 
 .PHONY: all doxygen *install* *tools drivers dhahelper*

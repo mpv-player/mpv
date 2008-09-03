@@ -30,7 +30,7 @@
  * USA
  */
 
-#include <dvdread/ifo_types.h> /* only dvd_time_t, vm_cmd_t and user_ops_t */
+#include <libdvdread/ifo_types.h> /* only dvd_time_t, vm_cmd_t and user_ops_t */
 /* If it's ever removed add a uintX_t test. */
 
 #undef ATTRIBUTE_PACKED

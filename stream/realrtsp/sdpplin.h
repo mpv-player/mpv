@@ -30,7 +30,7 @@
 #define MPLAYER_SDPPLIN_H
 
 #include "rmff.h"
-#include "../librtsp/rtsp.h"
+#include "stream/librtsp/rtsp.h"
 
 typedef struct {
 

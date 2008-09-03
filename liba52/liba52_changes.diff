@@ -75,17 +75,11 @@
  
 --- liba52/bitstream.h	2006-06-12 15:05:07.000000000 +0200
 +++ liba52/bitstream.h	2006-06-05 02:23:02.000000000 +0200
-@@ -21,6 +25,48 @@
+@@ -21,6 +25,42 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
 +/* code from ffmpeg/libavcodec */
-+#if defined(__GNUC__) && (__GNUC__ > 3 || __GNUC_ == 3 && __GNUC_MINOR__ > 0)
-+#    define always_inline __attribute__((always_inline)) inline
-+#else
-+#    define always_inline inline
-+#endif
-+
 +#if defined(__sparc__) || defined(hpux)
 +/*
 + * the alt bitstream reader performs unaligned memory accesses; that doesn't work
@@ -97,11 +91,11 @@
 +#define ALT_BITSTREAM_READER
 +
 +/* used to avoid misaligned exceptions on some archs (alpha, ...) */
-+#if defined (ARCH_X86) || defined(ARCH_ARMV4L)
++#if defined (ARCH_X86) || defined(HAVE_ARMV6)
 +#    define unaligned32(a) (*(uint32_t*)(a))
 +#else
 +#    ifdef __GNUC__
-+static always_inline uint32_t unaligned32(const void *v) {
++static inline uint32_t unaligned32(const void *v) {
 +    struct Unaligned {
 +	uint32_t i;
 +    } __attribute__((packed));
@@ -142,7 +136,7 @@
 - (((uint8_t*)&x)[2] << 8)  | (((uint8_t*)&x)[3]))
 -
 +#	define swab32(x) __generic_swab32(x)
-+	static always_inline const uint32_t __generic_swab32(uint32_t x)
++	static inline const uint32_t __generic_swab32(uint32_t x)
 +	{
 +		return ((((uint8_t*)&x)[0] << 24) | (((uint8_t*)&x)[1] << 16) |
 +		 (((uint8_t*)&x)[2] << 8)  | (((uint8_t*)&x)[3]));
@@ -290,7 +284,7 @@
  {
      switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
  
-@@ -653,3 +685,1137 @@
+@@ -653,3 +685,1104 @@
  	goto mix_31to21;
      }
  }
@@ -621,39 +615,6 @@
 +	:: "r" (samples+256)
 +	: "%"REG_S
 +	);
-+}
-+
-+/*
-+ I hope dest and src will be at least 8 byte aligned and size
-+ will devide on 8 without remain
-+ Note: untested and unused.
-+*/
-+static void copy_MMX(void *dest,const void *src,unsigned size)
-+{
-+  unsigned i;
-+  size /= 64;
-+	for(i=0;i<size;i++)
-+	{
-+	    __asm __volatile(
-+		"movq	%0,   %%mm0\n\t"
-+		"movq	8%0,  %%mm1\n\t"
-+		"movq	16%0, %%mm2\n\t"
-+		"movq	24%0, %%mm3\n\t"
-+		"movq	32%0, %%mm4\n\t"
-+		"movq	40%0, %%mm5\n\t"
-+		"movq	48%0, %%mm6\n\t"
-+		"movq	56%0, %%mm7\n\t"
-+		"movq	%%mm0, %1\n\t"
-+		"movq	%%mm1, 8%1\n\t"
-+		"movq	%%mm2, 16%1\n\t"
-+		"movq	%%mm3, 24%1\n\t"
-+		"movq	%%mm4, 32%1\n\t"
-+		"movq	%%mm5, 40%1\n\t"
-+		"movq	%%mm6, 48%1\n\t"
-+		"movq	%%mm7, 56%1\n\t"
-+		:
-+		:"m"(src),"m"(dest));
-+	}
 +}
 +
 +static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,

@@ -20,8 +20,8 @@
 #include "gui/app.h"
 #include "help_mp.h"
 
-#include "../pixmaps/error.xpm"
-#include "../pixmaps/warning.xpm"
+#include "gui/mplayer/pixmaps/error.xpm"
+#include "gui/mplayer/pixmaps/warning.xpm"
 
 #include "gui/mplayer/widgets.h"
 #include "mb.h"

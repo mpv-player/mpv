@@ -1,4 +1,4 @@
-.\" synced with r27407
+.\" synced with r27466
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -8043,6 +8043,22 @@ Pour avoir tous les détails lisez le source.
 .IPs vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
 .RE
 .PD 1
+.
+.TP
+.B o=<key>=<value>[,<key>=<value>[,...]]
+Passe les à libavcodec les AVOptions.
+Notez que la création d'une rustine pour que cette option ne soit pas
+nécessaire, mais qu'à la place, toutes les options inconnues soient passées
+au système AVOption est la bienvenue.
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.PD 0
+.IPs o=bt=100k
+.PD 1
+.RE
 .
 .TP
 .B acodec=<value>

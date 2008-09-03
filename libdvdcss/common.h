@@ -5,7 +5,7 @@
  * Copyright (C) 1998, 1999, 2000 VideoLAN
  * $Id$
  *
- * Authors: Samuel Hocevar <sam@via.ecp.fr>
+ * Authors: Sam Hocevar <sam@via.ecp.fr>
  *          Vincent Seguin <seguin@via.ecp.fr>
  *          Gildas Bazin <gbazin@netcourrier.com>
  *

@@ -38,7 +38,7 @@
 #include "xbuffer.h"
 #include "libavutil/md5.h"
 #include "libavutil/intreadwrite.h"
-#include "../http.h"
+#include "stream/http.h"
 #include "mp_msg.h"
 
 /*

@@ -4,8 +4,8 @@
  * Copyright (C) 1998-2001 VideoLAN
  * $Id$
  *
- * Authors: Stéphane Borel <stef@via.ecp.fr>
- *          Samuel Hocevar <sam@zoy.org>
+ * Authors: StÃ©phane Borel <stef@via.ecp.fr>
+ *          Sam Hocevar <sam@zoy.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

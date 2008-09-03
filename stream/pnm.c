@@ -35,8 +35,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <inttypes.h>
-#ifndef HAVE_WINSOCK2
-#define closesocket close
+#ifndef HAVE_WINSOCK2_H
 #include <sys/socket.h>
 //#include <netinet/in.h>
 //#include <netdb.h>
@@ -50,7 +49,7 @@
 #include "libmpdemux/demuxer.h"
 #include "help_mp.h"
 #include "osdep/timer.h"
-
+#include "network.h"
 #include "pnm.h"
 #include "tcp.h"
 //#include "libreal/rmff.h"
@@ -205,7 +204,7 @@ static int rm_write(int s, const char *buf, int len) {
     if (n > 0)
       total += n;
     else if (n < 0) {
-#ifndef HAVE_WINSOCK2
+#ifndef HAVE_WINSOCK2_H
       if (timeout>0 && (errno == EAGAIN || errno == EINPROGRESS)) {
 #else
       if (timeout>0 && (errno == EAGAIN || WSAGetLastError() == WSAEINPROGRESS)) {

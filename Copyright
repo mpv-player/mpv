@@ -42,16 +42,16 @@ Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
 License:    GNU General Public License
 
 Name:       libdvdcss
-Version:    Subversion r208 (post 1.2.9 release)
+Version:    1.2.10
 Homepage:   http://developers.videolan.org/libdvdcss/
 Directory:  libdvdcss
-Copyright:  1998-2006 VideoLAN
+Copyright:  1998-2008 VideoLAN
 License:    GNU General Public License
 
 Name:       libdvdread
 Version:    0.9.7 + patches
 Homepage:   http://www.dtek.chalmers.se/groups/dvd/development.shtml
-Directory:  dvdread
+Directory:  libdvdread
 Copyright:  1998, 1999 Eric Smith <eric@brouhaha.com>
             1999 Christian Wolff for convergence integrated media
             2000-2001 Billy Biggs <vektor@dumbterm.net>,

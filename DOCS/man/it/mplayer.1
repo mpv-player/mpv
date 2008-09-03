@@ -1,4 +1,4 @@
-.\" synced with r27348
+.\" synced with r27454
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -3618,8 +3618,9 @@ Driver di uscita video molto veloce su schede che lo supportano.
 .RSs
 .IPs <sottodispositivo>
 Seleziona in modo esplicito il sotto dispositivo VIDIX da usare.
-I driver disponibili sono cyberblade, mach64,
-mga_crtc2, mga, nvidia, pm2, pm3, radeon, rage128, sis e unichrome.
+I driver disponibili sono cyberblade, ivtv, mach64,
+mga_crtc2, mga, nvidia, pm2, pm3, radeon, rage128, s3, sh_veu,
+sis_vid e unichrome.
 .RE
 .PD 1
 .
@@ -4111,6 +4112,10 @@ Seleziona esplicitamente il nome del dispositivo fbdev da usare
 (default: /dev/\:fb0).
 .RE
 .PD 1
+.
+.TP
+.B wii (solo Linux)
+Driver di uscita video specifico per Nintendo Wii/GameCube.
 .
 .TP
 .B 3dfx (solo Linux)
@@ -8585,26 +8590,16 @@ Sfocatura gaussiana di quantizzazione (default: 0.5), valori più grandi
 medieranno la quantizzazione maggiormente nel tempo (cambiamenti più lenti).
 .
 .TP
-.B vqcomp=<valore>
+.B vqcomp=<0.0\-1.0>
 Compressione della quantizzazione, vrc_eq dipende da questo (default: 0.5).
-Per esempio, supponendo che sia utilizzata l'equazione di default del rate control,
-se si utilizza vqcomp=1.0 il controllo della dimensione del file alloca per ogni
-fotogramma la quantità di bit necessari a codificarlo con lo stesso QP.
-Se vqcomp=0.0 il controllo della dimensione del file alloca lo stesso numero di bit
-per ogni fotogramma, cioè CBR preciso.
 .I NOTA:
-Questi sono impostazioni estreme e non dovrebbero mai essere usate.
-La miglior qualità percepita sarà ottimale tra questi due valori.
+La qualità percepita sarà ottimale per valori compresi nella gamma.
 .
 .TP
 .B vrc_eq=<equazione>
 equazione principale per il controllo della dimensione del file (ratecontrol)
 .RE
 .RSs
-.IPs "1\ \ \ \ "
-bitrate costante
-.IPs "tex\ \ "
-qualità costante
 .IPs 1+(tex/\:avgTex-1)*qComp
 approssimativamente l'equazione del vecchio controllo di dimensione
 .IPs tex^qComp

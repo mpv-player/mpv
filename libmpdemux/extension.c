@@ -61,6 +61,7 @@ static struct {
 	{ "ac3", DEMUXER_TYPE_LAVF },
         { "ape", DEMUXER_TYPE_LAVF },
         { "apl", DEMUXER_TYPE_LAVF },
+        { "eac3",DEMUXER_TYPE_LAVF },
         { "mac", DEMUXER_TYPE_LAVF },
         { "str", DEMUXER_TYPE_LAVF },
 

@@ -803,8 +803,8 @@ vobsub_parse_origin(vobsub_t *vob, const char *line)
 unsigned int vobsub_palette_to_yuv(unsigned int pal)
 {
     int r, g, b, y, u, v;
-    // Palette in idx file is not rgb value, it was calculated by wrong forumla.
-    // Here's reversed forumla of the one used to generate palette in idx file.
+    // Palette in idx file is not rgb value, it was calculated by wrong formula.
+    // Here's reversed formula of the one used to generate palette in idx file.
     r = pal >> 16 & 0xff;
     g = pal >> 8 & 0xff;
     b = pal & 0xff;

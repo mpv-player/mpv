@@ -31,7 +31,7 @@
 #define MPLAYER_REAL_H
 
 #include "rmff.h"
-#include "../librtsp/rtsp.h"
+#include "stream/librtsp/rtsp.h"
 
 #define HEADER_SIZE 4096
 

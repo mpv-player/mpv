@@ -10,9 +10,7 @@
 #include "help_mp.h"
 #include "options.h"
 
-#ifndef HAVE_WINSOCK2
-#define closesocket close
-#else
+#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
 

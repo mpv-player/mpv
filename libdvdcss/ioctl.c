@@ -5,11 +5,11 @@
  * $Id$
  *
  * Authors: Markus Kuespert <ltlBeBoy@beosmail.com>
- *          Samuel Hocevar <sam@zoy.org>
+ *          Sam Hocevar <sam@zoy.org>
  *          Jon Lech Johansen <jon-vl@nanocrew.net>
- *          Håkan Hjort <d95hjort@dtek.chalmers.se>
+ *          HÃ¥kan Hjort <d95hjort@dtek.chalmers.se>
  *          Eugenio Jarosiewicz <ej0@cise.ufl.edu>
- *          David Siebörger <drs-videolan@rucus.ru.ac.za>
+ *          David SiebÃ¶rger <drs-videolan@rucus.ru.ac.za>
  *          Alex Strelnikov <lelik@os2.ru>
  *          Gildas Bazin <gbazin@netcourrier.com>
  *

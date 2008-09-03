@@ -66,12 +66,6 @@ static    ComponentResult (*ImageCodecBeginBand)(ComponentInstance      ci,
                                  CodecDecompressParams * params,
                                  ImageSubCodecDecompressRecord * drp,
                                  long                   flags);
-static    ComponentResult (*ImageCodecDrawBand)(ComponentInstance      ci,
-                                 ImageSubCodecDecompressRecord * drp);
-static    ComponentResult (*ImageCodecEndBand)(ComponentInstance      ci,
-                                 ImageSubCodecDecompressRecord * drp,
-                                 OSErr                  result,
-                                 long                   flags);
 static    ComponentResult (*ImageCodecGetCodecInfo)(ComponentInstance      ci,
                                  CodecInfo *            info);
 static    ComponentResult (*ImageCodecPreDecompress)(ComponentInstance      ci,
