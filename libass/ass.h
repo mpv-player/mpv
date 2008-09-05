@@ -154,6 +154,14 @@ void ass_free_style(ass_track_t* track, int sid);
 void ass_free_event(ass_track_t* track, int eid);
 
 /**
+ * \brief Parse a chunk of subtitle stream data.
+ * \param track track
+ * \param data string to parse
+ * \param size length of data
+ */
+void ass_process_data(ass_track_t* track, char* data, int size);
+
+/**
  * \brief Parse Codec Private section of subtitle stream
  * \param track target track
  * \param data string to parse

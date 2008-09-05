@@ -717,21 +717,33 @@ static int process_text(ass_track_t* track, char* str)
 }
 
 /**
- * \brief Process CodecPrivate section of subtitle stream
+ * \brief Process a chunk of subtitle stream data.
  * \param track track
  * \param data string to parse
  * \param size length of data
- CodecPrivate section contains [Stream Info] and [V4+ Styles] ([V4 Styles] for SSA) sections
-*/ 
-void ass_process_codec_private(ass_track_t* track, char *data, int size)
+*/
+void ass_process_data(ass_track_t* track, char* data, int size)
 {
 	char* str = malloc(size + 1);
 
 	memcpy(str, data, size);
 	str[size] = '\0';
 
+	mp_msg(MSGT_ASS, MSGL_V, "event: %s\n", str);
 	process_text(track, str);
 	free(str);
+}
+
+/**
+ * \brief Process CodecPrivate section of subtitle stream
+ * \param track track
+ * \param data string to parse
+ * \param size length of data
+ CodecPrivate section contains [Stream Info] and [V4+ Styles] ([V4 Styles] for SSA) sections
+*/
+void ass_process_codec_private(ass_track_t* track, char *data, int size)
+{
+	ass_process_data(track, data, size);
 
 	if (!track->event_format) {
 		// probably an mkv produced by ancient mkvtoolnix
