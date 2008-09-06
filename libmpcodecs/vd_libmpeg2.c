@@ -11,7 +11,7 @@
 
 static vd_info_t info = 
 {
-	"MPEG 1/2 Video decoder libmpeg2-v0.4.0b",
+	"libmpeg2 MPEG 1/2 Video decoder",
 	"libmpeg2",
 	"A'rpi & Fabian Franz",
 	"Aaron & Walken",
