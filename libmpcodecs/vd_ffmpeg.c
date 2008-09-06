@@ -19,7 +19,7 @@ static vd_info_t info = {
 	"ffmpeg",
 	"A'rpi",
 	"A'rpi, Michael, Alex",
-	"native codecs (http://ffmpeg.sf.net/)"
+	"native codecs"
 };
 
 LIBVD_EXTERN(ffmpeg)
