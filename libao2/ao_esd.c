@@ -1,10 +1,26 @@
 /*
- * ao_esd - EsounD audio output driver for MPlayer
+ * EsounD audio output driver for MPlayer
  *
- * Juergen Keil <jk@tools.de>
+ * copyright (c) 2002 Juergen Keil <jk@tools.de>
  *
- * This driver is distributed under the terms of the GPL
+ * This file is part of MPlayer.
  *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+ /*
  * TODO / known problems:
  * - does not work well when the esd daemon has autostandby disabled
  *   (workaround: run esd with option "-as 2" - fortunatelly this is
