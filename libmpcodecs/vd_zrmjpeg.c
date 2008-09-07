@@ -1,9 +1,26 @@
 /*
- * Copyright (C) 2005 Rik Snel <rsnel@cube.dyndns.org>, license GPL v2 or later
- * - based on vd_mpegpes.c by A'rpi (C) 2002-2003 
+ * Copyright (C) 2005 Rik Snel <rsnel@cube.dyndns.org>
+ * - based on vd_mpegpes.c by A'rpi (C) 2002-2003
  * - guess_mjpeg_type code stolen from lav_io.c (C) 2000 Rainer Johanni
  *   <Rainer@Johanni.de> from the mjpegtools package
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 

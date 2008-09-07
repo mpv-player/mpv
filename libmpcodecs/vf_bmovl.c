@@ -1,8 +1,26 @@
-/* vf_bmovl.c v0.9.1 - BitMap OVerLay videofilter for MPlayer
+/*
+ * vf_bmovl.c v0.9.1 - BitMap OVerLay video filter for MPlayer
  *
  * (C) 2002 Per Wigren <wigren@home.se>
- * Licenced under the GNU General Public License
  *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+/*
  * Use MPlayer as a framebuffer to read bitmaps and commands from a FIFO
  * and display them in the window.
  *

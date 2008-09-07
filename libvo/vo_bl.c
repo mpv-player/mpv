@@ -1,21 +1,30 @@
-/* 
- * vo_bl.c - playback using the Blinkenlights UPD protocol (and to files)
- * 
- * UDP socket handling copied from bsender.c part of blib-0.6: 
+/*
+ * playback using the Blinkenlights UDP protocol (and to files)
+ *
+ * UDP socket handling copied from bsender.c part of blib-0.6:
  * http://sven.gimp.org/blinkenlights/
- * Copyright (c)  2001-2001 The Blinkenlights Crew:
+ * copyright (c)  2001-2001 The Blinkenlights Crew:
  * 	Sven Neumann <sven@gimp.org>
  * 	Michael Natterer <mitch@gimp.org>
  * 	Daniel Mack <daniel@yoobay.net>
- * (these portions are licensed under GNU GPL v2 or "(at your option)
- * any later version")
- * 
- * Other stuff: Copyright (C) Rik Snel 2002, License GNU GPL v2 or later
+ * copyright (C) 2004 Stefan Schuermans <1stein@schuermans.info>
+ * other stuff: copyright (C) 2002 Rik Snel
  *
- * patch from Stefan Schuermans <1stein@schuermans.info>:
- *   - correction of "maxval" in Blinkenlights UDP protcol
- *   - new scheme for new HDL
- *   - new scheme for grayscale in arbitrary size
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <stdio.h>
