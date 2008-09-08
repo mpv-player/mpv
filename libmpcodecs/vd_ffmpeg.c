@@ -283,7 +283,7 @@ static int init(sh_video_t *sh){
     avctx->width = sh->disp_w;
     avctx->height= sh->disp_h;
     avctx->workaround_bugs= lavc_param_workaround_bugs;
-    avctx->error_resilience= lavc_param_error_resilience;
+    avctx->error_recognition= lavc_param_error_resilience;
     if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
 #ifdef CODEC_FLAG2_FAST
     avctx->flags2|= lavc_param_fast;
