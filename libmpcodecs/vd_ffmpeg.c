@@ -401,7 +401,7 @@ static int init(sh_video_t *sh){
 	}
 
     if(sh->bih)
-	avctx->bits_per_sample= sh->bih->biBitCount;
+	avctx->bits_per_coded_sample= sh->bih->biBitCount;
 
     if(lavc_param_threads > 1)
         avcodec_thread_init(avctx, lavc_param_threads);

@@ -240,7 +240,7 @@ m_option_t lavcopts_conf[]={
         {"predia", &lavc_param_pre_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
         {"dia", &lavc_param_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
 	{"qpel", &lavc_param_qpel, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QPEL, NULL},
-	{"trell", &lavc_param_trell, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_TRELLIS_QUANT, NULL},
+	{"trell", &lavc_param_trell, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"lowdelay", &lavc_param_lowdelay, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_LOW_DELAY, NULL},
 	{"last_pred", &lavc_param_last_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{"preme", &lavc_param_pre_me, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
@@ -369,7 +369,6 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->luma_elim_threshold= lavc_param_luma_elim_threshold;
     lavc_venc_context->chroma_elim_threshold= lavc_param_chroma_elim_threshold;
     lavc_venc_context->rtp_payload_size= lavc_param_packet_size;
-    if(lavc_param_packet_size )lavc_venc_context->rtp_mode=1;
     lavc_venc_context->strict_std_compliance= lavc_param_strict;
     lavc_venc_context->i_quant_factor= lavc_param_vi_qfactor;
     lavc_venc_context->i_quant_offset= (int)(FF_QP2LAMBDA * lavc_param_vi_qoffset + 0.5);
@@ -540,7 +539,7 @@ static int config(struct vf_instance_s* vf,
 #endif    
     lavc_venc_context->dia_size= lavc_param_dia_size;
     lavc_venc_context->flags|= lavc_param_qpel;
-    lavc_venc_context->flags|= lavc_param_trell;
+    lavc_venc_context->trellis = lavc_param_trell;
     lavc_venc_context->flags|= lavc_param_lowdelay;
     lavc_venc_context->flags|= lavc_param_bit_exact;
     lavc_venc_context->flags|= lavc_param_aic;
@@ -665,7 +664,7 @@ static int config(struct vf_instance_s* vf,
 
 	  lavc_venc_context->flags &= ~CODEC_FLAG_QPEL;
 	  lavc_venc_context->flags &= ~CODEC_FLAG_4MV;
-	  lavc_venc_context->flags &= ~CODEC_FLAG_TRELLIS_QUANT;
+	  lavc_venc_context->trellis = 0;
 	  lavc_venc_context->flags &= ~CODEC_FLAG_CBP_RD;
 	  lavc_venc_context->flags &= ~CODEC_FLAG_QP_RD;
 	  lavc_venc_context->flags &= ~CODEC_FLAG_MV0;
@@ -700,8 +699,8 @@ static int config(struct vf_instance_s* vf,
     
     /* free second pass buffer, its not needed anymore */
     av_freep(&lavc_venc_context->stats_in);
-    if(lavc_venc_context->bits_per_sample)
-        mux_v->bih->biBitCount= lavc_venc_context->bits_per_sample;
+    if(lavc_venc_context->bits_per_coded_sample)
+        mux_v->bih->biBitCount= lavc_venc_context->bits_per_coded_sample;
     if(lavc_venc_context->extradata_size){
         mux_v->bih= realloc(mux_v->bih, sizeof(BITMAPINFOHEADER) + lavc_venc_context->extradata_size);
         memcpy(mux_v->bih + 1, lavc_venc_context->extradata, lavc_venc_context->extradata_size);
