@@ -122,7 +122,9 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                 ass_track = sh ? sh->ass_track : NULL;
                 if (!ass_track) continue;
                 if (type == 'a') { // ssa/ass subs with libass
-                    ass_process_data(ass_track, packet, len);
+                    ass_process_chunk(ass_track, packet, len,
+                                      (long long)(pts*1000 + 0.5),
+                                      (long long)((endpts-pts)*1000 + 0.5));
                 } else { // plaintext subs with libass
                     vo_sub = NULL;
                     if (pts != MP_NOPTS_VALUE) {
@@ -143,7 +145,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
                 if (type == 'a') { // ssa/ass subs without libass => convert to plaintext
                     int i;
                     unsigned char* p = packet;
-                    for (i=0; i < 9 && *p != '\0'; p++)
+                    for (i=0; i < 8 && *p != '\0'; p++)
                         if (*p == ',')
                             i++;
                     if (*p == '\0')  /* Broken line? */

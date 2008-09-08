@@ -2566,42 +2566,10 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
   return 0;
 }
 
-static void fix_ass_packet(char **block, int64_t *size,
-                           uint64_t block_duration, uint64_t timecode)
-{
-    char *line, *layer, *ptr = *block, *end = ptr+*size;
-    *end = 0;
-    for (; *ptr!=',' && ptr<end-1; ptr++);
-    if (*ptr == ',')
-        layer = ++ptr;
-    for (; *ptr!=',' && ptr<end-1; ptr++);
-    if (*ptr == ',') {
-        int64_t end_pts = timecode + block_duration;
-        int sc = timecode / 10;
-        int ec = end_pts  / 10;
-        int sh, sm, ss, eh, em, es, len;
-        sh = sc/360000;  sc -= 360000*sh;
-        sm = sc/  6000;  sc -=   6000*sm;
-        ss = sc/   100;  sc -=    100*ss;
-        eh = ec/360000;  ec -= 360000*eh;
-        em = ec/  6000;  ec -=   6000*em;
-        es = ec/   100;  ec -=    100*es;
-        *ptr++ = '\0';
-        len = 50 + end-ptr;
-        if (!(line = malloc(len)))
-            return;
-        snprintf(line,len,"Dialogue: %s,%d:%02d:%02d.%02d,%d:%02d:%02d.%02d,%s",
-                 layer, sh, sm, ss, sc, eh, em, es, ec, ptr);
-        *block = line;
-        *size = strlen(line);
-    }
-}
-
 static void
 handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
                  int64_t size, uint64_t block_duration, uint64_t timecode)
 {
-  char *data = block;
   demux_packet_t *dp;
 
   if (block_duration == 0)
@@ -2611,17 +2579,12 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
       return;
     }
 
-  if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
-      fix_ass_packet(&data, &size, block_duration, timecode);
-
   sub_utf8 = 1;
   dp = new_demux_packet(size);
-  memcpy(dp->buffer, data, size);
+  memcpy(dp->buffer, block, size);
   dp->pts = timecode / 1000.0f;
   dp->endpts = (timecode + block_duration) / 1000.0f;
   ds_add_packet(demuxer->sub, dp);
-  if (data != block)
-      free(data);
 }
 
 // Taken from demux_real.c. Thanks to the original developpers :)
