@@ -7,18 +7,19 @@
 <title>Faire un MPEG-4 (&quot;DivX&quot;) de bonne qualité à partir d'un DVD</title>
 
 <para>
-  Il est fréquemment demandé:"Comment puis-je recopier un DVD avec la meilleure
-  qualité possible pour une taille donnée ?". Ou encore:"Comment puis-je recopier
-  un DVD sur mon disque dur avec la meilleure qualité possible ? je m'en fiche de
-  la taille du fichier, je veux la meilleure qualité."
+  Il y a une question qui revient souvent&nbsp;:"Comment puis-je recopier un DVD avec la
+  meilleure qualité possible pour une taille donnée&thinsp;?". Ou encore&nbsp;:
+  "Comment puis-je recopier un DVD sur mon disque dur avec la meilleure qualité
+  possible&thinsp;? je m'en fiche de la taille du fichier, je veux la meilleure
+  qualité."
 </para>
 
 <para>
   Cette dernière question est peut-être un peu mal posée. Après tout, si vous ne vous
   souciez pas de la taille du fichier, pourquoi ne pas simplement copier le
-  flux MPEG-2 du DVD entier ? Bien sûr, votre AVI finira par faire 5Gb, mais
-  si vous voulez la meilleure qualité et ne pas vous soucier de la taille,
-  ceci est probablement votre meilleure option.
+  flux MPEG-2 du DVD en entier&thinsp;? Bien sûr, votre AVI finira par faire 5Gb,
+  mais si vous voulez la meilleure qualité, sans vous soucier de la
+  taille, ceci est probablement votre meilleure option.
 </para>
 
 <para>
@@ -46,7 +47,8 @@
 </para>
 
 <sect2 id="menc-feat-dvd-mpeg4-preparing-encode">
-<title>Préparer l'encodage : identifier le matériel source et le nombre d'images par secondes</title>
+<title>Préparer l'encodage&nbsp;: identifier le matériel source et le nombre
+d'images par secondes</title>
 <para>
   Avant même de penser à encoder un film, il est nécessaire de passer par quelques étapes
   préliminaires.
@@ -55,7 +57,7 @@
 <para>
   La première et plus importante étape avant l'encodage sera la détermination du
   type de contenu utilisé. Si votre matériel source provient d'un DVD ou de la télévision
-  hertzienne/câble/satellite, il sera stocké sous l'un de ces 2 formats :
+  hertzienne/câble/satellite, il sera stocké sous l'un de ces 2 formats&nbsp;:
   NTSC pour l'Amérique du nord et le Japon, et PAL pour l'Europe, etc.
   Il est important de réaliser que ceci est uniquement un format adapté pour
   la télévision et cela ne correspond souvent <emphasis role="bold">pas</emphasis>
@@ -65,7 +67,8 @@
   Afin de produire un encodage acceptable, vous devez connaître le format original.
   Négliger cette étape créera divers défauts dans votre encodage, dont de hideux effets
   de peigne et des images dupliquées ou même perdues. De plus, ces artefacts
-  sont mauvais pour l'efficacité d'encodage : vous obtiendriez une moins bonne qualité 
+  sont mauvais pour l'efficacité d'encodage&nbsp;: vous obtiendriez une moins
+bonne qualité
   pour le même débit.
 </para>
 
@@ -73,41 +76,47 @@
 <title>Identification du nombre d'images par seconde de la source</title>
 <para>
   Voici une liste de types de matériel source courants, où vous devriez les trouver et 
-  leurs propriétés :
+  leurs propriétés&nbsp;:
 </para>
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Film standard</emphasis>: produit pour une diffusion
-  cinématographique en 24 images par secondes.
+    <emphasis role="bold">Film standard</emphasis>&nbsp;: produit pour une
+  diffusion cinématographique en 24 images par secondes.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Vidéo PAL</emphasis>: Enregistrée par une caméra à 50 trames
-  par secondes. Une trame consiste en l'ensemble des lignes paires (ou impaires) d'une image.
-  La télévision a été créée de façon à afficher alternativement l'une ou l'autre de ces trames
-  créant ainsi une forme de compression analogique bon marché.
-  L'oeil humain est censé compenser cette alternance de trames mais dès lors que vous
+    <emphasis role="bold">Vidéo PAL</emphasis>&nbsp;: Enregistrée par une
+  caméra à 50 trames par secondes.
+  Une trame consiste en l'ensemble des lignes paires (ou impaires) d'une
+  image.
+  La télévision a été créée de façon à afficher alternativement l'une ou
+  l'autre de ces trames créant ainsi une forme de compression analogique bon
+  marché.
+  L'oeil humain est censé compenser cette alternance de trames mais dès lors
+  que vous
   comprenez l'entrelacement, vous apprendrez à le voir sur la télévision et vous ne la regarderez
   plus de la même façon. Deux trames ne font <emphasis role="bold">pas</emphasis> une image 
   complète, car elles sont capturées avec un décalage d'1/50e de seconde et donc, à moins 
   qu'il n'y ait pas de mouvement, elles ne s'alignent pas parfaitement.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Vidéo NTSC</emphasis> : Enregistré par une caméra à
-  60000/1001 trames par secondes, ou 60 trames par secondes dans l'ère noir/blanc.
+    <emphasis role="bold">Vidéo NTSC</emphasis>&nbsp;: Enregistré par une
+  caméra à 60000/1001 trames par secondes, ou 60 trames par secondes dans
+  l'ère noir/blanc.
   A part cela, similaire au PAL.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Dessins animés</emphasis>: Habituellement dessiné en 24 images par secondes,
-  peut exister en mélange variés de nombre d'images par secondes.
+    <emphasis role="bold">Dessins animés</emphasis>&nbsp;: Habituellement
+  dessiné en 24 images par secondes, peut exister en mélange variés de
+  nombre d'images par secondes.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Infographie</emphasis>: peut être de 
+    <emphasis role="bold">Infographie</emphasis>&nbsp;: peut être de
   n'importe quel nombre d'images par secondes mais certains sont plus communs que d'autres;
   24 et 30 sont typiques du NTSC et 25 du PAL.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Vieux films</emphasis>: nombre d'images par secondes généralement 
-  plus bas.
+    <emphasis role="bold">Vieux films</emphasis>&nbsp;: nombre d'images par
+  secondes généralement plus bas.
 </para></listitem>
 </itemizedlist>
 </sect3>
@@ -125,7 +134,9 @@
 <para>
   La distinction la plus importante qui doit être faite entre ces formats
   est que certains utilisent des images entières alors que d'autres, des trames.
-  Avant d'être visionnable sur un téléviseur, <emphasis>tout</emphasis> film (DVD inclus) doit être converti dans un 
+  Avant d'être visionnable sur un téléviseur,
+  <emphasis role="bold">tout</emphasis>
+  film (DVD inclus) doit être converti dans un
   format basé sur des trames. Les diverses méthodes par lesquelles ceci peut être fait
   peuvent être rassemblées sous le terme anglais "telecine", parmi lesquels l'infâme
   NTSC "3:2 pulldown" en est une variété.
@@ -134,30 +145,34 @@
 </para>
 
 <itemizedlist>
-<title>Plusieurs variétés communes de pulldown :</title>
+  <title>Plusieurs variétés communes de pulldown&nbsp;:</title>
 <listitem><para>
-  <emphasis role="bold">Pulldown PAL 2:2 </emphasis>: Le plus joli de tous.
+    <emphasis role="bold">Pulldown PAL 2:2 </emphasis>&nbsp;: Le plus joli de
+  tous.
   Chaque image est affichée pour la durée de deux trames par extraction des lignes
   paires et impaires, puis en les affichant par alternance.
   Si l'original est à 24 images par secondes, ce procédé accélère le film de 4%.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">pulldown PAL 2:2:2:2:2:2:2:2:2:2:2:3</emphasis>:
-  Toutes les 12 images, une image est affichées pour la durée de 3 trames au lieu de deux. Cela
+  <emphasis role="bold">pulldown PAL 2:2:2:2:2:2:2:2:2:2:2:3</emphasis>&nbsp;:
+  Toutes les 12 images, une image est affichées pour la durée de 3 trames au
+  lieu de deux. Cela
   permet d'éviter le problème de l'accélération de 4% mais rend le processus bien plus
   difficile à inverser. Cette technique est généralement utilisée dans les productions
   musicales où l'accélération de 4% endommagerait sérieusement la qualité musicale.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Téléciné NTSC 3:2</emphasis>: Les images sont alternativement
+    <emphasis role="bold">Téléciné NTSC 3:2</emphasis>&nbsp;: Les images sont
+  alternativement
   affichées pendant une durée de 3 ou 2 trames. Cela donne un nombre de trames par seconde
   de 2,5 fois le nombre d'images par seconde de l'original.
   Le résultat est aussi très légèrement ralenti de 60 trames par secondes à 60000/1001
   trames par seconde pour maintenir la vitesse d'affichage NTSC.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Pulldown NTSC 2:2</emphasis>: Utilisé pour montrer 
-  du 30 images par secondes sur du NTSC. Joli, comme le pulldown PAL 2:2.
+    <emphasis role="bold">Pulldown NTSC 2:2</emphasis>&nbsp;: Utilisé pour
+  montrer du 30 images par secondes sur du NTSC. Joli, comme le pulldown PAL
+  2:2.
 </para></listitem>
 </itemizedlist>
 
@@ -190,11 +205,11 @@
   Les étapes pour gérer correctement ce genre de cas seront évoquées <link
   linkend="menc-feat-telecine">plus tard dans ce guide</link>.
   Pour l'instant, nous allons vous donner quelques indications pour définir à quel type
-  source vous avez à faire :
+  source vous avez à faire&nbsp;:
 </para>
 
 <itemizedlist>
-<title>Régions NTSC:</title>
+  <title>Régions NTSC&nbsp;:</title>
 <listitem><para>
   Si <application>MPlayer</application> affiche que le nombre d'image a changé en
   24000/1001 quand vous regardez votre film et qu'il ne change plus après cela, c'est
@@ -223,7 +238,7 @@
 </itemizedlist>
 
 <itemizedlist>
-<title>Régions PAL:</title>
+  <title>Régions PAL&nbsp;:</title>
 <listitem><para>
   Si vous ne voyez jamais d'effet de peigne, le film est en pulldown 2:2.
 </para></listitem>
@@ -263,9 +278,9 @@
 </para>
 
 <para>
-  Il y a trois approches possibles pour encoder une vidéo: débit constant
-  (CBR), quantification constante, et multipasse (ABR pour average bitrate
-   ou débit moyen).
+  Il y a trois approches possibles pour encoder une vidéo&nbsp;: débit
+  constant (CBR), quantification constante, et multipasse (ABR pour average
+  bitrate ou débit moyen).
 </para>
 
 <para>
@@ -281,7 +296,7 @@
   problème ci-dessus.
 </para>
 
-<note><title>Note:</title>
+<note><title>Note&nbsp;:</title>
 <para>
   La plupart des codecs qui supportent la compression ABR supportent seulement deux
   passages alors que d'autres comme le <systemitem class="library">x264</systemitem>,
@@ -331,7 +346,7 @@
   en ignorant le débit, vous pouvez utiliser <option>vqscale=2</option>. Cela
   donnera le même débit et le même PSNR (Peak Signal-to-Noise Ratio, rapport signal
   sur bruit de crête) que le CBR avec <option>vbitrate</option>=infini et la valeur
-  par défaut de <option>vqmin</option> : 2.
+  par défaut de <option>vqmin</option>&nbsp;:&nbsp;2.
 </para>
 
 <para>
@@ -339,8 +354,8 @@
   spécifié que le macrobloc en ait besoin ou non. En fait, il doit être possible
   d'utiliser un quantificateur plus haut sur un macrobloc sans sacrifier la
   qualité visuelle. Pourquoi gaspiller les bits avec un quantificateur inutilement
-  bas ? Votre microprocesseur a assez de ressources car il a le temps, mais votre
-  disque lui a une taille limitée.
+  bas&thinsp;? Votre microprocesseur est sûrement a largement assez puissant,
+  tandis que votre disque lui, a une taille limitée.
 </para>
 
 <para>
@@ -386,11 +401,12 @@
   le débit.  Mais avant cela, il faudra définir l'espace que
   vous réservez aux piste(s) audio et vous devrez <link linkend="menc-feat-dvd-mpeg4-audio">
   les encoder</link> en premier.
-  Vous pourrez alors calculer le débit souhaité avec l'équation suivante :
+  Vous pourrez alors calculer le débit souhaité avec l'équation
+  suivante&nbsp;:
   <systemitem>Débit = (taille_fichier_final_en_Mo - taille_fichier_son_en_Mo) *
   1024 * 1024 / durée_en_secondes * 8 / 1000</systemitem>
   Par exemple, pour ramener deux heures de films sur un CD de 702Mo avec une piste
-  son de 60Mo, le débit vidéo sera alors de :
+  son de 60Mo, le débit vidéo sera alors de&nbsp;:
   <systemitem>(702 - 60) * 1024 * 1024 / (120*60) * 8 / 1000 = 740kbit/s</systemitem>
 </para>
 
@@ -445,7 +461,8 @@
   à la suivante. Ces vecteurs de mouvements voient leur utilité grandement
   réduite quand la prochaine image à un contenu totalement différent. Quand
   il y a un mouvement qui sort de la région encodée, cela ne pose pas de problème
-  aux vecteurs. En revanche, cela peut poser des problèmes avec les bandes noires:
+  aux vecteurs. En revanche, cela peut poser des problèmes avec les bandes
+  noires&nbsp;:
 </para>
 
 <orderedlist continuation="continues">
@@ -521,7 +538,7 @@
   Lors du recadrage, il y a quelques règles qui doivent être respectées pour éviter
   d'endommager votre film.
   Le format YUV normal, 4:2:0, stocke la chrominance (la couleur) de manière
-  sous-échantillonnée, c'est à dire que la chrominance est échantillonée moitié moins
+  sous-échantillonnée, c'est à dire que la chrominance est échantillonnée moitié moins
   souvent que la luminance (intensité). Sur le schéma suivant, L indique l'échantillonage en luminance et C en chrominance.
 </para>
 
@@ -610,7 +627,7 @@
 </para>
 
 <para>
-  Ensuite, la vidéo entrelacée est échantillonée de la façon suivante:
+  Ensuite, la vidéo entrelacée est échantillonnée de la façon suivante&nbsp;:
 </para>
 
 <informaltable>
@@ -643,8 +660,8 @@
 <spanspec spanname="spa15-16" namest="col15" nameend="col16"/>
   <tbody>
     <row>
-      <entry namest="col1" nameend="col8">Top field</entry>
-      <entry namest="col9" nameend="col16">Bottom field</entry>
+      <entry namest="col1" nameend="col8">Trame impaire</entry>
+      <entry namest="col9" nameend="col16">Trame paire</entry>
     </row>
     <row>
       <entry>L</entry>
