@@ -3116,7 +3116,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 
 <sect2 id="menc-feat-xvid-intro">
-<title>Quelles options devrais-je utiliser pour avoir les meilleurs résultats?</title>
+<title>Quelles options devrais-je utiliser pour avoir les meilleurs
+résultats&thinsp;?</title>
 
 <para>
  Commencez par passer en revue la section <systemitem class="library">Xvid</systemitem>
@@ -3643,7 +3644,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <sect3 id="menc-feat-x264-encoding-options-intro">
 <title>Introduction</title>
-<para>Ce guide considère deux principales catégories d'options d'encodage:</para>
+<para>
+  Ce guide considère deux principales catégories d'options d'encodage&nbsp;:
+</para>
 
 <orderedlist>
   <listitem><para>Les options qui traitent principalement du compromis entre la durée d'encodage et la qualité
@@ -3654,7 +3657,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Finalement, seul vous pouvez décider quelles sont les meilleures options en fonction de vos objectifs.
-  La décision pour la première catégorie d'options est la plus simple:
+  La décision pour la première catégorie d'options est la plus simple&nbsp;:
   vous devez seulement décider si les différences de qualité
   justifient les différences de vitesse. Pour la deuxième catégorie d'options,
   les préférences peuvent être bien plus subjectives, et plus de facteurs
@@ -3667,8 +3670,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  Avant de continuer, il vous est important que vous sachiez que ce guide utilise une unique
-  mesure de qualité: le PSNR global.
+  Avant de continuer, il est important que vous sachiez que ce guide
+  utilise une unique mesure de qualité&nbsp;: le PSNR global.
   Pour une brève explication du PSNR, voir
   <ulink url="http://fr.wikipedia.org/wiki/PSNR">l'article Wikipedia sur le PSNR</ulink>.
   Le PSNR global est le dernier nombre PSNR donné quand vous incluez l'option
@@ -3684,7 +3687,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Premièrement, l'utilisation de deux passes permet souvent de gagner environ 1dB
   en PSNR, ce qui est une très grande différence.
   Deuxièmement, tester les options en faisant des comparaisons directes de
-  qualité avec un encodage en une passe introduit un facteur de confusion important:
+  qualité avec un encodage en une passe introduit est facteur d'erreur&nbsp;:
   le débit varie souvent de façon significative avec chaque encodage.
   Il n'est pas toujours facile de dire si les changements de qualité sont
   principalement dûs aux changements d'options, ou si ils
@@ -3698,7 +3701,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">subq</emphasis>:
+  <emphasis role="bold">subq</emphasis>&nbsp;:
   Des options qui vous permettent de jouer sur le compromis vitesse-qualité,
   <option>subq</option> et <option>frameref</option> (voir ci-dessous) sont
   habituellement de loin les plus importantes.
@@ -3742,7 +3745,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 </listitem>
 <listitem><para>
-  <emphasis role="bold">frameref</emphasis>:
+  <emphasis role="bold">frameref</emphasis>&nbsp;:
   <option>frameref</option> est réglé à 1 par défaut, mais il ne faut pas penser que cela implique
   qu'il est raisonnable de le laisser à 1.
   Augmenter simplement <option>frameref</option> à 2 permet un gain de PSNR d'environ
@@ -3767,7 +3770,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   mais les bénéfices sur la qualité sont à peine mesurables, et encore
   moins perceptibles.
 </para>
-<note><title>Note:</title>
+<note><title>Note&nbsp;:</title>
 <para>
   Augmenter <option>frameref</option> à des valeurs inutilement élevées
   <emphasis role="bold">peut affecter</emphasis> et <emphasis role="bold">habituellement affecte</emphasis>
@@ -3782,7 +3785,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Si la vitesse vous intéresse, un compromis raisonnable est
   d'utiliser des valeurs de <option>subq</option> et <option>frameref</option> basses
   pour la première passe, et de les augmenter ensuite sur pour la seconde passe.
-  Typiquement, cela a un effet négatif négligeable sur la qualité finale:
+  Typiquement, cela a un effet négatif négligeable sur la qualité
+  finale&nbsp;:
   vous perdrez probablement bien moins de 0.1dB en PSNR, ce qui devrait
   être une différence beaucoup trop faible pour être visible.
   Cependant, des valeurs différentes de <option>frameref</option> peuvent
@@ -3801,7 +3805,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">me</emphasis>:
+  <emphasis role="bold">me</emphasis>&nbsp;:
   Cette option sert pour le choix de la méthode de recherche d'estimation de mouvement.
   Cette option modifie de manière directe le compromis entre qualité et vitesse.
   <option>me=dia</option> n'est plus rapide que de quelques pourcents par rapport à
@@ -3821,7 +3825,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">partitions=all</emphasis>:
+  <emphasis role="bold">partitions=all</emphasis>&nbsp;:
   Cette option autorise l'utilisation des sous-partitions 8x4, 4x8 et 4x4
   (en plus de celles présentes par défaut) dans
   les macroblocs prédits. L'autoriser résulte en une perte de vitesse raisonnablement
@@ -3832,11 +3836,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">bframes</emphasis>:
+  <emphasis role="bold">bframes</emphasis>&nbsp;:
   Si vous avez l'habitude d'encoder avec d'autre codecs, vous avez peut-être réalisé
   que les images B ne sont pas toujours utiles.
-  Avec le H.264, ceci a changé: il y a de nouvelles techniques et types de blocs
-  qui sont possibles avec les images B.
+  Avec le H.264, ceci a changé&nbsp;: il y a de nouvelles techniques et types
+  de blocs qui sont possibles avec les images B.
   Habituellement, même un algorithme de choix d'image B naïf peut avoir un
   bénéfice significatif sur le PSNR.
   Il est intéressant de noter que l'utilisation d'images B accélère
@@ -3857,8 +3861,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">b_adapt</emphasis>:
-  Note: activé par défaut.
+  <emphasis role="bold">b_adapt</emphasis>&nbsp;:
+  Note&nbsp;: activé par défaut.
 </para>
 <para>
   Avec cette option activée, l'encodeur utilise une procédure de décision 
@@ -3876,7 +3880,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">b_pyramid</emphasis>:
+  <emphasis role="bold">b_pyramid</emphasis>&nbsp;:
   Vous pouvez aussi activer cette option si vous utilisez 2 images B ou plus;
   comme l'indique la page man, vous obtiendrez une faible amélioration de la
   qualité sans surcoût en vitesse.
@@ -3885,7 +3889,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">weight_b</emphasis>:
+  <emphasis role="bold">weight_b</emphasis>&nbsp;:
   En théorie, il n'y a beaucoup de gain à espérer de cette option.
   Cependant, dans les scènes de fondu, la prédiction
   pondérée permet d'économiser beaucoup en débit (kbit/s).
@@ -3907,7 +3911,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 <listitem id="menc-feat-x264-encoding-options-speedvquality-threads">
 <para>
-<emphasis role="bold">threads</emphasis>:
+<emphasis role="bold">threads</emphasis>&nbsp;:
 Cette option permet de lancer des threads autorisant ainsi l'encodage en parallèle sur plusieurs CPUs.
 Il est possible de choisir manuellement le nombre de threads à créer ou, mieux, d'utiliser
 <option>threads=auto</option> et laisser 
@@ -3926,7 +3930,7 @@ Elle permet d'augmenter la vitesse d'encodage linéairement en fonction du nombr
 <title>Options relatives à diverses préférences</title>
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Encodage en deux passes</emphasis>:
+  <emphasis role="bold">Encodage en deux passes</emphasis>&nbsp;:
   On a suggéré ci-dessus de toujours utiliser un encodage en deux passages,
   mais il reste tout de même quelques raisons pour ne pas l'utiliser. Par exemple, si vous
   faites une capture de la télévision et l'encodez en temps réel, vous
@@ -3982,11 +3986,11 @@ Elle permet d'augmenter la vitesse d'encodage linéairement en fonction du nombr
   sera normalement trop faible pour être visible. Essayez, par exemple,
   d'ajouter <option>subq=1:frameref=1</option> à la première passe <option>x264encopts</option>.
   Ensuite, sur la seconde passe, utilisez des options plus lentes pour avoir une
-  meilleure qualité:
+  meilleure qualité&nbsp;:
   <option>subq=6:frameref=15:partitions=all:me=umh</option>
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Encodage en trois passes</emphasis> ?
+  <emphasis role="bold">Encodage en trois passes</emphasis>&thinsp;?
   x264 offre la possibilité de faire un nombre arbitraire de passes consécutives.
   Si vous spécifiez <option>pass=1</option> lors de la première passe, puis
   utilisez <option>pass=3</option> pour la passe suivante, cette dernière passe
@@ -4004,7 +4008,7 @@ Elle permet d'augmenter la vitesse d'encodage linéairement en fonction du nombr
   ces cas spéciaux.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">qcomp</emphasis>:
+  <emphasis role="bold">qcomp</emphasis>&nbsp;:
   <option>qcomp</option> gère l'allocation des bits entre les images
   "coûteuses" des scènes riches en mouvement et celles "bon marché" des scènes de faible mouvement.
   La valeur minimale, <option>qcomp=0</option> s'emplie à réaliser un vrai débit constant.
@@ -4021,7 +4025,7 @@ Elle permet d'augmenter la vitesse d'encodage linéairement en fonction du nombr
   utilisées).
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">keyint</emphasis>:
+  <emphasis role="bold">keyint</emphasis>&nbsp;:
   <option>keyint</option> permet de jouer sur le compromis entre la
   précision de la navigation dans les fichiers et leur efficacité de compression.
   Par défaut, <option>keyint</option> est égal à 250.
@@ -4037,7 +4041,7 @@ Elle permet d'augmenter la vitesse d'encodage linéairement en fonction du nombr
   de scène.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">deblock</emphasis>:
+  <emphasis role="bold">deblock</emphasis>&nbsp;:
   Ce sujet risque d'être une source de controverses.
 </para>
 <para>
@@ -4160,7 +4164,8 @@ Elle permet d'augmenter la vitesse d'encodage linéairement en fonction du nombr
 
 <para>
 Video for Windows offre la possibilité d'encoder en utiliser les codecs vidéo binaires.
-Il est possible d'encoder avec les codecs suivants (si vous en connaissez d'autres, dites-le nous!)
+Il est possible d'encoder avec les codecs suivants (si vous en connaissez
+d'autres, dites-le nous&thinsp;!)
 </para>
 <para>
 Notez que le support est très expériemental que que certains codecs peuvent
@@ -4307,13 +4312,14 @@ si un codec se plante ou donne un résulat étrange.
 </informaltable>
 
 La première colonne contient le nom du codec qui soit être donné après le
-paramètre <literal>codec</literal>, comme ceci: <option>-xvfwopts codec=divx.dll</option>.
+paramètre <literal>codec</literal>, comme ceci&nbsp;:
+<option>-xvfwopts codec=divx.dll</option>.
 Le code FourCC utilisé par chaque codec est donné entre parenthèse.
 </para>
 <informalexample>
 <para>
 Exemple de conversion d'une bande annonce DVD ISO en un fichier video flash VP6
-en utilisant une configuration de débit compdata:
+en utilisant une configuration de débit compdata&nbsp;:
 <screen>
 mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceable>bande_annonce.flv</replaceable> \
 -ovc vfw -xvfwopts codec=vp6vfw.dll:compdata=onepass.mcf -oac mp3lame \
@@ -4335,17 +4341,19 @@ ainsi que d'autres options. Ceci fonctionne sur x86 sous *NIX et Windows.
 En premier lieu, vous devez compiler le programme <application>vfw2menc</application>.
 Il se trouve dans le sous-répertoire <filename class="directory">TOOLS</filename>
 de l'arborescence des sources de MPlayer.
-La compilation sous Linux peut se faire en utilisant <application>Wine</application>:
+La compilation sous Linux peut se faire en utilisant
+<application>Wine</application>&nbsp;:
 <screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
 
 Pour compiler sous Windows avec <application>MinGW</application> ou
-<application>Cygwin</application> tapez:
+<application>Cygwin</application> tapez&nbsp;:
 <screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
 
 Pour compiler avec <application>MSVC</application> vous aurez besoin de getopt.
-Getopt est trouvable dans l'archive d'origine de <application>vfw2menc</application> disponible
-ici:
-The <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer on win32</ulink> project.
+Getopt peut être obtenu dans l'archive d'origine de
+<application>vfw2menc</application> disponible ici&nbsp;:
+The <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer on
+win32</ulink> project.
 </para>
 <informalexample>
 <para>
@@ -4372,7 +4380,8 @@ apparaître la boîte de dialogue avant que l'encodage ne commence.
 des fichiers compatibles <application>QuickTime</application></title>
 
 <sect2 id="menc-feat-quicktime-7-why-use-it">
-<title>Pourquoi produire des fichiers compatibles <application>QuickTime</application>?</title>
+<title>Pourquoi produire des fichiers compatibles
+<application>QuickTime</application>&thinsp;?</title>
 
 <para>
 Il existe plusieurs raisons pour lesquelles il est souhaitable de produire des
@@ -4392,9 +4401,10 @@ fichiers compatibles <application>QuickTime</application>
 	veilles machines basées sur des processeurs G4.
 </para></listitem>
 <listitem><para>
-	<application>QuickTime</application> 7 supporte la nouvelle génération de codecs: H.264,
-	qui clame une bien meilleure qualité d'image que la génération de codecs précédente
-	(MPEG-2, MPEG-4 &hellip;).
+  <application>QuickTime</application> 7 supporte la nouvelle génération de
+  codecs&nbsp;:
+  H.264, qui offre une bien meilleure qualité d'image que la génération de
+  codecs précédente (MPEG-2, MPEG-4 &hellip;).
 </para></listitem>
 </itemizedlist>
 </sect2>
@@ -4423,21 +4433,21 @@ fichiers compatibles <application>QuickTime</application>
 	
 <itemizedlist>
 <listitem><para>
-	<emphasis role="bold">trames-B</emphasis>:
+  <emphasis role="bold">trames-B</emphasis>&nbsp;:
 	<application>QuickTime</application> 7 supporte un maximum d'une trame-B, i.e.
 	<option>-x264encopts bframes=1</option>. Ainsi,
 	<option>b_pyramid</option> et <option>weight_b</option> n'auront aucun
 	effet car ces options requierent que <option>bframes</option> soit supérieure à 1.
 </para></listitem>
 <listitem><para>
-	<emphasis role="bold">Macroblocs</emphasis>:
+  <emphasis role="bold">Macroblocs</emphasis>&nbsp;:
 	<application>QuickTime</application> 7 ne supporte pas les macroblocs de type 8x8 DCT.
 	Cette option (<option>8x8dct</option>) est désactivée par défaut,
 	donc soyez sûr de ne pas l'activer explicitement. Ceci signifie aussi que l'option
 	<option>i8x8</option> n'aura aucun effet, car elle nécessite l'option <option>8x8dct</option>.
 </para></listitem>
 <listitem><para>
-	<emphasis role="bold">Ratio d'aspect</emphasis>:
+  <emphasis role="bold">Ratio d'aspect</emphasis>&nbsp;:
 	<application>QuickTime</application> 7 ne supporte pas l'information sur le SAR (l'échantillonage
 	de ratio d'aspect ou Sample Aspect Ratio) dans les fichiers MPEG-4; il suppose que SAR=1.
 	Lisez <link linkend="menc-feat-quicktime-7-scale"> la section sur le redimensionnement</link> pour une
@@ -4492,7 +4502,8 @@ fichiers compatibles <application>QuickTime</application>
 	<option>-vf scale=-10:-1</option> ou <option>-vf scale=-1:-10</option>.
 	Ces options vont redimensionner la vidéo à la bonne largeur pour la hauteur rognée,
 	arrondi au plus proche multiple de 16 pour une compression optimale.
-	Rappelez vous que si vous rognez, vous devez d'abord rogner et ensuite redimensionner:
+  Rappelez vous que si vous rognez, vous devez d'abord rogner et ensuite
+  redimensionner&nbsp;:
 
 	<screen>-vf crop=720:352:0:62,scale=-10:-1</screen>
 </para>
@@ -4514,7 +4525,7 @@ fichiers compatibles <application>QuickTime</application>
 </para>
 
 <para>
-	La chaîne de filtre résultante a cette forme:
+  La chaîne de filtre résultante a cette forme&nbsp;:
   	<screen>-vf crop=720:352:0:62,scale=-10:-1,harddup</screen>
 </para>
 
@@ -4633,18 +4644,19 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 	vous devriez aussi renseigner le film de sorte que le plugin
 	<application>QuickTime</application> puisse commencer à le lire
 	pendant qu'il se télécharge. <application>mp4creator</application>
-	peut créer ces pistes de renseignement:
+  peut créer ces pistes de renseignement&nbsp;:
 	
 	<screen>mp4creator -hint=1 narnia.mp4
 	mp4creator -hint=2 narnia.mp4
 	mp4creator -optimize narnia.mp4</screen>
 
 	Vous pouvez vérifier le résultat final pour vous assurer
-	que les pistes de renseignement ont été créées avec succès:
+  que les pistes de renseignement ont été créées avec succès&nbsp;:
 
-  	<screen>mp4creator -list narnia.mp4</screen>
+  <screen>mp4creator -list narnia.mp4</screen>
 
-	Vous devriez voir une liste de pistes: 1 audio, 1 vidéo, et 2 pistes de renseignement
+  Vous devriez voir une liste de pistes&nbsp;: 1 audio, 1 vidéo, et 2 pistes
+  de renseignement
 
 	<screen>Track   Type    Info
 	1       audio   MPEG-4 AAC LC, 8548.714 secs, 190 kbps, 48000 Hz
@@ -4848,7 +4860,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <para>
   Le format VCD requière que le débit de votre vidéo soit constant (CBR) à 1152 kbit/s.
   A cette forte contrainte, il faut ajouter la très petite taille de la mémoire
-  tampon VBV: 327 kbits.
+  tampon VBV&nbsp;: 327 kbits.
   Le SVCD autorise des débits vidéo variables jusqu'à 2500 kbit/s et une taille
   de mémoire tampon VBV légèrement moins restrictive de 917 kbits.
   Les débits vidéo DVD peuvent aller jusqu'à 9800 kbit/s
@@ -4877,28 +4889,28 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </para>
 
 <para>
-  VCD:
+  VCD&nbsp;:
   <screen>
   -of mpeg -mpegopts format=xvcd
   </screen>
 </para>
 
 <para>
-  SVCD:
+  SVCD&nbsp;:
   <screen>
   -of mpeg -mpegopts format=xsvcd
   </screen>
 </para>
 
 <para>
-  DVD(avec estampille temporelle sur chaque image si possible):
+  DVD(avec estampille temporelle sur chaque image si possible)&nbsp;:
   <screen>
   -of mpeg -mpegopts format=dvd:tsaf
   </screen>
 </para>
 
 <para>
-  DVD avec pullup NTSC:
+  DVD avec pullup NTSC&nbsp;:
   <screen>
   -of mpeg -mpegopts format=dvd:tsaf:telecine -ofps 24000/1001
   </screen>
@@ -4975,13 +4987,13 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   filtre audio <option>-af lavcresample</option>.
   </para>
   <para>
-  DVD:
+    DVD&nbsp;:
   <screen>
   -srate 48000 -af lavcresample=48000
   </screen>
 </para>
 <para>
-  VCD et SVCD:
+  VCD et SVCD&nbsp;:
   <screen>
   -srate 44100 -af lavcresample=44100
   </screen>
@@ -5005,12 +5017,12 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <para>
   Ceci est une liste de champs de <option>-lavcopts</option> que
   vous pourriez avoir besoin de changer si vous voulez faire
-  un film compatible VCD, SVCD, ou DVD:
+  un film compatible VCD, SVCD, ou DVD&nbsp;:
 </para>
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">acodec</emphasis>:
+  <emphasis role="bold">acodec</emphasis>&nbsp;:
   <option>mp2</option> pour le VCD, le SVCD, ou le DVD PAL;
   <option>ac3</option> est plus communément utilisé pour le DVD.
   L'audio PCM peut aussi être utilisé pour le DVD, mais c'est principalement
@@ -5020,14 +5032,14 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">abitrate</emphasis>:
+  <emphasis role="bold">abitrate</emphasis>&nbsp;:
   (débit audio) 224 pour le VCD; jusqu'à 384 pour le SVCD; jusqu'à 1536 pour le DVD, mais
   utilise communément une gamme de valeurs de 192 kbit/s pour le stéréo à
   384 kbit/s pour le son canaux 5.1.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">vcodec</emphasis>:
+  <emphasis role="bold">vcodec</emphasis>&nbsp;:
   <option>mpeg1video</option> pour le VCD;
   <option>mpeg2video</option> pour le SVCD;
   <option>mpeg2video</option> est habituellement utilisé pour le DVD mais on peut
@@ -5035,7 +5047,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">keyint</emphasis>:
+  <emphasis role="bold">keyint</emphasis>&nbsp;:
   Utilisé pour régler la taille du GOP.
   18 pour les vidéo à 30 images par secondes, ou 15 pour les vidéos à 25/24 images par secondes.
   Les producteurs commerciaux semblent préférer des intervalles entre images clés de 12.
@@ -5045,24 +5057,24 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">vrc_buf_size</emphasis>:
+  <emphasis role="bold">vrc_buf_size</emphasis>&nbsp;:
   327 pour le VCD, 917 pour le SVCD, et 1835 pour le DVD.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">vrc_minrate</emphasis>:
+  <emphasis role="bold">vrc_minrate</emphasis>&nbsp;:
   1152, pour le VCD. Peut être laissé de côté pour le SVCD et le DVD.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">vrc_maxrate</emphasis>:
+  <emphasis role="bold">vrc_maxrate</emphasis>&nbsp;:
   1152 pour le VCD; 2500 pour le SVCD; 9800 pour le DVD.
   Pour le SVCD et le DVD, vous pourriez vouloir utiliser des valeurs plus
   basses selon vos préférences et contraintes personnelles.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">vbitrate</emphasis>:
+  <emphasis role="bold">vbitrate</emphasis>&nbsp;:
   (débit vidéo) 1152 pour le VCD;
   jusqu'à 2500 pour le SVCD;
   jusqu'à 9800 pour le DVD.
@@ -5082,10 +5094,10 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <title>Exemples</title>
 <para>
   Ceci est un paramétrage typique minimal de <option>-lavcopts</option> pour
-  encoder une vidéo:
+  encoder une vidéo&nbsp;:
 </para>
 <para>
-  VCD:
+  VCD&nbsp;:
   <screen>
   -lavcopts vcodec=mpeg1video:vrc_buf_size=327:vrc_minrate=1152:\
   vrc_maxrate=1152:vbitrate=1152:keyint=15:acodec=mp2
@@ -5093,7 +5105,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </para>
 
 <para>
-  SVCD:
+  SVCD&nbsp;:
   <screen>
   -lavcopts vcodec=mpeg2video:vrc_buf_size=917:vrc_maxrate=2500:vbitrate=1800:\
   keyint=15:acodec=mp2
@@ -5101,7 +5113,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </para>
 
 <para>
-  DVD:
+  DVD&nbsp;:
   <screen>
   -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:\
   keyint=15:acodec=ac3
@@ -5123,7 +5135,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   Le faire peut aider à réduire l'apparition de blocs dans les zones de faible
   variations de couleurs.
   Pour résumer, la ligne suivante est un exemple de paramétrage de lavcopts
-  pour un DVD de haute qualité:
+  pour un DVD de haute qualité&nbsp;:
 </para>
 
 <para>
@@ -5160,7 +5172,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <sect3 id="menc-feat-vcd-dvd-audio-toolame">
 <title>toolame</title>
 <para>
-  Pour un VCD et un SVCD:
+  Pour un VCD et un SVCD&nbsp;:
   <screen>
   -oac toolame -toolameopts br=224
   </screen>
@@ -5170,7 +5182,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <sect3 id="menc-feat-vcd-dvd-audio-twolame">
 <title>twolame</title>
 <para>
-  Pour un VCD et un SVCD:
+  Pour un VCD et un SVCD&nbsp;:
   <screen>
   -oac twolame -twolameopts br=224
   </screen>
@@ -5180,7 +5192,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <sect3 id="menc-feat-vcd-dvd-audio-lavc">
 <title>libavcodec</title>
 <para>
-  Pour un DVD avec un son 2 canaux:
+  Pour un DVD avec un son 2 canaux&nbsp;:
   <screen>
   -oac lavc -lavcopts acodec=ac3:abitrate=192
   </screen>
@@ -5250,7 +5262,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
 <title>AVI NTSC Contenant Audio AC-3 vers DVD</title>
 <para>
-  Si la source a déjà l'audio en AC-3, et est en NTSC @ 24000/1001 fps:
+  Si la source a déjà l'audio en AC-3, et est en NTSC @ 24000/1001 fps&nbsp;:
   <screen>
   mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:tsaf:telecine \
   -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\
