@@ -239,16 +239,20 @@ static void mpeg2_idct_add_c (const int last, int16_t * block,
 
 void mpeg2_idct_init (uint32_t accel)
 {
-#ifdef ARCH_X86
+#ifdef HAVE_SSE2
     if (accel & MPEG2_ACCEL_X86_SSE2) {
 	mpeg2_idct_copy = mpeg2_idct_copy_sse2;
 	mpeg2_idct_add = mpeg2_idct_add_sse2;
 	mpeg2_idct_mmx_init ();
-    } else if (accel & MPEG2_ACCEL_X86_MMXEXT) {
+    } else
+#elif HAVE_MMX2
+    if (accel & MPEG2_ACCEL_X86_MMXEXT) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
 	mpeg2_idct_add = mpeg2_idct_add_mmxext;
 	mpeg2_idct_mmx_init ();
-    } else if (accel & MPEG2_ACCEL_X86_MMX) {
+    } else
+#elif HAVE_MMX
+    if (accel & MPEG2_ACCEL_X86_MMX) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mmx;
 	mpeg2_idct_add = mpeg2_idct_add_mmx;
 	mpeg2_idct_mmx_init ();
@@ -261,12 +265,14 @@ void mpeg2_idct_init (uint32_t accel)
 	mpeg2_idct_altivec_init ();
     } else
 #endif
-#ifdef ARCH_ALPHA
+#ifdef HAVE_VIS
     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
 	mpeg2_idct_add = mpeg2_idct_add_mvi;
 	mpeg2_idct_alpha_init ();
-    } else if (accel & MPEG2_ACCEL_ALPHA) {
+    } else
+#elif ARCH_ALPHA
+    if (accel & MPEG2_ACCEL_ALPHA) {
 	int i;
 
 	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
