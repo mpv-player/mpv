@@ -27,7 +27,7 @@
      uint32_t eax, ebx, ecx, edx;
      int AMD;
      uint32_t caps;
-@@ -105,7 +120,21 @@
+@@ -107,8 +120,22 @@
  	caps |= MPEG2_ACCEL_X86_MMXEXT;
  
      return caps;
@@ -50,7 +50,8 @@
 +#endif /* ARCH_X86 || ARCH_X86_64 */
  
  #if defined(ARCH_PPC) || defined(ARCH_SPARC)
-@@ -212,7 +241,7 @@
+ #include <signal.h>
+@@ -214,7 +241,7 @@
  
      accel = 0;
  #ifdef ACCEL_DETECT
@@ -78,7 +79,7 @@
  static void state_restore_mmx (cpu_state_t * state)
  {
      emms ();
-@@ -48,18 +48,18 @@
+@@ -44,18 +48,18 @@
  #endif
  
  #ifdef ARCH_PPC
@@ -104,7 +105,7 @@
  #endif
  
  static void state_save_altivec (cpu_state_t * state)
-@@ -115,9 +119,9 @@
+@@ -115,7 +119,7 @@
  
  void mpeg2_cpu_state_init (uint32_t accel)
  {
@@ -113,8 +114,6 @@
      if (accel & MPEG2_ACCEL_X86_MMX) {
  	mpeg2_cpu_state_restore = state_restore_mmx;
      }
- #endif
- #ifdef ARCH_PPC
 --- libmpeg2/decode.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/decode.c	2006-06-16 20:12:50.000000000 +0200
 @@ -351,6 +355,15 @@
@@ -145,7 +144,7 @@
      mpeg2dec->fbuf[0] = &mpeg2dec->fbuf_alloc[0].fbuf;
      mpeg2dec->fbuf[1] = &mpeg2dec->fbuf_alloc[1].fbuf;
      mpeg2dec->fbuf[2] = &mpeg2dec->fbuf_alloc[2].fbuf;
-@@ -551,6 +558,7 @@
+@@ -553,6 +560,7 @@
  	if (!(mpeg2dec->sequence.flags & SEQ_FLAG_PROGRESSIVE_SEQUENCE)) {
  	    picture->nb_fields = (buffer[3] & 2) ? 3 : 2;
  	    flags |= (buffer[3] & 128) ? PIC_FLAG_TOP_FIELD_FIRST : 0;
@@ -153,7 +152,7 @@
  	} else
  	    picture->nb_fields = (buffer[3]&2) ? ((buffer[3]&128) ? 6 : 4) : 2;
  	break;
-@@ -799,6 +807,7 @@
+@@ -801,6 +809,7 @@
  	mpeg2dec->scaled[index] = mpeg2dec->q_scale_type;
  	for (i = 0; i < 32; i++) {
  	    k = mpeg2dec->q_scale_type ? non_linear_scale[i] : (i << 1);
@@ -232,7 +231,8 @@
  #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
  
  typedef struct mpeg2_picture_s {
-@@ -156,10 +160,13 @@
+@@ -154,11 +159,14 @@
+ #define MPEG2_ACCEL_X86_MMX 1
  #define MPEG2_ACCEL_X86_3DNOW 2
  #define MPEG2_ACCEL_X86_MMXEXT 4
 +#define MPEG2_ACCEL_X86_SSE2 8
@@ -260,7 +260,7 @@
  };
  
  typedef struct {
-@@ -214,6 +224,9 @@
+@@ -214,6 +223,9 @@
      int8_t q_scale_type, scaled[4];
      uint8_t quantizer_matrix[4][64];
      uint8_t new_quantizer_matrix[4][64];
@@ -270,7 +270,7 @@
  };
  
  typedef struct {
-@@ -312,3 +312,5 @@
+@@ -298,3 +313,5 @@
  extern mpeg2_mc_t mpeg2_mc_altivec;
  extern mpeg2_mc_t mpeg2_mc_alpha;
  extern mpeg2_mc_t mpeg2_mc_vis;
@@ -286,7 +286,7 @@
  
      decoder->quantizer_matrix[0] =
  	decoder->quantizer_prescale[0][quantizer_scale_code];
-@@ -1568,6 +1569,18 @@
+@@ -1564,6 +1569,18 @@
  
  #define NEXT_MACROBLOCK							\
  do {									\
@@ -305,7 +305,7 @@
      decoder->offset += 16;						\
      if (decoder->offset == decoder->width) {				\
  	do { /* just so we can use the break statement */		\
-@@ -1604,6 +1604,12 @@
+@@ -1587,6 +1604,12 @@
      }									\
  } while (0)
  
@@ -318,7 +318,7 @@
  void mpeg2_init_fbuf (mpeg2_decoder_t * decoder, uint8_t * current_fbuf[3],
  		      uint8_t * forward_fbuf[3], uint8_t * backward_fbuf[3])
  {
-@@ -1661,7 +1667,9 @@
+@@ -1644,7 +1667,9 @@
  
      if (decoder->mpeg1) {
  	decoder->motion_parser[0] = motion_zero_420;
