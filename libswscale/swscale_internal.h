@@ -29,10 +29,28 @@
 
 #include "libavutil/avutil.h"
 
+#define STR(s)         AV_TOSTRING(s) //AV_STRINGIFY is too long
+
 #define MAX_FILTER_SIZE 256
 
 #define VOFW 2048
 #define VOF  (VOFW*2)
+
+#ifdef WORDS_BIGENDIAN
+#define ALT32_CORR (-1)
+#else
+#define ALT32_CORR   1
+#endif
+
+#ifdef ARCH_X86_64
+#   define APCK_PTR2 8
+#   define APCK_COEF 16
+#   define APCK_SIZE 24
+#else
+#   define APCK_PTR2 4
+#   define APCK_COEF 8
+#   define APCK_SIZE 16
+#endif
 
 typedef int (*SwsFunc)(struct SwsContext *context, uint8_t* src[], int srcStride[], int srcSliceY,
              int srcSliceH, uint8_t* dst[], int dstStride[]);
@@ -221,7 +239,8 @@ const char *sws_format_name(int format);
         || (x)==PIX_FMT_GRAY16LE    \
     )
 #define isRGB(x)        (           \
-           (x)==PIX_FMT_BGR32       \
+           (x)==PIX_FMT_RGB32       \
+        || (x)==PIX_FMT_RGB32_1     \
         || (x)==PIX_FMT_RGB24       \
         || (x)==PIX_FMT_RGB565      \
         || (x)==PIX_FMT_RGB555      \
@@ -231,7 +250,8 @@ const char *sws_format_name(int format);
         || (x)==PIX_FMT_MONOBLACK   \
     )
 #define isBGR(x)        (           \
-           (x)==PIX_FMT_RGB32       \
+           (x)==PIX_FMT_BGR32       \
+        || (x)==PIX_FMT_BGR32_1     \
         || (x)==PIX_FMT_BGR24       \
         || (x)==PIX_FMT_BGR565      \
         || (x)==PIX_FMT_BGR555      \

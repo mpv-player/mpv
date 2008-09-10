@@ -1,7 +1,7 @@
 /*
  * PPM/PGM/PGMYUV video output driver
  *
- * Written by Ivo van Poorten. (C) Copyright 2004, 2005.
+ * copyright (C) 2004, 2005 Ivo van Poorten
  *
  * This file is part of MPlayer.
  *

@@ -37,12 +37,18 @@ mpeg2_mc_t mpeg2_mc;
 
 void mpeg2_mc_init (uint32_t accel)
 {
-#ifdef ARCH_X86
+#ifdef HAVE_MMX2
     if (accel & MPEG2_ACCEL_X86_MMXEXT)
 	mpeg2_mc = mpeg2_mc_mmxext;
-    else if (accel & MPEG2_ACCEL_X86_3DNOW)
+    else
+#endif
+#ifdef HAVE_3DNOW
+    if (accel & MPEG2_ACCEL_X86_3DNOW)
 	mpeg2_mc = mpeg2_mc_3dnow;
-    else if (accel & MPEG2_ACCEL_X86_MMX)
+    else
+#endif
+#ifdef HAVE_MMX
+    if (accel & MPEG2_ACCEL_X86_MMX)
 	mpeg2_mc = mpeg2_mc_mmx;
     else
 #endif
@@ -56,7 +62,7 @@ void mpeg2_mc_init (uint32_t accel)
 	mpeg2_mc = mpeg2_mc_alpha;
     else
 #endif
-#ifdef ARCH_SPARC
+#ifdef HAVE_VIS
     if (accel & MPEG2_ACCEL_SPARC_VIS)
 	mpeg2_mc = mpeg2_mc_vis;
     else

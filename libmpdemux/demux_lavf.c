@@ -181,7 +181,6 @@ static const char *preferred_list[] = {
     "mov,mp4,m4a,3gp,3g2,mj2",
     "mpc",
     "mpc8",
-    "matroska",
     NULL
 };
 
@@ -250,7 +249,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             wf->nSamplesPerSec= codec->sample_rate;
             wf->nAvgBytesPerSec= codec->bit_rate/8;
             wf->nBlockAlign= codec->block_align ? codec->block_align : 1;
-            wf->wBitsPerSample= codec->bits_per_sample;
+            wf->wBitsPerSample= codec->bits_per_coded_sample;
             wf->cbSize= codec->extradata_size;
             if(codec->extradata_size)
                 memcpy(wf + 1, codec->extradata, codec->extradata_size);
@@ -326,7 +325,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             bih->biSize= sizeof(BITMAPINFOHEADER) + codec->extradata_size;
             bih->biWidth= codec->width;
             bih->biHeight= codec->height;
-            bih->biBitCount= codec->bits_per_sample;
+            bih->biBitCount= codec->bits_per_coded_sample;
             bih->biSizeImage = bih->biWidth * bih->biHeight * bih->biBitCount/8;
             bih->biCompression= codec->codec_tag;
             sh_video->bih= bih;
@@ -594,8 +593,8 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     if(pkt.pts != AV_NOPTS_VALUE){
         dp->pts=pkt.pts * av_q2d(priv->avfc->streams[id]->time_base);
         priv->last_pts= dp->pts * AV_TIME_BASE;
-        if(pkt.duration)
-            dp->endpts = dp->pts + pkt.duration * av_q2d(priv->avfc->streams[id]->time_base);
+        if(pkt.convergence_duration)
+            dp->endpts = dp->pts + pkt.convergence_duration * av_q2d(priv->avfc->streams[id]->time_base);
     }
     dp->pos=demux->filepos;
     dp->flags= !!(pkt.flags&PKT_FLAG_KEY);

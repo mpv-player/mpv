@@ -1,9 +1,26 @@
-/* Copyright (C) Mark Sanderson, 2006, <mmp@kiora.ath.cx>.
- * Released under the terms and conditions of the GPL.
+/*
+ * copyright (C) 2006 Mark Sanderson <mmp@kiora.ath.cx>
  *
  * 30-Mar-2006 Modified from tdfxfb.c by Mark Zealey
- * 
- * Hints and tricks:
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+/* Hints and tricks:
  * - Use -dr to get direct rendering
  * - Use -vf yuy2 to get yuy2 rendering, *MUCH* faster than yv12
  */

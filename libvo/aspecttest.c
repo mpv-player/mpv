@@ -1,6 +1,4 @@
-/* testapp for aspect.[ch] by Atmos
- * gcc aspecttest.c aspect.c -o aspecttest -DASPECT_TEST [-DASPECT_DEBUG]
- */
+/* test app for aspect.[ch] by Atmos */
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -22,7 +22,7 @@
  */
 
 /*
-  supported Input formats: YV12, I420/IYUV, YUY2, UYVY, BGR32, BGR24, BGR16, BGR15, RGB32, RGB24, Y8/Y800, YVU9/IF09, PAL8
+  supported Input formats: YV12, I420/IYUV, YUY2, UYVY, BGR32, BGR32_1, BGR24, BGR16, BGR15, RGB32, RGB32_1, RGB24, Y8/Y800, YVU9/IF09, PAL8
   supported output formats: YV12, I420/IYUV, YUY2, UYVY, {BGR,RGB}{1,4,8,15,16,24,32}, Y8/Y800, YVU9/IF09
   {BGR,RGB}{1,4,8,15,16} support dithering
 
@@ -54,6 +54,7 @@ untested special converters
   BGR24 -> YV12
 */
 
+#define _SVID_SOURCE //needed for MAP_ANONYMOUS
 #include <inttypes.h>
 #include <string.h>
 #include <math.h>
@@ -104,10 +105,12 @@ unsigned swscale_version(void)
         || (x)==PIX_FMT_YUYV422     \
         || (x)==PIX_FMT_UYVY422     \
         || (x)==PIX_FMT_RGB32       \
+        || (x)==PIX_FMT_RGB32_1     \
         || (x)==PIX_FMT_BGR24       \
         || (x)==PIX_FMT_BGR565      \
         || (x)==PIX_FMT_BGR555      \
         || (x)==PIX_FMT_BGR32       \
+        || (x)==PIX_FMT_BGR32_1     \
         || (x)==PIX_FMT_RGB24       \
         || (x)==PIX_FMT_RGB565      \
         || (x)==PIX_FMT_RGB555      \
@@ -149,7 +152,7 @@ unsigned swscale_version(void)
         || isBGR(x)                 \
     )
 
-#define RGB2YUV_SHIFT 16
+#define RGB2YUV_SHIFT 15
 #define BY ((int)( 0.098*(1<<RGB2YUV_SHIFT)+0.5))
 #define BV ((int)(-0.071*(1<<RGB2YUV_SHIFT)+0.5))
 #define BU ((int)( 0.439*(1<<RGB2YUV_SHIFT)+0.5))
@@ -161,6 +164,17 @@ unsigned swscale_version(void)
 #define RU ((int)(-0.148*(1<<RGB2YUV_SHIFT)+0.5))
 
 extern const int32_t Inverse_Table_6_9[8][4];
+
+static const double rgb2yuv_table[8][9]={
+    {0.7152, 0.0722, 0.2126, -0.386, 0.5, -0.115, -0.454, -0.046, 0.5},
+    {0.7152, 0.0722, 0.2126, -0.386, 0.5, -0.115, -0.454, -0.046, 0.5},
+    {0.587 , 0.114 , 0.299 , -0.331, 0.5, -0.169, -0.419, -0.081, 0.5},
+    {0.587 , 0.114 , 0.299 , -0.331, 0.5, -0.169, -0.419, -0.081, 0.5},
+    {0.59  , 0.11  , 0.30  , -0.331, 0.5, -0.169, -0.421, -0.079, 0.5}, //FCC
+    {0.587 , 0.114 , 0.299 , -0.331, 0.5, -0.169, -0.419, -0.081, 0.5},
+    {0.587 , 0.114 , 0.299 , -0.331, 0.5, -0.169, -0.419, -0.081, 0.5}, //SMPTE 170M
+    {0.701 , 0.087 , 0.212 , -0.384, 0.5  -0.116, -0.445, -0.055, 0.5}, //SMPTE 240M
+};
 
 /*
 NOTES
@@ -223,6 +237,20 @@ DECLARE_ALIGNED(8, const uint64_t, ff_bgr2VCoeff)   = 0x00003831D0E6F6EAULL;
 DECLARE_ALIGNED(8, const uint64_t, ff_bgr2YOffset)  = 0x1010101010101010ULL;
 DECLARE_ALIGNED(8, const uint64_t, ff_bgr2UVOffset) = 0x8080808080808080ULL;
 DECLARE_ALIGNED(8, const uint64_t, ff_w1111)        = 0x0001000100010001ULL;
+
+DECLARE_ALIGNED(8, const uint64_t, ff_bgr24toY1Coeff) = 0x0C88000040870C88ULL;
+DECLARE_ALIGNED(8, const uint64_t, ff_bgr24toY2Coeff) = 0x20DE4087000020DEULL;
+DECLARE_ALIGNED(8, const uint64_t, ff_rgb24toY1Coeff) = 0x20DE0000408720DEULL;
+DECLARE_ALIGNED(8, const uint64_t, ff_rgb24toY2Coeff) = 0x0C88408700000C88ULL;
+DECLARE_ALIGNED(8, const uint64_t, ff_bgr24toYOffset) = 0x0008400000084000ULL;
+
+DECLARE_ALIGNED(8, const uint64_t, ff_bgr24toUV[2][4]) = {
+    {0x38380000DAC83838ULL, 0xECFFDAC80000ECFFULL, 0xF6E40000D0E3F6E4ULL, 0x3838D0E300003838ULL},
+    {0xECFF0000DAC8ECFFULL, 0x3838DAC800003838ULL, 0x38380000D0E33838ULL, 0xF6E4D0E30000F6E4ULL},
+};
+
+DECLARE_ALIGNED(8, const uint64_t, ff_bgr24toUVOffset)= 0x0040400000404000ULL;
+
 #endif /* defined(ARCH_X86) */
 
 // clipping helper table for C implementations:
@@ -442,6 +470,31 @@ static inline void yuv2nv12XinC(int16_t *lumFilter, int16_t **lumSrc, int lumFil
             else if (V<0) V=0;    \
         }
 
+#define YSCALE_YUV_2_GRAY16_C(type) \
+    for (i=0; i<(dstW>>1); i++){\
+        int j;\
+        int Y1 = 1<<18;\
+        int Y2 = 1<<18;\
+        int U  = 1<<18;\
+        int V  = 1<<18;\
+        type av_unused *r, *b, *g;\
+        const int i2= 2*i;\
+        \
+        for (j=0; j<lumFilterSize; j++)\
+        {\
+            Y1 += lumSrc[j][i2] * lumFilter[j];\
+            Y2 += lumSrc[j][i2+1] * lumFilter[j];\
+        }\
+        Y1>>=11;\
+        Y2>>=11;\
+        if ((Y1|Y2|U|V)&65536)\
+        {\
+            if (Y1>65535)   Y1=65535; \
+            else if (Y1<0)Y1=0;   \
+            if (Y2>65535)   Y2=65535; \
+            else if (Y2<0)Y2=0;   \
+        }
+
 #define YSCALE_YUV_2_RGBX_C(type) \
     YSCALE_YUV_2_PACKEDX_C(type)  \
     r = (type *)c->table_rV[V];   \
@@ -455,6 +508,12 @@ static inline void yuv2nv12XinC(int16_t *lumFilter, int16_t **lumSrc, int lumFil
         int Y2= (buf0[i2+1]*yalpha1+buf1[i2+1]*yalpha)>>19;           \
         int U= (uvbuf0[i     ]*uvalpha1+uvbuf1[i     ]*uvalpha)>>19;  \
         int V= (uvbuf0[i+VOFW]*uvalpha1+uvbuf1[i+VOFW]*uvalpha)>>19;  \
+
+#define YSCALE_YUV_2_GRAY16_2_C   \
+    for (i=0; i<(dstW>>1); i++){ \
+        const int i2= 2*i;       \
+        int Y1= (buf0[i2  ]*yalpha1+buf1[i2  ]*yalpha)>>11;           \
+        int Y2= (buf0[i2+1]*yalpha1+buf1[i2+1]*yalpha)>>11;           \
 
 #define YSCALE_YUV_2_RGB2_C(type) \
     YSCALE_YUV_2_PACKED2_C\
@@ -470,6 +529,12 @@ static inline void yuv2nv12XinC(int16_t *lumFilter, int16_t **lumSrc, int lumFil
         int Y2= buf0[i2+1]>>7;\
         int U= (uvbuf1[i     ])>>7;\
         int V= (uvbuf1[i+VOFW])>>7;\
+
+#define YSCALE_YUV_2_GRAY16_1_C \
+    for (i=0; i<(dstW>>1); i++){\
+        const int i2= 2*i;\
+        int Y1= buf0[i2  ]<<1;\
+        int Y2= buf0[i2+1]<<1;\
 
 #define YSCALE_YUV_2_RGB1_C(type) \
     YSCALE_YUV_2_PACKED1_C\
@@ -493,11 +558,13 @@ static inline void yuv2nv12XinC(int16_t *lumFilter, int16_t **lumSrc, int lumFil
     g = (type *)(c->table_gU[U] + c->table_gV[V]);\
     b = (type *)c->table_bU[U];\
 
-#define YSCALE_YUV_2_ANYRGB_C(func, func2)\
+#define YSCALE_YUV_2_ANYRGB_C(func, func2, func_g16)\
     switch(c->dstFormat)\
     {\
     case PIX_FMT_RGB32:\
     case PIX_FMT_BGR32:\
+    case PIX_FMT_RGB32_1:\
+    case PIX_FMT_BGR32_1:\
         func(uint32_t)\
             ((uint32_t*)dest)[i2+0]= r[Y1] + g[Y1] + b[Y1];\
             ((uint32_t*)dest)[i2+1]= r[Y2] + g[Y2] + b[Y2];\
@@ -668,6 +735,22 @@ static inline void yuv2nv12XinC(int16_t *lumFilter, int16_t **lumSrc, int lumFil
             ((uint8_t*)dest)[2*i2+3]= Y2;\
         }                \
         break;\
+    case PIX_FMT_GRAY16BE:\
+        func_g16\
+            ((uint8_t*)dest)[2*i2+0]= Y1>>8;\
+            ((uint8_t*)dest)[2*i2+1]= Y1;\
+            ((uint8_t*)dest)[2*i2+2]= Y2>>8;\
+            ((uint8_t*)dest)[2*i2+3]= Y2;\
+        }                \
+        break;\
+    case PIX_FMT_GRAY16LE:\
+        func_g16\
+            ((uint8_t*)dest)[2*i2+0]= Y1;\
+            ((uint8_t*)dest)[2*i2+1]= Y1>>8;\
+            ((uint8_t*)dest)[2*i2+2]= Y2;\
+            ((uint8_t*)dest)[2*i2+3]= Y2>>8;\
+        }                \
+        break;\
     }\
 
 
@@ -680,6 +763,8 @@ static inline void yuv2packedXinC(SwsContext *c, int16_t *lumFilter, int16_t **l
     {
     case PIX_FMT_BGR32:
     case PIX_FMT_RGB32:
+    case PIX_FMT_BGR32_1:
+    case PIX_FMT_RGB32_1:
         YSCALE_YUV_2_RGBX_C(uint32_t)
             ((uint32_t*)dest)[i2+0]= r[Y1] + g[Y1] + b[Y1];
             ((uint32_t*)dest)[i2+1]= r[Y2] + g[Y2] + b[Y2];
@@ -817,6 +902,22 @@ static inline void yuv2packedXinC(SwsContext *c, int16_t *lumFilter, int16_t **l
             ((uint8_t*)dest)[2*i2+1]= Y1;
             ((uint8_t*)dest)[2*i2+2]= V;
             ((uint8_t*)dest)[2*i2+3]= Y2;
+        }
+        break;
+    case PIX_FMT_GRAY16BE:
+        YSCALE_YUV_2_GRAY16_C(void)
+            ((uint8_t*)dest)[2*i2+0]= Y1>>8;
+            ((uint8_t*)dest)[2*i2+1]= Y1;
+            ((uint8_t*)dest)[2*i2+2]= Y2>>8;
+            ((uint8_t*)dest)[2*i2+3]= Y2;
+        }
+        break;
+    case PIX_FMT_GRAY16LE:
+        YSCALE_YUV_2_GRAY16_C(void)
+            ((uint8_t*)dest)[2*i2+0]= Y1;
+            ((uint8_t*)dest)[2*i2+1]= Y1>>8;
+            ((uint8_t*)dest)[2*i2+2]= Y2;
+            ((uint8_t*)dest)[2*i2+3]= Y2>>8;
         }
         break;
     }
@@ -1217,7 +1318,7 @@ static inline int initFilter(int16_t **outFilter, int16_t **filterPos, int *outF
     filterSize= (minFilterSize +(filterAlign-1)) & (~(filterAlign-1));
     assert(filterSize > 0);
     filter= av_malloc(filterSize*dstW*sizeof(double));
-    if (filterSize >= MAX_FILTER_SIZE || !filter)
+    if (filterSize >= MAX_FILTER_SIZE*16/((flags&SWS_ACCURATE_RND) ? APCK_SIZE : 16) || !filter)
         goto error;
     *outFilterSize= filterSize;
 
@@ -1573,7 +1674,25 @@ static int PlanarToUyvyWrapper(SwsContext *c, uint8_t* src[], int srcStride[], i
     return srcSliceH;
 }
 
-/* {RGB,BGR}{15,16,24,32} -> {RGB,BGR}{15,16,24,32} */
+static int YUV422PToYuy2Wrapper(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
+                                int srcSliceH, uint8_t* dstParam[], int dstStride[]){
+    uint8_t *dst=dstParam[0] + dstStride[0]*srcSliceY;
+
+    yuv422ptoyuy2(src[0],src[1],src[2],dst,c->srcW,srcSliceH,srcStride[0],srcStride[1],dstStride[0]);
+
+    return srcSliceH;
+}
+
+static int YUV422PToUyvyWrapper(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
+                                int srcSliceH, uint8_t* dstParam[], int dstStride[]){
+    uint8_t *dst=dstParam[0] + dstStride[0]*srcSliceY;
+
+    yuv422ptouyvy(src[0],src[1],src[2],dst,c->srcW,srcSliceH,srcStride[0],srcStride[1],dstStride[0]);
+
+    return srcSliceH;
+}
+
+/* {RGB,BGR}{15,16,24,32,32_1} -> {RGB,BGR}{15,16,24,32} */
 static int rgb2rgbWrapper(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
                           int srcSliceH, uint8_t* dst[], int dstStride[]){
     const int srcFormat= c->srcFormat;
@@ -1632,12 +1751,15 @@ static int rgb2rgbWrapper(SwsContext *c, uint8_t* src[], int srcStride[], int sr
 
     if(conv)
     {
+        uint8_t *srcPtr= src[0];
+        if(srcFormat == PIX_FMT_RGB32_1 || srcFormat == PIX_FMT_BGR32_1)
+            srcPtr += ALT32_CORR;
+
         if (dstStride[0]*srcBpp == srcStride[0]*dstBpp && srcStride[0] > 0)
-            conv(src[0], dst[0] + dstStride[0]*srcSliceY, srcSliceH*srcStride[0]);
+            conv(srcPtr, dst[0] + dstStride[0]*srcSliceY, srcSliceH*srcStride[0]);
         else
         {
             int i;
-            uint8_t *srcPtr= src[0];
             uint8_t *dstPtr= dst[0] + dstStride[0]*srcSliceY;
 
             for (i=0; i<srcSliceH; i++)
@@ -1887,7 +2009,6 @@ int sws_setColorspaceDetails(SwsContext *c, const int inv_table[4], int srcRange
     int64_t cy  = 1<<16;
     int64_t oy  = 0;
 
-    if (isYUV(c->dstFormat) || isGray(c->dstFormat)) return -1;
     memcpy(c->srcColorspaceTable, inv_table, sizeof(int)*4);
     memcpy(c->dstColorspaceTable,     table, sizeof(int)*4);
 
@@ -1896,6 +2017,7 @@ int sws_setColorspaceDetails(SwsContext *c, const int inv_table[4], int srcRange
     c->saturation= saturation;
     c->srcRange  = srcRange;
     c->dstRange  = dstRange;
+    if (isYUV(c->dstFormat) || isGray(c->dstFormat)) return 0;
 
     c->uOffset=   0x0400040004000400LL;
     c->vOffset=   0x0400040004000400LL;
@@ -2093,7 +2215,8 @@ SwsContext *sws_getContext(int srcW, int srcH, int srcFormat, int dstW, int dstH
     if ((isBGR(srcFormat) || isRGB(srcFormat)) && !(flags&SWS_FULL_CHR_H_INP)
       && srcFormat!=PIX_FMT_RGB8      && srcFormat!=PIX_FMT_BGR8
       && srcFormat!=PIX_FMT_RGB4      && srcFormat!=PIX_FMT_BGR4
-      && srcFormat!=PIX_FMT_RGB4_BYTE && srcFormat!=PIX_FMT_BGR4_BYTE)
+      && srcFormat!=PIX_FMT_RGB4_BYTE && srcFormat!=PIX_FMT_BGR4_BYTE
+      && ((dstW>>c->chrDstHSubSample) <= (srcW>>1) || (flags&(SWS_FAST_BILINEAR|SWS_POINT))))
         c->chrSrcHSubSample=1;
 
     if (param){
@@ -2116,7 +2239,7 @@ SwsContext *sws_getContext(int srcW, int srcH, int srcFormat, int dstW, int dstH
     sws_setColorspaceDetails(c, Inverse_Table_6_9[SWS_CS_DEFAULT], srcRange, Inverse_Table_6_9[SWS_CS_DEFAULT] /* FIXME*/, dstRange, 0, 1<<16, 1<<16);
 
     /* unscaled special Cases */
-    if (unscaled && !usesHFilter && !usesVFilter)
+    if (unscaled && !usesHFilter && !usesVFilter && (srcRange == dstRange || isBGR(dstFormat) || isRGB(dstFormat)))
     {
         /* yv12_to_nv12 */
         if (srcFormat == PIX_FMT_YUV420P && (dstFormat == PIX_FMT_NV12 || dstFormat == PIX_FMT_NV21))
@@ -2150,36 +2273,38 @@ SwsContext *sws_getContext(int srcW, int srcH, int srcFormat, int dstW, int dstH
            && srcFormat != PIX_FMT_BGR4_BYTE && dstFormat != PIX_FMT_BGR4_BYTE
            && srcFormat != PIX_FMT_RGB4_BYTE && dstFormat != PIX_FMT_RGB4_BYTE
            && srcFormat != PIX_FMT_MONOBLACK && dstFormat != PIX_FMT_MONOBLACK
-           && !needsDither)
+                                             && dstFormat != PIX_FMT_RGB32_1
+                                             && dstFormat != PIX_FMT_BGR32_1
+           && (!needsDither || (c->flags&(SWS_FAST_BILINEAR|SWS_POINT))))
              c->swScale= rgb2rgbWrapper;
+
+        if (srcFormat == PIX_FMT_YUV422P)
+        {
+            if (dstFormat == PIX_FMT_YUYV422)
+                c->swScale= YUV422PToYuy2Wrapper;
+            else if (dstFormat == PIX_FMT_UYVY422)
+                c->swScale= YUV422PToUyvyWrapper;
+        }
 
         /* LQ converters if -sws 0 or -sws 4*/
         if (c->flags&(SWS_FAST_BILINEAR|SWS_POINT)){
-            /* rgb/bgr -> rgb/bgr (dither needed forms) */
-            if ( (isBGR(srcFormat) || isRGB(srcFormat))
-              && (isBGR(dstFormat) || isRGB(dstFormat))
-              && needsDither)
-                c->swScale= rgb2rgbWrapper;
-
             /* yv12_to_yuy2 */
-            if (srcFormat == PIX_FMT_YUV420P &&
-                (dstFormat == PIX_FMT_YUYV422 || dstFormat == PIX_FMT_UYVY422))
+            if (srcFormat == PIX_FMT_YUV420P)
             {
                 if (dstFormat == PIX_FMT_YUYV422)
                     c->swScale= PlanarToYuy2Wrapper;
-                else
+                else if (dstFormat == PIX_FMT_UYVY422)
                     c->swScale= PlanarToUyvyWrapper;
             }
         }
 
 #ifdef COMPILE_ALTIVEC
         if ((c->flags & SWS_CPU_CAPS_ALTIVEC) &&
-            ((srcFormat == PIX_FMT_YUV420P &&
-             (dstFormat == PIX_FMT_YUYV422 || dstFormat == PIX_FMT_UYVY422)))) {
+            srcFormat == PIX_FMT_YUV420P) {
           // unscaled YV12 -> packed YUV, we want speed
           if (dstFormat == PIX_FMT_YUYV422)
               c->swScale= yv12toyuy2_unscaled_altivec;
-          else
+          else if (dstFormat == PIX_FMT_UYVY422)
               c->swScale= yv12touyvy_unscaled_altivec;
         }
 #endif
@@ -2507,6 +2632,12 @@ int sws_scale(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
     int i;
     uint8_t* src2[4]= {src[0], src[1], src[2]};
     uint32_t pal[256];
+    int use_pal=   c->srcFormat == PIX_FMT_PAL8
+                || c->srcFormat == PIX_FMT_BGR4_BYTE
+                || c->srcFormat == PIX_FMT_RGB4_BYTE
+                || c->srcFormat == PIX_FMT_BGR8
+                || c->srcFormat == PIX_FMT_RGB8;
+
     if (c->sliceDir == 0 && srcSliceY != 0 && srcSliceY + srcSliceH != c->srcH) {
         av_log(c, AV_LOG_ERROR, "Slices start in the middle!\n");
         return 0;
@@ -2515,15 +2646,34 @@ int sws_scale(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
         if (srcSliceY == 0) c->sliceDir = 1; else c->sliceDir = -1;
     }
 
-    if (c->srcFormat == PIX_FMT_PAL8){
+    if (use_pal){
         for (i=0; i<256; i++){
-            int p= ((uint32_t*)(src[1]))[i];
-            int r= (p>>16)&0xFF;
-            int g= (p>> 8)&0xFF;
-            int b=  p     &0xFF;
-            int y= av_clip_uint8(((RY*r + GY*g + BY*b)>>RGB2YUV_SHIFT) + 16 );
-            int u= av_clip_uint8(((RU*r + GU*g + BU*b)>>RGB2YUV_SHIFT) + 128);
-            int v= av_clip_uint8(((RV*r + GV*g + BV*b)>>RGB2YUV_SHIFT) + 128);
+            int p, r, g, b,y,u,v;
+            if(c->srcFormat == PIX_FMT_PAL8){
+                p=((uint32_t*)(src[1]))[i];
+                r= (p>>16)&0xFF;
+                g= (p>> 8)&0xFF;
+                b=  p     &0xFF;
+            }else if(c->srcFormat == PIX_FMT_RGB8){
+                r= (i>>5    )*36;
+                g= ((i>>2)&7)*36;
+                b= (i&3     )*85;
+            }else if(c->srcFormat == PIX_FMT_BGR8){
+                b= (i>>6    )*85;
+                g= ((i>>3)&7)*36;
+                r= (i&7     )*36;
+            }else if(c->srcFormat == PIX_FMT_RGB4_BYTE){
+                r= (i>>3    )*255;
+                g= ((i>>1)&3)*85;
+                b= (i&1     )*255;
+            }else if(c->srcFormat == PIX_FMT_BGR4_BYTE){
+                b= (i>>3    )*255;
+                g= ((i>>1)&3)*85;
+                r= (i&1     )*255;
+            }
+            y= av_clip_uint8((RY*r + GY*g + BY*b + ( 33<<(RGB2YUV_SHIFT-1)))>>RGB2YUV_SHIFT);
+            u= av_clip_uint8((RU*r + GU*g + BU*b + (257<<(RGB2YUV_SHIFT-1)))>>RGB2YUV_SHIFT);
+            v= av_clip_uint8((RV*r + GV*g + BV*b + (257<<(RGB2YUV_SHIFT-1)))>>RGB2YUV_SHIFT);
             pal[i]= y + (u<<8) + (v<<16);
         }
         src2[1]= (uint8_t*)pal;
@@ -2544,7 +2694,7 @@ int sws_scale(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
         int dstStride2[4]= {-dstStride[0], -dstStride[1], -dstStride[2]};
 
         src2[0] += (srcSliceH-1)*srcStride[0];
-        if (c->srcFormat != PIX_FMT_PAL8)
+        if (!use_pal)
             src2[1] += ((srcSliceH>>c->chrSrcVSubSample)-1)*srcStride[1];
         src2[2] += ((srcSliceH>>c->chrSrcVSubSample)-1)*srcStride[2];
 

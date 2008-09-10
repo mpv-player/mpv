@@ -1,14 +1,25 @@
 /*
- *  vosub_vidix.c
+ * vidix interface to any mplayer vo driver
+ * (partly based on vesa_lvo.c)
  *
- *	Copyright (C) Nick Kurshev <nickols_k@mail.ru> - 2002
- *	Copyright (C) Alex Beregszaszi
+ * copyright (C) 2002 Nick Kurshev <nickols_k@mail.ru>
+ * copyright (C) Alex Beregszaszi
  *
- *  You can redistribute this file under terms and conditions
- *  of GNU General Public licence v2 or later.
+ * This file is part of MPlayer.
  *
- * This file contains vidix interface to any mplayer's VO plugin.
- * (Partly based on vesa_lvo.c from mplayer's package)
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <inttypes.h>

@@ -173,22 +173,6 @@ Note:         You will need vcdimager/cdrecord to master/burn the resulting
 
 
 
-encode2mpeglight.sh
-
-Author:       Giacomo Comes
-
-Description:  Convert anything MPlayer can play to VCD/SVCD/DVD MPEG.
-
-Usage:        encode2mpeglight.sh -o <NAME> -n <NORM> [options] <source>
-              For help and documentation run:
-                encode2mpeglight.sh -h
-                encode2mpeglight.sh -l
-                encode2mpeglight.sh -doc
-
-Note:         This script uses only MEncode/MPlayer. Check the final log
-              file for informations/warnings about the encoding process.
-
-
 Tech scripts in the TOOLS dir
 -----------------------------
 

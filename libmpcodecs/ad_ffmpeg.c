@@ -63,7 +63,7 @@ static int init(sh_audio_t *sh_audio)
 	lavc_context->sample_rate = sh_audio->wf->nSamplesPerSec;
 	lavc_context->bit_rate = sh_audio->wf->nAvgBytesPerSec * 8;
 	lavc_context->block_align = sh_audio->wf->nBlockAlign;
-	lavc_context->bits_per_sample = sh_audio->wf->wBitsPerSample;
+	lavc_context->bits_per_coded_sample = sh_audio->wf->wBitsPerSample;
     }
     lavc_context->request_channels = audio_output_channels;
     lavc_context->codec_tag = sh_audio->format; //FOURCC

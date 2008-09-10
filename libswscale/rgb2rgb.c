@@ -35,22 +35,22 @@
 
 #define FAST_BGR2YV12 // use 7-bit instead of 15-bit coefficients
 
-void (*rgb24to32)(const uint8_t *src, uint8_t *dst, long src_size);
-void (*rgb24to16)(const uint8_t *src, uint8_t *dst, long src_size);
-void (*rgb24to15)(const uint8_t *src, uint8_t *dst, long src_size);
-void (*rgb32to24)(const uint8_t *src, uint8_t *dst, long src_size);
+void (*rgb24tobgr32)(const uint8_t *src, uint8_t *dst, long src_size);
+void (*rgb24tobgr16)(const uint8_t *src, uint8_t *dst, long src_size);
+void (*rgb24tobgr15)(const uint8_t *src, uint8_t *dst, long src_size);
+void (*rgb32tobgr24)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb32to16)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb32to15)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb15to16)(const uint8_t *src, uint8_t *dst, long src_size);
-void (*rgb15to24)(const uint8_t *src, uint8_t *dst, long src_size);
+void (*rgb15tobgr24)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb15to32)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb16to15)(const uint8_t *src, uint8_t *dst, long src_size);
-void (*rgb16to24)(const uint8_t *src, uint8_t *dst, long src_size);
+void (*rgb16tobgr24)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb16to32)(const uint8_t *src, uint8_t *dst, long src_size);
 //void (*rgb24tobgr32)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb24tobgr24)(const uint8_t *src, uint8_t *dst, long src_size);
-void (*rgb24tobgr16)(const uint8_t *src, uint8_t *dst, long src_size);
-void (*rgb24tobgr15)(const uint8_t *src, uint8_t *dst, long src_size);
+void (*rgb24to16)(const uint8_t *src, uint8_t *dst, long src_size);
+void (*rgb24to15)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb32tobgr32)(const uint8_t *src, uint8_t *dst, long src_size);
 //void (*rgb32tobgr24)(const uint8_t *src, uint8_t *dst, long src_size);
 void (*rgb32tobgr16)(const uint8_t *src, uint8_t *dst, long src_size);
@@ -63,6 +63,9 @@ void (*yv12touyvy)(const uint8_t *ysrc, const uint8_t *usrc, const uint8_t *vsrc
                    long width, long height,
                    long lumStride, long chromStride, long dstStride);
 void (*yuv422ptoyuy2)(const uint8_t *ysrc, const uint8_t *usrc, const uint8_t *vsrc, uint8_t *dst,
+                      long width, long height,
+                      long lumStride, long chromStride, long dstStride);
+void (*yuv422ptouyvy)(const uint8_t *ysrc, const uint8_t *usrc, const uint8_t *vsrc, uint8_t *dst,
                       long width, long height,
                       long lumStride, long chromStride, long dstStride);
 void (*yuy2toyv12)(const uint8_t *src, uint8_t *ydst, uint8_t *udst, uint8_t *vdst,
@@ -330,7 +333,7 @@ void palette8tobgr15(const uint8_t *src, uint8_t *dst, long num_pixels, const ui
         ((uint16_t *)dst)[i] = bswap_16(((const uint16_t *)palette)[src[i]]);
 }
 
-void rgb32tobgr24(const uint8_t *src, uint8_t *dst, long src_size)
+void rgb32to24(const uint8_t *src, uint8_t *dst, long src_size)
 {
     long i;
     long num_pixels = src_size >> 2;
@@ -349,7 +352,7 @@ void rgb32tobgr24(const uint8_t *src, uint8_t *dst, long src_size)
     }
 }
 
-void rgb24tobgr32(const uint8_t *src, uint8_t *dst, long src_size)
+void rgb24to32(const uint8_t *src, uint8_t *dst, long src_size)
 {
     long i;
     for (i=0; 3*i<src_size; i++)
@@ -393,7 +396,7 @@ void rgb16tobgr32(const uint8_t *src, uint8_t *dst, long src_size)
     }
 }
 
-void rgb16tobgr24(const uint8_t *src, uint8_t *dst, long src_size)
+void rgb16to24(const uint8_t *src, uint8_t *dst, long src_size)
 {
     const uint16_t *end;
     uint8_t *d = dst;
@@ -416,13 +419,8 @@ void rgb16tobgr16(const uint8_t *src, uint8_t *dst, long src_size)
 
     for (i=0; i<num_pixels; i++)
     {
-        unsigned b,g,r;
-        register uint16_t rgb;
-        rgb = src[2*i];
-        r = rgb&0x1F;
-        g = (rgb&0x7E0)>>5;
-        b = (rgb&0xF800)>>11;
-        dst[2*i] = (b&0x1F) | ((g&0x3F)<<5) | ((r&0x1F)<<11);
+        unsigned rgb = ((const uint16_t*)src)[i];
+        ((uint16_t*)dst)[i] = (rgb>>11) | (rgb&0x7E0) | (rgb<<11);
     }
 }
 
@@ -433,13 +431,8 @@ void rgb16tobgr15(const uint8_t *src, uint8_t *dst, long src_size)
 
     for (i=0; i<num_pixels; i++)
     {
-        unsigned b,g,r;
-        register uint16_t rgb;
-        rgb = src[2*i];
-        r = rgb&0x1F;
-        g = (rgb&0x7E0)>>5;
-        b = (rgb&0xF800)>>11;
-        dst[2*i] = (b&0x1F) | ((g&0x1F)<<5) | ((r&0x1F)<<10);
+        unsigned rgb = ((const uint16_t*)src)[i];
+        ((uint16_t*)dst)[i] = (rgb>>11) | ((rgb&0x7C0)>>1) | ((rgb&0x1F)<<10);
     }
 }
 
@@ -467,7 +460,7 @@ void rgb15tobgr32(const uint8_t *src, uint8_t *dst, long src_size)
     }
 }
 
-void rgb15tobgr24(const uint8_t *src, uint8_t *dst, long src_size)
+void rgb15to24(const uint8_t *src, uint8_t *dst, long src_size)
 {
     const uint16_t *end;
     uint8_t *d = dst;
@@ -490,13 +483,8 @@ void rgb15tobgr16(const uint8_t *src, uint8_t *dst, long src_size)
 
     for (i=0; i<num_pixels; i++)
     {
-        unsigned b,g,r;
-        register uint16_t rgb;
-        rgb = src[2*i];
-        r = rgb&0x1F;
-        g = (rgb&0x3E0)>>5;
-        b = (rgb&0x7C00)>>10;
-        dst[2*i] = (b&0x1F) | ((g&0x3F)<<5) | ((r&0x1F)<<11);
+        unsigned rgb = ((const uint16_t*)src)[i];
+        ((uint16_t*)dst)[i] = ((rgb&0x7C00)>>10) | ((rgb&0x3E0)<<1) | (rgb<<11);
     }
 }
 
@@ -507,17 +495,14 @@ void rgb15tobgr15(const uint8_t *src, uint8_t *dst, long src_size)
 
     for (i=0; i<num_pixels; i++)
     {
-        unsigned b,g,r;
-        register uint16_t rgb;
-        rgb = src[2*i];
-        r = rgb&0x1F;
-        g = (rgb&0x3E0)>>5;
-        b = (rgb&0x7C00)>>10;
-        dst[2*i] = (b&0x1F) | ((g&0x1F)<<5) | ((r&0x1F)<<10);
+        unsigned br;
+        unsigned rgb = ((const uint16_t*)src)[i];
+        br = rgb&0x7c1F;
+        ((uint16_t*)dst)[i] = (br>>10) | (rgb&0x3E0) | (br<<10);
     }
 }
 
-void rgb8tobgr8(const uint8_t *src, uint8_t *dst, long src_size)
+void bgr8torgb8(const uint8_t *src, uint8_t *dst, long src_size)
 {
     long i;
     long num_pixels = src_size;

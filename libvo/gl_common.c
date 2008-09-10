@@ -1,13 +1,32 @@
+/*
+ * common OpenGL routines
+ *
+ * copyleft (C) 2005 Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
+ * Special thanks go to the xine team and Matthias Hopf, whose video_out_opengl.c
+ * gave me lots of good ideas.
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 /**
  * \file gl_common.c
  * \brief OpenGL helper functions used by vo_gl.c and vo_gl2.c
- *
- * Common OpenGL routines.
- * Copyleft (C) Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>, 2005
- * Licensed under the GNU GPL v2 or later.
- * Special thanks go to the xine team and Matthias Hopf, whose video_out_opengl.c
- * gave me lots of good ideas.
  */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

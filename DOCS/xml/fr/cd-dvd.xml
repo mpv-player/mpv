@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20637 -->
+<!-- synced with r26990 -->
 <chapter id="cd-dvd">
 <title>Utilisation des CD/DVD</title>
 
@@ -25,12 +25,15 @@ peut contribuer à diminuer.
 </para></listitem>
 </itemizedlist>
 
+<!-- ********** -->
+
 <sect2 id="drives_linux">
 <title>Linux</title>
 
 <para>
 Vous pouvez réduire la vitesse des lecteurs de CD-ROM IDE avec <command>hdparm</command>,
-<command>setcd</command> ou <command>cdctl</command>. Ils fonctionnent comme suit :
+<command>setcd</command> ou <command>cdctl</command>. Ils fonctionnent comme
+suit&nbsp;:
 <screen>hdparm -E <replaceable>[vitesse]</replaceable> <replaceable>[périph. cdrom]</replaceable></screen>
 <screen>setcd -x <replaceable>[vitesse]</replaceable> <replaceable>[périph. cdrom]</replaceable></screen>
 <screen>cdctl -bS <replaceable>[vitesse]</replaceable></screen>
@@ -42,7 +45,8 @@ vrai périphérique IDE, et non au périphérique SCSI émulé.
 </para>
 
 <para>
-Si vous avez les privilèges root, la commande suivante peut également aider :
+  Si vous avez les privilèges root, la commande suivante peut également
+aider&nbsp;:
 <screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[périph. cdrom]</replaceable>/settings</screen>
 </para>
 
@@ -50,7 +54,8 @@ Si vous avez les privilèges root, la commande suivante peut également aider :
 Ceci créé un cache de 2 Mo, ce qui est utile pour les CD-ROMs endommagés (rayés).
 Si vous lui donnez une valeur trop haute, le lecteur ne va pas cesser de s'arrêter
 et de repartir, ce qui va dramatiquement diminuer les performances. Il est
-également recommandé d'optimiser votre lecteur de CD-ROM avec <command>hdparm</command> :
+également recommandé d'optimiser votre lecteur de CD-ROM avec
+<command>hdparm</command>&nbsp;:
 <screen>hdparm -d1 -a8 -u1 <replaceable>[périph. cdrom]</replaceable></screen>
 </para>
 
@@ -61,27 +66,29 @@ man de <command>hdparm</command> pour plus d'explications).
 
 <para>
 Référez vous à "<filename>/proc/ide/<replaceable>[périph. cdrom]</replaceable>/settings</filename>"
-pour optimiser précisémment votre lecteur CD-ROM.
+pour optimiser précisément votre lecteur CD-ROM.
 </para>
 
 <para>
-Les lecteurs SCSI n'ont pas une manière uniforme de règler ces paramètres (Vous en
-connaissez une ? Dites-la nous !). Il y a un outil qui fonctionne pour les
+Les lecteurs SCSI n'ont pas une manière uniforme de régler ces paramètres
+(Vous en connaissez une&thinsp;? Dites-la nous&thinsp;!). Il y a un outil qui
+fonctionne pour les
 <ulink url="http://das.ist.org/~georg/">Lecteurs SCSI Plextor</ulink>.
 </para>
 </sect2>
 
+<!-- ********** -->
 
 <sect2 id="drives_freebsd">
 <title>FreeBSD</title>
 
-<para>Vitesse :
+<para>Vitesse&nbsp;:
 <screen>
 cdcontrol [-f <replaceable>périphérique</replaceable>] speed <replaceable>[vitesse]</replaceable>
 </screen>
 </para>
 
-<para>DMA :
+<para>DMA&nbsp;:
 <screen>
 sysctl hw.ata.atapi_dma=1
 </screen>
@@ -92,17 +99,21 @@ sysctl hw.ata.atapi_dma=1
 </sect1>
 
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="dvd">
 <title>Lecture de DVD</title>
+
 <para>
 Pour voir la liste complète des options disponibles, veuillez lire la page de man.
-La syntaxe pour lire un Digital Versatile Disc (DVD) est la suivante :
+La syntaxe pour lire un Digital Versatile Disc (DVD) est la suivante&nbsp;:
 <screen>mplayer dvd://<replaceable>&lt;piste&gt;</replaceable> [-dvd-device <replaceable>&lt;périphérique&gt;</replaceable>]</screen>
 </para>
 
 <para>
-Exemple :
-<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
+  Exemple&nbsp;:
+  <screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
 </para>
 
 <para>
@@ -134,81 +145,62 @@ le réglage de leur code de région.
 </para></note>
 
 <formalpara>
-<title>Structure d'un DVD</title>
-<para>
-Les disques DVD utilisent tous des secteurs de 2048 octets par secteur avec ECC/CRC. Ils ont
-généralement un système de fichier UDF sur une seule piste, qui contient divers fichiers (des
-petits fichiers .IFO et .BUK et de gros (1Go) fichiers .VOB). Ce sont de véritables fichiers et ils
-peuvent être joués/copiés depuis le système de fichier monté d'un DVD non-crypté.
+  <title>Décodage DVD</title>
+  <para>
+    Le décodage DVD est réalisé par <systemitem>libdvdcss</systemitem>. La
+    méthode peut être spécifiée par la variable d'environnement
+    <envar>DVDCSS_METHOD</envar>. Voir le manuel pour plus de détails.
 </para>
 </formalpara>
 
+<sect2 id="region_code">
+<title>Code zone</title>
 <para>
-Les fichiers .IFO contiennent les infos de navigation dans le film (carte des chapitres/titres/angles,
-table des langues, etc) et sont requis pour lire et interpréter le contenu des .VOB (le film). Les
-fichiers .BUK sont des backups de ces fichiers. Ils utilisent des <emphasis role="bold">secteurs</emphasis>
-partout, donc vous avez besoin d'utiliser un adressage brut des secteurs sur le disque pour implémenter
-la navigation DVD. C'est également requis pour décrypter le contenu.
+  Les lecteurs DVD d'aujourd'hui sont équipés d'une restriction sans queue ni
+  tête appelée <ulink
+url="http://fr.wikipedia.org/wiki/DVD#Protections_commerciales_par_zones">
+    protection commerciale par zones </ulink>.
+  C'est un système qui oblige les lecteurs DVD à accepter uniquement les DVDs
+  produits pour l'une des six zones qui découpent le monde.  Il est
+  impensable qu'un groupe de personne se réunisse pour arriver à élaborer une
+  telle idée et pense que la Terre entière se pliera à leur volonté.
 </para>
 
 <para>
-Le support DVD nécessite un accès brut aux secteurs du périphérique. Malheureusement,
-vous devez (sous Linux) être root pour avoir accès aux adresses des secteurs d'un fichier. C'est
-pourquoi nous n'utilisons pas du tout le pilote de système de fichier du noyau, à
-la place nous l'avons réimplémenté dans l'espace utilisateur. <systemitem>libdvdread</systemitem>
-0.9.x fait cela. Le pilote pour le système
-de fichier UDF du noyau n'est pas requis puisqu'ils ont déjà leur pilote UDF incorporé.
-De plus le DVD n'a pas besoin d'être monté étant donné que seul l'accès brut aux secteurs est utilisé.
+  Les lecteurs qui appliquent le réglage des zones uniquement via logiciel
+  sont connus comme des lecteurs RPC-1, ceux qui le font via matériel comme
+  des lecteurs RPC-2.
+  Les lecteurs RPC-2 permettent de changer de zone cinq fois avant qu'il ne
+  se bloque.
+  Sous Linux, vous pouvez utiliser l'outil <ulink
+  url="http://linvdr.org/projects/regionset/">regionset</ulink> pour modifier
+  le code zone de votre lecteur DVD.
 </para>
 
 <para>
-Parfois <filename>/dev/dvd</filename> ne peut être lu par les utilisateurs; les auteurs de
-<systemitem>libdvdread</systemitem> ont donc implémenté une couche d'émulation qui transforme les
-adresses des secteurs en noms de fichier+offsets, pour émuler l'accès brut par-dessus un système de fichier
-monté ou même un disque dur.
+  Heureusement, il est possible de convertir les lecteurs RPC-2 en RPC-1 lors
+  d'une mise à jours du micrologiciel.
+  Saisissez la référence de votre lecteur DVD dans votre moteur de recherche
+  favori ou jetez un œil au forum et à la section téléchargement de <ulink
+  url="http://www.rpc1.org/">"The firmware page"</ulink>.
+  Les mises en garde habituelles des mises à jours de micrologiciels restent
+  valables mais les expériences de suppressions de restrictions de zones sont
+  généralement fructueuses.
 </para>
+</sect2>
 
-<para>
-<systemitem>libdvdread</systemitem> accepte même le point de montage au lieu du nom de périphérique
-pour l'accès brut et regarde dans <filename>/proc/mounts</filename> pour obtenir le nom de périphérique.
-Il a été développé pour Solaris, où les noms de périphériques sont alloués dynamiquement.
-</para>
-
-<formalpara>
-<title>Décodage DVD</title>
-<para>
-Le décodage DVD est réalisé par <systemitem>libdvdcss</systemitem>. La méthode peut être
-spécifiée par la variable d'environnement <envar>DVDCSS_METHOD</envar>. Voir le manuel
-pour plus de détails.
-</para>
-</formalpara>
-
-<para>
-Les lecteurs DVD RPC-1 ne protègent les réglages de protection de région
-que de façon logicielle.
-Les lecteurs RPC-2 ont une protection matérielle qui ne permet que 5 changements.
-Il peut être requis/recommandé de mettre à niveau le firmware en RPC-1
-si vous avez un lecteur DVD RPC-2.
-Vous pouvez essayer de trouver des mises à jour de firmware pour votre lecteur
-sur internet. <ulink url="http://forum.rpc-1.com/dl_all.php">Ce forum sur les firmware</ulink>
-est sans doute un bon point de départ pour vos recherches. 
-Si il n'y a pas de mise à niveau de firmware disponible pour votre périphérique,
-utilisez l'<ulink url="http://linvdr.org/projects/regionset/">outil
-de réglage de région</ulink> pour changer le code de région de votre lecteur DVD (sous Linux).
-<emphasis role="bold">Attention</emphasis> :
-Vous ne pouvez changer la région que 5 fois.
-</para>
 </sect1>
 
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <sect1 id="vcd">
 <title>Lecture de VCDs</title>
 <para>
 Pour voir la liste complète des options disponibles, veuillez lire la page de man.
-La syntaxe pour lire un Video CD standard (VCD) est la suivante :
+La syntaxe pour lire un Vidéo CD standard (VCD) est la suivante&nbsp;:
 <screen>mplayer vcd://<replaceable>&lt;piste&gt;</replaceable> [-cdrom-device <replaceable>&lt;périphérique&gt;</replaceable>]</screen>
-Exemple :
+Exemple&nbsp;:
 <screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
 Le périphérique VCD par défaut est <filename>/dev/cdrom</filename>. Si votre installation diffère,
 faites un lien symbolique (symlink) ou spécifiez le bon périphérique en ligne de commande avec l'option
@@ -235,10 +227,8 @@ et lire le fichier obtenu avec <application>MPlayer</application>.
 <title>Structure d'un VCD</title>
 
 <para>
-Un CD Video (VCD) est constitué de secteurs CD-ROM XA, c'est-à-dire des pistes CD-ROM mode 2
-forme 1 et 2 :</para>
-</formalpara>
-
+Un CD Video (VCD) est constitué de secteurs CD-ROM XA, c'est-à-dire des
+pistes CD-ROM mode 2 forme 1 et 2&nbsp;:
 <itemizedlist>
 <listitem><para>
 La première piste est en mode 2 forme 2 ce qui signifie qu'elle utilise une
@@ -277,9 +267,11 @@ CD peut être trouvée dans la
 </para></listitem>
 
 </itemizedlist>
+</para>
+</formalpara>
 
 <formalpara>
-<title>À propos des fichiers .DAT :</title>
+  <title>À propos des fichiers .DAT&nbsp;:</title>
 <para>
 Le fichier de ~600 Mo visible sur la première piste d'un VCD monté n'est
 pas un vrai fichier !
@@ -297,8 +289,8 @@ Il possède un pilote de système de fichier iso9660 modifié
 les pistes brutes au travers de ce fichier .DAT fantôme.
 Si vous montez le disque en utilisant leur pilote, vous pouvez
 copier et même lire les fichiers .DAT avec <application>MPlayer</application>.
-Mais cela ne <emphasis role="bold">fonctionnera pas</emphasis>
-avec le pilote iso9660 standard du noyau !
+Mais cela ne fonctionnera pas avec le pilote iso9660 standard du
+noyau&thinsp;!
 Il est recommandé d'utiliser l'option <option>vcd://</option>
 à la place.
 D'autres possibilités pour la copie de VCD sont le nouveau pilote noyau
