@@ -1,6 +1,6 @@
 /*
  * mpeg2.h
- * Copyright (C) 2000-2003 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2004 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
@@ -25,11 +25,11 @@
  * $Id$
  */
 
-#ifndef MPEG2_H
-#define MPEG2_H
+#ifndef LIBMPEG2_MPEG2_H
+#define LIBMPEG2_MPEG2_H
 
 #define MPEG2_VERSION(a,b,c) (((a)<<16)|((b)<<8)|(c))
-#define MPEG2_RELEASE MPEG2_VERSION (0, 4, 1)	/* 0.4.1 */
+#define MPEG2_RELEASE MPEG2_VERSION (0, 5, 1)	/* 0.5.1 */
 
 #define SEQ_FLAG_MPEG2 1
 #define SEQ_FLAG_CONSTRAINED_PARAMETERS 2
@@ -132,7 +132,8 @@ typedef enum {
     STATE_SLICE = 7,
     STATE_END = 8,
     STATE_INVALID = 9,
-    STATE_INVALID_END = 10
+    STATE_INVALID_END = 10,
+    STATE_SEQUENCE_MODIFIED = 11
 } mpeg2_state_t;
 
 typedef struct mpeg2_convert_init_s {
@@ -160,6 +161,7 @@ void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf);
 #define MPEG2_ACCEL_X86_3DNOW 2
 #define MPEG2_ACCEL_X86_MMXEXT 4
 #define MPEG2_ACCEL_X86_SSE2 8
+#define MPEG2_ACCEL_X86_SSE3 16
 #define MPEG2_ACCEL_PPC_ALTIVEC 1
 #define MPEG2_ACCEL_ALPHA 1
 #define MPEG2_ACCEL_ALPHA_MVI 2
@@ -187,6 +189,9 @@ void mpeg2_tag_picture (mpeg2dec_t * mpeg2dec, uint32_t tag, uint32_t tag2);
 void mpeg2_init_fbuf (mpeg2_decoder_t * decoder, uint8_t * current_fbuf[3],
 		      uint8_t * forward_fbuf[3], uint8_t * backward_fbuf[3]);
 void mpeg2_slice (mpeg2_decoder_t * decoder, int code, const uint8_t * buffer);
+int mpeg2_guess_aspect (const mpeg2_sequence_t * sequence,
+			unsigned int * pixel_width,
+			unsigned int * pixel_height);
 
 typedef enum {
     MPEG2_ALLOC_MPEG2DEC = 0,
@@ -201,4 +206,4 @@ void mpeg2_free (void * buf);
 void mpeg2_malloc_hooks (void * malloc (unsigned, mpeg2_alloc_t),
 			 int free (void *));
 
-#endif /* MPEG2_H */
+#endif /* LIBMPEG2_MPEG2_H */

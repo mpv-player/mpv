@@ -19,10 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Modified for use with MPlayer, see libmpeg2_changes.diff for the exact changes.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
  */
 
 #include "config.h"
@@ -54,7 +50,7 @@ static void state_restore_mmx (cpu_state_t * state)
 #define STVX(a,b,c) "stvx v" #a ",r" #b ",r" #c "\n\t"
 #define LVX0(a,b,c) "lvx v" #a ",0,r" #c "\n\t"
 #define LVX(a,b,c) "lvx v" #a ",r" #b ",r" #c "\n\t"
-#else			/* gnu */
+#else				/* gnu */
 #define LI(a,b) "li " #a "," #b "\n\t"
 #define STVX0(a,b,c) "stvx " #a ",0," #c "\n\t"
 #define STVX(a,b,c) "stvx " #a "," #b "," #c "\n\t"

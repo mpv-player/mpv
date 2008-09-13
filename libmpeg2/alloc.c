@@ -62,9 +62,9 @@ void mpeg2_free (void * buf)
 	free (*(((void **)buf) - 1));
 }
 
-void mpeg2_malloc_hooks (void * malloc (unsigned, mpeg2_alloc_t),
-			 int free (void *))
+void mpeg2_malloc_hooks (void * alloc_func (unsigned, mpeg2_alloc_t),
+			 int free_func (void *))
 {
-    malloc_hook = malloc;
-    free_hook = free;
+    malloc_hook = alloc_func;
+    free_hook = free_func;
 }

@@ -56,6 +56,7 @@ MPlayer (1.0)
     libmpeg2:
     * enable Alpha/ARM optimizations in libmpeg2
     * SSE2-optimized IDCT routines from upstream libmpeg2
+    * libmpeg2 updated to version 0.5.1
 
     Drivers:
     * replace PolypAudio by PulseAudio (-ao pulse)

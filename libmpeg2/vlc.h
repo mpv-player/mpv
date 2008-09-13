@@ -21,6 +21,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef LIBMPEG2_VLC_H
+#define LIBMPEG2_VLC_H
+
 #define GETWORD(bit_buf,shift,bit_ptr)				\
 do {								\
     bit_buf |= ((bit_ptr[0] << 8) | bit_ptr[1]) << (shift);	\
@@ -121,7 +124,7 @@ static const MBtab MB_P [] = {
 #define INTER MACROBLOCK_MOTION_FORWARD|MACROBLOCK_MOTION_BACKWARD
 
 static const MBtab MB_B [] = {
-    {0,                 0}, {INTRA|QUANT,       6},
+    {0,                 6}, {INTRA|QUANT,       6},
     {BWD|CODED|QUANT,   6}, {FWD|CODED|QUANT,   6},
     {INTER|CODED|QUANT, 5}, {INTER|CODED|QUANT, 5},
 					{INTRA,       5}, {INTRA,       5},
@@ -201,7 +204,7 @@ static const CBPtab CBP_7 [] = {
 };
 
 static const CBPtab CBP_9 [] = {
-    {0,    0}, {0x00, 9}, {0x39, 9}, {0x36, 9},
+    {0,    9}, {0x00, 9}, {0x39, 9}, {0x36, 9},
     {0x37, 9}, {0x3b, 9}, {0x3d, 9}, {0x3e, 9},
     {0x17, 8}, {0x17, 8}, {0x1b, 8}, {0x1b, 8},
     {0x1d, 8}, {0x1d, 8}, {0x1e, 8}, {0x1e, 8},
@@ -289,7 +292,7 @@ static const DCTtab DCT_B14_10 [] = {
 };
 
 static const DCTtab DCT_B14_8 [] = {
-    { 65, 0, 6}, { 65, 0, 6}, { 65, 0, 6}, { 65, 0, 6},
+    { 65, 0,12}, { 65, 0,12}, { 65, 0,12}, { 65, 0,12},
     {  3, 2, 7}, {  3, 2, 7}, { 10, 1, 7}, { 10, 1, 7},
     {  1, 4, 7}, {  1, 4, 7}, {  9, 1, 7}, {  9, 1, 7},
     {  8, 1, 6}, {  8, 1, 6}, {  8, 1, 6}, {  8, 1, 6},
@@ -326,7 +329,7 @@ static const DCTtab DCT_B15_10 [] = {
 };
 
 static const DCTtab DCT_B15_8 [] = {
-    { 65, 0, 6}, { 65, 0, 6}, { 65, 0, 6}, { 65, 0, 6},
+    { 65, 0,12}, { 65, 0,12}, { 65, 0,12}, { 65, 0,12},
     {  8, 1, 7}, {  8, 1, 7}, {  9, 1, 7}, {  9, 1, 7},
     {  7, 1, 7}, {  7, 1, 7}, {  3, 2, 7}, {  3, 2, 7},
     {  1, 7, 6}, {  1, 7, 6}, {  1, 7, 6}, {  1, 7, 6},
@@ -427,3 +430,5 @@ static const MBAtab MBA_11 [] = {
     { 7,  7}, { 7,  7}, { 7,  7}, { 7,  7},
     { 7,  7}, { 7,  7}, { 7,  7}, { 7,  7}
 };
+
+#endif /* LIBMPEG2_VLC_H */

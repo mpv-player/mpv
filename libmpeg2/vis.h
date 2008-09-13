@@ -41,6 +41,9 @@
  * the assembler to keep the binary from becoming tainted.
  */
 
+#ifndef LIBMPEG2_VIS_H
+#define LIBMPEG2_VIS_H
+
 #define vis_opc_base	((0x1 << 31) | (0x36 << 19))
 #define vis_opf(X)	((X) << 5)
 #define vis_sreg(X)	(X)
@@ -326,3 +329,5 @@ static inline void vis_alignaddrl_g0(void *_ptr)
 /* Pixel component distance.  */
 
 #define vis_pdist(rs1,rs2,rd)		vis_dd2d(0x3e, rs1, rs2, rd)
+
+#endif /* LIBMPEG2_VIS_H */

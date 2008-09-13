@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with mpeg2dec; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
@@ -30,12 +30,12 @@
 #include "attributes.h"
 #include "mpeg2_internal.h"
 
-#define avg2(a,b) ((a+b+1)>>1)
+#define avg2(a,b)     ((a+b+1)>>1)
 #define avg4(a,b,c,d) ((a+b+c+d+2)>>2)
 
-#define predict_o(i) (ref[i])
-#define predict_x(i) (avg2 (ref[i], ref[i+1]))
-#define predict_y(i) (avg2 (ref[i], (ref+stride)[i]))
+#define predict_o(i)  (ref[i])
+#define predict_x(i)  (avg2 (ref[i], ref[i+1]))
+#define predict_y(i)  (avg2 (ref[i], (ref+stride)[i]))
 #define predict_xy(i) (avg4 (ref[i], ref[i+1], \
 			     (ref+stride)[i], (ref+stride)[i+1]))
 
@@ -67,7 +67,7 @@ static void inline MC_##op##_##xy##_16_c (uint8_t * dest, const uint8_t * ref,	\
 	op (predict_##xy, 15);						\
 	ref += stride;							\
 	dest += stride;							\
-    } while (--height);							\
+    } while (--height);						\
 }									\
 static void MC_##op##_##xy##_8_c (uint8_t * dest, const uint8_t * ref,	\
 				  const int stride, int height)		\
@@ -83,13 +83,11 @@ static void MC_##op##_##xy##_8_c (uint8_t * dest, const uint8_t * ref,	\
 	op (predict_##xy, 7);						\
 	ref += stride;							\
 	dest += stride;							\
-    } while (--height);							\
+    } while (--height);						\
 }									\
 /* definitions of the actual mc functions */
 
-MC_FUNC (put,o)
 MC_FUNC (avg,o)
-MC_FUNC (put,x)
 MC_FUNC (avg,x)
 MC_FUNC (put,y)
 MC_FUNC (avg,y)
@@ -117,7 +115,7 @@ static void MC_put_xy_16_arm (uint8_t * dest, const uint8_t * ref,
 }
 
 extern void MC_put_o_8_arm (uint8_t * dest, const uint8_t * ref,
-				int stride, int height);
+			     int stride, int height);
 
 extern void MC_put_x_8_arm (uint8_t * dest, const uint8_t * ref,
 			    int stride, int height);

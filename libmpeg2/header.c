@@ -246,7 +246,7 @@ static int sequence_ext (mpeg2dec_t * mpeg2dec)
     sequence->vbv_buffer_size |= buffer[4] << 21;
 
     sequence->frame_period =
-	sequence->frame_period * ((buffer[5]&31)+1) / (((buffer[5]>>2)&3)+1);
+	sequence->frame_period * ((buffer[5]&31)+1) / (((buffer[5]>>5)&3)+1);
 
     mpeg2dec->ext_state = SEQ_DISPLAY_EXT;
 
@@ -257,12 +257,11 @@ static int sequence_display_ext (mpeg2dec_t * mpeg2dec)
 {
     uint8_t * buffer = mpeg2dec->chunk_start;
     mpeg2_sequence_t * sequence = &(mpeg2dec->new_sequence);
-    uint32_t flags;
 
-    flags = ((sequence->flags & ~SEQ_MASK_VIDEO_FORMAT) |
-	     ((buffer[0]<<4) & SEQ_MASK_VIDEO_FORMAT));
+    sequence->flags = ((sequence->flags & ~SEQ_MASK_VIDEO_FORMAT) |
+		       ((buffer[0]<<4) & SEQ_MASK_VIDEO_FORMAT));
     if (buffer[0] & 1) {
-	flags |= SEQ_FLAG_COLOUR_DESCRIPTION;
+	sequence->flags |= SEQ_FLAG_COLOUR_DESCRIPTION;
 	sequence->colour_primaries = buffer[1];
 	sequence->transfer_characteristics = buffer[2];
 	sequence->matrix_coefficients = buffer[3];
@@ -279,6 +278,17 @@ static int sequence_display_ext (mpeg2dec_t * mpeg2dec)
 	    ((buffer[2]& 1 ) << 13) | (buffer[3] << 5) | (buffer[4] >> 3);
 
     return 0;
+}
+
+static inline void simplify (unsigned int * u, unsigned int * v)
+{
+    unsigned int a, b, tmp;
+
+    a = *u;	b = *v;
+    while (a) {	/* find greatest common divisor */
+	tmp = a;	a = b % tmp;	b = tmp;
+    }
+    *u /= b;	*v /= b;
 }
 
 static inline void finalize_sequence (mpeg2_sequence_t * sequence)
@@ -317,8 +327,10 @@ static inline void finalize_sequence (mpeg2_sequence_t * sequence)
 	    sequence->pixel_width = 64;	sequence->pixel_height = 45;	return;
 	case 6:	/* 720x480 16:9 */
 	    sequence->pixel_width = 32;	sequence->pixel_height = 27;	return;
-	case 12:	/* 720*480 4:3 */
-	    sequence->pixel_width = 8;	sequence->pixel_height = 9;	return;
+	case 8: /* BT.601 625 lines 4:3 */
+	    sequence->pixel_width = 59;	sequence->pixel_height = 54;	return;
+	case 12: /* BT.601 525 lines 4:3 */
+	    sequence->pixel_width = 10;	sequence->pixel_height = 11;	return;
 	default:
 	    height = 88 * sequence->pixel_width + 1171;
 	    width = 2000;
@@ -327,22 +339,89 @@ static inline void finalize_sequence (mpeg2_sequence_t * sequence)
 
     sequence->pixel_width = width;
     sequence->pixel_height = height;
-    while (width) {	/* find greatest common divisor */
-	int tmp = width;
-	width = height % tmp;
-	height = tmp;
-    }
-    sequence->pixel_width /= height;
-    sequence->pixel_height /= height;
+    simplify (&sequence->pixel_width, &sequence->pixel_height);
 }
 
-static void copy_matrix (mpeg2dec_t * mpeg2dec, int index)
+int mpeg2_guess_aspect (const mpeg2_sequence_t * sequence,
+			unsigned int * pixel_width,
+			unsigned int * pixel_height)
 {
-    if (memcmp (mpeg2dec->quantizer_matrix[index],
-		mpeg2dec->new_quantizer_matrix[index], 64)) {
-	memcpy (mpeg2dec->quantizer_matrix[index],
-		mpeg2dec->new_quantizer_matrix[index], 64);
-	mpeg2dec->scaled[index] = -1;
+    static struct {
+	unsigned int width, height;
+    } video_modes[] = {
+	{720, 576}, /* 625 lines, 13.5 MHz (D1, DV, DVB, DVD) */
+	{704, 576}, /* 625 lines, 13.5 MHz (1/1 D1, DVB, DVD, 4CIF) */
+	{544, 576}, /* 625 lines, 10.125 MHz (DVB, laserdisc) */
+	{528, 576}, /* 625 lines, 10.125 MHz (3/4 D1, DVB, laserdisc) */
+	{480, 576}, /* 625 lines, 9 MHz (2/3 D1, DVB, SVCD) */
+	{352, 576}, /* 625 lines, 6.75 MHz (D2, 1/2 D1, CVD, DVB, DVD) */
+	{352, 288}, /* 625 lines, 6.75 MHz, 1 field (D4, VCD, DVB, DVD, CIF) */
+	{176, 144}, /* 625 lines, 3.375 MHz, half field (QCIF) */
+	{720, 486}, /* 525 lines, 13.5 MHz (D1) */
+	{704, 486}, /* 525 lines, 13.5 MHz */
+	{720, 480}, /* 525 lines, 13.5 MHz (DV, DSS, DVD) */
+	{704, 480}, /* 525 lines, 13.5 MHz (1/1 D1, ATSC, DVD) */
+	{544, 480}, /* 525 lines. 10.125 MHz (DSS, laserdisc) */
+	{528, 480}, /* 525 lines. 10.125 MHz (3/4 D1, laserdisc) */
+	{480, 480}, /* 525 lines, 9 MHz (2/3 D1, SVCD) */
+	{352, 480}, /* 525 lines, 6.75 MHz (D2, 1/2 D1, CVD, DVD) */
+	{352, 240}  /* 525  lines. 6.75 MHz, 1 field (D4, VCD, DSS, DVD) */
+    };
+    unsigned int width, height, pix_width, pix_height, i, DAR_16_9;
+
+    *pixel_width = sequence->pixel_width;
+    *pixel_height = sequence->pixel_height;
+    width = sequence->picture_width;
+    height = sequence->picture_height;
+    for (i = 0; i < sizeof (video_modes) / sizeof (video_modes[0]); i++)
+	if (width == video_modes[i].width && height == video_modes[i].height)
+	    break;
+    if (i == sizeof (video_modes) / sizeof (video_modes[0]) ||
+	(sequence->pixel_width == 1 && sequence->pixel_height == 1) ||
+	width != sequence->display_width || height != sequence->display_height)
+	return 0;
+
+    for (pix_height = 1; height * pix_height < 480; pix_height <<= 1);
+    height *= pix_height;
+    for (pix_width = 1; width * pix_width <= 352; pix_width <<= 1);
+    width *= pix_width;
+
+    if (! (sequence->flags & SEQ_FLAG_MPEG2)) {
+	static unsigned int mpeg1_check[2][2] = {{11, 54}, {27, 45}};
+	DAR_16_9 = (sequence->pixel_height == 27 ||
+		    sequence->pixel_height == 45);
+	if (width < 704 ||
+	    sequence->pixel_height != mpeg1_check[DAR_16_9][height == 576])
+	    return 0;
+    } else {
+	DAR_16_9 = (3 * sequence->picture_width * sequence->pixel_width >
+		    4 * sequence->picture_height * sequence->pixel_height);
+	switch (width) {
+	case 528: case 544:	pix_width *= 4; pix_height *= 3; break;
+	case 480:		pix_width *= 3; pix_height *= 2; break;
+	}
+    }
+    if (DAR_16_9) {
+	pix_width *= 4; pix_height *= 3;
+    }
+    if (height == 576) {
+	pix_width *= 59; pix_height *= 54;
+    } else {
+	pix_width *= 10; pix_height *= 11;
+    }
+    *pixel_width = pix_width;
+    *pixel_height = pix_height;
+    simplify (pixel_width, pixel_height);
+    return (height == 576) ? 1 : 2;
+}
+
+static void copy_matrix (mpeg2dec_t * mpeg2dec, int idx)
+{
+    if (memcmp (mpeg2dec->quantizer_matrix[idx],
+		mpeg2dec->new_quantizer_matrix[idx], 64)) {
+	memcpy (mpeg2dec->quantizer_matrix[idx],
+		mpeg2dec->new_quantizer_matrix[idx], 64);
+	mpeg2dec->scaled[idx] = -1;
     }
 }
 
@@ -392,31 +471,30 @@ void mpeg2_header_sequence_finalize (mpeg2dec_t * mpeg2dec)
 			      (sequence->chroma_height == sequence->height));
 
     if (mpeg2dec->sequence.width != (unsigned)-1) {
-	unsigned int new_byte_rate;
-
 	/*
 	 * According to 6.1.1.6, repeat sequence headers should be
-	 * identical to the original. However some DVDs dont respect
-	 * that and have different bitrates in the repeat sequence
-	 * headers. So we'll ignore that in the comparison and still
-	 * consider these as repeat sequence headers.
-	 *
-	 * However, be careful not to alter the current sequence when
-	 * returning STATE_INVALID_END.
+	 * identical to the original. However some encoders do not
+	 * respect that and change various fields (including bitrate
+	 * and aspect ratio) in the repeat sequence headers. So we
+	 * choose to be as conservative as possible and only restart
+	 * the decoder if the width, height, chroma_width,
+	 * chroma_height or low_delay flag are modified.
 	 */
-	new_byte_rate = sequence->byte_rate;
-	sequence->byte_rate = mpeg2dec->sequence.byte_rate;
-	if (memcmp (&(mpeg2dec->sequence), sequence,
-		    sizeof (mpeg2_sequence_t))) {
+	if (sequence->width != mpeg2dec->sequence.width ||
+	    sequence->height != mpeg2dec->sequence.height ||
+	    sequence->chroma_width != mpeg2dec->sequence.chroma_width ||
+	    sequence->chroma_height != mpeg2dec->sequence.chroma_height ||
+	    ((sequence->flags ^ mpeg2dec->sequence.flags) &
+	     SEQ_FLAG_LOW_DELAY)) {
 	    decoder->stride_frame = sequence->width;
-	    sequence->byte_rate = new_byte_rate;
 	    mpeg2_header_end (mpeg2dec);
 	    mpeg2dec->action = invalid_end_action;
 	    mpeg2dec->state = STATE_INVALID_END;
 	    return;
 	}
-	sequence->byte_rate = new_byte_rate;
-	mpeg2dec->state = STATE_SEQUENCE_REPEATED;
+	mpeg2dec->state = (memcmp (&(mpeg2dec->sequence), sequence,
+				   sizeof (mpeg2_sequence_t)) ?
+			   STATE_SEQUENCE_MODIFIED : STATE_SEQUENCE_REPEATED);
     } else
 	decoder->stride_frame = sequence->width;
     mpeg2dec->sequence = *sequence;
@@ -468,34 +546,6 @@ void mpeg2_set_fbuf (mpeg2dec_t * mpeg2dec, int b_type)
 	}
 }
 
-mpeg2_state_t mpeg2_header_picture_start (mpeg2dec_t * mpeg2dec)
-{
-    mpeg2_picture_t * picture = &(mpeg2dec->new_picture);
-
-    mpeg2dec->state = ((mpeg2dec->state != STATE_SLICE_1ST) ?
-		       STATE_PICTURE : STATE_PICTURE_2ND);
-    picture->flags = 0;
-    picture->tag = picture->tag2 = 0;
-    if (mpeg2dec->num_tags) {
-	if (mpeg2dec->bytes_since_tag >= 4) {
-	    mpeg2dec->num_tags = 0;
-	    picture->tag = mpeg2dec->tag_current;
-	    picture->tag2 = mpeg2dec->tag2_current;
-	    picture->flags = PIC_FLAG_TAGS;
-	} else if (mpeg2dec->num_tags > 1) {
-	    mpeg2dec->num_tags = 1;
-	    picture->tag = mpeg2dec->tag_previous;
-	    picture->tag2 = mpeg2dec->tag2_previous;
-	    picture->flags = PIC_FLAG_TAGS;
-	}
-    }
-    picture->display_offset[0].x = picture->display_offset[1].x =
-	picture->display_offset[2].x = mpeg2dec->display_offset_x;
-    picture->display_offset[0].y = picture->display_offset[1].y =
-	picture->display_offset[2].y = mpeg2dec->display_offset_y;
-    return mpeg2_parse_header (mpeg2dec);
-}
-
 int mpeg2_header_picture (mpeg2dec_t * mpeg2dec)
 {
     uint8_t * buffer = mpeg2dec->chunk_start;
@@ -503,13 +553,13 @@ int mpeg2_header_picture (mpeg2dec_t * mpeg2dec)
     mpeg2_decoder_t * decoder = &(mpeg2dec->decoder);
     int type;
 
-    type = (buffer [1] >> 3) & 7;
+    mpeg2dec->state = ((mpeg2dec->state != STATE_SLICE_1ST) ?
+		       STATE_PICTURE : STATE_PICTURE_2ND);
     mpeg2dec->ext_state = PIC_CODING_EXT;
 
     picture->temporal_reference = (buffer[0] << 2) | (buffer[1] >> 6);
 
-    picture->flags |= type;
-
+    type = (buffer [1] >> 3) & 7;
     if (type == PIC_FLAG_CODING_TYPE_P || type == PIC_FLAG_CODING_TYPE_B) {
 	/* forward_f_code and backward_f_code - used in mpeg1 only */
 	decoder->f_motion.f_code[1] = (buffer[3] >> 2) & 1;
@@ -519,11 +569,30 @@ int mpeg2_header_picture (mpeg2dec_t * mpeg2dec)
 	decoder->b_motion.f_code[0] = ((buffer[4] >> 3) & 7) - 1;
     }
 
+    picture->flags = PIC_FLAG_PROGRESSIVE_FRAME | type;
+    picture->tag = picture->tag2 = 0;
+    if (mpeg2dec->num_tags) {
+	if (mpeg2dec->bytes_since_tag >= mpeg2dec->chunk_ptr - buffer + 4) {
+	    mpeg2dec->num_tags = 0;
+	    picture->tag = mpeg2dec->tag_current;
+	    picture->tag2 = mpeg2dec->tag2_current;
+	    picture->flags |= PIC_FLAG_TAGS;
+	} else if (mpeg2dec->num_tags > 1) {
+	    mpeg2dec->num_tags = 1;
+	    picture->tag = mpeg2dec->tag_previous;
+	    picture->tag2 = mpeg2dec->tag2_previous;
+	    picture->flags |= PIC_FLAG_TAGS;
+	}
+    }
+    picture->nb_fields = 2;
+    picture->display_offset[0].x = picture->display_offset[1].x =
+	picture->display_offset[2].x = mpeg2dec->display_offset_x;
+    picture->display_offset[0].y = picture->display_offset[1].y =
+	picture->display_offset[2].y = mpeg2dec->display_offset_y;
+
     /* XXXXXX decode extra_information_picture as well */
 
-    picture->nb_fields = 2;
-
-    mpeg2dec->q_scale_type = 0;
+    decoder->q_scale_type = 0;
     decoder->intra_dc_precision = 7;
     decoder->frame_pred_frame_dct = 1;
     decoder->concealment_motion_vectors = 0;
@@ -570,10 +639,11 @@ static int picture_coding_ext (mpeg2dec_t * mpeg2dec)
     decoder->top_field_first = buffer[3] >> 7;
     decoder->frame_pred_frame_dct = (buffer[3] >> 6) & 1;
     decoder->concealment_motion_vectors = (buffer[3] >> 5) & 1;
-    mpeg2dec->q_scale_type = buffer[3] & 16;
+    decoder->q_scale_type = buffer[3] & 16;
     decoder->intra_vlc_format = (buffer[3] >> 3) & 1;
     decoder->scan = (buffer[3] & 4) ? mpeg2_scan_alt : mpeg2_scan_norm;
-    flags |= (buffer[4] & 0x80) ? PIC_FLAG_PROGRESSIVE_FRAME : 0;
+    if (!(buffer[4] & 0x80))
+	flags &= ~PIC_FLAG_PROGRESSIVE_FRAME;
     if (buffer[4] & 0x40)
 	flags |= (((buffer[4]<<26) | (buffer[5]<<18) | (buffer[6]<<10)) &
 		  PIC_MASK_COMPOSITE_DISPLAY) | PIC_FLAG_COMPOSITE_DISPLAY;
@@ -794,7 +864,7 @@ int mpeg2_header_user_data (mpeg2dec_t * mpeg2dec)
     return 0;
 }
 
-static void prescale (mpeg2dec_t * mpeg2dec, int index)
+static void prescale (mpeg2dec_t * mpeg2dec, int idx)
 {
     static int non_linear_scale [] = {
 	 0,  1,  2,  3,  4,  5,   6,   7,
@@ -805,14 +875,14 @@ static void prescale (mpeg2dec_t * mpeg2dec, int index)
     int i, j, k;
     mpeg2_decoder_t * decoder = &(mpeg2dec->decoder);
 
-    if (mpeg2dec->scaled[index] != mpeg2dec->q_scale_type) {
-	mpeg2dec->scaled[index] = mpeg2dec->q_scale_type;
+    if (mpeg2dec->scaled[idx] != decoder->q_scale_type) {
+	mpeg2dec->scaled[idx] = decoder->q_scale_type;
 	for (i = 0; i < 32; i++) {
-	    k = mpeg2dec->q_scale_type ? non_linear_scale[i] : (i << 1);
+	    k = decoder->q_scale_type ? non_linear_scale[i] : (i << 1);
 	    decoder->quantizer_scales[i] = k;
 	    for (j = 0; j < 64; j++)
-		decoder->quantizer_prescale[index][i][j] =
-		    k * mpeg2dec->quantizer_matrix[index][j];
+		decoder->quantizer_prescale[idx][i][j] =
+		    k * mpeg2dec->quantizer_matrix[idx][j];
 	}
     }
 }
@@ -864,7 +934,7 @@ mpeg2_state_t mpeg2_header_slice_start (mpeg2dec_t * mpeg2dec)
 			 mpeg2dec->fbuf[b_type]->buf);
     }
     mpeg2dec->action = NULL;
-    return (mpeg2_state_t)-1;
+    return STATE_INTERNAL_NORETURN;
 }
 
 static mpeg2_state_t seek_sequence (mpeg2dec_t * mpeg2dec)

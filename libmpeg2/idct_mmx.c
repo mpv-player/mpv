@@ -19,10 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Modified for use with MPlayer, see libmpeg2_changes.diff for the exact changes.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
  */
 
 #include "config.h"
@@ -1294,8 +1290,6 @@ void mpeg2_idct_add_mmx (const int last, int16_t * const block,
 
 void mpeg2_idct_mmx_init (void)
 {
-    extern uint8_t mpeg2_scan_norm[64];
-    extern uint8_t mpeg2_scan_alt[64];
     int i, j;
 
     /* the mmx/mmxext idct uses a reordered input, so we patch scan tables */

@@ -19,10 +19,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Modified for use with MPlayer, see libmpeg2_changes.diff for the exact changes.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
  */
 
 #include "config.h"
@@ -67,7 +63,7 @@ static mmx_t round4 = {0x0002000200020002LL};
  * unrolling will help
  */
 
-static inline void mmx_zero_reg ()
+static inline void mmx_zero_reg (void)
 {
     /* load 0 into mm0 */
     pxor_r2r (mm0, mm0);

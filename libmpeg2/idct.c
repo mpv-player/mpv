@@ -283,8 +283,6 @@ void mpeg2_idct_init (uint32_t accel)
     } else
 #endif
     {
-	extern uint8_t mpeg2_scan_norm[64];
-	extern uint8_t mpeg2_scan_alt[64];
 	int i, j;
 
 	mpeg2_idct_copy = mpeg2_idct_copy_c;
