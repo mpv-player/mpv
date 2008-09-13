@@ -1,122 +1,44 @@
 --- libmpeg2/cpu_accel.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/cpu_accel.c	2006-06-16 20:12:50.000000000 +0200
-@@ -22,6 +26,7 @@
-  */
- 
- #include "config.h"
-+#include "cpudetect.h"
- 
- #include <inttypes.h>
- 
-@@ -30,9 +35,17 @@
- #include "mpeg2_internal.h"
- 
- #ifdef ACCEL_DETECT
--#ifdef ARCH_X86
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
-+
-+/* MPlayer imports libmpeg2 as decoder, which detects MMX / 3DNow!
-+ * instructions via assembly. However, it is regarded as duplicated work
-+ * in MPlayer, so that we enforce using MPlayer's implementation.
-+ */
-+#define MPLAYER_CPUDETECT
-+
- static inline uint32_t arch_accel (void)
- {
-+#if !defined(MPLAYER_CPUDETECT)
-     uint32_t eax, ebx, ecx, edx;
-     int AMD;
-     uint32_t caps;
-@@ -107,8 +120,22 @@
- 	caps |= MPEG2_ACCEL_X86_MMXEXT;
- 
-     return caps;
-+#else /* MPLAYER_CPUDETECT: Use MPlayer's CPU capability property. */
-+    caps = 0;
-+    if (gCpuCaps.hasMMX)
-+        caps |= MPEG2_ACCEL_X86_MMX;
-+    if (gCpuCaps.hasSSE2)
-+	caps |= MPEG2_ACCEL_X86_SSE2;
-+    if (gCpuCaps.hasMMX2)
-+	caps |= MPEG2_ACCEL_X86_MMXEXT;
-+    if (gCpuCaps.has3DNow)
-+	caps |= MPEG2_ACCEL_X86_3DNOW;
-+
-+    return caps;
-+
-+#endif /* MPLAYER_CPUDETECT */
- }
--#endif /* ARCH_X86 */
-+#endif /* ARCH_X86 || ARCH_X86_64 */
- 
- #if defined(ARCH_PPC) || defined(ARCH_SPARC)
- #include <signal.h>
-@@ -214,7 +241,7 @@
- 
-     accel = 0;
- #ifdef ACCEL_DETECT
--#if defined (ARCH_X86) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
-+#if defined (ARCH_X86) || defined (ARCH_X86_64) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
-     accel = arch_accel ();
- #endif
- #endif
---- libmpeg2/cpu_state.c	2006-06-16 20:12:26.000000000 +0200
-+++ libmpeg2/cpu_state.c	2006-06-16 20:12:50.000000000 +0200
-@@ -29,14 +33,14 @@
- #include "mpeg2.h"
+@@ -29,9 +33,13 @@
  #include "attributes.h"
  #include "mpeg2_internal.h"
--#ifdef ARCH_X86
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
- #include "mmx.h"
- #endif
  
- void (* mpeg2_cpu_state_save) (cpu_state_t * state) = NULL;
- void (* mpeg2_cpu_state_restore) (cpu_state_t * state) = NULL;
- 
--#ifdef ARCH_X86
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
- static void state_restore_mmx (cpu_state_t * state)
++#include "cpudetect.h"
++
+ #if defined(ARCH_X86) || defined(ARCH_X86_64)
+ static inline uint32_t arch_accel (uint32_t accel)
  {
-     emms ();
-@@ -44,18 +48,18 @@
- #endif
++/* Use MPlayer CPU detection instead of libmpeg2 variant. */
++#if 0
+     if (accel & (MPEG2_ACCEL_X86_3DNOW | MPEG2_ACCEL_X86_MMXEXT))
+ 	accel |= MPEG2_ACCEL_X86_MMX;
+ 	
+@@ -124,6 +132,21 @@
+ #endif /* ACCEL_DETECT */
  
- #ifdef ARCH_PPC
--#ifdef HAVE_ALTIVEC_H	/* gnu */
--#define LI(a,b) "li " #a "," #b "\n\t"
--#define STVX0(a,b,c) "stvx " #a ",0," #c "\n\t"
--#define STVX(a,b,c) "stvx " #a "," #b "," #c "\n\t"
--#define LVX0(a,b,c) "lvx " #a ",0," #c "\n\t"
--#define LVX(a,b,c) "lvx " #a "," #b "," #c "\n\t"
--#else			/* apple */
-+#if defined(__APPLE_CC__)	/* apple */
- #define LI(a,b) "li r" #a "," #b "\n\t"
- #define STVX0(a,b,c) "stvx v" #a ",0,r" #c "\n\t"
- #define STVX(a,b,c) "stvx v" #a ",r" #b ",r" #c "\n\t"
- #define LVX0(a,b,c) "lvx v" #a ",0,r" #c "\n\t"
- #define LVX(a,b,c) "lvx v" #a ",r" #b ",r" #c "\n\t"
-+#else			/* gnu */
-+#define LI(a,b) "li " #a "," #b "\n\t"
-+#define STVX0(a,b,c) "stvx " #a ",0," #c "\n\t"
-+#define STVX(a,b,c) "stvx " #a "," #b "," #c "\n\t"
-+#define LVX0(a,b,c) "lvx " #a ",0," #c "\n\t"
-+#define LVX(a,b,c) "lvx " #a "," #b "," #c "\n\t"
- #endif
+     return accel;
++
++#else /* 0 */
++    accel = 0;
++    if (gCpuCaps.hasMMX)
++        accel |= MPEG2_ACCEL_X86_MMX;
++    if (gCpuCaps.hasSSE2)
++	accel |= MPEG2_ACCEL_X86_SSE2;
++    if (gCpuCaps.hasMMX2)
++	accel |= MPEG2_ACCEL_X86_MMXEXT;
++    if (gCpuCaps.has3DNow)
++	accel |= MPEG2_ACCEL_X86_3DNOW;
++
++    return accel;
++
++#endif /* 0 */
+ }
+ #endif /* ARCH_X86 || ARCH_X86_64 */
  
- static void state_save_altivec (cpu_state_t * state)
-@@ -115,7 +119,7 @@
- 
- void mpeg2_cpu_state_init (uint32_t accel)
- {
--#ifdef ARCH_X86
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
-     if (accel & MPEG2_ACCEL_X86_MMX) {
- 	mpeg2_cpu_state_restore = state_restore_mmx;
-     }
 --- libmpeg2/decode.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/decode.c	2006-06-16 20:12:50.000000000 +0200
-@@ -351,6 +355,15 @@
+@@ -345,6 +349,15 @@
      fbuf->buf[1] = buf[1];
      fbuf->buf[2] = buf[2];
      fbuf->id = id;
@@ -127,8 +49,8 @@
 +	mpeg2dec->fbuf[1]->buf[2]=buf[2];
 +	mpeg2dec->fbuf[1]->id=NULL;
 +    }
-+//        printf("libmpeg2: FBUF 0:%p 1:%p 2:%p\n",
-+//	    mpeg2dec->fbuf[0]->buf[0],mpeg2dec->fbuf[1]->buf[0],mpeg2dec->fbuf[2]->buf[0]);
++//    printf("libmpeg2: FBUF 0:%p 1:%p 2:%p\n",
++//	mpeg2dec->fbuf[0]->buf[0],mpeg2dec->fbuf[1]->buf[0],mpeg2dec->fbuf[2]->buf[0]);
  }
  
  void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf)
@@ -144,37 +66,30 @@
      mpeg2dec->fbuf[0] = &mpeg2dec->fbuf_alloc[0].fbuf;
      mpeg2dec->fbuf[1] = &mpeg2dec->fbuf_alloc[1].fbuf;
      mpeg2dec->fbuf[2] = &mpeg2dec->fbuf_alloc[2].fbuf;
-@@ -553,6 +560,7 @@
- 	if (!(mpeg2dec->sequence.flags & SEQ_FLAG_PROGRESSIVE_SEQUENCE)) {
- 	    picture->nb_fields = (buffer[3] & 2) ? 3 : 2;
- 	    flags |= (buffer[3] & 128) ? PIC_FLAG_TOP_FIELD_FIRST : 0;
-+	    flags |= (buffer[3] &   2) ? PIC_FLAG_REPEAT_FIRST_FIELD : 0;
- 	} else
- 	    picture->nb_fields = (buffer[3]&2) ? ((buffer[3]&128) ? 6 : 4) : 2;
- 	break;
-@@ -801,6 +809,7 @@
- 	mpeg2dec->scaled[index] = mpeg2dec->q_scale_type;
+@@ -872,6 +879,7 @@
+ 	mpeg2dec->scaled[idx] = decoder->q_scale_type;
  	for (i = 0; i < 32; i++) {
- 	    k = mpeg2dec->q_scale_type ? non_linear_scale[i] : (i << 1);
+ 	    k = decoder->q_scale_type ? non_linear_scale[i] : (i << 1);
 +	    decoder->quantizer_scales[i] = k;
  	    for (j = 0; j < 64; j++)
- 		decoder->quantizer_prescale[index][i][j] =
- 		    k * mpeg2dec->quantizer_matrix[index][j];
+ 		decoder->quantizer_prescale[idx][i][j] =
+ 		    k * mpeg2dec->quantizer_matrix[idx][j];
 --- libmpeg2/idct.c	(revision 26652)
 +++ libmpeg2/idct.c	(working copy)
-@@ -235,30 +239,40 @@
+@@ -235,34 +239,40 @@
  
  void mpeg2_idct_init (uint32_t accel)
  {
 -#ifdef ARCH_X86
 +#ifdef HAVE_SSE2
-+    if (accel & MPEG2_ACCEL_X86_SSE2) {
-+	mpeg2_idct_copy = mpeg2_idct_copy_sse2;
-+	mpeg2_idct_add = mpeg2_idct_add_sse2;
-+	mpeg2_idct_mmx_init ();
+     if (accel & MPEG2_ACCEL_X86_SSE2) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_sse2;
+ 	mpeg2_idct_add = mpeg2_idct_add_sse2;
+ 	mpeg2_idct_mmx_init ();
+-    } else if (accel & MPEG2_ACCEL_X86_MMXEXT) {
 +    } else
 +#elif HAVE_MMX2
-     if (accel & MPEG2_ACCEL_X86_MMXEXT) {
++    if (accel & MPEG2_ACCEL_X86_MMXEXT) {
  	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
  	mpeg2_idct_add = mpeg2_idct_add_mmxext;
  	mpeg2_idct_mmx_init ();
@@ -208,17 +123,6 @@
  	int i;
  
  	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
---- libmpeg2/idct_mmx.c	2006-06-16 20:12:26.000000000 +0200
-+++ libmpeg2/idct_mmx.c	2006-06-16 20:12:50.000000000 +0200
-@@ -23,7 +27,7 @@
- 
- #include "config.h"
- 
--#ifdef ARCH_X86
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
- 
- #include <inttypes.h>
- 
 --- libmpeg2/motion_comp.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/motion_comp.c	2006-06-16 20:12:50.000000000 +0200
 @@ -33,16 +37,22 @@
@@ -248,7 +152,7 @@
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
  	mpeg2_mc = mpeg2_mc_altivec;
      else
-@@ -52,11 +62,21 @@
+@@ -52,15 +62,20 @@
  	mpeg2_mc = mpeg2_mc_alpha;
      else
  #endif
@@ -258,61 +162,36 @@
  	mpeg2_mc = mpeg2_mc_vis;
      else
  #endif
-+#ifdef ARCH_ARM
+ #ifdef ARCH_ARM
+-    if (accel & MPEG2_ACCEL_ARM) {
 +#ifdef HAVE_IWMMXT
 +    if (accel & MPEG2_ACCEL_ARM_IWMMXT)
 +	mpeg2_mc = mpeg2_mc_iwmmxt;
 +    else
 +#endif
 +    if (accel & MPEG2_ACCEL_ARM)
-+	mpeg2_mc = mpeg2_mc_arm;
+ 	mpeg2_mc = mpeg2_mc_arm;
+-    } else
 +    else
-+#endif
+ #endif
  	mpeg2_mc = mpeg2_mc_c;
  }
- 
---- libmpeg2/motion_comp_mmx.c	2006-06-16 20:12:26.000000000 +0200
-+++ libmpeg2/motion_comp_mmx.c	2006-06-16 20:12:50.000000000 +0200
-@@ -23,7 +27,7 @@
- 
- #include "config.h"
- 
--#ifdef ARCH_X86
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
- 
- #include <inttypes.h>
- 
 --- include/mpeg2.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2.h	2006-06-16 20:12:50.000000000 +0200
-@@ -82,6 +86,7 @@
- #define PIC_FLAG_COMPOSITE_DISPLAY 32
- #define PIC_FLAG_SKIP 64
- #define PIC_FLAG_TAGS 128
-+#define PIC_FLAG_REPEAT_FIRST_FIELD 256
- #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
- 
- typedef struct mpeg2_picture_s {
-@@ -154,11 +159,14 @@
- #define MPEG2_ACCEL_X86_MMX 1
- #define MPEG2_ACCEL_X86_3DNOW 2
- #define MPEG2_ACCEL_X86_MMXEXT 4
-+#define MPEG2_ACCEL_X86_SSE2 8
- #define MPEG2_ACCEL_PPC_ALTIVEC 1
- #define MPEG2_ACCEL_ALPHA 1
- #define MPEG2_ACCEL_ALPHA_MVI 2
+@@ -164,6 +168,7 @@
  #define MPEG2_ACCEL_SPARC_VIS 1
  #define MPEG2_ACCEL_SPARC_VIS2 2
-+#define MPEG2_ACCEL_ARM 1
+ #define MPEG2_ACCEL_ARM 1
 +#define MPEG2_ACCEL_ARM_IWMMXT 2
  #define MPEG2_ACCEL_DETECT 0x80000000
  
  uint32_t mpeg2_accel (uint32_t accel);
 --- libmpeg2/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2_internal.h	2006-06-16 20:12:50.000000000 +0200
-@@ -144,6 +148,11 @@
-     int second_field;
+@@ -152,6 +156,11 @@
  
-     int mpeg1;
+     /* XXX: stuff due to xine shit */
+     int8_t q_scale_type;
 +
 +    int quantizer_scales[32];
 +    int quantizer_scale;
@@ -321,8 +200,8 @@
  };
  
  typedef struct {
-@@ -214,6 +223,9 @@
-     int8_t q_scale_type, scaled[4];
+@@ -223,6 +232,9 @@
+     //int8_t q_scale_type, scaled[4];
      uint8_t quantizer_matrix[4][64];
      uint8_t new_quantizer_matrix[4][64];
 +
@@ -331,12 +210,13 @@
  };
  
  typedef struct {
-@@ -298,3 +313,5 @@
- extern mpeg2_mc_t mpeg2_mc_altivec;
+@@ -313,5 +325,6 @@
  extern mpeg2_mc_t mpeg2_mc_alpha;
  extern mpeg2_mc_t mpeg2_mc_vis;
-+extern mpeg2_mc_t mpeg2_mc_arm;
+ extern mpeg2_mc_t mpeg2_mc_arm;
 +extern mpeg2_mc_t mpeg2_mc_iwmmxt;
+ 
+ #endif /* LIBMPEG2_MPEG2_INTERNAL_H */
 --- libmpeg2/slice.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/slice.c	2006-06-16 20:12:50.000000000 +0200
 @@ -142,6 +146,7 @@
@@ -347,578 +227,31 @@
  
      decoder->quantizer_matrix[0] =
  	decoder->quantizer_prescale[0][quantizer_scale_code];
-@@ -1564,6 +1569,18 @@
+@@ -1564,6 +1569,24 @@
  
  #define NEXT_MACROBLOCK							\
  do {									\
-+    if(decoder->quant_store) {                                          \
-+       if (decoder->picture_structure == TOP_FIELD)                     \
-+        decoder->quant_store[2*decoder->quant_stride*(decoder->v_offset>>4) \
-+                    +(decoder->offset>>4)] = decoder->quantizer_scale;  \
-+       else if (decoder->picture_structure == BOTTOM_FIELD)             \
-+        decoder->quant_store[2*decoder->quant_stride*(decoder->v_offset>>4) \
-+	            + decoder->quant_stride                             \
-+                    +(decoder->offset>>4)] = decoder->quantizer_scale;  \
-+       else                                                             \
-+        decoder->quant_store[decoder->quant_stride*(decoder->v_offset>>4) \
-+                    +(decoder->offset>>4)] = decoder->quantizer_scale;  \
-+    }                                                                   \
++    if(decoder->quant_store) {						\
++	if (decoder->picture_structure == TOP_FIELD)			\
++	    decoder->quant_store[2 * decoder->quant_stride		\
++				 * (decoder->v_offset >> 4)		\
++				 + (decoder->offset >> 4)]		\
++		= decoder->quantizer_scale;				\
++	else if (decoder->picture_structure == BOTTOM_FIELD)		\
++	    decoder->quant_store[2 * decoder->quant_stride		\
++				 * (decoder->v_offset >> 4)		\
++				 + decoder->quant_stride		\
++				 + (decoder->offset >> 4)]		\
++		= decoder->quantizer_scale;				\
++	else								\
++	    decoder->quant_store[decoder->quant_stride			\
++				 * (decoder->v_offset >> 4)		\
++				 + (decoder->offset >> 4)]		\
++		= decoder->quantizer_scale;				\
++    }									\
      decoder->offset += 16;						\
      if (decoder->offset == decoder->width) {				\
  	do { /* just so we can use the break statement */		\
-@@ -1587,6 +1604,12 @@
-     }									\
- } while (0)
- 
-+static void motion_dummy (mpeg2_decoder_t * const decoder,
-+                          motion_t * const motion,
-+                          mpeg2_mc_fct * const * const table)
-+{
-+}
-+
- void mpeg2_init_fbuf (mpeg2_decoder_t * decoder, uint8_t * current_fbuf[3],
- 		      uint8_t * forward_fbuf[3], uint8_t * backward_fbuf[3])
- {
-@@ -1644,7 +1667,9 @@
- 
-     if (decoder->mpeg1) {
- 	decoder->motion_parser[0] = motion_zero_420;
-+        decoder->motion_parser[MC_FIELD] = motion_dummy;
- 	decoder->motion_parser[MC_FRAME] = motion_mp1;
-+        decoder->motion_parser[MC_DMV] = motion_dummy;
- 	decoder->motion_parser[4] = motion_reuse_420;
-     } else if (decoder->picture_structure == FRAME_PICTURE) {
- 	if (decoder->chroma_format == 0) {
---- libmpeg2/idct_altivec.c	2004/08/02 11:26:43	12933
-+++ libmpeg2/idct_altivec.c	2005/05/15 20:11:34	15484
-@@ -41,7 +41,7 @@
- typedef vector signed int vector_s32_t;
- typedef vector unsigned int vector_u32_t;
- 
--#if defined(HAVE_ALTIVEC_H) && (__GNUC__ * 100 + __GNUC_MINOR__ < 303)
-+#if defined(HAVE_ALTIVEC_H) && !defined(__APPLE_CC__) && (__GNUC__ * 100 + __GNUC_MINOR__ < 303)
- /* work around gcc <3.3 vec_mergel bug */
- static inline vector_s16_t my_vec_mergel (vector_s16_t const A,
- 					  vector_s16_t const B)
-Index: libmpeg2/motion_comp_arm.c
-===================================================================
---- libmpeg2/motion_comp_arm.c	(revision 0)
-+++ libmpeg2/motion_comp_arm.c	(revision 0)
-@@ -0,0 +1,187 @@
-+/*
-+ * motion_comp_arm.c
-+ * Copyright (C) 2004 AGAWA Koji <i (AT) atty (DOT) jp>
-+ *
-+ * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
-+ * See http://libmpeg2.sourceforge.net/ for updates.
-+ *
-+ * mpeg2dec is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ *
-+ * mpeg2dec is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-+ */
-+
-+#include "config.h"
-+
-+#ifdef ARCH_ARM
-+
-+#include <inttypes.h>
-+
-+#include "mpeg2.h"
-+#include "attributes.h"
-+#include "mpeg2_internal.h"
-+
-+#define avg2(a,b) ((a+b+1)>>1)
-+#define avg4(a,b,c,d) ((a+b+c+d+2)>>2)
-+
-+#define predict_o(i) (ref[i])
-+#define predict_x(i) (avg2 (ref[i], ref[i+1]))
-+#define predict_y(i) (avg2 (ref[i], (ref+stride)[i]))
-+#define predict_xy(i) (avg4 (ref[i], ref[i+1], \
-+			     (ref+stride)[i], (ref+stride)[i+1]))
-+
-+#define put(predictor,i) dest[i] = predictor (i)
-+#define avg(predictor,i) dest[i] = avg2 (predictor (i), dest[i])
-+
-+/* mc function template */
-+
-+#define MC_FUNC(op,xy)							\
-+static void inline MC_##op##_##xy##_16_c (uint8_t * dest, const uint8_t * ref,	\
-+				   const int stride, int height)	\
-+{									\
-+    do {								\
-+	op (predict_##xy, 0);						\
-+	op (predict_##xy, 1);						\
-+	op (predict_##xy, 2);						\
-+	op (predict_##xy, 3);						\
-+	op (predict_##xy, 4);						\
-+	op (predict_##xy, 5);						\
-+	op (predict_##xy, 6);						\
-+	op (predict_##xy, 7);						\
-+	op (predict_##xy, 8);						\
-+	op (predict_##xy, 9);						\
-+	op (predict_##xy, 10);						\
-+	op (predict_##xy, 11);						\
-+	op (predict_##xy, 12);						\
-+	op (predict_##xy, 13);						\
-+	op (predict_##xy, 14);						\
-+	op (predict_##xy, 15);						\
-+	ref += stride;							\
-+	dest += stride;							\
-+    } while (--height);							\
-+}									\
-+static void MC_##op##_##xy##_8_c (uint8_t * dest, const uint8_t * ref,	\
-+				  const int stride, int height)		\
-+{									\
-+    do {								\
-+	op (predict_##xy, 0);						\
-+	op (predict_##xy, 1);						\
-+	op (predict_##xy, 2);						\
-+	op (predict_##xy, 3);						\
-+	op (predict_##xy, 4);						\
-+	op (predict_##xy, 5);						\
-+	op (predict_##xy, 6);						\
-+	op (predict_##xy, 7);						\
-+	ref += stride;							\
-+	dest += stride;							\
-+    } while (--height);							\
-+}									\
-+/* definitions of the actual mc functions */
-+
-+MC_FUNC (put,o)
-+MC_FUNC (avg,o)
-+MC_FUNC (put,x)
-+MC_FUNC (avg,x)
-+MC_FUNC (put,y)
-+MC_FUNC (avg,y)
-+MC_FUNC (put,xy)
-+MC_FUNC (avg,xy)
-+
-+
-+extern void MC_put_o_16_arm (uint8_t * dest, const uint8_t * ref,
-+			     int stride, int height);
-+
-+extern void MC_put_x_16_arm (uint8_t * dest, const uint8_t * ref,
-+			     int stride, int height);
-+
-+
-+static void MC_put_y_16_arm (uint8_t * dest, const uint8_t * ref,
-+			      int stride, int height)
-+{
-+    MC_put_y_16_c(dest, ref, stride, height);
-+}
-+
-+static void MC_put_xy_16_arm (uint8_t * dest, const uint8_t * ref,
-+			       int stride, int height)
-+{
-+    MC_put_xy_16_c(dest, ref, stride, height);
-+}
-+
-+extern void MC_put_o_8_arm (uint8_t * dest, const uint8_t * ref,
-+				int stride, int height);
-+
-+extern void MC_put_x_8_arm (uint8_t * dest, const uint8_t * ref,
-+			    int stride, int height);
-+
-+static void MC_put_y_8_arm (uint8_t * dest, const uint8_t * ref,
-+			     int stride, int height)
-+{
-+    MC_put_y_8_c(dest, ref, stride, height);
-+}
-+
-+static void MC_put_xy_8_arm (uint8_t * dest, const uint8_t * ref,
-+			      int stride, int height)
-+{
-+    MC_put_xy_8_c(dest, ref, stride, height);
-+}
-+
-+static void MC_avg_o_16_arm (uint8_t * dest, const uint8_t * ref,
-+			      int stride, int height)
-+{
-+    MC_avg_o_16_c(dest, ref, stride, height);
-+}
-+
-+static void MC_avg_x_16_arm (uint8_t * dest, const uint8_t * ref,
-+			      int stride, int height)
-+{
-+    MC_avg_x_16_c(dest, ref, stride, height);
-+}
-+
-+static void MC_avg_y_16_arm (uint8_t * dest, const uint8_t * ref,
-+			      int stride, int height)
-+{
-+    MC_avg_y_16_c(dest, ref, stride, height);
-+}
-+
-+static void MC_avg_xy_16_arm (uint8_t * dest, const uint8_t * ref,
-+			       int stride, int height)
-+{
-+    MC_avg_xy_16_c(dest, ref, stride, height);
-+}
-+
-+static void MC_avg_o_8_arm (uint8_t * dest, const uint8_t * ref,
-+			     int stride, int height)
-+{
-+    MC_avg_o_8_c(dest, ref, stride, height);
-+}
-+
-+static void MC_avg_x_8_arm (uint8_t * dest, const uint8_t * ref,
-+			     int stride, int height)
-+{
-+    MC_avg_x_8_c(dest, ref, stride, height);
-+}
-+
-+static void MC_avg_y_8_arm (uint8_t * dest, const uint8_t * ref,
-+			     int stride, int height)
-+{
-+    MC_avg_y_8_c(dest, ref, stride, height);
-+}
-+
-+static void MC_avg_xy_8_arm (uint8_t * dest, const uint8_t * ref,
-+			      int stride, int height)
-+{
-+    MC_avg_xy_8_c(dest, ref, stride, height);
-+}
-+
-+MPEG2_MC_EXTERN (arm)
-+
-+#endif
-Index: libmpeg2/motion_comp_arm_s.S
-===================================================================
---- libmpeg2/motion_comp_arm_s.S	(revision 0)
-+++ libmpeg2/motion_comp_arm_s.S	(revision 0)
-@@ -0,0 +1,322 @@
-+@ motion_comp_arm_s.S
-+@ Copyright (C) 2004 AGAWA Koji <i (AT) atty (DOT) jp>
-+@
-+@ This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
-+@ See http://libmpeg2.sourceforge.net/ for updates.
-+@
-+@ mpeg2dec is free software; you can redistribute it and/or modify
-+@ it under the terms of the GNU General Public License as published by
-+@ the Free Software Foundation; either version 2 of the License, or
-+@ (at your option) any later version.
-+@
-+@ mpeg2dec is distributed in the hope that it will be useful,
-+@ but WITHOUT ANY WARRANTY; without even the implied warranty of
-+@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+@ GNU General Public License for more details.
-+@
-+@ You should have received a copy of the GNU General Public License
-+@ along with this program; if not, write to the Free Software
-+@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-+
-+	.text
-+
-+@ ----------------------------------------------------------------
-+	.align
-+	.global MC_put_o_16_arm
-+MC_put_o_16_arm:
-+	@@ void func(uint8_t * dest, const uint8_t * ref, int stride, int height)
-+	pld [r1]
-+        stmfd sp!, {r4-r11, lr} @ R14 is also called LR
-+	and r4, r1, #3
-+	adr r5, MC_put_o_16_arm_align_jt
-+	add r5, r5, r4, lsl #2
-+	ldr pc, [r5]
-+
-+MC_put_o_16_arm_align0:
-+	ldmia r1, {r4-r7}
-+	add r1, r1, r2
-+	pld [r1]
-+	stmia r0, {r4-r7}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne MC_put_o_16_arm_align0
-+        ldmfd sp!, {r4-r11, pc} @@ update PC with LR content.
-+
-+.macro	PROC shift
-+	ldmia r1, {r4-r8}
-+	add r1, r1, r2
-+	mov r9, r4, lsr #(\shift)
-+	pld [r1]
-+	mov r10, r5, lsr #(\shift)
-+	orr r9, r9, r5, lsl #(32-\shift)
-+	mov r11, r6, lsr #(\shift)
-+	orr r10, r10, r6, lsl #(32-\shift)
-+	mov r12, r7, lsr #(\shift)
-+	orr r11, r11, r7, lsl #(32-\shift)
-+	orr r12, r12, r8, lsl #(32-\shift)
-+	stmia r0, {r9-r12}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+.endm
-+
-+MC_put_o_16_arm_align1:
-+	and r1, r1, #0xFFFFFFFC
-+1:	PROC(8)
-+	bne 1b
-+        ldmfd sp!, {r4-r11, pc} @@ update PC with LR content.
-+MC_put_o_16_arm_align2:
-+	and r1, r1, #0xFFFFFFFC
-+1:	PROC(16)
-+	bne 1b
-+        ldmfd sp!, {r4-r11, pc} @@ update PC with LR content.
-+MC_put_o_16_arm_align3:
-+	and r1, r1, #0xFFFFFFFC
-+1:	PROC(24)
-+	bne 1b
-+        ldmfd sp!, {r4-r11, pc} @@ update PC with LR content.
-+MC_put_o_16_arm_align_jt:
-+	.word MC_put_o_16_arm_align0
-+	.word MC_put_o_16_arm_align1
-+	.word MC_put_o_16_arm_align2
-+	.word MC_put_o_16_arm_align3
-+
-+@ ----------------------------------------------------------------
-+	.align
-+	.global MC_put_o_8_arm
-+MC_put_o_8_arm:
-+	@@ void func(uint8_t * dest, const uint8_t * ref, int stride, int height)
-+	pld [r1]
-+        stmfd sp!, {r4-r10, lr} @ R14 is also called LR
-+	and r4, r1, #3
-+	adr r5, MC_put_o_8_arm_align_jt
-+	add r5, r5, r4, lsl #2
-+	ldr pc, [r5]
-+MC_put_o_8_arm_align0:
-+	ldmia r1, {r4-r5}
-+	add r1, r1, r2
-+	pld [r1]
-+	stmia r0, {r4-r5}
-+	add r0, r0, r2
-+	subs r3, r3, #1
-+	bne MC_put_o_8_arm_align0
-+        ldmfd sp!, {r4-r10, pc} @@ update PC with LR content.
-+
-+.macro	PROC8 shift
-+	ldmia r1, {r4-r6}
-+	add r1, r1, r2
-+	mov r9, r4, lsr #(\shift)
-+	pld [r1]
-+	mov r10, r5, lsr #(\shift)
-+	orr r9, r9, r5, lsl #(32-\shift)
-+	orr r10, r10, r6, lsl #(32-\shift)
-+	stmia r0, {r9-r10}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+.endm
-+
-+MC_put_o_8_arm_align1:
-+	and r1, r1, #0xFFFFFFFC
-+1:	PROC8(8)
-+	bne 1b
-+        ldmfd sp!, {r4-r10, pc} @@ update PC with LR content.
-+
-+MC_put_o_8_arm_align2:
-+	and r1, r1, #0xFFFFFFFC
-+1:	PROC8(16)
-+	bne 1b
-+        ldmfd sp!, {r4-r10, pc} @@ update PC with LR content.
-+
-+MC_put_o_8_arm_align3:
-+	and r1, r1, #0xFFFFFFFC
-+1:	PROC8(24)
-+	bne 1b
-+        ldmfd sp!, {r4-r10, pc} @@ update PC with LR content.
-+
-+MC_put_o_8_arm_align_jt:
-+	.word MC_put_o_8_arm_align0
-+	.word MC_put_o_8_arm_align1
-+	.word MC_put_o_8_arm_align2
-+	.word MC_put_o_8_arm_align3
-+
-+@ ----------------------------------------------------------------
-+.macro	AVG_PW rW1, rW2
-+	mov \rW2, \rW2, lsl #24
-+	orr \rW2, \rW2, \rW1, lsr #8
-+	eor r9, \rW1, \rW2
-+	and \rW2, \rW1, \rW2
-+	and r10, r9, r12
-+	add \rW2, \rW2, r10, lsr #1
-+	and r10, r9, r11
-+	add \rW2, \rW2, r10
-+.endm
-+
-+	.align
-+	.global MC_put_x_16_arm
-+MC_put_x_16_arm:
-+	@@ void func(uint8_t * dest, const uint8_t * ref, int stride, int height)
-+	pld [r1]
-+        stmfd sp!, {r4-r11,lr} @ R14 is also called LR
-+	and r4, r1, #3
-+	adr r5, MC_put_x_16_arm_align_jt
-+	ldr r11, [r5]
-+	mvn r12, r11
-+	add r5, r5, r4, lsl #2
-+	ldr pc, [r5, #4]
-+
-+.macro	ADJ_ALIGN_QW shift, R0, R1, R2, R3, R4
-+	mov \R0, \R0, lsr #(\shift)
-+	orr \R0, \R0, \R1, lsl #(32 - \shift)
-+	mov \R1, \R1, lsr #(\shift)
-+	orr \R1, \R1, \R2, lsl #(32 - \shift)
-+	mov \R2, \R2, lsr #(\shift)
-+	orr \R2, \R2, \R3, lsl #(32 - \shift)
-+	mov \R3, \R3, lsr #(\shift)
-+	orr \R3, \R3, \R4, lsl #(32 - \shift)
-+	mov \R4, \R4, lsr #(\shift)
-+@	and \R4, \R4, #0xFF
-+.endm
-+
-+MC_put_x_16_arm_align0:
-+	ldmia r1, {r4-r8}
-+	add r1, r1, r2
-+	pld [r1]
-+	AVG_PW r7, r8
-+	AVG_PW r6, r7
-+	AVG_PW r5, r6
-+	AVG_PW r4, r5
-+	stmia r0, {r5-r8}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne MC_put_x_16_arm_align0
-+        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
-+MC_put_x_16_arm_align1:
-+	and r1, r1, #0xFFFFFFFC
-+1:	ldmia r1, {r4-r8}
-+	add r1, r1, r2
-+	pld [r1]
-+	ADJ_ALIGN_QW 8, r4, r5, r6, r7, r8
-+	AVG_PW r7, r8
-+	AVG_PW r6, r7
-+	AVG_PW r5, r6
-+	AVG_PW r4, r5
-+	stmia r0, {r5-r8}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne 1b
-+        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
-+MC_put_x_16_arm_align2:
-+	and r1, r1, #0xFFFFFFFC
-+1:	ldmia r1, {r4-r8}
-+	add r1, r1, r2
-+	pld [r1]
-+	ADJ_ALIGN_QW 16, r4, r5, r6, r7, r8
-+	AVG_PW r7, r8
-+	AVG_PW r6, r7
-+	AVG_PW r5, r6
-+	AVG_PW r4, r5
-+	stmia r0, {r5-r8}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne 1b
-+        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
-+MC_put_x_16_arm_align3:
-+	and r1, r1, #0xFFFFFFFC
-+1:	ldmia r1, {r4-r8}
-+	add r1, r1, r2
-+	pld [r1]
-+	ADJ_ALIGN_QW 24, r4, r5, r6, r7, r8
-+	AVG_PW r7, r8
-+	AVG_PW r6, r7
-+	AVG_PW r5, r6
-+	AVG_PW r4, r5
-+	stmia r0, {r5-r8}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne 1b
-+        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
-+MC_put_x_16_arm_align_jt:
-+	.word 0x01010101
-+	.word MC_put_x_16_arm_align0
-+	.word MC_put_x_16_arm_align1
-+	.word MC_put_x_16_arm_align2
-+	.word MC_put_x_16_arm_align3
-+
-+@ ----------------------------------------------------------------
-+	.align
-+	.global MC_put_x_8_arm
-+MC_put_x_8_arm:
-+	@@ void func(uint8_t * dest, const uint8_t * ref, int stride, int height)
-+	pld [r1]
-+        stmfd sp!, {r4-r11,lr} @ R14 is also called LR
-+	and r4, r1, #3
-+	adr r5, MC_put_x_8_arm_align_jt
-+	ldr r11, [r5]
-+	mvn r12, r11
-+	add r5, r5, r4, lsl #2
-+	ldr pc, [r5, #4]
-+
-+.macro	ADJ_ALIGN_DW shift, R0, R1, R2
-+	mov \R0, \R0, lsr #(\shift)
-+	orr \R0, \R0, \R1, lsl #(32 - \shift)
-+	mov \R1, \R1, lsr #(\shift)
-+	orr \R1, \R1, \R2, lsl #(32 - \shift)
-+	mov \R2, \R2, lsr #(\shift)
-+@	and \R4, \R4, #0xFF
-+.endm
-+
-+MC_put_x_8_arm_align0:
-+	ldmia r1, {r4-r6}
-+	add r1, r1, r2
-+	pld [r1]
-+	AVG_PW r5, r6
-+	AVG_PW r4, r5
-+	stmia r0, {r5-r6}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne MC_put_x_8_arm_align0
-+        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
-+MC_put_x_8_arm_align1:
-+	and r1, r1, #0xFFFFFFFC
-+1:	ldmia r1, {r4-r6}
-+	add r1, r1, r2
-+	pld [r1]
-+	ADJ_ALIGN_DW 8, r4, r5, r6
-+	AVG_PW r5, r6
-+	AVG_PW r4, r5
-+	stmia r0, {r5-r6}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne 1b
-+        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
-+MC_put_x_8_arm_align2:
-+	and r1, r1, #0xFFFFFFFC
-+1:	ldmia r1, {r4-r6}
-+	add r1, r1, r2
-+	pld [r1]
-+	ADJ_ALIGN_DW 16, r4, r5, r6
-+	AVG_PW r5, r6
-+	AVG_PW r4, r5
-+	stmia r0, {r5-r6}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne 1b
-+        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
-+MC_put_x_8_arm_align3:
-+	and r1, r1, #0xFFFFFFFC
-+1:	ldmia r1, {r4-r6}
-+	add r1, r1, r2
-+	pld [r1]
-+	ADJ_ALIGN_DW 24, r4, r5, r6
-+	AVG_PW r5, r6
-+	AVG_PW r4, r5
-+	stmia r0, {r5-r6}
-+	subs r3, r3, #1
-+	add r0, r0, r2
-+	bne 1b
-+        ldmfd sp!, {r4-r11,pc} @@ update PC with LR content.
-+MC_put_x_8_arm_align_jt:
-+	.word 0x01010101
-+	.word MC_put_x_8_arm_align0
-+	.word MC_put_x_8_arm_align1
-+	.word MC_put_x_8_arm_align2
-+	.word MC_put_x_8_arm_align3
 Index: libmpeg2/motion_comp_iwmmxt.c
 ===================================================================
 --- libmpeg2/motion_comp_iwmmxt.c	(revision 0)
