@@ -905,7 +905,7 @@ to ensure it does not cause security problems (e.g.\& make sure to use full
 paths if "." is in your path like on Windows).
 .sp 1
 This can be "misused" to disable screensavers that do not support the proper
-X API.
+X API (see also \-stop\-xscreensaver).
 If you think this is too complicated, ask the author of the screensaver
 program to support the proper X APIs.
 .sp 1
@@ -3217,6 +3217,8 @@ do not know the screen resolution like fbdev, x11 and TV-out.
 .TP
 .B \-stop\-xscreensaver (X11 only)
 Turns off xscreensaver at startup and turns it on again on exit.
+If your screensaver supports neither the XSS nor XResetScreenSaver
+API please use \-heartbeat\-cmd instead.
 .
 .TP
 .B "\-vm \ \ \ "
