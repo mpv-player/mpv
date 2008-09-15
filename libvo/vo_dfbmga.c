@@ -136,8 +136,6 @@ pixelformat_name( DFBSurfacePixelFormat format )
           return "ARGB";
      case DSPF_RGB32:
           return "RGB32";
-     case DSPF_RGB24:
-	  return "RGB24";
      case DSPF_RGB16:
 	  return "RGB16";
      case DSPF_ARGB1555:
@@ -169,8 +167,6 @@ imgfmt_to_pixelformat( uint32_t format )
      switch (format) {
      case IMGFMT_BGR32:
 	  return DSPF_RGB32;
-     case IMGFMT_BGR24:
-	  return DSPF_RGB24;
      case IMGFMT_BGR16:
 	  return DSPF_RGB16;
      case IMGFMT_BGR15:
@@ -894,7 +890,6 @@ query_format( uint32_t format )
 {
      switch (format) {
           case IMGFMT_BGR32:
-          case IMGFMT_BGR24:
           case IMGFMT_BGR16:
           case IMGFMT_BGR15:
           case IMGFMT_UYVY:
@@ -989,11 +984,6 @@ draw_alpha( int x0, int y0,
      case DSPF_ARGB:
 	  vo_draw_alpha_rgb32( w, h, src, srca, stride,
                                dst + pitch * y0 + 4 * x0,
-                               pitch );
-	  break;
-     case DSPF_RGB24:
-	  vo_draw_alpha_rgb24( w, h, src, srca, stride,
-                               dst + pitch * y0 + 3 * x0,
                                pitch );
 	  break;
      case DSPF_RGB16:
