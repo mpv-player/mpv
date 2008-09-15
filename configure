@@ -6562,7 +6562,6 @@ if test "$_libpostproc_a" = auto ; then
 elif test "$_libpostproc_so" = auto ; then
   _libpostproc_so=no
   cat > $TMPC << EOF
-  #define CONFIG_LIBPOSTPROC 1
   #include <inttypes.h>
   #include <libpostproc/postprocess.h>
   int main(void) { pp_get_mode_by_name_and_quality("de", 0); return 0; }
