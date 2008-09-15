@@ -1350,6 +1350,7 @@ if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
 fi
 
 
+_inc_extra=-I.
 _timer=timer-linux.c
 _getch=getch2.c
 if freebsd ; then
@@ -6041,7 +6042,7 @@ EOF
   done
   if test "$_theora" = no && test "$_tremor_internal" = yes; then
     for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora -logg"; do
-      cc_check -I. tremor/bitwise.c $_ld_theora \
+      cc_check tremor/bitwise.c $_ld_theora \
         && _ld_extra="$_ld_extra $_ld_theora" && theora=yes && break
     done
   fi
@@ -7737,7 +7738,6 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
-CFLAGS="-I. $CFLAGS"
 CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
 
 cat > $TMPC << EOF
