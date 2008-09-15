@@ -666,10 +666,6 @@ config( uint32_t width, uint32_t height,
           dlc.flags       = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
           dlc.width       = besrect.w + besrect.x * 2;
           dlc.height      = besrect.h + besrect.y * 2;
-
-          if (use_crtc2)
-               dlc.buffermode = DLBM_FRONTONLY;
-          else
                dlc.buffermode = buffermode;
 
           if ((res = bes->TestConfiguration( bes, &dlc, &failed )) != DFB_OK) {
@@ -1173,7 +1169,7 @@ blit_to_screen( void )
 
      if (use_bes) {
 #if DIRECTFBVERSION > DFB_VERSION(0,9,15)
-          if (vo_vsync && !flipping && !use_crtc2)
+          if (vo_vsync && !flipping)
                bes->WaitForSync( bes );
 #endif
 
