@@ -35,10 +35,9 @@
 #include "libvo/sub.h"
 
 #include "libavformat/avformat.h"
+#include "libavformat/avio.h"
 #include "libavutil/avutil.h"
-#include "libavformat/avi.h"
 #include "libavcodec/opt.h"
-#include "libavformat/riff.h"
 
 #include "mp_taglists.h"
 
