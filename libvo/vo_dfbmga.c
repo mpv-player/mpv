@@ -72,6 +72,7 @@ static IDirectFBSurface *frame;
 static IDirectFBSurface *subframe;
 
 static IDirectFBSurface *besframe;
+static IDirectFBSurface *c1frame;
 static IDirectFBSurface *c2frame;
 static IDirectFBSurface *spicframe;
 
@@ -79,6 +80,7 @@ static DFBSurfacePixelFormat frame_format;
 static DFBSurfacePixelFormat subframe_format;
 
 static DFBRectangle besrect;
+static DFBRectangle c1rect;
 static DFBRectangle c2rect;
 static DFBRectangle *subrect;
 
@@ -87,9 +89,11 @@ static IDirectFBInputDevice  *remote;
 static IDirectFBEventBuffer  *buffer;
 
 static int blit_done;
+static int c1stretch;
 static int stretch;
 
 static int use_bes;
+static int use_crtc1;
 static int use_crtc2;
 static int use_spic;
 static int use_input;
@@ -231,6 +235,7 @@ preinit( const char *arg )
 
      /* Some defaults */
      use_bes = 0;
+     use_crtc1 = 0;
      use_crtc2 = 1;
      use_spic = 1;
      field_parity = -1;
@@ -253,6 +258,10 @@ preinit( const char *arg )
                if (!strncmp(vo_subdevice, "bes", 3)) {
                     use_bes = !opt_no;
                     vo_subdevice += 3;
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "crtc1", 5)) {
+                    use_crtc1 = !opt_no;
+                    vo_subdevice += 5;
                     opt_no = 0;
                } else if (!strncmp(vo_subdevice, "crtc2", 5)) {
                     use_crtc2 = !opt_no;
@@ -358,6 +367,7 @@ preinit( const char *arg )
                        "Example: mplayer -vo dfbmga:nocrtc2:bes:buffermode=single\n"
                        "\nOptions (use 'no' prefix to disable):\n"
                        "  bes    Use Backend Scaler\n"
+                       "  crtc1  Use CRTC1\n"
                        "  crtc2  Use CRTC2\n"
                        "  spic   Use hardware sub-picture for OSD\n"
                        "  input  Use DirectFB for keyboard input\n"
@@ -378,8 +388,12 @@ preinit( const char *arg )
                return -1;
           }
      }
-     if (!use_bes && !use_crtc2) {
+     if (!use_bes && !use_crtc1 && !use_crtc2) {
 	  mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: No output selected\n" );
+          return -1;
+     }
+     if (use_bes && use_crtc1) {
+	  mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: Both BES and CRTC1 outputs selected\n" );
           return -1;
      }
 
@@ -419,7 +433,7 @@ preinit( const char *arg )
                return -1;
           }
 
-     if (use_bes) {
+     if (use_crtc1 || use_bes) {
           struct layer_enum l = {
                "FBDev Primary Layer",
                &primary,
@@ -554,6 +568,8 @@ static void release_config( void )
           spic->Release( spic );
      if (c2frame)
           c2frame->Release( c2frame );
+     if (c1frame)
+          c1frame->Release( c1frame );
      if (besframe)
           besframe->Release( besframe );
      if (bufs[0])
@@ -566,6 +582,7 @@ static void release_config( void )
      spicframe = NULL;
      spic = NULL;
      c2frame = NULL;
+     c1frame = NULL;
      besframe = NULL;
      bufs[0] = NULL;
      bufs[1] = NULL;
@@ -682,6 +699,63 @@ config( uint32_t width, uint32_t height,
                   dlc.buffermode == DLBM_TRIPLE ? "triple" :
                   dlc.buffermode == DLBM_BACKVIDEO ? "double" : "single" );
           mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: BES surface %dx%d %s\n", dlc.width, dlc.height, pixelformat_name( dlc.pixelformat ) );
+     }
+
+     /*
+      * CRTC1
+      */
+     if (use_crtc1) {
+          dlc.flags      = DLCONF_BUFFERMODE;
+          dlc.buffermode = buffermode;
+
+          if ((res = primary->TestConfiguration( primary, &dlc, &failed )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Invalid CRTC1 configuration - %s!\n",
+                       DirectFBErrorString( res ) );
+               return -1;
+          }
+          if ((res = primary->SetConfiguration( primary, &dlc )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: CRTC1 configuration failed - %s!\n",
+                       DirectFBErrorString( res ) );
+               return -1;
+          }
+          if ((res = primary->GetConfiguration( primary, &dlc )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Getting CRTC1 configuration failed - %s!\n",
+                       DirectFBErrorString( res ) );
+               return -1;
+          }
+
+          primary->GetSurface( primary, &c1frame );
+          c1frame->SetBlittingFlags( c1frame, DSBLIT_NOFX );
+          c1frame->SetColor( c1frame, 0, 0, 0, 0xff );
+
+          c1frame->GetSize( c1frame, &screen_width, &screen_height );
+
+          aspect_save_screenres( screen_width, screen_height );
+          aspect( &out_width, &out_height, (flags & VOFLAG_FULLSCREEN) ? A_ZOOM : A_NOZOOM );
+
+          if (in_width != out_width || in_height != out_height)
+               c1stretch = 1;
+          else
+               c1stretch = 0;
+
+          c1rect.x = (screen_width  - out_width)  / 2;
+          c1rect.y = (screen_height - out_height) / 2;
+          c1rect.w = out_width;
+          c1rect.h = out_height;
+
+          c1frame->Clear( c1frame, 0, 0, 0, 0xff );
+          c1frame->Flip( c1frame, NULL, 0 );
+          c1frame->Clear( c1frame, 0, 0, 0, 0xff );
+          c1frame->Flip( c1frame, NULL, 0 );
+          c1frame->Clear( c1frame, 0, 0, 0, 0xff );
+
+          mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: CRTC1 using %s buffering\n",
+                  dlc.buffermode == DLBM_TRIPLE ? "triple" :
+                  dlc.buffermode == DLBM_BACKVIDEO ? "double" : "single" );
+          mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: CRTC1 surface %dx%d %s\n", screen_width, screen_height, pixelformat_name( dlc.pixelformat ) );
      }
 
      /*
@@ -865,6 +939,10 @@ config( uint32_t width, uint32_t height,
           /* Draw OSD to CRTC2 surface */
           subframe = c2frame;
           subrect = &c2rect;
+     } else if (use_crtc1) {
+          /* Draw OSD to CRTC1 surface */
+          subframe = c1frame;
+          subrect = &c1rect;
      } else {
           /* Draw OSD to BES surface */
           subframe = besframe;
@@ -876,7 +954,8 @@ config( uint32_t width, uint32_t height,
      mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Sub-picture surface %dx%d %s (%s)\n",
              sub_width, sub_height,
              pixelformat_name( subframe_format ),
-             use_crtc2 ? (use_spic ? "Sub-picture layer" : "CRTC2") : "BES" );
+             use_crtc2 ? (use_spic ? "Sub-picture layer" : "CRTC2") :
+             use_crtc1 ? "CRTC1" : "BES" );
 
      osd_dirty = 0;
      osd_current = 1;
@@ -889,21 +968,28 @@ static int
 query_format( uint32_t format )
 {
      switch (format) {
-          case IMGFMT_BGR32:
-          case IMGFMT_BGR16:
-          case IMGFMT_BGR15:
-          case IMGFMT_UYVY:
           case IMGFMT_YV12:
           case IMGFMT_I420:
           case IMGFMT_IYUV:
+               if (is_g200 || use_crtc1)
+                    return 0;
+               break;
+          case IMGFMT_BGR32:
+          case IMGFMT_BGR16:
+          case IMGFMT_BGR15:
+               if (is_g200 && use_bes)
+                    return 0;
+               break;
+          case IMGFMT_UYVY:
                if (is_g200)
                     return 0;
+               break;
           case IMGFMT_YUY2:
                break;
 #if DIRECTFBVERSION > DFB_VERSION(0,9,21)
           case IMGFMT_NV12:
           case IMGFMT_NV21:
-               if (!use_bes || use_crtc2)
+               if (use_crtc1 || use_crtc2)
                     return 0;
                break;
 #endif
@@ -1096,6 +1182,18 @@ blit_to_screen( void )
           srect = &besrect;
      }
 
+     if (use_crtc1) {
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
+          if (vo_vsync && !flipping)
+               primary->WaitForSync( primary );
+#endif
+
+          if (c1stretch)
+               c1frame->StretchBlit( c1frame, blitsrc, srect, &c1rect );
+          else
+               c1frame->Blit( c1frame, blitsrc, srect, c1rect.x, c1rect.y );
+     }
+
      if (use_crtc2) {
 #if DIRECTFBVERSION > DFB_VERSION(0,9,15)
           if (vo_vsync && !flipping)
@@ -1161,7 +1259,9 @@ flip_page( void )
      if (flipping) {
           if (use_crtc2)
                c2frame->Flip( c2frame, NULL, vo_vsync ? DSFLIP_WAITFORSYNC : DSFLIP_ONSYNC );
-          else
+          if (use_crtc1)
+               c1frame->Flip( c1frame, NULL, vo_vsync ? DSFLIP_WAITFORSYNC : DSFLIP_ONSYNC );
+          if (use_bes)
                besframe->Flip( besframe, NULL, vo_vsync ? DSFLIP_WAITFORSYNC : DSFLIP_ONSYNC );
 
           if (!use_spic) {
@@ -1334,6 +1434,8 @@ set_equalizer( char *data, int value )
      /* Prefer CRTC2 over BES */
      if (use_crtc2)
           res = crtc2->SetColorAdjustment( crtc2, &ca );
+     else if (use_crtc1)
+          res = primary->SetColorAdjustment( primary, &ca );
      else
           res = bes->SetColorAdjustment( bes, &ca );
 
@@ -1353,6 +1455,8 @@ get_equalizer( char *data, int *value )
      /* Prefer CRTC2 over BES */
      if (use_crtc2)
           res = crtc2->GetColorAdjustment( crtc2, &ca );
+     else if (use_crtc1)
+          res = primary->GetColorAdjustment( primary, &ca );
      else
           res = bes->GetColorAdjustment( bes, &ca );
 
