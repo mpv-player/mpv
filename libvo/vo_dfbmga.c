@@ -58,7 +58,7 @@ const LIBVO_EXTERN(dfbmga)
  */
 static IDirectFB *dfb;
 
-static IDirectFBDisplayLayer *primary;
+static IDirectFBDisplayLayer *crtc1;
 static IDirectFBDisplayLayer *bes;
 static IDirectFBDisplayLayer *crtc2;
 static IDirectFBDisplayLayer *spic;
@@ -90,7 +90,7 @@ static IDirectFBEventBuffer  *buffer;
 
 static int blit_done;
 static int c1stretch;
-static int stretch;
+static int c2stretch;
 
 static int use_bes;
 static int use_crtc1;
@@ -436,18 +436,18 @@ preinit( const char *arg )
      if (use_crtc1 || use_bes) {
           struct layer_enum l = {
                "FBDev Primary Layer",
-               &primary,
+               &crtc1,
                DFB_UNSUPPORTED
           };
           dfb->EnumDisplayLayers( dfb, get_layer_by_name, &l );
           if (l.res != DFB_OK) {
-               mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: Can't get primary layer - %s\n",
+               mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: Can't get CRTC1 layer - %s\n",
                        DirectFBErrorString( l.res ) );
                uninit();
                return -1;
           }
-          if ((res = primary->SetCooperativeLevel( primary, DLSCL_EXCLUSIVE )) != DFB_OK) {
-               mp_msg( MSGT_VO, MSGL_ERR, "Can't get exclusive access to primary layer - %s\n",
+          if ((res = crtc1->SetCooperativeLevel( crtc1, DLSCL_EXCLUSIVE )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR, "Can't get exclusive access to CRTC1 layer - %s\n",
                        DirectFBErrorString( res ) );
                uninit();
                return -1;
@@ -708,26 +708,26 @@ config( uint32_t width, uint32_t height,
           dlc.flags      = DLCONF_BUFFERMODE;
           dlc.buffermode = buffermode;
 
-          if ((res = primary->TestConfiguration( primary, &dlc, &failed )) != DFB_OK) {
+          if ((res = crtc1->TestConfiguration( crtc1, &dlc, &failed )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR,
                        "vo_dfbmga: Invalid CRTC1 configuration - %s!\n",
                        DirectFBErrorString( res ) );
                return -1;
           }
-          if ((res = primary->SetConfiguration( primary, &dlc )) != DFB_OK) {
+          if ((res = crtc1->SetConfiguration( crtc1, &dlc )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR,
                        "vo_dfbmga: CRTC1 configuration failed - %s!\n",
                        DirectFBErrorString( res ) );
                return -1;
           }
-          if ((res = primary->GetConfiguration( primary, &dlc )) != DFB_OK) {
+          if ((res = crtc1->GetConfiguration( crtc1, &dlc )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR,
                        "vo_dfbmga: Getting CRTC1 configuration failed - %s!\n",
                        DirectFBErrorString( res ) );
                return -1;
           }
 
-          primary->GetSurface( primary, &c1frame );
+          crtc1->GetSurface( crtc1, &c1frame );
           c1frame->SetBlittingFlags( c1frame, DSBLIT_NOFX );
           c1frame->SetColor( c1frame, 0, 0, 0, 0xff );
 
@@ -842,9 +842,9 @@ config( uint32_t width, uint32_t height,
 
           if (in_width != out_width ||
               in_height != out_height)
-               stretch = 1;
+               c2stretch = 1;
           else
-               stretch = 0;
+               c2stretch = 0;
 
           c2rect.x = (screen_width  - out_width)  / 2;
           c2rect.y = (screen_height - out_height) / 2;
@@ -1185,7 +1185,7 @@ blit_to_screen( void )
      if (use_crtc1) {
 #if DIRECTFBVERSION > DFB_VERSION(0,9,15)
           if (vo_vsync && !flipping)
-               primary->WaitForSync( primary );
+               crtc1->WaitForSync( crtc1 );
 #endif
 
           if (c1stretch)
@@ -1200,7 +1200,7 @@ blit_to_screen( void )
                crtc2->WaitForSync( crtc2 );
 #endif
 
-     if (stretch)
+     if (c2stretch)
                c2frame->StretchBlit( c2frame, blitsrc, srect, &c2rect );
      else
                c2frame->Blit( c2frame, blitsrc, srect, c2rect.x, c2rect.y );
@@ -1290,8 +1290,8 @@ uninit( void )
           crtc2->Release( crtc2 );
      if (bes)
           bes->Release( bes );
-     if (primary)
-          primary->Release( primary );
+     if (crtc1)
+          crtc1->Release( crtc1 );
      if (dfb)
           dfb->Release( dfb );
 
@@ -1300,7 +1300,7 @@ uninit( void )
      keyboard = NULL;
      crtc2 = NULL;
      bes = NULL;
-     primary = NULL;
+     crtc1 = NULL;
      dfb = NULL;
 }
 
@@ -1435,7 +1435,7 @@ set_equalizer( char *data, int value )
      if (use_crtc2)
           res = crtc2->SetColorAdjustment( crtc2, &ca );
      else if (use_crtc1)
-          res = primary->SetColorAdjustment( primary, &ca );
+          res = crtc1->SetColorAdjustment( crtc1, &ca );
      else
           res = bes->SetColorAdjustment( bes, &ca );
 
@@ -1456,7 +1456,7 @@ get_equalizer( char *data, int *value )
      if (use_crtc2)
           res = crtc2->GetColorAdjustment( crtc2, &ca );
      else if (use_crtc1)
-          res = primary->GetColorAdjustment( primary, &ca );
+          res = crtc1->GetColorAdjustment( crtc1, &ca );
      else
           res = bes->GetColorAdjustment( bes, &ca );
 
