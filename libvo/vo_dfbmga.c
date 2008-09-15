@@ -1,26 +1,25 @@
 /*
-   MPlayer video driver for DirectFB / Matrox G200/G400/G450/G550
-
-   Copyright (C) 2002-2005 Ville Syrjala <syrjala@sci.fi>
-
-   Originally based on vo_directfb.c by
-   Jiri Svoboda <Jiri.Svoboda@seznam.cz>
-
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later version.
-
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
-
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; if not, write to the
-   Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301 USA.
-*/
+ * MPlayer video driver for DirectFB / Matrox G200/G400/G450/G550
+ *
+ * copyright (C) 2002-2005 Ville Syrjala <syrjala@sci.fi>
+ * Originally based on vo_directfb.c by Jiri Svoboda <Jiri.Svoboda@seznam.cz>.
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 /* directfb includes */
 #include <directfb.h>
