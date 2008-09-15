@@ -320,7 +320,8 @@ Codecs:
   --enable-xmms             enable XMMS input plugin support [disabled]
   --enable-libdca           enable libdca support [autodetect]
   --disable-mp3lib          disable builtin mp3lib [enabled]
-  --disable-liba52          disable builtin liba52 [enabled]
+  --disable-liba52          disable liba52 [autodetect] 
+  --disable-liba52-internal disable builtin liba52 [autodetect] 
   --disable-libmpeg2        disable builtin libmpeg2 [autodetect]
   --disable-musepack        disable musepack support [autodetect]
   --disable-libamr_nb       disable libamr narrowband [autodetect]
@@ -574,7 +575,8 @@ _libvorbis=auto
 _speex=auto
 _theora=auto
 _mp3lib=yes
-_liba52=yes
+_liba52=auto
+_liba52_internal=auto
 _libdca=auto
 _libmpeg2=auto
 _faad=auto
@@ -938,6 +940,8 @@ for ac_option do
   --disable-theora)	_theora=no	;;
   --enable-mp3lib)	_mp3lib=yes	;;
   --disable-mp3lib)	_mp3lib=no	;;
+  --enable-liba52-internal)	_liba52_internal=yes	;;
+  --disable-liba52-internal)	_liba52_internal=no	;;
   --enable-liba52)	_liba52=yes	;;
   --disable-liba52)	_liba52=no	;;
   --enable-libdca)	_libdca=yes     ;;
@@ -6069,12 +6073,29 @@ else
 fi
 echores "$_mp3lib"
 
-echocheck "internal liba52 support"
+echocheck "liba52 support"
+if test "$_liba52_internal" = auto ; then
+  _liba52=yes
+  _liba52_internal=yes
+  _def_liba52_internal="#define CONFIG_LIBA52_INTERNAL 1"
+  _res_comment="internal"
+elif test "$_liba52_internal" = no && test "$_liba52" = auto ; then
+  _liba52=no
+  cat > $TMPC << EOF
+#include <inttypes.h>
+#include <a52dec/a52.h>
+int main(void) { a52_state_t *testHand; testHand=a52_init(0); return 0; }
+EOF
+  cc_check -la52 && _liba52=yes
+  _ld_extra="$_ld_extra -la52"
+  _res_comment="external"
+fi
 if test "$_liba52" = yes ; then
   _def_liba52='#define CONFIG_LIBA52 1'
-  _codecmodules="liba52 $_codecmodules"
+  _codecmodules="liba52($_res_comment) $_codecmodules"
 else
   _def_liba52='#undef CONFIG_LIBA52'
+  _def_liba52_internal="#undef CONFIG_LIBA52_INTERNAL"
   _nocodecmodules="liba52 $_nocodecmodules"
 fi
 echores "$_liba52"
@@ -7823,6 +7844,7 @@ MPLAYER = $_mplayer
 
 #internal libraries
 LIBA52 = $_liba52
+LIBA52_INTERNAL = $_liba52_internal
 LIBMPEG2 = $_libmpeg2
 MP3LIB = $_mp3lib
 TREMOR_INTERNAL = $_tremor_internal
@@ -8366,6 +8388,9 @@ $_def_xvid_lavc
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
+
+/* enable liba52 support */
+$_def_liba52_internal
 $_def_liba52
 $_def_libmpeg2
 
