@@ -1,7 +1,7 @@
 /*
  * MPlayer video driver for DirectFB / Matrox G200/G400/G450/G550
  *
- * copyright (C) 2002-2005 Ville Syrjala <syrjala@sci.fi>
+ * copyright (C) 2002-2008 Ville Syrjala <syrjala@sci.fi>
  * Originally based on vo_directfb.c by Jiri Svoboda <Jiri.Svoboda@seznam.cz>.
  *
  * This file is part of MPlayer.
