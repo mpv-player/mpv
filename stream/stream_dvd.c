@@ -873,7 +873,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
           mp_msg(MSGT_IDENTIFY, MSGL_V, "%02X", discid[i]);
         mp_msg(MSGT_IDENTIFY, MSGL_V, "\n");
       }
-      if (DVDUDFVolumeInfo(dvd, volid, sizeof(volid), NULL, 0) >= 0)
+      if (DVDUDFVolumeInfo(dvd, volid, sizeof(volid), NULL, 0) >= 0 || DVDISOVolumeInfo(dvd, volid, sizeof(volid), NULL, 0) >= 0)
         mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_DVD_VOLUME_ID=%s\n", volid);
     }
     /**
