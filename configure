@@ -6074,6 +6074,8 @@ fi
 echores "$_mp3lib"
 
 echocheck "liba52 support"
+_def_liba52='#undef CONFIG_LIBA52'
+_def_liba52_internal="#undef CONFIG_LIBA52_INTERNAL"
 if test "$_liba52_internal" = auto ; then
   _liba52=yes
   _liba52_internal=yes
@@ -6094,8 +6096,6 @@ if test "$_liba52" = yes ; then
   _def_liba52='#define CONFIG_LIBA52 1'
   _codecmodules="liba52($_res_comment) $_codecmodules"
 else
-  _def_liba52='#undef CONFIG_LIBA52'
-  _def_liba52_internal="#undef CONFIG_LIBA52_INTERNAL"
   _nocodecmodules="liba52 $_nocodecmodules"
 fi
 echores "$_liba52"
