@@ -634,7 +634,7 @@ COMMON_LIBS-$(LIBAVFORMAT_A)      += libavformat/libavformat.a
 COMMON_LIBS-$(LIBAVCODEC_A)       += libavcodec/libavcodec.a
 COMMON_LIBS-$(LIBAVUTIL_A)        += libavutil/libavutil.a
 COMMON_LIBS-$(LIBPOSTPROC_A)      += libpostproc/libpostproc.a
-COMMON_LIBS  = libswscale/libswscale.a
+COMMON_LIBS-$(LIBSWSCALE_A)       += libswscale/libswscale.a
 COMMON_LIBS += $(COMMON_LIBS-yes)
 
 OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)))

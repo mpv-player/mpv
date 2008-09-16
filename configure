@@ -293,10 +293,12 @@ Codecs:
   --disable-libavcodec_a    disable static libavcodec [autodetect]
   --disable-libavformat_a   disable static libavformat [autodetect]
   --disable-libpostproc_a   disable static libpostproc [autodetect]
+  --disable-libswscale_a    disable static libswscale [autodetect]
   --disable-libavutil_so    disable shared libavutil [autodetect]
   --disable-libavcodec_so   disable shared libavcodec [autodetect]
   --disable-libavformat_so  disable shared libavformat [autodetect]
   --disable-libpostproc_so  disable shared libpostproc [autodetect]
+  --disable-libswscale_so   disable shared libswscale [autodetect]
   --disable-libavcodec_mpegaudio_hp disable high precision audio decoding
                                     in libavcodec [enabled]
   --disable-tremor-internal disable internal Tremor [enabled]
@@ -518,6 +520,8 @@ _libavformat_a=auto
 _libavformat_so=auto
 _libpostproc_a=auto
 _libpostproc_so=auto
+_libswscale_a=auto
+_libswscale_so=auto
 _libavcodec_mpegaudio_hp=yes
 _mencoder=yes
 _mplayer=yes
@@ -1086,6 +1090,10 @@ for ac_option do
   --disable-libpostproc_a)	_libpostproc_a=no	;;
   --enable-libpostproc_so)	_libpostproc_so=yes	;;
   --disable-libpostproc_so)	_libpostproc_so=no	;;
+  --enable-libswscale_a)	_libswscale_a=yes	;;
+  --disable-libswscale_a)	_libswscale_a=no	;;
+  --enable-libswscale_so)	_libswscale_so=yes	;;
+  --disable-libswscale_so)	_libswscale_so=no	;;
   --enable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=yes	;;
   --disable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=no	;;
 
@@ -6605,6 +6613,40 @@ test "$_libpostproc_so" = yes \
   && _def_libpostproc_so='#define CONFIG_LIBPOSTPROC_SO 1'
 echores "$_libpostproc"
 
+echocheck "FFmpeg libswscale"
+if test "$_libswscale_a" = auto ; then
+  _libswscale_a=no
+  if test -d libswscale && test -f libswscale/swscale.h ; then
+    _libswscale_a='yes'
+    _res_comment="static"
+  fi
+elif test "$_libswscale_so" = auto ; then
+  _libswscale_so=no
+  _res_comment="using libswscale.so, but static libswscale is recommended"
+  cat > $TMPC << EOF
+  #include <libswscale/swscale.h>
+  int main(void) { sws_scale(0, 0, 0, 0, 0, 0, 0); return 0; }
+EOF
+  if $_pkg_config --exists libswscale ; then
+    _inc_libswscale=`$_pkg_config --cflags libswscale`
+    _ld_tmp=`$_pkg_config --libs libswscale`
+    cc_check $_inc_libswscale $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+      && _libswscale_so=yes
+  elif cc_check -lswscale ; then
+    _ld_extra="$_ld_extra -lswscale"
+    _libswscale_so=yes
+  fi
+fi
+_libswscale=no
+_def_libswscale='#undef CONFIG_LIBSWSCALE'
+_def_libswscale_a='#undef CONFIG_LIBSWSCALE_A'
+_def_libswscale_so='#undef CONFIG_LIBSWSCALE_SO'
+test "$_libswscale_a" = yes || test "$_libswscale_so" = yes && _libswscale=yes
+test "$_libswscale"    = yes && _def_libswscale='#define CONFIG_LIBSWSCALE 1'
+test "$_libswscale_a"  = yes && _def_libswscale_a='#define CONFIG_LIBSWSCALE_A 1'
+test "$_libswscale_so" = yes \
+  && _def_libswscale_so='#define CONFIG_LIBSWSCALE_SO 1'
+echores "$_libswscale"
 
 echocheck "libamr narrowband"
 if test "$_libamr_nb" = auto ; then
@@ -7973,6 +8015,9 @@ LIBAVFORMAT_SO = $_libavformat_so
 LIBPOSTPROC = $_libpostproc
 LIBPOSTPROC_A = $_libpostproc_a
 LIBPOSTPROC_SO = $_libpostproc_so
+LIBSWSCALE = $_libswscale
+LIBSWSCALE_A = $_libswscale_a
+LIBSWSCALE_SO = $_libswscale_so
 
 BUILD_STATIC=yes
 SRC_PATH=..
@@ -8341,6 +8386,10 @@ $_def_libavformat_so
 $_def_libavutil
 $_def_libavutil_a
 $_def_libavutil_so
+
+$_def_libswscale
+$_def_libswscale_a
+$_def_libswscale_so
 
 /* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
