@@ -326,7 +326,8 @@ The name comes from the fact that this method encodes the file
 <emphasis>twice</emphasis>.  The first encoding (dubbed pass) creates some
 temporary files (<filename>*.log</filename>) with a size of few megabytes, do
 not delete them yet (you can delete the AVI or rather just not create any video
-by redirecting it into <filename>/dev/null</filename>).
+by redirecting it into <filename>/dev/null</filename>
+or on Windows into <filename>NUL</filename>).
 In the second pass, the two pass output
 file is created, using the bitrate data from the temporary files. The
 resulting file will have much better image quality. If this is the first
