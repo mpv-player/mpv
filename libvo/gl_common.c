@@ -366,7 +366,7 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLenum format, GLenum type, GLi
   if (!stride) return;
   init = malloc(stride * h);
   memset(init, val, stride * h);
-  glAdjustAlignment(w);
+  glAdjustAlignment(stride);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
   glTexImage2D(target, 0, fmt, w, h, 0, format, type, init);
   glTexParameterf(target, GL_TEXTURE_PRIORITY, 1.0);
