@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <png.h>
 
@@ -21,6 +24,8 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "subopt-helper.h"
+
+#define BUFLENGTH 512
 
 static const vo_info_t info = 
 {
@@ -33,6 +38,7 @@ static const vo_info_t info =
 const LIBVO_EXTERN (png)
 
 static int z_compression = Z_NO_COMPRESSION;
+static char *png_outdir = NULL;
 static int framenum = 0;
 
 struct pngdata {
@@ -42,9 +48,56 @@ struct pngdata {
 	enum {OK,ERROR} status;  
 };
 
+static void png_mkdir(char *buf, int verbose) { 
+    struct stat stat_p;
+
+#ifndef __MINGW32__	
+    if ( mkdir(buf, 0755) < 0 ) {
+#else
+    if ( mkdir(buf) < 0 ) {
+#endif
+        switch (errno) { /* use switch in case other errors need to be caught
+                            and handled in the future */
+            case EEXIST:
+                if ( stat(buf, &stat_p ) < 0 ) {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
+                            MSGTR_VO_GenericError, strerror(errno) );
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
+                            MSGTR_VO_UnableToAccess,buf);
+                    exit_player(MSGTR_Exit_error);
+                }
+                if ( !S_ISDIR(stat_p.st_mode) ) {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
+                            buf, MSGTR_VO_ExistsButNoDirectory);
+                    exit_player(MSGTR_Exit_error);
+                }
+                if ( !(stat_p.st_mode & S_IWUSR) ) {
+                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
+                            buf, MSGTR_VO_DirExistsButNotWritable);
+                    exit_player(MSGTR_Exit_error);
+                }
+                
+                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
+                        buf, MSGTR_VO_DirExistsAndIsWritable);
+                break;
+
+            default:
+                mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
+                        MSGTR_VO_GenericError, strerror(errno) );
+                mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
+                        buf, MSGTR_VO_CantCreateDirectory);
+                exit_player(MSGTR_Exit_error);
+        } /* end switch */
+    } else if ( verbose ) {  
+        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
+                buf, MSGTR_VO_DirectoryCreateSuccess);
+    } /* end if */
+}
+    
 static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
+    char buf[BUFLENGTH];
     
 	    if(z_compression == 0) {
  		    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_PNG_Warning1);
@@ -52,6 +105,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
  		    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_PNG_Warning3);
 	    }	    
     
+    snprintf(buf, BUFLENGTH, "%s", png_outdir);
+    png_mkdir(buf, 1);
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Compression level %i\n", z_compression);
 	  	
     return 0;
@@ -148,7 +203,7 @@ static uint32_t draw_image(mp_image_t* mpi){
     // if -dr or -slices then do nothing:
     if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
     
-    snprintf (buf, 100, "%08d.png", ++framenum);
+    snprintf (buf, 100, "%s/%08d.png", png_outdir, ++framenum);
 
     png = create_png(buf, mpi->w, mpi->h, IMGFMT_IS_BGR(mpi->imgfmt));
 
@@ -198,7 +253,12 @@ query_format(uint32_t format)
     return 0;
 }
 
-static void uninit(void){}
+static void uninit(void){
+    if (png_outdir) {
+        free(png_outdir);
+        png_outdir = NULL;
+    }
+}
 
 static void check_events(void){}
 
@@ -211,12 +271,14 @@ static int int_zero_to_nine(int *sh)
 
 static opt_t subopts[] = {
     {"z",   OPT_ARG_INT, &z_compression, (opt_test_f)int_zero_to_nine},
+    {"outdir",      OPT_ARG_MSTRZ,  &png_outdir,           NULL, 0},
     {NULL}
 };
 
 static int preinit(const char *arg)
 {
     z_compression = 0;
+    png_outdir = strdup(".");
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
     }
