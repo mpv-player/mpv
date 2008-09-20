@@ -101,7 +101,6 @@ static Atom XA_NET_WM_PID;
 static Atom XA_WIN_PROTOCOLS;
 static Atom XA_WIN_LAYER;
 static Atom XA_WIN_HINTS;
-static Atom XA_BLACKBOX_PID;
 static Atom XAWM_PROTOCOLS;
 static Atom XAWM_DELETE_WINDOW;
 
@@ -325,20 +324,6 @@ static int vo_wm_detect(void)
         for (i = 0; i < nitems; i++)
             wm |= net_wm_support_state_test(args[i]);
         XFree(args);
-#if 0
-        // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
-        // (in their implementation it only changes internal window state, nothing more!!!)
-        if (wm & vo_wm_FULLSCREEN)
-        {
-            if (x11_get_property(XA_BLACKBOX_PID, &args, &nitems))
-            {
-                mp_msg(MSGT_VO, MSGL_V,
-                       "[x11] Detected wm is a broken OpenBox.\n");
-                wm ^= vo_wm_FULLSCREEN;
-            }
-            XFree(args);
-        }
-#endif
     }
 
     if (wm == 0)
@@ -358,7 +343,6 @@ static void init_atoms(void)
     XA_INIT(_WIN_PROTOCOLS);
     XA_INIT(_WIN_LAYER);
     XA_INIT(_WIN_HINTS);
-    XA_INIT(_BLACKBOX_PID);
     XA_INIT(WM_PROTOCOLS);
     XA_INIT(WM_DELETE_WINDOW);
 }
