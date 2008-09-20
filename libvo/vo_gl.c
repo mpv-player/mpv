@@ -281,9 +281,9 @@ static void genEOSD(mp_eosd_images_t *imgs) {
   if (!largeeosdtex[0]) {
     glGenTextures(2, largeeosdtex);
     BindTexture(gl_target, largeeosdtex[0]);
-    glCreateClearTex(gl_target, GL_ALPHA, scale_type, 512, 512, 0);
+    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, 512, 512, 0);
     BindTexture(gl_target, largeeosdtex[1]);
-    glCreateClearTex(gl_target, GL_ALPHA, scale_type, 512, 512, 0);
+    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, 512, 512, 0);
   }
   for (i = img; i; i = i->next)
   {
@@ -322,7 +322,7 @@ static void genEOSD(mp_eosd_images_t *imgs) {
     } else {
       texSize(i->w, i->h, &sx, &sy);
       BindTexture(gl_target, *curtex++);
-      glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
+      glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, sx, sy, 0);
     }
     glUploadTex(gl_target, GL_ALPHA, GL_UNSIGNED_BYTE, i->bitmap, i->stride,
                 x, y, i->w, i->h, 0);
@@ -412,10 +412,10 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
       BindTexture(GL_TEXTURE_3D, default_texs[i + 14]);
     }
     ActiveTexture(GL_TEXTURE1);
-    glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
+    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
                      texture_width / 2, texture_height / 2, 128);
     ActiveTexture(GL_TEXTURE2);
-    glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
+    glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
                      texture_width / 2, texture_height / 2, 128);
     switch (use_yuv) {
       case YUV_CONVERSION_FRAGMENT_LOOKUP:
@@ -433,7 +433,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
     BindTexture(gl_target, 0);
     update_yuvconv();
   }
-  glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
+  glCreateClearTex(gl_target, gl_texfmt, gl_format, gl_type, GL_LINEAR,
                    texture_width, texture_height, 0);
 
   resize(d_width, d_height);
@@ -537,14 +537,14 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   // create Textures for OSD part
   glGenTextures(1, &osdtex[osdtexCnt]);
   BindTexture(gl_target, osdtex[osdtexCnt]);
-  glCreateClearTex(gl_target, GL_LUMINANCE, scale_type, sx, sy, 0);
+  glCreateClearTex(gl_target, GL_LUMINANCE, GL_LUMINANCE, GL_UNSIGNED_BYTE, scale_type, sx, sy, 0);
   glUploadTex(gl_target, GL_LUMINANCE, GL_UNSIGNED_BYTE, src, stride,
               0, 0, w, h, 0);
 
 #ifndef FAST_OSD
   glGenTextures(1, &osdatex[osdtexCnt]);
   BindTexture(gl_target, osdatex[osdtexCnt]);
-  glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 255);
+  glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, sx, sy, 255);
   {
   int i;
   char *tmp = malloc(stride * h);

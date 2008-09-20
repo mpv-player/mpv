@@ -256,16 +256,16 @@ static int initTextures(void)
         ActiveTexture(GL_TEXTURE0);
       }
 
-      glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
+      glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
                        texture_width, texture_height, 0);
 
       glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
       if (image_format == IMGFMT_YV12) {
         ActiveTexture(GL_TEXTURE1);
-        glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
+        glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
                          texture_width / 2, texture_height / 2, 128);
         ActiveTexture(GL_TEXTURE2);
-        glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
+        glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, gl_bitmap_format,  gl_bitmap_type, GL_LINEAR,
                          texture_width / 2, texture_height / 2, 128);
         ActiveTexture(GL_TEXTURE0);
       }

@@ -210,7 +210,7 @@ const char *glValName(GLint value);
 int glFindFormat(uint32_t format, int *bpp, GLint *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type);
 int glFmt2bpp(GLenum format, GLenum type);
-void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
+void glCreateClearTex(GLenum target, GLenum fmt, GLenum format, GLenum type, GLint filter,
                       int w, int h, unsigned char val);
 int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
                    FILE *f, int *width, int *height, int *maxval);

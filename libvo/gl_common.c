@@ -349,22 +349,26 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
  * \brief create a texture and set some defaults
  * \param target texture taget, usually GL_TEXTURE_2D
  * \param fmt internal texture format
+ * \param format texture host data format
+ * \param type texture host data type
  * \param filter filter used for scaling, e.g. GL_LINEAR
  * \param w texture width
  * \param h texture height
  * \param val luminance value to fill texture with
  * \ingroup gltexture
  */
-void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
+void glCreateClearTex(GLenum target, GLenum fmt, GLenum format, GLenum type, GLint filter,
                       int w, int h, unsigned char val) {
   GLfloat fval = (GLfloat)val / 255.0;
   GLfloat border[4] = {fval, fval, fval, fval};
-  GLenum clrfmt = (fmt == GL_ALPHA) ? GL_ALPHA : GL_LUMINANCE;
-  char *init = malloc(w * h);
-  memset(init, val, w * h);
+  int stride = w * glFmt2bpp(format, type);
+  char *init;
+  if (!stride) return;
+  init = malloc(stride * h);
+  memset(init, val, stride * h);
   glAdjustAlignment(w);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
-  glTexImage2D(target, 0, fmt, w, h, 0, clrfmt, GL_UNSIGNED_BYTE, init);
+  glTexImage2D(target, 0, fmt, w, h, 0, format, type, init);
   glTexParameterf(target, GL_TEXTURE_PRIORITY, 1.0);
   glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
@@ -411,6 +415,7 @@ int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
                    FILE *f, int *width, int *height, int *maxval) {
   unsigned w, h, m, val, bpp;
   char *data;
+  GLenum type;
   ppm_skip(f);
   if (fgetc(f) != 'P' || fgetc(f) != '6')
     return 0;
@@ -437,8 +442,9 @@ int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
     if (fmt == GL_FLOAT_RGB32_NV && target != GL_TEXTURE_RECTANGLE)
       fmt = GL_RGB16;
   }
-  glCreateClearTex(target, fmt, filter, w, h, 0);
-  glUploadTex(target, GL_RGB, (m > 255) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE,
+  type = m > 255 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE;
+  glCreateClearTex(target, fmt, GL_RGB, type, filter, w, h, 0);
+  glUploadTex(target, GL_RGB, type,
               data, w * bpp, 0, 0, w, h, 0);
   free(data);
   if (width) *width = w;
@@ -980,7 +986,7 @@ static void create_conv_textures(gl_conversion_params_t *params, int *texu, char
       gen_gamma_map(lookup_data, LOOKUP_RES, params->rgamma);
       gen_gamma_map(&lookup_data[LOOKUP_RES], LOOKUP_RES, params->ggamma);
       gen_gamma_map(&lookup_data[2 * LOOKUP_RES], LOOKUP_RES, params->bgamma);
-      glCreateClearTex(GL_TEXTURE_2D, GL_LUMINANCE8, GL_LINEAR,
+      glCreateClearTex(GL_TEXTURE_2D, GL_LUMINANCE8, GL_LUMINANCE, GL_UNSIGNED_BYTE, GL_LINEAR,
                        LOOKUP_RES, 4, 0);
       glUploadTex(GL_TEXTURE_2D, GL_LUMINANCE, GL_UNSIGNED_BYTE, lookup_data,
                   LOOKUP_RES, 0, 0, LOOKUP_RES, 4, 0);
