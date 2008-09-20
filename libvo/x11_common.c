@@ -111,14 +111,11 @@ void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
         xev.xclient.type = ClientMessage;
         xev.xclient.serial = 0;
         xev.xclient.send_event = True;
-        xev.xclient.message_type = XInternAtom(x11->display,
-                                               "_NET_WM_STATE", False);
+        xev.xclient.message_type = x11->XA_NET_WM_STATE;
         xev.xclient.window = x11->window;
         xev.xclient.format = 32;
         xev.xclient.data.l[0] = action;
-        xev.xclient.data.l[1] = XInternAtom(x11->display,
-                                            "_NET_WM_STATE_FULLSCREEN",
-                                            False);
+        xev.xclient.data.l[1] = x11->XA_NET_WM_STATE_FULLSCREEN;
         xev.xclient.data.l[2] = 0;
         xev.xclient.data.l[3] = 0;
         xev.xclient.data.l[4] = 0;
@@ -301,20 +298,6 @@ static int vo_wm_detect(struct vo *vo)
         for (i = 0; i < nitems; i++)
             wm |= net_wm_support_state_test(vo->x11, args[i]);
         XFree(args);
-#if 0
-        // ugly hack for broken OpenBox _NET_WM_STATE_FULLSCREEN support
-        // (in their implementation it only changes internal window state, nothing more!!!)
-        if (wm & vo_wm_FULLSCREEN)
-        {
-            if (x11_get_property(x11, x11->XA_BLACKBOX_PID, &args, &nitems))
-            {
-                mp_msg(MSGT_VO, MSGL_V,
-                       "[x11] Detected wm is a broken OpenBox.\n");
-                wm ^= vo_wm_FULLSCREEN;
-            }
-            XFree(args);
-        }
-#endif
     }
 
     if (wm == 0)
@@ -335,7 +318,6 @@ static void init_atoms(struct vo_x11_state *x11)
     XA_INIT(_WIN_PROTOCOLS);
     XA_INIT(_WIN_LAYER);
     XA_INIT(_WIN_HINTS);
-    XA_INIT(_BLACKBOX_PID);
     XA_INIT(WM_PROTOCOLS);
     XA_INIT(WM_DELETE_WINDOW);
 }

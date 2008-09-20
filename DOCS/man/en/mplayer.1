@@ -905,7 +905,7 @@ to ensure it does not cause security problems (e.g.\& make sure to use full
 paths if "." is in your path like on Windows).
 .sp 1
 This can be "misused" to disable screensavers that do not support the proper
-X API.
+X API (also see \-stop\-xscreensaver).
 If you think this is too complicated, ask the author of the screensaver
 program to support the proper X APIs.
 .sp 1
@@ -3217,6 +3217,8 @@ do not know the screen resolution like fbdev, x11 and TV-out.
 .TP
 .B \-stop\-xscreensaver (X11 only)
 Turns off xscreensaver at startup and turns it on again on exit.
+If your screensaver supports neither the XSS nor XResetScreenSaver
+API please use \-heartbeat\-cmd instead.
 .
 .TP
 .B "\-vm \ \ \ "
@@ -3915,7 +3917,7 @@ Explicitly choose the Matrox device name to use (default: /dev/\:mga_vid).
 .PD 1
 .
 .TP
-.B s3fb (Linux only) (see also \-vf yuv2 and \-dr)
+.B s3fb (Linux only) (also see \-vf yuv2 and \-dr)
 S3 Virge specific video output driver.
 This driver supports the card's YUV conversion and scaling, double
 buffering and direct rendering features.
@@ -4477,8 +4479,21 @@ This is not a bug, but a side effect of not decoding at full resolution.
 If <w> is specified lowres decoding will be used only if the width of the
 video is major than or equal to <w>.
 .RE
-.IPs "o\ \ \ \ "
-FIXME: undocumented
+.B o=<key>=<value>[,<key>=<value>[,...]]
+Pass AVOptions to libavcodec decoder
+Note, a patch to make the o= unneeded and pass all unknown options through
+the AVOption system is welcome.
+A full list of AVOptions can be found in FFmpeg manual.
+Note that some options may conflict with MEncoder options.
+.sp 1
+.RS
+.I EXAMPLE:
+.RE
+.RSs
+.PD 0
+.IPs o=debug=pict
+.PD 1
+.RE
 .IPs "sb=<number> (MPEG-2 only)"
 Skip the given number of macroblock rows at the bottom.
 .IPs "st=<number> (MPEG-2 only)"
@@ -7630,9 +7645,11 @@ Read the source for full details.
 .
 .TP
 .B o=<key>=<value>[,<key>=<value>[,...]]
-Pass AVOptions to libavcodec
+Pass AVOptions to libavcodec encoder
 Note, a patch to make the o= unneeded and pass all unknown options through
 the AVOption system is welcome.
+A full list of AVOptions can be found in FFmpeg manual.
+Note that some AVOptions may conflict with MEncoder options.
 .sp 1
 .RS
 .I EXAMPLE:
@@ -7889,7 +7906,7 @@ so quality may be low.
 motion estimation search range (default: 0 (unlimited))
 .
 .TP
-.B mbd=<0\-2> (see also *cmp, qpel)
+.B mbd=<0\-2> (also see *cmp, qpel)
 Macroblock decision algorithm (high quality mode), encode each macro
 block in all modes and choose the best.
 This is slow but results in better quality and file size.
@@ -9075,9 +9092,6 @@ FIXME: Document this.
 .B skip_threshold=<0\-1000000>
 FIXME: Document this.
 .
-.TP
-.B "o\ \ \ \ \ \ "
-FIXME: undocumented
 .
 .
 .SS nuv (\-nuvopts)
@@ -10473,8 +10487,21 @@ Maximum length in seconds to analyze the stream properties.
 Force a specific libavformat demuxer.
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: undocumented
+.B o=<key>=<value>[,<key>=<value>[,...]]
+Pass AVOptions to libavformat demuxer
+Note, a patch to make the o= unneeded and pass all unknown options through
+the AVOption system is welcome.
+A full list of AVOptions can be found in FFmpeg manual.
+Note that some options may conflict with MPlayer/MEncoder options.
+.sp 1
+.RS
+.I EXAMPLE:
+.RE
+.RSs
+.PD 0
+.IPs o=ignidx
+.PD 1
+.RE
 .
 .TP
 .B probesize=<value>
@@ -10532,6 +10559,8 @@ MPEG-4 format
 MPEG-4 format with extra header flags required by Apple iPod firmware
 .IPs "dv\ \ \ "
 Sony Digital Video container
+.IPs "matroska\ \ \ "
+Matroska
 .RE
 .PD 1
 .TP
@@ -10541,8 +10570,21 @@ currently it is meaningful only for MPEG[12].
 Sometimes raising it is necessary in order to avoid "buffer underflows".
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: undocumented
+.B o=<key>=<value>[,<key>=<value>[,...]]
+Pass AVOptions to libavformat muxer
+Note, a patch to make the o= unneeded and pass all unknown options through
+the AVOption system is welcome.
+A full list of AVOptions can be found in FFmpeg manual.
+Note that some options may conflict with MEncoder options.
+.sp 1
+.RS
+.I EXAMPLE:
+.RE
+.RSs
+.PD 0
+.IPs o=packetsize=100
+.PD 1
+.RE
 .
 .TP
 .B packetsize=<size>

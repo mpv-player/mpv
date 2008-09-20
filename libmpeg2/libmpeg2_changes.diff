@@ -1,0 +1,318 @@
+--- libmpeg2/cpu_accel.c	2006-06-16 20:12:26.000000000 +0200
++++ libmpeg2/cpu_accel.c	2006-06-16 20:12:50.000000000 +0200
+@@ -29,9 +33,13 @@
+ #include "attributes.h"
+ #include "mpeg2_internal.h"
+ 
++#include "cpudetect.h"
++
+ #if defined(ARCH_X86) || defined(ARCH_X86_64)
+ static inline uint32_t arch_accel (uint32_t accel)
+ {
++/* Use MPlayer CPU detection instead of libmpeg2 variant. */
++#if 0
+     if (accel & (MPEG2_ACCEL_X86_3DNOW | MPEG2_ACCEL_X86_MMXEXT))
+ 	accel |= MPEG2_ACCEL_X86_MMX;
+ 	
+@@ -124,6 +132,21 @@
+ #endif /* ACCEL_DETECT */
+ 
+     return accel;
++
++#else /* 0 */
++    accel = 0;
++    if (gCpuCaps.hasMMX)
++        accel |= MPEG2_ACCEL_X86_MMX;
++    if (gCpuCaps.hasSSE2)
++	accel |= MPEG2_ACCEL_X86_SSE2;
++    if (gCpuCaps.hasMMX2)
++	accel |= MPEG2_ACCEL_X86_MMXEXT;
++    if (gCpuCaps.has3DNow)
++	accel |= MPEG2_ACCEL_X86_3DNOW;
++
++    return accel;
++
++#endif /* 0 */
+ }
+ #endif /* ARCH_X86 || ARCH_X86_64 */
+ 
+--- libmpeg2/decode.c	2006-06-16 20:12:26.000000000 +0200
++++ libmpeg2/decode.c	2006-06-16 20:12:50.000000000 +0200
+@@ -345,6 +349,15 @@
+     fbuf->buf[1] = buf[1];
+     fbuf->buf[2] = buf[2];
+     fbuf->id = id;
++    // HACK! FIXME! At first I frame, copy pointers to prediction frame too!
++    if (mpeg2dec->custom_fbuf && !mpeg2dec->fbuf[1]->buf[0]){
++	mpeg2dec->fbuf[1]->buf[0]=buf[0];
++	mpeg2dec->fbuf[1]->buf[1]=buf[1];
++	mpeg2dec->fbuf[1]->buf[2]=buf[2];
++	mpeg2dec->fbuf[1]->id=NULL;
++    }
++//    printf("libmpeg2: FBUF 0:%p 1:%p 2:%p\n",
++//	mpeg2dec->fbuf[0]->buf[0],mpeg2dec->fbuf[1]->buf[0],mpeg2dec->fbuf[2]->buf[0]);
+ }
+ 
+ void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf)
+--- libmpeg2/header.c	2006-06-16 20:12:26.000000000 +0200
++++ libmpeg2/header.c	2006-06-16 20:12:50.000000000 +0200
+@@ -100,6 +104,9 @@
+     mpeg2dec->decoder.convert = NULL;
+     mpeg2dec->decoder.convert_id = NULL;
+     mpeg2dec->picture = mpeg2dec->pictures;
++    memset(&mpeg2dec->fbuf_alloc[0].fbuf, 0, sizeof(mpeg2_fbuf_t));
++    memset(&mpeg2dec->fbuf_alloc[1].fbuf, 0, sizeof(mpeg2_fbuf_t));
++    memset(&mpeg2dec->fbuf_alloc[2].fbuf, 0, sizeof(mpeg2_fbuf_t));
+     mpeg2dec->fbuf[0] = &mpeg2dec->fbuf_alloc[0].fbuf;
+     mpeg2dec->fbuf[1] = &mpeg2dec->fbuf_alloc[1].fbuf;
+     mpeg2dec->fbuf[2] = &mpeg2dec->fbuf_alloc[2].fbuf;
+@@ -872,6 +879,7 @@
+ 	mpeg2dec->scaled[idx] = decoder->q_scale_type;
+ 	for (i = 0; i < 32; i++) {
+ 	    k = decoder->q_scale_type ? non_linear_scale[i] : (i << 1);
++	    decoder->quantizer_scales[i] = k;
+ 	    for (j = 0; j < 64; j++)
+ 		decoder->quantizer_prescale[idx][i][j] =
+ 		    k * mpeg2dec->quantizer_matrix[idx][j];
+--- libmpeg2/idct.c	(revision 26652)
++++ libmpeg2/idct.c	(working copy)
+@@ -235,34 +239,40 @@
+ 
+ void mpeg2_idct_init (uint32_t accel)
+ {
+-#ifdef ARCH_X86
++#ifdef HAVE_SSE2
+     if (accel & MPEG2_ACCEL_X86_SSE2) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_sse2;
+ 	mpeg2_idct_add = mpeg2_idct_add_sse2;
+ 	mpeg2_idct_mmx_init ();
+-    } else if (accel & MPEG2_ACCEL_X86_MMXEXT) {
++    } else
++#elif HAVE_MMX2
++    if (accel & MPEG2_ACCEL_X86_MMXEXT) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
+ 	mpeg2_idct_add = mpeg2_idct_add_mmxext;
+ 	mpeg2_idct_mmx_init ();
+-    } else if (accel & MPEG2_ACCEL_X86_MMX) {
++    } else
++#elif HAVE_MMX
++    if (accel & MPEG2_ACCEL_X86_MMX) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_mmx;
+ 	mpeg2_idct_add = mpeg2_idct_add_mmx;
+ 	mpeg2_idct_mmx_init ();
+     } else
+ #endif
+-#ifdef ARCH_PPC
++#ifdef HAVE_ALTIVEC
+     if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_altivec;
+ 	mpeg2_idct_add = mpeg2_idct_add_altivec;
+ 	mpeg2_idct_altivec_init ();
+     } else
+ #endif
+-#ifdef ARCH_ALPHA
++#ifdef HAVE_VIS
+     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
+ 	mpeg2_idct_add = mpeg2_idct_add_mvi;
+ 	mpeg2_idct_alpha_init ();
+-    } else if (accel & MPEG2_ACCEL_ALPHA) {
++    } else
++#elif ARCH_ALPHA
++    if (accel & MPEG2_ACCEL_ALPHA) {
+ 	int i;
+ 
+ 	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
+--- libmpeg2/motion_comp.c	2006-06-16 20:12:26.000000000 +0200
++++ libmpeg2/motion_comp.c	2006-06-16 20:12:50.000000000 +0200
+@@ -33,16 +37,22 @@
+ 
+ void mpeg2_mc_init (uint32_t accel)
+ {
+-#ifdef ARCH_X86
++#ifdef HAVE_MMX2
+     if (accel & MPEG2_ACCEL_X86_MMXEXT)
+ 	mpeg2_mc = mpeg2_mc_mmxext;
+-    else if (accel & MPEG2_ACCEL_X86_3DNOW)
++    else
++#endif
++#ifdef HAVE_3DNOW
++    if (accel & MPEG2_ACCEL_X86_3DNOW)
+ 	mpeg2_mc = mpeg2_mc_3dnow;
+-    else if (accel & MPEG2_ACCEL_X86_MMX)
++    else
++#endif
++#ifdef HAVE_MMX
++    if (accel & MPEG2_ACCEL_X86_MMX)
+ 	mpeg2_mc = mpeg2_mc_mmx;
+     else
+ #endif
+-#ifdef ARCH_PPC
++#ifdef HAVE_ALTIVEC
+     if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
+ 	mpeg2_mc = mpeg2_mc_altivec;
+     else
+@@ -52,15 +62,20 @@
+ 	mpeg2_mc = mpeg2_mc_alpha;
+     else
+ #endif
+-#ifdef ARCH_SPARC
++#ifdef HAVE_VIS
+     if (accel & MPEG2_ACCEL_SPARC_VIS)
+ 	mpeg2_mc = mpeg2_mc_vis;
+     else
+ #endif
+ #ifdef ARCH_ARM
+-    if (accel & MPEG2_ACCEL_ARM) {
++#ifdef HAVE_IWMMXT
++    if (accel & MPEG2_ACCEL_ARM_IWMMXT)
++	mpeg2_mc = mpeg2_mc_iwmmxt;
++    else
++#endif
++    if (accel & MPEG2_ACCEL_ARM)
+ 	mpeg2_mc = mpeg2_mc_arm;
+-    } else
++    else
+ #endif
+ 	mpeg2_mc = mpeg2_mc_c;
+ }
+--- include/mpeg2.h	2006-06-16 20:12:26.000000000 +0200
++++ libmpeg2/mpeg2.h	2006-06-16 20:12:50.000000000 +0200
+@@ -164,6 +168,7 @@
+ #define MPEG2_ACCEL_SPARC_VIS 1
+ #define MPEG2_ACCEL_SPARC_VIS2 2
+ #define MPEG2_ACCEL_ARM 1
++#define MPEG2_ACCEL_ARM_IWMMXT 2
+ #define MPEG2_ACCEL_DETECT 0x80000000
+ 
+ uint32_t mpeg2_accel (uint32_t accel);
+--- libmpeg2/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
++++ libmpeg2/mpeg2_internal.h	2006-06-16 20:12:50.000000000 +0200
+@@ -152,6 +156,11 @@
+ 
+     /* XXX: stuff due to xine shit */
+     int8_t q_scale_type;
++
++    int quantizer_scales[32];
++    int quantizer_scale;
++    char* quant_store;
++    int quant_stride;
+ };
+ 
+ typedef struct {
+@@ -223,6 +232,9 @@
+     //int8_t q_scale_type, scaled[4];
+     uint8_t quantizer_matrix[4][64];
+     uint8_t new_quantizer_matrix[4][64];
++
++    unsigned char *pending_buffer;
++    int pending_length;
+ };
+ 
+ typedef struct {
+@@ -313,5 +325,6 @@
+ extern mpeg2_mc_t mpeg2_mc_alpha;
+ extern mpeg2_mc_t mpeg2_mc_vis;
+ extern mpeg2_mc_t mpeg2_mc_arm;
++extern mpeg2_mc_t mpeg2_mc_iwmmxt;
+ 
+ #endif /* LIBMPEG2_MPEG2_INTERNAL_H */
+--- libmpeg2/slice.c	2006-06-16 20:12:26.000000000 +0200
++++ libmpeg2/slice.c	2006-06-16 20:12:50.000000000 +0200
+@@ -142,6 +146,7 @@
+ 
+     quantizer_scale_code = UBITS (bit_buf, 5);
+     DUMPBITS (bit_buf, bits, 5);
++    decoder->quantizer_scale = decoder->quantizer_scales[quantizer_scale_code];
+ 
+     decoder->quantizer_matrix[0] =
+ 	decoder->quantizer_prescale[0][quantizer_scale_code];
+@@ -1564,6 +1569,24 @@
+ 
+ #define NEXT_MACROBLOCK							\
+ do {									\
++    if(decoder->quant_store) {						\
++	if (decoder->picture_structure == TOP_FIELD)			\
++	    decoder->quant_store[2 * decoder->quant_stride		\
++				 * (decoder->v_offset >> 4)		\
++				 + (decoder->offset >> 4)]		\
++		= decoder->quantizer_scale;				\
++	else if (decoder->picture_structure == BOTTOM_FIELD)		\
++	    decoder->quant_store[2 * decoder->quant_stride		\
++				 * (decoder->v_offset >> 4)		\
++				 + decoder->quant_stride		\
++				 + (decoder->offset >> 4)]		\
++		= decoder->quantizer_scale;				\
++	else								\
++	    decoder->quant_store[decoder->quant_stride			\
++				 * (decoder->v_offset >> 4)		\
++				 + (decoder->offset >> 4)]		\
++		= decoder->quantizer_scale;				\
++    }									\
+     decoder->offset += 16;						\
+     if (decoder->offset == decoder->width) {				\
+ 	do { /* just so we can use the break statement */		\
+Index: libmpeg2/motion_comp_iwmmxt.c
+===================================================================
+--- libmpeg2/motion_comp_iwmmxt.c	(revision 0)
++++ libmpeg2/motion_comp_iwmmxt.c	(revision 0)
+@@ -0,0 +1,59 @@
++/*
++ * motion_comp_iwmmxt.c
++ * Copyright (C) 2004 AGAWA Koji <i (AT) atty (DOT) jp>
++ *
++ * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
++ * See http://libmpeg2.sourceforge.net/ for updates.
++ *
++ * mpeg2dec is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * mpeg2dec is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#include "config.h"
++
++#if defined(ARCH_ARM) && defined(HAVE_IWMMXT)
++
++#include <inttypes.h>
++
++#include "mpeg2.h"
++#include "attributes.h"
++#include "mpeg2_internal.h"
++
++/* defined in libavcodec */
++
++extern void put_pixels16_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels16_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels16_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels16_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels8_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels8_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels8_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void put_pixels8_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels16_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels16_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels16_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels16_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels8_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels8_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels8_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++extern void avg_pixels8_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
++
++mpeg2_mc_t mpeg2_mc_iwmmxt = {
++    {put_pixels16_iwmmxt, put_pixels16_x2_iwmmxt, put_pixels16_y2_iwmmxt, put_pixels16_xy2_iwmmxt,
++     put_pixels8_iwmmxt, put_pixels8_x2_iwmmxt,  put_pixels8_y2_iwmmxt,  put_pixels8_xy2_iwmmxt}, \
++    {avg_pixels16_iwmmxt, avg_pixels16_x2_iwmmxt, avg_pixels16_y2_iwmmxt, avg_pixels16_xy2_iwmmxt,
++     avg_pixels8_iwmmxt, avg_pixels8_x2_iwmmxt,  avg_pixels8_y2_iwmmxt,  avg_pixels8_xy2_iwmmxt}, \
++};
++
++#endif /* defined(ARCH_ARM) && defined(HAVE_IWMMXT) */

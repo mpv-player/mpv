@@ -17,7 +17,11 @@
 
 #include "ad_internal.h"
 
+#ifdef CONFIG_LIBA52_INTERNAL
 #include "liba52/a52.h"
+#else
+#include <a52dec/a52.h>
+#endif
 
 
 static int isdts = -1;
@@ -97,8 +101,10 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
   sh_audio->a_in_buffer_len = length;
     
   // TODO: is DTS also checksummed?
+#ifdef CONFIG_LIBA52_INTERNAL
   if(isdts == 0 && crc16_block(sh_audio->a_in_buffer + 2, length - 2) != 0)
     mp_msg(MSGT_DECAUDIO, MSGL_STATUS, "a52: CRC check failed!  \n");
+#endif
     
   return length;
 }

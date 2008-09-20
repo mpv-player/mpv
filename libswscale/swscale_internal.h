@@ -126,6 +126,12 @@ typedef struct SwsContext{
     int srcColorspaceTable[4];
     int dstColorspaceTable[4];
     int srcRange, dstRange;
+    int yuv2rgb_y_offset;
+    int yuv2rgb_y_coeff;
+    int yuv2rgb_v2r_coeff;
+    int yuv2rgb_v2g_coeff;
+    int yuv2rgb_u2g_coeff;
+    int yuv2rgb_u2b_coeff;
 
 #define RED_DITHER            "0*8"
 #define GREEN_DITHER          "1*8"
@@ -248,6 +254,7 @@ const char *sws_format_name(int format);
         || (x)==PIX_FMT_RGB4        \
         || (x)==PIX_FMT_RGB4_BYTE   \
         || (x)==PIX_FMT_MONOBLACK   \
+        || (x)==PIX_FMT_MONOWHITE   \
     )
 #define isBGR(x)        (           \
            (x)==PIX_FMT_BGR32       \
@@ -259,6 +266,7 @@ const char *sws_format_name(int format);
         || (x)==PIX_FMT_BGR4        \
         || (x)==PIX_FMT_BGR4_BYTE   \
         || (x)==PIX_FMT_MONOBLACK   \
+        || (x)==PIX_FMT_MONOWHITE   \
     )
 
 static inline int fmt_depth(int fmt)
@@ -289,6 +297,7 @@ static inline int fmt_depth(int fmt)
         case PIX_FMT_RGB4_BYTE:
             return 4;
         case PIX_FMT_MONOBLACK:
+        case PIX_FMT_MONOWHITE:
             return 1;
         default:
             return 0;

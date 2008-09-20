@@ -54,7 +54,6 @@ struct vo_x11_state {
     Atom XA_WIN_PROTOCOLS;
     Atom XA_WIN_LAYER;
     Atom XA_WIN_HINTS;
-    Atom XA_BLACKBOX_PID;
     Atom XAWM_PROTOCOLS;
     Atom XAWM_DELETE_WINDOW;
 };

@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307	 USA
  */
 
-#ifndef ALPHA_ASM_H
-#define ALPHA_ASM_H
+#ifndef LIBMPEG2_ALPHA_ASM_H
+#define LIBMPEG2_ALPHA_ASM_H
 
 #include <inttypes.h>
 
@@ -178,4 +178,4 @@ struct unaligned_long { uint64_t l; } __attribute__((packed));
 #error "Unknown compiler!"
 #endif
 
-#endif /* ALPHA_ASM_H */
+#endif /* LIBMPEG2_ALPHA_ASM_H */

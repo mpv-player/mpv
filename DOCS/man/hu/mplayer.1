@@ -1,4 +1,4 @@
-.\" Synced with r27407
+.\" Synced with r27607
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 08. 06." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 09. 14." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -906,7 +906,7 @@ hogy ne okozzon biztonsági problémát (pl.\& gyõzõdj meg róla, hogy teljes elérés
 utakat használsz, ha a "." benne van az elérési utadban, mint Windows alatt).
 .sp 1
 Ezt "ki lehet használni" az olyan képernyõvédõ letiltásához, amely nem
-támogatja ehhez a megfelelõ X API-kat.
+támogatja ehhez a megfelelõ X API-kat (lásd még \-stop\-xscreensaver).
 Ha úgy gondolod, hogy ez túl komplikált, kérd meg a képernyõvédõ
 szerzõjét, hogy támogassa a szükséges X API-kat.
 .sp 1
@@ -3230,6 +3230,8 @@ ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TV-out.
 .TP
 .B \-stop\-xscreensaver (csak X11)
 Kikapcsolja az xscreensaver-t a lejátszás indításakor, kilépéskor újraindítja.
+Ha a képernyõ védõd sem az XSS, sem az XResetScreenSaver API-t nem támogatja,
+használd inkább a \-heartbeat\-cmd kapcsolót.
 .
 .TP
 .B "\-vm \ \ \ "
@@ -3474,8 +3476,9 @@ Nagyon gyors kimeneti videó vezérlõ az olyan kártyákon, amik támogatják.
 .RSs
 .IPs <aleszköz>
 Explicit kiválasztja a használni kívánt VIDIX aleszközt.
-A használható aleszközök a cyberblade, mach64,
-mga_crtc2, mga, nvidia, pm2, pm3, radeon, rage128, sis és unichrome.
+A használható aleszközök a cyberblade, ivtv, mach64,
+mga_crtc2, mga, nvidia, pm2, pm3, radeon, rage128, s3, sh_veu,
+sis_vid és unichrome.
 .RE
 .PD 1
 .
@@ -7410,11 +7413,11 @@ A codec specifikus kódolási paramétereket a következõ szintaxissal adhatod meg:
 .B \-<codec>opts <opció1[=érték1]:opció2[=érték2]:...>
 .
 .PP
-Ahol a <codec> lehet: lavc, xvidenc, lame, toolame, twolame,
+Ahol a <codec> lehet: lavc, xvidenc, mp3lame, toolame, twolame,
 nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .
-s.SS lame (\-lameopts)
+s.SS mp3lame (\-lameopts)
 .
 .TP
 .B "help\ \ \ "
@@ -7646,6 +7649,21 @@ Nézd meg a forrást a részletekért.
 .IPs vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
 .RE
 .PD 1
+.
+.TP
+.B o=<kulcs>=<érték>[,<kulcs>=<érték>[,...]]
+AVOption átadása a libavcodec-nek
+Emlékezz rá, hogy az o= kapcsolót feleslegessé tevõ, az összes ismeretlen
+opciót a AVOption rendszernek átadó javítást szívesen fogadunk.
+.sp 1
+.RS
+.I PÉLDA:
+.RE
+.RSs
+.PD 0
+.IPs o=bt=100k
+.PD 1
+.RE
 .
 .TP
 .B acodec=<érték>

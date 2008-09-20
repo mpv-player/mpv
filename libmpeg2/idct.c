@@ -20,7 +20,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Modified for use with MPlayer, see libmpeg-0.4.1.diff for the exact changes.
+ * Modified for use with MPlayer, see libmpeg2_changes.diff for the exact changes.
  * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
  * $Id$
  */
@@ -283,8 +283,6 @@ void mpeg2_idct_init (uint32_t accel)
     } else
 #endif
     {
-	extern uint8_t mpeg2_scan_norm[64];
-	extern uint8_t mpeg2_scan_alt[64];
 	int i, j;
 
 	mpeg2_idct_copy = mpeg2_idct_copy_c;

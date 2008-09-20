@@ -23,6 +23,8 @@ Documentation:
 
  * document channels.conf syntax
 
+ * ability for multiple languages/locales in one binary
+
 Small improvements:
 
  * vo_mga should completely blank the screen like fbdev and tdfxfb
@@ -87,7 +89,7 @@ Filters:
 
  * xinerama video filter that splits movie to 2 screens (like zr)
 
- * mixing of multiple videos (picture in picture, ...)
+ * mixing of multiple videos (picture in picture, review shmem patch)
 
  * video watermark/logo filter (apply vf_overlay patch?)
 

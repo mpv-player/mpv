@@ -272,8 +272,6 @@ void mpeg2_idct_add_altivec (const int last, int16_t * const _block,
 
 void mpeg2_idct_altivec_init (void)
 {
-    extern uint8_t mpeg2_scan_norm[64];
-    extern uint8_t mpeg2_scan_alt[64];
     int i, j;
 
     /* the altivec idct uses a transposed input, so we patch scan tables */

@@ -382,25 +382,15 @@ static void check_os_katmai_support( void )
 
    mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
    ret = sysctl(mib, 2, &has_sse, &varlen, NULL, 0);
-   if (ret < 0 || !has_sse) {
-      gCpuCaps.hasSSE=0;
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
-   } else {
-      gCpuCaps.hasSSE=1;
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "yes!\n" );
-   }
+   gCpuCaps.hasSSE = ret >= 0 && has_sse;
+   mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
 
    mib[1] = CPU_SSE2;
    varlen = sizeof(has_sse2);
    mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE2... " );
    ret = sysctl(mib, 2, &has_sse2, &varlen, NULL, 0);
-   if (ret < 0 || !has_sse2) {
-      gCpuCaps.hasSSE2=0;
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
-   } else {
-      gCpuCaps.hasSSE2=1;
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "yes!\n" );
-   }
+   gCpuCaps.hasSSE2 = ret >= 0 && has_sse2;
+   mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE2 ? "yes.\n" : "no!\n" );
 #else
    gCpuCaps.hasSSE = 0;
    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "No OS support for SSE, disabling to be safe.\n" );
@@ -412,8 +402,7 @@ static void check_os_katmai_support( void )
       exc_fil = SetUnhandledExceptionFilter(win32_sig_handler_sse);
       __asm __volatile ("xorps %xmm0, %xmm0");
       SetUnhandledExceptionFilter(exc_fil);
-      if ( gCpuCaps.hasSSE ) mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
-      else mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
+      mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
 #elif defined(__OS2__)
    EXCEPTIONREGISTRATIONRECORD RegRec = { 0, &os2_sig_handler_sse };
@@ -422,8 +411,7 @@ static void check_os_katmai_support( void )
       DosSetExceptionHandler( &RegRec );
       __asm __volatile ("xorps %xmm0, %xmm0");
       DosUnsetExceptionHandler( &RegRec );
-      if ( gCpuCaps.hasSSE ) mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
-      else mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
+      mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
 #elif defined(__linux__)
 #if defined(_POSIX_SOURCE)
@@ -447,11 +435,7 @@ static void check_os_katmai_support( void )
 //      __asm __volatile ("xorps %%xmm0, %%xmm0");
       __asm __volatile ("xorps %xmm0, %xmm0");
 
-      if ( gCpuCaps.hasSSE ) {
-	 mp_msg(MSGT_CPUDETECT,MSGL_V, "yes.\n" );
-      } else {
-	 mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
-      }
+      mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
 
    /* Restore the original signal handlers.
@@ -461,11 +445,7 @@ static void check_os_katmai_support( void )
    /* If we've gotten to here and the XMM CPUID bit is still set, we're
     * safe to go ahead and hook out the SSE code throughout Mesa.
     */
-   if ( gCpuCaps.hasSSE ) {
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "Tests of OS support for SSE passed.\n" );
-   } else {
-      mp_msg(MSGT_CPUDETECT,MSGL_V, "Tests of OS support for SSE failed!\n" );
-   }
+   mp_msg(MSGT_CPUDETECT,MSGL_V, "Tests of OS support for SSE %s\n", gCpuCaps.hasSSE ? "passed." : "failed!" );
 #else
    /* We can't use POSIX signal handling to test the availability of
     * SSE, so we disable it by default.

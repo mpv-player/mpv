@@ -21,6 +21,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef LIBMPEG2_MMX_H
+#define LIBMPEG2_MMX_H
+
 /*
  * The type of an value that fits in an MMX register (note that long
  * long constant values MUST be suffixed by LL and unsigned long long
@@ -285,3 +288,5 @@ typedef	union {
 #define	pshufw_r2r(regs,regd,imm)	mmx_r2ri(pshufw, regs, regd, imm)
 
 #define	sfence() __asm__ __volatile__ ("sfence\n\t")
+
+#endif /* LIBMPEG2_MMX_H */

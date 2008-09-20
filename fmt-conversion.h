@@ -13,32 +13,32 @@ enum PixelFormat imgfmt2pixfmt(int fmt)
         case IMGFMT_BGR24:
             return PIX_FMT_BGR24;
         case IMGFMT_BGR16:
-            return PIX_FMT_BGR565;
+            return PIX_FMT_RGB565;
         case IMGFMT_BGR15:
-            return PIX_FMT_BGR555;
+            return PIX_FMT_RGB555;
         case IMGFMT_BGR8:
-            return PIX_FMT_BGR8;
+            return PIX_FMT_RGB8;
         case IMGFMT_BGR4:
-            return PIX_FMT_BGR4;
+            return PIX_FMT_RGB4;
         case IMGFMT_BGR1:
         case IMGFMT_RGB1:
             return PIX_FMT_MONOBLACK;
         case IMGFMT_RG4B:
-            return PIX_FMT_RGB4_BYTE;
-        case IMGFMT_BG4B:
             return PIX_FMT_BGR4_BYTE;
+        case IMGFMT_BG4B:
+            return PIX_FMT_RGB4_BYTE;
         case IMGFMT_RGB32:
             return PIX_FMT_BGR32;
         case IMGFMT_RGB24:
             return PIX_FMT_RGB24;
         case IMGFMT_RGB16:
-            return PIX_FMT_RGB565;
+            return PIX_FMT_BGR565;
         case IMGFMT_RGB15:
-            return PIX_FMT_RGB555;
+            return PIX_FMT_BGR555;
         case IMGFMT_RGB8:
-            return PIX_FMT_RGB8;
+            return PIX_FMT_BGR8;
         case IMGFMT_RGB4:
-            return PIX_FMT_RGB4;
+            return PIX_FMT_BGR4;
         case IMGFMT_YUY2:
             return PIX_FMT_YUYV422;
         case IMGFMT_UYVY:
