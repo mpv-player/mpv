@@ -140,14 +140,11 @@ void vo_x11_ewmh_fullscreen(int action)
         xev.xclient.type = ClientMessage;
         xev.xclient.serial = 0;
         xev.xclient.send_event = True;
-        xev.xclient.message_type = XInternAtom(mDisplay,
-                                               "_NET_WM_STATE", False);
+        xev.xclient.message_type = XA_NET_WM_STATE;
         xev.xclient.window = vo_window;
         xev.xclient.format = 32;
         xev.xclient.data.l[0] = action;
-        xev.xclient.data.l[1] = XInternAtom(mDisplay,
-                                            "_NET_WM_STATE_FULLSCREEN",
-                                            False);
+        xev.xclient.data.l[1] = XA_NET_WM_STATE_FULLSCREEN;
         xev.xclient.data.l[2] = 0;
         xev.xclient.data.l[3] = 0;
         xev.xclient.data.l[4] = 0;
