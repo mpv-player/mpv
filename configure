@@ -1362,7 +1362,7 @@ if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
 fi
 
 
-_inc_extra="$_inc_extra -I."
+_inc_extra="-I. $_inc_extra"
 _timer=timer-linux.c
 _getch=getch2.c
 if freebsd ; then
