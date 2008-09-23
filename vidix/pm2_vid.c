@@ -92,7 +92,7 @@ static int find_chip(unsigned int vendor, uint32_t chip_id)
     return -1;
 }
 
-static int pm2_probe(int verbose, int force __attribute__ ((unused)))
+static int pm2_probe(int verbose, int force)
 {
     pciinfo_t lst[MAX_PCI_DEVICES];
     unsigned i,num_pci;
