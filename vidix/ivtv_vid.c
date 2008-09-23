@@ -221,7 +221,7 @@ static void de_macro_uv(unsigned char *srcu, unsigned char *srcv,
 	}
 }
 
-int ivtv_probe(int verbose)
+int ivtv_probe(int verbose, int force)
 {
 	unsigned char fb_number = 0;
 	char *device_name = NULL;
@@ -356,7 +356,7 @@ yuv_found:
 	return 0;
 }
 
-int ivtv_init(void)
+int ivtv_init(const char *args)
 {
 	if(ivtv_verbose)
 		printf(IVTV_MSG"init\n");
