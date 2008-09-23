@@ -90,7 +90,7 @@ static vidix_capability_t ivtv_cap =
 };
 
 static void de_macro_y(unsigned char *src, unsigned char *dst,
-	unsigned int w, unsigned int h, int src_x, int src_y, int height __attribute__ ((unused)), int width)
+	unsigned int w, unsigned int h, int src_x, int src_y, int height, int width)
 {
 	unsigned int x, y, i;
 	unsigned char *dst_2;
@@ -221,7 +221,7 @@ static void de_macro_uv(unsigned char *srcu, unsigned char *srcv,
 	}
 }
 
-int ivtv_probe(int verbose,int force __attribute__ ((unused)))
+int ivtv_probe(int verbose)
 {
 	unsigned char fb_number = 0;
 	char *device_name = NULL;
@@ -356,7 +356,7 @@ yuv_found:
 	return 0;
 }
 
-int ivtv_init(const char *args __attribute__ ((unused)))
+int ivtv_init(void)
 {
 	if(ivtv_verbose)
 		printf(IVTV_MSG"init\n");
