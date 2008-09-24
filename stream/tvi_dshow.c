@@ -883,7 +883,7 @@ static HRESULT load_freq_table(int nCountry, int nInputType,
     TRCCountryList *pCountryList;
     int i, index;
 
-    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: load_freq_table called %d (%d)\n",nCountry,nInputType);
+    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: load_freq_table called %d (%s)\n",nCountry,nInputType == TunerInputAntenna ? "broadcast" : "cable");
     /* ASSERT(sizeof(TRCCountryList)==10); // need properly aligned structure */
 
     if (!pplFreqTable || !pnFirst || !pnLen)
@@ -926,6 +926,7 @@ static HRESULT load_freq_table(int nCountry, int nInputType,
     }
     for (i = 0; i < *pnLen; i++) {
 	(*pplFreqTable)[i] = plFreqTable[i + 2];
+	mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: load_freq_table #%d => (%ld)\n",i+*pnFirst,(*pplFreqTable)[i]);
     }
     FreeLibrary(hDLL);
     return S_OK;
