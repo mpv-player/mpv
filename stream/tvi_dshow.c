@@ -3478,7 +3478,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 		return TVI_CONTROL_FALSE;
 
 	    ret = get_frequency(priv, &lFreq);
-	    lFreq = lFreq * 16 / 1000000;	//convert from Hz to 1/16 MHz units
+	    lFreq = lFreq / (1000000/16);	//convert from Hz to 1/16 MHz units
 
 	    *(unsigned long *) arg = lFreq;
 	    return ret;
@@ -3489,7 +3489,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (!priv->pTVTuner)
 		return TVI_CONTROL_FALSE;
 	    //convert to Hz
-	    nFreq = 1000000 * nFreq / 16;	//convert from 1/16 MHz units to Hz
+	    nFreq = (1000000/16) * nFreq;	//convert from 1/16 MHz units to Hz
 	    return set_frequency(priv, nFreq);
 	}
     case TVI_CONTROL_VID_SET_HUE:
