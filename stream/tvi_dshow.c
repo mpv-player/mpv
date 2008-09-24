@@ -1028,7 +1028,7 @@ static HRESULT set_nearest_freq(priv_t * priv, long lFreq)
     TunerInputType tunerInput;
     long lInput;
 
-    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_nearest_freq called\n");
+    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_nearest_freq called: %ld\n", lFreq);
     if(priv->freq_table_len == -1 && !priv->freq_table) {
 
         hr = OLE_CALL_ARGS(priv->pTVTuner, get_ConnectInput, &lInput);
@@ -1058,11 +1058,13 @@ static HRESULT set_nearest_freq(priv_t * priv, long lFreq)
 	    nChannel = priv->first_channel + i;
 	    lFreqDiff = labs(lFreq - priv->freq_table[i]);
 	}
+	mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_nearest_freq #%d (%ld) => %d (%ld)\n",i+priv->first_channel,priv->freq_table[i], nChannel,lFreqDiff);
     }
     if (nChannel == -1) {
 	mp_msg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_UnableFindNearestChannel);
 	return E_FAIL;
     }
+    mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: set_nearest_freq #%d (%ld)\n",nChannel,priv->freq_table[nChannel - priv->first_channel]);
     hr = OLE_CALL_ARGS(priv->pTVTuner, put_Channel, nChannel,
 		   AMTUNER_SUBCHAN_DEFAULT, AMTUNER_SUBCHAN_DEFAULT);
     if (FAILED(hr)) {
@@ -1087,7 +1089,7 @@ static int set_frequency(priv_t * priv, long lFreq)
 {
     HRESULT hr;
 
-    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_frequency called\n");
+    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_frequency called: %ld\n", lFreq);
     if (!priv->pTVTuner)
 	return TVI_CONTROL_FALSE;
     if (priv->direct_setfreq_call) {	//using direct call to set frequency
