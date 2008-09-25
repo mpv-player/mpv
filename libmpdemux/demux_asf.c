@@ -499,7 +499,6 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 		  p++;
                   //printf("  group part: %d bytes\n",len2);
                   if(len2 > len - 1 || len2 < 0) break; // Not enough data
-                  if(len2 == 0) continue;
                   len2 = FFMIN(len2, asf->packetsize);
                   demux_asf_read_packet(demux,p,len2,streamno,seq,x,duration,-1,keyframe);
                   p+=len2;
