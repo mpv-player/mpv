@@ -2353,9 +2353,10 @@ static void pause_loop(void)
 	mpctx->audio_out->pause();	// pause audio, keep data if possible
 
     while ( (cmd = mp_input_get_cmd(20, 1, 1)) == NULL
-            || cmd->id == MP_CMD_SET_MOUSE_POS) {
+            || cmd->id == MP_CMD_SET_MOUSE_POS || cmd->pausing == 4) {
 	if (cmd) {
 	  cmd = mp_input_get_cmd(0,1,0);
+	  run_command(mpctx, cmd);
 	  mp_cmd_free(cmd);
 	  continue;
 	}
