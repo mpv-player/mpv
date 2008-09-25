@@ -3833,8 +3833,8 @@ if(auto_quality>0){
   current_module="pause";
 
   if (mpctx->osd_function == OSD_PAUSE) {
-      pause_loop();
       mpctx->was_paused = 1;
+      pause_loop();
   }
 
 // handle -sstep
