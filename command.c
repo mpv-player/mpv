@@ -447,6 +447,17 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_OK;
 }
 
+/// Number of chapters in file
+static int mp_property_chapters(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+    if (mpctx->demuxer->num_chapters == 0)
+        stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &mpctx->demuxer->num_chapters);
+    return m_property_int_ro(prop, action, arg, mpctx->demuxer->num_chapters);
+}
+
 /// Current dvd angle (RW)
 static int mp_property_angle(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
@@ -1983,6 +1994,8 @@ static const m_option_t mp_properties[] = {
      M_OPT_MIN, 0, 0, NULL },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
      M_OPT_MIN, 1, 0, NULL },
+    { "chapters", mp_property_chapters, CONF_TYPE_INT,
+     0, 0, 0, NULL },
     { "angle", mp_property_angle, CONF_TYPE_INT,
      CONF_RANGE, -2, 10, NULL },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,

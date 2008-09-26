@@ -3531,6 +3531,11 @@ if (mpctx->global_sub_size) {
   }
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2lf\n", demuxer_get_time_length(mpctx->demuxer));
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_SEEKABLE=%d\n", mpctx->stream->seek ? 1 : 0);
+  if (mpctx->demuxer) {
+      if (mpctx->demuxer->num_chapters == 0)
+          stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &mpctx->demuxer->num_chapters);
+      mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_CHAPTERS=%d\n", mpctx->demuxer->num_chapters);
+  } 
 
 if(!mpctx->sh_video) goto main; // audio-only
 
