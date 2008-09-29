@@ -1,4 +1,4 @@
-.\" synced with r27466
+.\" synced with r27607
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -947,7 +947,7 @@ donc de votre responsablité qu'elle ne pose pas de problème de sécurité
 le chemin de recherche $PATH, comme c'est le cas sous Windows).
 .sp 1
 Ceci peut être "détourné" pour désactiver un économiseur d'écran ne gérant par
-l'API de X prévu à cet effet.
+l'API de X prévu à cet effet (voir aussi \-stop\-xscreensaver).
 Si cela vous semble un peu trop compliqué, demandez à l'auteur du programme
 d'économiseur d'écran de gérer l'API de X dédiée.
 .sp 1
@@ -3396,6 +3396,8 @@ fbdev, x11 et TVout
 .B \-stop\-xscreensaver (X11 uniquement)
 Désactive xscreensaver (le reposeur d'écran) au lancement et le réactive
 à la sortie.
+Si votre reposeur d'écran ne supporte ni l'API XSS, ni XResetScreenSaver,
+alors veuillez utiliser \-heartbeat\-cmd à la place.
 .
 .TP
 .B "\-vm \ \ \ "
@@ -11119,6 +11121,8 @@ format MPEG-4 avec les drapeaux supplémentaires requis par les micrologiciels
 (firmware) des iPods d'Apple
 .IPs "dv\ \ \ "
 Sony Digital Video container
+.IPs "matroska\ \ \ "
+Matroska
 .RE
 .PD 1
 .
