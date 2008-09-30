@@ -947,6 +947,7 @@ got_video:
 			    // last fragment!
 			    if(dp_hdr->len!=vpkg_length-vpkg_offset)
 				mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,vpkg_length-vpkg_offset);
+			    if (vpkg_offset > dp->len - sizeof(dp_hdr_t) - dp_hdr->len) vpkg_offset = dp->len - sizeof(dp_hdr_t) - dp_hdr->len;
             		    stream_read(demuxer->stream, dp_data+dp_hdr->len, vpkg_offset);
 			    if((dp_data[dp_hdr->len]&0x20) && (sh_video->format==0x30335652)) --dp_hdr->chunks; else
 			    dp_hdr->len+=vpkg_offset;
@@ -970,6 +971,7 @@ got_video:
 			// non-last fragment:
 			if(dp_hdr->len!=vpkg_offset)
 			    mp_msg(MSGT_DEMUX,MSGL_V,"warning! assembled.len=%d  offset=%d  frag.len=%d  total.len=%d  \n",dp->len,vpkg_offset,len,vpkg_length);
+			if (len > dp->len - sizeof(dp_hdr_t) - dp_hdr->len) len = dp->len - sizeof(dp_hdr_t) - dp_hdr->len;
             		stream_read(demuxer->stream, dp_data+dp_hdr->len, len);
 			if((dp_data[dp_hdr->len]&0x20) && (sh_video->format==0x30335652)) --dp_hdr->chunks; else
 			dp_hdr->len+=len;
@@ -992,6 +994,7 @@ got_video:
 		extra[0]=1; extra[1]=0; // offset of the first chunk
 		if(0x00==(vpkg_header&0xc0)){
 		    // first fragment:
+		    if (len > dp->len - sizeof(dp_hdr_t)) len = dp->len - sizeof(dp_hdr_t);
 		    dp_hdr->len=len;
 		    stream_read(demuxer->stream, dp_data, len);
 		    ds->asf_packet=dp;
