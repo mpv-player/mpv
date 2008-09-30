@@ -1,4 +1,4 @@
-.\" synced with r27607
+.\" synced with r27651
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -4726,8 +4726,24 @@ réduite.
 Si <l> est défini, le décodage en résolution réduite sera effectué uniquement
 si la largeur de la vidéo est plus grande ou égale à <l>.
 .RE
-.IPs "o\ \ \ \ "
-FIXME: non documenté
+.B o=<clef>=<valeur>[,<clef>=<valeur>[,...]]
+Passe des AVOptions au décodeur libavcodec.
+Notez que la création d'une rustine pour que cette option ne soit pas
+nécessaire, mais qu'à la place, toutes les options inconnues soient passées
+au système AVOption est la bienvenue.
+Une liste complète des AVOptions est disponible dans la documentation de
+FFmpeg.
+De plus, notez que certaines options peuvent entrer en conflit avec les
+options de MEncoder.
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.PD 0
+.IPs o=debug=pict
+.PD 1
+.RE
 .IPs "sb=<valeur> (MPEG-2 uniquement)"
 Saute <valeur> lignes de macro-blocs au bas de l'image.
 .IPs "st=<valeur> (MPEG-2 uniquement)"
@@ -8049,11 +8065,15 @@ Pour avoir tous les détails lisez le source.
 .PD 1
 .
 .TP
-.B o=<key>=<value>[,<key>=<value>[,...]]
-Passe les à libavcodec les AVOptions.
+.B o=<clef>=<valeur>[,<clef>=<valeur>[,...]]
+Passe les AVOptions à l'encodeur libavcodec.
 Notez que la création d'une rustine pour que cette option ne soit pas
 nécessaire, mais qu'à la place, toutes les options inconnues soient passées
 au système AVOption est la bienvenue.
+Une liste complète des AVOptions est disponible dans la documentation de
+FFmpeg.
+De plus, notez que certaines options peuvent entrer en conflit avec les
+options de MEncoder.
 .sp 1
 .RS
 .I EXEMPLE\ :
@@ -9563,10 +9583,6 @@ FIXME: Document this.
 .B skip_threshold=<0\-1000000>
 FIXME: Document this.
 .
-.TP
-.B "o\ \ \ \ \ \ "
-FIXME: non documenté
-.
 .
 .SS nuv (\-nuvopts)
 .
@@ -11070,8 +11086,24 @@ Durée maximale (en secondes) pour analyser les propriétés du flux.
 Force l'utilisation d'un dé-multiplexeur libavformat spécifique.
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: non documenté
+.B o=<clef>=<valeur>[,<clef>=<valeur>[,...]]
+Passe les AVOptions au démultiplexeur libavformat.
+Notez que la création d'une rustine pour que cette option ne soit pas
+nécessaire, mais qu'à la place, toutes les options inconnues soient passées
+au système AVOption est la bienvenue.
+Une liste complète des AVOptions est disponible dans la documentation de
+FFmpeg.
+De plus, notez que certaines options peuvent entrer en conflit avec les
+options de MPlayer/MEncoder.
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.PD 0
+.IPs o=ignidx
+.PD 1
+.RE
 .
 .TP
 .B probesize=<valeur>
@@ -11134,8 +11166,24 @@ Il arrive qu'il faille augmenter ce paramètre pour éviter des débordements
 de tampons "buffer underflows".
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: non documenté
+.B o=<clef>=<valeur>[,<clef>=<valeur>[,...]]
+Passe les AVOptions au multiplexeur libavformat.
+Notez que la création d'une rustine pour que cette option ne soit pas
+nécessaire, mais qu'à la place, toutes les options inconnues soient passées
+au système AVOption est la bienvenue.
+Une liste complète des AVOptions est disponible dans la documentation de
+FFmpeg.
+De plus, notez que certaines options peuvent entrer en conflit avec les
+options de MEncoder.
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.PD 0
+.IPs o=packetsize=100
+.PD 1
+.RE
 .
 .TP
 .B packetsize=<taille>
