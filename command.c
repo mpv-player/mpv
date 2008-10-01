@@ -2637,7 +2637,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 		play_tree_add_file(e, cmd->args[0].v.s);
 
 		if (cmd->args[1].v.i)	// append
-		    play_tree_append_entry(mpctx->playtree, e);
+		    play_tree_append_entry(mpctx->playtree->child, e);
 		else {
 		    // Go back to the starting point.
 		    while (play_tree_iter_up_step
@@ -2659,7 +2659,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			   MSGTR_PlaylistLoadUnable, cmd->args[0].v.s);
 		else {
 		    if (cmd->args[1].v.i)	// append
-			play_tree_append_entry(mpctx->playtree, e);
+			play_tree_append_entry(mpctx->playtree->child, e);
 		    else {
 			// Go back to the starting point.
 			while (play_tree_iter_up_step
