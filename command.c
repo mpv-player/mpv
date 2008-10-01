@@ -2645,7 +2645,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			/* NOP */ ;
 		    play_tree_free_list(mpctx->playtree->child, 1);
 		    play_tree_set_child(mpctx->playtree, e);
-		    play_tree_iter_step(mpctx->playtree_iter, 0, 0);
+		    pt_iter_goto_head(mpctx->playtree_iter);
 		    mpctx->eof = PT_NEXT_SRC;
 		}
 		brk_cmd = 1;
@@ -2668,7 +2668,7 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 			    /* NOP */ ;
 			play_tree_free_list(mpctx->playtree->child, 1);
 			play_tree_set_child(mpctx->playtree, e);
-			play_tree_iter_step(mpctx->playtree_iter, 0, 0);
+			pt_iter_goto_head(mpctx->playtree_iter);
 			mpctx->eof = PT_NEXT_SRC;
 		    }
 		}
