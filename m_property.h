@@ -169,6 +169,9 @@ int m_property_int_range(const m_option_t* prop,int action,
 int m_property_choice(const m_option_t* prop,int action,
                       void* arg,int* var);
 
+int m_property_flag_ro(const m_option_t* prop,int action,
+                    void* arg,int var);
+
 /// Switch betwen min and max.
 int m_property_flag(const m_option_t* prop,int action,
                     void* arg,int* var);

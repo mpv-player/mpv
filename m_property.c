@@ -245,6 +245,17 @@ int m_property_choice(const m_option_t* prop,int action,
     return m_property_int_range(prop,action,arg,var);
 }
 
+int m_property_flag_ro(const m_option_t* prop,int action,
+                       void* arg,int var) {
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+        *(char**)arg = strdup((var > prop->min) ? MSGTR_Enabled : MSGTR_Disabled);
+        return 1;
+    }
+    return m_property_int_ro(prop,action,arg,var);
+}
+
 int m_property_flag(const m_option_t* prop,int action,
                     void* arg,int* var) {
     switch(action) {
@@ -253,9 +264,7 @@ int m_property_flag(const m_option_t* prop,int action,
         *var = *var == prop->min ? prop->max : prop->min;
         return 1;
     case M_PROPERTY_PRINT:
-        if(!arg) return 0;
-        *(char**)arg = strdup((*var > prop->min) ? MSGTR_Enabled : MSGTR_Disabled);
-        return 1;
+        return m_property_flag_ro(prop, action, arg, *var);
     }
     return m_property_int_range(prop,action,arg,var);
 }
