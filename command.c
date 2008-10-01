@@ -554,6 +554,12 @@ static int mp_property_metadata(m_option_t * prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_pause(m_option_t * prop, int action, void *arg,
+                             MPContext * mpctx)
+{
+    return m_property_flag_ro(prop, action, arg, mpctx->osd_function == OSD_PAUSE);
+}
+
 
 ///@}
 
@@ -2000,6 +2006,8 @@ static const m_option_t mp_properties[] = {
      CONF_RANGE, -2, 10, NULL },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
      0, 0, 0, NULL },
+    { "pause", mp_property_pause, CONF_TYPE_FLAG,
+     M_OPT_RANGE, 0, 1, NULL },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
