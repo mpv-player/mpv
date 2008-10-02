@@ -152,7 +152,7 @@
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
  	mpeg2_mc = mpeg2_mc_altivec;
      else
-@@ -52,15 +62,20 @@
+@@ -52,15 +62,15 @@
  	mpeg2_mc = mpeg2_mc_alpha;
      else
  #endif
@@ -164,11 +164,6 @@
  #endif
  #ifdef ARCH_ARM
 -    if (accel & MPEG2_ACCEL_ARM) {
-+#ifdef HAVE_IWMMXT
-+    if (accel & MPEG2_ACCEL_ARM_IWMMXT)
-+	mpeg2_mc = mpeg2_mc_iwmmxt;
-+    else
-+#endif
 +    if (accel & MPEG2_ACCEL_ARM)
  	mpeg2_mc = mpeg2_mc_arm;
 -    } else
@@ -176,16 +171,6 @@
  #endif
  	mpeg2_mc = mpeg2_mc_c;
  }
---- include/mpeg2.h	2006-06-16 20:12:26.000000000 +0200
-+++ libmpeg2/mpeg2.h	2006-06-16 20:12:50.000000000 +0200
-@@ -164,6 +168,7 @@
- #define MPEG2_ACCEL_SPARC_VIS 1
- #define MPEG2_ACCEL_SPARC_VIS2 2
- #define MPEG2_ACCEL_ARM 1
-+#define MPEG2_ACCEL_ARM_IWMMXT 2
- #define MPEG2_ACCEL_DETECT 0x80000000
- 
- uint32_t mpeg2_accel (uint32_t accel);
 --- libmpeg2/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2_internal.h	2006-06-16 20:12:50.000000000 +0200
 @@ -152,6 +156,11 @@
@@ -210,13 +195,6 @@
  };
  
  typedef struct {
-@@ -313,5 +325,6 @@
- extern mpeg2_mc_t mpeg2_mc_alpha;
- extern mpeg2_mc_t mpeg2_mc_vis;
- extern mpeg2_mc_t mpeg2_mc_arm;
-+extern mpeg2_mc_t mpeg2_mc_iwmmxt;
- 
- #endif /* LIBMPEG2_MPEG2_INTERNAL_H */
 --- libmpeg2/slice.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/slice.c	2006-06-16 20:12:50.000000000 +0200
 @@ -142,6 +146,7 @@
@@ -252,67 +230,3 @@
      decoder->offset += 16;						\
      if (decoder->offset == decoder->width) {				\
  	do { /* just so we can use the break statement */		\
-Index: libmpeg2/motion_comp_iwmmxt.c
-===================================================================
---- libmpeg2/motion_comp_iwmmxt.c	(revision 0)
-+++ libmpeg2/motion_comp_iwmmxt.c	(revision 0)
-@@ -0,0 +1,59 @@
-+/*
-+ * motion_comp_iwmmxt.c
-+ * Copyright (C) 2004 AGAWA Koji <i (AT) atty (DOT) jp>
-+ *
-+ * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
-+ * See http://libmpeg2.sourceforge.net/ for updates.
-+ *
-+ * mpeg2dec is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ *
-+ * mpeg2dec is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write to the Free Software
-+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-+ */
-+
-+#include "config.h"
-+
-+#if defined(ARCH_ARM) && defined(HAVE_IWMMXT)
-+
-+#include <inttypes.h>
-+
-+#include "mpeg2.h"
-+#include "attributes.h"
-+#include "mpeg2_internal.h"
-+
-+/* defined in libavcodec */
-+
-+extern void put_pixels16_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void put_pixels16_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void put_pixels16_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void put_pixels16_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void put_pixels8_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void put_pixels8_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void put_pixels8_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void put_pixels8_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void avg_pixels16_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void avg_pixels16_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void avg_pixels16_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void avg_pixels16_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void avg_pixels8_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void avg_pixels8_x2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void avg_pixels8_y2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+extern void avg_pixels8_xy2_iwmmxt(uint8_t * dest, const uint8_t * ref, const int stride, int height);
-+
-+mpeg2_mc_t mpeg2_mc_iwmmxt = {
-+    {put_pixels16_iwmmxt, put_pixels16_x2_iwmmxt, put_pixels16_y2_iwmmxt, put_pixels16_xy2_iwmmxt,
-+     put_pixels8_iwmmxt, put_pixels8_x2_iwmmxt,  put_pixels8_y2_iwmmxt,  put_pixels8_xy2_iwmmxt}, \
-+    {avg_pixels16_iwmmxt, avg_pixels16_x2_iwmmxt, avg_pixels16_y2_iwmmxt, avg_pixels16_xy2_iwmmxt,
-+     avg_pixels8_iwmmxt, avg_pixels8_x2_iwmmxt,  avg_pixels8_y2_iwmmxt,  avg_pixels8_xy2_iwmmxt}, \
-+};
-+
-+#endif /* defined(ARCH_ARM) && defined(HAVE_IWMMXT) */

@@ -177,11 +177,9 @@ See the <link linkend="subosd">Subtitles and OSD</link> section for details.
 <title>What about the GUI?</title>
 
 <para>
-The GUI needs GTK 1.2.x or GTK 2.0 (it isn't fully GTK, but the panels are).
-The skins are stored in PNG format, so GTK,
-<systemitem class="library">libpng</systemitem> (and their devel stuff, usually
-called <systemitem class="library">gtk-dev</systemitem>
-and <systemitem class="library">libpng-dev</systemitem>) has to be installed.
+The GUI needs GTK 1.2.x or GTK 2.0 (it isn't fully GTK, but the panels are),
+so <systemitem class="library">GTK</systemitem> (and the devel stuff, usually
+called <systemitem class="library">gtk-dev</systemitem>) has to be installed.
 You can build it by specifying <option>--enable-gui</option> during
 <filename>./configure</filename>. Then, to turn on GUI mode, you have to
 execute the <command>gmplayer</command> binary.
@@ -189,16 +187,16 @@ execute the <command>gmplayer</command> binary.
 
 <para>
 As <application>MPlayer</application> doesn't have a skin included, you
-have to download them if you want to use the GUI. See the <ulink
+have to download one if you want to use the GUI. See the <ulink
 url="http://www.mplayerhq.hu/dload.html">download page</ulink>.
-They should be extracted to the usual system-wide directory (<filename
+It should be extracted to the usual system-wide directory (<filename
 class="directory">$PREFIX/share/mplayer/skins</filename>), or to <filename
 class="directory">$HOME/.mplayer/skins</filename>.
 <application>MPlayer</application> by default looks in these directories
 for a directory named <filename class="directory">default</filename>, but
 you can use the <option>-skin <replaceable>newskin</replaceable></option>
 option, or the <literal>skin=newskin</literal> config file directive to use
-the skin in <filename class="directory">*/skins/newskin</filename>
+the skin in the <filename class="directory">*/skins/newskin</filename>
 directory.
 </para>
 </sect1>

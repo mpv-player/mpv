@@ -2349,9 +2349,10 @@ static void pause_loop(struct MPContext *mpctx)
 	mpctx->audio_out->pause();	// pause audio, keep data if possible
 
     while ( (cmd = mp_input_get_cmd(mpctx->input, 20, 1, 1)) == NULL
-            || cmd->id == MP_CMD_SET_MOUSE_POS) {
+            || cmd->id == MP_CMD_SET_MOUSE_POS || cmd->pausing == 4) {
 	if (cmd) {
 	  cmd = mp_input_get_cmd(mpctx->input, 0,1,0);
+	  run_command(mpctx, cmd);
 	  mp_cmd_free(cmd);
 	  continue;
 	}
@@ -3559,6 +3560,11 @@ if (mpctx->global_sub_size) {
   }
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2lf\n", demuxer_get_time_length(mpctx->demuxer));
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_SEEKABLE=%d\n", mpctx->stream->seek ? 1 : 0);
+  if (mpctx->demuxer) {
+      if (mpctx->demuxer->num_chapters == 0)
+          stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &mpctx->demuxer->num_chapters);
+      mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_CHAPTERS=%d\n", mpctx->demuxer->num_chapters);
+  } 
 
 if(!mpctx->sh_video) goto main; // audio-only
 
@@ -3864,8 +3870,8 @@ if(auto_quality>0){
   current_module="pause";
 
   if (mpctx->osd_function == OSD_PAUSE) {
-      pause_loop(mpctx);
       mpctx->was_paused = 1;
+      pause_loop(mpctx);
   }
 
 // handle -sstep

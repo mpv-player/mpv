@@ -883,7 +883,7 @@ static HRESULT load_freq_table(int nCountry, int nInputType,
     TRCCountryList *pCountryList;
     int i, index;
 
-    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: load_freq_table called %d (%d)\n",nCountry,nInputType);
+    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: load_freq_table called %d (%s)\n",nCountry,nInputType == TunerInputAntenna ? "broadcast" : "cable");
     /* ASSERT(sizeof(TRCCountryList)==10); // need properly aligned structure */
 
     if (!pplFreqTable || !pnFirst || !pnLen)
@@ -926,6 +926,7 @@ static HRESULT load_freq_table(int nCountry, int nInputType,
     }
     for (i = 0; i < *pnLen; i++) {
 	(*pplFreqTable)[i] = plFreqTable[i + 2];
+	mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: load_freq_table #%d => (%ld)\n",i+*pnFirst,(*pplFreqTable)[i]);
     }
     FreeLibrary(hDLL);
     return S_OK;
@@ -1028,7 +1029,7 @@ static HRESULT set_nearest_freq(priv_t * priv, long lFreq)
     TunerInputType tunerInput;
     long lInput;
 
-    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_nearest_freq called\n");
+    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_nearest_freq called: %ld\n", lFreq);
     if(priv->freq_table_len == -1 && !priv->freq_table) {
 
         hr = OLE_CALL_ARGS(priv->pTVTuner, get_ConnectInput, &lInput);
@@ -1058,11 +1059,13 @@ static HRESULT set_nearest_freq(priv_t * priv, long lFreq)
 	    nChannel = priv->first_channel + i;
 	    lFreqDiff = labs(lFreq - priv->freq_table[i]);
 	}
+	mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_nearest_freq #%d (%ld) => %d (%ld)\n",i+priv->first_channel,priv->freq_table[i], nChannel,lFreqDiff);
     }
     if (nChannel == -1) {
 	mp_msg(MSGT_TV,MSGL_ERR, MSGTR_TVI_DS_UnableFindNearestChannel);
 	return E_FAIL;
     }
+    mp_msg(MSGT_TV, MSGL_V, "tvi_dshow: set_nearest_freq #%d (%ld)\n",nChannel,priv->freq_table[nChannel - priv->first_channel]);
     hr = OLE_CALL_ARGS(priv->pTVTuner, put_Channel, nChannel,
 		   AMTUNER_SUBCHAN_DEFAULT, AMTUNER_SUBCHAN_DEFAULT);
     if (FAILED(hr)) {
@@ -1087,7 +1090,7 @@ static int set_frequency(priv_t * priv, long lFreq)
 {
     HRESULT hr;
 
-    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_frequency called\n");
+    mp_msg(MSGT_TV, MSGL_DBG4, "tvi_dshow: set_frequency called: %ld\n", lFreq);
     if (!priv->pTVTuner)
 	return TVI_CONTROL_FALSE;
     if (priv->direct_setfreq_call) {	//using direct call to set frequency
@@ -3478,7 +3481,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 		return TVI_CONTROL_FALSE;
 
 	    ret = get_frequency(priv, &lFreq);
-	    lFreq = lFreq * 16 / 1000000;	//convert from Hz to 1/16 MHz units
+	    lFreq = lFreq / (1000000/16);	//convert from Hz to 1/16 MHz units
 
 	    *(unsigned long *) arg = lFreq;
 	    return ret;
@@ -3489,7 +3492,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (!priv->pTVTuner)
 		return TVI_CONTROL_FALSE;
 	    //convert to Hz
-	    nFreq = 1000000 * nFreq / 16;	//convert from 1/16 MHz units to Hz
+	    nFreq = (1000000/16) * nFreq;	//convert from 1/16 MHz units to Hz
 	    return set_frequency(priv, nFreq);
 	}
     case TVI_CONTROL_VID_SET_HUE:
