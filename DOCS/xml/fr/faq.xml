@@ -104,7 +104,7 @@ Comment puis-je "build" un <application>MPlayer</application> 32 bit sur un Athl
 <answer><para>
 Essayer les options de configuration suivantes:
 <screen>
-./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
+./configure --target=i386-linux --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
 </screen>
 </para></answer>
 </qandaentry>
