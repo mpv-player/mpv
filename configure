@@ -6095,9 +6095,7 @@ elif test "$_liba52_internal" = no && test "$_liba52" = auto ; then
 #include <a52dec/a52.h>
 int main(void) { a52_state_t *testHand; testHand=a52_init(0); return 0; }
 EOF
-  cc_check -la52 && _liba52=yes
-  _ld_extra="$_ld_extra -la52"
-  _res_comment="external"
+  cc_check -la52 && _liba52=yes && _res_comment="external" && _ld_extra="$_ld_extra -la52"
 fi
 if test "$_liba52" = yes ; then
   _def_liba52='#define CONFIG_LIBA52 1'
