@@ -6021,9 +6021,8 @@ if test "$_theora" = auto ; then
 #include <theora/theora.h>
 #include <string.h>
 int main(void) {
-  /* theora is in flux, make sure that all interface routines and
-   * datatypes exist and work the way we expect it, so we don't break
-   * mplayer */
++  /* Theora is in flux, make sure that all interface routines and datatypes
++   * exist and work the way we expect it, so we don't break MPlayer. */
   ogg_packet op;
   theora_comment tc;
   theora_info inf;
