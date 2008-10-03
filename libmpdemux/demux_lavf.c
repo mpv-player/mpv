@@ -94,9 +94,9 @@ static int mp_read(void *opaque, uint8_t *buf, int size) {
     return ret;
 }
 
-static offset_t mp_seek(void *opaque, offset_t pos, int whence) {
+static int64_t mp_seek(void *opaque, int64_t pos, int whence) {
     stream_t *stream = opaque;
-    offset_t current_pos;
+    int64_t current_pos;
     mp_msg(MSGT_HEADER,MSGL_DBG2,"mp_seek(%p, %d, %d)\n", stream, (int)pos, whence);
     if(whence == SEEK_CUR)
         pos +=stream_tell(stream);
