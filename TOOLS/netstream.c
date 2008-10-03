@@ -59,11 +59,6 @@ char* out_filename = NULL;
 char* force_fourcc=NULL;
 char* passtmpfile="divx2pass.log";
 
-#ifdef __MINGW32__
-#define usleep sleep
-void strsep() {};
-#endif
-
 static unsigned short int port = 10000;
 
 typedef struct client_st client_t;
