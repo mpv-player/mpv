@@ -111,7 +111,7 @@ How can I build a 32 bit <application>MPlayer</application> on a 64 bit Athlon?
 <answer><para>
 Try the following configure options:
 <screen>
-./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
+./configure --target=i386-linux --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
 </screen>
 </para></answer>
 </qandaentry>

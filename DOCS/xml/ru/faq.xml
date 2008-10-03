@@ -108,7 +108,7 @@ while reloading 'asm'</systemitem>.
 <answer><para>
 Попробуйте следующие опции configure:
 <screen>
-./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
+./configure --target=i386-linux --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
 </screen>
 </para></answer>
 </qandaentry>

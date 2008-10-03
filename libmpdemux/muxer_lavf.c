@@ -73,7 +73,7 @@ static int mp_write(void *opaque, uint8_t *buf, int size)
 	return stream_write_buffer(muxer->stream, buf, size);
 }
 
-static offset_t mp_seek(void *opaque, offset_t pos, int whence)
+static int64_t mp_seek(void *opaque, int64_t pos, int whence)
 {
 	muxer_t *muxer = opaque;
 	if(whence == SEEK_CUR)
