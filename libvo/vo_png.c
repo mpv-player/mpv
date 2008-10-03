@@ -24,6 +24,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "subopt-helper.h"
+#include "mplayer.h"
 
 #define BUFLENGTH 512
 
