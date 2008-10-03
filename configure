@@ -580,7 +580,7 @@ _speex=auto
 _theora=auto
 _mp3lib=yes
 _liba52=auto
-_liba52_internal=auto
+_liba52_internal=yes
 _libdca=auto
 _libmpeg2=auto
 _faad=auto
@@ -6084,9 +6084,8 @@ echores "$_mp3lib"
 echocheck "liba52 support"
 _def_liba52='#undef CONFIG_LIBA52'
 _def_liba52_internal="#undef CONFIG_LIBA52_INTERNAL"
-if test "$_liba52_internal" = auto ; then
+if test "$_liba52_internal" = yes ; then
   _liba52=yes
-  _liba52_internal=yes
   _def_liba52_internal="#define CONFIG_LIBA52_INTERNAL 1"
   _res_comment="internal"
 elif test "$_liba52_internal" = no && test "$_liba52" = auto ; then
