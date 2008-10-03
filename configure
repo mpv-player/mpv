@@ -3441,7 +3441,9 @@ echores "$_strsep"
 
 echocheck "vsscanf()"
 cat > $TMPC << EOF
+#define _ISOC99_SOURCE
 #include <stdarg.h>
+#include <stdio.h>
 int main(void) { vsscanf(0, 0, 0); return 0; }
 EOF
 _vsscanf=no
