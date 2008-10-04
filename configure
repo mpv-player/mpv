@@ -1972,11 +1972,14 @@ EOF
     echores "$proc"
     ;;
 
-  sparc)
+  sparc|sparc64)
     _arch='SPARC'
     _target_arch='ARCH_SPARC = yes'
     iproc='sparc'
-    if sunos ; then
+    if test "$host_arch" = "sparc64" ; then
+      _vis='yes'
+      proc='ultrasparc'
+    elif sunos ; then
 	echocheck "CPU type"
 	karch=`uname -m`
 	case "`echo $karch`" in
@@ -1992,16 +1995,6 @@ EOF
     else
 	proc=v8
     fi
-    _mcpu="-mcpu=$proc"
-    _optimizing="$proc"
-    ;;
-
-  sparc64)
-    _arch='SPARC'
-    _target_arch='ARCH_SPARC = yes'
-    _vis='yes'
-    iproc='sparc'
-    proc='ultrasparc'
     _mcpu="-mcpu=$proc"
     _optimizing="$proc"
     ;;
