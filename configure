@@ -409,8 +409,6 @@ Miscellaneous options:
   --cc=COMPILER          C compiler to build MPlayer [gcc]
   --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
-  --ar=AR                librarian to build MPlayer [ar]
-  --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
   --windres=WINDRES      windres to build MPlayer [windres]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
@@ -488,10 +486,8 @@ _iwmmxt=auto
 _mtrr=auto
 _altivec=auto
 _install=install
-_ranlib=ranlib
 _windres=windres
 _cc=cc
-_ar=ar
 test "$CC" && _cc="$CC"
 _as=auto
 _runtime_cpudetection=no
@@ -790,12 +786,6 @@ for ac_option do
     ;;
   --as=*)
     _as=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --ar=*)
-    _ar=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --ranlib=*)
-    _ranlib=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --windres=*)
     _windres=`echo $ac_option | cut -d '=' -f 2`
@@ -1383,12 +1373,6 @@ fi
 
 if aix ; then
   _ld_extra="$_ld_extra -lC"
-fi
-
-if irix ; then
-  _ranlib='ar -r'
-elif linux ; then
-  _ranlib='true'
 fi
 
 if win32 ; then
@@ -7769,11 +7753,9 @@ MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 LIBDIR = \$(DESTDIR)$_libdir
 
-AR = $_ar
 CC = $_cc
 CXX = $_cc
 HOST_CC = $_host_cc
-RANLIB = $_ranlib
 WINDRES = $_windres
 INSTALL = $_install
 INSTALLSTRIP = $_install_strip
