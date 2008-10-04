@@ -6894,7 +6894,7 @@ fi
 _res_comment="in libavcodec: $_mp3lame_lavc"
 echores "$_mp3lame"
 
-fi
+fi # test "$_mencoder" != no
 
 echocheck "mencoder"
 if test "$_mencoder" = yes ; then
