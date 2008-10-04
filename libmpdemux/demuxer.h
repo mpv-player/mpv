@@ -11,11 +11,7 @@
 struct MPOpts;
 
 #define MAX_PACKS 4096
-#ifdef CONFIG_TV_BSDBT848
-#define MAX_PACK_BYTES 0x2000000
-#else
-#define MAX_PACK_BYTES 0x800000
-#endif
+#define MAX_PACK_BYTES 0x8000000  // 128 MiB
 
 #define DEMUXER_TYPE_UNKNOWN 0
 #define DEMUXER_TYPE_MPEG_ES 1
