@@ -8010,6 +8010,26 @@ cat > $TMPH << EOF
 #ifndef MPLAYER_CONFIG_H
 #define MPLAYER_CONFIG_H
 
+/* Undefine this if you do not want to select mono audio (left or right)
+   with a stereo MPEG layer 2/3 audio stream. The command line option
+   -stereo has three possible values (0 for stereo, 1 for left-only, 2 for
+   right-only), with 0 being the default.
+   */
+#define CONFIG_FAKE_MONO 1
+
+/* set up max. outburst. use 65536 for ALSA 0.5, for others 16384 is enough */
+#define MAX_OUTBURST 65536
+
+/* set up audio OUTBURST. Do not change this! */
+#define OUTBURST 512
+
+/* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
+#undef FAST_OSD
+#undef FAST_OSD_TABLE
+
+/* Define this to enable MPEG-1/2 image postprocessing in libmpeg2 */
+#define MPEG12_POSTPROC 1
+
 #define CONFIGURATION "$_configuration"
 
 /* yes, we have inttypes.h */
@@ -8123,13 +8143,6 @@ $_def_mp3lame
 $_def_mp3lame_preset
 $_def_mp3lame_preset_medium
 
-/* Undefine this if you do not want to select mono audio (left or right)
-   with a stereo MPEG layer 2/3 audio stream. The command line option
-   -stereo has three possible values (0 for stereo, 1 for left-only, 2 for
-   right-only), with 0 being the default.
-   */
-#define CONFIG_FAKE_MONO 1
-
 /* Undefine this if your sound card driver has no working select().
    If you have kernel Oops, player hangups, or just no audio, you should
    try to recompile MPlayer with this option disabled! */
@@ -8143,12 +8156,6 @@ $_def_langinfo
 
 /* define this to use RTC (/dev/rtc) for video timers */
 $_def_rtc
-
-/* set up max. outburst. use 65536 for ALSA 0.5, for others 16384 is enough */
-#define MAX_OUTBURST 65536
-
-/* set up audio OUTBURST. Do not change this! */
-#define OUTBURST 512
 
 /* Define this if your system has the header file for the OSS sound interface */
 $_def_sys_soundcard
@@ -8245,12 +8252,6 @@ $_def_lircc
 /* DVD navigation support using libdvdnav */
 $_def_dvdnav
 
-/* Define this to enable MPEG 1/2 image postprocessing (requires a FAST CPU!) */
-#define MPEG12_POSTPROC 1
-
-/* maximum alignment used by libmpeg2 */
-#define ATTRIBUTE_ALIGNED_MAX 16
-
 /* Win32 DLL support */
 $_def_win32dll
 #define WIN32_PATH "$_win32codecsdir"
@@ -8266,83 +8267,6 @@ $_def_quicktime
 /* Win32-loader support */
 $_def_win32_loader
 
-/* FFmpeg */
-/* Define this to enable image postprocessing in libavcodec */
-$_def_libpostproc
-$_def_libpostproc_a
-$_def_libpostproc_so
-
-/* Define this if you enabled thread support for libavcodec */
-$_def_threads
-#ifdef HAVE_THREADS
-#define ENABLE_THREADS 1
-#else
-#define ENABLE_THREADS 0
-#endif
-
-/* ffmpeg's libavcodec support (requires libavcodec source) */
-$_def_libavcodec
-$_def_libavcodec_a
-$_def_libavcodec_so
-$_def_libavcodec_mpegaudio_hp
-
-/* ffmpeg's libavformat support (requires libavformat source) */
-$_def_libavformat
-$_def_libavformat_a
-$_def_libavformat_so
-
-$_def_libavutil
-$_def_libavutil_a
-$_def_libavutil_so
-
-$_def_libswscale
-$_def_libswscale_a
-$_def_libswscale_so
-
-/* Use libavcodec's decoders */
-#define CONFIG_DECODERS 1
-#define ENABLE_DECODERS 1
-/* Use libavcodec's encoders */
-#define CONFIG_ENCODERS 1
-#define ENABLE_ENCODERS 1
-
-/* Use libavformat's demuxers */
-#define CONFIG_DEMUXERS 1
-#define ENABLE_DEMUXERS 1
-/* Use libavformat's muxers */
-$_def_muxers
-
-/* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
-#define HAVE_EBX_AVAILABLE 1
-#ifndef MP_DEBUG
-#define HAVE_EBP_AVAILABLE 1
-#endif
-
-#define CONFIG_GPL 1
-#define ENABLE_SMALL 0
-#define ENABLE_GRAY 0
-
-/* Use AMR codecs from libavcodec. */
-$_def_libamr
-$_def_libamr_nb
-$_def_libamr_wb
-
-/* Use specific parts from FFmpeg. */
-`ff_config_enable "$_libavdecoders_all" "$_libavdecoders"`
-`ff_config_enable "$_libavencoders_all" "$_libavencoders"`
-`ff_config_enable "$_libavparsers_all"  "$_libavparsers"`
-`ff_config_enable "$_libavdemuxers_all" "$_libavdemuxers"`
-`ff_config_enable "$_libavmuxers_all"   "$_libavmuxers"`
-`ff_config_enable "$_libavprotocols_all" "$_libavprotocols"`
-`ff_config_enable "$_libavbsfs_all" "$_libavbsfs"`
-
-$_def_libdirac_lavc
-$_def_faac_lavc
-$_def_mp3lame_lavc
-$_def_libschroedinger_lavc
-$_def_x264_lavc
-$_def_xvid_lavc
-
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
 
@@ -8352,6 +8276,9 @@ $_def_liba52
 
 /* enable libmpeg2 support */
 $_def_libmpeg2
+
+/* maximum alignment used by libmpeg2 */
+#define ATTRIBUTE_ALIGNED_MAX 16
 
 /* XAnim DLL support */
 $_def_xanim
@@ -8400,10 +8327,6 @@ $_def_sunaudio
 $_def_sgiaudio
 $_def_win32waveout
 $_def_nas
-
-/* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
-#undef FAST_OSD
-#undef FAST_OSD_TABLE
 
 /* Enable TV Interface support */
 $_def_tv
@@ -8510,9 +8433,6 @@ $_def_lrint
 $_def_lrintf
 $_def_round
 $_def_roundf
-
-/* mkstemp support */
-$_def_mkstemp
 
 /* nanosleep support */
 $_def_nanosleep
@@ -8730,6 +8650,85 @@ $_def_xshape
 #if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
 #define X11_FULLSCREEN 1
 #endif
+
+/* FFmpeg */
+/* Define this to enable image postprocessing in libavcodec */
+$_def_libpostproc
+$_def_libpostproc_a
+$_def_libpostproc_so
+
+/* ffmpeg's libavcodec support (requires libavcodec source) */
+$_def_libavcodec
+$_def_libavcodec_a
+$_def_libavcodec_so
+$_def_libavcodec_mpegaudio_hp
+
+/* ffmpeg's libavformat support (requires libavformat source) */
+$_def_libavformat
+$_def_libavformat_a
+$_def_libavformat_so
+
+$_def_libavutil
+$_def_libavutil_a
+$_def_libavutil_so
+
+$_def_libswscale
+$_def_libswscale_a
+$_def_libswscale_so
+
+/* Define this if you enabled thread support for libavcodec */
+$_def_threads
+#ifdef HAVE_THREADS
+#define ENABLE_THREADS 1
+#else
+#define ENABLE_THREADS 0
+#endif
+
+/* Use libavcodec's decoders */
+#define CONFIG_DECODERS 1
+#define ENABLE_DECODERS 1
+/* Use libavcodec's encoders */
+#define CONFIG_ENCODERS 1
+#define ENABLE_ENCODERS 1
+
+/* Use libavformat's demuxers */
+#define CONFIG_DEMUXERS 1
+#define ENABLE_DEMUXERS 1
+/* Use libavformat's muxers */
+$_def_muxers
+
+/* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
+#define HAVE_EBX_AVAILABLE 1
+#ifndef MP_DEBUG
+#define HAVE_EBP_AVAILABLE 1
+#endif
+
+#define CONFIG_GPL 1
+#define ENABLE_SMALL 0
+#define ENABLE_GRAY 0
+
+/* External libraries used through libavcodec. */
+$_def_faac_lavc
+$_def_libamr
+$_def_libamr_nb
+$_def_libamr_wb
+$_def_libdirac_lavc
+$_def_libschroedinger_lavc
+$_def_mp3lame_lavc
+$_def_x264_lavc
+$_def_xvid_lavc
+
+/* mkstemp support */
+$_def_mkstemp
+
+/* Use specific parts from FFmpeg. */
+`ff_config_enable "$_libavdecoders_all" "$_libavdecoders"`
+`ff_config_enable "$_libavencoders_all" "$_libavencoders"`
+`ff_config_enable "$_libavparsers_all"  "$_libavparsers"`
+`ff_config_enable "$_libavdemuxers_all" "$_libavdemuxers"`
+`ff_config_enable "$_libavmuxers_all"   "$_libavmuxers"`
+`ff_config_enable "$_libavprotocols_all" "$_libavprotocols"`
+`ff_config_enable "$_libavbsfs_all" "$_libavbsfs"`
 
 #endif /* MPLAYER_CONFIG_H */
 EOF
