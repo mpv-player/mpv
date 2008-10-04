@@ -7997,7 +7997,7 @@ cat > $TMPH << EOF
 /* yes, we have inttypes.h */
 #define HAVE_INTTYPES_H 1
 
-/* int_fastXY_t emulation */
+/* int_fastXY_t emulation, libmpeg2 + FFmpeg */
 $_def_fast_inttypes
 
 /* libdvdcss */
@@ -8031,7 +8031,7 @@ $_def_dynamic_plugins
 /* "restrict" keyword */
 $_def_restrict_keyword
 
-/* __builtin_expect branch prediction hint */
+/* __builtin_expect branch prediction hint, libmpeg2 + FFmpeg */
 $_def_builtin_expect
 
 /* attribute(used) as needed by some compilers */
@@ -8245,11 +8245,11 @@ $_def_corevideo
 $_def_quartz
 $_def_quicktime
 
-/* Build our Win32-loader */
+/* Win32-loader support */
 $_def_win32_loader
 
 /* FFmpeg */
-/* Define this to enable image postprocessing in libavcodec (requires a FAST CPU!) */
+/* Define this to enable image postprocessing in libavcodec */
 $_def_libpostproc
 $_def_libpostproc_a
 $_def_libpostproc_so
@@ -8331,6 +8331,8 @@ $_def_mp3lib
 /* enable liba52 support */
 $_def_liba52_internal
 $_def_liba52
+
+/* enable libmpeg2 support */
 $_def_libmpeg2
 
 /* XAnim DLL support */
@@ -8355,7 +8357,7 @@ $_def_fastmemcpy
 /* Use UnRAR executable for Vobsubs */
 $_def_unrar_exec
 
-/* gui support, please do not edit this option */
+/* gui support */
 $_def_gui
 $_def_gtk2
 
@@ -8650,7 +8652,8 @@ $_def_gethostbyname2
 /* Extension defines */
 `ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE"`
 
-$_def_altivec_h	// enables usage of altivec.h
+/* altivec.h support */
+$_def_altivec_h
 
 /* libvo options */
 #define SCREEN_SIZE_X 1
