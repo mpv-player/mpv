@@ -1888,10 +1888,6 @@ EOF
     _arch='IA64'
     _target_arch='ARCH_IA64 = yes'
     iproc='ia64'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   x86_64|amd64)
@@ -1996,7 +1992,6 @@ EOF
     else
 	proc=v8
     fi
-    _march=''
     _mcpu="-mcpu=$proc"
     _optimizing="$proc"
     ;;
@@ -2007,7 +2002,6 @@ EOF
     _vis='yes'
     iproc='sparc'
     proc='ultrasparc'
-    _march=''
     _mcpu="-mcpu=$proc"
     _optimizing="$proc"
     ;;
@@ -2016,20 +2010,12 @@ EOF
     _arch='ARM ARMV4L'
     _target_arch='ARCH_ARMV4L = yes'
     iproc='arm'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   sh)
     _arch='SH'
     _target_arch='ARCH_SH = yes'
     iproc='sh'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
@@ -2037,10 +2023,6 @@ EOF
     _def_dcbzl='#undef HAVE_DCBZL'
     _target_arch='ARCH_POWERPC = yes'
     iproc='ppc'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
 
     echocheck "CPU type"
     case $system_name in
@@ -2148,7 +2130,6 @@ EOF
     _arch='ALPHA'
     _target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
-    _march=''
 
     echocheck "CPU type"
     cat > $TMPC << EOF
@@ -2190,10 +2171,6 @@ EOF
     _arch='SGI_MIPS'
     _target_arch='ARCH_SGI_MIPS = yes'
     iproc='sgi-mips'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
 
     if irix ; then
 	echocheck "CPU type"
@@ -2219,60 +2196,35 @@ EOF
     _arch='PA_RISC'
     _target_arch='ARCH_PA_RISC = yes'
     iproc='PA-RISC'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   s390)
     _arch='S390'
     _target_arch='ARCH_S390 = yes'
     iproc='390'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   s390x)
     _arch='S390X'
     _target_arch='ARCH_S390X = yes'
     iproc='390x'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   vax)
     _arch='VAX'
     _target_arch='ARCH_VAX = yes'
     iproc='vax'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   xtensa)
     _arch='XTENSA'
     _target_arch='ARCH_XTENSA = yes'
     iproc='xtensa'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   generic)
     _arch='GENERIC'
     _target_arch='ARCH_GENERIC = yes'
-    iproc=''
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
     ;;
 
   *)
