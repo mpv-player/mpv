@@ -707,7 +707,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       /* end setting sw-params */
 
       mp_msg(MSGT_AO,MSGL_V,"alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
-	     ao_data.samplerate, ao_data.channels, bytes_per_sample, ao_data.buffersize,
+	     ao_data.samplerate, ao_data.channels, (int)bytes_per_sample, ao_data.buffersize,
 	     snd_pcm_format_description(alsa_format));
 
     } // end switch alsa_handler (spdif)
