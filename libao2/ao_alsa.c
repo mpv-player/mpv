@@ -765,6 +765,10 @@ static void audio_resume(void)
 {
     int err;
 
+    if (snd_pcm_state(alsa_handler) == SND_PCM_STATE_SUSPENDED) {
+        mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_ALSA_PcmInSuspendModeTryingResume);
+        while ((err = snd_pcm_resume(alsa_handler)) == -EAGAIN) sleep(1);
+    }
     if (alsa_can_pause) {
         if ((err = snd_pcm_pause(alsa_handler, 0)) < 0)
         {
