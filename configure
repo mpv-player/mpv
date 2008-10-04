@@ -7796,16 +7796,6 @@ VO_SRCS = $_vosrc
 MENCODER = $_mencoder
 MPLAYER = $_mplayer
 
-#internal libraries
-LIBA52 = $_liba52
-LIBA52_INTERNAL = $_liba52_internal
-LIBMPEG2 = $_libmpeg2
-MP3LIB = $_mp3lib
-TREMOR_INTERNAL = $_tremor_internal
-
-HAVE_SYS_MMAN_H = $_mman
-HAVE_POSIX_SELECT = $_posix_select
-
 NEED_GETTIMEOFDAY    = $_need_gettimeofday
 NEED_GLOB    = $_need_glob
 NEED_MMAP    = $_need_mmap
@@ -7815,12 +7805,9 @@ NEED_STRSEP  = $_need_strsep
 NEED_SWAB    = $_need_swab
 NEED_VSSCANF = $_need_vsscanf
 
-# audio output
-OSS = $_ossaudio
-ALSA9 = $_alsa9
-ALSA1X = $_alsa1x
-
 # features
+ALSA1X = $_alsa1x
+ALSA9 = $_alsa9
 APPLE_IR = $_apple_ir
 APPLE_REMOTE = $_apple_remote
 AUDIO_INPUT = $_audio_input
@@ -7842,9 +7829,13 @@ GIF = $_gif
 GUI = $_gui
 GUI_GTK = $_gui_gtk
 GUI_WIN32 = $_gui_win32
+HAVE_POSIX_SELECT = $_posix_select
+HAVE_SYS_MMAN_H = $_mman
 JOYSTICK = $_joystick
 JPEG = $_jpeg
 LADSPA = $_ladspa
+LIBA52 = $_liba52
+LIBA52_INTERNAL = $_liba52_internal
 LIBASS = $_ass
 LIBDCA = $_libdca
 LIBDV = $_libdv
@@ -7853,6 +7844,7 @@ LIBLZO = $_liblzo
 LIBMAD = $_mad
 LIBMENU = $_menu
 LIBMENU_DVBIN = $_menu_dvbin
+LIBMPEG2 = $_libmpeg2
 LIBNEMESI = $_nemesi
 LIBNUT = $_libnut
 LIBSMBCLIENT = $_smb
@@ -7863,9 +7855,11 @@ LIVE555 = $_live
 MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FINDER = $_macosx_finder
 MP3LAME = $_mp3lame
+MP3LIB = $_mp3lib
 MUSEPACK = $_musepack
 NATIVE_RTSP = $_native_rtsp
 NETWORK = $_network
+OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
 PNG = $_png
 PVR = $_pvr
@@ -7879,6 +7873,7 @@ REAL_CODECS = $_real
 SPEEX = $_speex
 STREAM_CACHE = $_stream_cache
 TOOLAME=$_toolame
+TREMOR_INTERNAL = $_tremor_internal
 TV = $_tv
 TV_BSDBT848 = $_tv_bsdbt848
 TV_DSHOW = $_tv_dshow
