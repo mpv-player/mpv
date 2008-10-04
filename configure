@@ -7751,7 +7751,6 @@ BINDIR = \$(DESTDIR)$_bindir
 DATADIR = \$(DESTDIR)$_datadir
 MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
-LIBDIR = \$(DESTDIR)$_libdir
 
 CC = $_cc
 CXX = $_cc
