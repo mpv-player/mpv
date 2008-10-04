@@ -6110,7 +6110,7 @@ fi
 echores "$_musepack"
 
 
-echocheck "FAAC (AAC encoder) support"
+echocheck "FAAC support"
 if test "$_faac" = auto ; then
   cat > $TMPC <<EOF
 #include <inttypes.h>
@@ -6141,7 +6141,7 @@ _res_comment="in libavcodec: $_faac_lavc"
 echores "$_faac"
 
 
-echocheck "FAAD2 (AAC) support"
+echocheck "FAAD2 support"
 if test "$_faad_internal" = auto ; then
   if x86_32 && test cc_vendor=gnu; then
     case $cc_version in
