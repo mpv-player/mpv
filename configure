@@ -7762,7 +7762,6 @@ MAN_LANG = $man_lang
 MAN_LANGS = $man_langs
 MAN_LANG_ALL = $man_lang_all
 
-DESTDIR =
 prefix = \$(DESTDIR)$_prefix
 BINDIR = \$(DESTDIR)$_bindir
 DATADIR = \$(DESTDIR)$_datadir
