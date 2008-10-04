@@ -489,6 +489,14 @@ int ds_fill_buffer(demux_stream_t *ds)
             if (!ds->first)
                 ds->last = NULL;
             --ds->packs;
+            /* The code below can set ds->eof to 1 when another stream runs
+             * out of buffer space. That makes sense because in that situation
+             * the calling code should not count on being able to demux more
+             * packets from this stream.
+             * If however the situation improves and we're called again
+             * despite the eof flag then it's better to clear it to avoid
+             * weird behavior. */
+            ds->eof = 0;
             return 1;
         }
         if (demux->audio->packs >= MAX_PACKS
