@@ -574,14 +574,14 @@ static char TY_XDS    [ 8 ][ 25 ][ 34 ];
 static char TY_XDS_new[ 8 ][ 25 ][ 34 ];
 
 // Array of [ MPAARating|TVRating ][ NumberRatings ]
-static const char const *TY_XDS_CHIP[ 2 ][ 8 ] = 
+static const char * const TY_XDS_CHIP[ 2 ][ 8 ] = 
 {
    { "(NOT APPLICABLE)", "G", "PG", "PG-13", "R", "NC-17", "X", "(NOT RATED)" },
    { "(NOT RATED)", "TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA", 
       "(NOT RATED)" }
 };
 
-static const char const *TY_XDS_modes[] = 
+static const char * const TY_XDS_modes[] = 
 {
   "CURRENT",                        // 01h-02h current program
   "FUTURE ",                        // 03h-04h future program
