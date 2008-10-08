@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r27182
+.\" In sync with r27384
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -64,7 +64,7 @@ mencoder \- Movie Encoder
 .
 .br
 .B mplayer
-[dvd|dvdnav]://[Titel|[Starttitel]\-Endtitel]
+[dvd|dvdnav]://[Titel|[Starttitel]\-Endtitel][/Gerät]
 [Optionen]
 .
 .br
@@ -976,7 +976,7 @@ identify=6.
 Zum Beispiel listet es für eine DVD die Kapitel die zeitliche Länge jedes
 Titels sowie die Disc-ID.
 Kombiniere dies mit \-frames 0, um alle Ausgaben zu unterdrücken.
-Das Wrapper-Script TOOLS/\:midentify.sh unterdrückt die anderen Ausgaben von
+Das Wrapper-Script TOOLS/\:midentify unterdrückt die anderen Ausgaben von
 MPlayer
 und führt (hoffentlich) Shell-Escaping für die Dateinamen aus.
 .
@@ -1098,6 +1098,10 @@ gesendet werden (momentan werden nur die Derivate von X11 unterstützt).
 Nötig, um in DVD-Menüs Schaltflächen auszuwählen.
 .
 .TP
+.B \-noar
+Schaltet Unterstützung für Apple-Infrarotfernbedienung ab.
+.
+.TP
 .B \-noconsolecontrols
 Für Ereignisse wird von MPlayer nicht die Standardeingabe (stdin) verwendet.
 Das ist nützlich beim Lesen von Daten von der Standardeingabe.
@@ -1115,10 +1119,6 @@ Schaltet die Joystickunterstützung aus.
 .TP
 .B \-nolirc
 Schaltet Unterstützung für LIRC aus.
-.
-.TP
-.B \-noar
-Schaltet Unterstützung für Apple-Infrarotfernbedienung ab.
 .
 .TP
 .B \-nomouseinput
@@ -3028,7 +3028,6 @@ Wird nur von fbdev-, dga2-, svga- und vesa-Videoausgabetreibern unterstützt.
 Spiele den Film mit Fensterrand und Dekoration.
 Da dies standardmäßig an ist, benutze \-noborder um die normale
 Fensterdekoration abzuschalten.
-Wird vom directx-Videoausgabetreiber unterstützt.
 .
 .TP
 .B \-brightness <\-100\-100>
@@ -3394,7 +3393,7 @@ beispielsweise nützlich ist, um MPlayer in einen Browser einzubetten (z.B.\&
 mit der plugger-Erweiterung).
 .
 .TP
-.B \-xineramascreen <\-2\-...> (nur bei X11)
+.B \-xineramascreen <\-2\-...>
 Bei Xinerama-Konfigurationen (z.B.\& bei einem einzigen Desktop, der sich
 über mehrere Monitore erstreckt) gibt diese Option an, auf welchem Schirm
 das Video angezeigt werden soll.
@@ -3405,6 +3404,10 @@ Die mit der Option \-geometry gesetzte Initialposition ist relativ zum
 angegebenen Bildschirm.
 Wird normalerweise nur mit "\-fstype \-fullscreen" oder "\-fstype none"
 funktionieren.
+Diese Option ist nicht geeignet, nur das Startbild zu setzen (und nicht auch
+das Bild im Vollbildmodus), \-geometry ist für diesen Zweck momentan die beste
+zur Verfügung stehende Option.
+Unterstützt von den Videoausgabetreibern gl, gl2, x11 und xv.
 .
 .TP
 .B \-zrbw (nur bei \-vo zr)
@@ -11028,6 +11031,10 @@ momentan nur für MPEG[12] von Bedeutung.
 Manchmal ist es nötig, diese zu erhöhen, um "Buffer Underflows" zu verweiden.
 .
 .TP
+.B "o\ \ \ \ \ \ "
+FIXME: Dokumentiere diese Option.
+.
+.TP
 .B packetsize=<Größe>
 Größe, ausgedrückt in Bytes, des einheitlichen Pakets für das gewählte Format.
 Beim Muxing zu MPEG[12]-Implementierungen sind die Standardwerte 2324 für
@@ -11041,9 +11048,6 @@ Decodierungszeitstempels (DTS) für jeden vorhandenen Stream
 (Verzögerung von Demuxing zu Decodierung).
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: Dokumentiere diese Option.
-.
 .
 .
 .\" --------------------------------------------------------------------------
