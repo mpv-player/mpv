@@ -192,7 +192,7 @@ static int control(int cmd, void *arg)
 	set_vol = vol->left / f_multi + pmin + 0.5;
 
 	//setting channels
-	if ((err = snd_mixer_selem_set_playback_volume(elem, 0, set_vol)) < 0) {
+	if ((err = snd_mixer_selem_set_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, set_vol)) < 0) {
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_ErrorSettingLeftChannel, 
 		 snd_strerror(err));
 	  return CONTROL_ERROR;
@@ -201,7 +201,7 @@ static int control(int cmd, void *arg)
 
 	set_vol = vol->right / f_multi + pmin + 0.5;
 
-	if ((err = snd_mixer_selem_set_playback_volume(elem, 1, set_vol)) < 0) {
+	if ((err = snd_mixer_selem_set_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, set_vol)) < 0) {
 	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_ErrorSettingRightChannel, 
 		 snd_strerror(err));
 	  return CONTROL_ERROR;
@@ -221,9 +221,9 @@ static int control(int cmd, void *arg)
 	}
       }
       else {
-	snd_mixer_selem_get_playback_volume(elem, 0, &get_vol);
+	snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &get_vol);
 	vol->left = (get_vol - pmin) * f_multi;
-	snd_mixer_selem_get_playback_volume(elem, 1, &get_vol);
+	snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, &get_vol);
 	vol->right = (get_vol - pmin) * f_multi;
 
 	mp_msg(MSGT_AO,MSGL_DBG2,"left=%f, right=%f\n",vol->left,vol->right);

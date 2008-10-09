@@ -1120,7 +1120,7 @@ static void check_events (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Event event;
-	SDLKey keypressed = 0;
+	SDLKey keypressed = SDLK_UNKNOWN;
 	
 	/* Poll the waiting SDL Events */
 	while ( SDL_PollEvent(&event) ) {
