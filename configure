@@ -8070,15 +8070,77 @@ $_def_fast_inttypes
 /* libdvdread */
 #define HAVE_UINTPTR_T 1
 
+/* Define this if your system has the "alloca.h" header file */
+$_def_alloca
+
+/* Define this if your system has the "byteswap.h" header file */
+$_def_byteswap_h
+
+/* Define this if your system has the "sys/mman.h" header file */
+$_def_mman
+$_def_mman_has_map_failed
+
+/* Define this if your system has the header file for the OSS sound interface */
+$_def_sys_soundcard
+
+/* Define this if your system has the header file for the OSS sound interface
+ * in /usr/include */
+$_def_soundcard
+
+/* Define this if your system has the sysinfo header */
+$_def_sys_sysinfo
+
+/* Define this if your system has the "malloc.h" header file */
+$_def_malloc
+
+/* memalign is mapped to malloc if unsupported */
+$_def_memalign
+$_def_map_memalign
+$_def_memalign_hack
+
+/* define this to use nl_langinfo function */
+$_def_langinfo
+
+/* nanosleep support */
+$_def_nanosleep
+
+/* do we have gethostbyname2? */
+$_def_gethostbyname2
+
+/* Define this if your system has swab */
+$_def_swab
+
+/* Define this if your system has posix select */
+$_def_posix_select
+
+/* Define this if your system has gettimeofday */
+$_def_gettimeofday
+
+/* Define this if your system has glob */
+$_def_glob
+
+/* Define this if your system has setenv */
+$_def_setenv
+#ifndef HAVE_SETENV
+int setenv(const char *name, const char *val, int overwrite);
+#endif
+
+/* Define this if your system has strsep */
+$_def_strsep
+
+/* Define this if your system has vsscanf */
+$_def_vsscanf
+
+/* Define this if your system has sysi86 */
+$_def_sysi86
+$_def_sysi86_iv
+
 /* C99 *lrint* and round* functions available */
 $_def_llrint
 $_def_lrint
 $_def_lrintf
 $_def_round
 $_def_roundf
-
-/* nanosleep support */
-$_def_nanosleep
 
 /* name of messages charset */
 $_def_charset
@@ -8143,68 +8205,6 @@ $_def_asmalign_pot
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_def_fastmemcpy
-
-/* Define this if your system has the "malloc.h" header file */
-$_def_malloc
-
-/* memalign is mapped to malloc if unsupported */
-$_def_memalign
-$_def_map_memalign
-$_def_memalign_hack
-
-/* Define this if your system has the "alloca.h" header file */
-$_def_alloca
-
-/* Define this if your system has the "byteswap.h" header file */
-$_def_byteswap_h
-
-/* Define this if your system has the "sys/mman.h" header file */
-$_def_mman
-$_def_mman_has_map_failed
-
-/* Define this if your system has the header file for the OSS sound interface */
-$_def_sys_soundcard
-
-/* Define this if your system has the header file for the OSS sound interface
- * in /usr/include */
-$_def_soundcard
-
-/* Define this if your system has the sysinfo header */
-$_def_sys_sysinfo
-
-/* do we have gethostbyname2? */
-$_def_gethostbyname2
-
-/* Define this if your system has swab */
-$_def_swab
-
-/* Define this if your system has posix select */
-$_def_posix_select
-
-/* Define this if your system has gettimeofday */
-$_def_gettimeofday
-
-/* Define this if your system has glob */
-$_def_glob
-
-/* Define this if your system has setenv */
-$_def_setenv
-#ifndef HAVE_SETENV
-int setenv(const char *name, const char *val, int overwrite);
-#endif
-
-/* Define this if your system has strsep */
-$_def_strsep
-
-/* Define this if your system has vsscanf */
-$_def_vsscanf
-
-/* Define this if your system has sysi86 */
-$_def_sysi86
-$_def_sysi86_iv
-
-/* Define this if your system has pthreads */
-$_def_pthreads
 
 /* Toggles debugging informations */
 $_def_debug
@@ -8293,9 +8293,6 @@ $_def_mp3lame_preset_medium
 
 /* define this to use iconv(3) function to codepage conversions */
 $_def_iconv
-
-/* define this to use nl_langinfo function */
-$_def_langinfo
 
 /* define this to use RTC (/dev/rtc) for video timers */
 $_def_rtc
@@ -8682,6 +8679,7 @@ $_def_libswscale_so
 
 /* Define this if you enabled thread support for libavcodec */
 $_def_threads
+$_def_pthreads
 #ifdef HAVE_THREADS
 #define ENABLE_THREADS 1
 #else
