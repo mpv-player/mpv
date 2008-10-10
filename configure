@@ -8073,9 +8073,6 @@ $_def_fast_inttypes
 /* Define this if your system has the "alloca.h" header file */
 $_def_alloca
 
-/* Define this if your system has the "byteswap.h" header file */
-$_def_byteswap_h
-
 /* Define this if your system has the "sys/mman.h" header file */
 $_def_mman
 $_def_mman_has_map_failed
@@ -8170,6 +8167,18 @@ $_def_dcbzl
 /* Define this to any prefered value from 386 up to infinity with step 100 */
 #define __CPU__ $iproc
 
+/* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
+$_def_fastmemcpy
+
+/* enable/disable SIGHANDLER */
+$_def_sighandler
+
+/* enable/disable automatic gdb attach on crash, requires SIGHANDLER */
+$_def_crash_debug
+
+/* Toggles debugging informations */
+$_def_debug
+
 /* Dynamic a/v plugins */
 $_def_dynamic_plugins
 
@@ -8202,18 +8211,6 @@ $_def_named_asm_args
 
 /* assembler handling of .align */
 $_def_asmalign_pot
-
-/* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
-$_def_fastmemcpy
-
-/* Toggles debugging informations */
-$_def_debug
-
-/* enable/disable SIGHANDLER */
-$_def_sighandler
-
-/* enable/disable automatic gdb attach on crash, requires SIGHANDLER */
-$_def_crash_debug
 
 /* enables / disables cdparanoia support */
 $_def_cdparanoia
@@ -8308,8 +8305,14 @@ $_def_apple_remote
 /* Apple IR Remote (Linux remote control driver) */
 $_def_apple_ir
 
+/* enables / disables new input joystick support */
+$_def_joystick
+
 /* Support for maemo (http://www.maemo.org) */
 $_def_maemo
+
+/* Define this for Cygwin build for win32 */
+$_def_confwin32
 
 /* Mac OS X specific features */
 $_def_macosx_finder
@@ -8353,6 +8356,9 @@ $_def_libdv
 $_def_mp3lame
 $_def_mp3lame_preset
 $_def_mp3lame_preset_medium
+
+$_def_toolame
+$_def_twolame
 
 /* liblzo support */
 $_def_liblzo
@@ -8479,9 +8485,6 @@ $_def_radio_bsdbt848
 /* Enable Video 4 Linux 2 MPEG PVR support */
 $_def_pvr
 
-/* Define this for Cygwin build for win32 */
-$_def_confwin32
-
 /* termcap flag for getch2.c */
 $_def_termcap
 
@@ -8591,9 +8594,6 @@ $_def_vidix_drv_sis
 $_def_vidix_drv_unichrome
 $_def_vidix_pfx
 
-/* enables / disables new input joystick support */
-$_def_joystick
-
 /* libvo options */
 #define SCREEN_SIZE_X 1
 #define SCREEN_SIZE_Y 1
@@ -8642,8 +8642,6 @@ $_def_xdpms
 $_def_aa
 $_def_caca
 $_def_tga
-$_def_toolame
-$_def_twolame
 
 /* Define this if you have shm support */
 $_def_shm
@@ -8685,6 +8683,9 @@ $_def_pthreads
 #else
 #define ENABLE_THREADS 0
 #endif
+
+/* Define this if your system has the "byteswap.h" header file */
+$_def_byteswap_h
 
 /* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
