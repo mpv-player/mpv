@@ -8273,24 +8273,6 @@ $_def_vcd
 #endif
 
 
-/* Define if you are using Xvid library */
-$_def_xvid
-
-/* Define if you are using the X.264 library */
-$_def_x264
-
-/* Define if you are using libnut */
-$_def_libnut
-
-/* Define to include support for libdv-0.9.5 */
-$_def_libdv
-
-/* Indicates if libmp3lame is available
-   Note: for mencoder */
-$_def_mp3lame
-$_def_mp3lame_preset
-$_def_mp3lame_preset_medium
-
 /* define this to use iconv(3) function to codepage conversions */
 $_def_iconv
 
@@ -8350,6 +8332,28 @@ $_def_libmpeg2
 /* maximum alignment used by libmpeg2 */
 #define ATTRIBUTE_ALIGNED_MAX 16
 
+/* enable FAAD (AAC) support */
+$_def_faad
+$_def_faad_internal
+
+/* enable FAAC (AAC encoder) support */
+$_def_faac
+
+/* Define if you are using the Xvid library */
+$_def_xvid
+
+/* Define if you are using the X.264 library */
+$_def_x264
+
+/* Define to include support for libdv-0.9.5 */
+$_def_libdv
+
+/* Indicates if libmp3lame is available
+   Note: for mencoder */
+$_def_mp3lame
+$_def_mp3lame_preset
+$_def_mp3lame_preset_medium
+
 /* liblzo support */
 $_def_liblzo
 
@@ -8368,13 +8372,6 @@ $_def_musepack
 
 /* enable OggTheora support */
 $_def_theora
-
-/* enable FAAD (AAC) support */
-$_def_faad
-$_def_faad_internal
-
-/* enable FAAC (AAC encoder) support */
-$_def_faac
 
 /* enable libdca support */
 $_def_libdca
@@ -8400,11 +8397,12 @@ $_def_real_path
 $_def_qtx
 $_def_qtx_win32
 
-/* LIVE555 Streaming Media library support */
-$_def_live
+/* Define if you are using libnut */
+$_def_libnut
 
-/* libnemesi Streaming Media library support */
-$_def_nemesi
+/* XMMS input plugin support */
+$_def_xmms
+#define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
 
 /* Use UnRAR executable for Vobsubs */
 $_def_unrar_exec
@@ -8412,6 +8410,9 @@ $_def_unrar_exec
 /* gui support */
 $_def_gui
 $_def_gtk2
+
+/* used by GUI: */
+$_def_xshape
 
 /* Audio output drivers */
 $_def_ossaudio
@@ -8481,9 +8482,6 @@ $_def_pvr
 /* Define this for Cygwin build for win32 */
 $_def_confwin32
 
-/* SMB support */
-$_def_smb
-
 /* termcap flag for getch2.c */
 $_def_termcap
 
@@ -8542,6 +8540,15 @@ $_def_ladspa
 /* enable network */
 $_def_network
 
+/* LIVE555 Streaming Media library support */
+$_def_live
+
+/* libnemesi Streaming Media library support */
+$_def_nemesi
+
+/* SMB support */
+$_def_smb
+
 /* enable ftp support */
 $_def_ftp
 
@@ -8586,10 +8593,6 @@ $_def_vidix_pfx
 
 /* enables / disables new input joystick support */
 $_def_joystick
-
-/* XMMS input plugin support */
-$_def_xmms
-#define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
 
 /* libvo options */
 #define SCREEN_SIZE_X 1
@@ -8644,9 +8647,6 @@ $_def_twolame
 
 /* Define this if you have shm support */
 $_def_shm
-
-/* used by GUI: */
-$_def_xshape
 
 #if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
 #define X11_FULLSCREEN 1
