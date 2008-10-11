@@ -8118,9 +8118,6 @@ $_def_glob
 
 /* Define this if your system has setenv */
 $_def_setenv
-#ifndef HAVE_SETENV
-int setenv(const char *name, const char *val, int overwrite);
-#endif
 
 /* Define this if your system has strsep */
 $_def_strsep
