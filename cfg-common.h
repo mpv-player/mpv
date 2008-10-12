@@ -349,8 +349,6 @@ const m_option_t msgl_config[]={
 
 };
 
-extern char * proc_priority;
-
 #ifdef WIN32
 struct {
   char* name;
