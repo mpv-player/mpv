@@ -51,10 +51,8 @@ void *map_phys_mem(unsigned long base, unsigned long size) {
   if(!IsWinNT()){
   HANDLE hDevice ;
   PVOID inBuf[1] ;		/* buffer for struct pointer to VxD */
-  DWORD RetInfo[2] ;		/* buffer to receive data from VxD */
   DWORD cbBytesReturned ;	/* count of bytes returned from VxD */
   MAPDEVREQUEST req ;		/* map device request structure */
-  DWORD *pNicstar, Status, Time ; int i ; char *endptr ;
   const PCHAR VxDName = "\\\\.\\MAPDEV.VXD" ;
   const PCHAR VxDNameAlreadyLoaded = "\\\\.\\MAPDEV" ;
 
