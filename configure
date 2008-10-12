@@ -8563,10 +8563,6 @@ $_def_use_aton
 
 /* socklen_t support */
 $_def_socklen_t
-#ifndef HAVE_SOCKLEN_T
-#define HAVE_SOCKLEN_T 1
-typedef int socklen_t;
-#endif
 
 /* closesocket() support */
 $_def_closesocket
