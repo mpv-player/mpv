@@ -8065,7 +8065,6 @@ $_def_fast_inttypes
 
 /* libfaad2 */
 #define HAVE_MEMCPY 1
-#define HAVE_STRCHR 1
 
 /* libdvdread */
 #define HAVE_UINTPTR_T 1
