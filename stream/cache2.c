@@ -18,7 +18,7 @@
 
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
 #elif defined(__OS2__)
 #define INCL_DOS
@@ -239,7 +239,7 @@ static void cache_execute_control(cache_vars_t *s) {
 
 cache_vars_t* cache_init(int size,int sector){
   int num;
-#if !defined(WIN32) && !defined(__OS2__)
+#if !defined(__MINGW32__) && !defined(__CYGWIN__) && !defined(__OS2__)
   cache_vars_t* s=shmem_alloc(sizeof(cache_vars_t));
 #else
   cache_vars_t* s=malloc(sizeof(cache_vars_t));
@@ -253,14 +253,14 @@ cache_vars_t* cache_init(int size,int sector){
   }//32kb min_size
   s->buffer_size=num*sector;
   s->sector_size=sector;
-#if !defined(WIN32) && !defined(__OS2__)
+#if !defined(__MINGW32__) && !defined(__CYGWIN__) && !defined(__OS2__)
   s->buffer=shmem_alloc(s->buffer_size);
 #else
   s->buffer=malloc(s->buffer_size);
 #endif
 
   if(s->buffer == NULL){
-#if !defined(WIN32) && !defined(__OS2__)
+#if !defined(__MINGW32__) && !defined(__CYGWIN__) && !defined(__OS2__)
     shmem_free(s,sizeof(cache_vars_t));
 #else
     free(s);
@@ -276,7 +276,7 @@ cache_vars_t* cache_init(int size,int sector){
 void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
   if(!s->cache_pid) return;
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
   TerminateThread((HANDLE)s->cache_pid,0);
 #elif defined(__OS2__)
   DosKillThread( s->cache_pid );
@@ -286,7 +286,7 @@ void cache_uninit(stream_t *s) {
   waitpid(s->cache_pid,NULL,0);
 #endif
   if(!c) return;
-#if defined(WIN32) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
   free(c->stream);
   free(c->buffer);
   free(s->cache_data);
@@ -327,17 +327,17 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
      min = s->buffer_size - s->fill_limit;
   }
   
-#if !defined(WIN32) && !defined(__OS2__)
+#if !defined(__MINGW32__) && !defined(__CYGWIN__) && !defined(__OS2__)
   if((stream->cache_pid=fork())){
 #else
   {
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
     DWORD threadId;
 #endif
     stream_t* stream2=malloc(sizeof(stream_t));
     memcpy(stream2,s->stream,sizeof(stream_t));
     s->stream=stream2;
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
     stream->cache_pid = CreateThread(NULL,0,ThreadProc,s,0,&threadId);
 #else   // OS2
     stream->cache_pid = _beginthread( ThreadProc, NULL, 256 * 1024, s );
@@ -359,7 +359,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     return 1; // parent exits
   }
   
-#if defined(WIN32) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
 }
 
 static void ThreadProc( void *s ){

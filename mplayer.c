@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "config.h"
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 #define _UWIN 1  /*disable Non-underscored versions of non-ANSI functions as otherwise int eof would conflict with eof()*/
 #include <windows.h>
 #endif
@@ -87,7 +87,7 @@ int player_idle_mode=0;
 int quiet=0;
 int enable_mouse_movements=0;
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 char * proc_priority=NULL;
 #endif
 
@@ -688,7 +688,7 @@ void exit_player_with_rc(const char* how, int rc){
 
   if (mpctx->user_muted && !mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
   uninit_player(INITIALIZED_ALL);
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
   timeEndPeriod(1);
 #endif
 #ifdef CONFIG_X11
@@ -1207,7 +1207,7 @@ static void print_status(float a_pos, float a_v, float corr)
     width = screen_width;
   else
   width = 80;
-#if defined(WIN32) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
   /* Windows command line is broken (MinGW's rxvt works, but we
    * should not depend on that). */
   width--;
@@ -2571,9 +2571,9 @@ int gui_no_filename=0;
   m_config_preparse_command_line(mconfig,argc,argv);
 
   print_version();
-#if defined(WIN32) && defined(CONFIG_WIN32DLL)
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
   set_path_env();
-#endif /*WIN32 && CONFIG_WIN32DLL*/
+#endif
 
 #ifdef CONFIG_TV
   stream_tv_defaults.immediate = 1;
@@ -2617,7 +2617,7 @@ int gui_no_filename=0;
     }
     }
 	
-#if defined(WIN32) && defined(CONFIG_GUI)
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_GUI)
     void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
     if(runningmplayer && filename && use_gui){
         COPYDATASTRUCT csData;
@@ -2632,7 +2632,7 @@ int gui_no_filename=0;
     }
 #endif
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 	// request 1ms timer resolution
 	timeBeginPeriod(1);
 	if(proc_priority){
@@ -2652,7 +2652,7 @@ int gui_no_filename=0;
       use_gui=0;
     }
 #else
-#ifndef WIN32
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
     if(use_gui && !vo_init()){
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_GuiNeedsX);
       use_gui=0;
@@ -3085,7 +3085,7 @@ if (edl_output_filename) {
       char *buf = strdup(filename), *psub;
       char *pdot = strrchr(buf, '.');
       char *pslash = strrchr(buf, '/');
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
       if (!pslash) pslash = strrchr(buf, '\\');
 #endif
       if (pdot && (!pslash || pdot > pslash))
@@ -3096,7 +3096,7 @@ if (edl_output_filename) {
           char *bname;
           int l;
           bname = strrchr(buf,'/');
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
           if(!bname) bname = strrchr(buf,'\\');
 #endif
           if(bname) bname++;

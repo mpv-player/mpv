@@ -614,13 +614,14 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 	switch (info->depth) {
 	case 15:
 		key = ((r >> 3) << 10) | ((g >> 3) << 5) | ((b >> 3));
-#ifndef WIN32
+
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
         key = key | 0x00008000;
 #endif       
 		break;
 	case 16: // XXX unchecked
 		key = ((r >> 3) << 11) | ((g >> 2) << 5) | ((b >> 3));
-#ifndef WIN32
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
         key = key | 0x00008000;
 #endif       
 		break;
@@ -629,7 +630,7 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 		break;
 	case 32:
 		key = chromakey;
-#ifndef WIN32
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
         key = key | 0x80000000;
 #endif       
 		break;

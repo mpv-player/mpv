@@ -29,7 +29,7 @@ CpuCaps gCpuCaps;
 #include <signal.h>
 #endif
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
 #endif
 
@@ -314,7 +314,7 @@ static void sigill_handler_sse( int signal, struct sigcontext sc )
 }
 #endif /* __linux__ && _POSIX_SOURCE */
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
 {
    if(ep->ExceptionRecord->ExceptionCode==EXCEPTION_ILLEGAL_INSTRUCTION){
@@ -325,7 +325,7 @@ LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
    }
    return EXCEPTION_CONTINUE_SEARCH;
 }
-#endif /* WIN32 */
+#endif /* defined(__MINGW32__) || defined(__CYGWIN__) */
 
 #ifdef __OS2__
 ULONG _System os2_sig_handler_sse( PEXCEPTIONREPORTRECORD       p1,
@@ -395,7 +395,7 @@ static void check_os_katmai_support( void )
    gCpuCaps.hasSSE = 0;
    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "No OS support for SSE, disabling to be safe.\n" );
 #endif
-#elif defined(WIN32)
+#elif defined(__MINGW32__) || defined(__CYGWIN__)
    LPTOP_LEVEL_EXCEPTION_FILTER exc_fil;
    if ( gCpuCaps.hasSSE ) {
       mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );

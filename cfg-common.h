@@ -349,7 +349,7 @@ const m_option_t msgl_config[]={
 
 };
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 struct {
   char* name;
   int prio;
@@ -366,7 +366,7 @@ struct {
   { "idle", IDLE_PRIORITY_CLASS},
   { NULL, NORMAL_PRIORITY_CLASS} /* default */
 };
-#endif /* WIN32 */
+#endif /* defined(__MINGW32__) || defined(__CYGWIN__) */
 
 extern const m_option_t noconfig_opts[];
 

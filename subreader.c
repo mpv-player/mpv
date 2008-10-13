@@ -1836,7 +1836,7 @@ char** sub_filenames(const char* path, char *fname)
     subcnt = 0;
     
     tmp = strrchr(fname,'/');
-#if defined(WIN32) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
     if(!tmp)tmp = strrchr(fname,'\\');
     if(!tmp)tmp = strrchr(fname,':');
 #endif

@@ -42,6 +42,15 @@
  /* Loop over all titles and call dvdcss_title to crack the keys. */
  static int initAllCSSKeys( dvd_reader_t *dvd )
  {
+@@ -438,7 +438,7 @@
+   
+   verbose = get_verbose();
+ 
+-#ifdef WIN32
++#if defined(__CYGWIN__) || defined(__MINGW32__)
+   /* Stat doesn't work on devices under mingwin/cygwin. */
+   if( path[0] && path[1] == ':' && path[2] == '\0' )
+     {
 @@ -494,7 +488,7 @@
      char *path_copy;
  #if defined(SYS_BSD)
@@ -51,7 +60,17 @@
      FILE *mntfile;
  #endif
  
-@@ -598,7 +592,7 @@
+@@ -495,7 +495,8 @@
+     /* XXX: We should scream real loud here. */
+     if( !(path_copy = strdup( path ) ) ) return 0;
+ 
+-#ifndef WIN32 /* don't have fchdir, and getcwd( NULL, ... ) is strange */
++/* don't have fchdir, and getcwd( NULL, ... ) is strange */
++#if !(defined(__CYGWIN__) || defined(__MINGW32__))
+     /* Resolve any symlinks and get the absolut dir name. */
+     {
+       char *new_path;
+@@ -597,7 +592,7 @@
        }
        fclose( mntfile );
      }
@@ -512,3 +531,7 @@
    uint16_t next_pgc_nr;
    uint16_t prev_pgc_nr;
    uint16_t goup_pgc_nr;
+Index: libdvdread/dvd_reader.c
+===================================================================
+--- libdvdread/dvd_reader.c	(revision 27759)
++++ libdvdread/dvd_reader.c	(working copy)

@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 #ifdef __MINGW32__
 #define mkdir(a,b) mkdir(a)
 #endif
@@ -44,7 +44,7 @@
 	#include <linux/cdrom.h>
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 	#include <sys/cdio.h>
-#elif defined(WIN32)
+#elif defined(__MINGW32__) || defined(__CYGWIN__)
         #include <ddk/ntddcdrm.h>
 #elif (__bsdi__)
         #include <dvd.h>
@@ -72,7 +72,7 @@ int
 read_toc(const char *dev) {
 	int first = 0, last = -1;
 	int i;
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
         HANDLE drive;
         DWORD r;
         CDROM_TOC toc;
@@ -326,7 +326,7 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 	sprintf( file_name, "%s%08lx", cddb_data->cache_dir, cddb_data->disc_id);
 	
 	file_fd = open(file_name, O_RDONLY
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 	| O_BINARY
 #endif
 	);

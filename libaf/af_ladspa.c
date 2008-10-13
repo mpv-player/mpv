@@ -296,16 +296,15 @@ static void* mydlopen(const char *filename, int flag) {
     size_t filenamelen;
     void *result = NULL;
 
-#   ifdef WIN32         /* for windows there's only absolute path support.
-                         * if you have a windows machine, feel free to fix
-                         * this. (path separator, shared objects extension,
-                         * et cetera).
-                         */
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+    /* For Windows there's only absolute path support.
+     * If you have a Windows machine, feel free to fix this.
+     * (path separator, shared objects extension, et cetera). */
         af_msg(AF_MSG_VERBOSE, "\ton windows, only absolute pathnames "
                 "are supported\n");
         af_msg(AF_MSG_VERBOSE, "\ttrying %s\n", filename);
         return dlopen(filename, flag);
-#   endif
+#endif
 
     filenamelen = strlen(filename);
 

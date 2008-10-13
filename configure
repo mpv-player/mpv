@@ -8227,7 +8227,7 @@ $_def_vcd
 #ifdef sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
-#elif defined(WIN32) || defined(__OS2__)
+#elif defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
 #define DEFAULT_CDROM_DEVICE    "D:"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(__APPLE__) || defined(__DARWIN__)

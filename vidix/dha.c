@@ -48,7 +48,7 @@
 #endif
 #include <unistd.h>
 
-#if defined(WIN32)
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 #include "sysdep/libdha_win32.c"
 #elif defined (__EMX__)
 #include "sysdep/libdha_os2.c"

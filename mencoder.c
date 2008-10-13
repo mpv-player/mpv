@@ -30,7 +30,7 @@
 #define        SIGQUIT 3
 #define        SIGPIPE 13
 #endif
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
 #endif
 
@@ -143,7 +143,7 @@ double cur_video_time_usage=0;
 double cur_vout_time_usage=0;
 int benchmark=0;
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 char * proc_priority=NULL;
 #endif
 
@@ -456,9 +456,9 @@ user_correct_pts = 0;
 #endif
 #endif
 
-#if defined(WIN32) && defined(CONFIG_WIN32DLL)
+#if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
   set_path_env();
-#endif /*WIN32 && CONFIG_WIN32DLL*/
+#endif
   
   InitTimer();
 
@@ -516,7 +516,7 @@ if (frameno_filename) {
   }
 }
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
   if(proc_priority){
     int i;
     for(i=0; priority_presets_defs[i].name; i++){
