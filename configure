@@ -2010,6 +2010,7 @@ EOF
     _arch='POWERPC PPC'
     _def_dcbzl='#undef HAVE_DCBZL'
     _target_arch='ARCH_POWERPC = yes'
+    _def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
 
     echocheck "CPU type"
