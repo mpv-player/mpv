@@ -677,6 +677,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   return 0;
 }
 
+#ifndef GL_WIN32
 static int gl_handlekey(int key)
 {
   if(key=='a'||key=='A') {
@@ -688,6 +689,7 @@ static int gl_handlekey(int key)
   }
   return 1;
 }
+#endif
 
 static void check_events(void)
 {
