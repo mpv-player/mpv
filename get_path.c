@@ -20,8 +20,13 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
+#ifdef __MINGW32__
 #include <windows.h>
+#endif
+
+#ifdef __CYGWIN__
+#include <windows.h>
+#include <sys/cygwin.h>
 #endif
 
 #ifdef __OS2__
