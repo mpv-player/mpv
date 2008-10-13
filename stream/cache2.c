@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "osdep/shmem.h"
 #include "osdep/timer.h"
 #ifdef WIN32
 #include <windows.h>
@@ -26,7 +27,6 @@ static DWORD WINAPI ThreadProc(void* s);
 static void ThreadProc( void *s );
 #else
 #include <sys/wait.h>
-#include "osdep/shmem.h"
 #endif
 
 #include "mp_msg.h"
