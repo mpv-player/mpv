@@ -1403,10 +1403,6 @@ if mingw32 ; then
   _need_shmem=no
 fi
 
-if cygwin ; then
-  _def_confwin32='#define WIN32'
-fi
-
 if amigaos ; then
   _select=no
   _sighandler=no
@@ -5460,7 +5456,7 @@ if test "$_libdvdcss_internal" = yes ; then
     _def_dvd_darwin='#define DARWIN_DVD_IOCTL'
     _ld_extra="$_ld_extra -framework IOKit"
   elif cygwin ; then
-    cflags_libdvdcss="-DSYS_CYGWIN"
+    cflags_libdvdcss="-DSYS_CYGWIN -DWIN32"
   elif beos ; then
     cflags_libdvdcss="-DSYS_BEOS"
   elif os2 ; then
@@ -8291,9 +8287,6 @@ $_def_joystick
 
 /* Support for maemo (http://www.maemo.org) */
 $_def_maemo
-
-/* Define this for Cygwin build for win32 */
-$_def_confwin32
 
 /* Mac OS X specific features */
 $_def_macosx_finder
