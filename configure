@@ -2976,21 +2976,6 @@ fi
 echores "$_alloca"
 
 
-echocheck "byteswap.h"
-cat > $TMPC << EOF
-#include <byteswap.h>
-int main(void) {  bswap_16(0); return 0; }
-EOF
-_byteswap_h=no
-cc_check && _byteswap_h=yes
-if cc_check ; then
-  _def_byteswap_h='#define HAVE_BYTESWAP_H 1'
-else
-  _def_byteswap_h='#undef HAVE_BYTESWAP_H'
-fi
-echores "$_byteswap_h"
-
-
 echocheck "mman.h"
 cat > $TMPC << EOF
 #include <sys/types.h>
@@ -8675,9 +8660,6 @@ $_def_pthreads
 #else
 #define ENABLE_THREADS 0
 #endif
-
-/* Define this if your system has the "byteswap.h" header file */
-$_def_byteswap_h
 
 /* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
