@@ -1549,19 +1549,14 @@ to enable driver autodetection.
 Since VIDIX requires direct hardware access you can either run it as root
 or set the SUID bit on the <application>MPlayer</application> binary
 (<emphasis role="bold">Warning: This is a security risk!</emphasis>).
-Alternatively, if you are running Linux kernel 2.4.x, you can use a
-special kernel module, like this:
+Alternatively, you can use a special kernel module, like this:
 </para>
 
 <procedure>
 <step><para>
   Download the
   <ulink url="http://www.arava.co.il/matan/svgalib/">development version</ulink>
-  of svgalib (for example 1.9.17), <emphasis role="bold">OR</emphasis>
-  download a version made by Alex especially for usage with
-  <application>MPlayer</application> (it doesn't need the svgalib source to
-  compile) from
-  <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">here</ulink>.
+  of svgalib (1.9.x).
 </para></step>
 <step><para>
   Compile the module in the
@@ -1579,7 +1574,8 @@ special kernel module, like this:
 <step><para>
   Then run <filename>configure</filename> again and pass the parameter
   <option>--enable-svgalib_helper</option> as well as
-  <option>--with-extraincdir=/path/to/svgalib_helper/sources</option>,
+  <option>--with-extraincdir=<replaceable>/path/to/svgalib_helper/sources/</replaceable>kernel/svgalib_helper</option>,
+  where <replaceable>/path/to/svgalib_helper/sources/</replaceable> has to be
   adjusted to wherever you extracted svgalib_helper sources.
 </para></step>
 <step><para>
