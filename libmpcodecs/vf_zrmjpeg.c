@@ -49,8 +49,7 @@
  * be2me_32, otherwise the linker will complain that it doesn't exist */
 #define HAVE_AV_CONFIG_H
 #include "libavcodec/avcodec.h"
-#include "libavcodec/dsputil.h"
-#include "libavcodec/mpegvideo.h"
+#include "libavcodec/mjpegenc.h"
 //#include "jpeg_enc.h" /* this file is not present yet */
 
 #undef malloc
@@ -68,21 +67,6 @@
 // "local" flag in vd_ffmpeg.c. If not set, avcodec_init() et. al. need to be called
 // set when init is done, so that initialization is not done twice.
 extern int avcodec_initialized;
-
-/// structure copied from mjpeg.c
-/* zrmjpeg_encode_mb needs access to these tables for the black & white
- * option */
-typedef struct MJpegContext {
-	uint8_t huff_size_dc_luminance[12];
-	uint16_t huff_code_dc_luminance[12];
-	uint8_t huff_size_dc_chrominance[12];
-	uint16_t huff_code_dc_chrominance[12];
-
-	uint8_t huff_size_ac_luminance[256];
-	uint16_t huff_code_ac_luminance[256];
-	uint8_t huff_size_ac_chrominance[256];
-	uint16_t huff_code_ac_chrominance[256];
-} MJpegContext;
 
 /// The get_pixels() routine to use. The real routine comes from dsputil
 static void (*get_pixels)(DCTELEM *restrict block, const uint8_t *pixels, int line_size);
