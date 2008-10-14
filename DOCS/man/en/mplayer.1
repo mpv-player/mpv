@@ -10044,7 +10044,7 @@ exhaustive search (very slow, and no better than umh)
 radius of exhaustive or multi-hexagon motion search (default: 16)
 .
 .TP
-.B subq=<1\-7>
+.B subq=<1\-9>
 Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
 estimation decision process.
@@ -10069,12 +10069,18 @@ Then selects the best type.
 Then finishes the quarterpixel refinement for that type.
 .IPs 5
 Runs best quality quarterpixel precision motion estimation on all
-candidate macroblock types, before selecting the best type (default).
+candidate macroblock types, before selecting the best type.
+Also refines the two motion vectors used in bidirectional macroblocks,
+rather than reusing vectors from the forward and backward searches.
 .IPs 6
 Enables rate-distortion optimization of macroblock types in
-I- and P-frames.
+I- and P-frames (default).
 .IPs 7
-Enables rate-distortion optimization of motion vectors and intra modes. (best)
+Enables rate-distortion optimization of macroblock types in all frames.
+.IPs 8
+Enables rate-distortion optimization of motion vectors in I- and P-frames.
+.IPs 9
+Enables rate-distortion optimization of motion vectors in all frames (best).
 .RE
 .PD 1
 .RS
@@ -10096,18 +10102,7 @@ Without this option, a whole macroblock must use the same reference.
 Requires frameref>1.
 .
 .TP
-.B (no)brdo
-Enables rate-distortion optimization of macroblock types in B-frames.
-Requires subq>=6.
-.
-.TP
-.B (no)bime
-Refine the two motion vectors used in bidirectional macroblocks,
-rather than re-using vectors from the forward and backward searches.
-This option has no effect without B-frames.
-.
-.TP
-.B trellis=<0\-2>
+.B trellis=<0\-2> (cabac only)
 rate-distortion optimal quantization
 .PD 0
 .RSs
@@ -10119,6 +10114,19 @@ enabled only for the final encode
 enabled during all mode decisions (slow, requires subq>=6)
 .RE
 .PD 1
+.
+.TP
+.B psy-rd=rd[:trell]
+Sets the strength of the psychovisual optimization.
+.PD 0
+.RSs
+.IPs rd=<0.0\-10.0>
+rate-distortion strength (requires subq>=6) (default: 1.0)
+.IPs trell=<0.0\-10.0>
+trellis (requires trellis, experimental) (default: 0.0)
+.RE
+.PD 1
+.
 .
 .TP
 .B deadzone_inter=<0\-32>
