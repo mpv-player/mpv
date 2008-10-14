@@ -1276,7 +1276,7 @@ static uint32_t put_image(mp_image_t *mpi){
 	}
 	else //packed
 	{
-        fast_memcpy( image, mpi->planes[0], image_height * dstride);
+		mem2agpcpy_pic(image, mpi->planes[0], w * (mpi->bpp / 8), h, dstride, mpi->stride[0]);
 	}
 	return VO_TRUE;
 }
