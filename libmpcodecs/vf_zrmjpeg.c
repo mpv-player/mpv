@@ -57,8 +57,6 @@
 #undef free
 #undef realloc
 
-extern int avcodec_initialized;
-
 /* some convenient #define's, is this portable enough? */
 /// Printout  with vf_zrmjpeg: prefix at VERBOSE level
 #define VERBOSE(...) mp_msg(MSGT_DECVIDEO, MSGL_V, "vf_zrmjpeg: " __VA_ARGS__)
