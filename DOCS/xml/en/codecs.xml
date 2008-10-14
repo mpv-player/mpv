@@ -15,7 +15,7 @@ of our homepage.
 </para>
 
 <para>
-If you have a Win32 codec not listed here which is not supported yet,
+If you have a Win32 codec which is not supported yet,
 please read the <link linkend="codec-importing">codec importing HOWTO</link>
 and help us add support for it.
 </para>
@@ -58,22 +58,8 @@ Just run <filename>./configure</filename> and compile.
 
 <para>
 <ulink url="http://www.xvid.org">Xvid</ulink> is a free software MPEG-4 ASP
-compliant video codec, which features two pass encoding and full MPEG-4 ASP
-support, making it a lot more efficient than the well-known DivX codec.
-It yields very good video quality and good performance due to CPU
-optimizations for most modern processors.
-</para>
-
-<para>
-It began as a forked development of the OpenDivX codec.
-This happened when ProjectMayo changed OpenDivX to closed source
-DivX4, and the non-ProjectMayo people working on OpenDivX got angry,
-then started Xvid. So both projects have the same origin.
-</para>
-
-<para>
-Note that Xvid is not necessary to decode Xvid-encoded video.
-<systemitem class="library">libavcodec</systemitem> is used by
+compliant video codec. Note that Xvid is not necessary to decode Xvid-encoded
+video. <systemitem class="library">libavcodec</systemitem> is used by
 default as it offers better speed.
 </para>
 
@@ -126,57 +112,27 @@ default as it offers better speed.
 <sect2 id="codec-x264">
 <title><systemitem class="library">x264</systemitem></title>
 
-<sect3 id="codec-x264-whatis">
-<title>What is <systemitem class="library">x264</systemitem>?</title>
-
 <para>
 <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
-is a library for creating H.264 video streams.
-It is not 100% complete, but supports most of H.264's features which impact
-quality.
-There are also many advanced features in the H.264 specification
-which have nothing to do with video quality per se; many of these
-are not yet implemented in <systemitem class="library">x264</systemitem>.
-</para>
-</sect3>
-
-
-<sect3 id="codec-x264-encode">
-<title>How can I encode videos using <application>MEncoder</application>
-  and <systemitem class="library">x264</systemitem>?</title>
-
-<para>
-If you have the GIT client installed, the latest x264
-sources can be gotten with this command:
-<screen>git clone git://git.videolan.org/x264.git</screen>
+is a library for creating H.264 video.
 <application>MPlayer</application> sources are updated whenever
 an <systemitem class="library">x264</systemitem> API change
 occurs, so it is always suggested to use
-<application>MPlayer</application> from Subversion as well.
-Perhaps this situation will change when and if an
-<systemitem class="library">x264</systemitem> "release" occurs.
-Meanwhile, <systemitem class="library">x264</systemitem> should
-be considered a bit unstable, in the sense that its programming
-interface is subject to change.
+<application>MPlayer</application> from Subversion.
 </para>
 
 <para>
-<systemitem class="library">x264</systemitem> is built and
-installed in the standard way:
-<screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-This installs libx264.a in /usr/local/lib and x264.h is placed in
-/usr/local/include.
+If you have a GIT client installed, the latest x264
+sources can be gotten with this command:
+<screen>git clone git://git.videolan.org/x264.git</screen>
 
-With the <systemitem class="library">x264</systemitem> library
-and header placed in the standard locations, building
-<application>MPlayer</application> with
-<systemitem class="library">x264</systemitem> support is easy.
-Just run the standard:
-<screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-The <filename>./configure</filename> script will autodetect that you have
-satisfied the requirements for <systemitem class="library">x264</systemitem>.
+Then build and install in the standard way:
+<screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
+
+Now rerun <filename>./configure</filename> for
+<application>MPlayer</application> to pick up
+<systemitem class="library">x264</systemitem> support.
 </para>
-</sect3>
 </sect2>
 </sect1>
 
@@ -286,21 +242,23 @@ only white noise).
 <title>AAC codec</title>
 
 <para>
-AAC (Advanced Audio Coding) is an audio codec sometimes found in MOV and MP4
-files. An open source decoder called FAAD is available from
-<ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> includes a CVS snapshot of libfaad 2.1
-beta, so you do not need to get it separately.
+An open source AAC decoder called FAAD2 is available from
+<ulink url="http://www.audiocoding.com/downloads.html"/>.
+<application>MPlayer</application> includes a copy of it in its source tree.
+If you want to use the external library instead, install it and pass
+<option>--enable-faad-external</option> to <filename>./configure</filename>.
 </para>
 
 <para>
-If you use gcc 3.2 which fails to compile our internal FAAD or want to use
-the external library for some other reason, download the library from the
-<ulink url="http://www.audiocoding.com/modules/mydownloads/">download page</ulink>
-and pass <option>--enable-faad-external</option>
-to <filename>./configure</filename>.
-You do not need all of faad2 to decode AAC files, libfaad is enough. Build
-it like this:
+FAAD2 binaries are not available from audiocoding.com, but you can (apt-)get
+Debian packages from
+<ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink>,
+Mandrake/Mandriva RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink>
+and Fedora RPMs from <ulink url="http://rpm.livna.org/">Livna</ulink>.
+</para>
+<para>
+If you choose to build from source, you do not need all of FAAD2 to decode
+AAC files, libfaad is enough. Build it like this:
 <screen>
 cd faad2/
 sh bootstrap
@@ -309,11 +267,6 @@ cd libfaad
 make
 make install
 </screen>
-Binaries are not available from audiocoding.com, but you can (apt-)get Debian
-packages from
-<ulink url="http://www.debian-multimedia.org/">Christian Marillat's homepage</ulink>,
-Mandrake/Mandriva RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink>
-and Fedora RPMs from <ulink url="http://rpm.livna.org/">Livna</ulink>.
 </para>
 </sect2>
 
