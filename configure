@@ -8127,9 +8127,6 @@ $_def_runtime_cpudetection
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 $_def_words_endian
 
-/* Define if your processor can access unaligned data in a fast way */
-$_def_fast_unaligned
-
 `ff_config_enable "$_arch_all" "$_arch" "ARCH"`
 
 /* Extension defines */
@@ -8673,6 +8670,9 @@ $_def_muxers
 #ifndef MP_DEBUG
 #define HAVE_EBP_AVAILABLE 1
 #endif
+
+/* Define if your processor can access unaligned data in a fast way */
+$_def_fast_unaligned
 
 #define CONFIG_GPL 1
 #define ENABLE_SMALL 0
