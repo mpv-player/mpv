@@ -134,6 +134,9 @@ int vo_gamma_hue = 1000;
 
 extern vd_functions_t* mpvdec; // FIXME!
 
+#define SCREEN_SIZE_X 1
+#define SCREEN_SIZE_Y 1
+
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
     int i,j;
     unsigned int out_fmt=0;

@@ -8556,8 +8556,6 @@ $_def_vidix_drv_unichrome
 $_def_vidix_pfx
 
 /* libvo options */
-#define SCREEN_SIZE_X 1
-#define SCREEN_SIZE_Y 1
 $_def_x11
 $_def_xv
 $_def_xvmc
