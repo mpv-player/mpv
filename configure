@@ -8607,9 +8607,6 @@ $_def_tga
 /* Define this if you have shm support */
 $_def_shm
 
-#if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
-#define X11_FULLSCREEN 1
-#endif
 
 /* FFmpeg */
 /* Define this to enable image postprocessing in libavcodec */
