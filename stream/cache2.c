@@ -20,9 +20,11 @@
 #include "osdep/timer.h"
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
+static DWORD WINAPI ThreadProc(void* s);
 #elif defined(__OS2__)
 #define INCL_DOS
 #include <os2.h>
+static void ThreadProc( void *s );
 #else
 #include <sys/wait.h>
 #endif
@@ -35,7 +37,6 @@ extern int use_gui;
 
 int stream_fill_buffer(stream_t *s);
 int stream_seek_long(stream_t *s,off_t pos);
-static void ThreadProc(void *s);
 
 typedef struct {
   // constats:
@@ -361,8 +362,11 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   
 #if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
 }
-
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+static DWORD WINAPI ThreadProc(void*s){
+#else   // OS2
 static void ThreadProc( void *s ){
+#endif
 #endif
   
 #ifdef CONFIG_GUI
