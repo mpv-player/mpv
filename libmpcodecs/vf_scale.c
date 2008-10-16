@@ -558,7 +558,7 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, Sw
 
 #ifdef ARCH_X86
 	if(gCpuCaps.hasMMX)
-		asm volatile("emms\n\t"::: "memory"); //FIXME this shouldnt be required but it IS (even for non mmx versions)
+		__asm__ volatile("emms\n\t"::: "memory"); //FIXME this should not be required but it IS (even for non-MMX versions)
 #endif
 	if(firstTime)
 	{

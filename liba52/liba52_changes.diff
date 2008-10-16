@@ -1,6 +1,6 @@
 --- include/a52.h	2006-06-12 15:04:57.000000000 +0200
 +++ liba52/a52.h	2006-06-05 02:23:02.000000000 +0200
-@@ -59,4 +63,9 @@
+@@ -63,4 +63,9 @@
  int a52_block (a52_state_t * state);
  void a52_free (a52_state_t * state);
  
@@ -12,7 +12,7 @@
  #endif /* A52_H */
 --- liba52/a52_internal.h	2006-06-12 15:05:07.000000000 +0200
 +++ liba52/a52_internal.h	2006-06-05 02:23:02.000000000 +0200
-@@ -103,18 +107,34 @@
+@@ -107,18 +107,34 @@
  #define DELTA_BIT_NONE (2)
  #define DELTA_BIT_RESERVED (3)
  
@@ -52,7 +52,7 @@
 +void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias);
 --- liba52/bitstream.c	2006-06-12 15:05:07.000000000 +0200
 +++ liba52/bitstream.c	2006-06-05 02:23:02.000000000 +0200
-@@ -31,6 +35,10 @@
+@@ -35,6 +35,10 @@
  
  #define BUFFER_SIZE 4096
  
@@ -63,7 +63,7 @@
  void a52_bitstream_set_ptr (a52_state_t * state, uint8_t * buf)
  {
      int align;
-@@ -38,6 +46,9 @@
+@@ -42,6 +46,9 @@
      align = (long)buf & 3;
      state->buffer_start = (uint32_t *) (buf - align);
      state->bits_left = 0;
@@ -75,7 +75,7 @@
  
 --- liba52/bitstream.h	2006-06-12 15:05:07.000000000 +0200
 +++ liba52/bitstream.h	2006-06-05 02:23:02.000000000 +0200
-@@ -21,6 +25,42 @@
+@@ -25,6 +25,42 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
@@ -118,7 +118,7 @@
  /* (stolen from the kernel) */
  #ifdef WORDS_BIGENDIAN
  
-@@ -28,7 +74,7 @@
+@@ -32,7 +74,7 @@
  
  #else
  
@@ -127,7 +127,7 @@
  
  #	define swab32(x) __i386_swab32(x)
  	static inline const uint32_t __i386_swab32(uint32_t x)
-@@ -39,19 +85,34 @@
+@@ -43,19 +85,34 @@
  
  #	else
  
@@ -166,7 +166,7 @@
      uint32_t result;
  	
      if (num_bits < state->bits_left) {
-@@ -61,10 +122,29 @@
+@@ -65,10 +122,29 @@
      }
  
      return a52_bitstream_get_bh (state, num_bits);
@@ -196,7 +196,7 @@
      int32_t result;
  	
      if (num_bits < state->bits_left) {
-@@ -74,4 +154,5 @@
+@@ -78,4 +154,5 @@
      }
  
      return a52_bitstream_get_bh_2 (state, num_bits);
@@ -204,7 +204,7 @@
  }
 --- liba52/downmix.c	2006-06-12 15:17:53.000000000 +0200
 +++ liba52/downmix.c	2006-06-05 02:23:02.000000000 +0200
-@@ -19,18 +23,46 @@
+@@ -23,18 +23,46 @@
   * You should have received a copy of the GNU General Public License
   * along with this program; if not, write to the Free Software
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -251,7 +251,7 @@
  int a52_downmix_init (int input, int flags, sample_t * level,
  		      sample_t clev, sample_t slev)
  {
-@@ -447,7 +479,7 @@
+@@ -451,7 +479,7 @@
  	samples[i] = 0;
  }
  
@@ -260,7 +260,7 @@
  		  sample_t clev, sample_t slev)
  {
      switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
-@@ -559,7 +591,7 @@
+@@ -563,7 +591,7 @@
  	break;
  
      case CONVERT (A52_3F2R, A52_2F1R):
@@ -269,7 +269,7 @@
  	move2to1 (samples + 768, samples + 512, bias);
  	break;
  
-@@ -583,12 +615,12 @@
+@@ -587,12 +615,12 @@
  	break;
  
      case CONVERT (A52_3F1R, A52_3F2R):
@@ -284,7 +284,7 @@
  {
      switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
  
-@@ -653,3 +685,1104 @@
+@@ -657,3 +685,1104 @@
  	goto mix_31to21;
      }
  }
@@ -292,7 +292,7 @@
 +#if defined(ARCH_X86) || defined(ARCH_X86_64)
 +static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movlps %2, %%xmm7		\n\t"
 +	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +	"mov $-1024, %%"REG_S"		\n\t"
@@ -315,7 +315,7 @@
 +
 +static void mix3to1_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movlps %1, %%xmm7		\n\t"
 +	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +	"mov $-1024, %%"REG_S"		\n\t"
@@ -336,7 +336,7 @@
 +
 +static void mix4to1_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movlps %1, %%xmm7		\n\t"
 +	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +	"mov $-1024, %%"REG_S"		\n\t"
@@ -358,7 +358,7 @@
 +
 +static void mix5to1_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movlps %1, %%xmm7		\n\t"
 +	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +	"mov $-1024, %%"REG_S"		\n\t"
@@ -381,7 +381,7 @@
 +
 +static void mix3to2_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movlps %1, %%xmm7		\n\t"
 +	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +	"mov $-1024, %%"REG_S"		\n\t"
@@ -404,7 +404,7 @@
 +
 +static void mix21to2_SSE (sample_t * left, sample_t * right, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movlps %2, %%xmm7		\n\t"
 +		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +		"mov $-1024, %%"REG_S"		\n\t"
@@ -427,7 +427,7 @@
 +
 +static void mix21toS_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movlps %1, %%xmm7		\n\t"
 +		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +		"mov $-1024, %%"REG_S"		\n\t"
@@ -451,7 +451,7 @@
 +
 +static void mix31to2_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movlps %1, %%xmm7		\n\t"
 +		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +		"mov $-1024, %%"REG_S"		\n\t"
@@ -475,7 +475,7 @@
 +
 +static void mix31toS_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movlps %1, %%xmm7		\n\t"
 +		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +		"mov $-1024, %%"REG_S"		\n\t"
@@ -501,7 +501,7 @@
 +
 +static void mix22toS_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movlps %1, %%xmm7		\n\t"
 +		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +		"mov $-1024, %%"REG_S"		\n\t"
@@ -526,7 +526,7 @@
 +
 +static void mix32to2_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movlps %1, %%xmm7		\n\t"
 +	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +	"mov $-1024, %%"REG_S"		\n\t"
@@ -550,7 +550,7 @@
 +
 +static void mix32toS_SSE (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movlps %1, %%xmm7		\n\t"
 +	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +	"mov $-1024, %%"REG_S"		\n\t"
@@ -577,7 +577,7 @@
 +
 +static void move2to1_SSE (sample_t * src, sample_t * dest, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movlps %2, %%xmm7		\n\t"
 +		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 +		"mov $-1024, %%"REG_S"		\n\t"
@@ -600,7 +600,7 @@
 +
 +static void zero_MMX(sample_t * samples)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"mov $-1024, %%"REG_S"		\n\t"
 +		"pxor %%mm0, %%mm0		\n\t"
 +		ASMALIGN(4)
@@ -826,7 +826,7 @@
 +
 +static void mix2to1_3dnow (sample_t * dest, sample_t * src, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movd  %2, %%mm7	\n\t"
 +	"punpckldq %2, %%mm7	\n\t"
 +	"mov $-1024, %%"REG_S"	\n\t"
@@ -857,7 +857,7 @@
 +
 +static void mix3to1_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movd  %1, %%mm7	\n\t"
 +	"punpckldq %1, %%mm7	\n\t"
 +	"mov $-1024, %%"REG_S"	\n\t"
@@ -884,7 +884,7 @@
 +
 +static void mix4to1_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movd  %1, %%mm7	\n\t"
 +	"punpckldq %1, %%mm7	\n\t"
 +	"mov $-1024, %%"REG_S"	\n\t"
@@ -913,7 +913,7 @@
 +
 +static void mix5to1_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movd  %1, %%mm7	\n\t"
 +	"punpckldq %1, %%mm7	\n\t"
 +	"mov $-1024, %%"REG_S"	\n\t"
@@ -944,7 +944,7 @@
 +
 +static void mix3to2_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movd  %1, %%mm7	\n\t"
 +	"punpckldq %1, %%mm7	\n\t"
 +	"mov $-1024, %%"REG_S"	\n\t"
@@ -975,7 +975,7 @@
 +
 +static void mix21to2_3dnow (sample_t * left, sample_t * right, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movd  %2, %%mm7	\n\t"
 +		"punpckldq %2, %%mm7	\n\t"
 +		"mov $-1024, %%"REG_S"	\n\t"
@@ -1006,7 +1006,7 @@
 +
 +static void mix21toS_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movd  %1, %%mm7	\n\t"
 +		"punpckldq %1, %%mm7	\n\t"
 +		"mov $-1024, %%"REG_S"	\n\t"
@@ -1039,7 +1039,7 @@
 +
 +static void mix31to2_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movd  %1, %%mm7	\n\t"
 +		"punpckldq %1, %%mm7	\n\t"
 +		"mov $-1024, %%"REG_S"	\n\t"
@@ -1072,7 +1072,7 @@
 +
 +static void mix31toS_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movd  %1, %%mm7	\n\t"
 +		"punpckldq %1, %%mm7	\n\t"
 +		"mov $-1024, %%"REG_S"	\n\t"
@@ -1109,7 +1109,7 @@
 +
 +static void mix22toS_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movd  %1, %%mm7	\n\t"
 +		"punpckldq %1, %%mm7	\n\t"
 +		"mov $-1024, %%"REG_S"	\n\t"
@@ -1144,7 +1144,7 @@
 +
 +static void mix32to2_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"movd  %1, %%mm7	\n\t"
 +	"punpckldq %1, %%mm7	\n\t"
 +	"mov $-1024, %%"REG_S"	\n\t"
@@ -1178,7 +1178,7 @@
 +/* todo: should be optimized better */
 +static void mix32toS_3dnow (sample_t * samples, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +	"mov $-1024, %%"REG_S"		\n\t"
 +	ASMALIGN(4)
 +	"1:			\n\t"
@@ -1217,7 +1217,7 @@
 +
 +static void move2to1_3dnow (sample_t * src, sample_t * dest, sample_t bias)
 +{
-+	asm volatile(
++	__asm__ volatile(
 +		"movd  %2, %%mm7	\n\t"
 +		"punpckldq %2, %%mm7	\n\t"
 +		"mov $-1024, %%"REG_S"	\n\t"
@@ -1385,13 +1385,13 @@
 +	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
 +	break;
 +    }
-+    __asm __volatile("femms":::"memory");
++    __asm__ volatile("femms":::"memory");
 +}
 +
 +#endif // ARCH_X86 || ARCH_X86_64
 --- liba52/imdct.c	2008-02-19 00:18:33.000000000 +0100
 +++ liba52/imdct.c	2008-02-19 00:16:40.000000000 +0100
-@@ -22,6 +26,11 @@
+@@ -26,6 +26,11 @@
   * You should have received a copy of the GNU General Public License
   * along with this program; if not, write to the Free Software
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -1403,7 +1403,7 @@
   */
  
  #include "config.h"
-@@ -39,12 +48,49 @@
+@@ -43,12 +48,49 @@
  #include "a52.h"
  #include "a52_internal.h"
  #include "mm_accel.h"
@@ -1453,7 +1453,7 @@
  static uint8_t fftorder[] = {
        0,128, 64,192, 32,160,224, 96, 16,144, 80,208,240,112, 48,176,
        8,136, 72,200, 40,168,232,104,248,120, 56,184, 24,152,216, 88,
-@@ -56,6 +102,40 @@
+@@ -60,6 +102,40 @@
        6,134, 70,198, 38,166,230,102,246,118, 54,182, 22,150,214, 86
  };
  
@@ -1494,7 +1494,7 @@
  /* Root values for IFFT */
  static sample_t roots16[3];
  static sample_t roots32[7];
-@@ -241,7 +321,7 @@
+@@ -245,7 +321,7 @@
      ifft_pass (buf, roots128 - 32, 32);
  }
  
@@ -1503,7 +1503,7 @@
  {
      int i, k;
      sample_t t_r, t_i, a_r, a_i, b_r, b_i, w_1, w_2;
-@@ -285,6 +365,701 @@
+@@ -289,6 +365,701 @@
      }
  }
  
@@ -1892,7 +1892,7 @@
 +
 +    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
 +    /* Bit reversed shuffling */
-+	asm volatile(
++	__asm__ volatile(
 +		"xor %%"REG_S", %%"REG_S"		\n\t"
 +		"lea "MANGLE(bit_reverse_512)", %%"REG_a"\n\t"
 +		"mov $1008, %%"REG_D"			\n\t"
@@ -1952,7 +1952,7 @@
 +    
 +    /* 1. iteration */
 +	// Note w[0][0]={1,0}
-+	asm volatile(
++	__asm__ volatile(
 +		"xorps %%xmm1, %%xmm1	\n\t"
 +		"xorps %%xmm2, %%xmm2	\n\t"
 +		"mov %0, %%"REG_S"	\n\t"
@@ -1974,7 +1974,7 @@
 +        
 +    /* 2. iteration */
 +	// Note w[1]={{1,0}, {0,-1}}
-+	asm volatile(
++	__asm__ volatile(
 +		"movaps "MANGLE(ps111_1)", %%xmm7\n\t" // 1,1,1,-1
 +		"mov %0, %%"REG_S"		\n\t"
 +		ASMALIGN(4)
@@ -2002,7 +2002,7 @@
 + Note sseW2+32={0,0,-sqrt(2),-sqrt(2))
 + Note sseW2+48={1,-1,sqrt(2),-sqrt(2))
 +*/
-+	asm volatile(
++	__asm__ volatile(
 +		"movaps 48+"MANGLE(sseW2)", %%xmm6\n\t" 
 +		"movaps 16+"MANGLE(sseW2)", %%xmm7\n\t" 
 +		"xorps %%xmm5, %%xmm5		\n\t"
@@ -2047,7 +2047,7 @@
 +	two_m_plus_one = two_m<<1;
 +	two_m_plus_one_shl3 = (two_m_plus_one<<3);
 +	buf_offset = buf+128;
-+	asm volatile(
++	__asm__ volatile(
 +		"mov %0, %%"REG_S"			\n\t"
 +		ASMALIGN(4)
 +		"1:					\n\t"
@@ -2079,7 +2079,7 @@
 +    }
 +
 +    /* Post IFFT complex multiply  plus IFFT complex conjugate*/
-+	asm volatile(
++	__asm__ volatile(
 +		"mov $-1024, %%"REG_S"			\n\t"
 +		ASMALIGN(4)
 +		"1:					\n\t"
@@ -2102,7 +2102,7 @@
 +    window_ptr = a52_imdct_window;
 +
 +    /* Window and convert to real valued signal */
-+	asm volatile(
++	__asm__ volatile(
 +		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
 +		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 +		"movss %3, %%xmm2			\n\t"  // bias
@@ -2129,7 +2129,7 @@
 +	delay_ptr+=128;
 +//	window_ptr+=128;
 +	
-+	asm volatile(
++	__asm__ volatile(
 +		"mov $1024, %%"REG_D"			\n\t"  // 512
 +		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 +		"movss %3, %%xmm2			\n\t"  // bias
@@ -2158,7 +2158,7 @@
 +    /* The trailing edge of the window goes into the delay line */
 +    delay_ptr = delay;
 +
-+	asm volatile(
++	__asm__ volatile(
 +		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
 +		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 +		ASMALIGN(4)
@@ -2180,7 +2180,7 @@
 +	delay_ptr+=128;
 +//	window_ptr-=128;
 +	
-+	asm volatile(
++	__asm__ volatile(
 +		"mov $1024, %%"REG_D"			\n\t"  // 1024
 +		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 +		ASMALIGN(4)
@@ -2205,7 +2205,7 @@
  void a52_imdct_256(sample_t * data, sample_t * delay, sample_t bias)
  {
      int i, k;
-@@ -364,7 +1145,7 @@
+@@ -368,7 +1145,7 @@
  
  void a52_imdct_init (uint32_t mm_accel)
  {
@@ -2214,7 +2214,7 @@
      double sum;
  
      /* compute imdct window - kaiser-bessel derived window, alpha = 5.0 */
-@@ -416,6 +1197,99 @@
+@@ -420,6 +1197,99 @@
  	post2[i].real = cos ((M_PI / 128) * (i + 0.5));
  	post2[i].imag = sin ((M_PI / 128) * (i + 0.5));
      }
@@ -2314,7 +2314,7 @@
  
  #ifdef LIBA52_DJBFFT
      if (mm_accel & MM_ACCEL_DJBFFT) {
-@@ -426,7 +1300,5 @@
+@@ -430,7 +1300,5 @@
  #endif
      {
  	fprintf (stderr, "No accelerated IMDCT transform found\n");
@@ -2324,7 +2324,7 @@
  }
 --- include/mm_accel.h	2006-06-12 15:05:00.000000000 +0200
 +++ liba52/mm_accel.h	2006-06-05 02:23:04.000000000 +0200
-@@ -30,7 +34,12 @@
+@@ -34,7 +34,12 @@
  /* x86 accelerations */
  #define MM_ACCEL_X86_MMX	0x80000000
  #define MM_ACCEL_X86_3DNOW	0x40000000

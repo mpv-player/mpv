@@ -153,7 +153,7 @@ static void hardthresh_mmx(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *pe
 	
 	threshold1= qp*((1<<4) - bias) - 1;
 	
-        asm volatile(
+        __asm__ volatile(
 #define REQUANT_CORE(dst0, dst1, dst2, dst3, src0, src1, src2, src3) \
 		"movq " #src0 ", %%mm0	\n\t"\
 		"movq " #src1 ", %%mm1	\n\t"\
@@ -221,7 +221,7 @@ static void softthresh_mmx(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *pe
 
 	threshold1= qp*((1<<4) - bias) - 1;
 	
-        asm volatile(
+        __asm__ volatile(
 #undef REQUANT_CORE
 #define REQUANT_CORE(dst0, dst1, dst2, dst3, src0, src1, src2, src3) \
 		"movq " #src0 ", %%mm0	\n\t"\
@@ -334,7 +334,7 @@ static void store_slice_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_
 	for(y=0; y<height; y++){
 		uint8_t *dst1= dst;
 		int16_t *src1= src;
-		asm volatile(
+		__asm__ volatile(
 			"movq (%3), %%mm3	\n\t"
 			"movq (%3), %%mm4	\n\t"
 			"movd %4, %%mm2		\n\t"
@@ -500,10 +500,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	}
 
 #ifdef HAVE_MMX
-	if(gCpuCaps.hasMMX) asm volatile ("emms\n\t");
+	if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
 #endif
 #ifdef HAVE_MMX2
-	if(gCpuCaps.hasMMX2) asm volatile ("sfence\n\t");
+	if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
 #endif
 
 	return vf_next_put_image(vf,dmpi, pts);

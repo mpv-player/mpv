@@ -368,13 +368,13 @@ block_metrics_faster_c(unsigned char *a, unsigned char *b, int as, int bs,
 #define MEQ(X,Y) ((X).even == (Y).even && (X).odd == (Y).odd && (X).temp == (Y).temp && (X).noise == (Y).noise)
 
 #define BLOCK_METRICS_TEMPLATE() \
-    asm volatile("pxor %mm7, %mm7\n\t"   /* The result is colleted in mm7 */ \
+    __asm__ volatile("pxor %mm7, %mm7\n\t"   /* The result is colleted in mm7 */ \
 		 "pxor %mm6, %mm6\n\t"   /* Temp to stay at 0 */	     \
 	);								     \
     a -= as;								     \
     b -= bs;								     \
     do {								     \
-	asm volatile(							     \
+	__asm__ volatile(						     \
 	    "movq (%0,%2), %%mm0\n\t"					     \
 	    "movq (%1,%3), %%mm1\n\t"   /* mm1 = even */		     \
 	    PSADBW(%%mm1, %%mm0, %%mm4, %%mm6)				     \
@@ -439,7 +439,7 @@ block_metrics_3dnow(unsigned char *a, unsigned char *b, int as, int bs,
     static const unsigned long long ones = 0x0101010101010101ull;
 
     BLOCK_METRICS_TEMPLATE();
-    asm volatile("movq %%mm7, %0\n\temms" : "=m" (tm));
+    __asm__ volatile("movq %%mm7, %0\n\temms" : "=m" (tm));
     get_block_stats(&tm, p, s);
 #endif
     return tm;
@@ -471,7 +471,7 @@ block_metrics_mmx2(unsigned char *a, unsigned char *b, int as, int bs,
 #ifdef DEBUG
     struct frame_stats ts = *s;
 #endif
-    asm volatile("prefetcht0 (%0,%2)\n\t"
+    __asm__ volatile("prefetcht0 (%0,%2)\n\t"
 		 "prefetcht0 (%1,%3)\n\t" :
 		 : "r" (a), "r" (b),
 		 "r" (prefetch_line * as), "r" (prefetch_line * bs));
@@ -479,7 +479,7 @@ block_metrics_mmx2(unsigned char *a, unsigned char *b, int as, int bs,
     BLOCK_METRICS_TEMPLATE();
 
     s->num_blocks++;
-    asm volatile(
+    __asm__ volatile(
 	"movq %3, %%mm0\n\t"
 	"movq %%mm7, %%mm1\n\t"
 	"psubusw %%mm0, %%mm1\n\t"
@@ -525,7 +525,7 @@ block_metrics_mmx2(unsigned char *a, unsigned char *b, int as, int bs,
 	s->interlaced_high += interlaced >> 16;
 	s->interlaced_low += interlaced;
     } else {
-	asm volatile(
+	__asm__ volatile(
 	    "pcmpeqw %%mm0, %%mm0\n\t" /* -1 */
 	    "psubw 	%%mm0, %%mm4\n\t"
 	    "psubw 	%%mm0, %%mm5\n\t"
@@ -539,7 +539,7 @@ block_metrics_mmx2(unsigned char *a, unsigned char *b, int as, int bs,
 	    : "=m" (s->tiny), "=m" (s->low), "=m" (s->high)
 	    );
 
-	asm volatile(
+	__asm__ volatile(
 	    "pshufw $0, %2, %%mm0\n\t"
 	    "psubusw %%mm7, %%mm0\n\t"
 	    "pcmpeqw %%mm6, %%mm0\n\t"   /* 0 if below sad_thres */
@@ -556,7 +556,7 @@ block_metrics_mmx2(unsigned char *a, unsigned char *b, int as, int bs,
 	    );
     }
 
-    asm volatile(
+    __asm__ volatile(
 	"movq %%mm7, (%1)\n\t"
 	PMAXUW((%0), %%mm7)
 	"movq %%mm7, (%0)\n\t"
@@ -597,7 +597,7 @@ dint_copy_line_mmx2(unsigned char *dst, unsigned char *a, long bos,
 #else
     unsigned long len = (w+7) >> 3;
     int ret;
-    asm volatile (
+    __asm__ volatile (
 	"pxor %%mm6, %%mm6 \n\t"       /* deinterlaced pixel counter */
 	"movd %0, %%mm7 \n\t"
 	"punpcklbw %%mm7, %%mm7 \n\t"
@@ -607,7 +607,7 @@ dint_copy_line_mmx2(unsigned char *dst, unsigned char *a, long bos,
 	: "rm" (t)
 	);
     do {
-	asm volatile (
+	__asm__ volatile (
 	    "movq (%0), %%mm0\n\t"
 	    "movq (%0,%3,2), %%mm1\n\t"
 	    "movq %%mm0, (%2)\n\t"
@@ -639,7 +639,7 @@ dint_copy_line_mmx2(unsigned char *dst, unsigned char *a, long bos,
 	dst += 8;
     } while (--len);
 
-    asm volatile ("pxor %%mm7, %%mm7 \n\t"
+    __asm__ volatile ("pxor %%mm7, %%mm7 \n\t"
 		  "psadbw %%mm6, %%mm7 \n\t"
 		  "movd %%mm7, %0 \n\t"
 		  "emms \n\t"

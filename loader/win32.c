@@ -4569,7 +4569,7 @@ static INT WINAPI expMessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type
 void exp_EH_prolog(void *dest);
 //! just a dummy function that acts a container for the asm section
 void exp_EH_prolog_dummy(void) {
-  asm volatile (
+  __asm__ volatile (
 // take care, this "function" may not change flags or
 // registers besides eax (which is also why we can't use
 // exp_EH_prolog_dummy directly)

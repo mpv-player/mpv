@@ -194,11 +194,11 @@ static int put_image( struct vf_instance_s* vf, mp_image_t *mpi, double pts) {
     
 #ifdef HAVE_MMX
     if(gCpuCaps.hasMMX)
-	asm volatile ("emms\n\t");
+	__asm__ volatile ("emms\n\t");
 #endif
 #ifdef HAVE_MMX2
     if(gCpuCaps.hasMMX2)
-	asm volatile ("sfence\n\t");
+	__asm__ volatile ("sfence\n\t");
 #endif
     
     return vf_next_put_image( vf, dmpi, pts);

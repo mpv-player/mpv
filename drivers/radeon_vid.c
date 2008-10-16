@@ -129,7 +129,7 @@ static int swap_fourcc __initdata = 0;
 static inline double FastSin(double x)
 {
    register double res;
-   __asm __volatile("fsin":"=t"(res):"0"(x));
+   __asm__ __volatile("fsin":"=t"(res):"0"(x));
    return res;
 }
 #undef sin
@@ -138,7 +138,7 @@ static inline double FastSin(double x)
 static inline double FastCos(double x)
 {
    register double res;
-   __asm __volatile("fcos":"=t"(res):"0"(x));
+   __asm__ __volatile("fcos":"=t"(res):"0"(x));
    return res;
 }
 #undef cos

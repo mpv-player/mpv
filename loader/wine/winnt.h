@@ -693,7 +693,7 @@ typedef HANDLE *PHANDLE;
 #else  /* __GNUC__ */
 # define ASM_GLOBAL_FUNC(name,code) \
       void asm_dummy_##name(void) { \
-          asm( ".align 4\n\t" \
+          __asm__( ".align 4\n\t" \
                ".globl " ASM_NAME(#name) "\n\t" \
                ".type " ASM_NAME(#name) ",@function\n" \
                ASM_NAME(#name) ":\n\t" \

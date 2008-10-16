@@ -46,7 +46,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 	int i;
 	short out[24]; // output buffer for the partial metrics from the mmx code
 	
-	asm (
+	__asm__ (
 		"movl $4, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t" // 4 even difference sums
 		"pxor %%mm5, %%mm5 \n\t" // 4 odd difference sums
@@ -105,7 +105,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 	m->o = out[4]+out[5]+out[6]+out[7];
 	m->d = m->e + m->o;
 
-	asm (
+	__asm__ (
 		// First loop to measure first four columns
 		"movl $4, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t" // Past spacial noise

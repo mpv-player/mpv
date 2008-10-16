@@ -62,7 +62,7 @@ static __inline__ int enable_os_io(void)
  
 /* Calling callgate with function 13 sets IOPL for the program */
  
-	asm volatile ("movl $13,%%ebx;.byte 0xff,0x1d;.long _callgate"
+	__asm__ volatile ("movl $13,%%ebx;.byte 0xff,0x1d;.long _callgate"
 			: /*no outputs */
 			: /*no inputs */
 			: "eax","ebx","ecx","edx","cc");

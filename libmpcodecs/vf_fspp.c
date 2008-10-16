@@ -187,7 +187,7 @@ static void store_slice_mmx(uint8_t *dst, int16_t *src, long dst_stride, long sr
     width = (width+7)&~7;
     dst_stride-=width;
     //src_stride=(src_stride-width)*2;
-    asm volatile(
+    __asm__ volatile(
 	"mov %5, %%"REG_d"                \n\t"
 	"mov %6, %%"REG_S"                \n\t"
 	"mov %7, %%"REG_D"                \n\t"
@@ -255,7 +255,7 @@ static void store_slice2_mmx(uint8_t *dst, int16_t *src, long dst_stride, long s
     width = (width+7)&~7;
     dst_stride-=width;
     //src_stride=(src_stride-width)*2;
-    asm volatile(
+    __asm__ volatile(
 	"mov %5, %%"REG_d"                \n\t"
 	"mov %6, %%"REG_S"                \n\t"
 	"mov %7, %%"REG_D"                \n\t"
@@ -318,7 +318,7 @@ static void store_slice2_mmx(uint8_t *dst, int16_t *src, long dst_stride, long s
 static void mul_thrmat_mmx(struct vf_priv_s *p, int q)
 {
     uint64_t *adr=&p->threshold_mtx_noq[0];
-    asm volatile(
+    __asm__ volatile(
 	"movd %0, %%mm7                \n\t"
 	"add $8*8*2, %%"REG_D"            \n\t"
 	"movq 0*8(%%"REG_S"), %%mm0        \n\t"
@@ -558,10 +558,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
     }
 
 #ifdef HAVE_MMX
-    if(gCpuCaps.hasMMX) asm volatile ("emms\n\t");
+    if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
 #endif
 #ifdef HAVE_MMX2
-    if(gCpuCaps.hasMMX2) asm volatile ("sfence\n\t");
+    if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
 #endif
     return vf_next_put_image(vf,dmpi, pts);
 }
@@ -868,7 +868,7 @@ static void column_fidct_c(int16_t* thr_adr, DCTELEM *data, DCTELEM *output, int
 static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,  int cnt)
 {
     uint64_t __attribute__((aligned(8))) temps[4];
-    asm volatile(
+    __asm__ volatile(
 	ASMALIGN(4)
 	"1:                   \n\t"
 	"movq "DCTSIZE_S"*0*2(%%"REG_S"), %%mm1 \n\t"
@@ -1669,7 +1669,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 			  int16_t* output_adr,  int output_stride,  int cnt)
 {
     uint64_t __attribute__((aligned(8))) temps[4];
-    asm volatile(
+    __asm__ volatile(
 	"lea (%%"REG_a",%%"REG_a",2), %%"REG_d"    \n\t"
 	"1:                     \n\t"
 	"movq "DCTSIZE_S"*0*2(%%"REG_S"), %%mm0 \n\t"
@@ -1935,7 +1935,7 @@ static void row_fdct_c(DCTELEM *data, const uint8_t *pixels, int line_size, int 
 static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size,  int cnt)
 {
     uint64_t __attribute__((aligned(8))) temps[4];
-    asm volatile(
+    __asm__ volatile(
 	"lea (%%"REG_a",%%"REG_a",2), %%"REG_d"    \n\t"
 	"6:                     \n\t"
 	"movd (%%"REG_S"), %%mm0           \n\t"

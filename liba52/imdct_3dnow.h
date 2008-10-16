@@ -431,7 +431,7 @@ imdct_do_512_3dnow
 */
 
     FFT_128P_3DNOW (&buf[0]);
-//    asm volatile ("femms \n\t":::"memory");
+//    __asm__ volatile ("femms \n\t":::"memory");
     
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
 #if 1  
@@ -489,7 +489,7 @@ imdct_do_512_3dnow
 
     /* Window and convert to real valued signal */
 #if 1
-	asm volatile (
+	__asm__ volatile (
 		"movd (%0), %%mm3	\n\t"
 		"punpckldq %%mm3, %%mm3	\n\t"
 	:: "r" (&bias)

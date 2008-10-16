@@ -150,7 +150,7 @@ static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int 
 	long mmx_len= len&(~7);
 	noise+=shift;
 
-	asm volatile(
+	__asm__ volatile(
 		"mov %3, %%"REG_a"		\n\t"
 		"pcmpeqb %%mm7, %%mm7		\n\t"
 		"psllw $15, %%mm7		\n\t"
@@ -179,7 +179,7 @@ static inline void lineNoise_MMX2(uint8_t *dst, uint8_t *src, int8_t *noise, int
 	long mmx_len= len&(~7);
 	noise+=shift;
 
-	asm volatile(
+	__asm__ volatile(
 		"mov %3, %%"REG_a"		\n\t"
 		"pcmpeqb %%mm7, %%mm7		\n\t"
 		"psllw $15, %%mm7		\n\t"
@@ -220,7 +220,7 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
 	long mmx_len= len&(~7);
 
-	asm volatile(
+	__asm__ volatile(
 		"mov %5, %%"REG_a"		\n\t"
 		ASMALIGN(4)
 		"1:				\n\t"
@@ -357,10 +357,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
         vf_clone_mpi_attributes(dmpi, mpi);
 
 #ifdef HAVE_MMX
-	if(gCpuCaps.hasMMX) asm volatile ("emms\n\t");
+	if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
 #endif
 #ifdef HAVE_MMX2
-	if(gCpuCaps.hasMMX2) asm volatile ("sfence\n\t");
+	if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
 #endif
 
 	return vf_next_put_image(vf,dmpi, pts);

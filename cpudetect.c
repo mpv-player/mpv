@@ -85,14 +85,14 @@ static void
 do_cpuid(unsigned int ax, unsigned int *p)
 {
 #if 0
-	__asm __volatile(
+	__asm__ __volatile(
 	"cpuid;"
 	: "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
 	:  "0" (ax)
 	);
 #else
 // code from libavcodec:
-    __asm __volatile
+    __asm__ __volatile__
 	("mov %%"REG_b", %%"REG_S"\n\t"
          "cpuid\n\t"
          "xchg %%"REG_b", %%"REG_S
@@ -400,7 +400,7 @@ static void check_os_katmai_support( void )
    if ( gCpuCaps.hasSSE ) {
       mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
       exc_fil = SetUnhandledExceptionFilter(win32_sig_handler_sse);
-      __asm __volatile ("xorps %xmm0, %xmm0");
+      __asm__ __volatile ("xorps %xmm0, %xmm0");
       SetUnhandledExceptionFilter(exc_fil);
       mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
@@ -409,7 +409,7 @@ static void check_os_katmai_support( void )
    if ( gCpuCaps.hasSSE ) {
       mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
       DosSetExceptionHandler( &RegRec );
-      __asm __volatile ("xorps %xmm0, %xmm0");
+      __asm__ __volatile ("xorps %xmm0, %xmm0");
       DosUnsetExceptionHandler( &RegRec );
       mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
@@ -432,8 +432,8 @@ static void check_os_katmai_support( void )
    if ( gCpuCaps.hasSSE ) {
       mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
 
-//      __asm __volatile ("xorps %%xmm0, %%xmm0");
-      __asm __volatile ("xorps %xmm0, %xmm0");
+//      __asm__ __volatile ("xorps %%xmm0, %%xmm0");
+      __asm__ __volatile ("xorps %xmm0, %xmm0");
 
       mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
@@ -532,7 +532,7 @@ void GetCpuCaps( CpuCaps *caps)
           } else {
             canjump = 1;
             
-            asm volatile ("mtspr 256, %0\n\t"
+            __asm__ volatile ("mtspr 256, %0\n\t"
                           "vand %%v0, %%v0, %%v0"
                           :
                           : "r" (-1));

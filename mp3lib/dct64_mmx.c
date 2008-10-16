@@ -9,7 +9,7 @@
 void dct64_MMX(short *a,short *b,real *c)
 {
     char tmp[256];
-    __asm __volatile(
+    __asm__ __volatile(
 "	movl %2,%%eax\n\t"
 /* Phase 1*/
 "	flds     (%%eax)\n\t"

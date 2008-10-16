@@ -41,7 +41,7 @@ int synth_1to1_pent(real *bandPtr, int channel, short *samples)
 {
   real tmp[3];
   register int retval;
-    __asm __volatile(
+    __asm__ __volatile(
 "        movl %%ebp,"MANGLE(saved_ebp)"\n\t"
 "        movl %1,%%eax\n\t"/*bandPtr*/
 "        movl %3,%%esi\n\t"

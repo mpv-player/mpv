@@ -256,7 +256,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 //	printf(" %d %d\n", (int)from&1023, (int)to&1023);
 	// Pure Assembly cuz gcc is a bit unpredictable ;)
 	if(i>=BLOCK_SIZE/64)
-		asm volatile(
+		__asm__ volatile(
 			"xor %%"REG_a", %%"REG_a"	\n\t"
 			ASMALIGN(4)
 			"1:			\n\t"

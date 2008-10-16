@@ -140,7 +140,7 @@ static int config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt){
 	
 	int sw, sh;
-//asm volatile("emms\n\t");
+//__asm__ volatile("emms\n\t");
 	allocStuff(&vf->priv->luma, width, height);
 	
 	getSubSampleFactors(&sw, &sh, outfmt);

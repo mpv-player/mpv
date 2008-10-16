@@ -46,7 +46,7 @@ void mp_msg( int x, const char *format, ... ) // stub for cpudetect.c
 static inline long long rdtsc()
 {
 	long long l;
-	asm volatile(	"rdtsc\n\t"
+	__asm__ volatile("rdtsc\n\t"
 		: "=A" (l)
 	);
 //	printf("%d\n", int(l/1000));

@@ -2124,8 +2124,8 @@ EOF
     cat > $TMPC << EOF
 int main(void) {
     unsigned long ver, mask;
-    asm ("implver %0" : "=r" (ver));
-    asm ("amask %1, %0" : "=r" (mask) : "r" (-1));
+    __asm__ ("implver %0" : "=r" (ver));
+    __asm__ ("amask %1, %0" : "=r" (mask) : "r" (-1));
     printf("%ld-%x\n", ver, ~mask);
     return 0;
 }
@@ -2374,7 +2374,7 @@ echocheck ".align is a power of two"
 if test "$_asmalign_pot" = auto ; then
 _asmalign_pot=no
 cat > $TMPC << EOF
-int main(void) { asm (".align 3"); return 0; }
+int main(void) { __asm__ (".align 3"); return 0; }
 EOF
 cc_check && _asmalign_pot=yes
 fi

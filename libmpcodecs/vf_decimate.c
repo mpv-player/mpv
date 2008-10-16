@@ -23,7 +23,7 @@ struct vf_priv_s {
 static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 {
 	volatile short out[4];
-	asm (
+	__asm__ (
 		"movl $8, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"

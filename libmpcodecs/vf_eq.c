@@ -44,7 +44,7 @@ static void process_MMX(unsigned char *dest, int dstride, unsigned char *src, in
 	contvec[0] = contvec[1] = contvec[2] = contvec[3] = contrast;
 		
 	while (h--) {
-		asm volatile (
+		__asm__ volatile (
 			"movq (%5), %%mm3 \n\t"
 			"movq (%6), %%mm4 \n\t"
 			"pxor %%mm0, %%mm0 \n\t"
@@ -82,7 +82,7 @@ static void process_MMX(unsigned char *dest, int dstride, unsigned char *src, in
 		src += sstep;
 		dest += dstep;
 	}
-	asm volatile ( "emms \n\t" ::: "memory" );
+	__asm__ volatile ( "emms \n\t" ::: "memory" );
 }
 #endif
 

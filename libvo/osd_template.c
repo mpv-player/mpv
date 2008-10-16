@@ -33,7 +33,7 @@ static inline void RENAME(vo_draw_alpha_yv12)(int w,int h, unsigned char* src, u
     w=w>>1;
 #endif
 #ifdef HAVE_MMX
-    asm volatile(
+    __asm__ volatile(
         "pcmpeqb %%mm5, %%mm5\n\t" // F..F
         "movq %%mm5, %%mm4\n\t"
         "movq %%mm5, %%mm7\n\t"
@@ -44,13 +44,13 @@ static inline void RENAME(vo_draw_alpha_yv12)(int w,int h, unsigned char* src, u
     for(y=0;y<h;y++){
         register int x;
 #ifdef HAVE_MMX
-    asm volatile(
+    __asm__ volatile(
 	PREFETCHW" %0\n\t"
 	PREFETCH" %1\n\t"
 	PREFETCH" %2\n\t"
 	::"m"(*dstbase),"m"(*srca),"m"(*src):"memory");
     for(x=0;x<w;x+=8){
-	asm volatile(
+	__asm__ volatile(
 		"movl %1, %%eax\n\t"
 		"orl 4%1, %%eax\n\t"
 		" jz 1f\n\t"
@@ -92,7 +92,7 @@ static inline void RENAME(vo_draw_alpha_yv12)(int w,int h, unsigned char* src, u
         dstbase+=dststride;
     }
 #ifdef HAVE_MMX
-	asm volatile(EMMS:::"memory");
+	__asm__ volatile(EMMS:::"memory");
 #endif
     return;
 }
@@ -103,7 +103,7 @@ static inline void RENAME(vo_draw_alpha_yuy2)(int w,int h, unsigned char* src, u
     w=w>>1;
 #endif
 #ifdef HAVE_MMX
-    asm volatile(
+    __asm__ volatile(
         "pxor %%mm7, %%mm7\n\t"
         "pcmpeqb %%mm5, %%mm5\n\t" // F..F
         "movq %%mm5, %%mm6\n\t"
@@ -115,13 +115,13 @@ static inline void RENAME(vo_draw_alpha_yuy2)(int w,int h, unsigned char* src, u
     for(y=0;y<h;y++){
         register int x;
 #ifdef HAVE_MMX
-    asm volatile(
+    __asm__ volatile(
 	PREFETCHW" %0\n\t"
 	PREFETCH" %1\n\t"
 	PREFETCH" %2\n\t"
 	::"m"(*dstbase),"m"(*srca),"m"(*src));
     for(x=0;x<w;x+=4){
-	asm volatile(
+	__asm__ volatile(
 		"movl %1, %%eax\n\t"
 		"orl %%eax, %%eax\n\t"
 		" jz 1f\n\t"
@@ -164,7 +164,7 @@ static inline void RENAME(vo_draw_alpha_yuy2)(int w,int h, unsigned char* src, u
         dstbase+=dststride;
     }
 #ifdef HAVE_MMX
-	asm volatile(EMMS:::"memory");
+	__asm__ volatile(EMMS:::"memory");
 #endif
     return;
 }
@@ -196,7 +196,7 @@ static inline void RENAME(vo_draw_alpha_uyvy)(int w,int h, unsigned char* src, u
 static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
 #ifdef HAVE_MMX
-    asm volatile(
+    __asm__ volatile(
         "pxor %%mm7, %%mm7\n\t"
         "pcmpeqb %%mm6, %%mm6\n\t" // F..F
         ::);        
@@ -206,14 +206,14 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
         register int x;
 #if defined(ARCH_X86) && (!defined(ARCH_X86_64) || defined(HAVE_MMX))
 #ifdef HAVE_MMX
-    asm volatile(
+    __asm__ volatile(
 	PREFETCHW" %0\n\t"
 	PREFETCH" %1\n\t"
 	PREFETCH" %2\n\t"
 	::"m"(*dst),"m"(*srca),"m"(*src):"memory");
     for(x=0;x<w;x+=2){
      if(srca[x] || srca[x+1])
-	asm volatile(
+	__asm__ volatile(
 		PREFETCHW" 32%0\n\t"
 		PREFETCH" 32%1\n\t"
 		PREFETCH" 32%2\n\t"
@@ -250,7 +250,7 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 #else /* HAVE_MMX */
     for(x=0;x<w;x++){
         if(srca[x]){
-	    asm volatile(
+	    __asm__ volatile(
 		"movzbl (%0), %%ecx\n\t"
 		"movzbl 1(%0), %%eax\n\t"
 
@@ -296,7 +296,7 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
         dstbase+=dststride;
     }
 #ifdef HAVE_MMX
-	asm volatile(EMMS:::"memory");
+	__asm__ volatile(EMMS:::"memory");
 #endif
     return;
 }
@@ -308,12 +308,12 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
 #endif
 #ifdef HAVE_MMX
 #ifdef HAVE_3DNOW
-    asm volatile(
+    __asm__ volatile(
         "pxor %%mm7, %%mm7\n\t"
         "pcmpeqb %%mm6, %%mm6\n\t" // F..F
         ::);
 #else /* HAVE_3DNOW */
-    asm volatile(
+    __asm__ volatile(
         "pxor %%mm7, %%mm7\n\t"
         "pcmpeqb %%mm5, %%mm5\n\t" // F..F
         "movq %%mm5, %%mm4\n\t"
@@ -327,14 +327,14 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
 #if defined(ARCH_X86) && (!defined(ARCH_X86_64) || defined(HAVE_MMX))
 #ifdef HAVE_MMX
 #ifdef HAVE_3DNOW
-    asm volatile(
+    __asm__ volatile(
 	PREFETCHW" %0\n\t"
 	PREFETCH" %1\n\t"
 	PREFETCH" %2\n\t"
 	::"m"(*dstbase),"m"(*srca),"m"(*src):"memory");
     for(x=0;x<w;x+=2){
      if(srca[x] || srca[x+1])
-	asm volatile(
+	__asm__ volatile(
 		PREFETCHW" 32%0\n\t"
 		PREFETCH" 32%1\n\t"
 		PREFETCH" 32%2\n\t"
@@ -362,13 +362,13 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
 		:: "m" (dstbase[4*x]), "m" (srca[x]), "m" (src[x]));
 	}
 #else //this is faster for intels crap
-    asm volatile(
+    __asm__ volatile(
 	PREFETCHW" %0\n\t"
 	PREFETCH" %1\n\t"
 	PREFETCH" %2\n\t"
 	::"m"(*dstbase),"m"(*srca),"m"(*src):"memory");
     for(x=0;x<w;x+=4){
-	asm volatile(
+	__asm__ volatile(
 		"movl %1, %%eax\n\t"
 		"orl %%eax, %%eax\n\t"
 		" jz 1f\n\t"
@@ -417,7 +417,7 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
 #else /* HAVE_MMX */
     for(x=0;x<w;x++){
         if(srca[x]){
-	    asm volatile(
+	    __asm__ volatile(
 		"movzbl (%0), %%ecx\n\t"
 		"movzbl 1(%0), %%eax\n\t"
 		"movzbl 2(%0), %%edx\n\t"
@@ -461,7 +461,7 @@ static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, 
         dstbase+=dststride;
     }
 #ifdef HAVE_MMX
-	asm volatile(EMMS:::"memory");
+	__asm__ volatile(EMMS:::"memory");
 #endif
     return;
 }

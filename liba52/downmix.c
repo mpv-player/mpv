@@ -689,7 +689,7 @@ void upmix_C (sample_t * samples, int acmod, int output)
 #if defined(ARCH_X86) || defined(ARCH_X86_64)
 static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movlps %2, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"mov $-1024, %%"REG_S"		\n\t"
@@ -712,7 +712,7 @@ static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
 
 static void mix3to1_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"mov $-1024, %%"REG_S"		\n\t"
@@ -733,7 +733,7 @@ static void mix3to1_SSE (sample_t * samples, sample_t bias)
 
 static void mix4to1_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"mov $-1024, %%"REG_S"		\n\t"
@@ -755,7 +755,7 @@ static void mix4to1_SSE (sample_t * samples, sample_t bias)
 
 static void mix5to1_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"mov $-1024, %%"REG_S"		\n\t"
@@ -778,7 +778,7 @@ static void mix5to1_SSE (sample_t * samples, sample_t bias)
 
 static void mix3to2_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"mov $-1024, %%"REG_S"		\n\t"
@@ -801,7 +801,7 @@ static void mix3to2_SSE (sample_t * samples, sample_t bias)
 
 static void mix21to2_SSE (sample_t * left, sample_t * right, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movlps %2, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"mov $-1024, %%"REG_S"		\n\t"
@@ -824,7 +824,7 @@ static void mix21to2_SSE (sample_t * left, sample_t * right, sample_t bias)
 
 static void mix21toS_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movlps %1, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"mov $-1024, %%"REG_S"		\n\t"
@@ -848,7 +848,7 @@ static void mix21toS_SSE (sample_t * samples, sample_t bias)
 
 static void mix31to2_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movlps %1, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"mov $-1024, %%"REG_S"		\n\t"
@@ -872,7 +872,7 @@ static void mix31to2_SSE (sample_t * samples, sample_t bias)
 
 static void mix31toS_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movlps %1, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"mov $-1024, %%"REG_S"		\n\t"
@@ -898,7 +898,7 @@ static void mix31toS_SSE (sample_t * samples, sample_t bias)
 
 static void mix22toS_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movlps %1, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"mov $-1024, %%"REG_S"		\n\t"
@@ -923,7 +923,7 @@ static void mix22toS_SSE (sample_t * samples, sample_t bias)
 
 static void mix32to2_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"mov $-1024, %%"REG_S"		\n\t"
@@ -947,7 +947,7 @@ static void mix32to2_SSE (sample_t * samples, sample_t bias)
 
 static void mix32toS_SSE (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movlps %1, %%xmm7		\n\t"
 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 	"mov $-1024, %%"REG_S"		\n\t"
@@ -974,7 +974,7 @@ static void mix32toS_SSE (sample_t * samples, sample_t bias)
 
 static void move2to1_SSE (sample_t * src, sample_t * dest, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movlps %2, %%xmm7		\n\t"
 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
 		"mov $-1024, %%"REG_S"		\n\t"
@@ -997,7 +997,7 @@ static void move2to1_SSE (sample_t * src, sample_t * dest, sample_t bias)
 
 static void zero_MMX(sample_t * samples)
 {
-	asm volatile(
+	__asm__ volatile(
 		"mov $-1024, %%"REG_S"		\n\t"
 		"pxor %%mm0, %%mm0		\n\t"
 		ASMALIGN(4)
@@ -1223,7 +1223,7 @@ static void upmix_MMX (sample_t * samples, int acmod, int output)
 
 static void mix2to1_3dnow (sample_t * dest, sample_t * src, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movd  %2, %%mm7	\n\t"
 	"punpckldq %2, %%mm7	\n\t"
 	"mov $-1024, %%"REG_S"	\n\t"
@@ -1254,7 +1254,7 @@ static void mix2to1_3dnow (sample_t * dest, sample_t * src, sample_t bias)
 
 static void mix3to1_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movd  %1, %%mm7	\n\t"
 	"punpckldq %1, %%mm7	\n\t"
 	"mov $-1024, %%"REG_S"	\n\t"
@@ -1281,7 +1281,7 @@ static void mix3to1_3dnow (sample_t * samples, sample_t bias)
 
 static void mix4to1_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movd  %1, %%mm7	\n\t"
 	"punpckldq %1, %%mm7	\n\t"
 	"mov $-1024, %%"REG_S"	\n\t"
@@ -1310,7 +1310,7 @@ static void mix4to1_3dnow (sample_t * samples, sample_t bias)
 
 static void mix5to1_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movd  %1, %%mm7	\n\t"
 	"punpckldq %1, %%mm7	\n\t"
 	"mov $-1024, %%"REG_S"	\n\t"
@@ -1341,7 +1341,7 @@ static void mix5to1_3dnow (sample_t * samples, sample_t bias)
 
 static void mix3to2_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movd  %1, %%mm7	\n\t"
 	"punpckldq %1, %%mm7	\n\t"
 	"mov $-1024, %%"REG_S"	\n\t"
@@ -1372,7 +1372,7 @@ static void mix3to2_3dnow (sample_t * samples, sample_t bias)
 
 static void mix21to2_3dnow (sample_t * left, sample_t * right, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movd  %2, %%mm7	\n\t"
 		"punpckldq %2, %%mm7	\n\t"
 		"mov $-1024, %%"REG_S"	\n\t"
@@ -1403,7 +1403,7 @@ static void mix21to2_3dnow (sample_t * left, sample_t * right, sample_t bias)
 
 static void mix21toS_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movd  %1, %%mm7	\n\t"
 		"punpckldq %1, %%mm7	\n\t"
 		"mov $-1024, %%"REG_S"	\n\t"
@@ -1436,7 +1436,7 @@ static void mix21toS_3dnow (sample_t * samples, sample_t bias)
 
 static void mix31to2_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movd  %1, %%mm7	\n\t"
 		"punpckldq %1, %%mm7	\n\t"
 		"mov $-1024, %%"REG_S"	\n\t"
@@ -1469,7 +1469,7 @@ static void mix31to2_3dnow (sample_t * samples, sample_t bias)
 
 static void mix31toS_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movd  %1, %%mm7	\n\t"
 		"punpckldq %1, %%mm7	\n\t"
 		"mov $-1024, %%"REG_S"	\n\t"
@@ -1506,7 +1506,7 @@ static void mix31toS_3dnow (sample_t * samples, sample_t bias)
 
 static void mix22toS_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movd  %1, %%mm7	\n\t"
 		"punpckldq %1, %%mm7	\n\t"
 		"mov $-1024, %%"REG_S"	\n\t"
@@ -1541,7 +1541,7 @@ static void mix22toS_3dnow (sample_t * samples, sample_t bias)
 
 static void mix32to2_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"movd  %1, %%mm7	\n\t"
 	"punpckldq %1, %%mm7	\n\t"
 	"mov $-1024, %%"REG_S"	\n\t"
@@ -1575,7 +1575,7 @@ static void mix32to2_3dnow (sample_t * samples, sample_t bias)
 /* todo: should be optimized better */
 static void mix32toS_3dnow (sample_t * samples, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 	"mov $-1024, %%"REG_S"		\n\t"
 	ASMALIGN(4)
 	"1:			\n\t"
@@ -1614,7 +1614,7 @@ static void mix32toS_3dnow (sample_t * samples, sample_t bias)
 
 static void move2to1_3dnow (sample_t * src, sample_t * dest, sample_t bias)
 {
-	asm volatile(
+	__asm__ volatile(
 		"movd  %2, %%mm7	\n\t"
 		"punpckldq %2, %%mm7	\n\t"
 		"mov $-1024, %%"REG_S"	\n\t"
@@ -1782,7 +1782,7 @@ static void downmix_3dnow (sample_t * samples, int acmod, int output, sample_t b
 	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
 	break;
     }
-    __asm __volatile("femms":::"memory");
+    __asm__ volatile("femms":::"memory");
 }
 
 #endif // ARCH_X86 || ARCH_X86_64
