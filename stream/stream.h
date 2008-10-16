@@ -65,6 +65,33 @@
 #define STREAM_CTRL_GET_ANGLE 10
 #define STREAM_CTRL_SET_ANGLE 11
 
+#ifdef __sun
+#define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+#define DEFAULT_CDROM_DEVICE    "D:"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(__APPLE__) || defined(__DARWIN__)
+#define DEFAULT_CDROM_DEVICE    "/dev/disk1"
+#define DEFAULT_DVD_DEVICE	"/dev/rdiskN"
+#elif defined(__OpenBSD__)
+#define DEFAULT_CDROM_DEVICE	"/dev/rcd0a"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+#define DEFAULT_CDROM_DEVICE	"/dev/acd0"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(__DragonFly__)
+#define DEFAULT_CDROM_DEVICE	"/dev/cd0"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(__AMIGAOS4__)
+#define DEFAULT_CDROM_DEVICE    "a1ide.device:2"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#else
+#define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
+#define DEFAULT_DVD_DEVICE	"/dev/dvd"
+#endif
+
+
 #ifdef CONFIG_NETWORK
 #include "network.h"
 #endif
