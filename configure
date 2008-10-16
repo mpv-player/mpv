@@ -7753,6 +7753,7 @@ MAN_LANG_ALL = $man_lang_all
 prefix = \$(DESTDIR)$_prefix
 BINDIR = \$(DESTDIR)$_bindir
 DATADIR = \$(DESTDIR)$_datadir
+LIBDIR = \$(DESTDIR)$_libdir
 MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 
