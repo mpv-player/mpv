@@ -5450,7 +5450,7 @@ fi
 if test "$_libdvdcss_internal" = yes ; then
   if linux || netbsd || openbsd || bsdos ; then
     _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
-    openbsd && _dev_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
+    openbsd && _def_dvd_openbsd='#define HAVE_OPENBSD_DVD_STRUCT 1'
   elif freebsd || dragonfly ; then
     _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
   elif darwin ; then
@@ -8191,7 +8191,7 @@ $_def_dvdio
 $_def_bsdi_dvd
 $_def_dvd_bsd
 $_def_dvd_linux
-$_dev_dvd_openbsd
+$_def_dvd_openbsd
 $_def_dvd_darwin
 $_def_sol_scsi_h
 $_def_hpux_scsi_h
