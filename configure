@@ -8020,488 +8020,293 @@ cat > $TMPH << EOF
 
 /* Define this to enable MPEG-1/2 image postprocessing in libmpeg2 */
 #define MPEG12_POSTPROC 1
+#define ATTRIBUTE_ALIGNED_MAX 16
+
+
 
 #define CONFIGURATION "$_configuration"
 
-/* Common data directory (for fonts, etc) */
 #define MPLAYER_DATADIR "$_datadir"
 #define MPLAYER_CONFDIR "$_confdir"
 #define MPLAYER_LIBDIR "$_libdir"
 
-/* yes, we have inttypes.h */
+/* definitions needed by included libraries */
 #define HAVE_INTTYPES_H 1
-
-/* int_fastXY_t emulation, libmpeg2 + FFmpeg */
+/* libmpeg2 + FFmpeg */
 $_def_fast_inttypes
-
 /* libdvdcss */
 #define HAVE_ERRNO_H 1
-
 /* libdvdcss + libdvdread */
 #define HAVE_LIMITS_H 1
-
 /* libdvdcss + libfaad2 */
 #define HAVE_UNISTD_H 1
-
 /* libfaad2 + libdvdread */
 #define STDC_HEADERS 1
-
-/* libfaad2 */
 #define HAVE_MEMCPY 1
-
 /* libdvdread */
 #define HAVE_UINTPTR_T 1
 
-/* Define this if your system has the "alloca.h" header file */
-$def_alloca_h
 
-/* Define this if your system has the "sys/mman.h" header file */
+/* system headers */
+$def_alloca_h
+$def_alsa_asoundlib_h
+$def_altivec_h
+$def_malloc_h
 $def_mman_h
 $_def_mman_has_map_failed
-
-/* Define this if your system has the header file for the OSS sound interface */
-$def_sys_soundcard_h
-
-/* Define this if your system has the header file for the OSS sound interface
- * in /usr/include */
 $def_soundcard_h
-
-/* Define this if your system has the sysinfo header */
+$def_sys_asoundlib_h
+$def_sys_soundcard_h
 $def_sys_sysinfo_h
+$def_termios_h
+$def_termios_sys_h
+$def_winsock2_h
 
-/* Define this if your system has the "malloc.h" header file */
-$def_malloc_h
 
-/* memalign is mapped to malloc if unsupported */
-$_def_memalign
-$_def_map_memalign
-$_def_memalign_hack
-
-/* define this to use nl_langinfo function */
-$_def_langinfo
-
-/* nanosleep support */
-$_def_nanosleep
-
-/* do we have gethostbyname2? */
+/* system functions */
 $_def_gethostbyname2
-
-/* Define this if your system has swab */
-$_def_swab
-
-/* Define this if your system has posix select */
-$_def_posix_select
-
-/* Define this if your system has gettimeofday */
 $_def_gettimeofday
-
-/* Define this if your system has glob */
 $_def_glob
-
-/* Define this if your system has setenv */
-$_def_setenv
-
-/* Define this if your system has strsep */
-$_def_strsep
-
-/* Define this if your system has vsscanf */
-$_def_vsscanf
-
-/* Define this if your system has sysi86 */
-$_def_sysi86
-$_def_sysi86_iv
-
-/* C99 *lrint* and round* functions available */
+$_def_langinfo
 $_def_llrint
 $_def_lrint
 $_def_lrintf
+$_def_map_memalign
+$_def_memalign
+$_def_memalign_hack
+$_def_nanosleep
+$_def_posix_select
 $_def_round
 $_def_roundf
+$_def_select
+$_def_setenv
+$_def_shm
+$_def_strsep
+$_def_swab
+$_def_sysi86
+$_def_sysi86_iv
+$_def_termcap
+$_def_termios
+$_def_vsscanf
 
-/* name of messages charset */
+
+/* system-specific features */
+$_def_asmalign_pot
+$_def_builtin_expect
+$_def_dl
+$_def_iconv
+$_def_kstat
+$_def_macosx_bundle
+$_def_macosx_finder
+$_def_maemo
+$_def_named_asm_args
+$_def_quicktime
+$_def_restrict_keyword
+$_def_rtc
+$_def_unrar_exec
+
+
+/* configurable options */
 $_def_charset
-
-/* Runtime CPU detection */
-$_def_runtime_cpudetection
-
-/* Define if your processor stores words with the most significant
-   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
-$_def_words_endian
-
-`ff_config_enable "$_arch_all" "$_arch" "ARCH"`
-
-/* Extension defines */
-`ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE"`
-
-/* altivec.h support */
-$def_altivec_h
-
-/* Define this to any prefered value from 386 up to infinity with step 100 */
-#define __CPU__ $iproc
-
-/* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
-$_def_fastmemcpy
-
-/* enable/disable SIGHANDLER */
-$_def_sighandler
-
-/* enable/disable automatic gdb attach on crash, requires SIGHANDLER */
 $_def_crash_debug
-
-/* Toggles debugging informations */
 $_def_debug
-
-/* Dynamic a/v plugins */
 $_def_dynamic_plugins
-
-/* Define this to compile stream-caching support, it can be enabled via
-   -cache <kilobytes> */
+$_def_fastmemcpy
+$_def_menu
+$_def_runtime_cpudetection
+$_def_sighandler
+$_def_sortsub
 $_def_stream_cache
 
-/* "restrict" keyword */
-$_def_restrict_keyword
 
-/* __builtin_expect branch prediction hint */
-$_def_builtin_expect
+/* CPU stuff */
+#define __CPU__ $iproc
+$_def_words_endian
+`ff_config_enable "$_arch_all" "$_arch" "ARCH"`
+`ff_config_enable "$_cpuexts_all" "$_cpuexts" "HAVE"`
 
-/* compiler support for named assembler arguments */
-$_def_named_asm_args
 
-/* assembler handling of .align */
-$_def_asmalign_pot
-
-/* enables / disables cdparanoia support */
-$_def_cdparanoia
-$_def_cddb
-
-/* Indicates that libcdio is available for VCD and CD-DA playback */
-$_def_libcdio
-
-/* Indicates that Ogle's libdvdread is available for DVD playback */
-$_def_dvdread
-
-/* Indicates that dvdread is internal */
-$_def_dvdread_internal
-
-/* Additional options for libdvdread/libdvdcss */
-$_def_dvd
-$_def_cdrom
-$_def_cdio
-$_def_dvdio
+/* DVD/VCD/CD */
 $_def_bsdi_dvd
+$_def_cddb
+$_def_cdio
+$_def_cdparanoia
+$_def_cdrom
+$_def_dvd
 $_def_dvd_bsd
+$_def_dvd_darwin
 $_def_dvd_linux
 $_def_dvd_openbsd
-$_def_dvd_darwin
-$_def_sol_scsi_h
-$_def_hpux_scsi_h
-
-/* DVD navigation support using libdvdnav */
+$_def_dvdio
 $_def_dvdnav
-
+$_def_dvdread
+$_def_dvdread_internal
+$_def_hpux_scsi_h
+$_def_libcdio
+$_def_sol_scsi_h
 $_def_vcd
 
-/* define this to use iconv(3) function to codepage conversions */
-$_def_iconv
 
-/* define this to use RTC (/dev/rtc) for video timers */
-$_def_rtc
-
-/* Undefine this if your sound card driver has no working select().
-   If you have kernel Oops, player hangups, or just no audio, you should
-   try to recompile MPlayer with this option disabled! */
-$_def_select
-
-/* Define this if you have the elf dynamic linker -ldl library */
-$_def_dl
-
-/* Define this if you have the kstat kernel statistics library */
-$_def_kstat
-
-/* Define this if you have zlib */
-$_def_zlib
-
-/* LIRC (remote control, see www.lirc.org) support: */
-$_def_lirc
-
-/*
- * LIRCCD (LIRC client daemon)
- * See http://www.dolda2000.cjb.net/~fredrik/lirccd/
- */
-$_def_lircc
-
-/* Apple Remote (remote control, see http://docs.info.apple.com/article.html?artnum=302504) support: */
-$_def_apple_remote
-
-/* Apple IR Remote (Linux remote control driver) */
-$_def_apple_ir
-
-/* enables / disables new input joystick support */
-$_def_joystick
-
-/* Support for maemo (http://www.maemo.org) */
-$_def_maemo
-
-/* Mac OS X specific features */
-$_def_macosx_finder
-$_def_macosx_bundle
-$_def_coreaudio
-$_def_corevideo
-$_def_quartz
-$_def_quicktime
-
-/* Use codec libs included in mplayer CVS / source dist: */
-$_def_mp3lib
-
-/* enable liba52 support */
-$_def_liba52_internal
-$_def_liba52
-
-/* enable libmpeg2 support */
-$_def_libmpeg2
-
-/* maximum alignment used by libmpeg2 */
-#define ATTRIBUTE_ALIGNED_MAX 16
-
-/* enable FAAD (AAC) support */
+/* codec libraries */
+$_def_faac
 $_def_faad
 $_def_faad_internal
-
-/* enable FAAC (AAC encoder) support */
-$_def_faac
-
-/* Define if you are using the Xvid library */
-$_def_xvid
-
-/* Define if you are using the X.264 library */
-$_def_x264
-
-/* Define to include support for libdv-0.9.5 */
+$_def_liba52
+$_def_liba52_internal
+$_def_libdca
 $_def_libdv
-
-/* Indicates if libmp3lame is available
-   Note: for mencoder */
+$_def_liblzo
+$_def_libmpeg2
+$_def_mad
 $_def_mp3lame
 $_def_mp3lame_preset
 $_def_mp3lame_preset_medium
-
-$_def_toolame
-$_def_twolame
-
-/* liblzo support */
-$_def_liblzo
-
-/* libmad support */
-$_def_mad
-
-/* enable OggVorbis support */
-$_def_vorbis
-$_def_tremor
-
-/* enable Speex support */
-$_def_speex
-
-/* enable musepack support */
+$_def_mp3lib
 $_def_musepack
-
-/* enable OggTheora support */
+$_def_speex
 $_def_theora
+$_def_toolame
+$_def_tremor
+$_def_twolame
+$_def_vorbis
+$_def_x264
+$_def_xvid
+$_def_zlib
 
-/* enable libdca support */
-$_def_libdca
-
-/* Win32 DLL support */
-$_def_win32dll
-#define WIN32_PATH "$_win32codecsdir"
-
-/* Win32-loader support */
-$_def_win32_loader
-
-/* XAnim DLL support */
-$_def_xanim
-/* Default search path */
-$_def_xanim_path
-
-/* RealPlayer DLL support */
-$_def_real
-/* Default search path */
-$_def_real_path
-
-/* enables / disables QTX codecs */
-$_def_qtx
-$_def_qtx_win32
-
-/* Define if you are using libnut */
 $_def_libnut
 
-/* XMMS input plugin support */
+
+/* binary codecs */
+$_def_qtx
+$_def_qtx_win32
+$_def_real
+$_def_real_path
+$_def_win32_loader
+$_def_win32dll
+#define WIN32_PATH "$_win32codecsdir"
+$_def_xanim
+$_def_xanim_path
 $_def_xmms
 #define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
 
-/* Use UnRAR executable for Vobsubs */
-$_def_unrar_exec
 
-/* gui support */
-$_def_gui
+/* GUI */
 $_def_gtk2
-
-/* used by GUI: */
+$_def_gui
 $_def_xshape
 
+
 /* Audio output drivers */
+$_def_alsa
+$_def_alsa1x
+$_def_alsa5
+$_def_alsa9
+$_def_arts
+$_def_coreaudio
+$_def_esd
+$_def_esd_latency
+$_def_jack
+$_def_nas
+$_def_openal
+$_def_openal_h
 $_def_ossaudio
 $_def_ossaudio_devdsp
 $_def_ossaudio_devmixer
-$_def_alsa
-$_def_alsa5
-$_def_alsa9
-$_def_alsa1x
-$_def_arts
-$_def_esd
-$_def_esd_latency
 $_def_pulse
-$_def_jack
-$_def_openal
-$_def_openal_h
-$def_sys_asoundlib_h
-$def_alsa_asoundlib_h
-$_def_sunaudio
 $_def_sgiaudio
+$_def_sunaudio
 $_def_win32waveout
-$_def_nas
 
-/* Enable TV Interface support */
+$_def_ladspa
+
+
+/* input */
+$_def_apple_ir
+$_def_apple_remote
+$_def_ioctl_bt848_h_name
+$_def_ioctl_meteor_h_name
+$_def_joystick
+$_def_lirc
+$_def_lircc
+$_def_pvr
+$_def_radio
+$_def_radio_bsdbt848
+$_def_radio_capture
+$_def_radio_v4l
+$_def_radio_v4l2
 $_def_tv
-
-/* Enable Video 4 Linux TV interface support */
+$_def_tv_bsdbt848
+$_def_tv_dshow
+$_def_tv_teletext
 $_def_tv_v4l
-
-/* Enable Video 4 Linux 1 TV interface support */
 $_def_tv_v4l1
-
-/* Enable Video 4 Linux 2 TV interface support */
 $_def_tv_v4l2
 
-/* Enable DirectShow TV interface support */
-$_def_tv_dshow
 
-/* *BSD BrookTree headers */
-$_def_ioctl_meteor_h_name
-$_def_ioctl_bt848_h_name
+/* font stuff */
+$_def_ass
+$_def_bitmap_font
+$_def_enca
+$_def_fontconfig
+$_def_freetype
+$_def_fribidi
 
-/* Enable *BSD BrookTree TV interface support */
-$_def_tv_bsdbt848
 
-/* Enable TV Teletext Interface support */
-$_def_tv_teletext
+/* networking */
+$_def_closesocket
+$_def_ftp
+$_def_inet6
+$_def_live
+$_def_nemesi
+$_def_network
+$_def_smb
+$_def_socklen_t
+$_def_use_aton
+$_def_vstream
 
-/* Enable Radio Interface support */
-$_def_radio
 
-/* Enable Capture for Radio Interface support */
-$_def_radio_capture
-
-/* Enable Video 4 Linux Radio interface support */
-$_def_radio_v4l
-
-/* Enable Video 4 Linux 2 Radio interface support */
-$_def_radio_v4l2
-
-/* Enable *BSD BrookTree Radio interface support */
-$_def_radio_bsdbt848
-
-/* Enable Video 4 Linux 2 MPEG PVR support */
-$_def_pvr
-
-/* termcap flag for getch2.c */
-$_def_termcap
-
-/* termios flag for getch2.c */
-$_def_termios
-$def_termios_h
-$def_termios_sys_h
-
-/* enable PNG support */
-$_def_png
-
-/* enable JPEG support */
-$_def_jpeg
-
-/* enable PNM support */
-$_def_pnm
-
-/* enable md5sum support */
-$_def_md5sum
-
-/* enable yuv4mpeg support */
-$_def_yuv4mpeg
-
-/* enable GIF support */
+/* libvo options */
+$_def_3dfx
+$_def_aa
+$_def_bl
+$_def_caca
+$_def_corevideo
+$_def_dfbmga
+$_def_dga
+$_def_dga1
+$_def_dga2
+$_def_directfb
+$_def_directfb_version
+$_def_directx
+$_def_dvb
+$_def_dvb_head
+$_def_dvbin
+$_def_dxr2
+$_def_dxr3
+$_def_fbdev
+$_def_ggi
+$_def_ggiwmh
 $_def_gif
 $_def_gif_4
 $_def_gif_tvt_hack
-
-/* enable bitmap font support */
-$_def_bitmap_font
-
-/* enable FreeType support */
-$_def_freetype
-
-/* enable Fontconfig support */
-$_def_fontconfig
-
-/* enable SSA/ASS support */
-$_def_ass
-
-/* enable FriBiDi usage */
-$_def_fribidi
-
-/* enable ENCA usage */
-$_def_enca
-
-/* enables / disables osd menu */
-$_def_menu
-
-/* enables / disables subtitles sorting */
-$_def_sortsub
-
-/* enable LADSPA plugin support */
-$_def_ladspa
-
-/* enable network */
-$_def_network
-
-/* LIVE555 Streaming Media library support */
-$_def_live
-
-/* libnemesi Streaming Media library support */
-$_def_nemesi
-
-/* SMB support */
-$_def_smb
-
-/* enable ftp support */
-$_def_ftp
-
-/* enable vstream support */
-$_def_vstream
-
-/* enable winsock2 instead of Unix functions*/
-$def_winsock2_h
-
-/* define this to use inet_aton() instead of inet_pton() */
-$_def_use_aton
-
-/* socklen_t support */
-$_def_socklen_t
-
-/* closesocket() support */
-$_def_closesocket
-
-/* enables inet6 support */
-$_def_inet6
-
-/* enables / disables VIDIX usage */
+$_def_gl
+$_def_gl_win32
+$_def_ivtv
+$_def_jpeg
+$_def_md5sum
+$_def_mga
+$_def_png
+$_def_pnm
+$_def_quartz
+$_def_s3fb
+$_def_sdl
+$_def_sdlbuggy
+$_def_svga
+$_def_tdfxfb
+$_def_tdfxvid
+$_def_tga
+$_def_v4l2
+$_def_vesa
 $_def_vidix
 $_def_vidix_drv_cyberblade
 $_def_vidix_drv_ivtv
@@ -8517,103 +8322,62 @@ $_def_vidix_drv_sh_veu
 $_def_vidix_drv_sis
 $_def_vidix_drv_unichrome
 $_def_vidix_pfx
-
-/* libvo options */
-$_def_x11
-$_def_xv
-$_def_xvmc
 $_def_vm
+$_def_wii
+$_def_x11
+$_def_xdpms
 $_def_xf86keysym
 $_def_xinerama
-$_def_gl
-$_def_gl_win32
-$_def_dga
-$_def_dga1
-$_def_dga2
-$_def_sdl
-/* defined for SDLlib with keyrepeat bugs (before 1.2.1) */
-$_def_sdlbuggy
-$_def_directx
-$_def_ggi
-$_def_ggiwmh
-$_def_3dfx
-$_def_s3fb
-$_def_wii
-$_def_tdfxfb
-$_def_tdfxvid
-$_def_xvr100
-$_def_directfb
-$_def_directfb_version
-$_def_dfbmga
-$_def_zr
-$_def_bl
-$_def_mga
 $_def_xmga
-$_def_fbdev
-$_def_dxr2
-$_def_dxr3
-$_def_ivtv
-$_def_v4l2
-$_def_dvb
-$_def_dvb_head
-$_def_dvbin
-$_def_svga
-$_def_vesa
 $_def_xss
-$_def_xdpms
-$_def_aa
-$_def_caca
-$_def_tga
-
-/* Define this if you have shm support */
-$_def_shm
+$_def_xv
+$_def_xvmc
+$_def_xvr100
+$_def_yuv4mpeg
+$_def_zr
 
 
 /* FFmpeg */
-/* Define this to enable image postprocessing in libavcodec */
-$_def_libpostproc
-$_def_libpostproc_a
-$_def_libpostproc_so
-
-/* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
 $_def_libavcodec_a
-$_def_libavcodec_so
 $_def_libavcodec_mpegaudio_hp
-
-/* ffmpeg's libavformat support (requires libavformat source) */
+$_def_libavcodec_so
 $_def_libavformat
 $_def_libavformat_a
 $_def_libavformat_so
-
 $_def_libavutil
 $_def_libavutil_a
 $_def_libavutil_so
-
+$_def_libpostproc
+$_def_libpostproc_a
+$_def_libpostproc_so
 $_def_libswscale
 $_def_libswscale_a
 $_def_libswscale_so
 
-/* Define this if you enabled thread support for libavcodec */
-$_def_threads
+$_def_dcbzl
+$_def_extern_prefix
+$_def_fast_unaligned
+$_def_mkstemp
 $_def_pthreads
+$_def_threads
 #ifdef HAVE_THREADS
 #define ENABLE_THREADS 1
 #else
 #define ENABLE_THREADS 0
 #endif
 
-/* Use libavcodec's decoders */
+#define CONFIG_GPL 1
+#define ENABLE_SMALL 0
+#define ENABLE_GRAY 0
+
 #define CONFIG_DECODERS 1
 #define ENABLE_DECODERS 1
-/* Use libavcodec's encoders */
 #define CONFIG_ENCODERS 1
 #define ENABLE_ENCODERS 1
 
-/* Use libavformat's demuxers */
 #define CONFIG_DEMUXERS 1
 #define ENABLE_DEMUXERS 1
-/* Use libavformat's muxers */
 $_def_muxers
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
@@ -8621,17 +8385,6 @@ $_def_muxers
 #ifndef MP_DEBUG
 #define HAVE_EBP_AVAILABLE 1
 #endif
-
-/* Define if your processor can access unaligned data in a fast way */
-$_def_fast_unaligned
-
-/* The G5 has the dcbzl when in 64bit mode but the G4 and earlier CPUs do not
-   have the instruction. */
-$_def_dcbzl
-
-#define CONFIG_GPL 1
-#define ENABLE_SMALL 0
-#define ENABLE_GRAY 0
 
 /* External libraries used through libavcodec. */
 $_def_faac_lavc
@@ -8644,13 +8397,6 @@ $_def_mp3lame_lavc
 $_def_x264_lavc
 $_def_xvid_lavc
 
-/* mkstemp support */
-$_def_mkstemp
-
-/* extern symbol prefix */
-$_def_extern_prefix
-
-/* Use specific parts from FFmpeg. */
 `ff_config_enable "$_libavdecoders_all" "$_libavdecoders"`
 `ff_config_enable "$_libavencoders_all" "$_libavencoders"`
 `ff_config_enable "$_libavparsers_all"  "$_libavparsers"`
