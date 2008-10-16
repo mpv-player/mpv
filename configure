@@ -8166,13 +8166,6 @@ $_def_restrict_keyword
 
 /* __builtin_expect branch prediction hint */
 $_def_builtin_expect
-#ifdef HAVE_BUILTIN_EXPECT
-#define likely(x) __builtin_expect ((x) != 0, 1)
-#define unlikely(x) __builtin_expect ((x) != 0, 0)
-#else
-#define likely(x) (x)
-#define unlikely(x) (x)
-#endif
 
 /* compiler support for named assembler arguments */
 $_def_named_asm_args
