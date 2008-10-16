@@ -104,7 +104,7 @@ int main(int argc, char *argv[]){
     printf("params: flags: %d, paramSize: %d, what: %d, params[0] = %x\n",
         params->flags, params->paramSize, params->what, params->params[0]);
 
-//    __asm__ __volatile__ ("movl %%esp, %0\n\t" : "=a" (esp) :: "memory" );
+//    __asm__ volatile ("movl %%esp, %0\n\t" : "=a" (esp) :: "memory" );
 //    printf("ESP=%p\n",esp);
 
     *((void**)0x62b7d640) = &x_table[0]; //malloc(0x00001837 * 4); // ugly hack?
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]){
 
     ret = dispatcher(params, &globals);
 
-//    __asm__ __volatile__ ("movl %%esp, %0\n\t" : "=a" (esp) :: "memory" );
+//    __asm__ volatile ("movl %%esp, %0\n\t" : "=a" (esp) :: "memory" );
 //    printf("ESP=%p\n",esp);
 
     printf("!!! CDComponentDispatch() => %d  glob=%p\n",ret,globals);

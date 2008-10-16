@@ -1595,7 +1595,7 @@ if x86 && test "$_runtime_cpudetection" = no ; then
 void catch() { exit(1); }
 int main(void) {
   signal(SIGILL, catch);
-  __asm__ __volatile__ ("$3":::"memory"); return 0;
+  __asm__ volatile ("$3":::"memory"); return 0;
 }
 EOF
 
@@ -2443,7 +2443,7 @@ if arm ; then
   echocheck "ARMv5TE (Enhanced DSP Extensions)"
   if test $_armv5te = "auto" ; then
     cat > $TMPC << EOF
-int main(void) { __asm__ __volatile__ ("qadd r0, r0, r0"); return 0; }
+int main(void) { __asm__ volatile ("qadd r0, r0, r0"); return 0; }
 EOF
     _armv5te=no
     cc_check && _armv5te=yes
@@ -2453,7 +2453,7 @@ EOF
   echocheck "ARMv6 (SIMD instructions)"
   if test $_armv6 = "auto" ; then
     cat > $TMPC << EOF
-int main(void) { __asm__ __volatile__ ("sadd16 r0, r0, r0"); return 0; }
+int main(void) { __asm__ volatile ("sadd16 r0, r0, r0"); return 0; }
 EOF
     _armv6=no
     cc_check && _armv6=yes
@@ -2463,7 +2463,7 @@ EOF
   echocheck "ARM VFP"
   if test $_armvfp = "auto" ; then
     cat > $TMPC << EOF
-int main(void) { __asm__ __volatile__ ("fadds s0, s0, s0"); return 0; }
+int main(void) { __asm__ volatile ("fadds s0, s0, s0"); return 0; }
 EOF
     _armvfp=no
     cc_check && _armvfp=yes
@@ -2473,7 +2473,7 @@ EOF
   echocheck "iWMMXt (Intel XScale SIMD instructions)"
   if test $_iwmmxt = "auto" ; then
     cat > $TMPC << EOF
-int main(void) { __asm__ __volatile__ ("wunpckelub wr6, wr4"); return 0; }
+int main(void) { __asm__ volatile ("wunpckelub wr6, wr4"); return 0; }
 EOF
     _iwmmxt=no
     cc_check && _iwmmxt=yes

@@ -84,7 +84,7 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 #define small_memcpy(to,from,n)\
 {\
 register unsigned long int dummy;\
-__asm__ __volatile__(\
+__asm__ volatile(\
 	"rep; movsb"\
 	:"=&D"(to), "=&S"(from), "=&c"(dummy)\
 /* It's most portable way to notify compiler */\
@@ -153,7 +153,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 #endif
 #ifndef HAVE_ONLY_MMX1
         /* PREFETCH has effect even for MOVSB instruction ;) */
-	__asm__ __volatile__ (
+	__asm__ volatile (
 	        PREFETCH" (%0)\n"
 	        PREFETCH" 64(%0)\n"
 	        PREFETCH" 128(%0)\n"
@@ -188,7 +188,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	/* if SRC is misaligned */
 	for(; i>0; i--)
 	{
-		__asm__ __volatile__ (
+		__asm__ volatile (
 		PREFETCH" 320(%0)\n"
 		"movups (%0), %%xmm0\n"
 		"movups 16(%0), %%xmm1\n"
@@ -210,7 +210,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	*/
 	for(; i>0; i--)
 	{
-		__asm__ __volatile__ (
+		__asm__ volatile (
 		PREFETCH" 320(%0)\n"
 		"movaps (%0), %%xmm0\n"
 		"movaps 16(%0), %%xmm1\n"
@@ -228,7 +228,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	// Align destination at BLOCK_SIZE boundary
 	for(; ((int)to & (BLOCK_SIZE-1)) && i>0; i--)
 	{
-		__asm__ __volatile__ (
+		__asm__ volatile (
 #ifndef HAVE_ONLY_MMX1
         	PREFETCH" 320(%0)\n"
 #endif
@@ -317,7 +317,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 
 	for(; i>0; i--)
 	{
-		__asm__ __volatile__ (
+		__asm__ volatile (
 #ifndef HAVE_ONLY_MMX1
         	PREFETCH" 320(%0)\n"
 #endif
@@ -346,11 +346,11 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 #ifdef HAVE_MMX2
                 /* since movntq is weakly-ordered, a "sfence"
 		 * is needed to become ordered again. */
-		__asm__ __volatile__ ("sfence":::"memory");
+		__asm__ volatile ("sfence":::"memory");
 #endif
 #ifndef HAVE_SSE
 		/* enables to use FPU */
-		__asm__ __volatile__ (EMMS:::"memory");
+		__asm__ volatile (EMMS:::"memory");
 #endif
 	}
 	/*
@@ -405,7 +405,7 @@ static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
         */
 	for(; i>0; i--)
 	{
-		__asm__ __volatile__ (
+		__asm__ volatile (
         	PREFETCH" 320(%0)\n"
 		"movq (%0), %%mm0\n"
 		"movq 8(%0), %%mm1\n"
@@ -430,10 +430,10 @@ static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
 #ifdef HAVE_MMX2
                 /* since movntq is weakly-ordered, a "sfence"
 		 * is needed to become ordered again. */
-		__asm__ __volatile__ ("sfence":::"memory");
+		__asm__ volatile ("sfence":::"memory");
 #endif
 		/* enables to use FPU */
-		__asm__ __volatile__ (EMMS:::"memory");
+		__asm__ volatile (EMMS:::"memory");
 	}
 	/*
 	 *	Now do the tail of the block

@@ -79,7 +79,7 @@ char* def_path = WIN32_PATH;
 
 static void do_cpuid(unsigned int ax, unsigned int *regs)
 {
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 "pushl %%ebx; pushl %%ecx; pushl %%edx;"
 	 ".byte  0x0f, 0xa2;"
@@ -95,7 +95,7 @@ static void do_cpuid(unsigned int ax, unsigned int *regs)
 static unsigned int c_localcount_tsc()
 {
     int a;
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 "rdtsc\n\t"
 	 :"=a"(a)
@@ -106,7 +106,7 @@ static unsigned int c_localcount_tsc()
 }
 static void c_longcount_tsc(long long* z)
 {
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 "pushl %%ebx\n\t"
 	 "movl %%eax, %%ebx\n\t"
@@ -2867,7 +2867,7 @@ static int WINAPI expIsBadStringPtrA(const char* string, int nchars)
 static long WINAPI expInterlockedExchangeAdd( long* dest, long incr )
 {
     long ret;
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 "lock; xaddl %0,(%1)"
 	 : "=r" (ret)
@@ -4006,7 +4006,7 @@ static int exp_initterm(INITTERMFUNC *start, INITTERMFUNC *end)
 	    // ok this trick with push/pop is necessary as otherwice
 	    // edi/esi registers are being trashed
 	    void* p = *start;
-	    __asm__ __volatile__
+	    __asm__ volatile
 		(
 		 "pushl %%ebx		\n\t"
 		 "pushl %%ecx		\n\t"
@@ -4272,7 +4272,7 @@ static double expcos(double x)
 
 static void explog10(void)
 {
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 "fldl 8(%esp)	\n\t"
 	 "fldln2	\n\t"
@@ -4283,7 +4283,7 @@ static void explog10(void)
 
 static void expcos(void)
 {
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 "fldl 8(%esp)	\n\t"
 	 "fcos		\n\t"
@@ -4300,7 +4300,7 @@ static void expcos(void)
 
 static void exp_ftol(void)
 {
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 "sub $12, %esp		\n\t"
 	 "fstcw   -2(%ebp)	\n\t"
@@ -4319,8 +4319,8 @@ static void exp_ftol(void)
 }
 
 #define FPU_DOUBLES(var1,var2) double var1,var2; \
-  __asm__ __volatile__( "fstpl %0;fwait" : "=m" (var2) : ); \
-  __asm__ __volatile__( "fstpl %0;fwait" : "=m" (var1) : )
+  __asm__ volatile( "fstpl %0;fwait" : "=m" (var2) : ); \
+  __asm__ volatile( "fstpl %0;fwait" : "=m" (var1) : )
 
 static double exp_CIpow(void)
 {
@@ -4361,7 +4361,7 @@ static int exp_setjmp3(void* jmpbuf, int x)
 {
     //dbgprintf("!!!!UNIMPLEMENTED: setjmp3(%p, %d) => 0\n", jmpbuf, x);
     //return 0;
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 //"mov 4(%%esp), %%edx	\n\t"
 	 "mov (%%esp), %%eax   \n\t"
@@ -4383,7 +4383,7 @@ static int exp_setjmp3(void* jmpbuf, int x)
 	 : "eax"
 	);
 #if 1
-    __asm__ __volatile__
+    __asm__ volatile
 	(
 	 "mov %%fs:0, %%eax	\n\t" // unsure
 	 "mov %%eax, 24(%%edx)	\n\t"
@@ -4762,7 +4762,7 @@ static double expfloor(double x)
 }
 
 #define FPU_DOUBLE(var) double var; \
-  __asm__ __volatile__( "fstpl %0;fwait" : "=m" (var) : )
+  __asm__ volatile( "fstpl %0;fwait" : "=m" (var) : )
 
 static double exp_CIcos(void)
 {

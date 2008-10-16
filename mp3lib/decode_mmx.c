@@ -217,7 +217,7 @@ int synth_1to1_MMX(real *bandPtr, int channel, short *samples)
     dct64_MMX_func(a, b, bandPtr);
     window = mp3lib_decwins + 16 - bo1;
     //printf("DEBUG: channel %d, bo %d, off %d\n", channel, bo, 16 - bo1);
-__asm__ __volatile(
+__asm__ volatile(
 ASMALIGN(4)
 ".L03:\n\t"
         "movq  (%1),%%mm0\n\t"

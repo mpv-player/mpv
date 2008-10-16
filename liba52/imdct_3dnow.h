@@ -45,7 +45,7 @@ static void FFT_4_3DNOW(complex_t *x)
   /* delta_p = 1 here */
   /* x[k] = sum_{i=0..3} x[i] * w^{i*k}, w=e^{-2*pi/4} 
    */
-  __asm__ __volatile__(
+  __asm__ volatile(
 	"movq	24(%1), %%mm3\n\t"
 	"movq	8(%1), %%mm1\n\t"
 	"pxor	%2, %%mm3\n\t" /* mm3.re | -mm3.im */
@@ -90,7 +90,7 @@ static void FFT_8_3DNOW(complex_t *x)
    */
   complex_t wT1, wB1, wB2;
   
-  __asm__ __volatile__(
+  __asm__ volatile(
 	"movq	8(%2), %%mm0\n\t"
 	"movq	24(%2), %%mm1\n\t"
 	"movq	%%mm0, %0\n\t"  /* wT1 = x[1]; */
@@ -99,7 +99,7 @@ static void FFT_8_3DNOW(complex_t *x)
 	:"r"(x)
 	:"memory");
 
-  __asm__ __volatile__(
+  __asm__ volatile(
 	"movq	16(%0), %%mm2\n\t"
 	"movq	32(%0), %%mm3\n\t"
 	"movq	%%mm2, 8(%0)\n\t"  /* x[1] = x[2]; */
@@ -114,7 +114,7 @@ static void FFT_8_3DNOW(complex_t *x)
   
   /* x[0] x[4] x[2] x[6] */
   
-  __asm__ __volatile__(
+  __asm__ volatile(
       "movq	40(%1), %%mm0\n\t"
       "movq	%%mm0,	%%mm3\n\t"
       "movq	56(%1),	%%mm1\n\t"
@@ -153,7 +153,7 @@ static void FFT_8_3DNOW(complex_t *x)
       :"memory");
   
   /* x[1] x[5] */
-  __asm__ __volatile__ (
+  __asm__ volatile (
 	"movq	%6,	%%mm6\n\t"
 	"movq	%5,	%%mm7\n\t"
 	"movq	%1,	%%mm0\n\t"
@@ -203,7 +203,7 @@ static void FFT_8_3DNOW(complex_t *x)
 
 
   /* x[3] x[7] */
-  __asm__ __volatile__(
+  __asm__ volatile(
 	"movq	%1,	%%mm0\n\t"
 #ifdef HAVE_3DNOWEX
 	"pswapd	%3,	%%mm1\n\t"
@@ -358,13 +358,13 @@ imdct_do_512_3dnow
 	
     /* Pre IFFT complex multiply plus IFFT cmplx conjugate & reordering*/
 #if 1
-      __asm__ __volatile__ (
+      __asm__ volatile (
 	"movq %0, %%mm7\n\t"
 	::"m"(x_plus_minus_3dnow)
 	:"memory");
 	for( i=0; i < 128; i++) {
 		int j = pm128[i];
-	__asm__ __volatile__ (
+	__asm__ volatile (
 		"movd	%1, %%mm0\n\t"
 		"movd	%3, %%mm1\n\t"
 		"punpckldq %2, %%mm0\n\t" /* mm0 = data[256-2*j-1] | data[2*j]*/
@@ -394,7 +394,7 @@ imdct_do_512_3dnow
 		buf[i].im = (data[256-2*j-1] * xsin1[j] + data[2*j] * xcos1[j])*(-1.0);*/
 	}
 #else
-  __asm__ __volatile__ ("femms":::"memory");
+  __asm__ volatile ("femms":::"memory");
     for( i=0; i < 128; i++) {
 	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
 	int j= pm128[i];
@@ -435,14 +435,14 @@ imdct_do_512_3dnow
     
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
 #if 1  
-  __asm__ __volatile__ (
+  __asm__ volatile (
 	"movq %0, %%mm7\n\t"
 	"movq %1, %%mm6\n\t"
 	::"m"(x_plus_minus_3dnow),
 	"m"(x_minus_plus_3dnow)
 	:"eax","memory");
 	for (i=0; i < 128; i++) {
-	    __asm__ __volatile__ (
+	    __asm__ volatile (
 		"movq %1, %%mm0\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
 		"movq %%mm0, %%mm1\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
 #ifndef HAVE_3DNOWEX
@@ -473,7 +473,7 @@ imdct_do_512_3dnow
 		ac3_buf[i].im =(tmp_a_r * ac3_xsin1[i])  -  (tmp_a_i  * ac3_xcos1[i]);*/
 	}
 #else    
-  __asm__ __volatile__ ("femms":::"memory");
+  __asm__ volatile ("femms":::"memory");
     for( i=0; i < 128; i++) {
 	/* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
 	tmp_a_r =        buf[i].real;
@@ -496,7 +496,7 @@ imdct_do_512_3dnow
 	);
 	for (i=0; i< 64; i++) {
 /* merge two loops in one to enable working of 2 decoders */
-	__asm__ __volatile__ (
+	__asm__ volatile (
 		"movd	516(%1), %%mm0\n\t"
 		"movd	(%1), %%mm1\n\t" /**data_ptr++=-buf[64+i].im**window_ptr+++*delay_ptr++;*/
 		"punpckldq (%2), %%mm0\n\t"/*data_ptr[128]=-buf[i].re*window_ptr[128]+delay_ptr[128];*/
@@ -520,7 +520,7 @@ imdct_do_512_3dnow
 	}
 	window_ptr += 128;
 #else    
-  __asm__ __volatile__ ("femms":::"memory");
+  __asm__ volatile ("femms":::"memory");
     for(i=0; i< 64; i++) { 
 	*data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
 	*data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
@@ -538,7 +538,7 @@ imdct_do_512_3dnow
 	for(i=0; i< 64; i++) {
 /* merge two loops in one to enable working of 2 decoders */
 	    window_ptr -=2;
-	    __asm__ __volatile__(
+	    __asm__ volatile(
 		"movd	508(%1), %%mm0\n\t"
 		"movd	(%1), %%mm1\n\t"
 		"punpckldq (%2), %%mm0\n\t"
@@ -565,9 +565,9 @@ imdct_do_512_3dnow
 		:"memory");
 		delay_ptr += 2;
 	}
-  __asm__ __volatile__ ("femms":::"memory");
+  __asm__ volatile ("femms":::"memory");
 #else    
-  __asm__ __volatile__ ("femms":::"memory");
+  __asm__ volatile ("femms":::"memory");
     for(i=0; i< 64; i++) { 
 	*delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
 	*delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 

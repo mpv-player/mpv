@@ -18,7 +18,7 @@ static float attribute_used plus_1f = 1.0;
 void dct64_MMX_3dnowex(short *a,short *b,real *c)
 {
   char tmp[256];
-    __asm__ __volatile(
+    __asm__ volatile(
 "	movl %2,%%eax\n\t"
 
 "	leal 128+%3,%%edx\n\t"

@@ -86,7 +86,7 @@ static unsigned int GetTimer(){
 static inline unsigned long long int read_tsc( void )
 {
   unsigned long long int retval;
-  __asm__ __volatile ("rdtsc":"=A"(retval)::"memory");
+  __asm__ volatile ("rdtsc":"=A"(retval)::"memory");
   return retval;
 }
 

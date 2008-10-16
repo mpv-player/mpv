@@ -138,7 +138,7 @@ void Setup_FS_Segment(void)
 {
     unsigned int ldt_desc = LDT_SEL(fs_ldt);
 
-    __asm__ __volatile__(
+    __asm__ volatile(
 	"movl %0,%%eax; movw %%ax, %%fs" : : "r" (ldt_desc)
 	:"eax"
     );
@@ -154,7 +154,7 @@ static int LDT_Modify( int func, struct modify_ldt_ldt_s *ptr,
 {
     int res;
 #ifdef __PIC__
-    __asm__ __volatile__( "pushl %%ebx\n\t"
+    __asm__ volatile( "pushl %%ebx\n\t"
 			  "movl %2,%%ebx\n\t"
 			  "int $0x80\n\t"
 			  "popl %%ebx"
@@ -165,7 +165,7 @@ static int LDT_Modify( int func, struct modify_ldt_ldt_s *ptr,
 			  "d"(16)//sizeof(*ptr) from kernel point of view
 			  :"esi"     );
 #else
-    __asm__ __volatile__("int $0x80"
+    __asm__ volatile("int $0x80"
 			 : "=a" (res)
 			 : "0" (__NR_modify_ldt),
 			 "b" (func),

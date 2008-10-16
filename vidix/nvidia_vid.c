@@ -372,7 +372,7 @@ static int nv_probe(int verbose, int force){
  * PCI-Memory IO access macros.
  */
 
-#define MEM_BARRIER() __asm__ __volatile__ ("" : : : "memory")
+#define MEM_BARRIER() __asm__ volatile ("" : : : "memory")
 
 #undef	VID_WR08
 #define VID_WR08(p,i,val) ({ MEM_BARRIER(); ((uint8_t *)(p))[(i)]=(val); })

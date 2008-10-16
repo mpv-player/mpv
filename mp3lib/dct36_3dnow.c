@@ -39,7 +39,7 @@ void dct36_3dnow(real *inbuf, real *o1,
     real *o2, real *wintab, real *tsbuf)
 #endif
 {
-    __asm__ __volatile__(
+    __asm__ volatile(
 	"movq (%%eax),%%mm0\n\t"
 	"movq 4(%%eax),%%mm1\n\t"
 	"pfadd %%mm1,%%mm0\n\t"
