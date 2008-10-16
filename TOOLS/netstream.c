@@ -44,7 +44,7 @@
 #include "mpbswap.h"
 
 /// Netstream packets def and some helpers
-#include "stream/netstream.h"
+#include "stream/stream_netstream.h"
 
 // linking hacks
 char *info_name;

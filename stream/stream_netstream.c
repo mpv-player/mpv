@@ -59,7 +59,7 @@
 #include "mpbswap.h"
 
 #include "network.h"
-#include "netstream.h"
+#include "stream_netstream.h"
 #include "tcp.h"
 
 static struct stream_priv_s {
