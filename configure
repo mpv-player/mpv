@@ -8135,10 +8135,6 @@ $_def_words_endian
 /* altivec.h support */
 $def_altivec_h
 
-/* For the PPC.  G5 has the dcbzl when in 64bit mode but G4s and earlier do not
-   have the instruction. */
-$_def_dcbzl
-
 /* Define this to any prefered value from 386 up to infinity with step 100 */
 #define __CPU__ $iproc
 
@@ -8627,6 +8623,10 @@ $_def_muxers
 
 /* Define if your processor can access unaligned data in a fast way */
 $_def_fast_unaligned
+
+/* The G5 has the dcbzl when in 64bit mode but the G4 and earlier CPUs do not
+   have the instruction. */
+$_def_dcbzl
 
 #define CONFIG_GPL 1
 #define ENABLE_SMALL 0
