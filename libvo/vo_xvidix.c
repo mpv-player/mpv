@@ -124,44 +124,9 @@ static void set_window(int force_update)
     vo_dwidth = drwWidth;
     vo_dheight = drwHeight;
 
-#ifdef CONFIG_XINERAMA
-    if (XineramaIsActive(mDisplay))
-    {
-        XineramaScreenInfo *screens;
-        int num_screens;
-        int i = 0;
-
-        screens = XineramaQueryScreens(mDisplay, &num_screens);
-
-        /* find the screen we are on */
-        while (i < num_screens &&
-               ((screens[i].x_org < drwcX) || (screens[i].y_org < drwcY) ||
-                (screens[i].x_org + screens[i].width >= drwcX) ||
-                (screens[i].y_org + screens[i].height >= drwcY)))
-        {
-            i++;
-        }
-
-        if (i < num_screens)
-        {
-            /* save the screen we are on */
-            xinerama_screen = i;
-        } else
-        {
-            /* oops.. couldnt find the screen we are on
-             * because the upper left corner left the
-             * visual range. assume we are still on the
-             * same screen
-             */
-            i = xinerama_screen;
-        }
-
-        /* set drwcX and drwcY to the right values */
-        drwcX = drwcX - screens[i].x_org;
-        drwcY = drwcY - screens[i].y_org;
-        XFree(screens);
-    }
-#endif
+    update_xinerama_info();
+    drwcX -= xinerama_x;
+    drwcY -= xinerama_y;
 
     if (vo_panscan > 0.0f && vo_fs)
     {
