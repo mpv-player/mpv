@@ -8218,7 +8218,7 @@ $_def_dvdnav
 
 $_def_vcd
 
-#ifdef sun
+#ifdef __sun
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
