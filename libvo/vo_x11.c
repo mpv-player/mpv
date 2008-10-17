@@ -480,7 +480,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
 
     while (fmte->mpfmt) {
-      if (IMGFMT_RGB_DEPTH(fmte->mpfmt) == myximage->bits_per_pixel &&
+      int depth = IMGFMT_RGB_DEPTH(fmte->mpfmt);
+      /* bits_per_pixel in X seems to be set to 16 for 15 bit formats
+         => force depth to 16 so that only the color masks are used for the format check */
+      if (depth == 15)
+          depth = 16;
+
+      if (depth            == myximage->bits_per_pixel &&
           fmte->byte_order == myximage->byte_order &&
           fmte->red_mask   == myximage->red_mask   &&
           fmte->green_mask == myximage->green_mask &&
