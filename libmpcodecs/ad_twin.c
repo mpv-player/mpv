@@ -138,7 +138,7 @@ static int init_vqf_audio_codec(sh_audio_t *sh_audio){
     priv->framesize=TvqGetFrameSize();
     sh_audio->audio_in_minsize=priv->framesize*in_fmt->nChannels;
     sh_audio->a_in_buffer_size=4*sh_audio->audio_in_minsize;
-    sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
+    sh_audio->a_in_buffer=av_malloc(sh_audio->a_in_buffer_size);
     sh_audio->a_in_buffer_len=0;
 
 

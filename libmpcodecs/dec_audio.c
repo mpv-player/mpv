@@ -74,8 +74,7 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 	sh_audio->a_in_buffer_size = sh_audio->audio_in_minsize;
 	mp_msg(MSGT_DECAUDIO, MSGL_V, MSGTR_AllocatingBytesForInputBuffer,
 	       sh_audio->a_in_buffer_size);
-	sh_audio->a_in_buffer = memalign(16, sh_audio->a_in_buffer_size);
-	memset(sh_audio->a_in_buffer, 0, sh_audio->a_in_buffer_size);
+	sh_audio->a_in_buffer = av_mallocz(sh_audio->a_in_buffer_size);
 	sh_audio->a_in_buffer_len = 0;
     }
 
@@ -84,12 +83,11 @@ static int init_audio_codec(sh_audio_t *sh_audio)
     mp_msg(MSGT_DECAUDIO, MSGL_V, MSGTR_AllocatingBytesForOutputBuffer,
 	   sh_audio->audio_out_minsize, MAX_OUTBURST, sh_audio->a_buffer_size);
 
-    sh_audio->a_buffer = memalign(16, sh_audio->a_buffer_size);
+    sh_audio->a_buffer = av_mallocz(sh_audio->a_buffer_size);
     if (!sh_audio->a_buffer) {
 	mp_msg(MSGT_DECAUDIO, MSGL_ERR, MSGTR_CantAllocAudioBuf);
 	return 0;
     }
-    memset(sh_audio->a_buffer, 0, sh_audio->a_buffer_size);
     sh_audio->a_buffer_len = 0;
 
     if (!sh_audio->ad_driver->init(sh_audio)) {
@@ -306,12 +304,8 @@ void uninit_audio(sh_audio_t *sh_audio)
     free(sh_audio->a_out_buffer);
     sh_audio->a_out_buffer = NULL;
     sh_audio->a_out_buffer_size = 0;
-    if (sh_audio->a_buffer)
-	free(sh_audio->a_buffer);
-    sh_audio->a_buffer = NULL;
-    if (sh_audio->a_in_buffer)
-	free(sh_audio->a_in_buffer);
-    sh_audio->a_in_buffer = NULL;
+    av_freep(&sh_audio->a_buffer);
+    av_freep(&sh_audio->a_in_buffer);
 }
 
 
