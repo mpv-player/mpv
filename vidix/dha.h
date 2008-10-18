@@ -42,7 +42,7 @@
 
 #define MAX_DEV_PER_VENDOR_CFG1 64
 #define MAX_PCI_DEVICES_PER_BUS 32
-#define MAX_PCI_DEVICES         64
+#define MAX_PCI_DEVICES         256
 #define PCI_MULTIFUNC_DEV	0x80
 #define PCI_COMMAND_IO          0x1     /* Enable response to I/O space */
 

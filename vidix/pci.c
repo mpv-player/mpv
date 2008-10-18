@@ -441,7 +441,7 @@ struct pci_config_reg {
 
 #define MAX_DEV_PER_VENDOR_CFG1 64
 #define MAX_PCI_DEVICES_PER_BUS 32
-#define MAX_PCI_DEVICES         64
+#define MAX_PCI_DEVICES         256
 #define NF ((void (*)())NULL), { 0.0, 0, 0, NULL }
 #define PCI_MULTIFUNC_DEV	0x80
 #define PCI_ID_REG              0x00
