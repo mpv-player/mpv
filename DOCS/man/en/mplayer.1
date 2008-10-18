@@ -10078,9 +10078,9 @@ I- and P-frames (default).
 .IPs 7
 Enables rate-distortion optimization of macroblock types in all frames.
 .IPs 8
-Enables rate-distortion optimization of motion vectors in I- and P-frames.
+Enables rate-distortion optimization of motion vectors and intra prediction modes in I- and P-frames.
 .IPs 9
-Enables rate-distortion optimization of motion vectors in all frames (best).
+Enables rate-distortion optimization of motion vectors and intra prediction modes in all frames (best).
 .RE
 .PD 1
 .RS
@@ -10121,7 +10121,7 @@ Sets the strength of the psychovisual optimization.
 .PD 0
 .RSs
 .IPs rd=<0.0\-10.0>
-rate-distortion strength (requires subq>=6) (default: 1.0)
+psy optimization strength (requires subq>=6) (default: 1.0)
 .IPs trell=<0.0\-10.0>
 trellis (requires trellis, experimental) (default: 0.0)
 .RE
