@@ -7,7 +7,7 @@
 #include "ldt_keeper.h"
 #include "mp_msg.h"
 
-/* ilyen egy sima komponens */
+/* this is what a plain component looks like */
 ComponentResult ComponentDummy(
     ComponentParameters *params,
     void **globals,
