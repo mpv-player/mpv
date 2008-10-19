@@ -81,10 +81,15 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_h
     if(vo_screenwidth && vo_screenheight){
       if(!vo_geometry)center=1;
     }
-    else mp_msg(MSGT_VO, MSGL_WARN, "vo_cvidix: warn: screenwidth and height not set assuming 640x480\n");
   }
-  if(!vo_screenwidth)vo_screenwidth=640;
-  if(!vo_screenheight)vo_screenheight=480;
+  if(!vo_screenwidth){
+    mp_msg(MSGT_VO, MSGL_WARN, "vo_cvidix: Screen width not set (see -screenw), assuming 640 pixels.\n");
+    vo_screenwidth = 640;
+    }
+  if(!vo_screenheight){
+    mp_msg(MSGT_VO, MSGL_WARN, "vo_cvidix: Screen height not set (see -screenh), assuming 480 pixels.\n");
+    vo_screenheight = 480;
+  }
   swidth = width;
   sheight = height;
   sformat = format;
