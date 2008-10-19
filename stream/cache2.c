@@ -20,7 +20,7 @@
 #include "osdep/timer.h"
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
-static DWORD WINAPI ThreadProc(void* s);
+static void ThreadProc( void *s );
 #elif defined(__OS2__)
 #define INCL_DOS
 #include <os2.h>
@@ -198,14 +198,15 @@ int cache_fill(cache_vars_t* s){
   
 }
 
-static void cache_execute_control(cache_vars_t *s) {
+static int cache_execute_control(cache_vars_t *s) {
+  int res = 1;
   static unsigned last;
   if (!s->stream->control) {
     s->stream_time_length = 0;
     s->control_new_pos = 0;
     s->control_res = STREAM_UNSUPPORTED;
     s->control = -1;
-    return;
+    return res;
   }
   if (GetTimerMS() - last > 99) {
     double len;
@@ -215,7 +216,7 @@ static void cache_execute_control(cache_vars_t *s) {
       s->stream_time_length = 0;
     last = GetTimerMS();
   }
-  if (s->control == -1) return;
+  if (s->control == -1) return res;
   switch (s->control) {
     case STREAM_CTRL_GET_CURRENT_TIME:
     case STREAM_CTRL_SEEK_TO_TIME:
@@ -230,12 +231,15 @@ static void cache_execute_control(cache_vars_t *s) {
     case STREAM_CTRL_SET_ANGLE:
       s->control_res = s->stream->control(s->stream, s->control, &s->control_uint_arg);
       break;
+    case -2:
+      res = 0;
     default:
       s->control_res = STREAM_UNSUPPORTED;
       break;
   }
   s->control_new_pos = s->stream->pos;
   s->control = -1;
+  return res;
 }
 
 cache_vars_t* cache_init(int size,int sector){
@@ -277,11 +281,8 @@ cache_vars_t* cache_init(int size,int sector){
 void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
   if(!s->cache_pid) return;
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-  TerminateThread((HANDLE)s->cache_pid,0);
-#elif defined(__OS2__)
-  DosKillThread( s->cache_pid );
-  DosWaitThread( &s->cache_pid, DCWW_WAIT );
+#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+  cache_do_control(s, -2, NULL);
 #else
   kill(s->cache_pid,SIGKILL);
   waitpid(s->cache_pid,NULL,0);
@@ -332,15 +333,12 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   if((stream->cache_pid=fork())){
 #else
   {
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-    DWORD threadId;
-#endif
     stream_t* stream2=malloc(sizeof(stream_t));
     memcpy(stream2,s->stream,sizeof(stream_t));
     s->stream=stream2;
 #if defined(__MINGW32__) || defined(__CYGWIN__)
-    stream->cache_pid = CreateThread(NULL,0,ThreadProc,s,0,&threadId);
-#else   // OS2
+    stream->cache_pid = _beginthread( ThreadProc, 0, s );
+#else
     stream->cache_pid = _beginthread( ThreadProc, NULL, 256 * 1024, s );
 #endif
 #endif
@@ -362,11 +360,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   
 #if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
 }
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-static DWORD WINAPI ThreadProc(void*s){
-#else   // OS2
 static void ThreadProc( void *s ){
-#endif
 #endif
   
 #ifdef CONFIG_GUI
@@ -374,13 +368,15 @@ static void ThreadProc( void *s ){
 #endif
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
-  while(1){
+  do {
     if(!cache_fill(s)){
 	 usec_sleep(FILL_USLEEP_TIME); // idle
     }
-    cache_execute_control(s);
 //	 cache_stats(s->cache_data);
-  }
+  } while (cache_execute_control(s));
+#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+  _endthread();
+#endif
 }
 
 int cache_stream_fill_buffer(stream_t *s){
@@ -455,6 +451,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_ASPECT_RATIO:
     case STREAM_CTRL_GET_NUM_ANGLES:
     case STREAM_CTRL_GET_ANGLE:
+    case -2:
       s->control = cmd;
       break;
     default:
