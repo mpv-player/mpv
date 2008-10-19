@@ -375,10 +375,10 @@ static void ThreadProc( void *s ){
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
   while(1){
-    if(!cache_fill((cache_vars_t*)s)){
+    if(!cache_fill(s)){
 	 usec_sleep(FILL_USLEEP_TIME); // idle
     }
-    cache_execute_control((cache_vars_t*)s);
+    cache_execute_control(s);
 //	 cache_stats(s->cache_data);
   }
 }
