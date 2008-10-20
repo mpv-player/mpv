@@ -398,7 +398,7 @@ read_next:
         // See also gcc problem report PR c/7847:
         // http://gcc.gnu.org/cgi-bin/gnatsweb.pl?database=gcc&cmd=view+audit-trail&pr=7847
         for(i=0;i<9;i++) {	// check if all values zero:
-          typeof(d->dsi_pack.sml_agli.data[i].address) tmp_addr;
+          __typeof__(d->dsi_pack.sml_agli.data[i].address) tmp_addr;
           memcpy(&tmp_addr,&d->dsi_pack.sml_agli.data[i].address,sizeof(tmp_addr));
           if((skip=tmp_addr)!=0) break;
         }
