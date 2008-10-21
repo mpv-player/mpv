@@ -5372,6 +5372,34 @@ echores "$_sgiaudio"
 fi #if irix
 
 
+# set default CD/DVD devices
+if win32 || os2 ; then
+  default_cdrom_device="D:"
+elif darwin ; then
+  default_cdrom_device="/dev/disk1"
+elif dragonfly ; then
+  default_cdrom_device="/dev/cd0"
+elif freebsd ; then
+  default_cdrom_device="/dev/acd0"
+elif openbsd ; then
+  default_cdrom_device="/dev/rcd0a"
+elif sunos ; then
+  default_cdrom_device="/vol/dev/aliases/cdrom0"
+elif amigaos ; then
+  default_cdrom_device="a1ide.device:2"
+else
+  default_cdrom_device="/dev/cdrom"
+fi
+
+if win32 || os2 || dragonfly || freebsd || openbsd || sunos || amigaos ; then
+  default_dvd_device=$default_cdrom_device
+elif darwin ; then
+  default_dvd_device="/dev/rdiskN"
+else
+  default_dvd_device="/dev/dvd"
+fi
+
+
 echocheck "VCD support"
 if linux || freebsd || netbsd || dragonfly || bsdos || darwin || sunos || mingw32; then
   _inputmodules="vcd $_inputmodules"
@@ -8127,6 +8155,8 @@ $_def_words_endian
 
 
 /* DVD/VCD/CD */
+#define DEFAULT_CDROM_DEVICE "$default_cdrom_device"
+#define DEFAULT_DVD_DEVICE   "$default_dvd_device"
 $_def_bsdi_dvd
 $_def_cddb
 $_def_cdio
