@@ -42,6 +42,16 @@ section of our homepage at
 
   http://www.mplayerhq.hu/dload.html
 
+MPlayer has builtin support for the most common audio and video formats. For a
+few formats no native decoder exists and external binary codecs are required
+to handle them. Examples are newer RealVideo variants and a variety of rare
+formats. However, binary codecs are NOT required in this day and age, they are
+strictly optional.
+
+Please note that binary codecs only work on the processor architecture they
+were compiled for. Choose the correct package for your processor. No other
+package is necessary.
+
 The GUI needs at least one skin and codec packages add support for some more
 video and audio formats. MPlayer does not come with any of these by default,
 you have to download and install them separately.
@@ -63,13 +73,6 @@ from within that directory.
 _______________________________
 STEP1: Installing Binary Codecs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-MPlayer has builtin support for the most common audio and video formats. For a
-few formats no native decoder exists and external binary codecs are required
-to handle them, for example newer RealVideo variants and a variety of uncommon
-formats. This step is not mandatory, but recommended for getting MPlayer to
-play a broader range of formats. Please note that binary codecs only work on
-the processor architecture they were compiled for.
 
 Unpack the codecs archives and put the contents in a directory where MPlayer
 will find them. The default directory is /usr/local/lib/codecs/ (it used to be
