@@ -83,9 +83,7 @@ static int init(sh_video_t *sh){
     #elif ARCH_ARM
        accel |= MPEG2_ACCEL_ARM;
     #endif
-    #ifdef HAVE_IWMMXT
-       accel |= MPEG2_ACCEL_ARM_IWMMXT;
-    #elif HAVE_MVI
+    #ifdef HAVE_MVI
        accel |= MPEG2_ACCEL_ALPHA_MVI;
     #elif HAVE_VIS
        accel |= MPEG2_ACCEL_SPARC_VIS;
