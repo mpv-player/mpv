@@ -371,7 +371,7 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
 
 ////////// Extra routines that help implement the above interface functions:
 
-#define MAX_RTP_FRAME_SIZE 50000
+#define MAX_RTP_FRAME_SIZE 5000000
     // >= the largest conceivable frame composed from one or more RTP packets
 
 static void afterReading(void* clientData, unsigned frameSize,
