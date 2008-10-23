@@ -2489,7 +2489,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMVFP IWMMXT MLIB MMI SH4 VIS MVI'
+_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMVFP IWMMXT MLIB MMI VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
