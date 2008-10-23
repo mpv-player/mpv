@@ -111,11 +111,6 @@ Here are just a few tips:
   the only thing you achieve is a massive waste of CPU power.
 </para></listitem>
 <listitem><para>
-  To specify the I420 colorspace (<option>outfmt=i420</option>), you have to
-  add an option <option>-vc rawi420</option> due to a fourcc conflict with an
-  Intel Indeo video codec.
-</para></listitem>
-<listitem><para>
   There are several ways of capturing audio. You can grab the sound either using
   your sound card via an external cable connection between video card and
   line-in, or using the built-in ADC in the bt878 chip. In the latter case, you
