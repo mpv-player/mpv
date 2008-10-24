@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <see AUTHORS for email address>
 
-// Updated to help_mp-en.h r27071
+// Updated to help_mp-en.h r27402
 
 
 // ========================= MPlayer help ===========================
@@ -1092,6 +1092,11 @@ static char help_text[]=
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed "audio_out: i moduli alsa9/alsa1x sono stati rimossi, ora usa -ao alsa.\n"
+#define MSGTR_AO_TryingPreferredAudioDriver "Provo con il driver audio preferito '%.*s', opzioni '%s'\n"
+#define MSGTR_AO_NoSuchDriver "driver audio '%.*s' non trovato\n"
+#define MSGTR_AO_FailedInit "Inizializzazione del driver audio '%s' non riuscita\n"
+#define MSGTR_AO_TryingEveryKnown "Provo con tutti i driver audio conosciuti...\n"
+
 
 // ao_oss.c
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Non posso aprire il dispositivo mixer %s: %s\n"
