@@ -96,7 +96,10 @@ int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype);
 int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 {
 	int i;
-	char frontend_dev[32], dvr_dev[32], demux_dev[32], sec_dev[32];
+	char frontend_dev[32], dvr_dev[32], demux_dev[32];
+#ifndef CONFIG_DVB_HEAD
+	char sec_dev[32];
+#endif
 
 #ifdef CONFIG_DVB_HEAD
 	sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
