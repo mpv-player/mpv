@@ -108,15 +108,15 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	    break;
 	case 24:
 	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		palette8tobgr24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		palette8topacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
-		palette8torgb24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		palette8topacked24(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	case 32:
 	    if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		palette8tobgr32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		palette8topacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    else
-		palette8torgb32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
+		palette8topacked32(mpi->planes[0],dmpi->planes[0],mpi->h*mpi->w,mpi->planes[1]);
 	    break;
 	}
     } else {
@@ -139,15 +139,15 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 		break;
 	    case 24:
 		if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		    palette8tobgr24(src,dst,mpi->w,mpi->planes[1]);
+		    palette8topacked24(src,dst,mpi->w,mpi->planes[1]);
 		else
-		    palette8torgb24(src,dst,mpi->w,mpi->planes[1]);
+		    palette8topacked24(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    case 32:
 		if (IMGFMT_IS_BGR(dmpi->imgfmt))
-		    palette8tobgr32(src,dst,mpi->w,mpi->planes[1]);
+		    palette8topacked32(src,dst,mpi->w,mpi->planes[1]);
 		else
-		    palette8torgb32(src,dst,mpi->w,mpi->planes[1]);
+		    palette8topacked32(src,dst,mpi->w,mpi->planes[1]);
 		break;
 	    }
 	}
