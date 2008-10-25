@@ -7982,8 +7982,9 @@ LIBSUF=.a
 LIBNAME=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 
 CONFIG_ENCODERS=yes
+# Some FFmpeg codecs depend on this. Enable it unconditionally for now.
+CONFIG_FFT=yes
 CONFIG_GPL=yes
-CONFIG_MUXERS=$_mencoder
 CONFIG_LIBAMR=$_libamr
 CONFIG_LIBAMR_NB=$_libamr_nb
 CONFIG_LIBAMR_WB=$_libamr_wb
@@ -7995,12 +7996,11 @@ CONFIG_LIBVORBIS=$_libvorbis
 CONFIG_LIBX264=$_x264_lavc
 CONFIG_LIBXVID=$_xvid_lavc
 CONFIG_MLIB = $_mlib
+CONFIG_MUXERS=$_mencoder
 CONFIG_POSTPROC = yes
 # Prevent building libavcodec/imgresample.c with conflicting symbols
 CONFIG_SWSCALE=yes
 CONFIG_ZLIB=$_zlib
-# Some FFmpeg codecs depend on this. Enable it unconditionally for now.
-CONFIG_FFT=yes
 
 HAVE_PTHREADS = $_pthreads
 HAVE_W32THREADS = $_w32threads
@@ -8412,6 +8412,16 @@ $_def_threads
 #define ENABLE_SMALL 0
 #define ENABLE_GRAY 0
 
+/* Some FFmpeg codecs depend on this. Enable it unconditionally for now. */
+#define CONFIG_FFT 1
+#define ENABLE_FFT 1
+
+/* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
+#define HAVE_EBX_AVAILABLE 1
+#ifndef MP_DEBUG
+#define HAVE_EBP_AVAILABLE 1
+#endif
+
 #define CONFIG_DECODERS 1
 #define ENABLE_DECODERS 1
 #define CONFIG_ENCODERS 1
@@ -8420,17 +8430,7 @@ $_def_threads
 #define CONFIG_DEMUXERS 1
 #define ENABLE_DEMUXERS 1
 
-/* Some FFmpeg codecs depend on this. Enable it unconditionally for now. */
-#define CONFIG_FFT 1
-#define ENABLE_FFT 1
-
 $_def_muxers
-
-/* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
-#define HAVE_EBX_AVAILABLE 1
-#ifndef MP_DEBUG
-#define HAVE_EBP_AVAILABLE 1
-#endif
 
 /* External libraries used through libavcodec. */
 $_def_faac_lavc
