@@ -103,17 +103,14 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 
 #include "libvo/video_out.h"
 
-#define SCREEN_SIZE_X 1
-#define SCREEN_SIZE_Y 1
-
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
                        unsigned int preferred_outfmt)
 {
     struct MPOpts *opts = sh->opts;
     int i, j;
     unsigned int out_fmt = 0;
-    int screen_size_x = 0;      //SCREEN_SIZE_X;
-    int screen_size_y = 0;      //SCREEN_SIZE_Y;
+    int screen_size_x = 0;
+    int screen_size_y = 0;
     vf_instance_t *vf = sh->vfilter, *sc = NULL;
     int palette = 0;
     int vocfg_flags = 0;
@@ -249,9 +246,9 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         screen_size_y = opts->screen_size_y;
         if (!opts->vidmode) {
             if (!screen_size_x)
-                screen_size_x = SCREEN_SIZE_X;
+                screen_size_x = 1;
             if (!screen_size_y)
-                screen_size_y = SCREEN_SIZE_Y;
+                screen_size_y = 1;
             if (screen_size_x <= 8)
                 screen_size_x *= sh->disp_w;
             if (screen_size_y <= 8)
