@@ -52,7 +52,7 @@ extern char* def_path;
 #else
 // this asm code is no longer needed
 #define STORE_ALL \
-    __asm__ __volatile__ ( \
+    __asm__ volatile ( \
     "push %%ebx\n\t" \
     "push %%ecx\n\t" \
     "push %%edx\n\t" \
@@ -60,7 +60,7 @@ extern char* def_path;
     "push %%edi\n\t"::)
 
 #define REST_ALL \
-    __asm__ __volatile__ ( \
+    __asm__ volatile ( \
     "pop %%edi\n\t" \
     "pop %%esi\n\t" \
     "pop %%edx\n\t" \
@@ -98,7 +98,7 @@ LRESULT WINAPI SendDriverMessage(HDRVR hDriver, UINT message,
 #endif
     if (!module || !module->hDriverModule || !module->DriverProc) return -1;
 #ifndef __svr4__
-    __asm__ __volatile__ ("fsave (%0)\n\t": :"r"(&qw));
+    __asm__ volatile ("fsave (%0)\n\t": :"r"(&qw));
 #endif
 
 #ifdef WIN32_LOADER
@@ -110,7 +110,7 @@ LRESULT WINAPI SendDriverMessage(HDRVR hDriver, UINT message,
     REST_ALL;
 
 #ifndef __svr4__
-    __asm__ __volatile__ ("frstor (%0)\n\t": :"r"(&qw));
+    __asm__ volatile ("frstor (%0)\n\t": :"r"(&qw));
 #endif
 
 #ifdef DETAILED_OUT

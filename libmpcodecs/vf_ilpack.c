@@ -61,7 +61,7 @@ static void pack_li_1_C(unsigned char *dst, unsigned char *y,
 static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w)
 {
-	asm volatile (""
+	__asm__ volatile (""
 		ASMALIGN(4)
 		"1: \n\t"
 		"movq (%0), %%mm1 \n\t"
@@ -91,7 +91,7 @@ static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w, int us, int vs)
 {
-	asm volatile (""
+	__asm__ volatile (""
 		"push %%"REG_BP" \n\t"
 #ifdef ARCH_X86_64
 		"mov %6, %%"REG_BP" \n\t"
@@ -199,7 +199,7 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w, int us, int vs)
 {
-	asm volatile (""
+	__asm__ volatile (""
 		"push %%"REG_BP" \n\t"
 #ifdef ARCH_X86_64
 		"mov %6, %%"REG_BP" \n\t"

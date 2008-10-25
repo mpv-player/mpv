@@ -171,7 +171,7 @@ static __inline__ void outb(short port,char val)
     }
     else
 #endif
-   __asm__ __volatile__("outb %0,%1" : :"a" (val), "d" (port));
+   __asm__ volatile("outb %0,%1" : :"a" (val), "d" (port));
     return;
 }
 
@@ -199,7 +199,7 @@ static __inline__ void outw(short port,short val)
     }
     else
 #endif
-   __asm__ __volatile__("outw %0,%1" : :"a" (val), "d" (port));
+   __asm__ volatile("outw %0,%1" : :"a" (val), "d" (port));
     return;
 }
 
@@ -227,7 +227,7 @@ static __inline__ void outl(short port,unsigned int val)
     }
     else
 #endif
-   __asm__ __volatile__("outl %0,%1" : :"a" (val), "d" (port));
+   __asm__ volatile("outl %0,%1" : :"a" (val), "d" (port));
     return;
 }
 
@@ -255,7 +255,7 @@ static __inline__ unsigned int inb(short port)
     }
     else
 #endif
-   __asm__ __volatile__("inb %1,%0" :
+   __asm__ volatile("inb %1,%0" :
        "=a" (ret) :
        "d" (port));
    return ret;
@@ -285,7 +285,7 @@ static __inline__ unsigned int inw(short port)
     }
     else
 #endif
-   __asm__ __volatile__("inw %1,%0" :
+   __asm__ volatile("inw %1,%0" :
        "=a" (ret) :
        "d" (port));
    return ret;
@@ -315,7 +315,7 @@ static __inline__ unsigned int inl(short port)
     }
     else
 #endif
-   __asm__ __volatile__("inl %1,%0" :
+   __asm__ volatile("inl %1,%0" :
        "=a" (ret) :
        "d" (port));
    return ret;
@@ -327,7 +327,7 @@ static __inline__ void intr_disable()
     if (svgahelper_initialized == 1)
 	return;
 #endif
-  __asm__ __volatile__("cli");
+  __asm__ volatile("cli");
 }
 
 static __inline__ void intr_enable()
@@ -336,7 +336,7 @@ static __inline__ void intr_enable()
     if (svgahelper_initialized == 1)
 	return;
 #endif
-  __asm__ __volatile__("sti");
+  __asm__ volatile("sti");
 }
 
 #endif /* MPLAYER_ASMMACROS_X86_H */

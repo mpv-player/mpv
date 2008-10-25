@@ -29,7 +29,7 @@ CpuCaps gCpuCaps;
 #include <signal.h>
 #endif
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
 #endif
 
@@ -57,7 +57,7 @@ static int has_cpuid(void)
 	long a, c;
 
 // code from libavcodec:
-    __asm__ __volatile__ (
+    __asm__ volatile (
                           /* See if CPUID instruction is supported ... */
                           /* ... Get copies of EFLAGS into eax and ecx */
                           "pushf\n\t"
@@ -85,14 +85,14 @@ static void
 do_cpuid(unsigned int ax, unsigned int *p)
 {
 #if 0
-	__asm __volatile(
+	__asm__ volatile(
 	"cpuid;"
 	: "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
 	:  "0" (ax)
 	);
 #else
 // code from libavcodec:
-    __asm __volatile
+    __asm__ volatile
 	("mov %%"REG_b", %%"REG_S"\n\t"
          "cpuid\n\t"
          "xchg %%"REG_b", %%"REG_S
@@ -314,7 +314,7 @@ static void sigill_handler_sse( int signal, struct sigcontext sc )
 }
 #endif /* __linux__ && _POSIX_SOURCE */
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
 {
    if(ep->ExceptionRecord->ExceptionCode==EXCEPTION_ILLEGAL_INSTRUCTION){
@@ -325,7 +325,7 @@ LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
    }
    return EXCEPTION_CONTINUE_SEARCH;
 }
-#endif /* WIN32 */
+#endif /* defined(__MINGW32__) || defined(__CYGWIN__) */
 
 #ifdef __OS2__
 ULONG _System os2_sig_handler_sse( PEXCEPTIONREPORTRECORD       p1,
@@ -395,12 +395,12 @@ static void check_os_katmai_support( void )
    gCpuCaps.hasSSE = 0;
    mp_msg(MSGT_CPUDETECT,MSGL_WARN, "No OS support for SSE, disabling to be safe.\n" );
 #endif
-#elif defined(WIN32)
+#elif defined(__MINGW32__) || defined(__CYGWIN__)
    LPTOP_LEVEL_EXCEPTION_FILTER exc_fil;
    if ( gCpuCaps.hasSSE ) {
       mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
       exc_fil = SetUnhandledExceptionFilter(win32_sig_handler_sse);
-      __asm __volatile ("xorps %xmm0, %xmm0");
+      __asm__ volatile ("xorps %xmm0, %xmm0");
       SetUnhandledExceptionFilter(exc_fil);
       mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
@@ -409,7 +409,7 @@ static void check_os_katmai_support( void )
    if ( gCpuCaps.hasSSE ) {
       mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
       DosSetExceptionHandler( &RegRec );
-      __asm __volatile ("xorps %xmm0, %xmm0");
+      __asm__ volatile ("xorps %xmm0, %xmm0");
       DosUnsetExceptionHandler( &RegRec );
       mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
@@ -432,8 +432,8 @@ static void check_os_katmai_support( void )
    if ( gCpuCaps.hasSSE ) {
       mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
 
-//      __asm __volatile ("xorps %%xmm0, %%xmm0");
-      __asm __volatile ("xorps %xmm0, %xmm0");
+//      __asm__ volatile ("xorps %%xmm0, %%xmm0");
+      __asm__ volatile ("xorps %xmm0, %xmm0");
 
       mp_msg(MSGT_CPUDETECT,MSGL_V, gCpuCaps.hasSSE ? "yes.\n" : "no!\n" );
    }
@@ -532,7 +532,7 @@ void GetCpuCaps( CpuCaps *caps)
           } else {
             canjump = 1;
             
-            asm volatile ("mtspr 256, %0\n\t"
+            __asm__ volatile ("mtspr 256, %0\n\t"
                           "vand %%v0, %%v0, %%v0"
                           :
                           : "r" (-1));

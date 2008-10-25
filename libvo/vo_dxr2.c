@@ -20,10 +20,7 @@
 #include "sub.h"
 #include "get_path.h"
 #include "libmpdemux/mpeg_packetizer.h"
-
-#ifdef X11_FULLSCREEN
 #include "x11_common.h"
-#endif
 
 #include <dxr2ioctl.h>
 

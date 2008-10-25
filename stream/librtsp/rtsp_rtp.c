@@ -42,6 +42,7 @@
 #include "rtsp.h"
 #include "rtsp_rtp.h"
 #include "rtsp_session.h"
+#include "stream/network.h"
 #include "stream/freesdp/common.h"
 #include "stream/freesdp/parser.h"
 

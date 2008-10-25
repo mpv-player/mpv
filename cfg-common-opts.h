@@ -5,11 +5,12 @@
 	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, CONF_GLOBAL|CONF_NOSAVE, 0, 0, NULL},
         {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 	{"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"nomsgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 #ifdef CONFIG_ICONV
 	{"msgcharset", &mp_msg_charset, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 	{"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 	{"noconfig", (void *) noconfig_opts, CONF_TYPE_SUBCONFIG, CONF_GLOBAL|CONF_NOCFG|CONF_PRE_PARSE, 0, 0, NULL},

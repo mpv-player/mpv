@@ -32,7 +32,7 @@ void dct64_sse(short *out0,short *out1,real *c)
 
         for (i = 0; i < 0x20 / 2; i += 4)
         {
-            asm(
+            __asm__(
                 "movaps    %2, %%xmm3\n\t"
                 "shufps    $27, %%xmm3, %%xmm3\n\t"
                 "movaps    %3, %%xmm1\n\t"
@@ -57,7 +57,7 @@ void dct64_sse(short *out0,short *out1,real *c)
 
         for (i = 0; i < 0x20; i += 0x10)
         {
-            asm(
+            __asm__(
                 "movaps    %4, %%xmm1\n\t"
                 "movaps    %5, %%xmm3\n\t"
                 "movaps    %6, %%xmm4\n\t"
@@ -86,7 +86,7 @@ void dct64_sse(short *out0,short *out1,real *c)
 
     {
         real *costab = costab_mmx + 16;
-        asm(
+        __asm__(
             "movaps    %4, %%xmm0\n\t"
             "movaps    %5, %%xmm1\n\t"
             "movaps    %8, %%xmm4\n\t"
@@ -116,7 +116,7 @@ void dct64_sse(short *out0,short *out1,real *c)
         real *costab = costab_mmx + 24;
         int i;
 
-        asm(
+        __asm__(
             "movaps    %0, %%xmm0\n\t"
             "shufps    $27, %%xmm0, %%xmm0\n\t"
             "movaps    %1, %%xmm5\n\t"
@@ -127,7 +127,7 @@ void dct64_sse(short *out0,short *out1,real *c)
 
         for (i = 0; i < 0x20; i += 8)
         {
-            asm(
+            __asm__(
                 "movaps    %2, %%xmm2\n\t"
                 "movaps    %3, %%xmm3\n\t"
                 "movaps    %%xmm2, %%xmm4\n\t"
@@ -150,7 +150,7 @@ void dct64_sse(short *out0,short *out1,real *c)
     {
         int i;
 
-        asm(
+        __asm__(
             "movss     %0, %%xmm1\n\t"
             "movss     %1, %%xmm0\n\t"
             "movaps    %%xmm1, %%xmm3\n\t"
@@ -166,7 +166,7 @@ void dct64_sse(short *out0,short *out1,real *c)
 
         for (i = 0; i < 0x20; i += 8)
         {
-            asm(
+            __asm__(
                 "movaps    %2, %%xmm3\n\t"
                 "movaps    %%xmm3, %%xmm4\n\t"
                 "shufps    $20, %%xmm4, %%xmm4\n\t"
@@ -190,7 +190,7 @@ void dct64_sse(short *out0,short *out1,real *c)
 
     {
         int i;
-        asm(
+        __asm__(
             "movss     %0, %%xmm0\n\t"
             "movaps    %%xmm1, %%xmm2\n\t"
             "movaps    %%xmm0, %%xmm7\n\t"
@@ -204,7 +204,7 @@ void dct64_sse(short *out0,short *out1,real *c)
 
         for (i = 0x8; i < 0x20; i += 8)
         {
-            asm volatile (
+            __asm__ volatile (
                           "movaps    %2, %%xmm1\n\t"
                           "movaps    %%xmm1, %%xmm3\n\t"
                           "shufps    $224, %%xmm3, %%xmm3\n\t"
@@ -285,7 +285,7 @@ void dct64_sse(short *out0,short *out1,real *c)
        To do saturation efficiently in x86 we can use fist(t)(p),
        pf2iw, or packssdw. We use fist(p) here.
     */
-    asm(
+    __asm__(
         "flds       %0\n\t"
         "flds     (%2)\n\t"
         "fadds   4(%2)\n\t"

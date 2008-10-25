@@ -1,4 +1,4 @@
-.\" Synced with r27607
+.\" Synced with r27691
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 09. 14." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 10. 05." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -3092,8 +3092,8 @@ Ha egy külsõ ablak is meg van adva a \-win opcióval, akkor az x és y
 koordináták az ablak bal felsõ sarkához viszonyulnak a képernyõ helyett.
 .br
 .I MEGJEGYZÉS:
-Ezt az opciót csak az x11, xmga, xv, xvmc, xvidix, gl, gl2, directx és
-tdfxfb videó kimeneti vezérlõk támogatják.
+Ezt az opciót csak az x11, xmga, xv, xvmc, xvidix, gl, gl2, directx,
+fbdev és tdfxfb videó kimeneti vezérlõk támogatják.
 .sp 1
 .I PÉLDA:
 .PD 0
@@ -4226,6 +4226,8 @@ Minden fájl neve a képkocka sorszáma lesz vezetõ nullákkal.
 .IPs z=<0\-9>
 Megadja a tömörítési szintet.
 0-val nincs tömörítés, 9 a maximális tömörítés.
+.IPs outdir=<könyvtárnév>
+Megadja a könyvtárat, ahova a PNG fájlokat menteni kell (alapértelmezett: ./).
 .RE
 .PD 1
 .
@@ -4507,8 +4509,21 @@ Ez nem hiba, hanem a nem teljes felbontású dekódolás mellékhatásai.
 Ha a <w> is meg van adva, a lowres dekódolás csak akkor lesz használva, ha a
 videó szélessége nagyobb vagy egyenlõ mint <w>.
 .RE
-.IPs "o\ \ \ \ "
-FIXME: nem dokumentált
+.B o=<kulcs>=<érték>[,<kulcs>=<érték>[,...]]
+AVOptions átadása a libavcodec dekódolójának.
+Megjegyezzük, hogy az o= kapcsolót feleslegessé tevõ, az összes ismeretlen
+opciót az AVOption rendszernek átadó javítást szívesen fogadunk.
+Az AVOptions teljes listája megtalálható az FFmpeg kézikönyvében.
+Figyelj rá, hogy néhány opció ütközhet a MEncoder kapcsolóival.
+.sp 1
+.RS
+.I PÉLDA:
+.RE
+.RSs
+.PD 0
+.IPs o=debug=pict
+.PD 1
+.RE
 .IPs "sb=<szám> (csak MPEG-2)"
 Kihagyja a megadott számú makroblokk sort a tetején.
 .IPs "st=<szám> (csak MPEG-2)"
@@ -7652,9 +7667,11 @@ Nézd meg a forrást a részletekért.
 .
 .TP
 .B o=<kulcs>=<érték>[,<kulcs>=<érték>[,...]]
-AVOption átadása a libavcodec-nek
-Emlékezz rá, hogy az o= kapcsolót feleslegessé tevõ, az összes ismeretlen
-opciót a AVOption rendszernek átadó javítást szívesen fogadunk.
+AVOption átadása a libavcodec kódolójának.
+Megjegyezzük, hogy az o= kapcsolót feleslegessé tevõ, az összes ismeretlen
+opciót az AVOption rendszernek átadó javítást szívesen fogadunk.
+Az AVOptions teljes listája megtalálható az FFmpeg kézikönyvében.
+Figyelj rá, hogy néhány opció ütközhet a MEncoder kapcsolóival.
 .sp 1
 .RS
 .I PÉLDA:
@@ -10498,8 +10515,21 @@ A folyam tulajdonságainak megállapításához maximálisan analizálndó hossz másodpe
 Kényszeríti a megadott libavformat demuxer-t.
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: nem dokumentált
+.B o=<kulcs>=<érték>[,<kulcs>=<érték>[,...]]
+AVOptions átadása a libavformat demuxer-ének.
+Megjegyezzük, hogy az o= kapcsolót feleslegessé tevõ, az összes ismeretlen
+opciót az AVOption rendszernek átadó javítást szívesen fogadunk.
+Az AVOptions teljes listája megtalálható az FFmpeg kézikönyvében.
+Figyelj rá, hogy néhány opció ütközhet az MPlayer/MEncoder kapcsolóival.
+.sp 1
+.RS
+.I PÉLDA:
+.RE
+.RSs
+.PD 0
+.IPs o=ignidx
+.PD 1
+.RE
 .
 .TP
 .B probesize=<érték>
@@ -10555,6 +10585,8 @@ MPEG-4 formátum
 MPEG-4 formátum extra fejléc flag-ekkel, melyek az Apple iPod firmware-jének kellenek
 .IPs "dv\ \ \ "
 Sony Digital Video konténer
+.IPs "matroska\ \ \ "
+Matroska
 .RE
 .PD 1
 .TP
@@ -10564,8 +10596,21 @@ jelenleg csak MPEG[12] esetén van értelme.
 Néha szükséges növelni a "buffer alulcsordulás" elkerüléséhez.
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: nem dokumentált
+.B o=<kulcs>=<érték>[,<kulcs>=<érték>[,...]]
+AVOptions átadása a libavformat muxer-ének.
+Megjegyezzük, hogy az o= kapcsolót feleslegessé tevõ, az összes ismeretlen
+opciót az AVOption rendszernek átadó javítást szívesen fogadunk.
+Az AVOptions teljes listája megtalálható az FFmpeg kézikönyvében.
+Figyelj rá, hogy néhány opció ütközhet a MEncoder kapcsolóival.
+.sp 1
+.RS
+.I PÉLDA:
+.RE
+.RSs
+.PD 0
+.IPs o=packetsize=100
+.PD 1
+.RE
 .
 .TP
 .B packetsize=<méret>

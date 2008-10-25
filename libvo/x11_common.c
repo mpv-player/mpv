@@ -526,6 +526,12 @@ static void vo_x11_putkey_ext(struct vo *vo, int keysym)
     struct mp_fifo *f = vo->key_fifo;
     switch (keysym)
     {
+        case XF86XK_MenuKB:
+            mplayer_put_key(f, KEY_MENU);
+            break;
+        case XF86XK_AudioPlay:
+            mplayer_put_key(f, KEY_PLAY);
+            break;
         case XF86XK_AudioPause:
             mplayer_put_key(f, KEY_PAUSE);
             break;
@@ -537,6 +543,9 @@ static void vo_x11_putkey_ext(struct vo *vo, int keysym)
             break;
         case XF86XK_AudioNext:
             mplayer_put_key(f, KEY_NEXT);
+            break;
+        case XF86XK_AudioMute:
+            mplayer_put_key(f, KEY_MUTE);
             break;
         case XF86XK_AudioLowerVolume:
             mplayer_put_key(f, KEY_VOLUME_DOWN);

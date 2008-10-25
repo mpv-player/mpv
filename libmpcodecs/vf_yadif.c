@@ -143,7 +143,7 @@ static void filter_line_mmx2(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, u
 
 #define FILTER\
     for(x=0; x<w; x+=4){\
-        asm volatile(\
+        __asm__ volatile(\
             "pxor      %%mm7, %%mm7 \n\t"\
             LOAD4("(%[cur],%[mrefs])", %%mm0) /* c = cur[x-refs] */\
             LOAD4("(%[cur],%[prefs])", %%mm1) /* e = cur[x+refs] */\
@@ -260,7 +260,7 @@ static void filter_line_mmx2(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, u
              [pb1]  "m"(pb_1),\
              [mode] "g"(mode)\
         );\
-        asm volatile("movd %%mm1, %0" :"=m"(*dst));\
+        __asm__ volatile("movd %%mm1, %0" :"=m"(*dst));\
         dst += 4;\
         prev+= 4;\
         cur += 4;\
@@ -371,7 +371,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
         }
     }
 #if defined(HAVE_MMX) && defined(NAMED_ASM_ARGS)
-    if(gCpuCaps.hasMMX2) asm volatile("emms \n\t" : : : "memory");
+    if(gCpuCaps.hasMMX2) __asm__ volatile("emms \n\t" : : : "memory");
 #endif
 }
 

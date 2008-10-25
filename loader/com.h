@@ -18,8 +18,6 @@
  * Internal functions and structures for COM emulation code.
  */
 
-#if !defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -88,7 +86,5 @@ void  STDCALL  CoTaskMemFree(void*);
 #ifdef __cplusplus
 };
 #endif /* __cplusplus */
-
-#endif /* WIN32 */
 
 #endif /* MPLAYER_COM_H */

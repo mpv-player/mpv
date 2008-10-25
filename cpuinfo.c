@@ -8,7 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION <= 3) && (__MINGW32_MINOR_VERSION < 10)
+#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION <= 3) && (__MINGW32_MINOR_VERSION < 10) && !defined(MINGW64)
 #include <sys/timeb.h>
 void gettimeofday(struct timeval* t,void* timezone) {
   struct timeb timebuffer;
@@ -49,9 +49,9 @@ cpuid(int func) {
   cpuid_regs_t regs;
 #define CPUID   ".byte 0x0f, 0xa2; "
 #ifdef __x86_64__
-  asm("mov %%rbx, %%rsi\n\t"
+  __asm__("mov %%rbx, %%rsi\n\t"
 #else
-  asm("mov %%ebx, %%esi\n\t"
+  __asm__("mov %%ebx, %%esi\n\t"
 #endif
       CPUID"\n\t"
 #ifdef __x86_64__
@@ -70,7 +70,7 @@ rdtsc(void)
 {
   uint64_t i;
 #define RDTSC   ".byte 0x0f, 0x31; "
-  asm volatile (RDTSC : "=A"(i) : );
+  __asm__ volatile (RDTSC : "=A"(i) : );
   return i;
 }
 

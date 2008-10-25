@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26990 -->
+<!-- synced with r27640 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -327,11 +327,11 @@ A név abból a tényből ered, hogy ez a módszer a fájlt
 lépés) létrehoz pár ideiglenes, néhány megabájtos fájlt
 (<filename>*.log</filename>), ezeket ne töröld le még (az AVI-t
 letörölheted vagy egyszerűen létre sem hozod, a videó
-<filename>/dev/null</filename> -ba irányításával). A második lépésben,
-a két menetes kimenet fájl lesz létrehozva, az ideiglenes fájlok
-bitrátájának felhasználásával. Az eredmény fájlnak sokkal jobb lesz a
-képminősége. Ha most hallasz erről először, nézz meg pár a neten
-elérhető leírást.
+<filename>/dev/null</filename>-ba vagy Windows alatt a <filename>NUL</filename>-ba
+irányításával). A második lépésben, a két menetes kimenet fájl lesz létrehozva,
+az ideiglenes fájlok bitrátájának felhasználásával. Az eredmény fájlnak
+sokkal jobb lesz a képminősége. Ha most hallasz erről először, nézz meg
+pár a neten elérhető leírást.
 </para>
 
 <example id="copy_audio_track">

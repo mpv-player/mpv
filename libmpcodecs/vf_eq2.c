@@ -130,7 +130,7 @@ void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
   dstep = dstride - w;
 
   while (h-- > 0) {
-    asm volatile (
+    __asm__ volatile (
       "movq (%5), %%mm3 \n\t"
       "movq (%6), %%mm4 \n\t"
       "pxor %%mm0, %%mm0 \n\t"
@@ -170,7 +170,7 @@ void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
     dst += dstep;
   }
 
-  asm volatile ( "emms \n\t" ::: "memory" );
+  __asm__ volatile ( "emms \n\t" ::: "memory" );
 }
 #endif
 

@@ -1299,52 +1299,6 @@ static void get_capabilities(priv_t * priv)
 *---------------------------------------------------------------------------------------
 */
 /**
- * \brief routine for reconnecting two pins with new media type
- * \param pGraph IGraphBuilder interface
- * \param chan chain data
- * \param pmt [in/out] new mediatype for pin connection
- *
- * \return S_OK if operation successfult, error code otherwise
- * will also return media type of new connection into pmt variable
- */
-static HRESULT reconnect_pins(IGraphBuilder *pGraph, chain_t *chain, AM_MEDIA_TYPE *pmt)
-{
-    AM_MEDIA_TYPE old_mt;
-    HRESULT hr;
-
-    do {
-        /* save old media type for reconnection in case of error */
-        hr = OLE_CALL_ARGS(chain->pCapturePin, ConnectionMediaType, &old_mt);
-        if(FAILED(hr))
-            return hr;
-
-        hr = OLE_CALL(chain->pCapturePin, Disconnect);
-        if(FAILED(hr))
-            return hr;
-
-        hr = OLE_CALL_ARGS(chain->pSG, SetMediaType, pmt);
-        if(FAILED(hr))
-            return hr;
-
-        hr = OLE_CALL_ARGS(pGraph, Connect, chain->pCapturePin, chain->pSGIn);
-        if(FAILED(hr))
-        {
-            OLE_CALL_ARGS(chain->pSG, SetMediaType, &old_mt);
-            OLE_CALL_ARGS(pGraph, Connect, chain->pCapturePin, chain->pSGIn);
-            break;
-        }
-        hr = OLE_CALL_ARGS(chain->pCapturePin, ConnectionMediaType, &old_mt);
-
-        hr = S_OK;
-    } while(0);
-
-    FreeMediaType(pmt);
-    CopyMediaType(pmt, &old_mt);
-    FreeMediaType(&old_mt);
-    return hr;
-}
-
-/**
  * \brief building in graph audio/video capture chain
  *
  * \param priv           driver's private data

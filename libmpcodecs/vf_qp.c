@@ -33,8 +33,6 @@
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
 
-// Needed to bring in lrintf.
-#define HAVE_AV_CONFIG_H
 #include "libavcodec/avcodec.h"
 #include "libavcodec/eval.h"
 

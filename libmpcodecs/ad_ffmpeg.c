@@ -177,6 +177,8 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
               src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_LIBA52_DEFAULT;
             else if (!strcasecmp(codec, "vorbis"))
               src_ch_layout = AF_CHANNEL_LAYOUT_VORBIS_DEFAULT;
+            else if (!strcasecmp(codec, "flac"))
+              src_ch_layout = AF_CHANNEL_LAYOUT_FLAC_DEFAULT;
             else
               src_ch_layout = AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT;
             reorder_channel_nch(buf, src_ch_layout,

@@ -90,14 +90,4 @@ static int find_asf_guid(char *buf, const char *guid, int cur_pos, int buf_len)
   return -1;
 }
 
-static int find_backwards_asf_guid(char *buf, const char *guid, int cur_pos)
-{
-  int i;
-  for (i=cur_pos-16; i>0; i--) {
-    if (memcmp(&buf[i], guid, 16) == 0)
-      return i + 16 + 8; // point after guid + length
-  }
-  return -1;
-}
-
 #endif /* MPLAYER_ASFGUID_H */

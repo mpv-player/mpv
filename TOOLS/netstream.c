@@ -44,7 +44,7 @@
 #include "mpbswap.h"
 
 /// Netstream packets def and some helpers
-#include "stream/netstream.h"
+#include "stream/stream_netstream.h"
 
 // linking hacks
 char *info_name;
@@ -58,11 +58,6 @@ char *info_comment;
 char* out_filename = NULL;
 char* force_fourcc=NULL;
 char* passtmpfile="divx2pass.log";
-
-#ifdef __MINGW32__
-#define usleep sleep
-void strsep() {};
-#endif
 
 static unsigned short int port = 10000;
 

@@ -57,24 +57,24 @@ typedef union {
 
 
 #define mmx_i2r(op,imm,reg) \
-        __asm__ __volatile__ (#op " %0, %%" #reg \
+        __asm__ volatile (#op " %0, %%" #reg \
                               : /* nothing */ \
                               : "i" (imm) )
 
 #define mmx_m2r(op, mem, reg) \
-        __asm__ __volatile__ (#op " %0, %%" #reg \
+        __asm__ volatile (#op " %0, %%" #reg \
                               : /* nothing */ \
                               : "m" (mem))
 
 #define mmx_r2m(op, reg, mem) \
-        __asm__ __volatile__ (#op " %%" #reg ", %0" \
+        __asm__ volatile (#op " %%" #reg ", %0" \
                               : "=m" (mem) \
                               : /* nothing */ )
 
 #define mmx_r2r(op, regs, regd) \
-        __asm__ __volatile__ (#op " %" #regs ", %" #regd)
+        __asm__ volatile (#op " %" #regs ", %" #regd)
 
 
-#define emms() __asm__ __volatile__ ("emms")
+#define emms() __asm__ volatile ("emms")
 
 #endif /* MPLAYER_MMX_H */

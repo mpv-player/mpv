@@ -94,7 +94,7 @@ extern "C" {
 #  ifndef _EGCS_ 
 #define __stdcall __attribute__((__stdcall__))
 #define __cdecl   __attribute__((__cdecl__))
-#  define RESTORE_ES  __asm__ __volatile__("pushl %ds\n\tpopl %es")
+#  define RESTORE_ES  __asm__ volatile("pushl %ds\n\tpopl %es")
 #  endif
 # else
 // #  error You need gcc >= 2.7 to build Wine on a 386

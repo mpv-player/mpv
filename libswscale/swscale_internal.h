@@ -71,7 +71,7 @@ typedef struct SwsContext{
     int chrSrcW, chrSrcH, chrDstW, chrDstH;
     int lumXInc, chrXInc;
     int lumYInc, chrYInc;
-    int dstFormat, srcFormat;               ///< format 4:2:0 type is always YV12
+    enum PixelFormat dstFormat, srcFormat;  ///< format 4:2:0 type is always YV12
     int origDstFormat, origSrcFormat;       ///< format
     int chrSrcHSubSample, chrSrcVSubSample;
     int chrIntHSubSample, chrIntVSubSample;
@@ -79,6 +79,9 @@ typedef struct SwsContext{
     int vChrDrop;
     int sliceDir;
     double param[2];
+
+    uint32_t pal_yuv[256];
+    uint32_t pal_rgb[256];
 
     int16_t **lumPixBuf;
     int16_t **chrPixBuf;

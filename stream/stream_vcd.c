@@ -1,7 +1,7 @@
 
 #include "config.h"
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
 #endif
 
@@ -14,7 +14,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <unistd.h>
-#ifndef WIN32
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
 #include <sys/ioctl.h>
 #endif
 #include <errno.h>
@@ -23,7 +23,7 @@
 #include "vcd_read_fbsd.h" 
 #elif defined(__APPLE__)
 #include "vcd_read_darwin.h" 
-#elif defined(WIN32)
+#elif defined(__MINGW32__) || defined(__CYGWIN__)
 #include "vcd_read_win32.h"
 #else
 #include "vcd_read.h"
@@ -81,13 +81,13 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
   int bsize = VCD_SECTOR_SIZE;
 #endif
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
   HANDLE hd;
   char device[] = "\\\\.\\?:";
 #endif
 
   if(mode != STREAM_READ
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
       || GetVersion() > 0x80000000 // Win9x
 #endif
       ) {
@@ -102,7 +102,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       p->device = strdup(DEFAULT_CDROM_DEVICE);
   }
 
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
   device[4] = p->device[0];
   /* open() can't be used for devices so do it the complicated way */
   hd = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL,

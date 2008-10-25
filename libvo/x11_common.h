@@ -4,6 +4,8 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
+#include "config.h"
+
 struct vo;
 
 struct vo_x11_state {
@@ -57,6 +59,10 @@ struct vo_x11_state {
     Atom XAWM_PROTOCOLS;
     Atom XAWM_DELETE_WINDOW;
 };
+
+#if defined(CONFIG_GL) || defined(CONFIG_X11) || defined(CONFIG_XV)
+#define X11_FULLSCREEN 1
+#endif
 
 #ifdef X11_FULLSCREEN
 

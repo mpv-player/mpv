@@ -352,6 +352,16 @@ static int asf_init_audio_stream(demuxer_t *demuxer,struct asf_priv* asf, sh_aud
   return 1;
 }
 
+static int find_backwards_asf_guid(char *buf, const char *guid, int cur_pos)
+{
+  int i;
+  for (i=cur_pos-16; i>0; i--) {
+    if (memcmp(&buf[i], guid, 16) == 0)
+      return i + 16 + 8; // point after guid + length
+  }
+  return -1;
+}
+
 int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   int hdr_len = asf->header.objh.size - sizeof(asf->header);
   int hdr_skip = 0;

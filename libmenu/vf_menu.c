@@ -33,7 +33,7 @@ static struct vf_priv_s* st_priv = NULL;
 static mp_image_t* pause_mpi = NULL;
 static int go2pause = 0;
 /// if nonzero display menu at startup
-int attribute_used menu_startup = 0;
+int menu_startup = 0;
 
 struct vf_priv_s {
   menu_t* root;

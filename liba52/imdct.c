@@ -750,7 +750,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 
     /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
     /* Bit reversed shuffling */
-	asm volatile(
+	__asm__ volatile(
 		"xor %%"REG_S", %%"REG_S"		\n\t"
 		"lea "MANGLE(bit_reverse_512)", %%"REG_a"\n\t"
 		"mov $1008, %%"REG_D"			\n\t"
@@ -810,7 +810,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     
     /* 1. iteration */
 	// Note w[0][0]={1,0}
-	asm volatile(
+	__asm__ volatile(
 		"xorps %%xmm1, %%xmm1	\n\t"
 		"xorps %%xmm2, %%xmm2	\n\t"
 		"mov %0, %%"REG_S"	\n\t"
@@ -832,7 +832,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
         
     /* 2. iteration */
 	// Note w[1]={{1,0}, {0,-1}}
-	asm volatile(
+	__asm__ volatile(
 		"movaps "MANGLE(ps111_1)", %%xmm7\n\t" // 1,1,1,-1
 		"mov %0, %%"REG_S"		\n\t"
 		ASMALIGN(4)
@@ -860,7 +860,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
  Note sseW2+32={0,0,-sqrt(2),-sqrt(2))
  Note sseW2+48={1,-1,sqrt(2),-sqrt(2))
 */
-	asm volatile(
+	__asm__ volatile(
 		"movaps 48+"MANGLE(sseW2)", %%xmm6\n\t" 
 		"movaps 16+"MANGLE(sseW2)", %%xmm7\n\t" 
 		"xorps %%xmm5, %%xmm5		\n\t"
@@ -905,7 +905,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	two_m_plus_one = two_m<<1;
 	two_m_plus_one_shl3 = (two_m_plus_one<<3);
 	buf_offset = buf+128;
-	asm volatile(
+	__asm__ volatile(
 		"mov %0, %%"REG_S"			\n\t"
 		ASMALIGN(4)
 		"1:					\n\t"
@@ -937,7 +937,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     }
 
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
-	asm volatile(
+	__asm__ volatile(
 		"mov $-1024, %%"REG_S"			\n\t"
 		ASMALIGN(4)
 		"1:					\n\t"
@@ -960,7 +960,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     window_ptr = a52_imdct_window;
 
     /* Window and convert to real valued signal */
-	asm volatile(
+	__asm__ volatile(
 		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		"movss %3, %%xmm2			\n\t"  // bias
@@ -987,7 +987,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	delay_ptr+=128;
 //	window_ptr+=128;
 	
-	asm volatile(
+	__asm__ volatile(
 		"mov $1024, %%"REG_D"			\n\t"  // 512
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		"movss %3, %%xmm2			\n\t"  // bias
@@ -1016,7 +1016,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     /* The trailing edge of the window goes into the delay line */
     delay_ptr = delay;
 
-	asm volatile(
+	__asm__ volatile(
 		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		ASMALIGN(4)
@@ -1038,7 +1038,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	delay_ptr+=128;
 //	window_ptr-=128;
 	
-	asm volatile(
+	__asm__ volatile(
 		"mov $1024, %%"REG_D"			\n\t"  // 1024
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		ASMALIGN(4)

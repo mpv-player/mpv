@@ -109,7 +109,7 @@ static int get_int2(unsigned char *buf) {
 static unsigned int guess_mjpeg_type(unsigned char *data, unsigned int size,
 		int d_height) {
 	unsigned int p;
-	int marker, length, height, ncomps, i, hf[3], vf[3];
+	int marker, length, height, i, hf[3], vf[3];
 	unsigned int app0 = 0, header = 0;
 
 	/* The initial marker must be SIO */

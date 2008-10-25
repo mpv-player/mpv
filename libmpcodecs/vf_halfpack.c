@@ -37,7 +37,7 @@ static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
 	vinc = srcstride[2] - w/2;
 
 	for (h/=2; h; h--) {
-		asm (
+		__asm__ (
 			"pxor %%mm0, %%mm0 \n\t"
 			ASMALIGN(4)
 			"1: \n\t"
@@ -99,7 +99,7 @@ static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
 		v += vinc;
 		dst += dstinc;
 	}
-	asm volatile ( "emms \n\t" ::: "memory" );
+	__asm__ volatile ( "emms \n\t" ::: "memory" );
 }
 #endif
 

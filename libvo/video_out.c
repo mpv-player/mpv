@@ -202,7 +202,7 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_X11
 	&video_out_xvidix,
 #endif
-#ifdef WIN32
+#if defined(__MINGW32__) || defined(__CYGWIN__)
     &video_out_winvidix,
 #endif
     &video_out_cvidix,

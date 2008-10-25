@@ -25,6 +25,9 @@
 #ifndef HAVE_CLOSESOCKET
 #define closesocket close
 #endif
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
 
 #define BUFFER_SIZE		2048
 

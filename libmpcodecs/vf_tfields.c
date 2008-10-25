@@ -59,7 +59,7 @@ static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int 
 		s += ss;
 	}
 	for (i=h-1; i; i--) {
-		asm volatile(
+		__asm__ volatile(
 			"1: \n\t"
 			"movq (%%"REG_S"), %%mm0 \n\t"
 			"movq (%%"REG_S",%%"REG_a"), %%mm1 \n\t"
@@ -79,7 +79,7 @@ static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int 
 		s += ss;
 	}
 	if (!up) fast_memcpy(d, s, w);
-	asm volatile("emms \n\t" : : : "memory");
+	__asm__ volatile("emms \n\t" : : : "memory");
 }
 #endif
 
@@ -95,7 +95,7 @@ static void qpel_li_MMX2(unsigned char *d, unsigned char *s, int w, int h, int d
 		s += ss;
 	}
 	for (i=h-1; i; i--) {
-		asm volatile(
+		__asm__ volatile(
 			"pxor %%mm7, %%mm7 \n\t"
 			"2: \n\t"
 			"movq (%%"REG_S"), %%mm0 \n\t"
@@ -116,7 +116,7 @@ static void qpel_li_MMX2(unsigned char *d, unsigned char *s, int w, int h, int d
 		s += ss;
 	}
 	if (!up) fast_memcpy(d, s, w);
-	asm volatile("emms \n\t" : : : "memory");
+	__asm__ volatile("emms \n\t" : : : "memory");
 }
 #endif
 
@@ -132,7 +132,7 @@ static void qpel_li_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds
 		s += ss;
 	}
 	for (i=h-1; i; i--) {
-		asm volatile(
+		__asm__ volatile(
 			"pxor %%mm7, %%mm7 \n\t"
 			"3: \n\t"
 			"movq (%%"REG_S"), %%mm0 \n\t"
@@ -166,7 +166,7 @@ static void qpel_li_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds
 		s += ss;
 	}
 	if (!up) fast_memcpy(d, s, w);
-	asm volatile("emms \n\t" : : : "memory");
+	__asm__ volatile("emms \n\t" : : : "memory");
 }
 
 static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
@@ -186,7 +186,7 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 		d[j] = (s[j+ssd] + 3*s[j])>>2;
 	d += ds; s += ss;
 	for (i=h-3; i; i--) {
-		asm volatile(
+		__asm__ volatile(
 			"pxor %%mm0, %%mm0 \n\t"
 			"movq (%%"REG_d"), %%mm4 \n\t"
 			"movq 8(%%"REG_d"), %%mm5 \n\t"
@@ -246,7 +246,7 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 		d[j] = (s[j+ssd] + 3*s[j])>>2;
 	d += ds; s += ss;
 	if (!up) fast_memcpy(d, s, w);
-	asm volatile("emms \n\t" : : : "memory");
+	__asm__ volatile("emms \n\t" : : : "memory");
 }
 #endif
 

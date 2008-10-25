@@ -48,7 +48,6 @@ static int depthonscreen;
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
-static HWND hWnd;
 /* Window parameters */
 static HWND hWnd=NULL,hWndFS=NULL;
 static float window_aspect;

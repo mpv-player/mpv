@@ -33,7 +33,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#define HAVE_AV_CONFIG_H
 #include "libavcodec/avcodec.h"
 #include "libavcodec/eval.h"
 

@@ -438,7 +438,7 @@ dvd_reader_t *DVDOpen( const char *path )
   
   verbose = get_verbose();
 
-#ifdef WIN32
+#if defined(__CYGWIN__) || defined(__MINGW32__)
   /* Stat doesn't work on devices under mingwin/cygwin. */
   if( path[0] && path[1] == ':' && path[2] == '\0' )
     {
@@ -495,7 +495,8 @@ dvd_reader_t *DVDOpen( const char *path )
     /* XXX: We should scream real loud here. */
     if( !(path_copy = strdup( path ) ) ) return 0;
 
-#ifndef WIN32 /* don't have fchdir, and getcwd( NULL, ... ) is strange */
+/* don't have fchdir, and getcwd( NULL, ... ) is strange */
+#if !(defined(__CYGWIN__) || defined(__MINGW32__))
     /* Resolve any symlinks and get the absolut dir name. */
     {
       char *new_path;
