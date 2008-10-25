@@ -7999,6 +7999,8 @@ CONFIG_POSTPROC = yes
 # Prevent building libavcodec/imgresample.c with conflicting symbols
 CONFIG_SWSCALE=yes
 CONFIG_ZLIB=$_zlib
+# Some FFmpeg codecs depend on this. Enable it unconditionally for now.
+CONFIG_FFT=yes
 
 HAVE_PTHREADS = $_pthreads
 HAVE_W32THREADS = $_w32threads
@@ -8417,6 +8419,11 @@ $_def_threads
 
 #define CONFIG_DEMUXERS 1
 #define ENABLE_DEMUXERS 1
+
+/* Some FFmpeg codecs depend on this. Enable it unconditionally for now. */
+#define CONFIG_FFT 1
+#define ENABLE_FFT 1
+
 $_def_muxers
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
