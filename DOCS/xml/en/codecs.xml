@@ -84,10 +84,7 @@ default as it offers better speed.
   <screen>cd xvidcore/build/generic</screen>
 </para></step>
 <step><para>
-  <screen>./bootstrap.sh</screen>
-</para></step>
-<step><para>
-  <screen>./configure</screen>
+  <screen>./bootstrap.sh &amp;&amp; ./configure</screen>
   You may have to add some options (examine the output of
   <command>./configure --help</command>).
 </para></step>
