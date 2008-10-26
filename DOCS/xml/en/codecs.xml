@@ -97,11 +97,6 @@ default as it offers better speed.
   <screen>make &amp;&amp; make install</screen>
 </para></step>
 <step><para>
-  If you specified <option>--enable-divxcompat</option>,
-  copy <filename>../../src/divx4.h</filename> to
-  <filename class="directory">/usr/local/include/</filename>.
-</para></step>
-<step><para>
   Recompile <application>MPlayer</application>.
 </para></step>
 </procedure>
