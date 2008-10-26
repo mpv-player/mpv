@@ -7981,12 +7981,12 @@ LIBPREF=lib
 LIBSUF=.a
 LIBNAME=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 
-CONFIG_ENCODERS=yes
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
 CONFIG_FFT=yes
-CONFIG_MDCT=yes
 CONFIG_GOLOMB=yes
+CONFIG_MDCT=yes
 
+CONFIG_ENCODERS=yes
 CONFIG_GPL=yes
 CONFIG_LIBAMR=$_libamr
 CONFIG_LIBAMR_NB=$_libamr_nb
@@ -8418,10 +8418,10 @@ $_def_threads
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
 #define CONFIG_FFT 1
 #define ENABLE_FFT 1
-#define CONFIG_MDCT 1
-#define ENABLE_MDCT 1
 #define CONFIG_GOLOMB 1
 #define ENABLE_GOLOMB 1
+#define CONFIG_MDCT 1
+#define ENABLE_MDCT 1
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
 #define HAVE_EBX_AVAILABLE 1
