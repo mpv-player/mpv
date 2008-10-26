@@ -72,9 +72,7 @@ default as it offers better speed.
   The CVS version is usually stable enough to use, as most of the time it
   features fixes for bugs that exist in releases.
   Here is what to do to make <systemitem class="library">Xvid</systemitem>
-  CVS work with <application>MEncoder</application> (you need at least
-  <application>autoconf</application> 2.50,
-  <application>automake</application> and <application>libtool</application>):
+  CVS work with <application>MEncoder</application>:
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
