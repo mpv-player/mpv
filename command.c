@@ -1949,6 +1949,8 @@ static int mp_property_teletext_page(m_option_t * prop, int action, void *arg,
     tvi_handle_t *tvh = mpctx->demuxer->priv;
     int result;
     int val;
+    if (mpctx->demuxer->type != DEMUXER_TYPE_TV || !tvh)
+        return M_PROPERTY_UNAVAILABLE;
     switch(action){
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
