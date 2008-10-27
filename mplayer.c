@@ -3433,7 +3433,7 @@ demux_info_print(mpctx->demuxer);
 
 //================== Read SUBTITLES (DVD & TEXT) ==========================
 if(vo_spudec==NULL && mpctx->sh_video &&
-     (mpctx->stream->type==STREAMTYPE_DVD || mpctx->stream->type == STREAMTYPE_DVDNAV || mpctx->d_sub->id >= 0)){
+     (mpctx->stream->type==STREAMTYPE_DVD || mpctx->stream->type == STREAMTYPE_DVDNAV)){
   init_vo_spudec();
 }
 
