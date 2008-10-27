@@ -24,7 +24,6 @@ extern void *vobsub_out_open(const char *basename, const unsigned int *palette, 
 extern void vobsub_out_output(void *me, const unsigned char *packet, int len, double pts);
 extern void vobsub_out_close(void *me);
 extern int vobsub_set_from_lang(void *vobhandle, unsigned char * lang);
-extern unsigned int vobsub_get_forced_subs_flag(void const * const vobhandle);
 extern void vobsub_seek(void * vobhandle, float pts);
 
 #endif /* MPLAYER_VOBSUB_H */

@@ -1088,14 +1088,15 @@ void init_vo_spudec(void) {
     unsigned int palette[16], width, height;
     current_module="spudec_init_vobsub";
     if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
-      vo_spudec=spudec_new_scaled(palette, width, height);
+      vo_spudec=spudec_new_scaled(palette, width, height, NULL, 0);
   }
 
 #ifdef CONFIG_DVDREAD
   if (vo_spudec==NULL && mpctx->stream->type==STREAMTYPE_DVD) {
     current_module="spudec_init_dvdread";
     vo_spudec=spudec_new_scaled(((dvd_priv_t *)(mpctx->stream->priv))->cur_pgc->palette,
-                                mpctx->sh_video->disp_w, mpctx->sh_video->disp_h);
+                                mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
+                                NULL, 0);
   }
 #endif
 
@@ -1103,34 +1104,14 @@ void init_vo_spudec(void) {
   if (vo_spudec==NULL && mpctx->stream->type==STREAMTYPE_DVDNAV) {
     unsigned int *palette = mp_dvdnav_get_spu_clut(mpctx->stream);
     current_module="spudec_init_dvdnav";
-    vo_spudec=spudec_new_scaled(palette, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h);
+    vo_spudec=spudec_new_scaled(palette, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h, NULL, 0);
   }
 #endif
 
-  if ((vo_spudec == NULL) && (mpctx->demuxer->type == DEMUXER_TYPE_MATROSKA) &&
-      (mpctx->d_sub->sh != NULL) && (((sh_sub_t *)mpctx->d_sub->sh)->type == 'v')) {
-    sh_sub_t *mkv_sh_sub = (sh_sub_t *)mpctx->d_sub->sh;
-    current_module = "spudec_init_matroska";
-    vo_spudec =
-      spudec_new_scaled_vobsub(mkv_sh_sub->palette, mkv_sh_sub->colors,
-                             mkv_sh_sub->custom_colors, mkv_sh_sub->width,
-                               mkv_sh_sub->height);
-    forced_subs_only = mkv_sh_sub->forced_subs_only;
-  }
-
   if (vo_spudec==NULL) {
     sh_sub_t *sh = (sh_sub_t *)mpctx->d_sub->sh;
-    unsigned int *palette = NULL;
-    if (sh && !sh->has_palette && sh->extradata_len == 16*4) {
-      int i;
-      for (i = 0; i < 16; i++)
-        sh->palette[i] = AV_RB32(sh->extradata + i*4);
-      sh->has_palette = 1;
-    }
-    if (sh && sh->has_palette)
-      palette = sh->palette;
     current_module="spudec_init_normal";
-    vo_spudec=spudec_new_scaled(palette, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h);
+    vo_spudec=spudec_new_scaled(NULL, mpctx->sh_video->disp_w, mpctx->sh_video->disp_h, sh->extradata, sh->extradata_len);
     spudec_set_font_factor(vo_spudec,font_factor);
   }
 
@@ -3112,8 +3093,6 @@ if (edl_output_filename) {
     if(vo_vobsub){
       initialized_flags|=INITIALIZED_VOBSUB;
       vobsub_set_from_lang(vo_vobsub, dvdsub_lang);
-      // check if vobsub requested only to display forced subtitles
-      forced_subs_only=vobsub_get_forced_subs_flag(vo_vobsub);
 
       // setup global sub numbering
       mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] = mpctx->global_sub_size; // the global # of the first vobsub.
@@ -3436,10 +3415,6 @@ if(vo_spudec==NULL && mpctx->sh_video &&
      (mpctx->stream->type==STREAMTYPE_DVD || mpctx->stream->type == STREAMTYPE_DVDNAV)){
   init_vo_spudec();
 }
-
-// Apply current settings for forced subs
-if (vo_spudec!=NULL)
-  spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 
 if(mpctx->sh_video) {
 // after reading video params we should load subtitles because

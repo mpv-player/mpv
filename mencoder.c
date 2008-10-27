@@ -738,18 +738,15 @@ else {
 if (spudec_ifo) {
   unsigned int palette[16], width, height;
   if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
-    vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
+    vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h, NULL, 0);
 }
 #ifdef CONFIG_DVDREAD
 if (vo_spudec==NULL) {
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
-			    sh_video->disp_w, sh_video->disp_h);
+                           sh_video->disp_w, sh_video->disp_h, NULL, 0);
 }
 #endif
 }
-
-// Apply current settings for forced subs
-spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 
 ostream = open_output_stream(out_filename, 0);
 if(!ostream) {

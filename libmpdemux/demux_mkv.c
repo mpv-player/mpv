@@ -255,123 +255,6 @@ aac_get_sample_rate_index (uint32_t sample_rate)
     return 11;
 }
 
-
-static int
-vobsub_parse_size (sh_sub_t *sh, const char *start)
-{
-  if (sscanf(&start[6], "%dx%d", &sh->width, &sh->height) == 2)
-    {
-      mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub size: %ux%u\n",
-             sh->width, sh->height);
-      return 1;
-    }
-  return 0;
-}
-
-static int
-vobsub_parse_palette (sh_sub_t *sh, const char *start)
-{
-  int i;
-
-  start += 8;
-  while (isspace(*start))
-    start++;
-  for (i = 0; i < 16; i++)
-    {
-      unsigned int tmp;
-      if (sscanf(start, "%06x", &tmp) != 1)
-        break;
-      sh->palette[i] = vobsub_palette_to_yuv(tmp);
-      start += 6;
-      while ((*start == ',') || isspace(*start))
-        start++;
-    }
-  if (i == 16)
-    {
-      mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub palette: %06x,%06x,"
-             "%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,"
-             "%06x,%06x,%06x\n", sh->palette[0],
-             sh->palette[1], sh->palette[2],
-             sh->palette[3], sh->palette[4],
-             sh->palette[5], sh->palette[6],
-             sh->palette[7], sh->palette[8],
-             sh->palette[9], sh->palette[10],
-             sh->palette[11], sh->palette[12],
-             sh->palette[13], sh->palette[14],
-             sh->palette[15]);
-      sh->has_palette = 1;
-      return 2;
-    }
-  return 0;
-}
-
-static int
-vobsub_parse_custom_colors (sh_sub_t *sh, const char *start)
-{
-  int use_custom_colors, i;
-  const char *p;
-  unsigned int tridx = 0;
-
-  use_custom_colors = 0;
-  start += 14;
-  while (isspace(*start))
-    start++;
-   if (!strncasecmp(start, "ON", 2) || (*start == '1'))
-     use_custom_colors = 1;
-   else if (!strncasecmp(start, "OFF", 3) || (*start == '0'))
-     use_custom_colors = 0;
-   mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub custom colors: %s\n",
-          use_custom_colors ? "ON" : "OFF");
-   if ((p = strstr(start, "tridx:")) != NULL)
-     tridx = strtoul(p + 6, NULL, 2);
-   if ((start = strstr(start, "colors:")) != NULL)
-     {
-       start += 7;
-       while (isspace(*start))
-         start++;
-       for (i = 0; i < 4; i++)
-         {
-           unsigned int tmp;
-           if (sscanf(start, "%06x", &tmp) != 1)
-             break;
-           sh->colors[i] = vobsub_rgb_to_yuv(tmp);
-           if ((tridx << i) & 0x08)
-             sh->colors[i] |= 1 << 31;
-           start += 6;
-           while ((*start == ',') || isspace(*start))
-             start++;
-         }
-       if (i == 4)
-         {
-           sh->custom_colors = 4;
-           mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub colors: %08x,"
-                  "%08x,%08x,%08x\n", sh->colors[0],
-                  sh->colors[1], sh->colors[2],
-                  sh->colors[3]);
-         }
-     }
-   if (!use_custom_colors)
-     sh->custom_colors = 0;
-   return 4;
-}
-
-static int
-vobsub_parse_forced_subs (sh_sub_t *sh, const char *start)
-{
-  start += 12;
-  while (isspace(*start))
-    start++;
-  if (!strncasecmp(start, "on", 2) || (*start == '1'))
-    sh->forced_subs_only = 1;
-  else if (!strncasecmp(start, "off", 3) || (*start == '0'))
-    sh->forced_subs_only = 0;
-  else
-    return 0;
-  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub forced subs: %d\n",
-         sh->forced_subs_only);
-  return 8;
-}
-
 /** \brief Free cached demux packets
  *
  * Reordering the timecodes requires caching of demux packets. This function
@@ -399,63 +282,6 @@ free_cached_dps (demuxer_t *demuxer)
       track->max_pts = 0;
     }
 }
-
-static int
-demux_mkv_parse_idx (mkv_track_t *t)
-{
-  int things_found, last;
-  char *buf, *pos, *start;
-
-  if ((t->private_data == NULL) || (t->private_size == 0))
-    return 0;
-
-  things_found = 0;
-  buf = malloc(t->private_size + 1);
-  if (buf == NULL)
-    return 0;
-  memcpy(buf, t->private_data, t->private_size);
-  buf[t->private_size] = 0;
-  t->sh_sub->has_palette = 0;
-
-  pos = buf;
-  start = buf;
-  last = 0;
-  do
-    {
-      if ((*pos == 0) || (*pos == '\r') || (*pos == '\n'))
-        {
-          if (*pos == 0)
-            last = 1;
-          *pos = 0;
-
-          if (!strncasecmp(start, "size: ", 6))
-            things_found |= vobsub_parse_size(t->sh_sub, start);
-          else if (!strncasecmp(start, "palette:", 8))
-            things_found |= vobsub_parse_palette(t->sh_sub, start);
-          else if (!strncasecmp(start, "custom colors:", 14))
-            things_found |= vobsub_parse_custom_colors(t->sh_sub, start);
-          else if (!strncasecmp(start, "forced subs:", 12))
-            things_found |= vobsub_parse_forced_subs(t->sh_sub, start);
-
-          if (last)
-            break;
-          do
-            {
-              pos++;
-            }
-          while ((*pos == '\r') || (*pos == '\n'));
-          start = pos;
-        }
-      else
-        pos++;
-    }
-  while (!last && (*start != 0));
-
-  free(buf);
-
-  return (things_found & 3) == 3;
-}
-
 
 static int
 demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
@@ -2159,38 +1985,6 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
   return 0;
 }
 
-/** \brief Parse the private data for VobSub subtitle tracks.
-
-  This function tries to parse the private data for all VobSub tracks.
-  The private data contains the normal text from the original .idx file.
-  Things like the palette, subtitle dimensions and custom colors are
-  stored here.
-
-  \param demuxer The generic demuxer.
-*/
-static void
-demux_mkv_parse_vobsub_data (demuxer_t *demuxer)
-{
-  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  mkv_track_t *track;
-  int i;
-
-  for (i = 0; i < mkv_d->num_tracks; i++)
-    {
-      track = mkv_d->tracks[i];
-      if ((track->type != MATROSKA_TRACK_SUBTITLE) ||
-          (track->subtitle_type != MATROSKA_SUBTYPE_VOBSUB))
-        continue;
-
-      if (!demux_mkv_parse_idx (track))
-        {
-          free (track->private_data);
-          track->private_data = NULL;
-          track->private_size = 0;
-        }
-    }
-}
-
 static int
 demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
 {
@@ -2426,8 +2220,6 @@ demux_mkv_open (demuxer_t *demuxer)
             break;
         }
     }
-
-  demux_mkv_parse_vobsub_data (demuxer);
 
   if (demuxer->chapters)
     {

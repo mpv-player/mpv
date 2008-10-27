@@ -23,7 +23,9 @@
 #include <math.h>
 #include "libvo/video_out.h"
 #include "spudec.h"
+#include "vobsub.h"
 #include "libavutil/avutil.h"
+#include "libavutil/intreadwrite.h"
 #include "libswscale/swscale.h"
 
 /* Valid values for spu_aamode:
@@ -1114,39 +1116,73 @@ void spudec_set_font_factor(void * this, double factor)
   spu->font_start_level = (int)(0xF0-(0xE0*factor));
 }
 
-void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height)
+static void spudec_parse_extradata(spudec_handle_t *this,
+                                   uint8_t *extradata, int extradata_len)
 {
-  return spudec_new_scaled_vobsub(palette, NULL, 0, frame_width, frame_height);
+  uint8_t *buffer, *ptr;
+  unsigned int *pal = this->global_palette, *cuspal = this->cuspal;
+  unsigned int tridx;
+  int i;
+
+  if (extradata_len == 16*4) {
+    for (i=0; i<16; i++)
+      pal[i] = AV_RB32(extradata + i*4);
+    this->auto_palette = 0;
+    return;
+  }
+
+  if (!(ptr = buffer = malloc(extradata_len+1)))
+    return;
+  memcpy(buffer, extradata, extradata_len);
+  buffer[extradata_len] = 0;
+
+  do {
+    sscanf(ptr, "size: %dx%d", &this->orig_frame_width, &this->orig_frame_height);
+    if (sscanf(ptr, "palette: %x, %x, %x, %x, %x, %x, %x, %x,"
+                            " %x, %x, %x, %x, %x, %x, %x, %x",
+               &pal[ 0], &pal[ 1], &pal[ 2], &pal[ 3],
+               &pal[ 4], &pal[ 5], &pal[ 6], &pal[ 7],
+               &pal[ 8], &pal[ 9], &pal[10], &pal[11],
+               &pal[12], &pal[13], &pal[14], &pal[15]) == 16) {
+      for (i=0; i<16; i++)
+        pal[i] = vobsub_palette_to_yuv(pal[i]);
+      this->auto_palette = 0;
+    }
+    if (!strncasecmp(ptr, "forced subs: on", 15))
+      this->forced_subs_only = 1;
+    if (sscanf(ptr, "custom colors: ON, tridx: %x, colors: %x, %x, %x, %x",
+               &tridx, cuspal+0, cuspal+1, cuspal+2, cuspal+3) == 5) {
+      for (i=0; i<4; i++) {
+        cuspal[i] = vobsub_rgb_to_yuv(cuspal[i]);
+        if (tridx & (1 << (12-4*i)))
+          cuspal[i] |= 1 << 31;
+      }
+      this->custom = 1;
+    }
+  } while ((ptr=strchr(ptr,'\n')) && *++ptr);
+
+  free(buffer);
 }
 
-/* get palette custom color, width, height from .idx file */
-void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsigned int custom, unsigned int frame_width, unsigned int frame_height)
+void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height, uint8_t *extradata, int extradata_len)
 {
   spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
   if (this){
-    //(fprintf(stderr,"VobSub Custom Palette: %d,%d,%d,%d", this->cuspal[0], this->cuspal[1], this->cuspal[2],this->cuspal[3]);
-    this->packet = NULL;
-    this->image = NULL;
-    this->scaled_image = NULL;
+    this->orig_frame_height = frame_height;
+    // set up palette:
+    if (palette)
+      memcpy(this->global_palette, palette, sizeof(this->global_palette));
+    else
+      this->auto_palette = 1;
+    if (extradata)
+      spudec_parse_extradata(this, extradata, extradata_len);
     /* XXX Although the video frame is some size, the SPU frame is
        always maximum size i.e. 720 wide and 576 or 480 high */
     this->orig_frame_width = 720;
-    this->orig_frame_height = (frame_height == 480 || frame_height == 240) ? 480 : 576;
-    this->custom = custom;
-    // set up palette:
-    this->auto_palette = 1;
-    if (palette){
-      memcpy(this->global_palette, palette, sizeof(this->global_palette));
-      this->auto_palette = 0;
-    }
-    this->custom = custom;
-    if (custom && cuspal) {
-      memcpy(this->cuspal, cuspal, sizeof(this->cuspal));
-      this->auto_palette = 0;
-    }
-    // forced subtitles default: show all subtitles
-    this->forced_subs_only=0;
-    this->is_forced_sub=0;
+    if (this->orig_frame_height == 480 || this->orig_frame_height == 240)
+      this->orig_frame_height = 480;
+    else
+      this->orig_frame_height = 576;
   }
   else
     mp_msg(MSGT_SPUDEC,MSGL_FATAL, "FATAL: spudec_init: calloc");
@@ -1155,7 +1191,7 @@ void *spudec_new_scaled_vobsub(unsigned int *palette, unsigned int *cuspal, unsi
 
 void *spudec_new(unsigned int *palette)
 {
-    return spudec_new_scaled(palette, 0, 0);
+    return spudec_new_scaled(palette, 0, 0, NULL, 0);
 }
 
 void spudec_free(void *this)

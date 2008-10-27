@@ -595,14 +595,13 @@ packet_queue_insert(packet_queue_t *queue)
  **********************************************************************/
 
 typedef struct {
+    unsigned char *extradata;
+    unsigned int extradata_len;
     unsigned int palette[16];
-    unsigned int cuspal[4];
     int delay;
-    unsigned int custom;
     unsigned int have_palette;
     unsigned int orig_frame_width, orig_frame_height;
     unsigned int origin_x, origin_y;
-    unsigned int forced_subs;
     /* index */
     packet_queue_t *spu_streams;
     unsigned int spu_streams_size;
@@ -767,23 +766,6 @@ vobsub_parse_timestamp(vobsub_t *vob, const char *line)
 }
 
 static int
-vobsub_parse_size(vobsub_t *vob, const char *line)
-{
-    // size: WWWxHHH
-    char *p;
-    while (isspace(*line))
-	++line;
-    if (!isdigit(*line))
-	return -1;
-    vob->orig_frame_width = strtoul(line, &p, 10);
-    if (*p != 'x')
-	return -1;
-    ++p;
-    vob->orig_frame_height = strtoul(p, NULL, 10);
-    return 0;
-}
-
-static int
 vobsub_parse_origin(vobsub_t *vob, const char *line)
 {
     // org: X,Y
@@ -828,86 +810,6 @@ unsigned int vobsub_rgb_to_yuv(unsigned int rgb)
 }
 
 static int
-vobsub_parse_palette(vobsub_t *vob, const char *line)
-{
-    // palette: XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX
-    unsigned int n;
-    n = 0;
-    while (1) {
-	const char *p;
-	int tmp;
-	while (isspace(*line))
-	    ++line;
-	p = line;
-	while (isxdigit(*p))
-	    ++p;
-	if (p - line != 6)
-	    return -1;
-	tmp = strtoul(line, NULL, 16);
-	vob->palette[n++] = vobsub_palette_to_yuv(tmp);
-	if (n == 16)
-	    break;
-	if (*p == ',')
-	    ++p;
-	line = p;
-    }
-    vob->have_palette = 1;
-    return 0;
-}
-
-static int
-vobsub_parse_custom(vobsub_t *vob, const char *line)
-{
-    //custom colors: OFF/ON(0/1)
-    if ((strncmp("ON", line + 15, 2) == 0)||strncmp("1", line + 15, 1) == 0)
-        vob->custom=1;
-    else if ((strncmp("OFF", line + 15, 3) == 0)||strncmp("0", line + 15, 1) == 0)
-        vob->custom=0;
-    else
-        return -1;
-    return 0;
-}
-
-static int
-vobsub_parse_cuspal(vobsub_t *vob, const char *line)
-{
-    //colors: XXXXXX, XXXXXX, XXXXXX, XXXXXX
-    unsigned int n, tmp;
-    n = 0;
-    line += 40;
-    while(1){
-    	const char *p;
-	while (isspace(*line))
-	    ++line;
-	p=line;
-	while (isxdigit(*p))
-	    ++p;
-	if (p - line !=6)
-	    return -1;
-	tmp = strtoul(line, NULL, 16);
-	vob->cuspal[n++] |= vobsub_rgb_to_yuv(tmp);
-	if (n==4)
-	    break;
-	if(*p == ',')
-	    ++p;
-	line = p;
-    }
-    return 0;
-}
-
-static int
-vobsub_parse_tridx(vobsub_t *vob, const char *line)
-{
-    //tridx: XXXX
-    int tridx, i;
-    tridx = strtoul((line + 26), NULL, 2);
-    for (i = 0; i < 4; ++i)
-        if ((tridx << i) & 0x08)
-            vob->cuspal[i] |= 1 << 31;
-    return tridx;
-}
-
-static int
 vobsub_parse_delay(vobsub_t *vob, const char *line)
 {
     int h, m, s, ms;
@@ -942,26 +844,6 @@ vobsub_set_lang(const char *line)
 }
 
 static int
-vobsub_parse_forced_subs(vobsub_t *vob, const char *line)
-{
-    const char *p;
-
-    p  = line;
-    while (isspace(*p))
-	++p;
-
-    if (strncasecmp("on",p,2) == 0){
-	    vob->forced_subs=~0;
-	    return 0;
-    } else if (strncasecmp("off",p,3) == 0){
-	    vob->forced_subs=0;
-	    return 0;
-    }
-	
-    return -1;
-}
-
-static int
 vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 {
     ssize_t line_size;
@@ -973,6 +855,12 @@ vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 	if (line_size < 0) {
 	    break;
 	}
+
+	vob->extradata = realloc(vob->extradata, vob->extradata_len+line_size+1);
+	memcpy(vob->extradata+vob->extradata_len, line, line_size);
+	vob->extradata_len += line_size;
+	vob->extradata[vob->extradata_len] = 0;
+
 	if (*line == 0 || *line == '\r' || *line == '\n' || *line == '#')
 	    continue;
 	else if (strncmp("langidx:", line, 8) == 0)
@@ -981,19 +869,10 @@ vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 	    res = vobsub_parse_delay(vob, line);
 	else if (strncmp("id:", line, 3) == 0)
 	    res = vobsub_parse_id(vob, line + 3);
-	else if (strncmp("palette:", line, 8) == 0)
-	    res = vobsub_parse_palette(vob, line + 8);
-	else if (strncmp("size:", line, 5) == 0)
-	    res = vobsub_parse_size(vob, line + 5);
 	else if (strncmp("org:", line, 4) == 0)
 	    res = vobsub_parse_origin(vob, line + 4);
 	else if (strncmp("timestamp:", line, 10) == 0)
 	    res = vobsub_parse_timestamp(vob, line + 10);
-	else if (strncmp("custom colors:", line, 14) == 0)
-	    //custom colors: ON/OFF, tridx: XXXX, colors: XXXXXX, XXXXXX, XXXXXX,XXXXXX
-	    res = vobsub_parse_cuspal(vob, line) + vobsub_parse_tridx(vob, line) + vobsub_parse_custom(vob, line);
-	else if (strncmp("forced subs:", line, 12) == 0)
-		res = vobsub_parse_forced_subs(vob, line + 12);
 	else {
 	    mp_msg(MSGT_VOBSUB,MSGL_V, "vobsub: ignoring %s", line);
 	    continue;
@@ -1115,11 +994,10 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 		    /* NOOP */ ;
 		rar_close(fd);
 	    }
-	    /* if no palette in .idx then use custom colors */
-	    if ((vob->custom == 0)&&(vob->have_palette!=1))
-		vob->custom = 1;
-	    if (spu && vob->orig_frame_width && vob->orig_frame_height)
-	      *spu = spudec_new_scaled_vobsub(vob->palette, vob->cuspal, vob->custom, vob->orig_frame_width, vob->orig_frame_height);
+	    if (spu)
+	      *spu = spudec_new_scaled(vob->palette, vob->orig_frame_width, vob->orig_frame_height, vob->extradata, vob->extradata_len);
+	    if (vob->extradata)
+	      free(vob->extradata);
 
 	    /* read the indexed mpeg_stream */
 	    strcpy(buf, name);
@@ -1250,15 +1128,6 @@ int vobsub_get_index_by_id(void *vobhandle, int id)
         if (i == vobsubid || vob->spu_streams[i].packets_size > 0)
             ++j;
     return j;
-}
-
-unsigned int 
-vobsub_get_forced_subs_flag(void const * const vobhandle)
-{
-  if (vobhandle)
-    return ((vobsub_t*) vobhandle)->forced_subs;
-  else
-    return 0;
 }
 
 int

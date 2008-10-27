@@ -97,12 +97,6 @@ typedef struct {
 typedef struct {
   int sid;
   char type;                    // t = text, v = VobSub, a = SSA/ASS
-  int has_palette;              // If we have a valid palette
-  unsigned int palette[16];     // for VobSubs
-  int width, height;            // for VobSubs
-  int custom_colors;
-  unsigned int colors[4];
-  int forced_subs_only;
   unsigned char* extradata; // extra header data passed from demuxer
   int extradata_len;
 #ifdef CONFIG_ASS
