@@ -17,8 +17,8 @@ please read the <link linkend="codec-importing">codec importing HOWTO</link>
 and help us add support for it.
 </para>
 
-<sect1 id="video-codecs">
-<title>Video codecs</title>
+<sect1 id="codec_installation">
+<title>Codec installation</title>
 
 <!-- ********** -->
 
@@ -93,6 +93,80 @@ Now rerun <filename>./configure</filename> for
 <systemitem class="library">x264</systemitem> support.
 </para>
 </sect2>
+<!-- ********** -->
+
+<sect2 id="libmad">
+<title><systemitem class="library">libmad</systemitem> support</title>
+
+<para>
+<ulink url="http://www.underbit.com/products/mad/"><systemitem class="library">libmad</systemitem></ulink>
+is a multiplatform, integer (internally 24bit PCM) only
+MPEG audio decoding library. It does not handle broken files well, and it
+sometimes has problems with seeking, but it may perform better on FPU-less
+(such as <link linkend="arm">ARM</link>)
+platform than <systemitem class="library">mp3lib</systemitem>.
+</para>
+
+<para>
+If you have a proper installation of
+<systemitem class="library">libmad</systemitem>,
+<filename>./configure</filename> will notice and support for MPEG audio
+decoding via <systemitem class="library">libmad</systemitem> will be built
+automatically.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="aac">
+<title>AAC codec</title>
+
+<para>
+An open source AAC decoder called FAAD2 is available from
+<ulink url="http://www.audiocoding.com/downloads.html"/>.
+<application>MPlayer</application> includes a copy of it in its source tree.
+If you want to use the external library instead, install it and pass
+<option>--enable-faad-external</option> to <filename>./configure</filename>.
+</para>
+
+<para>
+FAAD2 binaries are not available from audiocoding.com, but you can (apt-)get
+Debian packages from
+<ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink>,
+Mandrake/Mandriva RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink>
+and Fedora RPMs from <ulink url="http://rpm.livna.org/">Livna</ulink>.
+</para>
+<para>
+If you choose to build from source, you do not need all of FAAD2 to decode
+AAC files, libfaad is enough. Build it like this:
+<screen>
+cd faad2/
+sh bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="amr">
+<title>AMR codecs</title>
+
+<para>
+Adaptive Multi-Rate speech codec is used in third generation (3G) mobile
+phones.
+Reference implementation is available from
+<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+(free for private use).
+To enable support, download and install support libraries for
+<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB and AMR-WB</ulink>
+following the instructions on that page. Recompile MPlayer afterwards.
+</para>
+</sect2>
+
 </sect1>
 
 
@@ -159,29 +233,6 @@ MPEG decoder cards.
 
 <!-- ********** -->
 
-<sect2 id="libmad">
-<title><systemitem class="library">libmad</systemitem> support</title>
-
-<para>
-<ulink url="http://www.underbit.com/products/mad/"><systemitem class="library">libmad</systemitem></ulink>
-is a multiplatform, integer (internally 24bit PCM) only
-MPEG audio decoding library. It does not handle broken files well, and it
-sometimes has problems with seeking, but it may perform better on FPU-less
-(such as <link linkend="arm">ARM</link>)
-platform than <systemitem class="library">mp3lib</systemitem>.
-</para>
-
-<para>
-If you have a proper installation of
-<systemitem class="library">libmad</systemitem>,
-<filename>./configure</filename> will notice and support for MPEG audio
-decoding via <systemitem class="library">libmad</systemitem> will be built
-automatically.
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="hwmpa">
 <title>Hardware MPEG audio codec</title>
 
@@ -192,57 +243,6 @@ and DXR2 adapters.
 Don't use it in combination with any other audio output device
 (such as OSS and ALSA) that isn't able to decode it (you will hear
 only white noise).
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="aac">
-<title>AAC codec</title>
-
-<para>
-An open source AAC decoder called FAAD2 is available from
-<ulink url="http://www.audiocoding.com/downloads.html"/>.
-<application>MPlayer</application> includes a copy of it in its source tree.
-If you want to use the external library instead, install it and pass
-<option>--enable-faad-external</option> to <filename>./configure</filename>.
-</para>
-
-<para>
-FAAD2 binaries are not available from audiocoding.com, but you can (apt-)get
-Debian packages from
-<ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink>,
-Mandrake/Mandriva RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink>
-and Fedora RPMs from <ulink url="http://rpm.livna.org/">Livna</ulink>.
-</para>
-<para>
-If you choose to build from source, you do not need all of FAAD2 to decode
-AAC files, libfaad is enough. Build it like this:
-<screen>
-cd faad2/
-sh bootstrap
-./configure
-cd libfaad
-make
-make install
-</screen>
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="amr">
-<title>AMR codecs</title>
-
-<para>
-Adaptive Multi-Rate speech codec is used in third generation (3G) mobile
-phones.
-Reference implementation is available from
-<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
-(free for private use).
-To enable support, download and install support libraries for
-<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB and AMR-WB</ulink>
-following the instructions on that page. Recompile MPlayer afterwards.
 </para>
 </sect2>
 
