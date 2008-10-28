@@ -757,7 +757,7 @@ support this MPEG-4 attribute.
 
 <para>
 This feature can be used only with
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>'s
+<systemitem class="library">libavcodec</systemitem>'s
 <systemitem>mpeg4</systemitem> codec. Keep in mind: although
 <application>MPlayer</application> will correctly play the created file,
 other players may use the wrong aspect ratio.

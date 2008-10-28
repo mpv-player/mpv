@@ -110,7 +110,7 @@ PCM/MP3/VBR MP3 audio.
 </para></listitem>
 <listitem><para>
   Encoding to all the codecs of FFmpeg's
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+  <systemitem class="library">libavcodec</systemitem>
 </para></listitem>
 <listitem><para>
   Video encoding from V4L compatible TV tuners
