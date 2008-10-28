@@ -7723,7 +7723,7 @@ _ld_tmp=""
 for I in $_libs_mplayer ; do
   _tmp=`echo $I | sed -e 's/^-L.*$//'`
   if test -z "$_tmp" ; then
-    _ld_extra="$I $_ld_extra"
+    _ld_extra="$_ld_extra $I"
   else
     _ld_tmp="$_ld_tmp $I"
   fi
