@@ -3,9 +3,6 @@
 <chapter id="codecs">
 <title>Codecs</title>
 
-<sect1 id="video-codecs">
-<title>Video codecs</title>
-
 <para>
 The <ulink url="../../codecs-status.html">codec status table</ulink> is a
 complete list of all supported codecs, regenerated daily.
@@ -19,6 +16,9 @@ If you have a Win32 codec which is not supported yet,
 please read the <link linkend="codec-importing">codec importing HOWTO</link>
 and help us add support for it.
 </para>
+
+<sect1 id="video-codecs">
+<title>Video codecs</title>
 
 <!-- ********** -->
 
