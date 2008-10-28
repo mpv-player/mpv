@@ -1741,7 +1741,7 @@ static int pal2rgbWrapper(SwsContext *c, uint8_t* src[], int srcStride[], int sr
 
 
     for (i=0; i<srcSliceH; i++) {
-        conv(srcPtr, dstPtr, c->srcW, c->pal_rgb);
+        conv(srcPtr, dstPtr, c->srcW, (uint8_t *) c->pal_rgb);
         srcPtr+= srcStride[0];
         dstPtr+= dstStride[0];
     }
@@ -2734,7 +2734,8 @@ int sws_scale(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
                 r= (i>>3    )*255;
                 g= ((i>>1)&3)*85;
                 b= (i&1     )*255;
-            }else if(c->srcFormat == PIX_FMT_BGR4_BYTE){
+            }else {
+                assert(c->srcFormat == PIX_FMT_BGR4_BYTE);
                 b= (i>>3    )*255;
                 g= ((i>>1)&3)*85;
                 r= (i&1     )*255;

@@ -72,9 +72,7 @@ default as it offers better speed.
   The CVS version is usually stable enough to use, as most of the time it
   features fixes for bugs that exist in releases.
   Here is what to do to make <systemitem class="library">Xvid</systemitem>
-  CVS work with <application>MEncoder</application> (you need at least
-  <application>autoconf</application> 2.50,
-  <application>automake</application> and <application>libtool</application>):
+  CVS work with <application>MEncoder</application>:
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
@@ -86,20 +84,12 @@ default as it offers better speed.
   <screen>cd xvidcore/build/generic</screen>
 </para></step>
 <step><para>
-  <screen>./bootstrap.sh</screen>
-</para></step>
-<step><para>
-  <screen>./configure</screen>
+  <screen>./bootstrap.sh &amp;&amp; ./configure</screen>
   You may have to add some options (examine the output of
   <command>./configure --help</command>).
 </para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
-</para></step>
-<step><para>
-  If you specified <option>--enable-divxcompat</option>,
-  copy <filename>../../src/divx4.h</filename> to
-  <filename class="directory">/usr/local/include/</filename>.
 </para></step>
 <step><para>
   Recompile <application>MPlayer</application>.
