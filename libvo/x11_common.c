@@ -1240,7 +1240,7 @@ Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
                                    unsigned int width, unsigned int height,
                                    int depth, Colormap col_map)
 {
-    unsigned long xswamask = CWBackingStore | CWBorderPixel;
+    unsigned long xswamask = CWBorderPixel;
     XSetWindowAttributes xswa;
     Window ret_win;
 
@@ -1251,7 +1251,7 @@ Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
     }
     xswa.background_pixel = 0;
     xswa.border_pixel = 0;
-    xswa.backing_store = Always;
+    xswa.backing_store = NotUseful;
     xswa.bit_gravity = StaticGravity;
 
     ret_win =
