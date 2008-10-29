@@ -42,8 +42,7 @@ answers.
   You don't absolutely need X, some video output drivers work without it.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - recommended version is
-  3.79.x or later. To build the XML documentation you need 3.80.
+  <emphasis role="bold">GNU make</emphasis> 3.81
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - 2.0.9 or later is required
