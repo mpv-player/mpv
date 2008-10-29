@@ -70,8 +70,7 @@ answers.
   necessary for encoding MP3 audio with <application>MEncoder</application>.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">zlib</emphasis> - recommended, necessary for compressed
-  MOV header and PNG support
+  <emphasis role="bold">zlib</emphasis> - recommended, many codecs use it.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
