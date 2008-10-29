@@ -87,6 +87,10 @@ answers.
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - optional, for SMB networking support
 </para></listitem>
+<listitem><para>
+  <emphasis role="bold"><ulink url="http://www.underbit.com/products/mad/">libmad</ulink></emphasis>
+  - optional, for for fast integer-only MP3 decoding on FPU-less platforms
+</para></listitem>
 </itemizedlist>
 </sect1>
 
