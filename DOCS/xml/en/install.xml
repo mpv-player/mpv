@@ -42,8 +42,7 @@ answers.
   You don't absolutely need X, some video output drivers work without it.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - recommended version is
-  3.79.x or later. To build the XML documentation you need 3.80.
+  <emphasis role="bold">GNU make</emphasis> 3.81
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - 2.0.9 or later is required
@@ -70,8 +69,7 @@ answers.
   necessary for encoding MP3 audio with <application>MEncoder</application>.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">zlib</emphasis> - recommended, necessary for compressed
-  MOV header and PNG support
+  <emphasis role="bold">zlib</emphasis> - recommended, many codecs use it.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
@@ -86,6 +84,10 @@ answers.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - optional, for SMB networking support
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold"><ulink url="http://www.underbit.com/products/mad/">libmad</ulink></emphasis>
+  - optional, for for fast integer-only MP3 decoding on FPU-less platforms
 </para></listitem>
 </itemizedlist>
 </sect1>
