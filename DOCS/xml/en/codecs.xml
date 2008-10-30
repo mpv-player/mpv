@@ -145,6 +145,24 @@ following the instructions on that page. Recompile MPlayer afterwards.
 </para>
 </sect2>
 
+<sect2 id="xmms">
+<title>XMMS</title>
+
+<para>
+<application>MPlayer</application> can use <application>XMMS</application> input
+plugins to play many file formats. There are plugins for SNES game tunes, SID
+tunes (from Commodore 64), many Amiga formats, .xm, .it, VQF, Musepack, Bonk,
+shorten and many others. You can find them at the
+<ulink url="http://www.xmms.org/plugins.php?category=input">XMMS input plugin page</ulink>.
+</para>
+
+<para>
+For this feature you need to have <application>XMMS</application> and compile
+<application>MPlayer</application> with
+<filename>./configure --enable-xmms</filename>.
+</para>
+</sect2>
+
 </sect1>
 
 
