@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27771 -->
+<!-- synced with r27843 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Il Visualizzatore di film</title>
@@ -113,9 +113,8 @@ PCM/MP3/VBR MP3.
   <application>MPlayer</application>
 </para></listitem>
 <listitem><para>
-  Codifica in tutti i formati di
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-  di FFmpeg
+  Codifica in tutti i formati da
+  <systemitem class="library">libavcodec</systemitem> di FFmpeg
 </para></listitem>
 <listitem><para>
   Codifica video da sintonizzatori TV compatibili V4L
