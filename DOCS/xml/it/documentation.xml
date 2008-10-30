@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25566 -->
+<!-- synced with r27771 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Il Visualizzatore di film</title>
@@ -47,11 +47,9 @@ e cerca l'argomento, leggi le <xref linkend="faq"/>, o prova a ricercare nei
 file (con grep, per esempio). Molte domande possono avere una risposta qui da
 qualche parte e le restanti probabilmente sono già state poste nelle nostre
 <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">mailing list</ulink>.
-<!-- FIXME: This refers to nonexistent links
 Controlla gli
-<ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archivi</ulink>, ci
+<ulink url="https://lists.mplayerhq.hu/mailman/listinfo">archivi</ulink>, ci
 sono un sacco di valide informazioni da trovare.
--->
 </para>
 </preface>
 
@@ -61,14 +59,14 @@ sono un sacco di valide informazioni da trovare.
 
 <para>
 <application>MPlayer</application> è un visualizzatore di filmati per Linux
-(gira su molte altre piattaforme Unix e architetture di CPU
-<emphasis role="bold">non-x86</emphasis>, vedi <xref linkend="ports"/>).
+(gira su molte altre piattaforme Unix e architetture di CPU non-x86, vedi
+<xref linkend="ports"/>).
 Riproduce la maggior parte dei file del tipo MPEG, VOB, AVI, OGG/OGM, VIVO,
 ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA,
 file Matroska, aiutato da molti codec nativi, di Xanim, RealPlayer, o codec DLL
 binari di Win32. Puoi guardare
-<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
-e anche filmati <emphasis role="bold">MPEG-4 (DivX)</emphasis>.
+VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora, e anche filmati
+MPEG-4 (DivX).
 Un'altra importante caratteristica di <application>MPlayer</application> è il
 supporto per un'ampia gamma di driver di uscita. Funziona con X11, Xv, DGA,
 OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, ma puoi anche usare GGI e SDL
@@ -79,18 +77,18 @@ così puoi gustarti i filmati a schermo intero.
 <application>MPlayer</application> supporta la riproduzione attraverso alcune
 schede di decodifica MPEG hardware, come <link linkend="dvb">DVB</link> e
 <link linkend="dxr3">DXR3/Hollywood+</link>. E cosa dire dei grandi e bei
-sottotitoli sfumati con antialias (<emphasis role="bold">14 tipi supportati</emphasis>)
-con font europei/ISO 8859-1,2 (ungherese, inglese, ceco, etc), cirillici,
-coreani, e del visualizzatore su schermo (OnScreen Display, OSD)?
+sottotitoli sfumati con antialias (14 tipi supportati) con font
+europei/ISO 8859-1,2 (ungherese, inglese, ceco, etc), cirillici, coreani,
+e del visualizzatore su schermo (OnScreen Display, OSD)?
 </para>
 
 <para>
 Il riproduttore è decisamente robusto nella riproduzione di file MPEG rovinati
 (utile per alcuni VCD) e riproduce file AVI imperfetti, che sono illeggibili
-con il famoso Windows Media Player. Possono venir letti anche gli AVI non
-indicizzati e puoi ricostruire il loro indice temporaneamente con l'opzione
-<option>-idx</option> o permanentemente con
-<application>MEncoder</application>, abilitando così la ricerca!
+con il famoso <application>Windows Media Player</application>.
+Si possono anche leggere gli AVI non indicizzati e puoi ricostruire il loro
+indice temporaneamente con l'opzione <option>-idx</option> o permanentemente
+con <application>MEncoder</application>, abilitando così la ricerca!
 Come puoi vedere, la stabilità e la qualità sono lo cose più importanti,
 ma anche la velocità è impressionante. C'è anche un potente sistema di
 filtri per la manipolazione audio e video.
@@ -101,12 +99,11 @@ filtri per la manipolazione audio e video.
 Encoder, Codificatore di film di MPlayer) è un semplice codificatore di film,
 progettato per codificare tutti i filmati visualizzabili da
 <application>MPlayer</application>
-(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+(AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA)
 in altri formati sempre visualizzabili da <application>MPlayer</application>
-(vedi sotto). Può codificare con vari codec, come
-<emphasis role="bold">MPEG-4 (DivX4)</emphasis>
+(vedi sotto). Può codificare con vari codec, come MPEG-4 (DivX4)
 (uno o due passi), <systemitem class="library">libavcodec</systemitem>, audio
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
+PCM/MP3/VBR MP3.
 </para>
 
 <itemizedlist>
@@ -121,7 +118,7 @@ in altri formati sempre visualizzabili da <application>MPlayer</application>
   di FFmpeg
 </para></listitem>
 <listitem><para>
-  Codifica video da <emphasis role="bold">sintonizzatori TV compatibili V4L</emphasis>
+  Codifica video da sintonizzatori TV compatibili V4L
 </para></listitem>
 <listitem><para>
   Codifica/multiplex in file AVI con interleave con indici corretti
@@ -133,10 +130,7 @@ in altri formati sempre visualizzabili da <application>MPlayer</application>
   Codifica in 1, 2 o 3 passi
 </para></listitem>
 <listitem><para>
-  Audio MP3 <emphasis role="bold">VBR</emphasis>
-  <important><para>
-  L'audio MP3 VBR non sempre suona bene nei riproduttori per Windows!
-  </para></important>
+  Audio MP3 VBR
 </para></listitem>
 <listitem><para>
   Audio PCM
@@ -157,8 +151,8 @@ in altri formati sempre visualizzabili da <application>MPlayer</application>
   rotate, scale, conversione rgb/yuv)
 </para></listitem>
 <listitem><para>
-  Può codificare sottotitoli DVD/VOBsub <emphasis role="bold">E</emphasis>
-  sottotitoli testuali nel file di uscita
+  Può codificare sottotitoli DVD/VOBsub e sottotitoli testuali nel file di
+  uscita
 </para></listitem>
 <listitem><para>
   Può codificare sottotitoli DVD in formato VOBsub
@@ -179,7 +173,6 @@ possono esser distribuiti nei termini della GNU General Public License Version 2
 &cd-dvd.xml;
 &faq.xml;
 
-&containers.xml;
 &codecs.xml;
 &video.xml;
 &audio.xml;
