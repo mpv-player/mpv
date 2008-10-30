@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26258 -->
+<!-- synced with r27640 -->
 <chapter id="mencoder">
 <title>Utilizzo base di <application>MEncoder</application></title>
 
@@ -327,7 +327,7 @@ La definizione viene dal fatto che questo metodo codifica il file
 file temporanei (<filename>*.log</filename>) con una dimensione di pochi
 megabyte, non cancellarli dopo il primo passaggio (puoi cancellare l'AVI o
 meglio ancora non creare alcun video ridirezionandolo verso
-<filename>/dev/null</filename>).
+<filename>/dev/null</filename> o verso <filename>NUL</filename> sotto Windows).
 Nel secondo passaggio viene creato il secondo file di output, usando i dati
 del bitrate presi dai file temporanei. Il file risultante avrà una qualità
 dell'immagine decisamente migliore. Se questa è la prima volta che senti
