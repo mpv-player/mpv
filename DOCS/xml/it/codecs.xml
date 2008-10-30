@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26146 -->
+<!-- synced with r27833 -->
 <chapter id="codecs">
 <title>Codec</title>
 
@@ -14,66 +14,9 @@ del nostro sito sono disponibili alcuni codec binari da usare con MPlayer.
 </para>
 
 <para>
-I più importanti su tutti:
-</para>
-
-<itemizedlist>
-<listitem><para>
-  video
-  <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) e
-  <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>)
-</para></listitem>
-<listitem><para>
-  decodificatori nativi per <emphasis role="bold">tutte le tipologie di DivX,
-  3ivX, Microsoft MPEG-4</emphasis> v1, v2 e altre varianti di MPEG-4.
-</para></listitem>
-<listitem><para>
-  decodificatore nativi per <emphasis role="bold">Windows Media Video 7/8</emphasis>
-  (<emphasis role="bold">WMV1/WMV2</emphasis>), e decodificatori su DLL Win32
-  per <emphasis role="bold">Windows Media Video 9</emphasis>
-  (<emphasis role="bold">WMV3</emphasis>),
-  entrambi usati in file <filename>.wmv</filename>.
-</para></listitem>
-<listitem><para>
-  decodificatore nativo <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis>
-</para></listitem>
-<listitem><para>
-  decodificatore nativo <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis>
-</para></listitem>
-<listitem><para>
-  decodificatore <emphasis role="bold">3ivx</emphasis> v1, v2
-</para></listitem>
-<listitem><para>
-  codec Cinepak e <emphasis role="bold">Intel Indeo</emphasis> (3.1,3.2,4.1,5.0)
-</para></listitem>
-<listitem><para>
-  formati hardware <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 e
-  altri
-</para></listitem>
-<listitem><para>
-  varianti VIVO 1.0, 2.0, I263 e altre <emphasis role="bold">H.263(+)</emphasis>
-</para></listitem>
-<listitem><para>
-  FLI/FLC
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> atraverso
-  <systemitem class="library">libavcodec</systemitem>, e
-  codec <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> usando le
-  librerie di RealPlayer
-</para></listitem>
-<listitem><para>
-  decodificatore nativo per HuffYUV
-</para></listitem>
-<listitem><para>
-  vari vecchi formati semplici tipo RLE
-</para></listitem>
-</itemizedlist>
-
-<para>
-Se hai un codec Win32 non elencato qui che non è ancora supportato, leggi per
-favore l'HOWTO sull'<link linkend="codec-importing">importazione codec</link>
-e aiutaci ad aggiungerne il decodificatore relativo.
+Se hai un codec Win32 che non è ancora supportato, leggi per favore
+l'HOWTO sull'<link linkend="codec-importing">importazione codec</link>
+ed aiutaci ad aggiungerne il decodificatore relativo.
 </para>
 
 <!-- ********** -->
@@ -94,8 +37,8 @@ Anche la codifica è possibile per alcuni formati, ed è permessa da
 
 <para>
 Per una lista completa dei codec
-<ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink> e
-<ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>
+<ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC6">video</ulink> e
+<ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC7">audio</ulink>
 supportati per favore visita la homepage di FFmpeg.
 </para>
 
@@ -113,23 +56,9 @@ Esegui semplicemente <filename>./configure</filename> e compila.
 
 <para>
 <ulink url="http://www.xvid.org">Xvid</ulink> è un codec video libero
-compatibile MPEG-4 ASP, che contempla codifica a doppio pasaggio e supporto
-completo MPEG-4 ASP, rendendolo molto più efficiente del ben noto codec DivX.
-Porta una buona qualità video e delle buone prestazionu, grazie alle
-ottimizzazioni per CPU per molti processori moderni.
-</para>
-
-<para>
-Nacque come un fork di sviluppo del codec OpenDivX.
-Ciò è accaduto quando ProjectMayo portò OpenDivX in DivX4 a sorgenti chiusi,
-e le persone non di ProjectMayo che lavoravano su OpenDivX si arrabbiarono,
-così iniziarono Xvid. Perciò tutti e due i progetti hanno la stessa origine.
-</para>
-
-<para>
-Nota che Xvid non è necessario per decodificare video codificato in Xvid.
-Viene usata di default <systemitem class="library">libavcodec</systemitem>
-visto che ha maggior velocità.
+compatibile MPEG-4 ASP. Nota che Xvid non è necessario per decodificare video
+codificato in Xvid. Viene usata di default
+<systemitem class="library">libavcodec</systemitem>, dato che è più veloce.
 </para>
 
 <procedure>
@@ -143,9 +72,7 @@ visto che ha maggior velocità.
   nei rilasci.
   Ecco quello che devi fare per far sì che la versione CVS di
   <systemitem class="library">Xvid</systemitem> funzioni con
-  <application>MEncoder</application> (ti servono almeno
-  <application>autoconf</application> 2.50,
-  <application>automake</application>, e <application>libtool</application>):
+  <application>MEncoder</application>:
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
@@ -157,10 +84,7 @@ visto che ha maggior velocità.
   <screen>cd xvidcore/build/generic</screen>
 </para></step>
 <step><para>
-  <screen>./bootstrap.sh</screen>
-</para></step>
-<step><para>
-  <screen>./configure</screen>
+  <screen>./bootstrap.sh &amp;&amp; ./configure</screen>
   Puoi dover aggiungere alcune opzioni (controlla quello che emette
   <command>./configure --help</command>).
 </para></step>
@@ -168,14 +92,7 @@ visto che ha maggior velocità.
   <screen>make &amp;&amp; make install</screen>
 </para></step>
 <step><para>
-  Se hai specificato <option>--enable-divxcompat</option>,
-  copia <filename>../../src/divx4.h</filename> in
-  <filename class="directory">/usr/local/include/</filename>.
-</para></step>
-<step><para>
-  Ricompila <application>MPlayer</application> con
-  <option>--with-xvidlibdir=<replaceable>/percorso/di/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/percorso/di/</replaceable>xvid.h</option>.
+  Ricompila <application>MPlayer</application>.
 </para></step>
 </procedure>
 </sect2>
@@ -185,155 +102,27 @@ visto che ha maggior velocità.
 <sect2 id="codec-x264">
 <title><systemitem class="library">x264</systemitem></title>
 
-<sect3 id="codec-x264-whatis">
-<title>Cos'è <systemitem class="library">x264</systemitem>?</title>
-
 <para>
 <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
 è una libreria per creare flussi video H.264.
-Non è completa al 100%, ma attualmente ha perlomeno qualche tipo di supporto
-per la maggior parte delle caratteristiche di H.264 che influenzano la qualità.
-Ci sono anche molte caratteristiche avanzate nelle specifiche H.264 che non
-hanno nulla ha che fare con la qualità video di per sé; molte di queste non
-sono ancora implementate in <systemitem class="library">x264</systemitem>.
-</para>
-
-<itemizedlist>
-<title>Caratteristiche del codificatore</title>
-  <listitem><para>CAVLC/CABAC</para></listitem>
-  <listitem><para>Multi-referenza</para></listitem>
-  <listitem><para>
-  Intra: tutti i tipi di macroblocco (16x16, 8x8, e 4x4 con tutte le predizioni)
-  </para></listitem>
-  <listitem><para>
-  Inter P: tutti i partizionamenti (da 16x16 fino a 4x4)
-  </para></listitem>
-  <listitem><para>
-  Inter B: partizionamenti da 16x16 fino a 8x8 (includendo SKIP/DIRECT)
-  </para></listitem>
-  <listitem><para>
-  Controllo frequenza: quantizzatore costante, frequenza bit costante, ABR a
-  passaggio singolo o multiplo, VBV facoltativo
-  </para></listitem>
-  <listitem><para>Rilevazione cambi scena</para></listitem>
-  <listitem><para>Posizionamento fotogrammi B adattivo</para></listitem>
-  <listitem><para>
-  Fotogrammi B come referenza / ordine arbitrario dei fotogrammi
-  </para></listitem>
-  <listitem><para>Trasformazione spaziale adattivo 8x8 e 4x4</para></listitem>
-  <listitem><para>Modalità senza perdita (lossless)</para></listitem>
-  <listitem><para>Matrici di quantizzazione personalizzate</para></listitem>
-  <listitem><para>Codifica parallela di sezioni multiple</para></listitem>
-  <listitem><para>Interlacciamento</para></listitem>
-</itemizedlist>
-</sect3>
-
-
-<sect3 id="codec-h264-whatis">
-<title>Cos'è H.264?</title>
-
-<para>
-H.264 è un nome per un nuovo codec video digitale sviluppato in comunione
-dall'ITU e da MPEG.
-Può anche essere correttamente chiamato coi nomi altisonanti di
-"ISO/IEC 14496-10" o "MPEG-4 Part 10".
-Più frequentemente, viene chiamato "MPEG-4 AVC" o solo "AVC".
-</para>
-
-<para>
-In qualsiasi modo tu lo chiami, può valer la pena provare l'H.264 dato che
-tipicamente raggiunge la qualità di MPEG-4 ASP con il 5%-30% in meno della
-frequenza bit.
-I risultati reali dipenderanno sia dal materiale sorgente che dal codificatore.
-I guadagni ottenuti usando H.264 non arrivano senza un costo: per decodificare
-flussi H.264 pare richiedere CPU potenti e memoria.
-Per esempio, su un Athlon 1733 MHz, un H.264 a risoluzione video DVD a 1500kbps
-richiede circa il 35% della CPU, per la decodifica.
-Per contronto, decodificare un flusso MPEG-4 ASP a risoluzione video DVD a
-1500kbps richiede circa il 10% della CPU.
-Ciò significa che anche un DVD rip decente può delle volte saltellare su CPU
-più lente di 2.0 GHz o giù di lì.
-</para>
-
-<para>
-Almeno con <systemitem class="library">x264</systemitem>,
-le risorse richieste per la codifica non sono peggiori di quelle cui sei
-abituato per MPEG-4 ASP.
-Per esempio, su un Athlon 1733 MHz una codifica tipica di un DVD girerebbe a
-5-15fps.
-</para>
-
-<para>
-Questa documentazione non vuole spiegare i dettagli di H.264, ma se sei
-interessato in un breve resoconto, potresti voler leggere
-<ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
-</para>
-</sect3>
-
-
-<sect3 id="codec-x264-playback">
-<title>Come posso riprodurre video H.264 con
-  <application>MPlayer</application>?</title>
-  
-<para>
-<application>MPlayer</application> usa il decodificatore H.264 di
-<systemitem class="library">libavcodec</systemitem>.
-<systemitem class="library">libavcodec</systemitem> ha avuto una decodifica
-almeno minimalmente usabile da circa luglio 2004, tuttavia grandi modifiche e
-sviluppi sono stati implementati da quel momento, sia in termini di maggiori
-funzionalità supportate che in termini di miglior utilizzo della CPU.
-Tanto per esser sicuri, è sempre una buona idea usare un checkout recente di
-<systemitem class="library">libavcodec</systemitem> da SubVersion.
-</para>
-
-<para>
-If you want a quick and easy way to know whether there have been
-recent changes to <systemitem class="library">libavcodec</systemitem>'s
-H.264 decoding, you might keep an eye on 
-<ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">FFmpeg Subversion repository's web interface</ulink>.
-Se vuoi un modo rapido ed indolore di sapere se ci sono state modifiche recenti
-alla decodifica H.264 di <systemitem class="library">libavcodec</systemitem>,
-puoi poter dare un'occhiata all'<ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">interfaccia web del repository SubVersion di FFmpeg</ulink>.
-</para>
-</sect3>
-
-
-<sect3 id="codec-x264-encode">
-<title>Come posso codificare video usando <application>MEncoder</application>
-  e <systemitem class="library">x264</systemitem>?</title>
-
-<para>
-Se hai il client di subversion installato, i sorgenti più recenti di x264
-possono esser ottenuti con questo comando:
-<screen>svn co svn://svn.videolan.org/x264/trunk x264</screen>
 I sorgenti di <application>MPlayer</application> vengono aggiornati
-ogniqualvolta c'è una modifica nelle API di
-<systemitem class="library">x264</systemitem>, per cui si consiglia sempre di
-usare allo stesso modo la versione da SubVersion di MPlayer.
-Forse questa situazione cambierà quando e se ci sarà un rilascio di
-<systemitem class="library">x264</systemitem>.
-Nel frattempo, <systemitem class="library">x264</systemitem> dovrebbe esser
-considerato molto instabile, nel senso che la sua interfaccia di programmazione
-è soggetta a cambiamenti.
+ogniqualvolta ci sia un cambiamento nelle API di
+<systemitem class="library">x264</systemitem>, quindi si consiglia sempre di
+utilizzare la versione Subversion di <application>MPlayer</application>.
 </para>
 
 <para>
-<systemitem class="library">x264</systemitem> so compila e installa nel solito
-modo:
-<screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-Questo installa libx264 in /usr/local/lib e x264.h viene posto in
-/usr/local/include.
+Se hai un client GIT installato, si possono ottenere i sorgenti più recenti di
+x264 col seguente comando:
+<screen>git clone git://git.videolan.org/x264.git</screen>
 
-Con la libreria <systemitem class="library">x264</systemitem>  e gli header nei
-percorsi standard, compilare il supporto per
-<systemitem class="library">x264</systemitem> in
-<application>MPlayer</application> è facile.
-Lancia semplicemente il comando:
-<screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-Lo script <filename>./configure</filename> controllerà automaticamente che tu
-abbia i requisiti richiesti per <systemitem class="library">x264</systemitem>.
+Dopodiché lo si compila e installa nel solito modo:
+<screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
+
+Poi riesegui <filename>./configure</filename> affinché
+<application>MPlayer</application> rilevi la presenza di
+<systemitem class="library">x264</systemitem>.
 </para>
-</sect3>
 </sect2>
 </sect1>
 
@@ -344,55 +133,6 @@ abbia i requisiti richiesti per <systemitem class="library">x264</systemitem>.
 <sect1 id="audio-codecs">
 <title>Codec audio</title>
 
-<itemizedlist>
-<title>I codec più importanti su tutti:</title>
-<listitem><para>
-  audio MPEG layer 1/2/3 (MP1/2/3) (codice
-  <emphasis role="bold">nativo</emphasis>, con ottimizzazione MMX/SSE/3DNow!)
-</para></listitem>
-<listitem><para>
-  Windows Media Audio 7 e 8 (AKA WMAv1 and WMAv2)
-  (codice <emphasis role="bold">nativo</emphasis>, con
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-</para></listitem>
-<listitem><para>
-  Windows Media Audio 9 (WMAv3) (usando le DLL DMO)
-</para></listitem>
-<listitem><para>
-  audio AC-3 Dolby (codice <emphasis role="bold">nativo</emphasis>, con
-  ottimizzazione MMX/SSE/3DNow!)
-</para></listitem>
-<listitem><para>
-  AC-3 passando attraverso l'hardware della scheda audio
-</para></listitem>
-<listitem><para>
-  AAC
-</para></listitem>
-<listitem><para>
-  codec audio Ogg Vorbis (libreria <emphasis role="bold">nativa</emphasis>)
-</para></listitem>
-<listitem><para>
-  RealAudio: DNET (AC-3 a bassa frequenza), Cook, Sipro and ATRAC3
-</para></listitem>
-<listitem><para>
-  QuickTime: codec audio Qualcomm e QDesign
-</para></listitem>
-<listitem><para>
-  audio VIVO (g723, Vivo Siren)
-</para></listitem>
-<listitem><para>
-  audio Voxware (usando le DLL DirectShow)
-</para></listitem>
-<listitem><para>
-  alaw e ulaw, svariati formati gsm, adpcm e pcm e altri vecchi codec audio
-  semplici
-</para></listitem>
-<listitem><para>
-  codec voce Adaptive Multi-Rate (AMR)
-</para></listitem>
-</itemizedlist>
-
-<!-- ********** -->
 
 <sect2 id="swac3">
 <title>Decodifica software AC-3</title>
@@ -500,21 +240,23 @@ bianco).
 <title>Codec AAC</title>
 
 <para>
-AAC (Advanced Audio Coding) è un codec audio che si trova delle volte nei file
-MOV e MP4. E' disponibile da <ulink url="http://www.audiocoding.com"/> un
-decodificatore open source chiamato FAAD.
-<application>MPlayer</application> include uno snapshot CVS di libfaad 2.1 beta,
-così non hai bisogno di recuperarlo separatamente.
+E' disponibile da <ulink url="http://www.audiocoding.com/downloads.html"/> un
+decodificatore open source che si chiama FAAD2.
+<application>MPlayer</application> ne include una copia nei suoi sorgenti.
+Se vuoi usare la libreria esterna per qualche altra ragione, installala e passa
+<option>--enable-faad-external</option> a <filename>./configure</filename>.
 </para>
 
 <para>
-Se usi gcc 3.2 che fallirà nel compilare la nostra FAAD interna oppure vuoi
-usare la libreria esterna per qualche altra ragione, scarica la libreria della
-<ulink url="http://www.audiocoding.com/modules/mydownloads/">pagina di download</ulink>
-e passa <option>--enable-faad-external</option> a
-<filename>./configure</filename>.
-Non ti serve tutto di faad2 per decodificare i file AAC, è sufficiente libfaad.
-Compilala così:
+Gli eseguibili di FAAD2 non sono disponibili da audiocoding.com, ma puoi
+ottenere con apt(-get) i pacchetti Debian da
+<ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink>,
+gli RPM per Mandrake/Mandriva da <ulink url="http://plf.zarb.org">P.L.F</ulink>
+e quelli per Fedora da <ulink url="http://rpm.livna.org/">Livna</ulink>.
+</para>
+<para>
+Se decidi di compilarli dai sorgenti, non ti serve tutto di faad2 per
+decodificare i file AAC, ti basta libfaad. Compilala così:
 <screen>
 cd faad2/
 sh bootstrap
@@ -523,11 +265,6 @@ cd libfaad
 make
 make install
 </screen>
-I binari non sono disponibili da audiocoding.com, ma puoi apt-gettare i
-pacchetti Debian dal
-<ulink url="http://www.debian-multimedia.org/">sito di Christian Marillat</ulink>,
-gli RPM per Mandrake/Mandriva da <ulink url="http://plf.zarb.org">P.L.F</ulink>
-e gli RPM per Fedora RPMs da <ulink url="http://rpm.livna.org/">Livna</ulink>.
 </para>
 </sect2>
 
