@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27833 -->
+<!-- synced with r27852 -->
 <chapter id="codecs">
 <title>Codec</title>
-
-<sect1 id="video-codecs">
-<title>Codec video</title>
 
 <para>
 La <ulink url="../../codecs-status.html">tabella di stato dei codec</ulink> è
@@ -18,113 +15,6 @@ Se hai un codec Win32 che non è ancora supportato, leggi per favore
 l'HOWTO sull'<link linkend="codec-importing">importazione codec</link>
 ed aiutaci ad aggiungerne il decodificatore relativo.
 </para>
-
-<!-- ********** -->
-
-<sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
-<title>FFmpeg/libavcodec</title>
-
-<para>
-<ulink url="http://ffmpeg.org">FFmpeg</ulink> contiene
-<systemitem class="library">libavcodec</systemitem>, la libreria open source
-dominante di codec audio e video. E' in grado di decodificare molti formati
-multimediali, di solito a velocità più elevate delle alternative, e punta ad
-aggiungere prima o poi il supporto di decodifica per i restanti.
-E' il decodificatore di default usato da <application>MPlayer</application>.
-Anche la codifica è possibile per alcuni formati, ed è permessa da
-<application>MEncoder</application>.
-</para>
-
-<para>
-Per una lista completa dei codec
-<ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC6">video</ulink> e
-<ulink url="http://ffmpeg.mplayerhq.hu/general.html#SEC7">audio</ulink>
-supportati per favore visita la homepage di FFmpeg.
-</para>
-
-<para>
-<application>MPlayer</application> contiene
-<systemitem class="library">libavcodec</systemitem>.
-Esegui semplicemente <filename>./configure</filename> e compila.
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="xvid">
-<title>Xvid</title>
-
-<para>
-<ulink url="http://www.xvid.org">Xvid</ulink> è un codec video libero
-compatibile MPEG-4 ASP. Nota che Xvid non è necessario per decodificare video
-codificato in Xvid. Viene usata di default
-<systemitem class="library">libavcodec</systemitem>, dato che è più veloce.
-</para>
-
-<procedure>
-<title>Installare <systemitem class="library">Xvid</systemitem></title>
-<para>
-  Come molti software open source, è disponibili in due modi:
-  <ulink url="http://www.xvid.org/downloads.html">rilasci ufficiali</ulink>
-  e la versione in CVS.
-  La versione CVS solitamente è solitamente abbastanza stabile da utilizzare,
-  visto che la maggior parte delle volte include fix per i bachi che esistono
-  nei rilasci.
-  Ecco quello che devi fare per far sì che la versione CVS di
-  <systemitem class="library">Xvid</systemitem> funzioni con
-  <application>MEncoder</application>:
-</para>
-<step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
-</para></step>
-<step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
-</para></step>
-<step><para>
-  <screen>cd xvidcore/build/generic</screen>
-</para></step>
-<step><para>
-  <screen>./bootstrap.sh &amp;&amp; ./configure</screen>
-  Puoi dover aggiungere alcune opzioni (controlla quello che emette
-  <command>./configure --help</command>).
-</para></step>
-<step><para>
-  <screen>make &amp;&amp; make install</screen>
-</para></step>
-<step><para>
-  Ricompila <application>MPlayer</application>.
-</para></step>
-</procedure>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="codec-x264">
-<title><systemitem class="library">x264</systemitem></title>
-
-<para>
-<ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
-è una libreria per creare flussi video H.264.
-I sorgenti di <application>MPlayer</application> vengono aggiornati
-ogniqualvolta ci sia un cambiamento nelle API di
-<systemitem class="library">x264</systemitem>, quindi si consiglia sempre di
-utilizzare la versione Subversion di <application>MPlayer</application>.
-</para>
-
-<para>
-Se hai un client GIT installato, si possono ottenere i sorgenti più recenti di
-x264 col seguente comando:
-<screen>git clone git://git.videolan.org/x264.git</screen>
-
-Dopodiché lo si compila e installa nel solito modo:
-<screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
-
-Poi riesegui <filename>./configure</filename> affinché
-<application>MPlayer</application> rilevi la presenza di
-<systemitem class="library">x264</systemitem>.
-</para>
-</sect2>
-</sect1>
 
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -192,29 +82,6 @@ schede di decodifica MPEG DXR3/Hollywood+.
 
 <!-- ********** -->
 
-<sect2 id="libmad">
-<title>Supporto per <systemitem class="library">libmad</systemitem></title>
-
-<para>
-<ulink url="http://www.underbit.com/products/mad/"><systemitem class="library">libmad</systemitem></ulink>
-è una libreria multipiattaforma di decodifica audio, per MPEG solo interi
-(internamente PCM a 24bit). Non gestisce bene file danneggiati, e delle volte
-ha problemi con la ricerca, ma può lavorare meglio su piattaforme senza FPU
-(come <link linkend="arm">ARM</link>) rispetto ad
-<systemitem class="library">mp3lib</systemitem>.
-</para>
-
-<para>
-Se hai una corretta installazione di
-<systemitem class="library">libmad</systemitem>,
-<filename>./configure</filename> se ne accorgerà e il supporto per audio MPEG
-attraverso <systemitem class="library">libmad</systemitem> verrà
-automaticamente compilato.
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="hwmpa">
 <title>Codec hardware audio MPEG</title>
 
@@ -234,60 +101,8 @@ bianco).
 </para>
 </sect2>
 
-<!-- ********** -->
-
-<sect2 id="aac">
-<title>Codec AAC</title>
-
-<para>
-E' disponibile da <ulink url="http://www.audiocoding.com/downloads.html"/> un
-decodificatore open source che si chiama FAAD2.
-<application>MPlayer</application> ne include una copia nei suoi sorgenti.
-Se vuoi usare la libreria esterna per qualche altra ragione, installala e passa
-<option>--enable-faad-external</option> a <filename>./configure</filename>.
-</para>
-
-<para>
-Gli eseguibili di FAAD2 non sono disponibili da audiocoding.com, ma puoi
-ottenere con apt(-get) i pacchetti Debian da
-<ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink>,
-gli RPM per Mandrake/Mandriva da <ulink url="http://plf.zarb.org">P.L.F</ulink>
-e quelli per Fedora da <ulink url="http://rpm.livna.org/">Livna</ulink>.
-</para>
-<para>
-Se decidi di compilarli dai sorgenti, non ti serve tutto di faad2 per
-decodificare i file AAC, ti basta libfaad. Compilala così:
-<screen>
-cd faad2/
-sh bootstrap
-./configure
-cd libfaad
-make
-make install
-</screen>
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="amr">
-<title>Codec AMR</title>
-
-<para>
-Il codec voce Adaptive Multi-Rate è usato nei telefoni cellulari di terza
-generazione (3G).
-La referenza per l'implementazione è disponibile da 
-<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
-(gratuita per uso personale).
-Per abilitarne il supporto, scarica e installa le librerie per 
-<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB e AMR-WB</ulink>
-seguendo le istruzioni da quella pagina.
-Dopodiché ricompila <application>MPlayer</application>.
-</para>
-</sect2>
 
 </sect1>
-
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
