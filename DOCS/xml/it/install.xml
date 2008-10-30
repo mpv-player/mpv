@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24087 -->
+<!-- synced with r27663 -->
 <chapter id="install">
 <title>Installazione</title>
 
@@ -182,21 +182,20 @@ Vedi la sezione <link linkend="subosd">Sottotitoli e OSD</link> per i dettagli.
 
 <para>
 La GUI abbisogna di GTK 1.2.x o GTK 2.0 (non è completamente in GTK, ma i
-pannelli lo sono).
-Le skin sono salvate in formato PNG, così GTK,
-<systemitem class="library">libpng</systemitem> (e le loro controparti di
-sviluppo, solitamente chiamate <systemitem class="library">gtk-dev</systemitem>
-e <systemitem class="library">libpng-dev</systemitem>) vanno installate.
-Puoi compilarla specificando <option>--enable-gui</option> quando esegui
+pannelli lo sono), per cui le <systemitem class="library">GTK</systemitem> (e
+le controparti di sviluppo, solitamente chiamate
+<systemitem class="library">gtk-dev</systemitem>) devono essere installate.
+Puoi compilare la GUI specificando <option>--enable-gui</option> quando esegui
 <filename>./configure</filename>.
-Poi, per abilitare la GUI, devi lanciare il binario <command>gmplayer</command>.
+Poi, per girare in modalità GUI, devi lanciare il binario
+<command>gmplayer</command>.
 </para>
 
 <para>
 Siccome <application>MPlayer</application> non ha una skin inclusa, devi
 scaricarne una se vuoi usare la GUI. Vedi la
 <ulink url="http://www.mplayerhq.hu/dload.html">pagina di download</ulink>.
-Queste devono essere decompresse nella directory di sistema (<filename
+Dovrebbe essere decompressa nella directory di sistema (<filename
 class="directory">$PREFIX/share/mplayer/skins</filename>) o dell'utente
 <filename class="directory">$HOME/.mplayer/skins</filename>.
 <application>MPlayer</application> di default cerca in questi percorsi una
