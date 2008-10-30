@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27640 -->
+<!-- synced with r27843 -->
 <chapter id="mencoder">
 <title>Utilizzo base di <application>MEncoder</application></title>
 
@@ -756,10 +756,9 @@ Tristemente, ci sono pochi riproduttori oltre ad
 </para>
 
 <para>
-This feature can be used only with
 Questa caratteristica può essere usata solo con il codec
 <systemitem>mpeg4</systemitem> di
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
+<systemitem class="library">libavcodec</systemitem>.
 Ricorda: anche se <application>MPlayer</application> riprodurrà correttamente
 il file generato, altri riproduttori potrebbero usare il rapporto di aspetto
 sbagliato.
