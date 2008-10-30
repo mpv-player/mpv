@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r24604 -->
+<!-- synced with r27815 -->
 <chapter id="tv">
 <title>TV</title>
 
@@ -113,11 +113,6 @@ Qui ci sono giusto alcuni consigli:
   in YV12, perciò l'unica cosa che otterrai sarà spreco di CPU.
 </para></listitem>
 <listitem><para>
-  Per specificare lo spazio colore I420 (<option>outfmt=i420</option>), devi
-  aggiungere un'opzione <option>-vc rawi420</option> a causa di un conflitto
-  del fourcc con un codec video Intel Indeo.
-</para></listitem>
-<listitem><para>
   Ci sono vari modi per la cattura dell'audio. Puoi acquisire il suono sia
   usando la tua scheda audio attraverso una connessione via cavo esterna tra la
   scheda video e il line-in, sia usando l'ADC integrato nel chip bt878.
@@ -199,7 +194,8 @@ sulla direzione orizzontale a causa di una limitazione hardware.
 <title>Televideo (teletext)</title>
 
 <para>
-Il televideo è attualmente disponibile solo in MPlayer per i driver v4l e v4l2.
+Il televideo è attualmente disponibile solo in
+<application>MPlayer</application> per i driver v4l e v4l2.
 </para>
 
 <sect2 id="tv-teletext-implementation-notes">
