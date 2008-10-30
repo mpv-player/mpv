@@ -2406,7 +2406,7 @@ duration/location of each type.
   codec family</title>
 
 <para>
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+<systemitem class="library">libavcodec</systemitem>
 provides simple encoding to a lot of interesting video and audio formats.
 You can encode to the following codecs (more or less up to date):
 </para>
@@ -2839,7 +2839,7 @@ and development advancements, you may get very different results.
 
 <para>
 With this feature of
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+<systemitem class="library">libavcodec</systemitem>
 you are able to set custom inter (I-frames/keyframes) and intra
 (P-frames/predicted frames) matrices. It is supported by many of the codecs:
 <systemitem>mpeg1video</systemitem> and <systemitem>mpeg2video</systemitem>
