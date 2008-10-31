@@ -86,6 +86,7 @@ int slave_mode=0;
 int player_idle_mode=0;
 int quiet=0;
 int enable_mouse_movements=0;
+float start_volume = -1;
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 char * proc_priority=NULL;
@@ -3573,6 +3574,8 @@ if(mpctx->sh_video){
     audio_delay += mpctx->sh_video->stream_delay;
 }
 if(mpctx->sh_audio){
+  if (start_volume >= 0)
+    mixer_setvolume(&mpctx->mixer, start_volume, start_volume);
   if (! ignore_start)
     audio_delay -= mpctx->sh_audio->stream_delay;
   mpctx->delay=-audio_delay;

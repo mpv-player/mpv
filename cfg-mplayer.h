@@ -108,6 +108,7 @@ const m_option_t mplayer_opts[]={
         {"nosoftvol", &soft_vol, CONF_TYPE_FLAG, 0, 1, 0, NULL},
         {"softvol-max", &soft_vol_max, CONF_TYPE_FLOAT, CONF_RANGE, 10, 10000, NULL},
 	{"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+	{"volume", &start_volume, CONF_TYPE_FLOAT, CONF_RANGE, -1, 10000, NULL},
 	{"master", "Option -master has been removed, use -af volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// override audio buffer size (used only by -ao oss, anyway obsolete...)
 	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
