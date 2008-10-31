@@ -1476,13 +1476,14 @@ static int parse_obj_params(const m_option_t* opt,const char *name,
   int r;
   m_obj_params_t* p = opt->priv;
   const m_struct_t* desc;
-  char* cpy = strdup(param);
+  char* cpy;
   
   // We need the object desc
   if(!p)
     return M_OPT_INVALID;
   
   desc = p->desc;
+  cpy = strdup(param);
   r = get_obj_params(name,desc->name,cpy,desc,p->separator,dst ? &opts : NULL);
   free(cpy);
   if(r < 0)
