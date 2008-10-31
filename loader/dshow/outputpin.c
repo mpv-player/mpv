@@ -906,6 +906,7 @@ COutputPin* COutputPinCreate(const AM_MEDIA_TYPE* amt,SAMPLEPROC SampleProc,void
     if (!This->vt || !This->mempin || !ivt)
     {
         COutputPin_Destroy(This);
+        free(ivt);
 	return NULL;
     }
 
