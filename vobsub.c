@@ -852,7 +852,8 @@ vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 	char *line = NULL;
     do {
 	line_size = vobsub_getline(&line, &line_reserve, fd);
-	if (line_size < 0) {
+	if (line_size < 0 || line_size > 1000000 ||
+	    vob->extradata_len+line_size > 10000000) {
 	    break;
 	}
 
