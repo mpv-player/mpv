@@ -595,8 +595,6 @@ packet_queue_insert(packet_queue_t *queue)
  **********************************************************************/
 
 typedef struct {
-    unsigned char *extradata;
-    unsigned int extradata_len;
     unsigned int palette[16];
     int delay;
     unsigned int have_palette;
@@ -844,7 +842,8 @@ vobsub_set_lang(const char *line)
 }
 
 static int
-vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
+vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd,
+                      unsigned char **extradata, unsigned int *extradata_len)
 {
     ssize_t line_size;
     int res = -1;
@@ -853,14 +852,14 @@ vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
     do {
 	line_size = vobsub_getline(&line, &line_reserve, fd);
 	if (line_size < 0 || line_size > 1000000 ||
-	    vob->extradata_len+line_size > 10000000) {
+	    *extradata_len+line_size > 10000000) {
 	    break;
 	}
 
-	vob->extradata = realloc(vob->extradata, vob->extradata_len+line_size+1);
-	memcpy(vob->extradata+vob->extradata_len, line, line_size);
-	vob->extradata_len += line_size;
-	vob->extradata[vob->extradata_len] = 0;
+	*extradata = realloc(*extradata, *extradata_len+line_size+1);
+	memcpy(*extradata+*extradata_len, line, line_size);
+	*extradata_len += line_size;
+	(*extradata)[*extradata_len] = 0;
 
 	if (*line == 0 || *line == '\r' || *line == '\n' || *line == '#')
 	    continue;
@@ -960,6 +959,8 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
 void *
 vobsub_open(const char *const name,const char *const ifo,const int force,void** spu)
 {
+    unsigned char *extradata = NULL;
+    unsigned int extradata_len = 0;
     vobsub_t *vob = calloc(1, sizeof(vobsub_t));
     if(spu)
       *spu = NULL;
@@ -991,14 +992,14 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 		  return NULL;
 		}
 	    } else {
-		while (vobsub_parse_one_line(vob, fd) >= 0)
+	        while (vobsub_parse_one_line(vob, fd, &extradata, &extradata_len) >= 0)
 		    /* NOOP */ ;
 		rar_close(fd);
 	    }
 	    if (spu)
-	      *spu = spudec_new_scaled(vob->palette, vob->orig_frame_width, vob->orig_frame_height, vob->extradata, vob->extradata_len);
-	    if (vob->extradata)
-	      free(vob->extradata);
+	      *spu = spudec_new_scaled(vob->palette, vob->orig_frame_width, vob->orig_frame_height, extradata, extradata_len);
+	    if (extradata)
+	      free(extradata);
 
 	    /* read the indexed mpeg_stream */
 	    strcpy(buf, name);
