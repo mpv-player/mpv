@@ -77,14 +77,14 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 {
 	FcBool rc;
 	FcResult result;
-	FcPattern *pat = 0, *rpat = 0;
+	FcPattern *pat = NULL, *rpat = NULL;
 	int r_index, r_slant, r_weight;
 	FcChar8 *r_family, *r_style, *r_file, *r_fullname;
 	FcBool r_outline, r_embolden;
 	FcCharSet* r_charset;
-	FcFontSet* fset = 0;
+	FcFontSet* fset = NULL;
 	int curf;
-	char* retval = 0;
+	char* retval = NULL;
 	int family_cnt;
 	
 	*index = 0;
@@ -318,7 +318,7 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 	char* fname;
 	const char* fonts_dir = library->fonts_dir;
 	char buf[1000];
-	FILE* fp = 0;
+	FILE* fp = NULL;
 
 	if (!fonts_dir)
 		return;
@@ -464,9 +464,9 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 		}
 	}
 
-	priv->family_default = family ? strdup(family) : 0;
+	priv->family_default = family ? strdup(family) : NULL;
 exit:
-	priv->path_default = path ? strdup(path) : 0;
+	priv->path_default = path ? strdup(path) : NULL;
 	priv->index_default = 0;
 
 	return priv;
