@@ -973,7 +973,7 @@ const stream_info_t stream_info_http1 = {
   "Bertrand, Albeau, Reimar Doeffinger, Arpi?",
   "plain http",
   open_s1,
-  {"http", "http_proxy", "unsv", "icyx", NULL},
+  {"http", "http_proxy", "unsv", "icyx", "noicyx", NULL},
   NULL,
   0 // Urls are an option string
 };
