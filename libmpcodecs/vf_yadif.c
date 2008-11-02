@@ -37,13 +37,7 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
-
-#define MIN(a,b) ((a) > (b) ? (b) : (a))
-#define MAX(a,b) ((a) < (b) ? (b) : (a))
-#define ABS(a) ((a) > 0 ? (a) : (-(a)))
-
-#define MIN3(a,b,c) MIN(MIN(a,b),c)
-#define MAX3(a,b,c) MAX(MAX(a,b),c)
+#include "libavutil/common.h"
 
 //===========================================================================//
 
@@ -297,18 +291,18 @@ static void filter_line_c(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint
         int c= cur[-refs];
         int d= (prev2[0] + next2[0])>>1;
         int e= cur[+refs];
-        int temporal_diff0= ABS(prev2[0] - next2[0]);
-        int temporal_diff1=( ABS(prev[-refs] - c) + ABS(prev[+refs] - e) )>>1;
-        int temporal_diff2=( ABS(next[-refs] - c) + ABS(next[+refs] - e) )>>1;
-        int diff= MAX3(temporal_diff0>>1, temporal_diff1, temporal_diff2);
+        int temporal_diff0= FFABS(prev2[0] - next2[0]);
+        int temporal_diff1=( FFABS(prev[-refs] - c) + FFABS(prev[+refs] - e) )>>1;
+        int temporal_diff2=( FFABS(next[-refs] - c) + FFABS(next[+refs] - e) )>>1;
+        int diff= FFMAX3(temporal_diff0>>1, temporal_diff1, temporal_diff2);
         int spatial_pred= (c+e)>>1;
-        int spatial_score= ABS(cur[-refs-1] - cur[+refs-1]) + ABS(c-e)
-                         + ABS(cur[-refs+1] - cur[+refs+1]) - 1;
+        int spatial_score= FFABS(cur[-refs-1] - cur[+refs-1]) + FFABS(c-e)
+                         + FFABS(cur[-refs+1] - cur[+refs+1]) - 1;
 
 #define CHECK(j)\
-    {   int score= ABS(cur[-refs-1+j] - cur[+refs-1-j])\
-                 + ABS(cur[-refs  +j] - cur[+refs  -j])\
-                 + ABS(cur[-refs+1+j] - cur[+refs+1-j]);\
+    {   int score= FFABS(cur[-refs-1+j] - cur[+refs-1-j])\
+                 + FFABS(cur[-refs  +j] - cur[+refs  -j])\
+                 + FFABS(cur[-refs+1+j] - cur[+refs+1-j]);\
         if(score < spatial_score){\
             spatial_score= score;\
             spatial_pred= (cur[-refs  +j] + cur[+refs  -j])>>1;\
@@ -322,14 +316,14 @@ static void filter_line_c(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint
 #if 0
             int a= cur[-3*refs];
             int g= cur[+3*refs];
-            int max= MAX3(d-e, d-c, MIN3(MAX(b-c,f-e),MAX(b-c,b-a),MAX(f-g,f-e)) );
-            int min= MIN3(d-e, d-c, MAX3(MIN(b-c,f-e),MIN(b-c,b-a),MIN(f-g,f-e)) );
+            int max= FFMAX3(d-e, d-c, FFMIN3(FFMAX(b-c,f-e),FFMAX(b-c,b-a),FFMAX(f-g,f-e)) );
+            int min= FFMIN3(d-e, d-c, FFMAX3(FFMIN(b-c,f-e),FFMIN(b-c,b-a),FFMIN(f-g,f-e)) );
 #else
-            int max= MAX3(d-e, d-c, MIN(b-c, f-e));
-            int min= MIN3(d-e, d-c, MAX(b-c, f-e));
+            int max= FFMAX3(d-e, d-c, FFMIN(b-c, f-e));
+            int min= FFMIN3(d-e, d-c, FFMAX(b-c, f-e));
 #endif
 
-            diff= MAX3(diff, min, -max);
+            diff= FFMAX3(diff, min, -max);
         }
 
         if(spatial_pred > d + diff)
