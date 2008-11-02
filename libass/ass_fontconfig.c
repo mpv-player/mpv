@@ -407,10 +407,7 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	if (!fc) {
 		mp_msg(MSGT_ASS, MSGL_WARN,
 		       MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed);
-		priv->config = NULL;
-		priv->path_default = strdup(path);
-		priv->index_default = 0;
-		return priv;
+		goto exit;
 	}
 
 	rc = FcInit();
@@ -419,7 +416,7 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	priv->config = FcConfigGetCurrent();
 	if (!priv->config) {
 		mp_msg(MSGT_ASS, MSGL_FATAL, MSGTR_LIBASS_FcInitLoadConfigAndFontsFailed);
-		return 0;
+		goto exit;
 	}
 
 	for (i = 0; i < library->num_fontdata; ++i)
@@ -468,6 +465,7 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	}
 
 	priv->family_default = family ? strdup(family) : 0;
+exit:
 	priv->path_default = path ? strdup(path) : 0;
 	priv->index_default = 0;
 
