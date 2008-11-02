@@ -4179,11 +4179,11 @@ echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect linker flags
 if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
   cat > $TMPC << EOF
-#include <GL/gl.h>
 #ifdef GL_WIN32
 #include <windows.h>
-#include <GL/glext.h>
+#include <GL/gl.h>
 #else
+#include <GL/gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #endif

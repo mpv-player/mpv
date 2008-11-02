@@ -7,14 +7,14 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#include <GL/gl.h>
 #include "video_out.h"
 
 #ifdef GL_WIN32
 #include <windows.h>
-#include <GL/glext.h>
+#include <GL/gl.h>
 #include "w32_common.h"
 #else
+#include <GL/gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #include "x11_common.h"
@@ -39,6 +39,15 @@
  * (e.g. _NV), _ARB is not used to ease readability.
  * \{
  */
+#ifndef GL_TEXTURE_3D
+#define GL_TEXTURE_3D 0x806F
+#endif
+#ifndef GL_TEXTURE_WRAP_R
+#define GL_TEXTURE_WRAP_R 0x8072
+#endif
+#ifndef GL_CLAMP_TO_EDGE
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
 #ifndef GL_REGISTER_COMBINERS_NV
 #define GL_REGISTER_COMBINERS_NV 0x8522
 #endif
@@ -171,11 +180,29 @@
 #ifndef GL_UNSIGNED_BYTE_2_3_3_REV
 #define GL_UNSIGNED_BYTE_2_3_3_REV 0x8362
 #endif
+#ifndef GL_UNSIGNED_SHORT_4_4_4_4
+#define GL_UNSIGNED_SHORT_4_4_4_4 0x8033
+#endif
+#ifndef GL_UNSIGNED_SHORT_4_4_4_4_REV
+#define GL_UNSIGNED_SHORT_4_4_4_4_REV 0x8365
+#endif
 #ifndef GL_UNSIGNED_SHORT_5_6_5
 #define GL_UNSIGNED_SHORT_5_6_5 0x8363
 #endif
+#ifndef GL_UNSIGNED_INT_8_8_8_8
+#define GL_UNSIGNED_INT_8_8_8_8 0x8035
+#endif
+#ifndef GL_UNSIGNED_INT_8_8_8_8_REV
+#define GL_UNSIGNED_INT_8_8_8_8_REV 0x8367
+#endif
 #ifndef GL_UNSIGNED_SHORT_5_6_5_REV
 #define GL_UNSIGNED_SHORT_5_6_5_REV 0x8364
+#endif
+#ifndef GL_UNSIGNED_INT_10_10_10_2
+#define GL_UNSIGNED_INT_10_10_10_2 0x8036
+#endif
+#ifndef GL_UNSIGNED_INT_2_10_10_10_REV
+#define GL_UNSIGNED_INT_2_10_10_10_REV 0x8368
 #endif
 #ifndef GL_UNSIGNED_SHORT_5_5_5_1
 #define GL_UNSIGNED_SHORT_5_5_5_1 0x8034
