@@ -1870,12 +1870,6 @@ EOF
       esac
     fi
 
-    if test $_cmov = "yes" && test $_fast_cmov = "auto" ; then
-        _fast_cmov="yes"
-    else
-        _fast_cmov="no"
-    fi
-
     echores "$proc"
     ;;
 
@@ -2222,6 +2216,12 @@ EOF
     die "unsupported architecture $host_arch"
     ;;
 esac # case "$host_arch" in
+
+if test $_cmov = "yes" && test $_fast_cmov = "auto" ; then
+    _fast_cmov="yes"
+else
+    _fast_cmov="no"
+fi
 
 if test "$_runtime_cpudetection" = yes ; then
   if x86 ; then
