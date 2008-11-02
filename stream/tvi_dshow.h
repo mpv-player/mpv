@@ -5,6 +5,7 @@
 
 #define INITGUID
 #include <inttypes.h>
+#include <windows.h>
 //#include <ole2.h>
 #include <vfw.h>
 #include "loader/dshow/mediatype.h"
