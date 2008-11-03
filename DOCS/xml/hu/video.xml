@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27044 -->
+<!-- synced with r27770 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1558,18 +1558,13 @@ nélküli használata, és így az automatikus detektálás engedélyezése.
 Mivel a VIDIX-nek direkt hardver elérés kell, futtathatod root-ként vagy
 beállíthatod a SUID bit-et az <application>MPlayer</application> binárisán
 (<emphasis role="bold">Figyelem: Ez biztonsági kockázatot jelent!</emphasis>).
-Alternatívaként, ha 2.4.x-es Linux kernelt futtatsz, használhatsz egy
-speciális kernel modult, így:
+Alternatívaként használhatsz egy speciális kernel modult, így:
 </para>
 
 <procedure>
 <step><para>
-  Töltsd le az svgalib (pl. 1.9.17-es)
-  <ulink url="http://www.arava.co.il/matan/svgalib/">fejlesztői verzióját</ulink>,
-  <emphasis role="bold">VAGY</emphasis> az Alex által speciálisan az
-  <application>MPlayer</application>rel történő használatra készítettet
-  (a lefordításához nem kell az svgalib forrás)
-  <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">innen</ulink>.
+  Töltsd le az svgalib (pl. 1.9.x-es)
+  <ulink url="http://www.arava.co.il/matan/svgalib/">fejlesztői verzióját</ulink>.
 </para></step>
 <step><para>
   Fordítsd le a modult az
@@ -1586,9 +1581,9 @@ speciális kernel modult, így:
 <step><para>
   Ezután futtasd le a <filename>configure</filename>-t újra és add meg neki a
   <option>--enable-svgalib_helper</option> és a
-  <option>--with-extraincdir=/eleresi/ut/svgalib_helper/forrasahoz</option>
-  paramétereket, az svgalib_helper kicsomagolt forrását tartalmazó könyvtárnak
-  megfelelően.
+  <option>--with-extraincdir=<replaceable>/eleresi/ut/svgalib_helper/forrasahoz/</replaceable>kernel/svgalib_helper</option>
+  paramétereket, ahol a <replaceable>/eleresi/ut/svgalib_helper/forrasahoz/</replaceable> könyvtárat
+  az svgalib_helper kicsomagolt forrását tartalmazó könyvtárnak megfelelően kell beállítani.
 </para></step>
 <step><para>
   Forgass újra.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27211 -->
+<!-- synced with r27843 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -111,7 +111,7 @@ alkotó codec-ekkel, audiót tekintve pedig PCM/MP3/VBR MP3 a választék.
   összes formátumból lehet kódolni
 </para></listitem>
 <listitem><para>
-  Az FFmpeg <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+  Az FFmpeg <systemitem class="library">libavcodec</systemitem>
   által támogatott összes formátumba tud tömöríteni
 </para></listitem>
 <listitem><para>
@@ -173,7 +173,6 @@ a GNU General Public License v2 értelmében terjeszthető.
 &cd-dvd.xml;
 &faq.xml;
 
-&containers.xml;
 &codecs.xml;
 &video.xml;
 &audio.xml;

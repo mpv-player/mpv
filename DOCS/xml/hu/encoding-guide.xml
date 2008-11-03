@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26990 -->
+<!-- synced with r27843 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2405,7 +2405,7 @@ Az időtartam/hely alapján kell döntened.
   codec családdal</title>
 
 <para>
-A <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+A <systemitem class="library">libavcodec</systemitem>
 számos érdekes videó és audió formátumba történő egyszerű kódolást biztosít.
 A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
 </para>
@@ -3041,7 +3041,7 @@ Kérlek vedd figyelembe, hogy a forrásanyagodtól, a géped típusától
 <title>Egyedi inter/intra matricák</title>
 
 <para>
-A <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+A <systemitem class="library">libavcodec</systemitem>
 ezen képességével egyedi inter (I-frame/kulcs frame) és intra
 (P-frame/jósolt frame) matricákat állíthatsz be. Több codec támogatja ezt:
 az <systemitem>mpeg1video</systemitem> és <systemitem>mpeg2video</systemitem>
@@ -3779,7 +3779,7 @@ Kérlek vedd figyelembe, hogy a forrásanyagodtól, a géped típusától
 <para>
 Az <systemitem class="library">x264</systemitem> egy szabad függvénykönyvtár
 a H.264/AVC videó folyamok kódolásához.
-Mielőtt elkezdenél kódolni, <link linkend="codec-x264-encode">be kell
+Mielőtt elkezdenél kódolni, <link linkend="codec-x264">be kell
 állítanod a <application>MEncoder</application>ben a támogatását</link>.
 </para>
 

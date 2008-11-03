@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27663 -->
+<!-- synced with r27867 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -42,8 +42,7 @@ a dokumentációt és megtalálod a válaszokat.
   működik nélküle is.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - a javasolt verzió
-  3.79.x vagy régebbi. Az XML dokumentáció elkészítéséhez 3.80-as kell.
+  <emphasis role="bold">GNU make</emphasis> 3.81
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> 2.0.9 vagy későbbi szükséges,
@@ -70,8 +69,7 @@ a dokumentációt és megtalálod a válaszokat.
   történő kódolásához.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">zlib</emphasis> - javasolt, szükséges a tömörített
-  MOV fejlécekhez és a PNG támogatáshoz
+  <emphasis role="bold">zlib</emphasis> - javasolt, sok codec használja.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
@@ -86,6 +84,10 @@ a dokumentációt és megtalálod a válaszokat.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - választható, smb hálózat támogatásához kell.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold"><ulink url="http://www.underbit.com/products/mad/">libmad</ulink></emphasis>
+  - választható, gyors csak egészszámos MP3 dekódolás FPU nélküli platformokon
 </para></listitem>
 </itemizedlist>
 </sect1>
@@ -341,6 +343,157 @@ a Tulajdonságok menü még NINCS KIFEJLESZTVE!
 </para></listitem>
 </orderedlist>
 </sect2>
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
+<sect1 id="codec-installation">
+<title>Codec telepítés</title>
+
+<!-- ********** -->
+
+<sect2 id="xvid">
+<title>Xvid</title>
+
+<para>
+Az <ulink url="http://www.xvid.org">Xvid</ulink> egy szabad szoftveres MPEG-4
+ASP kompatibilis videó codec. Jegyezd meg, hogy az Xvid nem szükséges az Xvid-es
+videók dekódolásához. A <systemitem class="library">libavcodec</systemitem> az
+alapértelmezett, mivel jobb a sebessége.
+</para>
+
+<procedure>
+<title>Az <systemitem class="library">Xvid</systemitem> telepítése</title>
+<para>
+  Mint a legtöbb nyílt forráskódú program, ez is két formában érhető el:
+  <ulink url="http://www.xvid.org/downloads.html">hivatalos kiadás</ulink>
+  és a CVS verzió.
+  A CVS verzió általában elég stabil a használathoz, mivel legtöbbször csak
+  a kiadásokban benne lévő hibák javításait tartalmazza.
+  Itt van lépésről lépésre, hogy mit kell tenned, ha az <systemitem class="library">Xvid</systemitem>
+  CVS-t használni akarod a <application>MEncoder</application>rel:
+</para>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
+</para></step>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
+</para></step>
+<step><para>
+  <screen>cd xvidcore/build/generic</screen>
+</para></step>
+<step><para>
+  <screen>./bootstrap.sh &amp;&amp; ./configure</screen>
+  Meg kell adnod pár kapcsolót (tanulmányozd a
+  <command>./configure --help</command> kimenetét).
+</para></step>
+<step><para>
+  <screen>make &amp;&amp; make install</screen>
+</para></step>
+<step><para>
+  Fordítsd újra az <application>MPlayer</application>t.
+</para></step>
+</procedure>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="codec-x264">
+<title><systemitem class="library">x264</systemitem></title>
+
+<para>
+Az <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+egy függvénykönyvtár a H.264 videó létrehozásához.
+Az <application>MPlayer</application> forrás mindig frissül, ha
+egy <systemitem class="library">x264</systemitem> API változás
+jelenik meg, így javasolt az <application>MPlayer</application>
+Subversion verziójának használata.
+</para>
+
+<para>
+Ha van feltelepítve GIT kliensed, a legújabb x264
+forrást letöltheted ezzel a paranccsal:
+<screen>git clone git://git.videolan.org/x264.git</screen>
+
+Majd fordíts és telepíts a szabványos módon:
+<screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
+
+Ezután futtasd újra a <filename>./configure</filename>-t, hogy
+az <application>MPlayer</application>be belekerüljön az
+<systemitem class="library">x264</systemitem> támogatás.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="aac">
+<title>AAC</title>
+
+<para>
+Egy FAAD2-nek hívott nyílt forráskódú AAC dekódoló elérhető itt:
+<ulink url="http://www.audiocoding.com/downloads.html"/>.
+Az <application>MPlayer</application> tartalmaz egy másolatot a forrásfájában.
+Ha inkább a külső függvénykönyvtárat használnád, telepítsd és add meg a
+<option>--enable-faad-external</option> kapcsolót a <filename>./configure</filename>-nak.
+</para>
+
+<para>
+FAAD2 binárisok nem tölthetőek le az audiocoding.com-ról, de (apt-)get-tel
+telepítheted <ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink> Debian csomagjait,
+vagy Mandrake/Mandriva RPM-et a <ulink url="http://plf.zarb.org">P.L.F</ulink>-ről,
+Fedora RPM-et pedig a <ulink url="http://rpm.livna.org/">Livna</ulink>-ról.
+</para>
+<para>
+Ha úgy döntesz, hogy forrásból fordítasz, nem kell a teljes FAAD2 az AAC fájlok
+dekódolásához, elég a libfaad. Így készítsd el:
+<screen>
+cd faad2/
+sh bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="amr">
+<title>AMR</title>
+
+<para>
+Az Adaptive Multi-Rate beszéd codec-et harmadik generációs (3G) mobiltelefonokban
+használják.
+A referencia implementáció elérhető
+<ulink url="http://www.3gpp.org">A 3. Generációs Együttműködés Projekt</ulink>
+oldalán (személyes felhasználásra ingyenes).
+A támogatás bekapcsolásához töltsd le és telepítsd a függvénykönyvtárakat az
+<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB és AMR-WB</ulink>-hez
+az oldal utasításait követve. Utána forgasd újra az MPlayert!
+</para>
+</sect2>
+
+<sect2 id="xmms">
+<title>XMMS</title>
+
+<para>
+Az <application>MPlayer</application> tudja használni az <application>XMMS</application>
+bemeneti plugin-jait több fájlformátum lejátszásához. Van plugin SNES játék hangokhoz, SID
+hangokhoz (Commodore 64-ről), több Amiga formátumhoz, .xm, .it, VQF, Musepack, Bonk
+és még számos máshoz. Megtalálhatod őket az
+<ulink url="http://www.xmms.org/plugins.php?category=input">XMMS bemenetu plugin oldalán</ulink>.
+</para>
+
+<para>
+Ehhez a tulajdonsághoz rendelkezden kell az <application>XMMS</application>-sel, az
+<application>MPlayer</application>t pedig ezzel kell fordítanod:
+<filename>./configure --enable-xmms</filename>.
+</para>
+</sect2>
+
 </sect1>
 
 
