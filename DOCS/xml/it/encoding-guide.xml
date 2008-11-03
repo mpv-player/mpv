@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 41% synced with r22753 (row 2212) -->
+<!-- 44% synced with r22753 (row 2361) -->
 <chapter id="encoding-guide">
 <title>La codifica con <application>MEncoder</application></title>
 
@@ -2023,10 +2023,10 @@ interlacciato.
 
 
 <sect3 id="menc-feat-telecine-ident-mixedpt">
-<title>Progressivo e telecine miscelati</title>
+<title>Progressivo e telecine mescolati</title>
 
 <para>
-Tutto il contenuto di un video "progressivo e telecine miscelato" è stato
+Tutto il contenuto di un video "progressivo e telecine mescolati" è stato
 in origine filmato a 24000/1001 fotogrammi al secondo, ma alcune parti alla
 fine hanno subito il telecine.
 </para>
@@ -2046,15 +2046,15 @@ davvero in telecine e non solamente interlacciate.
 
 
 <sect3 id="menc-feat-telecine-ident-mixedpi">
-<title>Progressivo e interlacciato miscelati</title>
+<title>Progressivo e interlacciato mescolati</title>
 
 <para>
-Nei contenuti con video "progressivo e interlacciato miscelati", il video
+Nei contenuti con video "progressivo e interlacciato mescolati", il video
 progressivo e interlacciato sono mescolati tra loro.
 </para>
 
 <para>
-Questa categoria è decisamente simile a "progressivo e telecine miscelato",
+Questa categoria è decisamente simile a "progressivo e telecine mescolati",
 fino a quando non controlli le parti a 30000/1001 fps e scopri che non hanno
 il pattern del telecine.
 </para>
@@ -2088,9 +2088,9 @@ Se non lo usi, <application>MEncoder</application> cercherà di codificare a
 
 <para>
 Spesso e volentieri capita che un video che sembra progressivo contenga anche
-alcune brevi parti di telecine miscelate. A meno che tu non sia sicuro,
+alcune brevi parti di telecine mescolate. A meno che tu non sia sicuro,
 conviene trattare il video come 
-<link linkend="menc-feat-telecine-encode-mixedpt">progressivo e telecine miscelati</link>.
+<link linkend="menc-feat-telecine-encode-mixedpt">progressivo e telecine mescolati</link>.
 Il calo di prestazioni è piccolo
 <link linkend="menc-feat-telecine-footnotes">[3]</link>.
 </para>
@@ -2106,7 +2106,7 @@ Il telecine può essere invertito per ricavare il contenuto originario a
 <application>MPlayer</application> include vari filtri per ottenere ciò;
 il filtro migliore, <option>pullup</option>, è descritto nella sezione
 <link linkend="menc-feat-telecine-encode-mixedpt">progressivo e telecine
-miscelati</link>.
+mescolati</link>.
 </para>
 </sect3>
 
@@ -2193,10 +2193,10 @@ mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc \
 
 
 <sect3 id="menc-feat-telecine-encode-mixedpt">
-<title>Progressivo e telecine miscelati</title>
+<title>Progressivo e telecine mescolati</title>
 
 <para>
-Per poter portare un video progressivo e telecine miscelati in un video
+Per poter portare un video progressivo e telecine mescolati in un video
 completamente progressivo, le parti in telecine devono essere passate in
 telecine inverso. Ci son tre modi per ottenere ciò, e sono descritti qui sotto.
 Nota che dovresti <emphasis role="bold">sempre</emphasis> effettuare il
@@ -2209,43 +2209,40 @@ uscita sarà a 24000/1001 fotogrammi al secondo.
 
 <itemizedlist>
 <listitem><para>
-  <option>-vf pullup</option> is designed to inverse-telecine
-  telecined material while leaving progressive data alone. In order to
-  work properly, <option>pullup</option> <emphasis role="bold">must</emphasis>
-  be followed by the <option>softskip</option> filter or
-  else <application>MEncoder</application> will crash.
-  <option>pullup</option> is, however, the cleanest and most
-  accurate method available for encoding both telecine and
-  "mixed progressive and telecine".
+  <option>-vf pullup</option> è studiata per togliere il telecine da materiale
+  in telecine lasciando stare le parti in progressivo. Per poter funzionare
+  correttamente, <option>pullup</option> <emphasis role="bold">deve</emphasis>
+  essere seguita dal filtro <option>softskip</option> altrimenti
+  <application>MEncoder</application> andrà in crash.
+  <option>pullup</option> è tuttavia il modo migliore e più preciso disponibile
+  per codificare sia telecine che "progressivo e telecine mescolati".
   <screen>
 mencoder dvd://1 -oac copy -vf pullup,softskip 
     -ovc lavc -ofps 24000/1001<!--
   --></screen>
 </para></listitem>
 <listitem><para>
-  An older method
-  is to, rather than inverse-telecine the telecined parts, telecine
-  the non-telecined parts and then inverse-telecine the whole
-  video. Sound confusing? softpulldown is a filter that goes through
-  a video and makes the entire file telecined. If we follow
-  softpulldown with either <option>detc</option> or
-  <option>ivtc</option>, the final result will be entirely
-  progressive. <option>-ofps 24000/1001</option> is needed.
+  Un metodo più vecchio, invece di togliere il telecine dove c'è, è portare
+  in telecine le parti che non lo sono e dopo invertire il telecine su tutto il
+  video. Sembra incasinato? softpulldown è un filtro che prende tutto il video
+  e lo porta in telecine. Se facciamo seguire a softpulldown
+  <option>detc</option> oppure <option>ivtc</option>, il risultato finale sarà
+  completamente progressivo. Serve <option>-ofps 24000/1001</option>.
   <screen>
 mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
   </screen>
 </para></listitem>
 
 <listitem><para>
-  I have not used <option>-vf filmdint</option> myself, but here is what
-  D Richard Felker III has to say:
+  Non ho usato <option>-vf filmdint</option>, ma questa è l'opinione che ne ha
+  D Richard Felker III:
 
-  <blockquote><para>It is OK, but IMO it tries to deinterlace rather
-     than doing inverse telecine too often (much like settop DVD
-     players &amp; progressive TVs) which gives ugly flickering and
-     other artifacts. If you are going to use it, you at least need to
-     spend some time tuning the options and watching the output first
-     to make sure it is not messing up.
+  <blockquote><para>E' OK, ma IMO cerca troppo spesso di deinterlacciare
+    piuttosto che invertire il telecine (come molti lettori DVD da tavolo &amp;
+    televisioni progressive), il che porta orrendi sfarfallii e altri
+    artefatti. Se vuoi utilizzarlo devi perlomeno spendere un po' di tempo ad
+    impostare le opzioni e controllare i risultati prima di esser certo che non
+    faccia danni.
   </para></blockquote>
 </para></listitem>
 </itemizedlist>
@@ -2253,59 +2250,57 @@ mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
 
 
 <sect3 id="menc-feat-telecine-encode-mixedpi">
-<title>Mixed progressive and interlaced</title>
+<title>Progressivo e interlacciato mescolati</title>
 
 <para>
-There are two options for dealing with this category, each of
-which is a compromise. You should decide based on the
-duration/location of each type.
+Ci sono due opzioni per gestire questa categoria, ognuna delle quali è un
+compromesso. Dovresti decidere basandoti sulla lunghezza/durata di uno dei due
+tipi.
 </para>
 
 <itemizedlist>
 <listitem>
   <para>
-  Treat it as progressive. The interlaced parts will look interlaced,
-  and some of the interlaced fields will have to be dropped, resulting
-  in a bit of uneven jumpiness. You can use a postprocessing filter if
-  you want to, but it may slightly degrade the progressive parts.
+  Trattarlo come progressivo. Le parti interlacciate sembreranno interlacciate,
+  e alcuni dei campi interlacciati dovranno essere scartati, apportando un
+  pelino di saltellamenti impari. Se vuoi puoi utilizzare un filtro di
+  postelaborazione, ma potrebbe leggermente inficiare le parti progressive.
   </para>
 
   <para>
-  This option should definitely not be used if you want to eventually
-  display the video on an interlaced device (with a TV card, for
-  example). If you have interlaced frames in a 24000/1001 frames per
-  second video, they will be telecined along with the progressive
-  frames. Half of the interlaced "frames" will be displayed for three
-  fields' duration (3/(60000/1001) seconds), resulting in a flicking
-  "jump back in time" effect that looks quite bad. If you
-  even attempt this, you <emphasis role="bold">must</emphasis> use a
-  deinterlacing filter like <option>lb</option> or
-  <option>l5</option>.
+  Questa opzione non sarebbe decisamente da usare se casomai ti interessi
+  riprodurre il video su un dispositivo interlacciato (con una sche da TV, per
+  esempio). Se hai fotogrammi interlacciati in un video a 24000/1001 fotogrammi
+  al secondo, verranno messi in telecine con i fotogrammi progressivi.
+  Metà dei "fotogrammi" interlacciati saranno mostrati per la durata di tre
+  campi (3/(60000/1001) secondi), risultando in un effetto alla "salto indietro
+  nel tempo" che è bruttino. Se solo provi a far in questo modo,
+  <emphasis role="bold">devi</emphasis> usare in filtro di deinterlacciamento
+  come <option>lb</option> o <option>l5</option>.
   </para>
 
   <para>
-  It may also be a bad idea for progressive display, too. It will drop
-  pairs of consecutive interlaced fields, resulting in a discontinuity
-  that can be more visible than with the second method, which shows
-  some progressive frames twice. 30000/1001 frames per second interlaced
-  video is already a bit choppy because it really should be shown at
-  60000/1001 fields per second, so the duplicate frames do not stand out as
-  much.
+  Può anche essere una brutta idea per un display progressivo. Scarterà coppie
+  di campi interlacciati consecutivi, dando una discontinuità che si vede
+  maggiormente con il secondo metodo, che mostra per due volte alcuni
+  fotogrammi progressivi. Il video interlacciato a 30000/1001 fotogrammi per
+  secondo è di suo un pochino zoppo dato che sarebbe da mostrare a 60000/1001
+  campi al secondo, quindi i fotogrammi duplicati non si notano così tanto.
   </para>
 
   <para>
-  Either way, it is best to consider your content and how you intend to
-  display it. If your video is 90% progressive and you never intend to
-  show it on a TV, you should favor a progressive approach. If it is
-  only half progressive, you probably want to encode it as if it is all
-  interlaced.
+  In ogni modo è meglio tenere in considerazione il tuo contenuto e come
+  intendi riprodurlo. Se il tuo video è al 90% progressivo e non pensi di
+  riprodurlo mai su una TV, dovresti propendere per l'approccio progressivo.
+  Se è progressivo solo per metà, probabilmente ti converrà codificarlo come
+  se fosse interlacciato.
   </para>
 </listitem>
 
 <listitem><para>
-  Treat it as interlaced. Some frames of the progressive parts will
-  need to be duplicated, resulting in uneven jumpiness. Again,
-  deinterlacing filters may slightly degrade the progressive parts.
+  Trattarlo come interlacciato. Alcuni fotogrammi delle parti progressive
+  verranno duplicati, portando saltelli impari. Ancora, i filtri di
+  deinterlacciamento potrebbero inficiare le parti progressive.
 </para></listitem>
 </itemizedlist>
 </sect3>
@@ -2314,53 +2309,53 @@ duration/location of each type.
 <!-- ********** -->
 
 <sect2 id="menc-feat-telecine-footnotes">
-<title>Footnotes</title>
+<title>Note a pie' pagina</title>
 
 <orderedlist>
 <listitem>
   <formalpara>
-  <title>About cropping:</title>
+  <title>Riguardo il taglio (crop):</title>
   <para>
-  Video data on DVDs are stored in a format called YUV 4:2:0. In YUV
-  video, luma ("brightness") and chroma ("color")
-  are stored separately. Because the human eye is somewhat less
-  sensitive to color than it is to brightness, in a YUV 4:2:0 picture
-  there is only one chroma pixel for every four luma pixels. In a
-  progressive picture, each square of four luma pixels (two on each
-  side) has one common chroma pixel. You must crop progressive YUV
-  4:2:0 to even resolutions, and use even offsets. For example,
-  <option>crop=716:380:2:26</option> is OK but
-  <option>crop=716:380:3:26 </option> is not.
+  I dati video sui DVD sono memorizzati in un formato conosciuto come YUV 4:2:0.
+  In un video YUV, la luminosità ("luma") e il colore ("chroma") vengono
+  salvati separatamente. Dato che l'occhio umano è in qualche modo meno
+  sensibile al colore che alla luminosità, in un'immagine YUV 4:2:0 c'è solo
+  un pixel chroma ogni quattro pixel luma. In un'immagine progressiva, ogni
+  quadrato di quattro pixel luma (due per lato) ha in comune un pixel chroma.
+  Devi prima ridimensionare lo YUV 4:2:0 progressivo a una risoluzione pari, e
+  anche utilizzare lo scostamento. Per esempio,
+  <option>crop=716:380:2:26</option> è OK ma
+  <option>crop=716:380:3:26 </option> non lo è.
   </para>
   </formalpara>
 
   <para>
-  When you are dealing with interlaced YUV 4:2:0, the situation is a
-  bit more complicated. Instead of every four luma pixels in the
-  <emphasis>frame</emphasis> sharing a chroma pixel, every four luma
-  pixels in each <emphasis> field</emphasis> share a chroma
-  pixel. When fields are interlaced to form a frame, each scanline is
-  one pixel high. Now, instead of all four luma pixels being in a
-  square, there are two pixels side-by-side, and the other two pixels
-  are side-by-side two scanlines down. The two luma pixels in the
-  intermediate scanline are from the other field, and so share a
-  different chroma pixel with two luma pixels two scanlines away. All
-  this confusion makes it necessary to have vertical crop dimensions
-  and offsets be multiples of four. Horizontal can stay even.
+  Quando gestisci YUV 4:2:0 interlacciato, la situazione è un pelo più
+  complessa. Invece di avere quattro pixel luma nel
+  <emphasis>fotogramma</emphasis> che condividono un pixel chroma, quattro
+  pixel in ogni <emphasis>campo</emphasis> condividono un pixel chroma.
+  Quando i campi vengono interlacciati per formare un fotogramma, ogni
+  "scanline" è alta un pixel. Ora, invece di avere tutti i quattro pixel luma
+  in un quadrato, ci sono due pixel affiancati, e gli altri due pixel sono
+  affiancati due scanline più sotto. I due pixel luma nella scanline di mezzo
+  sono di un altro campo, e quindi condividono un pixel chroma differente con
+  due pixel due scanline dopo. Tutta questa confusione rende necessario avere
+  dimensione verticale pari e lo scostamento deve essere un multiplo di quattro.
+  La dimensione orizzontale può rimanere dispari.
   </para>
 
   <para>
-  For telecined video, I recommend that cropping take place after
-  inverse telecining. Once the video is progressive you only need to
-  crop by even numbers. If you really want to gain the slight speedup
-  that cropping first may offer, you must crop vertically by multiples
-  of four or else the inverse-telecine filter will not have proper data.
+  Per video in telecine, si consiglia di effettuare il taglio dopo l'inversione
+  del telecine. Una volta che il video è progressivo ti serve solo tagliare di
+  numeri dispari. Se davvero vuoi ottenere il piccolo aumento di velocità che
+  puoi avere tagliando prima, devi prima tagliare in verticale di multipli di
+  quattro, altrimenti il filtro di telecine inverso non riceverà dati corretti.
   </para>
 
   <para>
-  For interlaced (not telecined) video, you must always crop
-  vertically by multiples of four unless you use <option>-vf
-  field</option> before cropping.
+  Per video interlacciato (non in telecine), devi sempre tagliare
+  verticalmente di multipli di quattro a meno che tu non stia usando
+  <option>-vf field</option> prima del taglio.
   </para>
 </listitem>
 
