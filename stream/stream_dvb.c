@@ -611,7 +611,7 @@ static void dvbin_close(stream_t *stream)
 	close(priv->dvr_fd);
 
 	close(priv->fe_fd);
-#ifdef CONFIG_DVB
+#ifndef CONFIG_DVB_HEAD
 	close(priv->sec_fd);
 #endif
 
