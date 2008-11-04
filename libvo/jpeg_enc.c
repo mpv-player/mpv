@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "config.h"
 #include "mp_msg.h"
 /* We need this #define because we need ../libavcodec/common.h to #define 
