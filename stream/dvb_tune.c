@@ -118,7 +118,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 		return 0;
 	}
 #ifdef CONFIG_DVB_HEAD
-	priv->sec_fd=0;
+	priv->sec_fd=-1;
 #else
 	priv->sec_fd = open(sec_dev, O_RDWR);
 	if(priv->sec_fd < 0)
