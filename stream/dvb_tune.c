@@ -117,9 +117,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", frontend_dev, errno);
 		return 0;
 	}
-#ifdef CONFIG_DVB_HEAD
-	priv->sec_fd=-1;
-#else
+#ifndef CONFIG_DVB_HEAD
 	priv->sec_fd = open(sec_dev, O_RDWR);
 	if(priv->sec_fd < 0)
 	{
