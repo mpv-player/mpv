@@ -8,13 +8,6 @@
 
 <itemizedlist>
 <listitem>
-  <para>SIGILL (signal 4) on P3 using 2.2.x kernels:</para>
-  <para>Problem: kernel 2.2.x doesn't have proper (working) SSE support</para>
-  <para>Solution: upgrade kernel to 2.4.x</para>
-  <para>Workaround: <command>./configure --disable-sse</command></para>
-</listitem>
-
-<listitem>
   <para>General SIGILL (signal 4):</para>
   <para>
   Problem: you compiled and run <application>MPlayer</application> on
@@ -139,78 +132,6 @@
 </itemizedlist>
 </sect2>
 
-<!-- ********** -->
-
-<sect2 id="bugs-nosound">
-<title>No sound at all</title>
-
-<itemizedlist>
-<listitem>
-  <para>your file uses an unsupported audio codec</para>
-  <para>
-  Solution: read the documentation and help us adding support for it
-  </para>
-</listitem>
-</itemizedlist>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="bugs-nopicture">
-<title>No picture at all (just plain grey/green window)</title>
-
-<itemizedlist>
-<listitem>
-  <para>your file uses an unsupported video codec</para>
-  <para>
-  Solution: read the documentation and help us adding support for it
-  </para>
-</listitem>
-
-<listitem>
-  <para>
-  auto-selected codec can't decode the file, try to select another using
-  <option>-vc</option> or <option>-vfm</option> options
-  </para>
-</listitem>
-</itemizedlist>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="bugs-video">
-<title>Video-out problems</title>
-
-<para>
-First note that the options <option>-fs</option>, <option>-vm</option> and
-<option>-zoom</option> are not supported by all drivers. Plus, not all
-drivers support scaling/zooming in hardware.
-</para>
-
-<formalpara>
-<title>OSD/sub flickering</title>
-<para>
-<itemizedlist>
-  <listitem><para>x11 driver: sorry, it can't be fixed now</para></listitem>
-  <listitem><para>xv driver: use <option>-double</option> option</para></listitem>
-</itemizedlist>
-</para>
-</formalpara>
-
-<formalpara>
-<title>Green image using mga_vid
-  (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
-<para>
-<itemizedlist>
-<listitem><para>
-  mga_vid misdetected your card's RAM amount, reload it using
-  <option>mga_ram_size</option> option.
-</para></listitem>
-</itemizedlist>
-</para>
-</formalpara>
-
-</sect2>
 </sect1>
 
 </appendix>

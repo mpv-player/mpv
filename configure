@@ -4179,11 +4179,11 @@ echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect linker flags
 if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
   cat > $TMPC << EOF
-#include <GL/gl.h>
 #ifdef GL_WIN32
 #include <windows.h>
-#include <GL/glext.h>
+#include <GL/gl.h>
 #else
+#include <GL/gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #endif
@@ -5785,7 +5785,7 @@ if test "$_zlib" = yes ; then
   _ld_extra="$_ld_extra -lz"
 else
   _def_zlib='#undef CONFIG_ZLIB'
-  _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// `
+  _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// -e/TSCC_DECODER// `
   _libavencoders=`echo $_libavencoders | sed -e s/FLASHSV_ENCODER// -e s/PNG_ENCODER// -e s/ZMBV_ENCODER// `
 fi
 echores "$_zlib"

@@ -611,9 +611,10 @@ static void dvbin_close(stream_t *stream)
 	close(priv->dvr_fd);
 
 	close(priv->fe_fd);
-#ifdef CONFIG_DVB
+#ifndef CONFIG_DVB_HEAD
 	close(priv->sec_fd);
 #endif
+	priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
 
 	priv->is_on = 0;
 	dvb_free_config(priv->config);
@@ -685,6 +686,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 		return STREAM_ERROR;
 
 	priv = (dvb_priv_t *)stream->priv;
+	priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
 	priv->config = dvb_get_config();
 	if(priv->config == NULL)
 	{

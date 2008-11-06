@@ -550,6 +550,7 @@ http_set_field( HTTP_header_t *http_hdr, const char *field_name ) {
 	new_field->field_name = malloc(strlen(field_name)+1);
 	if( new_field->field_name==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+		free(new_field);
 		return;
 	}
 	strcpy( new_field->field_name, field_name );
@@ -972,7 +973,7 @@ const stream_info_t stream_info_http1 = {
   "Bertrand, Albeau, Reimar Doeffinger, Arpi?",
   "plain http",
   open_s1,
-  {"http", "http_proxy", "unsv", "icyx", NULL},
+  {"http", "http_proxy", "unsv", "icyx", "noicyx", NULL},
   NULL,
   0 // Urls are an option string
 };

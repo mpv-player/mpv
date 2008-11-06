@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26073 -->
+<!-- synced with r27770 -->
 <chapter id="video">
 <title>Dispositivi di uscita video</title>
 
@@ -880,21 +880,26 @@ Linux 2.4.x.
 
 <para>
 Per una versione del driver per Linux 2.6.x controlla
-<ulink url="http://attila.kinali.ch/mga/"/>.
+<ulink url="http://attila.kinali.ch/mga/"/> oppure butta un occhio sul
+repository Subversion esterno di mga_vid, che si può ottenere tramite
+
+<screen>
+svn checkout svn://svn.mplayerhq.hu/mga_vid
+</screen>
 </para>
 
 <procedure>
 <title>Installazione:</title>
 <step><para>
-  Per usarlo, devi innanzitutto compilare <filename>mga_vid.o</filename>:
+  Per usarlo devi innanzitutto compilare <filename>drivers/mga_vid.o</filename>:
   <screen>
 cd drivers
-make<!--
+make drivers<!--
 --></screen>
 </para></step>
 <step><para>
   Poi esegui (come <systemitem class="username">root</systemitem>)
-  <screen>make install</screen>
+  <screen>make install-drivers</screen>
   che dovrebbe installare il modulo e creare per te il nodo del dispositivo.
   Carica il driver con
   <screen>insmod mga_vid.o</screen>
@@ -973,14 +978,14 @@ seguenti.
 <procedure>
 <title>Installare il modulo del kernel tdfx_vid.o:</title>
 <step><para>
-  Compila <filename>tdfx_vid.o</filename>:
+  Compila <filename>drivers/tdfx_vid.o</filename>:
   <screen>
 cd drivers
-make</screen>
+make drivers</screen>
 </para></step>
 <step><para>
   Poi esegui (come <systemitem class="username">root</systemitem>)
-  <screen>make install</screen>
+  <screen>make install-drivers</screen>
   che dovrebbe installare il modulo e creare per te il nodo del dispositivo.
   Carica il driver con
   <screen>insmod tdfx_vid.o</screen>
@@ -1593,6 +1598,10 @@ lo farà automaticamente. Per favore dillo agli sviluppatori. Il modo corretto
 driver.
 </para>
 
+
+<sect2 id="svgalib_helper">
+<title>svgalib_helper</title>
+
 <para>
 Visto che VIDIX richiede un accesso diretto all'hardware puoi sia eseguirlo come
 root, sia impostare il bit SUID sull'eseguibile di
@@ -1604,12 +1613,7 @@ Alternativamente puoi usare uno modulo del kernel speciale, come questo:
 <procedure>
 <step><para>
   Scarica la <ulink url="http://www.arava.co.il/matan/svgalib/">versione di
-  sviluppo</ulink> di svgalib (per esempio la 1.9.17),
-  <emphasis role="bold">OPPURE</emphasis> scarica una versione fatta da Alex
-  appositamente per essere usata con <application>MPlayer</application> (non ha
-  bisogno dei sorgenti di svgalib per la compilazione) da
-  <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9
-  .17-mplayer.tar.bz2">qui</ulink>.
+  sviluppo</ulink> di svgalib (1.9.x).
 </para></step>
 <step><para>
   Compila il modulo nella directory
@@ -1619,23 +1623,22 @@ Alternativamente puoi usare uno modulo del kernel speciale, come questo:
 </para></step>
 <step><para>
   Per creare i dispositivi necessari nella directory
-  <filename class="directory">/dev</filename>, esegui, come root,
+  <filename class="directory">/dev</filename>, esegui, da utente root,
   <screen>make device</screen> nella directory
   <filename class="directory">svgalib_helper</filename>.
 </para></step>
 <step><para>
-  Sposta la directory <filename class="directory">svgalib_helper</filename>
-  nella sotto-directory <filename class="directory">vidix</filename> nei
-  sorgenti di <application>MPlayer</application>.
-</para></step>
-<step><para>
-  Togli il commento prima della riga con CFLAGS che contiene "svgalib_helper"
-  dal file <filename class="directory">vidix/Makefile</filename>.
+  Poi esegui di nuovo <filename>configure</filename> passando i parametri
+  <option>--enable-svgalib_helper</option> e
+  <option>--with-extraincdir=<replaceable>/percorso/dei/sorgenti/di/svgalib_helper</replaceable>kernel/svgalib_helper</option>,
+  dove <replaceable>/percorso/dei/sorgenti/di/svgalib_helper</replaceable> deve
+  puntare al percorso dove hai estratto i sorgenti di svgalib_helper.
 </para></step>
 <step><para>
   Ricompila.
 </para></step>
 </procedure>
+</sect2>
 
 
 <sect2 id="vidix-ati">
@@ -2430,40 +2433,21 @@ sezione successiva!
     inutilizzabili per questo fine. Devi abilitare TUTTE le caratteristiche
     specifiche per matroxfb durante la compilazione (tranne MultiHead), e
     compilarle dentro ai <emphasis role="bold">moduli</emphasis>!
-    Devi anche avere I2C abilitato.
+    Devi anche abilitare I2C e mettere gli strumenti
+    <application>matroxset</application>, <application>fbset</application>
+    e <application>con2fb</application> in un percorso eseguibile (path).
     </para>
 
     <procedure>
     <step><para>
-      Entra in <filename class="directory">TVout</filename> e scrivi
-      <command>./compile.sh</command>. Installa
-      <filename>TVout/matroxset/matroxset</filename>
-      da qualche parte nella tua <envar>PATH</envar>.
+      Quindi carica nel kernel i moduli <systemitem>matroxfb_Ti3026,
+      matroxfb_maven, i2c-matroxfb, matroxfb_crtc2</systemitem>.
+      La tua console in modalità testo entrerà in modalità framebuffer
+      (senza via di ritorno!).
     </para></step>
     <step><para>
-      Se non hai <command>fbset</command> installato, metti
-      <filename>TVout/fbset/fbset</filename>
-      in qualche dove nella tua <envar>PATH</envar>.
-    </para></step>
-    <step><para>
-      Se non hai <command>con2fb</command> installato, metti
-      <filename>TVout/con2fb/con2fb</filename>
-      da qualche parte nella tua <envar>PATH</envar>.
-    </para></step>
-    <step><para>
-      Poi entra nella directory <filename class="directory">TVout/</filename>
-      nei sorgenti di <application>MPlayer</application>, ed esegui
-      <filename>./modules</filename> come root. La tua console in modalità
-      testuale entrerà in modalità framebuffer (nessuna via di ritorno!).
-    </para></step>
-    <step><para>
-      Poi, MODIFICA ed esegui lo script <filename>./matroxtv</filename>. Questo
-      ti presenterà un menu molto semplice. Premi <keycap>2</keycap> e
-      <keycap>Enter</keycap>. Ora dovresti avere la stessa immmagine sul tuo
-      monitor e sulla TV. se l'immagine sulla TV (di default PAL) mostra alcune
-      strane strisce, lo script non è stato in grado di impostare
-      adeguatamente la risoluzione (a 640x512 di default). Prova altre
-      risoluzioni dal menu e/o fai dei tentativi con fbset.
+      Dopodiché imposta il monitor e la TV come ti garba usando gli strumenti
+      citati sopra.
     </para></step>
     <step><para>
       Evvai. L'operazione successiva è far sparire il cursore a blocco di tty1
@@ -2556,6 +2540,31 @@ recommended for G400, see the section above.
 La patch necessaria per il kernel e l'HOWTO dettagliato sono scaricabili da
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="tv-out_matrox_cable">
+<title>Costruire un cavo per l'uscita TV Matrox</title>
+<para>
+Nessuno si prende alcuna responsabilità, né garantisce per qualsiasi danno
+causato da questa documentazione.
+</para>
+
+<formalpara><title>Cavo per G400</title>
+<para>
+Il quarto pin del connettore CRTC2 è il segnale video composito. La terra sono
+il sesto, settimo e ottavo pin. (informazioni fornite da Balázs Rácz)
+</para>
+</formalpara>
+
+<formalpara><title>Cavo per G450</title>
+<para>
+Il primo pin del connettore CRTC2 è il segnale video composito. La terra sono
+il quinto, sesto, settimo e quindicesimo pin (5, 6, 7, 15).
+(informazioni fornite da Balázs Kerekes)
+</para>
+</formalpara>
 </sect2>
 
 <!-- ********** -->

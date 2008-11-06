@@ -105,7 +105,7 @@ cue://file[:track]
 .
 .br
 .B mplayer
-[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]://
 [user:pass@]URL[:port] [options]
 .
 .br
@@ -2647,6 +2647,12 @@ the maximum, which e.g.\& the OSD cannot display correctly.
 .B \-volstep <0\-100>
 Set the step size of mixer volume changes in percent of the whole range
 (default: 3).
+.
+.TP
+.B \-volume <-1\-100> (also see \-af volume)
+Set the startup volume in the mixer, either hardware or software (if
+used with \-softvol).
+A value of -1 (the default) will not change the volume.
 .
 .
 .
@@ -10114,7 +10120,7 @@ enabled during all mode decisions (slow, requires subq>=6)
 .PD 1
 .
 .TP
-.B psy-rd=rd[:trell]
+.B psy-rd=rd[,trell]
 Sets the strength of the psychovisual optimization.
 .PD 0
 .RSs

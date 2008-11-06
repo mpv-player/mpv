@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27050 -->
+<!-- synced with r27815 -->
 <chapter id="tv">
 <title>TV</title>
 
@@ -109,11 +109,6 @@ Itt csak pár tippet említünk meg:
   minőségének növelése érdekében, a mentett kép igazából később lesz
   visszakonvertálva YV12-be így az egyetlen, amit elérsz, az erőteljes CPU
   használat.
-</para></listitem>
-<listitem><para>
-  Az I420 színtér megadásához (<option>outfmt=i420</option>) meg kell adnod
-  egy <option>-vc rawi420</option> kapcsolót is, mivel fourcc ütközés van
-  egy Intel Indeo videó codec-kel.
 </para></listitem>
 <listitem><para>
   Rengeteg módon menthetsz el audiót. A hangot grabbelheted a hang kártyáddal is

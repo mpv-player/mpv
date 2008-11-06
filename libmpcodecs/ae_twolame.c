@@ -39,7 +39,7 @@ m_option_t twolameopts_conf[] = {
 
 static int bind_twolame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 {
-	mpae_twolame_ctx *ctx = (mpae_twolame_ctx *) encoder->priv;
+	mpae_twolame_ctx *ctx = encoder->priv;
 	
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX)+256);
 	mux_a->wf->wFormatTag = 0x50;
@@ -83,7 +83,7 @@ static int bind_twolame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 
 static int encode_twolame(audio_encoder_t *encoder, uint8_t *dest, void *src, int len, int max_size)
 {
-	mpae_twolame_ctx *ctx = (mpae_twolame_ctx *)encoder->priv;
+	mpae_twolame_ctx *ctx = encoder->priv;
 	int ret_size = 0, r2;
 	
 	len /= (2*encoder->params.channels);
@@ -139,7 +139,7 @@ int mpae_init_twolame(audio_encoder_t *encoder)
 	else
 		mp_msg(MSGT_MENCODER, MSGL_ERR, "ae_twolame, Twolame can't encode > 2 channels, exiting\n");
 	
-	ctx = (mpae_twolame_ctx *) calloc(1, sizeof(mpae_twolame_ctx));
+	ctx = calloc(1, sizeof(mpae_twolame_ctx));
 	if(ctx == NULL)
 	{
 		mp_msg(MSGT_MENCODER, MSGL_ERR, "ae_twolame, couldn't alloc a %d bytes context, exiting\n", sizeof(mpae_twolame_ctx));
