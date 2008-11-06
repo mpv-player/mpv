@@ -1193,7 +1193,7 @@ static void glSetupYUVFragprog(gl_conversion_params_t *params) {
     memcpy(chrom_scale_texs, lum_scale_texs, sizeof(chrom_scale_texs));
   else
     create_scaler_textures(YUV_CHROM_SCALER(type), &cur_texu, chrom_scale_texs);
-  glGetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
+  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &i);
   if (i < cur_texu)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] %i texture units needed for this type of YUV fragment support (found %i)\n",
