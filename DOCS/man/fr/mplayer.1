@@ -1,4 +1,4 @@
-.\" synced with r27691
+.\" synced with r27895
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -108,7 +108,7 @@ cue://fichier[:piste]
 .
 .br
 .B mplayer
-[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]://
 [utilisateur:mot_de_passe@]URL[:port] [options]
 .
 .br
@@ -2712,6 +2712,12 @@ sans '.idx', '.ifo' ou '.sub'.
 .B \-vobsubid <0\-31>
 Définit le numéro de sous-titre du fichier VOBsub.
 .
+.TP
+.B \-volume <-1\-100> (voir aussi \-af volume)
+Défini le niveau de démarrage du volume mixeur, soit matériel ou matériel
+(si l'option \-softvol est aussi activée).
+La valeur -1 (par défaut) ne change pas le volume.
+.
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
 .
@@ -3382,13 +3388,13 @@ N'est pas géré par tous les pilotes de sortie vidéo.
 .
 .TP
 .B \-screenh <pixels>
-Définit la résolution verticale de votre écran pour des pilotes de
+Définit la hauteur de votre écran pour des pilotes de
 sortie vidéo qui ne connaissent pas la résolution de l'écran, comme
 fbdev, x11 et TVout
 .
 .TP
 .B \-screenw <pixels>
-Définit la résolution horizontale de votre écran pour des pilotes de
+Définit la largeur de votre écran pour des pilotes de
 sortie vidéo qui ne connaissent pas la résolution de l'écran, comme
 fbdev, x11 et TVout
 .
@@ -10590,7 +10596,7 @@ rayon de de la recherche exhaustive et multi-hexagonale de mouvement
 (par défaut\ 16)
 .
 .TP
-.B subq=<1\-7>
+.B subq=<1\-9>
 Ajuste la qualité d'affinement de subpel.
 Ce paramètre contrôle le compromis qualité/\:vitesse lié aux décisions du
 processus d'estimation du mouvement.
@@ -10619,13 +10625,21 @@ Puis termine l'affinement quarterpixel pour ce type
 .IPs 5
 Effectue la recherche de mouvement de la meilleure qualité sur tous les
 types de macro-blocs candidats, avant de choisir le meilleur type.
-(par défaut)
+Affine aussi les deux vecteurs de mouvement utilisés par les macro-blocs
+bi-directionnels, au lieu de ré-utiliser les vecteurs des recherches
+avant et arrière.
 .IPs 6
 Active la sélection des macro-blocs en fonction de leur taux de distortion,
-pour les trames-I et P.
+pour les trames-I et P (par défaut).
 .IPs 7
-Active la sélection des macro-blocs en fonction de leur taux de distortion,
-pour les vecteurs de mouvement et les modes intras (le meilleur).
+Active la sélection des macro-blocs en fonction de leur taux de distortion dans
+toutes les trames.
+.IPs 8
+Active la sélection des vecteurs de mouvement et des modes de prédictions intra
+en fonction de leur taux de distortion dans les trames-I et -P.
+.IPs 9
+Active la sélection des vecteurs de mouvement et des modes de prédictions intra
+en fonction de leur taux de distortion dans toutes les trames (le meilleur).
 .RE
 .PD 1
 .RS
@@ -10648,20 +10662,7 @@ Sans cette option, tout le macro-bloc doit utiliser la même référence.
 Nécessite frameref>1.
 .TP
 .
-.TP
-.B (no)brdo
-Active l'optimisation du type de macroblocs dans les trames-B d'après
-leur taux de distortion
-Nécessite subq>=6.
-.
-.TP
-.B (no)bime
-Affine les deux vecteurs de mouvement utilisés par les macro-blocs
-bi-directionnels, au lieu de ré-utiliser les vecteurs des recherches
-avant et arrière.
-Cette option n'a pas d'effet sans trames-B.
-.
-.B trellis=<0\-2>
+.B trellis=<0\-2> (cabac uniquement)
 quatification optimale du point de vue du taux de distortion
 .PD 0
 .RSs
@@ -10672,6 +10673,18 @@ activé uniquement lors de l'encodage final
 .IPs 2
 activé pour toutes les décisions de modes de macroblocs (lent, requiert
 subq>=6)
+.RE
+.PD 1
+.
+.TP
+.B psy-rd=rd[,trell]
+Défini la force de l'optimisation psycho-visuelle.
+.PD 0
+.RSs
+.IPs rd=<0.0\-10.0>
+force de l'optimisation psy (requière subq>=6) (defaut\ : 1.0)
+.IPs trell=<0.0\-10.0>
+trellis (requière trellis, expérimental) (default\ : 0.0)
 .RE
 .PD 1
 .
