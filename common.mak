@@ -8,11 +8,18 @@ ifndef SUBDIR
 vpath %.c $(SRC_DIR)
 vpath %.h $(SRC_DIR)
 vpath %.S $(SRC_DIR)
+vpath %.asm $(SRC_DIR)
+
+ifeq ($(SRC_DIR),$(SRC_PATH_BARE))
+BUILD_ROOT_REL = .
+else
+BUILD_ROOT_REL = ..
+endif
 
 ALLFFLIBS = avcodec avdevice avfilter avformat avutil postproc swscale
 
-CFLAGS = -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
-         -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) $(OPTFLAGS)
+CFLAGS := -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+          -I$(BUILD_ROOT_REL) -I$(SRC_PATH) $(OPTFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
@@ -32,7 +39,17 @@ CFLAGS = -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
 %.d: %.cpp
 	$(DEPEND_CMD) > $@
 
+%.o: %.d
+
 %$(EXESUF): %.c
+
+SVN_ENTRIES = $(SRC_PATH_BARE)/.svn/entries
+ifeq ($(wildcard $(SVN_ENTRIES)),$(SVN_ENTRIES))
+$(BUILD_ROOT_REL)/version.h: $(SVN_ENTRIES)
+endif
+
+$(BUILD_ROOT_REL)/version.h:
+	$(SRC_PATH)/version.sh $(SRC_PATH) $@ $(EXTRA_VERSION)
 
 install: install-libs install-headers
 
@@ -43,18 +60,12 @@ endif
 
 CFLAGS   += $(CFLAGS-yes)
 OBJS     += $(OBJS-yes)
-ASM_OBJS += $(ASM_OBJS-yes)
-CPP_OBJS += $(CPP_OBJS-yes)
 FFLIBS   := $(FFLIBS-yes) $(FFLIBS)
 TESTS    += $(TESTS-yes)
 
 FFEXTRALIBS := $(addprefix -l,$(addsuffix $(BUILDSUF),$(FFLIBS))) $(EXTRALIBS)
 FFLDFLAGS   := $(addprefix -L$(BUILD_ROOT)/lib,$(FFLIBS)) $(LDFLAGS)
 
-SRCS := $(OBJS:.o=.c) $(ASM_OBJS:.o=.S) $(CPP_OBJS:.o=.cpp)
-OBJS := $(OBJS) $(ASM_OBJS) $(CPP_OBJS)
-
-SRCS  := $(addprefix $(SUBDIR),$(SRCS))
 OBJS  := $(addprefix $(SUBDIR),$(OBJS))
 TESTS := $(addprefix $(SUBDIR),$(TESTS))
 
@@ -68,7 +79,7 @@ depend dep: $(DEPS)
 
 CLEANSUFFIXES = *.o *~ *.ho
 LIBSUFFIXES   = *.a *.lib *.so *.so.* *.dylib *.dll *.def *.dll.a *.exp *.map
-DISTCLEANSUFFIXES = *.d
+DISTCLEANSUFFIXES = *.d *.pc
 
 define RULES
 $(SUBDIR)%$(EXESUF): $(SUBDIR)%.o
@@ -79,6 +90,12 @@ $(SUBDIR)%-test.o: $(SUBDIR)%.c
 
 $(SUBDIR)%-test.o: $(SUBDIR)%-test.c
 	$(CC) $(CFLAGS) -DTEST -c -o $$@ $$^
+
+$(SUBDIR)i386/%.o: $(SUBDIR)i386/%.asm
+	$(YASM) $(YASMFLAGS) -I $$(<D)/ -o $$@ $$<
+
+$(SUBDIR)i386/%.d: $(SUBDIR)i386/%.asm
+	$(YASM) $(YASMFLAGS) -I $$(<D)/ -M -o $$(@:%.d=%.o) $$< > $$@
 
 clean::
 	rm -f $(TESTS) $(addprefix $(SUBDIR),$(CLEANFILES) $(CLEANSUFFIXES) $(LIBSUFFIXES)) \
