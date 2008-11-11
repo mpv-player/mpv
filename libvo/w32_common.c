@@ -43,8 +43,6 @@ static BOOL (WINAPI* myEnumDisplayMonitors)(HDC, LPCRECT, MONITORENUMPROC, LPARA
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     RECT r;
     POINT p;
-    if (WinID < 0 || message == WM_PAINT || message == WM_ERASEBKGND ||
-        message == WM_SIZE) {
     switch (message) {
         case WM_ERASEBKGND: // no need to erase background seperately
             return 1;
@@ -146,19 +144,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                     mplayer_put_key(MOUSE_BTN4);
                 break;
             }
-    }
-    } else switch (message) {
-        case WM_MOUSEMOVE:
-        case WM_LBUTTONDOWN:
-        case WM_LBUTTONUP:
-        case WM_LBUTTONDBLCLK:
-        case WM_MBUTTONDOWN:
-        case WM_MBUTTONUP:
-        case WM_MBUTTONDBLCLK:
-        case WM_RBUTTONDOWN:
-        case WM_RBUTTONUP:
-        case WM_RBUTTONDBLCLK:
-            SendNotifyMessage(WinID, message, wParam, lParam);
     }
     
     return DefWindowProc(hWnd, message, wParam, lParam);
@@ -394,6 +379,7 @@ int vo_w32_init(void) {
         vo_window = CreateWindowEx(WS_EX_NOPARENTNOTIFY, classname, classname,
                      WS_CHILD | WS_VISIBLE,
                      0, 0, vo_dwidth, vo_dheight, WinID, 0, hInstance, 0);
+        EnableWindow(vo_window, 0);
     } else
     vo_window = CreateWindowEx(0, classname, classname,
                   vo_border ? (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP,
