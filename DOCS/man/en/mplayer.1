@@ -10050,34 +10050,38 @@ exhaustive search (very slow, and no better than umh)
 radius of exhaustive or multi-hexagon motion search (default: 16)
 .
 .TP
-.B subq=<1\-9>
+.B subq=<0\-9>
 Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
 estimation decision process.
 subq=5 can compress up to 10% better than subq=1.
 .PD 0
 .RSs
-.IPs 1
+.IPs 0
 Runs fullpixel precision motion estimation on all candidate
 macroblock types.
-Then selects the best type.
-Then refines the motion of that type to fast quarterpixel precision (fastest).
+Then selects the best type with SAD metric (faster than subq=1, not recommended
+unless you're looking for ultra-fast encoding).
+.IPs 1
+Does as 0, then refines the motion of that type to fast quarterpixel precision
+(fast).
 .IPs 2
 Runs halfpixel precision motion estimation on all candidate macroblock types.
-Then selects the best type.
+Then selects the best type with SATD metric.
 Then refines the motion of that type to fast quarterpixel precision.
 .IPs 3
 As 2, but uses a slower quarterpixel refinement.
 .IPs 4
 Runs fast quarterpixel precision motion estimation on all candidate
 macroblock types.
-Then selects the best type.
+Then selects the best type with SATD metric.
 Then finishes the quarterpixel refinement for that type.
 .IPs 5
 Runs best quality quarterpixel precision motion estimation on all
 candidate macroblock types, before selecting the best type.
-Also refines the two motion vectors used in bidirectional macroblocks,
-rather than reusing vectors from the forward and backward searches.
+Also refines the two motion vectors used in bidirectional macroblocks with
+SATD metric, rather than reusing vectors from the forward and backward
+searches.
 .IPs 6
 Enables rate-distortion optimization of macroblock types in
 I- and P-frames (default).
