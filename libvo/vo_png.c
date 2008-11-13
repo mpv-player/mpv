@@ -247,8 +247,8 @@ static int
 query_format(uint32_t format)
 {
     switch(format){
-    case IMGFMT_RGB|24:
-    case IMGFMT_BGR|24:
+    case IMGFMT_RGB24:
+    case IMGFMT_BGR24:
         return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE;
     }
     return 0;
