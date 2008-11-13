@@ -3521,7 +3521,7 @@ if test "$_macosx" = auto ; then
     else
 	_macosx=no
 	_noaomodules="macosx $_noaomodules"
-	_novomodules="quartz $_novomodules"
+	_novomodules="macosx quartz $_novomodules"
     fi
 fi
 if test "$_macosx" = yes ; then
