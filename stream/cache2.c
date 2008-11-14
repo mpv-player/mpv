@@ -33,6 +33,7 @@ static void ThreadProc( void *s );
 #include "help_mp.h"
 
 #include "stream.h"
+#include "cache2.h"
 extern int use_gui;
 
 int stream_fill_buffer(stream_t *s);
