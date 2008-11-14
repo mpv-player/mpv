@@ -1,4 +1,4 @@
-.\" synced with r27895
+.\" synced with r27906
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -10596,24 +10596,27 @@ rayon de de la recherche exhaustive et multi-hexagonale de mouvement
 (par défaut\ 16)
 .
 .TP
-.B subq=<1\-9>
+.B subq=<0\-9>
 Ajuste la qualité d'affinement de subpel.
 Ce paramètre contrôle le compromis qualité/\:vitesse lié aux décisions du
 processus d'estimation du mouvement.
 subq=5 peut augmenter jusqu'à 10% le taux de compression par rapport à subq=1.
 .PD 0
 .RSs
-.IPs 1
+.IPs 0
 Effectue une recherche de mouvement d'une précision fullpixel (c-à-d qu'elle
 capture les mouvements d'une trame à la suivante avec une précision d'un pixel)
 sur tous les types de macro-blocs candidats.
-Sélectionne ensuite le meilleur type.
-Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
-ce type (le plus rapide).
+Sélectionne ensuite le meilleur type avec la métrique SAD (plus rapide que
+subq=1, mais non recommandé à moins que vous cherchiez à réaliser un encodage
+ultra-rapide).
+.IPs 1
+Comme 0, affine ensuite rapidement avec une précision qu'un quart de pixel le
+mouvement de ce type (rapide).
 .IPs 2
 Effectue une recherche de mouvement d'une précision demi pixel sur tous les
 types de macro-blocs candidats.
-Sélectionne ensuite le meilleur type.
+Sélectionne ensuite le meilleur type avec la métrique SATD.
 Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
 ce type.
 .IPs 3
@@ -10621,13 +10624,14 @@ Comme 2, mais utilise un affinage plus lent qu'un quart de pixel.
 .IPs 4
 Effectue une rapide recherche de mouvement d'une précision d'un quart de
 pixel (quarterpixel) sur tous les types de macro-blocs candidats.
-Puis termine l'affinement quarterpixel pour ce type
+Puis sélectionne le meilleur type avec la métrique SATD.
+Termine ensuite l'affinement quarterpixel pour ce type.
 .IPs 5
 Effectue la recherche de mouvement de la meilleure qualité sur tous les
 types de macro-blocs candidats, avant de choisir le meilleur type.
 Affine aussi les deux vecteurs de mouvement utilisés par les macro-blocs
-bi-directionnels, au lieu de ré-utiliser les vecteurs des recherches
-avant et arrière.
+bi-directionnels avec la métrique SATD, au lieu de ré-utiliser les vecteurs
+des recherches avant et arrière.
 .IPs 6
 Active la sélection des macro-blocs en fonction de leur taux de distortion,
 pour les trames-I et P (par défaut).
