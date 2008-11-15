@@ -1743,12 +1743,13 @@ void vo_x11_selectinput_witherr(Display * display, Window w,
 }
 
 #ifdef CONFIG_XF86VM
-void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
-                  int *modeline_height)
+void vo_vm_switch(void)
 {
     int vm_event, vm_error;
     int vm_ver, vm_rev;
     int i, j, have_vm = 0;
+    int X = vo_dwidth, Y = vo_dheight;
+    int modeline_width, modeline_height;
 
     int modecount;
 
@@ -1761,8 +1762,6 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
     } else {
         mp_msg(MSGT_VO, MSGL_WARN,
                "XF86VidMode extension not available.\n");
-        *modeline_width = vo_screenwidth;
-        *modeline_height = vo_screenheight;
     }
 
     if (have_vm)
@@ -1771,39 +1770,39 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
             XF86VidModeGetAllModeLines(mDisplay, mScreen, &modecount,
                                        &vidmodes);
         j = 0;
-        *modeline_width = vidmodes[0]->hdisplay;
-        *modeline_height = vidmodes[0]->vdisplay;
+        modeline_width = vidmodes[0]->hdisplay;
+        modeline_height = vidmodes[0]->vdisplay;
 
         for (i = 1; i < modecount; i++)
             if ((vidmodes[i]->hdisplay >= X)
                 && (vidmodes[i]->vdisplay >= Y))
-                if ((vidmodes[i]->hdisplay <= *modeline_width)
-                    && (vidmodes[i]->vdisplay <= *modeline_height))
+                if ((vidmodes[i]->hdisplay <= modeline_width)
+                    && (vidmodes[i]->vdisplay <= modeline_height))
                 {
-                    *modeline_width = vidmodes[i]->hdisplay;
-                    *modeline_height = vidmodes[i]->vdisplay;
+                    modeline_width = vidmodes[i]->hdisplay;
+                    modeline_height = vidmodes[i]->vdisplay;
                     j = i;
                 }
 
         mp_msg(MSGT_VO, MSGL_INFO, MSGTR_SelectedVideoMode,
-               *modeline_width, *modeline_height, X, Y);
+               modeline_width, modeline_height, X, Y);
         XF86VidModeLockModeSwitch(mDisplay, mScreen, 0);
         XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);
         XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);
 
         // FIXME: all this is more of a hack than proper solution
-        X = (vo_screenwidth - *modeline_width) / 2;
-        Y = (vo_screenheight - *modeline_height) / 2;
+        X = (vo_screenwidth - modeline_width) / 2;
+        Y = (vo_screenheight - modeline_height) / 2;
         XF86VidModeSetViewPort(mDisplay, mScreen, X, Y);
         vo_dx = X;
         vo_dy = Y;
-        vo_dwidth = *modeline_width;
-        vo_dheight = *modeline_height;
-        aspect_save_screenres(*modeline_width, *modeline_height);
+        vo_dwidth = modeline_width;
+        vo_dheight = modeline_height;
+        aspect_save_screenres(modeline_width, modeline_height);
     }
 }
 
-void vo_vm_close(Display * dpy)
+void vo_vm_close(void)
 {
 #ifdef CONFIG_GUI
     if (vidmodes != NULL && vo_window != None)
@@ -1812,9 +1811,6 @@ void vo_vm_close(Display * dpy)
 #endif
     {
         int i, modecount;
-        int screen;
-
-        screen = DefaultScreen(dpy);
 
         free(vidmodes);
         vidmodes = NULL;
@@ -1830,8 +1826,8 @@ void vo_vm_close(Display * dpy)
                 break;
             }
 
-        XF86VidModeSwitchToMode(dpy, screen, vidmodes[i]);
-        XF86VidModeSwitchToMode(dpy, screen, vidmodes[i]);
+        XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[i]);
+        XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[i]);
         free(vidmodes);
         vidmodes = NULL;
     }

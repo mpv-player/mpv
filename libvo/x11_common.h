@@ -122,8 +122,8 @@ void saver_off( Display * );
 void saver_on( Display * );
 
 #ifdef CONFIG_XF86VM
-void vo_vm_switch(uint32_t, uint32_t, int*, int*);
-void vo_vm_close(Display*);
+void vo_vm_switch(void);
+void vo_vm_close(void);
 #endif
 
 void update_xinerama_info(void);

@@ -232,17 +232,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 #ifdef CONFIG_XF86VM
         if (vm)
         {
-            if ((d_width == 0) && (d_height == 0))
-            {
-                vm_width = image_width;
-                vm_height = image_height;
-            } else
-            {
-                vm_width = d_width;
-                vm_height = d_height;
-            }
-            vo_vm_switch(vm_width, vm_height, &modeline_width,
-                         &modeline_height);
+            vo_vm_switch();
         } else
 #endif
         XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay),
@@ -659,7 +649,7 @@ static void uninit(void)
     for (i = 0; i < num_buffers; i++)
         deallocate_xvimage(i);
 #ifdef CONFIG_XF86VM
-    vo_vm_close(mDisplay);
+    vo_vm_close();
 #endif
     mp_input_rm_event_fd(ConnectionNumber(mDisplay));
     vo_x11_uninit();
