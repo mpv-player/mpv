@@ -304,7 +304,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 {
 // int screen;
     int fullscreen = 0;
-    int vm = 0;
 
 // int interval, prefer_blank, allow_exp, nothing;
     unsigned int fg, bg;
@@ -315,6 +314,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
 
 #ifdef CONFIG_XF86VM
+    int vm = 0;
     unsigned int modeline_width, modeline_height;
     static uint32_t vm_width;
     static uint32_t vm_height;
@@ -324,6 +324,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     old_vo_dwidth = -1;
     old_vo_dheight = -1;
 
+    int_pause = 0;
     if (!title)
         title = "MPlayer X11 (XImage/Shm) render";
 
@@ -333,13 +334,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     if (flags & (VOFLAG_FULLSCREEN|VOFLAG_MODESWITCHING))
         fullscreen = 1;
+#ifdef CONFIG_XF86VM
     if (flags & VOFLAG_MODESWITCHING)
         vm = 1;
+#endif
     if (flags & VOFLAG_FLIPPING)
         Flip_Flag = 1;
     zoomFlag = flags & VOFLAG_SWSCALE;
 
-    int_pause = 0;
 // if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
 
 //printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
