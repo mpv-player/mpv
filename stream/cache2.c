@@ -16,15 +16,22 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifdef __CYGWIN__
+#define PTHREAD_CACHE 1
+#endif
+
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#if defined(__MINGW32__)
 #include <windows.h>
 static void ThreadProc( void *s );
 #elif defined(__OS2__)
 #define INCL_DOS
 #include <os2.h>
 static void ThreadProc( void *s );
+#elif defined(PTHREAD_CACHE)
+#include <pthread.h>
+static void *ThreadProc(void *s);
 #else
 #include <sys/wait.h>
 #endif
@@ -245,7 +252,7 @@ static int cache_execute_control(cache_vars_t *s) {
 
 cache_vars_t* cache_init(int size,int sector){
   int num;
-#if !defined(__MINGW32__) && !defined(__CYGWIN__) && !defined(__OS2__)
+#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
   cache_vars_t* s=shmem_alloc(sizeof(cache_vars_t));
 #else
   cache_vars_t* s=malloc(sizeof(cache_vars_t));
@@ -259,14 +266,14 @@ cache_vars_t* cache_init(int size,int sector){
   }//32kb min_size
   s->buffer_size=num*sector;
   s->sector_size=sector;
-#if !defined(__MINGW32__) && !defined(__CYGWIN__) && !defined(__OS2__)
+#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
   s->buffer=shmem_alloc(s->buffer_size);
 #else
   s->buffer=malloc(s->buffer_size);
 #endif
 
   if(s->buffer == NULL){
-#if !defined(__MINGW32__) && !defined(__CYGWIN__) && !defined(__OS2__)
+#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
     shmem_free(s,sizeof(cache_vars_t));
 #else
     free(s);
@@ -282,14 +289,14 @@ cache_vars_t* cache_init(int size,int sector){
 void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
   if(!s->cache_pid) return;
-#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
   cache_do_control(s, -2, NULL);
 #else
   kill(s->cache_pid,SIGKILL);
   waitpid(s->cache_pid,NULL,0);
 #endif
   if(!c) return;
-#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
   free(c->stream);
   free(c->buffer);
   free(s->cache_data);
@@ -330,17 +337,19 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
      min = s->buffer_size - s->fill_limit;
   }
   
-#if !defined(__MINGW32__) && !defined(__CYGWIN__) && !defined(__OS2__)
+#if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
   if((stream->cache_pid=fork())){
 #else
   {
     stream_t* stream2=malloc(sizeof(stream_t));
     memcpy(stream2,s->stream,sizeof(stream_t));
     s->stream=stream2;
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#if defined(__MINGW32__)
     stream->cache_pid = _beginthread( ThreadProc, 0, s );
-#else
+#elif defined(__OS2__)
     stream->cache_pid = _beginthread( ThreadProc, NULL, 256 * 1024, s );
+#else
+    pthread_create(&stream->cache_pid, NULL, ThreadProc, s);
 #endif
 #endif
     // wait until cache is filled at least prefill_init %
@@ -359,9 +368,13 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     return 1; // parent exits
   }
   
-#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
 }
+#ifdef PTHREAD_CACHE
+static void *ThreadProc( void *s ){
+#else
 static void ThreadProc( void *s ){
+#endif
 #endif
   
 #ifdef CONFIG_GUI
@@ -375,8 +388,11 @@ static void ThreadProc( void *s ){
     }
 //	 cache_stats(s->cache_data);
   } while (cache_execute_control(s));
-#if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
+#if defined(__MINGW32__) || defined(__OS2__)
   _endthread();
+#endif
+#ifdef PTHREAD_CACHE
+  return NULL;
 #endif
 }
 
