@@ -638,27 +638,7 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
 
 static int draw_frame(uint8_t * src[])
 {
-#if 0
-    int stride[3] = { 0, 0, 0 };
-
-    if (in_format == IMGFMT_YUY2)
-        stride[0] = srcW * 2;
-    else if (in_format == IMGFMT_BGR8)
-        stride[0] = srcW;
-    else if (in_format == IMGFMT_BGR15)
-        stride[0] = srcW * 2;
-    else if (in_format == IMGFMT_BGR16)
-        stride[0] = srcW * 2;
-    else if (in_format == IMGFMT_BGR24)
-        stride[0] = srcW * 3;
-    else if (in_format == IMGFMT_BGR32)
-        stride[0] = srcW * 4;
-
-    return draw_slice(src, stride, srcW, srcH, 0, 0);
-#else
-    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_X11_DrawFrameCalled);
-    return -1;
-#endif
+    return VO_ERROR;
 }
 
 static uint32_t get_image(mp_image_t * mpi)
