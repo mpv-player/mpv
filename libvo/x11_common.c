@@ -1758,9 +1758,12 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
         mp_msg(MSGT_VO, MSGL_V, "XF86VidMode extension v%i.%i\n", vm_ver,
                vm_rev);
         have_vm = 1;
-    } else
+    } else {
         mp_msg(MSGT_VO, MSGL_WARN,
                "XF86VidMode extension not available.\n");
+        *modeline_width = vo_screenwidth;
+        *modeline_height = vo_screenheight;
+    }
 
     if (have_vm)
     {
