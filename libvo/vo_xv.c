@@ -166,7 +166,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                        uint32_t d_height, uint32_t flags, char *title,
                        uint32_t format)
 {
-    XSizeHints hint;
     XVisualInfo vinfo;
     XGCValues xgcv;
     XSetWindowAttributes xswa;
@@ -230,10 +229,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     else
 #endif
     {
-        hint.x = vo_dx;
-        hint.y = vo_dy;
-        hint.width = d_width;
-        hint.height = d_height;
 #ifdef CONFIG_XF86VM
         if (vm)
         {
@@ -248,16 +243,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             }
             vo_vm_switch(vm_width, vm_height, &modeline_width,
                          &modeline_height);
-            hint.x = (vo_screenwidth - modeline_width) / 2;
-            hint.y = (vo_screenheight - modeline_height) / 2;
-            hint.width = modeline_width;
-            hint.height = modeline_height;
             aspect_save_screenres(modeline_width, modeline_height);
         } else
 #endif
-        hint.flags = PPosition | PSize /* | PBaseSize */ ;
-        hint.base_width = hint.width;
-        hint.base_height = hint.height;
         XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay),
                              &attribs);
         depth = attribs.depth;
