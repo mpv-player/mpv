@@ -1966,6 +1966,59 @@ static char help_text[]=
 #define MSGTR_RADIO_DriverV4L2 "[radio] Utilizando interfaz de radio V4Lv2.\n"
 #define MSGTR_RADIO_DriverV4L "[radio] Utilizando interfaz de radio V4Lv1.\n"
 #define MSGTR_RADIO_DriverBSDBT848 "[radio] Usando la interfaz de radio *BSD BT848.\n"
+#define MSGTR_RADIO_AvailableDrivers "[radio] Drivers disponibles: "
+
+//tv.c
+#define MSGTR_TV_BogusNormParameter "tv.c: norm_from_string(%s): Parametro de normal inválido al configurar %s.\n"
+#define MSGTR_TV_NoVideoInputPresent "Error: Entrada de video no encontrada!\n"
+#define MSGTR_TV_UnknownImageFormat ""\
+"==================================================================\n"\
+" ADVERTENCIA: HA SELECCIONADO UN FORMATO DE SALIDA DE IMAGEN NO  \n"\
+" CONOCIDO Y/O NO PROBADO (0x%x)                                  \n"\
+" Esto podría causarle problemas de reproducción o que el programa\n"\
+" se cayera! Los Bug reports serán ignorados! Intentelo nuevamente\n"\
+" con YV12 (el colorspace por omisión) y leer la documentación.   \n"\
+"==================================================================\n"
+#define MSGTR_TV_SelectedNormId "Id norma seleccionada: %d\n"
+#define MSGTR_TV_SelectedNorm "Norma seleccionada : %s\n"
+#define MSGTR_TV_CannotSetNorm "Error: No puedo configurar la norma!\n"
+#define MSGTR_TV_MJP_WidthHeight "  MJP: ancho %d alto %d\n"
+#define MSGTR_TV_UnableToSetWidth "Imposible configurar ancho requerido: %d\n"
+#define MSGTR_TV_UnableToSetHeight "Imposible configurar alto requerido: %d\n"
+#define MSGTR_TV_NoTuner "No hay un sintonizador en la entrada seleccionada!\n"
+#define MSGTR_TV_UnableFindChanlist "Imposible encontrar lista de canales seleccionada! (%s)\n"
+#define MSGTR_TV_SelectedChanlist "Lista de canales seleccionada: %s (incluyendo %d canales)\n"
+#define MSGTR_TV_ChannelFreqParamConflict "No puede configurar simultaneamente frecuencia y canal!\n"
+#define MSGTR_TV_ChannelNamesDetected "Nombres de canales de TV detectados.\n"
+#define MSGTR_TV_NoFreqForChannel "Imposible encontrar frecuencia para el canal %s (%s)\n"
+#define MSGTR_TV_SelectedChannel3 "Canal seleccionado: %s - %s (freq: %.3f)\n"
+#define MSGTR_TV_SelectedChannel2 "Canal seleccionado: %s (freq: %.3f)\n"
+#define MSGTR_TV_SelectedFrequency "Frecuencia seleccionada: %lu (%.3f)\n"
+#define MSGTR_TV_RequestedChannel "Canal requerido: %s\n"
+#define MSGTR_TV_UnsupportedAudioType "Tipo de audio '%s (%x)' no soportado!\n"
+#define MSGTR_TV_AudioFormat "  Audio TV: %d canales, %d bits, %d Hz\n"
+#define MSGTR_TV_AvailableDrivers "Drivers disponibles:\n"
+#define MSGTR_TV_DriverInfo "Driver seleccionado: %s\n nombre: %s\n autor: %s\n comentario: %s\n"
+#define MSGTR_TV_NoSuchDriver "Ese driver no existe: %s\n"
+#define MSGTR_TV_DriverAutoDetectionFailed "Falló la utodeteccion del driver de TV.\n"
+#define MSGTR_TV_UnknownColorOption "Se especificó una opción de color desconodida (%d)!\n"
+#define MSGTR_TV_CurrentFrequency "Frecuencia actual: %lu (%.3f)\n"
+#define MSGTR_TV_NoTeletext "Sin teletexto"
+#define MSGTR_TV_Bt848IoctlFailed "tvi_bsdbt848: llamada a %s ioctl fallida. Error: %s\n"
+#define MSGTR_TV_Bt848InvalidAudioRate "tvi_bsdbt848: Audio rate inválido. Error: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningBktrDev "tvi_bsdbt848: Imposible abrir dispositivo bktr. Error: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningTunerDev "tvi_bsdbt848: Imposible abrir dispositivo sintonizador. Error: %s\n"
+#define MSGTR_TV_Bt848ErrorOpeningDspDev "tvi_bsdbt848: Imposible abrir dispositivo dsp. Error: %s\n"
+#define MSGTR_TV_Bt848ErrorConfiguringDsp "tvi_bsdbt848: Falló la configuración del dsp. Error: %s\n"
+#define MSGTR_TV_Bt848ErrorReadingAudio "tvi_bsdbt848: Error leyendo datos de audio. Error: %s\n"
+#define MSGTR_TV_Bt848MmapFailed "tvi_bsdbt848: mmap fallido. Error: %s\n"
+#define MSGTR_TV_Bt848FrameBufAllocFailed "tvi_bsdbt848: Fallo al reservar frame buffer (allocation failed). Error: %s\n"
+#define MSGTR_TV_Bt848ErrorSettingWidth "tvi_bsdbt848: Error configurando el ancho del picture. Error: %s\n"
+#define MSGTR_TV_Bt848ErrorSettingHeight "tvi_bsdbt848: Error configurando el alto del picture. Error: %s\n"
+#define MSGTR_TV_Bt848UnableToStopCapture "tvi_bsdbt848: Imposible detener la captura. Error: %s\n"
+#define MSGTR_TV_TTSupportedLanguages "Idiomas de teletexto soportados:\n"
+#define MSGTR_TV_TTSelectedLanguage "Se seleccionó el idioma de teletexto por omisión: %s\n"
+#define MSGTR_TV_ScannerNotAvailableWithoutTuner "No se puede utilizar el scanner de canales sin un sintonizador\n"
 
 // ================================== LIBASS ====================================
 
