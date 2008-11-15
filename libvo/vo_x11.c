@@ -421,7 +421,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 XSelectInput(mDisplay, vo_window, ExposureMask);
         } else
         {
-            vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
+            vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, vo_dwidth, vo_dheight,
                     flags, theCmap, "x11", title);
         }
 
