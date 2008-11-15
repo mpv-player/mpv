@@ -349,7 +349,11 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 #elif defined(__OS2__)
     stream->cache_pid = _beginthread( ThreadProc, NULL, 256 * 1024, s );
 #else
-    pthread_create(&stream->cache_pid, NULL, ThreadProc, s);
+    {
+    pthread_t tid;
+    pthread_create(&tid, NULL, ThreadProc, s);
+    stream->cache_pid = 1;
+    }
 #endif
 #endif
     // wait until cache is filled at least prefill_init %
