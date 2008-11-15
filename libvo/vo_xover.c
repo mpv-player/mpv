@@ -188,8 +188,6 @@ static void set_window(int force_update)
   XFillRectangle(mDisplay, vo_window, vo_gc, drwX, drwY, drwWidth,
 		 (vo_fs ? drwHeight - 1 : drwHeight));
 
-  if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
-
   /* flush, update drawable */
   XFlush(mDisplay);
 

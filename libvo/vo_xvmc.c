@@ -714,8 +714,6 @@ skip_surface_allocation:
 
    mp_msg(MSGT_VO,MSGL_V, "[xvmc] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
 
-   if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
-
 //end vo_xv
 
    /* store image dimesions for displaying */

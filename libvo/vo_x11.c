@@ -507,9 +507,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     dst_width = width;
     //printf( "X11 bpp: %d  color mask:  R:%lX  G:%lX  B:%lX\n",bpp,myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
-    if (vo_ontop)
-        vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
-
     return 0;
 }
 

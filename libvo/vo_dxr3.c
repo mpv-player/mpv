@@ -551,9 +551,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OVERLAY);
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_RECTANGLE);
 	}
-
-	if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
-
 #endif
 
 	return 0;
