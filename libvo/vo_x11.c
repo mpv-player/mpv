@@ -441,6 +441,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                     flags, theCmap, "x11", title);
         }
 
+        if (vo_gc != None)
+            XFreeGC(mDisplay, vo_gc);
+        vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
         XSync(mDisplay, False);
 
         vo_x11_selectinput_witherr(mDisplay, vo_window,
@@ -463,10 +466,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         }
 #endif
     }
-
-    if (vo_gc != None)
-        XFreeGC(mDisplay, vo_gc);
-    vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
 
     if (myximage)
     {
