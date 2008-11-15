@@ -229,7 +229,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         if (vm)
         {
             vo_vm_switch();
-        } else
+        }
 #endif
         XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay),
                              &attribs);
