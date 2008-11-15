@@ -352,10 +352,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     current_buf = 0;
     current_ip_buf = 0;
 
-#if 0
-    set_gamma_correction();
-#endif
-
     aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
     calc_drwXY(&drwX, &drwY);
@@ -366,31 +362,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                         drwY - (vo_panscan_y >> 1),
                         vo_dwidth + vo_panscan_x - 1,
                         vo_dheight + vo_panscan_y - 1);
-
-
-#if 0
-#ifdef HAVE_SHM
-    if (Shmem_Flag)
-    {
-        XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc,
-                      xvimage[current_buf], 0, 0, image_width,
-                      image_height, drwX, drwY, 1, 1, False);
-        XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc,
-                      xvimage[current_buf], 0, 0, image_width,
-                      image_height, drwX, drwY, vo_dwidth,
-                      (vo_fs ? vo_dheight - 1 : vo_dheight), False);
-    } else
-#endif
-    {
-        XvPutImage(mDisplay, xv_port, vo_window, vo_gc,
-                   xvimage[current_buf], 0, 0, image_width, image_height,
-                   drwX, drwY, 1, 1);
-        XvPutImage(mDisplay, xv_port, vo_window, vo_gc,
-                   xvimage[current_buf], 0, 0, image_width, image_height,
-                   drwX, drwY, vo_dwidth,
-                   (vo_fs ? vo_dheight - 1 : vo_dheight));
-    }
-#endif
 
     mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", drwX,
            drwY, vo_dwidth, vo_dheight);
