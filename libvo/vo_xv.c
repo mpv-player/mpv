@@ -462,11 +462,6 @@ static void check_events(void)
 
     if (e & VO_EVENT_RESIZE)
     {
-        XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &vo_dwidth,
-                     &vo_dheight, &drwBorderWidth, &drwDepth);
-        mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", drwX,
-               drwY, vo_dwidth, vo_dheight);
-
         calc_drwXY(&drwX, &drwY);
     }
 
