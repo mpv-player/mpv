@@ -89,8 +89,7 @@ static int flip_flag;
 
 static int int_pause;
 
-static Window mRoot;
-static uint32_t drwX, drwY, drwBorderWidth, drwDepth;
+static uint32_t drwX, drwY;
 static uint32_t max_width = 0, max_height = 0; // zero means: not set
 
 static void (*draw_alpha_fnc) (int x0, int y0, int w, int h,
@@ -175,9 +174,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 #ifdef CONFIG_XF86VM
     int vm = 0;
-    unsigned int modeline_width, modeline_height;
-    static uint32_t vm_width;
-    static uint32_t vm_height;
 #endif
 
     image_height = height;

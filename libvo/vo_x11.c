@@ -315,9 +315,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 #ifdef CONFIG_XF86VM
     int vm = 0;
-    unsigned int modeline_width, modeline_height;
-    static uint32_t vm_width;
-    static uint32_t vm_height;
 #endif
 
     vo_mouse_autohide = 1;
@@ -403,7 +400,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             vo_window = WinID ? ((Window) WinID) : mRootWin;
             if (WinID)
             {
-                int border;
                 XUnmapWindow(mDisplay, vo_window);
                 XChangeWindowAttributes(mDisplay, vo_window, xswamask,
                                         &xswa);

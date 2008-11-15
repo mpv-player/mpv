@@ -463,9 +463,6 @@ unsigned long xswamask;
 int depth;
 #ifdef CONFIG_XF86VM
 int vm=0;
-unsigned int modeline_width, modeline_height;
-static uint32_t vm_width;
-static uint32_t vm_height;
 #endif
 //end of vo_xv
 
