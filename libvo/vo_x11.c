@@ -454,12 +454,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
     getMyXImage();
 
-    if (!WinID)
-    {
-        vo_dwidth = vo_screenwidth;
-        vo_dheight = vo_screenheight;
-    }
-
     while (fmte->mpfmt) {
       int depth = IMGFMT_RGB_DEPTH(fmte->mpfmt);
       /* bits_per_pixel in X seems to be set to 16 for 15 bit formats
@@ -529,22 +523,26 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 static void Display_Image(XImage * myximage, uint8_t * ImageData)
 {
+    int x = (vo_dwidth - dst_width) / 2;
+    int y = (vo_dheight - myximage->height) / 2;
+    if (WinID == 0) {
+      x = vo_dx;
+      y = vo_dy;
+    }
     myximage->data += out_offset;
 #ifdef HAVE_SHM
     if (Shmem_Flag)
     {
         XShmPutImage(mDisplay, vo_window, vo_gc, myximage,
                      0, 0,
-                     (vo_dwidth - dst_width) / 2,
-                     (vo_dheight - myximage->height) / 2, dst_width,
+                     x, y, dst_width,
                      myximage->height, True);
     } else
 #endif
     {
         XPutImage(mDisplay, vo_window, vo_gc, myximage,
                   0, 0,
-                  (vo_dwidth - dst_width) / 2,
-                  (vo_dheight - myximage->height) / 2, dst_width,
+                  x, y, dst_width,
                   myximage->height);
     }
     myximage->data -= out_offset;
