@@ -265,7 +265,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 XMapWindow(mDisplay, vo_window);
                 vo_x11_update_geometry();
                 aspect_save_prescale(vo_dwidth, vo_dheight);
-            }
+            } else
+                XSelectInput(mDisplay, vo_window, ExposureMask);
         } else
         {
             vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, vo_dwidth, vo_dheight,
