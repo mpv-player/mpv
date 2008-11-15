@@ -388,10 +388,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             }
             vo_vm_switch(vm_width, vm_height, &modeline_width,
                          &modeline_height);
-            vo_dx = (vo_screenwidth - modeline_width) / 2;
-            vo_dy = (vo_screenheight - modeline_height) / 2;
-            vo_dwidth = modeline_width;
-            vo_dheight = modeline_height;
         }
 #endif
         bg = WhitePixel(mDisplay, mScreen);

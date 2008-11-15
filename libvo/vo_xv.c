@@ -243,7 +243,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             }
             vo_vm_switch(vm_width, vm_height, &modeline_width,
                          &modeline_height);
-            aspect_save_screenres(modeline_width, modeline_height);
         } else
 #endif
         XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay),

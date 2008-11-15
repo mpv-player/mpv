@@ -1790,9 +1790,16 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
         XF86VidModeLockModeSwitch(mDisplay, mScreen, 0);
         XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);
         XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);
+
+        // FIXME: all this is more of a hack than proper solution
         X = (vo_screenwidth - *modeline_width) / 2;
         Y = (vo_screenheight - *modeline_height) / 2;
         XF86VidModeSetViewPort(mDisplay, mScreen, X, Y);
+        vo_dx = X;
+        vo_dy = Y;
+        vo_dwidth = *modeline_width;
+        vo_dheight = *modeline_height;
+        aspect_save_screenres(*modeline_width, *modeline_height);
     }
 }
 
