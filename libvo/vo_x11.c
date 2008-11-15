@@ -761,10 +761,14 @@ static int control(uint32_t request, void *data, ...)
             return int_pause = 0;
         case VOCTRL_QUERY_FORMAT:
             return query_format(*((uint32_t *) data));
-        case VOCTRL_GUISUPPORT:
-            return VO_TRUE;
         case VOCTRL_GET_IMAGE:
             return get_image(data);
+        case VOCTRL_GUISUPPORT:
+            return VO_TRUE;
+        case VOCTRL_FULLSCREEN:
+            vo_x11_fullscreen();
+            vo_x11_clearwindow(mDisplay, vo_window);
+            return VO_TRUE;
         case VOCTRL_SET_EQUALIZER:
             {
                 va_list ap;
@@ -789,12 +793,6 @@ static int control(uint32_t request, void *data, ...)
             }
         case VOCTRL_ONTOP:
             vo_x11_ontop();
-            return VO_TRUE;
-        case VOCTRL_FULLSCREEN:
-            {
-                vo_x11_fullscreen();
-                vo_x11_clearwindow(mDisplay, vo_window);
-            }
             return VO_TRUE;
         case VOCTRL_UPDATE_SCREENINFO:
             update_xinerama_info();
