@@ -226,7 +226,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 #ifdef CONFIG_GUI
     if (use_gui)
-        guiGetEvent(guiSetShVideo, 0);  // let the GUI to setup/resize our window
+        guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize the window
     else
 #endif
     {
