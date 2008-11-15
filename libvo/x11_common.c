@@ -1040,25 +1040,7 @@ int vo_x11_check_events(Display * mydisplay)
 //         if (vo_fs && Event.xconfigure.width != vo_screenwidth && Event.xconfigure.height != vo_screenheight) break;
                 if (vo_window == None)
                     break;
-                vo_dwidth = Event.xconfigure.width;
-                vo_dheight = Event.xconfigure.height;
-#if 0
-                /* when resizing, x and y are zero :( */
-                vo_dx = Event.xconfigure.x;
-                vo_dy = Event.xconfigure.y;
-#else
-                {
-                    Window root;
-                    int foo;
-                    Window win;
-
-                    XGetGeometry(mydisplay, vo_window, &root, &foo, &foo,
-                                 &foo /*width */ , &foo /*height */ , &foo,
-                                 &foo);
-                    XTranslateCoordinates(mydisplay, vo_window, root, 0, 0,
-                                          &vo_dx, &vo_dy, &win);
-                }
-#endif
+                vo_x11_update_geometry();
                 ret |= VO_EVENT_RESIZE;
                 break;
             case KeyPress:
@@ -1494,6 +1476,22 @@ static int vo_x11_get_fs_type(int supported)
     }
 
     return type;
+}
+
+/**
+ * \brief update vo_dx, vo_dy, vo_dwidth and vo_dheight with current values of vo_window
+ * \return returns current color depth of vo_window
+ */
+int vo_x11_update_geometry(void) {
+    unsigned depth, w, h;
+    int dummy_int;
+    Window dummy_win;
+    XGetGeometry(mDisplay, vo_window, &dummy_win, &dummy_int, &dummy_int,
+                 &w, &h, &dummy_int, &depth);
+    if (w <= INT_MAX && h <= INT_MAX) { vo_dwidth = w; vo_dheight = h; }
+    XTranslateCoordinates(mDisplay, vo_window, mRootWin, 0, 0, &vo_dx, &vo_dy,
+                          &dummy_win);
+    return depth <= INT_MAX ? depth : 0;
 }
 
 void vo_x11_fullscreen(void)

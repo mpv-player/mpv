@@ -430,9 +430,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                                            ButtonReleaseMask |
                                            ExposureMask);
                 XMapWindow(mDisplay, vo_window);
-                XGetGeometry(mDisplay, vo_window, &mRootWin,
-                             &vo_dx, &vo_dy, &vo_dwidth, &vo_dheight,
-                             &border, &depth);
+                depth = vo_x11_update_geometry();
             } else
                 XSelectInput(mDisplay, vo_window, ExposureMask);
         } else

@@ -1607,13 +1607,7 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
 
   // set new values
   vo_window = win;
-  {
-    Window root;
-    int tmp;
-    unsigned utmp;
-    XGetGeometry(mDisplay, vo_window, &root, &tmp, &tmp,
-        (unsigned *)&vo_dwidth, (unsigned *)&vo_dheight, &utmp, &utmp);
-  }
+  vo_x11_update_geometry();
   if (!keep_context) {
     void *(*getProcAddress)(const GLubyte *);
     const char *(*glXExtStr)(Display *, int);
