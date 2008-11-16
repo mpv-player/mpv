@@ -873,10 +873,10 @@ doxygen:
 	doxygen DOCS/tech/Doxyfile
 
 TAGS:
-	rm -f $@; ( find -name '*.[chS]' -print ) | xargs etags -a
+	rm -f $@; ( find -name '*.[chS]' -o -name '*.asm' -print ) | xargs etags -a
 
 tags:
-	rm -f $@; ( find -name '*.[chS]' -print ) | xargs ctags -a
+	rm -f $@; ( find -name '*.[chS]' -o -name '*.asm' -print ) | xargs ctags -a
 
 
 

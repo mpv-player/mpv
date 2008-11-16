@@ -78,6 +78,19 @@ cxx_check() {
   compile_check $TMPCPP $@ -lstdc++
 }
 
+yasm_check() {
+  echo >> "$TMPLOG"
+  cat "$TMPS" >> "$TMPLOG"
+  echo >> "$TMPLOG"
+  echo "$_yasm $YASMFLAGS -o $TMPEXE $TMPS $@" >> "$TMPLOG"
+  rm -f "$TMPEXE"
+  $_yasm $YASMFLAGS -o "$TMPEXE" "$TMPS" "$@" >> "$TMPLOG" 2>&1
+  TMP="$?"
+  echo >> "$TMPLOG"
+  echo >> "$TMPLOG"
+  return "$TMP"
+}
+
 tmp_run() {
   "$TMPEXE" >> "$TMPLOG" 2>&1
 }
@@ -408,6 +421,7 @@ Miscellaneous options:
   --cc=COMPILER          C compiler to build MPlayer [gcc]
   --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
+  --yasm=YASM            Yasm assembler to build MPlayer [yasm]
   --ar=AR                librarian to build MPlayer [ar]
   --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
   --windres=WINDRES      windres to build MPlayer [windres]
@@ -493,6 +507,7 @@ _cc=cc
 _ar=ar
 test "$CC" && _cc="$CC"
 _as=auto
+_yasm=yasm
 _runtime_cpudetection=no
 _cross_compile=auto
 _prefix="/usr/local"
@@ -789,6 +804,9 @@ for ac_option do
     ;;
   --as=*)
     _as=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --yasm=*)
+    _yasm=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --ar=*)
     _ar=`echo $ac_option | cut -d '=' -f 2`
@@ -2385,6 +2403,37 @@ else
 fi
 echores $_asmalign_pot
 
+echocheck "yasm"
+if test -z "$YASMFLAGS" ; then
+  if darwin ; then
+    x86_64 && objformat="macho64" || objformat="macho32"
+  elif win32 ; then
+    objformat="win32"
+  else 
+    objformat="elf"
+  fi
+  # currently tested for Linux x86, x86_64
+  YASMFLAGS="-f $objformat"
+  x86_64 && YASMFLAGS="$YASMFLAGS -m amd64"
+  case "$objformat" in
+    elf) test $_debug && YASMFLAGS="$YASMFLAGS -g dwarf2" ;;
+    macho64)             YASMFLAGS="$YASMFLAGS -DPIC -DPREFIX" ;;
+    *)                   YASMFLAGS="$YASMFLAGS -DPREFIX"  ;;
+  esac
+else
+  _warn_CFLAGS=yes
+fi
+
+echo "pabsw xmm0, xmm0" > $TMPS
+yasm_check || _yasm=""
+if test $_yasm ; then
+  _def_yasm='#define HAVE_YASM 1'
+  _have_yasm="yes"
+  echores "$_yasm"
+else
+  _def_yasm='#undef HAVE_YASM'
+  echores "no"
+fi
 
 #FIXME: This should happen before the check for CFLAGS..
 if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; then
@@ -7798,6 +7847,7 @@ AR = $_ar
 CC = $_cc
 CXX = $_cc
 HOST_CC = $_host_cc
+YASM = $_yasm
 INSTALL = $_install
 INSTALLSTRIP = $_install_strip
 RANLIB = $_ranlib
@@ -7816,6 +7866,7 @@ CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
 CFLAGS_STACKREALIGN = $cflags_stackrealign
 CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
 CFLAGS_TREMOR_LOW = $cflags_tremor_low
+YASMFLAGS = $YASMFLAGS
 
 EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
@@ -7983,6 +8034,7 @@ LIBNAME=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
 CONFIG_FFT=yes
+CONFIG_FFT_MMX=$_mmx
 CONFIG_GOLOMB=yes
 CONFIG_MDCT=yes
 
@@ -8007,6 +8059,7 @@ CONFIG_ZLIB=$_zlib
 
 HAVE_PTHREADS = $_pthreads
 HAVE_W32THREADS = $_w32threads
+HAVE_YASM = $_have_yasm
 
 `echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
@@ -8410,6 +8463,7 @@ $_def_threads
 #else
 #define ENABLE_THREADS 0
 #endif
+$_def_yasm
 
 #define CONFIG_GPL 1
 #define ENABLE_SMALL 0
@@ -8538,7 +8592,8 @@ EOF
 if test "$_warn_CFLAGS" = yes; then
   cat <<EOF
 
-MPlayer compilation will use the CPPFLAGS/CFLAGS/LDFLAGS set by you, but:
+MPlayer compilation will use the CPPFLAGS/CFLAGS/LDFLAGS/YASMFLAGS set by you,
+but:
 
     *** ***  DO NOT REPORT BUGS IF IT DOES NOT COMPILE/WORK!  *** ***
 
