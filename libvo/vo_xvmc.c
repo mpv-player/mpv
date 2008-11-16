@@ -454,7 +454,6 @@ int i,mode_id,rez;
 int numblocks,blocks_per_macroblock;//bpmb we have 6,8,12
 
 //from vo_xv
-XSizeHints hint;
 XVisualInfo vinfo;
 XGCValues xgcv;
 XSetWindowAttributes xswa;
@@ -646,10 +645,6 @@ skip_surface_allocation:
    else
 #endif
    {
-      hint.x = vo_dx;
-      hint.y = vo_dy;
-      hint.width = d_width;
-      hint.height = d_height;
 #ifdef CONFIG_XF86VM
       if ( vm )
       {
@@ -657,8 +652,6 @@ skip_surface_allocation:
       }
       else
 #endif
-   hint.flags = PPosition | PSize /* | PBaseSize */;
-   hint.base_width = hint.width; hint.base_height = hint.height;
    XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
    depth=attribs.depth;
    if (depth != 15 && depth != 16 && depth != 24 && depth != 32) depth = 24;
