@@ -2414,7 +2414,7 @@ if test -z "$YASMFLAGS" ; then
   fi
   # currently tested for Linux x86, x86_64
   YASMFLAGS="-f $objformat"
-  x86_64 && YASMFLAGS="$YASMFLAGS -m amd64"
+  x86_64 && YASMFLAGS="$YASMFLAGS -DARCH_X86_64 -m amd64"
   case "$objformat" in
     elf) test $_debug && YASMFLAGS="$YASMFLAGS -g dwarf2" ;;
     macho64)             YASMFLAGS="$YASMFLAGS -DPIC -DPREFIX" ;;
