@@ -110,7 +110,7 @@ It can encode with various codecs, like
 </para></listitem>
 <listitem><para>
   编码到所有FFmpeg的
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+  <systemitem class="library">libavcodec</systemitem>
   所支持的编码
 </para></listitem>
 <listitem><para>
