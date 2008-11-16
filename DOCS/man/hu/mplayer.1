@@ -1,4 +1,4 @@
-.\" Synced with r27691
+.\" Synced with r27906
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 10. 05." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 11. 16." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -107,7 +107,7 @@ cue://fájl[:sáv]
 .
 .br
 .B mplayer
-[fájl|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
+[fájl|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]://
 [felhasználó:jelszó@]URL[:port] [opciók]
 .
 .br
@@ -2661,6 +2661,12 @@ amitõl pl.\& az OSD nem tud helyesen megjelenni.
 A mixer hangerõ változtatásának léptékét állítja be a teljes tartomány
 százalékában (alapértelmezett: 3).
 .
+.TP
+.B \-volume <-1\-100> (lásd még \-af volume)
+Beállítja a kezdõ hangerõt a keverõben, akár hardveres, akár szoftveres (ha a
+\-softvol-lal együtt használod).
+A -1-es érték (alapértelmezett) nem változtat a hangerõn.
+.
 .
 .
 .SH "AUDIÓ KIMENETI VEZÉRLÕK (CSAK MPLAYER)"
@@ -3219,12 +3225,12 @@ Nem minden videó kimeneti vezérlõ támogatja.
 .
 .TP
 .B \-screenh <pixel>
-A függõleges képernyõ felbontás megadása az olyan videó kimeneti vezérlõnek,
+A képernyõ magasságának megadása az olyan videó kimeneti vezérlõnek,
 ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TV-out.
 .
 .TP
 .B \-screenw <pixel>
-A vízszintes képernyõ felbontás megadása az olyan videó kimeneti vezérlõnek,
+A képernyõ szélességének megadása az olyan videó kimeneti vezérlõnek,
 ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TV-out.
 .
 .TP
@@ -10064,18 +10070,20 @@ alapos keresés (nagyon lassú és nem jobb, mint az umh)
 az alapos vagy többszörös-hatszög mozgás keresés sugara (alapértelmezett: 16)
 .
 .TP
-.B subq=<1\-7>
+.B subq=<0\-9>
 A subpel finomítási minõségének beállítása.
 Ez a paraméter szabályozza a minõség kontra sebesség arányt a
 mozgás becslési döntések folyamatában.
 A subq=5 akár 10%-kal gyorsabb lehet, mint a subq=1.
 .PD 0
 .RSs
-.IPs 1
+.IPs 0
 Teljes pixeles pontosságú mozgás becslést végez minden résztvevõ
 makroblokk típuson.
-Ezután  kiválasztja a legjobb típust.
-Majd finomítja azt a típusú mozgást egy gyors negyedpixeles pontossághoz (leggyorsabb).
+Ezután SAD metrikával kiválasztja a legjobb típust (gyorsabb, mint a subq=1, de nem
+javasolt, csak ha nagyon gyors kódolást akarsz).
+.IPs 1
+Ugyan az, mint a 0, majd finomítja a mozgást gyors negyedpixeles precizítással (gyors).
 .IPs 2
 Félpixeles pontosságú mozgás becslést végez minden részvevõ makroblokk
 típuson.
@@ -10086,18 +10094,25 @@ Mint az 2, de lassabb negyedpixeles finomítást végez.
 .IPs 4
 Gyors negyedpixeles pontosságú mozgás becslést futtat le minden résztvevõ
 makroblokk típuson.
-Majd kiválasztja a legjobb típust.
+Majd SATD metrikával kiválasztja a legjobb típust.
 Ezután befejezi a negyedpixeles finomítást azon a típuson.
 .IPs 5
 Legjobb minõségû negyedpixel pontosságú mozgás becslést futtat le
 minden résztvevõ makroblokk típuson, mielõtt kiválaszaná a legjobb
-típust. (alapértelmezett)
+típust.
+Finomítja a két, bidirekcionális makroblokkban használt mozgás vektort is
+SATD metrikával a kétirányú kereséssel megtalált vektorok újra felhasználása helyett.
 .IPs 6
 Engedélyezi a ráta-torzítás optimalizálását a makroblokk típusokra
-az I- és P-kockáknál.
+az I- és P-kockáknál (alapértelmezett).
 .IPs 7
-Engedélyezi a ráta-torzítás optimalizálását az intra módokra és a mozgás
-vektorokra. (legjobb)
+Engedélyezi a ráta-torzítás optimalizálását a makroblokk típusokra minden kockánál.
+.IPs 8
+Engedélyezi a ráta-torzítás optimalizálását a mozgás vektorokra és a
+belsõ jósló módokra az I- és P-kockáknál.
+.IPs 9
+Engedélyezi a ráta-torzítás optimalizálását a mozgás vektorokra és a
+belsõ jósló módokra minden kockánál (legjobb).
 .RE
 .PD 1
 .RS
@@ -10119,18 +10134,7 @@ Ezen opció nélkül az egész makroblokknak ugyan azt a referencia kockát kell hasz
 frameref>1 szükséges.
 .
 .TP
-.B (no)brdo
-Engedélyezi a ráta-torzító optimalizálást a B-kockák makroblokk típusain.
-subq>=6 szükséges.
-.
-.TP
-.B (no)bime
-Finomítja a kétirányú makroblokkokban használt két mozgásvektort,
-az elõre és visszafelé történõ keresésbõl származó vektorok újrafelhasználása helyett.
-Ennek az opciónakl nincs hatása B-kockák nélkül.
-.
-.TP
-.B trellis=<0\-2>
+.B trellis=<0\-2> (csak cabac)
 ráta-torzító optimális kvantálás
 .PD 0
 .RSs
@@ -10142,6 +10146,19 @@ csak a végsõ kódoláshoz engedélyezi
 minden mód döntésnél engedélyezi (lassú, subq>=6 szükséges)
 .RE
 .PD 1
+.
+.TP
+.B psy-rd=rd[,trell]
+Beállítja a pszichovizuális optimalizáció erõsségét.
+.PD 0
+.RSs
+.IPs rd=<0.0\-10.0>
+psy optimalizáció erõssége (subq>=6 kell hozzá) (alapértelmezett: 1.0)
+.IPs trell=<0.0\-10.0>
+trellis (trellis kell hozzá, kísérleti) (alapértelmezett: 0.0)
+.RE
+.PD 1
+.
 .
 .TP
 .B deadzone_inter=<0\-32>

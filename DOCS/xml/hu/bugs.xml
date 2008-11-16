@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26990 -->
+<!-- synced with r27890 -->
 <appendix id="bugs">
 <title>Ismert hibák</title>
 
@@ -7,13 +7,6 @@
 <title>Speciális rendszer/CPU-specifikus hibák/problémák</title>
 
 <itemizedlist>
-<listitem>
-  <para>SIGILL (signal 4) P3-on 2.2.x kernelekkel:</para>
-  <para>Probléma: a 2.2.x kernelben nincs megfelelő (működő) SSE támogatás</para>
-  <para>Megoldás: frissítsd a kernelt 2.4.x-re</para>
-  <para>Tüneti kezelés: <command>./configure --disable-sse</command></para>
-</listitem>
-
 <listitem>
   <para>Általános SIGILL (signal 4):</para>
   <para>
@@ -139,78 +132,6 @@
 </itemizedlist>
 </sect2>
 
-<!-- ********** -->
-
-<sect2 id="bugs-nosound">
-<title>Egyáltalán nincs hang</title>
-
-<itemizedlist>
-<listitem>
-  <para>a fájlod nem támogatott audió codec-et használ</para>
-  <para>
-  Megoldás: olvasd el a dokumentációt és segíts a támogatás elkészítésében
-  </para>
-</listitem>
-</itemizedlist>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="bugs-nopicture">
-<title>Egyáltalán nincs kép (csak üres szürke/zöld ablak)</title>
-
-<itemizedlist>
-<listitem>
-  <para>a fájlod egy nem támogatott videó codec-et használ</para>
-  <para>
-  Megoldás: olvasd el a dokumentációt és segíts a támogatás elkészítésében
-  </para>
-</listitem>
-
-<listitem>
-  <para>
-  az automatikusan kiválasztott codec nem tudja dekódolni a fájlt, próbálj meg másik
-  codec-et kiválasztani a <option>-vc</option> vagy <option>-vfm</option> kapcsolókkal
-  </para>
-</listitem>
-</itemizedlist>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="bugs-video">
-<title>Videó-kimeneti problémák</title>
-
-<para>
-Vedd figyelembe, hogy a <option>-fs -vm</option> és <option>-zoom</option> kapcsolókat
-nem mindegyik vezérlő támogatja. Ráadásul csak pár vezérlő támogatja a hardveres
-méretezést/nagyítást.
-</para>
-
-<formalpara>
-<title>OSD/felirat vibrálás</title>
-<para>
-<itemizedlist>
-  <listitem><para>x11 vezérlő: bocs, ez jelenleg nem javítható</para></listitem>
-  <listitem><para>xv vezérlő: használd a <option>-double</option> kapcsolót</para></listitem>
-</itemizedlist>
-</para>
-</formalpara>
-
-<formalpara>
-<title>Zöld kép mga_vid használatakor
-  (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
-<para>
-<itemizedlist>
-<listitem><para>
-  az mga_vid rosszul detektálja a kártyád RAM-jának méretét, töltsd be
-  újra a <option>mga_ram_size</option> kapcsolóval
-</para></listitem>
-</itemizedlist>
-</para>
-</formalpara>
-
-</sect2>
 </sect1>
 
 </appendix>
