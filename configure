@@ -2432,6 +2432,7 @@ if test $_yasm ; then
   echores "$_yasm"
 else
   _def_yasm='#undef HAVE_YASM'
+  _have_yasm="no"
   echores "no"
 fi
 
