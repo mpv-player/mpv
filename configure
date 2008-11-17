@@ -7816,6 +7816,8 @@ if test "$cc_vendor" = "gnu" ; then
   cc_check -Wdeclaration-after-statement && CFLAGS="-Wdeclaration-after-statement $CFLAGS"
   cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
   cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
+else
+  CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
 fi
 
 cc_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
