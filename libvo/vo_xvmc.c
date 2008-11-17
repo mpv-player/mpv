@@ -1064,11 +1064,6 @@ int e=vo_x11_check_events(mDisplay);
    {
       e |= VO_EVENT_EXPOSE;
 
-      XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&vo_dwidth,&vo_dheight,
-                   &drwBorderWidth,&drwDepth );
-      mp_msg(MSGT_VO,MSGL_V, "[xvmc] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,
-              vo_dwidth,vo_dheight );
-
       calc_drwXY(&drwX, &drwY);
    }
    if ( e & VO_EVENT_EXPOSE )
