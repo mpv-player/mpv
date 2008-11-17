@@ -2427,11 +2427,13 @@ fi
 echo "pabsw xmm0, xmm0" > $TMPS
 yasm_check || _yasm=""
 if test $_yasm ; then
+  test "$_mmx" = "yes" && fft_mmx="yes"
   _def_yasm='#define HAVE_YASM 1'
   _have_yasm="yes"
   echores "$_yasm"
 else
   _def_yasm='#undef HAVE_YASM'
+  fft_mmx="no"
   _have_yasm="no"
   echores "no"
 fi
@@ -8037,7 +8039,7 @@ LIBNAME=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
 CONFIG_FFT=yes
-CONFIG_FFT_MMX=$_mmx
+CONFIG_FFT_MMX=$fft_mmx
 CONFIG_GOLOMB=yes
 CONFIG_MDCT=yes
 
