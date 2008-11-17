@@ -5837,7 +5837,7 @@ if test "$_zlib" = yes ; then
   _ld_extra="$_ld_extra -lz"
 else
   _def_zlib='#undef CONFIG_ZLIB'
-  _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// -e/TSCC_DECODER// `
+  _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// -e s/TSCC_DECODER// `
   _libavencoders=`echo $_libavencoders | sed -e s/FLASHSV_ENCODER// -e s/PNG_ENCODER// -e s/ZMBV_ENCODER// `
 fi
 echores "$_zlib"
