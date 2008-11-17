@@ -181,7 +181,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 {
     struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
-    XSizeHints hint;
     XVisualInfo vinfo;
     XGCValues xgcv;
     XSetWindowAttributes xswa;
@@ -223,44 +222,18 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
 #ifdef CONFIG_GUI
     if (use_gui)
-        guiGetEvent(guiSetShVideo, 0);  // let the GUI to setup/resize our window
+        guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize the window
     else
 #endif
     {
-        hint.x = vo->dx;
-        hint.y = vo->dy;
-        hint.width = d_width;
-        hint.height = d_height;
 #ifdef CONFIG_XF86VM
-        unsigned int modeline_width, modeline_height;
-        uint32_t vm_width;
-        uint32_t vm_height;
         int vm = flags & VOFLAG_MODESWITCHING;
         if (vm)
         {
-            if ((d_width == 0) && (d_height == 0))
-            {
-                vm_width = ctx->image_width;
-                vm_height = ctx->image_height;
-            } else
-            {
-                vm_width = d_width;
-                vm_height = d_height;
-            }
-            vo_vm_switch(vo, vm_width, vm_height, &modeline_width,
-                         &modeline_height);
+            vo_vm_switch(vo);
             ctx->mode_switched = 1;
-            hint.x = (opts->vo_screenwidth - modeline_width) / 2;
-            hint.y = (opts->vo_screenheight - modeline_height) / 2;
-            hint.width = modeline_width;
-            hint.height = modeline_height;
-            aspect_save_screenres(vo, modeline_width, modeline_height);
-        } else
-#warning This "else" makes no sense
+        }
 #endif
-        hint.flags = PPosition | PSize /* | PBaseSize */ ;
-        hint.base_width = hint.width;
-        hint.base_height = hint.height;
         XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
                              &attribs);
         depth = attribs.depth;
@@ -293,18 +266,13 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                                            ButtonReleaseMask |
                                            ExposureMask);
                 XMapWindow(x11->display, x11->window);
-                Window mRoot;
-                uint32_t drwBorderWidth, drwDepth;
-                XGetGeometry(x11->display, x11->window, &mRoot,
-                             &ctx->drwX, &ctx->drwY, &vo->dwidth, &vo->dheight,
-                             &drwBorderWidth, &drwDepth);
-                if (vo->dwidth <= 0) vo->dwidth = d_width;
-                if (vo->dheight <= 0) vo->dheight = d_height;
+                vo_x11_update_geometry(vo);
                 aspect_save_prescale(vo, vo->dwidth, vo->dheight);
-            }
+            } else
+                XSelectInput(x11->display, x11->window, ExposureMask);
         } else
         {
-            vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
+            vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, vo->dwidth, vo->dheight,
                    flags, CopyFromParent, "xv", title);
             XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
         }
@@ -360,10 +328,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     ctx->current_buf = 0;
     ctx->current_ip_buf = 0;
 
-#if 0
-    set_gamma_correction();
-#endif
-
     aspect(vo, &vo->dwidth, &vo->dheight, A_NOZOOM);
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
     calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
@@ -377,9 +341,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
            ctx->drwY, vo->dwidth, vo->dheight);
-
-    if (opts->vo_ontop)
-        vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
 
     return 0;
 }
@@ -480,16 +441,7 @@ static void check_events(struct vo *vo)
     int e = vo_x11_check_events(vo);
 
     if (e & VO_EVENT_RESIZE)
-    {
-        Window mRoot;
-        uint32_t drwBorderWidth, drwDepth;
-        XGetGeometry(x11->display, x11->window, &mRoot, &ctx->drwX, &ctx->drwY,
-                     &vo->dwidth, &vo->dheight, &drwBorderWidth, &drwDepth);
-        mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
-               ctx->drwY, vo->dwidth, vo->dheight);
-
         calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
-    }
 
     if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
     {
@@ -577,8 +529,7 @@ static int draw_slice(struct vo *vo, uint8_t * image[], int stride[], int w,
 
 static int draw_frame(struct vo *vo, uint8_t * src[])
 {
-    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_XV_DrawFrameCalled);
-    return -1;
+    return VO_ERROR;
 }
 
 static uint32_t draw_image(struct vo *vo, mp_image_t * mpi)

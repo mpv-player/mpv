@@ -688,7 +688,7 @@ SVCD)及H.263文件一样。可惜的是，除了<application>MPlayer</applicati
 
 <para>
 这种特性之可以与
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>的
+<systemitem class="library">libavcodec</systemitem>的
 <systemitem>mpeg4</systemitem>编码器一同使用。记住：虽然
 <application>MPlayer</application>可以正常播放所生成的文件，其他播放器可能使用错误
 的图象比例。

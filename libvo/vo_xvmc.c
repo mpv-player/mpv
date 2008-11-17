@@ -454,7 +454,6 @@ int i,mode_id,rez;
 int numblocks,blocks_per_macroblock;//bpmb we have 6,8,12
 
 //from vo_xv
-XSizeHints hint;
 XVisualInfo vinfo;
 XGCValues xgcv;
 XSetWindowAttributes xswa;
@@ -463,9 +462,6 @@ unsigned long xswamask;
 int depth;
 #ifdef CONFIG_XF86VM
 int vm=0;
-unsigned int modeline_width, modeline_height;
-static uint32_t vm_width;
-static uint32_t vm_height;
 #endif
 //end of vo_xv
 
@@ -649,28 +645,13 @@ skip_surface_allocation:
    else
 #endif
    {
-      hint.x = vo_dx;
-      hint.y = vo_dy;
-      hint.width = d_width;
-      hint.height = d_height;
 #ifdef CONFIG_XF86VM
       if ( vm )
       {
-	 if ((d_width==0) && (d_height==0))
-	    { vm_width=image_width; vm_height=image_height; }
-	 else
-	    { vm_width=d_width; vm_height=d_height; }
-	 vo_vm_switch(vm_width, vm_height,&modeline_width, &modeline_height);
-	 hint.x=(vo_screenwidth-modeline_width)/2;
-	 hint.y=(vo_screenheight-modeline_height)/2;
-	 hint.width=modeline_width;
-	 hint.height=modeline_height;
-	 aspect_save_screenres(modeline_width,modeline_height);
+	 vo_vm_switch();
       }
       else
 #endif
-   hint.flags = PPosition | PSize /* | PBaseSize */;
-   hint.base_width = hint.width; hint.base_height = hint.height;
    XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
    depth=attribs.depth;
    if (depth != 15 && depth != 16 && depth != 24 && depth != 32) depth = 24;
@@ -725,8 +706,6 @@ skip_surface_allocation:
    panscan_calc();
 
    mp_msg(MSGT_VO,MSGL_V, "[xvmc] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
-
-   if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
 //end vo_xv
 
@@ -1085,11 +1064,6 @@ int e=vo_x11_check_events(mDisplay);
    {
       e |= VO_EVENT_EXPOSE;
 
-      XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&vo_dwidth,&vo_dheight,
-                   &drwBorderWidth,&drwDepth );
-      mp_msg(MSGT_VO,MSGL_V, "[xvmc] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,
-              vo_dwidth,vo_dheight );
-
       calc_drwXY(&drwX, &drwY);
    }
    if ( e & VO_EVENT_EXPOSE )
@@ -1152,7 +1126,7 @@ static void uninit(void){
    xvmc_free();
  //from vo_xv
 #ifdef CONFIG_XF86VM
-   vo_vm_close(mDisplay);
+   vo_vm_close();
 #endif
    vo_x11_uninit();
 }

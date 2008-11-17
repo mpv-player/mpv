@@ -94,18 +94,19 @@ extern int mLocalDisplay;
 struct vo_x11_state *vo_x11_init_state(void);
 int vo_init(struct vo *vo);
 void vo_uninit(struct vo_x11_state *x11);
-extern void vo_x11_decoration(struct vo *vo, int d );
+void vo_x11_decoration(struct vo *vo, int d );
 void vo_x11_classhint(struct vo *vo, Window window, char *name);
 void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max);
 int vo_x11_check_events(struct vo *vo);
-extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
+void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
 void vo_x11_fullscreen(struct vo *vo);
+int vo_x11_update_geometry(struct vo *vo);
 void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
 void vo_x11_uninit(struct vo *vo);
 Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo);
 uint32_t vo_x11_set_equalizer(struct vo *vo, char *name, int value);
-extern uint32_t vo_x11_get_equalizer(char *name, int *value);
-extern void fstype_help(void);
+uint32_t vo_x11_get_equalizer(char *name, int *value);
+void fstype_help(void);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
         int x, int y, unsigned int width, unsigned int height, int flags,
 	Colormap col_map, const char *classname, const char *title);
@@ -113,7 +114,7 @@ void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
 	int img_width, int img_height, int use_fs);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 void vo_x11_ontop(struct vo *vo);
-extern void vo_x11_border(struct vo *vo);
+void vo_x11_border(struct vo *vo);
 void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action);
 
 #endif
@@ -146,7 +147,7 @@ int xv_test_ckm( void * arg );
 void vo_x11_putkey(struct vo *vo, int key);
 
 #ifdef CONFIG_XF86VM
-void vo_vm_switch(struct vo *vo, uint32_t, uint32_t, int*, int*);
+void vo_vm_switch(struct vo *vo);
 void vo_vm_close(struct vo *vo);
 #endif
 
@@ -161,6 +162,7 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11);
 #ifdef IS_OLD_VO
 #define vo_x11_create_vo_window(...) vo_x11_create_vo_window(global_vo, __VA_ARGS__)
 #define vo_x11_fullscreen() vo_x11_fullscreen(global_vo)
+#define vo_x11_update_geometry() vo_x11_update_geometry(global_vo)
 #define vo_x11_ontop() vo_x11_ontop(global_vo)
 #define vo_init() vo_init(global_vo)
 #define vo_x11_ewmh_fullscreen(action) vo_x11_ewmh_fullscreen(global_vo->x11->display, action)
@@ -168,7 +170,7 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11);
 #define vo_x11_uninit() vo_x11_uninit(global_vo)
 #define vo_x11_check_events(display) vo_x11_check_events(global_vo)
 #define vo_x11_sizehint(...) vo_x11_sizehint(global_vo, __VA_ARGS__)
-#define vo_vm_switch(...) vo_vm_switch(global_vo, __VA_ARGS__)
+#define vo_vm_switch() vo_vm_switch(global_vo)
 #define vo_x11_create_colormap(vinfo) vo_x11_create_colormap(global_vo, vinfo)
 #define vo_x11_set_equalizer(...) vo_x11_set_equalizer(global_vo, __VA_ARGS__)
 #define vo_xv_set_eq(...) vo_xv_set_eq(global_vo, __VA_ARGS__)
@@ -178,7 +180,7 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11);
 #define vo_xv_init_colorkey() vo_xv_init_colorkey(global_vo)
 #define vo_xv_draw_colorkey(...) vo_xv_draw_colorkey(global_vo, __VA_ARGS__)
 #define vo_x11_clearwindow_part(display, ...) vo_x11_clearwindow_part(global_vo, __VA_ARGS__)
-#define vo_vm_close(display) vo_vm_close(global_vo)
+#define vo_vm_close() vo_vm_close(global_vo)
 #define vo_x11_clearwindow(display, window) vo_x11_clearwindow(global_vo, window)
 #define vo_x11_classhint(display, window, name) vo_x11_classhint(global_vo, window, name)
 #define vo_x11_setlayer(display, window, layer) vo_x11_setlayer(global_vo, window, layer)

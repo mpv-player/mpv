@@ -170,6 +170,7 @@ static void texSize(int w, int h, int *texw, int *texh) {
     while (*texh < h)
       *texh *= 2;
   }
+  if (ati_hack) *texw = (*texw + 511) & ~511;
 }
 
 //! maximum size of custom fragment program
@@ -689,12 +690,8 @@ static uint32_t get_image(mp_image_t *mpi) {
   }
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
   if (ati_hack) {
-    int s = 1;
-    // for unexplainable reasons, with width < 512 chroma tends to be messed up
-    // (after ca. 2/3 the previous line repeats all over)
-    if (mpi->width < 512) return VO_FALSE;
-    while (s < mpi->width) s *= 2;
-    mpi->width = s;
+    mpi->width = texture_width;
+    mpi->height = texture_height;
   }
   if (!gl_buffer)
     GenBuffers(1, &gl_buffer);
@@ -734,6 +731,8 @@ static uint32_t draw_image(mp_image_t *mpi) {
   int stride[3];
   unsigned char *planes[3];
   mp_image_t mpi2 = *mpi;
+  int w = mpi->w, h = mpi->h;
+  if (ati_hack) { w = texture_width; h = texture_height; }
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
     goto skip_upload;
   mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
@@ -763,14 +762,14 @@ static uint32_t draw_image(mp_image_t *mpi) {
     slice = 0; // always "upload" full texture
   }
   glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
-              mpi->x, mpi->y, mpi->w, mpi->h, slice);
+              mpi->x, mpi->y, w, h, slice);
   if (mpi->imgfmt == IMGFMT_YV12) {
     ActiveTexture(GL_TEXTURE1);
     glUploadTex(gl_target, gl_format, gl_type, planes[1], stride[1],
-                mpi->x / 2, mpi->y / 2, mpi->w / 2, mpi->h / 2, slice);
+                mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
     ActiveTexture(GL_TEXTURE2);
     glUploadTex(gl_target, gl_format, gl_type, planes[2], stride[2],
-                mpi->x / 2, mpi->y / 2, mpi->w / 2, mpi->h / 2, slice);
+                mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
     ActiveTexture(GL_TEXTURE0);
   }
   if (mpi->flags & MP_IMGFLAG_DIRECT)

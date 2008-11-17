@@ -248,9 +248,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     set_window();               // set up mga_vid_config.dest_width etc
 
-    if (vo_ontop)
-        vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
-
     XSync(mDisplay, False);
 
     ioctl(f, MGA_VID_ON, 0);
