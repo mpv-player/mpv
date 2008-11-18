@@ -123,11 +123,11 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef CONFIG_TDFX_VID
         &video_out_tdfx_vid,
 #endif
-#ifdef CONFIG_DIRECT3D
-        &video_out_direct3d,
-#endif
 #ifdef CONFIG_DIRECTX
         &video_out_directx,
+#endif
+#ifdef CONFIG_DIRECT3D
+        &video_out_direct3d,
 #endif
 #ifdef CONFIG_COREVIDEO
 	&video_out_macosx,
