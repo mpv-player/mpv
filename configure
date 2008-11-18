@@ -369,6 +369,7 @@ Video output:
   --enable-caca            enable CACA  video output [autodetect]
   --enable-ggi             enable GGI video output [autodetect]
   --enable-ggiwmh          enable GGI libggiwmh extension [autodetect]
+  --enable-direct3d        enable Direct3D video output [autodetect]
   --enable-directx         enable DirectX video output [autodetect]
   --enable-dxr2            enable DXR2 video output [autodetect]
   --enable-dxr3            enable DXR3/H+ video output [autodetect]
@@ -547,6 +548,7 @@ _dga2=auto
 _xv=auto
 _xvmc=no  #auto when complete
 _sdl=auto
+_direct3d=auto
 _directx=auto
 _win32waveout=auto
 _nas=auto
@@ -867,6 +869,8 @@ for ac_option do
   --disable-xvmc)       _xvmc=no        ;;
   --enable-sdl)		_sdl=yes	;;
   --disable-sdl)	_sdl=no		;;
+  --enable-direct3d)    _direct3d=yes   ;;
+  --disable-direct3d)   _direct3d=no    ;;
   --enable-directx)     _directx=yes    ;;
   --disable-directx)    _directx=no     ;;
   --enable-win32waveout)  _win32waveout=yes ;;
@@ -4900,6 +4904,27 @@ else
 fi
 echores "$_win32waveout"
 
+echocheck "Direct3D"
+if test "$_direct3d" = auto ; then
+  cat > $TMPC << EOF
+#include <windows.h>
+#include <d3d9.h>
+int main(void) { return 0; }
+EOF
+  _direct3d=no
+  cc_check -ld3d9 && _direct3d=yes
+fi
+if test "$_direct3d" = yes ; then
+  _def_direct3d='#define CONFIG_DIRECT3D 1'
+  _libs_mplayer="$_libs_mplayer -ld3d9"
+  _vosrc="$_vosrc vo_direct3d.c"
+  _vomodules="direct3d $_vomodules"
+else
+  _def_direct3d='#undef CONFIG_DIRECT3D'
+  _novomodules="direct3d $_novomodules"
+fi
+echores "$_direct3d"
+
 echocheck "Directx"
 if test "$_directx" = auto ; then
   cat > $TMPC << EOF
@@ -8377,6 +8402,7 @@ $_def_dfbmga
 $_def_dga
 $_def_dga1
 $_def_dga2
+$_def_direct3d
 $_def_directfb
 $_def_directfb_version
 $_def_directx
