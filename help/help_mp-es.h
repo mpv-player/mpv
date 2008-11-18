@@ -58,14 +58,9 @@ static char help_text[]=
 "\n";
 #endif
 
-#define MSGTR_SamplesWanted "Se necesitan muestras de este formato para mejorar el soporte. Por favor contacte a los desarrolladores.\n"
-
-
-
 // ========================= MPlayer messages ===========================
 
 // mplayer.c: 
-
 #define MSGTR_Exiting "\nSaliendo...\n"
 #define MSGTR_ExitingHow "\nSaliendo... (%s)\n"
 #define MSGTR_Exit_quit "Salida."
@@ -213,7 +208,6 @@ static char help_text[]=
 #define MSGTR_MPEndposNoSizeBased "La opción -endpos en MPlayer aun no soporta unidades de tamaño.\n"
 
 // mplayer.c OSD
-
 #define MSGTR_OSDenabled "habilitado"
 #define MSGTR_OSDdisabled "deshabilitado"
 #define MSGTR_OSDAudio "Audio: %s"
@@ -258,8 +252,7 @@ static char help_text[]=
 #define MSGTR_SubVisibleStatus "Subtítulos: %s"
 #define MSGTR_SubForcedOnlyStatus "Sólo subtítulos forzados: %s"
  
-// mencoder.c:
-
+// mencoder.c
 #define MSGTR_UsingPass3ControlFile "Usando el archivo de control pass3: %s\n"
 #define MSGTR_MissingFilename "\nFalta el nombre del archivo.\n\n"
 #define MSGTR_CannotOpenFile_Device "No se pudo abrir el archivo o el dispositivo.\n"
@@ -424,7 +417,6 @@ static char help_text[]=
 #define MSGTR_CantCopyAudioFormat "El formato de audio 0x%x no es compatible con '-oac copy', por favor pruebe '-oac pcm' o use '-fafmttag' para sobreescribirlo.\n"
 
 // cfg-mencoder.h
-
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     método de tasa de bits variable\n"\
 "                0: cbr\n"\
@@ -474,7 +466,7 @@ static char help_text[]=
 "                 (320 kbps de tasa de bits)\n"\
 "                 <8-320>: codificación ABR con tasa de bits en promedio en los kbps dados.\n\n"
 
-//codec-cfg.c: 
+//codec-cfg.c 
 #define MSGTR_DuplicateFourcc "FourCC duplicado"
 #define MSGTR_TooManyFourccs "demasiados FourCCs/formatos..."
 #define MSGTR_ParseError "error en el analísis"
@@ -532,6 +524,9 @@ static char help_text[]=
 // m_property.c
 #define MSGTR_PropertyListHeader "\n Nombre                 Tipo            Min      Max\n\n"
 #define MSGTR_TotalProperties "\nTotal: %d propiedades\n"
+
+// loader/ldt_keeper.c
+#define MSGTR_LOADER_DYLD_Warning "AVISO: Se está intentando usar los codecs DLL pero la variable de entorno\n         DYLD_BIND_AT_LAUNCH no está establecida. Probablemente falle.\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Dispositivo de CD-ROM '%s' no encontrado.\n"
@@ -1607,6 +1602,9 @@ static char help_text[]=
 
 // ========================== LIBMPCODECS ===================================
 
+// ad_dvdpcm.c:
+#define MSGTR_SamplesWanted "Se necesitan muestras de este formato para mejorar el soporte. Por favor contacte a los desarrolladores.\n"
+
 // libmpcodecs/ad_libdv.c
 #define MSGTR_MPCODECS_AudioFramesizeDiffers "[AD_LIBDV] Advertencia! El framezise de audio difiere! leidos=%d  hdr=%d.\n"
 
@@ -1926,10 +1924,6 @@ static char help_text[]=
 "[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
 "[VO_XV] Vea 'mplayer -vo help' para otros (no-xv) drivers de salida de vídeo.\n"\
 "[VO_XV] Pruebe -vo x11.\n"
-
-// loader/ldt_keeper.c
-
-#define MSGTR_LOADER_DYLD_Warning "AVISO: Se está intentando usar los codecs DLL pero la variable de entorno\n         DYLD_BIND_AT_LAUNCH no está establecida. Probablemente falle.\n"
 
 // stream/stream_radio.c
 

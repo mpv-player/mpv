@@ -253,7 +253,7 @@ static char help_text[]=
 #define MSGTR_SubVisibleStatus "Subtitles: %s"
 #define MSGTR_SubForcedOnlyStatus "Forced sub only: %s"
 
-// mencoder.c:
+// mencoder.c
 #define MSGTR_UsingPass3ControlFile "Using pass3 control file: %s\n"
 #define MSGTR_MissingFilename "\nFilename missing.\n\n"
 #define MSGTR_CannotOpenFile_Device "Cannot open file/device.\n"
@@ -418,7 +418,7 @@ static char help_text[]=
 #define MSGTR_CouldntOpenCodec "Couldn't open codec %s, br=%d.\n"
 #define MSGTR_CantCopyAudioFormat "Audio format 0x%x is incompatible with '-oac copy', please try '-oac pcm' instead or use '-fafmttag' to override it.\n"
 
-// cfg-mencoder.h:
+// cfg-mencoder.h
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     variable bitrate method\n"\
 "                0: cbr (constant bitrate)\n"\
@@ -467,7 +467,7 @@ static char help_text[]=
 "                 (320 kbps bitrate)\n"\
 "                 <8-320>: ABR encoding at average given kbps bitrate.\n\n"
 
-//codec-cfg.c:
+//codec-cfg.c
 #define MSGTR_DuplicateFourcc "duplicated FourCC"
 #define MSGTR_TooManyFourccs "too many FourCCs/formats..."
 #define MSGTR_ParseError "parse error"
