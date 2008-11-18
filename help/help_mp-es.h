@@ -1072,6 +1072,10 @@ static char help_text[]=
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed "audio_out: los módulos alsa9 y alsa1x fueron eliminados, usa -ao alsa.\n"
+#define MSGTR_AO_TryingPreferredAudioDriver "Intentando controlador de audio preferido '%.*s', opciones '%s'\n"
+#define MSGTR_AO_NoSuchDriver "No existe ese controlador de audio '%.*s'\n"
+#define MSGTR_AO_FailedInit "Fallo al inicializar controlador de audio '%s'\n"
+#define MSGTR_AO_TryingEveryKnown "Intentando con todos los controladores de audio conocidos...\n"
 
 // ao_oss.c
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Imposible abrir dispositivo mezclador %s: %s\n"
@@ -1224,6 +1228,9 @@ static char help_text[]=
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] Plugin inválido: %s\n"
 
 // ======================= AF Audio Filters ================================
+
+// af_scaletempo.c
+#define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // libaf 
 
@@ -1666,6 +1673,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] La versión de tu driver mga_vid no es compatible con esta versión de MPlayer!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] No pude abrir: %s\n"
 #define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] La resolución de la fuente es en por lo menos una dimensión mas grande que 1023x1023. Por favor escale en software o use -lavdopts lowres=1\n"
+#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] Las versiones del controlador mga_vid del kernel (%u) y MPlayer (%u) no coinciden\n"
 
 // libvo/vesa_lvo.c
 
@@ -2019,6 +2027,24 @@ static char help_text[]=
 #define MSGTR_TV_TTSupportedLanguages "Idiomas de teletexto soportados:\n"
 #define MSGTR_TV_TTSelectedLanguage "Se seleccionó el idioma de teletexto por omisión: %s\n"
 #define MSGTR_TV_ScannerNotAvailableWithoutTuner "No se puede utilizar el scanner de canales sin un sintonizador\n"
+
+//tvi_dshow.c
+#define MSGTR_TVI_DS_UnableConnectInputVideoDecoder  "Imposible conectar la entrada seleccionada con el decodificador de video. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableConnectInputAudioDecoder  "Imposible conectar la entrada seleccionada con el decodificador de audio. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectVideoFormat "tvi_dshow: Imposible seleccioar formato de video. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableSelectAudioFormat "tvi_dshow: Imposible seleccionar formato de audio. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetMediaControlInterface "tvi_dshow: Imposible obtener interfaz IMediaControl. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableStartGraph "tvi_dshow: Imposible comenzar graph! Error:0x%x\n"
+#define MSGTR_TVI_DS_DeviceNotFound "tvi_dshow: No se encontró el dispositivo #%d\n"
+#define MSGTR_TVI_DS_UnableGetDeviceName "tvi_dshow: Imposible obtener nombre para dispositivo #%d\n"
+#define MSGTR_TVI_DS_UsingDevice "tvi_dshow: Utilizando dispositivo #%d: %s\n"
+#define MSGTR_TVI_DS_DeviceName  "tvi_dshow: Dispositivo #%d: %s\n"
+#define MSGTR_TVI_DS_DirectGetFreqFailed "tvi_dshow: Imposible obtener la frecuencia directamente. Se utilizará la tabla de canales incluída con el OS.\n"
+#define MSGTR_TVI_DS_DirectSetFreqFailed "tvi_dshow: Imposible configurar directamente la frecuencia.  Se utilizará la tabla de canales incluída con el OS.\n"
+#define MSGTR_TVI_DS_SupportedNorms "tvi_dshow: normas soportadas:"
+#define MSGTR_TVI_DS_AvailableVideoInputs "tvi_dshow: entradas de video disponibles:"
+#define MSGTR_TVI_DS_AvailableAudioInputs "tvi_dshow: entradas de audio disponibles:"
+//following phrase will be printed near the selected audio/video input
 
 // ================================== LIBASS ====================================
 
