@@ -50,27 +50,27 @@ const LIBVO_EXTERN(direct3d)
  * I try to keep their count low.
  */
 
-int gIsPaused;               /**< 1 = Movie is paused,
+static int gIsPaused;               /**< 1 = Movie is paused,
                                   0 = Movie is not paused */
-int gIsD3DConfigFinished;    /**< Synchronization "semaphore". 1 when
+static int gIsD3DConfigFinished;    /**< Synchronization "semaphore". 1 when
                                   instance of D3DConfigure is finished */
-int gIsPanscan;              /**< 1= Panscan enabled, 0 = Panscan disabled */
-RECT gFullScrMovieRect;      /**< Rect (upscaled) of the movie when displayed
+static int gIsPanscan;              /**< 1= Panscan enabled, 0 = Panscan disabled */
+static RECT gFullScrMovieRect;      /**< Rect (upscaled) of the movie when displayed
                                   in fullscreen */
-RECT gPanScanSrcRect;        /**< PanScan source surface cropping in
+static RECT gPanScanSrcRect;        /**< PanScan source surface cropping in
                                   fullscreen */
-int gSrcWidth;               /**< Source (movie) width */
-int gSrcHeight;              /**< Source (movie) heigth */
-LPDIRECT3D9 gpD3DHandle;         /**< Direct3D Handle */
-LPDIRECT3DDEVICE9  gpD3DDevice;  /**< The Direct3D Adapter */
-IDirect3DSurface9 *gpD3DSurface; /**< Offscreen Direct3D Surface. MPlayer
+static int gSrcWidth;               /**< Source (movie) width */
+static int gSrcHeight;              /**< Source (movie) heigth */
+static LPDIRECT3D9 gpD3DHandle;         /**< Direct3D Handle */
+static LPDIRECT3DDEVICE9  gpD3DDevice;  /**< The Direct3D Adapter */
+static IDirect3DSurface9 *gpD3DSurface; /**< Offscreen Direct3D Surface. MPlayer
                                       renders inside it. Uses colorspace
                                       MovieSrcFmt */
-IDirect3DSurface9 *gpD3DBackBuf; /**< Video card's back buffer (used to
+static IDirect3DSurface9 *gpD3DBackBuf; /**< Video card's back buffer (used to
                                       display next frame) */
-D3DFORMAT gMovieSrcFmt;          /**< Movie colorspace format (depends on
+static D3DFORMAT gMovieSrcFmt;          /**< Movie colorspace format (depends on
                                       the movie's codec) */
-D3DFORMAT gDesktopFmt;           /**< Desktop (screen) colorspace format.
+static D3DFORMAT gDesktopFmt;           /**< Desktop (screen) colorspace format.
                                       Usually XRGB */
 typedef struct
 {
@@ -106,7 +106,7 @@ static const DisplayFormatTable gDisplayFormatTable[] =
 
 /** @brief Calculate panscan source RECT in fullscreen.
  */
-void CalculatePanscanRect (void)
+static void CalculatePanscanRect (void)
 {
     int scaledHeight = 0;
     int scaledWidth = 0;
@@ -161,7 +161,7 @@ void CalculatePanscanRect (void)
 /** @brief Calculate scaled fullscreen movie rectangle with
  *  preserved aspect ratio.
  */
-void CalculateFullscreenRect (void)
+static void CalculateFullscreenRect (void)
 {
     int scaledHeight = 0;
     int scaledWidth = 0;
@@ -186,7 +186,7 @@ void CalculateFullscreenRect (void)
 
 /** @brief Destroy D3D Context related to the current window.
  */
-void D3DDestroyContext (void)
+static void D3DDestroyContext (void)
 {
     mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>D3DDestroyContext called\r\n");
     /* Let's destroy the old (if any) D3D Content */
@@ -215,7 +215,7 @@ void D3DDestroyContext (void)
  *  The first function called to initialize D3D context.
  *  @return 1 on success, 0 on failure
  */
-int D3DConfigure (void)
+static int D3DConfigure (void)
 {
     D3DPRESENT_PARAMETERS PresentParams;
     D3DDISPLAYMODE DisplayMode;
@@ -299,7 +299,7 @@ int D3DConfigure (void)
 
 /** @brief Uninitialize Direct3D and close the window.
  */
-void D3DUninit(void)
+static void D3DUninit(void)
 {
     mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>D3DUninit called\r\n");
 
