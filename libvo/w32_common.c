@@ -149,6 +149,23 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
+/**
+ * \brief Dispatch incoming window events and handle them.
+ *
+ * This function should be placed inside libvo's function "check_events".
+ *
+ * Global libvo variables changed:
+ * vo_dwidth:  new window client area width
+ * vo_dheight: new window client area height
+ *
+ * \return int with these flags possibly set, take care to handle in the right order
+ *         if it matters in your driver:
+ *
+ * VO_EVENT_RESIZE = The window was resized. If necessary reinit your
+ *                   driver render context accordingly.
+ * VO_EVENT_EXPOSE = The window was exposed. Call e.g. flip_frame() to redraw
+ *                   the window if the movie is paused.
+ */
 int vo_w32_check_events(void) {
     MSG msg;
     event_flags = 0;
@@ -178,6 +195,20 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p) {
     return TRUE;
 }
 
+/**
+ * \brief Update screen information.
+ *
+ * This function should be called in libvo's "control" callback
+ * with parameter VOCTRL_UPDATE_SCREENINFO.
+ * Note that this also enables the new API where geometry and aspect
+ * calculations are done in video_out.c:config_video_out
+ *
+ * Global libvo variables changed:
+ * xinerama_x
+ * xinerama_y
+ * vo_screenwidth
+ * vo_screenheight
+ */
 void w32_update_xinerama_info(void) {
     xinerama_x = xinerama_y = 0;
     if (xinerama_screen < -1) {
@@ -332,6 +363,18 @@ static int createRenderingContext(void) {
     return 1;
 }
 
+/**
+ * \brief Configure and show window on the screen.
+ *
+ * This function should be called in libvo's "config" callback.
+ * It configures a window and shows it on the screen.
+ *
+ * Global libvo variables changed:
+ * vo_fs
+ * vo_vm
+ *
+ * \return 1 - Success, 0 - Failure
+ */
 int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
     // store original size for videomode switching
     o_dwidth = width;
@@ -347,6 +390,23 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
     return createRenderingContext();
 }
 
+/**
+ * \brief Initialize w32_common framework.
+ *
+ * The first function that should be called from the w32_common framework.
+ * It handles window creation on the screen with proper title and attributes.
+ * It also initializes the framework's internal variables. The function should
+ * be called after your own preinit initialization and you shouldn't do any
+ * window management on your own.
+ *
+ * Global libvo variables changed:
+ * vo_w32_window
+ * vo_depthonscreen
+ * vo_screenwidth
+ * vo_screenheight
+ *
+ * \return 1 = Success, 0 = Failure
+ */
 int vo_w32_init(void) {
     HICON mplayerIcon = 0;
     char exedir[MAX_PATH];
@@ -403,17 +463,48 @@ int vo_w32_init(void) {
     return 1;
 }
 
+/**
+ * \brief Toogle fullscreen / windowed mode.
+ *
+ * Should be called on VOCTRL_FULLSCREEN event. The window is
+ * always resized after this call, so the rendering context
+ * should be reinitialized with the new dimensions.
+ * It is unspecified if vo_check_events will create a resize
+ * event in addition or not.
+ *
+ * Global libvo variables changed:
+ * vo_dwidth
+ * vo_dheight
+ * vo_fs
+ */
+
 void vo_w32_fullscreen(void) {
     vo_fs = !vo_fs;
 
     createRenderingContext();
 }
 
+/**
+ * \brief Toogle window border attribute.
+ *
+ * Should be called on VOCTRL_BORDER event.
+ *
+ * Global libvo variables changed:
+ * vo_border
+ */
 void vo_w32_border(void) {
     vo_border = !vo_border;
     createRenderingContext();
 }
 
+/**
+ * \brief Toogle window ontop attribute.
+ *
+ * Should be called on VOCTRL_ONTOP event.
+ *
+ * Global libvo variables changed:
+ * vo_ontop
+ */
 void vo_w32_ontop( void )
 {
     vo_ontop = !vo_ontop;
@@ -422,6 +513,13 @@ void vo_w32_ontop( void )
     }
 }
 
+/**
+ * \brief Uninitialize w32_common framework.
+ *
+ * Should be called last in video driver's uninit function. First release
+ * anything build ontop of the created window e.g. rendering context inside
+ * and call vo_w32_uninit at the end.
+ */
 void vo_w32_uninit(void) {
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: uninit\n");
     resetMode();
