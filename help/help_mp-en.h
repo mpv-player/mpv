@@ -56,7 +56,7 @@ static char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c:
+// mplayer.c
 #define MSGTR_Exiting "\nExiting...\n"
 #define MSGTR_ExitingHow "\nExiting... (%s)\n"
 #define MSGTR_Exit_quit "Quit"
@@ -467,7 +467,7 @@ static char help_text[]=
 "                 (320 kbps bitrate)\n"\
 "                 <8-320>: ABR encoding at average given kbps bitrate.\n\n"
 
-//codec-cfg.c
+// codec-cfg.c
 #define MSGTR_DuplicateFourcc "duplicated FourCC"
 #define MSGTR_TooManyFourccs "too many FourCCs/formats..."
 #define MSGTR_ParseError "parse error"
@@ -1384,7 +1384,7 @@ static char help_text[]=
 
 // ========================== LIBMPDEMUX ===================================
 
-// muxer.c, muxer_*.c:
+// muxer.c, muxer_*.c
 #define MSGTR_TooManyStreams "Too many streams!"
 #define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer supports only one audio stream!\n"
 #define MSGTR_IgnoringVideoStream "Ignoring video stream!\n"
@@ -1396,7 +1396,7 @@ static char help_text[]=
 #define MSGTR_WritingHeader "Writing header...\n"
 #define MSGTR_WritingTrailer "Writing index...\n"
 
-// demuxer.c, demux_*.c:
+// demuxer.c, demux_*.c
 #define MSGTR_AudioStreamRedefined "WARNING: Audio stream header %d redefined.\n"
 #define MSGTR_VideoStreamRedefined "WARNING: Video stream header %d redefined.\n"
 #define MSGTR_TooManyAudioInBuffer "\nToo many audio packets in the buffer: (%d in %d bytes).\n"

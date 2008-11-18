@@ -60,7 +60,7 @@ static char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c: 
+// mplayer.c
 #define MSGTR_Exiting "\nSaliendo...\n"
 #define MSGTR_ExitingHow "\nSaliendo... (%s)\n"
 #define MSGTR_Exit_quit "Salida."
@@ -569,7 +569,10 @@ static char help_text[]=
 #define MSGTR_DVDsubtitleLanguage "subtítulo ( sid ): %d idioma: %s\n"
 #define MSGTR_DVDnumSubtitles "Número de subtítulos en el disco: %d\n"
 
-// muxer.c, muxer_*.c:
+
+// ========================== LIBMPDEMUX ===================================
+
+// muxer.c, muxer_*.c
 #define MSGTR_TooManyStreams "¡Demasiados streams!"
 #define MSGTR_RawMuxerOnlyOneStream "El muxer rawaudio soporta sólo un stream de audio!\n"
 #define MSGTR_IgnoringVideoStream "Ignorando stream de video!\n"
@@ -581,7 +584,7 @@ static char help_text[]=
 #define MSGTR_WritingHeader "Escribiendo la cabecera...\n"
 #define MSGTR_WritingTrailer "Escribiendo el índice...\n"
 
-// demuxer.c, demux_*.c:
+// demuxer.c, demux_*.c
 #define MSGTR_AudioStreamRedefined "Advertencia! Cabecera de stream de audio %d redefinida!\n"
 #define MSGTR_VideoStreamRedefined "Advertencia! Cabecera de stream de video %d redefinida!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Demasiados (%d en %d bytes) paquetes de audio en el buffer!\n"
@@ -636,7 +639,77 @@ static char help_text[]=
 #define MSGTR_NoBindFound "No se econtró una asignación para la tecla '%s'"
 #define MSGTR_FailedToOpen "No se pudo abrir %s\n"
 
-// dec_video.c & dec_audio.c:
+// asfheader.c
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: más de 1 MB de tamaño del header (%d)!\nPor favor contacte a los autores de MPlayer y suba/envie este archivo.\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Imposible obtener %d bytes para la cabecera\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "EOF Mientras leia la cabecera ASF, archivo dañado o incompleto?\n"
+#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR quizas solo funcione con libavformat, intente con -demuxer 35 si tiene problemas\n"
+#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "No hay un chunk de datos despues de la cabecera!\n"
+#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: No encuentro cabeceras de audio o video, archivo dañado?\n"
+#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Largo inválido en la cabecera ASF!\n"
+
+// aviheader.c
+#define MSGTR_MPDEMUX_AVIHDR_EmptyList "** Lista vacia?!\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Encontré una pelicula en 0x%X - 0x%X\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "Encontré 'bih', %u bytes of %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Regenerado tabla de keyframes para video M$ mpg4v1\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Regenerando tabla de keyframes para video DIVX3\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Regenerando tabla de keyframes para video MPEG4\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "Encontre 'wf', %d bytes de %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh encontrado (size=%d) (total_frames=%d)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Leyendo INDEX block, %d chunks para %d frames (fpos=%"PRId64")\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Cabecera RIFF adicional...\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "Advertencia: esta no es una cabecera AVI extendida..\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Chunk arruinado?  chunksize=%d  (id=%.4s)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Construyendo el índice odml (%d superindexchunks).\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Archivo arruinado (incompleto?) detectado. Utilizaré el índice tradicional.\n"
+#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "No pude leer el archivo de índice %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s No es un archivo de índice MPlayer válido.\n"
+#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Imposible disponer de memoria suficiente para los datos de índice de %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "El archivo de índice termina prematuramente %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "El archivo de índice: %s fue cargado.\n"
+#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Generando Indice: %3lu %s     \r"
+#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: tabla de índices generada para %d chunks!\n"
+#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Imposible escribir el archivo de índice %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Archivo de índice guardado: %s\n"
+
+// demux_audio.c
+#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audio demuxer: Formato desconocido %d.\n"
+
+// demux_demuxers.c
+#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer error: demuxer erroneo: no vd, ad o sd.\n"
+
+// demux_mkv.c
+#define MSGTR_MPDEMUX_MKV_ZlibInitializationFailed "[mkv] zlib la inicialización ha fallado.\n"
+#define MSGTR_MPDEMUX_MKV_ZlibDecompressionFailed "[mkv] zlib la descompresión ha fallado.\n"
+#define MSGTR_MPDEMUX_MKV_LzoInitializationFailed "[mkv] lzo la inicialización ha fallado.\n"
+#define MSGTR_MPDEMUX_MKV_LzoDecompressionFailed "[mkv] lzo la descompresión ha fallado.\n"
+#define MSGTR_MPDEMUX_MKV_TrackEncrypted "[mkv] La pista número %u ha sido encriptada y la desencriptación no ha sido\n[mkv] todavía implementada. Omitiendo la pista.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownContentEncoding "[mkv] Tipo de codificación desconocida para la pista %u. Omitiendo la pista.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownCompression "[mkv] La pista %u ha sido comprimida con un algoritmo de compresión\n[mkv] desconocido o no soportado algoritmo (%u). Omitiendo la pista.\n"
+#define MSGTR_MPDEMUX_MKV_ZlibCompressionUnsupported "[mkv] La pista %u ha sido comprimida con zlib pero mplayer no ha sido\n[mkv] compilado con soporte para compresión con zlib. Omitiendo la pista.\n"
+#define MSGTR_MPDEMUX_MKV_TrackIDName "[mkv] Pista ID %u: %s (%s) \"%s\", %s\n"
+#define MSGTR_MPDEMUX_MKV_TrackID "[mkv] Pista ID %u: %s (%s), %s\n"
+#define MSGTR_MPDEMUX_MKV_UnknownCodecID "[mkv] CodecID (%s) desconocido/no soportado/erróneo/faltante Codec privado\n[mkv] datos (pista %u).\n"
+#define MSGTR_MPDEMUX_MKV_FlacTrackDoesNotContainValidHeaders "[mkv] La pista FLAC no contiene cabeceras válidas.\n"
+#define MSGTR_MPDEMUX_MKV_UnknownAudioCodec "[mkv] Codec de audio ID '%s' desconocido/no soportado para la pista %u\n[mkv] o erróneo/falta Codec privado.\n"
+#define MSGTR_MPDEMUX_MKV_SubtitleTypeNotSupported "[mkv] El tipo de subtítulos '%s' no está soportado.\n"
+#define MSGTR_MPDEMUX_MKV_WillPlayVideoTrack "[mkv] Reproducirá la pista de vídeo %u.\n"
+#define MSGTR_MPDEMUX_MKV_NoVideoTrackFound "[mkv] Ninguna pista de vídeo encontrada/deseada.\n"
+#define MSGTR_MPDEMUX_MKV_NoAudioTrackFound "[mkv] Ninguna pista de sonido encontrada/deseada.\n"
+#define MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack "[mkv] Mostrará la pista de subtítulos %u.\n"
+#define MSGTR_MPDEMUX_MKV_NoBlockDurationForSubtitleTrackFound "[mkv] Aviso: No se ha encontrado la duración del bloque para los subtítulos de la pista.\n"
+#define MSGTR_MPDEMUX_MKV_TooManySublines "[mkv] Aviso: demasiados líneas para renderizar, omitiendo.\n"
+#define MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst "\n[mkv] Aviso: demasiadas líneas para renderizar, omitiendo depués de la primera %i.\n"
+
+// demux_nuv.c
+#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "Este archivo no tiene blocks de video.\n"
+
+// demux_xmms.c
+#define MSGTR_MPDEMUX_XMMS_FoundPlugin "Plugin encontrado: %s (%s).\n"
+#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Cerrando plugin: %s.\n"
+
+// dec_video.c & dec_audio.c
 #define MSGTR_CantOpenCodec "No se pudo abrir codec.\n"
 #define MSGTR_CantCloseCodec "No se pudo cerrar codec.\n"
 
@@ -1290,8 +1363,6 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "No se puede abrir %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "No se puede inicializar la entrada del Apple Remote.\n"
 
-// ========================== LIBMPDEMUX ===================================
-
 // url.c
 
 #define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "Al parecer el string ya ha sido escapado en url_scape %c%c1%c2\n"
@@ -1330,16 +1401,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "No pude obtener el tamaño del bloque!\n"
 #define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "El tamaño del bloque de audio es cero, utilizando %d!\n"
 #define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "Tamaño del bloque de audio muy bajo, utilizando %d!\n"
-
-// asfheader.c
-
-#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: más de 1 MB de tamaño del header (%d)!\nPor favor contacte a los autores de MPlayer y suba/envie este archivo.\n"
-#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Imposible obtener %d bytes para la cabecera\n"
-#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "EOF Mientras leia la cabecera ASF, archivo dañado o incompleto?\n"
-#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR quizas solo funcione con libavformat, intente con -demuxer 35 si tiene problemas\n"
-#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "No hay un chunk de datos despues de la cabecera!\n"
-#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: No encuentro cabeceras de audio o video, archivo dañado?\n"
-#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Largo inválido en la cabecera ASF!\n"
 
 // asf_mmst_streaming.c
 
@@ -1401,32 +1462,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Recuperandome de un cross-run, puede que hayamos perdido algunos frames!\n"
 #define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Error fatal, imposible reponerme!\n"
 #define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nNo hay suficientes samples de audio!\n"
-
-// aviheader.c
-
-#define MSGTR_MPDEMUX_AVIHDR_EmptyList "** Lista vacia?!\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Encontré una pelicula en 0x%X - 0x%X\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "Encontré 'bih', %u bytes of %d\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Regenerado tabla de keyframes para video M$ mpg4v1\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Regenerando tabla de keyframes para video DIVX3\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Regenerando tabla de keyframes para video MPEG4\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "Encontre 'wf', %d bytes de %d\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh encontrado (size=%d) (total_frames=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Leyendo INDEX block, %d chunks para %d frames (fpos=%"PRId64")\n"
-#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Cabecera RIFF adicional...\n"
-#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "Advertencia: esta no es una cabecera AVI extendida..\n"
-#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Chunk arruinado?  chunksize=%d  (id=%.4s)\n"
-#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Construyendo el índice odml (%d superindexchunks).\n"
-#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Archivo arruinado (incompleto?) detectado. Utilizaré el índice tradicional.\n"
-#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "No pude leer el archivo de índice %s: %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s No es un archivo de índice MPlayer válido.\n"
-#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Imposible disponer de memoria suficiente para los datos de índice de %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "El archivo de índice termina prematuramente %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "El archivo de índice: %s fue cargado.\n"
-#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Generando Indice: %3lu %s     \r"
-#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: tabla de índices generada para %d chunks!\n"
-#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Imposible escribir el archivo de índice %s: %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Archivo de índice guardado: %s\n"
 
 // cache2.c
 
@@ -1503,50 +1538,10 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "El servidor retornó %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Se seteo el tamaño del caché a %d KBytes.\n"
 
-// demux_audio.c
 
-#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audio demuxer: Formato desconocido %d.\n"
+// ========================== LIBMENU ===================================
 
-// demux_demuxers.c
-
-#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer error: demuxer erroneo: no vd, ad o sd.\n"
-
-// demux_mkv.c
-#define MSGTR_MPDEMUX_MKV_ZlibInitializationFailed "[mkv] zlib la inicialización ha fallado.\n"
-#define MSGTR_MPDEMUX_MKV_ZlibDecompressionFailed "[mkv] zlib la descompresión ha fallado.\n"
-#define MSGTR_MPDEMUX_MKV_LzoInitializationFailed "[mkv] lzo la inicialización ha fallado.\n"
-#define MSGTR_MPDEMUX_MKV_LzoDecompressionFailed "[mkv] lzo la descompresión ha fallado.\n"
-#define MSGTR_MPDEMUX_MKV_TrackEncrypted "[mkv] La pista número %u ha sido encriptada y la desencriptación no ha sido\n[mkv] todavía implementada. Omitiendo la pista.\n"
-#define MSGTR_MPDEMUX_MKV_UnknownContentEncoding "[mkv] Tipo de codificación desconocida para la pista %u. Omitiendo la pista.\n"
-#define MSGTR_MPDEMUX_MKV_UnknownCompression "[mkv] La pista %u ha sido comprimida con un algoritmo de compresión\n[mkv] desconocido o no soportado algoritmo (%u). Omitiendo la pista.\n"
-#define MSGTR_MPDEMUX_MKV_ZlibCompressionUnsupported "[mkv] La pista %u ha sido comprimida con zlib pero mplayer no ha sido\n[mkv] compilado con soporte para compresión con zlib. Omitiendo la pista.\n"
-#define MSGTR_MPDEMUX_MKV_TrackIDName "[mkv] Pista ID %u: %s (%s) \"%s\", %s\n"
-#define MSGTR_MPDEMUX_MKV_TrackID "[mkv] Pista ID %u: %s (%s), %s\n"
-#define MSGTR_MPDEMUX_MKV_UnknownCodecID "[mkv] CodecID (%s) desconocido/no soportado/erróneo/faltante Codec privado\n[mkv] datos (pista %u).\n"
-#define MSGTR_MPDEMUX_MKV_FlacTrackDoesNotContainValidHeaders "[mkv] La pista FLAC no contiene cabeceras válidas.\n"
-#define MSGTR_MPDEMUX_MKV_UnknownAudioCodec "[mkv] Codec de audio ID '%s' desconocido/no soportado para la pista %u\n[mkv] o erróneo/falta Codec privado.\n"
-#define MSGTR_MPDEMUX_MKV_SubtitleTypeNotSupported "[mkv] El tipo de subtítulos '%s' no está soportado.\n"
-#define MSGTR_MPDEMUX_MKV_WillPlayVideoTrack "[mkv] Reproducirá la pista de vídeo %u.\n"
-#define MSGTR_MPDEMUX_MKV_NoVideoTrackFound "[mkv] Ninguna pista de vídeo encontrada/deseada.\n"
-#define MSGTR_MPDEMUX_MKV_NoAudioTrackFound "[mkv] Ninguna pista de sonido encontrada/deseada.\n"
-#define MSGTR_MPDEMUX_MKV_WillDisplaySubtitleTrack "[mkv] Mostrará la pista de subtítulos %u.\n"
-#define MSGTR_MPDEMUX_MKV_NoBlockDurationForSubtitleTrackFound "[mkv] Aviso: No se ha encontrado la duración del bloque para los subtítulos de la pista.\n"
-#define MSGTR_MPDEMUX_MKV_TooManySublines "[mkv] Aviso: demasiados líneas para renderizar, omitiendo.\n"
-#define MSGTR_MPDEMUX_MKV_TooManySublinesSkippingAfterFirst "\n[mkv] Aviso: demasiadas líneas para renderizar, omitiendo depués de la primera %i.\n"
-
-// demux_nuv.c
-
-#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "Este archivo no tiene blocks de video.\n"
-
-// demux_xmms.c
-
-#define MSGTR_MPDEMUX_XMMS_FoundPlugin "Plugin encontrado: %s (%s).\n"
-#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Cerrando plugin: %s.\n"
-
-// ========================== LIBMPMENU ===================================
-
-//	common
-
+// common
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Noencontre una entrada e n la definición del menú.\n"
 
 // libmenu/menu.c
