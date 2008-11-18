@@ -2894,7 +2894,7 @@ fi
 
 echocheck "socklen_t"
 _socklen_t=no
-for header in "sys/socket.h" "ws2tcpip.h" ; do
+for header in "sys/socket.h" "ws2tcpip.h" "sys/types.h" ; do
   cat > $TMPC << EOF
 #include <$header>
 int main(void) { socklen_t v = 0; return v; }
