@@ -678,7 +678,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 // Note: If you change MSGTR_PREFERENCES_Misc see if it still fits MSGTR_PREFERENCES_FRAME_Misc
 #define MSGTR_PREFERENCES_Misc "Misc"
-
 #define MSGTR_PREFERENCES_None "None"
 #define MSGTR_PREFERENCES_DriverDefault "driver default"
 #define MSGTR_PREFERENCES_AvailableDrivers "Available drivers:"
@@ -779,6 +778,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ArtsBroken "Newer aRts versions are incompatible "\
            "with GTK 1.x and will crash GMPlayer!"
 
+// -- aboutbox
 #define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
 #define MSGTR_ABOUT_Contributors "Code and documentation contributors\n"
 #define MSGTR_ABOUT_Codecs_libs_contributions "Codecs and third party libraries\n"
@@ -822,7 +822,6 @@ static char help_text[]=
 // wsxdnd.c
 #define MSGTR_WS_NotAFile "This does not seem to be a file...\n"
 #define MSGTR_WS_DDNothing "D&D: Nothing returned!\n"
-
 
 // ======================= video output drivers ========================
 
@@ -1376,7 +1375,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Can't open %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Can't init Apple Remote.\n"
 
-// lirc.c:
+// lirc.c
 #define MSGTR_SettingUpLIRC "Setting up LIRC support...\n"
 #define MSGTR_LIRCopenfailed "Failed to open LIRC support. You will not be able to use your remote control.\n"
 #define MSGTR_LIRCcfgerr "Failed to read LIRC config file %s.\n"
