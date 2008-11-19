@@ -55,7 +55,6 @@ static const vo_info_t info = {
 };
 
 const LIBVO_EXTERN(xmga)
-static XGCValues wGCV;
 
 static uint32_t mDepth;
 static XWindowAttributes attribs;
@@ -142,7 +141,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     vo_dy += xinerama_y;
     vo_dwidth = d_width;
     vo_dheight = d_height;
-    vo_mouse_autohide = 1;
 
     r = (vo_colorkey & 0x00ff0000) >> 16;
     g = (vo_colorkey & 0x0000ff00) >> 8;
@@ -189,44 +187,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
             XCreateColormap(mDisplay, mRootWin, vinfo.visual, AllocNone);
         xWAttribs.background_pixel = 0;
         xWAttribs.border_pixel = 0;
-        xWAttribs.event_mask =
-            StructureNotifyMask | ExposureMask | KeyPressMask |
-            ((WinID ==
-              0) ? 0 : (ButtonPressMask | ButtonReleaseMask |
-                        PointerMotionMask | PropertyChangeMask));
-        xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
+        xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 
-        if (WinID >= 0)
-        {
-
-            vo_window = WinID ? ((Window) WinID) : mRootWin;
-            if (WinID)
-            {
-                XUnmapWindow(mDisplay, vo_window);
-                XChangeWindowAttributes(mDisplay, vo_window, xswamask,
-                                        &xWAttribs);
-                vo_x11_selectinput_witherr(mDisplay, vo_window,
-                                           StructureNotifyMask |
-                                           KeyPressMask |
-                                           PropertyChangeMask |
-                                           PointerMotionMask |
-                                           ButtonPressMask |
-                                           ButtonReleaseMask |
-                                           ExposureMask);
-                XMapWindow(mDisplay, vo_window);
-            } else
-                XSelectInput(mDisplay, vo_window, ExposureMask);
-
-        } else
-        {
             vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
                     flags, xWAttribs.colormap, "xmga", title);
             XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xWAttribs);
-        }
-
-        if (vo_gc != None)
-            XFreeGC(mDisplay, vo_gc);
-        vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &wGCV);
 
     }                           // !GUI
 

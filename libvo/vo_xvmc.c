@@ -455,7 +455,6 @@ int numblocks,blocks_per_macroblock;//bpmb we have 6,8,12
 
 //from vo_xv
 XVisualInfo vinfo;
-XGCValues xgcv;
 XSetWindowAttributes xswa;
 XWindowAttributes attribs;
 unsigned long xswamask;
@@ -633,8 +632,6 @@ found_subpic:
 
 skip_surface_allocation:
 
-   vo_mouse_autohide = 1;
-
 #ifdef CONFIG_XF86VM
    if( flags&VOFLAG_MODESWITCHING ) vm = 1;
 #endif
@@ -663,29 +660,10 @@ skip_surface_allocation:
    xswa.border_pixel     = 0;
    xswamask = CWBackPixel | CWBorderPixel;
 
-   if ( WinID>=0 ){
-      vo_window = WinID ? ((Window)WinID) : mRootWin;
-      if ( WinID ) 
-      {
-         Window mRoot;
-         uint32_t drwBorderWidth, drwDepth;
-         XUnmapWindow( mDisplay,vo_window );
-         XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
-	 vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
-         XMapWindow( mDisplay,vo_window );
-         XGetGeometry(mDisplay, vo_window, &mRoot,
-                      &drwX, &drwY, &vo_dwidth, &vo_dheight,
-                      &drwBorderWidth, &drwDepth);
-         aspect_save_prescale(vo_dwidth, vo_dheight);
-      }
-   } else 
       vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height, flags,
               CopyFromParent, "xvmc", title);
       XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
 
-      if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
-      vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &xgcv);
-      XSync(mDisplay, False);
 #ifdef CONFIG_XF86VM
       if ( vm )
       {

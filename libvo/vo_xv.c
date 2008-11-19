@@ -166,7 +166,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                        uint32_t format)
 {
     XVisualInfo vinfo;
-    XGCValues xgcv;
     XSetWindowAttributes xswa;
     XWindowAttributes attribs;
     unsigned long xswamask;
@@ -187,8 +186,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 image_width, image_height, max_width, max_height);
         return -1;
     }
-
-    vo_mouse_autohide = 1;
 
     int_pause = 0;
     visible_buf = -1;
@@ -246,38 +243,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         xswa.border_pixel = 0;
         xswamask = CWBackPixel | CWBorderPixel;
 
-        if (WinID >= 0)
-        {
-            vo_window = WinID ? ((Window) WinID) : mRootWin;
-            if (WinID)
-            {
-                XUnmapWindow(mDisplay, vo_window);
-                XChangeWindowAttributes(mDisplay, vo_window, xswamask,
-                                        &xswa);
-                vo_x11_selectinput_witherr(mDisplay, vo_window,
-                                           StructureNotifyMask |
-                                           KeyPressMask |
-                                           PropertyChangeMask |
-                                           PointerMotionMask |
-                                           ButtonPressMask |
-                                           ButtonReleaseMask |
-                                           ExposureMask);
-                XMapWindow(mDisplay, vo_window);
-                vo_x11_update_geometry();
-                aspect_save_prescale(vo_dwidth, vo_dheight);
-            } else
-                XSelectInput(mDisplay, vo_window, ExposureMask);
-        } else
-        {
             vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, vo_dwidth, vo_dheight,
                    flags, CopyFromParent, "xv", title);
             XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
-        }
 
-        if (vo_gc != None)
-            XFreeGC(mDisplay, vo_gc);
-        vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
-        XSync(mDisplay, False);
 #ifdef CONFIG_XF86VM
         if (vm)
         {

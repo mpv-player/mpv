@@ -51,7 +51,6 @@ LIBVO_EXTERN(xover)
 
 /* X11 related variables */
 /* Colorkey handling */
-static XGCValues mGCV;
 static int colorkey;
 
 /* Image parameters */
@@ -217,7 +216,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   image_height = height;
   image_width = width;
   image_format = format;
-  vo_mouse_autohide=1;
 
   aspect_save_orig(width, height);
   aspect_save_prescale(d_width, d_height);
@@ -281,31 +279,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
       xswa.border_pixel     = 0;
       xswa.colormap         = XCreateColormap(mDisplay, RootWindow(mDisplay, mScreen),
 					      vinfo.visual, AllocNone);
-      xswa.event_mask = StructureNotifyMask | ExposureMask | KeyPressMask | PropertyChangeMask |
-	((WinID==0)?0:(ButtonPressMask | ButtonReleaseMask | PointerMotionMask));
-      xswamask = CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
+      xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 
-      if (WinID >= 0)
-	{
-	  vo_window = WinID ? ((Window)WinID) : RootWindow(mDisplay, mScreen);
-	  if ( WinID )
-	    {
-	      XUnmapWindow(mDisplay, vo_window);
-	      XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
-	      vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
-	      XMapWindow(mDisplay, vo_window);
-	    } else XSelectInput( mDisplay,vo_window,ExposureMask );
-	}
-      else
-	{
 	    vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy,
                   window_width, window_height, flags,
 	          xswa.colormap, "xvidix", title);
 	    XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
-	}
 	 
-      if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
-      vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &mGCV);
 #ifdef CONFIG_GUI
     }
 #endif

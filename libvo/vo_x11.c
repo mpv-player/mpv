@@ -317,7 +317,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     int vm = 0;
 #endif
 
-    vo_mouse_autohide = 1;
     old_vo_dwidth = -1;
     old_vo_dheight = -1;
 
@@ -395,36 +394,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         }
 #endif
 
-        if (WinID >= 0)
-        {
-            vo_window = WinID ? ((Window) WinID) : mRootWin;
-            if (WinID)
-            {
-                XUnmapWindow(mDisplay, vo_window);
-                XChangeWindowAttributes(mDisplay, vo_window, xswamask,
-                                        &xswa);
-                vo_x11_selectinput_witherr(mDisplay, vo_window,
-                                           StructureNotifyMask |
-                                           KeyPressMask |
-                                           PropertyChangeMask |
-                                           PointerMotionMask |
-                                           ButtonPressMask |
-                                           ButtonReleaseMask |
-                                           ExposureMask);
-                XMapWindow(mDisplay, vo_window);
-                depth = vo_x11_update_geometry();
-            } else
-                XSelectInput(mDisplay, vo_window, ExposureMask);
-        } else
-        {
             vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, vo_dwidth, vo_dheight,
                     flags, theCmap, "x11", title);
-        }
-
-        if (vo_gc != None)
-            XFreeGC(mDisplay, vo_gc);
-        vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
-        XSync(mDisplay, False);
+        if (WinID > 0)
+            depth = vo_x11_update_geometry();
 
 #ifdef CONFIG_XF86VM
         if (vm)
