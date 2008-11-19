@@ -291,7 +291,7 @@ static int D3DConfigure (void)
     IDirect3DDevice9_ColorFill(gpD3DDevice, gpD3DSurface, NULL,
                                D3DCOLOR_ARGB(0xFF, 0, 0, 0) );
 
-    if (vo_fs == 1)
+    if (vo_fs)
         CalculateFullscreenRect ();
 
     return 1;
@@ -364,10 +364,10 @@ static uint32_t D3DRenderFrame (mp_image_t *mpi)
 
     if (FAILED (IDirect3DDevice9_StretchRect (gpD3DDevice,
                                               gpD3DSurface,
-                                              gIsPanscan == 1 ?
+                                              gIsPanscan ?
                                               &gPanScanSrcRect : NULL,
                                               gpD3DBackBuf,
-                                              vo_fs == 1 ?
+                                              vo_fs ?
                                               &gFullScrMovieRect : NULL,
                                               D3DTEXF_LINEAR)))
     {
@@ -455,7 +455,8 @@ static int preinit(const char *arg)
        > an example of how to use it.
     */
 
-    if ((gpD3DHandle = Direct3DCreate9 (D3D_SDK_VERSION)) == NULL)
+    gpD3DHandle = Direct3DCreate9 (D3D_SDK_VERSION);
+    if (!gpD3DHandle)
     {
         mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Unable to initialize Direct3D\n");
         return -1;
@@ -478,7 +479,7 @@ static int preinit(const char *arg)
     /* w32_common framework call. Configures window on the screen, gets
      * fullscreen dimensions and does other useful stuff.
      */
-    if (vo_w32_init() == 0)
+    if (!vo_w32_init())
     {
         mp_msg(MSGT_VO,MSGL_V,"Unable to configure onscreen window\r\n");
         return -1;
@@ -567,16 +568,16 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
      */
-    if (vo_w32_config(d_width, d_height, options) == 0)
+    if (!vo_w32_config(d_width, d_height, options))
     {
         mp_msg(MSGT_VO,MSGL_V,"Unable to create onscreen window\r\n");
         return VO_ERROR;
     }
 
-    if (gIsD3DConfigFinished == 1)
+    if (gIsD3DConfigFinished)
     {
         gIsD3DConfigFinished = 0;
-        if (D3DConfigure () == 0)
+        if (!D3DConfigure ())
         {
             gIsD3DConfigFinished = 1;
             return VO_ERROR;
@@ -597,7 +598,7 @@ static void flip_page(void)
         mp_msg(MSGT_VO,MSGL_V,
                "<vo_direct3d>Video adapter became uncooperative.\n");
         mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Trying to reinitialize it...\n");
-        if (D3DConfigure() == 0)
+        if (!D3DConfigure())
         {
             mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Reinitialization Failed.\n");
             return;
@@ -647,7 +648,7 @@ static void check_events(void)
     if (flags & VO_EVENT_RESIZE)
         D3DConfigure();
 
-    if ((flags & VO_EVENT_EXPOSE) && gIsPaused == TRUE)
+    if ((flags & VO_EVENT_EXPOSE) && gIsPaused)
         flip_page();
 }
 
@@ -715,10 +716,10 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 
     if (FAILED (IDirect3DDevice9_StretchRect (gpD3DDevice,
                                               gpD3DSurface,
-                                              gIsPanscan == 1 ?
+                                              gIsPanscan ?
                                               &gPanScanSrcRect : NULL,
                                               gpD3DBackBuf,
-                                              vo_fs == 1 ?
+                                              vo_fs ?
                                               &gFullScrMovieRect : NULL,
                                               D3DTEXF_LINEAR)))
     {
