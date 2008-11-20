@@ -156,6 +156,8 @@ static char help_text[]=
 "  se encuentran. No podemos ayudarle a menos que nos provea esa\n"\
 "  información cuando reporte algún posible defecto.\n"
 #define MSGTR_LoadingConfig "Cargando configuración '%s'\n"
+#define MSGTR_LoadingProtocolProfile "Cargando el perfil protocol-related '%s'\n"
+#define MSGTR_LoadingExtensionProfile "Cargando el perfil extension-related '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: se agregó el archivo de subtítulo (%d): %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB: Archivo de subtítulos borrado (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Error abriendo archivo [%s] en modo escritura!\n"
@@ -254,9 +256,11 @@ static char help_text[]=
 #define MSGTR_FramedroppingStatus "Framedropping: %s"
 #define MSGTR_VSyncStatus "VSync: %s"
 #define MSGTR_SubSelectStatus "Subtítulos: %s"
-#define MSGTR_SubPosStatus "Posición sub: %s/100"
-#define MSGTR_SubAlignStatus "Alineación sub: %s"
-#define MSGTR_SubDelayStatus "Sub delay: %s"
+#define MSGTR_SubSourceStatus "Fuente de subtítulos: %s"
+#define MSGTR_SubPosStatus "Posición de subtítulos: %s/100"
+#define MSGTR_SubAlignStatus "Alineación de subtítulos: %s"
+#define MSGTR_SubDelayStatus "Retraso de subtítulos: %s"
+#define MSGTR_SubScale "Escalado de subtítulos: %s"
 #define MSGTR_SubVisibleStatus "Subtítulos: %s"
 #define MSGTR_SubForcedOnlyStatus "Sólo subtítulos forzados: %s"
  
@@ -756,6 +760,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Cirílico (Windows) (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Eslavo/Centroeuropeo (Windows) (CP1250)"
+#define MSGTR_PREFERENCES_FontEncoding23 "Arabic Windows (CP1256)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Sin autoescalado"
 #define MSGTR_PREFERENCES_FontPropWidth "Proporcional a la anchura de película"
 #define MSGTR_PREFERENCES_FontPropHeight "Proporcional a la altura de película"
@@ -1141,7 +1146,8 @@ static char help_text[]=
 #define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: no se pudo encontrar ventana XScreenSaver.\n"
 #define MSGTR_SelectedVideoMode "XF86VM: Modo de video seleccionado %dx%d para tamaño de imagen %dx%d.\n"
 #define MSGTR_InsertingAfVolume "[Mixer] No se ecnontró mezclador de volumen por hardware, insertando filtro de volumen.\n"
-#define MSGTR_NoVolume "[Mixer] Na hay control de volumen disponible.\n"
+#define MSGTR_NoVolume "[Mixer] No hay un control de volumen disponible.\n"
+#define MSGTR_NoBalance "[Mixer] No hay un control de balance disponible.\n"
 
 // Controladores vo viejos que han sido reemplazados
 #define MSGTR_VO_PGM_HasBeenReplaced "El controlador de salida pgm ha sido reemplazado por -vo pnm:pgmyuv.\n"
@@ -1449,6 +1455,9 @@ static char help_text[]=
 #define MSGTR_CacheFill "\rLlenando cache: %5.2f%% (%"PRId64" bytes)   "
 #define MSGTR_NoBindFound "No se econtró una asignación para la tecla '%s'"
 #define MSGTR_FailedToOpen "No se pudo abrir %s\n"
+#define MSGTR_VideoID "[%s] Stream de video encontrado, -vid %d\n"
+#define MSGTR_AudioID "[%s] Stream de audio encontrado, -aid %d\n"
+#define MSGTR_SubtitleID "[%s] Stream de subtítulos encontrado, -sid %d\n"
 
 // asfheader.c
 #define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: más de 1 MB de tamaño del header (%d)!\nPor favor contacte a los autores de MPlayer y suba/envie este archivo.\n"
@@ -1458,6 +1467,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "No hay un chunk de datos despues de la cabecera!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: No encuentro cabeceras de audio o video, archivo dañado?\n"
 #define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Largo inválido en la cabecera ASF!\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMLicenseURL "URL de la licencia DRM: %s\n"
+#define MSGTR_MPDEMUX_ASFHDR_DRMProtected "Este archivo tiene DRM encription, MPlayer no lo va a reproducir!\n"
 
 // aviheader.c
 #define MSGTR_MPDEMUX_AVIHDR_EmptyList "** Lista vacia?!\n"
@@ -1519,6 +1530,7 @@ static char help_text[]=
 // demux_xmms.c
 #define MSGTR_MPDEMUX_XMMS_FoundPlugin "Plugin encontrado: %s (%s).\n"
 #define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Cerrando plugin: %s.\n"
+#define MSGTR_MPDEMUX_XMMS_WaitForStart "Esperando a que el plugin XMMS comience la reprodución de '%s'...\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Dispositivo de CD-ROM '%s' no encontrado.\n"
@@ -1831,6 +1843,7 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Submenu definition needs a 'menu' attribute.\n"
+#define MSGTR_LIBMENU_InvalidProperty "[MENU] '%s', Propiedad inválida en entrada de menu de preferencias. (linea %d).\n"
 #define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Las definiciones de las entradas de 'Preferencia' en el menu necesitan un atributo 'property' válido (linea %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] El menu 'Pref' necesita un argumento.\n"
 
@@ -2023,12 +2036,22 @@ static char help_text[]=
 #define MSGTR_TVI_DS_AvailableVideoInputs "tvi_dshow: entradas de video disponibles:"
 #define MSGTR_TVI_DS_AvailableAudioInputs "tvi_dshow: entradas de audio disponibles:"
 //following phrase will be printed near the selected audio/video input
+#define MSGTR_TVI_DS_InputSelected "(seleccionado)"
+#define MSGTR_TVI_DS_UnableExtractFreqTable "tvi_dshow: Imposible cargar tabla de frecuencias desde kstvtune.ax\n"
+#define MSGTR_TVI_DS_WrongDeviceParam "tvi_dshow: Parametro de dispositivo inválido: %s\n"
+#define MSGTR_TVI_DS_WrongDeviceIndex "tvi_dshow: Indice de dispositivo inválido: %d\n"
+#define MSGTR_TVI_DS_WrongADeviceParam "tvi_dshow: Parametro de adevice inválido: %s\n"
+#define MSGTR_TVI_DS_WrongADeviceIndex "tvi_dshow: Indice de adevice inválido: %d\n"
+#define MSGTR_TVI_DS_SamplerateNotsupported "tvi_dshow: El dispositivo no soporta el Samplerate %d. Probando con el primero disponible.\n"
+#define MSGTR_TVI_DS_VideoAdjustigNotSupported "tvi_dshow: El dispositivo no soporta el ajuste de brillo/hue/saturación/contraste\n"
 
 // ================================== LIBASS ====================================
 
 // ass_bitmap.c
 #define MSGTR_LIBASS_FT_Glyph_To_BitmapError "[ass] FT_Glyph_To_Bitmap error %d \n"
 #define MSGTR_LIBASS_UnsupportedPixelMode "[ass] Modo píxel no soportado: %d\n"
+#define MSGTR_LIBASS_GlyphBBoxTooLarge "[ass] Glyph bounding box muy grande: %dx%dpx\n"
+
 
 // ass.c
 #define MSGTR_LIBASS_NoStyleNamedXFoundUsingY "[ass] [%p] Aviso: no se ha encontrado ningun estilo llamado '%s', usando '%s'\n"
@@ -2086,3 +2109,6 @@ static char help_text[]=
 #define MSGTR_LIBASS_GlyphNotFoundReselectingFont "[ass] Glifo 0x%X no encontrado, seleccionando la fuente para (%s, %d, %d)\n"
 #define MSGTR_LIBASS_GlyphNotFound "[ass] No se ha encontrado el glifo 0x%X en la fuente para (%s, %d, %d)\n"
 #define MSGTR_LIBASS_ErrorOpeningMemoryFont "[ass] Error abriendo la fuente en memoria: %s\n"
+#define MSGTR_LIBASS_NoCharmaps "[ass] Este font face no tiene charmaps\n"
+#define MSGTR_LIBASS_NoCharmapAutodetected "[ass] No se detectó un charmap automaticamente, probando con el primero\n"
+
