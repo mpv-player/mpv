@@ -190,6 +190,7 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "Evento DVDNAV: Busqueda Nav hecha\n"
 #define MSGTR_MenuCall "Llamada a menú\n"
 
+// --- edit decision lists
 #define MSGTR_EdlOutOfMem "No hay memoria suficiente para almacenar los datos EDL.\n"
 #define MSGTR_EdlRecordsNo "Leidas %d acciones EDL.\n"
 #define MSGTR_EdlQueueEmpty "No hay acciones EDL de las que ocuparse.\n"
@@ -890,7 +891,7 @@ static char help_text[]=
 "           1 : oscuro\n           2 : bold\n           3 : boldfont\n" \
 "           4 : reverso\n           5 : especial\n\n\n"
 
-// libvo/vo_dxr3.c
+// vo_dxr3.c
 #define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] No pude cargar la nueva paleta SPU!\n"
 #define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] No pude setear el playmode!\n"
 #define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] No pude setear el modo del subpicture!\n"
@@ -1080,7 +1081,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] No pude encontrar un modo para: %ux%u@%u.\n"
 #define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] Inicialización VESA completa.\n"
 
-// libvo/vesa_lvo.c
+// vesa_lvo.c
 #define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Este branch ya no esta soportado.\n[VESA_LVO] Por favor utiliza -vo vesa:vidix en su lugar.\n"
 #define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] No pude abrir: '%s'\n"
 #define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Formato de salida inválido: %s(%0X)\n"
