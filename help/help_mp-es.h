@@ -218,6 +218,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Velocidad: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDChapter "Capítulo: (%d) %s"
+#define MSGTR_OSDAngle "Ángulo: %d/%d"
 
 // property values
 #define MSGTR_Enabled "habilitado"
@@ -228,6 +229,9 @@ static char help_text[]=
 #define MSGTR_Bottom "abajo"
 #define MSGTR_Center "centro"
 #define MSGTR_Top "arriba"
+#define MSGTR_SubSourceFile "archivo"
+#define MSGTR_SubSourceVobsub "vobsub"
+#define MSGTR_SubSourceDemux "incluido"
 
 // OSD bar names
 #define MSGTR_Volume "Volumen"
@@ -237,8 +241,10 @@ static char help_text[]=
 #define MSGTR_Contrast "Contraste"
 #define MSGTR_Saturation "Saturación"
 #define MSGTR_Hue "Hue"
+#define MSGTR_Balance "Balance"
 
 // property state
+#define MSGTR_LoopStatus "Loop: %s"
 #define MSGTR_MuteStatus "Mudo: %s"
 #define MSGTR_AVDelayStatus "A-V delay: %s"
 #define MSGTR_OnTopStatus "Quedarse arriba: %s"
@@ -598,7 +604,7 @@ static char help_text[]=
 #define MSGTR_SKIN_LABEL "Skins:"
 
 // --- GTK menus
-#define MSGTR_MENU_AboutMPlayer "Sobre MPlayer"
+#define MSGTR_MENU_AboutMPlayer "Acerca de MPlayer"
 #define MSGTR_MENU_Open "Abrir..."
 #define MSGTR_MENU_PlayFile "Reproducir archivo..."
 #define MSGTR_MENU_PlayVCD "Reproducir VCD..."
@@ -841,6 +847,16 @@ static char help_text[]=
 #define MSGTR_LIBVO_ASPECT_NoSuitableNewResFound "[ASPECT] Aviso: ¡No se ha encontrado ninguna resolución nueva adecuada!\n"
 #define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] Error: No new size found that fits into res!\n"
 
+// font_load_ft.c
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "Fallo en New_Face. Quizas el font path no es correcto.\nPor favor proporcione el archivo de fuentes de texto (~/.mplayer/subfont.ttf).\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "Fallo en New_Memory_Face ..\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "Fuente de subtítulo: fallo en load_sub_face.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "Fuente de subtítulo: fallo en prepare_charset.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Imposible preparar la fuente para subtítulos.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Imposible preparar la fuente para el OSD.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Imposible generar tablas.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "Fallo en FT_Done_FreeType.\n"
+
 // sub.c
 #define MSGTR_VO_SUB_Seekbar "Barra de navegación"
 #define MSGTR_VO_SUB_Play "Play"
@@ -854,6 +870,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Volume "Volumen"
 #define MSGTR_VO_SUB_Brightness "Brillo"
 #define MSGTR_VO_SUB_Hue "Hue"
+#define MSGTR_VO_SUB_Balance "Balance"
 
 // vo_3dfx.c
 #define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Solo 16bpp soportado!"
