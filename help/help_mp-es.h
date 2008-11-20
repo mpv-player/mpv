@@ -1080,6 +1080,12 @@ static char help_text[]=
 #define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] No pude encontrar un modo para: %ux%u@%u.\n"
 #define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] Inicialización VESA completa.\n"
 
+// libvo/vesa_lvo.c
+#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Este branch ya no esta soportado.\n[VESA_LVO] Por favor utiliza -vo vesa:vidix en su lugar.\n"
+#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] No pude abrir: '%s'\n"
+#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Formato de salida inválido: %s(%0X)\n"
+#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] La version de tu driver fb_vid no es compatible con esta versión de MPlayer!\n"
+
 // vo_x11.c
 #define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] draw_frame() llamada!!!!!!\n"
 
@@ -1113,9 +1119,255 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Usando modo de salida interlaceado, bottom-field primero."
 #define MSGTR_VO_YUV4MPEG_ProgressiveMode "Usando (por defecto) modo de cuadro progresivo."
 
+// vobsub_vidix.c
+#define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] No puedo iniciar la reproducción: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] No puedo parar la reproducción: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Interleaved uv para yuv410p no soportado.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_slice() fue llamada.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_frame() fue llamada.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] fourcc no soportado para este driver vidix: %x (%s).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] El servidor de video server tiene una resolución no soportada (%dx%d), soportadas: %dx%d-%dx%d.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] Video server has unsupported color depth by vidix (%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] El driver Vidix no puede ampliar la imagen (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] El driver Vidix no puede reducir la imagen (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] No pude configurar la reproducción: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] Tienes una versión erronea de la librería VIDIX.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] No pude encontrar un driver VIDIX que funcione.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] No pude obtener la capacidad: %s.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: ¡No se pudo enviar evento de pantalla completa EWMH!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: no se pudo encontrar ventana XScreenSaver.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: Modo de video seleccionado %dx%d para tamaño de imagen %dx%d.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] No se ecnontró mezclador de volumen por hardware, insertando filtro de volumen.\n"
+#define MSGTR_NoVolume "[Mixer] Na hay control de volumen disponible.\n"
+
 // Controladores vo viejos que han sido reemplazados
 #define MSGTR_VO_PGM_HasBeenReplaced "El controlador de salida pgm ha sido reemplazado por -vo pnm:pgmyuv.\n"
 #define MSGTR_VO_MD5_HasBeenReplaced "El controlador de salida md5 ha sido reemplazado por -vo md5sum.\n"
+
+
+// ======================= audio output drivers ========================
+
+// audio_out.c
+#define MSGTR_AO_ALSA9_1x_Removed "audio_out: los módulos alsa9 y alsa1x fueron eliminados, usa -ao alsa.\n"
+#define MSGTR_AO_TryingPreferredAudioDriver "Intentando controlador de audio preferido '%.*s', opciones '%s'\n"
+#define MSGTR_AO_NoSuchDriver "No existe ese controlador de audio '%.*s'\n"
+#define MSGTR_AO_FailedInit "Fallo al inicializar controlador de audio '%s'\n"
+#define MSGTR_AO_TryingEveryKnown "Intentando con todos los controladores de audio conocidos...\n"
+
+// ao_oss.c
+#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Imposible abrir dispositivo mezclador %s: %s\n"
+#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: El mezclador de la tarjeta de audio no tiene el canal '%s' usando valor por omisión.\n"
+#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Imposible abrir dispositivo de audio %s: %s\n"
+#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Imposible crear descriptor de archivo, bloqueando: %s\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] No puedo configurar el dispositivo de audio %s para salida %s, tratando %s...\n"
+#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Imposible configurar dispositivo de audio a %d channels.\n"
+#define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: El controlador no soporta SNDCTL_DSP_GETOSPACE :-(\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Su controlador de audio no soporta select()  ***\n Recompile MPlayer con #undef HAVE_AUDIO_SELECT en config.h !\n\n"
+#define MSGTR_AO_OSS_CantReopen "[AO OSS]\n Error fatal: *** Imposible RE-ABRIR / RESETEAR DISPOSITIVO DE AUDIO *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Formato OSS Desconocido/No-soportado: %x.\n"
+
+// ao_arts.c
+#define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
+#define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Conectado al servidor de sonido.\n"
+#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Imposible abrir stream.\n"
+#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] Stream Abierto.\n"
+#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] Tamaño del buffer: %d\n"
+
+// ao_dxr2.c
+#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Fallo Seteando volumen en %d.\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz no soportado, trate \"-aop list=resample\"\n"
+
+// ao_esd.c
+#define MSGTR_AO_ESD_CantOpenSound "[AO ESD] Fallo en esd_open_sound: %s\n"
+#define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latencia: [servidor: %0.2fs, red: %0.2fs] (ajuste %0.2fs)\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] Fallo abriendo playback stream esd: %s\n"
+
+// ao_mpegpes.c
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Fallo configurando mezclador de audio DVB:%s\n"
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz no soportado, trate de resamplear...\n"
+ 
+// ao_pcm.c
+#define MSGTR_AO_PCM_FileInfo "[AO PCM] Archivo: %s (%s)\nPCM: Samplerate: %iHz Canales: %s Formato %s\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: El volcado más rápido se logra con -vc null -vo null\nPCM: Info: Para escribir archivos de onda (WAVE) use -ao pcm:waveheader (valor por omisión).\n"
+#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Imposible abrir %s para escribir!\n"
+
+// ao_sdl.c
+#define MSGTR_AO_SDL_INFO "[AO SDL] Samplerate: %iHz Canales: %s Formato %s\n"
+#define MSGTR_AO_SDL_DriverInfo "[AO SDL] usando controlador de audio: %s .\n"
+#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Formato de audio no soportado: 0x%x.\n"
+#define MSGTR_AO_SDL_CantInit "[AO SDL] Error inicializando audio SDL: %s\n"
+#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Imposible abrir audio: %s\n"
+
+// ao_sgi.c
+#define MSGTR_AO_SGI_INFO "[AO SGI] control.\n"
+#define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Samplerate: %iHz Canales: %s Formato %s\n"
+#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: dispositivo inválido.\n"
+#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: fallo en setparams: %s\nImposble configurar samplerate deseado.\n"
+#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE No fue aceptado en el recurso dado.\n"
+#define MSGTR_AO_SGI_CantGetParms "[AO SGI] init: fallo en getparams: %s\n"
+#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: samplerate es ahora %lf (el deseado es %lf)\n"
+#define MSGTR_AO_SGI_InitConfigError "[AO SGI] init: %s\n"
+#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: Imposible abrir canal de audio: %s\n"
+#define MSGTR_AO_SGI_Uninit "[AO SGI] uninit: ...\n"
+#define MSGTR_AO_SGI_Reset "[AO SGI] reseteando: ...\n"
+#define MSGTR_AO_SGI_PauseInfo "[AO SGI] audio_pausa: ...\n"
+#define MSGTR_AO_SGI_ResumeInfo "[AO SGI] audio_continuar: ...\n"
+
+// ao_sun.c
+#define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: Fallo en SETINFO.\n"
+#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: Fallo escribiendo."
+#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Imposible abrir dispositivo de audio %s, %s -> nosound.\n"
+#define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: Su tarjeta no soporta el canal %d, %s, %d Hz samplerate.\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Su controlador de audio no soporta select()  ***\nRecompile MPlayer con #undef HAVE_AUDIO_SELECT en config.h !\n\n"
+#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nError fatal: *** IMPOSIBLE RE-ABRIR / RESETEAR DISPOSITIVO DE AUDIO (%s) ***\n"
+
+// ao_alsa5.c
+#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: formato solicitado: %d Hz, %d canales, %s\n"
+#define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: No se encontró tarjeta de sonido alguna.\n"
+#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: formato inválido (%s) solicitado - deshabilitando salida.\n"
+#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: Fallo en playback open: %s\n"
+#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: Error en pcm info: %s\n"
+#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d tarjeta(s) de sonido encontrada(s), using: %s\n"
+#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: Error en la información del canal PCM: %s\n"
+#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: Error configurando parámetros: %s\n"
+#define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: Error configurando canal: %s\n"
+#define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: Error preparando canal: %s\n"
+#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: Error de 'playback drain': %s\n"
+#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: Error de 'playback flush': %s\n"
+#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: Error cerrando pcm: %s\n"
+#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: Error de 'playback drain': %s\n"
+#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: Error de 'playback flush': %s\n"
+#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: Error preparando canal: %s\n"
+#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: Error de 'playback drain': %s\n"
+#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: Error de 'playback flush': %s\n"
+#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: Error preparando canal: %s\n"
+#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: alsa underrun, reseteando stream.\n"
+#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: Error preparando playback: %s\n"
+#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: Error de escritura despues de resetear: %s - me rindo!.\n"
+#define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: Error de salida: %s\n"
+
+// ao_alsa.c
+#define MSGTR_AO_ALSA_InvalidMixerIndexDefaultingToZero "[AO_ALSA] Índice del mezclador inválido. Usando 0.\n"
+#define MSGTR_AO_ALSA_MixerOpenError "[AO_ALSA] Mezclador, error abriendo: %s\n"
+#define MSGTR_AO_ALSA_MixerAttachError "[AO_ALSA] Mezclador, adjunto %s error: %s\n"
+#define MSGTR_AO_ALSA_MixerRegisterError "[AO_ALSA] Mezclador, error de registro: %s\n"
+#define MSGTR_AO_ALSA_MixerLoadError "[AO_ALSA] Mezclador, error de carga: %s\n"
+#define MSGTR_AO_ALSA_UnableToFindSimpleControl "[AO_ALSA] Incapaz de encontrar un control simple '%s',%i.\n"
+#define MSGTR_AO_ALSA_ErrorSettingLeftChannel "[AO_ALSA] Error estableciendo el canal izquierdo, %s\n"
+#define MSGTR_AO_ALSA_ErrorSettingRightChannel "[AO_ALSA] Error estableciendo el canal derecho, %s\n"
+#define MSGTR_AO_ALSA_CommandlineHelp "\n[AO_ALSA] -ao alsa ayuda línea de comandos:\n"\
+"[AO_ALSA] Ejemplo: mplayer -ao alsa:dispositivo=hw=0.3\n"\
+"[AO_ALSA]   Establece como primera tarjeta el cuarto dispositivo de hardware.\n\n"\
+"[AO_ALSA] Opciones:\n"\
+"[AO_ALSA]   noblock\n"\
+"[AO_ALSA]     Abre el dispositivo en modo sin bloqueo.\n"\
+"[AO_ALSA]   device=<nombre-dispositivo>\n"\
+"[AO_ALSA]     Establece el dispositivo (cambiar , por . y : por =)\n"
+#define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d canales no están soportados.\n"
+#define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] La apertura en modo sin bloqueo ha fallado, intentando abrir en modo bloqueo.\n"
+#define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Error de apertura en la reproducción: %s\n"
+#define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Error estableciendo el modo bloqueo %s.\n"
+#define MSGTR_AO_ALSA_UnableToGetInitialParameters "[AO_ALSA] Incapaz de obtener los parámetros iniciales: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetAccessType "[AO_ALSA] Incapaz de establecer el tipo de acceso: %s\n"
+#define MSGTR_AO_ALSA_FormatNotSupportedByHardware "[AO_ALSA] Formato %s no soportado por el hardware, intentando la opción por defecto.\n"
+#define MSGTR_AO_ALSA_UnableToSetFormat "[AO_ALSA] Incapaz de establecer el formato: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetChannels "[AO_ALSA] Incapaz de establecer los canales: %s\n"
+#define MSGTR_AO_ALSA_UnableToDisableResampling "[AO_ALSA] Incapaz de deshabilitar el resampling:  %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSamplerate2 "[AO_ALSA] Incapaz de establecer el samplerate-2: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetBufferTimeNear "[AO_ALSA] Incapaz de establecer el tiempo del buffer: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodTime "[AO_ALSA] Incapaz de establecer el período de tiempo: %s\n"
+#define MSGTR_AO_ALSA_BufferTimePeriodTime "[AO_ALSA] tiempo_buffer: %d, tiempo_período :%d\n"
+#define MSGTR_AO_ALSA_UnableToGetPeriodSize "[AO ALSA] Incapaz de obtener el tamaño del período: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriodSize "[AO ALSA] Incapaz de establecer el tamaño del período(%ld): %s\n"
+#define MSGTR_AO_ALSA_UnableToSetPeriods "[AO_ALSA] Incapaz de establecer períodos: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetHwParameters "[AO_ALSA] Incapaz de establecer parámatros de hw: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBufferSize "[AO_ALSA] Incapaz de obtener el tamaño del buffer: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetSwParameters "[AO_ALSA] Incapaz de obtener parámatros de sw: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSwParameters "[AO_ALSA] Incapaz de establecer parámetros de sw: %s\n"
+#define MSGTR_AO_ALSA_UnableToGetBoundary "[AO_ALSA] Incapaz de obtener el límite: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStartThreshold "[AO_ALSA] Incapaz de establecer el umbral de comienzo: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetStopThreshold "[AO_ALSA] Incapaz de establecer el umbral de parada: %s\n"
+#define MSGTR_AO_ALSA_UnableToSetSilenceSize "[AO_ALSA] Incapaz de establecer el tamaño del silencio: %s\n"
+#define MSGTR_AO_ALSA_PcmCloseError "[AO_ALSA] pcm error de clausura: %s\n"
+#define MSGTR_AO_ALSA_NoHandlerDefined "[AO_ALSA] ¡Ningún manejador definido!\n"
+#define MSGTR_AO_ALSA_PcmPrepareError "[AO_ALSA] pcm error de preparación: %s\n"
+#define MSGTR_AO_ALSA_PcmPauseError "[AO_ALSA] pcm error de pausa: %s\n"
+#define MSGTR_AO_ALSA_PcmDropError "[AO_ALSA] pcm error de pérdida: %s\n"
+#define MSGTR_AO_ALSA_PcmResumeError "[AO_ALSA] pcm error volviendo al estado normal: %s\n"
+#define MSGTR_AO_ALSA_DeviceConfigurationError "[AO_ALSA] Error de configuración del dispositivo."
+#define MSGTR_AO_ALSA_PcmInSuspendModeTryingResume "[AO_ALSA] Pcm en modo suspendido, intentando volver al estado normal.\n"
+#define MSGTR_AO_ALSA_WriteError "[AO_ALSA] Error de escritura: %s\n"
+#define MSGTR_AO_ALSA_TryingToResetSoundcard "[AO_ALSA] Intentando resetear la tarjeta de sonido.\n"
+#define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] No se puede obtener el estado pcm: %s\n"
+
+// ao_plugin.c
+#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] Plugin inválido: %s\n"
+
+
+// ======================= audio filters ================================
+
+// af_scaletempo.c
+#define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
+
+// af_ladspa.c
+#define MSGTR_AF_LADSPA_AvailableLabels "Etiquetas disponibles en"
+#define MSGTR_AF_LADSPA_WarnNoInputs "ADVERTENCIA! Este plugin LADSPA no tiene entradas de audio.\n La señal de entrada de audio se perderá."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "Plugins Multi-canal (>2) no están soportados (todavía).\n  Use solo plugins mono y estereo."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "Este plugín LADSPA no tiene salidas de audio."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "El número de entradas y de salidas  de audio de este plugin LADSPA son distintas."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "Fallo la carga."
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "No se pudo encontrar la función ladspa_descriptor() en el archivo de biblioteca especificado."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "No se puede encontrar la etiqueta en la biblioteca del plugin."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "No se especificaron subopciones"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "No se especificó archivo de biblioteca"
+#define MSGTR_AF_LADSPA_ErrNoLabel "No se especificó etiqueta del filtro"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "No se especificaron suficientes controles en la línea de comando"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Control de entrada #%d esta abajo del límite inferior que es %0.4f.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Control de entrada #%d esta por encima del límite superior que es %0.4f.\n"
+
+// format.c
+#define MSGTR_AF_FORMAT_UnknownFormat "formato desconocido "
+
+
+// ========================== INPUT =========================================
+
+// joystick.c
+#define MSGTR_INPUT_JOYSTICK_Opening "Abriendo joystick %s\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Imposible abrir joystick %s : %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Error leyendo dispositivo joystick : %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick : perdimos %d bytes de datos\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick : Advertencia, init event, perdimos sync con el driver\n"
+#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick : Advertencia, tipo de evento desconocido %d\n"
+
+// input.c
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Demaciados fds de comandos, imposible registrar fd %d.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Demaciados fds de teclas, imposible registrar fd %d.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Comando %s: argumento %d no es un entero.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "Comando %s: argumento %d no es punto flotante.\n"
+#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "Commando %s: argumento %d no está terminado.\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownArg "Argumento desconocido %d\n"
+#define MSGTR_INPUT_INPUT_Err2FewArgs "Comando %s requiere a lo menos %d argumentos, solo encontramos %d hasta ahora.\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Error leyendo fd de comandos %d: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Buffer de comandos de fd %d lleno: botando contenido\n"
+#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Comando inválido asignado a la tecla %s"
+#define MSGTR_INPUT_INPUT_ErrSelect "Error en Select: %s\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Error en fd %d de entrada de teclas\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Ingreso de tecla muerta en fd %d\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Demaciados eventos de keydown al mismo tiempo\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Error en fd de comandos %d\n"
+#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Error leyendo archivo de configuración de input %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownKey "Tecla desconocida '%s'\n"
+#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Asignación no terminada %s\n"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "El buffer es demaciado pequeño para este nombre de tecla: %s\n"
+#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "No se econtró un comando para la tecla %s"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "Buffer demaciado pequeño para el comando %s\n"
+#define MSGTR_INPUT_INPUT_ErrWhyHere "Que estamos haciendo aqui?\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitJoystick "No se puede inicializar la entrada del joystick\n"
+#define MSGTR_INPUT_INPUT_ErrCantStatFile "No se puede obtener el estado %s: %s"
+#define MSGTR_INPUT_INPUT_ErrCantOpenFile "No se puede abrir %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "No se puede inicializar la entrada del Apple Remote.\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Dispositivo de CD-ROM '%s' no encontrado.\n"
@@ -1359,254 +1611,16 @@ static char help_text[]=
 #define MSGTR_DShowInitOK "INFO: Inicialización correcta de codec de video Win32/DShow.\n"
 #define MSGTR_DMOInitOK "INFO: Inicialización correcta de codec de video Win32/DMO.\n"
 
-// x11_common.c
-#define MSGTR_EwmhFullscreenStateFailed "\nX11: ¡No se pudo enviar evento de pantalla completa EWMH!\n"
-#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: no se pudo encontrar ventana XScreenSaver.\n"
-#define MSGTR_SelectedVideoMode "XF86VM: Modo de video seleccionado %dx%d para tamaño de imagen %dx%d.\n"
-#define MSGTR_InsertingAfVolume "[Mixer] No se ecnontró mezclador de volumen por hardware, insertando filtro de volumen.\n"
-#define MSGTR_NoVolume "[Mixer] Na hay control de volumen disponible.\n"
-
-// ======================= AO Audio Output drivers ========================
-
-// libao2
-
-// audio_out.c
-#define MSGTR_AO_ALSA9_1x_Removed "audio_out: los módulos alsa9 y alsa1x fueron eliminados, usa -ao alsa.\n"
-#define MSGTR_AO_TryingPreferredAudioDriver "Intentando controlador de audio preferido '%.*s', opciones '%s'\n"
-#define MSGTR_AO_NoSuchDriver "No existe ese controlador de audio '%.*s'\n"
-#define MSGTR_AO_FailedInit "Fallo al inicializar controlador de audio '%s'\n"
-#define MSGTR_AO_TryingEveryKnown "Intentando con todos los controladores de audio conocidos...\n"
-
-// ao_oss.c
-#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Imposible abrir dispositivo mezclador %s: %s\n"
-#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: El mezclador de la tarjeta de audio no tiene el canal '%s' usando valor por omisión.\n"
-#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Imposible abrir dispositivo de audio %s: %s\n"
-#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Imposible crear descriptor de archivo, bloqueando: %s\n"
-#define MSGTR_AO_OSS_CantSet "[AO OSS] No puedo configurar el dispositivo de audio %s para salida %s, tratando %s...\n"
-#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Imposible configurar dispositivo de audio a %d channels.\n"
-#define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: El controlador no soporta SNDCTL_DSP_GETOSPACE :-(\n"
-#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Su controlador de audio no soporta select()  ***\n Recompile MPlayer con #undef HAVE_AUDIO_SELECT en config.h !\n\n"
-#define MSGTR_AO_OSS_CantReopen "[AO OSS]\n Error fatal: *** Imposible RE-ABRIR / RESETEAR DISPOSITIVO DE AUDIO *** %s\n"
-#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Formato OSS Desconocido/No-soportado: %x.\n"
-
-// ao_arts.c
-#define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
-#define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Conectado al servidor de sonido.\n"
-#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Imposible abrir stream.\n"
-#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] Stream Abierto.\n"
-#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] Tamaño del buffer: %d\n"
-
-// ao_dxr2.c
-#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Fallo Seteando volumen en %d.\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz no soportado, trate \"-aop list=resample\"\n"
-
-// ao_esd.c
-#define MSGTR_AO_ESD_CantOpenSound "[AO ESD] Fallo en esd_open_sound: %s\n"
-#define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latencia: [servidor: %0.2fs, red: %0.2fs] (ajuste %0.2fs)\n"
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] Fallo abriendo playback stream esd: %s\n"
-
-// ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Fallo configurando mezclador de audio DVB:%s\n"
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz no soportado, trate de resamplear...\n"
- 
-// ao_pcm.c
-#define MSGTR_AO_PCM_FileInfo "[AO PCM] Archivo: %s (%s)\nPCM: Samplerate: %iHz Canales: %s Formato %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: El volcado más rápido se logra con -vc null -vo null\nPCM: Info: Para escribir archivos de onda (WAVE) use -ao pcm:waveheader (valor por omisión).\n"
-#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Imposible abrir %s para escribir!\n"
-
-// ao_sdl.c
-#define MSGTR_AO_SDL_INFO "[AO SDL] Samplerate: %iHz Canales: %s Formato %s\n"
-#define MSGTR_AO_SDL_DriverInfo "[AO SDL] usando controlador de audio: %s .\n"
-#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Formato de audio no soportado: 0x%x.\n"
-#define MSGTR_AO_SDL_CantInit "[AO SDL] Error inicializando audio SDL: %s\n"
-#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Imposible abrir audio: %s\n"
-
-// ao_sgi.c
-#define MSGTR_AO_SGI_INFO "[AO SGI] control.\n"
-#define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Samplerate: %iHz Canales: %s Formato %s\n"
-#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: dispositivo inválido.\n"
-#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: fallo en setparams: %s\nImposble configurar samplerate deseado.\n"
-#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE No fue aceptado en el recurso dado.\n"
-#define MSGTR_AO_SGI_CantGetParms "[AO SGI] init: fallo en getparams: %s\n"
-#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: samplerate es ahora %lf (el deseado es %lf)\n"
-#define MSGTR_AO_SGI_InitConfigError "[AO SGI] init: %s\n"
-#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: Imposible abrir canal de audio: %s\n"
-#define MSGTR_AO_SGI_Uninit "[AO SGI] uninit: ...\n"
-#define MSGTR_AO_SGI_Reset "[AO SGI] reseteando: ...\n"
-#define MSGTR_AO_SGI_PauseInfo "[AO SGI] audio_pausa: ...\n"
-#define MSGTR_AO_SGI_ResumeInfo "[AO SGI] audio_continuar: ...\n"
-
-// ao_sun.c
-#define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: Fallo en SETINFO.\n"
-#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: Fallo escribiendo."
-#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Imposible abrir dispositivo de audio %s, %s -> nosound.\n"
-#define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: Su tarjeta no soporta el canal %d, %s, %d Hz samplerate.\n"
-#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Su controlador de audio no soporta select()  ***\nRecompile MPlayer con #undef HAVE_AUDIO_SELECT en config.h !\n\n"
-#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nError fatal: *** IMPOSIBLE RE-ABRIR / RESETEAR DISPOSITIVO DE AUDIO (%s) ***\n"
-
-// ao_alsa5.c
-#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: formato solicitado: %d Hz, %d canales, %s\n"
-#define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: No se encontró tarjeta de sonido alguna.\n"
-#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: formato inválido (%s) solicitado - deshabilitando salida.\n"
-#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: Fallo en playback open: %s\n"
-#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: Error en pcm info: %s\n"
-#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d tarjeta(s) de sonido encontrada(s), using: %s\n"
-#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: Error en la información del canal PCM: %s\n"
-#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: Error configurando parámetros: %s\n"
-#define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: Error configurando canal: %s\n"
-#define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: Error preparando canal: %s\n"
-#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: Error de 'playback drain': %s\n"
-#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: Error de 'playback flush': %s\n"
-#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: Error cerrando pcm: %s\n"
-#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: Error de 'playback drain': %s\n"
-#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: Error de 'playback flush': %s\n"
-#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: Error preparando canal: %s\n"
-#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: Error de 'playback drain': %s\n"
-#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: Error de 'playback flush': %s\n"
-#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: Error preparando canal: %s\n"
-#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: alsa underrun, reseteando stream.\n"
-#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: Error preparando playback: %s\n"
-#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: Error de escritura despues de resetear: %s - me rindo!.\n"
-#define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: Error de salida: %s\n"
-
-// ao_alsa.c
-#define MSGTR_AO_ALSA_InvalidMixerIndexDefaultingToZero "[AO_ALSA] Índice del mezclador inválido. Usando 0.\n"
-#define MSGTR_AO_ALSA_MixerOpenError "[AO_ALSA] Mezclador, error abriendo: %s\n"
-#define MSGTR_AO_ALSA_MixerAttachError "[AO_ALSA] Mezclador, adjunto %s error: %s\n"
-#define MSGTR_AO_ALSA_MixerRegisterError "[AO_ALSA] Mezclador, error de registro: %s\n"
-#define MSGTR_AO_ALSA_MixerLoadError "[AO_ALSA] Mezclador, error de carga: %s\n"
-#define MSGTR_AO_ALSA_UnableToFindSimpleControl "[AO_ALSA] Incapaz de encontrar un control simple '%s',%i.\n"
-#define MSGTR_AO_ALSA_ErrorSettingLeftChannel "[AO_ALSA] Error estableciendo el canal izquierdo, %s\n"
-#define MSGTR_AO_ALSA_ErrorSettingRightChannel "[AO_ALSA] Error estableciendo el canal derecho, %s\n"
-#define MSGTR_AO_ALSA_CommandlineHelp "\n[AO_ALSA] -ao alsa ayuda línea de comandos:\n"\
-"[AO_ALSA] Ejemplo: mplayer -ao alsa:dispositivo=hw=0.3\n"\
-"[AO_ALSA]   Establece como primera tarjeta el cuarto dispositivo de hardware.\n\n"\
-"[AO_ALSA] Opciones:\n"\
-"[AO_ALSA]   noblock\n"\
-"[AO_ALSA]     Abre el dispositivo en modo sin bloqueo.\n"\
-"[AO_ALSA]   device=<nombre-dispositivo>\n"\
-"[AO_ALSA]     Establece el dispositivo (cambiar , por . y : por =)\n"
-#define MSGTR_AO_ALSA_ChannelsNotSupported "[AO_ALSA] %d canales no están soportados.\n"
-#define MSGTR_AO_ALSA_OpenInNonblockModeFailed "[AO_ALSA] La apertura en modo sin bloqueo ha fallado, intentando abrir en modo bloqueo.\n"
-#define MSGTR_AO_ALSA_PlaybackOpenError "[AO_ALSA] Error de apertura en la reproducción: %s\n"
-#define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Error estableciendo el modo bloqueo %s.\n"
-#define MSGTR_AO_ALSA_UnableToGetInitialParameters "[AO_ALSA] Incapaz de obtener los parámetros iniciales: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetAccessType "[AO_ALSA] Incapaz de establecer el tipo de acceso: %s\n"
-#define MSGTR_AO_ALSA_FormatNotSupportedByHardware "[AO_ALSA] Formato %s no soportado por el hardware, intentando la opción por defecto.\n"
-#define MSGTR_AO_ALSA_UnableToSetFormat "[AO_ALSA] Incapaz de establecer el formato: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetChannels "[AO_ALSA] Incapaz de establecer los canales: %s\n"
-#define MSGTR_AO_ALSA_UnableToDisableResampling "[AO_ALSA] Incapaz de deshabilitar el resampling:  %s\n"
-#define MSGTR_AO_ALSA_UnableToSetSamplerate2 "[AO_ALSA] Incapaz de establecer el samplerate-2: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetBufferTimeNear "[AO_ALSA] Incapaz de establecer el tiempo del buffer: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetPeriodTime "[AO_ALSA] Incapaz de establecer el período de tiempo: %s\n"
-#define MSGTR_AO_ALSA_BufferTimePeriodTime "[AO_ALSA] tiempo_buffer: %d, tiempo_período :%d\n"
-#define MSGTR_AO_ALSA_UnableToGetPeriodSize "[AO ALSA] Incapaz de obtener el tamaño del período: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetPeriodSize "[AO ALSA] Incapaz de establecer el tamaño del período(%ld): %s\n"
-#define MSGTR_AO_ALSA_UnableToSetPeriods "[AO_ALSA] Incapaz de establecer períodos: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetHwParameters "[AO_ALSA] Incapaz de establecer parámatros de hw: %s\n"
-#define MSGTR_AO_ALSA_UnableToGetBufferSize "[AO_ALSA] Incapaz de obtener el tamaño del buffer: %s\n"
-#define MSGTR_AO_ALSA_UnableToGetSwParameters "[AO_ALSA] Incapaz de obtener parámatros de sw: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetSwParameters "[AO_ALSA] Incapaz de establecer parámetros de sw: %s\n"
-#define MSGTR_AO_ALSA_UnableToGetBoundary "[AO_ALSA] Incapaz de obtener el límite: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetStartThreshold "[AO_ALSA] Incapaz de establecer el umbral de comienzo: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetStopThreshold "[AO_ALSA] Incapaz de establecer el umbral de parada: %s\n"
-#define MSGTR_AO_ALSA_UnableToSetSilenceSize "[AO_ALSA] Incapaz de establecer el tamaño del silencio: %s\n"
-#define MSGTR_AO_ALSA_PcmCloseError "[AO_ALSA] pcm error de clausura: %s\n"
-#define MSGTR_AO_ALSA_NoHandlerDefined "[AO_ALSA] ¡Ningún manejador definido!\n"
-#define MSGTR_AO_ALSA_PcmPrepareError "[AO_ALSA] pcm error de preparación: %s\n"
-#define MSGTR_AO_ALSA_PcmPauseError "[AO_ALSA] pcm error de pausa: %s\n"
-#define MSGTR_AO_ALSA_PcmDropError "[AO_ALSA] pcm error de pérdida: %s\n"
-#define MSGTR_AO_ALSA_PcmResumeError "[AO_ALSA] pcm error volviendo al estado normal: %s\n"
-#define MSGTR_AO_ALSA_DeviceConfigurationError "[AO_ALSA] Error de configuración del dispositivo."
-#define MSGTR_AO_ALSA_PcmInSuspendModeTryingResume "[AO_ALSA] Pcm en modo suspendido, intentando volver al estado normal.\n"
-#define MSGTR_AO_ALSA_WriteError "[AO_ALSA] Error de escritura: %s\n"
-#define MSGTR_AO_ALSA_TryingToResetSoundcard "[AO_ALSA] Intentando resetear la tarjeta de sonido.\n"
-#define MSGTR_AO_ALSA_CannotGetPcmStatus "[AO_ALSA] No se puede obtener el estado pcm: %s\n"
-
-// ao_plugin.c
-
-#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] Plugin inválido: %s\n"
-
-// ======================= AF Audio Filters ================================
-
-// af_scaletempo.c
-#define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
-
-// libaf 
-
-// af_ladspa.c
-
-#define MSGTR_AF_LADSPA_AvailableLabels "Etiquetas disponibles en"
-#define MSGTR_AF_LADSPA_WarnNoInputs "ADVERTENCIA! Este plugin LADSPA no tiene entradas de audio.\n La señal de entrada de audio se perderá."
-#define MSGTR_AF_LADSPA_ErrMultiChannel "Plugins Multi-canal (>2) no están soportados (todavía).\n  Use solo plugins mono y estereo."
-#define MSGTR_AF_LADSPA_ErrNoOutputs "Este plugín LADSPA no tiene salidas de audio."
-#define MSGTR_AF_LADSPA_ErrInOutDiff "El número de entradas y de salidas  de audio de este plugin LADSPA son distintas."
-#define MSGTR_AF_LADSPA_ErrFailedToLoad "Fallo la carga."
-#define MSGTR_AF_LADSPA_ErrNoDescriptor "No se pudo encontrar la función ladspa_descriptor() en el archivo de biblioteca especificado."
-#define MSGTR_AF_LADSPA_ErrLabelNotFound "No se puede encontrar la etiqueta en la biblioteca del plugin."
-#define MSGTR_AF_LADSPA_ErrNoSuboptions "No se especificaron subopciones"
-#define MSGTR_AF_LADSPA_ErrNoLibFile "No se especificó archivo de biblioteca"
-#define MSGTR_AF_LADSPA_ErrNoLabel "No se especificó etiqueta del filtro"
-#define MSGTR_AF_LADSPA_ErrNotEnoughControls "No se especificaron suficientes controles en la línea de comando"
-#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Control de entrada #%d esta abajo del límite inferior que es %0.4f.\n"
-#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Control de entrada #%d esta por encima del límite superior que es %0.4f.\n"
-
-// format.c
-
-#define MSGTR_AF_FORMAT_UnknownFormat "formato desconocido "
-
-// ========================== INPUT =========================================
-
-// joystick.c
-
-#define MSGTR_INPUT_JOYSTICK_Opening "Abriendo joystick %s\n"
-#define MSGTR_INPUT_JOYSTICK_CantOpen "Imposible abrir joystick %s : %s\n"
-#define MSGTR_INPUT_JOYSTICK_ErrReading "Error leyendo dispositivo joystick : %s\n"
-#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick : perdimos %d bytes de datos\n"
-#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick : Advertencia, init event, perdimos sync con el driver\n"
-#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick : Advertencia, tipo de evento desconocido %d\n"
-
-// input.c
-
-#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Demaciados fds de comandos, imposible registrar fd %d.\n"
-#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Demaciados fds de teclas, imposible registrar fd %d.\n"
-#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Comando %s: argumento %d no es un entero.\n"
-#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "Comando %s: argumento %d no es punto flotante.\n"
-#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "Commando %s: argumento %d no está terminado.\n"
-#define MSGTR_INPUT_INPUT_ErrUnknownArg "Argumento desconocido %d\n"
-#define MSGTR_INPUT_INPUT_Err2FewArgs "Comando %s requiere a lo menos %d argumentos, solo encontramos %d hasta ahora.\n"
-#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Error leyendo fd de comandos %d: %s\n"
-#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Buffer de comandos de fd %d lleno: botando contenido\n"
-#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Comando inválido asignado a la tecla %s"
-#define MSGTR_INPUT_INPUT_ErrSelect "Error en Select: %s\n"
-#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Error en fd %d de entrada de teclas\n"
-#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Ingreso de tecla muerta en fd %d\n"
-#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Demaciados eventos de keydown al mismo tiempo\n"
-#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Error en fd de comandos %d\n"
-#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Error leyendo archivo de configuración de input %s: %s\n"
-#define MSGTR_INPUT_INPUT_ErrUnknownKey "Tecla desconocida '%s'\n"
-#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Asignación no terminada %s\n"
-#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "El buffer es demaciado pequeño para este nombre de tecla: %s\n"
-#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "No se econtró un comando para la tecla %s"
-#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "Buffer demaciado pequeño para el comando %s\n"
-#define MSGTR_INPUT_INPUT_ErrWhyHere "Que estamos haciendo aqui?\n"
-#define MSGTR_INPUT_INPUT_ErrCantInitJoystick "No se puede inicializar la entrada del joystick\n"
-#define MSGTR_INPUT_INPUT_ErrCantStatFile "No se puede obtener el estado %s: %s"
-#define MSGTR_INPUT_INPUT_ErrCantOpenFile "No se puede abrir %s: %s\n"
-#define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "No se puede inicializar la entrada del Apple Remote.\n"
 
 // url.c
-
 #define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "Al parecer el string ya ha sido escapado en url_scape %c%c1%c2\n"
 
 // ai_alsa1x.c
-
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "No puedo setear el samplerate.\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "No puedo setear el tiempo del buffer.\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "No puedo setear el tiempo del periodo.\n"
 
 // ai_alsa1x.c / ai_alsa.c
-
 #define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Configuración erronea para este PCM: no hay configuraciones disponibles.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Tipo de acceso no disponible.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Formato de muestreo no disponible.\n"
@@ -1887,30 +1901,6 @@ static char help_text[]=
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s No soportado por el próximo filtro/vo :(\n"
 
 // ================================== LIBMPVO ====================================
-
-// libvo/vesa_lvo.c
-
-#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Este branch ya no esta soportado.\n[VESA_LVO] Por favor utiliza -vo vesa:vidix en su lugar.\n"
-#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] No pude abrir: '%s'\n"
-#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Formato de salida inválido: %s(%0X)\n"
-#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] La version de tu driver fb_vid no es compatible con esta versión de MPlayer!\n"
-
-// libvo/vobsub_vidix.c
-
-#define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] No puedo iniciar la reproducción: %s\n"
-#define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] No puedo parar la reproducción: %s\n"
-#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Interleaved uv para yuv410p no soportado.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_slice() fue llamada.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_frame() fue llamada.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] fourcc no soportado para este driver vidix: %x (%s).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] El servidor de video server tiene una resolución no soportada (%dx%d), soportadas: %dx%d-%dx%d.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] Video server has unsupported color depth by vidix (%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] El driver Vidix no puede ampliar la imagen (%d%d -> %d%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] El driver Vidix no puede reducir la imagen (%d%d -> %d%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] No pude configurar la reproducción: %s.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] Tienes una versión erronea de la librería VIDIX.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] No pude encontrar un driver VIDIX que funcione.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] No pude obtener la capacidad: %s.\n"
 
 // stream/stream_radio.c
 
