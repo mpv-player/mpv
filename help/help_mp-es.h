@@ -10,7 +10,7 @@
 // Sefanja Ruijsenaars <sefanja at gmx.net>,
 // Andoni Zubimendi <andoni at lpsat.net>
 //
-// In sync with r21655 
+// In sync with 27967 
 // FIXME: Necesita una revisión a fondo hay muchas faltas de ortografía
 
 
@@ -2044,6 +2044,26 @@ static char help_text[]=
 #define MSGTR_TVI_DS_WrongADeviceIndex "tvi_dshow: Indice de adevice inválido: %d\n"
 #define MSGTR_TVI_DS_SamplerateNotsupported "tvi_dshow: El dispositivo no soporta el Samplerate %d. Probando con el primero disponible.\n"
 #define MSGTR_TVI_DS_VideoAdjustigNotSupported "tvi_dshow: El dispositivo no soporta el ajuste de brillo/hue/saturación/contraste\n"
+#define MSGTR_TVI_DS_ChangingWidthHeightNotSupported "tvi_dshow: El dispositivo no soporta cambios de ancho/largo.\n"
+#define MSGTR_TVI_DS_SelectingInputNotSupported  "tvi_dshow: El dispositivo no soporta la selección de la fuente de captura\n"
+#define MSGTR_TVI_DS_FreqTableLoaded "tvi_dshow: Sistema cargado (%s) tabla de frecuencias para país id=%d (canales:%d).\n"
+#define MSGTR_TVI_DS_ErrorParsingAudioFormatStruct "tvi_dshow: Imposible procesar la estructura del formato de audio.\n"
+#define MSGTR_TVI_DS_ErrorParsingVideoFormatStruct "tvi_dshow: Imposible procesar la estructura del formato de video.\n"
+#define MSGTR_TVI_DS_UnableSetAudioMode "tvi_dshow: Imposible seleccionar modo de audio %d. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnsupportedMediaType "tvi_dshow: A %s se le ha pasado un tipo de medios no soportado.\n"
+#define MSGTR_TVI_DS_UnableGetsupportedVideoFormats "tvi_dshow: Imposible obtener los formatos de medios soportados desde el video pin. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableGetsupportedAudioFormats "tvi_dshow: Imposible obtener los formatos de medios soportados desde el audio pin. Error:0x%x Desabilitando audio.\n"
+#define MSGTR_TVI_DS_UnableFindNearestChannel "tvi_dshow: Imposible encontrar el canal más cercano en la tabla de frecuencias del sistema\n"
+#define MSGTR_TVI_DS_UnableToSetChannel "tvi_dshow: Imposible cambiar al canal más cercano en la tabla de frecuencias del sistema. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableTerminateVPPin "tvi_dshow: Imposible terminar pin VideoPort con cualquiera de los filtros en el graph. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVideoSubGraph "tvi_dshow: Imposible construir cadena de video del graph de captura. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildAudioSubGraph "tvi_dshow: Imposible construir cadena de audio del graph de captura. Error:0x%x\n"
+#define MSGTR_TVI_DS_UnableBuildVBISubGraph "tvi_dshow: Imposible construir cadena VBI del graph de captura. Error:0x%x\n"
+#define MSGTR_TVI_DS_GraphInitFailure "tvi_dshow: Falló la inicialización del graph Directshow.\n"
+#define MSGTR_TVI_DS_NoVideoCaptureDevice "tvi_dshow: No se pudo encontrar un dispositivo de captura de video\n"
+#define MSGTR_TVI_DS_NoAudioCaptureDevice "tvi_dshow: No se pudo encontrar un dispositivo de captura de audio\n"
+#define MSGTR_TVI_DS_GetActualMediatypeFailed "tvi_dshow: Imposible obtener el tipo de medios actual (Error:0x%x). Se asumirá que es igual al requerido.\n"
+
 
 // ================================== LIBASS ====================================
 
