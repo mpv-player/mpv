@@ -1374,46 +1374,10 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "No se puede abrir %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "No se puede inicializar la entrada del Apple Remote.\n"
 
-// open.c, stream.c:
-#define MSGTR_CdDevNotfound "Dispositivo de CD-ROM '%s' no encontrado.\n"
-#define MSGTR_ErrTrackSelect "Error seleccionando la pista de VCD!"
-#define MSGTR_ReadSTDIN "Leyendo desde la entrada estándar (stdin)...\n"
-#define MSGTR_UnableOpenURL "No se puede abrir URL: %s\n"
-#define MSGTR_ConnToServer "Connectado al servidor: %s\n"
-#define MSGTR_FileNotFound "Archivo no encontrado: '%s'\n"
-
-#define MSGTR_SMBInitError "No se puede inicializar la librería libsmbclient: %d\n"
-#define MSGTR_SMBFileNotFound "No se puede abrir desde la RED: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer no fue compilado con soporte de lectura de SMB.\n"
-
-#define MSGTR_CantOpenDVD "No se puede abrir el dispositivo de DVD: %s (%s)\n"
-
-// stream_dvd.c
-#define MSGTR_DVDspeedCantOpen "No se ha podido abrir el dispositivo de DVD para escritura, cambiar la velocidad del DVD requiere acceso de escritura\n"
-#define MSGTR_DVDrestoreSpeed "Restableciendo la velocidad del DVD"
-#define MSGTR_DVDlimitSpeed "Limitando la velocidad del DVD a %dKB/s... "
-#define MSGTR_DVDlimitFail "La limitación de la velocidad del DVD ha fallado.\n"
-#define MSGTR_DVDlimitOk "Se ha limitado la velocidad del DVD con éxito.\n"
-#define MSGTR_NoDVDSupport "MPlayer fue compilado sin soporte para DVD, saliendo.\n"
-#define MSGTR_DVDnumTitles "Hay %d títulos en este DVD.\n"
-#define MSGTR_DVDinvalidTitle "Número de título de DVD inválido: %d\n"
-#define MSGTR_DVDnumChapters "Hay %d capítulos en este título de DVD.\n"
-#define MSGTR_DVDinvalidChapter "Número de capítulo de DVD inválido: %d\n"
-#define MSGTR_DVDinvalidChapterRange "Especificación inválida de rango de capítulos %s\n"
-#define MSGTR_DVDinvalidLastChapter "Número del último capítulo del DVD inválido: %d\n"
-#define MSGTR_DVDnumAngles "Hay %d ángulos en este título de DVD.\n"
-#define MSGTR_DVDinvalidAngle "Número de ángulo de DVD inválido: %d\n"
-#define MSGTR_DVDnoIFO "No se pudo abrir archivo IFO para el título de DVD %d.\n"
-#define MSGTR_DVDnoVMG "No se pudo abrir la información VMG!\n"
-#define MSGTR_DVDnoVOBs "No se pudo abrir VOBS del título (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDnoMatchingAudio "DVD, no se encontró un idioma coincidente!\n"
-#define MSGTR_DVDaudioChannel "DVD, canal de audio seleccionado: %d idioma: %c%c\n"
-#define MSGTR_DVDaudioStreamInfo "stream de audio: %d formato: %s (%s) idioma: %s aid: %d.\n"
-#define MSGTR_DVDnumAudioChannels "Número de canales de audio en el disco: %d.\n"
-#define MSGTR_DVDnoMatchingSubtitle "DVD, no se encontró un idioma de subtitulo coincidente!\n"
-#define MSGTR_DVDsubtitleChannel "DVD, canal de subtitulos seleccionado: %d idioma: %c%c\n"
-#define MSGTR_DVDsubtitleLanguage "subtítulo ( sid ): %d idioma: %s\n"
-#define MSGTR_DVDnumSubtitles "Número de subtítulos en el disco: %d\n"
+// lirc.c 
+#define MSGTR_SettingUpLIRC "Configurando soporte para LIRC...\n"
+#define MSGTR_LIRCopenfailed "Fallo al abrir el soporte para LIRC.\n"
+#define MSGTR_LIRCcfgerr "Fallo al leer archivo de configuración de LIRC %s.\n"
 
 
 // ========================== LIBMPDEMUX ===================================
@@ -1555,6 +1519,48 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_XMMS_FoundPlugin "Plugin encontrado: %s (%s).\n"
 #define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Cerrando plugin: %s.\n"
 
+// open.c, stream.c:
+#define MSGTR_CdDevNotfound "Dispositivo de CD-ROM '%s' no encontrado.\n"
+#define MSGTR_ErrTrackSelect "Error seleccionando la pista de VCD!"
+#define MSGTR_ReadSTDIN "Leyendo desde la entrada estándar (stdin)...\n"
+#define MSGTR_UnableOpenURL "No se puede abrir URL: %s\n"
+#define MSGTR_ConnToServer "Connectado al servidor: %s\n"
+#define MSGTR_FileNotFound "Archivo no encontrado: '%s'\n"
+
+#define MSGTR_SMBInitError "No se puede inicializar la librería libsmbclient: %d\n"
+#define MSGTR_SMBFileNotFound "No se puede abrir desde la RED: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer no fue compilado con soporte de lectura de SMB.\n"
+
+#define MSGTR_CantOpenDVD "No se puede abrir el dispositivo de DVD: %s (%s)\n"
+
+// stream_dvd.c
+#define MSGTR_DVDspeedCantOpen "No se ha podido abrir el dispositivo de DVD para escritura, cambiar la velocidad del DVD requiere acceso de escritura\n"
+#define MSGTR_DVDrestoreSpeed "Restableciendo la velocidad del DVD"
+#define MSGTR_DVDlimitSpeed "Limitando la velocidad del DVD a %dKB/s... "
+#define MSGTR_DVDlimitFail "La limitación de la velocidad del DVD ha fallado.\n"
+#define MSGTR_DVDlimitOk "Se ha limitado la velocidad del DVD con éxito.\n"
+#define MSGTR_NoDVDSupport "MPlayer fue compilado sin soporte para DVD, saliendo.\n"
+#define MSGTR_DVDnumTitles "Hay %d títulos en este DVD.\n"
+#define MSGTR_DVDinvalidTitle "Número de título de DVD inválido: %d\n"
+#define MSGTR_DVDnumChapters "Hay %d capítulos en este título de DVD.\n"
+#define MSGTR_DVDinvalidChapter "Número de capítulo de DVD inválido: %d\n"
+#define MSGTR_DVDinvalidChapterRange "Especificación inválida de rango de capítulos %s\n"
+#define MSGTR_DVDinvalidLastChapter "Número del último capítulo del DVD inválido: %d\n"
+#define MSGTR_DVDnumAngles "Hay %d ángulos en este título de DVD.\n"
+#define MSGTR_DVDinvalidAngle "Número de ángulo de DVD inválido: %d\n"
+#define MSGTR_DVDnoIFO "No se pudo abrir archivo IFO para el título de DVD %d.\n"
+#define MSGTR_DVDnoVMG "No se pudo abrir la información VMG!\n"
+#define MSGTR_DVDnoVOBs "No se pudo abrir VOBS del título (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoMatchingAudio "DVD, no se encontró un idioma coincidente!\n"
+#define MSGTR_DVDaudioChannel "DVD, canal de audio seleccionado: %d idioma: %c%c\n"
+#define MSGTR_DVDaudioStreamInfo "stream de audio: %d formato: %s (%s) idioma: %s aid: %d.\n"
+#define MSGTR_DVDnumAudioChannels "Número de canales de audio en el disco: %d.\n"
+#define MSGTR_DVDnoMatchingSubtitle "DVD, no se encontró un idioma de subtitulo coincidente!\n"
+#define MSGTR_DVDsubtitleChannel "DVD, canal de subtitulos seleccionado: %d idioma: %c%c\n"
+#define MSGTR_DVDsubtitleLanguage "subtítulo ( sid ): %d idioma: %s\n"
+#define MSGTR_DVDnumSubtitles "Número de subtítulos en el disco: %d\n"
+
+
 // dec_video.c & dec_audio.c
 #define MSGTR_CantOpenCodec "No se pudo abrir codec.\n"
 #define MSGTR_CantCloseCodec "No se pudo cerrar codec.\n"
@@ -1591,11 +1597,6 @@ static char help_text[]=
 #define MSGTR_ADecoderPreinitFailed "Preinicialización del ADecoder ha fallado.\n"
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Alocando %d bytes para el búfer de entrada.\n"
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allocating %d + %d = %d bytes para el búfer de salida.\n"
-
-// LIRC
-#define MSGTR_SettingUpLIRC "Configurando soporte para LIRC...\n"
-#define MSGTR_LIRCopenfailed "Fallo al abrir el soporte para LIRC.\n"
-#define MSGTR_LIRCcfgerr "Fallo al leer archivo de configuración de LIRC %s.\n"
 
 // vf.c
 #define MSGTR_CouldNotFindVideoFilter "No se pudo encontrar el filtro de video '%s'.\n"
