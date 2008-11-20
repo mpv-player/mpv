@@ -1341,6 +1341,11 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick : Advertencia, init event, perdimos sync con el driver\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick : Advertencia, tipo de evento desconocido %d\n"
 
+// appleir.c
+#define MSGTR_INPUT_APPLE_IR_Init "Inicializando Apple IR en %s\n"
+#define MSGTR_INPUT_APPLE_IR_Detect "Apple IR detectado en%s\n"
+#define MSGTR_INPUT_APPLE_IR_CantOpen "Imposible abrir dispositivo Apple IR: %s\n"
+
 // input.c
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Demaciados fds de comandos, imposible registrar fd %d.\n"
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Demaciados fds de teclas, imposible registrar fd %d.\n"
