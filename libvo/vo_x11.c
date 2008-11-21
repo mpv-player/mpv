@@ -334,6 +334,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if (flags & VOFLAG_MODESWITCHING)
         vm = 1;
 #endif
+    Flip_Flag = 0;
     if (flags & VOFLAG_FLIPPING)
         Flip_Flag = 1;
     zoomFlag = flags & VOFLAG_SWSCALE;
