@@ -291,7 +291,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     current_buf = 0;
     current_ip_buf = 0;
 
-    aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
     calc_drwXY(&drwX, &drwY);
 

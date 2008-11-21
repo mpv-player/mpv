@@ -677,7 +677,6 @@ skip_surface_allocation:
 #endif
    }
 
-   aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
    calc_drwXY(&drwX, &drwY);
 
