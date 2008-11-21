@@ -10,7 +10,7 @@
 // Sefanja Ruijsenaars <sefanja at gmx.net>,
 // Andoni Zubimendi <andoni at lpsat.net>
 //
-// In sync with 27967 
+// In sync with r27967
 // FIXME: Necesita una revisión a fondo hay muchas faltas de ortografía
 
 
