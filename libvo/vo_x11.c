@@ -303,7 +303,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                        uint32_t format)
 {
 // int screen;
-    int fullscreen = 0;
 
 // int interval, prefer_blank, allow_exp, nothing;
     unsigned int fg, bg;
@@ -314,8 +313,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
 
 #ifdef CONFIG_XF86VM
-    int vm = 0;
+    int vm = flags & VOFLAG_MODESWITCHING;
 #endif
+    int fullscreen = flags & (VOFLAG_FULLSCREEN|VOFLAG_MODESWITCHING);
+    Flip_Flag = flags & VOFLAG_FLIPPING;
+    zoomFlag = flags & VOFLAG_SWSCALE;
 
     old_vo_dwidth = -1;
     old_vo_dheight = -1;
@@ -327,17 +329,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     in_format = format;
     srcW = width;
     srcH = height;
-
-    if (flags & (VOFLAG_FULLSCREEN|VOFLAG_MODESWITCHING))
-        fullscreen = 1;
-#ifdef CONFIG_XF86VM
-    if (flags & VOFLAG_MODESWITCHING)
-        vm = 1;
-#endif
-    Flip_Flag = 0;
-    if (flags & VOFLAG_FLIPPING)
-        Flip_Flag = 1;
-    zoomFlag = flags & VOFLAG_SWSCALE;
 
 // if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
 
