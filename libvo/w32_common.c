@@ -517,7 +517,7 @@ void vo_w32_ontop( void )
  * \brief Uninitialize w32_common framework.
  *
  * Should be called last in video driver's uninit function. First release
- * anything build ontop of the created window e.g. rendering context inside
+ * anything built on top of the created window e.g. rendering context inside
  * and call vo_w32_uninit at the end.
  */
 void vo_w32_uninit(void) {
