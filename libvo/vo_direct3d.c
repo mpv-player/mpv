@@ -29,6 +29,7 @@
 #include "mp_msg.h"
 #include "aspect.h"
 #include "w32_common.h"
+#include "libavutil/common.h"
 
 static const vo_info_t info =
 {
@@ -53,7 +54,6 @@ static struct global_priv {
                                 0 = Movie is not paused */
     int is_cfg_finished;        /**< Synchronization "semaphore". 1 when
                                 instance of reconfigure_d3d is finished */
-    int is_panscan;             /**< 1= Panscan enabled, 0 = Panscan disabled */
 
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
@@ -105,59 +105,6 @@ static const struct_fmt_table fmt_table[] = {
  *                                                                          *
  ****************************************************************************/
 
-/** @brief Calculate panscan source RECT in fullscreen.
- */
-static void calc_panscan_rect(void)
-{
-    int scaled_height = 0;
-    int scaled_width = 0;
-    int srcPanx;
-    int srcPany;
-
-    mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>calc_panscan_rect called\r\n");
-
-    aspect(&scaled_width, &scaled_height, A_ZOOM);
-    panscan_calc();
-
-    if (vo_panscan_x != 0 || vo_panscan_y != 0) {
-        priv->is_panscan = 1;
-        mp_msg(MSGT_VO,MSGL_V,
-              "<vo_direct3d>Panscan destination correction: x: %d, y: %d\r\n",
-              vo_panscan_x, vo_panscan_y);
-
-        mp_msg(MSGT_VO,MSGL_V,
-              "<vo_direct3d>vo_panscan_x %d, scaled_width %d, vo_screenwidth %d\r\n",
-              vo_panscan_x, scaled_width, vo_screenwidth);
-
-        mp_msg(MSGT_VO,MSGL_V,
-              "<vo_direct3d>vo_panscan_y %d, scaled_height %d, vo_screenheight %d\r\n",
-              vo_panscan_y, scaled_height, vo_screenheight);
-
-        srcPanx = vo_panscan_x / (vo_screenwidth / scaled_width);
-        srcPany = vo_panscan_y / (vo_screenheight / scaled_height);
-
-        mp_msg(MSGT_VO,MSGL_V,
-              "<vo_direct3d>Panscan source (needed) correction: x: %d, y: %d\r\n",
-              srcPanx, srcPany);
-
-        priv->fs_panscan_rect.left   = srcPanx / 2;
-        if (priv->fs_panscan_rect.left % 2 != 0) priv->fs_panscan_rect.left++;
-        priv->fs_panscan_rect.right  = priv->src_width - (srcPanx / 2);
-        if (priv->fs_panscan_rect.right % 2 != 0) priv->fs_panscan_rect.right--;
-        priv->fs_panscan_rect.top    = srcPany / 2;
-        if (priv->fs_panscan_rect.top % 2 != 0) priv->fs_panscan_rect.top++;
-        priv->fs_panscan_rect.bottom = priv->src_height - (srcPany / 2);
-        if (priv->fs_panscan_rect.bottom % 2 != 0) priv->fs_panscan_rect.bottom--;
-
-        mp_msg(MSGT_VO,MSGL_V,
-        "<vo_direct3d>Panscan Source Rect: t: %ld, l: %ld, r: %ld, b:%ld\r\n",
-        priv->fs_panscan_rect.top, priv->fs_panscan_rect.left,
-        priv->fs_panscan_rect.right, priv->fs_panscan_rect.bottom);
-    }
-    else
-        priv->is_panscan = 0;
-}
-
 /** @brief Calculate scaled fullscreen movie rectangle with
  *  preserved aspect ratio.
  */
@@ -165,23 +112,49 @@ static void calc_fs_rect(void)
 {
     int scaled_height = 0;
     int scaled_width = 0;
-    /* If we've created fullscreen context, we should calculate stretched
-    * movie RECT, otherwise it will fill the whole fullscreen with
-    * wrong aspect ratio */
 
+    // set default values
+    priv->fs_movie_rect.left     = 0;
+    priv->fs_movie_rect.right    = vo_dwidth;
+    priv->fs_movie_rect.top      = 0;
+    priv->fs_movie_rect.bottom   = vo_dheight;
+    priv->fs_panscan_rect.left   = 0;
+    priv->fs_panscan_rect.right  = priv->src_width;
+    priv->fs_panscan_rect.top    = 0;
+    priv->fs_panscan_rect.bottom = priv->src_height;
+    if (!vo_fs) return;
+
+    // adjust for fullscreen aspect and panscan
     aspect(&scaled_width, &scaled_height, A_ZOOM);
+    panscan_calc();
+    scaled_width  += vo_panscan_x;
+    scaled_height += vo_panscan_y;
 
-    priv->fs_movie_rect.left   = (vo_screenwidth - scaled_width) / 2;
-    priv->fs_movie_rect.right  = priv->fs_movie_rect.left + scaled_width;
-    priv->fs_movie_rect.top    = (vo_screenheight - scaled_height) / 2;
-    priv->fs_movie_rect.bottom = priv->fs_movie_rect.top + scaled_height;
+    // note: border is rounded to a multiple of two since at least
+    // ATI drivers can not handle odd values with YV12 input
+    if (scaled_width > vo_dwidth) {
+        int border = priv->src_width * (scaled_width - vo_dwidth) / scaled_width;
+        border = (border / 2 + 1) & ~1;
+        priv->fs_panscan_rect.left   = border;
+        priv->fs_panscan_rect.right  = priv->src_width - border;
+    } else {
+        priv->fs_movie_rect.left     = (vo_dwidth - scaled_width) / 2;
+        priv->fs_movie_rect.right    = priv->fs_movie_rect.left + scaled_width;
+    }
+    if (scaled_height > vo_dheight) {
+        int border = priv->src_height * (scaled_height - vo_dheight) / scaled_height;
+        border = (border / 2 + 1) & ~1;
+        priv->fs_panscan_rect.top    = border;
+        priv->fs_panscan_rect.bottom = priv->src_height - border;
+    } else {
+        priv->fs_movie_rect.top      = (vo_dheight - scaled_height) / 2;
+        priv->fs_movie_rect.bottom   = priv->fs_movie_rect.top + scaled_height;
+    }
 
     mp_msg(MSGT_VO,MSGL_V,
     "<vo_direct3d>Fullscreen Movie Rect: t: %ld, l: %ld, r: %ld, b:%ld\r\n",
         priv->fs_movie_rect.top, priv->fs_movie_rect.left,
         priv->fs_movie_rect.right, priv->fs_movie_rect.bottom);
-
-    /*calc_panscan_rect();*/
 }
 
 /** @brief Destroy D3D Context related to the current window.
@@ -285,8 +258,7 @@ static int reconfigure_d3d(void)
     IDirect3DDevice9_ColorFill(priv->d3d_device, priv->d3d_surface, NULL,
                                D3DCOLOR_ARGB(0xFF, 0, 0, 0) );
 
-    if (vo_fs)
-        calc_fs_rect();
+    calc_fs_rect();
 
     return 1;
 }
@@ -353,11 +325,9 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
 
     if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
                                             priv->d3d_surface,
-                                            priv->is_panscan ?
-                                            &priv->fs_panscan_rect : NULL,
+                                            &priv->fs_panscan_rect,
                                             priv->d3d_backbuf,
-                                            vo_fs ?
-                                            &priv->fs_movie_rect : NULL,
+                                            &priv->fs_movie_rect,
                                             D3DTEXF_LINEAR))) {
         mp_msg(MSGT_VO,MSGL_ERR,
                "<vo_direct3d>Unable to copy the frame to the back buffer\n");
@@ -521,13 +491,11 @@ static int control(uint32_t request, void *data, ...)
     case VOCTRL_UPDATE_SCREENINFO:
         w32_update_xinerama_info();
         return VO_TRUE;
-/*
     case VOCTRL_SET_PANSCAN:
-        calc_panscan_rect ();
+        calc_fs_rect ();
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
-*/
     }
     return VO_FALSE;
 }
@@ -695,11 +663,9 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 
     if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
                                             priv->d3d_surface,
-                                            priv->is_panscan ?
-                                            &priv->fs_panscan_rect : NULL,
+                                            &priv->fs_panscan_rect,
                                             priv->d3d_backbuf,
-                                            vo_fs ?
-                                            &priv->fs_movie_rect : NULL,
+                                            &priv->fs_movie_rect,
                                             D3DTEXF_LINEAR))) {
         mp_msg(MSGT_VO,MSGL_V,
                "<vo_direct3d>Unable to copy the frame to the back buffer\n");
