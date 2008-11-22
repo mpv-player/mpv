@@ -162,6 +162,7 @@ libvo drivers:
     * vo_cvidix.c - Sascha Sommer
     * vo_dga.c - None
     * vo_dfbmga.c - Ville Syrjälä
+    * vo_direct3d.c - Georgi Petrov
     * vo_directfb[2].c - Jiri Svoboda
     * vo_directx.c - Sascha Sommer
     * vo_dxr2.c - Alban Bedel

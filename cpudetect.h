@@ -44,6 +44,8 @@ typedef struct cpucaps_s {
 	int has3DNowExt;
 	int hasSSE;
 	int hasSSE2;
+	int hasSSSE3;
+	int hasSSE4a;
 	int isX86;
 	unsigned cl_size; /* size of cache line */
         int hasAltiVec;

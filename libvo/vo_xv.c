@@ -182,7 +182,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     XVisualInfo vinfo;
-    XGCValues xgcv;
     XSetWindowAttributes xswa;
     XWindowAttributes attribs;
     unsigned long xswamask;
@@ -201,8 +200,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                 ctx->image_width, ctx->image_height, ctx->max_width, ctx->max_height);
         return -1;
     }
-
-    x11->vo_mouse_autohide = 1;
 
     ctx->is_paused = 0;
     ctx->visible_buf = -1;
@@ -249,38 +246,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         xswa.border_pixel = 0;
         xswamask = CWBackPixel | CWBorderPixel;
 
-        if (WinID >= 0)
-        {
-            x11->window = WinID ? ((Window) WinID) : x11->rootwin;
-            if (WinID)
-            {
-                XUnmapWindow(x11->display, x11->window);
-                XChangeWindowAttributes(x11->display, x11->window, xswamask,
-                                        &xswa);
-                vo_x11_selectinput_witherr(x11->display, x11->window,
-                                           StructureNotifyMask |
-                                           KeyPressMask |
-                                           PropertyChangeMask |
-                                           PointerMotionMask |
-                                           ButtonPressMask |
-                                           ButtonReleaseMask |
-                                           ExposureMask);
-                XMapWindow(x11->display, x11->window);
-                vo_x11_update_geometry(vo);
-                aspect_save_prescale(vo, vo->dwidth, vo->dheight);
-            } else
-                XSelectInput(x11->display, x11->window, ExposureMask);
-        } else
-        {
             vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, vo->dwidth, vo->dheight,
                    flags, CopyFromParent, "xv", title);
             XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
-        }
 
-        if (x11->vo_gc != None)
-            XFreeGC(x11->display, x11->vo_gc);
-        x11->vo_gc = XCreateGC(x11->display, x11->window, 0L, &xgcv);
-        XSync(x11->display, False);
 #ifdef CONFIG_XF86VM
         if (vm)
         {
@@ -328,7 +297,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     ctx->current_buf = 0;
     ctx->current_ip_buf = 0;
 
-    aspect(vo, &vo->dwidth, &vo->dheight, A_NOZOOM);
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
     calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
 

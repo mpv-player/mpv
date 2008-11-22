@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r27402
+// Synced with help_mp-en.h: r27967
 
 
 // ========================= MPlayer help ===========================
@@ -52,7 +52,7 @@ static char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c:
+// mplayer.c
 #define MSGTR_Exiting "\nВыходим...\n"
 #define MSGTR_ExitingHow "\nВыходим... (%s)\n"
 #define MSGTR_Exit_quit "Выход"
@@ -249,7 +249,7 @@ static char help_text[]=
 #define MSGTR_SubVisibleStatus "Субтитры: %s"
 #define MSGTR_SubForcedOnlyStatus "Форсированы только субтитры: %s"
 
-// mencoder.c:
+// mencoder.c
 #define MSGTR_UsingPass3ControlFile "Использую следующий файл для контроля 3-го прохода: %s\n"
 #define MSGTR_MissingFilename "\nПропущено имя файла.\n\n"
 #define MSGTR_CannotOpenFile_Device "Не могу открыть файл/устройство.\n"
@@ -414,7 +414,7 @@ static char help_text[]=
 #define MSGTR_CouldntOpenCodec "Не могу открыть кодек %s, br=%d\n"
 #define MSGTR_CantCopyAudioFormat "Аудиоформат 0x%x несовместим с '-oac copy', попробуйте '-oac pcm'\nили используйте '-fafmttag' для его переопределения.\n"
 
-// cfg-mencoder.h:
+// cfg-mencoder.h
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     метод кодирования с переменным битпотоком\n"\
 "                0: cbr (постоянный битпоток)\n"\
@@ -463,7 +463,7 @@ static char help_text[]=
 "                 (битпоток 320 kbps)\n"\
 "                 <8-320>: ABR кодирование с заданным в кбит средним битпотоком.\n\n"
 
-//codec-cfg.c:
+//codec-cfg.c
 #define MSGTR_DuplicateFourcc "повторяющийся FourCC"
 #define MSGTR_TooManyFourccs "слишком много FourCCs/форматов..."
 #define MSGTR_ParseError "ошибка разбора синтаксиса"
@@ -674,7 +674,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Codecs "Кодеки и демультиплексор"
 // Note: If you change MSGTR_PREFERENCES_Misc see if it still fits MSGTR_PREFERENCES_FRAME_Misc
 #define MSGTR_PREFERENCES_Misc "Разное"
-
 #define MSGTR_PREFERENCES_None "Нет"
 #define MSGTR_PREFERENCES_DriverDefault "драйвер по умолчанию"
 #define MSGTR_PREFERENCES_AvailableDrivers "Доступные драйверы:"
@@ -775,6 +774,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ArtsBroken "Новые версии aRts несовместимы с GTK 1.x "\
 	   "и приведут к фатальной ошибке GMPlayer!"
 
+// --- aboutbox
 #define MSGTR_ABOUT_UHU "Разработка GUI спонсирована UHU Linux\n"
 #define MSGTR_ABOUT_Contributors "Разработчики кода и документации\n"
 #define MSGTR_ABOUT_Codecs_libs_contributions "Кодеки и сторонние библиотеки\n"
@@ -818,7 +818,6 @@ static char help_text[]=
 // wsxdnd.c
 #define MSGTR_WS_NotAFile "Это не похоже на файл...\n"
 #define MSGTR_WS_DDNothing "D&D: Ничего не возвращено!\n"
-
 
 // ======================= video output drivers ========================
 
@@ -1380,7 +1379,7 @@ static char help_text[]=
 
 // ========================== LIBMPDEMUX ===================================
 
-// muxer.c, muxer_*.c:
+// muxer.c, muxer_*.c
 #define MSGTR_TooManyStreams "Слишком много потоков!"
 #define MSGTR_RawMuxerOnlyOneStream "Мультиплексор rawaudio поддерживает только один аудиопоток!\n"
 #define MSGTR_IgnoringVideoStream "Игнорирую видеопоток!\n"
@@ -1392,7 +1391,7 @@ static char help_text[]=
 #define MSGTR_WritingHeader "Запись заголовка...\n"
 #define MSGTR_WritingTrailer "Запись индекса...\n"
 
-// demuxer.c, demux_*.c:
+// demuxer.c, demux_*.c
 #define MSGTR_AudioStreamRedefined "ПРЕДУПРЕЖДЕНИЕ: Заголовок аудио потока %d переопределён!\n"
 #define MSGTR_VideoStreamRedefined "ПРЕДУПРЕЖДЕНИЕ: Заголовок видео потока %d переопределён!\n"
 #define MSGTR_TooManyAudioInBuffer "\nСлишком много (%d в %d байтах) аудиопакетов в буфере!\n"
@@ -1491,7 +1490,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Не могу записать файл индекса %s: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Сохранён индексный файл: %s\n"
 
-// open.c, stream.c:
+// open.c, stream.c
 #define MSGTR_CdDevNotfound "CD-ROM '%s' не найден!\n"
 #define MSGTR_ErrTrackSelect "Ошибка выбора дорожки VCD!"
 #define MSGTR_ReadSTDIN "Чтение из stdin (со стандартного входа)...\n"
@@ -1627,7 +1626,7 @@ static char help_text[]=
 
 // ========================== LIBMPCODECS ===================================
 
-// dec_video.c & dec_audio.c:
+// dec_video.c & dec_audio.c
 #define MSGTR_CantOpenCodec "Не могу открыть кодек.\n"
 #define MSGTR_CantCloseCodec "Не могу закрыть кодек.\n"
 
@@ -1664,7 +1663,7 @@ static char help_text[]=
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Захватываю %d байт(а/ов) для входного буфера.\n"
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Захватываю %d + %d = %d байт(а/ов) для буфера вывода.\n"
 
-// libmpcodecs/ad_dvdpcm.c:
+// libmpcodecs/ad_dvdpcm.c
 #define MSGTR_SamplesWanted "Для улучшения поддержки необходимы образцы этого формата.\nПожалуйста, свяжитесь с разработчиками.\n"
 
 // libmpcodecs/ad_libdv.c

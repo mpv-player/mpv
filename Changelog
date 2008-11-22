@@ -64,6 +64,7 @@ MPlayer (1.0)
     * add Nintendo Wii/GameCube video driver (-vo wii)
     * VIDIX driver for SuperH Mobile VEU hardware block.
     * support -border on vo_gl/gl2 in x11
+    * Direct3D Windows video output driver added.
 
     MEncoder:
     * check for system-wide configuration file in MEncoder

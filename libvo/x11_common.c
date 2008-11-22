@@ -1246,6 +1246,23 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
   struct MPOpts *opts = vo->opts;
   struct vo_x11_state *x11 = vo->x11;
   Display *mDisplay = vo->x11->display;
+  XGCValues xgcv;
+  if (WinID >= 0) {
+    x11->window = WinID ? (Window)WinID : x11->rootwin;
+    if (col_map != CopyFromParent) {
+      unsigned long xswamask = CWColormap;
+      XSetWindowAttributes xswa;
+      xswa.colormap = col_map;
+      XUnmapWindow(mDisplay, x11->window);
+      XChangeWindowAttributes(mDisplay, x11->window, xswamask, &xswa);
+      XMapWindow(mDisplay, x11->window);
+    }
+    if (WinID) vo_x11_update_geometry(vo);
+    vo_x11_selectinput_witherr(mDisplay, x11->window,
+          StructureNotifyMask | KeyPressMask | PointerMotionMask |
+          ButtonPressMask | ButtonReleaseMask | ExposureMask);
+    goto final;
+  }
   if (x11->window == None) {
     XSizeHints hint;
     XEvent xev;
@@ -1281,6 +1298,12 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
   vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen(vo);
+final:
+  if (x11->vo_gc != None)
+    XFreeGC(mDisplay, x11->vo_gc);
+  x11->vo_gc = XCreateGC(mDisplay, x11->window, GCForeground, &xgcv);
+  XSync(mDisplay, False);
+  x11->vo_mouse_autohide = 1;
 }
 
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,

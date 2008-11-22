@@ -627,6 +627,9 @@ Parrish, Joey <joey@nicewarrior.org>
     * Windows support improvements
     * Cygwin installer package
 
+Petrov, Georgi (gogothebee) <gogothebee@gmail.com>
+    * Direct3D VO driver
+
 Pietrzak, Dariusz (Eyck) <eyck@ghost.anime.pl>
     * Debian packaging support (see debian/* and the documentation)
     * support for vplayer subtitle format

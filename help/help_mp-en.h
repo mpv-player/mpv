@@ -56,7 +56,7 @@ static char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c:
+// mplayer.c
 #define MSGTR_Exiting "\nExiting...\n"
 #define MSGTR_ExitingHow "\nExiting... (%s)\n"
 #define MSGTR_Exit_quit "Quit"
@@ -184,6 +184,7 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV Event: Nav Seek Done\n"
 #define MSGTR_MenuCall "Menu call\n"
 
+// --- edit decision lists
 #define MSGTR_EdlOutOfMem "Can't allocate enough memory to hold EDL data.\n"
 #define MSGTR_EdlRecordsNo "Read %d EDL actions.\n"
 #define MSGTR_EdlQueueEmpty "There are no EDL actions to take care of.\n"
@@ -253,7 +254,7 @@ static char help_text[]=
 #define MSGTR_SubVisibleStatus "Subtitles: %s"
 #define MSGTR_SubForcedOnlyStatus "Forced sub only: %s"
 
-// mencoder.c:
+// mencoder.c
 #define MSGTR_UsingPass3ControlFile "Using pass3 control file: %s\n"
 #define MSGTR_MissingFilename "\nFilename missing.\n\n"
 #define MSGTR_CannotOpenFile_Device "Cannot open file/device.\n"
@@ -418,7 +419,7 @@ static char help_text[]=
 #define MSGTR_CouldntOpenCodec "Couldn't open codec %s, br=%d.\n"
 #define MSGTR_CantCopyAudioFormat "Audio format 0x%x is incompatible with '-oac copy', please try '-oac pcm' instead or use '-fafmttag' to override it.\n"
 
-// cfg-mencoder.h:
+// cfg-mencoder.h
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     variable bitrate method\n"\
 "                0: cbr (constant bitrate)\n"\
@@ -467,7 +468,7 @@ static char help_text[]=
 "                 (320 kbps bitrate)\n"\
 "                 <8-320>: ABR encoding at average given kbps bitrate.\n\n"
 
-//codec-cfg.c:
+// codec-cfg.c
 #define MSGTR_DuplicateFourcc "duplicated FourCC"
 #define MSGTR_TooManyFourccs "too many FourCCs/formats..."
 #define MSGTR_ParseError "parse error"
@@ -678,7 +679,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 // Note: If you change MSGTR_PREFERENCES_Misc see if it still fits MSGTR_PREFERENCES_FRAME_Misc
 #define MSGTR_PREFERENCES_Misc "Misc"
-
 #define MSGTR_PREFERENCES_None "None"
 #define MSGTR_PREFERENCES_DriverDefault "driver default"
 #define MSGTR_PREFERENCES_AvailableDrivers "Available drivers:"
@@ -779,6 +779,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ArtsBroken "Newer aRts versions are incompatible "\
            "with GTK 1.x and will crash GMPlayer!"
 
+// -- aboutbox
 #define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
 #define MSGTR_ABOUT_Contributors "Code and documentation contributors\n"
 #define MSGTR_ABOUT_Codecs_libs_contributions "Codecs and third party libraries\n"
@@ -822,7 +823,6 @@ static char help_text[]=
 // wsxdnd.c
 #define MSGTR_WS_NotAFile "This does not seem to be a file...\n"
 #define MSGTR_WS_DDNothing "D&D: Nothing returned!\n"
-
 
 // ======================= video output drivers ========================
 
@@ -1375,7 +1375,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Can't open %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Can't init Apple Remote.\n"
 
-// lirc.c:
+// lirc.c
 #define MSGTR_SettingUpLIRC "Setting up LIRC support...\n"
 #define MSGTR_LIRCopenfailed "Failed to open LIRC support. You will not be able to use your remote control.\n"
 #define MSGTR_LIRCcfgerr "Failed to read LIRC config file %s.\n"
@@ -1383,7 +1383,7 @@ static char help_text[]=
 
 // ========================== LIBMPDEMUX ===================================
 
-// muxer.c, muxer_*.c:
+// muxer.c, muxer_*.c
 #define MSGTR_TooManyStreams "Too many streams!"
 #define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer supports only one audio stream!\n"
 #define MSGTR_IgnoringVideoStream "Ignoring video stream!\n"
@@ -1395,7 +1395,7 @@ static char help_text[]=
 #define MSGTR_WritingHeader "Writing header...\n"
 #define MSGTR_WritingTrailer "Writing index...\n"
 
-// demuxer.c, demux_*.c:
+// demuxer.c, demux_*.c
 #define MSGTR_AudioStreamRedefined "WARNING: Audio stream header %d redefined.\n"
 #define MSGTR_VideoStreamRedefined "WARNING: Video stream header %d redefined.\n"
 #define MSGTR_TooManyAudioInBuffer "\nToo many audio packets in the buffer: (%d in %d bytes).\n"
