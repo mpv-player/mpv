@@ -193,7 +193,6 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11);
 #define xv_colorkey global_vo->x11->xv_colorkey
 #define xv_port global_vo->x11->xv_port
 #define vo_gc global_vo->x11->vo_gc
-#define vo_mouse_autohide global_vo->x11->vo_mouse_autohide
 #define mRootWin global_vo->x11->rootwin
 #define mScreen global_vo->x11->screen
 #define mLocalDisplay global_vo->x11->display_is_local
