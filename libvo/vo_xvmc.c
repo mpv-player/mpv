@@ -1033,9 +1033,6 @@ int i,cfs;
 }
 
 static void check_events(void){
-Window mRoot;
-uint32_t drwBorderWidth,drwDepth;
-
 int e=vo_x11_check_events(mDisplay);
    if(e&VO_EVENT_RESIZE)
    {
