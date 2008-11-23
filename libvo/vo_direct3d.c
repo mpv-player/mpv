@@ -601,9 +601,9 @@ static void check_events(void)
  */
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 {
-    char *Src;      /**< Pointer to the source image */
-    char *Dst;      /**< Pointer to the destination image */
-    int  UVstride;  /**< Stride of the U/V planes */
+    char *my_src;   /**< Pointer to the source image */
+    char *dst;      /**< Pointer to the destination image */
+    int  uv_stride; /**< Stride of the U/V planes */
 
     /* Lock the offscreen surface if it's not already locked. */
     if (!priv->locked_rect.pBits) {
@@ -614,37 +614,37 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
         }
     }
 
-    UVstride = priv->locked_rect.Pitch / 2;
+    uv_stride = priv->locked_rect.Pitch / 2;
 
     /* Copy Y */
-    Dst = priv->locked_rect.pBits;
-    Dst = Dst + priv->locked_rect.Pitch * y + x;
-    Src=src[0];
-    memcpy_pic(Dst, Src, w, h, priv->locked_rect.Pitch, stride[0]);
+    dst = priv->locked_rect.pBits;
+    dst = dst + priv->locked_rect.Pitch * y + x;
+    my_src=src[0];
+    memcpy_pic(dst, my_src, w, h, priv->locked_rect.Pitch, stride[0]);
 
     w/=2;h/=2;x/=2;y/=2;
 
     /* Copy U */
-    Dst = priv->locked_rect.pBits;
-    Dst = Dst + priv->locked_rect.Pitch * priv->src_height
-          + UVstride * y + x;
+    dst = priv->locked_rect.pBits;
+    dst = dst + priv->locked_rect.Pitch * priv->src_height
+          + uv_stride * y + x;
     if (priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2'))
-        Src=src[2];
+        my_src=src[2];
     else
-        Src=src[1];
+        my_src=src[1];
 
-    memcpy_pic(Dst, Src, w, h, UVstride, stride[1]);
+    memcpy_pic(dst, my_src, w, h, uv_stride, stride[1]);
 
     /* Copy V */
-    Dst = priv->locked_rect.pBits;
-    Dst = Dst + priv->locked_rect.Pitch * priv->src_height
-          + UVstride * (priv->src_height / 2) + UVstride * y + x;
+    dst = priv->locked_rect.pBits;
+    dst = dst + priv->locked_rect.Pitch * priv->src_height
+          + uv_stride * (priv->src_height / 2) + uv_stride * y + x;
     if (priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2'))
-        Src=src[1];
+        my_src=src[1];
     else
-        Src=src[2];
+        my_src=src[2];
 
-    memcpy_pic(Dst, Src, w, h, UVstride, stride[2]);
+    memcpy_pic(dst, my_src, w, h, uv_stride, stride[2]);
 
     return 0; /* Success */
 }
