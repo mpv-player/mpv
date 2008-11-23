@@ -258,7 +258,15 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
     return 0;
 }
 
-static void uninit(vf_instance_t *vf);
+static void uninit(vf_instance_t *vf)
+{
+    av_freep(&vf->priv->avctx);
+    if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
+    if (vf->priv->buffer) free(vf->priv->buffer);
+    free(vf->priv->outbuffer);
+    free(vf->priv);
+}
+
 // open conflicts with stdio.h at least under MinGW
 static int screenshot_open(vf_instance_t *vf, char* args)
 {
@@ -284,15 +292,6 @@ static int screenshot_open(vf_instance_t *vf, char* args)
         return 0;
     }
     return 1;
-}
-
-static void uninit(vf_instance_t *vf)
-{
-    av_freep(&vf->priv->avctx);
-    if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
-    if (vf->priv->buffer) free(vf->priv->buffer);
-    free(vf->priv->outbuffer);
-    free(vf->priv);
 }
 
 
