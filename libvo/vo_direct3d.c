@@ -52,9 +52,6 @@ const LIBVO_EXTERN(direct3d)
 static struct global_priv {
     int is_paused;              /**< 1 = Movie is paused,
                                 0 = Movie is not paused */
-    int is_cfg_finished;        /**< Synchronization "semaphore". 1 when
-                                instance of reconfigure_d3d is finished */
-
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
     RECT fs_panscan_rect;       /**< PanScan source surface cropping in
@@ -269,9 +266,6 @@ static void uninit_d3d(void)
 {
     mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>uninit_d3d called\r\n");
 
-    /* Block further calls to reconfigure_d3d(). */
-    priv->is_cfg_finished = 0;
-
     /* Destroy D3D Context inside the window. */
     destroy_d3d_context();
 
@@ -441,9 +435,6 @@ static int preinit(const char *arg)
         return -1;
     }
 
-    /* Allow the first call to reconfigure_d3d. */
-    priv->is_cfg_finished = 1;
-
     return 0;
 }
 
@@ -527,14 +518,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         return VO_ERROR;
     }
 
-    if (priv->is_cfg_finished) {
-        priv->is_cfg_finished = 0;
-        if (!reconfigure_d3d()) {
-            priv->is_cfg_finished = 1;
-            return VO_ERROR;
-        }
-        priv->is_cfg_finished = 1;
-    }
+    if (!reconfigure_d3d())
+        return VO_ERROR;
+
     return 0; /* Success */
 }
 
