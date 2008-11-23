@@ -229,8 +229,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   for (temp = 0; temp < fb_size; temp += 4)
     memcpy(frame_buffer + temp, (void *) &black, 4);
 
-  vt_fd = open(TTY_DEV_NAME, O_WRONLY);
-  if (vt_doit && vt_fd == -1) {
+  if (vt_doit && (vt_fd = open(TTY_DEV_NAME, O_WRONLY)) == -1) {
     mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", TTY_DEV_NAME, strerror(errno));
     vt_doit = 0;
   }
