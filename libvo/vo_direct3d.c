@@ -302,11 +302,11 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
 
     /* If we're here, then we should lock the rect and copy a packed frame */
     if (!priv->locked_rect.pBits) {
-    if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                           &priv->locked_rect, NULL, 0))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Surface lock failure\n");
-       return VO_ERROR;
-    }
+        if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
+                                               &priv->locked_rect, NULL, 0))) {
+           mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Surface lock failure\n");
+           return VO_ERROR;
+        }
     }
 
     memcpy_pic(priv->locked_rect.pBits, mpi->planes[0], mpi->stride[0],
@@ -321,8 +321,8 @@ skip_upload:
     priv->locked_rect.pBits = NULL;
 
     if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
-       return VO_ERROR;
+        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
+        return VO_ERROR;
     }
 
     if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
@@ -607,11 +607,11 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 
     /* Lock the offscreen surface if it's not already locked. */
     if (!priv->locked_rect.pBits) {
-    if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                           &priv->locked_rect, NULL, 0))) {
-        mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface lock failure\n");
-        return VO_FALSE;
-    }
+        if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
+                                               &priv->locked_rect, NULL, 0))) {
+            mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface lock failure\n");
+            return VO_FALSE;
+        }
     }
 
     UVstride = priv->locked_rect.Pitch / 2;
