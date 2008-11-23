@@ -55,7 +55,6 @@
 #include "mp_msg.h"
 
 #define WII_DEV_NAME "/dev/fb0"
-#define TTY_DEV_NAME "/dev/tty"
 #define FB_PIXEL_SIZE 2
 
 static const vo_info_t info = {
@@ -109,8 +108,8 @@ static int fb_preinit(int reset)
   }
   fb_orig_vinfo = fb_vinfo;
 
-  if ((fb_tty_fd = open(TTY_DEV_NAME, O_RDWR)) < 0) {
-    mp_msg(MSGT_VO, MSGL_ERR, "notice: Can't open %s: %s\n", TTY_DEV_NAME, strerror(errno));
+  if ((fb_tty_fd = open("/dev/tty", O_RDWR)) < 0) {
+    mp_msg(MSGT_VO, MSGL_ERR, "notice: Can't open /dev/tty: %s\n", strerror(errno));
     goto err_out_fd;
   }
 
@@ -229,12 +228,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   for (temp = 0; temp < fb_size; temp += 4)
     memcpy(frame_buffer + temp, (void *) &black, 4);
 
-  if (vt_doit && (vt_fd = open(TTY_DEV_NAME, O_WRONLY)) == -1) {
-    mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", TTY_DEV_NAME, strerror(errno));
+  if (vt_doit && (vt_fd = open("/dev/tty", O_WRONLY)) == -1) {
+    mp_msg(MSGT_VO, MSGL_ERR, "can't open /dev/tty: %s\n", strerror(errno));
     vt_doit = 0;
   }
   if (vt_doit && !(vt_fp = fdopen(vt_fd, "w"))) {
-    mp_msg(MSGT_VO, MSGL_ERR, "Can't fdopen %s: %s\n", TTY_DEV_NAME, strerror(errno));
+    mp_msg(MSGT_VO, MSGL_ERR, "can't fdopen /dev/tty: %s\n", strerror(errno));
     vt_doit = 0;
   }
 
