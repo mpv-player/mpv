@@ -234,9 +234,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", TTY_DEV_NAME, strerror(errno));
     vt_doit = 0;
   }
-
-  vt_fp = fdopen(vt_fd, "w");
-  if (vt_doit && !vt_fp) {
+  if (vt_doit && !(vt_fp = fdopen(vt_fd, "w"))) {
     mp_msg(MSGT_VO, MSGL_ERR, "Can't fdopen %s: %s\n", TTY_DEV_NAME, strerror(errno));
     vt_doit = 0;
   }
