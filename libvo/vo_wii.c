@@ -73,21 +73,20 @@ static FILE *vt_fp = NULL;
 static int vt_doit = 1;
 static int fb_dev_fd = -1;
 static int fb_tty_fd = -1;
-
+static size_t fb_size;
 static uint8_t *frame_buffer;
 static uint8_t *center;
 
 static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
 static int fb_line_len;
-static size_t fb_size;
-
-static int in_width, out_width;
-static int in_height, out_height;
+static int in_width;
+static int in_height;
+static int out_width;
+static int out_height;
 static int fs;
 
-static int
-fb_preinit (int reset)
+static int fb_preinit (int reset)
 {
   static int fb_preinit_done = 0;
   static int fb_works = 0;
@@ -101,26 +100,18 @@ fb_preinit (int reset)
   if (fb_preinit_done)
     return fb_works;
 
-  if ((fb_dev_fd = open (WII_DEV_NAME, O_RDWR)) == -1)
-  {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Can't open %s: %s\n", WII_DEV_NAME, strerror (errno));
+  if ((fb_dev_fd = open (WII_DEV_NAME, O_RDWR)) == -1) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", WII_DEV_NAME, strerror (errno));
     goto err_out;
   }
-  
-  if (ioctl (fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo))
-  {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Can't get VSCREENINFO: %s\n", strerror (errno));
+  if (ioctl (fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't get VSCREENINFO: %s\n", strerror (errno));
     goto err_out_fd;
   }
-  
   fb_orig_vinfo = fb_vinfo;
 
-  if ((fb_tty_fd = open (TTY_DEV_NAME, O_RDWR)) < 0)
-  {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Notice: Can't open %s: %s\n", TTY_DEV_NAME, strerror (errno));
+  if ((fb_tty_fd = open (TTY_DEV_NAME, O_RDWR)) < 0) {
+    mp_msg(MSGT_VO, MSGL_ERR, "notice: Can't open %s: %s\n", TTY_DEV_NAME, strerror (errno));
     goto err_out_fd;
   }
 
@@ -134,12 +125,11 @@ fb_preinit (int reset)
  err_out:
   fb_preinit_done = 1;
   fb_works = 0;
-  
+
   return 0;
 }
 
-static void
-vt_set_textarea (int u, int l)
+static void vt_set_textarea(int u, int l)
 {
   /* how can I determine the font height?
    * just use 16 for now
@@ -147,31 +137,28 @@ vt_set_textarea (int u, int l)
   int urow = ((u + 15) / 16) + 1;
   int lrow = l / 16;
 
-  mp_msg (MSGT_VO, MSGL_DBG2,
-          "vt_set_textarea (%d, %d): %d,%d\n", u, l, urow, lrow);
+  mp_msg(MSGT_VO, MSGL_DBG2, "vt_set_textarea (%d, %d): %d,%d\n", u, l, urow, lrow);
 
-  if (vt_fp)
-  {
+  if (vt_fp) {
     fprintf (vt_fp, "\33[%d;%dr\33[%d;%dH", urow, lrow, lrow, 0);
     fflush (vt_fp);
   }
 }
 
-static int
-config (uint32_t width, uint32_t height, uint32_t d_width,
-        uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
+                  uint32_t d_height, uint32_t flags, char *title,
+                  uint32_t format)
 {
   struct fb_fix_screeninfo fb_finfo;
   uint32_t black = 0x00800080;
   long temp;
   int vt_fd;
-  
+
   fs = flags & VOFLAG_FULLSCREEN;
 
   if (pre_init_err == -2)
   {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Internal fatal error: config() was called before preinit()\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "Internal fatal error: config() was called before preinit()\n");
     return -1;
   }
 
@@ -187,22 +174,16 @@ config (uint32_t width, uint32_t height, uint32_t d_width,
   fb_vinfo.xres_virtual = fb_vinfo.xres;
   fb_vinfo.yres_virtual = fb_vinfo.yres;
 
-  if (fb_tty_fd >= 0 && ioctl (fb_tty_fd, KDSETMODE, KD_GRAPHICS) < 0)
-  {
-    mp_msg (MSGT_VO, MSGL_V,
-            "Can't set graphics mode: %s\n", strerror (errno));
+  if (fb_tty_fd >= 0 && ioctl (fb_tty_fd, KDSETMODE, KD_GRAPHICS) < 0) {
+    mp_msg(MSGT_VO, MSGL_V, "Can't set graphics mode: %s\n", strerror (errno));
     close (fb_tty_fd);
     fb_tty_fd = -1;
   }
 
-  if (ioctl (fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo))
-  {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Can't put VSCREENINFO: %s\n", strerror (errno));
-    if (fb_tty_fd >= 0 && ioctl (fb_tty_fd, KDSETMODE, KD_TEXT) < 0)
-    {
-      mp_msg (MSGT_VO, MSGL_ERR,
-              "Can't restore text mode: %s\n", strerror (errno));
+  if (ioctl (fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't put VSCREENINFO: %s\n", strerror (errno));
+    if (fb_tty_fd >= 0 && ioctl (fb_tty_fd, KDSETMODE, KD_TEXT) < 0) {
+      mp_msg(MSGT_VO, MSGL_ERR, "Can't restore text mode: %s\n", strerror (errno));
     }
     return 1;
   }
@@ -212,23 +193,19 @@ config (uint32_t width, uint32_t height, uint32_t d_width,
     out_width = fb_vinfo.xres;
     out_height = fb_vinfo.yres;
   }
-  
-  if (out_width < in_width || out_height < in_height)
-  {
-    mp_msg (MSGT_VO, MSGL_ERR, "Screensize is smaller than video size\n");
+
+  if (out_width < in_width || out_height < in_height) {
+    mp_msg(MSGT_VO, MSGL_ERR, "screensize is smaller than video size\n");
     return 1;
   }
 
-  if (ioctl (fb_dev_fd, FBIOGET_FSCREENINFO, &fb_finfo))
-  {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Can't get FSCREENINFO: %s\n", strerror (errno));
+  if (ioctl (fb_dev_fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't get FSCREENINFO: %s\n", strerror (errno));
     return 1;
   }
 
-  if (fb_finfo.type != FB_TYPE_PACKED_PIXELS)
-  {
-    mp_msg (MSGT_VO, MSGL_ERR, "Type %d not supported\n", fb_finfo.type);
+  if (fb_finfo.type != FB_TYPE_PACKED_PIXELS) {
+    mp_msg(MSGT_VO, MSGL_ERR, "type %d not supported\n", fb_finfo.type);
     return 1;
   }
 
@@ -240,8 +217,7 @@ config (uint32_t width, uint32_t height, uint32_t d_width,
                                    MAP_SHARED, fb_dev_fd, 0);
   if (frame_buffer == (uint8_t *) -1)
   {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Can't mmap %s: %s\n", WII_DEV_NAME, strerror (errno));
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't mmap %s: %s\n", WII_DEV_NAME, strerror (errno));
     return 1;
   }
 
@@ -249,28 +225,23 @@ config (uint32_t width, uint32_t height, uint32_t d_width,
     ((out_width - in_width) / 2) * FB_PIXEL_SIZE +
     ((out_height - in_height) / 2) * fb_line_len;
 
-  mp_msg (MSGT_VO, MSGL_DBG2, "Frame_buffer @ %p\n", frame_buffer);
-  mp_msg (MSGT_VO, MSGL_DBG2, "Center @ %p\n", center);
-  mp_msg (MSGT_VO, MSGL_V,
-          "Pixel per line: %d\n", fb_line_len / FB_PIXEL_SIZE);
+  mp_msg(MSGT_VO, MSGL_DBG2, "frame_buffer @ %p\n", frame_buffer);
+  mp_msg(MSGT_VO, MSGL_DBG2, "center @ %p\n", center);
+  mp_msg(MSGT_VO, MSGL_V, "pixel per line: %d\n", fb_line_len / FB_PIXEL_SIZE);
 
   /* blanking screen */
   for (temp = 0; temp < fb_size; temp += 4)
     memcpy (frame_buffer + temp, (void *) &black, 4);
 
   vt_fd = open (TTY_DEV_NAME, O_WRONLY);
-  if (vt_doit && vt_fd == -1)
-  {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Can't open %s: %s\n", TTY_DEV_NAME, strerror (errno));
+  if (vt_doit && vt_fd == -1) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", TTY_DEV_NAME, strerror (errno));
     vt_doit = 0;
   }
 
   vt_fp = fdopen (vt_fd, "w");
-  if (vt_doit && !vt_fp)
-  {
-    mp_msg (MSGT_VO, MSGL_ERR,
-            "Can't fdopen %s: %s\n", TTY_DEV_NAME, strerror (errno));
+  if (vt_doit && !vt_fp) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't fdopen %s: %s\n", TTY_DEV_NAME, strerror (errno));
     vt_doit = 0;
   }
 
@@ -280,21 +251,19 @@ config (uint32_t width, uint32_t height, uint32_t d_width,
   return 0;
 }
 
-static int
-query_format (uint32_t format)
+static int query_format(uint32_t format)
 {
   if (!fb_preinit (0))
     return 0;
-  
+
   if (format != IMGFMT_YUY2)
     return 0;
-  
+
   return VFCAP_ACCEPT_STRIDE | VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
 }
 
-static void
-draw_alpha (int x0, int y0, int w, int h,
-            unsigned char *src, unsigned char *srca, int stride)
+static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
+                       unsigned char *srca, int stride)
 {
   unsigned char *dst;
 
@@ -302,23 +271,19 @@ draw_alpha (int x0, int y0, int w, int h,
   vo_draw_alpha_yuy2 (w, h, src, srca, stride, dst, fb_line_len);
 }
 
-static int
-draw_frame (uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
   return 1;
 }
 
-static int
-draw_slice (uint8_t *src[], int stride[], int w, int h, int x, int y)
+static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
   uint8_t *d, *s;
 
   d = center + fb_line_len * y + FB_PIXEL_SIZE * x;
   s = src[0];
-
-  while (h)
-  {
-    memcpy (d, s, w * FB_PIXEL_SIZE); 
+  while (h) {
+    memcpy (d, s, w * FB_PIXEL_SIZE);
     d += fb_line_len;
     s += stride[0];
     h--;
@@ -327,71 +292,51 @@ draw_slice (uint8_t *src[], int stride[], int w, int h, int x, int y)
   return 0;
 }
 
-static void
-check_events(void)
+static void check_events(void)
 {
-  /* unused */
 }
 
-static void
-flip_page (void)
+static void flip_page(void)
 {
-  /* unused */
 }
 
-static void
-draw_osd (void)
+static void draw_osd(void)
 {
   vo_draw_text (in_width, in_height, draw_alpha);
 }
 
-static void
-uninit (void)
+static void uninit(void)
 {
   if (ioctl (fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo))
-    mp_msg (MSGT_VO, MSGL_WARN,
-            "ioctl FBIOGET_VSCREENINFO: %s\n", strerror (errno));
-
+    mp_msg(MSGT_VO, MSGL_WARN, "ioctl FBIOGET_VSCREENINFO: %s\n", strerror (errno));
   fb_orig_vinfo.xoffset = fb_vinfo.xoffset;
   fb_orig_vinfo.yoffset = fb_vinfo.yoffset;
-
   if (ioctl (fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
-    mp_msg (MSGT_VO, MSGL_WARN,
-            "Can't reset original fb_var_screeninfo: %s\n", strerror (errno));
-
-  if (fb_tty_fd >= 0)
-  {
+    mp_msg(MSGT_VO, MSGL_WARN, "Can't reset original fb_var_screeninfo: %s\n", strerror (errno));
+  if (fb_tty_fd >= 0) {
     if (ioctl (fb_tty_fd, KDSETMODE, KD_TEXT) < 0)
-      mp_msg (MSGT_VO, MSGL_WARN,
-              "Can't restore text mode: %s\n", strerror (errno));
+      mp_msg(MSGT_VO, MSGL_WARN, "Can't restore text mode: %s\n", strerror (errno));
   }
-
   if (vt_doit)
     vt_set_textarea (0, fb_orig_vinfo.yres);
-  
   close (fb_tty_fd);
   close (fb_dev_fd);
-
   if (frame_buffer)
     munmap (frame_buffer, fb_size);
-
   frame_buffer = NULL;
   fb_preinit (1);
 }
 
-static int
-preinit (const char *vo_subdevice)
+static int preinit(const char *vo_subdevice)
 {
   pre_init_err = 0;
 
   if (!pre_init_err)
     return pre_init_err = (fb_preinit (0) ? 0 : -1);
-
   return -1;
 }
 
-static uint32_t
-get_image(mp_image_t *mpi)
+static uint32_t get_image(mp_image_t *mpi)
 {
   if (((mpi->type != MP_IMGTYPE_STATIC) && (mpi->type != MP_IMGTYPE_TEMP)) ||
       (mpi->flags & MP_IMGFLAG_PLANAR) ||
@@ -407,8 +352,7 @@ get_image(mp_image_t *mpi)
   return VO_TRUE;
 }
 
-static int
-control (uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   if (request == VOCTRL_GET_IMAGE)
     return get_image (data);
