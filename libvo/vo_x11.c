@@ -6,6 +6,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "aspect.h"
 
 
 #include <X11/Xlib.h>
@@ -83,7 +84,6 @@ static uint32_t out_format = 0;
 static int out_offset;
 static int srcW = -1;
 static int srcH = -1;
-static int aspect;              // 1<<16 based fixed point aspect, so that the aspect stays correct during resizing
 
 static int old_vo_dwidth = -1;
 static int old_vo_dheight = -1;
@@ -354,8 +354,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     image_width = (width + 7) & (~7);
     image_height = height;
 
-    aspect = ((1 << 16) * d_width + d_height / 2) / d_height;
-
 #ifdef CONFIG_GUI
     if (use_gui)
         guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize the window
@@ -524,17 +522,13 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
     {
         int newW = vo_dwidth;
         int newH = vo_dheight;
-        int newAspect = (newW * (1 << 16) + (newH >> 1)) / newH;
         struct SwsContext *oldContext = swsContext;
-
-        if (newAspect > aspect)
-            newW = (newH * aspect + (1 << 15)) >> 16;
-        else
-            newH = ((newW << 16) + (aspect >> 1)) / aspect;
 
         old_vo_dwidth = vo_dwidth;
         old_vo_dheight = vo_dheight;
 
+        if (vo_fs)
+            aspect(&newW, &newH, A_ZOOM);
         if (sws_flags == 0)
             newW &= (~31);      // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
 
