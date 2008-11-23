@@ -468,6 +468,11 @@ static void Display_Image(XImage * myximage, uint8_t * ImageData)
 {
     int x = (vo_dwidth - dst_width) / 2;
     int y = (vo_dheight - myximage->height) / 2;
+
+    // do not draw if the image needs rescaling
+    if ((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) && zoomFlag)
+      return;
+
     if (WinID == 0) {
       x = vo_dx;
       y = vo_dy;
