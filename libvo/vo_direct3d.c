@@ -162,6 +162,11 @@ static void destroy_d3d_context(void)
     mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>destroy_d3d_context called\r\n");
     /* Let's destroy the old (if any) D3D Content */
 
+    if (priv->locked_rect.pBits) {
+        IDirect3DSurface9_UnlockRect(priv->d3d_surface);
+        priv->locked_rect.pBits = NULL;
+    }
+
     if (priv->d3d_surface != NULL) {
         IDirect3DSurface9_Release (priv->d3d_surface);
         priv->d3d_surface = NULL;
@@ -295,22 +300,26 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
         goto skip_upload;
     }
 
-    /* If the previous if failed, we should draw a packed frame */
+    /* If we're here, then we should lock the rect and copy a packed frame */
+    if (!priv->locked_rect.pBits) {
     if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
                                            &priv->locked_rect, NULL, 0))) {
        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Surface lock failure\n");
        return VO_ERROR;
     }
+    }
 
     memcpy_pic(priv->locked_rect.pBits, mpi->planes[0], mpi->stride[0],
                mpi->height, priv->locked_rect.Pitch, mpi->stride[0]);
 
+skip_upload:
+    /* This unlock is used for both slice_draw path and render_d3d_frame path. */
     if (FAILED(IDirect3DSurface9_UnlockRect(priv->d3d_surface))) {
         mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface unlock failure\n");
         return VO_ERROR;
     }
+    priv->locked_rect.pBits = NULL;
 
-skip_upload:
     if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
        return VO_ERROR;
@@ -596,10 +605,13 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
     char *Dst;      /**< Pointer to the destination image */
     int  UVstride;  /**< Stride of the U/V planes */
 
+    /* Lock the offscreen surface if it's not already locked. */
+    if (!priv->locked_rect.pBits) {
     if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
                                            &priv->locked_rect, NULL, 0))) {
         mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface lock failure\n");
         return VO_FALSE;
+    }
     }
 
     UVstride = priv->locked_rect.Pitch / 2;
@@ -633,11 +645,6 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
         Src=src[2];
 
     memcpy_pic(Dst, Src, w, h, UVstride, stride[2]);
-
-    if (FAILED(IDirect3DSurface9_UnlockRect(priv->d3d_surface))) {
-        mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface unlock failure\n");
-        return VO_ERROR;
-    }
 
     return 0; /* Success */
 }
