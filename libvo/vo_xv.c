@@ -85,7 +85,6 @@ static XvImage *xvimage[NUM_BUFFERS];
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
-static int flip_flag;
 
 static int int_pause;
 
@@ -194,7 +193,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if (flags & VOFLAG_MODESWITCHING)
         vm = 1;
 #endif
-    flip_flag = flags & VOFLAG_FLIPPING;
     num_buffers =
         vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
 
