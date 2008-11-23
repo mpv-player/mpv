@@ -171,7 +171,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     int depth;
 
 #ifdef CONFIG_XF86VM
-    int vm = 0;
+    int vm = flags & VOFLAG_MODESWITCHING;
 #endif
 
     image_height = height;
@@ -189,10 +189,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     int_pause = 0;
     visible_buf = -1;
 
-#ifdef CONFIG_XF86VM
-    if (flags & VOFLAG_MODESWITCHING)
-        vm = 1;
-#endif
     num_buffers =
         vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
 
