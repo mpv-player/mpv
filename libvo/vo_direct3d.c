@@ -52,6 +52,7 @@ const LIBVO_EXTERN(direct3d)
 static struct global_priv {
     int is_paused;              /**< 1 = Movie is paused,
                                 0 = Movie is not paused */
+    D3DLOCKED_RECT locked_rect; /**< The locked Offscreen surface */
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
     RECT fs_panscan_rect;       /**< PanScan source surface cropping in
@@ -282,9 +283,6 @@ static void uninit_d3d(void)
  */
 static uint32_t render_d3d_frame(mp_image_t *mpi)
 {
-    D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
-                                         to copy MPlayer's frame inside it.*/
-
     /* Uncomment when direct rendering is implemented.
      * if (mpi->flags & MP_IMGFLAG_DIRECT) ...
      */
@@ -299,13 +297,13 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
 
     /* If the previous if failed, we should draw a packed frame */
     if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                           &locked_rect, NULL, 0))) {
+                                           &priv->locked_rect, NULL, 0))) {
        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Surface lock failure\n");
        return VO_ERROR;
     }
 
-    memcpy_pic(locked_rect.pBits, mpi->planes[0], mpi->stride[0],
-               mpi->height, locked_rect.Pitch, mpi->stride[0]);
+    memcpy_pic(priv->locked_rect.pBits, mpi->planes[0], mpi->stride[0],
+               mpi->height, priv->locked_rect.Pitch, mpi->stride[0]);
 
     if (FAILED(IDirect3DSurface9_UnlockRect(priv->d3d_surface))) {
         mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface unlock failure\n");
@@ -594,31 +592,29 @@ static void check_events(void)
  */
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 {
-    D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
-                                         to copy MPlayer's frame inside it.*/
     char *Src;      /**< Pointer to the source image */
     char *Dst;      /**< Pointer to the destination image */
     int  UVstride;  /**< Stride of the U/V planes */
 
     if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                           &locked_rect, NULL, 0))) {
+                                           &priv->locked_rect, NULL, 0))) {
         mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface lock failure\n");
         return VO_FALSE;
     }
 
-    UVstride = locked_rect.Pitch / 2;
+    UVstride = priv->locked_rect.Pitch / 2;
 
     /* Copy Y */
-    Dst = locked_rect.pBits;
-    Dst = Dst + locked_rect.Pitch * y + x;
+    Dst = priv->locked_rect.pBits;
+    Dst = Dst + priv->locked_rect.Pitch * y + x;
     Src=src[0];
-    memcpy_pic(Dst, Src, w, h, locked_rect.Pitch, stride[0]);
+    memcpy_pic(Dst, Src, w, h, priv->locked_rect.Pitch, stride[0]);
 
     w/=2;h/=2;x/=2;y/=2;
 
     /* Copy U */
-    Dst = locked_rect.pBits;
-    Dst = Dst + locked_rect.Pitch * priv->src_height
+    Dst = priv->locked_rect.pBits;
+    Dst = Dst + priv->locked_rect.Pitch * priv->src_height
           + UVstride * y + x;
     if (priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2'))
         Src=src[2];
@@ -628,8 +624,8 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
     memcpy_pic(Dst, Src, w, h, UVstride, stride[1]);
 
     /* Copy V */
-    Dst = locked_rect.pBits;
-    Dst = Dst + locked_rect.Pitch * priv->src_height
+    Dst = priv->locked_rect.pBits;
+    Dst = Dst + priv->locked_rect.Pitch * priv->src_height
           + UVstride * (priv->src_height / 2) + UVstride * y + x;
     if (priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2'))
         Src=src[1];
