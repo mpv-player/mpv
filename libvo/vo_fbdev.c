@@ -547,7 +547,7 @@ static int fb_dev_fd;
 static int fb_tty_fd = -1;
 static size_t fb_size;
 static uint8_t *frame_buffer;
-static uint8_t *center;	/* thx .so :) */
+static uint8_t *center;
 static struct fb_fix_screeninfo fb_finfo;
 static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
@@ -1074,8 +1074,7 @@ static int draw_frame(uint8_t *src[])
 static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 		int y)
 {
-	uint8_t *d;
-	uint8_t *s;
+	uint8_t *d, *s;
 
 	d = center + fb_line_len * y + fb_pixel_size * x;
 
