@@ -109,7 +109,7 @@ static int fb_preinit(int reset)
   }
   fb_orig_vinfo = fb_vinfo;
 
-  if ((fb_tty_fd = open (TTY_DEV_NAME, O_RDWR)) < 0) {
+  if ((fb_tty_fd = open(TTY_DEV_NAME, O_RDWR)) < 0) {
     mp_msg(MSGT_VO, MSGL_ERR, "notice: Can't open %s: %s\n", TTY_DEV_NAME, strerror(errno));
     goto err_out_fd;
   }
@@ -229,13 +229,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   for (temp = 0; temp < fb_size; temp += 4)
     memcpy(frame_buffer + temp, (void *) &black, 4);
 
-  vt_fd = open (TTY_DEV_NAME, O_WRONLY);
+  vt_fd = open(TTY_DEV_NAME, O_WRONLY);
   if (vt_doit && vt_fd == -1) {
     mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", TTY_DEV_NAME, strerror(errno));
     vt_doit = 0;
   }
 
-  vt_fp = fdopen (vt_fd, "w");
+  vt_fp = fdopen(vt_fd, "w");
   if (vt_doit && !vt_fp) {
     mp_msg(MSGT_VO, MSGL_ERR, "Can't fdopen %s: %s\n", TTY_DEV_NAME, strerror(errno));
     vt_doit = 0;
@@ -249,7 +249,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 static int query_format(uint32_t format)
 {
-  if (!fb_preinit (0))
+  if (!fb_preinit(0))
     return 0;
 
   if (format != IMGFMT_YUY2)
