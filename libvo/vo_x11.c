@@ -89,7 +89,9 @@ static void check_events(void)
 {
     int ret = vo_x11_check_events(mDisplay);
 
-    if ((ret & VO_EVENT_RESIZE) || (ret & VO_EVENT_EXPOSE))
+    if (ret & VO_EVENT_RESIZE)
+        vo_x11_clearwindow(mDisplay, vo_window);
+    else if (ret & VO_EVENT_EXPOSE)
         vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width,
                                 myximage->height, 0);
     if (ret & VO_EVENT_EXPOSE && int_pause)
