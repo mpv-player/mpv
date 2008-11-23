@@ -466,7 +466,8 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 				mp_msg(MSGT_VO, MSGL_DBG2, "too small.\n");
 			else if (curr->xres > best->xres || curr->yres > best->yres)
 				mp_msg(MSGT_VO, MSGL_DBG2, "too large.\n");
-			else mp_msg(MSGT_VO, MSGL_DBG2, "it's worse, don't know why.\n");
+			else
+				mp_msg(MSGT_VO, MSGL_DBG2, "it's worse, don't know why.\n");
 		}
 	}
 
@@ -649,8 +650,7 @@ static int fb_preinit(int reset)
 	static int fb_preinit_done = 0;
 	static int fb_works = 0;
 
-	if (reset)
-	{
+	if (reset) {
 	    fb_preinit_done = 0;
 	    return 0;
 	}
@@ -805,13 +805,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 	fs = flags & VOFLAG_FULLSCREEN;
 
-	if(pre_init_err == -2)
-	{
+	if(pre_init_err == -2) {
 	    mp_msg(MSGT_VO, MSGL_ERR, "Internal fatal error: config() was called before preinit()\n");
 	    return -1;
 	}
 
-	if (pre_init_err) return 1;
+	if (pre_init_err)
+		return 1;
 
 	if (fb_mode_name && !vm) {
 		mp_msg(MSGT_VO, MSGL_ERR, "-fbmode can only be used with -vm\n");
@@ -882,11 +882,20 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 				fb_bpp_we_want, fb_bpp);
 
 	switch (fb_bpp) {
-		case 32: draw_alpha_p = vo_draw_alpha_rgb32; break;
-		case 24: draw_alpha_p = vo_draw_alpha_rgb24; break;
-		case 16: draw_alpha_p = vo_draw_alpha_rgb16; break;
-		case 15: draw_alpha_p = vo_draw_alpha_rgb15; break;
-		default: return 1;
+	case 32:
+		draw_alpha_p = vo_draw_alpha_rgb32;
+		break;
+	case 24:
+		draw_alpha_p = vo_draw_alpha_rgb24;
+		break;
+	case 16:
+		draw_alpha_p = vo_draw_alpha_rgb16;
+		break;
+	case 15:
+		draw_alpha_p = vo_draw_alpha_rgb15;
+		break;
+	default:
+		return 1;
 	}
 
 	fb_xres = fb_vinfo.xres;
@@ -949,8 +958,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	fb_size = fb_finfo.smem_len;
 	frame_buffer = NULL;
 #ifdef CONFIG_VIDIX
-	if(vidix_name)
-	{
+	if(vidix_name) {
 	    unsigned image_width,image_height,x_offset,y_offset;
 	    if(zoom || fs){
 		aspect_save_orig(width,height);
@@ -964,39 +972,36 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 		if(fb_xres > image_width)
 		    x_offset = (fb_xres - image_width) / 2;
-		else x_offset = 0;
+		else
+		    x_offset = 0;
 		if(fb_yres > image_height)
 		    y_offset = (fb_yres - image_height) / 2;
-		else y_offset = 0;
+		else
+		    y_offset = 0;
 
 		if(vidix_init(width,height,x_offset,y_offset,image_width,
 			    image_height,format,fb_bpp,
-			    fb_xres,fb_yres) != 0)
-		{
+			    fb_xres,fb_yres) != 0) {
 		    mp_msg(MSGT_VO, MSGL_ERR, "Can't initialize VIDIX driver\n");
 		    vidix_name = NULL;
 		    vidix_term();
 		    return -1;
-		}
-		else mp_msg(MSGT_VO, MSGL_V, "Using VIDIX\n");
+		} else
+		    mp_msg(MSGT_VO, MSGL_V, "Using VIDIX\n");
 		vidix_start();
-		if (vidix_grkey_support())
-		{
+		if (vidix_grkey_support()) {
 		    vidix_grkey_get(&gr_key);
 		    gr_key.key_op = KEYS_PUT;
-		    if (!(vo_colorkey & 0xff000000))
-		    {
+		    if (!(vo_colorkey & 0xff000000)) {
 			gr_key.ckey.op = CKEY_TRUE;
 			gr_key.ckey.red = (vo_colorkey & 0x00ff0000) >> 16;
 			gr_key.ckey.green = (vo_colorkey & 0x0000ff00) >> 8;
 			gr_key.ckey.blue = vo_colorkey & 0x000000ff;
-		    }
-		    else
+		    } else
 			gr_key.ckey.op = CKEY_FALSE;
 		    vidix_grkey_set(&gr_key);
 		}
-	}
-	else
+	} else
 #endif
 	{
 	    int x_offset=0,y_offset=0;
@@ -1061,7 +1066,10 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	(*draw_alpha_p)(w, h, src, srca, stride, dst, fb_line_len);
 }
 
-static int draw_frame(uint8_t *src[]) { return 1; }
+static int draw_frame(uint8_t *src[])
+{
+	return 1;
+}
 
 static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 		int y)
@@ -1116,10 +1124,12 @@ static void uninit(void)
 		vt_set_textarea(0, fb_orig_vinfo.yres);
         close(fb_tty_fd);
 	close(fb_dev_fd);
-	if(frame_buffer) munmap(frame_buffer, fb_size);
+	if(frame_buffer)
+		munmap(frame_buffer, fb_size);
 	frame_buffer = NULL;
 #ifdef CONFIG_VIDIX
-	if(vidix_name) vidix_term();
+	if(vidix_name)
+		vidix_term();
 #endif
 	fb_preinit(1);
 }
@@ -1128,8 +1138,7 @@ static int preinit(const char *vo_subdevice)
 {
     pre_init_err = 0;
 
-    if(vo_subdevice)
-    {
+    if(vo_subdevice) {
 #ifdef CONFIG_VIDIX
 	if (memcmp(vo_subdevice, "vidix", 5) == 0)
 	    vidix_name = &vo_subdevice[5];
@@ -1138,18 +1147,19 @@ static int preinit(const char *vo_subdevice)
 	else
 #endif
 	{
-	    if (fb_dev_name) free(fb_dev_name);
+	    if (fb_dev_name)
+		free(fb_dev_name);
 	    fb_dev_name = strdup(vo_subdevice);
 	}
     }
-    if(!pre_init_err) return pre_init_err = (fb_preinit(0) ? 0 : -1);
+    if(!pre_init_err)
+	return pre_init_err = (fb_preinit(0) ? 0 : -1);
     return -1;
 }
 
 static uint32_t get_image(mp_image_t *mpi)
 {
-    if (
-	!IMGFMT_IS_BGR(mpi->imgfmt) ||
+    if (!IMGFMT_IS_BGR(mpi->imgfmt) ||
 	(IMGFMT_BGR_DEPTH(mpi->imgfmt) != fb_bpp) ||
 	((mpi->type != MP_IMGTYPE_STATIC) && (mpi->type != MP_IMGTYPE_TEMP)) ||
 	(mpi->flags & MP_IMGFLAG_PLANAR) ||
