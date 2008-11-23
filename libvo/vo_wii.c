@@ -55,7 +55,6 @@
 #include "mp_msg.h"
 
 #define WII_DEV_NAME "/dev/fb0"
-#define FB_PIXEL_SIZE 2
 
 static const vo_info_t info = {
   "Nintendo Wii/GameCube Framebuffer Device",
@@ -78,6 +77,7 @@ static uint8_t *center;
 
 static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
+static int fb_pixel_size;       // 32:  4  24:  3  16:  2  15:  2
 static int fb_line_len;
 static int in_width;
 static int in_height;
@@ -185,6 +185,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     return 1;
   }
 
+  fb_pixel_size = 2;
+
   if (fs) {
     out_width  = fb_vinfo.xres;
     out_height = fb_vinfo.yres;
@@ -217,12 +219,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   }
 
   center = frame_buffer +
-    ((out_width - in_width) / 2) * FB_PIXEL_SIZE +
+    ((out_width - in_width) / 2) * fb_pixel_size +
     ((out_height - in_height) / 2) * fb_line_len;
 
   mp_msg(MSGT_VO, MSGL_DBG2, "frame_buffer @ %p\n", frame_buffer);
   mp_msg(MSGT_VO, MSGL_DBG2, "center @ %p\n", center);
-  mp_msg(MSGT_VO, MSGL_V, "pixel per line: %d\n", fb_line_len / FB_PIXEL_SIZE);
+  mp_msg(MSGT_VO, MSGL_V, "pixel per line: %d\n", fb_line_len / fb_pixel_size);
 
   /* blanking screen */
   for (temp = 0; temp < fb_size; temp += 4)
@@ -259,7 +261,8 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 {
   unsigned char *dst;
 
-  dst = center + fb_line_len * y0 + FB_PIXEL_SIZE * x0;
+  dst = center + fb_line_len * y0 + fb_pixel_size * x0;
+
   vo_draw_alpha_yuy2(w, h, src, srca, stride, dst, fb_line_len);
 }
 
@@ -272,10 +275,11 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
   uint8_t *d, *s;
 
-  d = center + fb_line_len * y + FB_PIXEL_SIZE * x;
+  d = center + fb_line_len * y + fb_pixel_size * x;
+
   s = src[0];
   while (h) {
-    memcpy(d, s, w * FB_PIXEL_SIZE);
+    memcpy(d, s, w * fb_pixel_size);
     d += fb_line_len;
     s += stride[0];
     h--;
