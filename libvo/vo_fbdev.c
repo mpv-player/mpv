@@ -710,74 +710,6 @@ err_out:
     return 0;
 }
 
-static void lots_of_printf(void)
-{
-    mp_msg(MSGT_VO, MSGL_V, "var info:\n");
-    mp_msg(MSGT_VO, MSGL_V, "xres: %u\n", fb_vinfo.xres);
-    mp_msg(MSGT_VO, MSGL_V, "yres: %u\n", fb_vinfo.yres);
-    mp_msg(MSGT_VO, MSGL_V, "xres_virtual: %u\n", fb_vinfo.xres_virtual);
-    mp_msg(MSGT_VO, MSGL_V, "yres_virtual: %u\n", fb_vinfo.yres_virtual);
-    mp_msg(MSGT_VO, MSGL_V, "xoffset: %u\n", fb_vinfo.xoffset);
-    mp_msg(MSGT_VO, MSGL_V, "yoffset: %u\n", fb_vinfo.yoffset);
-    mp_msg(MSGT_VO, MSGL_V, "bits_per_pixel: %u\n", fb_vinfo.bits_per_pixel);
-    mp_msg(MSGT_VO, MSGL_V, "grayscale: %u\n", fb_vinfo.grayscale);
-    mp_msg(MSGT_VO, MSGL_V, "red: %lu %lu %lu\n",
-           (unsigned long) fb_vinfo.red.offset,
-           (unsigned long) fb_vinfo.red.length,
-           (unsigned long) fb_vinfo.red.msb_right);
-    mp_msg(MSGT_VO, MSGL_V, "green: %lu %lu %lu\n",
-           (unsigned long) fb_vinfo.green.offset,
-           (unsigned long) fb_vinfo.green.length,
-           (unsigned long) fb_vinfo.green.msb_right);
-    mp_msg(MSGT_VO, MSGL_V, "blue: %lu %lu %lu\n",
-           (unsigned long) fb_vinfo.blue.offset,
-           (unsigned long) fb_vinfo.blue.length,
-           (unsigned long) fb_vinfo.blue.msb_right);
-    mp_msg(MSGT_VO, MSGL_V, "transp: %lu %lu %lu\n",
-           (unsigned long) fb_vinfo.transp.offset,
-           (unsigned long) fb_vinfo.transp.length,
-           (unsigned long) fb_vinfo.transp.msb_right);
-    mp_msg(MSGT_VO, MSGL_V, "nonstd: %u\n", fb_vinfo.nonstd);
-    mp_msg(MSGT_VO, MSGL_DBG2, "activate: %u\n", fb_vinfo.activate);
-    mp_msg(MSGT_VO, MSGL_DBG2, "height: %u\n", fb_vinfo.height);
-    mp_msg(MSGT_VO, MSGL_DBG2, "width: %u\n", fb_vinfo.width);
-    mp_msg(MSGT_VO, MSGL_DBG2, "accel_flags: %u\n", fb_vinfo.accel_flags);
-    mp_msg(MSGT_VO, MSGL_DBG2, "timing:\n");
-    mp_msg(MSGT_VO, MSGL_DBG2, "pixclock: %u\n", fb_vinfo.pixclock);
-    mp_msg(MSGT_VO, MSGL_DBG2, "left_margin: %u\n", fb_vinfo.left_margin);
-    mp_msg(MSGT_VO, MSGL_DBG2, "right_margin: %u\n", fb_vinfo.right_margin);
-    mp_msg(MSGT_VO, MSGL_DBG2, "upper_margin: %u\n", fb_vinfo.upper_margin);
-    mp_msg(MSGT_VO, MSGL_DBG2, "lower_margin: %u\n", fb_vinfo.lower_margin);
-    mp_msg(MSGT_VO, MSGL_DBG2, "hsync_len: %u\n", fb_vinfo.hsync_len);
-    mp_msg(MSGT_VO, MSGL_DBG2, "vsync_len: %u\n", fb_vinfo.vsync_len);
-    mp_msg(MSGT_VO, MSGL_DBG2, "sync: %u\n", fb_vinfo.sync);
-    mp_msg(MSGT_VO, MSGL_DBG2, "vmode: %u\n", fb_vinfo.vmode);
-    mp_msg(MSGT_VO, MSGL_V, "fix info:\n");
-    mp_msg(MSGT_VO, MSGL_V, "framebuffer size: %d bytes\n", fb_finfo.smem_len);
-    mp_msg(MSGT_VO, MSGL_V, "type: %lu\n", (unsigned long) fb_finfo.type);
-    mp_msg(MSGT_VO, MSGL_V, "type_aux: %lu\n", (unsigned long) fb_finfo.type_aux);
-    mp_msg(MSGT_VO, MSGL_V, "visual: %lu\n", (unsigned long) fb_finfo.visual);
-    mp_msg(MSGT_VO, MSGL_V, "line_length: %lu bytes\n", (unsigned long) fb_finfo.line_length);
-    mp_msg(MSGT_VO, MSGL_DBG2, "id: %.16s\n", fb_finfo.id);
-    mp_msg(MSGT_VO, MSGL_DBG2, "smem_start: %p\n", (void *) fb_finfo.smem_start);
-    mp_msg(MSGT_VO, MSGL_DBG2, "xpanstep: %u\n", fb_finfo.xpanstep);
-    mp_msg(MSGT_VO, MSGL_DBG2, "ypanstep: %u\n", fb_finfo.ypanstep);
-    mp_msg(MSGT_VO, MSGL_DBG2, "ywrapstep: %u\n", fb_finfo.ywrapstep);
-    mp_msg(MSGT_VO, MSGL_DBG2, "mmio_start: %p\n", (void *) fb_finfo.mmio_start);
-    mp_msg(MSGT_VO, MSGL_DBG2, "mmio_len: %u bytes\n", fb_finfo.mmio_len);
-    mp_msg(MSGT_VO, MSGL_DBG2, "accel: %u\n", fb_finfo.accel);
-    mp_msg(MSGT_VO, MSGL_V, "fb_bpp: %d\n", fb_bpp);
-    mp_msg(MSGT_VO, MSGL_V, "fb_pixel_size: %d bytes\n", fb_pixel_size);
-    mp_msg(MSGT_VO, MSGL_V, "other:\n");
-    mp_msg(MSGT_VO, MSGL_V, "in_width: %d\n", in_width);
-    mp_msg(MSGT_VO, MSGL_V, "in_height: %d\n", in_height);
-    mp_msg(MSGT_VO, MSGL_V, "out_width: %d\n", out_width);
-    mp_msg(MSGT_VO, MSGL_V, "out_height: %d\n", out_height);
-    mp_msg(MSGT_VO, MSGL_V, "first_row: %d\n", first_row);
-    mp_msg(MSGT_VO, MSGL_V, "last_row: %d\n", last_row);
-    mp_msg(MSGT_VO, MSGL_DBG2, "draw_alpha_p:%dbpp = %p\n", fb_bpp, draw_alpha_p);
-}
-
 static void vt_set_textarea(int u, int l)
 {
     /* how can I determine the font height?
@@ -915,8 +847,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         mp_msg(MSGT_VO, MSGL_ERR, "Can't get FSCREENINFO: %s\n", strerror(errno));
         return 1;
     }
-
-    lots_of_printf();
 
     if (fb_finfo.type != FB_TYPE_PACKED_PIXELS) {
         mp_msg(MSGT_VO, MSGL_ERR, "type %d not supported\n", fb_finfo.type);
