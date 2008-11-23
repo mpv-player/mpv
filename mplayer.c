@@ -3167,6 +3167,12 @@ if(stream_dump_type==5){
           exit_player(MSGTR_Exit_error);
         }
       }
+      if(dvd_last_chapter > 0) {
+        int chapter = -1;
+        if (stream_control(mpctx->stream, STREAM_CTRL_GET_CURRENT_CHAPTER,
+                           &chapter) == STREAM_OK && chapter + 1 > dvd_last_chapter)
+          break;
+      }
   }
   if(fclose(f)) {
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile,stream_dump_name);
@@ -3353,6 +3359,11 @@ if((stream_dump_type)&&(stream_dump_type<4)){
     if( (mpctx->demuxer->file_format==DEMUXER_TYPE_AVI || mpctx->demuxer->file_format==DEMUXER_TYPE_ASF || mpctx->demuxer->file_format==DEMUXER_TYPE_MOV)
 	&& stream_dump_type==2) fwrite(&in_size,1,4,f);
     if(in_size>0) fwrite(start,in_size,1,f);
+    if(dvd_last_chapter>0) {
+      int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer);
+      if(cur_chapter!=-1 && cur_chapter+1>dvd_last_chapter)
+        break;
+    }
   }
   fclose(f);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
