@@ -89,16 +89,11 @@ static void check_events(void)
 {
     int ret = vo_x11_check_events(mDisplay);
 
-    /* clear left over borders and redraw frame if we are paused */
+    if ((ret & VO_EVENT_RESIZE) || (ret & VO_EVENT_EXPOSE))
+        vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width,
+                                myximage->height, 0);
     if (ret & VO_EVENT_EXPOSE && int_pause)
-    {
-        vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width,
-                                myximage->height, 0);
         flip_page();
-    } else if ((ret & VO_EVENT_RESIZE) || (ret & VO_EVENT_EXPOSE))
-        vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width,
-                                myximage->height, 0);
-
 }
 
 static void draw_alpha_32(int x0, int y0, int w, int h, unsigned char *src,
