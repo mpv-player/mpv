@@ -306,7 +306,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 // int interval, prefer_blank, allow_exp, nothing;
     unsigned int fg, bg;
-    XGCValues xgcv;
     Colormap theCmap;
     XSetWindowAttributes xswa;
     unsigned long xswamask;
@@ -315,7 +314,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 #ifdef CONFIG_XF86VM
     int vm = flags & VOFLAG_MODESWITCHING;
 #endif
-    int fullscreen = flags & (VOFLAG_FULLSCREEN|VOFLAG_MODESWITCHING);
     Flip_Flag = flags & VOFLAG_FLIPPING;
     zoomFlag = flags & VOFLAG_SWSCALE;
 
@@ -329,10 +327,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     in_format = format;
     srcW = width;
     srcH = height;
-
-// if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
-
-//printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 
     XGetWindowAttributes(mDisplay, mRootWin, &attribs);
     depth = attribs.depth;
