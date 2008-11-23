@@ -210,10 +210,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   fb_line_len = fb_finfo.line_length;
   fb_size     = fb_finfo.smem_len;
   frame_buffer = NULL;
-
-  frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
-                                  MAP_SHARED, fb_dev_fd, 0);
-  if (frame_buffer == (uint8_t *) -1) {
+  if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
+                                       MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
     mp_msg(MSGT_VO, MSGL_ERR, "Can't mmap %s: %s\n", WII_DEV_NAME, strerror(errno));
     return 1;
   }
