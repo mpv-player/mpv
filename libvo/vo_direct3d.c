@@ -290,19 +290,14 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
      */
 
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-        return VO_TRUE;
+        goto skip_upload;
 
     if (mpi->flags & MP_IMGFLAG_PLANAR) { /* Copy a planar frame. */
         draw_slice(mpi->planes,mpi->stride,mpi->w,mpi->h,0,0);
-        return VO_TRUE;
+        goto skip_upload;
     }
 
     /* If the previous if failed, we should draw a packed frame */
-    if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
-       return VO_ERROR;
-    }
-
     if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
                                            &locked_rect, NULL, 0))) {
        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Surface lock failure\n");
@@ -315,6 +310,12 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
     if (FAILED(IDirect3DSurface9_UnlockRect(priv->d3d_surface))) {
         mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface unlock failure\n");
         return VO_ERROR;
+    }
+
+skip_upload:
+    if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
+       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
+       return VO_ERROR;
     }
 
     if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
@@ -599,11 +600,6 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
     char *Dst;      /**< Pointer to the destination image */
     int  UVstride;  /**< Stride of the U/V planes */
 
-    if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
-       return VO_ERROR;
-    }
-
     if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
                                            &locked_rect, NULL, 0))) {
         mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface lock failure\n");
@@ -645,22 +641,6 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
     if (FAILED(IDirect3DSurface9_UnlockRect(priv->d3d_surface))) {
         mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface unlock failure\n");
         return VO_ERROR;
-    }
-
-    if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
-                                            priv->d3d_surface,
-                                            &priv->fs_panscan_rect,
-                                            priv->d3d_backbuf,
-                                            &priv->fs_movie_rect,
-                                            D3DTEXF_LINEAR))) {
-        mp_msg(MSGT_VO,MSGL_V,
-               "<vo_direct3d>Unable to copy the frame to the back buffer\n");
-        return VO_ERROR;
-    }
-
-    if (FAILED(IDirect3DDevice9_EndScene(priv->d3d_device))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>EndScene failed\n");
-       return VO_ERROR;
     }
 
     return 0; /* Success */
