@@ -54,8 +54,6 @@
 #include "sub.h"
 #include "mp_msg.h"
 
-#define WII_DEV_NAME "/dev/fb0"
-
 static const vo_info_t info = {
   "Nintendo Wii/GameCube Framebuffer Device",
   "wii",
@@ -66,6 +64,8 @@ static const vo_info_t info = {
 LIBVO_EXTERN(wii)
 
 static signed int pre_init_err = -2;
+
+static char *fb_dev_name = NULL;
 
 static FILE *vt_fp = NULL;
 static int vt_doit = 1;
@@ -98,8 +98,12 @@ static int fb_preinit(int reset)
   if (fb_preinit_done)
     return fb_works;
 
-  if ((fb_dev_fd = open(WII_DEV_NAME, O_RDWR)) == -1) {
-    mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", WII_DEV_NAME, strerror(errno));
+  if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
+    fb_dev_name = strdup("/dev/fb0");
+  mp_msg(MSGT_VO, MSGL_V, "using %s\n", fb_dev_name);
+
+  if ((fb_dev_fd = open(fb_dev_name, O_RDWR)) == -1) {
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't open %s: %s\n", fb_dev_name, strerror(errno));
     goto err_out;
   }
   if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
@@ -212,7 +216,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   frame_buffer = NULL;
   if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
                                        MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
-    mp_msg(MSGT_VO, MSGL_ERR, "Can't mmap %s: %s\n", WII_DEV_NAME, strerror(errno));
+    mp_msg(MSGT_VO, MSGL_ERR, "Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
     return 1;
   }
 

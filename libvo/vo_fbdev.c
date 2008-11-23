@@ -532,7 +532,7 @@ static void fb_mode2fb_vinfo(fb_mode_t *m, struct fb_var_screeninfo *v)
 ******************************/
 
 /* command line/config file options */
-char *fb_dev_name = NULL;
+static char *fb_dev_name = NULL;
 char *fb_mode_cfgfile = NULL;
 char *fb_mode_name = NULL;
 
