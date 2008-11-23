@@ -12,9 +12,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#ifdef CONFIG_XF86VM
-#include <X11/extensions/xf86vmode.h>
-#endif
 #include <errno.h>
 
 #include "x11_common.h"
