@@ -1,4 +1,4 @@
-.\" synced with r27906
+.\" synced with r27979
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -3435,8 +3435,9 @@ La position initiale définie par l'option \-geometry est relative à l'écran
 défini.
 Fontionnera généralement uniquement avec  "\-fstype \-fullscreen" ou
 "\-fstype none".
-Cette option ne convient pour définir l'écran de démarrage (de même pour
-l'écran en mode plein écran), \-geometry est plus approprié.
+Cette option ne convient pas pour définir l'écran de démarrage (car l'affichage
+se fera toujours en plein écran sur le moniteur donné), \-geometry est plus
+approprié.
 Géré par les pilotes de sortie vidéo gl, gl2, x11, et xv.
 .
 .TP
@@ -3682,6 +3683,10 @@ Comme pour vidix
 .TP
 .B winvidix (Windows uniquement)
 VIDIX tournant sous Windows.
+.
+.TP
+.B direct3d (Windows uniquement) (CODE BÉTA!)
+Pilote de sortie vidéo utilisant l'interface Direct3D (utilse sous Vista).
 .
 .TP
 .B directx (Windows uniquement)
