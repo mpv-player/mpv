@@ -70,7 +70,7 @@ static char *fb_dev_name = NULL;
 static FILE *vt_fp = NULL;
 static int vt_doit = 1;
 
-static int fb_dev_fd = -1;
+static int fb_dev_fd;
 static int fb_tty_fd = -1;
 static size_t fb_size;
 static uint8_t *frame_buffer;
