@@ -3582,9 +3582,23 @@ if test "$_macosx" = auto ; then
 fi
 if test "$_macosx" = yes ; then
   cat > $TMPC <<EOF
+#include <CoreAudio/CoreAudio.h>
+int main(void) { return 0; }
+EOF
+  if cc_check -framework CoreAudio; then
+    _ld_extra="$_ld_extra -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
+    _coreaudio=yes
+    _def_coreaudio='#define CONFIG_COREAUDIO 1'
+    _aosrc="$_aosrc ao_macosx.c"
+    _aomodules="macosx $_aomodules"
+  else
+    _coreaudio=no
+    _def_coreaudio='#undef CONFIG_COREAUDIO'
+    _noaomodules="macosx $_noaomodules"
+  fi
+  cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
-#include <CoreAudio/CoreAudio.h>
 int main(void) {
     EnterMovies();
     ExitMovies();
