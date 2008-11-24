@@ -239,8 +239,6 @@ extern int vo_colorkey;
 
 extern int WinID;
 
-#if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
-
 typedef struct {
         float min;
 	float max;
@@ -252,7 +250,5 @@ extern range_t *str2range(char *s);
 extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
-
-#endif /* defined(CONFIG_FBDEV) || defined(CONFIG_VESA) */
 
 #endif /* MPLAYER_VIDEO_OUT_H */
