@@ -3606,21 +3606,15 @@ int main(void) {
     return 0;
 }
 EOF
-  if cc_check -framework Carbon -framework QuickTime -framework CoreAudio; then
-    _ld_extra="$_ld_extra -framework Carbon -framework QuickTime -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
-    _coreaudio=yes
-    _def_coreaudio='#define CONFIG_COREAUDIO 1'
-    _aosrc="$_aosrc ao_macosx.c"
-    _aomodules="macosx $_aomodules"
+  if cc_check -framework Carbon -framework QuickTime; then
+    _ld_extra="$_ld_extra -framework Carbon -framework QuickTime"
+    _quartz=yes
     _def_quartz='#define CONFIG_QUARTZ 1'
     _vosrc="$_vosrc vo_quartz.c"
     _vomodules="quartz $_vomodules"
     _def_quicktime='#define CONFIG_QUICKTIME 1'
   else
-    _macosx=no
-    _coreaudio=no
-    _def_coreaudio='#undef CONFIG_COREAUDIO'
-    _noaomodules="macosx $_noaomodules"
+    _quartz=yes
     _def_quartz='#undef CONFIG_QUARTZ'
     _novomodules="quartz $_novomodules"
     _def_quicktime='#undef CONFIG_QUICKTIME'
