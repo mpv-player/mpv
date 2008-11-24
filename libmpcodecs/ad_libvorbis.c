@@ -12,7 +12,11 @@
 static ad_info_t info = 
 {
 	"Ogg/Vorbis audio decoder",
+#ifdef CONFIG_TREMOR
+	"tremor",
+#else
 	"libvorbis",
+#endif
 	"Felix Buenemann, A'rpi",
 	"libvorbis",
 	""
