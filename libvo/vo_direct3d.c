@@ -265,10 +265,6 @@ static int reconfigure_d3d(void)
         return 0;
     }
 
-    /* Fill the Surface with black color. */
-    IDirect3DDevice9_ColorFill(priv->d3d_device, priv->d3d_surface, NULL,
-                               D3DCOLOR_ARGB(0xFF, 0, 0, 0) );
-
     calc_fs_rect();
 
     return 1;
