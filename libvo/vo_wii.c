@@ -69,12 +69,12 @@ static char *fb_dev_name = NULL;
 
 static FILE *vt_fp = NULL;
 static int vt_doit = 1;
+
 static int fb_dev_fd = -1;
 static int fb_tty_fd = -1;
 static size_t fb_size;
 static uint8_t *frame_buffer;
 static uint8_t *center;
-
 static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
 static int fb_pixel_size;       // 32:  4  24:  3  16:  2  15:  2
@@ -195,7 +195,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     out_width  = fb_vinfo.xres;
     out_height = fb_vinfo.yres;
   }
-
   if (out_width < in_width || out_height < in_height) {
     mp_msg(MSGT_VO, MSGL_ERR, "screensize is smaller than video size\n");
     return 1;
