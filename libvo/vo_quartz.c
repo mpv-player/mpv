@@ -1,19 +1,17 @@
-/*
-	vo_quartz.c
+/**
+  \author Nicolas Plourde <nicolasplourde@gmail.com>
 
-	by Nicolas Plourde <nicolasplourde@gmail.com>
+  Copyright (c) Nicolas Plourde - April 2004
 
-	Copyright (c) Nicolas Plourde - April 2004
+  YUV support Copyright (C) 2004 Romain Dolbeau <romain@dolbeau.org>
 
-	YUV support Copyright (C) 2004 Romain Dolbeau <romain@dolbeau.org>
+  \brief MPlayer Mac OSX Quartz video out module.
 
-	MPlayer Mac OSX Quartz video out module.
-
-	todo:	-screen overlay output
-			-fit osd in black bar when available
-			-fix RGB32
-			-(add sugestion here)
- */
+  \todo: -screen overlay output
+         -fit osd in black bar when available
+         -fix RGB32
+         -(add sugestion here)
+*/
 
 //SYS
 #include <stdio.h>
