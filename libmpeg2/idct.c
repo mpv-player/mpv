@@ -265,7 +265,7 @@ void mpeg2_idct_init (uint32_t accel)
 	mpeg2_idct_altivec_init ();
     } else
 #endif
-#ifdef HAVE_VIS
+#ifdef HAVE_MVI
     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
 	mpeg2_idct_add = mpeg2_idct_add_mvi;
