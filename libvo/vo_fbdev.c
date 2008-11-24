@@ -884,7 +884,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     fb_line_len = fb_finfo.line_length;
     fb_size     = fb_finfo.smem_len;
-    frame_buffer = NULL;
+
 #ifdef CONFIG_VIDIX
     if (vidix_name) {
         unsigned image_width, image_height, x_offset, y_offset;
