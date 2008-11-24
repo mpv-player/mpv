@@ -1,14 +1,14 @@
 /*
 	vo_quartz.c
-	
+
 	by Nicolas Plourde <nicolasplourde@gmail.com>
-	
+
 	Copyright (c) Nicolas Plourde - April 2004
 
 	YUV support Copyright (C) 2004 Romain Dolbeau <romain@dolbeau.org>
-	
+
 	MPlayer Mac OSX Quartz video out module.
-	
+
 	todo:	-screen overlay output
 			-fit osd in black bar when available
 			-fix RGB32
@@ -38,7 +38,7 @@
 
 #include "vo_quartz.h"
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
 	"Mac OSX (Quartz)",
 	"quartz",
@@ -172,7 +172,7 @@ static inline int convert_key(UInt32 key, UInt32 charcode)
 		case QZ_KP_MINUS: return '-';
 		case QZ_TAB: return KEY_TAB;
 		case QZ_PAGEUP: return KEY_PAGE_UP;
-		case QZ_PAGEDOWN: return KEY_PAGE_DOWN;  
+		case QZ_PAGEDOWN: return KEY_PAGE_DOWN;
 		case QZ_UP: return KEY_UP;
 		case QZ_DOWN: return KEY_DOWN;
 		case QZ_LEFT: return KEY_LEFT;
@@ -221,20 +221,20 @@ static OSStatus KeyEventHandler(EventHandlerCallRef nextHandler, EventRef event,
 {
     OSStatus result = noErr;
 	UInt32 class = GetEventClass (event);
-	UInt32 kind = GetEventKind (event); 
+	UInt32 kind = GetEventKind (event);
 
 	result = CallNextEventHandler(nextHandler, event);
-	
+
 	if(class == kEventClassKeyboard)
 	{
 		char macCharCodes;
 		UInt32 macKeyCode;
 		UInt32 macKeyModifiers;
-	
+
 		GetEventParameter(event, kEventParamKeyMacCharCodes, typeChar, NULL, sizeof(macCharCodes), NULL, &macCharCodes);
 		GetEventParameter(event, kEventParamKeyCode, typeUInt32, NULL, sizeof(macKeyCode), NULL, &macKeyCode);
 		GetEventParameter(event, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(macKeyModifiers), NULL, &macKeyModifiers);
-		
+
 		if(macKeyModifiers != 256)
 		{
 			if (kind == kEventRawKeyRepeat || kind == kEventRawKeyDown)
@@ -249,13 +249,13 @@ static OSStatus KeyEventHandler(EventHandlerCallRef nextHandler, EventRef event,
 			switch(macCharCodes)
 			{
 				case '[': SetWindowAlpha(theWindow, winAlpha-=0.05); break;
-				case ']': SetWindowAlpha(theWindow, winAlpha+=0.05); break;		
-			}	
+				case ']': SetWindowAlpha(theWindow, winAlpha+=0.05); break;
+			}
 		}
 		else
 			result = eventNotHandledErr;
 	}
-	
+
     return result;
 }
 
@@ -264,10 +264,10 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 {
     OSStatus result = noErr;
 	UInt32 class = GetEventClass (event);
-	UInt32 kind = GetEventKind (event); 
+	UInt32 kind = GetEventKind (event);
 
 	result = CallNextEventHandler(nextHandler, event);
-	
+
 	if(class == kEventClassMouse)
 	{
 		WindowPtr tmpWin;
@@ -288,16 +288,16 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 				}
 			}
 			break;
-			
+
 			case kEventMouseWheelMoved:
 			{
 				int wheel;
 				short part;
-				
+
 				GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(int), 0, &wheel);
 
 				part = FindWindow(mousePos,&tmpWin);
-				
+
 				if(part == inContent)
 				{
 					if(wheel > 0)
@@ -307,24 +307,24 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 				}
 			}
 			break;
-			
+
 			case kEventMouseDown:
 			case kEventMouseUp:
 			{
 				EventMouseButton button;
 				short part;
 				Rect bounds;
-				
+
 				GetWindowPortBounds(theWindow, &bounds);
 				GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(EventMouseButton), 0, &button);
-				
+
 				part = FindWindow(mousePos,&tmpWin);
 				if(kind == kEventMouseUp)
 				{
 					if (part != inContent)
 						break;
 					switch(button)
-					{ 
+					{
 						case kEventMouseButtonPrimary:
 							mplayer_put_key(MOUSE_BTN0);
 							break;
@@ -334,7 +334,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 						case kEventMouseButtonTertiary:
 							mplayer_put_key(MOUSE_BTN1);
 							break;
-				
+
 						default:result = eventNotHandledErr;break;
 					}
 					break;
@@ -355,7 +355,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 				else if(part == inContent)
 				{
 					switch(button)
-					{ 
+					{
 						case kEventMouseButtonPrimary:
 							mplayer_put_key(MOUSE_BTN0 | MP_KEY_DOWN);
 							break;
@@ -365,16 +365,16 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 						case kEventMouseButtonTertiary:
 							mplayer_put_key(MOUSE_BTN1 | MP_KEY_DOWN);
 							break;
-				
+
 						default:result = eventNotHandledErr;break;
 					}
 				}
-			}		
+			}
 			break;
-			
+
 			case kEventMouseDragged:
 			break;
-				
+
 			default:result = eventNotHandledErr;break;
 		}
 	}
@@ -389,29 +389,29 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 	uint32_t d_width;
 	uint32_t d_height;
 	UInt32 class = GetEventClass (event);
-	UInt32 kind = GetEventKind (event); 
+	UInt32 kind = GetEventKind (event);
 
 	result = CallNextEventHandler(nextHandler, event);
-	
+
 	aspect(&d_width,&d_height,A_NOZOOM);
 
 	if(class == kEventClassCommand)
 	{
 		HICommand theHICommand;
 		GetEventParameter( event, kEventParamDirectObject, typeHICommand, NULL, sizeof( HICommand ), NULL, &theHICommand );
-		
+
 		switch ( theHICommand.commandID )
 		{
 			case kHICommandQuit:
 				mplayer_put_key(KEY_CLOSE_WIN);
 				break;
-				
+
 			case kHalfScreenCmd:
 					if(vo_quartz_fs)
 					{
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
-						
+
 					SizeWindow(theWindow, (d_width/2), ((d_width/movie_aspect)/2), 1);
 					window_resized();
 				break;
@@ -421,7 +421,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 					{
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
-						
+
 					SizeWindow(theWindow, d_width, (d_width/movie_aspect), 1);
 					window_resized();
 				break;
@@ -431,7 +431,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 					{
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
-						
+
 					SizeWindow(theWindow, (d_width*2), ((d_width/movie_aspect)*2), 1);
 					window_resized();
 				break;
@@ -445,7 +445,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 				CheckMenuItem (aspectMenu, 1, vo_keepaspect);
 				window_resized();
 				break;
-				
+
 			case kAspectOrgCmd:
 				movie_aspect = old_movie_aspect;
 				if(!vo_quartz_fs)
@@ -454,7 +454,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 				}
 				window_resized();
 				break;
-				
+
 			case kAspectFullCmd:
 				movie_aspect = 4.0f/3.0f;
 				if(!vo_quartz_fs)
@@ -463,7 +463,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 				}
 				window_resized();
 				break;
-				
+
 			case kAspectWideCmd:
 				movie_aspect = 16.0f/9.0f;
 				if(!vo_quartz_fs)
@@ -472,14 +472,14 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 				}
 				window_resized();
 				break;
-				
+
 			case kPanScanCmd:
 				vo_panscan = (!(vo_panscan));
 				CheckMenuItem (aspectMenu, 2, vo_panscan);
 				window_panscan();
 				window_resized();
 				break;
-			
+
 			default:
 				result = eventNotHandledErr;
 				break;
@@ -489,21 +489,21 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 	{
 		WindowRef     window;
 		Rect          rectWindow = {0,0,0,0};
-		
+
 		GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
-	
+
 		if(window)
 		{
 			GetWindowBounds(window, kWindowGlobalPortRgn, &rectWindow);
-		}   
-	
+		}
+
 		switch (kind)
 		{
 			case kEventWindowClosed:
 				theWindow = NULL;
 				mplayer_put_key(KEY_CLOSE_WIN);
 				break;
-				
+
 			//resize window
 			case kEventWindowZoomed:
 			case kEventWindowBoundsChanged:
@@ -511,26 +511,26 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 				flip_page();
 				window_resized();
 				break;
-			
+
 			default:
 				result = eventNotHandledErr;
 				break;
 		}
 	}
-	
+
     return result;
 }
 
-static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttributes windowAttrs) 
+static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttributes windowAttrs)
 {
 	CFStringRef		titleKey;
-	CFStringRef		windowTitle; 
-	OSStatus	       	result;
-	
+	CFStringRef		windowTitle;
+	OSStatus		result;
+
 	MenuItemIndex index;
 	CFStringRef movMenuTitle;
 	CFStringRef aspMenuTitle;
- 
+
     const EventTypeSpec win_events[] = {
         { kEventClassWindow, kEventWindowClosed },
 		{ kEventClassWindow, kEventWindowBoundsChanged },
@@ -553,41 +553,41 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	SetRect(&winRect, 0, 0, d_width, d_height);
 	SetRect(&oldWinRect, 0, 0, d_width, d_height);
 	SetRect(&dstRect, 0, 0, d_width, d_height);
-	
+
 	//Clear Menu Bar
 	ClearMenuBar();
-	
+
 	//Create Window Menu
 	CreateStandardWindowMenu(0, &windMenu);
 	InsertMenu(windMenu, 0);
-	
+
 	//Create Movie Menu
 	CreateNewMenu (1004, 0, &movMenu);
 	movMenuTitle = CFSTR("Movie");
 	SetMenuTitleWithCFString(movMenu, movMenuTitle);
-	
+
 	AppendMenuItemTextWithCFString(movMenu, CFSTR("Half Size"), 0, kHalfScreenCmd, &index);
 	SetMenuItemCommandKey(movMenu, index, 0, '0');
-	
+
 	AppendMenuItemTextWithCFString(movMenu, CFSTR("Normal Size"), 0, kNormalScreenCmd, &index);
 	SetMenuItemCommandKey(movMenu, index, 0, '1');
-	
+
 	AppendMenuItemTextWithCFString(movMenu, CFSTR("Double Size"), 0, kDoubleScreenCmd, &index);
 	SetMenuItemCommandKey(movMenu, index, 0, '2');
-	
+
 	AppendMenuItemTextWithCFString(movMenu, CFSTR("Full Size"), 0, kFullScreenCmd, &index);
 	SetMenuItemCommandKey(movMenu, index, 0, 'F');
-	
+
 	AppendMenuItemTextWithCFString(movMenu, NULL, kMenuItemAttrSeparator, 0, &index);
 
 	AppendMenuItemTextWithCFString(movMenu, CFSTR("Aspect Ratio"), 0, 0, &index);
-	
+
 	////Create Aspect Ratio Sub Menu
 	CreateNewMenu (0, 0, &aspectMenu);
 	aspMenuTitle = CFSTR("Aspect Ratio");
 	SetMenuTitleWithCFString(aspectMenu, aspMenuTitle);
 	SetMenuItemHierarchicalMenu(movMenu, 6, aspectMenu);
-	
+
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Keep"), 0, kKeepAspectCmd, &index);
 	CheckMenuItem (aspectMenu, 1, vo_keepaspect);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Pan-Scan"), 0, kPanScanCmd, &index);
@@ -596,14 +596,14 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Original"), 0, kAspectOrgCmd, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("4:3"), 0, kAspectFullCmd, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("16:9"), 0, kAspectWideCmd, &index);
-		
+
 	InsertMenu(movMenu, GetMenuID(windMenu)); //insert before Window menu
-	
+
 	DrawMenuBar();
-  
+
 	//create window
 	CreateNewWindow(kDocumentWindowClass, windowAttrs, &winRect, &theWindow);
-	
+
 	CreateWindowGroup(0, &winGroup);
 	SetWindowGroup(theWindow, winGroup);
 
@@ -613,7 +613,7 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	result		= SetWindowTitleWithCFString(theWindow, windowTitle);
 	CFRelease(titleKey);
 	CFRelease(windowTitle);
-  
+
 	//Install event handler
 	InstallApplicationEventHandler (NewEventHandlerUPP (KeyEventHandler), GetEventTypeCount(key_events), key_events, NULL, NULL);
 	InstallApplicationEventHandler (NewEventHandlerUPP (MouseEventHandler), GetEventTypeCount(mouse_events), mouse_events, NULL, NULL);
@@ -643,14 +643,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		displayId = displays[device_id];
 	}
 	free(displays);
-	
+
 	displayRect = CGDisplayBounds(displayId);
-	
+
 	monitor_aspect = (float)displayRect.size.width/(float)displayRect.size.height;
 
 	//misc mplayer setup/////////////////////////////////////////////////////
 	SetRect(&imgRect, 0, 0, width, height);
-	switch (image_format) 
+	switch (image_format)
 	{
 		case IMGFMT_RGB32:
 			image_depth = 32;
@@ -666,36 +666,36 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	image_size = ((imgRect.right*imgRect.bottom*image_depth)+7)/8;
 
 	vo_fs = flags & VOFLAG_FULLSCREEN;
-	
+
 	//get movie aspect
 	panscan_init();
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(displayRect.size.width, displayRect.size.height);
-	
+
 	aspect(&d_width,&d_height,A_NOZOOM);
-	
+
 	movie_aspect = (float)d_width/(float)d_height;
 	old_movie_aspect = movie_aspect;
-	
+
 	if(image_data)
 		free(image_data);
-	
+
 	image_data = malloc(image_size);
 
 	//Create player window//////////////////////////////////////////////////
 	windowAttrs =   kWindowStandardDocumentAttributes
 					| kWindowStandardHandlerAttribute
 					| kWindowLiveResizeAttribute;
-					
+
 	windowAttrs &= (~kWindowResizableAttribute);
-					
- 	if (theWindow == NULL)
+
+	if (theWindow == NULL)
 	{
 		CGContextRef context;
 
 		quartz_CreateWindow(d_width, d_height, windowAttrs);
-		
+
 		if (theWindow == NULL)
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: Couldn't create window !!!!!\n");
@@ -706,25 +706,25 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		CGContextFillRect(context, tmpBounds);
 		QDEndCGContext(GetWindowPort(theWindow),&context);
 	}
-	else 
+	else
 	{
 		HideWindow(theWindow);
 		ChangeWindowAttributes(theWindow, ~windowAttrs, windowAttrs);
 		SetRect(&winRect, 0, 0, d_width, d_height);
 		SetRect(&oldWinRect, 0, 0, d_width, d_height);
 		SizeWindow (theWindow, d_width, d_height, 1);
- 	}
-	
-	switch (image_format) 
+	}
+
+	switch (image_format)
 	{
 		case IMGFMT_RGB32:
 		{
 			CGContextRef context;
-			
+
 			QDBeginCGContext(GetWindowPort(theWindow),&context);
-			
+
 			dataProviderRef = CGDataProviderCreateWithData (0, image_data, imgRect.right * imgRect.bottom * 4, 0);
-			
+
 			image = CGImageCreate   (imgRect.right,
 									 imgRect.bottom,
 									 8,
@@ -737,14 +737,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			QDEndCGContext(GetWindowPort(theWindow),&context);
 			break;
 		}
-			
+
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
 		case IMGFMT_UYVY:
 		case IMGFMT_YUY2:
 		{
-		 	get_image_done = 0;
+			get_image_done = 0;
 
 			if (!EnterMoviesDone)
 			{
@@ -753,33 +753,33 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			}
 			else
 				qterr = 0;
-	
+
 			if (qterr)
 			{
 				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: EnterMovies (%d)\n", qterr);
 				return -1;
 			}
-	
-	
+
+
 			SetIdentityMatrix(&matrix);
-	
+
 			if ((d_width != width) || (d_height != height))
 			{
 				ScaleMatrix(&matrix, FixDiv(Long2Fix(d_width),Long2Fix(width)), FixDiv(Long2Fix(d_height),Long2Fix(height)), 0, 0);
-			}		
+			}
 
 			yuv_qt_stuff.desc = (ImageDescriptionHandle)NewHandleClear( sizeof(ImageDescription) );
-		
+
 			yuv_qt_stuff.extension_colr = NewHandleClear(sizeof(NCLCColorInfoImageDescriptionExtension));
 			((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->colorParamType = kVideoColorInfoImageDescriptionExtensionType;
 			((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->primaries = 2;
 			((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->transferFunction = 2;
 			((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->matrix = 2;
-		
+
 			yuv_qt_stuff.extension_fiel = NewHandleClear(sizeof(FieldInfoImageDescriptionExtension));
 			((FieldInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_fiel))->fieldCount = 1;
 			((FieldInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_fiel))->fieldOrderings = 0;
-		
+
 			yuv_qt_stuff.extension_clap = NewHandleClear(sizeof(CleanApertureImageDescriptionExtension));
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthN = imgRect.right;
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthD = 1;
@@ -789,7 +789,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->horizOffD = 1;
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->vertOffN = 0;
 			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->vertOffD = 1;
-        
+
 			yuv_qt_stuff.extension_pasp = NewHandleClear(sizeof(PixelAspectRatioImageDescriptionExtension));
 			((PixelAspectRatioImageDescriptionExtension*)(*yuv_qt_stuff.extension_pasp))->hSpacing = 1;
 			((PixelAspectRatioImageDescriptionExtension*)(*yuv_qt_stuff.extension_pasp))->vSpacing = 1;
@@ -809,25 +809,25 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			(*yuv_qt_stuff.desc)->dataSize = 0;
 			(*yuv_qt_stuff.desc)->depth = 24;
 			(*yuv_qt_stuff.desc)->clutID = -1;
-	  
+
 			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_colr, kColorInfoImageDescriptionExtension);
 			if (qterr)
 			{
 				mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [colr] (%d)\n", qterr);
 			}
-			
+
 			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_fiel, kFieldInfoImageDescriptionExtension);
 			if (qterr)
 			{
 				mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [fiel] (%d)\n", qterr);
 			}
-		
+
 			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_clap, kCleanApertureImageDescriptionExtension);
 			if (qterr)
 			{
 				mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: AddImageDescriptionExtension [clap] (%d)\n", qterr);
 			}
-		
+
 			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_pasp, kCleanApertureImageDescriptionExtension);
 			if (qterr)
 			{
@@ -863,7 +863,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 					   GetWindowPort(theWindow),
 					   NULL,
 					   NULL,
-					   ((d_width != width) || (d_height != height)) ? 
+					   ((d_width != width) || (d_height != height)) ?
 					   &matrix : NULL,
 					   srcCopy,
 					   NULL,
@@ -879,17 +879,17 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		}
 		break;
 	}
-	
+
 	//Show window
 	RepositionWindow(theWindow, NULL, kWindowCenterOnMainScreen);
 	ShowWindow (theWindow);
-	
+
 	if(vo_fs)
 		window_fullscreen();
-		
+
 	if(vo_ontop)
 		window_ontop();
-		
+
 	if(vo_rootwin)
 	{
 		vo_fs = TRUE;
@@ -897,9 +897,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		SetWindowGroupLevel(winGroup, CGWindowLevelForKey(levelList[winLevel]));
 		window_fullscreen();
 	}
-	
+
 	window_resized();
-	
+
 	return 0;
 }
 
@@ -908,7 +908,7 @@ static void check_events(void)
 	EventRef theEvent;
 	EventTargetRef theTarget;
 	OSStatus	theErr;
-	
+
 	//Get event
 	theTarget = GetEventDispatcherTarget();
     theErr = ReceiveNextEvent(0, 0, kEventDurationNoWait,true, &theEvent);
@@ -930,8 +930,8 @@ static void flip_page(void)
 
 	if(theWindow == NULL)
 		return;
-		
-	switch (image_format) 
+
+	switch (image_format)
 	{
 		case IMGFMT_RGB32:
 		{
@@ -941,7 +941,7 @@ static void flip_page(void)
 			QDEndCGContext(GetWindowPort(theWindow),&context);
 		}
 		break;
-			
+
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
@@ -965,38 +965,38 @@ static void flip_page(void)
 			}
 		break;
 	}
-	
+
 	if(!vo_quartz_fs)
 	{
 		CGContextRef context;
-		
+
 		QDBeginCGContext(GetWindowPort(theWindow),&context);
 		//render resize box
 		CGContextBeginPath(context);
 		CGContextSetAllowsAntialiasing(context, false);
 		//CGContextSaveGState(context);
-	
+
 		//line white
 		CGContextSetRGBStrokeColor (context, 0.2, 0.2, 0.2, 0.5);
-		CGContextMoveToPoint( context, winRect.right-1, 1); CGContextAddLineToPoint( context, winRect.right-1, 1);	
+		CGContextMoveToPoint( context, winRect.right-1, 1); CGContextAddLineToPoint( context, winRect.right-1, 1);
 		CGContextMoveToPoint( context, winRect.right-1, 5); CGContextAddLineToPoint( context, winRect.right-5, 1);
 		CGContextMoveToPoint( context, winRect.right-1, 9); CGContextAddLineToPoint( context, winRect.right-9, 1);
 		CGContextStrokePath( context );
 
 		//line gray
 		CGContextSetRGBStrokeColor (context, 0.4, 0.4, 0.4, 0.5);
-		CGContextMoveToPoint( context, winRect.right-1, 2); CGContextAddLineToPoint( context, winRect.right-2, 1);	
+		CGContextMoveToPoint( context, winRect.right-1, 2); CGContextAddLineToPoint( context, winRect.right-2, 1);
 		CGContextMoveToPoint( context, winRect.right-1, 6); CGContextAddLineToPoint( context, winRect.right-6, 1);
 		CGContextMoveToPoint( context, winRect.right-1, 10); CGContextAddLineToPoint( context, winRect.right-10, 1);
 		CGContextStrokePath( context );
-	
+
 		//line black
 		CGContextSetRGBStrokeColor (context, 0.6, 0.6, 0.6, 0.5);
-		CGContextMoveToPoint( context, winRect.right-1, 3); CGContextAddLineToPoint( context, winRect.right-3, 1);	
+		CGContextMoveToPoint( context, winRect.right-1, 3); CGContextAddLineToPoint( context, winRect.right-3, 1);
 		CGContextMoveToPoint( context, winRect.right-1, 7); CGContextAddLineToPoint( context, winRect.right-7, 1);
 		CGContextMoveToPoint( context, winRect.right-1, 11); CGContextAddLineToPoint( context, winRect.right-11, 1);
 		CGContextStrokePath( context );
-		
+
 		//CGContextRestoreGState( context );
 		CGContextFlush (context);
 		QDEndCGContext(GetWindowPort(theWindow),&context);
@@ -1028,22 +1028,22 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
 	switch (image_format)
 	{
-  		case IMGFMT_YV12:
-  		case IMGFMT_I420:
- 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoY.offset) + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
-  			x=x/2;y=y/2;w=w/2;h=h/2;
-  
- 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCb.offset) + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
- 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCr.offset) + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
-  			return 0;
-  
-  		case IMGFMT_IYUV:
- 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoY.offset) + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
-  			x=x/2;y=y/2;w=w/2;h=h/2;
-  			
- 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCr.offset) + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
- 			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCb.offset) + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
-  			return 0;
+		case IMGFMT_YV12:
+		case IMGFMT_I420:
+			memcpy_pic(((char*)P) + be2me_32(P->componentInfoY.offset) + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
+			x=x/2;y=y/2;w=w/2;h=h/2;
+
+			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCb.offset) + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
+			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCr.offset) + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
+			return 0;
+
+		case IMGFMT_IYUV:
+			memcpy_pic(((char*)P) + be2me_32(P->componentInfoY.offset) + x + imgRect.right * y, src[0], w, h, imgRect.right, stride[0]);
+			x=x/2;y=y/2;w=w/2;h=h/2;
+
+			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCr.offset) + x + imgRect.right / 2 * y, src[1], w, h, imgRect.right / 2, stride[1]);
+			memcpy_pic(((char*)P) + be2me_32(P->componentInfoCb.offset) + x + imgRect.right / 2 * y, src[2], w, h, imgRect.right / 2, stride[2]);
+			return 0;
 	}
 	return -1;
 }
@@ -1055,7 +1055,7 @@ static int draw_frame(uint8_t *src[])
 		case IMGFMT_RGB32:
 			fast_memcpy(image_data,src[0],image_size);
 			return 0;
-			
+
 		case IMGFMT_UYVY:
 		case IMGFMT_YUY2:
 			memcpy_pic(((char*)P), src[0], imgRect.right * 2, imgRect.bottom, imgRect.right * 2, imgRect.right * 2);
@@ -1073,7 +1073,7 @@ static int query_format(uint32_t format)
 	{
 		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
     }
-    
+
     if ((format == IMGFMT_YV12) || (format == IMGFMT_IYUV) || (format == IMGFMT_I420))
 	{
 		image_qtcodec = kMpegYUV420CodecType; //kYUV420CodecType ?;
@@ -1085,7 +1085,7 @@ static int query_format(uint32_t format)
 		image_qtcodec = kComponentVideoUnsigned;
 		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
     }
-    
+
     if (format == IMGFMT_UYVY)
 	{
 		image_qtcodec = k422YpCbCr8CodecType;
@@ -1098,7 +1098,7 @@ static int query_format(uint32_t format)
 static void uninit(void)
 {
 	OSErr qterr;
-	
+
 	switch (image_format)
 	{
 		case IMGFMT_YV12:
@@ -1127,11 +1127,11 @@ static void uninit(void)
 static int preinit(const char *arg)
 {
 	int parse_err = 0;
-	
-    if(arg) 
+
+    if(arg)
     {
         char *parse_pos = (char *)&arg[0];
-        while (parse_pos[0] && !parse_err) 
+        while (parse_pos[0] && !parse_err)
 		{
 			if (strncmp (parse_pos, "device_id=", 10) == 0)
 			{
@@ -1149,15 +1149,15 @@ static int preinit(const char *arg)
             else if (parse_pos[0]) parse_err = 1;
         }
     }
-	
+
 #if !defined (CONFIG_MACOSX_FINDER) || !defined (CONFIG_SDL)
-	//this chunk of code is heavily based off SDL_macosx.m from SDL 
+	//this chunk of code is heavily based off SDL_macosx.m from SDL
 	//the CPSEnableForegroundOperation that was here before is private and shouldn't be used
 	//replaced by a call to the 10.3+ TransformProcessType
 {
 	ProcessSerialNumber myProc, frProc;
 	Boolean sameProc;
-	
+
 	if (GetFrontProcess(&frProc) == noErr)
 	{
 		if (GetCurrentProcess(&myProc) == noErr)
@@ -1180,15 +1180,15 @@ static uint32_t draw_yuv_image(mp_image_t *mpi)
 	// ATM we're only called for planar IMGFMT
 	// drawing is done directly in P
 	// and displaying is in flip_page.
-	return get_image_done ? VO_TRUE : VO_FALSE;  
+	return get_image_done ? VO_TRUE : VO_FALSE;
 }
 
 static uint32_t get_yuv_image(mp_image_t *mpi)
 {
 	if(mpi->type!=MP_IMGTYPE_EXPORT) return VO_FALSE;
-  
+
 	if(mpi->imgfmt!=image_format) return VO_FALSE;
-  
+
 	if(mpi->flags&MP_IMGFLAG_PLANAR)
 	{
 		if (mpi->num_planes != 3)
@@ -1208,8 +1208,8 @@ static uint32_t get_yuv_image(mp_image_t *mpi)
 			mpi->planes[2]=((char*)P) + be2me_32(P->componentInfoCr.offset);
 			mpi->stride[1]=imgRect.right/2;
 			mpi->stride[2]=imgRect.right/2;
-		} 
-		else 
+		}
+		else
 		{
 			// YV12
 			mpi->planes[1]=((char*)P) + be2me_32(P->componentInfoCr.offset);
@@ -1217,13 +1217,13 @@ static uint32_t get_yuv_image(mp_image_t *mpi)
 			mpi->stride[1]=imgRect.right/2;
 			mpi->stride[2]=imgRect.right/2;
 		}
-		
+
 		mpi->flags|=MP_IMGFLAG_DIRECT;
 		get_image_done = 1;
 		return VO_TRUE;
 	}
-	else 
-	{ 
+	else
+	{
 		// doesn't work yet
 		if (mpi->num_planes != 1)
 		{
@@ -1252,7 +1252,7 @@ static int control(uint32_t request, void *data, ...)
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
 		case VOCTRL_SET_PANSCAN: window_panscan(); return VO_TRUE;
-			
+
 		case VOCTRL_GET_IMAGE:
 			switch (image_format)
 			{
@@ -1287,12 +1287,12 @@ void window_resized()
 {
 	float aspectX;
 	float aspectY;
-	
+
 	int padding = 0;
-	
+
 	uint32_t d_width;
 	uint32_t d_height;
-	
+
 	CGRect tmpBounds;
 
 	CGContextRef context;
@@ -1303,10 +1303,10 @@ void window_resized()
 	{
 	aspect( &d_width, &d_height, A_NOZOOM);
 	d_height = ((float)d_width/movie_aspect);
-	
+
 	aspectX = (float)((float)winRect.right/(float)d_width);
 	aspectY = (float)((float)(winRect.bottom)/(float)d_height);
-	
+
 	if((d_height*aspectX)>(winRect.bottom))
 	{
 		padding = (winRect.right - d_width*aspectY)/2;
@@ -1322,7 +1322,7 @@ void window_resized()
 	{
 		SetRect(&dstRect, 0, 0, winRect.right, winRect.bottom);
 	}
-	
+
 	switch (image_format)
 	{
 		case IMGFMT_RGB32:
@@ -1338,25 +1338,25 @@ void window_resized()
 		{
 			long scale_X = FixDiv(Long2Fix(dstRect.right - dstRect.left),Long2Fix(imgRect.right));
 			long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top),Long2Fix(imgRect.bottom));
-			
+
 			SetIdentityMatrix(&matrix);
 			if (((dstRect.right - dstRect.left)   != imgRect.right) || ((dstRect.bottom - dstRect.right) != imgRect.bottom))
 			{
 				ScaleMatrix(&matrix, scale_X, scale_Y, 0, 0);
-				
+
 				if (padding > 0)
 				{
 					TranslateMatrix(&matrix, Long2Fix(dstRect.left), Long2Fix(dstRect.top));
 				}
 			}
-			
+
 			SetDSequenceMatrix(seqId, &matrix);
 			break;
 		}
 		default:
 			break;
 	}
-	
+
 	//Clear Background
 	tmpBounds = CGRectMake( 0, 0, winRect.right, winRect.bottom);
 	QDBeginCGContext(GetWindowPort(theWindow),&context);
@@ -1389,15 +1389,15 @@ void window_fullscreen()
 				CGDisplayHideCursor(displayId);
 				mouseHide = TRUE;
 			}
-			
+
 			if(fs_res_x != 0 || fs_res_y != 0)
 			{
 				CFDictionaryRef mode;
 				size_t desiredBitDepth = 32;
 				boolean_t exactMatch;
-				
+
 				originalMode = CGDisplayCurrentMode(displayId);
-        
+
 				mode = CGDisplayBestModeForParameters(displayId, desiredBitDepth, fs_res_x, fs_res_y, &exactMatch);
 
 				if (mode != NULL)
@@ -1422,12 +1422,12 @@ void window_fullscreen()
 		}
 
 		//save old window size
- 		if (!vo_quartz_fs)
+		if (!vo_quartz_fs)
 		{
 			GetWindowPortBounds(theWindow, &oldWinRect);
 			GetWindowBounds(theWindow, kWindowContentRgn, &oldWinBounds);
 		}
-		
+
 		//go fullscreen
 		panscan_calc();
 		ChangeWindowAttributes(theWindow, kWindowNoShadowAttribute, 0);
@@ -1443,10 +1443,10 @@ void window_fullscreen()
 		{
 			CGDisplaySwitchToMode(displayId, originalMode);
 			CGDisplayRelease(displayId);
-		
+
 			//Get Main device info///////////////////////////////////////////////////
 			displayRect = CGDisplayBounds(displayId);
-        
+
 			originalMode = NULL;
 		}
 		SetSystemUIMode( kUIModeNormal, 0);
@@ -1454,7 +1454,7 @@ void window_fullscreen()
 		//show mouse cursor
 		CGDisplayShowCursor(displayId);
 		mouseHide = FALSE;
-		
+
 		//revert window to previous setting
 		ChangeWindowAttributes(theWindow, 0, kWindowNoShadowAttribute);
 		SizeWindow(theWindow, oldWinRect.right, oldWinRect.bottom,1);
@@ -1466,12 +1466,12 @@ void window_fullscreen()
 void window_panscan()
 {
 	panscan_calc();
-	
+
 	if(vo_panscan > 0)
 		CheckMenuItem (aspectMenu, 2, 1);
 	else
 		CheckMenuItem (aspectMenu, 2, 0);
-	
+
 	if(vo_quartz_fs)
 	{
 		MoveWindow(theWindow, displayRect.origin.x-(vo_panscan_x >> 1), displayRect.origin.y-(vo_panscan_y >> 1), 1);
