@@ -933,8 +933,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     {
         int x_offset = 0, y_offset = 0;
         geometry(&x_offset, &y_offset, &out_width, &out_height, fb_xres, fb_yres);
-        if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
-                                             MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
+
+        frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
+                                        MAP_SHARED, fb_dev_fd, 0);
+        if (frame_buffer == (uint8_t *) -1) {
         mp_msg(MSGT_VO, MSGL_ERR, "Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
         return 1;
         }
