@@ -91,8 +91,11 @@ static GLint gl_texfmt;
 static GLenum gl_format;
 static GLenum gl_type;
 static GLuint gl_buffer;
+static GLuint gl_buffer_uv[2];
 static int gl_buffersize;
+static int gl_buffersize_uv;
 static void *gl_bufferptr;
+static void *gl_bufferptr_uv[2];
 static GLuint fragprog;
 static GLuint default_texs[22];
 static char *custom_prog;
@@ -381,6 +384,10 @@ static void uninitGl(void) {
     DeleteBuffers(1, &gl_buffer);
   gl_buffer = 0; gl_buffersize = 0;
   gl_bufferptr = NULL;
+  if (DeleteBuffers && gl_buffer_uv[0])
+    DeleteBuffers(2, gl_buffer_uv);
+  gl_buffer_uv[0] = gl_buffer_uv[1] = 0; gl_buffersize_uv = 0;
+  gl_bufferptr_uv[0] = gl_bufferptr_uv[1] = 0;
   err_shown = 0;
 }
 
@@ -713,6 +720,27 @@ static uint32_t get_image(mp_image_t *mpi) {
     mpi->stride[1] = mpi->width >> 1;
     mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> 1);
     mpi->stride[2] = mpi->width >> 1;
+    if (ati_hack) {
+      mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
+      if (!gl_buffer_uv[0]) GenBuffers(2, gl_buffer_uv);
+      if (mpi->stride[1] * mpi->height > gl_buffersize_uv) {
+        BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[0]);
+        BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[1] * mpi->height,
+                   NULL, GL_DYNAMIC_DRAW);
+        BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[1]);
+        BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[1] * mpi->height,
+                   NULL, GL_DYNAMIC_DRAW);
+        gl_buffersize_uv = mpi->stride[1] * mpi->height;
+      }
+      if (!gl_bufferptr_uv[0]) {
+        BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[0]);
+        gl_bufferptr_uv[0] = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+        BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[1]);
+        gl_bufferptr_uv[1] = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+      }
+      mpi->planes[1] = gl_bufferptr_uv[0];
+      mpi->planes[2] = gl_bufferptr_uv[1];
+    }
   }
   mpi->flags |= MP_IMGFLAG_DIRECT;
   return VO_TRUE;
@@ -752,13 +780,25 @@ static uint32_t draw_image(mp_image_t *mpi) {
     UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     gl_bufferptr = NULL;
     slice = 0; // always "upload" full texture
+    if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
+      planes[0] = planes[1] = planes[2] = NULL;
   }
   glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
               mpi->x, mpi->y, w, h, slice);
   if (mpi->imgfmt == IMGFMT_YV12) {
+    if ((mpi->flags & MP_IMGFLAG_DIRECT) && !(mpi->flags & MP_IMGFLAG_COMMON_PLANE)) {
+      BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[0]);
+      UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+      gl_bufferptr_uv[0] = NULL;
+    }
     ActiveTexture(GL_TEXTURE1);
     glUploadTex(gl_target, gl_format, gl_type, planes[1], stride[1],
                 mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
+    if ((mpi->flags & MP_IMGFLAG_DIRECT) && !(mpi->flags & MP_IMGFLAG_COMMON_PLANE)) {
+      BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer_uv[1]);
+      UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+      gl_bufferptr_uv[1] = NULL;
+    }
     ActiveTexture(GL_TEXTURE2);
     glUploadTex(gl_target, gl_format, gl_type, planes[2], stride[2],
                 mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
