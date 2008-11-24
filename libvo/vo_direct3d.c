@@ -52,6 +52,8 @@ const LIBVO_EXTERN(direct3d)
 static struct global_priv {
     int is_paused;              /**< 1 = Movie is paused,
                                 0 = Movie is not paused */
+    int is_clear_needed;        /**< 1 = Clear the backbuffer before StretchRect
+                                0 = (default) Don't clear it */
     D3DLOCKED_RECT locked_rect; /**< The locked Offscreen surface */
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
@@ -153,6 +155,12 @@ static void calc_fs_rect(void)
     "<vo_direct3d>Fullscreen Movie Rect: t: %ld, l: %ld, r: %ld, b:%ld\r\n",
         priv->fs_movie_rect.top, priv->fs_movie_rect.left,
         priv->fs_movie_rect.right, priv->fs_movie_rect.bottom);
+
+    /* The backbuffer should be cleared before next StretchRect. This is
+     * necessary because our new draw area could be smaller than the
+     * previous one used by StretchRect and without it, leftovers from the
+     * previous frame will be left. */
+    priv->is_clear_needed = 1;
 }
 
 /** @brief Destroy D3D Context related to the current window.
@@ -323,6 +331,12 @@ skip_upload:
     if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
         mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
         return VO_ERROR;
+    }
+
+    if (priv->is_clear_needed) {
+        IDirect3DDevice9_Clear (priv->d3d_device, 0, NULL,
+                                D3DCLEAR_TARGET, 0, 0, 0);
+        priv->is_clear_needed = 0;
     }
 
     if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
@@ -554,7 +568,6 @@ static void flip_page(void)
             mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Video adapter reinitialized.\n");
 
     }
-    /*IDirect3DDevice9_Clear (priv->d3d_device, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);*/
 }
 
 /** @brief libvo Callback: Draw OSD/Subtitles,
