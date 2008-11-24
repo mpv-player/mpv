@@ -86,32 +86,33 @@ static int int_pause = 0;
 static float winAlpha = 1;
 static int mouseHide = FALSE;
 
-static int device_width;
-static int device_height;
-static int device_id;
+static int device_id = 0;
 
 static short fs_res_x=0;
 static short fs_res_y=0;
 
 static WindowRef theWindow = NULL;
 static WindowGroupRef winGroup = NULL;
-static CGContextRef context;
 static CGRect bounds;
-static GDHandle deviceHdl;
+static CGDirectDisplayID displayId = 0;
+static CFDictionaryRef originalMode = NULL;
 
-static CGDataProviderRef dataProviderRef;
-static CGImageRef image;
+static CGDataProviderRef dataProviderRef = NULL;
+static CGImageRef image = NULL;
 
 static Rect imgRect; // size of the original image (unscaled)
 static Rect dstRect; // size of the displayed image (after scaling)
 static Rect winRect; // size of the window containg the displayed image (include padding)
 static Rect oldWinRect; // size of the window containg the displayed image (include padding) when NOT in FS mode
-static Rect deviceRect; // size of the display device
+static CGRect displayRect; // size of the display device
 static Rect oldWinBounds;
 
 static MenuRef windMenu;
 static MenuRef movMenu;
 static MenuRef aspectMenu;
+
+static int lastScreensaverUpdate = 0;
+static int lastMouseHide = 0;
 
 enum
 {
@@ -282,7 +283,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 			{
 				if(vo_quartz_fs)
 				{
-					CGDisplayShowCursor(kCGDirectMainDisplay);
+					CGDisplayShowCursor(displayId);
 					mouseHide = FALSE;
 				}
 			}
@@ -342,7 +343,8 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 				{
 					if(!vo_quartz_fs)
 					{
-						GrowWindow(theWindow, mousePos, NULL);
+						Rect newSize;
+						ResizeWindow(theWindow, mousePos, NULL, &newSize);
 					}
 				}
 				else if(part == inMenuBar)
@@ -486,13 +488,13 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 	else if(class == kEventClassWindow)
 	{
 		WindowRef     window;
-		Rect          rectPort = {0,0,0,0};
+		Rect          rectWindow = {0,0,0,0};
 		
 		GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
 	
 		if(window)
 		{
-			GetPortBounds(GetWindowPort(window), &rectPort);
+			GetWindowBounds(window, kWindowGlobalPortRgn, &rectWindow);
 		}   
 	
 		switch (kind)
@@ -622,32 +624,29 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 {
 	WindowAttributes	windowAttrs;
 	OSErr				qterr;
-	int i;
 	CGRect tmpBounds;
+	CGDisplayCount displayCount;
+	CGDirectDisplayID *displays;
 
 	//Get Main device info///////////////////////////////////////////////////
 
-
-	deviceHdl = GetMainDevice();
-	
-	for(i=0; i<device_id; i++)
-	{
-		deviceHdl = GetNextDevice(deviceHdl);
-		
-		if(deviceHdl == NULL)
-		{
+	//Display IDs might not be consecutive, get the list of all devices up to # device_id
+	displayCount = device_id + 1;
+	displays = malloc(sizeof(CGDirectDisplayID) * displayCount);
+	if (kCGErrorSuccess != CGGetActiveDisplayList(displayCount, displays, &displayCount) || displayCount < device_id + 1) {
 			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: Device ID %d do not exist, falling back to main device.\n", device_id);
-			deviceHdl = GetMainDevice();
+			displayId = kCGDirectMainDisplay;
 			device_id = 0;
-			break;
 		}
+	else
+	{
+		displayId = displays[device_id];
 	}
+	free(displays);
 	
-	deviceRect = (*deviceHdl)->gdRect;
-	device_width = deviceRect.right-deviceRect.left;
-	device_height = deviceRect.bottom-deviceRect.top;
+	displayRect = CGDisplayBounds(displayId);
 	
-	monitor_aspect = (float)device_width/(float)device_height;
+	monitor_aspect = (float)displayRect.size.width/(float)displayRect.size.height;
 
 	//misc mplayer setup/////////////////////////////////////////////////////
 	SetRect(&imgRect, 0, 0, width, height);
@@ -672,7 +671,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	panscan_init();
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
-	aspect_save_screenres(device_width, device_height);
+	aspect_save_screenres(displayRect.size.width, displayRect.size.height);
 	
 	aspect(&d_width,&d_height,A_NOZOOM);
 	
@@ -693,6 +692,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 					
  	if (theWindow == NULL)
 	{
+		CGContextRef context;
+
 		quartz_CreateWindow(d_width, d_height, windowAttrs);
 		
 		if (theWindow == NULL)
@@ -701,8 +702,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			return -1;
 		}
 		tmpBounds = CGRectMake( 0, 0, winRect.right, winRect.bottom);
-		CreateCGContextForPort(GetWindowPort(theWindow),&context);
+		QDBeginCGContext(GetWindowPort(theWindow),&context);
 		CGContextFillRect(context, tmpBounds);
+		QDEndCGContext(GetWindowPort(theWindow),&context);
 	}
 	else 
 	{
@@ -717,7 +719,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	{
 		case IMGFMT_RGB32:
 		{
-			CreateCGContextForPort (GetWindowPort (theWindow), &context);
+			CGContextRef context;
+			
+			QDBeginCGContext(GetWindowPort(theWindow),&context);
 			
 			dataProviderRef = CGDataProviderCreateWithData (0, image_data, imgRect.right * imgRect.bottom * 4, 0);
 			
@@ -729,6 +733,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 									 CGColorSpaceCreateDeviceRGB(),
 									 kCGImageAlphaNoneSkipFirst,
 									 dataProviderRef, 0, 1, kCGRenderingIntentDefault);
+
+			QDEndCGContext(GetWindowPort(theWindow),&context);
 			break;
 		}
 			
@@ -921,7 +927,6 @@ static void draw_osd(void)
 static void flip_page(void)
 {
 	int curTime;
-	static int lastTime = 0;
 
 	if(theWindow == NULL)
 		return;
@@ -930,7 +935,10 @@ static void flip_page(void)
 	{
 		case IMGFMT_RGB32:
 		{
+			CGContextRef context;
+			QDBeginCGContext(GetWindowPort(theWindow),&context);
 			CGContextDrawImage (context, bounds, image);
+			QDEndCGContext(GetWindowPort(theWindow),&context);
 		}
 		break;
 			
@@ -960,6 +968,9 @@ static void flip_page(void)
 	
 	if(!vo_quartz_fs)
 	{
+		CGContextRef context;
+		
+		QDBeginCGContext(GetWindowPort(theWindow),&context);
 		//render resize box
 		CGContextBeginPath(context);
 		CGContextSetAllowsAntialiasing(context, false);
@@ -988,30 +999,28 @@ static void flip_page(void)
 		
 		//CGContextRestoreGState( context );
 		CGContextFlush (context);
+		QDEndCGContext(GetWindowPort(theWindow),&context);
 	}
 
-	//auto hide mouse cursor and futur on-screen control?
+	curTime  = TickCount()/60;
+
+	//auto hide mouse cursor (and future on-screen control?)
 	if(vo_quartz_fs && !mouseHide)
 	{
-		int curTime = TickCount()/60;
-		static int lastTime = 0;
-		
-		if( ((curTime - lastTime) >= 5) || (lastTime == 0) )
+		if( ((curTime - lastMouseHide) >= 5) || (lastMouseHide == 0) )
 		{
-			CGDisplayHideCursor(kCGDirectMainDisplay);
+			CGDisplayHideCursor(displayId);
 			mouseHide = TRUE;
-			lastTime = curTime;
+			lastMouseHide = curTime;
 		}
 	}
 
 	//update activity every 30 seconds to prevent
 	//screensaver from starting up.
-	curTime  = TickCount()/60;
-		
-	if( ((curTime - lastTime) >= 30) || (lastTime == 0) )
+	if( ((curTime - lastScreensaverUpdate) >= 30) || (lastScreensaverUpdate == 0) )
 	{
 		UpdateSystemActivity(UsrActivity);
-		lastTime = curTime;
+		lastScreensaverUpdate = curTime;
 	}
 }
 
@@ -1143,9 +1152,9 @@ static int preinit(const char *arg)
 	
 #if !defined (CONFIG_MACOSX_FINDER) || !defined (CONFIG_SDL)
 	//this chunk of code is heavily based off SDL_macosx.m from SDL 
-	//it uses an Apple private function to request foreground operation
+	//the CPSEnableForegroundOperation that was here before is private and shouldn't be used
+	//replaced by a call to the 10.3+ TransformProcessType
 {
-	void CPSEnableForegroundOperation(ProcessSerialNumber* psn);
 	ProcessSerialNumber myProc, frProc;
 	Boolean sameProc;
 	
@@ -1155,7 +1164,7 @@ static int preinit(const char *arg)
 		{
 			if (SameProcess(&frProc, &myProc, &sameProc) == noErr && !sameProc)
 			{
-				CPSEnableForegroundOperation(&myProc);
+				TransformProcessType(&myProc, kProcessTransformToForegroundApplication);
 			}
 			SetFrontProcess(&myProc);
 		}
@@ -1286,7 +1295,9 @@ void window_resized()
 	
 	CGRect tmpBounds;
 
-	GetPortBounds( GetWindowPort(theWindow), &winRect );
+	CGContextRef context;
+
+	GetWindowPortBounds(theWindow, &winRect );
 
 	if(vo_keepaspect)
 	{
@@ -1317,7 +1328,6 @@ void window_resized()
 		case IMGFMT_RGB32:
 		{
 			bounds = CGRectMake(dstRect.left, dstRect.top, dstRect.right-dstRect.left, dstRect.bottom-dstRect.top);
-			CreateCGContextForPort (GetWindowPort (theWindow), &context);
 			break;
 		}
 		case IMGFMT_YV12:
@@ -1349,8 +1359,9 @@ void window_resized()
 	
 	//Clear Background
 	tmpBounds = CGRectMake( 0, 0, winRect.right, winRect.bottom);
-	CreateCGContextForPort(GetWindowPort(theWindow),&context);
+	QDBeginCGContext(GetWindowPort(theWindow),&context);
 	CGContextFillRect(context, tmpBounds);
+	QDEndCGContext(GetWindowPort(theWindow),&context);
 }
 
 void window_ontop()
@@ -1367,29 +1378,46 @@ void window_ontop()
 
 void window_fullscreen()
 {
-	static Ptr restoreState = NULL;
-
 	//go fullscreen
 	if(vo_fs)
 	{
 		if(winLevel != 0)
 		{
-			if(device_id == 0)
+			if(displayId == kCGDirectMainDisplay)
 			{
 				SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
-				CGDisplayHideCursor(kCGDirectMainDisplay);
+				CGDisplayHideCursor(displayId);
 				mouseHide = TRUE;
 			}
 			
 			if(fs_res_x != 0 || fs_res_y != 0)
 			{
-				BeginFullScreen( &restoreState, deviceHdl, &fs_res_x, &fs_res_y, NULL, NULL, 0);
+				CFDictionaryRef mode;
+				size_t desiredBitDepth = 32;
+				boolean_t exactMatch;
 				
-				//Get Main device info///////////////////////////////////////////////////
-				deviceRect = (*deviceHdl)->gdRect;
+				originalMode = CGDisplayCurrentMode(displayId);
         
-				device_width = deviceRect.right;
-				device_height = deviceRect.bottom;
+				mode = CGDisplayBestModeForParameters(displayId, desiredBitDepth, fs_res_x, fs_res_y, &exactMatch);
+
+				if (mode != NULL)
+				{
+					if (!exactMatch)
+					{
+						//Warn if the mode doesn't match exactly
+						mp_msg(MSGT_VO, MSGL_WARN, "Quartz warning: did not get exact mode match (got %dx%d) \n", (int) CFDictionaryGetValue(mode, kCGDisplayWidth), (int) CFDictionaryGetValue(mode, kCGDisplayHeight));
+					}
+
+					CGDisplayCapture(displayId);
+					CGDisplaySwitchToMode(displayId, mode);
+				}
+				else
+				{
+					mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: can't switch to fullscreen \n");
+				}
+
+				//Get Main device info///////////////////////////////////////////////////
+				displayRect = CGDisplayBounds(displayId);
 			}
 		}
 
@@ -1403,29 +1431,28 @@ void window_fullscreen()
 		//go fullscreen
 		panscan_calc();
 		ChangeWindowAttributes(theWindow, kWindowNoShadowAttribute, 0);
-		MoveWindow(theWindow, deviceRect.left-(vo_panscan_x >> 1), deviceRect.top-(vo_panscan_y >> 1), 1);
-		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
+		MoveWindow(theWindow, displayRect.origin.x-(vo_panscan_x >> 1), displayRect.origin.y-(vo_panscan_y >> 1), 1);
+		SizeWindow(theWindow, displayRect.size.width+vo_panscan_x, displayRect.size.height+vo_panscan_y,1);
 
 		vo_quartz_fs = 1;
 	}
 	else //go back to windowed mode
 	{
 		vo_quartz_fs = 0;
-		if(restoreState != NULL)
+		if(originalMode != NULL)
 		{
-			EndFullScreen(restoreState, 0);
+			CGDisplaySwitchToMode(displayId, originalMode);
+			CGDisplayRelease(displayId);
 		
 			//Get Main device info///////////////////////////////////////////////////
-			deviceRect = (*deviceHdl)->gdRect;
+			displayRect = CGDisplayBounds(displayId);
         
-			device_width = deviceRect.right;
-			device_height = deviceRect.bottom;
-			restoreState = NULL;
+			originalMode = NULL;
 		}
 		SetSystemUIMode( kUIModeNormal, 0);
 
 		//show mouse cursor
-		CGDisplayShowCursor(kCGDirectMainDisplay);
+		CGDisplayShowCursor(displayId);
 		mouseHide = FALSE;
 		
 		//revert window to previous setting
@@ -1447,7 +1474,7 @@ void window_panscan()
 	
 	if(vo_quartz_fs)
 	{
-		MoveWindow(theWindow, deviceRect.left-(vo_panscan_x >> 1), deviceRect.top-(vo_panscan_y >> 1), 1);
-		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
+		MoveWindow(theWindow, displayRect.origin.x-(vo_panscan_x >> 1), displayRect.origin.y-(vo_panscan_y >> 1), 1);
+		SizeWindow(theWindow, displayRect.size.width+vo_panscan_x, displayRect.size.height+vo_panscan_y,1);
 	}
 }
