@@ -333,7 +333,9 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 							mplayer_put_key(MOUSE_BTN1);
 							break;
 
-						default:result = eventNotHandledErr;break;
+                default:
+                    result = eventNotHandledErr;
+                    break;
 					}
 					break;
 				}
@@ -364,7 +366,9 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 							mplayer_put_key(MOUSE_BTN1 | MP_KEY_DOWN);
 							break;
 
-						default:result = eventNotHandledErr;break;
+                default:
+                    result = eventNotHandledErr;
+                    break;
 					}
 				}
 			}
@@ -373,7 +377,9 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 			case kEventMouseDragged:
 			break;
 
-			default:result = eventNotHandledErr;break;
+        default:
+            result = eventNotHandledErr;
+            break;
 		}
 	}
 
@@ -407,7 +413,8 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 			case kHalfScreenCmd:
 					if(vo_quartz_fs)
 					{
-						vo_fs = (!(vo_fs)); window_fullscreen();
+                vo_fs = (!(vo_fs));
+                window_fullscreen();
 					}
 
 					SizeWindow(theWindow, (d_width/2), ((d_width/movie_aspect)/2), 1);
@@ -417,7 +424,8 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 			case kNormalScreenCmd:
 					if(vo_quartz_fs)
 					{
-						vo_fs = (!(vo_fs)); window_fullscreen();
+                vo_fs = (!(vo_fs));
+                window_fullscreen();
 					}
 
 					SizeWindow(theWindow, d_width, (d_width/movie_aspect), 1);
@@ -427,7 +435,8 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 			case kDoubleScreenCmd:
 					if(vo_quartz_fs)
 					{
-						vo_fs = (!(vo_fs)); window_fullscreen();
+                vo_fs = (!(vo_fs));
+                window_fullscreen();
 					}
 
 					SizeWindow(theWindow, (d_width*2), ((d_width/movie_aspect)*2), 1);
@@ -435,7 +444,8 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 				break;
 
 			case kFullScreenCmd:
-				vo_fs = (!(vo_fs)); window_fullscreen();
+            vo_fs = (!(vo_fs));
+            window_fullscreen();
 				break;
 
 			case kKeepAspectCmd:
@@ -1143,8 +1153,10 @@ static int preinit(const char *arg)
 				parse_pos = &parse_pos[1];
 				fs_res_y = strtol(parse_pos, &parse_pos, 0);
             }
-            if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
-            else if (parse_pos[0]) parse_err = 1;
+            if (parse_pos[0] == ':')
+                parse_pos = &parse_pos[1];
+            else if (parse_pos[0])
+                parse_err = 1;
         }
     }
 
