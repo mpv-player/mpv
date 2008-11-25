@@ -52,9 +52,9 @@ const LIBVO_EXTERN(direct3d)
 static struct global_priv {
     int is_paused;              /**< 1 = Movie is paused,
                                 0 = Movie is not paused */
-    int is_cfg_finished;        /**< Synchronization "semaphore". 1 when
-                                instance of reconfigure_d3d is finished */
-
+    int is_clear_needed;        /**< 1 = Clear the backbuffer before StretchRect
+                                0 = (default) Don't clear it */
+    D3DLOCKED_RECT locked_rect; /**< The locked Offscreen surface */
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
     RECT fs_panscan_rect;       /**< PanScan source surface cropping in
@@ -155,6 +155,12 @@ static void calc_fs_rect(void)
     "<vo_direct3d>Fullscreen Movie Rect: t: %ld, l: %ld, r: %ld, b:%ld\r\n",
         priv->fs_movie_rect.top, priv->fs_movie_rect.left,
         priv->fs_movie_rect.right, priv->fs_movie_rect.bottom);
+
+    /* The backbuffer should be cleared before next StretchRect. This is
+     * necessary because our new draw area could be smaller than the
+     * previous one used by StretchRect and without it, leftovers from the
+     * previous frame will be left. */
+    priv->is_clear_needed = 1;
 }
 
 /** @brief Destroy D3D Context related to the current window.
@@ -163,6 +169,11 @@ static void destroy_d3d_context(void)
 {
     mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>destroy_d3d_context called\r\n");
     /* Let's destroy the old (if any) D3D Content */
+
+    if (priv->locked_rect.pBits) {
+        IDirect3DSurface9_UnlockRect(priv->d3d_surface);
+        priv->locked_rect.pBits = NULL;
+    }
 
     if (priv->d3d_surface != NULL) {
         IDirect3DSurface9_Release (priv->d3d_surface);
@@ -254,10 +265,6 @@ static int reconfigure_d3d(void)
         return 0;
     }
 
-    /* Fill the Surface with black color. */
-    IDirect3DDevice9_ColorFill(priv->d3d_device, priv->d3d_surface, NULL,
-                               D3DCOLOR_ARGB(0xFF, 0, 0, 0) );
-
     calc_fs_rect();
 
     return 1;
@@ -268,9 +275,6 @@ static int reconfigure_d3d(void)
 static void uninit_d3d(void)
 {
     mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>uninit_d3d called\r\n");
-
-    /* Block further calls to reconfigure_d3d(). */
-    priv->is_cfg_finished = 0;
 
     /* Destroy D3D Context inside the window. */
     destroy_d3d_context();
@@ -288,39 +292,47 @@ static void uninit_d3d(void)
  */
 static uint32_t render_d3d_frame(mp_image_t *mpi)
 {
-    D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
-                                         to copy MPlayer's frame inside it.*/
-
     /* Uncomment when direct rendering is implemented.
      * if (mpi->flags & MP_IMGFLAG_DIRECT) ...
      */
 
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-        return VO_TRUE;
+        goto skip_upload;
 
     if (mpi->flags & MP_IMGFLAG_PLANAR) { /* Copy a planar frame. */
         draw_slice(mpi->planes,mpi->stride,mpi->w,mpi->h,0,0);
-        return VO_TRUE;
+        goto skip_upload;
     }
 
-    /* If the previous if failed, we should draw a packed frame */
-    if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
-       return VO_ERROR;
+    /* If we're here, then we should lock the rect and copy a packed frame */
+    if (!priv->locked_rect.pBits) {
+        if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
+                                               &priv->locked_rect, NULL, 0))) {
+           mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Surface lock failure\n");
+           return VO_ERROR;
+        }
     }
 
-    if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                           &locked_rect, NULL, 0))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>Surface lock failure\n");
-       return VO_ERROR;
-    }
+    memcpy_pic(priv->locked_rect.pBits, mpi->planes[0], mpi->stride[0],
+               mpi->height, priv->locked_rect.Pitch, mpi->stride[0]);
 
-    memcpy_pic(locked_rect.pBits, mpi->planes[0], mpi->stride[0],
-               mpi->height, locked_rect.Pitch, mpi->stride[0]);
-
+skip_upload:
+    /* This unlock is used for both slice_draw path and render_d3d_frame path. */
     if (FAILED(IDirect3DSurface9_UnlockRect(priv->d3d_surface))) {
         mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface unlock failure\n");
         return VO_ERROR;
+    }
+    priv->locked_rect.pBits = NULL;
+
+    if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
+        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
+        return VO_ERROR;
+    }
+
+    if (priv->is_clear_needed) {
+        IDirect3DDevice9_Clear (priv->d3d_device, 0, NULL,
+                                D3DCLEAR_TARGET, 0, 0, 0);
+        priv->is_clear_needed = 0;
     }
 
     if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
@@ -441,9 +453,6 @@ static int preinit(const char *arg)
         return -1;
     }
 
-    /* Allow the first call to reconfigure_d3d. */
-    priv->is_cfg_finished = 1;
-
     return 0;
 }
 
@@ -527,14 +536,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         return VO_ERROR;
     }
 
-    if (priv->is_cfg_finished) {
-        priv->is_cfg_finished = 0;
-        if (!reconfigure_d3d()) {
-            priv->is_cfg_finished = 1;
-            return VO_ERROR;
-        }
-        priv->is_cfg_finished = 1;
-    }
+    if (!reconfigure_d3d())
+        return VO_ERROR;
+
     return 0; /* Success */
 }
 
@@ -560,7 +564,6 @@ static void flip_page(void)
             mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Video adapter reinitialized.\n");
 
     }
-    /*IDirect3DDevice9_Clear (priv->d3d_device, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);*/
 }
 
 /** @brief libvo Callback: Draw OSD/Subtitles,
@@ -607,75 +610,50 @@ static void check_events(void)
  */
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 {
-    D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
-                                         to copy MPlayer's frame inside it.*/
-    char *Src;      /**< Pointer to the source image */
-    char *Dst;      /**< Pointer to the destination image */
-    int  UVstride;  /**< Stride of the U/V planes */
+    char *my_src;   /**< Pointer to the source image */
+    char *dst;      /**< Pointer to the destination image */
+    int  uv_stride; /**< Stride of the U/V planes */
 
-    if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
-       return VO_ERROR;
+    /* Lock the offscreen surface if it's not already locked. */
+    if (!priv->locked_rect.pBits) {
+        if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
+                                               &priv->locked_rect, NULL, 0))) {
+            mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface lock failure\n");
+            return VO_FALSE;
+        }
     }
 
-    if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                           &locked_rect, NULL, 0))) {
-        mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface lock failure\n");
-        return VO_FALSE;
-    }
-
-    UVstride = locked_rect.Pitch / 2;
+    uv_stride = priv->locked_rect.Pitch / 2;
 
     /* Copy Y */
-    Dst = locked_rect.pBits;
-    Dst = Dst + locked_rect.Pitch * y + x;
-    Src=src[0];
-    memcpy_pic(Dst, Src, w, h, locked_rect.Pitch, stride[0]);
+    dst = priv->locked_rect.pBits;
+    dst = dst + priv->locked_rect.Pitch * y + x;
+    my_src=src[0];
+    memcpy_pic(dst, my_src, w, h, priv->locked_rect.Pitch, stride[0]);
 
     w/=2;h/=2;x/=2;y/=2;
 
     /* Copy U */
-    Dst = locked_rect.pBits;
-    Dst = Dst + locked_rect.Pitch * priv->src_height
-          + UVstride * y + x;
+    dst = priv->locked_rect.pBits;
+    dst = dst + priv->locked_rect.Pitch * priv->src_height
+          + uv_stride * y + x;
     if (priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2'))
-        Src=src[2];
+        my_src=src[2];
     else
-        Src=src[1];
+        my_src=src[1];
 
-    memcpy_pic(Dst, Src, w, h, UVstride, stride[1]);
+    memcpy_pic(dst, my_src, w, h, uv_stride, stride[1]);
 
     /* Copy V */
-    Dst = locked_rect.pBits;
-    Dst = Dst + locked_rect.Pitch * priv->src_height
-          + UVstride * (priv->src_height / 2) + UVstride * y + x;
+    dst = priv->locked_rect.pBits;
+    dst = dst + priv->locked_rect.Pitch * priv->src_height
+          + uv_stride * (priv->src_height / 2) + uv_stride * y + x;
     if (priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2'))
-        Src=src[1];
+        my_src=src[1];
     else
-        Src=src[2];
+        my_src=src[2];
 
-    memcpy_pic(Dst, Src, w, h, UVstride, stride[2]);
-
-    if (FAILED(IDirect3DSurface9_UnlockRect(priv->d3d_surface))) {
-        mp_msg(MSGT_VO,MSGL_V,"<vo_direct3d>Surface unlock failure\n");
-        return VO_ERROR;
-    }
-
-    if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
-                                            priv->d3d_surface,
-                                            &priv->fs_panscan_rect,
-                                            priv->d3d_backbuf,
-                                            &priv->fs_movie_rect,
-                                            D3DTEXF_LINEAR))) {
-        mp_msg(MSGT_VO,MSGL_V,
-               "<vo_direct3d>Unable to copy the frame to the back buffer\n");
-        return VO_ERROR;
-    }
-
-    if (FAILED(IDirect3DDevice9_EndScene(priv->d3d_device))) {
-       mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>EndScene failed\n");
-       return VO_ERROR;
-    }
+    memcpy_pic(dst, my_src, w, h, uv_stride, stride[2]);
 
     return 0; /* Success */
 }

@@ -1096,137 +1096,141 @@ rozdzielczości DVD) żeby dobrze wyglądać.
 </sect2>
 
 <!-- ********** -->
-<!-- synced 'till here -->
 
 <sect2 id="menc-feat-dvd-mpeg4-filtering">
-<title>Filtering</title>
+<title>Filtrowanie</title>
 
 <para>
-Learning how to use <application>MEncoder</application>'s video filters
-is essential to producing good encodes.
-All video processing is performed through the filters -- cropping,
-scaling, color adjustment, noise removal, sharpening, deinterlacing,
-telecine, inverse telecine, and deblocking, just to name a few.
-Along with the vast number of supported input formats, the variety of
-filters available in <application>MEncoder</application> is one of its
-main advantages over other similar programs.
+Bardzo ważne do robienia dobrych kodowań jest nauczenie się posługiwania
+systemem filtrów <application>MEncodera</application>.
+Całe przetwarzanie video jest wykonywane przez filtry &ndash; kadrowanie, skalowanie,
+dopasowywanie kolorów, usuwanie szumu, telecine, odwrócone telecine, usuwanie
+bloków żeby wymienić choć część.
+Poza dużą ilością obsługiwanych formatów wejściowych to właśnie zakres
+dostępnych filtrów jest jedną z głównych przewag
+<application>MEncodera</application> nad podobnymi programami.
 </para>
 
 <para>
-Filters are loaded in a chain using the -vf option:
+Filtry są ładowane do łańcucha przy pomocy opcji -vf:
 
-<screen>-vf filter1=options,filter2=options,...</screen>
+<screen>-vf filtr1=opcje,filtr2=opcje,...</screen>
 
-Most filters take several numeric options separated by colons, but
-the syntax for options varies from filter to filter, so read the man
-page for details on the filters you wish to use.
+Większość filtrów przyjmuje kilka parametrów numerycznych oddzielanych
+dwukropkami, ale dokładna składnia zależy od filtru więc szczegóły odnośnie
+filtrów, które chcesz zastosować, znajdziesz na stronie man.
 </para>
 
 <para>
-Filters operate on the video in the order they are loaded.
-For example, the following chain:
+Filtry działają na filmie w kolejnoścy w jakiej zostały załadowane.
+Na przykład następujący łańcuch:
 
 <screen>-vf crop=688:464:12:4,scale=640:464</screen>
 
-will first crop the 688x464 region of the picture with upper-left
-corner at (12,4), and then scale the result down to 640x464.
+najpierw skadruje fragment 688x464 filmu z lewym górnym rogiem na pozycji
+(12,4) a potem zmniejszy rozdzielczość wyniku do 640x464.
 </para>
 
 <para>
-Certain filters need to be loaded at or near the beginning of the
-filter chain, in order to take advantage of information from the
-video decoder that will be lost or invalidated by other filters.
-The principal examples are <option>pp</option> (postprocessing, only
-when it is performing deblock or dering operations),
-<option>spp</option> (another postprocessor to remove MPEG artifacts),
-<option>pullup</option> (inverse telecine), and
-<option>softpulldown</option> (for converting soft telecine to hard telecine).
+Niektóre filtry trzeba ładować na początku lub blisko początku łańcucha,
+ponieważ korzystają one z informacji którą następne filtry mogą zgubić lub
+unieważnić.
+Sztandarowym przykłądem jest <option>pp</option> (postprocessing, tylko gdy
+wykonuje operacje usuwania bloków lub pierścieni),
+<option>spp</option> (inny postprocessor do usuwania artefaktów MPEG),
+<option>pullup</option> (odwrócone telecine) i
+<option>softpulldown</option> (konwertuje miękkie telecine na twarde).
 </para>
 
 <para>
-In general, you want to do as little filtering as possible to the movie
-in order to remain close to the original DVD source. Cropping is often
-necessary (as described above), but avoid to scale the video. Although
-scaling down is sometimes preferred to using higher quantizers, we want
-to avoid both these things: remember that we decided from the start to
-trade bits for quality.
+W ogólności chcesz przeprowadzać jak najmniej filtrowania żeby film pozostał
+możliwie bliski oryginałowi.
+Kadrowanie często jest niezbęne (jak opisano powyżej) ale staraj się uniknąć
+skalowania.
+Chociaż czasami zmniejszenie rozdzielczości jest lepszym wyjściem niż użycie
+wyższego kwantyzatora, chcemy uniknąć obu: pamiętajmy, że od początku
+zdecydowaliśmy się wybrać jakość kosztem wielkości.
 </para>
 
 <para>
-Also, do not adjust gamma, contrast, brightness, etc. What looks good
-on your display may not look good on others. These adjustments should
-be done on playback only.
+Nie należy też dostosowywać gammy, kontrastu, jasności itp.
+Co wygląda dobrze na Twoim ekranie może nie być tak dobre na innych.
+Takie dostrojenia powinny być wykonywane tylko przy odtwarzaniu.
 </para>
 
 <para>
-One thing you might want to do, however, is pass the video through a
-very light denoise filter, such as <option>-vf hqdn3d=2:1:2</option>.
-Again, it is a matter of putting those bits to better use: why waste them
-encoding noise when you can just add that noise back in during playback?
-Increasing the parameters for <option>hqdn3d</option> will further
-improve compressibility, but if you increase the values too much, you
-risk degrading the image visibly. The suggested values above
-(<option>2:1:2</option>) are quite conservative; you should feel free to
-experiment with higher values and observe the results for yourself.
+Jedną rzeczą którą możesz chcieć zrobić, jest przepuszczenie filmu przez bardzo
+lekkie usuwanie szumów, takie jak <option>-vf hqdn3d=2:1:2</option>.
+Znów, to kwestia lepszego zastosowania bitów: po co marnować je na zakodowanie
+szumu skoro można dodać ten szum przy odtwarzaniu?
+Zwiększenie parametrów dla <option>hqdn3d</option> jeszcze bardziej poprawi
+kompresowalność, ale jeśli przesadzisz to zauważalnie zniekształcisz obraz.
+Wartości sugerowane powyżej (<option>2:1:2</option>) są dość konserwatywne; nie
+bój się eksperymentować z wyższymi wartościami i samemu oceniać wyniki.
 </para>
 </sect2>
 
 <!-- ********** -->
 
 <sect2 id="menc-feat-dvd-mpeg4-interlacing">
-<title>Interlacing and Telecine</title>
+<title>Przeplot i telecine</title>
 
 <para>
-Almost all movies are shot at 24 fps. Because NTSC is 30000/1001 fps, some
-processing must be done to this 24 fps video to make it run at the correct
-NTSC framerate. The process is called 3:2 pulldown, commonly referred to
-as telecine (because pulldown is often applied during the telecine
-process), and, naively described, it works by slowing the film down to
-24000/1001 fps, and repeating every fourth frame.
+Prawie wszystkie filmy są kręcone przy 24 fps.
+Ponieważ NTSC ma 30000/1001 fps potrzebna jest pewna przeróbka żeby film 24 fps
+mógł być wyświetlany z prawidłową szybkością NTSC.
+Ten proces nazywa się 3:2 pulldown, często zwany też telecine (ponieważ jest
+używany przy konwersji z kina do telewizji) i, w uproszczeniu, jest to
+spowolnienie filmu do 24000/1001 fps i powtórzenie co czwartej klatki.
 </para>
 
 <para>
-No special processing, however, is done to the video for PAL DVDs, which
-run at 25 fps. (Technically, PAL can be telecined, called 2:2 pulldown,
-but this does not become an issue in practice.) The 24 fps film is simply
-played back at 25 fps. The result is that the movie runs slightly faster,
-but unless you are an alien, you probably will not notice the difference.
-Most PAL DVDs have pitch-corrected audio, so when they are played back at
-25 fps things will sound right, even though the audio track (and hence the
-whole movie) has a running time that is 4% less than NTSC DVDs.
+Filmy DVD PAL, odtwarzanie przy 25 fps, nie wymagają żadnego specjalnego
+traktowania.
+(Technicznie rzecz ujmując, PAL może być poddany telecine, nazywanemu 2:2
+pulldown, ale w praktyce nie jest to problemem.)
+Po prostu film 24 fps jest odtwarzany przy 25 fps.
+W wyniku tego film jest odtwarzany odrobinkę szybciej, ale jeśli nie masz
+nieziemskich zmysłów to tego nie zauważysz.
+Większość DVD PAL ma skorygowaną wysokość dźwięku, więc kiedy są odtwarzane
+przy 25 fps dźwięk będzie brzmiał poprawnie, mimo tego że ścieżka dźwiekowa
+(jak i cały film) jest o 4% krótsza niż DVD NTSC.
 </para>
 
 <para>
-Because the video in a PAL DVD has not been altered, you need not worry
-much about framerate. The source is 25 fps, and your rip will be 25
-fps. However, if you are ripping an NTSC DVD movie, you may need to
-apply inverse telecine.
+Ponieważ film na DVD PAL nie został zmieniony, nie ma powodu za bardzo
+przejmować się framerate.
+Oryginał ma 25 fps i Twój rip też będzie miał 25 fps.
+Jednak jeśli ripujesz film z DVD NTSC możesz być zmuszony do zastosowania
+odwrotnego telecine.
 </para>
 
 <para>
-For movies shot at 24 fps, the video on the NTSC DVD is either telecined
-30000/1001, or else it is progressive 24000/1001 fps and intended to be
-telecined on-the-fly by a DVD player. On the other hand, TV series are usually
-only interlaced, not telecined. This is not a hard rule: some TV series
-are interlaced (such as Buffy the Vampire Slayer) whereas some are a
-mixture of progressive and interlaced (such as Angel, or 24).
+Dla filmów nagrywanych przy 24 fps obraz na DVD NTSC jest albo poddany telecine
+na 30000/1001 albo jest progresywny przy 24000/1001 i&nbsp;przeznaczony do poddania
+telecine w locie przez odtwarzacz DVD.
+Z drugiej strony seriale telewizyjne zazwyczaj mają tylko przeplot, nie są poddane telecine.
+Nie jest to reguła: Niektóre seriale (na przykład Buffy Łowca Wampirów) mają
+przeplot, a inne są mieszanką progresywnego i&nbsp;przeplotu (Angel, 24).
 </para>
 
 <para>
-It is highly recommended that you read the section on
+Jest wysoce zalecane żebyś przeczytał sekcję
+<!-- TODO przetłumaczyć tytuł -->
 <link linkend="menc-feat-telecine">How to deal with telecine and interlacing in NTSC DVDs</link>
-to learn how to handle the different possibilities.
+żeby dowiedzieć się jak sobie radzić z&nbsp;różnymi możliwościami.
 </para>
 
 <para>
-However, if you are mostly just ripping movies, likely you are either
-dealing with 24 fps progressive or telecined video, in which case you can
-use the <option>pullup</option> filter <option>-vf
-pullup,softskip</option>.
+Jednak jeśli zazwyczaj tylko ripujesz filmy, prawdopodobnie masz doczynienia
+z filmem 24 fps progresywnym lub poddanym telecine, a w takim przypadku możesz
+użyć filtra <option>pullup</option> podając parametr
+<option>-vf pullup,softskip</option>.
 </para>
 </sect2>
 
 <!-- ********** -->
+<!-- synced 'till here -->
 
 <sect2 id="menc-feat-dvd-mpeg4-encoding-interlaced">
 <title>Encoding interlaced video</title>

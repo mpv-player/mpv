@@ -6,14 +6,12 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "aspect.h"
 
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#ifdef CONFIG_XF86VM
-#include <X11/extensions/xf86vmode.h>
-#endif
 #include <errno.h>
 
 #include "x11_common.h"
@@ -83,7 +81,6 @@ static uint32_t out_format = 0;
 static int out_offset;
 static int srcW = -1;
 static int srcH = -1;
-static int aspect;              // 1<<16 based fixed point aspect, so that the aspect stays correct during resizing
 
 static int old_vo_dwidth = -1;
 static int old_vo_dheight = -1;
@@ -92,16 +89,13 @@ static void check_events(void)
 {
     int ret = vo_x11_check_events(mDisplay);
 
-    /* clear left over borders and redraw frame if we are paused */
+    if (ret & VO_EVENT_RESIZE)
+        vo_x11_clearwindow(mDisplay, vo_window);
+    else if (ret & VO_EVENT_EXPOSE)
+        vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width,
+                                myximage->height, 0);
     if (ret & VO_EVENT_EXPOSE && int_pause)
-    {
-        vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width,
-                                myximage->height, 0);
         flip_page();
-    } else if ((ret & VO_EVENT_RESIZE) || (ret & VO_EVENT_EXPOSE))
-        vo_x11_clearwindow_part(mDisplay, vo_window, myximage->width,
-                                myximage->height, 0);
-
 }
 
 static void draw_alpha_32(int x0, int y0, int w, int h, unsigned char *src,
@@ -306,7 +300,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 // int interval, prefer_blank, allow_exp, nothing;
     unsigned int fg, bg;
-    XGCValues xgcv;
     Colormap theCmap;
     XSetWindowAttributes xswa;
     unsigned long xswamask;
@@ -315,7 +308,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 #ifdef CONFIG_XF86VM
     int vm = flags & VOFLAG_MODESWITCHING;
 #endif
-    int fullscreen = flags & (VOFLAG_FULLSCREEN|VOFLAG_MODESWITCHING);
     Flip_Flag = flags & VOFLAG_FLIPPING;
     zoomFlag = flags & VOFLAG_SWSCALE;
 
@@ -329,10 +321,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     in_format = format;
     srcW = width;
     srcH = height;
-
-// if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
-
-//printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 
     XGetWindowAttributes(mDisplay, mRootWin, &attribs);
     depth = attribs.depth;
@@ -353,8 +341,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
      */
     image_width = (width + 7) & (~7);
     image_height = height;
-
-    aspect = ((1 << 16) * d_width + d_height / 2) / d_height;
 
 #ifdef CONFIG_GUI
     if (use_gui)
@@ -479,6 +465,11 @@ static void Display_Image(XImage * myximage, uint8_t * ImageData)
 {
     int x = (vo_dwidth - dst_width) / 2;
     int y = (vo_dheight - myximage->height) / 2;
+
+    // do not draw if the image needs rescaling
+    if ((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) && zoomFlag)
+      return;
+
     if (WinID == 0) {
       x = vo_dx;
       y = vo_dy;
@@ -524,17 +515,13 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
     {
         int newW = vo_dwidth;
         int newH = vo_dheight;
-        int newAspect = (newW * (1 << 16) + (newH >> 1)) / newH;
         struct SwsContext *oldContext = swsContext;
-
-        if (newAspect > aspect)
-            newW = (newH * aspect + (1 << 15)) >> 16;
-        else
-            newH = ((newW << 16) + (aspect >> 1)) / aspect;
 
         old_vo_dwidth = vo_dwidth;
         old_vo_dheight = vo_dheight;
 
+        if (vo_fs)
+            aspect(&newW, &newH, A_ZOOM);
         if (sws_flags == 0)
             newW &= (~31);      // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
 

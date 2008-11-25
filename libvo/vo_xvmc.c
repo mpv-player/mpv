@@ -460,7 +460,7 @@ XWindowAttributes attribs;
 unsigned long xswamask;
 int depth;
 #ifdef CONFIG_XF86VM
-int vm=0;
+int vm = flags & VOFLAG_MODESWITCHING;
 #endif
 //end of vo_xv
 
@@ -631,10 +631,6 @@ found_subpic:
    image_width = width;
 
 skip_surface_allocation:
-
-#ifdef CONFIG_XF86VM
-   if( flags&VOFLAG_MODESWITCHING ) vm = 1;
-#endif
 
 #ifdef CONFIG_GUI
    if(use_gui)
@@ -1033,9 +1029,6 @@ int i,cfs;
 }
 
 static void check_events(void){
-Window mRoot;
-uint32_t drwBorderWidth,drwDepth;
-
 int e=vo_x11_check_events(mDisplay);
    if(e&VO_EVENT_RESIZE)
    {

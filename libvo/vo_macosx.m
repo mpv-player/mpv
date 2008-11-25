@@ -10,6 +10,12 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <CoreServices/CoreServices.h>
+//special workaround for Apple bug #6267445
+//(OSServices Power API disabled in OSServices.h for 64bit systems)
+#ifndef __POWER__
+#include <CoreServices/../Frameworks/OSServices.framework/Headers/Power.h>
+#endif
 
 //MPLAYER
 #include "config.h"
@@ -324,8 +330,6 @@ static int preinit(const char *arg)
 	{
 		#if !defined (CONFIG_MACOSX_FINDER) || !defined (CONFIG_SDL)
 		//this chunk of code is heavily based off SDL_macosx.m from SDL 
-		//it uses an Apple private function to request foreground operation
-		void CPSEnableForegroundOperation(ProcessSerialNumber* psn);
 		ProcessSerialNumber myProc, frProc;
 		Boolean sameProc;
 
@@ -335,7 +339,7 @@ static int preinit(const char *arg)
 			{
 				if (SameProcess(&frProc, &myProc, &sameProc) == noErr && !sameProc)
 				{
-					CPSEnableForegroundOperation(&myProc);
+					TransformProcessType(&myProc, kProcessTransformToForegroundApplication);
 				}
 				SetFrontProcess(&myProc);
 			}
@@ -751,7 +755,7 @@ static int control(uint32_t request, void *data)
 	
 	glFlush();
 	
-	//auto hide mouse cursor and futur on-screen control?
+	//auto hide mouse cursor (and future on-screen control?)
 	if(isFullscreen && !mouseHide && !isRootwin)
 	{
 		int curTime = TickCount()/60;
