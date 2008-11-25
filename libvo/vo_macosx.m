@@ -759,7 +759,7 @@ static int control(uint32_t request, void *data, ...)
 	
 	glFlush();
 	
-	//auto hide mouse cursor and futur on-screen control?
+	//auto hide mouse cursor (and future on-screen control?)
 	if(isFullscreen && !mouseHide && !isRootwin)
 	{
 		int curTime = TickCount()/60;
