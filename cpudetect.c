@@ -57,10 +57,17 @@ static int has_cpuid(void)
 	long a, c;
 
 // code from libavcodec:
+#ifdef ARCH_X86_64
+#define PUSHF "pushfq\n\t"
+#define POPF "popfq\n\t"
+#else
+#define PUSHF "pushfl\n\t"
+#define POPF "popfl\n\t"
+#endif
     __asm__ volatile (
                           /* See if CPUID instruction is supported ... */
                           /* ... Get copies of EFLAGS into eax and ecx */
-                          "pushf\n\t"
+                          PUSHF
                           "pop %0\n\t"
                           "mov %0, %1\n\t"
                           
@@ -68,15 +75,17 @@ static int has_cpuid(void)
                           /*     to the EFLAGS reg */
                           "xor $0x200000, %0\n\t"
                           "push %0\n\t"
-                          "popf\n\t"
+                          POPF
                           
                           /* ... Get the (hopefully modified) EFLAGS */
-                          "pushf\n\t"
+                          PUSHF
                           "pop %0\n\t"
                           : "=a" (a), "=c" (c)
                           :
                           : "cc" 
                           );
+#undef PUSHF
+#undef POPF
 
 	return a != c;
 }
