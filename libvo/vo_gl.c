@@ -544,7 +544,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
 #ifndef FAST_OSD
   glGenTextures(1, &osdatex[osdtexCnt]);
   BindTexture(gl_target, osdatex[osdtexCnt]);
-  glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, sx, sy, 255);
+  glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, sx, sy, 0);
   {
   int i;
   char *tmp = malloc(stride * h);
