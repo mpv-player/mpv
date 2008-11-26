@@ -8071,6 +8071,7 @@ LIBSUF=.a
 LIBNAME=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 
 # Some FFmpeg codecs depend on these. Enable them unconditionally for now.
+CONFIG_AANDCT=yes
 CONFIG_FFT=yes
 CONFIG_FFT_MMX=$fft_mmx
 CONFIG_GOLOMB=yes
@@ -8078,7 +8079,6 @@ CONFIG_MDCT=yes
 
 CONFIG_ENCODERS=yes
 CONFIG_GPL=yes
-CONFIG_AANDCT=yes
 CONFIG_LIBAMR=$_libamr
 CONFIG_LIBAMR_NB=$_libamr_nb
 CONFIG_LIBAMR_WB=$_libamr_wb
@@ -8510,6 +8510,8 @@ $_def_yasm
 #define ENABLE_GRAY 0
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
+#define CONFIG_AANDCT 1
+#define ENABLE_AANDCT 1
 #define CONFIG_FFT 1
 #define ENABLE_FFT 1
 #define CONFIG_GOLOMB 1
