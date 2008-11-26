@@ -88,8 +88,8 @@ static const struct_fmt_table fmt_table[] = {
     {IMGFMT_I420, MAKEFOURCC('I','4','2','0')},
     {IMGFMT_IYUV, MAKEFOURCC('I','Y','U','V')},
     {IMGFMT_YVU9, MAKEFOURCC('Y','V','U','9')},
-    {IMGFMT_YUY2, MAKEFOURCC('Y','U','Y','2')},
-    {IMGFMT_UYVY, MAKEFOURCC('U','Y','V','Y')},
+    {IMGFMT_YUY2,  D3DFMT_YUY2},
+    {IMGFMT_UYVY,  D3DFMT_UYVY},
     {IMGFMT_BGR32, D3DFMT_X8R8G8B8},
     {IMGFMT_RGB32, D3DFMT_X8B8G8R8},
     {IMGFMT_BGR24, D3DFMT_R8G8B8}, //untested
