@@ -90,6 +90,12 @@ static const struct_fmt_table fmt_table[] = {
     {IMGFMT_YVU9, MAKEFOURCC('Y','V','U','9')},
     {IMGFMT_YUY2, MAKEFOURCC('Y','U','Y','2')},
     {IMGFMT_UYVY, MAKEFOURCC('U','Y','V','Y')},
+    {IMGFMT_BGR32, D3DFMT_X8R8G8B8},
+    {IMGFMT_RGB32, D3DFMT_X8B8G8R8},
+    {IMGFMT_BGR24, D3DFMT_R8G8B8}, //untested
+    {IMGFMT_BGR16, D3DFMT_R5G6B5},
+    {IMGFMT_BGR15, D3DFMT_X1R5G5B5},
+    {IMGFMT_BGR8 , D3DFMT_R3G3B2}, //untested
 };
 
 #define DISPLAY_FORMAT_TABLE_ENTRIES \
