@@ -56,6 +56,10 @@
 	NSMenuItem *kAspectFullCmd;
 	NSMenuItem *kAspectWideCmd;
 	NSMenuItem *kPanScanCmd;
+	
+	//timestamps for disabling screensaver and mouse hiding
+	int lastMouseHide;
+	int lastScreensaverUpdate;
 }
 
 - (BOOL) acceptsFirstResponder;

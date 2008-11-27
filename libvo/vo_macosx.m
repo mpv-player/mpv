@@ -759,28 +759,25 @@ static int control(uint32_t request, void *data, ...)
 	
 	glFlush();
 	
+	curTime  = TickCount()/60;
+
 	//auto hide mouse cursor (and future on-screen control?)
 	if(isFullscreen && !mouseHide && !isRootwin)
 	{
-		int curTime = TickCount()/60;
-		static int lastTime = 0;
-		
-		if( ((curTime - lastTime) >= 5) || (lastTime == 0) )
+		if( ((curTime - lastMouseHide) >= 5) || (lastMouseHide == 0) )
 		{
 			CGDisplayHideCursor(kCGDirectMainDisplay);
-			mouseHide = YES;
-			lastTime = curTime;
+			mouseHide = TRUE;
+			lastMouseHide = curTime;
 		}
 	}
 	
 	//update activity every 30 seconds to prevent
 	//screensaver from starting up.
-	curTime  = TickCount()/60;
-		
-	if( ((curTime - lastTime) >= 30) || (lastTime == 0) )
+	if( ((curTime - lastScreensaverUpdate) >= 30) || (lastScreensaverUpdate == 0) )
 	{
 		UpdateSystemActivity(UsrActivity);
-		lastTime = curTime;
+		lastScreensaverUpdate = curTime;
 	}
 }
 
