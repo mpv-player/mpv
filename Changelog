@@ -65,6 +65,8 @@ MPlayer (1.0)
     * VIDIX driver for SuperH Mobile VEU hardware block.
     * support -border on vo_gl/gl2 in x11
     * Direct3D Windows video output driver added.
+    * initial code duplication cleanup between vo_wii and vo_fbdev2
+    * initial code duplication cleanup between vo_x11,vo_xv,vo_xvmc
 
     MEncoder:
     * check for system-wide configuration file in MEncoder
@@ -84,6 +86,8 @@ MPlayer (1.0)
     * some new slave commands (check DOCS/tech/slave.txt)
     * misc fixes to libass
     * libdvdcss updated to 1.2.10, now same as upstream version
+    * fix -endchapter support again for -dump* options
+    * add startup volume option
 
     Ports:
     * small crash with vo_macosx fixed
@@ -92,6 +96,8 @@ MPlayer (1.0)
     * vo_gl now works with -wid and nVidia drivers on Windows (this is a hack)
     * VIDIX on SuperH.
     * workarounds for AltiVec on Apple gcc 3.3 on Mac OS X dropped
+    * vo_macosx can now be compiled in 64-bits mode
+    * OpenGL support for unmodified MinGW64
 
   rc2try2:
 
