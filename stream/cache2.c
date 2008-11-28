@@ -16,10 +16,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#ifdef __CYGWIN__
-#define PTHREAD_CACHE 1
-#endif
-
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
 #if defined(__MINGW32__)

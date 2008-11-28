@@ -715,6 +715,7 @@ _rpath=no
 _asmalign_pot=auto
 _stream_cache=yes
 _def_stream_cache="#define CONFIG_STREAM_CACHE 1"
+_def_pthread_cache="#undef PTHREAD_CACHE"
 _need_shmem=yes
 for ac_option do
   case "$ac_option" in
@@ -3135,6 +3136,15 @@ else
   mingw32 || _win32dll=no
 fi
 echores "$_pthreads"
+
+if cygwin ; then
+  if test "$_pthreads" = yes ; then
+    _def_pthread_cache="#define PTHREAD_CACHE 1"
+  else
+    _stream_cache=no
+    _def_stream_cache="#undef CONFIG_STREAM_CACHE"
+  fi
+fi
 
 echocheck "w32threads"
 if test "$_pthreads" = yes ; then
