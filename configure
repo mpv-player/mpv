@@ -422,6 +422,7 @@ Miscellaneous options:
   --cc=COMPILER          C compiler to build MPlayer [gcc]
   --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
+  --nm=NM                nm tool to build MPlayer [nm]
   --yasm=YASM            Yasm assembler to build MPlayer [yasm]
   --ar=AR                librarian to build MPlayer [ar]
   --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
@@ -508,6 +509,7 @@ _cc=cc
 _ar=ar
 test "$CC" && _cc="$CC"
 _as=auto
+_nm=auto
 _yasm=yasm
 _runtime_cpudetection=no
 _cross_compile=auto
@@ -806,6 +808,9 @@ for ac_option do
     ;;
   --as=*)
     _as=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --nm=*)
+    _nm=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --yasm=*)
     _yasm=`echo $ac_option | cut -d '=' -f 2`
@@ -1551,6 +1556,11 @@ if test "$_as" = auto ; then
   test -z "$_as" && _as=as
 fi
 
+if test "$_nm" = auto ; then
+  _nm=`$_cc -print-prog-name=nm`
+  test -z "$_nm" && _nm=nm
+fi
+
 # XXX: this should be ok..
 _cpuinfo="echo"
 
@@ -2269,7 +2279,7 @@ cat > $TMPC << EOF
 int ff_extern;
 EOF
 cc_check -c || die "Symbol mangling check failed."
-sym=$(nm -P -g $TMPEXE)
+sym=$($_nm -P -g $TMPEXE)
 extern_prefix=${sym%%ff_extern*}
 _def_extern_prefix="#define EXTERN_PREFIX \"$extern_prefix\""
 echores $extern_prefix
