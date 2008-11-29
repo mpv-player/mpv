@@ -82,6 +82,8 @@ typedef struct MPContext {
     // In the audio-only case used as a timer since the last seek
     // by the audio CPU usage meter.
     double delay;
+    // AV sync: time until next frame should be shown
+    float time_frame;
 
     // Timestamp from the last time some timing functions read the
     // current time, in (occasionally wrapping) microseconds. Used
@@ -112,7 +114,9 @@ typedef struct MPContext {
     int last_dvb_step;
     int dvbin_reopen;
 
-    int was_paused;
+    int paused;
+    // step this many frames, then pause
+    int step_frames;
 
 #ifdef CONFIG_DVDNAV
     struct mp_image *nav_smpi; ///< last decoded dvdnav video image
@@ -138,5 +142,7 @@ double playing_audio_pts(struct MPContext *mpctx);
 void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc);
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr);
 int reinit_video_chain(struct MPContext *mpctx);
+void pause_player(struct MPContext *mpctx);
+void unpause_player(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

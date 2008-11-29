@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "command.h"
@@ -559,10 +560,27 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_pause(m_option_t * prop, int action, void *arg,
-                             MPContext * mpctx)
+static int mp_property_pause(m_option_t *prop, int action, void *arg,
+                             void *ctx)
 {
-    return m_property_flag_ro(prop, action, arg, mpctx->osd_function == OSD_PAUSE);
+    MPContext *mpctx = ctx;
+
+    switch (action) {
+    case M_PROPERTY_SET:
+	if (!arg)
+	    return M_PROPERTY_ERROR;
+	if (mpctx->paused == (bool)*(int *) arg)
+	    return M_PROPERTY_OK;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        if (mpctx->paused)
+            unpause_player(mpctx);
+        else
+            pause_player(mpctx);
+	return M_PROPERTY_OK;
+    default:
+	return m_property_flag(prop, action, arg, &mpctx->paused);
+    }
 }
 
 
@@ -2212,6 +2230,7 @@ static struct {
     { "loop", MP_CMD_LOOP, 0, 0, -1, MSGTR_LoopStatus },
     { "chapter", MP_CMD_SEEK_CHAPTER, 0, 0, -1, NULL },
     { "angle", MP_CMD_SWITCH_ANGLE, 0, 0, -1, NULL },
+    { "pause", MP_CMD_PAUSE, 0, 0, -1, NULL },
     // audio
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
     { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
@@ -2503,9 +2522,8 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	    } break;
 
 	case MP_CMD_FRAME_STEP:
-	case MP_CMD_PAUSE:
-	    cmd->pausing = 1;
-	    brk_cmd = 1;
+            mpctx->step_frames++;
+            unpause_player(mpctx);
 	    break;
 
 	case MP_CMD_FILE_FILTER:
@@ -3215,18 +3233,14 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     switch (cmd->pausing) {
     case 1:	// "pausing"
-	mpctx->osd_function = OSD_PAUSE;
+        pause_player(mpctx);
 	break;
     case 3:	// "pausing_toggle"
-	mpctx->was_paused = !mpctx->was_paused;
-	if (mpctx->was_paused)
-	    mpctx->osd_function = OSD_PAUSE;
-	else if (mpctx->osd_function == OSD_PAUSE)
-	    mpctx->osd_function = OSD_PLAY;
+        if (mpctx->paused)
+            unpause_player(mpctx);
+        else
+            pause_player(mpctx);
 	break;
-    case 2:	// "pausing_keep"
-	if (mpctx->was_paused)
-	    mpctx->osd_function = OSD_PAUSE;
     }
     return brk_cmd;
 }
