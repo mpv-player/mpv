@@ -9,7 +9,7 @@
 #import "vo_macosx.h"
 #include <sys/types.h>
 #include <sys/ipc.h>
-#include <sys/shm.h>
+#include <sys/mman.h>
 #include <CoreServices/CoreServices.h>
 //special workaround for Apple bug #6267445
 //(OSServices Power API disabled in OSServices.h for 64bit systems)
@@ -39,8 +39,7 @@ NSAutoreleasePool *autoreleasepool;
 OSType pixelFormat;
 
 //shared memory
-int shm_id;
-struct shmid_ds shm_desc;
+int shm_fd;
 BOOL shared_buffer = false;
 
 //Screen
@@ -165,20 +164,35 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	else
 	{
 		movie_aspect = (float)d_width/(float)d_height;
-				
-		shm_id = shmget(9849, image_width*image_height*image_bytes, IPC_CREAT | 0666);
-		if (shm_id == -1)
+		
+		// create shared memory
+		shm_fd = shm_open("mplayerosx", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+		if (shm_fd == -1)
 		{
-			perror("vo_mplayer shmget: ");
+			mp_msg(MSGT_VO, MSGL_FATAL, 
+				   "vo_macosx: failed to open shared memory. Error: %s\n", strerror(errno));
 			return 1;
 		}
 		
-		image_data = shmat(shm_id, NULL, 0);
-		if (!image_data)
-		{	
-			perror("vo_mplayer shmat: ");
+		
+		if (ftruncate(shm_fd, image_width*image_height*image_bytes) == -1)
+		{
+			mp_msg(MSGT_VO, MSGL_FATAL, 
+				   "vo_macosx: failed to size shared memory, possibly already in use. Error: %s\n", strerror(errno));
+			shm_unlink("mplayerosx");
 			return 1;
 		}
+		
+		image_data = mmap(NULL, image_width*image_height*image_bytes,
+					PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+		
+		if (image_data == MAP_FAILED)
+		{
+			mp_msg(MSGT_VO, MSGL_FATAL, 
+				   "vo_macosx: failed to map shared memory. Error: %s\n", strerror(errno));
+			shm_unlink("mplayerosx");
+			return 1;
+		}		
 		
 		//connnect to mplayerosx
 		mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:@"mplayerosx" host:nil];
@@ -269,12 +283,13 @@ static void uninit(void)
 		mplayerosxProto = nil;
 		[mplayerosxProxy release];
 		mplayerosxProxy = nil;
-
-		if (shmdt(image_data) == -1)
-			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shmdt failed\n");
-	
-		if (shmctl(shm_id, IPC_RMID, &shm_desc) == -1)
-			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shmctl failed\n");
+		
+		if (munmap(image_data, image_width*image_height*image_bytes) == -1)
+			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: munmap failed. Error: %s\n", strerror(errno));
+		
+		if (shm_unlink("mplayerosx") == -1)
+			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shm_unlink failed. Error: %s\n", strerror(errno));
+		
 	}
 
     SetSystemUIMode( kUIModeNormal, 0);
