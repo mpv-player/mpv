@@ -29,6 +29,7 @@ MPlayer (1.0)
     * support for attachments in lavf demuxer
     * support for chapters in lavf demuxer
     * FLAC speedup in lavf demuxer
+    * MNG demuxer
 
     Filters:
     * vf_ow new overcomplete wavelet denoiser

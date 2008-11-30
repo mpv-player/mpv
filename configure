@@ -286,6 +286,7 @@ Optional features:
 Codecs:
   --enable-gif		    enable GIF support [autodetect]
   --enable-png		    enable PNG input/output support [autodetect]
+  --enable-mng		    enable MNG input support [autodetect]
   --enable-jpeg		    enable JPEG input/output support [autodetect]
   --enable-libcdio	    enable libcdio support [autodetect]
   --enable-liblzo	    enable liblzo support [autodetect]
@@ -555,6 +556,7 @@ _directx=auto
 _win32waveout=auto
 _nas=auto
 _png=auto
+_mng=auto
 _jpeg=auto
 _pnm=yes
 _md5sum=yes
@@ -885,6 +887,8 @@ for ac_option do
   --disable-nas)	_nas=no		;;
   --enable-png)		_png=yes	;;
   --disable-png)	_png=no		;;
+  --enable-mng)		_mng=yes	;;
+  --disable-mng)	_mng=no		;;
   --enable-jpeg)	_jpeg=yes	;;
   --disable-jpeg)	_jpeg=no		;;
   --enable-pnm)		_pnm=yes	;;
@@ -4693,6 +4697,28 @@ else
   _novomodules="png $_novomodules"
 fi
 
+echocheck "MNG support"
+if test "$_mng" = auto ; then
+  _mng=no
+  cat > $TMPC << EOF
+#include <libmng.h>
+int main(void) {
+  const char * p_ver = mng_version_text();
+  return !p_ver || p_ver[0] == 0;
+}
+EOF
+  if cc_check -lmng -lz $_ld_lm ; then
+    _mng=yes
+  fi
+fi
+echores "$_mng"
+if test "$_mng" = yes ; then
+  _def_mng='#define CONFIG_MNG 1'
+  _ld_extra="$_ld_extra -lmng -lz"
+else
+  _def_mng='#undef CONFIG_MNG'
+fi
+
 echocheck "JPEG support"
 if test "$_jpeg" = auto ; then
   _jpeg=no
@@ -8011,6 +8037,7 @@ LIRC = $_lirc
 LIVE555 = $_live
 MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FINDER = $_macosx_finder
+MNG = $_mng
 MP3LAME = $_mp3lame
 MP3LIB = $_mp3lib
 MUSEPACK = $_musepack
@@ -8452,6 +8479,7 @@ $_def_ivtv
 $_def_jpeg
 $_def_md5sum
 $_def_mga
+$_def_mng
 $_def_png
 $_def_pnm
 $_def_quartz

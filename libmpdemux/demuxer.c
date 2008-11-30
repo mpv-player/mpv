@@ -80,6 +80,7 @@ extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_lavf_preferred;
 extern const demuxer_desc_t demuxer_desc_aac;
 extern const demuxer_desc_t demuxer_desc_nut;
+extern const demuxer_desc_t demuxer_desc_mng;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -151,6 +152,9 @@ const demuxer_desc_t *const demuxer_list[] = {
 #endif
 #ifdef CONFIG_XMMS
     &demuxer_desc_xmms,
+#endif
+#ifdef CONFIG_MNG
+    &demuxer_desc_mng,
 #endif
     /* Please do not add any new demuxers here. If you want to implement a new
      * demuxer, add it to libavformat, except for wrappers around external
