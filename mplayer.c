@@ -2514,6 +2514,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 	mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
 	mpctx->num_buffered_frames = 0;
 	mpctx->delay = 0;
+        mpctx->time_frame = 0;
 	// Not all demuxers set d_video->pts during seek, so this value
 	// (which is used by at least vobsub and edl code below) may
 	// be completely wrong (probably 0).
@@ -3743,7 +3744,7 @@ if(!mpctx->sh_audio && mpctx->d_audio->sh) {
 
 /*========================== PLAY AUDIO ============================*/
 
-if (mpctx->sh_audio)
+if (mpctx->sh_audio && !mpctx->paused)
     if (!fill_audio_out_buffers(mpctx))
 	// at eof, all audio at least written to ao
 	if (!mpctx->sh_video)
@@ -3891,16 +3892,6 @@ if(auto_quality>0){
  }
 #endif
  
-//============================ Handle PAUSE ===============================
-
-// handle -sstep
-if(step_sec>0) {
-	mpctx->osd_function=OSD_FFW;
-	mpctx->rel_seek_secs+=step_sec;
-}
-
- edl_update(mpctx);
-
 //================= Keyboard events, SEEKing ====================
 
   current_module="key_events";
@@ -3908,19 +3899,27 @@ if(step_sec>0) {
 {
   while (1) {
   mp_cmd_t* cmd;
-  int brk_cmd = 0;
-  while( !brk_cmd && (cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
-      brk_cmd = run_command(mpctx, cmd);
+  while ((cmd = mp_input_get_cmd(mpctx->input, 0,0,0)) != NULL) {
+      run_command(mpctx, cmd);
       mp_cmd_free(cmd);
-      if (brk_cmd == 2)
-	  goto goto_enable_cache;
+      if (mpctx->stop_play)
+          break;
   }
-  if (mpctx->paused && !mpctx->stop_play)
+  if (mpctx->paused && !(mpctx->stop_play || mpctx->rel_seek_secs
+                         || mpctx->abs_seek_pos))
       pause_loop(mpctx);
   else
       break;
   }
 }
+
+// handle -sstep
+if (step_sec > 0 && !mpctx->paused) {
+	mpctx->osd_function=OSD_FFW;
+	mpctx->rel_seek_secs+=step_sec;
+}
+
+ edl_update(mpctx);
 
   /* Looping. */
   if(mpctx->stop_play==AT_END_OF_FILE && opts->loop_times>=0) {

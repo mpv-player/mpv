@@ -2367,12 +2367,11 @@ static const struct {
 };
 #endif
 
-int run_command(MPContext *mpctx, mp_cmd_t *cmd)
+void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     sh_video_t * const sh_video = mpctx->sh_video;
-    int brk_cmd = 0;
     if (!set_property_command(mpctx, cmd))
 	switch (cmd->id) {
 	case MP_CMD_SEEK:{
@@ -2397,7 +2396,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    mpctx->rel_seek_secs += v;
 		    mpctx->osd_function = (v > 0) ? OSD_FFW : OSD_REW;
 		}
-		brk_cmd = 1;
 	    }
 	    break;
 
@@ -2562,7 +2560,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 			mpctx->stop_play = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
 		    if (mpctx->stop_play)
 			mpctx->play_tree_step = n;
-		    brk_cmd = 1;
 		}
 	    }
 	    break;
@@ -2579,7 +2576,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    play_tree_iter_free(i);
 		} else
 		    mpctx->stop_play = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
-		brk_cmd = 1;
 	    }
 	    break;
 
@@ -2593,7 +2589,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		else if (v < 0 && mpctx->playtree_iter->file > 1)
 		    mpctx->stop_play = PT_PREV_SRC;
 	    }
-	    brk_cmd = 1;
 	    break;
 
 	case MP_CMD_SUB_STEP:
@@ -2676,7 +2671,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    pt_iter_goto_head(mpctx->playtree_iter);
 		    mpctx->stop_play = PT_NEXT_SRC;
 		}
-		brk_cmd = 1;
 	    }
 	    break;
 
@@ -2700,7 +2694,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 			mpctx->stop_play = PT_NEXT_SRC;
 		    }
 		}
-		brk_cmd = 1;
 	    }
 	    break;
 
@@ -2710,7 +2703,6 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		   (mpctx->playtree_iter, 0, 1) != PLAY_TREE_ITER_END)
 		/* NOP */ ;
 	    mpctx->stop_play = PT_STOP;
-	    brk_cmd = 1;
 	    break;
 
 #ifdef CONFIG_RADIO
@@ -3242,5 +3234,4 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
             pause_player(mpctx);
 	break;
     }
-    return brk_cmd;
 }
