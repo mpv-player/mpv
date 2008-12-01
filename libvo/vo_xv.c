@@ -80,6 +80,8 @@ struct xvctx {
     int total_buffers;
     int have_visible_image_copy;
     int have_next_image_copy;
+    int unchanged_visible_image;
+    int unchanged_next_image;
     int visible_buf;
     XvImage *xvimage[NUM_BUFFERS + 1];
     uint32_t image_width;
@@ -90,6 +92,7 @@ struct xvctx {
     uint32_t max_width, max_height; // zero means: not set
     int event_fd_registered; // for uninit called from preinit
     int mode_switched;
+    int osd_objects_drawn;
     void (*draw_alpha_fnc)(void *ctx, int x0, int y0, int w, int h,
                            unsigned char *src, unsigned char *srca,
                            int stride);
@@ -115,6 +118,7 @@ static void draw_alpha_yv12(void *p, int x0, int y0, int w, int h,
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
                        ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + x0,
                        ctx->xvimage[ctx->current_buf]->pitches[0]);
+    ctx->osd_objects_drawn++;
 }
 
 static void draw_alpha_yuy2(void *p, int x0, int y0, int w, int h,
@@ -130,6 +134,7 @@ static void draw_alpha_yuy2(void *p, int x0, int y0, int w, int h,
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
                        ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + 2 * x0,
                        ctx->xvimage[ctx->current_buf]->pitches[0]);
+    ctx->osd_objects_drawn++;
 }
 
 static void draw_alpha_uyvy(void *p, int x0, int y0, int w, int h,
@@ -145,6 +150,7 @@ static void draw_alpha_uyvy(void *p, int x0, int y0, int w, int h,
                        ctx->xvimage[ctx->current_buf]->offsets[0] +
                        ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + 2 * x0 + 1,
                        ctx->xvimage[ctx->current_buf]->pitches[0]);
+    ctx->osd_objects_drawn++;
 }
 
 static void draw_alpha_null(void *p, int x0, int y0, int w, int h,
@@ -445,22 +451,28 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct xvctx *ctx = vo->priv;
 
+    ctx->osd_objects_drawn = 0;
     osd_draw_text(osd,
                   ctx->image_width -
                   ctx->image_width * vo->panscan_x / (vo->dwidth +
                                                       vo->panscan_x),
                   ctx->image_height, ctx->draw_alpha_fnc, vo);
+    if (ctx->osd_objects_drawn)
+        ctx->unchanged_next_image = false;
 }
 
 static int redraw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct xvctx *ctx = vo->priv;
 
-    // Could check if OSD was empty
-    if (!ctx->have_visible_image_copy)
+    if (ctx->have_visible_image_copy)
+        copy_backup_image(vo, ctx->visible_buf, ctx->num_buffers);
+    else if (ctx->unchanged_visible_image) {
+        copy_backup_image(vo, ctx->num_buffers, ctx->visible_buf);
+        ctx->have_visible_image_copy = true;
+    }
+    else
         return false;
-
-    copy_backup_image(vo, ctx->visible_buf, ctx->num_buffers);
     int temp = ctx->current_buf;
     ctx->current_buf = ctx->visible_buf;
     draw_osd(vo, osd);
@@ -479,6 +491,8 @@ static void flip_page(struct vo *vo)
 
     ctx->have_visible_image_copy = ctx->have_next_image_copy;
     ctx->have_next_image_copy = false;
+    ctx->unchanged_visible_image = ctx->unchanged_next_image;
+    ctx->unchanged_next_image = false;
 
     if (ctx->num_buffers > 1) {
         ctx->current_buf = vo_directrendering ? 0 : ((ctx->current_buf + 1) %
@@ -553,6 +567,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
         copy_backup_image(vo, ctx->num_buffers, ctx->current_buf);
         ctx->have_next_image_copy = true;
     }
+    ctx->unchanged_next_image = true;
     return true;
 }
 
