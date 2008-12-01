@@ -20,6 +20,7 @@ Buffer allocation:
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "options.h"
@@ -76,8 +77,11 @@ struct xvctx {
     int current_buf;
     int current_ip_buf;
     int num_buffers;
+    int total_buffers;
+    int have_visible_image_copy;
+    int have_next_image_copy;
     int visible_buf;
-    XvImage *xvimage[NUM_BUFFERS];
+    XvImage *xvimage[NUM_BUFFERS + 1];
     uint32_t image_width;
     uint32_t image_height;
     uint32_t image_format;
@@ -203,6 +207,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     ctx->is_paused = 0;
     ctx->visible_buf = -1;
+    ctx->have_visible_image_copy = false;
+    ctx->have_next_image_copy = false;
 
     /* check image formats */
     ctx->xv_format = 0;
@@ -280,13 +286,14 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     // In case config has been called before
-    for (i = 0; i < ctx->num_buffers; i++)
+    for (i = 0; i < ctx->total_buffers; i++)
         deallocate_xvimage(vo, i);
 
     ctx->num_buffers =
         vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
+    ctx->total_buffers = ctx->num_buffers + 1;
 
-    for (i = 0; i < ctx->num_buffers; i++)
+    for (i = 0; i < ctx->total_buffers; i++)
         allocate_xvimage(vo, i);
 
     ctx->current_buf = 0;
@@ -397,6 +404,18 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     }
 }
 
+// Only copies luma for planar formats as draw_alpha doesn't change others */
+void copy_backup_image(struct vo *vo, int dest, int src)
+{
+    struct xvctx *ctx = vo->priv;
+
+    XvImage *vb = ctx->xvimage[dest];
+    XvImage *cp = ctx->xvimage[src];
+    memcpy_pic(vb->data + vb->offsets[0], cp->data + cp->offsets[0],
+               vb->width, vb->height,
+               vb->pitches[0], cp->pitches[0]);
+}
+
 static void check_events(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
@@ -433,6 +452,23 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
                   ctx->image_height, ctx->draw_alpha_fnc, vo);
 }
 
+static int redraw_osd(struct vo *vo, struct osd_state *osd)
+{
+    struct xvctx *ctx = vo->priv;
+
+    // Could check if OSD was empty
+    if (!ctx->have_visible_image_copy)
+        return false;
+
+    copy_backup_image(vo, ctx->visible_buf, ctx->num_buffers);
+    int temp = ctx->current_buf;
+    ctx->current_buf = ctx->visible_buf;
+    draw_osd(vo, osd);
+    ctx->current_buf = temp;
+    put_xvimage(vo, ctx->xvimage[ctx->visible_buf]);
+    return true;
+}
+
 static void flip_page(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
@@ -440,6 +476,9 @@ static void flip_page(struct vo *vo)
 
     /* remember the currently visible buffer */
     ctx->visible_buf = ctx->current_buf;
+
+    ctx->have_visible_image_copy = ctx->have_next_image_copy;
+    ctx->have_next_image_copy = false;
 
     if (ctx->num_buffers > 1) {
         ctx->current_buf = vo_directrendering ? 0 : ((ctx->current_buf + 1) %
@@ -491,26 +530,30 @@ static int draw_frame(struct vo *vo, uint8_t *src[])
 static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct xvctx *ctx = vo->priv;
-    if (mpi->flags & MP_IMGFLAG_DIRECT) {
+
+    ctx->have_next_image_copy = false;
+
+    if (mpi->flags & MP_IMGFLAG_DIRECT)
         // direct rendering:
         ctx->current_buf = (int) (mpi->priv);        // hack!
-        return VO_TRUE;
-    }
-    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-        return VO_TRUE;         // done
-    if (mpi->flags & MP_IMGFLAG_PLANAR) {
+    else if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
+        ; // done
+    else if (mpi->flags & MP_IMGFLAG_PLANAR)
         draw_slice(vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
-        return VO_TRUE;
-    }
-    if (mpi->flags & MP_IMGFLAG_YUV) {
+    else if (mpi->flags & MP_IMGFLAG_YUV)
         // packed YUV:
         memcpy_pic(ctx->xvimage[ctx->current_buf]->data +
                    ctx->xvimage[ctx->current_buf]->offsets[0], mpi->planes[0],
                    mpi->w * (mpi->bpp / 8), mpi->h,
                    ctx->xvimage[ctx->current_buf]->pitches[0], mpi->stride[0]);
-        return VO_TRUE;
+    else
+          return false;
+
+    if (ctx->is_paused) {
+        copy_backup_image(vo, ctx->num_buffers, ctx->current_buf);
+        ctx->have_next_image_copy = true;
     }
-    return VO_FALSE;            // not (yet) supported
+    return true;
 }
 
 static uint32_t get_image(struct xvctx *ctx, mp_image_t *mpi)
@@ -599,7 +642,7 @@ static void uninit(struct vo *vo)
         XFree(ctx->fo);
         ctx->fo = NULL;
     }
-    for (i = 0; i < ctx->num_buffers; i++)
+    for (i = 0; i < ctx->total_buffers; i++)
         deallocate_xvimage(vo, i);
 #ifdef CONFIG_XF86VM
     if (ctx->mode_switched)
@@ -800,6 +843,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_SCREENINFO:
         update_xinerama_info(vo);
         return VO_TRUE;
+    case VOCTRL_REDRAW_OSD:
+        return redraw_osd(vo, data);
     }
     return VO_NOTIMPL;
 }

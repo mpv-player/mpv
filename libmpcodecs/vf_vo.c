@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -88,6 +89,8 @@ static int control(struct vf_instance* vf, int request, void* data)
 	if(!video_out->config_ok) return CONTROL_FALSE; // vo not configured?
 	vo_draw_osd(video_out, data);
 	return CONTROL_TRUE;
+    case VFCTRL_REDRAW_OSD:
+        return vo_control(video_out, VOCTRL_REDRAW_OSD, data) == true;
     case VFCTRL_FLIP_PAGE:
     {
 	if(!video_out->config_ok) return CONTROL_FALSE; // vo not configured?

@@ -2322,7 +2322,6 @@ void pause_player(struct MPContext *mpctx)
     if (mpctx->paused)
         return;
     mpctx->paused = 1;
-    mpctx->osd_function = OSD_PAUSE;
     mpctx->step_frames = 0;
     mpctx->time_frame -= get_relative_time(mpctx);
 
@@ -2338,13 +2337,21 @@ void unpause_player(struct MPContext *mpctx)
     if (!mpctx->paused)
         return;
     mpctx->paused = 0;
-    mpctx->osd_function = OSD_PLAY;
 
     if (mpctx->audio_out && mpctx->sh_audio)
         mpctx->audio_out->resume();	// resume audio
-    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
+    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok
+        && !mpctx->step_frames)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);	// resume video
     (void)get_relative_time(mpctx);	// ignore time that passed during pause
+}
+
+void add_step_frame(struct MPContext *mpctx)
+{
+    mpctx->step_frames++;
+    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
+	vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
+    unpause_player(mpctx);
 }
 
 static void pause_loop(struct MPContext *mpctx)
@@ -3781,6 +3788,8 @@ if(!mpctx->sh_video) {
 	  mpctx->stop_play = PT_NEXT_ENTRY;
           goto goto_next_file;
       }
+      if (blit_frame)
+          vo_osd_changed(0);
       if (frame_time < 0)
 	  mpctx->stop_play = AT_END_OF_FILE;
       else {
@@ -3905,11 +3914,20 @@ if(auto_quality>0){
       if (mpctx->stop_play)
           break;
   }
-  if (mpctx->paused && !(mpctx->stop_play || mpctx->rel_seek_secs
-                         || mpctx->abs_seek_pos))
-      pause_loop(mpctx);
-  else
+  if (!mpctx->paused || mpctx->stop_play || mpctx->rel_seek_secs
+      || mpctx->abs_seek_pos)
       break;
+  if (mpctx->sh_video) {
+      update_osd_msg(mpctx);
+      int hack = vo_osd_changed(0);
+      vo_osd_changed(hack);
+      if (hack)
+          if (redraw_osd(mpctx->sh_video, mpctx->osd) < 0) {
+              add_step_frame(mpctx);
+              break;
+          }
+  }
+  pause_loop(mpctx);
   }
 }
 

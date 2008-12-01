@@ -91,6 +91,7 @@ typedef struct vf_seteq_s
 /* Hack to make the OSD state object available to vf_expand which accesses
  * the OSD state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
+#define VFCTRL_REDRAW_OSD  21 /* Change user-visible OSD immediately */
 
 #include "vfcap.h"
 

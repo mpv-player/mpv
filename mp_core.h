@@ -144,5 +144,6 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr
 int reinit_video_chain(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
+void add_step_frame(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

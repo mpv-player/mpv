@@ -573,10 +573,14 @@ static int mp_property_pause(m_option_t *prop, int action, void *arg,
 	    return M_PROPERTY_OK;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-        if (mpctx->paused)
+        if (mpctx->paused) {
             unpause_player(mpctx);
-        else
+            mpctx->osd_function = OSD_PLAY;
+        }
+        else {
             pause_player(mpctx);
+            mpctx->osd_function = OSD_PAUSE;
+        }
 	return M_PROPERTY_OK;
     default:
 	return m_property_flag(prop, action, arg, &mpctx->paused);
@@ -2520,8 +2524,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	    } break;
 
 	case MP_CMD_FRAME_STEP:
-            mpctx->step_frames++;
-            unpause_player(mpctx);
+            add_step_frame(mpctx);
 	    break;
 
 	case MP_CMD_FILE_FILTER:
