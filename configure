@@ -4971,7 +4971,7 @@ fi
 if test "$_direct3d" = yes ; then
   _def_direct3d='#define CONFIG_DIRECT3D 1'
   _libs_mplayer="$_libs_mplayer -ld3d9"
-  _vosrc="$_vosrc vo_direct3d.c"
+  _vosrc="$_vosrc vo_direct3d.c w32_common.c"
   _vomodules="direct3d $_vomodules"
 else
   _def_direct3d='#undef CONFIG_DIRECT3D'
