@@ -1913,6 +1913,7 @@ EOF
   ia64)
     _arch='IA64'
     _target_arch='ARCH_IA64 = yes'
+    def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='ia64'
     ;;
 
@@ -1921,6 +1922,7 @@ EOF
     _target_arch='ARCH_X86_64 = yes'
     _target_arch_x86="ARCH_X86 = yes"
     _def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
+    def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='x86_64'
 
     # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
@@ -2150,6 +2152,7 @@ EOF
     _arch='ALPHA'
     _target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
+    def_fast_64bit='#define HAVE_FAST_64BIT 1'
 
     echocheck "CPU type"
     cat > $TMPC << EOF
@@ -2560,7 +2563,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMVFP IWMMXT MLIB MMI SH4 VIS MVI'
+_cpuexts_all='ALTIVEC BSWAP MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMVFP IWMMXT MLIB MMI SH4 VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2578,6 +2581,9 @@ test "$_armvfp"    = yes && _cpuexts="ARMVFP $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
 test "$_mvi"       = yes && _cpuexts="MVI $_cpuexts"
+if x86 ; then
+  _cpuexts="BSWAP $_cpuexts"
+fi
 
 # Checking kernel version...
 if x86_32 && linux ; then
@@ -8546,6 +8552,7 @@ $_def_libswscale_so
 $_def_dcbzl
 $_def_extern_prefix
 $_def_fast_unaligned
+$def_fast_64bit
 $_def_mkstemp
 $_def_pthreads
 $_def_threads
