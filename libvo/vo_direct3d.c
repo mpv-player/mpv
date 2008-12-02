@@ -208,7 +208,7 @@ static int create_d3d_surfaces(void)
 
     if (FAILED(IDirect3DDevice9_GetBackBuffer(priv->d3d_device, 0, 0,
                                               D3DBACKBUFFER_TYPE_MONO,
-                                              &(priv->d3d_backbuf)))) {
+                                              &priv->d3d_backbuf))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Back Buffer address get failed\n");
         return 0;
     }
