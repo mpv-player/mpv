@@ -180,12 +180,12 @@ static void destroy_d3d_surfaces(void)
         priv->locked_rect.pBits = NULL;
     }
 
-    if (priv->d3d_surface != NULL) {
+    if (priv->d3d_surface) {
         IDirect3DSurface9_Release(priv->d3d_surface);
         priv->d3d_surface = NULL;
     }
 
-    if (priv->d3d_backbuf != NULL) {
+    if (priv->d3d_backbuf) {
         IDirect3DSurface9_Release(priv->d3d_backbuf);
         priv->d3d_backbuf = NULL;
     }
@@ -298,7 +298,7 @@ static int reconfigure_d3d(void)
     destroy_d3d_surfaces();
 
     /* Destroy the D3D Device */
-    if (priv->d3d_device != NULL) {
+    if (priv->d3d_device) {
         IDirect3DDevice9_Release(priv->d3d_device);
         priv->d3d_device = NULL;
     }
@@ -367,13 +367,13 @@ static void uninit_d3d(void)
     destroy_d3d_surfaces();
 
     /* Destroy the D3D Device */
-    if (priv->d3d_device != NULL) {
+    if (priv->d3d_device) {
         IDirect3DDevice9_Release(priv->d3d_device);
         priv->d3d_device = NULL;
     }
 
     /* Stop the whole D3D. */
-    if (NULL != priv->d3d_handle) {
+    if (priv->d3d_handle) {
         mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Calling IDirect3D9_Release\r\n");
         IDirect3D9_Release(priv->d3d_handle);
     }
@@ -637,7 +637,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     destroy_d3d_surfaces();
 
     /* Destroy the D3D Device */
-    if (priv->d3d_device != NULL) {
+    if (priv->d3d_device) {
         IDirect3DDevice9_Release(priv->d3d_device);
         priv->d3d_device = NULL;
     }
