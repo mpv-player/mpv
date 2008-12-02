@@ -3443,11 +3443,14 @@ Play video through the XFree86 Direct Graphics Access extension.
 Considered obsolete.
 .
 .TP
-.B sdl (SDL only)
+.B sdl (SDL only, buggy/outdated)
 Highly platform independent SDL (Simple Directmedia Layer) library
 video output driver.
 Since SDL uses its own X11 layer, MPlayer X11 options do not have
 any effect on SDL.
+Note that it has several minor bugs (\-vm/\-novm is mostly ignored,
+\-fs behaves like \-novm should, window is in top-left corner when
+returning from fullscreen, panscan is not supported, ...)
 .PD 0
 .RSs
 .IPs driver=<driver>

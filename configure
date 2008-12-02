@@ -286,6 +286,7 @@ Optional features:
 Codecs:
   --enable-gif		    enable GIF support [autodetect]
   --enable-png		    enable PNG input/output support [autodetect]
+  --enable-mng		    enable MNG input support [autodetect]
   --enable-jpeg		    enable JPEG input/output support [autodetect]
   --enable-libcdio	    enable libcdio support [autodetect]
   --enable-liblzo	    enable liblzo support [autodetect]
@@ -422,6 +423,7 @@ Miscellaneous options:
   --cc=COMPILER          C compiler to build MPlayer [gcc]
   --host-cc=COMPILER     C compiler for tools needed while building [gcc]
   --as=ASSEMBLER         assembler to build MPlayer [as]
+  --nm=NM                nm tool to build MPlayer [nm]
   --yasm=YASM            Yasm assembler to build MPlayer [yasm]
   --ar=AR                librarian to build MPlayer [ar]
   --ranlib=RANLIB        ranlib to build MPlayer [ranlib]
@@ -508,6 +510,7 @@ _cc=cc
 _ar=ar
 test "$CC" && _cc="$CC"
 _as=auto
+_nm=auto
 _yasm=yasm
 _runtime_cpudetection=no
 _cross_compile=auto
@@ -553,6 +556,7 @@ _directx=auto
 _win32waveout=auto
 _nas=auto
 _png=auto
+_mng=auto
 _jpeg=auto
 _pnm=yes
 _md5sum=yes
@@ -713,6 +717,7 @@ _rpath=no
 _asmalign_pot=auto
 _stream_cache=yes
 _def_stream_cache="#define CONFIG_STREAM_CACHE 1"
+_def_pthread_cache="#undef PTHREAD_CACHE"
 _need_shmem=yes
 for ac_option do
   case "$ac_option" in
@@ -807,6 +812,9 @@ for ac_option do
   --as=*)
     _as=`echo $ac_option | cut -d '=' -f 2`
     ;;
+  --nm=*)
+    _nm=`echo $ac_option | cut -d '=' -f 2`
+    ;;
   --yasm=*)
     _yasm=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -879,6 +887,8 @@ for ac_option do
   --disable-nas)	_nas=no		;;
   --enable-png)		_png=yes	;;
   --disable-png)	_png=no		;;
+  --enable-mng)		_mng=yes	;;
+  --disable-mng)	_mng=no		;;
   --enable-jpeg)	_jpeg=yes	;;
   --disable-jpeg)	_jpeg=no		;;
   --enable-pnm)		_pnm=yes	;;
@@ -1549,6 +1559,11 @@ fi
 if test "$_as" = auto ; then
   _as=`$_cc -print-prog-name=as`
   test -z "$_as" && _as=as
+fi
+
+if test "$_nm" = auto ; then
+  _nm=`$_cc -print-prog-name=nm`
+  test -z "$_nm" && _nm=nm
 fi
 
 # XXX: this should be ok..
@@ -2269,7 +2284,7 @@ cat > $TMPC << EOF
 int ff_extern;
 EOF
 cc_check -c || die "Symbol mangling check failed."
-sym=$(nm -P -g $TMPEXE)
+sym=$($_nm -P -g $TMPEXE)
 extern_prefix=${sym%%ff_extern*}
 _def_extern_prefix="#define EXTERN_PREFIX \"$extern_prefix\""
 echores $extern_prefix
@@ -3125,6 +3140,15 @@ else
   mingw32 || _win32dll=no
 fi
 echores "$_pthreads"
+
+if cygwin ; then
+  if test "$_pthreads" = yes ; then
+    _def_pthread_cache="#define PTHREAD_CACHE 1"
+  else
+    _stream_cache=no
+    _def_stream_cache="#undef CONFIG_STREAM_CACHE"
+  fi
+fi
 
 echocheck "w32threads"
 if test "$_pthreads" = yes ; then
@@ -4673,6 +4697,28 @@ else
   _novomodules="png $_novomodules"
 fi
 
+echocheck "MNG support"
+if test "$_mng" = auto ; then
+  _mng=no
+  cat > $TMPC << EOF
+#include <libmng.h>
+int main(void) {
+  const char * p_ver = mng_version_text();
+  return !p_ver || p_ver[0] == 0;
+}
+EOF
+  if cc_check -lmng -lz $_ld_lm ; then
+    _mng=yes
+  fi
+fi
+echores "$_mng"
+if test "$_mng" = yes ; then
+  _def_mng='#define CONFIG_MNG 1'
+  _ld_extra="$_ld_extra -lmng -lz"
+else
+  _def_mng='#undef CONFIG_MNG'
+fi
+
 echocheck "JPEG support"
 if test "$_jpeg" = auto ; then
   _jpeg=no
@@ -4925,7 +4971,7 @@ fi
 if test "$_direct3d" = yes ; then
   _def_direct3d='#define CONFIG_DIRECT3D 1'
   _libs_mplayer="$_libs_mplayer -ld3d9"
-  _vosrc="$_vosrc vo_direct3d.c"
+  _vosrc="$_vosrc vo_direct3d.c w32_common.c"
   _vomodules="direct3d $_vomodules"
 else
   _def_direct3d='#undef CONFIG_DIRECT3D'
@@ -7994,6 +8040,7 @@ LIRC = $_lirc
 LIVE555 = $_live
 MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FINDER = $_macosx_finder
+MNG = $_mng
 MP3LAME = $_mp3lame
 MP3LIB = $_mp3lib
 MUSEPACK = $_musepack
@@ -8435,6 +8482,7 @@ $_def_ivtv
 $_def_jpeg
 $_def_md5sum
 $_def_mga
+$_def_mng
 $_def_png
 $_def_pnm
 $_def_quartz

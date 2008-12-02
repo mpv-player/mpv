@@ -312,7 +312,7 @@ static void sh_veu_wait_irq(vidix_playback_t *info)
     unsigned long n_pending;
 
     /* Wait for an interrupt */
-    read(uio_dev.fd, &n_pending, sizeof(u_long));
+    read(uio_dev.fd, &n_pending, sizeof(unsigned long));
 
     write_reg(&uio_mmio, 0x100, VEVTR); /* ack int, write 0 to bit 0 */
 }
@@ -473,7 +473,7 @@ static void sh_veu_blit(vidix_playback_t *info, int frame)
     write_reg(&uio_mmio, addr + info->offset.u, VSACR);
 
     /* Enable interrupt in UIO driver */
-    write(uio_dev.fd, &enable, sizeof(u_long));
+    write(uio_dev.fd, &enable, sizeof(unsigned long));
 
     write_reg(&uio_mmio, 1, VESTR); /* start operation */
 }
