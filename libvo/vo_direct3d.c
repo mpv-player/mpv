@@ -508,7 +508,7 @@ static int preinit(const char *arg)
     D3DDISPLAYMODE disp_mode;
 
     /* Set to zero all global variables. */
-    priv = calloc(1, sizeof (struct global_priv));
+    priv = calloc(1, sizeof(struct global_priv));
     if (!priv) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Not enough memory\r\n");
         return -1;
@@ -594,7 +594,7 @@ static int control(uint32_t request, void *data, ...)
         w32_update_xinerama_info();
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
-        calc_fs_rect ();
+        calc_fs_rect();
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
@@ -689,7 +689,7 @@ static void uninit(void)
 
     uninit_d3d();
     vo_w32_uninit(); /* w32_common framework call */
-    free (priv);
+    free(priv);
     priv = NULL;
 }
 
