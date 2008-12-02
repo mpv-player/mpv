@@ -95,7 +95,6 @@ static char* openURL_sip(SIPClient* client, char const* url) {
 int rtspStreamOverTCP = 0; 
 extern int rtsp_port;
 
-extern "C" int audio_id, video_id, dvdsub_id;
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
   struct MPOpts *opts = demuxer->opts;
   Boolean success = False;
@@ -258,7 +257,8 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
   if (demux_is_multiplexed_rtp_stream(demuxer)) {
     stream_t* s = new_ds_stream(demuxer->video);
     demuxer_t* od = demux_open(opts, s, DEMUXER_TYPE_UNKNOWN,
-			       audio_id, video_id, dvdsub_id, NULL);
+			       opts->audio_id, opts->video_id, opts->sub_id,
+                               NULL);
     demuxer = new_demuxers_demuxer(od, od, od);
   }
 
@@ -638,7 +638,7 @@ demux_packet_t* ReadBufferQueue::getPendingBuffer() {
   return dp;
 }
 
-static int demux_rtp_control(struct demuxer_st *demuxer, int cmd, void *arg) {
+static int demux_rtp_control(struct demuxer *demuxer, int cmd, void *arg) {
   double endpts = ((RTPState*)demuxer->priv)->mediaSession->playEndTime();
 
   switch(cmd) {
