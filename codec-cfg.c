@@ -24,6 +24,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -37,15 +38,16 @@
 
 #include "help_mp.h"
 
-// for mmioFOURCC:
-#include "libmpdemux/aviheader.h"
-
 #include "libmpcodecs/img_format.h"
 #include "codec-cfg.h"
 
 #ifndef CODECS2HTML
 #include "codecs.conf.h"
 #endif
+
+#define mmioFOURCC( ch0, ch1, ch2, ch3 )				\
+		( (uint32_t)(uint8_t)(ch0) | ( (uint32_t)(uint8_t)(ch1) << 8 ) |	\
+		( (uint32_t)(uint8_t)(ch2) << 16 ) | ( (uint32_t)(uint8_t)(ch3) << 24 ) )
 
 #define PRINT_LINENUM mp_msg(MSGT_CODECCFG,MSGL_ERR," at line %d\n", line_num)
 
