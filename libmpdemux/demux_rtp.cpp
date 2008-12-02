@@ -8,6 +8,7 @@ extern "C" {
 #endif
 #include "demux_rtp.h"
 #include "stheader.h"
+#include "options.h"
 }
 #include "demux_rtp_internal.h"
 
