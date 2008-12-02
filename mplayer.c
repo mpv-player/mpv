@@ -685,7 +685,7 @@ void uninit_player(unsigned int mask){
   current_module=NULL;
 }
 
-void exit_player_with_rc(const char* how, int rc){
+void exit_player_with_rc(exit_reason_t how, int rc){
 
   if (mpctx->user_muted && !mpctx->edl_muted) mixer_mute(&mpctx->mixer); 
   uninit_player(INITIALIZED_ALL);
@@ -724,13 +724,28 @@ void exit_player_with_rc(const char* how, int rc){
 
 
   if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
-  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,how);
+  switch(how) {
+  case EXIT_QUIT:
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,MSGTR_Exit_quit);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=QUIT\n");
+    break;
+  case EXIT_EOF:
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,MSGTR_Exit_eof);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=EOF\n");
+    break;
+  case EXIT_ERROR:
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,MSGTR_Exit_error);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=ERROR\n");
+    break;
+  default:
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=NONE\n");
+  }
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
 
   exit(rc);
 }
 
-void exit_player(const char* how){
+void exit_player(exit_reason_t how){
   exit_player_with_rc(how, 1);
 }
 
@@ -827,7 +842,7 @@ char *conffile;
 int conffile_fd;
 if (!disable_system_conf &&
     m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
-  exit_player(NULL);
+  exit_player(EXIT_NONE);
 if ((conffile = get_path("")) == NULL) {
   mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
 } else {
@@ -847,7 +862,7 @@ if ((conffile = get_path("")) == NULL) {
     }
     if (!disable_user_conf &&
         m_config_parse_config_file(conf, conffile) < 0)
-      exit_player(NULL);
+      exit_player(EXIT_NONE);
     free(conffile);
   }
 }
@@ -958,7 +973,7 @@ static int libmpdemux_was_interrupted(int eof) {
   if((cmd = mp_input_get_cmd(0,0,0)) != NULL) {
        switch(cmd->id) {
        case MP_CMD_QUIT:
-	 exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
+	 exit_player_with_rc(EXIT_QUIT, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
        case MP_CMD_PLAY_TREE_STEP: {
 	 eof = (cmd->args[0].v.i > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
 	 mpctx->play_tree_step = (cmd->args[0].v.i == 0) ? 1 : cmd->args[0].v.i;
@@ -1586,7 +1601,7 @@ if(mpctx->sh_audio){
 	// output:
 	&ao_data.samplerate, &ao_data.channels, &ao_data.format)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
-      exit_player(MSGTR_Exit_error);
+      exit_player(EXIT_ERROR);
   }
 #endif  
   current_module="ao2_init";
@@ -2672,7 +2687,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   if(!parse_codec_cfg(mem_ptr=get_path("codecs.conf"))){
     if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
       if(!parse_codec_cfg(NULL)){
-        exit_player_with_rc(NULL, 0);
+        exit_player_with_rc(EXIT_NONE, 0);
       }
       mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_BuiltinCodecsConf);
     }
@@ -2737,18 +2752,18 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
     }
 
     if(opt_exit)
-      exit_player(NULL);
+      exit_player(EXIT_NONE);
 
     if (player_idle_mode && use_gui) {
         mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoIdleAndGui);
-        exit_player_with_rc(NULL, 1);
+        exit_player_with_rc(EXIT_NONE, 1);
     }
 
     if(!filename && !player_idle_mode){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
-        exit_player_with_rc(NULL, 0);
+        exit_player_with_rc(EXIT_NONE, 0);
       } else gui_no_filename=1;
     }
 
@@ -3001,7 +3016,7 @@ while (player_idle_mode && !filename) {
             entry = parse_playlist_file(cmd->args[0].v.s);
             break;
         case MP_CMD_QUIT:
-            exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
+            exit_player_with_rc(EXIT_QUIT, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
             break;
         case MP_CMD_GET_PROPERTY:
         case MP_CMD_SET_PROPERTY:
@@ -3146,14 +3161,14 @@ if(stream_dump_type==5){
   current_module="dumpstream";
   if(mpctx->stream->type==STREAMTYPE_STREAM && mpctx->stream->fd<0){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpstreamFdUnavailable);
-    exit_player(MSGTR_Exit_error);
+    exit_player(EXIT_ERROR);
   }
   stream_reset(mpctx->stream);
   stream_seek(mpctx->stream,mpctx->stream->start_pos);
   f=fopen(stream_dump_name,"wb");
   if(!f){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
-    exit_player(MSGTR_Exit_error);
+    exit_player(EXIT_ERROR);
   }
   if (dvd_chapter > 1) {
     int chapter = dvd_chapter - 1;
@@ -3164,7 +3179,7 @@ if(stream_dump_type==5){
       if(len>0) {
         if(fwrite(buf,len,1,f) != 1) {
           mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile,stream_dump_name);
-          exit_player(MSGTR_Exit_error);
+          exit_player(EXIT_ERROR);
         }
       }
       if(dvd_last_chapter > 0) {
@@ -3176,10 +3191,10 @@ if(stream_dump_type==5){
   }
   if(fclose(f)) {
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile,stream_dump_name);
-    exit_player(MSGTR_Exit_error);
+    exit_player(EXIT_ERROR);
   }
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
-  exit_player_with_rc(MSGTR_Exit_eof, 0);
+  exit_player_with_rc(EXIT_EOF, 0);
 }
 
 #ifdef CONFIG_DVDREAD
@@ -3341,7 +3356,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
   }
   if(!ds){        
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpSelectedStreamMissing);
-      exit_player(MSGTR_Exit_error);
+      exit_player(EXIT_ERROR);
   }
   // disable other streams:
   if(mpctx->d_audio && mpctx->d_audio!=ds) {ds_free_packs(mpctx->d_audio); mpctx->d_audio->id=-2; }
@@ -3351,7 +3366,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
   f=fopen(stream_dump_name,"wb");
   if(!f){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
-    exit_player(MSGTR_Exit_error);
+    exit_player(EXIT_ERROR);
   }
   while(!ds->eof){
     unsigned char* start;
@@ -3367,7 +3382,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
   }
   fclose(f);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
-  exit_player_with_rc(MSGTR_Exit_eof, 0);
+  exit_player_with_rc(EXIT_EOF, 0);
 }
 
 mpctx->sh_audio=mpctx->d_audio->sh;
@@ -4031,7 +4046,7 @@ if(use_gui || mpctx->playtree_iter != NULL || player_idle_mode){
 }
 
 
-exit_player_with_rc(MSGTR_Exit_eof, 0);
+exit_player_with_rc(EXIT_EOF, 0);
 
 return 1;
 }
