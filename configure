@@ -8298,6 +8298,7 @@ $_def_runtime_cpudetection
 $_def_sighandler
 $_def_sortsub
 $_def_stream_cache
+$_def_pthread_cache
 
 
 /* CPU stuff */
