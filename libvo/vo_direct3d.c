@@ -549,7 +549,7 @@ static int preinit(const char *arg)
 /** @brief libvo Callback: Handle control requests.
  *  @return VO_TRUE on success, VO_NOTIMPL when not implemented
  */
-static int control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data)
 {
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
