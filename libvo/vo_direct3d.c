@@ -330,9 +330,6 @@ static int resize_d3d(void)
 
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d><INFO>resize_d3d called.\n");
 
-
-    check_events();
-
     destroy_d3d_surfaces();
 
     /* Reset the D3D Device with all parameters the same except the new
