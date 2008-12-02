@@ -386,8 +386,6 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
      * if (mpi->flags & MP_IMGFLAG_DIRECT) ...
      */
 
-    resize_d3d();
-
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         goto skip_upload;
 
