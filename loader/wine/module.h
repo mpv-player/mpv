@@ -139,11 +139,11 @@ typedef struct modref_list_t
 
 
 /* module.c */
-extern FARPROC MODULE_GetProcAddress( HMODULE hModule, LPCSTR function, WIN_BOOL snoop );
-extern WINE_MODREF *MODULE32_LookupHMODULE( HMODULE hModule );
-extern WINE_MODREF *MODULE_FindModule( LPCSTR path );
+FARPROC MODULE_GetProcAddress( HMODULE hModule, LPCSTR function, WIN_BOOL snoop );
+WINE_MODREF *MODULE32_LookupHMODULE( HMODULE hModule );
+WINE_MODREF *MODULE_FindModule( LPCSTR path );
 
 /* resource.c */
-extern INT       WINAPI AccessResource(HMODULE,HRSRC); 
+INT WINAPI AccessResource( HMODULE, HRSRC );
 
 #endif /* MPLAYER_MODULE_H */

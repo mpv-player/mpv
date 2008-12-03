@@ -61,10 +61,10 @@ static int getch2_key_db=0;
 #if 0
 #include <termcap.h>
 #else
-  extern int tgetent (char *BUFFER, char *TERMTYPE);
-  extern int tgetnum (char *NAME);
-  extern int tgetflag (char *NAME);
-  extern char *tgetstr (char *NAME, char **AREA);
+int tgetent(char *BUFFER, char *TERMTYPE);
+int tgetnum(char *NAME);
+int tgetflag(char *NAME);
+char *tgetstr(char *NAME, char **AREA);
 #endif
 
 static char term_buffer[4096];

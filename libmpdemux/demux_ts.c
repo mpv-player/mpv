@@ -1107,7 +1107,7 @@ static void demux_close_ts(demuxer_t * demuxer)
 }
 
 
-extern unsigned char mp_getbits(unsigned char*, unsigned int, unsigned char);
+unsigned char mp_getbits(unsigned char*, unsigned int, unsigned char);
 #define getbits mp_getbits
 
 static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, int pid, ES_stream_t *pes_es)
@@ -3085,7 +3085,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 }
 
 
-extern void skip_audio_frame(sh_audio_t *sh_audio);
+void skip_audio_frame(sh_audio_t *sh_audio);
 
 static void reset_fifos(demuxer_t *demuxer, int a, int v, int s)
 {

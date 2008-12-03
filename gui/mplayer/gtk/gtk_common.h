@@ -22,20 +22,20 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-extern GtkWidget * AddDialogFrame( GtkWidget * parent );
-extern GtkWidget * AddFrame( const char * title,int type,GtkWidget * parent,int add );
-extern GtkWidget * AddLabel( const char * title,GtkWidget * parent );
-extern GtkWidget * AddVBox( GtkWidget * parent,int type );
-extern GtkWidget * AddHBox( GtkWidget * parent,int type );
-extern GtkWidget * AddCheckButton( const char * title, GtkWidget * parent );
-extern GtkWidget * AddRadioButton( const char * title,GSList ** group,GtkWidget * parent );
-extern GtkWidget * AddSpinButton( const char * title,GtkAdjustment * adj,GtkWidget * parent );
-extern GtkWidget * AddButton( const char * title,GtkWidget * parent );
-extern GtkWidget * AddHSeparator( GtkWidget * parent );
-extern GtkWidget * AddHButtonBox( GtkWidget * parent );
-extern GtkWidget * AddHScaler( GtkAdjustment * adj,GtkWidget * parent,int digit );
-extern GtkWidget * AddVScaler( GtkAdjustment * adj,GtkWidget * parent,int digit );
-extern GtkWidget * AddComboBox( GtkWidget * parent );
-extern void WidgetDestroy( GtkWidget * widget,GtkWidget ** widget_pointer );
+GtkWidget * AddDialogFrame( GtkWidget * parent );
+GtkWidget * AddFrame( const char * title, int type, GtkWidget * parent, int add );
+GtkWidget * AddLabel( const char * title, GtkWidget * parent );
+GtkWidget * AddVBox( GtkWidget * parent, int type );
+GtkWidget * AddHBox( GtkWidget * parent, int type );
+GtkWidget * AddCheckButton( const char * title, GtkWidget * parent );
+GtkWidget * AddRadioButton( const char * title, GSList ** group, GtkWidget * parent );
+GtkWidget * AddSpinButton( const char * title, GtkAdjustment * adj, GtkWidget * parent );
+GtkWidget * AddButton( const char * title, GtkWidget * parent );
+GtkWidget * AddHSeparator( GtkWidget * parent );
+GtkWidget * AddHButtonBox( GtkWidget * parent );
+GtkWidget * AddHScaler( GtkAdjustment * adj, GtkWidget * parent, int digit );
+GtkWidget * AddVScaler( GtkAdjustment * adj, GtkWidget * parent, int digit );
+GtkWidget * AddComboBox( GtkWidget * parent );
+void WidgetDestroy( GtkWidget * widget, GtkWidget ** widget_pointer );
 
 #endif /* MPLAYER_GUI_GTK_COMMON_H */

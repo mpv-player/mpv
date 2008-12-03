@@ -29,23 +29,23 @@ extern int             mainVisible;
 extern int             mplMainAutoPlay;
 extern int             mplMiddleMenu;
 
-extern void mplInit( void * disp );
+void mplInit( void * disp );
 
-extern void mplMainDraw( void );
-extern void mplEventHandling( int msg,float param );
-extern void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY );
-extern void mplMainKeyHandle( int KeyCode,int Type,int Key );
-extern void mplDandDHandler(int num,char** files);
+void mplMainDraw( void );
+void mplEventHandling( int msg, float param );
+void mplMainMouseHandle( int Button, int X, int Y, int RX, int RY );
+void mplMainKeyHandle( int KeyCode, int Type, int Key );
+void mplDandDHandler(int num, char** files);
 
-extern void mplSubDraw( void );
-extern void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY );
+void mplSubDraw( void );
+void mplSubMouseHandle( int Button, int X, int Y, int RX, int RY );
 
-extern void mplMenuInit( void );
-extern void mplHideMenu( int mx,int my,int w );
-extern void mplShowMenu( int mx,int my );
-extern void mplMenuMouseHandle( int X,int Y,int RX,int RY );
+void mplMenuInit( void );
+void mplHideMenu( int mx, int my, int w );
+void mplShowMenu( int mx, int my );
+void mplMenuMouseHandle( int X, int Y, int RX, int RY );
 
-extern void mplPBInit( void );
-extern void mplPBShow( int x, int y );
+void mplPBInit( void );
+void mplPBShow( int x, int y );
 
 #endif /* MPLAYER_GUI_GMPLAYER_H */

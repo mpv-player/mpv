@@ -53,7 +53,7 @@
 #include "play.h"
 #include "widgets.h"
 
-extern unsigned int GetTimerMS( void );
+unsigned int GetTimerMS( void );
 
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;

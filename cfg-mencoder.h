@@ -8,8 +8,8 @@
 #include "cfg-common.h"
 
 extern int sws_flags;
-extern int readPPOpt(void *, char *arg);
-extern void revertPPOpt(void *conf, char* opt);
+int readPPOpt(void *, char *arg);
+void revertPPOpt(void *conf, char* opt);
 extern char *pp_help;
 
 extern m_option_t lameopts_conf[];
@@ -20,7 +20,7 @@ extern m_option_t faacopts_conf[];
 extern m_option_t vfwopts_conf[];
 extern m_option_t xvidencopts_conf[];
 
-extern void x264enc_set_param(const m_option_t* opt, char* arg);
+void x264enc_set_param(const m_option_t* opt, char* arg);
 
 extern m_option_t nuvopts_conf[];
 extern m_option_t mpegopts_conf[];
@@ -155,8 +155,8 @@ const m_option_t of_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-extern float avi_aspect_override; /* defined in libmpdemux/muxer_avi.c */
-extern int write_odml; /* defined in libmpdemux/muxer_avi.c */
+float avi_aspect_override; /* defined in libmpdemux/muxer_avi.c */
+int write_odml; /* defined in libmpdemux/muxer_avi.c */
 
 const m_option_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */

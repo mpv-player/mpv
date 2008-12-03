@@ -162,13 +162,13 @@ extern guiInterface_t guiIntfStruct;
 
 extern int use_gui;
 
-extern void guiInit( void );
-extern void guiDone( void );
-extern int  guiGetEvent( int type,char * arg );
-extern void guiEventHandling( void );
-extern void guiLoadFont( void );
-extern void guiLoadSubtitle( char * name );
-extern void guiMessageBox(int level, char * str);
+void guiInit( void );
+void guiDone( void );
+int  guiGetEvent( int type,char * arg );
+void guiEventHandling( void );
+void guiLoadFont( void );
+void guiLoadSubtitle( char * name );
+void guiMessageBox(int level, char * str);
 
 typedef struct plItem
 {
@@ -223,13 +223,13 @@ extern char * fsHistory[fsPersistant_MaxPos];
 
 extern float gtkEquChannels[6][10];
 
-extern void * gtkSet( int cmd,float param, void * vparam );
+void * gtkSet( int cmd, float param, void * vparam );
 
-extern char * gstrdup( const char * str );
-extern int    gstrcmp( const char * a,const char * b );
-extern void   gfree( void ** p );
-extern void   gaddlist( char *** list,const char * entry );
-extern char * gstrchr( char * str,int c );
+char * gstrdup( const char * str );
+int    gstrcmp( const char * a, const char * b );
+void   gfree( void ** p );
+void   gaddlist( char *** list, const char * entry );
+char * gstrchr( char * str, int c );
 
 #define guiSetFilename( s,n ) { gfree( (void **)&s ); s=gstrdup( n ); }
 

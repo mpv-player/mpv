@@ -31,7 +31,7 @@ struct DMO_AudioDecoder
 #include "mp_msg.h"
 
 typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
-extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 DMO_AudioDecoder * DMO_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* wf,int out_channels)
 //DMO_AudioDecoder * DMO_AudioDecoder_Create(const CodecInfo * info, const WAVEFORMATEX* wf)

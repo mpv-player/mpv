@@ -66,12 +66,12 @@
 #include <sys/io.h>
 #elif defined (__FreeBSD__)
 #include <sys/types.h>
-extern void outb(u_int32_t port, u_int8_t val);
-extern void outw(u_int32_t port, u_int16_t val);
-extern void outl(u_int32_t port, u_int32_t val);
-extern u_int8_t inb(u_int32_t port);
-extern u_int16_t inw(u_int32_t port);
-extern u_int32_t inl(u_int32_t port);
+void outb(u_int32_t port, u_int8_t val);
+void outw(u_int32_t port, u_int16_t val);
+void outl(u_int32_t port, u_int32_t val);
+u_int8_t inb(u_int32_t port);
+u_int16_t inw(u_int32_t port);
+u_int32_t inl(u_int32_t port);
 #else
 #error This stuff is not ported on your system
 #endif

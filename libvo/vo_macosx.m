@@ -85,8 +85,8 @@ static vo_info_t info =
 
 LIBVO_EXTERN(macosx)
 
-extern void mplayer_put_key(int code);
-extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
+void mplayer_put_key(int code);
+void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
 {

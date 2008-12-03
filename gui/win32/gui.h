@@ -99,23 +99,23 @@ struct gui_t
 #define     wsMovable       2
 #define     wsSizeable      4
 
-extern gui_t *create_gui(char *skindir, char *skinName, void (*playercontrol)(int event));
-extern int destroy_window(gui_t *gui);
-extern int create_window(gui_t *gui, char *skindir);
-extern int create_subwindow(gui_t *gui, char *skindir);
-extern int parse_filename(char *file, play_tree_t *playtree, m_config_t *mconfig, int clear);
-extern void capitalize(char *filename);
-extern int import_playtree_playlist_into_gui(play_tree_t *my_playtree, m_config_t *config);
+gui_t *create_gui(char *skindir, char *skinName, void (*playercontrol)(int event));
+int destroy_window(gui_t *gui);
+int create_window(gui_t *gui, char *skindir);
+int create_subwindow(gui_t *gui, char *skindir);
+int parse_filename(char *file, play_tree_t *playtree, m_config_t *mconfig, int clear);
+void capitalize(char *filename);
+int import_playtree_playlist_into_gui(play_tree_t *my_playtree, m_config_t *config);
 
 /* Dialogs */
-extern void display_playlistwindow(gui_t *gui);
-extern void update_playlistwindow(void);
-extern int display_openfilewindow(gui_t *gui, int add);
-extern void display_openurlwindow(gui_t *gui, int add);
-extern void display_skinbrowser(gui_t *gui);
-extern void display_chapterselwindow(gui_t *gui);
-extern void display_eqwindow(gui_t *gui);
-extern void display_prefswindow(gui_t *gui);
-extern void display_opensubtitlewindow(gui_t *gui);
+void display_playlistwindow(gui_t *gui);
+void update_playlistwindow(void);
+int display_openfilewindow(gui_t *gui, int add);
+void display_openurlwindow(gui_t *gui, int add);
+void display_skinbrowser(gui_t *gui);
+void display_chapterselwindow(gui_t *gui);
+void display_eqwindow(gui_t *gui);
+void display_prefswindow(gui_t *gui);
+void display_opensubtitlewindow(gui_t *gui);
 
 #endif /* MPLAYER_GUI_GUI_H */

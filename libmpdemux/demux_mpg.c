@@ -879,7 +879,7 @@ do{
   return 1;
 }
 
-extern void skip_audio_frame(sh_audio_t *sh_audio);
+void skip_audio_frame(sh_audio_t *sh_audio);
 
 void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, int flags){
     demux_stream_t *d_audio=demuxer->audio;

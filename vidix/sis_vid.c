@@ -167,7 +167,7 @@ static unsigned short sis_card_ids[] = {
 
 /** function declarations **/
 
-extern void sis_init_video_bridge(void);
+void sis_init_video_bridge(void);
 
 
 static void set_overlay(SISOverlayPtr pOverlay, int index);

@@ -47,7 +47,7 @@ extern int video_id;
 extern int dvdsub_id;
 extern int vobsub_id;
 
-extern void exit_player(const char* how);
-extern void update_set_of_subtitles(void);
+void exit_player(const char* how);
+void update_set_of_subtitles(void);
 
 #endif /* MPLAYER_MPLAYER_H */

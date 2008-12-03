@@ -47,7 +47,7 @@
 #include "libavutil/avstring.h"
 #include "libavutil/intreadwrite.h"
 
-extern void skip_audio_frame( sh_audio_t *sh_audio );
+void skip_audio_frame( sh_audio_t *sh_audio );
 extern int sub_justify;
 
 // 2/c0: audio data

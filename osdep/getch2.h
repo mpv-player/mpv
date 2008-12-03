@@ -12,20 +12,20 @@ extern int screen_height;
 extern char * erase_to_end_of_line;
 
 /* Get screen-size using IOCTL call. */
-extern void get_screen_size(void);
+void get_screen_size(void);
 
 /* Load key definitions from the TERMCAP database. 'termtype' can be NULL */
-extern int load_termcap(char *termtype);
+int load_termcap(char *termtype);
 
 /* Enable and disable STDIN line-buffering */
-extern void getch2_enable(void);
-extern void getch2_disable(void);
+void getch2_enable(void);
+void getch2_disable(void);
 
 /* Read a character or a special key code (see keycodes.h) */
-extern void getch2(void);
+void getch2(void);
 
 /* slave cmd function for Windows and OS/2 */
-extern int mp_input_slave_cmd_func(int fd,char* dest,int size);
+int mp_input_slave_cmd_func(int fd,char* dest,int size);
 
 #if defined(__MINGW32__) || defined(__OS2__)
 #define USE_SELECT  0

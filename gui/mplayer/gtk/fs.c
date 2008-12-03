@@ -43,7 +43,7 @@
 #ifndef __linux__
 #define get_current_dir_name()  getcwd(NULL, PATH_MAX)
 #else
-extern char * get_current_dir_name( void );
+char * get_current_dir_name( void );
 #endif
 
 gchar         * fsSelectedFile = NULL;

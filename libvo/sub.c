@@ -1030,7 +1030,7 @@ void *vo_vobsub=NULL;
 
 static int draw_alpha_init_flag=0;
 
-extern void vo_draw_alpha_init(void);
+void vo_draw_alpha_init(void);
 
        mp_osd_obj_t* vo_osd_list=NULL;
 

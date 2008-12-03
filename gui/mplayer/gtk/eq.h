@@ -23,7 +23,7 @@
 
 extern GtkWidget * Equalizer;
 
-extern GtkWidget * create_Equalizer( void );
-extern void ShowEqualizer( void );
+GtkWidget * create_Equalizer( void );
+void ShowEqualizer( void );
 
 #endif /* MPLAYER_GUI_EQ_H */

@@ -30,11 +30,11 @@ typedef struct
 extern "C" 
 {
 #endif
-extern void LDT_BytesToEntry( const unsigned long *buffer, ldt_entry *content);
-extern void LDT_EntryToBytes( unsigned long *buffer, const ldt_entry *content);
-extern int LDT_GetEntry( int entry, ldt_entry *content );
-extern int LDT_SetEntry( int entry, const ldt_entry *content );
-extern void LDT_Print( int start, int length );
+void LDT_BytesToEntry( const unsigned long *buffer, ldt_entry *content );
+void LDT_EntryToBytes( unsigned long *buffer, const ldt_entry *content );
+int LDT_GetEntry( int entry, ldt_entry *content );
+int LDT_SetEntry( int entry, const ldt_entry *content );
+void LDT_Print( int start, int length );
 
 
   /* This structure is used to build the local copy of the LDT. */

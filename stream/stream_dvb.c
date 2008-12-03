@@ -105,13 +105,13 @@ const m_option_t dvbin_opts_conf[] = {
 
 
 
-extern int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype);
-extern int dvb_demux_stop(int fd);
-extern int dvb_get_tuner_type(int fd);
+int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype);
+int dvb_demux_stop(int fd);
+int dvb_get_tuner_type(int fd);
 int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt);
 int dvb_fix_demuxes(dvb_priv_t *priv, int cnt);
 
-extern int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
+int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
 		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
 		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout);

@@ -361,7 +361,7 @@ static void exit_sighandler(int x){
 
 static muxer_t* muxer=NULL;
 
-extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 int main(int argc,char* argv[]){
 

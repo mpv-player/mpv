@@ -1159,7 +1159,7 @@ static HANDLE WINAPI expHeapCreate(long flags, long init_size, long max_size)
 // we will silently ignore this second call...
 static void* heapfreehack = 0;
 static int heapfreehackshown = 0;
-//extern void trapbug(void);
+//void trapbug(void);
 static void* WINAPI expHeapAlloc(HANDLE heap, int flags, int size)
 {
     void* z;

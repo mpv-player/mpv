@@ -28,8 +28,8 @@
 /*    || defined(HAVE_SSE) || defined(HAVE_SSE2) */
 #include <stddef.h>
 
-extern void * fast_memcpy(void * to, const void * from, size_t len);
-extern void * mem2agpcpy(void * to, const void * from, size_t len);
+void * fast_memcpy(void * to, const void * from, size_t len);
+void * mem2agpcpy(void * to, const void * from, size_t len);
 
 #else /* HAVE_MMX/MMX2/3DNOW/SSE/SSE2 */
 #define mem2agpcpy(a,b,c) memcpy(a,b,c)

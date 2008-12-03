@@ -124,8 +124,8 @@ char *heartbeat_cmd;
 #include "playtree.h"
 #include "playtreeparser.h"
 
-extern int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* config);
-extern int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* config, int enqueue);
+int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* config);
+int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* config, int enqueue);
 
 //**************************************************************************//
 //             Config
@@ -339,7 +339,7 @@ char* current_module=NULL; // for debugging
 #ifdef CONFIG_MENU
 #include "m_struct.h"
 #include "libmenu/menu.h"
-extern void vf_menu_pause_update(struct vf_instance_s* vf);
+void vf_menu_pause_update(struct vf_instance_s* vf);
 extern vf_info_t vf_info_menu;
 static vf_info_t* libmenu_vfs[] = {
   &vf_info_menu,
@@ -832,7 +832,7 @@ static void exit_sighandler(int x){
   exit(1);
 }
 
-extern void mp_input_register_options(m_config_t* cfg);
+void mp_input_register_options(m_config_t* cfg);
 
 #include "cfg-mplayer.h"
 

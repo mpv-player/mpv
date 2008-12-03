@@ -31,7 +31,7 @@
 #include "vidix/dhahelperwin/dhahelper.h"
 
 static HANDLE hDriver;
-extern int IsWinNT();
+int IsWinNT();
 
 
 

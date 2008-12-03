@@ -54,7 +54,7 @@ static float window_aspect;
 static vidix_grkey_t gr_key;
     
 
-extern void set_video_eq( int cap );
+void set_video_eq(int cap);
 
 
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

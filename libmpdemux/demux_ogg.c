@@ -29,7 +29,7 @@
 
 #ifdef CONFIG_OGGTHEORA
 #include <theora/theora.h>
-extern int _ilog (unsigned int); /* defined in many places in theora/lib/ */
+int _ilog (unsigned int); /* defined in many places in theora/lib/ */
 #endif
 
 #define BLOCK_SIZE 4096
@@ -607,11 +607,11 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
   
 }
 
-extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
-extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 /* defined in demux_mov.c */
-extern unsigned int store_ughvlc(unsigned char *s, unsigned int v);
+unsigned int store_ughvlc(unsigned char *s, unsigned int v);
 
 /** \brief Change the current subtitle stream and return its ID.
 

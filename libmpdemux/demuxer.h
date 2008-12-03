@@ -404,16 +404,16 @@ int demux_ogg_num_subs(demuxer_t *demuxer);
 int demux_ogg_sub_id(demuxer_t *demuxer, int index);
 #endif
 
-extern int demuxer_get_current_time(demuxer_t *demuxer);
-extern double demuxer_get_time_length(demuxer_t *demuxer);
-extern int demuxer_get_percent_pos(demuxer_t *demuxer);
-extern int demuxer_switch_audio(demuxer_t *demuxer, int index);
-extern int demuxer_switch_video(demuxer_t *demuxer, int index);
+int demuxer_get_current_time(demuxer_t *demuxer);
+double demuxer_get_time_length(demuxer_t *demuxer);
+int demuxer_get_percent_pos(demuxer_t *demuxer);
+int demuxer_switch_audio(demuxer_t *demuxer, int index);
+int demuxer_switch_video(demuxer_t *demuxer, int index);
 
-extern int demuxer_type_by_filename(char* filename);
+int demuxer_type_by_filename(char* filename);
 
-extern void demuxer_help(void);
-extern int get_demuxer_type_from_name(char *demuxer_name, int *force);
+void demuxer_help(void);
+int get_demuxer_type_from_name(char *demuxer_name, int *force);
 
 int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
                            const char* type, const void* data, size_t size);

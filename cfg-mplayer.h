@@ -40,8 +40,8 @@ extern int menu_fribidi_flip_commas;
 
 extern char *unrar_executable;
 
-extern int vo_zr_parseoption(const m_option_t* conf, char *opt, char * param);
-extern void vo_zr_revertoption(const m_option_t* opt,char* pram);
+int vo_zr_parseoption(const m_option_t* conf, char *opt, char * param);
+void vo_zr_revertoption(const m_option_t* opt,char* pram);
 
 extern m_option_t dxr2_opts[];
 
@@ -54,8 +54,8 @@ extern float force_monitor_aspect;
 extern float monitor_pixel_aspect;
 
 extern int sws_flags;
-extern int readPPOpt(void *conf, char *arg);
-extern void revertPPOpt(void *conf, char* opt);
+int readPPOpt(void *conf, char *arg);
+void revertPPOpt(void *conf, char* opt);
 extern char* pp_help;
 
 const m_option_t vd_conf[]={

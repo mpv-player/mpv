@@ -134,7 +134,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
-extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
+void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 // init driver
 static int init(sh_video_t *sh){

@@ -71,7 +71,7 @@ extern char* sub_cp;
 static char* sub_cp = 0;
 #endif
 
-extern void process_force_style(ass_track_t* track);
+void process_force_style(ass_track_t* track);
 
 ass_track_t* ass_default_track(ass_library_t* library) {
 	ass_track_t* track = ass_new_track(library);

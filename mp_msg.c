@@ -8,7 +8,7 @@
 #ifdef CONFIG_ICONV
 #include <iconv.h>
 #include <errno.h>
-extern char* get_term_charset(void);
+char* get_term_charset(void);
 #endif
 
 #if defined(FOR_MENCODER)

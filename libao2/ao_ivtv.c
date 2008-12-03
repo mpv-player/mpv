@@ -147,7 +147,7 @@ get_space (void)
 static int
 play (void *data, int len, int flags)
 {
-  extern int ivtv_write (unsigned char *data, int len);
+  int ivtv_write (unsigned char *data, int len);
   
   if (ao_data.format != AF_FORMAT_MPEG2)
     return 0;

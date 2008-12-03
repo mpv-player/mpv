@@ -75,7 +75,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
   int opt_exit = 0; // flag indicating whether mplayer should exit without playing anything
   play_tree_t *last_parent, *last_entry = NULL, *root;
 #ifdef CONFIG_MACOSX_FINDER
-  extern play_tree_t *macosx_finder_args(m_config_t *, int , char **);
+  play_tree_t *macosx_finder_args(m_config_t *, int , char **);
 #endif
 
 #ifdef MP_DEBUG

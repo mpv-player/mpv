@@ -25,9 +25,9 @@ extern GtkWidget * AudioConfig;
 extern GtkWidget * Preferences;
 extern GtkWidget * prEFontName;
 
-extern GtkWidget * create_Preferences( void );
-extern GtkWidget * create_AudioConfig( void );
+GtkWidget * create_Preferences( void );
+GtkWidget * create_AudioConfig( void );
 
-extern void ShowPreferences( void );
+void ShowPreferences( void );
 
 #endif /* MPLAYER_GUI_OPTS_H */

@@ -68,7 +68,7 @@ static uint32_t window_width, window_height;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight;
 
-extern void set_video_eq(int cap);
+void set_video_eq(int cap);
 
 
 static void set_window(int force_update)

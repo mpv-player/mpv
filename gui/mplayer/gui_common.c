@@ -48,7 +48,7 @@
 #include "play.h"
 #include "widgets.h"
 
-extern unsigned int GetTimerMS( void );
+unsigned int GetTimerMS( void );
 
 static inline void TranslateFilename( int c,char * tmp,size_t tmplen )
 {

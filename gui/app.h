@@ -191,14 +191,14 @@ extern char      * skinMPlayerDir;
 extern char      * skinMPlayerDir_obsolete;
 extern char      * skinName;
 
-extern void appInitStruct( listItems * item );
-extern void appClearItem( wItem * item );
-extern void appCopy( listItems * item1,listItems * item2 );
-extern int appFindMessage( unsigned char * str );
-extern int appFindKey( unsigned char * name );
+void appInitStruct( listItems * item );
+void appClearItem( wItem * item );
+void appCopy( listItems * item1, listItems * item2 );
+int appFindMessage( unsigned char * str );
+int appFindKey( unsigned char * name );
 
-extern void btnModify( int event,float state );
-extern float btnGetValue( int event );
-extern void btnSet( int event,int set );
+void btnModify( int event, float state );
+float btnGetValue( int event );
+void btnSet( int event, int set );
 
 #endif /* MPLAYER_GUI_APP_H */

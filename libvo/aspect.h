@@ -6,8 +6,8 @@ extern int vo_panscan_x;
 extern int vo_panscan_y;
 extern float vo_panscan_amount;
 
-extern void panscan_init( void );
-extern void panscan_calc( void );
+void panscan_init(void);
+void panscan_calc(void);
 
 void aspect_save_orig(int orgw, int orgh);
 

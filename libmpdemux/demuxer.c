@@ -34,8 +34,8 @@
 #endif
 #endif
 
-extern void resync_video_stream(sh_video_t *sh_video);
-extern void resync_audio_stream(sh_audio_t *sh_audio);
+void resync_video_stream(sh_video_t *sh_video);
+void resync_audio_stream(sh_audio_t *sh_audio);
 
 // Demuxer list
 extern const demuxer_desc_t demuxer_desc_rawaudio;

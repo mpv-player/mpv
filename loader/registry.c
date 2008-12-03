@@ -24,7 +24,7 @@
 //#undef TRACE
 //#define TRACE printf
 
-extern char *get_path ( const char * );
+char *get_path(const char*);
 
 // ...can be set before init_registry() call
 char* regpathname = NULL;

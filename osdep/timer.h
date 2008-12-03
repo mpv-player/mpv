@@ -13,7 +13,7 @@ int usec_sleep(int usec_delay);
 
 /* timer's callback handling */
 typedef void timer_callback( void );
-extern unsigned set_timer_callback(unsigned ms,timer_callback func);
-extern void restore_timer(void);
+unsigned set_timer_callback(unsigned ms,timer_callback func);
+void restore_timer(void);
 
 #endif /* MPLAYER_TIMER_H */

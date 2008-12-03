@@ -54,9 +54,9 @@
 #endif
 
 /* Globals / Externs */
-extern void renderinfobox(skin_t *skin, window_priv_t *priv);
-extern void renderwidget(skin_t *skin, image *dest, widget *item, int state);
-extern void print_version(void);
+void renderinfobox(skin_t *skin, window_priv_t *priv);
+void renderwidget(skin_t *skin, image *dest, widget *item, int state);
+void print_version(void);
 float sub_aspect;
 
 DWORD oldtime;
@@ -1086,7 +1086,7 @@ static int GetDesktopBitsPerPixel(void)
 }
 
 /* unloads a skin and destroys its windows */
-extern int destroy_window(gui_t *gui)
+int destroy_window(gui_t *gui)
 {
     RECT rd;
     unsigned int i;
@@ -1311,7 +1311,7 @@ static int window_render(gui_t *gui, HWND hWnd, HDC hdc, window_priv_t *priv, wi
 }
 
 /* creates the sub (AKA video) window,*/
-extern int create_subwindow(gui_t *gui, char *skindir)
+int create_subwindow(gui_t *gui, char *skindir)
 {
     HINSTANCE instance = GetModuleHandle(NULL);
     WNDCLASS wc;
@@ -1392,7 +1392,7 @@ extern int create_subwindow(gui_t *gui, char *skindir)
 }
 
 /* loads/updates a skin and creates windows for it */
-extern int create_window(gui_t *gui, char *skindir)
+int create_window(gui_t *gui, char *skindir)
 {
     HINSTANCE instance = GetModuleHandle(NULL);
     WNDCLASS wc;

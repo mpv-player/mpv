@@ -18,8 +18,8 @@
 
 // defined at asfheader.c:
 
-extern int asf_check_header(demuxer_t *demuxer);
-extern int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf);
+int asf_check_header(demuxer_t *demuxer);
+int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf);
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
@@ -531,7 +531,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 
 #include "stheader.h"
 
-extern void skip_audio_frame(sh_audio_t *sh_audio);
+void skip_audio_frame(sh_audio_t *sh_audio);
 
 static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
     struct asf_priv* asf = demuxer->priv;
