@@ -513,7 +513,6 @@ SRCS_MPLAYER = mplayer.c \
                libao2/ao_mpegpes.c \
                libao2/ao_null.c \
                libao2/ao_pcm.c \
-               $(addprefix libao2/,$(AO_SRCS)) \
                libvo/aspect.c \
                libvo/geometry.c \
                libvo/spuenc.c \
@@ -522,8 +521,16 @@ SRCS_MPLAYER = mplayer.c \
                libvo/vo_null.c \
                $(addprefix libvo/,$(VO_SRCS)) \
 
+SRCS_MPLAYER-$(ALSA1X)       += libao2/ao_alsa.c
+SRCS_MPLAYER-$(ALSA5)        += libao2/ao_alsa5.c
+SRCS_MPLAYER-$(ALSA9)        += libao2/ao_alsa.c
 SRCS_MPLAYER-$(APPLE_IR)     += input/appleir.c
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
+SRCS_MPLAYER-$(ARTS)         += libao2/ao_arts.c
+SRCS_MPLAYER-$(COREAUDIO)    += libao2/ao_macosx.c
+SRCS_MPLAYER-$(DIRECTX)      += libao2/ao_dsound.c
+SRCS_MPLAYER-$(DXR2)         += libao2/ao_dxr2.c
+SRCS_MPLAYER-$(ESD)          += libao2/ao_esd.c
 SRCS_MPLAYER-$(GUI)          += gui/bitmap.c
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
                                 gui/cfg.c \
@@ -560,6 +567,8 @@ SRCS_MPLAYER-$(GUI_WIN32)    += gui/win32/dialogs.c \
                                 gui/win32/widgetrender.c \
                                 gui/win32/wincfg.c \
 
+SRCS_MPLAYER-$(IVTV)         += libao2/ao_ivtv.c
+SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
 SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
                                 libmenu/menu_chapsel.c \
@@ -574,7 +583,14 @@ SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
 
 SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(LIRC)          += input/lirc.c
-
+SRCS_MPLAYER-$(NAS)           += libao2/ao_nas.c
+SRCS_MPLAYER-$(OPENAL)        += libao2/ao_openal.c
+SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c
+SRCS_MPLAYER-$(PULSE)         += libao2/ao_pulse.c
+SRCS_MPLAYER-$(SDL)           += libao2/ao_sdl.c
+SRCS_MPLAYER-$(SGIAUDIO)      += libao2/ao_sgi.c
+SRCS_MPLAYER-$(SUNAUDIO)      += libao2/ao_sun.c
+SRCS_MPLAYER-$(V4L2)          += libao2/ao_v4l2.c
 SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c \
                                  vidix/vidix.c \
                                  vidix/drivers.c \
@@ -598,6 +614,7 @@ SRCS_MPLAYER-$(VIDIX_S3)            += vidix/s3_vid.c
 SRCS_MPLAYER-$(VIDIX_SH_VEU)        += vidix/sh_veu_vid.c
 SRCS_MPLAYER-$(VIDIX_SIS)           += vidix/sis_vid.c vidix/sis_bridge.c
 SRCS_MPLAYER-$(VIDIX_UNICHROME)     += vidix/unichrome_vid.c
+SRCS_MPLAYER-$(WIN32WAVEOUT)  += libao2/ao_win32.c
 
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \

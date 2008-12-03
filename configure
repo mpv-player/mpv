@@ -3613,7 +3613,6 @@ EOF
     _ld_extra="$_ld_extra -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
     _coreaudio=yes
     _def_coreaudio='#define CONFIG_COREAUDIO 1'
-    _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
   else
     _coreaudio=no
@@ -4924,7 +4923,6 @@ if test "$_sdl" = yes ; then
   fi
   _vosrc="$_vosrc vo_sdl.c"
   _vomodules="sdl $_vomodules"
-  _aosrc="$_aosrc ao_sdl.c"
   _aomodules="sdl $_aomodules"
   _res_comment="using $_sdlconfig"
 else
@@ -4950,7 +4948,6 @@ fi
 if test "$_win32waveout" = yes ; then
   _def_win32waveout='#define CONFIG_WIN32WAVEOUT 1'
   _libs_mplayer="$_libs_mplayer -lwinmm"
-  _aosrc="$_aosrc ao_win32.c"
   _aomodules="win32 $_aomodules"
 else
   _def_win32waveout='#undef CONFIG_WIN32WAVEOUT'
@@ -4995,7 +4992,6 @@ if test "$_directx" = yes ; then
   _libs_mplayer="$_libs_mplayer -lgdi32"
   _vosrc="$_vosrc vo_directx.c"
   _vomodules="directx $_vomodules"
-  _aosrc="$_aosrc ao_dsound.c"
   _aomodules="dsound $_aomodules"
 else
   _def_directx='#undef CONFIG_DIRECTX'
@@ -5019,7 +5015,6 @@ fi
 if test "$_nas" = yes ; then
   _def_nas='#define CONFIG_NAS 1'
   _libs_mplayer="$_libs_mplayer -laudio -lXt"
-  _aosrc="$_aosrc ao_nas.c"
   _aomodules="nas $_aomodules"
 else
   _noaomodules="nas $_noaomodules"
@@ -5042,7 +5037,6 @@ fi
 if test "$_dxr2" = yes; then
   _def_dxr2='#define CONFIG_DXR2 1'
   _vosrc="$_vosrc vo_dxr2.c"
-  _aosrc="$_aosrc ao_dxr2.c"
   _aomodules="dxr2 $_aomodules"
   _vomodules="dxr2 $_vomodules"
 else
@@ -5095,7 +5089,6 @@ if test "$_ivtv" = yes ; then
   _def_ivtv='#define CONFIG_IVTV 1'
   _vosrc="$_vosrc vo_ivtv.c"
   _vomodules="ivtv $_vomodules"
-  _aosrc="$_aosrc ao_ivtv.c"
   _aomodules="ivtv $_aomodules"
 else
   _def_ivtv='#undef CONFIG_IVTV'
@@ -5130,7 +5123,6 @@ if test "$_v4l2" = yes ; then
   _def_v4l2='#define CONFIG_V4L2_DECODER 1'
   _vosrc="$_vosrc vo_v4l2.c"
   _vomodules="v4l2 $_vomodules"
-  _aosrc="$_aosrc ao_v4l2.c"
   _aomodules="v4l2 $_aomodules"
 else
   _def_v4l2='#undef CONFIG_V4L2_DECODER'
@@ -5158,7 +5150,6 @@ EOF
 fi
 if test "$_ossaudio" = yes ; then
   _def_ossaudio='#define CONFIG_OSS_AUDIO 1'
-  _aosrc="$_aosrc ao_oss.c"
   _aomodules="oss $_aomodules"
   if test "$_linux_devfs" = yes; then
     _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound/dsp"'
@@ -5210,7 +5201,6 @@ fi
 
 if test "$_arts" = yes ; then
   _def_arts='#define CONFIG_ARTS 1'
-  _aosrc="$_aosrc ao_arts.c"
   _aomodules="arts $_aomodules"
   _libs_mplayer="$_libs_mplayer `artsc-config --libs`"
   _inc_extra="$_inc_extra `artsc-config --cflags`"
@@ -5237,7 +5227,6 @@ echores "$_esd"
 
 if test "$_esd" = yes ; then
   _def_esd='#define CONFIG_ESD 1'
-  _aosrc="$_aosrc ao_esd.c"
   _aomodules="esd $_aomodules"
   _libs_mplayer="$_libs_mplayer `esd-config --libs`"
   _inc_extra="$_inc_extra `esd-config --cflags`"
@@ -5272,7 +5261,6 @@ echores "$_pulse"
 
 if test "$_pulse" = yes ; then
   _def_pulse='#define CONFIG_PULSE 1'
-  _aosrc="$_aosrc ao_pulse.c"
   _aomodules="pulse $_aomodules"
   _libs_mplayer="$_libs_mplayer `$_pkg_config --libs libpulse`"
   _inc_extra="$_inc_extra `$_pkg_config --cflags libpulse`"
@@ -5302,7 +5290,6 @@ fi
 
 if test "$_jack" = yes ; then
   _def_jack='#define CONFIG_JACK 1'
-  _aosrc="$_aosrc ao_jack.c"
   _aomodules="jack $_aomodules"
 else
   _noaomodules="jack $_noaomodules"
@@ -5332,7 +5319,6 @@ EOF
 fi
 if test "$_openal" = yes ; then
   _def_openal='#define CONFIG_OPENAL 1'
-  _aosrc="$_aosrc ao_openal.c"
   _aomodules="openal $_aomodules"
 else
   _noaomodules="openal $_noaomodules"
@@ -5404,14 +5390,12 @@ if test "$_alsaver" ; then
   _alsa=yes
   if test "$_alsaver" = '0.5.x' ; then
     _alsa5=yes
-    _aosrc="$_aosrc ao_alsa5.c"
     _aomodules="alsa5 $_aomodules"
     _def_alsa5='#define CONFIG_ALSA5 1'
     def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.5.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-sys' ; then
     _alsa9=yes
-    _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa9='#define CONFIG_ALSA9 1'
@@ -5419,7 +5403,6 @@ if test "$_alsaver" ; then
     _res_comment="using alsa 0.9.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-alsa' ; then
     _alsa9=yes
-    _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa9='#define CONFIG_ALSA9 1'
@@ -5427,7 +5410,6 @@ if test "$_alsaver" ; then
     _res_comment="using alsa 0.9.x and alsa/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-sys' ; then
     _alsa1x=yes
-    _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa1x="#define CONFIG_ALSA1X 1"
@@ -5435,7 +5417,6 @@ if test "$_alsaver" ; then
     _res_comment="using alsa 1.0.x and sys/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-alsa' ; then
     _alsa1x=yes
-    _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa1x="#define CONFIG_ALSA1X 1"
@@ -5464,7 +5445,6 @@ EOF
 fi
 if test "$_sunaudio" = yes ; then
   _def_sunaudio='#define CONFIG_SUN_AUDIO 1'
-  _aosrc="$_aosrc ao_sun.c"
   _aomodules="sun $_aomodules"
 else
   _def_sunaudio='#undef CONFIG_SUN_AUDIO'
@@ -5502,7 +5482,6 @@ fi
 if test "$_sgiaudio" = "yes" ; then
   _def_sgiaudio='#define CONFIG_SGI_AUDIO 1'
   _libs_mplayer="$_libs_mplayer -laudio"
-  _aosrc="$_aosrc ao_sgi.c"
   _aomodules="sgi $_aomodules"
 else
   _def_sgiaudio='#undef CONFIG_SGI_AUDIO'
@@ -7966,7 +7945,6 @@ GETCH = $_getch
 HELP_FILE = $_mp_help
 TIMER = $_timer
 
-AO_SRCS = $_aosrc
 VO_SRCS = $_vosrc
 
 EXESUF = $_exesuf
@@ -7990,18 +7968,23 @@ NEED_VSSCANF = $_need_vsscanf
 # features
 ALSA1X = $_alsa1x
 ALSA9 = $_alsa9
+ALSA5 = $_alsa5
 APPLE_IR = $_apple_ir
 APPLE_REMOTE = $_apple_remote
+ARTS = $_arts
 AUDIO_INPUT = $_audio_input
 BITMAP_FONT = $_bitmap_font
 CDDA = $_cdda
 CDDB = $_cddb
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
+DIRECTX = $_directx
 DVBIN = $_dvbin
 DVDNAV = $_dvdnav
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
+DXR2 = $_dxr2
+ESD = $_esd
 FAAC=$_faac
 FAAD = $_faad
 FAAD_INTERNAL = $_faad_internal
@@ -8014,6 +7997,8 @@ GUI_WIN32 = $_gui_win32
 HAVE_POSIX_SELECT = $_posix_select
 HAVE_SYS_MMAN_H = $_mman
 HAVE_XVMC = $_xvmc
+IVTV = $_ivtv
+JACK = $_jack
 JOYSTICK = $_joystick
 JPEG = $_jpeg
 LADSPA = $_ladspa
@@ -8041,11 +8026,14 @@ MNG = $_mng
 MP3LAME = $_mp3lame
 MP3LIB = $_mp3lib
 MUSEPACK = $_musepack
+NAS = $_nas
 NATIVE_RTSP = $_native_rtsp
 NETWORK = $_network
+OPENAL = $_openal
 OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
 PNG = $_png
+PULSE = $_pulse
 PVR = $_pvr
 QTX_CODECS = $_qtx
 QTX_CODECS_WIN32 = $_qtx_codecs_win32
@@ -8054,8 +8042,11 @@ QUARTZ = $_quartz
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 REAL_CODECS = $_real
+SDL = $_sdl
 SPEEX = $_speex
 STREAM_CACHE = $_stream_cache
+SGIAUDIO = $_sgiaudio
+SUNAUDIO = $_sunaudio
 TOOLAME=$_toolame
 TREMOR_INTERNAL = $_tremor_internal
 TV = $_tv
@@ -8067,6 +8058,7 @@ TV_V4L1 = $_tv_v4l1
 TV_V4L2 = $_tv_v4l2
 TWOLAME=$_twolame
 UNRAR_EXEC = $_unrar_exec
+V4L2 = $_v4l2
 VCD = $_vcd
 VIDIX = $_vidix
 VIDIX_PCIDB = $_vidix_pcidb_val
@@ -8086,6 +8078,7 @@ VIDIX_SIS=$_vidix_drv_sis
 VIDIX_UNICHROME=$_vidix_drv_unichrome
 VSTREAM = $_vstream
 WIN32DLL = $_win32dll
+WIN32WAVEOUT = $_win32waveout
 WIN32_EMULATION = $_win32_emulation
 X264 = $_x264
 XANIM_CODECS = $_xanim
