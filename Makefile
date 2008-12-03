@@ -498,7 +498,7 @@ SRCS_COMMON-$(WIN32DLL)              += libmpcodecs/ad_acm.c \
 SRCS_COMMON-$(XANIM_CODECS)          += libmpcodecs/vd_xanim.c
 SRCS_COMMON-$(XMMS_PLUGINS)          += libmpdemux/demux_xmms.c
 SRCS_COMMON-$(XVID4)                 += libmpcodecs/vd_xvid4.c
-SRCS_COMMON-$(ZORAN)                 += libmpcodecs/vd_zrmjpeg.c \
+SRCS_COMMON-$(ZR)                    += libmpcodecs/vd_zrmjpeg.c \
                                         libmpcodecs/vf_zrmjpeg.c
 
 SRCS_MPLAYER = mplayer.c \

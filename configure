@@ -8084,7 +8084,7 @@ X264 = $_x264
 XANIM_CODECS = $_xanim
 XMMS_PLUGINS = $_xmms
 XVID4 = $_xvid
-ZORAN = $_zr
+ZR = $_zr
 
 # FFmpeg
 LIBAVUTIL = $_libavutil
