@@ -140,8 +140,8 @@ static void resize(int x,int y){
     panscan_calc();
     new_w += vo_panscan_x;
     new_h += vo_panscan_y;
-    scale_x = (GLdouble) new_w / (GLdouble) x;
-    scale_y = (GLdouble) new_h / (GLdouble) y;
+    scale_x = (GLdouble)new_w / (GLdouble)x;
+    scale_y = (GLdouble)new_h / (GLdouble)y;
     glScaled(scale_x, scale_y, 1);
     ass_border_x = (vo_screenwidth - new_w) / 2;
     ass_border_y = (vo_screenheight - new_h) / 2;
@@ -270,7 +270,7 @@ static void genEOSD(mp_eosd_images_t *imgs) {
   int tinytexcur = 0;
   int smalltexcur = 0;
   GLuint *curtex;
-  GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
+  GLint scale_type = scaled_osd ? GL_LINEAR : GL_NEAREST;
   ass_image_t *img = imgs->imgs;
   ass_image_t *i;
 
@@ -521,7 +521,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
 {
   // initialize to 8 to avoid special-casing on alignment
   int sx = 8, sy = 8;
-  GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
+  GLint scale_type = scaled_osd ? GL_LINEAR : GL_NEAREST;
 
   if (w <= 0 || h <= 0 || stride < w) {
     mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
@@ -587,8 +587,8 @@ static void draw_osd(void)
   if (vo_osd_changed(0)) {
     int osd_h, osd_w;
     clearOSD();
-    osd_w = (scaled_osd) ? image_width : vo_dwidth;
-    osd_h = (scaled_osd) ? image_height : vo_dheight;
+    osd_w = scaled_osd ? image_width : vo_dwidth;
+    osd_h = scaled_osd ? image_height : vo_dheight;
     vo_draw_text(osd_w, osd_h, create_osd_texture);
   }
   if (vo_doublebuffering) do_render_osd();
@@ -635,7 +635,7 @@ static void do_render_osd(void) {
       glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
     }
     // set rendering parameters back to defaults
-    glDisable (GL_BLEND);
+    glDisable(GL_BLEND);
     if (!scaled_osd)
       glPopMatrix();
     BindTexture(gl_target, 0);
@@ -664,7 +664,7 @@ static void redraw(void) {
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
-  mpi_flipped = (stride[0] < 0);
+  mpi_flipped = stride[0] < 0;
   glUploadTex(gl_target, gl_format, gl_type, src[0], stride[0],
               x, y, w, h, slice_height);
   if (image_format == IMGFMT_YV12) {
@@ -705,7 +705,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     gl_bufferptr = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
   mpi->planes[0] = gl_bufferptr;
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-  if (mpi->planes[0] == NULL) {
+  if (!mpi->planes[0]) {
     if (!err_shown)
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not acquire buffer for dr\n"
                                 "Expect a _major_ speed penalty\n");
@@ -768,7 +768,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
   }
   stride[0] = mpi->stride[0]; stride[1] = mpi->stride[1]; stride[2] = mpi->stride[2];
   planes[0] = mpi->planes[0]; planes[1] = mpi->planes[1]; planes[2] = mpi->planes[2];
-  mpi_flipped = (stride[0] < 0);
+  mpi_flipped = stride[0] < 0;
   if (mpi->flags & MP_IMGFLAG_DIRECT) {
     intptr_t base = (intptr_t)planes[0];
     if (mpi_flipped)
@@ -825,7 +825,7 @@ query_format(uint32_t format)
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     if (use_osd)
       caps |= VFCAP_OSD | VFCAP_EOSD | (scaled_osd ? 0 : VFCAP_EOSD_UNSCALED);
-    if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGBA))
+    if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
     if (use_yuv && format == IMGFMT_YV12)
         return caps;
@@ -843,7 +843,7 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
-  if ( !vo_config_count ) return;
+  if (!vo_config_count) return;
   uninitGl();
   releaseGlContext(&gl_vinfo, &gl_context);
   if (custom_prog) free(custom_prog);
@@ -960,11 +960,11 @@ static int preinit(const char *arg)
       gl_target = GL_TEXTURE_2D;
     yuvconvtype = use_yuv | lscale << YUV_LUM_SCALER_SHIFT | cscale << YUV_CHROM_SCALER_SHIFT;
     if (many_fmts)
-      mp_msg (MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
+      mp_msg(MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
                "Use -vo gl:nomanyfmts if playback fails.\n");
-    mp_msg (MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
+    mp_msg(MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
              "(0 means image height).\n", slice_height);
-    if( !vo_init() ) return -1; // Can't open X11
+    if (!vo_init()) return -1; // Can't open X11
 
     return 0;
 }
@@ -997,7 +997,7 @@ static int control(uint32_t request, void *data, ...)
     int_pause = (request == VOCTRL_PAUSE);
     return VO_TRUE;
   case VOCTRL_QUERY_FORMAT:
-    return query_format(*((uint32_t*)data));
+    return query_format(*(uint32_t*)data);
   case VOCTRL_GET_IMAGE:
     return get_image(data);
   case VOCTRL_DRAW_IMAGE:
@@ -1039,7 +1039,7 @@ static int control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_SET_PANSCAN:
     if (!use_aspect) return VO_NOTIMPL;
-    resize (vo_dwidth, vo_dheight);
+    resize(vo_dwidth, vo_dheight);
     return VO_TRUE;
   case VOCTRL_GET_EQUALIZER:
     if (image_format == IMGFMT_YV12) {
