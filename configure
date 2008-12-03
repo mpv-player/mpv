@@ -4751,7 +4751,7 @@ fi
 
 echocheck "PNM support"
 if test "$_pnm" = yes; then
-  _def_pnm="#define CONFIG_PNM"
+  _def_pnm="#define CONFIG_PNM 1"
   _vosrc="$_vosrc vo_pnm.c"
   _vomodules="pnm $_vomodules"
 else
