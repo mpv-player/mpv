@@ -2425,7 +2425,7 @@ echores $_asmalign_pot
 echocheck "yasm"
 if test -z "$YASMFLAGS" ; then
   if darwin ; then
-    x86_64 && objformat="macho64" || objformat="macho32"
+    x86_64 && objformat="macho64" || objformat="macho"
   elif win32 ; then
     objformat="win32"
   else 
