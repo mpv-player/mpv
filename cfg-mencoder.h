@@ -155,8 +155,8 @@ const m_option_t of_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-float avi_aspect_override; /* defined in libmpdemux/muxer_avi.c */
-int write_odml; /* defined in libmpdemux/muxer_avi.c */
+extern float avi_aspect_override; /* defined in libmpdemux/muxer_avi.c */
+extern int write_odml; /* defined in libmpdemux/muxer_avi.c */
 
 const m_option_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
