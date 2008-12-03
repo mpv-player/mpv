@@ -175,6 +175,11 @@ int vo_w32_check_events(void) {
     }
     if (WinID >= 0) {
         RECT r;
+        GetClientRect(vo_window, &r);
+        if (r.right != vo_dwidth || r.bottom != vo_dheight) {
+            vo_dwidth = r.right; vo_dheight = r.bottom;
+            event_flags |= VO_EVENT_RESIZE;
+        }
         GetClientRect(WinID, &r);
         if (r.right != vo_dwidth || r.bottom != vo_dheight)
             MoveWindow(vo_window, 0, 0, r.right, r.bottom, FALSE);
