@@ -2730,8 +2730,8 @@ fi
 echocheck "__builtin_expect"
 # GCC branch prediction hint
 cat > $TMPC << EOF
-int foo (int a) {
-    a = __builtin_expect (a, 10);
+int foo(int a) {
+    a = __builtin_expect(a, 10);
     return a == 10 ? 0 : 1;
 }
 int main(void) { return foo(10) && foo(0); }
@@ -3119,7 +3119,7 @@ if test "$_pthreads" = auto ; then
 cat > $TMPC << EOF
 #include <pthread.h>
 void* func(void *arg) { return arg; }
-int main(void) { pthread_t tid; return pthread_create (&tid, 0, func, 0) == 0 ? 0 : 1; }
+int main(void) { pthread_t tid; return pthread_create(&tid, 0, func, 0) == 0 ? 0 : 1; }
 EOF
 _pthreads=no
 if ! hpux ; then
@@ -3189,15 +3189,15 @@ int main(void) {
   iconv_t icdsc;
   char *tocode="UTF-8";
   char *fromcode="cp1250";
-  if ((icdsc = iconv_open (tocode, fromcode)) != (iconv_t)(-1)) {
-    while ((numread = read (0, inbuffer, INBUFSIZE))) {
+  if ((icdsc = iconv_open(tocode, fromcode)) != (iconv_t)(-1)) {
+    while ((numread = read(0, inbuffer, INBUFSIZE))) {
       char *iptr=inbuffer;
       char *optr=outbuffer;
       size_t inleft=numread;
       size_t outleft=OUTBUFSIZE;
       if (iconv(icdsc, (const char **)&iptr, &inleft, &optr, &outleft)
           != (size_t)(-1)) {
-        write (1, outbuffer, OUTBUFSIZE - outleft);
+        write(1, outbuffer, OUTBUFSIZE - outleft);
       }
     }
     if (iconv_close(icdsc) == -1)
@@ -5040,8 +5040,8 @@ if test "$_ivtv" = auto ; then
 int main(void) {
 struct ivtv_cfg_stop_decode sd;
 struct ivtv_cfg_start_decode sd1;
-ioctl (0, IVTV_IOC_START_DECODE, &sd1);
-ioctl (0, IVTV_IOC_STOP_DECODE, &sd);
+ioctl(0, IVTV_IOC_START_DECODE, &sd1);
+ioctl(0, IVTV_IOC_STOP_DECODE, &sd);
 return 0; }
 EOF
   _ivtv=no
@@ -5688,7 +5688,7 @@ int main(void) {
     FT_Library library;
     FT_Int major=-1,minor=-1,patch=-1;
     int err=FT_Init_FreeType(&library);
-    if(err){
+    if (err) {
 	printf("Couldn't initialize freetype2 lib, err code: %d\n",err);
 	exit(err);
     }
@@ -5696,7 +5696,7 @@ int main(void) {
     printf("freetype2  header version: %d.%d.%d  library version: %d.%d.%d\n",
 	FREETYPE_MAJOR,FREETYPE_MINOR,FREETYPE_PATCH,
 	(int)major,(int)minor,(int)patch );
-    if(major!=FREETYPE_MAJOR || minor!=FREETYPE_MINOR){
+    if (major!=FREETYPE_MAJOR || minor!=FREETYPE_MINOR) {
 	printf("Library and header version mismatch! Fix it in your distribution!\n");
 	exit(1);
     }
@@ -5730,7 +5730,7 @@ if test "$_fontconfig" = auto ; then
 #include <fontconfig/fontconfig.h>
 int main(void) {
     int err = FcInit();
-    if(err == FcFalse){
+    if (err == FcFalse) {
         printf("Couldn't initialize fontconfig lib\n");
         exit(err);
     }
@@ -5796,7 +5796,7 @@ if test "$_fribidi" = auto ; then
 #define FRIBIDI_CHARSET_UTF8 FRIBIDI_CHAR_SET_UTF8
 #include <fribidi/fribidi.h>
 int main(void) {
-    if(fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8) {
+    if (fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8) {
        printf("Fribidi headers are not consistents with the library!\n");
        exit(1);
     }
@@ -6053,20 +6053,20 @@ int main(void) {
   int r;
   double t;
 
-  theora_info_init (&inf);
-  theora_comment_init (&tc);
+  theora_info_init(&inf);
+  theora_comment_init(&tc);
 
   return 0;
 
   /* we don't want to execute this kind of nonsense; just for making sure
    * that compilation works... */
   memset(&op, 0, sizeof(op));
-  r = theora_decode_header (&inf, &tc, &op);
-  r = theora_decode_init (&st, &inf);
-  t = theora_granule_time (&st, op.granulepos);
-  r = theora_decode_packetin (&st, &op);
-  r = theora_decode_YUVout (&st, &yuv);
-  theora_clear (&st);
+  r = theora_decode_header(&inf, &tc, &op);
+  r = theora_decode_init(&st, &inf);
+  t = theora_granule_time(&st, op.granulepos);
+  r = theora_decode_packetin(&st, &op);
+  r = theora_decode_YUVout(&st, &yuv);
+  theora_clear(&st);
 
   return 0;
 }
@@ -6161,7 +6161,7 @@ if test "$_libdca" = auto ; then
   cat > $TMPC << EOF
 #include <inttypes.h>
 #include <dts.h>
-int main(void) { dts_init (0); return 0; }
+int main(void) { dts_init(0); return 0; }
 EOF
   for _ld_dca in -ldts -ldca ; do
     cc_check $_ld_dca $_ld_lm && _ld_extra="$_ld_extra $_ld_dca" \
@@ -7371,7 +7371,7 @@ echocheck "byte order"
 if test "$_big_endian" = auto ; then
   cat > $TMPC <<EOF
 short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
-                      (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
+                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
 int main(void) { return (int)ascii_name; }
 EOF
   if cc_check ; then
