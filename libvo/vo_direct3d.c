@@ -202,7 +202,7 @@ static int create_d3d_surfaces(void)
                priv->d3d_device, priv->src_width, priv->src_height,
                priv->movie_src_fmt, D3DPOOL_DEFAULT, &priv->d3d_surface, NULL))) {
         mp_msg(MSGT_VO, MSGL_ERR,
-        "<vo_direct3d><INFO>IDirect3D9_CreateOffscreenPlainSurface Failed.\n");
+               "<vo_direct3d><INFO>IDirect3D9_CreateOffscreenPlainSurface Failed.\n");
         return 0;
     }
 

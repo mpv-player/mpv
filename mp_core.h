@@ -38,6 +38,12 @@ enum stop_play_reason {
     PT_STOP,
 };
 
+typedef enum {
+  EXIT_NONE,
+  EXIT_QUIT,
+  EXIT_EOF,
+  EXIT_ERROR
+} exit_reason_t;
 
 typedef struct MPContext {
     struct MPOpts opts;
@@ -129,7 +135,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 void init_vo_spudec(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
-void exit_player_with_rc(struct MPContext *mpctx, const char* how, int rc);
+void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc);
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr);
 int reinit_video_chain(struct MPContext *mpctx);
 

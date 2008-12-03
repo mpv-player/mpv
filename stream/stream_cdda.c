@@ -88,9 +88,9 @@ const m_option_t cdda_opts[] = {
   {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-extern int cdd_identify(const char *dev);
-extern int cddb_resolve(const char *dev, char **xmcd_file);
-extern cd_info_t* cddb_parse_xmcd(char *xmcd_file);
+int cdd_identify(const char *dev);
+int cddb_resolve(const char *dev, char **xmcd_file);
+cd_info_t* cddb_parse_xmcd(char *xmcd_file);
 
 static int seek(stream_t* s,off_t pos);
 static int fill_buffer(stream_t* s, char* buffer, int max_len);

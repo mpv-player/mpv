@@ -24,7 +24,7 @@
 extern char      * sbSelectedSkin;
 extern GtkWidget * SkinBrowser;
 
-extern void ShowSkinBrowser( void );
-extern GtkWidget * create_SkinBrowser( void );
+void ShowSkinBrowser( void );
+GtkWidget * create_SkinBrowser( void );
 
 #endif /* MPLAYER_GUI_SB_H */

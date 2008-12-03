@@ -48,8 +48,8 @@
 #include "widgets.h"
 #include "gui_common.h"
 
-extern unsigned int GetTimerMS( void );
-extern unsigned int GetTimer( void );
+unsigned int GetTimerMS( void );
+unsigned int GetTimer( void );
 
 unsigned char * mplPBDrawBuffer = NULL;
 int		mplPBVisible = 0;

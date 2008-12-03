@@ -55,7 +55,7 @@ int gui_sub_pos_y = -1;
 
 /* External functions */
 extern char *proc_priority;
-extern int m_config_parse_config_file(m_config_t *config, char *conffile);
+int m_config_parse_config_file(m_config_t *config, char *conffile);
 
 static m_config_t *gui_conf;
 static const m_option_t gui_opts[] =

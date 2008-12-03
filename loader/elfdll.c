@@ -33,8 +33,8 @@ extern modref_list* local_wm;
 
 
 /*------------------ HACKS -----------------*/
-extern DWORD fixup_imports(WINE_MODREF *wm);
-extern void dump_exports(HMODULE hModule);
+DWORD fixup_imports(WINE_MODREF *wm);
+void dump_exports(HMODULE hModule);
 /*---------------- END HACKS ---------------*/
 
 //char *extra_ld_library_path = "/usr/lib/win32";

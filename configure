@@ -2428,7 +2428,7 @@ echores $_asmalign_pot
 echocheck "yasm"
 if test -z "$YASMFLAGS" ; then
   if darwin ; then
-    x86_64 && objformat="macho64" || objformat="macho32"
+    x86_64 && objformat="macho64" || objformat="macho"
   elif win32 ; then
     objformat="win32"
   else 
@@ -2736,8 +2736,8 @@ fi
 echocheck "__builtin_expect"
 # GCC branch prediction hint
 cat > $TMPC << EOF
-int foo (int a) {
-    a = __builtin_expect (a, 10);
+int foo(int a) {
+    a = __builtin_expect(a, 10);
     return a == 10 ? 0 : 1;
 }
 int main(void) { return foo(10) && foo(0); }
@@ -3125,7 +3125,7 @@ if test "$_pthreads" = auto ; then
 cat > $TMPC << EOF
 #include <pthread.h>
 void* func(void *arg) { return arg; }
-int main(void) { pthread_t tid; return pthread_create (&tid, 0, func, 0) == 0 ? 0 : 1; }
+int main(void) { pthread_t tid; return pthread_create(&tid, 0, func, 0) == 0 ? 0 : 1; }
 EOF
 _pthreads=no
 if ! hpux ; then
@@ -3195,15 +3195,15 @@ int main(void) {
   iconv_t icdsc;
   char *tocode="UTF-8";
   char *fromcode="cp1250";
-  if ((icdsc = iconv_open (tocode, fromcode)) != (iconv_t)(-1)) {
-    while ((numread = read (0, inbuffer, INBUFSIZE))) {
+  if ((icdsc = iconv_open(tocode, fromcode)) != (iconv_t)(-1)) {
+    while ((numread = read(0, inbuffer, INBUFSIZE))) {
       char *iptr=inbuffer;
       char *optr=outbuffer;
       size_t inleft=numread;
       size_t outleft=OUTBUFSIZE;
       if (iconv(icdsc, (const char **)&iptr, &inleft, &optr, &outleft)
           != (size_t)(-1)) {
-        write (1, outbuffer, OUTBUFSIZE - outleft);
+        write(1, outbuffer, OUTBUFSIZE - outleft);
       }
     }
     if (iconv_close(icdsc) == -1)
@@ -3619,7 +3619,6 @@ EOF
     _ld_extra="$_ld_extra -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
     _coreaudio=yes
     _def_coreaudio='#define CONFIG_COREAUDIO 1'
-    _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
   else
     _coreaudio=no
@@ -3640,7 +3639,6 @@ EOF
     _ld_extra="$_ld_extra -framework Carbon -framework QuickTime"
     _quartz=yes
     _def_quartz='#define CONFIG_QUARTZ 1'
-    _vosrc="$_vosrc vo_quartz.c"
     _vomodules="quartz $_vomodules"
     _def_quicktime='#define CONFIG_QUICKTIME 1'
   else
@@ -3655,7 +3653,6 @@ cat > $TMPC <<EOF
 int main(void) { return 0; }
 EOF
 	if cc_check -framework Carbon -framework QuartzCore -framework OpenGL; then
-		_vosrc="$_vosrc vo_macosx.m"
 		_vomodules="macosx $_vomodules"
 		_ld_extra="$_ld_extra -framework Cocoa -framework QuartzCore -framework OpenGL"
 		_def_corevideo='#define CONFIG_COREVIDEO 1'
@@ -3803,7 +3800,6 @@ echores "$_smb"
 echocheck "tdfxfb"
 if test "$_tdfxfb" = yes ; then
   _def_tdfxfb='#define CONFIG_TDFXFB 1'
-  _vosrc="$_vosrc vo_tdfxfb.c"
   _vomodules="tdfxfb $_vomodules"
 else
   _def_tdfxfb='#undef CONFIG_TDFXFB'
@@ -3814,7 +3810,6 @@ echores "$_tdfxfb"
 echocheck "s3fb"
 if test "$_s3fb" = yes ; then
   _def_s3fb='#define CONFIG_S3FB 1'
-  _vosrc="$_vosrc vo_s3fb.c"
   _vomodules="s3fb $_vomodules"
 else
   _def_s3fb='#undef CONFIG_S3FB'
@@ -3825,7 +3820,6 @@ echores "$_s3fb"
 echocheck "wii"
 if test "$_wii" = yes ; then
   _def_wii='#define CONFIG_WII 1'
-  _vosrc="$_vosrc vo_wii.c"
   _vomodules="wii $_vomodules"
 else
   _def_wii='#undef CONFIG_WII'
@@ -3836,7 +3830,6 @@ echores "$_wii"
 echocheck "tdfxvid"
 if test "$_tdfxvid" = yes ; then
   _def_tdfxvid='#define CONFIG_TDFX_VID 1'
-  _vosrc="$_vosrc vo_tdfx_vid.c"
   _vomodules="tdfx_vid $_vomodules"
 else
   _def_tdfxvid='#undef CONFIG_TDFX_VID'
@@ -3863,7 +3856,6 @@ EOF
 fi
 if test "$_xvr100" = yes ; then
   _def_xvr100='#define CONFIG_XVR100 1'
-  _vosrc="$_vosrc vo_xvr100.c"
   _vomodules="xvr100 $_vomodules"
 else
   _def_tdfxvid='#undef CONFIG_XVR100'
@@ -3874,7 +3866,6 @@ echores "$_xvr100"
 echocheck "tga"
 if test "$_tga" = yes ; then
   _def_tga='#define CONFIG_TGA 1'
-  _vosrc="$_vosrc vo_tga.c"
   _vomodules="tga $_vomodules"
 else
   _def_tga='#undef CONFIG_TGA'
@@ -3886,7 +3877,6 @@ echores "$_tga"
 echocheck "md5sum support"
 if test "$_md5sum" = yes; then
   _def_md5sum="#define CONFIG_MD5SUM"
-  _vosrc="$_vosrc vo_md5sum.c"
   _vomodules="md5sum $_vomodules"
 else
   _def_md5sum="#undef CONFIG_MD5SUM"
@@ -3898,7 +3888,6 @@ echores "$_md5sum"
 echocheck "yuv4mpeg support"
 if test "$_yuv4mpeg" = yes; then
   _def_yuv4mpeg="#define CONFIG_YUV4MPEG"
-  _vosrc="$_vosrc vo_yuv4mpeg.c"
   _vomodules="yuv4mpeg $_vomodules"
 else
   _def_yuv4mpeg="#undef CONFIG_YUV4MPEG"
@@ -3910,7 +3899,6 @@ echores "$_yuv4mpeg"
 echocheck "bl"
 if test "$_bl" = yes ; then
   _def_bl='#define CONFIG_BL 1'
-  _vosrc="$_vosrc vo_bl.c"
   _vomodules="bl $_vomodules"
 else
   _def_bl='#undef CONFIG_BL'
@@ -3968,7 +3956,6 @@ echores "$_directfb"
 
 if test "$_directfb" = yes ; then
   _def_directfb='#define CONFIG_DIRECTFB 1'
-  _vosrc="$_vosrc vo_directfb2.c"
   _vomodules="directfb $_vomodules"
   _libs_mplayer="$_libs_mplayer -ldirectfb"
 else
@@ -3976,7 +3963,6 @@ else
   _novomodules="directfb $_novomodules"
 fi
 if test "$_dfbmga" = yes; then
-  _vosrc="$_vosrc vo_dfbmga.c"
   _vomodules="dfbmga $_vomodules"
   _def_dfbmga='#define CONFIG_DFBMGA 1'
 else
@@ -4028,7 +4014,6 @@ EOF
 fi
 if test "$_x11" = yes ; then
   _def_x11='#define CONFIG_X11 1'
-  _vosrc="$_vosrc x11_common.c vo_x11.c vo_xover.c"
   _vomodules="x11 xover $_vomodules"
 else
   _x11=no
@@ -4110,7 +4095,6 @@ fi
 if test "$_xv" = yes ; then
   _def_xv='#define CONFIG_XV 1'
   _libs_mplayer="$_libs_mplayer -lXv"
-  _vosrc="$_vosrc vo_xv.c"
   _vomodules="xv $_vomodules"
 else
   _def_xv='#undef CONFIG_XV'
@@ -4138,7 +4122,6 @@ fi
 if test "$_xvmc" = yes ; then
   _def_xvmc='#define HAVE_XVMC 1'
   _libs_mplayer="$_libs_mplayer -lXvMC -l$_xvmclib"
-  _vosrc="$_vosrc vo_xvmc.c"
   _vomodules="xvmc $_vomodules"
   _res_comment="using $_xvmclib"
 else
@@ -4249,7 +4232,6 @@ fi
 if test "$_dga" = yes ; then
   _def_dga='#define CONFIG_DGA 1'
   _libs_mplayer="$_libs_mplayer -lXxf86dga"
-  _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
 else
   _novomodules="dga $_novomodules"
@@ -4260,7 +4242,6 @@ echores "$_dga"
 echocheck "3dfx"
 if test "$_3dfx" = yes && test "$_dga" = yes ; then
   _def_3dfx='#define CONFIG_3DFX 1'
-  _vosrc="$_vosrc vo_3dfx.c"
   _vomodules="3dfx $_vomodules"
 else
   _def_3dfx='#undef CONFIG_3DFX'
@@ -4309,10 +4290,8 @@ else
 fi
 if test "$_gl" = yes ; then
   _def_gl='#define CONFIG_GL 1'
-  _vosrc="$_vosrc vo_gl.c vo_gl2.c gl_common.c"
   if test "$_gl_win32" = yes ; then
     _def_gl_win32='#define GL_WIN32 1'
-    _vosrc="$_vosrc w32_common.c"
     _res_comment="win32 version"
   fi
   _vomodules="opengl $_vomodules"
@@ -4366,7 +4345,6 @@ echores "$_vidix"
 
 if test "$_vidix" = yes ; then
   _def_vidix='#define CONFIG_VIDIX 1'
-  _vosrc="$_vosrc vo_cvidix.c"
   _vomodules="cvidix $_vomodules"
   test "$_vidix_drivers" || _vidix_drivers="cyberblade ivtv mach64 mga mga_crtc2 nvidia pm2 pm3 radeon rage128 s3 sh_veu sis unichrome"
   test $_ivtv = "yes" || _vidix_drivers=`echo $_vidix_drivers | sed s/ivtv//`
@@ -4402,14 +4380,14 @@ else
 fi
 
 if test "$_vidix" = yes && win32; then
-  _vosrc="$_vosrc vo_winvidix.c"
+  winvidix=yes
   _vomodules="winvidix $_vomodules"
   _libs_mplayer="$_libs_mplayer -lgdi32"
 else
   _novomodules="winvidix $_novomodules"
 fi
 if test "$_vidix" = yes && test "$_x11" = yes; then
-  _vosrc="$_vosrc vo_xvidix.c"
+  xvidix=yes
   _vomodules="xvidix $_vomodules"
 else
   _novomodules="xvidix $_novomodules"
@@ -4422,7 +4400,6 @@ if test "$_mga" = auto ; then
 fi
 if test "$_mga" = yes ; then
   _def_mga='#define CONFIG_MGA 1'
-  _vosrc="$_vosrc vo_mga.c"
   _vomodules="mga $_vomodules"
 else
   _def_mga='#undef CONFIG_MGA'
@@ -4438,7 +4415,6 @@ if test "$_xmga" = auto ; then
 fi
 if test "$_xmga" = yes ; then
   _def_xmga='#define CONFIG_XMGA 1'
-  _vosrc="$_vosrc vo_xmga.c"
   _vomodules="xmga $_vomodules"
 else
   _def_xmga='#undef CONFIG_XMGA'
@@ -4459,7 +4435,6 @@ fi
 if test "$_ggi" = yes ; then
   _def_ggi='#define CONFIG_GGI 1'
   _libs_mplayer="$_libs_mplayer -lggi"
-  _vosrc="$_vosrc vo_ggi.c"
   _vomodules="ggi $_vomodules"
 else
   _def_ggi='#undef CONFIG_GGI'
@@ -4514,7 +4489,6 @@ if test "$_aa" = yes ; then
   if cygwin ; then
     _libs_mplayer="$_libs_mplayer `aalib-config --libs | cut -d " " -f 2,5,6`"
   fi
-  _vosrc="$_vosrc vo_aa.c"
   _vomodules="aa $_vomodules"
 else
   _def_aa='#undef CONFIG_AA'
@@ -4541,7 +4515,6 @@ if test "$_caca" = yes ; then
   _def_caca='#define CONFIG_CACA 1'
   _inc_extra="$_inc_extra `caca-config --cflags`"
   _libs_mplayer="$_libs_mplayer `caca-config --libs`"
-  _vosrc="$_vosrc vo_caca.c"
   _vomodules="caca $_vomodules"
 else
   _def_caca='#undef CONFIG_CACA'
@@ -4562,7 +4535,6 @@ fi
 if test "$_svga" = yes ; then
   _def_svga='#define CONFIG_SVGALIB 1'
   _libs_mplayer="$_libs_mplayer -lvga"
-  _vosrc="$_vosrc vo_svga.c"
   _vomodules="svga $_vomodules"
 else
   _def_svga='#undef CONFIG_SVGALIB'
@@ -4578,7 +4550,6 @@ if test "$_fbdev" = auto ; then
 fi
 if test "$_fbdev" = yes ; then
   _def_fbdev='#define CONFIG_FBDEV 1'
-  _vosrc="$_vosrc vo_fbdev.c vo_fbdev2.c"
   _vomodules="fbdev $_vomodules"
 else
   _def_fbdev='#undef CONFIG_FBDEV'
@@ -4696,7 +4667,6 @@ echores "$_png"
 if test "$_png" = yes ; then
   _def_png='#define CONFIG_PNG 1'
   _ld_extra="$_ld_extra -lpng -lz"
-  _vosrc="$_vosrc vo_png.c"
   _vomodules="png $_vomodules"
 else
   _def_png='#undef CONFIG_PNG'
@@ -4746,7 +4716,6 @@ echores "$_jpeg"
 
 if test "$_jpeg" = yes ; then
   _def_jpeg='#define CONFIG_JPEG 1'
-  _vosrc="$_vosrc vo_jpeg.c"
   _vomodules="jpeg $_vomodules"
   _ld_extra="$_ld_extra -ljpeg"
 else
@@ -4758,8 +4727,7 @@ fi
 
 echocheck "PNM support"
 if test "$_pnm" = yes; then
-  _def_pnm="#define CONFIG_PNM"
-  _vosrc="$_vosrc vo_pnm.c"
+  _def_pnm="#define CONFIG_PNM 1"
   _vomodules="pnm $_vomodules"
 else
   _def_pnm="#undef CONFIG_PNM"
@@ -4805,7 +4773,6 @@ fi
 
 if test "$_gif" = yes ; then
   _def_gif='#define CONFIG_GIF 1'
-  _vosrc="$_vosrc vo_gif89a.c"
   _codecmodules="gif $_codecmodules"
   _vomodules="gif89a $_vomodules"
   _res_comment="old version, some encoding functions disabled"
@@ -4870,7 +4837,6 @@ fi
 if test "$_vesa" = yes ; then
   _def_vesa='#define CONFIG_VESA 1'
   _libs_mplayer="$_libs_mplayer -lvbe -llrmi"
-  _vosrc="$_vosrc vo_vesa.c vesa_lvo.c gtf.c"
   _vomodules="vesa $_vomodules"
 else
   _def_vesa='#undef CONFIG_VESA'
@@ -4928,9 +4894,7 @@ if test "$_sdl" = yes ; then
     _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs`"
     _inc_extra="$_inc_extra `$_sdlconfig --cflags | sed s/-D_GNU_SOURCE=1//`"
   fi
-  _vosrc="$_vosrc vo_sdl.c"
   _vomodules="sdl $_vomodules"
-  _aosrc="$_aosrc ao_sdl.c"
   _aomodules="sdl $_aomodules"
   _res_comment="using $_sdlconfig"
 else
@@ -4956,7 +4920,6 @@ fi
 if test "$_win32waveout" = yes ; then
   _def_win32waveout='#define CONFIG_WIN32WAVEOUT 1'
   _libs_mplayer="$_libs_mplayer -lwinmm"
-  _aosrc="$_aosrc ao_win32.c"
   _aomodules="win32 $_aomodules"
 else
   _def_win32waveout='#undef CONFIG_WIN32WAVEOUT'
@@ -4977,7 +4940,6 @@ fi
 if test "$_direct3d" = yes ; then
   _def_direct3d='#define CONFIG_DIRECT3D 1'
   _libs_mplayer="$_libs_mplayer -ld3d9"
-  _vosrc="$_vosrc vo_direct3d.c w32_common.c"
   _vomodules="direct3d $_vomodules"
 else
   _def_direct3d='#undef CONFIG_DIRECT3D'
@@ -4999,9 +4961,7 @@ fi
 if test "$_directx" = yes ; then
   _def_directx='#define CONFIG_DIRECTX 1'
   _libs_mplayer="$_libs_mplayer -lgdi32"
-  _vosrc="$_vosrc vo_directx.c"
   _vomodules="directx $_vomodules"
-  _aosrc="$_aosrc ao_dsound.c"
   _aomodules="dsound $_aomodules"
 else
   _def_directx='#undef CONFIG_DIRECTX'
@@ -5025,7 +4985,6 @@ fi
 if test "$_nas" = yes ; then
   _def_nas='#define CONFIG_NAS 1'
   _libs_mplayer="$_libs_mplayer -laudio -lXt"
-  _aosrc="$_aosrc ao_nas.c"
   _aomodules="nas $_aomodules"
 else
   _noaomodules="nas $_noaomodules"
@@ -5047,8 +5006,6 @@ EOF
 fi
 if test "$_dxr2" = yes; then
   _def_dxr2='#define CONFIG_DXR2 1'
-  _vosrc="$_vosrc vo_dxr2.c"
-  _aosrc="$_aosrc ao_dxr2.c"
   _aomodules="dxr2 $_aomodules"
   _vomodules="dxr2 $_vomodules"
 else
@@ -5069,7 +5026,6 @@ EOF
 fi
 if test "$_dxr3" = yes ; then
   _def_dxr3='#define CONFIG_DXR3 1'
-  _vosrc="$_vosrc vo_dxr3.c"
   _vomodules="dxr3 $_vomodules"
 else
   _def_dxr3='#undef CONFIG_DXR3'
@@ -5090,8 +5046,8 @@ if test "$_ivtv" = auto ; then
 int main(void) {
 struct ivtv_cfg_stop_decode sd;
 struct ivtv_cfg_start_decode sd1;
-ioctl (0, IVTV_IOC_START_DECODE, &sd1);
-ioctl (0, IVTV_IOC_STOP_DECODE, &sd);
+ioctl(0, IVTV_IOC_START_DECODE, &sd1);
+ioctl(0, IVTV_IOC_STOP_DECODE, &sd);
 return 0; }
 EOF
   _ivtv=no
@@ -5099,9 +5055,7 @@ EOF
 fi
 if test "$_ivtv" = yes ; then
   _def_ivtv='#define CONFIG_IVTV 1'
-  _vosrc="$_vosrc vo_ivtv.c"
   _vomodules="ivtv $_vomodules"
-  _aosrc="$_aosrc ao_ivtv.c"
   _aomodules="ivtv $_aomodules"
 else
   _def_ivtv='#undef CONFIG_IVTV'
@@ -5134,9 +5088,7 @@ EOF
 fi
 if test "$_v4l2" = yes ; then
   _def_v4l2='#define CONFIG_V4L2_DECODER 1'
-  _vosrc="$_vosrc vo_v4l2.c"
   _vomodules="v4l2 $_vomodules"
-  _aosrc="$_aosrc ao_v4l2.c"
   _aomodules="v4l2 $_aomodules"
 else
   _def_v4l2='#undef CONFIG_V4L2_DECODER'
@@ -5164,7 +5116,6 @@ EOF
 fi
 if test "$_ossaudio" = yes ; then
   _def_ossaudio='#define CONFIG_OSS_AUDIO 1'
-  _aosrc="$_aosrc ao_oss.c"
   _aomodules="oss $_aomodules"
   if test "$_linux_devfs" = yes; then
     _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound/dsp"'
@@ -5216,7 +5167,6 @@ fi
 
 if test "$_arts" = yes ; then
   _def_arts='#define CONFIG_ARTS 1'
-  _aosrc="$_aosrc ao_arts.c"
   _aomodules="arts $_aomodules"
   _libs_mplayer="$_libs_mplayer `artsc-config --libs`"
   _inc_extra="$_inc_extra `artsc-config --cflags`"
@@ -5243,7 +5193,6 @@ echores "$_esd"
 
 if test "$_esd" = yes ; then
   _def_esd='#define CONFIG_ESD 1'
-  _aosrc="$_aosrc ao_esd.c"
   _aomodules="esd $_aomodules"
   _libs_mplayer="$_libs_mplayer `esd-config --libs`"
   _inc_extra="$_inc_extra `esd-config --cflags`"
@@ -5278,7 +5227,6 @@ echores "$_pulse"
 
 if test "$_pulse" = yes ; then
   _def_pulse='#define CONFIG_PULSE 1'
-  _aosrc="$_aosrc ao_pulse.c"
   _aomodules="pulse $_aomodules"
   _libs_mplayer="$_libs_mplayer `$_pkg_config --libs libpulse`"
   _inc_extra="$_inc_extra `$_pkg_config --cflags libpulse`"
@@ -5308,7 +5256,6 @@ fi
 
 if test "$_jack" = yes ; then
   _def_jack='#define CONFIG_JACK 1'
-  _aosrc="$_aosrc ao_jack.c"
   _aomodules="jack $_aomodules"
 else
   _noaomodules="jack $_noaomodules"
@@ -5338,7 +5285,6 @@ EOF
 fi
 if test "$_openal" = yes ; then
   _def_openal='#define CONFIG_OPENAL 1'
-  _aosrc="$_aosrc ao_openal.c"
   _aomodules="openal $_aomodules"
 else
   _noaomodules="openal $_noaomodules"
@@ -5410,14 +5356,12 @@ if test "$_alsaver" ; then
   _alsa=yes
   if test "$_alsaver" = '0.5.x' ; then
     _alsa5=yes
-    _aosrc="$_aosrc ao_alsa5.c"
     _aomodules="alsa5 $_aomodules"
     _def_alsa5='#define CONFIG_ALSA5 1'
     def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.5.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-sys' ; then
     _alsa9=yes
-    _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa9='#define CONFIG_ALSA9 1'
@@ -5425,7 +5369,6 @@ if test "$_alsaver" ; then
     _res_comment="using alsa 0.9.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-alsa' ; then
     _alsa9=yes
-    _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa9='#define CONFIG_ALSA9 1'
@@ -5433,7 +5376,6 @@ if test "$_alsaver" ; then
     _res_comment="using alsa 0.9.x and alsa/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-sys' ; then
     _alsa1x=yes
-    _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa1x="#define CONFIG_ALSA1X 1"
@@ -5441,7 +5383,6 @@ if test "$_alsaver" ; then
     _res_comment="using alsa 1.0.x and sys/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-alsa' ; then
     _alsa1x=yes
-    _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa='#define CONFIG_ALSA 1'
     _def_alsa1x="#define CONFIG_ALSA1X 1"
@@ -5470,7 +5411,6 @@ EOF
 fi
 if test "$_sunaudio" = yes ; then
   _def_sunaudio='#define CONFIG_SUN_AUDIO 1'
-  _aosrc="$_aosrc ao_sun.c"
   _aomodules="sun $_aomodules"
 else
   _def_sunaudio='#undef CONFIG_SUN_AUDIO'
@@ -5508,7 +5448,6 @@ fi
 if test "$_sgiaudio" = "yes" ; then
   _def_sgiaudio='#define CONFIG_SGI_AUDIO 1'
   _libs_mplayer="$_libs_mplayer -laudio"
-  _aosrc="$_aosrc ao_sgi.c"
   _aomodules="sgi $_aomodules"
 else
   _def_sgiaudio='#undef CONFIG_SGI_AUDIO'
@@ -5755,7 +5694,7 @@ int main(void) {
     FT_Library library;
     FT_Int major=-1,minor=-1,patch=-1;
     int err=FT_Init_FreeType(&library);
-    if(err){
+    if (err) {
 	printf("Couldn't initialize freetype2 lib, err code: %d\n",err);
 	exit(err);
     }
@@ -5763,7 +5702,7 @@ int main(void) {
     printf("freetype2  header version: %d.%d.%d  library version: %d.%d.%d\n",
 	FREETYPE_MAJOR,FREETYPE_MINOR,FREETYPE_PATCH,
 	(int)major,(int)minor,(int)patch );
-    if(major!=FREETYPE_MAJOR || minor!=FREETYPE_MINOR){
+    if (major!=FREETYPE_MAJOR || minor!=FREETYPE_MINOR) {
 	printf("Library and header version mismatch! Fix it in your distribution!\n");
 	exit(1);
     }
@@ -5797,7 +5736,7 @@ if test "$_fontconfig" = auto ; then
 #include <fontconfig/fontconfig.h>
 int main(void) {
     int err = FcInit();
-    if(err == FcFalse){
+    if (err == FcFalse) {
         printf("Couldn't initialize fontconfig lib\n");
         exit(err);
     }
@@ -5863,7 +5802,7 @@ if test "$_fribidi" = auto ; then
 #define FRIBIDI_CHARSET_UTF8 FRIBIDI_CHAR_SET_UTF8
 #include <fribidi/fribidi.h>
 int main(void) {
-    if(fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8) {
+    if (fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8) {
        printf("Fribidi headers are not consistents with the library!\n");
        exit(1);
     }
@@ -6120,20 +6059,20 @@ int main(void) {
   int r;
   double t;
 
-  theora_info_init (&inf);
-  theora_comment_init (&tc);
+  theora_info_init(&inf);
+  theora_comment_init(&tc);
 
   return 0;
 
   /* we don't want to execute this kind of nonsense; just for making sure
    * that compilation works... */
   memset(&op, 0, sizeof(op));
-  r = theora_decode_header (&inf, &tc, &op);
-  r = theora_decode_init (&st, &inf);
-  t = theora_granule_time (&st, op.granulepos);
-  r = theora_decode_packetin (&st, &op);
-  r = theora_decode_YUVout (&st, &yuv);
-  theora_clear (&st);
+  r = theora_decode_header(&inf, &tc, &op);
+  r = theora_decode_init(&st, &inf);
+  t = theora_granule_time(&st, op.granulepos);
+  r = theora_decode_packetin(&st, &op);
+  r = theora_decode_YUVout(&st, &yuv);
+  theora_clear(&st);
 
   return 0;
 }
@@ -6228,7 +6167,7 @@ if test "$_libdca" = auto ; then
   cat > $TMPC << EOF
 #include <inttypes.h>
 #include <dts.h>
-int main(void) { dts_init (0); return 0; }
+int main(void) { dts_init(0); return 0; }
 EOF
   for _ld_dca in -ldts -ldca ; do
     cc_check $_ld_dca $_ld_lm && _ld_extra="$_ld_extra $_ld_dca" \
@@ -6998,7 +6937,6 @@ fi
 if test "$_zr" = yes ; then
   if test "$_libavcodec_a" = yes ; then
     _def_zr='#define CONFIG_ZR 1'
-    _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
     _vomodules="zr zr2 $_vomodules"
   else
     _res_comment="libavcodec (static) is required by zr, sorry"
@@ -7439,7 +7377,7 @@ echocheck "byte order"
 if test "$_big_endian" = auto ; then
   cat > $TMPC <<EOF
 short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
-                      (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
+                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
 int main(void) { return (int)ascii_name; }
 EOF
   if cc_check ; then
@@ -7975,9 +7913,6 @@ GETCH = $_getch
 HELP_FILE = $_mp_help
 TIMER = $_timer
 
-AO_SRCS = $_aosrc
-VO_SRCS = $_vosrc
-
 EXESUF = $_exesuf
 
 $_target_arch
@@ -7997,32 +7932,52 @@ NEED_SWAB    = $_need_swab
 NEED_VSSCANF = $_need_vsscanf
 
 # features
+3DFX = $_3dfx
+AA = $_aa
 ALSA1X = $_alsa1x
 ALSA9 = $_alsa9
+ALSA5 = $_alsa5
 APPLE_IR = $_apple_ir
 APPLE_REMOTE = $_apple_remote
+ARTS = $_arts
 AUDIO_INPUT = $_audio_input
 BITMAP_FONT = $_bitmap_font
+BL = $_bl
+CACA = $_caca
 CDDA = $_cdda
 CDDB = $_cddb
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
+DFBMGA = $_dfbmga
+DGA = $_dga
+DIRECT3D = $_direct3d
+DIRECTFB = $_directfb
+DIRECTX = $_directx
 DVBIN = $_dvbin
 DVDNAV = $_dvdnav
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
+DXR2 = $_dxr2
+DXR3 = $_dxr3
+ESD = $_esd
 FAAC=$_faac
 FAAD = $_faad
 FAAD_INTERNAL = $_faad_internal
+FBDEV = $_fbdev
 FREETYPE = $_freetype
 FTP = $_ftp
 GIF = $_gif
+GGI = $_ggi
+GL = $_gl
+GL_WIN32 = $_gl_win32
 GUI = $_gui
 GUI_GTK = $_gui_gtk
 GUI_WIN32 = $_gui_win32
 HAVE_POSIX_SELECT = $_posix_select
 HAVE_SYS_MMAN_H = $_mman
 HAVE_XVMC = $_xvmc
+IVTV = $_ivtv
+JACK = $_jack
 JOYSTICK = $_joystick
 JPEG = $_jpeg
 LADSPA = $_ladspa
@@ -8046,15 +8001,21 @@ LIRC = $_lirc
 LIVE555 = $_live
 MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FINDER = $_macosx_finder
+MD5SUM = $_md5sum
+MGA = $_mga
 MNG = $_mng
 MP3LAME = $_mp3lame
 MP3LIB = $_mp3lib
 MUSEPACK = $_musepack
+NAS = $_nas
 NATIVE_RTSP = $_native_rtsp
 NETWORK = $_network
+OPENAL = $_openal
 OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
 PNG = $_png
+PNM = $_pnm
+PULSE = $_pulse
 PVR = $_pvr
 QTX_CODECS = $_qtx
 QTX_CODECS_WIN32 = $_qtx_codecs_win32
@@ -8063,8 +8024,16 @@ QUARTZ = $_quartz
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 REAL_CODECS = $_real
+S3FB = $_s3fb
+SDL = $_sdl
 SPEEX = $_speex
 STREAM_CACHE = $_stream_cache
+SGIAUDIO = $_sgiaudio
+SUNAUDIO = $_sunaudio
+SVGA = $_svga
+TDFXFB = $_tdfxfb
+TDFXVID = $_tdfxvid
+TGA = $_tga
 TOOLAME=$_toolame
 TREMOR_INTERNAL = $_tremor_internal
 TV = $_tv
@@ -8076,7 +8045,9 @@ TV_V4L1 = $_tv_v4l1
 TV_V4L2 = $_tv_v4l2
 TWOLAME=$_twolame
 UNRAR_EXEC = $_unrar_exec
+V4L2 = $_v4l2
 VCD = $_vcd
+VESA = $_vesa
 VIDIX = $_vidix
 VIDIX_PCIDB = $_vidix_pcidb_val
 VIDIX_CYBERBLADE=$_vidix_drv_cyberblade
@@ -8094,13 +8065,22 @@ VIDIX_SH_VEU=$_vidix_drv_sh_veu
 VIDIX_SIS=$_vidix_drv_sis
 VIDIX_UNICHROME=$_vidix_drv_unichrome
 VSTREAM = $_vstream
+WII = $_wii
 WIN32DLL = $_win32dll
+WIN32WAVEOUT = $_win32waveout
 WIN32_EMULATION = $_win32_emulation
+WINVIDIX = $winvidix
+X11 = $_x11
 X264 = $_x264
 XANIM_CODECS = $_xanim
+XMGA = $_xmga
 XMMS_PLUGINS = $_xmms
+XV = $_xv
 XVID4 = $_xvid
-ZORAN = $_zr
+XVIDIX = $xvidix
+XVMC = $_xvmc
+YUV4MPEG = $_yuv4mpeg
+ZR = $_zr
 
 # FFmpeg
 LIBAVUTIL = $_libavutil
@@ -8307,6 +8287,7 @@ $_def_runtime_cpudetection
 $_def_sighandler
 $_def_sortsub
 $_def_stream_cache
+$_def_pthread_cache
 
 
 /* CPU stuff */

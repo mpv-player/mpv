@@ -110,7 +110,7 @@ struct skin_t
     image *(*pngRead)(skin_t *skin, unsigned char *fname);
 };
 
-extern skin_t *loadskin(char *skindir, int desktopbpp);
+skin_t *loadskin(char *skindir, int desktopbpp);
 
 // --- Widget types ---
 

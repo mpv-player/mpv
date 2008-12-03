@@ -1071,15 +1071,15 @@ typedef struct NT_TIB
 struct TEB;
 /*
 #if defined(__i386__) && defined(__GNUC__)
-extern inline struct TEB * WINAPI NtCurrentTeb(void);
-extern inline struct TEB * WINAPI NtCurrentTeb(void)
+inline struct TEB * WINAPI NtCurrentTeb(void);
+inline struct TEB * WINAPI NtCurrentTeb(void)
 {
     struct TEB *teb;
     __asm__(".byte 0x64\n\tmovl (0x18),%0" : "=r" (teb));
     return teb;
 }
 #else
-extern struct TEB * WINAPI NtCurrentTeb(void);
+struct TEB * WINAPI NtCurrentTeb(void);
 #endif
 */
 

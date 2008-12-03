@@ -29,9 +29,9 @@
 #include "gui/bitmap.h"
 #include "gui/wm/ws.h"
 
-extern char * Translate( char * str );
-extern void PutImage( txSample * bf,int x,int y,int max,int ofs );
-extern void SimplePotmeterPutImage( txSample * bf,int x,int y,float frac );
-extern void Render( wsTWindow * window,wItem * Items,int nrItems,char * db,int size );
+char * Translate( char * str );
+void PutImage( txSample * bf,int x, int y, int max, int ofs );
+void SimplePotmeterPutImage( txSample * bf, int x, int y, float frac );
+void Render( wsTWindow * window, wItem * Items, int nrItems, char * db, int size );
 
 #endif /* MPLAYER_GUI_GUI_COMMON_H */

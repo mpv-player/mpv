@@ -51,7 +51,7 @@ static long outscale = 32768;
 #include "tabinit.c"
 
 #if 1
-extern int mplayer_audio_read(char *buf,int size);
+int mplayer_audio_read(char *buf,int size);
 
 LOCAL int mp3_read(char *buf,int size){
 //  int len=fread(buf,1,size,mp3_file);
@@ -61,7 +61,7 @@ LOCAL int mp3_read(char *buf,int size){
   return len;
 }
 #else
-extern int mp3_read(char *buf,int size);
+int mp3_read(char *buf,int size);
 #endif
 /*
  * Modified for use with MPlayer, for details see the changelog at
@@ -386,11 +386,11 @@ static int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
 /******************************************************************************/
 
 /* It's hidden from gcc in assembler */
-extern void dct64_MMX(short *, short *, real *);
-extern void dct64_MMX_3dnow(short *, short *, real *);
-extern void dct64_MMX_3dnowex(short *, short *, real *);
-extern void dct64_sse(short *, short *, real *);
-extern void dct64_altivec(real *, real *, real *);
+void dct64_MMX(short *, short *, real *);
+void dct64_MMX_3dnow(short *, short *, real *);
+void dct64_MMX_3dnowex(short *, short *, real *);
+void dct64_sse(short *, short *, real *);
+void dct64_altivec(real *, real *, real *);
 void (*dct64_MMX_func)(short *, short *, real *);
 
 #include "layer2.c"

@@ -45,7 +45,7 @@ typedef struct mp3_hdr {
   struct mp3_hdr *next;
 } mp3_hdr_t;
 
-extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 int hr_mp3_seek = 0;
 

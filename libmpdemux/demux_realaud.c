@@ -141,7 +141,7 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 
 
 
-extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 
 

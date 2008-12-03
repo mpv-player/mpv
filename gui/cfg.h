@@ -73,7 +73,7 @@ typedef struct {
 extern gtkASS_t gtkASS;
 #endif
 
-extern int cfg_read( void );
-extern int cfg_write( void );
+int cfg_read( void );
+int cfg_write( void );
 
 #endif /* MPLAYER_GUI_CFG_H */

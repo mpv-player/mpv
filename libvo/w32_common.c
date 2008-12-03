@@ -178,6 +178,11 @@ int vo_w32_check_events(void) {
     }
     if (WinID >= 0) {
         RECT r;
+        GetClientRect(vo_window, &r);
+        if (r.right != vo_dwidth || r.bottom != vo_dheight) {
+            vo_dwidth = r.right; vo_dheight = r.bottom;
+            event_flags |= VO_EVENT_RESIZE;
+        }
         GetClientRect(WinID, &r);
         if (r.right != vo_dwidth || r.bottom != vo_dheight)
             MoveWindow(vo_window, 0, 0, r.right, r.bottom, FALSE);
@@ -383,10 +388,13 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
     o_dwidth = width;
     o_dheight = height;
 
-    prev_width = vo_dwidth = width;
-    prev_height = vo_dheight = height;
-    prev_x = vo_dx;
-    prev_y = vo_dy;
+    if (WinID < 0) {
+        // the desired size is ignored in wid mode, it always matches the window size.
+        prev_width = vo_dwidth = width;
+        prev_height = vo_dheight = height;
+        prev_x = vo_dx;
+        prev_y = vo_dy;
+    }
 
     vo_fs = flags & VOFLAG_FULLSCREEN;
     vo_vm = flags & VOFLAG_MODESWITCHING;

@@ -1,4 +1,4 @@
-.\" synced with r27979
+.\" synced with r28056
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -2868,10 +2868,14 @@ Définit le canal de mixage (par défaut\ : pcm).
 .PD 1
 .
 .TP
-.B sdl (SDL uniquement)
+.B sdl (SDL uniquement, bogué, périmé)
 Pilote de sortie audio de la librairie SDL.
 SDL (Simple Directmedia Layer) est une librairie très indépendante de la
 plateforme.
+Notez qu'il souffre d'un certain nombre de bogues mineurs (\-vm/\-novm est à
+peu près ignoré, \-fs se comporte comme like \-novm, la fenêtre est
+systématiquement dans le coin en haut à gauche lorsque l'on sort du mode plein
+écran, panscan n'est pas géré, ...)
 .PD 0
 .RSs
 .IPs <pilote>

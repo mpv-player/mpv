@@ -60,21 +60,21 @@ extern GdkBitmap * gtkIconMask;
 extern Pixmap      guiIcon;
 extern Pixmap	   guiIconMask;
 
-extern void widgetsCreate( void );
+void widgetsCreate( void );
 
-extern void gtkInit( void );
-extern void gtkAddIcon( GtkWidget * window );
+void gtkInit( void );
+void gtkAddIcon( GtkWidget * window );
 
-extern int  gtkFillSkinList( gchar * dir );
-extern void gtkClearList( GtkWidget * list );
-extern void gtkSetDefaultToCList( GtkWidget * list,char * item );
-extern int  gtkFindCList( GtkWidget * list,char * item );
+int  gtkFillSkinList( gchar * dir );
+void gtkClearList( GtkWidget * list );
+void gtkSetDefaultToCList( GtkWidget * list, char * item );
+int  gtkFindCList( GtkWidget * list, char * item );
 
-extern void gtkEventHandling( void );
+void gtkEventHandling( void );
 
-extern void gtkShow( int type,char * param );
-extern void gtkMessageBox( int type,const gchar * str );
-extern void gtkSetLayer( GtkWidget * wdg );
-extern void gtkActive( GtkWidget * wdg );
+void gtkShow( int type, char * param );
+void gtkMessageBox( int type, const gchar * str );
+void gtkSetLayer( GtkWidget * wdg );
+void gtkActive( GtkWidget * wdg );
 
 #endif /* MPLAYER_GUI_WIDGETS_H */

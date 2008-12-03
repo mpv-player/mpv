@@ -25,32 +25,32 @@ typedef struct {
 } PE_MODREF;
 
 struct wine_modref;
-extern int PE_unloadImage(HMODULE hModule);
-extern FARPROC PE_FindExportedFunction(struct wine_modref *wm, LPCSTR funcName, WIN_BOOL snoop);
-extern WIN_BOOL PE_EnumResourceTypesA(HMODULE,ENUMRESTYPEPROCA,LONG);
-extern WIN_BOOL PE_EnumResourceTypesW(HMODULE,ENUMRESTYPEPROCW,LONG);
-extern WIN_BOOL PE_EnumResourceNamesA(HMODULE,LPCSTR,ENUMRESNAMEPROCA,LONG);
-extern WIN_BOOL PE_EnumResourceNamesW(HMODULE,LPCWSTR,ENUMRESNAMEPROCW,LONG);
-extern WIN_BOOL PE_EnumResourceLanguagesA(HMODULE,LPCSTR,LPCSTR,ENUMRESLANGPROCA,LONG);
-extern WIN_BOOL PE_EnumResourceLanguagesW(HMODULE,LPCWSTR,LPCWSTR,ENUMRESLANGPROCW,LONG);
-extern HRSRC PE_FindResourceExW(struct wine_modref*, LPCWSTR, LPCWSTR, WORD);
-extern DWORD PE_SizeofResource(HMODULE,HRSRC);
-extern struct wine_modref *PE_LoadLibraryExA(LPCSTR, DWORD);
-extern void PE_UnloadLibrary(struct wine_modref *);
-extern HGLOBAL PE_LoadResource(struct wine_modref *wm, HRSRC);
-extern HMODULE PE_LoadImage( int hFile, LPCSTR filename, WORD *version );
-extern struct wine_modref *PE_CreateModule( HMODULE hModule, LPCSTR filename,
-                                             DWORD flags, WIN_BOOL builtin );
-extern WIN_BOOL PE_CreateProcess( HANDLE hFile, LPCSTR filename, LPCSTR cmd_line, LPCSTR env, 
-                              LPSECURITY_ATTRIBUTES psa, LPSECURITY_ATTRIBUTES tsa,
-                              WIN_BOOL inherit, DWORD flags, LPSTARTUPINFOA startup,
-                              LPPROCESS_INFORMATION info );
+int PE_unloadImage(HMODULE hModule);
+FARPROC PE_FindExportedFunction(struct wine_modref *wm, LPCSTR funcName, WIN_BOOL snoop);
+WIN_BOOL PE_EnumResourceTypesA(HMODULE, ENUMRESTYPEPROCA, LONG);
+WIN_BOOL PE_EnumResourceTypesW(HMODULE, ENUMRESTYPEPROCW, LONG);
+WIN_BOOL PE_EnumResourceNamesA(HMODULE, LPCSTR, ENUMRESNAMEPROCA, LONG);
+WIN_BOOL PE_EnumResourceNamesW(HMODULE, LPCWSTR, ENUMRESNAMEPROCW, LONG);
+WIN_BOOL PE_EnumResourceLanguagesA(HMODULE, LPCSTR, LPCSTR, ENUMRESLANGPROCA, LONG);
+WIN_BOOL PE_EnumResourceLanguagesW(HMODULE, LPCWSTR, LPCWSTR, ENUMRESLANGPROCW, LONG);
+HRSRC PE_FindResourceExW(struct wine_modref*, LPCWSTR, LPCWSTR, WORD);
+DWORD PE_SizeofResource(HMODULE, HRSRC);
+struct wine_modref *PE_LoadLibraryExA(LPCSTR, DWORD);
+void PE_UnloadLibrary(struct wine_modref *);
+HGLOBAL PE_LoadResource(struct wine_modref *wm, HRSRC);
+HMODULE PE_LoadImage(int hFile, LPCSTR filename, WORD *version);
+struct wine_modref *PE_CreateModule(HMODULE hModule, LPCSTR filename,
+                                    DWORD flags, WIN_BOOL builtin);
+WIN_BOOL PE_CreateProcess(HANDLE hFile, LPCSTR filename, LPCSTR cmd_line, LPCSTR env,
+                          LPSECURITY_ATTRIBUTES psa, LPSECURITY_ATTRIBUTES tsa,
+                          WIN_BOOL inherit, DWORD flags, LPSTARTUPINFOA startup,
+                          LPPROCESS_INFORMATION info);
 
-extern void PE_InitTls(void);
-extern WIN_BOOL PE_InitDLL(struct wine_modref *wm, DWORD type, LPVOID lpReserved);
+void PE_InitTls(void);
+WIN_BOOL PE_InitDLL(struct wine_modref *wm, DWORD type, LPVOID lpReserved);
 
-extern PIMAGE_RESOURCE_DIRECTORY GetResDirEntryA(PIMAGE_RESOURCE_DIRECTORY,LPCSTR,DWORD,WIN_BOOL);
-extern PIMAGE_RESOURCE_DIRECTORY GetResDirEntryW(PIMAGE_RESOURCE_DIRECTORY,LPCWSTR,DWORD,WIN_BOOL);
+PIMAGE_RESOURCE_DIRECTORY GetResDirEntryA(PIMAGE_RESOURCE_DIRECTORY, LPCSTR, DWORD, WIN_BOOL);
+PIMAGE_RESOURCE_DIRECTORY GetResDirEntryW(PIMAGE_RESOURCE_DIRECTORY, LPCWSTR, DWORD, WIN_BOOL);
 
 typedef DWORD CALLBACK (*DLLENTRYPROC)(HMODULE,DWORD,LPVOID);
 
@@ -74,8 +74,8 @@ typedef struct {
 	ELF_STDCALL_STUB	*stubs;
 } ELF_MODREF;
 
-extern struct wine_modref *ELF_LoadLibraryExA( LPCSTR libname, DWORD flags);
-extern void ELF_UnloadLibrary(struct wine_modref *);
-extern FARPROC ELF_FindExportedFunction(struct wine_modref *wm, LPCSTR funcName);
+struct wine_modref *ELF_LoadLibraryExA( LPCSTR libname, DWORD flags);
+void ELF_UnloadLibrary(struct wine_modref *);
+FARPROC ELF_FindExportedFunction(struct wine_modref *wm, LPCSTR funcName);
 
 #endif /* MPLAYER_PE_IMAGE_H */

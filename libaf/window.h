@@ -22,12 +22,12 @@
 #ifndef MPLAYER_WINDOW_H
 #define MPLAYER_WINDOW_H
 
-extern void af_window_boxcar(int n, FLOAT_TYPE* w);
-extern void af_window_triang(int n, FLOAT_TYPE* w);
-extern void af_window_hanning(int n, FLOAT_TYPE* w);
-extern void af_window_hamming(int n, FLOAT_TYPE* w);
-extern void af_window_blackman(int n, FLOAT_TYPE* w);
-extern void af_window_flattop(int n, FLOAT_TYPE* w);
-extern void af_window_kaiser(int n, FLOAT_TYPE* w, FLOAT_TYPE b);
+void af_window_boxcar(int n, FLOAT_TYPE* w);
+void af_window_triang(int n, FLOAT_TYPE* w);
+void af_window_hanning(int n, FLOAT_TYPE* w);
+void af_window_hamming(int n, FLOAT_TYPE* w);
+void af_window_blackman(int n, FLOAT_TYPE* w);
+void af_window_flattop(int n, FLOAT_TYPE* w);
+void af_window_kaiser(int n, FLOAT_TYPE* w, FLOAT_TYPE b);
 
 #endif /* MPLAYER_WINDOW_H */

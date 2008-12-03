@@ -37,17 +37,17 @@ enum DEBUG_CLASS { DBCL_FIXME, DBCL_ERR, DBCL_WARN, DBCL_TRACE, DBCL_COUNT };
 /* These function return a printable version of a string, including
    quotes.  The string will be valid for some time, but not indefinitely
    as strings are re-used.  */
-extern LPCSTR debugstr_an (LPCSTR s, int n);
-extern LPCSTR debugstr_wn (LPCWSTR s, int n);
-extern LPCSTR debugres_a (LPCSTR res);
-extern LPCSTR debugres_w (LPCWSTR res);
-extern LPCSTR debugstr_guid( const struct GUID *id );
-extern LPCSTR debugstr_hex_dump (const void *ptr, int len);
-extern int dbg_header_err( const char *dbg_channel, const char *func );
-extern int dbg_header_warn( const char *dbg_channel, const char *func );
-extern int dbg_header_fixme( const char *dbg_channel, const char *func );
-extern int dbg_header_trace( const char *dbg_channel, const char *func );
-extern int dbg_vprintf( const char *format, va_list args );
+LPCSTR debugstr_an( LPCSTR s, int n );
+LPCSTR debugstr_wn( LPCWSTR s, int n );
+LPCSTR debugres_a( LPCSTR res );
+LPCSTR debugres_w( LPCWSTR res );
+LPCSTR debugstr_guid( const struct GUID *id );
+LPCSTR debugstr_hex_dump( const void *ptr, int len );
+int dbg_header_err( const char *dbg_channel, const char *func );
+int dbg_header_warn( const char *dbg_channel, const char *func );
+int dbg_header_fixme( const char *dbg_channel, const char *func );
+int dbg_header_trace( const char *dbg_channel, const char *func );
+int dbg_vprintf( const char *format, va_list args );
 
 static inline LPCSTR debugstr_a( LPCSTR s )  { return debugstr_an( s, 80 ); }
 static inline LPCSTR debugstr_w( LPCWSTR s ) { return debugstr_wn( s, 80 ); }

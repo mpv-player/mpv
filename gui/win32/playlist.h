@@ -55,7 +55,7 @@ struct playlist_t
 #define SORT_BYTITLE        3
 #define SORT_BYDURATION     4
 
-extern playlist_t *create_playlist(void);
-extern BOOL adddirtoplaylist(playlist_t *playlist, const char* path, BOOL recursive);
+playlist_t *create_playlist(void);
+BOOL adddirtoplaylist(playlist_t *playlist, const char* path, BOOL recursive);
 
 #endif /* MPLAYER_GUI_PLAYLIST_H */

@@ -640,8 +640,6 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
 
 subtitle* vo_sub=NULL;
 
-// vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
-
 inline static void vo_update_text_sub(struct osd_state *osd, mp_osd_obj_t* obj,int dxs,int dys){
    unsigned char *t;
    int c,i,j,l,x,y,font,prevc,counter;
@@ -1036,7 +1034,7 @@ void *vo_vobsub=NULL;
 
 static int draw_alpha_init_flag=0;
 
-extern void vo_draw_alpha_init(void);
+void vo_draw_alpha_init(void);
 
        mp_osd_obj_t* vo_osd_list=NULL;
 

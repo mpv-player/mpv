@@ -31,9 +31,9 @@
 
 extern GtkWidget   * fsFileSelect;
 
-extern void HideFileSelect( void );
-extern void ShowFileSelect( int type, int modal );
+void HideFileSelect( void );
+void ShowFileSelect( int type, int modal );
 
-extern GtkWidget * create_FileSelect( void );
+GtkWidget * create_FileSelect( void );
 
 #endif /* MPLAYER_GUI_FS_H */

@@ -24,7 +24,7 @@
 extern GtkWidget * URL;
 extern int         gtkVURLDialogBox;
 
-extern void ShowURLDialogBox( void );
-extern GtkWidget * create_URL( void );
+void ShowURLDialogBox( void );
+GtkWidget * create_URL( void );
 
 #endif /* MPLAYER_GUI_GTK_URL_H */

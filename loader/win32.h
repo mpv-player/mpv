@@ -21,7 +21,7 @@
 #endif
 #endif
 
-extern void my_garbagecollection(void);
+void my_garbagecollection(void);
 
 typedef struct {
     UINT             uDriverSignature;
@@ -37,7 +37,7 @@ typedef DRVR  *LPDRVR;
 typedef struct tls_s tls_t;
 
 
-extern void* LookupExternal(const char* library, int ordinal);
-extern void* LookupExternalByName(const char* library, const char* name);
+void* LookupExternal(const char* library, int ordinal);
+void* LookupExternalByName(const char* library, const char* name);
 
 #endif /* MPLAYER_WIN32_H */

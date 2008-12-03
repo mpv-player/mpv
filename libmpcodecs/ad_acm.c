@@ -38,7 +38,7 @@ static int init(sh_audio_t *sh_audio)
   return 1;
 }
 
-extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 static int preinit(sh_audio_t *sh_audio)
 {

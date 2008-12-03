@@ -85,11 +85,11 @@
 
 #define AF_FORMAT_UNKNOWN (-1)
 
-extern int af_str2fmt(const char *str);
-extern int af_str2fmt_short(const char *str);
-extern int af_fmt2bits(int format);
-extern int af_bits2fmt(int bits);
-extern char* af_fmt2str(int format, char* str, int size);
-extern const char* af_fmt2str_short(int format);
+int af_str2fmt(const char *str);
+int af_str2fmt_short(const char *str);
+int af_fmt2bits(int format);
+int af_bits2fmt(int bits);
+char* af_fmt2str(int format, char* str, int size);
+const char* af_fmt2str_short(int format);
 
 #endif /* MPLAYER_AF_FORMAT_H */

@@ -1085,7 +1085,7 @@ discard:
   return 0;
 }
 
-extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 static demuxer_t* demux_open_real(demuxer_t* demuxer)
 {

@@ -2048,7 +2048,7 @@ static int analyze_mpa(muxer_stream_t *s)
 	return layer;	//actual layer with the highest score
 }
 
-extern int aac_parse_frame(uint8_t *buf, int *srate, int *num);
+int aac_parse_frame(uint8_t *buf, int *srate, int *num);
 
 static int parse_audio(muxer_stream_t *s, int finalize, unsigned int *nf, double *timer, double delay, int drop)
 {

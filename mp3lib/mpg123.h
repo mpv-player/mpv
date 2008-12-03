@@ -116,13 +116,13 @@ struct III_sideinfo
 extern real mp3lib_decwin[(512+32)];
 extern real *mp3lib_pnts[];
 
-extern int synth_1to1_pent( real *,int,short * );
-extern int synth_1to1_MMX( real *,int,short * );
-extern int synth_1to1_MMX_s(real *, int, short *, short *, int *);
+int synth_1to1_pent( real *, int, short * );
+int synth_1to1_MMX( real *, int, short * );
+int synth_1to1_MMX_s(real *, int, short *, short *, int *);
 
-extern void dct36_3dnow(real *,real *,real *,real *,real *);
-extern void dct36_3dnowex(real *,real *,real *,real *,real *);
-extern void dct36_sse(real *,real *,real *,real *,real *);
+void dct36_3dnow(real *, real *, real *, real *, real *);
+void dct36_3dnowex(real *, real *, real *, real *, real *);
+void dct36_sse(real *, real *, real *, real *, real *);
 
 typedef int (*synth_func_t)( real *,int,short * );
 typedef void (*dct36_func_t)(real *,real *,real *,real *,real *);
