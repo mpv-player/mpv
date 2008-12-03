@@ -237,7 +237,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
     /* nothing will change its size, be we need some values initialized */
     resize();
 
-    /* now init out own 'font' (to use vo_draw_text_sub without edit them) */
+    /* now init our own 'font' */
     if(!vo_font_save) vo_font_save = vo_font;
     if(vo_font == vo_font_save) {
       vo_font=malloc(sizeof(font_desc_t));//if(!desc) return NULL;

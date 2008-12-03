@@ -50,14 +50,6 @@ typedef struct mp_osd_obj_s {
 } mp_osd_obj_t;
 
 
-#if 0
-
-// disable subtitles:
-static inline void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-}
-
-#else
-
 #include "subreader.h"
 
 extern sub_data* subdata; //currently used subtitles
@@ -113,9 +105,6 @@ extern int spu_alignment;
 extern int spu_aamode;
 extern float spu_gaussvar;
 
-//extern void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
-//extern void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
-//extern void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 extern void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h));
 
@@ -133,7 +122,5 @@ unsigned utf8_get_char(const char **str);
 #include <inttypes.h>
 void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey);
 #endif
-
-#endif /* 0 */
 
 #endif /* MPLAYER_SUB_H */
