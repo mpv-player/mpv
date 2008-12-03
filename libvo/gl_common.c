@@ -186,10 +186,10 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   int dummy1;
   GLenum dummy2;
   GLint dummy3;
-  if (bpp == NULL) bpp = &dummy1;
-  if (gl_texfmt == NULL) gl_texfmt = &dummy3;
-  if (gl_format == NULL) gl_format = &dummy2;
-  if (gl_type == NULL) gl_type = &dummy2;
+  if (!bpp) bpp = &dummy1;
+  if (!gl_texfmt) gl_texfmt = &dummy3;
+  if (!gl_format) gl_format = &dummy2;
+  if (!gl_type) gl_type = &dummy2;
   
   *bpp = IMGFMT_IS_BGR(fmt)?IMGFMT_BGR_DEPTH(fmt):IMGFMT_RGB_DEPTH(fmt);
   *gl_texfmt = 3;
@@ -571,7 +571,7 @@ static void glSetupYUVCombiners(float uvcos, float uvsin) {
   if (i < 2)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] 2 general combiners needed for YUV combiner support (found %i)\n", i);
-  glGetIntegerv (GL_MAX_TEXTURE_UNITS, &i);
+  glGetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
   if (i < 3)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] 3 texture units needed for YUV combiner support (found %i)\n", i);
@@ -1468,7 +1468,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
 
   // set context
   if (!wglMakeCurrent(windc, new_context)) {
-    mp_msg (MSGT_VO, MSGL_FATAL, "[gl] Could not set GL context!\n");
+    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL context!\n");
     if (!keep_context) {
       wglDeleteContext(new_context);
     }
@@ -1597,9 +1597,9 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
 
   // set context
   if (!glXMakeCurrent(mDisplay, vo_window, new_context)) {
-    mp_msg (MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
+    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GLX context!\n");
     if (!keep_context) {
-      glXDestroyContext (mDisplay, new_context);
+      glXDestroyContext(mDisplay, new_context);
       XFree(new_vinfo);
     }
     return SET_WINDOW_FAILED;
