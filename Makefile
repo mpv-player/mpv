@@ -519,18 +519,32 @@ SRCS_MPLAYER = mplayer.c \
                libvo/video_out.c \
                libvo/vo_mpegpes.c \
                libvo/vo_null.c \
-               $(addprefix libvo/,$(VO_SRCS)) \
 
+SRCS_MPLAYER-$(3DFX)         += libvo/vo_3dfx.c
+SRCS_MPLAYER-$(AA)           += libvo/vo_aa.c
 SRCS_MPLAYER-$(ALSA1X)       += libao2/ao_alsa.c
 SRCS_MPLAYER-$(ALSA5)        += libao2/ao_alsa5.c
 SRCS_MPLAYER-$(ALSA9)        += libao2/ao_alsa.c
 SRCS_MPLAYER-$(APPLE_IR)     += input/appleir.c
 SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
 SRCS_MPLAYER-$(ARTS)         += libao2/ao_arts.c
+SRCS_MPLAYER-$(BL)           += libvo/vo_bl.c
+SRCS_MPLAYER-$(CACA)         += libvo/vo_caca.c
 SRCS_MPLAYER-$(COREAUDIO)    += libao2/ao_macosx.c
-SRCS_MPLAYER-$(DIRECTX)      += libao2/ao_dsound.c
-SRCS_MPLAYER-$(DXR2)         += libao2/ao_dxr2.c
+SRCS_MPLAYER-$(COREVIDEO)    += libvo/vo_macosx.m
+SRCS_MPLAYER-$(DFBMGA)       += libvo/vo_dfbmga.c
+SRCS_MPLAYER-$(DGA)          += libvo/vo_dga.c
+SRCS_MPLAYER-$(DIRECT3D)     += libvo/vo_direct3d.c libvo/w32_common.c
+SRCS_MPLAYER-$(DIRECTFB)     += libvo/vo_directfb2.c
+SRCS_MPLAYER-$(DIRECTX)      += libao2/ao_dsound.c libvo/vo_directx.c
+SRCS_MPLAYER-$(DXR2)         += libao2/ao_dxr2.c libvo/vo_dxr2.c
+SRCS_MPLAYER-$(DXR3)         += libvo/vo_dxr3.c
 SRCS_MPLAYER-$(ESD)          += libao2/ao_esd.c
+SRCS_MPLAYER-$(FBDEV)        += libvo/vo_fbdev.c libvo/vo_fbdev2.c
+SRCS_MPLAYER-$(GGI)          += libvo/vo_ggi.c
+SRCS_MPLAYER-$(GIF)          += libvo/vo_gif89a.c
+SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_gl.c libvo/vo_gl2.c
+SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
 SRCS_MPLAYER-$(GUI)          += gui/bitmap.c
 SRCS_MPLAYER-$(GUI_GTK)      += gui/app.c \
                                 gui/cfg.c \
@@ -567,9 +581,10 @@ SRCS_MPLAYER-$(GUI_WIN32)    += gui/win32/dialogs.c \
                                 gui/win32/widgetrender.c \
                                 gui/win32/wincfg.c \
 
-SRCS_MPLAYER-$(IVTV)         += libao2/ao_ivtv.c
+SRCS_MPLAYER-$(IVTV)         += libao2/ao_ivtv.c libvo/vo_ivtv.c
 SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
+SRCS_MPLAYER-$(JPEG)         += libvo/vo_jpeg.c
 SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
                                 libmenu/menu_chapsel.c \
                                 libmenu/menu_cmdlist.c  \
@@ -583,15 +598,28 @@ SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
 
 SRCS_MPLAYER-$(LIBMENU_DVBIN) += libmenu/menu_dvbin.c
 SRCS_MPLAYER-$(LIRC)          += input/lirc.c
+SRCS_MPLAYER-$(MD5SUM)        += libvo/vo_md5sum.c
+SRCS_MPLAYER-$(MGA)           += libvo/vo_mga.c
 SRCS_MPLAYER-$(NAS)           += libao2/ao_nas.c
 SRCS_MPLAYER-$(OPENAL)        += libao2/ao_openal.c
 SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c
+SRCS_MPLAYER-$(PNG)           += libvo/vo_png.c
+SRCS_MPLAYER-$(PNM)           += libvo/vo_pnm.c
 SRCS_MPLAYER-$(PULSE)         += libao2/ao_pulse.c
-SRCS_MPLAYER-$(SDL)           += libao2/ao_sdl.c
+SRCS_MPLAYER-$(QUARTZ)        += libvo/vo_quartz.c
+SRCS_MPLAYER-$(S3FB)          += libvo/vo_s3fb.c
+SRCS_MPLAYER-$(SDL)           += libao2/ao_sdl.c libvo/vo_sdl.c
 SRCS_MPLAYER-$(SGIAUDIO)      += libao2/ao_sgi.c
 SRCS_MPLAYER-$(SUNAUDIO)      += libao2/ao_sun.c
+SRCS_MPLAYER-$(SVGA)          += libvo/vo_svga.c
+SRCS_MPLAYER-$(TDFXFB)        += libvo/vo_tdfxfb.c
+SRCS_MPLAYER-$(TDFXVID)       += libvo/vo_tdfx_vid.c
+SRCS_MPLAYER-$(TGA)           += libvo/vo_tga.c
+SRCS_MPLAYER-$(V4L2)          += libvo/vo_v4l2.c
 SRCS_MPLAYER-$(V4L2)          += libao2/ao_v4l2.c
-SRCS_MPLAYER-$(VIDIX)         += libvo/vosub_vidix.c \
+SRCS_MPLAYER-$(VESA)          += libvo/gtf.c libvo/vo_vesa.c libvo/vesa_lvo.c
+SRCS_MPLAYER-$(VIDIX)         += libvo/vo_cvidix.c \
+                                 libvo/vosub_vidix.c \
                                  vidix/vidix.c \
                                  vidix/drivers.c \
                                  vidix/dha.c \
@@ -614,7 +642,17 @@ SRCS_MPLAYER-$(VIDIX_S3)            += vidix/s3_vid.c
 SRCS_MPLAYER-$(VIDIX_SH_VEU)        += vidix/sh_veu_vid.c
 SRCS_MPLAYER-$(VIDIX_SIS)           += vidix/sis_vid.c vidix/sis_bridge.c
 SRCS_MPLAYER-$(VIDIX_UNICHROME)     += vidix/unichrome_vid.c
+SRCS_MPLAYER-$(WII)           += libvo/vo_wii.c
 SRCS_MPLAYER-$(WIN32WAVEOUT)  += libao2/ao_win32.c
+SRCS_MPLAYER-$(WINVIDIX)      += libvo/vo_winvidix.c
+SRCS_MPLAYER-$(X11)           += libvo/vo_x11.c libvo/vo_xover.c libvo/x11_common.c
+SRCS_MPLAYER-$(XMGA)          += libvo/vo_xmga.c
+SRCS_MPLAYER-$(XV)            += libvo/vo_xv.c
+SRCS_MPLAYER-$(XVIDIX)        += libvo/vo_xvidix.c
+SRCS_MPLAYER-$(XVMC)          += libvo/vo_xvmc.c
+SRCS_MPLAYER-$(XVR100)        += libvo/vo_xvr100.c
+SRCS_MPLAYER-$(YUV4MPEG)      += libvo/vo_yuv4mpeg.c
+SRCS_MPLAYER-$(ZR)            += libvo/jpeg_enc.c libvo/vo_zr.c libvo/vo_zr2.c
 
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
