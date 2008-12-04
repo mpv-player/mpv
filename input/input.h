@@ -217,7 +217,7 @@ typedef int (*mp_cmd_func_t)(int fd,char* dest,int size);
 typedef void (*mp_close_func_t)(int fd);
 
 // Set this to grab all incoming key codes
-int (*mp_input_key_cb)(int code);
+extern int (*mp_input_key_cb)(int code);
 // Should return 1 if the command was processed
 typedef int (*mp_input_cmd_filter)(mp_cmd_t* cmd, int paused, void* ctx);
 

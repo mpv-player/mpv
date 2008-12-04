@@ -11,7 +11,7 @@ typedef int (*wrapper_func_t)(void *stack_base, int stack_size, reg386_t *reg,  
 
 extern wrapper_func_t report_entry, report_ret;
 
-void (*wrapper_target)(void);
+extern void (*wrapper_target)(void);
 
 int wrapper(void);
 int null_call(void);
