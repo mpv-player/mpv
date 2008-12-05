@@ -914,6 +914,8 @@ static int preinit(const char *arg)
               "    Slice size for texture transfer, 0 for whole image\n"
               "  noosd\n"
               "    Do not use OpenGL OSD code\n"
+              "  scaled-osd\n"
+              "    Render OSD at movie resolution and scale it\n"
               "  noaspect\n"
               "    Do not do aspect scaling\n"
               "  rectangle=<0,1,2>\n"
@@ -943,9 +945,12 @@ static int preinit(const char *arg)
               "    1: use improved bicubic scaling for luma.\n"
               "    2: use cubic in X, linear in Y direction scaling for luma.\n"
               "    3: as 1 but without using a lookup texture.\n"
-              "    4: experimental unsharp masking.\n"
+              "    4: experimental unsharp masking (sharpening).\n"
+              "    5: experimental unsharp masking (sharpening) with larger radius.\n"
               "  cscale=<n>\n"
               "    as lscale but for chroma (2x slower with little visible effect).\n"
+              "  filter-strength=<value>\n"
+              "    set the effect strength for some lscale/cscale filters\n"
               "  customprog=<filename>\n"
               "    use a custom YUV conversion program\n"
               "  customtex=<filename>\n"
@@ -956,6 +961,8 @@ static int preinit(const char *arg)
               "    use texture_rectangle for customtex texture\n"
               "  osdcolor=<0xAARRGGBB>\n"
               "    use the given color for the OSD\n"
+              "  ycbcr\n"
+              "    also try to use the GL_MESA_ycbcr_texture extension\n"
               "\n" );
       return -1;
     }
