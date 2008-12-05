@@ -212,6 +212,13 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
       *gl_format = GL_LUMINANCE;
       *gl_type = GL_UNSIGNED_BYTE;
       break;
+    case IMGFMT_UYVY:
+    case IMGFMT_YUY2:
+      *gl_texfmt = GL_YCBCR_MESA;
+      *bpp = 16;
+      *gl_format = GL_YCBCR_MESA;
+      *gl_type = fmt == IMGFMT_UYVY ? GL_UNSIGNED_SHORT_8_8 : GL_UNSIGNED_SHORT_8_8_REV;
+      break;
 #if 0
     // we do not support palettized formats, although the format the
     // swscale produces works
@@ -484,6 +491,8 @@ int glFmt2bpp(GLenum format, GLenum type) {
     case GL_LUMINANCE:
     case GL_ALPHA:
       return component_size;
+    case GL_YCBCR_MESA:
+      return 2;
     case GL_RGB:
     case GL_BGR:
       return 3 * component_size;

@@ -71,6 +71,7 @@ static int eosdtexCnt;
 static int osd_color;
 
 static int use_aspect;
+static int use_ycbcr;
 static int use_yuv;
 static int lscale;
 static int cscale;
@@ -833,6 +834,8 @@ query_format(uint32_t format)
     // ideally MPlayer should be fixed instead not to use Y800 when it has the choice
     if (!use_yuv && (format == IMGFMT_Y8 || format == IMGFMT_Y800))
         return 0;
+    if (!use_ycbcr && (format == IMGFMT_UYVY || format == IMGFMT_YUY2))
+        return 0;
     if (many_fmts &&
          glFindFormat(format, NULL, NULL, NULL, NULL))
         return caps;
@@ -858,6 +861,7 @@ static opt_t subopts[] = {
   {"osd",          OPT_ARG_BOOL, &use_osd,      NULL},
   {"scaled-osd",   OPT_ARG_BOOL, &scaled_osd,   NULL},
   {"aspect",       OPT_ARG_BOOL, &use_aspect,   NULL},
+  {"ycbcr",        OPT_ARG_BOOL, &use_ycbcr,    NULL},
   {"slice-height", OPT_ARG_INT,  &slice_height, (opt_test_f)int_non_neg},
   {"rectangle",    OPT_ARG_INT,  &use_rectangle,(opt_test_f)int_non_neg},
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
@@ -883,6 +887,7 @@ static int preinit(const char *arg)
     use_osd = 1;
     scaled_osd = 0;
     use_aspect = 1;
+    use_ycbcr = 0;
     use_yuv = 0;
     lscale = 0;
     cscale = 0;

@@ -210,6 +210,15 @@
 #ifndef GL_UNSIGNED_SHORT_1_5_5_5_REV
 #define GL_UNSIGNED_SHORT_1_5_5_5_REV 0x8366
 #endif
+#ifndef GL_UNSIGNED_SHORT_8_8
+#define GL_UNSIGNED_SHORT_8_8 0x85BA
+#endif
+#ifndef GL_UNSIGNED_SHORT_8_8_REV
+#define GL_UNSIGNED_SHORT_8_8_REV 0x85BB
+#endif
+#ifndef GL_YCBCR_MESA
+#define GL_YCBCR_MESA 0x8757
+#endif
 #ifndef GL_RGB32F
 #define GL_RGB32F 0x8815
 #endif
