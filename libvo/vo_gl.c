@@ -681,6 +681,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 }
 
 static uint32_t get_image(mp_image_t *mpi) {
+  int needed_size;
   if (!GenBuffers || !BindBuffer || !BufferData || !MapBuffer) {
     if (!err_shown)
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] extensions missing for dr\n"
@@ -697,8 +698,9 @@ static uint32_t get_image(mp_image_t *mpi) {
     GenBuffers(1, &gl_buffer);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
-  if (mpi->stride[0] * mpi->height > gl_buffersize) {
-    gl_buffersize = mpi->stride[0] * mpi->height;
+  needed_size = mpi->stride[0] * mpi->height;
+  if (needed_size > gl_buffersize) {
+    gl_buffersize = needed_size;
     BufferData(GL_PIXEL_UNPACK_BUFFER, gl_buffersize,
                NULL, GL_DYNAMIC_DRAW);
   }
