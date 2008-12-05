@@ -714,18 +714,18 @@ static uint32_t get_image(mp_image_t *mpi) {
 #endif
     mpi->planes[0] = mesa_bufferptr;
   } else {
-  if (!gl_buffer)
-    GenBuffers(1, &gl_buffer);
-  BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
-  if (needed_size > gl_buffersize) {
-    gl_buffersize = needed_size;
-    BufferData(GL_PIXEL_UNPACK_BUFFER, gl_buffersize,
-               NULL, GL_DYNAMIC_DRAW);
-  }
-  if (!gl_bufferptr)
-    gl_bufferptr = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-  mpi->planes[0] = gl_bufferptr;
-  BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    if (!gl_buffer)
+      GenBuffers(1, &gl_buffer);
+    BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
+    if (needed_size > gl_buffersize) {
+      gl_buffersize = needed_size;
+      BufferData(GL_PIXEL_UNPACK_BUFFER, gl_buffersize,
+                 NULL, GL_DYNAMIC_DRAW);
+    }
+    if (!gl_bufferptr)
+      gl_bufferptr = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    mpi->planes[0] = gl_bufferptr;
+    BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   }
   if (!mpi->planes[0]) {
     if (!err_shown)
