@@ -698,9 +698,9 @@ static uint32_t get_image(mp_image_t *mpi) {
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   if (mpi->stride[0] * mpi->height > gl_buffersize) {
-    BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->height,
-               NULL, GL_DYNAMIC_DRAW);
     gl_buffersize = mpi->stride[0] * mpi->height;
+    BufferData(GL_PIXEL_UNPACK_BUFFER, gl_buffersize,
+               NULL, GL_DYNAMIC_DRAW);
   }
   if (!gl_bufferptr)
     gl_bufferptr = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
