@@ -1191,6 +1191,13 @@ void vo_x11_sizehint(int x, int y, int width, int height, int max)
     vo_hint.flags |= PMinSize;
     vo_hint.min_width = vo_hint.min_height = 4;
 
+    // Set the base size. A window manager might display the window
+    // size to the user relative to this.
+    // Setting these to width/height might be nice, but e.g. fluxbox can't handle it.
+    vo_hint.flags |= PBaseSize;
+    vo_hint.base_width = 0 /*width*/;
+    vo_hint.base_height = 0 /*height*/;
+
     vo_hint.flags |= PWinGravity;
     vo_hint.win_gravity = StaticGravity;
     XSetWMNormalHints(mDisplay, vo_window, &vo_hint);
