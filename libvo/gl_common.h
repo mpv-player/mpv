@@ -384,5 +384,7 @@ extern void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
 extern int (APIENTRY *SwapInterval)(int);
 extern void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei,
                              GLsizei, GLint, GLenum, GLenum, const GLvoid *);
+extern void* (APIENTRY *AllocateMemoryMESA)(void *, int, size_t, float, float, float);
+extern void (APIENTRY *FreeMemoryMESA)(void *, int, void *);
 
 #endif /* MPLAYER_GL_COMMON_H */

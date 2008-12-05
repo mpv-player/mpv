@@ -85,6 +85,7 @@ static uint32_t image_format;
 static int many_fmts;
 static int ati_hack;
 static int force_pbo;
+static int mesa_buffer;
 static int use_glFinish;
 static int swap_interval;
 static GLenum gl_target;
@@ -97,6 +98,8 @@ static int gl_buffersize;
 static int gl_buffersize_uv;
 static void *gl_bufferptr;
 static void *gl_bufferptr_uv[2];
+static int mesa_buffersize;
+static void *mesa_bufferptr;
 static GLuint fragprog;
 static GLuint default_texs[22];
 static char *custom_prog;
@@ -389,6 +392,9 @@ static void uninitGl(void) {
     DeleteBuffers(2, gl_buffer_uv);
   gl_buffer_uv[0] = gl_buffer_uv[1] = 0; gl_buffersize_uv = 0;
   gl_bufferptr_uv[0] = gl_bufferptr_uv[1] = 0;
+  if (mesa_bufferptr)
+    FreeMemoryMESA(mDisplay, mScreen, mesa_bufferptr);
+  mesa_bufferptr = NULL;
   err_shown = 0;
 }
 
@@ -694,11 +700,23 @@ static uint32_t get_image(mp_image_t *mpi) {
     mpi->width = texture_width;
     mpi->height = texture_height;
   }
+  mpi->stride[0] = mpi->width * mpi->bpp / 8;
+  needed_size = mpi->stride[0] * mpi->height;
+  if (mesa_buffer) {
+#ifndef GL_WIN32
+    if (mesa_bufferptr && needed_size > mesa_buffersize) {
+      FreeMemoryMESA(mDisplay, mScreen, mesa_bufferptr);
+      mesa_bufferptr = NULL;
+    }
+    if (!mesa_bufferptr)
+      mesa_bufferptr = AllocateMemoryMESA(mDisplay, mScreen, needed_size, 0, 0, 0);
+    mesa_buffersize = needed_size;
+#endif
+    mpi->planes[0] = mesa_bufferptr;
+  } else {
   if (!gl_buffer)
     GenBuffers(1, &gl_buffer);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
-  mpi->stride[0] = mpi->width * mpi->bpp / 8;
-  needed_size = mpi->stride[0] * mpi->height;
   if (needed_size > gl_buffersize) {
     gl_buffersize = needed_size;
     BufferData(GL_PIXEL_UNPACK_BUFFER, gl_buffersize,
@@ -708,6 +726,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     gl_bufferptr = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
   mpi->planes[0] = gl_bufferptr;
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  }
   if (!mpi->planes[0]) {
     if (!err_shown)
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not acquire buffer for dr\n"
@@ -772,7 +791,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
   stride[0] = mpi->stride[0]; stride[1] = mpi->stride[1]; stride[2] = mpi->stride[2];
   planes[0] = mpi->planes[0]; planes[1] = mpi->planes[1]; planes[2] = mpi->planes[2];
   mpi_flipped = stride[0] < 0;
-  if (mpi->flags & MP_IMGFLAG_DIRECT) {
+  if (!mesa_buffer && mpi->flags & MP_IMGFLAG_DIRECT) {
     intptr_t base = (intptr_t)planes[0];
     if (mpi_flipped)
       base += (mpi->h - 1) * stride[0];
@@ -782,10 +801,11 @@ static uint32_t draw_image(mp_image_t *mpi) {
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
     UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     gl_bufferptr = NULL;
-    slice = 0; // always "upload" full texture
     if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
       planes[0] = planes[1] = planes[2] = NULL;
   }
+  if (mpi->flags & MP_IMGFLAG_DIRECT)
+    slice = 0; // always "upload" full texture
   glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
               mpi->x, mpi->y, w, h, slice);
   if (mpi->imgfmt == IMGFMT_YV12) {
@@ -807,7 +827,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
                 mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
     ActiveTexture(GL_TEXTURE0);
   }
-  if (mpi->flags & MP_IMGFLAG_DIRECT)
+  if (!mesa_buffer && mpi->flags & MP_IMGFLAG_DIRECT)
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 skip_upload:
   if (vo_doublebuffering) do_render();
@@ -872,6 +892,7 @@ static opt_t subopts[] = {
   {"filter-strength", OPT_ARG_FLOAT, &filter_strength, NULL},
   {"ati-hack",     OPT_ARG_BOOL, &ati_hack,     NULL},
   {"force-pbo",    OPT_ARG_BOOL, &force_pbo,    NULL},
+  {"mesa-buffer",  OPT_ARG_BOOL, &mesa_buffer,  NULL},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {"swapinterval", OPT_ARG_INT,  &swap_interval,NULL},
   {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
@@ -898,6 +919,7 @@ static int preinit(const char *arg)
     use_glFinish = 0;
     ati_hack = 0;
     force_pbo = 0;
+    mesa_buffer = 0;
     swap_interval = 1;
     slice_height = 0;
     custom_prog = NULL;
