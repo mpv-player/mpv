@@ -20,7 +20,7 @@ typedef struct af_hrtf_s {
     int dlbuflen, hrflen, basslen;
     /* L, C, R, Ls, Rs channels */
     float *lf, *rf, *lr, *rr, *cf, *cr;
-    float *cf_ir, *af_ir, *of_ir, *ar_ir, *or_ir, *cr_ir;
+    const float *cf_ir, *af_ir, *of_ir, *ar_ir, *or_ir, *cr_ir;
     int cf_o, af_o, of_o, ar_o, or_o, cr_o;
     /* Bass */
     float *ba_l, *ba_r;
@@ -59,7 +59,7 @@ typedef struct af_hrtf_s {
  *    sk:	convolution kernel
  *    offset:	offset on the ring buffer, can be 
  */
-static float conv(const int nx, const int nk, float *sx, float *sk,
+static float conv(const int nx, const int nk, const float *sx, const float *sk,
 		  const int offset)
 {
     /* k = reminder of offset / nx */
@@ -73,7 +73,7 @@ static float conv(const int nx, const int nk, float *sx, float *sk,
 }
 
 /* Detect when the impulse response starts (significantly) */
-static int pulse_detect(float *sx)
+static int pulse_detect(const float *sx)
 {
     /* nmax must be the reference impulse response length (128) minus
        s->hrflen */
