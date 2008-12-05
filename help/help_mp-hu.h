@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r27402 (2008. 08. 06.)
+// Sync'ed with help_mp-en.h r27967 (2008. 12. 05.)
 
 
 // ========================= MPlayer help ===========================
@@ -52,7 +52,7 @@ static char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c: 
+// mplayer.c
 #define MSGTR_Exiting "\nKilépés...\n"
 #define MSGTR_ExitingHow "\nKilépés... (%s)\n"
 #define MSGTR_Exit_quit "Kilépés"
@@ -183,6 +183,7 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV esemény: Nav keresés kész\n"
 #define MSGTR_MenuCall "Menü hívás\n"
 
+// --- edit decision lists
 #define MSGTR_EdlOutOfMem "Nem lehet elegendő memóriát foglalni az EDL adatoknak.\n"
 #define MSGTR_EdlRecordsNo "%d EDL akciók olvasása.\n"
 #define MSGTR_EdlQueueEmpty "Nincs olyan EDL akció, amivel foglalkozni kellene.\n"
@@ -252,7 +253,7 @@ static char help_text[]=
 #define MSGTR_SubVisibleStatus "Feliratok: %s"
 #define MSGTR_SubForcedOnlyStatus "Csak kényszerített felirat: %s"
 
-// mencoder.c:
+// mencoder.c
 #define MSGTR_UsingPass3ControlFile "Pass3 vezérlő fájl használata: %s\n"
 #define MSGTR_MissingFilename "\nHiányzó fájlnév!\n\n"
 #define MSGTR_CannotOpenFile_Device "Fájl/eszköz megnyitása sikertelen.\n"
@@ -417,7 +418,7 @@ static char help_text[]=
 #define MSGTR_CouldntOpenCodec "A(z) %s codec nem nyitható meg, br=%d.\n"
 #define MSGTR_CantCopyAudioFormat "A(z) 0x%x audió formátum nem kompatibilis a '-oac copy'-val, kérlek próbáld meg a '-oac pcm' helyette vagy használd a '-fafmttag'-ot a felülbírálásához.\n"
 
-// cfg-mencoder.h:
+// cfg-mencoder.h
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     a változó bitrátájú kódolás módja\n"\
 "                0: cbr (konstans bitráta)\n"\
@@ -466,7 +467,7 @@ static char help_text[]=
 "                 (320 kbps bitráta)\n"\
 "                 <8-320>: ABR kódolás átlagban a megadott bitrátával.\n\n"
 
-//codec-cfg.c:
+// codec-cfg.c
 #define MSGTR_DuplicateFourcc "dupla FourCC"
 #define MSGTR_TooManyFourccs "túl sok FourCCs/formátum..."
 #define MSGTR_ParseError "értelmezési hiba"
@@ -677,7 +678,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Codecs "Kodekek és demuxerek"
 // Megjegyzés: Ha megváltoztatod az MSGTR_PREFERENCES_Misc-et, nézd meg, hogy megfelel-e az MSGTR_PREFERENCES_FRAME_Misc-nek is!
 #define MSGTR_PREFERENCES_Misc "Egyéb"
-
 #define MSGTR_PREFERENCES_None "Egyik sem"
 #define MSGTR_PREFERENCES_DriverDefault "alapértelmezett vezérlő"
 #define MSGTR_PREFERENCES_AvailableDrivers "Driverek:"
@@ -778,6 +778,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ArtsBroken "Az újabb aRts verziók inkompatibilisek "\
            "a GTK 1.x-szel és összeomlasztják a GMPlayert!"
 
+// -- aboutbox
 #define MSGTR_ABOUT_UHU "GUI fejlesztést az UHU Linux támogatta\n"
 #define MSGTR_ABOUT_Contributors "Kód és dokumentáció közreműködői\n"
 #define MSGTR_ABOUT_Codecs_libs_contributions "Codec-ek és third party könyvtárak\n"
@@ -821,7 +822,6 @@ static char help_text[]=
 // wsxdnd.c
 #define MSGTR_WS_NotAFile "Úgy tűnik, hogy ez nem fájl...\n"
 #define MSGTR_WS_DDNothing "D&D: Semmi sem jött vissza!\n"
-
 
 // ======================= video output drivers ========================
 
@@ -1375,7 +1375,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Nem nyitható meg %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "Apple Remote inicializálása nem sikerült.\n"
 
-// lirc.c:
+// lirc.c
 #define MSGTR_SettingUpLIRC "LIRC támogatás indítása...\n"
 #define MSGTR_LIRCopenfailed "Nem tudtam megnyitni a lirc támogatást. Nem fogod tudni használni a távirányítót.\n"
 #define MSGTR_LIRCcfgerr "Nem tudom olvasni a LIRC konfigurációs fájlt: %s \n"
@@ -1383,7 +1383,7 @@ static char help_text[]=
 
 // ========================== LIBMPDEMUX ===================================
 
-// muxer.c, muxer_*.c:
+// muxer.c, muxer_*.c
 #define MSGTR_TooManyStreams "Túl sok stream!"
 #define MSGTR_RawMuxerOnlyOneStream "A rawaudio muxer csak egy audió folyamot támogat!\n"
 #define MSGTR_IgnoringVideoStream "Videó folyam figyelmen kívül hagyva!\n"
@@ -1395,7 +1395,7 @@ static char help_text[]=
 #define MSGTR_WritingHeader "Fejléc írása...\n"
 #define MSGTR_WritingTrailer "Index írása...\n"
 
-// demuxer.c, demux_*.c:
+// demuxer.c, demux_*.c
 #define MSGTR_AudioStreamRedefined "Vigyázat! Többszörösen definiált Audio-folyam: %d (Hibás fájl?)\n"
 #define MSGTR_VideoStreamRedefined "Vigyázat! Többszörösen definiált Video-folyam: %d (Hibás fájl?)\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Túl sok (%d db, %d bájt) audio-csomag a pufferben!\n"

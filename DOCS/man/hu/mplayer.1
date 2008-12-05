@@ -1,4 +1,4 @@
-.\" Synced with r27906
+.\" Synced with r28056
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 11. 16." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 12. 05." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -3268,8 +3268,9 @@ A kezdeti pozíció a \-geometry opcióval állítható be a megadott képernyõhöz
 relatívan.
 Általában a "\-fstype \-fullscreen" vagy "\-fstype none" opciókkal együtt
 mûködik.
-Ez az opció nem alkalmas csak a kezdõ képernyõ beállítására (sem a teljes
-képernyõére), jelenleg a \-geometry a legalkalmasabb erre a célra.
+Ez az opció nem alkalmas csak a kezdõ képernyõ beállítására (mert
+a megadott képernyõn mindig teljes képernyõsen jelenik meg), jelenleg
+a \-geometry a legalkalmasabb erre a célra.
 A gl, gl2, x11 és az xv videó kimeneti vezérlõ támogatja.
 .
 .TP
@@ -3457,11 +3458,15 @@ A videót az XFree86 Direct Graphics Access kiterjesztésén keresztül
 játsza le. Idejétmúltnak lett minõsítve.
 .
 .TP
-.B sdl (csak SDL)
+.B sdl (csak SDL, hibás/idejétmúlt)
 Platform független SDL (Simple Directmedia Layer) függvénykönyvtár
 videó kimeneti vezérlõje.
 Mivel az SDL csak a saját X11 rétegét használja, az MPlayer X11
 opcióinak nincs hatásuk az SDL-re.
+Emlékezz rá, hogy számos kisebb hibája van (\-vm/\-novm opciót a
+legtöbbször figyelmen kívül hagyja, a \-fs úgy mûködik, ahogy a
+\-novm opciónak kellene, az ablak a bal felsõ sarokba kerül, ha
+kikapcsolod a teljes képernyõs megjelenítést, a panscan nem támogatott, ...)
 .PD 0
 .RSs
 .IPs driver=<vezérlõ>
@@ -3518,6 +3523,10 @@ Windows-os frontend a VIDIX-hez
 Ugyan az, mint a vidix-nél.
 .RE
 .PD 1
+.
+.TP
+.B direct3d (csak Windows) (BÉTA KÓD!)
+Kimeneti videó vezérlõ, amely Direct3D interfészt használ (hasznos Vista-hoz).
 .
 .TP
 .B directx (csak Windows)
