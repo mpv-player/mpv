@@ -1,4 +1,4 @@
-.\" synced with r28056
+.\" synced with r28096
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -3803,11 +3803,11 @@ d'un texture permise par votre implémentation d'OpenGL.
 Faite pour fonctionner même avec l'implémentation la plus simple
 l'OpenGL, mais utilise des extensions récentes, permettant de gérer
 plus d'espaces de couleur et de direct rendering.
-Pour une rapidité optimale, essayez quelquechose qui ressemble à
+Pour une rapidité optimale, essayez quelquechose comme\ :
 .br
-\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+\-vo gl:yuv=2:rectangle=2:force\-pbo:ati\-hack \-dr \-noslices
 .br
-Le code vérifie très peu de choses, donc si une fonction ne marche
+Le code ne vérifiant que très peu de choses, si une fonction ne marche
 pas, c'est peut-être parceque votre carte ou votre implémentation de
 OpenGL ne la gère pas, même si aucun message d'erreur s'affiche.
 Utilisez glxinfo ou un outil similaire pour afficher les extensions
@@ -3911,6 +3911,10 @@ Le gamma du rouge, vert et bleu peut aussi être ajusté indépendement.
 La vitesse de ce type de conversion dépend plus de la bande passante
 de la carte vidéo que les autres méthodes.
 .RE
+.IPs ycbcr
+Utilise l'extension GL_MESA_ycbcr_texture pour la conversion YUV vers RGB.
+Dans la plupart des cas, cela est probablement plus lent que de réaliser
+la conversion RGB par logiciel.
 .IPs lscale=<n>
 Sélection de la fonction de mise à l'échelle à utiliser pour la luminance.
 Valide uniquement pour les modes yuv 2, 3, 4 et 6.
@@ -3929,13 +3933,17 @@ Fonctionne avec un peu plus de cartes que la méthode 1.
 3: Comme 1 sauf qu'elle n'effecture pas de consultation de table de texture.
 Peut être plus rapide sur certaines cartes.
 .br
-4: Utilise un masquage flou expérimental de taille 3x3 et d'une force de 0.5.
+4: Utilise un masquage flou expérimental de taille 3x3 et d'une force de 0.5
+par défaut (voir filter-strength).
 .br
-5: Utilise un masquage flou expérimental de taille 5x5 et d'une force de 0.5.
+5: Utilise un masquage flou expérimental de taille 5x5 et d'une force de 0.5
+par défaut (voir filter-strength).
 .RE
 .IPs cscale=<n>
 Sélection de la fonction de mise à l'échelle à utiliser pour la chrominance.
 Pour plus de détails, voir lscale.
+.IPs filter-strength=<valeur>
+Défini la force des filtres lscale/cscale.
 .
 .IPs customprog=<nom_fichier>
 Charge un programme fragment personnalisé depuis <nom_fichier>.
