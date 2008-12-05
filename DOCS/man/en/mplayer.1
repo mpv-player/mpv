@@ -3714,6 +3714,9 @@ Provides brightness, contrast, saturation, hue and gamma control.
 Gamma can also be set independently for red, green and blue.
 Speed depends more on GPU memory bandwidth than other methods.
 .RE
+.IPs ycbcr
+Use the GL_MESA_ycbcr_texture extension to convert YUV to RGB.
+In most cases this is probably slower than doing software conversion to RGB.
 .IPs lscale=<n>
 Select the scaling function to use for luminance scaling.
 Only valid for yuv modes 2, 3, 4 and 6.
@@ -3730,13 +3733,15 @@ Works on a few more cards than method 1.
 3: Same as 1 but does not use a lookup texture.
 Might be faster on some cards.
 .br
-4: Use experimental unsharp masking with 3x3 support and a strength of 0.5.
+4: Use experimental unsharp masking with 3x3 support and a default strength of 0.5 (see filter-strength).
 .br
-5: Use experimental unsharp masking with 5x5 support and a strength of 0.5.
+5: Use experimental unsharp masking with 5x5 support and a default strength of 0.5 (see filter-strength).
 .RE
 .IPs cscale=<n>
 Select the scaling function to use for chrominance scaling.
 For details see lscale.
+.IPs filter-strength=<value>
+Set the effect strength for the lscale/cscale filters that support it.
 .IPs customprog=<filename>
 Load a custom fragment program from <filename>.
 See TOOLS/edgedect.fp for an example.
