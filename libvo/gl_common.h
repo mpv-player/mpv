@@ -210,6 +210,15 @@
 #ifndef GL_UNSIGNED_SHORT_1_5_5_5_REV
 #define GL_UNSIGNED_SHORT_1_5_5_5_REV 0x8366
 #endif
+#ifndef GL_UNSIGNED_SHORT_8_8
+#define GL_UNSIGNED_SHORT_8_8 0x85BA
+#endif
+#ifndef GL_UNSIGNED_SHORT_8_8_REV
+#define GL_UNSIGNED_SHORT_8_8_REV 0x85BB
+#endif
+#ifndef GL_YCBCR_MESA
+#define GL_YCBCR_MESA 0x8757
+#endif
 #ifndef GL_RGB32F
 #define GL_RGB32F 0x8815
 #endif
@@ -375,5 +384,7 @@ extern void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
 extern int (APIENTRY *SwapInterval)(int);
 extern void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei,
                              GLsizei, GLint, GLenum, GLenum, const GLvoid *);
+extern void* (APIENTRY *AllocateMemoryMESA)(void *, int, size_t, float, float, float);
+extern void (APIENTRY *FreeMemoryMESA)(void *, int, void *);
 
 #endif /* MPLAYER_GL_COMMON_H */

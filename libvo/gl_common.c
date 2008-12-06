@@ -78,6 +78,8 @@ void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
 int (APIENTRY *SwapInterval)(int);
 void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei,
                             GLint, GLenum, GLenum, const GLvoid *);
+void* (APIENTRY *AllocateMemoryMESA)(void *, int, size_t, float, float, float);
+void (APIENTRY *FreeMemoryMESA)(void *, int, void *);
 /** \} */ // end of glextfunctions group
 
 //! \defgroup glgeneral OpenGL general helper functions
@@ -213,6 +215,13 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
       *gl_format = GL_LUMINANCE;
       *gl_type = GL_UNSIGNED_BYTE;
       break;
+    case IMGFMT_UYVY:
+    case IMGFMT_YUY2:
+      *gl_texfmt = GL_YCBCR_MESA;
+      *bpp = 16;
+      *gl_format = GL_YCBCR_MESA;
+      *gl_type = fmt == IMGFMT_UYVY ? GL_UNSIGNED_SHORT_8_8 : GL_UNSIGNED_SHORT_8_8_REV;
+      break;
 #if 0
     // we do not support palettized formats, although the format the
     // swscale produces works
@@ -306,6 +315,8 @@ static const extfunc_desc_t extfuncs[] = {
   {&ProgramEnvParameter4f, "_program", {"glProgramEnvParameter4fARB", NULL}},
   {&SwapInterval, "_swap_control", {"glXSwapInterval", "glXSwapIntervalEXT", "glXSwapIntervalSGI", "wglSwapInterval", "wglSwapIntervalEXT", "wglSwapIntervalSGI", NULL}},
   {&TexImage3D, NULL, {"glTexImage3D", NULL}},
+  {&AllocateMemoryMESA, "GLX_MESA_allocate_memory", {"glXAllocateMemoryMESA", NULL}},
+  {&FreeMemoryMESA, "GLX_MESA_allocate_memory", {"glXFreeMemoryMESA", NULL}},
   {NULL}
 };
 
@@ -485,6 +496,8 @@ int glFmt2bpp(GLenum format, GLenum type) {
     case GL_LUMINANCE:
     case GL_ALPHA:
       return component_size;
+    case GL_YCBCR_MESA:
+      return 2;
     case GL_RGB:
     case GL_BGR:
       return 3 * component_size;

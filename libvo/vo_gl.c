@@ -71,6 +71,7 @@ static int eosdtexCnt;
 static int osd_color;
 
 static int use_aspect;
+static int use_ycbcr;
 static int use_yuv;
 static int lscale;
 static int cscale;
@@ -84,6 +85,7 @@ static uint32_t image_format;
 static int many_fmts;
 static int ati_hack;
 static int force_pbo;
+static int mesa_buffer;
 static int use_glFinish;
 static int swap_interval;
 static GLenum gl_target;
@@ -96,6 +98,8 @@ static int gl_buffersize;
 static int gl_buffersize_uv;
 static void *gl_bufferptr;
 static void *gl_bufferptr_uv[2];
+static int mesa_buffersize;
+static void *mesa_bufferptr;
 static GLuint fragprog;
 static GLuint default_texs[22];
 static char *custom_prog;
@@ -388,6 +392,11 @@ static void uninitGl(void) {
     DeleteBuffers(2, gl_buffer_uv);
   gl_buffer_uv[0] = gl_buffer_uv[1] = 0; gl_buffersize_uv = 0;
   gl_bufferptr_uv[0] = gl_bufferptr_uv[1] = 0;
+#ifndef GL_WIN32
+  if (mesa_bufferptr)
+    FreeMemoryMESA(mDisplay, mScreen, mesa_bufferptr);
+#endif
+  mesa_bufferptr = NULL;
   err_shown = 0;
 }
 
@@ -680,6 +689,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 }
 
 static uint32_t get_image(mp_image_t *mpi) {
+  int needed_size;
   if (!GenBuffers || !BindBuffer || !BufferData || !MapBuffer) {
     if (!err_shown)
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] extensions missing for dr\n"
@@ -692,19 +702,33 @@ static uint32_t get_image(mp_image_t *mpi) {
     mpi->width = texture_width;
     mpi->height = texture_height;
   }
-  if (!gl_buffer)
-    GenBuffers(1, &gl_buffer);
-  BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
-  if (mpi->stride[0] * mpi->height > gl_buffersize) {
-    BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->height,
-               NULL, GL_DYNAMIC_DRAW);
-    gl_buffersize = mpi->stride[0] * mpi->height;
+  needed_size = mpi->stride[0] * mpi->height;
+  if (mesa_buffer) {
+#ifndef GL_WIN32
+    if (mesa_bufferptr && needed_size > mesa_buffersize) {
+      FreeMemoryMESA(mDisplay, mScreen, mesa_bufferptr);
+      mesa_bufferptr = NULL;
+    }
+    if (!mesa_bufferptr)
+      mesa_bufferptr = AllocateMemoryMESA(mDisplay, mScreen, needed_size, 0, 0, 0);
+    mesa_buffersize = needed_size;
+#endif
+    mpi->planes[0] = mesa_bufferptr;
+  } else {
+    if (!gl_buffer)
+      GenBuffers(1, &gl_buffer);
+    BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
+    if (needed_size > gl_buffersize) {
+      gl_buffersize = needed_size;
+      BufferData(GL_PIXEL_UNPACK_BUFFER, gl_buffersize,
+                 NULL, GL_DYNAMIC_DRAW);
+    }
+    if (!gl_bufferptr)
+      gl_bufferptr = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    mpi->planes[0] = gl_bufferptr;
+    BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   }
-  if (!gl_bufferptr)
-    gl_bufferptr = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-  mpi->planes[0] = gl_bufferptr;
-  BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   if (!mpi->planes[0]) {
     if (!err_shown)
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not acquire buffer for dr\n"
@@ -769,7 +793,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
   stride[0] = mpi->stride[0]; stride[1] = mpi->stride[1]; stride[2] = mpi->stride[2];
   planes[0] = mpi->planes[0]; planes[1] = mpi->planes[1]; planes[2] = mpi->planes[2];
   mpi_flipped = stride[0] < 0;
-  if (mpi->flags & MP_IMGFLAG_DIRECT) {
+  if (!mesa_buffer && mpi->flags & MP_IMGFLAG_DIRECT) {
     intptr_t base = (intptr_t)planes[0];
     if (mpi_flipped)
       base += (mpi->h - 1) * stride[0];
@@ -779,10 +803,11 @@ static uint32_t draw_image(mp_image_t *mpi) {
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
     UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     gl_bufferptr = NULL;
-    slice = 0; // always "upload" full texture
     if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
       planes[0] = planes[1] = planes[2] = NULL;
   }
+  if (mpi->flags & MP_IMGFLAG_DIRECT)
+    slice = 0; // always "upload" full texture
   glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
               mpi->x, mpi->y, w, h, slice);
   if (mpi->imgfmt == IMGFMT_YV12) {
@@ -804,7 +829,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
                 mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
     ActiveTexture(GL_TEXTURE0);
   }
-  if (mpi->flags & MP_IMGFLAG_DIRECT)
+  if (!mesa_buffer && mpi->flags & MP_IMGFLAG_DIRECT)
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 skip_upload:
   if (vo_doublebuffering) do_render();
@@ -833,6 +858,8 @@ query_format(uint32_t format)
     // ideally MPlayer should be fixed instead not to use Y800 when it has the choice
     if (!use_yuv && (format == IMGFMT_Y8 || format == IMGFMT_Y800))
         return 0;
+    if (!use_ycbcr && (format == IMGFMT_UYVY || format == IMGFMT_YUY2))
+        return 0;
     if (many_fmts &&
          glFindFormat(format, NULL, NULL, NULL, NULL))
         return caps;
@@ -858,6 +885,7 @@ static opt_t subopts[] = {
   {"osd",          OPT_ARG_BOOL, &use_osd,      NULL},
   {"scaled-osd",   OPT_ARG_BOOL, &scaled_osd,   NULL},
   {"aspect",       OPT_ARG_BOOL, &use_aspect,   NULL},
+  {"ycbcr",        OPT_ARG_BOOL, &use_ycbcr,    NULL},
   {"slice-height", OPT_ARG_INT,  &slice_height, (opt_test_f)int_non_neg},
   {"rectangle",    OPT_ARG_INT,  &use_rectangle,(opt_test_f)int_non_neg},
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
@@ -866,6 +894,7 @@ static opt_t subopts[] = {
   {"filter-strength", OPT_ARG_FLOAT, &filter_strength, NULL},
   {"ati-hack",     OPT_ARG_BOOL, &ati_hack,     NULL},
   {"force-pbo",    OPT_ARG_BOOL, &force_pbo,    NULL},
+  {"mesa-buffer",  OPT_ARG_BOOL, &mesa_buffer,  NULL},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {"swapinterval", OPT_ARG_INT,  &swap_interval,NULL},
   {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
@@ -883,6 +912,7 @@ static int preinit(const char *arg)
     use_osd = 1;
     scaled_osd = 0;
     use_aspect = 1;
+    use_ycbcr = 0;
     use_yuv = 0;
     lscale = 0;
     cscale = 0;
@@ -891,6 +921,7 @@ static int preinit(const char *arg)
     use_glFinish = 0;
     ati_hack = 0;
     force_pbo = 0;
+    mesa_buffer = 0;
     swap_interval = 1;
     slice_height = 0;
     custom_prog = NULL;
@@ -909,6 +940,8 @@ static int preinit(const char *arg)
               "    Slice size for texture transfer, 0 for whole image\n"
               "  noosd\n"
               "    Do not use OpenGL OSD code\n"
+              "  scaled-osd\n"
+              "    Render OSD at movie resolution and scale it\n"
               "  noaspect\n"
               "    Do not do aspect scaling\n"
               "  rectangle=<0,1,2>\n"
@@ -938,9 +971,12 @@ static int preinit(const char *arg)
               "    1: use improved bicubic scaling for luma.\n"
               "    2: use cubic in X, linear in Y direction scaling for luma.\n"
               "    3: as 1 but without using a lookup texture.\n"
-              "    4: experimental unsharp masking.\n"
+              "    4: experimental unsharp masking (sharpening).\n"
+              "    5: experimental unsharp masking (sharpening) with larger radius.\n"
               "  cscale=<n>\n"
               "    as lscale but for chroma (2x slower with little visible effect).\n"
+              "  filter-strength=<value>\n"
+              "    set the effect strength for some lscale/cscale filters\n"
               "  customprog=<filename>\n"
               "    use a custom YUV conversion program\n"
               "  customtex=<filename>\n"
@@ -951,6 +987,8 @@ static int preinit(const char *arg)
               "    use texture_rectangle for customtex texture\n"
               "  osdcolor=<0xAARRGGBB>\n"
               "    use the given color for the OSD\n"
+              "  ycbcr\n"
+              "    also try to use the GL_MESA_ycbcr_texture extension\n"
               "\n" );
       return -1;
     }
