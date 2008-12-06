@@ -177,8 +177,8 @@ static void texSize(int w, int h, int *texw, int *texh) {
     while (*texh < h)
       *texh *= 2;
   }
-  if (ati_hack) *texw = (*texw + 511) & ~511;
   if (mesa_buffer) *texw = (*texw + 63) & ~63;
+  else if (ati_hack) *texw = (*texw + 511) & ~511;
 }
 
 //! maximum size of custom fragment program
@@ -699,11 +699,11 @@ static uint32_t get_image(mp_image_t *mpi) {
     return VO_FALSE;
   }
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
-  if (ati_hack) {
+  if (mesa_buffer) mpi->width = texture_width;
+  else if (ati_hack) {
     mpi->width = texture_width;
     mpi->height = texture_height;
   }
-  if (mesa_buffer) mpi->width = texture_width;
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   needed_size = mpi->stride[0] * mpi->height;
   if (mesa_buffer) {
@@ -746,7 +746,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     mpi->stride[1] = mpi->width >> 1;
     mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> 1);
     mpi->stride[2] = mpi->width >> 1;
-    if (ati_hack) {
+    if (ati_hack && !mesa_buffer) {
       mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
       if (!gl_buffer_uv[0]) GenBuffers(2, gl_buffer_uv);
       if (mpi->stride[1] * mpi->height > gl_buffersize_uv) {
