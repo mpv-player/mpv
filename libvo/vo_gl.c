@@ -702,6 +702,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     mpi->width = texture_width;
     mpi->height = texture_height;
   }
+  if (mesa_buffer) mpi->width = (mpi->width + 63) & ~63;
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   needed_size = mpi->stride[0] * mpi->height;
   if (mesa_buffer) {
@@ -793,7 +794,9 @@ static uint32_t draw_image(mp_image_t *mpi) {
   stride[0] = mpi->stride[0]; stride[1] = mpi->stride[1]; stride[2] = mpi->stride[2];
   planes[0] = mpi->planes[0]; planes[1] = mpi->planes[1]; planes[2] = mpi->planes[2];
   mpi_flipped = stride[0] < 0;
-  if (!mesa_buffer && mpi->flags & MP_IMGFLAG_DIRECT) {
+  if (mpi->flags & MP_IMGFLAG_DIRECT) {
+    if (mesa_buffer) glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 1);
+    else {
     intptr_t base = (intptr_t)planes[0];
     if (mpi_flipped)
       base += (mpi->h - 1) * stride[0];
@@ -805,9 +808,9 @@ static uint32_t draw_image(mp_image_t *mpi) {
     gl_bufferptr = NULL;
     if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
       planes[0] = planes[1] = planes[2] = NULL;
-  }
-  if (mpi->flags & MP_IMGFLAG_DIRECT)
+    }
     slice = 0; // always "upload" full texture
+  }
   glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
               mpi->x, mpi->y, w, h, slice);
   if (mpi->imgfmt == IMGFMT_YV12) {
@@ -829,8 +832,10 @@ static uint32_t draw_image(mp_image_t *mpi) {
                 mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
     ActiveTexture(GL_TEXTURE0);
   }
-  if (!mesa_buffer && mpi->flags & MP_IMGFLAG_DIRECT)
-    BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  if (mpi->flags & MP_IMGFLAG_DIRECT) {
+    if (mesa_buffer) glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 0);
+    else BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  }
 skip_upload:
   if (vo_doublebuffering) do_render();
   return VO_TRUE;
