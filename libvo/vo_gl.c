@@ -178,6 +178,7 @@ static void texSize(int w, int h, int *texw, int *texh) {
       *texh *= 2;
   }
   if (ati_hack) *texw = (*texw + 511) & ~511;
+  if (mesa_buffer) *texw = (*texw + 63) & ~63;
 }
 
 //! maximum size of custom fragment program
@@ -702,7 +703,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     mpi->width = texture_width;
     mpi->height = texture_height;
   }
-  if (mesa_buffer) mpi->width = (mpi->width + 63) & ~63;
+  if (mesa_buffer) mpi->width = texture_width;
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   needed_size = mpi->stride[0] * mpi->height;
   if (mesa_buffer) {
@@ -794,8 +795,10 @@ static uint32_t draw_image(mp_image_t *mpi) {
   planes[0] = mpi->planes[0]; planes[1] = mpi->planes[1]; planes[2] = mpi->planes[2];
   mpi_flipped = stride[0] < 0;
   if (mpi->flags & MP_IMGFLAG_DIRECT) {
-    if (mesa_buffer) glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 1);
-    else {
+    if (mesa_buffer) {
+      glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 1);
+      w = texture_width;
+    } else {
       intptr_t base = (intptr_t)planes[0];
       if (ati_hack) { w = texture_width; h = texture_height; }
       if (mpi_flipped)
