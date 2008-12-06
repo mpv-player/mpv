@@ -873,7 +873,9 @@ $(VIDIX_DEPS) $(VIDIX_OBJS): $(VIDIX_PCI_FILES)
 install: $(INSTALL_TARGETS-yes)
 
 install-dirs:
-	$(INSTALL) -d $(BINDIR) $(CONFDIR) $(LIBDIR)
+	if test ! -d $(BINDIR) ; then $(INSTALL) -d $(BINDIR) ; fi
+	if test ! -d $(CONFDIR) ; then $(INSTALL) -d $(CONFDIR) ; fi
+	if test ! -d $(LIBDIR) ; then $(INSTALL) -d $(LIBDIR) ; fi
 
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
@@ -891,7 +893,7 @@ install-mencoder-man-en: install-mplayer-man-en
 	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
 
 install-mplayer-man-en:
-	$(INSTALL) -d $(MANDIR)/man1
+	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
 	$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
 
 define MENCODER_MAN_RULE
@@ -901,7 +903,7 @@ endef
 
 define MPLAYER_MAN_RULE
 install-mplayer-man-$(lang):
-	$(INSTALL) -d $(MANDIR)/$(lang)/man1
+	if test ! -d $(MANDIR)/$(lang)/man1 ; then $(INSTALL) -d $(MANDIR)/$(lang)/man1 ; fi
 	$(INSTALL) -c -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
 
