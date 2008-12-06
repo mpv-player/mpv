@@ -768,7 +768,7 @@ PARTS = ffmpeg/libavcodec \
         libswscale \
 
 FFMPEGLIBS  = $(foreach part, $(PARTS), $(part)/$(notdir $(part)).a)
-FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[choS] ffmpeg/libavcodec/*/*.[choS]) ffmpeg/libavcodec/*/*.asm
+FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[choS]) ffmpeg/libavcodec/*/*.[choS] ffmpeg/libavcodec/*/*.asm
 
 
 
@@ -795,6 +795,10 @@ checkheaders: $(ALLHEADERS:.h=.ho)
 
 dep depend: $(DEPS)
 	for part in $(PARTS); do $(MAKE) -C $$part depend; done
+
+# dummy to prevent default build rules from being used for FFMPEGFILES
+$(FFMPEGFILES):
+	echo "this shouldn't run"
 
 $(FFMPEGLIBS): $(FFMPEGFILES) config.h
 	$(MAKE) -C $(@D)
