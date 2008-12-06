@@ -777,7 +777,6 @@ static uint32_t draw_image(mp_image_t *mpi) {
   unsigned char *planes[3];
   mp_image_t mpi2 = *mpi;
   int w = mpi->w, h = mpi->h;
-  if (ati_hack) { w = texture_width; h = texture_height; }
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
     goto skip_upload;
   mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
@@ -798,6 +797,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
     if (mesa_buffer) glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 1);
     else {
       intptr_t base = (intptr_t)planes[0];
+      if (ati_hack) { w = texture_width; h = texture_height; }
       if (mpi_flipped)
         base += (mpi->h - 1) * stride[0];
       planes[0] -= base;
