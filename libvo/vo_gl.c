@@ -797,17 +797,17 @@ static uint32_t draw_image(mp_image_t *mpi) {
   if (mpi->flags & MP_IMGFLAG_DIRECT) {
     if (mesa_buffer) glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 1);
     else {
-    intptr_t base = (intptr_t)planes[0];
-    if (mpi_flipped)
-      base += (mpi->h - 1) * stride[0];
-    planes[0] -= base;
-    planes[1] -= base;
-    planes[2] -= base;
-    BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
-    UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    gl_bufferptr = NULL;
-    if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
-      planes[0] = planes[1] = planes[2] = NULL;
+      intptr_t base = (intptr_t)planes[0];
+      if (mpi_flipped)
+        base += (mpi->h - 1) * stride[0];
+      planes[0] -= base;
+      planes[1] -= base;
+      planes[2] -= base;
+      BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
+      UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+      gl_bufferptr = NULL;
+      if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
+        planes[0] = planes[1] = planes[2] = NULL;
     }
     slice = 0; // always "upload" full texture
   }
