@@ -22,24 +22,13 @@ CFLAGS := -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
           -I$(BUILD_ROOT_REL) -I$(SRC_PATH) -I$(SRC_PATH)/ffmpeg $(OPTFLAGS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ -MD -MP -MF $*.d $<
 
 %.o: %.S
-	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ -MD -MP -MF $*.d $<
 
 %.ho: %.h
 	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -Wno-unused -c -o $@ -x c $<
-
-%.d: %.c
-	$(DEPEND_CMD) > $@
-
-%.d: %.S
-	$(DEPEND_CMD) > $@
-
-%.d: %.cpp
-	$(DEPEND_CMD) > $@
-
-%.o: %.d
 
 %$(EXESUF): %.c
 
@@ -93,9 +82,7 @@ $(SUBDIR)%-test.o: $(SUBDIR)%-test.c
 
 $(SUBDIR)i386/%.o: $(SUBDIR)i386/%.asm
 	$(YASM) $(YASMFLAGS) -I $$(<D)/ -o $$@ $$<
-
-$(SUBDIR)i386/%.d: $(SUBDIR)i386/%.asm
-	$(YASM) $(YASMFLAGS) -I $$(<D)/ -M -o $$(@:%.d=%.o) $$< > $$@
+	$(YASM) $(YASMFLAGS) -I $$(<D)/ -M -o $$@ $$< > $$(@:%.o=%.d)
 
 clean::
 	rm -f $(TESTS) $(addprefix $(SUBDIR),$(CLEANFILES) $(CLEANSUFFIXES) $(LIBSUFFIXES)) \

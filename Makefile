@@ -776,20 +776,17 @@ FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[chS] ffmpeg/libavcodec/*/*.[c
 
 all: $(ALL_PRG-yes)
 
-%.d: %.c
-	$(MPDEPEND_CMD) > $@
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
 
-%.d: %.cpp
-	$(MPDEPEND_CMD_CXX) > $@
+%.o: %.cpp
+	$(CXX) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
 
-%.d: %.m
-	$(MPDEPEND_CMD) > $@
+%.o: %.m
+	$(CC) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
 
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
-
-%.o: %.m
-	$(CC) $(CFLAGS) -c -o $@ $<
 
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
@@ -837,8 +834,8 @@ version.h:
 
 ###### dependency declarations / specific CFLAGS ######
 
-codec-cfg.d: codecs.conf.h
-mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d osdep/mplayer-rc.o stream/network.d stream/stream_cddb.d: version.h
+codec-cfg.o: codecs.conf.h
+mencoder.o mplayer.o vobsub.o gui/win32/gui.o libmpdemux/muxer_avi.o osdep/mplayer-rc.o stream/network.o stream/stream_cddb.o: version.h
 $(DEPS): help_mp.h
 
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\" $(CFLAGS_LIBDVDCSS)
