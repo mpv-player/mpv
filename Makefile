@@ -768,7 +768,7 @@ PARTS = ffmpeg/libavcodec \
         libswscale \
 
 FFMPEGLIBS  = $(foreach part, $(PARTS), $(part)/$(notdir $(part)).a)
-FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[chS] ffmpeg/libavcodec/*/*.[chS])
+FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[choS] ffmpeg/libavcodec/*/*.[choS]) ffmpeg/libavcodec/*/*.asm
 
 
 
