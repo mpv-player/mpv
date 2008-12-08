@@ -645,7 +645,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 /** @brief libvo Callback: Flip next already drawn frame on the
  *         screen.
- *  @return N/A
  */
 static void flip_page(void)
 {
@@ -668,7 +667,6 @@ static void flip_page(void)
 }
 
 /** @brief libvo Callback: Draw OSD/Subtitles,
- *  @return N/A
  */
 static void draw_osd(void)
 {
@@ -676,7 +674,6 @@ static void draw_osd(void)
 
 /** @brief libvo Callback: Uninitializes all pointers and closes
  *         all D3D related stuff,
- *  @return N/A
  */
 static void uninit(void)
 {
@@ -689,7 +686,6 @@ static void uninit(void)
 }
 
 /** @brief libvo Callback: Handles video window events.
- *  @return N/A
  */
 static void check_events(void)
 {
@@ -763,7 +759,6 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 }
 
 /** @brief libvo Callback: Unused function
- *  @return N/A
  */
 static int draw_frame(uint8_t *src[])
 {
