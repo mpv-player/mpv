@@ -732,7 +732,6 @@ static int control(uint32_t request, void *data, ...)
 - (void) render
 {
 	int curTime;
-	static int lastTime = 0;
 
 	glClear(GL_COLOR_BUFFER_BIT);	
 	
