@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #include <CoreServices/CoreServices.h>
 //special workaround for Apple bug #6267445
 //(OSServices Power API disabled in OSServices.h for 64bit systems)
