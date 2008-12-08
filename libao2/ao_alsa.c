@@ -70,6 +70,7 @@ static int ao_noblock = 0;
 
 static int open_mode;
 static int alsa_can_pause = 0;
+static snd_pcm_sframes_t prepause_frames;
 
 #define ALSA_DEVICE_SIZE 256
 
@@ -333,6 +334,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 #else
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: compiled for ALSA-%s\n", SND_LIB_VERSION_STR);
 #endif
+
+    prepause_frames = 0;
 
     snd_lib_error_set_handler(alsa_error_handler);
     
@@ -753,6 +756,10 @@ static void audio_pause(void)
         }
           mp_msg(MSGT_AO,MSGL_V,"alsa-pause: pause supported by hardware\n");
     } else {
+        if (snd_pcm_delay(alsa_handler, &prepause_frames) < 0
+            || prepause_frames < 0)
+            prepause_frames = 0;
+
         if ((err = snd_pcm_drop(alsa_handler)) < 0)
         {
             mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmDropError, snd_strerror(err));
@@ -782,6 +789,11 @@ static void audio_resume(void)
            mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmPrepareError, snd_strerror(err));
             return;
         }
+        if (prepause_frames) {
+            void *silence = calloc(prepause_frames, bytes_per_sample);
+            play(silence, prepause_frames * bytes_per_sample, 0);
+            free(silence);
+        }
     }
 }
 
@@ -790,6 +802,7 @@ static void reset(void)
 {
     int err;
 
+    prepause_frames = 0;
     if ((err = snd_pcm_drop(alsa_handler)) < 0)
     {
 	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_ALSA_PcmPrepareError, snd_strerror(err));
