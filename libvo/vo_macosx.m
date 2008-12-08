@@ -25,6 +25,8 @@
 #include "aspect.h"
 #include "mp_msg.h"
 #include "m_option.h"
+#include "mp_fifo.h"
+#include "libvo/sub.h"
 
 #include "input/input.h"
 #include "input/mouse.h"
@@ -84,9 +86,6 @@ static vo_info_t info =
 };
 
 LIBVO_EXTERN(macosx)
-
-void mplayer_put_key(int code);
-void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
 {

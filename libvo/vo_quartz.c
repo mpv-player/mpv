@@ -30,6 +30,7 @@
 #include "m_option.h"
 #include "mp_fifo.h"
 #include "mpbswap.h"
+#include "libvo/sub.h"
 
 #include "input/input.h"
 #include "input/mouse.h"
@@ -127,8 +128,6 @@ enum
 };
 
 #include "osdep/keycodes.h"
-
-void vo_draw_text(int dxs, int dys, void (*draw_alpha) (int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride));
 
 //PROTOTYPE/////////////////////////////////////////////////////////////////
 static OSStatus KeyEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
