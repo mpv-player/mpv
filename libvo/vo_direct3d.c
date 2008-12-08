@@ -127,7 +127,8 @@ static void calc_fs_rect(void)
     priv->fs_panscan_rect.right  = priv->src_width;
     priv->fs_panscan_rect.top    = 0;
     priv->fs_panscan_rect.bottom = priv->src_height;
-    if (!vo_fs) return;
+    if (!vo_fs)
+        return;
 
     // adjust for fullscreen aspect and panscan
     aspect(&scaled_width, &scaled_height, A_ZOOM);
