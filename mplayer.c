@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "config.h"
 #include "talloc.h"
 
@@ -259,8 +260,6 @@ static char *stream_dump_name="stream.dump";
 
 // A-V sync:
 static float default_max_pts_correction=-1;//0.01f;
-static float max_pts_correction=0;//default_max_pts_correction;
-static float c_total=0;
        float audio_delay=0;
 static int ignore_start=0;
 
@@ -1160,16 +1159,25 @@ static void sadd_hhmmssf(char *buf, unsigned *pos, int len, float time) {
   saddf(buf, pos, len, "%02d.%1d", ss, f1);
 }
 
-/**
- * \brief print the status line
- * \param a_pos audio position
- * \param a_v A-V desynchronization
- * \param corr amount out A-V synchronization
- */
-static void print_status(struct MPContext *mpctx, float a_pos, float a_v, float corr)
+static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
 {
     struct MPOpts *opts = &mpctx->opts;
   sh_video_t * const sh_video = mpctx->sh_video;
+
+  if (mpctx->sh_audio && a_pos == MP_NOPTS_VALUE)
+      a_pos = playing_audio_pts(mpctx);
+  if (mpctx->sh_audio && sh_video && at_frame) {
+      mpctx->last_av_difference = a_pos - sh_video->pts - audio_delay;
+      if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
+          && !mpctx->drop_message_shown) {
+          mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
+          mpctx->drop_message_shown = true;
+      }
+  }
+  if (quiet)
+      return;
+
+
   int width;
   char *line;
   unsigned pos = 0;
@@ -1204,7 +1212,8 @@ static void print_status(struct MPContext *mpctx, float a_pos, float a_v, float 
 
   // A-V sync
   if (mpctx->sh_audio && sh_video)
-    saddf(line, &pos, width, "A-V:%7.3f ct:%7.3f ", a_v, corr);
+    saddf(line, &pos, width, "A-V:%7.3f ct:%7.3f ",
+          mpctx->last_av_difference, mpctx->total_avsync_change);
 
   // Video stats
   if (sh_video)
@@ -1696,7 +1705,8 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time) {
 	    ++total_frame_cnt;
 	    // we should avoid dropping too many frames in sequence unless we
 	    // are too late. and we allow 100ms A-V delay here:
-	    if (d < -dropped_frames*frame_time-0.100 && !mpctx->paused) {
+	    if (d < -dropped_frames*frame_time-0.100 && !mpctx->paused
+                && !mpctx->update_video_immediately) {
 		++drop_frame_cnt;
 		++dropped_frames;
 		return frame_dropping;
@@ -1921,71 +1931,39 @@ static void mp_dvdnav_save_smpi(struct MPContext *mpctx, int in_size,
 }
 #endif /* CONFIG_DVDNAV */
 
-static void adjust_sync_and_print_status(struct MPContext *mpctx,
-                                         int between_frames,
-                                         float timing_error)
+/* Modify video timing to match the audio timeline. There are two main
+ * reasons this is needed. First, video and audio can start from different
+ * positions at beginning of file or after a seek (MPlayer starts both
+ * immediately even if they have different pts). Second, the file can have
+ * audio timestamps that are inconsistent with the duration of the audio
+ * packets, for example two consecutive timestamp values differing by
+ * one second but only a packet with enough samples for half a second
+ * of playback between them.
+ */
+static void adjust_sync(struct MPContext *mpctx, double frame_time)
 {
     struct MPOpts *opts = &mpctx->opts;
-    current_module="av_sync";
+    current_module = "av_sync";
 
-    if(mpctx->sh_audio){
-	double a_pts, v_pts;
+    if (!mpctx->sh_audio)
+        return;
 
-	if (autosync)
-	    /*
-	     * If autosync is enabled, the value for delay must be calculated
-	     * a bit differently.  It is set only to the difference between
-	     * the audio and video timers.  Any attempt to include the real
-	     * or corrected delay causes the pts_correction code below to
-	     * try to correct for the changes in delay which autosync is
-	     * trying to measure.  This keeps the two from competing, but still
-	     * allows the code to correct for PTS drift *only*.  (Using a delay
-	     * value here, even a "corrected" one, would be incompatible with
-	     * autosync mode.)
-	     */
-	    a_pts = written_audio_pts(mpctx) - mpctx->delay;
-	else
-	    a_pts = playing_audio_pts(mpctx);
+    double a_pts = written_audio_pts(mpctx) - mpctx->delay;
+    double v_pts = mpctx->sh_video->pts;
+    double av_delay = a_pts - v_pts;
+    // Try to sync vo_flip() so it will *finish* at given time
+    av_delay += mpctx->last_vo_flip_duration;
+    av_delay -= audio_delay;   // This much pts difference is desired
 
-	v_pts = mpctx->sh_video->pts;
-
-	{
-	    static int drop_message=0;
-	    double AV_delay = a_pts - audio_delay - v_pts;
-	    double x;
-	    if (AV_delay>0.5 && drop_frame_cnt>50 && drop_message==0){
-		++drop_message;
-		mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
-	    }
-	    if (autosync)
-		x = AV_delay*0.1f;
-	    else
-		/* Do not correct target time for the next frame if this frame
-		 * was late not because of wrong target time but because the
-		 * target time could not be met */
-		x = (AV_delay + timing_error * opts->playback_speed) * 0.1f;
-	    if (x < -max_pts_correction)
-		x = -max_pts_correction;
-	    else if (x> max_pts_correction)
-		x = max_pts_correction;
-	    if (default_max_pts_correction >= 0)
-		max_pts_correction = default_max_pts_correction;
-	    else
-		max_pts_correction = mpctx->sh_video->frametime*0.10; // +-10% of time
-	    if (!between_frames) {
-		mpctx->delay+=x;
-		c_total+=x;
-	    }
-	    if(!quiet)
-		print_status(mpctx, a_pts - audio_delay, AV_delay, c_total);
-	}
-    
-    } else {
-	// No audio:
-    
-	if (!quiet)
-	    print_status(mpctx, 0, 0, 0);
-    }
+    double change = av_delay * 0.1;
+    double max_change = default_max_pts_correction >= 0 ?
+        default_max_pts_correction : frame_time * 0.1;
+    if (change < -max_change)
+        change = -max_change;
+    else if (change > max_change)
+        change = max_change;
+    mpctx->delay += change;
+    mpctx->total_avsync_change += change;
 }
 
 static int fill_audio_out_buffers(struct MPContext *mpctx)
@@ -2522,6 +2500,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 	mpctx->num_buffered_frames = 0;
 	mpctx->delay = 0;
         mpctx->time_frame = 0;
+        mpctx->update_video_immediately = true;
 	// Not all demuxers set d_video->pts during seek, so this value
 	// (which is used by at least vobsub and edl code below) may
 	// be completely wrong (probably 0).
@@ -2544,8 +2523,7 @@ static int seek(MPContext *mpctx, double amount, int style)
 
     edl_seek_reset(mpctx);
 
-    c_total = 0;
-    max_pts_correction = 0.1;
+    mpctx->total_avsync_change = 0;
     audio_time_usage = 0; video_time_usage = 0; vout_time_usage = 0;
     drop_frame_cnt = 0;
 
@@ -3733,6 +3711,9 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
 
  get_relative_time(mpctx); // reset current delta
  mpctx->time_frame = 0;
+ mpctx->drop_message_shown = 0;
+ mpctx->update_video_immediately = true;
+ mpctx->total_avsync_change = 0;
 
 while(!mpctx->stop_play){
     float aq_sleep_time=0;
@@ -3763,11 +3744,10 @@ if(!mpctx->sh_video) {
   double a_pos=0;
   // sh_audio can be NULL due to video stream switching
   // TODO: handle this better
-  if(!quiet || end_at.type == END_AT_TIME && mpctx->sh_audio)
+  if (mpctx->sh_audio)
     a_pos = playing_audio_pts(mpctx);
 
-  if(!quiet)
-      print_status(mpctx, a_pos, 0, 0);
+  print_status(mpctx, a_pos, false);
 
   if(end_at.type == END_AT_TIME && end_at.pos < a_pos)
     mpctx->stop_play = PT_NEXT_ENTRY;
@@ -3795,7 +3775,13 @@ if(!mpctx->sh_video) {
       else {
 	  // might return with !eof && !blit_frame if !correct_pts
 	  mpctx->num_buffered_frames += blit_frame;
-	  mpctx->time_frame += frame_time / opts->playback_speed;  // for nosound
+          if (mpctx->update_video_immediately) {
+              // Show this frame immediately, rest normally
+              mpctx->update_video_immediately = false;
+          } else {
+              mpctx->time_frame += frame_time / opts->playback_speed;
+              adjust_sync(mpctx, frame_time);
+          }
       }
   }
 
@@ -3837,11 +3823,12 @@ if(!mpctx->sh_video) {
            vo_flip_page(mpctx->video_out);
 	   mpctx->num_buffered_frames--;
 
-	   vout_time_usage += (GetTimer() - t2) * 0.000001;
+           mpctx->last_vo_flip_duration = (GetTimer() - t2) * 0.000001;
+           vout_time_usage += mpctx->last_vo_flip_duration;
+           print_status(mpctx, MP_NOPTS_VALUE, true);
         }
-//====================== A-V TIMESTAMP CORRECTION: =========================
-
-        adjust_sync_and_print_status(mpctx, frame_time_remaining, mpctx->time_frame);
+        else
+            print_status(mpctx, MP_NOPTS_VALUE, false);
 
 //============================ Auto QUALITY ============================
 
