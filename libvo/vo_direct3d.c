@@ -30,6 +30,8 @@
 #include "aspect.h"
 #include "w32_common.h"
 #include "libavutil/common.h"
+#include "font_load.h"
+#include "sub.h"
 
 static const vo_info_t info =
 {
@@ -71,8 +73,25 @@ static struct global_priv {
     IDirect3DSurface9 *d3d_surface; /**< Offscreen Direct3D Surface. MPlayer
                                     renders inside it. Uses colorspace
                                     priv->movie_src_fmt */
+    IDirect3DTexture9 *d3d_texture_osd; /**< Direct3D Texture. Uses RGBA */
+    IDirect3DTexture9 *d3d_texture_system; /**< Direct3D Texture. System memory
+                                    cannot lock a normal texture. Uses RGBA */
     IDirect3DSurface9 *d3d_backbuf; /**< Video card's back buffer (used to
                                     display next frame) */
+    int is_osd_populated;           /**< 1 = OSD texture has something to display,
+                                    0 = OSD texture is clear */
+    int device_caps_power2_only;    /**< 1 = texture sizes have to be power 2
+                                    0 = texture sizes can be anything */
+    int device_caps_square_only;    /**< 1 = textures have to be square
+                                    0 = textures do not have to be square */
+    int device_texture_sys;         /**< 1 = device can texture from system memory
+                                    0 = device requires shadow */
+    int max_texture_width;          /**< from the device capabilities */
+    int max_texture_height;         /**< from the device capabilities */
+    int osd_width;                  /**< current width of the OSD */
+    int osd_height;                 /**< current height of the OSD */
+    int osd_texture_width;          /**< current width of the OSD texture */
+    int osd_texture_height;         /**< current height of the OSD texture */
 } *priv;
 
 typedef struct {
@@ -99,6 +118,13 @@ static const struct_fmt_table fmt_table[] = {
 };
 
 #define DISPLAY_FORMAT_TABLE_ENTRIES (sizeof(fmt_table) / sizeof(fmt_table[0]))
+
+#define D3DFVF_MY_VERTEX (D3DFVF_XYZ | D3DFVF_TEX1)
+
+typedef struct {
+    float x, y, z;      /* Position of vertex in 3D space */
+    float tu, tv;       /* Texture coordinates */
+} struct_vertex;
 
 /****************************************************************************
  *                                                                          *
@@ -186,6 +212,17 @@ static void destroy_d3d_surfaces(void)
         priv->d3d_surface = NULL;
     }
 
+    /* kill the OSD texture and its shadow copy */
+    if (priv->d3d_texture_osd) {
+        IDirect3DTexture9_Release(priv->d3d_texture_osd);
+        priv->d3d_texture_osd = NULL;
+    }
+
+    if (priv->d3d_texture_system) {
+        IDirect3DTexture9_Release(priv->d3d_texture_system);
+        priv->d3d_texture_system = NULL;
+    }
+
     if (priv->d3d_backbuf) {
         IDirect3DSurface9_Release(priv->d3d_backbuf);
         priv->d3d_backbuf = NULL;
@@ -197,6 +234,8 @@ static void destroy_d3d_surfaces(void)
  */
 static int create_d3d_surfaces(void)
 {
+    int osd_width = vo_dwidth, osd_height = vo_dheight;
+    int tex_width = osd_width, tex_height = osd_height;
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d><INFO>create_d3d_surfaces called.\n");
 
     if (FAILED(IDirect3DDevice9_CreateOffscreenPlainSurface(
@@ -213,6 +252,77 @@ static int create_d3d_surfaces(void)
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Back Buffer address get failed\n");
         return 0;
     }
+
+    /* calculate the best size for the OSD depending on the factors from the device */
+    if (priv->device_caps_power2_only) {
+        tex_width  = 1;
+        tex_height = 1;
+        while (tex_width  < osd_width ) tex_width  <<= 1;
+        while (tex_height < osd_height) tex_height <<= 1;
+    }
+    if (priv->device_caps_square_only)
+        /* device only supports square textures */
+        tex_width = tex_height = tex_width > tex_height ? tex_width : tex_height;
+    // better round up to a multiple of 16
+    tex_width  = (tex_width  + 15) & ~15;
+    tex_height = (tex_height + 15) & ~15;
+
+    // make sure we respect the size limits without breaking aspect or pow2-requirements
+    while (tex_width > priv->max_texture_width || tex_height > priv->max_texture_height) {
+      osd_width  >>= 1;
+      osd_height >>= 1;
+      tex_width  >>= 1;
+      tex_height >>= 1;
+    }
+
+    priv->osd_width  = osd_width;
+    priv->osd_height = osd_height;
+    priv->osd_texture_width  = tex_width;
+    priv->osd_texture_height = tex_height;
+
+    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d><INFO>surface (%d, %d) requested = (%d, %d)\n",
+           vo_dwidth, vo_dheight, priv->osd_texture_width, priv->osd_texture_height);
+
+    /* create OSD */
+    if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
+                                              priv->osd_texture_width,
+                                              priv->osd_texture_height,
+                                              1,
+                                              D3DUSAGE_DYNAMIC,
+                                              D3DFMT_A8L8,
+                                              D3DPOOL_SYSTEMMEM,
+                                              &priv->d3d_texture_system,
+                                              NULL))) {
+        mp_msg(MSGT_VO,MSGL_ERR,
+               "<vo_direct3d><INFO>IDirect3DDevice9_CreateTexture Failed (d3d_texture_system).\n");
+        return 0;
+    }
+
+    if (!priv->device_texture_sys) {
+        /* only create if we need a shadow version on the external device */
+        if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
+                                                  priv->osd_texture_width,
+                                                  priv->osd_texture_height,
+                                                  1,
+                                                  D3DUSAGE_DYNAMIC,
+                                                  D3DFMT_A8L8,
+                                                  D3DPOOL_DEFAULT,
+                                                  &priv->d3d_texture_osd,
+                                                  NULL))) {
+            mp_msg(MSGT_VO,MSGL_ERR,
+                   "<vo_direct3d><INFO>IDirect3DDevice9_CreateTexture Failed (d3d_texture_osd).\n");
+            return 0;
+        }
+    }
+
+    /* setup default renderstate */
+    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_SRCBLEND, D3DBLEND_ONE);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHAFUNC, D3DCMP_GREATER);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHAREF, (DWORD)0x0);
+    IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_LIGHTING, FALSE);
+    IDirect3DDevice9_SetSamplerState(priv->d3d_device, 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+    IDirect3DDevice9_SetSamplerState(priv->d3d_device, 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
     return 1;
 }
@@ -353,6 +463,13 @@ static int resize_d3d(void)
 
     calc_fs_rect();
 
+#ifdef CONFIG_FREETYPE
+    // font needs to be adjusted
+    force_load_font = 1;
+#endif
+    // OSD needs to be drawn fresh for new size
+    vo_osd_changed(OSDTYPE_OSD);
+
     return 1;
 }
 
@@ -471,7 +588,7 @@ static int query_format(uint32_t movie_fmt)
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Accepted image format: %s\n",
                    vo_format_name(fmt_table[i].mplayer_fmt));
             return (VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
-                    /*| VFCAP_OSD*/ | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN);
+                    | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN);
 
         }
     }
@@ -502,6 +619,9 @@ static int query_format(uint32_t movie_fmt)
 static int preinit(const char *arg)
 {
     D3DDISPLAYMODE disp_mode;
+    D3DCAPS9 disp_caps;
+    DWORD texture_caps;
+    DWORD dev_caps;
 
     /* Set to zero all global variables. */
     priv = calloc(1, sizeof(struct global_priv));
@@ -533,6 +653,31 @@ static int preinit(const char *arg)
 
     mp_msg(MSGT_VO, MSGL_V, "disp_mode.Width %d, disp_mode.Height %d\n",
            disp_mode.Width, disp_mode.Height);
+
+    if (FAILED(IDirect3D9_GetDeviceCaps(priv->d3d_handle,
+                                        D3DADAPTER_DEFAULT,
+                                        D3DDEVTYPE_HAL,
+                                        &disp_caps))) {
+        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Could not read display capabilities\n");
+        return -1;
+    }
+
+    /* Store relevant information reguarding caps of device */
+    texture_caps                  = disp_caps.TextureCaps;
+    dev_caps                      = disp_caps.DevCaps;
+    priv->device_caps_power2_only =  (texture_caps & D3DPTEXTURECAPS_POW2) &&
+                                    !(texture_caps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL);
+    priv->device_caps_square_only = texture_caps & D3DPTEXTURECAPS_SQUAREONLY;
+    priv->device_texture_sys      = dev_caps & D3DDEVCAPS_TEXTURESYSTEMMEMORY;
+    priv->max_texture_width       = disp_caps.MaxTextureWidth;
+    priv->max_texture_height      = disp_caps.MaxTextureHeight;
+
+    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>device_caps_power2_only %d, device_caps_square_only %d\n"
+                            "<vo_direct3d>device_texture_sys %d\n"
+                            "<vo_direct3d>max_texture_width %d, max_texture_height %d\n",
+           priv->device_caps_power2_only, priv->device_caps_square_only,
+           priv->device_texture_sys, priv->max_texture_width,
+           priv->max_texture_height);
 
     /* w32_common framework call. Configures window on the screen, gets
      * fullscreen dimensions and does other useful stuff.
@@ -667,12 +812,6 @@ static void flip_page(void)
     }
 }
 
-/** @brief libvo Callback: Draw OSD/Subtitles,
- */
-static void draw_osd(void)
-{
-}
-
 /** @brief libvo Callback: Uninitializes all pointers and closes
  *         all D3D related stuff,
  */
@@ -765,4 +904,140 @@ static int draw_frame(uint8_t *src[])
 {
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>draw_frame called\n");
     return VO_FALSE;
+}
+
+/** @brief Maps MPlayer alpha to D3D
+ *         0x0 -> transparent and discarded by alpha test
+ *         0x1 -> 0xFF to become opaque
+ *         other alpha values are inverted +1 (2 = -2)
+ *         These values are then inverted again with
+           the texture filter D3DBLEND_INVSRCALPHA
+ */
+void vo_draw_alpha_l8a8(int w, int h, unsigned char* src, unsigned char *srca,
+                        int srcstride, unsigned char* dstbase, int dststride)
+{
+    int y;
+    for (y = 0; y < h; y++) {
+        unsigned short *dst = (unsigned short*)dstbase;
+        int x;
+        for (x = 0; x < w; x++) {
+            dst[x] = (-srca[x] << 8) | src[x];
+        }
+        src     += srcstride;
+        srca    += srcstride;
+        dstbase += dststride;
+    }
+}
+
+/** @brief Callback function to render the OSD to the texture
+ */
+static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
+                       unsigned char *srca, int stride)
+{
+    D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
+                                   to copy MPlayer's frame inside it.*/
+
+    if (FAILED(IDirect3DTexture9_LockRect(priv->d3d_texture_system, 0,
+                                          &locked_rect, NULL, 0))) {
+        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>IDirect3DTexture9_LockRect failure.\n");
+        return;
+    }
+
+    vo_draw_alpha_l8a8(w, h, src, srca, stride,
+        (unsigned char *)locked_rect.pBits + locked_rect.Pitch*y0 + 2*x0, locked_rect.Pitch);
+
+    /* this unlock is used for both slice_draw path and D3DRenderFrame path */
+    if (FAILED(IDirect3DTexture9_UnlockRect(priv->d3d_texture_system, 0))) {
+        mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>IDirect3DTexture9_UnlockRect failure.\n");
+        return;
+    }
+
+    priv->is_osd_populated = 1;
+}
+
+/** @brief libvo Callback: Draw OSD/Subtitles,
+ */
+static void draw_osd(void)
+{
+    if (vo_osd_changed(0)) {
+        D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
+                                         to copy MPlayer's frame inside it.*/
+
+        /* clear the OSD */
+        if (FAILED(IDirect3DTexture9_LockRect(priv->d3d_texture_system, 0,
+                                              &locked_rect, NULL, 0))) {
+            mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>IDirect3DTexture9_LockRect failure.\n");
+            return;
+        }
+
+        /* clear the whole texture to avoid issues due to interpolation */
+        memset(locked_rect.pBits, 0, locked_rect.Pitch * priv->osd_texture_height);
+
+        /* this unlock is used for both slice_draw path and D3DRenderFrame path */
+        if (FAILED(IDirect3DTexture9_UnlockRect(priv->d3d_texture_system, 0))) {
+            mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>IDirect3DTexture9_UnlockRect failure.\n");
+            return;
+        }
+
+        priv->is_osd_populated = 0;
+        /* required for if subs are in the boarder region */
+        priv->is_clear_needed = 1;
+
+        vo_draw_text(priv->osd_width, priv->osd_height, draw_alpha);
+
+        if (!priv->device_texture_sys)
+        {
+            /* only DMA to the shadow if its required */
+            if (FAILED(IDirect3DDevice9_UpdateTexture(priv->d3d_device,
+                                                      (IDirect3DBaseTexture9 *)priv->d3d_texture_system,
+                                                      (IDirect3DBaseTexture9 *)priv->d3d_texture_osd))) {
+                mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>IDirect3DDevice9_UpdateTexture failure.\n");
+                return;
+            }
+        }
+    }
+
+    /* update OSD */
+
+    if (priv->is_osd_populated) {
+
+        struct_vertex osd_quad_vb[] = {
+            {-1.0f, 1.0f, 0.0f,  0, 0 },
+            { 1.0f, 1.0f, 0.0f,  1, 0 },
+            {-1.0f,-1.0f, 0.0f,  0, 1 },
+            { 1.0f,-1.0f, 0.0f,  1, 1 }
+        };
+
+        /* calculate the texture coordinates */
+        osd_quad_vb[1].tu =
+            osd_quad_vb[3].tu = (float)priv->osd_width  / priv->osd_texture_width;
+        osd_quad_vb[2].tv =
+            osd_quad_vb[3].tv = (float)priv->osd_height / priv->osd_texture_height;
+
+        if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
+            mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>BeginScene failed\n");
+            return;
+        }
+
+        /* turn on alpha test */
+        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHABLENDENABLE, TRUE);
+        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, TRUE);
+
+        /* need to use a texture here (done here as we may be able to texture from system memory) */
+        IDirect3DDevice9_SetTexture(priv->d3d_device, 0,
+            (IDirect3DBaseTexture9 *)(priv->device_texture_sys
+            ? priv->d3d_texture_system : priv->d3d_texture_osd));
+
+        IDirect3DDevice9_SetFVF(priv->d3d_device, D3DFVF_MY_VERTEX);
+        IDirect3DDevice9_DrawPrimitiveUP(priv->d3d_device, D3DPT_TRIANGLESTRIP, 2, osd_quad_vb, sizeof(struct_vertex));
+
+        /* turn off alpha test */
+        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHATESTENABLE, FALSE);
+        IDirect3DDevice9_SetRenderState(priv->d3d_device, D3DRS_ALPHABLENDENABLE, FALSE);
+
+        if (FAILED(IDirect3DDevice9_EndScene(priv->d3d_device))) {
+            mp_msg(MSGT_VO,MSGL_ERR,"<vo_direct3d>EndScene failed\n");
+            return;
+        }
+    }
 }
