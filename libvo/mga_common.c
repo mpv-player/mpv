@@ -385,7 +385,7 @@ static int mga_init(int width,int height,unsigned int format){
 
 	if(width > 1024 && height > 1024)
 	{
-		mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_MGA_ResolutionTooHigh);
 		return -1;
 	} else if(height <= 1024)
 	{
@@ -396,7 +396,7 @@ static int mga_init(int width,int height,unsigned int format){
 			if(mga_vid_config.card_type != MGA_G550)
 			{
 				// we don't have a G550, so our resolution is too high
-				mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
+				mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_MGA_ResolutionTooHigh);
 				return -1;
 			} else {
 				// there is a deeper problem
@@ -467,7 +467,7 @@ static int preinit(const char *vo_subdevice)
 	ioctl(f,MGA_VID_GET_VERSION,&ver);
 	if(MGA_VID_VERSION != ver)
 	{
-		mp_msg(MSGT_VO, MSGL_ERR, MGSTR_LIBVO_MGA_mgavidVersionMismatch, ver, MGA_VID_VERSION);
+		mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_MGA_mgavidVersionMismatch, ver, MGA_VID_VERSION);
 		return -1;
 	}
 

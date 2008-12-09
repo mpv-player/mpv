@@ -955,8 +955,8 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] invalid output format %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Your mga_vid driver version is incompatible with this MPlayer version!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Couldn't open: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Source resolution exceeds 1023x1023 in at least one dimension.\n[MGA] Rescale in software or use -lavdopts lowres=1.\n"
-#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] mismatch between kernel (%u) and MPlayer (%u) mga_vid driver versions\n"
+#define MSGTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Source resolution exceeds 1023x1023 in at least one dimension.\n[MGA] Rescale in software or use -lavdopts lowres=1.\n"
+#define MSGTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] mismatch between kernel (%u) and MPlayer (%u) mga_vid driver versions\n"
 
 // vo_null.c
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Unknown subdevice: %s.\n"
