@@ -1421,8 +1421,7 @@ static mp_osd_msg_t* get_osd_msg(struct MPContext *mpctx)
 	    osd_visible = 0;
 	    vo_osd_progbar_type = -1; // disable
 	    vo_osd_changed(OSDTYPE_PROGBAR);
-	    if (mpctx->osd_function != OSD_PAUSE)
-		mpctx->osd_function = OSD_PLAY;
+            mpctx->osd_function = mpctx->paused ? OSD_PAUSE : OSD_PLAY;
 	}
     }
 
@@ -2377,6 +2376,11 @@ static void pause_loop(struct MPContext *mpctx)
 	    vf_menu_pause_update(vf_menu);
 #endif
 	usec_sleep(20000);
+      update_osd_msg(mpctx);
+      int hack = vo_osd_changed(0);
+      vo_osd_changed(hack);
+      if (hack)
+          break;
     }
 #ifdef CONFIG_GUI
     if (use_gui) {
@@ -3913,6 +3917,8 @@ if(auto_quality>0){
               add_step_frame(mpctx);
               break;
           }
+          else
+              vo_osd_changed(0);
   }
   pause_loop(mpctx);
   }
