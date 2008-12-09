@@ -485,6 +485,7 @@ static void uninit_d3d(void)
         mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Calling IDirect3D9_Release\r\n");
         IDirect3D9_Release(priv->d3d_handle);
     }
+    priv->d3d_handle = NULL;
 }
 
 /** @brief Render a frame on the screen.
