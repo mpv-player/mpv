@@ -455,10 +455,10 @@ int filter_video(sh_video_t *sh_video, void *frame, double pts,
     // apply video filters and call the leaf vo/ve
     int ret = vf->put_image(vf, mpi, pts);
     if (ret > 0) {
-        vf->control(vf, VFCTRL_DRAW_OSD, osd);
 #ifdef CONFIG_ASS
         vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
 #endif
+        vf->control(vf, VFCTRL_DRAW_OSD, osd);
     }
 
     t2 = GetTimer() - t2;
