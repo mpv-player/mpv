@@ -202,31 +202,26 @@ static void destroy_d3d_surfaces(void)
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>destroy_d3d_surfaces called\r\n");
     /* Let's destroy the old (if any) D3D Surfaces */
 
-    if (priv->locked_rect.pBits) {
+    if (priv->locked_rect.pBits)
         IDirect3DSurface9_UnlockRect(priv->d3d_surface);
-        priv->locked_rect.pBits = NULL;
-    }
+    priv->locked_rect.pBits = NULL;
 
-    if (priv->d3d_surface) {
+    if (priv->d3d_surface)
         IDirect3DSurface9_Release(priv->d3d_surface);
-        priv->d3d_surface = NULL;
-    }
+    priv->d3d_surface = NULL;
 
     /* kill the OSD texture and its shadow copy */
-    if (priv->d3d_texture_osd) {
+    if (priv->d3d_texture_osd)
         IDirect3DTexture9_Release(priv->d3d_texture_osd);
-        priv->d3d_texture_osd = NULL;
-    }
+    priv->d3d_texture_osd = NULL;
 
-    if (priv->d3d_texture_system) {
+    if (priv->d3d_texture_system)
         IDirect3DTexture9_Release(priv->d3d_texture_system);
-        priv->d3d_texture_system = NULL;
-    }
+    priv->d3d_texture_system = NULL;
 
-    if (priv->d3d_backbuf) {
+    if (priv->d3d_backbuf)
         IDirect3DSurface9_Release(priv->d3d_backbuf);
-        priv->d3d_backbuf = NULL;
-    }
+    priv->d3d_backbuf = NULL;
 }
 
 /** @brief Create D3D Offscreen and Backbuffer surfaces.
@@ -409,10 +404,9 @@ static int reconfigure_d3d(void)
     destroy_d3d_surfaces();
 
     /* Destroy the D3D Device */
-    if (priv->d3d_device) {
+    if (priv->d3d_device)
         IDirect3DDevice9_Release(priv->d3d_device);
-        priv->d3d_device = NULL;
-    }
+    priv->d3d_device = NULL;
 
     /* Stop the whole Direct3D */
     IDirect3D9_Release(priv->d3d_handle);
@@ -778,10 +772,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     destroy_d3d_surfaces();
 
     /* Destroy the D3D Device */
-    if (priv->d3d_device) {
+    if (priv->d3d_device)
         IDirect3DDevice9_Release(priv->d3d_device);
-        priv->d3d_device = NULL;
-    }
+    priv->d3d_device = NULL;
 
     if (!configure_d3d())
         return VO_ERROR;
