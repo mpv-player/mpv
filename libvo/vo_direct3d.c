@@ -476,10 +476,9 @@ static void uninit_d3d(void)
     destroy_d3d_surfaces();
 
     /* Destroy the D3D Device */
-    if (priv->d3d_device) {
+    if (priv->d3d_device)
         IDirect3DDevice9_Release(priv->d3d_device);
-        priv->d3d_device = NULL;
-    }
+    priv->d3d_device = NULL;
 
     /* Stop the whole D3D. */
     if (priv->d3d_handle) {
