@@ -401,11 +401,21 @@ static void uninitGl(void) {
   err_shown = 0;
 }
 
+static void autodetectGlExtensions(void) {
+  const char *extensions = glGetString(GL_EXTENSIONS);
+  const char *vendor     = glGetString(GL_VENDOR);
+  int is_ati = strstr(vendor, "ATI") != NULL;
+  if (ati_hack      == -1) ati_hack      = is_ati;
+  if (force_pbo     == -1) force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
+  if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      2 : 0;
+}
+
 /**
  * \brief Initialize a (new or reused) OpenGL context.
  * set global gl-related variables to their default values
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
+  autodetectGlExtensions();
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   glDisable(GL_BLEND); 
@@ -925,10 +935,10 @@ static int preinit(const char *arg)
     lscale = 0;
     cscale = 0;
     filter_strength = 0.5;
-    use_rectangle = 0;
+    use_rectangle = -1;
     use_glFinish = 0;
-    ati_hack = 0;
-    force_pbo = 0;
+    ati_hack = -1;
+    force_pbo = -1;
     mesa_buffer = 0;
     swap_interval = 1;
     slice_height = 0;
