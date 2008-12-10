@@ -41,6 +41,7 @@ const LIBVO_EXTERN (png)
 static int z_compression = Z_NO_COMPRESSION;
 static char *png_outdir = NULL;
 static int framenum = 0;
+static int use_alpha;
 
 struct pngdata {
 	FILE * fp;
@@ -167,7 +168,7 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
        bit_depth, color_type, interlace_type,
        compression_type, filter_type)*/
     png_set_IHDR(png.png_ptr, png.info_ptr, image_width, image_height,
-       8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+       8, use_alpha ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
        PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
     
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write Info\n");
@@ -246,10 +247,14 @@ static int draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 static int
 query_format(uint32_t format)
 {
+    const int supported_flags = VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE;
     switch(format){
     case IMGFMT_RGB24:
     case IMGFMT_BGR24:
-        return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE;
+        return use_alpha ? 0 : supported_flags;
+    case IMGFMT_RGBA:
+    case IMGFMT_BGRA:
+        return use_alpha ? supported_flags : 0;
     }
     return 0;
 }
@@ -271,6 +276,7 @@ static int int_zero_to_nine(int *sh)
 }
 
 static opt_t subopts[] = {
+    {"alpha", OPT_ARG_BOOL, &use_alpha, NULL, 0},
     {"z",   OPT_ARG_INT, &z_compression, (opt_test_f)int_zero_to_nine},
     {"outdir",      OPT_ARG_MSTRZ,  &png_outdir,           NULL, 0},
     {NULL}
@@ -280,6 +286,7 @@ static int preinit(const char *arg)
 {
     z_compression = 0;
     png_outdir = strdup(".");
+    use_alpha = 0;
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
     }
