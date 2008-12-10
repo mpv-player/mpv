@@ -3636,7 +3636,7 @@ EOF
     _vomodules="quartz $_vomodules"
     _def_quicktime='#define CONFIG_QUICKTIME 1'
   else
-    _quartz=yes
+    _quartz=no
     _def_quartz='#undef CONFIG_QUARTZ'
     _novomodules="quartz $_novomodules"
     _def_quicktime='#undef CONFIG_QUICKTIME'
