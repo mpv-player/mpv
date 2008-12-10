@@ -878,10 +878,10 @@ static int get_space(void)
 	return 0;
     }
     
-    ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
-    if (ret > ao_data.buffersize)  // Buffer underrun?
-	ret = ao_data.buffersize;
-    return ret;
+    unsigned space = snd_pcm_status_get_avail(status) * bytes_per_sample;
+    if (space > ao_data.buffersize) // Buffer underrun?
+        space = ao_data.buffersize;
+    return space;
 }
 
 /* delay in seconds between first and last sample in buffer */
