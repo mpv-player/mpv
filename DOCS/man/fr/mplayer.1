@@ -1,4 +1,4 @@
-.\" synced with r28096
+.\" synced with r28126
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -4461,6 +4461,10 @@ Définit le taux de compression.
 0 équivaut à pas de compression et 9 à la compression maximale.
 .IPs outdir=<chemin>
 Définit le répertoire où sauver les fichiers PNG (par défaut\ ./).
+.IPs alpha (par défaut\ : noalpha)
+Crée un fichier PNG avec un canal alpha.
+Notez que MPlayer ne gère en général pas les canaux alpha, donc cette
+option sera probablement rarement utile.
 .RE
 .PD 1
 .
