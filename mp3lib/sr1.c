@@ -403,7 +403,7 @@ void (*dct64_MMX_func)(short *, short *, real *);
 #ifdef CONFIG_FAKE_MONO
 void MP3_Init(int fakemono){
 #else
-void MP3_Init(){
+void MP3_Init(void){
 #endif
 
 //gCpuCaps.hasMMX=gCpuCaps.hasMMX2=gCpuCaps.hasSSE=0; // for testing!

@@ -4,7 +4,7 @@
 #ifdef CONFIG_FAKE_MONO
 void MP3_Init(int fakemono);
 #else
-void MP3_Init();
+void MP3_Init(void);
 #endif
 int MP3_Open(char *filename, int buffsize);
 void MP3_SeekFrame(int num, int dir);
