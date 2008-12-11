@@ -6071,15 +6071,25 @@ int main(void) {
   return 0;
 }
 EOF
-  for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora -logg"; do
-    cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" \
-                         && _theora=yes && break
-  done
+  _ld_theora=$($_pkg_config --silence-errors --libs theora)
+  _inc_theora=$($_pkg_config --silence-errors --cflags theora)
+  cc_check $_inc_theora $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" &&
+    _inc_extra="$_inc_extra $_inc_theora" && _theora=yes
+  if test _theora = no; then
+    _ld_theora="-ltheora -logg"
+    cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" && _theora=yes
+  fi
   if test "$_theora" = no && test "$_tremor_internal" = yes; then
-    for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora -logg"; do
-      cc_check tremor/bitwise.c $_ld_theora \
-        && _ld_extra="$_ld_extra $_ld_theora" && theora=yes && break
-    done
+    _ld_theora=$($_pkg_config --silence-errors --libs theora)
+    _inc_theora=$($_pkg_config --silence-errors --cflags theora)
+    cc_check tremor/bitwise.c $_inc_theora $_ld_theora &&
+      _ld_extra="$_ld_extra $_ld_theora" &&
+      _inc_extra="$_inc_extra $_inc_theora" && _theora=yes
+    if test _theora = no; then
+      _ld_theora="-ltheora -logg"
+      cc_check tremor/bitwise.c $_ld_theora &&
+        _ld_extra="$_ld_extra $_ld_theora" && _theora=yes
+    fi
   fi
 fi
 if test "$_theora" = yes ; then
