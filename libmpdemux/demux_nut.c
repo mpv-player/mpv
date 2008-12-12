@@ -240,7 +240,6 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_delay, int flags) {
 	nut_context_tt * nut = ((nut_priv_tt*)demuxer->priv)->nut;
 	nut_priv_tt * priv = demuxer->priv;
-	sh_audio_t * sh_audio = demuxer->audio->sh;
 	int nutflags = 0;
 	int ret;
 	const int tmp[] = { 0, -1 };
@@ -258,7 +257,6 @@ static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_dela
 	while ((ret = nut_seek(nut, time_pos, nutflags, tmp)) == NUT_ERR_EAGAIN);
 	priv->last_pts = -1;
 	if (ret) mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n", nut_error(ret));
-	if (sh_audio) resync_audio_stream(sh_audio);
 	demuxer->filepos = stream_tell(demuxer->stream);
 }
 
