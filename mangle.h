@@ -1,7 +1,7 @@
 /*
  * CPP macros to deal with different symbol mangling across binary formats.
  *
- * Copyright (C) 2002 by Felix Buenemann <atmosfear at users.sourceforge.net>
+ * Copyright (C) 2002 Felix Buenemann <atmosfear at users.sourceforge.net>
  *
  * This file is part of MPlayer.
  *

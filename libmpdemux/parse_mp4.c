@@ -1,7 +1,7 @@
 /*
  * MP4 file format parser code
  *
- * Copyright (C) 2002 by Felix Buenemann <atmosfear at users.sourceforge.net>
+ * Copyright (C) 2002 Felix Buenemann <atmosfear at users.sourceforge.net>
  * Code inspired by libmp4 from http://mpeg4ip.sourceforge.net/.
  *
  * This file is part of MPlayer.
