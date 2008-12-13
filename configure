@@ -5480,7 +5480,7 @@ fi
 
 
 echocheck "VCD support"
-if linux || freebsd || netbsd || dragonfly || bsdos || darwin || sunos || mingw32; then
+if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos || mingw32; then
   _inputmodules="vcd $_inputmodules"
   _def_vcd='#define CONFIG_VCD 1'
   _vcd="yes"
