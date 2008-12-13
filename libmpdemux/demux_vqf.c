@@ -148,7 +148,7 @@ static demuxer_t* demux_open_vqf(demuxer_t* demuxer) {
     }
     else
     {
-    mp_msg(MSGT_DEMUX, MSGL_V, "Unhandled chunk '%c%c%c%c' %u bytes\n",((char *)&chunk_id)[0],((char *)&chunk_id)[1],((char *)&chunk_id)[2],((char *)&chunk_id)[3],chunk_size);
+    mp_msg(MSGT_DEMUX, MSGL_V, "Unhandled chunk '%c%c%c%c' %u bytes\n",chunk_id[0],chunk_id[1],chunk_id[2],chunk_id[3],chunk_size);
     stream_skip(s,chunk_size-8); /*unknown chunk type */
     }
   }
