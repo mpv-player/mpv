@@ -1,7 +1,24 @@
-/* parse_mp4.h - Headerfile for MP4 file format parser code
- * This file is part of MPlayer, see http://mplayerhq.hu/ for info.  
- * (c)2002 by Felix Buenemann <atmosfear at users.sourceforge.net>
- * File licensed under the GPL, see http://www.fsf.org/ for more info.
+/*
+ * MP4 file format parser code
+ *
+ * Copyright (C) 2002 by Felix Buenemann <atmosfear at users.sourceforge.net>
+ * Code inspired by libmp4 from http://mpeg4ip.sourceforge.net/.
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef MPLAYER_PARSE_MP4_H

@@ -1,19 +1,29 @@
 /*
-**  Video 4 Linux 2 input
-**
-**  This file is part of MPlayer, see http://mplayerhq.hu/ for info.  
-**
-**  (c) 2003 Martin Olschewski <olschewski@zpr.uni-koeln.de>
-**  (c) 2003 Jindrich Makovicka <makovick@gmail.com>
-**  
-**  File licensed under the GPL, see http://www.fsf.org/ for more info.
-**
-**  Some ideas are based on works from
-**    Alex Beregszaszi <alex@fsn.hu>
-**    Gerd Knorr <kraxel@bytesex.org>
-**
-**  CODE IS UNDER DEVELOPMENT, NO FEATURE REQUESTS PLEASE!
-*/
+ * Video 4 Linux 2 input
+ *
+ * copyright (c) 2003 Martin Olschewski <olschewski@zpr.uni-koeln.de>
+ * copyright (c) 2003 Jindrich Makovicka <makovick@gmail.com>
+ *
+ * Some ideas are based on works from
+ *   Alex Beregszaszi <alex@fsn.hu>
+ *   Gerd Knorr <kraxel@bytesex.org>
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 /*
 
