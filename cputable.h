@@ -1,7 +1,24 @@
-/* cputable.h - Maps CPUID to real CPU name.
- * Copyleft 2001 by Felix Buenemann <atmosfear at users dot sourceforge dot net>
- * This file comes under the GNU GPL, see www.fsf.org for more info!
+/*
+ * Map CPUID to real CPU name.
  * Family F codenames owe much thanks to Neil Phillips, author of x86test.
+ *
+ * Copyright (C) 2001 Felix Buenemann <atmosfear at users.sourceforge.net>
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef MPLAYER_CPUTABLE_H
