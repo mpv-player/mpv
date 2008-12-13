@@ -7676,8 +7676,7 @@ fi
 
 _ld_extra="$_ld_extra $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_extra="$_ld_extra -ldvd"
-netbsd && x86_32 && _ld_extra="$_ld_extra -li386"
-openbsd && x86_32 && _ld_extra="$_ld_extra -li386"
+(netbsd || openbsd) && x86_32 && _ld_extra="$_ld_extra -li386"
 
 _def_debug='#undef MP_DEBUG'
 test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'
