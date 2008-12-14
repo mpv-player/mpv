@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #include <CoreServices/CoreServices.h>
 //special workaround for Apple bug #6267445
 //(OSServices Power API disabled in OSServices.h for 64bit systems)
@@ -25,6 +26,8 @@
 #include "aspect.h"
 #include "mp_msg.h"
 #include "m_option.h"
+#include "mp_fifo.h"
+#include "libvo/sub.h"
 
 #include "input/input.h"
 #include "input/mouse.h"
@@ -729,7 +732,6 @@ static int control(uint32_t request, void *data)
 - (void) render
 {
 	int curTime;
-	static int lastTime = 0;
 
 	glClear(GL_COLOR_BUFFER_BIT);	
 	

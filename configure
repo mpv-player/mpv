@@ -3642,7 +3642,7 @@ EOF
     _vomodules="quartz $_vomodules"
     _def_quicktime='#define CONFIG_QUICKTIME 1'
   else
-    _quartz=yes
+    _quartz=no
     _def_quartz='#undef CONFIG_QUARTZ'
     _novomodules="quartz $_novomodules"
     _def_quicktime='#undef CONFIG_QUICKTIME'
@@ -5486,7 +5486,7 @@ fi
 
 
 echocheck "VCD support"
-if linux || freebsd || netbsd || dragonfly || bsdos || darwin || sunos || mingw32; then
+if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos || mingw32; then
   _inputmodules="vcd $_inputmodules"
   _def_vcd='#define CONFIG_VCD 1'
   _vcd="yes"
@@ -6077,15 +6077,25 @@ int main(void) {
   return 0;
 }
 EOF
-  for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora -logg"; do
-    cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" \
-                         && _theora=yes && break
-  done
+  _ld_theora=$($_pkg_config --silence-errors --libs theora)
+  _inc_theora=$($_pkg_config --silence-errors --cflags theora)
+  cc_check $_inc_theora $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" &&
+    _inc_extra="$_inc_extra $_inc_theora" && _theora=yes
+  if test _theora = no; then
+    _ld_theora="-ltheora -logg"
+    cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" && _theora=yes
+  fi
   if test "$_theora" = no && test "$_tremor_internal" = yes; then
-    for _ld_theora in "`$_pkg_config --silence-errors --libs --cflags theora`" "-ltheora -logg"; do
-      cc_check tremor/bitwise.c $_ld_theora \
-        && _ld_extra="$_ld_extra $_ld_theora" && theora=yes && break
-    done
+    _ld_theora=$($_pkg_config --silence-errors --libs theora)
+    _inc_theora=$($_pkg_config --silence-errors --cflags theora)
+    cc_check tremor/bitwise.c $_inc_theora $_ld_theora &&
+      _ld_extra="$_ld_extra $_ld_theora" &&
+      _inc_extra="$_inc_extra $_inc_theora" && _theora=yes
+    if test _theora = no; then
+      _ld_theora="-ltheora -logg"
+      cc_check tremor/bitwise.c $_ld_theora &&
+        _ld_extra="$_ld_extra $_ld_theora" && _theora=yes
+    fi
   fi
 fi
 if test "$_theora" = yes ; then
@@ -6388,7 +6398,7 @@ if test "$_real" = auto ; then
   _real=no
   _res_comment="dynamic loader support needed"
   if test "$_dl" = yes || test "$_win32dll" = yes &&
-     (linux || freebsd || netbsd || dragonfly || darwin || win32) ; then
+     (linux || freebsd || netbsd || openbsd || dragonfly || darwin || win32) ; then
     _real=yes
   fi
 fi
@@ -6455,7 +6465,7 @@ int main(void) { return 0; }
 EOF
 
   _live=no
-  for I in $_inc_extra "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
+  for I in $_inc_extra "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/lib64/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
     cxx_check $I/liveMedia/include $I/UsageEnvironment/include \
       $I/groupsock/include && _livelibdir=`echo $I| sed s/-I//` && \
       _ld_extra="$_livelibdir/liveMedia/libliveMedia.a \
@@ -7672,8 +7682,7 @@ fi
 
 _ld_extra="$_ld_extra $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_extra="$_ld_extra -ldvd"
-netbsd && x86_32 && _ld_extra="$_ld_extra -li386"
-openbsd && x86_32 && _ld_extra="$_ld_extra -li386"
+(netbsd || openbsd) && x86_32 && _ld_extra="$_ld_extra -li386"
 
 _def_debug='#undef MP_DEBUG'
 test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'

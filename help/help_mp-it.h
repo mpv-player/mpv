@@ -1676,8 +1676,8 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] formato di uscita %0X invalido\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] La versione del tuo driver mga_vid è incompatibile con questo MPlayer!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Impossibile aprire: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] La risoluzione del sorgente ha almeno una delle due dimensioni maggiore di 1023x1023. Per favore ridimensiona via software o usa -lavdopts lowres=1\n"
-#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] incongruenza tra le versioni del driver mga_vid del kernel (%u) e di MPlayer (%u)\n"
+#define MSGTR_LIBVO_MGA_ResolutionTooHigh "[MGA] La risoluzione del sorgente ha almeno una delle due dimensioni maggiore di 1023x1023. Per favore ridimensiona via software o usa -lavdopts lowres=1\n"
+#define MSGTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] incongruenza tra le versioni del driver mga_vid del kernel (%u) e di MPlayer (%u)\n"
 
 // libvo/vesa_lvo.c
 #define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Questo branch non è più supportato.\n[VESA_LVO] Per favore usa al suo posto -vo vesa:vidix.\n"

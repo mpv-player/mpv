@@ -1688,7 +1688,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Neplatný formát výstupu %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Verze vašeho mga_vid ovladače není kompatibilní s touto verzí MPlayeru!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nemohu otevřít: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Vstupní rozlišení minimálně v jednom rozměru větší než 1023x1023. Přeškálujte prosím softwarově, nebo použijte -lavdopts lowres=1\n"
+#define MSGTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Vstupní rozlišení minimálně v jednom rozměru větší než 1023x1023. Přeškálujte prosím softwarově, nebo použijte -lavdopts lowres=1\n"
  
 // libvo/vesa_lvo.c
  

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "libavutil/common.h"
+#include "libavutil/intreadwrite.h"
 #include "mpbswap.h"
 
 #include "stream/stream.h"
@@ -50,19 +51,22 @@ static demuxer_t* demux_open_vqf(demuxer_t* demuxer) {
     unsigned chunk_size;
     hi->size=chunk_size=stream_read_dword(s); /* include itself */
     stream_read(s,chunk_id,4);
-    if(*((uint32_t *)&chunk_id[0])==mmioFOURCC('C','O','M','M'))
+    if (chunk_size < 8) return NULL;
+    chunk_size -= 8;
+    if(AV_RL32(chunk_id)==mmioFOURCC('C','O','M','M'))
     {
-    char buf[chunk_size-8];
+    char buf[BUFSIZ];
     unsigned i,subchunk_size;
-    if(stream_read(s,buf,chunk_size-8)!=chunk_size-8) return NULL;
+    if (chunk_size > sizeof(buf) || chunk_size < 20) return NULL;
+    if(stream_read(s,buf,chunk_size)!=chunk_size) return NULL;
     i=0;
-    subchunk_size=be2me_32(*((uint32_t *)&buf[0]));
-    hi->channelMode=be2me_32(*((uint32_t *)&buf[4]));
+    subchunk_size      = AV_RB32(buf);
+    hi->channelMode    = AV_RB32(buf + 4);
     w->nChannels=sh_audio->channels=hi->channelMode+1; /*0-mono;1-stereo*/
-    hi->bitRate=be2me_32(*((uint32_t *)&buf[8]));
+    hi->bitRate        = AV_RB32(buf + 8);
     sh_audio->i_bps=hi->bitRate*1000/8; /* bitrate kbit/s */
     w->nAvgBytesPerSec = sh_audio->i_bps;
-    hi->samplingRate=be2me_32(*((uint32_t *)&buf[12]));
+    hi->samplingRate   = AV_RB32(buf + 12);
     switch(hi->samplingRate){
     case 44:
         w->nSamplesPerSec=44100;
@@ -78,21 +82,23 @@ static demuxer_t* demux_open_vqf(demuxer_t* demuxer) {
         break;
     }
     sh_audio->samplerate=w->nSamplesPerSec;
-    hi->securityLevel=be2me_32(*((uint32_t *)&buf[16]));
+    hi->securityLevel  = AV_RB32(buf + 16);
     w->nBlockAlign = 0;
     sh_audio->samplesize = 4;
     w->wBitsPerSample = 8*sh_audio->samplesize;
     w->cbSize = 0;
+    if (subchunk_size > chunk_size - 4) continue;
     i+=subchunk_size+4;
-    while(i<chunk_size-8)
+    while(i + 8 < chunk_size)
     {
         unsigned slen,sid;
-        char sdata[chunk_size];
-        sid=*((uint32_t *)&buf[i]); i+=4;
-        slen=be2me_32(*((uint32_t *)&buf[i])); i+=4;
+        char sdata[BUFSIZ];
+        sid  = AV_RL32(buf + i); i+=4;
+        slen = AV_RB32(buf + i); i+=4;
+        if (slen > sizeof(sdata) - 1 || slen > chunk_size - i) break;
         if(sid==mmioFOURCC('D','S','I','Z'))
         {
-        hi->Dsiz=be2me_32(*((uint32_t *)&buf[i]));
+        hi->Dsiz=AV_RB32(buf + i);
         continue; /* describes the same info as size of DATA chunk */
         }
         memcpy(sdata,&buf[i],slen); sdata[slen]=0; i+=slen;
@@ -138,18 +144,18 @@ static demuxer_t* demux_open_vqf(demuxer_t* demuxer) {
     }
     }
     else
-    if(*((uint32_t *)&chunk_id[0])==mmioFOURCC('D','A','T','A'))
+    if(AV_RL32(chunk_id)==mmioFOURCC('D','A','T','A'))
     {
     demuxer->movi_start=stream_tell(s);
-    demuxer->movi_end=demuxer->movi_start+chunk_size-8;
+    demuxer->movi_end=demuxer->movi_start+chunk_size;
     mp_msg(MSGT_DEMUX, MSGL_V, "Found data at %"PRIX64" size %"PRIu64"\n",demuxer->movi_start,demuxer->movi_end);
     /* Done! play it */
     break;
     }
     else
     {
-    mp_msg(MSGT_DEMUX, MSGL_V, "Unhandled chunk '%c%c%c%c' %u bytes\n",((char *)&chunk_id)[0],((char *)&chunk_id)[1],((char *)&chunk_id)[2],((char *)&chunk_id)[3],chunk_size);
-    stream_skip(s,chunk_size-8); /*unknown chunk type */
+    mp_msg(MSGT_DEMUX, MSGL_V, "Unhandled chunk '%c%c%c%c' %u bytes\n",chunk_id[0],chunk_id[1],chunk_id[2],chunk_id[3],chunk_size);
+    stream_skip(s,chunk_size); /*unknown chunk type */
     }
   }
 

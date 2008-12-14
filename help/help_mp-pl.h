@@ -1575,7 +1575,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] niepoprawny format wyjściowy %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Wersja Twojego sterownika mga_vid jest niekompatybilna z tą wersją MPlayera!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nie mogłem otworzyć: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Żródłowa rozdzielczość jest co najmniej o wymiar większa niż 1023x1023. Proszę przeskaluj programowo lub użyj -lavdopts lowres=1\n"
+#define MSGTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Żródłowa rozdzielczość jest co najmniej o wymiar większa niż 1023x1023. Proszę przeskaluj programowo lub użyj -lavdopts lowres=1\n"
 
 // libvo/vesa_lvo.c
 

@@ -177,7 +177,8 @@ static void texSize(int w, int h, int *texw, int *texh) {
     while (*texh < h)
       *texh *= 2;
   }
-  if (ati_hack) *texw = (*texw + 511) & ~511;
+  if (mesa_buffer) *texw = (*texw + 63) & ~63;
+  else if (ati_hack) *texw = (*texw + 511) & ~511;
 }
 
 //! maximum size of custom fragment program
@@ -400,11 +401,21 @@ static void uninitGl(void) {
   err_shown = 0;
 }
 
+static void autodetectGlExtensions(void) {
+  const char *extensions = glGetString(GL_EXTENSIONS);
+  const char *vendor     = glGetString(GL_VENDOR);
+  int is_ati = strstr(vendor, "ATI") != NULL;
+  if (ati_hack      == -1) ati_hack      = is_ati;
+  if (force_pbo     == -1) force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
+  if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      2 : 0;
+}
+
 /**
  * \brief Initialize a (new or reused) OpenGL context.
  * set global gl-related variables to their default values
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
+  autodetectGlExtensions();
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   glDisable(GL_BLEND); 
@@ -698,7 +709,8 @@ static uint32_t get_image(mp_image_t *mpi) {
     return VO_FALSE;
   }
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
-  if (ati_hack) {
+  if (mesa_buffer) mpi->width = texture_width;
+  else if (ati_hack) {
     mpi->width = texture_width;
     mpi->height = texture_height;
   }
@@ -744,7 +756,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     mpi->stride[1] = mpi->width >> 1;
     mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> 1);
     mpi->stride[2] = mpi->width >> 1;
-    if (ati_hack) {
+    if (ati_hack && !mesa_buffer) {
       mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
       if (!gl_buffer_uv[0]) GenBuffers(2, gl_buffer_uv);
       if (mpi->stride[1] * mpi->height > gl_buffersize_uv) {
@@ -776,7 +788,6 @@ static uint32_t draw_image(mp_image_t *mpi) {
   unsigned char *planes[3];
   mp_image_t mpi2 = *mpi;
   int w = mpi->w, h = mpi->h;
-  if (ati_hack) { w = texture_width; h = texture_height; }
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
     goto skip_upload;
   mpi2.flags = 0; mpi2.type = MP_IMGTYPE_TEMP;
@@ -793,21 +804,26 @@ static uint32_t draw_image(mp_image_t *mpi) {
   stride[0] = mpi->stride[0]; stride[1] = mpi->stride[1]; stride[2] = mpi->stride[2];
   planes[0] = mpi->planes[0]; planes[1] = mpi->planes[1]; planes[2] = mpi->planes[2];
   mpi_flipped = stride[0] < 0;
-  if (!mesa_buffer && mpi->flags & MP_IMGFLAG_DIRECT) {
-    intptr_t base = (intptr_t)planes[0];
-    if (mpi_flipped)
-      base += (mpi->h - 1) * stride[0];
-    planes[0] -= base;
-    planes[1] -= base;
-    planes[2] -= base;
-    BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
-    UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    gl_bufferptr = NULL;
-    if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
-      planes[0] = planes[1] = planes[2] = NULL;
-  }
-  if (mpi->flags & MP_IMGFLAG_DIRECT)
+  if (mpi->flags & MP_IMGFLAG_DIRECT) {
+    if (mesa_buffer) {
+      glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 1);
+      w = texture_width;
+    } else {
+      intptr_t base = (intptr_t)planes[0];
+      if (ati_hack) { w = texture_width; h = texture_height; }
+      if (mpi_flipped)
+        base += (mpi->h - 1) * stride[0];
+      planes[0] -= base;
+      planes[1] -= base;
+      planes[2] -= base;
+      BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
+      UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+      gl_bufferptr = NULL;
+      if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
+        planes[0] = planes[1] = planes[2] = NULL;
+    }
     slice = 0; // always "upload" full texture
+  }
   glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
               mpi->x, mpi->y, w, h, slice);
   if (mpi->imgfmt == IMGFMT_YV12) {
@@ -829,8 +845,10 @@ static uint32_t draw_image(mp_image_t *mpi) {
                 mpi->x / 2, mpi->y / 2, w / 2, h / 2, slice);
     ActiveTexture(GL_TEXTURE0);
   }
-  if (!mesa_buffer && mpi->flags & MP_IMGFLAG_DIRECT)
-    BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  if (mpi->flags & MP_IMGFLAG_DIRECT) {
+    if (mesa_buffer) glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, 0);
+    else BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  }
 skip_upload:
   if (vo_doublebuffering) do_render();
   return VO_TRUE;
@@ -917,10 +935,10 @@ static int preinit(const char *arg)
     lscale = 0;
     cscale = 0;
     filter_strength = 0.5;
-    use_rectangle = 0;
+    use_rectangle = -1;
     use_glFinish = 0;
-    ati_hack = 0;
-    force_pbo = 0;
+    ati_hack = -1;
+    force_pbo = -1;
     mesa_buffer = 0;
     swap_interval = 1;
     slice_height = 0;

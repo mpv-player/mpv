@@ -442,7 +442,7 @@ FAAD2 binaries are not available from audiocoding.com, but you can (apt-)get
 Debian packages from
 <ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink>,
 Mandrake/Mandriva RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink>
-and Fedora RPMs from <ulink url="http://rpm.livna.org/">Livna</ulink>.
+and Fedora/CentOS/RHEL RPMs from <ulink url="http://rpmfusion.org/">RPMFusion</ulink>.
 </para>
 <para>
 If you choose to build from source, you do not need all of FAAD2 to decode

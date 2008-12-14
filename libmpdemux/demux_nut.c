@@ -14,9 +14,9 @@
 
 typedef struct {
 	int last_pts; // FIXME
-	nut_context_t * nut;
-	nut_stream_header_t * s;
-} nut_priv_t;
+	nut_context_tt * nut;
+	nut_stream_header_tt * s;
+} nut_priv_tt;
 
 static size_t mp_read(void * h, size_t len, uint8_t * buf) {
 	stream_t * stream = (stream_t*)h;
@@ -64,8 +64,7 @@ static int nut_check_file(demuxer_t * demuxer) {
 }
 
 static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
-	extern int index_mode;
-	nut_demuxer_opts_t dopts = {
+	nut_demuxer_opts_tt dopts = {
 		.input = {
 			.priv = demuxer->stream,
 			.seek = mp_seek,
@@ -77,9 +76,9 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 		.read_index = index_mode,
 		.cache_syncpoints = 1,
 	};
-	nut_priv_t * priv = demuxer->priv = calloc(1, sizeof(nut_priv_t));
-	nut_context_t * nut = priv->nut = nut_demuxer_init(&dopts);
-	nut_stream_header_t * s;
+	nut_priv_tt * priv = demuxer->priv = calloc(1, sizeof(nut_priv_tt));
+	nut_context_tt * nut = priv->nut = nut_demuxer_init(&dopts);
+	nut_stream_header_tt * s;
 	int ret;
 	int i;
 
@@ -97,8 +96,8 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 				calloc(sizeof(WAVEFORMATEX) +
 				              s[i].codec_specific_len, 1);
 			sh_audio_t* sh_audio = new_sh_audio(demuxer, i);
-			mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "nut", i);
 			int j;
+			mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "nut", i);
 
 			sh_audio->wf= wf; sh_audio->ds = demuxer->audio;
 			sh_audio->audio.dwSampleSize = 0; // FIXME
@@ -133,8 +132,8 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 				calloc(sizeof(BITMAPINFOHEADER) +
 				              s[i].codec_specific_len, 1);
 			sh_video_t * sh_video = new_sh_video(demuxer, i);
-			mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "nut", i);
 			int j;
+			mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "nut", i);
 
 			sh_video->bih = bih;
 			sh_video->ds = demuxer->video;
@@ -176,11 +175,11 @@ static demuxer_t * demux_open_nut(demuxer_t * demuxer) {
 }
 
 static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
-	nut_priv_t * priv = demuxer->priv;
-	nut_context_t * nut = priv->nut;
+	nut_priv_tt * priv = demuxer->priv;
+	nut_context_tt * nut = priv->nut;
 	demux_packet_t *dp;
 	demux_stream_t *ds;
-	nut_packet_t pd;
+	nut_packet_tt pd;
 	int ret;
 	double pts;
 
@@ -238,9 +237,8 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 }
 
 static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_delay, int flags) {
-	nut_context_t * nut = ((nut_priv_t*)demuxer->priv)->nut;
-	nut_priv_t * priv = demuxer->priv;
-	sh_audio_t * sh_audio = demuxer->audio->sh;
+	nut_context_tt * nut = ((nut_priv_tt*)demuxer->priv)->nut;
+	nut_priv_tt * priv = demuxer->priv;
 	int nutflags = 0;
 	int ret;
 	const int tmp[] = { 0, -1 };
@@ -258,12 +256,11 @@ static void demux_seek_nut(demuxer_t * demuxer, float time_pos, float audio_dela
 	while ((ret = nut_seek(nut, time_pos, nutflags, tmp)) == NUT_ERR_EAGAIN);
 	priv->last_pts = -1;
 	if (ret) mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n", nut_error(ret));
-	if (sh_audio) resync_audio_stream(sh_audio);
 	demuxer->filepos = stream_tell(demuxer->stream);
 }
 
 static int demux_control_nut(demuxer_t * demuxer, int cmd, void * arg) {
-	nut_priv_t * priv = demuxer->priv;
+	nut_priv_tt * priv = demuxer->priv;
 	switch (cmd) {
 		case DEMUXER_CTRL_GET_TIME_LENGTH:
 			*((double *)arg) = priv->s[0].max_pts *
@@ -282,7 +279,7 @@ static int demux_control_nut(demuxer_t * demuxer, int cmd, void * arg) {
 }
 
 static void demux_close_nut(demuxer_t *demuxer) {
-	nut_priv_t * priv = demuxer->priv;
+	nut_priv_tt * priv = demuxer->priv;
 	if (!priv) return;
 	nut_demuxer_uninit(priv->nut);
 	free(demuxer->priv);

@@ -954,8 +954,8 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Hibás kimeneti formátum %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Az mga_vid vezérlőd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nem nyitható meg: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] A forrás felbontása legalább egy dimenzióban nagyobb, mint 1023x1023. Méretezd át szoftveresen vagy használd a -lavdopts lowres=1-t\n"
-#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] különbség a kernel (%u) és az MPlayer (%u) mga_vid verziói között\n"
+#define MSGTR_LIBVO_MGA_ResolutionTooHigh "[MGA] A forrás felbontása legalább egy dimenzióban nagyobb, mint 1023x1023. Méretezd át szoftveresen vagy használd a -lavdopts lowres=1-t\n"
+#define MSGTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] különbség a kernel (%u) és az MPlayer (%u) mga_vid verziói között\n"
 
 // vo_null.c
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Ismeretlen aleszköz: %s.\n"

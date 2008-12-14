@@ -948,8 +948,8 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] 无效的输出格式 %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] 你的 mga_vid 驱动版本与 MPlayer 的版本不兼容!\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] 打不开: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] 原分辨率至少有一维超过了 1023x1023。用软件或用 -lavdopts lowres=1 重新缩放\n"
-#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] 内核（%u）与 MPlayer（%u）mga_vid 驱动版本号不符。\n"
+#define MSGTR_LIBVO_MGA_ResolutionTooHigh "[MGA] 原分辨率至少有一维超过了 1023x1023。用软件或用 -lavdopts lowres=1 重新缩放\n"
+#define MSGTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] 内核（%u）与 MPlayer（%u）mga_vid 驱动版本号不符。\n"
 
 // vo_null.c
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] 未知子设备: %s。\n"

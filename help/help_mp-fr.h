@@ -1695,8 +1695,8 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Format de sortie invalide %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] La version de votre pilote mga_vid est incompatible avec cette version de MPlayer !\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Impossible d'ouvrir : %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] La resolution à sa source est au moins dans une dimension plus large que 1023x1023. Veuillez remettre à l'échelle dans le logiciel ou utiliser -lavdopts lowres=1\n"
-#define MGSTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] La version du driver mga_vid (%u) ne correspond pas à celle utilisée lors de la compilation de MPlayer (%u)\n"
+#define MSGTR_LIBVO_MGA_ResolutionTooHigh "[MGA] La resolution à sa source est au moins dans une dimension plus large que 1023x1023. Veuillez remettre à l'échelle dans le logiciel ou utiliser -lavdopts lowres=1\n"
+#define MSGTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] La version du driver mga_vid (%u) ne correspond pas à celle utilisée lors de la compilation de MPlayer (%u)\n"
 
 // libvo/vesa_lvo.c
 
