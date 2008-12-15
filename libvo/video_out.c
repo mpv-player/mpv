@@ -225,7 +225,7 @@ const vo_functions_t* const video_out_drivers[] =
 #endif
         &video_out_null,
 	// should not be auto-selected
-#ifdef HAVE_XVMC
+#ifdef CONFIG_XVMC
         &video_out_xvmc,
 #endif
 	&video_out_mpegpes,
