@@ -119,6 +119,9 @@ static int control(int cmd, void *arg)
       long get_vol, set_vol;
       float f_multi;
 
+      if(ao_data.format == AF_FORMAT_AC3)
+	return CONTROL_TRUE;
+
       if(mixer_channel) {
 	 char *test_mix_index;
 
@@ -136,9 +139,6 @@ static int control(int cmd, void *arg)
 	 }
       }
       if(mixer_device) card = mixer_device;
-
-      if(ao_data.format == AF_FORMAT_AC3)
-	return CONTROL_TRUE;
 
       //allocate simple id
       snd_mixer_selem_id_alloca(&sid);
