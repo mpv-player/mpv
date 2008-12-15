@@ -29,6 +29,7 @@
 
 #define real float /* ugly - but only way */
 
+#include "config.h"
 #include "mangle.h"
 
 #ifdef DCT36_OPTIMIZE_FOR_K7

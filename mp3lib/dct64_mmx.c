@@ -3,6 +3,7 @@
 * See ChangeLog of mpg123-0.59s-pre.1 for detail
 * Applied to mplayer by Nick Kurshev <nickols_k@mail.ru>
 */
+#include "config.h"
 #include "mangle.h"
 #define real float /* ugly - but only way */
 
