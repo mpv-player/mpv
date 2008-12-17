@@ -1681,7 +1681,7 @@ EOF
 fi
 
 
-_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM ARMV4L SH POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
+_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM SH POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _arch='X86 X86_32'
@@ -2032,8 +2032,8 @@ EOF
     ;;
 
   arm|armv4l|armv5tel)
-    _arch='ARM ARMV4L'
-    _target_arch='ARCH_ARMV4L = yes'
+    _arch='ARM'
+    _target_arch='ARCH_ARM = yes'
     iproc='arm'
     ;;
 
