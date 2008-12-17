@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27867 -->
+<!-- synced with r28148 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -443,7 +443,7 @@ Ha inkább a külső függvénykönyvtárat használnád, telepítsd és add meg
 FAAD2 binárisok nem tölthetőek le az audiocoding.com-ról, de (apt-)get-tel
 telepítheted <ulink url="http://www.debian-multimedia.org/">Christian Marillat</ulink> Debian csomagjait,
 vagy Mandrake/Mandriva RPM-et a <ulink url="http://plf.zarb.org">P.L.F</ulink>-ről,
-Fedora RPM-et pedig a <ulink url="http://rpm.livna.org/">Livna</ulink>-ról.
+Fedora/CentOS/RHEL RPM-et pedig az <ulink url="http://rpmfusion.org/">RPMFusion</ulink>-ról.
 </para>
 <para>
 Ha úgy döntesz, hogy forrásból fordítasz, nem kell a teljes FAAD2 az AAC fájlok
