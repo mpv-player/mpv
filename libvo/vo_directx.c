@@ -37,6 +37,7 @@
 #include "aspect.h"
 #include "geometry.h"
 #include "mp_fifo.h"
+#include "sub.h"
 
 #ifdef CONFIG_GUI
 #include "gui/interface.h"
@@ -89,7 +90,6 @@ static float window_aspect;
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO) = NULL;
 static RECT last_rect = {0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE};
 
-void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 extern int vidmode;
 
 /*****************************************************************************
