@@ -30,7 +30,7 @@
 #include "m_option.h"
 #include "mp_fifo.h"
 #include "mpbswap.h"
-#include "libvo/sub.h"
+#include "sub.h"
 
 #include "input/input.h"
 #include "input/mouse.h"
