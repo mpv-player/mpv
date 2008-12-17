@@ -723,7 +723,7 @@ DIRS =  . \
         libass \
         libavcodec \
         libavcodec/alpha \
-        libavcodec/armv4l \
+        libavcodec/arm \
         libavcodec/bfin \
         libavcodec/i386 \
         libavcodec/mlib \
