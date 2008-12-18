@@ -1681,7 +1681,7 @@ EOF
 fi
 
 
-_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM ARMV4L SH POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
+_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM SH POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _arch='X86 X86_32'
@@ -2028,8 +2028,8 @@ EOF
     ;;
 
   arm|armv4l|armv5tel)
-    _arch='ARM ARMV4L'
-    _target_arch='ARCH_ARMV4L = yes'
+    _arch='ARM'
+    _target_arch='ARCH_ARM = yes'
     iproc='arm'
     ;;
 
@@ -4120,12 +4120,12 @@ EOF
   done
 fi
 if test "$_xvmc" = yes ; then
-  _def_xvmc='#define HAVE_XVMC 1'
+  _def_xvmc='#define CONFIG_XVMC 1'
   _libs_mplayer="$_libs_mplayer -lXvMC -l$_xvmclib"
   _vomodules="xvmc $_vomodules"
   _res_comment="using $_xvmclib"
 else
-  _def_xvmc='#undef HAVE_XVMC'
+  _def_xvmc='#undef CONFIG_XVMC'
   _novomodules="xvmc $_novomodules"
   _libavdecoders=`echo $_libavdecoders | sed -e s/MPEG_XVMC_DECODER// `
 fi
@@ -7984,7 +7984,6 @@ GUI_GTK = $_gui_gtk
 GUI_WIN32 = $_gui_win32
 HAVE_POSIX_SELECT = $_posix_select
 HAVE_SYS_MMAN_H = $_mman
-HAVE_XVMC = $_xvmc
 IVTV = $_ivtv
 JACK = $_jack
 JOYSTICK = $_joystick
@@ -8139,6 +8138,7 @@ CONFIG_MUXERS=$_mencoder
 CONFIG_POSTPROC = yes
 # Prevent building libavcodec/imgresample.c with conflicting symbols
 CONFIG_SWSCALE=yes
+CONFIG_XVMC=$_xvmc
 CONFIG_ZLIB=$_zlib
 
 HAVE_PTHREADS = $_pthreads

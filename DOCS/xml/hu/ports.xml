@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26990 -->
+<!-- synced with r28148 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -61,8 +61,8 @@ a bináris codec csomagokból, melyek akár az apt-get segítségével is telep�
 
 <para>
 Dominik Mierzejewski tartja karban az <application>MPlayer</application>
-hivatalos RPM csomagjait a Fedora Core-hoz. Elérhetőek
-a <ulink url="http://rpm.livna.org/">Livna repository</ulink>-ban.
+hivatalos RPM csomagjait a Fedora-hoz és CentOS/RHEL-hez. Elérhetőek
+a <ulink url="http://rpmfusion.org/">RPMFusion repository</ulink>-ban.
 </para>
 
 <para>
