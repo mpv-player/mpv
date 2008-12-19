@@ -23,6 +23,8 @@
 #ifndef MPLAYER_MANGLE_H
 #define MPLAYER_MANGLE_H
 
+#include "config.h"
+
 #if (__GNUC__ * 100 + __GNUC_MINOR__ >= 300)
 #define attribute_used __attribute__((used))
 #else
