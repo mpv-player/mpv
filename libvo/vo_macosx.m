@@ -28,6 +28,7 @@
 #include "m_option.h"
 #include "mp_fifo.h"
 #include "libvo/sub.h"
+#include "subopt-helper.h"
 
 #include "input/input.h"
 #include "input/mouse.h"
@@ -315,30 +316,31 @@ static void uninit(void)
     }
 }
 
+static opt_t subopts[] = {
+{"device_id",     OPT_ARG_INT,  &screen_id,     (opt_test_f)int_non_neg},
+{"shared_buffer", OPT_ARG_BOOL, &shared_buffer, NULL},
+{NULL}
+};
+
 static int preinit(const char *arg)
 {
-	int parse_err = 0;
-
-    if(arg) 
-    {
-        char *parse_pos = (char *)&arg[0];
-        while (parse_pos[0] && !parse_err) 
-		{
-			if (strncmp (parse_pos, "device_id=", 10) == 0)
-			{
-				parse_pos = &parse_pos[10];
-				screen_id = strtol(parse_pos, &parse_pos, 0);
-				screen_force = YES;
-            }
-			if (strncmp (parse_pos, "shared_buffer", 13) == 0)
-			{
-				parse_pos = &parse_pos[13];
-				shared_buffer = YES;
-            }
-            if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
-            else if (parse_pos[0]) parse_err = 1;
-        }
-    }
+	
+	// set defaults
+	screen_id = 0;
+	shared_buffer = false;
+	
+	if (subopt_parse(arg, subopts) != 0) {
+		mp_msg(MSGT_VO, MSGL_FATAL,
+				"\n-vo macosx command line help:\n"
+				"Example: mplayer -vo macosx:device_id=1:shared_buffer\n"
+				"\nOptions:\n"
+				"  device_id=<0-...>\n"
+				"    Set screen device id for fullscreen.\n"
+				"  shared_buffer\n"
+				"    Write output to a shared memory buffer instead of displaying it.\n"
+				"\n" );
+		return -1;
+	}
 
 	NSApplicationLoad();
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
