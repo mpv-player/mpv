@@ -251,4 +251,10 @@ extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
 
+struct keymap {
+  int from;
+  int to;
+};
+int lookup_keymap_table(const struct keymap *map, int key);
+
 #endif /* MPLAYER_VIDEO_OUT_H */

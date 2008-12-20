@@ -543,47 +543,23 @@ void vo_uninit(void)
 #include "wskeys.h"
 
 #ifdef XF86XK_AudioPause
+static const struct keymap keysym_map[] = {
+    {XF86XK_MenuKB, KEY_MENU},
+    {XF86XK_AudioPlay, KEY_PLAY}, {XF86XK_AudioPause, KEY_PAUSE}, {XF86XK_AudioStop, KEY_STOP},
+    {XF86XK_AudioPrev, KEY_PREV}, {XF86XK_AudioNext, KEY_NEXT},
+    {XF86XK_AudioMute, KEY_MUTE}, {XF86XK_AudioLowerVolume, KEY_VOLUME_DOWN}, {XF86XK_AudioRaiseVolume, KEY_VOLUME_UP},
+    {0, 0}
+};
+
 static void vo_x11_putkey_ext(int keysym)
 {
-    switch (keysym)
-    {
-        case XF86XK_MenuKB:
-            mplayer_put_key(KEY_MENU);
-            break;
-        case XF86XK_AudioPlay:
-            mplayer_put_key(KEY_PLAY);
-            break;
-        case XF86XK_AudioPause:
-            mplayer_put_key(KEY_PAUSE);
-            break;
-        case XF86XK_AudioStop:
-            mplayer_put_key(KEY_STOP);
-            break;
-        case XF86XK_AudioPrev:
-            mplayer_put_key(KEY_PREV);
-            break;
-        case XF86XK_AudioNext:
-            mplayer_put_key(KEY_NEXT);
-            break;
-        case XF86XK_AudioMute:
-            mplayer_put_key(KEY_MUTE);
-            break;
-        case XF86XK_AudioLowerVolume:
-            mplayer_put_key(KEY_VOLUME_DOWN);
-            break;
-        case XF86XK_AudioRaiseVolume:
-            mplayer_put_key(KEY_VOLUME_UP);
-            break;
-        default:
-            break;
-    }
+    int mpkey = lookup_keymap_table(keysym_map, keysym);
+    if (mpkey)
+        mplayer_put_key(mpkey);
 }
 #endif
 
-struct {
-    int x11key;
-    int mpkey;
-} static const keymap[] = {
+static const struct keymap keymap[] = {
     // special keys
     {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS}, {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
 
@@ -629,9 +605,8 @@ void vo_x11_putkey(int key)
         (key >  0   && key <  256 && strchr(passthrough_keys, key)))
         mpkey = key;
 
-    for (i = 0; !mpkey && keymap[i].x11key; i++)
-        if (keymap[i].x11key == key)
-            mpkey = keymap[i].mpkey;
+    if (!mpkey)
+        lookup_keymap_table(keymap, key);
 
     if (mpkey)
         mplayer_put_key(mpkey);

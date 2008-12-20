@@ -328,6 +328,17 @@ int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
   return vo->config(width, height, d_width, d_height, flags, title, format);
 }
 
+/**
+ * \brief lookup an integer in a table, table must have 0 as the last key
+ * \param key key to search for
+ * \result translation corresponding to key or "to" value of last mapping
+ *         if not found.
+ */
+int lookup_keymap_table(const struct keymap *map, int key) {
+  while (map->from && map->from != key) map++;
+  return map->to;
+}
+
 #if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
 /* Borrowed from vo_fbdev.c
 Monitor ranges related functions*/
