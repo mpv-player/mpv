@@ -582,6 +582,13 @@ static void vo_x11_putkey_ext(int keysym)
 
 void vo_x11_putkey(int key)
 {
+    static const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
+    if ((key >= 'a' && key <= 'z') ||
+        (key >= 'A' && key <= 'Z') ||
+        (key >= '0' && key <= '9') ||
+        (key >  0   && key <  256 && strchr(passthrough_keys, key)))
+        mplayer_put_key(key);
+
     switch (key)
     {
         case wsLeft:
@@ -595,9 +602,6 @@ void vo_x11_putkey(int key)
             break;
         case wsDown:
             mplayer_put_key(KEY_DOWN);
-            break;
-        case wsSpace:
-            mplayer_put_key(' ');
             break;
         case wsEscape:
             mplayer_put_key(KEY_ESC);
@@ -665,27 +669,17 @@ void vo_x11_putkey(int key)
         case wsF12:
             mplayer_put_key(KEY_F + 12);
             break;
-        case wsMinus:
         case wsGrayMinus:
             mplayer_put_key('-');
             break;
-        case wsPlus:
         case wsGrayPlus:
             mplayer_put_key('+');
             break;
         case wsGrayMul:
-        case wsMul:
             mplayer_put_key('*');
             break;
         case wsGrayDiv:
-        case wsDiv:
             mplayer_put_key('/');
-            break;
-        case wsLess:
-            mplayer_put_key('<');
-            break;
-        case wsMore:
-            mplayer_put_key('>');
             break;
         case wsGray0:
             mplayer_put_key(KEY_KP0);
@@ -738,90 +732,6 @@ void vo_x11_putkey(int key)
         case wsGrayEnter:
             mplayer_put_key(KEY_KPENTER);
             break;
-        case wsGrave:
-            mplayer_put_key('`');
-            break;
-        case wsTilde:
-            mplayer_put_key('~');
-            break;
-        case wsExclSign:
-            mplayer_put_key('!');
-            break;
-        case wsAt:
-            mplayer_put_key('@');
-            break;
-        case wsHash:
-            mplayer_put_key('#');
-            break;
-        case wsDollar:
-            mplayer_put_key('$');
-            break;
-        case wsPercent:
-            mplayer_put_key('%');
-            break;
-        case wsCircumflex:
-            mplayer_put_key('^');
-            break;
-        case wsAmpersand:
-            mplayer_put_key('&');
-            break;
-        case wsobracket:
-            mplayer_put_key('(');
-            break;
-        case wscbracket:
-            mplayer_put_key(')');
-            break;
-        case wsUnder:
-            mplayer_put_key('_');
-            break;
-        case wsocbracket:
-            mplayer_put_key('{');
-            break;
-        case wsccbracket:
-            mplayer_put_key('}');
-            break;
-        case wsColon:
-            mplayer_put_key(':');
-            break;
-        case wsSemicolon:
-            mplayer_put_key(';');
-            break;
-        case wsDblQuote:
-            mplayer_put_key('\"');
-            break;
-        case wsAcute:
-            mplayer_put_key('\'');
-            break;
-        case wsComma:
-            mplayer_put_key(',');
-            break;
-        case wsPoint:
-            mplayer_put_key('.');
-            break;
-        case wsQuestSign:
-            mplayer_put_key('?');
-            break;
-        case wsBSlash:
-            mplayer_put_key('\\');
-            break;
-        case wsPipe:
-            mplayer_put_key('|');
-            break;
-        case wsEqual:
-            mplayer_put_key('=');
-            break;
-        case wsosbrackets:
-            mplayer_put_key('[');
-            break;
-        case wscsbrackets:
-            mplayer_put_key(']');
-            break;
-
-
-        default:
-            if ((key >= 'a' && key <= 'z') || (key >= 'A' && key <= 'Z') ||
-                (key >= '0' && key <= '9'))
-                mplayer_put_key(key);
     }
 
 }
