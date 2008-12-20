@@ -580,160 +580,61 @@ static void vo_x11_putkey_ext(int keysym)
 }
 #endif
 
+struct {
+    int x11key;
+    int mpkey;
+} static const keymap[] = {
+    // special keys
+    {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS}, {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
+
+    // cursor keys
+    {wsLeft, KEY_LEFT}, {wsRight, KEY_RIGHT}, {wsUp, KEY_UP}, {wsDown, KEY_DOWN},
+
+    // navigation block
+    {wsInsert, KEY_INSERT}, {wsDelete, KEY_DELETE}, {wsHome, KEY_HOME}, {wsEnd, KEY_END},
+    {wsPageUp, KEY_PAGE_UP}, {wsPageDown, KEY_PAGE_DOWN},
+
+    // F-keys
+    {wsF1, KEY_F+1}, {wsF2, KEY_F+2}, {wsF3, KEY_F+3}, {wsF4, KEY_F+4},
+    {wsF5, KEY_F+5}, {wsF6, KEY_F+6}, {wsF7, KEY_F+7}, {wsF8, KEY_F+8},
+    {wsF9, KEY_F+9}, {wsF10, KEY_F+10}, {wsF11, KEY_F+11}, {wsF12, KEY_F+12},
+
+    // numpad independent of numlock
+    {wsGrayMinus, '-'}, {wsGrayPlus, '+'}, {wsGrayMul, '*'}, {wsGrayDiv, '/'},
+    {wsGrayEnter, KEY_KPENTER},
+
+    // numpad with numlock
+    {wsGray0, KEY_KP0}, {wsGray1, KEY_KP1}, {wsGray2, KEY_KP2},
+    {wsGray3, KEY_KP3}, {wsGray4, KEY_KP4}, {wsGray5, KEY_KP5},
+    {wsGray6, KEY_KP6}, {wsGray7, KEY_KP7}, {wsGray8, KEY_KP8},
+    {wsGray9, KEY_KP9}, {wsGrayDecimal, KEY_KPDEC},
+
+    // numpad without numlock
+    {wsGrayInsert, KEY_KPINS}, {wsGrayEnd, KEY_KP1}, {wsGrayDown, KEY_KP2},
+    {wsGrayPgDn, KEY_KP3}, {wsGrayLeft, KEY_KP4}, {wsGray5Dup, KEY_KP5},
+    {wsGrayRight, KEY_KP6}, {wsGrayHome, KEY_KP7}, {wsGrayUp, KEY_KP8},
+    {wsGrayPgUp, KEY_KP9}, {wsGrayDelete, KEY_KPDEL},
+
+    {0, 0} 
+};
+
 void vo_x11_putkey(int key)
 {
     static const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
+    int mpkey = 0;
+    int i;
     if ((key >= 'a' && key <= 'z') ||
         (key >= 'A' && key <= 'Z') ||
         (key >= '0' && key <= '9') ||
         (key >  0   && key <  256 && strchr(passthrough_keys, key)))
-        mplayer_put_key(key);
+        mpkey = key;
 
-    switch (key)
-    {
-        case wsLeft:
-            mplayer_put_key(KEY_LEFT);
-            break;
-        case wsRight:
-            mplayer_put_key(KEY_RIGHT);
-            break;
-        case wsUp:
-            mplayer_put_key(KEY_UP);
-            break;
-        case wsDown:
-            mplayer_put_key(KEY_DOWN);
-            break;
-        case wsEscape:
-            mplayer_put_key(KEY_ESC);
-            break;
-        case wsTab:
-            mplayer_put_key(KEY_TAB);
-            break;
-        case wsEnter:
-            mplayer_put_key(KEY_ENTER);
-            break;
-        case wsBackSpace:
-            mplayer_put_key(KEY_BS);
-            break;
-        case wsDelete:
-            mplayer_put_key(KEY_DELETE);
-            break;
-        case wsInsert:
-            mplayer_put_key(KEY_INSERT);
-            break;
-        case wsHome:
-            mplayer_put_key(KEY_HOME);
-            break;
-        case wsEnd:
-            mplayer_put_key(KEY_END);
-            break;
-        case wsPageUp:
-            mplayer_put_key(KEY_PAGE_UP);
-            break;
-        case wsPageDown:
-            mplayer_put_key(KEY_PAGE_DOWN);
-            break;
-        case wsF1:
-            mplayer_put_key(KEY_F + 1);
-            break;
-        case wsF2:
-            mplayer_put_key(KEY_F + 2);
-            break;
-        case wsF3:
-            mplayer_put_key(KEY_F + 3);
-            break;
-        case wsF4:
-            mplayer_put_key(KEY_F + 4);
-            break;
-        case wsF5:
-            mplayer_put_key(KEY_F + 5);
-            break;
-        case wsF6:
-            mplayer_put_key(KEY_F + 6);
-            break;
-        case wsF7:
-            mplayer_put_key(KEY_F + 7);
-            break;
-        case wsF8:
-            mplayer_put_key(KEY_F + 8);
-            break;
-        case wsF9:
-            mplayer_put_key(KEY_F + 9);
-            break;
-        case wsF10:
-            mplayer_put_key(KEY_F + 10);
-            break;
-        case wsF11:
-            mplayer_put_key(KEY_F + 11);
-            break;
-        case wsF12:
-            mplayer_put_key(KEY_F + 12);
-            break;
-        case wsGrayMinus:
-            mplayer_put_key('-');
-            break;
-        case wsGrayPlus:
-            mplayer_put_key('+');
-            break;
-        case wsGrayMul:
-            mplayer_put_key('*');
-            break;
-        case wsGrayDiv:
-            mplayer_put_key('/');
-            break;
-        case wsGray0:
-            mplayer_put_key(KEY_KP0);
-            break;
-        case wsGrayEnd:
-        case wsGray1:
-            mplayer_put_key(KEY_KP1);
-            break;
-        case wsGrayDown:
-        case wsGray2:
-            mplayer_put_key(KEY_KP2);
-            break;
-        case wsGrayPgDn:
-        case wsGray3:
-            mplayer_put_key(KEY_KP3);
-            break;
-        case wsGrayLeft:
-        case wsGray4:
-            mplayer_put_key(KEY_KP4);
-            break;
-        case wsGray5Dup:
-        case wsGray5:
-            mplayer_put_key(KEY_KP5);
-            break;
-        case wsGrayRight:
-        case wsGray6:
-            mplayer_put_key(KEY_KP6);
-            break;
-        case wsGrayHome:
-        case wsGray7:
-            mplayer_put_key(KEY_KP7);
-            break;
-        case wsGrayUp:
-        case wsGray8:
-            mplayer_put_key(KEY_KP8);
-            break;
-        case wsGrayPgUp:
-        case wsGray9:
-            mplayer_put_key(KEY_KP9);
-            break;
-        case wsGrayDecimal:
-            mplayer_put_key(KEY_KPDEC);
-            break;
-        case wsGrayInsert:
-            mplayer_put_key(KEY_KPINS);
-            break;
-        case wsGrayDelete:
-            mplayer_put_key(KEY_KPDEL);
-            break;
-        case wsGrayEnter:
-            mplayer_put_key(KEY_KPENTER);
-            break;
-    }
+    for (i = 0; !mpkey && keymap[i].x11key; i++)
+        if (keymap[i].x11key == key)
+            mpkey = keymap[i].mpkey;
 
+    if (mpkey)
+        mplayer_put_key(mpkey);
 }
 
 
