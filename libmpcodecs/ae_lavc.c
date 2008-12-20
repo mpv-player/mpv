@@ -16,6 +16,7 @@
 #include "libaf/af_format.h"
 #include "libaf/reorder_ch.h"
 #include "libavcodec/avcodec.h"
+#include "libavutil/intreadwrite.h"
 
 static AVCodec        *lavc_acodec;
 static AVCodecContext *lavc_actx;
@@ -67,8 +68,7 @@ static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 		case 0x11: /* imaadpcm */
 			mux_a->wf->wBitsPerSample = 4;
 			mux_a->wf->cbSize = 2;
-			((uint16_t*)mux_a->wf)[sizeof(WAVEFORMATEX)] = 
-				((lavc_actx->block_align - 4 * lavc_actx->channels) / (4 * lavc_actx->channels)) * 8 + 1;
+			AV_WL16(mux_a->wf+1, lavc_actx->frame_size);
 			break;
 		case 0x55: /* mp3 */
 			mux_a->wf->cbSize = 12;
