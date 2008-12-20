@@ -1,5 +1,5 @@
 
-/* this file contains libvo's common functions, variables used by 
+/* this file contains libvo's common functions, variables used by
    many/all drivers. */
 
 #include <stdio.h>
@@ -61,7 +61,7 @@ char *vo_subdevice = NULL;
 int vo_directrendering=0;
 
 int vo_colorkey = 0x0000ff00; // default colorkey is green
-			      // (0xff000000 means that colorkey has been disabled)
+                              // (0xff000000 means that colorkey has been disabled)
 
 //
 // Externally visible list of all vo drivers
@@ -130,10 +130,10 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_direct3d,
 #endif
 #ifdef CONFIG_COREVIDEO
-	&video_out_macosx,
+        &video_out_macosx,
 #endif
 #ifdef CONFIG_QUARTZ
-	&video_out_quartz,
+        &video_out_quartz,
 #endif
 #ifdef CONFIG_XMGA
         &video_out_xmga,
@@ -161,7 +161,7 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_xover,
 #endif
 #ifdef CONFIG_GL
-	        &video_out_gl,
+        &video_out_gl,
         &video_out_gl2,
 #endif
 #ifdef CONFIG_DGA
@@ -171,26 +171,26 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_sdl,
 #endif
 #ifdef CONFIG_GGI
-	&video_out_ggi,
+        &video_out_ggi,
 #endif
 #ifdef CONFIG_FBDEV
-	&video_out_fbdev,
-	&video_out_fbdev2,
+        &video_out_fbdev,
+        &video_out_fbdev2,
 #endif
 #ifdef CONFIG_SVGALIB
-	&video_out_svga,
+        &video_out_svga,
 #endif
 #ifdef CONFIG_AA
-	&video_out_aa,
+        &video_out_aa,
 #endif
 #ifdef CONFIG_CACA
-	&video_out_caca,
+        &video_out_caca,
 #endif
 #ifdef CONFIG_DXR2
-	&video_out_dxr2,
+        &video_out_dxr2,
 #endif
 #ifdef CONFIG_DXR3
-	&video_out_dxr3,
+        &video_out_dxr3,
 #endif
 #ifdef CONFIG_IVTV
         &video_out_ivtv,
@@ -199,56 +199,56 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_v4l2,
 #endif
 #ifdef CONFIG_ZR
-	&video_out_zr,
-	&video_out_zr2,
+        &video_out_zr,
+        &video_out_zr2,
 #endif
 #ifdef CONFIG_BL
-	&video_out_bl,
+        &video_out_bl,
 #endif
 #ifdef CONFIG_VESA
-	&video_out_vesa,
+        &video_out_vesa,
 #endif
 #ifdef CONFIG_DIRECTFB
-	&video_out_directfb,
+        &video_out_directfb,
 #endif
 #ifdef CONFIG_DFBMGA
         &video_out_dfbmga,
 #endif
 #ifdef CONFIG_VIDIX
 #ifdef CONFIG_X11
-	&video_out_xvidix,
+        &video_out_xvidix,
 #endif
 #if defined(__MINGW32__) || defined(__CYGWIN__)
-    &video_out_winvidix,
+        &video_out_winvidix,
 #endif
-    &video_out_cvidix,
+        &video_out_cvidix,
 #endif
         &video_out_null,
-	// should not be auto-selected
+        // should not be auto-selected
 #ifdef CONFIG_XVMC
         &video_out_xvmc,
 #endif
-	&video_out_mpegpes,
+        &video_out_mpegpes,
 #ifdef CONFIG_YUV4MPEG
-	&video_out_yuv4mpeg,
+        &video_out_yuv4mpeg,
 #endif
 #ifdef CONFIG_PNG
-	&video_out_png,
-#endif	
+        &video_out_png,
+#endif
 #ifdef CONFIG_JPEG
-	&video_out_jpeg,
+        &video_out_jpeg,
 #endif
 #ifdef CONFIG_GIF
-	&video_out_gif89a,
+        &video_out_gif89a,
 #endif
 #ifdef CONFIG_TGA
         &video_out_tga,
 #endif
 #ifdef CONFIG_PNM
-    &video_out_pnm,
+        &video_out_pnm,
 #endif
 #ifdef CONFIG_MD5SUM
-    &video_out_md5sum,
+        &video_out_md5sum,
 #endif
         NULL
 };
@@ -259,7 +259,7 @@ void list_video_out(void){
       mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_OUTPUTS\n");
       while (video_out_drivers[i]) {
         const vo_info_t *info = video_out_drivers[i++]->info;
-      	mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n", info->short_name, info->name);
+        mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n", info->short_name, info->name);
       }
       mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
@@ -329,7 +329,7 @@ int config_video_out(const vo_functions_t *vo, uint32_t width, uint32_t height,
 }
 
 #if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
-/* Borrowed from vo_fbdev.c 
+/* Borrowed from vo_fbdev.c
 Monitor ranges related functions*/
 
 char *monitor_hfreq_str = NULL;
