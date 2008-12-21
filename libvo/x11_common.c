@@ -522,289 +522,74 @@ void vo_uninit(struct vo_x11_state *x11)
 #include "wskeys.h"
 
 #ifdef XF86XK_AudioPause
+static const struct keymap keysym_map[] = {
+    {XF86XK_MenuKB, KEY_MENU},
+    {XF86XK_AudioPlay, KEY_PLAY}, {XF86XK_AudioPause, KEY_PAUSE}, {XF86XK_AudioStop, KEY_STOP},
+    {XF86XK_AudioPrev, KEY_PREV}, {XF86XK_AudioNext, KEY_NEXT},
+    {XF86XK_AudioMute, KEY_MUTE}, {XF86XK_AudioLowerVolume, KEY_VOLUME_DOWN}, {XF86XK_AudioRaiseVolume, KEY_VOLUME_UP},
+    {0, 0}
+};
+
 static void vo_x11_putkey_ext(struct vo *vo, int keysym)
 {
     struct mp_fifo *f = vo->key_fifo;
-    switch (keysym)
-    {
-        case XF86XK_MenuKB:
-            mplayer_put_key(f, KEY_MENU);
-            break;
-        case XF86XK_AudioPlay:
-            mplayer_put_key(f, KEY_PLAY);
-            break;
-        case XF86XK_AudioPause:
-            mplayer_put_key(f, KEY_PAUSE);
-            break;
-        case XF86XK_AudioStop:
-            mplayer_put_key(f, KEY_STOP);
-            break;
-        case XF86XK_AudioPrev:
-            mplayer_put_key(f, KEY_PREV);
-            break;
-        case XF86XK_AudioNext:
-            mplayer_put_key(f, KEY_NEXT);
-            break;
-        case XF86XK_AudioMute:
-            mplayer_put_key(f, KEY_MUTE);
-            break;
-        case XF86XK_AudioLowerVolume:
-            mplayer_put_key(f, KEY_VOLUME_DOWN);
-            break;
-        case XF86XK_AudioRaiseVolume:
-            mplayer_put_key(f, KEY_VOLUME_UP);
-            break;
-        default:
-            break;
-    }
+    int mpkey = lookup_keymap_table(keysym_map, keysym);
+    if (mpkey)
+        mplayer_put_key(f, mpkey);
 }
 #endif
 
+static const struct keymap keymap[] = {
+    // special keys
+    {wsEscape, KEY_ESC}, {wsBackSpace, KEY_BS}, {wsTab, KEY_TAB}, {wsEnter, KEY_ENTER},
+
+    // cursor keys
+    {wsLeft, KEY_LEFT}, {wsRight, KEY_RIGHT}, {wsUp, KEY_UP}, {wsDown, KEY_DOWN},
+
+    // navigation block
+    {wsInsert, KEY_INSERT}, {wsDelete, KEY_DELETE}, {wsHome, KEY_HOME}, {wsEnd, KEY_END},
+    {wsPageUp, KEY_PAGE_UP}, {wsPageDown, KEY_PAGE_DOWN},
+
+    // F-keys
+    {wsF1, KEY_F+1}, {wsF2, KEY_F+2}, {wsF3, KEY_F+3}, {wsF4, KEY_F+4},
+    {wsF5, KEY_F+5}, {wsF6, KEY_F+6}, {wsF7, KEY_F+7}, {wsF8, KEY_F+8},
+    {wsF9, KEY_F+9}, {wsF10, KEY_F+10}, {wsF11, KEY_F+11}, {wsF12, KEY_F+12},
+
+    // numpad independent of numlock
+    {wsGrayMinus, '-'}, {wsGrayPlus, '+'}, {wsGrayMul, '*'}, {wsGrayDiv, '/'},
+    {wsGrayEnter, KEY_KPENTER},
+
+    // numpad with numlock
+    {wsGray0, KEY_KP0}, {wsGray1, KEY_KP1}, {wsGray2, KEY_KP2},
+    {wsGray3, KEY_KP3}, {wsGray4, KEY_KP4}, {wsGray5, KEY_KP5},
+    {wsGray6, KEY_KP6}, {wsGray7, KEY_KP7}, {wsGray8, KEY_KP8},
+    {wsGray9, KEY_KP9}, {wsGrayDecimal, KEY_KPDEC},
+
+    // numpad without numlock
+    {wsGrayInsert, KEY_KPINS}, {wsGrayEnd, KEY_KP1}, {wsGrayDown, KEY_KP2},
+    {wsGrayPgDn, KEY_KP3}, {wsGrayLeft, KEY_KP4}, {wsGray5Dup, KEY_KP5},
+    {wsGrayRight, KEY_KP6}, {wsGrayHome, KEY_KP7}, {wsGrayUp, KEY_KP8},
+    {wsGrayPgUp, KEY_KP9}, {wsGrayDelete, KEY_KPDEL},
+
+    {0, 0} 
+};
+
 void vo_x11_putkey(struct vo *vo, int key)
 {
-    struct mp_fifo *f = vo->key_fifo;
-    switch (key)
-    {
-        case wsLeft:
-            mplayer_put_key(f, KEY_LEFT);
-            break;
-        case wsRight:
-            mplayer_put_key(f, KEY_RIGHT);
-            break;
-        case wsUp:
-            mplayer_put_key(f, KEY_UP);
-            break;
-        case wsDown:
-            mplayer_put_key(f, KEY_DOWN);
-            break;
-        case wsSpace:
-            mplayer_put_key(f, ' ');
-            break;
-        case wsEscape:
-            mplayer_put_key(f, KEY_ESC);
-            break;
-        case wsTab:
-            mplayer_put_key(f, KEY_TAB);
-            break;
-        case wsEnter:
-            mplayer_put_key(f, KEY_ENTER);
-            break;
-        case wsBackSpace:
-            mplayer_put_key(f, KEY_BS);
-            break;
-        case wsDelete:
-            mplayer_put_key(f, KEY_DELETE);
-            break;
-        case wsInsert:
-            mplayer_put_key(f, KEY_INSERT);
-            break;
-        case wsHome:
-            mplayer_put_key(f, KEY_HOME);
-            break;
-        case wsEnd:
-            mplayer_put_key(f, KEY_END);
-            break;
-        case wsPageUp:
-            mplayer_put_key(f, KEY_PAGE_UP);
-            break;
-        case wsPageDown:
-            mplayer_put_key(f, KEY_PAGE_DOWN);
-            break;
-        case wsF1:
-            mplayer_put_key(f, KEY_F + 1);
-            break;
-        case wsF2:
-            mplayer_put_key(f, KEY_F + 2);
-            break;
-        case wsF3:
-            mplayer_put_key(f, KEY_F + 3);
-            break;
-        case wsF4:
-            mplayer_put_key(f, KEY_F + 4);
-            break;
-        case wsF5:
-            mplayer_put_key(f, KEY_F + 5);
-            break;
-        case wsF6:
-            mplayer_put_key(f, KEY_F + 6);
-            break;
-        case wsF7:
-            mplayer_put_key(f, KEY_F + 7);
-            break;
-        case wsF8:
-            mplayer_put_key(f, KEY_F + 8);
-            break;
-        case wsF9:
-            mplayer_put_key(f, KEY_F + 9);
-            break;
-        case wsF10:
-            mplayer_put_key(f, KEY_F + 10);
-            break;
-        case wsF11:
-            mplayer_put_key(f, KEY_F + 11);
-            break;
-        case wsF12:
-            mplayer_put_key(f, KEY_F + 12);
-            break;
-        case wsMinus:
-        case wsGrayMinus:
-            mplayer_put_key(f, '-');
-            break;
-        case wsPlus:
-        case wsGrayPlus:
-            mplayer_put_key(f, '+');
-            break;
-        case wsGrayMul:
-        case wsMul:
-            mplayer_put_key(f, '*');
-            break;
-        case wsGrayDiv:
-        case wsDiv:
-            mplayer_put_key(f, '/');
-            break;
-        case wsLess:
-            mplayer_put_key(f, '<');
-            break;
-        case wsMore:
-            mplayer_put_key(f, '>');
-            break;
-        case wsGray0:
-            mplayer_put_key(f, KEY_KP0);
-            break;
-        case wsGrayEnd:
-        case wsGray1:
-            mplayer_put_key(f, KEY_KP1);
-            break;
-        case wsGrayDown:
-        case wsGray2:
-            mplayer_put_key(f, KEY_KP2);
-            break;
-        case wsGrayPgDn:
-        case wsGray3:
-            mplayer_put_key(f, KEY_KP3);
-            break;
-        case wsGrayLeft:
-        case wsGray4:
-            mplayer_put_key(f, KEY_KP4);
-            break;
-        case wsGray5Dup:
-        case wsGray5:
-            mplayer_put_key(f, KEY_KP5);
-            break;
-        case wsGrayRight:
-        case wsGray6:
-            mplayer_put_key(f, KEY_KP6);
-            break;
-        case wsGrayHome:
-        case wsGray7:
-            mplayer_put_key(f, KEY_KP7);
-            break;
-        case wsGrayUp:
-        case wsGray8:
-            mplayer_put_key(f, KEY_KP8);
-            break;
-        case wsGrayPgUp:
-        case wsGray9:
-            mplayer_put_key(f, KEY_KP9);
-            break;
-        case wsGrayDecimal:
-            mplayer_put_key(f, KEY_KPDEC);
-            break;
-        case wsGrayInsert:
-            mplayer_put_key(f, KEY_KPINS);
-            break;
-        case wsGrayDelete:
-            mplayer_put_key(f, KEY_KPDEL);
-            break;
-        case wsGrayEnter:
-            mplayer_put_key(f, KEY_KPENTER);
-            break;
-        case wsGrave:
-            mplayer_put_key(f, '`');
-            break;
-        case wsTilde:
-            mplayer_put_key(f, '~');
-            break;
-        case wsExclSign:
-            mplayer_put_key(f, '!');
-            break;
-        case wsAt:
-            mplayer_put_key(f, '@');
-            break;
-        case wsHash:
-            mplayer_put_key(f, '#');
-            break;
-        case wsDollar:
-            mplayer_put_key(f, '$');
-            break;
-        case wsPercent:
-            mplayer_put_key(f, '%');
-            break;
-        case wsCircumflex:
-            mplayer_put_key(f, '^');
-            break;
-        case wsAmpersand:
-            mplayer_put_key(f, '&');
-            break;
-        case wsobracket:
-            mplayer_put_key(f, '(');
-            break;
-        case wscbracket:
-            mplayer_put_key(f, ')');
-            break;
-        case wsUnder:
-            mplayer_put_key(f, '_');
-            break;
-        case wsocbracket:
-            mplayer_put_key(f, '{');
-            break;
-        case wsccbracket:
-            mplayer_put_key(f, '}');
-            break;
-        case wsColon:
-            mplayer_put_key(f, ':');
-            break;
-        case wsSemicolon:
-            mplayer_put_key(f, ';');
-            break;
-        case wsDblQuote:
-            mplayer_put_key(f, '\"');
-            break;
-        case wsAcute:
-            mplayer_put_key(f, '\'');
-            break;
-        case wsComma:
-            mplayer_put_key(f, ',');
-            break;
-        case wsPoint:
-            mplayer_put_key(f, '.');
-            break;
-        case wsQuestSign:
-            mplayer_put_key(f, '?');
-            break;
-        case wsBSlash:
-            mplayer_put_key(f, '\\');
-            break;
-        case wsPipe:
-            mplayer_put_key(f, '|');
-            break;
-        case wsEqual:
-            mplayer_put_key(f, '=');
-            break;
-        case wsosbrackets:
-            mplayer_put_key(f, '[');
-            break;
-        case wscsbrackets:
-            mplayer_put_key(f, ']');
-            break;
+    static const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
+    int mpkey = 0;
+    int i;
+    if ((key >= 'a' && key <= 'z') ||
+        (key >= 'A' && key <= 'Z') ||
+        (key >= '0' && key <= '9') ||
+        (key >  0   && key <  256 && strchr(passthrough_keys, key)))
+        mpkey = key;
 
+    if (!mpkey)
+        mpkey = lookup_keymap_table(keymap, key);
 
-        default:
-            if ((key >= 'a' && key <= 'z') || (key >= 'A' && key <= 'Z') ||
-                (key >= '0' && key <= '9'))
-                mplayer_put_key(f, key);
-    }
-
+    if (mpkey)
+        mplayer_put_key(vo->key_fifo, mpkey);
 }
 
 
