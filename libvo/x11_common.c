@@ -606,7 +606,7 @@ void vo_x11_putkey(int key)
         mpkey = key;
 
     if (!mpkey)
-        lookup_keymap_table(keymap, key);
+        mpkey = lookup_keymap_table(keymap, key);
 
     if (mpkey)
         mplayer_put_key(mpkey);
