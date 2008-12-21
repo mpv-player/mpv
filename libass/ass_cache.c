@@ -228,6 +228,13 @@ void ass_font_cache_done(void)
 	hashmap_done(font_cache);
 }
 
+
+// Create hash/compare functions for bitmap and glyph
+#define CREATE_HASH_FUNCTIONS
+#include "ass_cache_template.c"
+#define CREATE_COMPARISON_FUNCTIONS
+#include "ass_cache_template.c"
+
 //---------------------------------
 // bitmap cache
 
@@ -263,7 +270,8 @@ void ass_bitmap_cache_init(void)
 	bitmap_cache = hashmap_init(sizeof(bitmap_hash_key_t),
 				   sizeof(bitmap_hash_val_t),
 				   0xFFFF + 13,
-				   bitmap_hash_dtor, NULL, NULL);
+				   bitmap_hash_dtor, bitmap_compare,
+				   bitmap_hash);
 }
 
 void ass_bitmap_cache_done(void)
@@ -311,7 +319,7 @@ void ass_glyph_cache_init(void)
 	glyph_cache = hashmap_init(sizeof(glyph_hash_key_t),
 				   sizeof(glyph_hash_val_t),
 				   0xFFFF + 13,
-				   glyph_hash_dtor, NULL, NULL);
+				   glyph_hash_dtor, glyph_compare, glyph_hash);
 }
 
 void ass_glyph_cache_done(void)

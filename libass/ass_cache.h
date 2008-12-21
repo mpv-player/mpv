@@ -33,24 +33,9 @@ void* ass_font_cache_add(ass_font_t* font);
 void ass_font_cache_done(void);
 
 
-// describes a bitmap; bitmaps with equivalents structs are considered identical
-typedef struct bitmap_hash_key_s {
-	char bitmap; // bool : true = bitmap, false = outline
-	ass_font_t* font;
-	double size; // font size
-	uint32_t ch; // character code
-	unsigned outline; // border width, 16.16 fixed point value
-	int bold, italic;
-	char be; // blur edges
-
-	unsigned scale_x, scale_y; // 16.16
-	int frx, fry, frz; // signed 16.16
-	int shift_x, shift_y; // shift vector that was added to glyph before applying rotation
-	                      // = 0, if frx = fry = frx = 0
-	                      // = (glyph base point) - (rotation origin), otherwise
-	
-	FT_Vector advance; // subpixel shift vector
-} bitmap_hash_key_t;
+// Create definitions for bitmap_hash_key and glyph_hash_key
+#define CREATE_STRUCT_DEFINITIONS
+#include "ass_cache_template.c"
 
 typedef struct bitmap_hash_val_s {
 	bitmap_t* bm; // the actual bitmaps
@@ -63,17 +48,6 @@ void* cache_add_bitmap(bitmap_hash_key_t* key, bitmap_hash_val_t* val);
 bitmap_hash_val_t* cache_find_bitmap(bitmap_hash_key_t* key);
 void ass_bitmap_cache_reset(void);
 void ass_bitmap_cache_done(void);
-
-// describes an outline glyph
-typedef struct glyph_hash_key_s {
-	ass_font_t* font;
-	double size; // font size
-	uint32_t ch; // character code
-	int bold, italic;
-	unsigned scale_x, scale_y; // 16.16
-	FT_Vector advance; // subpixel shift vector
-	unsigned outline; // border width, 16.16
-} glyph_hash_key_t;
 
 typedef struct glyph_hash_val_s {
 	FT_Glyph glyph;
