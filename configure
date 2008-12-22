@@ -1339,8 +1339,8 @@ if test -z "$_target" ; then
       i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686|BePC) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
       x86_64|amd64)
-        if [ -n "`$_cc -dumpmachine | sed -n '/^x86_64-/p;/^amd64-/p'`" -a \
-             -z "`echo $CFLAGS | grep -- -m32`"  ]; then
+        if [ -n "$($_cc -dumpmachine | sed -n '/^x86_64-/p;/^amd64-/p')" -a \
+             -z "$(echo $CFLAGS $_cc | grep -- -m32)" ]; then
           host_arch=x86_64
         else
           host_arch=i386
