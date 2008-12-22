@@ -725,11 +725,11 @@ DIRS =  . \
         libavcodec/alpha \
         libavcodec/arm \
         libavcodec/bfin \
-        libavcodec/i386 \
         libavcodec/mlib \
         libavcodec/ppc \
         libavcodec/sh4 \
         libavcodec/sparc \
+        libavcodec/x86 \
         libavformat \
         libavutil \
         libdvdcss \
