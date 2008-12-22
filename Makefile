@@ -780,7 +780,7 @@ all: $(ALL_PRG-yes)
 	$(CC) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
 
 %.o: %.cpp
-	$(CXX) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
+	$(CXX) $(CXXFLAGS) -c -o $@ -MD -MP -MF $*.d $<
 
 %.o: %.m
 	$(CC) $(CFLAGS) -c -o $@ -MD -MP -MF $*.d $<
