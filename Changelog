@@ -13,6 +13,32 @@ MPlayer (1.0)
     * image decoders: Sun rasterfile, PCX image
     * MLP decoder via lavc
     * use lavc ADPCM codecs by default
+    * support for progressive jpeg in ffmjpeg
+    * ACDSystems mjpeg (ACDV) via binary DLL and lavc
+    * SIF1 via binary DLL
+    * wincam screen capture (WCMV) via binary DLL
+    * Creative Labs Video Blaster Webcam mjpeg (CJPG) via binary DLL and ijpg library
+    * kensington webcam (AJPG,ABYR) via binary DLL
+    * centre for wavelets (wavc) via binary DLL
+    * GeoVision Advanced MPEG-4 (GMP4,GM40) via binary DLL
+    * Xiricam jpg from Veo PC Camera (XJPG) via binary DLL
+    * WorldConnect Wavelet Video (SMSV) via binary DLL
+    * VDOWave 3 advanced (VDO3,VDOM,VDOW) via binary DLL
+    * VoxWare MetaVoice (format 0x0074) via binary DLL
+    * Ulead DV Audio (0x215,0x216) via binary DLL
+    * GoToMeeting codec (G2M2,G2M3) via binary DLL
+    * SP4x codec - used by Aiptek MegaCam (SP4x) via binary DLL
+    * Broadway MPEG Capture Codec (BW10) via binary DLL
+    * ZDSoft screen recorder (ZDSV) via binary DLL
+    * WebTrain Communication lossless screen recorder (WTVC) via binary DLL
+    * xfire video (XFR1) via binary DLL
+    * VFAPI rgb transcode (vifp) via binary DLL
+    * ETI CamCorder EYECON (NUB0,NUB1,NUB2) via binary DLL
+    * fox motion (FMVC) via binary DLL
+    * Trident video (TY2C,TY2N,TY0N) via binary DLL
+    * 10-bit video (v210) via Cinewave binary DLL
+    * Brooktree YUV 4:1:1 Raw (Y41P) via binary DLL
+    * many rare/obscure fourccs for known formats added
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
@@ -53,6 +79,9 @@ MPlayer (1.0)
     * VP3 decoder speedup
     * Split-Radix FFT (speedup multiple audio codecs)
     * MMX/SSE/ARM and other misc speedups
+    * QCELP decoder
+    * RV30 decoder
+    * RV40 decoder
 
     libmpeg2:
     * enable Alpha/ARM optimizations in libmpeg2
@@ -67,7 +96,7 @@ MPlayer (1.0)
     * support -border on vo_gl/gl2 in x11
     * Direct3D Windows video output driver added.
     * factorize code in vo_wii
-    * removed unnecessary code from vo x11,xv,xvmc
+    * removed unnecessary code from vo x11, xv, xvmc
 
     MEncoder:
     * check for system-wide configuration file in MEncoder
