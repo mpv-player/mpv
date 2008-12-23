@@ -407,7 +407,7 @@ static void autodetectGlExtensions(void) {
   int is_ati = strstr(vendor, "ATI") != NULL;
   if (ati_hack      == -1) ati_hack      = is_ati;
   if (force_pbo     == -1) force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
-  if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      2 : 0;
+  if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
 }
 
 /**
