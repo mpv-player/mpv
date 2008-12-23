@@ -1919,6 +1919,7 @@ EOF
   ia64)
     _arch='IA64'
     _target_arch='ARCH_IA64 = yes'
+    def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='ia64'
     ;;
 
@@ -1927,6 +1928,7 @@ EOF
     _target_arch='ARCH_X86_64 = yes'
     _target_arch_x86="ARCH_X86 = yes"
     _def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
+    def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='x86_64'
 
     # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
@@ -2011,6 +2013,7 @@ EOF
     if test "$host_arch" = "sparc64" ; then
       _vis='yes'
       proc='ultrasparc'
+      def_fast_64bit='#define HAVE_FAST_64BIT 1'
     elif sunos ; then
 	echocheck "CPU type"
 	karch=`uname -m`
@@ -2050,6 +2053,9 @@ EOF
     _def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
 
+    if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
+      def_fast_64bit='#define HAVE_FAST_64BIT 1'
+    fi
     echocheck "CPU type"
     case $system_name in
       Linux)
@@ -8532,6 +8538,7 @@ $_def_libswscale_so
 
 $_def_dcbzl
 $_def_extern_prefix
+$def_fast_64bit
 $_def_fast_unaligned
 $_def_mkstemp
 $_def_pthreads
