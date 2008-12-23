@@ -66,8 +66,8 @@ MPlayer (1.0)
     * VIDIX driver for SuperH Mobile VEU hardware block.
     * support -border on vo_gl/gl2 in x11
     * Direct3D Windows video output driver added.
-    * initial code duplication cleanup between vo_wii and vo_fbdev2
-    * initial code duplication cleanup between vo_x11,vo_xv,vo_xvmc
+    * factorize code in vo_wii
+    * removed unnecessary code from vo x11,xv,xvmc
 
     MEncoder:
     * check for system-wide configuration file in MEncoder
