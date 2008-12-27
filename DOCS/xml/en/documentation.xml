@@ -166,17 +166,17 @@ can be distributed under the terms of the GNU General Public License Version 2.
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
+&tvinput.xml;
+&radio.xml;
 
 &codecs.xml;
 &video.xml;
 &audio.xml;
-&tvinput.xml;
-&radio.xml;
 
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
