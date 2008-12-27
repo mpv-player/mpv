@@ -570,7 +570,7 @@ void GetCpuCaps( CpuCaps *caps)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: ARM\n");
 #endif
 
-#ifdef ARCH_POWERPC
+#ifdef ARCH_PPC
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: PowerPC\n");
 #endif
 
