@@ -235,7 +235,6 @@ I have problems playing files with the ... codec. Can I use them?
 <answer><para>
 Check the <ulink url="../../codecs-status.html">codec status</ulink>,
 if it doesn't contain your codec, read the
-<link linkend="codecs">codec documentation</link>, especially the
 <ulink url="../../tech/win32-codec-howto">Win32 codec HOWTO</ulink>
 and contact us.
 </para></answer>
