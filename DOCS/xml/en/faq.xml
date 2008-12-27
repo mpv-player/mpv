@@ -242,6 +242,18 @@ if it doesn't contain your codec, read the
 
 <qandaentry>
 <question><para>
+I get a core dump when trying to dump streams, what's wrong?
+</para></question>
+<answer><para>
+Don't panic. Make sure you know where your towel is.</para>
+<para>
+Seriously, notice the smiley and start looking for files that end in
+<filename>.dump</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 When I start playing, I get this message but everything seems fine:
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
