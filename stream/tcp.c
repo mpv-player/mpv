@@ -76,7 +76,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	char buf[255];
 	
 #ifdef HAVE_WINSOCK2_H
-	u_long val;
+	unsigned long val;
 	int to;
 #else
 	struct timeval to;

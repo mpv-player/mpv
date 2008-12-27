@@ -80,7 +80,7 @@ $(SUBDIR)%-test.o: $(SUBDIR)%.c
 $(SUBDIR)%-test.o: $(SUBDIR)%-test.c
 	$(CC) $(CFLAGS) -DTEST -c -o $$@ $$^
 
-$(SUBDIR)i386/%.o: $(SUBDIR)i386/%.asm
+$(SUBDIR)x86/%.o: $(SUBDIR)x86/%.asm
 	$(YASM) $(YASMFLAGS) -I $$(<D)/ -o $$@ $$<
 	$(YASM) $(YASMFLAGS) -I $$(<D)/ -M -o $$@ $$< > $$(@:%.o=%.d)
 

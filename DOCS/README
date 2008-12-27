@@ -6,7 +6,7 @@
 Thanks for reading MPlayer documentation !!!
 
 
-1. For "release" version users (i.e. non-CVS):
+1. For "release" version users (i.e. non-Subversion):
 
    a, Enter the HTML/ directory, and there you'll find the documentation,
       each language in its own subdirectory.
@@ -19,7 +19,7 @@ Thanks for reading MPlayer documentation !!!
       try the subdirectories in this very same folder.
 
 
-2. For "development" version users (i.e. CVS or CVS snapshots):
+2. For "development" version users (i.e. Subversion or Subversion snapshots):
 
    a, Enter the xml/ directory, and read the README file there to find
       out how to build a HTML version of the XML documentation. It will

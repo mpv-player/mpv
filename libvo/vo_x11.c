@@ -53,7 +53,6 @@ static const vo_info_t info = {
 
 const LIBVO_EXTERN(x11)
 /* private prototypes */
-static void Display_Image(XImage * myximage, unsigned char *ImageData);
 static void (*draw_alpha_fnc) (int x0, int y0, int w, int h,
                                unsigned char *src, unsigned char *srca,
                                int stride);

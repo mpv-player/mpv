@@ -1339,8 +1339,8 @@ if test -z "$_target" ; then
       i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686|BePC) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
       x86_64|amd64)
-        if [ -n "`$_cc -dumpmachine | sed -n '/^x86_64-/p;/^amd64-/p'`" -a \
-             -z "`echo $CFLAGS | grep -- -m32`"  ]; then
+        if [ -n "$($_cc -dumpmachine | sed -n '/^x86_64-/p;/^amd64-/p')" -a \
+             -z "$(echo $CFLAGS $_cc | grep -- -m32)" ]; then
           host_arch=x86_64
         else
           host_arch=i386
@@ -1681,7 +1681,7 @@ EOF
 fi
 
 
-_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM SH POWERPC PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
+_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM SH PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _arch='X86 X86_32'
@@ -1907,6 +1907,12 @@ EOF
       esac
     fi
 
+    if test $_cmov = "yes" && test $_fast_cmov = "auto" ; then
+        _fast_cmov="yes"
+    else
+        _fast_cmov="no"
+    fi
+
     echores "$proc"
     ;;
 
@@ -1931,6 +1937,7 @@ EOF
     else
 	cpuopt=-mcpu
     fi
+    test $_fast_cmov = "auto" && _fast_cmov=yes
     if test "$_runtime_cpudetection" = no ; then
       case "$pvendor" in
       AuthenticAMD)
@@ -1942,7 +1949,6 @@ EOF
           # 64-bit prescotts exist, but as far as GCC is concerned they
           # have the same capabilities as a nocona.
           proc=nocona
-          test $_fast_cmov = "auto" && _fast_cmov=no
           ;;
         esac
         ;;
@@ -2007,6 +2013,7 @@ EOF
     if test "$host_arch" = "sparc64" ; then
       _vis='yes'
       proc='ultrasparc'
+      def_fast_64bit='#define HAVE_FAST_64BIT 1'
     elif sunos ; then
 	echocheck "CPU type"
 	karch=`uname -m`
@@ -2040,12 +2047,15 @@ EOF
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
-    _arch='POWERPC PPC'
+    _arch='PPC'
     _def_dcbzl='#undef HAVE_DCBZL'
-    _target_arch='ARCH_POWERPC = yes'
+    _target_arch='ARCH_PPC = yes'
     _def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
 
+    if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
+      def_fast_64bit='#define HAVE_FAST_64BIT 1'
+    fi
     echocheck "CPU type"
     case $system_name in
       Linux)
@@ -2256,12 +2266,6 @@ EOF
     die "unsupported architecture $host_arch"
     ;;
 esac # case "$host_arch" in
-
-if test $_cmov = "yes" && test $_fast_cmov = "auto" ; then
-    _fast_cmov="yes"
-else
-    _fast_cmov="no"
-fi
 
 if test "$_runtime_cpudetection" = yes ; then
   if x86 ; then
@@ -8541,8 +8545,8 @@ $_def_libswscale_so
 
 $_def_dcbzl
 $_def_extern_prefix
-$_def_fast_unaligned
 $def_fast_64bit
+$_def_fast_unaligned
 $_def_mkstemp
 $_def_pthreads
 $_def_threads

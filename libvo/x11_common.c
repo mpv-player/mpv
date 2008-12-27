@@ -578,7 +578,6 @@ void vo_x11_putkey(struct vo *vo, int key)
 {
     static const char *passthrough_keys = " -+*/<>`~!@#$%^&()_{}:;\"\',.?\\|=[]";
     int mpkey = 0;
-    int i;
     if ((key >= 'a' && key <= 'z') ||
         (key >= 'A' && key <= 'Z') ||
         (key >= '0' && key <= '9') ||
