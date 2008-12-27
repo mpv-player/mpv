@@ -154,8 +154,7 @@ so please use <emphasis role="bold">only Subversion</emphasis> to report bugs.
 This includes binary packages of <application>MPlayer</application>.
 Subversion instructions can be found at the bottom of
 <ulink url="http://www.mplayerhq.hu/dload.html">this page</ulink> or in
-the README. If this did not help please refer to the list of
-<link linkend="bugs">known bugs</link> and the rest of the documentation.
+the README. If this did not help please refer to the rest of the documentation.
 If your problem is not known or not solvable by our instructions,
 then please report the bug.
 </para>
