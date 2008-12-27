@@ -785,6 +785,18 @@ static uint32_t get_image(mp_image_t *mpi) {
   return VO_TRUE;
 }
 
+static void clear_border(uint8_t *dst, int start, int stride, int height, int full_height, int value) {
+  int right_border = stride - start;
+  int bottom_border = full_height - height;
+  while (height > 0) {
+    memset(dst + start, value, right_border);
+    dst += stride;
+    height--;
+  }
+  if (bottom_border > 0)
+    memset(dst, value, stride * bottom_border);
+}
+
 static uint32_t draw_image(mp_image_t *mpi) {
   int slice = slice_height;
   int stride[3];
@@ -801,6 +813,13 @@ static uint32_t draw_image(mp_image_t *mpi) {
     if (mpi->imgfmt == IMGFMT_YV12) {
       memcpy_pic(mpi2.planes[1], mpi->planes[1], mpi->w >> 1, mpi->h >> 1, mpi2.stride[1], mpi->stride[1]);
       memcpy_pic(mpi2.planes[2], mpi->planes[2], mpi->w >> 1, mpi->h >> 1, mpi2.stride[2], mpi->stride[2]);
+    }
+    if (ati_hack) { // since we have to do a full upload we need to clear the borders
+      clear_border(mpi2.planes[0], mpi->w * bpp / 8, mpi2.stride[0], mpi->h, mpi2.height, 0);
+      if (mpi->imgfmt == IMGFMT_YV12) {
+        clear_border(mpi2.planes[1], mpi->w >> 1, mpi2.stride[1], mpi->h >> 1, mpi2.height >> 1, 128);
+        clear_border(mpi2.planes[2], mpi->w >> 1, mpi2.stride[2], mpi->h >> 1, mpi2.height >> 1, 128);
+      }
     }
     mpi = &mpi2;
   }
