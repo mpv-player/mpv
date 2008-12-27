@@ -108,11 +108,19 @@ static size_t rep_strnlen(const char *s, size_t max)
 #if (__GNUC__ >= 3)
 /* the strange !! is to ensure that __builtin_expect() takes either 0 or 1
    as its first argument */
+#ifndef likely
 #define likely(x)   __builtin_expect(!!(x), 1)
+#endif
+#ifndef unlikely
 #define unlikely(x) __builtin_expect(!!(x), 0)
+#endif
 #else
-#define likely(x) x
-#define unlikely(x) x
+#ifndef likely
+#define likely(x) (x)
+#endif
+#ifndef unlikely
+#define unlikely(x) (x)
+#endif
 #endif
 
 /* this null_context is only used if talloc_enable_leak_report() or
