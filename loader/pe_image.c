@@ -72,9 +72,9 @@ static void dump_exports( HMODULE hModule )
 { 
   char		*Module;
   unsigned int i, j;
-  u_short	*ordinal;
-  u_long	*function,*functions;
-  u_char	**name;
+  unsigned short	*ordinal;
+  unsigned long	*function,*functions;
+  unsigned char	**name;
   unsigned int load_addr = hModule;
 
   DWORD rva_start = PE_HEADER(hModule)->OptionalHeader
@@ -88,9 +88,9 @@ static void dump_exports( HMODULE hModule )
   TRACE("Module name is %s, %ld functions, %ld names\n", 
         Module, pe_exports->NumberOfFunctions, pe_exports->NumberOfNames);
 
-  ordinal=(u_short*) RVA(pe_exports->AddressOfNameOrdinals);
-  functions=function=(u_long*) RVA(pe_exports->AddressOfFunctions);
-  name=(u_char**) RVA(pe_exports->AddressOfNames);
+  ordinal=(unsigned short*) RVA(pe_exports->AddressOfNameOrdinals);
+  functions=function=(unsigned long*) RVA(pe_exports->AddressOfFunctions);
+  name=(unsigned char**) RVA(pe_exports->AddressOfNames);
 
   TRACE(" Ord    RVA     Addr   Name\n" );
   for (i=0;i<pe_exports->NumberOfFunctions;i++, function++)
@@ -126,15 +126,15 @@ FARPROC PE_FindExportedFunction(
 	LPCSTR funcName,	
         WIN_BOOL snoop )
 {
-	u_short				* ordinals;
-	u_long				* function;
-	u_char				** name;
+	unsigned short			* ordinals;
+	unsigned long			* function;
+	unsigned char			** name;
 	const char *ename = NULL;
 	int				i, ordinal;
 	PE_MODREF			*pem = &(wm->binfmt.pe);
 	IMAGE_EXPORT_DIRECTORY 		*exports = pem->pe_export;
 	unsigned int			load_addr = wm->module;
-	u_long				rva_start, rva_end, addr;
+	unsigned long			rva_start, rva_end, addr;
 	char				* forward;
 
 	if (HIWORD(funcName))
@@ -149,9 +149,9 @@ FARPROC PE_FindExportedFunction(
 		WARN("Module %08x(%s)/MODREF %p doesn't have a exports table.\n",wm->module,wm->modname,pem);
 		return NULL;
 	}
-	ordinals= (u_short*)  RVA(exports->AddressOfNameOrdinals);
-	function= (u_long*)   RVA(exports->AddressOfFunctions);
-	name	= (u_char **) RVA(exports->AddressOfNames);
+	ordinals= (unsigned short*)  RVA(exports->AddressOfNameOrdinals);
+	function= (unsigned long*)   RVA(exports->AddressOfFunctions);
+	name	= (unsigned char **) RVA(exports->AddressOfNames);
 	forward = NULL;
 	rva_start = PE_HEADER(wm->module)->OptionalHeader
 		.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
