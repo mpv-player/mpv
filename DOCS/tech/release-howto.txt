@@ -7,22 +7,18 @@ preparations:
   all docs are up to date, etc.
 - Verify man page, remove obsolete options, mention new ones.
 - Ask translation maintainers to update their help_mp*.h file.
-- Update the ChangeLog file (according to CVS log), ask other developers
+- Update the ChangeLog file (according to Subversion log), ask other developers
   to verify their parts, etc. Ask Diego to spellcheck it.
 - Consult at -dev-eng about unstable parts of the code which should be
   disabled for the release.
 - Find a codename for the release
 
 create the release tree:
-- tag cvs with release name
+- tag Subversion with release name
 - update release.sh script with version number
 ***the following steps are done automatically by release.sh script***
-- cvs checkout the mplayer src tree
-- check out libavcodec and libavformat from FFmpeg CVS
-- remove the CVS subdirs:
-    find main -name CVS -exec rm -rf {} \;
-- remove the .cvsignore files:
-    find main -name .cvsignore -exec rm {} \;
+- checkout the mplayer src tree
+- check out FFmpeg subdirs
 - remove obsolete DOCS translations, help files
 - replace version.sh with this (change version number too...):
 

@@ -49,8 +49,8 @@ data, search for sample media of both types. If a video codec is known to
 work at 7 different bit depths, then, as painful as it may be, do what you
 can to obtain sample media encoded for each of the 7 bit depths.
 
-- Latest CVS snapshot: It's always useful to develop code for the very
-latest development version of MPlayer. Be sure to update your local CVS
+- Latest Subversion snapshot: It's always useful to develop code for the very
+latest development version of MPlayer. Be sure to update your local Subversion
 copy often.
 
 - General programming knowledge, working Linux development environment: I
@@ -190,7 +190,8 @@ files:
 - ad.c or vd.c
 Of course, you will need to include your newly-created file(s): 
 vd_<name>.c -OR- ad_<name>.c. If you contribute enough decoders, the
-development team may even grant you write privileges to the CVS repository.
+development team may even grant you write privileges to the Subversion
+repository.
 
 5) Wait for bug reports to start rolling in
 You may think you're finished when you release the codec and if you're
