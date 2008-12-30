@@ -1,4 +1,4 @@
-.\" Synced with r28126
+.\" Synced with r28208
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 12. 17." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2008. 12. 30." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -592,6 +592,7 @@ alang=en
 profile-desc="profil dvdnav:// folyamokhoz"
 profile=protocol.dvd
 mouse-movements=yes
+nocache=yes
 
 [extension.flv]
 profile-desc="profil .flv fájlokhoz"
@@ -3560,6 +3561,9 @@ Mac OS X CoreVideo kimeneti videó vezérlõ
 .RSs
 .IPs device_id=<szám>
 Teljes képernyõs lejátszásnál a használni kívánt képernyõ eszköz.
+.IPs shared_buffer
+A kimenetet egy osztott memória bufferbe írja a megjelenítése helyett és
+megpróbál megnyitni egy létezõ NSConnection-t a GUI-val történõ kommunikációhoz.
 .RE
 .PD 1
 .

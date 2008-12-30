@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27843 -->
+<!-- synced with r28201 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -171,18 +171,13 @@ a GNU General Public License v2 értelmében terjeszthető.
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
-
-&codecs.xml;
-&video.xml;
-&audio.xml;
 &tvinput.xml;
 &radio.xml;
-
+&video.xml;
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
-&bugs.xml;
 &skin.xml;
 &history.xml;
