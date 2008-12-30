@@ -578,6 +578,12 @@ int vf_output_queued_frame(vf_instance_t *vf)
 	tmp = last->continue_buffered_image;
 	last->continue_buffered_image = NULL;
 	ret = tmp(last);
+	if (ret > 0) {
+	    vf->control(vf, VFCTRL_DRAW_OSD, NULL);
+#ifdef CONFIG_ASS
+	    vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
+#endif
+	}
 	if (ret)
 	    return ret;
     }
