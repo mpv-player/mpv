@@ -3550,6 +3550,10 @@ Choose the display device to use in fullscreen.
 .IPs shared_buffer
 Write output to a shared memory buffer instead of displaying it and 
 try to open an existing NSConnection for communication with a GUI.
+.IPs buffer_name=<name>
+Name of the shared buffer created with shm_open as well as the name of 
+the NSConnection MPlayer will try to open (default: "mplayerosx").
+Setting buffer_name implicitly enables shared_buffer.
 .RE
 .PD 1
 .
