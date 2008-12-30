@@ -365,7 +365,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 			if (correct_pts)
 				break;
 			else
-				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
+				if (!i) vf_extra_flip(vf);
 		}
 		break;
 	case 1:
@@ -395,7 +395,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 			if (correct_pts)
 				break;
 			else
-				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
+				if (!i) vf_extra_flip(vf);
 		}
 		break;
 	case 2:
@@ -421,7 +421,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 			if (correct_pts)
 				break;
 			else
-				if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
+				if (!i) vf_extra_flip(vf);
 		}
 		break;
 	}
