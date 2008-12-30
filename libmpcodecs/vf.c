@@ -655,6 +655,14 @@ int vf_next_control(struct vf_instance_s* vf, int request, void* data){
     return vf->next->control(vf->next,request,data);
 }
 
+void vf_extra_flip(struct vf_instance_s* vf) {
+    vf_next_control(vf, VFCTRL_DRAW_OSD, NULL);
+#ifdef CONFIG_ASS
+    vf_next_control(vf, VFCTRL_DRAW_EOSD, NULL);
+#endif
+    vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
+}
+
 int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt){
     int flags=vf->next->query_format(vf->next,fmt);
     if(flags) flags|=vf->default_caps;

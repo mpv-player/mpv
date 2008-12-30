@@ -440,7 +440,7 @@ static int continue_buffered_image(struct vf_instance_s *vf)
         if (correct_pts)
             break;
         if(i<(vf->priv->mode&1))
-            vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
+            vf_extra_flip(vf);
     }
     vf->priv->buffered_i = 1;
     return ret;

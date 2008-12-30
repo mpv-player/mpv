@@ -112,6 +112,7 @@ int vf_next_config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt);
 int vf_next_control(struct vf_instance_s* vf, int request, void* data);
+void vf_extra_flip(struct vf_instance_s* vf);
 int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt);
 int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi, double pts);
 void vf_next_draw_slice (struct vf_instance_s* vf, unsigned char** src, int* stride, int w,int h, int x, int y);
