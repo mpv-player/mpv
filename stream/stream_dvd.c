@@ -364,7 +364,8 @@ read_next:
   }
 
   len = DVDReadBlocks(d->title, d->cur_pack, 1, data);
-  if(!len) return -1; //error
+  // only == 0 should indicate an error, but some dvdread version are buggy when used with dvdcss
+  if(len <= 0) return -1; //error
 
   if(data[38]==0 && data[39]==0 && data[40]==1 && data[41]==0xBF &&
     data[1024]==0 && data[1025]==0 && data[1026]==1 && data[1027]==0xBF) {
