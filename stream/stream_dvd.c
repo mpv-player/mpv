@@ -570,6 +570,15 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
     if(!vts_file || !tt_srpt)
        return 0;
 
+    if(title_no < 0 || title_no >= tt_srpt->nr_of_srpts)
+       return 0;
+
+    // map global title to vts title
+    title_no = tt_srpt->title[title_no].vts_ttn - 1;
+
+    if(title_no < 0 || title_no >= vts_file->vts_ptt_srpt->nr_of_srpts)
+       return 0;
+
     if(chapter < 0 || chapter > vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts-1) //no such chapter
        return 0;
 
