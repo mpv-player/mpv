@@ -44,7 +44,7 @@
 /* NAS_FRAG_SIZE must be a power-of-two value */
 #define NAS_FRAG_SIZE 4096
 
-static char *nas_event_types[] = {
+static const char * const nas_event_types[] = {
 	"Undefined",
 	"Undefined",
 	"ElementNotify",
@@ -54,21 +54,21 @@ static char *nas_event_types[] = {
 	"DeviceNotify"
 };
 
-static char *nas_elementnotify_kinds[] = {
+static const char * const nas_elementnotify_kinds[] = {
 	"LowWater",
 	"HighWater",
 	"State",
 	"Unknown"
 };
 
-static char *nas_states[] = {
+static const char * const nas_states[] = {
 	"Stop",
 	"Start",
 	"Pause",
 	"Any"
 };
 
-static char *nas_reasons[] = {
+static const char * const nas_reasons[] = {
 	"User",
 	"Underrun",
 	"Overrun",
@@ -78,24 +78,24 @@ static char *nas_reasons[] = {
 	"Any"
 };
 
-static char* nas_reason(unsigned int reason)
+static const char* nas_reason(unsigned int reason)
 {
 	if (reason > 6) reason = 6;
 	return nas_reasons[reason];
 }
 
-static char* nas_elementnotify_kind(unsigned int kind)
+static const char* nas_elementnotify_kind(unsigned int kind)
 {
 	if (kind > 2) kind = 3;
 	return nas_elementnotify_kinds[kind];
 }
 
-static char* nas_event_type(unsigned int type) {
+static const char* nas_event_type(unsigned int type) {
 	if (type > 6) type = 0;
 	return nas_event_types[type];
 }
 
-static char* nas_state(unsigned int state) {
+static const char* nas_state(unsigned int state) {
 	if (state>3) state = 3;
 	return nas_states[state];
 }
