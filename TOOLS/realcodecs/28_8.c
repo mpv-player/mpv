@@ -1,7 +1,7 @@
 /*
    GPL v2 blah blah
    
-   This is a small dll that works as a wrapper for the actual 14_4.so.6.0
+   This is a small dll that works as a wrapper for the actual real28_8.so.6.0
    dll from real player 8.0. 
 */
 
