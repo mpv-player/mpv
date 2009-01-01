@@ -133,6 +133,7 @@ play_tree_parser_stop_keeping(play_tree_parser_t* p) {
     p->buffer_end -= p->iter -p->buffer;
     if(p->buffer_end)
       memmove(p->buffer,p->iter,p->buffer_end);
+    p->buffer[p->buffer_end] = 0;
     p->iter = p->buffer;
   }
 }
