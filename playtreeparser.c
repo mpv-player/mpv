@@ -6,9 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef MP_DEBUG
 #include <assert.h>
-#endif
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -61,6 +59,8 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
   if(p->stream->eof && (p->buffer_end == 0 || p->iter[0] == '\0'))
     return NULL;
     
+  assert(p->buffer_end < p->buffer_size);
+  assert(!p->buffer[p->buffer_end]);
   while(1) {
 
     if(resize) {
@@ -75,10 +75,12 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
       r = stream_read(p->stream,p->buffer + p->buffer_end,p->buffer_size - p->buffer_end - 1);
       if(r > 0) {
 	p->buffer_end += r;
+	assert(p->buffer_end < p->buffer_size);
 	p->buffer[p->buffer_end] = '\0';
 	while(strlen(p->buffer + p->buffer_end - r) != r)
 	  p->buffer[p->buffer_end - r + strlen(p->buffer + p->buffer_end - r)] = '\n';
       }
+      assert(!p->buffer[p->buffer_end]);
     }
     
     end = strchr(p->iter,'\n');
