@@ -2015,6 +2015,7 @@ static int fill_audio_out_buffers(void)
     current_module="play_audio";
 
     while (1) {
+	int sleep_time;
 	// all the current uses of ao_data.pts seem to be in aos that handle
 	// sync completely wrong; there should be no need to use ao_data.pts
 	// in get_space()
@@ -2026,7 +2027,9 @@ static int fill_audio_out_buffers(void)
 	// handle audio-only case:
 	// this is where mplayer sleeps during audio-only playback
 	// to avoid 100% CPU use
-	usec_sleep(10000); // Wait a tick before retry
+	sleep_time = (ao_data.outburst - bytes_to_write) * 1000 / ao_data.samplerate;
+	if (sleep_time < 10) sleep_time = 10; // limit to 100 wakeups per second
+	usec_sleep(sleep_time * 1000);
     }
 
     while (bytes_to_write) {
