@@ -78,7 +78,7 @@
 
 typedef const struct
 {
-	char *name;                  ///< profile name
+	const char *name;            ///< profile name
 	int id;                      ///< mpeg-4 profile id; iso/iec 14496-2:2001 table G-1
 	int width;                   ///< profile width restriction
 	int height;                  ///< profile height restriction
@@ -100,7 +100,7 @@ typedef const struct
 
 /* default vbv_occupancy is (64/170)*vbv_buffer_size */
 
-static profile_t profiles[] =
+static const profile_t profiles[] =
 {
 	/*   name               p@l    w    h    fps  obj Tvmv  vmv     vcv  ac%   vbv        pkt     bps    vbv_peak dbf  flags */
 	/* unrestricted profile (default) */
@@ -139,7 +139,7 @@ static profile_t profiles[] =
  * \param str the profile name
  * \return pointer of the appropriate profiles array entry or NULL for a mistyped profile name
  */
-static profile_t *profileFromName(char *str)
+static const profile_t *profileFromName(const char *str)
 {
 	profile_t *cur = profiles;
 	while (cur->name && strcasecmp(cur->name, str)) cur++;
@@ -672,7 +672,7 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 		};
 
 	//profile is unrestricted as default
-	profile_t *selected_profile =  profileFromName("unrestricted");
+	const profile_t *selected_profile =  profileFromName("unrestricted");
 	if(xvidenc_profile)
 		selected_profile = profileFromName(xvidenc_profile);
 	if(!selected_profile)
