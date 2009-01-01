@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <alloca.h>
 #include "ogg.h"
 #include "ivorbiscodec.h"
 #include "mdct.h"
