@@ -158,11 +158,26 @@ static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned in
     ds_read_packet(ds,demux->stream,len,pts,idxpos,flags);
     skip-=len;
   }
+  skip = FFMAX(skip, 0);
+  if (avi_stream_id(id) > 99 && id != mmioFOURCC('J','U','N','K'))
+    skip = FFMIN(skip, 65536);
   if(skip){
     mp_dbg(MSGT_DEMUX,MSGL_DBG2,"DEMUX_AVI: Skipping %d bytes from packet %04X\n",skip,id);
     stream_skip(demux->stream,skip);
   }
   return ds?1:0;
+}
+
+static uint32_t avi_find_id(stream_t *stream) {
+  uint32_t id = stream_read_dword_le(stream);
+  if (!id) {
+    mp_msg(MSGT_DEMUX, MSGL_WARN, "Incomplete stream? Trying resync.\n");
+    do {
+      id = stream_read_dword_le(stream);
+      if (stream_eof(stream)) return 0;
+    } while (avi_stream_id(id) > 99);
+  }
+  return id;
 }
 
 // return value:
@@ -222,7 +237,7 @@ do{
           demux->stream->eof=1;
           return 0;
     }
-    id=stream_read_dword_le(demux->stream);
+    id=avi_find_id(demux->stream);
     len=stream_read_dword_le(demux->stream);
     if(stream_eof(demux->stream)) return 0; // EOF!
     
@@ -347,7 +362,7 @@ do{
           return 0;
   }
 
-  id=stream_read_dword_le(demux->stream);
+  id=avi_find_id(demux->stream);
   len=stream_read_dword_le(demux->stream);
 
   if(stream_eof(demux->stream)) return 0;
