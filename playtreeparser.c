@@ -53,6 +53,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
   if(p->buffer == NULL) {
     p->buffer = malloc(BUF_STEP);
     p->buffer_size = BUF_STEP;
+    p->buffer[0] = 0;
     p->iter = p->buffer;
   }
 
@@ -110,9 +111,9 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
     if(end[0] != '\0') {
       p->buffer_end -= end-p->iter;
       memmove(p->buffer,end,p->buffer_end);
-      p->buffer[p->buffer_end] = '\0';
     } else
       p->buffer_end = 0;
+    p->buffer[p->buffer_end] = '\0';
     p->iter = p->buffer;
   } else
     p->iter = end;
