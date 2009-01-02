@@ -84,7 +84,9 @@ static int codec_initialized=0;
 
 // init driver
 static int init(sh_video_t *sh){
+#ifndef CONFIG_QUICKTIME
     long result = 1;
+#endif
     ComponentResult cres;
     ComponentDescription desc;
     Component prev=NULL;
