@@ -335,3 +335,8 @@ fail_out:
     free(desc);
   return NULL;
 }
+
+#ifndef CONFIG_FREETYPE
+void render_one_glyph(font_desc_t *desc, int c) {}
+int kerning(font_desc_t *desc, int prevc, int c) { return 0; }
+#endif
