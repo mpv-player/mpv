@@ -335,12 +335,3 @@ fail_out:
     free(desc);
   return NULL;
 }
-
-#if 0
-int main(void){
-
-read_font_desc("high_arpi.desc",1);
-
-}
-#endif
-
