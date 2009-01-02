@@ -31,7 +31,7 @@
 #define L16
 #endif
 
-#include "af_resample.h"
+#include "af_resample_template.c"
 
 // Filtering types
 #define RSMP_LIN   	(0<<0)	// Linear interpolation
@@ -316,12 +316,12 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 # define FORMAT_I 1
     if(s->up>s->dn){
 #     define UP
-#     include "af_resample.h"
+#     include "af_resample_template.c"
 #     undef UP 
     }
     else{
 #     define DN
-#     include "af_resample.h"
+#     include "af_resample_template.c"
 #     undef DN
     }
     break;
@@ -330,12 +330,12 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 # define FORMAT_F 1
     if(s->up>s->dn){
 #     define UP
-#     include "af_resample.h"
+#     include "af_resample_template.c"
 #     undef UP 
     }
     else{
 #     define DN
-#     include "af_resample.h"
+#     include "af_resample_template.c"
 #     undef DN
     }
     break;
