@@ -3,19 +3,17 @@
 #include <inttypes.h>
 
 #include "config.h"
+#include "mp_msg.h"
+#include "mpbswap.h"
+#include "vd_internal.h"
 
 #ifdef CONFIG_QUICKTIME
 #include <QuickTime/ImageCodec.h>
 #define dump_ImageDescription(x)
-#endif
-
-#include "loader/wine/windef.h"
-
-#include "mp_msg.h"
-#include "vd_internal.h"
-
-#ifdef WIN32_LOADER
+#else
 #include "loader/ldt_keeper.h"
+#include "loader/qtx/qtxsdk/components.h"
+#include "loader/wine/windef.h"
 #endif
 
 static vd_info_t info = {
@@ -27,16 +25,6 @@ static vd_info_t info = {
 };
 
 LIBVD_EXTERN(qtvideo)
-
-#include "mpbswap.h"
-
-#ifndef CONFIG_QUICKTIME
-#include "loader/qtx/qtxsdk/components.h"
-
-HMODULE   WINAPI LoadLibraryA(LPCSTR);
-FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
-int       WINAPI FreeLibrary(HMODULE);
-#endif
 
 //static ComponentDescription desc; // for FindNextComponent()
 static ComponentInstance ci=NULL; // codec handle
@@ -50,10 +38,13 @@ static Rect OutBufferRect;              //the dimensions of our GWorld
 
 static GWorldPtr OutBufferGWorld = NULL;//a GWorld is some kind of description for a drawing environment
 static ImageDescriptionHandle framedescHandle;
-static HINSTANCE qtime_qts; // handle to the preloaded quicktime.qts
-static HMODULE handler;
 
 #ifndef CONFIG_QUICKTIME
+HMODULE   WINAPI LoadLibraryA(LPCSTR);
+FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
+int       WINAPI FreeLibrary(HMODULE);
+static    HINSTANCE qtime_qts; // handle to the preloaded quicktime.qts
+static    HMODULE handler;
 static    Component (*FindNextComponent)(Component prev,ComponentDescription* desc);
 static    OSErr (*GetComponentInfo)(Component prev,ComponentDescription* desc,Handle h1,Handle h2,Handle h3);
 static    long (*CountComponents)(ComponentDescription* desc);
