@@ -4,20 +4,15 @@
 #include <inttypes.h>
 
 #include "config.h"
+#include "mp_msg.h"
+#include "mpbswap.h"
+#include "ad_internal.h"
 
 #ifdef CONFIG_QUICKTIME
 #include <QuickTime/QuickTimeComponents.h>
-#endif
-
-#include "mp_msg.h"
-
-#include "loader/wine/windef.h"
-
-#include "ad_internal.h"
-#include "mpbswap.h"
-
-#ifdef WIN32_LOADER
+#else
 #include "loader/ldt_keeper.h"
+#include "loader/wine/windef.h"
 #endif
 
 static ad_info_t info =  {
