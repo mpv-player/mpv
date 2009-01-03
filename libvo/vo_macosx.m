@@ -337,7 +337,7 @@ static int preinit(const char *arg)
 	// set defaults
 	screen_id = 0;
 	shared_buffer = false;
-	buffer_name = DEFAULT_BUFFER_NAME;
+	buffer_name = NULL;
 	
 	if (subopt_parse(arg, subopts) != 0) {
 		mp_msg(MSGT_VO, MSGL_FATAL,
@@ -361,7 +361,9 @@ static int preinit(const char *arg)
 	NSApp = [NSApplication sharedApplication];
 	isLeopardOrLater = floor(NSAppKitVersionNumber) > 824;
 	
-	if (strcmp(buffer_name, DEFAULT_BUFFER_NAME))
+	if (!buffer_name)
+		buffer_name = strdup(DEFAULT_BUFFER_NAME);
+	else
 		shared_buffer = true;
 	
 	if(!shared_buffer)
