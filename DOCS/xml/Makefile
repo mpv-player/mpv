@@ -23,9 +23,7 @@ help:
 	@echo "clean             : Purge the 'HTML' and 'HTML-single' directories."
 	@echo "releaseclean      : Remove generated files but keep the HTML."
 	@echo "distclean         : Remove ALL generated files."
-	@echo "clean-LANG        : Remove HTML files for one language."
 	@echo "releaseclean-LANG : Remove generated files for one language."
-	@echo "distclean-LANG    : Remove ALL generated files for one language."
 	@echo "Substitute LANG for one of $(DOC_LANG_ALL)"
 
 html-chunked: xsltproc.sh xmllint.sh $(HTML_CHUNKED) $(addprefix html-chunked-,$(DOC_LANGS))
@@ -59,11 +57,6 @@ html-single-$(1): xsltproc.sh xmllint.sh $(HTML_SINGLE)
 
 xmllint-$(1): xmllint.sh
 	$(MAKE) HTMLFILE=../$(HTML_SINGLE)/$(1)/MPlayer.html -C $(1) xmllint
-
-distclean-$(1): clean-$(1) releaseclean-$(1)
-
-clean-$(1):
-	-rm -rf $(HTML_SINGLE)/$(1) $(HTML_CHUNKED)/$(1)
 
 releaseclean-$(1):
 	$(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$(1) -C $(1) distclean
