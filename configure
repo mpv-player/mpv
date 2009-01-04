@@ -8285,6 +8285,7 @@ $_def_vsscanf
 $_def_asmalign_pot
 $_def_builtin_expect
 $_def_dl
+$_def_extern_prefix
 $_def_iconv
 $_def_kstat
 $_def_macosx_bundle
@@ -8552,7 +8553,6 @@ $_def_libswscale_a
 $_def_libswscale_so
 
 $_def_dcbzl
-$_def_extern_prefix
 $def_fast_64bit
 $_def_fast_unaligned
 $_def_mkstemp
