@@ -1,4 +1,4 @@
-.\" Synced with r28208
+.\" Synced with r28215
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008. 12. 30." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 01. 04." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1035,9 +1035,10 @@ A fõmenü megjelenítése az MPlayer indításakor.
 .TP
 .B \-mouse\-movements
 Engedélyezi az MPlayernek a pozícionáló eszköz eseményeinek fogadását,
-melyeket a videó kimeneti eszköz küld (jelenleg csak az X11 leszármazottak
-támogatottak).
+melyeket a videó kimeneti eszköz küld.
 Szükséges a dvd menükben a gombok kiválasztásához.
+Az X11 alapú VO-kban (x11, xv, xvmc, stb.), a gl, a gl2, a direct3d és a
+macosx VO-kban támogatott.
 .
 .TP
 .B \-noar
@@ -3564,6 +3565,10 @@ Teljes képernyõs lejátszásnál a használni kívánt képernyõ eszköz.
 .IPs shared_buffer
 A kimenetet egy osztott memória bufferbe írja a megjelenítése helyett és
 megpróbál megnyitni egy létezõ NSConnection-t a GUI-val történõ kommunikációhoz.
+.IPs buffer_name=<név>
+Az osztott buffer neve, mely az shm_open-nel jön létre, valamint az
+NSConnection neve, amit az MPlayer megpróbál megnyitni (alapértelmezett: "mplayerosx").
+A buffer_name megadása implicit engedélyezi a shared_buffer-t.
 .RE
 .PD 1
 .
