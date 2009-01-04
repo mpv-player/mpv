@@ -1166,6 +1166,16 @@ When playing an MPEG-TS stream, MPlayer/\:MEncoder will use the first program
 (if present) with the chosen audio stream.
 .
 .TP
+.B \-ausid <ID> (also see \-alang)
+Select audio substream channel.
+Currently the valid range is 0x55..0x75 and applies only to MPEG-TS when handled
+by the native demuxer (not by libavformat).
+The format type may not be correctly identified because of how this information
+(or lack thereof) is embedded in the stream, but it will demux correctly the
+audio streams when multiple substreams are present.
+MPlayer prints the available substream IDs when run with \-identify.
+.
+.TP
 .B \-alang <language code[,language code,...]> (also see \-aid)
 Specify a priority list of audio languages to use.
 Different container formats employ different language codes.

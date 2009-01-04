@@ -59,6 +59,7 @@
 int ts_prog;
 int ts_keep_broken=0;
 off_t ts_probe = 0;
+int audio_substream_id = -1;
 extern char *dvdsub_lang, *audio_lang;	//for -alang
 
 typedef enum
@@ -1280,6 +1281,67 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 	return m;
 }
 
+//this function parses the extension fields in the PES header and returns the substream_id, or -1 in case of errors
+static int parse_pes_extension_fields(unsigned char *p, int pkt_len)
+{
+	int skip;
+	unsigned char flags;
+	
+	if(!(p[7] & 0x1))	//no extension_field
+		return -1;
+	skip = 9;
+	if(p[7] & 0x80)
+	{
+		skip += 5;
+		if(p[7] & 0x40)
+			skip += 5;
+	}
+	if(p[7] & 0x20)	//escr_flag
+		skip += 6;
+	if(p[7] & 0x10)	//es_rate_flag
+		skip += 3;
+	if(p[7] & 0x08)//dsm_trick_mode is unsupported, skip
+	{
+		skip = 0;//don't let's parse the extension fields
+	}
+	if(p[7] & 0x04)	//additional_copy_info
+		skip += 1;
+	if(p[7] & 0x02)	//pes_crc_flag
+		skip += 2;
+	if(skip >= pkt_len)	//too few bytes
+		return -1;
+	flags = p[skip];
+	skip++;
+	if(flags & 0x80)	//pes_private_data_flag
+		skip += 16;
+	if(skip >= pkt_len)
+		return -1;
+	if(flags & 0x40)	//pack_header_field_flag
+	{
+		unsigned char l = p[skip];
+		skip += l;
+	}
+	if(flags & 0x20)	//program_packet_sequence_counter
+		skip += 2;
+	if(flags & 0x10)	//p_std
+		skip += 2;
+	if(skip >= pkt_len)
+		return -1;
+	if(flags & 0x01)	//finally the long desired pes_extension2
+	{
+		unsigned char l = p[skip];	//ext2 flag+len
+		skip++;
+		if((l == 0x81) && (skip < pkt_len))
+		{
+			int ssid = p[skip];
+			mp_msg(MSGT_IDENTIFY, MSGL_V, "SUBSTREAM_ID=%d (0x%02X)\n", ssid, ssid);
+			return ssid;
+		}
+	}
+	
+	return -1;
+}
+
 static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, int32_t type_from_pmt, pmt_t *pmt, int pid)
 {
 	unsigned char  *p;
@@ -1342,6 +1404,13 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 	{
 		mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_ts: illegal value for PES_header_data_length (0x%02x)\n", header_len);
 		return 0;
+	}
+	
+	if(stream_id==0xfd)
+	{
+		int ssid = parse_pes_extension_fields(p, pkt_len);
+		if((audio_substream_id!=-1) && (ssid != audio_substream_id))
+			return 0;
 	}
 
 	p += header_len + 9;
