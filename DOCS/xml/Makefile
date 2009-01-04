@@ -79,5 +79,4 @@ endef
 
 $(foreach lang, $(DOC_LANG_ALL),$(eval $(call lang-def,$(lang))))
 
-.PHONY: all help html-chunked* chunked-dir html-single* single-dir xmllint*
-.PHONY: clean-html-chunked clean-html-single releaseclean* distclean* clean*
+.PHONY: all help html-chunked* chunked-dir html-single* single-dir xmllint* *clean*
