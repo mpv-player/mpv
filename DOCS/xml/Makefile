@@ -20,8 +20,6 @@ help:
 	@echo "html-chunked-LANG : As above, but only one language."
 	@echo "xmllint           : Check syntax of all xml files."
 	@echo "xmllint-LANG      : Check syntax of LANG xml files."
-	@echo "clean-html-single : Purge the 'HTML-single' directory."
-	@echo "clean-html-chunked: Purge the 'HTML' directory."
 	@echo "clean             : Purge the 'HTML' and 'HTML-single' directories."
 	@echo "releaseclean      : Remove generated files but keep the HTML."
 	@echo "distclean         : Remove ALL generated files."
@@ -39,11 +37,8 @@ xmllint: xmllint.sh $(addprefix xmllint-,$(DOC_LANG_ALL))
 $(HTML_CHUNKED) $(HTML_SINGLE):
 	-mkdir -p $@
 
-clean-html-chunked:
-	-rm -rf $(HTML_CHUNKED)
-
-clean-html-single:
-	-rm -rf $(HTML_SINGLE)
+clean:
+	rm -rf $(HTML_CHUNKED) $(HTML_SINGLE)
 
 releaseclean: $(addprefix releaseclean-,$(DOC_LANG_ALL))
 	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
@@ -52,8 +47,6 @@ distclean: clean releaseclean
 
 xsltproc.sh xmllint.sh:
 	sh configure
-
-clean: clean-html-chunked clean-html-single
 
 define lang-def
 html-chunked-$(1): xsltproc.sh xmllint.sh $(HTML_CHUNKED)
