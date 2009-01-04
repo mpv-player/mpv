@@ -730,7 +730,6 @@ Si es un AVI, igual tiene interleaving malo. Intente la opción <option>-ni</opt
 </para></listitem>
 <listitem><para>
 Si su manejador de sonido tiene errores, o usa ALSA 0.5 con <option>-ao oss</option>.
-Consulte la <link linkend="audio-dev">sección de tarjeta de sonido</link>.
 </para></listitem>
 <listitem><para>
 El AVI tiene una cabecera errónea malo, pruebe la opción <option>-nobps</option>, y/o <option>-mc 0</option>.

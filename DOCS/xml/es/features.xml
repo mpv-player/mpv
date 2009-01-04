@@ -9,7 +9,6 @@
 <sect1 id="devices">
 <title>Dispositivos de Salida</title>
 &video.xml;
-&audio.xml;
 </sect1>
 
 &tvinput.xml;

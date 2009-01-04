@@ -179,7 +179,6 @@ It can encode with various codecs, like
 &cd-dvd.xml;
 &faq.xml;
 &video.xml;
-&audio.xml;
 &tvinput.xml;
 &radio.xml;
 

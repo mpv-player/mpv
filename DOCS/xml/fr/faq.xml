@@ -738,7 +738,7 @@ Ou il a peut-être un mauvais entête, dans ce cas <option>-nobps</option>
 et/ou <option>-mc 0</option> peut aider.
 </para></listitem>
 <listitem><para>
-Votre pilote son est bogué. Voir la <link linkend="audio">section audio</link>.
+Votre pilote son est bogué.
 </para></listitem>
 </itemizedlist>
 </para></answer>
