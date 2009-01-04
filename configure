@@ -5242,7 +5242,7 @@ if test "$_jack" = auto ; then
 
 cat > $TMPC << EOF
 #include <jack/jack.h>
-int main(void) { jack_client_new("test"); return 0; }
+int main(void) { jack_client_open("test", JackUseExactName, NULL); return 0; }
 EOF
   if cc_check -ljack ; then
     _libs_mplayer="$_libs_mplayer -ljack"
