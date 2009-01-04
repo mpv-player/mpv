@@ -227,19 +227,25 @@ static void print_help (void)
            "  name=<client name>\n"
            "    Client name to pass to JACK\n"
            "  estimate\n"
-           "    Estimates the amount of data in buffers (experimental)\n");
+           "    Estimates the amount of data in buffers (experimental)\n"
+           "  autostart\n"
+           "    Automatically start JACK server if necessary\n"
+         );
 }
 
 static int init(int rate, int channels, int format, int flags) {
   const char **matching_ports = NULL;
   char *port_name = NULL;
   char *client_name = NULL;
+  int autostart = 0;
   opt_t subopts[] = {
     {"port", OPT_ARG_MSTRZ, &port_name, NULL},
     {"name", OPT_ARG_MSTRZ, &client_name, NULL},
     {"estimate", OPT_ARG_BOOL, &estimate, NULL},
+    {"autostart", OPT_ARG_BOOL, &autostart, NULL},
     {NULL}
   };
+  jack_options_t open_options = JackUseExactName;
   int port_flags = JackPortIsInput;
   int i;
   estimate = 1;
@@ -255,7 +261,9 @@ static int init(int rate, int channels, int format, int flags) {
     client_name = malloc(40);
     sprintf(client_name, "MPlayer [%d]", getpid());
   }
-  client = jack_client_new(client_name);
+  if (!autostart)
+    open_options |= JackNoStartServer;
+  client = jack_client_open(client_name, open_options, NULL);
   if (!client) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
     goto err_out;
