@@ -450,6 +450,7 @@ Advanced options:
   --enable-altivec          enable AltiVec (PowerPC) [autodetect]
   --enable-armv5te          enable DSP extensions (ARM) [autodetect]
   --enable-armv6            enable ARMv6 (ARM) [autodetect]
+  --enable-armv6t2          enable ARMv6t2 (ARM) [autodetect]
   --enable-armvfp           enable ARM VFP (ARM) [autodetect]
   --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
   --disable-fastmemcpy      disable 3DNow!/SSE/MMX optimized memcpy [enable]
@@ -499,6 +500,7 @@ _cmov=auto
 _fast_cmov=auto
 _armv5te=auto
 _armv6=auto
+_armv6t2=auto
 _armvfp=auto
 _iwmmxt=auto
 _mtrr=auto
@@ -1266,6 +1268,8 @@ for ac_option do
   --disable-armv5te) _armv5te=no ;;
   --enable-armv6) _armv6=yes ;;
   --disable-armv6) _armv6=no ;;
+  --enable-armv6t2) _armv6t2=yes ;;
+  --disable-armv6t2) _armv6t2=no ;;
   --enable-armvfp) _armvfp=yes ;;
   --disable-armvfp) _armvfp=no ;;
   --enable-iwmmxt) _iwmmxt=yes ;;
@@ -2542,6 +2546,16 @@ int main(void) { __asm__ volatile ("sadd16 r0, r0, r0"); return 0; }
 EOF
     _armv6=no
     cc_check && _armv6=yes
+  fi
+  echores "$_armv6"
+
+  echocheck "ARMv6t2 (SIMD instructions)"
+  if test $_armv6t2 = "auto" ; then
+    cat > $TMPC << EOF
+int main(void) { __asm__ volatile ("movt r0, #0"); return 0; }
+EOF
+    _armv6t2=no
+    cc_check && _armv6t2=yes
   fi
   echores "$_armv6"
 
