@@ -58,7 +58,7 @@ clean:
 releaseclean:
 	rm -f $(foreach lang,$(DOC_LANG_ALL),$(lang)/main.xml)
 	rm -f $$(find . -name *.xml -type l)
-	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
+	rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
 
 distclean: clean releaseclean
 
