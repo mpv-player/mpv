@@ -35,14 +35,6 @@ xmllint: xmllint.sh $(addprefix xmllint-,$(DOC_LANG_ALL))
 $(HTML_CHUNKED) $(HTML_SINGLE):
 	-mkdir -p $@
 
-clean:
-	rm -rf $(HTML_CHUNKED) $(HTML_SINGLE)
-
-releaseclean: $(addprefix releaseclean-,$(DOC_LANG_ALL))
-	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
-
-distclean: clean releaseclean
-
 xsltproc.sh xmllint.sh:
 	sh configure
 
@@ -63,5 +55,13 @@ releaseclean-$(1):
 endef
 
 $(foreach lang, $(DOC_LANG_ALL),$(eval $(call lang-def,$(lang))))
+
+clean:
+	rm -rf $(HTML_CHUNKED) $(HTML_SINGLE)
+
+releaseclean: $(addprefix releaseclean-,$(DOC_LANG_ALL))
+	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
+
+distclean: clean releaseclean
 
 .PHONY: all help html-chunked* html-single* xmllint* *clean*
