@@ -158,9 +158,8 @@ rapportés dans les jours voir les heures qui suivent, donc n'utilisez
 est également valable pour les paquets binaires de <application>MPlayer</application>.
 Les instructions Subversion peuvent être trouvées en bas de
 <ulink url="http://www.mplayerhq.hu/dload.html">cette page</ulink>
-ou dans le README. Si tout cela ne vous aide pas, veuillez vous référer à
-<link linkend="bugs">la liste des bogues connus</link> et au reste de la
-documentation.
+ou dans le README. Si tout cela ne vous aide pas, veuillez vous référer
+au reste de la documentation.
 Si votre problème n'est pas connu ou non résolvable avec nos instructions, alors merci
 de rapporter le bogue.
 </para>
