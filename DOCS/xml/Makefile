@@ -39,11 +39,11 @@ xsltproc.sh xmllint.sh:
 
 define lang-def
 html-chunked-$(1): xsltproc.sh xmllint.sh $(HTML_CHUNKED)
-	-(mkdir -p $(HTML_CHUNKED)/$(1))
+	-mkdir -p $(HTML_CHUNKED)/$(1)
 	$(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$(1) -C $(1) html-chunked
 
 html-single-$(1): xsltproc.sh xmllint.sh $(HTML_SINGLE)
-	-(mkdir -p $(HTML_SINGLE)/$(1))
+	-mkdir -p $(HTML_SINGLE)/$(1)
 	$(MAKE) HTMLFILE=../$(HTML_SINGLE)/$(1)/MPlayer.html -C $(1) html-single
 
 xmllint-$(1): xmllint.sh
