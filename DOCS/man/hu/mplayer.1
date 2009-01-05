@@ -1,4 +1,4 @@
-.\" Synced with r28215
+.\" Synced with r28245
 .\" MPlayer (C) 2000-2008 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 01. 04." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 01. 05." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1167,6 +1167,16 @@ VOB(AC-3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
 Az MPlayer kiírja a használható audió ID-ket, ha bõbeszédû (\-v) módban
 fut. Ha egy MPEG-TS folyamot játszol le, az MPlayer/\:MEncoder az elsõ
 programot (ha van) fogja használni a kiválaszott audió folyammal.
+.
+.TP
+.B \-ausid <ID> (lásd még \-alang)
+Kiválasztja az audió alfolyam csatornáját.
+Jelenleg az érvényes tartomány 0x55..0x75 és csak az MPEG-TS-re vonatkozik,
+amennyiben azt a natív demuxer kezeli (nem a libavformat).
+A formátum típus lehet, hogy rosszul lesz megállapítva, attól függõen, hogy
+ez az információ (vagy annak hiánya) hogyan van az adatfolyamban, de jól
+demux-álja az audió folyamokat, ha több alfolyam található.
+Az MPlayer kiírja az elérhetõ alfolyam ID-ket a \-identify kapcsolóval.
 .
 .TP
 .B \-alang <nyelv kód[,nyelv kód,...]> (lásd még \-aid)
@@ -2770,6 +2780,9 @@ Hasznos, ha bizonyos kapcsolatokat automatikusan akarsz felépíteni.
 .IPs (no)estimate
 Megbecsüli az audió késleltetést, a szándékok szerint folyamatosabbá
 teszi a videó lejátszást (alapértelmezett: engedélyezve).
+.IPs (no)autostart (alapértelmezett: letiltva)
+Automatikusan elindítja a jackd-t, ha szükséges.
+Emlékezz rá, hogy ez nem megbízható és a szerver üzenetek bepiszkítják az stdout-ot.
 .RE
 .PD 1
 .
