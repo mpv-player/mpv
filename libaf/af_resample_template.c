@@ -24,10 +24,6 @@
    only be included by af_resample.c 
 */ 
 
-/* This header intentionally has no multiple inclusion guards. It is meant to
- * be included multiple times and generates different code depending on the
- * value of certain #defines. */
-
 #undef L
 #undef SHIFT
 #undef FORMAT
