@@ -20,9 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// Must be defined before any libc headers are included!
-#define _ISOC9X_SOURCE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
