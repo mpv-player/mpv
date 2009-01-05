@@ -18,7 +18,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <alloca.h>
 #include "ogg.h"
 #include "os.h"
 #include "misc.h"

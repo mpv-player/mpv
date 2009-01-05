@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <alloca.h>
 #include "ogg.h"
+#include "os.h"
 #include "ivorbiscodec.h"
 #include "mdct.h"
 #include "codec_internal.h"
