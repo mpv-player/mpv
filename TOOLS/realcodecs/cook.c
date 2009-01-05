@@ -56,7 +56,7 @@ int b_dlOpened=0;
 void *handle=NULL;
 
 /* exits program when failure */
-void loadSyms() {
+void loadSyms(void) {
 	fputs("loadSyms()\n", stderr);
 	if (!b_dlOpened) {
 		char *error;
@@ -147,7 +147,7 @@ void loadSyms() {
 	}
 }
 
-void closeDll() {
+void closeDll(void) {
 	if (handle) {
 		b_dlOpened=0;
 		dlclose(handle);
@@ -162,11 +162,11 @@ void _init(void) {
 struct timezone tz;
 struct timeval tv1, tv2;
 
-void tic() {
+void tic(void) {
 	gettimeofday(&tv1, &tz);
 }
 
-void toc() {
+void toc(void) {
 	long secs, usecs;
 	gettimeofday(&tv2, &tz);
 	secs=tv2.tv_sec-tv1.tv_sec;

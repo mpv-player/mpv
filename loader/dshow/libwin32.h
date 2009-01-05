@@ -17,7 +17,7 @@ typedef uint32_t fourcc_t;
 typedef struct FatalError
 {
     FatalError();
-    void PrintAll() {}
+    void PrintAll(void) {}
 }FatalError;
 */
 

@@ -166,11 +166,11 @@ static InputPlugin* input_plugins[100];
 static int no_plugins=0;
 
 /* Dummy functions  */
-static InputVisType input_get_vis_type(){return 0;}
+static InputVisType input_get_vis_type(void){return 0;}
 static void input_add_vis_pcm(int time, AFormat fmt, int nch, int length,
                                                                 void *ptr){}
 static void input_set_info_text(char * text){}
-char *xmms_get_gentitle_format(){ return ""; }
+char *xmms_get_gentitle_format(void){ return ""; }
 /* Dummy functions  END*/
 
 static void input_set_info(char* title,int length, int rate, int freq, int nch)
@@ -212,7 +212,7 @@ static void init_plugins_from_dir(const char *plugin_dir){
     closedir(dir);
 }
 
-static void init_plugins(){
+static void init_plugins(void) {
     char *home;
 
     no_plugins=0;
@@ -227,7 +227,7 @@ static void init_plugins(){
     init_plugins_from_dir(XMMS_INPUT_PLUGIN_DIR);
 }
 
-static void cleanup_plugins(){
+static void cleanup_plugins(void) {
     while(no_plugins>0){
         --no_plugins;
         mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_ClosingPlugin,

@@ -7,6 +7,8 @@
    tested it.
 */
 
+/* According to Uoti this code is broken. */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,8 +30,8 @@ static mga_vid_config_t mga_vid_config;
 static unsigned char* frame=NULL;
 static int f;
 
-static int mga_init(){
-
+static int mga_init(void)
+{
 	f = open("/dev/mga_vid",O_RDWR);
 	if(f == -1)
 	{
@@ -74,7 +76,8 @@ static int mga_init(){
 #endif
 
 // Returns current time in microseconds
-static unsigned int GetTimer(){
+static unsigned int GetTimer(void)
+{
   struct timeval tv;
   struct timezone tz;
 //  float s;

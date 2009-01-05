@@ -566,7 +566,8 @@ if(!restore){
 }
 
 #ifdef MGA_ALLOW_IRQ
-static void enable_irq(){
+static void enable_irq(void)
+{
 	long int cc;
 
 	cc = readl(mga_mmio_base + IEN);
@@ -582,7 +583,7 @@ static void enable_irq(){
 	return;
 }
 
-static void disable_irq()
+static void disable_irq(void)
 {
 	writeb( 0x11, mga_mmio_base + CRTCX);
 	writeb(0x20, mga_mmio_base + CRTCD );  /* clear 0, enable off */

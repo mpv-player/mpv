@@ -135,7 +135,7 @@ static uint32_t pfb_colorkey;
 
 
 
-void pfb_overlay_on() {
+void pfb_overlay_on(void) {
     int h_inc, h_step, ecp_div;
 
     pfb_vregs[PFB_CLOCK_CNTL_INDEX] = (pfb_vregs[PFB_CLOCK_CNTL_INDEX] & ~0x0000003f) | 0x00000008;
@@ -192,11 +192,11 @@ void pfb_overlay_on() {
     pfb_vregs[PFB_OV0_AUTO_FLIP_CNTL] = PFB_OV0_AUTO_FLIP_BUF0;
 }
 
-void pfb_overlay_off() {
+void pfb_overlay_off(void) {
     pfb_vregs[PFB_OV0_SCALE_CNTL] = 0;
 }
 
-void center_overlay() {
+void center_overlay(void) {
     if (pfb_xres > pfb_dstwidth) {
         pfb_wx0 = (pfb_xres - pfb_dstwidth) / 2;
         pfb_wx1 = pfb_wx0 + pfb_dstwidth;
@@ -321,7 +321,7 @@ static void uninit(void)
     munmap(pfb_vregs, PFB_REGS_MMAPLEN);
 }
 
-static uint32_t pfb_fullscreen() {
+static uint32_t pfb_fullscreen(void) {
     if (!pfb_fs) {
         aspect(&pfb_dstwidth,&pfb_dstheight, A_ZOOM);
         pfb_fs = 1;

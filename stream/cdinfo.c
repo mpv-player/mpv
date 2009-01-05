@@ -20,7 +20,7 @@
  *******************************************************************************************************************/
 
 cd_info_t*
-cd_info_new() {
+cd_info_new(void) {
 	cd_info_t *cd_info = NULL;
 	
 	cd_info = malloc(sizeof(cd_info_t));

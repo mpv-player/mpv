@@ -182,8 +182,8 @@ static int    old_video_driver = 0;
  void ShowDXR3Config( void );
  void HideDXR3Config( void );
 #endif
- void ShowAudioConfig();
- void HideAudioConfig();
+ void ShowAudioConfig( void );
+ void HideAudioConfig( void );
 
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
@@ -1499,7 +1499,7 @@ static GtkWidget *CBAudioMixerChannel;
 static GtkWidget *BAudioOk;
 static GtkWidget *BAudioCancel;
 
-void ShowAudioConfig() {
+void ShowAudioConfig( void ) {
   if (AudioConfig) gtkActive(AudioConfig);
   else AudioConfig = create_AudioConfig();
 
@@ -1532,7 +1532,7 @@ void ShowAudioConfig() {
   gtkSetLayer(AudioConfig);
 }
 
-void HideAudioConfig() {
+void HideAudioConfig( void ) {
   if (!AudioConfig) return;
   gtk_widget_hide(AudioConfig);
   gtk_widget_destroy(AudioConfig); 
@@ -1580,7 +1580,7 @@ static void audioButton(GtkButton *button, gpointer user_data) {
   }
 }
 
-GtkWidget *create_AudioConfig() {
+GtkWidget *create_AudioConfig( void ) {
   GList *items = NULL;
   GtkWidget *vbox;
   GtkWidget *table;

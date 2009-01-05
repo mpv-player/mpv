@@ -45,7 +45,7 @@
 static HFILE mapdev = -1;
 static ULONG stored_virt_addr;
 static char* mappath = "\\DEV\\PMAP$";
-static HFILE open_mmap() 
+static HFILE open_mmap(void)
 {
 	APIRET rc;
 	ULONG action;
@@ -62,7 +62,7 @@ static HFILE open_mmap()
 	return mapdev;
 }
 
-static void close_mmap()
+static void close_mmap(void)
 {
 	if (mapdev != -1)
 		DosClose(mapdev);

@@ -7,12 +7,14 @@
 const char *timer_name = "Windows native";
 
 // Returns current time in microseconds
-unsigned int GetTimer(){
+unsigned int GetTimer(void)
+{
   return timeGetTime() * 1000;
 }
 
 // Returns current time in milliseconds
-unsigned int GetTimerMS(){
+unsigned int GetTimerMS(voi)
+{
   return timeGetTime() ;
 }
 
@@ -27,7 +29,8 @@ int usec_sleep(int usec_delay){
 
 static DWORD RelativeTime = 0;
 
-float GetRelativeTime(){
+float GetRelativeTime(void)
+{
   DWORD t, r;
   t = GetTimer();
   r = t - RelativeTime;
@@ -35,6 +38,7 @@ float GetRelativeTime(){
   return (float) r *0.000001F;
 }
 
-void InitTimer(){
+void InitTimer(void)
+{
   GetRelativeTime();
 }

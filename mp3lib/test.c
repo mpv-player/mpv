@@ -11,7 +11,7 @@
 #include "mp3lib/mp3.h"
 #include "cpudetect.h"
 
-static inline unsigned int GetTimer(){
+static inline unsigned int GetTimer(void){
   struct timeval tv;
   struct timezone tz;
 //  float s;

@@ -117,8 +117,8 @@ static const struct{
 
 static void xvmc_free(void);
 static void xvmc_clean_surfaces(void);
-static int count_free_surfaces();
-static struct xvmc_render_state * find_free_surface();
+static int count_free_surfaces(void);
+static struct xvmc_render_state * find_free_surface(void);
 
 static const vo_info_t info = {
   "XVideo Motion Compensation",
@@ -175,7 +175,7 @@ static void allocate_xvimage(int xvimage_width,int xvimage_height,int xv_format)
    return;
 }
 
-static void deallocate_xvimage()
+static void deallocate_xvimage(void)
 {
 #ifdef HAVE_SHM
    if ( Shmem_Flag )
@@ -699,7 +699,7 @@ static int draw_frame(uint8_t *srcp[]){
    assert(0);
 }
 
-static void init_osd_yuv_pal(){
+static void init_osd_yuv_pal(void) {
    char * palette;
    int rez;
    int i,j;
@@ -745,7 +745,7 @@ int rez;
       printf("vo_xvmc: XvMCClearSubpicture failed!\n");
 }
 
-static void OSD_init(){
+static void OSD_init(void) {
 unsigned short osd_height, osd_width;
 int rez;
 
@@ -1201,7 +1201,7 @@ int stat;
             src_rndr->state &= ~MP_XVMC_STATE_OSD_SOURCE;
       }
 }
-static int count_free_surfaces(){
+static int count_free_surfaces(void) {
 int i,num;
    num=0;
    for(i=0; i<number_of_surfaces; i++){
@@ -1212,7 +1212,7 @@ int i,num;
    return num;
 }
 
-static struct xvmc_render_state * find_free_surface(){
+static struct xvmc_render_state * find_free_surface(void) {
 int i,t;
 int stat;
 struct xvmc_render_state * visible_rndr;

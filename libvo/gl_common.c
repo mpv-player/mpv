@@ -1522,7 +1522,7 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
   *context = 0;
 }
 
-void swapGlBuffers() {
+void swapGlBuffers(void) {
   HDC vo_hdc = GetDC(vo_w32_window);
   SwapBuffers(vo_hdc);
   ReleaseDC(vo_w32_window, vo_hdc);

@@ -208,7 +208,7 @@ query_format(uint32_t format)
 }
 
 #ifndef VO_XMGA
-static void mga_fullscreen()
+static void mga_fullscreen(void)
 {
 	uint32_t w,h;
 	if ( !vo_fs ) {
