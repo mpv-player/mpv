@@ -13,7 +13,7 @@ unsigned int GetTimer(void)
 }
 
 // Returns current time in milliseconds
-unsigned int GetTimerMS(voi)
+unsigned int GetTimerMS(void)
 {
   return timeGetTime() ;
 }
