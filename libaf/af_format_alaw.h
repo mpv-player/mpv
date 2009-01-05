@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_AF_FORMAT_ALAW_C
-#define MPLAYER_AF_FORMAT_ALAW_C
+#ifndef MPLAYER_AF_FORMAT_ALAW_H
+#define MPLAYER_AF_FORMAT_ALAW_H
 
 #include <inttypes.h>
 
@@ -321,4 +321,4 @@ static int to_alaw(void* in, void* out, int len, int bps, int format)
   }
   return AF_OK;
 }
-#endif /* MPLAYER_AF_FORMAT_ALAW_C */
+#endif /* MPLAYER_AF_FORMAT_ALAW_H */

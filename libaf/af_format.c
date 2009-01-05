@@ -43,8 +43,8 @@ long int lrintf(float);
 
 /* The below includes retrieves functions for converting to and from
    ulaw and alaw */ 
-#include "af_format_ulaw.c"
-#include "af_format_alaw.c"
+#include "af_format_ulaw.h"
+#include "af_format_alaw.h"
 
 // Switch endianness
 static void endian(void* in, void* out, int len, int bps);
