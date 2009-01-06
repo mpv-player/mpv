@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r27123 （MSGTR_EdlOutOfMem）
+// Synced with help_mp-en.h r28122 （MSGTR_EdlOutOfMem）
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; section/subsection;  XScreenSaver; keycolor;  
@@ -60,7 +60,7 @@ static char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c:
+// mplayer.c
 #define MSGTR_Exiting "\n正在退出..\n"
 #define MSGTR_ExitingHow "\n正在退出...（%s）\n"
 #define MSGTR_Exit_quit "退出"
@@ -188,6 +188,7 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV 事件：Nav 定位完成\n"
 #define MSGTR_MenuCall "菜单调用\n"
 
+// --- edit decision lists
 #define MSGTR_EdlOutOfMem "不能分配足够的内存来保持 EDL 数据。\n"
 #define MSGTR_EdlRecordsNo "读取 %d EDL 动作。\n"
 #define MSGTR_EdlQueueEmpty "没有 EDL 动作要处理。\n"
@@ -257,7 +258,7 @@ static char help_text[]=
 #define MSGTR_SubVisibleStatus "显示字幕: %s"
 #define MSGTR_SubForcedOnlyStatus "只用锁定的字幕: %s"
 
-// mencoder.c:
+// mencoder.c
 #define MSGTR_UsingPass3ControlFile "使用 pass3 控制文件: %s\n"
 #define MSGTR_MissingFilename "\n没有文件名。\n\n"
 #define MSGTR_CannotOpenFile_Device "打不开文件/设备。\n"
@@ -412,7 +413,7 @@ static char help_text[]=
 #define MSGTR_CouldntOpenCodec "打不开编解码器 %s, br=%d。\n"
 #define MSGTR_CantCopyAudioFormat "音频格式 0x%x 和 '-oac copy' 不兼容, 请试试用 '-oac pcm' 代替或者用 '-fafmttag'。\n"
 
-// cfg-mencoder.h:
+// cfg-mencoder.h
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     可变比特率方式\n"\
 "                0: cbr (常比特率)\n"\
@@ -461,7 +462,7 @@ static char help_text[]=
 "                 (比特率 320 kbps)\n"\
 "                 <8-320>: 以给定比特率为平均比特率的 ABR 编码。\n\n"
 
-//codec-cfg.c:
+//codec-cfg.c
 #define MSGTR_DuplicateFourcc "重复的 FourCC"
 #define MSGTR_TooManyFourccs "太多的 FourCCs/formats..."
 #define MSGTR_ParseError "解析错误"
@@ -671,7 +672,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Codecs "编解码器和分路器"
 // Note: If you change MSGTR_PREFERENCES_Misc see if it still fits MSGTR_PREFERENCES_FRAME_Misc
 #define MSGTR_PREFERENCES_Misc "其他"
-
 #define MSGTR_PREFERENCES_None "None"
 #define MSGTR_PREFERENCES_DriverDefault "默认驱动"
 #define MSGTR_PREFERENCES_AvailableDrivers "可用驱动:"
@@ -772,6 +772,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ArtsBroken "新版 aRts 与 GTK 1.x 不兼容, "\
            "会使 GMPlayer 崩溃!"
 
+// -- aboutbox
 #define MSGTR_ABOUT_UHU "GUI 开发由 UHU Linux 赞助\n"
 #define MSGTR_ABOUT_Contributors "代码和文档贡献者\n"
 #define MSGTR_ABOUT_Codecs_libs_contributions "编解码器和第三方库\n"
@@ -815,7 +816,6 @@ static char help_text[]=
 // wsxdnd.c
 #define MSGTR_WS_NotAFile "这好像不是一个文件...\n"
 #define MSGTR_WS_DDNothing "D&D: 没有任何东西返回!\n"
-
 
 // ======================= video output drivers ========================
 
@@ -1367,7 +1367,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "打不开 %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "不能初始化 Apple Remote 遥控器。\n"
 
-// lirc.c:
+// lirc.c
 #define MSGTR_SettingUpLIRC "设置 LIRC 支持\n"
 #define MSGTR_LIRCopenfailed "开启 LIRC 支持失败。你将无法使用你的遥控器。\n"
 #define MSGTR_LIRCcfgerr "读取 LIRC 配置文件 %s 失败。\n"
@@ -1375,7 +1375,7 @@ static char help_text[]=
 
 // ========================== LIBMPDEMUX ===================================
 
-// muxer.c, muxer_*.c:
+// muxer.c, muxer_*.c
 #define MSGTR_TooManyStreams "流太多!"
 #define MSGTR_RawMuxerOnlyOneStream "Rawaudio 合路器只支持一个音频流!\n"
 #define MSGTR_IgnoringVideoStream "忽略视频流!\n"
@@ -1387,7 +1387,7 @@ static char help_text[]=
 #define MSGTR_WritingHeader "正在写帧头...\n"
 #define MSGTR_WritingTrailer "正在写索引...\n"
 
-// demuxer.c, demux_*.c:
+// demuxer.c, demux_*.c
 #define MSGTR_AudioStreamRedefined "警告: 音频流头部 %d 被重新定义。\n"
 #define MSGTR_VideoStreamRedefined "警告: 视频流头部 %d 被重新定义。\n"
 #define MSGTR_TooManyAudioInBuffer "\n缓冲中音频包太多(%d in %d 字节)。\n"
