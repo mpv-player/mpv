@@ -79,7 +79,7 @@ extern int force_load_font;
 int init_freetype(void);
 int done_freetype(void);
 
-font_desc_t* read_font_desc_ft(const char* fname,int movie_width, int movie_height, float font_scale_factor);
+font_desc_t* read_font_desc_ft(const char* fname,int face_index,int movie_width, int movie_height, float font_scale_factor);
 void free_font_desc(font_desc_t *desc);
 
 void render_one_glyph(font_desc_t *desc, int c);
