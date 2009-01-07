@@ -2088,8 +2088,8 @@ external subtitles and Matroska tracks.
 You may also want to use \-embeddedfonts.
 .br
 .I NOTE:
-When fontconfig is compiled-in, \-ass turns on \-fontconfig
-unless explicitly turned off with \-nofontconfig.
+Unlike normal OSD, libass uses fontconfig by default. To disable it, use
+\-nofontconfig.
 .
 .TP
 .B \-ass\-border\-color <value>
@@ -2273,8 +2273,9 @@ With fontconfig, this option determines the fontconfig font name.
 Enables the usage of fontconfig managed fonts.
 .br
 .I NOTE:
-\-ass automatically turns this on unless explicitly overridden
-with \-nofontconfig.
+By default fontconfig is used for libass-rendered subtitles and not used for
+OSD. With \-fontconfig it is used for both libass and OSD, with \-nofontconfig
+it is not used at all.
 .
 .TP
 .B \-forcedsubsonly
