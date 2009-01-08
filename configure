@@ -5525,6 +5525,7 @@ if test "$_dvdread_internal" = auto ; then
      || darwin || win32; then
     _dvdread_internal=yes
     _dvdread=yes
+    _inc_extra="$_inc_extra -Ilibdvdread4"
   fi
 elif test "$_dvdread" = auto ; then
   _dvdread=no
@@ -5550,7 +5551,6 @@ EOF
 fi
 
 if test "$_dvdread_internal" = yes; then
-  _def_dvdread_internal="#define CONFIG_DVDREAD_INTERNAL 1"
   _def_dvdread='#define CONFIG_DVDREAD 1'
   _inputmodules="dvdread(internal) $_inputmodules"
   _largefiles=yes
@@ -5562,7 +5562,6 @@ elif test "$_dvdread" = yes; then
   _inputmodules="dvdread(external) $_inputmodules"
   _res_comment="external"
 else
-  _def_dvdread_internal="#undef CONFIG_DVDREAD_INTERNAL"
   _def_dvdread='#undef CONFIG_DVDREAD'
   _noinputmodules="dvdread $_noinputmodules"
 fi
@@ -8335,7 +8334,6 @@ $_def_dvd_openbsd
 $_def_dvdio
 $_def_dvdnav
 $_def_dvdread
-$_def_dvdread_internal
 $_def_hpux_scsi_h
 $_def_libcdio
 $_def_sol_scsi_h
