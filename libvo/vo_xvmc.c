@@ -431,22 +431,6 @@ opt_t subopts [] =
    return 0;
 }
 
-static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
-  *drwX = *drwY = 0;
-  if (vo_fs) {
-    aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
-    vo_dwidth = FFMIN(vo_dwidth, vo_screenwidth);
-    vo_dheight = FFMIN(vo_dheight, vo_screenheight);
-    *drwX = (vo_screenwidth - vo_dwidth) / 2;
-    *drwY = (vo_screenheight - vo_dheight) / 2;
-    mp_msg(MSGT_VO, MSGL_V, "[xvmc-fs] dx: %d dy: %d dw: %d dh: %d\n",
-           *drwX, *drwY, vo_dwidth, vo_dheight);
-  } else if (WinID == 0) {
-    *drwX = vo_dx;
-    *drwY = vo_dy;
-  }
-}
-
 static int config(uint32_t width, uint32_t height,
 		       uint32_t d_width, uint32_t d_height,
 		       uint32_t flags, char *title, uint32_t format){
@@ -674,7 +658,7 @@ skip_surface_allocation:
    }
 
    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
-   calc_drwXY(&drwX, &drwY);
+   vo_calc_drwXY(&drwX, &drwY);
 
    panscan_calc();
 
