@@ -85,17 +85,17 @@ const char * const genres[] = {
 "Darkwave",					/* 50 */
 "Techno-Industrial",		/* 51 */
 "Electronic",				/* 52 */
-"Jungle",					/* 53 */
-"Pop-Folk",					/* 54 */
-"Eurodance",				/* 55 */
-"Dream",					/* 56 */
-"Southern Rock",			/* 57 */
-"Comedy",					/* 58 */
-"Cult",						/* 59 */
-"Gangsta",					/* 60 */
-"Top 40",					/* 61 */
-"Christian Rap",			/* 62 */
-"Pop/Funk",					/* 63 */
+"Pop-Folk",					/* 53 */
+"Eurodance",				/* 54 */
+"Dream",					/* 55 */
+"Southern Rock",			/* 56 */
+"Comedy",					/* 57 */
+"Cult",						/* 58 */
+"Gangsta",					/* 59 */
+"Top 40",					/* 60 */
+"Christian Rap",			/* 61 */
+"Pop/Funk",					/* 62 */
+"Jungle",					/* 63 */
 "Native American",			/* 64 */
 "Cabaret",					/* 65 */
 "New Wave",					/* 66 */
