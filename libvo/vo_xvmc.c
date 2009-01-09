@@ -1019,7 +1019,7 @@ int e=vo_x11_check_events(mDisplay);
    {
       e |= VO_EVENT_EXPOSE;
 
-      calc_drwXY(&drwX, &drwY);
+      vo_calc_drwXY(&drwX, &drwY);
    }
    if ( e & VO_EVENT_EXPOSE )
    {
