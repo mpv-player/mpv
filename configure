@@ -7802,8 +7802,8 @@ if test "$_dvdnav" = yes ; then
   if test "$dvdnav_internal" = yes ; then
     _inc_extra="$_inc_extra -Ilibdvdnav"
   else
-  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
-  _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+    _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
+    _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
   fi
   _inputmodules="dvdnav $_inputmodules"
 else
