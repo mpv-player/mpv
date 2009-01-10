@@ -7775,10 +7775,12 @@ fi
 #because libdvdnavmini is intentionally not linked against libdvdread (to permit mplayer
 # to use its own copy of the library)
 echocheck "DVD support (libdvdnav)"
+dvdnav_internal=no
 if test "$_dvdnav" = auto ; then
   if test "$_dvdread_internal" = yes ; then
-    _dvdnav=no
-    _res_comment="Disabled in favor of the internal copy of dvdread. Append --disable-dvdread-internal."
+    _dvdnav=yes
+    dvdnav_internal=yes
+    _res_comment="internal"
   else
     $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
   fi
@@ -7797,8 +7799,12 @@ fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
   _def_dvdnav='#define CONFIG_DVDNAV 1'
+  if test "$dvdnav_internal" = yes ; then
+    _inc_extra="$_inc_extra -Ilibdvdnav"
+  else
   _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
   _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+  fi
   _inputmodules="dvdnav $_inputmodules"
 else
   _def_dvdnav='#undef CONFIG_DVDNAV'
@@ -7975,6 +7981,7 @@ DIRECTFB = $_directfb
 DIRECTX = $_directx
 DVBIN = $_dvbin
 DVDNAV = $_dvdnav
+DVDNAV_INTERNAL = $dvdnav_internal
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
 DXR2 = $_dxr2

@@ -234,6 +234,17 @@ SRCS_COMMON-$(CDDB)                  += stream/stream_cddb.c
 SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
                                         stream/stream_dvb.c
 SRCS_COMMON-$(DVDNAV)                += stream/stream_dvdnav.c
+SRCS_COMMON-$(DVDNAV_INTERNAL)       += libdvdnav/dvdnav.c \
+                                        libdvdnav/highlight.c \
+                                        libdvdnav/navigation.c \
+                                        libdvdnav/read_cache.c \
+                                        libdvdnav/remap.c \
+                                        libdvdnav/searching.c \
+                                        libdvdnav/settings.c \
+                                        libdvdnav/vm/decoder.c \
+                                        libdvdnav/vm/vm.c \
+                                        libdvdnav/vm/vmcmd.c \
+
 SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
                                         stream/stream_dvd_common.c
 SRCS_COMMON-$(DVDREAD_INTERNAL)      += libdvdread4/bitreader.c \
@@ -733,6 +744,8 @@ DIRS =  . \
         libavformat \
         libavutil \
         libdvdcss \
+        libdvdnav \
+        libdvdnav/vm \
         libdvdread4 \
         libfaad2 \
         libmenu \
@@ -839,6 +852,7 @@ mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d osdep/mplay
 $(DEPS): help_mp.h
 
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\" $(CFLAGS_LIBDVDCSS)
+libdvdnav/%.o libdvdnav/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\"
 libdvdread4/%.o libdvdread4/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_FAAD_FIXED)
 
