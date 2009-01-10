@@ -376,7 +376,7 @@ const void *mpctx_get_video_out(MPContext *mpctx)
     return mpctx->video_out;
 }
 
-void *mpctx_get_audio_out(MPContext *mpctx)
+const void *mpctx_get_audio_out(MPContext *mpctx)
 {
     return mpctx->audio_out;
 }
