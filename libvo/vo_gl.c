@@ -612,7 +612,8 @@ static void draw_osd(void)
     clearOSD();
     osd_w = scaled_osd ? image_width : vo_dwidth;
     osd_h = scaled_osd ? image_height : vo_dheight;
-    vo_draw_text(osd_w, osd_h, create_osd_texture);
+    vo_draw_text_ext(osd_w, osd_h, ass_border_x, ass_border_y, ass_border_x, ass_border_y,
+                     image_width, image_height, create_osd_texture);
   }
   if (vo_doublebuffering) do_render_osd();
 }

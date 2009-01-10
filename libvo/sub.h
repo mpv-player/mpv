@@ -106,6 +106,9 @@ extern int spu_aamode;
 extern float spu_gaussvar;
 
 void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
+void vo_draw_text_ext(int dxs, int dys, int left_border, int top_border,
+                      int right_border, int bottom_border, int orig_w, int orig_h,
+                      void (*draw_alpha)(int x0, int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h));
 
 void vo_init_osd(void);
