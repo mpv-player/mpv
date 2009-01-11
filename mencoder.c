@@ -421,7 +421,7 @@ user_correct_pts = 0;
   // Preparse the command line
   m_config_preparse_command_line(mconfig,argc,argv);
 
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2008 MPlayer Team\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2009 MPlayer Team\n");
 
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
