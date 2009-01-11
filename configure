@@ -2289,6 +2289,34 @@ if test "$_runtime_cpudetection" = yes ; then
 fi
 
 
+# endian testing
+echocheck "byte order"
+if test "$_big_endian" = auto ; then
+  cat > $TMPC <<EOF
+short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
+                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
+int main(void) { return (int)ascii_name; }
+EOF
+  if cc_check ; then
+    if strings $TMPEXE | grep -q -l MPlayerBigEndian ; then
+      _big_endian=yes
+    else
+      _big_endian=no
+    fi
+  else
+    echo ${_echo_n} "failed to autodetect byte order, defaulting to ${_echo_c}"
+  fi
+fi
+if test "$_big_endian" = yes ; then
+  _byte_order='big-endian'
+  _def_words_endian='#define WORDS_BIGENDIAN 1'
+else
+  _byte_order='little-endian'
+  _def_words_endian='#undef WORDS_BIGENDIAN'
+fi
+echores "$_byte_order"
+
+
 echocheck "extern symbol prefix"
 cat > $TMPC << EOF
 int ff_extern;
@@ -7449,32 +7477,6 @@ else
 fi
 echores "$_vstream"
 
-# endian testing
-echocheck "byte order"
-if test "$_big_endian" = auto ; then
-  cat > $TMPC <<EOF
-short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
-                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
-int main(void) { return (int)ascii_name; }
-EOF
-  if cc_check ; then
-    if strings $TMPEXE | grep -q -l MPlayerBigEndian ; then
-      _big_endian=yes
-    else
-      _big_endian=no
-    fi
-  else
-    echo ${_echo_n} "failed to autodetect byte order, defaulting to ${_echo_c}"
-  fi
-fi
-if test "$_big_endian" = yes ; then
-  _byte_order='big-endian'
-  _def_words_endian='#define WORDS_BIGENDIAN 1'
-else
-  _byte_order='little-endian'
-  _def_words_endian='#undef WORDS_BIGENDIAN'
-fi
-echores "$_byte_order"
 
 echocheck "OSD menu"
 if test "$_menu" = yes ; then
