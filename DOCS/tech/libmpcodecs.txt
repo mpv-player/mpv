@@ -259,7 +259,7 @@ static int config(struct vf_instance_s* vf,
         unsigned int flags, unsigned int outfmt){
     // use d_width/d_height if not set by user:
     if(vf->priv->w==-1) vf->priv->w=d_width;
-    if(vf->priv->h==-1) vf->priv->h=d_width;
+    if(vf->priv->h==-1) vf->priv->h=d_height;
     // initialize your filter code
     ...
     // OK now config the rest of the filter chain, with our output parameters:
