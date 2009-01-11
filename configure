@@ -3153,7 +3153,6 @@ echores "$_alloca"
 
 
 echocheck "fastmemcpy"
-# fastmemcpy check is done earlier with tests of CPU & binutils features
 if test "$_fastmemcpy" = yes ; then
   _def_fastmemcpy='#define CONFIG_FASTMEMCPY 1'
 else
