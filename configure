@@ -2891,7 +2891,7 @@ if test "$_winsock2_h" = yes ; then
 elif cc_check $_ld_sock ; then
   # NOTE: Linux has libresolv but does not need it
   :
-  _res_comment="using $_ld_sock"
+  test $_ld_sock && _res_comment="using $_ld_sock"
   echores "yes"
 elif cc_check $_ld_sock -lresolv ; then
   # NOTE: needed for SunOS at least
@@ -2913,7 +2913,7 @@ EOF
   if cc_check $_ld_sock ; then
       # NOTE: Linux has libresolv but does not need it
     :
-    _res_comment="using $_ld_sock"
+    test $_ld_sock && _res_comment="using $_ld_sock"
   elif cc_check $_ld_sock -lresolv ; then
     # NOTE: needed for SunOS at least
     _ld_sock="$_ld_sock -lresolv"
@@ -3151,7 +3151,7 @@ if ! hpux ; then
 fi
 fi
 if test "$_pthreads" = yes ; then
-  _res_comment="using $_ld_pthread"
+  test $_ld_pthread && _res_comment="using $_ld_pthread"
   _def_pthreads='#define HAVE_PTHREADS 1'
   _def_threads='#define HAVE_THREADS 1'
 else
@@ -3396,7 +3396,7 @@ EOF
 fi
 if test "$_termcap" = yes ; then
   _def_termcap='#define HAVE_TERMCAP 1'
-  _res_comment="using $_ld_tmp"
+  test $_ld_tmp && _res_comment="using $_ld_tmp"
 else
   _def_termcap='#undef HAVE_TERMCAP'
 fi
@@ -6500,7 +6500,7 @@ EOF
   fi
 fi
 if test "$_live" = yes && test "$_network" = yes; then
-  _res_comment="using $_livelibdir"
+  test $_livelibdir && _res_comment="using $_livelibdir"
   _def_live='#define CONFIG_LIVE555 1'
  _inputmodules="live555 $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes; then
