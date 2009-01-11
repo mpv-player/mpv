@@ -12,11 +12,11 @@ The VIDEO path:
 
     [MPlayer core]
           | (1)
-     _____V______   (2)  /~~~~~~~~~~\    (3,4)  |~~~~~~|
-     |          | -----> | vd_XXX.c |  -------> | vd.c |
-     | decvideo |        \__________/  <-(3a)-- |______|
-     |          | -----,  ,.............(3a,4a).....:
-     ~~~~~~~~~~~~  (6) V  V
+    ______V_____    (2)  /~~~~~~~~~~\    (3,4)  |~~~~~~|
+    |           | -----> | vd_XXX.c |  -------> | vd.c |
+    | dec_video |        \__________/  <-(3a)-- |______|
+    |           | -----,  ,.............(3a,4a).....:
+    ~~~~~~~~~~~~~  (6) V  V
                    /~~~~~~~~\     /~~~~~~~~\  (8)
                    | vf_X.c | --> | vf_Y.c | ---->  vf_vo.c / ve_XXX.c
                    \________/     \________/
@@ -27,7 +27,7 @@ The VIDEO path:
 
 Short description of video path:
 1. MPlayer/MEncoder core requests the decoding of a compressed video frame:
-   calls decvideo.c::decode_video()
+   calls dec_video.c::decode_video()
 
 2. decode_video() calls the previously ( init_video() ) selected video codec
    (vd_XXX.c file, where XXX == vfm name, see the 'driver' line of codecs.conf)
