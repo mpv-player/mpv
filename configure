@@ -2827,7 +2827,7 @@ if test "$_posix4" = yes ; then
 fi
 echores "$_posix4"
 
-for func in llrint lrint lrintf round roundf; do
+for func in llrint lrint lrintf round roundf truncf; do
 echocheck $func
 cat > $TMPC << EOF
 #include <math.h>
@@ -8292,6 +8292,7 @@ $_def_sysi86
 $_def_sysi86_iv
 $_def_termcap
 $_def_termios
+$_def_truncf
 $_def_vsscanf
 
 
