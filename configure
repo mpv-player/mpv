@@ -3414,7 +3414,7 @@ if test "$_termios" = auto ; then
 #include <$_termios_header>
 int main(void) { return 0; }
 EOF
-  cc_check && _termios=yes && _res_comment="$_termios_header" && break
+  cc_check && _termios=yes && _res_comment="using $_termios_header" && break
 done
 fi
 
@@ -5740,7 +5740,7 @@ echores "$_freetype"
 
 if test "$_freetype" = no ; then
     _fontconfig=no
-    _res_comment="freetype support needed"
+    _res_comment="FreeType support needed"
 fi
 echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
@@ -6976,7 +6976,7 @@ echores "$_zr"
 # mencoder requires (optional) those libs: libmp3lame
 if test "$_mencoder" != no ; then
 
-echocheck "libmp3lame (for mencoder)"
+echocheck "libmp3lame"
 _def_mp3lame_preset='#undef CONFIG_MP3LAME_PRESET'
 _def_mp3lame_preset_medium='#undef CONFIG_MP3LAME_PRESET_MEDIUM'
 if test "$_mp3lame" = auto ; then
