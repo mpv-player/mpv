@@ -2432,6 +2432,7 @@ else
 fi
 echores $_asmalign_pot
 
+if x86 ; then
 echocheck "yasm"
 if test -z "$YASMFLAGS" ; then
   if darwin ; then
@@ -2466,6 +2467,8 @@ else
   _have_yasm="no"
   echores "no"
 fi
+fi #if x86
+
 
 #FIXME: This should happen before the check for CFLAGS..
 if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; then
