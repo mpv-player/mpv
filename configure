@@ -2977,6 +2977,53 @@ else
 fi
 echores "$_network"
 
+
+echocheck "inet6"
+if test "$_inet6" = auto ; then
+  cat > $TMPC << EOF
+#include <sys/types.h>
+#if !defined(_WIN32) || defined(__CYGWIN__)
+#include <sys/socket.h>
+#include <netinet/in.h>
+#else
+#include <ws2tcpip.h>
+#endif
+int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); return 0; }
+EOF
+  _inet6=no
+  if cc_check $_ld_sock ; then
+    _inet6=yes
+  fi
+fi
+if test "$_inet6" = yes ; then
+  _def_inet6='#define HAVE_AF_INET6 1'
+else
+  _def_inet6='#undef HAVE_AF_INET6'
+fi
+echores "$_inet6"
+
+
+echocheck "gethostbyname2"
+if test "$_gethostbyname2" = auto ; then
+cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+int main(void) { gethostbyname2("", AF_INET); return 0; }
+EOF
+  _gethostbyname2=no
+  if cc_check ; then
+    _gethostbyname2=yes
+  fi
+fi
+if test "$_gethostbyname2" = yes ; then
+  _def_gethostbyname2='#define HAVE_GETHOSTBYNAME2 1'
+else
+  _def_gethostbyname2='#undef HAVE_GETHOSTBYNAME2'
+fi
+echores "$_gethostbyname2"
+
+
 echocheck "inttypes.h (required)"
 cat > $TMPC << EOF
 #include <inttypes.h>
@@ -3072,6 +3119,16 @@ else
   def_alloca_h='#undef HAVE_ALLOCA_H'
 fi
 echores "$_alloca"
+
+
+echocheck "fastmemcpy"
+# fastmemcpy check is done earlier with tests of CPU & binutils features
+if test "$_fastmemcpy" = yes ; then
+  _def_fastmemcpy='#define CONFIG_FASTMEMCPY 1'
+else
+  _def_fastmemcpy='#undef CONFIG_FASTMEMCPY'
+fi
+echores "$_fastmemcpy"
 
 
 echocheck "mman.h"
@@ -3515,6 +3572,15 @@ _def_posix_select='#undef HAVE_POSIX_SELECT'
 ! os2 && cc_check && _posix_select=yes \
   && _def_posix_select='#define HAVE_POSIX_SELECT 1'
 echores "$_posix_select"
+
+
+echocheck "audio select()"
+if test "$_select" = no ; then
+  _def_select='#undef HAVE_AUDIO_SELECT'
+elif test  "$_select" = yes ; then
+  _def_select='#define HAVE_AUDIO_SELECT 1'
+fi
+echores "$_select"
 
 
 echocheck "gettimeofday()"
@@ -4988,25 +5054,6 @@ echores "$_directx"
 fi #if win32; then
 
 
-echocheck "NAS"
-if test "$_nas" = auto ; then
-  cat > $TMPC << EOF
-#include <audio/audiolib.h>
-int main(void) { return 0; }
-EOF
-  _nas=no
-  cc_check $_ld_lm -laudio -lXt && _nas=yes
-fi
-if test "$_nas" = yes ; then
-  _def_nas='#define CONFIG_NAS 1'
-  _libs_mplayer="$_libs_mplayer -laudio -lXt"
-  _aomodules="nas $_aomodules"
-else
-  _noaomodules="nas $_noaomodules"
-  _def_nas='#undef CONFIG_NAS'
-fi
-echores "$_nas"
-
 echocheck "DXR2"
 if test "$_dxr2" = auto; then
   _dxr2=no
@@ -5224,6 +5271,27 @@ else
   _def_esd_latency='#undef CONFIG_ESD_LATENCY'
   _noaomodules="esd $_noaomodules"
 fi
+
+
+echocheck "NAS"
+if test "$_nas" = auto ; then
+  cat > $TMPC << EOF
+#include <audio/audiolib.h>
+int main(void) { return 0; }
+EOF
+  _nas=no
+  cc_check $_ld_lm -laudio -lXt && _nas=yes
+fi
+if test "$_nas" = yes ; then
+  _def_nas='#define CONFIG_NAS 1'
+  _libs_mplayer="$_libs_mplayer -laudio -lXt"
+  _aomodules="nas $_aomodules"
+else
+  _noaomodules="nas $_noaomodules"
+  _def_nas='#undef CONFIG_NAS'
+fi
+echores "$_nas"
+
 
 echocheck "pulse"
 if test "$_pulse" = auto ; then
@@ -7030,15 +7098,6 @@ else
 fi
 echores "$_mencoder"
 
-echocheck "fastmemcpy"
-# fastmemcpy check is done earlier with tests of CPU & binutils features
-if test "$_fastmemcpy" = yes ; then
-  _def_fastmemcpy='#define CONFIG_FASTMEMCPY 1'
-else
-  _def_fastmemcpy='#undef CONFIG_FASTMEMCPY'
-fi
-echores "$_fastmemcpy"
-
 
 echocheck "UnRAR executable"
 if test "$_unrar_exec" = auto ; then
@@ -7357,15 +7416,6 @@ fi
 echores "$_pvr"
 
 
-echocheck "audio select()"
-if test "$_select" = no ; then
-  _def_select='#undef HAVE_AUDIO_SELECT'
-elif test  "$_select" = yes ; then
-  _def_select='#define HAVE_AUDIO_SELECT 1'
-fi
-echores "$_select"
-
-
 echocheck "ftp"
 if ! beos && test "$_ftp" = yes ; then
   _def_ftp='#define CONFIG_FTP 1'
@@ -7463,52 +7513,6 @@ else
   _def_xmms='#undef CONFIG_XMMS'
 fi
 echores "$_xmms"
-
-echocheck "inet6"
-if test "$_inet6" = auto ; then
-  cat > $TMPC << EOF
-#include <sys/types.h>
-#if !defined(_WIN32) || defined(__CYGWIN__)
-#include <sys/socket.h>
-#include <netinet/in.h>
-#else
-#include <ws2tcpip.h>
-#endif
-int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); return 0; }
-EOF
-  _inet6=no
-  if cc_check $_ld_sock ; then
-    _inet6=yes
-  fi
-fi
-if test "$_inet6" = yes ; then
-  _def_inet6='#define HAVE_AF_INET6 1'
-else
-  _def_inet6='#undef HAVE_AF_INET6'
-fi
-echores "$_inet6"
-
-
-echocheck "gethostbyname2"
-if test "$_gethostbyname2" = auto ; then
-cat > $TMPC << EOF
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-int main(void) { gethostbyname2("", AF_INET); return 0; }
-EOF
-  _gethostbyname2=no
-  if cc_check ; then
-    _gethostbyname2=yes
-  fi
-fi
-
-if test "$_gethostbyname2" = yes ; then
-  _def_gethostbyname2='#define HAVE_GETHOSTBYNAME2 1'
-else
-  _def_gethostbyname2='#undef HAVE_GETHOSTBYNAME2'
-fi
-echores "$_gethostbyname2"
 
 
 # --------------- GUI specific tests begin -------------------
