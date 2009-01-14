@@ -1716,51 +1716,6 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time) {
 	return 0;
 }
 
-static int generate_video_frame(struct MPContext *mpctx)
-{
-    sh_video_t * const sh_video = mpctx->sh_video;
-    demux_stream_t *d_video = mpctx->d_video;
-
-    unsigned char *start;
-    int in_size;
-    int hit_eof=0;
-    double pts;
-
-    while (1) {
-	int drop_frame = check_framedrop(mpctx, sh_video->frametime);
-	void *decoded_frame;
-	current_module = "decode video";
-	// XXX Time used in this call is not counted in any performance
-	// timer now, OSD is not updated correctly for filter-added frames
-	if (vf_output_queued_frame(sh_video->vfilter))
-	    break;
-	current_module = "video_read_frame";
-	in_size = ds_get_packet_pts(d_video, &start, &pts);
-	if (in_size < 0) {
-	    // try to extract last frames in case of decoder lag
-	    in_size = 0;
-	    pts = 1e300;
-	    hit_eof = 1;
-	}
-	if (in_size > max_framesize)
-	    max_framesize = in_size;
-	current_module = "decode video";
-	decoded_frame = decode_video(sh_video, start, in_size, drop_frame, pts);
-	if (decoded_frame) {
-	    update_subtitles(sh_video, mpctx->d_sub, 0);
-	    update_teletext(sh_video, mpctx->demuxer, 0);
-	    update_osd_msg(mpctx);
-	    current_module = "filter video";
-	    if (filter_video(sh_video, decoded_frame, sh_video->pts,
-                             mpctx->osd))
-		break;
-	} else if (drop_frame)
-	    return -1;
-	if (hit_eof)
-	    return 0;
-    }
-    return 1;
-}
 
 #ifdef HAVE_RTC
     int rtc_fd = -1;
@@ -2280,35 +2235,76 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
 static double update_video(struct MPContext *mpctx, int *blit_frame)
 {
     struct sh_video *sh_video = mpctx->sh_video;
-    double frame_time;
     *blit_frame = 0;
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
                                mpctx->osd); // hack for vf_expand
     if (!mpctx->opts.correct_pts)
         return update_video_nocorrect_pts(mpctx, blit_frame);
-    else {
-	int res = generate_video_frame(mpctx);
-	if (!res)
-	    return -1;
-	sh_video->vfilter->control(sh_video->vfilter, VFCTRL_GET_PTS,
-                                   &sh_video->pts);
-	if (sh_video->pts == MP_NOPTS_VALUE) {
-	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts after filters MISSING\n");
-	    sh_video->pts = sh_video->last_pts;
-	}
-	if (sh_video->last_pts == MP_NOPTS_VALUE)
-	    sh_video->last_pts= sh_video->pts;
-	else if (sh_video->last_pts >= sh_video->pts) {
-	    sh_video->last_pts = sh_video->pts;
-	    mp_msg(MSGT_CPLAYER, MSGL_INFO, "pts value <= previous\n");
-	}
-	frame_time = sh_video->pts - sh_video->last_pts;
-	sh_video->last_pts = sh_video->pts;
-	sh_video->timer += frame_time;
-	if(mpctx->sh_audio)
-	    mpctx->delay -= frame_time;
-	*blit_frame = res > 0;
+
+    double pts;
+
+    while (1) {
+        current_module = "filter_video";
+        // XXX Time used in this call is not counted in any performance
+        // timer now, OSD time is not updated correctly for filter-added frames
+        if (vf_output_queued_frame(sh_video->vfilter))
+            break;
+        unsigned char *packet = NULL;
+        bool hit_eof = false;
+        int in_size = ds_get_packet_pts(mpctx->d_video, &packet, &pts);
+        if (in_size < 0) {
+            // try to extract last frames in case of decoder lag
+            in_size = 0;
+            pts = 1e300;
+            hit_eof = true;
+        }
+        if (in_size > max_framesize)
+            max_framesize = in_size;
+        current_module = "decode video";
+        int framedrop_type = check_framedrop(mpctx, sh_video->frametime);
+        void *decoded_frame = decode_video(sh_video, packet, in_size,
+                                           framedrop_type, pts);
+        if (decoded_frame) {
+            // These updates are done here for vf_expand OSD/subtitles
+            update_subtitles(sh_video, mpctx->d_sub, 0);
+            update_teletext(sh_video, mpctx->demuxer, 0);
+            update_osd_msg(mpctx);
+            current_module = "filter video";
+            if (filter_video(sh_video, decoded_frame, sh_video->pts,
+                             mpctx->osd))
+                break;
+        } else if (hit_eof)
+            return -1;
     }
+
+    sh_video->vfilter->control(sh_video->vfilter, VFCTRL_GET_PTS, &pts);
+    if (pts == MP_NOPTS_VALUE) {
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, "Video pts after filters MISSING\n");
+        // Try to use decoder pts from before filters
+        pts = sh_video->pts;
+    }
+    sh_video->pts = pts;
+    if (sh_video->last_pts == MP_NOPTS_VALUE)
+        sh_video->last_pts = sh_video->pts;
+    else if (sh_video->last_pts >= sh_video->pts) {
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Non-increasing video pts: %f <= %f\n",
+               sh_video->pts, sh_video->last_pts);
+        /* If the difference in pts is small treat it as jitter around the
+         * right value (possibly caused by incorrect timestamp ordering) and
+         * just show this frame immediately after the last one.
+         * Treat bigger differences as timestamp resets and start counting
+         * timing of later frames from the position of this one. */
+        if (sh_video->last_pts - sh_video->pts > 0.5)
+            sh_video->last_pts = sh_video->pts;
+        else
+            sh_video->pts = sh_video->last_pts;
+    }
+    double frame_time = sh_video->pts - sh_video->last_pts;
+    sh_video->last_pts = sh_video->pts;
+    sh_video->timer += frame_time;
+    if (mpctx->sh_audio)
+        mpctx->delay -= frame_time;
+    *blit_frame = 1;
     return frame_time;
 }
 
