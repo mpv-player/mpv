@@ -1,6 +1,8 @@
 #ifndef MPLAYER_MP_CORE_H
 #define MPLAYER_MP_CORE_H
 
+#include <stdbool.h>
+
 #include "options.h"
 #include "mixer.h"
 #include "subreader.h"
@@ -76,12 +78,28 @@ typedef struct MPContext {
     // struct.
     int num_buffered_frames;
 
+    // Show a video frame as quickly as possible without trying to adjust
+    // for AV sync. Used when starting a file or after seeking.
+    bool update_video_immediately;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
     // written to the ao, decreased when moving to the next frame.
     // In the audio-only case used as a timer since the last seek
     // by the audio CPU usage meter.
     double delay;
+    // AV sync: time until next frame should be shown
+    float time_frame;
+    // How long the last vo flip() call took. Used to adjust timing with
+    // the goal of making flip() calls finish (rather than start) at the
+    // specified time.
+    float last_vo_flip_duration;
+    // How much video timing has been changed to make it match the audio
+    // timeline. Used for status line information only.
+    double total_avsync_change;
+    // A-V sync difference when last frame was displayed. Kept to display
+    // the same value if the status line is updated at a time where no new
+    // video frame is shown.
+    double last_av_difference;
 
     // Timestamp from the last time some timing functions read the
     // current time, in (occasionally wrapping) microseconds. Used
@@ -112,7 +130,13 @@ typedef struct MPContext {
     int last_dvb_step;
     int dvbin_reopen;
 
-    int was_paused;
+    int paused;
+    // step this many frames, then pause
+    int step_frames;
+
+    // Set after showing warning about decoding being too slow for realtime
+    // playback rate. Used to avoid showing it multiple times.
+    bool drop_message_shown;
 
 #ifdef CONFIG_DVDNAV
     struct mp_image *nav_smpi; ///< last decoded dvdnav video image
@@ -138,5 +162,8 @@ double playing_audio_pts(struct MPContext *mpctx);
 void exit_player_with_rc(struct MPContext *mpctx, exit_reason_t how, int rc);
 void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr);
 int reinit_video_chain(struct MPContext *mpctx);
+void pause_player(struct MPContext *mpctx);
+void unpause_player(struct MPContext *mpctx);
+void add_step_frame(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

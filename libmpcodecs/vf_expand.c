@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -419,6 +420,11 @@ static int control(struct vf_instance* vf, int request, void* data){
         break;
     case VFCTRL_DRAW_OSD:
 	if(vf->priv->osd_enabled) return CONTROL_TRUE;
+        break;
+    case VFCTRL_REDRAW_OSD:
+        if (vf->priv->osd_enabled)
+            return false;
+        break;
     }
 #endif
     return vf_next_control(vf,request,data);

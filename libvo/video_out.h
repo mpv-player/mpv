@@ -87,6 +87,8 @@ typedef struct {
 } mp_colorkey_t;
 
 #define VOCTRL_XOVERLAY_SET_WIN 23
+#define VOCTRL_REDRAW_OSD 24
+
 typedef struct {
   int x,y;
   int w,h;

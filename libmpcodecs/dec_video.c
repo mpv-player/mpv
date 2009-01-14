@@ -6,6 +6,7 @@
 #include <malloc.h>
 #endif
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 
 #include "mp_msg.h"
@@ -136,6 +137,14 @@ int set_rectangle(sh_video_t *sh_video, int param, int value)
             return 1;
     }
     return 0;
+}
+
+int redraw_osd(struct sh_video *sh_video, struct osd_state *osd)
+{
+    struct vf_instance *vf = sh_video->vfilter;
+    if (vf->control(vf, VFCTRL_REDRAW_OSD, osd) == true)
+        return 0;
+    return -1;
 }
 
 void resync_video_stream(sh_video_t *sh_video)

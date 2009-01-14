@@ -1147,6 +1147,12 @@ static int control(uint32_t request, void *data)
   case VOCTRL_UPDATE_SCREENINFO:
     update_xinerama_info();
     return VO_TRUE;
+  case VOCTRL_REDRAW_OSD:
+    if (vo_doublebuffering)
+      do_render();
+    draw_osd();
+    flip_page();
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }
