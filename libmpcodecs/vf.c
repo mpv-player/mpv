@@ -578,12 +578,6 @@ int vf_output_queued_frame(vf_instance_t *vf)
 	tmp = last->continue_buffered_image;
 	last->continue_buffered_image = NULL;
 	ret = tmp(last);
-	if (ret > 0) {
-	    vf->control(vf, VFCTRL_DRAW_OSD, NULL);
-#ifdef CONFIG_ASS
-	    vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
-#endif
-	}
 	if (ret)
 	    return ret;
     }
@@ -659,14 +653,6 @@ int vf_next_config(struct vf_instance_s* vf,
 
 int vf_next_control(struct vf_instance_s* vf, int request, void* data){
     return vf->next->control(vf->next,request,data);
-}
-
-void vf_extra_flip(struct vf_instance_s* vf) {
-    vf_next_control(vf, VFCTRL_DRAW_OSD, NULL);
-#ifdef CONFIG_ASS
-    vf_next_control(vf, VFCTRL_DRAW_EOSD, NULL);
-#endif
-    vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 }
 
 int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt){
