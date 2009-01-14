@@ -96,6 +96,7 @@
 MPOpts opts;
 struct osd_state *osd;
 
+const int under_mencoder = 1;
 int vo_doublebuffering=0;
 int vo_directrendering=0;
 int forced_subs_only=0;

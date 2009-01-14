@@ -87,6 +87,7 @@
 
 #include "input/input.h"
 
+const int under_mencoder = 0;
 int slave_mode=0;
 int player_idle_mode=0;
 int quiet=0;
@@ -2209,65 +2210,82 @@ err_out:
   return 0;
 }
 
+static double update_video_nocorrect_pts(struct MPContext *mpctx,
+                                         int *blit_frame)
+{
+    struct sh_video *sh_video = mpctx->sh_video;
+    *blit_frame = 0;
+    double frame_time = 0;
+    while (1) {
+        current_module = "filter_video";
+        // In nocorrect-pts mode there is no way to properly time these frames
+        if (vf_output_queued_frame(sh_video->vfilter))
+            break;
+        unsigned char *packet = NULL;
+        frame_time = sh_video->next_frame_time;
+        if (mpctx->update_video_immediately)
+            frame_time = 0;
+        int in_size = video_read_frame(sh_video, &sh_video->next_frame_time,
+                                       &packet, force_fps);
+        if (in_size < 0) {
+#ifdef CONFIG_DVDNAV
+            if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
+                if (mp_dvdnav_is_eof(mpctx->stream))
+                    return -1;
+                if (mpctx->d_video)
+                    mpctx->d_video->eof = 0;
+                if (mpctx->d_audio)
+                    mpctx->d_audio->eof = 0;
+                mpctx->stream->eof = 0;
+            } else
+#endif
+            return -1;
+        }
+        if (in_size > max_framesize)
+            max_framesize = in_size;
+        sh_video->timer += frame_time;
+        if (mpctx->sh_audio)
+            mpctx->delay -= frame_time;
+        // video_read_frame can change fps (e.g. for ASF video)
+        vo_fps = sh_video->fps;
+        int framedrop_type = check_framedrop(mpctx, frame_time);
+        current_module = "decode video";
+
+        void *decoded_frame;
+#ifdef CONFIG_DVDNAV
+        decoded_frame = mp_dvdnav_restore_smpi(mpctx, &in_size, &packet, NULL);
+        if (in_size >= 0 && !decoded_frame)
+#endif
+        decoded_frame = decode_video(sh_video, packet, in_size, framedrop_type,
+                                     sh_video->pts);
+#ifdef CONFIG_DVDNAV
+        // Save last still frame for future display
+        mp_dvdnav_restore_smpi(mpctx, in_size, packet, decoded_frame);
+#endif
+        if (decoded_frame) {
+            // These updates are done here for vf_expand OSD/subtitles
+            update_subtitles(sh_video, mpctx->d_sub, 0);
+            update_teletext(sh_video, mpctx->demuxer, 0);
+            update_osd_msg(mpctx);
+            current_module = "filter video";
+            if (filter_video(sh_video, decoded_frame, sh_video->pts,
+                             mpctx->osd))
+                break;
+        }
+    }
+    *blit_frame = 1;
+    return frame_time;
+}
+
 static double update_video(struct MPContext *mpctx, int *blit_frame)
 {
-    struct MPOpts *opts = &mpctx->opts;
-    sh_video_t * const sh_video = mpctx->sh_video;
-    //--------------------  Decode a frame: -----------------------
+    struct sh_video *sh_video = mpctx->sh_video;
     double frame_time;
-    *blit_frame = 0; // Don't blit if we hit EOF
+    *blit_frame = 0;
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
                                mpctx->osd); // hack for vf_expand
-    if (!opts->correct_pts) {
-	unsigned char* start=NULL;
-	void *decoded_frame = NULL;
-	int drop_frame=0;
-	int in_size;
-
-	current_module = "video_read_frame";
-	frame_time = sh_video->next_frame_time;
-	in_size = video_read_frame(sh_video, &sh_video->next_frame_time,
-				   &start, force_fps);
-#ifdef CONFIG_DVDNAV
-	/// wait, still frame or EOF
-	if (mpctx->stream->type == STREAMTYPE_DVDNAV && in_size < 0) {
-	    if (mp_dvdnav_is_eof(mpctx->stream)) return -1;
-	    if (mpctx->d_video) mpctx->d_video->eof = 0;
-	    if (mpctx->d_audio) mpctx->d_audio->eof = 0;
-	    mpctx->stream->eof = 0;
-	} else
-#endif
-	if (in_size < 0)
-	    return -1;
-	if (in_size > max_framesize)
-	    max_framesize = in_size; // stats
-	sh_video->timer += frame_time;
-	if (mpctx->sh_audio)
-	    mpctx->delay -= frame_time;
-	// video_read_frame can change fps (e.g. for ASF video)
-	vo_fps = sh_video->fps;
-	drop_frame = check_framedrop(mpctx, frame_time);
-	update_subtitles(sh_video, mpctx->d_sub, 0);
-	update_teletext(sh_video, mpctx->demuxer, 0);
-	update_osd_msg(mpctx);
-	current_module = "decode_video";
-#ifdef CONFIG_DVDNAV
-	decoded_frame = mp_dvdnav_restore_smpi(mpctx, &in_size,&start,
-                                               decoded_frame);
-	/// still frame has been reached, no need to decode
-	if (in_size > 0 && !decoded_frame)
-#endif
-	decoded_frame = decode_video(sh_video, start, in_size, drop_frame,
-				     sh_video->pts);
-#ifdef CONFIG_DVDNAV
-	/// save back last still frame for future display
-        mp_dvdnav_save_smpi(mpctx, in_size, start, decoded_frame);
-#endif
-	current_module = "filter_video";
-	*blit_frame = (decoded_frame && filter_video(sh_video, decoded_frame,
-                                                     sh_video->pts,
-                                                     mpctx->osd));
-    }
+    if (!mpctx->opts.correct_pts)
+        return update_video_nocorrect_pts(mpctx, blit_frame);
     else {
 	int res = generate_video_frame(mpctx);
 	if (!res)
