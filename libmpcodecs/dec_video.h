@@ -12,8 +12,7 @@ int init_best_video_codec(sh_video_t *sh_video, char** video_codec_list, char** 
 void uninit_video(sh_video_t *sh_video);
 
 void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size, int drop_frame, double pts);
-int filter_video(sh_video_t *sh_video, void *frame, double pts,
-                 struct osd_state *osd);
+int filter_video(sh_video_t *sh_video, void *frame, double pts);
 
 int get_video_quality_max(sh_video_t *sh_video);
 void set_video_quality(sh_video_t *sh_video, int quality);

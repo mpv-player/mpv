@@ -2223,8 +2223,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
             update_teletext(sh_video, mpctx->demuxer, 0);
             update_osd_msg(mpctx);
             current_module = "filter video";
-            if (filter_video(sh_video, decoded_frame, sh_video->pts,
-                             mpctx->osd))
+            if (filter_video(sh_video, decoded_frame, sh_video->pts))
                 break;
         }
     }
@@ -2270,8 +2269,7 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
             update_teletext(sh_video, mpctx->demuxer, 0);
             update_osd_msg(mpctx);
             current_module = "filter video";
-            if (filter_video(sh_video, decoded_frame, sh_video->pts,
-                             mpctx->osd))
+            if (filter_video(sh_video, decoded_frame, sh_video->pts))
                 break;
         } else if (hit_eof)
             return -1;
@@ -3786,8 +3784,12 @@ if(!mpctx->sh_video) {
 	  mpctx->stop_play = PT_NEXT_ENTRY;
           goto goto_next_file;
       }
-      if (blit_frame)
+      if (blit_frame) {
+          struct vf_instance *vf = mpctx->sh_video->vfilter;
+          vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
+          vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
           vo_osd_changed(0);
+      }
       if (frame_time < 0)
 	  mpctx->stop_play = AT_END_OF_FILE;
       else {

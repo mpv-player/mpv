@@ -1346,7 +1346,13 @@ default:
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ, osd);
     {void *decoded_frame = decode_video(sh_video,frame_data.start,frame_data.in_size,
       skip_flag>0 && (!sh_video->vfilter || sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), MP_NOPTS_VALUE);
-      blit_frame = decoded_frame && filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE, osd);}
+      blit_frame = decoded_frame && filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE);
+      if (blit_frame) {
+          struct vf_instance *vf = sh_video->vfilter;
+          vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
+          vf->control(vf, VFCTRL_DRAW_OSD, osd);
+      }
+    }
     
     if (sh_video->vf_initialized < 0) mencoder_exit(1, NULL);
     
@@ -1711,7 +1717,11 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
             int softskip = (vfilter->control(vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) == CONTROL_TRUE);
             void *decoded_frame = decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip, MP_NOPTS_VALUE);
 	    if (decoded_frame)
-		filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE, osd);
+                if (filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE)) {
+                    struct vf_instance *vf = sh_video->vfilter;
+                    vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
+                    vf->control(vf, VFCTRL_DRAW_OSD, osd);
+                }
         }
 
         if (print_info) mp_msg(MSGT_MENCODER, MSGL_STATUS,

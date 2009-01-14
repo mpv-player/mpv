@@ -455,20 +455,13 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
     return mpi;
 }
 
-int filter_video(sh_video_t *sh_video, void *frame, double pts,
-                 struct osd_state *osd)
+int filter_video(sh_video_t *sh_video, void *frame, double pts)
 {
     mp_image_t *mpi = frame;
     unsigned int t2 = GetTimer();
     vf_instance_t *vf = sh_video->vfilter;
     // apply video filters and call the leaf vo/ve
     int ret = vf->put_image(vf, mpi, pts);
-    if (ret > 0) {
-#ifdef CONFIG_ASS
-        vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
-#endif
-        vf->control(vf, VFCTRL_DRAW_OSD, osd);
-    }
 
     t2 = GetTimer() - t2;
     vout_time_usage += t2 * 0.000001;
