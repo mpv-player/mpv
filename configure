@@ -2611,7 +2611,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MLIB MMI VIS MVI'
+_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -5532,6 +5532,7 @@ fi
 echores "$_sunaudio"
 
 
+def_mlib='#define CONFIG_MLIB 0'
 if sunos; then
 echocheck "Sun mediaLib"
 if test "$_mlib" = auto ; then
@@ -5540,9 +5541,8 @@ if test "$_mlib" = auto ; then
 #include <mlib.h>
 int main(void) { mlib_VideoColorYUV2ABGR420(0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  cc_check -lmlib && _mlib=yes
+  cc_check -lmlib && _mlib=yes && def_mlib='#define CONFIG_MLIB 1'
 fi
-test "$_mlib" = yes && _cpuexts="MLIB $_cpuexts"
 echores "$_mlib"
 fi #if sunos
 
@@ -8574,6 +8574,7 @@ $_def_libswscale_so
 $_def_dcbzl
 $def_fast_64bit
 $_def_fast_unaligned
+$def_mlib
 $_def_mkstemp
 $_def_pthreads
 $_def_threads
