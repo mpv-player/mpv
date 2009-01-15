@@ -6228,10 +6228,10 @@ if test "$_mp3lib" = auto ; then
 fi
 if test "$_mp3lib" = yes ; then
   _def_mp3lib='#define CONFIG_MP3LIB 1'
-  _codecmodules="mp3lib $_codecmodules"
+  _codecmodules="mp3lib(internal) $_codecmodules"
 else
   _def_mp3lib='#undef CONFIG_MP3LIB'
-  _nocodecmodules="mp3lib $_nocodecmodules"
+  _nocodecmodules="mp3lib(internal) $_nocodecmodules"
 fi
 echores "$_mp3lib"
 
@@ -6276,10 +6276,10 @@ if test "$_libmpeg2" = auto ; then
 fi
 if test "$_libmpeg2" = yes ; then
   _def_libmpeg2='#define CONFIG_LIBMPEG2 1'
-  _codecmodules="libmpeg2 $_codecmodules"
+  _codecmodules="libmpeg2(internal) $_codecmodules"
 else
   _def_libmpeg2='#undef CONFIG_LIBMPEG2'
-  _nocodecmodules="libmpeg2 $_nocodecmodules"
+  _nocodecmodules="libmpeg2(internal) $_nocodecmodules"
 fi
 echores "$_libmpeg2"
 
@@ -6410,7 +6410,11 @@ fi
 
 if test "$_faad" = yes ; then
   _def_faad='#define CONFIG_FAAD 1'
-  _codecmodules="faad2 $_codecmodules"
+  if test "$_faad_internal" = yes ; then
+    _codecmodules="faad2(internal) $_codecmodules"
+  else
+    _codecmodules="faad2 $_codecmodules"
+  fi
 else
   _faad=no
   _nocodecmodules="faad2 $_nocodecmodules"
@@ -6692,7 +6696,7 @@ test "$_libavcodec_so" = yes && _def_libavcodec_so='#define CONFIG_LIBAVCODEC_SO
 test "$_libavcodec_mpegaudio_hp" = yes \
   && _def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
 if test "$_libavcodec_a" = yes ; then
-  _codecmodules="libavcodec $_codecmodules"
+  _codecmodules="libavcodec(internal) $_codecmodules"
 elif test "$_libavcodec_so" = yes ; then
   _codecmodules="libavcodec.so $_codecmodules"
 else
@@ -7809,11 +7813,12 @@ if test "$_dvdnav" = yes ; then
   _def_dvdnav='#define CONFIG_DVDNAV 1'
   if test "$dvdnav_internal" = yes ; then
     _inc_extra="$_inc_extra -Ilibdvdnav"
+    _inputmodules="dvdnav(internal) $_inputmodules"
   else
     _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
     _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+    _inputmodules="dvdnav $_inputmodules"
   fi
-  _inputmodules="dvdnav $_inputmodules"
 else
   _def_dvdnav='#undef CONFIG_DVDNAV'
   _noinputmodules="dvdnav $_noinputmodules"
