@@ -1,4 +1,4 @@
-.\" synced with r28126
+.\" synced with r28279
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -33,7 +33,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "1er janvier 2008" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "15 janvier 2009" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -624,6 +624,7 @@ alang=en
 profile-desc="profil pour les flux dvdnav://"
 profile=protocol.dvd
 mouse-movements=yes
+nocache=yes
 
 [extension.flv]
 profile-desc="profil pour les fichiers .flv"
@@ -1089,9 +1090,10 @@ Affiche le menu principal au lancement de MPlayer.
 .TP
 .B \-mouse\-movements
 Permet MPlayer de recevoir des évènements souris envoyés
-par le pilote de sortie vidéo (seuls ceux dérivés de X11 sont gérés
-pour le moment).
+par le pilote de sortie vidéo.
 Utilisé pour sélectioner les boutons des menus DVDs.
+Géré par par les VOs basés sur X11 (x11, xv, xvmc, etc.) ainsi que les VOs gl,
+gl2, direct3d et macosx.
 .
 .TP
 .B \-noar
@@ -1226,6 +1228,15 @@ MPlayer affiche les IDs audios disponibles quand il est lancé en mode
 bavard (-v).
 Pour jouer des flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 (si présent) avec le flux audio choisi.
+.
+.TP
+.B \-ausid <ID> (voir aussi \-alang)
+Sélectionne le canal du sous-flux audio.
+L'intervalle des valeurs valides est 0x55..0x75 et s'applique uniquement au
+démultiplexeur MPEG-TS natif (par celui de libavformat).
+Le type de format peut ne pas être correctement identifié puisque cette information n'est pas présente dans le flux, mais le démultiplexage des flux audios se fera correctement en présence de sous-flux multiples.
+MPlayer affiche tous les identifiants des sous-flux quand il est lancé avec
+l'option \-identify.
 .
 .TP
 .B \-alang <code de langue[,code de langue,...]> (voir aussi \-aid)
@@ -2181,8 +2192,8 @@ sous-titres et ceux contenus dans les pistes Matroska.
 Fonctionne avec \-embeddedfonts.
 .br
 .I NOTE\ :
-Quand fontconfig est activé à compilation, \-ass active \-fontconfig à moins
-que vous l'empêchiez explicitement avec l'option \-nofontconfig.
+Contrairement aux OSD normaux, libass utilise fontconfig par défaut.
+Pour désactiver ceci, utiliser l'option \-nofontconfig.
 .
 .TP
 .B \-ass\-border\-color <valeur>
@@ -2367,8 +2378,8 @@ Avec Fontconfig, cette option détermine le nom de police fontconfig.
 Active l'utilisation des polices gérées par fontconfig.
 .br
 .I NOTE\ :
-\-ass active cette option automatiquement à moins que vous l'empêchiez
-explicitement avec l'option \-nofontconfig.
+Par défaut fontconfig est utilisé pour afficher les sous-titres rendus par libass.
+Cette option active aussi le rendu de l'OSD avec fontconfig.
 .
 .TP
 .B \-forcedsubsonly
@@ -2910,6 +2921,10 @@ Nom du client qui passé à JACK (par défaut\ : MPlayer [<PID>]).
 .IPs (no)estimate
 Estime le délai audio, supposé réduire les à-coups lors de la lecture
 vidéo (par défaut\ : activé).
+.IPs (no)autostart
+Démarre le serveur jackd si nécessaire (par défaut\ : désactivé)
+Notez que cette option ne semble pas fiable et polluera la console avec plein
+de messages du serveur jackd.
 .RE
 .PD 1
 .
@@ -3724,6 +3739,13 @@ pilote de sortie vidéo CoreVideo pour Mac OS X
 .RSs
 .IPs device_id=<numéro>
 Choisir le moniteur à utiliser en plein-écran.
+.IPs shared_buffer
+Écrit la sortie dans un tampon partagé au lieu de l'afficher, et essaye
+d'établir une NSConnection avec une IHM existante.
+.IPs buffer_name=<name>
+Nom du tampon partagé créé avec shm_open pour effectuer la NSConnection avec
+une IHM (defaut\ : "mplayerosx").
+Définir l'option buffer_name active shared_buffer implicitement.
 .RE
 .PD 1
 .
@@ -11707,7 +11729,7 @@ MPlayer était écrit à l'origine par Arpad Gereoffy.
 Voir le fichier AUTHORS pour la liste de certains des nombreux autres
 contributeurs.
 .TP
-MPlayer est (C) 2000\-2008 The MPlayer Team
+MPlayer est (C) 2000\-2009 The MPlayer Team
 .TP
 Cette page de man est basée sur sa version en langue anglaise, écrite et
 maintenue par Gabucino, Jonas Jermann et Diego Biurrun
