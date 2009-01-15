@@ -2218,7 +2218,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
                                      sh_video->pts);
 #ifdef CONFIG_DVDNAV
         // Save last still frame for future display
-        mp_dvdnav_restore_smpi(mpctx, in_size, packet, decoded_frame);
+        mp_dvdnav_save_smpi(mpctx, in_size, packet, decoded_frame);
 #endif
         if (decoded_frame) {
             // These updates are done here for vf_expand OSD/subtitles
