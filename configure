@@ -2490,7 +2490,7 @@ if test $_yasm ; then
   _have_yasm="yes"
   echores "$_yasm"
 else
-  _def_yasm='#undef HAVE_YASM'
+  _def_yasm='#define HAVE_YASM 0'
   fft_mmx="no"
   _have_yasm="no"
   echores "no"
@@ -8194,6 +8194,7 @@ for part in $1; do
     echo "#define ${_nprefix}_$part 1"
     echo "#define ENABLE_$part 1"
   else
+    echo "#define ${_nprefix}_$part 0"
     echo "#define ENABLE_$part 0"
   fi
 done
