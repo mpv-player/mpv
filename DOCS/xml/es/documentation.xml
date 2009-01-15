@@ -16,6 +16,7 @@ para LINUX</title>
   <year>2006</year>
   <year>2007</year>
   <year>2008</year>
+  <year>2009</year>	
   <holder>MPlayer team</holder>
 </copyright>
 <!--
@@ -179,7 +180,6 @@ pueden ser distribuidos bajo los términos de la Licencia GNU General Public
 License Version 2 (GPL v.2).
 </para>
 
-&history.xml;
 &install.xml;
 </chapter>
 
@@ -191,5 +191,4 @@ License Version 2 (GPL v.2).
 &ports.xml;
 &mencoder.xml;
 &bugreports.xml;
-&bugs.xml;
 &skin.xml;

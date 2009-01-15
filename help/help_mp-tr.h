@@ -56,7 +56,7 @@ static char help_text[]=
 // mplayer.c:
 
 #define MSGTR_Exiting "\nÇıkılıyor...\n"
-#define MSGTR_ExitingHow "\n(%s) Çıkılıyor... \n"
+#define MSGTR_ExitingHow "\nÇıkılıyor... (%s)\n"
 #define MSGTR_Exit_quit "Çık"
 #define MSGTR_Exit_eof "Dosya sonu"
 #define MSGTR_Exit_error "Önemli Hata"
@@ -1516,9 +1516,9 @@ static char help_text[]=
 // network.c
 
 #define MSGTR_MPDEMUX_NW_UnknownAF "Bilinmeyen adres sınıfı %d\n"
-#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "%s çözülüyor ( %s için )...\n"
+#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "Adres çözülüyor %s , %s için...\n"
 #define MSGTR_MPDEMUX_NW_CantResolv "%s için ad çözülemedi: %s\n"
-#define MSGTR_MPDEMUX_NW_ConnectingToServer "%s[%s] sunucusuna bağlanılıyor: %d...\n"
+#define MSGTR_MPDEMUX_NW_ConnectingToServer "Bağlantı kuruluyor %s[%s]: %d...\n"
 #define MSGTR_MPDEMUX_NW_CantConnect2Server "%s ile sunucuya bağlanılamadı\n"
 #define MSGTR_MPDEMUX_NW_SelectFailed "Seçim başarısız.\n"
 #define MSGTR_MPDEMUX_NW_ConnTimeout "Bağlantı zamanaşımı.\n"

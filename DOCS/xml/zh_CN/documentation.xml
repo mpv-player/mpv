@@ -15,23 +15,24 @@
   <year>2006</year>
   <year>2007</year>
   <year>2008</year>
+  <year>2009</year>	
   <holder>MPlayer工作组</holder>
 </copyright>
 <!--
 <legalnotice>
   <title>License</title>
-  <para>This program is free software; you can redistribute it and/or modify
+  <para>MPlayer is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by the
   Free Software Foundation; either version 2 of the License, or (at your
   option) any later version.</para>
 
-  <para>This program is distributed in the hope that it will be useful, but
+  <para>MPlayer is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
   or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
   for more details.</para>
 
   <para>You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software Foundation,
+  along with MPlayer; if not, write to the Free Software Foundation,
   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.</para>
 </legalnotice>
 -->
@@ -178,10 +179,7 @@ It can encode with various codecs, like
 &usage.xml;
 &cd-dvd.xml;
 &faq.xml;
-
-&codecs.xml;
 &video.xml;
-&audio.xml;
 &tvinput.xml;
 &radio.xml;
 
@@ -191,4 +189,3 @@ It can encode with various codecs, like
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
-&history.xml;

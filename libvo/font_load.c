@@ -336,11 +336,7 @@ fail_out:
   return NULL;
 }
 
-#if 0
-int main(void){
-
-read_font_desc("high_arpi.desc",1);
-
-}
+#ifndef CONFIG_FREETYPE
+void render_one_glyph(font_desc_t *desc, int c) {}
+int kerning(font_desc_t *desc, int prevc, int c) { return 0; }
 #endif
-

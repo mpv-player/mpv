@@ -17,6 +17,7 @@
     <year>2006</year>
     <year>2007</year>
     <year>2008</year>
+    <year>2009</year>		
     <holder>MPlayer-Team</holder>
   </copyright>
       <legalnotice>
@@ -218,7 +219,6 @@
 &containers.xml;
 &codecs.xml;
 &video.xml;
-&audio.xml;
 &tvinput.xml;
 &radio.xml;
 
@@ -226,6 +226,4 @@
 &mencoder.xml;
 &encoding-guide.xml;
 &bugreports.xml;
-&bugs.xml;
 &skin.xml;
-&history.xml;

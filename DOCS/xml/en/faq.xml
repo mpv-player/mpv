@@ -812,7 +812,6 @@ This can have multiple reasons.
 </para></listitem>
 <listitem><para>
   Your sound driver is buggy.
-  See the <link linkend="audio">audio section</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>

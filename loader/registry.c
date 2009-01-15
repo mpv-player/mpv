@@ -21,10 +21,10 @@
 #include "ext.h"
 #include "registry.h"
 
+#include "get_path.h"
+
 //#undef TRACE
 //#define TRACE printf
-
-char *get_path(const char*);
 
 // ...can be set before init_registry() call
 char* regpathname = NULL;

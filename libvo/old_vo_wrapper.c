@@ -99,6 +99,17 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
     osd_draw_text(global_osd, dxs, dys, draw_alpha_wrapper, draw_alpha);
 }
 
+void vo_draw_text_ext(int dxs, int dys, int left_border, int top_border,
+                      int right_border, int bottom_border, int orig_w, int orig_h,
+                      void (*draw_alpha)(int x0, int y0, int w,int h,
+                                         unsigned char* src,
+                                         unsigned char *srca, int stride))
+{
+    osd_draw_text_ext(global_osd, dxs, dys, left_border, top_border,
+                      right_border, bottom_border, orig_w, orig_h,
+                      draw_alpha_wrapper, draw_alpha);
+}
+
 int vo_update_osd(int dxs, int dys)
 {
     return osd_update(global_osd, dxs, dys);

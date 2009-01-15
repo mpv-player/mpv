@@ -496,7 +496,7 @@ void MP3_Init(void){
 
 #if 0
 
-void MP3_Close(){
+void MP3_Close(void){
   MP3_eof=1;
   if(mp3_file) fclose(mp3_file);
   mp3_file=NULL;
@@ -565,7 +565,7 @@ void MP3_PrintHeader(void){
 #include "genre.h"
 
 // Read & print ID3 TAG. Do not call when playing!!!  returns filesize.
-int MP3_PrintTAG(){
+int MP3_PrintTAG(void){
         struct id3tag {
                 char tag[3];
                 char title[30];

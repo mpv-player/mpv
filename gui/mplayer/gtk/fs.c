@@ -54,62 +54,67 @@ const gchar   * fsFilter = "*";
 int             fsType    = 0;
 
 char * fsVideoFilterNames[][2] =
-         { { "MPEG files (*.mpg,*.mpeg,*.m1v)",                         "*.mpg,*.mpeg,*.m1v" },
-	   { "VCD/SVCD Images (*.bin)",					"*.bin" },
-           { "VOB files (*.vob)",  				  	"*.vob" },
-           { "AVI files (*.avi)",  				  	"*.avi" },
-	   { "DiVX files (*.divx)",					"*.divx" },
-           { "QuickTime files (*.mov,*.qt,*.mp4)",		  	"*.mov,*.qt,*.mp4" },
-           { "ASF files (*.asf)",  				  	"*.asf" },
-           { "VIVO files (*.viv)", 				  	"*.viv" },
-	   { "RealVideo files (*.rm)",					"*.rm"  },
-	   { "Windows Media Video (*.wmv)",			  	"*.wmv" },
-	   { "OGG Media files (*.ogm)",			  		"*.ogm" },
-	   { "Matroska Media files (*.mkv)",			  	"*.mkv" },
+         {
+	   { "ASF files (*.asf)",					"*.asf" },
+	   { "AVI files (*.avi)",					"*.avi" },
 	   { "Autodesk animations (*.fli,*.flc)",			"*.fli,*.flc" },
-	   { "NuppelVideo files (*.nuv)",				"*.nuv" },
+	   { "DGStation Cuberevo recordings (*.trp)",			"*.trp" },
+	   { "DiVX files (*.divx)",					"*.divx" },
 	   { "MP3 files (*.mp3,*.mp2)",					"*.mp3,*.mp2" },
+	   { "MPEG files (*.mpg,*.mpeg,*.m1v)",				"*.mpg,*.mpeg,*.m1v" },
+	   { "Macromedia Flash Video (*.flv)",				"*.flv" },
+	   { "Matroska Audio files (*.mka)",				"*.mka" },
+	   { "Matroska Media files (*.mkv)",				"*.mkv" },
+	   { "NuppelVideo files (*.nuv)",				"*.nuv" },
+	   { "OGG Vorbis files (*.ogg)",				"*.ogg" },
+	   { "OGG Media files (*.ogm)",					"*.ogm" },
+	   { "QuickTime files (*.mov,*.qt,*.mp4)",			"*.mov,*.qt,*.mp4" },
+	   { "RealVideo files (*.rm)",					"*.rm"  },
+	   { "VCD/SVCD Images (*.bin)",					"*.bin" },
+	   { "VIVO files (*.viv)",					"*.viv" },
+	   { "VOB files (*.vob)",					"*.vob" },
 	   { "Wave files (*.wav)",					"*.wav" },
-	   { "WMA files (*.wma)",					"*.wma" },
-	   { "Matroska Audio files (*.mka)",			  	"*.mka" },
-	   { "Audio files",						"*.wav,*.ogg,*.mp2,*.mp3,*.wma,*.mka" },
-	   { "Video files", 						"*.asf,*.avi,*.divx,*.fli,*.flc,*.ogm,*.mpg,*.mpeg,*.m1v,*.mov,*.mp4,*.nuv,*.qt,*.rm,*.vob,*.viv,*.wmv,*.mkv,*.bin" },
-           { "All files",	      					"*" },
+	   { "Windows Media Audio (*.wma)",				"*.wma" },
+	   { "Windows Media Video (*.wmv)",				"*.wmv" },
+	   { "Audio files",						"*.mp2,*.mp3,*.mka,*.ogg,*.wav,*.wma" },
+	   { "Video files",						"*.asf,*.avi,*.fli,*.flc,*.trp,*.divx,*.mpg,*.mpeg,*.m1v,*.flv,*.mkv,*.nuv,*.ogm,*.mov,*.qt,*.mp4,*.rm,*.bin,*.viv,*.vob,*.wmv" },
+	   { "All files",						"*" },
 	   { NULL,NULL }
 	 };
 int fsLastVideoFilterSelected = -1;
 
 char * fsSubtitleFilterNames[][2] =
-         { { "UTF (*.utf)",  						   "*.utf" },
-           { "SUB (*.sub)",   						   "*.sub" },
-           { "SRT (*.srt)",   						   "*.str" },
-           { "SMI (*.smi)",   						   "*.smi" },
-           { "RT  (*.rt) ",   						   "*.rt"  },
-           { "TXT (*.txt)",   						   "*.txt" },
-           { "ASS (*.ass)",   						   "*.ass" },
-           { "SSA (*.ssa)",   						   "*.ssa" },
-           { "AQT (*.aqt)",   						   "*.aqt" },
-	   { "Subtitles",						   "*.utf,*.sub,*.srt,*.smi,*.rt,*.txt,*.ass,*.ssa,*.aqt" },
-           { "All files",	 					   "*" },
+         {
+           { "AQT (*.aqt)",						"*.aqt" },
+           { "ASS (*.ass)",						"*.ass" },
+           { "RT  (*.rt) ",						"*.rt"  },
+           { "SMI (*.smi)",						"*.smi" },
+           { "SRT (*.srt)",						"*.srt" },
+           { "SSA (*.ssa)",						"*.ssa" },
+           { "SUB (*.sub)",						"*.sub" },
+           { "TXT (*.txt)",						"*.txt" },
+           { "UTF (*.utf)",						"*.utf" },
+           { "Subtitles",						"*.aqt,*.ass,*.rt,*.smi,*.srt,*.ssa,*.sub,*.txt,*.utf" },
+           { "All files",						"*" },
 	   { NULL,NULL }
 	 };
 int fsLastSubtitleFilterSelected = -1;
 
 char * fsOtherFilterNames[][2] =
          {
-	   { "All files", "*"     },
+	   { "All files",						"*" },
 	   { NULL,NULL }
 	 };
 
 char * fsAudioFileNames[][2] =
 	 {
-	   { "WAV files (*.wav)",					   "*.wav" },
-	   { "MP3 files (*.mp2, *.mp3)",				   "*.mp2,*.mp3" },
-	   { "OGG Vorbis files (*.ogg)",				   "*.ogg" },
-	   { "WMA files (*.wma)",				 	   "*.wma" },
-	   { "Matroska Audio files (*.mka)",			  	   "*.mka" },
-	   { "Audio files",						   "*.ogg,*.mp2,*.mp3,*.wav,*.wma,*.mka" },
-	   { "All files",						   "*" },
+	   { "MP3 files (*.mp2, *.mp3)",				"*.mp2,*.mp3" },
+	   { "Matroska Audio files (*.mka)",				"*.mka" },
+	   { "OGG Vorbis files (*.ogg)",				"*.ogg" },
+	   { "WAV files (*.wav)",					"*.wav" },
+	   { "WMA files (*.wma)",					"*.wma" },
+	   { "Audio files",						"*.mp2,*.mp3,*.mka,*.ogg,*.wav,*.wma" },
+	   { "All files",						"*" },
 	   { NULL, NULL }
 	 };
 int fsLastAudioFilterSelected = -1;
@@ -117,13 +122,13 @@ int fsLastAudioFilterSelected = -1;
 char * fsFontFileNames[][2] =
          {
 #ifdef CONFIG_FREETYPE
-	   { "True Type fonts (*.ttf)",					   "*.ttf" },
-	   { "Type1 fonts (*.pfb)",					   "*.pfb" },
-	   { "All fonts",						   "*.ttf,*.pfb" },
+	   { "True Type fonts (*.ttf)",					"*.ttf" },
+	   { "Type1 fonts (*.pfb)",					"*.pfb" },
+	   { "All fonts",						"*.ttf,*.pfb" },
 #else
-	   { "font files (*.desc)",					   "*.desc" },
+	   { "Font files (*.desc)",					"*.desc" },
 #endif
-	   { "All files",						   "*" },
+	   { "All files",						"*" },
 	   { NULL,NULL }
 	 };
 int fsLastFontFilterSelected = -1;

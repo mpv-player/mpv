@@ -122,7 +122,7 @@ make</screen>
         Subversion</emphasis> beim Berichten von Fehlern. Dies gilt auch für Binärpakete von
       <application>MPlayer</application>. Subversion-Anweisungen findest du am unteren Ende
       <ulink url="http://www.mplayerhq.hu/dload.html">dieser Seite</ulink> oder in der README.
-      Wenn dies nicht hilft, ziehe die Liste <link linkend="bugs">bekannter Fehler</link> und den
+      Wenn dies nicht hilft, ziehe den
       Rest der Dokumentation zu Rate. Ist dein Problem nicht bekannt oder kann es durch unsere
       Anweisungen nicht gelöst werden, dann teil uns den Fehler mit.
     </para>

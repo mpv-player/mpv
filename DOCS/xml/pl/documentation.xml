@@ -16,6 +16,7 @@
   <year>2006</year>
   <year>2007</year>
   <year>2008</year>
+  <year>2009</year>	
   <holder>Załoga MPlayera</holder>
 </copyright>
 <legalnotice>
@@ -194,7 +195,6 @@ mogą być rozprowadzane zgodnie z warunkami GNU General Public License Version 
 &containers.xml;
 &codecs.xml;
 &video.xml;
-&audio.xml;
 &tvinput.xml;
 &radio.xml;
 
@@ -204,4 +204,3 @@ mogą być rozprowadzane zgodnie z warunkami GNU General Public License Version 
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
-&history.xml;

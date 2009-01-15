@@ -408,8 +408,7 @@ funciona con los siguientes controladores:
   </para></listitem>
 <listitem><para>
   Las características de <emphasis role="bold">otras placas</emphasis> no están soportadas
-  en <application>MPlayer</application>. <emphasis role="bold">¡Es muy recomendado leer la
-  sección de <link linkend="audio-dev">placas de sonido</link>!</emphasis>.
+  en <application>MPlayer</application>.
   </para></listitem>
 </itemizedlist>
 </sect2>

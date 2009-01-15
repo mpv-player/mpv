@@ -46,6 +46,8 @@ OSType pixelFormat;
 //shared memory
 int shm_fd;
 BOOL shared_buffer = false;
+#define DEFAULT_BUFFER_NAME "mplayerosx"
+static char *buffer_name;
 
 //Screen
 int screen_id;
@@ -163,10 +165,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	}
 	else
 	{
+		mp_msg(MSGT_VO, MSGL_INFO, "VO: [macosx] writing output to a shared buffer "
+				"named \"%s\".\n",buffer_name);
+		
 		movie_aspect = (float)d_width/(float)d_height;
 		
 		// create shared memory
-		shm_fd = shm_open("mplayerosx", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+		shm_fd = shm_open(buffer_name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 		if (shm_fd == -1)
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, 
@@ -179,7 +184,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, 
 				   "vo_macosx: failed to size shared memory, possibly already in use. Error: %s\n", strerror(errno));
-			shm_unlink("mplayerosx");
+			shm_unlink(buffer_name);
 			return 1;
 		}
 		
@@ -190,12 +195,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, 
 				   "vo_macosx: failed to map shared memory. Error: %s\n", strerror(errno));
-			shm_unlink("mplayerosx");
+			shm_unlink(buffer_name);
 			return 1;
 		}		
 		
 		//connnect to mplayerosx
-		mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:@"mplayerosx" host:nil];
+		mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:[NSString stringWithCString:buffer_name] host:nil];
 		if ([mplayerosxProxy conformsToProtocol:@protocol(MPlayerOSXVOProto)]) {
 			[mplayerosxProxy setProtocolForProxy:@protocol(MPlayerOSXVOProto)];
 			mplayerosxProto = (id <MPlayerOSXVOProto>)mplayerosxProxy;
@@ -287,7 +292,7 @@ static void uninit(void)
 		if (munmap(image_data, image_width*image_height*image_bytes) == -1)
 			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: munmap failed. Error: %s\n", strerror(errno));
 		
-		if (shm_unlink("mplayerosx") == -1)
+		if (shm_unlink(buffer_name) == -1)
 			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shm_unlink failed. Error: %s\n", strerror(errno));
 		
 	}
@@ -313,11 +318,15 @@ static void uninit(void)
         image_datas[1] = NULL;
         image_data = NULL;
     }
+    
+    if (buffer_name) free(buffer_name);
+    buffer_name = NULL;
 }
 
 static opt_t subopts[] = {
 {"device_id",     OPT_ARG_INT,  &screen_id,     (opt_test_f)int_non_neg},
 {"shared_buffer", OPT_ARG_BOOL, &shared_buffer, NULL},
+{"buffer_name",   OPT_ARG_MSTRZ,&buffer_name,   NULL},
 {NULL}
 };
 
@@ -327,16 +336,21 @@ static int preinit(const char *arg)
 	// set defaults
 	screen_id = 0;
 	shared_buffer = false;
+	buffer_name = NULL;
 	
 	if (subopt_parse(arg, subopts) != 0) {
 		mp_msg(MSGT_VO, MSGL_FATAL,
 				"\n-vo macosx command line help:\n"
-				"Example: mplayer -vo macosx:device_id=1:shared_buffer\n"
+				"Example: mplayer -vo macosx:device_id=1:shared_buffer:buffer_name=mybuff\n"
 				"\nOptions:\n"
 				"  device_id=<0-...>\n"
 				"    Set screen device id for fullscreen.\n"
 				"  shared_buffer\n"
 				"    Write output to a shared memory buffer instead of displaying it.\n"
+				"  buffer_name=<name>\n"
+				"    Name of the shared buffer created with shm_open() as well as\n"
+				"    the name of the NSConnection MPlayer will try to open.\n"
+				"    Setting buffer_name implicitly enables shared_buffer.\n"
 				"\n" );
 		return -1;
 	}
@@ -345,6 +359,11 @@ static int preinit(const char *arg)
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
 	NSApp = [NSApplication sharedApplication];
 	isLeopardOrLater = floor(NSAppKitVersionNumber) > 824;
+	
+	if (!buffer_name)
+		buffer_name = strdup(DEFAULT_BUFFER_NAME);
+	else
+		shared_buffer = true;
 	
 	if(!shared_buffer)
 	{

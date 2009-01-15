@@ -1,9 +1,23 @@
 /*
-   GPL v2 blah blah
-   
-   This is a small dll that works as a wrapper for the actual cook.so.6.0
-   dll from real player 8.0. 
-*/
+ * This is a small DLL that works as a wrapper for the actual realdrv4.so.6.0
+ * DLL from RealPlayer 8.0.
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 /*
    Assuming that RACloseCodec is the last call.
@@ -36,7 +50,7 @@ int b_dlOpened=0;
 void *handle=NULL;
 
 /* exits program when failure */
-void loadSyms() {
+void loadSyms(void) {
 	fputs("loadSyms()\n", stderr);
 	if (!b_dlOpened) {
 		char *error;
@@ -82,7 +96,7 @@ void loadSyms() {
 	}
 }
 
-void closeDll() {
+void closeDll(void) {
 	if (handle) {
 		b_dlOpened=0;
 		dlclose(handle);
@@ -97,11 +111,11 @@ void _init(void) {
 struct timezone tz;
 struct timeval tv1, tv2;
 
-void tic() {
+void tic(void) {
 	gettimeofday(&tv1, &tz);
 }
 
-void toc() {
+void toc(void) {
 	long secs, usecs;
 	gettimeofday(&tv2, &tz);
 	secs=tv2.tv_sec-tv1.tv_sec;

@@ -84,13 +84,13 @@ static XvMCMacroBlockArray mv_blocks;
 #define MAX_SURFACES 8
 static int number_of_surfaces=0;
 static XvMCSurface surface_array[MAX_SURFACES];
-static xvmc_render_state_t * surface_render;
+static struct xvmc_render_state * surface_render;
 
-static xvmc_render_state_t * p_render_surface_to_show=NULL;
-static xvmc_render_state_t * p_render_surface_visible=NULL;
+static struct xvmc_render_state * p_render_surface_to_show=NULL;
+static struct xvmc_render_state * p_render_surface_visible=NULL;
 
 //display queue, kinda render ahead
-static xvmc_render_state_t * show_queue[MAX_SURFACES];
+static struct xvmc_render_state * show_queue[MAX_SURFACES];
 static int free_element;
 
 
@@ -117,8 +117,8 @@ static const struct{
 
 static void xvmc_free(void);
 static void xvmc_clean_surfaces(void);
-static int count_free_surfaces();
-static xvmc_render_state_t * find_free_surface();
+static int count_free_surfaces(void);
+static struct xvmc_render_state * find_free_surface(void);
 
 static const vo_info_t info = {
   "XVideo Motion Compensation",
@@ -175,7 +175,7 @@ static void allocate_xvimage(int xvimage_width,int xvimage_height,int xv_format)
    return;
 }
 
-static void deallocate_xvimage()
+static void deallocate_xvimage(void)
 {
 #ifdef HAVE_SHM
    if ( Shmem_Flag )
@@ -346,13 +346,13 @@ surface_found:
 }
 
 static uint32_t xvmc_draw_image(mp_image_t *mpi){
-xvmc_render_state_t * rndr;
+   struct xvmc_render_state * rndr;
 
    assert(mpi!=NULL);
    assert(mpi->flags &MP_IMGFLAG_DIRECT);
 //   assert(mpi->flags &MP_IMGFLAGS_DRAWBACK);
 
-   rndr = (xvmc_render_state_t*)mpi->priv;//there is copy in plane[2]
+   rndr = (struct xvmc_render_state*)mpi->priv;//there is copy in plane[2]
    assert( rndr != NULL );
    assert( rndr->magic == MP_XVMC_RENDER_MAGIC );
    if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
@@ -431,22 +431,6 @@ opt_t subopts [] =
    return 0;
 }
 
-static void calc_drwXY(uint32_t *drwX, uint32_t *drwY) {
-  *drwX = *drwY = 0;
-  if (vo_fs) {
-    aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
-    vo_dwidth = FFMIN(vo_dwidth, vo_screenwidth);
-    vo_dheight = FFMIN(vo_dheight, vo_screenheight);
-    *drwX = (vo_screenwidth - vo_dwidth) / 2;
-    *drwY = (vo_screenheight - vo_dheight) / 2;
-    mp_msg(MSGT_VO, MSGL_V, "[xvmc-fs] dx: %d dy: %d dw: %d dh: %d\n",
-           *drwX, *drwY, vo_dwidth, vo_dheight);
-  } else if (WinID == 0) {
-    *drwX = vo_dx;
-    *drwY = vo_dy;
-  }
-}
-
 static int config(uint32_t width, uint32_t height,
 		       uint32_t d_width, uint32_t d_height,
 		       uint32_t flags, char *title, uint32_t format){
@@ -520,8 +504,8 @@ int vm = flags & VOFLAG_MODESWITCHING;
    printf("vo_xvmc: mv_blocks allocated\n");
 
    if(surface_render==NULL)
-      surface_render=malloc(MAX_SURFACES*sizeof(xvmc_render_state_t));//easy mem debug
-   memset(surface_render,0,MAX_SURFACES*sizeof(xvmc_render_state_t));
+      surface_render=malloc(MAX_SURFACES*sizeof(struct xvmc_render_state));//easy mem debug
+   memset(surface_render,0,MAX_SURFACES*sizeof(struct xvmc_render_state));
 
    for(i=0; i<MAX_SURFACES; i++){
       rez=XvMCCreateSurface(mDisplay,&ctx,&surface_array[i]);
@@ -674,7 +658,7 @@ skip_surface_allocation:
    }
 
    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
-   calc_drwXY(&drwX, &drwY);
+   vo_calc_drwXY(&drwX, &drwY);
 
    panscan_calc();
 
@@ -699,7 +683,7 @@ static int draw_frame(uint8_t *srcp[]){
    assert(0);
 }
 
-static void init_osd_yuv_pal(){
+static void init_osd_yuv_pal(void) {
    char * palette;
    int rez;
    int i,j;
@@ -745,7 +729,7 @@ int rez;
       printf("vo_xvmc: XvMCClearSubpicture failed!\n");
 }
 
-static void OSD_init(){
+static void OSD_init(void) {
 unsigned short osd_height, osd_width;
 int rez;
 
@@ -850,7 +834,7 @@ int rez;
 }
 
 static void draw_osd(void){
-xvmc_render_state_t * osd_rndr;
+struct xvmc_render_state * osd_rndr;
 int osd_has_changed;
 int have_osd_to_draw;
 int rez;
@@ -945,7 +929,8 @@ int status,rez;
    XvMCSyncSurface(mDisplay, srf);
 }
 
-static void put_xvmc_image(xvmc_render_state_t * p_render_surface, int draw_ck){
+static void put_xvmc_image(struct xvmc_render_state * p_render_surface,
+			   int draw_ck){
 int rez;
 int clipX,clipY,clipW,clipH;
 int i;
@@ -1034,7 +1019,7 @@ int e=vo_x11_check_events(mDisplay);
    {
       e |= VO_EVENT_EXPOSE;
 
-      calc_drwXY(&drwX, &drwY);
+      vo_calc_drwXY(&drwX, &drwY);
    }
    if ( e & VO_EVENT_EXPOSE )
    {
@@ -1071,7 +1056,7 @@ int i;
                     surface_render[i].state); 
       }
 
-      memset(surface_render,0,MAX_SURFACES*sizeof(xvmc_render_state_t));//for debuging
+      memset(surface_render,0,MAX_SURFACES*sizeof(struct xvmc_render_state));//for debuging
       free(surface_render);surface_render=NULL;
 
       XvMCDestroyContext(mDisplay,&ctx);
@@ -1127,13 +1112,13 @@ int mode_id;
 
 static int draw_slice(uint8_t *image[], int stride[],
 			   int w, int h, int x, int y){
-xvmc_render_state_t * rndr;
+struct xvmc_render_state * rndr;
 int rez;
 
    if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc: draw_slice y=%d\n",y);
 
-   rndr = (xvmc_render_state_t*)image[2];//this is copy of priv-ate
+   rndr = (struct xvmc_render_state*)image[2];//this is copy of priv-ate
    assert( rndr != NULL );
    assert( rndr->magic == MP_XVMC_RENDER_MAGIC );
 
@@ -1187,8 +1172,8 @@ int rez;
 
 //XvMCHide hides the surface on next retrace, so
 //check if the surface is not still displaying
-static void check_osd_source(xvmc_render_state_t * src_rndr){
-xvmc_render_state_t * osd_rndr;
+static void check_osd_source(struct xvmc_render_state * src_rndr){
+struct xvmc_render_state * osd_rndr;
 int stat;
       //If this is source surface, check does the OSD rendering is compleate
       if(src_rndr->state & MP_XVMC_STATE_OSD_SOURCE){
@@ -1200,7 +1185,7 @@ int stat;
             src_rndr->state &= ~MP_XVMC_STATE_OSD_SOURCE;
       }
 }
-static int count_free_surfaces(){
+static int count_free_surfaces(void) {
 int i,num;
    num=0;
    for(i=0; i<number_of_surfaces; i++){
@@ -1211,10 +1196,10 @@ int i,num;
    return num;
 }
 
-static xvmc_render_state_t * find_free_surface(){
+static struct xvmc_render_state * find_free_surface(void) {
 int i,t;
 int stat;
-xvmc_render_state_t * visible_rndr;
+struct xvmc_render_state * visible_rndr;
 
    visible_rndr = NULL;
    for(i=0; i<number_of_surfaces; i++){
@@ -1264,7 +1249,7 @@ int i;
 }
 
 static uint32_t get_image(mp_image_t *mpi){
-xvmc_render_state_t * rndr;
+   struct xvmc_render_state * rndr;
 
    rndr = find_free_surface();
 

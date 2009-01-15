@@ -737,9 +737,10 @@ static void scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y
   spu->scaled_image[scaled] = (color[0] * scale[0] + color[1] * scale[1] + color[2] * scale[2] + color[3] * scale[3])>>24;
   spu->scaled_aimage[scaled] = (scale[0] + scale[1] + scale[2] + scale[3]) >> 16;
   if (spu->scaled_aimage[scaled]){
-    spu->scaled_aimage[scaled] = 256 - spu->scaled_aimage[scaled];
-    if(spu->scaled_aimage[scaled] + spu->scaled_image[scaled] > 255)
-      spu->scaled_image[scaled] = 256 - spu->scaled_aimage[scaled];
+    // ensure that MPlayer's simplified alpha-blending can not overflow
+    spu->scaled_image[scaled] = FFMIN(spu->scaled_image[scaled], spu->scaled_aimage[scaled]);
+    // convert to MPlayer-style alpha
+    spu->scaled_aimage[scaled] = -spu->scaled_aimage[scaled];
   }
 }
 

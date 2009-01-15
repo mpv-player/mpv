@@ -74,7 +74,7 @@ void print_wave_header(WAVEFORMATEX *h, int verbose_level){
   else if (h->cbSize > 0)
   {
     int i;
-    uint8_t* p = ((uint8_t*)h) + sizeof(WAVEFORMATEX);
+    uint8_t* p = (uint8_t*)(h + 1);
     mp_msg(MSGT_HEADER, verbose_level, "Unknown extra header dump: ");
     for (i = 0; i < h->cbSize; i++)
 	mp_msg(MSGT_HEADER, verbose_level, "[%x] ", p[i]);
@@ -96,7 +96,7 @@ void print_video_header(BITMAPINFOHEADER *h, int verbose_level){
   if (h->biSize > sizeof(BITMAPINFOHEADER))
   {
     int i;
-    uint8_t* p = ((uint8_t*)h) + sizeof(BITMAPINFOHEADER);
+    uint8_t* p = (uint8_t*)(h + 1);
     mp_msg(MSGT_HEADER, verbose_level, "Unknown extra header dump: ");
     for (i = 0; i < h->biSize-sizeof(BITMAPINFOHEADER); i++)
 	mp_msg(MSGT_HEADER, verbose_level, "[%x] ", *(p+i));
@@ -135,7 +135,8 @@ void print_index(AVIINDEXENTRY *idx, int idx_size, int verbose_level){
   int i;
   unsigned int pos[256];
   unsigned int num[256];
-  for(i=0;i<256;i++) num[i]=pos[i]=0;
+  memset(pos, 0, sizeof(pos));
+  memset(num, 0, sizeof(num));
   for(i=0;i<idx_size;i++){
     int id=avi_stream_id(idx[i].ckid);
     if(id<0 || id>255) id=255;

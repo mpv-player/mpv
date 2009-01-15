@@ -6,9 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef MP_DEBUG
 #include <assert.h>
-#endif
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -55,12 +53,15 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
   if(p->buffer == NULL) {
     p->buffer = malloc(BUF_STEP);
     p->buffer_size = BUF_STEP;
+    p->buffer[0] = 0;
     p->iter = p->buffer;
   }
 
   if(p->stream->eof && (p->buffer_end == 0 || p->iter[0] == '\0'))
     return NULL;
     
+  assert(p->buffer_end < p->buffer_size);
+  assert(!p->buffer[p->buffer_end]);
   while(1) {
 
     if(resize) {
@@ -75,10 +76,12 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
       r = stream_read(p->stream,p->buffer + p->buffer_end,p->buffer_size - p->buffer_end - 1);
       if(r > 0) {
 	p->buffer_end += r;
+	assert(p->buffer_end < p->buffer_size);
 	p->buffer[p->buffer_end] = '\0';
 	while(strlen(p->buffer + p->buffer_end - r) != r)
 	  p->buffer[p->buffer_end - r + strlen(p->buffer + p->buffer_end - r)] = '\n';
       }
+      assert(!p->buffer[p->buffer_end]);
     }
     
     end = strchr(p->iter,'\n');
@@ -108,9 +111,9 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
     if(end[0] != '\0') {
       p->buffer_end -= end-p->iter;
       memmove(p->buffer,end,p->buffer_end);
-      p->buffer[p->buffer_end] = '\0';
     } else
       p->buffer_end = 0;
+    p->buffer[p->buffer_end] = '\0';
     p->iter = p->buffer;
   } else
     p->iter = end;
@@ -130,6 +133,7 @@ play_tree_parser_stop_keeping(play_tree_parser_t* p) {
     p->buffer_end -= p->iter -p->buffer;
     if(p->buffer_end)
       memmove(p->buffer,p->iter,p->buffer_end);
+    p->buffer[p->buffer_end] = 0;
     p->iter = p->buffer;
   }
 }

@@ -112,6 +112,14 @@ void osd_draw_text(struct osd_state *osd, int dxs, int dys,
                                       unsigned char* src, unsigned char *srca,
                                       int stride),
                    void *ctx);
+void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
+                       int left_border, int top_border, int right_border,
+                       int bottom_border, int orig_w, int orig_h,
+                       void (*draw_alpha)(void *ctx, int x0, int y0, int w,
+                                          int h, unsigned char* src,
+                                          unsigned char *srca,
+                                          int stride),
+                       void *ctx);
 void osd_remove_text(struct osd_state *osd, int dxs, int dys,
                      void (*remove)(int x0, int y0, int w, int h));
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27683 -->
+<!-- synced with r28207 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -234,8 +234,19 @@ Problémám van a ... codec-kel történő lejátszással. Egyáltalán használ
 <answer><para>
 Ellenőrizd a <ulink url="../../codecs-status.html">codec státusz</ulink>
 oldalt, ha nem tartalmazza a te codecedet, olvasd el a
-<link linkend="codecs">codec dokumentációt</link>, különösen a
-<link linkend="codec-importing">codec importálás HOGYAN</link>-t és keress meg minket.
+<ulink url="../../tech/win32-codec-howto">Win32 codec HOWTO</ulink>-t és keress meg minket.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Egy core dump-ot kapok, amikor folyamokat dump-olok, mi a baj?
+</para></question>
+<answer><para>
+Ne pánikolj. Keresd meg a zsepidet.</para>
+<para>
+Na komolyan, vedd már észre a smiley-t és keresd meg a
+<filename>.dump</filename>-ra végződő fájlokat!
 </para></answer>
 </qandaentry>
 
@@ -801,7 +812,6 @@ Ennek több oka lehet.
 </para></listitem>
 <listitem><para>
   A hang vezérlőd hibás.
-  Lásd az <link linkend="audio">audió részt</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>

@@ -893,11 +893,11 @@ void free_font_desc(font_desc_t *desc)
     free(desc);
 }
 
-static int load_sub_face(const char *name, FT_Face *face)
+static int load_sub_face(const char *name, int face_index, FT_Face *face)
 {
     int err = -1;
     
-    if (name) err = FT_New_Face(library, name, 0, face);
+    if (name) err = FT_New_Face(library, name, face_index, face);
 
     if (err) {
 	char *font_file = get_path("subfont.ttf");
@@ -940,7 +940,7 @@ int kerning(font_desc_t *desc, int prevc, int c)
     return f266ToInt(kern.x);
 }
 
-font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_height, float font_scale_factor)
+font_desc_t* read_font_desc_ft(const char *fname, int face_index, int movie_width, int movie_height, float font_scale_factor)
 {
     font_desc_t *desc = NULL;
 
@@ -1002,7 +1002,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
 //    t=GetTimer();
 
     /* generate the subtitle font */
-    err = load_sub_face(fname, &face);
+    err = load_sub_face(fname, face_index, &face);
     if (err) {
 	mp_msg(MSGT_OSD, MSGL_WARN, MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed);
 	goto gen_osd;
@@ -1128,6 +1128,7 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
     FcPattern *fc_pattern;
     FcPattern *fc_pattern2;
     FcChar8 *s;
+    int face_index;
     FcBool scalable;
 #endif
     font_desc_t *vo_font = *fontp;
@@ -1163,10 +1164,11 @@ void load_font_ft(int width, int height, font_desc_t** fontp, const char *font_n
 	}
 	// s doesn't need to be freed according to fontconfig docs
 	FcPatternGetString(fc_pattern, FC_FILE, 0, &s);
-	*fontp=read_font_desc_ft(s, width, height, font_scale_factor);
+	FcPatternGetInteger(fc_pattern, FC_INDEX, 0, &face_index);
+	*fontp=read_font_desc_ft(s, face_index, width, height, font_scale_factor);
 	FcPatternDestroy(fc_pattern);
     }
     else
 #endif
-    *fontp=read_font_desc_ft(font_name, width, height, font_scale_factor);
+    *fontp=read_font_desc_ft(font_name, 0, width, height, font_scale_factor);
 }

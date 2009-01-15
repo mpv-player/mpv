@@ -15,6 +15,7 @@
   <year>2006</year>
   <year>2007</year>
   <year>2008</year>
+  <year>2009</year>	
   <holder>MPlayer team</holder>
 </copyright>
 <legalnotice>
@@ -174,7 +175,6 @@ possono esser distribuiti nei termini della GNU General Public License Version 2
 
 &codecs.xml;
 &video.xml;
-&audio.xml;
 &tvinput.xml;
 &radio.xml;
 
@@ -182,6 +182,4 @@ possono esser distribuiti nei termini della GNU General Public License Version 2
 &mencoder.xml;
 &encoding-guide.xml;
 &bugreports.xml;
-&bugs.xml;
 &skin.xml;
-&history.xml;

@@ -244,7 +244,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 }
 
 // we do not draw osd.
-void draw_osd() {}
+void draw_osd(void) {}
 
 // we do not handle events.
 static void check_events(void) {}

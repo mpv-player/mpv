@@ -162,24 +162,6 @@ static void draw_alpha_null(void *p, int x0, int y0, int w, int h,
 
 static void deallocate_xvimage(struct vo *vo, int foo);
 
-static void calc_drwXY(struct vo *vo, uint32_t *drwX, uint32_t *drwY)
-{
-    struct MPOpts *opts = vo->opts;
-    *drwX = *drwY = 0;
-    if (vo_fs) {
-        aspect(vo, &vo->dwidth, &vo->dheight, A_ZOOM);
-        vo->dwidth = FFMIN(vo->dwidth, opts->vo_screenwidth);
-        vo->dheight = FFMIN(vo->dheight, opts->vo_screenheight);
-        *drwX = (opts->vo_screenwidth - vo->dwidth) / 2;
-        *drwY = (opts->vo_screenheight - vo->dheight) / 2;
-        mp_msg(MSGT_VO, MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n", *drwX,
-               *drwY, vo->dwidth, vo->dheight);
-    } else if (WinID == 0) {
-        *drwX = vo->dx;
-        *drwY = vo->dy;
-    }
-}
-
 /*
  * connect to server, create and map window,
  * allocate colors and (shared) memory
@@ -307,7 +289,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0)
         vo_fs = 1;
-    calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
+    vo_calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
 
     panscan_calc(vo);
 
@@ -429,7 +411,7 @@ static void check_events(struct vo *vo)
     int e = vo_x11_check_events(vo);
 
     if (e & VO_EVENT_RESIZE)
-        calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
+        vo_calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
 
     if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) {
         vo_xv_draw_colorkey(vo, ctx->drwX - (vo->panscan_x >> 1),

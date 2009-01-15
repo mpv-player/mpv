@@ -31,7 +31,7 @@ int screen_width=80;
 int screen_height=24;
 char * erase_to_end_of_line = NULL;
 
-void get_screen_size(){
+void get_screen_size(void){
 }
 
 static HANDLE stdin;
@@ -128,7 +128,8 @@ void getch2(struct mp_fifo *fifo)
 	mplayer_put_key(fifo, r);
 }
 
-void getch2_enable(){
+void getch2_enable(void)
+{
 	DWORD retval;
     stdin = GetStdHandle(STD_INPUT_HANDLE);
    	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
@@ -139,7 +140,8 @@ void getch2_enable(){
     else getch2_status=1;
 }
 
-void getch2_disable(){
+void getch2_disable(void)
+{
     if(!getch2_status) return; // already disabled / never enabled
     getch2_status=0;
 }

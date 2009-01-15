@@ -7,12 +7,14 @@
 const char timer_name[] = "Windows native";
 
 // Returns current time in microseconds
-unsigned int GetTimer(){
+unsigned int GetTimer(void)
+{
   return timeGetTime() * 1000;
 }
 
 // Returns current time in milliseconds
-unsigned int GetTimerMS(){
+unsigned int GetTimerMS(void)
+{
   return timeGetTime() ;
 }
 
@@ -25,5 +27,6 @@ int usec_sleep(int usec_delay){
   return 0;
 }
 
-void InitTimer(){
+void InitTimer(void)
+{
 }

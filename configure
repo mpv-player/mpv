@@ -450,6 +450,7 @@ Advanced options:
   --enable-altivec          enable AltiVec (PowerPC) [autodetect]
   --enable-armv5te          enable DSP extensions (ARM) [autodetect]
   --enable-armv6            enable ARMv6 (ARM) [autodetect]
+  --enable-armv6t2          enable ARMv6t2 (ARM) [autodetect]
   --enable-armvfp           enable ARM VFP (ARM) [autodetect]
   --enable-iwmmxt           enable iWMMXt (ARM) [autodetect]
   --disable-fastmemcpy      disable 3DNow!/SSE/MMX optimized memcpy [enable]
@@ -499,6 +500,7 @@ _cmov=auto
 _fast_cmov=auto
 _armv5te=auto
 _armv6=auto
+_armv6t2=auto
 _armvfp=auto
 _iwmmxt=auto
 _mtrr=auto
@@ -521,7 +523,7 @@ _libavcodec_a=auto
 _libamr_nb=auto
 _libamr_wb=auto
 _libavdecoders_all=`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
-_libavdecoders=` echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER// `
+_libavdecoders=` echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER// -e s/H264_VDPAU_DECODER// `
 _libavencoders_all=`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavencoders=` echo $_libavencoders_all | sed 's/ LIB[A-Z0-9_]*_ENCODER//g'`
 _libavparsers_all=`sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
@@ -1266,6 +1268,8 @@ for ac_option do
   --disable-armv5te) _armv5te=no ;;
   --enable-armv6) _armv6=yes ;;
   --disable-armv6) _armv6=no ;;
+  --enable-armv6t2) _armv6t2=yes ;;
+  --disable-armv6t2) _armv6t2=no ;;
   --enable-armvfp) _armvfp=yes ;;
   --disable-armvfp) _armvfp=no ;;
   --enable-iwmmxt) _iwmmxt=yes ;;
@@ -2286,6 +2290,34 @@ if test "$_runtime_cpudetection" = yes ; then
 fi
 
 
+# endian testing
+echocheck "byte order"
+if test "$_big_endian" = auto ; then
+  cat > $TMPC <<EOF
+short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
+                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
+int main(void) { return (int)ascii_name; }
+EOF
+  if cc_check ; then
+    if strings $TMPEXE | grep -q -l MPlayerBigEndian ; then
+      _big_endian=yes
+    else
+      _big_endian=no
+    fi
+  else
+    echo ${_echo_n} "failed to autodetect byte order, defaulting to ${_echo_c}"
+  fi
+fi
+if test "$_big_endian" = yes ; then
+  _byte_order='big-endian'
+  _def_words_endian='#define WORDS_BIGENDIAN 1'
+else
+  _byte_order='little-endian'
+  _def_words_endian='#undef WORDS_BIGENDIAN'
+fi
+echores "$_byte_order"
+
+
 echocheck "extern symbol prefix"
 cat > $TMPC << EOF
 int ff_extern;
@@ -2429,6 +2461,7 @@ else
 fi
 echores $_asmalign_pot
 
+if x86 ; then
 echocheck "yasm"
 if test -z "$YASMFLAGS" ; then
   if darwin ; then
@@ -2463,6 +2496,8 @@ else
   _have_yasm="no"
   echores "no"
 fi
+fi #if x86
+
 
 #FIXME: This should happen before the check for CFLAGS..
 if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; then
@@ -2546,6 +2581,16 @@ EOF
   fi
   echores "$_armv6"
 
+  echocheck "ARMv6t2 (SIMD instructions)"
+  if test $_armv6t2 = "auto" ; then
+    cat > $TMPC << EOF
+int main(void) { __asm__ volatile ("movt r0, #0"); return 0; }
+EOF
+    _armv6t2=no
+    cc_check && _armv6t2=yes
+  fi
+  echores "$_armv6"
+
   echocheck "ARM VFP"
   if test $_armvfp = "auto" ; then
     cat > $TMPC << EOF
@@ -2567,7 +2612,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC BSWAP MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMVFP IWMMXT MLIB MMI SH4 VIS MVI'
+_cpuexts_all='ALTIVEC BSWAP MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MLIB MMI SH4 VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2581,6 +2626,7 @@ test "$_fast_cmov" = yes && _cpuexts="FAST_CMOV $_cpuexts"
 test "$pld"        = yes && _cpuexts="PLD $_cpuexts"
 test "$_armv5te"   = yes && _cpuexts="ARMV5TE $_cpuexts"
 test "$_armv6"     = yes && _cpuexts="ARMV6 $_cpuexts"
+test "$_armv6t2"   = yes && _cpuexts="ARMV6T2 $_cpuexts"
 test "$_armvfp"    = yes && _cpuexts="ARMVFP $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
@@ -2785,7 +2831,7 @@ if test "$_posix4" = yes ; then
 fi
 echores "$_posix4"
 
-for func in llrint lrint lrintf round roundf; do
+for func in llrint lrint lrintf round roundf truncf; do
 echocheck $func
 cat > $TMPC << EOF
 #include <math.h>
@@ -2880,7 +2926,7 @@ if test "$_winsock2_h" = yes ; then
 elif cc_check $_ld_sock ; then
   # NOTE: Linux has libresolv but does not need it
   :
-  _res_comment="using $_ld_sock"
+  test $_ld_sock && _res_comment="using $_ld_sock"
   echores "yes"
 elif cc_check $_ld_sock -lresolv ; then
   # NOTE: needed for SunOS at least
@@ -2902,7 +2948,7 @@ EOF
   if cc_check $_ld_sock ; then
       # NOTE: Linux has libresolv but does not need it
     :
-    _res_comment="using $_ld_sock"
+    test $_ld_sock && _res_comment="using $_ld_sock"
   elif cc_check $_ld_sock -lresolv ; then
     # NOTE: needed for SunOS at least
     _ld_sock="$_ld_sock -lresolv"
@@ -2965,6 +3011,53 @@ else
   _ftp=no
 fi
 echores "$_network"
+
+
+echocheck "inet6"
+if test "$_inet6" = auto ; then
+  cat > $TMPC << EOF
+#include <sys/types.h>
+#if !defined(_WIN32) || defined(__CYGWIN__)
+#include <sys/socket.h>
+#include <netinet/in.h>
+#else
+#include <ws2tcpip.h>
+#endif
+int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); return 0; }
+EOF
+  _inet6=no
+  if cc_check $_ld_sock ; then
+    _inet6=yes
+  fi
+fi
+if test "$_inet6" = yes ; then
+  _def_inet6='#define HAVE_AF_INET6 1'
+else
+  _def_inet6='#undef HAVE_AF_INET6'
+fi
+echores "$_inet6"
+
+
+echocheck "gethostbyname2"
+if test "$_gethostbyname2" = auto ; then
+cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+int main(void) { gethostbyname2("", AF_INET); return 0; }
+EOF
+  _gethostbyname2=no
+  if cc_check ; then
+    _gethostbyname2=yes
+  fi
+fi
+if test "$_gethostbyname2" = yes ; then
+  _def_gethostbyname2='#define HAVE_GETHOSTBYNAME2 1'
+else
+  _def_gethostbyname2='#undef HAVE_GETHOSTBYNAME2'
+fi
+echores "$_gethostbyname2"
+
 
 echocheck "inttypes.h (required)"
 cat > $TMPC << EOF
@@ -3063,6 +3156,15 @@ fi
 echores "$_alloca"
 
 
+echocheck "fastmemcpy"
+if test "$_fastmemcpy" = yes ; then
+  _def_fastmemcpy='#define CONFIG_FASTMEMCPY 1'
+else
+  _def_fastmemcpy='#undef CONFIG_FASTMEMCPY'
+fi
+echores "$_fastmemcpy"
+
+
 echocheck "mman.h"
 cat > $TMPC << EOF
 #include <sys/types.h>
@@ -3140,7 +3242,7 @@ if ! hpux ; then
 fi
 fi
 if test "$_pthreads" = yes ; then
-  _res_comment="using $_ld_pthread"
+  test $_ld_pthread && _res_comment="using $_ld_pthread"
   _def_pthreads='#define HAVE_PTHREADS 1'
   _def_threads='#define HAVE_THREADS 1'
 else
@@ -3385,7 +3487,7 @@ EOF
 fi
 if test "$_termcap" = yes ; then
   _def_termcap='#define HAVE_TERMCAP 1'
-  _res_comment="using $_ld_tmp"
+  test $_ld_tmp && _res_comment="using $_ld_tmp"
 else
   _def_termcap='#undef HAVE_TERMCAP'
 fi
@@ -3403,7 +3505,7 @@ if test "$_termios" = auto ; then
 #include <$_termios_header>
 int main(void) { return 0; }
 EOF
-  cc_check && _termios=yes && _res_comment="$_termios_header" && break
+  cc_check && _termios=yes && _res_comment="using $_termios_header" && break
 done
 fi
 
@@ -3504,6 +3606,15 @@ _def_posix_select='#undef HAVE_POSIX_SELECT'
 ! os2 && cc_check && _posix_select=yes \
   && _def_posix_select='#define HAVE_POSIX_SELECT 1'
 echores "$_posix_select"
+
+
+echocheck "audio select()"
+if test "$_select" = no ; then
+  _def_select='#undef HAVE_AUDIO_SELECT'
+elif test  "$_select" = yes ; then
+  _def_select='#define HAVE_AUDIO_SELECT 1'
+fi
+echores "$_select"
 
 
 echocheck "gettimeofday()"
@@ -4977,25 +5088,6 @@ echores "$_directx"
 fi #if win32; then
 
 
-echocheck "NAS"
-if test "$_nas" = auto ; then
-  cat > $TMPC << EOF
-#include <audio/audiolib.h>
-int main(void) { return 0; }
-EOF
-  _nas=no
-  cc_check $_ld_lm -laudio -lXt && _nas=yes
-fi
-if test "$_nas" = yes ; then
-  _def_nas='#define CONFIG_NAS 1'
-  _libs_mplayer="$_libs_mplayer -laudio -lXt"
-  _aomodules="nas $_aomodules"
-else
-  _noaomodules="nas $_noaomodules"
-  _def_nas='#undef CONFIG_NAS'
-fi
-echores "$_nas"
-
 echocheck "DXR2"
 if test "$_dxr2" = auto; then
   _dxr2=no
@@ -5214,6 +5306,27 @@ else
   _noaomodules="esd $_noaomodules"
 fi
 
+
+echocheck "NAS"
+if test "$_nas" = auto ; then
+  cat > $TMPC << EOF
+#include <audio/audiolib.h>
+int main(void) { return 0; }
+EOF
+  _nas=no
+  cc_check $_ld_lm -laudio -lXt && _nas=yes
+fi
+if test "$_nas" = yes ; then
+  _def_nas='#define CONFIG_NAS 1'
+  _libs_mplayer="$_libs_mplayer -laudio -lXt"
+  _aomodules="nas $_aomodules"
+else
+  _noaomodules="nas $_noaomodules"
+  _def_nas='#undef CONFIG_NAS'
+fi
+echores "$_nas"
+
+
 echocheck "pulse"
 if test "$_pulse" = auto ; then
   _pulse=no
@@ -5246,7 +5359,7 @@ if test "$_jack" = auto ; then
 
 cat > $TMPC << EOF
 #include <jack/jack.h>
-int main(void) { jack_client_new("test"); return 0; }
+int main(void) { jack_client_open("test", JackUseExactName, NULL); return 0; }
 EOF
   if cc_check -ljack ; then
     _libs_mplayer="$_libs_mplayer -ljack"
@@ -5505,6 +5618,9 @@ echores "$_vcd"
 
 
 echocheck "dvdread"
+if test "$_dvdread_internal" = auto && test ! -f "libdvdread4/dvd_reader.c" ; then
+  _dvdread_internal=no
+fi
 if test "$_dvdread_internal" = auto ; then
   _dvdread_internal=no
   _dvdread=no
@@ -5514,6 +5630,7 @@ if test "$_dvdread_internal" = auto ; then
      || darwin || win32; then
     _dvdread_internal=yes
     _dvdread=yes
+    _inc_extra="$_inc_extra -Ilibdvdread4"
   fi
 elif test "$_dvdread" = auto ; then
   _dvdread=no
@@ -5539,7 +5656,6 @@ EOF
 fi
 
 if test "$_dvdread_internal" = yes; then
-  _def_dvdread_internal="#define CONFIG_DVDREAD_INTERNAL 1"
   _def_dvdread='#define CONFIG_DVDREAD 1'
   _inputmodules="dvdread(internal) $_inputmodules"
   _largefiles=yes
@@ -5551,7 +5667,6 @@ elif test "$_dvdread" = yes; then
   _inputmodules="dvdread(external) $_inputmodules"
   _res_comment="external"
 else
-  _def_dvdread_internal="#undef CONFIG_DVDREAD_INTERNAL"
   _def_dvdread='#undef CONFIG_DVDREAD'
   _noinputmodules="dvdread $_noinputmodules"
 fi
@@ -5730,7 +5845,7 @@ echores "$_freetype"
 
 if test "$_freetype" = no ; then
     _fontconfig=no
-    _res_comment="freetype support needed"
+    _res_comment="FreeType support needed"
 fi
 echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
@@ -6490,7 +6605,7 @@ EOF
   fi
 fi
 if test "$_live" = yes && test "$_network" = yes; then
-  _res_comment="using $_livelibdir"
+  test $_livelibdir && _res_comment="using $_livelibdir"
   _def_live='#define CONFIG_LIVE555 1'
  _inputmodules="live555 $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes; then
@@ -6966,7 +7081,7 @@ echores "$_zr"
 # mencoder requires (optional) those libs: libmp3lame
 if test "$_mencoder" != no ; then
 
-echocheck "libmp3lame (for mencoder)"
+echocheck "libmp3lame"
 _def_mp3lame_preset='#undef CONFIG_MP3LAME_PRESET'
 _def_mp3lame_preset_medium='#undef CONFIG_MP3LAME_PRESET_MEDIUM'
 if test "$_mp3lame" = auto ; then
@@ -7019,15 +7134,6 @@ else
   _libavmuxers=""
 fi
 echores "$_mencoder"
-
-echocheck "fastmemcpy"
-# fastmemcpy check is done earlier with tests of CPU & binutils features
-if test "$_fastmemcpy" = yes ; then
-  _def_fastmemcpy='#define CONFIG_FASTMEMCPY 1'
-else
-  _def_fastmemcpy='#undef CONFIG_FASTMEMCPY'
-fi
-echores "$_fastmemcpy"
 
 
 echocheck "UnRAR executable"
@@ -7347,15 +7453,6 @@ fi
 echores "$_pvr"
 
 
-echocheck "audio select()"
-if test "$_select" = no ; then
-  _def_select='#undef HAVE_AUDIO_SELECT'
-elif test  "$_select" = yes ; then
-  _def_select='#define HAVE_AUDIO_SELECT 1'
-fi
-echores "$_select"
-
-
 echocheck "ftp"
 if ! beos && test "$_ftp" = yes ; then
   _def_ftp='#define CONFIG_FTP 1'
@@ -7386,32 +7483,6 @@ else
 fi
 echores "$_vstream"
 
-# endian testing
-echocheck "byte order"
-if test "$_big_endian" = auto ; then
-  cat > $TMPC <<EOF
-short ascii_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|'B'),
-                       (('i'<<8)|'g'),(('E'<<8)|'n'),(('d'<<8)|'i'),(('a'<<8)|'n'),0};
-int main(void) { return (int)ascii_name; }
-EOF
-  if cc_check ; then
-    if strings $TMPEXE | grep -q -l MPlayerBigEndian ; then
-      _big_endian=yes
-    else
-      _big_endian=no
-    fi
-  else
-    echo ${_echo_n} "failed to autodetect byte order, defaulting to ${_echo_c}"
-  fi
-fi
-if test "$_big_endian" = yes ; then
-  _byte_order='big-endian'
-  _def_words_endian='#define WORDS_BIGENDIAN 1'
-else
-  _byte_order='little-endian'
-  _def_words_endian='#undef WORDS_BIGENDIAN'
-fi
-echores "$_byte_order"
 
 echocheck "OSD menu"
 if test "$_menu" = yes ; then
@@ -7453,52 +7524,6 @@ else
   _def_xmms='#undef CONFIG_XMMS'
 fi
 echores "$_xmms"
-
-echocheck "inet6"
-if test "$_inet6" = auto ; then
-  cat > $TMPC << EOF
-#include <sys/types.h>
-#if !defined(_WIN32) || defined(__CYGWIN__)
-#include <sys/socket.h>
-#include <netinet/in.h>
-#else
-#include <ws2tcpip.h>
-#endif
-int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); return 0; }
-EOF
-  _inet6=no
-  if cc_check $_ld_sock ; then
-    _inet6=yes
-  fi
-fi
-if test "$_inet6" = yes ; then
-  _def_inet6='#define HAVE_AF_INET6 1'
-else
-  _def_inet6='#undef HAVE_AF_INET6'
-fi
-echores "$_inet6"
-
-
-echocheck "gethostbyname2"
-if test "$_gethostbyname2" = auto ; then
-cat > $TMPC << EOF
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-int main(void) { gethostbyname2("", AF_INET); return 0; }
-EOF
-  _gethostbyname2=no
-  if cc_check ; then
-    _gethostbyname2=yes
-  fi
-fi
-
-if test "$_gethostbyname2" = yes ; then
-  _def_gethostbyname2='#define HAVE_GETHOSTBYNAME2 1'
-else
-  _def_gethostbyname2='#undef HAVE_GETHOSTBYNAME2'
-fi
-echores "$_gethostbyname2"
 
 
 # --------------- GUI specific tests begin -------------------
@@ -7765,10 +7790,15 @@ fi
 #because libdvdnavmini is intentionally not linked against libdvdread (to permit mplayer
 # to use its own copy of the library)
 echocheck "DVD support (libdvdnav)"
+if test "$_dvdread_internal" = yes && test ! -f "libdvdnav/dvdnav.c" ; then
+  _dvdnav=no
+fi
+dvdnav_internal=no
 if test "$_dvdnav" = auto ; then
   if test "$_dvdread_internal" = yes ; then
-    _dvdnav=no
-    _res_comment="Disabled in favor of the internal copy of dvdread. Append --disable-dvdread-internal."
+    _dvdnav=yes
+    dvdnav_internal=yes
+    _res_comment="internal"
   else
     $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
   fi
@@ -7787,8 +7817,12 @@ fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
   _def_dvdnav='#define CONFIG_DVDNAV 1'
-  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
-  _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+  if test "$dvdnav_internal" = yes ; then
+    _inc_extra="$_inc_extra -Ilibdvdnav"
+  else
+    _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
+    _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+  fi
   _inputmodules="dvdnav $_inputmodules"
 else
   _def_dvdnav='#undef CONFIG_DVDNAV'
@@ -7968,6 +8002,7 @@ DIRECTFB = $_directfb
 DIRECTX = $_directx
 DVBIN = $_dvbin
 DVDNAV = $_dvdnav
+DVDNAV_INTERNAL = $dvdnav_internal
 DVDREAD = $_dvdread
 DVDREAD_INTERNAL = $_dvdread_internal
 DXR2 = $_dxr2
@@ -8270,6 +8305,7 @@ $_def_sysi86
 $_def_sysi86_iv
 $_def_termcap
 $_def_termios
+$_def_truncf
 $_def_vsscanf
 
 
@@ -8277,6 +8313,7 @@ $_def_vsscanf
 $_def_asmalign_pot
 $_def_builtin_expect
 $_def_dl
+$_def_extern_prefix
 $_def_iconv
 $_def_kstat
 $_def_macosx_bundle
@@ -8326,7 +8363,6 @@ $_def_dvd_openbsd
 $_def_dvdio
 $_def_dvdnav
 $_def_dvdread
-$_def_dvdread_internal
 $_def_hpux_scsi_h
 $_def_libcdio
 $_def_sol_scsi_h
@@ -8544,7 +8580,6 @@ $_def_libswscale_a
 $_def_libswscale_so
 
 $_def_dcbzl
-$_def_extern_prefix
 $def_fast_64bit
 $_def_fast_unaligned
 $_def_mkstemp

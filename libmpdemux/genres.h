@@ -1,6 +1,20 @@
 /***********************************
  * Copyright (C) 2001  Jason Carter
- * See the file "LICENSE" for details
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *
  ***********************************
  * FILE: GENRES.H
  * NAME: ID3EDIT - ID3 tag v 1.1 editor
@@ -71,17 +85,17 @@ const char * const genres[] = {
 "Darkwave",					/* 50 */
 "Techno-Industrial",		/* 51 */
 "Electronic",				/* 52 */
-"Jungle",					/* 53 */
-"Pop-Folk",					/* 54 */
-"Eurodance",				/* 55 */
-"Dream",					/* 56 */
-"Southern Rock",			/* 57 */
-"Comedy",					/* 58 */
-"Cult",						/* 59 */
-"Gangsta",					/* 60 */
-"Top 40",					/* 61 */
-"Christian Rap",			/* 62 */
-"Pop/Funk",					/* 63 */
+"Pop-Folk",					/* 53 */
+"Eurodance",				/* 54 */
+"Dream",					/* 55 */
+"Southern Rock",			/* 56 */
+"Comedy",					/* 57 */
+"Cult",						/* 58 */
+"Gangsta",					/* 59 */
+"Top 40",					/* 60 */
+"Christian Rap",			/* 61 */
+"Pop/Funk",					/* 62 */
+"Jungle",					/* 63 */
 "Native American",			/* 64 */
 "Cabaret",					/* 65 */
 "New Wave",					/* 66 */

@@ -71,7 +71,7 @@ static uint32_t in_width, in_height, in_format, in_depth, in_s3_format,
 static char *inpage, *inpage0, *smem = NULL;
 static void (*alpha_func)();
 
-static void clear_screen();
+static void clear_screen(void);
 
 /* streams registers */
 #define PSTREAM_CONTROL_REG 0x8180
@@ -116,7 +116,7 @@ void writecrtc(int reg, int value) {
 }
 
 // enable S3 registers
-int enable() {
+int enable(void) {
   int fd;
 
   if (v)
@@ -148,7 +148,7 @@ int enable() {
   return 0;
 }
 
-void disable() {
+void disable(void) {
   if (v) {
     writecrtc(0x53, v->cr53);
     writecrtc(0x39, v->cr39);
@@ -227,7 +227,7 @@ int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, in
   return offset;
 }
 
-void yuv_off() {
+void yuv_off(void) {
   writecrtc(0x67, readcrtc(0x67) & ~0xc);
   memset(v->mmio + 0x8180, 0, 0x80);
   OUTREG(0x81b8, 0x900);
@@ -328,7 +328,7 @@ static void uninit(void)
   }
 }
 
-static void clear_screen()
+static void clear_screen(void)
 {
   if (inpage0) {
     int n;

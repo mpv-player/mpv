@@ -236,17 +236,28 @@ SRCS_COMMON-$(CDDB)                  += stream/stream_cddb.c
 SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
                                         stream/stream_dvb.c
 SRCS_COMMON-$(DVDNAV)                += stream/stream_dvdnav.c
+SRCS_COMMON-$(DVDNAV_INTERNAL)       += libdvdnav/dvdnav.c \
+                                        libdvdnav/highlight.c \
+                                        libdvdnav/navigation.c \
+                                        libdvdnav/read_cache.c \
+                                        libdvdnav/remap.c \
+                                        libdvdnav/searching.c \
+                                        libdvdnav/settings.c \
+                                        libdvdnav/vm/decoder.c \
+                                        libdvdnav/vm/vm.c \
+                                        libdvdnav/vm/vmcmd.c \
+
 SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
                                         stream/stream_dvd_common.c
-SRCS_COMMON-$(DVDREAD_INTERNAL)      += libdvdread/cmd_print.c \
-                                        libdvdread/dvd_input.c \
-                                        libdvdread/dvd_reader.c \
-                                        libdvdread/dvd_udf.c \
-                                        libdvdread/ifo_print.c \
-                                        libdvdread/ifo_read.c \
-                                        libdvdread/md5.c \
-                                        libdvdread/nav_print.c \
-                                        libdvdread/nav_read.c \
+SRCS_COMMON-$(DVDREAD_INTERNAL)      += libdvdread4/bitreader.c \
+                                        libdvdread4/dvd_input.c \
+                                        libdvdread4/dvd_reader.c \
+                                        libdvdread4/dvd_udf.c \
+                                        libdvdread4/ifo_print.c \
+                                        libdvdread4/ifo_read.c \
+                                        libdvdread4/md5.c \
+                                        libdvdread4/nav_print.c \
+                                        libdvdread4/nav_read.c \
 
 SRCS_COMMON-$(FAAD)                  += libmpcodecs/ad_faad.c
 SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
@@ -736,7 +747,9 @@ DIRS =  . \
         ffmpeg/libavformat \
         ffmpeg/libavutil \
         libdvdcss \
-        libdvdread \
+        libdvdnav \
+        libdvdnav/vm \
+        libdvdread4 \
         libfaad2 \
         libmenu \
         libmpcodecs \
@@ -843,7 +856,8 @@ mencoder.o mplayer.o vobsub.o gui/win32/gui.o libmpdemux/muxer_avi.o osdep/mplay
 $(DEPS): help_mp.h
 
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\" $(CFLAGS_LIBDVDCSS)
-libdvdread/%.o libdvdread/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
+libdvdnav/%.o libdvdnav/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\"
+libdvdread4/%.o libdvdread4/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
 libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_FAAD_FIXED)
 
 loader/% loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAGS_NO_OMIT_LEAF_FRAME_POINTER)

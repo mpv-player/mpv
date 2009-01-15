@@ -1,5 +1,5 @@
 .\" $Revision$
-.\" MPlayer (C) 2000-2008 MPlayer Team
+.\" MPlayer (C) 2000-2009 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .
 .\" --------------------------------------------------------------------------
@@ -31,7 +31,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008-01-01" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2009-01-05" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -595,6 +595,7 @@ alang=en
 profile-desc="profile for dvdnav:// streams"
 profile=protocol.dvd
 mouse-movements=yes
+nocache=yes
 
 [extension.flv]
 profile-desc="profile for .flv files"
@@ -1034,8 +1035,10 @@ Display the main menu at MPlayer startup.
 .TP
 .B \-mouse\-movements
 Permit MPlayer to receive pointer events reported by the video
-output driver (currently only derivatives of X11 are supported).
+output driver.
 Necessary to select the buttons in DVD menus.
+Supported for X11 based VOs (x11, xv, xvmc, etc.) and the gl, gl2, direct3d and
+macosx VOs.
 .
 .TP
 .B \-noar
@@ -1161,6 +1164,16 @@ VOB(AC-3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190).
 MPlayer prints the available audio IDs when run in verbose (\-v) mode.
 When playing an MPEG-TS stream, MPlayer/\:MEncoder will use the first program
 (if present) with the chosen audio stream.
+.
+.TP
+.B \-ausid <ID> (also see \-alang)
+Select audio substream channel.
+Currently the valid range is 0x55..0x75 and applies only to MPEG-TS when handled
+by the native demuxer (not by libavformat).
+The format type may not be correctly identified because of how this information
+(or lack thereof) is embedded in the stream, but it will demux correctly the
+audio streams when multiple substreams are present.
+MPlayer prints the available substream IDs when run with \-identify.
 .
 .TP
 .B \-alang <language code[,language code,...]> (also see \-aid)
@@ -2075,8 +2088,8 @@ external subtitles and Matroska tracks.
 You may also want to use \-embeddedfonts.
 .br
 .I NOTE:
-When fontconfig is compiled-in, \-ass turns on \-fontconfig
-unless explicitly turned off with \-nofontconfig.
+Unlike normal OSD, libass uses fontconfig by default. To disable it, use
+\-nofontconfig.
 .
 .TP
 .B \-ass\-border\-color <value>
@@ -2260,8 +2273,9 @@ With fontconfig, this option determines the fontconfig font name.
 Enables the usage of fontconfig managed fonts.
 .br
 .I NOTE:
-\-ass automatically turns this on unless explicitly overridden
-with \-nofontconfig.
+By default fontconfig is used for libass-rendered subtitles and not used for
+OSD. With \-fontconfig it is used for both libass and OSD, with \-nofontconfig
+it is not used at all.
 .
 .TP
 .B \-forcedsubsonly
@@ -2754,6 +2768,9 @@ Useful if you want to have certain connections established automatically.
 .IPs (no)estimate
 Estimate the audio delay, supposed to make the video playback smoother
 (default: enabled).
+.IPs (no)autostart (default: disabled)
+Automatically start jackd if necessary.
+Note that this seems unreliable and will spam stdout with server messages.
 .RE
 .PD 1
 .
@@ -3547,6 +3564,10 @@ Choose the display device to use in fullscreen.
 .IPs shared_buffer
 Write output to a shared memory buffer instead of displaying it and 
 try to open an existing NSConnection for communication with a GUI.
+.IPs buffer_name=<name>
+Name of the shared buffer created with shm_open as well as the name of 
+the NSConnection MPlayer will try to open (default: "mplayerosx").
+Setting buffer_name implicitly enables shared_buffer.
 .RE
 .PD 1
 .

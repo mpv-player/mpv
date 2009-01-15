@@ -227,13 +227,32 @@ void osd_set_nav_box (uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey) {
   nav_hl.ey = ey;
 }
 
-inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys) {
+inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys, int left_border, int top_border,
+                      int right_border, int bottom_border, int orig_w, int orig_h) {
   int len;
+  int sx = nav_hl.sx, sy = nav_hl.sy;
+  int ex = nav_hl.ex, ey = nav_hl.ey;
+  int scaled_w = dxs - left_border - right_border;
+  int scaled_h = dys - top_border - bottom_border;
+  if (scaled_w != orig_w) {
+    sx = sx * scaled_w / orig_w;
+    ex = ex * scaled_w / orig_w;
+  }
+  if (scaled_h != orig_h) {
+    sy = sy * scaled_h / orig_h;
+    ey = ey * scaled_h / orig_h;
+  }
+  sx += left_border; ex += left_border;
+  sy += top_border;  ey += top_border;
+  sx = FFMIN(FFMAX(sx, 0), dxs);
+  ex = FFMIN(FFMAX(ex, 0), dxs);
+  sy = FFMIN(FFMAX(sy, 0), dys);
+  ey = FFMIN(FFMAX(ey, 0), dys);
 
-  obj->bbox.x1 = obj->x = nav_hl.sx;
-  obj->bbox.y1 = obj->y = nav_hl.sy;
-  obj->bbox.x2 = nav_hl.ex;
-  obj->bbox.y2 = nav_hl.ey;
+  obj->bbox.x1 = obj->x = sx;
+  obj->bbox.y1 = obj->y = sy;
+  obj->bbox.x2 = ex;
+  obj->bbox.y2 = ey;
   
   alloc_buf (obj);
   len = obj->stride * (obj->bbox.y2 - obj->bbox.y1);
@@ -1066,7 +1085,9 @@ void osd_free(struct osd_state *osd)
 
 #define FONT_LOAD_DEFER 6
 
-int osd_update(struct osd_state *osd, int dxs, int dys)
+int osd_update_ext(struct osd_state *osd, int dxs, int dys, int left_border,
+                   int top_border, int right_border, int bottom_border,
+                   int orig_w, int orig_h)
 {
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
@@ -1122,7 +1143,7 @@ int osd_update(struct osd_state *osd, int dxs, int dys)
 	switch(obj->type){
 #ifdef CONFIG_DVDNAV
         case OSDTYPE_DVDNAV:
-           vo_update_nav(obj,dxs,dys);
+           vo_update_nav(obj,dxs,dys, left_border, top_border, right_border, bottom_border, orig_w, orig_h);
            break;
 #endif
 	case OSDTYPE_SUBTITLE:
@@ -1186,6 +1207,11 @@ int osd_update(struct osd_state *osd, int dxs, int dys)
     return chg;
 }
 
+int osd_update(struct osd_state *osd, int dxs, int dys)
+{
+    return osd_update_ext(osd, dxs, dys, 0, 0, 0, 0, dxs, dys);
+}
+
 struct osd_state *osd_create(void)
 {
     struct osd_state *osd = talloc_zero(NULL, struct osd_state);
@@ -1234,14 +1260,18 @@ void osd_remove_text(struct osd_state *osd, int dxs, int dys,
     }
 }
 
-void osd_draw_text(struct osd_state *osd, int dxs, int dys,
-                   void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h,
-                                      unsigned char* src, unsigned char *srca,
-                                      int stride),
+void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
+                       int left_border, int top_border, int right_border,
+                       int bottom_border, int orig_w, int orig_h,
+                       void (*draw_alpha)(void *ctx, int x0, int y0, int w,
+                                          int h, unsigned char* src,
+                                          unsigned char *srca,
+                                          int stride),
                    void *ctx)
 {
     mp_osd_obj_t* obj=vo_osd_list;
-    osd_update(osd, dxs, dys);
+    osd_update_ext(osd, dxs, dys, left_border, top_border, right_border,
+                   bottom_border, orig_w, orig_h);
     while(obj){
       if(obj->flags&OSDFLAG_VISIBLE){
 	vo_osd_changed_flag=obj->flags&OSDFLAG_CHANGED;	// temp hack
@@ -1267,6 +1297,15 @@ void osd_draw_text(struct osd_state *osd, int dxs, int dys,
       obj->flags&=~OSDFLAG_CHANGED;
       obj=obj->next;
     }
+}
+
+void osd_draw_text(struct osd_state *osd, int dxs, int dys,
+                   void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h,
+                                      unsigned char* src, unsigned char *srca,
+                                      int stride),
+                   void *ctx)
+{
+    osd_draw_text_ext(osd, dxs, dys, 0, 0, 0, 0, dxs, dys, draw_alpha, ctx);
 }
 
 static int vo_osd_changed_status = 0;

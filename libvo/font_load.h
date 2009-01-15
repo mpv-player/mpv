@@ -63,8 +63,6 @@ typedef struct font_desc {
 
 extern font_desc_t* vo_font;
 
-#ifdef CONFIG_FREETYPE
-
 extern char *subtitle_font_encoding;
 extern float text_font_scale_factor;
 extern float osd_font_scale_factor;
@@ -80,7 +78,7 @@ extern int force_load_font;
 int init_freetype(void);
 int done_freetype(void);
 
-font_desc_t* read_font_desc_ft(const char* fname,int movie_width, int movie_height, float font_scale_factor);
+font_desc_t* read_font_desc_ft(const char* fname,int face_index,int movie_width, int movie_height, float font_scale_factor);
 void free_font_desc(font_desc_t *desc);
 
 void render_one_glyph(font_desc_t *desc, int c);
@@ -90,13 +88,6 @@ void load_font_ft(int width, int height, font_desc_t **desc, const char *name, f
 
 void blur(unsigned char *buffer, unsigned short *tmp2, int width, int height,
           int stride, int *m2, int r, int mwidth);
-
-#else
-
-static void render_one_glyph(font_desc_t *desc, int c) {}
-static int kerning(font_desc_t *desc, int prevc, int c) { return 0; }
-
-#endif
 
 raw_file* load_raw(char *name,int verbose);
 font_desc_t* read_font_desc(const char* fname,float factor,int verbose);

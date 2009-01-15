@@ -364,7 +364,8 @@ read_next:
   }
 
   len = DVDReadBlocks(d->title, d->cur_pack, 1, data);
-  if(!len) return -1; //error
+  // only == 0 should indicate an error, but some dvdread version are buggy when used with dvdcss
+  if(len <= 0) return -1; //error
 
   if(data[38]==0 && data[39]==0 && data[40]==1 && data[41]==0xBF &&
     data[1024]==0 && data[1025]==0 && data[1026]==1 && data[1027]==0xBF) {
@@ -567,6 +568,15 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
     off_t pos;
 
     if(!vts_file || !tt_srpt)
+       return 0;
+
+    if(title_no < 0 || title_no >= tt_srpt->nr_of_srpts)
+       return 0;
+
+    // map global title to vts title
+    title_no = tt_srpt->title[title_no].vts_ttn - 1;
+
+    if(title_no < 0 || title_no >= vts_file->vts_ptt_srpt->nr_of_srpts)
        return 0;
 
     if(chapter < 0 || chapter > vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts-1) //no such chapter

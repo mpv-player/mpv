@@ -20,7 +20,8 @@ VFW (Video for Windows) is the old video API for Windows. Its codecs have
 the '.dll' or (rarely) '.drv' extension.  If MPlayer fails at playing your
 AVI with this kind of message:
 
-UNKNOWN video codec: HFYU (0x55594648)
+VIDEO:  [HFYU]  352x288  24bpp  25.000 fps  4321.0 kbps (527.5 kbyte/s)
+Cannot find codec matching selected -vo and video format 0x55594648.
 
 It means your AVI is encoded with a codec which has the HFYU fourcc (HFYU =
 HuffYUV codec, DIV3 = DivX Low Motion, etc.). Now that you know this, you

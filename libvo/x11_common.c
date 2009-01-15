@@ -9,6 +9,7 @@
 #include "options.h"
 #include "mp_msg.h"
 #include "mp_fifo.h"
+#include "libavutil/common.h"
 #include "x11_common.h"
 #include "talloc.h"
 
@@ -1848,6 +1849,24 @@ uint32_t vo_x11_get_equalizer(char *name, int *value)
     else
         return VO_NOTIMPL;
     return VO_TRUE;
+}
+
+void vo_calc_drwXY(struct vo *vo, uint32_t *drwX, uint32_t *drwY)
+{
+    struct MPOpts *opts = vo->opts;
+    *drwX = *drwY = 0;
+    if (vo_fs) {
+        aspect(vo, &vo->dwidth, &vo->dheight, A_ZOOM);
+        vo->dwidth = FFMIN(vo->dwidth, opts->vo_screenwidth);
+        vo->dheight = FFMIN(vo->dheight, opts->vo_screenheight);
+        *drwX = (opts->vo_screenwidth - vo->dwidth) / 2;
+        *drwY = (opts->vo_screenheight - vo->dheight) / 2;
+        mp_msg(MSGT_VO, MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n", *drwX,
+               *drwY, vo->dwidth, vo->dheight);
+    } else if (WinID == 0) {
+        *drwX = vo->dx;
+        *drwY = vo->dy;
+    }
 }
 
 #ifdef CONFIG_XV
