@@ -8192,10 +8192,8 @@ test -z "$_nprefix" && _nprefix='CONFIG'
 for part in $1; do
   if ` echo $2 | grep -q -E "(^| )$part($| )" `; then
     echo "#define ${_nprefix}_$part 1"
-    echo "#define ENABLE_$part 1"
   else
     echo "#define ${_nprefix}_$part 0"
-    echo "#define ENABLE_$part 0"
   fi
 done
 }
@@ -8579,26 +8577,17 @@ $def_mlib
 $_def_mkstemp
 $_def_pthreads
 $_def_threads
-#ifdef HAVE_THREADS
-#define ENABLE_THREADS 1
-#else
-#define ENABLE_THREADS 0
-#endif
 $_def_yasm
 
 #define CONFIG_GPL 1
-#define ENABLE_SMALL 0
-#define ENABLE_GRAY 0
+#define CONFIG_SMALL 0
+#define CONFIG_GRAY 0
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
 #define CONFIG_AANDCT 1
-#define ENABLE_AANDCT 1
 #define CONFIG_FFT 1
-#define ENABLE_FFT 1
 #define CONFIG_GOLOMB 1
-#define ENABLE_GOLOMB 1
 #define CONFIG_MDCT 1
-#define ENABLE_MDCT 1
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
 #define HAVE_EBX_AVAILABLE 1
@@ -8607,12 +8596,8 @@ $_def_yasm
 #endif
 
 #define CONFIG_DECODERS 1
-#define ENABLE_DECODERS 1
 #define CONFIG_ENCODERS 1
-#define ENABLE_ENCODERS 1
-
 #define CONFIG_DEMUXERS 1
-#define ENABLE_DEMUXERS 1
 
 $_def_muxers
 
