@@ -145,7 +145,7 @@ static int8_t *initNoise(FilterParam *fp){
 
 /***************************************************************************/
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
 	long mmx_len= len&(~7);
 	noise+=shift;
@@ -174,7 +174,7 @@ static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int 
 #endif
 
 //duplicate of previous except movntq
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 static inline void lineNoise_MMX2(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
 	long mmx_len= len&(~7);
 	noise+=shift;
@@ -216,7 +216,7 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 
 /***************************************************************************/
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
 	long mmx_len= len&(~7);
 
@@ -356,10 +356,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
         vf_clone_mpi_attributes(dmpi, mpi);
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 	if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
 #endif
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 	if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
 #endif
 
@@ -447,13 +447,13 @@ static int open(vf_instance_t *vf, char* args){
     }
 
  
-#ifdef HAVE_MMX
+#if HAVE_MMX
     if(gCpuCaps.hasMMX){
         lineNoise= lineNoise_MMX;
         lineNoiseAvg= lineNoiseAvg_MMX;
     }
 #endif
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
     if(gCpuCaps.hasMMX2) lineNoise= lineNoise_MMX2;
 //    if(gCpuCaps.hasMMX) lineNoiseAvg= lineNoiseAvg_MMX2;
 #endif

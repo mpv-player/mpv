@@ -76,7 +76,7 @@ static int a52_resample_MONO_to_5_MMX(float * _f, int16_t * s16){
 static int a52_resample_STEREO_to_2_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 /* benchmark scores are 0.3% better with SSE but we would need to set bias=0 and premultiply it
-#ifdef HAVE_SSE
+#if HAVE_SSE
 	__asm__ volatile(
 		"mov $-1024, %%"REG_S"		\n\t"
 		"1:				\n\t"

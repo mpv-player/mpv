@@ -40,7 +40,7 @@ enum {
 	F_SHOW
 };
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char *new, int os, int ns)
 {
 	int i;
@@ -516,7 +516,7 @@ static int open(vf_instance_t *vf, char* args)
 	p->first = 1;
 	if (args) sscanf(args, "%d", &p->drop);
 	block_diffs = block_diffs_C;
-#ifdef HAVE_MMX
+#if HAVE_MMX
 	if(gCpuCaps.hasMMX) block_diffs = block_diffs_MMX;
 #endif
 	return 1;

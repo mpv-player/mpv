@@ -29,21 +29,21 @@
 #include "mpeg2.h"
 #include "attributes.h"
 #include "mpeg2_internal.h"
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
 #include "mmx.h"
 #endif
 
 void (* mpeg2_cpu_state_save) (cpu_state_t * state) = NULL;
 void (* mpeg2_cpu_state_restore) (cpu_state_t * state) = NULL;
 
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
 static void state_restore_mmx (cpu_state_t * state)
 {
     emms ();
 }
 #endif
 
-#ifdef ARCH_PPC
+#if ARCH_PPC
 #if defined(__APPLE_CC__)	/* apple */
 #define LI(a,b) "li r" #a "," #b "\n\t"
 #define STVX0(a,b,c) "stvx v" #a ",0,r" #c "\n\t"
@@ -115,12 +115,12 @@ static void state_restore_altivec (cpu_state_t * state)
 
 void mpeg2_cpu_state_init (uint32_t accel)
 {
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
     if (accel & MPEG2_ACCEL_X86_MMX) {
 	mpeg2_cpu_state_restore = state_restore_mmx;
     }
 #endif
-#ifdef ARCH_PPC
+#if ARCH_PPC
     if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
 	mpeg2_cpu_state_save = state_save_altivec;
 	mpeg2_cpu_state_restore = state_restore_altivec;

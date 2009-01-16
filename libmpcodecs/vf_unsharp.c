@@ -192,11 +192,11 @@ static int put_image( struct vf_instance_s* vf, mp_image_t *mpi, double pts) {
     
     vf_clone_mpi_attributes(dmpi, mpi);
     
-#ifdef HAVE_MMX
+#if HAVE_MMX
     if(gCpuCaps.hasMMX)
 	__asm__ volatile ("emms\n\t");
 #endif
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
     if(gCpuCaps.hasMMX2)
 	__asm__ volatile ("sfence\n\t");
 #endif

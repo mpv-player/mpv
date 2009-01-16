@@ -155,7 +155,7 @@ static void dctB_c(DCTELEM *dst, DCTELEM *src){
     }
 }
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 static void dctB_mmx(DCTELEM *dst, DCTELEM *src){
     __asm__ volatile (
         "movq  (%0), %%mm0      \n\t"
@@ -397,10 +397,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
         memcpy_pic(dmpi->planes[2], mpi->planes[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, dmpi->stride[2], mpi->stride[2]);
     }
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
     if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
 #endif
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
     if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
 #endif
 
@@ -464,7 +464,7 @@ static int open(vf_instance_t *vf, char* args){
 	case 2: requantize= mediumthresh_c; break;
     }
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
     if(gCpuCaps.hasMMX){
         dctB= dctB_mmx;
     }

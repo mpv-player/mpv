@@ -106,7 +106,7 @@ void create_lut (eq2_param_t *par)
   par->lut_clean = 1;
 }
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 static
 void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
   unsigned w, unsigned h, unsigned dstride, unsigned sstride)
@@ -275,7 +275,7 @@ void check_values (eq2_param_t *par)
   if ((par->c == 1.0) && (par->b == 0.0) && (par->g == 1.0)) {
     par->adjust = NULL;
   }
-#ifdef HAVE_MMX
+#if HAVE_MMX
   else if (par->g == 1.0 && gCpuCaps.hasMMX) {
     par->adjust = &affine_1d_MMX;
   }

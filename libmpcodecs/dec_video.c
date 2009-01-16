@@ -370,7 +370,7 @@ void *decode_video(sh_video_t *sh_video, unsigned char *start, int in_size,
 
     //------------------------ frame decoded. --------------------
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
     // some codecs are broken, and doesn't restore MMX state :(
     // it happens usually with broken/damaged files.
     if (gCpuCaps.has3DNow) {

@@ -107,7 +107,7 @@ struct a52_state_s {
 #define DELTA_BIT_NONE (2)
 #define DELTA_BIT_RESERVED (3)
 
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
 # define REG_a "rax"
 # define REG_d "rdx"
 # define REG_S "rsi"

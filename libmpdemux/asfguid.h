@@ -26,7 +26,7 @@
 #include "mpbswap.h"
 
 
-#ifdef ARCH_X86
+#if ARCH_X86
 #define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))
 #else
 #define	ASF_LOAD_GUID_PREFIX(guid)	AV_RL32(guid)

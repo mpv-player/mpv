@@ -35,7 +35,7 @@
 
 #include "cpudetect.h"
 
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
 static inline uint32_t arch_accel (uint32_t accel)
 {
 /* Use MPlayer CPU detection instead of libmpeg2 variant. */
@@ -150,7 +150,7 @@ static inline uint32_t arch_accel (uint32_t accel)
 }
 #endif /* ARCH_X86 || ARCH_X86_64 */
 
-#if defined(ACCEL_DETECT) && (defined(ARCH_PPC) || defined(ARCH_SPARC))
+#if defined(ACCEL_DETECT) && (ARCH_PPC || ARCH_SPARC)
 #include <signal.h>
 #include <setjmp.h>
 
@@ -169,7 +169,7 @@ static RETSIGTYPE sigill_handler (int sig)
 }
 #endif /* ACCEL_DETECT && (ARCH_PPC || ARCH_SPARC) */
 
-#ifdef ARCH_PPC
+#if ARCH_PPC
 static uint32_t arch_accel (uint32_t accel)
 {
 #ifdef ACCEL_DETECT
@@ -206,7 +206,7 @@ static uint32_t arch_accel (uint32_t accel)
 }
 #endif /* ARCH_PPC */
 
-#ifdef ARCH_SPARC
+#if ARCH_SPARC
 static uint32_t arch_accel (uint32_t accel)
 {
     if (accel & MPEG2_ACCEL_SPARC_VIS2)
@@ -252,7 +252,7 @@ static uint32_t arch_accel (uint32_t accel)
 }
 #endif /* ARCH_SPARC */
 
-#ifdef ARCH_ALPHA
+#if ARCH_ALPHA
 static inline uint32_t arch_accel (uint32_t accel)
 {
     if (accel & MPEG2_ACCEL_ALPHA_MVI)
@@ -276,7 +276,7 @@ static inline uint32_t arch_accel (uint32_t accel)
 
 uint32_t mpeg2_detect_accel (uint32_t accel)
 {
-#if defined (ARCH_X86) || defined (ARCH_X86_64) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
+#if ARCH_X86 || ARCH_X86_64 || ARCH_PPC || ARCH_ALPHA || ARCH_SPARC
     accel = arch_accel (accel);
 #endif
     return accel;

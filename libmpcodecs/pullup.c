@@ -9,8 +9,8 @@
 
 
 
-#ifdef ARCH_X86
-#ifdef HAVE_MMX
+#if ARCH_X86
+#if HAVE_MMX
 static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 {
 	int ret;
@@ -767,8 +767,8 @@ void pullup_init_context(struct pullup_context *c)
 		c->diff = diff_y;
 		c->comb = licomb_y;
 		c->var = var_y;
-#ifdef ARCH_X86
-#ifdef HAVE_MMX
+#if ARCH_X86
+#if HAVE_MMX
 		if (c->cpu & PULLUP_CPU_MMX) {
 			c->diff = diff_y_mmx;
 			c->comb = licomb_y_mmx;

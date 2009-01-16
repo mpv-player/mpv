@@ -101,7 +101,7 @@ struct vf_priv_s { //align 16 !
 };
 
 
-#ifndef HAVE_MMX
+#if !HAVE_MMX
 
 //This func reads from 1 slice, 1 and clears 0 & 1
 static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int height, int log2_scale)
@@ -557,10 +557,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	}
     }
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
     if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
 #endif
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
     if(gCpuCaps.hasMMX2) __asm__ volatile ("sfence\n\t");
 #endif
     return vf_next_put_image(vf,dmpi, pts);
@@ -702,7 +702,7 @@ const vf_info_t vf_info_fspp = {
 #define THRESHOLD(r,x,t) if(((unsigned)((x)+t))>t*2) r=(x);else r=0;
 #define DESCALE(x,n)  (((x) + (1 << ((n)-1))) >> n)
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 
 DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_382683433)=FIX64(0.382683433, 14); 
 DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_541196100)=FIX64(0.541196100, 14); 
@@ -738,7 +738,7 @@ static const int16_t FIX_1_082392200=FIX(1.082392200, 13);
 
 #endif
 
-#ifndef HAVE_MMX
+#if !HAVE_MMX
 
 static void column_fidct_c(int16_t* thr_adr, DCTELEM *data, DCTELEM *output, int cnt)
 {
@@ -1598,7 +1598,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 
 #endif // HAVE_MMX
 
-#ifndef HAVE_MMX
+#if !HAVE_MMX
 
 static void row_idct_c(DCTELEM* workspace,
 		       int16_t* output_adr, int output_stride, int cnt)
@@ -1867,7 +1867,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 
 #endif // HAVE_MMX
 
-#ifndef HAVE_MMX
+#if !HAVE_MMX
 
 static void row_fdct_c(DCTELEM *data, const uint8_t *pixels, int line_size, int cnt)
 {

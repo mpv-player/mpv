@@ -22,7 +22,7 @@
 
 #include "config.h"
 
-#ifdef ARCH_ARM
+#if ARCH_ARM
 
 #include <inttypes.h>
 

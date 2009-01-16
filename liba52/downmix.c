@@ -56,7 +56,7 @@ void downmix_accel_init(uint32_t mm_accel)
 {
     a52_upmix= upmix_C;
     a52_downmix= downmix_C;
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
     if(mm_accel & MM_ACCEL_X86_MMX) a52_upmix= upmix_MMX;
     if(mm_accel & MM_ACCEL_X86_SSE) a52_downmix= downmix_SSE;
     if(mm_accel & MM_ACCEL_X86_3DNOW) a52_downmix= downmix_3dnow;
@@ -686,7 +686,7 @@ void upmix_C (sample_t * samples, int acmod, int output)
     }
 }
 
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
 static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
 {
 	__asm__ volatile(

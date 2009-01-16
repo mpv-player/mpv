@@ -19,7 +19,7 @@ struct vf_priv_s {
 	int max, last, cnt;
 };
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 {
 	volatile short out[4];
@@ -164,7 +164,7 @@ static int open(vf_instance_t *vf, char* args)
 	p->frac = 0.33;
 	if (args) sscanf(args, "%d:%d:%d:%f", &p->max, &p->hi, &p->lo, &p->frac);
 	diff = diff_C;
-#ifdef HAVE_MMX
+#if HAVE_MMX
 	if(gCpuCaps.hasMMX) diff = diff_MMX;
 #endif
 	return 1;
