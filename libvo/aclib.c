@@ -102,8 +102,6 @@
 #define HAVE_3DNOW 0
 #define HAVE_SSE 0
 #define HAVE_SSE2 0
-#define HAVE_MMX
-#define HAVE_MMX2
 #define RENAME(a) a ## _MMX2
 #include "aclib_template.c"
 #endif
