@@ -179,7 +179,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     buf16[2] = 0x0001;   // data-type ac3
     buf16[2] |= (sh_audio->a_in_buffer[5] & 0x7) << 8; // bsmod
     buf16[3] = len << 3; // number of bits in payload
-#ifdef WORDS_BIGENDIAN
+#if WORDS_BIGENDIAN
     memcpy(buf + 8, sh_audio->a_in_buffer, len);
 #else
     swab(sh_audio->a_in_buffer, buf + 8, len);
@@ -523,7 +523,7 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
   buf16[3] = fsize << 3;
 
   if (!convert_16bits) {
-#ifdef WORDS_BIGENDIAN
+#if WORDS_BIGENDIAN
   /* BE stream */
   if (indata_ptr[0] == 0x1f || indata_ptr[0] == 0x7f)
 #else
