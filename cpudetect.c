@@ -511,7 +511,7 @@ void GetCpuCaps( CpuCaps *caps)
 	caps->hasSSE4a=0;
 	caps->isX86=0;
 	caps->hasAltiVec = 0;
-#if !HAVE_ALTIVEC   
+#if HAVE_ALTIVEC   
 #ifdef __APPLE__
 /*
   rip-off from ffmpeg altivec detection code.
