@@ -566,7 +566,7 @@ void GetCpuCaps( CpuCaps *caps)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Sun Sparc\n");
 #endif
 
-#ifdef ARCH_ARMV4L
+#ifdef ARCH_ARM
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: ARM\n");
 #endif
 
