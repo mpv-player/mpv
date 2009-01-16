@@ -9,7 +9,7 @@ CpuCaps gCpuCaps;
 #endif
 #include <stdlib.h>
 
-#ifdef ARCH_X86
+#if ARCH_X86
 
 #include <stdio.h>
 #include <string.h>
@@ -57,7 +57,7 @@ static int has_cpuid(void)
 	long a, c;
 
 // code from libavcodec:
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
 #define PUSHF "pushfq\n\t"
 #define POPF "popfq\n\t"
 #else
@@ -212,27 +212,27 @@ void GetCpuCaps( CpuCaps *caps)
 //		caps->hasMMX = 0;
 
 #ifndef RUNTIME_CPUDETECT
-#ifndef HAVE_MMX
+#if !HAVE_MMX
 	if(caps->hasMMX) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"MMX supported but disabled\n");
 	caps->hasMMX=0;
 #endif
-#ifndef HAVE_MMX2
+#if !HAVE_MMX2
 	if(caps->hasMMX2) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"MMX2 supported but disabled\n");
 	caps->hasMMX2=0;
 #endif
-#ifndef HAVE_SSE
+#if !HAVE_SSE
 	if(caps->hasSSE) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"SSE supported but disabled\n");
 	caps->hasSSE=0;
 #endif
-#ifndef HAVE_SSE2
+#if !HAVE_SSE2
 	if(caps->hasSSE2) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"SSE2 supported but disabled\n");
 	caps->hasSSE2=0;
 #endif
-#ifndef HAVE_3DNOW
+#if !HAVE_3DNOW
 	if(caps->has3DNow) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"3DNow supported but disabled\n");
 	caps->has3DNow=0;
 #endif
-#ifndef HAVE_3DNOWEX
+#if !HAVE_3DNOWEX
 	if(caps->has3DNowExt) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"3DNowExt supported but disabled\n");
 	caps->has3DNowExt=0;
 #endif
@@ -304,7 +304,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #undef CPUID_STEPPING
 
 
-#if defined(__linux__) && defined(_POSIX_SOURCE) && !defined(ARCH_X86_64)
+#if defined(__linux__) && defined(_POSIX_SOURCE) && ARCH_X86_64
 static void sigill_handler_sse( int signal, struct sigcontext sc )
 {
    mp_msg(MSGT_CPUDETECT,MSGL_V, "SIGILL, " );
@@ -371,7 +371,7 @@ ULONG _System os2_sig_handler_sse( PEXCEPTIONREPORTRECORD       p1,
 
 static void check_os_katmai_support( void )
 {
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
    gCpuCaps.hasSSE=1;
    gCpuCaps.hasSSE2=1;
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__APPLE__)
@@ -511,7 +511,7 @@ void GetCpuCaps( CpuCaps *caps)
 	caps->hasSSE4a=0;
 	caps->isX86=0;
 	caps->hasAltiVec = 0;
-#ifdef HAVE_ALTIVEC   
+#if !HAVE_ALTIVEC   
 #ifdef __APPLE__
 /*
   rip-off from ffmpeg altivec detection code.
@@ -558,47 +558,47 @@ void GetCpuCaps( CpuCaps *caps)
         mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
 #endif /* HAVE_ALTIVEC */
 
-#ifdef ARCH_IA64
+#if ARCH_IA64
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Intel Itanium\n");
 #endif
 
-#ifdef ARCH_SPARC
+#if ARCH_SPARC
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Sun Sparc\n");
 #endif
 
-#ifdef ARCH_ARM
+#if ARCH_ARM
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: ARM\n");
 #endif
 
-#ifdef ARCH_PPC
+#if ARCH_PPC
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: PowerPC\n");
 #endif
 
-#ifdef ARCH_ALPHA
+#if ARCH_ALPHA
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Digital Alpha\n");
 #endif
 
-#ifdef ARCH_SGI_MIPS
+#if ARCH_SGI_MIPS
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: SGI MIPS\n");
 #endif
 
-#ifdef ARCH_PA_RISC
+#if ARCH_PA_RISC
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Hewlett-Packard PA-RISC\n");
 #endif
 
-#ifdef ARCH_S390
+#if ARCH_S390
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: IBM S/390\n");
 #endif
 
-#ifdef ARCH_S390X
+#if ARCH_S390X
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: IBM S/390X\n");
 #endif
 
-#ifdef ARCH_VAX
+#if ARCH_VAX
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO, "CPU: Digital VAX\n" );
 #endif
 
-#ifdef ARCH_XTENSA
+#if ARCH_XTENSA
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO, "CPU: Tensilica Xtensa\n" );
 #endif
 }
