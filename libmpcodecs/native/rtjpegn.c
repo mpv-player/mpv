@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "config.h"
-#ifdef HAVE_MMX
+#if HAVE_MMX
 #define MMX
 #endif
 
