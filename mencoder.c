@@ -425,7 +425,7 @@ user_correct_pts = 0;
 
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
-#ifdef ARCH_X86
+#if ARCH_X86
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags: Type: %d MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
       gCpuCaps.cpuType,gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
@@ -434,22 +434,22 @@ user_correct_pts = 0;
   mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithRuntimeDetection);
 #else
   mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithCPUExtensions);
-#ifdef HAVE_MMX
+#if HAVE_MMX
   mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX");
 #endif
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
   mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX2");
 #endif
-#ifdef HAVE_3DNOW
+#if HAVE_3DNOW
   mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNow");
 #endif
-#ifdef HAVE_3DNOWEX
+#if HAVE_3DNOWEX
   mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNowEx");
 #endif
-#ifdef HAVE_SSE
+#if HAVE_SSE
   mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE");
 #endif
-#ifdef HAVE_SSE2
+#if HAVE_SSE2
   mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE2");
 #endif
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n\n");
