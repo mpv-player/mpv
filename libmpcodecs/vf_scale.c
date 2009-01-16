@@ -322,7 +322,7 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
 static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src[3], int src_stride[3], int y, int h, 
                   uint8_t *dst[3], int dst_stride[3], int interlaced){
     uint8_t *src2[3]={src[0], src[1], src[2]};
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
     uint32_t pal2[256];
     if (src[1] && !src[2]){
         int i;

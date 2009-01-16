@@ -231,7 +231,7 @@ void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
 	    unsigned int* p=(unsigned int*) dst;
 	    int size=(mpi->bpp>>3)*w/4;
 	    int i;
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
 #define CLEAR_PACKEDYUV_PATTERN 0x00800080
 #define CLEAR_PACKEDYUV_PATTERN_SWAPPED 0x80008000
 #else
