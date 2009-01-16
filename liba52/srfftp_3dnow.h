@@ -46,7 +46,7 @@ typedef struct
 	"m"(x_minus_plus_3dnow)\
 	:"memory");
 
-#ifdef HAVE_3DNOWEX
+#if HAVE_3DNOWEX
 #define PSWAP_MM(mm_base,mm_hlp) "pswapd	"mm_base","mm_base"\n\t"
 #else
 #define PSWAP_MM(mm_base,mm_hlp)\
@@ -54,7 +54,7 @@ typedef struct
 	"psrlq $32, "mm_base"\n\t"\
 	"punpckldq "mm_hlp","mm_base"\n\t"
 #endif
-#ifdef HAVE_3DNOWEX
+#if HAVE_3DNOWEX
 #define PFNACC_MM(mm_base,mm_hlp)	"pfnacc	"mm_base","mm_base"\n\t"
 #else
 #define PFNACC_MM(mm_base,mm_hlp)\
