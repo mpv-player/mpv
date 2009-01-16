@@ -68,7 +68,7 @@ static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], i
     }
 }
 
-#if defined(HAVE_MMX) && defined(NAMED_ASM_ARGS)
+#if HAVE_MMX && defined(NAMED_ASM_ARGS)
 
 #define LOAD4(mem,dst) \
             "movd      "mem", "#dst" \n\t"\
@@ -281,7 +281,7 @@ static void filter_line_mmx2(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, u
 #undef CHECK2
 #undef FILTER
 
-#endif /* defined(HAVE_MMX) && defined(NAMED_ASM_ARGS) */
+#endif /* HAVE_MMX && defined(NAMED_ASM_ARGS) */
 
 static void filter_line_c(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint8_t *cur, uint8_t *next, int w, int refs, int parity){
     int x;
@@ -363,7 +363,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
             }
         }
     }
-#if defined(HAVE_MMX) && defined(NAMED_ASM_ARGS)
+#if HAVE_MMX && defined(NAMED_ASM_ARGS)
     if(gCpuCaps.hasMMX2) __asm__ volatile("emms \n\t" : : : "memory");
 #endif
 }
@@ -501,7 +501,7 @@ static int open(vf_instance_t *vf, char* args){
     if (args) sscanf(args, "%d:%d", &vf->priv->mode, &vf->priv->parity);
 
     filter_line = filter_line_c;
-#if defined(HAVE_MMX) && defined(NAMED_ASM_ARGS)
+#if HAVE_MMX && defined(NAMED_ASM_ARGS)
     if(gCpuCaps.hasMMX2) filter_line = filter_line_mmx2;
 #endif
 

@@ -36,7 +36,7 @@
    slow and to 16 if the machine is fast and has MMX.  
 */
 
-#if !defined(HAVE_MMX) // This machine is slow
+#if !HAVE_MMX // This machine is slow
 #define L8 
 #else
 #define L16

@@ -24,7 +24,7 @@
 
 //Note: we have MMX, MMX2, 3DNOW version there is no 3DNOW+MMX2 one
 //Plain C versions
-//#if !defined (HAVE_MMX) || defined (RUNTIME_CPUDETECT)
+//#if !HAVE_MMX || defined (RUNTIME_CPUDETECT)
 //#define COMPILE_C
 //#endif
 
