@@ -263,7 +263,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 sh_audio->audio.dwScale= codec->block_align ? codec->block_align*8 : 8;
                 sh_audio->audio.dwRate = codec->bit_rate;
             }
-            g= ff_gcd(sh_audio->audio.dwScale, sh_audio->audio.dwRate);
+            g= av_gcd(sh_audio->audio.dwScale, sh_audio->audio.dwRate);
             sh_audio->audio.dwScale /= g;
             sh_audio->audio.dwRate  /= g;
 //          printf("sca:%d rat:%d fs:%d sr:%d ba:%d\n", sh_audio->audio.dwScale, sh_audio->audio.dwRate, codec->frame_size, codec->sample_rate, codec->block_align);

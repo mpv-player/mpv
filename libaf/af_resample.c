@@ -201,7 +201,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
 
     // Calculate up and down sampling factors
-    d=ff_gcd(af->data->rate,n->rate);
+    d=av_gcd(af->data->rate,n->rate);
 
     // If sloppy resampling is enabled limit the upsampling factor
     if(((s->setup & FREQ_MASK) == FREQ_SLOPPY) && (af->data->rate/d > 5000)){
@@ -209,7 +209,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       int dn=n->rate/2;
       int m=2;
       while(af->data->rate/(d*m) > 5000){
-	d=ff_gcd(up,dn);
+	d=av_gcd(up,dn);
 	up/=2; dn/=2; m*=2;
       }
       d*=m;
