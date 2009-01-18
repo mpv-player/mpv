@@ -1947,7 +1947,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx)
 	// handle audio-only case:
 	// this is where mplayer sleeps during audio-only playback
 	// to avoid 100% CPU use
-	sleep_time = (ao_data.outburst - bytes_to_write) * 1000 / ao_data.samplerate;
+	sleep_time = (ao_data.outburst - bytes_to_write) * 1000 / ao_data.bps;
 	if (sleep_time < 10) sleep_time = 10; // limit to 100 wakeups per second
 	usec_sleep(sleep_time * 1000);
     }
@@ -2412,7 +2412,7 @@ static void print_version(void){
 
 /* Test for CPU capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
-#ifdef ARCH_X86
+#if ARCH_X86
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
       gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
@@ -2421,22 +2421,22 @@ static void print_version(void){
   mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithRuntimeDetection);
 #else
   mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithCPUExtensions);
-#ifdef HAVE_MMX
+#if HAVE_MMX
   mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX");
 #endif
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
   mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX2");
 #endif
-#ifdef HAVE_3DNOW
+#if HAVE_3DNOW
   mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNow");
 #endif
-#ifdef HAVE_3DNOWEX
+#if HAVE_3DNOWEX
   mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNowEx");
 #endif
-#ifdef HAVE_SSE
+#if HAVE_SSE
   mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE");
 #endif
-#ifdef HAVE_SSE2
+#if HAVE_SSE2
   mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE2");
 #endif
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");

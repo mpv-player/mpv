@@ -54,6 +54,7 @@ void (*a52_imdct_512) (sample_t * data, sample_t * delay, sample_t bias);
 
 #ifdef RUNTIME_CPUDETECT
 #undef HAVE_3DNOWEX
+#define HAVE_3DNOWEX 0
 #endif
 
 typedef struct complex_s {
@@ -118,7 +119,7 @@ static complex_t __attribute__((aligned(16))) * w[7] = {w_1, w_2, w_4, w_8, w_16
 static sample_t __attribute__((aligned(16))) xcos1[128];
 static sample_t __attribute__((aligned(16))) xsin1[128];
 
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
 // NOTE: SSE needs 16byte alignment or it will segfault 
 // 
 static float __attribute__((aligned(16))) sseSinCos1c[256];
@@ -365,7 +366,7 @@ void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias)
     }
 }
 
-#ifdef HAVE_ALTIVEC
+#if HAVE_ALTIVEC
 
 #ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
@@ -710,10 +711,9 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
 
 // Stuff below this line is borrowed from libac3
 #include "srfftp.h"
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
-#ifndef HAVE_3DNOW
+#if ARCH_X86 || ARCH_X86_64
+#undef HAVE_3DNOW
 #define HAVE_3DNOW 1
-#endif
 #include "srfftp_3dnow.h"
 
 const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = {{ 0x00000000UL, 0x80000000UL }}; 
@@ -721,8 +721,10 @@ const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = {{ 0x80000000
 const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
 
 #undef HAVE_3DNOWEX
+#define HAVE_3DNOWEX 0
 #include "imdct_3dnow.h"
-#define HAVE_3DNOWEX
+#undef HAVE_3DNOWEX
+#define HAVE_3DNOWEX 1
 #include "imdct_3dnow.h"
 
 void
@@ -1202,7 +1204,7 @@ void a52_imdct_init (uint32_t mm_accel)
 	    w[i][k].imag = sin (-M_PI * k / j);
 	}
     }
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
 	for (i = 0; i < 128; i++) {
 	    sseSinCos1c[2*i+0]= xcos1[i];
 	    sseSinCos1c[2*i+1]= -xcos1[i];
@@ -1256,7 +1258,7 @@ void a52_imdct_init (uint32_t mm_accel)
 	ifft128 = ifft128_c;
 	ifft64 = ifft64_c;
 
-#if defined(ARCH_X86) || defined(ARCH_X86_64)
+#if ARCH_X86 || ARCH_X86_64
 	if(mm_accel & MM_ACCEL_X86_SSE)
 	{
 	  fprintf (stderr, "Using SSE optimized IMDCT transform\n");
@@ -1276,7 +1278,7 @@ void a52_imdct_init (uint32_t mm_accel)
 	}
 	else
 #endif // ARCH_X86 || ARCH_X86_64
-#ifdef HAVE_ALTIVEC
+#if HAVE_ALTIVEC
         if (mm_accel & MM_ACCEL_PPC_ALTIVEC)
 	{
 	  fprintf(stderr, "Using AltiVec optimized IMDCT transform\n");
@@ -1285,7 +1287,7 @@ void a52_imdct_init (uint32_t mm_accel)
 	else
 #endif
 
-#ifdef LIBA52_DJBFFT
+#if LIBA52_DJBFFT
     if (mm_accel & MM_ACCEL_DJBFFT) {
 	fprintf (stderr, "Using djbfft for IMDCT transform\n");
 	ifft128 = (void (*) (complex_t *)) fftc4_un128;

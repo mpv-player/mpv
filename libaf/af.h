@@ -93,7 +93,7 @@ extern int* af_cpu_speed;
 
 // Default init type 
 #ifndef AF_INIT_TYPE
-#if defined(HAVE_SSE) || defined(HAVE_3DNOW)
+#if HAVE_SSE || HAVE_3DNOW
 #define AF_INIT_TYPE (af_cpu_speed?*af_cpu_speed:AF_INIT_FAST)
 #else
 #define AF_INIT_TYPE (af_cpu_speed?*af_cpu_speed:AF_INIT_SLOW)

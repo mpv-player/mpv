@@ -523,7 +523,7 @@ _libavcodec_a=auto
 _libamr_nb=auto
 _libamr_wb=auto
 _libavdecoders_all=`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
-_libavdecoders=` echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER// -e s/H264_VDPAU_DECODER// `
+_libavdecoders=` echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER// -e s/H264_VDPAU_DECODER// -e s/MPEG_VDPAU_DECODER// -e s/MPEG1_VDPAU_DECODER//`
 _libavencoders_all=`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavencoders=` echo $_libavencoders_all | sed 's/ LIB[A-Z0-9_]*_ENCODER//g'`
 _libavparsers_all=`sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' ffmpeg/libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
@@ -1690,7 +1690,7 @@ EOF
 fi
 
 
-_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM SH PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
+_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM SH4 PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _arch='X86 X86_32'
@@ -2049,10 +2049,10 @@ EOF
     iproc='arm'
     ;;
 
-  sh)
-    _arch='SH'
-    _target_arch='ARCH_SH = yes'
-    iproc='sh'
+  sh|sh4)
+    _arch='SH4'
+    _target_arch='ARCH_SH4 = yes'
+    iproc='sh4'
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
@@ -2496,7 +2496,7 @@ if test $_yasm ; then
   _have_yasm="yes"
   echores "$_yasm"
 else
-  _def_yasm='#undef HAVE_YASM'
+  _def_yasm='#define HAVE_YASM 0'
   fft_mmx="no"
   _have_yasm="no"
   echores "no"
@@ -2617,7 +2617,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC BSWAP MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MLIB MMI SH4 VIS MVI'
+_cpuexts_all='ALTIVEC BSWAP MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -5541,6 +5541,7 @@ fi
 echores "$_sunaudio"
 
 
+def_mlib='#define CONFIG_MLIB 0'
 if sunos; then
 echocheck "Sun mediaLib"
 if test "$_mlib" = auto ; then
@@ -5549,9 +5550,8 @@ if test "$_mlib" = auto ; then
 #include <mlib.h>
 int main(void) { mlib_VideoColorYUV2ABGR420(0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  cc_check -lmlib && _mlib=yes
+  cc_check -lmlib && _mlib=yes && def_mlib='#define CONFIG_MLIB 1'
 fi
-test "$_mlib" = yes && _cpuexts="MLIB $_cpuexts"
 echores "$_mlib"
 fi #if sunos
 
@@ -6240,10 +6240,10 @@ if test "$_mp3lib" = auto ; then
 fi
 if test "$_mp3lib" = yes ; then
   _def_mp3lib='#define CONFIG_MP3LIB 1'
-  _codecmodules="mp3lib $_codecmodules"
+  _codecmodules="mp3lib(internal) $_codecmodules"
 else
   _def_mp3lib='#undef CONFIG_MP3LIB'
-  _nocodecmodules="mp3lib $_nocodecmodules"
+  _nocodecmodules="mp3lib(internal) $_nocodecmodules"
 fi
 echores "$_mp3lib"
 
@@ -6288,10 +6288,10 @@ if test "$_libmpeg2" = auto ; then
 fi
 if test "$_libmpeg2" = yes ; then
   _def_libmpeg2='#define CONFIG_LIBMPEG2 1'
-  _codecmodules="libmpeg2 $_codecmodules"
+  _codecmodules="libmpeg2(internal) $_codecmodules"
 else
   _def_libmpeg2='#undef CONFIG_LIBMPEG2'
-  _nocodecmodules="libmpeg2 $_nocodecmodules"
+  _nocodecmodules="libmpeg2(internal) $_nocodecmodules"
 fi
 echores "$_libmpeg2"
 
@@ -6422,7 +6422,11 @@ fi
 
 if test "$_faad" = yes ; then
   _def_faad='#define CONFIG_FAAD 1'
-  _codecmodules="faad2 $_codecmodules"
+  if test "$_faad_internal" = yes ; then
+    _codecmodules="faad2(internal) $_codecmodules"
+  else
+    _codecmodules="faad2 $_codecmodules"
+  fi
 else
   _faad=no
   _nocodecmodules="faad2 $_nocodecmodules"
@@ -6641,7 +6645,7 @@ elif test "$_libavutil_so" = auto ; then
   _libavutil_so=no
   cat > $TMPC << EOF
 #include <libavutil/common.h>
-int main(void) { ff_gcd(1,1); return 0; }
+int main(void) { av_gcd(1,1); return 0; }
 EOF
   if $_pkg_config --exists libavutil ; then
     _inc_libavutil=`$_pkg_config --cflags libavutil`
@@ -6704,7 +6708,7 @@ test "$_libavcodec_so" = yes && _def_libavcodec_so='#define CONFIG_LIBAVCODEC_SO
 test "$_libavcodec_mpegaudio_hp" = yes \
   && _def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
 if test "$_libavcodec_a" = yes ; then
-  _codecmodules="libavcodec $_codecmodules"
+  _codecmodules="libavcodec(internal) $_codecmodules"
 elif test "$_libavcodec_so" = yes ; then
   _codecmodules="libavcodec.so $_codecmodules"
 else
@@ -7824,11 +7828,12 @@ if test "$_dvdnav" = yes ; then
   _def_dvdnav='#define CONFIG_DVDNAV 1'
   if test "$dvdnav_internal" = yes ; then
     _inc_extra="$_inc_extra -Ilibdvdnav"
+    _inputmodules="dvdnav(internal) $_inputmodules"
   else
     _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
     _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+    _inputmodules="dvdnav $_inputmodules"
   fi
-  _inputmodules="dvdnav $_inputmodules"
 else
   _def_dvdnav='#undef CONFIG_DVDNAV'
   _noinputmodules="dvdnav $_noinputmodules"
@@ -8205,9 +8210,8 @@ test -z "$_nprefix" && _nprefix='CONFIG'
 for part in $1; do
   if ` echo $2 | grep -q -E "(^| )$part($| )" `; then
     echo "#define ${_nprefix}_$part 1"
-    echo "#define ENABLE_$part 1"
   else
-    echo "#define ENABLE_$part 0"
+    echo "#define ${_nprefix}_$part 0"
   fi
 done
 }
@@ -8587,29 +8591,21 @@ $_def_libswscale_so
 $_def_dcbzl
 $def_fast_64bit
 $_def_fast_unaligned
+$def_mlib
 $_def_mkstemp
 $_def_pthreads
 $_def_threads
-#ifdef HAVE_THREADS
-#define ENABLE_THREADS 1
-#else
-#define ENABLE_THREADS 0
-#endif
 $_def_yasm
 
 #define CONFIG_GPL 1
-#define ENABLE_SMALL 0
-#define ENABLE_GRAY 0
+#define CONFIG_SMALL 0
+#define CONFIG_GRAY 0
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
 #define CONFIG_AANDCT 1
-#define ENABLE_AANDCT 1
 #define CONFIG_FFT 1
-#define ENABLE_FFT 1
 #define CONFIG_GOLOMB 1
-#define ENABLE_GOLOMB 1
 #define CONFIG_MDCT 1
-#define ENABLE_MDCT 1
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
 #define HAVE_EBX_AVAILABLE 1
@@ -8618,12 +8614,8 @@ $_def_yasm
 #endif
 
 #define CONFIG_DECODERS 1
-#define ENABLE_DECODERS 1
 #define CONFIG_ENCODERS 1
-#define ENABLE_ENCODERS 1
-
 #define CONFIG_DEMUXERS 1
-#define ENABLE_DEMUXERS 1
 
 $_def_muxers
 

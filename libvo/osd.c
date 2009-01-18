@@ -11,7 +11,7 @@
 #include <inttypes.h>
 #include "cpudetect.h"
 
-#ifdef ARCH_X86
+#if ARCH_X86
 #define CAN_COMPILE_X86_ASM
 #endif
 
@@ -23,21 +23,21 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 
 //Note: we have C, X86-nommx, MMX, MMX2, 3DNOW version therse no 3DNOW+MMX2 one
 //Plain C versions
-#if !defined (HAVE_MMX) || defined (RUNTIME_CPUDETECT)
+#if !HAVE_MMX || defined (RUNTIME_CPUDETECT)
 #define COMPILE_C
 #endif
 
 #ifdef CAN_COMPILE_X86_ASM
 
-#if (defined (HAVE_MMX) && !defined (HAVE_3DNOW) && !defined (HAVE_MMX2)) || defined (RUNTIME_CPUDETECT)
+#if (HAVE_MMX && !HAVE_3DNOW && !HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
 #define COMPILE_MMX
 #endif
 
-#if defined (HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
+#if HAVE_MMX2 || defined (RUNTIME_CPUDETECT)
 #define COMPILE_MMX2
 #endif
 
-#if (defined (HAVE_3DNOW) && !defined (HAVE_MMX2)) || defined (RUNTIME_CPUDETECT)
+#if (HAVE_3DNOW && !HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
 #define COMPILE_3DNOW
 #endif
 #endif //CAN_COMPILE_X86_ASM
@@ -45,6 +45,9 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #undef HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
+#define HAVE_MMX 0
+#define HAVE_MMX2 0
+#define HAVE_3DNOW 0
 
 #ifndef CAN_COMPILE_X86_ASM
 
@@ -52,6 +55,9 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #undef HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
+#define HAVE_MMX 0
+#define HAVE_MMX2 0
+#define HAVE_3DNOW 0
 #define RENAME(a) a ## _C
 #include "osd_template.c"
 #endif
@@ -64,6 +70,9 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #undef HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
+#define HAVE_MMX 0
+#define HAVE_MMX2 0
+#define HAVE_3DNOW 0
 #define RENAME(a) a ## _X86
 #include "osd_template.c"
 #endif
@@ -71,9 +80,12 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 //MMX versions
 #ifdef COMPILE_MMX
 #undef RENAME
-#define HAVE_MMX
+#undef HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
+#define HAVE_MMX 1
+#define HAVE_MMX2 0
+#define HAVE_3DNOW 0
 #define RENAME(a) a ## _MMX
 #include "osd_template.c"
 #endif
@@ -81,9 +93,12 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 //MMX2 versions
 #ifdef COMPILE_MMX2
 #undef RENAME
-#define HAVE_MMX
-#define HAVE_MMX2
+#undef HAVE_MMX
+#undef HAVE_MMX2
 #undef HAVE_3DNOW
+#define HAVE_MMX 1
+#define HAVE_MMX2 1
+#define HAVE_3DNOW 0
 #define RENAME(a) a ## _MMX2
 #include "osd_template.c"
 #endif
@@ -91,9 +106,12 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 //3DNOW versions
 #ifdef COMPILE_3DNOW
 #undef RENAME
-#define HAVE_MMX
+#undef HAVE_MMX
 #undef HAVE_MMX2
-#define HAVE_3DNOW
+#undef HAVE_3DNOW
+#define HAVE_MMX 1
+#define HAVE_MMX2 0
+#define HAVE_3DNOW 1
 #define RENAME(a) a ## _3DNow
 #include "osd_template.c"
 #endif
@@ -116,13 +134,13 @@ void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_yv12_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
 #else //RUNTIME_CPUDETECT
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 		vo_draw_alpha_yv12_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_3DNOW)
+#elif HAVE_3DNOW
 		vo_draw_alpha_yv12_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_MMX)
+#elif HAVE_MMX
 		vo_draw_alpha_yv12_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86)
+#elif ARCH_X86
 		vo_draw_alpha_yv12_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_yv12_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -146,13 +164,13 @@ void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_yuy2_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
 #else //RUNTIME_CPUDETECT
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 		vo_draw_alpha_yuy2_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_3DNOW)
+#elif HAVE_3DNOW
 		vo_draw_alpha_yuy2_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_MMX)
+#elif HAVE_MMX
 		vo_draw_alpha_yuy2_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86)
+#elif ARCH_X86
 		vo_draw_alpha_yuy2_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_yuy2_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -176,13 +194,13 @@ void vo_draw_alpha_uyvy(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_uyvy_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
 #else //RUNTIME_CPUDETECT
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 		vo_draw_alpha_uyvy_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_3DNOW)
+#elif HAVE_3DNOW
 		vo_draw_alpha_uyvy_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_MMX)
+#elif HAVE_MMX
 		vo_draw_alpha_uyvy_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86)
+#elif ARCH_X86
 		vo_draw_alpha_uyvy_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_uyvy_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -206,13 +224,13 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
 		vo_draw_alpha_rgb24_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
 #else //RUNTIME_CPUDETECT
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 		vo_draw_alpha_rgb24_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_3DNOW)
+#elif HAVE_3DNOW
 		vo_draw_alpha_rgb24_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_MMX)
+#elif HAVE_MMX
 		vo_draw_alpha_rgb24_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86)
+#elif ARCH_X86
 		vo_draw_alpha_rgb24_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_rgb24_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -236,13 +254,13 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 		vo_draw_alpha_rgb32_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
 #else //RUNTIME_CPUDETECT
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 		vo_draw_alpha_rgb32_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_3DNOW)
+#elif HAVE_3DNOW
 		vo_draw_alpha_rgb32_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (HAVE_MMX)
+#elif HAVE_MMX
 		vo_draw_alpha_rgb32_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined(ARCH_X86)
+#elif ARCH_X86
 		vo_draw_alpha_rgb32_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_rgb32_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -281,13 +299,13 @@ void vo_draw_alpha_init(void){
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using Unoptimized OnScreenDisplay\n");
 #endif
 #else //RUNTIME_CPUDETECT
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit MMX2) Optimized OnScreenDisplay\n");
-#elif defined (HAVE_3DNOW)
+#elif HAVE_3DNOW
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit 3DNow) Optimized OnScreenDisplay\n");
-#elif defined (HAVE_MMX)
+#elif HAVE_MMX
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX Optimized OnScreenDisplay\n");
-#elif defined(ARCH_X86)
+#elif ARCH_X86
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using X86 Optimized OnScreenDisplay\n");
 #else
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using Unoptimized OnScreenDisplay\n");

@@ -24,8 +24,8 @@
 #include <string.h>
 
 #ifdef CONFIG_FASTMEMCPY
-#if defined(HAVE_MMX) || defined(HAVE_MMX2) || defined(HAVE_3DNOW) \
-/*    || defined(HAVE_SSE) || defined(HAVE_SSE2) */
+#if HAVE_MMX || HAVE_MMX2 || HAVE_3DNOW \
+/*    || HAVE_SSE || HAVE_SSE2 */
 #include <stddef.h>
 
 void * fast_memcpy(void * to, const void * from, size_t len);

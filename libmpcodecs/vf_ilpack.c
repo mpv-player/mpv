@@ -57,7 +57,7 @@ static void pack_li_1_C(unsigned char *dst, unsigned char *y,
 	}
 }
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w)
 {
@@ -93,7 +93,7 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 {
 	__asm__ volatile (""
 		"push %%"REG_BP" \n\t"
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
 		"mov %6, %%"REG_BP" \n\t"
 #else
 		"movl 4(%%"REG_d"), %%"REG_BP" \n\t"
@@ -186,7 +186,7 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 		"pop %%"REG_BP" \n\t"
 		: 
 		: "S" (y), "D" (dst), "a" (u), "b" (v), "c" (w/16),
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
 		"d" ((long)us), "r" ((long)vs)
 #else
 		"d" (&us)
@@ -201,7 +201,7 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 {
 	__asm__ volatile (""
 		"push %%"REG_BP" \n\t"
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
 		"mov %6, %%"REG_BP" \n\t"
 #else
 		"movl 4(%%"REG_d"), %%"REG_BP" \n\t"
@@ -298,7 +298,7 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 		"pop %%"REG_BP" \n\t"
 		: 
 		: "S" (y), "D" (dst), "a" (u), "b" (v), "c" (w/16),
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
 		"d" ((long)us), "r" ((long)vs)
 #else
 		"d" (&us)
@@ -396,7 +396,7 @@ static int open(vf_instance_t *vf, char* args)
 	pack_nn = (pack_func_t *)pack_nn_C;
 	pack_li_0 = pack_li_0_C;
 	pack_li_1 = pack_li_1_C;
-#ifdef HAVE_MMX
+#if HAVE_MMX
 	if(gCpuCaps.hasMMX) {
 		pack_nn = (pack_func_t *)pack_nn_MMX;
 		pack_li_0 = pack_li_0_MMX;

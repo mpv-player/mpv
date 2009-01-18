@@ -43,7 +43,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifdef ARCH_ALPHA
+#if ARCH_ALPHA
 #include <sys/io.h>
 #endif
 #include <unistd.h>
@@ -91,7 +91,7 @@ static int mem_fd = -1;
 
 void *map_phys_mem(unsigned long base, unsigned long size)
 {    
-#ifdef ARCH_ALPHA
+#if ARCH_ALPHA
 /* TODO: move it into sysdep */
   base += bus_base();
 #endif

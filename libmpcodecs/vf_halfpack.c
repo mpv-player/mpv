@@ -17,7 +17,7 @@ struct vf_priv_s {
 	int field;
 };
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
 static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
 		     int dststride, int srcstride[3],
 		     int w, int h)
@@ -204,7 +204,7 @@ static int open(vf_instance_t *vf, char* args)
 	if (args) sscanf(args, "%d", &vf->priv->field);
 	
 	halfpack = halfpack_C;
-#ifdef HAVE_MMX
+#if HAVE_MMX
 	if(gCpuCaps.hasMMX) halfpack = halfpack_MMX;
 #endif
 	return 1;

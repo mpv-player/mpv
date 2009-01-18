@@ -102,7 +102,7 @@ static int synth_1to1_mono2stereo(real *bandPtr,unsigned char *samples,int *pnt)
 
 static synth_func_t synth_func;
 
-#ifdef HAVE_ALTIVEC
+#if HAVE_ALTIVEC
 #define dct64_base(a,b,c) if(gCpuCaps.hasAltiVec) dct64_altivec(a,b,c); else dct64(a,b,c)
 #else /* HAVE_ALTIVEC */
 #define dct64_base(a,b,c) dct64(a,b,c)
@@ -121,7 +121,7 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   *pnt += 128;
 
 /* optimized for x86 */
-#ifdef ARCH_X86
+#if ARCH_X86
   if ( synth_func )
    {
 //    printf("Calling %p, bandPtr=%p channel=%d samples=%p\n",synth_func,bandPtr,channel,samples);

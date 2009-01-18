@@ -3,7 +3,7 @@
   This file contains functions which improve and expand standard C-library
 */
 
-#ifndef HAVE_SSE2
+#if !HAVE_SSE2
 /*
    P3 processor has only one SSE decoder so can execute only 1 sse insn per
    cpu clock, but it has 3 mmx decoders (include load/store unit)
@@ -13,6 +13,7 @@
    I have doubts. Anyway SSE2 version of this code can be written better.
 */
 #undef HAVE_SSE
+#define HAVE_SSE 0
 #endif
 
 
@@ -65,7 +66,7 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 
 
 #undef HAVE_ONLY_MMX1
-#if defined(HAVE_MMX) && !defined(HAVE_MMX2) && !defined(HAVE_3DNOW) && !defined(HAVE_SSE)
+#if HAVE_MMX && !HAVE_MMX2 && !HAVE_3DNOW && !HAVE_SSE
 /*  means: mmx v.1. Note: Since we added alignment of destinition it speedups
     of memory copying on PentMMX, Celeron-1 and P2 upto 12% versus
     standard (non MMX-optimized) version.
@@ -76,7 +77,7 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 
 
 #undef HAVE_K6_2PLUS
-#if !defined( HAVE_MMX2) && defined( HAVE_3DNOW)
+#if !HAVE_MMX2 && HAVE_3DNOW
 #define HAVE_K6_2PLUS
 #endif
 
@@ -95,7 +96,7 @@ __asm__ volatile(\
 }
 
 #undef MMREG_SIZE
-#ifdef HAVE_SSE
+#if HAVE_SSE
 #define MMREG_SIZE 16
 #else
 #define MMREG_SIZE 64 //8
@@ -104,23 +105,23 @@ __asm__ volatile(\
 #undef PREFETCH
 #undef EMMS
 
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 #define PREFETCH "prefetchnta"
-#elif defined ( HAVE_3DNOW )
+#elif HAVE_3DNOW
 #define PREFETCH  "prefetch"
 #else
 #define PREFETCH " # nop"
 #endif
 
 /* On K6 femms is faster of emms. On K7 femms is directly mapped on emms. */
-#ifdef HAVE_3DNOW
+#if HAVE_3DNOW
 #define EMMS     "femms"
 #else
 #define EMMS     "emms"
 #endif
 
 #undef MOVNTQ
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
 #define MOVNTQ "movntq"
 #else
 #define MOVNTQ "movq"
@@ -183,7 +184,7 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
            perform reading and writing to be multiple to a number of
            processor's decoders, but it's not always possible.
         */
-#ifdef HAVE_SSE /* Only P3 (may be Cyrix3) */
+#if HAVE_SSE /* Only P3 (may be Cyrix3) */
 	if(((unsigned long)from) & 15)
 	/* if SRC is misaligned */
 	for(; i>0; i--)
@@ -343,12 +344,12 @@ static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 	}
 
 #endif /* Have SSE */
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
                 /* since movntq is weakly-ordered, a "sfence"
 		 * is needed to become ordered again. */
 		__asm__ volatile ("sfence":::"memory");
 #endif
-#ifndef HAVE_SSE
+#if !HAVE_SSE
 		/* enables to use FPU */
 		__asm__ volatile (EMMS:::"memory");
 #endif
@@ -427,7 +428,7 @@ static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
 		from=((const unsigned char *)from)+64;
 		to=((unsigned char *)to)+64;
 	}
-#ifdef HAVE_MMX2
+#if HAVE_MMX2
                 /* since movntq is weakly-ordered, a "sfence"
 		 * is needed to become ordered again. */
 		__asm__ volatile ("sfence":::"memory");

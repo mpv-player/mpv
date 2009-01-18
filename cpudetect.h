@@ -6,7 +6,7 @@
 #define CPUTYPE_I586	5
 #define CPUTYPE_I686    6
 
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
 #  define REGa    rax
 #  define REGb    rbx
 #  define REGBP   rbp

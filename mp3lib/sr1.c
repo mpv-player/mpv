@@ -27,10 +27,12 @@
 
 #include "libvo/fastmemcpy.h"
 
-#ifdef ARCH_X86_64
+#if ARCH_X86_64
 // 3DNow! and 3DNow!Ext routines don't compile under AMD64
 #undef HAVE_3DNOW
 #undef HAVE_3DNOWEX
+#define HAVE_3DNOW 0
+#define HAVE_3DNOWEX 0
 #endif
 
 //static FILE* mp3_file=NULL;
@@ -134,7 +136,7 @@ LOCAL unsigned int getbits_fast(short number_of_bits)
 //  if(MP3_frames>=7741) printf("getbits_fast: bits=%d  bitsleft=%d  wordptr=%x\n",number_of_bits,bitsleft,wordpointer);
   if((bitsleft-=number_of_bits)<0) return 0;
   if(!number_of_bits) return 0;
-#ifdef ARCH_X86
+#if ARCH_X86
   rval = bswap_16(*((uint16_t *)wordpointer));
 #else
   /*
@@ -177,7 +179,7 @@ LOCAL void set_pointer(int backstep)
 
 LOCAL int stream_head_read(unsigned char *hbuf,uint32_t *newhead){
   if(mp3_read(hbuf,4) != 4) return FALSE;
-#ifdef ARCH_X86
+#if ARCH_X86
   *newhead = bswap_32(*((uint32_t*)hbuf));
 #else
   /*
@@ -413,7 +415,7 @@ void MP3_Init(void){
 
     make_decode_tables(outscale);
 
-#ifdef HAVE_MMX
+#if HAVE_MMX
     if (gCpuCaps.hasMMX)
     {
 	_has_mmx = 1;
@@ -421,7 +423,7 @@ void MP3_Init(void){
     }
 #endif
 
-#ifdef HAVE_3DNOWEX
+#if HAVE_3DNOWEX
     if (gCpuCaps.has3DNowExt)
     {
 	dct36_func=dct36_3dnowex;
@@ -430,7 +432,7 @@ void MP3_Init(void){
     }
     else
 #endif
-#ifdef HAVE_3DNOW
+#if HAVE_3DNOW
     if (gCpuCaps.has3DNow)
     {
 	dct36_func = dct36_3dnow;
@@ -439,7 +441,7 @@ void MP3_Init(void){
     }
     else
 #endif
-#ifdef HAVE_SSE
+#if HAVE_SSE
     if (gCpuCaps.hasSSE)
     {
 	dct64_MMX_func = dct64_sse;
@@ -447,8 +449,8 @@ void MP3_Init(void){
     }
     else
 #endif
-#ifdef ARCH_X86_32
-#ifdef HAVE_MMX
+#if ARCH_X86_32
+#if HAVE_MMX
     if (gCpuCaps.hasMMX)
     {
 	dct64_MMX_func = dct64_MMX;
@@ -463,7 +465,7 @@ void MP3_Init(void){
     }
     else
 #endif /* ARCH_X86_32 */
-#ifdef HAVE_ALTIVEC
+#if HAVE_ALTIVEC
     if (gCpuCaps.hasAltiVec)
     {
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using AltiVec optimized decore!\n");
