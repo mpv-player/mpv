@@ -1286,6 +1286,11 @@ for ac_option do
   esac
 done
 
+if test "$_gui" = yes ; then
+  echo "Error: --enable-gui is no longer supported. Use an external frontend if you want a GUI." >&2
+  exit 1
+fi
+
 # Atmos: moved this here, to be correct, if --prefix is specified
 test -z "$_bindir" && _bindir="$_prefix/bin"
 test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
