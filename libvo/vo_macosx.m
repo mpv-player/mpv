@@ -49,8 +49,7 @@ BOOL shared_buffer = false;
 static char *buffer_name;
 
 //Screen
-int screen_id;
-BOOL screen_force;
+int screen_id = -1;
 NSRect screen_frame;
 NSScreen *screen_handle;
 NSArray *screen_array;
@@ -111,13 +110,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	screen_array = [NSScreen screens];
 	if(screen_id < [screen_array count])
 	{
-		screen_handle = [screen_array objectAtIndex:screen_id];
+		screen_handle = [screen_array objectAtIndex:(screen_id < 0 ? 0 : screen_id)];
 	}
 	else
 	{
 		mp_msg(MSGT_VO, MSGL_FATAL, "Get device error: Device ID %d do not exist, falling back to main device.\n", screen_id);
 		screen_handle = [screen_array objectAtIndex:0];
-		screen_id = 0;
+		screen_id = -1;
 	}
 	screen_frame = [screen_handle frame];
 	vo_screenwidth = screen_frame.size.width;
@@ -325,7 +324,7 @@ static void uninit(void)
 }
 
 static opt_t subopts[] = {
-{"device_id",     OPT_ARG_INT,  &screen_id,     (opt_test_f)int_non_neg},
+{"device_id",     OPT_ARG_INT,  &screen_id,     NULL},
 {"shared_buffer", OPT_ARG_BOOL, &shared_buffer, NULL},
 {"buffer_name",   OPT_ARG_MSTRZ,&buffer_name,   NULL},
 {NULL}
@@ -335,7 +334,7 @@ static int preinit(const char *arg)
 {
 	
 	// set defaults
-	screen_id = 0;
+	screen_id = -1;
 	shared_buffer = false;
 	buffer_name = NULL;
 	
@@ -859,7 +858,7 @@ static int control(uint32_t request, void *data, ...)
 		}
 		
 		old_frame = [window frame];	//save main window size & position
-		if(screen_force)
+		if(screen_id >= 0)
 			screen_frame = [screen_handle frame];
 		else {
 			screen_frame = [[window screen] frame];

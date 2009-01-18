@@ -3560,7 +3560,8 @@ Mac OS X CoreVideo video output driver
 .PD 0
 .RSs
 .IPs device_id=<number>
-Choose the display device to use in fullscreen.
+Choose the display device to use for fullscreen or set it to \-1 to 
+always use the same screen the video window is on (default: \-1 \- auto).
 .IPs shared_buffer
 Write output to a shared memory buffer instead of displaying it and 
 try to open an existing NSConnection for communication with a GUI.
