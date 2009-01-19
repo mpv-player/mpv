@@ -3,7 +3,7 @@
 /*
  * md5sum video output driver
  *
- * Written by Ivo van Poorten. (C) Copyright 2004, 2005, 2006.
+ * Copyright (C) 2004, 2005, 2006 Ivo van Poorten
  *
  * This file is part of MPlayer.
  *

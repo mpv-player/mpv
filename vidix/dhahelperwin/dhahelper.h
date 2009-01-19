@@ -1,7 +1,7 @@
 /*
  * direct hardware access under Windows NT/2000/XP
  *
- * Copyright (c) 2004 Sascha Sommer <saschasommer@freenet.de>.
+ * Copyright (c) 2004 Sascha Sommer <saschasommer@freenet.de>
  *
  * This file is part of MPlayer.
  *

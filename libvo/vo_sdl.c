@@ -3,7 +3,7 @@
  *
  *  (was video_out_sdl.c from OMS project/mpeg2dec -> http://linuxvideo.org)
  *
- *  Copyright (C) Ryan C. Gordon <icculus@lokigames.com> - April 22, 2000.
+ *  Copyright (C) Ryan C. Gordon <icculus@lokigames.com> - April 22, 2000
  *
  *  Copyright (C) Felix Buenemann <atmosfear@users.sourceforge.net> - 2001
  *

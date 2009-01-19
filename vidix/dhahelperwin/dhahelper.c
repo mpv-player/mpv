@@ -1,7 +1,7 @@
 /*
  * direct hardware access under Windows NT/2000/XP
  *
- * Copyright (c) 2004 Sascha Sommer <saschasommer@freenet.de>.
+ * Copyright (c) 2004 Sascha Sommer <saschasommer@freenet.de>
  * Patched to compile with MinGW by Kevin Kofler:
  * Copyright (c) 2007 Kevin Kofler
  *
