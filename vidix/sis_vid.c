@@ -2,8 +2,8 @@
  * VIDIX driver for SiS chipsets.
  * Based on SiS Xv driver
  *
- * Copyright (C) 2003 Jake Page, Sugar Media.
- * Copyright 2002-2003 by Thomas Winischhofer, Vienna, Austria.
+ * Copyright (C) 2003 Jake Page, Sugar Media
+ * Copyright 2002-2003 by Thomas Winischhofer, Vienna, Austria
  * 2003/10/08 integrated into mplayer/vidix architecture -- Alex Beregszaszi
  *
  * This file is part of MPlayer.
