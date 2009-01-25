@@ -1644,7 +1644,7 @@ const char *
 fsdp_get_media_format (const fsdp_media_description_t * dsc,
 		       unsigned int index)
 {
-  if (!dsc && (index < dsc->formats_count))
+  if (!dsc || (index < dsc->formats_count))
     return NULL;
   return dsc->formats[index];
 }
