@@ -2611,12 +2611,12 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEX SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
+_cpuexts_all='ALTIVEC MMX MMX2 3DNOW 3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
 test "$_3dnow"     = yes && _cpuexts="3DNOW $_cpuexts"
-test "$_3dnowext"  = yes && _cpuexts="3DNOWEX $_cpuexts"
+test "$_3dnowext"  = yes && _cpuexts="3DNOWEXT $_cpuexts"
 test "$_sse"       = yes && _cpuexts="SSE $_cpuexts"
 test "$_sse2"      = yes && _cpuexts="SSE2 $_cpuexts"
 test "$_ssse3"     = yes && _cpuexts="SSSE3 $_cpuexts"

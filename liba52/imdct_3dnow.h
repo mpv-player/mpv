@@ -26,7 +26,7 @@
 #undef FFT_ASMB16_3DNOW
 #undef FFT_128P_3DNOW
 
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 #define FFT_4_3DNOW fft_4_3dnowex
 #define FFT_8_3DNOW fft_8_3dnowex
 #define FFT_ASMB_3DNOW fft_asmb_3dnowex
@@ -52,7 +52,7 @@ static void FFT_4_3DNOW(complex_t *x)
 	"pxor   %3, %%mm1\n\t" /* -mm1.re | mm1.im */
 	"pfadd	%%mm1, %%mm3\n\t" /* vi.im = x[3].re - x[1].re; */
 	"movq	%%mm3, %%mm4\n\t" /* vi.re =-x[3].im + x[1].im; mm4 = vi */
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 	"pswapd %%mm4, %%mm4\n\t"
 #else
 	"punpckldq %%mm4, %%mm5\n\t"
@@ -129,7 +129,7 @@ static void FFT_8_3DNOW(complex_t *x)
       "movq	(%1),	%%mm1\n\t"
       "movq	16(%1),	%%mm4\n\t"
       "movq	%%mm1,	%%mm2\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
       "pswapd	%%mm3,	%%mm3\n\t"
 #else
       "punpckldq %%mm3,	%%mm6\n\t"
@@ -160,7 +160,7 @@ static void FFT_8_3DNOW(complex_t *x)
 	"movq	%2,	%%mm1\n\t"
 	"movq	56(%3),	%%mm3\n\t"
 	"pfsub	40(%3),	%%mm0\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 	"pswapd	%%mm1,	%%mm1\n\t"
 #else
 	"punpckldq %%mm1, %%mm2\n\t"
@@ -168,7 +168,7 @@ static void FFT_8_3DNOW(complex_t *x)
 #endif
 	"pxor	%%mm7,	%%mm1\n\t"
 	"pfadd	%%mm1,	%%mm0\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 	"pswapd	%%mm3,	%%mm3\n\t"
 #else
 	"punpckldq %%mm3, %%mm2\n\t"
@@ -182,7 +182,7 @@ static void FFT_8_3DNOW(complex_t *x)
 	"pfmul	%4,	%%mm0\n\t"
 	
 	"movq	40(%3),	%%mm5\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 	"pswapd	%%mm5,	%%mm5\n\t"
 #else
 	"punpckldq %%mm5, %%mm1\n\t"
@@ -205,7 +205,7 @@ static void FFT_8_3DNOW(complex_t *x)
   /* x[3] x[7] */
   __asm__ volatile(
 	"movq	%1,	%%mm0\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 	"pswapd	%3,	%%mm1\n\t"
 #else
 	"movq	%3,	%%mm1\n\t"
@@ -218,7 +218,7 @@ static void FFT_8_3DNOW(complex_t *x)
 	"movq	56(%4),	%%mm3\n\t"
 	"pxor	%%mm7,	%%mm3\n\t"
 	"pfadd	%%mm3,	%%mm2\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 	"pswapd	%%mm2,	%%mm2\n\t"
 #else
 	"punpckldq %%mm2, %%mm5\n\t"
@@ -331,7 +331,7 @@ static void FFT_128P_3DNOW(complex_t *a)
 }
 
 static void
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 imdct_do_512_3dnowex
 #else
 imdct_do_512_3dnow
@@ -371,14 +371,14 @@ imdct_do_512_3dnow
 		"punpckldq %4, %%mm1\n\t" /* mm1 = xcos[j] | xsin[j] */
 		"movq	%%mm0, %%mm2\n\t"
 		"pfmul	%%mm1, %%mm0\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 		"pswapd	%%mm1, %%mm1\n\t"
 #else
 		"punpckldq %%mm1, %%mm5\n\t"
 		"punpckhdq %%mm5, %%mm1\n\t"
 #endif
 		"pfmul	%%mm1, %%mm2\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 		"pfpnacc %%mm2, %%mm0\n\t"
 #else
 		"pxor	%%mm7, %%mm0\n\t"
@@ -445,7 +445,7 @@ imdct_do_512_3dnow
 	    __asm__ volatile (
 		"movq %1, %%mm0\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
 		"movq %%mm0, %%mm1\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
-#if !HAVE_3DNOWEX
+#if !HAVE_3DNOWEXT
 		"punpckldq %%mm1, %%mm2\n\t"
 		"punpckhdq %%mm2, %%mm1\n\t"
 #else			 
@@ -455,7 +455,7 @@ imdct_do_512_3dnow
 		"punpckldq %2, %%mm3\n\t" /* ac3_xsin[i] | ac3_xcos[i] */
 		"pfmul %%mm3, %%mm0\n\t"
 		"pfmul %%mm3, %%mm1\n\t"
-#if !HAVE_3DNOWEX
+#if !HAVE_3DNOWEXT
 		"pxor  %%mm7, %%mm0\n\t"
 		"pfacc %%mm1, %%mm0\n\t"
 		"punpckldq %%mm0, %%mm1\n\t"
@@ -543,7 +543,7 @@ imdct_do_512_3dnow
 		"movd	(%1), %%mm1\n\t"
 		"punpckldq (%2), %%mm0\n\t"
 		"punpckldq 508(%2), %%mm1\n\t"
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
 		"pswapd	(%3), %%mm3\n\t"
 		"pswapd	-512(%3), %%mm4\n\t"
 #else

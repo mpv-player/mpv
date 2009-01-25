@@ -389,7 +389,7 @@ SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c
 SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32) += mp3lib/decode_i586.c
 SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOW)    += mp3lib/dct36_3dnow.c \
                                                          mp3lib/dct64_3dnow.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOWEX)  += mp3lib/dct36_k7.c \
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_3DNOWEXT) += mp3lib/dct36_k7.c \
                                                          mp3lib/dct64_k7.c
 SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)      += mp3lib/dct64_mmx.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_ALTIVEC) += mp3lib/dct64_altivec.c

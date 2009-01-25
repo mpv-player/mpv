@@ -53,8 +53,8 @@
 void (*a52_imdct_512) (sample_t * data, sample_t * delay, sample_t bias);
 
 #ifdef RUNTIME_CPUDETECT
-#undef HAVE_3DNOWEX
-#define HAVE_3DNOWEX 0
+#undef HAVE_3DNOWEXT
+#define HAVE_3DNOWEXT 0
 #endif
 
 typedef struct complex_s {
@@ -720,11 +720,11 @@ const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = {{ 0x00000000
 const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = {{ 0x80000000UL, 0x00000000UL }}; 
 const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
 
-#undef HAVE_3DNOWEX
-#define HAVE_3DNOWEX 0
+#undef HAVE_3DNOWEXT
+#define HAVE_3DNOWEXT 0
 #include "imdct_3dnow.h"
-#undef HAVE_3DNOWEX
-#define HAVE_3DNOWEX 1
+#undef HAVE_3DNOWEXT
+#define HAVE_3DNOWEXT 1
 #include "imdct_3dnow.h"
 
 void

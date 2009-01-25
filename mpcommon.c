@@ -54,7 +54,7 @@ void print_version(const char* name)
 #if HAVE_3DNOW
     mp_msg(MSGT_CPLAYER,MSGL_V," 3DNow");
 #endif
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
     mp_msg(MSGT_CPLAYER,MSGL_V," 3DNowEx");
 #endif
 #if HAVE_SSE
