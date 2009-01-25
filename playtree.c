@@ -21,8 +21,10 @@ play_tree_is_valid(play_tree_t* pt);
 play_tree_t*
 play_tree_new(void) {
   play_tree_t* r = calloc(1,sizeof(play_tree_t));
-  if(r == NULL)
+  if(r == NULL) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",(int)sizeof(play_tree_t));
+    return NULL;
+  }
   r->entry_type = PLAY_TREE_ENTRY_NODE;
   return r;
 }
