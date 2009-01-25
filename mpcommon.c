@@ -37,7 +37,7 @@ void print_version(const char* name)
     GetCpuCaps(&gCpuCaps);
 #if ARCH_X86
     mp_msg(MSGT_CPLAYER, MSGL_V,
-	   "CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
+	   "CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNowExt: %d SSE: %d SSE2: %d\n",
 	   gCpuCaps.hasMMX, gCpuCaps.hasMMX2,
 	   gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
 	   gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
@@ -55,7 +55,7 @@ void print_version(const char* name)
     mp_msg(MSGT_CPLAYER,MSGL_V," 3DNow");
 #endif
 #if HAVE_3DNOWEXT
-    mp_msg(MSGT_CPLAYER,MSGL_V," 3DNowEx");
+    mp_msg(MSGT_CPLAYER,MSGL_V," 3DNowExt");
 #endif
 #if HAVE_SSE
     mp_msg(MSGT_CPLAYER,MSGL_V," SSE");
