@@ -20,12 +20,16 @@
 #include "huffman.h"
 #include "mp3.h"
 #include "libavutil/common.h"
+#include "libavutil/internal.h"
 #include "mpbswap.h"
 #include "cpudetect.h"
 //#include "liba52/mm_accel.h"
 #include "mp_msg.h"
 
 #include "libvo/fastmemcpy.h"
+
+#undef fprintf
+#undef printf
 
 #if ARCH_X86_64
 // 3DNow! and 3DNow!Ext routines don't compile under AMD64
