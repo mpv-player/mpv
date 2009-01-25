@@ -76,7 +76,7 @@ int mp_input_lirc_read(int fd,char* dest, int s) {
     return w;
   }
       
-  // Nothing in the buffer, pool the lirc fd
+  // Nothing in the buffer, poll the lirc fd
   FD_ZERO(&fds);
   FD_SET(fd,&fds);
   memset(&tv,0,sizeof(tv));
