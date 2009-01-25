@@ -37,10 +37,10 @@ void print_version(const char* name)
     GetCpuCaps(&gCpuCaps);
 #if ARCH_X86
     mp_msg(MSGT_CPLAYER, MSGL_V,
-	   "CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNowExt: %d SSE: %d SSE2: %d\n",
+	   "CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNowExt: %d SSE: %d SSE2: %d SSSE3: %d\n",
 	   gCpuCaps.hasMMX, gCpuCaps.hasMMX2,
 	   gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
-	   gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
+	   gCpuCaps.hasSSE, gCpuCaps.hasSSE2, gCpuCaps.hasSSSE3);
 #ifdef RUNTIME_CPUDETECT
     mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithRuntimeDetection);
 #else
@@ -62,6 +62,12 @@ void print_version(const char* name)
 #endif
 #if HAVE_SSE2
     mp_msg(MSGT_CPLAYER,MSGL_V," SSE2");
+#endif
+#if HAVE_SSSE3
+    mp_msg(MSGT_CPLAYER,MSGL_V," SSSE3");
+#endif
+#if HAVE_CMOV
+    mp_msg(MSGT_CPLAYER,MSGL_V," CMOV");
 #endif
     mp_msg(MSGT_CPLAYER,MSGL_V,"\n");
 #endif /* RUNTIME_CPUDETECT */
