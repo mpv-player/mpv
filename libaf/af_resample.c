@@ -25,6 +25,7 @@
 #include <inttypes.h>
 
 #include "libavutil/common.h"
+#include "libavutil/mathematics.h"
 #include "af.h"
 #include "dsp.h"
 

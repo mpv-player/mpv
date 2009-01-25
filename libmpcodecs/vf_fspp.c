@@ -43,6 +43,7 @@
 #include "mp_msg.h"
 #include "cpudetect.h"
 
+#include "libavutil/internal.h"
 #include "libavutil/intreadwrite.h"
 #include "libavutil/mem.h"
 #include "libavcodec/avcodec.h"
@@ -56,6 +57,9 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
+
+#undef free
+#undef malloc
 
 //===========================================================================//
 #define BLOCKSZ 12

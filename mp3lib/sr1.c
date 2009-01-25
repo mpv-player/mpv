@@ -20,6 +20,7 @@
 #include "huffman.h"
 #include "mp3.h"
 #include "libavutil/common.h"
+#include "libavutil/internal.h"
 #include "mpbswap.h"
 #include "cpudetect.h"
 //#include "liba52/mm_accel.h"
@@ -27,12 +28,15 @@
 
 #include "libvo/fastmemcpy.h"
 
+#undef fprintf
+#undef printf
+
 #if ARCH_X86_64
 // 3DNow! and 3DNow!Ext routines don't compile under AMD64
 #undef HAVE_3DNOW
-#undef HAVE_3DNOWEX
+#undef HAVE_3DNOWEXT
 #define HAVE_3DNOW 0
-#define HAVE_3DNOWEX 0
+#define HAVE_3DNOWEXT 0
 #endif
 
 //static FILE* mp3_file=NULL;
@@ -423,7 +427,7 @@ void MP3_Init(void){
     }
 #endif
 
-#if HAVE_3DNOWEX
+#if HAVE_3DNOWEXT
     if (gCpuCaps.has3DNowExt)
     {
 	dct36_func=dct36_3dnowex;

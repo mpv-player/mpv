@@ -453,6 +453,8 @@ parse_smil(play_tree_parser_t* p) {
       continue;
     if (strncasecmp(line,"<?xml",5)==0) // smil in xml
       continue;
+    if (strncasecmp(line,"<!DOCTYPE smil",13)==0) // smil in xml
+      continue;
     if (strncasecmp(line,"<smil",5)==0 || strncasecmp(line,"<?wpl",5)==0 ||
       strncasecmp(line,"(smil-document",14)==0)
       break; // smil header found

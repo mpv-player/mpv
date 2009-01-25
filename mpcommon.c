@@ -7,7 +7,11 @@
 #include "mplayer.h"
 #include "libvo/sub.h"
 #include "libvo/video_out.h"
+#include "cpudetect.h"
+#include "help_mp.h"
+#include "mp_msg.h"
 #include "spudec.h"
+#include "version.h"
 #include "vobsub.h"
 #ifdef CONFIG_TV_TELETEXT
 #include "stream/tv.h"
@@ -25,6 +29,53 @@ ass_track_t* ass_track = 0; // current track to render
 
 sub_data* subdata = NULL;
 subtitle* vo_sub_last = NULL;
+
+
+void print_version(const char* name)
+{
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, MP_TITLE, name);
+
+    /* Test for CPU capabilities (and corresponding OS support) for optimizing */
+    GetCpuCaps(&gCpuCaps);
+#if ARCH_X86
+    mp_msg(MSGT_CPLAYER, MSGL_V,
+	   "CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNowExt: %d SSE: %d SSE2: %d SSSE3: %d\n",
+	   gCpuCaps.hasMMX, gCpuCaps.hasMMX2,
+	   gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
+	   gCpuCaps.hasSSE, gCpuCaps.hasSSE2, gCpuCaps.hasSSSE3);
+#ifdef RUNTIME_CPUDETECT
+    mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithRuntimeDetection);
+#else
+    mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithCPUExtensions);
+#if HAVE_MMX
+    mp_msg(MSGT_CPLAYER,MSGL_V," MMX");
+#endif
+#if HAVE_MMX2
+    mp_msg(MSGT_CPLAYER,MSGL_V," MMX2");
+#endif
+#if HAVE_3DNOW
+    mp_msg(MSGT_CPLAYER,MSGL_V," 3DNow");
+#endif
+#if HAVE_3DNOWEXT
+    mp_msg(MSGT_CPLAYER,MSGL_V," 3DNowExt");
+#endif
+#if HAVE_SSE
+    mp_msg(MSGT_CPLAYER,MSGL_V," SSE");
+#endif
+#if HAVE_SSE2
+    mp_msg(MSGT_CPLAYER,MSGL_V," SSE2");
+#endif
+#if HAVE_SSSE3
+    mp_msg(MSGT_CPLAYER,MSGL_V," SSSE3");
+#endif
+#if HAVE_CMOV
+    mp_msg(MSGT_CPLAYER,MSGL_V," CMOV");
+#endif
+    mp_msg(MSGT_CPLAYER,MSGL_V,"\n");
+#endif /* RUNTIME_CPUDETECT */
+#endif /* ARCH_X86 */
+}
+
 
 void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
 {

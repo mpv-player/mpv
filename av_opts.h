@@ -19,7 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef MPLAYER_AV_OPTS_H
+#define MPLAYER_AV_OPTS_H
+
 /**
  * Parses str and sets AVOptions in v accordingly.
  */
 int parse_avopts(void *v, char *str);
+
+#endif /* MPLAYER_AV_OPTS_H */
