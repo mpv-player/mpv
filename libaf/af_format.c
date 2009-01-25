@@ -26,8 +26,9 @@
 #include <inttypes.h>
 #include <limits.h>
 
+#include "config.h"
 // Integer to float conversion through lrintf()
-#ifdef HAVE_LRINTF
+#if HAVE_LRINTF
 #include <math.h>
 long int lrintf(float);
 #else
