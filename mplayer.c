@@ -36,8 +36,6 @@
 
 #include <errno.h>
 
-#include "version.h"
-
 #include "mp_msg.h"
 
 #define HELP_MP_DEFINE_STATIC
@@ -73,8 +71,6 @@
 
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
-
-#include "cpudetect.h"
 
 #ifdef CONFIG_GUI
 #include "gui/interface.h"
@@ -2396,43 +2392,6 @@ static void pause_loop(void)
 #endif
 }
 
-void print_version(void){
-  mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", MP_TITLE);
-
-/* Test for CPU capabilities (and corresponding OS support) for optimizing */
-  GetCpuCaps(&gCpuCaps);
-#if ARCH_X86
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
-      gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
-      gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
-      gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
-#ifdef RUNTIME_CPUDETECT
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithRuntimeDetection);
-#else
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithCPUExtensions);
-#if HAVE_MMX
-  mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX");
-#endif
-#if HAVE_MMX2
-  mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX2");
-#endif
-#if HAVE_3DNOW
-  mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNow");
-#endif
-#if HAVE_3DNOWEX
-  mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNowEx");
-#endif
-#if HAVE_SSE
-  mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE");
-#endif
-#if HAVE_SSE2
-  mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE2");
-#endif
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
-#endif /* RUNTIME_CPUDETECT */
-#endif /* ARCH_X86 */
-}
-
 
 // Find the right mute status and record position for new file position
 static void edl_seek_reset(MPContext *mpctx)
@@ -2570,7 +2529,7 @@ int gui_no_filename=0;
   // Preparse the command line
   m_config_preparse_command_line(mconfig,argc,argv);
 
-  print_version();
+  print_version("MPlayer");
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
   set_path_env();
 #endif

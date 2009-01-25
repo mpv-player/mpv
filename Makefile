@@ -848,7 +848,7 @@ version.h:
 ###### dependency declarations / specific CFLAGS ######
 
 codec-cfg.d: codecs.conf.h
-mencoder.d mplayer.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d osdep/mplayer-rc.o stream/network.d stream/stream_cddb.d: version.h
+mpcommon.d vobsub.d gui/win32/gui.d libmpdemux/muxer_avi.d osdep/mplayer-rc.o stream/network.d stream/stream_cddb.d: version.h
 $(DEPS): help_mp.h
 
 libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.9\" $(CFLAGS_LIBDVDCSS)
