@@ -838,8 +838,8 @@ help_mp.h: help/help_mp-en.h $(HELP_FILE)
 ifeq ($(wildcard .svn/entries),.svn/entries)
 version.h: .svn/entries
 endif
-version.h:
-	./version.sh `$(CC) -dumpversion`
+version.h: version.sh
+	./$< `$(CC) -dumpversion`
 
 %(EXESUF): %.c
 
