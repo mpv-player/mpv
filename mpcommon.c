@@ -45,30 +45,22 @@ void print_version(const char* name)
     mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithRuntimeDetection);
 #else
     mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithCPUExtensions);
-#if HAVE_MMX
+if (HAVE_MMX)
     mp_msg(MSGT_CPLAYER,MSGL_V," MMX");
-#endif
-#if HAVE_MMX2
+if (HAVE_MMX2)
     mp_msg(MSGT_CPLAYER,MSGL_V," MMX2");
-#endif
-#if HAVE_AMD3DNOW
+if (HAVE_AMD3DNOW)
     mp_msg(MSGT_CPLAYER,MSGL_V," 3DNow");
-#endif
-#if HAVE_AMD3DNOWEXT
+if (HAVE_AMD3DNOWEXT)
     mp_msg(MSGT_CPLAYER,MSGL_V," 3DNowExt");
-#endif
-#if HAVE_SSE
+if (HAVE_SSE)
     mp_msg(MSGT_CPLAYER,MSGL_V," SSE");
-#endif
-#if HAVE_SSE2
+if (HAVE_SSE2)
     mp_msg(MSGT_CPLAYER,MSGL_V," SSE2");
-#endif
-#if HAVE_SSSE3
+if (HAVE_SSSE3)
     mp_msg(MSGT_CPLAYER,MSGL_V," SSSE3");
-#endif
-#if HAVE_CMOV
+if (HAVE_CMOV)
     mp_msg(MSGT_CPLAYER,MSGL_V," CMOV");
-#endif
     mp_msg(MSGT_CPLAYER,MSGL_V,"\n");
 #endif /* RUNTIME_CPUDETECT */
 #endif /* ARCH_X86 */
