@@ -367,7 +367,7 @@ stream_t* new_ds_stream(demux_stream_t *ds);
 static inline int avi_stream_id(unsigned int id){
   unsigned char *p=(unsigned char *)&id;
   unsigned char a,b;
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
   a=p[3]-'0'; b=p[2]-'0';
 #else
   a=p[0]-'0'; b=p[1]-'0';

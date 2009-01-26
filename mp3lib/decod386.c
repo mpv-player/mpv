@@ -54,7 +54,7 @@
  * layouts of double floating point values an all cpu architectures.  If
  * it doesn't work for you, just enable the "old WRITE_SAMPLE" macro.
  */
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
 #define	MANTISSA_OFFSET	1
 #else
 #define	MANTISSA_OFFSET	0
