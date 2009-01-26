@@ -25,16 +25,9 @@
 #include <string.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <math.h>
 
 #include "config.h"
-// Integer to float conversion through lrintf()
-#if HAVE_LRINTF
-#include <math.h>
-long int lrintf(float);
-#else
-#define lrintf(x) ((int)(x))
-#endif
-
 #include "af.h"
 #include "mpbswap.h"
 #include "libvo/fastmemcpy.h"
