@@ -1,16 +1,30 @@
 /*
-  ao_alsa9/1.x - ALSA-0.9.x-1.x output plugin for MPlayer
-
-  (C) Alex Beregszaszi
-  
-  modified for real alsa-0.9.0-support by Zsolt Barat <joy@streamminister.de>
-  additional AC3 passthrough support by Andy Lo A Foe <andy@alsaplayer.org>  
-  08/22/2002 iec958-init rewritten and merged with common init, zsolt
-  04/13/2004 merged with ao_alsa1.x, fixes provided by Jindrich Makovicka
-  04/25/2004 printfs converted to mp_msg, Zsolt.
-  
-  Any bugreports regarding to this driver are welcome.
-*/
+ * ALSA 0.9.x-1.x audio output driver
+ *
+ * Copyright (C) 2004 Alex Beregszaszi
+ *
+ * modified for real ALSA 0.9.0 support by Zsolt Barat <joy@streamminister.de>
+ * additional AC-3 passthrough support by Andy Lo A Foe <andy@alsaplayer.org>
+ * 08/22/2002 iec958-init rewritten and merged with common init, zsolt
+ * 04/13/2004 merged with ao_alsa1.x, fixes provided by Jindrich Makovicka
+ * 04/25/2004 printfs converted to mp_msg, Zsolt.
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <errno.h>
 #include <sys/time.h>
