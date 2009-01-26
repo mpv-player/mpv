@@ -24,7 +24,7 @@
 #include <string.h>
 
 #ifdef CONFIG_FASTMEMCPY
-#if HAVE_MMX || HAVE_MMX2 || HAVE_3DNOW \
+#if HAVE_MMX || HAVE_MMX2 || HAVE_AMD3DNOW \
 /*    || HAVE_SSE || HAVE_SSE2 */
 #include <stddef.h>
 

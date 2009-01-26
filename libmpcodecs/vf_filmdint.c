@@ -433,7 +433,7 @@ block_metrics_3dnow(unsigned char *a, unsigned char *b, int as, int bs,
 		    int lines, struct vf_priv_s *p, struct frame_stats *s)
 {
     struct metrics tm;
-#if !HAVE_3DNOW
+#if !HAVE_AMD3DNOW
     mp_msg(MSGT_VFILTER, MSGL_FATAL, "block_metrics_3dnow: internal error\n");
 #else
     static const unsigned long long ones = 0x0101010101010101ull;
@@ -1425,7 +1425,7 @@ static int open(vf_instance_t *vf, char* args)
 #if !HAVE_MMX
     p->mmx2 = 0;
 #endif
-#if !HAVE_3DNOW
+#if !HAVE_AMD3DNOW
     p->mmx2 &= 1;
 #endif
     p->thres.odd  = p->thres.even;

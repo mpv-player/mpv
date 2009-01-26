@@ -42,7 +42,7 @@ void mpeg2_mc_init (uint32_t accel)
 	mpeg2_mc = mpeg2_mc_mmxext;
     else
 #endif
-#if HAVE_3DNOW
+#if HAVE_AMD3DNOW
     if (accel & MPEG2_ACCEL_X86_3DNOW)
 	mpeg2_mc = mpeg2_mc_3dnow;
     else

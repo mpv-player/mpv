@@ -51,10 +51,10 @@ void print_version(const char* name)
 #if HAVE_MMX2
     mp_msg(MSGT_CPLAYER,MSGL_V," MMX2");
 #endif
-#if HAVE_3DNOW
+#if HAVE_AMD3DNOW
     mp_msg(MSGT_CPLAYER,MSGL_V," 3DNow");
 #endif
-#if HAVE_3DNOWEXT
+#if HAVE_AMD3DNOWEXT
     mp_msg(MSGT_CPLAYER,MSGL_V," 3DNowExt");
 #endif
 #if HAVE_SSE

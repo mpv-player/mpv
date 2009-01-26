@@ -136,7 +136,7 @@
 -    else if (accel & MPEG2_ACCEL_X86_3DNOW)
 +    else
 +#endif
-+#ifdef HAVE_3DNOW
++#ifdef HAVE_AMD3DNOW
 +    if (accel & MPEG2_ACCEL_X86_3DNOW)
  	mpeg2_mc = mpeg2_mc_3dnow;
 -    else if (accel & MPEG2_ACCEL_X86_MMX)

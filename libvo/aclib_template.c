@@ -66,7 +66,7 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 
 
 #undef HAVE_ONLY_MMX1
-#if HAVE_MMX && !HAVE_MMX2 && !HAVE_3DNOW && !HAVE_SSE
+#if HAVE_MMX && !HAVE_MMX2 && !HAVE_AMD3DNOW && !HAVE_SSE
 /*  means: mmx v.1. Note: Since we added alignment of destinition it speedups
     of memory copying on PentMMX, Celeron-1 and P2 upto 12% versus
     standard (non MMX-optimized) version.
@@ -77,7 +77,7 @@ If you have questions please contact with me: Nick Kurshev: nickols_k@mail.ru.
 
 
 #undef HAVE_K6_2PLUS
-#if !HAVE_MMX2 && HAVE_3DNOW
+#if !HAVE_MMX2 && HAVE_AMD3DNOW
 #define HAVE_K6_2PLUS
 #endif
 
@@ -107,14 +107,14 @@ __asm__ volatile(\
 
 #if HAVE_MMX2
 #define PREFETCH "prefetchnta"
-#elif HAVE_3DNOW
+#elif HAVE_AMD3DNOW
 #define PREFETCH  "prefetch"
 #else
 #define PREFETCH " # nop"
 #endif
 
 /* On K6 femms is faster of emms. On K7 femms is directly mapped on emms. */
-#if HAVE_3DNOW
+#if HAVE_AMD3DNOW
 #define EMMS     "femms"
 #else
 #define EMMS     "emms"

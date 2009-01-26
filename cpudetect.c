@@ -228,11 +228,11 @@ void GetCpuCaps( CpuCaps *caps)
 	if(caps->hasSSE2) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"SSE2 supported but disabled\n");
 	caps->hasSSE2=0;
 #endif
-#if !HAVE_3DNOW
+#if !HAVE_AMD3DNOW
 	if(caps->has3DNow) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"3DNow supported but disabled\n");
 	caps->has3DNow=0;
 #endif
-#if !HAVE_3DNOWEXT
+#if !HAVE_AMD3DNOWEXT
 	if(caps->has3DNowExt) mp_msg(MSGT_CPUDETECT,MSGL_WARN,"3DNowExt supported but disabled\n");
 	caps->has3DNowExt=0;
 #endif

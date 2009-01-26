@@ -46,7 +46,7 @@ static void deint(unsigned char *dest, int ds, unsigned char *src, int ss, int w
 	}
 }
 
-#if HAVE_3DNOW
+#if HAVE_AMD3DNOW
 static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
 	int i, j, ssd=ss;
@@ -485,7 +485,7 @@ static int open(vf_instance_t *vf, char* args)
 #if HAVE_MMX2
 	if(gCpuCaps.hasMMX2) qpel_li = qpel_li_MMX2;
 #endif
-#if HAVE_3DNOW
+#if HAVE_AMD3DNOW
 	if(gCpuCaps.has3DNow) qpel_li = qpel_li_3DNOW;
 #endif
 	return 1;

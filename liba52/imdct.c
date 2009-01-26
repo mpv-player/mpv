@@ -53,8 +53,8 @@
 void (*a52_imdct_512) (sample_t * data, sample_t * delay, sample_t bias);
 
 #ifdef RUNTIME_CPUDETECT
-#undef HAVE_3DNOWEXT
-#define HAVE_3DNOWEXT 0
+#undef HAVE_AMD3DNOWEXT
+#define HAVE_AMD3DNOWEXT 0
 #endif
 
 typedef struct complex_s {
@@ -712,19 +712,19 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
 // Stuff below this line is borrowed from libac3
 #include "srfftp.h"
 #if ARCH_X86 || ARCH_X86_64
-#undef HAVE_3DNOW
-#define HAVE_3DNOW 1
+#undef HAVE_AMD3DNOW
+#define HAVE_AMD3DNOW 1
 #include "srfftp_3dnow.h"
 
 const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = {{ 0x00000000UL, 0x80000000UL }}; 
 const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = {{ 0x80000000UL, 0x00000000UL }}; 
 const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
 
-#undef HAVE_3DNOWEXT
-#define HAVE_3DNOWEXT 0
+#undef HAVE_AMD3DNOWEXT
+#define HAVE_AMD3DNOWEXT 0
 #include "imdct_3dnow.h"
-#undef HAVE_3DNOWEXT
-#define HAVE_3DNOWEXT 1
+#undef HAVE_AMD3DNOWEXT
+#define HAVE_AMD3DNOWEXT 1
 #include "imdct_3dnow.h"
 
 void
