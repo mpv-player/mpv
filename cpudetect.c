@@ -558,48 +558,37 @@ void GetCpuCaps( CpuCaps *caps)
         mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
 #endif /* HAVE_ALTIVEC */
 
-#if ARCH_IA64
+if (ARCH_IA64)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Intel Itanium\n");
-#endif
 
-#if ARCH_SPARC
+if (ARCH_SPARC)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Sun Sparc\n");
-#endif
 
-#if ARCH_ARM
+if (ARCH_ARM)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: ARM\n");
-#endif
 
-#if ARCH_PPC
+if (ARCH_PPC)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: PowerPC\n");
-#endif
 
-#if ARCH_ALPHA
+if (ARCH_ALPHA)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Digital Alpha\n");
-#endif
 
-#if ARCH_SGI_MIPS
+if (ARCH_SGI_MIPS)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: SGI MIPS\n");
-#endif
 
-#if ARCH_PA_RISC
+if (ARCH_PA_RISC)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Hewlett-Packard PA-RISC\n");
-#endif
 
-#if ARCH_S390
+if (ARCH_S390)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: IBM S/390\n");
-#endif
 
-#if ARCH_S390X
+if (ARCH_S390X)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: IBM S/390X\n");
-#endif
 
-#if ARCH_VAX
+if (ARCH_VAX)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO, "CPU: Digital VAX\n" );
-#endif
 
-#if ARCH_XTENSA
+if (ARCH_XTENSA)
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO, "CPU: Tensilica Xtensa\n" );
-#endif
 }
 #endif /* !ARCH_X86 */
