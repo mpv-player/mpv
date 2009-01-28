@@ -152,7 +152,7 @@ typedef struct demuxer_info_st {
 
 #define MAX_A_STREAMS 256
 #define MAX_V_STREAMS 256
-#define MAX_S_STREAMS 32
+#define MAX_S_STREAMS 256
 
 struct demuxer_st;
 
