@@ -136,6 +136,7 @@ static void fixup(audio_encoder_t *encoder)
     // fixup CBR mp3 audio header:
     if(!lame_param_vbr) {
         encoder->stream->h.dwSampleSize=1;
+        if (encoder->stream->h.dwLength)
         ((MPEGLAYER3WAVEFORMAT*)(encoder->stream->wf))->nBlockSize=
             (encoder->stream->size+(encoder->stream->h.dwLength>>1))/encoder->stream->h.dwLength;
         encoder->stream->h.dwLength=encoder->stream->size;
