@@ -63,7 +63,6 @@ for DLL to know too much about its environment.
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/time.h>
-#include <sys/timeb.h>
 #ifdef	HAVE_KSTAT
 #include <kstat.h>
 #endif
