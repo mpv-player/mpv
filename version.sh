@@ -13,6 +13,8 @@ TITLE="#define MP_TITLE \"%s \"VERSION\" (C) 2000-2009 MPlayer Team\n\""
 
 # Update version.h only on revision changes to avoid spurious rebuilds
 if test "$NEW_REVISION" != "$OLD_REVISION"; then
-    echo "$NEW_REVISION" > version.h
-    echo "$TITLE" >> version.h
+    cat <<EOF > version.h
+$NEW_REVISION
+$TITLE
+EOF
 fi
