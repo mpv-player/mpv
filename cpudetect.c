@@ -18,27 +18,17 @@ CpuCaps gCpuCaps;
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <machine/cpu.h>
-#endif
-
-#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__APPLE__)
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__APPLE__)
 #include <sys/types.h>
 #include <sys/sysctl.h>
-#endif
-
-#ifdef __linux__
+#elif defined(__linux__)
 #include <signal.h>
-#endif
-
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#elif defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
-#endif
-
-#ifdef __OS2__
+#elif defined(__OS2__)
 #define INCL_DOS
 #include <os2.h>
-#endif
-
-#ifdef __AMIGAOS4__
+#elif defined(__AMIGAOS4__)
 #include <proto/exec.h>
 #endif
 
@@ -475,7 +465,7 @@ static void check_os_katmai_support( void )
 
 #ifdef __APPLE__
 #include <sys/sysctl.h>
-#elif __AMIGAOS4__
+#elif defined(__AMIGAOS4__)
 /* nothing */
 #else
 #include <signal.h>
@@ -529,7 +519,7 @@ void GetCpuCaps( CpuCaps *caps)
                         if (has_vu != 0)
                                 caps->hasAltiVec = 1;
         }
-#elif __AMIGAOS4__
+#elif defined(__AMIGAOS4__)
         ULONG result = 0;
 
         GetCPUInfoTags(GCIT_VectorUnit, &result, TAG_DONE);
