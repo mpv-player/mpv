@@ -1287,7 +1287,7 @@ void a52_imdct_init (uint32_t mm_accel)
 	else
 #endif
 
-#if LIBA52_DJBFFT
+#ifdef LIBA52_DJBFFT
     if (mm_accel & MM_ACCEL_DJBFFT) {
 	fprintf (stderr, "Using djbfft for IMDCT transform\n");
 	ifft128 = (void (*) (complex_t *)) fftc4_un128;
