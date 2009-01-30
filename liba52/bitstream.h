@@ -37,7 +37,7 @@
 #define ALT_BITSTREAM_READER
 
 /* used to avoid misaligned exceptions on some archs (alpha, ...) */
-#if ARCH_X86 || defined(HAVE_ARMV6)
+#if ARCH_X86 || HAVE_ARMV6
 #    define unaligned32(a) (*(uint32_t*)(a))
 #else
 #    ifdef __GNUC__
