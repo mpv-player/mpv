@@ -8151,6 +8151,7 @@ CONFIG_FFT=yes
 CONFIG_FFT_MMX=$fft_mmx
 CONFIG_GOLOMB=yes
 CONFIG_MDCT=yes
+CONFIG_RDFT=yes
 
 CONFIG_ENCODERS=yes
 CONFIG_GPL=yes
@@ -8588,6 +8589,7 @@ $_def_yasm
 #define CONFIG_FFT 1
 #define CONFIG_GOLOMB 1
 #define CONFIG_MDCT 1
+#define CONFIG_RDFT 1
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
 #define HAVE_EBX_AVAILABLE 1
