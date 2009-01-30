@@ -38,7 +38,7 @@
 
 /* No irq support in userspace implemented yet, do not enable this! */
 /* disable irq */
-#undef MGA_ALLOW_IRQ
+#define MGA_ALLOW_IRQ 0
 
 #define MGA_VSYNC_POS 2
 
@@ -565,7 +565,7 @@ if(!restore){
 #endif	
 }
 
-#ifdef MGA_ALLOW_IRQ
+#if MGA_ALLOW_IRQ
 static void enable_irq(void)
 {
 	long int cc;
@@ -1056,7 +1056,7 @@ static int mga_playback_on(void)
 	regs.besctl |= 1;
     	mga_vid_write_regs(0);
     }
-#ifdef MGA_ALLOW_IRQ
+#if MGA_ALLOW_IRQ
     if (mga_irq != -1)
 	enable_irq();
 #endif
@@ -1070,7 +1070,7 @@ static int mga_playback_off(void)
     if (mga_verbose) printf("[mga] playback off\n");
 
     vid_src_ready = 0;   
-#ifdef MGA_ALLOW_IRQ
+#if MGA_ALLOW_IRQ
     if (mga_irq != -1)
 	disable_irq();
 #endif
@@ -1240,7 +1240,7 @@ static int mga_init(void)
         mga_mmio_base, mga_irq, mga_mem_base);
     err = mtrr_set_type(pci_info.base0,mga_ram_size*1024*1024,MTRR_TYPE_WRCOMB);
     if(!err) printf("[mga] Set write-combining type of video memory\n");
-#ifdef MGA_ALLOW_IRQ
+#if MGA_ALLOW_IRQ
     if (mga_irq != -1)
     {
     	int tmp = request_irq(mga_irq, mga_handle_irq, SA_INTERRUPT | SA_SHIRQ, "Syncfb Time Base", &mga_irq);
@@ -1278,7 +1278,7 @@ static void mga_destroy(void)
     mga_vid_write_regs(1);
     mga_vid_in_use = 0;
 
-#ifdef MGA_ALLOW_IRQ
+#if MGA_ALLOW_IRQ
     if (mga_irq != -1)
     	free_irq(mga_irq, &mga_irq);
 #endif
