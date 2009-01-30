@@ -8588,6 +8588,7 @@ $_def_yasm
 
 #define CONFIG_GPL 1
 #define CONFIG_SMALL 0
+#define CONFIG_SWSCALE 1
 #define CONFIG_GRAY 0
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
