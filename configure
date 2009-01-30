@@ -4236,7 +4236,7 @@ if test "$_xvmc" = yes ; then
   _vomodules="xvmc $_vomodules"
   _res_comment="using $_xvmclib"
 else
-  _def_xvmc='#undef CONFIG_XVMC'
+  _def_xvmc='#define CONFIG_XVMC 0'
   _novomodules="xvmc $_novomodules"
   _libavdecoders=`echo $_libavdecoders | sed -e s/MPEG_XVMC_DECODER// `
 fi
