@@ -8254,6 +8254,11 @@ $_def_fast_inttypes
 /* libfaad2 + libdvdread */
 #define STDC_HEADERS 1
 #define HAVE_MEMCPY 1
+/* libfaad2 */
+#define HAVE_STRING_H 1
+#define HAVE_STRINGS_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_SYS_TYPES_H 1
 /* libdvdread */
 #define HAVE_UINTPTR_T 1
 
