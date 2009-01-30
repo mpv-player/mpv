@@ -44,9 +44,9 @@
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API
 
-#if HAVE_SYS_ASOUNDLIB_H
+#ifdef HAVE_SYS_ASOUNDLIB_H
 #include <sys/asoundlib.h>
-#elif HAVE_ALSA_ASOUNDLIB_H
+#elif defined(HAVE_ALSA_ASOUNDLIB_H)
 #include <alsa/asoundlib.h>
 #else
 #error "asoundlib.h is not in sys/ or alsa/ - please bugreport"
