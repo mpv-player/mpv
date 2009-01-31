@@ -8260,7 +8260,7 @@ $_def_fast_inttypes
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TYPES_H 1
 /* libdvdread */
-#define HAVE_UINTPTR_T 1
+#define HAVE_DLFCN_H 1
 
 
 /* system headers */
