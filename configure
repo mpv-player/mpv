@@ -3128,6 +3128,7 @@ echores "$_malloc"
 
 echocheck "memalign()"
 # XXX restrict to x86 ? extend to other CPUs/cacheline sizes ?
+_def_memalign_hack='#define CONFIG_MEMALIGN_HACK 0'
 cat > $TMPC << EOF
 #include <malloc.h>
 int main(void) { (void) memalign(64, sizeof(char)); return 0; }
