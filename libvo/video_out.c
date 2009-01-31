@@ -213,7 +213,7 @@ const struct vo_driver *video_out_drivers[] =
 #endif
         &video_out_null,
         // should not be auto-selected
-#ifdef CONFIG_XVMC
+#if CONFIG_XVMC
         &video_out_xvmc,
 #endif
         &video_out_mpegpes,

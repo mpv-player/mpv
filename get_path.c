@@ -18,12 +18,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#elif __MINGW32__
+#elif defined(__MINGW32__)
 #include <windows.h>
-#elif __CYGWIN__
+#elif defined(__CYGWIN__)
 #include <windows.h>
 #include <sys/cygwin.h>
-#elif __OS2__
+#elif defined(__OS2__)
 #define INCL_DOS
 #include <os2.h>
 #endif

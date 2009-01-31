@@ -78,6 +78,8 @@ static struct global_priv {
                                     cannot lock a normal texture. Uses RGBA */
     IDirect3DSurface9 *d3d_backbuf; /**< Video card's back buffer (used to
                                     display next frame) */
+    int cur_backbuf_width;          /**< Current backbuffer width */
+    int cur_backbuf_height;         /**< Current backbuffer height */
     int is_osd_populated;           /**< 1 = OSD texture has something to display,
                                     0 = OSD texture is clear */
     int device_caps_power2_only;    /**< 1 = texture sizes have to be power 2
@@ -126,6 +128,10 @@ typedef struct {
     float tu, tv;       /* Texture coordinates */
 } struct_vertex;
 
+typedef enum back_buffer_action {
+    BACKBUFFER_CREATE,
+    BACKBUFFER_RESET
+} back_buffer_action_e;
 /****************************************************************************
  *                                                                          *
  *                                                                          *
@@ -224,7 +230,8 @@ static void destroy_d3d_surfaces(void)
     priv->d3d_backbuf = NULL;
 }
 
-/** @brief Create D3D Offscreen and Backbuffer surfaces.
+/** @brief Create D3D Offscreen and Backbuffer surfaces. Each
+ *         surface is created only if it's not already present.
  *  @return 1 on success, 0 on failure
  */
 static int create_d3d_surfaces(void)
@@ -233,7 +240,8 @@ static int create_d3d_surfaces(void)
     int tex_width = osd_width, tex_height = osd_height;
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d><INFO>create_d3d_surfaces called.\n");
 
-    if (FAILED(IDirect3DDevice9_CreateOffscreenPlainSurface(
+    if (!priv->d3d_surface &&
+        FAILED(IDirect3DDevice9_CreateOffscreenPlainSurface(
                priv->d3d_device, priv->src_width, priv->src_height,
                priv->movie_src_fmt, D3DPOOL_DEFAULT, &priv->d3d_surface, NULL))) {
         mp_msg(MSGT_VO, MSGL_ERR,
@@ -241,7 +249,8 @@ static int create_d3d_surfaces(void)
         return 0;
     }
 
-    if (FAILED(IDirect3DDevice9_GetBackBuffer(priv->d3d_device, 0, 0,
+    if (!priv->d3d_backbuf &&
+        FAILED(IDirect3DDevice9_GetBackBuffer(priv->d3d_device, 0, 0,
                                               D3DBACKBUFFER_TYPE_MONO,
                                               &priv->d3d_backbuf))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Back Buffer address get failed\n");
@@ -279,7 +288,8 @@ static int create_d3d_surfaces(void)
            vo_dwidth, vo_dheight, priv->osd_texture_width, priv->osd_texture_height);
 
     /* create OSD */
-    if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
+    if (!priv->d3d_texture_system &&
+        FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
                                               priv->osd_texture_width,
                                               priv->osd_texture_height,
                                               1,
@@ -295,7 +305,8 @@ static int create_d3d_surfaces(void)
 
     if (!priv->device_texture_sys) {
         /* only create if we need a shadow version on the external device */
-        if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
+        if (!priv->d3d_texture_osd &&
+            FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device,
                                                   priv->osd_texture_width,
                                                   priv->osd_texture_height,
                                                   1,
@@ -332,14 +343,63 @@ static void fill_d3d_presentparams(D3DPRESENT_PARAMETERS *present_params)
     present_params->SwapEffect             = D3DSWAPEFFECT_COPY;
     present_params->Flags                  = D3DPRESENTFLAG_VIDEO;
     present_params->hDeviceWindow          = vo_w32_window; /* w32_common var */
-    present_params->BackBufferWidth        = 0; /* Fill up window Width */
-    present_params->BackBufferHeight       = 0; /* Fill up window Height */
+    present_params->BackBufferWidth        = priv->cur_backbuf_width;
+    present_params->BackBufferHeight       = priv->cur_backbuf_height;
     present_params->MultiSampleType        = D3DMULTISAMPLE_NONE;
-    /* D3DPRESENT_INTERVAL_ONE = vsync */
     present_params->PresentationInterval   = D3DPRESENT_INTERVAL_ONE;
     present_params->BackBufferFormat       = priv->desktop_fmt;
     present_params->BackBufferCount        = 1;
     present_params->EnableAutoDepthStencil = FALSE;
+}
+
+
+/** @brief Create a new backbuffer. Create or Reset the D3D
+ *         device.
+ *  @return 1 on success, 0 on failure
+ */
+static int change_d3d_backbuffer(back_buffer_action_e action)
+{
+    D3DPRESENT_PARAMETERS present_params;
+
+    destroy_d3d_surfaces();
+
+    /* Grow the backbuffer in the required dimension. */
+    if (vo_dwidth > priv->cur_backbuf_width)
+        priv->cur_backbuf_width = vo_dwidth;
+
+    if (vo_dheight > priv->cur_backbuf_height)
+        priv->cur_backbuf_height = vo_dheight;
+
+    /* The grown backbuffer dimensions are ready and fill_d3d_presentparams
+     * will use them, so we can reset the device.
+     */
+    fill_d3d_presentparams(&present_params);
+
+    /* vo_w32_window is w32_common variable. It's a handle to the window. */
+    if (action == BACKBUFFER_CREATE &&
+        FAILED(IDirect3D9_CreateDevice(priv->d3d_handle,
+                                       D3DADAPTER_DEFAULT,
+                                       D3DDEVTYPE_HAL, vo_w32_window,
+                                       D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+                                       &present_params, &priv->d3d_device))) {
+            mp_msg(MSGT_VO, MSGL_ERR,
+                   "<vo_direct3d><INFO>Could not create the D3D device\n");
+        return 0;
+    }
+
+    if (action == BACKBUFFER_RESET &&
+        FAILED(IDirect3DDevice9_Reset(priv->d3d_device, &present_params))) {
+            mp_msg(MSGT_VO, MSGL_ERR,
+                   "<vo_direct3d><INFO>Could not reset the D3D device\n");
+        return 0;
+    }
+
+    mp_msg(MSGT_VO, MSGL_V,
+           "<vo_direct3d><INFO>New backbuffer: Width: %d, Height:%d. VO Dest Width:%d, Height: %d\n",
+           present_params.BackBufferWidth, present_params.BackBufferHeight,
+           vo_dwidth, vo_dheight);
+
+    return 1;
 }
 
 /** @brief Configure initial Direct3D context. The first
@@ -348,10 +408,12 @@ static void fill_d3d_presentparams(D3DPRESENT_PARAMETERS *present_params)
  */
 static int configure_d3d(void)
 {
-    D3DPRESENT_PARAMETERS present_params;
     D3DDISPLAYMODE disp_mode;
+    D3DVIEWPORT9 vp = {0, 0, vo_dwidth, vo_dheight, 0, 1};
 
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d><INFO>configure_d3d called\n");
+
+    destroy_d3d_surfaces();
 
     /* Get the current desktop display mode, so we can set up a back buffer
      * of the same format. */
@@ -366,26 +428,17 @@ static int configure_d3d(void)
     /* Write current Desktop's colorspace format in the global storage. */
     priv->desktop_fmt = disp_mode.Format;
 
-    fill_d3d_presentparams(&present_params);
-
-    /* vo_w32_window is w32_common variable. It's a handle to the window. */
-    if (FAILED(IDirect3D9_CreateDevice(priv->d3d_handle,
-                                       D3DADAPTER_DEFAULT,
-                                       D3DDEVTYPE_HAL, vo_w32_window,
-                                       D3DCREATE_SOFTWARE_VERTEXPROCESSING,
-                                       &present_params, &priv->d3d_device))) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d><INFO>Could not create the D3D device\n");
+    if (!change_d3d_backbuffer(BACKBUFFER_CREATE))
         return 0;
-    }
 
     if (!create_d3d_surfaces())
         return 0;
 
-    mp_msg(MSGT_VO, MSGL_V,
-           "New BackBuffer: Width: %d, Height:%d. VO Dest Width:%d, Height: %d\n",
-            present_params.BackBufferWidth, present_params.BackBufferHeight,
-            vo_dwidth, vo_dheight);
+    if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device,
+                                            &vp))) {
+        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to set the viewport\n");
+        return VO_ERROR;
+    }
 
     calc_fs_rect();
 
@@ -400,7 +453,7 @@ static int reconfigure_d3d(void)
 {
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d><INFO>reconfigure_d3d called.\n");
 
-    /* Destroy the Offscreen and Backbuffer surfaces */
+    /* Destroy the offscreen, OSD and backbuffer surfaces */
     destroy_d3d_surfaces();
 
     /* Destroy the D3D Device */
@@ -425,35 +478,49 @@ static int reconfigure_d3d(void)
     return 1;
 }
 
-
 /** @brief Resize Direct3D context on window resize.
  *  @return 1 on success, 0 on failure
  */
 static int resize_d3d(void)
 {
-    D3DPRESENT_PARAMETERS present_params;
+    D3DVIEWPORT9 vp = {0, 0, vo_dwidth, vo_dheight, 0, 1};
 
     mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d><INFO>resize_d3d called.\n");
 
-    destroy_d3d_surfaces();
+    /* Make sure that backbuffer is large enough to accomodate the new
+       viewport dimensions. Grow it if necessary. */
 
-    /* Reset the D3D Device with all parameters the same except the new
-     * width/height.
-     */
-    fill_d3d_presentparams(&present_params);
-    if (FAILED(IDirect3DDevice9_Reset(priv->d3d_device, &present_params))) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d><INFO>Could not reset the D3D device\n");
-        return 0;
+    if (vo_dwidth > priv->cur_backbuf_width ||
+        vo_dheight > priv->cur_backbuf_height) {
+        change_d3d_backbuffer (BACKBUFFER_RESET);
     }
+
+    /* Destroy the OSD textures. They should always match the new dimensions
+     * of the onscreen window, so on each resize we need new OSD dimensions.
+     */
+
+    if (priv->d3d_texture_osd)
+        IDirect3DTexture9_Release(priv->d3d_texture_osd);
+    priv->d3d_texture_osd = NULL;
+
+    if (priv->d3d_texture_system)
+        IDirect3DTexture9_Release(priv->d3d_texture_system);
+    priv->d3d_texture_system = NULL;
+
+
+    /* Recreate the OSD. The function will observe that the offscreen plain
+     * surface and the backbuffer are not destroyed and will skip their creation,
+     * effectively recreating only the OSD.
+     */
 
     if (!create_d3d_surfaces())
         return 0;
 
-    mp_msg(MSGT_VO, MSGL_V,
-           "New BackBuffer: Width: %d, Height:%d. VO Dest Width:%d, Height: %d\n",
-           present_params.BackBufferWidth, present_params.BackBufferHeight,
-           vo_dwidth, vo_dheight);
+    if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device,
+                                            &vp))) {
+        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to set the viewport\n");
+        return VO_ERROR;
+    }
 
     calc_fs_rect();
 
@@ -644,8 +711,10 @@ static int preinit(const char *arg)
 
     /* Store in priv->desktop_fmt the user desktop's colorspace. Usually XRGB. */
     priv->desktop_fmt = disp_mode.Format;
+    priv->cur_backbuf_width = disp_mode.Width;
+    priv->cur_backbuf_height = disp_mode.Height;
 
-    mp_msg(MSGT_VO, MSGL_V, "disp_mode.Width %d, disp_mode.Height %d\n",
+    mp_msg(MSGT_VO, MSGL_V, "Setting backbuffer to the screen width: %d, height: %d\n",
            disp_mode.Width, disp_mode.Height);
 
     if (FAILED(IDirect3D9_GetDeviceCaps(priv->d3d_handle,
@@ -787,7 +856,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
  */
 static void flip_page(void)
 {
-    if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, 0, 0, 0, 0))) {
+    RECT rect = {0, 0, vo_dwidth, vo_dheight};
+    if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
         mp_msg(MSGT_VO, MSGL_V,
                "<vo_direct3d>Video adapter became uncooperative.\n");
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Trying to reinitialize it...\n");
@@ -795,7 +865,7 @@ static void flip_page(void)
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization Failed.\n");
             return;
         }
-        if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, 0, 0, 0, 0))) {
+        if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization Failed.\n");
             return;
         }

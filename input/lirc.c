@@ -20,11 +20,10 @@
 
 #include <lirc/lirc_client.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/time.h>
 #include <stdlib.h>
 
 #include "mp_msg.h"
@@ -39,10 +38,19 @@ static char* cmd_buf = NULL;
 int 
 mp_input_lirc_init(void) {
   int lirc_sock;
+  int mode;
 
   mp_msg(MSGT_LIRC,MSGL_V,MSGTR_SettingUpLIRC);
   if((lirc_sock=lirc_init("mplayer",1))==-1){
     mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCopenfailed);
+    return -1;
+  }
+
+  mode = fcntl(lirc_sock, F_GETFL);
+  if (mode < 0 || fcntl(lirc_sock, F_SETFL, mode | O_NONBLOCK) < 0) {
+    mp_msg(MSGT_LIRC, MSGL_ERR, "setting non-blocking mode failed: %s\n",
+	strerror(errno));
+    lirc_deinit();
     return -1;
   }
 
@@ -57,8 +65,6 @@ mp_input_lirc_init(void) {
 }
 
 int mp_input_lirc_read(int fd,char* dest, int s) {
-  fd_set fds;
-  struct timeval tv;
   int r,cl = 0;
   char *code = NULL,*c = NULL;
 
@@ -77,22 +83,8 @@ int mp_input_lirc_read(int fd,char* dest, int s) {
   }
       
   // Nothing in the buffer, poll the lirc fd
-  FD_ZERO(&fds);
-  FD_SET(fd,&fds);
-  memset(&tv,0,sizeof(tv));
-  while((r = select(fd+1,&fds,NULL,NULL,&tv)) <= 0) {
-    if(r < 0) {
-      if(errno == EINTR)
-	continue;
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Select error : %s\n",strerror(errno));
-      return MP_INPUT_ERROR;
-    } else
-      return MP_INPUT_NOTHING;
-  }
-  
-  // There's something to read
   if(lirc_nextcode(&code) != 0) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Lirc error :(\n");
+    mp_msg(MSGT_LIRC,MSGL_ERR,"Lirc error :(\n");
     return MP_INPUT_DEAD;
   }
 

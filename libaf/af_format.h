@@ -30,7 +30,7 @@
 #define AF_FORMAT_LE		(1<<0) // Little Endian
 #define AF_FORMAT_END_MASK	(1<<0)
 
-#if WORDS_BIGENDIAN	       	// Native endian of cpu
+#ifdef WORDS_BIGENDIAN	       	// Native endian of cpu
 #define	AF_FORMAT_NE		AF_FORMAT_BE
 #else
 #define	AF_FORMAT_NE		AF_FORMAT_LE

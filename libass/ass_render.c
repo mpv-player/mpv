@@ -41,8 +41,8 @@
 #include "ass_fontconfig.h"
 #include "ass_library.h"
 
-#define MAX_GLYPHS 1000
-#define MAX_LINES 100
+#define MAX_GLYPHS 3000
+#define MAX_LINES 300
 
 static int last_render_id = 0;
 

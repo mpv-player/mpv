@@ -101,7 +101,7 @@ static int disk_open(AFormat fmt, int rate, int nch) {
             xmms_afmt=AF_FORMAT_U16_LE;
             break;
         case FMT_U16_NE:
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
             xmms_afmt=AF_FORMAT_U16_BE;
 #else
             xmms_afmt=AF_FORMAT_U16_LE;

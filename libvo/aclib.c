@@ -30,7 +30,7 @@
 
 #ifdef CAN_COMPILE_X86_ASM
 
-#if (HAVE_MMX && !HAVE_3DNOW && !HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
+#if (HAVE_MMX && !HAVE_AMD3DNOW && !HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
 #define COMPILE_MMX
 #endif
 
@@ -38,7 +38,7 @@
 #define COMPILE_MMX2
 #endif
 
-#if (HAVE_3DNOW && !HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
+#if (HAVE_AMD3DNOW && !HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
 #define COMPILE_3DNOW
 #endif
 
@@ -48,24 +48,24 @@
 
 #undef HAVE_MMX
 #undef HAVE_MMX2
-#undef HAVE_3DNOW
+#undef HAVE_AMD3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
 #define HAVE_MMX 0
 #define HAVE_MMX2 0
-#define HAVE_3DNOW 0
+#define HAVE_AMD3DNOW 0
 #define HAVE_SSE 0
 #define HAVE_SSE2 0
 /*
 #ifdef COMPILE_C
 #undef HAVE_MMX
 #undef HAVE_MMX2
-#undef HAVE_3DNOW
+#undef HAVE_AMD3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
 #define HAVE_MMX 0
 #define HAVE_MMX2 0
-#define HAVE_3DNOW 0
+#define HAVE_AMD3DNOW 0
 #define HAVE_SSE 0
 #define HAVE_SSE2 0
 #define RENAME(a) a ## _C
@@ -77,12 +77,12 @@
 #undef RENAME
 #undef HAVE_MMX
 #undef HAVE_MMX2
-#undef HAVE_3DNOW
+#undef HAVE_AMD3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
 #define HAVE_MMX 1
 #define HAVE_MMX2 0
-#define HAVE_3DNOW 0
+#define HAVE_AMD3DNOW 0
 #define HAVE_SSE 0
 #define HAVE_SSE2 0
 #define RENAME(a) a ## _MMX
@@ -94,12 +94,12 @@
 #undef RENAME
 #undef HAVE_MMX
 #undef HAVE_MMX2
-#undef HAVE_3DNOW
+#undef HAVE_AMD3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
 #define HAVE_MMX 1
 #define HAVE_MMX2 1
-#define HAVE_3DNOW 0
+#define HAVE_AMD3DNOW 0
 #define HAVE_SSE 0
 #define HAVE_SSE2 0
 #define RENAME(a) a ## _MMX2
@@ -111,12 +111,12 @@
 #undef RENAME
 #undef HAVE_MMX
 #undef HAVE_MMX2
-#undef HAVE_3DNOW
+#undef HAVE_AMD3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
 #define HAVE_MMX 1
 #define HAVE_MMX2 0
-#define HAVE_3DNOW 1
+#define HAVE_AMD3DNOW 1
 #define HAVE_SSE 0
 #define HAVE_SSE2 0
 #define RENAME(a) a ## _3DNow
@@ -128,12 +128,12 @@
 #undef RENAME
 #undef HAVE_MMX
 #undef HAVE_MMX2
-#undef HAVE_3DNOW
+#undef HAVE_AMD3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
 #define HAVE_MMX 1
 #define HAVE_MMX2 1
-#define HAVE_3DNOW 0
+#define HAVE_AMD3DNOW 0
 #define HAVE_SSE 1
 #define HAVE_SSE2 1
 #define RENAME(a) a ## _SSE
@@ -165,7 +165,7 @@ void * fast_memcpy(void * to, const void * from, size_t len)
 		fast_memcpy_SSE(to, from, len);
 #elif HAVE_MMX2
 		fast_memcpy_MMX2(to, from, len);
-#elif HAVE_3DNOW
+#elif HAVE_AMD3DNOW
 		fast_memcpy_3DNow(to, from, len);
 #elif HAVE_MMX
 		fast_memcpy_MMX(to, from, len);
@@ -199,7 +199,7 @@ void * mem2agpcpy(void * to, const void * from, size_t len)
 		mem2agpcpy_SSE(to, from, len);
 #elif HAVE_MMX2
 		mem2agpcpy_MMX2(to, from, len);
-#elif HAVE_3DNOW
+#elif HAVE_AMD3DNOW
 		mem2agpcpy_3DNow(to, from, len);
 #elif HAVE_MMX
 		mem2agpcpy_MMX(to, from, len);

@@ -25,16 +25,9 @@
 #include <string.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <math.h>
 
 #include "config.h"
-// Integer to float conversion through lrintf()
-#if HAVE_LRINTF
-#include <math.h>
-long int lrintf(float);
-#else
-#define lrintf(x) ((int)(x))
-#endif
-
 #include "af.h"
 #include "mpbswap.h"
 #include "libvo/fastmemcpy.h"
@@ -339,7 +332,7 @@ af_info_t af_info_format = {
 };
 
 static inline uint32_t load24bit(void* data, int pos) {
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
   return (((uint32_t)((uint8_t*)data)[3*pos])<<24) |
 	 (((uint32_t)((uint8_t*)data)[3*pos+1])<<16) |
 	 (((uint32_t)((uint8_t*)data)[3*pos+2])<<8);
@@ -351,7 +344,7 @@ static inline uint32_t load24bit(void* data, int pos) {
 }
 
 static inline void store24bit(void* data, int pos, uint32_t expanded_value) {
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
       ((uint8_t*)data)[3*pos]=expanded_value>>24;
       ((uint8_t*)data)[3*pos+1]=expanded_value>>16;
       ((uint8_t*)data)[3*pos+2]=expanded_value>>8;

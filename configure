@@ -2617,12 +2617,12 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC BSWAP MMX MMX2 3DNOW 3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
+_cpuexts_all='ALTIVEC BSWAP MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
-test "$_3dnow"     = yes && _cpuexts="3DNOW $_cpuexts"
-test "$_3dnowext"  = yes && _cpuexts="3DNOWEXT $_cpuexts"
+test "$_3dnow"     = yes && _cpuexts="AMD3DNOW $_cpuexts"
+test "$_3dnowext"  = yes && _cpuexts="AMD3DNOWEXT $_cpuexts"
 test "$_sse"       = yes && _cpuexts="SSE $_cpuexts"
 test "$_sse2"      = yes && _cpuexts="SSE2 $_cpuexts"
 test "$_ssse3"     = yes && _cpuexts="SSSE3 $_cpuexts"
@@ -4245,7 +4245,7 @@ if test "$_xvmc" = yes ; then
   _vomodules="xvmc $_vomodules"
   _res_comment="using $_xvmclib"
 else
-  _def_xvmc='#undef CONFIG_XVMC'
+  _def_xvmc='#define CONFIG_XVMC 0'
   _novomodules="xvmc $_novomodules"
   _libavdecoders=`echo $_libavdecoders | sed -e s/MPEG_XVMC_DECODER// `
 fi
@@ -5632,7 +5632,7 @@ if test "$_dvdread_internal" = auto ; then
   if (linux || freebsd || netbsd || openbsd || dragonfly || sunos || hpux) \
      && (test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || \
          test "$_dvdio" = yes || test "$_bsdi_dvd" = yes) \
-     || darwin || win32; then
+     || darwin || win32 || os2; then
     _dvdread_internal=yes
     _dvdread=yes
     _inc_extra="$_inc_extra -Ilibdvdread4"
@@ -7898,6 +7898,7 @@ if test "$cc_vendor" = "gnu" ; then
   cc_check -std=gnu99 && CFLAGS="-std=gnu99 $CFLAGS"
   cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
   cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
+  cc_check -Wundef && CFLAGS="-Wundef $CFLAGS"
 else
   CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
 fi
@@ -8169,6 +8170,7 @@ CONFIG_FFT=yes
 CONFIG_FFT_MMX=$fft_mmx
 CONFIG_GOLOMB=yes
 CONFIG_MDCT=yes
+CONFIG_RDFT=yes
 
 CONFIG_ENCODERS=yes
 CONFIG_GPL=yes
@@ -8270,6 +8272,11 @@ $_def_fast_inttypes
 /* libfaad2 + libdvdread */
 #define STDC_HEADERS 1
 #define HAVE_MEMCPY 1
+/* libfaad2 */
+#define HAVE_STRING_H 1
+#define HAVE_STRINGS_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_SYS_TYPES_H 1
 /* libdvdread */
 #define HAVE_UINTPTR_T 1
 
@@ -8599,6 +8606,7 @@ $_def_yasm
 
 #define CONFIG_GPL 1
 #define CONFIG_SMALL 0
+#define CONFIG_SWSCALE 1
 #define CONFIG_GRAY 0
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
@@ -8606,6 +8614,7 @@ $_def_yasm
 #define CONFIG_FFT 1
 #define CONFIG_GOLOMB 1
 #define CONFIG_MDCT 1
+#define CONFIG_RDFT 1
 
 /* Use these registers in FFmpeg x86 inline asm. No proper detection yet. */
 #define HAVE_EBX_AVAILABLE 1

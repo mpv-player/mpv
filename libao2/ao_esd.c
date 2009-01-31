@@ -54,7 +54,8 @@
 #include "help_mp.h"
 
 
-#undef	ESD_DEBUG
+#define ESD_RESAMPLES 0
+#define ESD_DEBUG 0
 
 #if	ESD_DEBUG
 #define	dprintf(...)	printf(__VA_ARGS__)
