@@ -2506,6 +2506,7 @@ fi #if x86
 
 
 #FIXME: This should happen before the check for CFLAGS..
+def_altivec_h='#define HAVE_ALTIVEC_H 0'
 if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; then
 
     # check if AltiVec is supported by the compiler, and how to enable it
@@ -2516,7 +2517,6 @@ EOF
     if $(cc_check -maltivec -mabi=altivec) ; then
     _altivec_gcc_flags="-maltivec -mabi=altivec"
     # check if <altivec.h> should be included
-    def_altivec_h='#undef HAVE_ALTIVEC_H'
     cat > $TMPC << EOF
 #include <altivec.h>
 int main(void) { return 0; }
