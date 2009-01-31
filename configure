@@ -2495,6 +2495,12 @@ else
   _have_yasm="no"
   echores "no"
 fi
+
+echocheck "bswap"
+def_bswap='#define HAVE_BSWAP 0'
+echo 'bswap %eax' > $TMPS
+$_as $TMPS -o $TMPEXE > /dev/null 2>&1 && def_bswap='#define HAVE_BSWAP 1' && bswap=yes || bswap=no
+echores "$bswap"
 fi #if x86
 
 
@@ -8577,6 +8583,7 @@ $_def_libswscale
 $_def_libswscale_a
 $_def_libswscale_so
 
+$def_bswap
 $_def_dcbzl
 $def_fast_64bit
 $_def_fast_unaligned
