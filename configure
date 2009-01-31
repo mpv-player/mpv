@@ -8297,7 +8297,6 @@ $_def_lrint
 $_def_lrintf
 $_def_map_memalign
 $_def_memalign
-$_def_memalign_hack
 $_def_nanosleep
 $_def_posix_select
 $_def_round
@@ -8589,6 +8588,7 @@ $def_bswap
 $_def_dcbzl
 $def_fast_64bit
 $_def_fast_unaligned
+$_def_memalign_hack
 $def_mlib
 $_def_mkstemp
 $_def_pthreads
