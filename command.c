@@ -2463,6 +2463,8 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_SWITCH_RATIO:
+            if (!sh_video)
+                break;
 	    if (cmd->nargs == 0 || cmd->args[0].v.f == -1)
 		movie_aspect = (float) sh_video->disp_w / sh_video->disp_h;
 	    else
@@ -2969,6 +2971,8 @@ int run_command(MPContext * mpctx, mp_cmd_t * cmd)
 	    break;
 
 	case MP_CMD_VF_CHANGE_RECTANGLE:
+            if (!sh_video)
+                break;
 	    set_rectangle(sh_video, cmd->args[0].v.i, cmd->args[1].v.i);
 	    break;
 
