@@ -2839,7 +2839,7 @@ if eval test "x\$_$func" = "xyes"; then
   eval _def_$func="\"#define HAVE_`echo $func | tr '[a-z]' '[A-Z]'` 1\""
   echores yes
 else
-  eval _def_$func="\"#undef HAVE_`echo $func | tr '[a-z]' '[A-Z]'`\""
+  eval _def_$func="\"#define HAVE_`echo $func | tr '[a-z]' '[A-Z]'` 0\""
   echores no
 fi
 done
