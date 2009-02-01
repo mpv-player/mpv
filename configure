@@ -2964,9 +2964,9 @@ EOF
   echores "$_use_aton"
 fi
 
-_def_use_aton='#undef HAVE_ATON'
+_def_inet_aton='#define HAVE_INET_ATON 0'
 if test "$_use_aton" = yes; then
-  _def_use_aton='#define HAVE_ATON 1'
+  _def_inet_aton='#define HAVE_INET_ATON 1'
 fi
 
 
@@ -8483,12 +8483,12 @@ $_def_fribidi
 $_def_closesocket
 $_def_ftp
 $_def_inet6
+$_def_inet_aton
 $_def_live
 $_def_nemesi
 $_def_network
 $_def_smb
 $_def_socklen_t
-$_def_use_aton
 $_def_vstream
 
 
