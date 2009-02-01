@@ -22,10 +22,10 @@
 #include "url.h"
 #include "http.h"
 
-#ifndef HAVE_CLOSESOCKET
+#if !HAVE_CLOSESOCKET
 #define closesocket close
 #endif
-#ifndef HAVE_SOCKLEN_T
+#if !HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
 

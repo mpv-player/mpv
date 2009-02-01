@@ -2982,7 +2982,7 @@ done
 if test "$_socklen_t" = yes ; then
   _def_socklen_t='#define HAVE_SOCKLEN_T 1'
 else
-  _def_socklen_t='#undef HAVE_SOCKLEN_T'
+  _def_socklen_t='#define HAVE_SOCKLEN_T 0'
 fi
 echores "$_socklen_t"
 
@@ -2997,7 +2997,7 @@ cc_check $_ld_sock && _closesocket=yes
 if test "$_closesocket" = yes ; then
   _def_closesocket='#define HAVE_CLOSESOCKET 1'
 else
-  _def_closesocket='#undef HAVE_CLOSESOCKET'
+  _def_closesocket='#define HAVE_CLOSESOCKET 0'
 fi
 echores "$_closesocket"
 
