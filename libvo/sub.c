@@ -8,16 +8,12 @@
 #include <malloc.h>
 #endif
 
-#ifdef CONFIG_DVDNAV
 #include "stream/stream.h"
 #include "stream/stream_dvdnav.h"
 #define OSD_NAV_BOX_ALPHA 0x7f
-#endif
 
-#ifdef CONFIG_TV_TELETEXT
 #include "stream/tv.h"
 #include "osdep/timer.h"
-#endif
 
 #include "mplayer.h"
 #include "mp_msg.h"
