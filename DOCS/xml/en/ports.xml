@@ -852,41 +852,6 @@ The <option>-vo x11</option> output will be even slower than on Linux,
 since QNX has only X <emphasis>emulation</emphasis> which is very slow.
 </para>
 </sect2>
-
-<!-- ********** -->
-
-<sect2 id="amiga">
-<title>Amiga/MorphOS (GeekGadgets)</title>
-<para>
-The people over at
-<ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>
-make current <application>MPlayer</application> and
-<application>MEncoder</application> packages.
-</para>
-
-<para>
-Nicholas Det at Genesi has done a big and powerful port of <application>MPlayer
-</application> for MorphOS. Sadly it's based on the 0.90 series.
-</para>
-
-<para>
-Get if from <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
-<itemizedlist>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-  <application>MPlayer</application> 0.91 binary</ulink>
-</para></listitem>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-  <application>MPlayer</application> 0.91 source</ulink>
-</para></listitem>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
-  <application>MEncoder</application> 1.0pre3 binary</ulink>
-</para></listitem>
-</itemizedlist>
-</para>
-</sect2>
 </sect1>
 
 </chapter>
