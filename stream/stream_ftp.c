@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#ifndef HAVE_WINSOCK2_H
+#if !HAVE_WINSOCK2_H
 #include <sys/socket.h>
 #else
 #include <winsock2.h>

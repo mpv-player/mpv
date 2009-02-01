@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include "config.h"
-#ifndef HAVE_WINSOCK2_H
+#if !HAVE_WINSOCK2_H
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>

@@ -2911,7 +2911,7 @@ if test $_winsock2_h = yes ; then
   _ld_sock="-lws2_32"
   def_winsock2_h='#define HAVE_WINSOCK2_H 1'
 else
-  def_winsock2_h='#undef HAVE_WINSOCK2_H'
+  def_winsock2_h='#define HAVE_WINSOCK2_H 0'
 fi
 
 
