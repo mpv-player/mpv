@@ -183,6 +183,13 @@ adjustments to make the build work.
 <title>Solaris</title>
 
 <para>
+Solaris still has broken, POSIX-incompatible system tools and shell in default
+locations. Until a bold step out of the computing stone age is made, you will
+have to add <filename>/usr/xpg4/bin</filename> to your
+<systemitem>PATH</systemitem>.
+</para>
+
+<para>
 <application>MPlayer</application> should work on Solaris 2.6 or newer.
 Use the SUN audio driver with the <option>-ao sun</option> option for sound.
 </para>
