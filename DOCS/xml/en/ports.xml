@@ -61,8 +61,8 @@ from <ulink url="http://rpmfusion.org/">RPMFusion repository</ulink>.
 
 <!-- ********** -->
 
-<sect2 id="arm">
-<title>ARM</title>
+<sect2 id="arm_linux">
+<title>ARM Linux</title>
 
 <para>
 <application>MPlayer</application> works on Linux PDAs with ARM CPU e.g. Sharp
