@@ -7,10 +7,10 @@
 <title>Linux</title>
 
 <para>
-The main development platform is Linux on x86, although
-<application>MPlayer</application> works on many other Linux ports.
 Binary packages of <application>MPlayer</application> are available from several
-sources.
+sources. We have a list of places to get
+<ulink url="http://www.mplayerhq.hu/design7/projects.html#unofficial_packages">unofficial packages</ulink>
+for various distributions on our homepage.
 However, <emphasis role="bold">none of these packages are supported</emphasis>.
 Report problems to the authors, not to us.
 </para>
@@ -45,13 +45,6 @@ As root you can then install the <filename>.deb</filename> package as usual:
 
 <screen>dpkg -i ../mplayer_<replaceable>version</replaceable>.deb</screen>
 </para>
-
-<para>
-Christian Marillat has been making unofficial Debian packages of
-<application>MPlayer</application>, <application>MEncoder</application> and
-our binary codec packages for a while, you can (apt-)get them from
-<ulink url="http://www.debian-multimedia.org/">his homepage</ulink>.
-</para>
 </sect2>
 
 <!-- ********** -->
@@ -63,15 +56,6 @@ our binary codec packages for a while, you can (apt-)get them from
 Dominik Mierzejewski maintains the official RPM packages of
 <application>MPlayer</application> for Fedora and CentOS/RHEL. They are available
 from <ulink url="http://rpmfusion.org/">RPMFusion repository</ulink>.
-</para>
-
-<para>
-Mandrake/Mandriva RPM packages are available from the
-<ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SUSE used to include a crippled version of <application>MPlayer</application>
-in their distribution. They have removed it in their latest releases. You can
-get working RPMs from
-<ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>
 
