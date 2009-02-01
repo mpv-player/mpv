@@ -26,6 +26,11 @@ answers.
 
 <itemizedlist>
 <listitem><para>
+  <emphasis role="bold">POSIX system</emphasis> - You need a POSIX-compatible
+  shell and POSIX-compatible system tools like grep, sed, awk, etc. in your
+  path.
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">GNU make</emphasis> 3.81 or later
 </para></listitem>
 <listitem><para>
