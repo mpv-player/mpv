@@ -2924,18 +2924,15 @@ cat > $TMPC << EOF
 #include <arpa/inet.h>
 int main(void) { (void) inet_pton(0, 0, 0); return 0; }
 EOF
-if cc_check $_ld_sock ; then
-  # NOTE: Linux has libresolv but does not need it
-  test $_ld_sock && _res_comment="using $_ld_sock"
-  inet_pton=yes
-  def_inet_pton='#define HAVE_INET_PTON 1'
-elif cc_check $_ld_sock -lresolv ; then
-  _ld_sock="$_ld_sock -lresolv"
-  _res_comment="using $_ld_sock"
-  inet_pton=yes
+for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
+  cc_check $_ld_tmp && inet_pton=yes && break
+done
+if test $inet_pton = yes ; then
+  test $_ld_tmp && _res_comment="using $_ld_tmp"
   def_inet_pton='#define HAVE_INET_PTON 1'
 fi
 echores "$inet_pton"
+
 
 echocheck "inet_aton()"
 def_inet_aton='#define HAVE_INET_ATON 0'
@@ -2946,16 +2943,12 @@ cat > $TMPC << EOF
 #include <arpa/inet.h>
 int main(void) { (void) inet_aton(0, 0); return 0; }
 EOF
-if cc_check $_ld_sock ; then
-  # NOTE: Linux has libresolv but does not need it
-  test $_ld_sock && _res_comment="using $_ld_sock"
+for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
+  cc_check $_ld_tmp && inet_aton=yes && break
+done
+if test $inet_aton = yes ; then
+  test $_ld_tmp && _res_comment="using $_ld_tmp"
   def_inet_aton='#define HAVE_INET_ATON 1'
-  inet_aton=yes
-elif cc_check $_ld_sock -lresolv ; then
-  _ld_sock="$_ld_sock -lresolv"
-  _res_comment="using $_ld_sock"
-  def_inet_aton='#define HAVE_INET_ATON 1'
-  inet_aton=yes
 fi
 echores "$inet_aton"
 
