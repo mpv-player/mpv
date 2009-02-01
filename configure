@@ -6364,7 +6364,7 @@ if test "$_faac" = yes ; then
 else
   _faac_lavc=no
   _def_faac="#undef CONFIG_FAAC"
-  _def_faac_lavc="#undef CONFIG_LIBFAAC"
+  _def_faac_lavc="#define CONFIG_LIBFAAC 0"
   _nocodecmodules="faac $_nocodecmodules"
 fi
 _res_comment="in libavcodec: $_faac_lavc"
@@ -6923,7 +6923,7 @@ if test "$_xvid_lavc" = yes ; then
   _libavencoders="$_libavencoders LIBXVID_ENCODER"
 else
   _xvid_lavc=no
-  _def_xvid_lavc='#undef CONFIG_LIBXVID'
+  _def_xvid_lavc='#define CONFIG_LIBXVID 0'
 fi
 echores "$_xvid_lavc"
 
@@ -6956,7 +6956,7 @@ if test "$_x264" = yes ; then
 else
   _x264_lavc=no
   _def_x264='#undef CONFIG_X264'
-  _def_x264_lavc='#undef CONFIG_LIBX264'
+  _def_x264_lavc='#define CONFIG_LIBX264 0'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
 _res_comment="in libavcodec: $_x264_lavc"
@@ -6999,7 +6999,7 @@ if test "$_libdirac_lavc" = yes ; then
   _libavdecoders="$_libavdecoders LIBDIRAC_DECODER"
   _codecmodules="libdirac $_codecmodules"
 else
-  _def_libdirac_lavc='#undef CONFIG_LIBDIRAC'
+  _def_libdirac_lavc='#define CONFIG_LIBDIRAC 0'
   _nocodecmodules="libdirac $_nocodecmodules"
 fi
 echores "$_libdirac_lavc"
@@ -7031,7 +7031,7 @@ if test "$_libschroedinger_lavc" = yes ; then
   _libavdecoders="$_libavdecoders LIBSCHROEDINGER_DECODER"
   _codecmodules="libschroedinger $_codecmodules"
 else
-  _def_libschroedinger_lavc='#undef CONFIG_LIBSCHROEDINGER'
+  _def_libschroedinger_lavc='#define CONFIG_LIBSCHROEDINGER 0'
   _nocodecmodules="libschroedinger $_nocodecmodules"
 fi
 echores "$_libschroedinger_lavc"
@@ -7122,7 +7122,7 @@ EOF
 else
   _mp3lame_lavc=no
   _def_mp3lame='#undef CONFIG_MP3LAME'
-  _def_mp3lame_lavc="#undef CONFIG_LIBMP3LAME"
+  _def_mp3lame_lavc="#define CONFIG_LIBMP3LAME 0"
 fi
 _res_comment="in libavcodec: $_mp3lame_lavc"
 echores "$_mp3lame"
