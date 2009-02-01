@@ -53,9 +53,10 @@ As root you can then install the <filename>.deb</filename> package as usual:
 <title>RPM packaging</title>
 
 <para>
-Dominik Mierzejewski maintains the official RPM packages of
-<application>MPlayer</application> for Fedora and CentOS/RHEL. They are available
-from <ulink url="http://rpmfusion.org/">RPMFusion repository</ulink>.
+To build an RPM package, run the following command in the
+<application>MPlayer</application> source directory:
+
+<screen>FIXME: insert proper commands here</screen>
 </para>
 </sect2>
 
