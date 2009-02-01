@@ -635,11 +635,9 @@ Instructions and files for making SDL run under
 <title><application>MinGW</application></title>
 
 <para>
-Installing a version of <application>MinGW</application> that could
-compile <application>MPlayer</application> used to be quite tricky, but it
-works out of the box now. Just install <application>MinGW</application>
-3.1.0 or later and MSYS 1.0.9 or later and tell the MSYS postinstall that
-<application>MinGW</application> is installed.
+You need <application>MinGW</application> 3.1.0 or later and MSYS 1.0.9 or
+later. Tell the MSYS postinstall that <application>MinGW</application> is
+installed.
 </para>
 
 <para>
