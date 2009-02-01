@@ -26,13 +26,13 @@ answers.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - recommended version is
-  <emphasis role="bold">2.11.x</emphasis>.
+  <emphasis role="bold">binutils</emphasis> - GNU binutils 2.11 or later
+  is known to work.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - recommended versions are 2.95
-  and 3.4+. 2.96 and 3.0.x are known to generate faulty code, 3.1 and
-  3.2 also had problems, 3.3 some minor ones. On PowerPC, use 4.x.
+  <emphasis role="bold">compiler</emphasis> - We mostly use gcc, the
+  recommended versions on x86 are 2.95 and 3.4+. On PowerPC, use 4.x+.
+  icc 10.1+ is also known to work.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Xorg/XFree86</emphasis> - recommended version is
