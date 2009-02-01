@@ -110,11 +110,6 @@ available that are probably easier to use than our raw sources.
 </para>
 
 <para>
-To build <application>MPlayer</application> you will need GNU make
-(gmake - native BSD make will not work) and a recent version of binutils.
-</para>
-
-<para>
 If <application>MPlayer</application> complains about not finding
 <filename>/dev/cdrom</filename> or <filename>/dev/dvd</filename>,
 create an appropriate symbolic link:
@@ -221,17 +216,6 @@ installed.
   result in very poor MPlayer performance.
 </para></listitem>
 </itemizedlist>
-
-<para>
-To build the package you will need GNU <application>make</application>
-(<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), native
-Solaris make will not work. Typical error you get when building with
-Solaris' make instead of GNU make:
-<screen>
-% /usr/ccs/bin/make
-make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
-</screen>
-</para>
 
 <para>
 On Solaris SPARC, you need the GNU C/C++ Compiler; it does not matter if
@@ -378,7 +362,7 @@ work out of the box. The following information is taken from this HOWTO.
 </para>
 
 <para>
-You need GCC 3.4.0 or later, GNU make 3.80 or later and SDL 1.2.7 or later.
+You need GCC 3.4.0 or later and SDL 1.2.7 or later.
 HP cc will not produce a working program, prior GCC versions are buggy.
 For OpenGL functionality you need to install Mesa and the gl and gl2 video
 output drivers should work, speed may be very bad, depending on the CPU speed,
@@ -487,13 +471,6 @@ Segmentation fault<!--
 untested. It is highly recommended that you build
 <application>MPlayer</application> using GCC 3.4 or greater,
 or if you are building on POWER5, GCC 4.0 is required.
-</para>
-
-<para>
-Ensure that you are using GNU make
-(<filename>/opt/freeware/bin/gmake</filename>) to build
-<application>MPlayer</application>, as you will encounter problems if
-you use <filename>/usr/ccs/bin/make</filename>.
 </para>
 
 <para>
