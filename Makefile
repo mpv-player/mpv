@@ -903,7 +903,7 @@ install-mencoder-man-en: install-mplayer-man-en
 
 install-mplayer-man-en:
 	$(INSTALL) -d $(MANDIR)/man1
-	$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
+	$(INSTALL) -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
 
 define MENCODER_MAN_RULE
 install-mencoder-man-$(lang): install-mplayer-man-$(lang)
@@ -913,7 +913,7 @@ endef
 define MPLAYER_MAN_RULE
 install-mplayer-man-$(lang):
 	$(INSTALL) -d $(MANDIR)/$(lang)/man1
-	$(INSTALL) -c -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
+	$(INSTALL) -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
 
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MENCODER_MAN_RULE)))
