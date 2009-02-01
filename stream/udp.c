@@ -91,15 +91,13 @@ udp_open_socket (URL_t *url)
   }
   else
   {
-#if !HAVE_WINSOCK2_H
-#if HAVE_INET_ATON
-    inet_aton (url->hostname, &server_address.sin_addr);
-#else
+#if HAVE_INET_PTON
     inet_pton (AF_INET, url->hostname, &server_address.sin_addr);
-#endif /* HAVE_INET_ATON */
-#else
+#elif HAVE_INET_ATON
+    inet_aton (url->hostname, &server_address.sin_addr);
+#elif !HAVE_WINSOCK2_H
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-#endif /* HAVE_WINSOCK2_H */
+#endif
   }
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons (url->port);

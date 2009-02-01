@@ -115,13 +115,11 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	
 	memset(&server_address, 0, sizeof(server_address));
 	
-#if !HAVE_WINSOCK2_H
-#if HAVE_INET_ATON
-	if (inet_aton(host, our_s_addr)!=1)
-#else
+#if HAVE_INET_PTON
 	if (inet_pton(af, host, our_s_addr)!=1)
-#endif
-#else
+#elif HAVE_INET_ATON
+	if (inet_aton(host, our_s_addr)!=1)
+#elif HAVE_WINSOCK2_H
 	if ( inet_addr(host)==INADDR_NONE )
 #endif
 	{

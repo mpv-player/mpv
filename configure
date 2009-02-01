@@ -2915,59 +2915,49 @@ else
 fi
 
 
-_use_aton=no
 echocheck "inet_pton()"
+def_inet_pton='#define HAVE_INET_PTON 0'
+inet_pton=no
 cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 int main(void) { (void) inet_pton(0, 0, 0); return 0; }
 EOF
-if test "$_winsock2_h" = yes ; then
-    _res_comment="using winsock2 functions instead"
-    echores "no"
-elif cc_check $_ld_sock ; then
+if cc_check $_ld_sock ; then
   # NOTE: Linux has libresolv but does not need it
-  :
   test $_ld_sock && _res_comment="using $_ld_sock"
-  echores "yes"
+  inet_pton=yes
+  def_inet_pton='#define HAVE_INET_PTON 1'
 elif cc_check $_ld_sock -lresolv ; then
-  # NOTE: needed for SunOS at least
   _ld_sock="$_ld_sock -lresolv"
   _res_comment="using $_ld_sock"
-  echores "yes"
-else
-  _res_comment="trying inet_aton next"
-  echores "no"
+  inet_pton=yes
+  def_inet_pton='#define HAVE_INET_PTON 1'
+fi
+echores "$inet_pton"
 
   echocheck "inet_aton()"
+def_inet_aton='#define HAVE_INET_ATON 0'
+inet_aton=no
   cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 int main(void) { (void) inet_aton(0, 0); return 0; }
 EOF
-  _use_aton=yes
   if cc_check $_ld_sock ; then
       # NOTE: Linux has libresolv but does not need it
-    :
     test $_ld_sock && _res_comment="using $_ld_sock"
+    def_inet_aton='#define HAVE_INET_ATON 1'
+    inet_aton=yes
   elif cc_check $_ld_sock -lresolv ; then
-    # NOTE: needed for SunOS at least
     _ld_sock="$_ld_sock -lresolv"
     _res_comment="using $_ld_sock"
-  else
-    _use_aton=no
-    _network=no
-    _res_comment="network support disabled"
+    def_inet_aton='#define HAVE_INET_ATON 1'
+    inet_aton=yes
   fi
-  echores "$_use_aton"
-fi
-
-_def_inet_aton='#define HAVE_INET_ATON 0'
-if test "$_use_aton" = yes; then
-  _def_inet_aton='#define HAVE_INET_ATON 1'
-fi
+echores "$inet_aton"
 
 
 echocheck "socklen_t"
@@ -3003,7 +2993,8 @@ echores "$_closesocket"
 
 
 echocheck "network"
-# FIXME network check
+test $_winsock2_h = no && test $inet_pton = no &&
+  test $inet_aton = no && _network=no
 if test "$_network" = yes ; then
   _def_network='#define CONFIG_NETWORK 1'
   _ld_extra="$_ld_extra $_ld_sock"
@@ -8483,7 +8474,8 @@ $_def_fribidi
 $_def_closesocket
 $_def_ftp
 $_def_inet6
-$_def_inet_aton
+$def_inet_aton
+$def_inet_pton
 $_def_live
 $_def_nemesi
 $_def_network

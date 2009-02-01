@@ -297,13 +297,11 @@ rtp_connect (char *hostname, int port)
   if (!hostname || !strcmp (hostname, "0.0.0.0"))
     sin.sin_addr.s_addr = htonl (INADDR_ANY);
   else
-#if !HAVE_WINSOCK2_H
-#if HAVE_INET_ATON
-    inet_aton (hostname, &sin.sin_addr);
-#else
+#if HAVE_INET_PTON
     inet_pton (AF_INET, hostname, &sin.sin_addr);
-#endif
-#else
+#elif HAVE_INET_ATON
+    inet_aton (hostname, &sin.sin_addr);
+#elif HAVE_WINSOCK2_H
     sin.sin_addr.s_addr = htonl (INADDR_ANY);
 #endif
   sin.sin_port = htons (port);
@@ -386,13 +384,11 @@ is_multicast_address (char *addr)
   
   sin.sin_family = AF_INET;
 
-#if !HAVE_WINSOCK2_H
-#if HAVE_INET_ATON
-    inet_aton (addr, &sin.sin_addr);
-#else
+#if HAVE_INET_PTON
     inet_pton (AF_INET, addr, &sin.sin_addr);
-#endif
-#else
+#elif HAVE_INET_ATON
+    inet_aton (addr, &sin.sin_addr);
+#elif HAVE_WINSOCK2_H
     sin.sin_addr.s_addr = htonl (INADDR_ANY);
 #endif
   
