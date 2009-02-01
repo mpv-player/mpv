@@ -330,34 +330,6 @@ you may not be able to play DVD discs larger than 4 GB:
 
 <!-- ********** -->
 
-<sect2 id="irix">
-<title>IRIX</title>
-
-<para>
-You can either try to install the GNU install program, and (if you did
-not put it in your global path) then point to the location with:
-<screen>
-./configure --with-install=<replaceable>/path/and/name/of/install</replaceable>
-</screen>
-</para>
-
-<para>
-Or you can use the default install delivered with IRIX 6.5 in which case
-you will have to edit the <filename>Makefile</filename> by hand a little bit.
-Change the line:
-<programlisting>
-$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-</programlisting>
-to:
-<programlisting>
-$(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-</programlisting>
-and then go on with building and installing.
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="hp-ux">
 <title>HP-UX</title>
 
