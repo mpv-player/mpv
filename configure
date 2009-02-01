@@ -2937,26 +2937,26 @@ elif cc_check $_ld_sock -lresolv ; then
 fi
 echores "$inet_pton"
 
-  echocheck "inet_aton()"
+echocheck "inet_aton()"
 def_inet_aton='#define HAVE_INET_ATON 0'
 inet_aton=no
-  cat > $TMPC << EOF
+cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 int main(void) { (void) inet_aton(0, 0); return 0; }
 EOF
-  if cc_check $_ld_sock ; then
-      # NOTE: Linux has libresolv but does not need it
-    test $_ld_sock && _res_comment="using $_ld_sock"
-    def_inet_aton='#define HAVE_INET_ATON 1'
-    inet_aton=yes
-  elif cc_check $_ld_sock -lresolv ; then
-    _ld_sock="$_ld_sock -lresolv"
-    _res_comment="using $_ld_sock"
-    def_inet_aton='#define HAVE_INET_ATON 1'
-    inet_aton=yes
-  fi
+if cc_check $_ld_sock ; then
+  # NOTE: Linux has libresolv but does not need it
+  test $_ld_sock && _res_comment="using $_ld_sock"
+  def_inet_aton='#define HAVE_INET_ATON 1'
+  inet_aton=yes
+elif cc_check $_ld_sock -lresolv ; then
+  _ld_sock="$_ld_sock -lresolv"
+  _res_comment="using $_ld_sock"
+  def_inet_aton='#define HAVE_INET_ATON 1'
+  inet_aton=yes
+fi
 echores "$inet_aton"
 
 
