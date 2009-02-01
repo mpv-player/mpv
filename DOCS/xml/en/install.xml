@@ -26,6 +26,9 @@ answers.
 
 <itemizedlist>
 <listitem><para>
+  <emphasis role="bold">GNU make</emphasis> 3.81 or later
+</para></listitem>
+<listitem><para>
   <emphasis role="bold">binutils</emphasis> - GNU binutils 2.11 or later
   is known to work.
 </para></listitem>
@@ -40,9 +43,6 @@ answers.
   <emphasis role="bold">development packages</emphasis> are installed,
   too, otherwise it won't work.
   You don't absolutely need X, some video output drivers work without it.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">GNU make</emphasis> 3.81
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - 2.0.9 or later is required
