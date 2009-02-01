@@ -489,6 +489,23 @@ Messages in the GTK-2 interface will be broken then.<!--
 </listitem>
 </itemizedlist>
 </sect2>
+
+<!-- ********** -->
+
+<sect2 id="qnx">
+<title>QNX</title>
+
+<para>
+You'll need to download and install SDL for QNX. Then run
+<application>MPlayer</application> with <option>-vo sdl:driver=photon</option>
+and <option>-ao sdl:nto</option> options, it should be fast.
+</para>
+
+<para>
+The <option>-vo x11</option> output will be even slower than on Linux,
+since QNX has only X <emphasis>emulation</emphasis> which is very slow.
+</para>
+</sect2>
 </sect1>
 
 
@@ -816,38 +833,6 @@ with the ready to use binary.
 You can also use the <application>Xcode</application> 2.1 project;
 the old project for <application>Xcode</application> 1.x does
 not work anymore.
-</para>
-</sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
-<sect1 id="exotic_platforms">
-<title>Exotic Platforms</title>
-
-<para>
-<application>MPlayer</application> runs on a number of exotic platforms,
-but most of the platform-specific changes from those systems have not been
-merged back into the main source tree.
-For build instructions you should refer to the system-specific documentation.
-</para>
-
-<!-- ********** -->
-
-<sect2 id="qnx">
-<title>QNX</title>
-
-<para>
-You'll need to download and install SDL for QNX. Then run
-<application>MPlayer</application> with <option>-vo sdl:driver=photon</option>
-and <option>-ao sdl:nto</option> options, it should be fast.
-</para>
-
-<para>
-The <option>-vo x11</option> output will be even slower than on Linux,
-since QNX has only X <emphasis>emulation</emphasis> which is very slow.
 </para>
 </sect2>
 </sect1>
