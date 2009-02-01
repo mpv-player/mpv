@@ -3,17 +3,17 @@
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
-<sect1 id="linux">
-<title>Linux</title>
-
 <para>
 Binary packages of <application>MPlayer</application> are available from several
 sources. We have a list of places to get
 <ulink url="http://www.mplayerhq.hu/design7/projects.html#unofficial_packages">unofficial packages</ulink>
-for various distributions on our homepage.
+for various systems on our homepage.
 However, <emphasis role="bold">none of these packages are supported</emphasis>.
 Report problems to the authors, not to us.
 </para>
+
+<sect1 id="linux">
+<title>Linux</title>
 
 <!-- ********** -->
 
