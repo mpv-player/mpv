@@ -113,6 +113,7 @@ static int lavc_param_bit_exact = 0;
 static int lavc_param_aic= 0;
 static int lavc_param_aiv= 0;
 static int lavc_param_umv= 0;
+static int lavc_param_gmc= 0;
 static int lavc_param_obmc= 0;
 static int lavc_param_loop= 0;
 static int lavc_param_last_pred= 0;
@@ -282,6 +283,9 @@ m_option_t lavcopts_conf[]={
 #endif
 #ifdef CODEC_FLAG_CLOSED_GOP
 	{"cgop", &lavc_param_closed_gop, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_CLOSED_GOP, NULL},
+#endif
+#ifdef CODEC_FLAG_GMC
+	{"gmc", &lavc_param_gmc, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_GMC, NULL},
 #endif
 	{"dc", &lavc_param_dc_precision, CONF_TYPE_INT, CONF_RANGE, 8, 11, NULL},
 	{"border_mask", &lavc_param_border_masking, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
@@ -555,6 +559,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->flags|= lavc_param_ss;
     lavc_venc_context->flags|= lavc_param_alt;
     lavc_venc_context->flags|= lavc_param_ilme;
+    lavc_venc_context->flags|= lavc_param_gmc;
 #ifdef CODEC_FLAG_CLOSED_GOP
     lavc_venc_context->flags|= lavc_param_closed_gop;
 #endif    
