@@ -2053,7 +2053,7 @@ EOF
 
   ppc|ppc64|powerpc|powerpc64)
     _arch='PPC'
-    _def_dcbzl='#undef HAVE_DCBZL'
+    _def_dcbzl='#define HAVE_DCBZL 0'
     _target_arch='ARCH_PPC = yes'
     _def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
