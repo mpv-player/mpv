@@ -1325,7 +1325,7 @@ struct mp_osd_msg {
     /// Previous message on the stack.
     mp_osd_msg_t* prev;
     /// Message text.
-    char msg[64];
+    char msg[128];
     int  id,level,started;
     /// Display duration in ms.
     unsigned  time;
@@ -1362,9 +1362,9 @@ void set_osd_msg(int id, int level, int time, const char* fmt, ...) {
     }
     // write the msg
     va_start(va,fmt);
-    r = vsnprintf(msg->msg, 64, fmt, va);
+    r = vsnprintf(msg->msg, 128, fmt, va);
     va_end(va);
-    if(r >= 64) msg->msg[63] = 0;
+    if(r >= 128) msg->msg[127] = 0;
     // set id and time
     msg->id = id;
     msg->level = level;
@@ -1505,8 +1505,8 @@ void set_osd_bar(int type,const char* name,double min,double max,double val) {
 
 static void update_osd_msg(void) {
     mp_osd_msg_t *msg;
-    static char osd_text[64] = "";
-    static char osd_text_timer[64];
+    static char osd_text[128] = "";
+    static char osd_text_timer[128];
     
     // we need some mem for vo_osd_text
     vo_osd_text = (unsigned char*)osd_text;
@@ -1514,7 +1514,7 @@ static void update_osd_msg(void) {
     // Look if we have a msg
     if((msg = get_osd_msg())) {
         if(strcmp(osd_text,msg->msg)) {
-            strncpy((char*)osd_text, msg->msg, 63);
+            strncpy((char*)osd_text, msg->msg, 127);
             if(mpctx->sh_video) vo_osd_changed(OSDTYPE_OSD); else 
             if(term_osd) mp_msg(MSGT_CPLAYER,MSGL_STATUS,"%s%s\n",term_osd_esc,msg->msg);
         }
