@@ -351,12 +351,12 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
           while (1)
             {
               int srclen = *size;
-              if (dstlen > SIZE_MAX - LZO_OUTPUT_PADDING) goto lzo_fail;
-              *dest = realloc (*dest, dstlen + LZO_OUTPUT_PADDING);
-              result = lzo1x_decode (*dest, &dstlen, src, &srclen);
+              if (dstlen > SIZE_MAX - AV_LZO_OUTPUT_PADDING) goto lzo_fail;
+              *dest = realloc (*dest, dstlen + AV_LZO_OUTPUT_PADDING);
+              result = av_lzo1x_decode (*dest, &dstlen, src, &srclen);
               if (result == 0)
                 break;
-              if (!(result & LZO_OUTPUT_FULL))
+              if (!(result & AV_LZO_OUTPUT_FULL))
                 {
 lzo_fail:
                   mp_msg (MSGT_DEMUX, MSGL_WARN,
@@ -859,7 +859,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
 	    // audit: cheap guard against overflows later..
 	    if (num > SIZE_MAX - 1000) return 0;
             l = x + num;
-            track->private_data = malloc (num + LZO_INPUT_PADDING);
+            track->private_data = malloc (num + AV_LZO_INPUT_PADDING);
             if (stream_read(s, track->private_data, num) != (int) num)
               goto err_out;
             track->private_size = num;
@@ -2875,8 +2875,8 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                 case MATROSKA_ID_BLOCK:
                   block_length = ebml_read_length (s, &tmp);
                   free(block);
-                  if (block_length > SIZE_MAX - LZO_INPUT_PADDING) return 0;
-                  block = malloc (block_length + LZO_INPUT_PADDING);
+                  if (block_length > SIZE_MAX - AV_LZO_INPUT_PADDING) return 0;
+                  block = malloc (block_length + AV_LZO_INPUT_PADDING);
                   demuxer->filepos = stream_tell (s);
                   if (stream_read (s,block,block_length) != (int) block_length)
                   {
