@@ -56,7 +56,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		int in_len = encodedh->packetlength;
 #ifdef KEEP_BUFFER		
 		if (!previous_buffer) 
-			previous_buffer = ( unsigned char * ) malloc ( out_len + LZO_OUTPUT_PADDING );
+			previous_buffer = ( unsigned char * ) malloc ( out_len + AV_LZO_OUTPUT_PADDING );
 #endif
 
 		switch(encodedh->comptype)
@@ -69,7 +69,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			break;
 		    case '2': /* RTJpeg with LZO */
 			if (!buffer) 
-			    buffer = ( unsigned char * ) malloc ( out_len + LZO_OUTPUT_PADDING );
+			    buffer = ( unsigned char * ) malloc ( out_len + AV_LZO_OUTPUT_PADDING );
 			if (!buffer)
 			{
 			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
