@@ -56,7 +56,7 @@ static struct global_priv {
                                 0 = Movie is not paused */
     int is_clear_needed;        /**< 1 = Clear the backbuffer before StretchRect
                                 0 = (default) Don't clear it */
-    D3DLOCKED_RECT locked_rect; /**< The locked Offscreen surface */
+    D3DLOCKED_RECT locked_rect; /**< The locked offscreen surface */
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
     RECT fs_panscan_rect;       /**< PanScan source surface cropping in
@@ -273,10 +273,10 @@ static int create_d3d_surfaces(void)
 
     // make sure we respect the size limits without breaking aspect or pow2-requirements
     while (tex_width > priv->max_texture_width || tex_height > priv->max_texture_height) {
-      osd_width  >>= 1;
-      osd_height >>= 1;
-      tex_width  >>= 1;
-      tex_height >>= 1;
+        osd_width  >>= 1;
+        osd_height >>= 1;
+        tex_width  >>= 1;
+        tex_height >>= 1;
     }
 
     priv->osd_width  = osd_width;
@@ -437,7 +437,7 @@ static int configure_d3d(void)
     if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device,
                                             &vp))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to set the viewport\n");
-        return VO_ERROR;
+        return 0;
     }
 
     calc_fs_rect();
@@ -468,7 +468,7 @@ static int reconfigure_d3d(void)
     priv->d3d_handle = Direct3DCreate9(D3D_SDK_VERSION);
     if (!priv->d3d_handle) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to initialize Direct3D\n");
-        return -1;
+        return 0;
     }
 
     /* Configure Direct3D */
@@ -492,7 +492,8 @@ static int resize_d3d(void)
 
     if (vo_dwidth > priv->cur_backbuf_width ||
         vo_dheight > priv->cur_backbuf_height) {
-        change_d3d_backbuffer (BACKBUFFER_RESET);
+        if (!change_d3d_backbuffer(BACKBUFFER_RESET))
+            return 0;
     }
 
     /* Destroy the OSD textures. They should always match the new dimensions
@@ -519,7 +520,7 @@ static int resize_d3d(void)
     if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device,
                                             &vp))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to set the viewport\n");
-        return VO_ERROR;
+        return 0;
     }
 
     calc_fs_rect();
@@ -564,6 +565,11 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
     /* Uncomment when direct rendering is implemented.
      * if (mpi->flags & MP_IMGFLAG_DIRECT) ...
      */
+
+    /* If the D3D device is uncooperative (not initialized), return success.
+       The device will be probed for reinitialization in the next flip_page() */
+    if (!priv->d3d_device)
+        return VO_TRUE;
 
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         goto skip_upload;
@@ -857,21 +863,16 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 static void flip_page(void)
 {
     RECT rect = {0, 0, vo_dwidth, vo_dheight};
-    if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
+    if (!priv->d3d_device ||
+        FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
         mp_msg(MSGT_VO, MSGL_V,
-               "<vo_direct3d>Video adapter became uncooperative.\n");
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Trying to reinitialize it...\n");
+               "<vo_direct3d>Trying to reinitialize uncooperative video adapter.\n");
         if (!reconfigure_d3d()) {
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization Failed.\n");
-            return;
-        }
-        if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization Failed.\n");
+            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
             return;
         }
         else
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Video adapter reinitialized.\n");
-
     }
 }
 
@@ -913,6 +914,11 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
     char *my_src;   /**< Pointer to the source image */
     char *dst;      /**< Pointer to the destination image */
     int  uv_stride; /**< Stride of the U/V planes */
+
+    /* If the D3D device is uncooperative (not initialized), return success.
+       The device will be probed for reinitialization in the next flip_page() */
+    if (!priv->d3d_device)
+        return 0;
 
     /* Lock the offscreen surface if it's not already locked. */
     if (!priv->locked_rect.pBits) {
@@ -1022,6 +1028,10 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
  */
 static void draw_osd(void)
 {
+    // we can not render OSD if we lost the device e.g. because it was uncooperative
+    if (!priv->d3d_device)
+        return;
+
     if (vo_osd_changed(0)) {
         D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
                                          to copy MPlayer's frame inside it.*/

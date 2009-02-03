@@ -31,7 +31,7 @@
 #include <sys/time.h>
 #include <ctype.h>
 
-#ifndef HAVE_WINSOCK2_H
+#if !HAVE_WINSOCK2_H
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -74,7 +74,7 @@ udp_open_socket (URL_t *url)
 
   if (isalpha (url->hostname[0]))
   {
-#ifndef HAVE_WINSOCK2_H
+#if !HAVE_WINSOCK2_H
     hp = (struct hostent *) gethostbyname (url->hostname);
     if (!hp)
     {
@@ -91,15 +91,13 @@ udp_open_socket (URL_t *url)
   }
   else
   {
-#ifndef HAVE_WINSOCK2_H
-#ifdef HAVE_ATON
-    inet_aton (url->hostname, &server_address.sin_addr);
-#else
+#if HAVE_INET_PTON
     inet_pton (AF_INET, url->hostname, &server_address.sin_addr);
-#endif /* HAVE_ATON */
-#else
+#elif HAVE_INET_ATON
+    inet_aton (url->hostname, &server_address.sin_addr);
+#elif !HAVE_WINSOCK2_H
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-#endif /* HAVE_WINSOCK2_H */
+#endif
   }
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons (url->port);
@@ -110,7 +108,7 @@ udp_open_socket (URL_t *url)
   if (bind (socket_server_fd, (struct sockaddr *) &server_address,
             sizeof (server_address)) == -1)
   {
-#ifndef HAVE_WINSOCK2_H
+#if !HAVE_WINSOCK2_H
     if (errno != EINPROGRESS)
 #else
     if (WSAGetLastError () != WSAEINPROGRESS)
@@ -122,7 +120,7 @@ udp_open_socket (URL_t *url)
     }
   }
 	
-#ifdef HAVE_WINSOCK2_H
+#if HAVE_WINSOCK2_H
   if (isalpha (url->hostname[0]))
   {
     hp = (struct hostent *) gethostbyname (url->hostname);

@@ -16,6 +16,8 @@ Also read the man page to learn how to use MPlayer.
 
 
 Requirements:
+- POSIX system: You need a POSIX-compatible shell and POSIX-compatible system
+  tools like grep, sed, awk, etc. in your path.
 - You need a working development environment that can compile programs.
   On popular Linux distributions, this means having the glibc development
   package(s) installed.

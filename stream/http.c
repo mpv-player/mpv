@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifndef HAVE_WINSOCK2_H
+#if !HAVE_WINSOCK2_H
 #else
 #include <winsock2.h>
 #include <ws2tcpip.h>

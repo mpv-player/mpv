@@ -12,7 +12,7 @@
 #include <sys/types.h>
 
 #include "config.h"
-#ifndef HAVE_WINSOCK2_H
+#if !HAVE_WINSOCK2_H
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -22,10 +22,10 @@
 #include "url.h"
 #include "http.h"
 
-#ifndef HAVE_CLOSESOCKET
+#if !HAVE_CLOSESOCKET
 #define closesocket close
 #endif
-#ifndef HAVE_SOCKLEN_T
+#if !HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
 

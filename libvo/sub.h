@@ -50,7 +50,7 @@ typedef struct mp_osd_obj_s {
 } mp_osd_obj_t;
 
 struct osd_state {
-    unsigned char osd_text[64];
+    unsigned char osd_text[128];
     struct font_desc *sub_font;
 };
 

@@ -1310,7 +1310,7 @@ struct mp_osd_msg {
     /// Previous message on the stack.
     mp_osd_msg_t* prev;
     /// Message text.
-    char msg[64];
+    char msg[128];
     int  id,level,started;
     /// Display duration in ms.
     unsigned  time;
@@ -1347,9 +1347,9 @@ void set_osd_msg(int id, int level, int time, const char* fmt, ...) {
     }
     // write the msg
     va_start(va,fmt);
-    r = vsnprintf(msg->msg, 64, fmt, va);
+    r = vsnprintf(msg->msg, 128, fmt, va);
     va_end(va);
-    if(r >= 64) msg->msg[63] = 0;
+    if(r >= 128) msg->msg[127] = 0;
     // set id and time
     msg->id = id;
     msg->level = level;
@@ -1492,12 +1492,12 @@ static void update_osd_msg(struct MPContext *mpctx)
 {
     mp_osd_msg_t *msg;
     struct osd_state *osd = mpctx->osd;
-    char osd_text_timer[64];
+    char osd_text_timer[128];
     
     // Look if we have a msg
     if((msg = get_osd_msg(mpctx))) {
         if (strcmp(osd->osd_text, msg->msg)) {
-            strncpy(osd->osd_text, msg->msg, 63);
+            strncpy(osd->osd_text, msg->msg, 127);
             if(mpctx->sh_video) vo_osd_changed(OSDTYPE_OSD); else 
             if(term_osd) mp_msg(MSGT_CPLAYER,MSGL_STATUS,"%s%s\n",term_osd_esc,msg->msg);
         }
@@ -2283,8 +2283,8 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
     sh_video->pts = pts;
     if (sh_video->last_pts == MP_NOPTS_VALUE)
         sh_video->last_pts = sh_video->pts;
-    else if (sh_video->last_pts >= sh_video->pts) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Non-increasing video pts: %f <= %f\n",
+    else if (sh_video->last_pts > sh_video->pts) {
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Decreasing video pts: %f < %f\n",
                sh_video->pts, sh_video->last_pts);
         /* If the difference in pts is small treat it as jitter around the
          * right value (possibly caused by incorrect timestamp ordering) and

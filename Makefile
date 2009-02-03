@@ -873,8 +873,8 @@ vidix/%: CFLAGS += $(CFLAGS_DHAHELPER) $(CFLAGS_SVGALIB_HELPER)
 VIDIX_PCI_FILES = vidix/pci_dev_ids.c vidix/pci_ids.h vidix/pci_names.c \
                   vidix/pci_names.h vidix/pci_vendors.h
 
-$(VIDIX_PCI_FILES): vidix/pci.db vidix/pci_db2c.awk
-	awk -f vidix/pci_db2c.awk $< $(VIDIX_PCIDB)
+$(VIDIX_PCI_FILES): vidix/pci_db2c.awk vidix/pci.db
+	awk -f $^ $(VIDIX_PCIDB)
 
 VIDIX_DEPS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.d))
 VIDIX_OBJS = $(filter vidix/%,$(SRCS_MPLAYER:.c=.o))
@@ -909,7 +909,7 @@ install-mencoder-man-en: install-mplayer-man-en
 
 install-mplayer-man-en:
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
-	$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
+	$(INSTALL) -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
 
 define MENCODER_MAN_RULE
 install-mencoder-man-$(lang): install-mplayer-man-$(lang)
@@ -919,7 +919,7 @@ endef
 define MPLAYER_MAN_RULE
 install-mplayer-man-$(lang):
 	if test ! -d $(MANDIR)/$(lang)/man1 ; then $(INSTALL) -d $(MANDIR)/$(lang)/man1 ; fi
-	$(INSTALL) -c -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
+	$(INSTALL) -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
 
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MENCODER_MAN_RULE)))

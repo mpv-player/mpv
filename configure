@@ -197,7 +197,7 @@ case `echo -n` in
 esac
 
 msg_lang_all=`echo help/help_mp-??.h help/help_mp-??_??.h | sed -e "s:help/help_mp-\(..\).h:\1:g" -e "s:help/help_mp-\(.....\).h:\1:g"`
-man_lang_all=`echo DOCS/man/??/mplayer.1 | sed -e "s:DOCS/man/\(..\)/mplayer.1:\1:g"`
+man_lang_all=`echo DOCS/man/??/mplayer.1 DOCS/man/??_??/mplayer.1 | sed -e "s:DOCS/man/\(..\)/mplayer.1:\1:g" -e "s:DOCS/man/\(.._..\)/mplayer.1:\1:g"`
 doc_lang_all=`echo DOCS/xml/??/ DOCS/xml/??_??/ | sed -e "s:DOCS/xml/\(..\)/:\1:g" -e "s:DOCS/xml/\(.._..\)/:\1:g"`
 
 show_help(){
@@ -1690,6 +1690,7 @@ EOF
 fi
 
 
+def_fast_64bit='#define HAVE_FAST_64BIT 0'
 _arch_all='X86 X86_32 X86_64 IA64 SPARC ARM SH4 PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
@@ -2057,7 +2058,7 @@ EOF
 
   ppc|ppc64|powerpc|powerpc64)
     _arch='PPC'
-    _def_dcbzl='#undef HAVE_DCBZL'
+    _def_dcbzl='#define HAVE_DCBZL 0'
     _target_arch='ARCH_PPC = yes'
     _def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
@@ -2501,10 +2502,17 @@ else
   _have_yasm="no"
   echores "no"
 fi
+
+echocheck "bswap"
+def_bswap='#define HAVE_BSWAP 0'
+echo 'bswap %eax' > $TMPS
+$_as $TMPS -o $TMPEXE > /dev/null 2>&1 && def_bswap='#define HAVE_BSWAP 1' && bswap=yes || bswap=no
+echores "$bswap"
 fi #if x86
 
 
 #FIXME: This should happen before the check for CFLAGS..
+def_altivec_h='#define HAVE_ALTIVEC_H 0'
 if ppc && ( test "$_altivec" = yes || test "$_runtime_cpudetection" = yes ) ; then
 
     # check if AltiVec is supported by the compiler, and how to enable it
@@ -2515,7 +2523,6 @@ EOF
     if $(cc_check -maltivec -mabi=altivec) ; then
     _altivec_gcc_flags="-maltivec -mabi=altivec"
     # check if <altivec.h> should be included
-    def_altivec_h='#undef HAVE_ALTIVEC_H'
     cat > $TMPC << EOF
 #include <altivec.h>
 int main(void) { return 0; }
@@ -2617,7 +2624,7 @@ EOF
   echores "$_iwmmxt"
 fi
 
-_cpuexts_all='ALTIVEC BSWAP MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
+_cpuexts_all='ALTIVEC MMX MMX2 AMD3DNOW AMD3DNOWEXT SSE SSE2 SSSE3 FAST_CMOV CMOV PLD ARMV5TE ARMV6 ARMV6T2 ARMVFP IWMMXT MMI VIS MVI'
 test "$_altivec"   = yes && _cpuexts="ALTIVEC $_cpuexts"
 test "$_mmx"       = yes && _cpuexts="MMX $_cpuexts"
 test "$_mmxext"    = yes && _cpuexts="MMX2 $_cpuexts"
@@ -2636,9 +2643,6 @@ test "$_armvfp"    = yes && _cpuexts="ARMVFP $_cpuexts"
 test "$_iwmmxt"    = yes && _cpuexts="IWMMXT $_cpuexts"
 test "$_vis"       = yes && _cpuexts="VIS $_cpuexts"
 test "$_mvi"       = yes && _cpuexts="MVI $_cpuexts"
-if x86 ; then
-  _cpuexts="BSWAP $_cpuexts"
-fi
 
 # Checking kernel version...
 if x86_32 && linux ; then
@@ -2848,7 +2852,7 @@ if eval test "x\$_$func" = "xyes"; then
   eval _def_$func="\"#define HAVE_`echo $func | tr '[a-z]' '[A-Z]'` 1\""
   echores yes
 else
-  eval _def_$func="\"#undef HAVE_`echo $func | tr '[a-z]' '[A-Z]'`\""
+  eval _def_$func="\"#define HAVE_`echo $func | tr '[a-z]' '[A-Z]'` 0\""
   echores no
 fi
 done
@@ -2913,63 +2917,46 @@ if test $_winsock2_h = yes ; then
   _ld_sock="-lws2_32"
   def_winsock2_h='#define HAVE_WINSOCK2_H 1'
 else
-  def_winsock2_h='#undef HAVE_WINSOCK2_H'
+  def_winsock2_h='#define HAVE_WINSOCK2_H 0'
 fi
 
 
-_use_aton=no
 echocheck "inet_pton()"
+def_inet_pton='#define HAVE_INET_PTON 0'
+inet_pton=no
 cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 int main(void) { (void) inet_pton(0, 0, 0); return 0; }
 EOF
-if test "$_winsock2_h" = yes ; then
-    _res_comment="using winsock2 functions instead"
-    echores "no"
-elif cc_check $_ld_sock ; then
-  # NOTE: Linux has libresolv but does not need it
-  :
-  test $_ld_sock && _res_comment="using $_ld_sock"
-  echores "yes"
-elif cc_check $_ld_sock -lresolv ; then
-  # NOTE: needed for SunOS at least
-  _ld_sock="$_ld_sock -lresolv"
-  _res_comment="using $_ld_sock"
-  echores "yes"
-else
-  _res_comment="trying inet_aton next"
-  echores "no"
+for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
+  cc_check $_ld_tmp && inet_pton=yes && break
+done
+if test $inet_pton = yes ; then
+  test $_ld_tmp && _res_comment="using $_ld_tmp"
+  def_inet_pton='#define HAVE_INET_PTON 1'
+fi
+echores "$inet_pton"
 
-  echocheck "inet_aton()"
-  cat > $TMPC << EOF
+
+echocheck "inet_aton()"
+def_inet_aton='#define HAVE_INET_ATON 0'
+inet_aton=no
+cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 int main(void) { (void) inet_aton(0, 0); return 0; }
 EOF
-  _use_aton=yes
-  if cc_check $_ld_sock ; then
-      # NOTE: Linux has libresolv but does not need it
-    :
-    test $_ld_sock && _res_comment="using $_ld_sock"
-  elif cc_check $_ld_sock -lresolv ; then
-    # NOTE: needed for SunOS at least
-    _ld_sock="$_ld_sock -lresolv"
-    _res_comment="using $_ld_sock"
-  else
-    _use_aton=no
-    _network=no
-    _res_comment="network support disabled"
-  fi
-  echores "$_use_aton"
+for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
+  cc_check $_ld_tmp && inet_aton=yes && break
+done
+if test $inet_aton = yes ; then
+  test $_ld_tmp && _res_comment="using $_ld_tmp"
+  def_inet_aton='#define HAVE_INET_ATON 1'
 fi
-
-_def_use_aton='#undef HAVE_ATON'
-if test "$_use_aton" = yes; then
-  _def_use_aton='#define HAVE_ATON 1'
-fi
+echores "$inet_aton"
 
 
 echocheck "socklen_t"
@@ -2984,7 +2971,7 @@ done
 if test "$_socklen_t" = yes ; then
   _def_socklen_t='#define HAVE_SOCKLEN_T 1'
 else
-  _def_socklen_t='#undef HAVE_SOCKLEN_T'
+  _def_socklen_t='#define HAVE_SOCKLEN_T 0'
 fi
 echores "$_socklen_t"
 
@@ -2999,13 +2986,14 @@ cc_check $_ld_sock && _closesocket=yes
 if test "$_closesocket" = yes ; then
   _def_closesocket='#define HAVE_CLOSESOCKET 1'
 else
-  _def_closesocket='#undef HAVE_CLOSESOCKET'
+  _def_closesocket='#define HAVE_CLOSESOCKET 0'
 fi
 echores "$_closesocket"
 
 
 echocheck "network"
-# FIXME network check
+test $_winsock2_h = no && test $inet_pton = no &&
+  test $inet_aton = no && _network=no
 if test "$_network" = yes ; then
   _def_network='#define CONFIG_NETWORK 1'
   _ld_extra="$_ld_extra $_ld_sock"
@@ -3130,6 +3118,7 @@ echores "$_malloc"
 
 echocheck "memalign()"
 # XXX restrict to x86 ? extend to other CPUs/cacheline sizes ?
+_def_memalign_hack='#define CONFIG_MEMALIGN_HACK 0'
 cat > $TMPC << EOF
 #include <malloc.h>
 int main(void) { (void) memalign(64, sizeof(char)); return 0; }
@@ -3581,6 +3570,7 @@ echores "$_vsscanf"
 
 echocheck "swab()"
 cat > $TMPC << EOF
+#define _XOPEN_SOURCE
 #include <unistd.h>
 int main(void) { swab(0, 0, 0); return 0; }
 EOF
@@ -6368,7 +6358,7 @@ if test "$_faac" = yes ; then
 else
   _faac_lavc=no
   _def_faac="#undef CONFIG_FAAC"
-  _def_faac_lavc="#undef CONFIG_LIBFAAC"
+  _def_faac_lavc="#define CONFIG_LIBFAAC 0"
   _nocodecmodules="faac $_nocodecmodules"
 fi
 _res_comment="in libavcodec: $_faac_lavc"
@@ -6927,7 +6917,7 @@ if test "$_xvid_lavc" = yes ; then
   _libavencoders="$_libavencoders LIBXVID_ENCODER"
 else
   _xvid_lavc=no
-  _def_xvid_lavc='#undef CONFIG_LIBXVID'
+  _def_xvid_lavc='#define CONFIG_LIBXVID 0'
 fi
 echores "$_xvid_lavc"
 
@@ -6960,7 +6950,7 @@ if test "$_x264" = yes ; then
 else
   _x264_lavc=no
   _def_x264='#undef CONFIG_X264'
-  _def_x264_lavc='#undef CONFIG_LIBX264'
+  _def_x264_lavc='#define CONFIG_LIBX264 0'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
 _res_comment="in libavcodec: $_x264_lavc"
@@ -7003,7 +6993,7 @@ if test "$_libdirac_lavc" = yes ; then
   _libavdecoders="$_libavdecoders LIBDIRAC_DECODER"
   _codecmodules="libdirac $_codecmodules"
 else
-  _def_libdirac_lavc='#undef CONFIG_LIBDIRAC'
+  _def_libdirac_lavc='#define CONFIG_LIBDIRAC 0'
   _nocodecmodules="libdirac $_nocodecmodules"
 fi
 echores "$_libdirac_lavc"
@@ -7035,7 +7025,7 @@ if test "$_libschroedinger_lavc" = yes ; then
   _libavdecoders="$_libavdecoders LIBSCHROEDINGER_DECODER"
   _codecmodules="libschroedinger $_codecmodules"
 else
-  _def_libschroedinger_lavc='#undef CONFIG_LIBSCHROEDINGER'
+  _def_libschroedinger_lavc='#define CONFIG_LIBSCHROEDINGER 0'
   _nocodecmodules="libschroedinger $_nocodecmodules"
 fi
 echores "$_libschroedinger_lavc"
@@ -7126,7 +7116,7 @@ EOF
 else
   _mp3lame_lavc=no
   _def_mp3lame='#undef CONFIG_MP3LAME'
-  _def_mp3lame_lavc="#undef CONFIG_LIBMP3LAME"
+  _def_mp3lame_lavc="#define CONFIG_LIBMP3LAME 0"
 fi
 _res_comment="in libavcodec: $_mp3lame_lavc"
 echores "$_mp3lame"
@@ -8278,7 +8268,7 @@ $_def_fast_inttypes
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TYPES_H 1
 /* libdvdread */
-#define HAVE_UINTPTR_T 1
+#define HAVE_DLFCN_H 1
 
 
 /* system headers */
@@ -8307,7 +8297,6 @@ $_def_lrint
 $_def_lrintf
 $_def_map_memalign
 $_def_memalign
-$_def_memalign_hack
 $_def_nanosleep
 $_def_posix_select
 $_def_round
@@ -8494,12 +8483,13 @@ $_def_fribidi
 $_def_closesocket
 $_def_ftp
 $_def_inet6
+$def_inet_aton
+$def_inet_pton
 $_def_live
 $_def_nemesi
 $_def_network
 $_def_smb
 $_def_socklen_t
-$_def_use_aton
 $_def_vstream
 
 
@@ -8595,19 +8585,35 @@ $_def_libswscale
 $_def_libswscale_a
 $_def_libswscale_so
 
+$def_bswap
 $_def_dcbzl
 $def_fast_64bit
 $_def_fast_unaligned
+$_def_memalign_hack
 $def_mlib
 $_def_mkstemp
 $_def_pthreads
 $_def_threads
 $_def_yasm
 
+#define CONFIG_FASTDIV 0
+#define CONFIG_FFSERVER 0
 #define CONFIG_GPL 1
+#define CONFIG_HARDCODED_TABLES 0
+#define CONFIG_POSIX_MEMALIGN 0
+#define CONFIG_POWERPC_PERF 0
 #define CONFIG_SMALL 0
 #define CONFIG_SWSCALE 1
 #define CONFIG_GRAY 0
+
+#ifdef __MINGW32__
+#define HAVE_ARPA_INET_H 0
+#else
+#define HAVE_ARPA_INET_H 1
+#endif
+#define HAVE_DOS_PATHS 0
+#define HAVE_POLL_H 1
+#define HAVE_PPC4XX 0
 
 /* Some FFmpeg codecs depend on these. Enable them unconditionally for now. */
 #define CONFIG_AANDCT 1

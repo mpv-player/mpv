@@ -30,7 +30,7 @@
 
 #include <sys/types.h>
 #include "config.h"
-#ifndef HAVE_WINSOCK2_H
+#if !HAVE_WINSOCK2_H
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>

@@ -10,7 +10,7 @@
 #include "help_mp.h"
 #include "options.h"
 
-#ifdef HAVE_WINSOCK2_H
+#if HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
 
