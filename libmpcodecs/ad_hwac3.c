@@ -5,6 +5,7 @@
    (see http://www.dtek.chalmers.se/~dvd/)
 */
 
+#define _XOPEN_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

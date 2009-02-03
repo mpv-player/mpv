@@ -3564,6 +3564,7 @@ echores "$_vsscanf"
 
 echocheck "swab()"
 cat > $TMPC << EOF
+#define _XOPEN_SOURCE
 #include <unistd.h>
 int main(void) { swab(0, 0, 0); return 0; }
 EOF
