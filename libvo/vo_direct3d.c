@@ -56,7 +56,7 @@ static struct global_priv {
                                 0 = Movie is not paused */
     int is_clear_needed;        /**< 1 = Clear the backbuffer before StretchRect
                                 0 = (default) Don't clear it */
-    D3DLOCKED_RECT locked_rect; /**< The locked Offscreen surface */
+    D3DLOCKED_RECT locked_rect; /**< The locked offscreen surface */
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
     RECT fs_panscan_rect;       /**< PanScan source surface cropping in
@@ -273,10 +273,10 @@ static int create_d3d_surfaces(void)
 
     // make sure we respect the size limits without breaking aspect or pow2-requirements
     while (tex_width > priv->max_texture_width || tex_height > priv->max_texture_height) {
-      osd_width  >>= 1;
-      osd_height >>= 1;
-      tex_width  >>= 1;
-      tex_height >>= 1;
+        osd_width  >>= 1;
+        osd_height >>= 1;
+        tex_width  >>= 1;
+        tex_height >>= 1;
     }
 
     priv->osd_width  = osd_width;
