@@ -97,6 +97,7 @@ MPlayer (1.0)
     * Direct3D Windows video output driver added.
     * factorize code in vo_wii
     * removed unnecessary code from vo x11, xv, xvmc
+    * automatic detection of hw acceleration (vo gl:yuv=x) for vo_gl
 
     MEncoder:
     * check for system-wide configuration file in MEncoder
