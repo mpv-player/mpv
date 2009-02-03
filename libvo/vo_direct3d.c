@@ -860,19 +860,17 @@ static void flip_page(void)
     RECT rect = {0, 0, vo_dwidth, vo_dheight};
     if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
         mp_msg(MSGT_VO, MSGL_V,
-               "<vo_direct3d>Video adapter became uncooperative.\n");
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Trying to reinitialize it...\n");
+               "<vo_direct3d>Trying to reinitialize uncooperative video adapter.\n");
         if (!reconfigure_d3d()) {
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization Failed.\n");
+            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
             return;
         }
         if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization Failed.\n");
+            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
             return;
         }
         else
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Video adapter reinitialized.\n");
-
     }
 }
 
