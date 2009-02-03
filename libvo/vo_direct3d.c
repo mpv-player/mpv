@@ -492,7 +492,8 @@ static int resize_d3d(void)
 
     if (vo_dwidth > priv->cur_backbuf_width ||
         vo_dheight > priv->cur_backbuf_height) {
-        change_d3d_backbuffer (BACKBUFFER_RESET);
+        if (!change_d3d_backbuffer(BACKBUFFER_RESET))
+            return 0;
     }
 
     /* Destroy the OSD textures. They should always match the new dimensions
