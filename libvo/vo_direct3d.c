@@ -865,10 +865,6 @@ static void flip_page(void)
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
             return;
         }
-        if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
-            return;
-        }
         else
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Video adapter reinitialized.\n");
     }
