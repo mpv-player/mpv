@@ -437,7 +437,7 @@ static int configure_d3d(void)
     if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device,
                                             &vp))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to set the viewport\n");
-        return VO_ERROR;
+        return 0;
     }
 
     calc_fs_rect();
@@ -468,7 +468,7 @@ static int reconfigure_d3d(void)
     priv->d3d_handle = Direct3DCreate9(D3D_SDK_VERSION);
     if (!priv->d3d_handle) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to initialize Direct3D\n");
-        return -1;
+        return 0;
     }
 
     /* Configure Direct3D */
@@ -519,7 +519,7 @@ static int resize_d3d(void)
     if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device,
                                             &vp))) {
         mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Unable to set the viewport\n");
-        return VO_ERROR;
+        return 0;
     }
 
     calc_fs_rect();
