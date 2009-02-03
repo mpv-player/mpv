@@ -404,13 +404,22 @@ static void uninitGl(void) {
 static void autodetectGlExtensions(void) {
   const char *extensions = glGetString(GL_EXTENSIONS);
   const char *vendor     = glGetString(GL_VENDOR);
+  const char *version    = glGetString(GL_VERSION);
   int is_ati = strstr(vendor, "ATI") != NULL;
-  if (ati_hack      == -1) ati_hack      = is_ati;
+  int ati_broken_pbo = 0;
+  if (is_ati && strncmp(version, "2.1.", 4) == 0) {
+    int ver = atoi(version + 4);
+    mp_msg(MSGT_VO, MSGL_V, "[gl] Detected ATI driver version: %i\n", ver);
+    ati_broken_pbo = ver && ver < 8395;
+  }
+  if (ati_hack      == -1) ati_hack      = ati_broken_pbo;
   if (force_pbo     == -1) force_pbo     = strstr(extensions, "_pixel_buffer_object")      ? is_ati : 0;
   if (use_rectangle == -1) use_rectangle = strstr(extensions, "_texture_non_power_of_two") ?      0 : 0;
   if (is_ati && (lscale == 1 || lscale == 2 || cscale == 1 || cscale == 2))
     mp_msg(MSGT_VO, MSGL_WARN, "Selected scaling mode may be broken on ATI cards.\n"
              "Tell _them_ to fix GL_REPEAT if you have issues.\n");
+  mp_msg(MSGT_VO, MSGL_V, "[gl] Settings after autodetection: ati-hack = %i, force-pbo = %i, rectangle = %i\n",
+         ati_hack, force_pbo, use_rectangle);
 }
 
 /**
