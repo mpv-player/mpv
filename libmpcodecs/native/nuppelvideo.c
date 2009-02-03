@@ -75,7 +75,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
 			    break;
 			}
-			r = lzo1x_decode ( buffer, &out_len, encoded + 12, &in_len );
+			r = av_lzo1x_decode ( buffer, &out_len, encoded + 12, &in_len );
 			if ( r ) 
 			{
 			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
@@ -84,7 +84,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			RTjpeg_decompressYUV420 ( ( __s8 * ) buffer, decoded );
 			break;
 		    case '3': /* raw YUV420 with LZO */
-			r = lzo1x_decode ( decoded, &out_len, encoded + 12, &in_len );
+			r = av_lzo1x_decode ( decoded, &out_len, encoded + 12, &in_len );
 			if ( r ) 
 			{
 			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
