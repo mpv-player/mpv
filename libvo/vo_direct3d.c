@@ -566,6 +566,11 @@ static uint32_t render_d3d_frame(mp_image_t *mpi)
      * if (mpi->flags & MP_IMGFLAG_DIRECT) ...
      */
 
+    /* If the D3D device is uncooperative (not initialized), return success.
+       The device will be probed for reinitialization in the next flip_page() */
+    if (!priv->d3d_device)
+        return VO_TRUE;
+
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         goto skip_upload;
 
@@ -858,7 +863,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 static void flip_page(void)
 {
     RECT rect = {0, 0, vo_dwidth, vo_dheight};
-    if (FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
+    if (!priv->d3d_device ||
+        FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
         mp_msg(MSGT_VO, MSGL_V,
                "<vo_direct3d>Trying to reinitialize uncooperative video adapter.\n");
         if (!reconfigure_d3d()) {
@@ -908,6 +914,11 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
     char *my_src;   /**< Pointer to the source image */
     char *dst;      /**< Pointer to the destination image */
     int  uv_stride; /**< Stride of the U/V planes */
+
+    /* If the D3D device is uncooperative (not initialized), return success.
+       The device will be probed for reinitialization in the next flip_page() */
+    if (!priv->d3d_device)
+        return 0;
 
     /* Lock the offscreen surface if it's not already locked. */
     if (!priv->locked_rect.pBits) {
@@ -1017,6 +1028,10 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
  */
 static void draw_osd(void)
 {
+    // we can not render OSD if we lost the device e.g. because it was uncooperative
+    if (!priv->d3d_device)
+        return;
+
     if (vo_osd_changed(0)) {
         D3DLOCKED_RECT  locked_rect;   /**< Offscreen surface we lock in order
                                          to copy MPlayer's frame inside it.*/
