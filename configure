@@ -8591,7 +8591,11 @@ $_def_yasm
 #define CONFIG_SWSCALE 1
 #define CONFIG_GRAY 0
 
+#ifdef __MINGW32__
+#define HAVE_ARPA_INET_H 0
+#else
 #define HAVE_ARPA_INET_H 1
+#endif
 #define HAVE_DOS_PATHS 0
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
