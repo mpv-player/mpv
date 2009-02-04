@@ -935,7 +935,7 @@ clean:
 distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
 	rm -rf DOCS/tech/doxygen
 	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
-	rm -f configure.log config.mak config.h	codecs.conf.h help_mp.h \
+	rm -f configure.log config.mak config.h codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) \
            codec-cfg$(EXESUF) cpuinfo$(EXESUF) TAGS tags
 
