@@ -3,6 +3,12 @@
 # Missing messages are filled in from the master message file and, if
 # requested, character set conversion is performed.
 
+if test -z $2 ; then
+    echo "Error: missing parameters"
+    echo "Usage: $0 <messages file> <character set>"
+    exit 1
+fi
+
 MASTER=help/help_mp-en.h
 TARGET=help_mp.h
 
