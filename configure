@@ -718,6 +718,7 @@ _ass=auto
 _rpath=no
 _asmalign_pot=auto
 _stream_cache=yes
+def_dos_paths="#define HAVE_DOS_PATHS 0"
 _def_stream_cache="#define CONFIG_STREAM_CACHE 1"
 _def_pthread_cache="#undef PTHREAD_CACHE"
 _need_shmem=yes
@@ -1432,6 +1433,7 @@ if win32 ; then
   _ld_extra="$_ld_extra -lwinmm"
   _pe_executable=yes
   _timer=timer-win2.c
+  def_dos_paths="#define HAVE_DOS_PATHS 1"
 fi
 
 if mingw32 ; then
@@ -1454,6 +1456,7 @@ if os2 ; then
   _exesuf=".exe"
   _getch=getch2-os2.c
   _need_shmem=no
+  def_dos_paths="#define HAVE_DOS_PATHS 1"
 fi
 
 for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
@@ -8572,6 +8575,7 @@ $_def_libswscale_so
 
 $def_bswap
 $_def_dcbzl
+$def_dos_paths
 $def_fast_64bit
 $_def_fast_unaligned
 $_def_memalign_hack
@@ -8596,7 +8600,6 @@ $_def_yasm
 #else
 #define HAVE_ARPA_INET_H 1
 #endif
-#define HAVE_DOS_PATHS 0
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
 
