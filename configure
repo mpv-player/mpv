@@ -2918,6 +2918,17 @@ else
 fi
 
 
+echocheck "arpa/inet.h"
+arpa_inet_h=no
+def_arpa_inet_h='#define HAVE_ARPA_INET_H 0'
+cat > $TMPC << EOF
+#include <arpa/inet.h>
+int main(void) { return 0; }
+EOF
+cc_check && arpa_inet_h=yes && def_arpa_inet_h='#define HAVE_ARPA_INET_H 1'
+echores "$arpa_inet_h"
+
+
 echocheck "inet_pton()"
 def_inet_pton='#define HAVE_INET_PTON 0'
 inet_pton=no
@@ -8573,6 +8584,7 @@ $_def_libswscale
 $_def_libswscale_a
 $_def_libswscale_so
 
+$def_arpa_inet_h
 $def_bswap
 $_def_dcbzl
 $def_dos_paths
@@ -8595,11 +8607,6 @@ $_def_yasm
 #define CONFIG_SWSCALE 1
 #define CONFIG_GRAY 0
 
-#ifdef __MINGW32__
-#define HAVE_ARPA_INET_H 0
-#else
-#define HAVE_ARPA_INET_H 1
-#endif
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
 
