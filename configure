@@ -8569,7 +8569,6 @@ $_def_zr
 /* FFmpeg */
 $_def_libavcodec
 $_def_libavcodec_a
-$_def_libavcodec_mpegaudio_hp
 $_def_libavcodec_so
 $_def_libavformat
 $_def_libavformat_a
@@ -8584,12 +8583,18 @@ $_def_libswscale
 $_def_libswscale_a
 $_def_libswscale_so
 
+#define CONFIG_DECODERS 1
+#define CONFIG_ENCODERS 1
+#define CONFIG_DEMUXERS 1
+$_def_muxers
+
 $def_arpa_inet_h
 $def_bswap
 $_def_dcbzl
 $def_dos_paths
 $def_fast_64bit
 $_def_fast_unaligned
+$_def_libavcodec_mpegaudio_hp
 $_def_memalign_hack
 $def_mlib
 $_def_mkstemp
@@ -8600,12 +8605,12 @@ $_def_yasm
 #define CONFIG_FASTDIV 0
 #define CONFIG_FFSERVER 0
 #define CONFIG_GPL 1
+#define CONFIG_GRAY 0
 #define CONFIG_HARDCODED_TABLES 0
 #define CONFIG_POSIX_MEMALIGN 0
 #define CONFIG_POWERPC_PERF 0
 #define CONFIG_SMALL 0
 #define CONFIG_SWSCALE 1
-#define CONFIG_GRAY 0
 
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
@@ -8622,12 +8627,6 @@ $_def_yasm
 #ifndef MP_DEBUG
 #define HAVE_EBP_AVAILABLE 1
 #endif
-
-#define CONFIG_DECODERS 1
-#define CONFIG_ENCODERS 1
-#define CONFIG_DEMUXERS 1
-
-$_def_muxers
 
 /* External libraries used through libavcodec. */
 $_def_faac_lavc
