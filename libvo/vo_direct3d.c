@@ -382,7 +382,7 @@ static int change_d3d_backbuffer(back_buffer_action_e action)
                                        D3DDEVTYPE_HAL, vo_w32_window,
                                        D3DCREATE_SOFTWARE_VERTEXPROCESSING,
                                        &present_params, &priv->d3d_device))) {
-            mp_msg(MSGT_VO, MSGL_ERR,
+            mp_msg(MSGT_VO, MSGL_V,
                    "<vo_direct3d>Creating Direct3D device failed.\n");
         return 0;
     }
