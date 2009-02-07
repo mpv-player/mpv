@@ -694,7 +694,45 @@ static char* parse_tag(char* p, double pwr) {
 	if ((*p == '}') || (*p == 0))
 		return p;
 
-	if (mystrcmp(&p, "blur")) {
+	// New tags introduced in vsfilter 2.39
+	if (mystrcmp(&p, "xbord")) {
+		double val;
+		if (mystrtod(&p, &val))
+			mp_msg(MSGT_ASS, MSGL_V, "stub: \\xbord%.2f\n", val);
+	} else if (mystrcmp(&p, "ybord")) {
+		double val;
+		if (mystrtod(&p, &val))
+			mp_msg(MSGT_ASS, MSGL_V, "stub: \\ybord%.2f\n", val);
+	} else if (mystrcmp(&p, "xshad")) {
+		int val;
+		if (mystrtoi(&p, 10, &val))
+			mp_msg(MSGT_ASS, MSGL_V, "stub: \\xshad%d\n", val);
+	} else if (mystrcmp(&p, "yshad")) {
+		int val;
+		if (mystrtoi(&p, 10, &val))
+			mp_msg(MSGT_ASS, MSGL_V, "stub: \\yshad%d\n", val);
+	} else if (mystrcmp(&p, "fax")) {
+		int val;
+		if (mystrtoi(&p, 10, &val))
+			mp_msg(MSGT_ASS, MSGL_V, "stub: \\fax%d\n", val);
+	} else if (mystrcmp(&p, "fay")) {
+		int val;
+		if (mystrtoi(&p, 10, &val))
+			mp_msg(MSGT_ASS, MSGL_V, "stub: \\fay%d\n", val);
+	} else if (mystrcmp(&p, "iclip")) {
+		int x0, y0, x1, y1;
+		int res = 1;
+		skip('(');
+		res &= mystrtoi(&p, 10, &x0);
+		skip(',');
+		res &= mystrtoi(&p, 10, &y0);
+		skip(',');
+		res &= mystrtoi(&p, 10, &x1);
+		skip(',');
+		res &= mystrtoi(&p, 10, &y1);
+		skip(')');
+		mp_msg(MSGT_ASS, MSGL_V, "stub: \\iclip(%d,%d,%d,%d)\n", x0, y0, x1, y1);
+	} else if (mystrcmp(&p, "blur")) {
 		double val;
 		if (mystrtod(&p, &val)) {
 			val = (val < 0) ? 0 : val;
