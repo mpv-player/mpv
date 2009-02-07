@@ -35,7 +35,7 @@
 #include "loader/qtx/qtxsdk/components.h"
 #endif
 
-#ifdef CONFIG_ZLIB
+#if CONFIG_ZLIB
 #include <zlib.h>
 #endif
 
@@ -299,7 +299,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
       if (!(track->encodings[i].scope & type))
         continue;
 
-#ifdef CONFIG_ZLIB
+#if CONFIG_ZLIB
       if (track->encodings[i].comp_algo == 0)
         {
           /* zlib encoded track */
@@ -547,7 +547,7 @@ demux_mkv_read_trackencodings (demuxer_t *demuxer, mkv_track_t *track)
                                   MSGTR_MPDEMUX_MKV_UnknownCompression,
                                   track->tnum, e.comp_algo);
                         }
-#ifndef CONFIG_ZLIB
+#if !CONFIG_ZLIB
                       else if (e.comp_algo == 0)
                         {
                           mp_msg (MSGT_DEMUX, MSGL_WARN,
