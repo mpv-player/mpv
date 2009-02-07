@@ -8266,6 +8266,8 @@ $_def_fast_inttypes
 #define HAVE_STRINGS_H 1
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TYPES_H 1
+/* libdvdnav */
+#define READ_CACHE_TRACE 0
 /* libdvdread */
 #define HAVE_DLFCN_H 1
 
