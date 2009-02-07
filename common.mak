@@ -48,8 +48,8 @@ ifeq ($(wildcard $(SVN_ENTRIES)),$(SVN_ENTRIES))
 $(BUILD_ROOT_REL)/version.h: $(SVN_ENTRIES)
 endif
 
-$(BUILD_ROOT_REL)/version.h:
-	$(SRC_PATH)/version.sh $(SRC_PATH) $@ $(EXTRA_VERSION)
+$(BUILD_ROOT_REL)/version.h: $(SRC_PATH_BARE)/version.sh
+	$< $(SRC_PATH) $@ $(EXTRA_VERSION)
 
 install: install-libs install-headers
 
@@ -71,7 +71,7 @@ TESTS := $(addprefix $(SUBDIR),$(TESTS))
 
 DEP_LIBS:=$(foreach NAME,$(FFLIBS),lib$(NAME)/$($(BUILD_SHARED:yes=S)LIBNAME))
 
-ALLHEADERS := $(subst $(SRC_DIR)/,$(SUBDIR),$(wildcard $(SRC_DIR)/*.h))
+ALLHEADERS := $(subst $(SRC_DIR)/,$(SUBDIR),$(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/$(ARCH)/*.h))
 checkheaders: $(filter-out %_template.ho,$(ALLHEADERS:.h=.ho))
 
 DEPS := $(OBJS:.o=.d)
