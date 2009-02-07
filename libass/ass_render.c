@@ -43,6 +43,8 @@
 
 #define MAX_GLYPHS 3000
 #define MAX_LINES 300
+#define BE_RADIUS 1.5
+#define BLUR_MAX_RADIUS 50.0
 
 static int last_render_id = 0;
 
@@ -80,6 +82,7 @@ struct ass_renderer_s {
 	ass_settings_t settings;
 	int render_id;
 	ass_synth_priv_t* synth_priv;
+	ass_synth_priv_t* synth_priv_blur;
 
 	ass_image_t* images_root; // rendering result is stored here
 	ass_image_t* prev_images_root;
@@ -112,6 +115,7 @@ typedef struct glyph_info_s {
 	int asc, desc; // font max ascender and descender
 //	int height;
 	int be; // blur edges
+	double blur; // gaussian blur
 	int shadow;
 	double frx, fry, frz; // rotation
 	
@@ -160,6 +164,7 @@ typedef struct render_context_s {
 	char detect_collisions;
 	uint32_t fade; // alpha from \fad
 	char be; // blur edges
+	double blur; // gaussian blur
 	int shadow;
 	int drawing_mode; // not implemented; when != 0 text is discarded, except for style override tags
 
@@ -258,7 +263,8 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 		goto ass_init_exit;
 	}
 
-	priv->synth_priv = ass_synth_init();
+	priv->synth_priv = ass_synth_init(BE_RADIUS);
+	priv->synth_priv_blur = ass_synth_init(BLUR_MAX_RADIUS);
 
 	priv->library = library;
 	priv->ftlibrary = ft;
@@ -688,7 +694,16 @@ static char* parse_tag(char* p, double pwr) {
 	if ((*p == '}') || (*p == 0))
 		return p;
 
-	if (mystrcmp(&p, "fsc")) {
+	if (mystrcmp(&p, "blur")) {
+		double val;
+		if (mystrtod(&p, &val)) {
+			val = (val < 0) ? 0 : val;
+			val = (val > BLUR_MAX_RADIUS) ? BLUR_MAX_RADIUS : val;
+			render_context.blur = val;
+		} else
+			render_context.blur = 0.0;
+	// ASS standard tags
+	} else if (mystrcmp(&p, "fsc")) {
 		char tp = *p++;
 		double val;
 		if (tp == 'x') {
@@ -985,9 +1000,12 @@ static char* parse_tag(char* p, double pwr) {
 		reset_render_context();
 	} else if (mystrcmp(&p, "be")) {
 		int val;
-		if (mystrtoi(&p, 10, &val))
-			render_context.be = val ? 1 : 0;
-		else
+		if (mystrtoi(&p, 10, &val)) {
+			// Clamp to 10, since high values need excessive CPU
+			val = (val < 0) ? 0 : val;
+			val = (val > 10) ? 10 : val;
+			render_context.be = val;
+		} else
 			render_context.be = 0;
 	} else if (mystrcmp(&p, "b")) {
 		int b;
@@ -1181,6 +1199,7 @@ static void reset_render_context(void)
 	render_context.scale_y = render_context.style->ScaleY;
 	render_context.hspacing = render_context.style->Spacing;
 	render_context.be = 0;
+	render_context.blur = 0.0;
 	render_context.shadow = render_context.style->Shadow;
 	render_context.frx = render_context.fry = 0.;
 	render_context.frz = M_PI * render_context.style->Angle / 180.;
@@ -1321,9 +1340,10 @@ static void get_bitmap_glyph(glyph_info_t* info)
 
 			// render glyph
 			error = glyph_to_bitmap(ass_renderer->synth_priv,
+					ass_renderer->synth_priv_blur,
 					info->glyph, info->outline_glyph,
 					&info->bm, &info->bm_o,
-					&info->bm_s, info->be);
+					&info->bm_s, info->be, info->blur);
 			if (error)
 				info->symbol = 0;
 
@@ -1815,6 +1835,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].effect_timing = render_context.effect_timing;
 		text_info.glyphs[text_info.length].effect_skip_timing = render_context.effect_skip_timing;
 		text_info.glyphs[text_info.length].be = render_context.be;
+		text_info.glyphs[text_info.length].blur = render_context.blur;
 		text_info.glyphs[text_info.length].shadow = render_context.shadow;
 		text_info.glyphs[text_info.length].frx = render_context.frx;
 		text_info.glyphs[text_info.length].fry = render_context.fry;
@@ -1839,6 +1860,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].hash_key.ch = code;
 		text_info.glyphs[text_info.length].hash_key.advance = shift;
 		text_info.glyphs[text_info.length].hash_key.be = render_context.be;
+		text_info.glyphs[text_info.length].hash_key.blur = render_context.blur;
 
 		text_info.length++;
 

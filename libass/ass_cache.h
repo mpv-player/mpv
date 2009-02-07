@@ -42,6 +42,7 @@ typedef struct bitmap_hash_key_s {
 	unsigned outline; // border width, 16.16 fixed point value
 	int bold, italic;
 	char be; // blur edges
+	double blur; // gaussian blur
 
 	unsigned scale_x, scale_y; // 16.16
 	int frx, fry, frz; // signed 16.16

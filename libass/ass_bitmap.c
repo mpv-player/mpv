@@ -39,11 +39,12 @@ struct ass_synth_priv_s {
 
 	unsigned *g;
 	unsigned *gt2;
+
+	double radius;
 };
 
 static const unsigned int maxcolor = 255;
 static const unsigned base = 256;
-static const double blur_radius = 1.5;
 
 static int generate_tables(ass_synth_priv_t* priv, double radius)
 {
@@ -51,6 +52,11 @@ static int generate_tables(ass_synth_priv_t* priv, double radius)
 	int mx, i;
 	double volume_diff, volume_factor = 0;
 	unsigned volume;
+
+	if (priv->radius == radius)
+		return 0;
+	else
+		priv->radius = radius;
 
 	priv->g_r = ceil(radius);
 	priv->g_w = 2*priv->g_r+1;
@@ -106,10 +112,10 @@ static void resize_tmp(ass_synth_priv_t* priv, int w, int h)
 	priv->tmp = malloc((priv->tmp_w + 1) * priv->tmp_h * sizeof(short));
 }
 
-ass_synth_priv_t* ass_synth_init(void)
+ass_synth_priv_t* ass_synth_init(double radius)
 {
 	ass_synth_priv_t* priv = calloc(1, sizeof(ass_synth_priv_t));
-	generate_tables(priv, blur_radius);
+	generate_tables(priv, radius);
 	return priv;
 }
 
@@ -248,10 +254,12 @@ static bitmap_t* fix_outline_and_shadow(bitmap_t* bm_g, bitmap_t* bm_o)
 	return bm_s;
 }
 
-int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_glyph,
-		bitmap_t** bm_g, bitmap_t** bm_o, bitmap_t** bm_s, int be)
+int glyph_to_bitmap(ass_synth_priv_t* priv, ass_synth_priv_t* priv_blur,
+		FT_Glyph glyph, FT_Glyph outline_glyph, bitmap_t** bm_g,
+		bitmap_t** bm_o, bitmap_t** bm_s, int be, double blur_radius)
 {
-	const int bord = be ? ceil(blur_radius) : 0;
+	int bord = be ? (be+1) : 0;
+	bord = (blur_radius > 0.0) ? blur_radius : bord;
 
 	assert(bm_g && bm_o && bm_s);
 
@@ -269,17 +277,29 @@ int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_gly
 			return 1;
 		}
 	}
-	if (*bm_o)
+	if (*bm_o) {
 		resize_tmp(priv, (*bm_o)->w, (*bm_o)->h);
+		resize_tmp(priv_blur, (*bm_o)->w, (*bm_o)->h);
+	}
 	resize_tmp(priv, (*bm_g)->w, (*bm_g)->h);
+	resize_tmp(priv_blur, (*bm_g)->w, (*bm_g)->h);
 	
 	if (be) {
-		if (*bm_o)
-			blur((*bm_o)->buffer, priv->tmp, (*bm_o)->w, (*bm_o)->h, (*bm_o)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
-		else
-			blur((*bm_g)->buffer, priv->tmp, (*bm_g)->w, (*bm_g)->h, (*bm_g)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
+		while (be--) {
+			if (*bm_o)
+				blur((*bm_o)->buffer, priv->tmp, (*bm_o)->w, (*bm_o)->h, (*bm_o)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
+			else
+				blur((*bm_g)->buffer, priv->tmp, (*bm_g)->w, (*bm_g)->h, (*bm_g)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
+		}
+	} else {
+		if (blur_radius > 0.0) {
+			generate_tables(priv_blur, blur_radius);
+			if (*bm_o)
+				blur((*bm_o)->buffer, priv_blur->tmp, (*bm_o)->w, (*bm_o)->h, (*bm_o)->w, (int*)priv_blur->gt2, priv_blur->g_r, priv_blur->g_w);
+			else
+				blur((*bm_g)->buffer, priv_blur->tmp, (*bm_g)->w, (*bm_g)->h, (*bm_g)->w, (int*)priv_blur->gt2, priv_blur->g_r, priv_blur->g_w);
+		}
 	}
-
 	if (*bm_o)
 		*bm_s = fix_outline_and_shadow(*bm_g, *bm_o);
 	else
