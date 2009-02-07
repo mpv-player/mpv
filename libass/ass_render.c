@@ -813,10 +813,12 @@ static char* parse_tag(char* p, double pwr) {
 		else k = ((double)(t - t1)) / delta_t;
 		x = k * (x2 - x1) + x1;
 		y = k * (y2 - y1) + y1;
-		render_context.pos_x = x;
-		render_context.pos_y = y;
-		render_context.detect_collisions = 0;
-		render_context.evt_type = EVENT_POSITIONED;
+		if (render_context.evt_type != EVENT_POSITIONED) {
+			render_context.pos_x = x;
+			render_context.pos_y = y;
+			render_context.detect_collisions = 0;
+			render_context.evt_type = EVENT_POSITIONED;
+		}
 	} else if (mystrcmp(&p, "frx")) {
 		double val;
 		if (mystrtod(&p, &val)) {
@@ -892,10 +894,12 @@ static char* parse_tag(char* p, double pwr) {
 		v2 = strtol(p, &p, 10);
 		skip(')');
 		mp_msg(MSGT_ASS, MSGL_DBG2, "pos(%d, %d)\n", v1, v2);
-		render_context.evt_type = EVENT_POSITIONED;
-		render_context.detect_collisions = 0;
-		render_context.pos_x = v1;
-		render_context.pos_y = v2;
+		if (render_context.evt_type != EVENT_POSITIONED) {
+			render_context.evt_type = EVENT_POSITIONED;
+			render_context.detect_collisions = 0;
+			render_context.pos_x = v1;
+			render_context.pos_y = v2;
+		}
 	} else if (mystrcmp(&p, "fad")) {
 		int a1, a2, a3;
 		long long t1, t2, t3, t4;
