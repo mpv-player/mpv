@@ -5986,6 +5986,21 @@ fi
 echores "$_zlib"
 
 
+echocheck "bzlib"
+bzlib=no
+def_bzlib='#define CONFIG_BZLIB 0'
+cat > $TMPC << EOF
+#include <bzlib.h>
+int main(void) { BZ2_bzlibVersion(); return 0; }
+EOF
+cc_check -lbz2 && bzlib=yes
+if test "$bzlib" = yes ; then
+  def_bzlib='#define CONFIG_BZLIB 1'
+  _ld_extra="$_ld_extra -lbz2"
+fi
+echores "$bzlib"
+
+
 echocheck "RTC"
 if test "$_rtc" = auto ; then
   cat > $TMPC << EOF
