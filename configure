@@ -8176,6 +8176,7 @@ CONFIG_GOLOMB=yes
 CONFIG_MDCT=yes
 CONFIG_RDFT=yes
 
+CONFIG_BZLIB=$bzlib
 CONFIG_ENCODERS=yes
 CONFIG_GPL=yes
 CONFIG_LIBAMR=$_libamr
@@ -8607,6 +8608,7 @@ $_def_muxers
 
 $def_arpa_inet_h
 $def_bswap
+$def_bzlib
 $_def_dcbzl
 $def_dos_paths
 $def_fast_64bit
