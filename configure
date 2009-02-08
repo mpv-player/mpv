@@ -6850,7 +6850,7 @@ if test "$_libamr_nb" = yes ; then
   _libavencoders="$_libavencoders LIBAMR_NB_ENCODER"
   _codecmodules="libamr_nb $_codecmodules"
 else
-  _def_libamr_nb='#undef CONFIG_LIBAMR_NB'
+  _def_libamr_nb='#define CONFIG_LIBAMR_NB 0'
   _nocodecmodules="libamr_nb $_nocodecmodules"
 fi
 echores "$_libamr_nb"
@@ -6878,7 +6878,7 @@ if test "$_libamr_wb" = yes ; then
   _libavencoders="$_libavencoders LIBAMR_WB_ENCODER"
   _codecmodules="libamr_wb $_codecmodules"
 else
-  _def_libamr_wb='#undef CONFIG_LIBAMR_WB'
+  _def_libamr_wb='#define CONFIG_LIBAMR_WB 0'
   _nocodecmodules="libamr_wb $_nocodecmodules"
 fi
 echores "$_libamr_wb"
