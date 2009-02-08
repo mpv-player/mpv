@@ -22,8 +22,6 @@
  */
 
 #include "config.h"
-#ifdef CONFIG_FASTMEMCPY
-
 #include <stddef.h>
 #include <string.h>
 #include "cpudetect.h"
@@ -227,5 +225,3 @@ void * mem2agpcpy(void * to, const void * from, size_t len)
 #endif //!RUNTIME_CPUDETECT
 	return to;
 }
-
-#endif /* CONFIG_FASTMEMCPY */

@@ -8026,6 +8026,7 @@ ESD = $_esd
 FAAC=$_faac
 FAAD = $_faad
 FAAD_INTERNAL = $_faad_internal
+FASTMEMCPY = $_fastmemcpy
 FBDEV = $_fbdev
 FREETYPE = $_freetype
 FTP = $_ftp

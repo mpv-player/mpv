@@ -211,7 +211,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/video.c \
               libmpdemux/yuv4mpeg.c \
               libmpdemux/yuv4mpeg_ratio.c \
-              libvo/aclib.c \
               libvo/osd.c \
               libvo/sub.c \
               osdep/$(GETCH) \
@@ -297,6 +296,7 @@ SRCS_COMMON-$(FAAD_INTERNAL)         += libfaad2/bits.c \
                                         libfaad2/syntax.c \
                                         libfaad2/tns.c \
 
+SRCS_COMMON-$(FASTMEMCPY)            += libvo/aclib.c
 SRCS_COMMON-$(FREETYPE)              += libvo/font_load_ft.c
 SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
