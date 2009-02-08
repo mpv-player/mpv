@@ -1,11 +1,28 @@
 /*
+ * video driver for SVGAlib
+ * by Zoltan Mark Vician <se7en@sch.bme.hu>
+ * Code started: Mon Apr  1 23:25:47 2001
+ * Some changes by Matan Ziv-Av <matan@svgalib.org>
+ * complete rewrite by Ivan Kalvachev 19 Mar 2003
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
-  Video driver for SVGAlib 
-  by Zoltan Mark Vician <se7en@sch.bme.hu>
-  Code started: Mon Apr  1 23:25:47 2001
-  Some changes by Matan Ziv-Av <matan@svgalib.org>
-  Compleat rewrite by Ivan Kalvachev 19 Mar 2003:
-
+/*
 Wrangings:
  -  1bpp doesn't work right for me with '-double' and svgalib 1.4.3, 
     but works OK with svgalib 1.9.17
