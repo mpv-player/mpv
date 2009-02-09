@@ -446,7 +446,7 @@ make install</screen>
     </sect2>
 
 
-    <sect2 id="codec-x264">
+    <sect2 id="x264">
       <title><systemitem class="library">x264</systemitem></title>
       <para>
         <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
