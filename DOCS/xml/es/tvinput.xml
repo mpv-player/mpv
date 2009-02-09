@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.10 -->
+<chapter id="tv">
+<title>TV</title>
+
 <sect1 id="tv-input" xreflabel="Entrada de TV">
 <title>Entrada de TV</title>
 
@@ -213,3 +216,5 @@ el promediado de pixels solo en dirección horizontal debido a limitaciones de h
 </informalexample>
 </sect2>
 </sect1>
+
+</chapter>

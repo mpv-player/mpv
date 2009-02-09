@@ -19,7 +19,6 @@ para LINUX</title>
   <year>2009</year>	
   <holder>MPlayer team</holder>
 </copyright>
-<!--
 <legalnotice>
   <title>Licencia</title>
 
@@ -36,7 +35,6 @@ para LINUX</title>
   junto a este programa; si no es así, escriba a la Free Software Foundation, Inc.,
   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.</para>
 </legalnotice>
--->
 </bookinfo>
 
 
@@ -118,7 +116,7 @@ sistema de plugin para la manipulación de vídeo.
   </para></listitem>
 <listitem><para>
   Codificación a todos los codecs soportados por ffmpeg
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+  <systemitem class="library">libavcodec</systemitem>
   </para></listitem>
 <listitem><para>
   Codificación de vídeo desde un <emphasis role="bold">sintonizador de TV compatible con V4L</emphasis>
@@ -180,15 +178,15 @@ pueden ser distribuidos bajo los términos de la Licencia GNU General Public
 License Version 2 (GPL v.2).
 </para>
 
-&install.xml;
 </chapter>
 
-
-&features.xml;
+&install.xml;
 &usage.xml;
-&faq.xml;
 &cd-dvd.xml;
+&tvinput.xml;
+&video.xml;
 &ports.xml;
 &mencoder.xml;
+&faq.xml;
 &bugreports.xml;
 &skin.xml;

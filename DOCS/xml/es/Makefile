@@ -2,7 +2,7 @@
 #HTML_STYLESHEET = mystyle.css
 
 # Change to yes to enable symlinking missing files to English master versions
-USE_SYMLINKS = no
+USE_SYMLINKS = yes
 
 # Dependency information.
 $(HTMLDIR)/index.html: $(wildcard *.xml)

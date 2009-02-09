@@ -53,8 +53,8 @@ que funcionan desde
 </para>
 </sect2>
 
-<sect2 id="arm">
-<title>ARM</title>
+<sect2 id="arm_linux">
+<title>ARM Linux</title>
 <para>
 <application>MPlayer</application> funciona en PDAs con Linux en CPU ARM p.e.
 Sharp Zaurus, Compaq Ipaq. La manera más facil de obtener
@@ -247,33 +247,18 @@ video.
 </para>
 </sect1>
 
-<sect1 id="irix">
-<title>Silicon Graphics Irix</title>
+<sect1 id="hpux">
+<title>HP UX</title>
 <para>
-Puede probar a instalar el programa de instalación GNU, y (si no lo tiene
-en su ruta global) apuntar a donde esté con:
-<screen>./configure --with-install=<replaceable>/ruta/y/nombre/del/instalador</replaceable></screen>
+Martin Gansser mantiene un
+<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">COMO</ulink>
+de mucho valor acerca de cómo compilar <application>MPlayer</application> en HP-UX. ¡Tiene
+incluso una sección de FAQ!
 </para>
 
 <para>
-O puede usar el instalador por defecto que viene con IRIX 6.5 y en ese
-caso debe editar el <filename>Makefile</filename> a mano un poquito.
-Cambie las dos siguientes líneas:
-<programlisting>
-  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-
-  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
-</programlisting>
-por:
-<programlisting>
-  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-
-  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
-</programlisting>
-Y entonces haga (desde el directorio de fuentes de
-<application>MPlayer</application>):
-<screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
-y después continúe con la construcción e instalación.
+De todos modos, nuestro código crudo de <application>MPlayer</application> se usa para
+compilar en HP-UX sin problemas.
 </para>
 </sect1>
 
@@ -426,47 +411,6 @@ binarios compilados de <application>MPlayer</application> para Mac OS X desde el
 proyecto <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
 </para>
 
-</sect1>
-
-<sect1 id="hpux">
-<title>HP UX</title>
-<para>
-Martin Gansser mantiene un
-<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">COMO</ulink>
-de mucho valor acerca de cómo compilar <application>MPlayer</application> en HP-UX. ¡Tiene
-incluso una sección de FAQ!
-</para>
-
-<para>
-De todos modos, nuestro código crudo de <application>MPlayer</application> se usa para
-compilar en HP-UX sin problemas.
-</para>
-</sect1>
-
-<sect1 id="amiga">
-<title>Amiga/MorphOS (GeedGadgets)</title>
-<para>
-Nicholas Det en Genesi ha hecho una gran adaptación, potente, de <application>MPlayer</application>
-para MorphOS. Tristemente basado en la serie 0.90.
-</para>
-
-<para>
-Obténgalo desde <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
-<itemizedlist>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-<application>MPlayer</application> 0.91 binario</ulink>
-</para></listitem>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-<application>MPlayer</application> 0.91 código fuente</ulink>
-</para></listitem>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
-<application>MEncoder</application> 0.91 binario</ulink>
-</para></listitem>
-</itemizedlist>
-</para>
 </sect1>
 
 </chapter>
