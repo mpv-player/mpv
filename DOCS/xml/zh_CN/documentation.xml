@@ -178,14 +178,12 @@ It can encode with various codecs, like
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
 &video.xml;
 &tvinput.xml;
 &radio.xml;
-
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
-&bugs.xml;
 &skin.xml;

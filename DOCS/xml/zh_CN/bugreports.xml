@@ -137,7 +137,7 @@ svn update -r {"2004-08-23 15:17:25"}
 这包括<application>MPlayer</application>的二进制包。
 Subversion的指令可在
 <ulink url="http://www.mplayerhq.hu/dload.html">此页</ulink>底部查找，或在
-README文件中。如果这未能提供帮助，请查询<link linkend="bugs">已知错误</link>
+README文件中。如果这未能提供帮助，请查询 已知错误
 列表以及其后文档。
 如果你的问题是未知的或在我们的指示下未能解决，请报告此错误。
 </para>
