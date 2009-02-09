@@ -171,15 +171,12 @@ possono esser distribuiti nei termini della GNU General Public License Version 2
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
-
-&codecs.xml;
-&video.xml;
 &tvinput.xml;
 &radio.xml;
-
+&video.xml;
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
 &skin.xml;

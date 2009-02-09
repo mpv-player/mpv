@@ -236,9 +236,8 @@ Ho dei problemi a leggere dei file col codec ... . Posso usarli?
 <answer><para>
 Controlla la
 <ulink url="../../codecs-status.html">tabella di stato dei codec</ulink>, se
-non contiene il tuo codec, leggi la
-<link linkend="codecs">documentazione sui codec</link>, in particolare
-l'HOWTO sull'<link linkend="codec-importing">importazione codec</link> e
+non contiene il tuo codec, leggi
+l'HOWTO sull'<ulink url="../../tech/win32-codec-howto">importazione codec Win32</ulink> e
 contattaci.
 </para></answer>
 </qandaentry>
