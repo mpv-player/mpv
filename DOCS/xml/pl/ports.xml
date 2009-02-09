@@ -302,36 +302,6 @@ Problem może być rozwiązany przy pomocy łatki 109764-04 (sparc) / 109765-04 
 </itemizedlist>
 </sect2>
 
-<sect2 id="irix">
-<title>IRIX</title>
-<para>
-Możesz albo spróbować zainstalować program GNU install i (jeżeli nie
-umieściłeś go w globalnej ścieżce) wskazać go przez:
-<screen>./configure --with-install=
-<replaceable>/ścieżka/i/nazwa/programu/instalacyjnego</replaceable></screen>
-</para>
-
-<para>
-Albo użyć domyślnego programu instalacyjnego dostarczonego z IRIX 6.5, w tym
-wypadku należy ręcznie zmodyfikować plik <filename>Makefile</filename> w
-kilku miejscach. Zmień poniższe dwie linijki:
-<programlisting>
-  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-
-  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
-</programlisting>
-na:
-<programlisting>
-  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-
-  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
-</programlisting>
-A potem wykonaj (w katalogu źródłowym <application>MPlayera</application>):
-<screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
-i dalej skompiluj i zainstaluj.
-</para>
-</sect2>
-
 <sect2 id="hp-ux">
 <title>HP-UX</title>
 <para>
@@ -527,6 +497,22 @@ Oznacza to, że <emphasis role="bold">AIX 5.2 i 5.3 nie potrafią aktualnie uży
 		</listitem>
 	</itemizedlist>
 
+</sect2>
+
+<sect2 id="qnx">
+<title>QNX</title>
+<para>
+Będziesz musiał ściągnąć bibliotekę SDL dla QNX i zainstalować ją. Wtedy
+uruchom <application>MPlayera</application> z opcją
+<option>-vo sdl:driver=photon</option>
+i <option>-ao sdl:nto</option>, powinno działać szybko.
+</para>
+
+<para>
+Wyjście <option>-vo x11</option> będzie nawet wolniejsze niż na Linuksie,
+ponieważ QNX ma tylko <emphasis>emulację</emphasis> X'ów, która jest bardzo
+wolna.
+</para>
 </sect2>
 </sect1>
 
@@ -853,65 +839,6 @@ zawierający gotowy do uruchomienia program.
 Możes również skorzystać z projektu <application>Xcode</application> 2.1;
 stary projekt dla <application>Xcode</application> 1.x już nie działa.
  
-</para>
-</sect2>
-</sect1>
-
-<sect1 id="exotic_platforms">
-<title>Egzotyczne Platformy</title>
-
-<para>
-<application>MPlayer</application> dziła na wielu egzotycznych platfromach, ale
-większość zmian dla konkretnych platform nie trafiła do głównego drzewa ze źródłami
-programu.
-Instrukcji co do budowy szukaj w dokumentacji do określonych systemów.
-</para>
-
-<sect2 id="qnx">
-<title>QNX</title>
-<para>
-Będziesz musiał ściągnąć bibliotekę SDL dla QNX i zainstalować ją. Wtedy
-uruchom <application>MPlayera</application> z opcją
-<option>-vo sdl:driver=photon</option>
-i <option>-ao sdl:nto</option>, powinno działać szybko.
-</para>
-		
-<para>
-Wyjście <option>-vo x11</option> będzie nawet wolniejsze niż na Linuksie,
-ponieważ QNX ma tylko <emphasis>emulację</emphasis> X'ów, która jest bardzo
-wolna. 
-</para>
-</sect2>
-
-<sect2 id="amiga">
-<title>Amiga/MorphOS (GeekGadgets)</title>
-<para>
-Ludzie z <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
-tworzą aktualne paczki z <application>MPlayerem</application> i
-<application>MEncoderem</application>.
-</para>
-
-<para>
-Nicholas Det at Genesi stworzył potężny port <application>MPlayera
-</application> dla MorphOS. Niestety oparty jest on o serię 0.90.
-</para>
-
-<para>
-Pobierz go z <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
-<itemizedlist>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-pakiet binarny <application>MPlayer</application> 0.91</ulink>
-</para></listitem>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-źródła <application>MPlayera</application> 0.91</ulink>
-</para></listitem>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
-pakiet binarny <application>MEncodera</application> 1.0pre3</ulink>
-</para></listitem>
-</itemizedlist>
 </para>
 </sect2>
 </sect1>

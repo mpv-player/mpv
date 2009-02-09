@@ -160,7 +160,7 @@ z Subversion</emphasis> do zgłaszania błędów. Dotyczy to głównie pakietów
 <application>MPlayera</application>. Instrukcje dotyczące Subversion znajdują się
 na dole <ulink url="http://www.mplayerhq.hu/dload.html">tej strony</ulink>
 lub w pliku README. Jeżeli problem dalej występuje prosimy sprawdzić listę
-<link linkend="bugs">znanych błędów</link> i resztę dokumentacji. Jeżeli problem
+znanych błędów i resztę dokumentacji. Jeżeli problem
 nie jest znany lub rozwiązany przez naszą dokumentację prosimy zgłosić błąd.
 </para>
 

@@ -190,17 +190,13 @@ mogą być rozprowadzane zgodnie z warunkami GNU General Public License Version 
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
-
-&containers.xml;
 &codecs.xml;
 &video.xml;
 &tvinput.xml;
 &radio.xml;
-
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
-&bugs.xml;
 &skin.xml;
