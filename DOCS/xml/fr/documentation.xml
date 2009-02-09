@@ -174,16 +174,13 @@ peuvent être distribués selon les termes de la GNU General Public License Vers
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
-
-&containers.xml;
-&codecs.xml;
-&video.xml;
 &tvinput.xml;
 &radio.xml;
-
+&codecs.xml;
+&video.xml;
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
 &skin.xml;

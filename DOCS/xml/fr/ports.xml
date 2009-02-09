@@ -349,36 +349,6 @@ Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc)
 
 <!-- ********** -->
 
-<sect2 id="irix">
-<title>IRIX</title>
-
-<para>
-Vous pouvez soit essayer d'installer le programme d'installation GNU, et
-(si vous ne l'avez pas mis dans votre chemin par défaut) précisez ensuite
-l'endroit où il est:
-<screen>
-  ./configure --with-install=<replaceable>/chemin/et/nom/de/l'installation</replaceable>
-</screen>
-</para>
-
-<para>
-Soit vous pouvez utilisez l'installation par défaut livrée avec IRIX 6.5,
-auquel cas vous devrez éditer le <filename>Makefile</filename>
-manuellement.
-Changez la ligne suivante :
-<programlisting>
-  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-</programlisting>
-par:
-<programlisting>
-  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-</programlisting>
-Finalement, lancez la construction et l'installation.
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="hp-ux">
 <title>HP UX</title>
 
@@ -573,6 +543,24 @@ $ ./configure --charset=noconv
 </para>
 </listitem>
 </itemizedlist>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="qnx">
+<title>QNX</title>
+
+<para>
+Vous aurez besoin de télécharger et installer SDL pour QNX. Puis de lancer
+<application>MPlayer</application> avec les options <option>-vo sdl:driver=photon</option> et
+<option>-ao sdl:nto</option>, cela devrait être rapide.
+</para>
+
+<para>
+La sortie de <option>-vo x11</option> sera encore plus lente que sous Linux,
+étant donné que QNX n'a qu'une <emphasis>émulation</emphasis> X, qui est
+très lente.
+</para>
 </sect2>
 </sect1>
 
@@ -895,75 +883,6 @@ prêt à l'emploi.
 Vous pouvez aussi utiliser le projet <application>Xcode</application> 2.1;
 le vieux projet pour <application>Xcode</application> 1.x n'étant plus
 du tout en fonction.
-</para>
-</sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
-<sect1 id="exotic_platforms">
-<title>Plateformes Exotiques</title>
-
-<para>
-<application>MPlayer</application> se lance sur bon nombre de plateformes exotiques,
-mais la plupart des changements spécifiques à ces systèmes n'ont pas été
-mergé dans l'arbre des sources officielles de <application>MPlayer</application>.
-Pour les instructions de build vous devriez vous référer à la documentation
-spécifique du système.
-</para>
-
-<!-- ********** -->
-
-<sect2 id="qnx">
-<title>QNX</title>
-
-<para>
-Vous aurez besoin de télécharger et installer SDL pour QNX. Puis de lancer
-<application>MPlayer</application> avec les options <option>-vo sdl:driver=photon</option> et
-<option>-ao sdl:nto</option>, cela devrait être rapide.
-</para>
-
-<para>
-La sortie de <option>-vo x11</option> sera encore plus lente que sous Linux,
-étant donné que QNX n'a qu'une <emphasis>émulation</emphasis> X, qui est
-très lente.
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="amiga">
-<title>Amiga/MorphOS (GeekGadgets)</title>
-<para>
-Les gens de chez <ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>
-font des paquetages actualisés pour <application>MPlayer</application> et
-<application>MEncoder</application>.
-</para>
-
-<para>
-Nicholas Det de Genesi a réalisé un gros et puissant portage de
-<application>MPlayer</application> pour MorphOS.
-Malheureusement, il est basé sur la série 0.90.
-</para>
-
-<para>
-Téléchargez-le sur <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
-<itemizedlist>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-Binaire de <application>MPlayer</application> 0.91</ulink>
-</para></listitem>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-Source de <application>MPlayer</application> 0.91</ulink>
-</para></listitem>
-<listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
-Binaire de <application>MEncoder</application> 1.0pre3</ulink>
-</para></listitem>
-</itemizedlist>
 </para>
 </sect2>
 </sect1>
