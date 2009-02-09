@@ -755,28 +755,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
 
-    if(sh->ds->demuxer->type != DEMUXER_TYPE_LAVF &&
-       sh->ds->demuxer->type != DEMUXER_TYPE_LAVF_PREFERRED)
-    if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
-       || sh->format == mmioFOURCC('R', 'V', '1', '3')
-       || sh->format == mmioFOURCC('R', 'V', '2', '0')
-       || sh->format == mmioFOURCC('R', 'V', '3', '0')
-       || sh->format == mmioFOURCC('R', 'V', '4', '0'))
-    {
-        dp_hdr_t *hdr= (dp_hdr_t*)data;
-        uint32_t *offsets = (uint32_t*)(data + hdr->chunktab);
-        uint8_t *offstab = av_malloc((hdr->chunks+1) * 8);
-        uint8_t *buf = data;
-        int chunks = hdr->chunks;
-        int dlen = hdr->len;
-
-        buf[0] = chunks;
-        memcpy(offstab, offsets, (chunks + 1) * 8);
-        memmove(buf + 1 + (chunks + 1) * 8, data + sizeof(dp_hdr_t), dlen);
-        memcpy(buf + 1, offstab, (chunks + 1) * 8);
-        av_free(offstab);
-    }
-
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "vd_ffmpeg data: %04x, %04x, %04x, %04x\n",
            ((int *)data)[0], ((int *)data)[1], ((int *)data)[2], ((int *)data)[3]);
     ret = avcodec_decode_video(avctx, pic,

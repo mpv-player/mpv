@@ -98,7 +98,8 @@ typedef struct mkv_track
 
   /* stuff for realmedia */
   int realmedia;
-  int rv_kf_base, rv_kf_pts;
+  int64_t rv_kf_base;
+  int rv_kf_pts;
   float rv_pts;  /* previous video timestamp */
   float ra_pts;  /* previous audio timestamp */
 
@@ -2379,61 +2380,7 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
   ds_add_packet(demuxer->sub, dp);
 }
 
-// Taken from demux_real.c. Thanks to the original developpers :)
-#define SKIP_BITS(n) buffer <<= n
-#define SHOW_BITS(n) ((buffer) >> (32 - (n)))
-
-static float real_fix_timestamp(mkv_track_t *track, unsigned char *s,
-                                int timestamp) {
-  float v_pts;
-  uint32_t buffer = (s[0] << 24) + (s[1] << 16) + (s[2] << 8) + s[3];
-  int kf = timestamp;
-  int pict_type;
-  int orig_kf;
-
-  if (!strcmp(track->codec_id, MKV_V_REALV30) ||
-      !strcmp(track->codec_id, MKV_V_REALV40)) {
-
-    if (!strcmp(track->codec_id, MKV_V_REALV30)) {
-      SKIP_BITS(3);
-      pict_type = SHOW_BITS(2);
-      SKIP_BITS(2 + 7);
-    }else{
-      SKIP_BITS(1);
-      pict_type = SHOW_BITS(2);
-      SKIP_BITS(2 + 7 + 3);
-    }
-    kf = SHOW_BITS(13);         // kf= 2*SHOW_BITS(12);
-    orig_kf = kf;
-    if (pict_type <= 1) {
-      // I frame, sync timestamps:
-      track->rv_kf_base = timestamp - kf;
-      mp_msg(MSGT_DEMUX, MSGL_DBG2, "\nTS: base=%08X\n", track->rv_kf_base);
-      kf = timestamp;
-    } else {
-      // P/B frame, merge timestamps:
-      int tmp = timestamp - track->rv_kf_base;
-      kf |= tmp & (~0x1fff);    // combine with packet timestamp
-      if (kf < (tmp - 4096))    // workaround wrap-around problems
-        kf += 8192;
-      else if (kf > (tmp + 4096))
-        kf -= 8192;
-      kf += track->rv_kf_base;
-    }
-    if (pict_type != 3) {       // P || I  frame -> swap timestamps
-      int tmp = kf;
-      kf = track->rv_kf_pts;
-      track->rv_kf_pts = tmp;
-    }
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "\nTS: %08X -> %08X (%04X) %d %02X %02X %02X "
-           "%02X %5d\n", timestamp, kf, orig_kf, pict_type, s[0], s[1], s[2],
-           s[3], kf - (int)(1000.0 * track->rv_pts));
-  }
-  v_pts = kf * 0.001f;
-  track->rv_pts = v_pts;
-
-  return v_pts;
-}
+double real_fix_timestamp(unsigned char *buf, unsigned int timestamp, unsigned int format, int64_t *kf_base, int *kf_pts, double *pts);
 
 static void
 handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
@@ -2442,35 +2389,9 @@ handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   demux_packet_t *dp;
   uint32_t timestamp = mkv_d->last_pts * 1000;
-  uint32_t *hdr;
-  uint8_t chunks;
-  int isize;
-#ifdef WORDS_BIGENDIAN
-  uint8_t *p;
-  int i;
-#endif
 
-  chunks = *buffer++;
-  isize = --size - (chunks+1)*8;
-  dp = new_demux_packet (REALHEADER_SIZE + size);
-  memcpy (dp->buffer + REALHEADER_SIZE, buffer + (chunks+1)*8, isize);
-#ifdef WORDS_BIGENDIAN
-  p = (uint8_t *)(dp->buffer + REALHEADER_SIZE + isize);
-  for (i = 0; i<(chunks+1)*8; i+=4) {
-    p[i] = *((uint8_t *)buffer+i+3);
-    p[i+1] = *((uint8_t *)buffer+i+2);
-    p[i+2] = *((uint8_t *)buffer+i+1);
-    p[i+3] = *((uint8_t *)buffer+i);
-  }
-#else
-  memcpy (dp->buffer + REALHEADER_SIZE + isize, buffer, (chunks+1)*8);
-#endif
-
-  hdr = dp->buffer;
-  *hdr++ = chunks;                 // number of chunks
-  *hdr++ = timestamp;              // timestamp from packet header
-  *hdr++ = isize;                  // length of actual data
-  *hdr++ = REALHEADER_SIZE + isize;    // offset to chunk offset array
+  dp = new_demux_packet (size);
+  memcpy (dp->buffer, buffer, size);
 
   if (mkv_d->v_skip_to_keyframe)
     {
@@ -2479,8 +2400,9 @@ handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
       track->rv_kf_pts = timestamp;
     }
   else
-    dp->pts = real_fix_timestamp (track, dp->buffer + REALHEADER_SIZE,
-                                  timestamp);
+    dp->pts = real_fix_timestamp (dp->buffer, timestamp,
+                                  ((sh_video_t*)demuxer->video->sh)->bih->biCompression,
+                                  &track->rv_kf_base, &track->rv_kf_pts, NULL);
   dp->pos = demuxer->filepos;
   dp->flags = block_bref ? 0 : 0x10;
 
