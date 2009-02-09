@@ -151,9 +151,9 @@ void GetCpuCaps( CpuCaps *caps)
 		ptmpstr=tmpstr=GetCpuFriendlyName(regs, regs2);
 		while(*ptmpstr == ' ')        // strip leading spaces
 		    ptmpstr++;
-		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: %s ", ptmpstr);
+		mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: %s ", ptmpstr);
 		free(tmpstr);
-		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"(Family: %d, Model: %d, Stepping: %d)\n",
+		mp_msg(MSGT_CPUDETECT,MSGL_V,"(Family: %d, Model: %d, Stepping: %d)\n",
 		    caps->cpuType, caps->cpuModel, caps->cpuStepping);
 
 	}
@@ -545,40 +545,40 @@ void GetCpuCaps( CpuCaps *caps)
           }
         }
 #endif /* __APPLE__ */
-        mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
+        mp_msg(MSGT_CPUDETECT,MSGL_V,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
 #endif /* HAVE_ALTIVEC */
 
 if (ARCH_IA64)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Intel Itanium\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: Intel Itanium\n");
 
 if (ARCH_SPARC)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Sun Sparc\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: Sun Sparc\n");
 
 if (ARCH_ARM)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: ARM\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: ARM\n");
 
 if (ARCH_PPC)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: PowerPC\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: PowerPC\n");
 
 if (ARCH_ALPHA)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Digital Alpha\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: Digital Alpha\n");
 
 if (ARCH_SGI_MIPS)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: SGI MIPS\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: SGI MIPS\n");
 
 if (ARCH_PA_RISC)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Hewlett-Packard PA-RISC\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: Hewlett-Packard PA-RISC\n");
 
 if (ARCH_S390)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: IBM S/390\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: IBM S/390\n");
 
 if (ARCH_S390X)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: IBM S/390X\n");
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"CPU: IBM S/390X\n");
 
 if (ARCH_VAX)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO, "CPU: Digital VAX\n" );
+	mp_msg(MSGT_CPUDETECT,MSGL_V, "CPU: Digital VAX\n" );
 
 if (ARCH_XTENSA)
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO, "CPU: Tensilica Xtensa\n" );
+	mp_msg(MSGT_CPUDETECT,MSGL_V, "CPU: Tensilica Xtensa\n" );
 }
 #endif /* !ARCH_X86 */
