@@ -176,17 +176,13 @@ mohou být distribuovány za podmínek stanovených v GNU General Public License
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
-
-&containers.xml;
 &codecs.xml;
 &video.xml;
 &tvinput.xml;
 &radio.xml;
-
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
-&bugs.xml;
 &skin.xml;
