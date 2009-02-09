@@ -729,7 +729,7 @@ mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=j
 
     <para>
       Dieses Feature kann nur mit dem <systemitem>mpeg4</systemitem>-Codec von
-      <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+      <systemitem class="library">libavcodec</systemitem>
       verwendet werden. Vergiss nicht: Obwohl <application>MPlayer</application>
       die erzeugte Datei korrekt abspielen wird, könnten andere Player das verkehrte
       Seitenverhältnis benutzen.

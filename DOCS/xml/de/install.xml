@@ -395,6 +395,154 @@ make install</screen>
   </sect1>
 
   <!-- ********** -->
+  <sect1 id="codec-installation">
+    <title>Codec Installation</title>
+
+    <sect2 id="xvid">
+      <title>Xvid</title>
+
+      <para>
+        <ulink url="http://www.xvid.org">Xvid</ulink> ist ein freier MPEG-4 ASP
+        konformer Videocodec. Beachte, dass Xvid nicht benötigt wird, um mit Xvid
+        encodiertes Video zu decodieren. In der Standardkonfiguration wird dafür
+        <systemitem class="library">libavcodec</systemitem> benutzt, da er höhere
+        Geschwindigkeit bietet.
+      </para>
+
+      <procedure>
+        <title>Installation von <systemitem class="library">Xvid</systemitem></title>
+        <para>
+          Wie die meiste Open-Source-Software gibt es zwei verfügbare Varianten:
+          <ulink url="http://www.xvid.org/downloads.html">offizielle Releases</ulink>
+          und die CVS-Version.
+          Die CVS-Version ist für die Benutzung normalerweise stabil genug, da es meistens
+          Fehlerbehebungen für Bugs enthält, die im Release vorhanden sind.
+          Hier also, was du zu tun hast, um <systemitem class="library">Xvid</systemitem>
+          vom CVS mit <application>MEncoder</application> ans Laufen zu bringen
+          (du benötigst mindestens <application>autoconf</application> 2.50,
+          <application>automake</application> und <application>libtool</application>):
+        </para>
+        <step><para>
+            <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
+          </para></step>
+        <step><para>
+            <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
+          </para></step>
+        <step><para>
+            <screen>cd xvidcore/build/generic</screen>
+          </para></step>
+        <step><para>
+            <screen>./bootstrap.sh</screen>
+          </para></step>
+        <step><para>
+            <screen>./configure</screen>
+            Du musst möglicherweise ein paar Optionen hinzuzufügen (schaue dir
+            die Ausgabe von <command>./configure --help</command> an).
+          </para></step>
+        <step><para>
+            <screen>make &amp;&amp; make install</screen>
+          </para></step>
+      </procedure>
+    </sect2>
+
+
+    <sect2 id="codec-x264">
+      <title><systemitem class="library">x264</systemitem></title>
+      <para>
+        <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+        ist eine Bibliothek für die Erstellung von H.264-Videostreams.
+        <application>MPlayer</application> Sourcen werden auf den neuesten Stand
+        gebracht wenn es an <systemitem class="library">x264</systemitem> API
+        Veränderungen gibt. Deswegen wird empfohlen
+        <application>MPlayer</application> aus dem Subversion zu benutzen.
+      </para>
+
+      <para>
+        Wenn du GIT installiert hast, können die aktuellen x264 Sourcen
+        mit dem folgen Befehl besorgt werden:
+        <screen>git clone git://git.videolan.org/x264.git</screen>
+
+        Bau und installier dann nach der Standardformel:
+        <screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
+
+        Jetzt nochmal <filename>./configure</filename> ausführen, damit
+        <application>MPlayer</application> die Unterstützung für
+        <systemitem class="library">x264</systemitem> aktiviert.
+      </para>
+    </sect2>
+
+
+    <sect2 id="aac">
+      <title>AAC Codec</title>
+      <para>
+        AAC (Advanced Audio Coding) ist ein Audiocodec, der vorwiegend
+        in MOV- und MP4-Dateien vorkommt. Ein Open-Source-Decoder namens
+        FAAD ist auf <ulink url="http://www.audiocoding.com"/>
+        verfügbar. <application>MPlayer</application> enthält
+        eine CVS Version von libfaad 2.1 beta, so dass es nicht extra
+        installiert werden muss.
+      </para>
+
+      <para>
+        Um die externe FAAD-Bibliothek verwenden zu können (z.B. um mit gcc 3.2
+        compilieren zu können, der die interne Version nicht übersetzt), muss
+        die Bibliothek von der
+        <ulink url="http://www.audiocoding.com/modules/mydownloads/">Download Seite</ulink>
+        heruntergeladen und installiert werden. Anschließend muss die Option
+        <option>--enable-faad-external</option> an <filename>./configure</filename>
+        übergeben werden, damit die externe Bibliothek erkannt wird.
+        Es ist lediglich erforderlich, vorher libfaad zu installieren, und zwar so:
+        <screen>
+cd faad2/
+sh bootstrap
+./configure
+cd libfaad
+make
+make install<!--
+        --></screen>
+        Binärpakete sind auf audiocoding.com nicht erhältlich, Debian-Pakete
+        können aber mit (apt-)get von
+        <ulink url="http://www.debian-multimedia.org/">Christian Marillat's Homepage</ulink>, Mandrake/Mandriva RPMs von
+        <ulink url="http://plf.zarb.org">P.L.F</ulink> und RedHat RPMs
+        von <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>
+        heruntergeladen werden.
+      </para>
+    </sect2>
+
+    <sect2 id="amr">
+      <title>AMR Codecs</title>
+      <para>
+        Adaptive Multi-Rate Sprachcodec, wird in 3G (UMTS) Mobiltelephonen verwendet.
+        Die Referenzimplementierung ist auf
+        <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+        erhältlich (frei - wie in Freibier - für private Benutzung).
+        Um die Unterstützung zu aktiveren, lade die Bibliotheken für
+        <ulink url="http://www.penguin.cz/~utx/amr">AMR-NB and AMR-WB</ulink>
+        runter und installiere sie, indem du die Anweisungen auf dieser Seite befolgst.
+        Compiliere MPlayer danach erneut.
+      </para>
+      <para>
+        Für Unterstützung müssen die Codecs
+        <ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
+        und
+        <ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
+        heruntergeladen und in dasselbe Verzeichnis wie
+        <application>MPlayer</application> verschoben werden.
+        Anschließend folgende Befehle ausführen:
+        <screen>
+unzip 26104-610.zip
+unzip 26104-610_ANSI_C_source_code.zip
+mv c-code libavcodec/amr_float
+unzip 26204-600.zip
+unzip 26204-600_ANSI-C_source_code.zip
+mv c-code libavcodec/amrwb_float<!--
+        --></screen>
+        Befolge danach einfach das <link linkend="features">Standardvorgehen für die Compilierung</link> von
+        <application>MPlayer</application>.
+      </para>
+    </sect2>
+
+  </sect1>
 
   <sect1 id="rtc">
     <title>RTC</title>

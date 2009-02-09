@@ -120,7 +120,7 @@
         <listitem>
           <para>
             Encodierung zu allen Codecs von FFmpegs
-            <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+            <systemitem class="library">libavcodec</systemitem>
           </para>
         </listitem>
         <listitem>
@@ -214,16 +214,12 @@
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
-
-&containers.xml;
-&codecs.xml;
-&video.xml;
 &tvinput.xml;
 &radio.xml;
-
+&video.xml;
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
 &skin.xml;

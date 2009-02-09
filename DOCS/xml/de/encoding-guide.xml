@@ -2541,7 +2541,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
       Codecfamilie</title>
 
     <para>
-      <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+      <systemitem class="library">libavcodec</systemitem>
       stellt einfache Encodierung für eine Menge interessanter Video- und Audioformate
       zur Verfügung.
       Du kannst folgende Codecs encodieren (mehr oder weniger aktuell):
@@ -3191,7 +3191,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
     <sect2 id="custommatrices"><title>Maßgeschneiderte inter/intra-Matrizen</title>
 
       <para>
-        Mit diesem Feature von <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+        Mit diesem Feature von <systemitem class="library">libavcodec</systemitem>
         bist du in der Lage, eigene inter- (I-Frames/Keyframes) und intra-Matrizen
         (P-Frames/predicted Frames) zu setzen. Es wird von vielen Codecs unterstützt:
         <systemitem>mpeg1video</systemitem> und <systemitem>mpeg2video</systemitem>
