@@ -219,8 +219,9 @@ J'ai des problèmes pour lire les fichiers avec le codec ... . Puis-je l'utilise
 </para></question>
 <answer><para>
 Regardez l'<ulink url="../../codecs-status.html">état des codecs</ulink>,
-si il ne contient pas votre codec, lisez la <link linkend="codecs">documentation des codecs</link>,
-surtout le <link linkend="codec-importing">HOWTO importation des codecs</link> et contactez-nous.
+si il ne contient pas votre codec, lisez le
+<ulink url="../../tech/win32-codec-howto">HOWTO importation des codecs Win32</ulink>
+ et contactez-nous.
 </para></answer>
 </qandaentry>
 

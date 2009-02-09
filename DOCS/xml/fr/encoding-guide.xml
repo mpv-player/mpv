@@ -2329,7 +2329,7 @@ mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpf
 <title>Encodage avec la famille de codec <systemitem class="library">libavcodec</systemitem></title>
 
 <para>
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+<systemitem class="library">libavcodec</systemitem>
 fournit un encodage simple pour plusieurs formats vidéos et audio intéressants.
 Vous pouvez encoder vers les codecs suivant
 (la liste suivante est plus ou moins à jour)&nbsp;:
@@ -2957,7 +2957,7 @@ meilleure.
 
 <para>
 Grâce à cette fonctionnalité de
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+<systemitem class="library">libavcodec</systemitem>
 vous pouvez rentrer des matrices personnalisées inter (image I ou images clé) et intra
 (image P ou image prédite). De nombreux codecs le supportent - on rapporte que
 <systemitem>mpeg1video</systemitem> et <systemitem>mpeg2video</systemitem> fonctionnent avec.
@@ -3695,7 +3695,7 @@ résultats&thinsp;?</title>
 <para>
   <systemitem class="library">x264</systemitem> est une librairie libre pour
   encoder des flux vidéo H.264/AVC.
-  Avant de commencer à encoder, vous avez besoin de <link linkend="codec-x264-encode">
+  Avant de commencer à encoder, vous avez besoin de <link linkend="x264">
   paramétrer <application>MEncoder</application> pour qu'il le supporte</link>.
 </para>
 
