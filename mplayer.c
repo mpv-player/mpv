@@ -2592,6 +2592,8 @@ int gui_no_filename=0;
 #endif
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
+	// stop Windows from showing all kinds of annoying error dialogs
+	SetErrorMode(0x8003);
 	// request 1ms timer resolution
 	timeBeginPeriod(1);
 	if(proc_priority){
