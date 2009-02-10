@@ -351,6 +351,143 @@ ln -s <replaceable>$PREFIX/mplayer/arial-24</replaceable> $PREFIX/mplayer/font
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
+<sect1 id="codec-installation">
+<title>Codec installation</title>
+
+<!-- ********** -->
+
+<sect2 id="xvid">
+<title>Xvid</title>
+
+<para>
+<ulink url="http://www.xvid.org">Xvid</ulink> свободный, MPEG-4 ASP совместимый
+видео кодек, особенностями которого являются двухпроходное кодирование и
+полная поддержка MPEG-4 ASP.
+Имейте в виду, что Xvid не нужен для декодирования Xvid-кодированного видео.
+<systemitem class="library">libavcodec</systemitem> используется по-умолчанию,
+т.к. обеспечивает более высокую скорость.
+</para>
+
+<procedure>
+<title>Установка <systemitem class="library">Xvid</systemitem></title>
+
+<para>
+  Как и большинство ПО с открытым исходным кодом, он доступен как в виде
+  <ulink url="http://www.xvid.org/downloads.html">официальных релизов</ulink>,
+  так и в виде CVS версии.
+  Как правило, CVS версия достаточно стабильна для использования, т.к. в большинстве
+  случаев ее особенностью является отсутствие ошибок, присутствующих в релизах.
+  Далее описывается как заставить  работать
+  <systemitem class="library">Xvid</systemitem> CVS с <application>MEncoder</application>:
+</para>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
+</para></step>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
+</para></step>
+<step><para>
+  <screen>cd xvidcore/build/generic</screen>
+</para></step>
+<step><para>
+  <screen>./bootstrap.sh</screen>
+</para></step>
+<step><para>
+  <screen>./configure</screen>
+  Вам может потребоваться добавить некоторые опции (посмотрите вывод
+  <command>./configure --help</command>).
+</para></step>
+<step><para>
+  <screen>make &amp;&amp; make install</screen>
+</para></step>
+<step><para>
+  Перекомпилируйте <application>MPlayer</application>.
+</para></step>
+</procedure>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="x264">
+<title><systemitem class="library">x264</systemitem></title>
+
+<para>
+<ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+is a library for creating H.264 video.
+<application>MPlayer</application> sources are updated whenever
+an <systemitem class="library">x264</systemitem> API change
+occurs, so it is always suggested to use
+<application>MPlayer</application> from Subversion.
+</para>
+
+<para>
+If you have a GIT client installed, the latest x264
+sources can be gotten with this command:
+<screen>git clone git://git.videolan.org/x264.git</screen>
+
+Then build and install in the standard way:
+<screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
+
+Now rerun <filename>./configure</filename> for
+<application>MPlayer</application> to pick up
+<systemitem class="library">x264</systemitem> support.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="aac">
+<title>AAC кодек</title>
+<para>
+AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
+файлах. Декодер с открытым исходным кодом, называемый FAAD, доступен с
+<ulink url="http://www.audiocoding.com"/>.
+<application>MPlayer</application> включает в себя CVS версию libfaad 2.1 beta, поэтому
+Вам ничего не нужно дополнительно скачивать.
+</para>
+
+<para>
+Если Вы используете gcc 3.2, который не может скомпилировать встроенный FAAD,
+или просто хотите использовать внешнюю библиотеку, скачаете её с
+<ulink url="http://www.audiocoding.com/download.php">страницы загрузок</ulink>
+и укажите <filename>./configure</filename> <option>--enable-faad-external</option>.
+Вам не нужен весь faad2, чтобы декодировать AAC файлы, достаточно libfaad.
+Вот как Вы можете её собрать:
+<screen>
+cd faad2/
+sh bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+Бинарники отсутствуют на audiocoding.com, но вы можете скачать (apt-get) Debian
+пакеты с <ulink url="http://marillat.free.fr">домашней страницы Christian Marillat</ulink>,
+Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHat RPM'ники
+с <ulink url="http://rpm.livna.org/">Livna</ulink>.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="amr">
+<title>AMR кодеки</title>
+<para>
+Речевой кодек Adaptive Multi-Rate используется в мобильных телефонах третьего поколения (3G).
+
+Исходная реализация доступна с
+<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+(бесплатна для личного использования).
+Чтобы включить поддержку, скачайте и установите библиотеки поддержки для
+<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB и AMR-WB</ulink>, следуя
+инструкциям на указанной странице.
+</para>
+</sect2>
+
+</sect1>
+
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 <sect1 id="rtc">
 <title>RTC</title>

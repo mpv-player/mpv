@@ -118,7 +118,7 @@ windows media player. Даже AVI файлы без индекса являют
 </para></listitem>
 <listitem><para>
   кодирование во все кодеки FFmpeg'овской библиотеки
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+  <systemitem class="library">libavcodec</systemitem>
 </para></listitem>
 <listitem><para>
   кодирование видео с <emphasis role="bold">V4L совместимых TV тюнеров
@@ -181,7 +181,6 @@ Public License Version 2.
 
 &usage.xml;
 &cd-dvd.xml;
-&codecs.xml;
 &tvinput.xml;
 &radio.xml;
 &video.xml;

@@ -738,7 +738,7 @@ MPEG-4 имеет уникальную возможность: видео пот
 
 <para>
 Эта возможность может использоваться только с 
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>'овским
+<systemitem class="library">libavcodec</systemitem>'овским
 <systemitem>mpeg4</systemitem> кодеком. Имейте в виду: хотя 
 <application>MPlayer</application> корректно воспроизведет файл, другие 
 проигрыватели могут использовать неверные пропорции.
