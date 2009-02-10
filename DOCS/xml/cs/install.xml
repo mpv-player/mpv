@@ -348,6 +348,146 @@ Menu Preferences NENÍ v současnosti IMPLEMENTOVÁNO!
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
+<sect1 id="codec-installation">
+<title>Codec installation</title>
+
+<!-- ********** -->
+
+<sect2 id="xvid">
+<title>Xvid</title>
+
+<para>
+<ulink url="http://www.xvid.org">Xvid</ulink> je free software MPEG-4 ASP
+kompatibilní video kodec, jenž má podporu pro dvouprůchodové enkódování a
+plně podporuje MPEG-4 ASP.
+Poznamenejme, že Xvid není nutný pro dekódování Xvidem enkódovaného videa.
+Jako výchozí je používán <systemitem class="library">libavcodec</systemitem>,
+jelikož poskytuje vyšší rychlost.
+</para>
+
+<procedure>
+<title>Instalace <systemitem class="library">Xvid</systemitem></title>
+<para>
+  Stejně jako většina svobodného software je dostupný ve dvou verzích:
+  <ulink url="http://www.xvid.org/downloads.html">oficiálně uvolněné verzi</ulink>
+  a verzi CVS.
+  V současnosti je CVS verze obvykle dostatečně stabilní pro použití, jelikož
+  většinou obsahuje opravy chyb, které zůstaly po vydání.
+  Zde uvádíme postup pro zprovoznění <systemitem class="library">Xvid</systemitem>
+  CVS v <application>MEncoder</application>:
+</para>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
+</para></step>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
+</para></step>
+<step><para>
+  <screen>cd xvidcore/build/generic</screen>
+</para></step>
+<step><para>
+  <screen>./bootstrap.sh</screen>
+</para></step>
+<step><para>
+  <screen>./configure</screen>
+  Zde můžete přidat nějaké volby (prostudujte si výstup příkazu
+  <command>./configure --help</command>).
+</para></step>
+<step><para>
+  <screen>make &amp;&amp; make install</screen>
+</para></step>
+<step><para>
+  Znovu zkompilujte <application>MPlayer</application> s volbami.
+</para></step>
+</procedure>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="x264">
+<title><systemitem class="library">x264</systemitem></title>
+
+<para>
+<ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+is a library for creating H.264 video.
+<application>MPlayer</application> sources are updated whenever
+an <systemitem class="library">x264</systemitem> API change
+occurs, so it is always suggested to use
+<application>MPlayer</application> from Subversion.
+</para>
+
+<para>
+If you have a GIT client installed, the latest x264
+sources can be gotten with this command:
+<screen>git clone git://git.videolan.org/x264.git</screen>
+
+Then build and install in the standard way:
+<screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
+
+Now rerun <filename>./configure</filename> for
+<application>MPlayer</application> to pick up
+<systemitem class="library">x264</systemitem> support.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="aac">
+<title>Kodek AAC</title>
+
+<para>
+AAC (Advanced Audio Coding) je audio kodek, který lze občas nalézt v MOV a
+MP4 souborech. Open source dekodér jménem FAAD je k dispozici na
+<ulink url="http://www.audiocoding.com"/>.
+<application>MPlayer</application> obsahuje CVS obraz libfaad 2.1 beta,
+takže jej nemusíte stahovat dodatečně.
+</para>
+
+<para>
+Pokud používáte gcc 3.2 které nedokáže zkompilovat naši zabudovanou FAAD,
+nebo chcete použít externí knihovnu z jiných důvodů, stáhněte si ji z 
+<ulink url="http://www.audiocoding.com/modules/mydownloads/">download stránky</ulink>
+a předejte volbu <option>--enable-faad-external</option> skriptu
+<filename>./configure</filename>.
+Pro dekódování AAC souborů nepotřebujete celou faad2, libfaad stačí.
+Zkompilujete ji takto:
+<screen>
+cd faad2/
+sh bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+Binárky na audiocoding.com nenajdete, ale můžete si je opatřit v balíčcích pro
+Debian z
+<ulink url="http://www.debian-multimedia.org/">domácí stránky Christiana Marillata</ulink>,
+Mandrake/Mandriva RPM z <ulink url="http://plf.zarb.org">P.L.F</ulink>
+a Fedora RPM ze stránek <ulink url="http://rpm.livna.org/">Livna</ulink>.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="amr">
+<title>AMR kodeky</title>
+
+<para>
+Adaptivní Multi-Rate kodek pro mluvené slovo je používán třetí generací (3G)
+mobilních telefonů.
+Referenční implementace je dostupná od
+<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+(zdarma pro osobní použití).
+Pro zapnutí podpory si stáhněte podpůrné knihovny pro
+<ulink url="http://www.penguin.cz/~utx/amr">AMR-NB a AMR-WB</ulink>
+a následujte instrukce na stránce. Potom znovu zkompilujte MPlayer.
+</para>
+</sect2>
+
+</sect1>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
 <sect1 id="rtc">
 <title>RTC</title>
 

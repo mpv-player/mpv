@@ -753,7 +753,7 @@ tento atribut MPEG-4.
 
 <para>
 Tato vlastnost může být použita pouze s kodekem <systemitem>mpeg4</systemitem> z
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>u.
+<systemitem class="library">libavcodec</systemitem>u.
 Mějte na paměti: ačkoli
 <application>MPlayer</application> korektně přehraje vytvořený soubor, ostatní
 přehrávače použijí špatný poměr stran.
