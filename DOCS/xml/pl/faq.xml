@@ -239,8 +239,7 @@ Mam problemy z odtwarzaniem plików przy użyciu kodeka ... Czy mogę ich używa
 <answer><para>
 Sprawdź <ulink url="../../codecs-status.html">status kodeków</ulink>,
 jeżeli nie zawiera on Twojego kodeka przeczytaj
-<link linkend="codecs">dokumentację kodeków</link>, a w szczególności
-<link linkend="codec-importing">HOWTO importowania kodeków</link>
+<ulink url="../../tech/win32-codec-howto">HOWTO importowania kodeków Win32</ulink>
 i skontaktuj się z nami.
 </para></answer>
 </qandaentry>
