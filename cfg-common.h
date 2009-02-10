@@ -350,25 +350,6 @@ const m_option_t msgl_config[]={
 
 };
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-struct {
-  char* name;
-  int prio;
-} priority_presets_defs[] = {
-  { "realtime", REALTIME_PRIORITY_CLASS},
-  { "high", HIGH_PRIORITY_CLASS},
-#ifdef ABOVE_NORMAL_PRIORITY_CLASS
-  { "abovenormal", ABOVE_NORMAL_PRIORITY_CLASS},
-#endif
-  { "normal", NORMAL_PRIORITY_CLASS},
-#ifdef BELOW_NORMAL_PRIORITY_CLASS
-  { "belownormal", BELOW_NORMAL_PRIORITY_CLASS},
-#endif
-  { "idle", IDLE_PRIORITY_CLASS},
-  { NULL, NORMAL_PRIORITY_CLASS} /* default */
-};
-#endif /* defined(__MINGW32__) || defined(__CYGWIN__) */
-
 extern const m_option_t noconfig_opts[];
 
 extern const m_option_t lavc_decode_opts_conf[];

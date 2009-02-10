@@ -84,9 +84,7 @@ int quiet=0;
 int enable_mouse_movements=0;
 float start_volume = -1;
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-char * proc_priority=NULL;
-#endif
+#include "osdep/priority.h"
 
 char *heartbeat_cmd;
 
@@ -2596,17 +2594,12 @@ int gui_no_filename=0;
 	SetErrorMode(0x8003);
 	// request 1ms timer resolution
 	timeBeginPeriod(1);
-	if(proc_priority){
-		int i;
-        	for(i=0; priority_presets_defs[i].name; i++){
-        		if(strcasecmp(priority_presets_defs[i].name, proc_priority) == 0)
-				break;
-		}
-		mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_SettingProcessPriority,
-				priority_presets_defs[i].name);
-		SetPriorityClass(GetCurrentProcess(), priority_presets_defs[i].prio);
-	}
 #endif	
+
+#ifdef CONFIG_PRIORITY
+    set_priority();
+#endif
+
 #ifndef CONFIG_GUI
     if(use_gui){
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoGui);

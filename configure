@@ -718,8 +718,10 @@ _ass=auto
 _rpath=no
 _asmalign_pot=auto
 _stream_cache=yes
+_priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
 def_stream_cache="#define CONFIG_STREAM_CACHE 1"
+def_priority="#undef CONFIG_PRIORITY"
 def_pthread_cache="#undef PTHREAD_CACHE"
 _need_shmem=yes
 for ac_option do
@@ -1433,7 +1435,9 @@ if win32 ; then
   _ld_extra="$_ld_extra -lwinmm"
   _pe_executable=yes
   _timer=timer-win2.c
+  _priority=yes
   def_dos_paths="#define HAVE_DOS_PATHS 1"
+  def_priority="#define CONFIG_PRIORITY 1"
 fi
 
 if mingw32 ; then
@@ -1456,7 +1460,9 @@ if os2 ; then
   _exesuf=".exe"
   _getch=getch2-os2.c
   _need_shmem=no
+  _priority=yes
   def_dos_paths="#define HAVE_DOS_PATHS 1"
+  def_priority="#define CONFIG_PRIORITY 1"
 fi
 
 for I in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
@@ -8090,6 +8096,7 @@ OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
 PNG = $_png
 PNM = $_pnm
+PRIORITY = $_priority
 PULSE = $_pulse
 PVR = $_pvr
 QTX_CODECS = $_qtx
@@ -8355,6 +8362,7 @@ $def_macosx_bundle
 $def_macosx_finder
 $def_maemo
 $def_named_asm_args
+$def_priority
 $def_quicktime
 $def_restrict_keyword
 $def_rtc
