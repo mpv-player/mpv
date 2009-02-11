@@ -494,18 +494,19 @@ change the default operation which is to skip the block described by each line.
 </para>
 </sect2>
 </sect1>
+</chapter>
 
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
-<sect1 id="advaudio" xreflabel="Advanced Audio">
-<title>Advanced audio</title>
+<chapter id="advaudio" xreflabel="Advanced Audio">
+<title>Advanced audio usage</title>
 
-<sect2 id="advaudio-surround">
+<sect1 id="advaudio-surround">
 <title>Surround/Multichannel playback</title>
 
-<sect3 id="advaudio-surround-DVD">
+<sect2 id="advaudio-surround-DVD">
 <title>DVDs</title>
 
 <para>
@@ -524,10 +525,10 @@ quadraphonic playback the default, add this line:
 <application>MPlayer</application> will then output audio in four channels when
 all four channels are available.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="advaudio-surround-stereoinfour">
+<sect2 id="advaudio-surround-stereoinfour">
 <title>Playing stereo files to four speakers</title>
 
 <para>
@@ -538,10 +539,10 @@ See the section on
 <link linkend="advaudio-channels-copying">channel copying</link> for an
 explanation.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="advaudio-surround-passthrough">
+<sect2 id="advaudio-surround-passthrough">
 <title>AC-3/DTS Passthrough</title>
 
 <para>
@@ -594,10 +595,10 @@ playing a file that does not have AC-3 or DTS audio.
 <application>MPlayer</application> will fall back anyway when an audio family
 is specified.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="hwmpa-surround-passthrough">
+<sect2 id="hwmpa-surround-passthrough">
 <title>MPEG audio Passthrough</title>
 
 <para>
@@ -613,10 +614,10 @@ without decoding it.
 To use this codec:
 <screen> mplayer -ac hwmpa </screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="advaudio-surround-matrix">
+<sect2 id="advaudio-surround-matrix">
 <title>Matrix-encoded audio</title>
 
 <para>
@@ -647,10 +648,10 @@ Good links:
 </para></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="advaudio-surround-hrtf">
+<sect2 id="advaudio-surround-hrtf">
 <title>Surround emulation in headphones</title>
 
 <para>
@@ -685,10 +686,10 @@ you have a file with a different sampling rate that you want to play using
 mplayer <replaceable>filename</replaceable> -channels 6 -af resample=48000,hrtf
 </screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="advaudio-surround-troubleshooting">
+<sect2 id="advaudio-surround-troubleshooting">
 <title>Troubleshooting</title>
 
 <para>
@@ -696,15 +697,15 @@ If you do not hear any sound out of your surround channels, check your mixer
 settings with a mixer program such as <application>alsamixer</application>;
 audio outputs are often muted and set to zero volume by default.
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="advaudio-channels">
+<sect1 id="advaudio-channels">
 <title>Channel manipulation</title>
 
-<sect3 id="advaudio-channels-general">
+<sect2 id="advaudio-channels-general">
 <title>General information</title>
 
 <para>
@@ -773,10 +774,10 @@ The <option>channels</option> audio filter can be used to create or remove
 channels and is useful for controlling the number of channels sent to the sound
 card. See the following sections for more information on channel manipulation.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="advaudio-channels-mono">
+<sect2 id="advaudio-channels-mono">
 <title>Playing mono with two speakers</title>
 
 <para>
@@ -800,10 +801,10 @@ the right value. For example:
 mplayer <replaceable>filename</replaceable> -af extrastereo=0,volume=5
 </screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="advaudio-channels-copying">
+<sect2 id="advaudio-channels-copying">
 <title>Channel copying/moving</title>
 
 <para>
@@ -904,10 +905,10 @@ Combine all the suboptions to get:
 mplayer <replaceable>filename</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1
 </screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="advaudio-channels-mixing">
+<sect2 id="advaudio-channels-mixing">
 <title>Channel mixing</title>
 
 <para>
@@ -1074,12 +1075,12 @@ Combine all those options to get:
 mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=5:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0.5:0.5:0:0:0
 </screen>
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="advaudio-volume">
+<sect1 id="advaudio-volume">
 <title>Software Volume adjustment</title>
 
 <para>
@@ -1121,6 +1122,5 @@ values, <option>volume</option> may need to clip the signal to avoid sending
 your sound card data that is outside the allowable range; this will result in
 distorted audio.
 </para>
-</sect2>
 </sect1>
 </chapter>
