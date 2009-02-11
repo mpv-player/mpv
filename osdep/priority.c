@@ -34,9 +34,6 @@
 
 #else
 
-/* Disable non-underscored versions of non-ANSI functions
- * as otherwise int eof would conflict with eof(). */
-#define _UWIN 1
 #include <windows.h>
 
 #endif /* __OS2__ */
