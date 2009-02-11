@@ -1229,7 +1229,7 @@ Use <filename>avisubdump.c</filename> from the
 
 <qandaentry>
 <question><para>
-MPlayer won't...
+MEncoder won't...
 </para></question>
 <answer><para>
 Have a look at the <filename class="directory">TOOLS</filename>
