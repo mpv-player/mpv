@@ -985,16 +985,7 @@ tests: $(TESTS)
 testsclean:
 	rm -f $(TESTS)
 
-TOOLS = TOOLS/alaw-gen$(EXESUF) \
-        TOOLS/asfinfo$(EXESUF) \
-        TOOLS/avi-fix$(EXESUF) \
-        TOOLS/avisubdump$(EXESUF) \
-        TOOLS/compare$(EXESUF) \
-        TOOLS/dump_mp4$(EXESUF) \
-        TOOLS/movinfo$(EXESUF) \
-        TOOLS/netstream$(EXESUF) \
-        TOOLS/subrip$(EXESUF) \
-        TOOLS/vivodump$(EXESUF) \
+TOOLS = $(addsuffix $(EXESUF),$(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 movinfo netstream subrip vivodump))
 
 ifdef ARCH_X86
 TOOLS += TOOLS/modify_reg$(EXESUF)
