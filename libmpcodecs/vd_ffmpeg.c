@@ -15,11 +15,11 @@
 #include "vd_internal.h"
 
 static vd_info_t info = {
-	"FFmpeg's libavcodec codec family",
-	"ffmpeg",
-	"A'rpi",
-	"A'rpi, Michael, Alex",
-	"native codecs"
+        "FFmpeg's libavcodec codec family",
+        "ffmpeg",
+        "A'rpi",
+        "A'rpi, Michael, Alex",
+        "native codecs"
 };
 
 LIBVD_EXTERN(ffmpeg)
@@ -61,8 +61,8 @@ static enum PixelFormat get_format(struct AVCodecContext * avctx,
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_render_slice(struct AVCodecContext *s,
-                	AVFrame *src, int offset[4],
-                	int y, int type, int height);
+                        AVFrame *src, int offset[4],
+                        int y, int type, int height);
 #endif
 
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
@@ -86,25 +86,25 @@ static int lavc_param_bitexact=0;
 static char *lavc_avopt = NULL;
 
 const m_option_t lavc_decode_opts_conf[]={
-	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
-	{"er", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
-	{"idct", &lavc_param_idct_algo, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-	{"ec", &lavc_param_error_concealment, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
-	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
-	{"vismv", &lavc_param_vismv, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
-	{"st", &lavc_param_skip_top, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
-	{"sb", &lavc_param_skip_bottom, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
+        {"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
+        {"er", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
+        {"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
+        {"idct", &lavc_param_idct_algo, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
+        {"ec", &lavc_param_error_concealment, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
+        {"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
+        {"vismv", &lavc_param_vismv, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
+        {"st", &lavc_param_skip_top, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
+        {"sb", &lavc_param_skip_bottom, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
         {"fast", &lavc_param_fast, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG2_FAST, NULL},
-	{"lowres", &lavc_param_lowres_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"skiploopfilter", &lavc_param_skip_loop_filter_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"skipidct", &lavc_param_skip_idct_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"skipframe", &lavc_param_skip_frame_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        {"lowres", &lavc_param_lowres_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        {"skiploopfilter", &lavc_param_skip_loop_filter_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        {"skipidct", &lavc_param_skip_idct_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        {"skipframe", &lavc_param_skip_frame_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
         {"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
         {"bitexact", &lavc_param_bitexact, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_BITEXACT, NULL},
         {"o", &lavc_avopt, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
+        {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 static enum AVDiscard str2AVDiscard(char *str) {
@@ -127,30 +127,30 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     case VDCTRL_QUERY_FORMAT:
         {
             int format =(*((int*)arg));
-	    if( format == ctx->best_csp ) return CONTROL_TRUE;//supported
-	// possible conversions:
-	    switch( format ){
+            if( format == ctx->best_csp ) return CONTROL_TRUE;//supported
+        // possible conversions:
+            switch( format ){
         case IMGFMT_YV12:
         case IMGFMT_IYUV:
         case IMGFMT_I420:
-	    // "converted" using pointer/stride modification
-	    if(avctx->pix_fmt==PIX_FMT_YUV420P) return CONTROL_TRUE;// u/v swap
-	    if(avctx->pix_fmt==PIX_FMT_YUV422P && !ctx->do_dr1) return CONTROL_TRUE;// half stride
-	    break;
+            // "converted" using pointer/stride modification
+            if(avctx->pix_fmt==PIX_FMT_YUV420P) return CONTROL_TRUE;// u/v swap
+            if(avctx->pix_fmt==PIX_FMT_YUV422P && !ctx->do_dr1) return CONTROL_TRUE;// half stride
+            break;
 #if CONFIG_XVMC
         case IMGFMT_XVMC_IDCT_MPEG2:
         case IMGFMT_XVMC_MOCO_MPEG2:
             if(avctx->pix_fmt==PIX_FMT_XVMC_MPEG2_IDCT) return CONTROL_TRUE;
 #endif
-	}
+        }
         return CONTROL_FALSE;
         }
     break;
     case VDCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(avctx);
-	return CONTROL_TRUE;
+        return CONTROL_TRUE;
     case VDCTRL_QUERY_UNSEEN_FRAMES:
-	return avctx->has_b_frames + 10;
+        return avctx->has_b_frames + 10;
     }
     return CONTROL_UNKNOWN;
 }
@@ -222,21 +222,21 @@ static int init(sh_video_t *sh){
 
     ctx = sh->context = malloc(sizeof(vd_ffmpeg_ctx));
     if (!ctx)
-	return 0;
+        return 0;
     memset(ctx, 0, sizeof(vd_ffmpeg_ctx));
     
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
     if(!lavc_codec){
-	mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh->codec->dll);
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh->codec->dll);
         uninit(sh);
-	return 0;
+        return 0;
     }
 
     if(vd_use_slices && (lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND) && !do_vis_debug)
-	ctx->do_slices=1;
+        ctx->do_slices=1;
  
     if(lavc_codec->capabilities&CODEC_CAP_DR1 && !do_vis_debug && lavc_codec->id != CODEC_ID_H264 && lavc_codec->id != CODEC_ID_INTERPLAY_VIDEO && lavc_codec->id != CODEC_ID_ROQ)
-	ctx->do_dr1=1;
+        ctx->do_dr1=1;
     ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
     ctx->ip_count= ctx->b_count= 0;
 
@@ -309,37 +309,37 @@ static int init(sh_video_t *sh){
     /* SVQ3 extradata can show up as sh->ImageDesc if demux_mov is used, or
        in the phony AVI header if demux_lavf is used. The first case is
        handled here; the second case falls through to the next section. */
-	if (sh->ImageDesc) {
-	    avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
-	    avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-	    memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
-	    break;
-	}
-	/* fallthrough */
+        if (sh->ImageDesc) {
+            avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
+            avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+            memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
+            break;
+        }
+        /* fallthrough */
 
     case mmioFOURCC('A','V','R','n'):
     case mmioFOURCC('M','J','P','G'):
     /* AVRn stores huffman table in AVI header */
     /* Pegasus MJPEG stores it also in AVI header, but it uses the common
        MJPG fourcc :( */
-	if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
-	    break;
-	avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
-	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
-	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
+        if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
+            break;
+        avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
+        avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+        avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+        memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
 
 #if 0
-	{
-	    int x;
-	    uint8_t *p = avctx->extradata;
-	    
-	    for (x=0; x<avctx->extradata_size; x++)
-		mp_msg(MSGT_DECVIDEO, MSGL_INFO,"[%x] ", p[x]);
-	    mp_msg(MSGT_DECVIDEO, MSGL_INFO,"\n");
-	}
+        {
+            int x;
+            uint8_t *p = avctx->extradata;
+            
+            for (x=0; x<avctx->extradata_size; x++)
+                mp_msg(MSGT_DECVIDEO, MSGL_INFO,"[%x] ", p[x]);
+            mp_msg(MSGT_DECVIDEO, MSGL_INFO,"\n");
+        }
 #endif
-	break;
+        break;
 
     case mmioFOURCC('R', 'V', '1', '0'):
     case mmioFOURCC('R', 'V', '1', '3'):
@@ -350,27 +350,27 @@ static int init(sh_video_t *sh){
             /* only 1 packet per frame & sub_id from fourcc */
             avctx->extradata_size= 8;
             avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-	    ((uint32_t*)avctx->extradata)[0] = 0;
-	    ((uint32_t*)avctx->extradata)[1] =
-        	(sh->format == mmioFOURCC('R', 'V', '1', '3')) ? 0x10003001 : 0x10000000;
+            ((uint32_t*)avctx->extradata)[0] = 0;
+            ((uint32_t*)avctx->extradata)[1] =
+                (sh->format == mmioFOURCC('R', 'V', '1', '3')) ? 0x10003001 : 0x10000000;
         } else {
-	    /* has extra slice header (demux_rm or rm->avi streamcopy) */
-	    avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
-	    avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-	    memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
-	}
-	avctx->sub_id= AV_RB32(avctx->extradata+4);
+            /* has extra slice header (demux_rm or rm->avi streamcopy) */
+            avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+            avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+            memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
+        }
+        avctx->sub_id= AV_RB32(avctx->extradata+4);
 
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
         break;
 
     default:
-	if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
-	    break;
-	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
-	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
-	break;
+        if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
+            break;
+        avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
+        avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+        memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
+        break;
     }
     /* Pass palette to codec */
     if (sh->bih && (sh->bih->biBitCount <= 8)) {
@@ -384,10 +384,10 @@ static int init(sh_video_t *sh){
             /* Palette size in biClrUsed */
             memcpy(avctx->palctrl->palette, sh->bih+1,
                    FFMIN(sh->bih->biClrUsed * 4, AVPALETTE_SIZE));
-	}
+        }
 
     if(sh->bih)
-	avctx->bits_per_coded_sample= sh->bih->biBitCount;
+        avctx->bits_per_coded_sample= sh->bih->biBitCount;
 
     if(lavc_param_threads > 1)
         avcodec_thread_init(avctx, lavc_param_threads);
@@ -429,12 +429,12 @@ static void uninit(sh_video_t *sh){
     av_freep(&avctx);
     av_freep(&ctx->pic);
     if (ctx)
-	free(ctx);
+        free(ctx);
 }
 
 static void draw_slice(struct AVCodecContext *s,
-                	AVFrame *src, int offset[4],
-                	int y, int type, int height){
+                        AVFrame *src, int offset[4],
+                        int y, int type, int height){
     sh_video_t * sh = s->opaque;
     uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
 #if 0
@@ -478,57 +478,57 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
     // if sh->ImageDesc is non-NULL, it means we decode QuickTime(tm) video.
     // use dimensions from BIH to avoid black borders at the right and bottom.
     if (sh->bih && sh->ImageDesc) {
-	width = sh->bih->biWidth>>lavc_param_lowres;
-	height = sh->bih->biHeight>>lavc_param_lowres;
+        width = sh->bih->biWidth>>lavc_param_lowres;
+        height = sh->bih->biHeight>>lavc_param_lowres;
     }
     
      // it is possible another vo buffers to be used after vo config()
      // lavc reset its buffers on width/heigh change but not on aspect change!!!
     if (av_cmp_q(avctx->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
-	width != sh->disp_w  ||
-	height != sh->disp_h ||
-	pix_fmt != ctx->pix_fmt ||
-	!ctx->vo_initialized)
+        width != sh->disp_w  ||
+        height != sh->disp_h ||
+        pix_fmt != ctx->pix_fmt ||
+        !ctx->vo_initialized)
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
-	if (sh->aspect == 0 ||
-	    av_cmp_q(avctx->sample_aspect_ratio, 
-	             ctx->last_sample_aspect_ratio))
-	    sh->aspect = aspect;
-	ctx->last_sample_aspect_ratio = avctx->sample_aspect_ratio;
-	sh->disp_w = width;
-	sh->disp_h = height;
-	ctx->pix_fmt = pix_fmt;
-	switch(pix_fmt){
-	// YUVJ are YUV formats that use the full Y range and not just
-	// 16 - 235 (see colorspaces.txt).
-	// Currently they are all treated the same way.
-	case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
-	case PIX_FMT_YUVJ420P:
-	case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
-	case PIX_FMT_YUVJ422P:
-	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg / huffyuv
-	case PIX_FMT_YUVJ444P:
-	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //photo jpeg
-	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
-	case PIX_FMT_YUYV422: ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
-	case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_RGB24;break; //qtrle
-	case PIX_FMT_RGB32:   ctx->best_csp=IMGFMT_BGR32;break; //huffyuv / mjpeg
-	case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //8bps
-	case PIX_FMT_RGB555:  ctx->best_csp=IMGFMT_BGR15;break; //rpza,cram
-	case PIX_FMT_RGB565:  ctx->best_csp=IMGFMT_BGR16;break; //4xm
-	case PIX_FMT_GRAY8:   ctx->best_csp=IMGFMT_Y800;break; // gray jpeg
-	case PIX_FMT_PAL8:    ctx->best_csp=IMGFMT_BGR8;break; //8bps,mrle,cram
+        mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
+        if (sh->aspect == 0 ||
+            av_cmp_q(avctx->sample_aspect_ratio, 
+                     ctx->last_sample_aspect_ratio))
+            sh->aspect = aspect;
+        ctx->last_sample_aspect_ratio = avctx->sample_aspect_ratio;
+        sh->disp_w = width;
+        sh->disp_h = height;
+        ctx->pix_fmt = pix_fmt;
+        switch(pix_fmt){
+        // YUVJ are YUV formats that use the full Y range and not just
+        // 16 - 235 (see colorspaces.txt).
+        // Currently they are all treated the same way.
+        case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
+        case PIX_FMT_YUVJ420P:
+        case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
+        case PIX_FMT_YUVJ422P:
+        case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg / huffyuv
+        case PIX_FMT_YUVJ444P:
+        case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //photo jpeg
+        case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
+        case PIX_FMT_YUYV422: ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
+        case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_RGB24;break; //qtrle
+        case PIX_FMT_RGB32:   ctx->best_csp=IMGFMT_BGR32;break; //huffyuv / mjpeg
+        case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //8bps
+        case PIX_FMT_RGB555:  ctx->best_csp=IMGFMT_BGR15;break; //rpza,cram
+        case PIX_FMT_RGB565:  ctx->best_csp=IMGFMT_BGR16;break; //4xm
+        case PIX_FMT_GRAY8:   ctx->best_csp=IMGFMT_Y800;break; // gray jpeg
+        case PIX_FMT_PAL8:    ctx->best_csp=IMGFMT_BGR8;break; //8bps,mrle,cram
 #if CONFIG_XVMC
         case PIX_FMT_XVMC_MPEG2_MC:ctx->best_csp=IMGFMT_XVMC_MOCO_MPEG2;break;
         case PIX_FMT_XVMC_MPEG2_IDCT:ctx->best_csp=IMGFMT_XVMC_IDCT_MPEG2;break;
 #endif
-	default:
-	    ctx->best_csp=0;
-	}
-    	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h, ctx->best_csp))
-    		return -1;
-	ctx->vo_initialized = 1;
+        default:
+            ctx->best_csp=0;
+        }
+            if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h, ctx->best_csp))
+                    return -1;
+        ctx->vo_initialized = 1;
     }
     return 0;
 }
@@ -598,19 +598,19 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
   }
 
     mpi= mpcodecs_get_image(sh,type, flags,
-			(width+align)&(~align), (height+align)&(~align));
+                        (width+align)&(~align), (height+align)&(~align));
 
     // ok, let's see what did we get:
     if(  mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
        !(mpi->flags&MP_IMGFLAG_DIRECT)){
-	// nice, filter/vo likes draw_callback :)
-	avctx->draw_horiz_band= draw_slice;
+        // nice, filter/vo likes draw_callback :)
+        avctx->draw_horiz_band= draw_slice;
     } else
-	avctx->draw_horiz_band= NULL;
+        avctx->draw_horiz_band= NULL;
 
-	// Palette support: libavcodec copies palette to *data[1]
-	if (mpi->bpp == 8)
-		mpi->planes[1] = av_malloc(AVPALETTE_SIZE);
+        // Palette support: libavcodec copies palette to *data[1]
+        if (mpi->bpp == 8)
+                mpi->planes[1] = av_malloc(AVPALETTE_SIZE);
 
     pic->data[0]= mpi->planes[0];
     pic->data[1]= mpi->planes[1];
@@ -682,9 +682,9 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
         ctx->b_count--;
   }
 
-	// Palette support: free palette buffer allocated in get_buffer
-	if ( mpi && (mpi->bpp == 8))
-		av_freep(&mpi->planes[1]);
+        // Palette support: free palette buffer allocated in get_buffer
+        if ( mpi && (mpi->bpp == 8))
+                av_freep(&mpi->planes[1]);
 
     if(pic->type!=FF_BUFFER_TYPE_USER){
         avcodec_default_release_buffer(avctx, pic);
@@ -700,10 +700,10 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
 // copypaste from demux_real.c - it should match to get it working!
 //FIXME put into some header
 typedef struct dp_hdr_s {
-    uint32_t chunks;	// number of chunks
+    uint32_t chunks;        // number of chunks
     uint32_t timestamp; // timestamp from packet header
-    uint32_t len;	// length of actual data
-    uint32_t chunktab;	// offset to chunk offset array
+    uint32_t len;        // length of actual data
+    uint32_t chunktab;        // offset to chunk offset array
 } dp_hdr_t;
 
 void swap_palette(void *pal) {
@@ -730,13 +730,13 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     avctx->draw_horiz_band=NULL;
     avctx->opaque=sh;
     if(ctx->vo_initialized && !(flags&3) && !dr1){
-	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
-	    (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
-	    sh->disp_w, sh->disp_h);
-	if(mpi && mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
-	    // vd core likes slices!
-	    avctx->draw_horiz_band=draw_slice;
-	}
+        mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
+            (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
+            sh->disp_w, sh->disp_h);
+        if(mpi && mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
+            // vd core likes slices!
+            avctx->draw_horiz_band=draw_slice;
+        }
     }
 
     avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
@@ -744,7 +744,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "vd_ffmpeg data: %04x, %04x, %04x, %04x\n",
            ((int *)data)[0], ((int *)data)[1], ((int *)data)[2], ((int *)data)[3]);
     ret = avcodec_decode_video(avctx, pic,
-	     &got_picture, data, len);
+             &got_picture, data, len);
 
     dr1= ctx->do_dr1;
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
@@ -757,7 +757,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         static int frame_number=0;
         static double all_frametime=0.0;
         AVFrame *pic= avctx->coded_frame;
-	double quality=0.0;
+        double quality=0.0;
 
         if(!fvstats) {
             time_t today2;
@@ -775,19 +775,19 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
             }
         }
 
-	// average MB quantizer
-	{
-	    int x, y;
-	    int w = ((avctx->width  << lavc_param_lowres)+15) >> 4;
-	    int h = ((avctx->height << lavc_param_lowres)+15) >> 4;
-	    int8_t *q = pic->qscale_table;
-	    for( y = 0; y < h; y++ ) {
-		for( x = 0; x < w; x++ )
-		    quality += (double)*(q+x);
-		q += pic->qstride;
-	    }
-	    quality /= w * h;
-	}
+        // average MB quantizer
+        {
+            int x, y;
+            int w = ((avctx->width  << lavc_param_lowres)+15) >> 4;
+            int h = ((avctx->height << lavc_param_lowres)+15) >> 4;
+            int8_t *q = pic->qscale_table;
+            for( y = 0; y < h; y++ ) {
+                for( x = 0; x < w; x++ )
+                    quality += (double)*(q+x);
+                q += pic->qstride;
+            }
+            quality /= w * h;
+        }
 
         all_len+=len;
         all_frametime+=sh->frametime;
@@ -796,23 +796,23 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
            all_frametime, (double)(len*8)/sh->frametime/1000.0,
            (double)(all_len*8)/all_frametime/1000.0);
-	switch(pic->pict_type){
-	case FF_I_TYPE:
+        switch(pic->pict_type){
+        case FF_I_TYPE:
             fprintf(fvstats, "type= I\n");
-	    break;
-	case FF_P_TYPE:
+            break;
+        case FF_P_TYPE:
             fprintf(fvstats, "type= P\n");
-	    break;
-	case FF_S_TYPE:
+            break;
+        case FF_S_TYPE:
             fprintf(fvstats, "type= S\n");
-	    break;
-	case FF_B_TYPE:
+            break;
+        case FF_B_TYPE:
             fprintf(fvstats, "type= B\n");
-	    break;
-	default:
+            break;
+        default:
             fprintf(fvstats, "type= ? (%d)\n", pic->pict_type);
-	    break;
-	}
+            break;
+        }
         
         ctx->qp_stat[(int)(quality+0.5)]++;
         ctx->qp_sum += quality;
@@ -822,7 +822,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
 //--
 
-    if(!got_picture) return NULL;	// skipped image
+    if(!got_picture) return NULL;        // skipped image
 
     if(init_vo(sh,avctx->pix_fmt) < 0) return NULL;
 
@@ -832,10 +832,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         
     if(!mpi)
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE,
-	avctx->width, avctx->height);
-    if(!mpi){	// temporary!
-	mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_CouldntAllocateImageForCodec);
-	return NULL;
+        avctx->width, avctx->height);
+    if(!mpi){        // temporary!
+        mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_CouldntAllocateImageForCodec);
+        return NULL;
     }
     
     if(!dr1){
@@ -848,12 +848,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
     
     if (!mpi->planes[0])
-	return NULL;
+        return NULL;
 
     if(avctx->pix_fmt==PIX_FMT_YUV422P && mpi->chroma_y_shift==1){
-	// we have 422p but user wants 420p
-	mpi->stride[1]*=2;
-	mpi->stride[2]*=2;
+        // we have 422p but user wants 420p
+        mpi->stride[1]*=2;
+        mpi->stride[2]*=2;
     }
     
 #ifdef WORDS_BIGENDIAN
@@ -894,7 +894,7 @@ int i;
     for(i=0;fmt[i]!=-1;i++){
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt,i);
         if( init_vo(sh,fmt[i]) >= 0)
-	    return fmt[i];
+            return fmt[i];
     }
     return fmt[0];
 }
@@ -1021,8 +1021,8 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
 }
 
 static void mc_render_slice(struct AVCodecContext *s,
-                	AVFrame *src, int offset[4],
-                	int y, int type, int height){
+                        AVFrame *src, int offset[4],
+                        int y, int type, int height){
 int width= s->width;
 sh_video_t * sh = s->opaque;
 uint8_t *source[3]= {src->data[0], src->data[1], src->data[2]};
