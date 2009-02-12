@@ -844,8 +844,12 @@ int vo_x11_check_events(Display * mydisplay)
 //         if (vo_fs && Event.xconfigure.width != vo_screenwidth && Event.xconfigure.height != vo_screenheight) break;
                 if (vo_window == None)
                     break;
-                vo_x11_update_geometry();
-                ret |= VO_EVENT_RESIZE;
+                {
+                    int old_w = vo_dwidth, old_h = vo_dheight;
+                    vo_x11_update_geometry();
+                    if (vo_dwidth != old_w || vo_dheight != old_h)
+                        ret |= VO_EVENT_RESIZE;
+                }
                 break;
             case KeyPress:
                 {
