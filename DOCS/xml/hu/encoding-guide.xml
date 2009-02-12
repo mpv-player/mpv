@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r27843 -->
+<!-- synced with r28510 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -3779,7 +3779,7 @@ Kérlek vedd figyelembe, hogy a forrásanyagodtól, a géped típusától
 <para>
 Az <systemitem class="library">x264</systemitem> egy szabad függvénykönyvtár
 a H.264/AVC videó folyamok kódolásához.
-Mielőtt elkezdenél kódolni, <link linkend="codec-x264">be kell
+Mielőtt elkezdenél kódolni, <link linkend="x264">be kell
 állítanod a <application>MEncoder</application>ben a támogatását</link>.
 </para>
 

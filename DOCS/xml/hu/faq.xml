@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28207 -->
+<!-- synced with r28531 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -229,17 +229,6 @@ Kérünk olvasd el a <link linkend="bugreports">hiba jelentési útmutatót</lin
 
 <qandaentry>
 <question><para>
-Problémám van a ... codec-kel történő lejátszással. Egyáltalán használható?
-</para></question>
-<answer><para>
-Ellenőrizd a <ulink url="../../codecs-status.html">codec státusz</ulink>
-oldalt, ha nem tartalmazza a te codecedet, olvasd el a
-<ulink url="../../tech/win32-codec-howto">Win32 codec HOWTO</ulink>-t és keress meg minket.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Egy core dump-ot kapok, amikor folyamokat dump-olok, mi a baj?
 </para></question>
 <answer><para>
@@ -391,27 +380,6 @@ Miután lefuttattad a <filename>./configure</filename>-t,
 írd át a <filename>config.h</filename> fájlt és
 cseréld ki az <systemitem>#undef FAST_OSD</systemitem> sort
 <systemitem>#define FAST_OSD</systemitem>-re. Aztán forgass újra.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Nem érem el a GUI menüt. Jobb gombbal kattintok, de semelyik menüelemet
-sem tudom elérni!
-</para></question>
-<answer><para>
-FVWM-et használsz? Próbáld ki ezt:
-<orderedlist>
-<listitem><para>
-  <menuchoice><guimenu>Start</guimenu><guisubmenu>Settings</guisubmenu>
-    <guisubmenu>Configuration</guisubmenu>
-    <guimenuitem>Base Configuration</guimenuitem></menuchoice>
-</para></listitem>
-<listitem><para>
-  Állítsd át a <systemitem>Use Applications position hints</systemitem>-et
-  <systemitem>Yes</systemitem>-re!
-</para></listitem>
-</orderedlist>
 </para></answer>
 </qandaentry>
 
@@ -709,18 +677,6 @@ fel a fájlt az FTP-re.
 
 <qandaentry>
 <question><para>
-A számítógépem az MS DivX AVI-kat ~ 640x300-as felbontásban játssza le, sztereó MP3
-hanggal, és lassú.
-Ha használom a <option>-nosound</option> kapcsolót, minden rendben (csak nincs hang).
-</para></question>
-<answer><para>
-A géped túl lassú vagy a hangkártyád vezérlője hibás. Nézd végig a dokumentációt,
-hogy megtudd, hogyan javíthatsz a teljesítményen.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Hogy tudom használni a <application>dmix</application>-et az
 <application>MPlayer</application>rel?
 </para></question>
@@ -845,21 +801,6 @@ használnod, mint pl. a <application>xine</application>,
 a <application>VLC</application> vagy az <application>Ogle</application>.
 Ha DVD navigációt akarsz látni az <application>MPlayer</application>ben,
 neked magadnak kell megcsinálnod, de vigyázz, nagy fába vágod a fejszédet.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Nem tudok egyetlen újabb DVD-t sem megnézni a Sony Pictures/BMG-től.
-</para></question>
-<answer><para>
-Ez normális; átvertek, egy szándékosan elrontott lemezt adtak el neked.
-Az egyetlen módszer ezen DVD-k lejátszására a hibás blokkok kikerülése
-az mpdvdkit2 helyett a DVDnav használatával.
-Ezt úgy teheted meg, hogy az <application>MPlayer</application> DVDnav
-támogatással fordítod le, majd a parancssori dvd:// dvdnav://-ra cseréled.
-A DVDnav nagyon nagy mértékben kizárja az mpdvdkit2-et, győződj meg róla, hogy
-a <option>--disable-mpdvdkit</option> opciót megadtad a configure-nak.
 </para></answer>
 </qandaentry>
 
@@ -1288,7 +1229,7 @@ Használd az <filename>avisubdump.c</filename> fájlt a
 
 <qandaentry>
 <question><para>
-Az MPlayer nem...
+A MEncoder nem...
 </para></question>
 <answer><para>
 Nézz bele a <filename class="directory">TOOLS</filename>
