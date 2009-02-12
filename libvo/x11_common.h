@@ -147,6 +147,5 @@ void vo_vm_close(void);
 void update_xinerama_info(void);
 
 int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
-void vo_calc_drwXY(uint32_t *drwX, uint32_t *drwY);
 
 #endif /* MPLAYER_X11_COMMON_H */

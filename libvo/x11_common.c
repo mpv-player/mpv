@@ -1876,23 +1876,6 @@ uint32_t vo_x11_get_equalizer(char *name, int *value)
     return VO_TRUE;
 }
 
-void vo_calc_drwXY(uint32_t *drwX, uint32_t *drwY)
-{
-    *drwX = *drwY = 0;
-    if (vo_fs) {
-        aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
-        vo_dwidth  = FFMIN(vo_dwidth, vo_screenwidth);
-        vo_dheight = FFMIN(vo_dheight, vo_screenheight);
-        *drwX      = (vo_screenwidth - vo_dwidth) / 2;
-        *drwY      = (vo_screenheight - vo_dheight) / 2;
-        mp_msg(MSGT_VO, MSGL_V, "[vo-fs] dx: %d dy: %d dw: %d dh: %d\n",
-               *drwX, *drwY, vo_dwidth, vo_dheight);
-    } else if (WinID == 0) {
-        *drwX = vo_dx;
-        *drwY = vo_dy;
-    }
-}
-
 #ifdef CONFIG_XV
 int vo_xv_set_eq(uint32_t xv_port, char *name, int value)
 {
