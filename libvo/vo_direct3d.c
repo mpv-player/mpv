@@ -147,47 +147,18 @@ typedef enum back_buffer_action {
  */
 static void calc_fs_rect(void)
 {
-    int scaled_height = 0;
-    int scaled_width  = 0;
+    struct vo_rect src_rect;
+    struct vo_rect dst_rect;
+    calc_src_dst_rects(priv->src_width, priv->src_height, &src_rect, &dst_rect, NULL);
 
-    // set default values
-    priv->fs_movie_rect.left     = 0;
-    priv->fs_movie_rect.right    = vo_dwidth;
-    priv->fs_movie_rect.top      = 0;
-    priv->fs_movie_rect.bottom   = vo_dheight;
-    priv->fs_panscan_rect.left   = 0;
-    priv->fs_panscan_rect.right  = priv->src_width;
-    priv->fs_panscan_rect.top    = 0;
-    priv->fs_panscan_rect.bottom = priv->src_height;
-    if (!vo_fs)
-        return;
-
-    // adjust for fullscreen aspect and panscan
-    aspect(&scaled_width, &scaled_height, A_ZOOM);
-    panscan_calc();
-    scaled_width  += vo_panscan_x;
-    scaled_height += vo_panscan_y;
-
-    // note: border is rounded to a multiple of two since at least
-    // ATI drivers can not handle odd values with YV12 input
-    if (scaled_width > vo_dwidth) {
-        int border = priv->src_width * (scaled_width - vo_dwidth) / scaled_width;
-        border = (border / 2 + 1) & ~1;
-        priv->fs_panscan_rect.left   = border;
-        priv->fs_panscan_rect.right  = priv->src_width - border;
-    } else {
-        priv->fs_movie_rect.left     = (vo_dwidth - scaled_width) / 2;
-        priv->fs_movie_rect.right    = priv->fs_movie_rect.left + scaled_width;
-    }
-    if (scaled_height > vo_dheight) {
-        int border = priv->src_height * (scaled_height - vo_dheight) / scaled_height;
-        border = (border / 2 + 1) & ~1;
-        priv->fs_panscan_rect.top    = border;
-        priv->fs_panscan_rect.bottom = priv->src_height - border;
-    } else {
-        priv->fs_movie_rect.top      = (vo_dheight - scaled_height) / 2;
-        priv->fs_movie_rect.bottom   = priv->fs_movie_rect.top + scaled_height;
-    }
+    priv->fs_movie_rect.left     = dst_rect.left;
+    priv->fs_movie_rect.right    = dst_rect.right;
+    priv->fs_movie_rect.top      = dst_rect.top;
+    priv->fs_movie_rect.bottom   = dst_rect.bottom;
+    priv->fs_panscan_rect.left   = src_rect.left;
+    priv->fs_panscan_rect.right  = src_rect.right;
+    priv->fs_panscan_rect.top    = src_rect.top;
+    priv->fs_panscan_rect.bottom = src_rect.bottom;
 
     mp_msg(MSGT_VO, MSGL_V,
            "<vo_direct3d>Fullscreen movie rectangle: t: %ld, l: %ld, r: %ld, b:%ld\n",

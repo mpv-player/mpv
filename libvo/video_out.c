@@ -355,6 +355,66 @@ int lookup_keymap_table(const struct keymap *map, int key) {
   return map->to;
 }
 
+/**
+ * \brief helper function for the kind of panscan-scaling that needs a source
+ *        and destination rectangle like Direct3D and VDPAU
+ */
+static void src_dst_split_scaling(int src_size, int dst_size, int scaled_src_size,
+                                  int *src_start, int *src_end, int *dst_start, int *dst_end) {
+  if (scaled_src_size > dst_size) {
+    int border = src_size * (scaled_src_size - dst_size) / scaled_src_size;
+    // round to a multiple of 2, this is at least needed for vo_direct3d and ATI cards
+    border = (border / 2 + 1) & ~1;
+    *src_start = border;
+    *src_end   = src_size - border;
+    *dst_start = 0;
+    *dst_end   = dst_size;
+  } else {
+    *src_start = 0;
+    *src_end   = src_size;
+    *dst_start = (dst_size - scaled_src_size) / 2;
+    *dst_end   = *dst_start + scaled_src_size;
+  }
+}
+
+/**
+ * Calculate the appropriate source and destination rectangle to
+ * get a correctly scaled picture, including pan-scan.
+ * Can be extended to take future cropping support into account.
+ *
+ * \param crop specifies the cropping border size in the left, right, top and bottom members, may be NULL
+ */
+void calc_src_dst_rects(int src_width, int src_height, struct vo_rect *src, struct vo_rect *dst, struct vo_rect *crop) {
+  static const struct vo_rect no_crop = {0, 0, 0, 0, 0, 0};
+  int scaled_width  = 0;
+  int scaled_height = 0;
+  if (!crop) crop = &no_crop;
+  src_width  -= crop->left + crop->right;
+  src_height -= crop->top  + crop->bottom;
+  if (src_width  < 2) src_width  = 2;
+  if (src_height < 2) src_height = 2;
+  dst->left = 0; dst->right  = vo_dwidth;
+  dst->top  = 0; dst->bottom = vo_dheight;
+  src->left = 0; src->right  = src_width;
+  src->top  = 0; src->bottom = src_height;
+  if (vo_fs) {
+    aspect(&scaled_width, &scaled_height, A_ZOOM);
+    panscan_calc();
+    scaled_width  += vo_panscan_x;
+    scaled_height += vo_panscan_y;
+    src_dst_split_scaling(src_width, vo_dwidth, scaled_width,
+                          &src->left, &src->right, &dst->left, &dst->right);
+    src_dst_split_scaling(src_height, vo_dheight, scaled_height,
+                          &src->top, &src->bottom, &dst->top, &dst->bottom);
+  }
+  src->left += crop->left; src->right  += crop->left;
+  src->top  += crop->top;  src->bottom += crop->top;
+  src->width  = src->right  - src->left;
+  src->height = src->bottom - src->top;
+  dst->width  = dst->right  - dst->left;
+  dst->height = dst->bottom - dst->top;
+}
+
 #if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
 /* Borrowed from vo_fbdev.c
 Monitor ranges related functions*/
