@@ -1250,7 +1250,7 @@ static char help_text[]=
 #define MSGTR_AO_ALSA_ErrorSetBlockMode "[AL_ALSA] Fehler beim Setzen des block-Modus %s.\n"
 #define MSGTR_AO_ALSA_UnableToGetInitialParameters "[AO_ALSA] Kann Startparameter nicht ermitteln: %s\n"
 #define MSGTR_AO_ALSA_UnableToSetAccessType "[AO_ALSA] Kann Zugriffstyp nicht setzen: %s\n"
-#define MSGTR_AO_ALSA_FormatNotSupportedByHardware "[AO_ALSA] Format %s wird von der Hardware nicht unterstütz, versuche Standard.\n"
+#define MSGTR_AO_ALSA_FormatNotSupportedByHardware "[AO_ALSA] Format %s wird von der Hardware nicht unterstützt, versuche Standard.\n"
 #define MSGTR_AO_ALSA_UnableToSetFormat "[AO_ALSA] Kann Format nicht setzen: %s\n"
 #define MSGTR_AO_ALSA_UnableToSetChannels "[AO_ALSA] Kann Kanäle nicht ermitteln: %s\n"
 #define MSGTR_AO_ALSA_UnableToDisableResampling "[AO_ALSA] Kann Resampling nicht deaktivieren: %s\n"
