@@ -932,15 +932,15 @@ uninstall:
 ADD_ALL_EXESUFS = $(foreach exesuf,$(EXESUFS_ALL),$(1) $(1)$(exesuf))
 
 clean:
-	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
-	rm -f $(foreach file,mplayer mencoder,$(call ADD_ALL_EXESUFS,$(file)))
+	-rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
+	-rm -f $(foreach file,mplayer mencoder,$(call ADD_ALL_EXESUFS,$(file)))
 
 distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
-	rm -rf DOCS/tech/doxygen
-	rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
-	rm -f configure.log config.mak config.h codecs.conf.h help_mp.h \
+	-rm -rf DOCS/tech/doxygen
+	-rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
+	-rm -f configure.log config.mak config.h codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) TAGS tags
-	rm -f $(foreach file,codec-cfg cpuinfo,$(call ADD_ALL_EXESUFS,$(file)))
+	-rm -f $(foreach file,codec-cfg cpuinfo,$(call ADD_ALL_EXESUFS,$(file)))
 
 doxygen:
 	doxygen DOCS/tech/Doxyfile
@@ -984,7 +984,7 @@ endif
 tests: $(addsuffix $(EXESUF),$(TESTS))
 
 testsclean:
-	rm -f $(foreach file,$(TESTS),$(call ADD_ALL_EXESUFS,$(file)))
+	-rm -f $(foreach file,$(TESTS),$(call ADD_ALL_EXESUFS,$(file)))
 
 TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 movinfo netstream subrip vivodump)
 
@@ -998,8 +998,8 @@ tools: $(addsuffix $(EXESUF),$(TOOLS))
 alltools: $(addsuffix $(EXESUF),$(ALLTOOLS))
 
 toolsclean:
-	rm -f $(foreach file,$(ALLTOOLS),$(call ADD_ALL_EXESUFSx,$(file)))
-	rm -f TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
+	-rm -f $(foreach file,$(ALLTOOLS),$(call ADD_ALL_EXESUFSx,$(file)))
+	-rm -f TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
 TOOLS/bmovl-test$(EXESUF): -lSDL_image
 
@@ -1067,7 +1067,7 @@ install-drivers: $(DRIVER_OBJS)
 	-ln -s /dev/radeon_vid /dev/rage128_vid
 
 driversclean:
-	rm -f $(DRIVER_OBJS) drivers/*~
+	-rm -f $(DRIVER_OBJS) drivers/*~
 
 dhahelper: vidix/dhahelper/dhahelper.o vidix/dhahelper/test
 
@@ -1081,7 +1081,7 @@ install-dhahelper: vidix/dhahelper/dhahelper.o
 	-mknod /dev/dhahelper c 180 0
 
 dhahelperclean:
-	rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
+	-rm -f vidix/dhahelper/*.o vidix/dhahelper/*~ vidix/dhahelper/test
 
 dhahelperwin: vidix/dhahelperwin/dhasetup.exe vidix/dhahelperwin/dhahelper.sys
 
@@ -1113,7 +1113,7 @@ install-dhahelperwin:
 	vidix/dhahelperwin/dhasetup.exe install
 
 dhahelperwinclean:
-	rm -f $(addprefix vidix/dhahelperwin/,*.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp)
+	-rm -f $(addprefix vidix/dhahelperwin/,*.o *~ dhahelper.sys dhasetup.exe base.tmp temp.exp)
 
 
 
