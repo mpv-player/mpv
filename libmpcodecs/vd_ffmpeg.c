@@ -50,10 +50,6 @@ typedef struct {
     AVRational last_sample_aspect_ratio;
 } vd_ffmpeg_ctx;
 
-//#ifdef CONFIG_LIBPOSTPROC
-//unsigned int lavc_pp=0;
-//#endif
-
 #include "m_option.h"
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
@@ -100,9 +96,7 @@ const m_option_t lavc_decode_opts_conf[]={
 	{"vismv", &lavc_param_vismv, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
 	{"st", &lavc_param_skip_top, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
 	{"sb", &lavc_param_skip_bottom, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
-#ifdef CODEC_FLAG2_FAST
         {"fast", &lavc_param_fast, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG2_FAST, NULL},
-#endif
 	{"lowres", &lavc_param_lowres_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"skiploopfilter", &lavc_param_skip_loop_filter_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"skipidct", &lavc_param_skip_idct_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -252,11 +246,7 @@ static int init(sh_video_t *sh){
 
 #if CONFIG_XVMC
 
-#ifdef CODEC_CAP_HWACCEL
     if(lavc_codec->capabilities & CODEC_CAP_HWACCEL){
-#else
-    if(lavc_codec->id == CODEC_ID_MPEG2VIDEO_XVMC){
-#endif /* CODEC_CAP_HWACCEL */
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedCodec);
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
@@ -275,9 +265,7 @@ static int init(sh_video_t *sh){
         avctx->reget_buffer= get_buffer;
     }
 
-#ifdef CODEC_FLAG_NOT_TRUNCATED
     avctx->flags|= CODEC_FLAG_NOT_TRUNCATED;
-#endif
     avctx->flags|= lavc_param_bitexact;
     
     avctx->width = sh->disp_w;
@@ -285,9 +273,7 @@ static int init(sh_video_t *sh){
     avctx->workaround_bugs= lavc_param_workaround_bugs;
     avctx->error_recognition= lavc_param_error_resilience;
     if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
-#ifdef CODEC_FLAG2_FAST
     avctx->flags2|= lavc_param_fast;
-#endif
     avctx->codec_tag= sh->format;
     avctx->stream_codec_tag= sh->video.fccHandler;
     avctx->idct_algo= lavc_param_idct_algo;
