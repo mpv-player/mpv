@@ -292,9 +292,9 @@ Tengo problemas reproduciendo archivos con el codec .... ¿Puedo usarlo?
 </para></question>
 <answer><para>
 Compruebe el <ulink url="../../codecs-status.html">estado del codec</ulink>,
-si no contiene su codec, lea la <link linkend="codecs">documentación de codecs</link>,
-especialmente el <link linkend="win32-codecs">COMO importar codecs</link> y contacte con
-nosotros.
+si no contiene su codec, lea el
+<ulink url="../../tech/win32-codec-howto">COMO importar codecs Win32</ulink>
+y contacte con nosotros.
 </para></answer>
 </qandaentry>
 
@@ -449,27 +449,6 @@ y sustituir <systemitem>#undef FAST_OSD</systemitem> con
 <answer><para>
 Está usando el controlador vo con un solo buffer (x11,xv). Con xv, use la opción
 <option>-double</option>. Pruebe también <option>-vf expand</option>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-¿Qué es exactamente <systemitem class="library">libavcodec</systemitem>?
-</para></question>
-<answer><para>
-Consulte la sección
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-¡Pero configure me dice <screen>Checking for libavcodec ... no</screen>!
-</para></question>
-<answer><para>
-Necesita obtener <systemitem class="library">libavcodec</systemitem> del CVS de FFmpeg.
-Lea las instrucciones en la sección
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para></answer>
 </qandaentry>
 

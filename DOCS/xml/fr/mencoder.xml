@@ -799,7 +799,7 @@ Excepté <application>MPlayer</application>.
 <para>
 Cette fonction ne peut être utilisée qu'avec le codec
 <systemitem>mpeg4</systemitem> de
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
+<systemitem class="library">libavcodec</systemitem>.
 Gardez bien à l'esprit que même si
 <application>MPlayer</application>
 lit correctement le fichier créé, les autres lecteurs sont susceptibles d'utiliser un mauvais ratio.

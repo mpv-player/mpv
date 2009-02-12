@@ -1,4 +1,8 @@
 /*
+ * header for implementation of '-priority'
+ *
+ * Copyright (c) 2009 by KO Myung-Hun (komh@chollian.net)
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -16,23 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_W32_COMMON_H
-#define MPLAYER_W32_COMMON_H
+#ifndef MPLAYER_PRIORITY_H
+#define MPLAYER_PRIORITY_H
 
-#include <stdint.h>
-#include <windows.h>
+extern char *proc_priority;
 
-extern HWND vo_w32_window;
-extern int vo_vm;
+void set_priority(void);
 
-int vo_w32_init(void);
-void vo_w32_uninit(void);
-void vo_w32_ontop(void);
-void vo_w32_border(void);
-void vo_w32_fullscreen(void);
-int vo_w32_check_events(void);
-int vo_w32_config(uint32_t, uint32_t, uint32_t);
-void destroyRenderingContext(void);
-void w32_update_xinerama_info(void);
+#endif /* MPLAYER_PRIORITY_H */
 
-#endif /* MPLAYER_W32_COMMON_H */

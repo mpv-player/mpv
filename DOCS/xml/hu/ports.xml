@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28148 -->
+<!-- synced with r28432 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
+<para>
+Az <application>MPlayer</application> bináris csomagjai számos forrásból elérhetőek.
+Van egy listánk a számos rendszerhez elkészített
+<ulink url="http://www.mplayerhq.hu/design7/projects.html#unofficial_packages">nem hivatalos csomagokról</ulink>
+a weboldalunkon.
+Azonban <emphasis role="bold">ezen csomagok közül egyikhez sem nyújtunk támogatást</emphasis>.
+A problémáidat a szerzőknek jelezd, ne nekünk.
+</para>
+
 <sect1 id="linux">
 <title>Linux</title>
-
-<para>
-Az elsődleges fejlesztési platform a Linux x86-on, ennek ellenére az 
-<application>MPlayer</application> számos más Linux által támogatott architektúrán
-fut.
-Bináris csomagok számos forrásból elérhetőek, de ezek közül <emphasis role="bold">
-egyik sem támogatott a fejlesztők által</emphasis>, ezért ha bármi gond adódik velük,
-akkor a bináris csomag készítőjével kell felvenni a kapcsolatot, nem pedig velünk.
-</para>
 
 <!-- ********** -->
 
@@ -45,13 +45,6 @@ A forrás fa kitakarításához add ki a következő parancsot:
 Rendszergazdaként a szokásos módszerrel telepíthető a <filename>.deb</filename> csomag:
 <screen>dpkg -i ../mplayer_<replaceable>verziószám</replaceable>.deb</screen>
 </para>
-
-<para>
-Christian Marillat már régóta készít nem-hivatalos Debian csomagokat
-az <application>MPlayerből</application>, <application>MEncoderből</application> és
-a bináris codec csomagokból, melyek akár az apt-get segítségével is telepíthetők
-<ulink url="http://www.debian-multimedia.org/">a weboldaláról</ulink>.
-</para>
 </sect2>
 
 <!-- ********** -->
@@ -60,25 +53,17 @@ a bináris codec csomagokból, melyek akár az apt-get segítségével is telep�
 <title>RedHat csomagolás</title>
 
 <para>
-Dominik Mierzejewski tartja karban az <application>MPlayer</application>
-hivatalos RPM csomagjait a Fedora-hoz és CentOS/RHEL-hez. Elérhetőek
-a <ulink url="http://rpmfusion.org/">RPMFusion repository</ulink>-ban.
-</para>
+Az RPM csomag elkészítéséhez add ki a következő parancsot az
+<application>MPlayer</application> forrás könyvtárában:
 
-<para>
-A Mandrake/Mandriva RPM csomagok a
-<ulink url="http://plf.zarb.org/">P.L.F.</ulink> oldalán találhatóak.
-A SUSE régen az <application>MPlayer</application> egy csonkított verzióját tartalmazta,
-de az utóbbi kiadásokból már kiszedték. SuSE-val működő csomagok a
-<ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>
-oldalon találhatóak.
+<screen>FIXME: megfelelő parancs beszúrása</screen>
 </para>
 </sect2>
 
 <!-- ********** -->
 
-<sect2 id="arm">
-<title>ARM</title>
+<sect2 id="arm_linux">
+<title>ARM Linux</title>
 
 <para>
 Az <application>MPlayer</application> működik ARM CPU-val rendelkező PDA-kon is,
@@ -108,11 +93,6 @@ Az <application>MPlayer</application> fut az összes ismert BSD-n.
 Léteznek ports/pkgsrc/fink/stb. verziók az
 <application>MPlayer</application>ből, amelyek nagy valószínűséggel
 egyszerűbben fordíthatóak le, mint a mi nyers forrásaink.
-</para>
-
-<para>
-A fordításhoz szükséged lesz GNU make-ra (gmake, mivel a natív BSD make más
-szintaxist használ) és a binutils valamelyik frissebb verziójára.
 </para>
 
 <para>
@@ -189,6 +169,13 @@ fordítás.
 <title>Solaris</title>
 
 <para>
+A Solarisnak még mindig rossz, POSIX-inkompatibilis rendszer eszközei és shell-je
+van az alapértelmezett helyeken. Amíg nem tesznek egy bölcs lépést a számítástechnikai
+kőkorszak leváltására, addig a <filename>/usr/xpg4/bin</filename> könyvtárat
+hozzá kell adnod a <systemitem>PATH</systemitem>-hoz.
+</para>
+
+<para>
 Az <application>MPlayer</application> Solaris 2.6 vagy újabb rendszereken működik.
 A SUN audió vezérlőjét a <option>-ao sun</option> kapcsolóval használhatod.
 </para>
@@ -222,16 +209,6 @@ is.
   mivel nagyon lerontja az MPlayer teljesítményét.
 </para></listitem>
 </itemizedlist>
-
-<para>
-A fordításhoz GNU <application>make</application>-re lesz szükséged
-(<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), natív
-Solaris make nem jó. Egy tipikus hiba, ha mégis azzal probálkozol:
-<screen>
-% /usr/ccs/bin/make
-make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
-</screen>
-</para>
 
 <para>
 Solaris SPARC-on GNU C/C++ fordító is kell; az nem számít, hogy
@@ -338,34 +315,6 @@ hogy le tudsz játszani 4 GB-nál nagyobb DVD lemezt:
 
 <!-- ********** -->
 
-<sect2 id="irix">
-<title>IRIX</title>
-
-<para>
-A GNU install programot kell feltelepítened, és (ha nem tetted bele a globális
-path-ba) megadni a helyét:
-<screen>
-./configure --with-install=<replaceable>/eleresi/ut/es/install_neve</replaceable>
-</screen>
-</para>
-
-<para>
-Lehet az alap IRIX 6.5-ös install-t is használni, de ebben az esetben
-a <filename>Makefile</filename> egy kis kézi átírásra szorul. A következő
-sort kell átírni:
-<programlisting>
-$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-</programlisting>
-erre:
-<programlisting>
-$(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-</programlisting>
-ezután símán fordíts és telepíts.
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="hp-ux">
 <title>HP-UX</title>
 
@@ -377,8 +326,8 @@ egyből kész programot kapsz. A következő információk a HOGYAN-ból lettek 
 </para>
 
 <para>
-GCC 3.4.0 vagy későbbire lesz szükséged, GNU make 3.80 vagy újabb és SDL 1.2.7 vagy
-újabb. A HP cc nem tud működő programot fordítani, a korábbi GCC verziók pedig hibásak.
+GCC 3.4.0 vagy későbbire lesz szükséged és SDL 1.2.7 vagy újabb. A HP cc nem
+tud működő programot fordítani, a korábbi GCC verziók pedig hibásak.
 Az OpenGL funkcionalításhoz telepítened kel a Mesa-t és így a gl és gl2 videó kimeneti
 vezérlőknek működniük kell, bár nagyon lassúak is lehetnek a CPU sebességétől függően.
 
@@ -489,14 +438,6 @@ vagy ha POWER5-ön forgatsz, GCC 4.0 szükséges.
 </para>
 
 <para>
-Győződj meg róla, hogy a GNU make-et használod
-(<filename>/opt/freeware/bin/gmake</filename>) az
-<application>MPlayer</application> forgatásához, mivel problémákba
-fogsz ütközni, ha a <filename>/usr/ccs/bin/make</filename>
-fájlt használod.
-</para>
-
-<para>
 A CPU detektálás még fejlesztés alatt áll.
 A következő architektúrákat teszteltük:
 </para>
@@ -548,6 +489,23 @@ Messages in the GTK-2 interface will be broken then.<!--
   </para>
 </listitem>
 </itemizedlist>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="qnx">
+<title>QNX</title>
+
+<para>
+Le kell töltened és telepítened kell az SDL-t a QNX-re. Majd futtasd az
+<application>MPlayer</application>t a <option>-vo sdl:driver=photon</option>
+és <option>-ao sdl:nto</option> kapcsolókkal, így gyors lesz.
+</para>
+
+<para>
+A <option>-vo x11</option> kimenet még lassabb lesz, mint Linux-on,
+mivel a QNX-nek csak X <emphasis>emulációja</emphasis> van, ami nagyon lassú.
+</para>
 </sect2>
 </sect1>
 
@@ -695,11 +653,9 @@ használatával kapcsolatos utasítások és fájlok megtalálhatóak a
 <title><application>MinGW</application></title>
 
 <para>
-A <application>MinGW</application> egy olyan verziójának telepítése,
-ami le tudja fordítani az <application>MPlayer</application>t, régebben eléggé
-trükkös volt, de most már simán megy. Csak telepítsd a <application>MinGW</application>
-3.1.0 vagy későbbi és az MSYS 1.0.9 vagy későbbi verzóját és az MSYS telepítés utáni
-beállító programjának mondd meg, hogy telepítve van a <application>MinGW</application>.
+A <application>MinGW</application> 3.1.0 vagy későbbi és az MSYS 1.0.9 vagy későbbi
+verziójára lesz szükséged. Az MSYS postinstall-jának mondd meg, hogy telepítve van
+a <application>MinGW</application>.
 </para>
 
 <para>
@@ -878,73 +834,6 @@ egy használatra kész binárissal.
 Használhatod az <application>Xcode</application> 2.1 projektet is;
 a régi, <application>Xcode</application> 1.x projekt nem működik
 már.
-</para>
-</sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
-<sect1 id="exotic_platforms">
-<title>Egzotikus platformok</title>
-
-<para>
-Az <application>MPlayer</application> számos egzotikus platformon fut,
-de a platform-specifikus változtatások nagy része nem lett beleolvasztva
-a fő forrás fába.
-A fordítási leíráshoz nézd meg a rendszer-specifikus dokumentációt.
-</para>
-
-<!-- ********** -->
-
-<sect2 id="qnx">
-<title>QNX</title>
-
-<para>
-Le kell töltened és telepítened kell az SDL-t a QNX-re. Majd futtasd az
-<application>MPlayer</application>t a <option>-vo sdl:driver=photon</option>
-és <option>-ao sdl:nto</option> kapcsolókkal, így gyors lesz.
-</para>
-
-<para>
-A <option>-vo x11</option> kimenet még lassabb lesz, mint Linux-on,
-mivel a QNX-nek csak X <emphasis>emulációja</emphasis> van, ami nagyon lassú.
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="amiga">
-<title>Amiga/MorphOS (GeekGadgets)</title>
-<para>
-Az emberek a
-<ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>-nél
-készítettek csomagokat az aktuális <application>MPlayer</application>ből
-és <application>MEncoder</application>ből.
-</para>
-
-<para>
-Nicholas Det (Genesi) sikeresen átültette az <application>MPlayer</application>t
-MorphOS alá. Sajnálatos módon csak a 0.90-es széria van kész.
-</para>
-
-<para>
-Letölthető a <ulink url="http://www.morphzone.org/">MorphZone</ulink>-ról:
-<itemizedlist>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-  <application>MPlayer</application> 0.91 bináris</ulink>
-</para></listitem>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-  <application>MPlayer</application> 0.91 forrás</ulink>
-</para></listitem>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
-  <application>MEncoder</application> 1.0pre3 bináris</ulink>
-</para></listitem>
-</itemizedlist>
 </para>
 </sect2>
 </sect1>

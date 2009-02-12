@@ -329,35 +329,6 @@ MPlayer interrupted by signal 11 in module: init_audio_codec
 
 <!-- ********** -->
 
-<sect2 id="irix">
-<title>IRIX</title>
-
-<para>
-Вы либо можете попробовать установить программу GNU install, и (если Вы
-не поместили её в Ваш глобальный путь), укажите на её местонахождение:
-<screen>
-./configure --with-install=<replaceable>/путь/к/и/имя/установки</replaceable>
-</screen>
-</para>
-
-<para>
-Либо Вы можете использовать стандартную программу install, поставляемую вместе
-с IRIX 6.5, но в этом случае Вы должны будете вручную немножко подправить
-<filename>Makefile</filename>.
-Поменяйте следующую строку:
-<programlisting>
-$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-</programlisting>
-на:
-<programlisting>
-$(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-</programlisting>
-И затем просто соберите и установите MPlayer.
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="hp-ux">
 <title>HP-UX</title>
 
@@ -543,6 +514,23 @@ Messages in the GTK-2 interface will be broken then.<!--
   </para>
 </listitem>
 </itemizedlist>
+</sect2>
+
+
+<!-- ********** -->
+
+<sect2 id="qnx">
+<title>QNX</title>
+<para>
+Вам нужно скачать и установить SDL для QNX. Затем запустите
+<application>MPlayer</application> с опциями <option>-vo sdl:photon</option>
+и <option>-ao sdl:nto</option>, и все будет работать быстро.
+</para>
+
+<para>
+Вывод <option>-vo x11</option> будет ещё медленнее, чем под Linux, поскольку под
+QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно.
+</para>
 </sect2>
 </sect1>
 
@@ -876,70 +864,6 @@ MPlayer_source_directory
 <para>
 Также можно использовать проект <application>Xcode</application> 2.1;
 более старый <application>Xcode</application> 1.x больше не работает.
-</para>
-</sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
-<sect1 id="exotic_platforms">
-<title>Exotic Platforms</title>
-
-<para>
-<application>MPlayer</application> работает на некоторых экзотических платформах, но 
-большинство платформно-специфичных изменений для этих систем не были внесены обратно 
-в основное дерево исходных кодов. За инструкциями по сборке придется обратиться к 
-документации, специфичной для системы.
-</para>
-
-<!-- ********** -->
-
-<sect2 id="qnx">
-<title>QNX</title>
-<para>
-Вам нужно скачать и установить SDL для QNX. Затем запустите
-<application>MPlayer</application> с опциями <option>-vo sdl:photon</option>
-и <option>-ao sdl:nto</option>, и все будет работать быстро.
-</para>
-
-<para>
-Вывод <option>-vo x11</option> будет ещё медленнее, чем под Linux, поскольку под
-QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно.
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="amiga">
-<title>Amiga/MorphOS (GeekGadgets)</title>
-<para>
-Люди с <ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>
-сделали пакеты текущих <application>MPlayer</application> и
-<application>MEncoder</application>.
-</para>
-<para>
-Nicholas Det at Genesi сделал большой и значительный порт <application>MPlayer
-</application>'а под MorphOS. К сожалению, он основан на серии 0.90.
-</para>
-
-<para>
-Получите их с <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
-<itemizedlist>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-  <application>MPlayer</application> 0.91 бинарник</ulink>
-</para></listitem>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-  <application>MPlayer</application> 0.91 исходный код</ulink>
-</para></listitem>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
-  <application>MEncoder</application> 1.0pre3 бинарник</ulink>
-</para></listitem>
-</itemizedlist>
 </para>
 </sect2>
 </sect1>

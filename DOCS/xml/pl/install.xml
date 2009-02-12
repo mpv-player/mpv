@@ -376,6 +376,164 @@ Menu Ustawienia nie jest jeszcze ZAIMPLEMENTOWANE!
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
+<sect1 id="codec-installation">
+<title>Codec installation</title>
+
+<!-- ********** -->
+
+<sect2 id="xvid">
+<title>Xvid</title>
+
+<para>
+<ulink url="http://www.xvid.org">Xvid</ulink> jest wolnym, kompatybilnym
+z MPEG-4 ASP, kodekiem video z możliwościami kodowania dwuprzebiegowego
+i pełną obsługą MPEG-4 ASP.
+Zauważ, że Xvid nie jest konieczny do odtwarzania video zakodowanego przy
+pomocy Xvid. Domyślnie używana jest biblioteka
+<systemitem class="library">libavcodec</systemitem>, bo jest szybsza.
+</para>
+
+<procedure>
+<title>Instalacja <systemitem class="library">Xvid</systemitem></title>
+<para>
+  Jak większość otwartego oporgramowania dostępny jest w dwóch wersjach:
+  <ulink url="http://www.xvid.org/downloads.html">oficjalnych wydań</ulink>
+  i wersji CVS.
+  Wersja CVS jest zazwyczaj wystarczająco stablina by jej używać, jako że
+  zazwyczaj ma poprawki do błędów występujących w wydaniach.
+  Tak należy nakłonić <systemitem class="library">Xvid</systemitem> CVS do
+  pracy z <application>MEncoderem</application> (będziesz potrzebował
+  przenajmniej <application>autoconf</application> 2.50,
+  <application>automake</application> i <application>libtool</application>):
+</para>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
+</para></step>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
+</para></step>
+<step><para>
+  <screen>cd xvidcore/build/generic</screen>
+</para></step>
+<step><para>
+  <screen>./bootstrap.sh</screen>
+</para></step>
+<step><para>
+  <screen>./configure</screen>
+  Możesz potrzebować dodać jakieś opcje (przejrzyj wyjście
+  polecenia <command>./configure --help</command>)
+</para></step>
+<step><para>
+  <screen>make &amp;&amp; make install</screen>
+</para></step>
+<step><para>
+  Przekompiluj <application>MPlayera</application>.
+</para></step>
+</procedure>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="x264">
+<title><systemitem class="library">x264</systemitem></title>
+
+<para>
+<ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+is a library for creating H.264 video.
+<application>MPlayer</application> sources are updated whenever
+an <systemitem class="library">x264</systemitem> API change
+occurs, so it is always suggested to use
+<application>MPlayer</application> from Subversion.
+</para>
+
+<para>
+If you have a GIT client installed, the latest x264
+sources can be gotten with this command:
+<screen>git clone git://git.videolan.org/x264.git</screen>
+
+Then build and install in the standard way:
+<screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
+
+Now rerun <filename>./configure</filename> for
+<application>MPlayer</application> to pick up
+<systemitem class="library">x264</systemitem> support.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="aac">
+<title>Kodek AAC</title>
+
+<para>
+AAC (Advanced Audio Coding) jest kodekiem audio spotykanym czasami w plikach
+MOV i MP4. Otwarty dekoder nazywany FAAD dostępny jest na stronie
+<ulink url="http://www.audiocoding.com"/>.
+<application>MPlayer</application> zawiera migawkę CVS z
+libfaad 2.1beta, więc nie musisz ściągać go oddzielnie.
+</para>
+
+<para>
+Jeżeli używasz gcc 3.2, który ma kłopoty z kompilacją wbudowanej wersji
+FAAD lub chcesz z jakichś powodów użyć zewnętrznej biblioteki,
+ściągnij ją z
+<ulink url="http://www.audiocoding.com/modules/mydownloads/">tej strony</ulink>
+i dodaj opcję <option>--enable-external-faad</option> do
+<filename>./configure</filename>. Nie potrzebujesz całego faad2 do dekodowanie
+plików AAC. Wystarczy użyć samej biblioteki libfaad. Zbudujesz ją w następujący
+sposób
+<screen>
+cd faad2/
+sh bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+Wersje binarne nie są dostępne na stronie audiocoding.com, ale możesz
+ściągnąć (apt-getem) Debianowe paczki ze
+<ulink url="http://www.debian-multimedia.org/">strony domowej Christiana Marillata</ulink>,
+RPM-y dla Mandrake/Mandriva ze strony <ulink url="http://plf.zarb.org">P.L.F</ulink>,
+a RPM-y dla Fedory z <ulink url="http://rpm.livna.org/">Livna</ulink>.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="amr">
+<title>Kodeki AMR</title>
+
+<para>
+Kodeki mowy Adaptive Multi-Rate są używane w telefonii komórkowej
+trzeciej generacji (3G).
+Opis implementacji udostępniany jest przez
+<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+(za darmo dla osób prywatnych).
+</para>
+
+<para>
+Żeby uaktywnić obsługę kodeków, pobierz źródła kodeków
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink> i
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>,
+umieść je w katalogu do którego rozpakowałeś źródła
+<application>MPlayera</application> i wpisz następujące komendy:
+<screen>
+unzip 26104-610.zip
+unzip 26104-610_ANSI_C_source_code.zip
+mv c-code libavcodec/amr_float
+unzip 26204-600.zip
+unzip 26204-600_ANSI-C_source_code.zip
+mv c-code libavcodec/amrwb_float
+</screen>
+Gdy już to zrobisz, kontynuuj <link linkend="features">budowanie</link>
+<application>MPlayera</application> tak, jak zwykle.
+</para>
+</sect2>
+</sect1>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+
 <sect1 id="rtc">
 <title>RTC</title>
 

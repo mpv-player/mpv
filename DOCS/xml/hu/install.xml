@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28148 -->
+<!-- synced with r28422 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -25,13 +25,21 @@ a dokumentációt és megtalálod a válaszokat.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - a javasolt verzió a
-  <emphasis role="bold">2.11.x</emphasis>.
+  <emphasis role="bold">POSIX rendszer</emphasis> - Egy POSIX-kompatibilis
+  shell-re és POSIX-kompatibilis rendszer eszközökre, pl. grep, sed, awk, stb.
+  lesz szükséged a path-odban.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - a javasolt verziók a 2.95
-  és 3.4+. A 2.96 és 3.0.x tudvalevőleg hibás kódot generálnak, a 3.1-nek és a 3.2-nek is
-  vannak problémái, a 3.3-nak kisebb hibái. PowerPC-n használj 4.x+ verziót.
+  <emphasis role="bold">GNU make</emphasis> 3.81 vagy újabb
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">binutils</emphasis> - GNU binutils 2.11 vagy újabb
+  biztosan működik.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">fordító</emphasis> - Mi leginkább gcc-t használunk,
+  a javasolt verziók x86-on a 2.95 és 3.4+. PowerPC-n használj 4.x+-ot.
+  icc 10.1+ is működik.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Xorg/XFree86</emphasis> - a javasolt verzió a
@@ -40,9 +48,6 @@ a dokumentációt és megtalálod a válaszokat.
   különben nem fog működni.
   Nem feltétlenül van szükséged az X-re, néhány videó kimeneti vezérlő
   működik nélküle is.
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">GNU make</emphasis> 3.81
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> 2.0.9 vagy későbbi szükséges,

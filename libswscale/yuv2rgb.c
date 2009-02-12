@@ -1,5 +1,5 @@
 /*
- * yuv2rgb.c, Software YUV to RGB converter
+ *  software YUV to RGB converter
  *
  *  Copyright (C) 1999, Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
@@ -70,7 +70,7 @@ DECLARE_ASM_CONST(8, uint64_t, mmx_grnmask) = 0xfcfcfcfcfcfcfcfcULL;
 
 #endif /* HAVE_MMX */
 
-const int32_t Inverse_Table_6_9[8][4] = {
+const int32_t ff_yuv2rgb_coeffs[8][4] = {
     {117504, 138453, 13954, 34903}, /* no sequence_display_extension */
     {117504, 138453, 13954, 34903}, /* ITU-R Rec. 709 (1990) */
     {104597, 132201, 25675, 53279}, /* unspecified */
@@ -481,7 +481,7 @@ PROLOG(yuv2rgb_c_1_ordered_dither, uint8_t)
     dst_2[0]= out_2;
 EPILOG(1)
 
-SwsFunc yuv2rgb_get_func_ptr (SwsContext *c)
+SwsFunc sws_yuv2rgb_get_func_ptr (SwsContext *c)
 {
 #if HAVE_MMX2 || HAVE_MMX
     if (c->flags & SWS_CPU_CAPS_MMX2){
@@ -503,20 +503,20 @@ SwsFunc yuv2rgb_get_func_ptr (SwsContext *c)
 #endif
 #if HAVE_VIS
     {
-        SwsFunc t= yuv2rgb_init_vis(c);
+        SwsFunc t= sws_yuv2rgb_init_vis(c);
         if (t) return t;
     }
 #endif
 #if CONFIG_MLIB
     {
-        SwsFunc t= yuv2rgb_init_mlib(c);
+        SwsFunc t= sws_yuv2rgb_init_mlib(c);
         if (t) return t;
     }
 #endif
 #if HAVE_ALTIVEC
     if (c->flags & SWS_CPU_CAPS_ALTIVEC)
     {
-        SwsFunc t = yuv2rgb_init_altivec(c);
+        SwsFunc t = sws_yuv2rgb_init_altivec(c);
         if (t) return t;
     }
 #endif
@@ -563,7 +563,7 @@ static int div_round (int dividend, int divisor)
         return -((-dividend + (divisor>>1)) / divisor);
 }
 
-int yuv2rgb_c_init_tables (SwsContext *c, const int inv_table[4], int fullRange, int brightness, int contrast, int saturation)
+int sws_yuv2rgb_c_init_tables (SwsContext *c, const int inv_table[4], int fullRange, int brightness, int contrast, int saturation)
 {
     const int isRgb =      c->dstFormat==PIX_FMT_RGB32
                         || c->dstFormat==PIX_FMT_RGB32_1

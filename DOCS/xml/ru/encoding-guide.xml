@@ -2581,7 +2581,7 @@ mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001
 </title>
 
 <para>
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+<systemitem class="library">libavcodec</systemitem>
 предоставляет возможность простого кодирования в множество интересных видео и
 аудио форматов. Вы можете кодировать следующими кодеками (более или менее
 свежий список):
@@ -3221,8 +3221,7 @@ mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy
 
 <para>
 С этой возможностью
-<link linkend="ffmpeg"><systemitem
-class="library">libavcodec</systemitem></link>,
+<systemitem class="library">libavcodec</systemitem>,
 Вы можете установить нестандартные inter (I-кадры/ключевые) и intra
 (P-кадры/предсказанные) матрицы. Это поддерживается многими кодеками:
 В <systemitem>mpeg1video</systemitem> и <systemitem>mpeg2video</systemitem>
@@ -3957,7 +3956,7 @@ Xvid поддерживает профили кодирования через �
 <para>
 <systemitem class="library">x264</systemitem> &mdash; это свободная библиотека для
 кодирования H.264/AVC видео потоков.
-Перед началом кодирования Вы должны <link linkend="codec-x264-encode">
+Перед началом кодирования Вы должны <link linkend="x264">
 настроить <application>MEncoder</application> для его поддержки</link>.
 </para>
 

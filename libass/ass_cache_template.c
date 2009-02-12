@@ -55,6 +55,7 @@ START(bitmap, bipmap_hash_key_s)
     GENERIC(int, bold)
     GENERIC(int, italic)
     GENERIC(char, be) // blur edges
+    GENERIC(double, blur) // gaussian blur
     GENERIC(unsigned, scale_x) // 16.16
     GENERIC(unsigned, scale_y) // 16.16
     GENERIC(int, frx) // signed 16.16

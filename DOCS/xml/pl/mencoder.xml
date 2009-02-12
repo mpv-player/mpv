@@ -741,7 +741,7 @@ Niestety, istnieje tylko kilka odtwarzaczy video, pomijając
 <para>
 Możliwość ta może być jedynie używana z kodekiem <systemitem>mpeg4</systemitem>
 z biblioteki
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
+<systemitem class="library">libavcodec</systemitem>.
 Pamiętaj: chociaż <application>MPlayer</application> poprawnie odtworzy
 stworzone pliki, inne odtwarzacze mogą użyć złych proporcji obrazu
 (aspect ratio).

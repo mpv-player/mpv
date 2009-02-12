@@ -311,26 +311,6 @@ MPlayer interrupted by signal 11 in module: init_audio_codec
     </sect2>
 
 
-    <sect2 id="irix">
-      <title>IRIX</title>
-      <para>
-        Du kannst entweder versuchen, das GNU-Installationsprogramm zu installieren und dann
-        (falls du es nicht in deinen globalen Path gelegt hast) auf den Standort zeigen mit:
-        <screen>./configure --with-install=<replaceable>/path/and/name/of/install</replaceable></screen>
-      </para>
-
-      <para>
-        Oder du kannst die mit IRIX 6.5 gelieferte Standard-Installation verwenden, falls
-        du das <filename>Makefile</filename> ein bisschen von Hand editieren willst.
-        Ändere die folgende Zeile von:
-        <programlisting>$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1</programlisting>
-        zu:
-        <programlisting>$(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/</programlisting>
-        und fahre dann fort mit Compilierung und Installation.
-      </para>
-    </sect2>
-
-
     <sect2 id="hp-ux">
       <title>HP-UX</title>
       <para>
@@ -509,6 +489,21 @@ Segmentation fault</screen>
         </listitem>
       </itemizedlist>
 
+    </sect2>
+
+    <sect2 id="qnx">
+      <title>QNX</title>
+      <para>
+        Du musst SDL für QNX herunterladen und installieren. Dann starte
+        <application>MPlayer</application> mit den Optionen
+        <option>-vo sdl:driver=photon</option> und <option>-ao sdl:nto</option>,
+        es sollte schnell laufen.
+      </para>
+
+      <para>
+        Der Output mit <option>-vo x11</option> wird etwas langsamer sein als unter Linux,
+        da QNX nur X-<emphasis>Emulation</emphasis> besitzt, was sehr langsam ist.
+      </para>
     </sect2>
   </sect1>
 
@@ -857,71 +852,6 @@ svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main</screen>
         Du kannst auch das <application>Xcode</application> 2.1 Projekt verwenden;
         das alte Projekt für <application>Xcode</application> 1.x läuft
         nicht mehr.
-      </para>
-    </sect2>
-  </sect1>
-
-  <sect1 id="exotic_platforms">
-    <title>Exotische Plattformen</title>
-
-    <para>
-      <application>MPlayer</application> läuft auf einer Reihe exotischer Plattformen,
-      aber die meisten der plattformspezifischen Änderungen dieser Systeme wurden nicht
-      in den Hauptquellbaum zurückgemergt.
-      Build-Instruktionen findest du in der System-spezifischen Dokumentation.
-    </para>
-
-    <sect2 id="qnx">
-      <title>QNX</title>
-      <para>
-        Du musst SDL für QNX herunterladen und installieren. Dann starte
-        <application>MPlayer</application> mit den Optionen
-        <option>-vo sdl:driver=photon</option> und <option>-ao sdl:nto</option>,
-        es sollte schnell laufen.
-      </para>
-
-      <para>
-        Der Output mit <option>-vo x11</option> wird etwas langsamer sein als unter Linux,
-        da QNX nur X-<emphasis>Emulation</emphasis> besitzt, was sehr langsam ist.
-      </para>
-    </sect2>
-
-    <sect2 id="amiga">
-      <title>Amiga/MorphOS (GeekGadgets)</title>
-      <para>
-        Die Leute drüben auf <ulink url="http://www.amigasoft.net"/>
-        machen aktuelle <application>MPlayer</application>- und
-        <application>MEncoder</application>-Packages.
-      </para>
-
-      <para>
-        Nicholas Det bei Genesi hat eine große und starke Portierung des
-        <application>MPlayer</application> für MorphOS gemacht. Traurig,
-        dass sie auf der 0.90-Serie basiert.
-      </para>
-
-      <para>
-        Hol sie dir von <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
-        <itemizedlist>
-          <listitem>
-            <para>
-              <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-                <application>MPlayer</application> 0.91 Binary</ulink>
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-                <application>MPlayer</application> 0.91 Source</ulink>
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
-                <application>MEncoder</application> 1.0pre3 Binary</ulink>
-            </para>
-          </listitem>
-        </itemizedlist>
       </para>
     </sect2>
   </sect1>

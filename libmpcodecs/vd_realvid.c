@@ -9,6 +9,7 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "mpbswap.h"
 
 #include "vd_internal.h"
 #include "loader/wine/windef.h"
@@ -362,27 +363,23 @@ static void uninit(sh_video_t *sh){
 	bufsz = 0;
 }
 
-// copypaste from demux_real.c - it should match to get it working!
-typedef struct dp_hdr_s {
-    uint32_t chunks;	// number of chunks
-    uint32_t timestamp; // timestamp from packet header
-    uint32_t len;	// length of actual data
-    uint32_t chunktab;	// offset to chunk offset array
-} dp_hdr_t;
-
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	mp_image_t* mpi;
 	unsigned long result;
-	dp_hdr_t* dp_hdr=(dp_hdr_t*)data;
-	unsigned char* dp_data=((unsigned char*)data)+sizeof(dp_hdr_t);
-	uint32_t* extra=(uint32_t*)(((char*)data)+dp_hdr->chunktab);
+	uint8_t *buf = data;
+	int chunks = *buf++;
+	int extra_size = 8*(chunks+1);
+	uint32_t data_size = len-1-extra_size;
+	unsigned char* dp_data=buf+extra_size;
+	uint32_t* extra=(uint32_t*)buf;
+	int i;
 
 	unsigned int transform_out[5];
 	transform_in_t transform_in={
-		dp_hdr->len,	// length of the packet (sub-packets appended)
+		data_size,	// length of the packet (sub-packets appended)
 		0,		// unknown, seems to be unused
-		dp_hdr->chunks,	// number of sub-packets - 1
+		chunks,	// number of sub-packets - 1
 		extra,		// table of sub-packet offsets
 		0,		// unknown, seems to be unused
 		0,		// timestamp (should be unneded)
@@ -397,6 +394,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    if (!buffer) return 0;
 	}
 	
+	for (i=0; i<2*(chunks+1); i++)
+		extra[i] = le2me_32(extra[i]);
+
 #ifdef CONFIG_WIN32DLL
 	if (dll_type == 1)
 	    result=(*wrvyuv_transform)(dp_data, buffer, &transform_in,

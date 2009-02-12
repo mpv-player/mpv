@@ -407,7 +407,7 @@ codificato in Xvid. Viene usata di default
 
 <!-- ********** -->
 
-<sect2 id="codec-x264">
+<sect2 id="x264">
 <title><systemitem class="library">x264</systemitem></title>
 
 <para>

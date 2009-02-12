@@ -2314,7 +2314,7 @@ trvání/umístění každého typu.
 </title>
 
 <para>
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+<systemitem class="library">libavcodec</systemitem>
 zajišťuje jednoduché enkódování do mnoha zajímavých video a audio formátů.
 Můžete enkódovat do následujících kodeků (více méně aktuální):
 
@@ -2954,7 +2954,7 @@ počítače a pokrokům ve vývoji, můžete dospět k velmi odlišným výsledk
 
 <para>
 Díky této vlastnosti
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>u
+<systemitem class="library">libavcodec</systemitem>u
 můžete nastavit uživatelskou inter (I-snímky/klíčové snímky) a intra
 (P-snímky/predikované (rozumějte vypočítané) snímky) matice. To je podporováno
 mnoha kodeky:
@@ -3687,7 +3687,7 @@ počítače a pokrokům ve vývoji, můžete dospět k velmi odlišným výsledk
 <systemitem class="library">x264</systemitem> je svobodná knihovna pro
 enkódování H.264/AVC video proudů.
 Pře zahájením enkódování budete muset
-<link linkend="codec-x264-encode">nastavit její podporu v <application>MEncoder</application>u</link>.
+<link linkend="x264">nastavit její podporu v <application>MEncoder</application>u</link>.
 </para>
 
 <!-- ********** -->

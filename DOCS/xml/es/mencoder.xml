@@ -110,7 +110,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <para>
 <application>MEncoder</application> puede crear archivos con formato de salida
 MPEG (MPEG-PS). Probablemente esto sea util con el codec <emphasis>mpeg1video</emphasis>
-de <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>,
+de <systemitem class="library">libavcodec</systemitem>,
 porque los reproductores - excepto <application>MPlayer</application> - esperan
 video MPEG1, y audio en MPEG1 layer 2 (MP2) en los archivos MPEG.
 </para>
@@ -237,7 +237,7 @@ se describe <link linkend="menc-feat-fix-avi">más arriba</link>.
 <systemitem class="library">libavcodec</systemitem></title>
 
 <para>
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+<systemitem class="library">libavcodec</systemitem>
 provee un montón de interesantes formatos de video y audio (actualmente sus codecs
 de audio no están soportados). Puede codificar con los siguientes codecs
 (más o menos actualizado):
@@ -492,7 +492,7 @@ ahí fuera que soporten esta característica de MPEG4, excepto <application>MPla
 <para>
 Esta característica puede ser usada solo con el codec
 <systemitem>mpeg4</systemitem> de
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
+<systemitem class="library">libavcodec</systemitem>.
 Tenga en mente: aunque <application>MPlayer</application> puede reproducir
 correctamente el archivo creado, otros reproductores pueden usar una razón
 de aspecto incorrecta.
@@ -515,7 +515,7 @@ Uso
 
 <para>
 Con ésta característica de
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> puede
+<systemitem class="library">libavcodec</systemitem> puede
 personalizar las matrices inter (marcos-I/marcos clave) e intra (marcos-P/marcos
 de predicción). Está soportado por muchos codecs:
 <systemitem>mpeg1video</systemitem> y <systemitem>mpeg2video</systemitem>

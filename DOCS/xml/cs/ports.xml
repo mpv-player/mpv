@@ -339,34 +339,6 @@ nemůžete přehrávat DVD disky větší než 4 GB:
 
 <!-- ********** -->
 
-<sect2 id="irix">
-<title>IRIX</title>
-
-<para>
-Můžete buď zkusit nainstalovat program GNU install a (pokud jste si ho
-nedali do globální cesty) odkázat na jeho umístění pomocí:
-<screen>
-./configure --with-install=<replaceable>/cesta/a/název/programu/install</replaceable>
-</screen>
-</para>
-
-<para>
-nebo můžete použít výchozí install dodávaný s IRIXem 6.5. V tom případě
-budete muset ručně upravit <filename>Makefile</filename>.
-Změňte následující řádek:
-<programlisting>
-$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-</programlisting>
-na:
-<programlisting>
-$(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-</programlisting>
-a pokračujte kompilací a instalací.
-</para>
-</sect2>
-
-<!-- ********** -->
-
 <sect2 id="hp-ux">
 <title>HP-UX</title>
 
@@ -547,6 +519,23 @@ Messages in the GTK-2 interface will be broken then.<!--
   </para>
 </listitem>
 </itemizedlist>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="qnx">
+<title>QNX</title>
+
+<para>
+Musíte si stáhnout a nainstalovat SDL pro QNX. Pak spusťte
+<application>MPlayer</application> s volbami <option>-vo sdl:driver=photon</option>
+a <option>-ao sdl:nto</option>, mělo by to být rychlé.
+</para>
+
+<para>
+Výstup <option>-vo x11</option> bude ještě pomalejší než na Linuxu,
+jelikož QNX má pouze X <emphasis>emulaci</emphasis>, která je velmi pomalá.
+</para>
 </sect2>
 </sect1>
 
@@ -891,73 +880,6 @@ s binárkou připravenou k použití.
 Také lze použít projekt <application>Xcode</application> 2.1;
 starý projekt pro <application>Xcode</application> 1.x
 již nepracuje.
-</para>
-</sect2>
-</sect1>
-
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
-<sect1 id="exotic_platforms">
-<title>Exotické platformy</title>
-
-<para>
-<application>MPlayer</application> běží na mnoha exotických platformách,
-ale většina platformně závislých změn z těchto systémů nebyla přidána zpět
-do hlavního zdrojového stromu.
-Pokyny k sestavení byste měli najít v dokumentaci pro daný systém.
-</para>
-
-<!-- ********** -->
-
-<sect2 id="qnx">
-<title>QNX</title>
-
-<para>
-Musíte si stáhnout a nainstalovat SDL pro QNX. Pak spusťte
-<application>MPlayer</application> s volbami <option>-vo sdl:driver=photon</option>
-a <option>-ao sdl:nto</option>, mělo by to být rychlé.
-</para>
-
-<para>
-Výstup <option>-vo x11</option> bude ještě pomalejší než na Linuxu,
-jelikož QNX má pouze X <emphasis>emulaci</emphasis>, která je velmi pomalá.
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="amiga">
-<title>Amiga/MorphOS (GeekGadgets)</title>
-<para>
-Lidé z okruhu
-<ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
-tvoří současné balíčky <application>MPlayer</application> a
-<application>MEncoder</application>.
-</para>
-
-<para>
-Nicholas Det at Genesi vytvořil velký a výkonný port <application>MPlayer
-</application>u pro MorphOS. Naneštěstí je založen na verzi 0.90.
-</para>
-
-<para>
-Stáhněte si ji z <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
-<itemizedlist>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
-  <application>MPlayer</application> 0.91 binary</ulink>
-</para></listitem>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
-  <application>MPlayer</application> 0.91 source</ulink>
-</para></listitem>
-<listitem><para>
-  <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
-  <application>MEncoder</application> 1.0pre3 binary</ulink>
-</para></listitem>
-</itemizedlist>
 </para>
 </sect2>
 </sect1>

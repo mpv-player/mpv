@@ -1,28 +1,46 @@
-/* 
- * vo_tga.c: targa output
+/*
+ * TARGA video output
  *
- * this video output module write targa uncompressed file in 15, 24 and 32 bit bgr format.
+ * This video output module writes TARGA uncompressed files in 15, 24 and 32
+ * bit BGR format.
  *
  * to select the output format use the format filter:
  *  mplayer -vo tga -vf format=bgr15 ...
  *  mplayer -vo tga -vf format=bgr24 ...
  *  mplayer -vo tga -vf format=bgr32 ...
  *
- * The 16 bit file are loaded without problem from Gimp and ImageMagick but give an error
- * with entice (a visualizer from the enlightenment package that use the imlib2 package).
+ * The 16 bit files are loaded without problem from Gimp and ImageMagick but
+ * give an error with entice (a visualizer from the enlightenment package
+ * that uses the imlib2 package).
  *
- * In 32 bit mode the alpha channel is set to 255 (0xff). For big endian
- * machines, TGA_ALPHA32 changes from 0xff000000 to 0x000000ff, and TGA_SHIFT32 from 0 to 8.
+ * In 32-bit mode the alpha channel is set to 255 (0xff). For big-endian
+ * machines, TGA_ALPHA32 changes from 0xff000000 to 0x000000ff, and
+ * TGA_SHIFT32 from 0 to 8.
  *
- * I need to fill the alpha channel because entice consider that alpha channel (and displays
- * nothing, only the background!), but ImageMacick (the program display) or gimp doesn't
- * care.
+ * I need to fill the alpha channel because entice considers that alpha
+ * channel (and displays nothing, only the background!), but ImageMagick
+ * (the program display) or gimp doesn't care.
  *
- * maybe is possible (with a compilation switch) to avoid the fill of the alpha channel
- * and work outside mplayer (if needed)
+ * Maybe it is possible (with a compilation switch) to avoid the fill of
+ * the alpha channel and work outside MPlayer (if needed).
  *
  *    Daniele Forghieri ( guru@digitalfantasy.it )
  *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <stdio.h>

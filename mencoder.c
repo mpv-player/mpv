@@ -142,9 +142,7 @@ double cur_video_time_usage=0;
 double cur_vout_time_usage=0;
 int benchmark=0;
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-char * proc_priority=NULL;
-#endif
+#include "osdep/priority.h"
 
 // A-V sync:
 int delay_corrected=1;
@@ -481,17 +479,8 @@ if (frameno_filename) {
   }
 }
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-  if(proc_priority){
-    int i;
-    for(i=0; priority_presets_defs[i].name; i++){
-      if(strcasecmp(priority_presets_defs[i].name, proc_priority) == 0)
-        break;
-    }
-    mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_SettingProcessPriority,
-					priority_presets_defs[i].name);
-    SetPriorityClass(GetCurrentProcess(), priority_presets_defs[i].prio);
-  }
+#ifdef CONFIG_PRIORITY
+  set_priority();
 #endif	
 
 // check font

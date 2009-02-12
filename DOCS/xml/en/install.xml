@@ -403,7 +403,7 @@ default as it offers better speed.
 
 <!-- ********** -->
 
-<sect2 id="codec-x264">
+<sect2 id="x264">
 <title><systemitem class="library">x264</systemitem></title>
 
 <para>

@@ -212,11 +212,11 @@ typedef struct SwsContext{
 } SwsContext;
 //FIXME check init (where 0)
 
-SwsFunc yuv2rgb_get_func_ptr (SwsContext *c);
-int yuv2rgb_c_init_tables (SwsContext *c, const int inv_table[4], int fullRange, int brightness, int contrast, int saturation);
+SwsFunc sws_yuv2rgb_get_func_ptr (SwsContext *c);
+int sws_yuv2rgb_c_init_tables (SwsContext *c, const int inv_table[4], int fullRange, int brightness, int contrast, int saturation);
 
-void yuv2rgb_altivec_init_tables (SwsContext *c, const int inv_table[4],int brightness,int contrast, int saturation);
-SwsFunc yuv2rgb_init_altivec (SwsContext *c);
+void sws_yuv2rgb_altivec_init_tables (SwsContext *c, const int inv_table[4],int brightness,int contrast, int saturation);
+SwsFunc sws_yuv2rgb_init_altivec (SwsContext *c);
 void altivec_yuv2packedX (SwsContext *c,
                           int16_t *lumFilter, int16_t **lumSrc, int lumFilterSize,
                           int16_t *chrFilter, int16_t **chrSrc, int chrFilterSize,
@@ -309,8 +309,8 @@ static inline int fmt_depth(int fmt)
     }
 }
 
-extern const DECLARE_ALIGNED(8, uint64_t, ff_dither4[2]);
-extern const DECLARE_ALIGNED(8, uint64_t, ff_dither8[2]);
+extern const uint64_t ff_dither4[2];
+extern const uint64_t ff_dither8[2];
 
 extern const AVClass sws_context_class;
 

@@ -235,8 +235,8 @@ Mám potíže s přehráváním souborů s ... kodekem. Mohu je používat?
 Prověřte
 <ulink url="../../codecs-status.html">stav kodeku</ulink>,
 pokud neobsahuje váš kodek, přečtěte si
-<link linkend="codecs">kodekovou dokumentaci</link>, zvláště
-<link linkend="codec-importing">codec importing HOWTO</link> a kontaktujte nás.
+<ulink url="../../tech/win32-codec-howto">Win32 codec HOWTO</ulink>
+a kontaktujte nás.
 </para></answer>
 </qandaentry>
 

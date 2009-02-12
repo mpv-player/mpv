@@ -118,7 +118,7 @@ audio PCM/MP3/MP3 VBR.
 et de décodeurs de <application>MPlayer</application></para></listitem>
 <listitem><para>
   Encodage dans tous les codecs
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> de FFmpeg
+  <systemitem class="library">libavcodec</systemitem> de FFmpeg
 </para></listitem>
 <listitem><para>
   Encodage vidéo depuis les tuners TV compatibles V4L
@@ -174,16 +174,12 @@ peuvent être distribués selon les termes de la GNU General Public License Vers
 
 &usage.xml;
 &cd-dvd.xml;
-&faq.xml;
-
-&containers.xml;
-&codecs.xml;
-&video.xml;
 &tvinput.xml;
 &radio.xml;
-
+&video.xml;
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
+&faq.xml;
 &bugreports.xml;
 &skin.xml;

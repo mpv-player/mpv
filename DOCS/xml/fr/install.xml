@@ -336,6 +336,142 @@ Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant!
 
 <!-- ********** -->
 
+<sect1 id="codec-installation">
+<title>Installation Codec</title>
+
+<sect2 id="xvid">
+<title>Xvid</title>
+
+<para>
+<ulink url="http://www.xvid.org">Xvid</ulink> est un logiciel libre
+de codec video conforme au MPEG-4 ASP. Notez qu'Xvid n'est pas nécessaire
+pour décoder des vidéos encodée par Xvid.
+<systemitem class="library">libavcodec</systemitem> est utilisé par défaut
+parce qu'il offre une vitesse supérieure.
+</para>
+
+<procedure>
+<title>Installer <systemitem class="library">Xvid</systemitem></title>
+<para>
+  Comme la plupart des logiciels open source, il est disponible en deux
+parfums&nbsp;:
+  <ulink url="http://www.xvid.org/downloads.html">versions officielle</ulink>
+  et la version CVS.
+  La version CVS est habituellement suffisament stable pour être utilisée,
+  puisqu'elle bénéficie des corrections de bogues existant dans les versions
+  officielles.
+  Voici qui doit être fait pour faire fonctionner la version CVS de
+  <systemitem class="library">Xvid</systemitem>
+  avec <application>MEncoder</application>&nbsp;:
+</para>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
+  </para></step>
+<step><para>
+  <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</screen>
+</para></step>
+<step><para>
+  <screen>cd xvidcore/build/generic</screen>
+  </para></step>
+<step><para>
+  <screen>./bootstrap.sh</screen>
+  </para></step>
+<step><para>
+  <screen>./configure</screen>
+  Vous pouvez avoir à ajouter des options (examinez la sortie de
+  <command>./configure --help</command>).
+  </para></step>
+<step><para>
+  <screen>make &amp;&amp; make install</screen>
+  </para></step>
+<step><para>
+  Si vous avez spécifié <option>--enable-divxcompat</option>,
+  copiez <filename>../../src/divx4.h</filename> dans
+  <filename class="directory">/usr/local/include/</filename>.
+  </para></step>
+<step><para>
+  Recompilez <application>MPlayer</application>.
+  </para></step>
+</procedure>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="x264">
+<title>x264</title>
+
+<para>
+<ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+is a library for creating H.264 video.
+<application>MPlayer</application> sources are updated whenever
+an <systemitem class="library">x264</systemitem> API change
+occurs, so it is always suggested to use
+<application>MPlayer</application> from Subversion.
+</para>
+
+<para>
+If you have a GIT client installed, the latest x264
+sources can be gotten with this command:
+<screen>git clone git://git.videolan.org/x264.git</screen>
+
+Then build and install in the standard way:
+<screen>./configure &amp;&amp; make &amp;&amp; make install</screen>
+
+Now rerun <filename>./configure</filename> for
+<application>MPlayer</application> to pick up
+<systemitem class="library">x264</systemitem> support.
+</para>
+</sect2>
+<!-- ********** -->
+
+<sect2 id="aac">
+<title>Codec AAC</title>
+<para>
+Un décodeur open source appelé FAAD est disponible sur
+<ulink url="http://www.audiocoding.com/downloads.html"/>.
+<application>MPlayer</application> inclus une copie, vous n'avez donc pas
+à l'obtenir séparemment.
+Si vous voulez utiliser une librairie externe, passez
+<option>--enable-faad-external</option> à <filename>./configure</filename>.
+Vous n'avez pas besoin de tout faad2 pour décoder les fichiers AAC, libfaad suffit.
+Construisez comme ceci&nbsp;:
+<screen>
+cd faad2/
+sh bootstrap
+./configure
+cd libfaad
+make
+make install
+</screen>
+Les binaires ne sont pas disponibles sur audiocoding.com, mais vous pouvez
+obtenir les paquets Debian sur la
+<ulink url="http://www.debian-multimedia.org/">page web de Christian Marillat</ulink>,
+les RPMs Mandrake/Mandriva sur le <ulink url="http://plf.zarb.org">P.L.F</ulink> et les RPMS
+Fedora sur <ulink url="http://rpm.livna.org/">Livna</ulink>.
+</para>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="amr">
+<title>codecs AMR</title>
+<para>
+Le codec de voix Adaptive Multi-Rate est utilisé dans les téléphones mobiles de
+troisième génération (3G).
+L'implémentation de référence est disponible depuis
+<ulink url="http://www.3gpp.org">Projet d'Association sur la 3ème Génération</ulink>
+(gratuit pour un usage privé).
+</para>
+<para>
+  Pour activer le support, téléchargez et installez les bibliothèques pour
+  <ulink url="http://www.penguin.cz/~utx/amr">AMR-NB et AMR-WB</ulink> en
+  suivant les instructions de cette page.  Ensuite, recompilez
+  <application>MPlayer</application>.
+</para>
+</sect2>
+</sect1>
+
+<!-- ********** -->
 
 <sect1 id="rtc">
 <title>RTC</title>

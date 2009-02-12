@@ -225,8 +225,8 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
 </para></question>
 <answer><para>
 Проверьте <ulink url="../../codecs-status.html">состояние кодеков</ulink>,
-если его там нет, то прочтите <link linkend="codecs">документацию на кодеки</link>,
-особенно <link linkend="codec-importing">HOWTO по импортированию кодеков</link>, и 
+если его там нет, то прочтите
+<ulink url="../../tech/win32-codec-howto">HOWTO по импортированию кодеков</ulink>, и
 свяжитесь с нами.
 </para></answer>
 </qandaentry>

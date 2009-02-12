@@ -31,7 +31,7 @@
 
 #define LIBSWSCALE_VERSION_MAJOR 0
 #define LIBSWSCALE_VERSION_MINOR 6
-#define LIBSWSCALE_VERSION_MICRO 1
+#define LIBSWSCALE_VERSION_MICRO 2
 
 #define LIBSWSCALE_VERSION_INT  AV_VERSION_INT(LIBSWSCALE_VERSION_MAJOR, \
                                                LIBSWSCALE_VERSION_MINOR, \
@@ -98,8 +98,8 @@ unsigned swscale_version(void);
 // when used for filters they must have an odd number of elements
 // coeffs cannot be shared between vectors
 typedef struct {
-    double *coeff;
-    int length;
+    double *coeff;              ///< pointer to the list of coefficients
+    int length;                 ///< number of coefficients in the vector
 } SwsVector;
 
 // vectors can be shared
@@ -114,39 +114,94 @@ struct SwsContext;
 
 void sws_freeContext(struct SwsContext *swsContext);
 
-struct SwsContext *sws_getContext(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat, int flags,
+/**
+ * Allocates and returns a SwsContext. You need it to perform
+ * scaling/conversion operations using sws_scale().
+ *
+ * @param srcW the width of the source image
+ * @param srcH the height of the source image
+ * @param srcFormat the source image format
+ * @param dstW the width of the destination image
+ * @param dstH the height of the destination image
+ * @param dstFormat the destination image format
+ * @param flags specify which algorithm and options to use for rescaling
+ * @return a pointer to an allocated context, or NULL in case of error
+ */
+struct SwsContext *sws_getContext(int srcW, int srcH, enum PixelFormat srcFormat, int dstW, int dstH, enum PixelFormat dstFormat, int flags,
                                   SwsFilter *srcFilter, SwsFilter *dstFilter, double *param);
 int sws_scale(struct SwsContext *context, uint8_t* src[], int srcStride[], int srcSliceY,
               int srcSliceH, uint8_t* dst[], int dstStride[]);
+#if LIBSWSCALE_VERSION_MAJOR < 1
+/**
+ * @deprecated Use sws_scale() instead.
+ */
 int sws_scale_ordered(struct SwsContext *context, uint8_t* src[], int srcStride[], int srcSliceY,
                       int srcSliceH, uint8_t* dst[], int dstStride[]) attribute_deprecated;
+#endif
 
 
 int sws_setColorspaceDetails(struct SwsContext *c, const int inv_table[4], int srcRange, const int table[4], int dstRange, int brightness, int contrast, int saturation);
 int sws_getColorspaceDetails(struct SwsContext *c, int **inv_table, int *srcRange, int **table, int *dstRange, int *brightness, int *contrast, int *saturation);
+
+/**
+ * Returns a normalized Gaussian curve used to filter stuff
+ * quality=3 is high quality, lower is lower quality.
+ */
 SwsVector *sws_getGaussianVec(double variance, double quality);
+
+/**
+ * Allocates and returns a vector with \p length coefficients, all
+ * with the same value \p c.
+ */
 SwsVector *sws_getConstVec(double c, int length);
+
+/**
+ * Allocates and returns a vector with just one coefficient, with
+ * value 1.0.
+ */
 SwsVector *sws_getIdentityVec(void);
+
+/**
+ * Scales all the coefficients of \p a by the \p scalar value.
+ */
 void sws_scaleVec(SwsVector *a, double scalar);
 void sws_normalizeVec(SwsVector *a, double height);
 void sws_convVec(SwsVector *a, SwsVector *b);
 void sws_addVec(SwsVector *a, SwsVector *b);
 void sws_subVec(SwsVector *a, SwsVector *b);
 void sws_shiftVec(SwsVector *a, int shift);
+
+/**
+ * Allocates and returns a clone of the vector \p a, that is a vector
+ * with the same coefficients as \p a.
+ */
 SwsVector *sws_cloneVec(SwsVector *a);
 
 void sws_printVec(SwsVector *a);
 void sws_freeVec(SwsVector *a);
 
 SwsFilter *sws_getDefaultFilter(float lumaGBlur, float chromaGBlur,
-                                float lumaSarpen, float chromaSharpen,
+                                float lumaSharpen, float chromaSharpen,
                                 float chromaHShift, float chromaVShift,
                                 int verbose);
 void sws_freeFilter(SwsFilter *filter);
 
+/**
+ * Checks if \p context can be reused, otherwise reallocates a new
+ * one.
+ *
+ * If \p context is NULL, just calls sws_getContext() to get a new
+ * context. Otherwise, checks if the parameters are the ones already
+ * saved in \p context. If that is the case, returns the current
+ * context. Otherwise, frees \p context and gets a new context with
+ * the new parameters.
+ *
+ * Be warned that \p srcFilter and \p dstFilter are not checked, they
+ * are assumed to remain the same.
+ */
 struct SwsContext *sws_getCachedContext(struct SwsContext *context,
-                                        int srcW, int srcH, int srcFormat,
-                                        int dstW, int dstH, int dstFormat, int flags,
+                                        int srcW, int srcH, enum PixelFormat srcFormat,
+                                        int dstW, int dstH, enum PixelFormat dstFormat, int flags,
                                         SwsFilter *srcFilter, SwsFilter *dstFilter, double *param);
 
 #endif /* SWSCALE_SWSCALE_H */
