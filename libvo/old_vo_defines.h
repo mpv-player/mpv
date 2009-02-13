@@ -19,4 +19,6 @@
 #define vo_screenheight global_vo->opts->vo_screenheight
 #define vidmode global_vo->opts->vidmode
 #define movie_aspect global_vo->opts->movie_aspect
+
+#define calc_src_dst_rects(...) calc_src_dst_rects(global_vo, __VA_ARGS__)
 #endif

@@ -81,7 +81,6 @@ static int top_field_first;
 
 static int image_width,image_height;
 static int image_format;
-static uint32_t  drwX,drwY;
 
 #define NO_SUBPICTURE      0
 #define OVERLAY_SUBPICTURE 1
@@ -676,11 +675,6 @@ skip_surface_allocation:
    }
 
    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
-   vo_calc_drwXY(&drwX, &drwY);
-
-   panscan_calc();
-
-   mp_msg(MSGT_VO,MSGL_V, "[xvmc] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
 
 //end vo_xv
 
@@ -950,19 +944,16 @@ int status,rez;
 static void put_xvmc_image(struct xvmc_render_state * p_render_surface,
 			   int draw_ck){
 int rez;
-int clipX,clipY,clipW,clipH;
+struct vo_rect src_rect, dst_rect;
 int i;
 
    if(p_render_surface == NULL)
       return;
 
-   clipX = drwX-(vo_panscan_x>>1);
-   clipY = drwY-(vo_panscan_y>>1); 
-   clipW = vo_dwidth+vo_panscan_x;
-   clipH = vo_dheight+vo_panscan_y;
+   calc_src_dst_rects(image_width, image_height, &src_rect, &dst_rect, NULL);
    
    if(draw_ck)
-      vo_xv_draw_colorkey(clipX,clipY,clipW,clipH);
+      vo_xv_draw_colorkey(dst_rect.left, dst_rect.top, dst_rect.width, dst_rect.height);
 
    if(benchmark)
       return;
@@ -971,8 +962,8 @@ int i;
    int field = top_field_first ? i : i ^ 3;
    rez = XvMCPutSurface(mDisplay, p_render_surface->p_surface, 
                         vo_window,
-                        0, 0, image_width, image_height,
-                        clipX, clipY, clipW, clipH,
+                        src_rect.left, src_rect.top, src_rect.width, src_rect.height,
+                        dst_rect.left, dst_rect.top, dst_rect.width, dst_rect.height,
                         bob_deinterlace ? field : 3);
                         //p_render_surface_to_show->display_flags);
    if(rez != Success){
@@ -1036,8 +1027,6 @@ int e=vo_x11_check_events(mDisplay);
    if(e&VO_EVENT_RESIZE)
    {
       e |= VO_EVENT_EXPOSE;
-
-      vo_calc_drwXY(&drwX, &drwY);
    }
    if ( e & VO_EVENT_EXPOSE )
    {

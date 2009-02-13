@@ -318,5 +318,9 @@ struct keymap {
   int to;
 };
 int lookup_keymap_table(const struct keymap *map, int key);
+struct vo_rect {
+  int left, right, top, bottom, width, height;
+};
+void calc_src_dst_rects(struct vo *vo, int src_width, int src_height, struct vo_rect *src, struct vo_rect *dst, struct vo_rect *crop);
 
 #endif /* MPLAYER_VIDEO_OUT_H */

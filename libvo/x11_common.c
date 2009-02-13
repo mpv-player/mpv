@@ -811,8 +811,12 @@ int vo_x11_check_events(struct vo *vo)
 //         if (vo_fs && Event.xconfigure.width != opts->vo_screenwidth && Event.xconfigure.height != opts->vo_screenheight) break;
                 if (x11->window == None)
                     break;
-                vo_x11_update_geometry(vo);
-                ret |= VO_EVENT_RESIZE;
+                {
+                    int old_w = vo->dwidth, old_h = vo->dheight;
+                    vo_x11_update_geometry(vo);
+                    if (vo->dwidth != old_w || vo->dheight != old_h)
+                        ret |= VO_EVENT_RESIZE;
+                }
                 break;
             case KeyPress:
                 {
@@ -1866,24 +1870,6 @@ uint32_t vo_x11_get_equalizer(char *name, int *value)
     else
         return VO_NOTIMPL;
     return VO_TRUE;
-}
-
-void vo_calc_drwXY(struct vo *vo, uint32_t *drwX, uint32_t *drwY)
-{
-    struct MPOpts *opts = vo->opts;
-    *drwX = *drwY = 0;
-    if (vo_fs) {
-        aspect(vo, &vo->dwidth, &vo->dheight, A_ZOOM);
-        vo->dwidth = FFMIN(vo->dwidth, opts->vo_screenwidth);
-        vo->dheight = FFMIN(vo->dheight, opts->vo_screenheight);
-        *drwX = (opts->vo_screenwidth - vo->dwidth) / 2;
-        *drwY = (opts->vo_screenheight - vo->dheight) / 2;
-        mp_msg(MSGT_VO, MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n", *drwX,
-               *drwY, vo->dwidth, vo->dheight);
-    } else if (WinID == 0) {
-        *drwX = vo->dx;
-        *drwY = vo->dy;
-    }
 }
 
 #ifdef CONFIG_XV

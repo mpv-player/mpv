@@ -8025,6 +8025,7 @@ HELP_FILE = $_mp_help
 TIMER = $_timer
 
 EXESUF = $_exesuf
+EXESUFS_ALL = .exe
 
 $_target_arch
 $_target_arch_x86

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28422 -->
+<!-- synced with r28510 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -405,7 +405,7 @@ alapértelmezett, mivel jobb a sebessége.
 
 <!-- ********** -->
 
-<sect2 id="codec-x264">
+<sect2 id="x264">
 <title><systemitem class="library">x264</systemitem></title>
 
 <para>

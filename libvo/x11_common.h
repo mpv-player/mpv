@@ -172,8 +172,6 @@ void vo_vm_close(struct vo *vo);
 void update_xinerama_info(struct vo *vo);
 
 int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
-void vo_calc_drwXY(struct vo *vo, uint32_t *drwX, uint32_t *drwY);
-
 void xscreensaver_heartbeat(struct vo_x11_state *x11);
 
 // Old VOs use incompatible function calls, translate them to new
@@ -204,7 +202,6 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11);
 #define vo_x11_classhint(display, window, name) vo_x11_classhint(global_vo, window, name)
 #define vo_x11_setlayer(display, window, layer) vo_x11_setlayer(global_vo, window, layer)
 #define xv_setup_colorkeyhandling(a, b) xv_setup_colorkeyhandling(global_vo, a, b)
-#define vo_calc_drwXY(drwX, drwY) vo_calc_drwXY(global_vo, drwX, drwY)
 
 #define mDisplay global_vo->x11->display
 #define vo_depthonscreen global_vo->x11->depthonscreen

@@ -106,7 +106,8 @@ struct xvctx {
     uint32_t image_height;
     uint32_t image_format;
     int is_paused;
-    uint32_t drwX, drwY;
+    struct vo_rect src_rect;
+    struct vo_rect dst_rect;
     uint32_t max_width, max_height; // zero means: not set
     int event_fd_registered; // for uninit called from preinit
     int mode_switched;
@@ -179,6 +180,17 @@ static void draw_alpha_null(void *p, int x0, int y0, int w, int h,
 
 
 static void deallocate_xvimage(struct vo *vo, int foo);
+
+static void resize(struct vo *vo)
+{
+    struct xvctx *ctx = vo->priv;
+
+    calc_src_dst_rects(vo, ctx->image_width, ctx->image_height, &ctx->src_rect,
+                       &ctx->dst_rect, NULL);
+    struct vo_rect *dst = &ctx->dst_rect;
+    vo_x11_clearwindow_part(vo, vo->x11->window, dst->width, dst->height, 1);
+    vo_xv_draw_colorkey(vo, dst->left, dst->top, dst->width, dst->height);
+}
 
 /*
  * connect to server, create and map window,
@@ -307,17 +319,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0)
         vo_fs = 1;
-    vo_calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
 
-    panscan_calc(vo);
-
-    vo_xv_draw_colorkey(vo, ctx->drwX - (vo->panscan_x >> 1),
-                        ctx->drwY - (vo->panscan_y >> 1),
-                        vo->dwidth + vo->panscan_x - 1,
-                        vo->dheight + vo->panscan_y - 1);
-
-    mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", ctx->drwX,
-           ctx->drwY, vo->dwidth, vo->dheight);
+    resize(vo);
 
     return 0;
 }
@@ -391,22 +394,20 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 {
     struct xvctx *ctx = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
+    struct vo_rect *src = &ctx->src_rect;
+    struct vo_rect *dst = &ctx->dst_rect;
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag) {
         XvShmPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi,
-                      0, 0, ctx->image_width, ctx->image_height,
-                      ctx->drwX - (vo->panscan_x >> 1),
-                      ctx->drwY - (vo->panscan_y >> 1),
-                      vo->dwidth + vo->panscan_x, vo->dheight + vo->panscan_y,
+                      src->left, src->top, src->width, src->height,
+                      dst->left, dst->top, dst->width, dst->height,
                       False);
     } else
 #endif
     {
-        XvPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi, 0,
-                   0, ctx->image_width, ctx->image_height,
-                   ctx->drwX - (vo->panscan_x >> 1),
-                   ctx->drwY - (vo->panscan_y >> 1),
-                   vo->dwidth + vo->panscan_x, vo->dheight + vo->panscan_y);
+        XvPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi,
+                   src->left, src->top, src->width, src->height,
+                   dst->left, dst->top, dst->width, dst->height);
     }
 }
 
@@ -428,15 +429,8 @@ static void check_events(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     int e = vo_x11_check_events(vo);
 
-    if (e & VO_EVENT_RESIZE)
-        vo_calc_drwXY(vo, &ctx->drwX, &ctx->drwY);
-
-    if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) {
-        vo_xv_draw_colorkey(vo, ctx->drwX - (vo->panscan_x >> 1),
-                            ctx->drwY - (vo->panscan_y >> 1),
-                            vo->dwidth + vo->panscan_x - 1,
-                            vo->dheight + vo->panscan_y - 1);
-    }
+    if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
+        resize(vo);
 
     if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && ctx->is_paused) {
         /* did we already draw a buffer */
@@ -831,13 +825,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
             panscan_calc(vo);
 
             if (old_y != vo->panscan_y) {
-                vo_x11_clearwindow_part(vo, x11->window,
-                                        vo->dwidth + vo->panscan_x - 1,
-                                        vo->dheight + vo->panscan_y - 1, 1);
-                vo_xv_draw_colorkey(vo, ctx->drwX - (vo->panscan_x >> 1),
-                                    ctx->drwY - (vo->panscan_y >> 1),
-                                    vo->dwidth + vo->panscan_x - 1,
-                                    vo->dheight + vo->panscan_y - 1);
+                resize(vo);
                 flip_page(vo);
             }
         }
