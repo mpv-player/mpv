@@ -145,7 +145,6 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
         }
         return CONTROL_FALSE;
     }
-    break;
     case VDCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(avctx);
         return CONTROL_TRUE;
