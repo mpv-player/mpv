@@ -38,6 +38,7 @@ SRCS_COMMON = asxparser.c \
               cpudetect.c \
               edl.c \
               find_sub.c \
+              fmt-conversion.c \
               get_path.c \
               m_config.c \
               m_option.c \
