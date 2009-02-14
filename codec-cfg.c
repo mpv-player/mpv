@@ -182,6 +182,12 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 		{"IDCT_MPEG2",IMGFMT_XVMC_IDCT_MPEG2},
 		{"MOCO_MPEG2",IMGFMT_XVMC_MOCO_MPEG2},
 
+		{"VDPAU_MPEG1",IMGFMT_VDPAU_MPEG1},
+		{"VDPAU_MPEG2",IMGFMT_VDPAU_MPEG2},
+		{"VDPAU_H264",IMGFMT_VDPAU_H264},
+		{"VDPAU_WMV3",IMGFMT_VDPAU_WMV3},
+		{"VDPAU_VC1",IMGFMT_VDPAU_VC1},
+
 		{NULL,    0}
 	};
 

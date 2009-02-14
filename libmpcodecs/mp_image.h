@@ -118,6 +118,10 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->bpp=0;
 	return;
     }
+    if(IMGFMT_IS_VDPAU(out_fmt)){
+        mpi->bpp=0;
+        return;
+    }
     if(IMGFMT_IS_XVMC(out_fmt)){
 	mpi->bpp=0;
 	return;
