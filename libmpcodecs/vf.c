@@ -253,6 +253,7 @@ void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h){
   mp_image_t* mpi=NULL;
   int w2;
+  int number = mp_imgtype >> 16;
 
 #ifdef MP_DEBUG
   assert(w == -1 || w >= vf->w);
@@ -275,7 +276,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
   
   // Note: we should call libvo first to check if it supports direct rendering
   // and if not, then fallback to software buffers:
-  switch(mp_imgtype){
+  switch(mp_imgtype & 0xff){
   case MP_IMGTYPE_EXPORT:
     if(!vf->imgctx.export_images[0]) vf->imgctx.export_images[0]=new_mp_image(w2,h);
     mpi=vf->imgctx.export_images[0];
@@ -299,6 +300,19 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
     mpi=vf->imgctx.static_images[vf->imgctx.static_idx];
     vf->imgctx.static_idx^=1;
     break;
+  case MP_IMGTYPE_NUMBERED:
+    if (number == -1) {
+      int i;
+      for (i = 0; i < NUM_NUMBERED_MPI; i++)
+        if (!vf->imgctx.numbered_images[i] || !(vf->imgctx.numbered_images[i]->flags & MP_IMGFLAG_IN_USE))
+          break;
+      number = i;
+    }
+    if (number < 0 || number >= NUM_NUMBERED_MPI) return NULL;
+    if (!vf->imgctx.numbered_images[number]) vf->imgctx.numbered_images[number] = new_mp_image(w2,h);
+    mpi = vf->imgctx.numbered_images[number];
+    mpi->number = number;
+    break;
   }
   if(mpi){
     mpi->type=mp_imgtype;
@@ -306,6 +320,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
     // keep buffer allocation status & color flags only:
 //    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_DIRECT);
     mpi->flags&=MP_IMGFLAG_ALLOCATED|MP_IMGFLAG_TYPE_DISPLAYED|MP_IMGFLAGMASK_COLORS;
+    mpi->flags |= MP_IMGFLAG_IN_USE;
     // accept restrictions & draw_slice flags only:
     mpi->flags|=mp_imgflag&(MP_IMGFLAGMASK_RESTRICTIONS|MP_IMGFLAG_DRAW_CALLBACK);
     if(!vf->draw_slice) mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;

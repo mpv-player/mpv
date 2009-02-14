@@ -16,10 +16,13 @@ typedef struct vf_info_s {
     const void* opts;
 } vf_info_t;
 
+#define NUM_NUMBERED_MPI 50
+
 typedef struct vf_image_context_s {
     mp_image_t* static_images[2];
     mp_image_t* temp_images[1];
     mp_image_t* export_images[1];
+    mp_image_t* numbered_images[NUM_NUMBERED_MPI];
     int static_idx;
 } vf_image_context_t;
 

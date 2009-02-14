@@ -53,6 +53,8 @@
 
 // buffer type was printed (do NOT set this flag - it's for INTERNAL USE!!!)
 #define MP_IMGFLAG_TYPE_DISPLAYED 0x8000
+// set if it can not be reused yet (for MP_IMGTYPE_NUMBERED)
+#define MP_IMGFLAG_IN_USE 0x10000
 
 // codec doesn't support any form of direct rendering - it has own buffer
 // allocation. so we just export its buffer pointers:
@@ -65,6 +67,8 @@
 #define MP_IMGTYPE_IP 3
 // I+P+B type, requires 2+ independent static R/W and 1+ temp WO buffers
 #define MP_IMGTYPE_IPB 4
+// Upper 16 bits give desired buffer number, -1 means get next available
+#define MP_IMGTYPE_NUMBERED 5
 
 #define MP_MAX_PLANES	4
 
@@ -76,8 +80,9 @@
 #define MP_IMGFIELD_INTERLACED 0x20
 
 typedef struct mp_image_s {
-    unsigned short flags;
+    unsigned int flags;
     unsigned char type;
+    int number;
     unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8
     unsigned int imgfmt;
     int width,height;  // stored dimensions
