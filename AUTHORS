@@ -406,6 +406,7 @@ Jelveh, Reza (timebomb) <reza.jelveh@tu-harburg.de>
     * savage_vid VIDIX driver
     * miscellaneous small fixes and improvements
     * first musepack decoding patch
+    * swscale AltiVec fixes
 
 Jermann, Jonas (g0th) <jjermann@gmx.net>
     * manual page rewrite
