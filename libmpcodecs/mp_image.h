@@ -108,21 +108,10 @@ typedef struct mp_image_s {
 static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     mpi->flags&=~(MP_IMGFLAG_PLANAR|MP_IMGFLAG_YUV|MP_IMGFLAG_SWAPPED);
     mpi->imgfmt=out_fmt;
-    if(out_fmt == IMGFMT_MPEGPES){
-	mpi->bpp=0;
-	return;
-    }
-    if(out_fmt == IMGFMT_ZRMJPEGNI ||
-	    out_fmt == IMGFMT_ZRMJPEGIT ||
-	    out_fmt == IMGFMT_ZRMJPEGIB){
-	mpi->bpp=0;
-	return;
-    }
-    if(IMGFMT_IS_VDPAU(out_fmt)){
-        mpi->bpp=0;
-        return;
-    }
-    if(IMGFMT_IS_XVMC(out_fmt)){
+    // compressed formats
+    if(out_fmt == IMGFMT_MPEGPES ||
+       out_fmt == IMGFMT_ZRMJPEGNI || out_fmt == IMGFMT_ZRMJPEGIT || out_fmt == IMGFMT_ZRMJPEGIB ||
+       IMGFMT_IS_VDPAU(out_fmt) || IMGFMT_IS_XVMC(out_fmt)){
 	mpi->bpp=0;
 	return;
     }
