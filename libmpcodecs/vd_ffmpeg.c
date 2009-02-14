@@ -56,8 +56,8 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
 
 #if CONFIG_XVMC
-static enum PixelFormat get_format(struct AVCodecContext * avctx,
-                                   const enum PixelFormat * pix_fmt);
+static enum PixelFormat get_format(struct AVCodecContext *avctx,
+                                   const enum PixelFormat *pix_fmt);
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_render_slice(struct AVCodecContext *s,
@@ -120,16 +120,16 @@ static enum AVDiscard str2AVDiscard(char *str) {
 }
 
 // to set/get/query special features/parameters
-static int control(sh_video_t *sh,int cmd,void* arg,...){
+static int control(sh_video_t *sh, int cmd, void *arg, ...){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
     {
-        int format =(*((int*)arg));
-        if( format == ctx->best_csp ) return CONTROL_TRUE;//supported
+        int format =(*((int *)arg));
+        if(format == ctx->best_csp) return CONTROL_TRUE;//supported
         // possible conversions:
-        switch( format ){
+        switch(format){
         case IMGFMT_YV12:
         case IMGFMT_IYUV:
         case IMGFMT_I420:
@@ -154,10 +154,10 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
-void mp_msp_av_log_callback(void* ptr, int level, const char* fmt, va_list vl)
+void mp_msp_av_log_callback(void *ptr, int level, const char *fmt, va_list vl)
 {
     static int print_prefix=1;
-    AVClass* avc= ptr ? *(AVClass**)ptr : NULL;
+    AVClass *avc= ptr ? *(AVClass **)ptr : NULL;
     int type= MSGT_FIXME;
     int mp_level;
     char buf[256];
@@ -173,7 +173,7 @@ void mp_msp_av_log_callback(void* ptr, int level, const char* fmt, va_list vl)
 
     if(ptr){
         if(!strcmp(avc->class_name, "AVCodecContext")){
-            AVCodecContext * s= ptr;
+            AVCodecContext *s= ptr;
             if(s->codec){
                 if(s->codec->type == CODEC_TYPE_AUDIO){
                     if(s->codec->decode)
@@ -185,8 +185,8 @@ void mp_msp_av_log_callback(void* ptr, int level, const char* fmt, va_list vl)
                 //FIXME subtitles, encoders (what msgt for them? there is no appropriate ...)
             }
         }else if(!strcmp(avc->class_name, "AVFormatContext")){
-#if 0 //needs libavformat include FIXME iam too lazy to do this cleanly,probably the whole should be moved out of this file ...
-            AVFormatContext * s= ptr;
+#if 0 //needs libavformat include FIXME iam too lazy to do this cleanly, probably the whole should be moved out of this file ...
+            AVFormatContext *s= ptr;
             if(s->iformat)
                 type= MSGT_DEMUXER;
             else if(s->oformat)
@@ -226,7 +226,7 @@ static int init(sh_video_t *sh){
 
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
     if(!lavc_codec){
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh->codec->dll);
+        mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MissingLAVCcodec, sh->codec->dll);
         uninit(sh);
         return 0;
     }
@@ -295,22 +295,22 @@ static int init(sh_video_t *sh){
 
     if(lavc_avopt){
         if(parse_avopts(avctx, lavc_avopt) < 0){
-            mp_msg(MSGT_DECVIDEO,MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", lavc_avopt);
+            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Your options /%s/ look like gibberish to me pal\n", lavc_avopt);
             uninit(sh);
             return 0;
         }
     }
 
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
+    mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "libavcodec.size: %d x %d\n", avctx->width, avctx->height);
     switch (sh->format) {
     case mmioFOURCC('S','V','Q','3'):
     /* SVQ3 extradata can show up as sh->ImageDesc if demux_mov is used, or
        in the phony AVI header if demux_lavf is used. The first case is
        handled here; the second case falls through to the next section. */
         if (sh->ImageDesc) {
-            avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
+            avctx->extradata_size = (*(int *)sh->ImageDesc) - sizeof(int);
             avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-            memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
+            memcpy(avctx->extradata, ((int *)sh->ImageDesc)+1, avctx->extradata_size);
             break;
         }
         /* fallthrough */
@@ -333,8 +333,8 @@ static int init(sh_video_t *sh){
             uint8_t *p = avctx->extradata;
 
             for (x=0; x<avctx->extradata_size; x++)
-                mp_msg(MSGT_DECVIDEO, MSGL_INFO,"[%x] ", p[x]);
-            mp_msg(MSGT_DECVIDEO, MSGL_INFO,"\n");
+                mp_msg(MSGT_DECVIDEO, MSGL_INFO, "[%x] ", p[x]);
+            mp_msg(MSGT_DECVIDEO, MSGL_INFO, "\n");
         }
 #endif
         break;
@@ -348,8 +348,8 @@ static int init(sh_video_t *sh){
             /* only 1 packet per frame & sub_id from fourcc */
             avctx->extradata_size= 8;
             avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-            ((uint32_t*)avctx->extradata)[0] = 0;
-            ((uint32_t*)avctx->extradata)[1] =
+            ((uint32_t *)avctx->extradata)[0] = 0;
+            ((uint32_t *)avctx->extradata)[1] =
                 (sh->format == mmioFOURCC('R', 'V', '1', '3')) ? 0x10003001 : 0x10000000;
         } else {
             /* has extra slice header (demux_rm or rm->avi streamcopy) */
@@ -372,7 +372,7 @@ static int init(sh_video_t *sh){
     }
     /* Pass palette to codec */
     if (sh->bih && (sh->bih->biBitCount <= 8)) {
-        avctx->palctrl = calloc(1,sizeof(AVPaletteControl));
+        avctx->palctrl = calloc(1, sizeof(AVPaletteControl));
         avctx->palctrl->palette_changed = 1;
         if (sh->bih->biSize-sizeof(BITMAPINFOHEADER))
             /* Palette size in biSize */
@@ -391,12 +391,12 @@ static int init(sh_video_t *sh){
         avcodec_thread_init(avctx, lavc_param_threads);
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
+        mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantOpenCodec);
         uninit(sh);
         return 0;
     }
-    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: libavcodec init OK!\n");
-    return 1; //mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "INFO: libavcodec init OK!\n");
+    return 1; //mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, IMGFMT_YV12);
 }
 
 // uninit driver
@@ -407,9 +407,9 @@ static void uninit(sh_video_t *sh){
     if(lavc_param_vstats){
         int i;
         for(i=1; i<32; i++){
-            mp_msg(MSGT_DECVIDEO, MSGL_INFO,"QP: %d, count: %d\n", i, ctx->qp_stat[i]);
+            mp_msg(MSGT_DECVIDEO, MSGL_INFO, "QP: %d, count: %d\n", i, ctx->qp_stat[i]);
         }
-        mp_msg(MSGT_DECVIDEO, MSGL_INFO,MSGTR_MPCODECS_ArithmeticMeanOfQP,
+        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_ArithmeticMeanOfQP,
             ctx->qp_sum / avctx->coded_frame->coded_picture_number,
             1.0/(ctx->inv_qp_sum / avctx->coded_frame->coded_picture_number)
             );
@@ -417,7 +417,7 @@ static void uninit(sh_video_t *sh){
 
     if (avctx) {
         if (avctx->codec && avcodec_close(avctx) < 0)
-            mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
+            mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantCloseCodec);
 
         av_freep(&avctx->extradata);
         av_freep(&avctx->palctrl);
@@ -433,7 +433,7 @@ static void uninit(sh_video_t *sh){
 static void draw_slice(struct AVCodecContext *s,
                         AVFrame *src, int offset[4],
                         int y, int type, int height){
-    sh_video_t * sh = s->opaque;
+    sh_video_t *sh = s->opaque;
     uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
 #if 0
     int start=0, i;
@@ -450,7 +450,7 @@ static void draw_slice(struct AVCodecContext *s,
                                      src[1] + start*8,
                                      src[2] + start*8};
 //printf("%2d-%2d x %d\n", start, i, y);
-                    mpcodecs_draw_slice (sh,src2, stride, (i-start)*16, height, start*16, y);
+                    mpcodecs_draw_slice (sh, src2, stride, (i-start)*16, height, start*16, y);
                     start= i+1;
                 }
             }
@@ -524,7 +524,7 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
         default:
             ctx->best_csp=0;
         }
-        if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h, ctx->best_csp))
+        if (!mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, ctx->best_csp))
             return -1;
         ctx->vo_initialized = 1;
     }
@@ -532,9 +532,9 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 }
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
-    sh_video_t * sh = avctx->opaque;
+    sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
-    mp_image_t* mpi=NULL;
+    mp_image_t *mpi=NULL;
     int flags= MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE;
     int type= MP_IMGTYPE_IPB;
     int width= avctx->width;
@@ -545,7 +545,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         align=63; //yes seriously, its really needed (16x16 chroma blocks in SVQ1 -> 64x64)
 
     if (pic->buffer_hints) {
-        mp_msg(MSGT_DECVIDEO,MSGL_DBG2, "Buffer hints: %u\n", pic->buffer_hints);
+        mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Buffer hints: %u\n", pic->buffer_hints);
         type = MP_IMGTYPE_TEMP;
         if (pic->buffer_hints & FF_BUFFER_HINTS_READABLE)
             flags |= MP_IMGFLAG_READABLE;
@@ -559,7 +559,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         }
         flags|=(!avctx->hurry_up && ctx->do_slices) ?
                  MP_IMGFLAG_DRAW_CALLBACK:0;
-        mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type == MP_IMGTYPE_STATIC ? "using STATIC\n" : "using TEMP\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_DBG2, type == MP_IMGTYPE_STATIC ? "using STATIC\n" : "using TEMP\n");
     } else {
         if(!pic->reference){
             ctx->b_count++;
@@ -572,7 +572,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         }
     }
 
-    if(init_vo(sh,avctx->pix_fmt) < 0){
+    if(init_vo(sh, avctx->pix_fmt) < 0){
         avctx->release_buffer= avcodec_default_release_buffer;
         avctx->get_buffer= avcodec_default_get_buffer;
         return avctx->get_buffer(avctx, pic);
@@ -592,14 +592,14 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         }else{
             type= MP_IMGTYPE_IP;
         }
-        mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type== MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_DBG2, type== MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
     }
 
-    mpi= mpcodecs_get_image(sh,type, flags,
+    mpi= mpcodecs_get_image(sh, type, flags,
                         (width+align)&(~align), (height+align)&(~align));
 
     // ok, let's see what did we get:
-    if(  mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
+    if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
        !(mpi->flags&MP_IMGFLAG_DIRECT)){
         // nice, filter/vo likes draw_callback :)
         avctx->draw_horiz_band= draw_slice;
@@ -666,8 +666,8 @@ else
 }
 
 static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
-    mp_image_t* mpi= pic->opaque;
-    sh_video_t * sh = avctx->opaque;
+    mp_image_t *mpi= pic->opaque;
+    sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
     int i;
 
@@ -712,13 +712,13 @@ void swap_palette(void *pal) {
 }
 
 // decode a frame
-static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
+static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
     int got_picture=0;
     int ret;
     vd_ffmpeg_ctx *ctx = sh->context;
     AVFrame *pic= ctx->pic;
     AVCodecContext *avctx = ctx->avctx;
-    mp_image_t* mpi=NULL;
+    mp_image_t *mpi=NULL;
     int dr1= ctx->do_dr1;
 
     if(len<=0) return NULL; // skipped frame
@@ -745,7 +745,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
              &got_picture, data, len);
 
     dr1= ctx->do_dr1;
-    if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
+    if(ret<0) mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");
 //printf("repeat: %d\n", pic->repeat_pict);
 //-- vstats generation
     while(lavc_param_vstats){ // always one time loop
@@ -764,7 +764,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
             today = localtime(&today2);
             sprintf(filename, "vstats_%02d%02d%02d.log", today->tm_hour,
                 today->tm_min, today->tm_sec);
-            fvstats = fopen(filename,"w");
+            fvstats = fopen(filename, "w");
             if(!fvstats) {
                 perror("fopen");
                 lavc_param_vstats=0; // disable block
@@ -779,8 +779,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
             int w = ((avctx->width  << lavc_param_lowres)+15) >> 4;
             int h = ((avctx->height << lavc_param_lowres)+15) >> 4;
             int8_t *q = pic->qscale_table;
-            for( y = 0; y < h; y++ ) {
-                for( x = 0; x < w; x++ )
+            for(y = 0; y < h; y++) {
+                for(x = 0; x < w; x++)
                     quality += (double)*(q+x);
                 q += pic->qstride;
             }
@@ -822,10 +822,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(!got_picture) return NULL;        // skipped image
 
-    if(init_vo(sh,avctx->pix_fmt) < 0) return NULL;
+    if(init_vo(sh, avctx->pix_fmt) < 0) return NULL;
 
     if(dr1 && pic->opaque){
-        mpi= (mp_image_t*)pic->opaque;
+        mpi= (mp_image_t *)pic->opaque;
     }
 
     if(!mpi)
@@ -873,9 +873,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 }
 
 #if CONFIG_XVMC
-static enum PixelFormat get_format(struct AVCodecContext * avctx,
-                                    const enum PixelFormat * fmt){
-    sh_video_t * sh = avctx->opaque;
+static enum PixelFormat get_format(struct AVCodecContext *avctx,
+                                    const enum PixelFormat *fmt){
+    sh_video_t *sh = avctx->opaque;
     int i;
 
     if(avctx->xvmc_acceleration){
@@ -890,18 +890,18 @@ static enum PixelFormat get_format(struct AVCodecContext * avctx,
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
     for(i=0;fmt[i]!=-1;i++){
-        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt,i);
-        if( init_vo(sh,fmt[i]) >= 0)
+        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt, i);
+        if(init_vo(sh, fmt[i]) >= 0)
             return fmt[i];
     }
     return fmt[0];
 }
 
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
-    sh_video_t * sh = avctx->opaque;
+    sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
-    mp_image_t* mpi=NULL;
-    struct xvmc_render_state * render;
+    mp_image_t *mpi=NULL;
+    struct xvmc_render_state *render;
     int flags= MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE|
                MP_IMGFLAG_DRAW_CALLBACK;
 
@@ -914,10 +914,10 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     }
     assert(avctx->draw_horiz_band == mc_render_slice);
     assert(avctx->release_buffer == mc_release_buffer);
-    if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
+    if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer\n");
 
-    if(init_vo(sh,avctx->pix_fmt) < 0){
+    if(init_vo(sh, avctx->pix_fmt) < 0){
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_UnexpectedInitVoError);
         exit(1);
 //        return -1;//!!fixme check error conditions
@@ -932,7 +932,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
         flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE;
     }
 
-    mpi= mpcodecs_get_image(sh, MP_IMGTYPE_IPB,flags ,
+    mpi= mpcodecs_get_image(sh, MP_IMGTYPE_IPB, flags,
                             avctx->width, avctx->height);
     if(mpi==NULL){
         mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken);
@@ -941,7 +941,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
 //        return -1;//!!fixme check error conditions in ffmpeg
     };
 
-    if( (mpi->flags & MP_IMGFLAG_DIRECT) == 0){
+    if((mpi->flags & MP_IMGFLAG_DIRECT) == 0){
         mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed);
         assert(0);
         exit(1);
@@ -980,9 +980,9 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
 
     pic->type= FF_BUFFER_TYPE_USER;
 
-    render=(struct xvmc_render_state*)mpi->priv;//same as data[2]
-    if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
-        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer (render=%p)\n",render);
+    render=(struct xvmc_render_state *)mpi->priv;//same as data[2]
+    if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
+        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer (render=%p)\n", render);
     assert(render != 0);
     assert(render->magic == AV_XVMC_RENDER_MAGIC);
     render->state |= AV_XVMC_STATE_PREDICTION;
@@ -991,10 +991,10 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
 
 
 static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
-    mp_image_t* mpi= pic->opaque;
-    sh_video_t * sh = avctx->opaque;
+    mp_image_t *mpi= pic->opaque;
+    sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
-    struct xvmc_render_state * render;
+    struct xvmc_render_state *render;
     int i;
 
 
@@ -1007,9 +1007,9 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
 
 //printf("R%X %X\n", pic->linesize[0], pic->data[0]);
 //mark the surface as not requared for prediction
-    render=(struct xvmc_render_state*)pic->data[2];//same as mpi->priv
-    if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
-        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_release_buffer (render=%p)\n",render);
+    render=(struct xvmc_render_state *)pic->data[2];//same as mpi->priv
+    if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
+        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_release_buffer (render=%p)\n", render);
     assert(render!=NULL);
     assert(render->magic==AV_XVMC_RENDER_MAGIC);
     render->state&=~AV_XVMC_STATE_PREDICTION;
@@ -1022,7 +1022,7 @@ static void mc_render_slice(struct AVCodecContext *s,
                         AVFrame *src, int offset[4],
                         int y, int type, int height){
     int width= s->width;
-    sh_video_t * sh = s->opaque;
+    sh_video_t *sh = s->opaque;
     uint8_t *source[3]= {src->data[0], src->data[1], src->data[2]};
 
     assert(src->linesize[0]==0 && src->linesize[1]==0 && src->linesize[2]==0);
