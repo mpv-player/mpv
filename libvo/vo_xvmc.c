@@ -42,7 +42,7 @@
 #include <X11/extensions/XvMClib.h>
 
 #include "x11_common.h"
-#include "xvmc_render.h"
+#include "libavcodec/xvmc.h"
 
 #include "sub.h"
 #include "aspect.h"
@@ -371,11 +371,11 @@ static uint32_t xvmc_draw_image(mp_image_t *mpi){
 
    rndr = (struct xvmc_render_state*)mpi->priv;//there is copy in plane[2]
    assert( rndr != NULL );
-   assert( rndr->magic == MP_XVMC_RENDER_MAGIC );
+   assert( rndr->magic == AV_XVMC_RENDER_MAGIC );
    if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
        printf("vo_xvmc: draw_image(show rndr=%p)\n",rndr);
 // the surface have passed vf system without been skiped, it will be displayed
-   rndr->state |= MP_XVMC_STATE_DISPLAY_PENDING;
+   rndr->state |= AV_XVMC_STATE_DISPLAY_PENDING;
    p_render_surface_to_show = rndr;
    top_field_first = mpi->fields & MP_IMGFIELD_TOP_FIRST;
    return VO_TRUE;
@@ -528,7 +528,7 @@ int vm = flags & VOFLAG_MODESWITCHING;
       rez=XvMCCreateSurface(mDisplay,&ctx,&surface_array[i]);
       if( rez != Success )
 	 break;
-      surface_render[i].magic = MP_XVMC_RENDER_MAGIC;
+      surface_render[i].magic = AV_XVMC_RENDER_MAGIC;
       surface_render[i].data_blocks = data_blocks.blocks;
       surface_render[i].mv_blocks = mv_blocks.macro_blocks;
       surface_render[i].total_number_of_mv_blocks = numblocks;
@@ -899,12 +899,12 @@ int rez;
          osd_rndr->display_flags = p_render_surface_to_show->display_flags;
 //add more if needed    osd_rndr-> = p_render_surface_to_show->;
 
-         p_render_surface_to_show->state &= ~MP_XVMC_STATE_DISPLAY_PENDING;
-         p_render_surface_to_show->state |= MP_XVMC_STATE_OSD_SOURCE;
+         p_render_surface_to_show->state &= ~AV_XVMC_STATE_DISPLAY_PENDING;
+         p_render_surface_to_show->state |= AV_XVMC_STATE_OSD_SOURCE;
          p_render_surface_to_show->p_osd_target_surface_render = osd_rndr;
 
          p_render_surface_to_show = osd_rndr;
-         p_render_surface_to_show->state = MP_XVMC_STATE_DISPLAY_PENDING;
+         p_render_surface_to_show->state = AV_XVMC_STATE_DISPLAY_PENDING;
 
          if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
             printf("vo_xvmc:draw_osd: surface_to_show changed to %p\n",osd_rndr);
@@ -982,7 +982,7 @@ int i,cfs;
       printf("vo_xvmc: flip_page  show(rndr=%p)\n\n",p_render_surface_to_show);
 
    if(p_render_surface_to_show == NULL) return;
-   assert( p_render_surface_to_show->magic == MP_XVMC_RENDER_MAGIC );
+   assert( p_render_surface_to_show->magic == AV_XVMC_RENDER_MAGIC );
 //fixme   assert( p_render_surface_to_show != p_render_surface_visible);
 
    if(use_queue){
@@ -1010,9 +1010,9 @@ int i,cfs;
 
 //the visible surface won't be displayed anymore, mark it as free
    if(p_render_surface_visible != NULL)
-      p_render_surface_visible->state &= ~MP_XVMC_STATE_DISPLAY_PENDING;
+      p_render_surface_visible->state &= ~AV_XVMC_STATE_DISPLAY_PENDING;
 
-//!!fixme   assert(p_render_surface_to_show->state & MP_XVMC_STATE_DISPLAY_PENDING);
+//!!fixme   assert(p_render_surface_to_show->state & AV_XVMC_STATE_DISPLAY_PENDING);
 
    //show it, displaying is always vsynced, so skip it for benchmark
    put_xvmc_image(p_render_surface_to_show,first_frame);
@@ -1127,7 +1127,7 @@ int rez;
 
    rndr = (struct xvmc_render_state*)image[2];//this is copy of priv-ate
    assert( rndr != NULL );
-   assert( rndr->magic == MP_XVMC_RENDER_MAGIC );
+   assert( rndr->magic == AV_XVMC_RENDER_MAGIC );
 
    rez = XvMCRenderSurface(mDisplay,&ctx,rndr->picture_structure,
              		   rndr->p_surface,
@@ -1183,13 +1183,13 @@ static void check_osd_source(struct xvmc_render_state * src_rndr){
 struct xvmc_render_state * osd_rndr;
 int stat;
       //If this is source surface, check does the OSD rendering is compleate
-      if(src_rndr->state & MP_XVMC_STATE_OSD_SOURCE){
+      if(src_rndr->state & AV_XVMC_STATE_OSD_SOURCE){
          if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
             printf("vo_xvmc: OSD surface=%p quering\n",src_rndr);
          osd_rndr = src_rndr->p_osd_target_surface_render;
          XvMCGetSurfaceStatus(mDisplay, osd_rndr->p_surface, &stat);
          if(!(stat & XVMC_RENDERING))
-            src_rndr->state &= ~MP_XVMC_STATE_OSD_SOURCE;
+            src_rndr->state &= ~AV_XVMC_STATE_OSD_SOURCE;
       }
 }
 static int count_free_surfaces(void) {
@@ -1243,8 +1243,8 @@ int i;
 
   for(i=0; i<number_of_surfaces; i++){
 
-      surface_render[i].state&=!( MP_XVMC_STATE_DISPLAY_PENDING |
-                                  MP_XVMC_STATE_OSD_SOURCE |
+      surface_render[i].state&=!( AV_XVMC_STATE_DISPLAY_PENDING |
+                                  AV_XVMC_STATE_OSD_SOURCE |
                                   0);
       surface_render[i].p_osd_target_surface_render=NULL;
       if(surface_render[i].state != 0){

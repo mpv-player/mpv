@@ -27,7 +27,7 @@ LIBVD_EXTERN(ffmpeg)
 #include "libavcodec/avcodec.h"
 
 #if CONFIG_XVMC
-#include "xvmc_render.h"
+#include "libavcodec/xvmc.h"
 #endif
 
 int avcodec_initialized=0;
@@ -985,8 +985,8 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer (render=%p)\n",render);
     assert(render != 0);
-    assert(render->magic == MP_XVMC_RENDER_MAGIC);
-    render->state |= MP_XVMC_STATE_PREDICTION;
+    assert(render->magic == AV_XVMC_RENDER_MAGIC);
+    render->state |= AV_XVMC_STATE_PREDICTION;
     return 0;
 }
 
@@ -1012,8 +1012,8 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
     if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_release_buffer (render=%p)\n",render);
     assert(render!=NULL);
-    assert(render->magic==MP_XVMC_RENDER_MAGIC);
-    render->state&=~MP_XVMC_STATE_PREDICTION;
+    assert(render->magic==AV_XVMC_RENDER_MAGIC);
+    render->state&=~AV_XVMC_STATE_PREDICTION;
     for(i=0; i<4; i++){
         pic->data[i]= NULL;
     }
