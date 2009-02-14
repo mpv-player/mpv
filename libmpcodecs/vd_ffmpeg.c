@@ -11,6 +11,7 @@
 #include "libavutil/common.h"
 #include "libavutil/intreadwrite.h"
 #include "mpbswap.h"
+#include "fmt-conversion.h"
 
 #include "vd_internal.h"
 
@@ -497,33 +498,7 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
         sh->disp_w = width;
         sh->disp_h = height;
         ctx->pix_fmt = pix_fmt;
-        switch(pix_fmt){
-        // YUVJ are YUV formats that use the full Y range and not just
-        // 16 - 235 (see colorspaces.txt).
-        // Currently they are all treated the same way.
-        case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
-        case PIX_FMT_YUVJ420P:
-        case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
-        case PIX_FMT_YUVJ422P:
-        case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg / huffyuv
-        case PIX_FMT_YUVJ444P:
-        case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //photo jpeg
-        case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
-        case PIX_FMT_YUYV422: ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
-        case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_RGB24;break; //qtrle
-        case PIX_FMT_RGB32:   ctx->best_csp=IMGFMT_BGR32;break; //huffyuv / mjpeg
-        case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //8bps
-        case PIX_FMT_RGB555:  ctx->best_csp=IMGFMT_BGR15;break; //rpza,cram
-        case PIX_FMT_RGB565:  ctx->best_csp=IMGFMT_BGR16;break; //4xm
-        case PIX_FMT_GRAY8:   ctx->best_csp=IMGFMT_Y800;break; // gray jpeg
-        case PIX_FMT_PAL8:    ctx->best_csp=IMGFMT_BGR8;break; //8bps,mrle,cram
-#if CONFIG_XVMC
-        case PIX_FMT_XVMC_MPEG2_MC:ctx->best_csp=IMGFMT_XVMC_MOCO_MPEG2;break;
-        case PIX_FMT_XVMC_MPEG2_IDCT:ctx->best_csp=IMGFMT_XVMC_IDCT_MPEG2;break;
-#endif
-        default:
-            ctx->best_csp=0;
-        }
+        ctx->best_csp = pixfmt2imgfmt(pix_fmt);
         if (!mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, ctx->best_csp))
             return -1;
         ctx->vo_initialized = 1;
