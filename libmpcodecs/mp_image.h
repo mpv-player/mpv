@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mp_msg.h"
 
 //--------- codec's requirements (filled by the codec/vf) ---------
 
@@ -204,7 +205,7 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->chroma_y_shift=1;
 	return;
     }
-    fprintf(stderr,"mp_image: unknown out_fmt: 0x%X\n",out_fmt);
+    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"mp_image: unknown out_fmt: 0x%X\n",out_fmt);
     mpi->bpp=0;
 }
 #endif
