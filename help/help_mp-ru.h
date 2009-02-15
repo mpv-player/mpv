@@ -568,7 +568,7 @@ static char help_text[]=
 #define MSGTR_UNKNOWNWINDOWTYPE "Найден неизвестный тип окна..."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[скин] ошибка в файле конфигурации шкуры на строке %d: %s" 
+#define MSGTR_SKIN_ERRORMESSAGE "[скин] ошибка в файле конфигурации шкуры на строке %d: %s"
 #define MSGTR_SKIN_WARNING1 "[скин] предупреждение: в файле конфигурации шкуры на строке %d:\nэлемент GUI найден, но до этого не найдено \"section\" (%s)"
 #define MSGTR_SKIN_WARNING2 "[скин] предупреждение: в файле конфигурации шкуры на строке %d:\nэлемент GUI найден, но до этого не найдено \"subsection\" (%s)"
 #define MSGTR_SKIN_WARNING3 "[скин] предупреждение: в файле конфигурации шкуры на строке %d:\nэта подсекция не поддерживается этим элементом GUI (%s)"
@@ -784,7 +784,7 @@ static char help_text[]=
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Фатальная ошибка!"
 #define MSGTR_MSGBOX_LABEL_Error "Ошибка!"
-#define MSGTR_MSGBOX_LABEL_Warning "Предупреждение!" 
+#define MSGTR_MSGBOX_LABEL_Warning "Предупреждение!"
 
 // bitmap.c
 #define MSGTR_NotEnoughMemoryC32To1 "[c32to1] недостаточно памяти для изображения\n"
