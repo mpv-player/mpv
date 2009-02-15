@@ -899,7 +899,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
-    for(i=0;fmt[i]!=-1;i++){
+    for(i=0;fmt[i]!=PIX_FMT_NONE;i++){
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt, i);
         if(init_vo(sh, fmt[i]) >= 0)
             return fmt[i];
