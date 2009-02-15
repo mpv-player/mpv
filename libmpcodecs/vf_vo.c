@@ -165,7 +165,10 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static void get_image(struct vf_instance_s* vf,
         mp_image_t *mpi){
-    if(vo_directrendering && vo_config_count)
+    if(!vo_config_count) return;
+    // GET_IMAGE is required for hardware-accelerated formats
+    if(vo_directrendering ||
+       IMGFMT_IS_XVMC(mpi->imgfmt) || IMGFMT_IS_VDPAU(mpi->imgfmt))
 	video_out->control(VOCTRL_GET_IMAGE,mpi);
 }
 

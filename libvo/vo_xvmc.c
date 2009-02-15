@@ -683,7 +683,6 @@ skip_surface_allocation:
    free_element = 0;
    first_frame = 1;
 
-   vo_directrendering = 1;//ugly hack, coz xvmc works only with direct rendering
    image_format=format;
    return 0;		
 }
