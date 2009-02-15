@@ -371,7 +371,7 @@ static uint32_t xvmc_draw_image(mp_image_t *mpi){
 
    rndr = (struct xvmc_pixfmt_render*)mpi->priv;//there is copy in plane[2]
    assert( rndr != NULL );
-   assert( rndr->magic_id == AV_XVMC_RENDER_MAGIC );
+   assert( rndr->unique_id == AV_XVMC_RENDER_MAGIC );
    if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
        printf("vo_xvmc: draw_image(show rndr=%p)\n",rndr);
 // the surface have passed vf system without been skiped, it will be displayed
@@ -528,7 +528,7 @@ int vm = flags & VOFLAG_MODESWITCHING;
       rez=XvMCCreateSurface(mDisplay,&ctx,&surface_array[i]);
       if( rez != Success )
 	 break;
-      surface_render[i].magic_id = AV_XVMC_RENDER_MAGIC;
+      surface_render[i].unique_id = AV_XVMC_RENDER_MAGIC;
       surface_render[i].data_blocks = data_blocks.blocks;
       surface_render[i].mv_blocks = mv_blocks.macro_blocks;
       surface_render[i].total_number_of_mv_blocks = numblocks;
@@ -977,7 +977,7 @@ int i,cfs;
       printf("vo_xvmc: flip_page  show(rndr=%p)\n\n",p_render_surface_to_show);
 
    if(p_render_surface_to_show == NULL) return;
-   assert( p_render_surface_to_show->magic_id == AV_XVMC_RENDER_MAGIC );
+   assert( p_render_surface_to_show->unique_id == AV_XVMC_RENDER_MAGIC );
 //fixme   assert( p_render_surface_to_show != p_render_surface_visible);
 
    if(use_queue){
@@ -1122,7 +1122,7 @@ int rez;
 
    rndr = (struct xvmc_pixfmt_render*)image[2];//this is copy of priv-ate
    assert( rndr != NULL );
-   assert( rndr->magic_id == AV_XVMC_RENDER_MAGIC );
+   assert( rndr->unique_id == AV_XVMC_RENDER_MAGIC );
 
    rez = XvMCRenderSurface(mDisplay,&ctx,rndr->picture_structure,
              		   rndr->p_surface,
