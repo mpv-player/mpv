@@ -667,6 +667,8 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
             render->state&=~AV_XVMC_STATE_PREDICTION;
         }
 #endif
+        // release mpi (in case MPI_IMGTYPE_NUMBERED is used, e.g. for VDPAU)
+        mpi->flags &= ~MP_IMGFLAG_IN_USE;
     }
 
     if(pic->type!=FF_BUFFER_TYPE_USER){
