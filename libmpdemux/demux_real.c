@@ -140,7 +140,7 @@ static void dump_index(demuxer_t *demuxer, int stream_id)
     real_index_table_t *index;
     int i, entries;
 
-    if ( mp_msg_test(MSGT_DEMUX,MSGL_V) )
+    if (!mp_msg_test(MSGT_DEMUX,MSGL_V))
 	return;
     
     if ((unsigned)stream_id >= MAX_STREAMS)
