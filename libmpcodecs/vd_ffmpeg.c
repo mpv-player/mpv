@@ -653,11 +653,11 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
             ctx->b_count--;
     }
 
-    // Palette support: free palette buffer allocated in get_buffer
-    if (mpi && (mpi->bpp == 8))
-        av_freep(&mpi->planes[1]);
-#if CONFIG_XVMC
     if (mpi) {
+        // Palette support: free palette buffer allocated in get_buffer
+        if (mpi->bpp == 8)
+            av_freep(&mpi->planes[1]);
+#if CONFIG_XVMC
         if (IMGFMT_IS_XVMC(mpi->imgfmt)) {
             struct xvmc_pixfmt_render *render = (struct xvmc_pixfmt_render *)pic->data[2];//same as mpi->priv
             if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
@@ -666,8 +666,8 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
             assert(render->magic_id==AV_XVMC_RENDER_MAGIC);
             render->state&=~AV_XVMC_STATE_PREDICTION;
         }
-    }
 #endif
+    }
 
     if(pic->type!=FF_BUFFER_TYPE_USER){
         avcodec_default_release_buffer(avctx, pic);
