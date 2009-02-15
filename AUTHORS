@@ -700,6 +700,12 @@ Sanderson, Mark <mmp@kiora.ath.cx>
 Sauerbeck, Tilman <tsauerbeck@users.sourceforge.net>
     * TGA decoder (RLE/uncomp), -mf tga support
 
+Savchenko, Andrew <bircoph@gmail.com>
+    * build system enhancements
+    * parse system improvements
+    * Russian documentation translation
+    * various bug fixes, testing
+
 Scherthan, Frank <scherthan@uni-landau.de>
     * added OSD handling for live changing playback speed
 
@@ -950,9 +956,6 @@ MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
     * Marcin Biernat (boskicinek) <boski_cinek@o2.pl>
     * Marek Jarycki (Emdej) <emdej@emdej.com>
     * Leszek Kaplita (Flex) <flex@tenbit.pl>
-
-Savchenko, Andrew <bircoph@list.ru>
-    * Russian documentation translation
 
 Zubimendi, Andoni <andoni@lpsat.net>.
     * Spanish documentation translation
