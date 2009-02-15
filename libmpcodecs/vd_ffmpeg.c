@@ -884,10 +884,22 @@ static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
 #if CONFIG_XVMC
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                     const enum PixelFormat *fmt){
+    enum PixelFormat selected_format = fmt[0];
+    int imgfmt;
     sh_video_t *sh = avctx->opaque;
     int i;
 
-    if(avctx->xvmc_acceleration){
+    for(i=0;fmt[i]!=PIX_FMT_NONE;i++){
+        imgfmt = pixfmt2imgfmt(fmt[i]);
+        if(!IMGFMT_IS_XVMC(imgfmt)) continue;
+        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt, i);
+        if(init_vo(sh, fmt[i]) >= 0) {
+            selected_format = fmt[i];
+            break;
+        }
+    }
+    imgfmt = pixfmt2imgfmt(selected_format);
+    if(IMGFMT_IS_XVMC(imgfmt)) {
         vd_ffmpeg_ctx *ctx = sh->context;
         avctx->get_buffer= get_buffer;
         avctx->release_buffer= release_buffer;
@@ -897,12 +909,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
-    for(i=0;fmt[i]!=PIX_FMT_NONE;i++){
-        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt, i);
-        if(init_vo(sh, fmt[i]) >= 0)
-            return fmt[i];
-    }
-    return fmt[0];
+    return selected_format;
 }
 
 #endif /* CONFIG_XVMC */
