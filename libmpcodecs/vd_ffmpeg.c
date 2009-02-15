@@ -876,7 +876,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
     mp_image_t *mpi=NULL;
-    struct xvmc_render_state *render;
+    struct xvmc_pixfmt_render *render;
     int flags= MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE|
                MP_IMGFLAG_DRAW_CALLBACK;
 
@@ -955,7 +955,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
 
     pic->type= FF_BUFFER_TYPE_USER;
 
-    render=(struct xvmc_render_state *)mpi->priv;//same as data[2]
+    render=(struct xvmc_pixfmt_render *)mpi->priv;//same as data[2]
     if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer (render=%p)\n", render);
     assert(render != 0);
@@ -969,7 +969,7 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
     mp_image_t *mpi= pic->opaque;
     sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
-    struct xvmc_render_state *render;
+    struct xvmc_pixfmt_render *render;
     int i;
 
 
@@ -982,7 +982,7 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
 
 //printf("R%X %X\n", pic->linesize[0], pic->data[0]);
 //mark the surface as not requared for prediction
-    render=(struct xvmc_render_state *)pic->data[2];//same as mpi->priv
+    render=(struct xvmc_pixfmt_render *)pic->data[2];//same as mpi->priv
     if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_release_buffer (render=%p)\n", render);
     assert(render!=NULL);
