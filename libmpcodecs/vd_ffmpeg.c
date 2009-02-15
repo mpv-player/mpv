@@ -61,7 +61,6 @@ static void draw_slice(struct AVCodecContext *s, AVFrame *src, int offset[4],
 #if CONFIG_XVMC
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                    const enum PixelFormat *pix_fmt);
-static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
 #endif
 
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
@@ -250,7 +249,7 @@ static int init(sh_video_t *sh){
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
         avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
         avctx->get_format= get_format;//for now only this decoder will use it
-        avctx->get_buffer= mc_get_buffer;
+        avctx->get_buffer= get_buffer;
         avctx->release_buffer= release_buffer;
         avctx->draw_horiz_band = draw_slice;
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
@@ -551,6 +550,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         return avctx->get_buffer(avctx, pic);
     }
 
+    if (IMGFMT_IS_XVMC(ctx->best_csp)) {
+        type =  MP_IMGTYPE_NUMBERED | (0xffff << 16);
+    } else
     if (!pic->buffer_hints) {
         if(ctx->b_count>1 || ctx->ip_count>2){
             mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_DRIFailure);
@@ -578,6 +580,29 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         avctx->draw_horiz_band= draw_slice;
     } else
         avctx->draw_horiz_band= NULL;
+#if CONFIG_XVMC
+    if(IMGFMT_IS_XVMC(mpi->imgfmt)) {
+        struct xvmc_pixfmt_render *render = mpi->priv;//same as data[2]
+        avctx->draw_horiz_band= draw_slice;
+        if(!avctx->xvmc_acceleration) {
+            mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC);
+            assert(0);
+            exit(1);
+//            return -1;//!!fixme check error conditions in ffmpeg
+        }
+        if(!(mpi->flags & MP_IMGFLAG_DIRECT)) {
+            mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed);
+            assert(0);
+            exit(1);
+//            return -1;//!!fixme check error conditions in ffmpeg
+        }
+        if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
+            mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::get_buffer (xvmc render=%p)\n", render);
+        assert(render != 0);
+        assert(render->magic_id == AV_XVMC_RENDER_MAGIC);
+        render->state |= AV_XVMC_STATE_PREDICTION;
+    }
+#endif
 
     // Palette support: libavcodec copies palette to *data[1]
     if (mpi->bpp == 8)
@@ -867,7 +892,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
 
     if(avctx->xvmc_acceleration){
         vd_ffmpeg_ctx *ctx = sh->context;
-        avctx->get_buffer= mc_get_buffer;
+        avctx->get_buffer= get_buffer;
         avctx->release_buffer= release_buffer;
         avctx->draw_horiz_band = draw_slice;
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedMPEG2);
@@ -882,96 +907,6 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
             return fmt[i];
     }
     return fmt[0];
-}
-
-static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
-    sh_video_t *sh = avctx->opaque;
-    vd_ffmpeg_ctx *ctx = sh->context;
-    mp_image_t *mpi=NULL;
-    struct xvmc_pixfmt_render *render;
-    int flags= MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE|
-               MP_IMGFLAG_DRAW_CALLBACK;
-
-//  printf("vd_ffmpeg::mc_get_buffer (xvmc) %d %d %d\n", pic->reference, ctx->ip_count, ctx->b_count);
-    if(!avctx->xvmc_acceleration){
-        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC);
-        assert(0);
-        exit(1);
-//        return -1;//!!fixme check error conditions
-    }
-    if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
-        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer\n");
-
-    if(init_vo(sh, avctx->pix_fmt) < 0){
-        mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_UnexpectedInitVoError);
-        exit(1);
-//        return -1;//!!fixme check error conditions
-    }
-
-
-
-    if(!pic->reference){
-        ctx->b_count++;
-    }else{
-        ctx->ip_count++;
-        flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE;
-    }
-
-    mpi= mpcodecs_get_image(sh, MP_IMGTYPE_IPB, flags,
-                            avctx->width, avctx->height);
-    if(mpi==NULL){
-        mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken);
-        assert(0);
-        exit(1);
-//        return -1;//!!fixme check error conditions in ffmpeg
-    };
-
-    if((mpi->flags & MP_IMGFLAG_DIRECT) == 0){
-        mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed);
-        assert(0);
-        exit(1);
-//        return -1;//!!fixme check error conditions in ffmpeg
-    }
-
-    pic->data[0]= mpi->planes[0];
-    pic->data[1]= mpi->planes[1];
-    pic->data[2]= mpi->planes[2];
-
-
-    /* Note, some (many) codecs in libavcodec must have stride1==stride2 && no changes between frames
-     * lavc will check that and die with an error message, if its not true
-     */
-    pic->linesize[0]= mpi->stride[0];
-    pic->linesize[1]= mpi->stride[1];
-    pic->linesize[2]= mpi->stride[2];
-
-    pic->opaque = mpi;
-
-    if(pic->reference){
-    //I or P frame
-        pic->age= ctx->ip_age[0];
-
-        ctx->ip_age[0]= ctx->ip_age[1]+1;
-        ctx->ip_age[1]= 1;
-        ctx->b_age++;
-    }else{
-    //B frame
-        pic->age= ctx->b_age;
-
-        ctx->ip_age[0]++;
-        ctx->ip_age[1]++;
-        ctx->b_age=1;
-    }
-
-    pic->type= FF_BUFFER_TYPE_USER;
-
-    render=(struct xvmc_pixfmt_render *)mpi->priv;//same as data[2]
-    if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
-        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer (render=%p)\n", render);
-    assert(render != 0);
-    assert(render->magic_id == AV_XVMC_RENDER_MAGIC);
-    render->state |= AV_XVMC_STATE_PREDICTION;
-    return 0;
 }
 
 #endif /* CONFIG_XVMC */
