@@ -58,10 +58,8 @@ static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void draw_slice(struct AVCodecContext *s, AVFrame *src, int offset[4],
                        int y, int type, int height);
 
-#if CONFIG_XVMC
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                    const enum PixelFormat *pix_fmt);
-#endif
 
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
 static int lavc_param_error_resilience=2;
