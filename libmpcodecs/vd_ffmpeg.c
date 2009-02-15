@@ -55,15 +55,14 @@ typedef struct {
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
+static void draw_slice(struct AVCodecContext *s, AVFrame *src, int offset[4],
+                       int y, int type, int height);
 
 #if CONFIG_XVMC
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                    const enum PixelFormat *pix_fmt);
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic);
-static void mc_render_slice(struct AVCodecContext *s,
-                        AVFrame *src, int offset[4],
-                        int y, int type, int height);
 #endif
 
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
@@ -254,7 +253,7 @@ static int init(sh_video_t *sh){
         avctx->get_format= get_format;//for now only this decoder will use it
         avctx->get_buffer= mc_get_buffer;
         avctx->release_buffer= mc_release_buffer;
-        avctx->draw_horiz_band = mc_render_slice;
+        avctx->draw_horiz_band = draw_slice;
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }else
 #endif /* CONFIG_XVMC */
@@ -857,7 +856,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
         vd_ffmpeg_ctx *ctx = sh->context;
         avctx->get_buffer= mc_get_buffer;
         avctx->release_buffer= mc_release_buffer;
-        avctx->draw_horiz_band = mc_render_slice;
+        avctx->draw_horiz_band = draw_slice;
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedMPEG2);
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
@@ -887,7 +886,6 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
         exit(1);
 //        return -1;//!!fixme check error conditions
     }
-    assert(avctx->draw_horiz_band == mc_render_slice);
     assert(avctx->release_buffer == mc_release_buffer);
     if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer\n");
@@ -991,20 +989,6 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
     for(i=0; i<4; i++){
         pic->data[i]= NULL;
     }
-}
-
-static void mc_render_slice(struct AVCodecContext *s,
-                        AVFrame *src, int offset[4],
-                        int y, int type, int height){
-    int width= s->width;
-    sh_video_t *sh = s->opaque;
-    uint8_t *source[3]= {src->data[0], src->data[1], src->data[2]};
-
-    assert(src->linesize[0]==0 && src->linesize[1]==0 && src->linesize[2]==0);
-    assert(offset[0]==0 && offset[1]==0 && offset[2]==0);
-
-    mpcodecs_draw_slice (sh, source, src->linesize, width, height, 0, y);
-
 }
 
 #endif /* CONFIG_XVMC */
