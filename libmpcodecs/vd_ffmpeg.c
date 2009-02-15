@@ -959,7 +959,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer (render=%p)\n", render);
     assert(render != 0);
-    assert(render->magic == AV_XVMC_RENDER_MAGIC);
+    assert(render->magic_id == AV_XVMC_RENDER_MAGIC);
     render->state |= AV_XVMC_STATE_PREDICTION;
     return 0;
 }
@@ -986,7 +986,7 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
     if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_release_buffer (render=%p)\n", render);
     assert(render!=NULL);
-    assert(render->magic==AV_XVMC_RENDER_MAGIC);
+    assert(render->magic_id==AV_XVMC_RENDER_MAGIC);
     render->state&=~AV_XVMC_STATE_PREDICTION;
     for(i=0; i<4; i++){
         pic->data[i]= NULL;
