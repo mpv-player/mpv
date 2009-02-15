@@ -247,7 +247,6 @@ static int init(sh_video_t *sh){
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedCodec);
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
-        avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
         avctx->get_format= get_format;//for now only this decoder will use it
         avctx->get_buffer= get_buffer;
         avctx->release_buffer= release_buffer;
@@ -898,7 +897,6 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedMPEG2);
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
-        avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }
     for(i=0;fmt[i]!=-1;i++){
