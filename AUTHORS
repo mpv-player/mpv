@@ -12,10 +12,9 @@ ___________________
 The MPlayer project
 ~~~~~~~~~~~~~~~~~~~
 
-MPlayer was originally written by Árpád Gereöffy (for a more complete history
-see DOCS/HTML/en/history.html) and later extended by a bunch of other people,
-some of which are listed here in alphabetical order. If you think you are
-missing, feel free to send a patch.
+MPlayer was originally written by Árpád Gereöffy and later extended by
+a bunch of other people, some of which are listed here in alphabetical
+order. If you think you are missing, feel free to send a patch.
 
 Ackermann, Andreas (Acki) <asackerm@stud.informatik.uni-erlangen.de>
     * LIRC support
