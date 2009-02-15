@@ -248,11 +248,9 @@ static int init(sh_video_t *sh){
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
         avctx->get_format= get_format;//for now only this decoder will use it
-        avctx->get_buffer= get_buffer;
-        avctx->release_buffer= release_buffer;
         avctx->draw_horiz_band = draw_slice;
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
-    }else
+    }
 #endif /* CONFIG_XVMC */
     if(ctx->do_dr1){
         avctx->flags|= CODEC_FLAG_EMU_EDGE;
