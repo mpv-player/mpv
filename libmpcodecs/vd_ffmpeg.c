@@ -577,7 +577,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         avctx->draw_horiz_band= NULL;
 #if CONFIG_XVMC
     if(IMGFMT_IS_XVMC(mpi->imgfmt)) {
-        struct xvmc_pixfmt_render *render = mpi->priv;//same as data[2]
+        struct xvmc_pix_fmt *render = mpi->priv; //same as data[2]
         avctx->draw_horiz_band= draw_slice;
         if(!avctx->xvmc_acceleration) {
             mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC);
@@ -679,7 +679,7 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
             av_freep(&mpi->planes[1]);
 #if CONFIG_XVMC
         if (IMGFMT_IS_XVMC(mpi->imgfmt)) {
-            struct xvmc_pixfmt_render *render = (struct xvmc_pixfmt_render *)pic->data[2];//same as mpi->priv
+            struct xvmc_pix_fmt *render = (struct xvmc_pix_fmt*)pic->data[2]; //same as mpi->priv
             if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
                 mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::release_buffer (xvmc render=%p)\n", render);
             assert(render!=NULL);
