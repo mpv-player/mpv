@@ -894,7 +894,6 @@ int rez;
 
          //When replaceing the surface with osd one, save the flags too!
          osd_rndr->picture_structure = p_render_surface_to_show->picture_structure;
-         osd_rndr->display_flags = p_render_surface_to_show->display_flags;
 //add more if needed    osd_rndr-> = p_render_surface_to_show->;
 
          p_render_surface_to_show->state &= ~AV_XVMC_STATE_DISPLAY_PENDING;
@@ -963,7 +962,6 @@ int i;
                         src_rect.left, src_rect.top, src_rect.width, src_rect.height,
                         dst_rect.left, dst_rect.top, dst_rect.width, dst_rect.height,
                         bob_deinterlace ? field : 3);
-                        //p_render_surface_to_show->display_flags);
    if(rez != Success){
       printf("vo_xvmc: PutSurface failer, critical error %d!\n",rez);
       assert(0);
