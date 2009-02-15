@@ -62,7 +62,6 @@ static void draw_slice(struct AVCodecContext *s, AVFrame *src, int offset[4],
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                    const enum PixelFormat *pix_fmt);
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
-static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic);
 #endif
 
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
@@ -252,7 +251,7 @@ static int init(sh_video_t *sh){
         avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
         avctx->get_format= get_format;//for now only this decoder will use it
         avctx->get_buffer= mc_get_buffer;
-        avctx->release_buffer= mc_release_buffer;
+        avctx->release_buffer= release_buffer;
         avctx->draw_horiz_band = draw_slice;
         avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }else
@@ -657,6 +656,18 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
     // Palette support: free palette buffer allocated in get_buffer
     if (mpi && (mpi->bpp == 8))
         av_freep(&mpi->planes[1]);
+#if CONFIG_XVMC
+    if (mpi) {
+        if (IMGFMT_IS_XVMC(mpi->imgfmt)) {
+            struct xvmc_pixfmt_render *render = (struct xvmc_pixfmt_render *)pic->data[2];//same as mpi->priv
+            if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
+                mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::release_buffer (xvmc render=%p)\n", render);
+            assert(render!=NULL);
+            assert(render->magic_id==AV_XVMC_RENDER_MAGIC);
+            render->state&=~AV_XVMC_STATE_PREDICTION;
+        }
+    }
+#endif
 
     if(pic->type!=FF_BUFFER_TYPE_USER){
         avcodec_default_release_buffer(avctx, pic);
@@ -855,7 +866,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
     if(avctx->xvmc_acceleration){
         vd_ffmpeg_ctx *ctx = sh->context;
         avctx->get_buffer= mc_get_buffer;
-        avctx->release_buffer= mc_release_buffer;
+        avctx->release_buffer= release_buffer;
         avctx->draw_horiz_band = draw_slice;
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedMPEG2);
         assert(ctx->do_dr1);//these are must to!
@@ -886,7 +897,6 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
         exit(1);
 //        return -1;//!!fixme check error conditions
     }
-    assert(avctx->release_buffer == mc_release_buffer);
     if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
         mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer\n");
 
@@ -960,35 +970,6 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     assert(render->magic_id == AV_XVMC_RENDER_MAGIC);
     render->state |= AV_XVMC_STATE_PREDICTION;
     return 0;
-}
-
-
-static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
-    mp_image_t *mpi= pic->opaque;
-    sh_video_t *sh = avctx->opaque;
-    vd_ffmpeg_ctx *ctx = sh->context;
-    struct xvmc_pixfmt_render *render;
-    int i;
-
-
-    if(ctx->ip_count <= 2 && ctx->b_count<=1){
-        if(mpi->flags&MP_IMGFLAG_PRESERVE)
-            ctx->ip_count--;
-        else
-            ctx->b_count--;
-    }
-
-//printf("R%X %X\n", pic->linesize[0], pic->data[0]);
-//mark the surface as not requared for prediction
-    render=(struct xvmc_pixfmt_render *)pic->data[2];//same as mpi->priv
-    if(mp_msg_test(MSGT_DECVIDEO, MSGL_DBG5))
-        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_release_buffer (render=%p)\n", render);
-    assert(render!=NULL);
-    assert(render->magic_id==AV_XVMC_RENDER_MAGIC);
-    render->state&=~AV_XVMC_STATE_PREDICTION;
-    for(i=0; i<4; i++){
-        pic->data[i]= NULL;
-    }
 }
 
 #endif /* CONFIG_XVMC */
