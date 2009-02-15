@@ -702,7 +702,7 @@ Sauerbeck, Tilman <tsauerbeck@users.sourceforge.net>
 
 Savchenko, Andrew <bircoph@gmail.com>
     * build system enhancements
-    * parse system improvements
+    * improvements in config/command line parser
     * Russian documentation translation
     * various bug fixes, testing
 
