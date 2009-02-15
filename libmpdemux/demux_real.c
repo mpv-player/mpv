@@ -96,8 +96,6 @@ typedef struct {
     int video_curpos; ///< Current file position for video demuxing
     int a_num_of_packets; ///< Number of audio packets
     int v_num_of_packets; ///< Number of video packets
-    int a_idx_ptr; ///< Audio index position pointer
-    int v_idx_ptr; ///< Video index position pointer
     int a_bitrate; ///< Audio bitrate
     int v_bitrate; ///< Video bitrate
     int stream_switch; ///< Flag used to switch audio/video demuxing
@@ -583,9 +581,9 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 
     /* Handle audio/video demxing switch for multirate files (non-interleaved) */
     if (priv->is_multirate && priv->stream_switch) {
-        if (priv->a_idx_ptr >= priv->index_table_size[demuxer->audio->id])
+        if (priv->current_apacket >= priv->index_table_size[demuxer->audio->id])
             demuxer->audio->eof = 1;
-        if (priv->v_idx_ptr >= priv->index_table_size[demuxer->video->id])
+        if (priv->current_vpacket >= priv->index_table_size[demuxer->video->id])
             demuxer->video->eof = 1;
         if (demuxer->audio->eof && demuxer->video->eof)
             return 0;
@@ -593,8 +591,8 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
             stream_seek(demuxer->stream, priv->audio_curpos); // Get audio
         else if (demuxer->audio->eof && !demuxer->video->eof)
             stream_seek(demuxer->stream, priv->video_curpos); // Get video
-        else if (priv->index_table[demuxer->audio->id][priv->a_idx_ptr].timestamp <
-            priv->index_table[demuxer->video->id][priv->v_idx_ptr].timestamp)
+        else if (priv->index_table[demuxer->audio->id][priv->current_apacket].timestamp <
+            priv->index_table[demuxer->video->id][priv->current_vpacket].timestamp)
             stream_seek(demuxer->stream, priv->audio_curpos); // Get audio
         else
             stream_seek(demuxer->stream, priv->video_curpos); // Get video
@@ -829,18 +827,15 @@ got_audio:
         } // codec_id check, codec default case
 	}
 // we will not use audio index if we use -idx and have a video
-	if(!demuxer->video->sh && index_mode == 2 && (unsigned)demuxer->audio->id < MAX_STREAMS)
+	if(((!demuxer->video->sh && index_mode == 2) || priv->is_multirate) && (unsigned)demuxer->audio->id < MAX_STREAMS) {
 		while (priv->current_apacket + 1 < priv->index_table_size[demuxer->audio->id] &&
-		       timestamp > priv->index_table[demuxer->audio->id][priv->current_apacket].timestamp)
+		       timestamp > priv->index_table[demuxer->audio->id][priv->current_apacket].timestamp) {
 			priv->current_apacket += 1;
-	
-	if(priv->is_multirate)
-		while (priv->a_idx_ptr + 1 < priv->index_table_size[demuxer->audio->id] &&
-		       timestamp > priv->index_table[demuxer->audio->id][priv->a_idx_ptr + 1].timestamp) {
-			priv->a_idx_ptr++;
-			priv->audio_curpos = stream_tell(demuxer->stream);
 			priv->stream_switch = 1;
 		}
+		if (priv->stream_switch)
+			priv->audio_curpos = stream_tell(demuxer->stream);
+	}
 	
     // If we're reordering audio packets and we need more data get it
     if (audioreorder_getnextpk)
@@ -1029,19 +1024,16 @@ got_video:
 		if(len>0) stream_skip(demuxer->stream, len);
 	    }
 	}
-	if ((unsigned)demuxer->video->id < MAX_STREAMS)
+	if ((unsigned)demuxer->video->id < MAX_STREAMS) {
 		while (priv->current_vpacket + 1 < priv->index_table_size[demuxer->video->id] && 
-		       timestamp > priv->index_table[demuxer->video->id][priv->current_vpacket + 1].timestamp)
+		       timestamp > priv->index_table[demuxer->video->id][priv->current_vpacket + 1].timestamp) {
 			priv->current_vpacket += 1;
-
-	if(priv->is_multirate)
-		while (priv->v_idx_ptr + 1 < priv->index_table_size[demuxer->video->id] &&
-		       timestamp > priv->index_table[demuxer->video->id][priv->v_idx_ptr + 1].timestamp) {
-			priv->v_idx_ptr++;
-			priv->video_curpos = stream_tell(demuxer->stream);
 			priv->stream_switch = 1;
 		}
-	
+		if (priv->stream_switch)
+			priv->video_curpos = stream_tell(demuxer->stream);
+	}
+
 	return 1;
     }
 
@@ -1722,9 +1714,6 @@ header_end:
     	    break;
     }
 
-    if(priv->is_multirate)
-        demuxer->seekable = 0; // No seeking yet for multirate streams
-
     // detect streams:
     if(demuxer->video->id==-1 && v_streams>0){
 	// find the valid video stream:
@@ -1826,7 +1815,7 @@ static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, float audio
 	    				break;
 	    		}
 	    	} 
-	    else if (rel_seek_secs < 0)
+	    else if (rel_seek_secs < 0) {
 	    	while ((cur_timestamp - priv->index_table[vid][priv->current_vpacket].timestamp) < - rel_seek_secs * 1000){
 	    		priv->current_vpacket -= 1;
 	    		if (priv->current_vpacket < 0) {
@@ -1834,12 +1823,16 @@ static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, float audio
 	    			break;
 	    		}
 	    	}
-	    next_offset = priv->index_table[vid][priv->current_vpacket].offset;
-	    priv->audio_need_keyframe = 1;
+	    }
+	    priv->video_curpos = priv->index_table[vid][priv->current_vpacket].offset;
+	    priv->audio_need_keyframe = !priv->is_multirate;
 	    priv->video_after_seek = 1;
         }
-    	else if (streams & 2) {
-            cur_timestamp = priv->index_table[aid][priv->current_apacket].timestamp;
+    	if (streams & 2) {
+	    if (!(streams & 1)) {
+		cur_timestamp =
+		    priv->index_table[aid][priv->current_apacket].timestamp;
+	    }
 	    if (rel_seek_secs > 0)
 	    	while ((priv->index_table[aid][priv->current_apacket].timestamp - cur_timestamp) < rel_seek_secs * 1000){
 	    		priv->current_apacket += 1;
@@ -1856,9 +1849,10 @@ static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, float audio
 	    			break;
 	    		}
 	    	}
-	    next_offset = priv->index_table[aid][priv->current_apacket].offset;
+	    priv->audio_curpos = priv->index_table[aid][priv->current_apacket].offset;
         }
 //    }
+    next_offset = streams & 1 ? priv->video_curpos : priv->audio_curpos;
 //    printf("seek: pos: %d, current packets: a: %d, v: %d\n",
 //	next_offset, priv->current_apacket, priv->current_vpacket);
     if (next_offset)
