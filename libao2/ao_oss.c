@@ -479,7 +479,7 @@ static void audio_resume(void)
     int fillcnt;
     reset();
     fillcnt = get_space() - prepause_space;
-    if (fillcnt > 0) {
+    if (fillcnt > 0 && !(ao_data.format & AF_FORMAT_SPECIAL_MASK)) {
       void *silence = calloc(fillcnt, 1);
       play(silence, fillcnt, 0);
       free(silence);
