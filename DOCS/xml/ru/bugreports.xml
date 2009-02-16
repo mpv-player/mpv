@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28201 -->
+<!-- synced with r28615 -->
 <appendix id="bugreports">
 <title>Как сообщать об ошибках</title>
 
@@ -109,6 +109,8 @@ make
 (Как правило необходимо выполнять 'make distclean' до перекомпиляции
 более ранней версии, поэтому при отсутствии сохраненной копии
 Вам придется перекомпилировать весь проект.)
+Также Вы можете использовать <ulink url="http://ccache.samba.org/">ccache</ulink>
+для ускорения компиляции.
 </para>
 
 <para>
