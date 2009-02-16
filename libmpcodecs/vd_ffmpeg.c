@@ -922,4 +922,4 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
     return selected_format;
 }
 
-#endif /* CONFIG_XVMC */
+#endif /* CONFIG_XVMC || CONFIG_VDPAU */
