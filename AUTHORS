@@ -12,10 +12,9 @@ ___________________
 The MPlayer project
 ~~~~~~~~~~~~~~~~~~~
 
-MPlayer was originally written by Árpád Gereöffy (for a more complete history
-see DOCS/HTML/en/history.html) and later extended by a bunch of other people,
-some of which are listed here in alphabetical order. If you think you are
-missing, feel free to send a patch.
+MPlayer was originally written by Árpád Gereöffy and later extended by
+a bunch of other people, some of whom are listed here in alphabetical
+order. If you think you are missing, feel free to send a patch.
 
 Ackermann, Andreas (Acki) <asackerm@stud.informatik.uni-erlangen.de>
     * LIRC support
@@ -406,6 +405,7 @@ Jelveh, Reza (timebomb) <reza.jelveh@tu-harburg.de>
     * savage_vid VIDIX driver
     * miscellaneous small fixes and improvements
     * first musepack decoding patch
+    * swscale AltiVec fixes
 
 Jermann, Jonas (g0th) <jjermann@gmx.net>
     * manual page rewrite
@@ -699,6 +699,12 @@ Sanderson, Mark <mmp@kiora.ath.cx>
 Sauerbeck, Tilman <tsauerbeck@users.sourceforge.net>
     * TGA decoder (RLE/uncomp), -mf tga support
 
+Savchenko, Andrew <bircoph@gmail.com>
+    * build system enhancements
+    * improvements in config/command line parser
+    * Russian documentation translation
+    * various bug fixes, testing
+
 Scherthan, Frank <scherthan@uni-landau.de>
     * added OSD handling for live changing playback speed
 
@@ -949,9 +955,6 @@ MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
     * Marcin Biernat (boskicinek) <boski_cinek@o2.pl>
     * Marek Jarycki (Emdej) <emdej@emdej.com>
     * Leszek Kaplita (Flex) <flex@tenbit.pl>
-
-Savchenko, Andrew <bircoph@list.ru>
-    * Russian documentation translation
 
 Zubimendi, Andoni <andoni@lpsat.net>.
     * Spanish documentation translation

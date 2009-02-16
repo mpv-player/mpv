@@ -107,6 +107,16 @@
 #define IMGFMT_XVMC_MOCO_MPEG2 (IMGFMT_XVMC|0x02)
 #define IMGFMT_XVMC_IDCT_MPEG2 (IMGFMT_XVMC|0x82)
 
+// VDPAU specific format.
+#define IMGFMT_VDPAU               0x1DC80000
+#define IMGFMT_VDPAU_MASK          0xFFFF0000
+#define IMGFMT_IS_VDPAU(fmt)       (((fmt)&IMGFMT_VDPAU_MASK)==IMGFMT_VDPAU)
+#define IMGFMT_VDPAU_MPEG1         (IMGFMT_VDPAU|0x01)
+#define IMGFMT_VDPAU_MPEG2         (IMGFMT_VDPAU|0x02)
+#define IMGFMT_VDPAU_H264          (IMGFMT_VDPAU|0x03)
+#define IMGFMT_VDPAU_WMV3          (IMGFMT_VDPAU|0x04)
+#define IMGFMT_VDPAU_VC1           (IMGFMT_VDPAU|0x05)
+
 typedef struct {
     void* data;
     int size;

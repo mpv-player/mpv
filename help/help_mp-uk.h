@@ -1,7 +1,9 @@
-/* Translated by:  Volodymyr M. Lisivka <lvm@mystery.lviv.net>,
-		   Andriy Gritsenko <andrej@lucky.net>
+/*  Translated by:  Volodymyr M. Lisivka <lvm@mystery.lviv.net>,
+	  Andriy Gritsenko <andrej@lucky.net>
+    sevenfourk <sevenfourk@gmail.com>
    Was synced with help_mp-en.h: rev 1.105
- ========================= MPlayer help =========================== */
+
+========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
@@ -15,12 +17,10 @@ static char help_text[]=
 #endif
 #ifdef CONFIG_DVDREAD
 " dvd://<номер титрів> грати DVD титри/трек з пристрою замість файлу\n"
-" -alang/-slang   вибрати мову DVD аудіо/субтитрів (двосимвольний код країни)\n"
 #endif
+" -alang/-slang   вибрати мову DVD аудіо/субтитрів (двосимвольний код країни)\n"
 " -ss <час>       переміститися на задану (секунди або ГГ:ХХ:СС) позицію\n"
 " -nosound        без звуку\n"
-" -stereo <режим> вибір MPEG1 стерео виводу (0:стерео 1:лівий 2:правий)\n"
-" -channels <n>   номер вихідних каналів звуку\n"
 " -fs -vm -zoom   повноекранне програвання (повноекр.,зміна відео,масштабування\n"
 " -x <x> -y <y>   маштабувати картинку до <x> * <y> [якщо -vo драйвер підтримує!]\n"
 " -sub <file>     вказати файл субтитрів (див. також -subfps, -subdelay)\n"
@@ -28,9 +28,7 @@ static char help_text[]=
 " -vid x -aid y   опції для вибору відео (x) і аудіо (y) потоку для програвання\n"
 " -fps x -srate y опції для зміни відео (x кадр/сек) і аудіо (y Hz) швидкості\n"
 " -pp <quality>   дозволити фільтр (0-4 для DivX, 0-63 для mpegs)\n"
-" -nobps          використовувати альтернативний метод синхронізації A-V для AVI файлів (може допомогти!)\n"
 " -framedrop      дозволити втрату кадрів (для повільних машин)\n"
-" -wid <id вікна> використовувати існуюче вікно для відео виводу (корисно для plugger!)\n"
 "\n"
 "Клавіші:\n"
 " <-  або ->      перемотування вперед/назад на 10 секунд\n"
@@ -52,7 +50,6 @@ static char help_text[]=
 // ========================= MPlayer messages ===========================
 
 // mplayer.c: 
-
 #define MSGTR_Exiting "\nВиходимо...\n"
 #define MSGTR_ExitingHow "\nВиходимо... (%s)\n"
 #define MSGTR_Exit_quit "Вихід"
@@ -67,12 +64,13 @@ static char help_text[]=
 #define MSGTR_CantLoadSub "Не можу завантажити субтитри: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: обраний потік загублений!\n"
 #define MSGTR_CantOpenDumpfile "Не можу відкрити файл дампу!!!\n"
-#define MSGTR_CoreDumped "core dumped :)\n"
-#define MSGTR_FPSnotspecified "Кількість кадрів на секунду не вказано (або неприпустиме значення) у заголовку! Використовуйте ключ -fps!\n"
-#define MSGTR_CantFindAudioCodec "Не можу знайти кодек для аудіо формату 0x%X!\n"
+#define MSGTR_CoreDumped "Створено дамп ядра :)\n"
+#define MSGTR_FPSnotspecified "Не вказано чи невірна кількість кадрів, застосуйте опцію -fps.\n"
+#define MSGTR_TryForceAudioFmtStr "Намагаюсь форсувати групу аудіо кодеків %s...\n"
 #define MSGTR_CantFindVideoCodec "Не можу знайти кодек для відео формату 0x%X!\n"
-#define MSGTR_VOincompCodec "Вибачте, обраний video_out пристрій не сумісний з цим кодеком.\n"
-#define MSGTR_CannotInitVO "FATAL: Не можу ініціалізувати відео драйвер!\n"
+#define MSGTR_RTFMCodecs "Прочитайте DOCS/HTML/en/codecs.html!\n"
+#define MSGTR_TryForceVideoFmtStr "Намагаюсь форсувати групу відео кодеків %s...\n"
+#define MSGTR_CannotInitVO "ФАТАЛЬНО: Не можу ініціалізувати відео драйвер!\n"
 #define MSGTR_CannotInitAO "не можу відкрити/ініціалізувати аудіо пристрій -> ГРАЮ БЕЗ ЗВУКУ\n"
 #define MSGTR_StartPlaying "Початок програвання...\n"
 
@@ -83,7 +81,7 @@ static char help_text[]=
 "!!! Можливі причини, проблеми, обхідні шляхи: \n"\
 "- Найбільш загальні: поганий/сирий _аудіо_ драйвер :\n"\
 "  - спробуйте -ao sdl або використовуйте ALSA 0.5 або емуляцію oss на ALSA 0.9.\n"\
-"  - Experiment with different values for -autosync, 30 is a good start.\n"\
+"  - Експеримент з різними значеннями для -autosync, спробуйте 30 .\n"\
 "- Повільний відео вивід.\n"\
 "  - спробуйте інший -vo драйвер (список: -vo help) або спробуйте з -framedrop!\n"\
 "- Повільний ЦП. Не намагайтеся відтворювати великі dvd/divx на повільних\n"\
@@ -120,23 +118,127 @@ static char help_text[]=
 #define MSGTR_Paused "\n  =====  ПАУЗА  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nНеможливо завантажити playlist %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPlayer crashed by an 'Illegal Instruction'.\n"\
-"  It may be a bug in our new runtime CPU-detection code...\n"\
-"  Please read DOCS/HTML/en/bugreports.html.\n"
+"- MPlayer зламався через 'Невірні інструкції'.\n"\
+"  Може бути помилка у вашому новому коду визначення типу CPU...\n"\
+"  Будь-ласка перегляньте DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
-"- MPlayer crashed by an 'Illegal Instruction'.\n"\
-"  It usually happens when you run it on a CPU different than the one it was\n"\
-"  compiled/optimized for.\n  Verify this!\n"
+"- MPlayer зламався через 'Невірні інструкції'.\n"\
+"  Іноді таке трапляється під час запуску програвача на CPU що відрізняється від того, на якому він\n"\
+"  був зібраний/оптимізований.\n  Перевірте!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
-"  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
-"  disassembly. For details, see DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
+"- MPlayer зламався через невірне використання CPU/FPU/RAM.\n"\
+"  Зберіть знову MPlayer з --enable-debug а зробіть 'gdb' backtrace та\n"\
+"  дизасемблювання. Для довідок, перегляньте DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
-"- MPlayer crashed. This shouldn't happen.\n"\
-"  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your\n"\
-"  gcc version. If you think it's MPlayer's fault, please read\n"\
-"  DOCS/HTML/en/bugreports.html and follow the instructions there. We can't and\n"\
-"  won't help unless you provide this information when reporting a possible bug.\n"
+"- MPlayer зламався. Цього не повинно було трапитися.\n"\
+"  Може бути помилка у коді MPlayer _або_ ваших драйверах _або_ через\n"\
+"  версію gcc. Якщо важаєте що, це помилка MPlayer, будь-ласка читайте\n"\
+"  DOCS/HTML/en/bugreports.html та слідкуєте інструкціям. Ми можемо\n"\
+"  допомогти лише у разі забезпечення інформація коли доповідаєте про помилку.\n"
+#define MSGTR_LoadingConfig "Завантаження конфігурації '%s'\n"
+#define MSGTR_LoadingProtocolProfile "Завантаження профілю для протоколу '%s'\n"
+#define MSGTR_LoadingExtensionProfile "Завантаження профілю для розширення '%s'\n"
+#define MSGTR_AddedSubtitleFile "СУБТИТРИ: Додано файл субтитрів (%d): %s\n"
+#define MSGTR_RemovedSubtitleFile "СУБТИТРИ: Видалено файл субтитрів (%d): %s\n"
+#define MSGTR_ErrorOpeningOutputFile "Помилка при відкритті файлу [%s] для запису!\n"
+#define MSGTR_CommandLine "Командний рядок:"
+#define MSGTR_RTCDeviceNotOpenable "Не можу відкрити %s: %s (користувач повинен мати права читання для файлу.)\n"
+#define MSGTR_LinuxRTCInitErrorIrqpSet "Помилка ініцілізації Linux RTC у ioctl (rtc_irqp_set %lu): %s\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "Спробуйте додати \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" до скриптів запуску системи.\n"
+#define MSGTR_LinuxRTCInitErrorPieOn "Помилка ініціалізації Linux RTC у ioctl (rtc_pie_on): %s\n"
+#define MSGTR_UsingTimingType "Використовую %s синхронізацію.\n"
+#define MSGTR_NoIdleAndGui "Опція -idle не викориcтовується в GMPlayer.\n"
+#define MSGTR_MenuInitialized "Меню ініціалізовано: %s\n"
+#define MSGTR_MenuInitFailed "Ініціалізація меню невдале.\n"
+#define MSGTR_Getch2InitializedTwice "ПОПЕРЕДЖЕННЯ: getch2_init визвано двічі!\n"
+#define MSGTR_DumpstreamFdUnavailable "Не можу створити дамп цього потоку - не має доступного дексриптору.\n"
+#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Не можу відкрити відео фільтр libmenu з цим кореневим меню %s.\n"
+#define MSGTR_AudioFilterChainPreinitError "Помилка у ланці pre-init аудіо фільтру!\n"
+#define MSGTR_LinuxRTCReadError "Помилка читання Linux RTC: %s\n"
+#define MSGTR_SoftsleepUnderflow "Попередження! Недупустиме низьке значення затримки програми!\n"
+#define MSGTR_DvdnavNullEvent "Подія DVDNAV NULL?!\n"
+#define MSGTR_DvdnavHighlightEventBroken "Подія DVDNAV: Подія виділення зламана\n"
+#define MSGTR_DvdnavEvent "Подія DVDNAV: %s\n"
+#define MSGTR_DvdnavHighlightHide "Подія DVDNAV: Виділення сховано\n"
+#define MSGTR_DvdnavStillFrame "######################################## Подія DVDNAV: Стоп-кадр: %d сек\n"
+#define MSGTR_DvdnavNavStop "Подія DVDNAV: Зупинка Nav\n"
+#define MSGTR_DvdnavNavNOP "Подія DVDNAV: Nav NOP\n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "Подія DVDNAV: Зміна SPU потоку Nav: фізично: %d/%d/%d логічно: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "Подія DVDNAV: Зміна SPU потоку Nav: фізично: %d логічно: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "Подія DVDNAV: Зміна Аудіо потоку Nav: фізично: %d логічно: %d\n"
+#define MSGTR_DvdnavNavVTSChange "Подія DVDNAV: Зміна Nav VTS\n"
+#define MSGTR_DvdnavNavCellChange "Подія DVDNAV: Зміна Nav Cell\n"
+#define MSGTR_DvdnavNavSpuClutChange "Подія DVDNAV: Зміна Nav SPU CLUT\n"
+#define MSGTR_DvdnavNavSeekDone "Подія DVDNAV: Nav Seek зроблено\n"
+#define MSGTR_MenuCall "Виклик меню\n"
+
+#define MSGTR_EdlOutOfMem "Не можу виділити достатньо пам'яті для збереження даних EDL.\n"
+#define MSGTR_EdlRecordsNo "Читання %d EDL дій.\n"
+#define MSGTR_EdlQueueEmpty "Немає дій EDL які треба виконати.\n"
+#define MSGTR_EdlCantOpenForWrite "Не може відкрити EDL файл [%s] для запису.\n"
+#define MSGTR_EdlCantOpenForRead "Не може відкрити EDL файл [%s] для читання.\n"
+#define MSGTR_EdlNOsh_video "Не можу використати EDL без відео, вимикаю.\n"
+#define MSGTR_EdlNOValidLine "Невірний рядок EDL: %s\n"
+#define MSGTR_EdlBadlyFormattedLine "Погано відформатований EDL рядок [%d], пропускаю.\n"
+#define MSGTR_EdlBadLineOverlap "Остання зупинка була [%f]; наступний старт [%f].\n"\
+"Записи повинні бути у хронологічному порядку, не можу перекрити. Пропускаю.\n"
+#define MSGTR_EdlBadLineBadStop "Час зупинки повинен бути після часу старту.\n"
+#define MSGTR_EdloutBadStop "Ігнорування EDL відмінено, останній start > stop\n"
+#define MSGTR_EdloutStartSkip "Старт EDL пропуску, натисніть 'i' знов, щоб завершити блок.\n"
+#define MSGTR_EdloutEndSkip "Кінець EDL пропуску, рядок записано.\n"
+#define MSGTR_MPEndposNoSizeBased "Опція -endpos у MPlayer ще не підтримує одиниці ромзіру.\n"
+
+// mplayer.c OSD
+#define MSGTR_OSDenabled "увімкнено"
+#define MSGTR_OSDdisabled "вимкнено"
+#define MSGTR_OSDAudio "Аудіо: %s"
+#define MSGTR_OSDVideo "Відео: %s"
+#define MSGTR_OSDChannel "Канал: %s"
+#define MSGTR_OSDSubDelay "Затримка субтитрыв: %d мс"
+#define MSGTR_OSDSpeed "Швидкість: x %6.2f"
+#define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDChapter "Розділ: (%d) %s"
+#define MSGTR_OSDAngle "Кут: %d/%d"
+
+// property values
+#define MSGTR_EnabledEdl "увімкнено (EDL)"
+#define MSGTR_Disabled "вимкнено"
+#define MSGTR_HardFrameDrop "інтенсивний"
+#define MSGTR_Unknown "невідомий"
+#define MSGTR_Bottom "низ"
+#define MSGTR_Center "центр"
+#define MSGTR_Top "верх"
+#define MSGTR_SubSourceFile "файл"
+#define MSGTR_SubSourceVobsub "vobsub"
+#define MSGTR_SubSourceDemux "вкладено"
+
+// OSD bar names
+#define MSGTR_Volume "Гучність"
+#define MSGTR_Panscan "Зріз сторін"
+#define MSGTR_Gamma "Гамма"
+#define MSGTR_Brightness "Яскравість"
+#define MSGTR_Contrast "Контраст"
+#define MSGTR_Saturation "Насиченність"
+#define MSGTR_Hue "Колір"
+#define MSGTR_Balance "Баланс"
+
+// property state
+#define MSGTR_LoopStatus "Повтор: %s"
+#define MSGTR_MuteStatus "Вимкнути звук: %s"
+#define MSGTR_AVDelayStatus "A-V затримка: %s"
+#define MSGTR_OnTopStatus "Звурху інших: %s"
+#define MSGTR_RootwinStatus "Вікно-root: %s"
+#define MSGTR_BorderStatus "Рамка: %s"
+#define MSGTR_FramedroppingStatus "Пропуск кадрів: %s"
+#define MSGTR_VSyncStatus "Вертикальна синхронізація: %s"
+#define MSGTR_SubSelectStatus "Субтитри: %s"
+#define MSGTR_SubSourceStatus "Субтитри з: %s"
+#define MSGTR_SubPosStatus "Позиція субтитрів: %s/100"
+#define MSGTR_SubAlignStatus "Вирівнювання субтитрів: %s"
+#define MSGTR_SubDelayStatus "Затримка субтитрів: %s"
+#define MSGTR_SubScale "Масштаб субтитрів: %s"
+#define MSGTR_SubVisibleStatus "Субтитри: %s"
+#define MSGTR_SubForcedOnlyStatus "Форсувати тільки субтитри: %s"
 
 // mencoder.c:
 #define MSGTR_UsingPass3ControlFile "Використовую pass3 файл: %s\n"
@@ -147,13 +249,162 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nНе вибраний відео кодек (-ovc). Виберіть, спробуйте -ovc help!\n"
 #define MSGTR_CannotOpenOutputFile "Неможливо створити файл '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Неможливо відкрити кодек.\n"
+#define MSGTR_MencoderWrongFormatAVI "\nПОПЕРЕДЖЕННЯ: ФОРМАТ ФАЙЛУ НА ВИХОДІ _AVI_. Погляньте -of help.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nПОПЕРЕДЖЕННЯ: ФОРМАТ ФАЙЛУ НА ВИХОДІ _MPEG_. Погляньте -of help.\n"
+#define MSGTR_MissingOutputFilename "Не вказано файлу на виході, будь-ласка подивіться опцію -o."
 #define MSGTR_ForcingOutputFourcc "Встановлюю вихідний fourcc в %x [%.4s]\n"
+#define MSGTR_ForcingOutputAudiofmtTag "Форсую таг аудіо фармату на виході до 0x%x.\n"
 #define MSGTR_DuplicateFrames "\n%d повторних кадрів!\n"
 #define MSGTR_SkipFrame "\nКадр пропущено!\n"
+#define MSGTR_ResolutionDoesntMatch "\nНовий та попередній відео файл має різне розширення та кольорову гаму.\n"
+#define MSGTR_FrameCopyFileMismatch "\nУсі відео файли повинні мати однакові кадр/сек, розширення, та кодек для -ovc copy.\n"
+#define MSGTR_AudioCopyFileMismatch "\nУсі відео файли повинні мати однакові аудіо кодек та формат для -oac copy.\n"
+#define MSGTR_NoAudioFileMismatch "\nНе можу поєднати файли відео з файлами аудіо та відео. Спробуйте -nosound.\n"
+#define MSGTR_NoSpeedWithFrameCopy "ПОПЕРЕДЖЕННЯ: опція -speed не гарантує коректну роботу з -oac copy!\n"\
+"Ваше кодування може бути невдалим!\n"
 #define MSGTR_ErrorWritingFile "%s: Помилка запису файлу.\n"
+#define MSGTR_FlushingVideoFrames "\nЗкидую кадри відео.\n"
+#define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "Фільтри не було налаштовано! Порожній файл?\n"
 #define MSGTR_RecommendedVideoBitrate "Рекомендований бітрейт для %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nВідео потік: %8.3f kbit/s  (%d Б/с)  розмір: %"PRIu64" байт  %5.3f секунд  %d кадрів\n"
-#define MSGTR_AudioStreamResult "\nАудіо потік: %8.3f kbit/s  (%d Б/с)  розмір: %"PRIu64" байт  %5.3f секунд\n"
+#define MSGTR_EdlSkipStartEndCurrent "EDL SKIP: Початок: %.2f  Кінець: %.2f   Поточна: V: %.2f  A: %.2f     \r"
+#define MSGTR_OpenedStream "вдало: формат: %d  дані: 0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "відеокодек: копія кадрів (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "аудіокодек: копія кадрів (формат=%x каналів=%d швидкість=%d бітів=%d Б/с=%d приклад-%d)\n"
+#define MSGTR_CBRPCMAudioSelected "Вибрано CBR PCM аудіо.\n"
+#define MSGTR_MP3AudioSelected "Вибрано MP3 аудіо.\n"
+#define MSGTR_CannotAllocateBytes "Не можу виділити пам'ять для %d байтів.\n"
+#define MSGTR_SettingAudioDelay "Встановлюю аудіо затримку у %5.3fс.\n"
+#define MSGTR_SettingVideoDelay "Встановлюю відео затримку у %5.3fс.\n"
+#define MSGTR_SettingAudioInputGain "Встановлюю підсилення вхідного сигналу аудіо потоку у %f.\n"
+#define MSGTR_LamePresetEquals "\npreset=%s\n\n"
+#define MSGTR_LimitingAudioPreload "Обмежити підвантаження аудіо до 0.4с.\n"
+#define MSGTR_IncreasingAudioDensity "Збільшую густину аудіо до 4.\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Форсую аудіо підвантаження до 0, максимальну корекцію pts у 0.\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR аудіо: %d байтів/сек, %d байтів/блок\n"
+#define MSGTR_LameVersion "Версія LAME %s (%s)\n\n"
+#define MSGTR_InvalidBitrateForLamePreset "Помилка: Вказаний бітрейт не є вірним для даного встановлення.\n"\
+"\n"\
+"Використовуючи цей режим ви повинні ввести значення між \"8\" та \"320\".\n"\
+"\n"\
+"Для подальшої інформації спробуйте: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Помилка: Ви не ввели дійсний профайл та/чи опції з встановлення.\n"\
+"\n"\
+"Доступні профайли:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (Режим ABR) - Мається на увазі режим ABR. Для використання,\n"\
+"                       просто вкажіть бітрейт. Наприклад:\n"\
+"                       \"preset=185\" активує це\n"\
+"                       встановлення та використовує 185 як середнє значення кбіт/с.\n"\
+"\n"\
+"    Декілька прикладів:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"Для подальшої інформації спробуйте: \"-lameopts preset=help\"\n"
+#define MSGTR_LamePresetsLongInfo "\n"\
+"Встановлення розроблені так, щоб отримати якнайкращу якість.\n"\
+"\n"\
+"Вони були розроблені та налаштовані у результаті ретельних тестів\n"\
+"тести подвійного прослуховування, щоб досягти цього результату.\n"\
+"\n"\
+"Ключі встановлень постійно поновлюються, щоб відповідати останнім розробленням.\n"\
+"в результаті чого ви повинні отримати практично найкращу якість\n"\
+"на даний момент можливо при використанні LAME.\n"\
+"\n"\
+"Щоб активувати ці встановлення:\n"\
+"\n"\
+"   Для VBR режимів (найкраща якість звичайно):\n"\
+"\n"\
+"     \"preset=standard\" Звичайно цього встановлення повинно бути достатньо\n"\
+"                             для більшості людей та більшості музики, та воно\n"\
+"                             являє собою досить високу якість.\n"\
+"\n"\
+"     \"preset=extreme\" Якщо у вас хороший слух та добра музича апаратура,\n"\
+"                             це встановлення як правило забезпечить кращу якість\n"\
+"                             ніж режим \"standard\"\n"\
+"                             mode.\n"\
+"\n"\
+"   Для CBR 320kbps (максимально можлива якість, яку можна тримати з встановлень):\n"\
+"\n"\
+"     \"preset=insane\"  Це встановлення звичайно буде занадто для більшості людей\n"\
+"                             та ситуацій, але якщо ви мусите отримати найкращу\n"\
+"                             максимально можливу якість, не дивлячись на\n"\
+"                             розмір файлу, це ваш вибір.\n"\
+"\n"\
+"   Для ABR режимів (висока якість для заданого бітрейта, але така висока як VBR):\n"\
+"\n"\
+"     \"preset=<kbps>\"  Використовуючи це встановлення звичайно дає добру якість\n"\
+"                             для заданого бітрейта. Базуючись на введеному\n"\
+"                             бітрейті, це встановлення визначить оптимальні\n"\
+"                             налаштування для кожной конкретного випадку.\n"\
+"                             Не дивлячись на то, що цей підхід працює, він\n"\
+"                             далеко не такий гнучкий як VBR, та звичайно не досягає\n"\
+"                             такого рівня якості як VBR на високих бітрейтах.\n"\
+"\n"\
+"Наступні опції також доступні для існуючих профілей:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (Режим ABR) - Мається на увазі режим ABR. Для використання\n"\
+"                       просто вкажіть бітрейт. Наприклад:\n"\
+"                       \"preset=185\" активує це встановлення\n"\
+"                       та використая 185 як середнє значення кбіт/сек.\n"\
+"\n"\
+"   \"fast\" - Вмикає новий швидкий VBR для конкретного профілю.\n"\
+"            Недостатком цього ключа є те, що часто бітрейт буде\n"\
+"            набагато більше ніж у нормальному режимі;\n"\
+"            а якість може буте дещо гірше.\n"\
+"Попередження: У теперешній версії швидкі встановлення можуть привести до\n"\
+"              високому бітрейту, у порівнянні з звичайними встановленнями.\n"\
+"\n"\
+"   \"cbr\"  - Якщо ви використовуєте режим ABR (див. вище) з бітрейтом кратним\n"\
+"            80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"            ви можете застосувати опцію \"cbr\" щоб форсувати кодування у режимі\n"\
+"            CBR замість стандартного режиму abr. ABR забезпечує кращу якість,\n"\
+"            але CBR може бути корисним у таких ситуаціях,\n"\
+"            як передача потоків mp3 через інтернет.\n"\
+"\n"\
+"    Наприклад:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"\n"\
+"Декілька псевдонімів доступні для режима ABR:\n"\
+"phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
+"mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
+"fm/radio/tape => 112kbps    hifi => 160kbps\n"\
+"cd => 192kbps               studio => 256kbps"
+#define MSGTR_LameCantInit \
+"Не можу встановити опції LAME, перевірте бітрейт/частому_дискретизації, деякі\n"\
+"дуже низькі бітрейти (<32) потребують менші частоти\nдискретизації(наприклад, -srate 8000).\n"\
+"Якщо все це не допоможе, спробуйте встановлення."
+#define MSGTR_ConfigFileError "помилка у файлі налаштувань"
+#define MSGTR_ErrorParsingCommandLine "помилка аналізу командного рядка"
+#define MSGTR_VideoStreamRequired "Вивід відео обов'язковий!\n"
+#define MSGTR_ForcingInputFPS "Вхідні кадри/сек будуть замінені на %5.3f.\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "Вихідний формат файлу RAWVIDEO не підтримує аудіо - вимикаю відео.\n"
+#define MSGTR_DemuxerDoesntSupportNosound "Цей демультиплексор поки не підтримується -nosound.\n"
+#define MSGTR_MemAllocFailed "Не можу виділити пам'ять.\n"
+#define MSGTR_NoMatchingFilter "Не можу знайти потрібний фільтр/формат аудіовиводу!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, можливо зламаний компілятор C?\n"
+#define MSGTR_NoLavcAudioCodecName "Аудіо LAVC, відсутнє назва кодека!\n"
+#define MSGTR_LavcAudioCodecNotFound "Аудіо LAVC, не можу знайти кодувальщик для кодека %s.\n"
+#define MSGTR_CouldntAllocateLavcContext "Аудіо LAVC, не можу розмістити контекст!\n"
+#define MSGTR_CouldntOpenCodec "Не можу відкрити кодек %s, br=%d.\n"
+#define MSGTR_CantCopyAudioFormat "Аудіо формат 0x%x не використовується з '-oac copy', спробуйте\n'-oac pcm' замість чи використайте '-fafmttag' для його перевизначення.\n"
+
+#define MSGTR_VideoStreamResult "\nВідео потік: %8.3f кбіт/с  (%d Б/с)  розмір: %"PRIu64" байт  %5.3f секунд  %d кадрів\n"
+#define MSGTR_AudioStreamResult "\nАудіо потік: %8.3f кбіт/с  (%d Б/с)  розмір: %"PRIu64" байт  %5.3f секунд\n"
 
 // cfg-mencoder.h:
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\

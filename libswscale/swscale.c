@@ -2396,6 +2396,7 @@ SwsContext *sws_getContext(int srcW, int srcH, enum PixelFormat srcFormat, int d
 
 #ifdef COMPILE_ALTIVEC
         if ((c->flags & SWS_CPU_CAPS_ALTIVEC) &&
+            !(c->flags & SWS_BITEXACT) &&
             srcFormat == PIX_FMT_YUV420P) {
           // unscaled YV12 -> packed YUV, we want speed
           if (dstFormat == PIX_FMT_YUYV422)
@@ -2879,8 +2880,8 @@ SwsFilter *sws_getDefaultFilter(float lumaGBlur, float chromaGBlur,
     sws_normalizeVec(filter->lumH, 1.0);
     sws_normalizeVec(filter->lumV, 1.0);
 
-    if (verbose) sws_printVec(filter->chrH);
-    if (verbose) sws_printVec(filter->lumH);
+    if (verbose) sws_printVec2(filter->chrH, NULL, AV_LOG_DEBUG);
+    if (verbose) sws_printVec2(filter->lumH, NULL, AV_LOG_DEBUG);
 
     return filter;
 }
@@ -3067,7 +3068,7 @@ SwsVector *sws_cloneVec(SwsVector *a){
     return vec;
 }
 
-void sws_printVec(SwsVector *a){
+void sws_printVec2(SwsVector *a, AVClass *log_ctx, int log_level){
     int i;
     double max=0;
     double min=0;
@@ -3084,11 +3085,17 @@ void sws_printVec(SwsVector *a){
     for (i=0; i<a->length; i++)
     {
         int x= (int)((a->coeff[i]-min)*60.0/range +0.5);
-        av_log(NULL, AV_LOG_DEBUG, "%1.3f ", a->coeff[i]);
-        for (;x>0; x--) av_log(NULL, AV_LOG_DEBUG, " ");
-        av_log(NULL, AV_LOG_DEBUG, "|\n");
+        av_log(log_ctx, log_level, "%1.3f ", a->coeff[i]);
+        for (;x>0; x--) av_log(log_ctx, log_level, " ");
+        av_log(log_ctx, log_level, "|\n");
     }
 }
+
+#if LIBSWSCALE_VERSION_MAJOR < 1
+void sws_printVec(SwsVector *a){
+    sws_printVec2(a, NULL, AV_LOG_DEBUG);
+}
+#endif
 
 void sws_freeVec(SwsVector *a){
     if (!a) return;

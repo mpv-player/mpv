@@ -2856,7 +2856,7 @@ file if no DVB card is installed.
 .RSs
 .IPs card=<1\-4>
 DVB card to use if more than one card is present.
-If not specified mplayer will search the first usable card.
+If not specified MPlayer will search the first usable card.
 .IPs file=<filename>
 output filename
 .RE
@@ -3560,13 +3560,13 @@ Mac OS X CoreVideo video output driver
 .PD 0
 .RSs
 .IPs device_id=<number>
-Choose the display device to use for fullscreen or set it to \-1 to 
+Choose the display device to use for fullscreen or set it to \-1 to
 always use the same screen the video window is on (default: \-1 \- auto).
 .IPs shared_buffer
-Write output to a shared memory buffer instead of displaying it and 
+Write output to a shared memory buffer instead of displaying it and
 try to open an existing NSConnection for communication with a GUI.
 .IPs buffer_name=<name>
-Name of the shared buffer created with shm_open as well as the name of 
+Name of the shared buffer created with shm_open as well as the name of
 the NSConnection MPlayer will try to open (default: "mplayerosx").
 Setting buffer_name implicitly enables shared_buffer.
 .RE
@@ -4086,7 +4086,7 @@ if no DVB card is installed.
 .IPs card=<1\-4>
 Specifies the device number to use if you have more than one DVB output card
 (V3 API only, such as 1.x.y series drivers).
-If not specified mplayer will search the first usable card.
+If not specified MPlayer will search the first usable card.
 .IPs <filename>
 output filename (default: ./grab.mpg)
 .RE
@@ -6615,7 +6615,7 @@ Depending on the source MPEG, you may be fine ignoring this advice, as
 long as you do not see lots of "Bottom-first field" warnings.
 With no options it does normal inverse telecine, and should be used
 together with mencoder \-fps 30000/1001 \-ofps 24000/1001.
-When this filter is used with mplayer, it will result in an uneven
+When this filter is used with MPlayer, it will result in an uneven
 framerate during playback, but it is still generally better than using
 pp=lb or no deinterlacing at all.
 Multiple options can be specified separated by /.

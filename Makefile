@@ -39,6 +39,7 @@ SRCS_COMMON = asxparser.c \
               defaultopts.c \
               edl.c \
               find_sub.c \
+              fmt-conversion.c \
               get_path.c \
               m_config.c \
               m_option.c \

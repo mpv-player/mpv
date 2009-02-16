@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mp_msg.h"
 
 //--------- codec's requirements (filled by the codec/vf) ---------
 
@@ -53,6 +54,8 @@
 
 // buffer type was printed (do NOT set this flag - it's for INTERNAL USE!!!)
 #define MP_IMGFLAG_TYPE_DISPLAYED 0x8000
+// set if it can not be reused yet (for MP_IMGTYPE_NUMBERED)
+#define MP_IMGFLAG_IN_USE 0x10000
 
 // codec doesn't support any form of direct rendering - it has own buffer
 // allocation. so we just export its buffer pointers:
@@ -65,6 +68,8 @@
 #define MP_IMGTYPE_IP 3
 // I+P+B type, requires 2+ independent static R/W and 1+ temp WO buffers
 #define MP_IMGTYPE_IPB 4
+// Upper 16 bits give desired buffer number, -1 means get next available
+#define MP_IMGTYPE_NUMBERED 5
 
 #define MP_MAX_PLANES	4
 
@@ -76,8 +81,9 @@
 #define MP_IMGFIELD_INTERLACED 0x20
 
 typedef struct mp_image {
-    unsigned short flags;
+    unsigned int flags;
     unsigned char type;
+    int number;
     unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8
     unsigned int imgfmt;
     int width,height;  // stored dimensions
@@ -103,17 +109,10 @@ typedef struct mp_image {
 static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     mpi->flags&=~(MP_IMGFLAG_PLANAR|MP_IMGFLAG_YUV|MP_IMGFLAG_SWAPPED);
     mpi->imgfmt=out_fmt;
-    if(out_fmt == IMGFMT_MPEGPES){
-	mpi->bpp=0;
-	return;
-    }
-    if(out_fmt == IMGFMT_ZRMJPEGNI ||
-	    out_fmt == IMGFMT_ZRMJPEGIT ||
-	    out_fmt == IMGFMT_ZRMJPEGIB){
-	mpi->bpp=0;
-	return;
-    }
-    if(IMGFMT_IS_XVMC(out_fmt)){
+    // compressed formats
+    if(out_fmt == IMGFMT_MPEGPES ||
+       out_fmt == IMGFMT_ZRMJPEGNI || out_fmt == IMGFMT_ZRMJPEGIT || out_fmt == IMGFMT_ZRMJPEGIB ||
+       IMGFMT_IS_VDPAU(out_fmt) || IMGFMT_IS_XVMC(out_fmt)){
 	mpi->bpp=0;
 	return;
     }
@@ -206,7 +205,7 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->chroma_y_shift=1;
 	return;
     }
-    fprintf(stderr,"mp_image: unknown out_fmt: 0x%X\n",out_fmt);
+    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"mp_image: unknown out_fmt: 0x%X\n",out_fmt);
     mpi->bpp=0;
 }
 #endif

@@ -129,7 +129,7 @@ This will allow you to easily find the exact patch that did it.
 If you find the patch that is the cause of the problem, you have almost won;
 report about it to the
 <ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink> or
-subscribe to 
+subscribe to
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
 and post it there.
 There is a chance that the author will jump in to suggest a fix.
