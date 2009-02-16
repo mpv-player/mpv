@@ -529,7 +529,7 @@ int vm = flags & VOFLAG_MODESWITCHING;
       surface_render[i].data_blocks = data_blocks.blocks;
       surface_render[i].mv_blocks = mv_blocks.macro_blocks;
       surface_render[i].allocated_mv_blocks = numblocks;
-      surface_render[i].allocated_data_blocks = numblocks*blocks_per_macroblock;;
+      surface_render[i].allocated_data_blocks = numblocks*blocks_per_macroblock;
       surface_render[i].idct = (surface_info.mc_type & XVMC_IDCT) == XVMC_IDCT;
       surface_render[i].unsigned_intra = (surface_info.flags & XVMC_INTRA_UNSIGNED) == XVMC_INTRA_UNSIGNED;
       surface_render[i].p_surface = &surface_array[i];

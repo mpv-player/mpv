@@ -224,7 +224,7 @@ inline static int stream_read(stream_t *s,char* mem,int total){
 
 inline static unsigned char* stream_read_line(stream_t *s,unsigned char* mem, int max) {
   int len;
-  unsigned char* end,*ptr = mem;;
+  unsigned char* end,*ptr = mem;
   do {
     len = s->buf_len-s->buf_pos;
     // try to fill the buffer

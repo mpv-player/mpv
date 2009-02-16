@@ -538,7 +538,7 @@ static void write_mpeg2_scr(unsigned char *b, uint64_t ts)
 	scr_ext = ts % 300ULL;
 	ts /= 300ULL;
 	ts &= 0x1FFFFFFFFULL;	//33 bits
-	t1 = (ts >> 30) & 0x7;;
+	t1 = (ts >> 30) & 0x7;
 	t2 = (ts >> 15) & 0x7fff;
 	t3 = ts & 0x7fff;
 	

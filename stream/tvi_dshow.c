@@ -3312,7 +3312,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    if (!priv->chains[1]->arpmt[0])
 		return TVI_CONTROL_FALSE;
 
-	    samplerate = *(int *) arg;;
+	    samplerate = *(int *) arg;
 
 	    for (i = 0; priv->chains[1]->arpmt[i]; i++)
 		if (check_audio_format
