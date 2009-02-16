@@ -382,6 +382,7 @@ Video output:
   --enable-xmga            enable mga_vid X11 video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
   --enable-xvmc            enable XvMC acceleration [disable]
+  --enable-vdpau           enable VDPAU acceleration [autodetect]
   --enable-vm              enable XF86VidMode support [autodetect]
   --enable-xinerama        enable Xinerama support [autodetect]
   --enable-x11             enable X11 video output [autodetect]
@@ -523,7 +524,7 @@ _libavcodec_a=auto
 _libamr_nb=auto
 _libamr_wb=auto
 _libavdecoders_all=`sed -n 's/^[^#]*DEC.*(.*, *\(.*\)).*/\1_decoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
-_libavdecoders=` echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER// -e s/H264_VDPAU_DECODER// -e s/MPEG_VDPAU_DECODER// -e s/MPEG1_VDPAU_DECODER// -e s/VC1_VDPAU_DECODER//  -e s/WMV3_VDPAU_DECODER// `
+_libavdecoders=` echo $_libavdecoders_all | sed -e 's/ LIB[A-Z0-9_]*_DECODER//g' -e s/MPEG4AAC_DECODER//`
 _libavencoders_all=`sed -n 's/^[^#]*ENC.*(.*, *\(.*\)).*/\1_encoder/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
 _libavencoders=` echo $_libavencoders_all | sed 's/ LIB[A-Z0-9_]*_ENCODER//g'`
 _libavparsers_all=`sed -n 's/^[^#]*PARSER.*(.*, *\(.*\)).*/\1_parser/p' libavcodec/allcodecs.c | tr '[a-z]' '[A-Z]'`
@@ -552,6 +553,7 @@ _dga1=auto
 _dga2=auto
 _xv=auto
 _xvmc=no  #auto when complete
+_vdpau=auto
 _sdl=auto
 _direct3d=auto
 _directx=auto
@@ -880,6 +882,8 @@ for ac_option do
   --disable-xv)		_xv=no		;;
   --enable-xvmc)        _xvmc=yes       ;;
   --disable-xvmc)       _xvmc=no        ;;
+  --enable-vdpau)       _vdpau=yes      ;;
+  --disable-vdpau)      _vdpau=no       ;;
   --enable-sdl)		_sdl=yes	;;
   --disable-sdl)	_sdl=no		;;
   --enable-direct3d)    _direct3d=yes   ;;
@@ -4179,7 +4183,7 @@ else
   _novomodules="x11 $_novomodules"
   _res_comment="check if the dev(el) packages are installed"
   # disable stuff that depends on X
-  _xv=no ; _xvmc=no ; _xinerama=no ; _vm=no ; _xf86keysym=no
+  _xv=no ; _xvmc=no ; _xinerama=no ; _vm=no ; _xf86keysym=no ; _vdpau=no
 fi
 echores "$_x11"
 
@@ -4288,6 +4292,28 @@ else
   _libavdecoders=`echo $_libavdecoders | sed -e s/MPEG_XVMC_DECODER// `
 fi
 echores "$_xvmc"
+
+
+echocheck "VDPAU"
+if test "$_vdpau" = auto ; then
+  _vdpau=no
+  if test "$_dl" = yes ; then
+    cat > $TMPC <<EOF
+#include <vdpau/vdpau_x11.h>
+int main(void) {return 0;}
+EOF
+    cc_check && _vdpau=yes
+  fi
+fi
+if test "$_vdpau" = yes ; then
+  def_vdpau='#define CONFIG_VDPAU 1'
+  _vomodules="vdpau $_vomodules"
+else
+  def_vdpau='#define CONFIG_VDPAU 0'
+  _novomodules="vdpau $_novomodules"
+  _libavdecoders=`echo $_libavdecoders | sed -e s/MPEG_VDPAU_DECODER// -e s/H264_VDPAU_DECODER// -e s/WMV3_VDPAU_DECODER// -e s/VC1_VDPAU_DECODER//`
+fi
+echores "$_vdpau"
 
 
 echocheck "Xinerama"
@@ -8152,6 +8178,7 @@ TWOLAME=$_twolame
 UNRAR_EXEC = $_unrar_exec
 V4L2 = $_v4l2
 VCD = $_vcd
+VDPAU = $_vdpau
 VESA = $_vesa
 VIDIX = $_vidix
 VIDIX_PCIDB = $_vidix_pcidb_val
@@ -8237,6 +8264,7 @@ CONFIG_MUXERS=$_mencoder
 CONFIG_POSTPROC = yes
 # Prevent building libavcodec/imgresample.c with conflicting symbols
 CONFIG_SWSCALE=yes
+CONFIG_VDPAU=$_vdpau
 CONFIG_XVMC=$_xvmc
 CONFIG_ZLIB=$_zlib
 
@@ -8597,6 +8625,7 @@ $def_tdfxfb
 $def_tdfxvid
 $def_tga
 $def_v4l2
+$def_vdpau
 $def_vesa
 $def_vidix
 $def_vidix_drv_cyberblade

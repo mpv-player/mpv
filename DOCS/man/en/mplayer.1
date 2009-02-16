@@ -3423,6 +3423,11 @@ Select the driver to use as source to overlay on top of X11.
 .PD 1
 .
 .TP
+.B vdpau (with \-vc ffmpeg12vdpau, ffvc1vdpau or ffh264vdpau)
+Video output that uses VDPAU to decode video via hardware.
+Also supports displaying of software-decoded video.
+.
+.TP
 .B xvmc (X11 with \-vc ffmpeg12mc only)
 Video output driver that uses the XvMC (X Video Motion Compensation)
 extension of XFree86 4.x to speed up MPEG-1/2 and VCR2 decoding.

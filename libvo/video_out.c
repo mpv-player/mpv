@@ -87,6 +87,7 @@ extern vo_functions_t video_out_xmga;
 extern vo_functions_t video_out_x11;
 extern vo_functions_t video_out_xover;
 extern vo_functions_t video_out_xvmc;
+extern vo_functions_t video_out_vdpau;
 extern vo_functions_t video_out_xv;
 extern vo_functions_t video_out_gl;
 extern vo_functions_t video_out_gl2;
@@ -168,6 +169,9 @@ const vo_functions_t* const video_out_drivers[] =
 #endif
 #ifdef CONFIG_3DFX
         &video_out_3dfx,
+#endif
+#ifdef CONFIG_VDPAU
+        &video_out_vdpau,
 #endif
 #ifdef CONFIG_XV
         &video_out_xv,

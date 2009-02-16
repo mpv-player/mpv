@@ -232,6 +232,8 @@ static int init(sh_video_t *sh){
 
     if(lavc_codec->capabilities&CODEC_CAP_DR1 && !do_vis_debug && lavc_codec->id != CODEC_ID_H264 && lavc_codec->id != CODEC_ID_INTERPLAY_VIDEO && lavc_codec->id != CODEC_ID_ROQ)
         ctx->do_dr1=1;
+    if (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU)
+        ctx->do_dr1=1;
     ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
     ctx->ip_count= ctx->b_count= 0;
 
@@ -239,6 +241,13 @@ static int init(sh_video_t *sh){
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
 
+#if CONFIG_VDPAU
+    if(lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU){
+        avctx->get_format = get_format;
+        avctx->draw_horiz_band = draw_slice;
+        avctx->slice_flags = SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
+    }
+#endif /* CONFIG_VDPAU */
 #if CONFIG_XVMC
 
     if(lavc_codec->capabilities & CODEC_CAP_HWACCEL){
@@ -545,7 +554,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         return avctx->get_buffer(avctx, pic);
     }
 
-    if (IMGFMT_IS_XVMC(ctx->best_csp)) {
+    if (IMGFMT_IS_XVMC(ctx->best_csp) || IMGFMT_IS_VDPAU(ctx->best_csp)) {
         type =  MP_IMGTYPE_NUMBERED | (0xffff << 16);
     } else
     if (!pic->buffer_hints) {
@@ -575,6 +584,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         avctx->draw_horiz_band= draw_slice;
     } else
         avctx->draw_horiz_band= NULL;
+    if(IMGFMT_IS_VDPAU(mpi->imgfmt)) {
+        avctx->draw_horiz_band= draw_slice;
+    }
 #if CONFIG_XVMC
     if(IMGFMT_IS_XVMC(mpi->imgfmt)) {
         struct xvmc_pix_fmt *render = mpi->priv; //same as data[2]
@@ -879,7 +891,7 @@ static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
     return mpi;
 }
 
-#if CONFIG_XVMC
+#if CONFIG_XVMC || CONFIG_VDPAU
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                     const enum PixelFormat *fmt){
     enum PixelFormat selected_format = fmt[0];
@@ -889,7 +901,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
 
     for(i=0;fmt[i]!=PIX_FMT_NONE;i++){
         imgfmt = pixfmt2imgfmt(fmt[i]);
-        if(!IMGFMT_IS_XVMC(imgfmt)) continue;
+        if(!IMGFMT_IS_XVMC(imgfmt) && !IMGFMT_IS_VDPAU(imgfmt)) continue;
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt, i);
         if(init_vo(sh, fmt[i]) >= 0) {
             selected_format = fmt[i];
@@ -897,7 +909,7 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
         }
     }
     imgfmt = pixfmt2imgfmt(selected_format);
-    if(IMGFMT_IS_XVMC(imgfmt)) {
+    if(IMGFMT_IS_XVMC(imgfmt) || IMGFMT_IS_VDPAU(imgfmt)) {
         vd_ffmpeg_ctx *ctx = sh->context;
         avctx->get_buffer= get_buffer;
         avctx->release_buffer= release_buffer;

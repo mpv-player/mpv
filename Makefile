@@ -630,6 +630,7 @@ SRCS_MPLAYER-$(TDFXVID)       += libvo/vo_tdfx_vid.c
 SRCS_MPLAYER-$(TGA)           += libvo/vo_tga.c
 SRCS_MPLAYER-$(V4L2)          += libvo/vo_v4l2.c
 SRCS_MPLAYER-$(V4L2)          += libao2/ao_v4l2.c
+SRCS_MPLAYER-$(VDPAU)         += libvo/vo_vdpau.c
 SRCS_MPLAYER-$(VESA)          += libvo/gtf.c libvo/vo_vesa.c libvo/vesa_lvo.c
 SRCS_MPLAYER-$(VIDIX)         += libvo/vo_cvidix.c \
                                  libvo/vosub_vidix.c \
