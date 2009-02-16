@@ -69,7 +69,7 @@ extern "C" {
 /* Use if target platform has address generators with autoincrement */
 //#define PREFER_POINTERS
 
-#if defined(_WIN32_WCE) || defined(__arm__)
+#if defined(_WIN32_WCE) || defined(__arm__) || defined(__avr32__)
 #define FIXED_POINT
 #endif
 

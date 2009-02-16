@@ -52,7 +52,7 @@
  //#define PREFER_POINTERS
  
 -#ifdef _WIN32_WCE
-+#if defined(_WIN32_WCE) || defined(__arm__)
++#if defined(_WIN32_WCE) || defined(__arm__) || defined(__avr32__)
  #define FIXED_POINT
  #endif
  
