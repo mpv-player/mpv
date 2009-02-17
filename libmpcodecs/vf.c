@@ -320,7 +320,6 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
     // keep buffer allocation status & color flags only:
 //    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_DIRECT);
     mpi->flags&=MP_IMGFLAG_ALLOCATED|MP_IMGFLAG_TYPE_DISPLAYED|MP_IMGFLAGMASK_COLORS;
-    mpi->flags |= MP_IMGFLAG_IN_USE;
     // accept restrictions & draw_slice flags only:
     mpi->flags|=mp_imgflag&(MP_IMGFLAGMASK_RESTRICTIONS|MP_IMGFLAG_DRAW_CALLBACK);
     if(!vf->draw_slice) mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
@@ -347,6 +346,11 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	
         if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
           // non-direct and not yet allocated image. allocate it!
+          if (!mpi->bpp) { // no way we can allocate this
+              mp_msg(MSGT_DECVIDEO, MSGL_FATAL,
+                     "vf_get_image: Tried to allocate a format that can not be allocated!\n");
+              return NULL;
+          }
 	  
 	  // check if codec prefer aligned stride:  
 	  if(mp_imgflag&MP_IMGFLAG_PREFER_ALIGNED_STRIDE){
@@ -427,6 +431,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 
   mpi->qscale = NULL;
   }
+  mpi->flags |= MP_IMGFLAG_IN_USE;
 //    printf("\rVF_MPI: %p %p %p %d %d %d    \n",
 //	mpi->planes[0],mpi->planes[1],mpi->planes[2],
 //	mpi->stride[0],mpi->stride[1],mpi->stride[2]);
