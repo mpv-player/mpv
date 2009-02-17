@@ -249,7 +249,6 @@ static int init(sh_video_t *sh){
     }
 #endif /* CONFIG_VDPAU */
 #if CONFIG_XVMC
-
     if(lavc_codec->capabilities & CODEC_CAP_HWACCEL){
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedCodec);
         assert(ctx->do_dr1);//these are must to!
@@ -921,5 +920,4 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
     }
     return selected_format;
 }
-
 #endif /* CONFIG_XVMC || CONFIG_VDPAU */
