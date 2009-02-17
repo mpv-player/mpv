@@ -733,7 +733,7 @@ int mp_dvdnav_aid_from_lang(stream_t *stream, unsigned char *language) {
   dvdnav_priv_t * priv = stream->priv;
   int k;
   uint8_t lg;
-  uint16_t lang, lcode;;
+  uint16_t lang, lcode;
 
   while(language && strlen(language)>=2) {
     lcode = (language[0] << 8) | (language[1]);

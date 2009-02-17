@@ -202,6 +202,7 @@ void xscreensaver_heartbeat(struct vo_x11_state *x11);
 #define vo_x11_classhint(display, window, name) vo_x11_classhint(global_vo, window, name)
 #define vo_x11_setlayer(display, window, layer) vo_x11_setlayer(global_vo, window, layer)
 #define xv_setup_colorkeyhandling(a, b) xv_setup_colorkeyhandling(global_vo, a, b)
+#define vo_x11_border() vo_x11_border(global_vo)
 
 #define mDisplay global_vo->x11->display
 #define vo_depthonscreen global_vo->x11->depthonscreen

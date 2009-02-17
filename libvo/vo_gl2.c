@@ -897,7 +897,7 @@ static int control(uint32_t request, void *data)
       resize(&vo_dwidth, &vo_dheight);
       return VO_TRUE;
     case VOCTRL_BORDER:
-      vo_gl_border(global_vo);
+      vo_gl_border();
       return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
       return VO_TRUE;

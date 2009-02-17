@@ -66,7 +66,7 @@ struct voodoo_2d_reg_t {
   uint32_t lineStipple;
   uint32_t lineStyle;
   uint32_t pattern0Alias;
-  uint32_t pattern1Alias;;
+  uint32_t pattern1Alias;
   uint32_t clip1Min;
   uint32_t clip1Max;
   uint32_t srcFormat;

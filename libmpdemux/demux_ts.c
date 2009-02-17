@@ -322,7 +322,7 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 		sh_video_t *sh = new_sh_video_vid(demuxer, priv->last_vid, es->pid);
 		if(sh)
 		{
-			sh->format = IS_VIDEO(es->type) ? es->type : es->subtype;;
+			sh->format = IS_VIDEO(es->type) ? es->type : es->subtype;
 			sh->ds = demuxer->video;
 
 			priv->ts.streams[es->pid].id = priv->last_vid;

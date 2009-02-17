@@ -113,6 +113,8 @@ you need to go back.
 earlier version, so if you do not make a backup copy of your original
 source tree, you will have to recompile everything in it when you come
 back to the present.)
+Alternatively you may use <ulink url="http://ccache.samba.org/">ccache</ulink>
+to speed up compilation.
 </para>
 
 <para>

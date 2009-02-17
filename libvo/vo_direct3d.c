@@ -63,6 +63,8 @@ static struct global_priv {
                                 fullscreen */
     int src_width;              /**< Source (movie) width */
     int src_height;             /**< Source (movie) heigth */
+    int border_x;               /**< horizontal border value for OSD */
+    int border_y;               /**< vertical border value for OSD */
 
     D3DFORMAT movie_src_fmt;        /**< Movie colorspace format (depends on
                                     the movie's codec) */
@@ -149,7 +151,8 @@ static void calc_fs_rect(void)
 {
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
-    calc_src_dst_rects(priv->src_width, priv->src_height, &src_rect, &dst_rect, NULL);
+    struct vo_rect borders;
+    calc_src_dst_rects(priv->src_width, priv->src_height, &src_rect, &dst_rect, &borders, NULL);
 
     priv->fs_movie_rect.left     = dst_rect.left;
     priv->fs_movie_rect.right    = dst_rect.right;
@@ -159,6 +162,8 @@ static void calc_fs_rect(void)
     priv->fs_panscan_rect.right  = src_rect.right;
     priv->fs_panscan_rect.top    = src_rect.top;
     priv->fs_panscan_rect.bottom = src_rect.bottom;
+    priv->border_x               = borders.left;
+    priv->border_y               = borders.top;
 
     mp_msg(MSGT_VO, MSGL_V,
            "<vo_direct3d>Fullscreen movie rectangle: t: %ld, l: %ld, r: %ld, b:%ld\n",
@@ -1027,7 +1032,8 @@ static void draw_osd(void)
         /* required for if subs are in the boarder region */
         priv->is_clear_needed = 1;
 
-        vo_draw_text(priv->osd_width, priv->osd_height, draw_alpha);
+        vo_draw_text_ext(priv->osd_width, priv->osd_height, priv->border_x, priv->border_y,
+                         priv->border_x, priv->border_y, priv->src_width, priv->src_height, draw_alpha);
 
         if (!priv->device_texture_sys)
         {

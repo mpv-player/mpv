@@ -43,13 +43,7 @@
 #include "mp_msg.h"
 #include "cpudetect.h"
 
-#include "libavutil/internal.h"
-#include "libavutil/intreadwrite.h"
-#include "libavutil/mem.h"
-#include "libavcodec/avcodec.h"
-#include "libavcodec/dsputil.h"
-
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 
@@ -57,6 +51,12 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "libvo/fastmemcpy.h"
+
+#include "libavutil/internal.h"
+#include "libavutil/intreadwrite.h"
+#include "libavutil/mem.h"
+#include "libavcodec/avcodec.h"
+#include "libavcodec/dsputil.h"
 
 #undef free
 #undef malloc
@@ -690,7 +690,6 @@ const vf_info_t vf_info_fspp = {
 //Specific spp's dct, idct and threshold functions
 //I'd prefer to have them in the separate file.
 
-#include "mangle.h"
 //#define MANGLE(a) #a
 
 //typedef int16_t DCTELEM; //! only int16_t

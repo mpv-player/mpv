@@ -454,6 +454,8 @@ static void reset(void){
 #endif
 
   oss_format = format2oss(ao_data.format);
+  if(ao_data.format == AF_FORMAT_AC3)
+    ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &oss_format);
   if(ao_data.format != AF_FORMAT_AC3) {
     if (ao_data.channels > 2)
@@ -479,7 +481,7 @@ static void audio_resume(void)
     int fillcnt;
     reset();
     fillcnt = get_space() - prepause_space;
-    if (fillcnt > 0) {
+    if (fillcnt > 0 && !(ao_data.format & AF_FORMAT_SPECIAL_MASK)) {
       void *silence = calloc(fillcnt, 1);
       play(silence, fillcnt, 0);
       free(silence);

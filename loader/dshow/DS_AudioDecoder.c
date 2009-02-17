@@ -184,7 +184,7 @@ int DS_AudioDecoder_GetSrcSize(DS_AudioDecoder *this, int dest_size)
 {
     double efficiency =(double) this->in_fmt.nAvgBytesPerSec
 	/ (this->in_fmt.nSamplesPerSec*this->in_fmt.nBlockAlign);
-    int frames = (int)(dest_size*efficiency);;
+    int frames = (int)(dest_size*efficiency);
     
     if (frames < 1)
 	frames = 1;

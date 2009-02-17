@@ -77,7 +77,7 @@ rdtsc(void)
 static const char*
 brandname(int i)
 {
-  const static char* brandmap[] = {
+  static const char* brandmap[] = {
     NULL,
     "Intel(R) Celeron(R) processor",
     "Intel(R) Pentium(R) III processor",
@@ -105,7 +105,7 @@ store32(char *d, unsigned int v)
 
 
 int
-main(int argc, char **argv)
+main(void)
 {
   cpuid_regs_t regs, regs_ext;
   char idstr[13];

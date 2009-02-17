@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 #include <inttypes.h>
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <stdlib.h>

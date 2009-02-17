@@ -46,7 +46,7 @@
 #undef free
 #undef malloc
 
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 

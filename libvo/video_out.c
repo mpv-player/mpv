@@ -75,6 +75,7 @@ extern struct vo_driver video_out_xmga;
 extern struct vo_driver video_out_x11;
 extern struct vo_driver video_out_xover;
 extern struct vo_driver video_out_xvmc;
+extern struct vo_driver video_out_vdpau;
 extern struct vo_driver video_out_xv;
 extern struct vo_driver video_out_gl;
 extern struct vo_driver video_out_gl2;
@@ -156,6 +157,9 @@ const struct vo_driver *video_out_drivers[] =
 #endif
 #ifdef CONFIG_3DFX
         &video_out_3dfx,
+#endif
+#if CONFIG_VDPAU
+        &video_out_vdpau,
 #endif
 #ifdef CONFIG_XV
         &video_out_xv,
@@ -444,8 +448,13 @@ static void src_dst_split_scaling(int src_size, int dst_size, int scaled_src_siz
  * Can be extended to take future cropping support into account.
  *
  * \param crop specifies the cropping border size in the left, right, top and bottom members, may be NULL
+ * \param borders the border values as e.g. EOSD (ASS) and properly placed DVD highlight support requires,
+ *                may be NULL and only left and top are currently valid.
  */
-void calc_src_dst_rects(struct vo *vo, int src_width, int src_height, struct vo_rect *src, struct vo_rect *dst, struct vo_rect *crop) {
+void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
+                        struct vo_rect *src, struct vo_rect *dst,
+                        struct vo_rect *borders, const struct vo_rect *crop)
+{
   static const struct vo_rect no_crop = {0, 0, 0, 0, 0, 0};
   int scaled_width  = 0;
   int scaled_height = 0;
@@ -458,11 +467,18 @@ void calc_src_dst_rects(struct vo *vo, int src_width, int src_height, struct vo_
   dst->top  = 0; dst->bottom = vo->dheight;
   src->left = 0; src->right  = src_width;
   src->top  = 0; src->bottom = src_height;
+  if (borders) {
+    borders->left = 0; borders->top = 0;
+  }
   if (vo_fs) {
     aspect(vo, &scaled_width, &scaled_height, A_ZOOM);
     panscan_calc(vo);
     scaled_width  += vo->panscan_x;
     scaled_height += vo->panscan_y;
+    if (borders) {
+      borders->left = (vo->dwidth  - scaled_width ) / 2;
+      borders->top  = (vo->dheight - scaled_height) / 2;
+    }
     src_dst_split_scaling(src_width, vo->dwidth, scaled_width,
                           &src->left, &src->right, &dst->left, &dst->right);
     src_dst_split_scaling(src_height, vo->dheight, scaled_height,

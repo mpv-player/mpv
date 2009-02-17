@@ -39,7 +39,7 @@
 #include "mm_accel.h"
 #include "libavutil/avutil.h"
 
-#ifdef HAVE_MEMALIGN
+#if HAVE_MEMALIGN
 /* some systems have memalign() but no declaration for it */
 void * memalign (size_t align, size_t size);
 #endif

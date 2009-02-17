@@ -186,7 +186,7 @@ static void resize(struct vo *vo)
     struct xvctx *ctx = vo->priv;
 
     calc_src_dst_rects(vo, ctx->image_width, ctx->image_height, &ctx->src_rect,
-                       &ctx->dst_rect, NULL);
+                       &ctx->dst_rect, NULL, NULL);
     struct vo_rect *dst = &ctx->dst_rect;
     vo_x11_clearwindow_part(vo, vo->x11->window, dst->width, dst->height, 1);
     vo_xv_draw_colorkey(vo, dst->left, dst->top, dst->width, dst->height);
