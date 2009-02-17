@@ -8721,6 +8721,8 @@ $def_yasm
 #define HAVE_EBX_AVAILABLE 1
 #ifndef MP_DEBUG
 #define HAVE_EBP_AVAILABLE 1
+#else
+#define HAVE_EBP_AVAILABLE 0
 #endif
 
 /* External libraries used through libavcodec. */
