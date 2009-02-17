@@ -155,6 +155,7 @@ static void resize(int x,int y){
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
+  ass_border_x = ass_border_y = 0;
   if (vo_fs && use_aspect) {
     int new_w, new_h;
     GLdouble scale_x, scale_y;
