@@ -2061,6 +2061,7 @@ EOF
   avr32)
     _arch='AVR32'
     _target_arch='ARCH_AVR32 = yes'
+    def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='avr32'
     ;;
 
