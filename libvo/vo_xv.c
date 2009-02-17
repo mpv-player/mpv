@@ -161,7 +161,7 @@ static void deallocate_xvimage(int foo);
 
 static void resize(void)
 {
-    calc_src_dst_rects(image_width, image_height, &src_rect, &dst_rect, NULL);
+    calc_src_dst_rects(image_width, image_height, &src_rect, &dst_rect, NULL, NULL);
     vo_x11_clearwindow_part(mDisplay, vo_window, dst_rect.width, dst_rect.height, 1);
     vo_xv_draw_colorkey(dst_rect.left, dst_rect.top, dst_rect.width, dst_rect.height);
 }

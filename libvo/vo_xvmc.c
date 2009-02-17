@@ -943,7 +943,7 @@ int i;
    if(p_render_surface == NULL)
       return;
 
-   calc_src_dst_rects(image_width, image_height, &src_rect, &dst_rect, NULL);
+   calc_src_dst_rects(image_width, image_height, &src_rect, &dst_rect, NULL, NULL);
 
    if(draw_ck)
       vo_xv_draw_colorkey(dst_rect.left, dst_rect.top, dst_rect.width, dst_rect.height);

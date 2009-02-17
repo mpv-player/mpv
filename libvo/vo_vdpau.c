@@ -138,6 +138,7 @@ static int                                decoder_max_refs;
 
 static VdpRect                            src_rect_vid;
 static VdpRect                            out_rect_vid;
+static int                                border_x, border_y;
 
 static struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
 static int                                surface_num;
@@ -184,7 +185,8 @@ static void resize(void)
     int i;
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
-    calc_src_dst_rects(vid_width, vid_height, &src_rect, &dst_rect, NULL);
+    struct vo_rect borders;
+    calc_src_dst_rects(vid_width, vid_height, &src_rect, &dst_rect, &borders, NULL);
     out_rect_vid.x0 = dst_rect.left;
     out_rect_vid.x1 = dst_rect.right;
     out_rect_vid.y0 = dst_rect.top;
@@ -193,6 +195,8 @@ static void resize(void)
     src_rect_vid.x1 = src_rect.right;
     src_rect_vid.y0 = src_rect.top;
     src_rect_vid.y1 = src_rect.bottom;
+    border_x        = borders.left;
+    border_y        = borders.top;
 #ifdef CONFIG_FREETYPE
     // adjust font size to display size
     force_load_font = 1;
@@ -522,7 +526,8 @@ static void draw_osd(void)
 {
     mp_msg(MSGT_VO, MSGL_DBG2, "DRAW_OSD\n");
 
-    vo_draw_text(vo_dwidth, vo_dheight, draw_osd_I8A8);
+    vo_draw_text_ext(vo_dwidth, vo_dheight, border_x, border_y, border_x, border_y,
+                     vid_width, vid_height, draw_osd_I8A8);
 }
 
 static void flip_page(void)

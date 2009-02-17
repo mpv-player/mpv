@@ -387,8 +387,11 @@ static void src_dst_split_scaling(int src_size, int dst_size, int scaled_src_siz
  * Can be extended to take future cropping support into account.
  *
  * \param crop specifies the cropping border size in the left, right, top and bottom members, may be NULL
+ * \param borders the border values as e.g. EOSD (ASS) and properly placed DVD highlight support requires,
+ *                may be NULL and only left and top are currently valid.
  */
-void calc_src_dst_rects(int src_width, int src_height, struct vo_rect *src, struct vo_rect *dst, const struct vo_rect *crop) {
+void calc_src_dst_rects(int src_width, int src_height, struct vo_rect *src, struct vo_rect *dst,
+                        struct vo_rect *borders, const struct vo_rect *crop) {
   static const struct vo_rect no_crop = {0, 0, 0, 0, 0, 0};
   int scaled_width  = 0;
   int scaled_height = 0;
@@ -401,11 +404,18 @@ void calc_src_dst_rects(int src_width, int src_height, struct vo_rect *src, stru
   dst->top  = 0; dst->bottom = vo_dheight;
   src->left = 0; src->right  = src_width;
   src->top  = 0; src->bottom = src_height;
+  if (borders) {
+    borders->left = 0; borders->top = 0;
+  }
   if (vo_fs) {
     aspect(&scaled_width, &scaled_height, A_ZOOM);
     panscan_calc();
     scaled_width  += vo_panscan_x;
     scaled_height += vo_panscan_y;
+    if (borders) {
+      borders->left = (vo_dwidth  - scaled_width ) / 2;
+      borders->top  = (vo_dheight - scaled_height) / 2;
+    }
     src_dst_split_scaling(src_width, vo_dwidth, scaled_width,
                           &src->left, &src->right, &dst->left, &dst->right);
     src_dst_split_scaling(src_height, vo_dheight, scaled_height,
