@@ -77,7 +77,7 @@ rdtsc(void)
 static const char*
 brandname(int i)
 {
-  const static char* brandmap[] = {
+  static const char* brandmap[] = {
     NULL,
     "Intel(R) Celeron(R) processor",
     "Intel(R) Pentium(R) III processor",
