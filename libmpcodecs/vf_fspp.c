@@ -690,7 +690,6 @@ const vf_info_t vf_info_fspp = {
 //Specific spp's dct, idct and threshold functions
 //I'd prefer to have them in the separate file.
 
-#include "mangle.h"
 //#define MANGLE(a) #a
 
 //typedef int16_t DCTELEM; //! only int16_t
