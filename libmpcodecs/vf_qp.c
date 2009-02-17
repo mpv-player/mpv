@@ -36,7 +36,7 @@
 #include "libavcodec/avcodec.h"
 #include "libavcodec/eval.h"
 
-#ifdef HAVE_MALLOC_H
+#if HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 

@@ -3149,10 +3149,10 @@ cc_check && _malloc=yes
 if test "$_malloc" = yes ; then
   def_malloc_h='#define HAVE_MALLOC_H 1'
 else
-  def_malloc_h='#undef HAVE_MALLOC_H'
+  def_malloc_h='#define HAVE_MALLOC_H 0'
 fi
 # malloc.h emits a warning in FreeBSD and OpenBSD
-freebsd || openbsd || dragonfly && def_malloc_h='#undef HAVE_MALLOC_H'
+freebsd || openbsd || dragonfly && def_malloc_h='#define HAVE_MALLOC_H 0'
 echores "$_malloc"
 
 
