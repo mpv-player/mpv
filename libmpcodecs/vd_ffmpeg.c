@@ -240,6 +240,7 @@ static int init(sh_video_t *sh){
     ctx->pic = avcodec_alloc_frame();
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
+    avctx->opaque = sh;
 
 #if CONFIG_VDPAU
     if(lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU){
@@ -744,7 +745,6 @@ static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
 //ffmpeg interlace (mpeg2) bug have been fixed. no need of -noslices
     if (!dr1)
     avctx->draw_horiz_band=NULL;
-    avctx->opaque=sh;
     if(ctx->vo_initialized && !(flags&3) && !dr1){
         mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
             (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
