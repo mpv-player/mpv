@@ -388,7 +388,7 @@ static void src_dst_split_scaling(int src_size, int dst_size, int scaled_src_siz
  *
  * \param crop specifies the cropping border size in the left, right, top and bottom members, may be NULL
  */
-void calc_src_dst_rects(int src_width, int src_height, struct vo_rect *src, struct vo_rect *dst, struct vo_rect *crop) {
+void calc_src_dst_rects(int src_width, int src_height, struct vo_rect *src, struct vo_rect *dst, const struct vo_rect *crop) {
   static const struct vo_rect no_crop = {0, 0, 0, 0, 0, 0};
   int scaled_width  = 0;
   int scaled_height = 0;
