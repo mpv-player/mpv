@@ -1230,7 +1230,7 @@ void vo_init_osd(void){
 #ifdef CONFIG_DVDNAV
     new_osd_obj(OSDTYPE_DVDNAV);
 #endif
-#if CONFIG_TV_TELETEXT
+#ifdef CONFIG_TV_TELETEXT
     new_osd_obj(OSDTYPE_TELETEXT);
 #endif
 #ifdef CONFIG_FREETYPE
