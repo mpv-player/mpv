@@ -33,7 +33,7 @@ unsigned int* x_table[0x00001837];
 
 static    OSErr (*InitializeQTML)(long flags);
 
-int main(int argc, char *argv[]){
+int main(void) {
     void *handler;
     void *handler2;
     void* theqtdp=NULL;

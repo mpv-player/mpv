@@ -105,7 +105,7 @@ store32(char *d, unsigned int v)
 
 
 int
-main(int argc, char **argv)
+main(void)
 {
   cpuid_regs_t regs, regs_ext;
   char idstr[13];

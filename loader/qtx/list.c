@@ -18,7 +18,7 @@ void* GetProcAddress(void* handle,char* func);
 #define __cdecl   __attribute__((__cdecl__))
 #define APIENTRY 
 
-int main(int argc, char *argv[]){
+int main(void) {
     void *handler;
     ComponentDescription desc;
     Component (*FindNextComponent)(Component prev,ComponentDescription* desc);
