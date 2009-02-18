@@ -576,6 +576,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
 
     mpi= mpcodecs_get_image(sh, type, flags,
                         (width+align)&(~align), (height+align)&(~align));
+    if (!mpi) return -1;
 
     // ok, let's see what did we get:
     if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
