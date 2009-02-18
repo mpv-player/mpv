@@ -102,7 +102,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 {
 	AVRational pixelaspect = av_div_q((AVRational){d_width, d_height},
 	                                  (AVRational){width, height});
-	AVRational fps_frac = av_d2q(vo_fps, INT_MAX);
+	AVRational fps_frac = av_d2q(vo_fps, vo_fps * 1001 + 2);
 	if (image_width == width && image_height == height &&
 	     image_fps == vo_fps && vo_config_count)
 	  return 0;
