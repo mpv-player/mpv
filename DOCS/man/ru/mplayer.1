@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: utf-8
-.\" synced with r28576
+.\" synced with r28618
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -3400,6 +3400,11 @@ XResetScreenSaver API, пожалуйста, используйте \-heartbeat\
 поверх X11.
 .RE
 .PD 1
+.
+.TP
+.B vdpau (совместно с \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau или ffh264vdpau)
+Вывод видео, использующий VDPAU для аппаратного декодирования видео.
+Также поддерживает отображение программно декодированного видео.
 .
 .TP
 .B xvmc (только X11 с \-vc ffmpeg12mc)
