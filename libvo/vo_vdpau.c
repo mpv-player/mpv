@@ -654,14 +654,16 @@ static uint32_t get_image(mp_image_t *mpi)
 
 static int query_format(uint32_t format)
 {
+    int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD;
     switch (format) {
         case IMGFMT_YV12:
+            return default_flags | VOCAP_NOSLICES;
         case IMGFMT_VDPAU_MPEG1:
         case IMGFMT_VDPAU_MPEG2:
         case IMGFMT_VDPAU_H264:
         case IMGFMT_VDPAU_WMV3:
         case IMGFMT_VDPAU_VC1:
-            return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD;
+            return default_flags;
     }
     return 0;
 }
