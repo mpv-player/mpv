@@ -33,6 +33,7 @@ struct vf_priv_s {
 #define video_out (vf->priv->vo)
 
 static int query_format(struct vf_instance* vf, unsigned int fmt); /* forward declaration */
+static void draw_slice(struct vf_instance *vf, unsigned char **src, int *stride, int w,int h, int x, int y);
 
 static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
@@ -60,6 +61,7 @@ static int config(struct vf_instance* vf,
 
     // save vo's stride capability for the wanted colorspace:
     vf->default_caps=query_format(vf,outfmt);
+    vf->draw_slice = (vf->default_caps & VOCAP_NOSLICES) ? NULL : draw_slice;
 
     if (vo_config(video_out, width, height, d_width, d_height, flags, "MPlayer", outfmt))
 	return 0;
