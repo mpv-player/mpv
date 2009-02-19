@@ -160,10 +160,6 @@ static int open(vf_instance_t *vf, char* args)
         vf->priv->hue *= M_PI / 180.0;
 
 	process = process_C;
-#if HAVE_MMXX
-	if(gCpuCaps.hasMMX) process = process_MMX;
-#endif
-	
 	return 1;
 }
 
