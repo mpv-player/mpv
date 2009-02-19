@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28593 -->
+<!-- synced with r28615 -->
 <appendix id="bugreports">
 <title>Hogyan jelentsd a hibákat</title>
 
@@ -111,6 +111,8 @@ spórolsz, ha vissza kell lépned.
 (Általában le kell futtatni a 'make distclean'-t egy régi verzió újrafordítása
 előtt, így ha nem készítesz mentést az eredeti forrás fádról, újra kell fordítanod
 mindent, ha visszajössz a jelenbe.)
+Alternatívaként használhatod a <ulink url="http://ccache.samba.org/">ccache</ulink>-t
+a fordítás felgyorsítására.
 </para>
 
 <para>
