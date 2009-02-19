@@ -693,10 +693,10 @@ you have to use <option>-ao alsa:device=dmix</option>.
 I have no sound when playing a video and get error messages similar to this one:
 <screen>
 AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
-audio_setup: Can't open audio device /dev/dsp: Device or resource busy
-couldn't open/init audio device -> NOSOUND
-Audio: no sound!!!
-Start playing...
+[AO OSS] audio_setup: Can't open audio device /dev/dsp: Device or resource busy
+Could not open/initialize audio device -> no sound.
+Audio: no sound
+Starting playback...
 </screen>
 </para></question>
 <answer><para>
