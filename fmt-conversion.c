@@ -50,14 +50,19 @@ static const struct {
     {IMGFMT_YVU9,  PIX_FMT_YUV410P},
     {IMGFMT_IF09,  PIX_FMT_YUV410P},
     {IMGFMT_YV12,  PIX_FMT_YUV420P},
-    {IMGFMT_YV12,  PIX_FMT_YUVJ420P},
     {IMGFMT_I420,  PIX_FMT_YUV420P},
     {IMGFMT_IYUV,  PIX_FMT_YUV420P},
     {IMGFMT_411P,  PIX_FMT_YUV411P},
     {IMGFMT_422P,  PIX_FMT_YUV422P},
-    {IMGFMT_422P,  PIX_FMT_YUVJ422P},
     {IMGFMT_444P,  PIX_FMT_YUV444P},
+
+    // YUVJ are YUV formats that use the full Y range and not just
+    // 16 - 235 (see colorspaces.txt).
+    // Currently they are all treated the same way.
+    {IMGFMT_YV12,  PIX_FMT_YUVJ420P},
+    {IMGFMT_422P,  PIX_FMT_YUVJ422P},
     {IMGFMT_444P,  PIX_FMT_YUVJ444P},
+
     {IMGFMT_XVMC_MOCO_MPEG2, PIX_FMT_XVMC_MPEG2_MC},
     {IMGFMT_XVMC_IDCT_MPEG2, PIX_FMT_XVMC_MPEG2_IDCT},
     {IMGFMT_VDPAU_MPEG1,     PIX_FMT_VDPAU_MPEG1},
