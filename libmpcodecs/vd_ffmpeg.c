@@ -894,7 +894,7 @@ static mp_image_t *decode(sh_video_t *sh, void *data, int len, int flags){
 #if CONFIG_XVMC || CONFIG_VDPAU
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                     const enum PixelFormat *fmt){
-    enum PixelFormat selected_format = fmt[0];
+    enum PixelFormat selected_format;
     int imgfmt;
     sh_video_t *sh = avctx->opaque;
     int i;
@@ -904,10 +904,10 @@ static enum PixelFormat get_format(struct AVCodecContext *avctx,
         if(!IMGFMT_IS_XVMC(imgfmt) && !IMGFMT_IS_VDPAU(imgfmt)) continue;
         mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt, i);
         if(init_vo(sh, fmt[i]) >= 0) {
-            selected_format = fmt[i];
             break;
         }
     }
+    selected_format = fmt[i];
     imgfmt = pixfmt2imgfmt(selected_format);
     if(IMGFMT_IS_XVMC(imgfmt) || IMGFMT_IS_VDPAU(imgfmt)) {
         vd_ffmpeg_ctx *ctx = sh->context;
