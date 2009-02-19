@@ -75,7 +75,7 @@ static char help_text[]=
 #define MSGTR_TryForceVideoFmtStr "Попытка форсировать семейство видеокодеков %s...\n"
 #define MSGTR_CantFindVideoCodec "Не могу найти кодек для выбранного -vo и видеоформата 0x%X!\n"
 #define MSGTR_CannotInitVO "ФАТАЛЬНАЯ ОШИБКА: Не могу инициализировать видеодрайвер!\n"
-#define MSGTR_CannotInitAO "не могу открыть/инициализировать аудиоустройство -> БЕЗ ЗВУКА\n"
+#define MSGTR_CannotInitAO "Не могу открыть/инициализировать аудиоустройство -> без звука.\n"
 #define MSGTR_StartPlaying "Начало воспроизведения...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
