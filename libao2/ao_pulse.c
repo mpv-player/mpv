@@ -52,6 +52,8 @@ static struct pa_threaded_mainloop *mainloop;
 /** A temporary variable to store the current volume */
 static pa_cvolume volume;
 
+static int broken_pause;
+
 LIBAO_EXTERN(pulse)
 
 #define GENERIC_ERR_MSG(ctx, str) \
@@ -138,12 +140,24 @@ static int init(int rate_hz, int channels, int format, int flags) {
     char *devarg = NULL;
     char *host = NULL;
     char *sink = NULL;
+    char *version = pa_get_library_version();
 
     if (ao_subdevice) {
         devarg = strdup(ao_subdevice);
         sink = strchr(devarg, ':');
         if (sink) *sink++ = 0;
         if (devarg[0]) host = devarg;
+    }
+
+    broken_pause = 0;
+    // not sure which versions are affected, assume 0.9.1*
+    // known bad: 0.9.14, 0.9.13
+    // known good: 0.9.9, 0.9.10
+    // to test: pause, wait ca. 5 seconds framestep and see if MPlayer hangs somewhen
+    if (strncmp(version, "0.9.1", 5) == 0 && strncmp(version, "0.9.10", 6) != 0) {
+        mp_msg(MSGT_AO, MSGL_WARN, "[pulse] working around probably broken pause functionality,\n"
+                                   "        see http://www.pulseaudio.org/ticket/440\n");
+        broken_pause = 1;
     }
 
     ss.channels = channels;
@@ -288,6 +302,10 @@ static void audio_pause(void) {
 
 /** Resume the audio stream by uncorking it on the server */
 static void audio_resume(void) {
+    // without this, certain versions will cause an infinite hang because
+    // pa_stream_writable_size returns 0 always.
+    // Note that this workaround causes A-V desync after pause
+    if (broken_pause) reset();
     cork(0);
 }
 
