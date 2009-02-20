@@ -178,6 +178,9 @@ static void video_to_output_surface(void)
                                                              &dummy);
     CHECK_ST_WARNING("Error when calling vdp_presentation_queue_block_until_surface_idle")
 
+    // we would need to provide past and future frames to allow deinterlacing,
+    // which is not really possible currently. Deinterlacing is supposed to fall
+    // back to bob deinterlacing, but that seems not to work either.
     vdp_st = vdp_video_mixer_render(video_mixer, VDP_INVALID_HANDLE, 0,
                                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME,
                                     0, NULL, surface_render[vid_surface_num].surface, 0, NULL, &src_rect_vid,
@@ -763,10 +766,10 @@ static const char help_msg[] =
     "\nOptions:\n"
     "  deint\n"
     "    0: no deinterlacing\n"
-    "    1: temporal deinterlacing\n"
-    "    2: temporal-spatial deinterlacing\n"
+    "    1: temporal deinterlacing (not yet working)\n"
+    "    2: temporal-spatial deinterlacing (not yet working)\n"
     "  pullup\n"
-    "    Try to apply inverse-telecine\n"
+    "    Try to apply inverse-telecine (needs deinterlacing, not working)\n"
     "  denoise\n"
     "    Apply denoising, argument is strength from 0.0 to 1.0\n"
     "  sharpen\n"
