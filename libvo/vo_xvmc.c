@@ -162,7 +162,7 @@ static void allocate_xvimage(int xvimage_width,int xvimage_height,int xv_format)
     else
     {
         Shmem_Flag = 0;
-        mp_msg(MSGT_VO,MSGL_INFO, "Shared memory not supported\nReverting to normal Xv\n" );
+        mp_msg(MSGT_VO,MSGL_WARN, "Shared memory not supported\nReverting to normal Xv\n" );
     }
     if ( Shmem_Flag )
     {
@@ -226,58 +226,59 @@ return -1;//fail
 //print all info needed to add new format
 static void print_xvimage_format_values(XvImageFormatValues *xifv){
     int i;
+    const msgl=MSGL_DBG4;
 
-    printf("Format_ID = 0x%X\n",xifv->id);
+    mp_msg(MSGT_VO,msgl,"Format_ID = 0x%X\n",xifv->id);
 
-    printf("  type = ");
-    if(xifv->type == XvRGB) printf("RGB\n");
-    else if(xifv->type == XvYUV) printf("YUV\n");
-    else printf("Unknown\n");
+    mp_msg(MSGT_VO,msgl,"  type = ");
+    if(xifv->type == XvRGB) mp_msg(MSGT_VO,msgl,"RGB\n");
+    else if(xifv->type == XvYUV) mp_msg(MSGT_VO,msgl,"YUV\n");
+    else mp_msg(MSGT_VO,msgl,"Unknown\n");
 
-    printf("  byte_order = ");
-    if(xifv->byte_order == LSBFirst) printf("LSB First\n");
-    else if(xifv->type == MSBFirst) printf("MSB First\n");
-    else printf("Unknown\n");//yes Linux support other types too
+    mp_msg(MSGT_VO,msgl,"  byte_order = ");
+    if(xifv->byte_order == LSBFirst) mp_msg(MSGT_VO,msgl,"LSB First\n");
+    else if(xifv->type == MSBFirst) mp_msg(MSGT_VO,msgl,"MSB First\n");
+    else mp_msg(MSGT_VO,msgl,"Unknown\n");//yes Linux support other types too
 
-    printf("  guid = ");
+    mp_msg(MSGT_VO,msgl,"  guid = ");
     for(i=0;i<16;i++)
-        printf("%02X ",(unsigned char)xifv->guid[i]);
-    printf("\n");
+        mp_msg(MSGT_VO,msgl,"%02X ",(unsigned char)xifv->guid[i]);
+    mp_msg(MSGT_VO,msgl,"\n");
 
-    printf("  bits_per_pixel = %d\n",xifv->bits_per_pixel);
+    mp_msg(MSGT_VO,msgl,"  bits_per_pixel = %d\n",xifv->bits_per_pixel);
 
-    printf("  format = ");
-    if(xifv->format == XvPacked) printf("XvPacked\n");
-    else if(xifv->format == XvPlanar) printf("XvPlanar\n");
-    else printf("Unknown\n");
+    mp_msg(MSGT_VO,msgl,"  format = ");
+    if(xifv->format == XvPacked) mp_msg(MSGT_VO,msgl,"XvPacked\n");
+    else if(xifv->format == XvPlanar) mp_msg(MSGT_VO,msgl,"XvPlanar\n");
+    else mp_msg(MSGT_VO,msgl,"Unknown\n");
 
-    printf("  num_planes = %d\n",xifv->num_planes);
+    mp_msg(MSGT_VO,msgl,"  num_planes = %d\n",xifv->num_planes);
 
     if(xifv->type == XvRGB){
-        printf("  red_mask = %0X\n",  xifv->red_mask);
-        printf("  green_mask = %0X\n",xifv->green_mask);
-        printf("  blue_mask = %0X\n", xifv->blue_mask);
+        mp_msg(MSGT_VO,msgl,"  red_mask = %0X\n",  xifv->red_mask);
+        mp_msg(MSGT_VO,msgl,"  green_mask = %0X\n",xifv->green_mask);
+        mp_msg(MSGT_VO,msgl,"  blue_mask = %0X\n", xifv->blue_mask);
     }
     if(xifv->type == XvYUV){
-        printf("  y_sample_bits = %d\n  u_sample_bits = %d\n  v_sample_bits = %d\n",
+        mp_msg(MSGT_VO,msgl,"  y_sample_bits = %d\n  u_sample_bits = %d\n  v_sample_bits = %d\n",
                 xifv->y_sample_bits,xifv->u_sample_bits,xifv->v_sample_bits);
-        printf("  horz_y_period = %d\n  horz_u_period = %d\n  horz_v_period = %d\n",
+        mp_msg(MSGT_VO,msgl,"  horz_y_period = %d\n  horz_u_period = %d\n  horz_v_period = %d\n",
                 xifv->horz_y_period,xifv->horz_u_period,xifv->horz_v_period);
-        printf("  vert_y_period = %d\n  vert_u_period = %d\n  vert_v_period = %d\n",
+        mp_msg(MSGT_VO,msgl,"  vert_y_period = %d\n  vert_u_period = %d\n  vert_v_period = %d\n",
                 xifv->vert_y_period,xifv->vert_u_period,xifv->vert_v_period);
 
-        printf("  component_order = ");
+        mp_msg(MSGT_VO,msgl,"  component_order = ");
         for(i=0;i<32;i++)
             if(xifv->component_order[i]>=32)
-                printf("%c",xifv->component_order[i]);
-        printf("\n");
+                mp_msg(MSGT_VO,msgl,"%c",xifv->component_order[i]);
+        mp_msg(MSGT_VO,msgl,"\n");
 
-        printf("  scanline = ");
-        if(xifv->scanline_order == XvTopToBottom) printf("XvTopToBottom\n");
-        else if(xifv->scanline_order == XvBottomToTop) printf("XvBottomToTop\n");
-        else printf("Unknown\n");
+        mp_msg(MSGT_VO,msgl,"  scanline = ");
+        if(xifv->scanline_order == XvTopToBottom) mp_msg(MSGT_VO,msgl,"XvTopToBottom\n");
+        else if(xifv->scanline_order == XvBottomToTop) mp_msg(MSGT_VO,msgl,"XvBottomToTop\n");
+        else mp_msg(MSGT_VO,msgl,"Unknown\n");
     }
-    printf("\n");
+    mp_msg(MSGT_VO,msgl,"\n");
 }
 
 // WARNING This function may changes xv_port and surface_info!
@@ -329,8 +330,8 @@ static int xvmc_find_surface_by_format(int format,int width,int height,
                         mp_msg(MSGT_VO,MSGL_DBG3,"vo_xvmc: Fail to grab port %ld\n",p);
                         continue;
                     }
-                    printf("vo_xvmc: Using Xv Adaptor #%d (%s)\n", i, ai[i].name);
-                    printf("vo_xvmc: Port %ld grabed\n",p);
+                    mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: Using Xv Adaptor #%d (%s)\n", i, ai[i].name);
+                    mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: Port %ld grabed\n",p);
                     xv_port = p;
                 }
                 goto surface_found;
@@ -340,7 +341,7 @@ static int xvmc_find_surface_by_format(int format,int width,int height,
     }//for adaptors
     XvFreeAdaptorInfo(ai);
 
-    if(!query) printf("vo_xvmc: Could not find free matching surface. Sorry.\n");
+    if(!query) mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: Could not find free matching surface. Sorry.\n");
     return 0;
 
 // somebody know cleaner way to escape from 3 internal loops?
@@ -402,20 +403,20 @@ static int preinit(const char *arg){
         mp_msg(MSGT_VO,MSGL_ERR,"********** Try with  -vo x11  or  -vo sdl  ***********\n");
         return -1;
     }
-    printf("vo_xvmc: X-Video extension %d.%d\n",xv_version,xv_release);
+    mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: X-Video extension %d.%d\n",xv_version,xv_release);
 
     if( True != XvMCQueryExtension(mDisplay,&mc_eventBase,&mc_errorBase) ){
-        printf("vo_xvmc: No X-Video MotionCompensation Extension on %s\n",
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: No X-Video MotionCompensation Extension on %s\n",
                 XDisplayName(NULL));
         return -1;
     }
 
     if(Success == XvMCQueryVersion(mDisplay, &mc_ver, &mc_rev) ){
-        printf("vo_xvmc: X-Video MotionCompensation Extension version %i.%i\n",
+        mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: X-Video MotionCompensation Extension version %i.%i\n",
                 mc_ver,mc_rev);
     }
     else{
-        printf("vo_xvmc: Error querying version info!\n");
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: Error querying version info!\n");
         return -1;
     }
     surface_render = NULL;
@@ -480,13 +481,13 @@ static int config(uint32_t width, uint32_t height,
 
     rez = XvMCCreateContext(mDisplay, xv_port,mode_id,width,height,XVMC_DIRECT,&ctx);
     if( rez != Success ){
-        printf("vo_xvmc: XvMCCreateContext failed with error %d\n",rez);
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: XvMCCreateContext failed with error %d\n",rez);
         return -1;
     }
     if( ctx.flags & XVMC_DIRECT ){
-        printf("vo_xvmc: Allocated Direct Context\n");
+        mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: Allocated Direct Context\n");
     }else{
-        printf("vo_xvmc: Allocated Indirect Context!\n");
+        mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: Allocated Indirect Context!\n");
     }
 
 
@@ -501,7 +502,7 @@ static int config(uint32_t width, uint32_t height,
         XvMCDestroyContext(mDisplay,&ctx);
         return -1;
     }
-    printf("vo_xvmc: data_blocks allocated\n");
+    mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: data_blocks allocated\n");
 
     rez = XvMCCreateMacroBlocks(mDisplay,&ctx,numblocks,&mv_blocks);
     if( rez != Success ){
@@ -509,7 +510,7 @@ static int config(uint32_t width, uint32_t height,
         XvMCDestroyContext(mDisplay,&ctx);
         return -1;
     }
-    printf("vo_xvmc: mv_blocks allocated\n");
+    mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: mv_blocks allocated\n");
 
     if(surface_render==NULL)
         surface_render = malloc(MAX_SURFACES * sizeof(struct xvmc_pix_fmt)); //easy mem debug
@@ -532,20 +533,20 @@ static int config(uint32_t width, uint32_t height,
     }
     number_of_surfaces = i;
     if( number_of_surfaces < 4 ){// +2 I or P and +2 for B (to avoid visible motion drawing)
-        printf("vo_xvmc: Unable to allocate at least 4 Surfaces\n");
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: Unable to allocate at least 4 Surfaces\n");
         uninit();
         return -1;
     }
-    printf("vo_xvmc: Motion Compensation context allocated - %d surfaces\n",
+    mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: Motion Compensation context allocated - %d surfaces\n",
             number_of_surfaces);
 
     //debug
-    printf("vo_xvmc: idct=%d unsigned_intra=%d\n",
+    mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: idct=%d unsigned_intra=%d\n",
             (surface_info.mc_type & XVMC_IDCT) == XVMC_IDCT,
             (surface_info.flags & XVMC_INTRA_UNSIGNED) == XVMC_INTRA_UNSIGNED);
 
 // Find way to display OSD & subtitle
-    printf("vo_xvmc: looking for OSD support\n");
+    mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: looking for OSD support\n");
     subpicture_mode = NO_SUBPICTURE;
     if(surface_info.flags & XVMC_OVERLAID_SURFACE)
         subpicture_mode = OVERLAY_SUBPICTURE;
@@ -574,7 +575,7 @@ static int config(uint32_t width, uint32_t height,
 
                         subpicture_mode = BLEND_SUBPICTURE;
                         subpicture_info = xvfmv[s];
-                        printf("    Subpicture id 0x%08X\n",subpicture_info.id);
+                        mp_msg(MSGT_VO,MSGL_INFO,"    Subpicture id 0x%08X\n",subpicture_info.id);
                         goto found_subpic;
                     }
                 }
@@ -593,18 +594,18 @@ found_subpic:
 
     switch(subpicture_mode){
         case NO_SUBPICTURE:
-            printf("vo_xvmc: No OSD support for this mode\n");
+            mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: No OSD support for this mode\n");
             break;
         case OVERLAY_SUBPICTURE:
-            printf("vo_xvmc: OSD support via color key tricks\n");
-            printf("vo_xvmc: not yet implemented:(\n");
+            mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: OSD support via color key tricks\n");
+            mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: not yet implemented:(\n");
             break;
         case BLEND_SUBPICTURE:
-            printf("vo_xvmc: OSD support by additional frontend rendering\n");
+            mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: OSD support by additional frontend rendering\n");
             break;
         case BACKEND_SUBPICTURE:
-            printf("vo_xvmc: OSD support by backend rendering (fast)\n");
-            printf("vo_xvmc: Please send feedback to confirm that it works,otherwise send bugreport!\n");
+            mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: OSD support by backend rendering (fast)\n");
+            mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: Please send feedback to confirm that it works,otherwise send bugreport!\n");
             break;
     }
 
@@ -714,7 +715,7 @@ static void init_osd_yuv_pal(void) {
         }
         rez = XvMCSetSubpicturePalette(mDisplay, &subpicture, palette);
         if(rez!=Success){
-            printf("vo_xvmc: Setting palette failed.\n");
+            mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: Setting palette failed.\n");
         }
         free(palette);
     }
@@ -727,7 +728,7 @@ static void clear_osd_subpic(int x0, int y0, int w, int h){
                             x0, y0, w,h,
                             subpicture_clear_color);
     if(rez != Success)
-        printf("vo_xvmc: XvMCClearSubpicture failed!\n");
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: XvMCClearSubpicture failed!\n");
 }
 
 static void OSD_init(void) {
@@ -764,23 +765,23 @@ static void OSD_init(void) {
                                 osd_width,osd_height,subpicture_info.id);
     if(rez != Success){
         subpicture_mode = NO_SUBPICTURE;
-        printf("vo_xvmc: Create Subpicture failed, OSD disabled\n");
+        mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: Create Subpicture failed, OSD disabled\n");
         return;
     }
     if( mp_msg_test(MSGT_VO,MSGL_DBG4) ){
         int i;
-        printf("vo_xvmc: Created Subpicture:\n");
-        printf("         xvimage_id=0x%X\n",subpicture.xvimage_id);
-        printf("         width=%d\n",subpicture.width);
-        printf("         height=%d\n",subpicture.height);
-        printf("         num_palette_entries=0x%X\n",subpicture.num_palette_entries);
-        printf("         entry_bytes=0x%X\n",subpicture.entry_bytes);
+        mp_msg(MSGT_VO,MSGL_DBG4,"vo_xvmc: Created Subpicture:\n");
+        mp_msg(MSGT_VO,MSGL_DBG4,"         xvimage_id=0x%X\n",subpicture.xvimage_id);
+        mp_msg(MSGT_VO,MSGL_DBG4,"         width=%d\n",subpicture.width);
+        mp_msg(MSGT_VO,MSGL_DBG4,"         height=%d\n",subpicture.height);
+        mp_msg(MSGT_VO,MSGL_DBG4,"         num_palette_entries=0x%X\n",subpicture.num_palette_entries);
+        mp_msg(MSGT_VO,MSGL_DBG4,"         entry_bytes=0x%X\n",subpicture.entry_bytes);
 
-        printf("         component_order=\"");
+        mp_msg(MSGT_VO,MSGL_DBG4,"         component_order=\"");
         for(i=0; i<4; i++)
             if(subpicture.component_order[i] >= 32)
-                printf("%c", subpicture.component_order[i]);
-        printf("\"\n");
+                mp_msg(MSGT_VO,MSGL_DBG4,"%c", subpicture.component_order[i]);
+        mp_msg(MSGT_VO,MSGL_DBG4,"\"\n");
     }
 
     //call init for the surface type
@@ -806,7 +807,7 @@ static void draw_osd_IA44(int x0,int y0, int w,int h, unsigned char* src, unsign
     rez = XvMCCompositeSubpicture(mDisplay, &subpicture, xvimage, 0, 0,
                                     w,h,x0,y0);
     if(rez != Success){
-        printf("vo_xvmc: composite subpicture failed\n");
+        mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: composite subpicture failed\n");
         assert(0);
     }
 }
@@ -825,7 +826,7 @@ static void draw_osd_AI44(int x0,int y0, int w,int h, unsigned char* src, unsign
     rez = XvMCCompositeSubpicture(mDisplay, &subpicture, xvimage, 0, 0,
                                     w,h,x0,y0);
     if(rez != Success){
-        printf("vo_xvmc: composite subpicture failed\n");
+        mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: composite subpicture failed\n");
         assert(0);
     }
 }
@@ -872,7 +873,7 @@ static void draw_osd(void){
                         0, 0, subpicture.width, subpicture.height,
                         0, 0, image_width, image_height);
             if(rez!=Success){
-                printf("vo_xvmc: BlendSubpicture failed rez=%d\n",rez);
+                mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: BlendSubpicture failed rez=%d\n",rez);
                 assert(0);
                 return;
             }
@@ -949,7 +950,7 @@ static void put_xvmc_image(struct xvmc_pix_fmt *p_render_surface,
                             dst_rect.left, dst_rect.top, dst_rect.width, dst_rect.height,
                             bob_deinterlace ? field : 3);
         if(rez != Success){
-            printf("vo_xvmc: PutSurface failer, critical error %d!\n",rez);
+            mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: PutSurface failer, critical error %d!\n",rez);
             assert(0);
         }
     }
@@ -1039,7 +1040,7 @@ static void xvmc_free(void){
 
             if( (surface_render[i].state != 0) &&
                 (p_render_surface_visible != &surface_render[i]) )
-                printf("vo_xvmc::uninit surface_render[%d].status=%d\n",i,
+                mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc::uninit surface_render[%d].status=%d\n",i,
                         surface_render[i].state);
         }
 
@@ -1115,25 +1116,25 @@ static int draw_slice(uint8_t *image[], int stride[],
     if(rez != Success)
     {
     int i;
-        printf("vo_xvmc::slice: RenderSirface returned %d\n",rez);
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc::slice: RenderSirface returned %d\n",rez);
 
-        printf("vo_xvmc::slice: pict=%d,flags=%x,start_blocks=%d,num_blocks=%d\n",
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc::slice: pict=%d,flags=%x,start_blocks=%d,num_blocks=%d\n",
                 rndr->picture_structure,rndr->flags,rndr->start_mv_blocks_num,
                 rndr->filled_mv_blocks_num);
-        printf("vo_xvmc::slice: this_surf=%p, past_surf=%p, future_surf=%p\n",
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc::slice: this_surf=%p, past_surf=%p, future_surf=%p\n",
                 rndr->p_surface,rndr->p_past_surface,rndr->p_future_surface);
 
         for(i=0; i<rndr->filled_mv_blocks_num; i++){
             XvMCMacroBlock* testblock;
             testblock = &mv_blocks.macro_blocks[i];
 
-            printf("vo_xvmc::slice: mv_block - x=%d,y=%d,mb_type=0x%x,mv_type=0x%x,mv_field_select=%d\n",
+            mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc::slice: mv_block - x=%d,y=%d,mb_type=0x%x,mv_type=0x%x,mv_field_select=%d\n",
                     testblock->x,testblock->y,testblock->macroblock_type,
                     testblock->motion_type,testblock->motion_vertical_field_select);
-            printf("vo_xvmc::slice: dct_type=%d,data_index=0x%x,cbp=%d,pad0=%d\n",
+            mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc::slice: dct_type=%d,data_index=0x%x,cbp=%d,pad0=%d\n",
                     testblock->dct_type,testblock->index,testblock->coded_block_pattern,
                     testblock->pad0);
-            printf("vo_xvmc::slice: PMV[0][0][0/1]=(%d,%d)\n",
+            mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc::slice: PMV[0][0][0/1]=(%d,%d)\n",
                     testblock->PMV[0][0][0],testblock->PMV[0][0][1]);
         }
     }
@@ -1199,7 +1200,7 @@ static struct xvmc_pix_fmt *find_free_surface(void) {
     //all surfaces are busy, but there is one that will be free
     //on next monitor retrace, we just have to wait
     if(visible_rndr != NULL){
-        printf("vo_xvmc: waiting retrace\n");
+        mp_msg(MSGT_VO,MSGL_INFO,"vo_xvmc: waiting retrace\n");
         for(t=0;t<1000;t++){
             usec_sleep(1000);//1ms
             XvMCGetSurfaceStatus(mDisplay, visible_rndr->p_surface,&stat);
@@ -1208,9 +1209,9 @@ static struct xvmc_pix_fmt *find_free_surface(void) {
         }
     }
 //todo remove when stable
-    printf("vo_xvmc: no free surfaces, this should not happen in g1\n");
+    mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: no free surfaces, this should not happen in g1\n");
     for(i=0;i<number_of_surfaces;i++)
-        printf("vo_xvmc: surface[%d].state=%d\n",i,surface_render[i].state);
+        mp_msg(MSGT_VO,MSGL_WARN,"vo_xvmc: surface[%d].state=%d\n",i,surface_render[i].state);
     return NULL;
 }
 
@@ -1237,7 +1238,7 @@ static uint32_t get_image(mp_image_t *mpi){
     rndr = find_free_surface();
 
     if(rndr == NULL){
-        printf("vo_xvmc: get_image failed\n");
+        mp_msg(MSGT_VO,MSGL_ERR,"vo_xvmc: get_image failed\n");
         return VO_FALSE;
     }
 
