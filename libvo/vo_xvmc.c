@@ -639,7 +639,7 @@ skip_surface_allocation:
       {
          vo_vm_switch();
       }
-      else
+//      else
 #endif
    XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
    depth=attribs.depth;
