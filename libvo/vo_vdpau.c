@@ -42,6 +42,7 @@
 #include "x11_common.h"
 #include "aspect.h"
 #include "sub.h"
+#include "subopt-helper.h"
 
 #include "libavcodec/vdpau.h"
 
@@ -111,6 +112,8 @@ static VdpOutputSurfaceDestroy           *vdp_output_surface_destroy;
 static VdpVideoMixerCreate               *vdp_video_mixer_create;
 static VdpVideoMixerDestroy              *vdp_video_mixer_destroy;
 static VdpVideoMixerRender               *vdp_video_mixer_render;
+static VdpVideoMixerSetFeatureEnables    *vdp_video_mixer_set_feature_enables;
+static VdpVideoMixerSetAttributeValues   *vdp_video_mixer_set_attribute_values;
 
 static VdpPresentationQueueTargetDestroy *vdp_presentation_queue_target_destroy;
 static VdpPresentationQueueCreate        *vdp_presentation_queue_create;
@@ -132,6 +135,10 @@ static VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES];
 static int                                output_surface_width, output_surface_height;
 
 static VdpVideoMixer                      video_mixer;
+static int                                deint;
+static int                                pullup;
+static float                              denoise;
+static float                              sharpen;
 
 static VdpDecoder                         decoder;
 static int                                decoder_max_refs;
@@ -254,6 +261,10 @@ static int win_x11_init_vdpau_procs(void)
         {VDP_FUNC_ID_VIDEO_MIXER_CREATE, &vdp_video_mixer_create},
         {VDP_FUNC_ID_VIDEO_MIXER_DESTROY,       &vdp_video_mixer_destroy},
         {VDP_FUNC_ID_VIDEO_MIXER_RENDER,        &vdp_video_mixer_render},
+        {VDP_FUNC_ID_VIDEO_MIXER_SET_FEATURE_ENABLES,
+                        &vdp_video_mixer_set_feature_enables},
+        {VDP_FUNC_ID_VIDEO_MIXER_SET_ATTRIBUTE_VALUES,
+                        &vdp_video_mixer_set_attribute_values},
         {VDP_FUNC_ID_PRESENTATION_QUEUE_TARGET_DESTROY,
                         &vdp_presentation_queue_target_destroy},
         {VDP_FUNC_ID_PRESENTATION_QUEUE_CREATE, &vdp_presentation_queue_create},
@@ -310,7 +321,16 @@ static int win_x11_init_vdpau_flip_queue(void)
 
 static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
 #define VDP_NUM_MIXER_PARAMETER 3
+#define MAX_NUM_FEATURES 5
+    int i;
     VdpStatus vdp_st;
+    int feature_count = 0;
+    VdpVideoMixerFeature features[MAX_NUM_FEATURES];
+    VdpBool feature_enables[MAX_NUM_FEATURES];
+    static const denoise_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL};
+    const void * const denoise_value[] = {&denoise};
+    static const sharpen_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL};
+    const void * const sharpen_value[] = {&sharpen};
     static const VdpVideoMixerParameter parameters[VDP_NUM_MIXER_PARAMETER] = {
         VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH,
         VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_HEIGHT,
@@ -321,12 +341,30 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
         &vid_height,
         &vdp_chroma_type
     };
+    if (deint == 1)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
+    if (deint == 2)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL;
+    if (pullup)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_INVERSE_TELECINE;
+    if (denoise)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_NOISE_REDUCTION;
+    if (sharpen)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_SHARPNESS;
 
-    vdp_st = vdp_video_mixer_create(vdp_device, 0, 0,
+    vdp_st = vdp_video_mixer_create(vdp_device, feature_count, features,
                                     VDP_NUM_MIXER_PARAMETER,
                                     parameters, parameter_values,
                                     &video_mixer);
     CHECK_ST_ERROR("Error when calling vdp_video_mixer_create")
+
+    for (i = 0; i < feature_count; i++) feature_enables[i] = VDP_TRUE;
+    if (feature_count)
+        vdp_video_mixer_set_feature_enables(video_mixer, feature_count, features, feature_enables);
+    if (denoise)
+        vdp_video_mixer_set_attribute_values(video_mixer, 1, denoise_attrib, denoise_value);
+    if (sharpen)
+        vdp_video_mixer_set_attribute_values(video_mixer, 1, sharpen_attrib, sharpen_value);
 
     return 0;
 }
@@ -711,15 +749,43 @@ static void uninit(void)
     dlclose(vdpau_lib_handle);
 }
 
+static opt_t subopts[] = {
+    {"deint",   OPT_ARG_INT,   &deint,   (opt_test_f)int_non_neg},
+    {"pullup",  OPT_ARG_BOOL,  &pullup,  NULL},
+    {"denoise", OPT_ARG_FLOAT, &denoise, NULL},
+    {"sharpen", OPT_ARG_FLOAT, &sharpen, NULL},
+    {NULL}
+};
+
+static const char help_msg[] =
+    "\n-vo vdpau command line help:\n"
+    "Example: mplayer -vo vdpau:deint=2\n"
+    "\nOptions:\n"
+    "  deint\n"
+    "    0: no deinterlacing\n"
+    "    1: temporal deinterlacing\n"
+    "    2: temporal-spatial deinterlacing\n"
+    "  pullup\n"
+    "    Try to apply inverse-telecine\n"
+    "  denoise\n"
+    "    Apply denoising, argument is strength from 0.0 to 1.0\n"
+    "  sharpen\n"
+    "    Apply sharpening or softening, argument is strength from -1.0 to 1.0\n"
+    ;
+
 static int preinit(const char *arg)
 {
     int i;
     static const char *vdpaulibrary = "libvdpau.so.1";
     static const char *vdpau_device_create = "vdp_device_create_x11";
 
-    if (arg) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown subdevice: %s\n", arg);
-        return ENOSYS;
+    deint = 0;
+    pullup = 0;
+    denoise = 0;
+    sharpen = 0;
+    if (subopt_parse(arg, subopts) != 0) {
+        mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
+        return -1;
     }
 
     vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
