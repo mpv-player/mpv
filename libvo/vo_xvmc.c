@@ -225,7 +225,8 @@ return -1;//fail
 
 //print all info needed to add new format
 static void print_xvimage_format_values(XvImageFormatValues *xifv){
-int i;
+    int i;
+
     printf("Format_ID = 0x%X\n",xifv->id);
 
     printf("  type = ");
@@ -282,12 +283,12 @@ int i;
 // WARNING This function may changes xv_port and surface_info!
 static int xvmc_find_surface_by_format(int format,int width,int height,
                                         XvMCSurfaceInfo * surf_info,int query){
-int rez;
-XvAdaptorInfo * ai;
-int num_adaptors,i;
-unsigned long p;
-int s,mc_surf_num;
-XvMCSurfaceInfo * mc_surf_list;
+    int rez;
+    XvAdaptorInfo * ai;
+    int num_adaptors,i;
+    unsigned long p;
+    int s,mc_surf_num;
+    XvMCSurfaceInfo * mc_surf_list;
 
     rez = XvQueryAdaptors(mDisplay,DefaultRootWindow(mDisplay),&num_adaptors,&ai);
     if( rez != Success ) return -1;
@@ -379,13 +380,13 @@ static uint32_t xvmc_draw_image(mp_image_t *mpi){
 }
 
 static int preinit(const char *arg){
-int xv_version,xv_release,xv_request_base,xv_event_base,xv_error_base;
-int mc_eventBase,mc_errorBase;
-int mc_ver,mc_rev;
-strarg_t ck_src_arg = { 0, NULL };
-strarg_t ck_method_arg = { 0, NULL };
-opt_t subopts [] =
-{
+    int xv_version,xv_release,xv_request_base,xv_event_base,xv_error_base;
+    int mc_eventBase,mc_errorBase;
+    int mc_ver,mc_rev;
+    strarg_t ck_src_arg = { 0, NULL };
+    strarg_t ck_method_arg = { 0, NULL };
+    opt_t subopts [] =
+    {
         /* name         arg type      arg var           test */
         {  "port",      OPT_ARG_INT,  &xv_port_request, (opt_test_f)int_pos },
         {  "adaptor",   OPT_ARG_INT,  &xv_adaptor,      (opt_test_f)int_non_neg },
@@ -396,7 +397,7 @@ opt_t subopts [] =
         {  "queue",     OPT_ARG_BOOL, &use_queue,       NULL },
         {  "bobdeint",  OPT_ARG_BOOL, &bob_deinterlace, NULL },
         {  NULL }
-};
+    };
 
     //Obtain display handler
     if (!vo_init()) return -1;//vo_xv
@@ -448,17 +449,17 @@ opt_t subopts [] =
 static int config(uint32_t width, uint32_t height,
                        uint32_t d_width, uint32_t d_height,
                        uint32_t flags, char *title, uint32_t format){
-int i,mode_id,rez;
-int numblocks,blocks_per_macroblock;//bpmb we have 6,8,12
+    int i,mode_id,rez;
+    int numblocks,blocks_per_macroblock;//bpmb we have 6,8,12
 
 //from vo_xv
-XVisualInfo vinfo;
-XSetWindowAttributes xswa;
-XWindowAttributes attribs;
-unsigned long xswamask;
-int depth;
+    XVisualInfo vinfo;
+    XSetWindowAttributes xswa;
+    XWindowAttributes attribs;
+    unsigned long xswamask;
+    int depth;
 #ifdef CONFIG_XF86VM
-int vm = flags & VOFLAG_MODESWITCHING;
+    int vm = flags & VOFLAG_MODESWITCHING;
 #endif
 //end of vo_xv
 
@@ -727,7 +728,8 @@ static void init_osd_yuv_pal(void) {
 }
 
 static void clear_osd_subpic(int x0, int y0, int w, int h){
-int rez;
+    int rez;
+
     rez=XvMCClearSubpicture(mDisplay, &subpicture,
                             x0, y0, w,h,
                             subpicture_clear_color);
@@ -736,8 +738,8 @@ int rez;
 }
 
 static void OSD_init(void) {
-unsigned short osd_height, osd_width;
-int rez;
+    unsigned short osd_height, osd_width;
+    int rez;
 
     if(subpicture_alloc){
         if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
@@ -801,8 +803,8 @@ int rez;
 }
 
 static void draw_osd_IA44(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-int ox,oy;
-int rez;
+    int ox,oy;
+    int rez;
 
     if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
         printf("vo_xvmc:composite AI44 subpicture (%d,%d - %d,%d)\n",x0,y0,w,h);
@@ -821,8 +823,9 @@ int rez;
 }
 
 static void draw_osd_AI44(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-int ox,oy;
-int rez;
+    int ox,oy;
+    int rez;
+
     if(  mp_msg_test(MSGT_VO,MSGL_DBG4) )
         printf("vo_xvmc:composite AI44 subpicture (%d,%d - %d,%d)\n",x0,y0,w,h);
 
@@ -840,10 +843,10 @@ int rez;
 }
 
 static void draw_osd(void){
-struct xvmc_pix_fmt *osd_rndr;
-int osd_has_changed;
-int have_osd_to_draw;
-int rez;
+    struct xvmc_pix_fmt *osd_rndr;
+    int osd_has_changed;
+    int have_osd_to_draw;
+    int rez;
 
     if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
         printf("vo_xvmc: draw_osd ,OSD_mode=%d, surface_to_show=%p\n",
@@ -915,7 +918,8 @@ int rez;
 }
 
 static void xvmc_sync_surface(XvMCSurface * srf){
-int status,rez;
+    int status,rez;
+
     rez = XvMCGetSurfaceStatus(mDisplay,srf,&status);
     assert(rez==Success);
     if((status & XVMC_RENDERING) == 0)
@@ -936,9 +940,9 @@ int status,rez;
 
 static void put_xvmc_image(struct xvmc_pix_fmt *p_render_surface,
                            int draw_ck){
-int rez;
-struct vo_rect src_rect, dst_rect;
-int i;
+    int rez;
+    struct vo_rect src_rect, dst_rect;
+    int i;
 
     if(p_render_surface == NULL)
         return;
@@ -967,8 +971,7 @@ int i;
 }
 
 static void flip_page(void){
-int i,cfs;
-
+    int i,cfs;
 
     if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
         printf("vo_xvmc: flip_page  show(rndr=%p)\n\n",p_render_surface_to_show);
@@ -1015,7 +1018,8 @@ int i,cfs;
 }
 
 static void check_events(void){
-int e=vo_x11_check_events(mDisplay);
+    int e=vo_x11_check_events(mDisplay);
+
     if(e&VO_EVENT_RESIZE)
     {
         e |= VO_EVENT_EXPOSE;
@@ -1027,7 +1031,8 @@ int e=vo_x11_check_events(mDisplay);
 }
 
 static void xvmc_free(void){
-int i;
+    int i;
+
     if( subpicture_alloc ){
 
         XvMCDestroySubpicture(mDisplay,&subpicture);
@@ -1086,9 +1091,9 @@ static void uninit(void){
 }
 
 static int query_format(uint32_t format){
-uint32_t flags;
-XvMCSurfaceInfo qsurface_info;
-int mode_id;
+    uint32_t flags;
+    XvMCSurfaceInfo qsurface_info;
+    int mode_id;
 
     if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
         printf("vo_xvmc: query_format=%X\n",format);
@@ -1111,8 +1116,8 @@ int mode_id;
 
 static int draw_slice(uint8_t *image[], int stride[],
                            int w, int h, int x, int y){
-struct xvmc_pix_fmt *rndr;
-int rez;
+    struct xvmc_pix_fmt *rndr;
+    int rez;
 
     if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
         printf("vo_xvmc: draw_slice y=%d\n",y);
@@ -1172,8 +1177,9 @@ int rez;
 //XvMCHide hides the surface on next retrace, so
 //check if the surface is not still displaying
 static void check_osd_source(struct xvmc_pix_fmt *src_rndr) {
-struct xvmc_pix_fmt *osd_rndr;
-int stat;
+    struct xvmc_pix_fmt *osd_rndr;
+    int stat;
+
     //If this is source surface, check does the OSD rendering is compleate
     if(src_rndr->state & AV_XVMC_STATE_OSD_SOURCE){
         if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
@@ -1185,7 +1191,8 @@ int stat;
     }
 }
 static int count_free_surfaces(void) {
-int i,num;
+    int i,num;
+
     num=0;
     for(i=0; i<number_of_surfaces; i++){
         check_osd_source(&surface_render[i]);
@@ -1196,9 +1203,9 @@ int i,num;
 }
 
 static struct xvmc_pix_fmt *find_free_surface(void) {
-int i,t;
-int stat;
-struct xvmc_pix_fmt *visible_rndr;
+    int i,t;
+    int stat;
+    struct xvmc_pix_fmt *visible_rndr;
 
     visible_rndr = NULL;
     for(i=0; i<number_of_surfaces; i++){
@@ -1231,7 +1238,7 @@ struct xvmc_pix_fmt *visible_rndr;
 }
 
 static void xvmc_clean_surfaces(void){
-int i;
+    int i;
 
     for(i=0; i<number_of_surfaces; i++){
 
@@ -1354,5 +1361,5 @@ static int control(uint32_t request, void *data, ... )
             update_xinerama_info();
             return VO_TRUE;
     }
-return VO_NOTIMPL;
+    return VO_NOTIMPL;
 }
