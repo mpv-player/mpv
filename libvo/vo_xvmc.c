@@ -42,6 +42,7 @@
 #include <X11/extensions/XvMClib.h>
 
 #include "x11_common.h"
+#include "libavcodec/avcodec.h"
 #include "libavcodec/xvmc.h"
 
 #include "sub.h"
@@ -61,7 +62,6 @@
 
 #define UNUSED(x) ((void)(x))
 
-#include "libavcodec/avcodec.h"
 #if LIBAVCODEC_BUILD < ((51<<16)+(40<<8)+2)
 #error You need at least libavcodecs v51.40.2
 #endif
