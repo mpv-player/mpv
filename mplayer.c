@@ -2527,7 +2527,6 @@ int gui_no_filename=0;
   // Preparse the command line
   m_config_preparse_command_line(mconfig,argc,argv);
 
-  print_version("MPlayer");
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
   set_path_env();
 #endif
@@ -2574,6 +2573,8 @@ int gui_no_filename=0;
     }
     }
 	
+  print_version("MPlayer");
+
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_GUI)
     void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
     if(runningmplayer && filename && use_gui){
