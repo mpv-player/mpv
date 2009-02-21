@@ -159,7 +159,7 @@ ppc() {
 
 alpha() {
   case "$host_arch" in
-    alpha) return 0;;
+    alpha*) return 0;;
     *) return 1;;
   esac
 }
@@ -2183,7 +2183,7 @@ EOF
 
     ;;
 
-  alpha)
+  alpha*)
     _arch='ALPHA'
     _target_arch='ARCH_ALPHA = yes'
     iproc='alpha'
