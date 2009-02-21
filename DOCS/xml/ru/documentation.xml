@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r25566 -->
+<!-- synced with r28266 -->
 
 <bookinfo id="toc">
-<title><application>MPlayer</application> - The Movie Player</title>
+<title><application>MPlayer</application> - Медиа Проигрыватель</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
-<date>March 24, 2003</date>
+<date>24 Марта, 2003</date>
 <copyright>
   <year>2000</year>
   <year>2001</year>
@@ -16,7 +16,7 @@
   <year>2007</year>
   <year>2008</year>
   <year>2009</year>	
-  <holder>команда MPlayer[MPlayer team]</holder>
+  <holder>MPlayer team</holder>
 </copyright>
 <legalnotice>
   <title>License</title>
@@ -41,19 +41,17 @@
 <title>Как читать эту документацию</title>
 
 <para>
-Если Вы инсталлируете программу в первый раз, прочитайте все от начала до конца 
-в секции "Установка", и просматривайте ссылки, которые Вы обнаружите. 
+Если Вы инсталлируете программу в первый раз, прочитайте все от начала до конца
+секции "Установка", и просматривайте ссылки, которые Вы обнаружите.
 Если у Вас все ещё остались
-вопросы, вернитесь к <link linkend="toc">Оглавлению</link> и поищите там, 
+вопросы, вернитесь к <link linkend="toc">Оглавлению</link> и поищите там,
 прочтите <xref linkend="faq"/>, или попытайтесь про'grep'пить файлы.
 На большую часть вопросов Вы найдёте ответы здесь, а остальные, наверное, уже
-спрашивались в наших 
-<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">рассылках</ulink>. 
-<!-- FIXME: This refers to nonexistent links
+спрашивались в наших
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">рассылках</ulink>.
 Проверьте
-<ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">по архивам</ulink>, в
+<ulink url="https://lists.mplayerhq.hu/mailman/listinfo">по архивам</ulink>, в
 которых можно найти много ценной информации.
--->
 </para>
 </preface>
 
@@ -62,109 +60,106 @@
 <title>Введение</title>
 
 <para>
-<application>MPlayer</application> - это проигрыватель фильмов для LINUX'а
-(работает на многих других UNIX'ах и <emphasis role="bold">не-x86</emphasis>
+<application>MPlayer</application> &mdash; это проигрыватель фильмов для LINUX'а
+(работает на многих других UNIX'ах и не-x86
 CPU, см. <xref linkend="ports"/>). Он проигрывает большинство MPEG, VOB, AVI,
-OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM,
-RoQ, PVA, Matroska файлов, опираясь на множество "родных", XAnim'овских, RealPlayer'овских, и
-Win32 DLL кодеков. Вы также можете смотреть <emphasis role="bold">VideoCD, SVCD,
-DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>, и
-<emphasis role="bold">DivX</emphasis> фильмы. Другой важной особенностью
+Ogg/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM,
+RoQ, PVA, Matroska файлов, опираясь на множество "родных", XAnim'овских,
+RealPlayer'овских и Win32 DLL кодеков. Вы также можете смотреть VideoCD, SVCD,
+DVD, 3ivx, RealMedia, Sorenson, Theora, и MPEG-4 (DivX) фильмы.
+Другой важной особенностью
 <application>MPlayer</application>'а является широкий спектр поддерживаемых
 устройств вывода. Он работает с X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, и кроме того Вы можете
 использовать GGI and SDL (и таким образом все их драйверы) и также несколько
-низкоуровневых драйверов для конкретных карт (для Matrox, 3Dfx and Radeon,
+низкоуровневых драйверов для конкретных карт (для Matrox, 3Dfx и Radeon,
 Mach64, Permedia3)! Большинство из них поддерживают программное или аппаратное
 масштабирование, поэтому Вы можете насладиться просмотром фильма на полном
 экране.<application>MPlayer</application> поддерживает некоторые аппаратные
 MPEG декодеры, такие как <link linkend="dvb">DVB</link> и
 <link linkend="dxr3">DXR3/Hollywood+</link>. А как насчёт славных больших
-сглаженных затенённых субтитров (<emphasis role="bold">14 поддерживаемых
-типов</emphasis>) с Европейскими/ISO 8859-1,2 (венгерский, английский, чешский,
-и т. п.), кириллическими, корейскими шрифтами, и вывода информации на экран
+сглаженных затенённых субтитров (14 поддерживаемых
+типов) с Европейскими/ISO 8859-1,2 (венгерский, английский, чешский,
+и т.п.), кириллическими, корейскими шрифтами и вывода информации на экран
 [On Screen Display (OSD)]?
 </para>
 
 <para>
 Плеер без проблем проигрывает повреждённые MPEG файлы (полезно для некоторых VCD),
-плохие AVI файлы, которые не проигрываются известным 
-windows media player. Даже AVI файлы без индекса являются проигрываемыми.
-Вы можете временно сделать индекс с помощью ключа <option>-idx</option>, или
+плохие AVI файлы, которые не проигрываются известным
+<application>Windows Media Player</application>.
+Даже AVI файлы без индекса являются проигрываемыми.
+Вы можете временно сделать индекс с помощью ключа <option>-idx</option> или
 перманентно с помощью <application>MEncoder</application>'а,
 таким образом получив возможность перемещаться
-по фильму! Как видите стабильность и качество - наиболее важные вещи,
-но скорость также изумительна. Кроме того у него мощная
-система плагинов для манипуляции видео.
+по фильму! Как видите стабильность и качество &mdash; наиболее важные вещи,
+но скорость также изумительна. Кроме того имеется мощная
+система фильтров для манипуляции с видео и аудио.
 </para>
 
 <para>
 <application>MEncoder</application> (Кодировщик фильмов <application>MPlayer
-</application>'a [<application>MPlayer</application>'s Movie Encoder]) - это простой
+</application>'a) &mdash; это простой
 кодировщик фильмов предназначенный для кодирования фильмов, проигрываемых MPlayer'ом
-(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>) в другие
+AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA в другие
 проигрываемые <application>MPlayer</application>'ом форматы (см. ниже).
 Он может кодировать такими разными кодеками, как
-<emphasis role="bold">MPEG-4 (DivX4)</emphasis> (1 или 2 прохода),
+MPEG-4 (DivX4) (1 или 2 прохода),
 <systemitem class="library">libavcodec</systemitem>,
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> звук. 
+PCM/MP3/VBR MP3 звук.
 </para>
 
 <itemizedlist>
 <title>Возможности <application>MEncoder</application>'а</title>
 <listitem><para>
-  кодирование из широкого спектра форматов файлов и декодеров
+  Кодирование из широкого спектра форматов файлов и декодеров
   <application>MPlayer'а</application>
 </para></listitem>
 <listitem><para>
-  кодирование во все кодеки FFmpeg'овской библиотеки
+  Кодирование во все кодеки FFmpeg'овской библиотеки
   <systemitem class="library">libavcodec</systemitem>
 </para></listitem>
 <listitem><para>
-  кодирование видео с <emphasis role="bold">V4L совместимых TV тюнеров
-  </emphasis>
+  Кодирование видео с V4L совместимых TV тюнеров
 </para></listitem>
 <listitem><para>
-  кодирование/мультиплексирование в "слоёные"[interleaved] AVI файлы
+  Кодирование/мультиплексирование в "слоёные"[interleaved] AVI файлы
   с соответствующим индексом
 </para></listitem>
 <listitem><para>
-  создание файлов с аудио потоком из внешнего файла
+  Создание файлов с аудио потоком из внешнего файла
 </para></listitem>
 <listitem><para>
-  кодирование в 1, 2 или 3 прохода
+  Кодирование в 1, 2 или 3 прохода
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">VBR</emphasis> MP3 аудио
-  <important><para>
-  VBR MP3 аудио не всегда хорошо проигрывается плеерами Windows!
-  </para></important>
 </para></listitem>
 <listitem><para>
   PCM аудио
 </para></listitem>
 <listitem><para>
-  копирование потоков
+  Копирование потоков
 </para></listitem>
 <listitem><para>
-  входная A/V синхронизация (основана на PTS, может быть отключена с помощью
+  Входная A/V синхронизация (основана на PTS, может быть отключена с помощью
   ключа <option>-mc 0</option> )
 </para></listitem>
 <listitem><para>
-  коррекция FPS[кадров/сек] ключом <option>-ofps</option> (полезно при кодировании
-  29.97fps VOB в 24fps AVI)
+  Коррекция FPS[кадров/сек] ключом <option>-ofps</option> (полезно при кодировании
+  30000/1001 fps VOB в 24000/1001 fps AVI)
 </para></listitem>
 <listitem><para>
-  использование нашей очень мощной системы плагинов (обрезание[crop],
+  Использование нашей очень мощной системы плагинов (обрезание[crop],
   расширение[expand], отражение[flip], пост-обработка[postprocess],
-  поворот[rotate], масштабирование[scale], rgb/yuv преобразования)
+  поворот[rotate], масштабирование[scale], RGB/YUV преобразования)
 </para></listitem>
 <listitem><para>
-  может кодировать DVD/VOBsub <emphasis role="bold">И</emphasis> текстовые субтитры 
+  Может кодировать DVD/VOBsub и текстовые субтитры
   в один выходной файл
 </para></listitem>
 <listitem><para>
-  может извлекать DVD субтитры в VOBsub формат
+  Может извлекать DVD субтитры в VOBsub формат
 </para></listitem>
 
 </itemizedlist>
