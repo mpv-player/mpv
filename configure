@@ -2398,6 +2398,7 @@ elif test -z "$CFLAGS" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
     CFLAGS="-Wall -Wno-switch -Wpointer-arith -Wredundant-decls -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+    _ld_extra="$_ld_extra -ffast-math"
   fi
 else
   _warn_CFLAGS=yes
