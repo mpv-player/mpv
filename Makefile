@@ -68,6 +68,7 @@ SRCS_COMMON = asxparser.c \
               libaf/af_resample.c \
               libaf/af_scaletempo.c \
               libaf/af_sinesuppress.c \
+              libaf/af_stats.c \
               libaf/af_sub.c \
               libaf/af_surround.c \
               libaf/af_sweep.c \

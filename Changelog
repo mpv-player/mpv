@@ -62,6 +62,7 @@ MPlayer (1.0)
     * change vf_screenshot dependency from libpng to lavc
     * add af_scaletempo which maintains audio pitch when changing playback speed
     * fix multi-channel reordering
+    * af_stats, filter to print information about the audio stream
 
     Streaming:
     * tv:// support for Windows
