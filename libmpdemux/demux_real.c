@@ -624,7 +624,15 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
     if (len < 12){
 	mp_msg(MSGT_DEMUX, MSGL_V,"%08X: packet v%d len=%d  \n",(int)demuxer->filepos,(int)version,(int)len);
 	mp_msg(MSGT_DEMUX, MSGL_WARN,"bad packet len (%d)\n", len);
-	stream_skip(demuxer->stream, len);
+	if ((unsigned)demuxer->video->id < MAX_STREAMS) {
+	    if (priv->current_vpacket + 1 < priv->index_table_size[demuxer->video->id]) {
+		stream_seek(demuxer->stream, priv->index_table[demuxer->video->id][++priv->current_vpacket].offset);
+	    }
+	} else if ((unsigned)demuxer->audio->id < MAX_STREAMS) {
+	    if (priv->current_apacket + 1 < priv->index_table_size[demuxer->audio->id]) {
+		stream_seek(demuxer->stream, priv->index_table[demuxer->audio->id][++priv->current_apacket].offset);
+	    }
+	}
 	continue; //goto loop;
     }
 

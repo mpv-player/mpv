@@ -6,6 +6,14 @@ Note: before start on this, read colorspaces.txt !
 The constants for different pixelformats are defined in img_format.h,
 their usage is mandatory.
 
+WARNING: Please keep in mind that some of this information may be out-dated,
+so if you are working on a new vo, consider submitting preliminary patches
+very early on. Currently vo_gl is one of the more up-to-date VOs to use
+as reference if you are unsure about something and do not want to ask on the
+list.
+vo_vdpau and vo_direct3d may be a good choice, too, they use different
+approaches closer to the sometimes convoluted way DirectX works.
+
 Each vo driver _has_ to implement these:
 
     preinit():
@@ -15,7 +23,9 @@ Each vo driver _has_ to implement these:
       Uninit the whole system, this is on the same "level" as preinit.
 
     control():
-      Current controls:
+      Current controls (VOCTRL_QUERY_FORMAT must be implemented,
+      VOCTRL_DRAW_IMAGE, VOCTRL_FULLSCREEN, VOCTRL_UPDATE_SCREENINFO
+      should be implemented):
 	 VOCTRL_QUERY_FORMAT  -  queries if a given pixelformat is supported.
 	        It also returns various flags decsirbing the capabilities
 		of the driver with teh given mode. for the flags, see
@@ -64,7 +74,37 @@ Each vo driver _has_ to implement these:
 		by drivers which use X11, except SDL, as well as directx and
 		gl2 under Windows.
 	 VOCTRL_BORDER
-		Makes the player window borderless.  Only supported by directx.
+		Makes the player window borderless.
+	 VOCTRL_FULLSCREEN
+		Switch from and to fullscreen mode
+	 VOCTRL_GET_PANSCAN
+	 VOCTRL_SET_PANSCAN
+                Needed to implement pan-scan support ('w' and 'e' keys during
+		playback in fullscreen mode)
+	 VOCTRL_START_SLICE
+	 	Called before the first draw_slice of each frame, useful if
+		you need to do some set-up work.
+	 VOCTRL_DRAW_EOSD
+		Required for EOSD (ASS subtitle) support. Provides all
+		information necessary to draw the EOSD for the current video
+		frame.
+	 VOCTRL_GET_EOSD_RES
+		Required for EOSD (ASS subtitle) support. Informs the ASS
+		renderer about the properties of the drawing area (size,
+		borders).
+	 VOCTRL_SET_DEINTERLACE
+	 VOCTRL_GET_DEINTERLACE
+		Get or set deinterlacing status for VOs that support some kind
+		of deinterlacing.
+	 VOCTRL_UPDATE_SCREENINFO
+	 	Should set the xinerama_x, xinerama_y, vo_screenwidth and
+		vo_screenheight appropriately for the currently used
+		monitor and -xineramascreen option.
+		Usually should simply call the w32_update_xinerama_info or
+		update_xinerama_info function.
+		By supporting this, the VO also requests the newer API
+		that sets vo_dx, vo_dy etc. appropriately before config()
+		is called.
 
     config():	
       Set up the video system. You get the dimensions and flags.
@@ -86,25 +126,22 @@ Each vo driver _has_ to implement these:
       So, you can check for vo_config_count>0 in uninit() when freeing
       resources allocated in config() to avoid crash!
 
-      You should call geometry() in config() to enable user defined
-      window size and position. The code should look as following:
-      ---
-      set x,y,w,h to the values supplied by the caller or to those you deam
-      useful.
-      call geometry(&x, &y, &w, &h, screenw, screenh)
-      call aspect()
-      ---
-      see libvo/geometry.c for further information
+      You should implement VOCTRL_UPDATE_SCREENINFO so that vo_dx, vo_dy,
+      vo_dwidth and vo_dheight are already pre-set to values that take
+      aspect and -geometry into account. It is also necessary to properly
+      support multi-monitor setups (if based on x11_common, w32_common).
 
     draw_slice(): this displays YV12 pictures (3 planes, one full sized that
 	 contains brightness (Y), and 2 quarter-sized which the colour-info
 	 (U,V). MPEG codecs (libmpeg2, opendivx) use this. This doesn't have
 	 to display the whole frame, only update small parts of it.
+	 If this is not supported, it must be signaled in QUERY_FORMAT with
+	 VOCAP_NOSLICES.
 
     draw_frame(): this is the older interface, this displays only complete
 	 frames, and can do only packed format (YUY2, RGB/BGR).
 	 Win32 codecs use this (DivX, Indeo, etc).
-	 If you implement VOCTRL_DRAW_IMAGE, you can left draw_frame.
+	 If you implement VOCTRL_DRAW_IMAGE, you do not need to implement draw_frame.
 
     draw_osd(): this displays subtitles and OSD.
 	 It's a bit tricky to use it, since it's a callback-style stuff.
@@ -113,11 +150,25 @@ Each vo driver _has_ to implement these:
 	 The vo_draw_text() checks the characters to draw, and calls
 	 draw_alpha() for each. As a help, osd.c contains draw_alpha for
 	 each pixelformats, use this if possible!
+	 Note that if you do not draw directly onto the video you should
+	 use vo_draw_text_ext() which allows you to specify the border
+	 values etc. needed to draw DVD menu highlights at the correct place.
+	 If you do not want to implement this, you can still use -vf
+	 expand=osd=1 to draw the OSD, or even implement code to insert
+	 this filter automatically.
+	 Make sure you set VFCAP_OSD depending on whether you implemented it
+	 or not.
 	 
 	 NOTE: This one will be obsolete soon! But it's still useful when
 	 you want to do tricks, like rendering osd _after_ hardware scaling
 	 (tdfxfb) or render subtitles under of the image (vo_mpegpes, sdl)
 
-    flip_page(): this is called after each frame, this diplays the buffer for
+	 NOTE2: above NOTE is probably wrong, there are currently no plans to
+	 obsolete draw_osd, though there is the more advanced EOSD support for
+	 ASS subtitles.
+
+    flip_page(): this is called after each frame, this displays the buffer for
 	 real. This is 'swapbuffers' when doublebuffering.
+	 Try to do as little work here as possible, since that affect jitter/
+	 A-V sync.
 

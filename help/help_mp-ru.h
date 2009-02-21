@@ -75,7 +75,7 @@ static char help_text[]=
 #define MSGTR_TryForceVideoFmtStr "Попытка форсировать семейство видеокодеков %s...\n"
 #define MSGTR_CantFindVideoCodec "Не могу найти кодек для выбранного -vo и видеоформата 0x%X!\n"
 #define MSGTR_CannotInitVO "ФАТАЛЬНАЯ ОШИБКА: Не могу инициализировать видеодрайвер!\n"
-#define MSGTR_CannotInitAO "не могу открыть/инициализировать аудиоустройство -> БЕЗ ЗВУКА\n"
+#define MSGTR_CannotInitAO "Не могу открыть/инициализировать аудиоустройство -> без звука.\n"
 #define MSGTR_StartPlaying "Начало воспроизведения...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
@@ -103,7 +103,7 @@ static char help_text[]=
 #define MSGTR_NoGui "MPlayer был скомпилирован БЕЗ поддержки GUI!\n"
 #define MSGTR_GuiNeedsX "GUI MPlayer необходим X11!\n"
 #define MSGTR_Playing "\nВоспроизведение %s.\n"
-#define MSGTR_NoSound "Аудио: без звука!!!\n"
+#define MSGTR_NoSound "Аудио: без звука\n"
 #define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (время кадра: %5.3f).\n"
 #define MSGTR_CompiledWithRuntimeDetection "Скомпилировано для определения типа процессора во время выполнения.\n"
 #define MSGTR_CompiledWithCPUExtensions "Скомпилировано для x86 CPU со следующими расширениями:"
