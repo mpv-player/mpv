@@ -584,14 +584,7 @@ static int init(int rate,int channels,int format,int flags){
     ao_data.bps = byte_per_sec = bytes_per_sample * ao_data.samplerate;
     ao_data.outburst = byte_per_sec > 100000 ? 16384 : 8192;
 
-    AUDIO_INITINFO(&info);
-    info.play.samples = 0;
-    info.play.eof = 0;
-    info.play.error = 0;
-    ioctl (audio_fd, AUDIO_SETINFO, &info);
-
-    queued_bursts = 0;
-    queued_samples = 0;
+    reset();
 
     return 1;
 }
@@ -608,7 +601,15 @@ static void uninit(int immed){
 
 // stop playing and empty buffers (for seeking/pause)
 static void reset(void){
+    audio_info_t info;
     flush_audio(audio_fd);
+
+    AUDIO_INITINFO(&info);
+    info.play.samples = 0;
+    info.play.eof = 0;
+    info.play.error = 0;
+    ioctl(audio_fd, AUDIO_SETINFO, &info);
+
     queued_bursts = 0;
     queued_samples = 0;
 }
