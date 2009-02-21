@@ -28,8 +28,7 @@
 #define MAX_DB  80
 #define MIN_VAL 1E-8
 
-struct af_stats
-{
+struct af_stats {
     long long n_samples;
     double tsquare;
     int max;
@@ -38,8 +37,11 @@ struct af_stats
 
 static inline int logdb(double v)
 {
-    return v > 1 ? 0 : v <= MIN_VAL ? MAX_DB - 1 :
-        log(v) / -0.23025850929940456840179914546843642076;
+    if (v > 1)
+        return 0;
+    if (v <= MIN_VAL)
+        return MAX_DB - 1;
+    return log(v) / -0.23025850929940456840179914546843642076;
 }
 
 static int stats_init(af_instance_t *af, struct af_stats *s, af_data_t *data)
@@ -73,7 +75,7 @@ static void stats_print(struct af_stats *s)
     mp_msg(MSGT_AFILTER, MSGL_INFO, "stats: mean_volume: -%d dB\n",
            logdb(s->tsquare / s->n_samples));
     mp_msg(MSGT_AFILTER, MSGL_INFO, "stats: max_volume: -%d dB\n",
-           logdb(s->max / 32768.0));
+           logdb(s->max / (32768.0 * 32768.0)));
     for (i = 0; i < MAX_DB; i++)
         h[i] = 0;
     for (i = 0; i < 65536; i++) {
@@ -86,7 +88,7 @@ static void stats_print(struct af_stats *s)
     sum = 0;
     for (; i < MAX_DB; i++) {
         sum += h[i];
-        mp_msg(MSGT_AFILTER, MSGL_INFO, "stats:histogram_%ddb: %lld\n",
+        mp_msg(MSGT_AFILTER, MSGL_INFO, "stats: histogram_%ddb: %lld\n",
                i, h[i]);
         if (sum > s->n_samples / 1000)
             break;
@@ -95,7 +97,7 @@ static void stats_print(struct af_stats *s)
 
 static int control(struct af_instance_s *af, int cmd, void *arg)
 {
-    struct af_stats *s = (struct af_stats *)af->setup;
+    struct af_stats *s = af->setup;
 
     switch(cmd) {
         case AF_CONTROL_REINIT:
@@ -110,15 +112,13 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
 
 static void uninit(struct af_instance_s *af)
 {
-    if (af->data)
-        free(af->data);
-    if (af->setup)
-        free(af->setup);
+    free(af->data);
+    free(af->setup);
 }
 
 static af_data_t *play(struct af_instance_s *af, af_data_t *data)
 {
-    struct af_stats *s = (struct af_stats *)af->setup;
+    struct af_stats *s = af->setup;
     int16_t *a, *aend;
     int v, v2;
 
@@ -136,7 +136,8 @@ static af_data_t *play(struct af_instance_s *af, af_data_t *data)
     return data;
 }
 
-static int af_open(af_instance_t* af){
+static int af_open(af_instance_t *af)
+{
     af->control = control;
     af->uninit  = uninit;
     af->play    = play;
