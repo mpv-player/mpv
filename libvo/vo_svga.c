@@ -188,7 +188,7 @@ char s[64];
 
         force_vm=vga_getmodenumber(s);
         if(force_vm>0) {
-          if( mp_msg_test(MSGT_VO,MSGL_V) ) mp_msg(MSGT_VO,MSGL_V, "vo_svga: Forcing mode %i\n",force_vm);
+          mp_msg(MSGT_VO,MSGL_V, "vo_svga: Forcing mode %i\n",force_vm);
         }else{
           force_vm = 0;
         }
@@ -210,7 +210,6 @@ uint8_t * rgbplane;
 int i;
 
   if (mode_capabilities&CAP_ACCEL_CLEAR){
-    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
       mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: clearing box %d,%d - %d,%d with HW acceleration\n",
              x,y,w,h);
     if(mode_capabilities&CAP_ACCEL_BACKGR)
@@ -220,7 +219,6 @@ int i;
     return;
   }
   if (mode_capabilities & CAP_LINEAR){
-    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
       mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: clearing box %d,%d - %d,%d with memset\n",x,y,w,h);
     rgbplane=PageStore[0].vbase + (y*mode_stride) + (x*modeinfo->bytesperpixel);
     for(i=0;i<h;i++){
@@ -232,7 +230,6 @@ int i;
     return;
   }
   //native
-  if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
     mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: clearing box %d,%d - %d,%d with native draw \n",x,y,w,h);
   if(modeinfo->bytesperpixel!=0) w*=modeinfo->bytesperpixel;
   for(i=0;i<h;i++){
@@ -248,7 +245,6 @@ int bytesperline;
 int page;
 
   if(mpi->flags & MP_IMGFLAG_DIRECT){
-    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
       mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: drawing direct rendered surface\n");
     cpage=(uint32_t)mpi->priv;
     assert((cpage>=0)&&(cpage<max_pages));
@@ -278,7 +274,6 @@ int page;
         (stride == mode_stride) ){ //only monolite image can be accelerated
       w=(stride*8)/mpi->bpp;//we transfer pixels in the stride so the source
 //ACCELERATE
-      if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: using HW PutImage (x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
       if(mode_capabilities & CAP_ACCEL_BACKGR)
         vga_accel(ACCEL_SYNC);
@@ -289,7 +284,6 @@ int page;
 
     if( mode_capabilities&CAP_LINEAR){
 //DIRECT
-      if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: using Direct memcpy (x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
       bytesperline=(w*mpi->bpp)/8;
       base=PageStore[cpage].vbase + (y*mode_stride) + (x*mpi->bpp)/8;
@@ -311,7 +305,6 @@ int page;
   //one byte per pixel! svgalib innovation
     if(mpi->imgfmt==IMGFMT_RG4B || mpi->imgfmt==IMGFMT_BG4B) length=w;
 
-    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
       mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: using Native vga_draw(x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
     y+=PageStore[cpage].yoffset;//y position of the page beggining
     for(i=0;i<h;i++){
@@ -347,7 +340,6 @@ static int find_best_svga_mode(int req_w,int req_h, int req_bpp){
   for(i=1;i<=lastmode;i++){
     vminfo = vga_getmodeinfo(i);
     if( vminfo == NULL ) continue;
-    if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: testing mode %d (%s)\n",i,vga_getmodename(i));
     if( vga_hasmode(i) == 0 ) continue;
     if( req_bpp != bpp_from_vminfo(vminfo) )continue;
@@ -360,7 +352,6 @@ static int find_best_svga_mode(int req_w,int req_h, int req_bpp){
     if( bestmode==0 || prev_badness >= badness ){//modeX etc...
       prev_badness=badness;
       bestmode=i;
-      if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
         mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: found good mode %d with badness %d\n",i,badness);
     }
   }
@@ -423,7 +414,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   int32_t req_bpp;
 
   uint32_t accflags;
-  if( mp_msg_test(MSGT_VO,MSGL_V) )
     mp_msg(MSGT_VO,MSGL_V, "vo_svga: config(%i, %i, %i, %i, %08x, %s, %08x)\n", width, height,
            d_width, d_height, flags, title, format);
 //Only RGB modes supported
@@ -433,10 +423,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   if( vo_dbpp!=0 && vo_dbpp!=req_bpp) {assert(0);return-1;}
 
   if(!force_vm) {
-    if ( mp_msg_test(MSGT_VO,MSGL_V) ) {
       mp_msg(MSGT_VO,MSGL_V, "vo_svga: Looking for the best resolution...\n");
       mp_msg(MSGT_VO,MSGL_V, "vo_svga: req_w: %d, req_h: %d, bpp: %d\n",req_w,req_h,req_bpp);
-    }
     vid_mode=find_best_svga_mode(req_w,req_h,req_bpp);
     if(vid_mode==0)
       return 1;
@@ -612,7 +600,6 @@ UNUSED(src);
 
 static void draw_osd(void)
 {
-  if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
      mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: draw_osd()\n");
   //only modes with bytesperpixel>0 can draw OSD
   if(modeinfo->bytesperpixel==0) return;
@@ -641,10 +628,9 @@ static void flip_page(void) {
   PageStore[old_page].locks=PAGE_EMPTY;
   PageStore[cpage].locks=PAGE_BUSY;
 
-  if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
     mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: viewing page %d\n",cpage);
   if(sync_flip && old_page!=cpage){
-    if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga:vga_waitretrace\n");
+    mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga:vga_waitretrace\n");
     vga_waitretrace();
   }
   vga_setdisplaystart(PageStore[cpage].doffset);
@@ -669,7 +655,6 @@ int32_t req_bpp,flags;
 int i,lastmode;
 vga_modeinfo * vminfo;
 
-  if ( mp_msg_test(MSGT_VO,MSGL_DBG4) )
     mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: query_format=%X \n",format);
 //only RGB modes supported
   if( (!IMGFMT_IS_RGB(format)) && (!IMGFMT_IS_BGR(format)) ) return 0;
@@ -707,7 +692,6 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                        unsigned char *srca, int stride) {
   char* base;
 
-  if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
     mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: draw_alpha(x0=%d,y0=%d,w=%d,h=%d,src=%p,srca=%p,stride=%d\n",
            x0,y0,w,h,src,srca,stride);
   if(!blackbar_osd) {
@@ -716,7 +700,6 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     y0+=y_pos;
   }
 
-  if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
     mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: OSD draw in page %d\n",cpage);
   base=PageStore[cpage].vbase + y0*mode_stride + x0*modeinfo->bytesperpixel;
   switch (mode_bpp) {
@@ -764,7 +747,6 @@ int page;
       mpi->planes[0] = PageStore[page].vbase +
              y_pos*mode_stride + (x_pos*mpi->bpp)/8;
       mpi->priv=(void *)page;
-      if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: direct render allocated! page=%d\n",page);
       return VO_TRUE;
     }
