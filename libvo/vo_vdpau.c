@@ -330,9 +330,9 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
     int feature_count = 0;
     VdpVideoMixerFeature features[MAX_NUM_FEATURES];
     VdpBool feature_enables[MAX_NUM_FEATURES];
-    static const denoise_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL};
+    static const VdpVideoMixerAttribute denoise_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL};
     const void * const denoise_value[] = {&denoise};
-    static const sharpen_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL};
+    static const VdpVideoMixerAttribute sharpen_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL};
     const void * const sharpen_value[] = {&sharpen};
     static const VdpVideoMixerParameter parameters[VDP_NUM_MIXER_PARAMETER] = {
         VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH,
