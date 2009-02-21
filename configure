@@ -8708,6 +8708,8 @@ $def_yasm
 #define CONFIG_SMALL 0
 #define CONFIG_SWSCALE 1
 
+#define HAVE_GETHRTIME 0
+#define HAVE_INLINE_ASM 0
 #define HAVE_POLL_H 1
 #define HAVE_PPC4XX 0
 
