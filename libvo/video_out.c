@@ -170,11 +170,11 @@ const vo_functions_t* const video_out_drivers[] =
 #ifdef CONFIG_3DFX
         &video_out_3dfx,
 #endif
-#if CONFIG_VDPAU
-        &video_out_vdpau,
-#endif
 #ifdef CONFIG_XV
         &video_out_xv,
+#endif
+#if CONFIG_VDPAU
+        &video_out_vdpau,
 #endif
 #ifdef CONFIG_X11
         &video_out_x11,
