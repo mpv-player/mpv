@@ -131,6 +131,8 @@ MPlayer (1.0)
     * vo_macosx can now be compiled in 64-bits mode
     * OpenGL support for unmodified MinGW64
 
+    SWScaler:
+    * new LGPLed YUV to RGB tables generator
 
 
   rc2try2:
