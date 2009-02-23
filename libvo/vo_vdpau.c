@@ -427,9 +427,10 @@ static void free_video_specific(void) {
         surface_render[i].surface = VDP_INVALID_HANDLE;
     }
 
-    if (video_mixer != VDP_INVALID_HANDLE)
+    if (video_mixer != VDP_INVALID_HANDLE) {
         vdp_st = vdp_video_mixer_destroy(video_mixer);
-    CHECK_ST_WARNING("Error when calling vdp_video_mixer_destroy")
+        CHECK_ST_WARNING("Error when calling vdp_video_mixer_destroy")
+    }
     video_mixer = VDP_INVALID_HANDLE;
 }
 
