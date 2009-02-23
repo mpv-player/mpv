@@ -50,6 +50,9 @@
 
 #include "libavutil/common.h"
 
+#include "libass/ass.h"
+#include "libass/ass_mp.h"
+
 static vo_info_t info = {
     "VDPAU with X11",
     "vdpau",
@@ -77,6 +80,9 @@ LIBVO_EXTERN(vdpau)
 
 /* number of palette entries */
 #define PALETTE_SIZE 256
+
+/* Initial maximum number of EOSD surfaces */
+#define EOSD_SURFACES_INITIAL 512
 
 /*
  * Global variable declaration - VDPAU specific
@@ -125,6 +131,11 @@ static VdpPresentationQueueTargetCreateX11       *vdp_presentation_queue_target_
 /* output_surfaces[2] is used in composite-picture. */
 static VdpOutputSurfaceRenderOutputSurface       *vdp_output_surface_render_output_surface;
 static VdpOutputSurfacePutBitsIndexed            *vdp_output_surface_put_bits_indexed;
+static VdpOutputSurfaceRenderBitmapSurface       *vdp_output_surface_render_bitmap_surface;
+
+static VdpBitmapSurfaceCreate                    *vdp_bitmap_surface_create;
+static VdpBitmapSurfaceDestroy                   *vdp_bitmap_surface_destroy;
+static VdpBitmapSurfacePutBitsNative             *vdp_bitmap_surface_putbits_native;
 
 static VdpDecoderCreate                          *vdp_decoder_create;
 static VdpDecoderDestroy                         *vdp_decoder_destroy;
@@ -158,6 +169,26 @@ static const VdpChromaType                vdp_chroma_type = VDP_CHROMA_TYPE_420;
 static unsigned char                     *index_data;
 static int                                index_data_size;
 static uint32_t                           palette[PALETTE_SIZE];
+
+// EOSD
+// Pool of surfaces
+struct {
+    VdpBitmapSurface surface;
+    int w;
+    int h;
+    char in_use;
+} *eosd_surfaces;
+
+// List of surfaces to be rendered
+struct {
+    VdpBitmapSurface surface;
+    VdpRect source;
+    VdpRect dest;
+    VdpColor color;
+} *eosd_targets;
+
+static int eosd_render_count;
+static int eosd_surface_count;
 
 /*
  * X11 specific
@@ -286,6 +317,12 @@ static int win_x11_init_vdpau_procs(void)
         {VDP_FUNC_ID_DECODER_CREATE,            &vdp_decoder_create},
         {VDP_FUNC_ID_DECODER_RENDER,            &vdp_decoder_render},
         {VDP_FUNC_ID_DECODER_DESTROY,           &vdp_decoder_destroy},
+        {VDP_FUNC_ID_BITMAP_SURFACE_CREATE,     &vdp_bitmap_surface_create},
+        {VDP_FUNC_ID_BITMAP_SURFACE_DESTROY,    &vdp_bitmap_surface_destroy},
+        {VDP_FUNC_ID_BITMAP_SURFACE_PUT_BITS_NATIVE,
+                        &vdp_bitmap_surface_putbits_native},
+        {VDP_FUNC_ID_OUTPUT_SURFACE_RENDER_BITMAP_SURFACE,
+                        &vdp_output_surface_render_bitmap_surface},
         {0, NULL}
     };
 
@@ -563,10 +600,125 @@ static void draw_osd_I8A8(int x0,int y0, int w,int h, unsigned char *src,
     CHECK_ST_WARNING("Error when calling vdp_output_surface_render_output_surface")
 }
 
+static void draw_eosd(void) {
+    VdpStatus vdp_st;
+    VdpOutputSurface output_surface = output_surfaces[surface_num];
+    VdpOutputSurfaceRenderBlendState blend_state;
+    int i;
+
+    blend_state.struct_version                 = VDP_OUTPUT_SURFACE_RENDER_BLEND_STATE_VERSION;
+    blend_state.blend_factor_source_color      = VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_SRC_ALPHA;
+    blend_state.blend_factor_source_alpha      = VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE;
+    blend_state.blend_factor_destination_color = VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    blend_state.blend_factor_destination_alpha = VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_SRC_ALPHA;
+    blend_state.blend_equation_color           = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD;
+    blend_state.blend_equation_alpha           = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD;
+
+    for (i=0; i<eosd_render_count; i++) {
+        vdp_st = vdp_output_surface_render_bitmap_surface(
+            output_surface, &eosd_targets[i].dest,
+            eosd_targets[i].surface, &eosd_targets[i].source,
+            &eosd_targets[i].color, &blend_state,
+            VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
+        CHECK_ST_WARNING("EOSD: Error when rendering")
+    }
+}
+
+static void generate_eosd(mp_eosd_images_t *imgs) {
+    VdpStatus vdp_st;
+    VdpRect destRect;
+    int j, found;
+    ass_image_t *img = imgs->imgs;
+    ass_image_t *i;
+
+    // Nothing changed, no need to redraw
+    if (imgs->changed == 0)
+        return;
+    eosd_render_count = 0;
+    // There's nothing to render!
+    if (!img)
+        return;
+
+    if (imgs->changed == 1)
+        goto eosd_skip_upload;
+
+    for (j=0; j<eosd_surface_count; j++)
+        eosd_surfaces[j].in_use = 0;
+
+    for (i = img; i; i = i->next) {
+        // Try to reuse a suitable surface
+        found = -1;
+        for (j=0; j<eosd_surface_count; j++) {
+            if (eosd_surfaces[j].surface != VDP_INVALID_HANDLE && !eosd_surfaces[j].in_use &&
+                eosd_surfaces[j].w >= i->w && eosd_surfaces[j].h >= i->h) {
+                found = j;
+                break;
+            }
+        }
+        // None found, allocate a new surface
+        if (found < 0) {
+            for (j=0; j<eosd_surface_count; j++) {
+                if (!eosd_surfaces[j].in_use) {
+                    if (eosd_surfaces[j].surface != VDP_INVALID_HANDLE)
+                        vdp_bitmap_surface_destroy(eosd_surfaces[j].surface);
+                    found = j;
+                    break;
+                }
+            }
+            // Allocate new space for surface/target arrays
+            if (found < 0) {
+                j = found = eosd_surface_count;
+                eosd_surface_count = eosd_surface_count ? eosd_surface_count*2 : EOSD_SURFACES_INITIAL;
+                eosd_surfaces = realloc(eosd_surfaces, eosd_surface_count * sizeof(*eosd_surfaces));
+                eosd_targets  = realloc(eosd_targets,  eosd_surface_count * sizeof(*eosd_targets));
+                for(j=found; j<eosd_surface_count; j++) {
+                    eosd_surfaces[j].surface = VDP_INVALID_HANDLE;
+                    eosd_surfaces[j].in_use = 0;
+                }
+            }
+            vdp_st = vdp_bitmap_surface_create(vdp_device, VDP_RGBA_FORMAT_A8,
+                i->w, i->h, VDP_TRUE, &eosd_surfaces[found].surface);
+            CHECK_ST_WARNING("EOSD: error when creating surface")
+            eosd_surfaces[found].w = i->w;
+            eosd_surfaces[found].h = i->h;
+        }
+        eosd_surfaces[found].in_use = 1;
+        eosd_targets[eosd_render_count].surface = eosd_surfaces[found].surface;
+        destRect.x0 = 0;
+        destRect.y0 = 0;
+        destRect.x1 = i->w;
+        destRect.y1 = i->h;
+        vdp_st = vdp_bitmap_surface_putbits_native(eosd_targets[eosd_render_count].surface,
+            (const void *) &i->bitmap, &i->stride, &destRect);
+        CHECK_ST_WARNING("EOSD: putbits failed")
+        eosd_render_count++;
+    }
+
+eosd_skip_upload:
+    eosd_render_count = 0;
+    for (i = img; i; i = i->next) {
+        // Render dest, color, etc.
+        eosd_targets[eosd_render_count].color.alpha = 1.0 - ((i->color >> 0) & 0xff) / 255.0;
+        eosd_targets[eosd_render_count].color.blue  = ((i->color >>  8) & 0xff) / 255.0;
+        eosd_targets[eosd_render_count].color.green = ((i->color >> 16) & 0xff) / 255.0;
+        eosd_targets[eosd_render_count].color.red   = ((i->color >> 24) & 0xff) / 255.0;
+        eosd_targets[eosd_render_count].dest.x0 = i->dst_x;
+        eosd_targets[eosd_render_count].dest.y0 = i->dst_y;
+        eosd_targets[eosd_render_count].dest.x1 = i->w + i->dst_x;
+        eosd_targets[eosd_render_count].dest.y1 = i->h + i->dst_y;
+        eosd_targets[eosd_render_count].source.x0 = 0;
+        eosd_targets[eosd_render_count].source.y0 = 0;
+        eosd_targets[eosd_render_count].source.x1 = i->w;
+        eosd_targets[eosd_render_count].source.y1 = i->h;
+        eosd_render_count++;
+    }
+}
+
 static void draw_osd(void)
 {
     mp_msg(MSGT_VO, MSGL_DBG2, "DRAW_OSD\n");
 
+    draw_eosd();
     vo_draw_text_ext(vo_dwidth, vo_dheight, border_x, border_y, border_x, border_y,
                      vid_width, vid_height, draw_osd_I8A8);
 }
@@ -695,7 +847,7 @@ static uint32_t get_image(mp_image_t *mpi)
 
 static int query_format(uint32_t format)
 {
-    int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD;
+    int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_UNSCALED;
     switch (format) {
         case IMGFMT_YV12:
             return default_flags | VOCAP_NOSLICES;
@@ -728,6 +880,14 @@ static void DestroyVdpauObjects(void)
         CHECK_ST_WARNING("Error when calling vdp_output_surface_destroy")
     }
 
+    for (i = 0; i<eosd_surface_count; i++) {
+        if (eosd_surfaces[i].surface != VDP_INVALID_HANDLE) {
+            vdp_st = vdp_bitmap_surface_destroy(eosd_surfaces[i].surface);
+            CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy")
+        }
+        eosd_surfaces[i].surface = VDP_INVALID_HANDLE;
+    }
+
     vdp_st = vdp_device_destroy(vdp_device);
     CHECK_ST_WARNING("Error when calling vdp_device_destroy")
 }
@@ -743,6 +903,11 @@ static void uninit(void)
 
     free(index_data);
     index_data = NULL;
+
+    free(eosd_surfaces);
+    eosd_surfaces = NULL;
+    free(eosd_targets);
+    eosd_targets = NULL;
 
 #ifdef CONFIG_XF86VM
     vo_vm_close();
@@ -821,6 +986,10 @@ static int preinit(const char *arg)
     index_data = NULL;
     index_data_size = 0;
 
+    eosd_surface_count = eosd_render_count = 0;
+    eosd_surfaces = NULL;
+    eosd_targets  = NULL;
+
     return 0;
 }
 
@@ -878,6 +1047,23 @@ static int control(uint32_t request, void *data, ...)
         case VOCTRL_UPDATE_SCREENINFO:
             update_xinerama_info();
             return VO_TRUE;
+        case VOCTRL_DRAW_EOSD:
+            if (!data)
+                return VO_FALSE;
+            generate_eosd(data);
+            return VO_TRUE;
+        case VOCTRL_GET_EOSD_RES: {
+            mp_eosd_res_t *r = data;
+            r->mt = r->mb = r->ml = r->mr = 0;
+            if (vo_fs) {
+                r->w = vo_screenwidth;
+                r->h = vo_screenheight;
+                r->ml = r->mr = border_x;
+                r->mt = r->mb = border_y;
+            } else
+                r->w = vo_dwidth; r->h = vo_dheight;
+            return VO_TRUE;
+        }
     }
     return VO_NOTIMPL;
 }
