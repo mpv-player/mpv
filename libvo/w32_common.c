@@ -109,11 +109,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             if (vo_keepaspect && !vo_fs) {
               WINDOWPOS *wpos = lParam;
               int xborder, yborder;
-              RECT r2;
-              GetClientRect(vo_window, &r);
-              GetWindowRect(vo_window, &r2);
-              xborder = (r2.right - r2.left) - (r.right - r.left);
-              yborder = (r2.bottom - r2.top) - (r.bottom - r.top);
+              r.left = r.top = 0;
+              r.right = wpos->cx;
+              r.bottom = wpos->cy;
+              AdjustWindowRect(&r, GetWindowLong(vo_window, GWL_STYLE), 0);
+              xborder = (r.right - r.left) - wpos->cx;
+              yborder = (r.bottom - r.top) - wpos->cy;
               wpos->cx -= xborder; wpos->cy -= yborder;
               aspect_fit(&wpos->cx, &wpos->cy, wpos->cx, wpos->cy);
               wpos->cx += xborder; wpos->cy += yborder;
