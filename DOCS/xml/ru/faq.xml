@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with  r28660  -->
+<!-- synced with  r28707  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -578,7 +578,7 @@ Windows Media 9.)
 <answer><para>
 Это тоже эффект системы управления энергопотреблением (смотрите выше).
 Подсоедините разъем внешнего питания <emphasis role="bold">до</emphasis>
-включения ноутбука либо используйте опцию <option>-nortc</option>.
+включения ноутбука либо убедитесь, что не используется опция <option>-rtc</option>.
 </para></answer>
 </qandaentry>
 

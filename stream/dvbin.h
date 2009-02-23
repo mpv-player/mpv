@@ -38,9 +38,16 @@
 
 #undef DVB_ATSC
 #if defined(DVB_API_VERSION_MINOR)
-#if DVB_API_VERSION == 3 && DVB_API_VERSION_MINOR >= 1
+
+/* kernel headers >=2.6.28 have version 5.
+ *
+ * FIXME: are there any real differences between 3.1 and 5?
+ */
+
+#if (DVB_API_VERSION == 3 && DVB_API_VERSION_MINOR >= 1) || DVB_API_VERSION == 5
 #define DVB_ATSC 1
 #endif
+
 #endif
 
 

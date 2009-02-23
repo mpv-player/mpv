@@ -53,7 +53,7 @@ If you set it to too high, the drive will continuously spin up and down, and
 will dramatically decrease the performance.
 It is recommended that you also tune your CD-ROM drive
 with <command>hdparm</command>:
-<screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom device]</replaceable></screen>
+<screen>hdparm -d1 -a256 -u1 <replaceable>[cdrom device]</replaceable></screen>
 </para>
 
 <para>
@@ -68,8 +68,16 @@ for fine-tuning your CD-ROM.
 </para>
 
 <para>
-SCSI drives do not have a uniform way of setting these parameters (Do you know
-one? Tell us!) There is a tool that works for
+You may tweak the speed of SCSI CD-ROM drives with
+<command>sdparm</command>, you need version 1.03 or higher:
+<screen>sdparm --command=speed=<replaceable>[speed in kB/s]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
+Speed must be specified in kilobytes per second, the drive will
+round it as appropriate. Please refer to the sdparm man page for
+details.
+</para>
+
+<para>
+There is also a dedicated tool that works for
 <ulink url="http://das.ist.org/~georg/">Plextor SCSI drives</ulink>.
 </para>
 </sect2>
