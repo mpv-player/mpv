@@ -590,7 +590,7 @@ It works normal when i run it as a user.
 <answer><para>
 This is again a power management effect (see above). Plug the external power
 connector in <emphasis role="bold">before</emphasis> you power on your notebook
-or use the <option>-nortc</option> option.
+or make sure you do not use the <option>-rtc</option> option.
 </para></answer>
 </qandaentry>
 
