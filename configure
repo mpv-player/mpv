@@ -7873,49 +7873,6 @@ fi
 echores "$_maemo"
 fi
 
-#this must be the last test to be performed or the ones following it will likely fail
-#because libdvdnavmini is intentionally not linked against libdvdread (to permit mplayer
-# to use its own copy of the library)
-echocheck "DVD support (libdvdnav)"
-dvdnav_internal=no
-if test "$_dvdnav" = auto ; then
-  if test "$_dvdread_internal" = yes ; then
-    _dvdnav=yes
-    dvdnav_internal=yes
-    _res_comment="internal"
-  else
-    $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
-  fi
-fi
-if test "$_dvdnav" = auto ; then
-  cat > $TMPC <<EOF
-#include <inttypes.h>
-#include <dvdnav/dvdnav.h>
-int main(void) { dvdnav_t *dvd=0; return 0; }
-EOF
-  _dvdnav=no
-  _dvdnavdir=`$_dvdnavconfig --cflags`
-  _dvdnavlibs=`$_dvdnavconfig --libs`
-  cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
-fi
-if test "$_dvdnav" = yes ; then
-  _largefiles=yes
-  def_dvdnav='#define CONFIG_DVDNAV 1'
-  if test "$dvdnav_internal" = yes ; then
-    _inc_extra="$_inc_extra -Ilibdvdnav"
-    _inputmodules="dvdnav(internal) $_inputmodules"
-  else
-    _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
-    _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
-    _inputmodules="dvdnav $_inputmodules"
-  fi
-else
-  def_dvdnav='#undef CONFIG_DVDNAV'
-  _noinputmodules="dvdnav $_noinputmodules"
-fi
-echores "$_dvdnav"
-
-
 #############################################################################
 
 # On OS/2 nm supports only a.out. So the -Zomf compiler option to generate
@@ -7980,6 +7937,53 @@ else
 fi
 
 cc_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
+
+# This must be the last test to be performed. Any other tests following it
+# could fail due to linker errors. libdvdnavmini is intentionally not linked
+# against libdvdread (to permit MPlayer to use its own copy of the library).
+# So any compilation using the flags added here but not linking against
+# libdvdread can fail.
+echocheck "DVD support (libdvdnav)"
+dvdnav_internal=no
+if test "$_dvdnav" = auto ; then
+  if test "$_dvdread_internal" = yes ; then
+    _dvdnav=yes
+    dvdnav_internal=yes
+    _res_comment="internal"
+  else
+    $_dvdnavconfig --version --minilibs >> $TMPLOG 2>&1 || _dvdnav=no
+  fi
+fi
+if test "$_dvdnav" = auto ; then
+  cat > $TMPC <<EOF
+#include <inttypes.h>
+#include <dvdnav/dvdnav.h>
+int main(void) { dvdnav_t *dvd=0; return 0; }
+EOF
+  _dvdnav=no
+  _dvdnavdir=`$_dvdnavconfig --cflags`
+  _dvdnavlibs=`$_dvdnavconfig --libs`
+  cc_check $_dvdnavdir $_dvdnavlibs $_ld_dl $_ld_pthread && _dvdnav=yes
+fi
+if test "$_dvdnav" = yes ; then
+  _largefiles=yes
+  def_dvdnav='#define CONFIG_DVDNAV 1'
+  if test "$dvdnav_internal" = yes ; then
+    _inc_extra="$_inc_extra -Ilibdvdnav"
+    _inputmodules="dvdnav(internal) $_inputmodules"
+  else
+    _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
+    _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+    _inputmodules="dvdnav $_inputmodules"
+  fi
+else
+  def_dvdnav='#undef CONFIG_DVDNAV'
+  _noinputmodules="dvdnav $_noinputmodules"
+fi
+echores "$_dvdnav"
+
+# DO NOT ADD ANY TESTS THAT USE LINKER FLAGS HERE (like cc_check).
+# Read dvdnav comment above.
 
 #############################################################################
 echo "Creating config.mak"
