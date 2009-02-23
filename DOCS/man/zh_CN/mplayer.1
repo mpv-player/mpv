@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r27348
+.\" sync with en/mplayer.1 r28576
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -43,7 +43,7 @@
 .\" 名称
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2008-01-01" "MPlayer 项目" "电影播放器"
+.TH MPlayer 1 "2009-01-05" "MPlayer 项目" "电影播放器"
 .
 .SH 名称
 mplayer  \- 影视播放器
@@ -117,7 +117,7 @@ cue://文件[:曲目]
 .
 .br
 .B mplayer
-[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]:// 
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]://
 [用户名:密码@]URL[:端口] [选项]
 .
 .br
@@ -582,6 +582,7 @@ alang=en
 profile-desc="用于 dvdnav:// 媒体流的配置集"
 profile=protocol.dvd
 mouse-movements=yes
+nocache=yes
 
 [extension.flv]
 profile-desc="用于 .flv 文件的配置集"
@@ -712,8 +713,8 @@ GUI 的配置文件
 对慢机器或者不能正确处理回车符(即 \\r)的旧机器特别有用。
 .
 .TP
-.B \-priority <优先> (仅适用于 Windows)
-根据 Windows 下可用的预定义优先级设置 MPlayer 的进程优先级。
+.B \-priority <优先>（仅适用于 Windows 和 OS/2）
+根据 Windows 和 OS/2 下可用的预定义优先级设置 MPlayer 的进程优先级。
 可能的 <优先> 值为:
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
@@ -864,6 +865,7 @@ MPlayer 执行此命令时不加以检查，所以你有责任确保该命令不
 .sp 1
 该选项可能被“误用”以禁用不提供对于适当的 X API 接口的支持的屏幕保护程序。
 如果你觉得这太复杂了，请要求屏幕保护程序的作者提供对于适当的 X API 的支持。
+（另参见 \-stop\-xscreensaver）
 .sp 1
 .I 用于 xscreensaver 的示例：
 mplayer \-heartbeat\-cmd "xscreensaver\-command \-deactivate" file
@@ -982,8 +984,9 @@ n 大小的 FIFO 能容纳 (n\-1) 缓冲事件。
 .
 .TP
 .B \-mouse\-movements
-允许 MPlayer 接受指针事件来自视频输出驱动(目前仅支持 X11 衍生型)。
+允许 MPlayer 接收来自视频输出驱动的指针事件。
 必须选择 DVD 菜单中的按钮。
+支持基于 X11 的视频输出（x11、xv、xvmc等）以及 gl、gl2、direct3d 和 macosx 的视频输出
 .
 .TP
 .B \-noar
@@ -1096,15 +1099,24 @@ MPlayer 从标准输入读取以新行 (\\n) 分隔开的命令行,
 此选项仅当 AC-3 流包含所需范围的压缩信息时显示效果。
 .
 .TP
-.B \-aid <标识> (也请参见 \-alang)
+.B \-aid <代码> (也请参见 \-alang)
 选择音频频道 (MPEG: 0\-31, AVI/\:OGM: 1\-99, ASF/\:RM: 0\-127, 
 VOB(AC-3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190)。
-MPlayer 在 verbose (\-v) 模式下会打印可用的音频标识。
+MPlayer 在 verbose (\-v) 模式下会打印可用的音频代码。
 当播放 MPEG-TS 流时, MPlayer/\:MEncoder 用第一个程序
 播放已选择的(如果有的话)音频流。
 .
 .TP
-.B \-alang <语言代号[,语言代号,...]> (也请参见 \-aid)
+.B \-ausid <代码>（也请参见 \-alang）
+选择子音频流的频道。
+当前有效的取值范围为 0x55..0x75，并且当由原生流分解器（而不是 libavformat）时处理时，
+只适用于MPEG-TS。
+由于媒体类型信息在媒体流中的嵌入方式有异或其在流中缺失，媒体类型可能无法正确识别，但当
+多个子流存在时，音频流会正确分解出来。
+当使用 \-identify 运行时，MPlayer 打印出可用的子流的代码。
+.
+.TP
+.B \-alang <语言代码[,语言代码,...]> (也请参见 \-aid)
 指定使用音频语言的优先级列表。
 不同的容器格式使用不同的语言代号。DVDs 使用 ISO 639\-1 的
 两字符语言代号, Matroska、MPEG-TS 和 NUT 使用 ISO 639\-2 的
@@ -1938,8 +1950,7 @@ MPlayer将同时打印“-tv channels=”选项中的值，包括已有的以及
 你可能也想使用 \-embeddedfonts。
 .br
 .I 注意：
-当字体配置是预先编译进去的时，除非明确使用 \-nofontconfig 关闭该选项，
-否则 \-ass 将打开 \-fontconfig。
+不像通常的 OSD，libass 默认使用 fontconfig。使用 \-nofontconfig 以禁用此行为。
 .
 .TP
 .B \-ass\-border\-color <参数值>
@@ -2421,6 +2432,10 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 .B \-vobsubid <0\-31>
 指定 VOBsub 字幕标识。
 .
+.TP
+.B \-vobsubid <0\-31>
+指定 VOBsub 的字幕代码。
+.
 .
 .
 .SH "音频输出选项（仅适用于MPLAYER）"
@@ -2565,6 +2580,9 @@ OSS 音频输出驱动
 如果你想自动建立某些连接时有用。
 .IPs (no)estimate
 估计音频延迟, 假定让视频回放更流畅 (默认是: 启用)。
+.IPs (no)autostart（默认值：禁用）
+当有需要时自动启动 jackd。
+注意该选项似乎不可靠，并且会往标准输出发送服务端消息。
 .RE
 .PD 1
 .
@@ -2648,7 +2666,7 @@ DVB 卡音频输出驱动输出到 MPEG-PES 文件如果没安装 DVB 卡。
 .RSs
 .IPs card=<1\-4>
 指定 DVB 卡如果有多于一个卡。
-如果不指定，mplayer 将搜索第一个可用的卡。
+如果不指定，MPlayer 将搜索第一个可用的卡。
 If not specified mplayer will search the first usable card.
 .IPs file=<文件名>
 输出文件名
@@ -2884,9 +2902,9 @@ x 和 y 代表从屏幕左上角到显示图像左上角的距离(以像素为�
 如果使用 \-wid 选项指定了外部窗口, 
 那么 x 和 y 坐标是相对于窗口而不是屏幕的左上角。
 .br
-.I 注意:
-此选项仅被 x11, xmga, xv, xvmc, xvidix, 
-gl, gl2, directx 和 tdfxfb 视频输出驱动支持。
+.I 注意：
+此选项仅被 x11、xmga、xv、xvmc、xvidix、
+gl、gl2、directx、fbdev 和 tdfxfb 视频输出驱动支持。
 .sp 1
 .I 示例:
 .PD 0
@@ -3007,15 +3025,16 @@ ggi 和 gl2 的都支持此功能。
 .
 .TP
 .B \-screenh <像素>
-指定垂直分辨率, 如果视频输出驱动不知道屏幕分辨率, 如 fbdev, x11 和 TVout。
+指定屏幕高度，如果视频输出驱动，如 fbdev, x11 和 TVout，不知道屏幕分辨率。
 .
 .TP
 .B \-screenw <pixels>
-指定水平分辨率, 如果视频输出驱动不知道屏幕分辨率, 如 fbdev, x11 和 TVout。
+指定屏幕宽度，如果视频输出驱动，如 fbdev, x11 和 TVout，不知道屏幕分辨率。
 .
 .TP
 .B \-stop\-xscreensaver (仅用于 X11)
 启动时关闭 xscreensaver, 退出时再打开它。
+如果你的屏保程序不支持 XSS 或 XResetScreenSaver 的 API，则请使用 \-heartbeat\-cmd 选项。
 .
 .TP
 .B "\-vm \ \ \ "
@@ -3041,7 +3060,7 @@ ggi 和 gl2 的都支持此功能。
 息），\-1 表示在目前窗口所在的显示屏上全屏幕。
 通过 \-geometry 选项设置的初始位置是相对于指定屏幕的。
 通常只能与 "\-fstype \-fullscreen" 或 "\-fstype none" 一起工作。
-该选项不适用于仅仅设置启动屏幕（也不适用于设置全屏屏幕），\-geometry 是目前可用
+该选项不适用于仅仅设置启动屏幕（因为其总是在指定的屏幕上以全屏方式显示），\-geometry 是目前可用
 于此目前的最好选项。
 This option is not suitable to only set the startup screen (and not also the
 fullscreen screen), \-geometry is the best that is available for that purpose
@@ -3214,9 +3233,11 @@ Supported by the gl, gl2, x11, and xv video output drivers.
 考虑废弃。
 .
 .TP
-.B sdl (仅用于 SDL)
+.B sdl（仅用于 SDL，漏洞多且过时）
 高级平台独立的 SDL(简单 Directmedia 层) 库视频输出驱动。
 既然 SDL 使用自己的 X11 层, MPlayer X11 选项对 SDL 没有影响。
+注意该选项有数个非重要漏洞（总是忽略 \-vm/\-novm，\-fs 的行为如同 \-novm，
+当从全屏模式切换回来时窗口在左上角，不支持全景模式……）
 .PD 0
 .RSs
 .IPs driver=<驱动>
@@ -3236,8 +3257,9 @@ VIDIX (VIDeo Interface for *niX) 是不同显卡的视频加速特性的接口�
 .RSs
 .IPs <子设备>
 明确表示选择使用哪个 VIDIX 子设备驱动。
-可用的子设备有 cyberblade, mach64, mga_crtc2, mga, nvidia, pm2, pm3, radeon,
-rage128, sis 和 unichrome。
+可用的子设备有 cyberblade, ivtv, mach64,
+mga_crtc2, mga, nvidia, pm2, pm3, radeon, rage128, s3, sh_veu,
+sis_vid 和 unichrome。
 .RE
 .PD 1
 .
@@ -3272,6 +3294,10 @@ VIDIX 的 Windows 前台
 .PD 1
 .
 .TP
+.B direct3d（仅适用于 Windows）（公测代码！）
+使用 Direct3D 接口的视频输出驱动（对于 Vista 系统很有用）。
+.
+.TP
 .B directx (仅用于 Windows)
 使用 DirectX 接口的视频输出驱动。
 .PD 0
@@ -3301,7 +3327,14 @@ Mac OS X CoreVideo 视频输出驱动
 .PD 0
 .RSs
 .IPs device_id=<数值>
-选择全屏显示设备。
+选择用于全屏模式的显示设备，或将其设为 \-1 以总是使用视频窗口所在的屏幕
+（默认值：\-1 \- 自动选择）。
+.IPs shared_buffer
+将输出写入一块共享内存模式的缓冲区，而不是将其显示出来，并且尝试打开一个
+已存在的 NSConnection 连接以与图形界面通信。
+.IPs buffer_name=<名字>
+shm_open 创建的共享缓冲区的名字，也是 MPlayer 尝试打开的 NSConnection 连接
+的名字（默认值：“mplayerosx”）。
 .RE
 .PD 1
 .
@@ -3376,7 +3409,7 @@ OpenGL 视频输出驱动, 简版。
 但也利用较新的扩展, 允许支持更多的色彩空间和直接渲染。
 要获取最佳的速度，请尝试类似于
 .br
-\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+\-vo gl:yuv=2:rectangle=2:force\-pbo:ati\-hack \-dr \-noslices
 .br
 的选项。
 此代码执行极少的检测, 所以如果某个特性不工作, 
@@ -3455,6 +3488,9 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 对红, 绿和蓝色, Gamma 也能被独立设置。
 速度比其他方法更多地依赖于 GPU 内存带宽。
 .RE
+.IPs ycbcr
+使用 GL_MESA_ycbcr_texture 扩展组件完成 YUV 至 RGB 的转换。
+在大多数情况下，这可能比使用软件方式转换至 RGB 要慢。
 .IPs lscale=<n>
 选择缩放功能供调节发光性。
 仅对 yuv 模式 2, 3, 4 和 6 有效。
@@ -3470,13 +3506,15 @@ GL_ARB_fragment_shader！）。至少需要三个纹理单位。提供饱和度�
 3：与 1 相同，但不使用参照纹理。
 可能在一些显卡上运行较快。
 .br
-4：使用实验性的非锐化的蔽码，参数为支持 3x3 和 0.5 的强化。
+4：使用实验性的非锐化的蔽码，参数为支持 3x3 和 0.5 的默认强化值。（参见 filter-strength）
 .br
-5：使用实验性的非锐化的蔽码，参数为支持 5x5 和 0.5 的强化。
+5：使用实验性的非锐化的蔽码，参数为支持 5x5 和 0.5 的默认强化值。（参见 filter-strength）
 .RE
 .IPs cscale=<n>
 选择缩放功能供调节色度.
 详情参见 lscale。
+.IPs filter-strength=<值>
+设置支持该强度值的 lscale/cscale 滤镜的效果强度。
 .IPs customprog=<文件名>
 从 <文件名> 装载定制的片断程序。
 示例参见 TOOLS/edgedect.fp。
@@ -3669,6 +3707,10 @@ S3 Virge专用的视频输出驱动。
 .PD 1
 .
 .TP
+.B wii（仅适用于 Linux）
+任天堂 Wii/GameCube 专用的视频输出驱动。
+.
+.TP
 .B 3dfx (仅用于 Linux)
 3dfx 专用的视频输出驱动，此驱动在 X11 上直接使用硬件。
 只支持 16 bpp。
@@ -3771,7 +3813,7 @@ iTVC16) MPEG 解码器芯片 (Hauppauge WinTV PVR-150/250/350/500)
 .RSs
 .IPs card=<1\-4>
 如果有多于一个 DVB 输出卡, 指定设备号 (仅适用于 V3 API, 比如 1.x.y 驱动系列)。
-如果不指定，mplayer 将搜索第一个可用的卡。
+如果不指定，MPlayer 将搜索第一个可用的卡。
 .IPs <文件名>
 输出文件名 (默认是: ./grab.mpg)
 .RE
@@ -3920,6 +3962,11 @@ PGMYUV 像 PGM, 但也包含 U 和 V 平面, 添加在图像的底部。
 .IPs z=<0\-9>
 指定压缩级别。
 0 没压缩, 9 最强压缩。
+.IPs outdir=<目录名>
+指定保存 PNG 文件的目录（默认值：./）。
+.IPs alpha（默认值：noalpha）
+创建使用 alpha 通道的 PNG 文件。
+注意 MPlayer 通常不支持 alpha 通道，所以该选项只在极少数情况下才有用。
 .RE
 .PD 1
 .
@@ -4190,8 +4237,20 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 如果 <宽度> 指定了, 就使用了低分辨率解码, 
 只要视频的宽度宽过(is major than)或等于 <宽度>。
 .RE
-.IPs "o\ \ \ \ "
-FIXME：没有说明文档
+.B o=<键>=<值>[,<键>=<值>[,...]]
+传递 AVOption 选项至 libavcoder 解码器。
+注意，欢迎制造一个使 o= 不再需要，而将所有未知选项传递至 AVOption 系统的补丁。
+AVOption 的完整列表可在 FFmpeg 用户手册中找到。
+注意某些选项可能与 MEncoder 选项冲突。
+.sp 1
+.RS
+.I 示例：
+.RE
+.RSs
+.PD 0
+.IPs o=debug=pict
+.PD 1
+.RE
 .IPs "sb=<数值> (仅用于 MPEG-2)"
 跳过宏块底部的制定行数。
 .IPs "st=<数值> (仅用于 MPEG-2)"
@@ -6119,7 +6178,7 @@ MPEG-2解码器设置的扫描场标志。
 扫描”的警告。
 不设选项时，它只是做普通的逆转电视图像模式处理，并且应当与
 mencoder \-fps 30000/1001 \-ofps 24000/1001一同使用。
-当这个滤镜用于mplayer时，它将导致播放时帧速率不匀衡，但在通常情况下比
+当这个滤镜用于 MPlayer 时，它将导致播放时帧速率不匀衡，但在通常情况下比
 使用pp=lb或不进行解除隔行扫描操作要好。
 多个选项可以使用/.分隔开指定。
 .RSs
@@ -6911,11 +6970,11 @@ h参数值。
 .B \-<codec>opts <option1[=value1]:option2[=value2]:...>
 .
 .PP
-这里<codec>可以是：lavc、xvidenc、lame、toolame、twolame、nuv、xvfw、faac、
+这里<codec>可以是：lavc、xvidenc、mp3lame、toolame、twolame、nuv、xvfw、faac、
 x264enc、mpeg、lavf。
 .
 .
-.SS lame (\-lameopts)
+.SS mp3lame (\-lameopts)
 .
 .TP
 .B "help\ \ \ "
@@ -7143,6 +7202,22 @@ MPEG版本（默认值：4）
 .IPs vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
 .RE
 .PD 1
+.
+.TP
+.B o=<key>=<value>[,<key>=<value>[,...]]
+将 AVOption 选项传递至 libavcodec 编码器。
+注意，欢迎提供一个使 o= 选项不再需要，而将所有未知选项传递至 AVOption 系统的补丁。
+AVOption 的完整列表可以 FFmpeg 用户手册中找到。
+注意有些 AVOption 选项可能与 MEncoder 选项冲突。
+.sp 1
+.RS
+.I 示例：
+.RE
+.RSs
+.PD 0
+.IPs o=bt=100k
+.PD 1
+.RE
 .
 .TP
 .B acodec=<value>
@@ -7681,22 +7756,14 @@ lmin= <I/P帧量化参数>:lmax= <I/P帧量化参数>:vb_qfactor= <B帧量化参
 .TP
 .B vqcomp=<0.0\-1.0>
 量化参数压缩，vrc_eq选项依赖于该选项（默认值：0.5）。
-例如，假设使用了默认的码率控制方程式，如果vqcomp=1.0，那么码率控制过程中将分配给
-每个帧足够的比特数，以使它们在同一个量化参数下编码。
-如果vqcomp=0.0，那么码率控制中将分配给每个帧相同的比特数，也就是严格的CBR模式。
 .I 注意：
-以上都是极端性的设置，应当从不使用。
-在这两个极端值之间的某个值能使感观质量达到最优。
+在两个极端值之间的某个值能使感观质量达到最优。
 .
 .TP
 .B vrc_eq=<equation>
 主码率控制方程式
 .RE
 .RSs
-.IPs "1\ \ \ \ "
-恒定比特率
-.IPs "tex\ \ "
-恒定质量
 .IPs 1+(tex/\:avgTex-1)*qComp
 近似于以前码率控制代码所用的方程式
 .IPs tex^qComp
@@ -8473,6 +8540,10 @@ denoise3d或hqdn3d之类的视频滤镜来过滤噪声。
 当前该选项只有当场景切换侦测功能禁用时才能工作（sc_threshold=1000000000）。
 .
 .TP
+.B "gmc\ \ \ \ "
+启动全局动作补偿。
+.
+.TP
 .B (no)lowdelay
 设置用于 MPEG-1/2 的低延迟标志（禁用B帧）。
 .
@@ -8512,10 +8583,6 @@ FIXME：为这个选项写说明文档。
 .TP
 .B skip_threshold=<0\-1000000>
 FIXME：为这个选项写说明文档。
-.
-.TP
-.B "o\ \ \ \ \ \ "
-FIXME：没有说明文档
 .
 .
 .SS nuv（\-nuvopts）
@@ -9365,33 +9432,42 @@ p4x4只在subq >= 5，并且分辨率低时才推荐使用。
 彻底性运动搜索或多六边形运动搜索的半径（默认值：16）
 .
 .TP
-.B subq=<1\-7>
+.B subq=<0\-9>
 调整亚像素优化质量。
 该参数控制的是运动估计决策过程中质量与速度的权衡。
 subq=5能比subq=1多压缩掉10%。
 .PD 0
 .RSs
-.IPs 1
+.IPs 0
 对于所有候选宏块类型运行全像素精度的运动估计操作。
-然后选择最佳的类型。
-然后优化这种类型的运动值，使其达到快速四分之一像素模式的精度（运行最快）。
+然后选择 SAD 指标最佳的类型（比 subq=1 快，不推荐，除非
+你需要极其快速的编码）。
+.IPs 1
+执行值为 0 时的操作，
+然后优化这种类型的运动值，使其达到快速四分之一像素模式的精度（运行快）。
 .IPs 2
 对于所有候选宏块类型运行半像素精度的运动估计操作。
-然后选择最佳的类型。
+然后选择 SATD 指标最佳的类型。
 然后优化这种类型的运动值，使其达到快速四分之一像素模式的精度。
 .IPs 3
 与2相似，但采用较慢的四分之一像素优化模式。
 .IPs 4
 对于所有候选宏块类型运行快速四分之一像素精度的运动估计操作。
-然后选择最佳的类型。
+然后选择 SATD 指标最佳的类型。
 然后完成对于此种类型的四分之像素模式的优化操作。
 .IPs 5
 在选择最佳类型之前，对于所有候选宏块类型运行最佳质量的四分之一像素精度的运动估计
-操作（默认值）。
+操作。
+同时也使用 SATD 指标优化双向宏块中使用的两个运动矢量，而不是重用向前和向后搜索中
+找到的矢量。
 .IPs 6
-启用I帧和P帧中宏块类型的码率失真优化模式。
+启用I帧和P帧中宏块类型的码率失真优化模式。（默认值）
 .IPs 7
-启用运动矢量和帧内模式的码率失真优化模式。（最佳）
+在所有帧中启用宏块类型的码率失真优化模式。
+.IPs 8
+启用运动矢量的码率失真优化模式，以及I帧和P帧中的内部预测模式。
+.IPs 9
+启用运动矢量的码率失真优化模式，以及所有帧中的内部预测模式。（最佳）
 .RE
 .PD 1
 .RS
@@ -9411,17 +9487,7 @@ subq=5能比subq=1多压缩掉10%。
 要求frameref>1。
 .
 .TP
-.B (no)brdo
-启用B帧中宏块类型的码率失真优化。
-要求subq>=6。
-.
-.TP
-.B (no)bime
-优化双向宏块中所用的两个运动矢量，而不是重复使用向前和向后搜索中得到的矢量。
-没有B帧时这个选项没有任何作用。
-.
-.TP
-.B trellis=<0\-2>
+.B trellis=<0\-2>（仅适用于 cabac）
 码率失真最优的量化模式
 .PD 0
 .RSs
@@ -9433,6 +9499,19 @@ subq=5能比subq=1多压缩掉10%。
 启用所有模式下的决策（运行慢，要求subq>=6）
 .RE
 .PD 1
+.
+.TP
+.B psy-rd=rd[,trell]
+设置心理视觉优化模式的强度。
+.PD 0
+.RSs
+.IPs rd=<0.0\-10.0>
+心理优化模式的强度（要求 subq>=6）（默认值：1.0）
+.IPs trell=<0.0\-10.0>
+trellis（要求 trellis，实验性）（默认值：0.0）
+.RE
+.PD 1
+.
 .
 .TP
 .B deadzone_inter=<0\-32>
@@ -9769,8 +9848,20 @@ PAL至NTSC的电视图像化处理
 强制使用一个特定的 libav 格式库的分离器。
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME：没有说明文档
+.B o=<键>=<值>[,<键>=<值>[,...]]
+传递 AVOption 选项至 libavformat 流分解器。
+注意，欢迎制造一个使 o= 不再需要，而将所有未知选项传递至 AVOption 系统的补丁。
+AVOption 的完整列表可在 FFmpeg 用户手册中找到。
+注意某些选项可能与 MPlayer/MEncoder 选项冲突。
+.sp 1
+.RS
+.I 示例：
+.RE
+.RSs
+.PD 0
+.IPs o=ignidx
+.PD 1
+.RE
 .
 .TP
 .B probesize=<value>
@@ -9781,7 +9872,6 @@ FIXME：没有说明文档
 .B cryptokey=<hexstring>
 分离器要使用的加密密钥。
 该值是密钥的原始二进制数据转换后得到十六进制字符串。
-.
 .
 .
 .SS FFmpeg libavformat muxers（\-lavfopts）（另参见\-of lavf）
@@ -9825,6 +9915,8 @@ MPEG-4格式
 含有苹果 iPod 固件所需额外标志数据的 MPEG-4 格式
 .IPs "dv\ \ \ "
 Sony 数字视频容器格式
+.IPs "matroska\ \ \ "
+Matroska
 .RE
 .PD 1
 .TP
@@ -9834,8 +9926,20 @@ Sony 数字视频容器格式
 有时需要提高这个值以防止“缓冲下溢”。
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME：无说明文档
+.B o=<键>=<值>[,<键>=<值>[,...]]
+传递 AVOption 选项至 libavformat 流合并器。
+注意，欢迎制造一个使 o= 不再需要，而将所有未知选项传递至 AVOption 系统的补丁。
+AVOption 的完整列表可在 FFmpeg 用户手册中找到。
+注意某些选项可能与 MEncoder 选项冲突。
+.sp 1
+.RS
+.I 示例：
+.RE
+.RSs
+.PD 0
+.IPs o=packetsize=100
+.PD 1
+.RE
 .
 .TP
 .B packetsize=<size>
