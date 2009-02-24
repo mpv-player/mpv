@@ -150,6 +150,7 @@ static int                                deint;
 static int                                pullup;
 static float                              denoise;
 static float                              sharpen;
+static int                                top_field_first;
 
 static VdpDecoder                         decoder;
 static int                                decoder_max_refs;
@@ -200,24 +201,34 @@ static void video_to_output_surface(void)
 {
     VdpTime dummy;
     VdpStatus vdp_st;
-    VdpOutputSurface output_surface = output_surfaces[surface_num];
+    int i;
     if (vid_surface_num < 0)
         return;
 
-    vdp_st = vdp_presentation_queue_block_until_surface_idle(vdp_flip_queue,
-                                                             output_surface,
-                                                             &dummy);
-    CHECK_ST_WARNING("Error when calling vdp_presentation_queue_block_until_surface_idle")
+    // we would need to provide 2 past and 1 future frames to allow advanced
+    // deinterlacing, which is not really possible currently.
+    for (i = 0; i <= !!deint; i++) {
+        int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
+        VdpOutputSurface output_surface;
+        if (i)
+            flip_page();
+        if (deint)
+            field = top_field_first == i ?
+                    VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
+                    VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;
+        output_surface = output_surfaces[surface_num];
+        vdp_st = vdp_presentation_queue_block_until_surface_idle(vdp_flip_queue,
+                                                                 output_surface,
+                                                                 &dummy);
+        CHECK_ST_WARNING("Error when calling vdp_presentation_queue_block_until_surface_idle")
 
-    // we would need to provide past and future frames to allow deinterlacing,
-    // which is not really possible currently. Deinterlacing is supposed to fall
-    // back to bob deinterlacing, but that seems not to work either.
     vdp_st = vdp_video_mixer_render(video_mixer, VDP_INVALID_HANDLE, 0,
-                                    VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME,
+                                    field,
                                     0, NULL, surface_render[vid_surface_num].surface, 0, NULL, &src_rect_vid,
                                     output_surface,
                                     NULL, &out_rect_vid, 0, NULL);
     CHECK_ST_WARNING("Error when calling vdp_video_mixer_render")
+    }
 }
 
 static void resize(void)
@@ -381,9 +392,9 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
         &vid_height,
         &vdp_chroma_type
     };
-    if (deint == 1)
-        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
     if (deint == 2)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
+    if (deint == 3)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL;
     if (pullup)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_INVERSE_TELECINE;
@@ -817,6 +828,7 @@ static uint32_t draw_image(mp_image_t *mpi)
                                                     mpi->stride); // pitch
         CHECK_ST_ERROR("Error when calling vdp_video_surface_put_bits_y_cb_cr")
     }
+    top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
 
     video_to_output_surface();
     return VO_TRUE;
@@ -932,8 +944,9 @@ static const char help_msg[] =
     "\nOptions:\n"
     "  deint\n"
     "    0: no deinterlacing\n"
-    "    1: temporal deinterlacing (not yet working)\n"
-    "    2: temporal-spatial deinterlacing (not yet working)\n"
+    "    1: bob deinterlacing (current fallback)\n"
+    "    2: temporal deinterlacing (not yet working)\n"
+    "    3: temporal-spatial deinterlacing (not yet working)\n"
     "  pullup\n"
     "    Try to apply inverse-telecine (needs deinterlacing, not working)\n"
     "  denoise\n"
