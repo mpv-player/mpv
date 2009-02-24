@@ -222,12 +222,13 @@ static void video_to_output_surface(void)
                                                                  &dummy);
         CHECK_ST_WARNING("Error when calling vdp_presentation_queue_block_until_surface_idle")
 
-    vdp_st = vdp_video_mixer_render(video_mixer, VDP_INVALID_HANDLE, 0,
-                                    field,
-                                    0, NULL, surface_render[vid_surface_num].surface, 0, NULL, &src_rect_vid,
-                                    output_surface,
-                                    NULL, &out_rect_vid, 0, NULL);
-    CHECK_ST_WARNING("Error when calling vdp_video_mixer_render")
+        vdp_st = vdp_video_mixer_render(video_mixer, VDP_INVALID_HANDLE, 0,
+                                        field, 0, NULL,
+                                        surface_render[vid_surface_num].surface,
+                                        0, NULL, &src_rect_vid,
+                                        output_surface,
+                                        NULL, &out_rect_vid, 0, NULL);
+        CHECK_ST_WARNING("Error when calling vdp_video_mixer_render")
     }
 }
 
