@@ -1,4 +1,4 @@
-.\" Synced with r28670
+.\" Synced with r28727
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 02. 19." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 02. 25." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -3439,6 +3439,29 @@ Vezérlõ kiválasztása az overlay forrásaként az X11 felett.
 .B vdpau (\-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau vagy ffh264vdpau kapcsolókkal)
 Videó kimenet, ami a VDPAU-t használja a videó hardveres dekódolásához.
 Támogatja a szoftveresen dekódolt videó megjelenítését is.
+.PD 0
+.RSs
+.IPs sharpen=<\-1\-1>
+Pozitív értékekkel egy élesítõ algoritmust alkalmaz a videóra,
+negatív értékekkel pedig elmosást (alapértelmezett: 0).
+.IPs denoise=<0\-1>
+Egy zajcsökkentõ algoritmust alkalmaz a videóra (alapértelmezett: 0, nincs zajcsökkentés).
+.IPs deint=<0\-3>
+Kiválasztja a deinterlacer-t (alapértelmezett: 0).
+.RSss
+.IPs 0
+Nincs deinterlace.
+.IPs 1
+Bob deinterlace (jelenleg visszalép a fejlettebb deinterlacer-ekre).
+.IPs 2
+Mozgás adaptív idõbeli deinterlace (még nem mûködik).
+.IPs 3
+Mozgás adaptív idõbeli deinterlace él-vezérelt térbeli interpolációval (még nem mûködik).
+.RE
+.IPs pullup
+Inverz telecine-t próbál alkalmazni, deinterlace kell hozzá.
+.RE
+.PD 1 
 .
 .TP
 .B xvmc (csak X11 \-vc ffmpeg12mc kapcsolóval)
@@ -5516,6 +5539,13 @@ A lejátszás sebességének változása megváltoztatja a hangmagasságot,
 megtartva az audió 1.2x-es tempóját.
 .RE
 .PD 1
+.
+.TP
+.B "stats\ \ "
+Statisztikát gyûjt és ír ki az audió folyamról, fõként a hangerõrõl.
+Ezek a statisztikák különösen a hang beállításánál hasznosak a
+romlás elkerülése mellett.
+A hangerõ dB-ben kerül kiírásra és kompatibilis az audió hangerõ szûrõvel.
 .
 .
 .
