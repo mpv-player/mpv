@@ -3426,6 +3426,30 @@ Select the driver to use as source to overlay on top of X11.
 .B vdpau (with \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau or ffh264vdpau)
 Video output that uses VDPAU to decode video via hardware.
 Also supports displaying of software-decoded video.
+.PD 0
+.RSs
+.IPs sharpen=<\-1\-1>
+For positive values, apply a sharpening algorithm to the video,
+for negative values a blurring algorithm (default: 0).
+.IPs denoise=<0\-1>
+Apply a noise reduction algorithm to the video (default: 0, no noise reduction).
+.IPs deint=<0\-3>
+Chooses the deinterlacer (default: 0).
+.RSss
+.IPs 0
+No deinterlacing.
+.IPs 1
+Bob deinterlacing (current fallback for advanced deinterlacers).
+.IPs 2
+Motion adaptive temporal deinterlacing (not yet working).
+.IPs 3
+Motion adaptive temporal deinterlacing with edge-guided spatial interpolation
+(not yet working).
+.RE
+.IPs pullup
+Try to apply inverse telecine, needs deinterlacing.
+.RE
+.PD 1 
 .
 .TP
 .B xvmc (X11 with \-vc ffmpeg12mc only)

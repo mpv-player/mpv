@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r27123
+// In sync with r28122
 // TODO: cosmetic commit 27072
 // FIXME: improve wording/meaning of periodsize|timer.. for ao_alsa.c strings
 
@@ -54,13 +54,13 @@ static char help_text[]=
 "\n";
 #endif
 
-// libmpcodecs/ad_dvdpcm.c:
+// libmpcodecs/ad_dvdpcm.c
 #define MSGTR_SamplesWanted "Beispiele für dieses Format werden gebraucht, um die Unterstützung zu verbessern. Bitte kontaktiere die Entwickler.\n"
 
 
 // ========================= MPlayer Ausgaben ===========================
 
-// mplayer.c:
+// mplayer.c
 #define MSGTR_Exiting "\nBeenden...\n"
 #define MSGTR_ExitingHow "\nBeenden... (%s)\n"
 #define MSGTR_Exit_quit "Ende"
@@ -195,6 +195,7 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV-Ereignis: Nav Suche beendet.\n"
 #define MSGTR_MenuCall "Menü-Aufruf\n"
 
+// --- edit decision lists
 #define MSGTR_EdlOutOfMem "Kann nicht genug Speicher für EDL-Daten reservieren.\n"
 #define MSGTR_EdlRecordsNo "%d EDL-Aktionen gelesen.\n"
 #define MSGTR_EdlQueueEmpty "Es gibt keine auszuführenden EDL-Aktionen.\n"
@@ -264,7 +265,7 @@ static char help_text[]=
 #define MSGTR_SubVisibleStatus "Untertitel: %s"
 #define MSGTR_SubForcedOnlyStatus "Erzwungene Untertitel: %s"
 
-// mencoder.c:
+// mencoder.c
 #define MSGTR_UsingPass3ControlFile "Verwende Pass 3 Kontrolldatei: %s\n"
 #define MSGTR_MissingFilename "\nDateiname nicht angegeben.\n\n"
 #define MSGTR_CannotOpenFile_Device "Kann Datei/Gerät nicht öffnen.\n"
@@ -484,7 +485,7 @@ static char help_text[]=
 "                 <8-320>: ABR-Encodierung mit der angegebenen durchschnittlichen\n"\
 "                          Bitrate\n\n"
 
-//codec-cfg.c:
+//codec-cfg.c
 #define MSGTR_DuplicateFourcc "Doppelter FourCC."
 #define MSGTR_TooManyFourccs "Zu viele FourCCs/Formate..."
 #define MSGTR_ParseError "Fehler beim Parsen."
@@ -543,7 +544,7 @@ static char help_text[]=
 #define MSGTR_PropertyListHeader "\n Name                 Typ             Min        Max\n\n"
 #define MSGTR_TotalProperties "\nInsgesamt: %d Eigenschaften\n"
 
-// open.c, stream.c:
+// open.c, stream.c
 #define MSGTR_CdDevNotfound "CDROM-Laufwerk '%s' nicht gefunden.\n"
 #define MSGTR_ErrTrackSelect "Fehler beim Auswählen des VCD Tracks."
 #define MSGTR_ReadSTDIN "Lese von Standardeingabe (stdin)...\n"
@@ -584,7 +585,7 @@ static char help_text[]=
 #define MSGTR_DVDsubtitleLanguage "Untertitel ( sid ): %d Sprache: %s\n"
 #define MSGTR_DVDnumSubtitles "Anzahl der Untertitel auf der Disc: %d\n"
 
-// muxer.c, muxer_*.c:
+// muxer.c, muxer_*.c
 #define MSGTR_TooManyStreams "Zu viele Streams!"
 #define MSGTR_RawMuxerOnlyOneStream "Der rawaudio-Muxer unterstützt nur einen Audiostream!\n"
 #define MSGTR_IgnoringVideoStream "Ignoriere Videostream!\n"
@@ -597,7 +598,7 @@ static char help_text[]=
 #define MSGTR_WritingHeader "Schreibe Dateikopf...\n"
 #define MSGTR_WritingTrailer "Schreibe Dateiindex...\n"
 
-// demuxer.c, demux_*.c:
+// demuxer.c, demux_*.c
 #define MSGTR_AudioStreamRedefined "Warnung! Audiostream-Header %d neu definiert!\n"
 #define MSGTR_VideoStreamRedefined "Warnung! Videostream-Header %d neu definiert!\n"
 #define MSGTR_TooManyAudioInBuffer "\nZu viele Audiopakete im Puffer: (%d in %d Bytes).\n"
@@ -664,7 +665,7 @@ static char help_text[]=
 #define MSGTR_AudioID "[%s] Audiostream gefunden, -aid %d\n"
 #define MSGTR_SubtitleID "[%s] Untertitelstream gefunden, -sid %d\n"
 
-// dec_video.c & dec_audio.c:
+// dec_video.c & dec_audio.c
 #define MSGTR_CantOpenCodec "Konnte Codec nicht öffnen.\n"
 #define MSGTR_CantCloseCodec "Konnte Codec nicht schließen.\n"
 
