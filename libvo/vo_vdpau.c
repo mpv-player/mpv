@@ -1076,8 +1076,10 @@ static int control(uint32_t request, void *data, ...)
                 r->h = vo_screenheight;
                 r->ml = r->mr = border_x;
                 r->mt = r->mb = border_y;
-            } else
-                r->w = vo_dwidth; r->h = vo_dheight;
+            } else {
+                r->w = vo_dwidth;
+                r->h = vo_dheight;
+            }
             return VO_TRUE;
         }
     }
