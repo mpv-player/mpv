@@ -72,6 +72,7 @@ udp_open_socket (URL_t *url)
     return -1;
   }
 
+  memset(&server_address, 0, sizeof(server_address));
   if (isalpha (url->hostname[0]))
   {
 #if !HAVE_WINSOCK2_H
