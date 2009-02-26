@@ -1012,6 +1012,13 @@ static int preinit(const char *arg)
 static int control(uint32_t request, void *data, ...)
 {
     switch (request) {
+        case VOCTRL_GET_DEINTERLACE:
+            *(int*)data = deint;
+            return VO_TRUE;
+        case VOCTRL_SET_DEINTERLACE:
+            deint = *(int*)data;
+printf("Set to %d. \n", deint);
+            return VO_TRUE;
         case VOCTRL_PAUSE:
             return (int_pause = 1);
         case VOCTRL_RESUME:
