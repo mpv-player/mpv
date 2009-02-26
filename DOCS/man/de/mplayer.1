@@ -3,7 +3,7 @@
 .\" Tobias Diedrich gepflegt.
 .\" Encoding: iso-8859-1
 .\"
-.\" In sync with r27801
+.\" In sync with r28126
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -108,7 +108,7 @@ cue://Datei[:Titel]
 .
 .br
 .B mplayer
-[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|smb]://
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]://
 [Benutzer:Passwort@]URL[:Port] [Optionen]
 .
 .br
@@ -2788,6 +2788,12 @@ Maximum sein, was z.B.\& das OSD nicht korrekt darstellen kann.
 Setzt die Schrittweite der Mixer-Lautstärkeänderungen in Prozent der
 Gesamtweite (Standard: 3).
 .
+.TP
+.B \-volume <-1\-100> (siehe auch \-af volume)
+Setze die Lautstärke im Mixer zum Programmstart, entweder in Hardware oder
+Software (in Verbindung mit \-softvol).
+Ein Wert von -1 (Standard) ändert die Lautstärke nicht.
+.
 .
 .
 .SH "AUDIOAUSGABETREIBER (NUR BEI MPLAYER)"
@@ -3406,8 +3412,9 @@ Die mit der Option \-geometry gesetzte Initialposition ist relativ zum
 angegebenen Bildschirm.
 Wird normalerweise nur mit "\-fstype \-fullscreen" oder "\-fstype none"
 funktionieren.
-Diese Option ist nicht geeignet, nur das Startbild zu setzen (und nicht auch
-das Bild im Vollbildmodus), \-geometry ist für diesen Zweck momentan die beste
+Diese Option ist nicht geeignet, nur das Startbild zu setzen (denn es wird auf
+dem angegebenen Bildschirm immer im Vollbildmodus dargestellt), \-geometry ist
+für diesen Zweck momentan die beste
 zur Verfügung stehende Option.
 Unterstützt von den Videoausgabetreibern gl, gl2, x11 und xv.
 .
@@ -3610,11 +3617,15 @@ Gib das Video über die Direct Graphics Access-Erweiterung von XFree86 aus.
 Wird als veraltet betrachtet.
 .
 .TP
-.B sdl (nur bei SDL)
+.B sdl (nur bei SDL, fehlerhaft/veraltet)
 Höchst-plattformunabhängiger Videoausgabetreiber der SDL-Bibliothek (Simple
 Directmedia Layer).
 Da SDL einen eigenen X11-Layer benutzt, haben die X11-Optionen von MPlayer
 keine Wirkung auf SDL.
+Beachte, dass es mehrere kleine Bugs gibt (\-vm/\-novm wird größtenteils
+ignoriert, \-fs verhält sich so wie \-novm es sollte, das Fenster ist
+in der oberen linken Ecke, wenn man aus dem Vollbildmodus
+zurückkehrt, Panscan wird nicht unterstützt...)
 .PD 0
 .RSs
 .IPs driver=<Treiber>
@@ -3672,6 +3683,10 @@ Windows-Frontend für VIDIX
 das gleich wie bei vidix
 .RE
 .PD 1
+.
+.TP
+.B direct3d (nur bei Windows) (BETA-Code!)
+Videoausgabetreiber, der das Direct3D-Interface verwendet (nützlich für Vista).
 .
 .TP
 .B directx (nur bei Windows)
@@ -3785,7 +3800,7 @@ funktionieren, benutzt aber auch neuere Erweiterungen, die mehr Farbräume
 und direct rendering ermöglichen.
 Probiere für optimale Geschwindigkeit etwas ähnliches wie
 .br
-\-vo gl:yuv=2:force\-pbo:ati\-hack \-dr \-noslices
+\-vo gl:yuv=2:rectangle=2:force\-pbo:ati\-hack \-dr \-noslices
 .br
 Dieser Code macht nur sehr wenige Fehlerüberprüfungen, falls also ein Feature
 nicht funktioniert liegt das vieleicht an fehlender Unterstützung durch deine
@@ -3889,6 +3904,10 @@ Gamma kann außerdem unabhängig für rot, grün und blau gesetzt werden.
 Die Geschwindigkeit hängt mehr von der Speicherbandbreite der GPU ab als
 andere Methoden.
 .RE
+.IPs ycbcr
+Verwende die GL_MESA_ycbcr_texture-Erweiterung, um YUV nach RGB zu konvertieren.
+Dies ist in den meisten Fällen vermutlich langsamer als eine Konvertierung zu
+RGB in Software.
 .IPs lscale=<n>
 Wählt die zu benutzende Skalierungsmethode für Luminanzskalierung.
 Nur gültig für yuv-Modi 2, 3, 4 und 6.
@@ -3908,13 +3927,16 @@ Funktioniert auf ein paar mehr Karten als Methode 1.
 Ist auf manchen Karten möglicherweise schneller.
 .br
 4: Verwende experimentelle unscharfe Maskierung mit 3x3-Unterstützung und einer
-Stärke von 0.5.
+Standardstärke von 0.5.
 5: Verwende experimentelle unscharfe Maskierung mit 5x5-Unterstützung und einer
-Stärke von 0.5.
+Standardstärke von 0.5.
 .RE
 .IPs cscale=<n>
 Wählt die zu benutzende Skalierungsmethode für Chrominanzskalierung.
 Für Details siehe lscale.
+.IPs filter-strength=<Wert>
+Setze die Effektstärke für diejenigen lscale/cscale-Filter, die dies
+unterstützen.
 .IPs customprog=<Dateiname>
 Lädt ein eigenes Fragmentprogramm aus <Dateiname>.
 Siehe TOOLS/\:edgedetect.fp als Beispiel.
@@ -4416,6 +4438,10 @@ Gibt die Kompressionsstufe an.
 .IPs outdir=<Verzeichnisname>
 Gib das Verzeichnis an, in das die PNG-Dateien gespeichert werden sollen
 (Standard: ./).
+.IPs alpha (Standard: noalpha)
+Erstelle PNG-Dateien mit Alpha-Kanal.
+Beachte, dass MPlayer Alpha-Kanäle im allgemeinen nicht unterstützt, so dass
+dies nur in manchen Fällen sinnvoll ist.
 .RE
 .PD 1
 .
@@ -10529,33 +10555,39 @@ Gründliche Suche (sehr langsam und nicht besser als umh)
 Radius der gründlichen bzw. Multi-Hexagon-Bewegungssuche (Standard: 16)
 .
 .TP
-.B subq=<1\-9>
+.B subq=<0\-9>
 Anpassen der Verfeinerungsqualität von subpel.
 Dieser Parameter kontrolliert das Gleichgewicht von Qualität und
 Geschwindigkeit beim Prozess der Bewegungsschätzung.
 subq=5 kann bis zu 10% besser als subq=1 komprimieren.
 .PD 0
 .RSs
-.IPs 1
+.IPs 0
 Wendet Vollpixel-Präzisionsbewegungsschätzung auf alle in Frage kommenden
-Makroblock-Typen an, wählt dann den besten Typen und verfeinert schließlich die
-Bewegung dieses Typen auf schnelle Viertelpixel-Präzision (am schnellsten).
+Makroblock-Typen an, wählt dann den besten Typen anhand einer SATD-Metrik
+(schneller als subq=1, nicht zu empfehlen, wenn du nicht ultra-schnelle
+Encodierung brauchst).
+.IPs 1
+Macht das gleiche wie 0 und verfeinert die Bewegung dieses Typs auf schnelle
+Viertelpixel-Präzision (schnell).
 .IPs 2
 Wendet Halbpixel-Präzisionsbewegungsschätzung auf alle in Frage kommenden
-Makroblock-Typen an, wählt dann den besten Typen und verfeinert schließlich die
+Makroblock-Typen an, wählt dann den besten Typen anhand einer SATD-Metrik und
+verfeinert schließlich die
 Bewegung dieses Typen auf schnelle Viertelpixel-Präzision.
 .IPs 3
 Wie 2, verwendet jedoch langsamere Viertelpixel-Verfeinerung.
 .IPs 4
 Wendet schnelle Viertelpixel-Präzisionsbewegungsschätzung auf alle in Frage
-kommenden Makroblock-Typen an, wählt dann den besten Typen und schließt dann
+kommenden Makroblock-Typen an, wählt dann den besten Typen anhand einer
+SATD-Metrik und schließt dann
 die Viertelpixel-Verfeinerung für diesen Typen ab.
 .IPs 5
 Wendet die bestmögliche Viertelpixel-Präzisionsbewegungsschätzung auf alle in
 Frage kommenden Makroblock-Typen an und wählt dann den besten Typen.
-Anstatt die Vektoren von Vorwärts- und Rückwärtssuche wiederzuverwenden
-wAußerdemerden die beiden Bewegungsvektoren, die in bidirektionalen
-Makroblöcken verwendet werden, verfeinert.
+Außerdem werden anstatt die Vektoren von Vorwärts- und Rückwärtssuche
+wiederzuverwenden die beiden Bewegungsvektoren, die in bidirektionalen
+Makroblöcken verwendet werden, anhand einer SATD-Metrik verfeinert.
 .IPs 6
 Aktiviert Rate-Distortion-Optimierung von Makroblock-Typen in Intra- und
 P-Frames an (Standard).
@@ -10602,7 +10634,7 @@ während allen Modus-Entscheidungen aktiviert (langsam, benötigt subq>=6)
 .PD 1
 .
 .TP
-.B psy-rd=rd[:trell]
+.B psy-rd=rd[,trell]
 Setzt die Stärke der psychovisuellen Optimierung.
 .PD 0
 .RSs
