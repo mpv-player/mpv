@@ -1017,7 +1017,6 @@ static int control(uint32_t request, void *data, ...)
             return VO_TRUE;
         case VOCTRL_SET_DEINTERLACE:
             deint = *(int*)data;
-printf("Set to %d. \n", deint);
             return VO_TRUE;
         case VOCTRL_PAUSE:
             return (int_pause = 1);
