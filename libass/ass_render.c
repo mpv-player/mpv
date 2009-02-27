@@ -1310,7 +1310,7 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 	key.italic = render_context.italic;
 	key.outline = render_context.border * 0xFFFF;
 
-	info->glyph = info->outline_glyph = 0;
+	memset(info, 0, sizeof(glyph_info_t));
 
 	val = cache_find_glyph(&key);
 	if (val) {
