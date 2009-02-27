@@ -30,7 +30,7 @@
 #include "mputils.h"
 #include "ass_utils.h"
 
-int mystrtoi(char** p, int base, int* res)
+int mystrtoi(char** p, int* res)
 {
 	// NOTE: base argument is ignored, but not used in libass anyway
 	double temp_res;
@@ -41,7 +41,7 @@ int mystrtoi(char** p, int base, int* res)
 	else return 0;
 }
 
-int mystrtoll(char** p, int base, long long* res)
+int mystrtoll(char** p, long long* res)
 {
 	double temp_res;
 	char* start = *p;

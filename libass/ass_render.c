@@ -702,31 +702,31 @@ static char* parse_tag(char* p, double pwr) {
 			mp_msg(MSGT_ASS, MSGL_V, "stub: \\ybord%.2f\n", val);
 	} else if (mystrcmp(&p, "xshad")) {
 		int val;
-		if (mystrtoi(&p, 10, &val))
+		if (mystrtoi(&p, &val))
 			mp_msg(MSGT_ASS, MSGL_V, "stub: \\xshad%d\n", val);
 	} else if (mystrcmp(&p, "yshad")) {
 		int val;
-		if (mystrtoi(&p, 10, &val))
+		if (mystrtoi(&p, &val))
 			mp_msg(MSGT_ASS, MSGL_V, "stub: \\yshad%d\n", val);
 	} else if (mystrcmp(&p, "fax")) {
 		int val;
-		if (mystrtoi(&p, 10, &val))
+		if (mystrtoi(&p, &val))
 			mp_msg(MSGT_ASS, MSGL_V, "stub: \\fax%d\n", val);
 	} else if (mystrcmp(&p, "fay")) {
 		int val;
-		if (mystrtoi(&p, 10, &val))
+		if (mystrtoi(&p, &val))
 			mp_msg(MSGT_ASS, MSGL_V, "stub: \\fay%d\n", val);
 	} else if (mystrcmp(&p, "iclip")) {
 		int x0, y0, x1, y1;
 		int res = 1;
 		skip('(');
-		res &= mystrtoi(&p, 10, &x0);
+		res &= mystrtoi(&p, &x0);
 		skip(',');
-		res &= mystrtoi(&p, 10, &y0);
+		res &= mystrtoi(&p, &y0);
 		skip(',');
-		res &= mystrtoi(&p, 10, &x1);
+		res &= mystrtoi(&p, &x1);
 		skip(',');
-		res &= mystrtoi(&p, 10, &y1);
+		res &= mystrtoi(&p, &y1);
 		skip(')');
 		mp_msg(MSGT_ASS, MSGL_V, "stub: \\iclip(%d,%d,%d,%d)\n", x0, y0, x1, y1);
 	} else if (mystrcmp(&p, "blur")) {
@@ -781,18 +781,18 @@ static char* parse_tag(char* p, double pwr) {
 		double x, y;
 		double k;
 		skip('(');
-		mystrtoi(&p, 10, &x1);
+		mystrtoi(&p, &x1);
 		skip(',');
-		mystrtoi(&p, 10, &y1);
+		mystrtoi(&p, &y1);
 		skip(',');
-		mystrtoi(&p, 10, &x2);
+		mystrtoi(&p, &x2);
 		skip(',');
-		mystrtoi(&p, 10, &y2);
+		mystrtoi(&p, &y2);
 		if (*p == ',') {
 			skip(',');
-			mystrtoll(&p, 10, &t1);
+			mystrtoll(&p, &t1);
 			skip(',');
-			mystrtoll(&p, 10, &t2);
+			mystrtoll(&p, &t2);
 			mp_msg(MSGT_ASS, MSGL_DBG2, "movement6: (%d, %d) -> (%d, %d), (%" PRId64 " .. %" PRId64 ")\n", 
 				x1, y1, x2, y2, (int64_t)t1, (int64_t)t2);
 		} else {
@@ -867,7 +867,7 @@ static char* parse_tag(char* p, double pwr) {
 		// FIXME: simplify
 	} else if (mystrcmp(&p, "an")) {
 		int val;
-		if (mystrtoi(&p, 10, &val) && val) {
+		if (mystrtoi(&p, &val) && val) {
 			int v = (val - 1) / 3; // 0, 1 or 2 for vertical alignment
 			mp_msg(MSGT_ASS, MSGL_DBG2, "an %d\n", val);
 			if (v != 0) v = 3 - v;
@@ -879,16 +879,16 @@ static char* parse_tag(char* p, double pwr) {
 			render_context.alignment = render_context.style->Alignment;
 	} else if (mystrcmp(&p, "a")) {
 		int val;
-		if (mystrtoi(&p, 10, &val) && val)
+		if (mystrtoi(&p, &val) && val)
 			render_context.alignment = val;
 		else
 			render_context.alignment = render_context.style->Alignment;
 	} else if (mystrcmp(&p, "pos")) {
 		int v1, v2;
 		skip('(');
-		mystrtoi(&p, 10, &v1);
+		mystrtoi(&p, &v1);
 		skip(',');
-		mystrtoi(&p, 10, &v2);
+		mystrtoi(&p, &v2);
 		skip(')');
 		mp_msg(MSGT_ASS, MSGL_DBG2, "pos(%d, %d)\n", v1, v2);
 		if (render_context.evt_type != EVENT_POSITIONED) {
@@ -902,9 +902,9 @@ static char* parse_tag(char* p, double pwr) {
 		long long t1, t2, t3, t4;
 		if (*p == 'e') ++p; // either \fad or \fade
 		skip('(');
-		mystrtoi(&p, 10, &a1);
+		mystrtoi(&p, &a1);
 		skip(',');
-		mystrtoi(&p, 10, &a2);
+		mystrtoi(&p, &a2);
 		if (*p == ')') {
 			// 2-argument version (\fad, according to specs)
 			// a1 and a2 are fade-in and fade-out durations
@@ -919,24 +919,24 @@ static char* parse_tag(char* p, double pwr) {
 			// 6-argument version (\fade)
 			// a1 and a2 (and a3) are opacity values
 			skip(',');
-			mystrtoi(&p, 10, &a3);
+			mystrtoi(&p, &a3);
 			skip(',');
-			mystrtoll(&p, 10, &t1);
+			mystrtoll(&p, &t1);
 			skip(',');
-			mystrtoll(&p, 10, &t2);
+			mystrtoll(&p, &t2);
 			skip(',');
-			mystrtoll(&p, 10, &t3);
+			mystrtoll(&p, &t3);
 			skip(',');
-			mystrtoll(&p, 10, &t4);
+			mystrtoll(&p, &t4);
 		}
 		skip(')');
 		render_context.fade = interpolate_alpha(frame_context.time - render_context.event->Start, t1, t2, t3, t4, a1, a2, a3);
 	} else if (mystrcmp(&p, "org")) {
 		int v1, v2;
 		skip('(');
-		mystrtoi(&p, 10, &v1);
+		mystrtoi(&p, &v1);
 		skip(',');
-		mystrtoi(&p, 10, &v2);
+		mystrtoi(&p, &v2);
 		skip(')');
 		mp_msg(MSGT_ASS, MSGL_DBG2, "org(%d, %d)\n", v1, v2);
 		//				render_context.evt_type = EVENT_POSITIONED;
@@ -990,13 +990,13 @@ static char* parse_tag(char* p, double pwr) {
 		int x0, y0, x1, y1;
 		int res = 1;
 		skip('(');
-		res &= mystrtoi(&p, 10, &x0);
+		res &= mystrtoi(&p, &x0);
 		skip(',');
-		res &= mystrtoi(&p, 10, &y0);
+		res &= mystrtoi(&p, &y0);
 		skip(',');
-		res &= mystrtoi(&p, 10, &x1);
+		res &= mystrtoi(&p, &x1);
 		skip(',');
-		res &= mystrtoi(&p, 10, &y1);
+		res &= mystrtoi(&p, &y1);
 		skip(')');
 		if (res) {
 			render_context.clip_x0 = render_context.clip_x0 * (1-pwr) + x0 * pwr;
@@ -1039,7 +1039,7 @@ static char* parse_tag(char* p, double pwr) {
 		reset_render_context();
 	} else if (mystrcmp(&p, "be")) {
 		int val;
-		if (mystrtoi(&p, 10, &val)) {
+		if (mystrtoi(&p, &val)) {
 			// Clamp to 10, since high values need excessive CPU
 			val = (val < 0) ? 0 : val;
 			val = (val > 10) ? 10 : val;
@@ -1048,7 +1048,7 @@ static char* parse_tag(char* p, double pwr) {
 			render_context.be = 0;
 	} else if (mystrcmp(&p, "b")) {
 		int b;
-		if (mystrtoi(&p, 10, &b)) {
+		if (mystrtoi(&p, &b)) {
 			if (pwr >= .5)
 				render_context.bold = b;
 		} else
@@ -1056,7 +1056,7 @@ static char* parse_tag(char* p, double pwr) {
 		update_font();
 	} else if (mystrcmp(&p, "i")) {
 		int i;
-		if (mystrtoi(&p, 10, &i)) {
+		if (mystrtoi(&p, &i)) {
 			if (pwr >= .5)
 				render_context.italic = i;
 		} else
@@ -1064,37 +1064,37 @@ static char* parse_tag(char* p, double pwr) {
 		update_font();
 	} else if (mystrcmp(&p, "kf") || mystrcmp(&p, "K")) {
 		int val = 0;
-		mystrtoi(&p, 10, &val);
+		mystrtoi(&p, &val);
 		render_context.effect_type = EF_KARAOKE_KF;
 		if (render_context.effect_timing)
 			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
 	} else if (mystrcmp(&p, "ko")) {
 		int val = 0;
-		mystrtoi(&p, 10, &val);
+		mystrtoi(&p, &val);
 		render_context.effect_type = EF_KARAOKE_KO;
 		if (render_context.effect_timing)
 			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
 	} else if (mystrcmp(&p, "k")) {
 		int val = 0;
-		mystrtoi(&p, 10, &val);
+		mystrtoi(&p, &val);
 		render_context.effect_type = EF_KARAOKE;
 		if (render_context.effect_timing)
 			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
 	} else if (mystrcmp(&p, "shad")) {
 		int val;
-		if (mystrtoi(&p, 10, &val))
+		if (mystrtoi(&p, &val))
 			render_context.shadow = val;
 		else
 			render_context.shadow = render_context.style->Shadow;
 	} else if (mystrcmp(&p, "pbo")) {
 		int val = 0;
-		mystrtoi(&p, 10, &val); // ignored
+		mystrtoi(&p, &val); // ignored
 	} else if (mystrcmp(&p, "p")) {
 		int val;
-		if (!mystrtoi(&p, 10, &val))
+		if (!mystrtoi(&p, &val))
 			val = 0;
 		render_context.drawing_mode = !!val;
 	}
