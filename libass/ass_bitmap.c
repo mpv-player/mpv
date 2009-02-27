@@ -259,6 +259,7 @@ int glyph_to_bitmap(ass_synth_priv_t* priv, ass_synth_priv_t* priv_blur,
 		bitmap_t** bm_o, bitmap_t** bm_s, int be, double blur_radius)
 {
 	int bord = be ? (be+1) : 0;
+	blur_radius *= 2;
 	bord = (blur_radius > 0.0) ? blur_radius : bord;
 
 	assert(bm_g && bm_o && bm_s);
