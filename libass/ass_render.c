@@ -1144,7 +1144,7 @@ static unsigned get_next_char(char** str)
 			return ' ';
 		}
 	}
-	chr = utf8_get_char(&p);
+	chr = utf8_get_char((const char **)&p);
 	*str = p;
 	return chr;
 }
@@ -2043,7 +2043,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			center.x = x2scr(render_context.org_x);
 			center.y = y2scr(render_context.org_y);
 		} else {
-			int bx, by;
+			int bx = 0, by = 0;
 			get_base_point(bbox, alignment, &bx, &by);
 			center.x = device_x + bx;
 			center.y = device_y + by;
