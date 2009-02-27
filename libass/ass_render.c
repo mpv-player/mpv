@@ -581,12 +581,9 @@ static void change_border(double border)
 	if (!render_context.font) return;
 
 	if (border < 0) {
-		if (render_context.style->BorderStyle == 1) {
-			if (render_context.style->Outline == 0 && render_context.style->Shadow > 0)
-				border = 1.;
-			else
-				border = render_context.style->Outline;
-		} else
+		if (render_context.style->BorderStyle == 1)
+			border = render_context.style->Outline;
+		else
 			border = 1.;
 	}
 	render_context.border = border;
