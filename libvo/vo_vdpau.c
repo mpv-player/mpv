@@ -148,6 +148,7 @@ static int                                output_surface_width, output_surface_h
 
 static VdpVideoMixer                      video_mixer;
 static int                                deint;
+static int                                deint_type;
 static int                                pullup;
 static float                              denoise;
 static float                              sharpen;
@@ -965,6 +966,7 @@ static int preinit(const char *arg)
     static const char *vdpau_device_create = "vdp_device_create_x11";
 
     deint = 0;
+    deint_type = 3;
     pullup = 0;
     denoise = 0;
     sharpen = 0;
@@ -972,6 +974,8 @@ static int preinit(const char *arg)
         mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
         return -1;
     }
+    if (deint)
+        deint_type = deint;
 
     vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
     if (!vdpau_lib_handle) {
@@ -1018,6 +1022,8 @@ static int control(uint32_t request, void *data, ...)
             return VO_TRUE;
         case VOCTRL_SET_DEINTERLACE:
             deint = *(int*)data;
+            if (deint)
+                deint = deint_type;
             return VO_TRUE;
         case VOCTRL_PAUSE:
             return (int_pause = 1);
