@@ -944,7 +944,7 @@ static const char help_msg[] =
     "\n-vo vdpau command line help:\n"
     "Example: mplayer -vo vdpau:deint=2\n"
     "\nOptions:\n"
-    "  deint\n"
+    "  deint (all modes > 0 respect -field-dominance)\n"
     "    0: no deinterlacing\n"
     "    1: bob deinterlacing (current fallback)\n"
     "    2: temporal deinterlacing (not yet working)\n"
