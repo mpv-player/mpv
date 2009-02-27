@@ -781,18 +781,18 @@ static char* parse_tag(char* p, double pwr) {
 		double x, y;
 		double k;
 		skip('(');
-		x1 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &x1);
 		skip(',');
-		y1 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &y1);
 		skip(',');
-		x2 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &x2);
 		skip(',');
-		y2 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &y2);
 		if (*p == ',') {
 			skip(',');
-			t1 = strtoll(p, &p, 10);
+			mystrtoll(&p, 10, &t1);
 			skip(',');
-			t2 = strtoll(p, &p, 10);
+			mystrtoll(&p, 10, &t2);
 			mp_msg(MSGT_ASS, MSGL_DBG2, "movement6: (%d, %d) -> (%d, %d), (%" PRId64 " .. %" PRId64 ")\n", 
 				x1, y1, x2, y2, (int64_t)t1, (int64_t)t2);
 		} else {
@@ -886,9 +886,9 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "pos")) {
 		int v1, v2;
 		skip('(');
-		v1 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &v1);
 		skip(',');
-		v2 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &v2);
 		skip(')');
 		mp_msg(MSGT_ASS, MSGL_DBG2, "pos(%d, %d)\n", v1, v2);
 		if (render_context.evt_type != EVENT_POSITIONED) {
@@ -902,9 +902,9 @@ static char* parse_tag(char* p, double pwr) {
 		long long t1, t2, t3, t4;
 		if (*p == 'e') ++p; // either \fad or \fade
 		skip('(');
-		a1 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &a1);
 		skip(',');
-		a2 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &a2);
 		if (*p == ')') {
 			// 2-argument version (\fad, according to specs)
 			// a1 and a2 are fade-in and fade-out durations
@@ -919,24 +919,24 @@ static char* parse_tag(char* p, double pwr) {
 			// 6-argument version (\fade)
 			// a1 and a2 (and a3) are opacity values
 			skip(',');
-			a3 = strtol(p, &p, 10);
+			mystrtoi(&p, 10, &a3);
 			skip(',');
-			t1 = strtoll(p, &p, 10);
+			mystrtoll(&p, 10, &t1);
 			skip(',');
-			t2 = strtoll(p, &p, 10);
+			mystrtoll(&p, 10, &t2);
 			skip(',');
-			t3 = strtoll(p, &p, 10);
+			mystrtoll(&p, 10, &t3);
 			skip(',');
-			t4 = strtoll(p, &p, 10);
+			mystrtoll(&p, 10, &t4);
 		}
 		skip(')');
 		render_context.fade = interpolate_alpha(frame_context.time - render_context.event->Start, t1, t2, t3, t4, a1, a2, a3);
 	} else if (mystrcmp(&p, "org")) {
 		int v1, v2;
 		skip('(');
-		v1 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &v1);
 		skip(',');
-		v2 = strtol(p, &p, 10);
+		mystrtoi(&p, 10, &v2);
 		skip(')');
 		mp_msg(MSGT_ASS, MSGL_DBG2, "org(%d, %d)\n", v1, v2);
 		//				render_context.evt_type = EVENT_POSITIONED;
@@ -1063,19 +1063,22 @@ static char* parse_tag(char* p, double pwr) {
 			render_context.italic = render_context.style->Italic;
 		update_font();
 	} else if (mystrcmp(&p, "kf") || mystrcmp(&p, "K")) {
-		int val = strtol(p, &p, 10);
+		int val = 0;
+		mystrtoi(&p, 10, &val);
 		render_context.effect_type = EF_KARAOKE_KF;
 		if (render_context.effect_timing)
 			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
 	} else if (mystrcmp(&p, "ko")) {
-		int val = strtol(p, &p, 10);
+		int val = 0;
+		mystrtoi(&p, 10, &val);
 		render_context.effect_type = EF_KARAOKE_KO;
 		if (render_context.effect_timing)
 			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
 	} else if (mystrcmp(&p, "k")) {
-		int val = strtol(p, &p, 10);
+		int val = 0;
+		mystrtoi(&p, 10, &val);
 		render_context.effect_type = EF_KARAOKE;
 		if (render_context.effect_timing)
 			render_context.effect_skip_timing += render_context.effect_timing;
@@ -1087,7 +1090,8 @@ static char* parse_tag(char* p, double pwr) {
 		else
 			render_context.shadow = render_context.style->Shadow;
 	} else if (mystrcmp(&p, "pbo")) {
-		(void)strtol(p, &p, 10); // ignored
+		int val = 0;
+		mystrtoi(&p, 10, &val); // ignored
 	} else if (mystrcmp(&p, "p")) {
 		int val;
 		if (!mystrtoi(&p, 10, &val))

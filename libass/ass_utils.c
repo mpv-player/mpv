@@ -32,8 +32,21 @@
 
 int mystrtoi(char** p, int base, int* res)
 {
+	// NOTE: base argument is ignored, but not used in libass anyway
+	double temp_res;
 	char* start = *p;
-	*res = strtol(*p, p, base);
+	temp_res = strtod(*p, p);
+	*res = (int) (temp_res + 0.5);
+	if (*p != start) return 1;
+	else return 0;
+}
+
+int mystrtoll(char** p, int base, long long* res)
+{
+	double temp_res;
+	char* start = *p;
+	temp_res = strtod(*p, p);
+	*res = (long long) (temp_res + 0.5);
 	if (*p != start) return 1;
 	else return 0;
 }

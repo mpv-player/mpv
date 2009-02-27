@@ -26,6 +26,7 @@
 #include <stdint.h>
 
 int mystrtoi(char** p, int base, int* res);
+int mystrtoll(char** p, int base, long long* res);
 int mystrtou32(char** p, int base, uint32_t* res);
 int mystrtod(char** p, double* res);
 int strtocolor(char** q, uint32_t* res);
