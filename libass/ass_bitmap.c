@@ -62,8 +62,8 @@ static int generate_tables(ass_synth_priv_t* priv, double radius)
 	priv->g_w = 2*priv->g_r+1;
 
 	if (priv->g_r) {
-		priv->g = malloc(priv->g_w * sizeof(unsigned));
-		priv->gt2 = malloc(256 * priv->g_w * sizeof(unsigned));
+		priv->g = realloc(priv->g, priv->g_w * sizeof(unsigned));
+		priv->gt2 = realloc(priv->gt2, 256 * priv->g_w * sizeof(unsigned));
 		if (priv->g==NULL || priv->gt2==NULL) {
 			return -1;
 		}
