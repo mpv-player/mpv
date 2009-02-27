@@ -208,7 +208,7 @@ static void video_to_output_surface(void)
 
     // we would need to provide 2 past and 1 future frames to allow advanced
     // deinterlacing, which is not really possible currently.
-    for (i = 0; i <= !!deint; i++) {
+    for (i = 0; i <= !!(deint > 1); i++) {
         int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
         VdpOutputSurface output_surface;
         if (i)
@@ -394,9 +394,9 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
         &vid_height,
         &vdp_chroma_type
     };
-    if (deint == 2)
-        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
     if (deint == 3)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
+    if (deint == 4)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL;
     if (pullup)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_INVERSE_TELECINE;
@@ -946,9 +946,10 @@ static const char help_msg[] =
     "\nOptions:\n"
     "  deint (all modes > 0 respect -field-dominance)\n"
     "    0: no deinterlacing\n"
-    "    1: bob deinterlacing (current fallback)\n"
-    "    2: temporal deinterlacing (not yet working)\n"
-    "    3: temporal-spatial deinterlacing (not yet working)\n"
+    "    1: only show first field\n"
+    "    2: bob deinterlacing (current fallback)\n"
+    "    3: temporal deinterlacing (not yet working)\n"
+    "    4: temporal-spatial deinterlacing (not yet working)\n"
     "  pullup\n"
     "    Try to apply inverse-telecine (needs deinterlacing, not working)\n"
     "  denoise\n"
