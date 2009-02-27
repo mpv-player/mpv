@@ -1,4 +1,4 @@
-.\" Synced with r28727
+.\" Synced with r28736
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 02. 25." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 02. 27." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -287,7 +287,7 @@ Képernyõmentések készítésének elindítása/leállítása.
 Fájlnév megjelenítése az OSD-n.
 .IPs "! és @"
 Ugrás az elõzõ/következõ fejezet elejére.
-.IPs "D (csak \-vo xvmc, \-vf yadif, \-vf kerndeint mellett)"
+.IPs "D (csak \-vo xvmc, \-vo vdpau, \-vf yadif, \-vf kerndeint mellett)"
 Deinterlacer aktiválása/deaktiválása.
 .IPs "A"
 Lépegetés az elérhetõ DVD szögek között.
@@ -4436,7 +4436,7 @@ Kikapcsolja az automatikus film képarány kompenzációt.
 .B "\-field\-dominance <\-1\-1>"
 Beállítja az elsõ mezõt az átlapolt tartalomnál.
 Hasznos a framerátát duplázó deinterlacer-eknél: \-vf tfields=1,
-\-vf yadif=1 and \-vo xvmc:bobdeint.
+\-vf yadif=1, \-vo vdpau:deint és \-vo xvmc:bobdeint.
 .PD 0
 .RSs
 .IPs \-1
