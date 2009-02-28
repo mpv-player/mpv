@@ -49,6 +49,7 @@
 #include "gui/interface.h"
 
 #include "libavutil/common.h"
+#include "libavutil/mathematics.h"
 
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
@@ -1041,7 +1042,7 @@ static int get_equalizer(char *name, int *value) {
     else if (!strcasecmp(name, "saturation"))
         *value = (procamp.saturation-1.0) * 100;
     else if (!strcasecmp(name, "hue"))
-        *value = procamp.hue * 100 / 3.141592;
+        *value = procamp.hue * 100 / M_PI;
     else
         return VO_NOTIMPL;
     return VO_TRUE;
@@ -1060,7 +1061,7 @@ static int set_equalizer(char *name, int value) {
     else if (!strcasecmp(name, "saturation"))
         procamp.saturation = value / 100.0 + 1.0;
     else if (!strcasecmp(name, "hue"))
-        procamp.hue = value / 100.0 * 3.141592;
+        procamp.hue = value / 100.0 * M_PI;
     else
         return VO_NOTIMPL;
 
