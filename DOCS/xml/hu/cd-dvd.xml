@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26990 -->
+<!-- synced with r28706 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -53,7 +53,7 @@ Ha túl nagyra állítod, a meghajtó folyton felpörög majd leáll, és draszt
 csökkenni fog a teljesítménye.
 A javasolt módszer a CD-ROM meghajtó
 <command>hdparm</command>-mal történő beállítása:
-<screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom eszköz]</replaceable></screen>
+<screen>hdparm -d1 -a256 -u1 <replaceable>[cdrom eszköz]</replaceable></screen>
 </para>
 
 <para>
@@ -68,8 +68,16 @@ fájlt a CD-ROM tuningolásához.
 </para>
 
 <para>
-A SCSI meghajtókra vonatkozóan nincs egységes módszer ezen paraméterek
-beállításához. (Ismersz egyet? Mondd el nekünk is!) Van egy eszköz, ami
+A SCSI CD-ROM meghajtók sebességével is lehet trükközni az
+<command>sdparm</command> segítségével, 1.03 vagy újabb kell:
+<screen>sdparm --command=speed=<replaceable>[sebesség kB/s-ben]</replaceable> <replaceable>[cdrom eszköz]</replaceable></screen>
+A sebességet kilobájt/másodpercben kell megadni, a meghajtó
+megfelelően kerekíteni fogja. Nézd meg az sdparm man oldalát a
+részletekért.
+</para>
+
+<para>
+Van egy dedikált segédeszköz is, ami a
 <ulink url="http://das.ist.org/~georg/">Plextor SCSI meghajtókkal</ulink> működik.
 </para>
 </sect2>

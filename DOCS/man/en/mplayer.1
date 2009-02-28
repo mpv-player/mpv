@@ -285,7 +285,7 @@ Start/stop taking screenshots.
 Show filename on the OSD.
 .IPs "! and @"
 Seek to the beginning of the previous/next chapter.
-.IPs "D (\-vo xvmc, \-vf yadif, \-vf kerndeint only)"
+.IPs "D (\-vo xvmc, \-vo vdpau, \-vf yadif, \-vf kerndeint only)"
 Activate/deactivate deinterlacer.
 .IPs "A"
 Cycle through the available DVD angles.
@@ -3439,15 +3439,18 @@ Chooses the deinterlacer (default: 0).
 .IPs 0
 No deinterlacing.
 .IPs 1
-Bob deinterlacing (current fallback for advanced deinterlacers).
+Show only one field, similar to \-vf field.
 .IPs 2
-Motion adaptive temporal deinterlacing (not yet working).
+Bob deinterlacing (current fallback for advanced deinterlacers).
 .IPs 3
+Motion adaptive temporal deinterlacing (not yet working).
+This is the default if "D" is used to enable deinterlacing.
+.IPs 4
 Motion adaptive temporal deinterlacing with edge-guided spatial interpolation
 (not yet working).
 .RE
 .IPs pullup
-Try to apply inverse telecine, needs deinterlacing.
+Try to apply inverse telecine, needs temporal deinterlacing.
 .RE
 .PD 1 
 .
@@ -4406,7 +4409,7 @@ Disable automatic movie aspect ratio compensation.
 .B "\-field\-dominance <\-1\-1>"
 Set first field for interlaced content.
 Useful for deinterlacers that double the framerate: \-vf tfields=1,
-\-vf yadif=1 and \-vo xvmc:bobdeint.
+\-vf yadif=1, \-vo vdpau:deint and \-vo xvmc:bobdeint.
 .PD 0
 .RSs
 .IPs \-1

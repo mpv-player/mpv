@@ -1,4 +1,4 @@
-.\" Synced with r28670
+.\" Synced with r28736
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 02. 19." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 02. 27." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -287,7 +287,7 @@ Képernyõmentések készítésének elindítása/leállítása.
 Fájlnév megjelenítése az OSD-n.
 .IPs "! és @"
 Ugrás az elõzõ/következõ fejezet elejére.
-.IPs "D (csak \-vo xvmc, \-vf yadif, \-vf kerndeint mellett)"
+.IPs "D (csak \-vo xvmc, \-vo vdpau, \-vf yadif, \-vf kerndeint mellett)"
 Deinterlacer aktiválása/deaktiválása.
 .IPs "A"
 Lépegetés az elérhetõ DVD szögek között.
@@ -3439,6 +3439,29 @@ Vezérlõ kiválasztása az overlay forrásaként az X11 felett.
 .B vdpau (\-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau vagy ffh264vdpau kapcsolókkal)
 Videó kimenet, ami a VDPAU-t használja a videó hardveres dekódolásához.
 Támogatja a szoftveresen dekódolt videó megjelenítését is.
+.PD 0
+.RSs
+.IPs sharpen=<\-1\-1>
+Pozitív értékekkel egy élesítõ algoritmust alkalmaz a videóra,
+negatív értékekkel pedig elmosást (alapértelmezett: 0).
+.IPs denoise=<0\-1>
+Egy zajcsökkentõ algoritmust alkalmaz a videóra (alapértelmezett: 0, nincs zajcsökkentés).
+.IPs deint=<0\-3>
+Kiválasztja a deinterlacer-t (alapértelmezett: 0).
+.RSss
+.IPs 0
+Nincs deinterlace.
+.IPs 1
+Bob deinterlace (jelenleg visszalép a fejlettebb deinterlacer-ekre).
+.IPs 2
+Mozgás adaptív idõbeli deinterlace (még nem mûködik).
+.IPs 3
+Mozgás adaptív idõbeli deinterlace él-vezérelt térbeli interpolációval (még nem mûködik).
+.RE
+.IPs pullup
+Inverz telecine-t próbál alkalmazni, deinterlace kell hozzá.
+.RE
+.PD 1 
 .
 .TP
 .B xvmc (csak X11 \-vc ffmpeg12mc kapcsolóval)
@@ -4413,7 +4436,7 @@ Kikapcsolja az automatikus film képarány kompenzációt.
 .B "\-field\-dominance <\-1\-1>"
 Beállítja az elsõ mezõt az átlapolt tartalomnál.
 Hasznos a framerátát duplázó deinterlacer-eknél: \-vf tfields=1,
-\-vf yadif=1 and \-vo xvmc:bobdeint.
+\-vf yadif=1, \-vo vdpau:deint és \-vo xvmc:bobdeint.
 .PD 0
 .RSs
 .IPs \-1
@@ -5516,6 +5539,13 @@ A lejátszás sebességének változása megváltoztatja a hangmagasságot,
 megtartva az audió 1.2x-es tempóját.
 .RE
 .PD 1
+.
+.TP
+.B "stats\ \ "
+Statisztikát gyûjt és ír ki az audió folyamról, fõként a hangerõrõl.
+Ezek a statisztikák különösen a hang beállításánál hasznosak a
+romlás elkerülése mellett.
+A hangerõ dB-ben kerül kiírásra és kompatibilis az audió hangerõ szûrõvel.
 .
 .
 .

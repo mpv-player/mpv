@@ -75,7 +75,7 @@ LIBVO_EXTERN(vdpau)
                message, vdp_get_error_string(vdp_st));
 
 /* number of video and output surfaces */
-#define NUM_OUTPUT_SURFACES                3
+#define NUM_OUTPUT_SURFACES                2
 #define MAX_VIDEO_SURFACES                 50
 
 /* number of palette entries */
@@ -128,7 +128,6 @@ static VdpPresentationQueueDisplay       *vdp_presentation_queue_display;
 static VdpPresentationQueueBlockUntilSurfaceIdle *vdp_presentation_queue_block_until_surface_idle;
 static VdpPresentationQueueTargetCreateX11       *vdp_presentation_queue_target_create_x11;
 
-/* output_surfaces[2] is used in composite-picture. */
 static VdpOutputSurfaceRenderOutputSurface       *vdp_output_surface_render_output_surface;
 static VdpOutputSurfacePutBitsIndexed            *vdp_output_surface_put_bits_indexed;
 static VdpOutputSurfaceRenderBitmapSurface       *vdp_output_surface_render_bitmap_surface;
@@ -142,11 +141,14 @@ static VdpDecoderDestroy                         *vdp_decoder_destroy;
 static VdpDecoderRender                          *vdp_decoder_render;
 
 static void                              *vdpau_lib_handle;
-static VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES];
+/* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
+#define osd_surface output_surfaces[NUM_OUTPUT_SURFACES]
+static VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
 static int                                output_surface_width, output_surface_height;
 
 static VdpVideoMixer                      video_mixer;
 static int                                deint;
+static int                                deint_type;
 static int                                pullup;
 static float                              denoise;
 static float                              sharpen;
@@ -207,7 +209,7 @@ static void video_to_output_surface(void)
 
     // we would need to provide 2 past and 1 future frames to allow advanced
     // deinterlacing, which is not really possible currently.
-    for (i = 0; i <= !!deint; i++) {
+    for (i = 0; i <= !!(deint > 1); i++) {
         int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
         VdpOutputSurface output_surface;
         if (i)
@@ -266,7 +268,7 @@ static void resize(void)
             output_surface_height = FFMAX(output_surface_height, vo_dheight);
         }
         // Creation of output_surfaces
-        for (i = 0; i < NUM_OUTPUT_SURFACES; i++) {
+        for (i = 0; i <= NUM_OUTPUT_SURFACES; i++) {
             if (output_surfaces[i] != VDP_INVALID_HANDLE)
                 vdp_output_surface_destroy(output_surfaces[i]);
             vdp_st = vdp_output_surface_create(vdp_device, VDP_RGBA_FORMAT_B8G8R8A8,
@@ -393,9 +395,9 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
         &vid_height,
         &vdp_chroma_type
     };
-    if (deint == 2)
-        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
     if (deint == 3)
+        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
+    if (deint == 4)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL;
     if (pullup)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_INVERSE_TELECINE;
@@ -585,8 +587,8 @@ static void draw_osd_I8A8(int x0,int y0, int w,int h, unsigned char *src,
 
     pitch = w*2;
 
-    // write source_data to output_surfaces[2].
-    vdp_st = vdp_output_surface_put_bits_indexed(output_surfaces[2],
+    // write source_data to osd_surface.
+    vdp_st = vdp_output_surface_put_bits_indexed(osd_surface,
                                                  VDP_INDEXED_FORMAT_I8A8,
                                                  (const void *const*)&index_data,
                                                  &pitch,
@@ -605,7 +607,7 @@ static void draw_osd_I8A8(int x0,int y0, int w,int h, unsigned char *src,
 
     vdp_st = vdp_output_surface_render_output_surface(output_surface,
                                                       &output_indexed_rect_vid,
-                                                      output_surfaces[2],
+                                                      osd_surface,
                                                       &output_indexed_rect_vid,
                                                       NULL,
                                                       &blend_state,
@@ -747,7 +749,7 @@ static void flip_page(void)
                                             0);
     CHECK_ST_WARNING("Error when calling vdp_presentation_queue_display")
 
-    surface_num = !surface_num;
+    surface_num = (surface_num + 1) % NUM_OUTPUT_SURFACES;
     visible_buf = 1;
 }
 
@@ -888,7 +890,7 @@ static void DestroyVdpauObjects(void)
     vdp_st = vdp_presentation_queue_target_destroy(vdp_flip_target);
     CHECK_ST_WARNING("Error when calling vdp_presentation_queue_target_destroy")
 
-    for (i = 0; i < NUM_OUTPUT_SURFACES; i++) {
+    for (i = 0; i <= NUM_OUTPUT_SURFACES; i++) {
         vdp_st = vdp_output_surface_destroy(output_surfaces[i]);
         output_surfaces[i] = VDP_INVALID_HANDLE;
         CHECK_ST_WARNING("Error when calling vdp_output_surface_destroy")
@@ -943,11 +945,12 @@ static const char help_msg[] =
     "\n-vo vdpau command line help:\n"
     "Example: mplayer -vo vdpau:deint=2\n"
     "\nOptions:\n"
-    "  deint\n"
+    "  deint (all modes > 0 respect -field-dominance)\n"
     "    0: no deinterlacing\n"
-    "    1: bob deinterlacing (current fallback)\n"
-    "    2: temporal deinterlacing (not yet working)\n"
-    "    3: temporal-spatial deinterlacing (not yet working)\n"
+    "    1: only show first field\n"
+    "    2: bob deinterlacing (current fallback)\n"
+    "    3: temporal deinterlacing (not yet working)\n"
+    "    4: temporal-spatial deinterlacing (not yet working)\n"
     "  pullup\n"
     "    Try to apply inverse-telecine (needs deinterlacing, not working)\n"
     "  denoise\n"
@@ -963,6 +966,7 @@ static int preinit(const char *arg)
     static const char *vdpau_device_create = "vdp_device_create_x11";
 
     deint = 0;
+    deint_type = 3;
     pullup = 0;
     denoise = 0;
     sharpen = 0;
@@ -970,6 +974,8 @@ static int preinit(const char *arg)
         mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
         return -1;
     }
+    if (deint)
+        deint_type = deint;
 
     vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
     if (!vdpau_lib_handle) {
@@ -1011,6 +1017,14 @@ static int preinit(const char *arg)
 static int control(uint32_t request, void *data)
 {
     switch (request) {
+        case VOCTRL_GET_DEINTERLACE:
+            *(int*)data = deint;
+            return VO_TRUE;
+        case VOCTRL_SET_DEINTERLACE:
+            deint = *(int*)data;
+            if (deint)
+                deint = deint_type;
+            return VO_TRUE;
         case VOCTRL_PAUSE:
             return (int_pause = 1);
         case VOCTRL_RESUME:
@@ -1064,8 +1078,10 @@ static int control(uint32_t request, void *data)
                 r->h = vo_screenheight;
                 r->ml = r->mr = border_x;
                 r->mt = r->mb = border_y;
-            } else
-                r->w = vo_dwidth; r->h = vo_dheight;
+            } else {
+                r->w = vo_dwidth;
+                r->h = vo_dheight;
+            }
             return VO_TRUE;
         }
     }

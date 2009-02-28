@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28660 -->
+<!-- synced with r28707 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -590,7 +590,8 @@ Normálisan működik, ha felhasználóként futtatom.
 <answer><para>
 Ez megint csak az energia menedzsment hatása (lásd feljebb). Dugd be a
 külső áramkábelt <emphasis role="bold">mielőtt</emphasis> bekapcsolod
-a notebookodat vagy használd a <option>-nortc</option> kapcsolót.
+a notebookodat vagy bizonyosodj meg róla, hogy nem használod a
+<option>-rtc</option> kapcsolót.
 </para></answer>
 </qandaentry>
 
