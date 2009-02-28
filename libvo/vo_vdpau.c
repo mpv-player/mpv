@@ -785,6 +785,11 @@ static int draw_slice(uint8_t *image[], int stride[], int w, int h,
         }
         vdp_st = vdp_decoder_create(vdp_device, vdp_decoder_profile, vid_width, vid_height, max_refs, &decoder);
         CHECK_ST_WARNING("Failed creating VDPAU decoder");
+        if (vdp_st != VDP_STATUS_OK) {
+            decoder = VDP_INVALID_HANDLE;
+            decoder_max_refs = 0;
+            return VO_FALSE;
+        }
         decoder_max_refs = max_refs;
     }
     vdp_st = vdp_decoder_render(decoder, rndr->surface, (void *)&rndr->info, rndr->bitstream_buffers_used, rndr->bitstream_buffers);
