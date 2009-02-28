@@ -847,7 +847,8 @@ uint8_t reconstruct_single_channel(NeAACDecHandle hDecoder, ic_stream *ics,
     output_channels = 1;
 #endif
 
-    if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] < output_channels) {
+    if (hDecoder->element_alloced[hDecoder->fr_ch_ele] == 0 ||
+        hDecoder->element_output_channels[hDecoder->fr_ch_ele] < output_channels) {
         hDecoder->element_output_channels[hDecoder->fr_ch_ele] = output_channels;
         retval = allocate_single_channel(hDecoder, sce->channel, output_channels);
         if (retval > 0)
