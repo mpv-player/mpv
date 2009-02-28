@@ -140,6 +140,8 @@ static VdpDecoderCreate                          *vdp_decoder_create;
 static VdpDecoderDestroy                         *vdp_decoder_destroy;
 static VdpDecoderRender                          *vdp_decoder_render;
 
+static VdpGenerateCSCMatrix                      *vdp_generate_csc_matrix;
+
 static void                              *vdpau_lib_handle;
 /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
 #define osd_surface output_surfaces[NUM_OUTPUT_SURFACES]
@@ -192,6 +194,9 @@ struct {
 
 static int eosd_render_count;
 static int eosd_surface_count;
+
+// Video equalizer
+static VdpProcamp procamp;
 
 /*
  * X11 specific
@@ -339,6 +344,7 @@ static int win_x11_init_vdpau_procs(void)
                         &vdp_bitmap_surface_putbits_native},
         {VDP_FUNC_ID_OUTPUT_SURFACE_RENDER_BITMAP_SURFACE,
                         &vdp_output_surface_render_bitmap_surface},
+        {VDP_FUNC_ID_GENERATE_CSC_MATRIX,       &vdp_generate_csc_matrix},
         {0, NULL}
     };
 
@@ -1018,7 +1024,53 @@ static int preinit(const char *arg)
     eosd_surfaces = NULL;
     eosd_targets  = NULL;
 
+    procamp.struct_version = VDP_PROCAMP_VERSION;
+    procamp.brightness = 0.0;
+    procamp.contrast   = 1.0;
+    procamp.saturation = 1.0;
+    procamp.hue        = 0.0;
+
     return 0;
+}
+
+static int get_equalizer(char *name, int *value) {
+    if (!strcasecmp(name, "brightness"))
+        *value = procamp.brightness * 100;
+    else if (!strcasecmp(name, "contrast"))
+        *value = (procamp.contrast-1.0) * 100;
+    else if (!strcasecmp(name, "saturation"))
+        *value = (procamp.saturation-1.0) * 100;
+    else if (!strcasecmp(name, "hue"))
+        *value = procamp.hue * 100 / 3.141592;
+    else
+        return VO_NOTIMPL;
+    return VO_TRUE;
+}
+
+static int set_equalizer(char *name, int value) {
+    VdpStatus vdp_st;
+    VdpCSCMatrix matrix;
+    VdpVideoMixerAttribute attributes[] = {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
+    const void *attribute_values[] = {&matrix};
+
+    if (!strcasecmp(name, "brightness"))
+        procamp.brightness = value / 100.0;
+    else if (!strcasecmp(name, "contrast"))
+        procamp.contrast = value / 100.0 + 1.0;
+    else if (!strcasecmp(name, "saturation"))
+        procamp.saturation = value / 100.0 + 1.0;
+    else if (!strcasecmp(name, "hue"))
+        procamp.hue = value / 100.0 * 3.141592;
+    else
+        return VO_NOTIMPL;
+
+    vdp_st = vdp_generate_csc_matrix(&procamp, VDP_COLOR_STANDARD_ITUR_BT_601,
+                                     &matrix);
+    CHECK_ST_WARNING("Error when generating CSC matrix")
+    vdp_st = vdp_video_mixer_set_attribute_values(video_mixer, 1, attributes,
+                                                  attribute_values);
+    CHECK_ST_WARNING("Error when setting CSC matrix")
+    return VO_TRUE;
 }
 
 static int control(uint32_t request, void *data, ...)
@@ -1065,7 +1117,7 @@ static int control(uint32_t request, void *data, ...)
             value = va_arg(ap, int);
 
             va_end(ap);
-            return vo_x11_set_equalizer(data, value);
+            return set_equalizer(data, value);
         }
         case VOCTRL_GET_EQUALIZER: {
             va_list ap;
@@ -1075,7 +1127,7 @@ static int control(uint32_t request, void *data, ...)
             value = va_arg(ap, int *);
 
             va_end(ap);
-            return vo_x11_get_equalizer(data, value);
+            return get_equalizer(data, value);
         }
         case VOCTRL_ONTOP:
             vo_x11_ontop();
