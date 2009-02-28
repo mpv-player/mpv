@@ -1,9 +1,10 @@
-/*  Translated by:  Volodymyr M. Lisivka <lvm@mystery.lviv.net>,
-	  Andriy Gritsenko <andrej@lucky.net>
-    sevenfourk <sevenfourk@gmail.com>
-   Was synced with help_mp-en.h: rev 1.105
+// Translated by:  Volodymyr M. Lisivka <lvm@mystery.lviv.net>,
+// Andriy Gritsenko <andrej@lucky.net>
+// sevenfourk <sevenfourk@gmail.com>
 
-========================= MPlayer help =========================== */
+// Was synced with help_mp-en.h: r28450
+
+// ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
@@ -95,7 +96,7 @@ static char help_text[]=
 
 #define MSGTR_NoGui "MPlayer був скомпільований БЕЗ підтримки GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI вимагає X11!\n"
-#define MSGTR_Playing "Програвання %s\n"
+#define MSGTR_Playing "\nПрогравання %s\n"
 #define MSGTR_NoSound "Аудіо: без звуку!!!\n"
 #define MSGTR_FPSforced "Примусово змінена кількість кадрів на секунду на %5.3f (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Скомпільвано з автовизначенням CPU - УВАГА - це не оптимально!\nДля отримання кращих результатів перекомпілюйте MPlayer з --disable-runtime-cpudetection\n"
@@ -172,6 +173,7 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "Подія DVDNAV: Nav Seek зроблено\n"
 #define MSGTR_MenuCall "Виклик меню\n"
 
+// --- edit decision lists
 #define MSGTR_EdlOutOfMem "Не можу виділити достатньо пам'яті для збереження даних EDL.\n"
 #define MSGTR_EdlRecordsNo "Читання %d EDL дій.\n"
 #define MSGTR_EdlQueueEmpty "Немає дій EDL які треба виконати.\n"
@@ -201,6 +203,7 @@ static char help_text[]=
 #define MSGTR_OSDAngle "Кут: %d/%d"
 
 // property values
+#define MSGTR_Enabled "увімкнено"
 #define MSGTR_EnabledEdl "увімкнено (EDL)"
 #define MSGTR_Disabled "вимкнено"
 #define MSGTR_HardFrameDrop "інтенсивний"
@@ -266,6 +269,8 @@ static char help_text[]=
 #define MSGTR_FlushingVideoFrames "\nЗкидую кадри відео.\n"
 #define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "Фільтри не було налаштовано! Порожній файл?\n"
 #define MSGTR_RecommendedVideoBitrate "Рекомендований бітрейт для %s CD: %d\n"
+#define MSGTR_VideoStreamResult "\nВідео потік: %8.3f кбіт/с  (%d Б/с)  розмір: %"PRIu64" байт(ів)  %5.3f сек  %d кадрів\n"
+#define MSGTR_AudioStreamResult "\nАудіо потік: %8.3f кбіт/с  (%d Б/с)  розмір: %"PRIu64" байт(ів)  %5.3f сек\n"
 #define MSGTR_EdlSkipStartEndCurrent "EDL SKIP: Початок: %.2f  Кінець: %.2f   Поточна: V: %.2f  A: %.2f     \r"
 #define MSGTR_OpenedStream "вдало: формат: %d  дані: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "відеокодек: копія кадрів (%dx%d %dbpp fourcc=%x)\n"
@@ -403,22 +408,19 @@ static char help_text[]=
 #define MSGTR_CouldntOpenCodec "Не можу відкрити кодек %s, br=%d.\n"
 #define MSGTR_CantCopyAudioFormat "Аудіо формат 0x%x не використовується з '-oac copy', спробуйте\n'-oac pcm' замість чи використайте '-fafmttag' для його перевизначення.\n"
 
-#define MSGTR_VideoStreamResult "\nВідео потік: %8.3f кбіт/с  (%d Б/с)  розмір: %"PRIu64" байт  %5.3f секунд  %d кадрів\n"
-#define MSGTR_AudioStreamResult "\nАудіо потік: %8.3f кбіт/с  (%d Б/с)  розмір: %"PRIu64" байт  %5.3f секунд\n"
-
 // cfg-mencoder.h:
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     метод змінного бітрейту\n"\
-"                0: cbr\n"\
-"                1: mt\n"\
-"                2: rh(default)\n"\
-"                3: abr\n"\
-"                4: mtrh\n"\
+"                0: cbr (постійний бітрейт)\n"\
+"                1: mt (Mark Taylor VBR алгоритм)\n"\
+"                2: rh (Robert Hegemann VBR алгоритм - зомовчування)\n"\
+"                3: abr (середній бітрейт)\n"\
+"                4: mtrh (Mark Taylor Robert Hegemann VBR алгоритм)\n"\
 "\n"\
-" abr           приблизний бітрейт\n"\
+" abr           середній бітрейт\n"\
 "\n"\
 " cbr           постійний бітрейт\n"\
-"               Forces also CBR mode encoding on subsequent ABR presets modes\n"\
+"               Також форсує CBR режим кодування на слідуючих ABR режимах\n"\
 "\n"\
 " br=<0-1024>   вказати бітрейт в kBit (тільки для CBR та ABR)\n"\
 "\n"\
@@ -426,11 +428,11 @@ static char help_text[]=
 "\n"\
 " aq=<0-9>      алгорітмична якість (0-краща/повільніша 9-гірша/швидкіша)\n"\
 "\n"\
-" ratio=<1-100> ступень стиснення\n"\
+" ratio=<1-100> рівень стиснення\n"\
 "\n"\
-" vol=<0-10>    set audio input gain\n"\
+" vol=<0-10>    встановити посилення вхідного аудіо\n"\
 "\n"\
-" mode=<0-3>    (якщо не вказано: auto)\n"\
+" mode=<0-3>    (замовчування: auto)\n"\
 "                0: stereo\n"\
 "                1: joint-stereo\n"\
 "                2: dualchannel\n"\
@@ -441,20 +443,510 @@ static char help_text[]=
 "                1: all\n"\
 "                2: adjust\n"\
 "\n"\
-" fast          переходити на швидке кодування при послідовних VBR presets modes,\n"\
+" fast          Переходити на швидке кодування при послідовних VBR presets modes,\n"\
 "               трохи менша якість та більші бітрейти.\n"\
 "\n"\
 " preset=<value> запровадити найбільші установки якості.\n"\
-"                 середня:    VBR кодування, добра якість\n"\
+"                 середня: VBR кодування, добра якість\n"\
 "                 (150-180 kbps бітрейт)\n"\
-"                 стандарт:   VBR кодування, висока якість\n"\
+"                 стандарт: VBR кодування, висока якість\n"\
 "                 (170-210 kbps бітрейт)\n"\
-"                 висока:     VBR кодування, дуже висока якість\n"\
+"                 висока: VBR кодування, дуже висока якість\n"\
 "                 (200-240 kbps бітрейт)\n"\
-"                 божевільна: CBR кодування, найвища настройка якості\n"\
+"                 найкраща: CBR кодування, найвища якость\n"\
 "                 (320 kbps бітрейт)\n"\
-"                 <8-320>:    ABR кодування з вказаним приблизним бітрейтом.\n\n"
+"                 <8-320>: ABR кодування з вказаним приблизним бітрейтом.\n\n"
    
+// codec-cfg.c
+#define MSGTR_DuplicateFourcc "подвоєні FourCC"
+#define MSGTR_TooManyFourccs "забагато FourCCs/форматів..."
+#define MSGTR_ParseError "помилка у синтаксичному розборі"
+#define MSGTR_ParseErrorFIDNotNumber "помилка у синтаксичному розборі (ID формату не є номером?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "помилка у синтаксичному розборі (ID ім'я формату не є номером?)"
+#define MSGTR_DuplicateFID "подвоєний ID формату"
+#define MSGTR_TooManyOut "забагато вихідних форматів..."
+#define MSGTR_InvalidCodecName "\nкодек(%s) ім'я невірне!\n"
+#define MSGTR_CodecLacksFourcc "\nкодек(%s) не має FourCC/фармат!\n"
+#define MSGTR_CodecLacksDriver "\nкодек(%s) не має драйверу!\n"
+#define MSGTR_CodecNeedsDLL "\nкодек(%s) потребує 'dll'!\n"
+#define MSGTR_CodecNeedsOutfmt "\nкодек(%s) потребує 'outfmt'!\n"
+#define MSGTR_CantAllocateComment "Не можу виділити пам'ять для коментаря. "
+#define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
+#define MSGTR_ReadingFile "Читаю %s: "
+#define MSGTR_CantOpenFileError "Не можу відкрити '%s': %s\n"
+#define MSGTR_CantGetMemoryForLine "Не можу виділити пам'ять для 'line': %s\n"
+#define MSGTR_CantReallocCodecsp "Не можу виконати realloc для '*codecsp': %s\n"
+#define MSGTR_CodecNameNotUnique "Назва кодеку '%s' не унікальна."
+#define MSGTR_CantStrdupName "Не можу виконати strdup -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "Не можу виконати strdup -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "Не можу виконати strdup -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "Не можу виконати strdup -> 'dll': %s"
+#define MSGTR_AudioVideoCodecTotals "%d аудіо & %d відео кодеки\n"
+#define MSGTR_CodecDefinitionIncorrect "Неправильно визначено кодек."
+#define MSGTR_OutdatedCodecsConf "Цей codecs.conf застарий та несумісний із цим релізом MPlayer!"
+
+// fifo.c
+#define MSGTR_CannotMakePipe "Не можу створити канал!\n"
+
+// parser-mecmd.c, parser-mpcmd.c
+#define MSGTR_NoFileGivenOnCommandLine "'--' означає кінець опцій, але не було вказано назви файлу у команд. рядку.\n"
+#define MSGTR_TheLoopOptionMustBeAnInteger "Опція loop має бути цілим числом: %s\n"
+#define MSGTR_UnknownOptionOnCommandLine "Невідома опція команд. рядку: -%s\n"
+#define MSGTR_ErrorParsingOptionOnCommandLine "Помилка аналізу опції команд. рядку: -%s\n"
+#define MSGTR_InvalidPlayEntry "Невірний елемент програвання %s\n"
+#define MSGTR_NotAnMEncoderOption "-%s не є опцією MEncoder \n"
+#define MSGTR_NoFileGiven "Файл не вказано\n"
+
+// m_config.c
+#define MSGTR_SaveSlotTooOld "Знайдений слот збереження застарий з lvl %d: %d !!!\n"
+#define MSGTR_InvalidCfgfileOption "Опція %s не може бути використана у файлі конфігурації.\n"
+#define MSGTR_InvalidCmdlineOption "Опція %s не може бути використана у команд. рядку.\n"
+#define MSGTR_InvalidSuboption "Помилка: опція '%s' не має субопцій '%s'.\n"
+#define MSGTR_MissingSuboptionParameter "Помилка: в субопції '%s' опції '%s' повинен бути параметр!\n"
+#define MSGTR_MissingOptionParameter "Помилка: опція '%s' повинна мати параметр!\n"
+#define MSGTR_OptionListHeader "\n І'мя                 Тип            Мін        Макс      Загальн  CL    Конф\3n\n"
+#define MSGTR_TotalOptions "\nЗагалом: %d опцій\n"
+#define MSGTR_ProfileInclusionTooDeep "ПОПЕРЕДЖЕННЯ: Включення профайлу дуже глибоко.\n"
+#define MSGTR_NoProfileDefined "Не визначено профайлів.\n"
+#define MSGTR_AvailableProfiles "Доступні профайлиs:\n"
+#define MSGTR_UnknownProfile "Невідомий профайл '%s'.\n"
+#define MSGTR_Profile "Профайл %s: %s\n"
+
+// m_property.c
+#define MSGTR_PropertyListHeader "\n Назва                 Тип            Мін        Макс\n\n"
+#define MSGTR_TotalProperties "\nЗагалом: %d властивостей\n"
+
+// loader/ldt_keeper.c
+#define MSGTR_LOADER_DYLD_Warning "ПОПЕРЕДЖЕННЯ: Намагаюсь використати DLL кодеки але змінна середовища\n         DYLD_BIND_AT_LAUNCH не встановлена. Це здається поламка.\n"
+
+
+// ====================== GUI messages/buttons ========================
+
+// --- labels ---
+#define MSGTR_About "Про"
+#define MSGTR_FileSelect "Вибрати файл..."
+#define MSGTR_SubtitleSelect "Вибрати субтитри..."
+#define MSGTR_OtherSelect "Вибрати..."
+#define MSGTR_AudioFileSelect "Вибрати іншу аудіо доріжку..."
+#define MSGTR_FontSelect "Вибрати шрифт..."
+// Note: If you change MSGTR_PlayList please see if it still fits MSGTR_MENU_PlayList
+#define MSGTR_PlayList "Список програвання"
+#define MSGTR_Equalizer "Аквалайзер"
+#define MSGTR_ConfigureEqualizer "Налаштувати Аквалайзер"
+#define MSGTR_SkinBrowser "Переглядач скінів"
+#define MSGTR_Network "Передача потоку..."
+// Note: If you change MSGTR_Preferences please see if it still fits MSGTR_MENU_Preferences
+#define MSGTR_Preferences "Шалаштування"
+#define MSGTR_AudioPreferences "Налаштування аудіо драйверу"
+#define MSGTR_NoMediaOpened "Носій не відкритий."
+#define MSGTR_VCDTrack "VCD доріжка %d"
+#define MSGTR_NoChapter "Без розділу"
+#define MSGTR_Chapter "Розділ %d"
+#define MSGTR_NoFileLoaded "Файл не завантжено."
+
+// --- buttons ---
+#define MSGTR_Ok "OK"
+#define MSGTR_Cancel "Відміна"
+#define MSGTR_Add "Додати"
+#define MSGTR_Remove "Видалити"
+#define MSGTR_Clear "Очистити"
+#define MSGTR_Config "Налаштунки"
+#define MSGTR_ConfigDriver "Налаштувати драйвер"
+#define MSGTR_Browse "Дивитись"
+
+// --- error messages ---
+#define MSGTR_NEMDB "Вибачте, не достатньо пам'яті для прорисовки буферу."
+#define MSGTR_NEMFMR "Вибачте, не достатньо пам'яті для рендерення меню."
+#define MSGTR_IDFGCVD "Вибачте, не знаходжу відео драйвер для підтримки GUI."
+#define MSGTR_NEEDLAVC "Вибачте, ви не можете програвати не MPEG файли з вашим DXR3/H+ пристроєм без перекодування.\nВключіть lavc у нашалтунки DXR3/H+."
+#define MSGTR_UNKNOWNWINDOWTYPE "Знайдено невідомий тип вікна..."
+
+// --- skin loader error messages
+#define MSGTR_SKIN_ERRORMESSAGE "[скін] помилка у налаштунках скіна у рядку %d: %s"
+#define MSGTR_SKIN_WARNING1 "[скін] попередження: у налаштунках у рядку %d:\nвіджет (%s) знайдено але \"секцію\" не знайдено"
+#define MSGTR_SKIN_WARNING2 "[скін] попередження: у налаштунках у рядку %d:\nвіджет (%s) знайдено але \"підсекцію\" не знайдено"
+#define MSGTR_SKIN_WARNING3 "[скін] попередження: у налаштунках у рядку %d:\nця підсекція не підтримується віджетом (%s)"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] файл ( %s ) не знайдено.\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[skin] файл ( %s ) не прочитати.\n"
+#define MSGTR_SKIN_BITMAP_16bit  "Глибина матриці у 16 біт і менше не підтримується (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "Файл не знайдено (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "Помилка читання BMP (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "Помилка читання TGA (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "Помилка читання PNG (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE запакований у TGA не підримується (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "тип файлу невідомий (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "помилка конвертування з 24 до 32 біт (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownMessage "невідоме повідомлення: %s\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "недостатньо пам'яті\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "Вказано забагато шрифтів.\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "Файл шрифту не знайдено.\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "Font image file not found.\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "ідентифікатор шрифту не існує (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "невідомий параметр (%s)\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Скін не знайдено (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Обраний скін ( %s ) не знайдено, обираю 'default'...\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "помилка читання файлу налаштування скіну (%s)\n"
+#define MSGTR_SKIN_LABEL "Скіни:"
+
+// --- GTK menus
+#define MSGTR_MENU_AboutMPlayer "Про програму"
+#define MSGTR_MENU_Open "Відкрити..."
+#define MSGTR_MENU_PlayFile "Грати файл..."
+#define MSGTR_MENU_PlayVCD "Грати VCD..."
+#define MSGTR_MENU_PlayDVD "Грати DVD..."
+#define MSGTR_MENU_PlayURL "Грати URL..."
+#define MSGTR_MENU_LoadSubtitle "Завантажити субтитри..."
+#define MSGTR_MENU_DropSubtitle "Викинути субтитри..."
+#define MSGTR_MENU_LoadExternAudioFile "Завантажити зовнішній аудіо файл..."
+#define MSGTR_MENU_Playing "Відтворення"
+#define MSGTR_MENU_Play "Грати"
+#define MSGTR_MENU_Pause "Пауза"
+#define MSGTR_MENU_Stop "Зупинити"
+#define MSGTR_MENU_NextStream "Наступний потік"
+#define MSGTR_MENU_PrevStream "Попередній потік"
+#define MSGTR_MENU_Size "Розмір"
+#define MSGTR_MENU_HalfSize   "Half size"
+#define MSGTR_MENU_NormalSize "Нормальний розмір"
+#define MSGTR_MENU_DoubleSize "Подвійний розмір"
+#define MSGTR_MENU_FullScreen "Повний екран"
+#define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_VCD "VCD"
+#define MSGTR_MENU_PlayDisc "Грати диск..."
+#define MSGTR_MENU_ShowDVDMenu "Показати DVD меню"
+#define MSGTR_MENU_Titles "Титри"
+#define MSGTR_MENU_Title "Титр %2d"
+#define MSGTR_MENU_None "(нема)"
+#define MSGTR_MENU_Chapters "Розділи"
+#define MSGTR_MENU_Chapter "Розділ %2d"
+#define MSGTR_MENU_AudioLanguages "Аудіо мови"
+#define MSGTR_MENU_SubtitleLanguages "Мови субтитрів"
+#define MSGTR_MENU_PlayList MSGTR_PlayList
+#define MSGTR_MENU_SkinBrowser "Переглядач жупанів"
+#define MSGTR_MENU_Preferences MSGTR_Preferences
+#define MSGTR_MENU_Exit "Вихід..."
+#define MSGTR_MENU_Mute "Тиша"
+#define MSGTR_MENU_Original "Вихідний"
+#define MSGTR_MENU_AspectRatio "Відношення сторін"
+#define MSGTR_MENU_AudioTrack "Аудіо доріжка"
+#define MSGTR_MENU_Track "Доріжка %d"
+#define MSGTR_MENU_VideoTrack "Відео доріжка"
+#define MSGTR_MENU_Subtitles "Субтитри"
+
+// --- equalizer
+// Note: If you change MSGTR_EQU_Audio please see if it still fits MSGTR_PREFERENCES_Audio
+#define MSGTR_EQU_Audio "Аудіо"
+// Note: If you change MSGTR_EQU_Video please see if it still fits MSGTR_PREFERENCES_Video
+#define MSGTR_EQU_Video "Відео"
+#define MSGTR_EQU_Contrast "Контраст: "
+#define MSGTR_EQU_Brightness "Яскравість: "
+#define MSGTR_EQU_Hue "Тон: "
+#define MSGTR_EQU_Saturation "Насиченість: "
+#define MSGTR_EQU_Front_Left "Передній Лівий"
+#define MSGTR_EQU_Front_Right "Передній Правий"
+#define MSGTR_EQU_Back_Left "Задній Лівий"
+#define MSGTR_EQU_Back_Right "Задній Правий"
+#define MSGTR_EQU_Center "Центральний"
+#define MSGTR_EQU_Bass "Бас"
+#define MSGTR_EQU_All "Усі"
+#define MSGTR_EQU_Channel1 "Канал 1:"
+#define MSGTR_EQU_Channel2 "Канал 2:"
+#define MSGTR_EQU_Channel3 "Канал 3:"
+#define MSGTR_EQU_Channel4 "Канал 4:"
+#define MSGTR_EQU_Channel5 "Канал 5:"
+#define MSGTR_EQU_Channel6 "Канал 6:"
+
+// --- playlist
+#define MSGTR_PLAYLIST_Path "Шлях"
+#define MSGTR_PLAYLIST_Selected "Вибрані файли"
+#define MSGTR_PLAYLIST_Files "Файли"
+#define MSGTR_PLAYLIST_DirectoryTree "Дерево каталогу"
+
+// --- preferences
+#define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
+#define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
+#define MSGTR_PREFERENCES_SubtitleOSD "Субтитри й OSD"
+#define MSGTR_PREFERENCES_Codecs "Кодеки й demuxer"
+// Note: If you change MSGTR_PREFERENCES_Misc see if it still fits MSGTR_PREFERENCES_FRAME_Misc
+#define MSGTR_PREFERENCES_Misc "Різне"
+#define MSGTR_PREFERENCES_None "Немає"
+#define MSGTR_PREFERENCES_DriverDefault "звичайний драйвер"
+#define MSGTR_PREFERENCES_AvailableDrivers "Доступні драйвери:"
+#define MSGTR_PREFERENCES_DoNotPlaySound "Не грати звук"
+#define MSGTR_PREFERENCES_NormalizeSound "Нормалізувати звук"
+#define MSGTR_PREFERENCES_EnableEqualizer "Дозволити еквалайзер"
+#define MSGTR_PREFERENCES_ExtraStereo "Дозволити додаткове стерео"
+#define MSGTR_PREFERENCES_Coefficient "Коефіціент:"
+#define MSGTR_PREFERENCES_AudioDelay "Затримка аудіо"
+#define MSGTR_PREFERENCES_DoubleBuffer "Дозволити подвійне буферування"
+#define MSGTR_PREFERENCES_DirectRender "Дозволити прямий вивід"
+#define MSGTR_PREFERENCES_FrameDrop "Дозволити пропуск кадрів"
+#define MSGTR_PREFERENCES_HFrameDrop "Дозволити викидування кадрів (небезпечно)"
+#define MSGTR_PREFERENCES_Flip "Перегорнути зображення догори ногами"
+#define MSGTR_PREFERENCES_Panscan "Panscan: "
+#define MSGTR_PREFERENCES_OSDTimer "Таймер та індікатори"
+#define MSGTR_PREFERENCES_OSDProgress "Лише лінійки"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Таймер, проценти та загальний час"
+#define MSGTR_PREFERENCES_Subtitle "Субтитри:"
+#define MSGTR_PREFERENCES_SUB_Delay "Затримка: "
+#define MSGTR_PREFERENCES_SUB_FPS "к/c:"
+#define MSGTR_PREFERENCES_SUB_POS "Положення: "
+#define MSGTR_PREFERENCES_SUB_AutoLoad "Заборонити автозавантаження субтитрів"
+#define MSGTR_PREFERENCES_SUB_Unicode "Unicode субтитри"
+#define MSGTR_PREFERENCES_SUB_MPSUB "Перетворити вказані субтитри до формату MPlayer"
+#define MSGTR_PREFERENCES_SUB_SRT "Перетворити вказані субтитри до формату SubViewer (SRT)"
+#define MSGTR_PREFERENCES_SUB_Overlap "Дозволити/заборонити перекриття субтитрів"
+#define MSGTR_PREFERENCES_SUB_USE_ASS "SSA/ASS вивід субтитрів"
+#define MSGTR_PREFERENCES_SUB_ASS_USE_MARGINS "Використовувати кордони"
+#define MSGTR_PREFERENCES_SUB_ASS_TOP_MARGIN "Угорі: "
+#define MSGTR_PREFERENCES_SUB_ASS_BOTTOM_MARGIN "Знизу: "
+#define MSGTR_PREFERENCES_Font "Шрифт:"
+#define MSGTR_PREFERENCES_FontFactor "Фактор шрифту:"
+#define MSGTR_PREFERENCES_PostProcess "Дозволити postprocessing"
+#define MSGTR_PREFERENCES_AutoQuality "Авто якість: "
+#define MSGTR_PREFERENCES_NI "Використовувати неперемежений AVI парсер"
+#define MSGTR_PREFERENCES_IDX "Перебудувати індекс, якщо треба"
+#define MSGTR_PREFERENCES_VideoCodecFamily "Драйвер відео содеку:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "Драйвер аудіо кодеку:"
+#define MSGTR_PREFERENCES_FRAME_OSD_Level "Рівень OSD"
+#define MSGTR_PREFERENCES_FRAME_Subtitle "Субтитри"
+#define MSGTR_PREFERENCES_FRAME_Font "Шрифт"
+#define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Кодек й demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "Кеш"
+#define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
+#define MSGTR_PREFERENCES_Audio_Device "Пристрій:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Мікшер:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Канал мікшеру:"
+#define MSGTR_PREFERENCES_Message "Не забудьте, що вам треба перезапустити програвання для набуття чинності деяких параметрів!"
+#define MSGTR_PREFERENCES_DXR3_VENC "Відео кодек:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "Використовувати LAVC (FFmpeg)"
+#define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
+#define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
+#define MSGTR_PREFERENCES_FontEncoding3 "Western European Languages with Euro (ISO-8859-15)"
+#define MSGTR_PREFERENCES_FontEncoding4 "Slavic/Central European Languages (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, Galician, Maltese, Turkish (ISO-8859-3)"
+#define MSGTR_PREFERENCES_FontEncoding6 "Old Baltic charset (ISO-8859-4)"
+#define MSGTR_PREFERENCES_FontEncoding7 "Cyrillic (ISO-8859-5)"
+#define MSGTR_PREFERENCES_FontEncoding8 "Arabic (ISO-8859-6)"
+#define MSGTR_PREFERENCES_FontEncoding9 "Modern Greek (ISO-8859-7)"
+#define MSGTR_PREFERENCES_FontEncoding10 "Turkish (ISO-8859-9)"
+#define MSGTR_PREFERENCES_FontEncoding11 "Baltic (ISO-8859-13)"
+#define MSGTR_PREFERENCES_FontEncoding12 "Celtic (ISO-8859-14)"
+#define MSGTR_PREFERENCES_FontEncoding13 "Hebrew charsets (ISO-8859-8)"
+#define MSGTR_PREFERENCES_FontEncoding14 "Russian (KOI8-R)"
+#define MSGTR_PREFERENCES_FontEncoding15 "Ukrainian, Belarusian (KOI8-U/RU)"
+#define MSGTR_PREFERENCES_FontEncoding16 "Simplified Chinese charset (CP936)"
+#define MSGTR_PREFERENCES_FontEncoding17 "Traditional Chinese charset (BIG5)"
+#define MSGTR_PREFERENCES_FontEncoding18 "Japanese charsets (SHIFT-JIS)"
+#define MSGTR_PREFERENCES_FontEncoding19 "Korean charset (CP949)"
+#define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
+#define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
+#define MSGTR_PREFERENCES_FontEncoding23 "Arabic Windows (CP1256)"
+#define MSGTR_PREFERENCES_FontNoAutoScale "Без автомасштабування"
+#define MSGTR_PREFERENCES_FontPropWidth "Пропорційно ширині кадру"
+#define MSGTR_PREFERENCES_FontPropHeight "Пропорційно висоті кадру"
+#define MSGTR_PREFERENCES_FontPropDiagonal "Пропорційно діагоналі кадру"
+#define MSGTR_PREFERENCES_FontEncoding "Кодування:"
+#define MSGTR_PREFERENCES_FontBlur "Розпливання:"
+#define MSGTR_PREFERENCES_FontOutLine "Обведення:"
+#define MSGTR_PREFERENCES_FontTextScale "Масштаб тексту:"
+#define MSGTR_PREFERENCES_FontOSDScale "Масштаб OSD:"
+#define MSGTR_PREFERENCES_Cache "Кеш on/off"
+#define MSGTR_PREFERENCES_CacheSize "Розмір кешу: "
+#define MSGTR_PREFERENCES_LoadFullscreen "Стартувати в полний екран"
+#define MSGTR_PREFERENCES_SaveWinPos "Зберігати положення вікна"
+#define MSGTR_PREFERENCES_XSCREENSAVER "Зупинити XScreenSaver"
+#define MSGTR_PREFERENCES_PlayBar "Дозволити лінійку програвання"
+#define MSGTR_PREFERENCES_AutoSync "AutoSync ув/вимк"
+#define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM пристрій:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD пристрій:"
+#define MSGTR_PREFERENCES_FPS "Кадрів на секунду:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Показувати неактивне вікно зображення"
+#define MSGTR_PREFERENCES_ArtsBroken "Новіші версії aRts не сумісні"\
+           "з GTK 1.x та спричинять помилку GMPlayer!"
+
+// -- aboutbox
+#define MSGTR_ABOUT_UHU "GUI розробку спонсовано UHU Linux\n"
+#define MSGTR_ABOUT_Contributors "Розробники коду та документації\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "Кодеки та сторонні бібліотеки\n"
+#define MSGTR_ABOUT_Translations "Переклади\n"
+#define MSGTR_ABOUT_Skins "Жупани\n"
+
+// --- messagebox
+#define MSGTR_MSGBOX_LABEL_FatalError "Фатальна помилка!"
+#define MSGTR_MSGBOX_LABEL_Error "Помилка!"
+#define MSGTR_MSGBOX_LABEL_Warning "Попередження!" 
+
+// bitmap.c
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] недостатньо пам'яті для картинки\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] недостатньо пам'яті для картинки\n"
+
+// cfg.c
+#define MSGTR_ConfigFileReadError "[cfg] помилка читання файлу налаштунків ...\n"
+#define MSGTR_UnableToSaveOption "[cfg] Не можу зберегти '%s' опцію.\n"
+
+// interface.c
+#define MSGTR_DeletingSubtitles "[GUI] Видаляю субтитри.\n"
+#define MSGTR_LoadingSubtitles "[GUI] Вантажу субтитри: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] Додаю відео фільтр: %s\n"
+#define MSGTR_RemovingVideoFilter "[GUI] Видаляю відео фільтр: %s\n"
+
+// mw.c
+#define MSGTR_NotAFile "Здається, це не файл: %s !\n"
+
+// ws.c
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] Не можу відкрити дисплей.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] Віддалений дисплей, вимикаю XMITSHM.\n"
+#define MSGTR_WS_NoXshm "[ws] Вибачте, ваша система не підтримує розширення загальної пам'яті X.\n"
+#define MSGTR_WS_NoXshape "[ws] Вибачте, здається, ваша система не підтримує розширення XShape.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] Вибачте, глибина кольору занизька.\n"
+#define MSGTR_WS_TooManyOpenWindows "[ws] Забагато відкритих вікон.\n"
+#define MSGTR_WS_ShmError "[ws] помилка розширення загальної пам'яті\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Вибачте, не достатньо пам'яті для прорисування буферу.\n"
+#define MSGTR_WS_DpmsUnavailable "DPMS не доступний?\n"
+#define MSGTR_WS_DpmsNotEnabled "Не можу увімкнути DPMS.\n"
+
+// wsxdnd.c
+#define MSGTR_WS_NotAFile "Здається, це не файл...\n"
+#define MSGTR_WS_DDNothing "D&D: Нічого не повернено!\n"
+
+// ======================= video output drivers ========================
+
+#define MSGTR_VOincompCodec "Обраний пристрій виводу відео несумісний з цим кодеком.\n"\
+                "Спробуйте додати фільтр scale до списку вашого списку фільтрів,\n"\
+                "наприклад. -vf spp,scale замість -vf spp.\n"
+#define MSGTR_VO_GenericError "Виникла слідуюча помилка"
+#define MSGTR_VO_UnableToAccess "Неможлово отримати доступ"
+#define MSGTR_VO_ExistsButNoDirectory "вже існує, але це не директорія."
+#define MSGTR_VO_DirExistsButNotWritable "Директорія виводу вже існує, але не доступна для запису."
+#define MSGTR_VO_DirExistsAndIsWritable "Директорія виводу вже існує та доступна для запису."
+#define MSGTR_VO_CantCreateDirectory "Не можу створити директорію виводу."
+#define MSGTR_VO_CantCreateFile "Не можу створити файл виводу."
+#define MSGTR_VO_DirectoryCreateSuccess "Директорія виводу успішно створена."
+#define MSGTR_VO_ParsingSuboptions "Перевіряю синтаксис субопцій."
+#define MSGTR_VO_SuboptionsParsedOK "Перевірка синтаксису закінчилась успішно."
+#define MSGTR_VO_ValueOutOfRange "значення за межами доступного діапазону"
+#define MSGTR_VO_NoValueSpecified "Не вказано значення."
+#define MSGTR_VO_UnknownSuboptions "невідома(і) субопція(ї)"
+
+// aspect.c
+#define MSGTR_LIBVO_ASPECT_NoSuitableNewResFound "[ASPECT] Попередження: Не знайдено потрібного розширення!\n"
+#define MSGTR_LIBVO_ASPECT_NoNewSizeFoundThatFitsIntoRes "[ASPECT] Помилка: Не знайдено розмір, що помістився б у дане розширення!\n"
+
+// font_load_ft.c
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewFaceFailed "Помилка New_Face. Можливо шлях до шрифту невірний.\nВкажіть файл шрифту (~/.mplayer/subfont.ttf).\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_NewMemoryFaceFailed "Помилка New_Memory_Face..\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFaceFailed "шрифт субтитрів: помилка load_sub_face.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_SubFontCharsetFailed "шрифт субтитрів: помилка prepare_charset.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareSubtitleFont "Не можу підготувати шрифт субтитрів.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont "Не можу підготувати шрифт OSD.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables "Не можу генерувати таблиці.\n"
+#define MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed "Помилка FT_Done_FreeType.\n"
+
+// sub.c
+#define MSGTR_VO_SUB_Seekbar "Навігація"
+#define MSGTR_VO_SUB_Play "Грати"
+#define MSGTR_VO_SUB_Pause "Пауза"
+#define MSGTR_VO_SUB_Stop "Стоп"
+#define MSGTR_VO_SUB_Rewind "Назад"
+#define MSGTR_VO_SUB_Forward "Уперед"
+#define MSGTR_VO_SUB_Clock "Час"
+#define MSGTR_VO_SUB_Contrast "Контраст"
+#define MSGTR_VO_SUB_Saturation "Насиченість"
+#define MSGTR_VO_SUB_Volume "Гучність"
+#define MSGTR_VO_SUB_Brightness "Блискучість"
+#define MSGTR_VO_SUB_Hue "Колір"
+#define MSGTR_VO_SUB_Balance "Баланс"
+
+// vo_3dfx.c
+#define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Підтримується тільки 16bpp!"
+#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Візуальний ID  %lx.\n"
+#define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] Не можу відкрити /dev/3dfx.\n"
+#define MSGTR_LIBVO_3DFX_Error "[VO_3DFX] Помилка: %d.\n"
+#define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] Не можу показати області пам'яті 3dfx: %p,%p,%d.\n"
+#define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Ініціалізовано: %p.\n"
+#define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Невідомий підпристрій: %s.\n"
+
+// vo_aa.c
+#define MSGTR_VO_AA_HelpHeader "\n\nСубопції vo_aa бібліотеки aalib:\n"
+#define MSGTR_VO_AA_AdditionalOptions "Додаткові опції, що забезпечує vo_aa:\n" \
+"  help        показати це повідомлення\n" \
+"  osdcolor    встановити колір OSD\n  subcolor    встановити колір субтитрівr\n" \
+"        параметри кольору:\n           0 : стандартний\n" \
+"           1 : дим\n           2 : товстий\n           3 : товстий шрифт\n" \
+"           4 : реверс\n           5 : спеціяльний\n\n\n"
+
+
+// vo_dxr3.c
+#define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Не можу завантажити нову палітру SPU!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] Не можу встановити режим програвання!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] Не можу встановити режим субкартинки!\n"
+#define MSGTR_LIBVO_DXR3_UnableToGetTVNorm "[VO_DXR3] Не можу отримати режим ТБ!\n"
+#define MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate "[VO_DXR3] Авто-вибір режиму ТБ за частотою кадрів: "
+#define MSGTR_LIBVO_DXR3_UnableToSetTVNorm "[VO_DXR3] Не можу отримати режим ТБ!\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForNTSC "[VO_DXR3] Встановлюю для NTSC.\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] Встановлюю для PAL/SECAM.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] Встановлюю пропорції 4:3.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] Встановлюю пропорції 16:9.\n"
+#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] не вистачає пам'яті\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] Не можу знайти головний колір!\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] Не можу знайти точний головний колір, використовую найбільш схоже (0x%lx).\n"
+#define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] Ініціялізування.\n"
+#define MSGTR_LIBVO_DXR3_FailedRestoringTVNorm "[VO_DXR3] Не можу встановити режим ТБ!\n"
+#define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] Дозволяю попередню буферизацію.\n"
+#define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] Використовую новий механізм синхронізації.\n"
+#define MSGTR_LIBVO_DXR3_UsingOverlay "[VO_DXR3] Використовую оверлей.\n"
+#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Помилка: Оверлей потребує збирання з встановленими бібліотеками/допоміжними файлами X11.\n"
+#define MSGTR_LIBVO_DXR3_WillSetTVNormTo "[VO_DXR3] Встановлюю режим ТБ у: "
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "авто-регулювання за частотою кадрів фільма (PAL/PAL-60)"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "авто-регулювання за частотою кадрів фільма (PAL/NTSC)"
+#define MSGTR_LIBVO_DXR3_UseCurrentNorm "Використовую поточний режим."
+#define MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm "Запропонований невідомий режим. Спробуйте поточний."
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying "[VO_DXR3] Помилка при відкритті %s для запису, пробую /dev/em8300 замість.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingMV "[VO_DXR3] Помилка при відкритті %s для запису, пробую /dev/em8300_mv замість.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWell "[VO_DXR3] Також помилка при відкритті /dev/em8300 для запису!\nВиходжу.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellMV "[VO_DXR3] Також помилка при відкритті /dev/em8300_для запису!\nВиходжу.\n"
+#define MSGTR_LIBVO_DXR3_Opened "[VO_DXR3] Відкрито: %s.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP "[VO_DXR3] Помилка при відкритті %s для запису, пробую /dev/em8300_sp замість.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP "[VO_DXR3] Також помилка при відкритті /dev/em8300_sp для запису!\nВиходжу.\n"
+#define MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup "[VO_DXR3] Не можу відкрити дисплей у час встановлення хаку оверлея!\n"
+#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Не можу ініціялізувати X11!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] Невдалось встановити атрибут оверлея.\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] Невдалось встановити екран оверлею!\nВиходжу.\n"
+#define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] Неадалось увімкнути оверлей!\nВиходжу.\n"
+#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] Невдалось зімнити розмір вікна оверлею!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayBcs "[VO_DXR3] Невдалося встановити bcs оверлею!\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayYOffsetValues "[VO_DXR3] Не можу отримати значення Y-зміщення оверлею!\nВиходжу.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXOffsetValues "[VO_DXR3] Не можу отримати значення X-зміщення оверлею!\nВиходжу.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection "[VO_DXR3] Не можу отримати корекцію оверлея масштабування X!\nВиходжу.\n"
+#define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Зміщення за Y: %d.\n"
+#define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] Зміщення за X: %d.\n"
+#define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Корекція за X: %d.\n"
+#define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Не можу встановити сигнал mix!\n"
+
+// vo_jpeg.c
+#define MSGTR_VO_JPEG_ProgressiveJPEG "Увімкнено прогресивний JPEG."
+#define MSGTR_VO_JPEG_NoProgressiveJPEG "Ввимкнено прогресивний JPEG."
+#define MSGTR_VO_JPEG_BaselineJPEG "Увімкнено основний JPEG."
+#define MSGTR_VO_JPEG_NoBaselineJPEG "Ввимкнено основний JPEG."
+
+// vo_mga.c
+#define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): розмір змінений до %dx%d.\n"
+#define MSGTR_LIBVO_MGA_Uninit "[VO] деініціялізація!\n"
+
+// mga_common.c
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] помилка у mga_vid_config ioctl (неправильна версія mga_vid.o?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Не можу отримати значення luma з модуля ядра!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Не можу встановити значення luma з модуля ядра!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Невідома ширина/висота екрану!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] невірний вихідний формат %0X\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Версія вашого mga_vid драйверу несумісна із цією версією MPlayer!\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Не можу відкрити: %s\n"
+#define MSGTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Розширення джерела, у крайньому випадку в одному вимірі, більше ніж 1023x1023.\n[MGA] Перемасштабуйте програмно або викорстайте -lavdopts lowres=1.\n"
+#define MSGTR_LIBVO_MGA_mgavidVersionMismatch "[MGA] версія драйверу mga_vid ядра (%u) та MPlayer (%u) не співпадають\n"
+
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Компактовід \"%s\" не знайдений!\n"
 #define MSGTR_ErrTrackSelect "Помилка вибору треку на VCD!"
@@ -518,7 +1010,6 @@ static char help_text[]=
 #define MSGTR_TVInputNotSeekable "TV input is not seekable! (Seeking will probably be for changing channels ;)\n"
 #define MSGTR_ClipInfo "Інформація кліпу:\n"
 
-
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Не зміг відкрити кодек\n"
 #define MSGTR_CantCloseCodec "Не зміг закрити кодек\n"
@@ -572,232 +1063,3 @@ static char help_text[]=
 #define MSGTR_MovieAspectIsSet "Відношення сторін %.2f:1 - масштабую аби скоректувати.\n"
 #define MSGTR_MovieAspectUndefined "Відношення сторін не вказано - масштабування не використовується.\n"
 
-// ====================== GUI messages/buttons ========================
-
-#ifdef CONFIG_GUI
-
-// --- labels ---
-#define MSGTR_About "Про програму"
-#define MSGTR_FileSelect "Вибрати файл..."
-#define MSGTR_SubtitleSelect "Вибрати субтитри..."
-#define MSGTR_OtherSelect "Вибір..."
-#define MSGTR_AudioFileSelect "Вибрати зовнішній аудіо канал..."
-#define MSGTR_FontSelect "Вибрати шрифт..."
-#define MSGTR_PlayList "Список програвання"
-#define MSGTR_Equalizer "Еквалайзер"
-#define MSGTR_SkinBrowser "Переглядач жупанів"
-#define MSGTR_Network "Програвання з мережі..."
-#define MSGTR_Preferences "Налаштування"
-#define MSGTR_NoMediaOpened "Немає відкритого носію."
-#define MSGTR_VCDTrack "Доріжка VCD %d"
-#define MSGTR_NoChapter "No chapter"
-#define MSGTR_Chapter "Chapter %d"
-#define MSGTR_NoFileLoaded "Немає завантаженого файлу."
-
-// --- buttons ---
-#define MSGTR_Ok "Так"
-#define MSGTR_Cancel "Скасувати"
-#define MSGTR_Add "Додати"
-#define MSGTR_Remove "Видалити"
-#define MSGTR_Clear "Вичистити"
-#define MSGTR_Config "Конфігурувати"
-#define MSGTR_ConfigDriver "Конфігурувати драйвер"
-#define MSGTR_Browse "Проглядати"
-
-// --- error messages ---
-#define MSGTR_NEMDB "Вибачте, не вистачає пам'яті для відмальовування буферу."
-#define MSGTR_NEMFMR "Вибачте, не вистачає пам'яті для відображення меню."
-#define MSGTR_IDFGCVD "Вибачте, не знайдено відповідного до GUI вихідного відео драйверу."
-#define MSGTR_NEEDLAVC "Вибачте, ви не можете грати не-MPEG файли на вашому DXR3/H+ пристрої без перекодування.\nБудь ласка, ввімкніть lavc в панелі конфігурування DXR3/H+."
-
-// --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[жупан] помилка у файлі конфігурації жупана, рядок %d  : %s" 
-#define MSGTR_SKIN_WARNING1 "[жупан] попередження: у файлі конфігурації жупана, рядок %d: widget знайдений але до цього не знайдено \"section\" (%s)"
-#define MSGTR_SKIN_WARNING2 "[жупан] попередження: у файлі конфігурації жупана, рядок %d: widget знайдений але до цього не знайдено \"subsection\" (%s)"
-#define MSGTR_SKIN_WARNING3 "[жупан] попередження: у файлі конфігурації жупана, рядок %d: цей widget (%s) не підтримує цю subsection"
-#define MSGTR_SKIN_BITMAP_16bit  "Глибина кольору бітової карти у 16 біт і менше не підтримується (%s).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "файл не знайдений (%s)\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "помилка читання BMP (%s)\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "помилка читання TGA (%s)\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "помилка читання PNG (%s)\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE запакований TGA не підтримується (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "невідомий тип файлу (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConversionError "помилка перетворення 24-біт у 32-біт (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownMessage "невідоме повідомлення: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "не вистачає пам'яті\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "оголошено надто багато шрифтів\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "файл шрифту не знайдений\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "файл образів шрифту не знайдений\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "неіснуючий ідентифікатор шрифту (%s)\n"
-#define MSGTR_SKIN_UnknownParameter "невідомий параметр (%s)\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "Жупан не знайдено (%s).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Помилка читання файла конфігурації жупана (%s).\n"
-#define MSGTR_SKIN_LABEL "Жупани:"
-
-// --- gtk menus
-#define MSGTR_MENU_AboutMPlayer "Про програму"
-#define MSGTR_MENU_Open "Відкрити..."
-#define MSGTR_MENU_PlayFile "Грати файл..."
-#define MSGTR_MENU_PlayVCD "Грати VCD..."
-#define MSGTR_MENU_PlayDVD "Грати DVD..."
-#define MSGTR_MENU_PlayURL "Грати URL..."
-#define MSGTR_MENU_LoadSubtitle "Завантажити субтитри..."
-#define MSGTR_MENU_DropSubtitle "Викинути субтитри..."
-#define MSGTR_MENU_LoadExternAudioFile "Завантажити зовнішній аудіо файл..."
-#define MSGTR_MENU_Playing "Відтворення"
-#define MSGTR_MENU_Play "Грати"
-#define MSGTR_MENU_Pause "Пауза"
-#define MSGTR_MENU_Stop "Зупинити"
-#define MSGTR_MENU_NextStream "Наступний потік"
-#define MSGTR_MENU_PrevStream "Попередній потік"
-#define MSGTR_MENU_Size "Розмір"
-#define MSGTR_MENU_NormalSize "Нормальний розмір"
-#define MSGTR_MENU_DoubleSize "Подвійний розмір"
-#define MSGTR_MENU_FullScreen "Повний екран"
-#define MSGTR_MENU_DVD "DVD"
-#define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "Грати диск..."
-#define MSGTR_MENU_ShowDVDMenu "Показати DVD меню"
-#define MSGTR_MENU_Titles "Титри"
-#define MSGTR_MENU_Title "Титр %2d"
-#define MSGTR_MENU_None "(нема)"
-#define MSGTR_MENU_Chapters "Розділи"
-#define MSGTR_MENU_Chapter "Розділ %2d"
-#define MSGTR_MENU_AudioLanguages "Авто мова"
-#define MSGTR_MENU_SubtitleLanguages "Мова субтитрів"
-#define MSGTR_MENU_SkinBrowser "Переглядач жупанів"
-#define MSGTR_MENU_Exit "Вихід..."
-#define MSGTR_MENU_Mute "Тиша"
-#define MSGTR_MENU_Original "Вихідний"
-#define MSGTR_MENU_AspectRatio "Відношення сторін"
-#define MSGTR_MENU_AudioTrack "Аудіо доріжка"
-#define MSGTR_MENU_Track "Доріжка %d"
-#define MSGTR_MENU_VideoTrack "Відео доріжка"
-
-// --- equalizer
-#define MSGTR_EQU_Audio "Аудіо"
-#define MSGTR_EQU_Video "Відео"
-#define MSGTR_EQU_Contrast "Контраст: "
-#define MSGTR_EQU_Brightness "Яскравість: "
-#define MSGTR_EQU_Hue "Тон: "
-#define MSGTR_EQU_Saturation "Насиченість: "
-#define MSGTR_EQU_Front_Left "Передній Лівий"
-#define MSGTR_EQU_Front_Right "Передній Правий"
-#define MSGTR_EQU_Back_Left "Задній Лівий"
-#define MSGTR_EQU_Back_Right "Задній Правий"
-#define MSGTR_EQU_Center "Центральний"
-#define MSGTR_EQU_Bass "Бас"
-#define MSGTR_EQU_All "Усі"
-#define MSGTR_EQU_Channel1 "Канал 1:"
-#define MSGTR_EQU_Channel2 "Канал 2:"
-#define MSGTR_EQU_Channel3 "Канал 3:"
-#define MSGTR_EQU_Channel4 "Канал 4:"
-#define MSGTR_EQU_Channel5 "Канал 5:"
-#define MSGTR_EQU_Channel6 "Канал 6:"
-
-// --- playlist
-#define MSGTR_PLAYLIST_Path "Шлях"
-#define MSGTR_PLAYLIST_Selected "Вибрані файли"
-#define MSGTR_PLAYLIST_Files "Файли"
-#define MSGTR_PLAYLIST_DirectoryTree "Дерево каталогу"
-
-// --- preferences
-#define MSGTR_PREFERENCES_SubtitleOSD "Субтитри й OSD"
-#define MSGTR_PREFERENCES_Codecs "Кодеки й demuxer"
-#define MSGTR_PREFERENCES_Misc "Різне"
-
-#define MSGTR_PREFERENCES_None "Немає"
-#define MSGTR_PREFERENCES_AvailableDrivers "Доступні драйвери:"
-#define MSGTR_PREFERENCES_DoNotPlaySound "Не грати звук"
-#define MSGTR_PREFERENCES_NormalizeSound "Нормалізувати звук"
-#define MSGTR_PREFERENCES_EnableEqualizer "Дозволити еквалайзер"
-#define MSGTR_PREFERENCES_ExtraStereo "Дозволити додаткове стерео"
-#define MSGTR_PREFERENCES_Coefficient "Коефіціент:"
-#define MSGTR_PREFERENCES_AudioDelay "Затримка аудіо"
-#define MSGTR_PREFERENCES_DoubleBuffer "Дозволити подвійне буферування"
-#define MSGTR_PREFERENCES_DirectRender "Дозволити прямий вивід"
-#define MSGTR_PREFERENCES_FrameDrop "Дозволити пропуск кадрів"
-#define MSGTR_PREFERENCES_HFrameDrop "Дозволити викидування кадрів (небезпечно)"
-#define MSGTR_PREFERENCES_Flip "Перегорнути зображення догори ногами"
-#define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_OSDTimer "Таймер та індікатори"
-#define MSGTR_PREFERENCES_OSDProgress "Лише лінійки"
-#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Таймер, проценти та загальний час"
-#define MSGTR_PREFERENCES_Subtitle "Субтитри:"
-#define MSGTR_PREFERENCES_SUB_Delay "Затримка: "
-#define MSGTR_PREFERENCES_SUB_FPS "к/c:"
-#define MSGTR_PREFERENCES_SUB_POS "Положення: "
-#define MSGTR_PREFERENCES_SUB_AutoLoad "Заборонити автозавантаження субтитрів"
-#define MSGTR_PREFERENCES_SUB_Unicode "Unicode субтитри"
-#define MSGTR_PREFERENCES_SUB_MPSUB "Перетворити вказані субтитри до формату MPlayer"
-#define MSGTR_PREFERENCES_SUB_SRT "Перетворити вказані субтитри до формату SubViewer (SRT)"
-#define MSGTR_PREFERENCES_SUB_Overlap "Дозволити/заборонити перекриття субтитрів"
-#define MSGTR_PREFERENCES_Font "Шрифт:"
-#define MSGTR_PREFERENCES_FontFactor "Фактор шрифту:"
-#define MSGTR_PREFERENCES_PostProcess "Дозволити postprocessing"
-#define MSGTR_PREFERENCES_AutoQuality "Авто якість: "
-#define MSGTR_PREFERENCES_NI "Використовувати неперемежений AVI парсер"
-#define MSGTR_PREFERENCES_IDX "Перебудувати індекс, якщо треба"
-#define MSGTR_PREFERENCES_VideoCodecFamily "Драйвер відео содеку:"
-#define MSGTR_PREFERENCES_AudioCodecFamily "Драйвер аудіо кодеку:"
-#define MSGTR_PREFERENCES_FRAME_OSD_Level "Рівень OSD"
-#define MSGTR_PREFERENCES_FRAME_Subtitle "Субтитри"
-#define MSGTR_PREFERENCES_FRAME_Font "Шрифт"
-#define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
-#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Кодек й demuxer"
-#define MSGTR_PREFERENCES_FRAME_Cache "Кеш"
-#define MSGTR_PREFERENCES_Message "Не забудьте, що вам треба перезапустити програвання для набуття чинності деяких параметрів!"
-#define MSGTR_PREFERENCES_DXR3_VENC "Відео кодек:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "Використовувати LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
-#define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
-#define MSGTR_PREFERENCES_FontEncoding3 "Western European Languages with Euro (ISO-8859-15)"
-#define MSGTR_PREFERENCES_FontEncoding4 "Slavic/Central European Languages (ISO-8859-2)"
-#define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, Galician, Maltese, Turkish (ISO-8859-3)"
-#define MSGTR_PREFERENCES_FontEncoding6 "Old Baltic charset (ISO-8859-4)"
-#define MSGTR_PREFERENCES_FontEncoding7 "Cyrillic (ISO-8859-5)"
-#define MSGTR_PREFERENCES_FontEncoding8 "Arabic (ISO-8859-6)"
-#define MSGTR_PREFERENCES_FontEncoding9 "Modern Greek (ISO-8859-7)"
-#define MSGTR_PREFERENCES_FontEncoding10 "Turkish (ISO-8859-9)"
-#define MSGTR_PREFERENCES_FontEncoding11 "Baltic (ISO-8859-13)"
-#define MSGTR_PREFERENCES_FontEncoding12 "Celtic (ISO-8859-14)"
-#define MSGTR_PREFERENCES_FontEncoding13 "Hebrew charsets (ISO-8859-8)"
-#define MSGTR_PREFERENCES_FontEncoding14 "Russian (KOI8-R)"
-#define MSGTR_PREFERENCES_FontEncoding15 "Ukrainian, Belarusian (KOI8-U/RU)"
-#define MSGTR_PREFERENCES_FontEncoding16 "Simplified Chinese charset (CP936)"
-#define MSGTR_PREFERENCES_FontEncoding17 "Traditional Chinese charset (BIG5)"
-#define MSGTR_PREFERENCES_FontEncoding18 "Japanese charsets (SHIFT-JIS)"
-#define MSGTR_PREFERENCES_FontEncoding19 "Korean charset (CP949)"
-#define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
-#define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
-#define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
-#define MSGTR_PREFERENCES_FontNoAutoScale "Без автомасштабування"
-#define MSGTR_PREFERENCES_FontPropWidth "Пропорційно ширині кадру"
-#define MSGTR_PREFERENCES_FontPropHeight "Пропорційно висоті кадру"
-#define MSGTR_PREFERENCES_FontPropDiagonal "Пропорційно діагоналі кадру"
-#define MSGTR_PREFERENCES_FontEncoding "Кодування:"
-#define MSGTR_PREFERENCES_FontBlur "Розпливання:"
-#define MSGTR_PREFERENCES_FontOutLine "Обведення:"
-#define MSGTR_PREFERENCES_FontTextScale "Масштаб тексту:"
-#define MSGTR_PREFERENCES_FontOSDScale "Масштаб OSD:"
-#define MSGTR_PREFERENCES_Cache "Кеш on/off"
-#define MSGTR_PREFERENCES_CacheSize "Розмір кешу: "
-#define MSGTR_PREFERENCES_LoadFullscreen "Стартувати в полний екран"
-#define MSGTR_PREFERENCES_SaveWinPos "Зберігати положення вікна"
-#define MSGTR_PREFERENCES_XSCREENSAVER "Stop XScreenSaver"
-#define MSGTR_PREFERENCES_PlayBar "Дозволити лінійку програвання"
-#define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"
-#define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
-#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM пристрій:"
-#define MSGTR_PREFERENCES_DVDDevice "DVD пристрій:"
-#define MSGTR_PREFERENCES_FPS "Кадрів на секунду:"
-#define MSGTR_PREFERENCES_ShowVideoWindow "Показувати неактивне вікно зображення"
-
-#define MSGTR_ABOUT_UHU "GUI розробку спонсовано UHU Linux\n"
-
-// --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "фатальна помилка..."
-#define MSGTR_MSGBOX_LABEL_Error "помилка..."
-#define MSGTR_MSGBOX_LABEL_Warning "попередження..." 
-
-#endif
