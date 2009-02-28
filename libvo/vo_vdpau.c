@@ -1050,7 +1050,7 @@ static int get_equalizer(char *name, int *value) {
 static int set_equalizer(char *name, int value) {
     VdpStatus vdp_st;
     VdpCSCMatrix matrix;
-    VdpVideoMixerAttribute attributes[] = {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
+    static const VdpVideoMixerAttribute attributes[] = {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
     const void *attribute_values[] = {&matrix};
 
     if (!strcasecmp(name, "brightness"))
