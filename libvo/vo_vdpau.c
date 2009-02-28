@@ -212,8 +212,10 @@ static void video_to_output_surface(void)
     for (i = 0; i <= !!(deint > 1); i++) {
         int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
         VdpOutputSurface output_surface;
-        if (i)
+        if (i) {
+            draw_osd();
             flip_page();
+        }
         if (deint)
             field = top_field_first == i ?
                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
