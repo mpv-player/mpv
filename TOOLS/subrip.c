@@ -21,8 +21,6 @@
 #include "vobsub.h"
 #include "spudec.h"
 
-void guiMessageBox(int level, char * str) {};
-
 /* XXX Kludge ahead, this MUST be the same as the definitions found in ../spudec.c */
 typedef struct packet_t packet_t;
 struct packet_t {
@@ -74,9 +72,6 @@ typedef struct {
   int spu_changed;
 } spudec_handle_t;
 
-int use_gui;
-int gtkMessageBox;
-int identify=0;
 int vobsub_id=0;
 int sub_pos=0;
 
