@@ -823,7 +823,7 @@ mencoder$(EXESUF): $(MENCODER_DEPS)
 mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
 
-codec-cfg$(EXESUF): codec-cfg.c codecs.conf.h help_mp.h
+codec-cfg$(EXESUF): codec-cfg.c help_mp.h
 	$(HOST_CC) -O -DCODECS2HTML $(EXTRA_INC) -o $@ $<
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
