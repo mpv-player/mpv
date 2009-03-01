@@ -467,6 +467,10 @@ static int x2scr(double x) {
 	return x*frame_context.orig_width_nocrop / frame_context.track->PlayResX +
 		FFMAX(global_settings->left_margin, 0);
 }
+static int x2scr_pos(double x) {
+	return x*frame_context.orig_width / frame_context.track->PlayResX +
+		global_settings->left_margin;
+}
 /**
  * \brief Mapping between script and screen coordinates
  */
@@ -2014,7 +2018,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		int base_y = 0;
 		mp_msg(MSGT_ASS, MSGL_DBG2, "positioned event at %f, %f\n", render_context.pos_x, render_context.pos_y);
 		get_base_point(bbox, alignment, &base_x, &base_y);
-		device_x = x2scr(render_context.pos_x) - base_x;
+		device_x = x2scr_pos(render_context.pos_x) - base_x;
 		device_y = y2scr(render_context.pos_y) - base_y;
 	}
 	
