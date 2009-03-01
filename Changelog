@@ -100,6 +100,7 @@ MPlayer (1.0)
     * removed unnecessary code from vo x11, xv, xvmc
     * automatic detection of hw acceleration (vo gl:yuv=x) for vo_gl
     * add OS/2 DART audio driver (-ao dart)
+    * add VDPAU video output
 
     MEncoder:
     * check for system-wide configuration file in MEncoder
