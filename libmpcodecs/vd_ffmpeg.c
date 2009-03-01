@@ -208,7 +208,7 @@ static void set_format_params(struct AVCodecContext *avctx, enum PixelFormat fmt
         vd_ffmpeg_ctx *ctx = sh->context;
         ctx->do_dr1    = 1;
         ctx->do_slices = 1;
-	avctx->thread_count    = 1;
+        avctx->thread_count    = 1;
         avctx->get_buffer      = get_buffer;
         avctx->release_buffer  = release_buffer;
         avctx->reget_buffer    = get_buffer;
