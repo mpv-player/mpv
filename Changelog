@@ -99,6 +99,7 @@ MPlayer (1.0)
     * factorize code in vo_wii
     * removed unnecessary code from vo x11, xv, xvmc
     * automatic detection of hw acceleration (vo gl:yuv=x) for vo_gl
+    * add OS/2 DART audio driver (-ao dart)
 
     MEncoder:
     * check for system-wide configuration file in MEncoder

@@ -47,6 +47,7 @@ extern ao_functions_t audio_out_sun;
 extern ao_functions_t audio_out_sgi;
 extern ao_functions_t audio_out_win32;
 extern ao_functions_t audio_out_dsound;
+extern ao_functions_t audio_out_dart;
 extern ao_functions_t audio_out_dxr2;
 extern ao_functions_t audio_out_ivtv;
 extern ao_functions_t audio_out_v4l2;
@@ -62,6 +63,9 @@ const ao_functions_t* const audio_out_drivers[] =
 #endif
 #ifdef CONFIG_WIN32WAVEOUT
         &audio_out_win32,
+#endif
+#ifdef CONFIG_DART
+        &audio_out_dart,
 #endif
 #ifdef CONFIG_COREAUDIO
         &audio_out_macosx,
