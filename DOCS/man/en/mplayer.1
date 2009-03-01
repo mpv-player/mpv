@@ -3448,11 +3448,12 @@ for negative values a blurring algorithm (default: 0).
 Apply a noise reduction algorithm to the video (default: 0, no noise reduction).
 .IPs deint=<0\-3>
 Chooses the deinterlacer (default: 0).
+All modes > 0 respect \-field\-dominance.
 .RSss
 .IPs 0
 No deinterlacing.
 .IPs 1
-Show only one field, similar to \-vf field.
+Show only first field, similar to \-vf field.
 .IPs 2
 Bob deinterlacing (current fallback for advanced deinterlacers).
 .IPs 3
