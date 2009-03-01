@@ -886,14 +886,6 @@ void list_codecs(int audioflag){
 
 
 #ifdef CODECS2HTML
-/*
- * Fake out GUI references when building the codecs2html utility.
- */
-#ifdef CONFIG_GUI
-void gtkMessageBox( int type,char * str ) { return; }
-int use_gui = 0;
-#endif
-
 void wrapline(FILE *f2,char *s){
     int c;
     if(!s){
