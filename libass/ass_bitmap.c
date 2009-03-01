@@ -214,6 +214,7 @@ static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 		dst += bm->w;
 	}
 
+	FT_Done_Glyph(glyph);
 	return bm;
 }
 
