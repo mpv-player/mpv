@@ -2,7 +2,6 @@ MPlayer (1.0)
 
   rc3: "StillAlive" March 1, 2009
     Decoders:
-    * Nellymoser audio decoding via lavc
     * support for X8 frame (fixes "J-type picture is not supported" for WMV2)
     * support for DTS WAV/DTS-CD passthrough by ad_hwac3
     * Apple's raw YUV2 in MOV
@@ -10,8 +9,6 @@ MPlayer (1.0)
     * video game codecs: BFI video, Playstation MDEC video, ADPCM XA audio,
       EA Maxis XA ADPCM audio, RL2 video, Beam Software SIFF video, V.Flash PTX video
     * AVOption support for libavcodec-based decoders
-    * image decoders: Sun rasterfile, PCX image
-    * MLP decoder via lavc
     * use lavc ADPCM codecs by default
     * support for progressive jpeg in ffmjpeg
     * ACDSystems mjpeg (ACDV) via binary DLL and lavc
@@ -39,14 +36,15 @@ MPlayer (1.0)
     * 10-bit video (v210) via Cinewave binary DLL
     * Brooktree YUV 4:1:1 Raw (Y41P) via binary DLL
     * many rare/obscure fourccs for known formats added
+    * lower priority for binary Linux rv3040 codecs due to bugs
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
     * support for wavpack in Matroska
-    * demux_lavf permits program switching
     * AVOption support for lavf demuxing
     * prefer lavf musepack demuxer over libmpdemux
-    * prefer lavf MOV demuxer over libmpdemux
+    * prefer lavf MOV demuxer over libmpdemux (use -demuxer mov for old behavior)
+    * support program switching in lavf demuxer
     * support -slang in lavf demuxer
     * support nosound switching in lavf demuxer
     * support libass in lavf demuxer
@@ -54,6 +52,7 @@ MPlayer (1.0)
     * support MOV subtitle format
     * support for attachments in lavf demuxer
     * support for chapters in lavf demuxer
+    * support seeking in multirate RealMedia files
     * FLAC speedup in lavf demuxer
     * MNG demuxer
 
@@ -70,20 +69,66 @@ MPlayer (1.0)
     * DVD streams can switch angles
     * DVD still menus are now supported via dvdnav://
     * allow specifying the TV standard for each channel
+    * switch internal dvdread to libdvdread SVN external
 
     FFmpeg/libavcodec:
-    * DNxHD (SMPTE VC-3) encoder
-    * H.264 speedup and PAFF decoding (install YASM for faster H264 decoding)
+    * DNxHD encoder
+    * H.264 PAFF decoding
+    * Nellymoser ASAO decoder
+    * Beam Software SIFF demuxer and decoder
+    * libvorbis Vorbis decoding removed in favor of native decoder
+    * IntraX8 (J-Frame) subdecoder for WMV2 and VC-1
+    * Ogg (Vorbis only) muxer
+    * PC Paintbrush PCX decoder
+    * Sun Rasterfile decoder
+    * TechnoTrend PVA demuxer
+    * Linux Media Labs MPEG-4 (LMLM4) demuxer
+    * AVM2 (Flash 9) SWF muxer
+    * QT variant of IMA ADPCM encoder
+    * Ipod/Iphone compatible mp4 muxer
+    * Mimic decoder
+    * MSN TCP Webcam stream demuxer
+    * RL2 demuxer / decoder
+    * IFF demuxer
+    * 8SVX audio decoder
+    * BFI demuxer
+    * MAXIS EA XA (.xa) demuxer / decoder
+    * BFI video decoder
+    * OMA demuxer
+    * MLP/TrueHD decoder
+    * Electronic Arts CMV decoder
+    * Motion Pixels Video decoder
+    * Motion Pixels MVI demuxer
+    * removed animated GIF decoder/demuxer
+    * D-Cinema audio muxer
+    * Electronic Arts TGV decoder
+    * Apple Lossless Audio Codec (ALAC) encoder
+    * AAC decoder
+    * floating point PCM encoder/decoder
+    * MXF muxer
+    * E-AC-3 support added to AC-3 decoder
+    * Nellymoser ASAO encoder
+    * ASS and SSA demuxer and muxer
+    * liba52 wrapper removed
+    * SVQ3 watermark decoding support
+    * Speex decoding via libspeex
+    * Electronic Arts TGQ decoder
+    * RV30 and RV40 decoder
+    * QCELP / PureVoice decoder
+    * hybrid WavPack support
+    * R3D REDCODE demuxer
+    * Electronic Arts TQI decoder
+    * OpenJPEG based JPEG 2000 decoder
+    * NC (NC4600) cameras file demuxer
+    * MXF D-10 muxer
+    * Generic metadata API
+    * H.264 speedup and PAFF decoding (install Yasm for faster H264 decoding)
     * correctly decode more of the H.264 conformance testsuite
-    * Nellymoser audio codec
     * VC-1/WMV3 decoder speedup
     * VP3 decoder speedup
     * VP6 decoder speedup
     * Split-Radix FFT (speedup multiple audio codecs)
     * MMX/SSE/ARM and other misc speedups
-    * QCELP decoder
-    * RV30 decoder
-    * RV40 decoder
 
     libmpeg2:
     * enable Alpha/ARM optimizations in libmpeg2
@@ -99,7 +144,6 @@ MPlayer (1.0)
     * Direct3D Windows video output driver added.
     * factorize code in vo_wii
     * removed unnecessary code from vo x11, xv, xvmc
-    * automatic detection of hw acceleration (vo gl:yuv=x) for vo_gl
     * add OS/2 DART audio driver (-ao dart)
     * add VDPAU video output
 
@@ -119,7 +163,7 @@ MPlayer (1.0)
     * add options to disable some or all configuration files
     * support for DOS-style file:///x:/path paths
     * some new slave commands (check DOCS/tech/slave.txt)
-    * misc fixes to libass
+    * libass fixes and updates to match VSFilter renderer
     * libdvdcss updated to 1.2.10, now same as upstream version
     * fix -endchapter support again for -dump* options
     * add startup volume option
@@ -132,6 +176,7 @@ MPlayer (1.0)
     * VIDIX on SuperH.
     * workarounds for AltiVec on Apple gcc 3.3 on Mac OS X dropped
     * vo_macosx can now be compiled in 64-bits mode
+    * allow multiple MPlayer instances w/ vo_macosx using buffer_name
     * OpenGL support for unmodified MinGW64
 
     SWScaler:
