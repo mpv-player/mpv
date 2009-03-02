@@ -25,6 +25,7 @@ struct m_struct_st;
 // Simple types
 extern const m_option_type_t m_option_type_flag;
 extern const m_option_type_t m_option_type_int;
+extern const m_option_type_t m_option_type_int64;
 extern const m_option_type_t m_option_type_float;
 extern const m_option_type_t m_option_type_double;
 extern const m_option_type_t m_option_type_string;
@@ -152,6 +153,7 @@ extern const m_obj_params_t m_span_params_def;
 // FIXME: backward compatibility
 #define CONF_TYPE_FLAG		(&m_option_type_flag)
 #define CONF_TYPE_INT		(&m_option_type_int)
+#define CONF_TYPE_INT64		(&m_option_type_int64)
 #define CONF_TYPE_FLOAT		(&m_option_type_float)
 #define CONF_TYPE_DOUBLE	(&m_option_type_double)
 #define CONF_TYPE_STRING	(&m_option_type_string)
