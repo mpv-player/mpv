@@ -1,4 +1,4 @@
-.\" synced with r28415
+.\" synced with r28788
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -300,7 +300,7 @@ Amorce/arrête la capture d'écran.
 Affiche le nom de fichier dans l'OSD.
 .IPs "! and @"
 Saute au début du chapitre précédent/suivant.
-.IPs "D (\-vo xvmc, \-vf yadif et \-vf kerndeint uniquement)"
+.IPs "D (\-vo xvmc, \-vo vdpau, \-vf yadif et \-vf kerndeint uniquement)"
 Active/désactive le désentrelacement.
 .IPs "A"
 Bascule entre les angles disponibles du DVD.
@@ -764,9 +764,9 @@ Cela est particulièrement utile sur les terminaux lents ou endommagés qui ne
 gèrent pas les retours chariot (c-à-d \\r).
 .
 .TP
-.B \-priority <prio> (Windows uniquement)
+.B \-priority <prio> (Windows et OS/2 uniquement)
 Définit le niveau de priorité de MPlayer suivant les priorités prédéfinies
-disponibles sous Windows.
+disponibles sous Windows et OS/2.
 Valeurs possibles de <prio>\ :
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
@@ -946,6 +946,7 @@ MPlayer utilise cette commande sans aucune sorte de vérification, il est
 donc de votre responsablité qu'elle ne pose pas de problème de sécurité
 (c-à-d que vous devriez spécifier le chemin absolu, surtout si "." est dans
 le chemin de recherche $PATH, comme c'est le cas sous Windows).
+Cela fonctionne aussi lors de la lecture d'une vidéo (c-à-d. que ça ne fonctionne pas avec \-novideo alors que ça fonctionne avec \-vo null).
 .sp 1
 Ceci peut être "détourné" pour désactiver un économiseur d'écran ne gérant par
 l'API de X prévu à cet effet (voir aussi \-stop\-xscreensaver).
@@ -2980,7 +2981,7 @@ Choisit explicitement le périphérique audio à utiliser (par défaut\ :
 pilote de sortie audio waveout natif de Windows
 .
 .TP
-.B dsound (Windows only)
+.B dsound (Windows uniquement)
 pilote de sortie audio DirectX DirectSound
 .PD 0
 .RSs
@@ -2988,6 +2989,18 @@ pilote de sortie audio DirectX DirectSound
 Défini le numéro de périphérique à utiliser.
 Jouer un fichier avec l'option \-v vous donnera une liste des périphériques
 disponibles.
+.RE
+.PD 1
+.
+.TP
+.B dart (OS/2 uniquement)
+pilote de sortie audio DART pour OS/2
+.PD 0
+.RSs
+.IPs (no)share
+Ouvre DART en mode partagé (share) ou exclusif.
+.IPs bufsize=<taille>
+Fixe la taille du tampon à <taille> échantillons (par défaut\ : 2048).
 .RE
 .PD 1
 .
@@ -3608,6 +3621,42 @@ Géré actuellement uniquement par tdfx_vid.
 .RSs
 .IPs <pilote_vo>
 Sélectionnne le pilote à utiliser comme source pour l'incrustation dans X11.
+.RE
+.PD 1
+.
+.TP
+.B vdpau (avec \-vc ffmpeg12vdpau, ffwmv3vdpau, ffvc1vdpau ou ffh264vdpau)
+Sortie vidéo utilisant VDPAU pour décoder les vidéos matériellement.
+Gère aussi l'affichage de vidéos décodées en logiciel.
+.PD 0
+.RSs
+.IPs sharpen=<\-1\-1>
+Pour des valeurs positives, applique à la vidéo un filtre d'affinage,
+pour des valeurs négatives, applique à la vidéo un filtre de flou (par
+défaut\ : 0)
+.IPs denoise=<0\-1>
+Applique à la vidéo un filtre de réduction de bruit (par défaut\ : 0, pas de
+réduction de bruit)
+.IPs deint=<0\-3>
+Sélectionne un désentrelaceur (par défaut\ : 0)
+Tous les modes > 0 respectent \-field\-dominance.
+.RSss
+.IPs 0
+pas de désentrelacement
+.IPs 1
+Affiche uniquement le premier champ, comme le filtre \-vf field.
+.IPs 2
+désentrelaceur bob (solution de secours pour les désentrelaceurs avancés).
+.IPs 3
+Désentrelaceur à adaptation de mouvement temporel (ne fonctionne pas encore).
+C'est le comportement par défaut si "D" est utilisé pour activer le
+désentrelacement.
+.IPs 4
+Désentrelaceur à adaptation de mouvement temporel avec interpolation spatiale guidé par les bords (ne fonctionne pas encore).
+.RE
+.IPs pullup
+Essaye d'appliquer un filtre téléciné inverse.
+Nécessite un filtre de désentrelacement temporel.
 .RE
 .PD 1
 .
@@ -4618,7 +4667,7 @@ Désactive la compensation automatique du rapport hauteur/\:largeur.
 .B \-field\-dominance <\-1\-1>
 Défini le premier champ du contenu entrelacé.
 Utile pour les dé-entrelaceurs qui doublent le nombre d'images par seconde
-\-vf tfields=1, \-vf yadif=1 et \-vo xvmc:bobdeint.
+\-vf tfields=1, \-vf yadif=1, \-vo vdpau:deint et \-vo xvmc:bobdeint.
 .PD 0
 .RSs
 .IPs \-1
@@ -5768,6 +5817,14 @@ Jouera le média à 1.2x la vitesse normale, avec le son à un ton normal.
 Changer la vitesse de lecture affectera le ton, en laissant le tempo à 1.2x.
 .RE
 .PD 1
+.
+TP
+.B "stats\ \ "
+Collecte et affiche des statistiques à propos des flux audio, le volume en
+particulier.
+Ces statistiques sont voués à être utilisés pour aider l'ajustement du volume
+sans saturation.
+Les volumes sont affichés en dB et sont compatibles avec le filtre audio volume.
 .
 .
 .
@@ -6950,7 +7007,7 @@ Suivant la source MPEG, il est inutile de tenir compte de ce conseil, tant
 que vous ne voyez pas une multitude d'avertissements "Bottom-first field".
 Sans options il fait un telecine inverse normal, et devrait être utilisé avec
 mencoder \-fps 30000/1001 \-ofps 24000/1001.
-Quand ce filtre est utilisé avec mplayer, cela produira un débit impair
+Quand ce filtre est utilisé avec MPlayer, cela produira un débit impair
 pendant la lecture, mais il sera généralement meilleur qu'en utilisant
 pp=lb ou pas de désentrelacement du tout.
 Les options multiples doivent être séparées par /.
