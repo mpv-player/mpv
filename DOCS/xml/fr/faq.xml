@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--synced with r20876 -->
+<!--synced with r28707 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -67,14 +67,19 @@ auto*, comme d'
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
+
 <qandadiv id="faq-compilation-installation">
 <title>Compilation et installation</title>
+
 <qandaentry>
 <question><para>
 La compilation échoue avec une erreur et <application>gcc</application> parachute
 des messages cryptés contenant la phrase
 <systemitem>internal compiler error</systemitem> ou
-<systemitem>unable to find a register to spill</systemitem>.
+<systemitem>unable to find a register to spill</systemitem> ou
+<systemitem>can't find a register in class `GENERAL_REGS'
+while reloading `asm'</systemitem>..
 </para></question>
 <answer><para>
 Vous êtes tombé sur un bogue de <application>gcc</application>. S'il vous plait
@@ -99,7 +104,7 @@ pour plus de détails.
 
 <qandaentry>
 <question><para>
-Comment puis-je "build" un <application>MPlayer</application> 32 bit sur un Athlon 64 bit?
+Comment puis-je compiler un <application>MPlayer</application> 32 bit sur un Athlon 64 bit?
 </para></question>
 <answer><para>
 Essayer les options de configuration suivantes:
@@ -140,15 +145,15 @@ s'appellent <filename>XFree86-devel*</filename> sous Red Hat
 <filename>xlibs-dev</filename> sous Debian Woody, et
 <filename>libx11-dev</filename> sous Debian Sarge. Vérifiez également que les liens symboliques
 <filename class="directory">/usr/X11</filename> et
-<filename class="directory">/usr/include/X11</filename> existent (cela peut poser un
-problème sur les systèmes Mandrake).
+<filename class="directory">/usr/include/X11</filename> existent.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
 Compiler sous Mac OS 10.3 donne plusieurs erreurs de lien</para></question>
-<answer><para>
+<answer>
+<para>
 Les erreurs de lien que vous avez ressemblent très probablement à ça:
 <screen>
 ld: Undefined symbols:
@@ -160,13 +165,14 @@ leurs logiciels et distribuant les fichiers binaires aux utilisateurs de 10.3
 à travers Software Update.
 Les symboles non définis sont définis dans Mac OS 10.4, mais pas dans 10.3.
 Une solution pourrait être de repasser à la version 7.0.1 ou plus prédécente de Quicktime.
-
 Il existe une meilleure solution:
-</para><para>
+</para>
+<para>
 téléchargez une <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">copie plus ancienne du Frameworks</ulink>.
 Cela vous donnera un fichier compressé qui contient le Framework
 QuickTime 7.0.1 et un Framework QuartzCore 10.3.9.
-</para><para>
+</para>
+<para>
 Décompressez les fichiers autrepart que sur votre System folder.
 (i.e. n'installez pas ce frameworks dans votre répertoire
 <filename class="directory">/System/Library/Frameworks</filename>!
@@ -179,14 +185,17 @@ Dans config.mak, vous devez rajouter
 à la variable <systemitem>OPTFLAGS</systemitem>.
 Si vous utilisez <application>X-Code</application>, il vous suffit de sélectionner ces
 frameworks au lieu de ceux du système.
-</para><para>
+</para>
+<para>
 Le fichier binaire <application>MPlayer</application> résultant utilisera en fait
 le framework qui est installé sur votre système au travers de liens dynamiques résolus lors de l'exécution.
 (Vous pouvez le vérifier en utilisant <systemitem>otool -l</systemitem>).
-</para></answer>
+</para>
+</answer>
 </qandaentry>
-
 </qandadiv>
+
+<!-- ********** -->
 
 <qandadiv id="faq-general">
 <title>Questions générales</title>
@@ -232,7 +241,7 @@ Quand je démarre la lecture, j'obtiens ce message mais tout semble se dérouler
 </para></question>
 <answer><para>
 Vous avez besoin d'un noyau configuré spécialement pour utiliser le
-code de timing. Pour les détails voir la section <link linkend="rtc">RTC</link> de la documentation.
+code de timing RTC. Pour plus de détails, voir la section <link linkend="rtc">RTC</link> de la documentation.
 </para></answer>
 </qandaentry>
 
@@ -258,45 +267,66 @@ Quelle est la signification des nombres sur la ligne de commande ?
 </para></question>
 <answer><para>
 Exemple:
-<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
+<screen>
+A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>A: 2.1</systemitem></term>
-<listitem><para>position audio en secondes</para></listitem>
+<varlistentry>
+  <term><systemitem>A: 2.1</systemitem></term>
+  <listitem><para>position audio en secondes</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>V: 2.2</systemitem></term>
-<listitem><para>position vidéo en secondes</para></listitem>
+<varlistentry>
+  <term><systemitem>V: 2.2</systemitem></term>
+  <listitem><para>position vidéo en secondes</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
-<listitem><para>différence audio-video en secondes (décalage)</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V: -0.167</systemitem></term>
+  <listitem><para>différence audio-video en secondes
+  (décalage)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>ct: 0.042</systemitem></term>
-<listitem><para>correction de synchro A-V faite</para></listitem>
+<varlistentry>
+  <term><systemitem>ct: 0.042</systemitem></term>
+  <listitem><para>correction de synchro A-V faite</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>57/57</systemitem></term>
-<listitem><para>trames lues/décodées (à partir du dernier déplacement)</para></listitem>
+<varlistentry>
+  <term><systemitem>57/57</systemitem></term>
+  <listitem><para>trames lues/décodées (à partir du dernier
+  déplacement)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>41%</systemitem></term>
-<listitem><para>utilisation CPU du codec vidéo en pourcents (pour les tranches et
-le rendu direct (Direct Rendering) ceci inclus video_out)</para></listitem>
+<varlistentry>
+  <term><systemitem>41%</systemitem></term>
+  <listitem><para>utilisation CPU du codec vidéo en pourcents (pour les
+  tranches et le rendu direct (Direct Rendering) ceci inclus
+  video_out)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0%</systemitem></term>
-<listitem><para>utilisation CPU de video_out</para></listitem>
+<varlistentry>
+  <term><systemitem>0%</systemitem></term>
+  <listitem><para>utilisation CPU de video_out</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2.6%</systemitem></term>
-<listitem><para>utilisation CPU du codec audio en pourcents</para></listitem>
+<varlistentry>
+  <term><systemitem>2.6%</systemitem></term>
+  <listitem><para>utilisation CPU du codec audio en
+  pourcents</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0</systemitem></term>
-<listitem><para>nombre de trames sautées pour maintenir la synchro A-V</para></listitem>
+<varlistentry>
+  <term><systemitem>0</systemitem></term>
+  <listitem><para>nombre de trames sautées pour maintenir la synchro
+  A-V</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>4</systemitem></term>
-<listitem><para>niveau actuel de postprocessing (en utilisant
-<option>-autoq</option>)</para></listitem>
+<varlistentry>
+  <term><systemitem>4</systemitem></term>
+  <listitem><para>niveau actuel de postprocessing (en utilisant
+  <option>-autoq</option>)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>49%</systemitem></term>
-<listitem><para>taille actuelle du cache (environ 50% est normal)</para></listitem>
+<varlistentry>
+  <term><systemitem>49%</systemitem></term>
+  <listitem><para>taille actuelle du cache (environ 50% est
+  normal)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>1.00x</systemitem></term>
-<listitem><para>vitesse de lecture en tant que facteur de la vitesse originale</para></listitem>
+<varlistentry>
+  <term><systemitem>1.00x</systemitem></term>
+  <listitem><para>vitesse de lecture en tant que facteur de la vitesse
+  originale</para></listitem>
 </varlistentry>
 </variablelist>
 La plupart d'entre eux sont là pour des raisons de déboggage, utilisez l'option
@@ -322,10 +352,10 @@ Téléchargez et installez les codecs binaires depuis notre
 <qandaentry>
 <question><para>
 Comment puis-je faire en sorte que <application>MPlayer</application> se souvienne des options que
-j'ai utilisé pour un fichier en particulier, c'est à dire <filename>movie.avi</filename>?
+j'ai utilisé pour un fichier en particulier, <filename>movie.avi</filename> par exemple?
 </para></question>
 <answer><para>
-Créez un fichier dénommé <filename>movie.avi.conf</filename> avec dedans les options spécifiques
+Créez un fichier dénommé <filename>movie.avi.conf</filename> contenant les options spécifiques
 à ce fichier et placez-le dans <filename class="directory">~/.mplayer</filename>
 ou dans le même répertoire que le fichier.
 </para></answer>
@@ -345,29 +375,19 @@ et remplacez <systemitem>#undef FAST_OSD</systemitem> par
 
 <qandaentry>
 <question><para>
-Je ne peux pas accéder au menu de la GUI. J'appuie sur le bouton droit de la
-souris, mais je ne peux pas accéder aux éléments du menu !
-</para></question>
-<answer><para>
-Utilisez-vous FVWM ? Essayez cela:
-<orderedlist>
-<listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
-<listitem><para>Mettez <systemitem>Use Applications position hints</systemitem>
-à <systemitem>Yes</systemitem></para></listitem>
-</orderedlist>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Comment puis-je lancer <application>MPlayer</application> en tâche de fond ?
 </para></question>
 <answer><para>
 Utilisez:
-<screen>mplayer <replaceable>options</replaceable> <replaceable>nomfichier</replaceable> &lt; /dev/null &amp;</screen>
+<screen>
+mplayer <replaceable>options</replaceable>
+<replaceable>nomfichier</replaceable> &lt; /dev/null &amp;
+</screen>
 </para></answer>
 </qandaentry>
 </qandadiv>
+
+<!-- ********** -->
 
 <qandadiv id="faq-playback">
 <title>Problèmes de lecture</title>
@@ -381,7 +401,7 @@ Avez-vous un fichier <filename>codecs.conf</filename> encore présent dans
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
 <filename>/usr/local/etc/</filename> ou dans un endroit similaire? Supprimez-le,
 un fichier <filename>codecs.conf</filename> obsolète peut causer d'obscurs
-problèmes et ne doit être utilisé que par les dévelopeurs travaillant sur le suuport
+problèmes et ne doit être utilisé que par les développeurs travaillant sur le support
 de codec. Cela remplace les paramètres interne de codec de <application>MPlayer</application>,
 ce qui créera un désastre si des modifications incompatibles sont faites avec
 des versions plus récentes du logiciel. A moins qu'il soit utilisé par des experts, c'est une recette
@@ -403,6 +423,7 @@ mplayer -vf expand=0:-100:0:0 -slang de dvd://1
 </screen>
 </para></answer>
 </qandaentry>
+
 <qandaentry>
 <question><para>
 Comment sélectionner les pistes audio ou les sous-titres d'un DVD ou de fichiers
@@ -481,34 +502,34 @@ Windows Media 9).
 <para>
 Si vous avez ce problème vous avez deux options:
 <itemizedlist>
-<listitem><para>Attendez deux semaines. Cela peut fonctionner de nouveau.</para></listitem>
-<listitem><para>Relinkez toutes les binaires du système avec des options de
-prelink différentes. Voici les étapes à suivre:</para>
-<para>
-<orderedlist>
-<listitem><para>Éditez <filename>/etc/syconfig/prelink</filename> et changez</para>
-<para>
-<programlisting>
-PRELINK_OPTS=-mR
-</programlisting>
+<listitem><para>
+    Attendez deux semaines. Cela peut fonctionner de nouveau.
+</para></listitem>
+<listitem><para>
+  Relinkez toutes les binaires du système avec des options de prelink
+  différentes. Voici les étapes à suivre:
 </para>
-<para>
-par
-<programlisting>
-PRELINK_OPTS="-mR --no-exec-shield"
-</programlisting>
-</para>
-</listitem>
-<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
-<listitem><para><command>/etc/cron.daily/prelink</command>
-(Cela relink toutes les applications, et peut prendre beaucoup de temps.)</para></listitem>
-<listitem>
-<para><command>execstack -s <replaceable>/chemin/de/</replaceable>mplayer</command>
-(Cela désactive exec-shield pour le binaire <application>MPlayer</application>.)
-</para>
-</listitem>
-</orderedlist>
-</para>
+<procedure>
+<step><para>
+  Éditez <filename>/etc/syconfig/prelink</filename> et changez
+  <programlisting>PRELINK_OPTS=-mR</programlisting> par <programlisting>
+  PRELINK_OPTS="-mR --no-exec-shield"</programlisting>
+</para></step>
+<step><para>
+  <command>touch /var/lib/misc/prelink.force</command>
+</para></step>
+<step><para>
+  <command>/etc/cron.daily/prelink</command>
+  (Cela relink toutes les applications, et peut prendre beaucoup de
+  temps.)
+</para></step>
+<step><para>
+  <command>execstack -s
+  <replaceable>/chemin/vers/</replaceable>mplayer</command>
+  (Cela désactive exec-shield pour le binaire
+  <application>MPlayer</application>.)
+  </para></step>
+  </procedure>
 </listitem>
 </itemizedlist>
 </para></answer>
@@ -516,7 +537,7 @@ PRELINK_OPTS="-mR --no-exec-shield"
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> meurt avec
+<application>MPlayer</application> plante avec
 <screen>MPlayer interrupted by signal 4 in module: decode_video</screen>
 </para></question>
 <answer><para>
@@ -540,7 +561,7 @@ supportés alors qu'en fait elle ne les supporte pas. Essayez avec YUY2
 
 <qandaentry>
 <question><para>
-J'ai des valeurs en pourcentage très étrange (vraiment trop grande)
+J'ai des valeurs en pourcentage très étrange (vraiment trop grandes)
 lors de la lecture de fichiers sur mon portable.
 </para></question>
 <answer><para>
@@ -554,13 +575,13 @@ voir si <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq
 
 <qandaentry>
 <question><para>
-L'audio/vidéo devient totalement désync quand je lance <application>MPlayer</application>
+L'audio/vidéo devient totalement désynchronisé quand je lance <application>MPlayer</application>
 en tant que root sur mon portable. Cela fonctionne normalement quand je le lance en tant que simple utilisateur.
 </para></question>
 <answer><para>
 C'est là encore un effet de la gestion d'énergie (voir ci-dessus). Branchez
 l'alimentation secteur <emphasis role="bold">avant</emphasis> d'allumer votre
-portable ou utilisez l'option <option>-nortc</option>.
+portable ou soyez sûr de ne pas utiliser l'option <option>-rtc</option>.
 </para></answer>
 </qandaentry>
 
@@ -576,22 +597,24 @@ Essayez <option>-nocache</option>.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
+
 <qandadiv id="faq-driver">
 <title>Problèmes de pilote vidéo/audio (vo/ao)</title>
+
 <qandaentry>
 <question><para>
 Quand je passe en mode plein écran j'obtiens juste des bandes noires autour de l'image
 et pas de réel agrandissement en mode plein écran.
 </para></question>
 <answer><para>
-Votre pilote de sortie vidéo ne supporte pas l'agrandissement en hardware et à partir du
-moment où l'agrandissement logiciel peut être incroyablement lent, <application>MPlayer</application>
+Votre pilote de sortie vidéo ne supporte pas l'agrandissement en hardware et puisque l'agrandissement logiciel peut être incroyablement lent, <application>MPlayer</application>
 ne le fait pas automatiquement. Il est plus que probable que vous utilisez le pilote de sortie vidéo
 <systemitem>x11</systemitem> à la place de <systemitem>xv</systemitem>.
 Essayez d'ajouter <option>-vo xv</option> à la ligne de commande ou lisez la
 <link linkend="video">section vidéo</link> pour trouver
 les pilotes de sortie vidéo alternatif. L'option <option>-zoom</option>
-explicitement permet l'agrandissement logiciel.
+permet explicitement l'utilisation de l'agrandissement logiciel.
 </para></answer>
 </qandaentry>
 
@@ -637,24 +660,13 @@ Essayez aussi de tester avec l'option <option>-fstype</option>.
 
 <qandaentry>
 <question><para>
-L'audio va en désync lors de la lecture d'un fichier AVI.
+L'audio se désynchronise lors de la lecture d'un fichier AVI.
 </para></question>
 <answer><para>
 Essayez l'option <option>-bps</option> ou <option>-nobps</option>. Si cela ne
 s'améliore pas, lisez
 <link linkend="bugreports">comment rapporter un bogue</link>
 et téléchargez le fichier par FTP.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Mon ordinateur joue les AVI DivX MS dans des résolutions ~ 640x300 et un son MP3 stéréo
-trop lentement. Quand j'utilise l'option <option>-nosound</option>, tout va BIEN (mais c'est calme).
-</para></question>
-<answer><para>
-Votre machine est trop lente ou votre pilote de carte son ne marche pas. Consultez la
-documentation pour voir si vous pouvez améliorer les performances.
 </para></answer>
 </qandaentry>
 
@@ -672,13 +684,13 @@ vous devez utiliser <option>-ao alsa:device=dmix</option>.
 
 <qandaentry>
 <question><para>
-Je n'ai pas de son en jouant une vidéo et j'obtiens des messages similaires à celui ci:
+Je n'ai pas de son en jouant une vidéo et j'obtiens des messages d'erreur similaires à celui-ci:
 <screen>
-    AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
-    audio_setup: Can't open audio device /dev/dsp: Device or resource busy
-    couldn't open/init audio device -> NOSOUND
-    Audio: no sound!!!
-    Start playing...
+AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+[AO OSS] audio_setup: Can't open audio device /dev/dsp: Device or resource busy
+Could not open/initialize audio device -> no sound.
+Audio: no sound
+Starting playback...
 </screen>
 </para></question>
 <answer><para>
@@ -722,7 +734,8 @@ Essayez le filtre audio <systemitem>resample</systemitem>.
 <question><para>
 Quand je lis ce film j'obtiens des désynchro vidéo-audio et/ou <application>MPlayer</application>
 plante avec le message suivant:
-<screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
+<screen>Too many (945 in 8390980 bytes) video packets in the buffer!
+</screen>
 </para></question>
 <answer><para>
 Il peut y avoir plusieurs raisons.
@@ -739,7 +752,14 @@ Ou il a peut-être un mauvais entête, dans ce cas <option>-nobps</option>
 et/ou <option>-mc 0</option> peut aider.
 </para></listitem>
 <listitem><para>
-Votre pilote son est bogué.
+  Beaucoup de fichiers FLV ne sont lus correctement qu'avec
+  <option>-correct-pts</option>.
+  Malheureusement, <application>MEncoder</application> n'a pas cette option
+  mais vous pouvez essayer de régler <option>-fps</option>à la valeur
+  correcte si vous la connaissez.
+</para></listitem>
+<listitem><para>
+  Votre pilote son est bogué.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -754,19 +774,13 @@ recherche sur des flux de type RealMedia?
 l'option <option>-mc 10</option> peut aider.
 </para></answer>
 </qandaentry>
-<qandaentry>
-<question><para>
-Comment puis-je me débarasser des désynchronisation A/V durant la recherche
-sur des flux RealMedia?
-</para></question>
-<answer><para>
-<option>-mc 0.1</option> peut aider.
-</para></answer>
-</qandaentry>
 </qandadiv>
+
+<!-- ********** -->
 
 <qandadiv id="faq-dvd">
 <title>Lecture DVD</title>
+
 <qandaentry>
 <question><para>
 Et a propos de la navigation et des menus DVD ?
@@ -775,24 +789,11 @@ Et a propos de la navigation et des menus DVD ?
 <application>MPlayer</application> ne supporte pas les menus DVD à cause de sérieuses
 limitations architecturales qui empèchent de gérer correctement les images fixes
 et le contenu intéractif. Si vous voulez jouer avec des jolis menus, vous
-devrez utiliser un autre lecteur comme <application>xine</application>, <application>vlc</application> ou
-<application>Ogle</application>. Si vous voulez voir la navigation DVD dans <application>MPlayer</application>,
-vous devrez l'implémenter vous-même, mais soyez conscient que ce sera très dur.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Je ne peux pas regarder les DVDs récents de Sony Pictures/BMG.
-</para></question>
-<answer><para>
-C'est normal, vous vous êtes fait avoir, vous avez acheté un disque intentionellement défectueux.
-La seule façon de lire ces DVDs est de contourner les mauvais blocs du disque
-en utilisant DVDnav au lieu de mpdvdkit2.
-Vous pouvez le faire en compilant <application>MPlayer</application> avec le support de DVDnav
-et en remplaçant dvd:// par dvdnav:// dans la ligne de commande.
-DVDnav et mpdvdkit2 étant mutuellement exclusifs, assurez-vous de passer
-l'option <option>--disable-mpdvdkit</option> au script de configuration.
+devrez utiliser un autre lecteur comme <application>xine</application>,
+<application>VLC</application> ou <application>Ogle</application>.
+Si vous voulez voir la navigation DVD dans <application>MPlayer</application>,
+vous devrez l'implémenter vous-même, mais soyez conscient que ce sera très
+dur.
 </para></answer>
 </qandaentry>
 
@@ -873,6 +874,7 @@ mplayer dvd://1 -dvd-device <replaceable>/chemin/du/répertoire</replaceable>
 
 <qandadiv id="faq-features">
 <title>Demandes de fonctionnalités</title>
+
 <qandaentry>
 <question><para>
 Si est <application>MPlayer</application> est en pause et que j'essaie de me déplacer ou de presser
@@ -898,8 +900,11 @@ L'avance arrière n'est pas près d'être implémenté dans un proche avenir.
 </qandaentry>
 </qandadiv>
 
+<!-- ********** -->
+
 <qandadiv id="faq-encoding">
 <title>Encodage</title>
+
 <qandaentry>
 <question><para>
 Comment puis-je encoder ?
@@ -946,9 +951,9 @@ générer des fichiers MPEG-2 qui peuvent être utilisés comme une base pour cr
 sont plus à même d'être joués sans modification sur n'importe quelle plateformes (par exemple
 pour partager une vidéo depuis une caméra numérique pour des amis qui n'y connaisse rien en
 informatique).
-<!--Veuillez lire
-<link linkend="menc-feat-vcd-dvd">Utilisé MEncoder pour créer des fichiers compatible VCD/SVCD/DVD</link>
-pour plus de détails.!-->
+Veuillez lire
+<link linkend="menc-feat-vcd-dvd">Utiliser MEncoder pour créer des fichiers compatible VCD/SVCD/DVD</link>
+pour plus de détails.
 </para></answer>
 </qandaentry>
 
@@ -1055,36 +1060,49 @@ Non, VFAT ne supporte pas les fichiers plus gros que 2Go.
 
 <qandaentry>
 <question><para>
-Quel est le sens des nombres sur la ligne de status pendantl'encodage?
+Quel est le sens des nombres sur la ligne de status pendant l'encodage?
 </para></question>
 <answer><para>
 Exemple:
-<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+<screen>
+  Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]
+</screen>
 <variablelist>
-<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
-<listitem><para>position temporelle dans le flux encodé</para></listitem>
+<varlistentry>
+  <term><systemitem>Pos: 264.5s</systemitem></term>
+  <listitem><para>position temporelle dans le flux encodé</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>6612f</systemitem></term>
-<listitem><para>number d'images encoded</para></listitem>
+<varlistentry>
+  <term><systemitem>6612f</systemitem></term>
+  <listitem><para>number d'images encoded</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>( 2%)</systemitem></term>
-<listitem><para>pourcentage du flux d'entrée encodé</para></listitem>
+<varlistentry>
+  <term><systemitem>( 2%)</systemitem></term>
+  <listitem><para>pourcentage du flux d'entrée encodé</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>7.12fps</systemitem></term>
-<listitem><para>vitesse d'encodage en images par seconde</para></listitem>
+<varlistentry>
+  <term><systemitem>7.12fps</systemitem></term>
+  <listitem><para>vitesse d'encodage en images par seconde</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
-<listitem><para>estimation du temps d'encodage restant</para></listitem>
+<varlistentry>
+  <term><systemitem>Trem: 576min</systemitem></term>
+  <listitem><para>estimation du temps d'encodage restant</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>2856mb</systemitem></term>
-<listitem><para>estimation de la taille finale de l'encodage</para></listitem>
+<varlistentry>
+  <term><systemitem>2856mb</systemitem></term>
+  <listitem><para>estimation de la taille finale de
+  l'encodage</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
-<listitem><para>décalage actuel entre les flux audio et video</para></listitem>
+<varlistentry>
+  <term><systemitem>A-V:0.065</systemitem></term>
+  <listitem><para>décalage actuel entre les flux audio et
+  video</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>[2126:192]</systemitem></term>
-<listitem>
-<para>débit video moyen (en Mo/s) and débit audio moyen (in Mo/s)</para></listitem>
+<varlistentry>
+  <term><systemitem>[2126:192]</systemitem></term>
+  <listitem><para>
+  débit video moyen (en ko/s) and débit audio moyen (in ko/s)
+  </para></listitem>
 </varlistentry>
 </variablelist>
 </para></answer>
@@ -1104,8 +1122,7 @@ Parce que le débit avec lequel vous avez encodé l'audio est trop grand pour fa
 Je ne peux pas convertir un fichier ASF en AVI/MPEG-4 (DivX) car il utilise 1000 images par secondes?
 </para></question>
 <answer><para>
-Vous devrez fixer le nombre d'images par seconde à la main avec l'option <option>-ofps</option>
-puisque ASF utilise un nombre d'images par seconde variable alors que AVI en utilise un fixe.
+Puisque ASF utilise un nombre d'images par seconde variable alors que AVI en utilise un fixe, vous devrez fixer le nombre d'images par seconde à la main avec l'option <option>-ofps</option>.
 </para></answer>
 </qandaentry>
 
@@ -1128,10 +1145,11 @@ Cela n'est pas possible directement, mais vous pouvez essayer ça (notez le
 <emphasis role="bold">&amp;</emphasis> à la fin de la commande
 <command>mplayer</command>):
 <screen>
-    mkfifo encode
-    mplayer -ao pcm -aofile encode dvd://1 &amp;
-    lame <replaceable>vos_options</replaceable> encode music.mp3
-    rm encode
+mkfifo <replaceable>encode</replaceable>
+mplayer -ao pcm -aofile <replaceable>encode</replaceable> dvd://1 &amp;
+lame <replaceable>vos_options</replaceable>
+<replaceable>encode</replaceable> <replaceable>musique.mp3</replaceable>
+rm <replaceable>encode</replaceable>
 </screen>
 Cela vous permet d'utiliser n'importe quel encodeur, pas seulement <application>LAME</application>,
 remplacez simplement <command>lame</command> par votre encodeur audio préféré dans la
@@ -1144,7 +1162,6 @@ commande ci-dessus.
 Pourquoi est-ce que les lecteurs de tiers partie n'arrivent pas à jouer des films MPEG-4 encodé par
 des versions plus tardives que 1.0pre7 de <application>MEncoder</application>?
 </para></question>
-
 <answer><para>
 <systemitem class="library">libavcodec</systemitem>, la librairie d'encodage
 native MPEG-4 normalement incluse avec <application>MEncoder</application>,
@@ -1166,7 +1183,7 @@ Vous pouvez aussi changer le FourCC des fichiers existant de la même façon:
 </screen>
 Notez que cela règlera le FourCC à XVID plutôt que DIVX.
 Ceci est recommandé étant donné que DIVX FourCC signifie DivX4, ce qui est un codec MPEG-4
-très basic, alorsque DX50 et XVID tout deux signifie MPEG-4 complèt (ASP).
+très basic, alorsque DX50 et XVID tout deux signifie MPEG-4 complet (ASP).
 Donc, si vous changez le FourCC à DIVX, de mauvais logiciels ou lecteurs hardware
 peuvent cafouiller sur quelques fonctionalités avançées que
 <systemitem class="library">libavcodec</systemitem> supporte, mais que DivX
@@ -1201,15 +1218,16 @@ des sous-titres inclus dans les fichiers AVI OpenDML</ulink>.
 
 <qandaentry>
 <question><para>
- MPlayer n'ira pas...
+MPlayer n'ira pas...
 </para></question>
 <answer><para>
-voir le sous-répertoire <filename class="directory">TOOLS</filename>
+Voir le sous-répertoire <filename class="directory">TOOLS</filename>
 pour une collection de scripts et codes aléatoires.
 <filename>TOOLS/README</filename> contient la documentation.
 </para></answer>
 </qandaentry>
 </qandadiv>
+
 </qandaset>
 
 </chapter>
