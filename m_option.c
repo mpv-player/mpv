@@ -146,7 +146,7 @@ static int parse_int(const m_option_t* opt,const char *name, char *param, void* 
 
   tmp_int = strtol(param, &endptr, 10);
   if (*endptr)
-  tmp_int = strtol(param, &endptr, 0);
+    tmp_int = strtol(param, &endptr, 0);
   if (*endptr) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "The %s option must be an integer: %s\n",name, param);
     return M_OPT_INVALID;
