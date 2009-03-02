@@ -1,6 +1,6 @@
 MPlayer (1.0)
 
-  rc3:
+  rc3: "StillAlive" March 1, 2009
     Decoders:
     * Nellymoser audio decoding via lavc
     * support for X8 frame (fixes "J-type picture is not supported" for WMV2)
@@ -73,11 +73,12 @@ MPlayer (1.0)
 
     FFmpeg/libavcodec:
     * DNxHD (SMPTE VC-3) encoder
-    * H.264 speedup and PAFF decoding
+    * H.264 speedup and PAFF decoding (install YASM for faster H264 decoding)
     * correctly decode more of the H.264 conformance testsuite
     * Nellymoser audio codec
-    * VC-1/WMV3 MMX optimizations
+    * VC-1/WMV3 decoder speedup
     * VP3 decoder speedup
+    * VP6 decoder speedup
     * Split-Radix FFT (speedup multiple audio codecs)
     * MMX/SSE/ARM and other misc speedups
     * QCELP decoder
