@@ -250,7 +250,7 @@ extern char *vo_subdevice;
 
 extern int vo_colorkey;
 
-extern int WinID;
+extern int64_t WinID;
 
 typedef struct {
         float min;
