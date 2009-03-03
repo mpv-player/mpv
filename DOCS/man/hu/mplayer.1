@@ -1,4 +1,4 @@
-.\" Synced with r28775
+.\" Synced with r28788
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 03. 01." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 03. 03." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -905,6 +905,7 @@ segítségével - pl.\& shell használat.
 Az MPlayer ezt a parancsot ellenõrzés nélkül használja, a te felelõsséged,
 hogy ne okozzon biztonsági problémát (pl.\& gyõzõdj meg róla, hogy teljes elérési
 utakat használsz, ha a "." benne van az elérési utadban, mint Windows alatt).
+Csak videó lejátszás közben mûködik (pl. a \-novideo kapcsolóval nem, de \-vo null mellett igen).
 .sp 1
 Ezt "ki lehet használni" az olyan képernyõvédõ letiltásához, amely nem
 támogatja ehhez a megfelelõ X API-kat (lásd még \-stop\-xscreensaver).
@@ -3460,11 +3461,12 @@ negatív értékekkel pedig elmosást (alapértelmezett: 0).
 Egy zajcsökkentõ algoritmust alkalmaz a videóra (alapértelmezett: 0, nincs zajcsökkentés).
 .IPs deint=<0\-3>
 Kiválasztja a deinterlacer-t (alapértelmezett: 0).
+Minden mód > 0 figyelembe veszi a \-field\-dominance kapcsolót.
 .RSss
 .IPs 0
 Nincs deinterlace.
 .IPs 1
-Csak egy mezõt mutat, hasonló a \-vf field kapcsolóhoz.
+Csak az elsõ mezõt mutatja, hasonló a \-vf field kapcsolóhoz.
 .IPs 2
 Bob deinterlace (jelenleg erre lép vissz a fejlettebb deinterlacer-ekrõl).
 .IPs 3
