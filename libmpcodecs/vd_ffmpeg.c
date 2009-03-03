@@ -409,7 +409,8 @@ static int init(sh_video_t *sh){
         uninit(sh);
         return 0;
     }
-    // this is necessary in case get_format was never called
+    // this is necessary in case get_format was never called and init_vo is
+    // too late e.g. for H.264 VDPAU
     set_format_params(avctx, avctx->pix_fmt);
     mp_msg(MSGT_DECVIDEO, MSGL_V, "INFO: libavcodec init OK!\n");
     return 1; //mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, IMGFMT_YV12);
@@ -504,6 +505,9 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
         pix_fmt != ctx->pix_fmt ||
         !ctx->vo_initialized)
     {
+        // this is a special-case HACK for MPEG-1/2 VDPAU that uses neither get_format nor
+        // sets the value correctly in avcodec_open.
+        set_format_params(avctx, avctx->pix_fmt);
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
         if (sh->aspect == 0 ||
             av_cmp_q(avctx->sample_aspect_ratio,
