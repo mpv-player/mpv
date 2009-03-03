@@ -173,7 +173,6 @@ static int parse_int(const m_option_t* opt,const char *name, char *param, void* 
 }
 
 static char* print_int(const m_option_t* opt,  const void* val) {
-  opt = NULL;
   if (opt->type->size == sizeof(int64_t))
     return dup_printf("%"PRId64, *(const int64_t *)val);
   return dup_printf("%d",VAL(val));
