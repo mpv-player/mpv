@@ -2,6 +2,8 @@
  * GyS-TermIO v2.0 (for GySmail v3)
  * a very small replacement of ncurses library
  *
+ * copyright (C) 1999 A'rpi/ESP-team
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
