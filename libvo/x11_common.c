@@ -1135,6 +1135,12 @@ void vo_x11_create_vo_window(XVisualInfo *vis, int x, int y,
   vo_x11_nofs_sizepos(vo_dx, vo_dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen();
+  else if (vo_fs) {
+    // if we are already in fullscreen do not switch back and forth, just
+    // set the size values right.
+    vo_dwidth  = vo_screenwidth;
+    vo_dheight = vo_screenheight;
+  }
 final:
   if (vo_gc != None)
     XFreeGC(mDisplay, vo_gc);
