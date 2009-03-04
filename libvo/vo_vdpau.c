@@ -1010,7 +1010,7 @@ static int preinit(const char *arg)
     for (i = 0; i < MAX_VIDEO_SURFACES; i++)
         surface_render[i].surface = VDP_INVALID_HANDLE;
     video_mixer = VDP_INVALID_HANDLE;
-    for (i = 0; i < NUM_OUTPUT_SURFACES; i++)
+    for (i = 0; i <= NUM_OUTPUT_SURFACES; i++)
         output_surfaces[i] = VDP_INVALID_HANDLE;
     vdp_flip_queue = VDP_INVALID_HANDLE;
     output_surface_width = output_surface_height = -1;
