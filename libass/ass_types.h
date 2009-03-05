@@ -105,6 +105,7 @@ typedef struct ass_track_s {
 	int PlayResY;
 	double Timer;
 	int WrapStyle;
+	char ScaledBorderAndShadow;
 
 	
 	int default_style; // index of default style

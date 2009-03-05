@@ -96,6 +96,17 @@ int strtocolor(char** q, uint32_t* res)
 	return result;
 }
 
+// Return a boolean value for a string
+char parse_bool(char* str) {
+	while (*str == ' ' || *str == '\t')
+		str++;
+	if (!strncasecmp(str, "yes", 3))
+		return 1;
+	else if (strtol(str, NULL, 10) > 0)
+		return 1;
+	return 0;
+}
+
 #if 0
 static void sprint_tag(uint32_t tag, char* dst)
 {

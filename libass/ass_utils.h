@@ -30,6 +30,7 @@ int mystrtoll(char** p, long long* res);
 int mystrtou32(char** p, int base, uint32_t* res);
 int mystrtod(char** p, double* res);
 int strtocolor(char** q, uint32_t* res);
+char parse_bool(char* str);
 
 static inline int d6_to_int(int x) {
 	return (x + 32) >> 6;

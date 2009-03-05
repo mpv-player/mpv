@@ -520,6 +520,8 @@ static int process_info_line(ass_track_t* track, char *str)
 		track->Timer = atof(str + 6);
 	} else if (!strncmp(str,"WrapStyle:", 10)) {
 		track->WrapStyle = atoi(str + 10);
+	} else if (!strncmp(str, "ScaledBorderAndShadow:", 22)) {
+		track->ScaledBorderAndShadow = parse_bool(str + 22);
 	}
 	return 0;
 }
