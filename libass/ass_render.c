@@ -474,14 +474,14 @@ static int x2scr(double x) {
 	return x*frame_context.orig_width_nocrop / frame_context.track->PlayResX +
 		FFMAX(global_settings->left_margin, 0);
 }
-static int x2scr_pos(double x) {
+static double x2scr_pos(double x) {
 	return x*frame_context.orig_width / frame_context.track->PlayResX +
 		global_settings->left_margin;
 }
 /**
  * \brief Mapping between script and screen coordinates
  */
-static int y2scr(double y) {
+static double y2scr(double y) {
 	return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY +
 		FFMAX(global_settings->top_margin, 0);
 }
@@ -787,29 +787,29 @@ static char* parse_tag(char* p, double pwr) {
 			val = -1.; // reset to default
 		change_border(val);
 	} else if (mystrcmp(&p, "move")) {
-		int x1, x2, y1, y2;
+		double x1, x2, y1, y2;
 		long long t1, t2, delta_t, t;
 		double x, y;
 		double k;
 		skip('(');
-		mystrtoi(&p, &x1);
+		mystrtod(&p, &x1);
 		skip(',');
-		mystrtoi(&p, &y1);
+		mystrtod(&p, &y1);
 		skip(',');
-		mystrtoi(&p, &x2);
+		mystrtod(&p, &x2);
 		skip(',');
-		mystrtoi(&p, &y2);
+		mystrtod(&p, &y2);
 		if (*p == ',') {
 			skip(',');
 			mystrtoll(&p, &t1);
 			skip(',');
 			mystrtoll(&p, &t2);
-			mp_msg(MSGT_ASS, MSGL_DBG2, "movement6: (%d, %d) -> (%d, %d), (%" PRId64 " .. %" PRId64 ")\n", 
+			mp_msg(MSGT_ASS, MSGL_DBG2, "movement6: (%f, %f) -> (%f, %f), (%" PRId64 " .. %" PRId64 ")\n", 
 				x1, y1, x2, y2, (int64_t)t1, (int64_t)t2);
 		} else {
 			t1 = 0;
 			t2 = render_context.event->Duration;
-			mp_msg(MSGT_ASS, MSGL_DBG2, "movement: (%d, %d) -> (%d, %d)\n", x1, y1, x2, y2);
+			mp_msg(MSGT_ASS, MSGL_DBG2, "movement: (%f, %f) -> (%f, %f)\n", x1, y1, x2, y2);
 		}
 		skip(')');
 		delta_t = t2 - t1;
@@ -895,13 +895,13 @@ static char* parse_tag(char* p, double pwr) {
 		else
 			render_context.alignment = render_context.style->Alignment;
 	} else if (mystrcmp(&p, "pos")) {
-		int v1, v2;
+		double v1, v2;
 		skip('(');
-		mystrtoi(&p, &v1);
+		mystrtod(&p, &v1);
 		skip(',');
-		mystrtoi(&p, &v2);
+		mystrtod(&p, &v2);
 		skip(')');
-		mp_msg(MSGT_ASS, MSGL_DBG2, "pos(%d, %d)\n", v1, v2);
+		mp_msg(MSGT_ASS, MSGL_DBG2, "pos(%f, %f)\n", v1, v2);
 		if (render_context.evt_type != EVENT_POSITIONED) {
 			render_context.evt_type = EVENT_POSITIONED;
 			render_context.detect_collisions = 0;
@@ -1859,8 +1859,13 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			pen.y += delta.y * render_context.scale_y;
 		}
 
-		shift.x = pen.x & 63;
-		shift.y = pen.y & 63;
+		shift.x = pen.x & 56;
+		shift.y = pen.y & 56;
+
+		if (render_context.evt_type == EVENT_POSITIONED) {
+			shift.x += double_to_d6(x2scr_pos(render_context.pos_x)) & 56;
+			shift.y -= double_to_d6(y2scr(render_context.pos_y)) & 56;
+		}
 
 		ass_font_set_transform(render_context.font,
 				       render_context.scale_x * frame_context.font_scale_x,
