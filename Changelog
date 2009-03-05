@@ -163,10 +163,15 @@ MPlayer (1.0)
     * add options to disable some or all configuration files
     * support for DOS-style file:///x:/path paths
     * some new slave commands (check DOCS/tech/slave.txt)
-    * libass fixes and updates to match VSFilter renderer
     * libdvdcss updated to 1.2.10, now same as upstream version
     * fix -endchapter support again for -dump* options
     * add startup volume option
+
+    libass:
+    * various fixes and updates to match VSFilter renderer
+    * support \blur tag and ScaledBordersAndShadow property
+    * fractional arguments and subpixel accuracy
+    * keep positions when pan-and-scan is used
 
     Ports:
     * small crash with vo_macosx fixed
