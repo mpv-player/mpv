@@ -45,6 +45,7 @@
 #define MAX_LINES 300
 #define BE_RADIUS 1.5
 #define BLUR_MAX_RADIUS 50.0
+#define ROUND(x) ((int) ((x) + .5))
 
 static int last_render_id = 0;
 
@@ -116,7 +117,7 @@ typedef struct glyph_info_s {
 //	int height;
 	int be; // blur edges
 	double blur; // gaussian blur
-	int shadow;
+	double shadow;
 	double frx, fry, frz; // rotation
 	
 	bitmap_hash_key_t hash_key;
@@ -165,7 +166,7 @@ typedef struct render_context_s {
 	uint32_t fade; // alpha from \fad
 	char be; // blur edges
 	double blur; // gaussian blur
-	int shadow;
+	double shadow;
 	int drawing_mode; // not implemented; when != 0 text is discarded, except for style override tags
 
 	effect_t effect_type;
@@ -421,8 +422,8 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 		if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_s || (info->shadow == 0))
 			continue;
 
-		pen_x = dst_x + info->pos.x + info->shadow;
-		pen_y = dst_y + info->pos.y + info->shadow;
+		pen_x = dst_x + info->pos.x + ROUND(info->shadow);
+		pen_y = dst_y + info->pos.y + ROUND(info->shadow);
 		bm = info->bm_s;
 
 		tail = render_glyph(bm, pen_x, pen_y, info->c[3], 0, 1000000, tail);
