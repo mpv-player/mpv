@@ -88,8 +88,8 @@ static WAVEHDR*     waveBlocks;         //pointer to our ringbuffer memory
 static HWAVEOUT     hWaveOut;           //handle to the waveout device
 static unsigned int buf_write=0;
 static unsigned int buf_write_pos=0;
-static int          full_buffers=0;
-static int          buffered_bytes=0;
+static volatile int full_buffers=0;
+static volatile int buffered_bytes=0;
 
 
 static ao_info_t info = 
