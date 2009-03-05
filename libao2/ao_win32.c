@@ -251,7 +251,8 @@ static int init(int rate,int channels,int format,int flags)
 // close audio device
 static void uninit(int immed)
 {
-    if(!immed)while(buffered_bytes > 0)usec_sleep(50000);
+    if(!immed)
+	usec_sleep(get_delay() * 1000 * 1000);
     else buffered_bytes=0;
 	waveOutReset(hWaveOut);
 	waveOutClose(hWaveOut);
