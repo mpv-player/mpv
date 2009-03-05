@@ -422,8 +422,8 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 		if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_s || (info->shadow == 0))
 			continue;
 
-		pen_x = dst_x + info->pos.x + ROUND(info->shadow);
-		pen_y = dst_y + info->pos.y + ROUND(info->shadow);
+		pen_x = dst_x + info->pos.x + ROUND(info->shadow * frame_context.border_scale);
+		pen_y = dst_y + info->pos.y + ROUND(info->shadow * frame_context.border_scale);
 		bm = info->bm_s;
 
 		tail = render_glyph(bm, pen_x, pen_y, info->c[3], 0, 1000000, tail);
@@ -1397,7 +1397,7 @@ static void get_bitmap_glyph(glyph_info_t* info)
 					ass_renderer->synth_priv_blur,
 					info->glyph, info->outline_glyph,
 					&info->bm, &info->bm_o,
-					&info->bm_s, info->be, info->blur);
+					&info->bm_s, info->be, info->blur * frame_context.border_scale);
 			if (error)
 				info->symbol = 0;
 
