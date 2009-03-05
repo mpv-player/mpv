@@ -1098,18 +1098,17 @@ vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/common.ver vidix/dhahelper
 
 vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
 	$(CC) -Wl,--base-file,$@ -Wl,--entry,_DriverEntry@8 -nostartfiles \
-            -nostdlib -o vidix/dhahelperwin/junk.tmp $^ -lntoskrnl
-	-rm -f vidix/dhahelperwin/junk.tmp
+            -nostdlib -o $(@D)/junk.tmp $^ -lntoskrnl
+	-rm -f $(@D)/junk.tmp
 
 vidix/dhahelperwin/temp.exp: vidix/dhahelperwin/base.tmp
-	dlltool --dllname vidix/dhahelperwin/dhahelper.sys --base-file $< --output-exp $@
+	dlltool --dllname $(@D)/dhahelper.sys --base-file $< --output-exp $@
 
 vidix/dhahelperwin/dhahelper.sys: vidix/dhahelperwin/temp.exp vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
 	$(CC) -Wl,--subsystem,native -Wl,--image-base,0x10000 \
             -Wl,--file-alignment,0x1000 -Wl,--section-alignment,0x1000 \
             -Wl,--entry,_DriverEntry@8 -Wl,$< -mdll -nostartfiles -nostdlib \
-            -o $@ vidix/dhahelperwin/dhahelper.o \
-            vidix/dhahelperwin/dhahelper-rc.o -lntoskrnl
+            -o $@ $(@:.sys=.o) $(@:.sys=-rc.o) -lntoskrnl
 	strip $@
 
 install-dhahelperwin:
