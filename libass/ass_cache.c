@@ -324,3 +324,53 @@ void ass_glyph_cache_reset(void)
 	ass_glyph_cache_done();
 	ass_glyph_cache_init();
 }
+
+
+//---------------------------------
+// composite cache
+
+hashmap_t* composite_cache;
+
+static void composite_hash_dtor(void* key, size_t key_size, void* value, size_t value_size)
+{
+	composite_hash_val_t* v = value;
+	free(v->a);
+	free(v->b);
+	free(key);
+	free(value);
+}
+
+void* cache_add_composite(composite_hash_key_t* key, composite_hash_val_t* val)
+{
+	return hashmap_insert(composite_cache, key, val);
+}
+
+/**
+ * \brief Get a composite bitmap from composite cache.
+ * \param key hash key
+ * \return requested hash val or 0 if not found
+*/
+composite_hash_val_t* cache_find_composite(composite_hash_key_t* key)
+{
+	return hashmap_find(composite_cache, key);
+}
+
+void ass_composite_cache_init(void)
+{
+	composite_cache = hashmap_init(sizeof(composite_hash_key_t),
+				   sizeof(composite_hash_val_t),
+				   0xFFFF + 13,
+				   composite_hash_dtor, NULL, NULL);
+}
+
+void ass_composite_cache_done(void)
+{
+	hashmap_done(composite_cache);
+}
+
+void ass_composite_cache_reset(void)
+{
+	ass_composite_cache_done();
+	ass_composite_cache_init();
+}
+

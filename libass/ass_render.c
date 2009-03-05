@@ -279,6 +279,7 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 	
 	ass_font_cache_init();
 	ass_bitmap_cache_init();
+	ass_composite_cache_init();
 	ass_glyph_cache_init();
 
 	text_info.glyphs = calloc(MAX_GLYPHS, sizeof(glyph_info_t));
@@ -294,6 +295,7 @@ void ass_renderer_done(ass_renderer_t* priv)
 {
 	ass_font_cache_done();
 	ass_bitmap_cache_done();
+	ass_composite_cache_done();
 	ass_glyph_cache_done();
 	if (render_context.stroker) {
 		FT_Stroker_Done(render_context.stroker);
@@ -406,6 +408,93 @@ static ass_image_t** render_glyph(bitmap_t* bm, int dst_x, int dst_y, uint32_t c
 }
 
 /**
+ * \brief Calculate overlapping area of two consecutive bitmaps and in case they
+ * overlap, composite them together
+ * Mainly useful for translucent glyphs and especially borders, to avoid the
+ * luminance adding up where they overlap (which looks ugly)
+ */
+static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_hash_key_t *last_hash, bitmap_hash_key_t* hash) {
+	int left, top, bottom, right;
+	int old_left, old_top, w, h, cur_left, cur_top;
+	int x, y, opos, cpos;
+	char m;
+	composite_hash_key_t hk;
+	composite_hash_val_t *hv;
+	composite_hash_key_t *nhk;
+	int ax = (*last_tail)->dst_x;
+	int ay = (*last_tail)->dst_y;
+	int aw = (*last_tail)->w;
+	int ah = (*last_tail)->h;
+	int bx = (*tail)->dst_x;
+	int by = (*tail)->dst_y;
+	int bw = (*tail)->w;
+	int bh = (*tail)->h;
+	unsigned char* a;
+	unsigned char* b;
+
+	if ((*last_tail)->bitmap == (*tail)->bitmap)
+		return;
+
+	// Calculate overlap coordinates
+	left = (ax > bx) ? ax : bx;
+	top = (ay > by) ? ay : by;
+	right = ((ax+aw) < (bx+bw)) ? (ax+aw) : (bx+bw);
+	bottom = ((ay+ah) < (by+bh)) ? (ay+ah) : (by+bh);
+	if ((right <= left) || (bottom <= top))
+		return;
+	old_left = left-(ax);
+	old_top = top-(ay);
+	w = right-left;
+	h = bottom-top;
+	cur_left = left-(bx);
+	cur_top = top-(by);
+
+	// Query cache
+	memcpy(&hk.a, last_hash, sizeof(*last_hash));
+	memcpy(&hk.b, hash, sizeof(*hash));
+	hk.aw = aw;
+	hk.ah = ah;
+	hk.bw = bw;
+	hk.bh = bh;
+	hk.ax = ax;
+	hk.ay = ay;
+	hk.bx = bx;
+	hk.by = by;
+	hv = cache_find_composite(&hk);
+	if (hv) {
+		(*last_tail)->bitmap = hv->a;
+		(*tail)->bitmap = hv->b;
+		return;
+	}
+
+	// Allocate new bitmaps and copy over data
+	a = (*last_tail)->bitmap;
+	b = (*tail)->bitmap;
+	(*last_tail)->bitmap = malloc(aw*ah);
+	(*tail)->bitmap = malloc(bw*bh);
+	memcpy((*last_tail)->bitmap, a, aw*ah);
+	memcpy((*tail)->bitmap, b, bw*bh);
+
+	// Composite overlapping area
+	for (y=0; y<h; y++)
+		for (x=0; x<w; x++) {
+			opos = (old_top+y)*(aw) + (old_left+x);
+			cpos = (cur_top+y)*(bw) + (cur_left+x);
+			m = (a[opos] > b[cpos]) ? a[opos] : b[cpos];
+			(*last_tail)->bitmap[opos] = 0;
+			(*tail)->bitmap[cpos] = m;
+		}
+
+	// Insert bitmaps into the cache
+	nhk = calloc(1, sizeof(*nhk));
+	memcpy(nhk, &hk, sizeof(*nhk));
+	hv = calloc(1, sizeof(*hv));
+	hv->a = (*last_tail)->bitmap;
+	hv->b = (*tail)->bitmap;
+	cache_add_composite(nhk, hv);
+}
+
+/**
  * \brief Convert text_info_t struct to ass_image_t list
  * Splits glyphs in halves when needed (for \kf karaoke).
  */
@@ -416,6 +505,9 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 	bitmap_t* bm;
 	ass_image_t* head;
 	ass_image_t** tail = &head;
+	ass_image_t** last_tail = 0;
+	ass_image_t** here_tail = 0;
+	bitmap_hash_key_t* last_hash = 0;
 
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
@@ -426,9 +518,15 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 		pen_y = dst_y + info->pos.y + ROUND(info->shadow * frame_context.border_scale);
 		bm = info->bm_s;
 
+		here_tail = tail;
 		tail = render_glyph(bm, pen_x, pen_y, info->c[3], 0, 1000000, tail);
+		if (last_tail && tail != here_tail && ((info->c[3] & 0xff) > 0))
+			render_overlap(last_tail, here_tail, last_hash, &info->hash_key);
+		last_tail = here_tail;
+		last_hash = &info->hash_key;
 	}
 
+	last_tail = 0;
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
 		if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_o)
@@ -440,8 +538,14 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 		
 		if ((info->effect_type == EF_KARAOKE_KO) && (info->effect_timing <= info->bbox.xMax)) {
 			// do nothing
-		} else
+		} else {
+			here_tail = tail;
 			tail = render_glyph(bm, pen_x, pen_y, info->c[2], 0, 1000000, tail);
+			if (last_tail && tail != here_tail && ((info->c[2] & 0xff) > 0))
+				render_overlap(last_tail, here_tail, last_hash, &info->hash_key);
+			last_tail = here_tail;
+			last_hash = &info->hash_key;
+		}
 	}
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
@@ -2121,6 +2225,7 @@ static void ass_reconfigure(ass_renderer_t* priv)
 	priv->render_id = ++last_render_id;
 	ass_glyph_cache_reset();
 	ass_bitmap_cache_reset();
+	ass_composite_cache_reset();
 	ass_free_images(priv->prev_images_root);
 	priv->prev_images_root = 0;
 }

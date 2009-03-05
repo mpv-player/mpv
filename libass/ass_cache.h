@@ -65,6 +65,27 @@ bitmap_hash_val_t* cache_find_bitmap(bitmap_hash_key_t* key);
 void ass_bitmap_cache_reset(void);
 void ass_bitmap_cache_done(void);
 
+
+// Cache for composited bitmaps
+typedef struct composite_hash_key_s {
+	int aw, ah, bw, bh;
+	int ax, ay, bx, by;
+	bitmap_hash_key_t a;
+	bitmap_hash_key_t b;
+} composite_hash_key_t;
+
+typedef struct composite_hash_val_s {
+	unsigned char* a;
+	unsigned char* b;
+} composite_hash_val_t;
+
+void ass_composite_cache_init(void);
+void* cache_add_composite(composite_hash_key_t* key, composite_hash_val_t* val);
+composite_hash_val_t* cache_find_composite(composite_hash_key_t* key);
+void ass_composite_cache_reset(void);
+void ass_composite_cache_done(void);
+
+
 // describes an outline glyph
 typedef struct glyph_hash_key_s {
 	ass_font_t* font;
