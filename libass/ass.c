@@ -347,6 +347,8 @@ void process_force_style(ass_track_t* track) {
 			track->Timer = atof(token);
 		else if(!strcasecmp(*fs, "WrapStyle"))
 			track->WrapStyle = atoi(token);
+		else if(!strcasecmp(*fs, "ScaledBorderAndShadow"))
+			track->ScaledBorderAndShadow = parse_bool(token);
 
 		dt = strrchr(*fs, '.');
 		if (dt) {
