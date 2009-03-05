@@ -7996,7 +7996,7 @@ if test "$_dvdnav" = yes ; then
   _largefiles=yes
   def_dvdnav='#define CONFIG_DVDNAV 1'
   if test "$dvdnav_internal" = yes ; then
-    _inc_extra="$_inc_extra -Ilibdvdnav"
+    cflags_libdvdnav="-Ilibdvdnav"
     _inputmodules="dvdnav(internal) $_inputmodules"
   else
     _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
@@ -8054,6 +8054,7 @@ CFLAGS_DHAHELPER = $cflags_dhahelper
 CFLAGS_FAAD_FIXED = $cflags_faad_fixed
 CFLAGS_LIBDVDCSS = $cflags_libdvdcss
 CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
+CFLAGS_LIBDVDNAV = $cflags_libdvdnav
 CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
 CFLAGS_STACKREALIGN = $cflags_stackrealign
 CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
