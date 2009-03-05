@@ -224,9 +224,15 @@ static void ass_lazy_track_init(void)
 	} else {
 		double orig_aspect = (global_settings->aspect * frame_context.height * frame_context.orig_width) /
 			frame_context.orig_height / frame_context.width;
-		if (!track->PlayResY) {
+		if (!track->PlayResY && track->PlayResX == 1280) {
+			track->PlayResY = 1024;
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_PlayResYUndefinedSettingY, track->PlayResY);
+		} else if (!track->PlayResY) {
 			track->PlayResY = track->PlayResX / orig_aspect + .5;
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_PlayResYUndefinedSettingY, track->PlayResY);
+		} else if (!track->PlayResX && track->PlayResY == 1024) {
+			track->PlayResX = 1280;
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_PlayResXUndefinedSettingX, track->PlayResX);
 		} else if (!track->PlayResX) {
 			track->PlayResX = track->PlayResY * orig_aspect + .5;
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_PlayResXUndefinedSettingX, track->PlayResX);
