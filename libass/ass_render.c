@@ -485,6 +485,11 @@ static double y2scr(double y) {
 	return y * frame_context.orig_height_nocrop / frame_context.track->PlayResY +
 		FFMAX(global_settings->top_margin, 0);
 }
+static double y2scr_pos(double y) {
+	return y * frame_context.orig_height / frame_context.track->PlayResY +
+		global_settings->top_margin;
+}
+
 // the same for toptitles
 static int y2scr_top(double y) {
 	if (global_settings->use_margins)
@@ -1864,7 +1869,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 
 		if (render_context.evt_type == EVENT_POSITIONED) {
 			shift.x += double_to_d6(x2scr_pos(render_context.pos_x)) & 56;
-			shift.y -= double_to_d6(y2scr(render_context.pos_y)) & 56;
+			shift.y -= double_to_d6(y2scr_pos(render_context.pos_y)) & 56;
 		}
 
 		ass_font_set_transform(render_context.font,
@@ -2031,7 +2036,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		mp_msg(MSGT_ASS, MSGL_DBG2, "positioned event at %f, %f\n", render_context.pos_x, render_context.pos_y);
 		get_base_point(bbox, alignment, &base_x, &base_y);
 		device_x = x2scr_pos(render_context.pos_x) - base_x;
-		device_y = y2scr(render_context.pos_y) - base_y;
+		device_y = y2scr_pos(render_context.pos_y) - base_y;
 	}
 	
 	// fix clip coordinates (they depend on alignment)
