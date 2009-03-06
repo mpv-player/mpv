@@ -155,7 +155,7 @@ static int init(int rate,int channels,int format,int flags)
 		case AF_FORMAT_AC3:
 		case AF_FORMAT_S24_LE:
 		case AF_FORMAT_S16_LE:
-		case AF_FORMAT_S8:
+		case AF_FORMAT_U8:
 			break;
 		default:
 			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",af_fmt2str_short(format));
