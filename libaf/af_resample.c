@@ -174,8 +174,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 {
   switch(cmd){
   case AF_CONTROL_REINIT:{
-    af_resample_t* s   = (af_resample_t*)af->setup; 
-    af_data_t* 	   n   = (af_data_t*)arg; // New configuration
+    af_resample_t* s   = af->setup; 
+    af_data_t* 	   n   = arg; // New configuration
     int            i,d = 0;
     int 	   rv  = AF_OK;
 
@@ -270,7 +270,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     return rv;
   }
   case AF_CONTROL_COMMAND_LINE:{
-    af_resample_t* s   = (af_resample_t*)af->setup; 
+    af_resample_t* s   = af->setup; 
     int rate=0;
     int type=RSMP_INT;
     int sloppy=1;
@@ -323,7 +323,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   int 		 len = 0; 	 // Length of output data
   af_data_t*     c   = data;	 // Current working data
   af_data_t*     l   = af->data; // Local data
-  af_resample_t* s   = (af_resample_t*)af->setup;
+  af_resample_t* s   = af->setup;
 
   if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
     return NULL;
