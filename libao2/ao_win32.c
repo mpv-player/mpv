@@ -172,6 +172,7 @@ static int init(int rate,int channels,int format,int flags)
 	ao_data.bps=channels*rate;
 	if(format != AF_FORMAT_U8 && format != AF_FORMAT_S8)
 	  ao_data.bps*=2;
+	ao_data.outburst = BUFFER_SIZE;
 	if(ao_data.buffersize==-1)
 	{
 		ao_data.buffersize=af_fmt2bits(format)/8;
@@ -298,22 +299,18 @@ static int write_waveOutBuffer(unsigned char* data,int len){
     //unprepare the header if it is prepared
 	if(current->dwFlags & WHDR_PREPARED) 
            waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
-	x=BUFFER_SIZE-buf_write_pos;          
+	x=BUFFER_SIZE;          
     if(x>len) x=len;                   
     fast_memcpy(current->lpData+buf_write_pos,data+len2,x); 
-    if(buf_write_pos==0)full_buffers++;
+    full_buffers++;
     len2+=x; len-=x;                 
-	buffered_bytes+=x; buf_write_pos+=x; 
+	buffered_bytes+=x;
 	//prepare header and write data to device
-	current->dwBufferLength = buf_write_pos;
+	current->dwBufferLength = x;
 	waveOutPrepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 	waveOutWrite(hWaveOut, current, sizeof(WAVEHDR));
     
-	if(buf_write_pos>=BUFFER_SIZE){        //buffer is full find next
-       // block is full, find next!
        buf_write=(buf_write+1)%BUFFER_COUNT;  
-	   buf_write_pos=0;                 
-    }                                 
   }
   return len2;
 }
