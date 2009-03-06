@@ -301,7 +301,7 @@ static void genEOSD(mp_eosd_images_t *imgs) {
   ass_image_t *i;
 
   if (imgs->changed == 0) // there are elements, but they are unchanged
-      goto call_render;
+      return;
   if (img && imgs->changed == 1) // there are elements, but they just moved
       goto skip_upload;
 
@@ -386,8 +386,6 @@ skip_upload:
   }
   glEndList();
   BindTexture(gl_target, 0);
-call_render:
-  if (vo_doublebuffering) do_render_osd(2);
 }
 
 /**
@@ -1118,6 +1116,7 @@ static int control(uint32_t request, void *data, ...)
     if (!data)
       return VO_FALSE;
     genEOSD(data);
+    if (vo_doublebuffering) do_render_osd(2);
     return VO_TRUE;
   case VOCTRL_GET_EOSD_RES:
     {
