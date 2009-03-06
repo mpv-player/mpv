@@ -18,7 +18,7 @@ typedef struct vd_functions_s
 } vd_functions_t;
 
 // NULL terminated array of all drivers
-extern vd_functions_t* mpcodecs_vd_drivers[];
+extern const vd_functions_t * const mpcodecs_vd_drivers[];
 
 extern int vd_use_slices;
 
