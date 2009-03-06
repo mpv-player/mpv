@@ -87,7 +87,7 @@ static const int channel_mask[] = {
 static WAVEHDR*     waveBlocks;         //pointer to our ringbuffer memory
 static HWAVEOUT     hWaveOut;           //handle to the waveout device
 static unsigned int buf_write=0;
-static volatile int buffered_bytes=0;
+static volatile int buf_read=0;
 
 
 static ao_info_t info =
@@ -105,7 +105,7 @@ static void CALLBACK waveOutProc(HWAVEOUT hWaveOut,UINT uMsg,DWORD dwInstance,
 {
 	if(uMsg != WOM_DONE)
         return;
-		buffered_bytes-=BUFFER_SIZE;
+	buf_read = (buf_read + 1) % BUFFER_COUNT;
 }
 
 // to set/get/query special features/parameters
@@ -233,7 +233,7 @@ static int init(int rate,int channels,int format,int flags)
         buffer += BUFFER_SIZE;
     }
     buf_write=0;
-    buffered_bytes=0;
+    buf_read=0;
 
     return 1;
 }
@@ -243,7 +243,6 @@ static void uninit(int immed)
 {
     if(!immed)
 	usec_sleep(get_delay() * 1000 * 1000);
-    else buffered_bytes=0;
 	waveOutReset(hWaveOut);
 	waveOutClose(hWaveOut);
 	mp_msg(MSGT_AO, MSGL_V,"waveOut device closed\n");
@@ -256,7 +255,7 @@ static void reset(void)
 {
    	waveOutReset(hWaveOut);
 	buf_write=0;
-	buffered_bytes=0;
+	buf_read=0;
 }
 
 // stop playing, keep buffers (for pause)
@@ -274,7 +273,9 @@ static void audio_resume(void)
 // return: how many bytes can be played without blocking
 static int get_space(void)
 {
-    return BUFFER_COUNT*BUFFER_SIZE - buffered_bytes;
+    int free = buf_read - buf_write - 1;
+    if (free < 0) free += BUFFER_COUNT;
+    return free * BUFFER_SIZE;
 }
 
 //writes data into buffer, based on ringbuffer code in ao_sdl.c
@@ -283,8 +284,9 @@ static int write_waveOutBuffer(unsigned char* data,int len){
   int len2=0;
   int x;
   while(len>0){
+    int buf_next = (buf_write + 1) % BUFFER_COUNT;
     current = &waveBlocks[buf_write];
-    if(buffered_bytes==BUFFER_COUNT*BUFFER_SIZE) break;
+    if(buf_next == buf_read) break;
     //unprepare the header if it is prepared
 	if(current->dwFlags & WHDR_PREPARED)
            waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
@@ -292,13 +294,12 @@ static int write_waveOutBuffer(unsigned char* data,int len){
     if(x>len) x=len;
     fast_memcpy(current->lpData,data+len2,x);
     len2+=x; len-=x;
-	buffered_bytes+=x;
 	//prepare header and write data to device
 	current->dwBufferLength = x;
 	waveOutPrepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 	waveOutWrite(hWaveOut, current, sizeof(WAVEHDR));
 
-       buf_write=(buf_write+1)%BUFFER_COUNT;
+       buf_write = buf_next;
   }
   return len2;
 }
@@ -316,5 +317,7 @@ static int play(void* data,int len,int flags)
 // return: delay in seconds between first and last sample in buffer
 static float get_delay(void)
 {
-	return (float)(buffered_bytes + ao_data.buffersize)/(float)ao_data.bps;
+	int used = buf_write - buf_read;
+	if (used < 0) used += BUFFER_COUNT;
+	return (float)(used * BUFFER_SIZE + ao_data.buffersize)/(float)ao_data.bps;
 }
