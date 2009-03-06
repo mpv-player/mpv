@@ -49,6 +49,7 @@
 #include "gui/interface.h"
 
 #include "libavutil/common.h"
+#include "libavutil/mathematics.h"
 
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
@@ -140,6 +141,8 @@ static VdpDecoderCreate                          *vdp_decoder_create;
 static VdpDecoderDestroy                         *vdp_decoder_destroy;
 static VdpDecoderRender                          *vdp_decoder_render;
 
+static VdpGenerateCSCMatrix                      *vdp_generate_csc_matrix;
+
 static void                              *vdpau_lib_handle;
 /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
 #define osd_surface output_surfaces[NUM_OUTPUT_SURFACES]
@@ -193,11 +196,16 @@ struct {
 static int eosd_render_count;
 static int eosd_surface_count;
 
+// Video equalizer
+static VdpProcamp procamp;
+
 /*
  * X11 specific
  */
 static int                                visible_buf;
 static int                                int_pause;
+
+static void draw_eosd(void);
 
 static void video_to_output_surface(void)
 {
@@ -212,8 +220,11 @@ static void video_to_output_surface(void)
     for (i = 0; i <= !!(deint > 1); i++) {
         int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
         VdpOutputSurface output_surface;
-        if (i)
+        if (i) {
+            draw_eosd();
+            draw_osd();
             flip_page();
+        }
         if (deint)
             field = top_field_first == i ?
                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
@@ -337,6 +348,7 @@ static int win_x11_init_vdpau_procs(void)
                         &vdp_bitmap_surface_putbits_native},
         {VDP_FUNC_ID_OUTPUT_SURFACE_RENDER_BITMAP_SURFACE,
                         &vdp_output_surface_render_bitmap_surface},
+        {VDP_FUNC_ID_GENERATE_CSC_MATRIX,       &vdp_generate_csc_matrix},
         {0, NULL}
     };
 
@@ -733,7 +745,6 @@ static void draw_osd(void)
 {
     mp_msg(MSGT_VO, MSGL_DBG2, "DRAW_OSD\n");
 
-    draw_eosd();
     vo_draw_text_ext(vo_dwidth, vo_dheight, border_x, border_y, border_x, border_y,
                      vid_width, vid_height, draw_osd_I8A8);
 }
@@ -785,6 +796,11 @@ static int draw_slice(uint8_t *image[], int stride[], int w, int h,
         }
         vdp_st = vdp_decoder_create(vdp_device, vdp_decoder_profile, vid_width, vid_height, max_refs, &decoder);
         CHECK_ST_WARNING("Failed creating VDPAU decoder");
+        if (vdp_st != VDP_STATUS_OK) {
+            decoder = VDP_INVALID_HANDLE;
+            decoder_max_refs = 0;
+            return VO_FALSE;
+        }
         decoder_max_refs = max_refs;
     }
     vdp_st = vdp_decoder_render(decoder, rndr->surface, (void *)&rndr->info, rndr->bitstream_buffers_used, rndr->bitstream_buffers);
@@ -996,7 +1012,7 @@ static int preinit(const char *arg)
     for (i = 0; i < MAX_VIDEO_SURFACES; i++)
         surface_render[i].surface = VDP_INVALID_HANDLE;
     video_mixer = VDP_INVALID_HANDLE;
-    for (i = 0; i < NUM_OUTPUT_SURFACES; i++)
+    for (i = 0; i <= NUM_OUTPUT_SURFACES; i++)
         output_surfaces[i] = VDP_INVALID_HANDLE;
     vdp_flip_queue = VDP_INVALID_HANDLE;
     output_surface_width = output_surface_height = -1;
@@ -1011,7 +1027,53 @@ static int preinit(const char *arg)
     eosd_surfaces = NULL;
     eosd_targets  = NULL;
 
+    procamp.struct_version = VDP_PROCAMP_VERSION;
+    procamp.brightness = 0.0;
+    procamp.contrast   = 1.0;
+    procamp.saturation = 1.0;
+    procamp.hue        = 0.0;
+
     return 0;
+}
+
+static int get_equalizer(char *name, int *value) {
+    if (!strcasecmp(name, "brightness"))
+        *value = procamp.brightness * 100;
+    else if (!strcasecmp(name, "contrast"))
+        *value = (procamp.contrast-1.0) * 100;
+    else if (!strcasecmp(name, "saturation"))
+        *value = (procamp.saturation-1.0) * 100;
+    else if (!strcasecmp(name, "hue"))
+        *value = procamp.hue * 100 / M_PI;
+    else
+        return VO_NOTIMPL;
+    return VO_TRUE;
+}
+
+static int set_equalizer(char *name, int value) {
+    VdpStatus vdp_st;
+    VdpCSCMatrix matrix;
+    static const VdpVideoMixerAttribute attributes[] = {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
+    const void *attribute_values[] = {&matrix};
+
+    if (!strcasecmp(name, "brightness"))
+        procamp.brightness = value / 100.0;
+    else if (!strcasecmp(name, "contrast"))
+        procamp.contrast = value / 100.0 + 1.0;
+    else if (!strcasecmp(name, "saturation"))
+        procamp.saturation = value / 100.0 + 1.0;
+    else if (!strcasecmp(name, "hue"))
+        procamp.hue = value / 100.0 * M_PI;
+    else
+        return VO_NOTIMPL;
+
+    vdp_st = vdp_generate_csc_matrix(&procamp, VDP_COLOR_STANDARD_ITUR_BT_601,
+                                     &matrix);
+    CHECK_ST_WARNING("Error when generating CSC matrix")
+    vdp_st = vdp_video_mixer_set_attribute_values(video_mixer, 1, attributes,
+                                                  attribute_values);
+    CHECK_ST_WARNING("Error when setting CSC matrix")
+    return VO_TRUE;
 }
 
 static int control(uint32_t request, void *data)
@@ -1052,12 +1114,12 @@ static int control(uint32_t request, void *data)
             return VO_TRUE;
         case VOCTRL_SET_EQUALIZER: {
             struct voctrl_set_equalizer_args *args = data;
-            return vo_x11_set_equalizer(args->name, args->value);
+            return set_equalizer(args->name, args->value);
         }
         case VOCTRL_GET_EQUALIZER:
         {
             struct voctrl_get_equalizer_args *args = data;
-            return vo_x11_get_equalizer(args->name, args->valueptr);
+            return get_equalizer(args->name, args->valueptr);
         }
         case VOCTRL_ONTOP:
             vo_x11_ontop();
@@ -1069,6 +1131,7 @@ static int control(uint32_t request, void *data)
             if (!data)
                 return VO_FALSE;
             generate_eosd(data);
+            draw_eosd();
             return VO_TRUE;
         case VOCTRL_GET_EOSD_RES: {
             mp_eosd_res_t *r = data;

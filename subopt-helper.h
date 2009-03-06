@@ -24,13 +24,10 @@ typedef struct opt_s
   int type;    ///< option type as defined in subopt-helper.h
   void * valp; ///< pointer to the mem where the value should be stored
   opt_test_f test; ///< argument test func ( optional )
-  int set;     ///< Is set internally by the parser if the option was found.
-               ///< Don't use it at initialization of your opts, it will be
-               ///< overriden anyway!
 } opt_t;
 
 /** parses the string for the options specified in opt */
-int subopt_parse( char const * const str, opt_t * opts );
+int subopt_parse( char const * const str, const opt_t * opts );
 
 
 /*------------------ arg specific types and declaration -------------------*/

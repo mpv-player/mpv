@@ -38,7 +38,7 @@
 
 static int freq = 0;
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
   "V4L2 MPEG Audio Decoder output",
   "v4l2",

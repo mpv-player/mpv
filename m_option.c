@@ -137,16 +137,16 @@ const m_option_type_t m_option_type_flag = {
 // Integer
 
 static int parse_int(const m_option_t* opt,const char *name, char *param, void* dst, int src) {
-  long tmp_int;
+  long long tmp_int;
   char *endptr;
   src = 0;
 
   if (param == NULL)
     return M_OPT_MISSING_PARAM;
 
-  tmp_int = strtol(param, &endptr, 10);
+  tmp_int = strtoll(param, &endptr, 10);
   if (*endptr)
-  tmp_int = strtol(param, &endptr, 0);
+    tmp_int = strtoll(param, &endptr, 0);
   if (*endptr) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "The %s option must be an integer: %s\n",name, param);
     return M_OPT_INVALID;
@@ -162,13 +162,19 @@ static int parse_int(const m_option_t* opt,const char *name, char *param, void* 
     return M_OPT_OUT_OF_RANGE;
   }
 
-  if(dst) VAL(dst) = tmp_int;
+  if(dst) {
+    if (opt->type->size == sizeof(int64_t))
+      *(int64_t *)dst = tmp_int;
+    else
+      VAL(dst) = tmp_int;
+  }
 
   return 1;
 }
 
 static char* print_int(const m_option_t* opt,  const void* val) {
-  opt = NULL;
+  if (opt->type->size == sizeof(int64_t))
+    return dup_printf("%"PRId64, *(const int64_t *)val);
   return dup_printf("%d",VAL(val));
 }
 
@@ -176,6 +182,19 @@ const m_option_type_t m_option_type_int = {
   "Integer",
   "",
   sizeof(int),
+  0,
+  parse_int,
+  print_int,
+  copy_opt,
+  copy_opt,
+  NULL,
+  NULL
+};
+
+const m_option_type_t m_option_type_int64 = {
+  "Integer64",
+  "",
+  sizeof(int64_t),
   0,
   parse_int,
   print_int,

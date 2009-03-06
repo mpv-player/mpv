@@ -549,6 +549,7 @@ SRCS_MPLAYER-$(BL)           += libvo/vo_bl.c
 SRCS_MPLAYER-$(CACA)         += libvo/vo_caca.c
 SRCS_MPLAYER-$(COREAUDIO)    += libao2/ao_macosx.c
 SRCS_MPLAYER-$(COREVIDEO)    += libvo/vo_macosx.m
+SRCS_MPLAYER-$(DART)         += libao2/ao_dart.c
 SRCS_MPLAYER-$(DFBMGA)       += libvo/vo_dfbmga.c
 SRCS_MPLAYER-$(DGA)          += libvo/vo_dga.c
 SRCS_MPLAYER-$(DIRECT3D)     += libvo/vo_direct3d.c libvo/w32_common.c
@@ -855,22 +856,22 @@ version.h: version.sh
 
 ###### dependency declarations / specific CFLAGS ######
 
-codec-cfg.o: codecs.conf.h
-mpcommon.o vobsub.o gui/win32/gui.o libmpdemux/muxer_avi.o osdep/mplayer-rc.o stream/network.o stream/stream_cddb.o: version.h
-$(DEPS): help_mp.h
+# Make sure all generated header files are created.
+$(DEPS) $(MENCODER_DEPS) $(MPLAYER_DEPS): codecs.conf.h help_mp.h version.h
 
-libdvdcss/%.o libdvdcss/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.10\" $(CFLAGS_LIBDVDCSS)
-libdvdnav/%.o libdvdnav/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\"
-libdvdread4/%.o libdvdread4/%.d: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
-libfaad2/%.o libfaad2/%.d: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_FAAD_FIXED)
+libdvdcss/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.10\" $(CFLAGS_LIBDVDCSS)
+libdvdnav/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\"
+libdvdnav/% stream/stream_dvdnav%: CFLAGS += $(CFLAGS_LIBDVDNAV)
+libdvdread4/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
+libfaad2/%: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_FAAD_FIXED)
 
-loader/% loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAGS_NO_OMIT_LEAF_FRAME_POINTER)
-#loader/%.o loader/%.d: CFLAGS += -Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
-loader/win32.o loader/win32.d: CFLAGS += $(CFLAGS_STACKREALIGN)
+loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAGS_NO_OMIT_LEAF_FRAME_POINTER)
+#loader/%: CFLAGS += -Ddbg_printf=__vprintf -DTRACE=__vprintf -DDETAILED_OUT
+loader/win32%: CFLAGS += $(CFLAGS_STACKREALIGN)
 
-mp3lib/decode_i586.o: CFLAGS += -fomit-frame-pointer
+mp3lib/decode_i586%: CFLAGS += -fomit-frame-pointer
 
-tremor/%.o tremor/%.d: CFLAGS += $(CFLAGS_TREMOR_LOW)
+tremor/%: CFLAGS += $(CFLAGS_TREMOR_LOW)
 
 vidix/%: CFLAGS += $(CFLAGS_DHAHELPER) $(CFLAGS_SVGALIB_HELPER)
 
@@ -966,10 +967,10 @@ tags:
 
 TEST_OBJS = mp_msg-mencoder.o mp_fifo.o osdep/$(GETCH) osdep/$(TIMER) -ltermcap -lm
 
-codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h codec-cfg.h $(TEST_OBJS)
+codec-cfg-test$(EXESUF): codec-cfg.c codecs.conf.h help_mp.h $(TEST_OBJS)
 	$(CC) -I. -DTESTING -o $@ $^
 
-codecs2html$(EXESUF): codec-cfg.c $(TEST_OBJS)
+codecs2html$(EXESUF): codec-cfg.c help_mp.h $(TEST_OBJS)
 	$(CC) -I. -DCODECS2HTML -o $@ $^
 
 liba52/test$(EXESUF): cpudetect.o $(filter liba52/%,$(SRCS_COMMON:.c=.o)) -lm
@@ -1007,7 +1008,7 @@ tools: $(addsuffix $(EXESUF),$(TOOLS))
 alltools: $(addsuffix $(EXESUF),$(ALLTOOLS))
 
 toolsclean:
-	-rm -f $(foreach file,$(ALLTOOLS),$(call ADD_ALL_EXESUFSx,$(file)))
+	-rm -f $(foreach file,$(ALLTOOLS),$(call ADD_ALL_EXESUFS,$(file)))
 	-rm -f TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
 
 TOOLS/bmovl-test$(EXESUF): -lSDL_image
@@ -1104,18 +1105,17 @@ vidix/dhahelperwin/dhahelper-rc.o: vidix/dhahelperwin/common.ver vidix/dhahelper
 
 vidix/dhahelperwin/base.tmp: vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
 	$(CC) -Wl,--base-file,$@ -Wl,--entry,_DriverEntry@8 -nostartfiles \
-            -nostdlib -o vidix/dhahelperwin/junk.tmp $^ -lntoskrnl
-	-rm -f vidix/dhahelperwin/junk.tmp
+            -nostdlib -o $(@D)/junk.tmp $^ -lntoskrnl
+	-rm -f $(@D)/junk.tmp
 
 vidix/dhahelperwin/temp.exp: vidix/dhahelperwin/base.tmp
-	dlltool --dllname vidix/dhahelperwin/dhahelper.sys --base-file $< --output-exp $@
+	dlltool --dllname $(@D)/dhahelper.sys --base-file $< --output-exp $@
 
 vidix/dhahelperwin/dhahelper.sys: vidix/dhahelperwin/temp.exp vidix/dhahelperwin/dhahelper.o vidix/dhahelperwin/dhahelper-rc.o
 	$(CC) -Wl,--subsystem,native -Wl,--image-base,0x10000 \
             -Wl,--file-alignment,0x1000 -Wl,--section-alignment,0x1000 \
             -Wl,--entry,_DriverEntry@8 -Wl,$< -mdll -nostartfiles -nostdlib \
-            -o $@ vidix/dhahelperwin/dhahelper.o \
-            vidix/dhahelperwin/dhahelper-rc.o -lntoskrnl
+            -o $@ $(@:.sys=.o) $(@:.sys=-rc.o) -lntoskrnl
 	strip $@
 
 install-dhahelperwin:

@@ -40,7 +40,7 @@
 
 #include <jack/jack.h>
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
   "JACK audio output",
   "jack",

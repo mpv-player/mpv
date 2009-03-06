@@ -32,7 +32,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
     "ALSA-0.5.x audio output",
     "alsa5",

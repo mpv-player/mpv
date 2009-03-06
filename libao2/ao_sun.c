@@ -49,7 +49,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
     "Sun audio output",
     "sun",

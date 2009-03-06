@@ -87,12 +87,10 @@ static const int channel_mask[] = {
 static WAVEHDR*     waveBlocks;         //pointer to our ringbuffer memory
 static HWAVEOUT     hWaveOut;           //handle to the waveout device
 static unsigned int buf_write=0;
-static unsigned int buf_write_pos=0;
-static int          full_buffers=0;
-static int          buffered_bytes=0;
+static volatile int buf_read=0;
 
 
-static ao_info_t info = 
+static const ao_info_t info =
 {
 	"Windows waveOut audio output",
 	"win32",
@@ -102,17 +100,12 @@ static ao_info_t info =
 
 LIBAO_EXTERN(win32)
 
-static void CALLBACK waveOutProc(HWAVEOUT hWaveOut,UINT uMsg,DWORD dwInstance,  
+static void CALLBACK waveOutProc(HWAVEOUT hWaveOut,UINT uMsg,DWORD dwInstance,
     DWORD dwParam1,DWORD dwParam2)
 {
 	if(uMsg != WOM_DONE)
         return;
-	if (full_buffers) {
-		buffered_bytes-=BUFFER_SIZE;
-		--full_buffers;
-	} else {
-		buffered_bytes=0;
-	}
+	buf_read = (buf_read + 1) % BUFFER_COUNT;
 }
 
 // to set/get/query special features/parameters
@@ -145,34 +138,34 @@ static int control(int cmd,void *arg)
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags)
 {
-	WAVEFORMATEXTENSIBLE wformat;      
-	DWORD totalBufferSize = (BUFFER_SIZE + sizeof(WAVEHDR)) * BUFFER_COUNT;
+	WAVEFORMATEXTENSIBLE wformat;
 	MMRESULT result;
 	unsigned char* buffer;
 	int i;
-   
+
 	switch(format){
 		case AF_FORMAT_AC3:
 		case AF_FORMAT_S24_LE:
 		case AF_FORMAT_S16_LE:
-		case AF_FORMAT_S8:
+		case AF_FORMAT_U8:
 			break;
 		default:
 			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",af_fmt2str_short(format));
 			format=AF_FORMAT_S16_LE;
-	}   
+	}
 
 	// FIXME multichannel mode is buggy
 	if(channels > 2)
 		channels = 2;
-   
-	//fill global ao_data 
+
+	//fill global ao_data
 	ao_data.channels=channels;
 	ao_data.samplerate=rate;
 	ao_data.format=format;
 	ao_data.bps=channels*rate;
 	if(format != AF_FORMAT_U8 && format != AF_FORMAT_S8)
 	  ao_data.bps*=2;
+	ao_data.outburst = BUFFER_SIZE;
 	if(ao_data.buffersize==-1)
 	{
 		ao_data.buffersize=af_fmt2bits(format)/8;
@@ -181,22 +174,22 @@ static int init(int rate,int channels,int format,int flags)
 	}
 	mp_msg(MSGT_AO, MSGL_V,"ao_win32: Samplerate:%iHz Channels:%i Format:%s\n",rate, channels, af_fmt2str_short(format));
     mp_msg(MSGT_AO, MSGL_V,"ao_win32: Buffersize:%d\n",ao_data.buffersize);
-	
+
 	//fill waveformatex
     ZeroMemory( &wformat, sizeof(WAVEFORMATEXTENSIBLE));
     wformat.Format.cbSize          = (channels>2)?sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX):0;
-    wformat.Format.nChannels       = channels;                
-    wformat.Format.nSamplesPerSec  = rate;            
+    wformat.Format.nChannels       = channels;
+    wformat.Format.nSamplesPerSec  = rate;
     if(format == AF_FORMAT_AC3)
     {
         wformat.Format.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
         wformat.Format.wBitsPerSample  = 16;
         wformat.Format.nBlockAlign     = 4;
     }
-    else 
+    else
     {
         wformat.Format.wFormatTag      = (channels>2)?WAVE_FORMAT_EXTENSIBLE:WAVE_FORMAT_PCM;
-        wformat.Format.wBitsPerSample  = af_fmt2bits(format); 
+        wformat.Format.wBitsPerSample  = af_fmt2bits(format);
         wformat.Format.nBlockAlign     = wformat.Format.nChannels * (wformat.Format.wBitsPerSample >> 3);
     }
 	if(channels>2)
@@ -205,9 +198,9 @@ static int init(int rate,int channels,int format,int flags)
         wformat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
 	    wformat.Samples.wValidBitsPerSample=af_fmt2bits(format);
     }
-  
+
     wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec * wformat.Format.nBlockAlign;
- 	
+ 
     //open sound device
     //WAVE_MAPPER always points to the default wave device on the system
     result = waveOutOpen(&hWaveOut,WAVE_MAPPER,(WAVEFORMATEX*)&wformat,(DWORD_PTR)waveOutProc,0,CALLBACK_FUNCTION);
@@ -231,9 +224,8 @@ static int init(int rate,int channels,int format,int flags)
 		return 0;
     }
 	//allocate buffer memory as one big block
-	buffer = malloc(totalBufferSize);
-	memset(buffer,0x0,totalBufferSize);
-    //and setup pointers to each buffer 
+	buffer = calloc(BUFFER_COUNT, BUFFER_SIZE + sizeof(WAVEHDR));
+    //and setup pointers to each buffer
     waveBlocks = (WAVEHDR*)buffer;
     buffer += sizeof(WAVEHDR) * BUFFER_COUNT;
     for(i = 0; i < BUFFER_COUNT; i++) {
@@ -241,9 +233,7 @@ static int init(int rate,int channels,int format,int flags)
         buffer += BUFFER_SIZE;
     }
     buf_write=0;
-    buf_write_pos=0;
-    full_buffers=0;
-    buffered_bytes=0;
+    buf_read=0;
 
     return 1;
 }
@@ -251,8 +241,8 @@ static int init(int rate,int channels,int format,int flags)
 // close audio device
 static void uninit(int immed)
 {
-    if(!immed)while(buffered_bytes > 0)usec_sleep(50000);
-    else buffered_bytes=0;
+    if(!immed)
+	usec_sleep(get_delay() * 1000 * 1000);
 	waveOutReset(hWaveOut);
 	waveOutClose(hWaveOut);
 	mp_msg(MSGT_AO, MSGL_V,"waveOut device closed\n");
@@ -265,9 +255,7 @@ static void reset(void)
 {
    	waveOutReset(hWaveOut);
 	buf_write=0;
-    buf_write_pos=0;
-	full_buffers=0;
-	buffered_bytes=0;
+	buf_read=0;
 }
 
 // stop playing, keep buffers (for pause)
@@ -285,7 +273,9 @@ static void audio_resume(void)
 // return: how many bytes can be played without blocking
 static int get_space(void)
 {
-    return BUFFER_COUNT*BUFFER_SIZE - buffered_bytes;
+    int free = buf_read - buf_write - 1;
+    if (free < 0) free += BUFFER_COUNT;
+    return free * BUFFER_SIZE;
 }
 
 //writes data into buffer, based on ringbuffer code in ao_sdl.c
@@ -293,28 +283,23 @@ static int write_waveOutBuffer(unsigned char* data,int len){
   WAVEHDR* current;
   int len2=0;
   int x;
-  while(len>0){                       
+  while(len>0){
+    int buf_next = (buf_write + 1) % BUFFER_COUNT;
     current = &waveBlocks[buf_write];
-    if(buffered_bytes==BUFFER_COUNT*BUFFER_SIZE) break;
+    if(buf_next == buf_read) break;
     //unprepare the header if it is prepared
-	if(current->dwFlags & WHDR_PREPARED) 
+	if(current->dwFlags & WHDR_PREPARED)
            waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
-	x=BUFFER_SIZE-buf_write_pos;          
-    if(x>len) x=len;                   
-    fast_memcpy(current->lpData+buf_write_pos,data+len2,x); 
-    if(buf_write_pos==0)full_buffers++;
-    len2+=x; len-=x;                 
-	buffered_bytes+=x; buf_write_pos+=x; 
+	x=BUFFER_SIZE;
+    if(x>len) x=len;
+    fast_memcpy(current->lpData,data+len2,x);
+    len2+=x; len-=x;
 	//prepare header and write data to device
-	current->dwBufferLength = buf_write_pos;
+	current->dwBufferLength = x;
 	waveOutPrepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 	waveOutWrite(hWaveOut, current, sizeof(WAVEHDR));
-    
-	if(buf_write_pos>=BUFFER_SIZE){        //buffer is full find next
-       // block is full, find next!
-       buf_write=(buf_write+1)%BUFFER_COUNT;  
-	   buf_write_pos=0;                 
-    }                                 
+
+       buf_write = buf_next;
   }
   return len2;
 }
@@ -332,5 +317,7 @@ static int play(void* data,int len,int flags)
 // return: delay in seconds between first and last sample in buffer
 static float get_delay(void)
 {
-	return (float)(buffered_bytes + ao_data.buffersize)/(float)ao_data.bps;
+	int used = buf_write - buf_read;
+	if (used < 0) used += BUFFER_COUNT;
+	return (float)(used * BUFFER_SIZE + ao_data.buffersize)/(float)ao_data.bps;
 }

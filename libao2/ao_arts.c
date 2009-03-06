@@ -38,7 +38,7 @@
 
 static arts_stream_t stream;
 
-static ao_info_t info =
+static const ao_info_t info =
 {
     "aRts audio output",
     "arts",

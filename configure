@@ -415,6 +415,7 @@ Audio output:
   --disable-nas          disable NAS audio output [autodetect]
   --disable-sgiaudio     disable SGI audio output [autodetect]
   --disable-sunaudio     disable Sun audio output [autodetect]
+  --disable-dart         disable DART audio output [autodetect]
   --disable-win32waveout disable Windows waveout audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
@@ -588,6 +589,7 @@ _arts=auto
 _esd=auto
 _pulse=auto
 _jack=auto
+_dart=auto
 _openal=auto
 _libcdio=auto
 _liblzo=auto
@@ -956,6 +958,8 @@ for ac_option do
   --disable-jack)	_jack=no	;;
   --enable-openal)	_openal=yes	;;
   --disable-openal)	_openal=no	;;
+  --enable-dart)   _dart=yes   ;;
+  --disable-dart)  _dart=no    ;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
   --enable-mp3lame)	_mp3lame=yes	;;
@@ -5651,6 +5655,29 @@ echores "$_sgiaudio"
 fi #if irix
 
 
+if os2 ; then
+echocheck "DART"
+if test "$_dart" = auto; then
+  cat > $TMPC << EOF
+#include <os2.h>
+#include <dart.h>
+int main( void ) { return 0; }
+EOF
+  _dart=no;
+  cc_check -ldart && _dart=yes
+fi
+if test "$_dart" = yes ; then
+  def_dart='#define CONFIG_DART 1'
+  _libs_mplayer="$_libs_mplayer -ldart"
+  _aomodules="dart $_aomodules"
+else
+  def_dart='#undef CONFIG_DART'
+  _noaomodules="dart $_noaomodules"
+fi
+echores "$_dart"
+fi #if os2
+
+
 # set default CD/DVD devices
 if win32 || os2 ; then
   default_cdrom_device="D:"
@@ -7980,7 +8007,7 @@ if test "$_dvdnav" = yes ; then
   _largefiles=yes
   def_dvdnav='#define CONFIG_DVDNAV 1'
   if test "$dvdnav_internal" = yes ; then
-    _inc_extra="$_inc_extra -Ilibdvdnav"
+    cflags_libdvdnav="-Ilibdvdnav"
     _inputmodules="dvdnav(internal) $_inputmodules"
   else
     _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
@@ -8042,6 +8069,7 @@ CFLAGS_DHAHELPER = $cflags_dhahelper
 CFLAGS_FAAD_FIXED = $cflags_faad_fixed
 CFLAGS_LIBDVDCSS = $cflags_libdvdcss
 CFLAGS_LIBDVDCSS_DVDREAD = $cflags_libdvdcss_dvdread
+CFLAGS_LIBDVDNAV = $cflags_libdvdnav
 CFLAGS_NO_OMIT_LEAF_FRAME_POINTER = $cflags_no_omit_leaf_frame_pointer
 CFLAGS_STACKREALIGN = $cflags_stackrealign
 CFLAGS_SVGALIB_HELPER = $cflags_svgalib_helper
@@ -8098,6 +8126,7 @@ CDDA = $_cdda
 CDDB = $_cddb
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
+DART = $_dart
 DFBMGA = $_dfbmga
 DGA = $_dga
 DIRECT3D = $_direct3d
@@ -8540,6 +8569,7 @@ $def_alsa5
 $def_alsa9
 $def_arts
 $def_coreaudio
+$def_dart
 $def_esd
 $def_esd_latency
 $def_jack

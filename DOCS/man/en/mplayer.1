@@ -904,6 +904,7 @@ i.e.\& using the shell.
 MPlayer uses this command without any checking, it is your responsibility
 to ensure it does not cause security problems (e.g.\& make sure to use full
 paths if "." is in your path like on Windows).
+It also only works when playing video (i.e. not with \-novideo but works with \-vo null).
 .sp 1
 This can be "misused" to disable screensavers that do not support the proper
 X API (also see \-stop\-xscreensaver).
@@ -2836,6 +2837,18 @@ Playing a file with \-v will show a list of available devices.
 .PD 1
 .
 .TP
+.B dart (OS/2 only)
+OS/2 DART audio output driver
+.PD 0
+.RSs
+.IPs (no)share
+Open DART in shareable or exclusive mode.
+.IPs bufsize=<size>
+Set buffer size to <size> in samples (default: 2048).
+.RE
+.PD 1
+.
+.TP
 .B dxr2 (also see \-dxr2) (DXR2 only)
 Creative DXR2 specific output driver
 .
@@ -3433,13 +3446,14 @@ For positive values, apply a sharpening algorithm to the video,
 for negative values a blurring algorithm (default: 0).
 .IPs denoise=<0\-1>
 Apply a noise reduction algorithm to the video (default: 0, no noise reduction).
-.IPs deint=<0\-3>
+.IPs deint=<0\-4>
 Chooses the deinterlacer (default: 0).
+All modes > 0 respect \-field\-dominance.
 .RSss
 .IPs 0
 No deinterlacing.
 .IPs 1
-Show only one field, similar to \-vf field.
+Show only first field, similar to \-vf field.
 .IPs 2
 Bob deinterlacing (current fallback for advanced deinterlacers).
 .IPs 3

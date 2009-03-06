@@ -45,17 +45,10 @@ static char const * parse_float( char const * const str, float * const valp );
  *         else a non-zero value is returned.
  *
  */
-int subopt_parse( char const * const str, opt_t * opts )
+int subopt_parse( char const * const str, const opt_t * opts )
 {
   int parse_err = 0, idx;
   unsigned int parse_pos = 0;
-
-  /* Initialize set member to false.          *
-   * It is set to true if it was found in str */
-  for ( idx=0; opts[idx].name; ++idx )
-  {
-    opts[idx].set = 0;
-  }
 
   if ( str )
   {
@@ -101,7 +94,7 @@ int subopt_parse( char const * const str, opt_t * opts )
         if( strncmp( &str[parse_pos], opts[idx].name, opt_len ) == 0 )
         {
           /* option was found */
-          opts[idx].set = 1; next = 1;
+          next = 1;
 
           assert( opts[idx].valp && "Need a pointer to store the arg!" );
 
@@ -196,7 +189,7 @@ else if ( substr_len == opt_len+2 )
                   strncmp( &str[parse_pos+2], opts[idx].name, opt_len ) == 0 )
         {
           /* option was found but negated */
-          opts[idx].set = 1; next = 1;
+          next = 1;
 
           /* set arg to false */
           *((int *)(opts[idx].valp)) = 0;

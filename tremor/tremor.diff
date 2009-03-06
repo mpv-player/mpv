@@ -166,3 +166,13 @@
 +#endif /* 0 */
 +
  #endif  /* _OS_TYPES_H */
+--- mapping0.c	(revision 28274)
++++ mapping0.c	(revision 28275)
+@@ -19,6 +20,7 @@
+ #include <string.h>
+ #include <math.h>
+ #include "ogg.h"
++#include "os.h"
+ #include "ivorbiscodec.h"
+ #include "mdct.h"
+ #include "codec_internal.h"

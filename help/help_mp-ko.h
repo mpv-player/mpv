@@ -4,7 +4,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "사용법:   mplayer [선택사항] [url|경로/]파일명\n"
 "\n"
 "기본 선택사항: (전체 목록은 man 페이지 참조)\n"

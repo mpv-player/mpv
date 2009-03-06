@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26936 -->
+<!-- synced with r28432 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -22,26 +22,26 @@ Rapportez les problèmes à leurs auteurs, pas à nous.
 
 <para>
 Pour construire le paquet Debian, lancez la commande suivante dans le
-répertoire source de <application>MPlayer</application>:
+répertoire source de <application>MPlayer</application>&nbsp;:
 
 <screen>fakeroot debian/rules binary</screen>
 
 Si vous voulez passer des options particulières à configure, vous pouvez
 définir la variable d'environnement <envar>DEB_BUILD_OPTIONS</envar>.
-Par exemple, si vous voulez le support de la GUI et de l'OSD, faites:
+Par exemple, si vous voulez le support de la GUI et de l'OSD, faites&nbsp;:
 
 <screen>DEB_BUILD_OPTIONS="--enable-gui --enable-menu" fakeroot debian/rules binary</screen>
 
 Vous pouvez aussi passer quelques variables au Makefile. Par exemple, si
-vous voulez compiler avec gcc 3.4 même si ce n'est pas celui par défaut:
+vous voulez compiler avec gcc 3.4 même si ce n'est pas celui par défaut&nbsp;:
 
 <screen>CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules binary</screen>
 
-Pour nettoyer l'arborescence des sources, exécutez la commande suivante:
+Pour nettoyer l'arborescence des sources, exécutez la commande suivante&nbsp;:
 
 <screen>fakeroot debian/rules clean</screen>
 
-En tant que root installez le paquet <filename>.deb</filename> comme d'habitude:
+En tant que root installez le paquet <filename>.deb</filename> comme d'habitude&nbsp;:
 
 <screen>dpkg -i ../mplayer_<replaceable>version</replaceable>.deb</screen>
 </para>
@@ -123,7 +123,7 @@ récente des binutils.
 <para>
 Si <application>MPlayer</application> se plaint de ne pas trouver
 <filename>/dev/cdrom</filename> ou <filename>/dev/dvd</filename>, créez
-le lien symbolique approprié:
+le lien symbolique approprié&nbsp;:
 <screen>ln -s /dev/<replaceable>votre_périphérique_cdrom</replaceable> /dev/cdrom</screen>
 </para>
 
@@ -150,7 +150,7 @@ requis).
 
 <para>
 À cause des limitations dans les différentes versions de gas (relocation
-contre MMX), vous aurez besoin de compiler en deux étapes:
+contre MMX), vous aurez besoin de compiler en deux étapes&nbsp;:
 D'abord assurez-vous que le non-natif est en premier dans votre
 <envar>$PATH</envar> et faites un <command>gmake -k</command>, ensuite
 assurez-vous que la version native est utilisée et faites
@@ -213,7 +213,7 @@ un fichier VOB sur un CPU à 400MHz. Vous aurez besoin d'avoir
 installé.
 </para>
 
-<para><emphasis role="bold">Attention :</emphasis></para>
+<para><emphasis role="bold">Attention&nbsp;:</emphasis></para>
  <itemizedlist>
  <listitem><para>
    <emphasis role="bold">mediaLib</emphasis> est
@@ -222,7 +222,7 @@ installé.
  qui ont construit MPlayer avec le support mediaLib ont reporté une
  forte coloration verte sur les vidéo encodées et décodées avec
  libavcodec.
- Si vous le désirez, vous pouvez activer mediaLib avec:
+ Si vous le désirez, vous pouvez activer mediaLib avec&nbsp;:
  <screen>./configure --enable-mlib</screen>
  Ceci est à vos risques et périls. Les utilisateurs x86 ne doivent
  <emphasis role="bold">jamais</emphasis> utiliser mediaLib, puisque cela
@@ -235,7 +235,7 @@ Pour construire ce paquetage vous aurez besoin de GNU <application>make</applica
 (<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), le
 make natif de Solaris ne fonctionnera pas.
 Message d'erreur typique si vous utilisez le make de Solaris au lieu de
-celui de GNU:
+celui de GNU&nbsp;:
 <screen>
 % /usr/ccs/bin/make
 make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
@@ -264,23 +264,23 @@ l'autodétection échoue, utilisez l'option
 pour indiquer au script <filename>configure</filename> où il peut trouver
 GNU "as" sur votre système).
 </para>
-<para>Solutions aux problèmes courants :</para>
+<para>Solutions aux problèmes courants&nbsp;:</para>
 <itemizedlist>
 <listitem><para>
 Message d'erreur de <filename>configure</filename> sur un système Solaris
-x86 en utilisant GCC sans assembleur GNU:
+x86 en utilisant GCC sans assembleur GNU&nbsp;:
 <screen>
    % configure
    ...
    Checking assembler (/usr/ccs/bin/as) ... , failed
    Please upgrade(downgrade) binutils to 2.10.1...
 </screen>
-(Solution: Installez et utilisez un gcc configuré avec <option>--with-as=gas</option>)
+(Solution&nbsp;: Installez et utilisez un gcc configuré avec <option>--with-as=gas</option>)
 </para>
 
 <para>
 Erreur typique obtenue en construisant avec un compilateur C GNU qui n'utilise
-pas GNU as:
+pas GNU as&nbsp;:
 <screen>
    % gmake
    ...
@@ -297,7 +297,7 @@ pas GNU as:
 <listitem><para>
 <application>MPlayer</application> est susceptible de renvoyer une
 erreur de segmentation (segfault) à l'encodage ou au décodage de vidéos utilisant
-win32codecs :
+win32codecs&nbsp;:
 <screen>
 ...
 Trying to force audio codec driver family acm...
@@ -314,12 +314,12 @@ antérieures à Solaris Nevada b31. Ceci a été réparé par Sun pour
 Solaris Nevada b32 mais pas encore pour Solaris 10. Le Projet MPlayer
 a averti Sun de ce problème. Un patch pour Solaris 10 est actuellement en
 développement. Plus d'information sont disponibles à l'adresse
-suivante : <ulink url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
+suivante&nbsp;: <ulink url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
  </para></listitem>
 
 <listitem><para>
 A cause de bogues dans Solaris 8, il se peut que vous ne puissiez pas lire
-de disques DVD plus gros que 4 Go:
+de disques DVD plus gros que 4 Go&nbsp;:
 </para>
 
 <itemizedlist>
@@ -350,7 +350,7 @@ Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc)
 <!-- ********** -->
 
 <sect2 id="hp-ux">
-<title>HP UX</title>
+<title>HP-UX</title>
 
 <para>
 Joe Page héberge un
@@ -373,8 +373,7 @@ Une bonne alternative au pauvre système son natif de HP-UX est GNU esound.
 
 <para>
 Créer le périphérique DVD
-scanne le bus SCSI avec:
-
+scanne le bus SCSI avec&nbsp;:
 <screen>
 # ioscan -fn
 
@@ -400,18 +399,18 @@ Créer un lien depuis le prériphérique brut vers le périphérique DVD.
 <screen>
 ln -s /dev/rdsk/c<replaceable>&lt;SCSI bus instance&gt;</replaceable>t<replaceable>&lt;SCSI target ID&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable> /dev/<replaceable>&lt;device&gt;</replaceable>
 </screen>
-Exemple:
+Exemple&nbsp;:
 <screen>ln -s /dev/rdsk/c1t2d0 /dev/dvd</screen>
 </para>
 
 <para>
-Ci-dessous sont exposées les solutions pour certains problèmes communs:
+Ci-dessous sont exposées les solutions pour certains problèmes communs&nbsp;:
 </para>
 
 <itemizedlist>
 <listitem>
 <para>
-Plante au démarrage avec le message d'erreur suivant:
+Plante au démarrage avec le message d'erreur suivant&nbsp;:
 <screen>
 /usr/lib/dld.sl: Unresolved symbol: finite (code) from /usr/local/lib/gcc-lib/hppa2.0n-hp-hpux11.00/3.2/../../../libGL.sl
 </screen>
@@ -421,36 +420,36 @@ Plante au démarrage avec le message d'erreur suivant:
 Cela signifie que la fonction <systemitem>.finite().</systemitem> n'est pas
 disponible dans la librairie standard math de HP-UX.
 A la place, il y a <systemitem>.isfinite().</systemitem>.
-Solution: Utiliser le dernier fichier dépôt Mesa.
+Solution&nbsp;: Utiliser le dernier fichier dépôt Mesa.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Plante à la lecture avec le message d'erreur suivant:
+Plante à la lecture avec le message d'erreur suivant&nbsp;:
 <screen>
 /usr/lib/dld.sl: Unresolved symbol: sem_init (code) from /usr/local/lib/libSDL-1.2.sl.0
 </screen>
 </para>
 
 <para>
-Solution: Utiliser l'option extralibdir lors de configure
+Solution&nbsp;: Utiliser l'option extralibdir lors de configure
 <option>--with-extralibdir="/usr/lib -lrt"</option>
 </para>
 </listitem>
 
 <listitem>
 <para>
-MPlayer segfaults avec un message comme celui-ci:
+MPlayer segfaults avec un message comme celui-ci&nbsp;:
 <screen>
 Pid 10166 received a SIGSEGV for stack growth failure.
-Possible causes: insufficient memory or swap space, or stack size exceeded maxssiz.
+Possible causes&nbsp;: insufficient memory or swap space, or stack size exceeded maxssiz.
 Segmentation fault
 </screen>
 </para>
 
 <para>
-Solution:
+Solution&nbsp;:
 Le noyau HP-UX a une taille de pile par défaut de 8MO(?) par processus.
 (des patches 11.0 et de plus récent 10.20 vous permettront d'augmenter
 <systemitem>maxssiz</systemitem> jusqu'à 350MB pour les programmes
@@ -491,7 +490,7 @@ des problèmes si vous utilisez <filename>/usr/ccs/bin/make</filename>.
 
 <para>
 La détection CPU est toujours un travail en cours.
-Les architectures suivantes ont été testé:
+Les architectures suivantes ont été testé&nbsp;:
 </para>
 
 <itemizedlist>
@@ -502,7 +501,7 @@ Les architectures suivantes ont été testé:
 
 <para>
 Les architectures suivantes n'ont pas été testé, mais devraient quand
-même marcher:
+même marcher&nbsp;:
 <itemizedlist>
 <listitem><para>POWER</para></listitem>
 <listitem><para>POWER2</para></listitem>
@@ -520,11 +519,11 @@ un usage personnel et non-commercial. Cependant, il n'y a actuellement
 pas de pilote de son pour AIX 5.2 ou 5.3. Cela signifie qu'à l'heure actuelle <emphasis
 role="bold">MPlayer ne produit pas de son sous AIX 5.2 et 5.3.</emphasis>
 </para>
-<para>Solutions aux problèmes courants :</para>
+<para>Solutions aux problèmes courants&nbsp;:</para>
 <itemizedlist>
 <listitem>
 <para>
-Si vous rencontrez ce message d'erreur de <filename>configure</filename> :
+Si vous rencontrez ce message d'erreur de <filename>configure</filename>&nbsp;:
 <screen>
 $ ./configure
 ...
@@ -536,7 +535,7 @@ Messages in the GTK-2 interface will be broken then.
 Ceci est du au fait que AIX utilise un jeu de caractÃ¨re (charset) non
 standards. En conséquence, la conversion d'une sortie MPlayer en un
 autre character set et n'est pas suporté pour l'instant. La solution
-est d'utiliser:
+est d'utiliser&nbsp;:
 <screen>
 $ ./configure --charset=noconv
 </screen>
@@ -588,7 +587,7 @@ très lente.
 <para>
 Si vous souhaitez éviter d'utiliser la commande en ligne, une astuce
 toute simple est de mettre un raccourci sur votre bureau qui contient
-quelque chose comme ce qui suit dans la section d'execution:
+quelque chose comme ce qui suit dans la section d'execution&nbsp;:
 <screen><replaceable>c:\chemin\vers\</replaceable>mplayer.exe %1</screen>
 Cela va faire lire à <application>MPlayer</application> n'importe quel
 film qui est laché sur le raccourci.
@@ -656,11 +655,11 @@ Essayez de les rendre accessibles en écriture si vous avez des problèmes.
   Vous pouvez lire des VCDs en jouant les fichiers
   <filename>.DAT</filename> ou <filename>.MPG</filename> que Windows affiche
   sur les VCDs. Cela fonctionne tout simplement comme cela (changez la lettre
-  de votre lecteur de CD-ROM):
+  de votre lecteur de CD-ROM)&nbsp;:
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
-Vous pouvez aussi lire une piste VCD directement en utilisant :
+Vous pouvez aussi lire une piste VCD directement en utilisant&nbsp;:
 <screen> mplayer vcd://<replaceable>&lt;track&gt;</replaceable> -cdrom-device <replaceable>d:</replaceable></screen>
-Les DVDs fonctionnent également, ajustez <option>-dvd-device</option> à la lettre de votre lecteur DVD-ROM :
+Les DVDs fonctionnent également, ajustez <option>-dvd-device</option> à la lettre de votre lecteur DVD-ROM&nbsp;:
 <screen>mplayer dvd://<replaceable>&lt;titre&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
 La console <application>Cygwin</application>/<application>MinGW</application>
 est plutôt lente. Il semble que rediriger la sortie ou utiliser l'option
@@ -754,7 +753,7 @@ Contrairement à d'autres Unix comme la plupart des Linux et des BSDs,
 OSX n'a pas un seul système de package installé par défault.
 </para>
 <para>
-Il y en a au moins deux au choix :
+Il y en a au moins deux au choix&nbsp;:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink> et
 <ulink url="http://www.macports.org/">MacPorts</ulink>.
 Les deux fournissent approximativement les même services
@@ -770,7 +769,7 @@ Les exemples à suivre sont basés sur MacPorts.
 </para>
 <para>
 Par exemple, pour compiler <application>MPlayer</application> avec le
-support OSD:
+support OSD&nbsp;:
 <screen>sudo port install pkgconfig</screen>
 Ceci va installer <application>pkg-config</application>, le système de
 gestion des flags de compilation/linking des librairies.
@@ -778,7 +777,7 @@ Le script <systemitem>configure</systemitem> de
 <application>MPlayer</application> l'utilise pour détecter les
 librairies proprement.
 Vous pouvez ensuite installer <application>fontconfig</application> de
-la même manière:
+la même manière&nbsp;:
 <screen>sudo port install fontconfig</screen>
 Vous pouvez ensuite lancer le script
 <systemitem>configure</systemitem> de
@@ -786,7 +785,7 @@ Vous pouvez ensuite lancer le script
 <systemitem>PKG_CONFIG_PATH</systemitem> et
 <systemitem>PATH</systemitem> pour que
 <systemitem>configure</systemitem> trouve les librairies installées
-avec MacPorts):
+avec MacPorts)&nbsp;:
 <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
 
@@ -798,7 +797,7 @@ avec MacPorts):
 <para>
 Vous pouvez obtenir un GUI natif et un binaire pré-compilé de
 <application>MPlayer</application> pour Mac OS X depuis le projet
-<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>, mais soyez averti:
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>, mais soyez averti&nbsp;:
 ce projet n'est plus du tout actif.
 </para>
 
@@ -822,7 +821,7 @@ AltiVec.
 </para>
 
 <para>
-Pour récupérer les modules SVN utilisez:
+Pour récupérer les modules SVN utilisez&nbsp;:
 <screen>
 svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
 svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
@@ -831,7 +830,7 @@ svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
 
 <para>
 Pour compiler <application>MPlayerOSX</application> vous aurez besoin de
-mettre en place quelque chose comme ceci:
+mettre en place quelque chose comme ceci&nbsp;:
 
 <screen>
 MPlayer_repertoire_source
@@ -846,21 +845,21 @@ Premièrement vous avez besoin de compiler main et main_noaltivec.
 </para>
 
 <para>
-  Pour assurer une rétro compatibilité maximum, commencez par créer la variable d'environnement suivante :
+  Pour assurer une rétro compatibilité maximum, commencez par créer la variable d'environnement suivante&nbsp;:
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
 
 <para>
-Et, configurez:
+Et, configurez&nbsp;:
 </para>
 
 <para>
 Si vous configurez pour un CPU G4 (ou plus récent) avec le support AltiVec,
-faites comme suit :
+faites comme suit&nbsp;:
 <screen>
 ./configure --disable-gl --disable-x11
 </screen>
-Si vous configurez pour un G3 sans le support AltiVec, faites comme suit :
+Si vous configurez pour un G3 sans le support AltiVec, faites comme suit&nbsp;:
 <screen>
 ./configure --disable-gl --disable-x11 --disable-altivec
 </screen>

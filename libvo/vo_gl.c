@@ -76,6 +76,13 @@ static GLuint osdtex[MAX_OSD_PARTS];
 static GLuint osdatex[MAX_OSD_PARTS];
 #endif
 static GLuint *eosdtex;
+#define LARGE_EOSD_TEX_SIZE 512
+#define TINYTEX_SIZE 16
+#define TINYTEX_COLS (LARGE_EOSD_TEX_SIZE/TINYTEX_SIZE)
+#define TINYTEX_MAX (TINYTEX_COLS*TINYTEX_COLS)
+#define SMALLTEX_SIZE 32
+#define SMALLTEX_COLS (LARGE_EOSD_TEX_SIZE/SMALLTEX_SIZE)
+#define SMALLTEX_MAX (SMALLTEX_COLS*SMALLTEX_COLS)
 static GLuint largeeosdtex[2];
 //! Display lists that draw the OSD parts
 static GLuint osdDispList[MAX_OSD_PARTS];
@@ -284,6 +291,26 @@ static void clearEOSD(void) {
   eosdtex = NULL;
 }
 
+static void do_render_osd(int);
+
+static inline int is_tinytex(ass_image_t *i, int tinytexcur) {
+  return i->w < TINYTEX_SIZE && i->h < TINYTEX_SIZE && tinytexcur < TINYTEX_MAX;
+}
+
+static inline int is_smalltex(ass_image_t *i, int smalltexcur) {
+  return i->w < SMALLTEX_SIZE && i->h < SMALLTEX_SIZE && smalltexcur < SMALLTEX_MAX;
+}
+
+static inline void tinytex_pos(int tinytexcur, int *x, int *y) {
+  *x = (tinytexcur % TINYTEX_COLS) * TINYTEX_SIZE;
+  *y = (tinytexcur / TINYTEX_COLS) * TINYTEX_SIZE;
+}
+
+static inline void smalltex_pos(int smalltexcur, int *x, int *y) {
+  *x = (smalltexcur % SMALLTEX_COLS) * SMALLTEX_SIZE;
+  *y = (smalltexcur / SMALLTEX_COLS) * SMALLTEX_SIZE;
+}
+
 /**
  * \brief construct display list from ass image list
  * \param img image list to create OSD from.
@@ -309,17 +336,17 @@ static void genEOSD(mp_eosd_images_t *imgs) {
   if (!largeeosdtex[0]) {
     glGenTextures(2, largeeosdtex);
     BindTexture(gl_target, largeeosdtex[0]);
-    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, 512, 512, 0);
+    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, LARGE_EOSD_TEX_SIZE, LARGE_EOSD_TEX_SIZE, 0);
     BindTexture(gl_target, largeeosdtex[1]);
-    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, 512, 512, 0);
+    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, LARGE_EOSD_TEX_SIZE, LARGE_EOSD_TEX_SIZE, 0);
   }
   for (i = img; i; i = i->next)
   {
     if (i->w <= 0 || i->h <= 0 || i->stride < i->w)
       continue;
-    if (i->w < 16 && i->h < 16 && tinytexcur < 1024)
+    if (is_tinytex(i, tinytexcur))
       tinytexcur++;
-    else if (i->w < 32 && i->h < 32 && smalltexcur < 256)
+    else if (is_smalltex(i, smalltexcur))
       smalltexcur++;
     else
       eosdtexCnt++;
@@ -337,14 +364,12 @@ static void genEOSD(mp_eosd_images_t *imgs) {
       mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
       continue;
     }
-    if (i->w < 16 && i->h < 16 && tinytexcur < 1024) {
-      x = (tinytexcur & 31) << 4;
-      y = (tinytexcur >> 5) << 4;
+    if (is_tinytex(i, tinytexcur)) {
+      tinytex_pos(tinytexcur, &x, &y);
       BindTexture(gl_target, largeeosdtex[0]);
       tinytexcur++;
-    } else if (i->w < 32 && i->h < 32 && smalltexcur < 256) {
-      x = (smalltexcur & 15) << 5;
-      y = (smalltexcur >> 4) << 5;
+    } else if (is_smalltex(i, smalltexcur)) {
+      smalltex_pos(smalltexcur, &x, &y);
       BindTexture(gl_target, largeeosdtex[1]);
       smalltexcur++;
     } else {
@@ -364,16 +389,14 @@ skip_upload:
     if (i->w <= 0 || i->h <= 0 || i->stride < i->w)
       continue;
     glColor4ub(i->color >> 24, (i->color >> 16) & 0xff, (i->color >> 8) & 0xff, 255 - (i->color & 0xff));
-    if (i->w < 16 && i->h < 16 && tinytexcur < 1024) {
-      x = (tinytexcur & 31) << 4;
-      y = (tinytexcur >> 5) << 4;
-      sx = sy = 512;
+    if (is_tinytex(i, tinytexcur)) {
+      tinytex_pos(tinytexcur, &x, &y);
+      sx = sy = LARGE_EOSD_TEX_SIZE;
       BindTexture(gl_target, largeeosdtex[0]);
       tinytexcur++;
-    } else if (i->w < 32 && i->h < 32 && smalltexcur < 256) {
-      x = (smalltexcur & 15) << 5;
-      y = (smalltexcur >> 4) << 5;
-      sx = sy = 512;
+    } else if (is_smalltex(i, smalltexcur)) {
+      smalltex_pos(smalltexcur, &x, &y);
+      sx = sy = LARGE_EOSD_TEX_SIZE;
       BindTexture(gl_target, largeeosdtex[1]);
       smalltexcur++;
     } else {
@@ -630,8 +653,6 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   osdtexCnt++;
 }
 
-static void do_render_osd(void);
-
 static void draw_osd(void)
 {
   if (!use_osd) return;
@@ -643,7 +664,7 @@ static void draw_osd(void)
     vo_draw_text_ext(osd_w, osd_h, ass_border_x, ass_border_y, ass_border_x, ass_border_y,
                      image_width, image_height, create_osd_texture);
   }
-  if (vo_doublebuffering) do_render_osd();
+  if (vo_doublebuffering) do_render_osd(1);
 }
 
 static void do_render(void) {
@@ -662,8 +683,11 @@ static void do_render(void) {
     glDisableYUVConversion(gl_target, yuvconvtype);
 }
 
-static void do_render_osd(void) {
-  if (osdtexCnt > 0 || eosdDispList) {
+/**
+ * \param type bit 0: render OSD, bit 1: render EOSD
+ */
+static void do_render_osd(int type) {
+  if (((type & 1) && osdtexCnt > 0) || ((type & 2) && eosdDispList)) {
     // set special rendering parameters
     if (!scaled_osd) {
       glMatrixMode(GL_PROJECTION);
@@ -672,11 +696,11 @@ static void do_render_osd(void) {
       glOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
     }
     glEnable(GL_BLEND);
-    if (eosdDispList) {
+    if ((type & 2) && eosdDispList) {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glCallList(eosdDispList);
     }
-    if (osdtexCnt > 0) {
+    if ((type & 1) && osdtexCnt > 0) {
       glColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff - (osd_color >> 24));
       // draw OSD
 #ifndef FAST_OSD
@@ -702,14 +726,14 @@ static void flip_page(void) {
       glClear(GL_COLOR_BUFFER_BIT);
   } else {
     do_render();
-    do_render_osd();
+    do_render_osd(3);
     if (use_glFinish) glFinish();
     else glFlush();
   }
 }
 
 static void redraw(void) {
-  if (vo_doublebuffering) { do_render(); do_render_osd(); }
+  if (vo_doublebuffering) { do_render(); do_render_osd(3); }
   flip_page();
 }
 
@@ -1113,6 +1137,7 @@ static int control(uint32_t request, void *data)
     if (!data)
       return VO_FALSE;
     genEOSD(data);
+    if (vo_doublebuffering) do_render_osd(2);
     return VO_TRUE;
   case VOCTRL_GET_EOSD_RES:
     {

@@ -360,7 +360,7 @@
      }
  #endif
  
-@@ -865,22 +842,13 @@
+@@ -865,22 +842,14 @@
  
      /* always allocate 2 channels, PS can always "suddenly" turn up */
  #if (defined(PS_DEC) || defined(DRM_PS))
@@ -373,7 +373,8 @@
 -    if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] == 0)
 -    {
 -        /* element_output_channels not set yet */
-+    if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] < output_channels) {
++    if (hDecoder->element_alloced[hDecoder->fr_ch_ele] == 0 ||
++        hDecoder->element_output_channels[hDecoder->fr_ch_ele] < output_channels) {
          hDecoder->element_output_channels[hDecoder->fr_ch_ele] = output_channels;
 -    } else if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] != output_channels) {
 -        /* element inconsistency */

@@ -67,7 +67,7 @@
 #define	ESD_CLIENT_NAME	"MPlayer"
 #define	ESD_MAX_DELAY	(1.0f)	/* max amount of data buffered in esd (#sec) */
 
-static ao_info_t info =
+static const ao_info_t info =
 {
     "EsounD audio output",
     "esd",

@@ -6,7 +6,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "使い方:   mplayer [オプション] [url|パス/]ファイル名\n"
 "\n"
 "基本的なオプション: (man page に全て網羅されています)\n"

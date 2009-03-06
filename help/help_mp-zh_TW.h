@@ -9,7 +9,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "用法:   mplayer [選項] [URL|路徑/]文件名\n"
 "\n"
 "基本選項: (完整列表參見手册頁)\n"
