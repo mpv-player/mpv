@@ -1,6 +1,6 @@
 --- include/a52.h	2006-06-12 15:04:57.000000000 +0200
 +++ liba52/a52.h	2006-06-05 02:23:02.000000000 +0200
-@@ -63,4 +63,9 @@
+@@ -59,4 +66,9 @@
  int a52_block (a52_state_t * state);
  void a52_free (a52_state_t * state);
  
@@ -12,11 +12,11 @@
  #endif /* A52_H */
 --- liba52/a52_internal.h	2006-06-12 15:05:07.000000000 +0200
 +++ liba52/a52_internal.h	2006-06-05 02:23:02.000000000 +0200
-@@ -107,18 +107,34 @@
+@@ -103,18 +107,34 @@
  #define DELTA_BIT_NONE (2)
  #define DELTA_BIT_RESERVED (3)
  
-+#ifdef ARCH_X86_64
++#if ARCH_X86_64
 +# define REG_a "rax"
 +# define REG_d "rdx"
 +# define REG_S "rsi"
@@ -52,7 +52,7 @@
 +void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias);
 --- liba52/bitstream.c	2006-06-12 15:05:07.000000000 +0200
 +++ liba52/bitstream.c	2006-06-05 02:23:02.000000000 +0200
-@@ -35,6 +35,10 @@
+@@ -31,6 +35,10 @@
  
  #define BUFFER_SIZE 4096
  
@@ -63,7 +63,7 @@
  void a52_bitstream_set_ptr (a52_state_t * state, uint8_t * buf)
  {
      int align;
-@@ -42,6 +46,9 @@
+@@ -38,6 +46,9 @@
      align = (long)buf & 3;
      state->buffer_start = (uint32_t *) (buf - align);
      state->bits_left = 0;
@@ -75,7 +75,7 @@
  
 --- liba52/bitstream.h	2006-06-12 15:05:07.000000000 +0200
 +++ liba52/bitstream.h	2006-06-05 02:23:02.000000000 +0200
-@@ -25,6 +25,42 @@
+@@ -21,6 +25,42 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
@@ -91,7 +91,7 @@
 +#define ALT_BITSTREAM_READER
 +
 +/* used to avoid misaligned exceptions on some archs (alpha, ...) */
-+#if defined (ARCH_X86) || defined(HAVE_ARMV6)
++#if ARCH_X86 || HAVE_ARMV6
 +#    define unaligned32(a) (*(uint32_t*)(a))
 +#else
 +#    ifdef __GNUC__
@@ -118,7 +118,7 @@
  /* (stolen from the kernel) */
  #ifdef WORDS_BIGENDIAN
  
-@@ -32,7 +74,7 @@
+@@ -28,7 +68,7 @@
  
  #else
  
@@ -127,7 +127,7 @@
  
  #	define swab32(x) __i386_swab32(x)
  	static inline const uint32_t __i386_swab32(uint32_t x)
-@@ -43,19 +85,34 @@
+@@ -39,19 +79,34 @@
  
  #	else
  
@@ -166,7 +166,7 @@
      uint32_t result;
  	
      if (num_bits < state->bits_left) {
-@@ -65,10 +122,29 @@
+@@ -61,10 +116,29 @@
      }
  
      return a52_bitstream_get_bh (state, num_bits);
@@ -196,7 +196,7 @@
      int32_t result;
  	
      if (num_bits < state->bits_left) {
-@@ -78,4 +154,5 @@
+@@ -74,4 +148,5 @@
      }
  
      return a52_bitstream_get_bh_2 (state, num_bits);
@@ -204,7 +204,7 @@
  }
 --- liba52/downmix.c	2006-06-12 15:17:53.000000000 +0200
 +++ liba52/downmix.c	2006-06-05 02:23:02.000000000 +0200
-@@ -23,18 +23,46 @@
+@@ -19,18 +23,46 @@
   * You should have received a copy of the GNU General Public License
   * along with this program; if not, write to the Free Software
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -241,7 +241,7 @@
 +{
 +    a52_upmix= upmix_C;
 +    a52_downmix= downmix_C;
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
 +    if(mm_accel & MM_ACCEL_X86_MMX) a52_upmix= upmix_MMX;
 +    if(mm_accel & MM_ACCEL_X86_SSE) a52_downmix= downmix_SSE;
 +    if(mm_accel & MM_ACCEL_X86_3DNOW) a52_downmix= downmix_3dnow;
@@ -251,7 +251,7 @@
  int a52_downmix_init (int input, int flags, sample_t * level,
  		      sample_t clev, sample_t slev)
  {
-@@ -451,7 +479,7 @@
+@@ -447,7 +479,7 @@
  	samples[i] = 0;
  }
  
@@ -260,7 +260,7 @@
  		  sample_t clev, sample_t slev)
  {
      switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
-@@ -563,7 +591,7 @@
+@@ -559,7 +591,7 @@
  	break;
  
      case CONVERT (A52_3F2R, A52_2F1R):
@@ -269,7 +269,7 @@
  	move2to1 (samples + 768, samples + 512, bias);
  	break;
  
-@@ -587,12 +615,12 @@
+@@ -583,12 +615,12 @@
  	break;
  
      case CONVERT (A52_3F1R, A52_3F2R):
@@ -284,12 +284,12 @@
  {
      switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
  
-@@ -657,3 +685,1104 @@
+@@ -653,3 +685,1104 @@
  	goto mix_31to21;
      }
  }
 +
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
 +static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
 +{
 +	__asm__ volatile(
@@ -1391,7 +1391,7 @@
 +#endif // ARCH_X86 || ARCH_X86_64
 --- liba52/imdct.c	2008-02-19 00:18:33.000000000 +0100
 +++ liba52/imdct.c	2008-02-19 00:16:40.000000000 +0100
-@@ -26,6 +26,11 @@
+@@ -22,6 +26,11 @@
   * You should have received a copy of the GNU General Public License
   * along with this program; if not, write to the Free Software
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -1403,7 +1403,7 @@
   */
  
  #include "config.h"
-@@ -43,12 +48,49 @@
+@@ -39,12 +48,50 @@
  #include "a52.h"
  #include "a52_internal.h"
  #include "mm_accel.h"
@@ -1413,6 +1413,7 @@
 +
 +#ifdef RUNTIME_CPUDETECT
 +#undef HAVE_AMD3DNOWEXT
++#define HAVE_AMD3DNOWEXT 0
 +#endif
  
  typedef struct complex_s {
@@ -1453,7 +1454,7 @@
  static uint8_t fftorder[] = {
        0,128, 64,192, 32,160,224, 96, 16,144, 80,208,240,112, 48,176,
        8,136, 72,200, 40,168,232,104,248,120, 56,184, 24,152,216, 88,
-@@ -60,6 +102,40 @@
+@@ -56,6 +103,40 @@
        6,134, 70,198, 38,166,230,102,246,118, 54,182, 22,150,214, 86
  };
  
@@ -1473,7 +1474,7 @@
 +static sample_t __attribute__((aligned(16))) xcos1[128];
 +static sample_t __attribute__((aligned(16))) xsin1[128];
 +
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
 +// NOTE: SSE needs 16byte alignment or it will segfault 
 +// 
 +static float __attribute__((aligned(16))) sseSinCos1c[256];
@@ -1494,7 +1495,7 @@
  /* Root values for IFFT */
  static sample_t roots16[3];
  static sample_t roots32[7];
-@@ -245,7 +321,7 @@
+@@ -241,7 +322,7 @@
      ifft_pass (buf, roots128 - 32, 32);
  }
  
@@ -1503,11 +1504,11 @@
  {
      int i, k;
      sample_t t_r, t_i, a_r, a_i, b_r, b_i, w_1, w_2;
-@@ -289,6 +365,701 @@
+@@ -285,6 +366,702 @@
      }
  }
  
-+#ifdef HAVE_ALTIVEC
++#if HAVE_ALTIVEC
 +
 +#ifdef HAVE_ALTIVEC_H
 +#include <altivec.h>
@@ -1852,10 +1853,9 @@
 +
 +// Stuff below this line is borrowed from libac3
 +#include "srfftp.h"
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
-+#ifndef HAVE_AMD3DNOW
++#if ARCH_X86 || ARCH_X86_64
++#undef HAVE_AMD3DNOW
 +#define HAVE_AMD3DNOW 1
-+#endif
 +#include "srfftp_3dnow.h"
 +
 +const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = {{ 0x00000000UL, 0x80000000UL }}; 
@@ -1863,8 +1863,10 @@
 +const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
 +
 +#undef HAVE_AMD3DNOWEXT
++#define HAVE_AMD3DNOWEXT 0
 +#include "imdct_3dnow.h"
-+#define HAVE_AMD3DNOWEXT
++#undef HAVE_AMD3DNOWEXT
++#define HAVE_AMD3DNOWEXT 1
 +#include "imdct_3dnow.h"
 +
 +void
@@ -2205,7 +2207,7 @@
  void a52_imdct_256(sample_t * data, sample_t * delay, sample_t bias)
  {
      int i, k;
-@@ -368,7 +1145,7 @@
+@@ -364,7 +1141,7 @@
  
  void a52_imdct_init (uint32_t mm_accel)
  {
@@ -2214,7 +2216,7 @@
      double sum;
  
      /* compute imdct window - kaiser-bessel derived window, alpha = 5.0 */
-@@ -420,6 +1197,99 @@
+@@ -416,6 +1193,99 @@
  	post2[i].real = cos ((M_PI / 128) * (i + 0.5));
  	post2[i].imag = sin ((M_PI / 128) * (i + 0.5));
      }
@@ -2229,7 +2231,7 @@
 +	    w[i][k].imag = sin (-M_PI * k / j);
 +	}
 +    }
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
 +	for (i = 0; i < 128; i++) {
 +	    sseSinCos1c[2*i+0]= xcos1[i];
 +	    sseSinCos1c[2*i+1]= -xcos1[i];
@@ -2283,7 +2285,7 @@
 +	ifft128 = ifft128_c;
 +	ifft64 = ifft64_c;
 +
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
 +	if(mm_accel & MM_ACCEL_X86_SSE)
 +	{
 +	  fprintf (stderr, "Using SSE optimized IMDCT transform\n");
@@ -2303,7 +2305,7 @@
 +	}
 +	else
 +#endif // ARCH_X86 || ARCH_X86_64
-+#ifdef HAVE_ALTIVEC
++#if HAVE_ALTIVEC
 +        if (mm_accel & MM_ACCEL_PPC_ALTIVEC)
 +	{
 +	  fprintf(stderr, "Using AltiVec optimized IMDCT transform\n");
@@ -2314,7 +2316,7 @@
  
  #ifdef LIBA52_DJBFFT
      if (mm_accel & MM_ACCEL_DJBFFT) {
-@@ -430,7 +1300,5 @@
+@@ -426,7 +1296,5 @@
  #endif
      {
  	fprintf (stderr, "No accelerated IMDCT transform found\n");
@@ -2324,7 +2326,7 @@
  }
 --- include/mm_accel.h	2006-06-12 15:05:00.000000000 +0200
 +++ liba52/mm_accel.h	2006-06-05 02:23:04.000000000 +0200
-@@ -34,7 +34,12 @@
+@@ -30,7 +34,12 @@
  /* x86 accelerations */
  #define MM_ACCEL_X86_MMX	0x80000000
  #define MM_ACCEL_X86_3DNOW	0x40000000
@@ -2339,7 +2341,7 @@
  
 --- liba52/parse.c	2006-12-05 08:08:01.000000000 +0100
 +++ liba52/parse.c	2006-12-05 08:08:44.000000000 +0100
-@@ -28,6 +28,7 @@
+@@ -24,6 +28,7 @@
  #include "config.h"
  
  #include <stdlib.h>
@@ -2347,7 +2349,7 @@
  #include <string.h>
  #include <inttypes.h>
  
-@@ -35,13 +36,12 @@
+@@ -31,13 +36,12 @@
  #include "a52_internal.h"
  #include "bitstream.h"
  #include "tables.h"
@@ -2364,7 +2366,7 @@
  #endif
  
  typedef struct {
-@@ -64,7 +64,16 @@
+@@ -60,7 +64,16 @@
      if (state == NULL)
  	return NULL;
  
@@ -2381,7 +2383,7 @@
      if (state->samples == NULL) {
  	free (state);
  	return NULL;
-@@ -78,6 +87,7 @@
+@@ -74,6 +87,7 @@
      state->lfsr_state = 1;
  
      a52_imdct_init (mm_accel);
@@ -2389,7 +2391,7 @@
  
      return state;
  }
-@@ -145,7 +155,7 @@
+@@ -141,7 +155,7 @@
      state->acmod = acmod = buf[6] >> 5;
  
      a52_bitstream_set_ptr (state, buf + 6);
@@ -2398,7 +2400,7 @@
  
      if ((acmod == 2) && (bitstream_get (state, 2) == 2))	/* dsurmod */
  	acmod = A52_DOLBY;
-@@ -176,28 +186,28 @@
+@@ -172,28 +186,28 @@
  
      chaninfo = !acmod;
      do {
@@ -2435,7 +2437,7 @@
  	} while (addbsil--);
      }
  
-@@ -684,7 +694,7 @@
+@@ -680,7 +694,7 @@
  				 state->fbw_expbap[i].exp[0],
  				 state->fbw_expbap[i].exp + 1))
  		return 1;
@@ -2444,7 +2446,7 @@
  	}
      if (lfeexpstr != EXP_REUSE) {
  	do_bit_alloc |= 32;
-@@ -759,7 +769,7 @@
+@@ -755,7 +769,7 @@
      if (bitstream_get (state, 1)) {	/* skiple */
  	i = bitstream_get (state, 9);	/* skipl */
  	while (i--)
@@ -2453,7 +2455,7 @@
      }
  
      samples = state->samples;
-@@ -900,6 +910,10 @@
+@@ -896,6 +910,10 @@
  
  void a52_free (a52_state_t * state)
  {

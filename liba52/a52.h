@@ -28,6 +28,9 @@
 #ifndef A52_H
 #define A52_H
 
+#include <stdint.h>
+#include "mm_accel.h"
+
 #ifndef LIBA52_DOUBLE
 typedef float sample_t;
 #else
