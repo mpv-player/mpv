@@ -264,7 +264,7 @@ static void be_blur(unsigned char *buf, int w, int h) {
 	unsigned int old_sum, new_sum;
 
 	for (y=0; y<h; y++) {
-		old_sum = 2 * buf[0];
+		old_sum = 2 * buf[y*w];
 		for (x=0; x<w-1; x++) {
 			new_sum = buf[y*w+x] + buf[y*w+x+1];
 			buf[y*w+x] = (old_sum + new_sum) >> 2;
@@ -273,7 +273,7 @@ static void be_blur(unsigned char *buf, int w, int h) {
 	}
 
 	for (x=0; x<w; x++) {
-		old_sum = 2 * buf[0];
+		old_sum = 2 * buf[x];
 		for (y=0; y<h-1; y++) {
 			new_sum = buf[y*w+x] + buf[(y+1)*w+x];
 			buf[y*w+x] = (old_sum + new_sum) >> 2;
