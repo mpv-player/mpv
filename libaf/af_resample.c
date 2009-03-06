@@ -216,7 +216,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     // Create space for circular buffers
     s->xq = malloc(n->nch*sizeof(void*));
-    s->xq[0] = malloc(n->nch*2*L*af->data->bps);
+    s->xq[0] = calloc(n->nch, 2*L*af->data->bps);
     for(i=1;i<n->nch;i++)
       s->xq[i] = (uint8_t *)s->xq[i-1] + 2*L*af->data->bps;
     s->xi = 0;
