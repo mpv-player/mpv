@@ -181,9 +181,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     // Free space for circular buffers
     if(s->xq){
-      for(i=1;i<af->data->nch;i++)
-	if(s->xq[i])
-	  free(s->xq[i]);
+      free(s->xq[0]);
       free(s->xq);
       s->xq = NULL;
     }
@@ -218,8 +216,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     // Create space for circular buffers
     s->xq = malloc(n->nch*sizeof(void*));
-    for(i=0;i<n->nch;i++)
-      s->xq[i] = malloc(2*L*af->data->bps);
+    s->xq[0] = malloc(n->nch*2*L*af->data->bps);
+    for(i=1;i<n->nch;i++)
+      s->xq[i] = (uint8_t *)s->xq[i-1] + 2*L*af->data->bps;
     s->xi = 0;
 
     // Check if the design needs to be redone
