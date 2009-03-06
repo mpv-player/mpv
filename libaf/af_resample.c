@@ -305,6 +305,13 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 // Deallocate memory 
 static void uninit(struct af_instance_s* af)
 {
+  af_resample_t *s = af->setup;
+  if (s) {
+    if (s->xq) free(s->xq[0]);
+    free(s->xq);
+    free(s->w);
+    free(s);
+  }
   if(af->data)
     free(af->data->audio);
   free(af->data);
