@@ -660,7 +660,7 @@ static void generate_eosd(mp_eosd_images_t *imgs) {
 
     // Nothing changed, no need to redraw
     if (imgs->changed == 0)
-        goto eosd_draw_only;
+        return;
     eosd_render_count = 0;
     // There's nothing to render!
     if (!img)
@@ -739,8 +739,6 @@ eosd_skip_upload:
         eosd_targets[eosd_render_count].source.y1 = i->h;
         eosd_render_count++;
     }
-eosd_draw_only:
-    draw_eosd();
 }
 
 static void draw_osd(void)
