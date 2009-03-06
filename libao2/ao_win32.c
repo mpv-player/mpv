@@ -87,7 +87,6 @@ static const int channel_mask[] = {
 static WAVEHDR*     waveBlocks;         //pointer to our ringbuffer memory
 static HWAVEOUT     hWaveOut;           //handle to the waveout device
 static unsigned int buf_write=0;
-static unsigned int buf_write_pos=0;
 static volatile int full_buffers=0;
 static volatile int buffered_bytes=0;
 
@@ -240,7 +239,6 @@ static int init(int rate,int channels,int format,int flags)
         buffer += BUFFER_SIZE;
     }
     buf_write=0;
-    buf_write_pos=0;
     full_buffers=0;
     buffered_bytes=0;
 
@@ -265,7 +263,6 @@ static void reset(void)
 {
    	waveOutReset(hWaveOut);
 	buf_write=0;
-    buf_write_pos=0;
 	full_buffers=0;
 	buffered_bytes=0;
 }
@@ -301,7 +298,7 @@ static int write_waveOutBuffer(unsigned char* data,int len){
            waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 	x=BUFFER_SIZE;          
     if(x>len) x=len;                   
-    fast_memcpy(current->lpData+buf_write_pos,data+len2,x); 
+    fast_memcpy(current->lpData,data+len2,x); 
     full_buffers++;
     len2+=x; len-=x;                 
 	buffered_bytes+=x;
