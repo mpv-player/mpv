@@ -146,7 +146,6 @@ static int control(int cmd,void *arg)
 static int init(int rate,int channels,int format,int flags)
 {
 	WAVEFORMATEXTENSIBLE wformat;      
-	DWORD totalBufferSize = (BUFFER_SIZE + sizeof(WAVEHDR)) * BUFFER_COUNT;
 	MMRESULT result;
 	unsigned char* buffer;
 	int i;
@@ -231,8 +230,7 @@ static int init(int rate,int channels,int format,int flags)
 		return 0;
     }
 	//allocate buffer memory as one big block
-	buffer = malloc(totalBufferSize);
-	memset(buffer,0x0,totalBufferSize);
+	buffer = calloc(BUFFER_COUNT, BUFFER_SIZE + sizeof(WAVEHDR));
     //and setup pointers to each buffer 
     waveBlocks = (WAVEHDR*)buffer;
     buffer += sizeof(WAVEHDR) * BUFFER_COUNT;
