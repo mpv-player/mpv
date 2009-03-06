@@ -44,6 +44,7 @@
 #define MAX_GLYPHS 3000
 #define MAX_LINES 300
 #define BLUR_MAX_RADIUS 50.0
+#define MAX_BE 100
 #define ROUND(x) ((int) ((x) + .5))
 #define SUBPIXEL_MASK 56	// d6 bitmask for subpixel accuracy adjustment
 
@@ -1158,9 +1159,9 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "be")) {
 		int val;
 		if (mystrtoi(&p, &val)) {
-			// Clamp to 10, since high values need excessive CPU
+			// Clamp to a safe upper limit, since high values need excessive CPU
 			val = (val < 0) ? 0 : val;
-			val = (val > 10) ? 10 : val;
+			val = (val > MAX_BE) ? MAX_BE : val;
 			render_context.be = val;
 		} else
 			render_context.be = 0;
