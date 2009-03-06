@@ -45,6 +45,7 @@
 #define MAX_LINES 300
 #define BLUR_MAX_RADIUS 50.0
 #define ROUND(x) ((int) ((x) + .5))
+#define SUBPIXEL_MASK 56	// d6 bitmask for subpixel accuracy adjustment
 
 static int last_render_id = 0;
 
@@ -1964,12 +1965,12 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			pen.y += delta.y * render_context.scale_y;
 		}
 
-		shift.x = pen.x & 56;
-		shift.y = pen.y & 56;
+		shift.x = pen.x & SUBPIXEL_MASK;
+		shift.y = pen.y & SUBPIXEL_MASK;
 
 		if (render_context.evt_type == EVENT_POSITIONED) {
-			shift.x += double_to_d6(x2scr_pos(render_context.pos_x)) & 56;
-			shift.y -= double_to_d6(y2scr_pos(render_context.pos_y)) & 56;
+			shift.x += double_to_d6(x2scr_pos(render_context.pos_x)) & SUBPIXEL_MASK;
+			shift.y -= double_to_d6(y2scr_pos(render_context.pos_y)) & SUBPIXEL_MASK;
 		}
 
 		ass_font_set_transform(render_context.font,
