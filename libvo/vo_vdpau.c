@@ -742,7 +742,6 @@ static void draw_osd(void)
 {
     mp_msg(MSGT_VO, MSGL_DBG2, "DRAW_OSD\n");
 
-    draw_eosd();
     vo_draw_text_ext(vo_dwidth, vo_dheight, border_x, border_y, border_x, border_y,
                      vid_width, vid_height, draw_osd_I8A8);
 }
@@ -1140,6 +1139,7 @@ static int control(uint32_t request, void *data, ...)
             if (!data)
                 return VO_FALSE;
             generate_eosd(data);
+            draw_eosd();
             return VO_TRUE;
         case VOCTRL_GET_EOSD_RES: {
             mp_eosd_res_t *r = data;
