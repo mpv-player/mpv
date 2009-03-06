@@ -119,7 +119,7 @@ static const char* nas_state(unsigned int state) {
 	return nas_states[state];
 }
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
 	"NAS audio output",
 	"nas",

@@ -39,7 +39,7 @@
 #include "libvo/fastmemcpy.h"
 #include "subopt-helper.h"
 
-static ao_info_t info = {
+static const ao_info_t info = {
     "DART audio output",
     "dart",
     "KO Myung-Hun <komh@chollian.net>",

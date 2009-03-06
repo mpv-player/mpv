@@ -57,7 +57,7 @@
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
     "ALSA-0.9.x-1.x audio output",
     "alsa",

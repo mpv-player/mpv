@@ -63,7 +63,7 @@ int vo_mpegpes_fd2 = -1;
 
 #include <errno.h>
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
 #ifdef CONFIG_DVB
 	"DVB audio output",

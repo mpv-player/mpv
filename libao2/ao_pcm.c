@@ -35,7 +35,7 @@
 #include "help_mp.h"
 
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
 	"RAW PCM/WAVE file writer audio output",
 	"pcm",

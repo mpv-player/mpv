@@ -41,7 +41,7 @@
 
 static int freq = 0;
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
   "IVTV MPEG Audio Decoder output",
   "ivtv",

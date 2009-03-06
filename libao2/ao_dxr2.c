@@ -36,7 +36,7 @@
 #include "libmpdemux/mpeg_packetizer.h"
 
 
-static ao_info_t info =
+static const ao_info_t info =
 {
 	"DXR2 audio output",
 	"dxr2",

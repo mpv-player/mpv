@@ -33,7 +33,7 @@
 #define PULSE_CLIENT_NAME "MPlayer"
 
 /** General driver info */
-static ao_info_t info = {
+static const ao_info_t info = {
     "PulseAudio audio output",
     "pulse",
     "Lennart Poettering",

@@ -90,7 +90,7 @@ static unsigned int buf_write=0;
 static volatile int buf_read=0;
 
 
-static ao_info_t info =
+static const ao_info_t info =
 {
 	"Windows waveOut audio output",
 	"win32",

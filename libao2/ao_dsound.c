@@ -42,7 +42,7 @@
 #include "subopt-helper.h"
 
 
-static ao_info_t info =
+static const ao_info_t info =
 {
 	"Windows DirectSound audio output",
 	"dsound",

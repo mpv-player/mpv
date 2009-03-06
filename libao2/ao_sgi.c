@@ -32,7 +32,7 @@
 #include "help_mp.h"
 #include "libaf/af_format.h"
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
 	"sgi audio output",
 	"sgi",

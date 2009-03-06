@@ -38,7 +38,7 @@
 
 #include "libvo/fastmemcpy.h"
 
-static ao_info_t info = 
+static const ao_info_t info = 
 {
 	"SDLlib audio output",
 	"sdl",
