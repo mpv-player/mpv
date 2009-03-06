@@ -76,6 +76,13 @@ static GLuint osdtex[MAX_OSD_PARTS];
 static GLuint osdatex[MAX_OSD_PARTS];
 #endif
 static GLuint *eosdtex;
+#define LARGE_EOSD_TEX_SIZE 512
+#define TINYTEX_SIZE 16
+#define TINYTEX_COLS (LARGE_EOSD_TEX_SIZE/TINYTEX_SIZE)
+#define TINYTEX_MAX (TINYTEX_COLS*TINYTEX_COLS)
+#define SMALLTEX_SIZE 32
+#define SMALLTEX_COLS (LARGE_EOSD_TEX_SIZE/SMALLTEX_SIZE)
+#define SMALLTEX_MAX (SMALLTEX_COLS*SMALLTEX_COLS)
 static GLuint largeeosdtex[2];
 //! Display lists that draw the OSD parts
 static GLuint osdDispList[MAX_OSD_PARTS];
@@ -286,6 +293,24 @@ static void clearEOSD(void) {
 
 static void do_render_osd(int);
 
+static inline int is_tinytex(ass_image_t *i, int tinytexcur) {
+  return i->w < TINYTEX_SIZE && i->h < TINYTEX_SIZE && tinytexcur < TINYTEX_MAX;
+}
+
+static inline int is_smalltex(ass_image_t *i, int smalltexcur) {
+  return i->w < SMALLTEX_SIZE && i->h < SMALLTEX_SIZE && smalltexcur < SMALLTEX_MAX;
+}
+
+static inline void tinytex_pos(int tinytexcur, int *x, int *y) {
+  *x = (tinytexcur % TINYTEX_COLS) * TINYTEX_SIZE;
+  *y = (tinytexcur / TINYTEX_COLS) * TINYTEX_SIZE;
+}
+
+static inline void smalltex_pos(int smalltexcur, int *x, int *y) {
+  *x = (smalltexcur % SMALLTEX_COLS) * SMALLTEX_SIZE;
+  *y = (smalltexcur / SMALLTEX_COLS) * SMALLTEX_SIZE;
+}
+
 /**
  * \brief construct display list from ass image list
  * \param img image list to create OSD from.
@@ -311,17 +336,17 @@ static void genEOSD(mp_eosd_images_t *imgs) {
   if (!largeeosdtex[0]) {
     glGenTextures(2, largeeosdtex);
     BindTexture(gl_target, largeeosdtex[0]);
-    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, 512, 512, 0);
+    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, LARGE_EOSD_TEX_SIZE, LARGE_EOSD_TEX_SIZE, 0);
     BindTexture(gl_target, largeeosdtex[1]);
-    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, 512, 512, 0);
+    glCreateClearTex(gl_target, GL_ALPHA, GL_ALPHA, GL_UNSIGNED_BYTE, scale_type, LARGE_EOSD_TEX_SIZE, LARGE_EOSD_TEX_SIZE, 0);
   }
   for (i = img; i; i = i->next)
   {
     if (i->w <= 0 || i->h <= 0 || i->stride < i->w)
       continue;
-    if (i->w < 16 && i->h < 16 && tinytexcur < 1024)
+    if (is_tinytex(i, tinytexcur))
       tinytexcur++;
-    else if (i->w < 32 && i->h < 32 && smalltexcur < 256)
+    else if (is_smalltex(i, smalltexcur))
       smalltexcur++;
     else
       eosdtexCnt++;
@@ -339,14 +364,12 @@ static void genEOSD(mp_eosd_images_t *imgs) {
       mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
       continue;
     }
-    if (i->w < 16 && i->h < 16 && tinytexcur < 1024) {
-      x = (tinytexcur & 31) << 4;
-      y = (tinytexcur >> 5) << 4;
+    if (is_tinytex(i, tinytexcur)) {
+      tinytex_pos(tinytexcur, &x, &y);
       BindTexture(gl_target, largeeosdtex[0]);
       tinytexcur++;
-    } else if (i->w < 32 && i->h < 32 && smalltexcur < 256) {
-      x = (smalltexcur & 15) << 5;
-      y = (smalltexcur >> 4) << 5;
+    } else if (is_smalltex(i, smalltexcur)) {
+      smalltex_pos(smalltexcur, &x, &y);
       BindTexture(gl_target, largeeosdtex[1]);
       smalltexcur++;
     } else {
@@ -366,16 +389,14 @@ skip_upload:
     if (i->w <= 0 || i->h <= 0 || i->stride < i->w)
       continue;
     glColor4ub(i->color >> 24, (i->color >> 16) & 0xff, (i->color >> 8) & 0xff, 255 - (i->color & 0xff));
-    if (i->w < 16 && i->h < 16 && tinytexcur < 1024) {
-      x = (tinytexcur & 31) << 4;
-      y = (tinytexcur >> 5) << 4;
-      sx = sy = 512;
+    if (is_tinytex(i, tinytexcur)) {
+      tinytex_pos(tinytexcur, &x, &y);
+      sx = sy = LARGE_EOSD_TEX_SIZE;
       BindTexture(gl_target, largeeosdtex[0]);
       tinytexcur++;
-    } else if (i->w < 32 && i->h < 32 && smalltexcur < 256) {
-      x = (smalltexcur & 15) << 5;
-      y = (smalltexcur >> 4) << 5;
-      sx = sy = 512;
+    } else if (is_smalltex(i, smalltexcur)) {
+      smalltex_pos(smalltexcur, &x, &y);
+      sx = sy = LARGE_EOSD_TEX_SIZE;
       BindTexture(gl_target, largeeosdtex[1]);
       smalltexcur++;
     } else {
