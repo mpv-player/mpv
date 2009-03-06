@@ -415,10 +415,13 @@ int filter_video(sh_video_t *sh_video, void *frame, double pts)
     // apply video filters and call the leaf vo/ve
     int ret = vf->put_image(vf, mpi, pts);
     if (ret > 0) {
-	vf->control(vf, VFCTRL_DRAW_OSD, NULL);
+	// draw EOSD first so it ends up below the OSD.
+	// Note that changing this is will not work right with vf_ass and the
+	// vos currently always draw the EOSD first in paused mode.
 #ifdef CONFIG_ASS
 	vf->control(vf, VFCTRL_DRAW_EOSD, NULL);
 #endif
+	vf->control(vf, VFCTRL_DRAW_OSD, NULL);
     }
 
     t2 = GetTimer()-t2;
