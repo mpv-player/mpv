@@ -33,7 +33,7 @@
    Valid definitions are L8 and L16, where the number denotes the
    length of the filter. This definition affects the computational
    complexity (see play()), the performance (see filter.h) and the
-   memory usage. The filterlength is choosen to 8 if the machine is
+   memory usage. The filter length is chosen to 8 if the machine is
    slow and to 16 if the machine is fast and has MMX.  
 */
 
@@ -175,11 +175,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   switch(cmd){
   case AF_CONTROL_REINIT:{
     af_resample_t* s   = (af_resample_t*)af->setup; 
-    af_data_t* 	   n   = (af_data_t*)arg; // New configureation
+    af_data_t* 	   n   = (af_data_t*)arg; // New configuration
     int            i,d = 0;
     int 	   rv  = AF_OK;
 
-    // Free space for circular bufers
+    // Free space for circular buffers
     if(s->xq){
       for(i=1;i<af->data->nch;i++)
 	if(s->xq[i])
@@ -216,13 +216,13 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       d*=m;
     }
 
-    // Create space for circular bufers
+    // Create space for circular buffers
     s->xq = malloc(n->nch*sizeof(void*));
     for(i=0;i<n->nch;i++)
       s->xq[i] = malloc(2*L*af->data->bps);
     s->xi = 0;
 
-    // Check if the the design needs to be redone
+    // Check if the design needs to be redone
     if(s->up != af->data->rate/d || s->dn != n->rate/d){
       float* w;
       float* wt;
@@ -233,9 +233,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       s->wi = 0;
       s->i = 0;
       
-      // Calculate cuttof frequency for filter
+      // Calculate cutoff frequency for filter
       fc = 1/(float)(max(s->up,s->dn));
-      // Allocate space for polyphase filter bank and protptype filter
+      // Allocate space for polyphase filter bank and prototype filter
       w = malloc(sizeof(float) * s->up *L);
       if(NULL != s->w)
 	free(s->w);
