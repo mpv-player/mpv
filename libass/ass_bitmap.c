@@ -255,11 +255,38 @@ static bitmap_t* fix_outline_and_shadow(bitmap_t* bm_g, bitmap_t* bm_o)
 	return bm_s;
 }
 
-int glyph_to_bitmap(ass_synth_priv_t* priv, ass_synth_priv_t* priv_blur,
+/**
+ * \brief Blur with [[1,2,1]. [2,4,2], [1,2,1]] kernel
+ * This blur is the same as the one employed by vsfilter.
+ */
+static void be_blur(unsigned char *buf, int w, int h) {
+	unsigned int x, y;
+	unsigned int old_sum, new_sum;
+
+	for (y=0; y<h; y++) {
+		old_sum = 2 * buf[0];
+		for (x=0; x<w-1; x++) {
+			new_sum = buf[y*w+x] + buf[y*w+x+1];
+			buf[y*w+x] = (old_sum + new_sum) >> 2;
+			old_sum = new_sum;
+		}
+	}
+
+	for (x=0; x<w; x++) {
+		old_sum = 2 * buf[0];
+		for (y=0; y<h-1; y++) {
+			new_sum = buf[y*w+x] + buf[(y+1)*w+x];
+			buf[y*w+x] = (old_sum + new_sum) >> 2;
+			old_sum = new_sum;
+		}
+	}
+}
+
+int glyph_to_bitmap(ass_synth_priv_t* priv_blur,
 		FT_Glyph glyph, FT_Glyph outline_glyph, bitmap_t** bm_g,
 		bitmap_t** bm_o, bitmap_t** bm_s, int be, double blur_radius)
 {
-	int bord = be ? (be+1) : 0;
+	int bord = be ? (be/4+1) : 0;
 	blur_radius *= 2;
 	bord = (blur_radius > 0.0) ? blur_radius : bord;
 
@@ -279,19 +306,16 @@ int glyph_to_bitmap(ass_synth_priv_t* priv, ass_synth_priv_t* priv_blur,
 			return 1;
 		}
 	}
-	if (*bm_o) {
-		resize_tmp(priv, (*bm_o)->w, (*bm_o)->h);
+	if (*bm_o)
 		resize_tmp(priv_blur, (*bm_o)->w, (*bm_o)->h);
-	}
-	resize_tmp(priv, (*bm_g)->w, (*bm_g)->h);
 	resize_tmp(priv_blur, (*bm_g)->w, (*bm_g)->h);
 	
 	if (be) {
 		while (be--) {
 			if (*bm_o)
-				blur((*bm_o)->buffer, priv->tmp, (*bm_o)->w, (*bm_o)->h, (*bm_o)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
+				be_blur((*bm_o)->buffer, (*bm_o)->w, (*bm_o)->h);
 			else
-				blur((*bm_g)->buffer, priv->tmp, (*bm_g)->w, (*bm_g)->h, (*bm_g)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
+				be_blur((*bm_g)->buffer, (*bm_g)->w, (*bm_g)->h);
 		}
 	} else {
 		if (blur_radius > 0.0) {

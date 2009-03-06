@@ -43,7 +43,6 @@
 
 #define MAX_GLYPHS 3000
 #define MAX_LINES 300
-#define BE_RADIUS 1.5
 #define BLUR_MAX_RADIUS 50.0
 #define ROUND(x) ((int) ((x) + .5))
 
@@ -83,7 +82,6 @@ struct ass_renderer_s {
 	ass_settings_t settings;
 	int render_id;
 	ass_synth_priv_t* synth_priv;
-	ass_synth_priv_t* synth_priv_blur;
 
 	ass_image_t* images_root; // rendering result is stored here
 	ass_image_t* prev_images_root;
@@ -270,8 +268,7 @@ ass_renderer_t* ass_renderer_init(ass_library_t* library)
 		goto ass_init_exit;
 	}
 
-	priv->synth_priv = ass_synth_init(BE_RADIUS);
-	priv->synth_priv_blur = ass_synth_init(BLUR_MAX_RADIUS);
+	priv->synth_priv = ass_synth_init(BLUR_MAX_RADIUS);
 
 	priv->library = library;
 	priv->ftlibrary = ft;
@@ -1503,7 +1500,6 @@ static void get_bitmap_glyph(glyph_info_t* info)
 
 			// render glyph
 			error = glyph_to_bitmap(ass_renderer->synth_priv,
-					ass_renderer->synth_priv_blur,
 					info->glyph, info->outline_glyph,
 					&info->bm, &info->bm_o,
 					&info->bm_s, info->be, info->blur * frame_context.border_scale);
