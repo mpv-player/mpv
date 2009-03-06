@@ -6,7 +6,8 @@
  
 +#include "cpudetect.h"
 +
- #if defined(ARCH_X86) || defined(ARCH_X86_64)
+-#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
  static inline uint32_t arch_accel (uint32_t accel)
  {
 +/* Use MPlayer CPU detection instead of libmpeg2 variant. */
@@ -36,6 +37,95 @@
  }
  #endif /* ARCH_X86 || ARCH_X86_64 */
  
+@@ -127,7 +150,7 @@
+ }
+ #endif /* ARCH_X86 || ARCH_X86_64 */
+ 
+-#if defined(ACCEL_DETECT) && (defined(ARCH_PPC) || defined(ARCH_SPARC))
++#if defined(ACCEL_DETECT) && (ARCH_PPC || ARCH_SPARC)
+ #include <signal.h>
+ #include <setjmp.h>
+ 
+@@ -146,7 +169,7 @@
+ }
+ #endif /* ACCEL_DETECT && (ARCH_PPC || ARCH_SPARC) */
+ 
+-#ifdef ARCH_PPC
++#if ARCH_PPC
+ static uint32_t arch_accel (uint32_t accel)
+ {
+ #ifdef ACCEL_DETECT
+@@ -183,7 +206,7 @@
+ }
+ #endif /* ARCH_PPC */
+ 
+-#ifdef ARCH_SPARC
++#if ARCH_SPARC
+ static uint32_t arch_accel (uint32_t accel)
+ {
+     if (accel & MPEG2_ACCEL_SPARC_VIS2)
+@@ -229,7 +252,7 @@
+ }
+ #endif /* ARCH_SPARC */
+ 
+-#ifdef ARCH_ALPHA
++#if ARCH_ALPHA
+ static inline uint32_t arch_accel (uint32_t accel)
+ {
+     if (accel & MPEG2_ACCEL_ALPHA_MVI)
+@@ -253,7 +276,7 @@
+ 
+ uint32_t mpeg2_detect_accel (uint32_t accel)
+ {
+-#if defined (ARCH_X86) || defined (ARCH_X86_64) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
++#if ARCH_X86 || ARCH_X86_64 || ARCH_PPC || ARCH_ALPHA || ARCH_SPARC
+     accel = arch_accel (accel);
+ #endif
+     return accel;
+Index: libmpeg2/cpu_state.c
+===================================================================
+--- libmpeg2/cpu_state.c	(revision 28324)
++++ libmpeg2/cpu_state.c	(revision 28325)
+@@ -29,21 +29,21 @@
+ #include "mpeg2.h"
+ #include "attributes.h"
+ #include "mpeg2_internal.h"
+-#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
+ #include "mmx.h"
+ #endif
+ 
+ void (* mpeg2_cpu_state_save) (cpu_state_t * state) = NULL;
+ void (* mpeg2_cpu_state_restore) (cpu_state_t * state) = NULL;
+ 
+-#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
+ static void state_restore_mmx (cpu_state_t * state)
+ {
+     emms ();
+ }
+ #endif
+ 
+-#ifdef ARCH_PPC
++#if ARCH_PPC
+ #if defined(__APPLE_CC__)	/* apple */
+ #define LI(a,b) "li r" #a "," #b "\n\t"
+ #define STVX0(a,b,c) "stvx v" #a ",0,r" #c "\n\t"
+@@ -115,12 +115,12 @@
+ 
+ void mpeg2_cpu_state_init (uint32_t accel)
+ {
+-#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
+     if (accel & MPEG2_ACCEL_X86_MMX) {
+ 	mpeg2_cpu_state_restore = state_restore_mmx;
+     }
+ #endif
+-#ifdef ARCH_PPC
++#if ARCH_PPC
+     if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
+ 	mpeg2_cpu_state_save = state_save_altivec;
+ 	mpeg2_cpu_state_restore = state_restore_altivec;
 --- libmpeg2/decode.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/decode.c	2006-06-16 20:12:50.000000000 +0200
 @@ -345,6 +349,15 @@
@@ -81,7 +171,7 @@
  void mpeg2_idct_init (uint32_t accel)
  {
 -#ifdef ARCH_X86
-+#ifdef HAVE_SSE2
++#if HAVE_SSE2
      if (accel & MPEG2_ACCEL_X86_SSE2) {
  	mpeg2_idct_copy = mpeg2_idct_copy_sse2;
  	mpeg2_idct_add = mpeg2_idct_add_sse2;
@@ -103,7 +193,7 @@
      } else
  #endif
 -#ifdef ARCH_PPC
-+#ifdef HAVE_ALTIVEC
++#if HAVE_ALTIVEC
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
  	mpeg2_idct_copy = mpeg2_idct_copy_altivec;
  	mpeg2_idct_add = mpeg2_idct_add_altivec;
@@ -111,7 +201,7 @@
      } else
  #endif
 -#ifdef ARCH_ALPHA
-+#ifdef HAVE_MVI
++#if HAVE_MVI
      if (accel & MPEG2_ACCEL_ALPHA_MVI) {
  	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
  	mpeg2_idct_add = mpeg2_idct_add_mvi;
@@ -123,46 +213,89 @@
  	int i;
  
  	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
+Index: libmpeg2/idct_alpha.c
+===================================================================
+--- libmpeg2/idct_alpha.c	(revision 28324)
++++ libmpeg2/idct_alpha.c	(revision 28325)
+@@ -24,7 +24,7 @@
+ 
+ #include "config.h"
+ 
+-#ifdef ARCH_ALPHA
++#if ARCH_ALPHA
+ 
+ #include <stdlib.h>
+ #include <inttypes.h>
+Index: libmpeg2/idct_altivec.c
+===================================================================
+--- libmpeg2/idct_altivec.c	(revision 28324)
++++ libmpeg2/idct_altivec.c	(revision 28325)
+@@ -23,7 +23,7 @@
+ 
+ #include "config.h"
+ 
+-#ifdef ARCH_PPC
++#if ARCH_PPC
+ 
+ #ifdef HAVE_ALTIVEC_H
+ #include <altivec.h>
+Index: libmpeg2/idct_mmx.c
+===================================================================
+--- libmpeg2/idct_mmx.c	(revision 28324)
++++ libmpeg2/idct_mmx.c	(revision 28325)
+@@ -23,7 +23,7 @@
+ 
+ #include "config.h"
+ 
+-#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
+ 
+ #include <inttypes.h>
+ 
 --- libmpeg2/motion_comp.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/motion_comp.c	2006-06-16 20:12:50.000000000 +0200
-@@ -33,16 +37,22 @@
+@@ -33,34 +37,40 @@
  
  void mpeg2_mc_init (uint32_t accel)
  {
 -#ifdef ARCH_X86
-+#ifdef HAVE_MMX2
++#if HAVE_MMX2
      if (accel & MPEG2_ACCEL_X86_MMXEXT)
  	mpeg2_mc = mpeg2_mc_mmxext;
 -    else if (accel & MPEG2_ACCEL_X86_3DNOW)
 +    else
 +#endif
-+#ifdef HAVE_AMD3DNOW
++#if HAVE_AMD3DNOW
 +    if (accel & MPEG2_ACCEL_X86_3DNOW)
  	mpeg2_mc = mpeg2_mc_3dnow;
 -    else if (accel & MPEG2_ACCEL_X86_MMX)
 +    else
 +#endif
-+#ifdef HAVE_MMX
++#if HAVE_MMX
 +    if (accel & MPEG2_ACCEL_X86_MMX)
  	mpeg2_mc = mpeg2_mc_mmx;
      else
  #endif
 -#ifdef ARCH_PPC
-+#ifdef HAVE_ALTIVEC
++#if HAVE_ALTIVEC
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
  	mpeg2_mc = mpeg2_mc_altivec;
      else
-@@ -52,15 +62,15 @@
+ #endif
+-#ifdef ARCH_ALPHA
++#if ARCH_ALPHA
+     if (accel & MPEG2_ACCEL_ALPHA)
  	mpeg2_mc = mpeg2_mc_alpha;
      else
  #endif
 -#ifdef ARCH_SPARC
-+#ifdef HAVE_VIS
++#if HAVE_VIS
      if (accel & MPEG2_ACCEL_SPARC_VIS)
  	mpeg2_mc = mpeg2_mc_vis;
      else
  #endif
- #ifdef ARCH_ARM
+-#ifdef ARCH_ARM
++#if ARCH_ARM
 -    if (accel & MPEG2_ACCEL_ARM) {
 +    if (accel & MPEG2_ACCEL_ARM)
  	mpeg2_mc = mpeg2_mc_arm;
@@ -171,6 +304,71 @@
  #endif
  	mpeg2_mc = mpeg2_mc_c;
  }
+Index: libmpeg2/motion_comp_alpha.c
+===================================================================
+--- libmpeg2/motion_comp_alpha.c	(revision 28324)
++++ libmpeg2/motion_comp_alpha.c	(revision 28325)
+@@ -22,7 +22,7 @@
+ 
+ #include "config.h"
+ 
+-#ifdef ARCH_ALPHA
++#if ARCH_ALPHA
+ 
+ #include <inttypes.h>
+ 
+Index: libmpeg2/motion_comp_altivec.c
+===================================================================
+--- libmpeg2/motion_comp_altivec.c	(revision 28324)
++++ libmpeg2/motion_comp_altivec.c	(revision 28325)
+@@ -23,7 +23,7 @@
+ 
+ #include "config.h"
+ 
+-#ifdef ARCH_PPC
++#if ARCH_PPC
+ 
+ #ifdef HAVE_ALTIVEC_H
+ #include <altivec.h>
+Index: libmpeg2/motion_comp_arm.c
+===================================================================
+--- libmpeg2/motion_comp_arm.c	(revision 28324)
++++ libmpeg2/motion_comp_arm.c	(revision 28325)
+@@ -22,7 +22,7 @@
+ 
+ #include "config.h"
+ 
+-#ifdef ARCH_ARM
++#if ARCH_ARM
+ 
+ #include <inttypes.h>
+ 
+Index: libmpeg2/motion_comp_mmx.c
+===================================================================
+--- libmpeg2/motion_comp_mmx.c	(revision 28324)
++++ libmpeg2/motion_comp_mmx.c	(revision 28325)
+@@ -23,7 +23,7 @@
+ 
+ #include "config.h"
+ 
+-#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#if ARCH_X86 || ARCH_X86_64
+ 
+ #include <inttypes.h>
+ 
+Index: libmpeg2/motion_comp_vis.c
+===================================================================
+--- libmpeg2/motion_comp_vis.c	(revision 28324)
++++ libmpeg2/motion_comp_vis.c	(revision 28325)
+@@ -22,7 +22,7 @@
+ 
+ #include "config.h"
+ 
+-#ifdef ARCH_SPARC
++#if ARCH_SPARC
+ 
+ #include <inttypes.h>
+ 
 --- libmpeg2/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2_internal.h	2006-06-16 20:12:50.000000000 +0200
 @@ -152,6 +156,11 @@
@@ -195,6 +393,15 @@
  };
  
  typedef struct {
+@@ -226,7 +238,7 @@
+ };
+ 
+ typedef struct {
+-#ifdef ARCH_PPC
++#if ARCH_PPC
+     uint8_t regv[12*16];
+ #endif
+     int dummy;
 --- libmpeg2/slice.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/slice.c	2006-06-16 20:12:50.000000000 +0200
 @@ -142,6 +146,7 @@
