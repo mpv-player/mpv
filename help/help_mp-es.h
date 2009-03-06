@@ -17,7 +17,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Uso:   mplayer [opciones] [url o ruta del archivo]\n"
 "\n"
 "Opciones básicas: ('man mplayer' para una lista completa)\n"

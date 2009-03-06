@@ -6,7 +6,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Употреба:   mplayer [опции] [url|път/]име_на_файл\n"
 "\n"
 "Основни опции:   (пълният списък е в ръководството - 'man mplayer')\n"

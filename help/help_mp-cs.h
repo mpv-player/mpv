@@ -7,7 +7,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Použití:          mplayer [volby] [url|cesta/]jméno_souboru\n"
 "\n"
 "Základní volby: (úplný seznam najdete v manuálové stránce)\n"

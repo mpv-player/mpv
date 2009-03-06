@@ -3,7 +3,7 @@
 //synced with help_mp-en.h revision 1.152
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Gebruik:   mplayer [opties] [url|pad/]bestandsnaam\n"
 "\n"
 "Basis-opties: (volledige lijst in de man-pagina's)\n"

@@ -9,7 +9,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Indítás:   mplayer [opciók] [url|útvonal/]fájlnév\n"
 "\n"
 "Alapvető opciók: (az összes opció listájához lásd a man lapot)\n"

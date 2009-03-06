@@ -4,7 +4,7 @@
 // ========================= MPlayer hjälp ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Användning:   mplayer [argument] [url|sökväg/]filnamn\n"
 "\n"
 "Grundläggande argument: (komplett lista återfinns i `man mplayer`)\n"

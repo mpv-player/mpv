@@ -7,7 +7,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Benyt:   mplayer [indstillinger] [URL|sti/]filnavn\n"
 "\n"
 "Basale indstillinger (se manualen for en komplet liste):\n"

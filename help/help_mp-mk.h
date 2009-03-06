@@ -5,7 +5,7 @@
 // ========================= MPlayer Помош ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Употреба: mplayer [опции] [url|патека/]ИмеНаДатотеката\n"
 "\n"
 "Основни Опции: (комплетна листа на man страницата)\n"

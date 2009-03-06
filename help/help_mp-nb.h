@@ -4,7 +4,7 @@
 // ========================= MPlayer hjelp ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char help_text[]=
+static const char help_text[]=
 "Bruk:    mplayer [valg] [sti/]filnavn\n"
 "\n"
 "Valg:\n"

@@ -7,7 +7,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 // Preklad do slovenčiny 
 
-static char help_text[]=
+static const char help_text[]=
 "Použitie:   mplayer [prepínače] [url|cesta/]menosúboru\n"
 "\n"
 "Základné prepínače: (Kompletný zoznam nájdete v man stránke)\n"
