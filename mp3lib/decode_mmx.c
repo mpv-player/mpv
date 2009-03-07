@@ -12,9 +12,9 @@
 #define real float /* ugly - but only way */
 
 extern void (*dct64_MMX_func)(short*, short*, real*);
-static unsigned long long attribute_used __attribute__((aligned(8))) null_one = 0x0000ffff0000ffffULL;
-static unsigned long long attribute_used __attribute__((aligned(8))) one_null = 0xffff0000ffff0000ULL;
-unsigned int __attribute__((aligned(16))) costab_mmx[] =
+static const unsigned long long attribute_used __attribute__((aligned(8))) null_one = 0x0000ffff0000ffffULL;
+static const unsigned long long attribute_used __attribute__((aligned(8))) one_null = 0xffff0000ffff0000ULL;
+const unsigned int __attribute__((aligned(16))) costab_mmx[] =
 {
 	1056974725,
 	1057056395,
@@ -54,7 +54,7 @@ unsigned int __attribute__((aligned(16))) costab_mmx[] =
   make_decode_tables_MMX(32768), which had been implemented in (deleted since
   r23383) tabinit_MMX.c.
   */
-static short __attribute__((aligned(8))) mp3lib_decwins[] =
+static const short __attribute__((aligned(8))) mp3lib_decwins[] =
 {
 	     0,	     7,	    54,	   114,	   510,	  1288,	  1644,	  9372,
 	 18760,	 -9373,	  1644,	 -1289,	   510,	  -115,	    54,	    -8,
@@ -191,7 +191,7 @@ int synth_1to1_MMX(real *bandPtr, int channel, short *samples)
     static short buffs[2][2][0x110] __attribute__((aligned(8)));
     static int bo = 1;
     short *b0, (*buf)[0x110], *a, *b;
-    short* window;
+    const short* window;
     int bo1, i = 8;
 
     if (channel == 0) {

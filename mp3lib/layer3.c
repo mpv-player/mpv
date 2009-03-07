@@ -53,7 +53,7 @@ struct bandInfoStruct {
 static int longLimit[9][23];
 static int shortLimit[9][14];
 
-static struct bandInfoStruct bandInfo[9] = { 
+static const struct bandInfoStruct bandInfo[9] = { 
 
 /* MPEG 1.0 */
  { {0,4,8,12,16,20,24,30,36,44,52,62,74, 90,110,134,162,196,238,288,342,418,576},
@@ -132,7 +132,7 @@ static void init_layer3(int down_sample_sblimit)
 
   for (i=0;i<8;i++)
   {
-    static double Ci[8]={-0.6,-0.535,-0.33,-0.185,-0.095,-0.041,-0.0142,-0.0037};
+    static const double Ci[8]={-0.6,-0.535,-0.33,-0.185,-0.095,-0.041,-0.0142,-0.0037};
     double sq=sqrt(1.0+Ci[i]*Ci[i]);
     aa_cs[i] = 1.0/sq;
     aa_ca[i] = Ci[i]/sq;
@@ -180,7 +180,7 @@ static void init_layer3(int down_sample_sblimit)
   }
 
   for(j=0;j<4;j++) {
-    static int len[4] = { 36,36,12,36 };
+    static const int len[4] = { 36,36,12,36 };
     for(i=0;i<len[j];i+=2)
       win1[j][i] = + win[j][i];
     for(i=1;i<len[j];i+=2)
@@ -213,10 +213,10 @@ static void init_layer3(int down_sample_sblimit)
 
   for(j=0;j<9;j++)
   {
-   struct bandInfoStruct *bi = &bandInfo[j];
+   const struct bandInfoStruct *bi = &bandInfo[j];
    int *mp;
    int cb,lwin;
-   int *bdf;
+   const int *bdf;
 
    mp = map[j][0] = mapbuf0[j];
    bdf = bi->longDiff;
@@ -984,7 +984,7 @@ static void III_i_stereo(real xr_buf[2][SBLIMIT][SSLIMIT],int *scalefac,
    struct gr_info_s *gr_info,int sfreq,int ms_stereo,int lsf)
 {
       real (*xr)[SBLIMIT*SSLIMIT] = (real (*)[SBLIMIT*SSLIMIT] ) xr_buf;
-      struct bandInfoStruct *bi = &bandInfo[sfreq];
+      const struct bandInfoStruct *bi = &bandInfo[sfreq];
 
       const real *tab1,*tab2;
 
