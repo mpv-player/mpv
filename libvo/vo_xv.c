@@ -611,7 +611,7 @@ static int preinit(const char *arg)
     strarg_t ck_method_arg = { 0, NULL };
     int xv_adaptor = -1;
 
-    opt_t subopts[] =
+    const opt_t subopts[] =
     {  
       /* name         arg type     arg var         test */
       {  "port",      OPT_ARG_INT, &xv_port,       (opt_test_f)int_pos },

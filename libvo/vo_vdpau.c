@@ -949,7 +949,7 @@ static void uninit(void)
     dlclose(vdpau_lib_handle);
 }
 
-static opt_t subopts[] = {
+static const opt_t subopts[] = {
     {"deint",   OPT_ARG_INT,   &deint,   (opt_test_f)int_non_neg},
     {"pullup",  OPT_ARG_BOOL,  &pullup,  NULL},
     {"denoise", OPT_ARG_FLOAT, &denoise, NULL},

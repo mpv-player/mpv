@@ -973,7 +973,7 @@ uninit(void)
   vo_uninit();
 }
 
-static opt_t subopts[] = {
+static const opt_t subopts[] = {
   {"manyfmts",     OPT_ARG_BOOL, &many_fmts,    NULL},
   {"osd",          OPT_ARG_BOOL, &use_osd,      NULL},
   {"scaled-osd",   OPT_ARG_BOOL, &scaled_osd,   NULL},

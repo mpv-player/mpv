@@ -578,19 +578,19 @@ static int parse_suboptions(const char *arg) {
     char *pseudoargv[4], *osdcolor = NULL, *subcolor = NULL, **strings,
          *helpmsg = NULL;
     int pseudoargc, displayhelp = 0, *booleans;
-    opt_t extra_opts[] = {
+    const opt_t extra_opts[] = {
             {"osdcolor", OPT_ARG_MSTRZ, &osdcolor,    NULL, 0},
             {"subcolor", OPT_ARG_MSTRZ, &subcolor,    NULL, 0},
             {"help",     OPT_ARG_BOOL,  &displayhelp, NULL, 0} };
     opt_t *subopts = NULL, *p;
-    char *strings_list[] = {"-driver", "-kbddriver", "-mousedriver", "-font",
+    char * const strings_list[] = {"-driver", "-kbddriver", "-mousedriver", "-font",
         "-width", "-height", "-minwidth", "-minheight", "-maxwidth",
         "-maxheight", "-recwidth", "-recheight", "-bright",  "-contrast",
         "-gamma",  "-dimmul", "-boldmul", "-random" };
-    char *booleans_list[] = {"-dim", "-bold", "-reverse", "-normal",
+    char * const booleans_list[] = {"-dim", "-bold", "-reverse", "-normal",
         "-boldfont", "-inverse", "-extended", "-eight", "-dither",
         "-floyd_steinberg", "-error_distribution"};
-    char *nobooleans_list[] = {"-nodim", "-nobold", "-noreverse", "-nonormal",
+    char * const nobooleans_list[] = {"-nodim", "-nobold", "-noreverse", "-nonormal",
         "-noboldfont", "-noinverse", "-noextended", "-noeight", "-nodither",
         "-nofloyd_steinberg", "-noerror_distribution"};
     const int nstrings = sizeof(strings_list) / sizeof(char*);

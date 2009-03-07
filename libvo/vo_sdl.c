@@ -1526,7 +1526,7 @@ static int preinit(const char *arg)
     char * sdl_driver = NULL;
     int sdl_hwaccel;
     int sdl_forcexv;
-    opt_t subopts[] = {
+    const opt_t subopts[] = {
 	    {"forcexv", OPT_ARG_BOOL,  &sdl_forcexv, NULL, 0},
 	    {"hwaccel", OPT_ARG_BOOL,  &sdl_hwaccel, NULL, 0},
 	    {"driver",  OPT_ARG_MSTRZ, &sdl_driver,  NULL, 0},

@@ -175,7 +175,7 @@ static int preinit(const char *arg)
     strarg_t mode_str = {0, NULL};
     strarg_t par_str = {0, NULL};
     strarg_t dfb_params = {0, NULL};
-    opt_t subopts[] = {
+    const opt_t subopts[] = {
       {"input",       OPT_ARG_BOOL, &use_input,  NULL},
       {"buffermode",  OPT_ARG_STR,  &mode_str,   check_mode},
       {"fieldparity", OPT_ARG_STR,  &par_str,    check_parity},

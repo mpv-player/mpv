@@ -209,7 +209,7 @@ static int preinit(const char *arg) {
 	const char *dev = NULL;
 	char *dev_arg = NULL, *norm_arg = NULL;
 	int norm = VIDEO_MODE_AUTO, prebuf = 0;
-	opt_t subopts[] = { /* don't want warnings with -Wall... */
+	const opt_t subopts[] = { /* don't want warnings with -Wall... */
 		{ "dev",    OPT_ARG_MSTRZ, &dev_arg,   NULL, 	        0 },
 		{ "prebuf", OPT_ARG_BOOL,  &prebuf,    (opt_test_f)pbc, 0 },
 		{ "norm",   OPT_ARG_MSTRZ, &norm_arg,  (opt_test_f)nc,  0 },

@@ -120,7 +120,7 @@ static int preinit(const char *arg)
 {
     int ppm_type = 0, pgm_type = 0, pgmyuv_type = 0,
         raw_mode = 0, ascii_mode = 0;
-    opt_t subopts[] = {
+    const opt_t subopts[] = {
         {"ppm",         OPT_ARG_BOOL,   &ppm_type,      NULL, 0},
         {"pgm",         OPT_ARG_BOOL,   &pgm_type,      NULL, 0},
         {"pgmyuv",      OPT_ARG_BOOL,   &pgmyuv_type,   NULL, 0},
