@@ -767,7 +767,7 @@ int mp_input_parse_and_queue_cmds(const char *str) {
 mp_cmd_t*
 mp_input_parse_cmd(char* str) {
   int i,l;
-  int pausing = 0;
+  int pausing = -1;
   char *ptr,*e;
   mp_cmd_t *cmd;
   const mp_cmd_t *cmd_def;
@@ -817,6 +817,15 @@ mp_input_parse_cmd(char* str) {
   cmd = calloc(1, sizeof(mp_cmd_t));
   cmd->id = cmd_def->id;
   cmd->name = strdup(cmd_def->name);
+  if (pausing == -1) {
+    switch (cmd->id) {
+      case MP_CMD_KEYDOWN_EVENTS:
+      case MP_CMD_SET_MOUSE_POS:
+        pausing = 4; break;
+      default:
+        pausing = 0; break;
+    }
+  }
   cmd->pausing = pausing;
 
   ptr = str;
