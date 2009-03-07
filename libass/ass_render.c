@@ -1059,10 +1059,12 @@ static char* parse_tag(char* p, double pwr) {
 		skip(')');
 		mp_msg(MSGT_ASS, MSGL_DBG2, "org(%d, %d)\n", v1, v2);
 		//				render_context.evt_type = EVENT_POSITIONED;
-		render_context.org_x = v1;
-		render_context.org_y = v2;
-		render_context.have_origin = 1;
-		render_context.detect_collisions = 0;
+		if (!render_context.have_origin) {
+			render_context.org_x = v1;
+			render_context.org_y = v2;
+			render_context.have_origin = 1;
+			render_context.detect_collisions = 0;
+		}
 	} else if (mystrcmp(&p, "t")) {
 		double v[3];
 		int v1, v2;
