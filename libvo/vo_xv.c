@@ -295,8 +295,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     current_buf = 0;
     current_ip_buf = 0;
 
-    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
-    
     resize();
 
     return 0;

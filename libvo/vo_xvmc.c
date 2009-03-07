@@ -664,8 +664,6 @@ skip_surface_allocation:
 #endif
     }
 
-    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
-
 //end vo_xv
 
     /* store image dimesions for displaying */
