@@ -44,10 +44,10 @@ static real cos9[3],cos18[3];
 #endif
 
 struct bandInfoStruct {
-  int longIdx[23];
-  int longDiff[22];
-  int shortIdx[14];
-  int shortDiff[13];
+  uint16_t longIdx[23];
+  uint8_t  longDiff[22];
+  uint16_t shortIdx[14];
+  uint8_t  shortDiff[13];
 };
 
 static int longLimit[9][23];
@@ -216,7 +216,7 @@ static void init_layer3(int down_sample_sblimit)
    const struct bandInfoStruct *bi = &bandInfo[j];
    int *mp;
    int cb,lwin;
-   const int *bdf;
+   const uint8_t *bdf;
 
    mp = map[j][0] = mapbuf0[j];
    bdf = bi->longDiff;
