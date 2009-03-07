@@ -95,7 +95,7 @@ static BOOL isLeopardOrLater;
 
 static vo_info_t info = 
 {
-	"Mac OSX Core Video",
+	"Mac OS X Core Video",
 	"macosx",
 	"Nicolas Plourde <nicolas.plourde@gmail.com>",
 	""
@@ -127,7 +127,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	}
 	else
 	{
-		mp_msg(MSGT_VO, MSGL_FATAL, "Get device error: Device ID %d do not exist, falling back to main device.\n", screen_id);
+		mp_msg(MSGT_VO, MSGL_FATAL, "Get device error: Device ID %d does not exist, falling back to main device.\n", screen_id);
 		screen_handle = [screen_array objectAtIndex:0];
 		screen_id = -1;
 	}
@@ -212,7 +212,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			return 1;
 		}		
 		
-		//connnect to mplayerosx
+		//connect to mplayerosx
 		mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:[NSString stringWithCString:buffer_name] host:nil];
 		if ([mplayerosxProxy conformsToProtocol:@protocol(MPlayerOSXVOProto)]) {
 			[mplayerosxProxy setProtocolForProxy:@protocol(MPlayerOSXVOProto)];
@@ -357,7 +357,7 @@ static int preinit(const char *arg)
 				"Example: mplayer -vo macosx:device_id=1:shared_buffer:buffer_name=mybuff\n"
 				"\nOptions:\n"
 				"  device_id=<0-...>\n"
-				"    Set screen device id for fullscreen.\n"
+				"    Set screen device ID for fullscreen.\n"
 				"  shared_buffer\n"
 				"    Write output to a shared memory buffer instead of displaying it.\n"
 				"  buffer_name=<name>\n"
@@ -808,7 +808,7 @@ static int control(uint32_t request, void *data, ...)
 	
 	curTime  = TickCount()/60;
 
-	//auto hide mouse cursor (and future on-screen control?)
+	//automatically hide mouse cursor (and future on-screen control?)
 	if(isFullscreen && !mouseHide && !isRootwin)
 	{
 		if( ((curTime - lastMouseHide) >= 5) || (lastMouseHide == 0) )
@@ -959,8 +959,8 @@ static int control(uint32_t request, void *data, ...)
 		return;
 	[NSApp sendEvent:event];
 	// Without SDL's bootstrap code (include SDL.h in mplayer.c),
-	// on Leopard, we got trouble to get the play window auto focused
-	// when app is actived. Following code fix this problem.
+	// on Leopard, we have trouble to get the play window automatically focused
+	// when the app is actived. The Following code fix this problem.
 #ifndef CONFIG_SDL
 	if (isLeopardOrLater && [event type] == NSAppKitDefined
 			&& [event subtype] == NSApplicationActivatedEventType) {
