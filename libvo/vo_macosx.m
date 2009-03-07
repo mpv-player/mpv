@@ -1,4 +1,7 @@
 /*
+ * Mac OS X video output driver
+ * Copyright (c) 2005 Nicolas Plourde <nicolasplourde@gmail.com>
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -15,14 +18,6 @@
  * with MPlayer; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-/*
-	vo_macosx.m
-	by Nicolas Plourde <nicolasplourde@gmail.com>
-	
-	MPlayer Mac OSX video out module.
- 	Copyright (c) Nicolas Plourde - 2005
-*/
 
 #import "vo_macosx.h"
 #include <sys/types.h>
