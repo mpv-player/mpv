@@ -9,6 +9,8 @@ sleep 2
 sleep 2
 ./fastmem-sse
 sleep 2
+./fastmem-c
+sleep 2
 ./fastmem2-k6
 sleep 2
 ./fastmem2-k7
