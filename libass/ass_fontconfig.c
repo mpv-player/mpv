@@ -99,31 +99,31 @@ static char* _select_font(fc_instance_t* priv, const char* family, int treat_fam
 		goto error;
 	
 	if (!treat_family_as_pattern) {
-	FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)family);
+		FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)family);
 
-	// In SSA/ASS fonts are sometimes referenced by their "full name",
-	// which is usually a concatenation of family name and font
-	// style (ex. Ottawa Bold). Full name is available from
-	// FontConfig pattern element FC_FULLNAME, but it is never
-	// used for font matching.
-	// Therefore, I'm removing words from the end of the name one
-	// by one, and adding shortened names to the pattern. It seems
-	// that the first value (full name in this case) has
-	// precedence in matching.
-	// An alternative approach could be to reimplement FcFontSort
-	// using FC_FULLNAME instead of FC_FAMILY.
-	family_cnt = 1;
-	{
-		char* s = strdup(family);
-		char* p = s + strlen(s);
-		while (--p > s)
-			if (*p == ' ' || *p == '-') {
-				*p = '\0';
-				FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
-				++ family_cnt;
-			}
-		free(s);
-	}
+		// In SSA/ASS fonts are sometimes referenced by their "full name",
+		// which is usually a concatenation of family name and font
+		// style (ex. Ottawa Bold). Full name is available from
+		// FontConfig pattern element FC_FULLNAME, but it is never
+		// used for font matching.
+		// Therefore, I'm removing words from the end of the name one
+		// by one, and adding shortened names to the pattern. It seems
+		// that the first value (full name in this case) has
+		// precedence in matching.
+		// An alternative approach could be to reimplement FcFontSort
+		// using FC_FULLNAME instead of FC_FAMILY.
+		family_cnt = 1;
+		{
+			char* s = strdup(family);
+			char* p = s + strlen(s);
+			while (--p > s)
+				if (*p == ' ' || *p == '-') {
+					*p = '\0';
+					FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)s);
+					++ family_cnt;
+				}
+			free(s);
+		}
 	}
 	FcPatternAddBool(pat, FC_OUTLINE, FcTrue);
 	FcPatternAddInteger(pat, FC_SLANT, italic);
