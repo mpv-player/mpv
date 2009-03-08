@@ -184,6 +184,7 @@ typedef struct render_context_s {
 	char* family;
 	unsigned bold;
 	unsigned italic;
+	int treat_family_as_pattern;
 	
 } render_context_t;
 
@@ -676,6 +677,7 @@ static void update_font(void)
 	ass_renderer_t* priv = frame_context.ass_priv;
 	ass_font_desc_t desc;
 	desc.family = strdup(render_context.family);
+	desc.treat_family_as_pattern = render_context.treat_family_as_pattern;
 
 	val = render_context.bold;
 	// 0 = normal, 1 = bold, >1 = exact weight
@@ -1359,6 +1361,7 @@ static void reset_render_context(void)
 	if (render_context.family)
 		free(render_context.family);
 	render_context.family = strdup(render_context.style->FontName);
+	render_context.treat_family_as_pattern = render_context.style->treat_fontname_as_pattern;
 	render_context.bold = render_context.style->Bold;
 	render_context.italic = render_context.style->Italic;
 	update_font();

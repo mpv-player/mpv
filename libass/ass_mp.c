@@ -94,6 +94,7 @@ ass_track_t* ass_default_track(ass_library_t* library) {
 		style = track->styles + sid;
 		style->Name = strdup("Default");
 		style->FontName = (font_fontconfig >= 0 && sub_font_name) ? strdup(sub_font_name) : (font_fontconfig >= 0 && font_name) ? strdup(font_name) : strdup("Sans");
+		style->treat_fontname_as_pattern = 1;
 
 		fs = track->PlayResY * text_font_scale_factor / 100.;
 		// approximate autoscale coefficients

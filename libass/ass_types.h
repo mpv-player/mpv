@@ -58,6 +58,7 @@ typedef struct ass_style_s {
 	int MarginV;
 //        int AlphaLevel;
 	int Encoding;
+	int treat_fontname_as_pattern;
 } ass_style_t;
 
 typedef struct render_priv_s render_priv_t;

@@ -2253,14 +2253,14 @@ Use this if commas in subtitles are shown at the start of a sentence
 instead of at the end.
 .
 .TP
-.B \-font <path to font.desc file>
+.B \-font <path to font.desc file, path to font (FreeType), font pattern (Fontconfig)>
 Search for the OSD/\:SUB fonts in an alternative directory (default for normal
 fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
 ~/.mplayer/\:subfont.ttf).
 .br
 .I NOTE:
 With FreeType, this option determines the path to the text font file.
-With fontconfig, this option determines the fontconfig font name.
+With Fontconfig, this option determines the Fontconfig font pattern.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -2270,6 +2270,8 @@ With fontconfig, this option determines the fontconfig font name.
 \-font ~/\:.mplayer/\:arialuni.ttf
 .br
 \-font 'Bitstream Vera Sans'
+.br
+\-font 'Bitstream Vera Sans:style=Bold'
 .RE
 .PD 1
 .
@@ -2508,8 +2510,8 @@ Currently useless.
 Same as \-audiofile, but for subtitle streams (OggDS?).
 .
 .TP
-.B \-subfont <filename> (FreeType only)
-Sets the subtitle font.
+.B \-subfont <path to font (FreeType), font pattern (Fontconfig)> (FreeType only)
+Sets the subtitle font (see \-font).
 If no \-subfont is given, \-font is used.
 .
 .TP

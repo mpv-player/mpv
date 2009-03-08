@@ -125,7 +125,7 @@ static int add_face(void* fc_priv, ass_font_t* font, uint32_t ch)
 	if (font->n_faces == ASS_FONT_MAX_FACES)
 		return -1;
 	
-	path = fontconfig_select(fc_priv, font->desc.family, font->desc.bold,
+	path = fontconfig_select(fc_priv, font->desc.family, font->desc.treat_family_as_pattern, font->desc.bold,
 					      font->desc.italic, &index, ch);
 
 	mem_idx = find_font(font->library, path);
@@ -169,6 +169,7 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	font.ftlibrary = ftlibrary;
 	font.n_faces = 0;
 	font.desc.family = strdup(desc->family);
+	font.desc.treat_family_as_pattern = desc->treat_family_as_pattern;
 	font.desc.bold = desc->bold;
 	font.desc.italic = desc->italic;
 

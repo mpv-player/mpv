@@ -35,7 +35,7 @@
 typedef struct fc_instance_s fc_instance_t;
 
 fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path, int fc);
-char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index, uint32_t code);
+char* fontconfig_select(fc_instance_t* priv, const char* family, int treat_family_as_pattern, unsigned bold, unsigned italic, int* index, uint32_t code);
 void fontconfig_done(fc_instance_t* priv);
 
 #endif /* LIBASS_FONTCONFIG_H */

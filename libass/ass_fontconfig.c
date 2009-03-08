@@ -66,14 +66,15 @@ struct fc_instance_s {
  * \brief Low-level font selection.
  * \param priv private data
  * \param family font family
+ * \param treat_family_as_pattern treat family as fontconfig pattern
  * \param bold font weight value
  * \param italic font slant value
  * \param index out: font index inside a file
  * \param code: the character that should be present in the font, can be 0
  * \return font file path
 */ 
-static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
-			  uint32_t code)
+static char* _select_font(fc_instance_t* priv, const char* family, int treat_family_as_pattern,
+			  unsigned bold, unsigned italic, int* index, uint32_t code)
 {
 	FcBool rc;
 	FcResult result;
@@ -89,10 +90,15 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	
 	*index = 0;
 
-	pat = FcPatternCreate();
+	if (treat_family_as_pattern)
+		pat = FcNameParse((const FcChar8*)family);
+	else
+		pat = FcPatternCreate();
+
 	if (!pat)
 		goto error;
 	
+	if (!treat_family_as_pattern) {
 	FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)family);
 
 	// In SSA/ASS fonts are sometimes referenced by their "full name",
@@ -117,6 +123,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 				++ family_cnt;
 			}
 		free(s);
+	}
 	}
 	FcPatternAddBool(pat, FC_OUTLINE, FcTrue);
 	FcPatternAddInteger(pat, FC_SLANT, italic);
@@ -182,7 +189,8 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	if (result != FcResultMatch)
 		r_fullname = NULL;
 
-	if (!(r_family && strcasecmp((const char*)r_family, family) == 0) &&
+	if (!treat_family_as_pattern &&
+		!(r_family && strcasecmp((const char*)r_family, family) == 0) &&
 	    !(r_fullname && strcasecmp((const char*)r_fullname, family) == 0))
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_SelectedFontFamilyIsNotTheRequestedOne,
 		       (const char*)(r_fullname ? r_fullname : r_family), family);
@@ -219,14 +227,15 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
  * \brief Find a font. Use default family or path if necessary.
  * \param priv_ private data
  * \param family font family
+ * \param treat_family_as_pattern treat family as fontconfig pattern
  * \param bold font weight value
  * \param italic font slant value
  * \param index out: font index inside a file
  * \param code: the character that should be present in the font, can be 0
  * \return font file path
 */ 
-char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
-			uint32_t code)
+char* fontconfig_select(fc_instance_t* priv, const char* family, int treat_family_as_pattern,
+			unsigned bold, unsigned italic, int* index, uint32_t code)
 {
 	char* res = 0;
 	if (!priv->config) {
@@ -234,9 +243,9 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 		return priv->path_default;
 	}
 	if (family && *family)
-		res = _select_font(priv, family, bold, italic, index, code);
+		res = _select_font(priv, family, treat_family_as_pattern, bold, italic, index, code);
 	if (!res && priv->family_default) {
-		res = _select_font(priv, priv->family_default, bold, italic, index, code);
+		res = _select_font(priv, priv->family_default, 0, bold, italic, index, code);
 		if (res)
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFontFamily, 
 					family, bold, italic, res, *index);
@@ -248,7 +257,7 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 		       family, bold, italic, res, *index);
 	}
 	if (!res) {
-		res = _select_font(priv, "Arial", bold, italic, index, code);
+		res = _select_font(priv, "Arial", 0, bold, italic, index, code);
 		if (res)
 			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingArialFontFamily, 
 					family, bold, italic, res, *index);
@@ -474,8 +483,8 @@ exit:
 
 #else /* CONFIG_FONTCONFIG */
 
-char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, unsigned italic, int* index,
-			uint32_t code)
+char* fontconfig_select(fc_instance_t* priv, const char* family, int treat_family_as_pattern,
+			unsigned bold, unsigned italic, int* index, uint32_t code)
 {
 	*index = priv->index_default;
 	return priv->path_default;
