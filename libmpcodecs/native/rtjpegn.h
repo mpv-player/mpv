@@ -35,27 +35,27 @@
 #define __s32 int32_t
 #define __s64 int64_t
 
-extern void RTjpeg_init_Q(__u8 Q);
-extern void RTjpeg_init_compress(__u32 *buf, int width, int height, __u8 Q);
-extern void RTjpeg_init_decompress(__u32 *buf, int width, int height);
-extern int RTjpeg_compressYUV420(__s8 *sp, unsigned char *bp);
-extern int RTjpeg_compressYUV422(__s8 *sp, unsigned char *bp);
-extern void RTjpeg_decompressYUV420(__s8 *sp, __u8 *bp);
-extern void RTjpeg_decompressYUV422(__s8 *sp, __u8 *bp);
-extern int RTjpeg_compress8(__s8 *sp, unsigned char *bp);
-extern void RTjpeg_decompress8(__s8 *sp, __u8 *bp);
+void RTjpeg_init_Q(__u8 Q);
+void RTjpeg_init_compress(__u32 *buf, int width, int height, __u8 Q);
+void RTjpeg_init_decompress(__u32 *buf, int width, int height);
+int RTjpeg_compressYUV420(__s8 *sp, unsigned char *bp);
+int RTjpeg_compressYUV422(__s8 *sp, unsigned char *bp);
+void RTjpeg_decompressYUV420(__s8 *sp, __u8 *bp);
+void RTjpeg_decompressYUV422(__s8 *sp, __u8 *bp);
+int RTjpeg_compress8(__s8 *sp, unsigned char *bp);
+void RTjpeg_decompress8(__s8 *sp, __u8 *bp);
 
-extern void RTjpeg_init_mcompress(void);
-extern int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask);
-extern int RTjpeg_mcompressYUV422(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask);
-extern int RTjpeg_mcompress8(__s8 *sp, unsigned char *bp, __u16 lmask);
-extern void RTjpeg_set_test(int i);
+void RTjpeg_init_mcompress(void);
+int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask);
+int RTjpeg_mcompressYUV422(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask);
+int RTjpeg_mcompress8(__s8 *sp, unsigned char *bp, __u16 lmask);
+void RTjpeg_set_test(int i);
 
-extern void RTjpeg_yuv420rgb(__u8 *buf, __u8 *rgb, int stride);
-extern void RTjpeg_yuv422rgb(__u8 *buf, __u8 *rgb, int stride);
-extern void RTjpeg_yuvrgb8(__u8 *buf, __u8 *rgb, int stride);
-extern void RTjpeg_yuvrgb16(__u8 *buf, __u8 *rgb, int stride);
-extern void RTjpeg_yuvrgb24(__u8 *buf, __u8 *rgb, int stride);
-extern void RTjpeg_yuvrgb32(__u8 *buf, __u8 *rgb, int stride);
+void RTjpeg_yuv420rgb(__u8 *buf, __u8 *rgb, int stride);
+void RTjpeg_yuv422rgb(__u8 *buf, __u8 *rgb, int stride);
+void RTjpeg_yuvrgb8(__u8 *buf, __u8 *rgb, int stride);
+void RTjpeg_yuvrgb16(__u8 *buf, __u8 *rgb, int stride);
+void RTjpeg_yuvrgb24(__u8 *buf, __u8 *rgb, int stride);
+void RTjpeg_yuvrgb32(__u8 *buf, __u8 *rgb, int stride);
 
 #endif /* MPLAYER_RTJPEGN_H */
