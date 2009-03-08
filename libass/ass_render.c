@@ -446,12 +446,12 @@ static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_h
 	bottom = ((ay+ah) < (by+bh)) ? (ay+ah) : (by+bh);
 	if ((right <= left) || (bottom <= top))
 		return;
-	old_left = left-(ax);
-	old_top = top-(ay);
+	old_left = left-ax;
+	old_top = top-ay;
 	w = right-left;
 	h = bottom-top;
-	cur_left = left-(bx);
-	cur_top = top-(by);
+	cur_left = left-bx;
+	cur_top = top-by;
 
 	// Query cache
 	memcpy(&hk.a, last_hash, sizeof(*last_hash));
