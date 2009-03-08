@@ -105,9 +105,9 @@ int main( void )
   mga_init();
   marr1 = &frame[3];
 #else
-  marr1 = &arr1[3];
+  marr1 = &arr1[0];
 #endif
-  marr2 = &arr2[9];
+  marr2 = &arr2[0];
 
   for(i=0; i<ARR_SIZE-16; i++) marr1[i] = marr2[i] = i;
 
