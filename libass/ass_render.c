@@ -1796,75 +1796,46 @@ static void get_base_point(FT_BBox bbox, int alignment, int* bx, int* by)
 }
 
 /**
- * \brief Multiply 4-vector by 4-matrix
- * \param a 4-vector
- * \param m 4-matrix]
- * \param b out: 4-vector
- * Calculates a * m and stores result in b
+ * \brief Apply transformation to outline points of a glyph
+ * Applies rotations given by frx, fry and frz and projects the points back
+ * onto the screen plane.
  */
-static inline void transform_point_3d(double *a, double *m, double *b)
-{
-	b[0] = a[0] * m[0] + a[1] * m[4] + a[2] * m[8] +  a[3] * m[12];
-	b[1] = a[0] * m[1] + a[1] * m[5] + a[2] * m[9] +  a[3] * m[13];
-	b[2] = a[0] * m[2] + a[1] * m[6] + a[2] * m[10] + a[3] * m[14];
-	b[3] = a[0] * m[3] + a[1] * m[7] + a[2] * m[11] + a[3] * m[15];
-}
-
-/**
- * \brief Apply 3d transformation to a vector
- * \param v FreeType vector (2d)
- * \param m 4-matrix
- * Transforms v by m, projects the result back to the screen plane
- * Result is returned in v.
- */
-static inline void transform_vector_3d(FT_Vector* v, double *m) {
-	const double camera = 2500 * frame_context.border_scale; // camera distance
-	const double cutoff_z = 10.;
-	double a[4], b[4];
-	a[0] = d6_to_double(v->x);
-	a[1] = d6_to_double(v->y);
-	a[2] = 0.;
-	a[3] = 1.;
-	transform_point_3d(a, m, b);
-	/* Apply perspective projection with the following matrix:
-	   2500     0     0     0
-	      0  2500     0     0
-	      0     0     0     0
-	      0     0     8     2500
-	   where 2500 is camera distance, 8 - z-axis scale.
-	   Camera is always located in (org_x, org_y, -2500). This means
-	   that different subtitle events can be displayed at the same time
-	   using different cameras. */
-	b[0] *= camera;
-	b[1] *= camera;
-	b[3] = 8 * b[2] + camera;
-	if (b[3] < cutoff_z)
-		b[3] = cutoff_z;
-	v->x = double_to_d6(b[0] / b[3]);
-	v->y = double_to_d6(b[1] / b[3]);
-}
-
-/**
- * \brief Apply 3d transformation to a glyph
- * \param glyph FreeType glyph
- * \param m 4-matrix
- * Transforms glyph by m, projects the result back to the screen plane
- * Result is returned in glyph.
- */
-static inline void transform_glyph_3d(FT_Glyph glyph, double *m, FT_Vector shift) {
-	int i;
-	FT_Outline* outline = &((FT_OutlineGlyph)glyph)->outline;
+static void transform_3d_points(FT_Vector shift, FT_Glyph glyph, double frx, double fry, double frz) {
+	double sx = sin(frx);
+	double sy = sin(fry);
+	double sz = sin(frz);
+	double cx = cos(frx);
+	double cy = cos(fry);
+	double cz = cos(frz);
+	FT_Outline *outline = &((FT_OutlineGlyph) glyph)->outline;
 	FT_Vector* p = outline->points;
+	double x, y, z, xx, yy, zz;
+	int i;
 
 	for (i=0; i<outline->n_points; i++) {
-		p[i].x += shift.x;
-		p[i].y += shift.y;
-		transform_vector_3d(p + i, m);
-		p[i].x -= shift.x;
-		p[i].y -= shift.y;
-	}
+		x = p[i].x + shift.x;
+		y = p[i].y + shift.y;
+		z = 0.;
 
-	//transform_vector_3d(&glyph->advance, m);
+		xx = x*cz + y*sz;
+		yy = -(x*sz - y*cz);
+		zz = z;
+
+		x = xx;
+		y = yy*cx + zz*sx;
+		z = yy*sx - zz*cx;
+
+		xx = x*cy + z*sy;
+		yy = y;
+		zz = x*sy - z*cy;
+
+		zz = FFMAX(zz, -19000);
+
+		x = (xx * 20000) / (zz + 20000);
+		y = (yy * 20000) / (zz + 20000);
+		p[i].x = x - shift.x + 0.5;
+		p[i].y = y - shift.y + 0.5;
+	}
 }
 
 /**
@@ -1879,27 +1850,17 @@ static inline void transform_glyph_3d(FT_Glyph glyph, double *m, FT_Vector shift
  */
 static void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz)
 {
-	fry = - fry; // FreeType's y axis goes in the opposite direction
+	frx = - frx;
+	frz = - frz;
 	if (frx != 0. || fry != 0. || frz != 0.) {
-		double m[16];
-		double sx = sin(frx);
-		double sy = sin(fry);
- 		double sz = sin(frz);
-		double cx = cos(frx);
-		double cy = cos(fry);
-		double cz = cos(frz);
-		m[0] = cy * cz;            m[1] = cy*sz;              m[2]  = -sy;    m[3] = 0.0;
-		m[4] = -cx*sz + sx*sy*cz;  m[5] = cx*cz + sx*sy*sz;   m[6]  = sx*cy;  m[7] = 0.0;
-		m[8] = sx*sz + cx*sy*cz;   m[9] = -sx*cz + cx*sy*sz;  m[10] = cx*cy;  m[11] = 0.0;
-		m[12] = 0.0;               m[13] = 0.0;               m[14] = 0.0;    m[15] = 1.0;
-
 		if (glyph && *glyph)
-			transform_glyph_3d(*glyph, m, shift);
+			transform_3d_points(shift, *glyph, frx, fry, frz);
 
 		if (glyph2 && *glyph2)
-			transform_glyph_3d(*glyph2, m, shift);
+			transform_3d_points(shift, *glyph2, frx, fry, frz);
 	}
 }
+
 
 /**
  * \brief Main ass rendering function, glues everything together
