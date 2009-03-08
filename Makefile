@@ -92,7 +92,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/dec_video.c \
               libmpcodecs/img_format.c \
               libmpcodecs/mp_image.c \
-              libmpcodecs/native/rtjpegn.c \
               libmpcodecs/native/xa_gsm.c \
               libmpcodecs/pullup.c \
               libmpcodecs/vd.c \
@@ -686,7 +685,7 @@ SRCS_MENCODER-$(FAAC)             += libmpcodecs/ae_faac.c
 SRCS_MENCODER-$(LIBAVCODEC)       += libmpcodecs/ae_lavc.c libmpcodecs/ve_lavc.c
 SRCS_MENCODER-$(LIBAVFORMAT)      += libmpdemux/muxer_lavf.c
 SRCS_MENCODER-$(LIBDV)            += libmpcodecs/ve_libdv.c
-SRCS_MENCODER-$(LIBLZO)           += libmpcodecs/ve_nuv.c
+SRCS_MENCODER-$(LIBLZO)           += libmpcodecs/ve_nuv.c libmpcodecs/native/rtjpegn.c
 SRCS_MENCODER-$(MP3LAME)          += libmpcodecs/ae_lame.c
 SRCS_MENCODER-$(QTX_CODECS_WIN32) += libmpcodecs/ve_qtvideo.c
 SRCS_MENCODER-$(TOOLAME)          += libmpcodecs/ae_toolame.c
