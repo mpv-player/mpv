@@ -92,7 +92,6 @@ static mmx_t RTjpeg_cmask;
 static __u16 RTjpeg_lmask;
 static __u16 RTjpeg_cmask;
 #endif
-static int RTjpeg_mtest=0;
 
 static const unsigned char RTjpeg_lum_quant_tbl[64] = {
     16,  11,  10,  16,  24,  40,  51,  61,
@@ -149,11 +148,6 @@ static int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
   fprintf(stdout, "\n\n");
 
 #endif
-
-// *strm++ = 0x10;
-// *strm   = 0x00;
-//
-// return 2;
 
  // first byte allways written
  ((__u8*)strm)[0]=
@@ -2849,8 +2843,6 @@ void RTjpeg_init_decompress(__u32 *buf, int width, int height)
  RTjpeg_cb8--;
 
  RTjpeg_idct_init();
-
-// RTjpeg_color_init();
 }
 
 int RTjpeg_compressYUV420(__s8 *sp, unsigned char *bp)
@@ -3035,11 +3027,8 @@ static int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
  
  if(result.q)
  {
-//  if(!RTjpeg_mtest)
-//   for(i=0; i<16; i++)((__u64 *)old)[i]=((__u64 *)RTjpeg_block)[i];
   return 0;
  }
-// printf(".");
  return 1;
 }
 
@@ -3051,7 +3040,6 @@ static int RTjpeg_bcomp(__s16 *old, __u16 *mask)
  for(i=0; i<64; i++)
   if(abs(old[i]-RTjpeg_block[i])>*mask)
   {
-   if(!RTjpeg_mtest)
     for(i=0; i<16; i++)((__u64 *)old)[i]=((__u64 *)RTjpeg_block)[i];
    return 0;
   }
@@ -3059,15 +3047,9 @@ static int RTjpeg_bcomp(__s16 *old, __u16 *mask)
 }
 #endif
 
-static void RTjpeg_set_test(int i)
-{
- RTjpeg_mtest=i;
-}
-
 int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask)
 {
  __s8 * sb;
-//rh __s16 *block;
  register __s8 * bp1 = bp + (RTjpeg_width<<3);
  register __s8 * bp2 = bp + RTjpeg_Ysize;
  register __s8 * bp3 = bp2 + (RTjpeg_Csize>>1);
