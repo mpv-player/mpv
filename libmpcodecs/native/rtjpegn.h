@@ -36,9 +36,7 @@
 #define __s64 int64_t
 
 void RTjpeg_init_compress(__u32 *buf, int width, int height, __u8 Q);
-void RTjpeg_init_decompress(__u32 *buf, int width, int height);
 int RTjpeg_compressYUV420(__s8 *sp, unsigned char *bp);
-void RTjpeg_decompressYUV420(__s8 *sp, __u8 *bp);
 
 void RTjpeg_init_mcompress(void);
 int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask);

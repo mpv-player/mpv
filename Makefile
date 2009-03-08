@@ -92,7 +92,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/dec_video.c \
               libmpcodecs/img_format.c \
               libmpcodecs/mp_image.c \
-              libmpcodecs/native/nuppelvideo.c \
               libmpcodecs/native/rtjpegn.c \
               libmpcodecs/native/xa_gsm.c \
               libmpcodecs/pullup.c \
@@ -102,7 +101,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vd_mpegpes.c \
               libmpcodecs/vd_mtga.c \
               libmpcodecs/vd_null.c \
-              libmpcodecs/vd_nuv.c \
               libmpcodecs/vd_raw.c \
               libmpcodecs/vd_sgi.c \
               libmpcodecs/vf.c \
