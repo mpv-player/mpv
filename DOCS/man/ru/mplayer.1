@@ -2,7 +2,7 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translated by Vladimir Voroshilov <voroshil@gmail.com>
 .\" Encoding: koi8-r
-.\" synced with r28807
+.\" synced with r28895
 .
 .\" --------------------------------------------------------------------------
 .\" Определения макросов
@@ -922,6 +922,8 @@ mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 Задержка в миллисекундах перед началом автоповтора (0 для отключения).
 .IPs ar\-rate
 Количество клавиш в секунду, генерируемых при автоповторе.
+.IPs (no)default-binds
+Использовать привязки клавиш, поставляемые с MPlayer по умолчанию.
 .IPs keylist
 Выводит все клавиши, которые можно назначить командам.
 .IPs cmdlist
@@ -1085,17 +1087,18 @@ FIXME: Это требует тщательного разъяснения и описания.
 .
 .TP
 .B \-slave (смотрите также \-input)
-Включает "рабский" режим, в котором MPlayer работает в качестве бэкэнда к другим программам.
+Включает ведомый режим, в котором MPlayer работает в качестве бэкэнда к другим программам.
 Вместо перехвата событий клавиатуры, MPlayer будет читать со стандартного входа команды,
 разделенные символом новой строки (\\n).
 .br
 .I ЗАМЕЧАНИЕ:
 Смотрите список этих команд в \-input cmdlist и описания в DOCS/tech/slave.txt.
+Эта опция не предназначена для отключения других источников ввода,
+например при помощи окна видео; для данных целей используйте иные
+способы, например, \-input nodefault\-binds:conf=/dev/null.
 .
 .TP
 .B \-softsleep
-.\" FIXME is translation correct?
-.\" Time frames by repeatedly checking the current time instead of asking the
 Устанавливает тайминг кадров, постоянно проверяя текущее время, вместо просьбы
 ядру пробуждать MPlayer в нужный момент.
 Полезно, если таймер вашего ядра неточен и вы не можете использовать RTC.
@@ -2217,14 +2220,14 @@ SubViewer (SRT).
 вместо их конца.
 .
 .TP
-.B \-font <путь к файлу font.desc>
+.B \-font <путь к файлу font.desc, путь к шрифту (FreeType), название шрифта (Fontconfig))>
 Ищет OSD/\:SUB шрифты в другом каталоге (по умолчанию для обычных
 шрифтов: ~/\:.mplayer/\:font/\:font.desc, по умолчанию для FreeType шрифтов:
 ~/.mplayer/\:subfont.ttf).
 .br
 .I ЗАМЕЧАНИЕ:
 С FreeType, эта опция определяет путь к файлу шрифта текста.
-С fontconfig, эта опция определяет название шрифта fontconfig.
+С Fontconfig, эта опция определяет название шрифта fontconfig.
 .sp 1
 .I ПРИМЕР:
 .PD 0
@@ -2234,6 +2237,8 @@ SubViewer (SRT).
 \-font ~/\:.mplayer/\:arialuni.ttf
 .br
 \-font 'Bitstream Vera Sans'
+.br
+\-font 'Bitstream Vera Sans:style=Bold'
 .RE
 .PD 1
 .
@@ -2475,8 +2480,8 @@ cp1250, если определение не работает.
 То же, что и \-audiofile, но для потока субтитров (OggDS?).
 .
 .TP
-.B \-subfont <имя файла> (только FreeType)
-Устанавливает шрифт субтитров.
+.B \-subfont <имя файла (FreeType), название шрифта (Fontconfig)> (только FreeType)
+Устанавливает шрифт субтитров (см. \-font).
 Если опция \-subfont не указана, используется \-font.
 .
 .TP
