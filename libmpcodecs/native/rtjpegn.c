@@ -68,7 +68,7 @@ static const __u64 RTjpeg_aan_tab[64]={
 #if !HAVE_MMX
 static __s32 RTjpeg_ws[64+31];
 #endif
-__u8 RTjpeg_alldata[2*64+4*64+4*64+4*64+4*64+32];
+static __u8 RTjpeg_alldata[2*64+4*64+4*64+4*64+4*64+32];
 
 static __s16 *block; // rh
 static __s16 *RTjpeg_block;
@@ -86,13 +86,13 @@ static int RTjpeg_Ysize, RTjpeg_Csize;
 static __s16 *RTjpeg_old=NULL;
 
 #if HAVE_MMX
-mmx_t RTjpeg_lmask;
-mmx_t RTjpeg_cmask;
+static mmx_t RTjpeg_lmask;
+static mmx_t RTjpeg_cmask;
 #else
-__u16 RTjpeg_lmask;
-__u16 RTjpeg_cmask;
+static __u16 RTjpeg_lmask;
+static __u16 RTjpeg_cmask;
 #endif
-int RTjpeg_mtest=0;
+static int RTjpeg_mtest=0;
 
 static const unsigned char RTjpeg_lum_quant_tbl[64] = {
     16,  11,  10,  16,  24,  40,  51,  61,
@@ -133,7 +133,7 @@ static const unsigned char RTjpeg_chrom_quant_tbl[64] = {
 /* Block to Stream (encoding)                         */
 /*                                                    */
 
-int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
+static int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
 {
  register int ci, co=1;
  register __s16 ZZvalue;
@@ -303,7 +303,7 @@ fprintf(stdout, "\n\n");
 /* Stream to Block  (decoding)                        */
 /*                                                    */
 
-int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
+static int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
 {
  int ci;
  register int co;
@@ -447,7 +447,7 @@ fprintf(stdout, "\n\n");
 
 #else
 
-int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
+static int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
 {
  register int ci, co=1, tmp;
  register __s16 ZZvalue;
@@ -506,7 +506,7 @@ int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
  return (int)co;
 }
 
-int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
+static int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
 {
  int ci=1, co=1, tmp;
  register int i;
@@ -539,7 +539,7 @@ int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
 #endif
 
 #if HAVE_MMX
-void RTjpeg_quant_init(void)
+static void RTjpeg_quant_init(void)
 {
  int i;
  __s16 *qtbl;
@@ -554,7 +554,7 @@ void RTjpeg_quant_init(void)
 static mmx_t RTjpeg_ones={0x0001000100010001LL};
 static mmx_t RTjpeg_half={0x7fff7fff7fff7fffLL};
 
-void RTjpeg_quant(__s16 *block, __s32 *qtbl)
+static void RTjpeg_quant(__s16 *block, __s32 *qtbl)
 {
  int i;
  mmx_t *bl, *ql;
@@ -591,11 +591,11 @@ void RTjpeg_quant(__s16 *block, __s32 *qtbl)
  }
 }
 #else
-void RTjpeg_quant_init(void)
+static void RTjpeg_quant_init(void)
 {
 }
 
-void RTjpeg_quant(__s16 *block, __s32 *qtbl)
+static void RTjpeg_quant(__s16 *block, __s32 *qtbl)
 {
  int i;
  
@@ -626,7 +626,7 @@ static mmx_t RTjpeg_zero ={0x0000000000000000LL};
 #define D_MULTIPLY(var,const)  ((__s32) ((var) * (const)))
 #endif
 
-void RTjpeg_dct_init(void)
+static void RTjpeg_dct_init(void)
 {
  int i;
  
@@ -637,7 +637,7 @@ void RTjpeg_dct_init(void)
  }
 }
 
-void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
+static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 {
 #if !HAVE_MMX
   __s32 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -1554,7 +1554,7 @@ void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 #define RL(x) ((x)>235) ? 235 : (((x)<16) ? 16 : (x))
 #define MULTIPLY(var,const)  (((__s32) ((var) * (const)) + 128)>>8)
 
-void RTjpeg_idct_init(void)
+static void RTjpeg_idct_init(void)
 {
  int i;
  
@@ -1565,7 +1565,7 @@ void RTjpeg_idct_init(void)
  }
 }
 
-void RTjpeg_idct(__u8 *odata, __s16 *data, int rskip)
+static void RTjpeg_idct(__u8 *odata, __s16 *data, int rskip)
 {
 #if HAVE_MMX
 
@@ -2702,7 +2702,7 @@ Initialise all the cache-aliged data blocks
 
 */
 
-void RTjpeg_init_data(void)
+static void RTjpeg_init_data(void)
 {
  unsigned long dptr;
  
@@ -2733,7 +2733,7 @@ Input: buf -> pointer to 128 ints for quant values store to pass back to
        Q -> quality factor (192=best, 32=worst)
 */
 
-void RTjpeg_init_Q(__u8 Q)
+static void RTjpeg_init_Q(__u8 Q)
 {
  int i;
  __u64 qual;
@@ -2907,7 +2907,7 @@ int RTjpeg_compressYUV420(__s8 *sp, unsigned char *bp)
  return (sp-sb);
 }
 
-int RTjpeg_compressYUV422(__s8 *sp, unsigned char *bp)
+static int RTjpeg_compressYUV422(__s8 *sp, unsigned char *bp)
 {
  __s8 * sb;
  register __s8 * bp2 = bp + RTjpeg_Ysize;
@@ -2951,7 +2951,7 @@ int RTjpeg_compressYUV422(__s8 *sp, unsigned char *bp)
  return (sp-sb);
 }
 
-int RTjpeg_compress8(__s8 *sp, unsigned char *bp)
+static int RTjpeg_compress8(__s8 *sp, unsigned char *bp)
 {
  __s8 * sb;
  int i, j;
@@ -2979,7 +2979,7 @@ int RTjpeg_compress8(__s8 *sp, unsigned char *bp)
  return (sp-sb);
 }
 
-void RTjpeg_decompressYUV422(__s8 *sp, __u8 *bp)
+static void RTjpeg_decompressYUV422(__s8 *sp, __u8 *bp)
 {
  register __s8 * bp2 = bp + RTjpeg_Ysize;
  register __s8 * bp3 = bp2 + (RTjpeg_Csize);
@@ -3089,7 +3089,7 @@ void RTjpeg_decompressYUV420(__s8 *sp, __u8 *bp)
 #endif
 }
 
-void RTjpeg_decompress8(__s8 *sp, __u8 *bp)
+static void RTjpeg_decompress8(__s8 *sp, __u8 *bp)
 {
  int i, j;
 
@@ -3140,7 +3140,7 @@ void RTjpeg_init_mcompress(void)
 
 #if HAVE_MMX
 
-int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
+static int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
 {
  int i;
  mmx_t *mold=(mmx_t *)old;
@@ -3186,7 +3186,7 @@ int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
 }
 
 #else
-int RTjpeg_bcomp(__s16 *old, __u16 *mask)
+static int RTjpeg_bcomp(__s16 *old, __u16 *mask)
 {
  int i;
 
@@ -3201,7 +3201,7 @@ int RTjpeg_bcomp(__s16 *old, __u16 *mask)
 }
 #endif
 
-void RTjpeg_set_test(int i)
+static void RTjpeg_set_test(int i)
 {
  RTjpeg_mtest=i;
 }
@@ -3298,7 +3298,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
 }
 
 
-int RTjpeg_mcompressYUV422(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask)
+static int RTjpeg_mcompressYUV422(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask)
 {
  __s8 * sb;
  __s16 *block;
@@ -3374,7 +3374,7 @@ int RTjpeg_mcompressYUV422(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
  return (sp-sb);
 }
 
-int RTjpeg_mcompress8(__s8 *sp, unsigned char *bp, __u16 lmask)
+static int RTjpeg_mcompress8(__s8 *sp, unsigned char *bp, __u16 lmask)
 {
  __s8 * sb;
  __s16 *block;
@@ -3412,7 +3412,7 @@ int RTjpeg_mcompress8(__s8 *sp, unsigned char *bp, __u16 lmask)
  return (sp-sb);
 }
 
-void RTjpeg_color_init(void)
+static void RTjpeg_color_init(void)
 {
 }  
 
@@ -3422,7 +3422,7 @@ void RTjpeg_color_init(void)
 #define KcbB 132252
 #define Ky 76284
 
-void RTjpeg_yuv422rgb(__u8 *buf, __u8 *rgb, int stride)
+static void RTjpeg_yuv422rgb(__u8 *buf, __u8 *rgb, int stride)
 {
  int tmp;
  int i, j;
@@ -3470,7 +3470,7 @@ void RTjpeg_yuv422rgb(__u8 *buf, __u8 *rgb, int stride)
 }
 
 
-void RTjpeg_yuv420rgb(__u8 *buf, __u8 *rgb, int stride)
+static void RTjpeg_yuv420rgb(__u8 *buf, __u8 *rgb, int stride)
 {
  int tmp;
  int i, j;
@@ -3544,7 +3544,7 @@ void RTjpeg_yuv420rgb(__u8 *buf, __u8 *rgb, int stride)
 }
 
 
-void RTjpeg_yuvrgb32(__u8 *buf, __u8 *rgb, int stride)
+static void RTjpeg_yuvrgb32(__u8 *buf, __u8 *rgb, int stride)
 {
  int tmp;
  int i, j;
@@ -3620,7 +3620,7 @@ void RTjpeg_yuvrgb32(__u8 *buf, __u8 *rgb, int stride)
  }
 }
 
-void RTjpeg_yuvrgb24(__u8 *buf, __u8 *rgb, int stride)
+static void RTjpeg_yuvrgb24(__u8 *buf, __u8 *rgb, int stride)
 {
  int tmp;
  int i, j;
@@ -3693,7 +3693,7 @@ void RTjpeg_yuvrgb24(__u8 *buf, __u8 *rgb, int stride)
  }
 }
 
-void RTjpeg_yuvrgb16(__u8 *buf, __u8 *rgb, int stride)
+static void RTjpeg_yuvrgb16(__u8 *buf, __u8 *rgb, int stride)
 {
  int tmp;
  int i, j;
@@ -3790,7 +3790,7 @@ void RTjpeg_yuvrgb16(__u8 *buf, __u8 *rgb, int stride)
 
 /* fix stride */
 
-void RTjpeg_yuvrgb8(__u8 *buf, __u8 *rgb, int stride)
+static void RTjpeg_yuvrgb8(__u8 *buf, __u8 *rgb, int stride)
 {
  memcpy(rgb, buf, RTjpeg_width*RTjpeg_height);
 }
