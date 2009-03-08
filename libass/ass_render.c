@@ -434,6 +434,9 @@ static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_h
 	if ((*last_tail)->bitmap == (*tail)->bitmap)
 		return;
 
+	if ((*last_tail)->color != (*tail)->color)
+		return;
+
 	// Calculate overlap coordinates
 	left = (ax > bx) ? ax : bx;
 	top = (ay > by) ? ay : by;
