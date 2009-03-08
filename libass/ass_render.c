@@ -423,10 +423,12 @@ static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_h
 	int ax = (*last_tail)->dst_x;
 	int ay = (*last_tail)->dst_y;
 	int aw = (*last_tail)->w;
+	int as = (*last_tail)->stride;
 	int ah = (*last_tail)->h;
 	int bx = (*tail)->dst_x;
 	int by = (*tail)->dst_y;
 	int bw = (*tail)->w;
+	int bs = (*tail)->stride;
 	int bh = (*tail)->h;
 	unsigned char* a;
 	unsigned char* b;
@@ -472,16 +474,16 @@ static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_h
 	// Allocate new bitmaps and copy over data
 	a = (*last_tail)->bitmap;
 	b = (*tail)->bitmap;
-	(*last_tail)->bitmap = malloc(aw*ah);
-	(*tail)->bitmap = malloc(bw*bh);
-	memcpy((*last_tail)->bitmap, a, aw*ah);
-	memcpy((*tail)->bitmap, b, bw*bh);
+	(*last_tail)->bitmap = malloc(as*ah);
+	(*tail)->bitmap = malloc(bs*bh);
+	memcpy((*last_tail)->bitmap, a, as*ah);
+	memcpy((*tail)->bitmap, b, bs*bh);
 
 	// Composite overlapping area
 	for (y=0; y<h; y++)
 		for (x=0; x<w; x++) {
-			opos = (old_top+y)*(aw) + (old_left+x);
-			cpos = (cur_top+y)*(bw) + (cur_left+x);
+			opos = (old_top+y)*(as) + (old_left+x);
+			cpos = (cur_top+y)*(bs) + (cur_left+x);
 			m = (a[opos] > b[cpos]) ? a[opos] : b[cpos];
 			(*last_tail)->bitmap[opos] = 0;
 			(*tail)->bitmap[cpos] = m;
