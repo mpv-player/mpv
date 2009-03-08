@@ -1,4 +1,4 @@
-.\" synced with r28807
+.\" synced with r28895
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -1009,6 +1009,8 @@ d'une touche
 (0 pour désactiver).
 .IPs ar-rate
 Combien de frappes par seconde pendant la répétition automatique.
+.IPs (no)default-binds
+Répond aux touches de contrôle par défaut de MPlayer.
 .IPs keylist
 Affiche toutes les touches pouvant être attachées.
 .IPs cmdlist
@@ -1193,6 +1195,9 @@ commandes séparées par un retour chariot (\\n) via l'entrée stdin.
 .I NOTE\ :
 Voir \-input cmdlist pour une liste des commandes esclaves, et
 DOCS/tech/slave.txt pour leur description.
+De plus, cette option n'est pas vouée à désactiver les autres entrées,
+comme via la fenêtre vidéo\ ; pour cela, utilisez d'autres méthodes, comme
+\-input nodefault\-binds:conf=/dev/null.
 .
 .TP
 .B \-softsleep
@@ -2354,14 +2359,14 @@ les sous-titres.
 phrases au lieu de la fin.
 .
 .TP
-.B \-font <chemin vers le fichier font.desc>
+.B \-font <chemin vers le fichier font.desc, la police (FreeType), motif de police (Fontconfig)>
 Recherche les polices OSD/\:SUB dans un répertoire particulier
 (par défaut pour les polices normales: ~/\:.mplayer/\:font/\:font.desc,
 pour les polices FreeType: ~/.mplayer/\:subfont.ttf).
 .br
 .I NOTE:
 Avec FreeType, cette option détermine le chemin vers le fichier de polices.
-Avec Fontconfig, cette option détermine le nom de police fontconfig.
+Avec Fontconfig, cette option détermine le motif de police Fontconfig.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -2370,7 +2375,9 @@ Avec Fontconfig, cette option détermine le nom de police fontconfig.
 .br
 \-font ~/\:.mplayer/\:arialuni.ttf
 .br
-\-font 'Bitstream Vera Sans'
+\-font 'Bitstream Vera Sans:style'
+.br
+\-font 'Bitstream Vera Sans:style=Bold'
 .RE
 .PD 1
 .
@@ -2615,8 +2622,8 @@ Inutile actuellement.
 Identique à \-audiofile, mais pour les flux de sous-titres (OggDS ?).
 .
 .TP
-.B \-subfont <filename> (FreeType uniquement)
-Spécifie la police des sous-titres.
+.B \-subfont <chemin vers la police (FreeType), motif de police (Fontconfig)> (FreeType uniquement)
+Spécifie la police des sous-titres (voir \-font).
 Si \-subfont n'est pas spécifié, \-font est utilisé.
 .
 .TP
