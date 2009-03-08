@@ -2108,11 +2108,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	}
 	
 	// fix clip coordinates (they depend on alignment)
-	render_context.clip_x0 = x2scr(render_context.clip_x0);
-	render_context.clip_x1 = x2scr(render_context.clip_x1);
 	if (render_context.evt_type == EVENT_NORMAL ||
 	    render_context.evt_type == EVENT_HSCROLL ||
 	    render_context.evt_type == EVENT_VSCROLL) {
+		render_context.clip_x0 = x2scr(render_context.clip_x0);
+		render_context.clip_x1 = x2scr(render_context.clip_x1);
 		if (valign == VALIGN_TOP) {
 			render_context.clip_y0 = y2scr_top(render_context.clip_y0);
 			render_context.clip_y1 = y2scr_top(render_context.clip_y1);
@@ -2124,8 +2124,10 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			render_context.clip_y1 = y2scr_sub(render_context.clip_y1);
 		}
 	} else if (render_context.evt_type == EVENT_POSITIONED) {
-		render_context.clip_y0 = y2scr(render_context.clip_y0);
-		render_context.clip_y1 = y2scr(render_context.clip_y1);
+		render_context.clip_x0 = x2scr_pos(render_context.clip_x0);
+		render_context.clip_x1 = x2scr_pos(render_context.clip_x1);
+		render_context.clip_y0 = y2scr_pos(render_context.clip_y0);
+		render_context.clip_y1 = y2scr_pos(render_context.clip_y1);
 	}
 
 	// calculate rotation parameters
