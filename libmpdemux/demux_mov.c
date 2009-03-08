@@ -2192,7 +2192,6 @@ if(trak->pos==0 && trak->stream_header_len>0){
       if (samplenr < 0)
         vo_sub = NULL;
       else if (samplenr != priv->current_sub) {
-        av_unused sh_sub_t *sh = demuxer->sub->sh;
         off_t pos = trak->samples[samplenr].pos;
         int len = trak->samples[samplenr].size;
         double subpts = (double)trak->samples[samplenr].pts / (double)trak->timescale;
