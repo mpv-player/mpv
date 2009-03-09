@@ -56,8 +56,8 @@
 #endif
 
 char *subtitle_font_encoding = NULL;
-float text_font_scale_factor = 5.0;
-float osd_font_scale_factor = 6.0;
+float text_font_scale_factor = 3.5;
+float osd_font_scale_factor = 4.0;
 float subtitle_font_radius = 2.0;
 float subtitle_font_thickness = 2.0;
 // 0 = no autoscale
