@@ -18,6 +18,7 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <inttypes.h>
+#include "libvo/fastmemcpy.h"
 
 //#define ARR_SIZE 100000
 #define ARR_SIZE (1024*768*2)
@@ -113,7 +114,7 @@ int main(void)
     t  = GetTimer();
     v1 = read_tsc();
     for (i = 0; i < 100; i++)
-        memcpy(marr1, marr2, ARR_SIZE - 16);
+        fast_memcpy(marr1, marr2, ARR_SIZE - 16);
     v2 = read_tsc();
     t  = GetTimer() - t;
     // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t

@@ -1029,8 +1029,8 @@ TOOLS/fastmem-mga-sse$(EXESUF): CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=0 -DHAVE_
 
 fastmemcpybench: $(addsuffix $(EXESUF),$(addprefix TOOLS/fastmem-,c mmx k6 k7 sse mga-mmx mga-k6 mga-k7 mga-sse))
 
-TOOLS/fastmem-%$(EXESUF): TOOLS/fastmemcpybench.c
-	$(CC) $(CFLAGS) -o $@ $<
+TOOLS/fastmem-%$(EXESUF): TOOLS/fastmemcpybench.c libvo/aclib.c
+	$(CC) $(CFLAGS) -o $@ $^
 
 REAL_SRCS    = $(wildcard TOOLS/realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
