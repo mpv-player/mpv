@@ -2,7 +2,8 @@ Due to a lack of Windows developers, it is a good idea to allow Linux
 developers to do at least some basic check of their code.
 This HOWTO explains how to set up MinGW cross-compilation under Debian.
 
-First, you need to install the "mingw32" package and get a MPlayer SVN checkou.
+First, you need to install the "mingw32" package and get a MPlayer SVN
+checkout.
 
 Next, you need quite a lot of dependencies. Since this is for testing and
 not actually use, the easiest way is to use this package:
