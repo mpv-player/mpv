@@ -132,7 +132,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     len = mpi->width*mpi->height*3/2;
     // Try lzo ???
     if(vf->priv->lzo) {
-      r = lzo1x_1_compress(mpi->planes[0],mpi->width*mpi->height*3/2,
+      r = lzo1x_1_compress(mpi->planes[0],len,
 			   zdata,&zlen,vf->priv->zmem);
       if(r != LZO_E_OK) {
 	mp_msg(MSGT_VFILTER,MSGL_ERR,"LZO compress error\n");
