@@ -154,7 +154,7 @@ License:    GNU General Public License
 Name:       NuppelVideo / RTJPEG
 Version:    0.52a + patches
 Homepage:   http://web.archive.org/web/20060219034716/http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/
-Directory:  libmpcodecs/native/rtjpegn.[ch] libmpdemux/nuppelvideo.h
+Directory:  libmpcodecs/native/rtjpegn.[ch]
 Copyright:  1998 Justin Schoeman (justin@suntiger.ee.up.ac.za)
             1998, 1999 Joerg Walter <trouble@moes.pmnet.uni-oldenburg.de>
             1999 Wim Taymans <wim.taymans@tvd.be>
