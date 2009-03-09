@@ -24,8 +24,7 @@
 #include "native/rtjpegn.h"
 
 #define LZO_AL(size) (((size) + (sizeof(long) - 1)) / sizeof(long))
-#define LZO_IN_LEN          (1024*1024L)
-#define LZO_OUT_LEN         (LZO_IN_LEN + LZO_IN_LEN / 64 + 16 + 3)
+#define LZO_OUT_LEN(in)     ((in) + (in) / 64 + 16 + 3)
 
 //===========================================================================//
 
@@ -85,6 +84,8 @@ static int config(struct vf_instance_s* vf,
   mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
   mux_v->aspect = (float)d_width/d_height;
   vf->priv->buffer = realloc(vf->priv->buffer,vf->priv->buf_size);
+  if (vf->priv->lzo)
+    vf->priv->zbuffer = realloc(vf->priv->zbuffer, FRAMEHEADERSIZE + LZO_OUT_LEN(vf->priv->buf_size));
   vf->priv->tbl_wrote = 0;
 
   return 1;
@@ -218,8 +219,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     if(lzo_init() != LZO_E_OK) {
       mp_msg(MSGT_VFILTER,MSGL_WARN,"LZO init failed: no lzo compression\n");
       vf->priv->lzo = 0;
-    }
-    vf->priv->zbuffer = (lzo_bytep)malloc(FRAMEHEADERSIZE + LZO_OUT_LEN);
+    } else
     vf->priv->zmem = malloc(sizeof(long)*LZO_AL(LZO1X_1_MEM_COMPRESS));
   }
 
