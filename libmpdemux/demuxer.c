@@ -45,7 +45,6 @@ extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_avi;
 extern const demuxer_desc_t demuxer_desc_y4m;
 extern const demuxer_desc_t demuxer_desc_asf;
-extern const demuxer_desc_t demuxer_desc_nuv;
 extern const demuxer_desc_t demuxer_desc_real;
 extern const demuxer_desc_t demuxer_desc_smjpeg;
 extern const demuxer_desc_t demuxer_desc_matroska;
@@ -100,7 +99,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_y4m,
     &demuxer_desc_asf,
     &demuxer_desc_nsv,
-    &demuxer_desc_nuv,
     &demuxer_desc_real,
     &demuxer_desc_smjpeg,
     &demuxer_desc_matroska,
