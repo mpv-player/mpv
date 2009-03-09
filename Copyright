@@ -9,22 +9,24 @@ from several external sources:
 
 Name:       FFmpeg
 Version:    Subversion HEAD
-Homepage:   http://www.ffmpeg.org
+URL:        http://www.ffmpeg.org
 Directory:  libavcodec, libavformat, libavutil, libpostproc
 Copyright:  Many, see individual files for copyright notices.
 License:    GNU Lesser General Public License, some parts GNU General Public
             License, GNU General Public License when combined
 
+
 Name:       FAAD2
 Version:    2.1 beta (20040915 CVS snapshot) + fixes and portability patches
-Homepage:   http://www.audiocoding.com
+URL:        http://www.audiocoding.com
 Directory:  libfaad2
 Copyright:  2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 License:    GNU General Public License
 
+
 Name:       GSM 06.10 library
 Version:    patchlevel 10
-Homepage:   http://kbs.cs.tu-berlin.de/~jutta/toast.html
+URL:        http://kbs.cs.tu-berlin.de/~jutta/toast.html
 Directory:  libmpcodecs/native/
 Copyright:  1992 by Jutta Degener and Carsten Bormann, TU Berlin
 License:    permissive, see libmpcodecs/native/xa_gsm.c
@@ -32,7 +34,7 @@ License:    permissive, see libmpcodecs/native/xa_gsm.c
 
 Name:       liba52
 Version:    0.7.4 + patches
-Homepage:   http://liba52.sourceforge.net/
+URL:        http://liba52.sourceforge.net/
 Directory:  liba52
 Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
             2000-2001 Michel Lespinasse <walken@zoy.org>
@@ -41,12 +43,14 @@ Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
             2004 Romain Dolbeau <romain@dolbeau.org>
 License:    GNU General Public License
 
+
 Name:       libdvdcss
 Version:    1.2.10
-Homepage:   http://developers.videolan.org/libdvdcss/
+URL:        http://developers.videolan.org/libdvdcss/
 Directory:  libdvdcss
 Copyright:  1998-2008 VideoLAN
 License:    GNU General Public License
+
 
 Name:       libdvdread
 Version:    0.9.7 + patches
@@ -60,9 +64,10 @@ Copyright:  1998, 1999 Eric Smith <eric@brouhaha.com>
             2000-2003 Håkan Hjort <d95hjort@dtek.chalmers.se>
 License:    GNU General Public License
 
+
 Name:       libmpeg2
 Version:    0.5.1 + patches
-Homepage:   http://libmpeg2.sourceforge.net/
+URL:        http://libmpeg2.sourceforge.net/
 Directory:  libmpeg2
 Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
             2000-2004 Michel Lespinasse <walken@zoy.org>
@@ -72,25 +77,28 @@ Copyright:  1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
             2003 Peter Gubanov <peter@elecard.net.ru>
 License:    GNU General Public License
 
+
 Name:       mpg123
 Version:    0.59s + significant changes
-Homepage:   http://www.mpg123.de/
+URL:        http://www.mpg123.de/
 Directory:  mp3lib
 Copyright:  1995-1999 by Michael Hipp
             2004 Romain Dolbeau <romain@dolbeau.org>
             2006 Zuxy Meng <zuxy.meng@gmail.com
 License:    GNU General Public License
 
+
 Name:       Tremor
 Version:    1.0 + parts CVS from December 2004 + patches
-Homepage:   http://xiph.org/
+URL:        http://xiph.org/
 Directory:  tremor
 Copyright:  1994-2002, Xiph.org Foundation http://www.xiph.org/
 License:    BSD-like, see tremor/COPYING
 
+
 Name:       avifile DLL loader
 Version:    0.47 + patches + CVS updates
-Homepage:   http://avifile.sourceforge.net/
+URL:        http://avifile.sourceforge.net/
 Directory:  loader/
 Copyright:  1993 Robert J. Amstadt
             1994 Eric Youndale & Erik Bos
@@ -101,68 +109,77 @@ Copyright:  1993 Robert J. Amstadt
             2000-2001 Eugene Kuznetsov (divx@euro.ru)
 License:    GNU General Public License
 
+
 Name:       dvbstream
 Version:    0.4.3-pre3 (CVS checkout)
-Homepage:   http://sourceforge.net/projects/dvbtools/
+URL:        http://sourceforge.net/projects/dvbtools/
 Directory:  stream/dvbin.h stream/rtp.[ch] stream/stream_dvb.c
 Copyright:  2001-2002 Dave Chapman <dave@dchapman.com>
 License:    GNU General Public License
 
+
 Name:       librtsp
 Version:    xine CVS 2003/04/10 + patches
-Homepage:   http://www.xinehq.de
+URL:        http://www.xinehq.de
 Directory:  stream/librtsp/
 Copyright:  2000-2002 the xine project
 License:    GNU General Public License
 
+
 Name:       realrtsp
 Version:    xine CVS 2003/04/17 + patches
-Homepage:   http://www.xinehq.de
+URL:        http://www.xinehq.de
 Directory:  stream/realrtsp/
 Copyright:  2002 the xine project
 License:    GNU General Public License
 
+
 Name:       pnm protocol implementation
 Version:    xine CVS 2002/12/26 + patches
-Homepage:   http://www.xinehq.de
+URL:        http://www.xinehq.de
 Directory:  stream/pnm.[ch]
 Copyright:  2000-2002 the xine project
 License:    GNU General Public License
 
+
 Name:       id3edit
 Version:    1.9 + patches
-Homepage:   http://id3edit.sourceforge.net/
+URL:        http://id3edit.sourceforge.net/
 Directory:  libmpdemux/genres.h
 Copyright:  2001 Jason Carter
 License:    GNU General Public License
 
+
 Name:       FreeSDP
 Version:    0.4.1
-Homepage:   https://savannah.nongnu.org/projects/freesdp/
+URL:        https://savannah.nongnu.org/projects/freesdp/
 Directory:  stream/freesdp/
 Copyright:  2001-2003 Federico Montesino Pouzols <fedemp@suidzer0.org>
 License:    GNU General Public License
 
+
 Name:       MJPEG Tools
 Version:    post 2001-12-03 release or CVS snapshot
-Homepage:   http://mjpeg.sourceforge.net/
+URL:        http://mjpeg.sourceforge.net/
 Directory:  libmpdemux/yuv4mpeg*
 Copyright:  2001 Matthew J. Marjanovic <maddog@mir.com>
             2001 Andrew Stevens <andrew.stevens@philips.com>
 License:    GNU General Public License
 
+
 Name:       NuppelVideo / RTJPEG
 Version:    0.52a + patches
-Homepage:   http://web.archive.org/web/20060219034716/http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/
+URL:        http://web.archive.org/web/20060219034716/http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/
 Directory:  libmpcodecs/native/rtjpegn.[ch]
 Copyright:  1998 Justin Schoeman (justin@suntiger.ee.up.ac.za)
             1998, 1999 Joerg Walter <trouble@moes.pmnet.uni-oldenburg.de>
             1999 Wim Taymans <wim.taymans@tvd.be>
 License:    GNU General Public License
 
+
 Name:       ReactOS
 Version:    r25937
-Homepage:   http://www.reactos.org/
+URL:        http://www.reactos.org/
 Directory:  vidix/dhahelperwin/ntverp.h vidix/dhahelperwin/common.ver
 Copyright:  Alex Ionescu (alex.ionescu@reactos.org)
 License:    GNU General Public License
