@@ -53,15 +53,25 @@ License:    GNU General Public License
 
 
 Name:       libdvdread
-Version:    0.9.7 + patches
-Homepage:   http://www.dtek.chalmers.se/groups/dvd/development.shtml
-Directory:  libdvdread
+Version:    Subversion HEAD
+URL:        svn://svn.mplayerhq.hu/dvdnav/trunk/libdvdread/src
+Directory:  libdvdread4
 Copyright:  1998, 1999 Eric Smith <eric@brouhaha.com>
             1999 Christian Wolff for convergence integrated media
-            2000-2001 Billy Biggs <vektor@dumbterm.net>,
+            2000-2004 Billy Biggs <vektor@dumbterm.net>,
             2001-2002 Samuel Hocevar <sam@zoy.org>,
-            2000-2003 Björn Englund <d4bjorn@dtek.chalmers.se>,
-            2000-2003 Håkan Hjort <d95hjort@dtek.chalmers.se>
+            2000-2004 Björn Englund <d4bjorn@dtek.chalmers.se>,
+            2000-2004 Håkan Hjort <d95hjort@dtek.chalmers.se>
+License:    GNU General Public License
+
+
+Name:       libdvdnav
+Version:    Subversion HEAD from
+URL:        svn://svn.mplayerhq.hu/dvdnav/trunk/libdvdnav/src
+Directory:  libdvdnav
+Copyright:  2000, 2001 Martin Norbäck, Håkan Hjort
+            2000-2004 Rich Wareham <richwareham@users.sourceforge.net>
+            2001-2004 the dvdnav project
 License:    GNU General Public License
 
 
