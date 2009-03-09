@@ -68,6 +68,8 @@ m_option_t nuvopts_conf[]={
 //===========================================================================//
 
 
+#define COMPDATASIZE (128*4)
+
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
@@ -75,8 +77,8 @@ static int config(struct vf_instance_s* vf,
   // We need a buffer wich can holda header and a whole YV12 picture
   // or a RTJpeg table
   vf->priv->buf_size = width*height*3/2+FRAMEHEADERSIZE;
-  if(vf->priv->buf_size < (int)(128*sizeof(long int) + FRAMEHEADERSIZE))
-    vf->priv->buf_size = 128*sizeof(long int) + FRAMEHEADERSIZE;
+  if(vf->priv->buf_size < COMPDATASIZE + FRAMEHEADERSIZE)
+    vf->priv->buf_size = COMPDATASIZE + FRAMEHEADERSIZE;
 
   mux_v->bih->biWidth=width;
   mux_v->bih->biHeight=height;
@@ -110,16 +112,16 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     
   // This has to be don here otherwise tv with sound doesn't work
   if(!vf->priv->tbl_wrote) {    
-    RTjpeg_init_compress((long int*)data,mpi->width,mpi->height,vf->priv->q);
+    RTjpeg_init_compress((uint32_t *)data,mpi->width,mpi->height,vf->priv->q);
     RTjpeg_init_mcompress();
 
     ench->frametype = 'D'; // compressor data
     ench->comptype  = 'R'; // compressor data for RTjpeg
-    ench->packetlength = 128*sizeof(long int);
+    ench->packetlength = COMPDATASIZE;
   
     le2me_rtframeheader(ench);
     mux_v->buffer=vf->priv->buffer;
-    muxer_write_chunk(mux_v,FRAMEHEADERSIZE + 128*sizeof(long int), 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
+    muxer_write_chunk(mux_v,FRAMEHEADERSIZE + COMPDATASIZE, 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     vf->priv->tbl_wrote = 1;
     memset(ench,0,FRAMEHEADERSIZE); // Reset the header
   }
