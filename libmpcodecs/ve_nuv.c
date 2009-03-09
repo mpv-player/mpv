@@ -105,7 +105,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
   struct rtframeheader* ench = (struct rtframeheader*)vf->priv->buffer;
   uint8_t* data = vf->priv->buffer + FRAMEHEADERSIZE;
   uint8_t* zdata = vf->priv->zbuffer + FRAMEHEADERSIZE;
-  int len = 0, zlen = 0,r;
+  int len = 0, r;
+  size_t zlen = 0;
 
   memset(vf->priv->buffer,0,FRAMEHEADERSIZE); // Reset the header
   if(vf->priv->lzo)
