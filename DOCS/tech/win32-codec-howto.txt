@@ -53,7 +53,7 @@ New Method:
 
 Using Microsoft GraphEdit (fast)
 
-- Get GraphEdit from either DirectX SDK or doom9.
+- Get GraphEdit from the Microsoft SDK, DirectX SDK or doom9.
 - Start 'graphedit.exe'.
 - From the menu select "Graph -> Insert Filters".
 - Expand item "DirectShow Filters".
