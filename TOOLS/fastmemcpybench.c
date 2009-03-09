@@ -1,10 +1,10 @@
 /*
-   fastmemcpybench.c used to benchmark fastmemcpy.h code from libvo.
-
-   Note: this code can not be used on PentMMX-PII because they contain
-   a bug in rdtsc. For Intel processors since P6(PII) rdpmc should be used
-   instead. For PIII it's disputable and seems bug was fixed but I don't
-   tested it.
+ * benchmark tool for fast_memcpy code from libvo
+ *
+ * NOTE: This code can not be used on Pentium MMX / II because they contain
+ * a bug in rdtsc. For Intel processors since P6(PII) rdpmc should be used
+ * instead. For PIII it's disputable and it seems the bug was fixed but this
+ * was not confirmed through testing.
 */
 
 /* According to Uoti this code is broken. */
@@ -34,7 +34,7 @@ static int mga_init(void)
 {
     f = open("/dev/mga_vid", O_RDWR);
     if (f == -1) {
-        fprintf(stderr, "Couldn't open /dev/mga_vid\n");
+        fprintf(stderr, "Couldn't open /dev/mga_vid.\n");
         return -1;
     }
 
@@ -61,7 +61,7 @@ static int mga_init(void)
     frame = (char*)mmap(0, mga_vid_config.frame_size*mga_vid_config.num_frames,
                         PROT_WRITE,MAP_SHARED, f, 0);
     if (!frame) {
-        printf("Can't mmap mga frame\n");
+        printf("Can't mmap MGA frame.\n");
         exit(1);
     }
 
@@ -117,7 +117,7 @@ int main(void)
     v2 = read_tsc();
     t  = GetTimer() - t;
     // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
-    printf(NAME ": cpu clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
+    printf(NAME ": CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
            100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
     return 0;
 }
