@@ -37,6 +37,7 @@ MPlayer (1.0)
     * Brooktree YUV 4:1:1 Raw (Y41P) via binary DLL
     * many rare/obscure fourccs for known formats added
     * lower priority for binary Linux rv3040 codecs due to bugs
+    * remove native NuppleVideo decoder, use lavc instead
 
     Demuxers:
     * -lavfdopts cryptokey allows decrypting MXF and ASF files
@@ -55,6 +56,7 @@ MPlayer (1.0)
     * support seeking in multirate RealMedia files
     * FLAC speedup in lavf demuxer
     * MNG demuxer
+    * remove native NuppleVideo demuxer, use lavf demuxer instead
 
     Filters:
     * vf_ow new overcomplete wavelet denoiser
@@ -166,6 +168,8 @@ MPlayer (1.0)
     * libdvdcss updated to 1.2.10, now same as upstream version
     * fix -endchapter support again for -dump* options
     * add startup volume option
+    * add option to disable default key binds
+    * change default OSD and subtitle font size to a smaller default
 
     libass:
     * various fixes and updates to match VSFilter renderer
