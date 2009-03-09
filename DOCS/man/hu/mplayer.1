@@ -1,4 +1,4 @@
-.\" Synced with r28807
+.\" Synced with r28895
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 03. 05." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 03. 09." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -958,6 +958,8 @@ Az Apple IR távirányítóhoz használt eszköz (alapértelmezetten automatikus detekt
 Egy gomb automatikus ismétlése elõtti késleltetés miliszekundumban (0: kikapcsolás).
 .IPs ar-rate
 Billentyû/másodperc érték megadása autorepeat használata esetén.
+.IPs (no)default-binds
+Az alapértelmezetten MPlayerbe épített billentyû-hozzárendeléseket használja.
 .IPs keylist
 Az összes használható billentyû listájának kiírása.
 .IPs cmdlist
@@ -1134,6 +1136,8 @@ parancsokat olvas az stdin-rõl.
 .I MEGJEGYZÉS:
 A \-input cmdlist kapcsoló kilistázza a szolga módban használható parancsokat,
 a DOCS/tech/slave.txt fájlban megtalálod a leírásukat.
+Ez nem a többi, pl. a videó ablakon keresztül érkezõ input letiltására készült,
+arra használj mást, mint a \-input nodefault\-binds:conf=/dev/null.
 .
 .TP
 .B \-softsleep
@@ -2258,14 +2262,14 @@ Akkor használd, ha a feliratban lévõ vesszõk a mondat elején látszódnak
 és nem a végén.
 .
 .TP
-.B \-font <útvonal a font.desc fájlhoz>
+.B \-font <útvonal a font.desc fájlhoz, útvonal a betûtípushoz (FreeType), betûtípus minta (Fontconfig)>
 Az OSD/\:SUB betûtipusok megadott könyvtárban történõ keresése
 (normál fontoknál alapértelmezett:
 ~/\:.mplayer/\:font/\:font.desc, FreeType fontokhoz: ~/.mplayer/\:subfont.ttf).
 .br
 .I MEGJEGYZÉS:
 FreeType-pal ez az opció a szöveges betûtípus fájlok elérési útját határozza meg.
-A fontconfig-gal ez az opció a fontconfig betûtípus nevét határozza meg.
+A fontconfig-gal ez az opció a Fontconfig betûtípus mintáját határozza meg.
 .sp 1
 .I PÉLDA:
 .PD 0
@@ -2275,6 +2279,8 @@ A fontconfig-gal ez az opció a fontconfig betûtípus nevét határozza meg.
 \-font ~/\:.mplayer/\:arialuni.ttf
 .br
 \-font 'Bitstream Vera Sans'
+.br
+\-font 'Bitstream Vera Sans:style=Bold'
 .RE
 .PD 1
 .
@@ -2514,9 +2520,9 @@ Jelenleg haszontalan.
 Ugyan az, mint az \-audiofile, de felirat folyamokra (OggDS?).
 .
 .TP
-.B \-subfont <fájlnév> (csak FreeType)
-Beállítja a felirat betûtípusát.
-Ha nincs megafva a \-subfont, a \-font lesz használva.
+.B \-subfont <útvonal a betûtípushoz (FreeType), betûtípus minta (Fontconfig)> (csak FreeType)
+Beállítja a felirat betûtípusát (lásd \-font).
+Ha nincs megadva a \-subfont, a \-font lesz használva.
 .
 .TP
 .B \-subfont\-autoscale <0\-3> (csak FreeType)
