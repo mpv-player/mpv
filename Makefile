@@ -986,7 +986,7 @@ tests: $(addsuffix $(EXESUF),$(TESTS))
 testsclean:
 	-rm -f $(foreach file,$(TESTS),$(call ADD_ALL_EXESUFS,$(file)))
 
-TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 movinfo netstream subrip vivodump)
+TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 fastmemcpybench movinfo netstream subrip vivodump)
 
 ifdef ARCH_X86
 TOOLS += TOOLS/modify_reg
@@ -999,7 +999,7 @@ alltools: $(addsuffix $(EXESUF),$(ALLTOOLS))
 
 toolsclean:
 	-rm -f $(foreach file,$(ALLTOOLS),$(call ADD_ALL_EXESUFS,$(file)))
-	-rm -f TOOLS/fastmem-* TOOLS/realcodecs/*.so.6.0
+	-rm -f TOOLS/realcodecs/*.so.6.0
 
 TOOLS/bmovl-test$(EXESUF): -lSDL_image
 
@@ -1016,27 +1016,11 @@ TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c
 TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF): $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
 	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS_MENCODER) $(COMMON_LDFLAGS)
 
-TOOLS/fastmem-c$(EXESUF):       CFLAGS += -DHAVE_MMX=0 -DHAVE_AMD3DNOW=0 -DHAVE_MMX2=0 -DHAVE_SSE=0 -DNAME=\"C\"
-TOOLS/fastmem-mmx$(EXESUF):     CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=0 -DHAVE_MMX2=0 -DHAVE_SSE=0 -DNAME=\"MMX\"
-TOOLS/fastmem-k6$(EXESUF):      CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=1 -DHAVE_MMX2=0 -DHAVE_SSE=0 -DNAME=\"K6\"
-TOOLS/fastmem-k7$(EXESUF):      CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=1 -DHAVE_MMX2=1 -DHAVE_SSE=0 -DNAME=\"K7\"
-TOOLS/fastmem-sse$(EXESUF):     CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=0 -DHAVE_MMX2=1 -DHAVE_SSE=1 -DNAME=\"SSE\"
-TOOLS/fastmem-mga-mmx$(EXESUF): CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=0 -DHAVE_MMX2=0 -DHAVE_SSE=0 -DNAME=\"MGA-MMX\"  -DCONFIG_MGA
-TOOLS/fastmem-mga-k6$(EXESUF):  CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=1 -DHAVE_MMX2=0 -DHAVE_SSE=0 -DNAME=\"MGA-K6\"   -DCONFIG_MGA
-TOOLS/fastmem-mga-k7$(EXESUF):  CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=1 -DHAVE_MMX2=1 -DHAVE_SSE=0 -DNAME=\"MGA-K7\"   -DCONFIG_MGA
-TOOLS/fastmem-mga-sse$(EXESUF): CFLAGS += -DHAVE_MMX=1 -DHAVE_AMD3DNOW=0 -DHAVE_MMX2=1 -DHAVE_SSE=1 -DNAME=\"MGA-SSE\"  -DCONFIG_MGA
-
-fastmemcpybench: $(addsuffix $(EXESUF),$(addprefix TOOLS/fastmem-,c mmx k6 k7 sse mga-mmx mga-k6 mga-k7 mga-sse))
-
-TOOLS/fastmem-%$(EXESUF): TOOLS/fastmemcpybench.c libvo/aclib.c
-	$(CC) $(CFLAGS) -o $@ $^
-
 REAL_SRCS    = $(wildcard TOOLS/realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
 
 realcodecs: $(REAL_TARGETS)
-
-fastmemcpybench realcodecs: CFLAGS += -g
+realcodecs: CFLAGS += -g
 
 %.so.6.0: %.o
 	ld -shared -o $@ $< -ldl -lc

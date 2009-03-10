@@ -7,8 +7,6 @@
  * was not confirmed through testing.
 */
 
-/* According to Uoti this code is broken. */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +16,92 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <inttypes.h>
-#include "libvo/fastmemcpy.h"
+
+#include "config.h"
+#include "cpudetect.h"
+
+#define BLOCK_SIZE 4096
+#define CONFUSION_FACTOR 0
+
+#if HAVE_MMX
+#define COMPILE_MMX
+#endif
+
+#if HAVE_MMX2
+#define COMPILE_MMX2
+#endif
+
+#if HAVE_AMD3DNOW
+#define COMPILE_AMD3DNOW
+#endif
+
+#if HAVE_SSE
+#define COMPILE_SSE
+#endif
+
+#ifdef COMPILE_MMX
+#undef RENAME
+#undef HAVE_MMX
+#undef HAVE_MMX2
+#undef HAVE_AMD3DNOW
+#undef HAVE_SSE
+#undef HAVE_SSE2
+#define HAVE_MMX 1
+#define HAVE_MMX2 0
+#define HAVE_AMD3DNOW 0
+#define HAVE_SSE 0
+#define HAVE_SSE2 0
+#define RENAME(a) a ## _MMX
+#include "libvo/aclib_template.c"
+#endif
+
+#ifdef COMPILE_MMX2
+#undef RENAME
+#undef HAVE_MMX
+#undef HAVE_MMX2
+#undef HAVE_AMD3DNOW
+#undef HAVE_SSE
+#undef HAVE_SSE2
+#define HAVE_MMX 1
+#define HAVE_MMX2 1
+#define HAVE_AMD3DNOW 0
+#define HAVE_SSE 0
+#define HAVE_SSE2 0
+#define RENAME(a) a ## _MMX2
+#include "libvo/aclib_template.c"
+#endif
+
+#ifdef COMPILE_AMD3DNOW
+#undef RENAME
+#undef HAVE_MMX
+#undef HAVE_MMX2
+#undef HAVE_AMD3DNOW
+#undef HAVE_SSE
+#undef HAVE_SSE2
+#define HAVE_MMX 1
+#define HAVE_MMX2 0
+#define HAVE_AMD3DNOW 1
+#define HAVE_SSE 0
+#define HAVE_SSE2 0
+#define RENAME(a) a ## _3DNow
+#include "libvo/aclib_template.c"
+#endif
+
+#ifdef COMPILE_SSE
+#undef RENAME
+#undef HAVE_MMX
+#undef HAVE_MMX2
+#undef HAVE_AMD3DNOW
+#undef HAVE_SSE
+#undef HAVE_SSE2
+#define HAVE_MMX 1
+#define HAVE_MMX2 1
+#define HAVE_AMD3DNOW 0
+#define HAVE_SSE 1
+#define HAVE_SSE2 1
+#define RENAME(a) a ## _SSE
+#include "libvo/aclib_template.c"
+#endif
 
 //#define ARR_SIZE 100000
 #define ARR_SIZE (1024*768*2)
@@ -114,11 +197,60 @@ int main(void)
     t  = GetTimer();
     v1 = read_tsc();
     for (i = 0; i < 100; i++)
-        fast_memcpy(marr1, marr2, ARR_SIZE - 16);
+        memcpy(marr1, marr2, ARR_SIZE - 16);
     v2 = read_tsc();
     t  = GetTimer() - t;
     // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
-    printf(NAME ": CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
+    printf("libc:   CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
            100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+
+#if HAVE_MMX
+    t  = GetTimer();
+    v1 = read_tsc();
+    for (i = 0; i < 100; i++)
+        fast_memcpy_MMX(marr1, marr2, ARR_SIZE - 16);
+    v2 = read_tsc();
+    t  = GetTimer() - t;
+    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
+    printf("MMX:    CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
+           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+#endif
+
+#if HAVE_AMD3DNOW
+    t  = GetTimer();
+    v1 = read_tsc();
+    for (i = 0; i < 100; i++)
+        fast_memcpy_3DNow(marr1, marr2, ARR_SIZE - 16);
+    v2 = read_tsc();
+    t  = GetTimer() - t;
+    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
+    printf("3DNow!: CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
+           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+#endif
+
+#if HAVE_MMX2
+    t  = GetTimer();
+    v1 = read_tsc();
+    for (i = 0; i < 100; i++)
+        fast_memcpy_MMX2(marr1, marr2, ARR_SIZE - 16);
+    v2 = read_tsc();
+    t  = GetTimer() - t;
+    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
+    printf("MMX2:   CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
+           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+#endif
+
+#if HAVE_SSE
+    t  = GetTimer();
+    v1 = read_tsc();
+    for (i = 0; i < 100; i++)
+        fast_memcpy_SSE(marr1, marr2, ARR_SIZE - 16);
+    v2 = read_tsc();
+    t  = GetTimer() - t;
+    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
+    printf("SSE:    CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
+           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+#endif
+
     return 0;
 }
