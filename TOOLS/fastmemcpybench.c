@@ -194,62 +194,33 @@ int main(void)
     for (i = 0; i < ARR_SIZE - 16; i++)
         marr1[i] = marr2[i] = i;
 
-    t  = GetTimer();
-    v1 = read_tsc();
-    for (i = 0; i < 100; i++)
-        memcpy(marr1, marr2, ARR_SIZE - 16);
-    v2 = read_tsc();
-    t  = GetTimer() - t;
-    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
-    printf("libc:   CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
-           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+#define testblock(func, name)                                                \
+    t  = GetTimer();                                                         \
+    v1 = read_tsc();                                                         \
+    for (i = 0; i < 100; i++)                                                \
+        func(marr1, marr2, ARR_SIZE - 16);                                   \
+    v2 = read_tsc();                                                         \
+    t  = GetTimer() - t;                                                     \
+    /* ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t */   \
+    printf(name "CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t, \
+           100000000.0f / (float)t, (float)ARR_SIZE*95.36743f / (float)t);
+
+    testblock(memcpy, "libc:   ");
 
 #if HAVE_MMX
-    t  = GetTimer();
-    v1 = read_tsc();
-    for (i = 0; i < 100; i++)
-        fast_memcpy_MMX(marr1, marr2, ARR_SIZE - 16);
-    v2 = read_tsc();
-    t  = GetTimer() - t;
-    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
-    printf("MMX:    CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
-           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+    testblock(fast_memcpy_MMX, "MMX:    ");
 #endif
 
 #if HAVE_AMD3DNOW
-    t  = GetTimer();
-    v1 = read_tsc();
-    for (i = 0; i < 100; i++)
-        fast_memcpy_3DNow(marr1, marr2, ARR_SIZE - 16);
-    v2 = read_tsc();
-    t  = GetTimer() - t;
-    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
-    printf("3DNow!: CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
-           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+    testblock(fast_memcpy_3DNow, "3DNow!: ");
 #endif
 
 #if HAVE_MMX2
-    t  = GetTimer();
-    v1 = read_tsc();
-    for (i = 0; i < 100; i++)
-        fast_memcpy_MMX2(marr1, marr2, ARR_SIZE - 16);
-    v2 = read_tsc();
-    t  = GetTimer() - t;
-    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
-    printf("MMX2:   CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
-           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+    testblock(fast_memcpy_MMX2, "MMX2:   ");
 #endif
 
 #if HAVE_SSE
-    t  = GetTimer();
-    v1 = read_tsc();
-    for (i = 0; i < 100; i++)
-        fast_memcpy_SSE(marr1, marr2, ARR_SIZE - 16);
-    v2 = read_tsc();
-    t  = GetTimer() - t;
-    // ARR_SIZE*100 / (1024*1024) / (t/1000000) = ARR_SIZE*95.36743 / t
-    printf("SSE:    CPU clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n", v2-v1, t,
-           100000000.0f/(float)t, (float)ARR_SIZE*95.36743f/(float)t);
+    testblock(fast_memcpy_SSE, "SSE:    ");
 #endif
 
     return 0;
