@@ -46,6 +46,7 @@ typedef struct cpucaps_s {
 	int has3DNowExt;
 	int hasSSE;
 	int hasSSE2;
+	int hasSSE3;
 	int hasSSSE3;
 	int hasSSE4a;
 	int isX86;
