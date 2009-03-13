@@ -7768,13 +7768,11 @@ fi #if test "$_gui"
 # --------------- GUI specific tests end -------------------
 
 
-if test "$_charset" = "noconv" ; then
-  _charset=""
-fi
-if test "$_charset" ; then
+if test "$_charset" != "noconv" ; then
   def_charset="#define MSG_CHARSET \"$_charset\""
 else
   def_charset="#undef MSG_CHARSET"
+  _charset="UTF-8"
 fi
 
 if test -n "$_charset" && test "$_charset" != "UTF-8" ; then
