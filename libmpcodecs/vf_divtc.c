@@ -682,11 +682,10 @@ static int open(vf_instance_t *vf, char* args)
    if(!(p->history=calloc(sizeof *p->history, p->window)))
       goto nomem;
 
-   diff=
+   diff = diff_C;
 #if HAVE_MMX
-      gCpuCaps.hasMMX?diff_MMX:
+   if(gCpuCaps.hasMMX) diff = diff_MMX;
 #endif
-      diff_C;
 
    free(args);
    return 1;
