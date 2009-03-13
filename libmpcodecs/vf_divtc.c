@@ -69,7 +69,7 @@ static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 	"emms \n\t"
 	:
 	: "S" (old), "D" (new), "a" ((long)os), "b" ((long)ns), "d" (out)
-	: "memory"
+	: "%ecx", "memory"
 	);
    return out[0]+out[1]+out[2]+out[3];
    }
