@@ -379,7 +379,7 @@ static int preinit(const char *arg){
     int mc_ver,mc_rev;
     strarg_t ck_src_arg = { 0, NULL };
     strarg_t ck_method_arg = { 0, NULL };
-    opt_t subopts [] =
+    const opt_t subopts [] =
     {
         /* name         arg type      arg var           test */
         {  "port",      OPT_ARG_INT,  &xv_port_request, (opt_test_f)int_pos },
@@ -663,8 +663,6 @@ skip_surface_allocation:
         }
 #endif
     }
-
-    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0) vo_fs = 1;
 
 //end vo_xv
 

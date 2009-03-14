@@ -104,7 +104,7 @@ static char *gif_filename = NULL;
 // the default output filename
 #define DEFAULT_FILE "out.gif"
 
-static opt_t subopts[] = {
+static const opt_t subopts[] = {
   {"output",       OPT_ARG_MSTRZ, &gif_filename, NULL, 0},
   {"fps",          OPT_ARG_FLOAT, &target_fps,   NULL, 0},
   {NULL, 0, NULL, NULL, 0}

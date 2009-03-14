@@ -29,7 +29,6 @@ extern const vd_functions_t mpcodecs_vd_vfwex;
 extern const vd_functions_t mpcodecs_vd_raw;
 extern const vd_functions_t mpcodecs_vd_hmblck;
 extern const vd_functions_t mpcodecs_vd_xanim;
-extern const vd_functions_t mpcodecs_vd_nuv;
 extern const vd_functions_t mpcodecs_vd_mpng;
 extern const vd_functions_t mpcodecs_vd_ijpg;
 extern const vd_functions_t mpcodecs_vd_mtga;
@@ -64,7 +63,6 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     &mpcodecs_vd_lzo,
     &mpcodecs_vd_raw,
     &mpcodecs_vd_hmblck,
-    &mpcodecs_vd_nuv,
 #ifdef CONFIG_XANIM
     &mpcodecs_vd_xanim,
 #endif

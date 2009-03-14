@@ -59,7 +59,7 @@ static vo_mpegpes_t *pes;
 static int output = -1;
 static char *device = NULL;
 
-static opt_t subopts[] = {
+static const opt_t subopts[] = {
   {"output",   OPT_ARG_INT,       &output,       (opt_test_f)int_non_neg},
   {"device",   OPT_ARG_MSTRZ,     &device,       NULL},
   {NULL}

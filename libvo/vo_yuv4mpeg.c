@@ -513,7 +513,7 @@ static void check_events(void)
 static int preinit(const char *arg)
 {
   int il, il_bf;
-  opt_t subopts[] = {
+  const opt_t subopts[] = {
     {"interlaced",    OPT_ARG_BOOL, &il,    NULL},
     {"interlaced_bf", OPT_ARG_BOOL, &il_bf, NULL},
     {"file",          OPT_ARG_MSTRZ,  &yuv_filename,  NULL},

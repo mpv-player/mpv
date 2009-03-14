@@ -1128,6 +1128,7 @@ long long ass_step_sub(ass_track_t* track, long long now, int movement) {
 ass_track_t* ass_new_track(ass_library_t* library) {
 	ass_track_t* track = calloc(1, sizeof(ass_track_t));
 	track->library = library;
+	track->ScaledBorderAndShadow = 1;
 	track->parser_priv = calloc(1, sizeof(parser_priv_t));
 	return track;
 }

@@ -229,7 +229,7 @@ static int int_zero_to_nine(int *sh)
     return 1;
 }
 
-static opt_t subopts[] = {
+static const opt_t subopts[] = {
     {"alpha", OPT_ARG_BOOL, &use_alpha, NULL, 0},
     {"z",   OPT_ARG_INT, &z_compression, (opt_test_f)int_zero_to_nine},
     {NULL}

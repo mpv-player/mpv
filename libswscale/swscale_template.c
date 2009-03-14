@@ -230,28 +230,28 @@
     "test                  %%"REG_S", %%"REG_S"     \n\t"\
     " jnz                         2b                \n\t"\
 
-#define YSCALEYUV2PACKEDX_YA(offset) \
+#define YSCALEYUV2PACKEDX_YA(offset,coeff,src1,src2,dst1,dst2) \
     "lea                "offset"(%0), %%"REG_d"     \n\t"\
     "mov                 (%%"REG_d"), %%"REG_S"     \n\t"\
-    "movq      "VROUNDER_OFFSET"(%0), %%mm1         \n\t"\
-    "movq                      %%mm1, %%mm7         \n\t"\
+    "movq      "VROUNDER_OFFSET"(%0), "#dst1"       \n\t"\
+    "movq                    "#dst1", "#dst2"       \n\t"\
     ASMALIGN(4)\
     "2:                                             \n\t"\
-    "movq               8(%%"REG_d"), %%mm0         \n\t" /* filterCoeff */\
-    "movq  (%%"REG_S", %%"REG_a", 2), %%mm2         \n\t" /* Y1srcData */\
-    "movq 8(%%"REG_S", %%"REG_a", 2), %%mm5         \n\t" /* Y2srcData */\
+    "movq               8(%%"REG_d"), "#coeff"      \n\t" /* filterCoeff */\
+    "movq  (%%"REG_S", %%"REG_a", 2), "#src1"       \n\t" /* Y1srcData */\
+    "movq 8(%%"REG_S", %%"REG_a", 2), "#src2"       \n\t" /* Y2srcData */\
     "add                         $16, %%"REG_d"            \n\t"\
     "mov                 (%%"REG_d"), %%"REG_S"     \n\t"\
-    "pmulhw                    %%mm0, %%mm2         \n\t"\
-    "pmulhw                    %%mm0, %%mm5         \n\t"\
-    "paddw                     %%mm2, %%mm1         \n\t"\
-    "paddw                     %%mm5, %%mm7         \n\t"\
+    "pmulhw                 "#coeff", "#src1"       \n\t"\
+    "pmulhw                 "#coeff", "#src2"       \n\t"\
+    "paddw                   "#src1", "#dst1"       \n\t"\
+    "paddw                   "#src2", "#dst2"       \n\t"\
     "test                  %%"REG_S", %%"REG_S"     \n\t"\
     " jnz                         2b                \n\t"\
 
 #define YSCALEYUV2PACKEDX \
     YSCALEYUV2PACKEDX_UV \
-    YSCALEYUV2PACKEDX_YA(LUM_MMX_FILTER_OFFSET) \
+    YSCALEYUV2PACKEDX_YA(LUM_MMX_FILTER_OFFSET,%%mm0,%%mm2,%%mm5,%%mm1,%%mm7) \
 
 #define YSCALEYUV2PACKEDX_END                 \
     :: "r" (&c->redDither),                   \
@@ -458,11 +458,11 @@
     "pmulhw "VG_COEFF"("#c"), %%mm4     \n\t"\
     /* mm2=(U-128)8, mm3=ug, mm4=vg mm5=(V-128)8 */\
 
-#define REAL_YSCALEYUV2RGB_YA(index, c) \
-    "movq  (%0, "#index", 2), %%mm0     \n\t" /*buf0[eax]*/\
-    "movq  (%1, "#index", 2), %%mm1     \n\t" /*buf1[eax]*/\
-    "movq 8(%0, "#index", 2), %%mm6     \n\t" /*buf0[eax]*/\
-    "movq 8(%1, "#index", 2), %%mm7     \n\t" /*buf1[eax]*/\
+#define REAL_YSCALEYUV2RGB_YA(index, c, b1, b2) \
+    "movq  ("#b1", "#index", 2), %%mm0     \n\t" /*buf0[eax]*/\
+    "movq  ("#b2", "#index", 2), %%mm1     \n\t" /*buf1[eax]*/\
+    "movq 8("#b1", "#index", 2), %%mm6     \n\t" /*buf0[eax]*/\
+    "movq 8("#b2", "#index", 2), %%mm7     \n\t" /*buf1[eax]*/\
     "psubw             %%mm1, %%mm0     \n\t" /* buf0[eax] - buf1[eax]*/\
     "psubw             %%mm7, %%mm6     \n\t" /* buf0[eax] - buf1[eax]*/\
     "pmulhw "LUM_MMX_FILTER_OFFSET"+8("#c"), %%mm0  \n\t" /* (buf0[eax] - buf1[eax])yalpha1>>16*/\
@@ -501,11 +501,11 @@
     "packuswb          %%mm6, %%mm5     \n\t"\
     "packuswb          %%mm3, %%mm4     \n\t"\
 
-#define YSCALEYUV2RGB_YA(index, c) REAL_YSCALEYUV2RGB_YA(index, c)
+#define YSCALEYUV2RGB_YA(index, c, b1, b2) REAL_YSCALEYUV2RGB_YA(index, c, b1, b2)
 
 #define YSCALEYUV2RGB(index, c) \
     REAL_YSCALEYUV2RGB_UV(index, c) \
-    REAL_YSCALEYUV2RGB_YA(index, c) \
+    REAL_YSCALEYUV2RGB_YA(index, c, %0, %1) \
     REAL_YSCALEYUV2RGB_COEFF(c)
 
 #define REAL_YSCALEYUV2PACKED1(index, c) \
@@ -1663,7 +1663,7 @@ static inline void RENAME(name ## _half)(uint8_t *dstU, uint8_t *dstV, uint8_t *
     {\
         int pix0= ((type*)src)[2*i+0];\
         int pix1= ((type*)src)[2*i+1];\
-        int g= (pix0&(maskg|maska))+(pix1&(maskg|maska));\
+        int g= (pix0&~(maskr|maskb))+(pix1&~(maskr|maskb));\
         int b= ((pix0+pix1-g)&(maskb|(2*maskb)))>>shb;\
         int r= ((pix0+pix1-g)&(maskr|(2*maskr)))>>shr;\
         g&= maskg|(2*maskg);\

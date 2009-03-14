@@ -94,8 +94,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/dec_video.c \
               libmpcodecs/img_format.c \
               libmpcodecs/mp_image.c \
-              libmpcodecs/native/nuppelvideo.c \
-              libmpcodecs/native/rtjpegn.c \
               libmpcodecs/native/xa_gsm.c \
               libmpcodecs/pullup.c \
               libmpcodecs/vd.c \
@@ -104,7 +102,6 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vd_mpegpes.c \
               libmpcodecs/vd_mtga.c \
               libmpcodecs/vd_null.c \
-              libmpcodecs/vd_nuv.c \
               libmpcodecs/vd_raw.c \
               libmpcodecs/vd_sgi.c \
               libmpcodecs/vf.c \
@@ -189,7 +186,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/demux_mov.c \
               libmpdemux/demux_mpg.c \
               libmpdemux/demux_nsv.c \
-              libmpdemux/demux_nuv.c \
               libmpdemux/demux_pva.c \
               libmpdemux/demux_rawaudio.c \
               libmpdemux/demux_rawvideo.c \
@@ -603,6 +599,7 @@ SRCS_MPLAYER-$(IVTV)         += libao2/ao_ivtv.c libvo/vo_ivtv.c
 SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
 SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
 SRCS_MPLAYER-$(JPEG)         += libvo/vo_jpeg.c
+SRCS_MPLAYER-$(KVA)          += libvo/vo_kva.c
 SRCS_MPLAYER-$(LIBMENU)      += libmenu/menu.c \
                                 libmenu/menu_chapsel.c \
                                 libmenu/menu_cmdlist.c  \
@@ -691,7 +688,7 @@ SRCS_MENCODER-$(FAAC)             += libmpcodecs/ae_faac.c
 SRCS_MENCODER-$(LIBAVCODEC)       += libmpcodecs/ae_lavc.c libmpcodecs/ve_lavc.c
 SRCS_MENCODER-$(LIBAVFORMAT)      += libmpdemux/muxer_lavf.c
 SRCS_MENCODER-$(LIBDV)            += libmpcodecs/ve_libdv.c
-SRCS_MENCODER-$(LIBLZO)           += libmpcodecs/ve_nuv.c
+SRCS_MENCODER-$(LIBLZO)           += libmpcodecs/ve_nuv.c libmpcodecs/native/rtjpegn.c
 SRCS_MENCODER-$(MP3LAME)          += libmpcodecs/ae_lame.c
 SRCS_MENCODER-$(QTX_CODECS_WIN32) += libmpcodecs/ve_qtvideo.c
 SRCS_MENCODER-$(TOOLAME)          += libmpcodecs/ae_toolame.c
@@ -999,7 +996,7 @@ testsclean:
 TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 movinfo netstream subrip vivodump)
 
 ifdef ARCH_X86
-TOOLS += TOOLS/modify_reg
+TOOLS += TOOLS/fastmemcpybench TOOLS/modify_reg
 endif
 
 ALLTOOLS = $(TOOLS) TOOLS/bmovl-test TOOLS/vfw2menc
@@ -1009,7 +1006,7 @@ alltools: $(addsuffix $(EXESUF),$(ALLTOOLS))
 
 toolsclean:
 	-rm -f $(foreach file,$(ALLTOOLS),$(call ADD_ALL_EXESUFS,$(file)))
-	-rm -f TOOLS/fastmem*-* TOOLS/realcodecs/*.so.6.0
+	-rm -f TOOLS/realcodecs/*.so.6.0
 
 TOOLS/bmovl-test$(EXESUF): -lSDL_image
 
@@ -1026,22 +1023,11 @@ TOOLS/vivodump$(EXESUF): TOOLS/vivodump.c
 TOOLS/netstream$(EXESUF) TOOLS/vivodump$(EXESUF): $(subst mplayer.o,mplayer-nomain.o,$(OBJS_MPLAYER)) $(filter-out %mencoder.o,$(OBJS_MENCODER)) $(OBJS_COMMON) $(COMMON_LIBS)
 	$(CC) $(CFLAGS) -o $@ $^ $(EXTRALIBS_MPLAYER) $(EXTRALIBS_MENCODER) $(COMMON_LDFLAGS)
 
-fastmemcpybench: TOOLS/fastmemcpybench.c
-	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-mmx$(EXESUF)  -DNAME=\"mmx\"      -DHAVE_MMX
-	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-k6$(EXESUF)   -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_AMD3DNOW
-	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-k7$(EXESUF)   -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_AMD3DNOW -DHAVE_MMX2
-	$(CC) $(CFLAGS) $< -o TOOLS/fastmem-sse$(EXESUF)  -DNAME=\"sse\"      -DHAVE_MMX -DHAVE_SSE      -DHAVE_MMX2
-	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-mmx$(EXESUF) -DNAME=\"mga-mmx\"  -DCONFIG_MGA -DHAVE_MMX
-	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-k6$(EXESUF)  -DNAME=\"mga-k6\ \" -DCONFIG_MGA -DHAVE_MMX -DHAVE_AMD3DNOW
-	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-k7$(EXESUF)  -DNAME=\"mga-k7\ \" -DCONFIG_MGA -DHAVE_MMX -DHAVE_AMD3DNOW -DHAVE_MMX2
-	$(CC) $(CFLAGS) $< -o TOOLS/fastmem2-sse$(EXESUF) -DNAME=\"mga-sse\"  -DCONFIG_MGA -DHAVE_MMX -DHAVE_SSE      -DHAVE_MMX2
-
 REAL_SRCS    = $(wildcard TOOLS/realcodecs/*.c)
 REAL_TARGETS = $(REAL_SRCS:.c=.so.6.0)
 
 realcodecs: $(REAL_TARGETS)
-
-fastmemcpybench realcodecs: CFLAGS += -g
+realcodecs: CFLAGS += -g
 
 %.so.6.0: %.o
 	ld -shared -o $@ $< -ldl -lc

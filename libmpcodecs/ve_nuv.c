@@ -19,13 +19,12 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#include "libmpdemux/nuppelvideo.h"
+#include "libavutil/intreadwrite.h"
 #include <lzo/lzo1x.h>
 #include "native/rtjpegn.h"
 
 #define LZO_AL(size) (((size) + (sizeof(long) - 1)) / sizeof(long))
-#define LZO_IN_LEN          (1024*1024L)
-#define LZO_OUT_LEN         (LZO_IN_LEN + LZO_IN_LEN / 64 + 16 + 3)
+#define LZO_OUT_LEN(in)     ((in) + (in) / 64 + 16 + 3)
 
 //===========================================================================//
 
@@ -68,6 +67,9 @@ m_option_t nuvopts_conf[]={
 //===========================================================================//
 
 
+#define COMPDATASIZE (128*4)
+#define FRAMEHEADERSIZE 12
+
 static int config(struct vf_instance* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
@@ -75,14 +77,16 @@ static int config(struct vf_instance* vf,
   // We need a buffer wich can holda header and a whole YV12 picture
   // or a RTJpeg table
   vf->priv->buf_size = width*height*3/2+FRAMEHEADERSIZE;
-  if(vf->priv->buf_size < (int)(128*sizeof(long int) + FRAMEHEADERSIZE))
-    vf->priv->buf_size = 128*sizeof(long int) + FRAMEHEADERSIZE;
+  if(vf->priv->buf_size < COMPDATASIZE + FRAMEHEADERSIZE)
+    vf->priv->buf_size = COMPDATASIZE + FRAMEHEADERSIZE;
 
   mux_v->bih->biWidth=width;
   mux_v->bih->biHeight=height;
   mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
   mux_v->aspect = (float)d_width/d_height;
   vf->priv->buffer = realloc(vf->priv->buffer,vf->priv->buf_size);
+  if (vf->priv->lzo)
+    vf->priv->zbuffer = realloc(vf->priv->zbuffer, FRAMEHEADERSIZE + LZO_OUT_LEN(vf->priv->buf_size));
   vf->priv->tbl_wrote = 0;
 
   return 1;
@@ -99,29 +103,29 @@ static int query_format(struct vf_instance* vf, unsigned int fmt){
 }
 
 static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
-  struct rtframeheader* ench = (struct rtframeheader*)vf->priv->buffer;
+  uint8_t *header  = vf->priv->buffer;
   uint8_t* data = vf->priv->buffer + FRAMEHEADERSIZE;
   uint8_t* zdata = vf->priv->zbuffer + FRAMEHEADERSIZE;
-  int len = 0, zlen = 0,r;
+  int len = 0, r;
+  size_t zlen = 0;
 
-  memset(vf->priv->buffer,0,FRAMEHEADERSIZE); // Reset the header
+  memset(header, 0, FRAMEHEADERSIZE); // Reset the header
   if(vf->priv->lzo)
     memset(vf->priv->zbuffer,0,FRAMEHEADERSIZE);
     
   // This has to be don here otherwise tv with sound doesn't work
   if(!vf->priv->tbl_wrote) {    
-    RTjpeg_init_compress((long int*)data,mpi->width,mpi->height,vf->priv->q);
+    RTjpeg_init_compress((uint32_t *)data,mpi->width,mpi->height,vf->priv->q);
     RTjpeg_init_mcompress();
 
-    ench->frametype = 'D'; // compressor data
-    ench->comptype  = 'R'; // compressor data for RTjpeg
-    ench->packetlength = 128*sizeof(long int);
+    header[0] = 'D'; // frametype: compressor data
+    header[1] = 'R'; // comptype:  compressor data for RTjpeg
+    AV_WL32(header + 8, COMPDATASIZE); // packetlength
   
-    le2me_rtframeheader(ench);
     mux_v->buffer=vf->priv->buffer;
-    muxer_write_chunk(mux_v,FRAMEHEADERSIZE + 128*sizeof(long int), 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
+    muxer_write_chunk(mux_v,FRAMEHEADERSIZE + COMPDATASIZE, 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     vf->priv->tbl_wrote = 1;
-    memset(ench,0,FRAMEHEADERSIZE); // Reset the header
+    memset(header, 0, FRAMEHEADERSIZE); // Reset the header
   }
 
   // Raw picture
@@ -129,7 +133,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
     len = mpi->width*mpi->height*3/2;
     // Try lzo ???
     if(vf->priv->lzo) {
-      r = lzo1x_1_compress(mpi->planes[0],mpi->width*mpi->height*3/2,
+      r = lzo1x_1_compress(mpi->planes[0],len,
 			   zdata,&zlen,vf->priv->zmem);
       if(r != LZO_E_OK) {
 	mp_msg(MSGT_VFILTER,MSGL_ERR,"LZO compress error\n");
@@ -139,10 +143,10 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
 
     if(zlen <= 0 || zlen > len) {
       memcpy(data,mpi->planes[0],len);
-      ench->comptype = '0';
+      header[1] = '0'; // comptype: uncompressed
     } else { // Use lzo only if it's littler
-      ench = (struct rtframeheader*)vf->priv->zbuffer;
-      ench->comptype = '3';
+      header = vf->priv->zbuffer;
+      header[1] = '3'; //comptype: lzo
       len = zlen;
     }
 
@@ -163,19 +167,18 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts){
     }
 
     if(zlen <= 0 || zlen > len)
-      ench->comptype = '1';
+      header[1] = '1'; // comptype: RTjpeg
     else {
-      ench = (struct rtframeheader*)vf->priv->zbuffer;
-      ench->comptype = '2';
+      header = vf->priv->zbuffer;
+      header[1] = '2'; // comptype: RTjpeg + LZO
       len = zlen;
     }
 
   }
     
-  ench->frametype = 'V'; // video frame
-  ench->packetlength = len;
-  le2me_rtframeheader(ench);
-  mux_v->buffer=(void*)ench;
+  header[0] = 'V'; // frametype: video frame
+  AV_WL32(header + 8, len); // packetlength
+  mux_v->buffer = header;
   muxer_write_chunk(mux_v, len + FRAMEHEADERSIZE, 0x10, pts, pts);
   return 1;
 }
@@ -216,8 +219,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     if(lzo_init() != LZO_E_OK) {
       mp_msg(MSGT_VFILTER,MSGL_WARN,"LZO init failed: no lzo compression\n");
       vf->priv->lzo = 0;
-    }
-    vf->priv->zbuffer = (lzo_bytep)malloc(FRAMEHEADERSIZE + LZO_OUT_LEN);
+    } else
     vf->priv->zmem = malloc(sizeof(long)*LZO_AL(LZO1X_1_MEM_COMPRESS));
   }
 

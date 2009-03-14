@@ -30,6 +30,8 @@ As a temporary hack, there is also the _experimental_ "pausing_keep_force "
 prefix, with which MPlayer will not exit the pause loop at all.
 Like this you can avoid the "frame stepping" effect of "pausing_keep "
 but most commands will either not work at all or behave in unexpected ways.
+For "set_mouse_pos" and "key_down_event", "pausing_keep_force" is the default
+since other values do not make much sense for them.
 
 
 Available commands ('mplayer -input cmdlist' will print a list):

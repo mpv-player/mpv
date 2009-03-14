@@ -339,7 +339,7 @@ static int int_zero_hundred(int *val)
 
 static int preinit(const char *arg)
 {
-    opt_t subopts[] = {
+    const opt_t subopts[] = {
         {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL, 0},
         {"baseline",    OPT_ARG_BOOL,   &jpeg_baseline,         NULL, 0},
         {"optimize",    OPT_ARG_INT,    &jpeg_optimize,

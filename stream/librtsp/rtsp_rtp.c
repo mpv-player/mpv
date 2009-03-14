@@ -507,7 +507,8 @@ rtp_setup_and_play (rtsp_t *rtsp_session)
   }
 
   /* only MPEG-TS is supported at the moment */
-  if (!strstr (fsdp_get_media_format (med_dsc, 0),
+  if (!fsdp_get_media_format (med_dsc, 0) ||
+      !strstr (fsdp_get_media_format (med_dsc, 0),
                RTSP_MEDIA_CONTAINER_MPEG_TS))
   {
     fsdp_description_delete (dsc);

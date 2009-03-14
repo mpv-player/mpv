@@ -33,6 +33,7 @@ typedef struct ass_font_desc_s {
 	char* family;
 	unsigned bold;
 	unsigned italic;
+	int treat_family_as_pattern;
 } ass_font_desc_t;
 
 #define ASS_FONT_MAX_FACES 10

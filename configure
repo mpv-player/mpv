@@ -366,6 +366,7 @@ Video output:
   --enable-vesa            enable VESA video output [autodetect]
   --enable-svga            enable SVGAlib video output [autodetect]
   --enable-sdl             enable SDL video output [autodetect]
+  --enable-kva             enable KVA video output [autodetect]
   --enable-aa              enable AAlib video output [autodetect]
   --enable-caca            enable CACA  video output [autodetect]
   --enable-ggi             enable GGI video output [autodetect]
@@ -556,6 +557,7 @@ _xv=auto
 _xvmc=no  #auto when complete
 _vdpau=auto
 _sdl=auto
+_kva=auto
 _direct3d=auto
 _directx=auto
 _win32waveout=auto
@@ -888,6 +890,8 @@ for ac_option do
   --disable-vdpau)      _vdpau=no       ;;
   --enable-sdl)		_sdl=yes	;;
   --disable-sdl)	_sdl=no		;;
+  --enable-kva)     _kva=yes    ;;
+  --disable-kva)    _kva=no     ;;
   --enable-direct3d)    _direct3d=yes   ;;
   --disable-direct3d)   _direct3d=no    ;;
   --enable-directx)     _directx=yes    ;;
@@ -4156,7 +4160,8 @@ echocheck "X11 headers presence"
     fi
   done
   if test $_cross_compile = no; then
-    for I in /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/openwin/include ; do
+    for I in /usr/X11/include /usr/X11R7/include /usr/X11R6/include \
+             /usr/include/X11R6 /usr/openwin/include ; do
       if test -f "$I/X11/Xlib.h" ; then
         _inc_extra="$_inc_extra -I$I"
         _x11_headers="yes"
@@ -4175,8 +4180,9 @@ if test "$_x11" = auto && test "$_x11_headers" = yes ; then
 #include <X11/Xutil.h>
 int main(void) { (void) XCreateWindow(0,0,0,0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  for I in "" -L/usr/X11R6/lib -L/usr/lib/X11R6 -L/usr/X11/lib \
-           -L/usr/lib32 -L/usr/openwin/lib -L/usr/X11R6/lib64 -L/usr/lib ; do
+  for I in "" -L/usr/X11R7/lib -L/usr/X11R6/lib -L/usr/lib/X11R6 \
+           -L/usr/X11/lib -L/usr/lib32 -L/usr/openwin/lib -L/usr/X11R6/lib64 \
+           -L/usr/lib ; do
     if netbsd; then
       _ld_tmp="$I -lXext -lX11 $_ld_pthread -Wl,-R`echo $I | sed s/^-L//`"
     else
@@ -5099,6 +5105,29 @@ else
   _noaomodules="sdl $_noaomodules"
 fi
 echores "$_sdl"
+
+
+if os2 ; then
+echocheck "KVA (SNAP/WarpOverlay!/DIVE)"
+if test "$_kva" = auto; then
+  cat > $TMPC << EOF
+#include <os2.h>
+#include <kva.h>
+int main( void ) { return 0; }
+EOF
+  _kva=no;
+  cc_check -lkva && _kva=yes
+fi
+if test "$_kva" = yes ; then
+  def_kva='#define CONFIG_KVA 1'
+  _libs_mplayer="$_libs_mplayer -lkva"
+  _vomodules="kva $_vomodules"
+else
+  def_kva='#undef CONFIG_KVA'
+  _novomodules="kva $_novomodules"
+fi
+echores "$_kva"
+fi #if os2
 
 
 if win32; then
@@ -7777,13 +7806,11 @@ fi #if test "$_gui"
 # --------------- GUI specific tests end -------------------
 
 
-if test "$_charset" = "noconv" ; then
-  _charset=""
-fi
-if test "$_charset" ; then
+if test "$_charset" != "noconv" ; then
   def_charset="#define MSG_CHARSET \"$_charset\""
 else
   def_charset="#undef MSG_CHARSET"
+  _charset="UTF-8"
 fi
 
 if test -n "$_charset" && test "$_charset" != "UTF-8" ; then
@@ -8160,6 +8187,7 @@ IVTV = $_ivtv
 JACK = $_jack
 JOYSTICK = $_joystick
 JPEG = $_jpeg
+KVA = $_kva
 LADSPA = $_ladspa
 LIBA52 = $_liba52
 LIBA52_INTERNAL = $_liba52_internal
@@ -8662,6 +8690,7 @@ $def_gl
 $def_gl_win32
 $def_ivtv
 $def_jpeg
+$def_kva
 $def_md5sum
 $def_mga
 $def_mng

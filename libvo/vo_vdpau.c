@@ -786,6 +786,7 @@ static int draw_slice(uint8_t *image[], int stride[], int w, int h,
                 break;
             case IMGFMT_VDPAU_H264:
                 vdp_decoder_profile = VDP_DECODER_PROFILE_H264_HIGH;
+                mp_msg(MSGT_VO, MSGL_V, "[vdpau] Creating H264 hardware decoder for %d reference frames.\n", max_refs);
                 break;
             case IMGFMT_VDPAU_WMV3:
                 vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_MAIN;
@@ -949,7 +950,7 @@ static void uninit(void)
     dlclose(vdpau_lib_handle);
 }
 
-static opt_t subopts[] = {
+static const opt_t subopts[] = {
     {"deint",   OPT_ARG_INT,   &deint,   (opt_test_f)int_non_neg},
     {"pullup",  OPT_ARG_BOOL,  &pullup,  NULL},
     {"denoise", OPT_ARG_FLOAT, &denoise, NULL},

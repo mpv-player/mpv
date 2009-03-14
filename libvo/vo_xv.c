@@ -317,8 +317,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     ctx->current_buf = 0;
     ctx->current_ip_buf = 0;
 
-    if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0)
-        vo_fs = 1;
 
     resize(vo);
 
@@ -682,7 +680,7 @@ static int preinit(struct vo *vo, const char *arg)
     struct vo_x11_state *x11 = vo->x11;
     int xv_adaptor = -1;
 
-    opt_t subopts[] = {
+    const opt_t subopts[] = {
         /* name         arg type     arg var         test */
         {"port", OPT_ARG_INT, &x11->xv_port, (opt_test_f) int_pos},
         {"adaptor", OPT_ARG_INT, &xv_adaptor, (opt_test_f) int_non_neg},

@@ -23,20 +23,13 @@
 #include <inttypes.h>
 #include <string.h>
 
-#ifdef CONFIG_FASTMEMCPY
-#if HAVE_MMX || HAVE_MMX2 || HAVE_AMD3DNOW \
-/*    || HAVE_SSE || HAVE_SSE2 */
+#if defined(CONFIG_FASTMEMCPY) && (HAVE_MMX || HAVE_MMX2 || HAVE_AMD3DNOW /* || HAVE_SSE || HAVE_SSE2 */)
 #include <stddef.h>
 
 void * fast_memcpy(void * to, const void * from, size_t len);
 void * mem2agpcpy(void * to, const void * from, size_t len);
 
-#else /* HAVE_MMX/MMX2/3DNOW/SSE/SSE2 */
-#define mem2agpcpy(a,b,c) memcpy(a,b,c)
-#define fast_memcpy(a,b,c) memcpy(a,b,c)
-#endif
-
-#else /* CONFIG_FASTMEMCPY */
+#else
 #define mem2agpcpy(a,b,c) memcpy(a,b,c)
 #define fast_memcpy(a,b,c) memcpy(a,b,c)
 #endif

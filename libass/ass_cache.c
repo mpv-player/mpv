@@ -192,6 +192,8 @@ static int font_compare(void* key1, void* key2, size_t key_size) {
 		return 0;
 	if (a->italic != b->italic)
 		return 0;
+	if (a->treat_family_as_pattern != b->treat_family_as_pattern)
+		return 0;
 	return 1;
 }
 

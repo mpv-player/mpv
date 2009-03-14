@@ -844,7 +844,7 @@ uninit(void)
   vo_uninit();
 }
 
-static opt_t subopts[] = {
+static const opt_t subopts[] = {
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {NULL}

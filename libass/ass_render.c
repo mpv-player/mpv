@@ -184,6 +184,7 @@ typedef struct render_context_s {
 	char* family;
 	unsigned bold;
 	unsigned italic;
+	int treat_family_as_pattern;
 	
 } render_context_t;
 
@@ -423,15 +424,20 @@ static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_h
 	int ax = (*last_tail)->dst_x;
 	int ay = (*last_tail)->dst_y;
 	int aw = (*last_tail)->w;
+	int as = (*last_tail)->stride;
 	int ah = (*last_tail)->h;
 	int bx = (*tail)->dst_x;
 	int by = (*tail)->dst_y;
 	int bw = (*tail)->w;
+	int bs = (*tail)->stride;
 	int bh = (*tail)->h;
 	unsigned char* a;
 	unsigned char* b;
 
 	if ((*last_tail)->bitmap == (*tail)->bitmap)
+		return;
+
+	if ((*last_tail)->color != (*tail)->color)
 		return;
 
 	// Calculate overlap coordinates
@@ -441,12 +447,12 @@ static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_h
 	bottom = ((ay+ah) < (by+bh)) ? (ay+ah) : (by+bh);
 	if ((right <= left) || (bottom <= top))
 		return;
-	old_left = left-(ax);
-	old_top = top-(ay);
+	old_left = left-ax;
+	old_top = top-ay;
 	w = right-left;
 	h = bottom-top;
-	cur_left = left-(bx);
-	cur_top = top-(by);
+	cur_left = left-bx;
+	cur_top = top-by;
 
 	// Query cache
 	memcpy(&hk.a, last_hash, sizeof(*last_hash));
@@ -469,16 +475,16 @@ static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_h
 	// Allocate new bitmaps and copy over data
 	a = (*last_tail)->bitmap;
 	b = (*tail)->bitmap;
-	(*last_tail)->bitmap = malloc(aw*ah);
-	(*tail)->bitmap = malloc(bw*bh);
-	memcpy((*last_tail)->bitmap, a, aw*ah);
-	memcpy((*tail)->bitmap, b, bw*bh);
+	(*last_tail)->bitmap = malloc(as*ah);
+	(*tail)->bitmap = malloc(bs*bh);
+	memcpy((*last_tail)->bitmap, a, as*ah);
+	memcpy((*tail)->bitmap, b, bs*bh);
 
 	// Composite overlapping area
 	for (y=0; y<h; y++)
 		for (x=0; x<w; x++) {
-			opos = (old_top+y)*(aw) + (old_left+x);
-			cpos = (cur_top+y)*(bw) + (cur_left+x);
+			opos = (old_top+y)*(as) + (old_left+x);
+			cpos = (cur_top+y)*(bs) + (cur_left+x);
 			m = (a[opos] > b[cpos]) ? a[opos] : b[cpos];
 			(*last_tail)->bitmap[opos] = 0;
 			(*tail)->bitmap[cpos] = m;
@@ -671,6 +677,7 @@ static void update_font(void)
 	ass_renderer_t* priv = frame_context.ass_priv;
 	ass_font_desc_t desc;
 	desc.family = strdup(render_context.family);
+	desc.treat_family_as_pattern = render_context.treat_family_as_pattern;
 
 	val = render_context.bold;
 	// 0 = normal, 1 = bold, >1 = exact weight
@@ -1062,10 +1069,12 @@ static char* parse_tag(char* p, double pwr) {
 		skip(')');
 		mp_msg(MSGT_ASS, MSGL_DBG2, "org(%d, %d)\n", v1, v2);
 		//				render_context.evt_type = EVENT_POSITIONED;
-		render_context.org_x = v1;
-		render_context.org_y = v2;
-		render_context.have_origin = 1;
-		render_context.detect_collisions = 0;
+		if (!render_context.have_origin) {
+			render_context.org_x = v1;
+			render_context.org_y = v2;
+			render_context.have_origin = 1;
+			render_context.detect_collisions = 0;
+		}
 	} else if (mystrcmp(&p, "t")) {
 		double v[3];
 		int v1, v2;
@@ -1355,6 +1364,7 @@ static void reset_render_context(void)
 	if (render_context.family)
 		free(render_context.family);
 	render_context.family = strdup(render_context.style->FontName);
+	render_context.treat_family_as_pattern = render_context.style->treat_fontname_as_pattern;
 	render_context.bold = render_context.style->Bold;
 	render_context.italic = render_context.style->Italic;
 	update_font();
@@ -1797,75 +1807,46 @@ static void get_base_point(FT_BBox bbox, int alignment, int* bx, int* by)
 }
 
 /**
- * \brief Multiply 4-vector by 4-matrix
- * \param a 4-vector
- * \param m 4-matrix]
- * \param b out: 4-vector
- * Calculates a * m and stores result in b
+ * \brief Apply transformation to outline points of a glyph
+ * Applies rotations given by frx, fry and frz and projects the points back
+ * onto the screen plane.
  */
-static inline void transform_point_3d(double *a, double *m, double *b)
-{
-	b[0] = a[0] * m[0] + a[1] * m[4] + a[2] * m[8] +  a[3] * m[12];
-	b[1] = a[0] * m[1] + a[1] * m[5] + a[2] * m[9] +  a[3] * m[13];
-	b[2] = a[0] * m[2] + a[1] * m[6] + a[2] * m[10] + a[3] * m[14];
-	b[3] = a[0] * m[3] + a[1] * m[7] + a[2] * m[11] + a[3] * m[15];
-}
-
-/**
- * \brief Apply 3d transformation to a vector
- * \param v FreeType vector (2d)
- * \param m 4-matrix
- * Transforms v by m, projects the result back to the screen plane
- * Result is returned in v.
- */
-static inline void transform_vector_3d(FT_Vector* v, double *m) {
-	const double camera = 2500 * frame_context.border_scale; // camera distance
-	const double cutoff_z = 10.;
-	double a[4], b[4];
-	a[0] = d6_to_double(v->x);
-	a[1] = d6_to_double(v->y);
-	a[2] = 0.;
-	a[3] = 1.;
-	transform_point_3d(a, m, b);
-	/* Apply perspective projection with the following matrix:
-	   2500     0     0     0
-	      0  2500     0     0
-	      0     0     0     0
-	      0     0     8     2500
-	   where 2500 is camera distance, 8 - z-axis scale.
-	   Camera is always located in (org_x, org_y, -2500). This means
-	   that different subtitle events can be displayed at the same time
-	   using different cameras. */
-	b[0] *= camera;
-	b[1] *= camera;
-	b[3] = 8 * b[2] + camera;
-	if (b[3] < cutoff_z)
-		b[3] = cutoff_z;
-	v->x = double_to_d6(b[0] / b[3]);
-	v->y = double_to_d6(b[1] / b[3]);
-}
-
-/**
- * \brief Apply 3d transformation to a glyph
- * \param glyph FreeType glyph
- * \param m 4-matrix
- * Transforms glyph by m, projects the result back to the screen plane
- * Result is returned in glyph.
- */
-static inline void transform_glyph_3d(FT_Glyph glyph, double *m, FT_Vector shift) {
-	int i;
-	FT_Outline* outline = &((FT_OutlineGlyph)glyph)->outline;
+static void transform_3d_points(FT_Vector shift, FT_Glyph glyph, double frx, double fry, double frz) {
+	double sx = sin(frx);
+	double sy = sin(fry);
+	double sz = sin(frz);
+	double cx = cos(frx);
+	double cy = cos(fry);
+	double cz = cos(frz);
+	FT_Outline *outline = &((FT_OutlineGlyph) glyph)->outline;
 	FT_Vector* p = outline->points;
+	double x, y, z, xx, yy, zz;
+	int i;
 
 	for (i=0; i<outline->n_points; i++) {
-		p[i].x += shift.x;
-		p[i].y += shift.y;
-		transform_vector_3d(p + i, m);
-		p[i].x -= shift.x;
-		p[i].y -= shift.y;
-	}
+		x = p[i].x + shift.x;
+		y = p[i].y + shift.y;
+		z = 0.;
 
-	//transform_vector_3d(&glyph->advance, m);
+		xx = x*cz + y*sz;
+		yy = -(x*sz - y*cz);
+		zz = z;
+
+		x = xx;
+		y = yy*cx + zz*sx;
+		z = yy*sx - zz*cx;
+
+		xx = x*cy + z*sy;
+		yy = y;
+		zz = x*sy - z*cy;
+
+		zz = FFMAX(zz, -19000);
+
+		x = (xx * 20000) / (zz + 20000);
+		y = (yy * 20000) / (zz + 20000);
+		p[i].x = x - shift.x + 0.5;
+		p[i].y = y - shift.y + 0.5;
+	}
 }
 
 /**
@@ -1880,27 +1861,17 @@ static inline void transform_glyph_3d(FT_Glyph glyph, double *m, FT_Vector shift
  */
 static void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, double frx, double fry, double frz)
 {
-	fry = - fry; // FreeType's y axis goes in the opposite direction
+	frx = - frx;
+	frz = - frz;
 	if (frx != 0. || fry != 0. || frz != 0.) {
-		double m[16];
-		double sx = sin(frx);
-		double sy = sin(fry);
- 		double sz = sin(frz);
-		double cx = cos(frx);
-		double cy = cos(fry);
-		double cz = cos(frz);
-		m[0] = cy * cz;            m[1] = cy*sz;              m[2]  = -sy;    m[3] = 0.0;
-		m[4] = -cx*sz + sx*sy*cz;  m[5] = cx*cz + sx*sy*sz;   m[6]  = sx*cy;  m[7] = 0.0;
-		m[8] = sx*sz + cx*sy*cz;   m[9] = -sx*cz + cx*sy*sz;  m[10] = cx*cy;  m[11] = 0.0;
-		m[12] = 0.0;               m[13] = 0.0;               m[14] = 0.0;    m[15] = 1.0;
-
 		if (glyph && *glyph)
-			transform_glyph_3d(*glyph, m, shift);
+			transform_3d_points(shift, *glyph, frx, fry, frz);
 
 		if (glyph2 && *glyph2)
-			transform_glyph_3d(*glyph2, m, shift);
+			transform_3d_points(shift, *glyph2, frx, fry, frz);
 	}
 }
+
 
 /**
  * \brief Main ass rendering function, glues everything together
@@ -2145,11 +2116,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	}
 	
 	// fix clip coordinates (they depend on alignment)
-	render_context.clip_x0 = x2scr(render_context.clip_x0);
-	render_context.clip_x1 = x2scr(render_context.clip_x1);
 	if (render_context.evt_type == EVENT_NORMAL ||
 	    render_context.evt_type == EVENT_HSCROLL ||
 	    render_context.evt_type == EVENT_VSCROLL) {
+		render_context.clip_x0 = x2scr(render_context.clip_x0);
+		render_context.clip_x1 = x2scr(render_context.clip_x1);
 		if (valign == VALIGN_TOP) {
 			render_context.clip_y0 = y2scr_top(render_context.clip_y0);
 			render_context.clip_y1 = y2scr_top(render_context.clip_y1);
@@ -2161,8 +2132,10 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			render_context.clip_y1 = y2scr_sub(render_context.clip_y1);
 		}
 	} else if (render_context.evt_type == EVENT_POSITIONED) {
-		render_context.clip_y0 = y2scr(render_context.clip_y0);
-		render_context.clip_y1 = y2scr(render_context.clip_y1);
+		render_context.clip_x0 = x2scr_pos(render_context.clip_x0);
+		render_context.clip_x1 = x2scr_pos(render_context.clip_x1);
+		render_context.clip_y0 = y2scr_pos(render_context.clip_y0);
+		render_context.clip_y1 = y2scr_pos(render_context.clip_y1);
 	}
 
 	// calculate rotation parameters

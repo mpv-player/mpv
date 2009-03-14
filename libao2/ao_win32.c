@@ -243,8 +243,9 @@ static void uninit(int immed)
 {
     if(!immed)
 	usec_sleep(get_delay() * 1000 * 1000);
+    else
 	waveOutReset(hWaveOut);
-	waveOutClose(hWaveOut);
+    while (waveOutClose(hWaveOut) == WAVERR_STILLPLAYING) usec_sleep(0);
 	mp_msg(MSGT_AO, MSGL_V,"waveOut device closed\n");
     free(waveBlocks);
 	mp_msg(MSGT_AO, MSGL_V,"buffer memory freed\n");
