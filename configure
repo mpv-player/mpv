@@ -366,6 +366,7 @@ Video output:
   --enable-vesa            enable VESA video output [autodetect]
   --enable-svga            enable SVGAlib video output [autodetect]
   --enable-sdl             enable SDL video output [autodetect]
+  --enable-kva             enable KVA video output [autodetect]
   --enable-aa              enable AAlib video output [autodetect]
   --enable-caca            enable CACA  video output [autodetect]
   --enable-ggi             enable GGI video output [autodetect]
@@ -556,6 +557,7 @@ _xv=auto
 _xvmc=no  #auto when complete
 _vdpau=auto
 _sdl=auto
+_kva=auto
 _direct3d=auto
 _directx=auto
 _win32waveout=auto
@@ -888,6 +890,8 @@ for ac_option do
   --disable-vdpau)      _vdpau=no       ;;
   --enable-sdl)		_sdl=yes	;;
   --disable-sdl)	_sdl=no		;;
+  --enable-kva)     _kva=yes    ;;
+  --disable-kva)    _kva=no     ;;
   --enable-direct3d)    _direct3d=yes   ;;
   --disable-direct3d)   _direct3d=no    ;;
   --enable-directx)     _directx=yes    ;;
@@ -5097,6 +5101,29 @@ fi
 echores "$_sdl"
 
 
+if os2 ; then
+echocheck "KVA (SNAP/WarpOverlay!/DIVE)"
+if test "$_kva" = auto; then
+  cat > $TMPC << EOF
+#include <os2.h>
+#include <kva.h>
+int main( void ) { return 0; }
+EOF
+  _kva=no;
+  cc_check -lkva && _kva=yes
+fi
+if test "$_kva" = yes ; then
+  def_kva='#define CONFIG_KVA 1'
+  _libs_mplayer="$_libs_mplayer -lkva"
+  _vomodules="kva $_vomodules"
+else
+  def_kva='#undef CONFIG_KVA'
+  _novomodules="kva $_novomodules"
+fi
+echores "$_kva"
+fi #if os2
+
+
 if win32; then
 
 echocheck "Windows waveout"
@@ -8145,6 +8172,7 @@ IVTV = $_ivtv
 JACK = $_jack
 JOYSTICK = $_joystick
 JPEG = $_jpeg
+KVA = $_kva
 LADSPA = $_ladspa
 LIBA52 = $_liba52
 LIBA52_INTERNAL = $_liba52_internal
@@ -8647,6 +8675,7 @@ $def_gl
 $def_gl_win32
 $def_ivtv
 $def_jpeg
+$def_kva
 $def_md5sum
 $def_mga
 $def_mng

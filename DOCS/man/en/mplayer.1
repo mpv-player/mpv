@@ -3596,6 +3596,23 @@ Try this option if you have display problems.
 .PD 1
 .
 .TP
+.B kva (OS/2 only)
+Video output driver that uses the libkva interface.
+.PD 0
+.RSs
+.IPs snap
+Force SNAP mode.
+.IPs wo
+Force WarpOverlay! mode.
+.IPs dive
+Force DIVE mode.
+.IPs (no)t23
+Enable/disable workaround for T23 laptop (default: \-not23).
+Try to enable this option if your video card supports upscaling only.
+.RE
+.PD 1
+.
+.TP
 .B quartz (Mac OS X only)
 Mac OS X Quartz video output driver.
 Under some circumstances, it might be more efficient to force a

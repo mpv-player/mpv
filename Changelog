@@ -148,6 +148,7 @@ MPlayer (1.0)
     * removed unnecessary code from vo x11, xv, xvmc
     * add OS/2 DART audio driver (-ao dart)
     * add VDPAU video output
+    * add OS/2 KVA video driver (-vo kva)
 
     MEncoder:
     * check for system-wide configuration file in MEncoder

@@ -112,6 +112,7 @@ extern vo_functions_t video_out_mpegpes;
 extern vo_functions_t video_out_yuv4mpeg;
 extern vo_functions_t video_out_direct3d;
 extern vo_functions_t video_out_directx;
+extern vo_functions_t video_out_kva;
 extern vo_functions_t video_out_dxr2;
 extern vo_functions_t video_out_dxr3;
 extern vo_functions_t video_out_ivtv;
@@ -145,6 +146,9 @@ const vo_functions_t* const video_out_drivers[] =
 #endif
 #ifdef CONFIG_DIRECT3D
         &video_out_direct3d,
+#endif
+#ifdef CONFIG_KVA
+        &video_out_kva,
 #endif
 #ifdef CONFIG_COREVIDEO
         &video_out_macosx,
