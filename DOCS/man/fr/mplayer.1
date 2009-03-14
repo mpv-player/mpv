@@ -1,4 +1,4 @@
-.\" synced with r28895
+.\" synced with r28950
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -3647,6 +3647,9 @@ réduction de bruit)
 .IPs deint=<0\-4>
 Sélectionne un désentrelaceur (par défaut\ : 0)
 Tous les modes > 0 respectent \-field\-dominance.
+.br
+.I NOTE\ :
+Les valeurs > 2 retardent la sortie vidéo d'une image.
 .RSss
 .IPs 0
 pas de désentrelacement
@@ -3771,6 +3774,24 @@ Pilote de sortie vidéo utilisant l'interface DirectX.
 .IPs noaccel
 Désactive l'accélération matérielle.
 Essayez cette option si vous avez des problèmes d'affichage.
+.RE
+.PD 1
+.
+.TP
+.B kva (OS/2 uniquement)
+Pilote de sortie vidéo utilisant l'interface libkva.
+.PD 0
+.RSs
+.IPs snap
+Force le mode SNAP.
+.IPs wo
+Force le mode WarpOverlay!.
+.IPs dive
+Force le mode DIVE.
+.IPs (no)t23
+Active le contournement pour les bugs de l'ordinateur portable T23.
+Essayez d'activer cette option si votre carte vidéo ne gère que
+l'agrandissement d'image (upscaling).
 .RE
 .PD 1
 .
