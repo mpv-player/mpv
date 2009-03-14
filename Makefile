@@ -986,10 +986,10 @@ tests: $(addsuffix $(EXESUF),$(TESTS))
 testsclean:
 	-rm -f $(foreach file,$(TESTS),$(call ADD_ALL_EXESUFS,$(file)))
 
-TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 fastmemcpybench movinfo netstream subrip vivodump)
+TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 movinfo netstream subrip vivodump)
 
 ifdef ARCH_X86
-TOOLS += TOOLS/modify_reg
+TOOLS += TOOLS/fastmemcpybench TOOLS/modify_reg
 endif
 
 ALLTOOLS = $(TOOLS) TOOLS/bmovl-test TOOLS/vfw2menc
