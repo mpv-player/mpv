@@ -447,6 +447,9 @@ static void free_video_specific(void) {
     decoder = VDP_INVALID_HANDLE;
     decoder_max_refs = -1;
 
+    for (i = 0; i < 3; i++)
+        deint_surfaces[i] = VDP_INVALID_HANDLE;
+
     for (i = 0; i < MAX_VIDEO_SURFACES; i++) {
         if (surface_render[i].surface != VDP_INVALID_HANDLE) {
           vdp_st = vdp_video_surface_destroy(surface_render[i].surface);
@@ -474,7 +477,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     XSetWindowAttributes xswa;
     XWindowAttributes attribs;
     unsigned long xswamask;
-    int depth, i;
+    int depth;
 
 #ifdef CONFIG_XF86VM
     int vm = flags & VOFLAG_MODESWITCHING;
@@ -542,9 +545,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     surface_num = 0;
     vid_surface_num = -1;
     resize();
-
-    for (i = 0; i < 3; i++)
-        deint_surfaces[i] = VDP_INVALID_HANDLE;
 
     return 0;
 }
