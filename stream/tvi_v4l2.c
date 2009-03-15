@@ -1126,7 +1126,7 @@ static int uninit(priv_t *priv)
         struct v4l2_buffer buf;
 
         /* get performance */
-        frames = 1 + lrintf((double)(priv->curr_frame - priv->first_frame) / (1e6 * getfps(priv)));
+        frames = 1 + lrintf((double)(priv->curr_frame - priv->first_frame) / 1e6 * getfps(priv));
         dropped = frames - priv->frames;
 
         /* turn off streaming */
