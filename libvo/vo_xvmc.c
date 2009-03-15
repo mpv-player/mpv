@@ -63,7 +63,7 @@
 #define UNUSED(x) ((void)(x))
 
 #if LIBAVCODEC_BUILD < ((51<<16)+(40<<8)+2)
-#error You need at least libavcodecs v51.40.2
+#error You need at least libavcodec v51.40.2
 #endif
 
 
