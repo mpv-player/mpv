@@ -1,5 +1,5 @@
 /*
- * subpic_encode.c - encodes a pixmap with RLE
+ * encode a pixmap with RLE
  *
  * Copyright (C) 2000   Alejandro J. Cura <alecu@protocultura.net>
  *

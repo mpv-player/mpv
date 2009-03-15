@@ -1,5 +1,5 @@
 /*
- * vf_bmovl.c v0.9.1 - BitMap OVerLay video filter for MPlayer
+ * BitMap OVerLay video filter for MPlayer
  *
  * (C) 2002 Per Wigren <wigren@home.se>
  *

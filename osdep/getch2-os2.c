@@ -1,5 +1,5 @@
 /*
- * getch2-os2.c : OS/2 TermIO for MPlayer
+ * OS/2 TermIO
  *
  * Copyright (c) 2007 KO Myung-Hun (komh@chollian.net)
  *

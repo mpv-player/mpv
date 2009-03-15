@@ -1,5 +1,5 @@
 /*
- * af_ladspa.c, LADSPA plugin loader
+ * LADSPA plugin loader
  *
  * Written by Ivo van Poorten <ivop@euronet.nl>
  * Copyright (C) 2004, 2005

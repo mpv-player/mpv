@@ -1,6 +1,5 @@
 /*
- * vf_fstep.c - filter to ouput only 1 every n frame, or only the I (key)
- *              frame
+ * filter to ouput only 1 every n frame, or only the I (key)frame
  *
  * The parameters are:
  *
