@@ -408,7 +408,7 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
         &vid_height,
         &vdp_chroma_type
     };
-        features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
+    features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
     if (deint == 4)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL;
     if (pullup)
