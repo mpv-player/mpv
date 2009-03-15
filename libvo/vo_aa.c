@@ -579,9 +579,9 @@ static int parse_suboptions(const char *arg) {
          *helpmsg = NULL;
     int pseudoargc, displayhelp = 0, *booleans;
     const opt_t extra_opts[] = {
-            {"osdcolor", OPT_ARG_MSTRZ, &osdcolor,    NULL, 0},
-            {"subcolor", OPT_ARG_MSTRZ, &subcolor,    NULL, 0},
-            {"help",     OPT_ARG_BOOL,  &displayhelp, NULL, 0} };
+            {"osdcolor", OPT_ARG_MSTRZ, &osdcolor,    NULL},
+            {"subcolor", OPT_ARG_MSTRZ, &subcolor,    NULL},
+            {"help",     OPT_ARG_BOOL,  &displayhelp, NULL} };
     opt_t *subopts = NULL, *p;
     char * const strings_list[] = {"-driver", "-kbddriver", "-mousedriver", "-font",
         "-width", "-height", "-minwidth", "-minheight", "-maxwidth",

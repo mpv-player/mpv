@@ -121,15 +121,15 @@ static int preinit(const char *arg)
     int ppm_type = 0, pgm_type = 0, pgmyuv_type = 0,
         raw_mode = 0, ascii_mode = 0;
     const opt_t subopts[] = {
-        {"ppm",         OPT_ARG_BOOL,   &ppm_type,      NULL, 0},
-        {"pgm",         OPT_ARG_BOOL,   &pgm_type,      NULL, 0},
-        {"pgmyuv",      OPT_ARG_BOOL,   &pgmyuv_type,   NULL, 0},
-        {"raw",         OPT_ARG_BOOL,   &raw_mode,      NULL, 0},
-        {"ascii",       OPT_ARG_BOOL,   &ascii_mode,    NULL, 0},
-        {"outdir",      OPT_ARG_MSTRZ,  &pnm_outdir,    NULL, 0},
-        {"subdirs",     OPT_ARG_MSTRZ,  &pnm_subdirs,   NULL, 0},
-        {"maxfiles",    OPT_ARG_INT,    &pnm_maxfiles,  (opt_test_f)int_pos, 0},
-        {NULL, 0, NULL, NULL, 0}
+        {"ppm",         OPT_ARG_BOOL,   &ppm_type,      NULL},
+        {"pgm",         OPT_ARG_BOOL,   &pgm_type,      NULL},
+        {"pgmyuv",      OPT_ARG_BOOL,   &pgmyuv_type,   NULL},
+        {"raw",         OPT_ARG_BOOL,   &raw_mode,      NULL},
+        {"ascii",       OPT_ARG_BOOL,   &ascii_mode,    NULL},
+        {"outdir",      OPT_ARG_MSTRZ,  &pnm_outdir,    NULL},
+        {"subdirs",     OPT_ARG_MSTRZ,  &pnm_subdirs,   NULL},
+        {"maxfiles",    OPT_ARG_INT,    &pnm_maxfiles,  (opt_test_f)int_pos},
+        {NULL, 0, NULL, NULL}
     };
     const char *info_message = NULL;
 
