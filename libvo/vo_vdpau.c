@@ -147,11 +147,13 @@ static void                              *vdpau_lib_handle;
 /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
 #define osd_surface output_surfaces[NUM_OUTPUT_SURFACES]
 static VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
+static VdpVideoSurface                    deint_surfaces[3];
 static int                                output_surface_width, output_surface_height;
 
 static VdpVideoMixer                      video_mixer;
 static int                                deint;
 static int                                deint_type;
+static int                                deint_counter;
 static int                                pullup;
 static float                              denoise;
 static float                              sharpen;
@@ -212,11 +214,9 @@ static void video_to_output_surface(void)
     VdpTime dummy;
     VdpStatus vdp_st;
     int i;
-    if (vid_surface_num < 0)
+    if (vid_surface_num < 0 || deint_surfaces[0] == VDP_INVALID_HANDLE)
         return;
 
-    // we would need to provide 2 past and 1 future frames to allow advanced
-    // deinterlacing, which is not really possible currently.
     for (i = 0; i <= !!(deint > 1); i++) {
         int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
         VdpOutputSurface output_surface;
@@ -236,9 +236,10 @@ static void video_to_output_surface(void)
         CHECK_ST_WARNING("Error when calling vdp_presentation_queue_block_until_surface_idle")
 
         vdp_st = vdp_video_mixer_render(video_mixer, VDP_INVALID_HANDLE, 0,
-                                        field, 0, NULL,
-                                        surface_render[vid_surface_num].surface,
-                                        0, NULL, &src_rect_vid,
+                                        field, 2, deint_surfaces + 1,
+                                        deint_surfaces[0],
+                                        1, &surface_render[vid_surface_num].surface,
+                                        &src_rect_vid,
                                         output_surface,
                                         NULL, &out_rect_vid, 0, NULL);
         CHECK_ST_WARNING("Error when calling vdp_video_mixer_render")
@@ -407,7 +408,6 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
         &vid_height,
         &vdp_chroma_type
     };
-    if (deint == 3)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
     if (deint == 4)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL;
@@ -425,6 +425,8 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
     CHECK_ST_ERROR("Error when calling vdp_video_mixer_create")
 
     for (i = 0; i < feature_count; i++) feature_enables[i] = VDP_TRUE;
+    if (deint < 3)
+        feature_enables[0] = VDP_FALSE;
     if (feature_count)
         vdp_video_mixer_set_feature_enables(video_mixer, feature_count, features, feature_enables);
     if (denoise)
@@ -472,7 +474,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     XSetWindowAttributes xswa;
     XWindowAttributes attribs;
     unsigned long xswamask;
-    int depth;
+    int depth, i;
 
 #ifdef CONFIG_XF86VM
     int vm = flags & VOFLAG_MODESWITCHING;
@@ -540,6 +542,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     surface_num = 0;
     vid_surface_num = -1;
     resize();
+
+    for (i = 0; i < 3; i++)
+        deint_surfaces[i] = VDP_INVALID_HANDLE;
 
     return 0;
 }
@@ -837,10 +842,12 @@ static uint32_t draw_image(mp_image_t *mpi)
     if (IMGFMT_IS_VDPAU(image_format)) {
         struct vdpau_render_state *rndr = mpi->priv;
         vid_surface_num = rndr - surface_render;
+        deint = FFMIN(deint, 2);
     } else if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)) {
         VdpStatus vdp_st;
         void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
-        struct vdpau_render_state *rndr = get_surface(0);
+        struct vdpau_render_state *rndr = get_surface(deint_counter);
+        deint_counter = (deint_counter + 1) & 3;
         vid_surface_num = rndr - surface_render;
         vdp_st = vdp_video_surface_put_bits_y_cb_cr(rndr->surface,
                                                     VDP_YCBCR_FORMAT_YV12,
@@ -850,7 +857,12 @@ static uint32_t draw_image(mp_image_t *mpi)
     }
     top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
 
+    if (deint < 3)
+        deint_surfaces[0] = surface_render[vid_surface_num].surface;
     video_to_output_surface();
+    deint_surfaces[2] = deint_surfaces[1];
+    deint_surfaces[1] = deint_surfaces[0];
+    deint_surfaces[0] = surface_render[vid_surface_num].surface;
     return VO_TRUE;
 }
 
@@ -984,6 +996,7 @@ static int preinit(const char *arg)
 
     deint = 0;
     deint_type = 3;
+    deint_counter = 0;
     pullup = 0;
     denoise = 0;
     sharpen = 0;
@@ -1087,6 +1100,18 @@ static int control(uint32_t request, void *data, ...)
             deint = *(int*)data;
             if (deint)
                 deint = deint_type;
+            if (deint_type > 2) {
+                VdpStatus vdp_st;
+                VdpVideoMixerFeature features[1] =
+                    {deint_type == 3 ?
+                     VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL :
+                     VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL};
+                VdpBool feature_enables[1] = {deint ? VDP_TRUE : VDP_FALSE};
+                vdp_st = vdp_video_mixer_set_feature_enables(video_mixer, 1,
+                                                             features,
+                                                             feature_enables);
+                CHECK_ST_WARNING("Error changing deinterlacing settings")
+            }
             return VO_TRUE;
         case VOCTRL_PAUSE:
             return (int_pause = 1);

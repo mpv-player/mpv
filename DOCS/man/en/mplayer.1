@@ -3464,13 +3464,15 @@ No deinterlacing.
 .IPs 1
 Show only first field, similar to \-vf field.
 .IPs 2
-Bob deinterlacing (current fallback for advanced deinterlacers).
+Bob deinterlacing
+(current fallback for advanced deinterlacers and hardware decoding).
 .IPs 3
-Motion adaptive temporal deinterlacing (not yet working).
+Motion adaptive temporal deinterlacing
+(currently only working with software-decoded video).
 This is the default if "D" is used to enable deinterlacing.
 .IPs 4
 Motion adaptive temporal deinterlacing with edge-guided spatial interpolation
-(not yet working).
+(currently only working with software-decoded video).
 .RE
 .IPs pullup
 Try to apply inverse telecine, needs temporal deinterlacing.
