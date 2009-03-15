@@ -3280,7 +3280,7 @@ fi
 echores "$_dynamic_plugins"
 
 
-def_threads='#undef HAVE_THREADS'
+def_threads='#define HAVE_THREADS 0'
 
 echocheck "pthread"
 if test "$_pthreads" = auto ; then
