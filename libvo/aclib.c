@@ -33,9 +33,6 @@
 //Feel free to fine-tune the above 2, it might be possible to get some speedup with them :)
 
 //#define STATISTICS
-#if ARCH_X86
-#define CAN_COMPILE_X86_ASM
-#endif
 
 //Note: we have MMX, MMX2, 3DNOW version there is no 3DNOW+MMX2 one
 //Plain C versions
@@ -43,7 +40,7 @@
 //#define COMPILE_C
 //#endif
 
-#ifdef CAN_COMPILE_X86_ASM
+#if ARCH_X86
 
 #if (HAVE_MMX && !HAVE_AMD3DNOW && !HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
 #define COMPILE_MMX
@@ -155,14 +152,14 @@
 #include "aclib_template.c"
 #endif
 
-#endif // CAN_COMPILE_X86_ASM
+#endif /* ARCH_X86 */
 
 
 #undef fast_memcpy
 void * fast_memcpy(void * to, const void * from, size_t len)
 {
 #ifdef RUNTIME_CPUDETECT
-#ifdef CAN_COMPILE_X86_ASM
+#if ARCH_X86
 	// ordered per speed fasterst first
 	if(gCpuCaps.hasSSE2)
 		fast_memcpy_SSE(to, from, len);
@@ -173,7 +170,7 @@ void * fast_memcpy(void * to, const void * from, size_t len)
 	else if(gCpuCaps.hasMMX)
 		fast_memcpy_MMX(to, from, len);
 	else
-#endif //CAN_COMPILE_X86_ASM
+#endif
 		memcpy(to, from, len); // prior to mmx we use the standart memcpy
 #else
 #if HAVE_SSE2
@@ -196,7 +193,7 @@ void * fast_memcpy(void * to, const void * from, size_t len)
 void * mem2agpcpy(void * to, const void * from, size_t len)
 {
 #ifdef RUNTIME_CPUDETECT
-#ifdef CAN_COMPILE_X86_ASM
+#if ARCH_X86
 	// ordered per speed fasterst first
 	if(gCpuCaps.hasSSE2)
 		mem2agpcpy_SSE(to, from, len);
@@ -207,7 +204,7 @@ void * mem2agpcpy(void * to, const void * from, size_t len)
 	else if(gCpuCaps.hasMMX)
 		mem2agpcpy_MMX(to, from, len);
 	else
-#endif //CAN_COMPILE_X86_ASM
+#endif
 		memcpy(to, from, len); // prior to mmx we use the standart memcpy
 #else
 #if HAVE_SSE2
