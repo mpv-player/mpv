@@ -290,11 +290,11 @@ main(void)
        have to check the family, model and stepping instead. */
     if (strstr(idstr, "AMD") &&
         family == 5 &&
-        (model >= 9 || model == 8 && stepping >= 8))
+        (model >= 9 || (model == 8 && stepping >= 8)))
       printf(" %s", "k6_mtrr");
     /* similar for cyrix_arr. */
     if (strstr(idstr, "Cyrix") &&
-        (family == 5 && model < 4 || family == 6))
+        (family == 5 && (model < 4 || family == 6)))
       printf(" %s", "cyrix_arr");
     /* as well as centaur_mcr. */
     if (strstr(idstr, "Centaur") &&
