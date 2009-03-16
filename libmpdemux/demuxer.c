@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "options.h"
+#include "talloc.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "m_config.h"
@@ -216,8 +217,7 @@ static const demuxer_desc_t *get_demuxer_desc_from_type(int file_format)
 demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
                        int a_id, int v_id, int s_id, char *filename)
 {
-    demuxer_t *d = malloc(sizeof(demuxer_t));
-    memset(d, 0, sizeof(demuxer_t));
+    struct demuxer *d = talloc_zero(NULL, struct demuxer);
     d->stream = stream;
     d->stream_pts = MP_NOPTS_VALUE;
     d->reference_clock = MP_NOPTS_VALUE;
@@ -386,7 +386,7 @@ void free_demuxer(demuxer_t *demuxer)
         }
         free(demuxer->attachments);
     }
-    free(demuxer);
+    talloc_free(demuxer);
 }
 
 
