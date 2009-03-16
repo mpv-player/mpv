@@ -439,6 +439,12 @@ static int open_tv(tvi_handle_t *tvh)
 #endif
 
     /* limits on w&h are norm-dependent -- JM */
+    if (tvh->tv_param->width != -1 && tvh->tv_param->height != -1) {
+        // first tell the driver both width and height, some drivers do not support setting them independently.
+        int dim[2];
+        dim[0] = tvh->tv_param->width; dim[1] = tvh->tv_param->height;
+        funcs->control(tvh->priv, TVI_CONTROL_VID_SET_WIDTH_HEIGHT, dim);
+    }
     /* set width */
     if (tvh->tv_param->width != -1)
     {

@@ -780,6 +780,14 @@ static int control(priv_t *priv, int cmd, void *arg)
         return TVI_CONTROL_TRUE;
     case TVI_CONTROL_VID_CHK_WIDTH:
         return TVI_CONTROL_TRUE;
+    case TVI_CONTROL_VID_SET_WIDTH_HEIGHT:
+        if (getfmt(priv) < 0) return TVI_CONTROL_FALSE;
+        priv->format.fmt.pix.width = ((int *)arg)[0];
+        priv->format.fmt.pix.height = ((int *)arg)[1];
+        priv->format.fmt.pix.field = V4L2_FIELD_ANY;
+        if (ioctl(priv->video_fd, VIDIOC_S_FMT, &priv->format) < 0)
+            return TVI_CONTROL_FALSE;
+        return TVI_CONTROL_TRUE;
     case TVI_CONTROL_VID_SET_WIDTH:
         if (getfmt(priv) < 0) return TVI_CONTROL_FALSE;
         priv->format.fmt.pix.width = *(int *)arg;
