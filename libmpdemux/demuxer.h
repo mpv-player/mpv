@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "stream/stream.h"
 
@@ -187,6 +188,18 @@ typedef struct demux_chapter
   char* name;
 } demux_chapter_t;
 
+struct matroska_data {
+    unsigned char segment_uid[16];
+    // Ordered chapter information if any
+    struct matroska_chapter {
+        uint64_t start;
+        uint64_t end;
+        bool has_segment_uid;
+        unsigned char segment_uid[16];
+    } *ordered_chapters;
+    int num_ordered_chapters;
+};
+
 typedef struct demux_attachment
 {
   char* name;
@@ -220,9 +233,11 @@ typedef struct demuxer {
 
   demux_chapter_t* chapters;
   int num_chapters;
-  
+
   demux_attachment_t* attachments;
   int num_attachments;
+
+    struct matroska_data matroska_data;
 
   void* priv;  // fileformat-dependent data
   char** info;

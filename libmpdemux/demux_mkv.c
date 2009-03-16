@@ -12,7 +12,9 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <inttypes.h>
+#include <stdbool.h>
 
+#include "talloc.h"
 #include "options.h"
 #include "stream/stream.h"
 #include "demuxer.h"
@@ -403,6 +405,24 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
             length -= l;
             if (duration == EBML_FLOAT_INVALID)
                 return 1;
+            break;
+
+        case MATROSKA_ID_SEGMENTUID:;
+            l = ebml_read_length(s, &i);
+            length -= i;
+            if (l != sizeof(demuxer->matroska_data.segment_uid)) {
+                mp_msg(MSGT_DEMUX, MSGL_INFO,
+                       "[mkv] segment uid invalid length %"PRIu64"\n", l);
+                stream_skip(s, l);
+            } else {
+                stream_read(s, demuxer->matroska_data.segment_uid, l);
+                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + segment uid");
+                for (int i = 0; i < l; i++)
+                    mp_msg(MSGT_DEMUX, MSGL_V, " %02x",
+                           demuxer->matroska_data.segment_uid[i]);
+                mp_msg(MSGT_DEMUX, MSGL_V, "\n");
+            }
+            length -= l;
             break;
 
         default:
@@ -1074,10 +1094,11 @@ demux_mkv_read_cues (demuxer_t *demuxer)
   return 0;
 }
 
-static uint64_t read_one_chapter(demuxer_t *demuxer, stream_t *s)
+static uint64_t read_one_chapter(struct demuxer *demuxer, stream_t *s)
 {
     uint64_t len, l;
     uint64_t start = 0, end = 0;
+    struct matroska_chapter chapter = {};
     char *name = 0;
     int i;
     uint32_t id;
@@ -1117,6 +1138,24 @@ static uint64_t read_one_chapter(demuxer_t *demuxer, stream_t *s)
             }
             break;
 
+        case MATROSKA_ID_CHAPTERSEGMENTUID:
+            l = ebml_read_length(s, &i);
+            len -= l + i;
+            if (l != sizeof(chapter.segment_uid)) {
+                mp_msg(MSGT_DEMUX, MSGL_INFO,
+                       "[mkv] chapter segment uid invalid length %"PRIu64"\n",
+                       l);
+                stream_skip(s, l);
+            } else {
+                stream_read(s, chapter.segment_uid, l);
+                chapter.has_segment_uid = true;
+                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Chapter segment uid ");
+                for (int i = 0; i < l; i++)
+                    mp_msg(MSGT_DEMUX, MSGL_V, "%02x ", chapter.segment_uid[i]);
+                mp_msg(MSGT_DEMUX, MSGL_V, "\n");
+            }
+            break;
+
         default:
             ebml_read_skip(s, &l);
             len -= l;
@@ -1128,6 +1167,15 @@ static uint64_t read_one_chapter(demuxer_t *demuxer, stream_t *s)
         name = strdup("(unnamed)");
 
     int cid = demuxer_add_chapter(demuxer, name, start, end);
+    struct matroska_data *m = &demuxer->matroska_data;
+    m->ordered_chapters = talloc_realloc(demuxer, m->ordered_chapters,
+                                         struct matroska_chapter,
+                                         m->num_ordered_chapters + 1);
+    chapter.start = start;
+    chapter.end = end;
+    // Will be undone later if this is a normal chapter rather than ordered
+    m->ordered_chapters[m->num_ordered_chapters] = chapter;
+    m->num_ordered_chapters++;
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Chapter %u from %02d:%02d:%02d."
            "%03d to %02d:%02d:%02d.%03d, %s\n",
@@ -1160,13 +1208,23 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing chapters ] ---------\n");
     length = ebml_read_length(s, NULL);
 
+    bool have_edition = false;
     while (length > 0) {
         id = ebml_read_id(s, &i);
         length -= i;
         switch (id) {
-        case MATROSKA_ID_EDITIONENTRY:;
+        case MATROSKA_ID_EDITIONENTRY:
+            if (have_edition) {
+                mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Multiple edition entries"
+                       " - ignoring all but first!\n");
+                ebml_read_skip(s, &l);
+                length -= l;
+                break;
+            }
+            have_edition = true;
             uint64_t editionlen = ebml_read_length(s, &i);
             length -= editionlen + i;
+            bool ordered = false;
             while (editionlen > 0) {
                 id = ebml_read_id(s, &i);
                 editionlen -= i;
@@ -1174,11 +1232,24 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                 case MATROSKA_ID_CHAPTERATOM:
                     l = read_one_chapter(demuxer, s);
                     break;
+                case MATROSKA_ID_EDITIONFLAGORDERED:
+                    ordered = ebml_read_uint(s, &l);
+                    mp_msg(MSGT_DEMUX, MSGL_V,
+                           "[mkv] Ordered chapter flag: %d\n", ordered);
+                    break;
+
                 default:
                     ebml_read_skip(s, &l);
                     break;
                 }
                 editionlen -= l;
+            }
+            if (!ordered) {
+                // The chapters should be interpreted as normal ones,
+                // so undo the addition of this information.
+                talloc_free(demuxer->matroska_data.ordered_chapters);
+                demuxer->matroska_data.ordered_chapters = NULL;
+                demuxer->matroska_data.num_ordered_chapters = 0;
             }
             break;
 

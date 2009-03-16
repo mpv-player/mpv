@@ -54,6 +54,7 @@
 #define MATROSKA_ID_WRITINGAPP           0x5741
 #define MATROSKA_ID_MUXINGAPP            0x4D80
 #define MATROSKA_ID_DATEUTC              0x4461
+#define MATROSKA_ID_SEGMENTUID           0x73A4
 
 /* ID in the tracks master */
 #define MATROSKA_ID_TRACKENTRY           0xAE
@@ -126,11 +127,13 @@
 
 /* IDs in the chapters master */
 #define MATROSKA_ID_EDITIONENTRY         0x45B9
+#define MATROSKA_ID_EDITIONFLAGORDERED   0x45DD
 #define MATROSKA_ID_CHAPTERATOM          0xB6
 #define MATROSKA_ID_CHAPTERTIMESTART     0x91
 #define MATROSKA_ID_CHAPTERTIMEEND       0x92
 #define MATROSKA_ID_CHAPTERDISPLAY       0x80
 #define MATROSKA_ID_CHAPSTRING           0x85
+#define MATROSKA_ID_CHAPTERSEGMENTUID    0x6E67
 
 /* IDs in the cluster master */
 #define MATROSKA_ID_CLUSTERTIMECODE      0xE7
