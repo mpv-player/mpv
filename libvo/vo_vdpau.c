@@ -157,6 +157,7 @@ static int                                deint_counter;
 static int                                pullup;
 static float                              denoise;
 static float                              sharpen;
+static int                                chroma_deint;
 static int                                top_field_first;
 
 static VdpDecoder                         decoder;
@@ -398,6 +399,9 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
     const void * const denoise_value[] = {&denoise};
     static const VdpVideoMixerAttribute sharpen_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL};
     const void * const sharpen_value[] = {&sharpen};
+    static const VdpVideoMixerAttribute skip_chroma_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_SKIP_CHROMA_DEINTERLACE};
+    const uint8_t skip_chroma_value = 1;
+    const void * const skip_chroma_value_ptr[] = {&skip_chroma_value};
     static const VdpVideoMixerParameter parameters[VDP_NUM_MIXER_PARAMETER] = {
         VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH,
         VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_HEIGHT,
@@ -433,6 +437,8 @@ static int create_vdp_mixer(VdpChromaType vdp_chroma_type) {
         vdp_video_mixer_set_attribute_values(video_mixer, 1, denoise_attrib, denoise_value);
     if (sharpen)
         vdp_video_mixer_set_attribute_values(video_mixer, 1, sharpen_attrib, sharpen_value);
+    if (!chroma_deint)
+        vdp_video_mixer_set_attribute_values(video_mixer, 1, skip_chroma_attrib, skip_chroma_value_ptr);
 
     return 0;
 }
@@ -964,6 +970,7 @@ static void uninit(void)
 
 static const opt_t subopts[] = {
     {"deint",   OPT_ARG_INT,   &deint,   (opt_test_f)int_non_neg},
+    {"chroma-deint", OPT_ARG_BOOL,  &chroma_deint,  NULL},
     {"pullup",  OPT_ARG_BOOL,  &pullup,  NULL},
     {"denoise", OPT_ARG_FLOAT, &denoise, NULL},
     {"sharpen", OPT_ARG_FLOAT, &sharpen, NULL},
@@ -980,6 +987,9 @@ static const char help_msg[] =
     "    2: bob deinterlacing (current fallback for hardware decoding)\n"
     "    3: temporal deinterlacing (only works with software codecs)\n"
     "    4: temporal-spatial deinterlacing (only works with software codecs)\n"
+    "  chroma-deint\n"
+    "    Operate on luma and chroma when using temporal deinterlacing (default)\n"
+    "    Use nochroma-deint to speed up temporal deinterlacing\n"
     "  pullup\n"
     "    Try to apply inverse-telecine (needs temporal deinterlacing)\n"
     "  denoise\n"
@@ -997,6 +1007,7 @@ static int preinit(const char *arg)
     deint = 0;
     deint_type = 3;
     deint_counter = 0;
+    chroma_deint = 1;
     pullup = 0;
     denoise = 0;
     sharpen = 0;
