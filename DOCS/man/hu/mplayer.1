@@ -1,4 +1,4 @@
-.\" Synced with r28895
+.\" Synced with r28968
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 03. 09." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 03. 16." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -161,7 +161,7 @@ Van X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, Mac OS X CoreVideo támogatás, de használhatod a GGI, SDL (és ennek összes
 vezérlõje), VESA (minden VESA-kompatibilis kártyán, még X11 nélkül is), néhány
 alacsony szintû, kártyaspecifikus vezérlõ (Matroxhoz, 3dfx-hez és ATI-hoz) és
-pár hardveeres MPEG dekódoló lap, mint pl. a Siemens DVB, Hauppauge PVR (IVTV),
+pár hardveeres MPEG dekódoló lap, mint pl.\& a Siemens DVB, Hauppauge PVR (IVTV),
 DXR2 és DXR3/\:Hollywood+ támogatását is. A legtöbbjük tudja a szoftveres és
 harderes nagyítást, így a filmjeidet teljes képernyõs módban élvezheted.
 .PP
@@ -572,7 +572,7 @@ spuaa=20
 .SH "PROFILOK"
 A különbözõ konfigurációjú történõ munka megkönnyítésére profilokat lehet
 definiálni a konfigurációs fájlokban.
-Egy profil a négyzetes zárójelbe tett nevével kezdõdik, pl. '[en-profilom]'.
+Egy profil a négyzetes zárójelbe tett nevével kezdõdik, pl.\& '[en-profilom]'.
 Az összes ezutáni opció a profil része lesz.
 A leírás (melyet a \-profile help mutat) a profile-desc opcióval adható meg.
 A profil befejezéséhez kezdj egy újat vagy használd a 'default' profil nevet
@@ -644,7 +644,7 @@ Kiírja az összes elérhetõ opciót.
 A konzol üzeneteket a megadott kódlapra konvertálja (alapértelmezett: automatikus
 felismerés).
 A szöveg a a configure \-\-charset opciójával megadott kódolású lesz.
-Beállíthatod "noconv"-ra is a konvertálás teljes letiltásához (pl. ha
+Beállíthatod "noconv"-ra is a konvertálás teljes letiltásához (pl.\& ha
 problémáid vannak az iconv-val).
 .br
 .I MEGJEGYZÉS:
@@ -905,7 +905,7 @@ segítségével - pl.\& shell használat.
 Az MPlayer ezt a parancsot ellenõrzés nélkül használja, a te felelõsséged,
 hogy ne okozzon biztonsági problémát (pl.\& gyõzõdj meg róla, hogy teljes elérési
 utakat használsz, ha a "." benne van az elérési utadban, mint Windows alatt).
-Csak videó lejátszás közben mûködik (pl. a \-novideo kapcsolóval nem, de \-vo null mellett igen).
+Csak videó lejátszás közben mûködik (pl.\& a \-novideo kapcsolóval nem, de \-vo null mellett igen).
 .sp 1
 Ezt "ki lehet használni" az olyan képernyõvédõ letiltásához, amely nem
 támogatja ehhez a megfelelõ X API-kat (lásd még \-stop\-xscreensaver).
@@ -1052,7 +1052,7 @@ Kikapcsolja az AppleIR távirányító támogatását.
 Megtiltja az MPlayernek a billentyûzet események olvasását a standard
 input-ról. Hasznos, ha a standard input-ról olvasol be adatot.
 Ez automatikusan engedélyezõdik, ha \- van a parancssorban.
-Vannak esetek, amikor kézzel kell beállítanod, pl. \&
+Vannak esetek, amikor kézzel kell beállítanod, pl.\&
 ha megnyitod a /dev/\:stdin -t (vagy a rendszereden az ennek megfelelõt),
 lejátszási listában használod az stdin-t vagy késõbb akarsz olvastatni
 az stdin-rõl a loadfile vagy loadlist szolga parancsok segítségével.
@@ -1136,7 +1136,7 @@ parancsokat olvas az stdin-rõl.
 .I MEGJEGYZÉS:
 A \-input cmdlist kapcsoló kilistázza a szolga módban használható parancsokat,
 a DOCS/tech/slave.txt fájlban megtalálod a leírásukat.
-Ez nem a többi, pl. a videó ablakon keresztül érkezõ input letiltására készült,
+Ez nem a többi, pl.\& a videó ablakon keresztül érkezõ input letiltására készült,
 arra használj mást, mint a \-input nodefault\-binds:conf=/dev/null.
 .
 .TP
@@ -1304,7 +1304,7 @@ Lejátszási csatornák igénylése (alapértelmezett: 2).
 Az MPlayer megmondja a dekódernek hogy annyi csatornán dekódoljon,
 amennyit ez az opció megad.
 Innentõl a dekóderen múlik ennek teljesítése.
-Ez akkor fontos ha AC-3-as hanggal ellátott videót nézel (pl. DVD).
+Ez akkor fontos ha AC-3-as hanggal ellátott videót nézel (pl.\& DVD).
 Ebben alapértelmezésként a liba52 dekódol és lemixeli az audiót a kért
 számú csatornára.
 A kimeneti csatornák dekódolt csatornák számától független, direkt
@@ -1421,7 +1421,7 @@ várakozással töltött másodpercek maximális száma. Alapértelmezett 30.
 .TP
 .B \-dvd\-device <eszköz elérési útja> (csak DVD)
 Megadja a DVD eszközt vagy .iso fájlnevet (alapértelmezett: /dev/\:dvd).
-Megadhatsz egy könyvtárat is, ami egy elõzõleg DVD-rõl (pl. vobcopy-val)
+Megadhatsz egy könyvtárat is, ami egy elõzõleg DVD-rõl (pl.\& vobcopy-val)
 lemásolt fájlokat tartalmaz.
 .
 .TP
@@ -1483,7 +1483,7 @@ Az indexet a MEncoderrel lehet maradandóan javítani (lásd a dokumentációt).
 .br
 .I MEGJEGYZÉS:
 Értelemszerûen ez az opció csak akkor használható ha a média tekerhetõ
-(tehát pl. stdin-nel, pipe-al nem).
+(tehát pl.\& stdin-nel, pipe-al nem).
 .
 .TP
 .B \-fps <lebegõpontos érték>
@@ -1510,7 +1510,7 @@ Hasznos hibás/\:befejezetlen letöltéseknél vagy hibás fájloknál.
 .br
 .I MEGJEGYZÉS:
 Értelemszerûen ez az opció csak akkor használható ha a média tekerhetõ
-(tehát pl. stdin-nel, pipe-al nem).
+(tehát pl.\& stdin-nel, pipe-al nem).
 .
 .TP
 .B \-noidx
@@ -2654,7 +2654,7 @@ Az OSS opciói
 .B vol, pcm, line.
 Az opciók teljes listájához lásd a SOUND_DEVICE_NAMES-t a
 /usr/\:include/\:linux/\:soundcard.h fájlban.
-ALSA-hoz használhatod a neveket, amiket pl. az \& alsamixer
+ALSA-hoz használhatod a neveket, amiket pl.\& az \& alsamixer
 megjelenít, úgy mint
 .B Master, Line, PCM.
 .br
@@ -3236,7 +3236,7 @@ Csak saját felelõsségre használd!
 Megváltoztatja a pan-and-scan funkcionalítás tartományát (alapértelmezett: 1).
 A pozitív értékek az alapértelmezett tartomány többszörösét jelentik.
 A negatív számok azt jelentik, hogy \-panscanrange+1 faktorig tudsz nagyítani.
-Pl. \-panscanrange \-3 4-es nagyítási faktort enged.
+Pl.\& \-panscanrange \-3 4-es nagyítási faktort enged.
 Ez a képesség még kísérleti.
 Ne jelents hibákat, hacsak nem \-vo gl-t használsz.
 .
@@ -3468,18 +3468,24 @@ Egy zajcsökkentõ algoritmust alkalmaz a videóra (alapértelmezett: 0, nincs zajcs
 .IPs deint=<0\-4>
 Kiválasztja a deinterlacer-t (alapértelmezett: 0).
 Minden mód > 0 figyelembe veszi a \-field\-dominance kapcsolót.
+.br
+.I MEGJEGYZÉS:
+A > 2 értékek késleltetik a videó kimenetet egy képkockával.
 .RSss
 .IPs 0
 Nincs deinterlace.
 .IPs 1
 Csak az elsõ mezõt mutatja, hasonló a \-vf field kapcsolóhoz.
 .IPs 2
-Bob deinterlace (jelenleg erre lép vissz a fejlettebb deinterlacer-ekrõl).
+Bob deinterlace
+(jelenleg erre lép vissz a fejlettebb deinterlacer-ekrõl és a hardveres dekódolásról).
 .IPs 3
-Mozgás adaptív idõbeli deinterlace (még nem mûködik).
+Mozgás adaptív idõbeli deinterlace
+(jelenleg csak a szoftveresen dekódolt videóknál mûködik).
 Ez az alapértelmezett, ha a "D" gombbal engedélyezhetõ a deinterlacing.
 .IPs 4
-Mozgás adaptív idõbeli deinterlace él-vezérelt térbeli interpolációval (még nem mûködik).
+Mozgás adaptív idõbeli deinterlace él-vezérelt térbeli interpolációval
+(jelenleg csak a szoftveresen dekódolt videóknál mûködik).
 .RE
 .IPs pullup
 Inverz telecine-t próbál alkalmazni, idõbeli deinterlace kell hozzá.
@@ -3607,10 +3613,27 @@ Próbáld ki ezt az opciót, ha megjelenítési problémáid vannak.
 .PD 1
 .
 .TP
+.B kva (csak OS/2)
+Kimeneti videó vezérlõ, ami a libkva interfészt használja.
+.PD 0
+.RSs
+.IPs snap
+Kényszeríti a SNAP módot.
+.IPs wo
+Kényszeríti a WarpOverlay! módot.
+.IPs dive
+Kényszeríti a DIVE módot.
+.IPs (no)t23
+Engedélyezi/letiltja a T23 laptopokra vonatkozó kódot (alapértelmezett: \-not23).
+Próbáld meg engedélyezni ezt az opciót, ha a videó kártyád csak a felméretezést támogatja.
+.RE
+.PD 1
+.
+.TP
 .B quartz (csak Mac OS X)
 Mac OS X Quartz kimeneti videó vezérlõ.
 Bizonyos esetekben hatékonyabb lehet egy csomagolt YUV kimeneti
-formátum kényszerítése, pl. a \& \-vf format=yuy2 kapcsolóval.
+formátum kényszerítése, pl.\& a \& \-vf format=yuy2 kapcsolóval.
 .PD 0
 .RSs
 .IPs device_id=<szám>
@@ -3943,7 +3966,7 @@ Ez a vezérlõ nagyon hardver specifikus.
 .RSs
 .IPs <aleszköz>
 Explicit kiválasztja a használni kívánt Blinkenlights aleszköz vezérlõt.
-Valami olyasmi, mint pl. arcade:host=localhost:2323 vagy
+Valami olyasmi, mint pl.\& arcade:host=localhost:2323 vagy
 hdl:file=name1,file=name2.
 Meg kell adnod az aleszközt.
 .RE
@@ -4167,7 +4190,7 @@ Kimeneti videó vezérlõ a DVB kártyákhoz, ami a kimenetet egy MPEG-PES fájlba
 .RSs
 .IPs card=<1\-4>
 Megadja a használandó eszköz számát, ha több, mint egy kimeneti DVB kártya van
-(csak V3 API, mint pl. az 1.x.y sorozatú vezérlõk).
+(csak V3 API, mint pl.\& az 1.x.y sorozatú vezérlõk).
 Ha nincs megadva, az MPlayer megkeresi az elsõ használható kártyát.
 .IPs <fájlnév>
 kimeneti fájl neve (alapértelmezett: ./grab.mpg).
@@ -4643,7 +4666,7 @@ A <kihagyási érték> a következõk egyike lehet:
 .br
 none: Soha ne hagyja ki.
 .br
-default: Hagyja ki, ha a feldolgozási lépés haszontalan (pl. 0 méretû csomag AVI-ban).
+default: Hagyja ki, ha a feldolgozási lépés haszontalan (pl.\& 0 méretû csomag AVI-ban).
 .br
 nonref: Hagyja ki a nem referencia kockákat (pl.\& nem lesz felhasználva
 másik kocka dekódolásánál, a hiba nem tud "tovább épülni").
@@ -4894,7 +4917,7 @@ Kikapcsolja a képarány számításokat.
 .TP
 .B "\-zoom\ \ "
 A szoftveres méretezést engedélyezi, ha használható.
-Ez olyan kimeneti vezérlõkkel (mint pl. x11, fbdev) is engedélyezi a méretezést,
+Ez olyan kimeneti vezérlõkkel (mint pl.\& x11, fbdev) is engedélyezi a méretezést,
 melyekben nincs támogatás a hardveres méretezéshez, vagy az MPlayer letiltja a
 méretezést teljesítménybeli indokok miatt.
 .
@@ -5320,7 +5343,7 @@ ha szükséges.
 .
 .TP
 .B surround[=késleltetés]
-Dekódoló mátrix kódolású térhatású hanghoz, mint pl. a Dolby Surround-hoz.
+Dekódoló mátrix kódolású térhatású hanghoz, mint pl.\& a Dolby Surround-hoz.
 Sok két csatornás audióval rendelkezõ fájl tartalmaz mátrixos térhatású
 hangot. Legalább négy csatornát támogató hangkártya kell hozzá.
 .PD 0
@@ -5932,7 +5955,7 @@ A használható formátumok listájához lásd a format=fmt=help kapcsolót.
 .PD 0
 .RSs
 .IPs <fourcc>
-formátum név mint pl. rgb15, bgr24, yv12, stb. (alapértelmezett: yuy2)
+formátum név mint pl.\& rgb15, bgr24, yv12, stb. (alapértelmezett: yuy2)
 .RE
 .PD 1
 .
@@ -5948,7 +5971,7 @@ Az elérhetõ formátumok listájához lásd a noformat=fmt=help kapcsolót.
 .PD 0
 .RSs
 .IPs <fourcc>
-formátum név, mint pl. rgb15, bgr24, yv12, stb. (alapértelmezett: yv12)
+formátum név, mint pl.\& rgb15, bgr24, yv12, stb. (alapértelmezett: yv12)
 .RE
 .PD 1
 .
@@ -6166,7 +6189,7 @@ Kvantálási paraméter kényszerítése (alapértelmezett: 0, videó QP használata).
 kvantálási paraméter (QP) változtató szûrõ
 .RSs
 .IPs <egyenlet>
-valamilyen egyenlet, pl. "2+2*sin(PI*qp)"
+valamilyen egyenlet, pl.\& "2+2*sin(PI*qp)"
 .RE
 .
 .TP
@@ -7954,7 +7977,7 @@ maximális Lagrange szorzó a ratecontrol-hoz (alapértelmezett: 31.0)
 .B mblmin=<0.01\-255.0>
 Minimális makroblokk-szintû Lagrange szorzó a ratecontrol-hoz
 (alapértelmezett: 2.0).
-Ez a paraméter az adaptív kvantálási opciókat érinti, mint pl. a
+Ez a paraméter az adaptív kvantálási opciókat érinti, mint pl.\& a
 qprd, lumi_mask, stb..
 .RE
 .
@@ -8195,7 +8218,7 @@ N lépéses módban a második lépés (vpass=3, ez nem elírás) mindkettõt
 elvégzi: elõször elolvassa a statisztika fájlt, majd felülírja.
 Ajánlott a divx2pass.log elmentése, mielõtt ezt megtennéd, ha esély van rá,
 hogy meg kell szakítanod a MEncoder-t.
-Használhatod mindegyik kódolási opciót, kivéve a nagyon CPU-igényeseket, pl. "qns".
+Használhatod mindegyik kódolási opciót, kivéve a nagyon CPU-igényeseket, pl.\& "qns".
 .br
 Ezt a lépést újra és újra lefuttathatod a kódolás finomítása érdekében.
 Minden következõ lépés felhasználja az elõzõ lépés statisztikáit a továbblépéshez.
@@ -9129,7 +9152,7 @@ Zajcsökkentés, a 0 azt jelenti, hogy kikapcsolva.
 0\-600 a hasznos tartomány egy átlagos tartalom esetén, de lehet, hogy kicsit feljebb
 kell vinned, ha nagyon zajos az anyagod (alapértelmezett: 0).
 Mivel kicsi hatása van a sebességre, inkább ezt ajánlott használni, mint a
-zajszûrést a videó szûrõknél, pl. denoise3d vagy hqdn3d-vel.
+zajszûrést a videó szûrõknél, pl.\& denoise3d vagy hqdn3d-vel.
 .
 .TP
 .B qns=<0\-3>
@@ -9554,7 +9577,7 @@ utolsó kockája vagy egy P-kocka vagy egy N-kocka, de nem B-kocka.
 .TP
 .B (no)packed
 Ez az opció a kocka-sorrendbeli gondokat oldja meg konténer formátumokba,
-pl. AVI-ba történõ kódoláskor, ami nem tud megbírkózni a nem sorrendben
+pl.\& AVI-ba történõ kódoláskor, ami nem tud megbírkózni a nem sorrendben
 lévõ kockákkal. A gyakorlatban a legtöbb dekódoló (mind szoftveres, mind
 hardveres) saját maga is tudja kezelni a kocka-sorrendet és összezavarodhat,
 ha ez az opció be van kapcsolva, így nyugodtan kikapcsolva hagyhatod,
@@ -10054,7 +10077,7 @@ Az alacsonyabb érték nagyobb ugrálást enged a kvantáló értékének,
 a magasabb értékek finomabb váltásokra kényszerítik.
 A cplx_blur biztosítja, hogy minden I-kocka minõsége összehasonlítható
 az õt követõ P-kockával és hogy a váltakozó nagy és kicsi komplexitású
-kockák (pl. alacsony fps-û animáció) nem vesztegetnek biteket egy
+kockák (pl.\& alacsony fps-û animáció) nem vesztegetnek biteket egy
 ingadozó kvantálóval.
 .
 .TP
@@ -10290,7 +10313,7 @@ Inkább ezzen a paraméteren változtass, mielõtt a deadzone_inter-hez hozzányúlnál
 .B (no)fast_pskip
 A P-kockák korai skip detektálásának végrehajtása (alapértelmezett: bekapcsolva).
 Ez általában javítja a sebességet, de néha a kevésbé részletes
-területeken (pl. ég) mellékhatásokat okoz.
+területeken (pl.\& ég) mellékhatásokat okoz.
 .
 .TP
 .B (no)dct_decimate
@@ -10307,7 +10330,7 @@ Zajcsökkentés, a 0 a kikapcsolást jelenti.
 100\-1000 a használandó tartomány egy átlagos tartalomnál, de a nagyon zajos
 tartalomnál kicsit felnyomhatod (alapértelmezett: 0).
 Tekintve, hogy kicsi a befolyása a sebességre, inkább ez a preferálandó a
-zajcsökkentésnél a videó szûrõkkel, mint pl. a denoise3d-vel vagy hqdn3d-vel
+zajcsökkentésnél a videó szûrõkkel, mint pl.\& a denoise3d-vel vagy hqdn3d-vel
 történõ zajcsökkentés helyett.
 .
 .TP
@@ -10409,7 +10432,7 @@ a szálak megfelelõ számának kiválasztását.
 .B (no)global_header
 Az SPS és a PPS csak egyszer fog megjelenni, a bitfolyam elején
 (alapértelmezett: letiltva).
-Néhány lejátszó, mint pl. a Sony PSP, igényli ezt az opciót.
+Néhány lejátszó, mint pl.\& a Sony PSP, igényli ezt az opciót.
 Alapértelmezésként az SPS és a PPS minden IDR kocka elõtt ismétlõdik.
 .
 .TP
@@ -10490,7 +10513,7 @@ A bináris codec fájl neve, amivel kódolni akarsz.
 .
 .TP
 .B compdata=<fájl>
-A codec beállításokat tartalmazó fájl neve (pl. firstpass.mcf), melyet a vfw2menc készített.
+A codec beállításokat tartalmazó fájl neve (pl.\& firstpass.mcf), melyet a vfw2menc készített.
 .
 .
 .SS MPEG muxer (\-mpegopts)
@@ -11171,7 +11194,7 @@ you can directly play it via cdda:// without setting format, hwac3 or hwdts.
 mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
 .fi
 .br
-Egy kicsit játszadoznod kell a pan értékekkel (pl. felszorozni az értékeket) a
+Egy kicsit játszadoznod kell a pan értékekkel (pl.\& felszorozni az értékeket) a
 hangerõ növeléséhez vagy a kattogás elkerüléséhez.
 .
 .PP
