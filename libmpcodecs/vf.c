@@ -304,7 +304,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
     if (number == -1) {
       int i;
       for (i = 0; i < NUM_NUMBERED_MPI; i++)
-        if (!vf->imgctx.numbered_images[i] || !(vf->imgctx.numbered_images[i]->flags & MP_IMGFLAG_IN_USE))
+        if (!vf->imgctx.numbered_images[i] || !vf->imgctx.numbered_images[i]->usage_count)
           break;
       number = i;
     }
@@ -431,7 +431,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 
   mpi->qscale = NULL;
   }
-  mpi->flags |= MP_IMGFLAG_IN_USE;
+  mpi->usage_count++;
 //    printf("\rVF_MPI: %p %p %p %d %d %d    \n",
 //	mpi->planes[0],mpi->planes[1],mpi->planes[2],
 //	mpi->stride[0],mpi->stride[1],mpi->stride[2]);

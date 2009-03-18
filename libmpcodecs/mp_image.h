@@ -54,8 +54,6 @@
 
 // buffer type was printed (do NOT set this flag - it's for INTERNAL USE!!!)
 #define MP_IMGFLAG_TYPE_DISPLAYED 0x8000
-// set if it can not be reused yet (for MP_IMGTYPE_NUMBERED)
-#define MP_IMGFLAG_IN_USE 0x10000
 
 // codec doesn't support any form of direct rendering - it has own buffer
 // allocation. so we just export its buffer pointers:
@@ -101,6 +99,7 @@ typedef struct mp_image_s {
     int chroma_height;
     int chroma_x_shift; // horizontal
     int chroma_y_shift; // vertical
+    int usage_count;
     /* for private use by filter or vo driver (to store buffer id or dmpi) */
     void* priv;
 } mp_image_t;

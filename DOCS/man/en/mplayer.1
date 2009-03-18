@@ -3464,15 +3464,14 @@ No deinterlacing.
 .IPs 1
 Show only first field, similar to \-vf field.
 .IPs 2
-Bob deinterlacing
-(current fallback for advanced deinterlacers and hardware decoding).
+Bob deinterlacing, similar to \-vf tfields=1.
 .IPs 3
-Motion adaptive temporal deinterlacing
-(currently only working with software-decoded video).
+Motion adaptive temporal deinterlacing.
+May lead to A/V desync with slow video hardware and/or high resolution.
 This is the default if "D" is used to enable deinterlacing.
 .IPs 4
-Motion adaptive temporal deinterlacing with edge-guided spatial interpolation
-(currently only working with software-decoded video).
+Motion adaptive temporal deinterlacing with edge-guided spatial interpolation.
+Needs fast video hardware.
 .RE
 .IPs chroma\-deint
 Makes temporal deinterlacers operate both on luma and chroma (default).

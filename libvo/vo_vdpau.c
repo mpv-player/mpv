@@ -148,12 +148,14 @@ static void                              *vdpau_lib_handle;
 #define osd_surface output_surfaces[NUM_OUTPUT_SURFACES]
 static VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
 static VdpVideoSurface                    deint_surfaces[3];
+static mp_image_t                        *deint_mpi[3];
 static int                                output_surface_width, output_surface_height;
 
 static VdpVideoMixer                      video_mixer;
 static int                                deint;
 static int                                deint_type;
 static int                                deint_counter;
+static int                                deint_buffer_past_frames;
 static int                                pullup;
 static float                              denoise;
 static float                              sharpen;
@@ -455,6 +457,12 @@ static void free_video_specific(void) {
 
     for (i = 0; i < 3; i++)
         deint_surfaces[i] = VDP_INVALID_HANDLE;
+
+    for (i = 0; i < 3; i++)
+        if (deint_mpi[i]) {
+            deint_mpi[i]->usage_count--;
+            deint_mpi[i] = NULL;
+        }
 
     for (i = 0; i < MAX_VIDEO_SURFACES; i++) {
         if (surface_render[i].surface != VDP_INVALID_HANDLE) {
@@ -848,7 +856,14 @@ static uint32_t draw_image(mp_image_t *mpi)
     if (IMGFMT_IS_VDPAU(image_format)) {
         struct vdpau_render_state *rndr = mpi->priv;
         vid_surface_num = rndr - surface_render;
-        deint = FFMIN(deint, 2);
+        if (deint_buffer_past_frames) {
+            mpi->usage_count++;
+            if (deint_mpi[2])
+                deint_mpi[2]->usage_count--;
+            deint_mpi[2] = deint_mpi[1];
+            deint_mpi[1] = deint_mpi[0];
+            deint_mpi[0] = mpi;
+        }
     } else if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)) {
         VdpStatus vdp_st;
         void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
@@ -984,9 +999,9 @@ static const char help_msg[] =
     "  deint (all modes > 0 respect -field-dominance)\n"
     "    0: no deinterlacing\n"
     "    1: only show first field\n"
-    "    2: bob deinterlacing (current fallback for hardware decoding)\n"
-    "    3: temporal deinterlacing (only works with software codecs)\n"
-    "    4: temporal-spatial deinterlacing (only works with software codecs)\n"
+    "    2: bob deinterlacing\n"
+    "    3: temporal deinterlacing (resource-hungry)\n"
+    "    4: temporal-spatial deinterlacing (very resource-hungry)\n"
     "  chroma-deint\n"
     "    Operate on luma and chroma when using temporal deinterlacing (default)\n"
     "    Use nochroma-deint to speed up temporal deinterlacing\n"
@@ -1007,6 +1022,8 @@ static int preinit(const char *arg)
     deint = 0;
     deint_type = 3;
     deint_counter = 0;
+    deint_buffer_past_frames = 0;
+    deint_mpi[0] = deint_mpi[1] = deint_mpi[2] = NULL;
     chroma_deint = 1;
     pullup = 0;
     denoise = 0;
@@ -1017,6 +1034,8 @@ static int preinit(const char *arg)
     }
     if (deint)
         deint_type = deint;
+    if (deint > 2)
+        deint_buffer_past_frames = 1;
 
     vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
     if (!vdpau_lib_handle) {
@@ -1122,6 +1141,7 @@ static int control(uint32_t request, void *data, ...)
                                                              features,
                                                              feature_enables);
                 CHECK_ST_WARNING("Error changing deinterlacing settings")
+                deint_buffer_past_frames = 1;
             }
             return VO_TRUE;
         case VOCTRL_PAUSE:
