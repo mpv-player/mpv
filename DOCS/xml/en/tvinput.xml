@@ -52,7 +52,7 @@ Here are just a few tips:
 <listitem><para>
   Choose some sane image dimensions. The dimensions of the resulting image
   should be divisible by 16.
-</para></listitem> 
+</para></listitem>
 <listitem>
   <para>
   If you capture the video with the vertical resolution higher than half
@@ -88,7 +88,7 @@ Here are just a few tips:
   time. If you have a large capture buffer, <application>MEncoder</application>
   can survive an overload for few seconds but nothing more. It's better to
   turn off the 3D OpenGL screensavers and similar stuff.
-</para></listitem> 
+</para></listitem>
 <listitem><para>
   Don't mess with the system clock. <application>MEncoder</application> uses the
   system clock for doing A/V sync. If you adjust the system clock (especially
@@ -118,7 +118,7 @@ Here are just a few tips:
   <filename>linux/Documentation/sound/btaudio</filename> file (in the kernel
   tree, not <application>MPlayer</application>'s) for some instructions on using
   this driver.
-</para></listitem> 
+</para></listitem>
 <listitem><para>
   If <application>MEncoder</application> cannot open the audio device, make
   sure that it is really available. There can be some trouble with the sound
@@ -251,7 +251,7 @@ Here is an example for Russian:
 </row>
 <row>
   <entry>C</entry>
-  <entry>Cycle through teletext rendering modes (opaque, transparent, inverted opaque, 
+  <entry>Cycle through teletext rendering modes (opaque, transparent, inverted opaque,
   inverted transparent</entry>
 </row>
 <row>
