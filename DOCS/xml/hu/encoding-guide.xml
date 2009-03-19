@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r28510 -->
+<!-- synced with r28984 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1429,13 +1429,13 @@ a személyes igények és a technikai korlátok határoznak meg.
   Azonban van néhány nagyon fejlett opció, amit ha engedélyezel, nagyon
   nagy mértékben lelassítják a kódolást csekély javulást produkálva.
   </para>
-  
+
   <para>
   Ha a fantasztikus sebességet keresed, a codec alapértelmezett beállításai
   körül nézelődj (azonban így is ajánlott kipróbálni egyéb opciókat,
   amiket ezen leírás más fejezetei említenek).
   </para>
-  
+
   <para>
   Megfontolandó olyan codec-et választani, ami több-szálas módban
   dolgozza fel a forrást, azonban ez csak a több processzoros géppel
@@ -1681,7 +1681,7 @@ megy.
 </para>
 
 <para>
-Ezen hatalmas hátrány mellett az AVI-nak a következő fő korlátai vannak:  
+Ezen hatalmas hátrány mellett az AVI-nak a következő fő korlátai vannak:
 </para>
 
 <orderedlist>
@@ -2364,7 +2364,7 @@ Az időtartam/hely alapján kell döntened.
 </listitem>
 
 <listitem><formalpara>
-  <title>A kódolási paraméterekről és a minőségről:</title>  
+  <title>A kódolási paraméterekről és a minőségről:</title>
   <para>
   Csak mert itt javasoltam az <option>mbd=2</option>-t, nem jelenti
   azt, hogy máshol ne lehetne használni. A <option>trell</option>-lel
@@ -3902,7 +3902,7 @@ elért bitráta különbségből adódik.
   globális PSNR növelést jelent, változó 15%-33%-os sebességveszteség árán.
   Mivel a kódolási idő vs. minőség arány eléggé rossz, csak akkor ajánlott
   használni, ha minden egyes bit fontos és a kódolási idő nem számít.
-  </para>  
+  </para>
 </listitem>
 <listitem>
   <para>
@@ -3954,7 +3954,7 @@ elért bitráta különbségből adódik.
   Ezek legtöbbször ritka, szélsőséges esetek, de ha teljesen biztos
   akarsz lenni, gondolkozz el rajta, hogy van-e a videódban teljes
   képernyős ismétlődő, csillogó minta vagy nagyon nagy ideiglenes
-  elzáródás, ami kikényszeríthet egy I-kockát. 
+  elzáródás, ami kikényszeríthet egy I-kockát.
   Az első lépés <option>frameref</option>-jét úgy állítsd be, hogy
   elég nagy legyen ahhoz, hogy tartalmazza a villódzási ciklust
   (vagy az elzárást). Például ha a jelenet oda-vissza ugrál két kép
@@ -4197,7 +4197,7 @@ elért bitráta különbségből adódik.
   azt, hogy egyre csökkenő hasznot hoz, mely végül szinte észrevehetetlenül
   kicsi vagy akár nulla lesz). A videó folyam még így is fog tartalmazni
   kereshető pontokat, amíg van benne jelenet váltás.
-</para></listitem> 
+</para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">deblock</emphasis>:
@@ -4255,7 +4255,7 @@ elért bitráta különbségből adódik.
   Ez <emphasis role="bold">még</emphasis> nem igazolja a deblocking
   szűrő erősségének csökkentését.
   Általában jobb zajminőséget érhetsz el az utófeldolgozással.
-  Ha a H.264 kódolásod túl foltos vagy maszatos, próbáld meg 
+  Ha a H.264 kódolásod túl foltos vagy maszatos, próbáld meg
   lejátszani a <option>-vf noise</option> kapcsolóval.
   A <option>-vf noise=8a:4a</option>-nak a gyenge mellékhatásokat
   el kell tüntetnie.
@@ -4409,7 +4409,7 @@ opciókat, ha a codec hibázik vagy rossz kimenetet ad.
   <entry>jp2avi.dll</entry>
   <entry>ImagePower MJPEG2000 (IPJ2)</entry>
   <entry>d860a11766da0d0ea064672c6833768b</entry>
-  <entry><option>-vf flip</option></entry>  
+  <entry><option>-vf flip</option></entry>
 </row>
 <row>
   <entry>m3jp2k32.dll</entry>
@@ -4845,7 +4845,7 @@ mp4creator -optimize narnia.mp4</screen>
 <para>
   Ha tag-eket akarsz hozzáfűzni a videódhoz, amiket az iTunes megjelnít, használhatod az
   <ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>-t.
-  
+
   <screen>AtomicParsley narnia.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
 
   A <option>--metaEnema</option> opció eltávolít minden meglévő metadata-t
@@ -4879,7 +4879,7 @@ mp4creator -optimize narnia.mp4</screen>
 A <application>MEncoder</application> képes VCD, SCVD és DVD formátumú
 MPEG fájlok létrehozására a
 <systemitem class="library">libavcodec</systemitem> könyvtár segítségével.
-Ezek a fájlok a 
+Ezek a fájlok a
 <ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>-rel
 vagy a
 <ulink url="http://dvdauthor.sourceforge.net/">dvdauthor</ulink>-ral
@@ -4918,7 +4918,7 @@ legyen.
 <tbody>
 <row>
   <entry>NTSC DVD</entry>
-  <entry>720x480, 704x480, 352x480, 352x240</entry> 
+  <entry>720x480, 704x480, 352x480, 352x240</entry>
   <entry>MPEG-2</entry>
   <entry>9800 kbps</entry>
   <entry>48000 Hz</entry>
@@ -4931,7 +4931,7 @@ legyen.
   <entry>NTSC DVD</entry>
   <entry>352x240<footnote id='fn-rare-resolutions'><para>
   Ezek a felbontások ritkán használatosak a DVD-ken, mert elég
-  alacsony minőségűek.</para></footnote></entry>         
+  alacsony minőségűek.</para></footnote></entry>
   <entry>MPEG-1</entry>
   <entry>1856 kbps</entry>
   <entry>48000 Hz</entry>

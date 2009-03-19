@@ -1,4 +1,4 @@
-.\" Synced with r28968
+.\" Synced with r28991
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 03. 16." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 03. 19." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -3477,16 +3477,20 @@ Nincs deinterlace.
 .IPs 1
 Csak az elsõ mezõt mutatja, hasonló a \-vf field kapcsolóhoz.
 .IPs 2
-Bob deinterlace
-(jelenleg erre lép vissz a fejlettebb deinterlacer-ekrõl és a hardveres dekódolásról).
+Bob deinterlace, hasonló a \-vf tfields=1 kapcsolóhoz.
 .IPs 3
-Mozgás adaptív idõbeli deinterlace
-(jelenleg csak a szoftveresen dekódolt videóknál mûködik).
+Mozgás adaptív idõbeli deinterlace.
+A/V deszinkronizációt okozhat lassú videó hardveren és/vagy nagy felbontásnál.
 Ez az alapértelmezett, ha a "D" gombbal engedélyezhetõ a deinterlacing.
 .IPs 4
-Mozgás adaptív idõbeli deinterlace él-vezérelt térbeli interpolációval
-(jelenleg csak a szoftveresen dekódolt videóknál mûködik).
+Mozgás adaptív idõbeli deinterlace él-vezérelt térbeli interpolációval.
+Gyors videó hardver kell hozzá.
 .RE
+.IPs chroma\-deint
+Az idõbeli deinterlacer-ek mind a fényerõsségen, mint a telítettségen változtatnak (alapértelmezett).
+Használd a nochroma\-deint kapcsolót, ha csak a fényerõsséget akarod változtatni és gyorsítani
+szeretnél a fejlett deinterlacing-en.
+Hasznos lassú videó memóriánál.
 .IPs pullup
 Inverz telecine-t próbál alkalmazni, idõbeli deinterlace kell hozzá.
 .RE
