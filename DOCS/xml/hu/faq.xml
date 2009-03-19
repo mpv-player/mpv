@@ -466,7 +466,7 @@ Letöltöttem egy videót egy P2P hálózatról és nem megy!
 </para></question>
 <answer><para>
 A fájlod valószínűleg sérült vagy fake. Ha egy ismerőstől kaptad és ő
-azt mondja, hogy működik, hasonlítsd össze az 
+azt mondja, hogy működik, hasonlítsd össze az
 <application>md5sum</application> hash-eket.
 </para></answer>
 </qandaentry>

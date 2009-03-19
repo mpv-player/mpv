@@ -92,13 +92,13 @@ aktiválható).
   és <emphasis>címkék</emphasis>.
   Minden egyes elemnek meg kell adnod a pozícióját és a méretét.
   </para>
-  
+
   <para>
   Egy <emphasis role="bold">gomb</emphasis>nak három állása van (lenyomott,
   felengedett, letiltott), így a képe függőlegesen három részre van osztva.
   Lásd a <link linkend="skin-button">gomb</link> elemet a részletekért.
   </para>
-  
+
   <para>
   Egy <emphasis role="bold">potmeter</emphasis>nek (főként a kereső sáv és a
   hangerő/balansz állító) bármennyi fázisa lehet a képének egymás alatti
@@ -106,7 +106,7 @@ aktiválható).
   <link linkend="skin-hpotmeter">hpotmeter</link>t és
   <link linkend="skin-potmeter">potmeter</link>t a részletekért.
   </para>
-  
+
   <para>
   A <emphasis role="bold">címkék</emphasis> egy kicsit különlegesek: A
   megrajzolásukhoz szükséges karaktereket egy kép fájlból nyerjük és
@@ -781,7 +781,7 @@ Ahol az <literal><replaceable>image</replaceable></literal> a betűhöz használ
 kép fájl neve (nem kell megadnod a kiterjesztést).
 <anchor id="skin-font-char"/>
 <programlisting>"char" = X, Y, width, height</programlisting>
-Itt az <literal>X</literal> és az <literal>Y</literal> a 
+Itt az <literal>X</literal> és az <literal>Y</literal> a
 <literal>char</literal> karakter pozícióját adja meg a képen (<literal>0,0</literal>
 a bal felső sarok). A <literal>width</literal> és a <literal>height</literal>
 a karakter méretei pixelben.
