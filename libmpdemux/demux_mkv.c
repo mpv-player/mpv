@@ -2295,6 +2295,8 @@ demux_mkv_open (demuxer_t *demuxer)
       demuxer->seekable = 1;
     }
 
+  demuxer->accurate_seek = true;
+
   return DEMUXER_TYPE_MATROSKA;
 }
 
@@ -2962,6 +2964,12 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
 static void
 demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
 {
+    if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
+        if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0)
+            flags |= SEEK_BACKWARD;
+        else
+            flags |= SEEK_FORWARD;
+    }
   free_cached_dps (demuxer);
   if (!(flags & SEEK_FACTOR))  /* time in secs */
     {
@@ -3016,12 +3024,12 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
               for (i=0; i < mkv_d->num_cluster_pos; i++)
                 {
                   diff = mkv_d->cluster_positions[i] - target_filepos;
-                  if (rel_seek_secs < 0 && diff < 0 && -diff < min_diff)
+                  if (flags & SEEK_BACKWARD && diff < 0 && -diff < min_diff)
                     {
                       cluster_pos = mkv_d->cluster_positions[i];
                       min_diff = -diff;
                     }
-                  else if (rel_seek_secs > 0
+                  else if (flags & SEEK_FORWARD
                            && (diff < 0 ? -1 * diff : diff) < min_diff)
                     {
                       cluster_pos = mkv_d->cluster_positions[i];
@@ -3045,14 +3053,14 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
                 diff = target_timecode + mkv_d->first_tc -
                        (int64_t) mkv_d->indexes[i].timecode * mkv_d->tc_scale / 1000000.0;
 
-                if ((flags & SEEK_ABSOLUTE || target_timecode <= mkv_d->last_pts*1000)) {
-                    // Absolute seek or seek backward: find the last index
-                    // position before target time
+                if (flags & SEEK_BACKWARD) {
+                    // Seek backward: find the last index position
+                    // before target time
                     if (diff < 0 || diff >= min_diff)
                         continue;
                 }
                 else {
-                    // Relative seek forward: find the first index position
+                    // Seek forward: find the first index position
                     // after target time. If no such index exists, find last
                     // position between current position and target time.
                     if (diff <= 0) {
@@ -3076,8 +3084,10 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
 
       if (demuxer->video->id >= 0)
         mkv_d->v_skip_to_keyframe = 1;
-      if (rel_seek_secs > 0.0)
+      if (flags & SEEK_FORWARD)
         mkv_d->skip_to_timecode = target_timecode;
+      else
+          mkv_d->skip_to_timecode = 0;
       mkv_d->a_skip_to_keyframe = 1;
 
       demux_mkv_fill_buffer(demuxer, NULL);

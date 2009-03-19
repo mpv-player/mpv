@@ -96,6 +96,8 @@ struct MPOpts;
 
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)
+#define SEEK_FORWARD  (1 << 2)
+#define SEEK_BACKWARD (1 << 3)
 
 #define MP_INPUT_BUFFER_PADDING_SIZE 8
 
@@ -221,6 +223,9 @@ typedef struct demuxer {
   int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
   int file_format;  // file format: mpeg/avi/asf
   int seekable;  // flag
+    /* Set if using absolute seeks for small movements is OK (no pts resets
+     * that would make pts ambigious, preferably supports back/forward flags */
+    bool accurate_seek;
   //
   demux_stream_t *audio; // audio buffer/demuxer
   demux_stream_t *video; // video buffer/demuxer

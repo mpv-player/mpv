@@ -2463,6 +2463,16 @@ static void edl_update(MPContext *mpctx)
 static int seek(MPContext *mpctx, double amount, int style)
 {
     current_module = "seek";
+    if (mpctx->demuxer->accurate_seek && mpctx->sh_video
+        && !(style & (SEEK_ABSOLUTE | SEEK_FACTOR))) {
+        style |= SEEK_ABSOLUTE;
+        if (amount > 0)
+            style |= SEEK_FORWARD;
+        else
+            style |= SEEK_BACKWARD;
+        amount += mpctx->sh_video->pts;
+    }
+
     if (demux_seek(mpctx->demuxer, amount, audio_delay, style) == 0)
 	return -1;
 
