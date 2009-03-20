@@ -160,6 +160,8 @@ const m_option_t mplayer_opts[]={
         OPT_INTRANGE("screenh", vo_screenheight, CONF_OLD, 0, 4096),
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        OPT_FLAG_ON("force-window-position", force_window_position, 0),
+        OPT_FLAG_OFF("noforce-window-position", force_window_position, 0),
 	// set aspect ratio of monitor - useful for 16:9 TV-out
         OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
         OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),

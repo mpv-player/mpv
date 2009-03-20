@@ -3055,6 +3055,13 @@ VESA framebuffer does not support mode changing.
 Override framebuffer mode configuration file (default: /etc/\:fb.modes).
 .
 .TP
+.B \-force\-window\-position
+Forcefully move MPlayer's video output window to default location whenever
+there is a change in video parameters, video stream or file.
+This used to be the default behavior.
+Currently only affects X11 VOs.
+.
+.TP
 .B \-fs (also see \-zoom)
 Fullscreen playback (centers movie, and paints black bands around it).
 Not supported by all video output drivers.
