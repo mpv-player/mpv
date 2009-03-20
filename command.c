@@ -1027,6 +1027,7 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
 #endif
 	if (mpctx->video_out->config_ok)
 	    vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
+        mpctx->opts.fullscreen = vo_fs;
 	return M_PROPERTY_OK;
     default:
 	return m_property_flag(prop, action, arg, &vo_fs);
