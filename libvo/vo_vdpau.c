@@ -479,6 +479,42 @@ static void free_video_specific(void) {
     video_mixer = VDP_INVALID_HANDLE;
 }
 
+static int create_vdp_decoder(int max_refs)
+{
+    VdpStatus vdp_st;
+    VdpDecoderProfile vdp_decoder_profile;
+    if (decoder != VDP_INVALID_HANDLE)
+        vdp_decoder_destroy(decoder);
+    switch (image_format) {
+        case IMGFMT_VDPAU_MPEG1:
+            vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG1;
+            break;
+        case IMGFMT_VDPAU_MPEG2:
+            vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG2_MAIN;
+            break;
+        case IMGFMT_VDPAU_H264:
+            vdp_decoder_profile = VDP_DECODER_PROFILE_H264_HIGH;
+            mp_msg(MSGT_VO, MSGL_V, "[vdpau] Creating H264 hardware decoder for %d reference frames.\n", max_refs);
+            break;
+        case IMGFMT_VDPAU_WMV3:
+            vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_MAIN;
+            break;
+        case IMGFMT_VDPAU_VC1:
+            vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
+            break;
+    }
+    vdp_st = vdp_decoder_create(vdp_device, vdp_decoder_profile,
+                                vid_width, vid_height, max_refs, &decoder);
+    CHECK_ST_WARNING("Failed creating VDPAU decoder");
+    if (vdp_st != VDP_STATUS_OK) {
+        decoder = VDP_INVALID_HANDLE;
+        decoder_max_refs = 0;
+        return -1;
+    }
+    decoder_max_refs = max_refs;
+    return 0;
+}
+
 /*
  * connect to X server, create and map window, initialize all
  * VDPAU objects, create different surfaces etc.
@@ -791,38 +827,10 @@ static int draw_slice(uint8_t *image[], int stride[], int w, int h,
     int max_refs = image_format == IMGFMT_VDPAU_H264 ? rndr->info.h264.num_ref_frames : 2;
     if (!IMGFMT_IS_VDPAU(image_format))
         return VO_FALSE;
-    if (decoder == VDP_INVALID_HANDLE || decoder_max_refs < max_refs) {
-        VdpDecoderProfile vdp_decoder_profile;
-        if (decoder != VDP_INVALID_HANDLE)
-            vdp_decoder_destroy(decoder);
-        decoder = VDP_INVALID_HANDLE;
-        switch (image_format) {
-            case IMGFMT_VDPAU_MPEG1:
-                vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG1;
-                break;
-            case IMGFMT_VDPAU_MPEG2:
-                vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG2_MAIN;
-                break;
-            case IMGFMT_VDPAU_H264:
-                vdp_decoder_profile = VDP_DECODER_PROFILE_H264_HIGH;
-                mp_msg(MSGT_VO, MSGL_V, "[vdpau] Creating H264 hardware decoder for %d reference frames.\n", max_refs);
-                break;
-            case IMGFMT_VDPAU_WMV3:
-                vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_MAIN;
-                break;
-            case IMGFMT_VDPAU_VC1:
-                vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
-                break;
-        }
-        vdp_st = vdp_decoder_create(vdp_device, vdp_decoder_profile, vid_width, vid_height, max_refs, &decoder);
-        CHECK_ST_WARNING("Failed creating VDPAU decoder");
-        if (vdp_st != VDP_STATUS_OK) {
-            decoder = VDP_INVALID_HANDLE;
-            decoder_max_refs = 0;
-            return VO_FALSE;
-        }
-        decoder_max_refs = max_refs;
-    }
+    if ((decoder == VDP_INVALID_HANDLE || decoder_max_refs < max_refs)
+        && create_vdp_decoder(max_refs) < 0)
+        return VO_FALSE;
+    
     vdp_st = vdp_decoder_render(decoder, rndr->surface, (void *)&rndr->info, rndr->bitstream_buffers_used, rndr->bitstream_buffers);
     CHECK_ST_WARNING("Failed VDPAU decoder rendering");
     return VO_TRUE;
