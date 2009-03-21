@@ -509,10 +509,10 @@ static int create_vdp_decoder(int max_refs)
     if (vdp_st != VDP_STATUS_OK) {
         decoder = VDP_INVALID_HANDLE;
         decoder_max_refs = 0;
-        return -1;
+        return 0;
     }
     decoder_max_refs = max_refs;
-    return 0;
+    return 1;
 }
 
 /*
@@ -828,7 +828,7 @@ static int draw_slice(uint8_t *image[], int stride[], int w, int h,
     if (!IMGFMT_IS_VDPAU(image_format))
         return VO_FALSE;
     if ((decoder == VDP_INVALID_HANDLE || decoder_max_refs < max_refs)
-        && create_vdp_decoder(max_refs) < 0)
+        && !create_vdp_decoder(max_refs))
         return VO_FALSE;
     
     vdp_st = vdp_decoder_render(decoder, rndr->surface, (void *)&rndr->info, rndr->bitstream_buffers_used, rndr->bitstream_buffers);
