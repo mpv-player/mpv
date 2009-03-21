@@ -596,7 +596,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     vid_surface_num = -1;
     resize();
 
-    if (!create_vdp_decoder(2))
+    if (IMGFMT_IS_VDPAU(image_format) && !create_vdp_decoder(2))
         return -1;
 
     return 0;
