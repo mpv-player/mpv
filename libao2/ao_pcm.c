@@ -77,7 +77,7 @@ struct WaveHeader
 
 /* init with default values */
 static struct WaveHeader wavhdr;
-uint64_t data_length;
+static uint64_t data_length;
 
 static FILE *fp = NULL;
 
