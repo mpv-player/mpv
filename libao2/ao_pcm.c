@@ -77,6 +77,7 @@ struct WaveHeader
 
 /* init with default values */
 static struct WaveHeader wavhdr;
+uint64_t data_length;
 
 static FILE *fp = NULL;
 
@@ -162,7 +163,6 @@ static int init(int rate,int channels,int format,int flags){
 	if(fp) {
 		if(ao_pcm_waveheader){ /* Reserve space for wave header */
 			fwrite(&wavhdr,sizeof(wavhdr),1,fp);
-			wavhdr.file_length=wavhdr.data_length=0;
 		}
 		return 1;
 	}
@@ -174,11 +174,17 @@ static int init(int rate,int channels,int format,int flags){
 // close audio device
 static void uninit(int immed){
 	
-	if(ao_pcm_waveheader && fseek(fp, 0, SEEK_SET) == 0){ /* Write wave header */
-		wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
+	if(ao_pcm_waveheader){ /* Rewrite wave header */
+		if (fseek(fp, 0, SEEK_SET) != 0)
+			mp_msg(MSGT_AO, MSGL_ERR, "Could not seek to start, WAV size headers not updated!\n");
+		else if (data_length > 0x7ffff000)
+			mp_msg(MSGT_AO, MSGL_ERR, "File larger than allowed for WAV files, may play truncated!\n");
+		else {
+		wavhdr.file_length = data_length + sizeof(wavhdr) - 8;
 		wavhdr.file_length = le2me_32(wavhdr.file_length);
-		wavhdr.data_length = le2me_32(wavhdr.data_length);
+		wavhdr.data_length = le2me_32(data_length);
 		fwrite(&wavhdr,sizeof(wavhdr),1,fp);
+		}
 	}
 	fclose(fp);
 	if (ao_outputfilename)
@@ -241,7 +247,7 @@ static int play(void* data,int len,int flags){
 	fwrite(data,len,1,fp);
 
 	if(ao_pcm_waveheader)
-		wavhdr.data_length += len;
+		data_length += len;
 	
 	return len;
 }
