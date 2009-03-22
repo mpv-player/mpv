@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r28745
+.\" sync with en/mplayer.1 r28991
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -862,6 +862,7 @@ xv, xvidix 和 dfbmga。
 .I 注意：
 MPlayer 执行此命令时不加以检查，所以你有责任确保该命令不造成任何安全问题（例
 如，如果“.”就像在 Windows 中那样是在你的路径中，则确保使用完整路径）。
+并且该选项只有在播放视频时有效（即没有使用 \-novideo，但可以使用 \-vo null）。
 .sp 1
 该选项可能被“误用”以禁用不提供对于适当的 X API 接口的支持的屏幕保护程序。
 如果你觉得这太复杂了，请要求屏幕保护程序的作者提供对于适当的 X API 的支持。
@@ -910,6 +911,8 @@ mplayer \-heartbeat\-cmd "gnome\-screensaver\-command \-p" file
 在开始自动重复一个键之前等待多少毫秒 (0 代表停用)。
 .IPs ar-rate
 自动重复数是每秒重复多少次按键。
+.IPs (no)default-binds
+默认情况下使用 MPlayer 自带的键位设置。
 .IPs keylist
 列出所有可以被绑定于命令的键。
 .IPs cmdlist
@@ -1074,6 +1077,8 @@ MPlayer 从标准输入读取以新行 (\\n) 分隔开的命令行,
 .br
 .I 注意:
 请参见 \-input cmdlist 的命令列表和 DOCS/tech/slave.txt 中的描述。
+另外，该选项并非用来禁用其它的输入，例如通过视频窗口。要使用其它方法实现那种效果，例如 
+\-input nodefault\-binds:conf=/dev/null。
 .
 .TP
 .B \-softsleep
@@ -2096,14 +2101,14 @@ SSA/ASS 提供器能在那里放置字幕 (与 \-ass\-use\-margins 组合用)。
 如果字幕中的逗号显示在句首而不是在句尾, 就使用它。
 .
 .TP
-.B \-font <文件 font.desc 的路径> 
+.B \-font <文件 font.desc 的路径，字体（FreeType）的路径，字体样式（Fontconfig）的路径> 
 在别的目录中寻找 OSD/\:SUB 字体(
 默认的普通字体为: ~/\:.mplayer/\:font/\:font.desc, 
 默认的 FreeType 字体为: ~/.mplayer/\:subfont.ttf)。
 .br
 .I 注意:
 对于 FreeType, 此选项决定文本字体文件的路径。
-对于 fontconfig, 此选项决定 fontconfig 的字体名称。
+对于 Fontconfig, 此选项决定 Fontconfig 的字体名称。
 .sp 1
 .I 示例:
 .PD 0
@@ -2113,6 +2118,8 @@ SSA/ASS 提供器能在那里放置字幕 (与 \-ass\-use\-margins 组合用)。
 \-font ~/\:.mplayer/\:arialuni.ttf
 .br
 \-font 'Bitstream Vera Sans'
+.br
+\-font 'Bitstream Vera Sans:style=Bold'
 .RE
 .PD 1
 .
@@ -2333,9 +2340,9 @@ CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
 与 \-audiofile 一样, 但用于字幕流(OggDS?)。
 .
 .TP
-.B \-subfont <文件名>（仅用于FreeType字体）
-设置字幕字体。
-如果没有给出\-subfont，则使用\-font。
+.B \-subfont <字体（FreeType）的路径，字体样式（Fontconfig）的路径>（仅用于 FreeType 字体）
+设置字幕字体（参见 \-font）。
+如果没有给出 \-subfont，则使用 \-font。
 .
 .TP
 .B \-subfont\-autoscale <0\-3> (仅用于 FreeType)
@@ -2643,6 +2650,18 @@ DirectX DirectSound 音频输出驱动
 .IPs device=<devicenum>
 设置设备号。
 用 \-v 播放文件能显示可用设备列表。
+.RE
+.PD 1
+.
+.TP
+.B dart（仅适用于 OS/2）
+OS/2 DART 音频输出驱动
+.PD 0
+.RSs
+.IPs (no)share
+以共享或独占模式打开 DART 输出。
+.IPs bufsize=<大小>
+将缓冲大小设为<大小>，单位为采样数（默认值：2048）。
 .RE
 .PD 1
 .
@@ -3211,22 +3230,31 @@ Supported by the gl, gl2, x11, and xv video output drivers.
 使用负数值时，则应用模糊算法（默认值：0）。
 .IPs denoise=<0\-1>
 将一种消除噪点的算法应用于视频画面（默认值：0，不消除噪点）。
-.IPs deint=<0\-3>
+.IPs deint=<0\-4>
 选择反隔行扫描模式的算法（默认值：0）。
+所有大于 0 的模式服从 \-field\-dominance 选项的设置。
+.br
+.I 注意：
+大于 2 的值将使视频输出延后一帧。
 .RSss
 .IPs 0
 不反隔行扫描。
 .IPs 1
-只显示一个隔行扫描域，与 \-vf field 作用相类似。
+只显示第一个隔行扫描域，与 \-vf field 作用相类似。
 .IPs 2
-跳跃式反隔行扫描（当前高级反隔行扫描算法的退化形式）。
+跳跃式反隔行扫描，与 \-vf tfields=1 作用相类似。
 .IPs 3
-适应运动画面的瞬间反隔行扫描（还未实现）。
+适应运动画面的瞬间反隔行扫描。
+可能在低性能视频硬件和/或高分辨率的情况下导致音视频不同步。
 这是当“D”用于开启反隔行扫描时的默认值。
 .IPs 4
-采用边缘导向空间插值算法的适应运动画面的瞬间反隔行扫描
-（还未实现）。
+采用边缘导向空间插值算法的适应运动画面的瞬间反隔行扫描。
+需要高性能的视频硬件。
 .RE
+.IPs chroma\-deint
+使瞬间反隔行扫描算法同时作用于亮度和色度通道上（默认值）。
+使用 nochroma\-deint 以使其仅作用于亮度通道，从而加速高级反隔行扫描算法。
+对于低速显存很有用。
 .IPs pullup
 尝试应用反电视电影模式，需要瞬间反隔行扫描。
 .RE
@@ -3337,6 +3365,23 @@ VIDIX 的 Windows 前台
 .IPs noaccel
 关闭硬件加速。
 如果显示有问题, 尝试此选项。
+.RE
+.PD 1
+.
+.TP
+.B kva（仅适用于 OS/2）
+使用 libkva 接口的视频输出驱动。
+.PD 0
+.RSs
+.IPs snap
+强制使用 SNAP 模式。
+.IPs wo
+强制使用 WarpOverlay! 模式。
+.IPs dive
+强制使用 DIVE 模式。
+.IPs (no)t23
+启用/禁用解决 T23 笔记本问题的变通模式（默认值：\-not23）。
+如果你的显卡仅支持画面放大输出，尝试开启这个选项。
 .RE
 .PD 1
 .
