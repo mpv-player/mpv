@@ -1205,6 +1205,8 @@ static int control(uint32_t request, void *data)
     if (vo_doublebuffering)
       do_render();
     draw_osd();
+    if (vo_doublebuffering)
+      do_render_osd(2);
     flip_page();
     return VO_TRUE;
   }
