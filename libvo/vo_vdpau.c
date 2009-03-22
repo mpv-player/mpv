@@ -534,6 +534,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 #endif
 
     image_format = format;
+    vid_width    = width;
+    vid_height   = height;
+    free_video_specific();
+    if (IMGFMT_IS_VDPAU(image_format) && !create_vdp_decoder(2))
+        return -1;
 
     int_pause = 0;
     visible_buf = 0;
@@ -579,15 +584,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         vo_fs = 1;
 
     /* -----VDPAU related code here -------- */
-
-    free_video_specific();
-
     if (vdp_flip_queue == VDP_INVALID_HANDLE && win_x11_init_vdpau_flip_queue())
         return -1;
-
-    // video width and height
-    vid_width  = width;
-    vid_height = height;
 
     if (create_vdp_mixer(vdp_chroma_type))
         return -1;
@@ -595,9 +593,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     surface_num = 0;
     vid_surface_num = -1;
     resize();
-
-    if (IMGFMT_IS_VDPAU(image_format) && !create_vdp_decoder(2))
-        return -1;
 
     return 0;
 }
