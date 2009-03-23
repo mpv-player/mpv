@@ -61,9 +61,9 @@ compile_check() {
   echo >> "$TMPLOG"
   cat "$1" >> "$TMPLOG"
   echo >> "$TMPLOG"
-  echo "$_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o $TMPEXE $@" >> "$TMPLOG"
+  echo "$_cc $CFLAGS $_extra_cflags $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o $TMPEXE $@" >> "$TMPLOG"
   rm -f "$TMPEXE"
-  $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
+  $_cc $CFLAGS $_extra_cflags $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
   echo >> "$TMPLOG"
@@ -466,10 +466,10 @@ Advanced options:
 
 Use these options if autodetection fails (Options marked with (*) accept
 multiple paths separated by ':'):
+  --extra-cflags=FLAGS        extra CFLAGS
   --extra-libs=FLAGS          extra linker flags
   --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
   --extra-libs-mencoder=FLAGS extra linker flags for MEncoder
-  --with-extraincdir=DIR      extra header search paths in DIR (*)
   --with-extralibdir=DIR      extra linker search paths in DIR (*)
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
@@ -765,9 +765,6 @@ for ac_option do
   --realcodecsdir=*)
     _realcodecsdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-extraincdir=*)
-    _inc_extra=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
-    ;;
   --with-extralibdir=*)
     _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
@@ -801,6 +798,9 @@ for ac_option do
     _dvdreadconfig=`echo $ac_option | cut -d '=' -f 2`
     ;;
 
+  --extra-cflags=*)
+    _extra_cflags=-`echo $ac_option | cut -d '=' -f 2`
+    ;;
   --extra-libs=*)
     _extra_libs=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -1412,22 +1412,22 @@ if test "$_runtime_cpudetection" = yes && ! x86 && ! ppc; then
 fi
 
 
-_inc_extra="-I. $_inc_extra"
+_extra_cflags="-I. $_extra_cflags"
 _timer=timer-linux.c
 _getch=getch2.c
 if freebsd ; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
-  _inc_extra="$_inc_extra -I/usr/local/include"
+  _extra_cflags="$_extra_cflags -I/usr/local/include"
 fi
 
 if netbsd || dragonfly ; then
   _ld_extra="$_ld_extra -L/usr/pkg/lib"
-  _inc_extra="$_inc_extra -I/usr/pkg/include"
+  _extra_cflags="$_extra_cflags -I/usr/pkg/include"
 fi
 
 if darwin; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
-  _inc_extra="$_inc_extra -I/usr/local/include"
+  _extra_cflags="$_extra_cflags -I/usr/local/include"
   _timer=timer-darwin.c
 fi
 
@@ -2419,7 +2419,7 @@ elif test "$cc_vendor" = "intel" ; then
   _ld_extra="$_ld_extra -i-static"
 fi
 if test -n "$CPPFLAGS" ; then
-  _inc_extra="$_inc_extra $CPPFLAGS"
+  _extra_cflags="$_extra_cflags $CPPFLAGS"
   _warn_CFLAGS=yes
 fi
 
@@ -4090,7 +4090,7 @@ EOF
   for _inc_tmp in "" -I/usr/local/include/directfb \
       -I/usr/include/directfb -I/usr/local/include; do
     cc_check $_inc_tmp -ldirectfb && _directfb=yes && \
-      _inc_extra="$_inc_extra $_inc_tmp" && break
+      _extra_cflags="$_extra_cflags $_inc_tmp" && break
   done
 fi
 
@@ -4105,7 +4105,7 @@ int
 dfb_ver = DIRECTFB_MAJOR_VERSION.DIRECTFB_MINOR_VERSION.DIRECTFB_MICRO_VERSION
 ;
 EOF
-  if $_cc -E $TMPC $_inc_extra > "$TMPEXE"; then
+  if $_cc -E $TMPC $_extra_cflags > "$TMPEXE"; then
     _directfb_version=`sed -n 's/^dfb_ver[^0-9]*\(.*\)/\1/p' "$TMPEXE" | tr -d '()'`
     _dfb_major=`echo $_directfb_version | cut -d . -f 1`
     _dfb_minor=`echo $_directfb_version | cut -d . -f 2`
@@ -4147,7 +4147,7 @@ fi
 echocheck "X11 headers presence"
   _x11_headers="no"
   _res_comment="check if the dev(el) packages are installed"
-  for I in `echo $_inc_extra | sed s/-I//g` /usr/include ; do
+  for I in `echo $_extra_cflags | sed s/-I//g` /usr/include ; do
     if test -f "$I/X11/Xlib.h" ; then
       _x11_headers="yes"
       _res_comment=""
@@ -4158,7 +4158,7 @@ echocheck "X11 headers presence"
     for I in /usr/X11/include /usr/X11R7/include /usr/X11R6/include \
              /usr/include/X11R6 /usr/openwin/include ; do
       if test -f "$I/X11/Xlib.h" ; then
-        _inc_extra="$_inc_extra -I$I"
+        _extra_cflags="$_extra_cflags -I$I"
         _x11_headers="yes"
         _res_comment="using $I"
         break
@@ -4710,7 +4710,7 @@ EOF
 fi
 if test "$_caca" = yes ; then
   def_caca='#define CONFIG_CACA 1'
-  _inc_extra="$_inc_extra `caca-config --cflags`"
+  _extra_cflags="$_extra_cflags `caca-config --cflags`"
   _libs_mplayer="$_libs_mplayer `caca-config --libs`"
   _vomodules="caca $_vomodules"
 else
@@ -4774,7 +4774,7 @@ int main(void) {return 0;}
 EOF
   for _inc_tmp in "" "-I/usr/src/DVB/ost/include" ; do
     cc_check $_inc_tmp && _dvb=yes && \
-     _inc_extra="$_inc_extra $_inc_tmp" && break
+     _extra_cflags="$_extra_cflags $_inc_tmp" && break
   done
 fi
 echores "$_dvb"
@@ -4803,7 +4803,7 @@ int main(void) {return 0;}
 EOF
   for _inc_tmp in "" "-I/usr/src/DVB/include" ; do
     cc_check $_inc_tmp && _dvbhead=yes && \
-      _inc_extra="$_inc_extra $_inc_tmp" && break
+      _extra_cflags="$_extra_cflags $_inc_tmp" && break
   done
 fi
 echores "$_dvbhead"
@@ -5083,13 +5083,13 @@ if test "$_sdl" = yes ; then
   def_sdl='#define CONFIG_SDL 1'
   if cygwin ; then
     _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/`"
-    _inc_extra="$_inc_extra `$_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/`"
+    _extra_cflags="$_extra_cflags `$_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/`"
   elif mingw32 ; then
     _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs | sed -e s/-mwindows// -e s/-lmingw32//`"
-    _inc_extra="$_inc_extra `$_sdlconfig --cflags | sed s/-Dmain=SDL_main//`"
+    _extra_cflags="$_extra_cflags `$_sdlconfig --cflags | sed s/-Dmain=SDL_main//`"
   else
     _libs_mplayer="$_libs_mplayer `$_sdlconfig --libs`"
-    _inc_extra="$_inc_extra `$_sdlconfig --cflags | sed s/-D_GNU_SOURCE=1//`"
+    _extra_cflags="$_extra_cflags `$_sdlconfig --cflags | sed s/-D_GNU_SOURCE=1//`"
   fi
   _vomodules="sdl $_vomodules"
   _aomodules="sdl $_aomodules"
@@ -5202,7 +5202,7 @@ int main(void) { return 0; }
 EOF
   for _inc_tmp in "" -I/usr/local/include/dxr2 -I/usr/include/dxr2; do
     cc_check $_inc_tmp && _dxr2=yes && \
-     _inc_extra="$_inc_extra $_inc_tmp" && break
+     _extra_cflags="$_extra_cflags $_inc_tmp" && break
   done
 fi
 if test "$_dxr2" = yes; then
@@ -5370,7 +5370,7 @@ if test "$_arts" = yes ; then
   def_arts='#define CONFIG_ARTS 1'
   _aomodules="arts $_aomodules"
   _libs_mplayer="$_libs_mplayer `artsc-config --libs`"
-  _inc_extra="$_inc_extra `artsc-config --cflags`"
+  _extra_cflags="$_extra_cflags `artsc-config --cflags`"
 else
   _noaomodules="arts $_noaomodules"
 fi
@@ -5396,7 +5396,7 @@ if test "$_esd" = yes ; then
   def_esd='#define CONFIG_ESD 1'
   _aomodules="esd $_aomodules"
   _libs_mplayer="$_libs_mplayer `esd-config --libs`"
-  _inc_extra="$_inc_extra `esd-config --cflags`"
+  _extra_cflags="$_extra_cflags `esd-config --cflags`"
 
   echocheck "esd_get_latency()"
   cat > $TMPC << EOF
@@ -5451,7 +5451,7 @@ if test "$_pulse" = yes ; then
   def_pulse='#define CONFIG_PULSE 1'
   _aomodules="pulse $_aomodules"
   _libs_mplayer="$_libs_mplayer `$_pkg_config --libs libpulse`"
-  _inc_extra="$_inc_extra `$_pkg_config --cflags libpulse`"
+  _extra_cflags="$_extra_cflags `$_pkg_config --cflags libpulse`"
 else
   def_pulse='#undef CONFIG_PULSE'
   _noaomodules="pulse $_noaomodules"
@@ -5470,7 +5470,7 @@ EOF
     _libs_mplayer="$_libs_mplayer -ljack"
   elif cc_check `$_pkg_config --libs --cflags --silence-errors jack` ; then
     _libs_mplayer="$_libs_mplayer `$_pkg_config --libs jack`"
-    _inc_extra="$_inc_extra "`$_pkg_config --cflags jack`""
+    _extra_cflags="$_extra_cflags "`$_pkg_config --cflags jack`""
   else
     _jack=no
   fi
@@ -5755,7 +5755,7 @@ if test "$_dvdread_internal" = auto ; then
      || darwin || win32 || os2; then
     _dvdread_internal=yes
     _dvdread=yes
-    _inc_extra="$_inc_extra -Ilibdvdread4"
+    _extra_cflags="$_extra_cflags -Ilibdvdread4"
   fi
 elif test "$_dvdread" = auto ; then
   _dvdread=no
@@ -5774,7 +5774,7 @@ EOF
   if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
     $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
     _dvdread=yes
-    _inc_extra="$_inc_extra $_dvdreadcflags"
+    _extra_cflags="$_extra_cflags $_dvdreadcflags"
     _ld_extra="$_ld_extra $_dvdreadlibs"
     _res_comment="external"
   fi
@@ -5840,7 +5840,7 @@ EOF
     _cdparanoia=no
     for _inc_tmp in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
       cc_check $_inc_tmp -lcdda_interface -lcdda_paranoia $_ld_lm && \
-        _cdparanoia=yes && _inc_extra="$_inc_extra $_inc_tmp" && break
+        _cdparanoia=yes && _extra_cflags="$_extra_cflags $_inc_tmp" && break
     done
 fi
 if test "$_cdparanoia" = yes ; then
@@ -5874,7 +5874,7 @@ EOF
       _inc_tmp=`$_pkg_config --cflags libcdio_paranoia`
       _ld_tmp=`$_pkg_config --libs libcdio_paranoia`
       cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes \
-        && _ld_extra="$_ld_extra $_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp"
+        && _ld_extra="$_ld_extra $_ld_tmp" && _extra_cflags="$_extra_cflags $_inc_tmp"
     fi
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
@@ -5961,7 +5961,7 @@ EOF
 fi
 if test "$_freetype" = yes ; then
     def_freetype='#define CONFIG_FREETYPE'
-    _inc_extra="$_inc_extra `$_freetypeconfig --cflags`"
+    _extra_cflags="$_extra_cflags `$_freetypeconfig --cflags`"
     _ld_extra="$_ld_extra `$_freetypeconfig --libs`"
 else
     def_freetype='#undef CONFIG_FREETYPE'
@@ -5996,7 +5996,7 @@ EOF
     _inc_tmp=`$_pkg_config --cflags fontconfig`
     _ld_tmp=`$_pkg_config --libs fontconfig`
     cc_check $_inc_tmp $_ld_tmp && _fontconfig=yes \
-      && _ld_extra="$_ld_extra $_ld_tmp" && _inc_extra="$_inc_extra $_inc_tmp"
+      && _ld_extra="$_ld_extra $_ld_tmp" && _extra_cflags="$_extra_cflags $_inc_tmp"
   fi
 fi
 if test "$_fontconfig" = yes ; then
@@ -6061,7 +6061,7 @@ EOF
 fi
 if test "$_fribidi" = yes ; then
     def_fribidi='#define CONFIG_FRIBIDI'
-    _inc_extra="$_inc_extra `$_fribidiconfig --cflags`"
+    _extra_cflags="$_extra_cflags `$_fribidiconfig --cflags`"
     _ld_extra="$_ld_extra `$_fribidiconfig --libs`"
 else
     def_fribidi='#undef CONFIG_FRIBIDI'
@@ -6339,7 +6339,7 @@ EOF
   _ld_theora=$($_pkg_config --silence-errors --libs theora)
   _inc_theora=$($_pkg_config --silence-errors --cflags theora)
   cc_check $_inc_theora $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" &&
-    _inc_extra="$_inc_extra $_inc_theora" && _theora=yes
+    _extra_cflags="$_extra_cflags $_inc_theora" && _theora=yes
   if test _theora = no; then
     _ld_theora="-ltheora -logg"
     cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" && _theora=yes
@@ -6349,7 +6349,7 @@ EOF
     _inc_theora=$($_pkg_config --silence-errors --cflags theora)
     cc_check tremor/bitwise.c $_inc_theora $_ld_theora &&
       _ld_extra="$_ld_extra $_ld_theora" &&
-      _inc_extra="$_inc_extra $_inc_theora" && _theora=yes
+      _extra_cflags="$_extra_cflags $_inc_theora" && _theora=yes
     if test _theora = no; then
       _ld_theora="-ltheora -logg"
       cc_check tremor/bitwise.c $_ld_theora &&
@@ -6700,7 +6700,7 @@ echocheck "Nemesi Streaming Media libraries"
 if test "$_nemesi" = auto  && test "$_network" = yes ; then
     _nemesi=no
     if $_pkg_config libnemesi --atleast-version=0.6.3 ; then
-        _inc_extra="$_inc_extra `$_pkg_config --cflags libnemesi`"
+        _extra_cflags="$_extra_cflags `$_pkg_config --cflags libnemesi`"
         _ld_extra="$_ld_extra `$_pkg_config --libs libnemesi`"
         _nemesi=yes
     fi
@@ -6728,7 +6728,7 @@ int main(void) { return 0; }
 EOF
 
   _live=no
-  for I in $_inc_extra "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/lib64/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
+  for I in $_extra_cflags "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/lib64/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
     cxx_check $I/liveMedia/include $I/UsageEnvironment/include \
       $I/groupsock/include && _livelibdir=`echo $I| sed s/-I//` && \
       _ld_extra="$_livelibdir/liveMedia/libliveMedia.a \
@@ -6736,7 +6736,7 @@ EOF
                  $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
                  $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a \
                  $_ld_extra  -lstdc++" \
-      _inc_extraxx="-I$_livelibdir/liveMedia/include \
+      _extra_cxxflags="-I$_livelibdir/liveMedia/include \
                   -I$_livelibdir/UsageEnvironment/include \
                   -I$_livelibdir/BasicUsageEnvironment/include \
                   -I$_livelibdir/groupsock/include" && \
@@ -6757,7 +6757,7 @@ elif test "$_live_dist" = yes && test "$_network" = yes; then
   _live="yes"
   def_live='#define CONFIG_LIVE555 1'
   _ld_extra="$_ld_extra -lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
-  _inc_extraxx="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
+  _extra_cxxflags="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
              -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  _inputmodules="live555 $_inputmodules"
 else
@@ -7127,7 +7127,7 @@ EOF
       _ld_dirac=`$_pkg_config --silence-errors --libs dirac`
       cc_check $_inc_dirac $_ld_dirac      &&
       _libdirac_lavc=yes                   &&
-      _inc_extra="$_inc_extra $_inc_dirac" &&
+      _extra_cflags="$_extra_cflags $_inc_dirac" &&
       _ld_extra="$_ld_extra $_ld_dirac"
     fi
   fi
@@ -7159,7 +7159,7 @@ EOF
       _ld_schroedinger=`$_pkg_config --silence-errors --libs schroedinger-1.0`
       cc_check $_inc_schroedinger $_ld_schroedinger &&
       _libschroedinger_lavc=yes                     &&
-      _inc_extra="$_inc_extra $_inc_schroedinger"   &&
+      _extra_cflags="$_extra_cflags $_inc_schroedinger"   &&
       _ld_extra="$_ld_extra $_ld_schroedinger"
     fi
   fi
@@ -7725,7 +7725,7 @@ if test "$_gtk1" = no ; then
 
   if $_pkg_config gtk+-2.0 --exists ; then
     _gtk=`$_pkg_config gtk+-2.0 --modversion 2>/dev/null`
-    _inc_extra="$_inc_extra `$_pkg_config gtk+-2.0 --cflags 2>/dev/null`"
+    _extra_cflags="$_extra_cflags `$_pkg_config gtk+-2.0 --cflags 2>/dev/null`"
     _libs_mplayer="$_libs_mplayer `$_pkg_config gtk+-2.0 --libs 2>/dev/null`"
     echores "$_gtk"
 
@@ -7761,7 +7761,7 @@ if test "$_gtk1" = yes ; then
     fi
   fi
   _gtk=`$_gtkconfig --version 2>&1`
-  _inc_extra="$_inc_extra `$_gtkconfig --cflags 2>&1`"
+  _extra_cflags="$_extra_cflags `$_gtkconfig --cflags 2>&1`"
   _libs_mplayer="$_libs_mplayer `$_gtkconfig --libs 2>&1`"
   echores "$_gtk (using $_gtkconfig)"
 
@@ -7920,7 +7920,7 @@ EOF
 fi
 if test "$_maemo" = yes ; then
   def_maemo='#define CONFIG_MAEMO 1'
-  _inc_extra="$_inc_extra `$_pkg_config --cflags libosso`"
+  _extra_cflags="$_extra_cflags `$_pkg_config --cflags libosso`"
   _ld_extra="$_ld_extra `$_pkg_config --libs libosso` -lXsp"
 else
   def_maemo='#undef CONFIG_MAEMO'
@@ -8027,7 +8027,7 @@ if test "$_dvdnav" = yes ; then
     cflags_libdvdnav="-Ilibdvdnav"
     _inputmodules="dvdnav(internal) $_inputmodules"
   else
-    _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
+    _extra_cflags="$_extra_cflags `$_dvdnavconfig --cflags`"
     _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
     _inputmodules="dvdnav $_inputmodules"
   fi
@@ -8073,9 +8073,9 @@ INSTALLSTRIP = $_install_strip
 RANLIB = $_ranlib
 WINDRES = $_windres
 
-CFLAGS = $CFLAGS $_inc_extra
-OPTFLAGS = $CFLAGS $_inc_extra
-CXXFLAGS = $CXXFLAGS $_inc_extra $_inc_extraxx
+CFLAGS = $CFLAGS $_extra_cflags
+OPTFLAGS = $CFLAGS $_extra_cflags
+CXXFLAGS = $CXXFLAGS $_extra_cflags $_extra_cxxflags
 CFLAGS_DHAHELPER = $cflags_dhahelper
 CFLAGS_FAAD_FIXED = $cflags_faad_fixed
 CFLAGS_LIBDVDCSS = $cflags_libdvdcss
