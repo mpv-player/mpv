@@ -8073,11 +8073,9 @@ INSTALLSTRIP = $_install_strip
 RANLIB = $_ranlib
 WINDRES = $_windres
 
-EXTRA_INC = $_inc_extra
-EXTRAXX_INC = $_inc_extra $_inc_extraxx
-CFLAGS = $CFLAGS \$(EXTRA_INC)
-OPTFLAGS = $CFLAGS \$(EXTRA_INC)
-CXXFLAGS = $CXXFLAGS \$(EXTRAXX_INC)
+CFLAGS = $CFLAGS $_inc_extra
+OPTFLAGS = $CFLAGS $_inc_extra
+CXXFLAGS = $CXXFLAGS $_inc_extra $_inc_extraxx
 CFLAGS_DHAHELPER = $cflags_dhahelper
 CFLAGS_FAAD_FIXED = $cflags_faad_fixed
 CFLAGS_LIBDVDCSS = $cflags_libdvdcss
