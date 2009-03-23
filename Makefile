@@ -822,7 +822,7 @@ mplayer$(EXESUF): $(MPLAYER_DEPS)
 	$(CC) -o $@ $^ $(LDFLAGS_MPLAYER)
 
 codec-cfg$(EXESUF): codec-cfg.c help_mp.h
-	$(HOST_CC) -O -DCODECS2HTML $(EXTRA_INC) -o $@ $<
+	$(HOST_CC) -O -DCODECS2HTML -I. -o $@ $<
 
 codecs.conf.h: codec-cfg$(EXESUF) etc/codecs.conf
 	./$^ > $@
