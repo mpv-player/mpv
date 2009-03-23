@@ -799,7 +799,7 @@ for ac_option do
     ;;
 
   --extra-cflags=*)
-    _extra_cflags=-`echo $ac_option | cut -d '=' -f 2`
+    _extra_cflags=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --extra-libs=*)
     _extra_libs=`echo $ac_option | cut -d '=' -f 2`
