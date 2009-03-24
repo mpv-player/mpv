@@ -464,13 +464,12 @@ Advanced options:
   --enable-crash-debug      enable automatic gdb attach on crash [disable]
   --enable-dynamic-plugins  enable dynamic A/V plugins [disable]
 
-Use these options if autodetection fails (Options marked with (*) accept
-multiple paths separated by ':'):
+Use these options if autodetection fails:
   --extra-cflags=FLAGS        extra CFLAGS
+  --extra-ldflags=FLAGS       extra LDFLAGS
   --extra-libs=FLAGS          extra linker flags
   --extra-libs-mplayer=FLAGS  extra linker flags for MPlayer
   --extra-libs-mencoder=FLAGS extra linker flags for MEncoder
-  --with-extralibdir=DIR      extra linker search paths in DIR (*)
   --with-xvmclib=NAME         adapter-specific library name (e.g. XvMCNVIDIA)
 
   --with-freetype-config=PATH path to freetype-config
