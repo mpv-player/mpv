@@ -61,9 +61,9 @@ compile_check() {
   echo >> "$TMPLOG"
   cat "$1" >> "$TMPLOG"
   echo >> "$TMPLOG"
-  echo "$_cc $CFLAGS $_extra_cflags $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o $TMPEXE $@" >> "$TMPLOG"
+  echo "$_cc $CFLAGS $_extra_cflags $_ld_static $_extra_ldflags $_libs_mplayer $_libs_mencoder -o $TMPEXE $@" >> "$TMPLOG"
   rm -f "$TMPEXE"
-  $_cc $CFLAGS $_extra_cflags $_ld_static $_ld_extra $_libs_mplayer $_libs_mencoder -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
+  $_cc $CFLAGS $_extra_cflags $_ld_static $_extra_ldflags $_libs_mplayer $_libs_mencoder -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
   echo >> "$TMPLOG"
@@ -765,9 +765,6 @@ for ac_option do
   --realcodecsdir=*)
     _realcodecsdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-extralibdir=*)
-    _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
 
   --with-install=*)
     _install=`echo $ac_option | cut -d '=' -f 2 `
@@ -800,6 +797,9 @@ for ac_option do
 
   --extra-cflags=*)
     _extra_cflags=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --extra-ldflags=*)
+    _extra_ldflags=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --extra-libs=*)
     _extra_libs=`echo $ac_option | cut -d '=' -f 2`
@@ -1416,23 +1416,23 @@ _extra_cflags="-I. $_extra_cflags"
 _timer=timer-linux.c
 _getch=getch2.c
 if freebsd ; then
-  _ld_extra="$_ld_extra -L/usr/local/lib"
+  _extra_ldflags="$_extra_ldflags -L/usr/local/lib"
   _extra_cflags="$_extra_cflags -I/usr/local/include"
 fi
 
 if netbsd || dragonfly ; then
-  _ld_extra="$_ld_extra -L/usr/pkg/lib"
+  _extra_ldflags="$_extra_ldflags -L/usr/pkg/lib"
   _extra_cflags="$_extra_cflags -I/usr/pkg/include"
 fi
 
 if darwin; then
-  _ld_extra="$_ld_extra -L/usr/local/lib"
+  _extra_ldflags="$_extra_ldflags -L/usr/local/lib"
   _extra_cflags="$_extra_cflags -I/usr/local/include"
   _timer=timer-darwin.c
 fi
 
 if aix ; then
-  _ld_extra="$_ld_extra -lC"
+  _extra_ldflags="$_extra_ldflags -lC"
 fi
 
 if irix ; then
@@ -1444,7 +1444,7 @@ fi
 if win32 ; then
   _exesuf=".exe"
   # -lwinmm is always needed for osdep/timer-win2.c
-  _ld_extra="$_ld_extra -lwinmm"
+  _extra_ldflags="$_extra_ldflags -lwinmm"
   _pe_executable=yes
   _timer=timer-win2.c
   _priority=yes
@@ -1465,7 +1465,7 @@ if amigaos ; then
 fi
 
 if qnx ; then
-  _ld_extra="$_ld_extra -lph"
+  _extra_ldflags="$_extra_ldflags -lph"
 fi
 
 if os2 ; then
@@ -2407,16 +2407,16 @@ elif test -z "$CFLAGS" ; then
     CFLAGS="-O2 $_march $_mcpu $_pipe"
   else
     CFLAGS="-Wall -Wno-switch -Wpointer-arith -Wredundant-decls -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
-    _ld_extra="$_ld_extra -ffast-math"
+    _extra_ldflags="$_extra_ldflags -ffast-math"
   fi
 else
   _warn_CFLAGS=yes
 fi
 if test -n "$LDFLAGS" ; then
-  _ld_extra="$_ld_extra $LDFLAGS"
+  _extra_ldflags="$_extra_ldflags $LDFLAGS"
   _warn_CFLAGS=yes
 elif test "$cc_vendor" = "intel" ; then
-  _ld_extra="$_ld_extra -i-static"
+  _extra_ldflags="$_extra_ldflags -i-static"
 fi
 if test -n "$CPPFLAGS" ; then
   _extra_cflags="$_extra_cflags $CPPFLAGS"
@@ -2720,7 +2720,7 @@ cat > $TMPC <<EOF
 int main(void) { return 0; }
 EOF
 if cc_check -lposix ; then
-  _ld_extra="$_ld_extra -lposix"
+  _extra_ldflags="$_extra_ldflags -lposix"
   echores "yes"
 else
   echores "no"
@@ -2860,7 +2860,7 @@ _kstat=no
 cc_check -lkstat && _kstat=yes
 if test "$_kstat" = yes ; then
   def_kstat="#define HAVE_LIBKSTAT 1"
-  _ld_extra="$_ld_extra -lkstat"
+  _extra_ldflags="$_extra_ldflags -lkstat"
 else
   def_kstat="#undef HAVE_LIBKSTAT"
 fi
@@ -2876,7 +2876,7 @@ EOF
 _posix4=no
 cc_check -lposix4 && _posix4=yes
 if test "$_posix4" = yes ; then
-  _ld_extra="$_ld_extra -lposix4"
+  _extra_ldflags="$_extra_ldflags -lposix4"
 fi
 echores "$_posix4"
 
@@ -3047,7 +3047,7 @@ test $_winsock2_h = no && test $inet_pton = no &&
   test $inet_aton = no && _network=no
 if test "$_network" = yes ; then
   def_network='#define CONFIG_NETWORK 1'
-  _ld_extra="$_ld_extra $_ld_sock"
+  _extra_ldflags="$_extra_ldflags $_ld_sock"
   _inputmodules="network $_inputmodules"
 else
   _noinputmodules="network $_noinputmodules"
@@ -3334,10 +3334,10 @@ echores "$_w32threads"
 echocheck "rpath"
 netbsd &&_rpath=yes
 if test "$_rpath" = yes ; then
-  for I in `echo $_ld_extra | sed 's/-L//g'` ; do
+  for I in `echo $_extra_ldflags | sed 's/-L//g'` ; do
     tmp="$tmp ` echo $I | sed 's/.*/ -L& -Wl,-R&/'`"
   done
-_ld_extra=$tmp
+_extra_ldflags=$tmp
 fi
 echores "$_rpath"
 
@@ -3377,7 +3377,7 @@ int main(void) {
 EOF
   _iconv=no
   for _ld_tmp in "" "-liconv" "-liconv $_ld_dl" ; do
-    cc_check $_ld_lm $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" && \
+    cc_check $_ld_lm $_ld_tmp && _extra_ldflags="$_extra_ldflags $_ld_tmp" && \
       _iconv=yes && break
   done
 fi
@@ -3538,7 +3538,7 @@ int main(void) { tgetent(NULL, NULL); return 0; }
 EOF
   _termcap=no
   for _ld_tmp in "-lncurses" "-ltinfo" "-ltermcap"; do
-    cc_check $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+    cc_check $_ld_tmp && _extra_ldflags="$_extra_ldflags $_ld_tmp" \
       && _termcap=yes && break
   done
 fi
@@ -3789,7 +3789,7 @@ if test "$_macosx" = yes ; then
 int main(void) { return 0; }
 EOF
   if cc_check -framework CoreAudio; then
-    _ld_extra="$_ld_extra -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
+    _extra_ldflags="$_extra_ldflags -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
     _coreaudio=yes
     def_coreaudio='#define CONFIG_COREAUDIO 1'
     _aomodules="macosx $_aomodules"
@@ -3809,7 +3809,7 @@ int main(void) {
 }
 EOF
   if cc_check -framework Carbon -framework QuickTime; then
-    _ld_extra="$_ld_extra -framework Carbon -framework QuickTime"
+    _extra_ldflags="$_extra_ldflags -framework Carbon -framework QuickTime"
     _quartz=yes
     def_quartz='#define CONFIG_QUARTZ 1'
     _vomodules="quartz $_vomodules"
@@ -3827,7 +3827,7 @@ int main(void) { return 0; }
 EOF
 	if cc_check -framework Carbon -framework QuartzCore -framework OpenGL; then
 		_vomodules="macosx $_vomodules"
-		_ld_extra="$_ld_extra -framework Cocoa -framework QuartzCore -framework OpenGL"
+		_extra_ldflags="$_extra_ldflags -framework Cocoa -framework QuartzCore -framework OpenGL"
 		def_corevideo='#define CONFIG_COREVIDEO 1'
 		_corevideo=yes
 	else
@@ -3894,7 +3894,7 @@ EOF
 fi
 if test "$_apple_remote" = yes ; then
   def_apple_remote='#define CONFIG_APPLE_REMOTE 1'
-  _ld_extra="$_ld_extra -framework IOKit"
+  _extra_ldflags="$_extra_ldflags -framework IOKit"
 else
   def_apple_remote='#undef CONFIG_APPLE_REMOTE'
 fi
@@ -3941,7 +3941,7 @@ fi
 
 echocheck "Samba support (libsmbclient)"
 if test "$_smb" = yes; then
-  _ld_extra="$_ld_extra -lsmbclient"
+  _extra_ldflags="$_extra_ldflags -lsmbclient"
 fi
 if test "$_smb" = auto; then
     _smb=no
@@ -3950,7 +3950,7 @@ if test "$_smb" = auto; then
 int main(void) { smbc_opendir("smb://"); return 0; }
 EOF
   for _ld_tmp in "-lsmbclient" "-lsmbclient $_ld_dl" "-lsmbclient $_ld_dl -lnsl" "-lsmbclient $_ld_dl -lssl -lnsl" ; do
-    cc_check $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" && \
+    cc_check $_ld_tmp && _extra_ldflags="$_extra_ldflags $_ld_tmp" && \
       _smb=yes && break
   done
 fi
@@ -4863,7 +4863,7 @@ fi
 echores "$_png"
 if test "$_png" = yes ; then
   def_png='#define CONFIG_PNG 1'
-  _ld_extra="$_ld_extra -lpng -lz"
+  _extra_ldflags="$_extra_ldflags -lpng -lz"
   _vomodules="png $_vomodules"
 else
   def_png='#undef CONFIG_PNG'
@@ -4887,7 +4887,7 @@ fi
 echores "$_mng"
 if test "$_mng" = yes ; then
   def_mng='#define CONFIG_MNG 1'
-  _ld_extra="$_ld_extra -lmng -lz"
+  _extra_ldflags="$_extra_ldflags -lmng -lz"
 else
   def_mng='#undef CONFIG_MNG'
 fi
@@ -4914,7 +4914,7 @@ echores "$_jpeg"
 if test "$_jpeg" = yes ; then
   def_jpeg='#define CONFIG_JPEG 1'
   _vomodules="jpeg $_vomodules"
-  _ld_extra="$_ld_extra -ljpeg"
+  _extra_ldflags="$_extra_ldflags -ljpeg"
 else
   def_jpeg='#undef CONFIG_JPEG'
   _novomodules="jpeg $_novomodules"
@@ -4974,7 +4974,7 @@ if test "$_gif" = yes ; then
   _vomodules="gif89a $_vomodules"
   _res_comment="old version, some encoding functions disabled"
   def_gif_4='#undef CONFIG_GIF_4'
-  _ld_extra="$_ld_extra $_ld_gif"
+  _extra_ldflags="$_extra_ldflags $_ld_gif"
 
   cat > $TMPC << EOF
 #include <signal.h>
@@ -5337,7 +5337,7 @@ EOF
        def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
      elif netbsd || openbsd ; then
        def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound"'
-       _ld_extra="$_ld_extra -lossaudio"
+       _extra_ldflags="$_extra_ldflags -lossaudio"
      else
        def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
      fi
@@ -5614,7 +5614,7 @@ if test "$_alsaver" ; then
     _alsa=no
     _res_comment="unknown version"
   fi
-  _ld_extra="$_ld_extra -lasound $_ld_dl $_ld_pthread"
+  _extra_ldflags="$_extra_ldflags -lasound $_ld_dl $_ld_pthread"
 else
   _noaomodules="alsa $_noaomodules"
 fi
@@ -5775,7 +5775,7 @@ EOF
     $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
     _dvdread=yes
     _extra_cflags="$_extra_cflags $_dvdreadcflags"
-    _ld_extra="$_ld_extra $_dvdreadlibs"
+    _extra_ldflags="$_extra_ldflags $_dvdreadlibs"
     _res_comment="external"
   fi
 fi
@@ -5788,7 +5788,7 @@ if test "$_dvdread_internal" = yes; then
 elif test "$_dvdread" = yes; then
   def_dvdread='#define CONFIG_DVDREAD 1'
   _largefiles=yes
-  _ld_extra="$_ld_extra -ldvdread"
+  _extra_ldflags="$_extra_ldflags -ldvdread"
   _inputmodules="dvdread(external) $_inputmodules"
   _res_comment="external"
 else
@@ -5812,7 +5812,7 @@ if test "$_libdvdcss_internal" = yes ; then
     def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
   elif darwin ; then
     def_dvd_darwin='#define DARWIN_DVD_IOCTL'
-    _ld_extra="$_ld_extra -framework IOKit"
+    _extra_ldflags="$_extra_ldflags -framework IOKit"
   elif cygwin ; then
     cflags_libdvdcss="-DSYS_CYGWIN -DWIN32"
   elif beos ; then
@@ -5845,8 +5845,8 @@ EOF
 fi
 if test "$_cdparanoia" = yes ; then
     _cdda='yes'
-    _ld_extra="$_ld_extra -lcdda_interface -lcdda_paranoia"
-    openbsd && _ld_extra="$_ld_extra -lutil"
+    _extra_ldflags="$_extra_ldflags -lcdda_interface -lcdda_paranoia"
+    openbsd && _extra_ldflags="$_extra_ldflags -lutil"
 fi
 echores "$_cdparanoia"
 
@@ -5868,13 +5868,13 @@ EOF
     for _ld_tmp in "" "-lwinmm" ; do
         _ld_tmp="-lcdio_cdda -lcdio -lcdio_paranoia $_ld_tmp"
         cc_check $_ld_tmp $_ld_lm \
-          && _libcdio=yes && _ld_extra="$_ld_extra $_ld_tmp" && break
+          && _libcdio=yes && _extra_ldflags="$_extra_ldflags $_ld_tmp" && break
     done
     if test "$_libcdio" = no && $_pkg_config --exists libcdio_paranoia ; then
       _inc_tmp=`$_pkg_config --cflags libcdio_paranoia`
       _ld_tmp=`$_pkg_config --libs libcdio_paranoia`
       cc_check $_inc_tmp $_ld_tmp $_ld_lm && _libcdio=yes \
-        && _ld_extra="$_ld_extra $_ld_tmp" && _extra_cflags="$_extra_cflags $_inc_tmp"
+        && _extra_ldflags="$_extra_ldflags $_ld_tmp" && _extra_cflags="$_extra_cflags $_inc_tmp"
     fi
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
@@ -5962,7 +5962,7 @@ fi
 if test "$_freetype" = yes ; then
     def_freetype='#define CONFIG_FREETYPE'
     _extra_cflags="$_extra_cflags `$_freetypeconfig --cflags`"
-    _ld_extra="$_ld_extra `$_freetypeconfig --libs`"
+    _extra_ldflags="$_extra_ldflags `$_freetypeconfig --libs`"
 else
     def_freetype='#undef CONFIG_FREETYPE'
 fi
@@ -5990,13 +5990,13 @@ EOF
   _fontconfig=no
   for _ld_tmp in "" "-lexpat -lfreetype" "-lexpat -lfreetype -lz" ; do
     _ld_tmp="-lfontconfig $_ld_tmp"
-    cc_check $_ld_tmp && _fontconfig=yes && _ld_extra="$_ld_extra $_ld_tmp" && break
+    cc_check $_ld_tmp && _fontconfig=yes && _extra_ldflags="$_extra_ldflags $_ld_tmp" && break
   done
   if test "$_fontconfig" = no && $_pkg_config --exists fontconfig ; then
     _inc_tmp=`$_pkg_config --cflags fontconfig`
     _ld_tmp=`$_pkg_config --libs fontconfig`
     cc_check $_inc_tmp $_ld_tmp && _fontconfig=yes \
-      && _ld_extra="$_ld_extra $_ld_tmp" && _extra_cflags="$_extra_cflags $_inc_tmp"
+      && _extra_ldflags="$_extra_ldflags $_ld_tmp" && _extra_cflags="$_extra_cflags $_inc_tmp"
   fi
 fi
 if test "$_fontconfig" = yes ; then
@@ -6062,7 +6062,7 @@ fi
 if test "$_fribidi" = yes ; then
     def_fribidi='#define CONFIG_FRIBIDI'
     _extra_cflags="$_extra_cflags `$_fribidiconfig --cflags`"
-    _ld_extra="$_ld_extra `$_fribidiconfig --libs`"
+    _extra_ldflags="$_extra_ldflags `$_fribidiconfig --libs`"
 else
     def_fribidi='#undef CONFIG_FRIBIDI'
 fi
@@ -6086,7 +6086,7 @@ EOF
 fi
     if test "$_enca" = yes ; then
 	def_enca='#define CONFIG_ENCA 1'
-	_ld_extra="$_ld_extra -lenca"
+	_extra_ldflags="$_extra_ldflags -lenca"
     else
 	def_enca='#undef CONFIG_ENCA'
     fi
@@ -6102,7 +6102,7 @@ _zlib=no
 cc_check -lz && _zlib=yes
 if test "$_zlib" = yes ; then
   def_zlib='#define CONFIG_ZLIB 1'
-  _ld_extra="$_ld_extra -lz"
+  _extra_ldflags="$_extra_ldflags -lz"
 else
   def_zlib='#define CONFIG_ZLIB 0'
   _libavdecoders=`echo $_libavdecoders | sed -e s/FLASHSV_DECODER// -e s/PNG_DECODER// -e s/ZMBV_DECODER// -e s/DXA_DECODER// -e s/TSCC_DECODER// `
@@ -6121,7 +6121,7 @@ EOF
 cc_check -lbz2 && bzlib=yes
 if test "$bzlib" = yes ; then
   def_bzlib='#define CONFIG_BZLIB 1'
-  _ld_extra="$_ld_extra -lbz2"
+  _extra_ldflags="$_extra_ldflags -lbz2"
 fi
 echores "$bzlib"
 
@@ -6161,7 +6161,7 @@ EOF
 fi
 if test "$_liblzo" = yes ; then
   def_liblzo='#define CONFIG_LIBLZO 1'
-  _ld_extra="$_ld_extra -llzo2"
+  _extra_ldflags="$_extra_ldflags -llzo2"
   _codecmodules="liblzo $_codecmodules"
 else
   def_liblzo='#undef CONFIG_LIBLZO'
@@ -6181,7 +6181,7 @@ EOF
 fi
 if test "$_mad" = yes ; then
   def_mad='#define CONFIG_LIBMAD 1'
-  _ld_extra="$_ld_extra -lmad"
+  _extra_ldflags="$_extra_ldflags -lmad"
   _codecmodules="libmad $_codecmodules"
 else
   def_mad='#undef CONFIG_LIBMAD'
@@ -6269,13 +6269,13 @@ elif test "$_tremor" = yes ; then
   def_tremor='#define CONFIG_TREMOR 1'
   _codecmodules="tremor(external) $_codecmodules"
   _res_comment="external Tremor"
-  _ld_extra="$_ld_extra -logg -lvorbisidec"
+  _extra_ldflags="$_extra_ldflags -logg -lvorbisidec"
 elif test "$_libvorbis" = yes ; then
   _vorbis=yes
   def_vorbis='#define CONFIG_OGGVORBIS 1'
   _codecmodules="libvorbis $_codecmodules"
   _res_comment="libvorbis"
-  _ld_extra="$_ld_extra -lvorbis -logg"
+  _extra_ldflags="$_extra_ldflags -lvorbis -logg"
 else
   _vorbis=no
   _nocodecmodules="libvorbis $_nocodecmodules"
@@ -6293,7 +6293,7 @@ EOF
 fi
 if test "$_speex" = yes ; then
   def_speex='#define CONFIG_SPEEX 1'
-  _ld_extra="$_ld_extra -lspeex"
+  _extra_ldflags="$_extra_ldflags -lspeex"
   _codecmodules="speex $_codecmodules"
 else
   def_speex='#undef CONFIG_SPEEX'
@@ -6338,22 +6338,22 @@ int main(void) {
 EOF
   _ld_theora=$($_pkg_config --silence-errors --libs theora)
   _inc_theora=$($_pkg_config --silence-errors --cflags theora)
-  cc_check $_inc_theora $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" &&
+  cc_check $_inc_theora $_ld_theora && _extra_ldflags="$_extra_ldflags $_ld_theora" &&
     _extra_cflags="$_extra_cflags $_inc_theora" && _theora=yes
   if test _theora = no; then
     _ld_theora="-ltheora -logg"
-    cc_check $_ld_theora && _ld_extra="$_ld_extra $_ld_theora" && _theora=yes
+    cc_check $_ld_theora && _extra_ldflags="$_extra_ldflags $_ld_theora" && _theora=yes
   fi
   if test "$_theora" = no && test "$_tremor_internal" = yes; then
     _ld_theora=$($_pkg_config --silence-errors --libs theora)
     _inc_theora=$($_pkg_config --silence-errors --cflags theora)
     cc_check tremor/bitwise.c $_inc_theora $_ld_theora &&
-      _ld_extra="$_ld_extra $_ld_theora" &&
+      _extra_ldflags="$_extra_ldflags $_ld_theora" &&
       _extra_cflags="$_extra_cflags $_inc_theora" && _theora=yes
     if test _theora = no; then
       _ld_theora="-ltheora -logg"
       cc_check tremor/bitwise.c $_ld_theora &&
-        _ld_extra="$_ld_extra $_ld_theora" && _theora=yes
+        _extra_ldflags="$_extra_ldflags $_ld_theora" && _theora=yes
     fi
   fi
 fi
@@ -6362,7 +6362,7 @@ if test "$_theora" = yes ; then
   _codecmodules="libtheora $_codecmodules"
   # when --enable-theora is forced, we'd better provide a probably sane
   # $_ld_theora than nothing
-  test -z "$_ld_theora" && _ld_extra="$_ld_extra -ltheora -logg"
+  test -z "$_ld_theora" && _extra_ldflags="$_extra_ldflags -ltheora -logg"
 else
   def_theora='#undef CONFIG_OGGTHEORA'
   _nocodecmodules="libtheora $_nocodecmodules"
@@ -6399,7 +6399,7 @@ elif test "$_liba52_internal" = no && test "$_liba52" = auto ; then
 #include <a52dec/a52.h>
 int main(void) { a52_state_t *testHand; testHand=a52_init(0); return 0; }
 EOF
-  cc_check -la52 && _liba52=yes && _res_comment="external" && _ld_extra="$_ld_extra -la52"
+  cc_check -la52 && _liba52=yes && _res_comment="external" && _extra_ldflags="$_extra_ldflags -la52"
 fi
 if test "$_liba52" = yes ; then
   def_liba52='#define CONFIG_LIBA52 1'
@@ -6439,7 +6439,7 @@ if test "$_libdca" = auto ; then
 int main(void) { dts_init(0); return 0; }
 EOF
   for _ld_dca in -ldts -ldca ; do
-    cc_check $_ld_dca $_ld_lm && _ld_extra="$_ld_extra $_ld_dca" \
+    cc_check $_ld_dca $_ld_lm && _extra_ldflags="$_extra_ldflags $_ld_dca" \
       && _libdca=yes && break
   done
 fi
@@ -6470,7 +6470,7 @@ EOF
 fi
 if test "$_musepack" = yes ; then
   def_musepack='#define CONFIG_MUSEPACK 1'
-  _ld_extra="$_ld_extra -lmpcdec"
+  _extra_ldflags="$_extra_ldflags -lmpcdec"
   _codecmodules="musepack $_codecmodules"
 else
   def_musepack='#undef CONFIG_MUSEPACK'
@@ -6552,7 +6552,7 @@ if test "$_faad_internal" = yes ; then
     _res_comment="internal fixed-point"
   fi
 elif test "$_faad" = yes ; then
-  _ld_extra="$_ld_extra -lfaad"
+  _extra_ldflags="$_extra_ldflags -lfaad"
 fi
 
 if test "$_faad" = yes ; then
@@ -6622,7 +6622,7 @@ if test "$_win32dll" = yes ; then
     def_win32_loader='#define WIN32_LOADER 1'
     _win32_emulation=yes
   else
-    _ld_extra="$_ld_extra -ladvapi32 -lole32"
+    _extra_ldflags="$_extra_ldflags -ladvapi32 -lole32"
     _res_comment="using native windows"
   fi
   _codecmodules="win32 $_codecmodules"
@@ -6701,7 +6701,7 @@ if test "$_nemesi" = auto  && test "$_network" = yes ; then
     _nemesi=no
     if $_pkg_config libnemesi --atleast-version=0.6.3 ; then
         _extra_cflags="$_extra_cflags `$_pkg_config --cflags libnemesi`"
-        _ld_extra="$_ld_extra `$_pkg_config --libs libnemesi`"
+        _extra_ldflags="$_extra_ldflags `$_pkg_config --libs libnemesi`"
         _nemesi=yes
     fi
 fi
@@ -6731,11 +6731,11 @@ EOF
   for I in $_extra_cflags "-I$_libdir/live" "-I/usr/lib/live" "-I/usr/lib64/live" "-I/usr/local/live" "-I/usr/local/lib/live" ; do
     cxx_check $I/liveMedia/include $I/UsageEnvironment/include \
       $I/groupsock/include && _livelibdir=`echo $I| sed s/-I//` && \
-      _ld_extra="$_livelibdir/liveMedia/libliveMedia.a \
+      _extra_ldflags="$_livelibdir/liveMedia/libliveMedia.a \
                  $_livelibdir/groupsock/libgroupsock.a \
                  $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
                  $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a \
-                 $_ld_extra  -lstdc++" \
+                 $_extra_ldflags  -lstdc++" \
       _extra_cxxflags="-I$_livelibdir/liveMedia/include \
                   -I$_livelibdir/UsageEnvironment/include \
                   -I$_livelibdir/BasicUsageEnvironment/include \
@@ -6756,7 +6756,7 @@ elif test "$_live_dist" = yes && test "$_network" = yes; then
   _res_comment="using distribution version"
   _live="yes"
   def_live='#define CONFIG_LIVE555 1'
-  _ld_extra="$_ld_extra -lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
+  _extra_ldflags="$_extra_ldflags -lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment -lstdc++"
   _extra_cxxflags="-I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
              -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  _inputmodules="live555 $_inputmodules"
@@ -6785,10 +6785,10 @@ EOF
   if $_pkg_config --exists libavutil ; then
     _inc_libavutil=`$_pkg_config --cflags libavutil`
     _ld_tmp=`$_pkg_config --libs libavutil`
-    cc_check $_inc_libavutil $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+    cc_check $_inc_libavutil $_ld_tmp && _extra_ldflags="$_extra_ldflags $_ld_tmp" \
       && _libavutil_so=yes
   elif cc_check -lavutil $_ld_lm ; then
-    _ld_extra="$_ld_extra -lavutil"
+    _extra_ldflags="$_extra_ldflags -lavutil"
     _libavutil_so=yes
     _res_comment="using libavutil.so, but static libavutil is recommended"
   fi
@@ -6824,10 +6824,10 @@ EOF
   if $_pkg_config --exists libavcodec ; then
     _inc_libavcodec=`$_pkg_config --cflags libavcodec`
     _ld_tmp=`$_pkg_config --libs libavcodec`
-    cc_check $_inc_libavcodec $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+    cc_check $_inc_libavcodec $_ld_tmp && _extra_ldflags="$_extra_ldflags $_ld_tmp" \
       && _libavcodec_so=yes
   elif cc_check -lavcodec $_ld_lm ; then
-    _ld_extra="$_ld_extra -lavcodec"
+    _extra_ldflags="$_extra_ldflags -lavcodec"
     _libavcodec_so=yes
     _res_comment="using libavcodec.so, but static libavcodec is recommended"
   fi
@@ -6868,10 +6868,10 @@ EOF
   if $_pkg_config --exists libavformat ; then
     _inc_libavformat=`$_pkg_config --cflags libavformat`
     _ld_tmp=`$_pkg_config --libs libavformat`
-    cc_check $_inc_libavformat $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+    cc_check $_inc_libavformat $_ld_tmp && _extra_ldflags="$_extra_ldflags $_ld_tmp" \
       && _libavformat_so=yes
   elif cc_check $_ld_lm -lavformat ; then
-    _ld_extra="$_ld_extra -lavformat"
+    _extra_ldflags="$_extra_ldflags -lavformat"
     _libavformat_so=yes
     _res_comment="using libavformat.so, but static libavformat is recommended"
   fi
@@ -6902,7 +6902,7 @@ elif test "$_libpostproc_so" = auto ; then
   int main(void) { pp_get_mode_by_name_and_quality("de", 0); return 0; }
 EOF
   if cc_check -lpostproc $_ld_lm ; then
-    _ld_extra="$_ld_extra -lpostproc"
+    _extra_ldflags="$_extra_ldflags -lpostproc"
     _libpostproc_so=yes
     _res_comment="using libpostproc.so, but static libpostproc is recommended"
   fi
@@ -6935,10 +6935,10 @@ EOF
   if $_pkg_config --exists libswscale ; then
     _inc_libswscale=`$_pkg_config --cflags libswscale`
     _ld_tmp=`$_pkg_config --libs libswscale`
-    cc_check $_inc_libswscale $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" \
+    cc_check $_inc_libswscale $_ld_tmp && _extra_ldflags="$_extra_ldflags $_ld_tmp" \
       && _libswscale_so=yes
   elif cc_check -lswscale ; then
-    _ld_extra="$_ld_extra -lswscale"
+    _extra_ldflags="$_extra_ldflags -lswscale"
     _libswscale_so=yes
   fi
 fi
@@ -6968,7 +6968,7 @@ EOF
 fi
 if test "$_libamr_nb" = yes ; then
   _libamr=yes
-  _ld_extra="$_ld_extra -lamrnb"
+  _extra_ldflags="$_extra_ldflags -lamrnb"
   def_libamr='#define CONFIG_LIBAMR 1'
   def_libamr_nb='#define CONFIG_LIBAMR_NB 1'
   _libavdecoders="$_libavdecoders LIBAMR_NB_DECODER"
@@ -6996,7 +6996,7 @@ EOF
 fi
 if test "$_libamr_wb" = yes ; then
   _libamr=yes
-  _ld_extra="$_ld_extra -lamrwb"
+  _extra_ldflags="$_extra_ldflags -lamrwb"
   def_libamr='#define CONFIG_LIBAMR 1'
   def_libamr_wb='#define CONFIG_LIBAMR_WB 1'
   _libavdecoders="$_libavdecoders LIBAMR_WB_DECODER"
@@ -7019,7 +7019,7 @@ EOF
 fi
 if test "$_libdv" = yes ; then
   def_libdv='#define CONFIG_LIBDV095 1'
-  _ld_extra="$_ld_extra -ldv"
+  _extra_ldflags="$_extra_ldflags -ldv"
   _codecmodules="libdv $_codecmodules"
 else
   def_libdv='#undef CONFIG_LIBDV095'
@@ -7036,7 +7036,7 @@ if test "$_xvid" = auto ; then
 int main(void) { xvid_global(0, 0, 0, 0); return 0; }
 EOF
   for _ld_tmp in "-lxvidcore $_ld_lm" "-lxvidcore $_ld_lm $_ld_pthread" ; do
-    cc_check $_ld_tmp && _ld_extra="$_ld_extra $_ld_tmp" && _xvid=yes && break
+    cc_check $_ld_tmp && _extra_ldflags="$_extra_ldflags $_ld_tmp" && _xvid=yes && break
   done
 fi
 
@@ -7128,7 +7128,7 @@ EOF
       cc_check $_inc_dirac $_ld_dirac      &&
       _libdirac_lavc=yes                   &&
       _extra_cflags="$_extra_cflags $_inc_dirac" &&
-      _ld_extra="$_ld_extra $_ld_dirac"
+      _extra_ldflags="$_extra_ldflags $_ld_dirac"
     fi
   fi
 fi
@@ -7160,7 +7160,7 @@ EOF
       cc_check $_inc_schroedinger $_ld_schroedinger &&
       _libschroedinger_lavc=yes                     &&
       _extra_cflags="$_extra_cflags $_inc_schroedinger"   &&
-      _ld_extra="$_ld_extra $_ld_schroedinger"
+      _extra_ldflags="$_extra_ldflags $_ld_schroedinger"
     fi
   fi
 fi
@@ -7190,7 +7190,7 @@ fi
 
 if test "$_libnut" = yes ; then
   def_libnut='#define CONFIG_LIBNUT 1'
-  _ld_extra="$_ld_extra -lnut"
+  _extra_ldflags="$_extra_ldflags -lnut"
 else
   def_libnut='#undef CONFIG_LIBNUT'
 fi
@@ -7406,7 +7406,7 @@ fi
 if test "$_tv_dshow" = yes ; then
   _inputmodules="tv-dshow $_inputmodules"
   def_tv_dshow='#define CONFIG_TV_DSHOW 1'
-  _ld_extra="$_ld_extra -lole32 -luuid"
+  _extra_ldflags="$_extra_ldflags -lole32 -luuid"
 else
   _noinputmodules="tv-dshow $_noinputmodules"
   def_tv_dshow='#undef CONFIG_TV_DSHOW'
@@ -7620,7 +7620,7 @@ fi
 if test "$_vstream" = yes ; then
   def_vstream='#define CONFIG_VSTREAM 1'
   _inputmodules="vstream $_inputmodules"
-  _ld_extra="$_ld_extra -lvstream-client"
+  _extra_ldflags="$_extra_ldflags -lvstream-client"
 else
   _noinputmodules="vstream $_noinputmodules"
   def_vstream='#undef CONFIG_VSTREAM'
@@ -7660,9 +7660,9 @@ if test "$_xmms" = yes ; then
 
   def_xmms='#define CONFIG_XMMS 1'
   if darwin ; then
-     _ld_extra="$_ld_extra ${_xmmslibdir}/libxmms.dylib"
+     _extra_ldflags="$_extra_ldflags ${_xmmslibdir}/libxmms.dylib"
   else
-     _ld_extra="$_ld_extra ${_xmmslibdir}/libxmms.so.1 -export-dynamic"
+     _extra_ldflags="$_extra_ldflags ${_xmmslibdir}/libxmms.so.1 -export-dynamic"
   fi
 else
   def_xmms='#undef CONFIG_XMMS'
@@ -7836,7 +7836,7 @@ cat > $TMPC <<EOF
 int main(void) { return 0; }
 EOF
 if cc_check -Wl,-z,noexecstack ; then
-  _ld_extra="-Wl,-z,noexecstack $_ld_extra"
+  _extra_ldflags="-Wl,-z,noexecstack $_extra_ldflags"
   echores "yes"
 else
   echores "no"
@@ -7851,9 +7851,9 @@ if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin &
   _ld_dl_dynamic='-rdynamic'
 fi
 
-_ld_extra="$_ld_extra $_ld_pthread $_ld_dl $_ld_dl_dynamic"
-bsdos && _ld_extra="$_ld_extra -ldvd"
-(netbsd || openbsd) && x86_32 && _ld_extra="$_ld_extra -li386"
+_extra_ldflags="$_extra_ldflags $_ld_pthread $_ld_dl $_ld_dl_dynamic"
+bsdos && _extra_ldflags="$_extra_ldflags -ldvd"
+(netbsd || openbsd) && x86_32 && _extra_ldflags="$_extra_ldflags -li386"
 
 def_debug='#undef MP_DEBUG'
 test "$_debug" != "" && def_debug='#define MP_DEBUG 1'
@@ -7883,7 +7883,7 @@ EOF
 fi
 if test "$_lirc" = yes ; then
   def_lirc='#define CONFIG_LIRC 1'
-  _ld_extra="$_ld_extra -llirc_client"
+  _extra_ldflags="$_extra_ldflags -llirc_client"
 else
   def_lirc='#undef CONFIG_LIRC'
 fi
@@ -7900,7 +7900,7 @@ EOF
 fi
 if test "$_lircc" = yes ; then
   def_lircc='#define CONFIG_LIRCC 1'
-  _ld_extra="$_ld_extra -llircc"
+  _extra_ldflags="$_extra_ldflags -llircc"
 else
   def_lircc='#undef CONFIG_LIRCC'
 fi
@@ -7921,7 +7921,7 @@ fi
 if test "$_maemo" = yes ; then
   def_maemo='#define CONFIG_MAEMO 1'
   _extra_cflags="$_extra_cflags `$_pkg_config --cflags libosso`"
-  _ld_extra="$_ld_extra `$_pkg_config --libs libosso` -lXsp"
+  _extra_ldflags="$_extra_ldflags `$_pkg_config --libs libosso` -lXsp"
 else
   def_maemo='#undef CONFIG_MAEMO'
 fi
@@ -7934,7 +7934,7 @@ fi
 # the OMF format needs to come after the 'extern symbol prefix' check, which
 # uses nm.
 if os2 ; then
-  _ld_extra="$_ld_extra -Zomf -Zstack 16384 -Zbin-files -Zargs-wild"
+  _extra_ldflags="$_extra_ldflags -Zomf -Zstack 16384 -Zbin-files -Zargs-wild"
 fi
 
 # linker paths should be the same for mencoder and mplayer
@@ -7942,7 +7942,7 @@ _ld_tmp=""
 for I in $_libs_mplayer ; do
   _tmp=`echo $I | sed -e 's/^-L.*$//'`
   if test -z "$_tmp" ; then
-    _ld_extra="$_ld_extra $I"
+    _extra_ldflags="$_extra_ldflags $I"
   else
     _ld_tmp="$_ld_tmp $I"
   fi
@@ -8028,7 +8028,7 @@ if test "$_dvdnav" = yes ; then
     _inputmodules="dvdnav(internal) $_inputmodules"
   else
     _extra_cflags="$_extra_cflags `$_dvdnavconfig --cflags`"
-    _ld_extra="$_ld_extra `$_dvdnavconfig --minilibs`"
+    _extra_ldflags="$_extra_ldflags `$_dvdnavconfig --minilibs`"
     _inputmodules="dvdnav $_inputmodules"
   fi
 else
@@ -8088,7 +8088,7 @@ CFLAGS_TREMOR_LOW = $cflags_tremor_low
 YASMFLAGS = $YASMFLAGS
 
 EXTRALIBS = $_extra_libs
-EXTRA_LIB = $_ld_extra $_ld_static $_ld_lm
+EXTRA_LIB = $_extra_ldflags $_ld_static $_ld_lm
 EXTRALIBS_MPLAYER = $_libs_mplayer
 EXTRALIBS_MENCODER = $_libs_mencoder
 
