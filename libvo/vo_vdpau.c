@@ -212,6 +212,13 @@ static int                                int_pause;
 
 static void draw_eosd(void);
 
+static void push_deint_surface(VdpVideoSurface surface)
+{
+    deint_surfaces[2] = deint_surfaces[1];
+    deint_surfaces[1] = deint_surfaces[0];
+    deint_surfaces[0] = surface;
+}
+
 static void video_to_output_surface(void)
 {
     VdpTime dummy;
@@ -227,9 +234,10 @@ static void video_to_output_surface(void)
             draw_eosd();
             draw_osd();
             flip_page();
+            push_deint_surface(surface_render[vid_surface_num].surface);
         }
         if (deint)
-            field = top_field_first == i ?
+            field = (top_field_first == i) ^ (deint > 2) ?
                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;
         output_surface = output_surfaces[surface_num];
@@ -887,9 +895,7 @@ static uint32_t draw_image(mp_image_t *mpi)
     if (deint < 3)
         deint_surfaces[0] = surface_render[vid_surface_num].surface;
     video_to_output_surface();
-    deint_surfaces[2] = deint_surfaces[1];
-    deint_surfaces[1] = deint_surfaces[0];
-    deint_surfaces[0] = surface_render[vid_surface_num].surface;
+    push_deint_surface(surface_render[vid_surface_num].surface);
     return VO_TRUE;
 }
 
