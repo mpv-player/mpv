@@ -881,7 +881,7 @@ static uint32_t draw_image(mp_image_t *mpi)
         VdpStatus vdp_st;
         void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
         struct vdpau_render_state *rndr = get_surface(deint_counter);
-        deint_counter = (deint_counter + 1) & 3;
+        deint_counter = (deint_counter + 1) % 3;
         vid_surface_num = rndr - surface_render;
         vdp_st = vdp_video_surface_put_bits_y_cb_cr(rndr->surface,
                                                     VDP_YCBCR_FORMAT_YV12,
