@@ -148,7 +148,7 @@ static void                              *vdpau_lib_handle;
 #define osd_surface output_surfaces[NUM_OUTPUT_SURFACES]
 static VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
 static VdpVideoSurface                    deint_surfaces[3];
-static mp_image_t                        *deint_mpi[3];
+static mp_image_t                        *deint_mpi[2];
 static int                                output_surface_width, output_surface_height;
 
 static VdpVideoMixer                      video_mixer;
@@ -466,7 +466,7 @@ static void free_video_specific(void) {
     for (i = 0; i < 3; i++)
         deint_surfaces[i] = VDP_INVALID_HANDLE;
 
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < 2; i++)
         if (deint_mpi[i]) {
             deint_mpi[i]->usage_count--;
             deint_mpi[i] = NULL;
@@ -872,9 +872,8 @@ static uint32_t draw_image(mp_image_t *mpi)
         vid_surface_num = rndr - surface_render;
         if (deint_buffer_past_frames) {
             mpi->usage_count++;
-            if (deint_mpi[2])
-                deint_mpi[2]->usage_count--;
-            deint_mpi[2] = deint_mpi[1];
+            if (deint_mpi[1])
+                deint_mpi[1]->usage_count--;
             deint_mpi[1] = deint_mpi[0];
             deint_mpi[0] = mpi;
         }
@@ -1035,7 +1034,7 @@ static int preinit(const char *arg)
     deint_type = 3;
     deint_counter = 0;
     deint_buffer_past_frames = 0;
-    deint_mpi[0] = deint_mpi[1] = deint_mpi[2] = NULL;
+    deint_mpi[0] = deint_mpi[1] = NULL;
     chroma_deint = 1;
     pullup = 0;
     denoise = 0;
