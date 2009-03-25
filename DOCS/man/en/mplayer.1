@@ -3457,7 +3457,7 @@ Chooses the deinterlacer (default: 0).
 All modes > 0 respect \-field\-dominance.
 .br
 .I NOTE:
-Values > 2 delay the video output by one frame.
+Values > 2 delay the video output by one field.
 .RSss
 .IPs 0
 No deinterlacing.
@@ -3478,7 +3478,7 @@ Makes temporal deinterlacers operate both on luma and chroma (default).
 Use nochroma\-deint to solely use luma and speed up advanced deinterlacing.
 Useful with slow video memory.
 .IPs pullup
-Try to apply inverse telecine, needs temporal deinterlacing.
+Try to apply inverse telecine, needs motion adaptive temporal deinterlacing.
 .RE
 .PD 1 
 .
