@@ -224,8 +224,11 @@ static void video_to_output_surface(void)
     VdpTime dummy;
     VdpStatus vdp_st;
     int i;
-    if (vid_surface_num < 0 || deint_surfaces[0] == VDP_INVALID_HANDLE)
+    if (vid_surface_num < 0)
         return;
+
+    if (deint < 2 || deint_surfaces[0] == VDP_INVALID_HANDLE)
+        push_deint_surface(surface_render[vid_surface_num].surface);
 
     for (i = 0; i <= !!(deint > 1); i++) {
         int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
@@ -234,10 +237,9 @@ static void video_to_output_surface(void)
             draw_eosd();
             draw_osd();
             flip_page();
-            push_deint_surface(surface_render[vid_surface_num].surface);
         }
         if (deint)
-            field = (top_field_first == i) ^ (deint > 2) ?
+            field = (top_field_first == i) ^ (deint > 1) ?
                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;
         output_surface = output_surfaces[surface_num];
@@ -254,6 +256,7 @@ static void video_to_output_surface(void)
                                         output_surface,
                                         NULL, &out_rect_vid, 0, NULL);
         CHECK_ST_WARNING("Error when calling vdp_video_mixer_render")
+        push_deint_surface(surface_render[vid_surface_num].surface);
     }
 }
 
@@ -891,10 +894,7 @@ static uint32_t draw_image(mp_image_t *mpi)
     }
     top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
 
-    if (deint < 3)
-        deint_surfaces[0] = surface_render[vid_surface_num].surface;
     video_to_output_surface();
-    push_deint_surface(surface_render[vid_surface_num].surface);
     return VO_TRUE;
 }
 
@@ -1045,7 +1045,7 @@ static int preinit(const char *arg)
     }
     if (deint)
         deint_type = deint;
-    if (deint > 2)
+    if (deint > 1)
         deint_buffer_past_frames = 1;
 
     vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
