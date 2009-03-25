@@ -63,6 +63,8 @@ for DLL to know too much about its environment.
 #include <sys/types.h>
 #include <dirent.h>
 #include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/timeb.h>
 #ifdef	HAVE_KSTAT
 #include <kstat.h>
 #endif
@@ -3519,7 +3521,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	free(tmp);
 	return result;
     }
-    if (strstr(cs1, "vp3"))
+    if (strstr(cs1, "vp3") || strstr(cs1, ".fpf"))
     {
 	int r;
 	int flg = 0;
@@ -3537,10 +3539,10 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	    flg |= O_RDONLY;
 	else if (GENERIC_WRITE & i1)
 	{
-	    flg |= O_WRONLY;
+	    flg |= O_WRONLY | O_CREAT;
 	    printf("Warning: openning filename %s  %d (flags; 0x%x) for write\n", tmp, r, flg);
 	}
-	r=open(tmp, flg);
+	r=open(tmp, flg, S_IRWXU);
 	free(tmp);
 	return r;
     }
