@@ -149,7 +149,7 @@ extern int audio_id;
 extern int video_id;
 
 static void close_s(stream_t *stream) {
-	close(stream->fd);
+	closesocket(stream->fd);
 	stream->fd=-1;
 }
 
