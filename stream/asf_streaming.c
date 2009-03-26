@@ -84,7 +84,8 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
 
     //Is protocol http, http_proxy, or mms? 
     if (!strcasecmp(proto, "http_proxy") || !strcasecmp(proto, "http") ||
-	!strcasecmp(proto, "mms") || !strcasecmp(proto, "mmshttp"))
+	!strcasecmp(proto, "mms") || !strcasecmp(proto, "mmsh") ||
+	!strcasecmp(proto, "mmshttp"))
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream, demuxer_type );
@@ -847,7 +848,7 @@ const stream_info_t stream_info_asf = {
   "Bertrand, Reimar Doeffinger, Albeu",
   "originally based on work by Majormms (is that code still there?)",
   open_s,
-  {"mms", "mmsu", "mmst", "http", "http_proxy", "mmshttp", NULL},
+  {"mms", "mmsu", "mmst", "http", "http_proxy", "mmsh", "mmshttp", NULL},
   NULL,
   0 // Urls are an option string
 };
