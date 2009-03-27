@@ -64,10 +64,10 @@ compile_check() {
   echo "$_cc $CFLAGS $extra_cflags $_ld_static $extra_ldflags $libs_mplayer $libs_mencoder -o $TMPEXE $@" >> "$TMPLOG"
   rm -f "$TMPEXE"
   $_cc $CFLAGS $extra_cflags $_ld_static $extra_ldflags $libs_mplayer $libs_mencoder -o "$TMPEXE" "$@" >> "$TMPLOG" 2>&1
-  TMP="$?"
+  TMPRES="$?"
   echo >> "$TMPLOG"
   echo >> "$TMPLOG"
-  return "$TMP"
+  return "$TMPRES"
 }
 
 cc_check() {
@@ -85,10 +85,10 @@ yasm_check() {
   echo "$_yasm $YASMFLAGS -o $TMPEXE $TMPS $@" >> "$TMPLOG"
   rm -f "$TMPEXE"
   $_yasm $YASMFLAGS -o "$TMPEXE" "$TMPS" "$@" >> "$TMPLOG" 2>&1
-  TMP="$?"
+  TMPRES="$?"
   echo >> "$TMPLOG"
   echo >> "$TMPLOG"
-  return "$TMP"
+  return "$TMPRES"
 }
 
 tmp_run() {
