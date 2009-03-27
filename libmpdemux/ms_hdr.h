@@ -27,7 +27,7 @@ typedef struct __attribute__((__packed__)) mpeglayer3waveformat_tag {
 #endif /* _MPEGLAYER3WAVEFORMAT_ */
 
 /* windows.h #includes wingdi.h on MinGW. */
-#if !defined(_BITMAPINFOHEADER_) && !defined(_WINGDI_H)
+#if !defined(_BITMAPINFOHEADER_) && !defined(_WINGDI_)
 #define _BITMAPINFOHEADER_
 typedef struct __attribute__((__packed__))
 {
