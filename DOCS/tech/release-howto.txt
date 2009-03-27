@@ -15,17 +15,12 @@ preparations:
 
 create the release tree:
 - tag Subversion with release name
+- Add a VERSION file with the release version to the root of the source tree.
 - update release.sh script with version number
 ***the following steps are done automatically by release.sh script***
 - checkout the mplayer src tree
 - check out FFmpeg subdirs
 - remove obsolete DOCS translations, help files
-- replace version.sh with this (change version number too...):
-
-============
-#!/bin/sh
-echo "#define VERSION \"1.0pre5-$1 \"" > version.h
-============
 
 - build the HTML docs from XML sources, then clean up:
     make html-chunked; make releaseclean
@@ -38,9 +33,9 @@ release the tree:
 ***end of part done by release.sh**
 
 test it (download to your local machine, extract, compile, run)
- - compilers: gcc 3, gcc 2.95, mingw, cygwin
+ - compilers: gcc 4.x, gcc 3.x, gcc 2.95, MinGW, Cygwin
  - architectures: PPC, AMD64, x86 with MMX[2], SSE[2], 3DNow
- - OS: Linux, BSD, Windows, MacOS X
+ - OS: Linux, BSD, Windows, Mac OS X
 
 copy to FTP:
     cp MPlayer-0.90rc5.tar.bz2 /home/ftp/MPlayer/releases/
