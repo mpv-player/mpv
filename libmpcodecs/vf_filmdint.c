@@ -424,7 +424,7 @@ block_metrics_faster_c(unsigned char *a, unsigned char *b, int as, int bs,
 	    "paddusw %%mm2, %%mm7\n\t"					     \
 	    "paddusw %%mm1, %%mm7\n\t"					     \
 	    : "=r" (a), "=r" (b)					     \
-	    : "r"((long)as), "r"((long)bs), "m" (ones), "0"(a), "1"(b), "X"(*a), "X"(*b) \
+	    : "r"((x86_reg)as), "r"((x86_reg)bs), "m" (ones), "0"(a), "1"(b), "X"(*a), "X"(*b) \
 	    );								     \
     } while (--lines);
 
@@ -466,8 +466,8 @@ block_metrics_mmx2(unsigned char *a, unsigned char *b, int as, int bs,
     mp_msg(MSGT_VFILTER, MSGL_FATAL, "block_metrics_mmx2: internal error\n");
 #else
     static const unsigned long long ones = 0x0101010101010101ull;
-    unsigned long interlaced;
-    unsigned long prefetch_line = (((long)a>>3) & 7) + 10;
+    x86_reg interlaced;
+    x86_reg prefetch_line = (((long)a>>3) & 7) + 10;
 #ifdef DEBUG
     struct frame_stats ts = *s;
 #endif
@@ -633,7 +633,7 @@ dint_copy_line_mmx2(unsigned char *dst, unsigned char *a, long bos,
 	    "por %%mm3, %%mm1 \n\t"     /* avg if >= threshold */
 	    "movq %%mm1, (%2,%4) \n\t"
 	    : /* no output */
-	    : "r" (a), "r" (bos), "r" (dst), "r" ((long)ss), "r" ((long)ds), "r" (cos)
+	    : "r" (a), "r" ((x86_reg)bos), "r" ((x86_reg)dst), "r" ((x86_reg)ss), "r" ((x86_reg)ds), "r" ((x86_reg)cos)
 	    );
 	a += 8;
 	dst += 8;
