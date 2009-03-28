@@ -1108,12 +1108,8 @@ static int ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_fo
 
     spriv=calloc(1, sizeof(struct stream_priv_s));
     spriv->device = strdup(dirname(stream->url));
-    if(!strncasecmp(filename,"vts_",4))
-    {
-        if(sscanf(filename+3, "_%02d_", &spriv->title)!=1)
+        if(sscanf(filename, "vts_%02d_", &spriv->title)!=1)
             spriv->title=1;
-    }else
-        spriv->title=1;
 
     free(filename);
     free(stream->url);
