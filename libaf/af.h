@@ -21,11 +21,11 @@
 
 #include <stdio.h>
 
+#include "af_format.h"
 #include "config.h"
 #include "control.h"
-#include "af_format.h"
-#include "mp_msg.h"
 #include "cpudetect.h"
+#include "mp_msg.h"
 
 /* Set the initialization type from mplayers cpudetect */
 #ifdef AF_INIT_TYPE
