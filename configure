@@ -5730,15 +5730,23 @@ fi
 
 
 echocheck "VCD support"
-if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos || mingw32; then
+_vcd=no
+if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos; then
+  _vcd=yes
+elif mingw32; then
+  cat > $TMPC << EOF
+#include <ddk/ntddcdrm.h>
+int main(void) { return 0; }
+EOF
+  cc_check && _vcd=yes
+fi
+if test "$_vcd" = yes; then
   _inputmodules="vcd $_inputmodules"
   def_vcd='#define CONFIG_VCD 1'
-  _vcd="yes"
 else
   def_vcd='#undef CONFIG_VCD'
   _noinputmodules="vcd $_noinputmodules"
   _res_comment="not supported on this OS"
-  _vcd="no"
 fi
 echores "$_vcd"
 
