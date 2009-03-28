@@ -455,6 +455,7 @@ static void render_overlap(ass_image_t** last_tail, ass_image_t** tail, bitmap_h
 	cur_top = top-by;
 
 	// Query cache
+	memset(&hk, 0, sizeof(hk));
 	memcpy(&hk.a, last_hash, sizeof(*last_hash));
 	memcpy(&hk.b, hash, sizeof(*hash));
 	hk.aw = aw;
@@ -1429,6 +1430,7 @@ static void get_outline_glyph(int symbol, glyph_info_t* info, FT_Vector* advance
 	int error;
 	glyph_hash_val_t* val;
 	glyph_hash_key_t key;
+	memset(&key, 0, sizeof(key));
 	key.font = render_context.font;
 	key.size = render_context.font_size;
 	key.ch = symbol;
@@ -2166,6 +2168,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	for (i = 0; i < text_info.length; ++i)
 		get_bitmap_glyph(text_info.glyphs + i);
 
+	memset(event_images, 0, sizeof(*event_images));
 	event_images->top = device_y - d6_to_int(text_info.lines[0].asc);
 	event_images->height = d6_to_int(text_info.height);
 	event_images->detect_collisions = render_context.detect_collisions;
