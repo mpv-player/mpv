@@ -62,7 +62,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_CENTER_CH | AF_CONTROL_SET: // Requires reinit
     // Sanity check
     if((*(int*)arg >= AF_NCH) || (*(int*)arg < 0)){
-      af_msg(AF_MSG_ERROR,"[sub] Center channel number must be between "
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Center channel number must be between "
 	     " 0 and %i current value is %i\n", AF_NCH-1, *(int*)arg);
       return AF_ERROR;
     }

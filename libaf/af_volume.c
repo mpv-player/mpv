@@ -78,7 +78,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       float x = 2.0*M_PI*15.0/(float)af->data->rate;
       float t = 2.0-cos(x);
       s->time = 1.0 - (t - sqrt(t*t - 1));
-      af_msg(AF_MSG_DEBUG0,"[volume] Forgetting factor = %0.5f\n",s->time);
+      mp_msg(MSGT_AFILTER, MSGL_DBG2, "[volume] Forgetting factor = %0.5f\n",s->time);
       af->data->format = AF_FORMAT_FLOAT_NE;
       af->data->bps    = 4;
     }
@@ -122,7 +122,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       for(i=0;i<AF_NCH;i++)
 	m=max(m,s->max[i]);
 	af_to_dB(1, &m, &m, 10.0);
-	af_msg(AF_MSG_INFO,"[volume] The maximum volume was %0.2fdB \n", m);
+	mp_msg(MSGT_AFILTER, MSGL_INFO, "[volume] The maximum volume was %0.2fdB \n", m);
     }
     return AF_OK;
   }

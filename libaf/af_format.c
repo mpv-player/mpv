@@ -62,7 +62,7 @@ static af_data_t* play_s16_float(struct af_instance_s* af, af_data_t* data);
 static int check_bps(int bps)
 {
   if(bps != 4 && bps != 3 && bps != 2 && bps != 1){
-    af_msg(AF_MSG_ERROR,"[format] The number of bytes per sample" 
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] The number of bytes per sample" 
 	   " must be 1, 2, 3 or 4. Current value is %i \n",bps);
     return AF_ERROR;
   }
@@ -77,7 +77,7 @@ static int check_format(int format)
   case(AF_FORMAT_IMA_ADPCM): 
   case(AF_FORMAT_MPEG2): 
   case(AF_FORMAT_AC3):
-    af_msg(AF_MSG_ERROR,"[format] Sample format %s not yet supported \n",
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] Sample format %s not yet supported \n",
 	 af_fmt2str(format,buf,256)); 
     return AF_ERROR;
   }
@@ -105,7 +105,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
        (AF_OK != check_format(af->data->format)))
       return AF_ERROR;
 
-    af_msg(AF_MSG_VERBOSE,"[format] Changing sample format from %s to %s\n",
+    mp_msg(MSGT_AFILTER, MSGL_V, "[format] Changing sample format from %s to %s\n",
 	   af_fmt2str(data->format,buf1,256),
 	   af_fmt2str(af->data->format,buf2,256));
 
@@ -119,13 +119,13 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if ((af->data->format & ~AF_FORMAT_END_MASK) ==
 	(data->format & ~AF_FORMAT_END_MASK))
     {
-	af_msg(AF_MSG_VERBOSE,"[format] Accelerated endianness conversion only\n");
+	mp_msg(MSGT_AFILTER, MSGL_V, "[format] Accelerated endianness conversion only\n");
 	af->play = play_swapendian;
     }
     if ((data->format == AF_FORMAT_FLOAT_NE) &&
 	(af->data->format == AF_FORMAT_S16_NE))
     {
-	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %s to %s conversion\n",
+	mp_msg(MSGT_AFILTER, MSGL_V, "[format] Accelerated %s to %s conversion\n",
 	   af_fmt2str(data->format,buf1,256),
 	   af_fmt2str(af->data->format,buf2,256));
 	af->play = play_float_s16;
@@ -133,7 +133,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if ((data->format == AF_FORMAT_S16_NE) &&
 	(af->data->format == AF_FORMAT_FLOAT_NE))
     {
-	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %s to %s conversion\n",
+	mp_msg(MSGT_AFILTER, MSGL_V, "[format] Accelerated %s to %s conversion\n",
 	   af_fmt2str(data->format,buf1,256),
 	   af_fmt2str(af->data->format,buf2,256));
 	af->play = play_s16_float;
@@ -143,7 +143,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_COMMAND_LINE:{
     int format = af_str2fmt_short(arg);
     if (format == -1) {
-      af_msg(AF_MSG_ERROR, "[format] %s is not a valid format\n", (char *)arg);
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] %s is not a valid format\n", (char *)arg);
       return AF_ERROR;
     }
     if(AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET,&format))

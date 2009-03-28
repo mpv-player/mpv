@@ -139,7 +139,7 @@ static int set_types(struct af_instance_s* af, af_data_t* data)
     s->setup = (s->setup & ~RSMP_MASK) | RSMP_LIN;
     af->data->format = AF_FORMAT_S16_NE;
     af->data->bps    = 2;
-    af_msg(AF_MSG_VERBOSE,"[resample] Using linear interpolation. \n");
+    mp_msg(MSGT_AFILTER, MSGL_V, "[resample] Using linear interpolation. \n");
   }
   else{
     /* If the input format is float or if float is explicitly selected
@@ -155,7 +155,7 @@ static int set_types(struct af_instance_s* af, af_data_t* data)
       af->data->format = AF_FORMAT_S16_NE;
       af->data->bps    = 2;
     }
-    af_msg(AF_MSG_VERBOSE,"[resample] Using %s processing and %s frequecy"
+    mp_msg(MSGT_AFILTER, MSGL_V, "[resample] Using %s processing and %s frequecy"
 	   " conversion.\n",
 	   ((s->setup & RSMP_MASK) == RSMP_FLOAT)?"floating point":"integer",
 	   ((s->setup & FREQ_MASK) == FREQ_SLOPPY)?"inexact":"exact");
@@ -193,7 +193,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if((s->setup & RSMP_MASK) == RSMP_LIN){
       s->pt=0LL;
       s->step=((uint64_t)n->rate<<STEPACCURACY)/(uint64_t)af->data->rate+1LL;
-      af_msg(AF_MSG_DEBUG0,"[resample] Linear interpolation step: 0x%016"PRIX64".\n",
+      mp_msg(MSGT_AFILTER, MSGL_DBG2, "[resample] Linear interpolation step: 0x%016"PRIX64".\n",
 	     s->step);
       af->mul = (double)af->data->rate / n->rate;
       return rv;
@@ -243,7 +243,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       // Design prototype filter type using Kaiser window with beta = 10
       if(NULL == w || NULL == s->w || 
 	 -1 == af_filter_design_fir(s->up*L, w, &fc, LP|KAISER , 10.0)){
-	af_msg(AF_MSG_ERROR,"[resample] Unable to design prototype filter.\n");
+	mp_msg(MSGT_AFILTER, MSGL_ERR, "[resample] Unable to design prototype filter.\n");
 	return AF_ERROR;
       }
       // Copy data from prototype to polyphase filter
@@ -260,7 +260,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	}
       }
       free(w);
-      af_msg(AF_MSG_VERBOSE,"[resample] New filter designed up: %i "
+      mp_msg(MSGT_AFILTER, MSGL_V, "[resample] New filter designed up: %i "
 	     "down: %i\n", s->up, s->dn);
     }
 
@@ -288,14 +288,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     
     // Sanity check
     if(((int*)arg)[0] < 8000 || ((int*)arg)[0] > 192000){
-      af_msg(AF_MSG_ERROR,"[resample] The output sample frequency " 
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[resample] The output sample frequency " 
 	     "must be between 8kHz and 192kHz. Current value is %i \n",
 	     ((int*)arg)[0]);
       return AF_ERROR;
     }
 
     af->data->rate=((int*)arg)[0]; 
-    af_msg(AF_MSG_VERBOSE,"[resample] Changing sample rate "  
+    mp_msg(MSGT_AFILTER, MSGL_V, "[resample] Changing sample rate "  
 	   "to %iHz\n",af->data->rate);
     return AF_OK;
   }

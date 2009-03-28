@@ -25,6 +25,7 @@
 #include "af_mp.h"
 #include "control.h"
 #include "af_format.h"
+#include "mp_msg.h"
 
 struct af_instance_s;
 
@@ -341,35 +342,5 @@ void af_fix_parameters(af_data_t *data);
 #ifndef lrnd
 #define lrnd(a,b) ((b)((a)>=0.0?(a)+0.5:(a)-0.5))
 #endif
-
-/* Error messages */
-
-typedef struct af_msg_cfg_s
-{
-  int level;   	/* Message level for debug and error messages max = 2
-		   min = -2 default = 0 */
-  FILE* err;	// Stream to print error messages to
-  FILE* msg;	// Stream to print information messages to
-}af_msg_cfg_t;
-
-extern af_msg_cfg_t af_msg_cfg; // Message 
-
-//! \addtogroup af_filter
-//! \{
-#define AF_MSG_FATAL	-3 ///< Fatal error exit immediately
-#define AF_MSG_ERROR    -2 ///< Error return gracefully
-#define AF_MSG_WARN     -1 ///< Print warning but do not exit (can be suppressed)
-#define AF_MSG_INFO	 0 ///< Important information
-#define AF_MSG_VERBOSE	 1 ///< Print this if verbose is enabled 
-#define AF_MSG_DEBUG0	 2 ///< Print if very verbose
-#define AF_MSG_DEBUG1	 3 ///< Print if very very verbose 
-
-//! Macro for printing error messages
-#ifndef af_msg
-#define af_msg(lev, args... ) \
-(((lev)<AF_MSG_WARN)?(fprintf(af_msg_cfg.err?af_msg_cfg.err:stderr, ## args )): \
-(((lev)<=af_msg_cfg.level)?(fprintf(af_msg_cfg.msg?af_msg_cfg.msg:stdout, ## args )):0))
-#endif
-//! \}
 
 #endif /* MPLAYER_AF_H */

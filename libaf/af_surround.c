@@ -98,13 +98,13 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->bps    = 4;
 
     if (af->data->nch != 4){
-      af_msg(AF_MSG_ERROR,"[surround] Only stereo input is supported.\n");
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Only stereo input is supported.\n");
       return AF_DETACH;
     }
     // Surround filer coefficients
     fc = 2.0 * 7000.0/(float)af->data->rate;
     if (-1 == af_filter_design_fir(L, s->w, &fc, LP|HAMMING, 0)){
-      af_msg(AF_MSG_ERROR,"[surround] Unable to design low-pass filter.\n");
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Unable to design low-pass filter.\n");
       return AF_ERROR;
     }
 
@@ -117,7 +117,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     s->dl = calloc(LD,af->data->bps);
     s->dr = calloc(LD,af->data->bps);
     if((NULL == s->dl) || (NULL == s->dr))
-      af_msg(AF_MSG_FATAL,"[delay] Out of memory\n");
+      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[delay] Out of memory\n");
     
     // Initialize delay queue index
     if(AF_OK != af_from_ms(1, &s->d, &s->wi, af->data->rate, 0.0, 1000.0))
@@ -137,7 +137,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     float d = 0;
     sscanf((char*)arg,"%f",&d);
     if ((d < 0) || (d > 1000)){
-      af_msg(AF_MSG_ERROR,"[surround] Invalid delay time, valid time values"
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Invalid delay time, valid time values"
 	     " are 0ms to 1000ms current value is %0.3f ms\n",d);
       return AF_ERROR;
     }

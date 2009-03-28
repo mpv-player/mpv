@@ -293,7 +293,7 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
 	if(af->data->rate != 48000) {
 	    // automatic samplerate adjustment in the filter chain
 	    // is not yet supported.
-	    af_msg(AF_MSG_ERROR,
+	    mp_msg(MSGT_AFILTER, MSGL_ERR,
 		   "[hrtf] ERROR: Sampling rate is not 48000 Hz (%d)!\n",
 		   af->data->rate);
 	    return AF_ERROR;
@@ -331,7 +331,7 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
 	    s->matrix_mode = 0;
 	    break;
 	default:
-	    af_msg(AF_MSG_ERROR,
+	    mp_msg(MSGT_AFILTER, MSGL_ERR,
 		   "[hrtf] Mode is neither 'm', 's', nor '0' (%c).\n",
 		   mode);
 	    return AF_ERROR;
@@ -409,29 +409,29 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data)
 	s->print_flag = 0;
 	switch (s->decode_mode) {
 	case HRTF_MIX_51:
-	  af_msg(AF_MSG_INFO,
+	  mp_msg(MSGT_AFILTER, MSGL_INFO,
 		 "[hrtf] Using HRTF to mix %s discrete surround into "
 		 "L, R channels\n", s->matrix_mode ? "5+1" : "5");
 	  break;
 	case HRTF_MIX_STEREO:
-	  af_msg(AF_MSG_INFO,
+	  mp_msg(MSGT_AFILTER, MSGL_INFO,
 		 "[hrtf] Using HRTF to mix stereo into "
 		 "L, R channels\n");
 	  break;
 	case HRTF_MIX_MATRIX2CH:
-	  af_msg(AF_MSG_INFO,
+	  mp_msg(MSGT_AFILTER, MSGL_INFO,
 		 "[hrtf] Using active matrix to decode 2 channel "
 		 "input, HRTF to mix %s matrix surround into "
 		 "L, R channels\n", "3/2");
 	  break;
 	default:
-	  af_msg(AF_MSG_WARN,
+	  mp_msg(MSGT_AFILTER, MSGL_WARN,
 		 "[hrtf] bogus decode_mode: %d\n", s->decode_mode);
 	  break;
 	}
 	
        if(s->matrix_mode)
-	  af_msg(AF_MSG_INFO,
+	  mp_msg(MSGT_AFILTER, MSGL_INFO,
 		 "[hrtf] Using active matrix to decode rear center "
 		 "channel\n");
     }
@@ -636,7 +636,7 @@ static int af_open(af_instance_t* af)
     s->print_flag = 1;
 
     if (allocate(s) != 0) {
- 	af_msg(AF_MSG_ERROR, "[hrtf] Memory allocation error.\n");
+ 	mp_msg(MSGT_AFILTER, MSGL_ERR, "[hrtf] Memory allocation error.\n");
 	return AF_ERROR;
     }
 
@@ -655,13 +655,13 @@ static int af_open(af_instance_t* af)
     s->cr_ir = cr_filt + (s->cr_o = pulse_detect(cr_filt));
 
     if((s->ba_ir = malloc(s->basslen * sizeof(float))) == NULL) {
- 	af_msg(AF_MSG_ERROR, "[hrtf] Memory allocation error.\n");
+ 	mp_msg(MSGT_AFILTER, MSGL_ERR, "[hrtf] Memory allocation error.\n");
 	return AF_ERROR;
     }
     fc = 2.0 * BASSFILTFREQ / (float)af->data->rate;
     if(af_filter_design_fir(s->basslen, s->ba_ir, &fc, LP | KAISER, 4 * M_PI) ==
        -1) {
-	af_msg(AF_MSG_ERROR, "[hrtf] Unable to design low-pass "
+	mp_msg(MSGT_AFILTER, MSGL_ERR, "[hrtf] Unable to design low-pass "
 	       "filter.\n");
 	return AF_ERROR;
     }

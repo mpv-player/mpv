@@ -91,9 +91,6 @@ static af_info_t* filter_list[]={
    NULL 
 };
 
-// Message printing
-af_msg_cfg_t af_msg_cfg={0,NULL,NULL};
-
 // CPU speed
 int* af_cpu_speed = NULL;
 
@@ -107,7 +104,7 @@ static af_info_t* af_find(char*name)
       return filter_list[i];
     i++;
   }
-  af_msg(AF_MSG_ERROR,"Couldn't find audio filter '%s'\n",name);
+  mp_msg(MSGT_AFILTER, MSGL_ERR, "Couldn't find audio filter '%s'\n",name);
   return NULL;
 } 
 
@@ -135,7 +132,7 @@ static af_instance_t* af_create(af_stream_t* s, const char* name_with_cmd)
   // Allocate space for the new filter and reset all pointers
   af_instance_t* new=malloc(sizeof(af_instance_t));
   if (!name || !new) {
-    af_msg(AF_MSG_ERROR,"[libaf] Could not allocate memory\n");
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Could not allocate memory\n");
     goto err_out;
   }  
   memset(new,0,sizeof(af_instance_t));
@@ -151,13 +148,13 @@ static af_instance_t* af_create(af_stream_t* s, const char* name_with_cmd)
      non-reentrant */
   if(new->info->flags & AF_FLAGS_NOT_REENTRANT){
     if(af_get(s,name)){
-      af_msg(AF_MSG_ERROR,"[libaf] There can only be one instance of" 
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] There can only be one instance of" 
 	     " the filter '%s' in each stream\n",name);  
       goto err_out;
     }
   }
   
-  af_msg(AF_MSG_VERBOSE,"[libaf] Adding filter %s \n",name);
+  mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Adding filter %s \n",name);
   
   // Initialize the new filter
   if(AF_OK == new->info->open(new) && 
@@ -172,7 +169,7 @@ static af_instance_t* af_create(af_stream_t* s, const char* name_with_cmd)
   
 err_out:
   free(new);
-  af_msg(AF_MSG_ERROR,"[libaf] Couldn't create or open audio filter '%s'\n",
+  mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Couldn't create or open audio filter '%s'\n",
 	 name);  
   free(name);
   return NULL;
@@ -232,7 +229,7 @@ void af_remove(af_stream_t* s, af_instance_t* af)
   if(!af) return;
 
   // Print friendly message 
-  af_msg(AF_MSG_VERBOSE,"[libaf] Removing filter %s \n",af->info->name); 
+  mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Removing filter %s \n",af->info->name); 
 
   // Notify filter before changing anything
   af->control(af,AF_CONTROL_PRE_DESTROY,0);
@@ -321,14 +318,14 @@ static int af_reinit(af_stream_t* s, af_instance_t* af)
 	    return rv;
 	}
 	if(!new){ // Should _never_ happen
-	  af_msg(AF_MSG_ERROR,"[libaf] Unable to correct audio format. " 
+	  mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to correct audio format. " 
 		 "This error should never uccur, please send bugreport.\n");
 	  return AF_ERROR;
 	}
 	af=new->next;
       }
       else {
-        af_msg(AF_MSG_ERROR, "[libaf] Automatic filter insertion disabled "
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Automatic filter insertion disabled "
                "but formats do not match. Giving up.\n");
         return AF_ERROR;
       }
@@ -347,7 +344,7 @@ static int af_reinit(af_stream_t* s, af_instance_t* af)
       break;
     }
     default:
-      af_msg(AF_MSG_ERROR,"[libaf] Reinitialization did not work, audio" 
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Reinitialization did not work, audio" 
 	     " filter '%s' returned error code %i\n",af->info->name,rv);
       return AF_ERROR;
     }
@@ -498,7 +495,7 @@ int af_init(af_stream_t* s)
        (s->last->data->nch    != s->output.nch)    || 
        (s->last->data->rate   != s->output.rate))  {
       // Something is stuffed audio out will not work 
-      af_msg(AF_MSG_ERROR,"[libaf] Unable to setup filter system can not" 
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to setup filter system can not" 
 	     " meet sound-card demands, please send bugreport. \n");
       af_uninit(s);
       return -1;
@@ -589,7 +586,7 @@ int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
 {
   // Calculate new length
   register int len = af_lencalc(af->mul,data);
-  af_msg(AF_MSG_VERBOSE,"[libaf] Reallocating memory in module %s, " 
+  mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, " 
 	 "old len = %i, new len = %i\n",af->info->name,af->data->len,len);
   // If there is a buffer free it
   if(af->data->audio) 
@@ -597,7 +594,7 @@ int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
   // Create new buffer and check that it is OK
   af->data->audio = malloc(len);
   if(!af->data->audio){
-    af_msg(AF_MSG_FATAL,"[libaf] Could not allocate memory \n");
+    mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
     return AF_ERROR;
   }
   af->data->len=len;
@@ -619,12 +616,12 @@ af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
 
 void af_help (void) {
   int i = 0;
-  af_msg(AF_MSG_INFO, "Available audio filters:\n");
+  mp_msg(MSGT_AFILTER, MSGL_INFO, "Available audio filters:\n");
   while (filter_list[i]) {
     if (filter_list[i]->comment && filter_list[i]->comment[0])
-      af_msg(AF_MSG_INFO, "  %-15s: %s (%s)\n", filter_list[i]->name, filter_list[i]->info, filter_list[i]->comment);
+      mp_msg(MSGT_AFILTER, MSGL_INFO, "  %-15s: %s (%s)\n", filter_list[i]->name, filter_list[i]->info, filter_list[i]->comment);
     else
-      af_msg(AF_MSG_INFO, "  %-15s: %s\n", filter_list[i]->name, filter_list[i]->info);
+      mp_msg(MSGT_AFILTER, MSGL_INFO, "  %-15s: %s\n", filter_list[i]->name, filter_list[i]->info);
     i++;
   }
 }

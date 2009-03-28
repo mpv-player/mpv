@@ -232,11 +232,11 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   // RESIZE_LOCAL_BUFFER - can't use macro
   max_bytes_out = ((int)(data->len / s->bytes_stride_scaled) + 1) * s->bytes_stride;
   if (max_bytes_out > af->data->len) {
-    af_msg(AF_MSG_VERBOSE, "[libaf] Reallocating memory in module %s, "
+    mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
           "old len = %i, new len = %i\n",af->info->name,af->data->len,max_bytes_out);
     af->data->audio = realloc(af->data->audio, max_bytes_out);
     if (!af->data->audio) {
-      af_msg(AF_MSG_FATAL, "[libaf] Could not allocate memory\n");
+      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory\n");
       return NULL;
     }
     af->data->len = max_bytes_out;
@@ -296,7 +296,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     int frames_stride, frames_overlap;
     int i, j;
 
-    af_msg(AF_MSG_VERBOSE,
+    mp_msg(MSGT_AFILTER, MSGL_V,
            "[scaletempo] %.3f speed * %.3f scale_nominal = %.3f\n",
            s->speed, s->scale_nominal, s->scale);
 
@@ -339,7 +339,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       s->buf_overlap      = realloc(s->buf_overlap, s->bytes_overlap);
       s->table_blend      = realloc(s->table_blend, s->bytes_overlap * 4);
       if(!s->buf_overlap || !s->table_blend) {
-        af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
+        mp_msg(MSGT_AFILTER, MSGL_FATAL, "[scaletempo] Out of memory\n");
         return AF_ERROR;
       }
       memset(s->buf_overlap, 0, s->bytes_overlap);
@@ -377,7 +377,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         s->buf_pre_corr = realloc(s->buf_pre_corr, s->bytes_overlap * 2 + UNROLL_PADDING);
         s->table_window = realloc(s->table_window, s->bytes_overlap * 2 - nch * bps * 2);
         if(!s->buf_pre_corr || !s->table_window) {
-          af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
+          mp_msg(MSGT_AFILTER, MSGL_FATAL, "[scaletempo] Out of memory\n");
           return AF_ERROR;
         }
         memset((char *)s->buf_pre_corr + s->bytes_overlap * 2, 0, UNROLL_PADDING);
@@ -394,7 +394,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         s->buf_pre_corr = realloc(s->buf_pre_corr, s->bytes_overlap);
         s->table_window = realloc(s->table_window, s->bytes_overlap - nch * bps);
         if(!s->buf_pre_corr || !s->table_window) {
-          af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
+          mp_msg(MSGT_AFILTER, MSGL_FATAL, "[scaletempo] Out of memory\n");
           return AF_ERROR;
         }
         pw = s->table_window;
@@ -415,11 +415,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       = (s->frames_search + frames_stride + frames_overlap) * bps * nch;
     s->buf_queue = realloc(s->buf_queue, s->bytes_queue + UNROLL_PADDING);
     if(!s->buf_queue) {
-      af_msg(AF_MSG_FATAL, "[scaletempo] Out of memory\n");
+      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[scaletempo] Out of memory\n");
       return AF_ERROR;
     }
 
-    af_msg (AF_MSG_DEBUG0, "[scaletempo] "
+    mp_msg (MSGT_AFILTER, MSGL_DBG2, "[scaletempo] "
             "%.2f stride_in, %i stride_out, %i standing, "
             "%i overlap, %i search, %i queue, %s mode\n",
             s->frames_stride_scaled,
@@ -470,25 +470,25 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       return AF_ERROR;
     }
     if (s->scale_nominal <= 0) {
-      af_msg(AF_MSG_ERROR, "[scaletempo] "
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
              MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
              ": scale > 0\n");
       return AF_ERROR;
     }
     if (s->ms_stride <= 0) {
-      af_msg(AF_MSG_ERROR, "[scaletempo] "
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
              MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
              ": stride > 0\n");
       return AF_ERROR;
     }
     if (s->percent_overlap < 0 || s->percent_overlap > 1) {
-      af_msg(AF_MSG_ERROR, "[scaletempo] "
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
              MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
              ": 0 <= overlap <= 1\n");
       return AF_ERROR;
     }
     if (s->ms_search < 0) {
-      af_msg(AF_MSG_ERROR, "[scaletempo] "
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
              MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
              ": search >= 0\n");
       return AF_ERROR;
@@ -507,14 +507,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         s->speed_tempo = 1;
         s->speed_pitch = 1;
       } else {
-        af_msg(AF_MSG_ERROR, "[scaletempo] "
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
                MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
                ": speed=[pitch|tempo|none|both]\n");
         return AF_ERROR;
       }
     }
     s->scale = s->speed * s->scale_nominal;
-    af_msg(AF_MSG_DEBUG0, "[scaletempo] %6.3f scale, %6.2f stride, %6.2f overlap, %6.2f search, speed = %s\n", s->scale_nominal, s->ms_stride, s->percent_overlap, s->ms_search, (s->speed_tempo?(s->speed_pitch?"tempo and speed":"tempo"):(s->speed_pitch?"pitch":"none")));
+    mp_msg(MSGT_AFILTER, MSGL_DBG2, "[scaletempo] %6.3f scale, %6.2f stride, %6.2f overlap, %6.2f search, speed = %s\n", s->scale_nominal, s->ms_stride, s->percent_overlap, s->ms_search, (s->speed_tempo?(s->speed_pitch?"tempo and speed":"tempo"):(s->speed_pitch?"pitch":"none")));
     return AF_OK;
   }
   }

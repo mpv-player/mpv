@@ -108,7 +108,7 @@ static void copy(void* in, void* out, int ins, int inos,int outs, int outos, int
     break;
   }
   default:
-    af_msg(AF_MSG_ERROR,"[channels] Unsupported number of bytes/sample: %i" 
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] Unsupported number of bytes/sample: %i" 
 	   " please report this error on the MPlayer mailing list. \n",bps);
   }
 }
@@ -118,14 +118,14 @@ static int check_routes(af_channels_t* s, int nin, int nout)
 {
   int i;
   if((s->nr < 1) || (s->nr > AF_NCH)){
-    af_msg(AF_MSG_ERROR,"[channels] The number of routing pairs must be" 
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] The number of routing pairs must be" 
 	   " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
     return AF_ERROR;
   }
 	
   for(i=0;i<s->nr;i++){
     if((s->route[i][FR] >= nin) || (s->route[i][TO] >= nout)){
-      af_msg(AF_MSG_ERROR,"[channels] Invalid routing in pair nr. %i.\n", i);
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] Invalid routing in pair nr. %i.\n", i);
       return AF_ERROR;
     }
   }
@@ -180,14 +180,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       int ch = 0;
       // Sanity check
       if((s->nr < 1) || (s->nr > AF_NCH)){
-	af_msg(AF_MSG_ERROR,"[channels] The number of routing pairs must be" 
+	mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] The number of routing pairs must be" 
 	     " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
       }	
       s->router = 1;
       // Scan for pairs on commandline
       while((*cp == ':') && (ch < s->nr)){
 	sscanf(cp, ":%i:%i%n" ,&s->route[ch][FR], &s->route[ch][TO], &n);
-	af_msg(AF_MSG_VERBOSE,"[channels] Routing from channel %i to" 
+	mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Routing from channel %i to" 
 	       " channel %i\n",s->route[ch][FR],s->route[ch][TO]);
 	cp = &cp[n];
 	ch++;
@@ -203,14 +203,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     
     // Sanity check
     if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > AF_NCH){
-      af_msg(AF_MSG_ERROR,"[channels] The number of output channels must be" 
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] The number of output channels must be" 
 	     " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
       return AF_ERROR;
     }
 
     af->data->nch=((int*)arg)[0]; 
     if(!s->router)
-      af_msg(AF_MSG_VERBOSE,"[channels] Changing number of channels" 
+      mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Changing number of channels" 
 	     " to %i\n",af->data->nch);
     return AF_OK;
   case AF_CONTROL_CHANNELS | AF_CONTROL_GET:
