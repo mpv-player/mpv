@@ -21,8 +21,9 @@
 
 #include <stdio.h>
 
-#include "af_format.h"
 #include "config.h"
+
+#include "af_format.h"
 #include "control.h"
 #include "cpudetect.h"
 #include "mp_msg.h"
