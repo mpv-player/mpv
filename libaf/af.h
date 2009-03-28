@@ -22,10 +22,17 @@
 #include <stdio.h>
 
 #include "config.h"
-#include "af_mp.h"
 #include "control.h"
 #include "af_format.h"
 #include "mp_msg.h"
+#include "cpudetect.h"
+
+/* Set the initialization type from mplayers cpudetect */
+#ifdef AF_INIT_TYPE
+#undef AF_INIT_TYPE
+#define AF_INIT_TYPE \
+  ((gCpuCaps.has3DNow || gCpuCaps.hasSSE)?AF_INIT_FAST:AF_INIT_SLOW)
+#endif 
 
 struct af_instance_s;
 
