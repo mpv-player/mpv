@@ -1875,6 +1875,7 @@ static void transform_3d(FT_Vector shift, FT_Glyph* glyph, FT_Glyph* glyph2, dou
 /**
  * \brief Main ass rendering function, glues everything together
  * \param event event to render
+ * \param event_images struct containing resulting images, will also be initialized
  * Process event, appending resulting ass_image_t's to images_root.
  */
 static int ass_render_event(ass_event_t* event, event_images_t* event_images)
