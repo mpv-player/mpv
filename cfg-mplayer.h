@@ -242,8 +242,8 @@ const m_option_t mplayer_opts[]={
 	{"crash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nocrash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 #endif
-	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
-	{"osd-duration", &osd_duration, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+        OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
+        OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
 #ifdef CONFIG_MENU
 	{"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},

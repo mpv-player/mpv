@@ -25,6 +25,8 @@ typedef struct MPOpts {
     int vo_gamma_saturation;
     int vo_gamma_hue;
 
+    int osd_level;
+    int osd_duration;
     int loop_times;
     int correct_pts;
     int user_correct_pts;

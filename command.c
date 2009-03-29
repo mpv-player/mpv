@@ -172,7 +172,7 @@ static void log_sub(struct MPContext *mpctx)
 static int mp_property_osdlevel(m_option_t *prop, int action, void *arg,
 				MPContext *mpctx)
 {
-    return m_property_choice(prop, action, arg, &osd_level);
+    return m_property_choice(prop, action, arg, &mpctx->opts.osd_level);
 }
 
 /// Loop (RW)
@@ -385,6 +385,7 @@ static int mp_property_time_pos(m_option_t *prop, int action,
 static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int chapter = -1;
     float next_pts = 0;
     int chapter_num;
@@ -440,13 +441,13 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
             mpctx->rel_seek_secs = next_pts;
         }
         if (chapter_name)
-            set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+            set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
                         MSGTR_OSDChapter, chapter + 1, chapter_name);
     }
     else if (step_all > 0)
         mpctx->rel_seek_secs = 1000000000.;
     else
-        set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+        set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
                     MSGTR_OSDChapter, 0, MSGTR_Unknown);
     if (chapter_name)
         free(chapter_name);
@@ -468,6 +469,7 @@ static int mp_property_chapters(m_option_t *prop, int action, void *arg,
 static int mp_property_angle(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int angle = -1;
     int angles;
     char *angle_name = NULL;
@@ -519,7 +521,7 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
     angle = demuxer_set_angle(mpctx->demuxer, angle);
-    set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+    set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
                         MSGTR_OSDAngle, angle, angles);
     if (angle_name)
         free(angle_name);
@@ -2285,6 +2287,7 @@ static struct {
 /// Handle commands that set a property.
 static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int i, r;
     m_option_t* prop;
     const char *pname;
@@ -2335,7 +2338,7 @@ static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 	if (val) {
 	    set_osd_msg(set_prop_cmd[i].osd_id >=
 			0 ? set_prop_cmd[i].osd_id : OSD_MSG_PROPERTY + i,
-			1, osd_duration, set_prop_cmd[i].osd_msg, val);
+			1, opts->osd_duration, set_prop_cmd[i].osd_msg, val);
 	    free(val);
 	}
     }
@@ -2377,6 +2380,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     struct MPOpts *opts = &mpctx->opts;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     sh_video_t * const sh_video = mpctx->sh_video;
+    int osd_duration = opts->osd_duration;
     if (!set_property_command(mpctx, cmd))
 	switch (cmd->id) {
 	case MP_CMD_SEEK:{
@@ -2621,18 +2625,18 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		int v = cmd->args[0].v.i;
 		int max = (term_osd
 			   && !sh_video) ? MAX_TERM_OSD_LEVEL : MAX_OSD_LEVEL;
-		if (osd_level > max)
-		    osd_level = max;
+		if (opts->osd_level > max)
+		    opts->osd_level = max;
 		if (v < 0)
-		    osd_level = (osd_level + 1) % (max + 1);
+		    opts->osd_level = (opts->osd_level + 1) % (max + 1);
 		else
-		    osd_level = v > max ? max : v;
+		    opts->osd_level = v > max ? max : v;
 		/* Show OSD state when disabled, but not when an explicit
 		   argument is given to the OSD command, i.e. in slave mode. */
-		if (v == -1 && osd_level <= 1)
+		if (v == -1 && opts->osd_level <= 1)
 		    set_osd_msg(OSD_MSG_OSD_STATUS, 0, osd_duration,
 				MSGTR_OSDosd,
-				osd_level ? MSGTR_OSDenabled :
+				opts->osd_level ? MSGTR_OSDenabled :
 				MSGTR_OSDdisabled);
 		else
 		    rm_osd_msg(OSD_MSG_OSD_STATUS);
@@ -3181,7 +3185,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    pointer_y = (int) (dy * (double) sh_video->disp_h);
 		    mp_dvdnav_update_mouse_pos(mpctx->stream,
 					       pointer_x, pointer_y, &button);
-		    if (osd_level > 1 && button > 0)
+		    if (opts->osd_level > 1 && button > 0)
 			set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				    "Selected button number %d", button);
 		}
@@ -3208,7 +3212,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    command = mp_dvdnav_bindings[i].cmd;
 
 		mp_dvdnav_handle_input(mpctx->stream,command,&button);
-		if (osd_level > 1 && button > 0)
+		if (opts->osd_level > 1 && button > 0)
 		    set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				"Selected button number %d", button);
 	    }

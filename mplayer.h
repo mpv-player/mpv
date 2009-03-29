@@ -17,7 +17,6 @@ extern char * video_driver;
 extern char * audio_driver;
 extern float  audio_delay;
 
-extern int osd_level;
 extern unsigned int osd_visible;
 
 extern char * font_name;

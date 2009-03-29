@@ -201,10 +201,8 @@ int enqueue=0;
 
 static int list_properties = 0;
 
-int osd_level=1;
 // if nonzero, hide current OSD contents when GetTimerMS() reaches this
 unsigned int osd_visible;
-int osd_duration = 1000;
 
 int term_osd = 1;
 static char* term_osd_esc = "\x1b[A\r\x1b[K";
@@ -1403,6 +1401,7 @@ static void clear_osd_msgs(void) {
 
 static mp_osd_msg_t* get_osd_msg(struct MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     mp_osd_msg_t *msg,*prev,*last = NULL;
     static unsigned last_update = 0;
     unsigned now = GetTimerMS();
@@ -1428,14 +1427,16 @@ static mp_osd_msg_t* get_osd_msg(struct MPContext *mpctx)
     // Look for the first message in the stack with high enough level.
     for(msg = osd_msg_stack ; msg ; last = msg, msg = prev) {
         prev = msg->prev;
-        if(msg->level > osd_level && hidden_dec_done) continue;
+        if (msg->level > opts->osd_level && hidden_dec_done)
+            continue;
         // The message has a high enough level or it is the first hidden one
         // in both cases we decrement the timer or kill it.
         if(!msg->started || msg->time > diff) {
             if(msg->started) msg->time -= diff;
             else msg->started = 1;
             // display it
-            if(msg->level <= osd_level) return msg;
+            if (msg->level <= opts->osd_level)
+                return msg;
             hidden_dec_done = 1;
             continue;
         }
@@ -1461,8 +1462,9 @@ static mp_osd_msg_t* get_osd_msg(struct MPContext *mpctx)
  */
 
 void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,double max,double val) {
-    
-    if(osd_level < 1) return;
+    struct MPOpts *opts = &mpctx->opts;
+    if (opts->osd_level < 1)
+        return;
     
     if(mpctx->sh_video) {
         osd_visible = (GetTimerMS() + 1000) | 1;
@@ -1472,8 +1474,8 @@ void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,d
         return;
     }
     
-    set_osd_msg(OSD_MSG_BAR,1,osd_duration,"%s: %d %%",
-                name,ROUND(100*(val-min)/(max-min)));
+    set_osd_msg(OSD_MSG_BAR, 1, opts->osd_duration, "%s: %d %%",
+                name, ROUND(100*(val-min)/(max-min)));
 }
 
 
@@ -1488,6 +1490,7 @@ void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,d
 
 static void update_osd_msg(struct MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     mp_osd_msg_t *msg;
     struct osd_state *osd = mpctx->osd;
     char osd_text_timer[128];
@@ -1504,7 +1507,7 @@ static void update_osd_msg(struct MPContext *mpctx)
         
     if(mpctx->sh_video) {
         // fallback on the timer
-        if(osd_level>=2) {
+        if (opts->osd_level >= 2) {
             int len = demuxer_get_time_length(mpctx->demuxer);
             int percentage = -1;
             char percentage_text[10];
@@ -1518,7 +1521,7 @@ static void update_osd_msg(struct MPContext *mpctx)
             else
                 percentage_text[0] = 0;
             
-            if (osd_level == 3) 
+            if (opts->osd_level == 3) 
                 snprintf(osd_text_timer, 63,
                          "%c %02d:%02d:%02d / %02d:%02d:%02d%s",
                          mpctx->osd_function,pts/3600,(pts/60)%60,pts%60,
