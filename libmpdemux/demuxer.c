@@ -259,6 +259,10 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
         sh->sid = sid;
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
     }
+    if (sid == dvdsub_id) {
+        demuxer->sub->id = id;
+        demuxer->sub->sh = demuxer->s_streams[id];
+    }
     return demuxer->s_streams[id];
 }
 
