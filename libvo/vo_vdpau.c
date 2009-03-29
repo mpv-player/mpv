@@ -892,7 +892,10 @@ static uint32_t draw_image(mp_image_t *mpi)
                                                     mpi->stride); // pitch
         CHECK_ST_ERROR("Error when calling vdp_video_surface_put_bits_y_cb_cr")
     }
+    if (mpi->fields & MP_IMGFIELD_ORDERED)
     top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
+    else
+        top_field_first = 1;
 
     video_to_output_surface();
     return VO_TRUE;
