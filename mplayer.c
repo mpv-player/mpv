@@ -76,6 +76,7 @@
 
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
+#include "osdep/findfiles.h"
 
 #ifdef CONFIG_GUI
 #include "gui/interface.h"
@@ -565,6 +566,20 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
   if(mask&INITIALIZED_DEMUXER){
     mpctx->initialized_flags&=~INITIALIZED_DEMUXER;
     current_module="free_demuxer";
+    if (mpctx->num_sources) {
+        mpctx->demuxer = mpctx->sources[0].demuxer;
+        for (int i = 1; i < mpctx->num_sources; i++) {
+            free_stream(mpctx->sources[i].stream);
+            free_demuxer(mpctx->sources[i].demuxer);
+        }
+    }
+    talloc_free(mpctx->sources);
+    mpctx->sources = NULL;
+    mpctx->num_sources = 0;
+    talloc_free(mpctx->timeline);
+    mpctx->timeline = NULL;
+    mpctx->num_timeline_parts = 0;
+    mpctx->video_offset = 0;
     if(mpctx->demuxer){
 	mpctx->stream=mpctx->demuxer->stream;
 	free_demuxer(mpctx->demuxer);
@@ -1493,8 +1508,13 @@ static void update_osd_msg(struct MPContext *mpctx)
     char osd_text_timer[128];
 
     if (mpctx->add_osd_seek_info) {
-        set_osd_bar(mpctx, 0, "Position", 0, 100,
-                    demuxer_get_percent_pos(mpctx->demuxer));
+        double percentage;
+        if (mpctx->timeline && mpctx->sh_video)
+            percentage = mpctx->sh_video->pts * 100 /
+                mpctx->timeline[mpctx->num_timeline_parts].start;
+        else
+            percentage = demuxer_get_percent_pos(mpctx->demuxer);
+        set_osd_bar(mpctx, 0, "Position", 0, 100, percentage);
         if (mpctx->sh_video)
             mpctx->osd_show_percentage_until = (GetTimerMS() + 1000) | 1;
         mpctx->add_osd_seek_info = false;
@@ -1513,13 +1533,21 @@ static void update_osd_msg(struct MPContext *mpctx)
     if(mpctx->sh_video) {
         // fallback on the timer
         if (opts->osd_level >= 2) {
-            int len = demuxer_get_time_length(mpctx->demuxer);
+            int len;
+            if (mpctx->timeline)
+                len = mpctx->timeline[mpctx->num_timeline_parts].start;
+            else
+                len = demuxer_get_time_length(mpctx->demuxer);
             int percentage = -1;
             char percentage_text[10];
             int pts = demuxer_get_current_time(mpctx->demuxer);
             
             if (mpctx->osd_show_percentage_until)
-                percentage = demuxer_get_percent_pos(mpctx->demuxer);
+                if (mpctx->timeline)
+                    percentage = mpctx->sh_video->pts * 100 /
+                        mpctx->timeline[mpctx->num_timeline_parts].start;
+                else
+                    percentage = demuxer_get_percent_pos(mpctx->demuxer);
             
             if (percentage >= 0)
                 snprintf(percentage_text, 9, " (%d%%)", percentage);
@@ -1682,7 +1710,7 @@ static double written_audio_pts(struct MPContext *mpctx)
     // to get the length in original units without speedup or slowdown
     a_pts -= buffered_output * mpctx->opts.playback_speed / ao_data.bps;
 
-    return a_pts;
+    return a_pts + mpctx->video_offset;
 }
 
 // Return pts value corresponding to currently playing audio.
@@ -2220,7 +2248,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx,
 #endif
         if (decoded_frame) {
             // These updates are done here for vf_expand OSD/subtitles
-            update_subtitles(sh_video, mpctx->d_sub, 0);
+            update_subtitles(sh_video, mpctx->d_sub, mpctx->video_offset, 0);
             update_teletext(sh_video, mpctx->demuxer, 0);
             update_osd_msg(mpctx);
             current_module = "filter video";
@@ -2252,6 +2280,8 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
         unsigned char *packet = NULL;
         bool hit_eof = false;
         int in_size = ds_get_packet_pts(mpctx->d_video, &packet, &pts);
+        if (pts != MP_NOPTS_VALUE)
+            pts += mpctx->video_offset;
         if (in_size < 0) {
             // try to extract last frames in case of decoder lag
             in_size = 0;
@@ -2266,7 +2296,7 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
                                            framedrop_type, pts);
         if (decoded_frame) {
             // These updates are done here for vf_expand OSD/subtitles
-            update_subtitles(sh_video, mpctx->d_sub, 0);
+            update_subtitles(sh_video, mpctx->d_sub, mpctx->video_offset, 0);
             update_teletext(sh_video, mpctx->demuxer, 0);
             update_osd_msg(mpctx);
             current_module = "filter video";
@@ -2459,6 +2489,48 @@ static void edl_update(MPContext *mpctx)
     }
 }
 
+static void reinit_decoders(struct MPContext *mpctx)
+{
+    reinit_video_chain(mpctx);
+    reinit_audio_chain(mpctx);
+    mp_property_do("sub", M_PROPERTY_SET, &mpctx->global_sub_pos, mpctx);
+}
+
+static bool timeline_set_part(struct MPContext *mpctx, int i)
+{
+    struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
+    struct timeline_part *n = mpctx->timeline + i;
+    mpctx->timeline_part = i;
+    mpctx->video_offset = n->start - n->source_start;
+    if (n->source == p->source)
+        return false;
+    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo && mpctx->opts.video_id != -2 ? 0 : INITIALIZED_VO) | INITIALIZED_AO | INITIALIZED_ACODEC);
+    mpctx->demuxer = n->source->demuxer;
+    mpctx->d_video = mpctx->demuxer->video;
+    mpctx->d_audio = mpctx->demuxer->audio;
+    mpctx->d_sub = mpctx->demuxer->sub;
+    mpctx->sh_video = mpctx->d_video->sh;
+    mpctx->sh_audio = mpctx->d_audio->sh;
+    return true;
+}
+
+// Given pts, switch playback to the corresponding part.
+// Return offset within that part.
+static double timeline_set_from_time(struct MPContext *mpctx, double pts,
+                                     bool *need_reset)
+{
+    if (pts < 0)
+        pts = 0;
+    for (int i = 0; i < mpctx->num_timeline_parts; i++) {
+        struct timeline_part *p = mpctx->timeline + i;
+        if (pts < (p+1)->start) {
+            *need_reset = timeline_set_part(mpctx, i);
+            return pts - p->start + p->source_start;
+        }
+    }
+    return -1;
+}
+
 
 // style & SEEK_ABSOLUTE == 0 means seek relative to current position, == 1 means absolute
 // style & SEEK_FACTOR == 0 means amount in seconds, == 2 means fraction of file length
@@ -2466,7 +2538,13 @@ static void edl_update(MPContext *mpctx)
 static int seek(MPContext *mpctx, double amount, int style)
 {
     current_module = "seek";
-    if (mpctx->demuxer->accurate_seek && mpctx->sh_video
+    if (mpctx->stop_play == AT_END_OF_FILE)
+        mpctx->stop_play = KEEP_PLAYING;
+    if (mpctx->timeline && style & SEEK_FACTOR) {
+        amount *= mpctx->timeline[mpctx->num_timeline_parts].start;
+        style &= ~SEEK_FACTOR;
+    }
+    if ((mpctx->demuxer->accurate_seek || mpctx->timeline) && mpctx->sh_video
         && !(style & (SEEK_ABSOLUTE | SEEK_FACTOR))) {
         style |= SEEK_ABSOLUTE;
         if (amount > 0)
@@ -2476,7 +2554,27 @@ static int seek(MPContext *mpctx, double amount, int style)
         amount += mpctx->sh_video->pts;
     }
 
-    if (demux_seek(mpctx->demuxer, amount, audio_delay, style) == 0)
+    /* At least the liba52 decoder wants to read from the input stream
+     * during initialization, so reinit must be done after the demux_seek()
+     * call that clears possible stream EOF. */
+    bool need_reset = false;
+    if (mpctx->timeline) {
+        amount = timeline_set_from_time(mpctx, amount, &need_reset);
+        if (amount == -1) {
+            mpctx->stop_play = AT_END_OF_FILE;
+            // Clear audio from current position
+            if (mpctx->sh_audio) {
+                mpctx->audio_out->reset();
+                mpctx->sh_audio->a_buffer_len = 0;
+                mpctx->sh_audio->a_out_buffer_len = 0;
+            }
+            return -1;
+        }
+    }
+    int seekresult = demux_seek(mpctx->demuxer, amount, audio_delay, style);
+    if (need_reset)
+        reinit_decoders(mpctx);
+    if (seekresult == 0)
 	return -1;
 
     if (mpctx->sh_video) {
@@ -2493,8 +2591,8 @@ static int seek(MPContext *mpctx, double amount, int style)
 	// Not all demuxers set d_video->pts during seek, so this value
 	// (which is used by at least vobsub and edl code below) may
 	// be completely wrong (probably 0).
-	mpctx->sh_video->pts = mpctx->d_video->pts;
-	update_subtitles(mpctx->sh_video, mpctx->d_sub, 1);
+	mpctx->sh_video->pts = mpctx->d_video->pts + mpctx->video_offset;
+	update_subtitles(mpctx->sh_video, mpctx->d_sub, mpctx->video_offset, 1);
 	update_teletext(mpctx->sh_video, mpctx->demuxer, 1);
     }
       
@@ -2518,6 +2616,177 @@ static int seek(MPContext *mpctx, double amount, int style)
 
     current_module = NULL;
     return 0;
+}
+
+static int find_ordered_chapter_sources(struct MPContext *mpctx,
+                                        struct content_source *sources,
+                                        int num_sources,
+                                        unsigned char uid_map[][16])
+{
+    int num_filenames = 0;
+    char **filenames = NULL;
+    if (num_sources > 1) {
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "This file references data from "
+               "other sources.\n");
+        if (mpctx->stream->type != STREAMTYPE_FILE) {
+            mp_msg(MSGT_CPLAYER, MSGL_WARN, "Playback source is not a "
+                   "normal disk file. Will not search for related files.\n");
+        } else {
+            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Will scan other files in the "
+                   "same directory to find referenced sources.\n");
+            filenames = find_files(mpctx->demuxer->filename, ".mkv",
+                                   &num_filenames);
+        }
+    }
+
+    int num_left = num_sources - 1;
+    for (int i = 0; i < num_filenames && num_left > 0; i++) {
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Checking file %s\n",
+               filename_recode(filenames[i]));
+        int format;
+        struct stream *s = open_stream(filenames[i], &mpctx->opts, &format);
+        if (!s)
+            continue;
+        struct demuxer *d = demux_open(&mpctx->opts, s, DEMUXER_TYPE_MATROSKA,
+                                       mpctx->opts.audio_id,
+                                       mpctx->opts.video_id,
+                                       mpctx->opts.sub_id, filenames[i]);
+        if (!d) {
+            free_stream(s);
+            continue;
+        }
+        if (d->file_format == DEMUXER_TYPE_MATROSKA) {
+            for (int i = 1; i < num_sources; i++) {
+                if (sources[i].demuxer)
+                    continue;
+                if (!memcmp(uid_map[i], d->matroska_data.segment_uid, 16)) {
+                    mp_msg(MSGT_CPLAYER, MSGL_INFO,"Match for source %d: %s\n",
+                           i, filename_recode(d->filename));
+                    sources[i].stream = s;
+                    sources[i].demuxer = d;
+                    num_left--;
+                    goto match;
+                }
+            }
+        }
+        free_demuxer(d);
+        free_stream(s);
+        continue;
+    match:
+        ;
+    }
+    talloc_free(filenames);
+    if (num_left) {
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, "Failed to find ordered chapter part!\n"
+               "There will be parts MISSING from the video!\n");
+        for (int i = 1, j = 1; i < num_sources; i++)
+            if (sources[i].demuxer) {
+                sources[j] = sources[i];
+                memcpy(uid_map[j], uid_map[i], 16);
+                j++;
+            }
+    }
+    return num_sources - num_left;
+}
+
+static void build_ordered_chapter_timeline(struct MPContext *mpctx)
+{
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, will build "
+           "edit timeline.\n");
+
+    struct demuxer *demuxer = mpctx->demuxer;
+    struct matroska_data *m = &demuxer->matroska_data;
+
+    struct content_source *sources = talloc_array_ptrtype(NULL, sources,
+                                                   m->num_ordered_chapters);
+    sources[0].stream = mpctx->stream;
+    sources[0].demuxer = mpctx->demuxer;
+    unsigned char uid_map[m->num_ordered_chapters][16];
+    int num_sources = 1;
+    memcpy(uid_map[0], m->segment_uid, 16);
+
+    for (int i = 0; i < m->num_ordered_chapters; i++) {
+        struct matroska_chapter *c = m->ordered_chapters + i;
+        if (!c->has_segment_uid)
+            memcpy(c->segment_uid, m->segment_uid, 16);
+
+        for (int j = 0; j < num_sources; j++)
+            if (!memcmp(c->segment_uid, uid_map[j], 16))
+                goto found1;
+        memcpy(uid_map[num_sources], c->segment_uid, 16);
+        sources[num_sources] = (struct content_source){};
+        num_sources++;
+    found1:
+        ;
+    }
+
+    num_sources = find_ordered_chapter_sources(mpctx, sources, num_sources,
+                                               uid_map);
+
+
+    struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline,
+                                                  m->num_ordered_chapters + 1);
+    uint64_t starttime = 0;
+    uint64_t missing_time = 0;
+    int part_count = 0;
+    for (int i = 0; i < m->num_ordered_chapters; i++) {
+        struct matroska_chapter *c = m->ordered_chapters + i;
+
+        int j;
+        for (j = 0; j < num_sources; j++) {
+            if (!memcmp(c->segment_uid, uid_map[j], 16))
+                goto found2;
+        }
+        missing_time += c->end - c->start;
+        continue;
+    found2:;
+        // Only add a separate part if the time or file actually changes
+        uint64_t prev_end = !part_count ? 0 : starttime
+            - timeline[part_count - 1].start
+            + timeline[part_count - 1].source_start;
+        if (part_count == 0 || c->start != prev_end
+            || sources + j != timeline[part_count - 1].source) {
+            timeline[part_count].source = sources + j;
+            timeline[part_count].start = starttime / 1000.;
+            timeline[part_count].source_start = c->start / 1000.;
+            part_count++;
+        }
+        starttime += c->end - c->start;
+    }
+    timeline[part_count].start = starttime / 1000.;
+
+    if (!part_count) {
+        // None of the parts come from the file itself???
+        talloc_free(sources);
+        talloc_free(timeline);
+        return;
+    }
+
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline contains %d parts from %d "
+           "sources. Total length %.3f seconds.\n", part_count, num_sources,
+           timeline[part_count].start);
+    if (missing_time)
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, "There are %.3f seconds missing "
+               "from the timeline!\n", missing_time / 1000.);
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Source files:\n");
+    for (int i = 0; i < num_sources; i++)
+        mp_msg(MSGT_CPLAYER, MSGL_V, "%d: %s\n", i,
+               filename_recode(sources[i].demuxer->filename));
+    mp_msg(MSGT_CPLAYER, MSGL_V, "Timeline parts: (number, start, "
+           "source_start, source):\n");
+    for (int i = 0; i < part_count; i++) {
+        struct timeline_part *p = timeline + i;
+        mp_msg(MSGT_CPLAYER, MSGL_V, "%3d %9.3f %9.3f %3td\n", i, p->start,
+               p->source_start, p->source - sources);
+    }
+    mp_msg(MSGT_CPLAYER, MSGL_V, "END %9.3f\n", timeline[part_count].start);
+    mpctx->sources = sources;
+    mpctx->num_sources = num_sources;
+    mpctx->timeline = timeline;
+    mpctx->num_timeline_parts = part_count;
+    mpctx->timeline_part = 0;
+    mpctx->video_offset = timeline[0].source_start;
+    mpctx->demuxer = timeline[0].source->demuxer;
 }
 
 
@@ -3311,6 +3580,17 @@ if (mpctx->demuxer && mpctx->demuxer->type==DEMUXER_TYPE_PLAYLIST)
 
 if(!mpctx->demuxer) 
   goto goto_next_file;
+
+ if (mpctx->demuxer->matroska_data.ordered_chapters)
+     build_ordered_chapter_timeline(mpctx);
+
+ if (!mpctx->sources) {
+     mpctx->sources = talloc_ptrtype(NULL, mpctx->sources);
+     *mpctx->sources = (struct content_source){.stream = mpctx->stream,
+                                               .demuxer = mpctx->demuxer};
+     mpctx->num_sources = 1;
+ }
+
 if(dvd_chapter>1) {
   float pts;
   if (demuxer_seek_chapter(mpctx->demuxer, dvd_chapter-1, 1, &pts, NULL, NULL) >= 0 && pts > -1.0)
@@ -3335,14 +3615,17 @@ if (mpctx->global_sub_size <= mpctx->global_sub_indices[SUB_SOURCE_DEMUX] + opts
 
 #ifdef CONFIG_ASS
 if (ass_enabled && ass_library) {
-  for (i = 0; i < mpctx->demuxer->num_attachments; ++i) {
-    demux_attachment_t* att = mpctx->demuxer->attachments + i;
-    if (extract_embedded_fonts &&
-        att->name && att->type && att->data && att->data_size &&
-        (strcmp(att->type, "application/x-truetype-font") == 0 ||
-         strcmp(att->type, "application/x-font") == 0))
-      ass_add_font(ass_library, att->name, att->data, att->data_size);
-  }
+    for (int j = 0; j < mpctx->num_sources; j++) {
+        struct demuxer *d = mpctx->sources[j].demuxer;
+        for (int i = 0; i < d->num_attachments; i++) {
+            struct demux_attachment *att = d->attachments + i;
+            if (extract_embedded_fonts
+                && att->name && att->type && att->data && att->data_size
+                && (strcmp(att->type, "application/x-truetype-font") == 0
+                    || strcmp(att->type, "application/x-font") == 0))
+                ass_add_font(ass_library, att->name, att->data, att->data_size);
+        }
+    }
 }
 #endif
 
@@ -3773,6 +4056,15 @@ if(!mpctx->sh_video) {
               mpctx->time_frame += frame_time / opts->playback_speed;
               adjust_sync(mpctx, frame_time);
           }
+      }
+  }
+  if (mpctx->timeline) {
+      struct timeline_part *next = mpctx->timeline + mpctx->timeline_part + 1;
+      if (mpctx->sh_video->pts >= next->start
+          || mpctx->stop_play == AT_END_OF_FILE
+          && mpctx->timeline_part + 1 < mpctx->num_timeline_parts) {
+          seek(mpctx, next->start, SEEK_ABSOLUTE);
+          continue;
       }
   }
 

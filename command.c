@@ -1544,7 +1544,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         d_sub->id = opts->sub_id;
     }
 #endif
-    update_subtitles(mpctx->sh_video, d_sub, 1);
+    update_subtitles(mpctx->sh_video, d_sub, 0, 1);
 
     return M_PROPERTY_OK;
 }

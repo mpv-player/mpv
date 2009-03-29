@@ -47,6 +47,17 @@ typedef enum {
   EXIT_ERROR
 } exit_reason_t;
 
+struct content_source {
+    struct stream *stream;
+    struct demuxer *demuxer;
+};
+
+struct timeline_part {
+    double start;
+    double source_start;
+    struct content_source *source;
+};
+
 typedef struct MPContext {
     struct MPOpts opts;
     struct m_config *mconfig;
@@ -68,6 +79,13 @@ typedef struct MPContext {
     enum stop_play_reason stop_play;
     int play_tree_step;
     unsigned int initialized_flags;  // which subsystems have been initialized
+
+    struct content_source *sources;
+    int num_sources;
+    struct timeline_part *timeline;
+    int num_timeline_parts;
+    int timeline_part;
+    double video_offset;
 
     struct stream *stream;
     struct demuxer *demuxer;
