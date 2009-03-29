@@ -174,7 +174,8 @@ static int                                surface_num;
 static int                                vid_surface_num;
 static uint32_t                           vid_width, vid_height;
 static uint32_t                           image_format;
-static const VdpChromaType                vdp_chroma_type = VDP_CHROMA_TYPE_420;
+static VdpChromaType                      vdp_chroma_type;
+static VdpYCbCrFormat                     vdp_pixel_format;
 
 /* draw_osd */
 static unsigned char                     *index_data;
@@ -598,6 +599,21 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if (vdp_flip_queue == VDP_INVALID_HANDLE && win_x11_init_vdpau_flip_queue())
         return -1;
 
+    vdp_chroma_type = VDP_CHROMA_TYPE_420;
+    switch (image_format) {
+        case IMGFMT_YV12:
+        case IMGFMT_I420:
+        case IMGFMT_IYUV:
+            vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
+            break;
+        case IMGFMT_YUY2:
+            vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
+            vdp_chroma_type  = VDP_CHROMA_TYPE_422;
+            break;
+        case IMGFMT_UYVY:
+            vdp_pixel_format = VDP_YCBCR_FORMAT_UYVY;
+            vdp_chroma_type  = VDP_CHROMA_TYPE_422;
+    }
     if (create_vdp_mixer(vdp_chroma_type))
         return -1;
 
@@ -887,7 +903,7 @@ static uint32_t draw_image(mp_image_t *mpi)
         deint_counter = (deint_counter + 1) % 3;
         vid_surface_num = rndr - surface_render;
         vdp_st = vdp_video_surface_put_bits_y_cb_cr(rndr->surface,
-                                                    VDP_YCBCR_FORMAT_YV12,
+                                                    vdp_pixel_format,
                                                     (const void *const*)destdata,
                                                     mpi->stride); // pitch
         CHECK_ST_ERROR("Error when calling vdp_video_surface_put_bits_y_cb_cr")
@@ -932,6 +948,8 @@ static int query_format(uint32_t format)
         case IMGFMT_YV12:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
+        case IMGFMT_YUY2:
+        case IMGFMT_UYVY:
             return default_flags | VOCAP_NOSLICES;
         case IMGFMT_VDPAU_MPEG1:
         case IMGFMT_VDPAU_MPEG2:
