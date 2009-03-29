@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r28991
+.\" sync with en/mplayer.1 r29059
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -43,7 +43,7 @@
 .\" 名称
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009-01-05" "MPlayer 项目" "电影播放器"
+.TH MPlayer 1 "2009-03-25" "MPlayer 项目" "电影播放器"
 .
 .SH 名称
 mplayer  \- 影视播放器
@@ -3233,9 +3233,6 @@ Supported by the gl, gl2, x11, and xv video output drivers.
 .IPs deint=<0\-4>
 选择反隔行扫描模式的算法（默认值：0）。
 所有大于 0 的模式服从 \-field\-dominance 选项的设置。
-.br
-.I 注意：
-大于 2 的值将使视频输出延后一帧。
 .RSss
 .IPs 0
 不反隔行扫描。
@@ -3256,7 +3253,7 @@ Supported by the gl, gl2, x11, and xv video output drivers.
 使用 nochroma\-deint 以使其仅作用于亮度通道，从而加速高级反隔行扫描算法。
 对于低速显存很有用。
 .IPs pullup
-尝试应用反电视电影模式，需要瞬间反隔行扫描。
+尝试应用反电视电影模式，需要使用运动自适应的瞬间反隔行扫描算法。
 .RE
 .PD 1
 .
