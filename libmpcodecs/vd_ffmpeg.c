@@ -451,7 +451,7 @@ static void draw_slice(struct AVCodecContext *s,
                         AVFrame *src, int offset[4],
                         int y, int type, int height){
     sh_video_t *sh = s->opaque;
-    uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
+    uint8_t *source[MP_MAX_PLANES]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
 #if 0
     int start=0, i;
     int width= s->width;
