@@ -930,6 +930,8 @@ static int query_format(uint32_t format)
     int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_UNSCALED;
     switch (format) {
         case IMGFMT_YV12:
+        case IMGFMT_I420:
+        case IMGFMT_IYUV:
             return default_flags | VOCAP_NOSLICES;
         case IMGFMT_VDPAU_MPEG1:
         case IMGFMT_VDPAU_MPEG2:
