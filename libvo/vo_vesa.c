@@ -283,8 +283,8 @@ static void vbeCopyData(uint8_t *image)
 static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
-    uint8_t *dst[3]= {dga_buffer, NULL, NULL};
-    int dstStride[3];
+    uint8_t *dst[MP_MAX_PLANES]={dga_buffer};
+    int dstStride[MP_MAX_PLANES]={0};
     if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
 	mp_msg(MSGT_VO,MSGL_DBG3, "vo_vesa: draw_slice was called: w=%u h=%u x=%u y=%u\n",w,h,x,y);
     dstStride[0]=dstride*((dstBpp+7)/8);
@@ -423,8 +423,8 @@ static int draw_frame(uint8_t *src[])
     {
 	int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
 	int srcStride[1];
-	uint8_t *dst[3]= {dga_buffer, NULL, NULL};
-	int dstStride[3];
+	uint8_t *dst[MP_MAX_PLANES]={dga_buffer};
+	int dstStride[MP_MAX_PLANES]={0};
 	dstStride[0]=dstride*((dstBpp+7)/8);
 	dstStride[1]=
 	dstStride[2]=dstStride[0]>>1;

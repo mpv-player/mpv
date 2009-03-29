@@ -68,8 +68,8 @@ aa_context *c;
 aa_renderparams *p;
 static int fast =0;
 /* used for the sws */
-static uint8_t * image[3];
-static int image_stride[3];
+static uint8_t * image[MP_MAX_PLANES];
+static int image_stride[MP_MAX_PLANES];
 
 /* image infos */
 static int image_format;
@@ -123,13 +123,11 @@ resize(void){
     sws = sws_getContextFromCmdLine(src_width,src_height,image_format,
 				   image_width,image_height,IMGFMT_Y8);
 
+    memset(image, 0, sizeof(image));
     image[0] = aa_image(c) + image_y * aa_imgwidth(c) + image_x;
-    image[1] = NULL;
-    image[2] = NULL;
 
+    memset(image_stride, 0, sizeof(image_stride));
     image_stride[0] = aa_imgwidth(c);
-    image_stride[1] = 0; 
-    image_stride[2] = 0;
 
     showosdmessage=0;
 
@@ -339,7 +337,7 @@ query_format(uint32_t format) {
 
 static int 
 draw_frame(uint8_t *src[]) {
-  int stride[3] = { 0 , 0 , 0 };
+  int stride[MP_MAX_PLANES] = {0};
 
   switch(image_format) {
   case IMGFMT_BGR15:
