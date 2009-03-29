@@ -132,10 +132,10 @@ static void uninit(struct vf_instance_s* vf){
 static inline void blur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride, FilterParam *fp){
 	int x, y;
 	FilterParam f= *fp;
-	uint8_t *srcArray[3]= {src, NULL, NULL};
-	uint8_t *dstArray[3]= {dst, NULL, NULL};
-	int srcStrideArray[3]= {srcStride, 0, 0};
-	int dstStrideArray[3]= {dstStride, 0, 0};
+	uint8_t *srcArray[MP_MAX_PLANES]= {src};
+	uint8_t *dstArray[MP_MAX_PLANES]= {dst};
+	int srcStrideArray[MP_MAX_PLANES]= {srcStride};
+	int dstStrideArray[MP_MAX_PLANES]= {dstStride};
 
 	sws_scale(f.filterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
 	

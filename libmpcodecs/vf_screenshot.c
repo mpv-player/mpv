@@ -108,16 +108,14 @@ static void gen_fname(struct vf_priv_s* priv)
 
 static void scale_image(struct vf_priv_s* priv, mp_image_t *mpi)
 {
-    uint8_t *dst[3];
-    int dst_stride[3];
+    uint8_t *dst[MP_MAX_PLANES] = {NULL};
+    int dst_stride[MP_MAX_PLANES] = {0};
 
     dst_stride[0] = priv->stride;
-    dst_stride[1] = dst_stride[2] = 0;
     if (!priv->buffer)
         priv->buffer = memalign(16, dst_stride[0]*priv->dh);
 
     dst[0] = priv->buffer;
-    dst[1] = dst[2] = 0;
     sws_scale_ordered(priv->ctx, mpi->planes, mpi->stride, 0, priv->dh, dst, dst_stride);
 }
 
@@ -137,12 +135,10 @@ static void draw_slice(struct vf_instance_s* vf, unsigned char** src,
                        int* stride, int w,int h, int x, int y)
 {
     if (vf->priv->store_slices) {
-        uint8_t *dst[3];
-        int dst_stride[3];
+        uint8_t *dst[MP_MAX_PLANES] = {NULL};
+        int dst_stride[MP_MAX_PLANES] = {0};
         dst_stride[0] = vf->priv->stride;
-        dst_stride[1] = dst_stride[2] = 0;
         dst[0] = vf->priv->buffer;
-        dst[1] = dst[2] = 0;
         sws_scale_ordered(vf->priv->ctx, src, stride, y, h, dst, dst_stride);
     }
     vf_next_draw_slice(vf,src,stride,w,h,x,y);

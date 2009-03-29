@@ -174,10 +174,10 @@ static inline void blur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride,
 	int x, y;
 	FilterParam f= *fp;
 	const int radius= f.distWidth/2;
-	uint8_t *srcArray[3]= {src, NULL, NULL};
-	uint8_t *dstArray[3]= {f.preFilterBuf, NULL, NULL};
-	int srcStrideArray[3]= {srcStride, 0, 0};
-	int dstStrideArray[3]= {f.preFilterStride, 0, 0};
+	uint8_t *srcArray[MP_MAX_PLANES]= {src};
+	uint8_t *dstArray[MP_MAX_PLANES]= {f.preFilterBuf};
+	int srcStrideArray[MP_MAX_PLANES]= {srcStride};
+	int dstStrideArray[MP_MAX_PLANES]= {f.preFilterStride};
 
 //	f.preFilterContext->swScale(f.preFilterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
 	sws_scale(f.preFilterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
