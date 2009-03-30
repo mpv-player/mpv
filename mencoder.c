@@ -698,6 +698,8 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
                            sh_video->disp_w, sh_video->disp_h, NULL, 0);
 }
 #endif
+if (vo_spudec)
+  spudec_set_forced_subs_only(vo_spudec, forced_subs_only);
 }
 
 ostream = open_output_stream(out_filename, 0);
