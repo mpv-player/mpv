@@ -54,7 +54,12 @@ typedef struct MPContext {
     struct mp_fifo *key_fifo;
     struct input_ctx *input;
     struct osd_state *osd;
-    int osd_show_percentage;
+
+    bool add_osd_seek_info;
+    // if nonzero, hide current OSD contents when GetTimerMS() reaches this
+    unsigned int osd_show_percentage_until;
+    unsigned int osd_visible;
+
     int osd_function;
     const ao_functions_t *audio_out;
     struct play_tree *playtree;

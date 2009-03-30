@@ -2227,7 +2227,7 @@ static struct {
     /// set/adjust or toggle command
     int toggle;
     /// progressbar type
-    int osd_progbar;
+    int osd_progbar; // -1 is special value for seek indicators
     /// osd msg id if it must be shared
     int osd_id;
     /// osd msg template
@@ -2235,7 +2235,7 @@ static struct {
 } set_prop_cmd[] = {
     // general
     { "loop", MP_CMD_LOOP, 0, 0, -1, MSGTR_LoopStatus },
-    { "chapter", MP_CMD_SEEK_CHAPTER, 0, 0, -1, NULL },
+    { "chapter", MP_CMD_SEEK_CHAPTER, 0, -1, -1, NULL },
     { "angle", MP_CMD_SWITCH_ANGLE, 0, 0, -1, NULL },
     { "pause", MP_CMD_PAUSE, 0, 0, -1, NULL },
     // audio
@@ -2317,7 +2317,9 @@ static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
     if (r <= 0)
 	return 1;
 
-    if (set_prop_cmd[i].osd_progbar) {
+    if (set_prop_cmd[i].osd_progbar == -1)
+        mpctx->add_osd_seek_info = true;
+    else if (set_prop_cmd[i].osd_progbar) {
 	if (prop->type == CONF_TYPE_INT) {
 	    if (mp_property_do(pname, M_PROPERTY_GET, &r, mpctx) > 0)
 		set_osd_bar(mpctx, set_prop_cmd[i].osd_progbar,
@@ -2386,8 +2388,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	case MP_CMD_SEEK:{
 		float v;
 		int abs;
-		if (sh_video)
-		    mpctx->osd_show_percentage = sh_video->fps;
+                mpctx->add_osd_seek_info = true;
 		v = cmd->args[0].v.f;
 		abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
 		if (abs == 2) {	/* Absolute seek to a specific timestamp in seconds */

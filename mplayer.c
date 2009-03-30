@@ -201,9 +201,6 @@ int enqueue=0;
 
 static int list_properties = 0;
 
-// if nonzero, hide current OSD contents when GetTimerMS() reaches this
-unsigned int osd_visible;
-
 int term_osd = 1;
 static char* term_osd_esc = "\x1b[A\r\x1b[K";
 static char* playing_msg = NULL;
@@ -211,7 +208,6 @@ static char* playing_msg = NULL;
 static double seek_to_sec;
 static off_t seek_to_byte=0;
 static off_t step_sec=0;
-static int loop_seek=0;
 
 static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
 
@@ -312,7 +308,6 @@ static char* rtc_device;
 
 edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
-short edl_decision = 0; ///< 1 when an EDL operation has been made.
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode.
 int use_filedir_conf;
 
@@ -1408,16 +1403,18 @@ static mp_osd_msg_t* get_osd_msg(struct MPContext *mpctx)
     unsigned diff;
     char hidden_dec_done = 0;
 
-    if (osd_visible) {
+    if (mpctx->osd_visible) {
 	// 36000000 means max timed visibility is 1 hour into the future, if
 	// the difference is greater assume it's wrapped around from below 0
-	if (osd_visible - now > 36000000) {
-	    osd_visible = 0;
+        if (mpctx->osd_visible - now > 36000000) {
+            mpctx->osd_visible = 0;
 	    vo_osd_progbar_type = -1; // disable
 	    vo_osd_changed(OSDTYPE_PROGBAR);
             mpctx->osd_function = mpctx->paused ? OSD_PAUSE : OSD_PLAY;
 	}
     }
+    if (mpctx->osd_show_percentage_until - now > 36000000)
+        mpctx->osd_show_percentage_until = 0;
 
     if(!last_update) last_update = now;
     diff = now >= last_update ? now - last_update : 0;
@@ -1467,7 +1464,7 @@ void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,d
         return;
     
     if(mpctx->sh_video) {
-        osd_visible = (GetTimerMS() + 1000) | 1;
+        mpctx->osd_visible = (GetTimerMS() + 1000) | 1;
         vo_osd_progbar_type = type;
         vo_osd_progbar_value = 256*(val-min)/(max-min);
         vo_osd_changed(OSDTYPE_PROGBAR);
@@ -1494,7 +1491,15 @@ static void update_osd_msg(struct MPContext *mpctx)
     mp_osd_msg_t *msg;
     struct osd_state *osd = mpctx->osd;
     char osd_text_timer[128];
-    
+
+    if (mpctx->add_osd_seek_info) {
+        set_osd_bar(mpctx, 0, "Position", 0, 100,
+                    demuxer_get_percent_pos(mpctx->demuxer));
+        if (mpctx->sh_video)
+            mpctx->osd_show_percentage_until = (GetTimerMS() + 1000) | 1;
+        mpctx->add_osd_seek_info = false;
+    }
+
     // Look if we have a msg
     if((msg = get_osd_msg(mpctx))) {
         if (strcmp(osd->osd_text, msg->msg)) {
@@ -1513,7 +1518,7 @@ static void update_osd_msg(struct MPContext *mpctx)
             char percentage_text[10];
             int pts = demuxer_get_current_time(mpctx->demuxer);
             
-            if (mpctx->osd_show_percentage)
+            if (mpctx->osd_show_percentage_until)
                 percentage = demuxer_get_percent_pos(mpctx->demuxer);
             
             if (percentage >= 0)
@@ -1532,10 +1537,6 @@ static void update_osd_msg(struct MPContext *mpctx)
                          pts%60,percentage_text);
         } else
             osd_text_timer[0]=0;
-        
-        // always decrement the percentage timer
-        if(mpctx->osd_show_percentage)
-            mpctx->osd_show_percentage--;
         
         if (strcmp(osd->osd_text, osd_text_timer)) {
             strncpy(osd->osd_text, osd_text_timer, 63);
@@ -2446,7 +2447,6 @@ static void edl_update(MPContext *mpctx)
 	    mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop "
 		   "[%f], length [%f]\n", next_edl_record->start_sec,
 		   next_edl_record->stop_sec, next_edl_record->length_sec);
-	    edl_decision = 1;
 	}
 	else if (next_edl_record->action == EDL_MUTE) {
 	    mpctx->edl_muted = !mpctx->edl_muted;
@@ -3928,22 +3928,13 @@ if (step_sec > 0 && !mpctx->paused) {
     play_n_frames=play_n_frames_mf;
     mpctx->stop_play=0;
     mpctx->abs_seek_pos=SEEK_ABSOLUTE; mpctx->rel_seek_secs=seek_to_sec;
-    loop_seek = 1;
   }
 
 if(mpctx->rel_seek_secs || mpctx->abs_seek_pos){
-  if (seek(mpctx, mpctx->rel_seek_secs, mpctx->abs_seek_pos) >= 0) {
-        // Set OSD:
-      if(!loop_seek){
-	if( !edl_decision )
-            set_osd_bar(mpctx, 0,"Position",0,100,demuxer_get_percent_pos(mpctx->demuxer));
-      }
-  }
+    seek(mpctx, mpctx->rel_seek_secs, mpctx->abs_seek_pos);
 
   mpctx->rel_seek_secs=0;
   mpctx->abs_seek_pos=0;
-  loop_seek=0;
-  edl_decision = 0;
 }
 
 #ifdef CONFIG_GUI
