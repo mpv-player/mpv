@@ -607,6 +607,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         case IMGFMT_IYUV:
             vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
             break;
+        case IMGFMT_NV12:
+            vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
+            break;
         case IMGFMT_YUY2:
             vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
             vdp_chroma_type  = VDP_CHROMA_TYPE_422;
@@ -903,6 +906,8 @@ static uint32_t draw_image(mp_image_t *mpi)
         struct vdpau_render_state *rndr = get_surface(deint_counter);
         deint_counter = (deint_counter + 1) % 3;
         vid_surface_num = rndr - surface_render;
+        if (image_format == IMGFMT_NV12)
+            destdata[1] = destdata[2];
         vdp_st = vdp_video_surface_put_bits_y_cb_cr(rndr->surface,
                                                     vdp_pixel_format,
                                                     (const void *const*)destdata,
@@ -949,6 +954,7 @@ static int query_format(uint32_t format)
         case IMGFMT_YV12:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
+        case IMGFMT_NV12:
         case IMGFMT_YUY2:
         case IMGFMT_UYVY:
             return default_flags | VOCAP_NOSLICES;
