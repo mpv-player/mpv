@@ -375,6 +375,7 @@ static int win_x11_init_vdpau_procs(void)
         return -1;
     }
 
+    vdp_get_error_string = NULL;
     for (dsc = vdp_func; dsc->pointer; dsc++) {
         vdp_st = vdp_get_proc_address(vdp_device, dsc->id, dsc->pointer);
         if (vdp_st != VDP_STATUS_OK) {
