@@ -538,7 +538,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   image_format = format;
   glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
 
-  int_pause = 0;
   vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
 #ifdef CONFIG_GUI

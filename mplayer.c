@@ -3984,6 +3984,10 @@ if (mpctx->stream->type == STREAMTYPE_DVDNAV) {
  mpctx->drop_message_shown = 0;
  mpctx->update_video_immediately = true;
  mpctx->total_avsync_change = 0;
+ // Make sure VO knows current pause state
+ if (mpctx->sh_video)
+     vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE : VOCTRL_RESUME,
+                NULL);
 
 while(!mpctx->stop_play){
     float aq_sleep_time=0;

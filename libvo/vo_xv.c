@@ -223,7 +223,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
     }
 
-    ctx->is_paused = 0;
     ctx->visible_buf = -1;
     ctx->have_visible_image_copy = false;
     ctx->have_next_image_copy = false;
