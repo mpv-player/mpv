@@ -186,6 +186,8 @@ main(void)
       char *desc;
     } cap2[] = {
       CPUID_FEATURE_DEF(0, "pni", "SSE3 Extensions"),
+      CPUID_FEATURE_DEF(1, "pclmulqdq", "Carryless Multiplication"),
+      CPUID_FEATURE_DEF(2, "dtes64", "64-bit Debug Store"),
       CPUID_FEATURE_DEF(3, "monitor", "MONITOR/MWAIT"),
       CPUID_FEATURE_DEF(4, "ds_cpl", "CPL Qualified Debug Store"),
       CPUID_FEATURE_DEF(5, "vmx", "Virtual Machine Extensions"),
@@ -194,13 +196,20 @@ main(void)
       CPUID_FEATURE_DEF(8, "tm2", "Thermal Monitor 2"),
       CPUID_FEATURE_DEF(9, "ssse3", "Supplemental SSE3"),
       CPUID_FEATURE_DEF(10, "cid", "L1 Context ID"),
+      CPUID_FEATURE_DEF(12, "fma", "Fused Multiply Add"),
       CPUID_FEATURE_DEF(13, "cx16", "CMPXCHG16B Available"),
       CPUID_FEATURE_DEF(14, "xtpr", "xTPR Disable"),
       CPUID_FEATURE_DEF(15, "pdcm", "Perf/Debug Capability MSR"),
       CPUID_FEATURE_DEF(18, "dca", "Direct Cache Access"),
       CPUID_FEATURE_DEF(19, "sse4_1", "SSE4.1 Extensions"),
       CPUID_FEATURE_DEF(20, "sse4_2", "SSE4.2 Extensions"),
+      CPUID_FEATURE_DEF(21, "x2apic", "x2APIC Feature"),
+      CPUID_FEATURE_DEF(22, "movbe", "MOVBE Instruction"),
       CPUID_FEATURE_DEF(23, "popcnt", "Pop Count Instruction"),
+      CPUID_FEATURE_DEF(25, "aes", "AES Instruction"),
+      CPUID_FEATURE_DEF(26, "xsave", "XSAVE/XRSTOR Extensions"),
+      CPUID_FEATURE_DEF(27, "osxsave", "XSAVE/XRSTOR Enabled in the OS"),
+      CPUID_FEATURE_DEF(28, "avx", "Advanced Vector Extension"),
       { -1 }
     };
     static struct {
@@ -227,7 +236,7 @@ main(void)
       CPUID_FEATURE_DEF(1, "cmp_legacy", "Chip Multi-Core"),
       CPUID_FEATURE_DEF(2, "svm", "Secure Virtual Machine"),
       CPUID_FEATURE_DEF(3, "extapic", "Extended APIC Space"),
-      CPUID_FEATURE_DEF(4, "cr8legacy", "CR8 Available in Legacy Mode"),
+      CPUID_FEATURE_DEF(4, "cr8_legacy", "CR8 Available in Legacy Mode"),
       CPUID_FEATURE_DEF(5, "abm", "Advanced Bit Manipulation"),
       CPUID_FEATURE_DEF(6, "sse4a", "SSE4A Extensions"),
       CPUID_FEATURE_DEF(7, "misalignsse", "Misaligned SSE Mode"),
