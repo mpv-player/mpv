@@ -68,7 +68,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
         else
             af->mul = (double)AC3_MAX_CODED_FRAME_SIZE / s->expect_len;
 
-        af_msg(AF_MSG_DEBUG0, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
+        mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
                data->nch, data->rate, af->mul, s->expect_len);
 
         af->data->format = AF_FORMAT_S16_NE;
@@ -98,7 +98,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             s->lavc_actx->bit_rate = bit_rate;
 
             if(avcodec_open(s->lavc_actx, s->lavc_acodec) < 0) {
-                af_msg(AF_MSG_ERROR, MSGTR_CouldntOpenCodec, "ac3", bit_rate);
+                mp_msg(MSGT_AFILTER, MSGL_ERR, MSGTR_CouldntOpenCodec, "ac3", bit_rate);
                 return AF_ERROR;
             }
         }
@@ -106,7 +106,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
         af->data->nch = 2;
         return test_output_res;
     case AF_CONTROL_COMMAND_LINE:
-        af_msg(AF_MSG_DEBUG0, "af_lavcac3enc cmdline: %s.\n", (char*)arg);
+        mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc cmdline: %s.\n", (char*)arg);
         s->bit_rate = 0;
         s->min_channel_num = 0;
         s->add_iec61937_header = 0;
@@ -119,7 +119,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
                 if (ff_ac3_bitrate_tab[i] * 1000 == s->bit_rate)
                     break;
             if (i >= 19) {
-                af_msg(AF_MSG_WARN, "af_lavcac3enc unable set unsupported "
+                mp_msg(MSGT_AFILTER, MSGL_WARN, "af_lavcac3enc unable set unsupported "
                        "bitrate %d, use default bitrate (check manpage to see "
                        "supported bitrates).\n", s->bit_rate);
                 s->bit_rate = 0;
@@ -127,7 +127,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
         }
         if (s->min_channel_num == 0)
             s->min_channel_num = 5;
-        af_msg(AF_MSG_VERBOSE, "af_lavcac3enc config spdif:%d, bitrate:%d, "
+        mp_msg(MSGT_AFILTER, MSGL_V, "af_lavcac3enc config spdif:%d, bitrate:%d, "
                "minchnum:%d.\n", s->add_iec61937_header, s->bit_rate,
                s->min_channel_num);
         return AF_OK;
@@ -171,13 +171,13 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
         max_output_len = AC3_MAX_CODED_FRAME_SIZE * frame_num;
 
     if (af->data->len < max_output_len) {
-        af_msg(AF_MSG_VERBOSE,"[libaf] Reallocating memory in module %s, "
+        mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
                "old len = %i, new len = %i\n", af->info->name, af->data->len,
                 max_output_len);
         free(af->data->audio);
         af->data->audio = malloc(max_output_len);
         if (!af->data->audio) {
-            af_msg(AF_MSG_FATAL,"[libaf] Could not allocate memory \n");
+            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
             return NULL;
         }
         af->data->len = max_output_len;
@@ -231,7 +231,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
             src += s->expect_len;
             left -= s->expect_len;
         }
-        af_msg(AF_MSG_DEBUG0, "avcodec_encode_audio got %d, pending %d.\n",
+        mp_msg(MSGT_AFILTER, MSGL_DBG2, "avcodec_encode_audio got %d, pending %d.\n",
                len, s->pending_len);
 
         if (s->add_iec61937_header) {
@@ -269,7 +269,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     c->nch   = 2;
     c->bps   = 2;
     c->len   = outsize;
-    af_msg(AF_MSG_DEBUG0, "play return size %d, pending %d\n",
+    mp_msg(MSGT_AFILTER, MSGL_DBG2, "play return size %d, pending %d\n",
            outsize, s->pending_len);
     return c;
 }
@@ -295,13 +295,13 @@ static int af_open(af_instance_t* af){
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {
-        af_msg(AF_MSG_ERROR, MSGTR_LavcAudioCodecNotFound, "ac3");
+        mp_msg(MSGT_AFILTER, MSGL_ERR, MSGTR_LavcAudioCodecNotFound, "ac3");
         return AF_ERROR;
     }
 
     s->lavc_actx = avcodec_alloc_context();
     if (!s->lavc_actx) {
-        af_msg(AF_MSG_ERROR, MSGTR_CouldntAllocateLavcContext);
+        mp_msg(MSGT_AFILTER, MSGL_ERR, MSGTR_CouldntAllocateLavcContext);
         return AF_ERROR;
     }
 

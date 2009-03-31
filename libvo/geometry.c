@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include "geometry.h"
 #include "mp_msg.h"
 
@@ -38,7 +39,7 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 {
         int width, height, xoff, yoff, xper, yper;
 
-	width = height = xoff = yoff = xper = yper = -1;
+	width = height = xoff = yoff = xper = yper = INT_MIN;
 
         if(vo_geometry != NULL) {
 		if(sscanf(vo_geometry, "%ix%i+%i+%i", &width, &height, &xoff, &yoff) != 4 )
@@ -90,22 +91,14 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		mp_msg(MSGT_VO, MSGL_V,"geometry window parameter: widw: %i,"
 		  " widh: %i, scrw: %i, scrh: %i\n",*widw, *widh, scrw, scrh);
 		  
-		/* FIXME: better checking of bounds... */
-		if( width != -1 && (width < 0 || width > scrw))
-		    width = (scrw < *widw) ? scrw : *widw;
-		if( height != -1 && (height < 0 || height > scrh))
-		    height = (scrh < *widh) ? scrh : *widh;
-		if(xoff != -1 && (xoff < 0 || xoff + width > scrw)) xoff = 0;
-		if(yoff != -1 && (yoff < 0 || yoff + height > scrh)) yoff = 0;
+		if (xoff != INT_MIN && xpos) *xpos = xoff;
+		if (yoff != INT_MIN && ypos) *ypos = yoff;
+		if (width  > 0 && widw) *widw = width;
+		if (height > 0 && widh) *widh = height;
 
-		if(xoff != -1 && xpos) *xpos = xoff;
-		if(yoff != -1 && ypos) *ypos = yoff;
-		if(width != -1 && widw) *widw = width;
-		if(height != -1 && widh) *widh = height;
-
-		if( width != -1 || height != -1)
+		if (width > 0 || height > 0)
 		    geometry_wh_changed = 1;
-		if( xoff != -1 || yoff != -1)
+		if (xoff != INT_MIN || yoff != INT_MIN)
 		    geometry_xy_changed = 1;
         }
 	return 1;

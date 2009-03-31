@@ -105,9 +105,9 @@ static char *gif_filename = NULL;
 #define DEFAULT_FILE "out.gif"
 
 static const opt_t subopts[] = {
-  {"output",       OPT_ARG_MSTRZ, &gif_filename, NULL, 0},
-  {"fps",          OPT_ARG_FLOAT, &target_fps,   NULL, 0},
-  {NULL, 0, NULL, NULL, 0}
+  {"output",       OPT_ARG_MSTRZ, &gif_filename, NULL},
+  {"fps",          OPT_ARG_FLOAT, &target_fps,   NULL},
+  {NULL, 0, NULL, NULL}
 };
 
 static int preinit(const char *arg)

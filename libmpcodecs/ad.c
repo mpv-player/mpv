@@ -1,6 +1,4 @@
-/*
-   ad.c - audio decoder interface
-*/
+/* audio decoder interface */
 
 #include <stdio.h>
 #include <stdlib.h>

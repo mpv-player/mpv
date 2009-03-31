@@ -340,19 +340,19 @@ static int int_zero_hundred(int *val)
 static int preinit(const char *arg)
 {
     const opt_t subopts[] = {
-        {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL, 0},
-        {"baseline",    OPT_ARG_BOOL,   &jpeg_baseline,         NULL, 0},
+        {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL},
+        {"baseline",    OPT_ARG_BOOL,   &jpeg_baseline,         NULL},
         {"optimize",    OPT_ARG_INT,    &jpeg_optimize,
-                                            (opt_test_f)int_zero_hundred, 0},
+                                            (opt_test_f)int_zero_hundred},
         {"smooth",      OPT_ARG_INT,    &jpeg_smooth,
-                                            (opt_test_f)int_zero_hundred, 0},
+                                            (opt_test_f)int_zero_hundred},
         {"quality",     OPT_ARG_INT,    &jpeg_quality,
-                                            (opt_test_f)int_zero_hundred, 0},
-        {"dpi",         OPT_ARG_INT,    &jpeg_dpi,              NULL, 0},
-        {"outdir",      OPT_ARG_MSTRZ,  &jpeg_outdir,           NULL, 0},
-        {"subdirs",     OPT_ARG_MSTRZ,  &jpeg_subdirs,          NULL, 0},
-        {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, (opt_test_f)int_pos, 0},
-        {NULL, 0, NULL, NULL, 0}
+                                            (opt_test_f)int_zero_hundred},
+        {"dpi",         OPT_ARG_INT,    &jpeg_dpi,              NULL},
+        {"outdir",      OPT_ARG_MSTRZ,  &jpeg_outdir,           NULL},
+        {"subdirs",     OPT_ARG_MSTRZ,  &jpeg_subdirs,          NULL},
+        {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, (opt_test_f)int_pos},
+        {NULL, 0, NULL, NULL}
     };
     const char *info_message = NULL;
 

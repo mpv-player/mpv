@@ -70,7 +70,7 @@ typedef struct MPOpts {
         int use_lirc;
         int use_lircc;
         int use_ar; // apple remote
-        int default_binds;
+        int default_bindings;
     } input;
 } MPOpts;
 

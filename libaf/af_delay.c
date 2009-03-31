@@ -63,7 +63,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     for(i=0;i<af->data->nch;i++){
       s->q[i] = calloc(L,af->data->bps);
       if(NULL == s->q[i])
-	af_msg(AF_MSG_FATAL,"[delay] Out of memory\n");
+	mp_msg(MSGT_AFILTER, MSGL_FATAL, "[delay] Out of memory\n");
     }
 
     return control(af,AF_CONTROL_DELAY_LEN | AF_CONTROL_SET,s->d);
@@ -87,9 +87,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       return AF_ERROR;
     s->ri = 0;
     for(i=0;i<AF_NCH;i++){
-      af_msg(AF_MSG_DEBUG0,"[delay] Channel %i delayed by %0.3fms\n",
+      mp_msg(MSGT_AFILTER, MSGL_DBG2, "[delay] Channel %i delayed by %0.3fms\n",
 	     i,clamp(s->d[i],0.0,1000.0));
-      af_msg(AF_MSG_DEBUG1,"[delay] Channel %i delayed by %i samples\n",
+      mp_msg(MSGT_AFILTER, MSGL_DBG3, "[delay] Channel %i delayed by %i samples\n",
 	     i,s->wi[i]);
     }
     return AF_OK;

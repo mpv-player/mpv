@@ -1,5 +1,5 @@
 /*
- * vf_tile.c - filter to tile a serie of image in a single, bigger, image
+ * filter to tile a serie of image in a single, bigger, image
  *
  * The parameters are:
  *

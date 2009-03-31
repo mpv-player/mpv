@@ -94,7 +94,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_SUB_CH | AF_CONTROL_SET: // Requires reinit
     // Sanity check
     if((*(int*)arg >= AF_NCH) || (*(int*)arg < 0)){
-      af_msg(AF_MSG_ERROR,"[sub] Subwoofer channel number must be between "
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Subwoofer channel number must be between "
 	     " 0 and %i current value is %i\n", AF_NCH-1, *(int*)arg);
       return AF_ERROR;
     }
@@ -106,7 +106,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_SUB_FC | AF_CONTROL_SET: // Requires reinit
     // Sanity check
     if((*(float*)arg > 300) || (*(float*)arg < 20)){
-      af_msg(AF_MSG_ERROR,"[sub] Cutoff frequency must be between 20Hz and"
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Cutoff frequency must be between 20Hz and"
 	     " 300Hz current value is %0.2f",*(float*)arg);
       return AF_ERROR;
     }

@@ -187,7 +187,7 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 		: 
 		: "S" (y), "D" (dst), "a" (u), "b" (v), "c" (w/16),
 #if ARCH_X86_64
-		"d" ((long)us), "r" ((long)vs)
+		"d" ((x86_reg)us), "r" ((x86_reg)vs)
 #else
 		"d" (&us)
 #endif
@@ -299,7 +299,7 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 		: 
 		: "S" (y), "D" (dst), "a" (u), "b" (v), "c" (w/16),
 #if ARCH_X86_64
-		"d" ((long)us), "r" ((long)vs)
+		"d" ((x86_reg)us), "r" ((x86_reg)vs)
 #else
 		"d" (&us)
 #endif

@@ -583,7 +583,7 @@ struct input_ctx {
     unsigned int num_key_down;
     unsigned int last_key_down;
 
-    bool default_binds;
+    bool default_bindings;
     // List of command binding sections
     mp_cmd_bind_section_t *cmd_bind_sections;
     // Name of currently used command section
@@ -623,8 +623,8 @@ static const m_option_t input_conf[] = {
     OPT_STRING("js-dev", input.js_dev, CONF_GLOBAL),
     OPT_STRING("ar-dev", input.ar_dev, CONF_GLOBAL),
     OPT_STRING("file", input.in_file, CONF_GLOBAL),
-    OPT_FLAG_ON("default-binds", input.default_binds, CONF_GLOBAL),
-    OPT_FLAG_OFF("nodefault-binds", input.default_binds, CONF_GLOBAL),
+    OPT_FLAG_ON("default-bindings", input.default_bindings, CONF_GLOBAL),
+    OPT_FLAG_OFF("nodefault-bindings", input.default_bindings, CONF_GLOBAL),
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1063,7 +1063,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys,
     cmd = find_bind_for_key(ictx->cmd_binds, n, keys);
   if (ictx->cmd_binds_default && cmd == NULL)
     cmd = find_bind_for_key(ictx->cmd_binds_default, n, keys);
-  if (ictx->default_binds && cmd == NULL)
+  if (ictx->default_bindings && cmd == NULL)
     cmd = find_bind_for_key(def_cmd_binds,n,keys);
 
   if(cmd == NULL) {
@@ -1698,7 +1698,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
         .ar_state = -1,
         .ar_delay = input_conf->ar_delay,
         .ar_rate = input_conf->ar_rate,
-        .default_binds = input_conf->default_binds,
+        .default_bindings = input_conf->default_bindings,
     };
 
   char* file;

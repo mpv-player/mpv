@@ -125,14 +125,12 @@ static void draw_slice (void * _sh, uint8_t * const * src, unsigned int y){
     vd_libmpeg2_ctx_t *context = sh->context;
     mpeg2dec_t* mpeg2dec = context->mpeg2dec;
     const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
-    int stride[3];
+    int stride[MP_MAX_PLANES] = {mpeg2dec->decoder.stride, mpeg2dec->decoder.uv_stride, mpeg2dec->decoder.uv_stride};
+    uint8_t *srcs[MP_MAX_PLANES] = {src[0], src[1], src[2]};
 
 //  printf("draw_slice() y=%d  \n",y);
 
-    stride[0]=mpeg2dec->decoder.stride;
-    stride[1]=stride[2]=mpeg2dec->decoder.uv_stride;
-
-    mpcodecs_draw_slice(sh, (uint8_t **)src,
+    mpcodecs_draw_slice(sh, srcs,
 		stride, info->sequence->picture_width,
 		(y+16<=info->sequence->picture_height) ? 16 :
 		    info->sequence->picture_height-y,

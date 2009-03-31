@@ -373,7 +373,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
 
 <para>
 A <application>MEncoder</application> támogatja a Sony PSP videó formátumába
-történő kódolást, de a PSP szoftverének változatától függően különböző 
+történő kódolást, de a PSP szoftverének változatától függően különböző
 korlátok vannak.
 Nyugodt lehetsz, ha a következő korlátokat figyelembe veszed:
 <itemizedlist>
@@ -610,7 +610,7 @@ mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=6
 Egy MPEG-4 fájl létrehozása JPEG fájlok explicit listájából (az aktuális könyvtárban
 lévő lista.txt tartalmazza a forrásként felhasználandó fájlokat, soronként egyet):
 <screen>
-mencoder mf://<replaceable>@lista.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
+mencoder mf://<replaceable>@lista.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \
 	-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>

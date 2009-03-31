@@ -130,7 +130,7 @@ static af_data_t* play_s16(struct af_instance_s* af, af_data_t* data)
     s->pos += 2 * M_PI * s->freq / data->rate;
   }
 
-   af_msg(AF_MSG_VERBOSE,"[sinesuppress] f:%8.2f: amp:%8.2f\n", s->freq, sqrt(s->real*s->real + s->imag*s->imag) / s->ref);
+   mp_msg(MSGT_AFILTER, MSGL_V, "[sinesuppress] f:%8.2f: amp:%8.2f\n", s->freq, sqrt(s->real*s->real + s->imag*s->imag) / s->ref);
 
   return data;
 }

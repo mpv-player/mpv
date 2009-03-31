@@ -13,10 +13,10 @@ If you want to add a codec yourself, read DOCS/tech/codecs.conf.txt.
 
 
 
-VFW codecs
+VfW codecs
 ~~~~~~~~~~
 
-VFW (Video for Windows) is the old video API for Windows. Its codecs have
+VfW (Video for Windows) is the old video API for Windows. Its codecs have
 the '.dll' or (rarely) '.drv' extension.  If MPlayer fails at playing your
 AVI with this kind of message:
 
@@ -26,7 +26,7 @@ Cannot find codec matching selected -vo and video format 0x55594648.
 It means your AVI is encoded with a codec which has the HFYU fourcc (HFYU =
 HuffYUV codec, DIV3 = DivX Low Motion, etc.). Now that you know this, you
 have to find out which DLL Windows loads in order to play this file.
-You can find the vfw codec by searching the internet for e.g. VIDC.HFYU.
+You can find the VfW codec by searching the internet for e.g. VIDC.HFYU.
 
 In our case, the 'system.ini' also contains this information in a line that reads:
 
@@ -111,9 +111,9 @@ false hits, but you may get lucky...
 Tips:
 ~~~~~~~
 If you get an error loading a new codec, it may need some more files to work.
-Start the filemon utility before loading MPlayer to find out which dlls are
+Start the filemon utility before loading MPlayer to find out which DLLs are
 trying to be loaded.
 
-Your codec may load some external .dll libraries. If the codec is already
+Your codec may load some external DLL libraries. If the codec is already
 installed in Windows, run listdlls wmplayer.exe while Windows Media
 Player is playing your file to find out which.

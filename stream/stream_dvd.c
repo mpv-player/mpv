@@ -1097,9 +1097,9 @@ static int ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_fo
     char *ext;
     char* filename;
     struct stream_priv_s *spriv;
+    int len = strlen(stream->url);
 
-    ext = strrchr (stream->url, '.');
-    if (!ext || strcasecmp (ext + 1, "ifo"))
+    if (len < 4 || strcasecmp (stream->url + len - 4, ".ifo"))
         return STREAM_UNSUPPORTED;
 
     mp_msg(MSGT_DVD, MSGL_INFO, ".IFO detected. Redirecting to dvd://\n");

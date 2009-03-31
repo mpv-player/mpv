@@ -527,7 +527,7 @@ levelezési listát is segítéségért és a legfrissebb információkért.
 A hivatalos Windows-os binárisok megtalálhatóak a
 <ulink url="http://www.mplayerhq.hu/design7/dload.html">letöltési oldalon</ulink>.
 A külső forrásból származó telepítő csomagokat és egyszerű GUI frontend-eket
-összegyűjtöttük a 
+összegyűjtöttük a
 <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">kapcsolódó projektek oldal</ulink>
 Windows-os részében.
 </para>
@@ -616,7 +616,7 @@ is segíthet. Ha a lejátszás szaggatott, próbáld meg a
 <option>-autosync 100</option> opciót. Ha ezek közül bármelyik segít, írd
 be a konfigurációs fájlodba.
 </para>
-  
+
 <note>
 <para>
 Ha Pentium 4-ed van és fagyásokat tapasztalsz a RealPlayer
@@ -670,7 +670,7 @@ alaphelyzetben nincs benne a <application>MinGW</application>-ben.
 Állítsd be a <option>--prefix=/mingw</option> kapcsolóval és
 telepítsd, mielőtt az <application>MPlayer</application>t fordítanád.
 </para>
-  
+
 <para>
 Az <application>MPlayer</application> és a szükséges függvénykönyvtárak
 elkészítésének módját elolvashatod az
@@ -824,7 +824,7 @@ Lehet, hogy szerkesztened kell a <filename>config.mak</filename> fájlt és
 <para>
 Folytasd a
 <screen>make</screen>
-paranccsal, majd menj a mplayerosx könyvtárba és írd be 
+paranccsal, majd menj a mplayerosx könyvtárba és írd be
 <screen>make dist</screen>
 Ez egy tömörített <systemitem>.dmg</systemitem> archívot hoz létre
 egy használatra kész binárissal.

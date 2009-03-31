@@ -46,7 +46,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
 #else
              .use_ar = 0,
 #endif
-             .default_binds = 1,
+             .default_bindings = 1,
          }
     };
 }

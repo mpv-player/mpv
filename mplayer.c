@@ -1098,8 +1098,10 @@ void init_vo_spudec(struct MPContext *mpctx)
     spudec_set_font_factor(vo_spudec,font_factor);
   }
 
-  if (vo_spudec!=NULL)
+  if (vo_spudec!=NULL) {
     mpctx->initialized_flags|=INITIALIZED_SPUDEC;
+    mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only, mpctx);
+  }
 }
 
 /*
@@ -3104,6 +3106,7 @@ if (edl_output_filename) {
     if(vo_vobsub){
       mpctx->initialized_flags|=INITIALIZED_VOBSUB;
       vobsub_set_from_lang(vo_vobsub, dvdsub_lang);
+      mp_property_do("sub_forced_only", M_PROPERTY_SET, &forced_subs_only, mpctx);
 
       // setup global sub numbering
       mpctx->global_sub_indices[SUB_SOURCE_VOBSUB] = mpctx->global_sub_size; // the global # of the first vobsub.

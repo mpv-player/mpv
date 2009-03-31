@@ -602,11 +602,11 @@ is specified.
 <title>MPEG audio Passthrough</title>
 
 <para>
-Digital TV transmissions (such as DVB and ATSC) and some DVDs usually have 
+Digital TV transmissions (such as DVB and ATSC) and some DVDs usually have
 MPEG audio streams (in particular MP2).
-Some MPEG hardware decoders such as full-featured DVB cards and DXR2 
-adapters can natively decode this format. 
-<application>MPlayer</application> can be configured to relay the audio data 
+Some MPEG hardware decoders such as full-featured DVB cards and DXR2
+adapters can natively decode this format.
+<application>MPlayer</application> can be configured to relay the audio data
 without decoding it.
 </para>
 

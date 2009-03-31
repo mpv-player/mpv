@@ -523,8 +523,8 @@ static void flip_page(void)
 static int draw_slice(uint8_t * src[], int stride[], int w, int h,
                            int x, int y)
 {
-    uint8_t *dst[3];
-    int dstStride[3];
+    uint8_t *dst[MP_MAX_PLANES] = {NULL};
+    int dstStride[MP_MAX_PLANES] = {0};
 
     if ((old_vo_dwidth != vo_dwidth
          || old_vo_dheight != vo_dheight) /*&& y==0 */  && zoomFlag)
@@ -557,8 +557,6 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
         }
         dst_width = newW;
     }
-    dstStride[1] = dstStride[2] = 0;
-    dst[1] = dst[2] = NULL;
 
     dstStride[0] = image_width * ((bpp + 7) / 8);
     dst[0] = ImageData;

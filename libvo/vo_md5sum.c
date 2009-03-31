@@ -108,8 +108,8 @@ static void md5sum_write_error(void) {
 static int preinit(const char *arg)
 {
     const opt_t subopts[] = {
-        {"outfile",     OPT_ARG_MSTRZ,    &md5sum_outfile,   NULL, 0},
-        {NULL, 0, NULL, NULL, 0}
+        {"outfile",     OPT_ARG_MSTRZ,    &md5sum_outfile,   NULL},
+        {NULL, 0, NULL, NULL}
     };
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,

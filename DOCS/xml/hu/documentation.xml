@@ -63,7 +63,7 @@ Az <application>MPlayer</application> egy Linuxon működő videolejátszó (fut
 számos más Unix-on és nem-x86 processzorokon is, lásd <xref linkend="ports"/>).
 Le tudja játszani a legtöbb MPEG, VOB, AVI, Ogg/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4,
 FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, és Matroska file-t, és ezekhez
-felsorakoztat jónéhány natív, XAnim, RealPlayer és Win32 DLL codecet. Nézhetsz vele 
+felsorakoztat jónéhány natív, XAnim, RealPlayer és Win32 DLL codecet. Nézhetsz vele
 Video CD-t, SVCD-t, DVD-t, 3ivx, RealMedia, Sorenson, Theora
 és MPEG-4 (DivX) filmet is. Az <application>MPlayer</application>
 másik nagy előnye a megjelenítési módok széles választékában rejlik.
@@ -73,7 +73,7 @@ az SDL/GGI drivereit is), és néhány alacsony szintű kártyaspecifikus vezér
 (Matrox, 3dfx, Radeon, Mach64, Permedia3) is használható!
 Legtöbbjük támogat szoftveres vagy hardveres nagyítást, így a teljesképernyős
 mód is elérhető. Az <application>MPlayer</application> támogat továbbá hardveres
-MPEG kártyákkal történő dekódolást/megjelenítést, így például a 
+MPEG kártyákkal történő dekódolást/megjelenítést, így például a
 <link linkend="dvb">DVB</link> és <link linkend="dxr3">DXR3/Hollywood+</link>
 kártyákon!
 És még nem is szóltam a szép, élsímított, árnyékolt feliratozásról

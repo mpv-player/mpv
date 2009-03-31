@@ -147,7 +147,7 @@ static int8_t *initNoise(FilterParam *fp){
 
 #if HAVE_MMX
 static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-	long mmx_len= len&(~7);
+	x86_reg mmx_len= len&(~7);
 	noise+=shift;
 
 	__asm__ volatile(
@@ -176,7 +176,7 @@ static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int 
 //duplicate of previous except movntq
 #if HAVE_MMX2
 static inline void lineNoise_MMX2(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-	long mmx_len= len&(~7);
+	x86_reg mmx_len= len&(~7);
 	noise+=shift;
 
 	__asm__ volatile(
@@ -218,7 +218,7 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 
 #if HAVE_MMX
 static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
-	long mmx_len= len&(~7);
+	x86_reg mmx_len= len&(~7);
 
 	__asm__ volatile(
 		"mov %5, %%"REG_a"		\n\t"

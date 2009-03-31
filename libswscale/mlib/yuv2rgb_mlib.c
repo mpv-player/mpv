@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "swscale.h"
+#include "libswscale/swscale.h"
 
 static int mlib_YUV2ARGB420_32(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
                                int srcSliceH, uint8_t* dst[], int dstStride[]){
@@ -73,7 +73,7 @@ static int mlib_YUV2RGB420_24(SwsContext *c, uint8_t* src[], int srcStride[], in
 }
 
 
-SwsFunc sws_yuv2rgb_init_mlib(SwsContext *c)
+SwsFunc ff_yuv2rgb_init_mlib(SwsContext *c)
 {
     switch(c->dstFormat){
     case PIX_FMT_RGB24: return mlib_YUV2RGB420_24;

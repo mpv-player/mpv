@@ -87,6 +87,7 @@ typedef struct SwsContext{
 
     int16_t **lumPixBuf;
     int16_t **chrPixBuf;
+    int16_t **alpPixBuf;
     int16_t *hLumFilter;
     int16_t *hLumFilterPos;
     int16_t *hChrFilter;
@@ -156,6 +157,8 @@ typedef struct SwsContext{
 #define VROUNDER_OFFSET       "11*8+4*4*256*2+16"
 #define U_TEMP                "11*8+4*4*256*2+24"
 #define V_TEMP                "11*8+4*4*256*2+32"
+#define Y_TEMP                "11*8+4*4*256*2+40"
+#define ALP_MMX_FILTER_OFFSET "11*8+4*4*256*2+48"
 
     uint64_t redDither   __attribute__((aligned(8)));
     uint64_t greenDither __attribute__((aligned(8)));
@@ -176,6 +179,8 @@ typedef struct SwsContext{
     uint64_t vRounder     __attribute__((aligned(8)));
     uint64_t u_temp       __attribute__((aligned(8)));
     uint64_t v_temp       __attribute__((aligned(8)));
+    uint64_t y_temp       __attribute__((aligned(8)));
+    int32_t  alpMmxFilter[4*MAX_FILTER_SIZE];
 
 #if HAVE_ALTIVEC
 
@@ -212,12 +217,17 @@ typedef struct SwsContext{
 } SwsContext;
 //FIXME check init (where 0)
 
-SwsFunc sws_yuv2rgb_get_func_ptr (SwsContext *c);
-int sws_yuv2rgb_c_init_tables (SwsContext *c, const int inv_table[4], int fullRange, int brightness, int contrast, int saturation);
+SwsFunc ff_yuv2rgb_get_func_ptr(SwsContext *c);
+int ff_yuv2rgb_c_init_tables(SwsContext *c, const int inv_table[4], int fullRange, int brightness, int contrast, int saturation);
 
-void sws_yuv2rgb_altivec_init_tables (SwsContext *c, const int inv_table[4],int brightness,int contrast, int saturation);
-SwsFunc sws_yuv2rgb_init_altivec (SwsContext *c);
-void altivec_yuv2packedX (SwsContext *c,
+void ff_yuv2rgb_init_tables_altivec(SwsContext *c, const int inv_table[4], int brightness, int contrast, int saturation);
+SwsFunc ff_yuv2rgb_init_mmx(SwsContext *c);
+SwsFunc ff_yuv2rgb_init_vis(SwsContext *c);
+SwsFunc ff_yuv2rgb_init_mlib(SwsContext *c);
+SwsFunc ff_yuv2rgb_init_altivec(SwsContext *c);
+SwsFunc ff_yuv2rgb_get_func_ptr_bfin(SwsContext *c);
+void ff_bfin_get_unscaled_swscale(SwsContext *c);
+void ff_yuv2packedX_altivec(SwsContext *c,
                           int16_t *lumFilter, int16_t **lumSrc, int lumFilterSize,
                           int16_t *chrFilter, int16_t **chrSrc, int chrFilterSize,
                           uint8_t *dest, int dstW, int dstY);

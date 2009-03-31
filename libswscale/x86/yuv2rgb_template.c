@@ -137,7 +137,7 @@
         uint8_t *py = src[0] + y*srcStride[0];                \
         uint8_t *pu = src[1] + (y>>1)*srcStride[1];           \
         uint8_t *pv = src[2] + (y>>1)*srcStride[2];           \
-        long index= -h_size/2;                                \
+        x86_reg index= -h_size/2;                                \
 
 #define YUV2RGB_INIT                                                       \
         /* This MMX assembly code deals with a SINGLE scan line at a time, \
@@ -162,9 +162,18 @@
         "add $"AV_STRINGIFY(depth*8)", %1    \n\t" \
         "add                       $4, %0    \n\t" \
         " js                       1b        \n\t" \
-\
+
+#define YUV2RGB_OPERANDS \
         : "+r" (index), "+r" (image) \
         : "r" (pu - index), "r" (pv - index), "r"(&c->redDither), "r" (py - 2*index) \
+        ); \
+    } \
+    __asm__ volatile (EMMS); \
+    return srcSliceH; \
+
+#define YUV2RGB_OPERANDS_ALPHA \
+        : "+r" (index), "+r" (image) \
+        : "r" (pu - index), "r" (pv - index), "r"(&c->redDither), "r" (py - 2*index), "r" (pa - 2*index) \
         ); \
     } \
     __asm__ volatile (EMMS); \
@@ -223,6 +232,7 @@ static inline int RENAME(yuv420_rgb16)(SwsContext *c, uint8_t* src[], int srcStr
         MOVNTQ "   %%mm5, 8 (%1);" /* store pixel 4-7 */
 
     YUV2RGB_ENDLOOP(2)
+    YUV2RGB_OPERANDS
 }
 
 static inline int RENAME(yuv420_rgb15)(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
@@ -280,6 +290,7 @@ static inline int RENAME(yuv420_rgb15)(SwsContext *c, uint8_t* src[], int srcStr
         MOVNTQ " %%mm5, 8 (%1);" /* store pixel 4-7 */
 
     YUV2RGB_ENDLOOP(2)
+    YUV2RGB_OPERANDS
 }
 
 static inline int RENAME(yuv420_rgb24)(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
@@ -394,6 +405,7 @@ static inline int RENAME(yuv420_rgb24)(SwsContext *c, uint8_t* src[], int srcStr
 #endif
 
     YUV2RGB_ENDLOOP(3)
+    YUV2RGB_OPERANDS
 }
 
 #define RGB_PLANAR2PACKED32                                             \
@@ -450,4 +462,23 @@ static inline int RENAME(yuv420_rgb32)(SwsContext *c, uint8_t* src[], int srcStr
         RGB_PLANAR2PACKED32
 
     YUV2RGB_ENDLOOP(4)
+    YUV2RGB_OPERANDS
+}
+
+static inline int RENAME(yuva420_rgb32)(SwsContext *c, uint8_t* src[], int srcStride[], int srcSliceY,
+                                        int srcSliceH, uint8_t* dst[], int dstStride[]){
+#if HAVE_7REGS
+    int y, h_size;
+
+    YUV2RGB_LOOP(4)
+
+        uint8_t *pa = src[3] + y*srcStride[3];
+        YUV2RGB_INIT
+        YUV2RGB
+        "movq     (%6, %0, 2), %%mm3;"            /* Load 8 A A7 A6 A5 A4 A3 A2 A1 A0 */
+        RGB_PLANAR2PACKED32
+
+    YUV2RGB_ENDLOOP(4)
+    YUV2RGB_OPERANDS_ALPHA
+#endif
 }

@@ -96,15 +96,15 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Allocate new buffers (as one continuous block)
     s->buf[0] = calloc(s->sz*af->data->nch, af->data->bps);
     if(NULL == s->buf[0])
-      af_msg(AF_MSG_FATAL, "[export] Out of memory\n");
+      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Out of memory\n");
     for(i = 1; i < af->data->nch; i++)
       s->buf[i] = s->buf[0] + i*s->sz*af->data->bps;
 	
     // Init memory mapping
     s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC, 0640);
-    af_msg(AF_MSG_INFO, "[export] Exporting to file: %s\n", s->filename);
+    mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Exporting to file: %s\n", s->filename);
     if(s->fd < 0)
-      af_msg(AF_MSG_FATAL, "[export] Could not open/create file: %s\n", 
+      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not open/create file: %s\n", 
 	     s->filename);
     
     // header + buffer
@@ -119,8 +119,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // mmap size
     s->mmap_area = mmap(0, mapsize, PROT_READ|PROT_WRITE,MAP_SHARED, s->fd, 0);
     if(s->mmap_area == NULL)
-      af_msg(AF_MSG_FATAL, "[export] Could not mmap file %s\n", s->filename);
-    af_msg(AF_MSG_INFO, "[export] Memory mapped to file: %s (%p)\n", 
+      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not mmap file %s\n", s->filename);
+    mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Memory mapped to file: %s (%p)\n", 
 	   s->filename, s->mmap_area);
 
     // Initialize header
@@ -160,7 +160,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_EXPORT_SZ | AF_CONTROL_SET:
     s->sz = * (int *) arg;
     if((s->sz <= 0) || (s->sz > 2048))
-      af_msg( AF_MSG_ERROR, "[export] Buffer size must be between"
+      mp_msg(MSGT_AFILTER, MSGL_ERR, "[export] Buffer size must be between"
 	      " 1 and 2048\n" );
 
     return AF_OK;

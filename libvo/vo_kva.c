@@ -131,8 +131,8 @@ struct {
     PBYTE       pbImage;
     BOOL        fFixT23;
     PFNWP       pfnwpOldFrame;
-    uint8_t    *planes[3];     // y = 0, u = 1, v = 2
-    int         stride[3];
+    uint8_t    *planes[MP_MAX_PLANES];     // y = 0, u = 1, v = 2
+    int         stride[MP_MAX_PLANES];
     BOOL        fHWAccel;
     RECTL       rclParent;
     struct SwsContext *sws;
@@ -230,6 +230,8 @@ static void imgCreate(void)
 
     m_int.pbImage = malloc(size);
 
+    memset(m_int.planes, 0, sizeof(m_int.planes));
+    memset(m_int.stride, 0, sizeof(m_int.stride));
     m_int.planes[0] = m_int.pbImage;
     m_int.stride[0] = m_int.lStride;
 
@@ -257,8 +259,8 @@ static void imgDisplay(void)
     ULONG ulBPL;
 
     if (!kvaLockBuffer(&pBuffer, &ulBPL)) {
-        uint8_t *dst[3];
-        int      dstStride[3];
+        uint8_t *dst[MP_MAX_PLANES] = {NULL};
+        int      dstStride[MP_MAX_PLANES] = {0};
 
         // Get packed or Y
         dst[0]       = pBuffer;

@@ -112,6 +112,15 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->channels=lavc_context->channels;
   sh_audio->samplerate=lavc_context->sample_rate;
   sh_audio->i_bps=lavc_context->bit_rate/8;
+  switch (lavc_context->sample_fmt) {
+      case SAMPLE_FMT_U8:  sh_audio->sample_format = AF_FORMAT_U8;       break;
+      case SAMPLE_FMT_S16: sh_audio->sample_format = AF_FORMAT_S16_NE;   break;
+      case SAMPLE_FMT_S32: sh_audio->sample_format = AF_FORMAT_S32_NE;   break;
+      case SAMPLE_FMT_FLT: sh_audio->sample_format = AF_FORMAT_FLOAT_NE; break;
+      default:
+          mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Unsupported sample format\n");
+          return 0;
+  }
   if(sh_audio->wf){
       // If the decoder uses the wrong number of channels all is lost anyway.
       // sh_audio->channels=sh_audio->wf->nChannels;
@@ -120,7 +129,7 @@ static int init(sh_audio_t *sh_audio)
       if (sh_audio->wf->nAvgBytesPerSec)
       sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
   }
-  sh_audio->samplesize=2;
+  sh_audio->samplesize=af_fmt2bits(sh_audio->sample_format)/ 8;
   return 1;
 }
 

@@ -58,6 +58,8 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
   return 1;
 }
 
+// force extension/type to have a fourcc
+
 static const struct {
   const char *type;
   uint32_t format;
@@ -65,6 +67,9 @@ static const struct {
   { "bmp",  mmioFOURCC('b', 'm', 'p', ' ') },
   { "jpeg", mmioFOURCC('I', 'J', 'P', 'G') },
   { "jpg",  mmioFOURCC('I', 'J', 'P', 'G') },
+  { "jls",  mmioFOURCC('I', 'J', 'P', 'G') },
+  { "thm",  mmioFOURCC('I', 'J', 'P', 'G') },
+  { "db",   mmioFOURCC('I', 'J', 'P', 'G') },
   { "pcx",  mmioFOURCC('p', 'c', 'x', ' ') },
   { "png",  mmioFOURCC('M', 'P', 'N', 'G') },
   { "ptx",  mmioFOURCC('p', 't', 'x', ' ') },

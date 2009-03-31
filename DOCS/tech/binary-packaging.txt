@@ -52,14 +52,13 @@ the following features MUST be included in any official binary package:
   - XAnim codecs support (*)
 
 * general:
-  - default font
   - FreeType fonts support
   - HTML documentation
   - large file support
   - man page(s)
 
 * input/demuxers:
-  - DVD(mpdvdkit2)
+  - DVD(libdvdread4/libdvdnav)
   - streaming
   - Matroska(internal)
   - (S)VCD
@@ -108,10 +107,10 @@ for Red Hat and Fedora RPMs I am using FHS-compliant paths:
 /etc/mplayer/                   system-wide configs
 /usr/bin/                       binaries
 /usr/lib/codecs/                binary codecs
+/usr/lib64/codecs/              binary codecs on 64bit Linux
 /usr/share/doc/mplayer-version/ docs
 /usr/share/man/man1/            man page
 /usr/share/man/XX/man1/         translated man page
-/usr/share/mplayer/font/        fonts
 /usr/share/mplayer/skins/       GUI skins
 
 You MUST NOT include the codecs.conf file in your package. It is useful
@@ -134,12 +133,9 @@ mplayer          contains MPlayer binary without GUI (mplayer),
                  config files, man pages and documentation;
                  required by mplayer-gui
 mplayer-codecs-* contain binary codecs available from MPlayer's site
-mplayer-font-*   contain various bitmap fonts for OSD (obsolete)
 mplayer-gui      contains MPlayer binary with GUI (gmplayer);
                  contains default skin (Blue)
 mplayer-skin-*   contain various MPlayer GUI skins
-mplayer-vidix    contains VIDIX support library for MPlayer
-mplayer-vidix-*  contain VIDIX drivers for specific cards, one per package
 
 There is no strict policy for now, just use your common sense.
 
