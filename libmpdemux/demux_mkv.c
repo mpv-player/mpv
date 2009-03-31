@@ -153,8 +153,7 @@ typedef struct mkv_demuxer
   mkv_track_t **tracks;
   int num_tracks;
 
-  uint64_t tc_scale, cluster_tc, first_tc;
-  int has_first_tc;
+  uint64_t tc_scale, cluster_tc;
 
   uint64_t cluster_size;
   uint64_t blockgroup_size;
@@ -173,8 +172,6 @@ typedef struct mkv_demuxer
   int64_t skip_to_timecode;
   int v_skip_to_keyframe, a_skip_to_keyframe;
 
-  int64_t stop_timecode;
-  
   int last_aid;
   int audio_tracks[MAX_A_STREAMS];
 } mkv_demuxer_t;
@@ -2165,8 +2162,6 @@ demux_mkv_open (demuxer_t *demuxer)
                 uint64_t num = ebml_read_uint (s, NULL);
                 if (num == EBML_UINT_INVALID)
                   return 0;
-                mkv_d->first_tc = num * mkv_d->tc_scale / 1000000.0;
-                mkv_d->has_first_tc = 1;
               }
             stream_seek (s, p - 4);
             cont = 1;
@@ -2267,22 +2262,6 @@ demux_mkv_open (demuxer_t *demuxer)
           mkv_d->last_aid++;
           if(mkv_d->last_aid == MAX_A_STREAMS)
             break;
-        }
-    }
-
-  if (demuxer->chapters)
-    {
-      for (i=0; i < (int)demuxer->num_chapters; i++)
-        {
-          demuxer->chapters[i].start -= mkv_d->first_tc;
-          demuxer->chapters[i].end -= mkv_d->first_tc;
-        }
-      if (dvd_last_chapter > 0 && dvd_last_chapter <= demuxer->num_chapters)
-        {
-          if (demuxer->chapters[dvd_last_chapter-1].end != 0)
-            mkv_d->stop_timecode = demuxer->chapters[dvd_last_chapter-1].end;
-          else if (dvd_last_chapter + 1 <= demuxer->num_chapters)
-            mkv_d->stop_timecode = demuxer->chapters[dvd_last_chapter].start;
         }
     }
 
@@ -2675,13 +2654,9 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
     return 0;
   block += old_length - length;
 
-  tc = ((time*mkv_d->tc_scale+mkv_d->cluster_tc) /1000000.0 - mkv_d->first_tc);
+  tc = ((time*mkv_d->tc_scale+mkv_d->cluster_tc) /1000000.0);
   if (tc < 0)
     tc = 0;
-  if (mkv_d->stop_timecode > 0 && tc > mkv_d->stop_timecode) {
-    free(lace_size);
-    return -1;
-  }
   current_pts = tc / 1000.0;
 
   for (i=0; i<mkv_d->num_tracks; i++)
@@ -2904,11 +2879,6 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                     uint64_t num = ebml_read_uint (s, &l);
                     if (num == EBML_UINT_INVALID)
                       return 0;
-                    if (!mkv_d->has_first_tc)
-                      {
-                        mkv_d->first_tc = num * mkv_d->tc_scale / 1000000.0;
-                        mkv_d->has_first_tc = 1;
-                      }
                     mkv_d->cluster_tc = num * mkv_d->tc_scale;
                     break;
                   }
@@ -3054,7 +3024,7 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
           for (i=0; i < mkv_d->num_indexes; i++)
             if (mkv_d->indexes[i].tnum == seek_id)
               {
-                diff = target_timecode + mkv_d->first_tc -
+                diff = target_timecode -
                        (int64_t) mkv_d->indexes[i].timecode * mkv_d->tc_scale / 1000000.0;
 
                 if (flags & SEEK_BACKWARD) {
