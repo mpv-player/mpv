@@ -3592,8 +3592,8 @@ if(!mpctx->demuxer)
  }
 
 if(dvd_chapter>1) {
-  float pts;
-  if (demuxer_seek_chapter(mpctx->demuxer, dvd_chapter-1, 1, &pts, NULL, NULL) >= 0 && pts > -1.0)
+  double pts;
+  if (demuxer_seek_chapter(mpctx->demuxer, dvd_chapter-1, &pts, NULL) >= 0 && pts > -1.0)
     seek(mpctx, pts, SEEK_ABSOLUTE);
 }
 

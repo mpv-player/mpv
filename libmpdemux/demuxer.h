@@ -431,7 +431,8 @@ int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
                            const char* type, const void* data, size_t size);
 
 int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end);
-int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts, int *num_chapters, char **chapter_name);
+int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
+                         char **chapter_name);
 
 /// Get current chapter index if available.
 int demuxer_get_current_chapter(demuxer_t *demuxer);

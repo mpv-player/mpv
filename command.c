@@ -387,8 +387,6 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
 {
     struct MPOpts *opts = &mpctx->opts;
     int chapter = -1;
-    float next_pts = 0;
-    int chapter_num;
     int step_all;
     char *chapter_name = NULL;
 
@@ -431,10 +429,12 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
+
+    double next_pts = 0;
+    chapter = demuxer_seek_chapter(mpctx->demuxer, chapter, &next_pts,
+                                   &chapter_name);
     mpctx->rel_seek_secs = 0;
     mpctx->abs_seek_pos = 0;
-    chapter = demuxer_seek_chapter(mpctx->demuxer, chapter, 1,
-                                   &next_pts, &chapter_num, &chapter_name);
     if (chapter >= 0) {
         if (next_pts > -1.0) {
             mpctx->abs_seek_pos = SEEK_ABSOLUTE;
@@ -450,7 +450,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
                     MSGTR_OSDChapter, 0, MSGTR_Unknown);
     if (chapter_name)
-        free(chapter_name);
+        talloc_free(chapter_name);
     return M_PROPERTY_OK;
 }
 
