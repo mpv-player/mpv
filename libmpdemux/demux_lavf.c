@@ -41,7 +41,7 @@
 
 #include "mp_taglists.h"
 
-#define PROBE_BUF_SIZE 2048
+#define PROBE_BUF_SIZE (32*1024)
 
 extern char *audio_lang;
 extern char *dvdsub_lang;
