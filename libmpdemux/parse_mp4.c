@@ -21,12 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "config.h"
 #include <stdio.h>
 #include <inttypes.h>
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <stdlib.h>
 #include "parse_mp4.h"
 #include "mp_msg.h"

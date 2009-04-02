@@ -4,9 +4,6 @@
 
 CpuCaps gCpuCaps;
 
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <stdlib.h>
 
 #if ARCH_X86

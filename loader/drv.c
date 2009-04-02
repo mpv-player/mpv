@@ -7,9 +7,6 @@
 #include "debug.h"
 
 #include <stdio.h>
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <stdlib.h>
 #ifdef __FreeBSD__
 #include <sys/time.h>

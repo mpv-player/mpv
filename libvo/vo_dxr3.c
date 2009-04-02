@@ -37,9 +37,6 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include "fastmemcpy.h"
 
 #include "video_out.h"

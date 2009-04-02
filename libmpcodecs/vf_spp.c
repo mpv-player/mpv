@@ -46,10 +46,6 @@
 #undef free
 #undef malloc
 
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"

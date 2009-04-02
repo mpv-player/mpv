@@ -24,8 +24,6 @@
 #include <math.h>
 #include <inttypes.h>
 
-#include "config.h"
-
 #include "mp_msg.h"
 #include "cpudetect.h"
 #include "img_format.h"
@@ -35,10 +33,6 @@
 
 #include "libavcodec/avcodec.h"
 #include "libavcodec/eval.h"
-
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 
 
 struct vf_priv_s {

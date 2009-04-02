@@ -14,9 +14,6 @@
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <unistd.h>
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>

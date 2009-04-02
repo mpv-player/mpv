@@ -32,14 +32,7 @@
 #include <inttypes.h>
 #include <math.h>
 
-#include "config.h"
-
 #include "mp_msg.h"
-
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"

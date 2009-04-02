@@ -21,10 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #include "af.h"
 
 // Static list of filters
