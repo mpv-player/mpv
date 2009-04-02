@@ -8819,6 +8819,11 @@ $def_xvid_lavc
 `ff_config_enable "$_libavprotocols_all" "$_libavprotocols"`
 `ff_config_enable "$_libavbsfs_all" "$_libavbsfs"`
 
+#define CONFIG_H263_VAAPI_HWACCEL 0
+#define CONFIG_MPEG2_VAAPI_HWACCEL 0
+#define CONFIG_MPEG4_VAAPI_HWACCEL 0
+#define CONFIG_H264_VAAPI_HWACCEL 0
+
 #endif /* MPLAYER_CONFIG_H */
 EOF
 
