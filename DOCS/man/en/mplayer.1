@@ -5058,6 +5058,23 @@ Reasonable values are around 0.001.
 .PD 1
 .
 .TP
+.B bs2b[=option1:option2]
+Bauer stereophonic to binaural transformation using libbs2b.
+Improves the headphone listening experience by making the sound
+similar to that from loudspeakers, allowing each ear to hear both
+channels and taking into account the distance difference and the
+head shadowing effect.
+It is applicable only to 2 channel audio.
+.PD 0
+.RSs
+.IPs level=<1\-3>
+Set cross feed level, higher level means stronger effect (default: 3).
+.IPs profile=<0\-1>
+Select cross feed profile to use, 1 provides softer sound than 0 (default: 1).
+.RE
+.PD 1
+.
+.TP
 .B hrtf[=flag]
 Head-related transfer function: Converts multichannel audio to
 2 channel output for headphones, preserving the spatiality of the sound.
