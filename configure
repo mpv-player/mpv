@@ -326,6 +326,7 @@ Codecs:
   --disable-faac            disable support for FAAC (AAC encoder) [autodetect]
   --disable-faac-lavc       disable support for FAAC in libavcodec [autodetect]
   --disable-ladspa          disable LADSPA plugin support [autodetect]
+  --disable-libbs2b         disable libbs2b audio filter support [autodetect]
   --disable-libdv           disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad             disable libmad (MPEG audio) support [autodetect]
   --disable-mp3lame         disable LAME MP3 encoding support [autodetect]
@@ -616,6 +617,7 @@ _faad_fixed=no
 _faac=auto
 _faac_lavc=auto
 _ladspa=auto
+_libbs2b=auto
 _xmms=no
 _dvdnav=auto
 _dvdnavconfig=dvdnav-config
@@ -1013,6 +1015,8 @@ for ac_option do
   --disable-faac-lavc)	_faac_lavc=no	;;
   --enable-ladspa)	_ladspa=yes	;;
   --disable-ladspa)	_ladspa=no		;;
+  --enable-libbs2b)	_libbs2b=yes	;;
+  --disable-libbs2b)	_libbs2b=no	;;
   --enable-xmms)	_xmms=yes	;;
   --disable-xmms)	_xmms=no	;;
   --enable-dvdread)	_dvdread=yes	;;
@@ -6597,6 +6601,43 @@ fi
 echores "$_ladspa"
 
 
+echocheck "libbs2b audio filter support"
+if test "$_libbs2b" = auto ; then
+  cat > $TMPC <<EOF
+#include <bs2b.h>
+#if BS2B_VERSION_MAJOR < 3
+#error Please use libbs2b >= 3.0.0, older versions are not supported.
+#endif
+int main(void) {
+    t_bs2bdp filter;
+    filter=bs2b_open();
+    bs2b_close(filter);
+    return 0;
+}
+EOF
+  _libbs2b=no
+  if $_pkg_config --exists libbs2b ; then
+    _inc_tmp=$($_pkg_config --cflags libbs2b)
+    _ld_tmp=$($_pkg_config --libs libbs2b)
+    cc_check $_inc_tmp $_ld_tmp && extra_ldflags="$extra_ldflags $_ld_tmp" &&
+      extra_cflags="$extra_cflags $_inc_tmp" && _libbs2b=yes
+  else
+    for _inc_tmp in "" -I/usr/include/bs2b -I/usr/local/include \
+        -I/usr/local/include/bs2b ; do
+      if cc_check $_inc_tmp $_ld_lm -lbs2b ; then
+        extra_ldflags="$extra_ldflags -lbs2b"
+        extra_cflags="$extra_cflags $_inc_tmp"
+        _libbs2b=yes
+        break
+      fi
+    done
+  fi
+fi
+def_libbs2b="#undef CONFIG_LIBBS2B"
+test "$_libbs2b" = yes && def_libbs2b="#define CONFIG_LIBBS2B"
+echores "$_libbs2b"
+
+
 if test -z "$_codecsdir" ; then
   for dir in "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/codecs \
              /usr/lib/codecs /usr/local/lib/win32 /usr/lib/win32 ; do
@@ -8183,6 +8224,7 @@ LADSPA = $_ladspa
 LIBA52 = $_liba52
 LIBA52_INTERNAL = $_liba52_internal
 LIBASS = $_ass
+LIBBS2B = $_libbs2b
 LIBDCA = $_libdca
 LIBDV = $_libdv
 LIBDVDCSS_INTERNAL = $_libdvdcss_internal
@@ -8604,6 +8646,7 @@ $def_sunaudio
 $def_win32waveout
 
 $def_ladspa
+$def_libbs2b
 
 
 /* input */
