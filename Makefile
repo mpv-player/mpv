@@ -745,6 +745,12 @@ DIRS =  . \
         libavcodec/x86 \
         libavformat \
         libavutil \
+        libavutil/arm \
+        libavutil/bfin \
+        libavutil/bfin \
+        libavutil/ppc \
+        libavutil/sh4 \
+        libavutil/x86 \
         libdvdcss \
         libdvdnav \
         libdvdnav/vm \
@@ -757,6 +763,11 @@ DIRS =  . \
         libmpeg2 \
         libpostproc \
         libswscale \
+        libswscale/bfin \
+        libswscale/mlib \
+        libswscale/ppc \
+        libswscale/sparc \
+        libswscale/x86 \
         libvo \
         loader \
         loader/dshow \
