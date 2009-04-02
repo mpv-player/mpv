@@ -2,9 +2,6 @@
 #include "options.h"
 
 #include <stdio.h>
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>

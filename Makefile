@@ -343,6 +343,7 @@ SRCS_COMMON-$(LIBAVCODEC_A)          += libaf/af_lavcac3enc.c \
                                         libmpcodecs/vf_uspp.c \
 
 SRCS_COMMON-$(LIBAVFORMAT)           += libmpdemux/demux_lavf.c
+SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
 SRCS_COMMON-$(LIBDCA)                += libmpcodecs/ad_libdca.c
 SRCS_COMMON-$(LIBDV)                 += libmpcodecs/ad_libdv.c \
                                         libmpcodecs/vd_libdv.c \
@@ -748,6 +749,12 @@ DIRS =  . \
         ffmpeg/libavcodec/sparc \
         ffmpeg/libavformat \
         ffmpeg/libavutil \
+        ffmpeg/libavutil/arm \
+        ffmpeg/libavutil/bfin \
+        ffmpeg/libavutil/bfin \
+        ffmpeg/libavutil/ppc \
+        ffmpeg/libavutil/sh4 \
+        ffmpeg/libavutil/x86 \
         libdvdcss \
         libdvdnav \
         libdvdnav/vm \
@@ -760,6 +767,11 @@ DIRS =  . \
         libmpeg2 \
         ffmpeg/libpostproc \
         libswscale \
+        libswscale/bfin \
+        libswscale/mlib \
+        libswscale/ppc \
+        libswscale/sparc \
+        libswscale/x86 \
         libvo \
         loader \
         loader/dshow \

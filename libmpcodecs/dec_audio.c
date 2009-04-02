@@ -19,10 +19,6 @@
 
 #include "libaf/af.h"
 
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #ifdef CONFIG_DYNAMIC_PLUGINS
 #include <dlfcn.h>
 #endif

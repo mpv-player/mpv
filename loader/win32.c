@@ -53,9 +53,6 @@ for DLL to know too much about its environment.
 #include <ctype.h>
 #include <pthread.h>
 #include <errno.h>
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 #include <time.h>
 #include <math.h>
 #include <unistd.h>

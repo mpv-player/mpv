@@ -21,10 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
 #include "af.h"
 
 // Static list of filters
@@ -53,6 +49,7 @@ extern af_info_t af_info_sinesuppress;
 extern af_info_t af_info_karaoke;
 extern af_info_t af_info_scaletempo;
 extern af_info_t af_info_stats;
+extern af_info_t af_info_bs2b;
 
 static af_info_t* filter_list[]={ 
    &af_info_dummy,
@@ -88,6 +85,9 @@ static af_info_t* filter_list[]={
    &af_info_karaoke,
    &af_info_scaletempo,
    &af_info_stats,
+#ifdef CONFIG_LIBBS2B
+   &af_info_bs2b,
+#endif
    NULL 
 };
 

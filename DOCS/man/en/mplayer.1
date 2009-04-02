@@ -3296,7 +3296,7 @@ This option is not suitable to only set the startup screen (because
 it will always display on the given screen in fullscreen mode),
 \-geometry is the best that is available for that purpose
 currently.
-Supported by the gl, gl2, x11, and xv video output drivers.
+Supported by at least the direct3d, gl, gl2, x11 and xv video output drivers.
 .
 .TP
 .B \-zrbw (\-vo zr only)
@@ -5052,6 +5052,23 @@ Controls the adaptivity (a larger value will make the filter adapt to
 amplitude and phase changes quicker, a smaller value will make the
 adaptation slower) (default: 0.0001).
 Reasonable values are around 0.001.
+.RE
+.PD 1
+.
+.TP
+.B bs2b[=option1:option2]
+Bauer stereophonic to binaural transformation using libbs2b.
+Improves the headphone listening experience by making the sound
+similar to that from loudspeakers, allowing each ear to hear both
+channels and taking into account the distance difference and the
+head shadowing effect.
+It is applicable only to 2 channel audio.
+.PD 0
+.RSs
+.IPs level=<1\-3>
+Set cross feed level, higher level means stronger effect (default: 3).
+.IPs profile=<0\-1>
+Select cross feed profile to use, 1 provides softer sound than 0 (default: 1).
 .RE
 .PD 1
 .

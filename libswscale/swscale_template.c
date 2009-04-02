@@ -26,15 +26,6 @@
 #undef PAVGB
 #undef PREFETCH
 #undef PREFETCHW
-#undef EMMS
-#undef SFENCE
-
-#if HAVE_AMD3DNOW
-/* On K6 femms is faster than emms. On K7 femms is directly mapped to emms. */
-#define EMMS     "femms"
-#else
-#define EMMS     "emms"
-#endif
 
 #if HAVE_AMD3DNOW
 #define PREFETCH  "prefetch"
@@ -45,12 +36,6 @@
 #else
 #define PREFETCH  " # nop"
 #define PREFETCHW " # nop"
-#endif
-
-#if HAVE_MMX2
-#define SFENCE "sfence"
-#else
-#define SFENCE " # nop"
 #endif
 
 #if HAVE_MMX2
@@ -2258,13 +2243,34 @@ static inline void RENAME(hScale)(int16_t *dst, int dstW, uint8_t *src, int srcW
 #endif /* HAVE_ALTIVEC */
 #endif /* HAVE_MMX */
 }
+
+static inline void RENAME(hyscale_fast)(SwsContext *c, int16_t *dst,
+                                        int dstWidth, uint8_t *src, int srcW,
+                                        int xInc)
+{
+    int i;
+    unsigned int xpos=0;
+    for (i=0;i<dstWidth;i++)
+    {
+        register unsigned int xx=xpos>>16;
+        register unsigned int xalpha=(xpos&0xFFFF)>>9;
+        dst[i]= (src[xx]<<7) + (src[xx+1] - src[xx])*xalpha;
+        xpos+=xInc;
+    }
+}
+
       // *** horizontal scale Y line to temp buffer
 static inline void RENAME(hyscale)(SwsContext *c, uint16_t *dst, long dstWidth, uint8_t *src, int srcW, int xInc,
-                                   int flags, int canMMX2BeUsed, int16_t *hLumFilter,
-                                   int16_t *hLumFilterPos, int hLumFilterSize, void *funnyYCode,
-                                   int srcFormat, uint8_t *formatConvBuffer, int16_t *mmx2Filter,
-                                   int32_t *mmx2FilterPos, uint32_t *pal, int isAlpha)
+                                   int flags, int16_t *hLumFilter,
+                                   int16_t *hLumFilterPos, int hLumFilterSize,
+                                   int srcFormat, uint8_t *formatConvBuffer,
+                                   uint32_t *pal, int isAlpha)
 {
+    int32_t *mmx2FilterPos = c->lumMmx2FilterPos;
+    int16_t *mmx2Filter = c->lumMmx2Filter;
+    int canMMX2BeUsed = c->canMMX2BeUsed;
+    void *funnyYCode = c->funnyYCode;
+
     if (srcFormat==PIX_FMT_YUYV422 || srcFormat==PIX_FMT_GRAY16BE)
     {
         RENAME(yuy2ToY)(formatConvBuffer, src, srcW, pal);
@@ -2480,15 +2486,7 @@ FUNNY_Y_CODE
         } //if MMX2 can't be used
 #endif
 #else
-        int i;
-        unsigned int xpos=0;
-        for (i=0;i<dstWidth;i++)
-        {
-            register unsigned int xx=xpos>>16;
-            register unsigned int xalpha=(xpos&0xFFFF)>>9;
-            dst[i]= (src[xx]<<7) + (src[xx+1] - src[xx])*xalpha;
-            xpos+=xInc;
-        }
+        RENAME(hyscale_fast)(c, dst, dstWidth, src, srcW, xInc);
 #endif /* ARCH_X86 */
     }
 
@@ -2506,12 +2504,37 @@ FUNNY_Y_CODE
     }
 }
 
-inline static void RENAME(hcscale)(SwsContext *c, uint16_t *dst, long dstWidth, uint8_t *src1, uint8_t *src2,
-                                   int srcW, int xInc, int flags, int canMMX2BeUsed, int16_t *hChrFilter,
-                                   int16_t *hChrFilterPos, int hChrFilterSize, void *funnyUVCode,
-                                   int srcFormat, uint8_t *formatConvBuffer, int16_t *mmx2Filter,
-                                   int32_t *mmx2FilterPos, uint32_t *pal)
+static inline void RENAME(hcscale_fast)(SwsContext *c, int16_t *dst,
+                                        int dstWidth, uint8_t *src1,
+                                        uint8_t *src2, int srcW, int xInc)
 {
+    int i;
+    unsigned int xpos=0;
+    for (i=0;i<dstWidth;i++)
+    {
+        register unsigned int xx=xpos>>16;
+        register unsigned int xalpha=(xpos&0xFFFF)>>9;
+        dst[i]=(src1[xx]*(xalpha^127)+src1[xx+1]*xalpha);
+        dst[i+VOFW]=(src2[xx]*(xalpha^127)+src2[xx+1]*xalpha);
+        /* slower
+        dst[i]= (src1[xx]<<7) + (src1[xx+1] - src1[xx])*xalpha;
+        dst[i+VOFW]=(src2[xx]<<7) + (src2[xx+1] - src2[xx])*xalpha;
+        */
+        xpos+=xInc;
+    }
+}
+
+inline static void RENAME(hcscale)(SwsContext *c, uint16_t *dst, long dstWidth, uint8_t *src1, uint8_t *src2,
+                                   int srcW, int xInc, int flags, int16_t *hChrFilter,
+                                   int16_t *hChrFilterPos, int hChrFilterSize,
+                                   int srcFormat, uint8_t *formatConvBuffer,
+                                   uint32_t *pal)
+{
+    int32_t *mmx2FilterPos = c->chrMmx2FilterPos;
+    int16_t *mmx2Filter = c->chrMmx2Filter;
+    int canMMX2BeUsed = c->canMMX2BeUsed;
+    void *funnyUVCode = c->funnyUVCode;
+
     if (srcFormat==PIX_FMT_YUYV422)
     {
         RENAME(yuy2ToUV)(formatConvBuffer, formatConvBuffer+VOFW, src1, src2, srcW, pal);
@@ -2769,20 +2792,7 @@ FUNNY_UV_CODE
         } //if MMX2 can't be used
 #endif
 #else
-        int i;
-        unsigned int xpos=0;
-        for (i=0;i<dstWidth;i++)
-        {
-            register unsigned int xx=xpos>>16;
-            register unsigned int xalpha=(xpos&0xFFFF)>>9;
-            dst[i]=(src1[xx]*(xalpha^127)+src1[xx+1]*xalpha);
-            dst[i+VOFW]=(src2[xx]*(xalpha^127)+src2[xx+1]*xalpha);
-            /* slower
-            dst[i]= (src1[xx]<<7) + (src1[xx+1] - src1[xx])*xalpha;
-            dst[i+VOFW]=(src2[xx]<<7) + (src2[xx+1] - src2[xx])*xalpha;
-            */
-            xpos+=xInc;
-        }
+        RENAME(hcscale_fast)(c, dst, dstWidth, src1, src2, srcW, xInc);
 #endif /* ARCH_X86 */
     }
     if(c->srcRange != c->dstRange && !(isRGB(c->dstFormat) || isBGR(c->dstFormat))){
@@ -2817,7 +2827,6 @@ static int RENAME(swScale)(SwsContext *c, uint8_t* src[], int srcStride[], int s
     const int dstFormat= c->dstFormat;
     const int srcFormat= c->srcFormat;
     const int flags= c->flags;
-    const int canMMX2BeUsed= c->canMMX2BeUsed;
     int16_t *vLumFilterPos= c->vLumFilterPos;
     int16_t *vChrFilterPos= c->vChrFilterPos;
     int16_t *hLumFilterPos= c->hLumFilterPos;
@@ -2838,8 +2847,6 @@ static int RENAME(swScale)(SwsContext *c, uint8_t* src[], int srcStride[], int s
     int16_t **alpPixBuf= c->alpPixBuf;
     const int vLumBufSize= c->vLumBufSize;
     const int vChrBufSize= c->vChrBufSize;
-    uint8_t *funnyYCode= c->funnyYCode;
-    uint8_t *funnyUVCode= c->funnyUVCode;
     uint8_t *formatConvBuffer= c->formatConvBuffer;
     const int chrSrcSliceY= srcSliceY >> c->chrSrcVSubSample;
     const int chrSrcSliceH= -((-srcSliceH) >> c->chrSrcVSubSample);
@@ -2942,14 +2949,14 @@ static int RENAME(swScale)(SwsContext *c, uint8_t* src[], int srcStride[], int s
                 assert(lastInLumBuf + 1 - srcSliceY >= 0);
                 //printf("%d %d\n", lumBufIndex, vLumBufSize);
                 RENAME(hyscale)(c, lumPixBuf[ lumBufIndex ], dstW, src1, srcW, lumXInc,
-                                flags, canMMX2BeUsed, hLumFilter, hLumFilterPos, hLumFilterSize,
-                                funnyYCode, c->srcFormat, formatConvBuffer,
-                                c->lumMmx2Filter, c->lumMmx2FilterPos, pal, 0);
+                                flags, hLumFilter, hLumFilterPos, hLumFilterSize,
+                                c->srcFormat, formatConvBuffer,
+                                pal, 0);
                 if (CONFIG_SWSCALE_ALPHA && alpPixBuf)
                     RENAME(hyscale)(c, alpPixBuf[ lumBufIndex ], dstW, src2, srcW, lumXInc,
-                                    flags, canMMX2BeUsed, hLumFilter, hLumFilterPos, hLumFilterSize,
-                                    funnyYCode, c->srcFormat, formatConvBuffer,
-                                    c->lumMmx2Filter, c->lumMmx2FilterPos, pal, 1);
+                                    flags, hLumFilter, hLumFilterPos, hLumFilterSize,
+                                    c->srcFormat, formatConvBuffer,
+                                    pal, 1);
                 lastInLumBuf++;
             }
             while(lastInChrBuf < lastChrSrcY)
@@ -2964,9 +2971,9 @@ static int RENAME(swScale)(SwsContext *c, uint8_t* src[], int srcStride[], int s
 
                 if (!(isGray(srcFormat) || isGray(dstFormat)))
                     RENAME(hcscale)(c, chrPixBuf[ chrBufIndex ], chrDstW, src1, src2, chrSrcW, chrXInc,
-                                    flags, canMMX2BeUsed, hChrFilter, hChrFilterPos, hChrFilterSize,
-                                    funnyUVCode, c->srcFormat, formatConvBuffer,
-                                    c->chrMmx2Filter, c->chrMmx2FilterPos, pal);
+                                    flags, hChrFilter, hChrFilterPos, hChrFilterSize,
+                                    c->srcFormat, formatConvBuffer,
+                                    pal);
                 lastInChrBuf++;
             }
             //wrap buf index around to stay inside the ring buffer
@@ -2990,14 +2997,14 @@ static int RENAME(swScale)(SwsContext *c, uint8_t* src[], int srcStride[], int s
                 assert(lastInLumBuf + 1 - srcSliceY < srcSliceH);
                 assert(lastInLumBuf + 1 - srcSliceY >= 0);
                 RENAME(hyscale)(c, lumPixBuf[ lumBufIndex ], dstW, src1, srcW, lumXInc,
-                                flags, canMMX2BeUsed, hLumFilter, hLumFilterPos, hLumFilterSize,
-                                funnyYCode, c->srcFormat, formatConvBuffer,
-                                c->lumMmx2Filter, c->lumMmx2FilterPos, pal, 0);
+                                flags, hLumFilter, hLumFilterPos, hLumFilterSize,
+                                c->srcFormat, formatConvBuffer,
+                                pal, 0);
                 if (CONFIG_SWSCALE_ALPHA && alpPixBuf)
                     RENAME(hyscale)(c, alpPixBuf[ lumBufIndex ], dstW, src2, srcW, lumXInc,
-                                    flags, canMMX2BeUsed, hLumFilter, hLumFilterPos, hLumFilterSize,
-                                    funnyYCode, c->srcFormat, formatConvBuffer,
-                                    c->lumMmx2Filter, c->lumMmx2FilterPos, pal, 1);
+                                    flags, hLumFilter, hLumFilterPos, hLumFilterSize,
+                                    c->srcFormat, formatConvBuffer,
+                                    pal, 1);
                 lastInLumBuf++;
             }
             while(lastInChrBuf+1 < (chrSrcSliceY + chrSrcSliceH))
@@ -3011,9 +3018,9 @@ static int RENAME(swScale)(SwsContext *c, uint8_t* src[], int srcStride[], int s
 
                 if (!(isGray(srcFormat) || isGray(dstFormat)))
                     RENAME(hcscale)(c, chrPixBuf[ chrBufIndex ], chrDstW, src1, src2, chrSrcW, chrXInc,
-                            flags, canMMX2BeUsed, hChrFilter, hChrFilterPos, hChrFilterSize,
-                            funnyUVCode, c->srcFormat, formatConvBuffer,
-                            c->chrMmx2Filter, c->chrMmx2FilterPos, pal);
+                            flags, hChrFilter, hChrFilterPos, hChrFilterSize,
+                            c->srcFormat, formatConvBuffer,
+                            pal);
                 lastInChrBuf++;
             }
             //wrap buf index around to stay inside the ring buffer
@@ -3209,8 +3216,10 @@ static int RENAME(swScale)(SwsContext *c, uint8_t* src[], int srcStride[], int s
         fillPlane(dst[3], dstStride[3], dstW, dstY-lastDstY, lastDstY, 255);
 
 #if HAVE_MMX
-    __asm__ volatile(SFENCE:::"memory");
-    __asm__ volatile(EMMS:::"memory");
+    if (flags & SWS_CPU_CAPS_MMX2 )  __asm__ volatile("sfence":::"memory");
+    /* On K6 femms is faster than emms. On K7 femms is directly mapped to emms. */
+    if (flags & SWS_CPU_CAPS_3DNOW)  __asm__ volatile("femms" :::"memory");
+    else                             __asm__ volatile("emms"  :::"memory");
 #endif
     /* store changed local vars back in the context */
     c->dstY= dstY;

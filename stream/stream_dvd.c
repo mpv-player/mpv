@@ -1094,7 +1094,6 @@ fail:
 
 static int ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
-    char *ext;
     char* filename;
     struct stream_priv_s *spriv;
     int len = strlen(stream->url);
