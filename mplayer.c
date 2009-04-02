@@ -579,6 +579,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     talloc_free(mpctx->timeline);
     mpctx->timeline = NULL;
     mpctx->num_timeline_parts = 0;
+    talloc_free(mpctx->chapters);
+    mpctx->num_chapters = 0;
     mpctx->video_offset = 0;
     if(mpctx->demuxer){
 	mpctx->stream=mpctx->demuxer->stream;
@@ -2618,6 +2620,43 @@ static int seek(MPContext *mpctx, double amount, int style)
     return 0;
 }
 
+int get_current_chapter(struct MPContext *mpctx)
+{
+    if (!mpctx->chapters || !mpctx->sh_video)
+        return demuxer_get_current_chapter(mpctx->demuxer);
+
+    int i;
+    double current_pts = mpctx->sh_video->pts;
+    for (i = 1; i < mpctx->num_chapters; i++)
+        if (current_pts < mpctx->chapters[i].start)
+            break;
+    return i - 1;
+}
+
+// currently returns a string allocated with malloc, not talloc
+char *chapter_display_name(struct MPContext *mpctx, int chapter)
+{
+    if (!mpctx->chapters || !mpctx->sh_video)
+        return demuxer_chapter_display_name(mpctx->demuxer, chapter);
+    return strdup(mpctx->chapters[chapter].name);
+}
+
+int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
+                 char **chapter_name)
+{
+    if (!mpctx->chapters || !mpctx->sh_video)
+        return demuxer_seek_chapter(mpctx->demuxer, chapter, seek_pts,
+                                    chapter_name);
+    if (chapter >= mpctx->num_chapters)
+        return -1;
+    if (chapter < 0)
+        chapter = 0;
+    *seek_pts = mpctx->chapters[chapter].start;
+    if (chapter_name)
+        *chapter_name = talloc_strdup(NULL, mpctx->chapters[chapter].name);
+    return chapter;
+}
+
 static int find_ordered_chapter_sources(struct MPContext *mpctx,
                                         struct content_source *sources,
                                         int num_sources,
@@ -2726,9 +2765,12 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
 
     struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline,
                                                   m->num_ordered_chapters + 1);
+    struct chapter *chapters = talloc_array_ptrtype(NULL, chapters,
+                                                    m->num_ordered_chapters);
     uint64_t starttime = 0;
     uint64_t missing_time = 0;
     int part_count = 0;
+    int num_chapters = 0;
     for (int i = 0; i < m->num_ordered_chapters; i++) {
         struct matroska_chapter *c = m->ordered_chapters + i;
 
@@ -2740,6 +2782,8 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
         missing_time += c->end - c->start;
         continue;
     found2:;
+        chapters[num_chapters].start = starttime / 1000.;
+        chapters[num_chapters].name = talloc_strdup(chapters, c->name);
         // Only add a separate part if the time or file actually changes
         uint64_t prev_end = !part_count ? 0 : starttime
             - timeline[part_count - 1].start
@@ -2747,11 +2791,12 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
         if (part_count == 0 || c->start != prev_end
             || sources + j != timeline[part_count - 1].source) {
             timeline[part_count].source = sources + j;
-            timeline[part_count].start = starttime / 1000.;
+            timeline[part_count].start = chapters[num_chapters].start;
             timeline[part_count].source_start = c->start / 1000.;
             part_count++;
         }
         starttime += c->end - c->start;
+        num_chapters++;
     }
     timeline[part_count].start = starttime / 1000.;
 
@@ -2759,6 +2804,7 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
         // None of the parts come from the file itself???
         talloc_free(sources);
         talloc_free(timeline);
+        talloc_free(chapters);
         return;
     }
 
@@ -2784,6 +2830,9 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
     mpctx->num_sources = num_sources;
     mpctx->timeline = timeline;
     mpctx->num_timeline_parts = part_count;
+    mpctx->num_chapters = num_chapters;
+    mpctx->chapters = chapters;
+
     mpctx->timeline_part = 0;
     mpctx->video_offset = timeline[0].source_start;
     mpctx->demuxer = timeline[0].source->demuxer;
@@ -3593,7 +3642,7 @@ if(!mpctx->demuxer)
 
 if(dvd_chapter>1) {
   double pts;
-  if (demuxer_seek_chapter(mpctx->demuxer, dvd_chapter-1, &pts, NULL) >= 0 && pts > -1.0)
+  if (seek_chapter(mpctx, dvd_chapter-1, &pts, NULL) >= 0 && pts > -1.0)
     seek(mpctx, pts, SEEK_ABSOLUTE);
 }
 
@@ -3993,7 +4042,7 @@ while(!mpctx->stop_play){
     float aq_sleep_time=0;
 
 if(dvd_last_chapter>0) {
-  int cur_chapter = demuxer_get_current_chapter(mpctx->demuxer);
+  int cur_chapter = get_current_chapter(mpctx);
   if(cur_chapter!=-1 && cur_chapter+1>dvd_last_chapter)
     goto goto_next_file;
 }

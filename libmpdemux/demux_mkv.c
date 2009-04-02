@@ -1170,6 +1170,7 @@ static uint64_t read_one_chapter(struct demuxer *demuxer, stream_t *s)
                                          m->num_ordered_chapters + 1);
     chapter.start = start;
     chapter.end = end;
+    chapter.name = talloc_strdup(m->ordered_chapters, name);
     // Will be undone later if this is a normal chapter rather than ordered
     m->ordered_chapters[m->num_ordered_chapters] = chapter;
     m->num_ordered_chapters++;

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "config.h"
+#include "talloc.h"
 #include "command.h"
 #include "input/input.h"
 #include "stream/stream.h"
@@ -391,7 +392,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     char *chapter_name = NULL;
 
     if (mpctx->demuxer)
-        chapter = demuxer_get_current_chapter(mpctx->demuxer);
+        chapter = get_current_chapter(mpctx);
     if (chapter < 0)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -404,7 +405,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT: {
         if (!arg)
             return M_PROPERTY_ERROR;
-        chapter_name = demuxer_chapter_display_name(mpctx->demuxer, chapter);
+        chapter_name = chapter_display_name(mpctx, chapter);
         if (!chapter_name)
             return M_PROPERTY_UNAVAILABLE;
         *(char **) arg = chapter_name;
@@ -431,8 +432,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     }
 
     double next_pts = 0;
-    chapter = demuxer_seek_chapter(mpctx->demuxer, chapter, &next_pts,
-                                   &chapter_name);
+    chapter = seek_chapter(mpctx, chapter, &next_pts, &chapter_name);
     mpctx->rel_seek_secs = 0;
     mpctx->abs_seek_pos = 0;
     if (chapter >= 0) {

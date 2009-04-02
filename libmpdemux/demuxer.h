@@ -198,6 +198,7 @@ struct matroska_data {
         uint64_t end;
         bool has_segment_uid;
         unsigned char segment_uid[16];
+        char *name;
     } *ordered_chapters;
     int num_ordered_chapters;
 };

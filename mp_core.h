@@ -58,6 +58,11 @@ struct timeline_part {
     struct content_source *source;
 };
 
+struct chapter {
+    double start;
+    char *name;
+};
+
 typedef struct MPContext {
     struct MPOpts opts;
     struct m_config *mconfig;
@@ -85,6 +90,8 @@ typedef struct MPContext {
     struct timeline_part *timeline;
     int num_timeline_parts;
     int timeline_part;
+    struct chapter *chapters;   
+    int num_chapters;
     double video_offset;
 
     struct stream *stream;
@@ -130,7 +137,7 @@ typedef struct MPContext {
     unsigned int last_time;
 
     // Used to communicate the parameters of a seek between parts
-    float rel_seek_secs;
+    double rel_seek_secs;
     int abs_seek_pos;
 
     float begin_skip; ///< start time of the current skip while on edlout mode
@@ -188,5 +195,9 @@ int reinit_video_chain(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx);
+int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
+                 char **chapter_name);
+int get_current_chapter(struct MPContext *mpctx);
+char *chapter_display_name(struct MPContext *mpctx, int chapter);
 
 #endif /* MPLAYER_MP_CORE_H */
