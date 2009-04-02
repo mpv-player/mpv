@@ -45,6 +45,7 @@ static af_data_t *play_##name(struct af_instance_s *af, af_data_t *data) \
     return data; \
 }
 
+PLAY(f,float)
 PLAY(fbe,float)
 PLAY(fle,float)
 PLAY(s32be,int32_t)
@@ -132,11 +133,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
                 af->play = play_u8;
                 break;
             default:
-#ifdef WORDS_BIGENDIAN
-                af->play = play_fbe;
-#else
-                af->play = play_fle;
-#endif //WORDS_BIGENDIAN
+                af->play = play_f;
                 af->data->format = AF_FORMAT_FLOAT_NE;
                 af->data->bps=4;
                 break;
