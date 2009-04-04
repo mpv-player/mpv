@@ -797,10 +797,10 @@ for ac_option do
     ;;
 
   --extra-cflags=*)
-    extra_cflags=`echo $ac_option | cut -d '=' -f 2`
+    extra_cflags=`echo $ac_option | cut -d '=' -f 2-`
     ;;
   --extra-ldflags=*)
-    extra_ldflags=`echo $ac_option | cut -d '=' -f 2`
+    extra_ldflags=`echo $ac_option | cut -d '=' -f 2-`
     ;;
   --extra-libs=*)
     extra_libs=`echo $ac_option | cut -d '=' -f 2`
