@@ -69,7 +69,8 @@ char * fsVideoFilterNames[][2] =
 	   { "OGG Vorbis files (*.ogg)",				"*.ogg" },
 	   { "OGG Media files (*.ogm)",					"*.ogm" },
 	   { "QuickTime files (*.mov,*.qt,*.mp4)",			"*.mov,*.qt,*.mp4" },
-	   { "RealVideo files (*.rm)",					"*.rm"  },
+	   { "RealVideo files (*.rm,*.rmvb)",				"*.rm,*.rmvb"  },
+	   { "Tivo files (*.ty)",					"*.ty"  },
 	   { "VCD/SVCD Images (*.bin)",					"*.bin" },
 	   { "VIVO files (*.viv)",					"*.viv" },
 	   { "VOB files (*.vob)",					"*.vob" },
@@ -77,7 +78,7 @@ char * fsVideoFilterNames[][2] =
 	   { "Windows Media Audio (*.wma)",				"*.wma" },
 	   { "Windows Media Video (*.wmv)",				"*.wmv" },
 	   { "Audio files",						"*.mp2,*.mp3,*.mka,*.ogg,*.wav,*.wma" },
-	   { "Video files",						"*.asf,*.avi,*.fli,*.flc,*.trp,*.divx,*.mpg,*.mpeg,*.m1v,*.flv,*.mkv,*.nuv,*.ogm,*.mov,*.qt,*.mp4,*.rm,*.bin,*.viv,*.vob,*.wmv" },
+	   { "Video files",						"*.asf,*.avi,*.fli,*.flc,*.trp,*.divx,*.mpg,*.mpeg,*.m1v,*.flv,*.mkv,*.nuv,*.ogm,*.mov,*.qt,*.mp4,*.rm,*.rmvb,*.ty,*.bin,*.viv,*.vob,*.wmv" },
 	   { "All files",						"*" },
 	   { NULL,NULL }
 	 };
