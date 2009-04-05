@@ -1,4 +1,4 @@
-.\" Synced with r29059
+.\" Synced with r29147
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 03. 28." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 04. 05." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -3131,6 +3131,10 @@ bal felsõ sarkáig mért távolság pixelben, vagy ha egy százalék jelet
 érték lesz. Támogatja továbbá a szabványos X11 \-geometry formátumot is.
 Ha egy külsõ ablak is meg van adva a \-win opcióval, akkor az x és y
 koordináták az ablak bal felsõ sarkához viszonyulnak a képernyõ helyett.
+A \-xineramascreen kapcsolóval megadott koordináták a képernyõhöz
+viszonyítottak, azon videó kimeneti vezérlõknél, amelyek teljes mértékben
+támogatják a \-xineramascreen kapcsolót (direct3d, gl, gl2, vdpau, x11, xv, xvmc).
+
 .br
 .I MEGJEGYZÉS:
 Ezt az opciót csak az x11, xmga, xv, xvmc, xvidix, gl, gl2, directx,
@@ -3306,7 +3310,7 @@ mûködik.
 Ez az opció nem alkalmas csak a kezdõ képernyõ beállítására (mert
 a megadott képernyõn mindig teljes képernyõsen jelenik meg), jelenleg
 a \-geometry a legalkalmasabb erre a célra.
-A gl, gl2, x11 és az xv videó kimeneti vezérlõ támogatja.
+A direct3d, gl, gl2, x11 és az xv videó kimeneti vezérlõ támogatja.
 .
 .TP
 .B \-zrbw (csak \-vo zr)
@@ -5085,6 +5089,23 @@ Az alkalmazhatóságot szabályozza (a nagyobb érték hatására a szûrõ az amplitudó 
 fázisváltásokra gyorsabban reagál, kisebb értéknél az átállás lassabb lesz)
 (alapértelmeztett: 0.0001).
 Az ésszerû értékek 0.001 körül vannak.
+.RE
+.PD 1
+.
+.TP
+.B bs2b[=opció1:opció2]
+Bauer térhatásúból két fülesbe történõ transzformálás libbs2b-vel.
+Javítja a fülhallgatón történõ hallgatást úgy, hogy a hangot hasonlóvá
+teszi, mintha hangszóróból jönne, lehetõvé téve hogy mindkét fül
+hallja mindkét csatornát figyelembe véve a távolság differenciát és
+a fej árnyékoló hatását.
+Csak 2 csatornás audió esetén használható.
+.PD 0
+.RSs
+.IPs level=<1\-3>
+Beállítja az összemosás szintjét, a nagyobb szint erõsebb effektet jelent (alapértelmezett: 3).
+.IPs profile=<0\-1>
+Kiválasztja az összemosás profilt, az 1 finomabb hangot ad, mint a 0 (alapértelmezett: 1).
 .RE
 .PD 1
 .
