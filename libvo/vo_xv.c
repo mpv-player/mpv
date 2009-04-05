@@ -116,7 +116,7 @@ struct xvctx {
                            unsigned char *src, unsigned char *srca,
                            int stride);
 #ifdef HAVE_SHM
-    XShmSegmentInfo Shminfo[NUM_BUFFERS];
+    XShmSegmentInfo Shminfo[NUM_BUFFERS + 1];
     int Shmem_Flag;
 #endif
 };
