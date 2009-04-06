@@ -909,8 +909,12 @@ install-gui: install-mplayer
 	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/
 
+install-gui-man:      $(foreach lang,$(MAN_LANGS),install-gui-man-$(lang))
 install-mencoder-man: $(foreach lang,$(MAN_LANGS),install-mencoder-man-$(lang))
 install-mplayer-man:  $(foreach lang,$(MAN_LANGS),install-mplayer-man-$(lang))
+
+install-gui-man-en: install-mplayer-man-en
+	cd $(MANDIR)/man1/ && ln -sf mplayer.1 gmplayer.1
 
 install-mencoder-man-en: install-mplayer-man-en
 	cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1
@@ -918,6 +922,11 @@ install-mencoder-man-en: install-mplayer-man-en
 install-mplayer-man-en:
 	$(INSTALL) -d $(MANDIR)/man1
 	$(INSTALL) -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/
+
+define GUI_MAN_RULE
+install-gui-man-$(lang): install-mplayer-man-$(lang)
+	cd $(MANDIR)/$(lang)/man1/ && ln -sf mplayer.1 gmplayer.1
+endef
 
 define MENCODER_MAN_RULE
 install-mencoder-man-$(lang): install-mplayer-man-$(lang)
@@ -930,6 +939,7 @@ install-mplayer-man-$(lang):
 	$(INSTALL) -m 644 DOCS/man/$(lang)/mplayer.1 $(MANDIR)/$(lang)/man1/
 endef
 
+$(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(GUI_MAN_RULE)))
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MENCODER_MAN_RULE)))
 $(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
 
