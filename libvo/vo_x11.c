@@ -330,7 +330,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     old_vo_dwidth = -1;
     old_vo_dheight = -1;
 
-    int_pause = 0;
     if (!title)
         title = "MPlayer X11 (XImage/Shm) render";
 

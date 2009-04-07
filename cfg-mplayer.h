@@ -160,6 +160,8 @@ const m_option_t mplayer_opts[]={
         OPT_INTRANGE("screenh", vo_screenheight, CONF_OLD, 0, 4096),
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        OPT_FLAG_ON("force-window-position", force_window_position, 0),
+        OPT_FLAG_OFF("noforce-window-position", force_window_position, 0),
 	// set aspect ratio of monitor - useful for 16:9 TV-out
         OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
         OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
@@ -240,8 +242,8 @@ const m_option_t mplayer_opts[]={
 	{"crash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nocrash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 #endif
-	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
-	{"osd-duration", &osd_duration, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+        OPT_INTRANGE("osdlevel", osd_level, 0, 0, 3),
+        OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
 #ifdef CONFIG_MENU
 	{"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
@@ -308,6 +310,9 @@ const m_option_t mplayer_opts[]={
 	OPT_FLAG_CONSTANTS("noloop", loop_times, 0, 0, -1),
 	OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
 	{"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
+
+        OPT_FLAG_ON("ordered-chapters", ordered_chapters, 0),
+        OPT_FLAG_OFF("noordered-chapters", ordered_chapters, 0),
 
 	// a-v sync stuff:
         OPT_FLAG_ON("correct-pts", user_correct_pts, 0),

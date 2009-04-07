@@ -933,7 +933,11 @@ static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
   {
    vo->dwidth = width;
    vo->dheight = height;
-   XMoveResizeWindow(vo->x11->display, vo->x11->window, x, y, width, height);
+   if (vo->opts->force_window_position)
+       XMoveResizeWindow(vo->x11->display, vo->x11->window, x, y, width,
+                         height);
+   else
+       XResizeWindow(vo->x11->display, vo->x11->window, width, height);
   }
 }
 

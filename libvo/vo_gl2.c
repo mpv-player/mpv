@@ -622,8 +622,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   image_width = width;
   image_format = format;
 
-  int_pause = 0;
-
 #ifdef CONFIG_GUI
   if (use_gui) {
     if (config_glx_gui(d_width, d_height) == -1)

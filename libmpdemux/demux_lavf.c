@@ -22,6 +22,7 @@
 #include <stdlib.h>
 // #include <unistd.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "options.h"
@@ -533,6 +534,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         demuxer->video->id=-2; // audio-only
     } //else if (best_video > 0 && demuxer->video->id == -1) demuxer->video->id = best_video;
 
+    demuxer->accurate_seek = true;
+
     return demuxer;
 }
 
@@ -612,6 +615,10 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, float audio
     } else {
       if (rel_seek_secs < 0) avsflags = AVSEEK_FLAG_BACKWARD;
     }
+    if (flags & SEEK_FORWARD)
+        avsflags = 0;
+    else if (flags & SEEK_BACKWARD)
+        avsflags = AVSEEK_FLAG_BACKWARD;
     if (flags & SEEK_FACTOR) {
       if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
         return;

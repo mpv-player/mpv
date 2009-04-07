@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "stream/stream.h"
 
@@ -95,6 +96,8 @@ struct MPOpts;
 
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)
+#define SEEK_FORWARD  (1 << 2)
+#define SEEK_BACKWARD (1 << 3)
 
 #define MP_INPUT_BUFFER_PADDING_SIZE 8
 
@@ -187,6 +190,19 @@ typedef struct demux_chapter
   char* name;
 } demux_chapter_t;
 
+struct matroska_data {
+    unsigned char segment_uid[16];
+    // Ordered chapter information if any
+    struct matroska_chapter {
+        uint64_t start;
+        uint64_t end;
+        bool has_segment_uid;
+        unsigned char segment_uid[16];
+        char *name;
+    } *ordered_chapters;
+    int num_ordered_chapters;
+};
+
 typedef struct demux_attachment
 {
   char* name;
@@ -208,6 +224,9 @@ typedef struct demuxer {
   int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
   int file_format;  // file format: mpeg/avi/asf
   int seekable;  // flag
+    /* Set if using absolute seeks for small movements is OK (no pts resets
+     * that would make pts ambigious, preferably supports back/forward flags */
+    bool accurate_seek;
   //
   demux_stream_t *audio; // audio buffer/demuxer
   demux_stream_t *video; // video buffer/demuxer
@@ -220,9 +239,11 @@ typedef struct demuxer {
 
   demux_chapter_t* chapters;
   int num_chapters;
-  
+
   demux_attachment_t* attachments;
   int num_attachments;
+
+    struct matroska_data matroska_data;
 
   void* priv;  // fileformat-dependent data
   char** info;
@@ -411,7 +432,8 @@ int demuxer_add_attachment(demuxer_t* demuxer, const char* name,
                            const char* type, const void* data, size_t size);
 
 int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end);
-int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts, int *num_chapters, char **chapter_name);
+int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts,
+                         char **chapter_name);
 
 /// Get current chapter index if available.
 int demuxer_get_current_chapter(demuxer_t *demuxer);

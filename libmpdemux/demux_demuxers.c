@@ -8,6 +8,7 @@
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "talloc.h"
 
 typedef struct dd_priv {
   demuxer_t* vd;
@@ -21,7 +22,7 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   demuxer_t* ret;
   dd_priv_t* priv;
 
-  ret = calloc(1,sizeof(demuxer_t));
+  ret = talloc_zero(NULL, struct demuxer);
   
   priv = malloc(sizeof(dd_priv_t));
   priv->vd = vd;

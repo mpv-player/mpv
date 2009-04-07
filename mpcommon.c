@@ -69,7 +69,8 @@ if (HAVE_CMOV)
 }
 
 
-void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
+void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub,
+                      double video_offset, int reset)
 {
     struct MPOpts *opts = sh_video->opts;
     unsigned char *packet=NULL;
@@ -152,10 +153,10 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
         double endpts;
         vo_sub = &subs;
         while (d_dvdsub->first) {
-            double pts = ds_get_next_pts(d_dvdsub);
+            double pts = ds_get_next_pts(d_dvdsub) + video_offset;
             if (pts > curpts)
                 break;
-            endpts = d_dvdsub->first->endpts;
+            endpts = d_dvdsub->first->endpts + video_offset;
             len = ds_get_packet_sub(d_dvdsub, &packet);
             if (type == 'm') {
                 if (len < 2) continue;

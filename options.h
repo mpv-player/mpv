@@ -10,6 +10,7 @@ typedef struct MPOpts {
     int screen_size_y;
     int vo_screenwidth;
     int vo_screenheight;
+    int force_window_position;
     float force_monitor_aspect;
     float monitor_pixel_aspect;
     int vidmode;
@@ -24,7 +25,10 @@ typedef struct MPOpts {
     int vo_gamma_saturation;
     int vo_gamma_hue;
 
+    int osd_level;
+    int osd_duration;
     int loop_times;
+    int ordered_chapters;
     int correct_pts;
     int user_correct_pts;
     int key_fifo_size;

@@ -553,7 +553,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if (IMGFMT_IS_VDPAU(image_format) && !create_vdp_decoder(2))
         return -1;
 
-    int_pause = 0;
     visible_buf = 0;
 
 #ifdef CONFIG_GUI

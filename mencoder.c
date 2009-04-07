@@ -575,8 +575,8 @@ if(stream->type==STREAMTYPE_DVDNAV){
   }
 
   if(dvd_chapter>1) {
-    float pts;
-    if (demuxer_seek_chapter(demuxer, dvd_chapter-1, 1, &pts, NULL, NULL) >= 0 && pts > -1.0)
+    double pts;
+    if (demuxer_seek_chapter(demuxer, dvd_chapter-1, &pts, NULL) >= 0 && pts > -1.0)
       seek_to_sec = pts;
   }
 
@@ -1471,7 +1471,7 @@ if(sh_audio && !demuxer2){
  }
  else
 #endif
-    update_subtitles(sh_video, d_dvdsub, 0);
+     update_subtitles(sh_video, d_dvdsub, 0, 0);
 
  frame_data = (s_frame_data){ .start = NULL, .in_size = 0, .frame_time = 0., .already_read = 0 };
 

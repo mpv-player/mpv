@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "config.h"
+#include "talloc.h"
 #include "command.h"
 #include "input/input.h"
 #include "stream/stream.h"
@@ -172,7 +173,7 @@ static void log_sub(struct MPContext *mpctx)
 static int mp_property_osdlevel(m_option_t *prop, int action, void *arg,
 				MPContext *mpctx)
 {
-    return m_property_choice(prop, action, arg, &osd_level);
+    return m_property_choice(prop, action, arg, &mpctx->opts.osd_level);
 }
 
 /// Loop (RW)
@@ -385,14 +386,13 @@ static int mp_property_time_pos(m_option_t *prop, int action,
 static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int chapter = -1;
-    float next_pts = 0;
-    int chapter_num;
     int step_all;
     char *chapter_name = NULL;
 
     if (mpctx->demuxer)
-        chapter = demuxer_get_current_chapter(mpctx->demuxer);
+        chapter = get_current_chapter(mpctx);
     if (chapter < 0)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -405,7 +405,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT: {
         if (!arg)
             return M_PROPERTY_ERROR;
-        chapter_name = demuxer_chapter_display_name(mpctx->demuxer, chapter);
+        chapter_name = chapter_display_name(mpctx, chapter);
         if (!chapter_name)
             return M_PROPERTY_UNAVAILABLE;
         *(char **) arg = chapter_name;
@@ -430,26 +430,27 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     default:
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
+
+    double next_pts = 0;
+    chapter = seek_chapter(mpctx, chapter, &next_pts, &chapter_name);
     mpctx->rel_seek_secs = 0;
     mpctx->abs_seek_pos = 0;
-    chapter = demuxer_seek_chapter(mpctx->demuxer, chapter, 1,
-                                   &next_pts, &chapter_num, &chapter_name);
     if (chapter >= 0) {
         if (next_pts > -1.0) {
             mpctx->abs_seek_pos = SEEK_ABSOLUTE;
             mpctx->rel_seek_secs = next_pts;
         }
         if (chapter_name)
-            set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+            set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
                         MSGTR_OSDChapter, chapter + 1, chapter_name);
     }
     else if (step_all > 0)
         mpctx->rel_seek_secs = 1000000000.;
     else
-        set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+        set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
                     MSGTR_OSDChapter, 0, MSGTR_Unknown);
     if (chapter_name)
-        free(chapter_name);
+        talloc_free(chapter_name);
     return M_PROPERTY_OK;
 }
 
@@ -468,6 +469,7 @@ static int mp_property_chapters(m_option_t *prop, int action, void *arg,
 static int mp_property_angle(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int angle = -1;
     int angles;
     char *angle_name = NULL;
@@ -519,7 +521,7 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
     angle = demuxer_set_angle(mpctx->demuxer, angle);
-    set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
+    set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
                         MSGTR_OSDAngle, angle, angles);
     if (angle_name)
         free(angle_name);
@@ -1027,6 +1029,7 @@ static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
 #endif
 	if (mpctx->video_out->config_ok)
 	    vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
+        mpctx->opts.fullscreen = vo_fs;
 	return M_PROPERTY_OK;
     default:
 	return m_property_flag(prop, action, arg, &vo_fs);
@@ -1541,7 +1544,7 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
         d_sub->id = opts->sub_id;
     }
 #endif
-    update_subtitles(mpctx->sh_video, d_sub, 1);
+    update_subtitles(mpctx->sh_video, d_sub, 0, 1);
 
     return M_PROPERTY_OK;
 }
@@ -2224,7 +2227,7 @@ static struct {
     /// set/adjust or toggle command
     int toggle;
     /// progressbar type
-    int osd_progbar;
+    int osd_progbar; // -1 is special value for seek indicators
     /// osd msg id if it must be shared
     int osd_id;
     /// osd msg template
@@ -2232,7 +2235,7 @@ static struct {
 } set_prop_cmd[] = {
     // general
     { "loop", MP_CMD_LOOP, 0, 0, -1, MSGTR_LoopStatus },
-    { "chapter", MP_CMD_SEEK_CHAPTER, 0, 0, -1, NULL },
+    { "chapter", MP_CMD_SEEK_CHAPTER, 0, -1, -1, NULL },
     { "angle", MP_CMD_SWITCH_ANGLE, 0, 0, -1, NULL },
     { "pause", MP_CMD_PAUSE, 0, 0, -1, NULL },
     // audio
@@ -2284,6 +2287,7 @@ static struct {
 /// Handle commands that set a property.
 static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
+    struct MPOpts *opts = &mpctx->opts;
     int i, r;
     m_option_t* prop;
     const char *pname;
@@ -2313,7 +2317,9 @@ static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
     if (r <= 0)
 	return 1;
 
-    if (set_prop_cmd[i].osd_progbar) {
+    if (set_prop_cmd[i].osd_progbar == -1)
+        mpctx->add_osd_seek_info = true;
+    else if (set_prop_cmd[i].osd_progbar) {
 	if (prop->type == CONF_TYPE_INT) {
 	    if (mp_property_do(pname, M_PROPERTY_GET, &r, mpctx) > 0)
 		set_osd_bar(mpctx, set_prop_cmd[i].osd_progbar,
@@ -2334,7 +2340,7 @@ static int set_property_command(MPContext *mpctx, mp_cmd_t *cmd)
 	if (val) {
 	    set_osd_msg(set_prop_cmd[i].osd_id >=
 			0 ? set_prop_cmd[i].osd_id : OSD_MSG_PROPERTY + i,
-			1, osd_duration, set_prop_cmd[i].osd_msg, val);
+			1, opts->osd_duration, set_prop_cmd[i].osd_msg, val);
 	    free(val);
 	}
     }
@@ -2376,13 +2382,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     struct MPOpts *opts = &mpctx->opts;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     sh_video_t * const sh_video = mpctx->sh_video;
+    int osd_duration = opts->osd_duration;
     if (!set_property_command(mpctx, cmd))
 	switch (cmd->id) {
 	case MP_CMD_SEEK:{
 		float v;
 		int abs;
-		if (sh_video)
-		    mpctx->osd_show_percentage = sh_video->fps;
+                mpctx->add_osd_seek_info = true;
 		v = cmd->args[0].v.f;
 		abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
 		if (abs == 2) {	/* Absolute seek to a specific timestamp in seconds */
@@ -2620,18 +2626,18 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		int v = cmd->args[0].v.i;
 		int max = (term_osd
 			   && !sh_video) ? MAX_TERM_OSD_LEVEL : MAX_OSD_LEVEL;
-		if (osd_level > max)
-		    osd_level = max;
+		if (opts->osd_level > max)
+		    opts->osd_level = max;
 		if (v < 0)
-		    osd_level = (osd_level + 1) % (max + 1);
+		    opts->osd_level = (opts->osd_level + 1) % (max + 1);
 		else
-		    osd_level = v > max ? max : v;
+		    opts->osd_level = v > max ? max : v;
 		/* Show OSD state when disabled, but not when an explicit
 		   argument is given to the OSD command, i.e. in slave mode. */
-		if (v == -1 && osd_level <= 1)
+		if (v == -1 && opts->osd_level <= 1)
 		    set_osd_msg(OSD_MSG_OSD_STATUS, 0, osd_duration,
 				MSGTR_OSDosd,
-				osd_level ? MSGTR_OSDenabled :
+				opts->osd_level ? MSGTR_OSDenabled :
 				MSGTR_OSDdisabled);
 		else
 		    rm_osd_msg(OSD_MSG_OSD_STATUS);
@@ -3180,7 +3186,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    pointer_y = (int) (dy * (double) sh_video->disp_h);
 		    mp_dvdnav_update_mouse_pos(mpctx->stream,
 					       pointer_x, pointer_y, &button);
-		    if (osd_level > 1 && button > 0)
+		    if (opts->osd_level > 1 && button > 0)
 			set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				    "Selected button number %d", button);
 		}
@@ -3207,7 +3213,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    command = mp_dvdnav_bindings[i].cmd;
 
 		mp_dvdnav_handle_input(mpctx->stream,command,&button);
-		if (osd_level > 1 && button > 0)
+		if (opts->osd_level > 1 && button > 0)
 		    set_osd_msg(OSD_MSG_TEXT, 1, osd_duration,
 				"Selected button number %d", button);
 	    }

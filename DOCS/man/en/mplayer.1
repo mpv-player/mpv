@@ -865,10 +865,12 @@ Enqueue files given on the command line in the playlist instead of playing them
 immediately.
 .
 .TP
-.B \-fixed\-vo
-Enforces a fixed video system for multiple files (one (un)initialization for
-all files).
+.B \-nofixed\-vo
+\-fixed\-vo enforces a fixed video system for multiple files (one
+(un)initialization for all files).
 Therefore only one window will be opened for all files.
+Now enabled by default, use \-nofixed\-vo to disable and create a new window
+whenever the video stream changes.
 Currently the following drivers are fixed-vo compliant: gl, gl2, mga, svga, x11,
 xmga, xv, xvidix and dfbmga.
 .
@@ -1069,6 +1071,11 @@ Turns off LIRC support.
 .B \-nomouseinput
 Disable mouse button press/\:release input (mozplayerxp's context menu relies
 on this option).
+.TP
+.B \-noorderedchapters
+Disable support for Matroska ordered chapters.
+MPlayer will not load or search for video segments from other files,
+and will also ignore any chapter order specified for the main file.
 .
 .TP
 .B \-rtc (RTC only)
@@ -3053,6 +3060,13 @@ VESA framebuffer does not support mode changing.
 .TP
 .B \-fbmodeconfig <filename> (\-vo fbdev only)
 Override framebuffer mode configuration file (default: /etc/\:fb.modes).
+.
+.TP
+.B \-force\-window\-position
+Forcefully move MPlayer's video output window to default location whenever
+there is a change in video parameters, video stream or file.
+This used to be the default behavior.
+Currently only affects X11 VOs.
 .
 .TP
 .B \-fs (also see \-zoom)

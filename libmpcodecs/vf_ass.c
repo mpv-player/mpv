@@ -373,6 +373,7 @@ static void uninit(struct vf_instance* vf)
 	free(vf->priv->planes[1]);
 	free(vf->priv->planes[2]);
 	free(vf->priv->line_limits);
+	free(vf->priv);
 }
 
 static const unsigned int fmt_list[]={

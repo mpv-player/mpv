@@ -47,6 +47,22 @@ typedef enum {
   EXIT_ERROR
 } exit_reason_t;
 
+struct content_source {
+    struct stream *stream;
+    struct demuxer *demuxer;
+};
+
+struct timeline_part {
+    double start;
+    double source_start;
+    struct content_source *source;
+};
+
+struct chapter {
+    double start;
+    char *name;
+};
+
 typedef struct MPContext {
     struct MPOpts opts;
     struct m_config *mconfig;
@@ -54,7 +70,12 @@ typedef struct MPContext {
     struct mp_fifo *key_fifo;
     struct input_ctx *input;
     struct osd_state *osd;
-    int osd_show_percentage;
+
+    bool add_osd_seek_info;
+    // if nonzero, hide current OSD contents when GetTimerMS() reaches this
+    unsigned int osd_show_percentage_until;
+    unsigned int osd_visible;
+
     int osd_function;
     const ao_functions_t *audio_out;
     struct play_tree *playtree;
@@ -63,6 +84,15 @@ typedef struct MPContext {
     enum stop_play_reason stop_play;
     int play_tree_step;
     unsigned int initialized_flags;  // which subsystems have been initialized
+
+    struct content_source *sources;
+    int num_sources;
+    struct timeline_part *timeline;
+    int num_timeline_parts;
+    int timeline_part;
+    struct chapter *chapters;   
+    int num_chapters;
+    double video_offset;
 
     struct stream *stream;
     struct demuxer *demuxer;
@@ -107,7 +137,7 @@ typedef struct MPContext {
     unsigned int last_time;
 
     // Used to communicate the parameters of a seek between parts
-    float rel_seek_secs;
+    double rel_seek_secs;
     int abs_seek_pos;
 
     float begin_skip; ///< start time of the current skip while on edlout mode
@@ -165,5 +195,9 @@ int reinit_video_chain(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx);
+int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts,
+                 char **chapter_name);
+int get_current_chapter(struct MPContext *mpctx);
+char *chapter_display_name(struct MPContext *mpctx, int chapter);
 
 #endif /* MPLAYER_MP_CORE_H */
