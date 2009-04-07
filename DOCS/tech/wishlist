@@ -44,8 +44,6 @@ Small improvements:
  * add help suboption to -lavcopts vcodec=/acodec=, -lavfopts format=,
    -subcp, and anything else that needs it.
 
- * ability to set mplayer default/startup volume
-
  * ability to cycle switch_aspect
 
  * ability to rename vo_jpeg,vo_gif,vo_png output filename

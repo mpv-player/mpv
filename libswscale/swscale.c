@@ -472,9 +472,9 @@ const char *sws_format_name(enum PixelFormat format)
     }
 }
 
-static inline void yuv2yuvXinC(int16_t *lumFilter, int16_t **lumSrc, int lumFilterSize,
-                               int16_t *chrFilter, int16_t **chrSrc, int chrFilterSize,
-                               int16_t **alpSrc, uint8_t *dest, uint8_t *uDest, uint8_t *vDest, uint8_t *aDest, int dstW, int chrDstW)
+static inline void yuv2yuvXinC(const int16_t *lumFilter, const int16_t **lumSrc, int lumFilterSize,
+                               const int16_t *chrFilter, const int16_t **chrSrc, int chrFilterSize,
+                               const int16_t **alpSrc, uint8_t *dest, uint8_t *uDest, uint8_t *vDest, uint8_t *aDest, int dstW, int chrDstW)
 {
     //FIXME Optimize (just quickly written not optimized..)
     int i;
@@ -516,8 +516,8 @@ static inline void yuv2yuvXinC(int16_t *lumFilter, int16_t **lumSrc, int lumFilt
 
 }
 
-static inline void yuv2nv12XinC(int16_t *lumFilter, int16_t **lumSrc, int lumFilterSize,
-                                int16_t *chrFilter, int16_t **chrSrc, int chrFilterSize,
+static inline void yuv2nv12XinC(const int16_t *lumFilter, const int16_t **lumSrc, int lumFilterSize,
+                                const int16_t *chrFilter, const int16_t **chrSrc, int chrFilterSize,
                                 uint8_t *dest, uint8_t *uDest, int dstW, int chrDstW, int dstFormat)
 {
     //FIXME Optimize (just quickly written not optimized..)
@@ -993,17 +993,17 @@ static inline void yuv2nv12XinC(int16_t *lumFilter, int16_t **lumSrc, int lumFil
     }\
 
 
-static inline void yuv2packedXinC(SwsContext *c, int16_t *lumFilter, int16_t **lumSrc, int lumFilterSize,
-                                  int16_t *chrFilter, int16_t **chrSrc, int chrFilterSize,
-                                  int16_t **alpSrc, uint8_t *dest, int dstW, int y)
+static inline void yuv2packedXinC(SwsContext *c, const int16_t *lumFilter, const int16_t **lumSrc, int lumFilterSize,
+                                  const int16_t *chrFilter, const int16_t **chrSrc, int chrFilterSize,
+                                  const int16_t **alpSrc, uint8_t *dest, int dstW, int y)
 {
     int i;
     YSCALE_YUV_2_ANYRGB_C(YSCALE_YUV_2_RGBX_C, YSCALE_YUV_2_PACKEDX_C(void,0), YSCALE_YUV_2_GRAY16_C, YSCALE_YUV_2_MONOX_C)
 }
 
-static inline void yuv2rgbXinC_full(SwsContext *c, int16_t *lumFilter, int16_t **lumSrc, int lumFilterSize,
-                                    int16_t *chrFilter, int16_t **chrSrc, int chrFilterSize,
-                                    int16_t **alpSrc, uint8_t *dest, int dstW, int y)
+static inline void yuv2rgbXinC_full(SwsContext *c, const int16_t *lumFilter, const int16_t **lumSrc, int lumFilterSize,
+                                    const int16_t *chrFilter, const int16_t **chrSrc, int chrFilterSize,
+                                    const int16_t **alpSrc, uint8_t *dest, int dstW, int y)
 {
     int i;
     int step= fmt_depth(c->dstFormat)/8;
@@ -1094,7 +1094,7 @@ static void fillPlane(uint8_t* plane, int stride, int width, int height, int y, 
     }
 }
 
-//Note: we have C, X86, MMX, MMX2, 3DNOW versions, there is no 3DNOW+MMX2 one
+//Note: we have C, MMX, MMX2, 3DNOW versions, there is no 3DNOW+MMX2 one
 //Plain C versions
 #if !HAVE_MMX || defined (RUNTIME_CPUDETECT) || !CONFIG_GPL
 #define COMPILE_C
@@ -1146,16 +1146,6 @@ static void fillPlane(uint8_t* plane, int stride, int width, int height, int y, 
 
 #if ARCH_X86
 
-//x86 versions
-/*
-#undef RENAME
-#undef HAVE_MMX
-#undef HAVE_MMX2
-#undef HAVE_AMD3DNOW
-#define ARCH_X86
-#define RENAME(a) a ## _X86
-#include "swscale_template.c"
-*/
 //MMX versions
 #ifdef COMPILE_MMX
 #undef RENAME
@@ -1776,39 +1766,55 @@ static void globalInit(void){
     }
 }
 
-static SwsFunc getSwsFunc(int flags){
+static SwsFunc getSwsFunc(SwsContext *c)
+{
+    int flags = c->flags;
 
 #if defined(RUNTIME_CPUDETECT) && CONFIG_GPL
 #if ARCH_X86
     // ordered per speed fastest first
-    if (flags & SWS_CPU_CAPS_MMX2)
+    if (flags & SWS_CPU_CAPS_MMX2) {
+        sws_init_swScale_MMX2(c);
         return swScale_MMX2;
-    else if (flags & SWS_CPU_CAPS_3DNOW)
+    } else if (flags & SWS_CPU_CAPS_3DNOW) {
+        sws_init_swScale_3DNow(c);
         return swScale_3DNow;
-    else if (flags & SWS_CPU_CAPS_MMX)
+    } else if (flags & SWS_CPU_CAPS_MMX) {
+        sws_init_swScale_MMX(c);
         return swScale_MMX;
-    else
+    } else {
+        sws_init_swScale_C(c);
         return swScale_C;
+    }
 
 #else
 #if ARCH_PPC
-    if (flags & SWS_CPU_CAPS_ALTIVEC)
+    if (flags & SWS_CPU_CAPS_ALTIVEC) {
+        sws_init_swScale_altivec(c);
         return swScale_altivec;
-    else
+    } else {
+        sws_init_swScale_C(c);
         return swScale_C;
+    }
 #endif
+    sws_init_swScale_C(c);
     return swScale_C;
 #endif /* ARCH_X86 */
 #else //RUNTIME_CPUDETECT
 #if   HAVE_MMX2
+    sws_init_swScale_MMX2(c);
     return swScale_MMX2;
 #elif HAVE_AMD3DNOW
+    sws_init_swScale_3DNow(c);
     return swScale_3DNow;
 #elif HAVE_MMX
+    sws_init_swScale_MMX(c);
     return swScale_MMX;
 #elif HAVE_ALTIVEC
+    sws_init_swScale_altivec(c);
     return swScale_altivec;
 #else
+    sws_init_swScale_C(c);
     return swScale_C;
 #endif
 #endif //!RUNTIME_CPUDETECT
@@ -1823,7 +1829,7 @@ static int PlanarToNV12Wrapper(SwsContext *c, uint8_t* src[], int srcStride[], i
     else
     {
         int i;
-        uint8_t *srcPtr= src[0];
+        const uint8_t *srcPtr= src[0];
         uint8_t *dstPtr= dst;
         for (i=0; i<srcSliceH; i++)
         {
@@ -2929,7 +2935,7 @@ SwsContext *sws_getContext(int srcW, int srcH, enum PixelFormat srcFormat, int d
                c->chrSrcW, c->chrSrcH, c->chrDstW, c->chrDstH, c->chrXInc, c->chrYInc);
     }
 
-    c->swScale= getSwsFunc(flags);
+    c->swScale= getSwsFunc(c);
     return c;
 }
 
