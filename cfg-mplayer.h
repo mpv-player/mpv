@@ -311,6 +311,9 @@ const m_option_t mplayer_opts[]={
 	OPT_INTRANGE("loop", loop_times, 0, -1, 10000),
 	{"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
+        OPT_FLAG_ON("ordered-chapters", ordered_chapters, 0),
+        OPT_FLAG_OFF("noordered-chapters", ordered_chapters, 0),
+
 	// a-v sync stuff:
         OPT_FLAG_ON("correct-pts", user_correct_pts, 0),
         OPT_FLAG_OFF("nocorrect-pts", user_correct_pts, 0),

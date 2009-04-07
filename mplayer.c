@@ -2730,6 +2730,12 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
 
 static void build_ordered_chapter_timeline(struct MPContext *mpctx)
 {
+    if (!mpctx->opts.ordered_chapters) {
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, but "
+               "you have disabled support for them. Ignoring.\n");
+        return;
+    }
+
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, will build "
            "edit timeline.\n");
 
