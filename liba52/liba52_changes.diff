@@ -1411,7 +1411,7 @@
 +
 +void (*a52_imdct_512) (sample_t * data, sample_t * delay, sample_t bias);
 +
-+#ifdef RUNTIME_CPUDETECT
++#if CONFIG_RUNTIME_CPUDETECT
 +#undef HAVE_AMD3DNOWEXT
 +#define HAVE_AMD3DNOWEXT 0
 +#endif
