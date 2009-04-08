@@ -22,13 +22,14 @@
 # If you want to add a new check for $feature, here is a simple skeleton:
 #
 # echocheck "$feature"
-# if "$_feature" = auto; then
+# if test "$_feature" = auto; then
 # cat > $TMPC << EOF
 # #include <feature.h>
 # int main(void) { return 0; }
 # EOF
 # _feature=no
 # cc_check && _feature=yes
+# fi
 # if test "$_feature" = yes ; then
 #   def_feature='#define CONFIG_FEATURE 1'
 # else
