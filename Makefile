@@ -862,7 +862,8 @@ version.h: version.sh
 ###### dependency declarations / specific CFLAGS ######
 
 # Make sure all generated header files are created.
-$(DEPS) $(MENCODER_DEPS) $(MPLAYER_DEPS): codecs.conf.h help_mp.h version.h
+$(DEPS) $(MENCODER_DEPS) $(MPLAYER_DEPS): codecs.conf.h help_mp.h
+mpcommon.d mpcommon.o vobsub.d vobsub.o stream/stream_cddb.d stream/stream_cddb.o stream/network.d stream/network.o libmpdemux/muxer_avi.d libmpdemux/muxer_avi.o gui/win32/gui.d gui/win32/gui.o: version.h
 
 libdvdcss/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.10\" $(CFLAGS_LIBDVDCSS)
 libdvdnav/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\"
