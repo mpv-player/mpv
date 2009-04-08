@@ -41,7 +41,7 @@ void print_version(const char* name)
 	   gCpuCaps.hasMMX, gCpuCaps.hasMMX2,
 	   gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
 	   gCpuCaps.hasSSE, gCpuCaps.hasSSE2, gCpuCaps.hasSSSE3);
-#ifdef RUNTIME_CPUDETECT
+#if CONFIG_RUNTIME_CPUDETECT
     mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithRuntimeDetection);
 #else
     mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithCPUExtensions);
@@ -62,7 +62,7 @@ if (HAVE_SSSE3)
 if (HAVE_CMOV)
     mp_msg(MSGT_CPLAYER,MSGL_V," CMOV");
     mp_msg(MSGT_CPLAYER,MSGL_V,"\n");
-#endif /* RUNTIME_CPUDETECT */
+#endif /* CONFIG_RUNTIME_CPUDETECT */
 #endif /* ARCH_X86 */
 }
 

@@ -2808,9 +2808,9 @@ echores "$_sighandler"
 echocheck "runtime cpudetection"
 if test "$_runtime_cpudetection" = yes ; then
   _optimizing="Runtime CPU-Detection enabled"
-  def_runtime_cpudetection='#define RUNTIME_CPUDETECT 1'
+  def_runtime_cpudetection='#define CONFIG_RUNTIME_CPUDETECT 1'
 else
-  def_runtime_cpudetection='#undef RUNTIME_CPUDETECT'
+  def_runtime_cpudetection='#define CONFIG_RUNTIME_CPUDETECT 0'
 fi
 echores "$_runtime_cpudetection"
 

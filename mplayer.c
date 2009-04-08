@@ -791,7 +791,7 @@ static void exit_sighandler(int x){
       async_quit_request = 1;
       return;  // killed from keyboard (^C) or killed [-9]
   case SIGILL:
-#ifdef RUNTIME_CPUDETECT
+#if CONFIG_RUNTIME_CPUDETECT
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGILL_RTCpuSel);
 #else
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_Exit_SIGILL);
