@@ -153,11 +153,11 @@ static int init(int rate_hz, int channels, int format, int flags) {
     }
 
     broken_pause = 0;
-    // not sure which versions are affected, assume 0.9.1*
+    // not sure which versions are affected, assume 0.9.11* to 0.9.14*
     // known bad: 0.9.14, 0.9.13
-    // known good: 0.9.9, 0.9.10
+    // known good: 0.9.9, 0.9.10, 0.9.15
     // to test: pause, wait ca. 5 seconds framestep and see if MPlayer hangs somewhen
-    if (strncmp(version, "0.9.1", 5) == 0 && strncmp(version, "0.9.10", 6) != 0) {
+    if (strncmp(version, "0.9.1", 5) == 0 && version[5] >= '1' && version[5] <= '4') {
         mp_msg(MSGT_AO, MSGL_WARN, "[pulse] working around probably broken pause functionality,\n"
                                    "        see http://www.pulseaudio.org/ticket/440\n");
         broken_pause = 1;
