@@ -392,12 +392,15 @@ static int control(int cmd, void *arg) {
                 volume.values[1] = (pa_volume_t)vol->right*PA_VOLUME_NORM/100;
             }
 
+            pa_threaded_mainloop_lock(mainloop);
             if (!(o = pa_context_set_sink_input_volume(context, pa_stream_get_index(stream), &volume, NULL, NULL))) {
+                pa_threaded_mainloop_unlock(mainloop);
                 GENERIC_ERR_MSG(context, "pa_context_set_sink_input_volume() failed");
                 return CONTROL_ERROR;
             }
             /* We don't wait for completion here */
             pa_operation_unref(o);
+            pa_threaded_mainloop_unlock(mainloop);
             return CONTROL_OK;
         }
 
