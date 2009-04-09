@@ -393,7 +393,8 @@ static int control(int cmd, void *arg) {
             }
 
             pa_threaded_mainloop_lock(mainloop);
-            if (!(o = pa_context_set_sink_input_volume(context, pa_stream_get_index(stream), &volume, NULL, NULL))) {
+            o = pa_context_set_sink_input_volume(context, pa_stream_get_index(stream), &volume, NULL, NULL);
+            if (!o) {
                 pa_threaded_mainloop_unlock(mainloop);
                 GENERIC_ERR_MSG(context, "pa_context_set_sink_input_volume() failed");
                 return CONTROL_ERROR;
