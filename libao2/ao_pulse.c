@@ -102,7 +102,10 @@ static void success_cb(pa_stream *s, int success, void *userdata) {
  */
 static int waitop(pa_operation *op) {
     pa_operation_state_t state;
-    if (!op) return 0;
+    if (!op) {
+        pa_threaded_mainloop_unlock(mainloop);
+        return 0;
+    }
     state = pa_operation_get_state(op);
     while (state == PA_OPERATION_RUNNING) {
         pa_threaded_mainloop_wait(mainloop);
