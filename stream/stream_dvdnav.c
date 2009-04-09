@@ -205,10 +205,13 @@ static int dvdnav_stream_read(dvdnav_priv_t * priv, unsigned char *buf, int *len
         if(ev->pgc_length)
           priv->duration = ev->pgc_length/90;
 
-        if (dvdnav_is_domain_vts(priv->dvdnav))
+        if (dvdnav_is_domain_vts(priv->dvdnav)) {
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "DVDNAV_TITLE_IS_MOVIE\n");
           priv->state &= ~NAV_FLAG_VTS_DOMAIN;
-        else
+        } else {
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "DVDNAV_TITLE_IS_MENU\n");
           priv->state |= NAV_FLAG_VTS_DOMAIN;
+        }
 
         nextstill = dvdnav_get_next_still_flag (priv->dvdnav);
         if (nextstill) {
