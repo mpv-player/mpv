@@ -957,7 +957,7 @@ void skiphtml(FILE *f1){
         }
 }
 
-static void print_int_array(const int* a, int size)
+static void print_int_array(const unsigned int* a, int size)
 {
 	printf("{ ");
 	while (size--)
