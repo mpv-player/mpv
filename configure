@@ -1430,8 +1430,6 @@ if netbsd || dragonfly ; then
 fi
 
 if darwin; then
-  extra_ldflags="$extra_ldflags -L/usr/local/lib"
-  extra_cflags="$extra_cflags -I/usr/local/include"
   CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -shared-libgcc"
   _timer=timer-darwin.c
 fi
