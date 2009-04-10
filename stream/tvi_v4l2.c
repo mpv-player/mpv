@@ -1313,6 +1313,7 @@ static int init(priv_t *priv)
         }
         mp_msg(MSGT_TV, MSGL_INFO, " %d = %s;", i, input.name);
     }
+    i = -1;
     if (ioctl(priv->video_fd, VIDIOC_G_INPUT, &i) < 0) {
         mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl get input failed: %s\n",
                info.short_name, strerror(errno));
