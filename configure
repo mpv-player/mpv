@@ -2416,6 +2416,23 @@ elif test -z "$CFLAGS" ; then
 else
   _warn_CFLAGS=yes
 fi
+
+cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+if test "$cc_vendor" = "gnu" ; then
+  cc_check -std=gnu99 && CFLAGS="-std=gnu99 $CFLAGS"
+  cc_check -Wdeclaration-after-statement && CFLAGS="-Wdeclaration-after-statement $CFLAGS"
+  cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
+  cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
+  cc_check -Wundef && CFLAGS="-Wundef $CFLAGS"
+else
+  CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
+fi
+
+cc_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
+
+
 if test -n "$LDFLAGS" ; then
   extra_ldflags="$extra_ldflags $LDFLAGS"
   _warn_CFLAGS=yes
@@ -8016,21 +8033,6 @@ if test "$_largefiles" = yes || freebsd ; then
 fi
 
 CXXFLAGS=" $CFLAGS -D__STDC_LIMIT_MACROS"
-
-cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
-if test "$cc_vendor" = "gnu" ; then
-  cc_check -std=gnu99 && CFLAGS="-std=gnu99 $CFLAGS"
-  cc_check -Wdeclaration-after-statement && CFLAGS="-Wdeclaration-after-statement $CFLAGS"
-  cc_check -Wno-pointer-sign && CFLAGS="-Wno-pointer-sign $CFLAGS"
-  cc_check -Wdisabled-optimization && CFLAGS="-Wdisabled-optimization $CFLAGS"
-  cc_check -Wundef && CFLAGS="-Wundef $CFLAGS"
-else
-  CFLAGS="-D_ISOC99_SOURCE -D_BSD_SOURCE $CFLAGS"
-fi
-
-cc_check -mno-omit-leaf-frame-pointer && cflags_no_omit_leaf_frame_pointer="-mno-omit-leaf-frame-pointer"
 
 # This must be the last test to be performed. Any other tests following it
 # could fail due to linker errors. libdvdnavmini is intentionally not linked
