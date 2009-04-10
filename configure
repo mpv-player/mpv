@@ -3288,6 +3288,11 @@ echores "$_dynamic_plugins"
 def_threads='#define HAVE_THREADS 0'
 
 echocheck "pthread"
+if linux ; then
+  THREAD_CFLAGS=-D_REENTRANT
+elif freebsd || netbsd || openbsd || bsdos ; then
+  THREAD_CFLAGS=-D_THREAD_SAFE
+fi
 if test "$_pthreads" = auto ; then
 cat > $TMPC << EOF
 #include <pthread.h>
@@ -3298,7 +3303,7 @@ _pthreads=no
 if ! hpux ; then
   for _ld_tmp in "-lpthreadGC2" "" "-lpthread" "-pthread" ; do
     # for crosscompilation, we cannot execute the program, be happy if we can link statically
-    cc_check $_ld_tmp && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
+    cc_check $THREAD_CFLAGS $_ld_tmp && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
   done
 fi
 fi
@@ -3306,6 +3311,7 @@ if test "$_pthreads" = yes ; then
   test $_ld_pthread && _res_comment="using $_ld_pthread"
   def_pthreads='#define HAVE_PTHREADS 1'
   def_threads='#define HAVE_THREADS 1'
+  extra_cflags="$extra_cflags $THREAD_CFLAGS"
 else
   _res_comment="v4l, v4l2, ao_nas, win32 loader disabled"
   def_pthreads='#undef HAVE_PTHREADS'
@@ -8000,13 +8006,6 @@ libs_mplayer=$_ld_tmp
 
 
 #############################################################################
-# Thread support
-if linux ; then
-  CFLAGS="$CFLAGS -D_REENTRANT"
-elif freebsd || netbsd || openbsd || bsdos ; then
-  # FIXME bsd needs this so maybe other OS'es
-  CFLAGS="$CFLAGS -D_THREAD_SAFE"
-fi
 # 64 bit file offsets?
 if test "$_largefiles" = yes || freebsd ; then
   CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
