@@ -67,7 +67,7 @@ static unsigned char volume=SDL_MIX_MAXVOLUME;
 #endif
 
 static int write_buffer(unsigned char* data,int len){
-  int free = BUFFSIZE - av_fifo_size(buffer);
+  int free = av_fifo_space(buffer);
   if (len > free) len = free;
   return av_fifo_generic_write(buffer, data, len, NULL);
 }
@@ -280,7 +280,7 @@ static void audio_resume(void)
 
 // return: how many bytes can be played without blocking
 static int get_space(void){
-    return BUFFSIZE - av_fifo_size(buffer);
+    return av_fifo_space(buffer);
 }
 
 // plays 'len' bytes of 'data'
