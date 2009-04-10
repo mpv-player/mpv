@@ -1466,6 +1466,7 @@ if amigaos ; then
   _sighandler=no
   _stream_cache=no
   def_stream_cache="#undef CONFIG_STREAM_CACHE"
+  CFLAGS="$CFLAGS -DNEWLIB -D__USE_INLINE__"
 fi
 
 if qnx ; then
@@ -8002,9 +8003,6 @@ libs_mplayer=$_ld_tmp
 #############################################################################
 if darwin ; then
   CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -shared-libgcc"
-fi
-if amigaos ; then
-  CFLAGS="$CFLAGS -DNEWLIB -D__USE_INLINE__"
 fi
 # Thread support
 if linux ; then
