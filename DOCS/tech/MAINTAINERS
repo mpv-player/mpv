@@ -43,9 +43,7 @@ Man page translations:
     * Italian: Daniele Forghieri
     * Polish: Waclaw Schiller
     * Spanish: Reynaldo H. Verdejo Pinochet (outdated)
-    * Chinese: unmaintained, outdated
-    * Swedish: unmaintained, outdated, incomplete
-    * Russian: Vladimir Voroshilov (incomplete)
+    * Russian: Vladimir Voroshilov
 
 Documentation translations:
     * Czech: Jiri Heryan
@@ -55,8 +53,8 @@ Documentation translations:
     * Italian: Paolo Tresoldi
     * Polish: Waclaw Schiller
     * Spanish: Reynaldo H. Verdejo Pinochet (outdated)
-    * Chinese (simplified): unmaintained, outdated, still HTML
-    * Italian: unmaintained, outdated, still HTML
+    * Chinese (simplified): unmaintained, outdated
+    * Italian: unmaintained, outdated
     * Russian: Vladimir Voroshilov
 
 Platforms/ports:
