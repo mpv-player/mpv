@@ -74,6 +74,7 @@ static const struct m_struct_st stream_opts = {
 };
 
 static int seek(stream_t *s, off_t newpos);
+static void show_audio_subs_languages(dvdnav_t *nav);
 
 static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   const char * title_str;
@@ -343,6 +344,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
           priv->state &= ~NAV_FLAG_WAIT;
           s->end_pos = 0;
           update_title_len(s);
+          show_audio_subs_languages(priv->dvdnav);
           if (priv->state & NAV_FLAG_WAIT_READ_AUTO)
             priv->state |= NAV_FLAG_WAIT_READ;
           if(dvdnav_current_title_info(priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
@@ -538,8 +540,12 @@ static void show_audio_subs_languages(dvdnav_t *nav)
     if(format == 0xFFFF || format > 6)
       format = 1; //unknown
     id = i + base[format];
-    mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo, i,
-      dvd_audio_stream_types[format], dvd_audio_stream_channels[channels], tmp, id); 
+    if (lang != 0xFFFF) {
+      mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo, i,
+             dvd_audio_stream_types[format], dvd_audio_stream_channels[channels], tmp, id); 
+      if(lang && tmp[0])
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", id, tmp);
+    }
   }
   
   for(i=0; i<32; i++)
@@ -555,7 +561,8 @@ static void show_audio_subs_languages(dvdnav_t *nav)
       tmp[1] = lang & 0xFF;
     }
     tmp[2] = 0;
-    mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i+0x20, tmp);
+    if (lang != 0xFFFF)
+      mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i+0x20, tmp);
   }
 }
 
