@@ -175,7 +175,8 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	  if (((AVCodecContext *)sh_audio->context)->channels >= 5) {
             int src_ch_layout = AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT;
             const char *codec=((AVCodecContext*)sh_audio->context)->codec->name;
-            if (!strcasecmp(codec, "ac3"))
+            if (!strcasecmp(codec, "ac3")
+                || !strcasecmp(codec, "eac3"))            
               src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_AC3_DEFAULT;
             else if (!strcasecmp(codec, "dca"))
               src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_DCA_DEFAULT;
