@@ -484,7 +484,7 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 	//if (j->s->mjpeg_write_tables == 1)
 	//	j->s->mjpeg_write_tables = 0;
 	
-	return pbBufPtr(&(j->s->pb)) - j->s->pb.buf;
+	return put_bits_ptr(&(j->s->pb)) - j->s->pb.buf;
 }
 
 void jpeg_enc_uninit(jpeg_enc_t *j) {

@@ -620,7 +620,7 @@ static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
 	//if (j->s->mjpeg_write_tables == 1)
 	//	j->s->mjpeg_write_tables = 0;
 
-	return pbBufPtr(&(j->s->pb)) - j->s->pb.buf;
+	return put_bits_ptr(&(j->s->pb)) - j->s->pb.buf;
 }
 
 /// the real uninit routine
