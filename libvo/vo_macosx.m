@@ -835,6 +835,7 @@ static int control(uint32_t request, void *data, ...)
 {
 	CVReturn error = kCVReturnSuccess;
 	
+	CVOpenGLTextureRelease(texture);
 	error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
