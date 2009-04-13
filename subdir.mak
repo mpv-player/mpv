@@ -18,7 +18,32 @@ endif
 
 INCINSTDIR := $(INCDIR)/lib$(NAME)
 
+THIS_LIB := $(SUBDIR)$($(BUILD_SHARED:yes=S)LIBNAME)
+
 define RULES
+$(SUBDIR)%$(EXESUF): $(SUBDIR)%.o
+	$(CC) $(FFLDFLAGS) -o $$@ $$^ -l$(FULLNAME) $(FFEXTRALIBS) $$(ELIBS)
+
+$(SUBDIR)%-test.o: $(SUBDIR)%.c
+	$(CC) $(CFLAGS) -DTEST -c -o $$@ $$^
+
+$(SUBDIR)%-test.o: $(SUBDIR)%-test.c
+	$(CC) $(CFLAGS) -DTEST -c -o $$@ $$^
+
+$(SUBDIR)x86/%.o: $(SUBDIR)x86/%.asm
+	$(YASM) $(YASMFLAGS) -I $$(<D)/ -o $$@ $$<
+
+$(SUBDIR)x86/%.d: $(SUBDIR)x86/%.asm
+	$(YASM) $(YASMFLAGS) -I $$(<D)/ -M -o $$(@:%.d=%.o) $$< > $$@
+
+clean::
+	rm -f $(EXAMPLES) $(addprefix $(SUBDIR),*-test$(EXESUF) $(CLEANFILES) $(CLEANSUFFIXES) $(LIBSUFFIXES)) \
+	    $(addprefix $(SUBDIR), $(foreach suffix,$(CLEANSUFFIXES),$(addsuffix /$(suffix),$(DIRS))))
+
+distclean:: clean
+	rm -f  $(addprefix $(SUBDIR),$(DISTCLEANSUFFIXES)) \
+            $(addprefix $(SUBDIR), $(foreach suffix,$(DISTCLEANSUFFIXES),$(addsuffix /$(suffix),$(DIRS))))
+
 ifdef BUILD_SHARED
 all: $(SUBDIR)$(SLIBNAME)
 
@@ -39,7 +64,7 @@ endif
 
 install-lib$(NAME)-shared: $(SUBDIR)$(SLIBNAME)
 	install -d "$(SHLIBDIR)"
-	install -m 755 $(SUBDIR)$(SLIBNAME) "$(SHLIBDIR)/$(SLIBNAME_WITH_VERSION)"
+	install -m 755 $$< "$(SHLIBDIR)/$(SLIBNAME_WITH_VERSION)"
 	$(STRIP) "$(SHLIBDIR)/$(SLIBNAME_WITH_VERSION)"
 	cd "$(SHLIBDIR)" && \
 		$(LN_S) $(SLIBNAME_WITH_VERSION) $(SLIBNAME_WITH_MAJOR)
@@ -49,7 +74,7 @@ install-lib$(NAME)-shared: $(SUBDIR)$(SLIBNAME)
 
 install-lib$(NAME)-static: $(SUBDIR)$(LIBNAME)
 	install -d "$(LIBDIR)"
-	install -m 644 $(SUBDIR)$(LIBNAME) "$(LIBDIR)"
+	install -m 644 $$< "$(LIBDIR)"
 	$(LIB_INSTALL_EXTRA_CMD)
 
 install-headers::
@@ -72,3 +97,8 @@ uninstall-headers::
 endef
 
 $(eval $(RULES))
+
+$(EXAMPLES) $(TESTPROGS): $(THIS_LIB) $(DEP_LIBS)
+
+examples: $(EXAMPLES)
+testprogs: $(TESTPROGS)
