@@ -1498,27 +1498,13 @@ echo configuration: $_configuration > "$TMPLOG"
 echo >> "$TMPLOG"
 
 
-# Check how to call 'head' and 'tail'. Newer versions spit out warnings
-# if used as 'head -1' instead of 'head -n 1', but older versions don't
-# know about '-n'.
-if test "$((echo line1 ; echo line2) | head -1 2>/dev/null)" = "line1" ; then
-  _head() { head -$1 2>/dev/null ; }
-else
-  _head() { head -n $1 2>/dev/null ; }
-fi
-if test "$((echo line1 ; echo line2) | tail -1 2>/dev/null)" = "line2" ; then
-  _tail() { tail -$1 2>/dev/null ; }
-else
-  _tail() { tail -n $1 2>/dev/null ; }
-fi
-
 # Checking CC version...
 # Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
 if test "$(basename $_cc)" = "icc" || test "$(basename $_cc)" = "ecc"; then
   echocheck "$_cc version"
   cc_vendor=intel
-  cc_name=$($_cc -V 2>&1 | _head 1 | cut -d ',' -f 1)
-  cc_version=$($_cc -V 2>&1 | _head 1 | cut -d ',' -f 2 | cut -d ' ' -f 3)
+  cc_name=$($_cc -V 2>&1 | head -n 1 | cut -d ',' -f 1)
+  cc_version=$($_cc -V 2>&1 | head -n 1 | cut -d ',' -f 2 | cut -d ' ' -f 3)
   _cc_major=$(echo $cc_version | cut -d '.' -f 1)
   _cc_minor=$(echo $cc_version | cut -d '.' -f 2)
   # TODO verify older icc/ecc compatibility
@@ -1538,7 +1524,7 @@ if test "$(basename $_cc)" = "icc" || test "$(basename $_cc)" = "ecc"; then
   echores "$cc_version"
 else
   for _cc in "$_cc" cc gcc ; do
-    cc_name_tmp=$($_cc -v 2>&1 | _tail 1 | cut -d ' ' -f 1)
+    cc_name_tmp=$($_cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1)
     if test "$cc_name_tmp" = "gcc"; then
     cc_name=$cc_name_tmp
     echocheck "$_cc version"
@@ -1624,13 +1610,13 @@ fi
 
 if x86 ; then
   # gather more CPU information
-  pname=$($_cpuinfo | grep 'model name' | cut -d ':' -f 2 | _head 1)
-  pvendor=$($_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | _head 1)
-  pfamily=$($_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2 | _head 1)
-  pmodel=$($_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2 | _head 1)
-  pstepping=$($_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2 | _head 1)
+  pname=$($_cpuinfo | grep 'model name' | cut -d ':' -f 2 | head -n 1)
+  pvendor=$($_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | head -n 1)
+  pfamily=$($_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -n 1)
+  pmodel=$($_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -n 1)
+  pstepping=$($_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -n 1)
 
-  exts=$($_cpuinfo | egrep 'features|flags' | cut -d ':' -f 2 | _head 1)
+  exts=$($_cpuinfo | egrep 'features|flags' | cut -d ':' -f 2 | head -n 1)
 
   pparam=$(echo $exts | sed -e s/k6_mtrr/mtrr/ -e s/cyrix_arr/mtrr/ -e s/centaur_mcr/mtrr/ \
                             -e s/xmm/sse/ -e s/kni/sse/)
@@ -2097,7 +2083,7 @@ EOF
     echocheck "CPU type"
     case $system_name in
       Linux)
-	proc=$($_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | _head 1)
+	proc=$($_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | head -n 1)
 	if test -n "$($_cpuinfo | grep altivec)"; then
 	    test $_altivec = auto && _altivec=yes
 	fi
