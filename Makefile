@@ -953,18 +953,18 @@ uninstall:
 	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
 	rm -f $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
 
-ADD_ALL_EXESUFS = $(foreach exesuf,$(EXESUFS_ALL),$(1) $(1)$(exesuf))
+ADD_ALL_EXESUFS = $(foreach file,$(1),$(foreach exesuf,$(EXESUFS_ALL),$(file) $(file)$(exesuf)))
 
 clean:
 	-rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
-	-rm -f $(foreach file,mplayer mencoder,$(call ADD_ALL_EXESUFS,$(file)))
+	-rm -f $(call ADD_ALL_EXESUFS,mplayer mencoder)
 
 distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
 	-rm -rf DOCS/tech/doxygen
 	-rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
 	-rm -f configure.log config.mak config.h codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) TAGS tags
-	-rm -f $(foreach file,codec-cfg cpuinfo,$(call ADD_ALL_EXESUFS,$(file)))
+	-rm -f $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
 
 doxygen:
 	doxygen DOCS/tech/Doxyfile
@@ -1008,7 +1008,7 @@ endif
 tests: $(addsuffix $(EXESUF),$(TESTS))
 
 testsclean:
-	-rm -f $(foreach file,$(TESTS),$(call ADD_ALL_EXESUFS,$(file)))
+	-rm -f $(call ADD_ALL_EXESUFS,$(TESTS))
 
 TOOLS = $(addprefix TOOLS/,alaw-gen asfinfo avi-fix avisubdump compare dump_mp4 movinfo netstream subrip vivodump)
 
