@@ -23,10 +23,7 @@
 #include "mplayer/play.h"
 #include "libvo/font_load.h"
 #include "cfg.h"
-
-#ifdef CONFIG_DVDREAD
- #include "stream/stream.h"
-#endif
+#include "stream/stream.h"
 
 typedef struct
 {
