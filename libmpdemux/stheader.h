@@ -4,6 +4,7 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 struct MPOpts;
+struct demuxer;
 
 // Stream headers:
 
@@ -111,12 +112,12 @@ typedef struct sh_sub {
 
 // demuxer.c:
 #define new_sh_audio(d, i) new_sh_audio_aid(d, i, i)
-sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid);
+sh_audio_t* new_sh_audio_aid(struct demuxer *demuxer,int id,int aid);
 #define new_sh_video(d, i) new_sh_video_vid(d, i, i)
-sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid);
+sh_video_t* new_sh_video_vid(struct demuxer *demuxer,int id,int vid);
 #define new_sh_sub(d, i) new_sh_sub_sid(d, i, i)
-sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid);
-void free_sh_audio(demuxer_t *demuxer, int id);
+sh_sub_t *new_sh_sub_sid(struct demuxer *demuxer, int id, int sid);
+void free_sh_audio(struct demuxer *demuxer, int id);
 void free_sh_video(sh_video_t *sh);
 
 // video.c:
