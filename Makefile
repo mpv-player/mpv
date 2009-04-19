@@ -784,14 +784,14 @@ DIRS =  . \
 
 ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 
-PARTS = libavcodec \
+FFMPEGPARTS = libavcodec \
         libavformat \
         libavutil \
         libpostproc \
         libswscale \
 
-FFMPEGLIBS  = $(foreach part, $(PARTS), $(part)/$(part).a)
-FFMPEGFILES = $(foreach part, $(PARTS), $(part)/*.[chS] $(part)/*/*.[chS])
+FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(part)/$(part).a)
+FFMPEGFILES = $(foreach part, $(FFMPEGPARTS), $(part)/*.[chS] $(part)/*/*.[chS])
 
 
 
@@ -820,7 +820,7 @@ all: $(ALL_PRG-yes)
 checkheaders: $(ALLHEADERS:.h=.ho)
 
 dep depend: $(DEPS)
-	for part in $(PARTS); do $(MAKE) -C $$part depend; done
+	for part in $(FFMPEGPARTS); do $(MAKE) -C $$part depend; done
 
 $(FFMPEGLIBS): $(FFMPEGFILES) config.h
 	$(MAKE) -C $(@D)
