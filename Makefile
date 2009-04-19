@@ -1022,7 +1022,7 @@ tools: $(addsuffix $(EXESUF),$(TOOLS))
 alltools: $(addsuffix $(EXESUF),$(ALLTOOLS))
 
 toolsclean:
-	-rm -f $(foreach file,$(ALLTOOLS),$(call ADD_ALL_EXESUFS,$(file)))
+	-rm -f $(call ADD_ALL_EXESUFS,$(ALLTOOLS))
 	-rm -f TOOLS/realcodecs/*.so.6.0
 
 TOOLS/bmovl-test$(EXESUF): -lSDL_image
