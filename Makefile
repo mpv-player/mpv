@@ -390,7 +390,7 @@ SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_AMD3DNOW)    += mp3lib/dct36_3dnow.c
                                                             mp3lib/dct64_3dnow.c
 SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_AMD3DNOWEXT) += mp3lib/dct36_k7.c \
                                                             mp3lib/dct64_k7.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)      += mp3lib/dct64_mmx.c
+SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)         += mp3lib/dct64_mmx.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_ALTIVEC) += mp3lib/dct64_altivec.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_MMX)    += mp3lib/decode_mmx.c
 SRCS_COMMON-$(MP3LIB)-$(HAVE_SSE)    += mp3lib/dct64_sse.c
@@ -785,10 +785,10 @@ DIRS =  . \
 ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 
 FFMPEGPARTS = libavcodec \
-        libavformat \
-        libavutil \
-        libpostproc \
-        libswscale \
+              libavformat \
+              libavutil \
+              libpostproc \
+              libswscale \
 
 FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(part)/$(part).a)
 FFMPEGFILES = $(foreach part, $(FFMPEGPARTS), $(part)/*.[chS] $(part)/*/*.[chS])
