@@ -748,7 +748,6 @@ DIRS =  . \
         libavutil \
         libavutil/arm \
         libavutil/bfin \
-        libavutil/bfin \
         libavutil/ppc \
         libavutil/sh4 \
         libavutil/x86 \
