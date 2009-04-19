@@ -953,15 +953,16 @@ uninstall:
 	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
 	rm -f $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
 
+ADD_ALL_DIRS    = $(foreach dir,$(DIRS),$(foreach suffix,$(1),$(addsuffix $(suffix),$(dir))))
 ADD_ALL_EXESUFS = $(foreach file,$(1),$(foreach exesuf,$(EXESUFS_ALL),$(file) $(file)$(exesuf)))
 
 clean:
-	-rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.o /*.a /*.ho /*~, $(addsuffix $(suffix),$(dir))))
+	-rm -f $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
 	-rm -f $(call ADD_ALL_EXESUFS,mplayer mencoder)
 
 distclean: clean testsclean toolsclean driversclean dhahelperclean dhahelperwinclean
 	-rm -rf DOCS/tech/doxygen
-	-rm -f $(foreach dir,$(DIRS),$(foreach suffix,/*.d, $(addsuffix $(suffix),$(dir))))
+	-rm -f $(call ADD_ALL_DIRS,/*.d)
 	-rm -f configure.log config.mak config.h codecs.conf.h help_mp.h \
            version.h $(VIDIX_PCI_FILES) TAGS tags
 	-rm -f $(call ADD_ALL_EXESUFS,codec-cfg cpuinfo)
