@@ -374,6 +374,7 @@ SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c \
                                         libmpeg2/motion_comp.c \
                                         libmpeg2/slice.c \
                                         $(SRCS_LIBMPEG2-yes)
+
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
                                         stream/stream_nemesi.c
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
@@ -387,6 +388,7 @@ SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
                                         stream/stream_live555.c
 SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.c
 SRCS_COMMON-$(MNG)                   += libmpdemux/demux_mng.c
+
 SRCS_MP3LIB-X86-$(HAVE_AMD3DNOW)     += mp3lib/dct36_3dnow.c \
                                         mp3lib/dct64_3dnow.c
 SRCS_MP3LIB-X86-$(HAVE_AMD3DNOWEXT)  += mp3lib/dct36_k7.c \
@@ -399,6 +401,7 @@ SRCS_MP3LIB-$(HAVE_MMX)              += mp3lib/decode_mmx.c
 SRCS_MP3LIB-$(HAVE_SSE)              += mp3lib/dct64_sse.c
 SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c \
                                         $(SRCS_MP3LIB-yes)
+
 SRCS_COMMON-$(MUSEPACK)              += libmpcodecs/ad_mpc.c \
                                         libmpdemux/demux_mpc.c
 SRCS_COMMON-$(NATIVE_RTSP)           += stream/stream_rtsp.c \
