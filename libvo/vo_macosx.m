@@ -127,7 +127,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	}
 	else
 	{
-		mp_msg(MSGT_VO, MSGL_FATAL, "Get device error: Device ID %d does not exist, falling back to main device.\n", screen_id);
+		mp_msg(MSGT_VO, MSGL_INFO, "[vo_macosx] Device ID %d does not exist, falling back to main device\n", screen_id);
 		screen_handle = [screen_array objectAtIndex:0];
 		screen_id = -1;
 	}
@@ -178,8 +178,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	}
 	else
 	{
-		mp_msg(MSGT_VO, MSGL_INFO, "VO: [macosx] writing output to a shared buffer "
-				"named \"%s\".\n",buffer_name);
+		mp_msg(MSGT_VO, MSGL_INFO, "[vo_macosx] writing output to a shared buffer "
+				"named \"%s\"\n",buffer_name);
 		
 		movie_aspect = (float)d_width/(float)d_height;
 		
@@ -188,7 +188,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		if (shm_fd == -1)
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, 
-				   "vo_macosx: failed to open shared memory. Error: %s\n", strerror(errno));
+				   "[vo_macosx] failed to open shared memory. Error: %s\n", strerror(errno));
 			return 1;
 		}
 		
@@ -196,7 +196,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		if (ftruncate(shm_fd, image_width*image_height*image_bytes) == -1)
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, 
-				   "vo_macosx: failed to size shared memory, possibly already in use. Error: %s\n", strerror(errno));
+				   "[vo_macosx] failed to size shared memory, possibly already in use. Error: %s\n", strerror(errno));
 			shm_unlink(buffer_name);
 			return 1;
 		}
@@ -207,7 +207,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		if (image_data == MAP_FAILED)
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, 
-				   "vo_macosx: failed to map shared memory. Error: %s\n", strerror(errno));
+				   "[vo_macosx] failed to map shared memory. Error: %s\n", strerror(errno));
 			shm_unlink(buffer_name);
 			return 1;
 		}		
@@ -303,10 +303,10 @@ static void uninit(void)
 		mplayerosxProxy = nil;
 		
 		if (munmap(image_data, image_width*image_height*image_bytes) == -1)
-			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: munmap failed. Error: %s\n", strerror(errno));
+			mp_msg(MSGT_VO, MSGL_FATAL, "[vo_macosx] uninit: munmap failed. Error: %s\n", strerror(errno));
 		
 		if (shm_unlink(buffer_name) == -1)
-			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shm_unlink failed. Error: %s\n", strerror(errno));
+			mp_msg(MSGT_VO, MSGL_FATAL, "[vo_macosx] uninit: shm_unlink failed. Error: %s\n", strerror(errno));
 		
 	}
 
@@ -477,20 +477,20 @@ static int control(uint32_t request, void *data, ...)
 	
 	error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat, image_datas[0], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[0]);
 	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create Pixel Buffer(%d)\n", error);
+		mp_msg(MSGT_VO, MSGL_ERR,"[vo_macosx] Failed to create Pixel Buffer(%d)\n", error);
 	if (vo_doublebuffering) {
 		error = CVPixelBufferCreateWithBytes(NULL, image_width, image_height, pixelFormat, image_datas[1], image_width*image_bytes, NULL, NULL, NULL, &frameBuffers[1]);
 		if(error != kCVReturnSuccess)
-			mp_msg(MSGT_VO, MSGL_ERR,"Failed to create Pixel Double Buffer(%d)\n", error);
+			mp_msg(MSGT_VO, MSGL_ERR,"[vo_macosx] Failed to create Pixel Double Buffer(%d)\n", error);
 	}
 	
 	error = CVOpenGLTextureCacheCreate(NULL, 0, [glContext CGLContextObj], [[self pixelFormat] CGLPixelFormatObj], 0, &textureCache);
 	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture Cache(%d)\n", error);
+		mp_msg(MSGT_VO, MSGL_ERR,"[vo_macosx] Failed to create OpenGL texture Cache(%d)\n", error);
 	
 	error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
 	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
+		mp_msg(MSGT_VO, MSGL_ERR,"[vo_macosx] Failed to create OpenGL texture(%d)\n", error);
 	
 	//show window
 	[window center];
@@ -838,7 +838,7 @@ static int control(uint32_t request, void *data, ...)
 	CVOpenGLTextureRelease(texture);
 	error = CVOpenGLTextureCacheCreateTextureFromImage(NULL, textureCache, frameBuffers[image_page], 0, &texture);
 	if(error != kCVReturnSuccess)
-		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
+		mp_msg(MSGT_VO, MSGL_ERR,"[vo_macosx] Failed to create OpenGL texture(%d)\n", error);
 
     CVOpenGLTextureGetCleanTexCoords(texture, lowerLeft, lowerRight, upperRight, upperLeft);
 }
