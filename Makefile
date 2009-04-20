@@ -784,6 +784,9 @@ DIRS =  . \
 
 ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 
+ADD_ALL_DIRS    = $(foreach dir,$(DIRS),$(foreach suffix,$(1),$(addsuffix $(suffix),$(dir))))
+ADD_ALL_EXESUFS = $(foreach file,$(1),$(foreach exesuf,$(EXESUFS_ALL),$(file) $(file)$(exesuf)))
+
 FFMPEGPARTS = libavcodec \
               libavformat \
               libavutil \
@@ -952,9 +955,6 @@ uninstall:
 	rm -f $(prefix)/share/applications/mplayer.desktop
 	rm -f $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
 	rm -f $(foreach lang,$(MAN_LANGS),$(foreach man,mplayer.1 mencoder.1,$(MANDIR)/$(lang)/man1/$(man)))
-
-ADD_ALL_DIRS    = $(foreach dir,$(DIRS),$(foreach suffix,$(1),$(addsuffix $(suffix),$(dir))))
-ADD_ALL_EXESUFS = $(foreach file,$(1),$(foreach exesuf,$(EXESUFS_ALL),$(file) $(file)$(exesuf)))
 
 clean:
 	-rm -f $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
