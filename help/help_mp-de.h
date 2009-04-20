@@ -1423,7 +1423,7 @@ static const char help_text[]=
 #define MSGTR_MPDEMUX_MMST_UnknownObject "unbekanntes Objekt\n"
 #define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Konnte Mediendaten nicht lesen.\n"
 #define MSGTR_MPDEMUX_MMST_MissingSignature "fehlende Signatur\n"
-#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Alles fertig. Vielen dank, dass Du eine prorietäre und patentierte Technologie beinhaltende Mediendatei heruntergeladen hast.\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Alles fertig. Vielen Dank, dass Du eine proprietäre und patentierte Technologie beinhaltende Mediendatei heruntergeladen hast.\n"
 #define MSGTR_MPDEMUX_MMST_UnknownCmd "Unbekanntes Kommando %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet lieferte Fehler zurück: %s\n"
 #define MSGTR_MPDEMUX_MMST_Connected "Verbunden.\n"
