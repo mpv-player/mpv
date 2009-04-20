@@ -795,7 +795,7 @@ FFMPEGPARTS = libavcodec \
               libswscale \
 
 FFMPEGLIBS  = $(foreach part, $(FFMPEGPARTS), $(part)/$(part).a)
-FFMPEGFILES = $(foreach part, $(FFMPEGPARTS), $(part)/*.[chS] $(part)/*/*.[chS])
+FFMPEGFILES = $(foreach part, $(FFMPEGPARTS), $(wildcard $(part)/*.[chS] $(part)/*/*.[chS]))
 
 
 
