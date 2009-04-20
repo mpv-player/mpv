@@ -784,8 +784,9 @@ DIRS =  . \
 
 ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 
-ADD_ALL_DIRS    = $(foreach dir,$(DIRS),$(foreach suffix,$(1),$(addsuffix $(suffix),$(dir))))
-ADD_ALL_EXESUFS = $(foreach file,$(1),$(foreach exesuf,$(EXESUFS_ALL),$(file) $(file)$(exesuf)))
+ADDSUFFIXES     = $(foreach suf,$(1),$(addsuffix $(suf),$(2)))
+ADD_ALL_DIRS    = $(call ADDSUFFIXES,$(1),$(DIRS))
+ADD_ALL_EXESUFS = $(1) $(call ADDSUFFIXES,$(EXESUFS_ALL),$(1))
 
 FFMPEGPARTS = libavcodec \
               libavformat \
