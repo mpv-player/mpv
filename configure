@@ -2611,6 +2611,17 @@ EOF
     test "$_altivec" = yes && CFLAGS="$CFLAGS $_altivec_gcc_flags"
 fi
 
+if ppc ; then
+def_xform_asm='#define HAVE_XFORM_ASM 0'
+xform_asm=no
+echocheck "XFORM ASM support"
+  cat > $TMPC << EOF
+int main(void) { __asm__ volatile ("lwzx 0, %y0" :: "Z"(*(int*)0)"); return 0; }
+EOF
+cc_check && xform_asm=yes && def_xform_asm='#define HAVE_XFORM_ASM 1'
+echores "$xform_asm"
+fi
+
 if arm ; then
   echocheck "ARM pld instruction"
   cat > $TMPC << EOF
@@ -8787,6 +8798,7 @@ $def_posix_memalign
 $def_pthreads
 $def_ten_operands
 $def_threads
+$def_xform_asm
 $def_yasm
 
 #define CONFIG_FASTDIV 0
