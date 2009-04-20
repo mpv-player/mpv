@@ -221,9 +221,10 @@ SRCS_COMMON = asxparser.c \
               stream/stream_null.c \
               stream/url.c \
 
-SRCS_COMMON-$(AUDIO_INPUT)-$(ALSA1X) += stream/ai_alsa1x.c
-SRCS_COMMON-$(AUDIO_INPUT)-$(ALSA9)  += stream/ai_alsa.c
-SRCS_COMMON-$(AUDIO_INPUT)-$(OSS)    += stream/ai_oss.c
+SRCS_AUDIO_INPUT-$(ALSA1X)           += stream/ai_alsa1x.c
+SRCS_AUDIO_INPUT-$(ALSA9)            += stream/ai_alsa.c
+SRCS_AUDIO_INPUT-$(OSS)              += stream/ai_oss.c
+SRCS_COMMON-$(AUDIO_INPUT)           += $(SRCS_AUDIO_INPUT-yes)
 SRCS_COMMON-$(BITMAP_FONT)           += libvo/font_load.c
 SRCS_COMMON-$(CDDA)                  += stream/stream_cdda.c \
                                         stream/cdinfo.c
@@ -353,6 +354,16 @@ SRCS_COMMON-$(LIBDVDCSS_INTERNAL)    += libdvdcss/css.c \
                                         libdvdcss/libdvdcss.c \
 
 SRCS_COMMON-$(LIBMAD)                += libmpcodecs/ad_libmad.c
+
+SRCS_LIBMPEG2-$(ARCH_ALPHA)          += libmpeg2/idct_alpha.c \
+                                        libmpeg2/motion_comp_alpha.c
+SRCS_LIBMPEG2-$(ARCH_ARM)            += libmpeg2/motion_comp_arm.c \
+                                        libmpeg2/motion_comp_arm_s.S
+SRCS_LIBMPEG2-$(HAVE_ALTIVEC)        += libmpeg2/idct_altivec.c \
+                                        libmpeg2/motion_comp_altivec.c
+SRCS_LIBMPEG2-$(HAVE_MMX)            += libmpeg2/idct_mmx.c \
+                                        libmpeg2/motion_comp_mmx.c
+SRCS_LIBMPEG2-$(HAVE_VIS)            += libmpeg2/motion_comp_vis.c
 SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c \
                                         libmpeg2/alloc.c \
                                         libmpeg2/cpu_accel.c\
@@ -361,16 +372,8 @@ SRCS_COMMON-$(LIBMPEG2)              += libmpcodecs/vd_libmpeg2.c \
                                         libmpeg2/header.c \
                                         libmpeg2/idct.c \
                                         libmpeg2/motion_comp.c \
-                                        libmpeg2/slice.c
-SRCS_COMMON-$(LIBMPEG2)-$(ARCH_ALPHA)   += libmpeg2/idct_alpha.c \
-                                           libmpeg2/motion_comp_alpha.c
-SRCS_COMMON-$(LIBMPEG2)-$(ARCH_ARM)     += libmpeg2/motion_comp_arm.c \
-                                           libmpeg2/motion_comp_arm_s.S
-SRCS_COMMON-$(LIBMPEG2)-$(HAVE_ALTIVEC) += libmpeg2/idct_altivec.c \
-                                           libmpeg2/motion_comp_altivec.c
-SRCS_COMMON-$(LIBMPEG2)-$(HAVE_MMX)     += libmpeg2/idct_mmx.c \
-                                           libmpeg2/motion_comp_mmx.c
-SRCS_COMMON-$(LIBMPEG2)-$(HAVE_VIS)     += libmpeg2/motion_comp_vis.c
+                                        libmpeg2/slice.c \
+                                        $(SRCS_LIBMPEG2-yes)
 SRCS_COMMON-$(LIBNEMESI)             += libmpdemux/demux_nemesi.c \
                                         stream/stream_nemesi.c
 SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
@@ -384,16 +387,18 @@ SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
                                         stream/stream_live555.c
 SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.c
 SRCS_COMMON-$(MNG)                   += libmpdemux/demux_mng.c
-SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32) += mp3lib/decode_i586.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_AMD3DNOW)    += mp3lib/dct36_3dnow.c \
-                                                            mp3lib/dct64_3dnow.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_AMD3DNOWEXT) += mp3lib/dct36_k7.c \
-                                                            mp3lib/dct64_k7.c
-SRCS_COMMON-$(MP3LIB)-$(ARCH_X86_32)-$(HAVE_MMX)         += mp3lib/dct64_mmx.c
-SRCS_COMMON-$(MP3LIB)-$(HAVE_ALTIVEC) += mp3lib/dct64_altivec.c
-SRCS_COMMON-$(MP3LIB)-$(HAVE_MMX)    += mp3lib/decode_mmx.c
-SRCS_COMMON-$(MP3LIB)-$(HAVE_SSE)    += mp3lib/dct64_sse.c
+SRCS_MP3LIB-X86-$(HAVE_AMD3DNOW)     += mp3lib/dct36_3dnow.c \
+                                        mp3lib/dct64_3dnow.c
+SRCS_MP3LIB-X86-$(HAVE_AMD3DNOWEXT)  += mp3lib/dct36_k7.c \
+                                        mp3lib/dct64_k7.c
+SRCS_MP3LIB-X86-$(HAVE_MMX)          += mp3lib/dct64_mmx.c
+SRCS_MP3LIB-$(ARCH_X86_32)           += mp3lib/decode_i586.c \
+                                        $(SRCS_MP3LIB-X86-yes)
+SRCS_MP3LIB-$(HAVE_ALTIVEC)          += mp3lib/dct64_altivec.c
+SRCS_MP3LIB-$(HAVE_MMX)              += mp3lib/decode_mmx.c
+SRCS_MP3LIB-$(HAVE_SSE)              += mp3lib/dct64_sse.c
+SRCS_COMMON-$(MP3LIB)                += libmpcodecs/ad_mp3lib.c mp3lib/sr1.c \
+                                        $(SRCS_MP3LIB-yes)
 SRCS_COMMON-$(MUSEPACK)              += libmpcodecs/ad_mpc.c \
                                         libmpdemux/demux_mpc.c
 SRCS_COMMON-$(NATIVE_RTSP)           += stream/stream_rtsp.c \
@@ -695,7 +700,7 @@ SRCS_MENCODER-$(WIN32DLL)         += libmpcodecs/ve_vfw.c
 SRCS_MENCODER-$(X264)             += libmpcodecs/ve_x264.c
 SRCS_MENCODER-$(XVID4)            += libmpcodecs/ve_xvid4.c
 
-SRCS_COMMON   += $(SRCS_COMMON-yes) $(SRCS_COMMON-yes-yes) $(SRCS_COMMON-yes-yes-yes)
+SRCS_COMMON   += $(SRCS_COMMON-yes)
 SRCS_MENCODER += $(SRCS_MENCODER-yes)
 SRCS_MPLAYER  += $(SRCS_MPLAYER-yes)
 
