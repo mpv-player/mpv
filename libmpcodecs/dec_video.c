@@ -316,7 +316,6 @@ stringset_free(&selected);
 
 if(!sh_video->initialized){
     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
-    mp_msg(MSGT_DECAUDIO,MSGL_HINT, MSGTR_RTFMCodecs);
     return 0; // failed
 }
 

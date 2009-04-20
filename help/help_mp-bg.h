@@ -72,7 +72,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "Броя кадри в секунда не е указан или е невалиден, ползвайте опцията -fps .\n"
 #define MSGTR_TryForceAudioFmtStr "Опит за ползване на фамилия аудио кодеци %s...\n"
 #define MSGTR_CantFindAudioCodec "Не може да бъде намерен кодек за този аудио формат 0x%X.\n"
-#define MSGTR_RTFMCodecs "Прочетете DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Опит за ползване на фамилия видео кодеци %s...\n"
 #define MSGTR_CantFindVideoCodec "Няма подходящ кодек за указаните -vo и видео формат 0x%X.\n"
 #define MSGTR_CannotInitVO "ФАТАЛНО: Видео драйвера не може да бъде инициализиран.\n"

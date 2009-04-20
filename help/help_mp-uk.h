@@ -69,7 +69,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "Не вказано чи невірна кількість кадрів, застосуйте опцію -fps.\n"
 #define MSGTR_TryForceAudioFmtStr "Намагаюсь форсувати групу аудіо кодеків %s...\n"
 #define MSGTR_CantFindVideoCodec "Не можу знайти кодек для відео формату 0x%X!\n"
-#define MSGTR_RTFMCodecs "Прочитайте DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Намагаюсь форсувати групу відео кодеків %s...\n"
 #define MSGTR_CannotInitVO "ФАТАЛЬНО: Не можу ініціалізувати відео драйвер!\n"
 #define MSGTR_CannotInitAO "не можу відкрити/ініціалізувати аудіо пристрій -> ГРАЮ БЕЗ ЗВУКУ\n"

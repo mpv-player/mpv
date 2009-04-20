@@ -73,7 +73,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "Başlıktaki FPS belirsiz veya geçersiz, -fps seçeneğini kullanınız!\n"
 #define MSGTR_TryForceAudioFmtStr "%s ses kodek sürücülerini zorlama deneniyor...\n"
 #define MSGTR_CantFindAudioCodec "0x%X! ses biçimi için kodek bulunamıyor\n"
-#define MSGTR_RTFMCodecs "DOCS/HTML/en/codecs.html sayfasını okuyunuz!\n"
 #define MSGTR_TryForceVideoFmtStr "%s video kodek sürücülerini zorlama deneniyor...\n"
 #define MSGTR_CantFindVideoCodec "Seçili -vo sürücüsü ve 0x%X video biçimi için kodek bulunamadı!\n"
 #define MSGTR_CannotInitVO "HATA: Video sürücüsü başlatılamıyor!\n"

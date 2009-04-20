@@ -71,7 +71,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "В заголовке кадры/сек не указаны (или недопустимые)! Используйте опцию -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Попытка форсировать семейство аудиокодеков %s...\n"
 #define MSGTR_CantFindAudioCodec "Не могу найти кодек для аудиоформата 0x%X!\n"
-#define MSGTR_RTFMCodecs "Прочтите DOCS/HTML/ru/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Попытка форсировать семейство видеокодеков %s...\n"
 #define MSGTR_CantFindVideoCodec "Не могу найти кодек для выбранного -vo и видеоформата 0x%X!\n"
 #define MSGTR_CannotInitVO "ФАТАЛЬНАЯ ОШИБКА: Не могу инициализировать видеодрайвер!\n"

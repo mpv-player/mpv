@@ -79,7 +79,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "FPS ist im Header nicht angegeben (oder ungültig)! Benutze die Option -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Versuche Audiocodecfamilie %s zu erzwingen...\n"
 #define MSGTR_CantFindAudioCodec "Kann Codec für Audioformat 0x%X nicht finden!\n"
-#define MSGTR_RTFMCodecs "Lies DOCS/HTML/de/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Versuche Videocodecfamilie %s zu erzwingen...\n"
 #define MSGTR_CantFindVideoCodec "Kann keinen Codec finden, der zu gewählter Option -vo und Videoformat 0x%X passt!\n"
 #define MSGTR_CannotInitVO "FATAL: Kann Videoausgabetreiber nicht initialisieren!\n"

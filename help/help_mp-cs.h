@@ -70,7 +70,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "Údaj o FPS v hlavičce souboru je špatný nebo chybí, použijte volbu -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Pokouším se vynutit rodinu audiokodeku %s...\n"
 #define MSGTR_CantFindAudioCodec "Nemohu nalézt kodek pro audio formát 0x%X!\n"
-#define MSGTR_RTFMCodecs "Přečtěte si DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Pokouším se vynutit rodinu videokodeku %s...\n"
 #define MSGTR_CantFindVideoCodec "Nemohu nalézt kodek pro vybraný -vo a video formát 0x%X.\n"
 #define MSGTR_CannotInitVO "Kritická chyba: Nemohu inicializovat video rozhraní!\n"

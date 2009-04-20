@@ -79,7 +79,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "FPS 在文件头中没有指定或者无效，请使用 -fps 选项。\n"
 #define MSGTR_TryForceAudioFmtStr "尝试强制使用音频编解码器驱动族 %s...\n"
 #define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的编解码器。\n"
-#define MSGTR_RTFMCodecs "请阅读 DOCS/zh/codecs.html！\n"
 #define MSGTR_TryForceVideoFmtStr "尝试强制使用视频编解码器驱动族 %s...\n"
 #define MSGTR_CantFindVideoCodec "找不到匹配所选 -vo 参数和视频格式 0x%X 的编解码器。\n"
 #define MSGTR_CannotInitVO "致命错误：无法初始化视频驱动！\n"

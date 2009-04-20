@@ -72,7 +72,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "Brak wartości FPS w nagłówku lub jest ona nieprawidłowa, użyj opcji -fps <ilość_klatek>.\n"
 #define MSGTR_TryForceAudioFmtStr "Próbuję wymusić kodek audio z rodziny %s...\n"
 #define MSGTR_CantFindAudioCodec "Nie mogę odnaleźć kodeka audio 0x%X.\n"
-#define MSGTR_RTFMCodecs "Zobacz DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Próbuję wymusić kodek video z rodziny %s...\n"
 #define MSGTR_CantFindVideoCodec "Nie mogę odnaleźć kodeka video pasującego do wybranego -vo i formatu video 0x%X.\n"
 #define MSGTR_CannotInitVO "Błąd krytyczny: Nie mogę uruchomić sterownika video.\n"

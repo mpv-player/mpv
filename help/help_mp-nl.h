@@ -68,7 +68,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "FPS niet gespecificeerd (of foutief) in de header! Gebruik de optie -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Probeer audio codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindAudioCodec "Kan codec voor audio format 0x%X niet vinden!\n"
-#define MSGTR_RTFMCodecs "Lees DOCS/HTML/en/codecs.html voor meer informatie!\n"
 #define MSGTR_TryForceVideoFmtStr "Probeer video codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindVideoCodec "Kan codec voor video format 0x%X niet vinden!\n"
 #define MSGTR_VOincompCodec "Sorry, geselecteerde video_out device is incompatibel met deze codec.\n"

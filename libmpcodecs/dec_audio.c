@@ -270,7 +270,6 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
     if (!sh_audio->initialized) {
 	mp_msg(MSGT_DECAUDIO, MSGL_ERR, MSGTR_CantFindAudioCodec,
 	       sh_audio->format);
-	mp_msg(MSGT_DECAUDIO, MSGL_HINT, MSGTR_RTFMCodecs);
 	return 0;   // failed
     }
 
