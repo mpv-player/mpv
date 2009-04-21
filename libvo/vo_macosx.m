@@ -121,7 +121,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	
 	//init screen
 	screen_array = [NSScreen screens];
-	if(screen_id < [screen_array count])
+	if(screen_id < (int)[screen_array count])
 	{
 		screen_handle = [screen_array objectAtIndex:(screen_id < 0 ? 0 : screen_id)];
 	}
