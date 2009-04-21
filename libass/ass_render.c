@@ -1603,7 +1603,7 @@ static void wrap_lines_smart(int max_text_width)
 			mp_msg(MSGT_ASS, MSGL_DBG2, "forced line break at %d\n", break_at);
 		}
 		
-		if (len >= max_text_width) {
+		if ((len >= max_text_width) && (frame_context.track->WrapStyle != 2)) {
 			break_type = 1;
 			break_at = last_space;
 			if (break_at == -1)
