@@ -22,19 +22,19 @@ choosemirror ()
 {
   cd $PREFDIR
 
-  #if [ ! -r mirrors ] || find  mirrors -mtime +20  ; then
+  #if [ ! -r mirrors ] || find mirrors -mtime +20 ; then
     echo Downloading mirrors list..
     wget -nv -c -N $MYSITE/mirrors || true
   #fi
   if [ ! -r bestsites ] || [ mirrors -nt bestsites ] || \
-    find  bestsites -mtime +20 > /dev/null ; then
+    find bestsites -mtime +20 > /dev/null ; then
     if which netselect > /dev/null  ; then
       echo  Choosing best mirrors using netselect....
       netselect  -s 5  $( cat mirrors ) | awk '{print $2}' > bestsites
     elif which fping > /dev/null ; then
-      fping -C 1   $( sed   's#.*//##;s#/.*##' mirrors ) 2>&1 | \
-        egrep -v 'bytes.*loss' | sort -n -k3  | \
-        grep -v ': *-' |  awk '/:/{print $1}' | head -5 > bestsites
+     fping -C 1  $( sed   's#.*//##;s#/.*##' mirrors ) 2>&1 | \
+       egrep -v 'bytes.*loss' | sort -n -k3 | \
+       grep -v ': *-' | awk '/:/{print $1}' | head -5 > bestsites
     else
       echo "(If you install 'netselect', it will select the best mirror for you"
       echo "  you may wish to stop this script and rerun after installation)"
@@ -54,11 +54,11 @@ INSTALL () {
   cd $CODECDIR/mplayer_binary_codecs
 
   if [ -r $filename ] ; then
-    cp $filename  $filename.bak
+    cp $filename $filename.bak
   fi
 
-  if [  "$url" = @MAINSITE@ ] ; then
-    cat $PREFDIR/bestsites |   while read mainsite ; do
+  if [ "$url" = @MAINSITE@ ] ; then
+    cat $PREFDIR/bestsites | while read mainsite ; do
       echo Downloading $filename from $mainsite ...
       wget -v -c -N $mainsite/$dir/$filename || true
       if [ -r "$filename" ] ; then
@@ -69,7 +69,7 @@ INSTALL () {
     done
   else
     wget -v -c -N $url/$dir/$filename || true
-    if  [ -r "$filename" ] ; then
+    if [ -r "$filename" ] ; then
       UNPACK "$filename"
       [ -r $filename.bak ] && rm $filename.bak
       return 0
@@ -146,9 +146,9 @@ case "$1" in
       egrep -v "^[[:space:]]*(#|$)" $PREFDIR/codecs_list | \
         while read arch url dir file info ; do
           if [ "$dpkgarch" = "$arch" ]; then
-            echo Installing $file  $info...
-            INSTALL "$url"  "$dir"  "$file"
-            n=1
+            echo Installing $file $info...
+            INSTALL "$url" "$dir" "$file"
+	    n=1
           fi
         done
     else
