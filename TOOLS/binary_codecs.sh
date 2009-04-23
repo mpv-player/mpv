@@ -26,7 +26,7 @@ choosemirror ()
   cd $PREFDIR
 
   #if [ ! -r mirrors ] || find mirrors -mtime +20 ; then
-    echo Downloading mirrors list
+    echo "Downloading mirrors list"
     wget -nv -c -N $MYSITE/mirrors || true
   #fi
   if [ ! -r bestsites ] || [ mirrors -nt bestsites ] || \
@@ -39,7 +39,7 @@ choosemirror ()
        egrep -v 'bytes.*loss' | sort -n -k3 | \
        grep -v ': *-' | awk '/:/{print $1}' | head -5 > bestsites
     else
-      echo "(If you install 'netselect', it will select the best mirror for you"
+      echo "(If you install 'netselect' or 'fping', it will select the best mirror for you"
       echo "  you may wish to stop this script and rerun after installation)"
       sleep 3
       head -3 mirrors > bestsites
@@ -66,7 +66,6 @@ INSTALL () {
       wget -c -N $mainsite/$dir/$filename || true
       if [ -r "$filename" ] ; then
         UNPACK "$filename"
-        [ -r $filename.bak ] && rm $filename.bak
         return 0
       fi
     done
@@ -74,7 +73,6 @@ INSTALL () {
     wget -c -N $url/$dir/$filename || true
     if [ -r "$filename" ] ; then
       UNPACK "$filename"
-      [ -r $filename.bak ] && rm $filename.bak
       return 0
     fi
   fi
@@ -148,7 +146,7 @@ case "$1" in
     choosemirror
     cd $PREFDIR
     #if [ ! -r codecs_list ] || find codecs_list -mtime +20 ; then
-      echo 'Getting codecs list'
+      echo "Getting codecs list"
       wget -nv -c -N $MYSITE/codecs_list || true
     #fi
 
