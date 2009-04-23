@@ -30,14 +30,15 @@ choosemirror ()
     wget -nv -c -N $MYSITE/mirrors || true
   #fi
   if [ ! -r bestsites ] || [ mirrors -nt bestsites ] || \
-    find bestsites -mtime +20 > /dev/null ; then
+    find bestsites -mtime +20 | grep -q bestsites ; then
     if which netselect > /dev/null ; then
       echo Choosing best mirrors using netselect
-      netselect -s 5 $( cat mirrors ) | awk '{print $2}' > bestsites
+      netselect -s 5 -t 5 $( cat mirrors ) | awk '{print $2}' > bestsites
     elif which fping > /dev/null ; then
-     fping -C 1 $( sed 's#.*//##;s#/.*##' mirrors ) 2>&1 | \
+     fping -C 1  $( sed   's#.*//##;s#/.*##' mirrors ) 2>&1 | \
        egrep -v 'bytes.*loss' | sort -n -k3 | \
-       grep -v ': *-' | awk '/:/{print $1}' | head -5 > bestsites
+       grep -v ': *-' | awk '/:/{print $1}' | head -5 | ( while read mainsite ; do
+         grep $mainsite $PREFDIR/mirrors ; done ) > bestsites
     else
       echo "(If you install 'netselect' or 'fping', it will select the best mirror for you"
       echo "  you may wish to stop this script and rerun after installation)"
@@ -84,7 +85,17 @@ INSTALL () {
 UNPACK ()
 {
   filename="$1"
-  if [ ! -r $filename.bak ] || ! cmp $filename.bak $filename ; then
+  if [ -r $filename.bak ] && cmp $filename.bak $filename && [ -r  $filename.list ] ; then
+    echo It appears that $filename was already succesfully installed
+    [ -r $filename.bak ] && rm $filename.bak
+  else
+    if grep -q " $filename$" $PREFDIR/MD5SUMS ; then
+      echo Checking MD5 for $filename
+      grep " $filename$" $PREFDIR/MD5SUMS | md5sum -c -
+    else
+      echo Warning: no MD5 for $filename were found. Hit enter to continue.
+      read dummy
+    fi
     echo Installing $filename ...
     if [ -r $filename.list ] ; then
       tr '\n' '\000' < $filename.list | xargs -r0 rm || true
@@ -150,13 +161,25 @@ case "$1" in
       wget -nv -c -N $MYSITE/codecs_list || true
     #fi
 
-    if grep -q "^$dpkgarch" $PREFDIR/codecs_list   ] ; then
+    cd $PREFDIR
+    echo Downloading MD5 sums from main site
+    [ -r MD5SUMS ] && mv MD5SUMS MD5SUMS.bak
+    if wget -nv -N http://www.mplayerhq.hu/MPlayer/releases/codecs/MD5SUMS ; then
+      [ -r MD5SUMS.bak ] && rm MD5SUMS.bak
+    else
+      echo "failed"
+      if [ -r MD5SUMS.bak ] ; then
+        echo "trying to use backup"
+        mv MD5SUMS.bak MD5SUMS
+      fi
+    fi
+
+    if grep -q "^$dpkgarch" $PREFDIR/codecs_list ; then
       egrep -v "^[[:space:]]*(#|$)" $PREFDIR/codecs_list | \
         while read arch url dir file info ; do
           if [ "$dpkgarch" = "$arch" ]; then
             echo Downloading and installing $file $info...
             INSTALL "$url" "$dir" "$file"
-            n=1
           fi
         done
       needlibstd=no
