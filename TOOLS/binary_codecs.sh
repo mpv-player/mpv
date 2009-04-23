@@ -26,14 +26,14 @@ choosemirror ()
   cd $PREFDIR
 
   #if [ ! -r mirrors ] || find mirrors -mtime +20 ; then
-    echo Downloading mirrors list..
+    echo Downloading mirrors list
     wget -nv -c -N $MYSITE/mirrors || true
   #fi
   if [ ! -r bestsites ] || [ mirrors -nt bestsites ] || \
     find bestsites -mtime +20 > /dev/null ; then
-    if which netselect > /dev/null  ; then
-      echo  Choosing best mirrors using netselect....
-      netselect  -s 5  $( cat mirrors ) | awk '{print $2}' > bestsites
+    if which netselect > /dev/null ; then
+      echo Choosing best mirrors using netselect
+      netselect -s 5 $( cat mirrors ) | awk '{print $2}' > bestsites
     elif which fping > /dev/null ; then
      fping -C 1  $( sed   's#.*//##;s#/.*##' mirrors ) 2>&1 | \
        egrep -v 'bytes.*loss' | sort -n -k3 | \
@@ -147,8 +147,8 @@ case "$1" in
     fi
     choosemirror
     cd $PREFDIR
-    #if [ ! -r codecs_list ] || find  codecs_list -mtime +20  ; then
-      echo 'Getting  codecs list ...'
+    #if [ ! -r codecs_list ] || find codecs_list -mtime +20 ; then
+      echo 'Getting codecs list'
       wget -nv -c -N $MYSITE/codecs_list || true
     #fi
 
@@ -156,7 +156,7 @@ case "$1" in
       egrep -v "^[[:space:]]*(#|$)" $PREFDIR/codecs_list | \
         while read arch url dir file info ; do
           if [ "$dpkgarch" = "$arch" ]; then
-            echo Installing $file $info...
+            echo Downloading and installing $file $info...
             INSTALL "$url" "$dir" "$file"
 	    n=1
           fi
