@@ -159,6 +159,19 @@ case "$1" in
             n=1
           fi
         done
+      needlibstd=no
+      test "$dpkgarch" = "powerpc" && needlibstd=yes
+      test "$dpkgarch" = "i386" && needlibstd=yes
+      if test "$needlibstd" = "yes" && ! test -r /usr/lib/libstdc++.so.5 ; then
+	echo "Warning: you need to install libstdc++ 5 libraries"
+	echo -n "Do it now? "
+	read R
+	case $R in
+         y*) apt-get install libstdc++5 ;;
+          *) echo "If you change your mind, use the command"
+             echo "  apt-get install libstdc++5" ;;
+        esac
+      fi
     else
       echo "Sorry, no codecs for your arch '$dpkgarch'. Sorry dude :("
       exit 1
