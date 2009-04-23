@@ -611,7 +611,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, float audio
     mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %f, %d)\n", demuxer, rel_seek_secs, audio_delay, flags);
 
     if (flags & SEEK_ABSOLUTE) {
-      priv->last_pts = priv->avfc->start_time;
+      priv->last_pts = 0;
     } else {
       if (rel_seek_secs < 0) avsflags = AVSEEK_FLAG_BACKWARD;
     }
