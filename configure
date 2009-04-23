@@ -5083,7 +5083,7 @@ fi
 if test "$_sdl" = auto || test "$_sdl" = yes ; then
   cat > $TMPC << EOF
 #include <SDL.h>
-int main(void) {
+int main(int argc, char *argv[]) {
   SDL_Init(SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE);
   return 0;
 }
