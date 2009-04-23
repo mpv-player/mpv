@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# avoid insecure tempfile creation
+umask 0022
+
 # This script will download binary codecs for MPlayer unto a Debian system.
 
 # Author:  thuglife, mennucc1
@@ -38,7 +41,7 @@ choosemirror ()
     else
       echo "(If you install 'netselect', it will select the best mirror for you"
       echo "  you may wish to stop this script and rerun after installation)"
-      sleep 5
+      sleep 3
       head -3 mirrors > bestsites
     fi
   fi
@@ -60,7 +63,7 @@ INSTALL () {
   if [ "$url" = @MAINSITE@ ] ; then
     cat $PREFDIR/bestsites | while read mainsite ; do
       echo Downloading $filename from $mainsite ...
-      wget -v -c -N $mainsite/$dir/$filename || true
+      wget -c -N $mainsite/$dir/$filename || true
       if [ -r "$filename" ] ; then
         UNPACK "$filename"
         [ -r $filename.bak ] && rm $filename.bak
@@ -68,7 +71,7 @@ INSTALL () {
       fi
     done
   else
-    wget -v -c -N $url/$dir/$filename || true
+    wget -c -N $url/$dir/$filename || true
     if [ -r "$filename" ] ; then
       UNPACK "$filename"
       [ -r $filename.bak ] && rm $filename.bak
@@ -91,20 +94,23 @@ UNPACK ()
       rm $filename.list
     fi
 
+    tarfail () { echo FAILED $filename ; rm $filename.list ; exit 1 ; }
+
     case "$filename" in
       *.tar.gz)
-        tar xvzf $filename > $filename.list
+        tar xvzf $filename > $filename.list || tarfail
         #rm $filename
         ;;
       *.tgz)
-        tar xvzf $filename > $filename.list
+        tar xvzf $filename > $filename.list || tarfail
         #rm $filename
         ;;
       *.tar.bz2)
-        tar  --bzip2 -xvf $filename > $filename.list
+        tar --bzip2 -xvf $filename > $filename.list || tarfail
         #rm $filename
         ;;
     esac
+    [ -r $filename.bak ] && rm $filename.bak
     LINK $filename.list
     echo "Installed $filename Succesfully!"
   fi
@@ -135,6 +141,10 @@ fi
 
 case "$1" in
   install)
+    if  test -x /bin/bzip2 || test -x /usr/bin/bzip2 ; then : ; else
+      echo You need to install bzip2
+      exit 1
+    fi
     choosemirror
     cd $PREFDIR
     #if [ ! -r codecs_list ] || find  codecs_list -mtime +20  ; then
