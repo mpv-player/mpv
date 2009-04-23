@@ -1536,22 +1536,17 @@ void swapGlBuffers(void) {
  * \brief find address of a linked function
  * \param s name of function to find
  * \return address of function or NULL if not found
- *
- * Copied from xine
  */
 static void *getdladdr(const char *s) {
+  void *ret = NULL;
 #ifdef HAVE_LIBDL
-#if defined(__sun) || defined(__sgi)
-  static void *handle = NULL;
+  void *handle = dlopen(NULL, RTLD_LAZY);
   if (!handle)
-    handle = dlopen(NULL, RTLD_LAZY);
-  return dlsym(handle, s);
-#else
-  return dlsym(0, s);
+    return NULL;
+  ret = dlsym(handle, s);
+  dlclose(handle);
 #endif
-#else
-  return NULL;
-#endif
+  return ret;
 }
 
 /**
