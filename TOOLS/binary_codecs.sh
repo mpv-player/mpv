@@ -6,7 +6,7 @@ umask 0022
 
 # This script will download binary codecs for MPlayer unto a Debian system.
 
-# Author:  thuglife, mennucc1
+# Author: thuglife, mennucc1
 #
 
 CODECDIR=/usr/lib/codecs
@@ -35,7 +35,7 @@ choosemirror ()
       echo Choosing best mirrors using netselect
       netselect -s 5 $( cat mirrors ) | awk '{print $2}' > bestsites
     elif which fping > /dev/null ; then
-     fping -C 1  $( sed   's#.*//##;s#/.*##' mirrors ) 2>&1 | \
+     fping -C 1 $( sed 's#.*//##;s#/.*##' mirrors ) 2>&1 | \
        egrep -v 'bytes.*loss' | sort -n -k3 | \
        grep -v ': *-' | awk '/:/{print $1}' | head -5 > bestsites
     else
@@ -87,9 +87,9 @@ UNPACK ()
 {
   filename="$1"
   if [ ! -r $filename.bak ] || ! cmp $filename.bak $filename ; then
-    echo Installing $filename  ...
-    if [ -r $filename.list  ] ; then
-      tr '\n' '\000' < $filename.list | xargs -r0 rm  || true
+    echo Installing $filename ...
+    if [ -r $filename.list ] ; then
+      tr '\n' '\000' < $filename.list | xargs -r0 rm || true
       UNLINK $filename.list
       rm $filename.list
     fi
@@ -141,7 +141,7 @@ fi
 
 case "$1" in
   install)
-    if  test -x /bin/bzip2 || test -x /usr/bin/bzip2 ; then : ; else
+    if test -x /bin/bzip2 || test -x /usr/bin/bzip2 ; then : ; else
       echo You need to install bzip2
       exit 1
     fi
@@ -152,13 +152,13 @@ case "$1" in
       wget -nv -c -N $MYSITE/codecs_list || true
     #fi
 
-    if  grep -q "^$dpkgarch" $PREFDIR/codecs_list   ] ; then
+    if grep -q "^$dpkgarch" $PREFDIR/codecs_list   ] ; then
       egrep -v "^[[:space:]]*(#|$)" $PREFDIR/codecs_list | \
         while read arch url dir file info ; do
           if [ "$dpkgarch" = "$arch" ]; then
             echo Downloading and installing $file $info...
             INSTALL "$url" "$dir" "$file"
-	    n=1
+            n=1
           fi
         done
     else
