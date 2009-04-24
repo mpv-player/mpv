@@ -2315,6 +2315,8 @@ static double update_video(struct MPContext *mpctx, int *blit_frame)
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Video pts after filters MISSING\n");
         // Try to use decoder pts from before filters
         pts = sh_video->pts;
+        if (pts == MP_NOPTS_VALUE)
+            pts = sh_video->last_pts;
     }
     sh_video->pts = pts;
     if (sh_video->last_pts == MP_NOPTS_VALUE)
