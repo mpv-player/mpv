@@ -3862,7 +3862,7 @@ EOF
 fi
 if test "$_corevideo" = yes ; then
   _vomodules="macosx $_vomodules"
-  extra_ldflags="$extra_ldflags -framework Cocoa -framework QuartzCore"
+  extra_ldflags="$extra_ldflags -framework Carbon -framework QuartzCore"
   def_corevideo='#define CONFIG_COREVIDEO 1'
 else
   _novomodules="macosx $_novomodules"
