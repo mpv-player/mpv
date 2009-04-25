@@ -2616,7 +2616,7 @@ def_xform_asm='#define HAVE_XFORM_ASM 0'
 xform_asm=no
 echocheck "XFORM ASM support"
   cat > $TMPC << EOF
-int main(void) { __asm__ volatile ("lwzx 0, %y0" :: "Z"(*(int*)0)"); return 0; }
+int main(void) { __asm__ volatile ("lwzx 0, %y0" :: "Z"(*(int*)0)); return 0; }
 EOF
 cc_check && xform_asm=yes && def_xform_asm='#define HAVE_XFORM_ASM 1'
 echores "$xform_asm"
