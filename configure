@@ -336,8 +336,8 @@ Codecs:
   --enable-xmms             enable XMMS input plugin support [disabled]
   --enable-libdca           enable libdca support [autodetect]
   --disable-mp3lib          disable builtin mp3lib [autodetect]
-  --disable-liba52          disable liba52 [autodetect] 
-  --disable-liba52-internal disable builtin liba52 [autodetect] 
+  --disable-liba52          disable liba52 [autodetect]
+  --disable-liba52-internal disable builtin liba52 [autodetect]
   --disable-libmpeg2        disable builtin libmpeg2 [autodetect]
   --disable-musepack        disable musepack support [autodetect]
   --disable-libamr_nb       disable libamr narrowband [autodetect]
@@ -2529,7 +2529,7 @@ if test -z "$YASMFLAGS" ; then
     x86_64 && objformat="macho64" || objformat="macho"
   elif win32 ; then
     objformat="win32"
-  else 
+  else
     objformat="elf"
   fi
   # currently tested for Linux x86, x86_64
@@ -3813,13 +3813,13 @@ EOF
   cc_check -framework CoreAudio && _coreaudio=yes
 fi
 if test "$_coreaudio" = yes ; then
-    extra_ldflags="$extra_ldflags -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
-    def_coreaudio='#define CONFIG_COREAUDIO 1'
-    _aomodules="macosx $_aomodules"
-  else
-    def_coreaudio='#undef CONFIG_COREAUDIO'
-    _noaomodules="macosx $_noaomodules"
-  fi
+  extra_ldflags="$extra_ldflags -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
+  def_coreaudio='#define CONFIG_COREAUDIO 1'
+  _aomodules="macosx $_aomodules"
+else
+  def_coreaudio='#undef CONFIG_COREAUDIO'
+  _noaomodules="macosx $_noaomodules"
+fi
 echores $_coreaudio
 
 
@@ -3839,20 +3839,20 @@ EOF
   cc_check -framework Carbon -framework QuickTime && _quartz=yes
 fi
 if test "$_quartz" = yes ; then
-    extra_ldflags="$extra_ldflags -framework Carbon -framework QuickTime"
-    def_quartz='#define CONFIG_QUARTZ 1'
-    _vomodules="quartz $_vomodules"
-    def_quicktime='#define CONFIG_QUICKTIME 1'
-  else
-    def_quartz='#undef CONFIG_QUARTZ'
-    _novomodules="quartz $_novomodules"
-    def_quicktime='#undef CONFIG_QUICKTIME'
-  fi
+  extra_ldflags="$extra_ldflags -framework Carbon -framework QuickTime"
+  def_quartz='#define CONFIG_QUARTZ 1'
+  _vomodules="quartz $_vomodules"
+  def_quicktime='#define CONFIG_QUICKTIME 1'
+else
+  def_quartz='#undef CONFIG_QUARTZ'
+  _novomodules="quartz $_novomodules"
+  def_quicktime='#undef CONFIG_QUICKTIME'
+fi
 echores $_quartz
 
 echocheck "CoreVideo"
 if test "$_corevideo" = auto ; then
-cat > $TMPC <<EOF
+  cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
 #include <QuartzCore/CoreVideo.h>
 int main(void) { return 0; }
@@ -3861,13 +3861,13 @@ EOF
   cc_check -framework Carbon -framework QuartzCore -framework OpenGL && _corevideo=yes
 fi
 if test "$_corevideo" = yes ; then
-		_vomodules="macosx $_vomodules"
-		extra_ldflags="$extra_ldflags -framework Cocoa -framework QuartzCore -framework OpenGL"
-		def_corevideo='#define CONFIG_COREVIDEO 1'
-	else
-		_novomodules="macosx $_novomodules"
-		def_corevideo='#undef CONFIG_COREVIDEO'
-	fi
+  _vomodules="macosx $_vomodules"
+  extra_ldflags="$extra_ldflags -framework Cocoa -framework QuartzCore -framework OpenGL"
+  def_corevideo='#define CONFIG_COREVIDEO 1'
+else
+  _novomodules="macosx $_novomodules"
+  def_corevideo='#undef CONFIG_COREVIDEO'
+fi
 echores "$_corevideo"
 
 echocheck "Mac OS X Finder Support"
