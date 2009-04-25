@@ -270,7 +270,6 @@ Optional features:
   --disable-sortsub      disable subtitle sorting [enabled]
   --enable-fribidi       enable the FriBiDi libs [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
-  --disable-macosx       disable Mac OS X specific features [autodetect]
   --disable-maemo        disable maemo specific features [autodetect]
   --enable-macosx-finder enable Mac OS X Finder invocation parameter
                          parsing [disabled]
@@ -406,6 +405,8 @@ Video output:
   --disable-pnm		   disable PNM video output [enable]
   --disable-md5sum	   disable md5sum video output [enable]
   --disable-yuv4mpeg	   disable yuv4mpeg video output [enable]
+  --disable-corevideo      disable CoreVideo video output [autodetect]
+  --disable-quartz         disable Quartz video output [autodetect]
 
 Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
@@ -420,6 +421,7 @@ Audio output:
   --disable-sunaudio     disable Sun audio output [autodetect]
   --disable-dart         disable DART audio output [autodetect]
   --disable-win32waveout disable Windows waveout audio output [autodetect]
+  --disable-coreaudio    disable CoreAudio audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
 Miscellaneous options:
@@ -706,8 +708,10 @@ _freetype=auto
 _fontconfig=auto
 _menu=no
 _qtx=auto
-_macosx=auto
 _maemo=auto
+_coreaudio=auto
+_corevideo=auto
+_quartz=auto
 _macosx_finder=no
 _macosx_bundle=auto
 _sortsub=yes
@@ -1245,8 +1249,12 @@ for ac_option do
   --enable-qtx) _qtx=yes ;;
   --disable-qtx) _qtx=no ;;
 
-  --enable-macosx) _macosx=yes ;;
-  --disable-macosx) _macosx=no ;;
+  --enable-coreaudio) _coreaudio=yes ;;
+  --disable-coreaudio) _coreaudio=no ;;
+  --enable-corevideo) _corevideo=yes ;;
+  --disable-corevideo) _corevideo=no ;;
+  --enable-quartz) _quartz=yes ;;
+  --disable-quartz) _quartz=no ;;
   --enable-macosx-finder) _macosx_finder=yes ;;
   --disable-macosx-finder) _macosx_finder=no ;;
   --enable-macosx-bundle) _macosx_bundle=yes;;
@@ -3795,33 +3803,28 @@ echores "$_sys_sysinfo"
 
 if darwin; then
 
-echocheck "Mac OS X APIs"
-if test "$_macosx" = auto ; then
-    productName=$(/usr/bin/sw_vers -productName)
-    if test "$productName" = "Mac OS X" ||
-       test "$productName" = "Mac OS X Server" ; then
-        _macosx=yes
-    else
-	_macosx=no
-	_noaomodules="macosx $_noaomodules"
-	_novomodules="macosx quartz $_novomodules"
-    fi
-fi
-if test "$_macosx" = yes ; then
+echocheck "CoreAudio"
+if test "$_coreaudio" = auto ; then
   cat > $TMPC <<EOF
 #include <CoreAudio/CoreAudio.h>
 int main(void) { return 0; }
 EOF
-  if cc_check -framework CoreAudio; then
+  _coreaudio=no
+  cc_check -framework CoreAudio && _coreaudio=yes
+fi
+if test "$_coreaudio" = yes ; then
     extra_ldflags="$extra_ldflags -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
-    _coreaudio=yes
     def_coreaudio='#define CONFIG_COREAUDIO 1'
     _aomodules="macosx $_aomodules"
   else
-    _coreaudio=no
     def_coreaudio='#undef CONFIG_COREAUDIO'
     _noaomodules="macosx $_noaomodules"
   fi
+echores $_coreaudio
+
+
+echocheck "Quartz framework"
+if test "$_quartz" = auto ; then
   cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
@@ -3832,46 +3835,46 @@ int main(void) {
     return 0;
 }
 EOF
-  if cc_check -framework Carbon -framework QuickTime; then
+  _quartz=no
+  cc_check -framework Carbon -framework QuickTime && _quartz=yes
+fi
+if test "$_quartz" = yes ; then
     extra_ldflags="$extra_ldflags -framework Carbon -framework QuickTime"
-    _quartz=yes
     def_quartz='#define CONFIG_QUARTZ 1'
     _vomodules="quartz $_vomodules"
     def_quicktime='#define CONFIG_QUICKTIME 1'
   else
-    _quartz=no
     def_quartz='#undef CONFIG_QUARTZ'
     _novomodules="quartz $_novomodules"
     def_quicktime='#undef CONFIG_QUICKTIME'
   fi
+echores $_quartz
+
+echocheck "CoreVideo"
+if test "$_corevideo" = auto ; then
 cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
 #include <QuartzCore/CoreVideo.h>
 int main(void) { return 0; }
 EOF
-	if cc_check -framework Carbon -framework QuartzCore -framework OpenGL; then
+  _corevideo=no
+  cc_check -framework Carbon -framework QuartzCore -framework OpenGL && _corevideo=yes
+fi
+if test "$_corevideo" = yes ; then
 		_vomodules="macosx $_vomodules"
 		extra_ldflags="$extra_ldflags -framework Cocoa -framework QuartzCore -framework OpenGL"
 		def_corevideo='#define CONFIG_COREVIDEO 1'
-		_corevideo=yes
 	else
 		_novomodules="macosx $_novomodules"
 		def_corevideo='#undef CONFIG_COREVIDEO'
-		_corevideo=no
 	fi
-fi
-echores "$_macosx"
+echores "$_corevideo"
 
 echocheck "Mac OS X Finder Support"
-if test "$_macosx_finder" = auto ; then
-  _macosx_finder=$_macosx
-fi
 if test "$_macosx_finder" = yes; then
   def_macosx_finder='#define CONFIG_MACOSX_FINDER 1'
-  _macosx_finder=yes
 else
   def_macosx_finder='#undef CONFIG_MACOSX_FINDER'
-  _macosx_finder=no
 fi
 echores "$_macosx_finder"
 
