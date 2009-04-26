@@ -3858,11 +3858,11 @@ if test "$_corevideo" = auto ; then
 int main(void) { return 0; }
 EOF
   _corevideo=no
-  cc_check -framework Carbon -framework QuartzCore && _corevideo=yes
+  cc_check -framework Carbon -framework QuartzCore -framework OpenGL && _corevideo=yes
 fi
 if test "$_corevideo" = yes ; then
   _vomodules="macosx $_vomodules"
-  extra_ldflags="$extra_ldflags -framework Carbon -framework QuartzCore"
+  extra_ldflags="$extra_ldflags -framework Cocoa -framework QuartzCore -framework OpenGL"
   def_corevideo='#define CONFIG_COREVIDEO 1'
 else
   _novomodules="macosx $_novomodules"
