@@ -1,4 +1,4 @@
-.\" synced with r28958
+.\" synced with r29147
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -33,7 +33,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "15 janvier 2009" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "27 avril 2009" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3284,6 +3284,9 @@ Il gère également le format d'option standard X11 \-geometry.
 Si une fenêtre externe est donnée par l'intermédiaire de l'option \-wid,
 alors les coordonnées x et y sont relatives aux coin supérieur gauche de la
 fenêtre au lieu celui de l'écran.
+Les coordonnées sont relatives à l'écran donné par l'option \-xineramascreen
+pour les pilotes de sortie vidéo gérant complètement l'option \-xineramascreen
+(direct3d, gl, gl2, vdpau, x11, xv, xvmc).
 .br
 .I NOTE:
 Cette option n'est permise que par les pilotes de sortie vidéo x11, xmga, xv,
@@ -3478,7 +3481,7 @@ Fontionnera généralement uniquement avec  "\-fstype \-fullscreen" ou
 Cette option ne convient pas pour définir l'écran de démarrage (car l'affichage
 se fera toujours en plein écran sur le moniteur donné), \-geometry est plus
 approprié.
-Géré par les pilotes de sortie vidéo gl, gl2, x11, et xv.
+Géré au moins par les pilotes de sortie vidéo direct3d, gl, gl2, x11, et xv.
 .
 .TP
 .B \-zrbw (\-vo zr uniquement)
@@ -3648,26 +3651,33 @@ réduction de bruit)
 .IPs deint=<0\-4>
 Sélectionne un désentrelaceur (par défaut\ : 0)
 Tous les modes > 0 respectent \-field\-dominance.
-.br
-.I NOTE\ :
-Les valeurs > 2 retardent la sortie vidéo d'une image.
 .RSss
 .IPs 0
 pas de désentrelacement
 .IPs 1
 Affiche uniquement le premier champ, comme le filtre \-vf field.
 .IPs 2
-désentrelaceur bob (solution de secours pour les désentrelaceurs avancés).
+désentrelaceur bob, similaire à \-vf tfields=1.
 .IPs 3
-Désentrelaceur à adaptation de mouvement temporel (ne fonctionne pas encore).
+Désentrelaceur à adaptation de mouvement temporel.
+Peut provoquer des désynchronisations A/V avec les cartes vidéos lentes
+et/ou avec les trop grandes résolutions.
 C'est le comportement par défaut si "D" est utilisé pour activer le
 désentrelacement.
 .IPs 4
-Désentrelaceur à adaptation de mouvement temporel avec interpolation spatiale guidé par les bords (ne fonctionne pas encore).
+Désentrelaceur à adaptation de mouvement temporel avec interpolation
+spatiale guidé par les bords.
+Nécessite une carte vidéo rapide.
 .RE
+.IPs chroma\-deint
+Ordonne au désentrelaceurs temporels de prendre en compte la luminance et
+la chrominance (par défaut).
+Utilisez nochroma\-deint pour ne prendre en compte que la luminance et
+accélérer le désentrelacement.
+Utile quand la mémoire vidéo est lente.
 .IPs pullup
 Essaye d'appliquer un filtre téléciné inverse.
-Nécessite un filtre de désentrelacement temporel.
+Nécessite un filtre de désentrelacement à adaptation de mouvement temporel.
 .RE
 .PD 1
 .
@@ -5329,6 +5339,25 @@ Contrôle l'adaptivité (une plus grande valeur rend le filtre plus rapide à
 réagir à des changements de phase et d'amplitude, une plus petite valueur
 rendra l'adaptation plus lente (par défaut\ : 0.0001).
 Les valeurs utiles sont autour de 0.001.
+.RE
+.PD 1
+.
+.TP
+.B bs2b[=option1:option2]
+Transformation stereophonique vers binaurale en utilisant libbs2b.
+Améliore le confort d'écoute avec un casque audio en le rendant plus
+proche du son sortant d'enceintes, permettant à chaque oreille d'entendre
+les deux canaux audio tout en prenant en compte la différence de distance
+et les effets de masquage.
+Ne fonctionne qu'avec deux canaux audio.
+.PD 0
+.RSs
+.IPs level=<1\-3>
+Défini le niveau de mixage entre les deux canaux, où un niveau plus élevé
+signifie un effet plus prononcé (par défaut\ : 3).
+.IPs profile=<0\-1>
+Déifini le profil à utiliser, où 1 donne un son plus doux que 0
+(par défaut\ : 1).
 .RE
 .PD 1
 .
