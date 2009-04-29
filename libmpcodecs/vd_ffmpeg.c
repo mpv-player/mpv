@@ -126,8 +126,14 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...){
     case VDCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(avctx);
         return CONTROL_TRUE;
-    case VDCTRL_QUERY_UNSEEN_FRAMES:
-        return avctx->has_b_frames + 10;
+    case VDCTRL_QUERY_UNSEEN_FRAMES:;
+        int delay = avctx->has_b_frames;
+#ifdef FF_THREAD_FRAME
+        // FFmpeg-mt has extra delay when using frame threading
+        if (avctx->thread_type & FF_THREAD_FRAME)
+            delay += avctx->thread_count - 1;
+#endif
+        return delay + 10;
     }
     return CONTROL_UNKNOWN;
 }
