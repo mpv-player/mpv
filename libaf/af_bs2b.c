@@ -37,7 +37,7 @@ struct af_bs2b {
     t_bs2bdp filter;    ///< instance of a library filter
 };
 
-#define PLAY(name,type) \
+#define PLAY(name, type) \
 static af_data_t *play_##name(struct af_instance_s *af, af_data_t *data) \
 { \
     /* filter is called for all pairs of samples available in the buffer */ \
@@ -47,23 +47,23 @@ static af_data_t *play_##name(struct af_instance_s *af, af_data_t *data) \
     return data; \
 }
 
-PLAY(f,float)
-PLAY(fbe,float)
-PLAY(fle,float)
-PLAY(s32be,int32_t)
+PLAY(f, float)
+PLAY(fbe, float)
+PLAY(fle, float)
+PLAY(s32be, int32_t)
 PLAY(u32be, uint32_t)
-PLAY(s32le,int32_t)
+PLAY(s32le, int32_t)
 PLAY(u32le, uint32_t)
-PLAY(s24be,bs2b_int24_t)
+PLAY(s24be, bs2b_int24_t)
 PLAY(u24be, bs2b_uint24_t)
-PLAY(s24le,bs2b_int24_t)
+PLAY(s24le, bs2b_int24_t)
 PLAY(u24le, bs2b_uint24_t)
-PLAY(s16be,int16_t)
+PLAY(s16be, int16_t)
 PLAY(u16be, uint16_t)
-PLAY(s16le,int16_t)
+PLAY(s16le, int16_t)
 PLAY(u16le, uint16_t)
-PLAY(s8,int8_t)
-PLAY(u8,uint8_t)
+PLAY(s8, int8_t)
+PLAY(u8, uint8_t)
 
 /// Sanity check for fcut value
 static int test_fcut(void *par)
@@ -163,7 +163,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             default:
                 af->play = play_f;
                 af->data->format = AF_FORMAT_FLOAT_NE;
-                af->data->bps=4;
+                af->data->bps = 4;
                 break;
         }
 
@@ -176,7 +176,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
                    af->data->rate, BS2B_MINSRATE, BS2B_MAXSRATE, BS2B_DEFAULT_SRATE);
         }
         bs2b_set_srate(s->filter, (long)af->data->rate);
-        mp_msg(MSGT_AFILTER,MSGL_V, "[bs2b] using format %s\n",
+        mp_msg(MSGT_AFILTER, MSGL_V, "[bs2b] using format %s\n",
                af_fmt2str(af->data->format,buf,256));
 
         return af_test_output(af,(af_data_t*)arg);
@@ -189,7 +189,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             {NULL}
         };
         if (subopt_parse(arg, subopts) != 0) {
-            mp_msg(MSGT_AFILTER,MSGL_ERR, "[bs2b] Invalid option specified.\n");
+            mp_msg(MSGT_AFILTER, MSGL_ERR, "[bs2b] Invalid option specified.\n");
             free(s->profile);
             return AF_ERROR;
         }
@@ -243,9 +243,9 @@ static int af_open(af_instance_t *af)
     af->control = control;
     af->uninit  = uninit;
     af->mul     = 1;
-    if (!(af->data = calloc(1,sizeof(af_data_t))))
+    if (!(af->data = calloc(1, sizeof(af_data_t))))
         return AF_ERROR;
-    if (!(af->setup = s = calloc(1,sizeof(struct af_bs2b)))) {
+    if (!(af->setup = s = calloc(1, sizeof(struct af_bs2b)))) {
         free(af->data);
         return AF_ERROR;
     }
