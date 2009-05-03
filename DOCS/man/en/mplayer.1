@@ -5067,10 +5067,26 @@ head shadowing effect.
 It is applicable only to 2 channel audio.
 .PD 0
 .RSs
-.IPs level=<1\-3>
-Set cross feed level, higher level means stronger effect (default: 3).
-.IPs profile=<0\-1>
-Select cross feed profile to use, 1 provides softer sound than 0 (default: 1).
+.IPs fcut=<300\-1000>
+Set cut frequency in Hz.
+.IPs feed=<10\-150>
+Set feed level for low frequencies in 0.1*dB.
+.IPs profile=<value>
+Several profiles are available for convenience:
+.RSs
+default: will be used if nothing else was specified (fcut=700,
+feed=45);
+.br
+cmoy: Chu Moy circuit implementation (fcut=700, feed=60);
+.br
+jmeier: Jan Meier circuit implementation (fcut=650, feed=95).
+.REss
+.PD 1
+.RE
+.sp 1
+.RS
+If fcut or feed options are specified together with a profile, they
+will be applied on top of the selected profile. 
 .RE
 .PD 1
 .

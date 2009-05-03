@@ -24,14 +24,16 @@
 #include <bs2b.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "af.h"
 #include "subopt-helper.h"
 
 /// Internal specific data of the filter
 struct af_bs2b {
-    int level;          ///< crossfeed level
-    int profile;        ///< profile (easy or normal)
+    int fcut;           ///< cut frequency in Hz
+    int feed;           ///< feed level for low frequencies in 0.1*dB
+    char *profile;      ///< profile (available crossfeed presets)
     t_bs2bdp filter;    ///< instance of a library filter
 };
 
@@ -49,35 +51,43 @@ PLAY(f,float)
 PLAY(fbe,float)
 PLAY(fle,float)
 PLAY(s32be,int32_t)
+PLAY(u32be, uint32_t)
 PLAY(s32le,int32_t)
+PLAY(u32le, uint32_t)
 PLAY(s24be,bs2b_int24_t)
+PLAY(u24be, bs2b_uint24_t)
 PLAY(s24le,bs2b_int24_t)
+PLAY(u24le, bs2b_uint24_t)
 PLAY(s16be,int16_t)
+PLAY(u16be, uint16_t)
 PLAY(s16le,int16_t)
+PLAY(u16le, uint16_t)
 PLAY(s8,int8_t)
 PLAY(u8,uint8_t)
 
-/// Sanity check for level value
-static int test_level(void *par)
+/// Sanity check for fcut value
+static int test_fcut(void *par)
 {
     const int val = *(int*)par;
-    if (val >= 1 && val <= BS2B_CLEVELS)
+    if (val >= BS2B_MINFCUT && val <= BS2B_MAXFCUT)
         return 1;
 
-    mp_msg(MSGT_AFILTER,MSGL_ERR, "[bs2b] Level must be in range 1..%i, but "
-           "current value is %i.\n", BS2B_CLEVELS, val);
+    mp_msg(MSGT_AFILTER, MSGL_ERR,
+           "[bs2b] Cut frequency must be in range [%d..%d], but current value is %d.\n",
+           BS2B_MINFCUT, BS2B_MAXFCUT, val);
     return 0;
 }
 
-/// Sanity check for profile value
-static int test_profile(void *par)
+/// Sanity check for feed value
+static int test_feed(void *par)
 {
     const int val = *(int*)par;
-    if (val >= 0 && val <= 1)
+    if (val >= BS2B_MINFEED && val <= BS2B_MAXFEED)
         return 1;
 
-    mp_msg(MSGT_AFILTER,MSGL_ERR, "[bs2b] Profile must be either 0 or 1, but "
-           "current value is %i.\n", val);
+    mp_msg(MSGT_AFILTER, MSGL_ERR,
+           "[bs2b] Feed level must be in range [%d..%d], but current value is %d.\n",
+           BS2B_MINFEED, BS2B_MAXFEED, val);
     return 0;
 }
 
@@ -111,20 +121,38 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
             case AF_FORMAT_S32_BE:
                 af->play = play_s32be;
                 break;
+            case AF_FORMAT_U32_BE:
+                af->play = play_u32be;
+                break;
             case AF_FORMAT_S32_LE:
                 af->play = play_s32le;
+                break;
+            case AF_FORMAT_U32_LE:
+                af->play = play_u32le;
                 break;
             case AF_FORMAT_S24_BE:
                 af->play = play_s24be;
                 break;
+            case AF_FORMAT_U24_BE:
+                af->play = play_u24be;
+                break;
             case AF_FORMAT_S24_LE:
                 af->play = play_s24le;
+                break;
+            case AF_FORMAT_U24_LE:
+                af->play = play_u24le;
                 break;
             case AF_FORMAT_S16_BE:
                 af->play = play_s16be;
                 break;
+            case AF_FORMAT_U16_BE:
+                af->play = play_u16be;
+                break;
             case AF_FORMAT_S16_LE:
                 af->play = play_s16le;
+                break;
+            case AF_FORMAT_U16_LE:
+                af->play = play_u16le;
                 break;
             case AF_FORMAT_S8:
                 af->play = play_s8;
@@ -139,6 +167,14 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
                 break;
         }
 
+        // bs2b have srate limits, try to resample if needed
+        if (af->data->rate > BS2B_MAXSRATE || af->data->rate < BS2B_MINSRATE) {
+            af->data->rate = BS2B_DEFAULT_SRATE;
+            mp_msg(MSGT_AFILTER, MSGL_WARN,
+                   "[bs2b] Requested sample rate %d Hz is out of bounds [%d..%d] Hz.\n"
+                   "[bs2b] Trying to resample to %d Hz.\n",
+                   af->data->rate, BS2B_MINSRATE, BS2B_MAXSRATE, BS2B_DEFAULT_SRATE);
+        }
         bs2b_set_srate(s->filter, (long)af->data->rate);
         mp_msg(MSGT_AFILTER,MSGL_V, "[bs2b] using format %s\n",
                af_fmt2str(af->data->format,buf,256));
@@ -147,18 +183,43 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
     }
     case AF_CONTROL_COMMAND_LINE: {
         const opt_t subopts[] = {
-            {"level",   OPT_ARG_INT, &s->level,   test_level},
-            {"profile", OPT_ARG_INT, &s->profile, test_profile},
+            {"fcut",    OPT_ARG_INT,   &s->fcut,    test_fcut},
+            {"feed",    OPT_ARG_INT,   &s->feed,    test_feed},
+            {"profile", OPT_ARG_MSTRZ, &s->profile, NULL},
             {NULL}
         };
         if (subopt_parse(arg, subopts) != 0) {
             mp_msg(MSGT_AFILTER,MSGL_ERR, "[bs2b] Invalid option specified.\n");
+            free(s->profile);
             return AF_ERROR;
         }
+        // parse profile if specified
+        if (s->profile) {
+            if (!strcmp(s->profile, "default"))
+                bs2b_set_level(s->filter, BS2B_DEFAULT_CLEVEL);
+            else if (!strcmp(s->profile, "cmoy"))
+                bs2b_set_level(s->filter, BS2B_CMOY_CLEVEL);
+            else if (!strcmp(s->profile, "jmeier"))
+                bs2b_set_level(s->filter, BS2B_JMEIER_CLEVEL);
+            else {
+                mp_msg(MSGT_AFILTER, MSGL_ERR,
+                       "[bs2b] Invalid profile specified: %s.\n"
+                       "[bs2b] Available profiles are: default, cmoy, jmeier.\n",
+                       s->profile);
+                free(s->profile);
+                return AF_ERROR;
+            }
+        }
+        // set fcut and feed only if specified, otherwise defaults will be used
+        if (s->fcut)
+            bs2b_set_level_fcut(s->filter, s->fcut);
+        if (s->feed)
+            bs2b_set_level_feed(s->filter, s->feed);
 
-        bs2b_set_level(s->filter, s->level + s->profile ? BS2B_CLEVELS : 0);
-        mp_msg(MSGT_AFILTER,MSGL_V, "[bs2b] using profile %i, level %i\n",
-               s->profile, s->level);
+        mp_msg(MSGT_AFILTER, MSGL_V,
+               "[bs2b] using cut frequency %d, LF feed level %d\n",
+               bs2b_get_level_fcut(s->filter), bs2b_get_level_feed(s->filter));
+        free(s->profile);
         return AF_OK;
     }
     }
@@ -195,9 +256,10 @@ static int af_open(af_instance_t *af)
         free(af->setup);
         return AF_ERROR;
     }
-    // Set defaults the same as in the library:
-    s->level   = 3;
-    s->profile = 1;
+    // Set zero defaults indicating no option was specified.
+    s->profile = NULL;
+    s->fcut    = 0;
+    s->feed    = 0;
     return AF_OK;
 }
 
