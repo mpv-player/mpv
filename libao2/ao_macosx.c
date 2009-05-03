@@ -52,6 +52,7 @@
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
 #include "osdep/timer.h"
+#include "libavutil/fifo.h"
 
 static const ao_info_t info =
   {
@@ -91,87 +92,35 @@ typedef struct ao_macosx_s
   int paused;
 
   /* Ring-buffer */
-  /* does not need explicit synchronization, but needs to allocate
-   * (num_chunks + 1) * chunk_size memory to store num_chunks * chunk_size
-   * data */
-  unsigned char *buffer;
-  unsigned int buffer_len; ///< must always be (num_chunks + 1) * chunk_size
+  AVFifoBuffer *buffer;
+  unsigned int buffer_len; ///< must always be num_chunks * chunk_size
   unsigned int num_chunks;
   unsigned int chunk_size;
-  
-  unsigned int buf_read_pos;
-  unsigned int buf_write_pos;
 } ao_macosx_t;
 
 static ao_macosx_t *ao = NULL;
 
 /**
- * \brief return number of free bytes in the buffer
- *    may only be called by mplayer's thread
- * \return minimum number of free bytes in buffer, value may change between
- *    two immediately following calls, and the real number of free bytes
- *    might actually be larger!
- */
-static int buf_free(void) {
-  int free = ao->buf_read_pos - ao->buf_write_pos - ao->chunk_size;
-  if (free < 0) free += ao->buffer_len;
-  return free;
-}
-
-/**
- * \brief return number of buffered bytes
- *    may only be called by playback thread
- * \return minimum number of buffered bytes, value may change between
- *    two immediately following calls, and the real number of buffered bytes
- *    might actually be larger!
- */
-static int buf_used(void) {
-  int used = ao->buf_write_pos - ao->buf_read_pos;
-  if (used < 0) used += ao->buffer_len;
-  return used;
-}
-
-/**
  * \brief add data to ringbuffer
  */
 static int write_buffer(unsigned char* data, int len){
-  int first_len = ao->buffer_len - ao->buf_write_pos;
-  int free = buf_free();
+  int free = ao->buffer_len - av_fifo_size(ao->buffer);
   if (len > free) len = free;
-  if (first_len > len) first_len = len;
-  // till end of buffer
-  memcpy (&ao->buffer[ao->buf_write_pos], data, first_len);
-  if (len > first_len) { // we have to wrap around
-    // remaining part from beginning of buffer
-    memcpy (ao->buffer, &data[first_len], len - first_len);
-  }
-  ao->buf_write_pos = (ao->buf_write_pos + len) % ao->buffer_len;
-  return len;
+  return av_fifo_generic_write(ao->buffer, data, len, NULL);
 }
 
 /**
  * \brief remove data from ringbuffer
  */
 static int read_buffer(unsigned char* data,int len){
-  int first_len = ao->buffer_len - ao->buf_read_pos;
-  int buffered = buf_used();
+  int buffered = av_fifo_size(ao->buffer);
   if (len > buffered) len = buffered;
-  if (first_len > len) first_len = len;
-  // till end of buffer
-  if (data) {
-    memcpy (data, &ao->buffer[ao->buf_read_pos], first_len);
-    if (len > first_len) { // we have to wrap around
-      // remaining part from beginning of buffer
-      memcpy (&data[first_len], ao->buffer, len - first_len);
-    }
-  }
-  ao->buf_read_pos = (ao->buf_read_pos + len) % ao->buffer_len;
-  return len;
+  return av_fifo_generic_read(ao->buffer, data, len, NULL);
 }
 
 OSStatus theRenderProc(void *inRefCon, AudioUnitRenderActionFlags *inActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumFrames, AudioBufferList *ioData)
 {
-int amt=buf_used();
+int amt=av_fifo_size(ao->buffer);
 int req=(inNumFrames)*ao->packetSize;
 
 	if(amt>req)
@@ -493,8 +442,8 @@ int b_alive;
 	ao_data.buffersize = ao_data.bps;
 
 	ao->num_chunks = (ao_data.bps+ao->chunk_size-1)/ao->chunk_size;
-    ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
-    ao->buffer = calloc(ao->num_chunks + 1, ao->chunk_size);
+    ao->buffer_len = ao->num_chunks * ao->chunk_size;
+    ao->buffer = av_fifo_alloc(ao->buffer_len);
 	
 	ao_msg(MSGT_AO,MSGL_V, "using %5d chunks of %d bytes (buffer len %d bytes)\n", (int)ao->num_chunks, (int)ao->chunk_size, (int)ao->buffer_len);
 
@@ -515,7 +464,7 @@ err_out2:
 err_out1:
     CloseComponent(ao->theOutputUnit);
 err_out:
-    free(ao->buffer);
+    av_fifo_free(ao->buffer);
     free(ao);
     ao = NULL;
     return CONTROL_FALSE; 
@@ -737,8 +686,8 @@ static int OpenSPDIF()
     ao_data.buffersize = ao_data.bps;
 
     ao->num_chunks = (ao_data.bps+ao->chunk_size-1)/ao->chunk_size;
-    ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
-    ao->buffer = calloc(ao->num_chunks + 1, ao->chunk_size);
+    ao->buffer_len = ao->num_chunks * ao->chunk_size;
+    ao->buffer = av_fifo_alloc(ao->buffer_len);
 
     ao_msg(MSGT_AO,MSGL_V, "using %5d chunks of %d bytes (buffer len %d bytes)\n", (int)ao->num_chunks, (int)ao->chunk_size, (int)ao->buffer_len);
 
@@ -782,7 +731,7 @@ err_out:
             ao_msg(MSGT_AO, MSGL_WARN, "Could not release hogmode: [%4.4s]\n",
                    (char *)&err);
     }
-    free(ao->buffer);
+    av_fifo_free(ao->buffer);
     free(ao);
     ao = NULL;
     return CONTROL_FALSE; 
@@ -981,7 +930,7 @@ static OSStatus RenderCallbackSPDIF( AudioDeviceID inDevice,
                                     const AudioTimeStamp * inOutputTime,
                                     void * threadGlobals )
 {
-    int amt = buf_used();
+    int amt = av_fifo_size(ao->buffer);
     int req = outOutputData->mBuffers[ao->i_stream_index].mDataByteSize;
 
     if (amt > req)
@@ -1030,27 +979,22 @@ static int play(void* output_samples,int num_bytes,int flags)
 static void reset(void)
 {
   audio_pause();
-  /* reset ring-buffer state */
-  ao->buf_read_pos=0;
-  ao->buf_write_pos=0;
-  
-  return;
+  av_fifo_reset(ao->buffer);
 }
 
 
 /* return available space */
 static int get_space(void)
 {
-  return buf_free();
+  return ao->buffer_len - av_fifo_size(ao->buffer);
 }
 
 
 /* return delay until audio is played */
 static float get_delay(void)
 {
-  int buffered = ao->buffer_len - ao->chunk_size - buf_free(); // could be less
   // inaccurate, should also contain the data buffered e.g. by the OS
-  return (float)(buffered)/(float)ao_data.bps;
+  return (float)av_fifo_size(ao->buffer)/(float)ao_data.bps;
 }
 
 
@@ -1061,8 +1005,8 @@ static void uninit(int immed)
   UInt32              i_param_size = 0;
 
   if (!immed) {
-    long long timeleft=(1000000LL*buf_used())/ao_data.bps;
-    ao_msg(MSGT_AO,MSGL_DBG2, "%d bytes left @%d bps (%d usec)\n", buf_used(), ao_data.bps, (int)timeleft);
+    long long timeleft=(1000000LL*av_fifo_size(ao->buffer))/ao_data.bps;
+    ao_msg(MSGT_AO,MSGL_DBG2, "%d bytes left @%d bps (%d usec)\n", av_fifo_size(ao->buffer), ao_data.bps, (int)timeleft);
     usec_sleep((int)timeleft);
   }
 
@@ -1115,7 +1059,7 @@ static void uninit(int immed)
       }
   }
 
-  free(ao->buffer);
+  av_fifo_free(ao->buffer);
   free(ao);
   ao = NULL;
 }
