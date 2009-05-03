@@ -580,6 +580,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask){
     mpctx->timeline = NULL;
     mpctx->num_timeline_parts = 0;
     talloc_free(mpctx->chapters);
+    mpctx->chapters = NULL;
     mpctx->num_chapters = 0;
     mpctx->video_offset = 0;
     if(mpctx->demuxer){
