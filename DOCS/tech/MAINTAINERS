@@ -67,7 +67,7 @@ Platforms/ports:
     * Solaris: Derek Lewis
     * Win32/Cygwin/MinGW: Sascha Sommer, Joey Parrish
     * MPlayer OS X frontend: Nicolas Plourde
-    * Mac OS X: Ulion
+    * Mac OS X: None
     * AIX: Derek Lewis
 
 MPlayer code:
@@ -172,7 +172,7 @@ libvo drivers:
     * vo_gl2.c - Reimar Döffinger
     * vo_ivtv.c - Benjamin Zores
     * vo_jpeg.c - Ivo van Poorten
-    * vo_macosx.m - Ulion
+    * vo_macosx.m - None
     * vo_md5sum.c - Ivo van Poorten
     * vo_mga.c - Attila Kinali
     * vo_mpegpes.c - None
@@ -209,7 +209,7 @@ libao2 drivers:
     * ao_esd.c - None
     * ao_ivtv.c - Benjamin Zores
     * ao_jack.c - Reimar Döffinger
-    * ao_macosx.c - Ulion
+    * ao_macosx.c - None
     * ao_mpegpes.c - None
     * ao_nas.c - Tobias Diedrich
     * ao_null.c - None
