@@ -105,9 +105,6 @@ extern int vo_fs_type;
 extern char** vo_fstype_list;
 
 extern char *mDisplayName;
-extern Window mRootWin;
-extern int mScreen;
-extern int mLocalDisplay;
 
 struct vo_x11_state *vo_x11_init_state(void);
 int vo_init(struct vo *vo);
