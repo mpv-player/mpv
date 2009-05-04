@@ -43,7 +43,7 @@ void mp_msg( int x, const char *format, ... ) // stub for cpudetect.c
 }
 
 #ifdef TIMING
-static inline long long rdtsc()
+static inline long long rdtsc(void)
 {
 	long long l;
 	__asm__ volatile("rdtsc\n\t"

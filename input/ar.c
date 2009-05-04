@@ -303,7 +303,7 @@ mp_input_ar_init_error:
     return -1;
 }
 
-int is_mplayer_front()
+int is_mplayer_front(void)
 {
     ProcessSerialNumber myProc, frProc;
     Boolean sameProc;

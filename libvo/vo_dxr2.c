@@ -203,7 +203,7 @@ int write_dxr2(const unsigned char *data, int len)
   return w;
 }
 
-static void flush_dxr2()
+static void flush_dxr2(void)
 {
   int w;
   while (dxr2bufpos) {

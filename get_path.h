@@ -22,6 +22,6 @@
 #define MPLAYER_GET_PATH_H
 
 char *get_path(const char *filename);
-void set_path_env();
+void set_path_env(void);
 
 #endif /* MPLAYER_GET_PATH_H */

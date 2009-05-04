@@ -24,7 +24,7 @@ extern const char *timer_name;
 void InitTimer(void);
 unsigned int GetTimer(void);
 unsigned int GetTimerMS(void);
-//int uGetTimer();
+//int uGetTimer(void);
 float GetRelativeTime(void);
 
 int usec_sleep(int usec_delay);

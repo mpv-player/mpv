@@ -90,7 +90,7 @@ static void do_cpuid(unsigned int ax, unsigned int *regs)
 	 :  "0" (ax), "S" (regs)
 	);
 }
-static unsigned int c_localcount_tsc()
+static unsigned int c_localcount_tsc(void)
 {
     int a;
     __asm__ volatile
@@ -116,7 +116,7 @@ static void c_longcount_tsc(long long* z)
 	 :"edx"
 	);
 }
-static unsigned int c_localcount_notsc()
+static unsigned int c_localcount_notsc(void)
 {
     struct timeval tv;
     unsigned limit=~0;
@@ -485,7 +485,7 @@ static void* my_realloc(void* memory, int size)
  *
  */
 
-static int WINAPI ext_unknown()
+static int WINAPI ext_unknown(void)
 {
     printf("Unknown func called\n");
     return 0;
@@ -1134,7 +1134,7 @@ static WIN_BOOL WINAPI expIsProcessorFeaturePresent(DWORD v)
 }
 
 
-static long WINAPI expGetVersion()
+static long WINAPI expGetVersion(void)
 {
     dbgprintf("GetVersion() => 0xC0000004\n");
     return 0xC0000004;//Windows 95
@@ -1426,12 +1426,12 @@ static void WINAPI expDeleteCriticalSection(CRITICAL_SECTION *c)
 #endif
     return;
 }
-static int WINAPI expGetCurrentThreadId()
+static int WINAPI expGetCurrentThreadId(void)
 {
     dbgprintf("GetCurrentThreadId() => %d\n", pthread_self());
     return pthread_self();
 }
-static int WINAPI expGetCurrentProcess()
+static int WINAPI expGetCurrentProcess(void)
 {
     dbgprintf("GetCurrentProcess() => %d\n", getpid());
     return getpid();
@@ -1445,7 +1445,7 @@ extern void* fs_seg;
 
 //static int tls_count;
 static int tls_use_map[64];
-static int WINAPI expTlsAlloc()
+static int WINAPI expTlsAlloc(void)
 {
     int i;
     for(i=0; i<64; i++)
@@ -1496,7 +1496,7 @@ struct tls_s {
     struct tls_s* next;
 };
 
-static void* WINAPI expTlsAlloc()
+static void* WINAPI expTlsAlloc(void)
 {
     if (g_tls == NULL)
     {
@@ -1913,7 +1913,7 @@ static DWORD WINAPI expRegQueryInfoKeyA( HKEY hkey, LPSTR class, LPDWORD class_l
 /*
  * return CPU clock (in kHz), using linux's /proc filesystem (/proc/cpuinfo)
  */
-static double linux_cpuinfo_freq()
+static double linux_cpuinfo_freq(void)
 {
     double freq=-1;
     FILE *f;
@@ -1945,7 +1945,7 @@ static double linux_cpuinfo_freq()
 }
 
 
-static double solaris_kstat_freq()
+static double solaris_kstat_freq(void)
 {
 #if	defined(HAVE_LIBKSTAT) && defined(KSTAT_DATA_INT32)
     /*
@@ -1988,7 +1988,7 @@ static double solaris_kstat_freq()
 /*
  * Measure CPU freq using the pentium's time stamp counter register (TSC)
  */
-static double tsc_freq()
+static double tsc_freq(void)
 {
     static double ofreq=0.0;
     int i;
@@ -2004,7 +2004,7 @@ static double tsc_freq()
     return ofreq;
 }
 
-static double CPU_Freq()
+static double CPU_Freq(void)
 {
     double freq;
 
@@ -2023,7 +2023,7 @@ static long WINAPI expQueryPerformanceFrequency(long long* z)
     dbgprintf("QueryPerformanceFrequency(0x%x) => 1 ( %Ld )\n", z, *z);
     return 1;
 }
-static long WINAPI exptimeGetTime()
+static long WINAPI exptimeGetTime(void)
 {
     struct timeval t;
     long result;
@@ -2116,13 +2116,13 @@ static int WINAPI expCloseHandle(long v1)
     return 1;
 }
 
-static const char* WINAPI expGetCommandLineA()
+static const char* WINAPI expGetCommandLineA(void)
 {
     dbgprintf("GetCommandLineA() => \"c:\\aviplay.exe\"\n");
     return "c:\\aviplay.exe";
 }
 static short envs[]={'p', 'a', 't', 'h', ' ', 'c', ':', '\\', 0, 0};
-static LPWSTR WINAPI expGetEnvironmentStringsW()
+static LPWSTR WINAPI expGetEnvironmentStringsW(void)
 {
     dbgprintf("GetEnvironmentStringsW() => 0\n", envs);
     return 0;
@@ -2160,7 +2160,7 @@ static int WINAPI expFreeEnvironmentStringsA(char* strings)
 static const char ch_envs[]=
 "__MSVCRT_HEAP_SELECT=__GLOBAL_HEAP_SELECTED,1\r\n"
 "PATH=C:\\;C:\\windows\\;C:\\windows\\system\r\n";
-static LPCSTR WINAPI expGetEnvironmentStrings()
+static LPCSTR WINAPI expGetEnvironmentStrings(void)
 {
     dbgprintf("GetEnvironmentStrings() => 0x%x\n", ch_envs);
     return (LPCSTR)ch_envs;
@@ -2818,7 +2818,7 @@ static int WINAPI expSizeofResource(int v1, int v2)
     return result;
 }
 
-static int WINAPI expGetLastError()
+static int WINAPI expGetLastError(void)
 {
     int result=GetLastError();
     dbgprintf("GetLastError() => 0x%x\n", result);
@@ -2914,7 +2914,7 @@ static int WINAPI expReleaseDC(int hwnd, int hdc)
     return 1;
 }
 
-static int WINAPI expGetDesktopWindow()
+static int WINAPI expGetDesktopWindow(void)
 {
     dbgprintf("GetDesktopWindow() => 0\n");
     return 0;
@@ -3581,7 +3581,7 @@ static UINT WINAPI expGetSystemDirectoryA(
 }
 /*
 static char sysdir[]=".";
-static LPCSTR WINAPI expGetSystemDirectoryA()
+static LPCSTR WINAPI expGetSystemDirectoryA(void)
 {
     dbgprintf("GetSystemDirectoryA() => 0x%x='%s'\n", sysdir, sysdir);
     return sysdir;
@@ -4039,7 +4039,7 @@ static int exp_initterm_e(INITTERMFUNC *start, INITTERMFUNC *end)
     return 0;
 }
 
-static void* exp__dllonexit()
+static void* exp__dllonexit(void)
 {
     // FIXME extract from WINE
     return NULL;

@@ -12,7 +12,7 @@
 #include <string.h>
 #include "win32.h" // printf macro
 
-void trapbug();
+void trapbug(void);
 typedef long STDCALL (*GETCLASS) (const GUID*, const GUID*, void**);
 
 void DMO_Filter_Destroy(DMO_Filter* This)

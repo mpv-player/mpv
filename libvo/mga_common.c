@@ -454,7 +454,7 @@ static int mga_init(int width,int height,unsigned int format){
   return 0;
 }
 
-static int mga_uninit(){
+static int mga_uninit(void){
   if(f>=0){
 	ioctl( f,MGA_VID_OFF,0 );
 	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);

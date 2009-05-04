@@ -215,7 +215,7 @@ static void print_format(int lev, const char* str, const AudioStreamBasicDescrip
 
 static int AudioDeviceSupportsDigital( AudioDeviceID i_dev_id );
 static int AudioStreamSupportsDigital( AudioStreamID i_stream_id );
-static int OpenSPDIF();
+static int OpenSPDIF(void);
 static int AudioStreamChangeFormat( AudioStreamID i_stream_id, AudioStreamBasicDescription change_format );
 static OSStatus RenderCallbackSPDIF( AudioDeviceID inDevice,
                                     const AudioTimeStamp * inNow,
@@ -473,7 +473,7 @@ err_out:
 /*****************************************************************************
  * Setup a encoded digital stream (SPDIF)
  *****************************************************************************/
-static int OpenSPDIF()
+static int OpenSPDIF(void)
 {
     OSStatus                err = noErr;
     UInt32                  i_param_size, b_mix = 0;
