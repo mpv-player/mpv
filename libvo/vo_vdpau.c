@@ -46,7 +46,7 @@
 
 #include "libavcodec/vdpau.h"
 
-#include "gui/interface.h"
+#include "font_load.h"
 
 #include "libavutil/common.h"
 #include "libavutil/mathematics.h"
@@ -555,11 +555,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     visible_buf = 0;
 
-#ifdef CONFIG_GUI
-    if (use_gui)
-        guiGetEvent(guiSetShVideo, 0);  // the GUI will set up / resize our window
-    else
-#endif
     {
 #ifdef CONFIG_XF86VM
         if (vm)
@@ -1196,8 +1191,6 @@ static int control(uint32_t request, void *data)
             return get_image(data);
         case VOCTRL_DRAW_IMAGE:
             return draw_image(data);
-        case VOCTRL_GUISUPPORT:
-            return VO_TRUE;
         case VOCTRL_BORDER:
             vo_x11_border();
             resize();
