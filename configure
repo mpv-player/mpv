@@ -3857,7 +3857,6 @@ if test "$_corevideo" = auto ; then
 #include <CoreServices/CoreServices.h>
 #include <OpenGL/OpenGL.h>
 #include <QuartzCore/CoreVideo.h>
-#include <QuickTime/QuickTime.h>
 int main(void) { return 0; }
 EOF
   _corevideo=no

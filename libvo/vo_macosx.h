@@ -22,7 +22,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
-#import <QuickTime/QuickTime.h>
+#import <Carbon/Carbon.h>
 
 // MPlayer OS X VO Protocol
 @protocol MPlayerOSXVOProto
