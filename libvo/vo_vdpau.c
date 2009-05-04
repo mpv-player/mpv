@@ -37,12 +37,14 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "options.h"
 #include "video_out.h"
-#include "video_out_internal.h"
 #include "x11_common.h"
 #include "aspect.h"
 #include "sub.h"
 #include "subopt-helper.h"
+#include "libmpcodecs/vfcap.h"
+#include "libmpcodecs/mp_image.h"
 
 #include "libavcodec/vdpau.h"
 
@@ -53,15 +55,6 @@
 
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
-
-static vo_info_t info = {
-    "VDPAU with X11",
-    "vdpau",
-    "Rajib Mahapatra <rmahapatra@nvidia.com> and others",
-    ""
-};
-
-LIBVO_EXTERN(vdpau)
 
 #define CHECK_ST_ERROR(message) \
     if (vdp_st != VDP_STATUS_OK) { \
@@ -220,7 +213,9 @@ static void push_deint_surface(VdpVideoSurface surface)
     deint_surfaces[0] = surface;
 }
 
-static void video_to_output_surface(void)
+static void flip_page(struct vo *vo);
+static void draw_osd(struct vo *vo, struct osd_state *osd);
+static void video_to_output_surface(struct vo *vo)
 {
     VdpTime dummy;
     VdpStatus vdp_st;
@@ -236,8 +231,8 @@ static void video_to_output_surface(void)
         VdpOutputSurface output_surface;
         if (i) {
             draw_eosd();
-            draw_osd();
-            flip_page();
+            //draw_osd(vo, NULL);
+            flip_page(vo);
         }
         if (deint)
             field = (top_field_first == i) ^ (deint > 1) ?
@@ -261,14 +256,15 @@ static void video_to_output_surface(void)
     }
 }
 
-static void resize(void)
+static void resize(struct vo *vo)
 {
     VdpStatus vdp_st;
     int i;
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
     struct vo_rect borders;
-    calc_src_dst_rects(vid_width, vid_height, &src_rect, &dst_rect, &borders, NULL);
+    calc_src_dst_rects(vo, vid_width, vid_height, &src_rect, &dst_rect,
+                       &borders, NULL);
     out_rect_vid.x0 = dst_rect.left;
     out_rect_vid.x1 = dst_rect.right;
     out_rect_vid.y0 = dst_rect.top;
@@ -285,14 +281,14 @@ static void resize(void)
 #endif
     vo_osd_changed(OSDTYPE_OSD);
 
-    if (output_surface_width < vo_dwidth || output_surface_height < vo_dheight) {
-        if (output_surface_width < vo_dwidth) {
+    if (output_surface_width < vo->dwidth || output_surface_height < vo->dheight) {
+        if (output_surface_width < vo->dwidth) {
             output_surface_width += output_surface_width >> 1;
-            output_surface_width = FFMAX(output_surface_width, vo_dwidth);
+            output_surface_width = FFMAX(output_surface_width, vo->dwidth);
         }
-        if (output_surface_height < vo_dheight) {
+        if (output_surface_height < vo->dheight) {
             output_surface_height += output_surface_height >> 1;
-            output_surface_height = FFMAX(output_surface_height, vo_dheight);
+            output_surface_height = FFMAX(output_surface_height, vo->dheight);
         }
         // Creation of output_surfaces
         for (i = 0; i <= NUM_OUTPUT_SURFACES; i++) {
@@ -305,14 +301,15 @@ static void resize(void)
             mp_msg(MSGT_VO, MSGL_DBG2, "OUT CREATE: %u\n", output_surfaces[i]);
         }
     }
-    video_to_output_surface();
+    video_to_output_surface(vo);
     if (visible_buf)
-        flip_page();
+        flip_page(vo);
 }
 
 /* Initialize vdp_get_proc_address, called from preinit() */
-static int win_x11_init_vdpau_procs(void)
+static int win_x11_init_vdpau_procs(struct vo *vo)
 {
+    struct vo_x11_state *x11 = vo->x11;
     VdpStatus vdp_st;
 
     struct vdp_function {
@@ -368,7 +365,7 @@ static int win_x11_init_vdpau_procs(void)
         {0, NULL}
     };
 
-    vdp_st = vdp_device_create(mDisplay, mScreen,
+    vdp_st = vdp_device_create(x11->display, x11->screen,
                                &vdp_device, &vdp_get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling vdp_device_create_x11: %i\n", vdp_st);
@@ -387,11 +384,12 @@ static int win_x11_init_vdpau_procs(void)
 }
 
 /* Initialize vdpau_flip_queue, called from config() */
-static int win_x11_init_vdpau_flip_queue(void)
+static int win_x11_init_vdpau_flip_queue(struct vo *vo)
 {
+    struct vo_x11_state *x11 = vo->x11;
     VdpStatus vdp_st;
 
-    vdp_st = vdp_presentation_queue_target_create_x11(vdp_device, vo_window,
+    vdp_st = vdp_presentation_queue_target_create_x11(vdp_device, x11->window,
                                                       &vdp_flip_target);
     CHECK_ST_ERROR("Error when calling vdp_presentation_queue_target_create_x11")
 
@@ -532,10 +530,11 @@ static int create_vdp_decoder(int max_refs)
  * connect to X server, create and map window, initialize all
  * VDPAU objects, create different surfaces etc.
  */
-static int config(uint32_t width, uint32_t height, uint32_t d_width,
-                  uint32_t d_height, uint32_t flags, char *title,
-                  uint32_t format)
+static int config(struct vo *vo, uint32_t width, uint32_t height,
+                  uint32_t d_width, uint32_t d_height, uint32_t flags,
+                  char *title, uint32_t format)
 {
+    struct vo_x11_state *x11 = vo->x11;
     XVisualInfo vinfo;
     XSetWindowAttributes xswa;
     XWindowAttributes attribs;
@@ -558,14 +557,15 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     {
 #ifdef CONFIG_XF86VM
         if (vm)
-            vo_vm_switch();
+            vo_vm_switch(vo);
         else
 #endif
-        XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
+        XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
+                             &attribs);
         depth = attribs.depth;
         if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
             depth = 24;
-        XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
+        XMatchVisualInfo(x11->display, x11->screen, depth, TrueColor, &vinfo);
 
         xswa.background_pixel = 0;
         xswa.border_pixel     = 0;
@@ -573,18 +573,18 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
            aspect ratio changes. */
         xswamask = CWBorderPixel;
 
-        vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
+        vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
                                 flags, CopyFromParent, "vdpau", title);
-        XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
+        XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
 
 #ifdef CONFIG_XF86VM
         if (vm) {
             /* Grab the mouse pointer in our window */
             if (vo_grabpointer)
-                XGrabPointer(mDisplay, vo_window, True, 0,
+                XGrabPointer(x11->display, x11->window, True, 0,
                              GrabModeAsync, GrabModeAsync,
-                             vo_window, None, CurrentTime);
-            XSetInputFocus(mDisplay, vo_window, RevertToNone, CurrentTime);
+                             x11->window, None, CurrentTime);
+            XSetInputFocus(x11->display, x11->window, RevertToNone, CurrentTime);
         }
 #endif
     }
@@ -593,7 +593,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         vo_fs = 1;
 
     /* -----VDPAU related code here -------- */
-    if (vdp_flip_queue == VDP_INVALID_HANDLE && win_x11_init_vdpau_flip_queue())
+    if (vdp_flip_queue == VDP_INVALID_HANDLE
+        && win_x11_init_vdpau_flip_queue(vo))
         return -1;
 
     vdp_chroma_type = VDP_CHROMA_TYPE_420;
@@ -619,17 +620,17 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     surface_num = 0;
     vid_surface_num = -1;
-    resize();
+    resize(vo);
 
     return 0;
 }
 
-static void check_events(void)
+static void check_events(struct vo *vo)
 {
-    int e = vo_x11_check_events(mDisplay);
+    int e = vo_x11_check_events(vo);
 
     if (e & VO_EVENT_RESIZE)
-        resize();
+        resize(vo);
 
     if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && int_pause) {
         /* did we already draw a buffer */
@@ -638,15 +639,15 @@ static void check_events(void)
             VdpStatus vdp_st;
             vdp_st = vdp_presentation_queue_display(vdp_flip_queue,
                                                     output_surfaces[surface_num],
-                                                    vo_dwidth, vo_dheight,
+                                                    vo->dwidth, vo->dheight,
                                                     0);
             CHECK_ST_WARNING("Error when calling vdp_presentation_queue_display")
         }
     }
 }
 
-static void draw_osd_I8A8(int x0,int y0, int w,int h, unsigned char *src,
-                          unsigned char *srca, int stride)
+static void draw_osd_I8A8(void *ctx, int x0, int y0, int w, int h,
+                          unsigned char *src, unsigned char *srca, int stride)
 {
     VdpOutputSurface output_surface = output_surfaces[surface_num];
     VdpStatus vdp_st;
@@ -821,22 +822,23 @@ eosd_skip_upload:
     }
 }
 
-static void draw_osd(void)
+static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     mp_msg(MSGT_VO, MSGL_DBG2, "DRAW_OSD\n");
 
-    vo_draw_text_ext(vo_dwidth, vo_dheight, border_x, border_y, border_x, border_y,
-                     vid_width, vid_height, draw_osd_I8A8);
+    osd_draw_text_ext(osd, vo->dwidth, vo->dheight, border_x, border_y,
+                      border_x, border_y, vid_width, vid_height,
+                      draw_osd_I8A8, vo);
 }
 
-static void flip_page(void)
+static void flip_page(struct vo *vo)
 {
     VdpStatus vdp_st;
     mp_msg(MSGT_VO, MSGL_DBG2, "\nFLIP_PAGE VID:%u -> OUT:%u\n",
            surface_render[vid_surface_num].surface, output_surfaces[surface_num]);
 
     vdp_st = vdp_presentation_queue_display(vdp_flip_queue, output_surfaces[surface_num],
-                                            vo_dwidth, vo_dheight,
+                                            vo->dwidth, vo->dheight,
                                             0);
     CHECK_ST_WARNING("Error when calling vdp_presentation_queue_display")
 
@@ -844,8 +846,8 @@ static void flip_page(void)
     visible_buf = 1;
 }
 
-static int draw_slice(uint8_t *image[], int stride[], int w, int h,
-                      int x, int y)
+static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
+                      int h, int x, int y)
 {
     VdpStatus vdp_st;
     struct vdpau_render_state *rndr = (struct vdpau_render_state *)image[0];
@@ -862,7 +864,7 @@ static int draw_slice(uint8_t *image[], int stride[], int w, int h,
 }
 
 
-static int draw_frame(uint8_t *src[])
+static int draw_frame(struct vo *vo, uint8_t *src[])
 {
     return VO_ERROR;
 }
@@ -884,7 +886,7 @@ static struct vdpau_render_state *get_surface(int number)
     return &surface_render[number];
 }
 
-static uint32_t draw_image(mp_image_t *mpi)
+static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 {
     if (IMGFMT_IS_VDPAU(image_format)) {
         struct vdpau_render_state *rndr = mpi->priv;
@@ -915,7 +917,7 @@ static uint32_t draw_image(mp_image_t *mpi)
     else
         top_field_first = 1;
 
-    video_to_output_surface();
+    video_to_output_surface(vo);
     return VO_TRUE;
 }
 
@@ -995,9 +997,9 @@ static void DestroyVdpauObjects(void)
     CHECK_ST_WARNING("Error when calling vdp_device_destroy")
 }
 
-static void uninit(void)
+static void uninit(struct vo *vo)
 {
-    if (!vo_config_count)
+    if (!vo->config_count)
         return;
     visible_buf = 0;
 
@@ -1013,9 +1015,9 @@ static void uninit(void)
     eosd_targets = NULL;
 
 #ifdef CONFIG_XF86VM
-    vo_vm_close();
+    vo_vm_close(vo);
 #endif
-    vo_x11_uninit();
+    vo_x11_uninit(vo);
 
     dlclose(vdpau_lib_handle);
 }
@@ -1050,7 +1052,7 @@ static const char help_msg[] =
     "    Apply sharpening or softening, argument is strength from -1.0 to 1.0\n"
     ;
 
-static int preinit(const char *arg)
+static int preinit(struct vo *vo, const char *arg)
 {
     int i;
     static const char *vdpaulibrary = "libvdpau.so.1";
@@ -1086,7 +1088,7 @@ static int preinit(const char *arg)
                vdpau_device_create, vdpaulibrary);
         return -1;
     }
-    if (!vo_init() || win_x11_init_vdpau_procs())
+    if (!vo_init(vo) || win_x11_init_vdpau_procs(vo))
         return -1;
 
     decoder = VDP_INVALID_HANDLE;
@@ -1117,7 +1119,7 @@ static int preinit(const char *arg)
     return 0;
 }
 
-static int get_equalizer(char *name, int *value) {
+static int get_equalizer(const char *name, int *value) {
     if (!strcasecmp(name, "brightness"))
         *value = procamp.brightness * 100;
     else if (!strcasecmp(name, "contrast"))
@@ -1131,7 +1133,7 @@ static int get_equalizer(char *name, int *value) {
     return VO_TRUE;
 }
 
-static int set_equalizer(char *name, int value) {
+static int set_equalizer(const char *name, int value) {
     VdpStatus vdp_st;
     VdpCSCMatrix matrix;
     static const VdpVideoMixerAttribute attributes[] = {VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX};
@@ -1157,7 +1159,7 @@ static int set_equalizer(char *name, int value) {
     return VO_TRUE;
 }
 
-static int control(uint32_t request, void *data)
+static int control(struct vo *vo, uint32_t request, void *data)
 {
     switch (request) {
         case VOCTRL_GET_DEINTERLACE:
@@ -1190,19 +1192,19 @@ static int control(uint32_t request, void *data)
         case VOCTRL_GET_IMAGE:
             return get_image(data);
         case VOCTRL_DRAW_IMAGE:
-            return draw_image(data);
+            return draw_image(vo, data);
         case VOCTRL_BORDER:
-            vo_x11_border();
-            resize();
-	    return VO_TRUE;
+            vo_x11_border(vo);
+            resize(vo);
+            return VO_TRUE;
         case VOCTRL_FULLSCREEN:
-            vo_x11_fullscreen();
-            resize();
+            vo_x11_fullscreen(vo);
+            resize(vo);
             return VO_TRUE;
         case VOCTRL_GET_PANSCAN:
             return VO_TRUE;
         case VOCTRL_SET_PANSCAN:
-            resize();
+            resize(vo);
             return VO_TRUE;
         case VOCTRL_SET_EQUALIZER: {
             struct voctrl_set_equalizer_args *args = data;
@@ -1214,10 +1216,10 @@ static int control(uint32_t request, void *data)
             return get_equalizer(args->name, args->valueptr);
         }
         case VOCTRL_ONTOP:
-            vo_x11_ontop();
+            vo_x11_ontop(vo);
             return VO_TRUE;
         case VOCTRL_UPDATE_SCREENINFO:
-            update_xinerama_info();
+            update_xinerama_info(vo);
             return VO_TRUE;
         case VOCTRL_DRAW_EOSD:
             if (!data)
@@ -1229,13 +1231,13 @@ static int control(uint32_t request, void *data)
             mp_eosd_res_t *r = data;
             r->mt = r->mb = r->ml = r->mr = 0;
             if (vo_fs) {
-                r->w = vo_screenwidth;
-                r->h = vo_screenheight;
+                r->w = vo->opts->vo_screenwidth;
+                r->h = vo->opts->vo_screenheight;
                 r->ml = r->mr = border_x;
                 r->mt = r->mb = border_y;
             } else {
-                r->w = vo_dwidth;
-                r->h = vo_dheight;
+                r->w = vo->dwidth;
+                r->h = vo->dheight;
             }
             return VO_TRUE;
         }
@@ -1243,4 +1245,21 @@ static int control(uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
-/* @} */
+const struct vo_driver video_out_vdpau = {
+    .is_new = 1,
+    .info = &(struct vo_info_s){
+        "VDPAU with X11",
+        "vdpau",
+        "Rajib Mahapatra <rmahapatra@nvidia.com> and others",
+        ""
+    },
+    .preinit = preinit,
+    .config = config,
+    .control = control,
+    .draw_frame = draw_frame,
+    .draw_slice = draw_slice,
+    .draw_osd = draw_osd,
+    .flip_page = flip_page,
+    .check_events = check_events,
+    .uninit = uninit,
+};
