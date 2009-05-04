@@ -3842,11 +3842,9 @@ if test "$_quartz" = yes ; then
   extra_ldflags="$extra_ldflags -framework Carbon -framework QuickTime"
   def_quartz='#define CONFIG_QUARTZ 1'
   _vomodules="quartz $_vomodules"
-  def_quicktime='#define CONFIG_QUICKTIME 1'
 else
   def_quartz='#undef CONFIG_QUARTZ'
   _novomodules="quartz $_novomodules"
-  def_quicktime='#undef CONFIG_QUICKTIME'
 fi
 echores $_quartz
 
@@ -6756,11 +6754,12 @@ echores "$_real"
 echocheck "QuickTime codecs"
 _qtx_emulation=no
 def_qtx_win32='#undef CONFIG_QTX_CODECS_WIN32'
+def_quicktime='#undef CONFIG_QUICKTIME'
 if test "$_qtx" = auto ; then
   test "$_win32dll" = yes || darwin && _qtx=yes
 fi
 if test "$_qtx" = yes ; then
-    darwin && extra_ldflags="$extra_ldflags -framework QuickTime"
+    darwin && extra_ldflags="$extra_ldflags -framework QuickTime" && def_quicktime='#define CONFIG_QUICKTIME 1'
     def_qtx='#define CONFIG_QTX_CODECS 1'
     win32 && _qtx_codecs_win32=yes && def_qtx_win32='#define CONFIG_QTX_CODECS_WIN32 1'
     _codecmodules="qtx $_codecmodules"
