@@ -204,12 +204,12 @@ libao2 drivers:
     * ao_alsa5.c - None
     * ao_alsa.c - Clemens Ladisch
     * ao_arts.c - None
+    * ao_coreaudio.c - None
     * ao_dsound.c - None
     * ao_dxr2.c - None
     * ao_esd.c - None
     * ao_ivtv.c - Benjamin Zores
     * ao_jack.c - Reimar Döffinger
-    * ao_macosx.c - None
     * ao_mpegpes.c - None
     * ao_nas.c - Tobias Diedrich
     * ao_null.c - None

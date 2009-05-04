@@ -1,5 +1,5 @@
 /*
- * Mac OS X audio output driver
+ * CoreAudio audio output driver for Mac OS X
  *
  * original copyright (C) Timothy J. Wood - Aug 2000
  * ported to MPlayer libao2 by Dan Christiansen
@@ -57,17 +57,17 @@
 static const ao_info_t info =
   {
     "Darwin/Mac OS X native audio output",
-    "macosx",
+    "coreaudio",
     "Timothy J. Wood & Dan Christiansen & Chris Roccati",
     ""
   };
 
-LIBAO_EXTERN(macosx)
+LIBAO_EXTERN(coreaudio)
 
 /* Prefix for all mp_msg() calls */
-#define ao_msg(a, b, c...) mp_msg(a, b, "AO: [macosx] " c)
+#define ao_msg(a, b, c...) mp_msg(a, b, "AO: [coreaudio] " c)
 
-typedef struct ao_macosx_s
+typedef struct ao_coreaudio_s
 {
   AudioDeviceID i_selected_dev;             /* Keeps DeviceID of the selected device. */
   int b_supports_digital;                   /* Does the currently selected device support digital mode? */
@@ -96,9 +96,9 @@ typedef struct ao_macosx_s
   unsigned int buffer_len; ///< must always be num_chunks * chunk_size
   unsigned int num_chunks;
   unsigned int chunk_size;
-} ao_macosx_t;
+} ao_coreaudio_t;
 
-static ao_macosx_t *ao = NULL;
+static ao_coreaudio_t *ao = NULL;
 
 /**
  * \brief add data to ringbuffer
@@ -248,7 +248,7 @@ int b_alive;
 
     ao_msg(MSGT_AO,MSGL_V, "init([%dHz][%dch][%s][%d])\n", rate, channels, af_fmt2str_short(format), flags);
 
-    ao = calloc(1, sizeof(ao_macosx_t));
+    ao = calloc(1, sizeof(ao_coreaudio_t));
 
     ao->i_selected_dev = 0;
     ao->b_supports_digital = 0;

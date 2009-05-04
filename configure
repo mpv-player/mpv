@@ -3815,10 +3815,10 @@ fi
 if test "$_coreaudio" = yes ; then
   extra_ldflags="$extra_ldflags -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
   def_coreaudio='#define CONFIG_COREAUDIO 1'
-  _aomodules="macosx $_aomodules"
+  _aomodules="coreaudio $_aomodules"
 else
   def_coreaudio='#undef CONFIG_COREAUDIO'
-  _noaomodules="macosx $_noaomodules"
+  _noaomodules="coreaudio $_noaomodules"
 fi
 echores $_coreaudio
 

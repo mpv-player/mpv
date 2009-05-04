@@ -168,7 +168,7 @@ Bunkus, Moritz (Mosu) <moritz@bunkus.org>
 
 Christiansen, Dan Villiom Podlaski (danchr) <danchr@daimi.au.dk>
     * timer-darwin.c
-    * ao_macosx
+    * CoreAudio audio output driver for Mac OS X
     * build system cleanups for Darwin
 
 Clagg, Jeff (snacky) <snacky@ikaruga.co.uk>
