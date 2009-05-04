@@ -1,5 +1,5 @@
 /*
- * MPlayer Mac OS X video output driver
+ * CoreVideo video output driver
  *
  * Copyright (c) 2005 Nicolas Plourde <nicolasplourde@gmail.com>
  *

@@ -313,7 +313,7 @@ Ajusta la saturación.
 .PD 1
 .PP
 (Las siguientes teclas son válidas únicamente cuando se usa quartz o el
-controlador de vídeo de macosx)
+controlador de vídeo de corevideo)
 .PP
 .PD 0
 .IPs "command + 0"
@@ -2882,7 +2882,7 @@ de aspecto de ventana.
 .TP
 .B \-ontop
 Hace que la ventana de reproducción se quede por encima de las otras ventanas.
-Soportado por controladores que usen X11, excepto SDL, así como directx,macosx,
+Soportado por controladores que usen X11, excepto SDL, así como directx,corevideo,
 quartz, ggi y gl2.
 .
 .TP
@@ -2892,7 +2892,7 @@ película a 16:9 para ajustarla a una pantalla 4:3 sin bandas negras).
 .br
 El rango controla cuánto de la imagen será recortado.
 Sólo funciona con los controladores de salida de vídeo xv, xmga, mga, gl, gl2,
-quartz, macosx y xvidix.
+quartz, corevideo y xvidix.
 .
 .TP
 .B \-panscanrange <\-19.0\-99.0> (experimental)
@@ -2915,7 +2915,7 @@ Reproduce la película en la ventana raíz (fondo de escritorio).
 Las imágenes del fondo de escritorio pueden cubrir sin embargo a la ventana
 de la película.
 Funciona sólo con los controladores de salida de vídeo x11, xv, xmga,
-xvidix, quartz, macosx y directx.
+xvidix, quartz, corevideo y directx.
 .
 .TP
 .B \-saturation <\-100\-100>
@@ -3249,7 +3249,7 @@ Especifica la resolución a pantalla completa (útil en sistemas lentos).
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 o 10.3.9 con QuickTime 7)
+.B corevideo (Mac OS X 10.4 o 10.3.9 con QuickTime 7)
 Controlador de salida de vídeo Mac OS X CoreVideo.
 .PD 0
 .RSs

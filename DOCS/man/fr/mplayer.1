@@ -328,7 +328,7 @@ Ajuste la saturation.
 .PP
 .RS
 (Les touches suivantes ne sont valides que lorsque le pilote de sortie
-vidéo quartz ou macosx est utilisé.)
+vidéo quartz ou corevideo est utilisé.)
 .RE
 .PP
 .PD 0
@@ -1097,7 +1097,7 @@ Permet MPlayer de recevoir des évènements souris envoyés
 par le pilote de sortie vidéo.
 Utilisé pour sélectioner les boutons des menus DVDs.
 Géré par par les VOs basés sur X11 (x11, xv, xvmc, etc.) ainsi que les VOs gl,
-gl2, direct3d et macosx.
+gl2, direct3d et corevideo.
 .
 .TP
 .B \-noar
@@ -3386,7 +3386,7 @@ hauteur/\:largeur de fenêtres.
 .B "\-ontop\ "
 Rend la fenêtre de lecture toujours visible.
 Permise par les pilotes de sortie vidéo qui utilisent X11, excepté SDL,
-aussi bien que directx, macosx, quartz, ggi et gl2.
+aussi bien que directx, corevideo, quartz, ggi et gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -3394,7 +3394,7 @@ Active la fonctionnalité "pan-and-scan" (par ex.\& couper les côtés d'un
 film 16/\:9e pour qu'il tienne sans bords noirs sur un écran 4/\:3)
 L'intervalle définit à quel point l'image sera coupée.
 Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga,
-gl, gl2, quartz, macosx et xvidix.
+gl, gl2, quartz, corevideo et xvidix.
 .br
 .I NOTE\ :
 Des valeurs compris entre \-1 et 0 sont aussi permises, mais très expérimentale,
@@ -3421,7 +3421,7 @@ N'est géré actuellement que par \-vo directx combinée avec l'option \-vm.
 Joue le film dans la fenêtre root (le fond du bureau).
 Les images en fond d'écran peuvent néanmoins cacher le film.
 Cette option ne fonctionne qu'avec les pilotes de sortie vidéo x11, xv, xmga,
-xvidix, quartz, macosx et directx.
+xvidix, quartz, corevideo et directx.
 .
 .TP
 .B \-saturation <\-100\-100>
@@ -3821,7 +3821,7 @@ Choisir la résolution du mode plein-écran (utile sur les systèmes plus lents).
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 ou 10.3.9 avec QuickTime 7)
+.B corevideo (Mac OS X 10.4 ou 10.3.9 avec QuickTime 7)
 pilote de sortie vidéo CoreVideo pour Mac OS X
 .PD 0
 .RSs

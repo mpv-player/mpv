@@ -314,7 +314,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .PD 1
 .PP
 .RS
-(以下的按键仅适用于 quartz or macosx 视频输出驱动。)
+(以下的按键仅适用于 quartz or corevideo 视频输出驱动。)
 .RE
 .PP
 .PD 0
@@ -989,7 +989,7 @@ n 大小的 FIFO 能容纳 (n\-1) 缓冲事件。
 .B \-mouse\-movements
 允许 MPlayer 接收来自视频输出驱动的指针事件。
 必须选择 DVD 菜单中的按钮。
-支持基于 X11 的视频输出（x11、xv、xvmc等）以及 gl、gl2、direct3d 和 macosx 的视频输出
+支持基于 X11 的视频输出（x11、xv、xvmc等）以及 gl、gl2、direct3d 和 corevideo 的视频输出
 .
 .TP
 .B \-noar
@@ -3007,14 +3007,14 @@ gl、gl2、directx、fbdev 和 tdfxfb 视频输出驱动支持。
 .TP
 .B "\-ontop\ "
 使得此播放器窗口位于其他窗口之上。
-视频输出驱动使用 X11 的, 除了 SDL, 还有使用 directx, macosx, quartz, 
+视频输出驱动使用 X11 的, 除了 SDL, 还有使用 directx, corevideo, quartz, 
 ggi 和 gl2 的都支持此功能。
 .
 .TP
 .B \-panscan <0.0\-1.0>
 启用 pan-and-scan 功能 (裁减如 16:9 电影的边适应 4:3 显示不带黑边)。
 范围参数值用来控制裁减多少图像。
-只能与 xv, xmga, mga, gl, gl2, quartz, macosx 和 xvidix 的
+只能与 xv, xmga, mga, gl, gl2, quartz, corevideo 和 xvidix 的
 视频输出驱动一起工作。
 .br
 .I 注意：
@@ -3038,7 +3038,7 @@ ggi 和 gl2 的都支持此功能。
 .B \-rootwin
 在根窗口(桌面背景)中播放电影。
 虽然桌面背景图像可能盖住电影窗口。
-只能与 x11, xv, xmga, xvidix, quartz, macosx 和 directx 的
+只能与 x11, xv, xmga, xvidix, quartz, corevideo 和 directx 的
 视频输出驱动一起工作。
 .
 .TP
@@ -3397,7 +3397,7 @@ Mac OS X Quartz 视频输出驱动。
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 或 10.3.9 的 QuickTime 7)
+.B corevideo (Mac OS X 10.4 或 10.3.9 的 QuickTime 7)
 Mac OS X CoreVideo 视频输出驱动
 .PD 0
 .RSs

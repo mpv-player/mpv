@@ -312,7 +312,7 @@ Adjust saturation.
 .PD 1
 .PP
 .RS
-(The following keys are valid only when using the quartz or macosx
+(The following keys are valid only when using the quartz or corevideo
 video output driver.)
 .RE
 .PP
@@ -1041,7 +1041,7 @@ Permit MPlayer to receive pointer events reported by the video
 output driver.
 Necessary to select the buttons in DVD menus.
 Supported for X11 based VOs (x11, xv, xvmc, etc.) and the gl, gl2, direct3d and
-macosx VOs.
+corevideo VOs.
 .
 .TP
 .B \-noar
@@ -3208,14 +3208,14 @@ Furthermore under X11 your window manager has to honor window aspect hints.
 .B "\-ontop\ "
 Makes the player window stay on top of other windows.
 Supported by video output drivers which use X11, except SDL,
-as well as directx, macosx, quartz, ggi and gl2.
+as well as directx, corevideo, quartz, ggi and gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
 Enables pan-and-scan functionality (cropping the sides of e.g.\& a 16:9
 movie to make it fit a 4:3 display without black bands).
 The range controls how much of the image is cropped.
-Only works with the xv, xmga, mga, gl, gl2, quartz, macosx and xvidix
+Only works with the xv, xmga, mga, gl, gl2, quartz, corevideo and xvidix
 video output drivers.
 .br
 .I NOTE:
@@ -3241,7 +3241,7 @@ Currently only supported by \-vo directx combined with the \-vm option.
 .B \-rootwin
 Play movie in the root window (desktop background).
 Desktop background images may cover the movie window, though.
-Only works with the x11, xv, xmga, xvidix, quartz, macosx and directx video output drivers.
+Only works with the x11, xv, xmga, xvidix, quartz, corevideo and directx video output drivers.
 .
 .TP
 .B \-saturation <\-100\-100>
@@ -3632,7 +3632,7 @@ Specify the fullscreen resolution (useful on slow systems).
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 or 10.3.9 with QuickTime 7)
+.B corevideo (Mac OS X 10.4 or 10.3.9 with QuickTime 7)
 Mac OS X CoreVideo video output driver
 .PD 0
 .RSs

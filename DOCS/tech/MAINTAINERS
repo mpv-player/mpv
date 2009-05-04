@@ -156,6 +156,7 @@ libvo drivers:
     * vo_aa.c - Alban Bedel
     * vo_caca.c - Howell Tam (Pigeon)
     * vo_bl.c - Rik Snel
+    * vo_corevideo.m - None
     * vo_cvidix.c - Sascha Sommer
     * vo_dga.c - None
     * vo_dfbmga.c - Ville Syrjälä
@@ -172,7 +173,6 @@ libvo drivers:
     * vo_gl2.c - Reimar Döffinger
     * vo_ivtv.c - Benjamin Zores
     * vo_jpeg.c - Ivo van Poorten
-    * vo_macosx.m - None
     * vo_md5sum.c - Ivo van Poorten
     * vo_mga.c - Attila Kinali
     * vo_mpegpes.c - None

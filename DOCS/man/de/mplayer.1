@@ -328,7 +328,7 @@ Passe Sättigung an.
 .PP
 .RS
 (Die folgenden Tasten sind nur gültig bei Benutzung der Videoausgabetreiber
-quartz und macosx.)
+quartz und corevideo.)
 .RE
 .PP
 .PD 0
@@ -3322,7 +3322,7 @@ Fenster-Seitenverhältnis verstehen.
 .B "\-ontop\ "
 Sorgt dafür, dass das Abspielfenster oberhalb von anderen Fenstern bleibt.
 Wird unterstützt von Videoausgabetreibern, die X11 benutzen, außer SDL,
-außerdem directx, macosx, quartz, ggi und gl2.
+außerdem directx, corevideo, quartz, ggi und gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -3330,7 +3330,7 @@ Aktiviert Panscan.
 Dabei werden z.B.\& bei einem 16:9-Film und einem 4:3-Monitor die Seiten
 abgeschnitten, damit der komplette Bildbereich ausgefüllt wird.
 Der Bereich kontrolliert, wieviel vom Bild abgeschnitten wird.
-Dies funktioniert nur mit den xv-, xmga-, mga-, gl-, gl2, quartz-, macosx- und
+Dies funktioniert nur mit den xv-, xmga-, mga-, gl-, gl2, quartz-, corevideo- und
 xvidix-Videoausgabetreibern.
 .br
 .I ANMERKUNG:
@@ -3356,7 +3356,7 @@ Momentan nur unterstützt von \-vo directx kombiniert mit der Option \-vm.
 .B \-rootwin
 Spielt den Film im Hauptfenster (dem Desktophintergrund) ab.
 Desktophintergrundbilder können den Film allerdings verdecken.
-Funktioniert nur mit den x11-, xv-, xmga-, xvidix-, quartz-, macosx- und
+Funktioniert nur mit den x11-, xv-, xmga-, xvidix-, quartz-, corevideo- und
 directx-Videoausgabetreibern.
 .
 .TP
@@ -3714,7 +3714,7 @@ Gib die Auflösung im Vollbildmodus an (nützlich auf langsamen Systemen).
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 oder 10.3.9 mit QuickTime 7)
+.B corevideo (Mac OS X 10.4 oder 10.3.9 mit QuickTime 7)
 Mac OS X CoreVideo-Videoausgabetreiber
 .PD 0
 .RSs

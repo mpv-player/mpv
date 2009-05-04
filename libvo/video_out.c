@@ -128,7 +128,7 @@ extern vo_functions_t video_out_cvidix;
 extern vo_functions_t video_out_tdfx_vid;
 extern vo_functions_t video_out_xvr100;
 extern vo_functions_t video_out_tga;
-extern vo_functions_t video_out_macosx;
+extern vo_functions_t video_out_corevideo;
 extern vo_functions_t video_out_quartz;
 extern vo_functions_t video_out_pnm;
 extern vo_functions_t video_out_md5sum;
@@ -151,7 +151,7 @@ const vo_functions_t* const video_out_drivers[] =
         &video_out_kva,
 #endif
 #ifdef CONFIG_COREVIDEO
-        &video_out_macosx,
+        &video_out_corevideo,
 #endif
 #ifdef CONFIG_QUARTZ
         &video_out_quartz,

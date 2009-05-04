@@ -740,7 +740,7 @@ Le compilateur préféré étant la version Apple de GCC 3.x ou supérieure.
 Vous pouvez obtenir l'environement de compilation de base en
 installant <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink> de Apple.
 Si vous avez Mac OS X 10.3.9 ou supérieur et QuickTime 7
-vous pouvez utiliser le pilote macosx de sortie vidéo.
+vous pouvez utiliser le pilote corevideo de sortie vidéo.
 </para>
 <para>
 Malheureusement, cet environement de base ne vous autorise pas à

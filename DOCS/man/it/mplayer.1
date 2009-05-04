@@ -330,7 +330,7 @@ Regola la saturazione.
 .PP
 .RS
 (I seguenti tasti sono validi solo quando si utilizza il driver di uscita
-video quartz oppure macosx.)
+video quartz oppure corevideo.)
 .RE
 .PP
 .PD 0
@@ -3296,7 +3296,7 @@ dell'aspetto finestra.
 Rende la finestra di visualizzazione del filmato in modalità 'stay on top',
 stai in cima, alle altre finestre.
 Supportato dai driver di uscita video che usano X11, SDL esclusa, così come
-da directx, macosx, quartz, ggi e gl2.
+da directx, corevideo, quartz, ggi e gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -3305,7 +3305,7 @@ filmato in formato 16:9 per adattarlo ad uno schermo 4:3 senza avere bande
 nere)
 Il parametro controlla quanto dell'immagine viene tagliato.
 Questa opzione funziona solo con i driver di uscita video xv, xmga, mga,
-gl, gl2, quartz, macosx e xvidix.
+gl, gl2, quartz, corevideo e xvidix.
 .br
 .I NOTA:
 Sono permessi anche valori compresi tra \-1 e 0, ma sono altamente sperimentali
@@ -3331,7 +3331,7 @@ l'opzione \-vm.
 .B \-rootwin
 Visualizza il filmato nella finestra root (lo sfondo del desktop).
 L'immagine di sfondo del desktop può però coprire la finestra del filmato.
-Funziona solo con i driver di uscita video x11, xv, xmga, xvidix, quartz, macosx e directx.
+Funziona solo con i driver di uscita video x11, xv, xmga, xvidix, quartz, corevideo e directx.
 .
 .TP
 .B \-saturation <\-100\-100>
@@ -3681,7 +3681,7 @@ Specifica la risoluzione a schermo intero (utile su sistemi lenti).
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 oppure 10.3.9 con QuickTime 7)
+.B corevideo (Mac OS X 10.4 oppure 10.3.9 con QuickTime 7)
 Driver di uscita video Mac OS X CoreVideo.
 .PD 0
 .RSs

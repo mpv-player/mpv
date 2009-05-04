@@ -637,7 +637,7 @@ Pietrzak, Dariusz (Eyck) <eyck@ghost.anime.pl>
 
 Plourde, Nicolas <nicolas.plourde@gmail.com>
     * quartz video output driver for Mac OS X
-    * macosx CoreVideo output driver for Mac OS X
+    * CoreVideo video output driver for Mac OS X
     * Darwin VCD/SVCD support
 
 Poettering, Lennart <mzzcynlre@0pointer.de>

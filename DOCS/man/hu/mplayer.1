@@ -314,7 +314,7 @@ Szaturáció beállítása.
 .PD 1
 .PP
 .RS
-(A következõ billentyûk csak quartz vagy macosx videó kimeneten mûködnek.)
+(A következõ billentyûk csak quartz vagy corevideo videó kimeneten mûködnek.)
 .RE
 .PP
 .PD 0
@@ -1041,7 +1041,7 @@ Engedélyezi az MPlayernek a pozícionáló eszköz eseményeinek fogadását,
 melyeket a videó kimeneti eszköz küld.
 Szükséges a dvd menükben a gombok kiválasztásához.
 Az X11 alapú VO-kban (x11, xv, xvmc, stb.), a gl, a gl2, a direct3d és a
-macosx VO-kban támogatott.
+corevideo VO-kban támogatott.
 .
 .TP
 .B \-noar
@@ -3220,14 +3220,14 @@ Továbbá X11 alatt az ablakkezelõdnek is támogatnia kell.
 .B "\-ontop\ "
 A lejátszási ablak folyamatosan a többi ablak elõtt lesz látható.
 Azok a videó kimeneti vezérlõk támogatják, amelyek X11-et használnak,
-kivéve az SDL-t, valamint a directx, macosx, quartz, ggi és gl2.
+kivéve az SDL-t, valamint a directx, corevideo, quartz, ggi és gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
 Pan & Scan funkció bekapcsolása (pl.\& egy 16:9 arányú film széleinek a
 levágása, hogy elférjen egy 4:3 arányú képernyõn fekete sávok nélkül)
 A tartomány vezérli, hogy a képbõl mennyi kerül levágásra.
-Ez a funkció csak az xv, xmga, mga, gl, gl2, quartz, macosx és xvidix videó
+Ez a funkció csak az xv, xmga, mga, gl, gl2, quartz, corevideo és xvidix videó
 kimeneti meghajtókkal mûködik.
 .br
 .I MEGJEGYZÉS:
@@ -3253,7 +3253,7 @@ Jelenleg csak a \-vo directx támogatja a \-vm opcióval együtt.
 .B \-rootwin
 A film root ablakban (asztal hátterében) történõ lejátszása.
 Az asztalon lévõ háttérkép kitakarhatja a filmet.
-Csak az x11, xv, xmga, xvidix, quartz, macosx és directx videó meghajtók
+Csak az x11, xv, xmga, xvidix, quartz, corevideo és directx videó meghajtók
 támogatják.
 .
 .TP
@@ -3649,7 +3649,7 @@ A teljes képernyõ felbontása (hasznos lassú rendszereknél).
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 vagy 10.3.9 QuickTime 7-tel)
+.B corevideo (Mac OS X 10.4 vagy 10.3.9 QuickTime 7-tel)
 Mac OS X CoreVideo kimeneti videó vezérlõ
 .PD 0
 .RSs
