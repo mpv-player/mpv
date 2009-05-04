@@ -8089,6 +8089,8 @@ cat > config.mak << EOF
 # Ensure that locale settings do not interfere with shell commands.
 export LC_ALL = C
 
+CONFIGURATION = $_configuration
+
 CHARSET = $_charset
 DOC_LANG = $doc_lang
 DOC_LANGS = $doc_langs
