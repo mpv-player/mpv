@@ -3854,15 +3854,18 @@ echocheck "CoreVideo"
 if test "$_corevideo" = auto ; then
   cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
+#include <CoreServices/CoreServices.h>
+#include <OpenGL/OpenGL.h>
 #include <QuartzCore/CoreVideo.h>
+#include <QuickTime/QuickTime.h>
 int main(void) { return 0; }
 EOF
   _corevideo=no
-  cc_check -framework Carbon -framework QuartzCore -framework OpenGL && _corevideo=yes
+  cc_check -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
 fi
 if test "$_corevideo" = yes ; then
   _vomodules="macosx $_vomodules"
-  extra_ldflags="$extra_ldflags -framework Cocoa -framework QuartzCore -framework OpenGL"
+  extra_ldflags="$extra_ldflags -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL"
   def_corevideo='#define CONFIG_COREVIDEO 1'
 else
   _novomodules="macosx $_novomodules"
