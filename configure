@@ -3823,7 +3823,7 @@ EOF
   cc_check -framework Carbon -framework QuickTime && _quartz=yes
 fi
 if test "$_quartz" = yes ; then
-  extra_ldflags="$extra_ldflags -framework Carbon -framework QuickTime"
+  libs_mplayer="$libs_mplayer -framework Carbon -framework QuickTime"
   def_quartz='#define CONFIG_QUARTZ 1'
   _vomodules="quartz $_vomodules"
 else
@@ -3846,7 +3846,7 @@ EOF
 fi
 if test "$_corevideo" = yes ; then
   _vomodules="corevideo $_vomodules"
-  extra_ldflags="$extra_ldflags -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL"
+  libs_mplayer="$libs_mplayer -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL"
   def_corevideo='#define CONFIG_COREVIDEO 1'
 else
   _novomodules="corevideo $_novomodules"
