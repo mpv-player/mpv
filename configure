@@ -5854,7 +5854,8 @@ if test "$_libdvdcss_internal" = yes ; then
   elif os2 ; then
     cflags_libdvdcss="-DSYS_OS2"
   fi
-  cflags_libdvdcss_dvdread="-Ilibdvdcss -DHAVE_DVDCSS_DVDCSS_H"
+  cflags_libdvdcss_dvdread="-Ilibdvdcss"
+  def_dvdcss="#define HAVE_DVDCSS_DVDCSS_H 1"
   _inputmodules="libdvdcss(internal) $_inputmodules"
   _largefiles=yes
 else
@@ -8561,6 +8562,7 @@ $def_dvd_bsd
 $def_dvd_darwin
 $def_dvd_linux
 $def_dvd_openbsd
+$def_dvdcss
 $def_dvdio
 $def_dvdnav
 $def_dvdread
