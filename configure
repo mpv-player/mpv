@@ -5848,7 +5848,7 @@ if test "$_libdvdcss_internal" = yes ; then
     def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
   elif darwin ; then
     def_dvd_darwin='#define DARWIN_DVD_IOCTL'
-    extra_ldflags="$extra_ldflags -framework IOKit"
+    extra_ldflags="$extra_ldflags -framework IOKit -framework Carbon"
   elif cygwin ; then
     cflags_libdvdcss="-DSYS_CYGWIN -DWIN32"
   elif beos ; then
