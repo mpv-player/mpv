@@ -3871,23 +3871,14 @@ fi
 echores "$_corevideo"
 
 echocheck "Mac OS X Finder Support"
-if test "$_macosx_finder" = yes; then
-  def_macosx_finder='#define CONFIG_MACOSX_FINDER 1'
-else
-  def_macosx_finder='#undef CONFIG_MACOSX_FINDER'
-fi
+def_macosx_finder='#undef CONFIG_MACOSX_FINDER'
+test "$_macosx_finder" = yes && def_macosx_finder='#define CONFIG_MACOSX_FINDER 1'
 echores "$_macosx_finder"
 
 echocheck "Mac OS X Bundle file locations"
-if test "$_macosx_bundle" = auto ; then
-  _macosx_bundle=$_macosx_finder
-fi
-if test "$_macosx_bundle" = yes; then
-  def_macosx_bundle='#define CONFIG_MACOSX_BUNDLE 1'
-else
-  def_macosx_bundle='#undef CONFIG_MACOSX_BUNDLE'
-  _macosx_bundle=no
-fi
+def_macosx_bundle='#undef CONFIG_MACOSX_BUNDLE'
+test "$_macosx_bundle" = auto && _macosx_bundle=$_macosx_finder
+test "$_macosx_bundle" = yes && def_macosx_bundle='#define CONFIG_MACOSX_BUNDLE 1'
 echores "$_macosx_bundle"
 
 echocheck "Apple Remote"
