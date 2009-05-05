@@ -3807,53 +3807,6 @@ echores "$_sys_sysinfo"
 
 if darwin; then
 
-echocheck "Quartz framework"
-if test "$_quartz" = auto ; then
-  cat > $TMPC <<EOF
-#include <Carbon/Carbon.h>
-#include <QuickTime/QuickTime.h>
-int main(void) {
-    EnterMovies();
-    ExitMovies();
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false);
-    return 0;
-}
-EOF
-  _quartz=no
-  cc_check -framework Carbon -framework QuickTime && _quartz=yes
-fi
-if test "$_quartz" = yes ; then
-  libs_mplayer="$libs_mplayer -framework Carbon -framework QuickTime"
-  def_quartz='#define CONFIG_QUARTZ 1'
-  _vomodules="quartz $_vomodules"
-else
-  def_quartz='#undef CONFIG_QUARTZ'
-  _novomodules="quartz $_novomodules"
-fi
-echores $_quartz
-
-echocheck "CoreVideo"
-if test "$_corevideo" = auto ; then
-  cat > $TMPC <<EOF
-#include <Carbon/Carbon.h>
-#include <CoreServices/CoreServices.h>
-#include <OpenGL/OpenGL.h>
-#include <QuartzCore/CoreVideo.h>
-int main(void) { return 0; }
-EOF
-  _corevideo=no
-  cc_check -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
-fi
-if test "$_corevideo" = yes ; then
-  _vomodules="corevideo $_vomodules"
-  libs_mplayer="$libs_mplayer -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL"
-  def_corevideo='#define CONFIG_COREVIDEO 1'
-else
-  _novomodules="corevideo $_novomodules"
-  def_corevideo='#undef CONFIG_COREVIDEO'
-fi
-echores "$_corevideo"
-
 echocheck "Mac OS X Finder Support"
 def_macosx_finder='#undef CONFIG_MACOSX_FINDER'
 test "$_macosx_finder" = yes && def_macosx_finder='#define CONFIG_MACOSX_FINDER 1'
@@ -4834,6 +4787,56 @@ else
 fi
 
 
+if darwin; then
+
+echocheck "Quartz"
+if test "$_quartz" = auto ; then
+  cat > $TMPC <<EOF
+#include <Carbon/Carbon.h>
+#include <QuickTime/QuickTime.h>
+int main(void) {
+    EnterMovies();
+    ExitMovies();
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false);
+    return 0;
+}
+EOF
+  _quartz=no
+  cc_check -framework Carbon -framework QuickTime && _quartz=yes
+fi
+if test "$_quartz" = yes ; then
+  libs_mplayer="$libs_mplayer -framework Carbon -framework QuickTime"
+  def_quartz='#define CONFIG_QUARTZ 1'
+  _vomodules="quartz $_vomodules"
+else
+  def_quartz='#undef CONFIG_QUARTZ'
+  _novomodules="quartz $_novomodules"
+fi
+echores $_quartz
+
+echocheck "CoreVideo"
+if test "$_corevideo" = auto ; then
+  cat > $TMPC <<EOF
+#include <Carbon/Carbon.h>
+#include <CoreServices/CoreServices.h>
+#include <OpenGL/OpenGL.h>
+#include <QuartzCore/CoreVideo.h>
+int main(void) { return 0; }
+EOF
+  _corevideo=no
+  cc_check -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL && _corevideo=yes
+fi
+if test "$_corevideo" = yes ; then
+  _vomodules="corevideo $_vomodules"
+  libs_mplayer="$libs_mplayer -framework Carbon -framework Cocoa -framework QuartzCore -framework OpenGL"
+  def_corevideo='#define CONFIG_COREVIDEO 1'
+else
+  _novomodules="corevideo $_novomodules"
+  def_corevideo='#undef CONFIG_COREVIDEO'
+fi
+echores "$_corevideo"
+
+fi #if darwin
 
 
 echocheck "PNG support"
