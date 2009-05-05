@@ -256,6 +256,7 @@ Optional features:
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-live          enable LIVE555 Streaming Media [autodetect]
   --enable-nemesi        enable Nemesi Streaming Media [autodetect]
+  --disable-vcd          disable VCD support [autodetect]
   --disable-dvdnav       disable libdvdnav [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
   --disable-dvdread-internal  disable internal libdvdread [autodetect]
@@ -622,6 +623,7 @@ _faac_lavc=auto
 _ladspa=auto
 _libbs2b=auto
 _xmms=no
+_vcd=auto
 _dvdnav=auto
 _dvdnavconfig=dvdnav-config
 _dvdreadconfig=dvdread-config
@@ -1024,6 +1026,8 @@ for ac_option do
   --disable-libbs2b)	_libbs2b=no	;;
   --enable-xmms)	_xmms=yes	;;
   --disable-xmms)	_xmms=no	;;
+  --enable-vcd)         _vcd=yes        ;;
+  --disable-vcd)        _vcd=no         ;;
   --enable-dvdread)	_dvdread=yes	;;
   --disable-dvdread)	_dvdread=no	;;
   --enable-dvdread-internal)	_dvdread_internal=yes	;;
@@ -5751,6 +5755,7 @@ fi
 
 
 echocheck "VCD support"
+if test "$_vcd" = auto; then
 _vcd=no
 if linux || freebsd || netbsd || openbsd || dragonfly || bsdos || darwin || sunos; then
   _vcd=yes
@@ -5760,6 +5765,7 @@ elif mingw32; then
 int main(void) { return 0; }
 EOF
   cc_check && _vcd=yes
+fi
 fi
 if test "$_vcd" = yes; then
   _inputmodules="vcd $_inputmodules"
