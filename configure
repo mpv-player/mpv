@@ -3815,7 +3815,7 @@ EOF
   cc_check -framework CoreAudio -framework AudioUnit -framework AudioToolbox && _coreaudio=yes
 fi
 if test "$_coreaudio" = yes ; then
-  extra_ldflags="$extra_ldflags -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
+  libs_mplayer="$libs_mplayer -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
   def_coreaudio='#define CONFIG_COREAUDIO 1'
   _aomodules="coreaudio $_aomodules"
 else
