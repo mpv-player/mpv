@@ -3807,10 +3807,12 @@ echocheck "CoreAudio"
 if test "$_coreaudio" = auto ; then
   cat > $TMPC <<EOF
 #include <CoreAudio/CoreAudio.h>
+#include <AudioToolbox/AudioToolbox.h>
+#include <AudioUnit/AudioUnit.h>
 int main(void) { return 0; }
 EOF
   _coreaudio=no
-  cc_check -framework CoreAudio && _coreaudio=yes
+  cc_check -framework CoreAudio -framework AudioUnit -framework AudioToolbox && _coreaudio=yes
 fi
 if test "$_coreaudio" = yes ; then
   extra_ldflags="$extra_ldflags -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
