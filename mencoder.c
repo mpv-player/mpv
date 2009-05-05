@@ -285,9 +285,7 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
 
 #include "cfg-mencoder.h"
 
-#ifdef CONFIG_DVDREAD
 #include "spudec.h"
-#endif
 #include "vobsub.h"
 
 #include "libao2/audio_out.h"
