@@ -92,49 +92,9 @@ static VdpGetProcAddress                 *vdp_get_proc_address;
 static VdpPresentationQueueTarget         vdp_flip_target;
 static VdpPresentationQueue               vdp_flip_queue;
 
-static VdpDeviceDestroy                  *vdp_device_destroy;
-static VdpVideoSurfaceCreate             *vdp_video_surface_create;
-static VdpVideoSurfaceDestroy            *vdp_video_surface_destroy;
-
-static VdpGetErrorString                 *vdp_get_error_string;
-
-/* May be used in software filtering/postprocessing options
- * in MPlayer (./mplayer -vf ..) if we copy video_surface data to
- * system memory.
- */
-static VdpVideoSurfacePutBitsYCbCr       *vdp_video_surface_put_bits_y_cb_cr;
-static VdpOutputSurfacePutBitsNative     *vdp_output_surface_put_bits_native;
-
-static VdpOutputSurfaceCreate            *vdp_output_surface_create;
-static VdpOutputSurfaceDestroy           *vdp_output_surface_destroy;
-
-/* VideoMixer puts video_surface data on displayable output_surface. */
-static VdpVideoMixerCreate               *vdp_video_mixer_create;
-static VdpVideoMixerDestroy              *vdp_video_mixer_destroy;
-static VdpVideoMixerRender               *vdp_video_mixer_render;
-static VdpVideoMixerSetFeatureEnables    *vdp_video_mixer_set_feature_enables;
-static VdpVideoMixerSetAttributeValues   *vdp_video_mixer_set_attribute_values;
-
-static VdpPresentationQueueTargetDestroy *vdp_presentation_queue_target_destroy;
-static VdpPresentationQueueCreate        *vdp_presentation_queue_create;
-static VdpPresentationQueueDestroy       *vdp_presentation_queue_destroy;
-static VdpPresentationQueueDisplay       *vdp_presentation_queue_display;
-static VdpPresentationQueueBlockUntilSurfaceIdle *vdp_presentation_queue_block_until_surface_idle;
-static VdpPresentationQueueTargetCreateX11       *vdp_presentation_queue_target_create_x11;
-
-static VdpOutputSurfaceRenderOutputSurface       *vdp_output_surface_render_output_surface;
-static VdpOutputSurfacePutBitsIndexed            *vdp_output_surface_put_bits_indexed;
-static VdpOutputSurfaceRenderBitmapSurface       *vdp_output_surface_render_bitmap_surface;
-
-static VdpBitmapSurfaceCreate                    *vdp_bitmap_surface_create;
-static VdpBitmapSurfaceDestroy                   *vdp_bitmap_surface_destroy;
-static VdpBitmapSurfacePutBitsNative             *vdp_bitmap_surface_putbits_native;
-
-static VdpDecoderCreate                          *vdp_decoder_create;
-static VdpDecoderDestroy                         *vdp_decoder_destroy;
-static VdpDecoderRender                          *vdp_decoder_render;
-
-static VdpGenerateCSCMatrix                      *vdp_generate_csc_matrix;
+#define VDP_FUNCTION(vdp_type, _, mp_name) static vdp_type *vdp_##mp_name;
+#include "vdpau_template.c"
+#undef VDP_FUNCTION
 
 static void                              *vdpau_lib_handle;
 /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
@@ -320,48 +280,9 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
     const struct vdp_function *dsc;
 
     static const struct vdp_function vdp_func[] = {
-        {VDP_FUNC_ID_GET_ERROR_STRING,          &vdp_get_error_string},
-        {VDP_FUNC_ID_DEVICE_DESTROY,            &vdp_device_destroy},
-        {VDP_FUNC_ID_VIDEO_SURFACE_CREATE,      &vdp_video_surface_create},
-        {VDP_FUNC_ID_VIDEO_SURFACE_DESTROY,     &vdp_video_surface_destroy},
-        {VDP_FUNC_ID_VIDEO_SURFACE_PUT_BITS_Y_CB_CR,
-                        &vdp_video_surface_put_bits_y_cb_cr},
-        {VDP_FUNC_ID_OUTPUT_SURFACE_PUT_BITS_NATIVE,
-                        &vdp_output_surface_put_bits_native},
-        {VDP_FUNC_ID_OUTPUT_SURFACE_CREATE,     &vdp_output_surface_create},
-        {VDP_FUNC_ID_OUTPUT_SURFACE_DESTROY,    &vdp_output_surface_destroy},
-        {VDP_FUNC_ID_VIDEO_MIXER_CREATE, &vdp_video_mixer_create},
-        {VDP_FUNC_ID_VIDEO_MIXER_DESTROY,       &vdp_video_mixer_destroy},
-        {VDP_FUNC_ID_VIDEO_MIXER_RENDER,        &vdp_video_mixer_render},
-        {VDP_FUNC_ID_VIDEO_MIXER_SET_FEATURE_ENABLES,
-                        &vdp_video_mixer_set_feature_enables},
-        {VDP_FUNC_ID_VIDEO_MIXER_SET_ATTRIBUTE_VALUES,
-                        &vdp_video_mixer_set_attribute_values},
-        {VDP_FUNC_ID_PRESENTATION_QUEUE_TARGET_DESTROY,
-                        &vdp_presentation_queue_target_destroy},
-        {VDP_FUNC_ID_PRESENTATION_QUEUE_CREATE, &vdp_presentation_queue_create},
-        {VDP_FUNC_ID_PRESENTATION_QUEUE_DESTROY,
-                        &vdp_presentation_queue_destroy},
-        {VDP_FUNC_ID_PRESENTATION_QUEUE_DISPLAY,
-                        &vdp_presentation_queue_display},
-        {VDP_FUNC_ID_PRESENTATION_QUEUE_BLOCK_UNTIL_SURFACE_IDLE,
-                        &vdp_presentation_queue_block_until_surface_idle},
-        {VDP_FUNC_ID_PRESENTATION_QUEUE_TARGET_CREATE_X11,
-                        &vdp_presentation_queue_target_create_x11},
-        {VDP_FUNC_ID_OUTPUT_SURFACE_RENDER_OUTPUT_SURFACE,
-                        &vdp_output_surface_render_output_surface},
-        {VDP_FUNC_ID_OUTPUT_SURFACE_PUT_BITS_INDEXED,
-                        &vdp_output_surface_put_bits_indexed},
-        {VDP_FUNC_ID_DECODER_CREATE,            &vdp_decoder_create},
-        {VDP_FUNC_ID_DECODER_RENDER,            &vdp_decoder_render},
-        {VDP_FUNC_ID_DECODER_DESTROY,           &vdp_decoder_destroy},
-        {VDP_FUNC_ID_BITMAP_SURFACE_CREATE,     &vdp_bitmap_surface_create},
-        {VDP_FUNC_ID_BITMAP_SURFACE_DESTROY,    &vdp_bitmap_surface_destroy},
-        {VDP_FUNC_ID_BITMAP_SURFACE_PUT_BITS_NATIVE,
-                        &vdp_bitmap_surface_putbits_native},
-        {VDP_FUNC_ID_OUTPUT_SURFACE_RENDER_BITMAP_SURFACE,
-                        &vdp_output_surface_render_bitmap_surface},
-        {VDP_FUNC_ID_GENERATE_CSC_MATRIX,       &vdp_generate_csc_matrix},
+#define VDP_FUNCTION(_, macro_name, mp_name) {macro_name, &vdp_##mp_name},
+#include "vdpau_template.c"
+#undef VDP_FUNCTION
         {0, NULL}
     };
 
@@ -796,7 +717,7 @@ static void generate_eosd(mp_eosd_images_t *imgs) {
         destRect.y0 = 0;
         destRect.x1 = i->w;
         destRect.y1 = i->h;
-        vdp_st = vdp_bitmap_surface_putbits_native(eosd_targets[eosd_render_count].surface,
+        vdp_st = vdp_bitmap_surface_put_bits_native(eosd_targets[eosd_render_count].surface,
             (const void *) &i->bitmap, &i->stride, &destRect);
         CHECK_ST_WARNING("EOSD: putbits failed")
         eosd_render_count++;
