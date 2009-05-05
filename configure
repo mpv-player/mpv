@@ -3807,28 +3807,6 @@ echores "$_sys_sysinfo"
 
 if darwin; then
 
-echocheck "CoreAudio"
-if test "$_coreaudio" = auto ; then
-  cat > $TMPC <<EOF
-#include <CoreAudio/CoreAudio.h>
-#include <AudioToolbox/AudioToolbox.h>
-#include <AudioUnit/AudioUnit.h>
-int main(void) { return 0; }
-EOF
-  _coreaudio=no
-  cc_check -framework CoreAudio -framework AudioUnit -framework AudioToolbox && _coreaudio=yes
-fi
-if test "$_coreaudio" = yes ; then
-  libs_mplayer="$libs_mplayer -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
-  def_coreaudio='#define CONFIG_COREAUDIO 1'
-  _aomodules="coreaudio $_aomodules"
-else
-  def_coreaudio='#undef CONFIG_COREAUDIO'
-  _noaomodules="coreaudio $_noaomodules"
-fi
-echores $_coreaudio
-
-
 echocheck "Quartz framework"
 if test "$_quartz" = auto ; then
   cat > $TMPC <<EOF
@@ -5678,6 +5656,30 @@ EOF
 fi
 echores "$_mlib"
 fi #if sunos
+
+
+if darwin; then
+echocheck "CoreAudio"
+if test "$_coreaudio" = auto ; then
+  cat > $TMPC <<EOF
+#include <CoreAudio/CoreAudio.h>
+#include <AudioToolbox/AudioToolbox.h>
+#include <AudioUnit/AudioUnit.h>
+int main(void) { return 0; }
+EOF
+  _coreaudio=no
+  cc_check -framework CoreAudio -framework AudioUnit -framework AudioToolbox && _coreaudio=yes
+fi
+if test "$_coreaudio" = yes ; then
+  libs_mplayer="$libs_mplayer -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
+  def_coreaudio='#define CONFIG_COREAUDIO 1'
+  _aomodules="coreaudio $_aomodules"
+else
+  def_coreaudio='#undef CONFIG_COREAUDIO'
+  _noaomodules="coreaudio $_noaomodules"
+fi
+echores $_coreaudio
+fi #if darwin
 
 
 if irix; then
