@@ -1227,7 +1227,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
 const struct vo_driver video_out_vdpau = {
     .is_new = 1,
-    .info = &(struct vo_info_s){
+    .info = &(const struct vo_info_s){
         "VDPAU with X11",
         "vdpau",
         "Rajib Mahapatra <rmahapatra@nvidia.com> and others",
