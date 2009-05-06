@@ -91,56 +91,54 @@ struct vdp_functions {
 
 struct vdpctx {
     struct vdp_functions *vdp;
+
+    VdpDevice                          vdp_device;
+    VdpDeviceCreateX11                *vdp_device_create;
+    VdpGetProcAddress                 *vdp_get_proc_address;
+
+    VdpPresentationQueueTarget         flip_target;
+    VdpPresentationQueue               flip_queue;
+
+    void                              *vdpau_lib_handle;
+
+    /* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
+#define osd_surface vc->output_surfaces[NUM_OUTPUT_SURFACES]
+    VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
+    VdpVideoSurface                    deint_surfaces[3];
+    mp_image_t                        *deint_mpi[2];
+    int                                output_surface_width, output_surface_height;
+
+    VdpVideoMixer                      video_mixer;
+    int                                deint;
+    int                                deint_type;
+    int                                deint_counter;
+    int                                deint_buffer_past_frames;
+    int                                pullup;
+    float                              denoise;
+    float                              sharpen;
+    int                                chroma_deint;
+    int                                top_field_first;
+
+    VdpDecoder                         decoder;
+    int                                decoder_max_refs;
+
+    VdpRect                            src_rect_vid;
+    VdpRect                            out_rect_vid;
+    int                                border_x, border_y;
+
+    struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
+    int                                surface_num;
+    int                                vid_surface_num;
+    uint32_t                           vid_width, vid_height;
+    uint32_t                           image_format;
+    VdpChromaType                      vdp_chroma_type;
+    VdpYCbCrFormat                     vdp_pixel_format;
+
+    /* draw_osd */
+    unsigned char                     *index_data;
+    int                                index_data_size;
+    uint32_t                           palette[PALETTE_SIZE];
 };
-
-/* Declaration for all variables of win_x11_init_vdpau_procs() and
- * win_x11_init_vdpau_flip_queue() functions
- */
-static VdpDevice                          vdp_device;
-static VdpDeviceCreateX11                *vdp_device_create;
-static VdpGetProcAddress                 *vdp_get_proc_address;
-
-static VdpPresentationQueueTarget         vdp_flip_target;
-static VdpPresentationQueue               vdp_flip_queue;
-
-static void                              *vdpau_lib_handle;
-/* output_surfaces[NUM_OUTPUT_SURFACES] is misused for OSD. */
-#define osd_surface output_surfaces[NUM_OUTPUT_SURFACES]
-static VdpOutputSurface                   output_surfaces[NUM_OUTPUT_SURFACES + 1];
-static VdpVideoSurface                    deint_surfaces[3];
-static mp_image_t                        *deint_mpi[2];
-static int                                output_surface_width, output_surface_height;
-
-static VdpVideoMixer                      video_mixer;
-static int                                deint;
-static int                                deint_type;
-static int                                deint_counter;
-static int                                deint_buffer_past_frames;
-static int                                pullup;
-static float                              denoise;
-static float                              sharpen;
-static int                                chroma_deint;
-static int                                top_field_first;
-
-static VdpDecoder                         decoder;
-static int                                decoder_max_refs;
-
-static VdpRect                            src_rect_vid;
-static VdpRect                            out_rect_vid;
-static int                                border_x, border_y;
-
-static struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
-static int                                surface_num;
-static int                                vid_surface_num;
-static uint32_t                           vid_width, vid_height;
-static uint32_t                           image_format;
-static VdpChromaType                      vdp_chroma_type;
-static VdpYCbCrFormat                     vdp_pixel_format;
-
-/* draw_osd */
-static unsigned char                     *index_data;
-static int                                index_data_size;
-static uint32_t                           palette[PALETTE_SIZE];
 
 // EOSD
 // Pool of surfaces
@@ -171,11 +169,12 @@ static VdpProcamp procamp;
 static int                                visible_buf;
 static int                                int_pause;
 
-static void push_deint_surface(VdpVideoSurface surface)
+static void push_deint_surface(struct vo *vo, VdpVideoSurface surface)
 {
-    deint_surfaces[2] = deint_surfaces[1];
-    deint_surfaces[1] = deint_surfaces[0];
-    deint_surfaces[0] = surface;
+    struct vdpctx *vc = vo->priv;
+    vc->deint_surfaces[2] = vc->deint_surfaces[1];
+    vc->deint_surfaces[1] = vc->deint_surfaces[0];
+    vc->deint_surfaces[0] = surface;
 }
 
 static void flip_page(struct vo *vo);
@@ -186,13 +185,13 @@ static void video_to_output_surface(struct vo *vo)
     VdpTime dummy;
     VdpStatus vdp_st;
     int i;
-    if (vid_surface_num < 0)
+    if (vc->vid_surface_num < 0)
         return;
 
-    if (deint < 2 || deint_surfaces[0] == VDP_INVALID_HANDLE)
-        push_deint_surface(surface_render[vid_surface_num].surface);
+    if (vc->deint < 2 || vc->deint_surfaces[0] == VDP_INVALID_HANDLE)
+        push_deint_surface(vo, vc->surface_render[vc->vid_surface_num].surface);
 
-    for (i = 0; i <= !!(deint > 1); i++) {
+    for (i = 0; i <= !!(vc->deint > 1); i++) {
         int field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
         VdpOutputSurface output_surface;
         if (i) {
@@ -200,25 +199,25 @@ static void video_to_output_surface(struct vo *vo)
             //draw_osd(vo, NULL);
             flip_page(vo);
         }
-        if (deint)
-            field = (top_field_first == i) ^ (deint > 1) ?
+        if (vc->deint)
+            field = (vc->top_field_first == i) ^ (vc->deint > 1) ?
                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
                     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;
-        output_surface = output_surfaces[surface_num];
-        vdp_st = vdp->presentation_queue_block_until_surface_idle(vdp_flip_queue,
+        output_surface = vc->output_surfaces[vc->surface_num];
+        vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
                                                                  output_surface,
                                                                  &dummy);
         CHECK_ST_WARNING("Error when calling vdp->presentation_queue_block_until_surface_idle")
 
-        vdp_st = vdp->video_mixer_render(video_mixer, VDP_INVALID_HANDLE, 0,
-                                        field, 2, deint_surfaces + 1,
-                                        deint_surfaces[0],
-                                        1, &surface_render[vid_surface_num].surface,
-                                        &src_rect_vid,
+        vdp_st = vdp->video_mixer_render(vc->video_mixer, VDP_INVALID_HANDLE, 0,
+                                        field, 2, vc->deint_surfaces + 1,
+                                        vc->deint_surfaces[0],
+                                        1, &vc->surface_render[vc->vid_surface_num].surface,
+                                        &vc->src_rect_vid,
                                         output_surface,
-                                        NULL, &out_rect_vid, 0, NULL);
+                                        NULL, &vc->out_rect_vid, 0, NULL);
         CHECK_ST_WARNING("Error when calling vdp_video_mixer_render")
-        push_deint_surface(surface_render[vid_surface_num].surface);
+        push_deint_surface(vo, vc->surface_render[vc->vid_surface_num].surface);
     }
 }
 
@@ -231,42 +230,42 @@ static void resize(struct vo *vo)
     struct vo_rect src_rect;
     struct vo_rect dst_rect;
     struct vo_rect borders;
-    calc_src_dst_rects(vo, vid_width, vid_height, &src_rect, &dst_rect,
+    calc_src_dst_rects(vo, vc->vid_width, vc->vid_height, &src_rect, &dst_rect,
                        &borders, NULL);
-    out_rect_vid.x0 = dst_rect.left;
-    out_rect_vid.x1 = dst_rect.right;
-    out_rect_vid.y0 = dst_rect.top;
-    out_rect_vid.y1 = dst_rect.bottom;
-    src_rect_vid.x0 = src_rect.left;
-    src_rect_vid.x1 = src_rect.right;
-    src_rect_vid.y0 = src_rect.top;
-    src_rect_vid.y1 = src_rect.bottom;
-    border_x        = borders.left;
-    border_y        = borders.top;
+    vc->out_rect_vid.x0 = dst_rect.left;
+    vc->out_rect_vid.x1 = dst_rect.right;
+    vc->out_rect_vid.y0 = dst_rect.top;
+    vc->out_rect_vid.y1 = dst_rect.bottom;
+    vc->src_rect_vid.x0 = src_rect.left;
+    vc->src_rect_vid.x1 = src_rect.right;
+    vc->src_rect_vid.y0 = src_rect.top;
+    vc->src_rect_vid.y1 = src_rect.bottom;
+    vc->border_x        = borders.left;
+    vc->border_y        = borders.top;
 #ifdef CONFIG_FREETYPE
     // adjust font size to display size
     force_load_font = 1;
 #endif
     vo_osd_changed(OSDTYPE_OSD);
 
-    if (output_surface_width < vo->dwidth || output_surface_height < vo->dheight) {
-        if (output_surface_width < vo->dwidth) {
-            output_surface_width += output_surface_width >> 1;
-            output_surface_width = FFMAX(output_surface_width, vo->dwidth);
+    if (vc->output_surface_width < vo->dwidth || vc->output_surface_height < vo->dheight) {
+        if (vc->output_surface_width < vo->dwidth) {
+            vc->output_surface_width += vc->output_surface_width >> 1;
+            vc->output_surface_width = FFMAX(vc->output_surface_width, vo->dwidth);
         }
-        if (output_surface_height < vo->dheight) {
-            output_surface_height += output_surface_height >> 1;
-            output_surface_height = FFMAX(output_surface_height, vo->dheight);
+        if (vc->output_surface_height < vo->dheight) {
+            vc->output_surface_height += vc->output_surface_height >> 1;
+            vc->output_surface_height = FFMAX(vc->output_surface_height, vo->dheight);
         }
         // Creation of output_surfaces
         for (i = 0; i <= NUM_OUTPUT_SURFACES; i++) {
-            if (output_surfaces[i] != VDP_INVALID_HANDLE)
-                vdp->output_surface_destroy(output_surfaces[i]);
-            vdp_st = vdp->output_surface_create(vdp_device, VDP_RGBA_FORMAT_B8G8R8A8,
-                                               output_surface_width, output_surface_height,
-                                               &output_surfaces[i]);
+            if (vc->output_surfaces[i] != VDP_INVALID_HANDLE)
+                vdp->output_surface_destroy(vc->output_surfaces[i]);
+            vdp_st = vdp->output_surface_create(vc->vdp_device, VDP_RGBA_FORMAT_B8G8R8A8,
+                                               vc->output_surface_width, vc->output_surface_height,
+                                               &vc->output_surfaces[i]);
             CHECK_ST_WARNING("Error when calling vdp->output_surface_create")
-            mp_msg(MSGT_VO, MSGL_DBG2, "OUT CREATE: %u\n", output_surfaces[i]);
+            mp_msg(MSGT_VO, MSGL_DBG2, "OUT CREATE: %u\n", vc->output_surfaces[i]);
         }
     }
     video_to_output_surface(vo);
@@ -297,8 +296,8 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
         {0, -1}
     };
 
-    vdp_st = vdp_device_create(x11->display, x11->screen,
-                               &vdp_device, &vdp_get_proc_address);
+    vdp_st = vc->vdp_device_create(x11->display, x11->screen,
+                               &vc->vdp_device, &vc->vdp_get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling vdp_device_create_x11: %i\n", vdp_st);
         return -1;
@@ -306,7 +305,7 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
 
     vdp->get_error_string = NULL;
     for (dsc = vdp_func; dsc->offset >= 0; dsc++) {
-        vdp_st = vdp_get_proc_address(vdp_device, dsc->id,
+        vdp_st = vc->vdp_get_proc_address(vc->vdp_device, dsc->id,
                                       (void **)((char *)vdp + dsc->offset));
         if (vdp_st != VDP_STATUS_OK) {
             mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling vdp_get_proc_address(function id %d): %s\n", dsc->id, vdp->get_error_string ? vdp->get_error_string(vdp_st) : "?");
@@ -324,12 +323,12 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     VdpStatus vdp_st;
 
-    vdp_st = vdp->presentation_queue_target_create_x11(vdp_device, x11->window,
-                                                      &vdp_flip_target);
+    vdp_st = vdp->presentation_queue_target_create_x11(vc->vdp_device, x11->window,
+                                                      &vc->flip_target);
     CHECK_ST_ERROR("Error when calling vdp->presentation_queue_target_create_x11")
 
-    vdp_st = vdp->presentation_queue_create(vdp_device, vdp_flip_target,
-                                           &vdp_flip_queue);
+    vdp_st = vdp->presentation_queue_create(vc->vdp_device, vc->flip_target,
+                                           &vc->flip_queue);
     CHECK_ST_ERROR("Error when calling vdp->presentation_queue_create")
 
     return 0;
@@ -347,9 +346,9 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
     VdpVideoMixerFeature features[MAX_NUM_FEATURES];
     VdpBool feature_enables[MAX_NUM_FEATURES];
     static const VdpVideoMixerAttribute denoise_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL};
-    const void * const denoise_value[] = {&denoise};
+    const void * const denoise_value[] = {&vc->denoise};
     static const VdpVideoMixerAttribute sharpen_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL};
-    const void * const sharpen_value[] = {&sharpen};
+    const void * const sharpen_value[] = {&vc->sharpen};
     static const VdpVideoMixerAttribute skip_chroma_attrib[] = {VDP_VIDEO_MIXER_ATTRIBUTE_SKIP_CHROMA_DEINTERLACE};
     const uint8_t skip_chroma_value = 1;
     const void * const skip_chroma_value_ptr[] = {&skip_chroma_value};
@@ -359,37 +358,37 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
         VDP_VIDEO_MIXER_PARAMETER_CHROMA_TYPE
     };
     const void *const parameter_values[VDP_NUM_MIXER_PARAMETER] = {
-        &vid_width,
-        &vid_height,
+        &vc->vid_width,
+        &vc->vid_height,
         &vdp_chroma_type
     };
     features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
-    if (deint == 4)
+    if (vc->deint == 4)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL;
-    if (pullup)
+    if (vc->pullup)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_INVERSE_TELECINE;
-    if (denoise)
+    if (vc->denoise)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_NOISE_REDUCTION;
-    if (sharpen)
+    if (vc->sharpen)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_SHARPNESS;
 
-    vdp_st = vdp->video_mixer_create(vdp_device, feature_count, features,
+    vdp_st = vdp->video_mixer_create(vc->vdp_device, feature_count, features,
                                     VDP_NUM_MIXER_PARAMETER,
                                     parameters, parameter_values,
-                                    &video_mixer);
+                                    &vc->video_mixer);
     CHECK_ST_ERROR("Error when calling vdp_video_mixer_create")
 
     for (i = 0; i < feature_count; i++) feature_enables[i] = VDP_TRUE;
-    if (deint < 3)
+    if (vc->deint < 3)
         feature_enables[0] = VDP_FALSE;
     if (feature_count)
-        vdp->video_mixer_set_feature_enables(video_mixer, feature_count, features, feature_enables);
-    if (denoise)
-        vdp->video_mixer_set_attribute_values(video_mixer, 1, denoise_attrib, denoise_value);
-    if (sharpen)
-        vdp->video_mixer_set_attribute_values(video_mixer, 1, sharpen_attrib, sharpen_value);
-    if (!chroma_deint)
-        vdp->video_mixer_set_attribute_values(video_mixer, 1, skip_chroma_attrib, skip_chroma_value_ptr);
+        vdp->video_mixer_set_feature_enables(vc->video_mixer, feature_count, features, feature_enables);
+    if (vc->denoise)
+        vdp->video_mixer_set_attribute_values(vc->video_mixer, 1, denoise_attrib, denoise_value);
+    if (vc->sharpen)
+        vdp->video_mixer_set_attribute_values(vc->video_mixer, 1, sharpen_attrib, sharpen_value);
+    if (!vc->chroma_deint)
+        vdp->video_mixer_set_attribute_values(vc->video_mixer, 1, skip_chroma_attrib, skip_chroma_value_ptr);
 
     return 0;
 }
@@ -402,33 +401,33 @@ static void free_video_specific(struct vo *vo)
     int i;
     VdpStatus vdp_st;
 
-    if (decoder != VDP_INVALID_HANDLE)
-        vdp->decoder_destroy(decoder);
-    decoder = VDP_INVALID_HANDLE;
-    decoder_max_refs = -1;
+    if (vc->decoder != VDP_INVALID_HANDLE)
+        vdp->decoder_destroy(vc->decoder);
+    vc->decoder = VDP_INVALID_HANDLE;
+    vc->decoder_max_refs = -1;
 
     for (i = 0; i < 3; i++)
-        deint_surfaces[i] = VDP_INVALID_HANDLE;
+        vc->deint_surfaces[i] = VDP_INVALID_HANDLE;
 
     for (i = 0; i < 2; i++)
-        if (deint_mpi[i]) {
-            deint_mpi[i]->usage_count--;
-            deint_mpi[i] = NULL;
+        if (vc->deint_mpi[i]) {
+            vc->deint_mpi[i]->usage_count--;
+            vc->deint_mpi[i] = NULL;
         }
 
     for (i = 0; i < MAX_VIDEO_SURFACES; i++) {
-        if (surface_render[i].surface != VDP_INVALID_HANDLE) {
-          vdp_st = vdp->video_surface_destroy(surface_render[i].surface);
+        if (vc->surface_render[i].surface != VDP_INVALID_HANDLE) {
+          vdp_st = vdp->video_surface_destroy(vc->surface_render[i].surface);
           CHECK_ST_WARNING("Error when calling vdp_video_surface_destroy")
         }
-        surface_render[i].surface = VDP_INVALID_HANDLE;
+        vc->surface_render[i].surface = VDP_INVALID_HANDLE;
     }
 
-    if (video_mixer != VDP_INVALID_HANDLE) {
-        vdp_st = vdp->video_mixer_destroy(video_mixer);
+    if (vc->video_mixer != VDP_INVALID_HANDLE) {
+        vdp_st = vdp->video_mixer_destroy(vc->video_mixer);
         CHECK_ST_WARNING("Error when calling vdp_video_mixer_destroy")
     }
-    video_mixer = VDP_INVALID_HANDLE;
+    vc->video_mixer = VDP_INVALID_HANDLE;
 }
 
 static int create_vdp_decoder(struct vo *vo, int max_refs)
@@ -437,9 +436,9 @@ static int create_vdp_decoder(struct vo *vo, int max_refs)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
     VdpDecoderProfile vdp_decoder_profile;
-    if (decoder != VDP_INVALID_HANDLE)
-        vdp->decoder_destroy(decoder);
-    switch (image_format) {
+    if (vc->decoder != VDP_INVALID_HANDLE)
+        vdp->decoder_destroy(vc->decoder);
+    switch (vc->image_format) {
         case IMGFMT_VDPAU_MPEG1:
             vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG1;
             break;
@@ -457,15 +456,15 @@ static int create_vdp_decoder(struct vo *vo, int max_refs)
             vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
             break;
     }
-    vdp_st = vdp->decoder_create(vdp_device, vdp_decoder_profile,
-                                vid_width, vid_height, max_refs, &decoder);
+    vdp_st = vdp->decoder_create(vc->vdp_device, vdp_decoder_profile,
+                                vc->vid_width, vc->vid_height, max_refs, &vc->decoder);
     CHECK_ST_WARNING("Failed creating VDPAU decoder");
     if (vdp_st != VDP_STATUS_OK) {
-        decoder = VDP_INVALID_HANDLE;
-        decoder_max_refs = 0;
+        vc->decoder = VDP_INVALID_HANDLE;
+        vc->decoder_max_refs = 0;
         return 0;
     }
-    decoder_max_refs = max_refs;
+    vc->decoder_max_refs = max_refs;
     return 1;
 }
 
@@ -477,6 +476,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height, uint32_t flags,
                   char *title, uint32_t format)
 {
+    struct vdpctx *vc = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
     XVisualInfo vinfo;
     XSetWindowAttributes xswa;
@@ -488,11 +488,11 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     int vm = flags & VOFLAG_MODESWITCHING;
 #endif
 
-    image_format = format;
-    vid_width    = width;
-    vid_height   = height;
+    vc->image_format = format;
+    vc->vid_width    = width;
+    vc->vid_height   = height;
     free_video_specific(vo);
-    if (IMGFMT_IS_VDPAU(image_format) && !create_vdp_decoder(vo, 2))
+    if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
         return -1;
 
     visible_buf = 0;
@@ -536,33 +536,33 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         vo_fs = 1;
 
     /* -----VDPAU related code here -------- */
-    if (vdp_flip_queue == VDP_INVALID_HANDLE
+    if (vc->flip_queue == VDP_INVALID_HANDLE
         && win_x11_init_vdpau_flip_queue(vo))
         return -1;
 
-    vdp_chroma_type = VDP_CHROMA_TYPE_420;
-    switch (image_format) {
+    vc->vdp_chroma_type = VDP_CHROMA_TYPE_420;
+    switch (vc->image_format) {
         case IMGFMT_YV12:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
-            vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
+            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
             break;
         case IMGFMT_NV12:
-            vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
+            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
             break;
         case IMGFMT_YUY2:
-            vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
-            vdp_chroma_type  = VDP_CHROMA_TYPE_422;
+            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
+            vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
             break;
         case IMGFMT_UYVY:
-            vdp_pixel_format = VDP_YCBCR_FORMAT_UYVY;
-            vdp_chroma_type  = VDP_CHROMA_TYPE_422;
+            vc->vdp_pixel_format = VDP_YCBCR_FORMAT_UYVY;
+            vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
     }
-    if (create_vdp_mixer(vo, vdp_chroma_type))
+    if (create_vdp_mixer(vo, vc->vdp_chroma_type))
         return -1;
 
-    surface_num = 0;
-    vid_surface_num = -1;
+    vc->surface_num = 0;
+    vc->vid_surface_num = -1;
     resize(vo);
 
     return 0;
@@ -583,8 +583,8 @@ static void check_events(struct vo *vo)
         if (visible_buf) {
             /* redraw the last visible buffer */
             VdpStatus vdp_st;
-            vdp_st = vdp->presentation_queue_display(vdp_flip_queue,
-                                                    output_surfaces[surface_num],
+            vdp_st = vdp->presentation_queue_display(vc->flip_queue,
+                                                    vc->output_surfaces[vc->surface_num],
                                                     vo->dwidth, vo->dheight,
                                                     0);
             CHECK_ST_WARNING("Error when calling vdp->presentation_queue_display")
@@ -598,7 +598,7 @@ static void draw_osd_I8A8(void *ctx, int x0, int y0, int w, int h,
     struct vo *vo = ctx;
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
-    VdpOutputSurface output_surface = output_surfaces[surface_num];
+    VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
     VdpStatus vdp_st;
     int i, j;
     int pitch;
@@ -610,16 +610,16 @@ static void draw_osd_I8A8(void *ctx, int x0, int y0, int w, int h,
         return;
 
     index_data_size_required = 2*w*h;
-    if (index_data_size < index_data_size_required) {
-        index_data      = realloc(index_data, index_data_size_required);
-        index_data_size = index_data_size_required;
+    if (vc->index_data_size < index_data_size_required) {
+        vc->index_data      = realloc(vc->index_data, index_data_size_required);
+        vc->index_data_size = index_data_size_required;
     }
 
     // index_data creation, component order - I, A, I, A, .....
     for (i = 0; i < h; i++)
         for (j = 0; j < w; j++) {
-            index_data[i*2*w + j*2]     =  src [i*stride+j];
-            index_data[i*2*w + j*2 + 1] = -srca[i*stride+j];
+            vc->index_data[i*2*w + j*2]     =  src [i*stride+j];
+            vc->index_data[i*2*w + j*2 + 1] = -srca[i*stride+j];
         }
 
     output_indexed_rect_vid.x0 = x0;
@@ -632,11 +632,11 @@ static void draw_osd_I8A8(void *ctx, int x0, int y0, int w, int h,
     // write source_data to osd_surface.
     vdp_st = vdp->output_surface_put_bits_indexed(osd_surface,
                                                  VDP_INDEXED_FORMAT_I8A8,
-                                                 (const void *const*)&index_data,
+                                                 (const void *const*)&vc->index_data,
                                                  &pitch,
                                                  &output_indexed_rect_vid,
                                                  VDP_COLOR_TABLE_FORMAT_B8G8R8X8,
-                                                 (void *)palette);
+                                                 (void *)vc->palette);
     CHECK_ST_WARNING("Error when calling vdp->output_surface_put_bits_indexed")
 
     blend_state.struct_version                 = VDP_OUTPUT_SURFACE_RENDER_BLEND_STATE_VERSION;
@@ -662,7 +662,7 @@ static void draw_eosd(struct vo *vo)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
-    VdpOutputSurface output_surface = output_surfaces[surface_num];
+    VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
     VdpOutputSurfaceRenderBlendState blend_state;
     int i;
 
@@ -739,7 +739,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
                     eosd_surfaces[j].in_use = 0;
                 }
             }
-            vdp_st = vdp->bitmap_surface_create(vdp_device, VDP_RGBA_FORMAT_A8,
+            vdp_st = vdp->bitmap_surface_create(vc->vdp_device, VDP_RGBA_FORMAT_A8,
                 i->w, i->h, VDP_TRUE, &eosd_surfaces[found].surface);
             CHECK_ST_WARNING("EOSD: error when creating surface")
             eosd_surfaces[found].w = i->w;
@@ -779,10 +779,11 @@ eosd_skip_upload:
 
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
+    struct vdpctx *vc = vo->priv;
     mp_msg(MSGT_VO, MSGL_DBG2, "DRAW_OSD\n");
 
-    osd_draw_text_ext(osd, vo->dwidth, vo->dheight, border_x, border_y,
-                      border_x, border_y, vid_width, vid_height,
+    osd_draw_text_ext(osd, vo->dwidth, vo->dheight, vc->border_x, vc->border_y,
+                      vc->border_x, vc->border_y, vc->vid_width, vc->vid_height,
                       draw_osd_I8A8, vo);
 }
 
@@ -792,14 +793,14 @@ static void flip_page(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
     mp_msg(MSGT_VO, MSGL_DBG2, "\nFLIP_PAGE VID:%u -> OUT:%u\n",
-           surface_render[vid_surface_num].surface, output_surfaces[surface_num]);
+           vc->surface_render[vc->vid_surface_num].surface, vc->output_surfaces[vc->surface_num]);
 
-    vdp_st = vdp->presentation_queue_display(vdp_flip_queue, output_surfaces[surface_num],
+    vdp_st = vdp->presentation_queue_display(vc->flip_queue, vc->output_surfaces[vc->surface_num],
                                             vo->dwidth, vo->dheight,
                                             0);
     CHECK_ST_WARNING("Error when calling vdp->presentation_queue_display")
 
-    surface_num = (surface_num + 1) % NUM_OUTPUT_SURFACES;
+    vc->surface_num = (vc->surface_num + 1) % NUM_OUTPUT_SURFACES;
     visible_buf = 1;
 }
 
@@ -810,14 +811,14 @@ static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
     struct vdpau_render_state *rndr = (struct vdpau_render_state *)image[0];
-    int max_refs = image_format == IMGFMT_VDPAU_H264 ? rndr->info.h264.num_ref_frames : 2;
-    if (!IMGFMT_IS_VDPAU(image_format))
+    int max_refs = vc->image_format == IMGFMT_VDPAU_H264 ? rndr->info.h264.num_ref_frames : 2;
+    if (!IMGFMT_IS_VDPAU(vc->image_format))
         return VO_FALSE;
-    if ((decoder == VDP_INVALID_HANDLE || decoder_max_refs < max_refs)
+    if ((vc->decoder == VDP_INVALID_HANDLE || vc->decoder_max_refs < max_refs)
         && !create_vdp_decoder(vo, max_refs))
         return VO_FALSE;
     
-    vdp_st = vdp->decoder_render(decoder, rndr->surface, (void *)&rndr->info, rndr->bitstream_buffers_used, rndr->bitstream_buffers);
+    vdp_st = vdp->decoder_render(vc->decoder, rndr->surface, (void *)&rndr->info, rndr->bitstream_buffers_used, rndr->bitstream_buffers);
     CHECK_ST_WARNING("Failed VDPAU decoder rendering");
     return VO_TRUE;
 }
@@ -835,17 +836,17 @@ static struct vdpau_render_state *get_surface(struct vo *vo, int number)
 
     if (number > MAX_VIDEO_SURFACES)
         return NULL;
-    if (surface_render[number].surface == VDP_INVALID_HANDLE) {
+    if (vc->surface_render[number].surface == VDP_INVALID_HANDLE) {
         VdpStatus vdp_st;
-        vdp_st = vdp->video_surface_create(vdp_device, vdp_chroma_type,
-                                          vid_width, vid_height,
-                                          &surface_render[number].surface);
+        vdp_st = vdp->video_surface_create(vc->vdp_device, vc->vdp_chroma_type,
+                                          vc->vid_width, vc->vid_height,
+                                          &vc->surface_render[number].surface);
         CHECK_ST_WARNING("Error when calling vdp_video_surface_create")
         if (vdp_st != VDP_STATUS_OK)
             return NULL;
     }
-    mp_msg(MSGT_VO, MSGL_DBG2, "VID CREATE: %u\n", surface_render[number].surface);
-    return &surface_render[number];
+    mp_msg(MSGT_VO, MSGL_DBG2, "VID CREATE: %u\n", vc->surface_render[number].surface);
+    return &vc->surface_render[number];
 }
 
 static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
@@ -853,34 +854,34 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
 
-    if (IMGFMT_IS_VDPAU(image_format)) {
+    if (IMGFMT_IS_VDPAU(vc->image_format)) {
         struct vdpau_render_state *rndr = mpi->priv;
-        vid_surface_num = rndr - surface_render;
-        if (deint_buffer_past_frames) {
+        vc->vid_surface_num = rndr - vc->surface_render;
+        if (vc->deint_buffer_past_frames) {
             mpi->usage_count++;
-            if (deint_mpi[1])
-                deint_mpi[1]->usage_count--;
-            deint_mpi[1] = deint_mpi[0];
-            deint_mpi[0] = mpi;
+            if (vc->deint_mpi[1])
+                vc->deint_mpi[1]->usage_count--;
+            vc->deint_mpi[1] = vc->deint_mpi[0];
+            vc->deint_mpi[0] = mpi;
         }
     } else if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)) {
         VdpStatus vdp_st;
         void *destdata[3] = {mpi->planes[0], mpi->planes[2], mpi->planes[1]};
-        struct vdpau_render_state *rndr = get_surface(vo, deint_counter);
-        deint_counter = (deint_counter + 1) % 3;
-        vid_surface_num = rndr - surface_render;
-        if (image_format == IMGFMT_NV12)
+        struct vdpau_render_state *rndr = get_surface(vo, vc->deint_counter);
+        vc->deint_counter = (vc->deint_counter + 1) % 3;
+        vc->vid_surface_num = rndr - vc->surface_render;
+        if (vc->image_format == IMGFMT_NV12)
             destdata[1] = destdata[2];
         vdp_st = vdp->video_surface_put_bits_y_cb_cr(rndr->surface,
-                                                    vdp_pixel_format,
+                                                    vc->vdp_pixel_format,
                                                     (const void *const*)destdata,
                                                     mpi->stride); // pitch
         CHECK_ST_ERROR("Error when calling vdp_video_surface_put_bits_y_cb_cr")
     }
     if (mpi->fields & MP_IMGFIELD_ORDERED)
-        top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
+        vc->top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
     else
-        top_field_first = 1;
+        vc->top_field_first = 1;
 
     video_to_output_surface(vo);
     return VO_TRUE;
@@ -888,10 +889,11 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 
 static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
 {
+    struct vdpctx *vc = vo->priv;
     struct vdpau_render_state *rndr;
 
     // no dr for non-decoding for now
-    if (!IMGFMT_IS_VDPAU(image_format)) return VO_FALSE;
+    if (!IMGFMT_IS_VDPAU(vc->image_format)) return VO_FALSE;
     if (mpi->type != MP_IMGTYPE_NUMBERED) return VO_FALSE;
 
     rndr = get_surface(vo, mpi->number);
@@ -941,15 +943,15 @@ static void destroy_vdpau_objects(struct vo *vo)
 
     free_video_specific(vo);
 
-    vdp_st = vdp->presentation_queue_destroy(vdp_flip_queue);
+    vdp_st = vdp->presentation_queue_destroy(vc->flip_queue);
     CHECK_ST_WARNING("Error when calling vdp->presentation_queue_destroy")
 
-    vdp_st = vdp->presentation_queue_target_destroy(vdp_flip_target);
+    vdp_st = vdp->presentation_queue_target_destroy(vc->flip_target);
     CHECK_ST_WARNING("Error when calling vdp->presentation_queue_target_destroy")
 
     for (i = 0; i <= NUM_OUTPUT_SURFACES; i++) {
-        vdp_st = vdp->output_surface_destroy(output_surfaces[i]);
-        output_surfaces[i] = VDP_INVALID_HANDLE;
+        vdp_st = vdp->output_surface_destroy(vc->output_surfaces[i]);
+        vc->output_surfaces[i] = VDP_INVALID_HANDLE;
         CHECK_ST_WARNING("Error when calling vdp->output_surface_destroy")
     }
 
@@ -961,12 +963,14 @@ static void destroy_vdpau_objects(struct vo *vo)
         eosd_surfaces[i].surface = VDP_INVALID_HANDLE;
     }
 
-    vdp_st = vdp->device_destroy(vdp_device);
+    vdp_st = vdp->device_destroy(vc->vdp_device);
     CHECK_ST_WARNING("Error when calling vdp_device_destroy")
 }
 
 static void uninit(struct vo *vo)
 {
+    struct vdpctx *vc = vo->priv;
+
     if (!vo->config_count)
         return;
     visible_buf = 0;
@@ -974,8 +978,8 @@ static void uninit(struct vo *vo)
     /* Destroy all vdpau objects */
     destroy_vdpau_objects(vo);
 
-    free(index_data);
-    index_data = NULL;
+    free(vc->index_data);
+    vc->index_data = NULL;
 
     free(eosd_surfaces);
     eosd_surfaces = NULL;
@@ -987,17 +991,8 @@ static void uninit(struct vo *vo)
 #endif
     vo_x11_uninit(vo);
 
-    dlclose(vdpau_lib_handle);
+    dlclose(vc->vdpau_lib_handle);
 }
-
-static const opt_t subopts[] = {
-    {"deint",   OPT_ARG_INT,   &deint,   (opt_test_f)int_non_neg},
-    {"chroma-deint", OPT_ARG_BOOL,  &chroma_deint,  NULL},
-    {"pullup",  OPT_ARG_BOOL,  &pullup,  NULL},
-    {"denoise", OPT_ARG_FLOAT, &denoise, NULL},
-    {"sharpen", OPT_ARG_FLOAT, &sharpen, NULL},
-    {NULL}
-};
 
 static const char help_msg[] =
     "\n-vo vdpau command line help:\n"
@@ -1027,34 +1022,42 @@ static int preinit(struct vo *vo, const char *arg)
     struct vdpctx *vc = talloc_zero(vo, struct vdpctx);
     vo->priv = vc;
 
-    deint = 0;
-    deint_type = 3;
-    deint_counter = 0;
-    deint_buffer_past_frames = 0;
-    deint_mpi[0] = deint_mpi[1] = NULL;
-    chroma_deint = 1;
-    pullup = 0;
-    denoise = 0;
-    sharpen = 0;
+    vc->deint = 0;
+    vc->deint_type = 3;
+    vc->deint_counter = 0;
+    vc->deint_buffer_past_frames = 0;
+    vc->deint_mpi[0] = vc->deint_mpi[1] = NULL;
+    vc->chroma_deint = 1;
+    vc->pullup = 0;
+    vc->denoise = 0;
+    vc->sharpen = 0;
+    const opt_t subopts[] = {
+        {"deint",   OPT_ARG_INT,   &vc->deint,   (opt_test_f)int_non_neg},
+        {"chroma-deint", OPT_ARG_BOOL,  &vc->chroma_deint,  NULL},
+        {"pullup",  OPT_ARG_BOOL,  &vc->pullup,  NULL},
+        {"denoise", OPT_ARG_FLOAT, &vc->denoise, NULL},
+        {"sharpen", OPT_ARG_FLOAT, &vc->sharpen, NULL},
+        {NULL}
+    };
     if (subopt_parse(arg, subopts) != 0) {
         mp_msg(MSGT_VO, MSGL_FATAL, help_msg);
         return -1;
     }
-    if (deint)
-        deint_type = deint;
-    if (deint > 1)
-        deint_buffer_past_frames = 1;
+    if (vc->deint)
+        vc->deint_type = vc->deint;
+    if (vc->deint > 1)
+        vc->deint_buffer_past_frames = 1;
 
     char *vdpaulibrary = "libvdpau.so.1";
     char *vdpau_device_create = "vdp_device_create_x11";
-    vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
-    if (!vdpau_lib_handle) {
+    vc->vdpau_lib_handle = dlopen(vdpaulibrary, RTLD_LAZY);
+    if (!vc->vdpau_lib_handle) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Could not open dynamic library %s\n",
                vdpaulibrary);
         return -1;
     }
-    vdp_device_create = dlsym(vdpau_lib_handle, vdpau_device_create);
-    if (!vdp_device_create) {
+    vc->vdp_device_create = dlsym(vc->vdpau_lib_handle, vdpau_device_create);
+    if (!vc->vdp_device_create) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Could not find function %s in %s\n",
                vdpau_device_create, vdpaulibrary);
         return -1;
@@ -1062,20 +1065,20 @@ static int preinit(struct vo *vo, const char *arg)
     if (!vo_init(vo) || win_x11_init_vdpau_procs(vo))
         return -1;
 
-    decoder = VDP_INVALID_HANDLE;
+    vc->decoder = VDP_INVALID_HANDLE;
     for (i = 0; i < MAX_VIDEO_SURFACES; i++)
-        surface_render[i].surface = VDP_INVALID_HANDLE;
-    video_mixer = VDP_INVALID_HANDLE;
+        vc->surface_render[i].surface = VDP_INVALID_HANDLE;
+    vc->video_mixer = VDP_INVALID_HANDLE;
     for (i = 0; i <= NUM_OUTPUT_SURFACES; i++)
-        output_surfaces[i] = VDP_INVALID_HANDLE;
-    vdp_flip_queue = VDP_INVALID_HANDLE;
-    output_surface_width = output_surface_height = -1;
+        vc->output_surfaces[i] = VDP_INVALID_HANDLE;
+    vc->flip_queue = VDP_INVALID_HANDLE;
+    vc->output_surface_width = vc->output_surface_height = -1;
 
     // full grayscale palette.
     for (i = 0; i < PALETTE_SIZE; ++i)
-        palette[i] = (i << 16) | (i << 8) | i;
-    index_data = NULL;
-    index_data_size = 0;
+        vc->palette[i] = (i << 16) | (i << 8) | i;
+    vc->index_data = NULL;
+    vc->index_data_size = 0;
 
     eosd_surface_count = eosd_render_count = 0;
     eosd_surfaces = NULL;
@@ -1130,7 +1133,7 @@ static int set_equalizer(struct vo *vo, const char *name, int value)
     vdp_st = vdp->generate_csc_matrix(&procamp, VDP_COLOR_STANDARD_ITUR_BT_601,
                                      &matrix);
     CHECK_ST_WARNING("Error when generating CSC matrix")
-    vdp_st = vdp->video_mixer_set_attribute_values(video_mixer, 1, attributes,
+    vdp_st = vdp->video_mixer_set_attribute_values(vc->video_mixer, 1, attributes,
                                                   attribute_values);
     CHECK_ST_WARNING("Error when setting CSC matrix")
     return VO_TRUE;
@@ -1143,24 +1146,24 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
         case VOCTRL_GET_DEINTERLACE:
-            *(int*)data = deint;
+            *(int*)data = vc->deint;
             return VO_TRUE;
         case VOCTRL_SET_DEINTERLACE:
-            deint = *(int*)data;
-            if (deint)
-                deint = deint_type;
-            if (deint_type > 2) {
+            vc->deint = *(int*)data;
+            if (vc->deint)
+                vc->deint = vc->deint_type;
+            if (vc->deint_type > 2) {
                 VdpStatus vdp_st;
                 VdpVideoMixerFeature features[1] =
-                    {deint_type == 3 ?
+                    {vc->deint_type == 3 ?
                      VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL :
                      VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL};
-                VdpBool feature_enables[1] = {deint ? VDP_TRUE : VDP_FALSE};
-                vdp_st = vdp->video_mixer_set_feature_enables(video_mixer, 1,
-                                                             features,
-                                                             feature_enables);
+                VdpBool feature_enables[1] = {vc->deint ? VDP_TRUE : VDP_FALSE};
+                vdp_st = vdp->video_mixer_set_feature_enables(vc->video_mixer,
+                                                              1, features,
+                                                              feature_enables);
                 CHECK_ST_WARNING("Error changing deinterlacing settings")
-                deint_buffer_past_frames = 1;
+                vc->deint_buffer_past_frames = 1;
             }
             return VO_TRUE;
         case VOCTRL_PAUSE:
@@ -1213,8 +1216,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
             if (vo_fs) {
                 r->w = vo->opts->vo_screenwidth;
                 r->h = vo->opts->vo_screenheight;
-                r->ml = r->mr = border_x;
-                r->mt = r->mb = border_y;
+                r->ml = r->mr = vc->border_x;
+                r->mt = r->mb = vc->border_y;
             } else {
                 r->w = vo->dwidth;
                 r->h = vo->dheight;
