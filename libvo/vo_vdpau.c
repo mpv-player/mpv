@@ -34,6 +34,8 @@
 
 #include <stdio.h>
 #include <dlfcn.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -138,36 +140,34 @@ struct vdpctx {
     unsigned char                     *index_data;
     int                                index_data_size;
     uint32_t                           palette[PALETTE_SIZE];
+
+    // EOSD
+    // Pool of surfaces
+    struct {
+        VdpBitmapSurface surface;
+        int w;
+        int h;
+        char in_use;
+    } *eosd_surfaces;
+
+    // List of surfaces to be rendered
+    struct {
+        VdpBitmapSurface surface;
+        VdpRect source;
+        VdpRect dest;
+        VdpColor color;
+    } *eosd_targets;
+
+    int eosd_render_count;
+    int eosd_surface_count;
+
+    // Video equalizer
+    VdpProcamp procamp;
+
+    bool visible_buf;
+    bool paused;
 };
 
-// EOSD
-// Pool of surfaces
-struct {
-    VdpBitmapSurface surface;
-    int w;
-    int h;
-    char in_use;
-} *eosd_surfaces;
-
-// List of surfaces to be rendered
-struct {
-    VdpBitmapSurface surface;
-    VdpRect source;
-    VdpRect dest;
-    VdpColor color;
-} *eosd_targets;
-
-static int eosd_render_count;
-static int eosd_surface_count;
-
-// Video equalizer
-static VdpProcamp procamp;
-
-/*
- * X11 specific
- */
-static int                                visible_buf;
-static int                                int_pause;
 
 static void push_deint_surface(struct vo *vo, VdpVideoSurface surface)
 {
@@ -269,7 +269,7 @@ static void resize(struct vo *vo)
         }
     }
     video_to_output_surface(vo);
-    if (visible_buf)
+    if (vc->visible_buf)
         flip_page(vo);
 }
 
@@ -495,7 +495,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
         return -1;
 
-    visible_buf = 0;
+    vc->visible_buf = false;
 
     {
 #ifdef CONFIG_XF86VM
@@ -578,9 +578,9 @@ static void check_events(struct vo *vo)
     if (e & VO_EVENT_RESIZE)
         resize(vo);
 
-    if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && int_pause) {
+    if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && vc->paused) {
         /* did we already draw a buffer */
-        if (visible_buf) {
+        if (vc->visible_buf) {
             /* redraw the last visible buffer */
             VdpStatus vdp_st;
             vdp_st = vdp->presentation_queue_display(vc->flip_queue,
@@ -674,11 +674,11 @@ static void draw_eosd(struct vo *vo)
     blend_state.blend_equation_color           = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD;
     blend_state.blend_equation_alpha           = VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_ADD;
 
-    for (i=0; i<eosd_render_count; i++) {
+    for (i=0; i<vc->eosd_render_count; i++) {
         vdp_st = vdp->output_surface_render_bitmap_surface(
-            output_surface, &eosd_targets[i].dest,
-            eosd_targets[i].surface, &eosd_targets[i].source,
-            &eosd_targets[i].color, &blend_state,
+            output_surface, &vc->eosd_targets[i].dest,
+            vc->eosd_targets[i].surface, &vc->eosd_targets[i].source,
+            &vc->eosd_targets[i].color, &blend_state,
             VDP_OUTPUT_SURFACE_RENDER_ROTATE_0);
         CHECK_ST_WARNING("EOSD: Error when rendering")
     }
@@ -697,7 +697,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
     // Nothing changed, no need to redraw
     if (imgs->changed == 0)
         return;
-    eosd_render_count = 0;
+    vc->eosd_render_count = 0;
     // There's nothing to render!
     if (!img)
         return;
@@ -705,75 +705,75 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
     if (imgs->changed == 1)
         goto eosd_skip_upload;
 
-    for (j=0; j<eosd_surface_count; j++)
-        eosd_surfaces[j].in_use = 0;
+    for (j=0; j<vc->eosd_surface_count; j++)
+        vc->eosd_surfaces[j].in_use = 0;
 
     for (i = img; i; i = i->next) {
         // Try to reuse a suitable surface
         found = -1;
-        for (j=0; j<eosd_surface_count; j++) {
-            if (eosd_surfaces[j].surface != VDP_INVALID_HANDLE && !eosd_surfaces[j].in_use &&
-                eosd_surfaces[j].w >= i->w && eosd_surfaces[j].h >= i->h) {
+        for (j=0; j<vc->eosd_surface_count; j++) {
+            if (vc->eosd_surfaces[j].surface != VDP_INVALID_HANDLE && !vc->eosd_surfaces[j].in_use &&
+                vc->eosd_surfaces[j].w >= i->w && vc->eosd_surfaces[j].h >= i->h) {
                 found = j;
                 break;
             }
         }
         // None found, allocate a new surface
         if (found < 0) {
-            for (j=0; j<eosd_surface_count; j++) {
-                if (!eosd_surfaces[j].in_use) {
-                    if (eosd_surfaces[j].surface != VDP_INVALID_HANDLE)
-                        vdp->bitmap_surface_destroy(eosd_surfaces[j].surface);
+            for (j=0; j<vc->eosd_surface_count; j++) {
+                if (!vc->eosd_surfaces[j].in_use) {
+                    if (vc->eosd_surfaces[j].surface != VDP_INVALID_HANDLE)
+                        vdp->bitmap_surface_destroy(vc->eosd_surfaces[j].surface);
                     found = j;
                     break;
                 }
             }
             // Allocate new space for surface/target arrays
             if (found < 0) {
-                j = found = eosd_surface_count;
-                eosd_surface_count = eosd_surface_count ? eosd_surface_count*2 : EOSD_SURFACES_INITIAL;
-                eosd_surfaces = realloc(eosd_surfaces, eosd_surface_count * sizeof(*eosd_surfaces));
-                eosd_targets  = realloc(eosd_targets,  eosd_surface_count * sizeof(*eosd_targets));
-                for(j=found; j<eosd_surface_count; j++) {
-                    eosd_surfaces[j].surface = VDP_INVALID_HANDLE;
-                    eosd_surfaces[j].in_use = 0;
+                j = found = vc->eosd_surface_count;
+                vc->eosd_surface_count = vc->eosd_surface_count ? vc->eosd_surface_count*2 : EOSD_SURFACES_INITIAL;
+                vc->eosd_surfaces = realloc(vc->eosd_surfaces, vc->eosd_surface_count * sizeof(*vc->eosd_surfaces));
+                vc->eosd_targets  = realloc(vc->eosd_targets,  vc->eosd_surface_count * sizeof(*vc->eosd_targets));
+                for(j=found; j<vc->eosd_surface_count; j++) {
+                    vc->eosd_surfaces[j].surface = VDP_INVALID_HANDLE;
+                    vc->eosd_surfaces[j].in_use = 0;
                 }
             }
             vdp_st = vdp->bitmap_surface_create(vc->vdp_device, VDP_RGBA_FORMAT_A8,
-                i->w, i->h, VDP_TRUE, &eosd_surfaces[found].surface);
+                i->w, i->h, VDP_TRUE, &vc->eosd_surfaces[found].surface);
             CHECK_ST_WARNING("EOSD: error when creating surface")
-            eosd_surfaces[found].w = i->w;
-            eosd_surfaces[found].h = i->h;
+            vc->eosd_surfaces[found].w = i->w;
+            vc->eosd_surfaces[found].h = i->h;
         }
-        eosd_surfaces[found].in_use = 1;
-        eosd_targets[eosd_render_count].surface = eosd_surfaces[found].surface;
+        vc->eosd_surfaces[found].in_use = 1;
+        vc->eosd_targets[vc->eosd_render_count].surface = vc->eosd_surfaces[found].surface;
         destRect.x0 = 0;
         destRect.y0 = 0;
         destRect.x1 = i->w;
         destRect.y1 = i->h;
-        vdp_st = vdp->bitmap_surface_put_bits_native(eosd_targets[eosd_render_count].surface,
+        vdp_st = vdp->bitmap_surface_put_bits_native(vc->eosd_targets[vc->eosd_render_count].surface,
             (const void *) &i->bitmap, &i->stride, &destRect);
         CHECK_ST_WARNING("EOSD: putbits failed")
-        eosd_render_count++;
+        vc->eosd_render_count++;
     }
 
 eosd_skip_upload:
-    eosd_render_count = 0;
+    vc->eosd_render_count = 0;
     for (i = img; i; i = i->next) {
         // Render dest, color, etc.
-        eosd_targets[eosd_render_count].color.alpha = 1.0 - ((i->color >> 0) & 0xff) / 255.0;
-        eosd_targets[eosd_render_count].color.blue  = ((i->color >>  8) & 0xff) / 255.0;
-        eosd_targets[eosd_render_count].color.green = ((i->color >> 16) & 0xff) / 255.0;
-        eosd_targets[eosd_render_count].color.red   = ((i->color >> 24) & 0xff) / 255.0;
-        eosd_targets[eosd_render_count].dest.x0 = i->dst_x;
-        eosd_targets[eosd_render_count].dest.y0 = i->dst_y;
-        eosd_targets[eosd_render_count].dest.x1 = i->w + i->dst_x;
-        eosd_targets[eosd_render_count].dest.y1 = i->h + i->dst_y;
-        eosd_targets[eosd_render_count].source.x0 = 0;
-        eosd_targets[eosd_render_count].source.y0 = 0;
-        eosd_targets[eosd_render_count].source.x1 = i->w;
-        eosd_targets[eosd_render_count].source.y1 = i->h;
-        eosd_render_count++;
+        vc->eosd_targets[vc->eosd_render_count].color.alpha = 1.0 - ((i->color >> 0) & 0xff) / 255.0;
+        vc->eosd_targets[vc->eosd_render_count].color.blue  = ((i->color >>  8) & 0xff) / 255.0;
+        vc->eosd_targets[vc->eosd_render_count].color.green = ((i->color >> 16) & 0xff) / 255.0;
+        vc->eosd_targets[vc->eosd_render_count].color.red   = ((i->color >> 24) & 0xff) / 255.0;
+        vc->eosd_targets[vc->eosd_render_count].dest.x0 = i->dst_x;
+        vc->eosd_targets[vc->eosd_render_count].dest.y0 = i->dst_y;
+        vc->eosd_targets[vc->eosd_render_count].dest.x1 = i->w + i->dst_x;
+        vc->eosd_targets[vc->eosd_render_count].dest.y1 = i->h + i->dst_y;
+        vc->eosd_targets[vc->eosd_render_count].source.x0 = 0;
+        vc->eosd_targets[vc->eosd_render_count].source.y0 = 0;
+        vc->eosd_targets[vc->eosd_render_count].source.x1 = i->w;
+        vc->eosd_targets[vc->eosd_render_count].source.y1 = i->h;
+        vc->eosd_render_count++;
     }
 }
 
@@ -801,7 +801,7 @@ static void flip_page(struct vo *vo)
     CHECK_ST_WARNING("Error when calling vdp->presentation_queue_display")
 
     vc->surface_num = (vc->surface_num + 1) % NUM_OUTPUT_SURFACES;
-    visible_buf = 1;
+    vc->visible_buf = true;
 }
 
 static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
@@ -955,12 +955,12 @@ static void destroy_vdpau_objects(struct vo *vo)
         CHECK_ST_WARNING("Error when calling vdp->output_surface_destroy")
     }
 
-    for (i = 0; i<eosd_surface_count; i++) {
-        if (eosd_surfaces[i].surface != VDP_INVALID_HANDLE) {
-            vdp_st = vdp->bitmap_surface_destroy(eosd_surfaces[i].surface);
+    for (i = 0; i<vc->eosd_surface_count; i++) {
+        if (vc->eosd_surfaces[i].surface != VDP_INVALID_HANDLE) {
+            vdp_st = vdp->bitmap_surface_destroy(vc->eosd_surfaces[i].surface);
             CHECK_ST_WARNING("Error when calling vdp->bitmap_surface_destroy")
         }
-        eosd_surfaces[i].surface = VDP_INVALID_HANDLE;
+        vc->eosd_surfaces[i].surface = VDP_INVALID_HANDLE;
     }
 
     vdp_st = vdp->device_destroy(vc->vdp_device);
@@ -973,7 +973,7 @@ static void uninit(struct vo *vo)
 
     if (!vo->config_count)
         return;
-    visible_buf = 0;
+    vc->visible_buf = false;
 
     /* Destroy all vdpau objects */
     destroy_vdpau_objects(vo);
@@ -981,10 +981,10 @@ static void uninit(struct vo *vo)
     free(vc->index_data);
     vc->index_data = NULL;
 
-    free(eosd_surfaces);
-    eosd_surfaces = NULL;
-    free(eosd_targets);
-    eosd_targets = NULL;
+    free(vc->eosd_surfaces);
+    vc->eosd_surfaces = NULL;
+    free(vc->eosd_targets);
+    vc->eosd_targets = NULL;
 
 #ifdef CONFIG_XF86VM
     vo_vm_close(vo);
@@ -1080,15 +1080,15 @@ static int preinit(struct vo *vo, const char *arg)
     vc->index_data = NULL;
     vc->index_data_size = 0;
 
-    eosd_surface_count = eosd_render_count = 0;
-    eosd_surfaces = NULL;
-    eosd_targets  = NULL;
+    vc->eosd_surface_count = vc->eosd_render_count = 0;
+    vc->eosd_surfaces = NULL;
+    vc->eosd_targets  = NULL;
 
-    procamp.struct_version = VDP_PROCAMP_VERSION;
-    procamp.brightness = 0.0;
-    procamp.contrast   = 1.0;
-    procamp.saturation = 1.0;
-    procamp.hue        = 0.0;
+    vc->procamp.struct_version = VDP_PROCAMP_VERSION;
+    vc->procamp.brightness = 0.0;
+    vc->procamp.contrast   = 1.0;
+    vc->procamp.saturation = 1.0;
+    vc->procamp.hue        = 0.0;
 
     return 0;
 }
@@ -1098,13 +1098,13 @@ static int get_equalizer(struct vo *vo, const char *name, int *value)
     struct vdpctx *vc = vo->priv;
 
     if (!strcasecmp(name, "brightness"))
-        *value = procamp.brightness * 100;
+        *value = vc->procamp.brightness * 100;
     else if (!strcasecmp(name, "contrast"))
-        *value = (procamp.contrast-1.0) * 100;
+        *value = (vc->procamp.contrast-1.0) * 100;
     else if (!strcasecmp(name, "saturation"))
-        *value = (procamp.saturation-1.0) * 100;
+        *value = (vc->procamp.saturation-1.0) * 100;
     else if (!strcasecmp(name, "hue"))
-        *value = procamp.hue * 100 / M_PI;
+        *value = vc->procamp.hue * 100 / M_PI;
     else
         return VO_NOTIMPL;
     return VO_TRUE;
@@ -1120,17 +1120,17 @@ static int set_equalizer(struct vo *vo, const char *name, int value)
     const void *attribute_values[] = {&matrix};
 
     if (!strcasecmp(name, "brightness"))
-        procamp.brightness = value / 100.0;
+        vc->procamp.brightness = value / 100.0;
     else if (!strcasecmp(name, "contrast"))
-        procamp.contrast = value / 100.0 + 1.0;
+        vc->procamp.contrast = value / 100.0 + 1.0;
     else if (!strcasecmp(name, "saturation"))
-        procamp.saturation = value / 100.0 + 1.0;
+        vc->procamp.saturation = value / 100.0 + 1.0;
     else if (!strcasecmp(name, "hue"))
-        procamp.hue = value / 100.0 * M_PI;
+        vc->procamp.hue = value / 100.0 * M_PI;
     else
         return VO_NOTIMPL;
 
-    vdp_st = vdp->generate_csc_matrix(&procamp, VDP_COLOR_STANDARD_ITUR_BT_601,
+    vdp_st = vdp->generate_csc_matrix(&vc->procamp, VDP_COLOR_STANDARD_ITUR_BT_601,
                                      &matrix);
     CHECK_ST_WARNING("Error when generating CSC matrix")
     vdp_st = vdp->video_mixer_set_attribute_values(vc->video_mixer, 1, attributes,
@@ -1167,9 +1167,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
             }
             return VO_TRUE;
         case VOCTRL_PAUSE:
-            return (int_pause = 1);
+            return (vc->paused = true);
         case VOCTRL_RESUME:
-            return (int_pause = 0);
+            return (vc->paused = false);
         case VOCTRL_QUERY_FORMAT:
             return query_format(*(uint32_t *)data);
         case VOCTRL_GET_IMAGE:
