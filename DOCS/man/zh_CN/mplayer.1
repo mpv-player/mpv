@@ -1,4 +1,4 @@
-.\" sync with en/mplayer.1 r29133
+.\" sync with en/mplayer.1 r29252
 .\" Encoding: UTF-8
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; playtree in parent list; colorkey; retrace; desync; downmix;
@@ -314,7 +314,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .PD 1
 .PP
 .RS
-(以下的按键仅适用于 quartz or corevideo 视频输出驱动。)
+（以下按键仅在使用 quartz 或 corevideo 视频输出驱动时有效。）
 .RE
 .PP
 .PD 0
@@ -2598,8 +2598,8 @@ OSS 音频输出驱动
 音频输出通过 NAS
 .
 .TP
-.B coreaudio (仅用于 Mac OS X)
-原生 Mac OS X 音频输出驱动
+.B coreaudio（仅适用于 Mac OS X）
+Mac OS X 自带的音频输出驱动
 .
 .TP
 .B "openal\ "
@@ -4754,10 +4754,25 @@ delta 的正弦, 使用非常低的值听此扫听(sweep)。
 该选项只能应用于 2 个声道的音频。
 .PD 0
 .RSs
-.IPs level=<1\-3>
-设置交叉反馈的级别，级别越高效果越强（默认值：3）。
-.IPs profile=<0\-1>
-选择所选用的交叉反馈配置，配置 1 输出的声音比配置 0 柔和（默认值：1）。
+.IPs fcut=<300\-1000>
+设置以 Hz 为单位的切换频率。
+.IPs feed=<10\-150>
+设置以 0.1*dB 为单位的用于低频率的反馈级别。
+.IPs profile=<value>
+有许多配置可供方便选用：
+.RSs
+默认配置：如果未指定其它参数将被使用（fcut=700，feed=45）；
+.br
+cmoy：Chu Moy 回路实现方案（fcut=700，feed=60）；
+.br
+jmeier：Jan Meier 回路实现方案（fcut=650，feed=95）。
+.REss
+.PD 1
+.RE
+.sp 1
+.RS
+如果同时指定了 fcut 或 feed 选项与配置，则这两个选项将覆盖配置中选项的值。
+.RE
 .RE
 .PD 1
 .
