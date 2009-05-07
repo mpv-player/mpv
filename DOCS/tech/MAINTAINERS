@@ -66,7 +66,7 @@ Platforms/ports:
     * OpenBSD: Björn Sandell
     * Solaris: Derek Lewis
     * Win32/Cygwin/MinGW: Sascha Sommer, Joey Parrish
-    * MPlayer OS X frontend: Nicolas Plourde
+    * MPlayer OS X frontend: Nicolas Plourde, Adrian Stutz
     * Mac OS X: None
     * AIX: Derek Lewis
 
@@ -156,7 +156,7 @@ libvo drivers:
     * vo_aa.c - Alban Bedel
     * vo_caca.c - Howell Tam (Pigeon)
     * vo_bl.c - Rik Snel
-    * vo_corevideo.m - None
+    * vo_corevideo.m - Adrian Stutz
     * vo_cvidix.c - Sascha Sommer
     * vo_dga.c - None
     * vo_dfbmga.c - Ville Syrjälä
