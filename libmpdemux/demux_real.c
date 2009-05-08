@@ -1,24 +1,38 @@
 /*
-    Real parser & demuxer
-    
-    (C) Alex Beregszaszi
-    (C) 2005, 2006 Roberto Togni
-    
-    Based on FFmpeg's libav/rm.c.
-
-Audio codecs: (supported by RealPlayer8 for Linux)
-    DNET - RealAudio 3.0, really it's AC3 in swapped-byteorder
-    SIPR - SiproLab's audio codec, ACELP decoder working with MPlayer,
-	   needs fine-tuning too :)
-    ATRC - RealAudio 8 (ATRAC3) - www.minidisc.org/atrac3_article.pdf,
-           ACM decoder uploaded, needs some fine-tuning to work
-	   -> RealAudio 8
-    COOK/COKR - Real Cooker -> RealAudio G2
-
-Video codecs: (supported by RealPlayer8 for Linux)
-    RV10 - H.263 based, working with libavcodec's decoder
-    RV20-RV40 - using RealPlayer's codec plugins
-*/
+ * Real parser & demuxer
+ * copyright (C) 2001 Alex Beregszaszi
+ * copyright (C) 2005, 2006 Roberto Togni
+ * based on FFmpeg's libav/rm.c
+ *
+ * audio codecs: (supported by RealPlayer8 for Linux)
+ *  DNET - RealAudio 3.0, really it's AC3 in swapped-byteorder
+ *  SIPR - SiproLab's audio codec, ACELP decoder working with MPlayer,
+ *         needs fine-tuning too :)
+ *  ATRC - RealAudio 8 (ATRAC3) - www.minidisc.org/atrac3_article.pdf,
+ *         ACM decoder uploaded, needs some fine-tuning to work
+ *         -> RealAudio 8
+ *  COOK/COKR - Real Cooker -> RealAudio G2
+ *
+ * video codecs: (supported by RealPlayer8 for Linux)
+ *  RV10 - H.263 based, working with libavcodec's decoder
+ *  RV20-RV40 - using RealPlayer's codec plugins
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
