@@ -364,6 +364,7 @@ struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
                         free(name);
                         return vo; // success!
                     }
+                    talloc_free_children(vo);
 		}
 	    }
             // continue...
@@ -380,6 +381,7 @@ struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
         vo->driver = video_driver;
         if (!vo_preinit(vo, vo_subdevice))
             return vo; // success!
+        talloc_free_children(vo);
     }
     free(vo);
     return NULL;
