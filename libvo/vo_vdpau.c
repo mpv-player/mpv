@@ -575,7 +575,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
         xswa.background_pixel = 0;
         xswa.border_pixel     = 0;
-        xswamask = CWBackPixel | CWBorderPixel;
+        /* Do not use CWBackPixel: It leads to VDPAU errors after
+           aspect ratio changes. */
+        xswamask = CWBorderPixel;
 
         vo_x11_create_vo_window(&vinfo, vo_dx, vo_dy, d_width, d_height,
                                 flags, CopyFromParent, "vdpau", title);
