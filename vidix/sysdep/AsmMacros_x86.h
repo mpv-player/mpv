@@ -321,7 +321,7 @@ static __inline__ unsigned int inl(short port)
    return ret;
 }
 
-static __inline__ void intr_disable()
+static __inline__ void intr_disable(void)
 {
 #ifdef CONFIG_SVGAHELPER
     if (svgahelper_initialized == 1)
@@ -330,7 +330,7 @@ static __inline__ void intr_disable()
   __asm__ volatile("cli");
 }
 
-static __inline__ void intr_enable()
+static __inline__ void intr_enable(void)
 {
 #ifdef CONFIG_SVGAHELPER
     if (svgahelper_initialized == 1)

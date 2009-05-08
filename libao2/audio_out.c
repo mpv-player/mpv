@@ -31,7 +31,7 @@ ao_data_t ao_data={0,0,0,0,OUTBURST,-1,0};
 char *ao_subdevice = NULL;
 
 extern const ao_functions_t audio_out_oss;
-extern const ao_functions_t audio_out_macosx;
+extern const ao_functions_t audio_out_coreaudio;
 extern const ao_functions_t audio_out_arts;
 extern const ao_functions_t audio_out_esd;
 extern const ao_functions_t audio_out_pulse;
@@ -67,7 +67,7 @@ const ao_functions_t* const audio_out_drivers[] =
         &audio_out_dart,
 #endif
 #ifdef CONFIG_COREAUDIO
-        &audio_out_macosx,
+        &audio_out_coreaudio,
 #endif
 #ifdef CONFIG_OSS_AUDIO
         &audio_out_oss,

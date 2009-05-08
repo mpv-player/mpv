@@ -30,8 +30,6 @@ HRESULT STDCALL CoInitialize(LPVOID pvReserved);
 void STDCALL CoUninitialize(void); 
 #endif
 
-//void trapbug();
-
 static void DS_Filter_Start(DS_Filter* This)
 {
     HRESULT hr;

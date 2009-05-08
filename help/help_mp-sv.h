@@ -70,7 +70,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "FPS ej specifierad i filhuvudet eller är icke godkänd, använd argument -fps.\n"
 #define MSGTR_TryForceAudioFmtStr "Försöker att forcera audiocodecfamilj %s...\n"
 #define MSGTR_CantFindAudioCodec "Kan inte finna codec för audioformat 0x%X.\n"
-#define MSGTR_RTFMCodecs "Läs DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Försöker att forcera videocodecfamilj %s...\n"
 #define MSGTR_CantFindVideoCodec "Kan inte finna codec för vald -vo och videoformat 0x%X.\n"
 #define MSGTR_CannotInitVO "FATALT: Kan inte initiera videodrivrutin.\n"

@@ -140,7 +140,7 @@ static void osdpercent(int duration, int min, int max, int val, const char *desc
     posbar[screen_w] = '\0';
 }
 
-static int resize ()
+static int resize(void)
 {
     screen_w = caca_get_width();
     screen_h = caca_get_height();

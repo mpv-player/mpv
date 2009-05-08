@@ -67,7 +67,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "헤더에 FPS가 지정되지 않았거나 유효하지 않습니다. -fps 옵션을 사용하세요.\n"
 #define MSGTR_TryForceAudioFmtStr "오디오 코덱 드라이버 집합 %s를 시도하고 있습니다...\n"
 #define MSGTR_CantFindAudioCodec "오디오 형식 0x%X를 위한 코덱을 찾을 수 없습니다.\n"
-#define MSGTR_RTFMCodecs "DOCS/HTML/en/codecs.html을 참조하세요!\n"
 #define MSGTR_TryForceVideoFmtStr "비디오 코덱 드라이버 집합 %s를 시도하고 있습니다...\n"
 #define MSGTR_CantFindVideoCodec "선택한 -vo 및 비디오 형식 0x%X과 일치하는 코덱을 찾을 수 없습니다.\n"
 #define MSGTR_VOincompCodec "선택한 비디오 출력 장치는 이 코덱과 호환되지 않습니다.\n"

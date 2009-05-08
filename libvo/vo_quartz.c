@@ -149,10 +149,10 @@ enum
 static OSStatus KeyEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
 static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
 static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
-void window_resized();
-void window_ontop();
-void window_fullscreen();
-void window_panscan();
+void window_resized(void);
+void window_ontop(void);
+void window_fullscreen(void);
+void window_panscan(void);
 
 static inline int convert_key(UInt32 key, UInt32 charcode)
 {
@@ -1313,7 +1313,7 @@ static int control(uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
-void window_resized()
+void window_resized(void)
 {
     float aspectX;
     float aspectY;
@@ -1394,7 +1394,7 @@ void window_resized()
     QDEndCGContext(GetWindowPort(theWindow), &context);
 }
 
-void window_ontop()
+void window_ontop(void)
 {
     if (!vo_quartz_fs)
     {
@@ -1406,7 +1406,7 @@ void window_ontop()
     SetWindowGroupLevel(winGroup, CGWindowLevelForKey(levelList[winLevel]));
 }
 
-void window_fullscreen()
+void window_fullscreen(void)
 {
     // go fullscreen
     if (vo_fs)
@@ -1491,7 +1491,7 @@ void window_fullscreen()
     window_resized();
 }
 
-void window_panscan()
+void window_panscan(void)
 {
     panscan_calc();
 

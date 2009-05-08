@@ -140,7 +140,7 @@ char *get_path(const char *filename){
 }
 
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
-void set_path_env()
+void set_path_env(void)
 {
 	/*make our codec dirs available for LoadLibraryA()*/
 	char tmppath[MAX_PATH*2 + 1];

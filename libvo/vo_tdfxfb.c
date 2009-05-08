@@ -202,7 +202,7 @@ static void uninit(void)
 	}
 }
 
-static void clear_screen()
+static void clear_screen(void)
 {
 	/* There needs to be some sort of delay here or else things seriously
 	 * screw up.  Causes the image to not be the right size on screen if

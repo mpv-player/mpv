@@ -81,7 +81,7 @@ HMODULE   WINAPI LoadLibraryA(LPCSTR);
 FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
 int       WINAPI FreeLibrary(HMODULE);
 
-static int loader_init()
+static int loader_init(void)
 {
 
 #ifdef WIN32_LOADER

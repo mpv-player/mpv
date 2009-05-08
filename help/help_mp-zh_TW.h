@@ -75,7 +75,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "FPS 在文件頭中没有指定或者無效，用 -fps 選項。\n"
 #define MSGTR_TryForceAudioFmtStr "嘗試鎖定為音頻編解碼器驅動族 %s...\n"
 #define MSGTR_CantFindAudioCodec "找不到音頻格式 0x%X 的編解碼器。\n"
-#define MSGTR_RTFMCodecs "請閲讀 DOCS/zh/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "嘗試鎖定為視頻編解碼器驅動族 %s...\n"
 #define MSGTR_CantFindVideoCodec "找不到匹配 -vo 所選的和視頻格式 0x%X 的編解碼器。\n"
 #define MSGTR_CannotInitVO "致命錯誤: 無法初始化視頻驅動!\n"

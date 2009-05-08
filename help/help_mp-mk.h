@@ -68,7 +68,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "FPS(Frames Per Second) не се специфицирани во хедерот или се невалидни, користете ја -fps опцијата.\n"
 #define MSGTR_TryForceAudioFmtStr "Проба да го присили драјверот на аудио кодекот %s ...\n"
 #define MSGTR_CantFindAudioCodec "Не може да го пронајде кодекот за аудио форматот 0x%X.\n"
-#define MSGTR_RTFMCodecs "Прочитај DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Пробува да го присили драјверот на видео кодекот %s ...\n"
 #define MSGTR_CantFindVideoCodec "Не може да го пронајде кодекот кој одговара избран со -vo и видео форматот 0x%X.\n"
 #define MSGTR_VOincompCodec "Избраниот излезен видео уред не е соодветен со овој кодек.\n"

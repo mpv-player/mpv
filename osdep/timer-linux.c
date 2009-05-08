@@ -31,9 +31,9 @@
 
 const char timer_name[] =
 #ifdef HAVE_NANOSLEEP
-  "nanosleep()";
+    "nanosleep()";
 #else
-  "usleep()";
+    "usleep()";
 #endif
 
 int usec_sleep(int usec_delay)
@@ -49,19 +49,22 @@ int usec_sleep(int usec_delay)
 }
 
 // Returns current time in microseconds
-unsigned int GetTimer(void){
+unsigned int GetTimer(void)
+{
   struct timeval tv;
   gettimeofday(&tv,NULL);
   return tv.tv_sec * 1000000 + tv.tv_usec;
 }  
 
 // Returns current time in milliseconds
-unsigned int GetTimerMS(void){
+unsigned int GetTimerMS(void)
+{
   struct timeval tv;
   gettimeofday(&tv,NULL);
   return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }  
 
 // Initialize timer, must be called at least once at start
-void InitTimer(void){
+void InitTimer(void)
+{
 }

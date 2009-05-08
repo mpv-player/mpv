@@ -364,7 +364,6 @@ int init_best_video_codec(sh_video_t *sh_video, char **video_codec_list,
     if (!sh_video->initialized) {
         mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantFindVideoCodec,
                sh_video->format);
-        mp_msg(MSGT_DECAUDIO, MSGL_HINT, MSGTR_RTFMCodecs);
         return 0;               // failed
     }
 

@@ -694,7 +694,7 @@ GCC 3.x or later.
 You can get the basic compilation environment by installing Apple's
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>.
 If you have Mac OS X 10.3.9 or later and QuickTime 7
-you can use the <option>macosx</option> video output driver.
+you can use the <option>corevideo</option> video output driver.
 </para>
 
 <para>

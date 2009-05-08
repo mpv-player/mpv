@@ -3204,17 +3204,17 @@ stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
 #ifdef CONFIG_MENU
  if(use_menu) {
      if(menu_cfg && menu_init(mpctx, mpctx->mconfig, mpctx->input, menu_cfg))
-     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);
+     mp_msg(MSGT_CPLAYER, MSGL_V, MSGTR_MenuInitialized, menu_cfg);
    else {
      menu_cfg = get_path("menu.conf");
      if(menu_init(mpctx, mpctx->mconfig, mpctx->input, menu_cfg))
-       mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);
+       mp_msg(MSGT_CPLAYER, MSGL_V, MSGTR_MenuInitialized, menu_cfg);
      else {
          if(menu_init(mpctx, mpctx->mconfig, mpctx->input,
                       MPLAYER_CONFDIR "/menu.conf"))
-         mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, MPLAYER_CONFDIR"/menu.conf");
+         mp_msg(MSGT_CPLAYER, MSGL_V, MSGTR_MenuInitialized, MPLAYER_CONFDIR"/menu.conf");
        else {
-         mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitFailed);
+         mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_MenuInitFailed);
          use_menu = 0;
        }
      }

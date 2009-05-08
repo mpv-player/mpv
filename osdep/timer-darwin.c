@@ -51,19 +51,19 @@ int usec_sleep(int usec_delay)
 
 
 /* current time in microseconds */
-unsigned int GetTimer()
+unsigned int GetTimer(void)
 {
   return (unsigned int)(uint64_t)(mach_absolute_time() * timebase_ratio * 1e6);
 }
 
 /* current time in milliseconds */
-unsigned int GetTimerMS()
+unsigned int GetTimerMS(void)
 {
   return (unsigned int)(uint64_t)(mach_absolute_time() * timebase_ratio * 1e3);
 }
 
 /* initialize timer, must be called at least once at start */
-void InitTimer()
+void InitTimer(void)
 {
   struct mach_timebase_info timebase;
 

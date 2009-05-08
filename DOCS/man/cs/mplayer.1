@@ -316,7 +316,7 @@ Nastavení sytosti barev (saturation).
 .PP
 .RS
 (Následující klávesy jsou činné pouze pokud používáte výstupní video rozhraní
-Quartz nebo macosx.)
+Quartz nebo corevideo.)
 .RE
 .PP
 .PD 0
@@ -2632,7 +2632,7 @@ Předpočítá zpoždění zvuku, což má činit přehrávání videa plynulej�
 Zvukový výstup přes NAS.
 .
 .TP
-.B macosx (pouze Mac OS X)
+.B coreaudio (pouze Mac OS X)
 Nativní Mac OS X zvuk.
 .
 .TP
@@ -3025,14 +3025,14 @@ Navíc pod X11 váš okenní manažer musí rozumět pokynům pro poměr stran o
 .B "\-ontop\ "
 Umístí okno přehrávače trvale nad ostatní okna.
 Podporováno video rozhraními používajícími X11, kromě SDL,
-stejně jako directx, macosx, quartz, ggi a gl2.
+stejně jako directx, corevideo, quartz, ggi a gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
 Zapne "přibližovací" funkci (pan-and-scan) (oříznutím videa po stranách tak,
 aby např.\& film 16:9 pokryl obrazovku 4:3 bez černých okrajů).
 Tato funkce pracuje pouze s video rozhraními xv, xmga, mga, gl,
-gl2, quartz, macosx a xvidix.
+gl2, quartz, corevideo a xvidix.
 .br
 .I POZNÁMKA:
 Hodnoty mezi \-1 a 0 jsou také povoleny, ale naprosto experimenální
@@ -3059,7 +3059,7 @@ Zatím podporování pouze \-vo directx v kombinaci s volbou \-vm.
 .B \-rootwin (pouze X11)
 Přehraje film v kořenovém okně (pozadí desktopu).
 Obrázek na ploše však může překrýt zobrazované video.
-Pracuje pouze s video rozhraními x11, xv, xmga, xvidix, quartz, macosx a directx.
+Pracuje pouze s video rozhraními x11, xv, xmga, xvidix, quartz, corevideo a directx.
 .
 .TP
 .B \-saturation <\-100\-100>
@@ -3375,7 +3375,7 @@ Nastaví rozlišení celoobrazovkového režimu (použitelné pro pomalé systé
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 nebo 10.3.9 s QuickTime 7)
+.B corevideo (Mac OS X 10.4 nebo 10.3.9 s QuickTime 7)
 Výstupní video rozhraní Mac OS X CoreVideo.
 .PD 0
 .RSs

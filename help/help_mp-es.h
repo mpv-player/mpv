@@ -79,7 +79,6 @@ static const char help_text[]=
 #define MSGTR_CoreDumped "Core dumped ;)\n"
 #define MSGTR_FPSnotspecified "FPS no especificado (o inválido) en la cabecera! Usa la opción -fps.\n"
 #define MSGTR_TryForceAudioFmtStr "Tratando de forzar la familia de codecs de audio %s...\n"
-#define MSGTR_RTFMCodecs "Revise el archivo DOCS/HTML/es/codecs.html!\n"
 #define MSGTR_CantFindAudioCodec "No se encontró codec para el formato de audio 0x%X!\n"
 #define MSGTR_TryForceVideoFmtStr "Tratando de forzar la familia de codecs de video %s...\n"
 #define MSGTR_CantFindVideoCodec "No se encontró codec para el formato de video 0x%X!\n"

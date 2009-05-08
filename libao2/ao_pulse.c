@@ -102,7 +102,10 @@ static void success_cb(pa_stream *s, int success, void *userdata) {
  */
 static int waitop(pa_operation *op) {
     pa_operation_state_t state;
-    if (!op) return 0;
+    if (!op) {
+        pa_threaded_mainloop_unlock(mainloop);
+        return 0;
+    }
     state = pa_operation_get_state(op);
     while (state == PA_OPERATION_RUNNING) {
         pa_threaded_mainloop_wait(mainloop);
@@ -150,11 +153,11 @@ static int init(int rate_hz, int channels, int format, int flags) {
     }
 
     broken_pause = 0;
-    // not sure which versions are affected, assume 0.9.1*
+    // not sure which versions are affected, assume 0.9.11* to 0.9.14*
     // known bad: 0.9.14, 0.9.13
-    // known good: 0.9.9, 0.9.10
+    // known good: 0.9.9, 0.9.10, 0.9.15
     // to test: pause, wait ca. 5 seconds framestep and see if MPlayer hangs somewhen
-    if (strncmp(version, "0.9.1", 5) == 0 && strncmp(version, "0.9.10", 6) != 0) {
+    if (strncmp(version, "0.9.1", 5) == 0 && version[5] >= '1' && version[5] <= '4') {
         mp_msg(MSGT_AO, MSGL_WARN, "[pulse] working around probably broken pause functionality,\n"
                                    "        see http://www.pulseaudio.org/ticket/440\n");
         broken_pause = 1;
@@ -389,12 +392,16 @@ static int control(int cmd, void *arg) {
                 volume.values[1] = (pa_volume_t)vol->right*PA_VOLUME_NORM/100;
             }
 
-            if (!(o = pa_context_set_sink_input_volume(context, pa_stream_get_index(stream), &volume, NULL, NULL))) {
+            pa_threaded_mainloop_lock(mainloop);
+            o = pa_context_set_sink_input_volume(context, pa_stream_get_index(stream), &volume, NULL, NULL);
+            if (!o) {
+                pa_threaded_mainloop_unlock(mainloop);
                 GENERIC_ERR_MSG(context, "pa_context_set_sink_input_volume() failed");
                 return CONTROL_ERROR;
             }
             /* We don't wait for completion here */
             pa_operation_unref(o);
+            pa_threaded_mainloop_unlock(mainloop);
             return CONTROL_OK;
         }
 

@@ -41,7 +41,6 @@ ACM Codecs:
 MPlayer may fail at playing the audio in your file with this message:
 
 Cannot find codec for audio format 0x55.
-Read DOCS/HTML/en/codecs.html!
 Audio: no sound
 
 MPlayer calls this the TwoCC format identifier. From the TwoCC list we find:

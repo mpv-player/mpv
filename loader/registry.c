@@ -216,7 +216,7 @@ static reg_handle_t* find_handle(int handle)
 	}
 	return 0;
 }
-static int generate_handle()
+static int generate_handle(void)
 {
 	static unsigned int zz=249;
 	zz++;

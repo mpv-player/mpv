@@ -223,7 +223,7 @@ LRESULT VFWAPI ICClose(HIC hic) {
 	return 0;
 }
 
-int VFWAPI ICDoSomething()
+int VFWAPI ICDoSomething(void)
 {
   return 0;
 }

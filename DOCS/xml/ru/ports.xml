@@ -726,7 +726,7 @@ mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>
 для компиляции, установив Apple'овский
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>.
 Если у вас Mac OS X 10.3.9 или выше и QuickTime 7, можете использовать 
-драйвер видео вывода <option>macosx</option>.
+драйвер видео вывода <option>corevideo</option>.
 </para>
 
 <para>

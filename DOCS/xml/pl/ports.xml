@@ -693,7 +693,7 @@ wyższym. Zalecanym kompilatorem jest GCC 3.x w wersji Apple.
 Możesz otrzymać podstawowe środowisko do kompilacji, instalując
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink> od Apple.
 Jeżeli masz Mac OS X 10.3.9 lub późniejszy i QuickTime 7, możesz
-skorzystać ze sterownika wyjścia video <option>macosx</option>.
+skorzystać ze sterownika wyjścia video <option>corevideo</option>.
 </para>
 
 <para>

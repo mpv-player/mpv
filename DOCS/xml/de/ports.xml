@@ -718,7 +718,7 @@ Segmentation fault</screen>
       <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>
       von Apple installierst.
       Besitzt du Mac OS X 10.3.9 oder später und QuickTime 7
-      kannst du den Videoausgabetreiber <option>macosx</option> verwenden.
+      kannst du den Videoausgabetreiber <option>corevideo</option> verwenden.
     </para>
 
     <para>

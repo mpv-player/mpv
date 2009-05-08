@@ -12,16 +12,16 @@ static int init(int rate,int channels,int format,int flags);
   Sample format: usually AFMT_S16_LE or AFMT_U8, for more definitions see
   dec_audio.c and linux/soundcards.h files!
 
-static void uninit();
+static void uninit(void);
   Guess what.
   Ok I help: closes the device, not (yet) called when exit.
 
-static void reset();
+static void reset(void);
   Resets device. To be exact, it's for deleting buffers' contents,
   so after reset() the previously received stuff won't be output.
   (called if pause or seek)
 
-static int get_space();
+static int get_space(void);
   Returns how many bytes can be written into the audio buffer without
   blocking (making caller process wait). MPlayer occasionally checks the
   remaining space and tries to fill the buffer with play() if there's free
@@ -41,7 +41,7 @@ static int play(void* data,int len,int flags);
   rounded down to 0 or the data will never be played (as MPlayer will never
   call play() with a larger len).
 
-static float get_delay(); 
+static float get_delay(void); 
   Returns how long time it will take to play the data currently in the
   output buffer. Be exact, if possible, since the whole timing depends
   on this! In the worst case, return the maximum delay.

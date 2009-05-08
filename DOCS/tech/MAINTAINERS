@@ -43,9 +43,7 @@ Man page translations:
     * Italian: Daniele Forghieri
     * Polish: Waclaw Schiller
     * Spanish: Reynaldo H. Verdejo Pinochet (outdated)
-    * Chinese: unmaintained, outdated
-    * Swedish: unmaintained, outdated, incomplete
-    * Russian: Vladimir Voroshilov (incomplete)
+    * Russian: Vladimir Voroshilov
 
 Documentation translations:
     * Czech: Jiri Heryan
@@ -55,8 +53,8 @@ Documentation translations:
     * Italian: Paolo Tresoldi
     * Polish: Waclaw Schiller
     * Spanish: Reynaldo H. Verdejo Pinochet (outdated)
-    * Chinese (simplified): unmaintained, outdated, still HTML
-    * Italian: unmaintained, outdated, still HTML
+    * Chinese (simplified): unmaintained, outdated
+    * Italian: unmaintained, outdated
     * Russian: Vladimir Voroshilov
 
 Platforms/ports:
@@ -68,8 +66,8 @@ Platforms/ports:
     * OpenBSD: Björn Sandell
     * Solaris: Derek Lewis
     * Win32/Cygwin/MinGW: Sascha Sommer, Joey Parrish
-    * MPlayer OS X frontend: Nicolas Plourde
-    * Mac OS X: Ulion
+    * MPlayer OS X frontend: Nicolas Plourde, Adrian Stutz
+    * Mac OS X: None
     * AIX: Derek Lewis
 
 MPlayer code:
@@ -158,6 +156,7 @@ libvo drivers:
     * vo_aa.c - Alban Bedel
     * vo_caca.c - Howell Tam (Pigeon)
     * vo_bl.c - Rik Snel
+    * vo_corevideo.m - Adrian Stutz
     * vo_cvidix.c - Sascha Sommer
     * vo_dga.c - None
     * vo_dfbmga.c - Ville Syrjälä
@@ -174,7 +173,6 @@ libvo drivers:
     * vo_gl2.c - Reimar Döffinger
     * vo_ivtv.c - Benjamin Zores
     * vo_jpeg.c - Ivo van Poorten
-    * vo_macosx.m - Ulion
     * vo_md5sum.c - Ivo van Poorten
     * vo_mga.c - Attila Kinali
     * vo_mpegpes.c - None
@@ -206,12 +204,12 @@ libao2 drivers:
     * ao_alsa5.c - None
     * ao_alsa.c - Clemens Ladisch
     * ao_arts.c - None
+    * ao_coreaudio.c - None
     * ao_dsound.c - None
     * ao_dxr2.c - None
     * ao_esd.c - None
     * ao_ivtv.c - Benjamin Zores
     * ao_jack.c - Reimar Döffinger
-    * ao_macosx.c - Ulion
     * ao_mpegpes.c - None
     * ao_nas.c - Tobias Diedrich
     * ao_null.c - None

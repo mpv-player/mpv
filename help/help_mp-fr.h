@@ -73,7 +73,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "FPS non spécifié dans l'entête ou invalide ! Utilisez l'option -fps.\n"
 #define MSGTR_TryForceAudioFmtStr "Tente de forcer la famille de codecs audio %s ...\n"
 #define MSGTR_CantFindAudioCodec "Ne peut trouver de codec pour le format audio 0x%X.\n"
-#define MSGTR_RTFMCodecs "Veuillez lire DOCS/HTML/fr/codecs.html !\n"
 #define MSGTR_TryForceVideoFmtStr "Tente de forcer la famille de codecs vidéo %s  ...\n"
 #define MSGTR_CantFindVideoCodec "Ne peut trouver codec pour format -vo sélectionné et vidéo 0x%X.\n"
 #define MSGTR_CannotInitVO "FATAL : Ne peut initialiser le pilote vidéo.\n"

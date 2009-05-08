@@ -694,7 +694,7 @@ Az alap fordítási környezetet az Apple
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>
 telepítésével kapod meg.
 Ha Mac OS X 10.3.9 vagy régebbi verziód és QuickTime 7-esed van,
-használhatod a <option>macosx</option> videó kimeneti vezérlőt is.
+használhatod a <option>corevideo</option> videó kimeneti vezérlőt is.
 </para>
 
 <para>

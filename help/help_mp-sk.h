@@ -71,7 +71,6 @@ static const char help_text[]=
 #define MSGTR_FPSnotspecified "V hlavičke súboru nie je udané (alebo je zlé) FPS! Použite voľbu -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Pokúšam sa vynútiť rodinu audiokodeku %s...\n"
 #define MSGTR_CantFindAudioCodec "Nemôžem nájsť kodek pre audio formát 0x%X!\n"
-#define MSGTR_RTFMCodecs "Prečítajte si DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Pokúšam se vnútiť rodinu videokodeku %s...\n"
 #define MSGTR_CantFindVideoCodec "Nemôžem najsť kodek pre video formát 0x%X!\n"
 #define MSGTR_CannotInitVO "FATAL: Nemôžem inicializovať video driver!\n"

@@ -198,7 +198,7 @@ query_format(uint32_t format)
     return 0;
 }
 
-static uint32_t Directx_CreatePrimarySurface()
+static uint32_t Directx_CreatePrimarySurface(void)
 {
     DDSURFACEDESC2   ddsd;
     //cleanup
@@ -308,7 +308,7 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
 	return 0;
 }
 
-static uint32_t Directx_CreateBackpuffer()
+static uint32_t Directx_CreateBackpuffer(void)
 {
     DDSURFACEDESC2   ddsd;
 	//cleanup
@@ -414,7 +414,7 @@ static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, L
     return 1; // list all adapters
 }
 
-static uint32_t Directx_InitDirectDraw()
+static uint32_t Directx_InitDirectDraw(void)
 {
 	HRESULT    (WINAPI *OurDirectDrawCreateEx)(GUID *,LPVOID *, REFIID,IUnknown FAR *);
 	DDSURFACEDESC2 ddsd;
@@ -531,7 +531,7 @@ static void check_events(void)
     }
 }
 
-static uint32_t Directx_ManageDisplay()
+static uint32_t Directx_ManageDisplay(void)
 {   
     HRESULT         ddrval;
     DDCAPS          capsDrv;
@@ -761,7 +761,7 @@ static uint32_t Directx_ManageDisplay()
 }
 
 //find out supported overlay pixelformats
-static uint32_t Directx_CheckOverlayPixelformats()
+static uint32_t Directx_CheckOverlayPixelformats(void)
 {
     DDCAPS          capsDrv;
     HRESULT         ddrval;
@@ -822,7 +822,7 @@ static uint32_t Directx_CheckOverlayPixelformats()
 }
 
 //find out the Pixelformat of the Primary Surface
-static uint32_t Directx_CheckPrimaryPixelformat()
+static uint32_t Directx_CheckPrimaryPixelformat(void)
 {	
 	uint32_t i=0;
     uint32_t formatcount = 0;

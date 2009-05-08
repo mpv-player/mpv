@@ -740,7 +740,7 @@ GCC 3.x a vyšších.
 Základní prostředí pro kompilaci můžete získat instalací
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>
 od Apple. Máte-li Mac OS X 10.3.9 nebo pozdější a QuickTime 7
-můžete použít výstupní video rozhraní <option>macosx</option>.
+můžete použít výstupní video rozhraní <option>corevideo</option>.
 </para>
 
 <para>

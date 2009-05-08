@@ -1,5 +1,5 @@
 /*
- * MPlayer Mac OS X video output driver
+ * CoreVideo video output driver
  *
  * Copyright (c) 2005 Nicolas Plourde <nicolasplourde@gmail.com>
  *
@@ -22,7 +22,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
-#import <QuickTime/QuickTime.h>
+#import <Carbon/Carbon.h>
 
 // MPlayer OS X VO Protocol
 @protocol MPlayerOSXVOProto

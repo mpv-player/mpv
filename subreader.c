@@ -1261,7 +1261,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block,
 		sub = nextsub;
 		m = 0;
 	}
-	if (n) mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Adjusted %d subtitle(s).\n", n);
+	if (n) mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: Adjusted %d subtitle(s).\n", n);
 }
 
 struct subreader {
@@ -1364,7 +1364,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     mpsub_multiplier = (uses_time ? 100.0 : 1.0);
     if (sub_format==SUB_INVALID) {mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");return NULL;}
     srp=sr+sub_format;
-    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Detected subtitle file format: %s\n", srp->name);
+    mp_msg(MSGT_SUBREADER, MSGL_V, "SUB: Detected subtitle file format: %s\n", srp->name);
     
     stream_reset(fd);
     stream_seek(fd,0);
@@ -1479,9 +1479,8 @@ sub_data* sub_read_file (char *filename, float fps) {
 #endif
 
 //    printf ("SUB: Subtitle format %s time.\n", uses_time?"uses":"doesn't use");
-    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Read %i subtitles", sub_num);
-    if (sub_errs) mp_msg(MSGT_SUBREADER,MSGL_INFO,", %i bad line(s).\n", sub_errs);
-    else 	  mp_msg(MSGT_SUBREADER,MSGL_INFO,".\n");
+    mp_msg(MSGT_SUBREADER, MSGL_V,"SUB: Read %i subtitles, %i bad line(s).\n",
+           sub_num, sub_errs);
 
     if(sub_num<=0){
 	free(first);

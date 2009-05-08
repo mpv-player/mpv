@@ -214,6 +214,8 @@ m_option_t mpegopts_conf[] = {
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+int mp_a52_framesize(uint8_t *buf, int *srate);
+
 static void fix_audio_sys_header(muxer_priv_t *priv, uint8_t id, uint8_t newid, uint32_t size)
 {
 	uint8_t i;
