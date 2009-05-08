@@ -151,7 +151,7 @@ struct vdpctx {
         VdpBitmapSurface surface;
         int w;
         int h;
-        char in_use;
+        bool in_use;
     } *eosd_surfaces;
 
     // List of surfaces to be rendered
@@ -170,6 +170,9 @@ struct vdpctx {
 
     bool visible_buf;
     bool paused;
+
+    // These tell what's been initialized and uninit() should free/uninitialize
+    bool mode_switched;
 };
 
 
@@ -301,7 +304,7 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
     };
 
     vdp_st = vc->vdp_device_create(x11->display, x11->screen,
-                               &vc->vdp_device, &vc->vdp_get_proc_address);
+                                   &vc->vdp_device, &vc->vdp_get_proc_address);
     if (vdp_st != VDP_STATUS_OK) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling vdp_device_create_x11: %i\n", vdp_st);
         return -1;
@@ -503,9 +506,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     {
 #ifdef CONFIG_XF86VM
-        if (vm)
+        if (vm) {
             vo_vm_switch(vo);
-        else
+            vc->mode_switched = true;
+        }
 #endif
         XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
                              &attribs);
@@ -615,7 +619,8 @@ static void draw_osd_I8A8(void *ctx, int x0, int y0, int w, int h,
 
     index_data_size_required = 2*w*h;
     if (vc->index_data_size < index_data_size_required) {
-        vc->index_data      = realloc(vc->index_data, index_data_size_required);
+        vc->index_data      = talloc_realloc_size(vc, vc->index_data,
+                                                  index_data_size_required);
         vc->index_data_size = index_data_size_required;
     }
 
@@ -710,7 +715,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
         goto eosd_skip_upload;
 
     for (j=0; j<vc->eosd_surface_count; j++)
-        vc->eosd_surfaces[j].in_use = 0;
+        vc->eosd_surfaces[j].in_use = false;
 
     for (i = img; i; i = i->next) {
         // Try to reuse a suitable surface
@@ -724,7 +729,7 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
         }
         // None found, allocate a new surface
         if (found < 0) {
-            for (j=0; j<vc->eosd_surface_count; j++) {
+            for (j = 0; j < vc->eosd_surface_count; j++) {
                 if (!vc->eosd_surfaces[j].in_use) {
                     if (vc->eosd_surfaces[j].surface != VDP_INVALID_HANDLE)
                         vdp->bitmap_surface_destroy(vc->eosd_surfaces[j].surface);
@@ -736,20 +741,25 @@ static void generate_eosd(struct vo *vo, mp_eosd_images_t *imgs)
             if (found < 0) {
                 j = found = vc->eosd_surface_count;
                 vc->eosd_surface_count = vc->eosd_surface_count ? vc->eosd_surface_count*2 : EOSD_SURFACES_INITIAL;
-                vc->eosd_surfaces = realloc(vc->eosd_surfaces, vc->eosd_surface_count * sizeof(*vc->eosd_surfaces));
-                vc->eosd_targets  = realloc(vc->eosd_targets,  vc->eosd_surface_count * sizeof(*vc->eosd_targets));
-                for(j=found; j<vc->eosd_surface_count; j++) {
+                vc->eosd_surfaces = talloc_realloc_size(vc, vc->eosd_surfaces,
+                                                vc->eosd_surface_count
+                                                * sizeof(*vc->eosd_surfaces));
+                vc->eosd_targets  = talloc_realloc_size(vc, vc->eosd_targets,
+                                                vc->eosd_surface_count 
+                                                * sizeof(*vc->eosd_targets));
+                for(j = found; j < vc->eosd_surface_count; j++) {
                     vc->eosd_surfaces[j].surface = VDP_INVALID_HANDLE;
-                    vc->eosd_surfaces[j].in_use = 0;
+                    vc->eosd_surfaces[j].in_use = false;
                 }
             }
-            vdp_st = vdp->bitmap_surface_create(vc->vdp_device, VDP_RGBA_FORMAT_A8,
+            vdp_st = vdp->bitmap_surface_create(vc->vdp_device,
+                                                VDP_RGBA_FORMAT_A8,
                 i->w, i->h, VDP_TRUE, &vc->eosd_surfaces[found].surface);
             CHECK_ST_WARNING("EOSD: error when creating surface");
             vc->eosd_surfaces[found].w = i->w;
             vc->eosd_surfaces[found].h = i->h;
         }
-        vc->eosd_surfaces[found].in_use = 1;
+        vc->eosd_surfaces[found].in_use = true;
         vc->eosd_targets[vc->eosd_render_count].surface = vc->eosd_surfaces[found].surface;
         destRect.x0 = 0;
         destRect.y0 = 0;
@@ -964,40 +974,27 @@ static void destroy_vdpau_objects(struct vo *vo)
         CHECK_ST_WARNING("Error when calling vdp->output_surface_destroy");
     }
 
-    for (i = 0; i<vc->eosd_surface_count; i++) {
+    for (i = 0; i < vc->eosd_surface_count; i++) {
         if (vc->eosd_surfaces[i].surface == VDP_INVALID_HANDLE)
             continue;
         vdp_st = vdp->bitmap_surface_destroy(vc->eosd_surfaces[i].surface);
         CHECK_ST_WARNING("Error when calling vdp->bitmap_surface_destroy");
     }
 
-    if (vc->vdp_device != VDP_INVALID_HANDLE) {
-        vdp_st = vdp->device_destroy(vc->vdp_device);
-        CHECK_ST_WARNING("Error when calling vdp_device_destroy");
-    }
+    vdp_st = vdp->device_destroy(vc->vdp_device);
+    CHECK_ST_WARNING("Error when calling vdp_device_destroy");
 }
 
 static void uninit(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    if (!vo->config_count)
-        return;
-    vc->visible_buf = false;
-
     /* Destroy all vdpau objects */
     destroy_vdpau_objects(vo);
 
-    free(vc->index_data);
-    vc->index_data = NULL;
-
-    free(vc->eosd_surfaces);
-    vc->eosd_surfaces = NULL;
-    free(vc->eosd_targets);
-    vc->eosd_targets = NULL;
-
 #ifdef CONFIG_XF86VM
-    vo_vm_close(vo);
+    if (vc->mode_switched)
+        vo_vm_close(vo);
 #endif
     vo_x11_uninit(vo);
 
@@ -1032,15 +1029,20 @@ static int preinit(struct vo *vo, const char *arg)
     struct vdpctx *vc = talloc_zero(vo, struct vdpctx);
     vo->priv = vc;
 
-    vc->deint = 0;
+    // Mark everything as invalid first so uninit() can tell what has been
+    // allocated
+    vc->decoder = VDP_INVALID_HANDLE;
+    for (i = 0; i < MAX_VIDEO_SURFACES; i++)
+        vc->surface_render[i].surface = VDP_INVALID_HANDLE;
+    vc->video_mixer = VDP_INVALID_HANDLE;
+    vc->flip_queue = VDP_INVALID_HANDLE;
+    vc->flip_target = VDP_INVALID_HANDLE;
+    for (i = 0; i <= NUM_OUTPUT_SURFACES; i++)
+        vc->output_surfaces[i] = VDP_INVALID_HANDLE;
+    vc->vdp_device = VDP_INVALID_HANDLE;
+
     vc->deint_type = 3;
-    vc->deint_counter = 0;
-    vc->deint_buffer_past_frames = 0;
-    vc->deint_mpi[0] = vc->deint_mpi[1] = NULL;
     vc->chroma_deint = 1;
-    vc->pullup = 0;
-    vc->denoise = 0;
-    vc->sharpen = 0;
     const opt_t subopts[] = {
         {"deint",   OPT_ARG_INT,   &vc->deint,   (opt_test_f)int_non_neg},
         {"chroma-deint", OPT_ARG_BOOL,  &vc->chroma_deint,  NULL},
@@ -1070,29 +1072,29 @@ static int preinit(struct vo *vo, const char *arg)
     if (!vc->vdp_device_create) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Could not find function %s in %s\n",
                vdpau_device_create, vdpaulibrary);
+        dlclose(vc->vdpau_lib_handle);
         return -1;
     }
-    if (!vo_init(vo) || win_x11_init_vdpau_procs(vo))
+    if (!vo_init(vo)) {
+        dlclose(vc->vdpau_lib_handle);
         return -1;
+    }
 
-    vc->decoder = VDP_INVALID_HANDLE;
-    for (i = 0; i < MAX_VIDEO_SURFACES; i++)
-        vc->surface_render[i].surface = VDP_INVALID_HANDLE;
-    vc->video_mixer = VDP_INVALID_HANDLE;
-    for (i = 0; i <= NUM_OUTPUT_SURFACES; i++)
-        vc->output_surfaces[i] = VDP_INVALID_HANDLE;
-    vc->flip_queue = VDP_INVALID_HANDLE;
+    // After this calling uninit() should work to free resources
+
+    if (win_x11_init_vdpau_procs(vo) < 0) {
+        if (vc->vdp->device_destroy)
+            vc->vdp->device_destroy(vc->vdp_device);
+        vo_x11_uninit(vo);
+        dlclose(vc->vdpau_lib_handle);
+        return -1;
+    }
+
     vc->output_surface_width = vc->output_surface_height = -1;
 
     // full grayscale palette.
     for (i = 0; i < PALETTE_SIZE; ++i)
         vc->palette[i] = (i << 16) | (i << 8) | i;
-    vc->index_data = NULL;
-    vc->index_data_size = 0;
-
-    vc->eosd_surface_count = vc->eosd_render_count = 0;
-    vc->eosd_surfaces = NULL;
-    vc->eosd_targets  = NULL;
 
     vc->procamp.struct_version = VDP_PROCAMP_VERSION;
     vc->procamp.brightness = 0.0;
