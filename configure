@@ -7968,7 +7968,7 @@ EOF
 fi
 if test "$_lirc" = yes ; then
   def_lirc='#define CONFIG_LIRC 1'
-  extra_ldflags="$extra_ldflags -llirc_client"
+  libs_mplayer="$libs_mplayer -llirc_client"
 else
   def_lirc='#undef CONFIG_LIRC'
 fi
@@ -7985,7 +7985,7 @@ EOF
 fi
 if test "$_lircc" = yes ; then
   def_lircc='#define CONFIG_LIRCC 1'
-  extra_ldflags="$extra_ldflags -llircc"
+  libs_mplayer="$libs_mplayer -llircc"
 else
   def_lircc='#undef CONFIG_LIRCC'
 fi
