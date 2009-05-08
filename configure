@@ -3855,7 +3855,7 @@ EOF
 fi
 if test "$_apple_remote" = yes ; then
   def_apple_remote='#define CONFIG_APPLE_REMOTE 1'
-  extra_ldflags="$extra_ldflags -framework IOKit"
+  libs_mplayer="$libs_mplayer -framework IOKit -framework Cocoa"
 else
   def_apple_remote='#undef CONFIG_APPLE_REMOTE'
 fi
