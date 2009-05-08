@@ -504,41 +504,39 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     vc->visible_buf = false;
 
-    {
 #ifdef CONFIG_XF86VM
-        if (vm) {
-            vo_vm_switch(vo);
-            vc->mode_switched = true;
-        }
-#endif
-        XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
-                             &attribs);
-        depth = attribs.depth;
-        if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
-            depth = 24;
-        XMatchVisualInfo(x11->display, x11->screen, depth, TrueColor, &vinfo);
-
-        xswa.background_pixel = 0;
-        xswa.border_pixel     = 0;
-        /* Do not use CWBackPixel: It leads to VDPAU errors after
-           aspect ratio changes. */
-        xswamask = CWBorderPixel;
-
-        vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
-                                flags, CopyFromParent, "vdpau", title);
-        XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
-
-#ifdef CONFIG_XF86VM
-        if (vm) {
-            /* Grab the mouse pointer in our window */
-            if (vo_grabpointer)
-                XGrabPointer(x11->display, x11->window, True, 0,
-                             GrabModeAsync, GrabModeAsync,
-                             x11->window, None, CurrentTime);
-            XSetInputFocus(x11->display, x11->window, RevertToNone, CurrentTime);
-        }
-#endif
+    if (vm) {
+        vo_vm_switch(vo);
+        vc->mode_switched = true;
     }
+#endif
+    XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
+                         &attribs);
+    depth = attribs.depth;
+    if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
+        depth = 24;
+    XMatchVisualInfo(x11->display, x11->screen, depth, TrueColor, &vinfo);
+
+    xswa.background_pixel = 0;
+    xswa.border_pixel     = 0;
+    /* Do not use CWBackPixel: It leads to VDPAU errors after
+     * aspect ratio changes. */
+    xswamask = CWBorderPixel;
+
+    vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
+                            flags, CopyFromParent, "vdpau", title);
+    XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
+
+#ifdef CONFIG_XF86VM
+    if (vm) {
+        /* Grab the mouse pointer in our window */
+        if (vo_grabpointer)
+            XGrabPointer(x11->display, x11->window, True, 0,
+                         GrabModeAsync, GrabModeAsync,
+                         x11->window, None, CurrentTime);
+        XSetInputFocus(x11->display, x11->window, RevertToNone, CurrentTime);
+    }
+#endif
 
     if ((flags & VOFLAG_FULLSCREEN) && WinID <= 0)
         vo_fs = 1;
