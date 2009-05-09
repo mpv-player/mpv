@@ -505,6 +505,8 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	// Which DCT method to use. AUTO will select the fastest one
 	j->s->avctx->dct_algo = FF_DCT_AUTO;
 	j->s->intra_quant_bias= 1<<(QUANT_BIAS_SHIFT-1); //(a + x/2)/x
+	// indicate we 'decode' to jpeg 4:2:2
+	j->s->avctx->pix_fmt = PIX_FMT_YUVJ422P;
 
 	j->s->avctx->thread_count = 1;
 
