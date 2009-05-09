@@ -6,48 +6,6 @@
 <sect1 id="skin-overview">
 <title>Overview</title>
 
-<para>
-It does not really have anything to do with the skin format, but you should
-know that <application>MPlayer</application> has
-<emphasis role="bold">no</emphasis> builtin skin, so
-<emphasis role="bold">at least one skin must be installed in order to be able
-to use the GUI.</emphasis>
-</para>
-
-<!-- ********** -->
-
-<sect2 id="skin-overview-directories">
-<title>Directories</title>
-
-<para>
-The directories searched for skins are (in order):
-<orderedlist>
-<listitem><para>
-  <filename class="directory">$(DATADIR)/skins/</filename>
-</para></listitem>
-<listitem><para>
-  <filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
-</para></listitem>
-<listitem><para>
-  <filename class="directory">~/.mplayer/skins/</filename>
-</para></listitem>
-</orderedlist>
-</para>
-
-<para>
-Note that the first path may vary according to the way
-<application>MPlayer</application> was configured (see the
-<option>--prefix</option> and <option>--datadir</option>
-arguments of the <command>configure</command> script).
-</para>
-
-<para>
-Every skin is installed into its own directory under one of the directories
-listed above, for example:
-<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
-</para>
-</sect2>
-
 <!-- ********** -->
 
 <sect2 id="skin-overview-components">
