@@ -50,18 +50,6 @@ listed above, for example:
 
 <!-- ********** -->
 
-<sect2 id="skin-overview-formats">
-<title>Image formats</title>
-
-<para>Images must be truecolor (24 or 32 bpp) PNGs.</para>
-<para>
-In the main window and in the playbar (see below) you can use images with
-`transparency': Regions filled with the color #FF00FF (magenta) are fully
-transparent when viewed by <application>MPlayer</application>. This means
-that you can even have shaped windows if your X server has the XShape extension.
-</para>
-</sect2>
-
 <sect2 id="skin-overview-components">
 <title>Skin components</title>
 
@@ -159,6 +147,18 @@ menu entries to work, <application>MPlayer</application> must know what to
 do if they are clicked. This is done by <link linkend="skin-gui">messages</link>
 (events). For these items you must define the messages to be generated when
 they are clicked.
+</para>
+</sect2>
+
+<sect2 id="skin-overview-formats">
+<title>Image formats</title>
+
+<para>Images must be truecolor (24 or 32 bpp) PNGs.</para>
+<para>
+In the main window and in the playbar (see below) you can use images with
+`transparency': Regions filled with the color #FF00FF (magenta) are fully
+transparent when viewed by <application>MPlayer</application>. This means
+that you can even have shaped windows if your X server has the XShape extension.
 </para>
 </sect2>
 
