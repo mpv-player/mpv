@@ -1127,7 +1127,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 	mp_msg(MSGT_DEMUX,MSGL_V, "Chunk: %.4s (%x) (size: 0x%x, offset: 0x%x)\n",
 	    (char *)&chunk_id, chunk_id, chunk_size, chunk_pos);
 	
-	if (chunk_size < 10){
+	if (chunk_id != MKTAG('D', 'A', 'T', 'A') && chunk_size < 10){
 	    mp_msg(MSGT_DEMUX,MSGL_ERR,"demux_real: invalid chunksize! (%d)\n",chunk_size);
 	    break; //return;
 	}
