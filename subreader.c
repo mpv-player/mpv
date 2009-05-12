@@ -53,7 +53,7 @@ int sub_match_fuzziness=0; // level of sub name matching fuzziness
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
 #ifdef CONFIG_SORTSUB
-/* 
+/*
    Some subtitling formats, namely AQT and Subrip09, define the end of a
    subtitle as the beginning of the following. Since currently we read one
    subtitle at time, for these format we keep two global *subtitle,
@@ -114,7 +114,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
 
 	case 0: /* find "START=" or "Slacktime:" */
 	    slacktime_s = stristr (s, "Slacktime:");
-	    if (slacktime_s) 
+	    if (slacktime_s)
                 sub_slacktime = strtol (slacktime_s+10, NULL, 0) / 10;
 
 	    s = stristr (s, "Start=");
@@ -126,7 +126,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
 		state = 1; continue;
 	    }
 	    break;
- 
+
 	case 1: /* find (optionnal) "<P", skip other TAGs */
 	    for  (; *s == ' ' || *s == '\t'; s++); /* strip blanks, if any */
 	    if (*s == '\0') break;
@@ -138,11 +138,11 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
 	      break;
 	    s++;
 	    continue;
- 
+
 	case 2: /* find ">" */
 	    if ((s = strchr (s, '>'))) { s++; state = 3; p = text; continue; }
 	    break;
- 
+
 	case 3: /* get all text until '<' appears */
 	    if (*s == '\0') break;
 	    else if (!strncasecmp (s, "<br>", 4)) {
@@ -160,7 +160,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
 
 	    /* skip duplicated space */
 	    if (p > text + 2) if (*(p-1) == ' ' && *(p-2) == ' ') p--;
-	    
+
 	    continue;
 
 	case 4: /* get current->end or skip <TAG> */
@@ -221,7 +221,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
 		return 0;
 	    }
 	}
-	    
+
     } while (state != 99);
 
     // For the last subtitle
@@ -231,7 +231,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
 	if (text[0] != '\0')
 	    current->text[current->lines++] = strdup (text);
     }
-    
+
     return current;
 }
 
@@ -239,21 +239,21 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
 static char *sub_readtext(char *source, char **dest) {
     int len=0;
     char *p=source;
-    
+
 //    printf("src=%p  dest=%p  \n",source,dest);
 
     while ( !eol(*p) && *p!= '|' ) {
 	p++,len++;
     }
-    
+
     *dest= malloc (len+1);
     if (!dest) {return ERR;}
-    
+
     strncpy(*dest, source, len);
     (*dest)[len]=0;
-    
+
     while (*p=='\r' || *p=='\n' || *p=='|') p++;
-    
+
     if (*p) return p;  // not-last text field
     else return NULL;  // last text field
 }
@@ -317,7 +317,7 @@ static subtitle *sub_read_line_subrip(stream_t* st, subtitle *current) {
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL, *q=NULL;
     int len;
-    
+
     while (1) {
 	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4) < 8) continue;
@@ -347,7 +347,7 @@ static subtitle *sub_read_line_subviewer(stream_t *st,subtitle *current) {
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL;
     int i,len;
-    
+
     while (!current->text[0]) {
 	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	if ((len=sscanf (line, "%d:%d:%d%[,.:]%d --> %d:%d:%d%[,.:]%d",&a1,&a2,&a3,(char *)&i,&a4,&b1,&b2,&b3,(char *)&i,&b4)) < 10)
@@ -399,7 +399,7 @@ static subtitle *sub_read_line_subviewer2(stream_t *st,subtitle *current) {
     int a1,a2,a3,a4;
     char *p=NULL;
     int i,len;
-   
+
     while (!current->text[0]) {
         if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	if (line[0]!='{')
@@ -443,11 +443,11 @@ static subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current) {
                 /* removed by wodzu
 		p=line;	
  		// finds the body of the subtitle
- 		for (i=0; i<3; i++){              
+ 		for (i=0; i<3; i++){
 		   p=strchr(p,':');
 		   if (p==NULL) break;
 		   ++p;
-		} 
+		}
 		if (p==NULL) {
 		    printf("SUB: Skipping incorrect subtitle line!\n");
 		    continue;
@@ -474,14 +474,14 @@ static subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current) {
 }
 
 static subtitle *sub_read_line_rt(stream_t *st,subtitle *current) {
-	//TODO: This format uses quite rich (sub/super)set of xhtml 
+	//TODO: This format uses quite rich (sub/super)set of xhtml
 	// I couldn't check it since DTD is not included.
-	// WARNING: full XML parses can be required for proper parsing 
+	// WARNING: full XML parses can be required for proper parsing
     char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL,*next=NULL;
     int i,len,plen;
-    
+
     while (!current->text[0]) {
 	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	//TODO: it seems that format of time is not easily determined, it may be 1:12, 1:12.0 or 0:1:12.0
@@ -500,7 +500,7 @@ static subtitle *sub_read_line_rt(stream_t *st,subtitle *current) {
 	((len=sscanf (line, "<%*[tT]ime %*[bB]egin=\"%d.%d\"%*[^<]<clear/>%n",&a3,&a4,&plen)) < 2) &&
 	((len=sscanf (line, "<%*[tT]ime %*[bB]egin=\"%d:%d\"%*[^<]<clear/>%n",&a2,&a3,&plen)) < 2) &&
 	((len=sscanf (line, "<%*[tT]ime %*[bB]egin=\"%d:%d.%d\"%*[^<]<clear/>%n",&a2,&a3,&a4,&plen)) < 3) &&
-	((len=sscanf (line, "<%*[tT]ime %*[bB]egin=\"%d:%d:%d.%d\"%*[^<]<clear/>%n",&a1,&a2,&a3,&a4,&plen)) < 4) 
+	((len=sscanf (line, "<%*[tT]ime %*[bB]egin=\"%d:%d:%d.%d\"%*[^<]<clear/>%n",&a1,&a2,&a3,&a4,&plen)) < 4)
 	)
 	    continue;
 	current->start = a1*360000+a2*6000+a3*100+a4/10;
@@ -550,13 +550,13 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current) {
 		if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	} while (sscanf (line, "Dialogue: Marked=%d,%d:%d:%d.%d,%d:%d:%d.%d,"
 			"%[^\n\r]", &nothing,
-			&hour1, &min1, &sec1, &hunsec1, 
+			&hour1, &min1, &sec1, &hunsec1,
 			&hour2, &min2, &sec2, &hunsec2,
 			line3) < 9
 		 &&
 		 sscanf (line, "Dialogue: %d,%d:%d:%d.%d,%d:%d:%d.%d,"
 			 "%[^\n\r]", &nothing,
-			 &hour1, &min1, &sec1, &hunsec1, 
+			 &hour1, &min1, &sec1, &hunsec1,
 			 &hour2, &min2, &sec2, &hunsec2,
 			 line3) < 9	    );
 
@@ -566,7 +566,7 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current) {
           {
             tmp = line2;
             if(!(tmp=strchr(++tmp, ','))) break;
-            if(*(++tmp) == ' ') break; 
+            if(*(++tmp) == ' ') break;
                   /* a space after a comma means we're already in a sentence */
             line2 = tmp;
           }
@@ -673,9 +673,9 @@ static subtitle *sub_read_line_mpsub(stream_t *st, subtitle *current) {
 		if (!stream_read_line(st, line, LINE_LEN)) return NULL;
 	} while (sscanf (line, "%f %f", &a, &b) !=2);
 
-	mpsub_position += a*mpsub_multiplier; 
+	mpsub_position += a*mpsub_multiplier;
 	current->start=(int) mpsub_position;
-	mpsub_position += b*mpsub_multiplier; 
+	mpsub_position += b*mpsub_multiplier;
 	current->end=(int) mpsub_position;
 
 	while (num < SUB_MAX_TEXT) {
@@ -719,13 +719,13 @@ static subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
         if (!(sscanf (line, "-->> %ld", &(current->start)) <1))
 		break;
     }
-    
+
 #ifdef CONFIG_SORTSUB
-    previous_sub_end = (current->start) ? current->start - 1 : 0; 
+    previous_sub_end = (current->start) ? current->start - 1 : 0;
 #else
-    if (previous_aqt_sub != NULL) 
+    if (previous_aqt_sub != NULL)
 	previous_aqt_sub->end = current->start-1;
-    
+
     previous_aqt_sub = current;
 #endif
 
@@ -769,7 +769,7 @@ static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
     int a1,a2,a3;
     char * next=NULL;
     int i,len;
-   
+
     while (1) {
     // try to locate next subtitle
         if (!stream_read_line (st, line, LINE_LEN))
@@ -779,13 +779,13 @@ static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
     }
 
     current->start = a1*360000+a2*6000+a3*100;
-    
+
 #ifdef CONFIG_SORTSUB
-    previous_sub_end = (current->start) ? current->start - 1 : 0; 
+    previous_sub_end = (current->start) ? current->start - 1 : 0;
 #else
-    if (previous_subrip09_sub != NULL) 
+    if (previous_subrip09_sub != NULL)
 	previous_subrip09_sub->end = current->start-1;
-    
+
     previous_subrip09_sub = current;
 #endif
 
@@ -793,9 +793,9 @@ static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
 	return NULL;
 
     next = line,i=0;
-    
+
     current->text[0]=""; // just to be sure that string is clear
-    
+
     while ((next =sub_readtext (next, &(current->text[i])))) {
 	if (current->text[i]==ERR) {return ERR;}
 	i++;
@@ -1011,7 +1011,7 @@ static int sub_autodetect (stream_t* st, int *uses_time) {
     char line[LINE_LEN+1];
     int i,j=0;
     char p;
-    
+
     while (j < 100) {
 	j++;
 	if (!stream_read_line (st, line, LINE_LEN))
@@ -1089,7 +1089,7 @@ void	subcp_open (stream_t *st)
 		  } else {
 		    cp_tmp = enca_fallback;
 		    if (st)
-		      mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: enca failed, stream must be seekable.\n"); 
+		      mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: enca failed, stream must be seekable.\n");
 		  }
 		}
 #endif
@@ -1162,7 +1162,7 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
   if(flip_hebrew) { // Please fix the indentation someday
   fribidi_set_mirroring(1);
   fribidi_set_reorder_nsm(0);
-   
+
   if( sub_utf8 == 0 ) {
     char_set_num = fribidi_parse_charset (fribidi_charset?fribidi_charset:"ISO8859-8");
   }else {
@@ -1286,7 +1286,7 @@ const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *prefe
 	mp_msg(MSGT_SUBREADER, MSGL_V, "%s ", languages[i]);
     }
     mp_msg(MSGT_SUBREADER, MSGL_V, "\n");
-    
+
     for (i = 0; i < langcnt; i++) {
 	if (strcasecmp(languages[i], preferred_language) != 0) continue;
 	analyser = enca_analyser_alloc(languages[i]);
@@ -1297,7 +1297,7 @@ const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *prefe
 	    break;
 	}
     }
-    
+
     free(languages);
 
     if (!detected_sub_cp) {
@@ -1321,7 +1321,7 @@ const char* guess_cp(stream_t *st, const char *preferred_language, const char *f
     buflen = stream_read(st,buffer, MAX_GUESS_BUFFER_SIZE);
 
     detected_sub_cp = guess_buffer_cp(buffer, buflen, preferred_language, fallback);
-    
+
     free(buffer);
     stream_reset(st);
     stream_seek(st,0);
@@ -1355,17 +1355,17 @@ sub_data* sub_read_file (char *filename, float fps) {
 	    { sub_read_line_mpl2, NULL, "mpl2" }
     };
     struct subreader *srp;
-    
+
     if(filename==NULL) return NULL; //qnx segfault
     i = 0;
     fd=open_stream (filename, NULL, &i); if (!fd) return NULL;
-    
+
     sub_format=sub_autodetect (fd, &uses_time);
     mpsub_multiplier = (uses_time ? 100.0 : 1.0);
     if (sub_format==SUB_INVALID) {mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");return NULL;}
     srp=sr+sub_format;
     mp_msg(MSGT_SUBREADER, MSGL_V, "SUB: Detected subtitle file format: %s\n", srp->name);
-    
+
     stream_reset(fd);
     stream_seek(fd,0);
 
@@ -1395,13 +1395,13 @@ sub_data* sub_read_file (char *filename, float fps) {
 #endif
 	    return NULL;
     }
-    
+
 #ifdef CONFIG_SORTSUB
     sub = malloc(sizeof(subtitle));
     //This is to deal with those formats (AQT & Subrip) which define the end of a subtitle
     //as the beginning of the following
     previous_sub_end = 0;
-#endif    
+#endif
     while(1){
         if(sub_num>=n_max){
             n_max+=16;
@@ -1425,7 +1425,7 @@ sub_data* sub_read_file (char *filename, float fps) {
           subcp_close();
 #endif
     	  if ( first ) free(first);
-	  return NULL; 
+	  return NULL;
 	 }
         // Apply any post processing that needs recoding first
         if ((sub!=ERR) && !sub_no_text_pp && srp->post) srp->post(sub);
@@ -1471,7 +1471,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 #endif	
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
-    
+
     free_stream(fd);
 
 #ifdef CONFIG_ICONV
@@ -1713,7 +1713,7 @@ char * strreplace( char * in,char * what,char * whereof )
 {
  int i;
  char * tmp;
- 
+
  if ( ( in == NULL )||( what == NULL )||( whereof == NULL )||( ( tmp=strstr( in,what ) ) == NULL ) ) return NULL;
  for( i=0;i<strlen( whereof );i++ ) tmp[i]=whereof[i];
  if ( strlen( what ) > strlen( whereof ) ) tmp[i]=0;
@@ -1744,7 +1744,7 @@ static void strcpy_trim(char *d, char *s)
     }
     *d = 0;
 }
- 
+
 static void strcpy_strip_ext(char *d, char *s)
 {
     char *tmp = strrchr(s,'.');
@@ -1760,7 +1760,7 @@ static void strcpy_strip_ext(char *d, char *s)
 	d++;
     }
 }
- 
+
 static void strcpy_get_ext(char *d, char *s)
 {
     char *tmp = strrchr(s,'.');
@@ -1802,14 +1802,14 @@ char** sub_filenames(const char* path, char *fname)
 {
     char *f_dir, *f_fname, *f_fname_noext, *f_fname_trim, *tmp, *tmp_sub_id;
     char *tmp_fname_noext, *tmp_fname_trim, *tmp_fname_ext, *tmpresult;
- 
+
     int len, pos, found, i, j;
     char * sub_exts[] = {  "utf", "utf8", "utf-8", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
     subfn *result;
     char **result2;
-    
+
     int subcnt;
- 
+
     FILE *f;
 
     DIR *d;
@@ -1831,15 +1831,15 @@ char** sub_filenames(const char* path, char *fname)
 
     result = malloc(sizeof(subfn)*MAX_SUBTITLE_FILES);
     memset(result, 0, sizeof(subfn)*MAX_SUBTITLE_FILES);
-    
+
     subcnt = 0;
-    
+
     tmp = strrchr(fname,'/');
 #if defined(__MINGW32__) || defined(__CYGWIN__) || defined(__OS2__)
     if(!tmp)tmp = strrchr(fname,'\\');
     if(!tmp)tmp = strrchr(fname,':');
 #endif
-    
+
     // extract filename & dirname from fname
     if (tmp) {
 	strcpy(f_fname, tmp+1);
@@ -1850,7 +1850,7 @@ char** sub_filenames(const char* path, char *fname)
 	strcpy(f_fname, fname);
 	strcpy(f_dir, "./");
     }
- 
+
     strcpy_strip_ext(f_fname_noext, f_fname);
     strcpy_trim(f_fname_trim, f_fname_noext);
 
@@ -1889,7 +1889,7 @@ char** sub_filenames(const char* path, char *fname)
 			break;
 		    }
 		}
- 
+
 		// we have a (likely) subtitle file
 		if (found) {
 		    int prio = 0;
@@ -1900,7 +1900,7 @@ char** sub_filenames(const char* path, char *fname)
 			if (strcmp(tmp_fname_trim, tmpresult) == 0 && sub_match_fuzziness >= 1) {
 			    // matches the movie name + lang extension
 			    prio = 5;
-			}		    
+			}
 		    }
 		    if (!prio && strcmp(tmp_fname_trim, f_fname_trim) == 0) {
 			// matches the movie name
@@ -1950,11 +1950,11 @@ char** sub_filenames(const char* path, char *fname)
 	    }
 	    closedir(d);
 	}
- 
+
     }
 
     if (tmp_sub_id) free(tmp_sub_id);
-    
+
     free(f_dir);
     free(f_fname);
     free(f_fname_noext);
@@ -1975,7 +1975,7 @@ char** sub_filenames(const char* path, char *fname)
 	result2[i] = result[i].fname;
     }
     result2[subcnt] = NULL;
-    
+
     free(result);
 
     return result2;
@@ -1998,7 +1998,7 @@ void list_sub_file(sub_data* subd){
 	mp_msg(MSGT_SUBREADER,MSGL_INFO,"\n");
     }
 
-    mp_msg(MSGT_SUBREADER,MSGL_INFO,"Subtitle format %s time.\n", 
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"Subtitle format %s time.\n",
                                   subd->sub_uses_time ? "uses":"doesn't use");
     mp_msg(MSGT_SUBREADER,MSGL_INFO,"Read %i subtitles, %i errors.\n", subd->sub_num, subd->sub_errs);
 }
@@ -2015,7 +2015,7 @@ void dump_srt(sub_data* subd, float fps){
 	sub_fps = fps;
     fd=fopen("dumpsub.srt","w");
     if(!fd)
-    { 
+    {
 	perror("dump_srt: fopen");
 	return;
     }
@@ -2081,7 +2081,7 @@ void dump_mpsub(sub_data* subd, float fps){
 			fprintf (fd, "%.0f",a);
 			else
 			fprintf (fd, "%.2f",a);
-			    
+
 			if ( (float)((int)b) == b)
 			fprintf (fd, " %.0f\n",b);
 			else
@@ -2128,7 +2128,7 @@ void dump_microdvd(sub_data* subd, float fps) {
 	start -= delay;
 	end -= delay;
 	fprintf(fd, "{%d}{%d}", start, end);
-	for (j = 0; j < subs[i].lines; ++j) 
+	for (j = 0; j < subs[i].lines; ++j)
 	    fprintf(fd, "%s%s", j ? "|" : "", subs[i].text[j]);
 	fprintf(fd, "\n");
     }
@@ -2148,11 +2148,11 @@ void dump_jacosub(sub_data* subd, float fps) {
 	sub_fps = fps;
     fd=fopen("dumpsub.jss","w");
     if(!fd)
-    { 
+    {
 	perror("dump_jacosub: fopen");
 	return;
     }
-    fprintf(fd, "#TIMERES %d\n", (subd->sub_uses_time) ? 100 : (int)sub_fps); 
+    fprintf(fd, "#TIMERES %d\n", (subd->sub_uses_time) ? 100 : (int)sub_fps);
     for(i=0; i < subd->sub_num; i++)
     {
         onesub=subs+i;    //=&subs[i];
@@ -2197,7 +2197,7 @@ void dump_sami(sub_data* subd, float fps) {
 	sub_fps = fps;
     fd=fopen("dumpsub.smi","w");
     if(!fd)
-    { 
+    {
 	perror("dump_jacosub: fopen");
 	return;
     }
@@ -2243,9 +2243,9 @@ void dump_sami(sub_data* subd, float fps) {
 void sub_free( sub_data * subd )
 {
  int i;
- 
+
     if ( !subd ) return;
- 
+
     if (subd->subtitles) {
 	for (i=0; i < subd->subtitles->lines; i++) free( subd->subtitles->text[i] );
 	free( subd->subtitles );
@@ -2306,7 +2306,7 @@ void sub_add_text(subtitle *sub, const char *txt, int len, double endpts) {
       buf[pos] = 0;
       sub->lines++;
       pos = 0;
-      buf = malloc(MAX_SUBLINE + 1);      
+      buf = malloc(MAX_SUBLINE + 1);
       sub->text[sub->lines] = buf;
       sub->endpts[sub->lines] = endpts;
     }
