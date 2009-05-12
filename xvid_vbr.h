@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *   XviD VBR Library
- *   
+ *
  *   Copyright (C) 2002 Edouard Gomez <ed.gomez@wanadoo.fr>
  *
  *   The curve treatment algorithm is based on work done by Foxer <email?> and
