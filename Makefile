@@ -881,7 +881,7 @@ $(call ADDSUFFIXES,.d .o,mpcommon vobsub stream/stream_cddb stream/network libmp
 libdvdcss/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DVERSION=\"1.2.10\" $(CFLAGS_LIBDVDCSS)
 libdvdnav/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H -DVERSION=\"MPlayer-custom\"
 libdvdnav/% stream/stream_dvdnav%: CFLAGS += $(CFLAGS_LIBDVDNAV)
-libdvdread4/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_LIBDVDCSS_DVDREAD)
+libdvdread4/%: CFLAGS += -D__USE_UNIX98 -D_GNU_SOURCE $(CFLAGS_LIBDVDCSS_DVDREAD)
 libfaad2/%: CFLAGS += -Ilibfaad2 -D_GNU_SOURCE -DHAVE_CONFIG_H $(CFLAGS_FAAD_FIXED)
 
 loader/%: CFLAGS += -Iloader -fno-omit-frame-pointer $(CFLAGS_NO_OMIT_LEAF_FRAME_POINTER)
