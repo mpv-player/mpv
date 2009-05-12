@@ -1,4 +1,4 @@
-/** 
+/**
  * \file subopt-helper.c
  *
  * \brief Compensates the suboption parsing code duplication a bit.
@@ -69,7 +69,7 @@ int subopt_parse( char const * const str, const opt_t * opts )
         {
           char * delim, * arg_delim;
 
-          /* search nearest delimiter ( option or argument delimiter ) */ 
+          /* search nearest delimiter ( option or argument delimiter ) */
           delim = strchr( &str[parse_pos], ':' );
           arg_delim = strchr( &str[parse_pos], '=' );
 
@@ -78,7 +78,7 @@ int subopt_parse( char const * const str, const opt_t * opts )
           {
             delim = strchr( &str[parse_pos], '=' );
           }
-          
+
           substr_len = delim ? // is a delim present
                          delim - &str[parse_pos] : // yes
                          strlen( &str[parse_pos] ); // no, end of string
@@ -204,7 +204,7 @@ else if ( substr_len == opt_len+2 )
         /* break out of the loop, if this subopt is processed */
         if ( next ) { break; }
       }
-      
+
       /* if we had a valid suboption the current pos should *
        * equal the delimiter char, which should be ':' for  *
        * suboptions.                                        */
