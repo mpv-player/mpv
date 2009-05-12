@@ -2,10 +2,10 @@
  * decoder for Closed Captions
  *
  * This decoder relies on MPlayer's OSD to display subtitles.
- * Be warned that the decoding is somewhat preliminary, though it basically works.
+ * Be warned that decoding is somewhat preliminary, though it basically works.
  *
- * Most notably, only the text information is decoded as of now, discarding color,
- * background and position info (see source below).
+ * Most notably, only the text information is decoded as of now, discarding
+ * color, background and position info (see source below).
  *
  * by Matteo Giani
  *
