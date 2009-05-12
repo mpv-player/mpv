@@ -5802,7 +5802,7 @@ if test "$_dvdread_internal" = auto ; then
      || darwin || win32 || os2; then
     _dvdread_internal=yes
     _dvdread=yes
-    extra_cflags="$extra_cflags -Ilibdvdread4"
+    extra_cflags="-Ilibdvdread4 $extra_cflags"
   fi
 elif test "$_dvdread" = auto ; then
   _dvdread=no
