@@ -35,7 +35,7 @@ int _ilog(unsigned int v){
 }
 
 /* 32 bit float (not IEEE; nonnormalized mantissa +
-   biased exponent) : neeeeeee eeemmmmm mmmmmmmm mmmmmmmm 
+   biased exponent) : neeeeeee eeemmmmm mmmmmmmm mmmmmmmm
    Why not IEEE?  It's just not that important here. */
 
 #define VQ_FEXP 10
@@ -78,12 +78,12 @@ ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
     long length=l[i];
     if(length>0){
       ogg_uint32_t entry=marker[length];
-      
+
       /* when we claim a node for an entry, we also claim the nodes
 	 below it (pruning off the imagined tree that may have dangled
 	 from it) as well as blocking the use of any nodes directly
 	 above for leaves */
-      
+
       /* update ourself */
       if(length<32 && (entry>>length)){
 	/* error condition; the lengths must specify an overpopulated tree */
@@ -91,12 +91,12 @@ ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
 	return(NULL);
       }
       r[count++]=entry;
-    
+
       /* Look to see if the next shorter marker points to the node
 	 above. if so, update it and repeat.  */
       {
 	for(j=length;j>0;j--){
-	  
+
 	  if(marker[j]&1){
 	    /* have to jump branches */
 	    if(j==1)
@@ -109,7 +109,7 @@ ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
 	  marker[j]++;
 	}
       }
-      
+
       /* prune the tree; the implicit invariant says all the longer
 	 markers were dangling from our just-taken node.  Dangle them
 	 from our *new* node. */
@@ -122,7 +122,7 @@ ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
     }else
       if(sparsecount==0)count++;
   }
-    
+
   /* bitreverse the words because our bitwise packer/unpacker is LSb
      endian */
   for(i=0,count=0;i<n;i++){
@@ -217,12 +217,12 @@ ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 
 	    val=VFLOAT_ADD(mindel,minpoint,val,point,&point);
 	    val=VFLOAT_ADD(last,lastpoint,val,point,&point);
-	    
+
 	    if(b->q_sequencep){
-	      last=val;	  
+	      last=val;
 	      lastpoint=point;
 	    }
-	    
+
 	    if(sparsemap){
 	      r[sparsemap[count]*b->dim+k]=val;
 	      rp[sparsemap[count]*b->dim+k]=point;
@@ -251,9 +251,9 @@ ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
 
 	    val=VFLOAT_ADD(mindel,minpoint,val,point,&point);
 	    val=VFLOAT_ADD(last,lastpoint,val,point,&point);
-	    
+
 	    if(b->q_sequencep){
-	      last=val;	  
+	      last=val;
 	      lastpoint=point;
 	    }
 
@@ -275,7 +275,7 @@ ogg_int32_t *_book_unquantize(const static_codebook *b,int n,int *sparsemap,
     for(j=0;j<n*b->dim;j++)
       if(rp[j]<*maxpoint)
 	r[j]>>=*maxpoint-rp[j];
-	    
+
     _ogg_free(rp);
     return(r);
   }
@@ -325,7 +325,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   int i,j,n=0,tabn;
   int *sortindex;
   memset(c,0,sizeof(*c));
-  
+
   /* count actually used entries */
   for(i=0;i<s->entries;i++)
     if(s->lengthlist[i]>0)
@@ -338,7 +338,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   c->q_min=s->q_min;
   c->q_delta=s->q_delta;
 
-  /* two different remappings go on here.  
+  /* two different remappings go on here.
 
      First, we collapse the likely sparse codebook down only to
      actually represented values/words.  This collapsing needs to be
@@ -352,7 +352,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     /* perform sort */
     ogg_uint32_t *codes=_make_words(s->lengthlist,s->entries,c->used_entries);
     ogg_uint32_t **codep=(ogg_uint32_t **)alloca(sizeof(*codep)*n);
-    
+
     if(codes==NULL)goto err_out;
 
     for(i=0;i<n;i++){
@@ -375,14 +375,14 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     _ogg_free(codes);
   }
 
-  
+
   c->valuelist=_book_unquantize(s,n,sortindex,&c->binarypoint);
   c->dec_index=(int *)_ogg_malloc(n*sizeof(*c->dec_index));
-  
+
   for(n=0,i=0;i<s->entries;i++)
     if(s->lengthlist[i]>0)
       c->dec_index[sortindex[n++]]=i;
- 
+
   c->dec_codelengths=(char *)_ogg_malloc(n*sizeof(*c->dec_codelengths));
   for(n=0,i=0;i<s->entries;i++)
     if(s->lengthlist[i]>0)
@@ -417,7 +417,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
       if(c->dec_firsttable[bitreverse(word)]==0){
 	while((lo+1)<n && c->codelist[lo+1]<=word)lo++;
 	while(    hi<n && word>=(c->codelist[hi]&mask))hi++;
-	
+
 	/* we only actually have 15 bits per hint to play with here.
            In order to overflow gracefully (nothing breaks, efficiency
            just drops), encode as the difference from the extremes. */
@@ -433,7 +433,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
       }
     }
   }
-  
+
 
   return(0);
  err_out:

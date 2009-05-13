@@ -1,4 +1,4 @@
-/* 
+/*
  *  srfftp.h
  *
  *  Copyright (C) Yuqing Deng <Yuqing_Deng@brown.edu> - April 2000
@@ -9,7 +9,7 @@
  *  "Computational Frameworks of the Fast Fourier Transform".
  *
  *  The ideas and the the organization of code borrowed from djbfft written by
- *  D. J. Bernstein <djb@cr.py.to>.  djbff can be found at 
+ *  D. J. Bernstein <djb@cr.py.to>.  djbff can be found at
  *  http://cr.yp.to/djbfft.html.
  *
  *  srfftp.h is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@
  *  along with GNU Make; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *  Modified for using AMD's 3DNow! - 3DNowEx(DSP)! SIMD operations 
+ *  Modified for using AMD's 3DNow! - 3DNowEx(DSP)! SIMD operations
  *  by Nick Kurshev <nickols_k@mail.ru>
  */
 

@@ -32,14 +32,14 @@ typedef struct vorbis_info{
 
   /* The below bitrate declarations are *hints*.
      Combinations of the three values carry the following implications:
-     
-     all three set to the same value: 
+
+     all three set to the same value:
        implies a fixed rate bitstream
-     only nominal set: 
-       implies a VBR stream that averages the nominal bitrate.  No hard 
+     only nominal set:
+       implies a VBR stream that averages the nominal bitrate.  No hard
        upper/lower limit
-     upper and or lower set: 
-       implies a VBR bitstream that obeys the bitrate limits. nominal 
+     upper and or lower set:
+       implies a VBR bitstream that obeys the bitrate limits. nominal
        may also be set to give a nominal rate.
      none set:
        the coder does not care to speculate.
@@ -82,9 +82,9 @@ typedef struct vorbis_dsp_state{
 
 typedef struct vorbis_block{
   /* necessary stream state for linking to the framing abstraction */
-  ogg_int32_t  **pcm;       /* this is a pointer into local storage */ 
+  ogg_int32_t  **pcm;       /* this is a pointer into local storage */
   oggpack_buffer opb;
-  
+
   long  lW;
   long  W;
   long  nW;
@@ -153,8 +153,8 @@ extern void     vorbis_info_init(vorbis_info *vi);
 extern void     vorbis_info_clear(vorbis_info *vi);
 extern int      vorbis_info_blocksize(vorbis_info *vi,int zo);
 extern void     vorbis_comment_init(vorbis_comment *vc);
-extern void     vorbis_comment_add(vorbis_comment *vc, char *comment); 
-extern void     vorbis_comment_add_tag(vorbis_comment *vc, 
+extern void     vorbis_comment_add(vorbis_comment *vc, char *comment);
+extern void     vorbis_comment_add_tag(vorbis_comment *vc,
 				       char *tag, char *contents);
 extern char    *vorbis_comment_query(vorbis_comment *vc, char *tag, int count);
 extern int      vorbis_comment_query_count(vorbis_comment *vc, char *tag);
@@ -177,7 +177,7 @@ extern long     vorbis_packet_blocksize(vorbis_info *vi,ogg_packet *op);
 
 /* Vorbis ERRORS and return codes ***********************************/
 
-#define OV_FALSE      -1  
+#define OV_FALSE      -1
 #define OV_EOF        -2
 #define OV_HOLE       -3
 

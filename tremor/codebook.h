@@ -40,7 +40,7 @@ typedef struct static_codebook{
 
   /* mapping ***************************************************************/
   int    maptype;        /* 0=none
-			    1=implicitly populated values from map column 
+			    1=implicitly populated values from map column
 			    2=listed arbitrary values */
 
   /* The below does a linear, single monotonic sequence mapping. */
@@ -62,10 +62,10 @@ typedef struct codebook{
   /* the below are ordered by bitreversed codeword and only used
      entries are populated */
   int           binarypoint;
-  ogg_int32_t  *valuelist;  /* list of dim*entries actual entry values */  
+  ogg_int32_t  *valuelist;  /* list of dim*entries actual entry values */
   ogg_uint32_t *codelist;   /* list of bitstream codewords for each entry */
 
-  int          *dec_index;  
+  int          *dec_index;
   char         *dec_codelengths;
   ogg_uint32_t *dec_firsttable;
   int           dec_firsttablen;
@@ -86,14 +86,14 @@ extern long _book_maptype1_quantvals(const static_codebook *b);
 extern int vorbis_staticbook_unpack(oggpack_buffer *b,static_codebook *c);
 
 extern long vorbis_book_decode(codebook *book, oggpack_buffer *b);
-extern long vorbis_book_decodevs_add(codebook *book, ogg_int32_t *a, 
+extern long vorbis_book_decodevs_add(codebook *book, ogg_int32_t *a,
 				     oggpack_buffer *b,int n,int point);
-extern long vorbis_book_decodev_set(codebook *book, ogg_int32_t *a, 
+extern long vorbis_book_decodev_set(codebook *book, ogg_int32_t *a,
 				    oggpack_buffer *b,int n,int point);
-extern long vorbis_book_decodev_add(codebook *book, ogg_int32_t *a, 
+extern long vorbis_book_decodev_add(codebook *book, ogg_int32_t *a,
 				    oggpack_buffer *b,int n,int point);
 extern long vorbis_book_decodevv_add(codebook *book, ogg_int32_t **a,
-				     long off,int ch, 
+				     long off,int ch,
 				    oggpack_buffer *b,int n,int point);
 
 extern int _ilog(unsigned int v);

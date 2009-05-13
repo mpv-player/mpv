@@ -1,19 +1,19 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
 ** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
-**  
+**
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation; either version 2 of the License, or
 ** (at your option) any later version.
-** 
+**
 ** This program is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU General Public License
-** along with this program; if not, write to the Free Software 
+** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 **
 ** Any non-GPL usage of this software or parts of this software is strictly
@@ -1270,7 +1270,7 @@ void aac_scalable_main_element(NeAACDecHandle hDecoder, NeAACDecFrameInfo *hInfo
         /* SBR data was corrupted, disable it until the next header */
         if (hDecoder->sbr[0]->ret != 0)
         {
-            hDecoder->sbr[0]->header_count = 0;  
+            hDecoder->sbr[0]->header_count = 0;
         }
 
         faad_endbits(&ld_sbr);
@@ -1515,7 +1515,7 @@ static uint8_t individual_channel_stream(NeAACDecHandle hDecoder, element *ele,
             return result;
     }
 
-    if (hDecoder->object_type >= ER_OBJECT_START) 
+    if (hDecoder->object_type >= ER_OBJECT_START)
     {
         if (ics->tns_data_present)
             tns_data(ics, &(ics->tns), ld);
@@ -2510,7 +2510,7 @@ uint32_t faad_latm_frame(latm_header *latm, bitfile *ld)
         endpos = faad_get_processed_bits(ld);
         if(ret>0)
             return (len*8)-(endpos-initpos);
-        //faad_getbits(ld, initpos-endpos); //go back to initpos, but is valid a getbits(-N) ? 
+        //faad_getbits(ld, initpos-endpos); //go back to initpos, but is valid a getbits(-N) ?
     }
     return -1U;
 }

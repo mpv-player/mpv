@@ -3,7 +3,7 @@
 @@ -29,9 +33,13 @@
  #include "attributes.h"
  #include "mpeg2_internal.h"
- 
+
 +#include "cpudetect.h"
 +
 -#if defined(ARCH_X86) || defined(ARCH_X86_64)
@@ -14,10 +14,10 @@
 +#if 0
      if (accel & (MPEG2_ACCEL_X86_3DNOW | MPEG2_ACCEL_X86_MMXEXT))
  	accel |= MPEG2_ACCEL_X86_MMX;
- 	
+
 @@ -124,6 +132,21 @@
  #endif /* ACCEL_DETECT */
- 
+
      return accel;
 +
 +#else /* 0 */
@@ -36,20 +36,20 @@
 +#endif /* 0 */
  }
  #endif /* ARCH_X86 || ARCH_X86_64 */
- 
+
 @@ -127,7 +150,7 @@
  }
  #endif /* ARCH_X86 || ARCH_X86_64 */
- 
+
 -#if defined(ACCEL_DETECT) && (defined(ARCH_PPC) || defined(ARCH_SPARC))
 +#if defined(ACCEL_DETECT) && (ARCH_PPC || ARCH_SPARC)
  #include <signal.h>
  #include <setjmp.h>
- 
+
 @@ -146,7 +169,7 @@
  }
  #endif /* ACCEL_DETECT && (ARCH_PPC || ARCH_SPARC) */
- 
+
 -#ifdef ARCH_PPC
 +#if ARCH_PPC
  static uint32_t arch_accel (uint32_t accel)
@@ -58,7 +58,7 @@
 @@ -183,7 +206,7 @@
  }
  #endif /* ARCH_PPC */
- 
+
 -#ifdef ARCH_SPARC
 +#if ARCH_SPARC
  static uint32_t arch_accel (uint32_t accel)
@@ -67,14 +67,14 @@
 @@ -229,7 +252,7 @@
  }
  #endif /* ARCH_SPARC */
- 
+
 -#ifdef ARCH_ALPHA
 +#if ARCH_ALPHA
  static inline uint32_t arch_accel (uint32_t accel)
  {
      if (accel & MPEG2_ACCEL_ALPHA_MVI)
 @@ -253,7 +276,7 @@
- 
+
  uint32_t mpeg2_detect_accel (uint32_t accel)
  {
 -#if defined (ARCH_X86) || defined (ARCH_X86_64) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
@@ -94,10 +94,10 @@ Index: libmpeg2/cpu_state.c
 +#if ARCH_X86 || ARCH_X86_64
  #include "mmx.h"
  #endif
- 
+
  void (* mpeg2_cpu_state_save) (cpu_state_t * state) = NULL;
  void (* mpeg2_cpu_state_restore) (cpu_state_t * state) = NULL;
- 
+
 -#if defined(ARCH_X86) || defined(ARCH_X86_64)
 +#if ARCH_X86 || ARCH_X86_64
  static void state_restore_mmx (cpu_state_t * state)
@@ -105,14 +105,14 @@ Index: libmpeg2/cpu_state.c
      emms ();
  }
  #endif
- 
+
 -#ifdef ARCH_PPC
 +#if ARCH_PPC
  #if defined(__APPLE_CC__)	/* apple */
  #define LI(a,b) "li r" #a "," #b "\n\t"
  #define STVX0(a,b,c) "stvx v" #a ",0,r" #c "\n\t"
 @@ -115,12 +115,12 @@
- 
+
  void mpeg2_cpu_state_init (uint32_t accel)
  {
 -#if defined(ARCH_X86) || defined(ARCH_X86_64)
@@ -142,7 +142,7 @@ Index: libmpeg2/cpu_state.c
 +//    printf("libmpeg2: FBUF 0:%p 1:%p 2:%p\n",
 +//	mpeg2dec->fbuf[0]->buf[0],mpeg2dec->fbuf[1]->buf[0],mpeg2dec->fbuf[2]->buf[0]);
  }
- 
+
  void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf)
 --- libmpeg2/header.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/header.c	2006-06-16 20:12:50.000000000 +0200
@@ -167,7 +167,7 @@ Index: libmpeg2/cpu_state.c
 --- libmpeg2/idct.c	(revision 26652)
 +++ libmpeg2/idct.c	(working copy)
 @@ -235,34 +239,40 @@
- 
+
  void mpeg2_idct_init (uint32_t accel)
  {
 -#ifdef ARCH_X86
@@ -211,19 +211,19 @@ Index: libmpeg2/cpu_state.c
 +#elif ARCH_ALPHA
 +    if (accel & MPEG2_ACCEL_ALPHA) {
  	int i;
- 
+
  	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
 Index: libmpeg2/idct_alpha.c
 ===================================================================
 --- libmpeg2/idct_alpha.c	(revision 28324)
 +++ libmpeg2/idct_alpha.c	(revision 28325)
 @@ -24,7 +24,7 @@
- 
+
  #include "config.h"
- 
+
 -#ifdef ARCH_ALPHA
 +#if ARCH_ALPHA
- 
+
  #include <stdlib.h>
  #include <inttypes.h>
 Index: libmpeg2/idct_altivec.c
@@ -231,12 +231,12 @@ Index: libmpeg2/idct_altivec.c
 --- libmpeg2/idct_altivec.c	(revision 28324)
 +++ libmpeg2/idct_altivec.c	(revision 28325)
 @@ -23,7 +23,7 @@
- 
+
  #include "config.h"
- 
+
 -#ifdef ARCH_PPC
 +#if ARCH_PPC
- 
+
  #ifdef HAVE_ALTIVEC_H
  #include <altivec.h>
 Index: libmpeg2/idct_mmx.c
@@ -244,18 +244,18 @@ Index: libmpeg2/idct_mmx.c
 --- libmpeg2/idct_mmx.c	(revision 28324)
 +++ libmpeg2/idct_mmx.c	(revision 28325)
 @@ -23,7 +23,7 @@
- 
+
  #include "config.h"
- 
+
 -#if defined(ARCH_X86) || defined(ARCH_X86_64)
 +#if ARCH_X86 || ARCH_X86_64
- 
+
  #include <inttypes.h>
- 
+
 --- libmpeg2/motion_comp.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/motion_comp.c	2006-06-16 20:12:50.000000000 +0200
 @@ -33,34 +37,40 @@
- 
+
  void mpeg2_mc_init (uint32_t accel)
  {
 -#ifdef ARCH_X86
@@ -309,25 +309,25 @@ Index: libmpeg2/motion_comp_alpha.c
 --- libmpeg2/motion_comp_alpha.c	(revision 28324)
 +++ libmpeg2/motion_comp_alpha.c	(revision 28325)
 @@ -22,7 +22,7 @@
- 
+
  #include "config.h"
- 
+
 -#ifdef ARCH_ALPHA
 +#if ARCH_ALPHA
- 
+
  #include <inttypes.h>
- 
+
 Index: libmpeg2/motion_comp_altivec.c
 ===================================================================
 --- libmpeg2/motion_comp_altivec.c	(revision 28324)
 +++ libmpeg2/motion_comp_altivec.c	(revision 28325)
 @@ -23,7 +23,7 @@
- 
+
  #include "config.h"
- 
+
 -#ifdef ARCH_PPC
 +#if ARCH_PPC
- 
+
  #ifdef HAVE_ALTIVEC_H
  #include <altivec.h>
 Index: libmpeg2/motion_comp_arm.c
@@ -335,44 +335,44 @@ Index: libmpeg2/motion_comp_arm.c
 --- libmpeg2/motion_comp_arm.c	(revision 28324)
 +++ libmpeg2/motion_comp_arm.c	(revision 28325)
 @@ -22,7 +22,7 @@
- 
+
  #include "config.h"
- 
+
 -#ifdef ARCH_ARM
 +#if ARCH_ARM
- 
+
  #include <inttypes.h>
- 
+
 Index: libmpeg2/motion_comp_mmx.c
 ===================================================================
 --- libmpeg2/motion_comp_mmx.c	(revision 28324)
 +++ libmpeg2/motion_comp_mmx.c	(revision 28325)
 @@ -23,7 +23,7 @@
- 
+
  #include "config.h"
- 
+
 -#if defined(ARCH_X86) || defined(ARCH_X86_64)
 +#if ARCH_X86 || ARCH_X86_64
- 
+
  #include <inttypes.h>
- 
+
 Index: libmpeg2/motion_comp_vis.c
 ===================================================================
 --- libmpeg2/motion_comp_vis.c	(revision 28324)
 +++ libmpeg2/motion_comp_vis.c	(revision 28325)
 @@ -22,7 +22,7 @@
- 
+
  #include "config.h"
- 
+
 -#ifdef ARCH_SPARC
 +#if ARCH_SPARC
- 
+
  #include <inttypes.h>
- 
+
 --- libmpeg2/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2_internal.h	2006-06-16 20:12:50.000000000 +0200
 @@ -152,6 +156,11 @@
- 
+
      /* XXX: stuff due to xine shit */
      int8_t q_scale_type;
 +
@@ -381,7 +381,7 @@ Index: libmpeg2/motion_comp_vis.c
 +    char* quant_store;
 +    int quant_stride;
  };
- 
+
  typedef struct {
 @@ -223,6 +232,9 @@
      //int8_t q_scale_type, scaled[4];
@@ -391,11 +391,11 @@ Index: libmpeg2/motion_comp_vis.c
 +    unsigned char *pending_buffer;
 +    int pending_length;
  };
- 
+
  typedef struct {
 @@ -226,7 +238,7 @@
  };
- 
+
  typedef struct {
 -#ifdef ARCH_PPC
 +#if ARCH_PPC
@@ -405,15 +405,15 @@ Index: libmpeg2/motion_comp_vis.c
 --- libmpeg2/slice.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/slice.c	2006-06-16 20:12:50.000000000 +0200
 @@ -142,6 +146,7 @@
- 
+
      quantizer_scale_code = UBITS (bit_buf, 5);
      DUMPBITS (bit_buf, bits, 5);
 +    decoder->quantizer_scale = decoder->quantizer_scales[quantizer_scale_code];
- 
+
      decoder->quantizer_matrix[0] =
  	decoder->quantizer_prescale[0][quantizer_scale_code];
 @@ -1564,6 +1569,24 @@
- 
+
  #define NEXT_MACROBLOCK							\
  do {									\
 +    if(decoder->quant_store) {						\

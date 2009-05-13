@@ -61,7 +61,7 @@ char *vorbis_comment_query(vorbis_comment *vc, char *tag, int count){
 
   strcpy(fulltag, tag);
   strcat(fulltag, "=");
-  
+
   for(i=0;i<vc->comments;i++){
     if(!tagcompare(vc->user_comments[i], fulltag, taglen)){
       if(count == found)
@@ -128,7 +128,7 @@ void vorbis_info_clear(vorbis_info *vi){
 
     for(i=0;i<ci->floors;i++) /* unpack does the range checking */
       _floor_P[ci->floor_type[i]]->free_info(ci->floor_param[i]);
-    
+
     for(i=0;i<ci->residues;i++) /* unpack does the range checking */
       _residue_P[ci->residue_type[i]]->free_info(ci->residue_param[i]);
 
@@ -142,7 +142,7 @@ void vorbis_info_clear(vorbis_info *vi){
     }
     if(ci->fullbooks)
 	_ogg_free(ci->fullbooks);
-    
+
     _ogg_free(ci);
   }
 
@@ -167,13 +167,13 @@ static int _vorbis_unpack_info(vorbis_info *vi,oggpack_buffer *opb){
 
   ci->blocksizes[0]=1<<oggpack_read(opb,4);
   ci->blocksizes[1]=1<<oggpack_read(opb,4);
-  
+
   if(vi->rate<1)goto err_out;
   if(vi->channels<1)goto err_out;
-  if(ci->blocksizes[0]<64)goto err_out; 
+  if(ci->blocksizes[0]<64)goto err_out;
   if(ci->blocksizes[1]<ci->blocksizes[0])goto err_out;
   if(ci->blocksizes[1]>8192)goto err_out;
-  
+
   if(oggpack_read(opb,1)!=1)goto err_out; /* EOP check */
 
   return(0);
@@ -192,14 +192,14 @@ static int _vorbis_unpack_comment(vorbis_comment *vc,oggpack_buffer *opb){
   if(vc->comments<0)goto err_out;
   vc->user_comments=(char **)_ogg_calloc(vc->comments+1,sizeof(*vc->user_comments));
   vc->comment_lengths=(int *)_ogg_calloc(vc->comments+1, sizeof(*vc->comment_lengths));
-	    
+
   for(i=0;i<vc->comments;i++){
     int len=oggpack_read(opb,32);
     if(len<0)goto err_out;
 	vc->comment_lengths[i]=len;
     vc->user_comments[i]=(char *)_ogg_calloc(len+1,1);
     _v_readstring(opb,vc->user_comments[i],len);
-  }	  
+  }
   if(oggpack_read(opb,1)!=1)goto err_out; /* EOP check */
 
   return(0);
@@ -267,7 +267,7 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
     ci->map_param[i]=_mapping_P[ci->map_type[i]]->unpack(vi,opb);
     if(!ci->map_param[i])goto err_out;
   }
-  
+
   /* mode settings */
   ci->modes=oggpack_read(opb,6)+1;
   /*vi->mode_param=_ogg_calloc(vi->modes,sizeof(void *));*/
@@ -282,7 +282,7 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
     if(ci->mode_param[i]->transformtype>=VI_WINDOWB)goto err_out;
     if(ci->mode_param[i]->mapping>=ci->maps)goto err_out;
   }
-  
+
   if(oggpack_read(opb,1)!=1)goto err_out; /* top level EOP check */
 
   return(0);
@@ -298,7 +298,7 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
 
 int vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,ogg_packet *op){
   oggpack_buffer opb;
-  
+
   if(op){
     oggpack_readinit(&opb,op->packet,op->bytes);
 

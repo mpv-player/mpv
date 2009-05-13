@@ -1,19 +1,19 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
 ** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
-**  
+**
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation; either version 2 of the License, or
 ** (at your option) any later version.
-** 
+**
 ** This program is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU General Public License
-** along with this program; if not, write to the Free Software 
+** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 **
 ** Any non-GPL usage of this software or parts of this software is strictly
@@ -354,7 +354,7 @@ uint8_t huffman_spectral_data(uint8_t cb, bitfile *ld, int16_t *sp)
         return huffman_2step_pair_sign(cb, ld, sp);
     case 12: {
         uint8_t err = huffman_2step_pair(11, ld, sp);
-        sp[0] = huffman_codebook(0); sp[1] = huffman_codebook(1); 
+        sp[0] = huffman_codebook(0); sp[1] = huffman_codebook(1);
         return err; }
     case 11:
     {
@@ -443,7 +443,7 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
             vcb11 = cb;
             cb = 11;
         }
-            
+
         cw = showbits_hcr(ld, hcbN[cb]);
         offset = hcb_table[cb][cw].offset;
         extra_bits = hcb_table[cb][cw].extra_bits;
@@ -466,7 +466,7 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
         while (!hcb3[offset].is_leaf)
         {
             uint8_t b;
-            
+
             if ( get1bit_hcr(ld, &b) ) return -1;
             offset += hcb3[offset].data[b];
         }
@@ -485,7 +485,7 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
         while (!hcb_bin_table[cb][offset].is_leaf)
         {
             uint8_t b;
-            
+
             if (get1bit_hcr(ld, &b) ) return -1;
             offset += hcb_bin_table[cb][offset].data[b];
         }
@@ -524,7 +524,7 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
                 int32_t j;
                 uint32_t off;
 
-                neg = (sp[k] < 0) ? 1 : 0; 
+                neg = (sp[k] < 0) ? 1 : 0;
 
                 for (i = 4; ; i++)
                 {
@@ -548,7 +548,7 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
             /* this finds errors in the ESCAPE signal */
             vcb11_check_LAV(vcb11, sp);
         }
-    }    
+    }
     return ld->len;
 }
 

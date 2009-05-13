@@ -2,10 +2,10 @@
 +++ misc.h	2004-12-30 13:09:20.000000000 +0100
 @@ -29,8 +29,9 @@
  /* 64 bit multiply */
- 
+
  #include <sys/types.h>
 +#include "config.h"
- 
+
 -#if BYTE_ORDER==LITTLE_ENDIAN
 +#ifndef WORDS_BIGENDIAN
  union magic {
@@ -15,7 +15,7 @@
    } halves;
    ogg_int64_t whole;
  };
--#endif 
+-#endif
 -
 -#if BYTE_ORDER==BIG_ENDIAN
 +#else
@@ -32,16 +32,16 @@
 +	    ogg_int32_t point;
  	    int val=VFLOAT_MULTI(delta,delpoint,
  				 abs(b->quantlist[index]),&point);
- 
+
 @@ -242,7 +245,7 @@
  	  int         lastpoint=0;
- 
+
  	  for(k=0;k<b->dim;k++){
 -	    int point;
 +	    ogg_int32_t point;
  	    int val=VFLOAT_MULTI(delta,delpoint,
  				 abs(b->quantlist[j*b->dim+k]),&point);
- 
+
 --- block.h	(revision 0)
 +++ block.h	(revision 0)
 @@ -0,0 +1,24 @@
@@ -76,9 +76,9 @@
  #include "misc.h"
  #include "os.h"
 +#include "block.h"
- 
+
  #define LSP_FRACBITS 14
- 
+
 --- floor1.c	(revision 24821)
 +++ floor1.c	(working copy)
 @@ -24,6 +24,7 @@
@@ -86,9 +86,9 @@
  #include "codebook.h"
  #include "misc.h"
 +#include "block.h"
- 
+
  #define floor1_rangedB 140 /* floor 1 fixed at -140dB to 0dB range */
- 
+
 --- synthesis.c	(revision 24821)
 +++ synthesis.c	(working copy)
 @@ -23,6 +23,7 @@
@@ -96,7 +96,7 @@
  #include "misc.h"
  #include "os.h"
 +#include "block.h"
- 
+
  int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
    vorbis_dsp_state     *vd=vb->vd;
 --- res012.c	(revision 24821)
@@ -106,7 +106,7 @@
  #include "misc.h"
  #include "os.h"
 +#include "block.h"
- 
+
  typedef struct {
    vorbis_info_residue0 *info;
 --- block.c	(revision 24821)
@@ -116,7 +116,7 @@
  #include "registry.h"
  #include "misc.h"
 +#include "block.h"
- 
+
  static int ilog(unsigned int v){
    int ret=0;
 --- os.h	(revision 25873)
@@ -124,11 +124,11 @@
 @@ -20,18 +20,8 @@
  #include <math.h>
  #include "os_types.h"
- 
+
 -#ifndef _V_IFDEFJAIL_H_
 -#  define _V_IFDEFJAIL_H_
 +#define STIN static inline
- 
+
 -#  ifdef __GNUC__
 -#    define STIN static __inline__
 -#  elif _WIN32
@@ -146,7 +146,7 @@
 @@ -32,6 +32,15 @@
  #define _ogg_realloc realloc
  #define _ogg_free    free
- 
+
 +#include <inttypes.h>
 +typedef int64_t  ogg_int64_t;
 +typedef int32_t  ogg_int32_t;
@@ -156,13 +156,13 @@
 +
 +#if 0
 +
- #ifdef _WIN32 
- 
+ #ifdef _WIN32
+
  #  ifndef __GNUC__
 @@ -85,4 +94,6 @@
- 
+
  #endif
- 
+
 +#endif /* 0 */
 +
  #endif  /* _OS_TYPES_H */

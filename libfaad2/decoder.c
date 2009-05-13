@@ -465,8 +465,8 @@ int8_t NEAACDECAPI NeAACDecInitDRM(NeAACDecHandle *hDecoder, uint32_t samplerate
     if ((channels == DRMCH_MONO) || (channels == DRMCH_STEREO))
         (*hDecoder)->sbr_present_flag = 0;
     else
-        (*hDecoder)->sbr_present_flag = 1;    
-#endif        
+        (*hDecoder)->sbr_present_flag = 1;
+#endif
 
     (*hDecoder)->fb = filter_bank_init((*hDecoder)->frameLength);
 

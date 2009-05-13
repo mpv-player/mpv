@@ -606,10 +606,10 @@ static uint8_t quant_to_spec(NeAACDecHandle hDecoder,
                     wb = wa + bin;
 
                     spec_data[wb+0] = iquant(quant_data[k+0], tab, &error) * scf;
-                    spec_data[wb+1] = iquant(quant_data[k+1], tab, &error) * scf;                        
-                    spec_data[wb+2] = iquant(quant_data[k+2], tab, &error) * scf;                        
+                    spec_data[wb+1] = iquant(quant_data[k+1], tab, &error) * scf;
+                    spec_data[wb+2] = iquant(quant_data[k+2], tab, &error) * scf;
                     spec_data[wb+3] = iquant(quant_data[k+3], tab, &error) * scf;
-                        
+
 #else
                     real_t iq0 = iquant(quant_data[k+0], tab, &error);
                     real_t iq1 = iquant(quant_data[k+1], tab, &error);
