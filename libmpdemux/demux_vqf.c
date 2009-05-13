@@ -29,7 +29,7 @@
 #include "stheader.h"
 #include "libmpcodecs/vqf.h"
 
-static int demux_probe_vqf(demuxer_t* demuxer) 
+static int demux_probe_vqf(demuxer_t* demuxer)
 {
   char buf[KEYWORD_BYTES];
   stream_t *s;

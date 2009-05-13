@@ -445,7 +445,7 @@ takže jej nemusíte stahovat dodatečně.
 
 <para>
 Pokud používáte gcc 3.2 které nedokáže zkompilovat naši zabudovanou FAAD,
-nebo chcete použít externí knihovnu z jiných důvodů, stáhněte si ji z 
+nebo chcete použít externí knihovnu z jiných důvodů, stáhněte si ji z
 <ulink url="http://www.audiocoding.com/modules/mydownloads/">download stránky</ulink>
 a předejte volbu <option>--enable-faad-external</option> skriptu
 <filename>./configure</filename>.

@@ -35,11 +35,11 @@
 #include "stheader.h"
 
 typedef struct {
-    float   v_pts;  
+    float   v_pts;
     int video_pack_no;
     unsigned int a_format;
     unsigned int v_format;
-    unsigned char fps;            
+    unsigned char fps;
 } nsv_priv_t;
 
 #define HEADER_SEARCH_SIZE 256000
@@ -55,38 +55,38 @@ static void demux_seek_nsv ( demuxer_t *demuxer, float rel_seek_secs, float audi
 
 
 static int demux_nsv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
-{  
+{
     unsigned char hdr[17];
     // for the extra data
     unsigned char aux[6];
     int i_aux = 0;
     // videolen = audio chunk length, audiolen = video chunk length
-    int videolen,audiolen; 
+    int videolen,audiolen;
 
     sh_video_t *sh_video = demuxer->video->sh;
     sh_audio_t *sh_audio = demuxer->audio->sh;
 
     nsv_priv_t * priv = demuxer->priv;
 
-    // if the audio/video chunk has no new header the first 2 bytes will be discarded 0xBEEF 
+    // if the audio/video chunk has no new header the first 2 bytes will be discarded 0xBEEF
     // or rather 0xEF 0xBE
     stream_read(demuxer->stream,hdr,7);
     if(stream_eof(demuxer->stream)) return 0;
     // sometimes instead of 0xBEEF as described for the next audio/video chunk we get
     // a whole new header
-    
+
     mp_dbg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: %08X %08X\n",hdr[0]<<8|hdr[1],stream_tell(demuxer->stream));
     switch(hdr[0]<<8|hdr[1]) {
         case 0x4E53:
             if(hdr[2]==0x56 && hdr[3]==0x73){
                 // NSVs
-                // get the header since there is no more metaheader after the first one 
+                // get the header since there is no more metaheader after the first one
                 // there is no more need to skip that
                 stream_read(demuxer->stream,hdr+7,17-7);
                 stream_read(demuxer->stream,hdr,7);
             }
             break;
-        
+
         case 0xEFBE:
             break;
 
@@ -111,22 +111,22 @@ static int demux_nsv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
     videolen=(hdr[2]>>4)|(hdr[3]<<4)|(hdr[4]<<0xC);
     //check if we got extra data like subtitles here
     if( (hdr[2]&0x0f) != 0x0 ) {
-        stream_read( demuxer->stream, aux, 6); 
+        stream_read( demuxer->stream, aux, 6);
 
         i_aux = aux[0]|aux[1]<<8;
-        // We skip this extra data 
+        // We skip this extra data
         stream_skip( demuxer->stream, i_aux );
         i_aux+=6;
         videolen -= i_aux;
     }
-    
 
-    // we need to return an empty packet when the 
-    // video frame is empty otherwise the stream will fasten up 
+
+    // we need to return an empty packet when the
+    // video frame is empty otherwise the stream will fasten up
     if(sh_video) {
         if( (hdr[2]&0x0f) != 0x0 )
             ds_read_packet(demuxer->video,demuxer->stream,videolen,priv->v_pts,demuxer->filepos-i_aux,0);
-        else 
+        else
             ds_read_packet(demuxer->video,demuxer->stream,videolen,priv->v_pts,demuxer->filepos,0);
     }
     else
@@ -134,8 +134,8 @@ static int demux_nsv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
 
     // read audio:
     audiolen=(hdr[5])|(hdr[6]<<8);
-    // we need to return an empty packet when the 
-    // audio frame is empty otherwise the stream will fasten up 
+    // we need to return an empty packet when the
+    // audio frame is empty otherwise the stream will fasten up
     if(sh_audio) {
         ds_read_packet(demuxer->audio,demuxer->stream,audiolen,priv->v_pts,demuxer->filepos+videolen,0);
     }
@@ -145,7 +145,7 @@ static int demux_nsv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
     ++priv->video_pack_no;
 
     return 1;
-    
+
 }
 
 
@@ -157,23 +157,23 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
     unsigned char buf[10];
     sh_video_t *sh_video = NULL;
     sh_audio_t *sh_audio = NULL;
-    
-    
+
+
     nsv_priv_t * priv = malloc(sizeof(nsv_priv_t));
     demuxer->priv=priv;
     priv->video_pack_no=0;
 
       /* disable seeking yet to be fixed*/
     demuxer->seekable = 0;
-        
+
     stream_read(demuxer->stream,hdr,4);
     if(stream_eof(demuxer->stream)) return 0;
-    
+
     if(hdr[0]==0x4E && hdr[1]==0x53 && hdr[2]==0x56){
         // NSV header!
         if(hdr[3]==0x73){
             // NSVs
-            stream_read(demuxer->stream,hdr+4,17-4);            
+            stream_read(demuxer->stream,hdr+4,17-4);
         }
 
         if(hdr[3]==0x66){
@@ -181,9 +181,9 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
             int len=stream_read_dword_le(demuxer->stream);
             // TODO: parse out metadata!!!!
             stream_skip(demuxer->stream,len-8);
-                
+
             // NSVs
-            stream_read(demuxer->stream,hdr,17);        
+            stream_read(demuxer->stream,hdr,17);
             if (stream_eof(demuxer->stream) || strncmp(hdr, "NSVs", 4))
                 return 0;
         }
@@ -202,9 +202,9 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
             priv->a_format=mmioFOURCC(hdr[8],hdr[9],hdr[10],hdr[11]);
         }
 
-        // store hdr fps 
+        // store hdr fps
         priv->fps=hdr[16];
-            
+
         if ((demuxer->video->id != -2) && strncmp(hdr+4,"NONE", 4)) {
             /* Create a new video stream header */
             sh_video = new_sh_video ( demuxer, 0 );
@@ -219,23 +219,23 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
              * video_read_properties() will choke
              */
             sh_video->ds = demuxer->video;
-        
+
             //   bytes 4-7  video codec fourcc
             priv->v_format = sh_video->format=mmioFOURCC(hdr[4],hdr[5],hdr[6],hdr[7]);
-        
+
             // new video stream! parse header
             sh_video->disp_w=hdr[12]|(hdr[13]<<8);
             sh_video->disp_h=hdr[14]|(hdr[15]<<8);
             sh_video->bih=calloc(1,sizeof(BITMAPINFOHEADER));
             sh_video->bih->biSize=sizeof(BITMAPINFOHEADER);
-            sh_video->bih->biPlanes=1; 
+            sh_video->bih->biPlanes=1;
             sh_video->bih->biBitCount=24;
             sh_video->bih->biWidth=hdr[12]|(hdr[13]<<8);
             sh_video->bih->biHeight=hdr[14]|(hdr[15]<<8);
             memcpy(&sh_video->bih->biCompression,hdr+4,4);
             sh_video->bih->biSizeImage=sh_video->bih->biWidth*sh_video->bih->biHeight*3;
 
-            // here we search for the correct keyframe 
+            // here we search for the correct keyframe
             // vp6 keyframe is when the 2nd byte of the vp6 header is
             // 0x36 for VP61 and 0x46 for VP62
             if((priv->v_format==mmioFOURCC('V','P','6','1')) ||
@@ -264,8 +264,8 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
                 // data starts 10 bytes before current pos but later
                 // we seek 17 backwards
                 stream_skip(demuxer->stream,7);
-            } 
-            
+            }
+
         switch(priv->fps){
         case 0x80:
             sh_video->fps=30;
@@ -287,14 +287,14 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
             break;
         default:
             sh_video->fps = (float)priv->fps;
-        }       
+        }
         sh_video->frametime = (float)1.0 / (float)sh_video->fps;
        }
-    }   
+    }
 
     // seek to start of NSV header
     stream_seek(demuxer->stream,stream_tell(demuxer->stream)-17);
-    
+
     return demuxer;
 }
 
@@ -304,7 +304,7 @@ static int nsv_check_file ( demuxer_t* demuxer )
     int i;
 
     mp_msg ( MSGT_DEMUX, MSGL_V, "Checking for Nullsoft Streaming Video\n" );
-   
+
     for (i = 0; i < HEADER_SEARCH_SIZE; i++) {
         uint8_t c = stream_read_char(demuxer->stream);
         if (stream_eof(demuxer->stream))

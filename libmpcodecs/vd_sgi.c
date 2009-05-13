@@ -51,7 +51,7 @@ static unsigned short last_y = -1;
 /* to set/get/query special features/parameters */
 static int
 control(sh_video_t* sh, int cmd, void *arg, ...)
-{ 
+{
   switch (cmd)
   {
     case VDCTRL_QUERY_FORMAT:
@@ -90,10 +90,10 @@ expandrow(unsigned char *optr, unsigned char *iptr, int chan_offset)
 {
   unsigned char pixel, count;
   optr += chan_offset;
-  
+
   while (1) {
     pixel = *iptr++;
-    
+
     if (!(count = (pixel & 0x7f))) {
       return;
     }
@@ -105,7 +105,7 @@ expandrow(unsigned char *optr, unsigned char *iptr, int chan_offset)
       }
     } else {
       pixel = *iptr++;
-      
+
       while (count--) {
         *optr = pixel;
         optr += OUT_PIXEL_STRIDE;
@@ -116,16 +116,16 @@ expandrow(unsigned char *optr, unsigned char *iptr, int chan_offset)
 
 
 /* expand an rle row into all 3 channels.
-   a separate function for grayscale so we don't slow down the 
+   a separate function for grayscale so we don't slow down the
    more common case rgb function with a bunch of ifs. */
 static void
 expandrow_gs(unsigned char *optr, unsigned char *iptr)
 {
   unsigned char pixel, count;
-  
+
   while (1) {
     pixel = *iptr++;
-    
+
     if (!(count = (pixel & 0x7f))) {
       return;
     }
@@ -139,7 +139,7 @@ expandrow_gs(unsigned char *optr, unsigned char *iptr)
       }
     } else {
       pixel = *iptr++;
-      
+
       while (count--) {
         optr[0] = pixel;
         optr[1] = pixel;
@@ -159,29 +159,29 @@ decode_rle_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
   uint32_t *starttab;
   int y, z, xsize, ysize, zsize, chan_offset;
   long start_offset;
-  
+
   xsize = info->xsize;
   ysize = info->ysize;
   zsize = info->zsize;
 
   /* rle offset table is right after the header */
-  starttab = (uint32_t*)(data + SGI_HEADER_LEN); 
-  
+  starttab = (uint32_t*)(data + SGI_HEADER_LEN);
+
    for (z = 0; z < zsize; z++) {
 
      /* set chan_offset so RGB ends up BGR */
      chan_offset = (zsize - 1) - z;
-     
+
      /* The origin for SGI images is the lower-left corner
         so read scan lines from bottom to top */
      for (y = ysize - 1; y >= 0; y--) {
        dest_row = mpi->planes[0] + mpi->stride[0] * (ysize - 1 - y);
-    
+
       /* set start of next run (offsets are from start of header) */
       start_offset = be2me_32(*(uint32_t*) &starttab[y + z * ysize]);
-      
+
       rle_data = &data[start_offset];
-    
+
       if(info->zsize == SGI_GRAYSCALE_IMAGE) {
         expandrow_gs(dest_row, rle_data);
       } else {
@@ -191,21 +191,21 @@ decode_rle_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
   }
 }
 
-  
+
 /* decode an sgi image */
 static void
 decode_uncompressed_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
 {
   unsigned char *src_row, *dest_row;
   int x, y, z, xsize, ysize, zsize, chan_offset;
-  
+
   xsize = info->xsize;
   ysize = info->ysize;
   zsize = info->zsize;
-  
-  /* skip header */ 
+
+  /* skip header */
   data += SGI_HEADER_LEN;
-  
+
   for (z = 0; z < zsize; z++) {
 
     /* set row ptr to start of current plane */
@@ -213,13 +213,13 @@ decode_uncompressed_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
 
     /* set chan_offset for RGB -> BGR */
     chan_offset = (zsize - 1) - z;
-    
-    /* the origin for SGI images is the lower-left corner  
+
+    /* the origin for SGI images is the lower-left corner
        so read scan lines from bottom to top. */
     for (y = ysize - 1; y >= 0; y--) {
       dest_row = mpi->planes[0] + mpi->stride[0] * y;
       for (x = 0; x < xsize; x++) {
-        
+
         /* we only do 24 bit output so promote 8 bit pixels to 24 */
         if (zsize == SGI_GRAYSCALE_IMAGE) {
           /* write greyscale value into all channels */
@@ -229,7 +229,7 @@ decode_uncompressed_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
         } else {
           dest_row[chan_offset] = src_row[x];
         }
-        
+
         dest_row += OUT_PIXEL_STRIDE;
       }
 
@@ -245,13 +245,13 @@ static void
 read_sgi_header(unsigned char *buf, SGIInfo *info)
 {
   /* sgi data is always stored in big endian byte order */
-  info->magic = be2me_16(*(unsigned short *) &buf[0]);     
+  info->magic = be2me_16(*(unsigned short *) &buf[0]);
   info->rle = buf[2];
   info->bytes_per_channel = buf[3];
-  info->dimension = be2me_16(*(unsigned short *) &buf[4]);     
-  info->xsize = be2me_16(*(unsigned short *) &buf[6]);     
-  info->ysize = be2me_16(*(unsigned short *) &buf[8]);     
-  info->zsize = be2me_16(*(unsigned short *) &buf[10]);     
+  info->dimension = be2me_16(*(unsigned short *) &buf[4]);
+  info->xsize = be2me_16(*(unsigned short *) &buf[6]);
+  info->ysize = be2me_16(*(unsigned short *) &buf[8]);
+  info->zsize = be2me_16(*(unsigned short *) &buf[10]);
 }
 
 
@@ -266,9 +266,9 @@ mp_image_t *decode(sh_video_t *sh, void *raw, int len, int flags)
   if (len <= 0) {
     return NULL; /* skip frame */
   }
-    
-  read_sgi_header(data, info); 
-  
+
+  read_sgi_header(data, info);
+
   /* make sure this is an SGI image file */
   if (info->magic != SGI_MAGIC) {
     mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Bad magic number in image.\n");
@@ -277,19 +277,19 @@ mp_image_t *decode(sh_video_t *sh, void *raw, int len, int flags)
 
   /* check image depth */
   if (info->bytes_per_channel != 1) {
-    mp_msg(MSGT_DECVIDEO, MSGL_INFO, 
+    mp_msg(MSGT_DECVIDEO, MSGL_INFO,
         "Unsupported bytes per channel value %i.\n", info->bytes_per_channel);
     return NULL;
   }
 
   /* check image dimension */
   if (info->dimension != 2 && info->dimension != 3) {
-    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Unsupported image dimension %i.\n", 
+    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Unsupported image dimension %i.\n",
         info->dimension);
     return NULL;
   }
 
-  /* change rgba images to rgb so alpha channel will be ignored */ 
+  /* change rgba images to rgb so alpha channel will be ignored */
   if (info->zsize == SGI_RGBA_IMAGE) {
     info->zsize = SGI_RGB_IMAGE;
   }
@@ -299,30 +299,30 @@ mp_image_t *decode(sh_video_t *sh, void *raw, int len, int flags)
     mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Unsupported image depth.\n");
     return NULL;
   }
-  
+
   /* (re)init libvo if image size is changed */
   if (last_x != info->xsize || last_y != info->ysize)
   {
     last_x = info->xsize;
     last_y = info->ysize;
-    
+
     if (!mpcodecs_config_vo(sh, info->xsize, info->ysize, outfmt)) {
       mp_msg(MSGT_DECVIDEO, MSGL_INFO, "Config vo failed:\n");
       return NULL;
     }
   }
-   
-  if (!(mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE, 
+
+  if (!(mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
           info->xsize, info->ysize))) {
     return NULL;
   }
- 
+
   if (info->rle) {
     decode_rle_sgi(info, data, mpi);
   } else {
     decode_uncompressed_sgi(info, data, mpi);
   }
-  
+
   return mpi;
 }
 

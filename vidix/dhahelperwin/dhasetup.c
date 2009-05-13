@@ -83,7 +83,7 @@ int main(int argc,char* argv[]){
       print_last_error("Unable to register DhaHelper Service");
       return 1;
     }
-	
+
     if(!StartService(hService, 0, NULL)){
        print_last_error("Error while starting service");
        return 1;

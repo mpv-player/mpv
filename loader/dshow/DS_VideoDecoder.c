@@ -14,7 +14,7 @@
 struct DS_VideoDecoder
 {
     IVideoDecoder iv;
-    
+
     DS_Filter* m_pDS_Filter;
     AM_MEDIA_TYPE m_sOurType, m_sDestType;
     VIDEOINFOHEADER* m_sVhdr;
@@ -53,7 +53,7 @@ static SampleProcUserData sampleProcData;
 
 int DS_VideoDecoder_GetCapabilities(DS_VideoDecoder *this)
 {return this->m_Caps;}
-	    
+
 typedef struct ct ct;
 
 struct ct {
@@ -62,7 +62,7 @@ struct ct {
 		const GUID *subtype;
 		int cap;
 	    };
-            
+
 static ct check[] = {
 		{16, fccYUY2, &MEDIASUBTYPE_YUY2, CAP_YUY2},
 		{12, fccIYUV, &MEDIASUBTYPE_IYUV, CAP_IYUV},
@@ -81,10 +81,10 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
     DS_VideoDecoder *this;
     HRESULT result;
     ct* c;
-                        
+
     this = malloc(sizeof(DS_VideoDecoder));
     memset( this, 0, sizeof(DS_VideoDecoder));
-    
+
     this->m_sVhdr2 = 0;
     this->m_iLastQuality = -1;
     this->m_iMaxAuto = maxauto;
@@ -98,10 +98,10 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
     /*try*/
     {
         unsigned int bihs;
-        
+
 	bihs = (format->biSize < (int) sizeof(BITMAPINFOHEADER)) ?
 	    sizeof(BITMAPINFOHEADER) : format->biSize;
-     
+
         this->iv.m_bh = malloc(bihs);
         memcpy(this->iv.m_bh, format, bihs);
         this->iv.m_bh->biSize = bihs;
@@ -113,7 +113,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
         this->iv.m_iPlaypos = -1;
         this->iv.m_fQuality = 0.0f;
         this->iv.m_bCapable16b = true;
-                
+
         bihs += sizeof(VIDEOINFOHEADER) - sizeof(BITMAPINFOHEADER);
 	this->m_sVhdr = malloc(bihs);
 	memset(this->m_sVhdr, 0, bihs);
@@ -153,7 +153,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 	this->m_sDestType.pUnk = 0;
 	this->m_sDestType.cbFormat = sizeof(VIDEOINFOHEADER);
 	this->m_sDestType.pbFormat = (char*)this->m_sVhdr2;
-        
+
         memset(&this->iv.m_obh, 0, sizeof(this->iv.m_obh));
 	memcpy(&this->iv.m_obh, this->iv.m_bh, sizeof(this->iv.m_obh) < (unsigned) this->iv.m_bh->biSize
 	       ? sizeof(this->iv.m_obh) : (unsigned) this->iv.m_bh->biSize);
@@ -166,7 +166,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 
 
 	this->m_pDS_Filter = DS_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType,&sampleProcData);
-	
+
 	if (!this->m_pDS_Filter)
 	{
 	    printf("Failed to create DirectShow filter\n");
@@ -207,7 +207,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 	    break;
 #endif
 	default:
-              
+
 	    this->m_Caps = CAP_NONE;
 
 	    printf("Decoder supports the following YUV formats: ");
@@ -269,7 +269,7 @@ void DS_VideoDecoder_StartInternal(DS_VideoDecoder *this)
     //cout << "DSSTART" << endl;
     this->m_pDS_Filter->m_pAll->vt->Commit(this->m_pDS_Filter->m_pAll);
     this->m_pDS_Filter->Start(this->m_pDS_Filter);
-    
+
     this->iv.m_State = START;
 }
 
@@ -284,17 +284,17 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
     IMediaSample* sample = 0;
     char* ptr;
     int result;
-    
+
     Debug printf("DS_VideoDecoder_DecodeInternal(%p,%p,%d,%d,%p)\n",this,src,size,is_keyframe,pImage);
-            
+
     this->m_pDS_Filter->m_pAll->vt->GetBuffer(this->m_pDS_Filter->m_pAll, &sample, 0, 0, 0);
-    
+
     if (!sample)
     {
 	Debug printf("ERROR: null sample\n");
 	return -1;
     }
-    
+
     //cout << "DECODE " << (void*) pImage << "   d: " << (void*) pImage->Data() << endl;
 
 
@@ -409,14 +409,14 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
     ALLOCATOR_PROPERTIES props,props1;
     int should_test=1;
     int stopped = 0;
-    
+
     Debug printf("DS_VideoDecoder_SetDestFmt (%p, %d, %d)\n",this,bits,(int)csp);
-        
+
        /* if (!CImage::Supported(csp, bits))
 	return -1;
 */
     // BitmapInfo temp = m_obh;
-    
+
     if (!csp)	// RGB
     {
 	int ok = true;
@@ -450,7 +450,7 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
 	      this->iv.m_obh.biCompression=3;//BI_BITFIELDS
 	      this->iv.m_obh.biSizeImage=abs((int)(2*this->iv.m_obh.biWidth*this->iv.m_obh.biHeight));
 	    }
-            
+
             if( bits == 16 ) {
 	      this->iv.m_obh.colors[0]=0xF800;
 	      this->iv.m_obh.colors[1]=0x07E0;
@@ -628,7 +628,7 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, unsigned int csp
     if (stopped)
     {
 	DS_VideoDecoder_StartInternal(this);
-        this->iv.m_State = START; 
+        this->iv.m_State = START;
     }
 
     return 0;
@@ -814,7 +814,7 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 	}
         return 0;
     }
-#if 0    
+#if 0
     if (strcmp((const char*)record.dll, "ir50_32.dll") == 0)
     {
 	IHidden2* hidden = 0;
@@ -872,23 +872,23 @@ int DS_SetAttr_DivX(char* attribute, int value){
 	    {
 	        printf("VideoDecoder::SetExtAttr: registry failure\n");
 	        return -1;
-	    }    
+	    }
 	    result=RegSetValueExA(newkey, "Current Post Process Mode", 0, REG_DWORD, &value, 4);
             if(result!=0)
 	    {
 	        printf("VideoDecoder::SetExtAttr: error writing value\n");
 	        return -1;
-	    }    
+	    }
 	    value=-1;
 	    result=RegSetValueExA(newkey, "Force Post Process Mode", 0, REG_DWORD, &value, 4);
             if(result!=0)
 	    {
 		printf("VideoDecoder::SetExtAttr: error writing value\n");
 	    	return -1;
-	    }    
+	    }
    	    RegCloseKey(newkey);
    	    return 0;
-	}   	
+	}
 
         if(
 	(strcasecmp(attribute, "Saturation")==0) ||
@@ -903,16 +903,16 @@ int DS_SetAttr_DivX(char* attribute, int value){
 	    {
 	        printf("VideoDecoder::SetExtAttr: registry failure\n");
 	        return -1;
-	    }    
+	    }
 	    result=RegSetValueExA(newkey, attribute, 0, REG_DWORD, &value, 4);
             if(result!=0)
 	    {
 	        printf("VideoDecoder::SetExtAttr: error writing value\n");
 	        return -1;
-	    }    
+	    }
    	    RegCloseKey(newkey);
    	    return 0;
-	}   	
+	}
 
         printf("Unknown attribute!\n");
         return -200;

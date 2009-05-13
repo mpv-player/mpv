@@ -103,10 +103,10 @@ static int init(sh_video_t *sh)
 
 	memset(&xvid_gbl_info, 0, sizeof(xvid_gbl_info_t));
 	xvid_gbl_info.version = XVID_VERSION;
-	
+
 	memset(&xvid_ini, 0, sizeof(xvid_gbl_init_t));
 	xvid_ini.version = XVID_VERSION;
-	
+
 	memset(&dec_p, 0, sizeof(xvid_dec_create_t));
 	dec_p.version = XVID_VERSION;
 
@@ -123,16 +123,16 @@ static int init(sh_video_t *sh)
 	case IMGFMT_UYVY:
 		cs = XVID_CSP_UYVY;
 		break;
-	case IMGFMT_I420: 
+	case IMGFMT_I420:
 	case IMGFMT_IYUV:
 		/* We will use our own buffers, this speeds decoding avoiding
 		 * frame memcpy's overhead */
 		cs = (do_dr2)?XVID_CSP_INTERNAL:XVID_CSP_USER;
 		break;
-	case IMGFMT_BGR15: 
+	case IMGFMT_BGR15:
 		cs = XVID_CSP_RGB555;
 		break;
-	case IMGFMT_BGR16: 
+	case IMGFMT_BGR16:
 		cs = XVID_CSP_RGB565;
 		break;
 	case IMGFMT_BGR32:
@@ -157,7 +157,7 @@ static int init(sh_video_t *sh)
 		       XVID_VERSION_PATCH(xvid_gbl_info.actual_version),
 		       xvid_gbl_info.build);
 	}
-	
+
 	/* Initialize the xvidcore library */
 	if(xvid_global(NULL, XVID_GBL_INIT, &xvid_ini, NULL))
 		return 0;
@@ -241,7 +241,7 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 	dec.general |= (lumadering ? XVID_DEBLOCKY|XVID_DERINGY : 0 );
 	dec.general |= (chromadering ? XVID_DEBLOCKUV|XVID_DERINGUV : 0 );
 #endif
-	dec.output.csp = p->cs;   
+	dec.output.csp = p->cs;
 
 	/* Decoding loop because xvidcore may return VOL information for
 	 * on the fly buffer resizing. In that case we must decode VOL,
@@ -256,18 +256,18 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 			mpi = mpcodecs_get_image(sh, p->img_type,
 					MP_IMGFLAG_ACCEPT_STRIDE,
 					sh->disp_w, sh->disp_h);
-			
+
 			if(p->cs != XVID_CSP_INTERNAL) {
 				dec.output.plane[0] = mpi->planes[0];
 				dec.output.plane[1] = mpi->planes[1];
 				dec.output.plane[2] = mpi->planes[2];
 
-				dec.output.stride[0] = mpi->stride[0]; 
-				dec.output.stride[1] = mpi->stride[1]; 
+				dec.output.stride[0] = mpi->stride[0];
+				dec.output.stride[1] = mpi->stride[1];
 				dec.output.stride[2] = mpi->stride[2];
 			}
 		}
-		
+
 		/* Decode data */
 		consumed = xvid_decore(p->hdl, XVID_DEC_DECODE, &dec, &stats);
 		if (consumed < 0) {
@@ -281,7 +281,7 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 			sh->aspect = stats2aspect(&stats);
 			if(!mpcodecs_config_vo(sh, stats.data.vol.width, stats.data.vol.height, IMGFMT_YV12))
 				return NULL;
-			
+
 			/* Don't take this path twice */
 			p->vo_initialized = !p->vo_initialized;
 		}
@@ -294,7 +294,7 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 	/* There are two ways to get out of the decoding loop:
 	 *  - a frame has been returned
 	 *  - no more data in buffer and no frames returned */
-	
+
 	/* If mpi is NULL, it proves nothing has been returned by the decoder
 	 * so don't try to display internal buffers. */
 	if (mpi != NULL && p->cs == XVID_CSP_INTERNAL) {
@@ -324,12 +324,12 @@ static float stats2aspect(xvid_dec_stats_t *stats)
 		float wpar;
 		float hpar;
 		float dar;
-	
+
 		/* MPEG4 strem stores PAR (Pixel Aspect Ratio), mplayer uses
 		 * DAR (Display Aspect Ratio)
-		 * 
+		 *
 		 * Both are related thanks to the equation:
-		 *            width 
+		 *            width
 		 *      DAR = ----- x PAR
 		 *            height
 		 *
@@ -378,7 +378,7 @@ static float stats2aspect(xvid_dec_stats_t *stats)
  * Module structure definition
  ****************************************************************************/
 
-static vd_info_t info = 
+static vd_info_t info =
 {
 	"XviD 1.0 decoder",
 	"xvid",

@@ -80,7 +80,7 @@ static int fd_can_read(int fd,int timeout) {
   FD_SET(fd,&fds);
   tv.tv_sec = timeout;
   tv.tv_usec = 0;
-  
+
   return select(fd+1, &fds, NULL, NULL, &tv) > 0;
 }
 
@@ -94,7 +94,7 @@ static int readline(char *buf,int max,struct stream_priv_s *ctl)
     int x,retval = 0;
     char *end,*bp=buf;
     int eof = 0;
- 
+
     do {
       if (ctl->cavail > 0) {
 	x = (max >= ctl->cavail) ? ctl->cavail : max-1;
@@ -149,7 +149,7 @@ static int readline(char *buf,int max,struct stream_priv_s *ctl)
       ctl->cavail += x;
       ctl->cput += x;
     } while (1);
-    
+
     return retval;
 }
 
@@ -167,7 +167,7 @@ static int readresp(struct stream_priv_s* ctl,char* rsp)
 
     if (readline(response,256,ctl) == -1)
       return 0;
- 
+
     r = atoi(response)/100;
     if(rsp) strcpy(rsp,response);
 
@@ -203,12 +203,12 @@ static int FtpSendCmd(const char *cmd, struct stream_priv_s *nControl,char* rsp)
       mp_msg(MSGT_OPEN,MSGL_ERR, "[ftp] write error: %s\n",strerror(errno));
       return 0;
     }
-    
+
     cmd += s;
     l -= s;
   }
-    
-  if (hascrlf)  
+
+  if (hascrlf)
     return readresp(nControl,rsp);
   else
     return FtpSendCmd("\r\n", nControl, rsp);
@@ -225,9 +225,9 @@ static int FtpOpenPort(struct stream_priv_s* p) {
     mp_msg(MSGT_OPEN,MSGL_WARN, "[ftp] command 'PASV' failed: %s\n",rsp_txt);
     return 0;
   }
-  
+
   par = strchr(rsp_txt,'(');
-  
+
   if(!par || !par[0] || !par[1]) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[ftp] invalid server response: %s ??\n",rsp_txt);
     return 0;
@@ -282,7 +282,7 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
 
   if(s->fd < 0 && !FtpOpenData(s,s->pos))
     return -1;
-  
+
   if(!fd_can_read(s->fd, 15)) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[ftp] read timed out\n");
     return -1;
@@ -314,13 +314,13 @@ static int seek(stream_t *s,off_t newpos) {
   if(s->fd >= 0) {
     static const char pre_cmd[]={TELNET_IAC,TELNET_IP,TELNET_IAC,TELNET_SYNCH};
     //int fl;
-    
+
     // First close the fd
     closesocket(s->fd);
     s->fd = 0;
-    
+
     // Send send the telnet sequence needed to make the server react
-    
+
     // Dunno if this is really needed, lftp have it. I let
     // it here in case it turn out to be needed on some other OS
     //fl=fcntl(p->handle,F_GETFL);
@@ -329,7 +329,7 @@ static int seek(stream_t *s,off_t newpos) {
     // send only first byte as OOB due to OOB braindamage in many unices
     send(p->handle,pre_cmd,1,MSG_OOB);
     send(p->handle,pre_cmd+1,sizeof(pre_cmd)-1,0);
-    
+
     //fcntl(p->handle,F_SETFL,fl);
 
     // Get the 426 Transfer aborted
@@ -387,7 +387,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 
   // Open the control connection
   p->handle = connect2Server(p->host,p->port,1);
-  
+
   if(p->handle < 0) {
     m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
@@ -422,7 +422,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     close_f(stream);
     return STREAM_ERROR;
   }
-    
+
   // Set the transfer type
   resp = FtpSendCmd("TYPE I",p,rsp_txt);
   if(resp != 2) {

@@ -154,7 +154,7 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 
 	/*clear the buffer*/
 	memset(frames[0],0x80,mga_vid_config.frame_size*mga_vid_config.num_frames);
-	return 0;  
+	return 0;
 }
 
 void vlvo_term( void )
@@ -242,7 +242,7 @@ void     vlvo_flip_page(void)
 	ioctl(lvo_handler,MGA_VID_FSEL,&next_frame);
 	next_frame=(next_frame+1)%mga_vid_config.num_frames;
 	lvo_mem=frames[next_frame];
-  }	
+  }
 }
 
 #if 0

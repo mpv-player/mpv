@@ -115,11 +115,11 @@ float movie_aspect=-1.0;
 int vo_flags=0;
 int vd_use_slices=1;
 
-/** global variables for gamma, brightness, contrast, saturation and hue 
+/** global variables for gamma, brightness, contrast, saturation and hue
     modified by mplayer.c and gui/mplayer/gtk/eq.c:
     ranges -100 - 100
     1000 if the vo default should be used
-*/   
+*/
 int vo_gamma_gamma = 1000;
 int vo_gamma_brightness = 1000;
 int vo_gamma_contrast = 1000;
@@ -151,7 +151,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_VoConfigRequest,w,h,vo_format_name(preferred_outfmt));
 
 //    if(!vf) return 1; // temp hack
-    
+
     if(get_video_quality_max(sh)<=0 && divx_quality){
 	// user wants postprocess but no pp filter yet:
 	sh->vfilter=vf=vf_open_filter(vf,"pp",NULL);
@@ -202,7 +202,7 @@ csp_again:
 	    palette=-1;
 	    vf=vf_open_filter(vf,"palette",NULL);
 	    goto csp_again;
-	} else 
+	} else
 	{ // sws failed, if the last filter (vf_vo) support MPEGPES try to append vf_lavc
 	     vf_instance_t* vo, *vp = NULL, *ve;
 	     // Remove the scale filter if we added it ourself

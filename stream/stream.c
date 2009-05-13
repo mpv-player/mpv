@@ -130,13 +130,13 @@ stream_t* open_stream_plugin(const stream_info_t* sinfo,char* filename,int mode,
   if(desc) {
     arg = m_struct_alloc(desc);
     if(sinfo->opts_url) {
-      m_option_t url_opt = 
+      m_option_t url_opt =
 	{ "stream url", arg , CONF_TYPE_CUSTOM_URL, 0, 0 ,0, sinfo->opts };
       if(m_option_parse(&url_opt,"stream url",filename,arg,M_CONFIG_FILE) < 0) {
 	mp_msg(MSGT_OPEN,MSGL_ERR, "URL parsing failed on url %s\n",filename);
 	m_struct_free(desc,arg);
 	return NULL;
-      }	
+      }
     }
     if(options) {
       int i;
@@ -174,14 +174,14 @@ stream_t* open_stream_plugin(const stream_info_t* sinfo,char* filename,int mode,
     s->flags &= ~STREAM_SEEK;
   if(s->seek && !(s->flags & STREAM_SEEK))
     s->flags |= STREAM_SEEK;
-  
+
   s->mode = mode;
 
   mp_msg(MSGT_OPEN,MSGL_V, "STREAM: [%s] %s\n",sinfo->name,filename);
   mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Description: %s\n",sinfo->info);
   mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Author: %s\n", sinfo->author);
   mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Comment: %s\n", sinfo->comment);
-  
+
   return s;
 }
 
@@ -257,9 +257,9 @@ int stream_fill_buffer(stream_t *s){
   case STREAMTYPE_DS:
     len = demux_read_data((demux_stream_t*)s->priv,s->buffer,STREAM_BUFFER_SIZE);
     break;
-  
-    
-  default: 
+
+
+  default:
     len= s->fill_buffer ? s->fill_buffer(s,s->buffer,STREAM_BUFFER_SIZE) : 0;
   }
   if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; return 0; }
@@ -320,13 +320,13 @@ if(newpos==0 || newpos!=s->pos){
       }
       break;
     }
-	
+
     if( s->streaming_ctrl!=NULL && s->streaming_ctrl->streaming_seek ) {
       if( s->streaming_ctrl->streaming_seek( s->fd, pos, s->streaming_ctrl )<0 ) {
         mp_msg(MSGT_STREAM,MSGL_INFO,"Stream not seekable!\n");
         return 1;
       }
-    } 
+    }
 #else
     if(newpos<s->pos){
       mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek backward in linear streams!\n");
@@ -359,9 +359,9 @@ while(stream_fill_buffer(s) > 0 && pos >= 0) {
   }
   pos -= s->buf_len;
 }
-  
+
 //  if(pos==s->buf_len) printf("XXX Seek to last byte of file -> EOF\n");
-  
+
   mp_msg(MSGT_STREAM,MSGL_V,"stream_seek: WARNING! Can't seek to 0x%"PRIX64" !\n",(int64_t)(pos+newpos));
   return 0;
 }
@@ -415,7 +415,7 @@ stream_t* new_stream(int fd,int type){
     mp_msg(MSGT_STREAM,MSGL_V,"WINSOCK2 init: %i\n", temp);
   }
 #endif
-  
+
   s->fd=fd;
   s->type=type;
   s->buf_pos=s->buf_len=0;

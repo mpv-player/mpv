@@ -81,7 +81,7 @@ struct vd_modes
 static struct vd_modes vo_dga_modes[] = {
     // these entries describe HW modes
     // however, we use the same entries to tell mplayer what we support
-    // so the last two values describe, which HW mode to use and which conversion 
+    // so the last two values describe, which HW mode to use and which conversion
     // function to use for a mode that is not supported by HW
 
     {0, 0, 0, 0, 0, 0, 0, 0, 0,},
@@ -193,7 +193,7 @@ static XF86VidModeModeInfo **vo_dga_vidmodes = NULL;
 
 static int vo_dga_src_format;
 static int vo_dga_width;        // bytes per line in framebuffer
-static int vo_dga_vp_width;     // visible pixels per line in 
+static int vo_dga_vp_width;     // visible pixels per line in
 
                                          // framebuffer
 static int vo_dga_vp_height;    // visible lines in framebuffer
@@ -203,12 +203,12 @@ static int vo_dga_src_height;   // height of video in pixels
 static int vo_dga_src_offset = 0;       // offset in src
 static int vo_dga_vp_offset = 0;        // offset in dest
 static int vo_dga_bytes_per_line;       // bytes per line to copy
-static int vo_dga_vp_skip;      // dto. for dest 
-static int vo_dga_lines;        // num of lines to copy                                
+static int vo_dga_vp_skip;      // dto. for dest
+static int vo_dga_lines;        // num of lines to copy
 static int vo_dga_hw_mode = 0;  // index in mode list that is actually
 
                                          // used by framebuffer
-static int vo_dga_src_mode = 0; // index in mode list that is used by 
+static int vo_dga_src_mode = 0; // index in mode list that is used by
 
                                          // codec
 static int vo_dga_XServer_mode = 0;     // index in mode list for resolution
@@ -278,7 +278,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 
 
 
-// quick & dirty - for debugging only 
+// quick & dirty - for debugging only
 #if 0
 static void fillblock(char *strt, int yoff, int lines, int val)
 {
@@ -410,7 +410,7 @@ static void uninit(void)
         }
 #else
         XF86DGADirectVideo(mDisplay, mScreen, 0);
-        // first disable DirectVideo and then switch mode back!     
+        // first disable DirectVideo and then switch mode back!
 #ifdef CONFIG_XF86VM
         if (vo_dga_vidmodes != NULL)
         {
@@ -434,7 +434,7 @@ static void uninit(void)
 
 
 //----------------------------------------------------------
-// TODO: check for larger maxy value 
+// TODO: check for larger maxy value
 // (useful for double buffering!!!)
 
 static int check_res(int num, int x, int y, int bpp,
@@ -449,11 +449,11 @@ static int check_res(int num, int x, int y, int bpp,
     if ((new_x >= x) && (new_y >= y) && (
                                             // prefer a better resolution either in X or in Y
                                             // as long as the other dimension is at least the same
-                                            // 
-                                            // hmm ... MAYBE it would be more clever to focus on the 
-                                            // x-resolution; I had 712x400 and 640x480 and the movie 
+                                            //
+                                            // hmm ... MAYBE it would be more clever to focus on the
+                                            // x-resolution; I had 712x400 and 640x480 and the movie
                                             // was 640x360; 640x480 would be the 'right thing' here
-                                            // but since 712x400 was queried first I got this one. 
+                                            // but since 712x400 was queried first I got this one.
                                             // I think there should be a cmd-line switch to let the
                                             // user choose the mode he likes ...   (acki2)
                                             (((new_x < *old_x) &&
@@ -471,8 +471,8 @@ static int check_res(int num, int x, int y, int bpp,
                                                || (*old_vbi >= 50
                                                    && new_vbi < *old_vbi
                                                    && new_vbi >= 50))) ||
-                                             // if everything is equal, then use the mode with the lower 
-                                             // stride 
+                                             // if everything is equal, then use the mode with the lower
+                                             // stride
                                              ((new_x == *old_x) &&
                                               (new_y == *old_y) &&
                                               (new_vbi == *old_vbi) &&
@@ -767,7 +767,7 @@ static int config(uint32_t width, uint32_t height,
 #endif
         return 1;
     }
-// now let's start the DGA thing 
+// now let's start the DGA thing
 
     if (!vo_config_count || width != prev_width || height != prev_height)
     {
@@ -899,9 +899,9 @@ static int preinit(const char *arg)
                    "resolution supported by DGA driver!\n");
 #endif
         }                       //else{
-        //  mp_msg(MSGT_VO, MSGL_V, "vo_dga: X running at: %s\n", 
+        //  mp_msg(MSGT_VO, MSGL_V, "vo_dga: X running at: %s\n",
         //            vd_GetModeString(vo_dga_XServer_mode));
-        //}                                
+        //}
 
 #ifdef CONFIG_DGA2
         vo_modelines = XDGAQueryModes(mDisplay, mScreen, &vo_modecount);

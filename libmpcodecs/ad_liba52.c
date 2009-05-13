@@ -45,7 +45,7 @@ static sample_t a52_level = 1;
 float a52_drc_level = 1.0;
 static int a52_drc_action = DRC_NO_ACTION;
 
-static ad_info_t info = 
+static ad_info_t info =
 {
 	"AC3 decoding with liba52",
 	"liba52",
@@ -85,12 +85,12 @@ while(1){
     demux_read_data(sh_audio->ds,sh_audio->a_in_buffer+8,length-8);
     if(sh_audio->format!=0x2000)
 	swab(sh_audio->a_in_buffer+8,sh_audio->a_in_buffer+8,length-8);
-    
+
 #ifdef CONFIG_LIBA52_INTERNAL
     if(crc16_block(sh_audio->a_in_buffer+2,length-2)!=0)
 	mp_msg(MSGT_DECAUDIO,MSGL_STATUS,"a52: CRC check failed!  \n");
 #endif
-    
+
     return length;
 }
 
@@ -312,7 +312,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     int i,len=-1;
 	if (sh_audio->sample_format == AF_FORMAT_FLOAT_NE)
 	    bias = 0;
-	if(!sh_audio->a_in_buffer_len) 
+	if(!sh_audio->a_in_buffer_len)
 	    if(a52_fillbuff(sh_audio)<0) return len; /* EOF */
 	sh_audio->a_in_buffer_len=0;
 	if (a52_frame (a52_state, sh_audio->a_in_buffer, &flags, &level, bias)){

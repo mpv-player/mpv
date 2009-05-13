@@ -117,7 +117,7 @@ void hashmap_done(hashmap_t* map)
 	if (map->count > 0 || map->hit_count + map->miss_count > 0)
 		mp_msg(MSGT_ASS, MSGL_V, "cache statistics: \n  total accesses: %d\n  hits: %d\n  misses: %d\n  object count: %d\n",
 		       map->hit_count + map->miss_count, map->hit_count, map->miss_count, map->count);
-	
+
 	for (i = 0; i < map->nbuckets; ++i) {
 		hashmap_item_t* item = map->root[i];
 		while (item) {
@@ -254,7 +254,7 @@ void* cache_add_bitmap(bitmap_hash_key_t* key, bitmap_hash_val_t* val)
  * \brief Get a bitmap from bitmap cache.
  * \param key hash key
  * \return requested hash val or 0 if not found
-*/ 
+*/
 bitmap_hash_val_t* cache_find_bitmap(bitmap_hash_key_t* key)
 {
 	return hashmap_find(bitmap_cache, key);
@@ -302,7 +302,7 @@ void* cache_add_glyph(glyph_hash_key_t* key, glyph_hash_val_t* val)
  * \brief Get a glyph from glyph cache.
  * \param key hash key
  * \return requested hash val or 0 if not found
-*/ 
+*/
 glyph_hash_val_t* cache_find_glyph(glyph_hash_key_t* key)
 {
 	return hashmap_find(glyph_cache, key);

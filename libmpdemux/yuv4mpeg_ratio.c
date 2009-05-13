@@ -68,7 +68,7 @@ static int gcd(int a, int b)
   }
   return a;
 }
-    
+
 
 /*************************************************************************
  *
@@ -93,7 +93,7 @@ void y4m_ratio_reduce(y4m_ratio_t *r)
  * Parse "nnn:ddd" into a ratio
  *
  * returns:         Y4M_OK  - success
- *           Y4M_ERR_RANGE  - range error 
+ *           Y4M_ERR_RANGE  - range error
  *
  *************************************************************************/
 

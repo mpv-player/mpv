@@ -184,7 +184,7 @@ void print_avisuperindex_chunk(avisuperindex_chunk *h, int verbose_level){
     mp_msg (MSGT_HEADER, verbose_level, "  FCC (%.4s) dwSize (%d) wLongsPerEntry(%d)\n", h->fcc, h->dwSize, h->wLongsPerEntry);
     mp_msg (MSGT_HEADER, verbose_level, "  bIndexSubType (%d) bIndexType (%d)\n", h->bIndexSubType, h->bIndexType);
     mp_msg (MSGT_HEADER, verbose_level, "  nEntriesInUse (%d) dwChunkId (%.4s)\n", h->nEntriesInUse, h->dwChunkId);
-    mp_msg (MSGT_HEADER, verbose_level, "  dwReserved[0] (%d) dwReserved[1] (%d) dwReserved[2] (%d)\n", 
+    mp_msg (MSGT_HEADER, verbose_level, "  dwReserved[0] (%d) dwReserved[1] (%d) dwReserved[2] (%d)\n",
 	    h->dwReserved[0], h->dwReserved[1], h->dwReserved[2]);
     mp_msg (MSGT_HEADER, verbose_level, "===========================\n");
 }

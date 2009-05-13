@@ -1888,7 +1888,7 @@ static int mp_property_teletext_common(m_option_t * prop, int action, void *arg,
 {
     int val,result;
     int base_ioctl=(int)prop->priv;
-    /* 
+    /*
       for teletext's GET,SET,STEP ioctls this is not 0
       SET is GET+1
       STEP is GET+2

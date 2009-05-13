@@ -1,7 +1,7 @@
 // MPlayer Turkish Translation
 // Synced with help_mp-en.h r26067
 // Translated by: Tuncer Altay, tunceraltay (at) yahoo.com and Kadir T. İri, centurium (at) gmx.net
-// Additions by Mehmet KÖSE <mehmetkse@gmail.com> 
+// Additions by Mehmet KÖSE <mehmetkse@gmail.com>
 // ~/Turkey/Ankara/Ankara University/Computer Engineering Department
 
 // ========================= MPlayer help ===========================
@@ -136,7 +136,7 @@ static const char help_text[]=
 "  Bunu doğrulayın!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- Mplayer CPU/FPU/RAM'in hatalı kullanımı nedeniyle çöktü.\n"\
-" Mplayer'ı --enable-debug seçeneğiyle yeniden derleyiniz. Bir 'gdb' backtrace ve\n"\  
+" Mplayer'ı --enable-debug seçeneğiyle yeniden derleyiniz. Bir 'gdb' backtrace ve\n"\
 " disassembly oluşturunuz. Ayrıntılar için DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- Mplayer çöktü. Bu durum oluşmamalıydı.\n"\
@@ -291,7 +291,7 @@ static const char help_text[]=
 #define MSGTR_SettingAudioDelay "Ses gecikmesi %5.3fs olarak ayarlanıyor.\n"
 #define MSGTR_SettingVideoDelay "Video gecikmesi %5.3fs olarak ayarlanıyor.\n"
 #define MSGTR_SettingAudioInputGain "Ses giriş kazancı %f olarak ayarlanıyor.\n"
-#define MSGTR_LamePresetEquals "\nönayarlama=%s\n\n" 
+#define MSGTR_LamePresetEquals "\nönayarlama=%s\n\n"
 #define MSGTR_LimitingAudioPreload "Ses önyüklemesi 0.4s olarak sınırlanıyor\n"
 #define MSGTR_IncreasingAudioDensity "Ses yoğunluğu 4 olarak artırılıyor.\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Ses önyüklemesi 0 olarak, en yüksek pts düzeltmesi 0 olarak zorlanıyor.\n"
@@ -525,7 +525,7 @@ static const char help_text[]=
 #define MSGTR_Profile "%s profili: %s\n"
 
 // m_property.c
-#define MSGTR_PropertyListHeader "\n Ad                   Tür             En az      En çok\n\n" 
+#define MSGTR_PropertyListHeader "\n Ad                   Tür             En az      En çok\n\n"
 #define MSGTR_TotalProperties "\nToplam: %d özellik\n"
 
 // open.c, stream.c:
@@ -1098,7 +1098,7 @@ static const char help_text[]=
 
 // ======================= AO Audio Output drivers ========================
 
-// libao2 
+// libao2
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed "ses_çıkışı: alsa9 ve alsa1x modülleri silindi, yerine -ao seçeneğini kullanınız.\n"
@@ -1142,7 +1142,7 @@ static const char help_text[]=
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Dosya File: %s (%s)\nPCM: Örnekleme oranı: %iHz Kanallar: %s Biçim %s\n"
 #define MSGTR_AO_PCM_HintInfo "[AO PCM] Bilgi: Daha hızlı döküm -vc null -vo null -ao pcm:fast ile sağlanabilir.\n[AO PCM] Bilgi: WAVE dosyalarını yazmak için  -ao pcm:waveheader (default) seçeneğini kullanınız.\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Yazma için %s açılamadı!\n"
- 
+
 // ao_sdl.c
 #define MSGTR_AO_SDL_INFO "[AO SDL] Örnekleme oranı: %iHz Kanallar: %s Biçim %s\n"
 #define MSGTR_AO_SDL_DriverInfo "[AO SDL] %s ses sürücüsü kullanılıyor.\n"
@@ -1258,7 +1258,7 @@ static const char help_text[]=
 
 // ======================= AF Audio Filters ================================
 
-// libaf 
+// libaf
 #define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c

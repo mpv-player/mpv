@@ -195,7 +195,7 @@ ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage);
  * \param bufsize size of buffer
  * \param codepage recode buffer contents from given codepage
  * \return newly allocated track
-*/ 
+*/
 ass_track_t* ass_read_memory(ass_library_t* library, char* buf, size_t bufsize, char* codepage);
 /**
  * \brief read styles from file into already initialized track

@@ -1229,7 +1229,7 @@ static const char help_text[]=
 
 // ======================= AF Audio Filters ================================
 
-// libaf 
+// libaf
 
 // af_ladspa.c
 
@@ -1747,7 +1747,7 @@ static const char help_text[]=
 // libvo/vo_null.c
 
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] 未知子設備: %s。\n"
-															
+
 // libvo/vo_png.c
 
 #define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] 警告: 壓縮級别設置為 0, 停用壓縮!\n"

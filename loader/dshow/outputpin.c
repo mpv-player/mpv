@@ -493,9 +493,9 @@ static HRESULT STDCALL COutputPin_QueryInternalConnections(IPin * This,
  * \return S_OK - success
  * \return E_UNEXPECTED - The pin is output pin
  *
- * \note 
- * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream, 
- * IMemAllocator::GetBuffer runs in different (streaming) thread then other 
+ * \note
+ * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream,
+ * IMemAllocator::GetBuffer runs in different (streaming) thread then other
  * methods (application thread).
  * IMemoryInputPin::NewSegment runs either in streaming or application thread.
  * Developer must use critical sections for thread-safing work.
@@ -697,9 +697,9 @@ static HRESULT STDCALL COutputMemPin_GetAllocatorRequirements(IMemInputPin* This
  * In the last case method might block indefinitely. If this might
  * happen IMemInpuPin::ReceiveCAnBlock returns S_OK
  *
- * \note 
- * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream, 
- * IMemAllocator::GetBuffer runs in different (streaming) thread then other 
+ * \note
+ * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream,
+ * IMemAllocator::GetBuffer runs in different (streaming) thread then other
  * methods (application thread).
  * IMemoryInputPin::NewSegment runs either in streaming or application thread.
  * Developer must use critical sections for thread-safing work.
@@ -736,9 +736,9 @@ static HRESULT STDCALL COutputMemPin_Receive(IMemInputPin* This,
  * \remarks
  * This method behaves like IMemInputPin::Receive but for array of samples
  *
- * \note 
- * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream, 
- * IMemAllocator::GetBuffer runs in different (streaming) thread then other 
+ * \note
+ * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream,
+ * IMemAllocator::GetBuffer runs in different (streaming) thread then other
  * methods (application thread).
  * IMemoryInputPin::NewSegment runs either in streaming or application thread.
  * Developer must use critical sections for thread-safing work.

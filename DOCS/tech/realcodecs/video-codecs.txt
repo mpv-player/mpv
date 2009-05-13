@@ -94,7 +94,7 @@ NOTE:
 rv30 only requires the (0x24,2|3,{w,h,w,h}) message. others can be left out!
 rv20 only requires the (0x11,2,0) message in rp8, before each transform call.
 
-(3,2,0) 
+(3,2,0)
 returns always(?) an error, since a global variable inside the codec
 (which points to a function similar to custommessage), is always NULL
 
@@ -140,7 +140,7 @@ unscaled video stream, the second possibly image size
 060	height	width	height	0
 070	0	1	0	0
 080	0	0xb	w	h
-090	w	h	0	0	
+090	w	h	0	0
 0A0	1	0xb0(w?)	0x58	0x58
 0B0	ptr->?	0	0	1
 0C0	0x32	1	0	0
@@ -148,7 +148,7 @@ unscaled video stream, the second possibly image size
 0E0	0	0	0	0
 0F0	0	0	0	0
 100	0	0	0	0
-110	p	p	p	p p are pointers to several function, for 
+110	p	p	p	p p are pointers to several function, for
 120	p	p	p	p example to the actual public functions
 130	p	p	p	p (except init, the others are some kind of
 140	p	p	p	p interfaces)

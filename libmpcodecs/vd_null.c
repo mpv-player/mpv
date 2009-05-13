@@ -6,7 +6,7 @@
 
 #include "vd_internal.h"
 
-static vd_info_t info = 
+static vd_info_t info =
 {
 	"Null video decoder",
 	"null",

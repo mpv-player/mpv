@@ -54,7 +54,7 @@ VDXContext *vdlOpen(const char *name,unsigned cap,int verbose)
 
   /* register all drivers */
   vidix_register_all_drivers ();
-  
+
   if (!vidix_find_driver (ctx, name, cap, verbose))
   {
     free (ctx);
@@ -71,7 +71,7 @@ VDXContext *vdlOpen(const char *name,unsigned cap,int verbose)
     free (ctx);
     return NULL;
   }
-  
+
   if (verbose)
     printf ("vidixlib: Attempt to initialize driver at: %p\n",
             ctx->drv->init);
@@ -83,10 +83,10 @@ VDXContext *vdlOpen(const char *name,unsigned cap,int verbose)
     free (ctx);
     return NULL;
   }
-  
+
   if (verbose)
     printf("vidixlib: '%s'successfully loaded\n", ctx->drv->name);
-  
+
   return ctx;
 }
 
@@ -94,7 +94,7 @@ void vdlClose(VDXContext *ctx)
 {
   if (ctx->drv->destroy)
     ctx->drv->destroy ();
-  
+
   memset (ctx, 0, sizeof (VDXContext)); /* <- it's not stupid */
   free (ctx);
 }

@@ -64,18 +64,18 @@ static void initPv(struct vf_priv_s *priv, int W, int H){
 	    - (ref[0][0] - ref[1][0] - ref[2][0] + ref[3][0])*(ref[1][1] - ref[3][1]))*W;
 	D=   (ref[1][0] - ref[3][0])*(ref[2][1] - ref[3][1])
 	   - (ref[2][0] - ref[3][0])*(ref[1][1] - ref[3][1]);
-	
+
 	a= D*(ref[1][0] - ref[0][0])*H + g*ref[1][0];
 	b= D*(ref[2][0] - ref[0][0])*W + h*ref[2][0];
 	c= D*ref[0][0]*W*H;
 	d= D*(ref[1][1] - ref[0][1])*H + g*ref[1][1];
 	e= D*(ref[2][1] - ref[0][1])*W + h*ref[2][1];
 	f= D*ref[0][1]*W*H;
-	
+
 	for(y=0; y<H; y++){
 		for(x=0; x<W; x++){
 			int u, v;
-			
+
 			u= (int)floor( SUB_PIXELS*(a*x + b*y + c)/(g*x + h*y + D*W*H) + 0.5);
 			v= (int)floor( SUB_PIXELS*(d*x + e*y + f)/(g*x + h*y + D*W*H) + 0.5);
 
@@ -88,7 +88,7 @@ static void initPv(struct vf_priv_s *priv, int W, int H){
 static double getCoeff(double d){
 	double A= -0.60;
 	double coeff;
-	
+
 	d= fabs(d);
 
 	// Equation is from VirtualDub
@@ -98,7 +98,7 @@ static double getCoeff(double d){
 		coeff = (-4.0*A + 8.0*A*d - 5.0*A*d*d + A*d*d*d);
 	else
 		coeff=0.0;
-	
+
 	return coeff;
 }
 
@@ -110,18 +110,18 @@ static int config(struct vf_instance_s* vf,
 	vf->priv->pvStride= width;
 	vf->priv->pv= (void*)memalign(8, width*height*2*sizeof(int32_t));
 	initPv(vf->priv, width, height);
-	
+
 	for(i=0; i<SUB_PIXELS; i++){
 		double d= i/(double)SUB_PIXELS;
 		double temp[4];
 		double sum=0;
-		
+
 		for(j=0; j<4; j++)
 			temp[j]= getCoeff(j - d - 1);
-		
+
 		for(j=0; j<4; j++)
 			sum+= temp[j];
-			
+
 		for(j=0; j<4; j++)
 			vf->priv->coeff[i][j]= (int)floor((1<<COEFF_BITS)*temp[j]/sum + 0.5);
 	}
@@ -142,7 +142,7 @@ static void uninit(struct vf_instance_s* vf){
 static inline void resampleCubic(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride, struct vf_priv_s *privParam, int xShift, int yShift){
 	int x, y;
 	struct vf_priv_s priv= *privParam;
-	
+
 	for(y=0; y<h; y++){
 		for(x=0; x<w; x++){
 			int u, v, subU, subV, sum, sx, sy;
@@ -162,7 +162,7 @@ static inline void resampleCubic(uint8_t *dst, uint8_t *src, int w, int h, int d
 				const int b= priv.coeff[subU][1];
 				const int c= priv.coeff[subU][2];
 				const int d= priv.coeff[subU][3];
-				
+
 				sum=
 				 priv.coeff[subV][0]*(  a*src[index - 1 - srcStride] + b*src[index - 0 - srcStride]
 				                      + c*src[index + 1 - srcStride] + d*src[index + 2 - srcStride])
@@ -184,7 +184,7 @@ static inline void resampleCubic(uint8_t *dst, uint8_t *src, int w, int h, int d
 						int ix= u + dx - 1;
 						if     (ix< 0) ix=0;
 						else if(ix>=w) ix=w-1;
-						
+
 						sum+=  priv.coeff[subU][dx]*priv.coeff[subV][dy]
 						      *src[ ix + iy*srcStride];
 					}
@@ -200,11 +200,11 @@ static inline void resampleCubic(uint8_t *dst, uint8_t *src, int w, int h, int d
 	}
 }
 
-static inline void resampleLinear(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride, 
+static inline void resampleLinear(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride,
 				  struct vf_priv_s *privParam, int xShift, int yShift){
 	int x, y;
 	struct vf_priv_s priv= *privParam;
-	
+
 	for(y=0; y<h; y++){
 		for(x=0; x<w; x++){
 			int u, v, subU, subV, sum, sx, sy, index, subUI, subVI;
@@ -220,7 +220,7 @@ static inline void resampleLinear(uint8_t *dst, uint8_t *src, int w, int h, int 
 			index= u + v*srcStride;
 			subUI= SUB_PIXELS - subU;
 			subVI= SUB_PIXELS - subV;
-            
+
 			if((unsigned)u < (unsigned)(w - 1)){
 				if((unsigned)v < (unsigned)(h - 1)){
 					sum= subVI*(subUI*src[index          ] + subU*src[index          +1])
@@ -267,20 +267,20 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 		mpi->w,mpi->h);
 
 	assert(mpi->flags&MP_IMGFLAG_PLANAR);
-	
+
 	if(vf->priv->cubic){
-		resampleCubic(dmpi->planes[0], mpi->planes[0], mpi->w,mpi->h, dmpi->stride[0], mpi->stride[0], 
+		resampleCubic(dmpi->planes[0], mpi->planes[0], mpi->w,mpi->h, dmpi->stride[0], mpi->stride[0],
 				vf->priv, 0, 0);
-		resampleCubic(dmpi->planes[1], mpi->planes[1], cw    , ch   , dmpi->stride[1], mpi->stride[1], 
+		resampleCubic(dmpi->planes[1], mpi->planes[1], cw    , ch   , dmpi->stride[1], mpi->stride[1],
 				vf->priv, mpi->chroma_x_shift, mpi->chroma_y_shift);
-		resampleCubic(dmpi->planes[2], mpi->planes[2], cw    , ch   , dmpi->stride[2], mpi->stride[2], 
+		resampleCubic(dmpi->planes[2], mpi->planes[2], cw    , ch   , dmpi->stride[2], mpi->stride[2],
 				vf->priv, mpi->chroma_x_shift, mpi->chroma_y_shift);
 	}else{
-		resampleLinear(dmpi->planes[0], mpi->planes[0], mpi->w,mpi->h, dmpi->stride[0], mpi->stride[0], 
+		resampleLinear(dmpi->planes[0], mpi->planes[0], mpi->w,mpi->h, dmpi->stride[0], mpi->stride[0],
 				vf->priv, 0, 0);
-		resampleLinear(dmpi->planes[1], mpi->planes[1], cw    , ch   , dmpi->stride[1], mpi->stride[1], 
+		resampleLinear(dmpi->planes[1], mpi->planes[1], cw    , ch   , dmpi->stride[1], mpi->stride[1],
 				vf->priv, mpi->chroma_x_shift, mpi->chroma_y_shift);
-		resampleLinear(dmpi->planes[2], mpi->planes[2], cw    , ch   , dmpi->stride[2], mpi->stride[2], 
+		resampleLinear(dmpi->planes[2], mpi->planes[2], cw    , ch   , dmpi->stride[2], mpi->stride[2],
 				vf->priv, mpi->chroma_x_shift, mpi->chroma_y_shift);
 	}
 
@@ -316,7 +316,7 @@ static int open(vf_instance_t *vf, char* args){
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
 	if(args==NULL) return 0;
-	
+
 	e=sscanf(args, "%lf:%lf:%lf:%lf:%lf:%lf:%lf:%lf:%d",
 		&vf->priv->ref[0][0], &vf->priv->ref[0][1],
 		&vf->priv->ref[1][0], &vf->priv->ref[1][1],

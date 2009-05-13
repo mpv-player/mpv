@@ -48,7 +48,7 @@ static int init(sh_audio_t *sh)
   WAVEFORMATEX *h=sh->wf;
 
   if(!h) return 0;
-   
+
   sh->i_bps=h->nAvgBytesPerSec;
   sh->channels=h->nChannels;
   sh->samplerate=h->nSamplesPerSec;
@@ -84,7 +84,7 @@ static int decode_audio(sh_audio_t *audio, unsigned char *buf, int minlen, int m
    if(xx<=0 || !dv_audio_frame) return 0; // EOF?
 
    dv_parse_header(decoder, dv_audio_frame);
-   
+
    if(xx!=decoder->frame_size)
        mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_MPCODECS_AudioFramesizeDiffers,
            xx, decoder->frame_size);
@@ -94,7 +94,7 @@ static int decode_audio(sh_audio_t *audio, unsigned char *buf, int minlen, int m
       /* Interleave the audio into a single buffer */
       int i=0;
       int16_t *bufP=(int16_t*)buf;
-      
+
 //      printf("samples=%d/%d  chans=%d  mem=%d  \n",decoder->audio->samples_this_frame,DV_AUDIO_MAX_SAMPLES,
 //          decoder->audio->num_channels, decoder->audio->samples_this_frame*decoder->audio->num_channels*2);
 

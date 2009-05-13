@@ -68,7 +68,7 @@ static int open(vf_instance_t *vf, char* args){
 	if(!strcasecmp(args,"abgr")) vf->priv->fmt=IMGFMT_ABGR; else
 	{ mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_UnknownFormatName, args);return 0;}
     }
-        
+
 
     return 1;
 }

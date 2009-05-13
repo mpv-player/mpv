@@ -20,9 +20,9 @@
 #include <errno.h>
 
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#include "vcd_read_fbsd.h" 
+#include "vcd_read_fbsd.h"
 #elif defined(__APPLE__)
-#include "vcd_read_darwin.h" 
+#include "vcd_read_darwin.h"
 #elif defined(__MINGW32__) || defined(__CYGWIN__)
 #include "vcd_read_win32.h"
 #else
@@ -111,7 +111,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 #else
   f=open(p->device,O_RDONLY);
 #endif
-  if(f<0){ 
+  if(f<0){
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,p->device);
     m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;

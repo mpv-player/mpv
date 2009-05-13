@@ -27,7 +27,7 @@ typedef struct
     enum seg_type type;            /* segment type */
 } ldt_entry;
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 void LDT_BytesToEntry( const unsigned long *buffer, ldt_entry *content );

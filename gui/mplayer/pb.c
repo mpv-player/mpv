@@ -59,7 +59,7 @@ int		mplPBFade = 0;
 void mplPBDraw( void )
 {
  int x;
- 
+
  if ( !appMPlayer.subWindow.isFullScreen ) return;
  if ( !mplPBVisible || !appMPlayer.barIsPresent ) return;
 
@@ -70,7 +70,7 @@ void mplPBDraw( void )
    case -2: x=( appMPlayer.subWindow.Width - appMPlayer.bar.width ); break;
    default: x=appMPlayer.bar.x;
   }
-	      
+
  switch ( mplPBFade )
   {
    case 1: // fade in
@@ -81,7 +81,7 @@ void mplPBDraw( void )
 	  mplPBFade=0;
 	  vo_mouse_autohide=0;
 	 }
-        wsMoveWindow( &appMPlayer.barWindow,0,x,mplPBLength ); 
+        wsMoveWindow( &appMPlayer.barWindow,0,x,mplPBLength );
 	break;
    case 2: // fade out
 	mplPBLength+=10;
@@ -89,11 +89,11 @@ void mplPBDraw( void )
 	 {
 	  mplPBLength=appMPlayer.subWindow.Height;
 	  mplPBFade=mplPBVisible=0;
-          vo_mouse_autohide=1; 
-          wsVisibleWindow( &appMPlayer.barWindow,wsHideWindow ); 
+          vo_mouse_autohide=1;
+          wsVisibleWindow( &appMPlayer.barWindow,wsHideWindow );
 	  return;
 	 }
-        wsMoveWindow( &appMPlayer.barWindow,0,x,mplPBLength ); 
+        wsMoveWindow( &appMPlayer.barWindow,0,x,mplPBLength );
 	break;
   }
 
@@ -102,12 +102,12 @@ void mplPBDraw( void )
   {
    btnModify( evSetMoviePosition,guiIntfStruct.Position );
    btnModify( evSetVolume,guiIntfStruct.Volume );
-   
+
    vo_mouse_autohide=0;
 
    fast_memcpy( mplPBDrawBuffer,appMPlayer.bar.Bitmap.Image,appMPlayer.bar.Bitmap.ImageSize );
    Render( &appMPlayer.barWindow,appMPlayer.barItems,appMPlayer.NumberOfBarItems,mplPBDrawBuffer,appMPlayer.bar.Bitmap.ImageSize );
-   wsConvert( &appMPlayer.barWindow,mplPBDrawBuffer,appMPlayer.bar.Bitmap.ImageSize );   
+   wsConvert( &appMPlayer.barWindow,mplPBDrawBuffer,appMPlayer.bar.Bitmap.ImageSize );
   }
  wsPutImage( &appMPlayer.barWindow );
 }
@@ -121,7 +121,7 @@ void mplPBMouseHandle( int Button,int X,int Y,int RX,int RY )
         int     i;
         wItem * item = NULL;
 	float   value = 0.0f;
-			 
+
  static int     SelectedItem = -1;
 	int     currentselected = -1;
 
@@ -129,7 +129,7 @@ void mplPBMouseHandle( int Button,int X,int Y,int RX,int RY )
    if ( ( appMPlayer.barItems[i].pressed != btnDisabled )&&
       ( wgIsRect( X,Y,appMPlayer.barItems[i].x,appMPlayer.barItems[i].y,appMPlayer.barItems[i].x+appMPlayer.barItems[i].width,appMPlayer.barItems[i].y+appMPlayer.barItems[i].height ) ) )
     { currentselected=i; break; }
-		    
+
  switch ( Button )
   {
    case wsPMMouseButton:
@@ -230,8 +230,8 @@ void mplPBShow( int x, int y )
  if ( !appMPlayer.barIsPresent || !gtkEnablePlayBar ) return;
  if ( !appMPlayer.subWindow.isFullScreen ) return;
 
- if ( y > appMPlayer.subWindow.Height - appMPlayer.bar.height ) 
-  { 
+ if ( y > appMPlayer.subWindow.Height - appMPlayer.bar.height )
+  {
    if ( !mplPBFade ) wsVisibleWindow( &appMPlayer.barWindow,wsShowWindow );
    mplPBFade=1; mplPBVisible=1; wsPostRedisplay( &appMPlayer.barWindow );
   }
@@ -256,10 +256,10 @@ void mplPBInit( void )
    wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsHideFrame|wsHideWindow,"PlayBar" );
 
  wsSetShape( &appMPlayer.barWindow,appMPlayer.bar.Mask.Image );
- 
+
  appMPlayer.barWindow.ReDraw=(void *)mplPBDraw;
  appMPlayer.barWindow.MouseHandler=mplPBMouseHandle;
  appMPlayer.barWindow.KeyHandler=mplMainKeyHandle;
- 
+
  mplPBLength=appMPlayer.subWindow.Height;
 }

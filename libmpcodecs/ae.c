@@ -40,11 +40,11 @@ audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params
 	audio_encoder_t *encoder;
 	if(! params)
 		return NULL;
-	
+
 	encoder = (audio_encoder_t *) calloc(1, sizeof(audio_encoder_t));
 	memcpy(&encoder->params, params, sizeof(audio_encoding_params_t));
 	encoder->stream = stream;
-	
+
 	switch(stream->codec)
 	{
 		case ACODEC_PCM:
@@ -79,7 +79,7 @@ audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params
 			ris = 0;
 			break;
 	}
-	
+
 	if(! ris)
 	{
 		free(encoder);
@@ -92,7 +92,7 @@ audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params
 		free(encoder);
 		return NULL;
 	}
-	
+
 	encoder->codec = stream->codec;
 	return encoder;
 }

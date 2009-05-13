@@ -10,7 +10,7 @@ static int pci_config_type( void )
   unsigned char tmp1, tmp2;
   int retval;
     retval = 0;
- 
+
     outb(PCI_MODE2_ENABLE_REG, 0x00);
     outb(PCI_MODE2_FORWARD_REG, 0x00);
     tmp1 = inb(PCI_MODE2_ENABLE_REG);
@@ -50,7 +50,7 @@ static int pci_get_vendor(
 static long pci_config_read_long(
           unsigned char bus,
           unsigned char dev,
-          int func, 
+          int func,
           unsigned cmd)
 {
     unsigned long config_cmd;

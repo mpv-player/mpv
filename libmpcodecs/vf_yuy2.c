@@ -21,12 +21,12 @@ static int config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt){
 
     sws_rgb2rgb_init(get_sws_cpuflags());
-    
+
     if(vf_next_query_format(vf,IMGFMT_YUY2)<=0){
 	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupport, "YUY2");
 	return 0;
     }
-    
+
     return vf_next_config(vf,width,height,d_width,d_height,flags,IMGFMT_YUY2);
 }
 
@@ -44,9 +44,9 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     else
     yv12toyuy2(mpi->planes[0],mpi->planes[1],mpi->planes[2], dmpi->planes[0],
 	    mpi->w,mpi->h, mpi->stride[0],mpi->stride[1],dmpi->stride[0]);
-    
+
     vf_clone_mpi_attributes(dmpi, mpi);
-    
+
     return vf_next_put_image(vf,dmpi, pts);
 }
 

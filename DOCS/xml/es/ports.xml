@@ -62,7 +62,7 @@ Sharp Zaurus, Compaq Ipaq. La manera más facil de obtener
 paquetes de <ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Si
 desea compilarlo usted mismo, debe mirar en
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</ulink>
-y el directorio 
+y el directorio
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 en el raiz de la distribución de OpenZaurus. Ahí siempre tienen los Makefile
 y parches más recientes usados para construir un
@@ -172,7 +172,7 @@ x86 hace dificil el uso de las instrucciones de MMX, SSE y 3DNOW! que no puede
 ser compilado usando el ensamblador de Sun <filename>/usr/ccs/bin/as</filename>.
 </para>
 
-<para>El script <filename>configure</filename> intenta encontrarlo, qué 
+<para>El script <filename>configure</filename> intenta encontrarlo, qué
 programa ensamblador es usado por tu órden &quot;gcc&quot; (en caso de que la
 autodetección falle, use la opción
 <option>--as=<replaceable>/donde/este/instalado/gnu-as</replaceable></option>
@@ -193,7 +193,7 @@ usando GCC sin el ensamblador GNU:
 </para>
 
 <para>
-Error típico que se obtiene cuando se construye con un compilador GNU C que no 
+Error típico que se obtiene cuando se construye con un compilador GNU C que no
 usa GNU as:
 <screen>
    % gmake
@@ -202,7 +202,7 @@ usa GNU as:
         -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
    Assembler: mplayer.c
    "(stdin)", line 3567 : Illegal mnemonic
-   "(stdin)", line 3567 : Error de sintaxis 
+   "(stdin)", line 3567 : Error de sintaxis
    ... más errores "Illegal mnemonic" y "Error de sintaxis" ...
 </screen>
 </para>
@@ -347,7 +347,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <para>Puede reproducir VCDs reproduciendo los archivos <filename>.DAT</filename> o
   <filename>.MPG</filename> que Windows muestra en los VCDs. Esto funciona de la
   siguiente manera (ajuste para la letra de unidad de su CD-ROM):</para>
-  
+
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
 
 <screen>mplayer <replaceable>/cygdrive/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
@@ -374,7 +374,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/types.h">
   <filename>types.h</filename></ulink>.</para>
 
-<para>Extraiga los archivos de cabecera de DirectX a 
+<para>Extraiga los archivos de cabecera de DirectX a
   <filename class="directory">/mingw/include/</filename>.</para>
 
 <para>VCDs y DVDs funcionan casi como en Cygwin (ajustando la letra de la unidad de su

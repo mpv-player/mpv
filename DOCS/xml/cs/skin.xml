@@ -417,7 +417,7 @@ a '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
     <link linkend="skin-button">tlačítka</link>)
   </para></listitem>
   <listitem><para>
-    <literal>tšířka</literal>, <literal>tvýška</literal> - 
+    <literal>tšířka</literal>, <literal>tvýška</literal> -
     velikost tlačítka
   </para></listitem>
   <listitem><para>
@@ -604,7 +604,7 @@ a '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   <row>
     <entry>$T</entry>
     <entry>znak podle typu datového proudu (soubor: <literal>f</literal>,
-    Video CD: <literal>v</literal>, DVD: <literal>d</literal>, 
+    Video CD: <literal>v</literal>, DVD: <literal>d</literal>,
     URL: <literal>u</literal>)
     </entry>
   </row>

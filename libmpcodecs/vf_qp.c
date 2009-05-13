@@ -50,7 +50,7 @@ static int config(struct vf_instance_s* vf,
 
 	vf->priv->qp_stride= (width+15)>>4;
         vf->priv->qp= av_malloc(vf->priv->qp_stride*h*sizeof(int8_t));
-        
+
         for(i=-129; i<128; i++){
             double const_values[]={
                 M_PI,
@@ -105,7 +105,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	}
 
 	dmpi= vf->dmpi;
-        
+
 	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h, dmpi->stride[0], mpi->stride[0]);
     		if(mpi->flags&MP_IMGFLAG_PLANAR){
@@ -114,13 +114,13 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 		}
 	}
         vf_clone_mpi_attributes(dmpi, mpi);
-        
+
         dmpi->qscale = vf->priv->qp;
         dmpi->qstride= vf->priv->qp_stride;
         if(mpi->qscale){
             for(y=0; y<((dmpi->h+15)>>4); y++){
                 for(x=0; x<vf->priv->qp_stride; x++){
-                    dmpi->qscale[x + dmpi->qstride*y]= 
+                    dmpi->qscale[x + dmpi->qstride*y]=
                         vf->priv->lut[ 129 + ((int8_t)mpi->qscale[x + mpi->qstride*y]) ];
                 }
             }
@@ -141,7 +141,7 @@ static void uninit(struct vf_instance_s* vf){
 
 	if(vf->priv->qp) av_free(vf->priv->qp);
 	vf->priv->qp= NULL;
-	
+
 	av_free(vf->priv);
 	vf->priv=NULL;
 }
@@ -154,11 +154,11 @@ static int open(vf_instance_t *vf, char* args){
     vf->uninit=uninit;
     vf->priv=av_malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
-    
+
 //    avcodec_init();
 
     if (args) strncpy(vf->priv->eq, args, 199);
-	
+
     return 1;
 }
 

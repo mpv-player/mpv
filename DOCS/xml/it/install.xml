@@ -219,7 +219,7 @@ utilizzare la skin nella directory
 
 <para>
 Devi dire a <application>MPlayer</application> quale font usare per usufruire
-dell'OSD e dei sottotitoli. Un qualsiasi font TrueType o basato su bitmap 
+dell'OSD e dei sottotitoli. Un qualsiasi font TrueType o basato su bitmap
 funzionerà. Tuttavia si consigliano i font TrueType in quanto hanno una resa
 grafica migliore, possono essere ridimensionati correttamente rispetto alla
 dimensione del filmato e gestiscono meglio differenti codifiche.
@@ -320,7 +320,7 @@ il menu Preferenze attualmente NON E' IMPLEMENTATO!
 <title>Installazione</title>
 <listitem><para>
   compila <application>MPlayer</application> passando
-  a <filename>./configure</filename> l'opzione <option>--enable-menu</option> 
+  a <filename>./configure</filename> l'opzione <option>--enable-menu</option>
 </para></listitem>
 <listitem><para>
   assicurati di avere un font OSD installato
@@ -475,10 +475,10 @@ make install
 <para>
 Il codec voce Adaptive Multi-Rate è usato nei telefoni cellulari di terza
 generazione (3G).
-La referenza per l'implementazione è disponibile da 
+La referenza per l'implementazione è disponibile da
 <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
 (gratuita per uso personale).
-Per abilitarne il supporto, scarica e installa le librerie per 
+Per abilitarne il supporto, scarica e installa le librerie per
 <ulink url="http://www.penguin.cz/~utx/amr">AMR-NB e AMR-WB</ulink>
 seguendo le istruzioni da quella pagina.
 Dopodiché ricompila <application>MPlayer</application>.

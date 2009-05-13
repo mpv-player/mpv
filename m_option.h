@@ -187,10 +187,10 @@ struct m_option_type {
   unsigned int size;
   /// See \ref OptionTypeFlags.
   unsigned int flags;
-  
+
   /// Parse the data from a string.
   /** It is the only required function, all others can be NULL.
-   * 
+   *
    *  \param opt The option that is parsed.
    *  \param name The full option name.
    *  \param param The parameter to parse.
@@ -201,7 +201,7 @@ struct m_option_type {
    *          consumed. For details see \ref OptionParserReturn.
    */
   int (*parse)(const m_option_t* opt,const char *name, char *param, void* dst, int src);
-  
+
   /// Print back a value in string form.
   /** \param opt The option to print.
    *  \param val Pointer to the memory holding the data to be printed.
@@ -224,7 +224,7 @@ struct m_option_type {
    *  \param src Pointer to the source memory.
    */
   void (*save)(const m_option_t* opt,void* dst, void* src);
-  
+
   /// Set the value in the program (dst) from a save slot.
   /** \param opt The option to copy.
    *  \param dst Pointer to the destination memory.
@@ -256,20 +256,20 @@ struct m_option_type {
 struct m_option {
   /// Option name.
   const char *name;
-  
+
   /// Reserved for higher level APIs, it shouldn't be used by parsers.
   /** The suboption parser and func types do use it. They should instead
    *  use the priv field but this was inherited from older versions of the
    *  config code.
    */
   void *p;
-  
+
   /// Option type.
   const m_option_type_t* type;
-  
+
   /// See \ref OptionFlags.
   unsigned int flags;
-  
+
   /// \brief Mostly useful for numeric types, the \ref M_OPT_MIN flags must
   /// also be set.
   double min;
@@ -277,7 +277,7 @@ struct m_option {
   /// \brief Mostly useful for numeric types, the \ref M_OPT_MAX flags must
   /// also be set.
   double max;
-  
+
   /// Type dependent data (for all kinds of extended settings).
   /** This used to be a function pointer to hold a 'reverse to defaults' func.
    *  Now it can be used to pass any type of extra args needed by the parser.
@@ -427,7 +427,7 @@ struct m_option {
 /// Returned when the given parameter couldn't be parsed.
 #define M_OPT_INVALID		-3
 
-/// \brief Returned if the value is "out of range". The exact meaning may 
+/// \brief Returned if the value is "out of range". The exact meaning may
 /// vary from type to type.
 #define M_OPT_OUT_OF_RANGE	-4
 
@@ -456,7 +456,7 @@ struct m_option {
 /** \ingroup Options
  *  This function takes the possible wildcards into account (see
  *  \ref M_OPT_TYPE_ALLOW_WILDCARD).
- * 
+ *
  *  \param list Pointer to an array of \ref m_option.
  *  \param name Name of the option.
  *  \return The matching option or NULL.

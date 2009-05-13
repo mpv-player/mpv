@@ -60,7 +60,7 @@ m_config_new(void) {
   for(i = 0 ; config->self_opts[i].name ; i++)
     config->self_opts[i].priv = config;
   m_config_register_options(config,config->self_opts);
-  
+
   return config;
 }
 
@@ -74,7 +74,7 @@ m_config_free(m_config_t* config) {
 #ifdef MP_DEBUG
   assert(config != NULL);
 #endif
-  
+
   while(i) {
     if (i->flags & M_CFG_OPT_ALIAS)
       sl = NULL;
@@ -104,7 +104,7 @@ m_config_free(m_config_t* config) {
     free(p);
   }
   free(config->self_opts);
-  free(config);  
+  free(config);
 }
 
 void
@@ -131,8 +131,8 @@ m_config_push(m_config_t* config) {
 
     // Update the current status
     m_option_save(co->opt,co->slots->data,co->opt->p);
-    
-    // Allocate a new slot    
+
+    // Allocate a new slot
     slot = calloc(1,sizeof(m_config_save_slot_t) + co->opt->type->size);
     slot->lvl = config->lvl;
     slot->prev = co->slots;
@@ -141,7 +141,7 @@ m_config_push(m_config_t* config) {
     // Reset our set flag
     co->flags &= ~M_CFG_OPT_SET;
   }
-  
+
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Config pushed level is now %d\n",config->lvl);
 }
 
@@ -165,7 +165,7 @@ m_config_pop(m_config_t* config) {
       continue;
     if(co->slots->lvl > config->lvl)
       mp_msg(MSGT_CFGPARSER, MSGL_WARN,MSGTR_SaveSlotTooOld,config->lvl,co->slots->lvl);
-    
+
     while(co->slots->lvl >= config->lvl) {
       m_option_free(co->opt,co->slots->data);
       slot = co->slots;
@@ -261,13 +261,13 @@ m_config_register_options(m_config_t *config, const m_option_t *args) {
   return 1;
 }
 
-static m_config_option_t* 
+static m_config_option_t*
 m_config_get_co(m_config_t *config, char* arg) {
   m_config_option_t *co;
 
   for(co = config->opts ; co ; co = co->next ) {
     int l = strlen(co->name) - 1;
-    if((co->opt->type->flags & M_OPT_TYPE_ALLOW_WILDCARD) && 
+    if((co->opt->type->flags & M_OPT_TYPE_ALLOW_WILDCARD) &&
        (co->name[l] == '*')) {
       if(strncasecmp(co->name,arg,l) == 0)
 	return co;
@@ -346,7 +346,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
       free(lst[2*i]);
       free(lst[2*i+1]);
     }
-    if(lst) free(lst);      
+    if(lst) free(lst);
   } else
     r = m_option_parse(co->opt,arg,param,set ? co->slots->data : NULL,config->mode);
 
@@ -516,7 +516,7 @@ parse_profile(const m_option_t *opt, const char *name, char *param, void *dst, i
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
     return M_OPT_EXIT-1;
   }
-    
+
   r = m_option_type_string_list.parse(opt,name,param,&list,src);
   if(r < 0) return r;
   if(!list || !list[0]) return M_OPT_INVALID;
@@ -568,10 +568,10 @@ show_profile(m_option_t *opt, char* name, char *param) {
     for(j = 0 ; j < config->profile_depth ; j++)
       spc[j] = ' ';
     spc[config->profile_depth] = '\0';
-    
+
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s%s=%s\n", spc,
 	   p->opts[2*i], p->opts[2*i+1]);
-    
+
 
     if(config->profile_depth < MAX_PROFILE_DEPTH &&
        !strcmp(p->opts[2*i],"profile")) {

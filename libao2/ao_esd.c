@@ -122,7 +122,7 @@ static int control(int cmd, void *arg)
 	    vol_cache_time = now;
 	}
 	esd_free_all_info(esd_i);
-	
+
 	return CONTROL_OK;
 
     case AOCONTROL_SET_VOLUME:
@@ -236,19 +236,19 @@ static int init(int rate_hz, int channels, int format, int flags)
 #ifdef CONFIG_ESD_LATENCY
     esd_latency = esd_get_latency(esd_fd);
 #else
-    esd_latency = ((channels == 1 ? 2 : 1) * ESD_DEFAULT_RATE * 
+    esd_latency = ((channels == 1 ? 2 : 1) * ESD_DEFAULT_RATE *
 		   (ESD_BUF_SIZE + 64 * (4.0f / bytes_per_sample))
-		   ) / rate_hz;  
-    esd_latency += ESD_BUF_SIZE * 2; 
+		   ) / rate_hz;
+    esd_latency += ESD_BUF_SIZE * 2;
 #endif
     if(esd_latency > 0) {
 	lag_serv = (esd_latency * 4.0f) / (bytes_per_sample * rate_hz);
 	lag_seconds = lag_net + lag_serv;
 	audio_delay += lag_seconds;
-	mp_msg(MSGT_AO, MSGL_INFO,MSGTR_AO_ESD_LatencyInfo, 
+	mp_msg(MSGT_AO, MSGL_INFO,MSGTR_AO_ESD_LatencyInfo,
 	       lag_serv, lag_net, lag_seconds);
     }
-    
+
     esd_play_fd = esd_play_stream_fallback(esd_fmt, rate_hz,
 					   server, ESD_CLIENT_NAME);
     if (esd_play_fd < 0) {
@@ -333,7 +333,7 @@ static int play(void* data, int len, int flags)
 	 */
 	n = write(esd_play_fd, (char*)data + offs, ESD_BUF_SIZE);
 	if ( n < 0 ) {
-	    if ( errno != EAGAIN ) 
+	    if ( errno != EAGAIN )
 		dprintf("esd play: write failed: %s\n", strerror(errno));
 	    break;
 	} else if ( n != ESD_BUF_SIZE ) {
@@ -343,13 +343,13 @@ static int play(void* data, int len, int flags)
 	    nwritten += n;
     }
 #endif
-	
+
     if (nwritten > 0) {
 	if (!esd_play_start.tv_sec)
 	    gettimeofday(&esd_play_start, NULL);
 	nsamples = nwritten / esd_bytes_per_sample;
 	esd_samples_written += nsamples;
- 
+
 	dprintf("esd play: %d %lu\n", nsamples, esd_samples_written);
     } else {
 	dprintf("esd play: blocked / %lu\n", esd_samples_written);
@@ -395,7 +395,7 @@ static void reset(void)
 {
 #ifdef	__svr4__
     /* throw away data buffered in the esd connection */
-    if (ioctl(esd_play_fd, I_FLUSH, FLUSHW)) 
+    if (ioctl(esd_play_fd, I_FLUSH, FLUSHW))
 	perror("I_FLUSH");
 #endif
 }
@@ -411,7 +411,7 @@ static int get_space(void)
     float current_delay;
     int space;
 
-    /* 
+    /*
      * Don't buffer too much data in the esd daemon.
      *
      * If we send too much, esd will block in write()s to the sound
@@ -461,7 +461,7 @@ static float get_delay(void)
     gettimeofday(&now, NULL);
     play_time  =  now.tv_sec  - esd_play_start.tv_sec;
     play_time += (now.tv_usec - esd_play_start.tv_usec) / 1000000.;
-    
+
     /* dprintf("esd delay: %f %f\n", play_time, buffered_samples_time); */
 
     if (play_time > buffered_samples_time) {

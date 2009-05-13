@@ -61,7 +61,7 @@ static vidix_grkey_t gr_key;
 
 static uint32_t setup_vidix(void){
   int x=vo_dx,y=vo_dy;
-  aspect(&vo_dwidth,&vo_dheight,vo_fs ? A_ZOOM : A_NOZOOM);  
+  aspect(&vo_dwidth,&vo_dheight,vo_fs ? A_ZOOM : A_NOZOOM);
   if(vo_fs || center){
     if(vo_dwidth <= vo_screenwidth)x = (vo_screenwidth - vo_dwidth)/2;
     else x=0;
@@ -183,7 +183,7 @@ static int control(uint32_t request, void *data, ...){
     if(vo_fs)vo_fs=0;
     else vo_fs=1;
     setup_vidix();
-    return VO_TRUE;      
+    return VO_TRUE;
   case VOCTRL_SET_EQUALIZER:
     {
       va_list ap;
@@ -202,6 +202,6 @@ static int control(uint32_t request, void *data, ...){
       va_end(ap);
       return vidix_control(request, data, value);
     }
-  }  
+  }
   return vidix_control(request, data);
 }

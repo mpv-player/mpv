@@ -11,11 +11,11 @@ Thanks for reading MPlayer documentation !!!
    a, Enter the HTML/ directory, and there you'll find the documentation,
       each language in its own subdirectory.
 
-   b, If you prefer reading the documentation as a single big file it 
-      can be found in the HTML-single/ directory, each language in its 
+   b, If you prefer reading the documentation as a single big file it
+      can be found in the HTML-single/ directory, each language in its
       own subdirectory.
 
-   c, If the HTML/ or HTML-single/ directories don't contain your language, 
+   c, If the HTML/ or HTML-single/ directories don't contain your language,
       try the subdirectories in this very same folder.
 
 

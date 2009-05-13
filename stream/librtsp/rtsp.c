@@ -59,12 +59,12 @@
 /*
  * network utilities
  */
- 
+
 static int write_stream(int s, const char *buf, int len) {
   int total, timeout;
 
   total = 0; timeout = 30;
-  while (total < len){ 
+  while (total < len){
     int n;
 
     n = send (s, &buf[total], len - total, 0);
@@ -87,37 +87,37 @@ static int write_stream(int s, const char *buf, int len) {
 }
 
 static ssize_t read_stream(int fd, void *buf, size_t count) {
-  
+
   ssize_t ret, total;
 
   total = 0;
 
   while (total < count) {
-  
+
     ret=recv (fd, ((uint8_t*)buf)+total, count-total, 0);
 
     if (ret<0) {
       if(errno == EAGAIN) {
         fd_set rset;
         struct timeval timeout;
-    
+
         FD_ZERO (&rset);
         FD_SET  (fd, &rset);
-        
+
         timeout.tv_sec  = 30;
         timeout.tv_usec = 0;
-        
+
         if (select (fd+1, &rset, NULL, NULL, &timeout) <= 0) {
           return -1;
         }
         continue;
       }
-      
+
       mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: read error.\n");
       return ret;
     } else
       total += ret;
-    
+
     /* end of stream */
     if (!ret) break;
   }
@@ -129,7 +129,7 @@ static ssize_t read_stream(int fd, void *buf, size_t count) {
  * rtsp_get gets a line from stream
  * and returns a null terminated string.
  */
- 
+
 static char *rtsp_get(rtsp_t *s) {
 
   int n=1;
@@ -154,7 +154,7 @@ static char *rtsp_get(rtsp_t *s) {
 #ifdef LOG
   mp_msg(MSGT_OPEN, MSGL_INFO, "librtsp: << '%s'\n", string);
 #endif
-  
+
 
   free(buffer);
   return string;
@@ -163,7 +163,7 @@ static char *rtsp_get(rtsp_t *s) {
 /*
  * rtsp_put puts a line on stream
  */
- 
+
 static void rtsp_put(rtsp_t *s, const char *string) {
 
   int len=strlen(string);
@@ -178,7 +178,7 @@ static void rtsp_put(rtsp_t *s, const char *string) {
   buf[len+1]=0x0a;
 
   write_stream(s->s, buf, len+2);
-  
+
 #ifdef LOG
   mp_msg(MSGT_OPEN, MSGL_INFO, " done.\n");
 #endif
@@ -194,7 +194,7 @@ static int rtsp_get_code(const char *string) {
 
   char buf[4];
   int code=0;
- 
+
   if (!strncmp(string, RTSP_PROTOCOL_VERSION, strlen(RTSP_PROTOCOL_VERSION)))
   {
     memcpy(buf, string+strlen(RTSP_PROTOCOL_VERSION)+1, 3);
@@ -218,9 +218,9 @@ static void rtsp_send_request(rtsp_t *s, const char *type, const char *what) {
 
   char **payload=s->scheduled;
   char *buf;
-  
+
   buf = malloc(strlen(type)+strlen(what)+strlen(RTSP_PROTOCOL_VERSION)+3);
-  
+
   sprintf(buf,"%s %s %s",type, what, RTSP_PROTOCOL_VERSION);
   rtsp_put(s,buf);
   free(buf);
@@ -240,10 +240,10 @@ static void rtsp_send_request(rtsp_t *s, const char *type, const char *what) {
 static void rtsp_schedule_standard(rtsp_t *s) {
 
   char tmp[17];
-  
+
   snprintf(tmp, 17, "CSeq: %u", s->cseq);
   rtsp_schedule_field(s, tmp);
-  
+
   if (s->session) {
     char *buf;
     buf = malloc(strlen(s->session)+15);
@@ -255,7 +255,7 @@ static void rtsp_schedule_standard(rtsp_t *s) {
 /*
  * get the answers, if server responses with something != 200, return NULL
  */
- 
+
 static int rtsp_get_answers(rtsp_t *s) {
 
   char *answer=NULL;
@@ -263,7 +263,7 @@ static int rtsp_get_answers(rtsp_t *s) {
   char **answer_ptr=s->answers;
   int code;
   int ans_count = 0;
-  
+
   answer=rtsp_get(s);
   if (!answer)
     return 0;
@@ -271,13 +271,13 @@ static int rtsp_get_answers(rtsp_t *s) {
   free(answer);
 
   rtsp_free_answers(s);
-  
+
   do { /* while we get answer lines */
-  
+
     answer=rtsp_get(s);
     if (!answer)
       return 0;
-    
+
     if (!strncasecmp(answer,"CSeq:",5)) {
       sscanf(answer,"%*s %u",&answer_seq);
       if (s->cseq != answer_seq) {
@@ -315,12 +315,12 @@ static int rtsp_get_answers(rtsp_t *s) {
     *answer_ptr=answer;
     answer_ptr++;
   } while ((strlen(answer)!=0) && (++ans_count < MAX_FIELDS));
-  
+
   s->cseq++;
-  
+
   *answer_ptr=NULL;
   rtsp_schedule_standard(s);
-    
+
   return code;
 }
 
@@ -330,7 +330,7 @@ static int rtsp_get_answers(rtsp_t *s) {
 
 int rtsp_send_ok(rtsp_t *s) {
   char cseq[16];
-  
+
   rtsp_put(s, "RTSP/1.0 200 OK");
   sprintf(cseq,"CSeq: %u", s->cseq);
   rtsp_put(s, cseq);
@@ -373,7 +373,7 @@ int rtsp_request_describe(rtsp_t *s, const char *what) {
   }
   rtsp_send_request(s,RTSP_METHOD_DESCRIBE,buf);
   free(buf);
-  
+
   return rtsp_get_answers(s);
 }
 
@@ -388,12 +388,12 @@ int rtsp_request_setup(rtsp_t *s, const char *what, char *control) {
     int len = strlen (s->host) + strlen (s->path) + 16;
     if (control)
       len += strlen (control) + 1;
-    
+
     buf = malloc (len);
     sprintf (buf, "rtsp://%s:%i/%s%s%s", s->host, s->port, s->path,
              control ? "/" : "", control ? control : "");
   }
-  
+
   rtsp_send_request (s, RTSP_METHOD_SETUP, buf);
   free (buf);
   return rtsp_get_answers (s);
@@ -412,7 +412,7 @@ int rtsp_request_setparameter(rtsp_t *s, const char *what) {
   }
   rtsp_send_request(s,RTSP_METHOD_SET_PARAMETER,buf);
   free(buf);
-  
+
   return rtsp_get_answers(s);
 }
 
@@ -420,7 +420,7 @@ int rtsp_request_play(rtsp_t *s, const char *what) {
 
   char *buf;
   int ret;
-  
+
   if (what) {
     buf=strdup(what);
   } else
@@ -430,7 +430,7 @@ int rtsp_request_play(rtsp_t *s, const char *what) {
   }
   rtsp_send_request(s,RTSP_METHOD_PLAY,buf);
   free(buf);
-  
+
   ret = rtsp_get_answers (s);
   if (ret == RTSP_STATUS_OK)
     s->server_state = RTSP_PLAYING;
@@ -441,7 +441,7 @@ int rtsp_request_play(rtsp_t *s, const char *what) {
 int rtsp_request_teardown(rtsp_t *s, const char *what) {
 
   char *buf;
-  
+
   if (what)
     buf = strdup (what);
   else
@@ -474,7 +474,7 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
     {
       char *rest=rtsp_get(s);
       if (!rest)
-        return -1;      
+        return -1;
 
       seq=-1;
       do {
@@ -540,10 +540,10 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
   s->server=NULL;
   s->server_state=0;
   s->server_caps=0;
-  
+
   s->cseq=0;
   s->session=NULL;
-  
+
   if (user_agent)
     s->user_agent=strdup(user_agent);
   else
@@ -587,7 +587,7 @@ char *rtsp_search_answers(rtsp_t *s, const char *tag) {
 
   char **answer;
   char *ptr;
-  
+
   if (!s->answers) return NULL;
   answer=s->answers;
 
@@ -652,7 +652,7 @@ char *rtsp_get_param(rtsp_t *s, const char *p) {
   }
   return NULL;
 }
-  
+
 /*
  * schedules a field for transmission
  */
@@ -660,7 +660,7 @@ char *rtsp_get_param(rtsp_t *s, const char *p) {
 void rtsp_schedule_field(rtsp_t *s, const char *string) {
 
   int i=0;
-  
+
   if (!string) return;
 
   while(s->scheduled[i]) {
@@ -670,13 +670,13 @@ void rtsp_schedule_field(rtsp_t *s, const char *string) {
 }
 
 /*
- * removes the first scheduled field which prefix matches string. 
+ * removes the first scheduled field which prefix matches string.
  */
 
 void rtsp_unschedule_field(rtsp_t *s, const char *string) {
 
   char **ptr=s->scheduled;
-  
+
   if (!string) return;
 
   while(*ptr) {
@@ -699,7 +699,7 @@ void rtsp_unschedule_field(rtsp_t *s, const char *string) {
 void rtsp_unschedule_all(rtsp_t *s) {
 
   char **ptr;
-  
+
   if (!s->scheduled) return;
   ptr=s->scheduled;
 
@@ -716,7 +716,7 @@ void rtsp_unschedule_all(rtsp_t *s) {
 void rtsp_free_answers(rtsp_t *s) {
 
   char **answer;
-  
+
   if (!s->answers) return;
   answer=s->answers;
 

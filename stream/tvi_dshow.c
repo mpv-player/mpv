@@ -49,7 +49,7 @@
  *       - ATI 9200 VIVO based card
  *       - ATI AIW 7500
  *       - nVidia Ti-4400
- * 
+ *
  *     Known bugs:
  *     * stream goes with 24.93 FPS (NTSC), while reporting 25 FPS (PAL) ?!
  *     * direct set frequency call does not work ('Insufficient Buffer' error)
@@ -97,7 +97,7 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param);
 *
 *---------------------------------------------------------------------------------------
 */
-/** 
+/**
     information about this file
 */
 const tvi_info_t tvi_info_dshow = {
@@ -170,7 +170,7 @@ typedef struct {
     int direct_getfreq_call;    ///< 0-find frequncy from frequency table (workaround),1-direct call to get frequency
 
     int fcc;                    ///< used video format code (FourCC)
-    int width;                  ///< picture width (default: auto) 
+    int width;                  ///< picture width (default: auto)
     int height;                 ///< picture height (default: auto)
 
     int channels;               ///< number of audio channels (default: auto)
@@ -208,7 +208,7 @@ typedef struct __attribute__((__packed__)) {
     WORD CountryCode;		///< Country code
     WORD CableFreqTable;	///< index of resource with frequencies for cable channels
     WORD BroadcastFreqTable;	///< index of resource with frequencies for broadcast channels
-    DWORD VideoStandard;	///< used video standard 
+    DWORD VideoStandard;	///< used video standard
 } TRCCountryList;
 /**
     information about image formats
@@ -231,7 +231,7 @@ typedef struct {
 static HRESULT init_ringbuffer(grabber_ringbuffer_t * rb, int buffersize,
 			       int blocksize);
 static HRESULT show_filter_info(IBaseFilter * pFilter);
-#if 0 
+#if 0
 //defined in current MinGW release
 HRESULT STDCALL GetRunningObjectTable(DWORD, IRunningObjectTable **);
 HRESULT STDCALL CreateItemMoniker(LPCOLESTR, LPCOLESTR, IMoniker **);
@@ -307,7 +307,7 @@ static const struct {
     {"us-cable-hrc", 1},
     {"japan-cable", 81},
     //default is USA
-    {NULL,           1} 
+    {NULL,           1}
 };
 
 /**
@@ -441,7 +441,7 @@ DEFINE_GUID(PIN_CATEGORY_CAPTURE, 0xfb6c4281, 0x0353, 0x11d1, 0x90, 0x5f,
 	    0x00, 0x00, 0xc0, 0xcc, 0x16, 0xba);
 DEFINE_GUID(PIN_CATEGORY_VIDEOPORT, 0xfb6c4285, 0x0353, 0x11d1, 0x90, 0x5f,
 	    0x00, 0x00, 0xc0, 0xcc, 0x16, 0xba);
-DEFINE_GUID(PIN_CATEGORY_PREVIEW, 0xfb6c4282, 0x0353, 0x11d1, 0x90, 0x5f, 
+DEFINE_GUID(PIN_CATEGORY_PREVIEW, 0xfb6c4282, 0x0353, 0x11d1, 0x90, 0x5f,
             0x00, 0x00, 0xc0, 0xcc, 0x16, 0xba);
 DEFINE_GUID(PIN_CATEGORY_VBI, 0xfb6c4284, 0x0353, 0x11d1, 0x90, 0x5f,
             0x00, 0x00, 0xc0, 0xcc, 0x16, 0xba);
@@ -471,7 +471,7 @@ void set_buffer_preference(int nDiv,WAVEFORMATEX* pWF,IPin* pOutPin,IPin* pInPin
     prop.cbBuffer += pWF->nBlockAlign - 1;
     prop.cbBuffer -= prop.cbBuffer % pWF->nBlockAlign;
     prop.cbPrefix = -1;
-    prop.cBuffers = -1;    
+    prop.cBuffers = -1;
 
     hr=OLE_QUERYINTERFACE(pOutPin,IID_IAMBufferNegotiation,pBN);
     if(FAILED(hr))
@@ -643,7 +643,7 @@ static CSampleGrabberCB *CSampleGrabberCB_Create(grabber_ringbuffer_t *
 *
 *---------------------------------------------------------------------------------------
 */
-/** 
+/**
 Registering graph in ROT. User will be able to connect to graph from GraphEdit.
 */
 static HRESULT AddToRot(IUnknown * pUnkGraph, DWORD * pdwRegister)
@@ -730,7 +730,7 @@ static void destroy_ringbuffer(grabber_ringbuffer_t * rb)
  * \param buffersize size of buffer in blocks
  * \param blocksize size of buffer's block
  *
- * \return S_OK if success 
+ * \return S_OK if success
  * \return E_OUTOFMEMORY not enough memory
  *
  * \note routine does not allocates memory for grabber_rinbuffer_s structure
@@ -813,7 +813,7 @@ static char *physcon2str(const long lPhysicalType)
  * \return system country code
  *
  * \remarks
- * After call to IAMTVTuner::put_CountryCode with returned value tuner switches to frequency table used in specified 
+ * After call to IAMTVTuner::put_CountryCode with returned value tuner switches to frequency table used in specified
  * country (which is usually larger then MPlayer's one, so workaround will work fine).
  *
  * \todo
@@ -863,14 +863,14 @@ static void *GetRC(HMODULE hDLL, int index)
  * \param[in] nCountry - country code
  * \param[in] nInputType (TunerInputCable or TunerInputAntenna)
  * \param[out] pplFreqTable - address of variable that receives pointer to array, containing frequencies
- * \param[out] pnLen length of array 
+ * \param[out] pnLen length of array
  * \param[out] pnFirst - channel number of first entry in array (nChannelMax)
  *
  * \return S_OK if success
  * \return E_POINTER pplFreqTable==NULL || plFirst==NULL || pnLen==NULL
  * \return E_FAIL error occured during load
  *
- * \remarks 
+ * \remarks
  * - array must be freed by caller
  * - MSDN says that it is not neccessery to unlock or free resource. It will be done after unloading DLL
  */
@@ -942,7 +942,7 @@ static HRESULT load_freq_table(int nCountry, int nInputType,
  * \return apropriate error code otherwise
  *
  * \note
- * Due to either bug in driver or error in following code calll to IKsProperty::Set 
+ * Due to either bug in driver or error in following code calll to IKsProperty::Set
  * in this methods always fail with error 0x8007007a.
  *
  * \todo test code on other machines and an error
@@ -1152,9 +1152,9 @@ static HRESULT get_frequency_direct(IAMTVTuner * pTVTuner, long *plFreq)
 }
 
 /**
- * \brief gets current frequency 
+ * \brief gets current frequency
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  * \param plFreq - pointer to long int to store frequency to (in Hz)
  *
  * \return TVI_CONTROL_TRUE if success, TVI_CONTROL_FALSE otherwise
@@ -1445,7 +1445,7 @@ static HRESULT build_sub_graph(priv_t * priv, chain_t * chain, const GUID* ppin_
             /*
                Code below is disabled, because terminating chain with NullRenderer leads to jerky video.
                Perhaps, this happens because  NullRenderer filter discards each received
-               frame while discarded frames causes live source filter to dramatically reduce frame rate. 
+               frame while discarded frames causes live source filter to dramatically reduce frame rate.
             */
             /* adding sink for video stream */
             hr = CoCreateInstance((GUID *) & CLSID_NullRenderer, NULL,CLSCTX_INPROC_SERVER, &IID_IBaseFilter,(void *) &pNR);
@@ -1778,10 +1778,10 @@ static int check_audio_format(AM_MEDIA_TYPE * pmt, int samplerate,
  * \return 1 if AM_MEDIA_TYPE compatible
  & \return 0 if not
  *
- * \note 
+ * \note
  * width and height are currently not used
  *
- * \todo 
+ * \todo
  * add width/height check
  */
 static int check_video_format(AM_MEDIA_TYPE * pmt, int fcc, int width,
@@ -1869,7 +1869,7 @@ static HRESULT show_filter_info(IBaseFilter * pFilter)
  * \brief gets device's frendly in ANSI encoding
  *
  * \param pM IMoniker interface, got in enumeration process
- * \param category device category 
+ * \param category device category
  *
  * \return TVI_CONTROL_TRUE if operation succeded, TVI_CONTROL_FALSE - otherwise
  */
@@ -1902,10 +1902,10 @@ static int get_device_name(IMoniker * pM, char *pBuf, int nLen)
  * \brief find capture device at given index
  *
  * \param index device index to search for (-1 mean only print available)
- * \param category device category 
+ * \param category device category
  *
  * \return IBaseFilter interface for capture device with given index
- * 
+ *
  * Sample values for category:
  *  CLSID_VideoInputDeviceCategory - Video Capture Sources
  *  CLSID_AudioInputDeviceCategory - Audio Capture Sources
@@ -2063,8 +2063,8 @@ static HRESULT get_available_formats_stream(chain_t *chain)
 }
 
 /**
- * \brief returns allocates an array and store available media formats for given pin type to it 
- * 
+ * \brief returns allocates an array and store available media formats for given pin type to it
+ *
  * \param pBuilder ICaptureGraphBuilder2 interface of graph builder
  * \param chain chain data structure
  *
@@ -2198,7 +2198,7 @@ static HRESULT get_available_formats_pin(ICaptureGraphBuilder2 * pBuilder,
 /**
  * \brief fills given buffer with audio data (usually one block)
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  * \param buffer buffer to store data to
  * \param len buffer's size in bytes (usually one block size)
  *
@@ -2251,14 +2251,14 @@ static double grab_audio_frame(priv_t * priv, char *buffer, int len)
 /**
  * \brief returns audio frame size
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  *
  * \return audio block size if audio enabled and 1 - otherwise
  */
 static int get_audio_framesize(priv_t * priv)
 {
     if (!priv->chains[1]->rbuf)
-	return 1;		//no audio       
+	return 1;		//no audio
     mp_msg(MSGT_TV,MSGL_DBG3,"get_audio_framesize: %d\n",priv->chains[1]->rbuf->blocksize);
     return priv->chains[1]->rbuf->blocksize;
 }
@@ -2281,7 +2281,7 @@ static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
 //END STUBS!!!
     ptsp->bufsize = ptsp->samples_per_line * (ptsp->count[0] + ptsp->count[1]);
 
-    mp_msg(MSGT_TV,MSGL_V,"vbi_get_props: sampling_rate=%d,offset:%d,samples_per_line: %d\n interlaced:%s, count=[%d,%d]\n",    
+    mp_msg(MSGT_TV,MSGL_V,"vbi_get_props: sampling_rate=%d,offset:%d,samples_per_line: %d\n interlaced:%s, count=[%d,%d]\n",
         ptsp->sampling_rate,
         ptsp->offset,
         ptsp->samples_per_line,
@@ -2314,7 +2314,7 @@ static void vbi_grabber(priv_t* priv)
 /**
  * \brief fills given buffer with video data (usually one frame)
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  * \param buffer buffer to store data to
  * \param len buffer's size in bytes (usually one frame size)
  *
@@ -2363,16 +2363,16 @@ static double grab_video_frame(priv_t * priv, char *buffer, int len)
 /**
  * \brief returns frame size
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  *
  * \return frame size if video present, 0 - otherwise
  */
 static int get_video_framesize(priv_t * priv)
 {
-//      if(!priv->pmtVideo) return 1; //no video       
+//      if(!priv->pmtVideo) return 1; //no video
 //      return priv->pmtVideo->lSampleSize;
     if (!priv->chains[0]->rbuf)
-	return 1;		//no video       
+	return 1;		//no video
 mp_msg(MSGT_TV,MSGL_DBG3,"geT_video_framesize: %d\n",priv->chains[0]->rbuf->blocksize);
     return priv->chains[0]->rbuf->blocksize;
 }
@@ -2430,8 +2430,8 @@ static HRESULT init_chain_common(ICaptureGraphBuilder2 *pBuilder, chain_t *chain
     if (FAILED(hr))
         chain->pStreamConfig = NULL;
 
-    /* 
-       Getting available video formats (last pointer in array  will be NULL) 
+    /*
+       Getting available video formats (last pointer in array  will be NULL)
        First tryin to call IAMStreamConfig::GetStreamCaos. this will give us additional information such as
        min/max picture dimensions, etc. If this call fails trying IPIn::EnumMediaTypes with default
        min/max values.
@@ -2572,12 +2572,12 @@ static HRESULT build_vbi_chain(priv_t *priv)
 /**
  * \brief playback/capture real start
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  *
  * \return 1 if success, 0 - otherwise
  *
  * TODO: move some code from init() here
- */                          
+ */
 static int start(priv_t * priv)
 {
     HRESULT hr;
@@ -2620,7 +2620,7 @@ static int start(priv_t * priv)
 /**
  * \brief driver initialization
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  *
  * \return 1 if success, 0 - otherwise
  */
@@ -2671,13 +2671,13 @@ static int init(priv_t * priv)
             mp_msg(MSGT_TV,MSGL_DBG2, "tvi_dshow: CoCreateInstance(CaptureGraphBuilder) call failed. Error:0x%x\n", (unsigned int)hr);
             break;
         }
-    
+
         hr = OLE_CALL_ARGS(priv->pBuilder, SetFiltergraph, priv->pGraph);
         if(FAILED(hr)){
             mp_msg(MSGT_TV,MSGL_ERR, "tvi_dshow: SetFiltergraph call failed. Error:0x%x\n",(unsigned int)hr);
             break;
         }
-    
+
         mp_msg(MSGT_TV, MSGL_DBG2, "tvi_dshow: Searching for available video capture devices\n");
         priv->chains[0]->pCaptureFilter = find_capture_device(priv->dev_index, &CLSID_VideoInputDeviceCategory);
         if(!priv->chains[0]->pCaptureFilter){
@@ -2961,7 +2961,7 @@ static void destroy_chain(chain_t *chain)
 /**
  * \brief driver uninitialization
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  *
  * \return always 1
  */
@@ -3071,11 +3071,11 @@ static tvi_handle_t *tvi_init_dshow(tv_param_t* tv_param)
 /**
  * \brief driver's ioctl handler
  *
- * \param priv driver's private data structure 
+ * \param priv driver's private data structure
  * \param cmd ioctl command
  * \param arg ioct command's parameter
  *
- * \return TVI_CONTROL_TRUE if success 
+ * \return TVI_CONTROL_TRUE if success
  * \return TVI_CONTROL_FALSE if failure
  * \return TVI_CONTROL_UNKNOWN if unknowm cmd called
  */
@@ -3318,7 +3318,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 		if (check_audio_format
 		    (priv->chains[1]->arpmt[i], samplerate, 16, priv->channels))
 		    break;
-	    if (!priv->chains[1]->arpmt[i]) {	
+	    if (!priv->chains[1]->arpmt[i]) {
                 //request not found. failing back to first available
 		mp_msg(MSGT_TV, MSGL_WARN, MSGTR_TVI_DS_SamplerateNotsupported, samplerate);
 		i = 0;
@@ -3372,7 +3372,7 @@ static int control(priv_t * priv, int cmd, void *arg)
 	    lAnalogFormat = tv_norms[tv_available_norms[i]].index;
 
 	    hr = OLE_QUERYINTERFACE(priv->chains[0]->pCaptureFilter,IID_IAMAnalogVideoDecoder, pVD);
-	    if (hr != S_OK)                            
+	    if (hr != S_OK)
 		return TVI_CONTROL_FALSE;
 	    hr = OLE_CALL_ARGS(pVD, put_TVFormat, lAnalogFormat);
 	    OLE_RELEASE_SAFE(pVD);

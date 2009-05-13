@@ -31,7 +31,7 @@
 struct vf_priv_s {
     muxer_stream_t* mux;
     dv_encoder_t* enc;
-    
+
 };
 #define mux_v (vf->priv->mux)
 
@@ -44,7 +44,7 @@ static int config(struct vf_instance_s* vf,
     if(width!=DV_WIDTH || (height!=DV_PAL_HEIGHT && height!=DV_NTSC_HEIGHT)){
 	mp_msg(MSGT_VFILTER,MSGL_ERR,"DV: only 720x480 (NTSC) and 720x576 (PAL) resolutions allowed! Try with -vf scale=720:480\n");
     }
-    
+
     vf->priv->enc->isPAL=(height==DV_PAL_HEIGHT);
     vf->priv->enc->is16x9=(d_width/(float)d_height > 1.7); // 16:9=1.777777
     vf->priv->enc->vlc_encode_passes=3;
@@ -72,7 +72,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
-    dv_encode_full_frame(vf->priv->enc, mpi->planes, 
+    dv_encode_full_frame(vf->priv->enc, mpi->planes,
 	(mpi->flags&MP_IMGFLAG_YUV) ? e_dv_color_yuv : e_dv_color_rgb,
 	mux_v->buffer);
 
@@ -91,10 +91,10 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
     vf->priv->mux=(muxer_stream_t*)args;
-    
+
     vf->priv->enc=dv_encoder_new(0,1,1); // FIXME, parse some options!
     if(!vf->priv->enc) return 0;
-    
+
     mux_v->bih=calloc(1, sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
     mux_v->bih->biWidth=0;

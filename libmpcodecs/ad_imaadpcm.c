@@ -62,7 +62,7 @@ static const int8_t adpcm_index[8] =
 // clamp a number above 16
 #define CLAMP_ABOVE_16(x)  if (x < 16) x = 16;
 
-static ad_info_t info = 
+static ad_info_t info =
 {
 	"IMA ADPCM audio decoder",
 	"imaadpcm",
@@ -84,7 +84,7 @@ static int preinit(sh_audio_t *sh_audio)
   if ((sh_audio->format == 0x11) || (sh_audio->format == 0x61) ||
       (sh_audio->format == 0x1100736d))
   {
-    sh_audio->ds->ss_div = (sh_audio->wf->nBlockAlign - 
+    sh_audio->ds->ss_div = (sh_audio->wf->nBlockAlign -
       (MS_IMA_ADPCM_PREAMBLE_SIZE * sh_audio->wf->nChannels)) * 2;
     sh_audio->ds->ss_mul = sh_audio->wf->nBlockAlign;
   }
@@ -103,7 +103,7 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   /* decodes 34 byte -> 64 short*/
-  sh_audio->i_bps = 
+  sh_audio->i_bps =
     (sh_audio->ds->ss_mul * sh_audio->samplerate) / sh_audio->ds->ss_div;
   sh_audio->samplesize=2;
 
@@ -263,7 +263,7 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
       }
     }
   }
-  
+
   decode_nibbles(output,
     (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) * 2,
     channels,
@@ -310,8 +310,8 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
   int res = -1;
   int (*decode_func)(unsigned short *output, unsigned char *input, int channels, int block_size) = qt_ima_adpcm_decode_block;
   if (demux_read_data(sh_audio->ds, sh_audio->a_in_buffer,
-    sh_audio->ds->ss_mul) != 
-    sh_audio->ds->ss_mul) 
+    sh_audio->ds->ss_mul) !=
+    sh_audio->ds->ss_mul)
     return -1;
 
   if ((sh_audio->format == 0x11) || (sh_audio->format == 0x1100736d))

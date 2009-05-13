@@ -37,7 +37,7 @@ int af_str2fmt(const char* str)
   else if(strstr(str,"le") || strstr(str,"LE"))
     format |= AF_FORMAT_LE;
   else
-    format |= AF_FORMAT_NE;    
+    format |= AF_FORMAT_NE;
 
   // Scan for special formats
   if(strstr(str,"mulaw") || strstr(str,"MULAW")){
@@ -55,7 +55,7 @@ int af_str2fmt(const char* str)
   if(strstr(str,"imaadpcm") || strstr(str,"IMAADPCM")){
     format |= AF_FORMAT_IMA_ADPCM; return format;
   }
-  
+
   // Scan for int/float
   if(strstr(str,"float") || strstr(str,"FLOAT")){
     format |= AF_FORMAT_F; return format;
@@ -65,10 +65,10 @@ int af_str2fmt(const char* str)
 
   // Scan for signed/unsigned
   if(strstr(str,"unsigned") || strstr(str,"UNSIGNED"))
-    format |= AF_FORMAT_US; 
+    format |= AF_FORMAT_US;
   else
     format |= AF_FORMAT_SI;
-  
+
   return format;
 }
 
@@ -94,7 +94,7 @@ int af_bits2fmt(int bits)
     return (bits/8 - 1) << 3;
 }
 
-/* Convert format to str input str is a buffer for the 
+/* Convert format to str input str is a buffer for the
    converted string, size is the size of the buffer */
 char* af_fmt2str(int format, char* str, int size)
 {
@@ -109,21 +109,21 @@ char* af_fmt2str(int format, char* str, int size)
     i+=snprintf(str,size-i,"little-endian ");
   else
     i+=snprintf(str,size-i,"big-endian ");
-  
+
   if(format & AF_FORMAT_SPECIAL_MASK){
     switch(format & AF_FORMAT_SPECIAL_MASK){
-    case(AF_FORMAT_MU_LAW): 
+    case(AF_FORMAT_MU_LAW):
       i+=snprintf(&str[i],size-i,"mu-law "); break;
-    case(AF_FORMAT_A_LAW): 
+    case(AF_FORMAT_A_LAW):
       i+=snprintf(&str[i],size-i,"A-law "); break;
-    case(AF_FORMAT_MPEG2): 
+    case(AF_FORMAT_MPEG2):
       i+=snprintf(&str[i],size-i,"MPEG-2 "); break;
-    case(AF_FORMAT_AC3): 
+    case(AF_FORMAT_AC3):
       i+=snprintf(&str[i],size-i,"AC3 "); break;
-    case(AF_FORMAT_IMA_ADPCM): 
+    case(AF_FORMAT_IMA_ADPCM):
       i+=snprintf(&str[i],size-i,"IMA-ADPCM "); break;
     default:
-      i+=snprintf(&str[i],size-i,MSGTR_AF_FORMAT_UnknownFormat); 
+      i+=snprintf(&str[i],size-i,MSGTR_AF_FORMAT_UnknownFormat);
     }
   }
   else{
@@ -183,7 +183,7 @@ static struct {
     { "floatle", AF_FORMAT_FLOAT_LE },
     { "floatbe", AF_FORMAT_FLOAT_BE },
     { "floatne", AF_FORMAT_FLOAT_NE },
-	
+
     { NULL, 0 }
 };
 

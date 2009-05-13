@@ -59,7 +59,7 @@ static FILE *logfile=0;
 #define LOGWRITE(x)
 #endif
 
-/* Helper functions for reading registers. */    
+/* Helper functions for reading registers. */
 
 static void CROUTW(int reg,int val)
 {
@@ -159,7 +159,7 @@ static int cyberblade_probe(int verbose, int force)
 
 static int cyberblade_init(void)
 {
-	cyberblade_mem = map_phys_mem(pci_info.base0, 0x800000); 
+	cyberblade_mem = map_phys_mem(pci_info.base0, 0x800000);
 	enable_app_io();
 	save_colourkey[0]=SRINB(0x50);
 	save_colourkey[1]=SRINB(0x51);
@@ -191,7 +191,7 @@ static void cyberblade_destroy(void)
 	SROUTB(0x56,save_colourkey[5]);
 	SROUTB(0x11, protect);
 	disable_app_io();
-	unmap_phys_mem(cyberblade_mem, 0x800000); 
+	unmap_phys_mem(cyberblade_mem, 0x800000);
 }
 
 
@@ -441,19 +441,19 @@ static int cyberblade_config_playback(vidix_playback_t *info)
     			Overflow=CRINB(0x07);
     			VDisp |= (Overflow & 2) <<7;
     			VDisp |= (Overflow & 0x40) << 3;
- 
+
     			TVHTotal=CRINB(0xe0)*8;
     			TVVTotal=CRINB(0xe6);
     			TVOverflow=CRINB(0xe7);
     			if(TVOverflow&0x20) TVVTotal|=512;
     			if(TVOverflow&0x01) TVVTotal|=256;
     			TVHTotal+=40; TVVTotal+=2;
- 
+
     			TVHSyncStart=CRINB(0xe4)*8;
     			TVVSyncStart=CRINB(0xf0);
     			if(TVOverflow&0x80) TVVSyncStart|=512;
 			if(TVOverflow&0x04) TVVSyncStart|=256;
- 
+
 			HWinStart=(TVHTotal-HDisp)&15;
 			HWinStart|=(HTotal-HDisp)&15;
 			HWinStart+=(TVHTotal-TVHSyncStart)-49;
@@ -465,7 +465,7 @@ static int cyberblade_config_playback(vidix_playback_t *info)
 		}
                 VWinStart=(VTotal-VSync)-8;
 
-		printf("[cyberblade] HTotal: 0x%x, HSStart: 0x%x\n",HTotal,HSync); 
+		printf("[cyberblade] HTotal: 0x%x, HSStart: 0x%x\n",HTotal,HSync);
 		printf("  VTotal: 0x%x, VStart: 0x%x\n",VTotal,VSync);
 		tx1=HWinStart+info->dest.x;
 		ty1=VWinStart+info->dest.y;
@@ -562,7 +562,7 @@ static int cyberblade_playback_on(void)
 
 static int cyberblade_playback_off(void)
 {
-        LOGWRITE("Disable overlay\n"); 
+        LOGWRITE("Disable overlay\n");
 	CROUTB(0x8E, 0xc4); /* VDE Flags*/
 
 	return 0;
@@ -572,7 +572,7 @@ static int cyberblade_playback_off(void)
 static int cyberblade_frame_sel(unsigned int frame)
 {
 	int protect;
-        LOGWRITE("Frame select\n"); 
+        LOGWRITE("Frame select\n");
 	protect=SRINB(0x11);
 	SROUTB(0x11, 0x92);
 	/* Set overlay address to that of selected frame */

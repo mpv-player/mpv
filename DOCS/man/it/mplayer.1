@@ -245,7 +245,7 @@ Pausa film (un'altra pressione la toglie).
 .IPs ".\ \ \ \ "
 Passo avanti.
 Premendolo una volta il film passa in pausa, ogni pressione seguente riprodurrà
-solo un fotogramma per poi tornare in modalità di pausa (qualsiasi altro tasto 
+solo un fotogramma per poi tornare in modalità di pausa (qualsiasi altro tasto
 continua).
 .IPs "q / ESC"
 Smette di riprodurre ed esce.
@@ -261,7 +261,7 @@ Diminuisce/\:aumenta il volume.
 Suono muto.
 .IPs "_ (solo MPEG-TS, AVI e libavformat)"
 Passa attraverso tutte le tracce video disponibili.
-.IPs "# (solo DVD, MPEG, Matroska, AVI e libavformat)" 
+.IPs "# (solo DVD, MPEG, Matroska, AVI e libavformat)"
 Passa attraverso tutte le tracce audio disponibili.
 .IPs "TAB (solo MPEG-TS e libavformat)"
 Passa attraverso tutti i programmi disponibili.
@@ -343,7 +343,7 @@ Ridimensiona la finestra del video alla sua dimensione originale.
 Ridimensiona la finestra del video al doppio della sua dimensione originale.
 .IPs "command + f"
 Cambia la modalità a schermo intero (vedi anche \-fs).
-.IPs "command + [ e command + ]" 
+.IPs "command + [ e command + ]"
 Regola il canale alpha della finestra del video.
 .RE
 .PD 1
@@ -3801,7 +3801,7 @@ renderizzarli senza il supporto OpenGL attraverso \-vf ass.
 .IPs osdcolor=<0xAARRGGBB>
 Colore per l'OSD (default: 0x00ffffff, che corrisponde al bianco opaco).
 .IPs rectangle=<0,1,2>
-Abilita l'utilizzo di texture rettangolari, fatto che risparmia RAM video 
+Abilita l'utilizzo di texture rettangolari, fatto che risparmia RAM video
 ma è spesso più lento (default: 0).
 .RSss
 0: Usa texture alla potenza di 2 (power-of-two) (default).
@@ -5457,7 +5457,7 @@ Per calcolare il ritardo richiesto ai vari canali comportati come segue:
 .IP 1. 3
 Misura la distanza degli altoparlanti in metri in relazione alla tua
 posizione di ascolto, in modo da ottenere le cinque distanze da s1 a s5
-(per un sistema 5.1). 
+(per un sistema 5.1).
 Non c'è nessun motivo per compensare il subwoofer (non noteresti la differenza
 comunque).
 .IP 2. 3
@@ -6290,7 +6290,7 @@ una qualche equazione tipo "2+2*sin(PI*qp)"
 .
 .TP
 .B geq=equazione
-filtro fd modifica con equazione generica 
+filtro fd modifica con equazione generica
 .RSs
 .IPs <equazione>
 Una qualche equazione, per es.\& 'p(W-X\\,Y)' per ribaltare l'immagine
@@ -6976,7 +6976,7 @@ Imposta il valore iniziale di fase del telecine per modalità un passo (default: 
 La modalità a due passi può vedere il futuro ed è perciò capace di
 usare il valore corretto di fase dall'inizio, mentre la modalità ad un passo
 può solo provare ad indovinare.
-Viene comunque utilizzata la fase corretta quando viene trovata, ma questa 
+Viene comunque utilizzata la fase corretta quando viene trovata, ma questa
 opzione può essere usata per correggere il possibile saltellamento all'inizio.
 Anche il primo passo della modalità a due passi utilizza questo valore, così
 se salvi i dati dal primo passo ottieni dei risultati costanti di fase.
@@ -8295,7 +8295,7 @@ La maggior parte dei codec richiede keyframe regolari, in modo da limitare
 l'accumulo di errori dovuti alle diverse implementazioni/precisioni di DCT
 ed iDCT.
 I keyframe sono necessari anche per il posizionamento visto che il
-posizionamento è possibile solo su un keyframe. 
+posizionamento è possibile solo su un keyframe.
 Bisogna però tener presente che i keyframe hanno bisogno di più spazio
 rispetto agli altri tipi di fotogrammi, perciò un numero alto comporta
 file di dimensione leggermente minore ma un posizionamento meno preciso.
@@ -9268,7 +9268,7 @@ dell'1%, a seconda delle altre opzioni utilizzate).
 Questa opzione non richiede l'abilitazione di mv0.
 .
 .TP
-.B qprd (solo per mbd=2) 
+.B qprd (solo per mbd=2)
 rapporto di distorsione del parametro di quantizzazione (QP) ottimale per il
 dato lambda per ogni macroblock.
 .
@@ -9365,7 +9365,7 @@ Un bias più positivo (\-32 \- \-16 invece di \-64) sembra migliorare il PSNR.
 .TP
 .B nr=<0\-100000>
 Riduzione disturbo, 0 significa disabilitato.
-0\-600 è una gamma utile per contenuti tipici, ma puoi volerlo alzare 
+0\-600 è una gamma utile per contenuti tipici, ma puoi volerlo alzare
 leggermente per materiale con molto disturbo (default: 0).
 Visto che influenza molto poco la velocità, potresti preferire il suo utilizzo
 piuttosto che filtrare il disturbo con dei filtri video come denoise3d o hqdn3d.
@@ -10078,7 +10078,7 @@ dell'immagine diviso per 16.
 Seleziona il bitrate medio da usare in kbit/\:secondo (default: disabilitato).
 Visto che il bitrate locale può variare, questa media può non essere accurata
 per video molto corti (vedi ratetol).
-Un bitrate costante può essere ottenuto combinando questa opzione con 
+Un bitrate costante può essere ottenuto combinando questa opzione con
 vbv_maxrate ottenendo però una significativa riduzione della qualità.
 .
 .TP
@@ -10282,7 +10282,7 @@ disturbo che vorresti eliminare può essere una buona idea alzarlo un poco.
 Utilizza CABAC (Context-Adaptive Binary Arithmetic Coding) (default: attivo).
 Rallenta leggermente la codifica e la decodifica ma può permettere di
 risparmiare il 10\-15% dei bit.
-A meno che la velocità di decodifica non sia una prerogativa indispensabile 
+A meno che la velocità di decodifica non sia una prerogativa indispensabile
 non dovresti disabilitarlo.
 .
 .TP
@@ -10539,7 +10539,7 @@ Questa opzione non ha effetto senza fotogrammi B.
 .
 .TP
 .B trellis=<0\-2>
-quantizzazione ottimale della rate-distortion 
+quantizzazione ottimale della rate-distortion
 .PD 0
 .RSs
 .IPs 0

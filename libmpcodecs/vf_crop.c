@@ -152,7 +152,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->crop_w=
     vf->priv->crop_h=-1;
     } //if(!vf->priv)
-    if(args) sscanf(args, "%d:%d:%d:%d", 
+    if(args) sscanf(args, "%d:%d:%d:%d",
     &vf->priv->crop_w,
     &vf->priv->crop_h,
     &vf->priv->crop_x,

@@ -66,9 +66,9 @@ int height=240;
 static int h263_decode_picture_header(unsigned char *b_ptr)
 {
     int i;
-        
+
     for(i=0;i<16;i++) printf(" %02X",b_ptr[i]); printf("\n");
-    
+
     buffer=b_ptr;
     bufptr=bitcnt=buf=0;
 
@@ -193,8 +193,8 @@ mux=muxer_new_stream(avi,MUXER_TYPE_VIDEO);
 mux->buffer_size=0x200000;
 mux->buffer=malloc(mux->buffer_size);
 
-mux->h.dwScale=1; 
-mux->h.dwRate=10; 
+mux->h.dwScale=1;
+mux->h.dwRate=10;
 
 mux->bih=malloc(sizeof(BITMAPINFOHEADER));
 mux->bih->biSize=sizeof(BITMAPINFOHEADER);
@@ -256,7 +256,7 @@ while((c=fgetc(f))>=0){
 	h263_decode_picture_header(mux->buffer);
 	muxer_write_chunk(mux,mux->buffer_len,0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 	mux->buffer_len=0;
-	
+
 	if((v_id&0xF0)==0x10) fprintf(stderr,"hmm. last video packet %02X\n",v_id);
     }
     flag2=0;

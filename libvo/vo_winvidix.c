@@ -42,7 +42,7 @@
 #include "vidix/vidix.h"
 
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
     "WIN32 (VIDIX)",
     "winvidix",
@@ -66,7 +66,7 @@ static HWND hWnd=NULL,hWndFS=NULL;
 static float window_aspect;
 
 static vidix_grkey_t gr_key;
-    
+
 
 void set_video_eq(int cap);
 
@@ -83,19 +83,19 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
 		case WM_WINDOWPOSCHANGED:
            {
                 int tmpheight=0;
-                /*calculate new window rect*/       
+                /*calculate new window rect*/
                  if(!vo_fs){
                  RECT rd;
                  POINT point_window;
-                 if(!hWnd)hWnd=hwnd;  
-                 ShowCursor(TRUE);              
+                 if(!hWnd)hWnd=hwnd;
+                 ShowCursor(TRUE);
                  point_window.x = 0;
                  point_window.y = 0;
-                 ClientToScreen(hWnd,&point_window);  
+                 ClientToScreen(hWnd,&point_window);
                  GetClientRect(hWnd,&rd);
-                      
+
                  vo_dwidth=rd.right - rd.left;
-                 vo_dheight=rd.bottom - rd.top;                       
+                 vo_dheight=rd.bottom - rd.top;
                  vo_dx =point_window.x;
                  vo_dy =point_window.y;
           //       aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
@@ -118,20 +118,20 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
                  if(rd.bottom > vo_screenheight) rd.bottom = vo_screenheight;
 
                  AdjustWindowRect(&rd, WS_OVERLAPPEDWINDOW | WS_SIZEBOX, 0);
-                 SetWindowPos(hWnd, HWND_TOPMOST, vo_dx+rd.left, vo_dy+rd.top, rd.right-rd.left, rd.bottom-rd.top, SWP_NOOWNERZORDER); 
+                 SetWindowPos(hWnd, HWND_TOPMOST, vo_dx+rd.left, vo_dy+rd.top, rd.right-rd.left, rd.bottom-rd.top, SWP_NOOWNERZORDER);
                }
                else {
-                 if(ShowCursor(FALSE)>=0)while(ShowCursor(FALSE)>=0){}       
+                 if(ShowCursor(FALSE)>=0)while(ShowCursor(FALSE)>=0){}
                  aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
                  vo_dx = (vo_screenwidth - vo_dwidth)/2;
-                 vo_dy = (vo_screenheight - vo_dheight)/2;           
-               }                 
+                 vo_dy = (vo_screenheight - vo_dheight)/2;
+               }
                /*update vidix*/
                /* FIXME: implement runtime resize/move if possible, this way is very ugly! */
 	           vidix_stop();
 	           if(vidix_init(image_width, image_height, vo_dx, vo_dy, vo_dwidth, vo_dheight, image_format, vo_depthonscreen, vo_screenwidth, vo_screenheight) != 0)
 	               mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s\n", strerror(errno));
-               /*set colorkey*/       
+               /*set colorkey*/
                vidix_start();
                mp_msg(MSGT_VO, MSGL_V, "[winvidix] window properties: pos: %dx%d, size: %dx%d\n",vo_dx, vo_dy, vo_dwidth, vo_dheight);
                if(vidix_grkey_support()){
@@ -142,29 +142,29 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
                  else {
                    gr_key.ckey.red = gr_key.ckey.blue = 255;
                    gr_key.ckey.green = 0;
-	             }              
+	             }
                  vidix_grkey_set(&gr_key);
-               }         
-    
+               }
+
            }
            break;
         case WM_SYSCOMMAND:
 	        switch (wParam){
-                case SC_SCREENSAVE:                
+                case SC_SCREENSAVE:
 		        case SC_MONITORPOWER:
-                    return 0;                      
+                    return 0;
 			 }
-             break;       
+             break;
         case WM_KEYDOWN:
 			switch (wParam){
 				case VK_LEFT:
-					{mplayer_put_key(KEY_LEFT);break;}      
+					{mplayer_put_key(KEY_LEFT);break;}
                 case VK_UP:
-					{mplayer_put_key(KEY_UP);break;} 
+					{mplayer_put_key(KEY_UP);break;}
                 case VK_RIGHT:
-					{mplayer_put_key(KEY_RIGHT);break;} 
+					{mplayer_put_key(KEY_RIGHT);break;}
 	            case VK_DOWN:
-					{mplayer_put_key(KEY_DOWN);break;} 
+					{mplayer_put_key(KEY_DOWN);break;}
 	            case VK_TAB:
 					{mplayer_put_key(KEY_TAB);break;}
 		        case VK_CONTROL:
@@ -204,7 +204,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_h
     vo_screenwidth = GetSystemMetrics(SM_CXSCREEN);
     vo_screenheight = GetSystemMetrics(SM_CYSCREEN);
     vo_depthonscreen = GetDeviceCaps(GetDC(GetDesktopWindow()),BITSPIXEL);
-    
+
 
     aspect_save_orig(width, height);
     aspect_save_prescale(d_width, d_height);
@@ -213,7 +213,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_h
     vo_dx = 0;
     vo_dy = 0;
 
-    vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;    
+    vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
     geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth, vo_screenheight);
 
     vo_fs = flags&VOFLAG_FULLSCREEN;
@@ -223,7 +223,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_h
     vo_dwidth=d_width; vo_dheight=d_height;
     window_aspect = (float)d_width / (float)d_height;
 
-   
+
     if(!vo_config_count){
     HINSTANCE hInstance = GetModuleHandle(NULL);
     WNDCLASS   wc;
@@ -248,27 +248,27 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_h
     hWnd = CreateWindow("MPlayer - The Movie Player",
                         title,
                         WS_OVERLAPPEDWINDOW| WS_SIZEBOX,
-                        rd.left,              
-                        rd.top,                   
-                        rd.right - rd.left,                      
-                        rd.bottom - rd.top,                       
+                        rd.left,
+                        rd.top,
+                        rd.right - rd.left,
+                        rd.bottom - rd.top,
                         NULL,
                         NULL,
                         hInstance,
                         NULL);
-    wc.hbrBackground = CreateSolidBrush(RGB(0,0,0));                     
+    wc.hbrBackground = CreateSolidBrush(RGB(0,0,0));
     wc.lpszClassName = "MPlayer - Fullscreen";
     RegisterClass(&wc);
     hWndFS = CreateWindow("MPlayer - Fullscreen","MPlayer VIDIX Fullscreen",WS_POPUP,0,0,vo_screenwidth,vo_screenheight,hWnd,NULL,hInstance,NULL);
-   
-    
 
 
-    
+
+
+
     }
     ShowWindow(hWnd,SW_SHOW);
     if(vo_fs)ShowWindow(hWndFS,SW_SHOW);
-    
+
     return 0;
 }
 
@@ -319,7 +319,7 @@ static void uninit(void){
     DestroyWindow(hWnd);
     if ( !vo_config_count ) return;
     vidix_term();
-    
+
     if (vidix_name){
 	free(vidix_name);
 	vidix_name = NULL;
@@ -345,8 +345,8 @@ static int preinit(const char *arg){
 static int control(uint32_t request, void *data, ...){
   switch (request) {
   case VOCTRL_FULLSCREEN:
-    if(!vo_fs){vo_fs=1;ShowWindow(hWndFS,SW_SHOW);SetForegroundWindow(hWndFS);}  
-    else {vo_fs=0; ShowWindow(hWndFS,SW_HIDE);}  
+    if(!vo_fs){vo_fs=1;ShowWindow(hWndFS,SW_SHOW);SetForegroundWindow(hWndFS);}
+    else {vo_fs=0; ShowWindow(hWndFS,SW_HIDE);}
     break;
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
@@ -354,7 +354,7 @@ static int control(uint32_t request, void *data, ...){
   {
     va_list ap;
     int value;
-    
+
     va_start(ap, data);
     value = va_arg(ap, int);
     va_end(ap);
@@ -365,7 +365,7 @@ static int control(uint32_t request, void *data, ...){
   {
     va_list ap;
     int *value;
-    
+
     va_start(ap, data);
     value = va_arg(ap, int*);
     va_end(ap);

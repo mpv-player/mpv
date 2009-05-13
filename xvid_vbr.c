@@ -296,7 +296,7 @@ int vbrInit(vbr_control_t *state)
 	default:
 		return(-1);
 	}
-	
+
 	return(state->init(state));
 
 }
@@ -586,7 +586,7 @@ static int vbr_update_2pass1(void *sstate,
 	state->cur_frame++;
 
 	return(0);
-	
+
 }
 
 static int vbr_finish_2pass1(void *sstate)
@@ -767,7 +767,7 @@ static int vbr_init_2pass2(void *sstate)
 			state->keyframe_locations[c++] = state->cur_frame;
 		}
 
-		total_bytes += frame_bytes;		
+		total_bytes += frame_bytes;
 
 	}
 
@@ -1025,7 +1025,7 @@ static int vbr_init_2pass2(void *sstate)
 			}
 		}
 	}
-	
+
 	state->curve_comp_scale = total1 / total2;
 
 	if (state->use_alt_curve) {
@@ -1444,7 +1444,7 @@ static int vbr_getintra_2pass2(void *sstate)
 	int intra;
 	vbr_control_t *state = sstate;
 
-	
+
 	/* Get next intra state (fetched by update) */
 	intra = state->pass1_intra;
 
@@ -1634,7 +1634,7 @@ static int vbr_getquant_fixedquant(void *sstate)
 		return(quant);
 
 	}
-		
+
 	/* No credit frame - return fixed quant */
 	return(state->fixed_quant);
 

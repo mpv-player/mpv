@@ -610,7 +610,7 @@ static int preinit(const char *arg)
     int xv_adaptor = -1;
 
     const opt_t subopts[] =
-    {  
+    {
       /* name         arg type     arg var         test */
       {  "port",      OPT_ARG_INT, &xv_port,       (opt_test_f)int_pos },
       {  "adaptor",   OPT_ARG_INT, &xv_adaptor,    (opt_test_f)int_non_neg },
@@ -687,7 +687,7 @@ static int preinit(const char *arg)
         /* check if adaptor number has been specified */
         if (xv_adaptor != -1 && xv_adaptor != i)
           continue;
-      
+
         if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask))
         {
             for (xv_p = ai[i].base_id;

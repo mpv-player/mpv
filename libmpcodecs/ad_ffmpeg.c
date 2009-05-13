@@ -11,7 +11,7 @@
 
 #include "mpbswap.h"
 
-static ad_info_t info = 
+static ad_info_t info =
 {
 	"FFmpeg/libavcodec audio decoders",
 	"ffmpeg",
@@ -46,13 +46,13 @@ static int init(sh_audio_t *sh_audio)
       avcodec_register_all();
       avcodec_initialized=1;
     }
-    
+
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_audio->codec->dll);
     if(!lavc_codec){
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh_audio->codec->dll);
 	return 0;
     }
-    
+
     lavc_context = avcodec_alloc_context();
     sh_audio->context=lavc_context;
 
@@ -73,7 +73,7 @@ static int init(sh_audio_t *sh_audio)
     if (sh_audio->wf && sh_audio->wf->cbSize > 0) {
         lavc_context->extradata = av_mallocz(sh_audio->wf->cbSize + FF_INPUT_BUFFER_PADDING_SIZE);
         lavc_context->extradata_size = sh_audio->wf->cbSize;
-        memcpy(lavc_context->extradata, (char *)sh_audio->wf + sizeof(WAVEFORMATEX), 
+        memcpy(lavc_context->extradata, (char *)sh_audio->wf + sizeof(WAVEFORMATEX),
                lavc_context->extradata_size);
     }
 
@@ -82,8 +82,8 @@ static int init(sh_audio_t *sh_audio)
     {
         lavc_context->extradata = av_malloc(sh_audio->codecdata_len);
         lavc_context->extradata_size = sh_audio->codecdata_len;
-        memcpy(lavc_context->extradata, (char *)sh_audio->codecdata, 
-               lavc_context->extradata_size);	
+        memcpy(lavc_context->extradata, (char *)sh_audio->codecdata,
+               lavc_context->extradata_size);
     }
 
     /* open it */
@@ -92,7 +92,7 @@ static int init(sh_audio_t *sh_audio)
         return 0;
     }
    mp_msg(MSGT_DECAUDIO,MSGL_V,"INFO: libavcodec init OK!\n");
-   
+
 //   printf("\nFOURCC: 0x%X\n",sh_audio->format);
    if(sh_audio->format==0x3343414D){
        // MACE 3:1
@@ -176,7 +176,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
             int src_ch_layout = AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT;
             const char *codec=((AVCodecContext*)sh_audio->context)->codec->name;
             if (!strcasecmp(codec, "ac3")
-                || !strcasecmp(codec, "eac3"))            
+                || !strcasecmp(codec, "eac3"))
               src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_AC3_DEFAULT;
             else if (!strcasecmp(codec, "dca"))
               src_ch_layout = AF_CHANNEL_LAYOUT_LAVC_DCA_DEFAULT;

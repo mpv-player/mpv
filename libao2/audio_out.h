@@ -53,8 +53,8 @@ typedef struct ao_data_s
   int channels;
   int format;
   int bps;
-  int outburst; 	  
-  int buffersize;         
+  int outburst;
+  int buffersize;
   int pts;
 } ao_data_t;
 

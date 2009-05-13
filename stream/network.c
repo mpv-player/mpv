@@ -139,7 +139,7 @@ check4proxies( URL_t *url ) {
 					MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout);
 				return url_out;
 			}
-			
+
 #ifdef HAVE_AF_INET6
 			if (network_ipv4_only_proxy && (gethostbyname(url->hostname)==NULL)) {
 				mp_msg(MSGT_NETWORK,MSGL_WARN,
@@ -208,14 +208,14 @@ http_send_request( URL_t *url, off_t pos ) {
 	if( strcasecmp(url->protocol, "noicyx") )
 	    http_set_field(http_hdr, "Icy-MetaData: 1");
 
-	if(pos>0) { 
+	if(pos>0) {
 	// Extend http_send_request with possibility to do partial content retrieval
 	    snprintf(str, 256, "Range: bytes=%"PRId64"-", (int64_t)pos);
 	    http_set_field(http_hdr, str);
 	}
-	    
+
 	if (network_cookies_enabled) cookies_set( http_hdr, server_url->hostname, server_url->url );
-	
+
 	http_set_field( http_hdr, "Connection: close");
 	http_add_basic_authentication( http_hdr, url->username, url->password );
 	if( http_build_request( http_hdr )==NULL ) {
@@ -235,13 +235,13 @@ http_send_request( URL_t *url, off_t pos ) {
 		goto err_out;
 	}
 	mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request: [%s]\n", http_hdr->buffer );
-	
+
 	ret = send( fd, http_hdr->buffer, http_hdr->buffer_size, 0 );
 	if( ret!=(int)http_hdr->buffer_size ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest);
 		goto err_out;
 	}
-	
+
 	http_free( http_hdr );
 
 	return fd;
@@ -265,7 +265,7 @@ http_read_response( int fd ) {
 	}
 
 	do {
-		i = recv( fd, response, BUFFER_SIZE, 0 ); 
+		i = recv( fd, response, BUFFER_SIZE, 0 );
 		if( i<0 ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ReadFailed);
 			http_free( http_hdr );
@@ -277,7 +277,7 @@ http_read_response( int fd ) {
 			return NULL;
 		}
 		http_response_append( http_hdr, response, i );
-	} while( !http_is_header_entire( http_hdr ) ); 
+	} while( !http_is_header_entire( http_hdr ) );
 	http_response_parse( http_hdr );
 	return http_hdr;
 }
@@ -340,7 +340,7 @@ http_seek( stream_t *stream, off_t pos ) {
 	if( stream==NULL ) return 0;
 
 	if( stream->fd>0 ) closesocket(stream->fd); // need to reconnect to seek in http-stream
-	fd = http_send_request( stream->streaming_ctrl->url, pos ); 
+	fd = http_send_request( stream->streaming_ctrl->url, pos );
 	if( fd<0 ) return 0;
 
 	http_hdr = http_read_response( fd );
@@ -420,7 +420,7 @@ nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctr
 		len += ret;
 //printf("read %d bytes from network\n", len );
 	}
-	
+
 	return len;
 }
 

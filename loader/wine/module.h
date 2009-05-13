@@ -48,7 +48,7 @@ typedef struct
     FARPROC16 BootApp;       /* startup procedure */
     FARPROC16 LoadAppSeg;    /* procedure to load a segment */
     FARPROC16 reserved2;
-    FARPROC16 MyAlloc;       /* memory allocation procedure, 
+    FARPROC16 MyAlloc;       /* memory allocation procedure,
                               * wine must write this field */
     FARPROC16 EntryAddrProc;
     FARPROC16 ExitProc;      /* exit procedure */
@@ -65,7 +65,7 @@ typedef struct
     SEGPTR    reserved WINE_PACKED;
 } LOADPARAMS16;
 
-typedef struct 
+typedef struct
 {
     LPSTR lpEnvAddress;
     LPSTR lpCmdLine;

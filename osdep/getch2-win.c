@@ -59,7 +59,7 @@ static int getch2_internal(void)
 	INPUT_RECORD eventbuffer[128];
     DWORD retval;
    	int i=0;
-    if(!getch2_status)return -1;    
+    if(!getch2_status)return -1;
     /*check if there are input events*/
 	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
 	{
@@ -67,18 +67,18 @@ static int getch2_internal(void)
 		return -1;
 	}
     if(retval<=0)return -1;
-    
-	/*read all events*/	
+
+	/*read all events*/
 	if(!ReadConsoleInput(stdin,eventbuffer,128,&retval))
 	{
 		printf("getch: can't read input events\n");
 		return -1;
 	}
- 
+
 	/*filter out keyevents*/
-    for (i = 0; i < retval; i++) 
+    for (i = 0; i < retval; i++)
     {
-		switch(eventbuffer[i].EventType) 
+		switch(eventbuffer[i].EventType)
 		{
 			case KEY_EVENT:
 				/*only a pressed key is interresting for us*/
@@ -114,26 +114,26 @@ static int getch2_internal(void)
 					case VK_DOWN:
 						return KEY_DOWN;
                     case VK_SHIFT:
-                        continue;              
+                        continue;
 					}
 					/*check for function keys*/
         			if(0x87 >= eventbuffer[i].Event.KeyEvent.wVirtualKeyCode && eventbuffer[i].Event.KeyEvent.wVirtualKeyCode >= 0x70)
 						return KEY_F + 1 + eventbuffer[i].Event.KeyEvent.wVirtualKeyCode - 0x70;
- 						
+
 					/*only characters should be remaining*/
-					//printf("getch2: YOU PRESSED \"%c\" \n",eventbuffer[i].Event.KeyEvent.uChar.AsciiChar); 
+					//printf("getch2: YOU PRESSED \"%c\" \n",eventbuffer[i].Event.KeyEvent.uChar.AsciiChar);
 				    return eventbuffer[i].Event.KeyEvent.uChar.AsciiChar;
 				}
-				break; 
-			
+				break;
+
 			case MOUSE_EVENT:
-            case WINDOW_BUFFER_SIZE_EVENT: 
-            case FOCUS_EVENT:  
+            case WINDOW_BUFFER_SIZE_EVENT:
+            case FOCUS_EVENT:
             case MENU_EVENT:
             default:
-				//printf("getch2: unsupported event type"); 
-			    break; 
-        } 
+				//printf("getch2: unsupported event type");
+			    break;
+        }
     }
 	return -1;
 }
@@ -184,7 +184,7 @@ static const struct {
     { 65001, "UTF-8" },
     { 0, NULL }
 };
- 
+
 char* get_term_charset(void)
 {
     static char codepage[10];

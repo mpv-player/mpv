@@ -84,7 +84,7 @@ static inline void blur(uint8_t *dst, uint8_t *src, int w, int radius, int dstSt
 static inline void blur2(uint8_t *dst, uint8_t *src, int w, int radius, int power, int dstStep, int srcStep){
 	uint8_t temp[2][4096];
 	uint8_t *a= temp[0], *b=temp[1];
-	
+
 	if(radius){
 		blur(a, src, w, radius, 1, srcStep);
 		for(; power>2; power--){
@@ -108,9 +108,9 @@ static inline void blur2(uint8_t *dst, uint8_t *src, int w, int radius, int powe
 
 static void hBlur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride, int radius, int power){
 	int y;
-	
+
 	if(radius==0 && dst==src) return;
-	
+
 	for(y=0; y<h; y++){
 		blur2(dst + y*dstStride, src + y*srcStride, w, radius, power, 1, 1);
 	}
@@ -119,7 +119,7 @@ static void hBlur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int s
 //FIXME optimize (x before y !!!)
 static void vBlur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride, int radius, int power){
 	int x;
-	
+
 	if(radius==0 && dst==src) return;
 
 	for(x=0; x<w; x++){
@@ -136,21 +136,21 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 		mpi->w,mpi->h);
 
 	assert(mpi->flags&MP_IMGFLAG_PLANAR);
-	
-	hBlur(dmpi->planes[0], mpi->planes[0], mpi->w,mpi->h, 
+
+	hBlur(dmpi->planes[0], mpi->planes[0], mpi->w,mpi->h,
 		dmpi->stride[0], mpi->stride[0], vf->priv->lumaParam.radius, vf->priv->lumaParam.power);
-	hBlur(dmpi->planes[1], mpi->planes[1], cw,ch, 
+	hBlur(dmpi->planes[1], mpi->planes[1], cw,ch,
 		dmpi->stride[1], mpi->stride[1], vf->priv->chromaParam.radius, vf->priv->chromaParam.power);
-	hBlur(dmpi->planes[2], mpi->planes[2], cw,ch, 
+	hBlur(dmpi->planes[2], mpi->planes[2], cw,ch,
 		dmpi->stride[2], mpi->stride[2], vf->priv->chromaParam.radius, vf->priv->chromaParam.power);
-	
-	vBlur(dmpi->planes[0], dmpi->planes[0], mpi->w,mpi->h, 
+
+	vBlur(dmpi->planes[0], dmpi->planes[0], mpi->w,mpi->h,
 		dmpi->stride[0], dmpi->stride[0], vf->priv->lumaParam.radius, vf->priv->lumaParam.power);
-	vBlur(dmpi->planes[1], dmpi->planes[1], cw,ch, 
+	vBlur(dmpi->planes[1], dmpi->planes[1], cw,ch,
 		dmpi->stride[1], dmpi->stride[1], vf->priv->chromaParam.radius, vf->priv->chromaParam.power);
-	vBlur(dmpi->planes[2], dmpi->planes[2], cw,ch, 
+	vBlur(dmpi->planes[2], dmpi->planes[2], cw,ch,
 		dmpi->stride[2], dmpi->stride[2], vf->priv->chromaParam.radius, vf->priv->chromaParam.power);
-    
+
 	return vf_next_put_image(vf,dmpi, pts);
 }
 
@@ -182,14 +182,14 @@ static int open(vf_instance_t *vf, char* args){
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
 	if(args==NULL) return 0;
-	
+
 	e=sscanf(args, "%d:%d:%d:%d",
 		&vf->priv->lumaParam.radius,
 		&vf->priv->lumaParam.power,
 		&vf->priv->chromaParam.radius,
 		&vf->priv->chromaParam.power
 		);
-	
+
 	if(e==2){
 		vf->priv->chromaParam.radius= vf->priv->lumaParam.radius;
 		vf->priv->chromaParam.power = vf->priv->lumaParam.power;
@@ -198,7 +198,7 @@ static int open(vf_instance_t *vf, char* args){
 
 	if(vf->priv->lumaParam.radius < 0) return 0;
 	if(vf->priv->chromaParam.radius < 0) return 0;
-		
+
 	return 1;
 }
 

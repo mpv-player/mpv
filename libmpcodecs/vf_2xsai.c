@@ -30,11 +30,11 @@ int Init_2xSaI(int d)
 
 	int minr = 0, ming = 0, minb = 0;
 	int i;
-	
+
 //	if (d != 15 && d != 16 && d != 24 && d != 32)
 //		return -1;
 
-	/* Get lowest color bit */	
+	/* Get lowest color bit */
 	for (i = 0; i < 255; i++) {
 		if (!minr)
 			minr = makecol(i, 0, 0);
@@ -52,7 +52,7 @@ int Init_2xSaI(int d)
 	greenMask = makecol_depth(d, 0, 255, 0);
 
 	PixelsPerMask = (d <= 16) ? 2 : 1;
-	
+
 	if (PixelsPerMask == 2) {
 		colorMask |= (colorMask << 16);
 		qcolorMask |= (qcolorMask << 16);
@@ -64,7 +64,7 @@ int Init_2xSaI(int d)
 //	TRACE("Low Pixel Mask:   0x%lX\n", lowPixelMask);
 //	TRACE("QColor Mask:      0x%lX\n", qcolorMask);
 //	TRACE("QLow Pixel Mask:  0x%lX\n", qlowpixelMask);
-	
+
 	return 0;
 }
 
@@ -77,7 +77,7 @@ int Init_2xSaI(int d)
 	+ ((((A & qlowpixelMask) + (B & qlowpixelMask) + (C & qlowpixelMask) + (D & qlowpixelMask)) >> 2) & qlowpixelMask)
 
 
-void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch, 
+void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 		   uint8_t *dst, uint32_t dst_pitch,
 		   uint32_t width, uint32_t height, int sbpp) {
 
@@ -90,9 +90,9 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 	src_line[1] = src;
 	src_line[2] = src + src_pitch;
 	src_line[3] = src + src_pitch * 2;
-	
+
 	x = 0, y = 0;
-	
+
 	if (PixelsPerMask == 2) {
 		unsigned short *sbp;
 		sbp = (unsigned short*)src_line[0];
@@ -119,9 +119,9 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 
 		dst_line[0] = dst + dst_pitch*2*y;
 		dst_line[1] = dst + dst_pitch*(2*y+1);
-	
+
 		/* Todo: x = width - 2, x = width - 1 */
-		
+
 		for (x = 0; x < width; x++) {
 			uint32_t product1a, product1b, product2a, product2b;
 
@@ -152,7 +152,7 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 					product1b = color[5];
 				else
 					product1b = INTERPOLATE(color[5], color[6]);
-					
+
 				product2b = product1b;
 
 			}
@@ -185,7 +185,7 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 				product1a = INTERPOLATE(color[9], color[5]);
 			else
 				product1a = color[5];
-	
+
 			if (PixelsPerMask == 2) {
 				*((uint32_t *) (&dst_line[0][x * 4])) = product1a | (product1b << 16);
 				*((uint32_t *) (&dst_line[1][x * 4])) = product2a | (product2b << 16);
@@ -196,16 +196,16 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 				*((uint32_t *) (&dst_line[1][x * 8])) = product2a;
 				*((uint32_t *) (&dst_line[1][x * 8 + 4])) = product2b;
 			}
-			
+
 			/* Move color matrix forward */
 			color[0] = color[1]; color[4] = color[5]; color[8] = color[9];   color[12] = color[13];
 			color[1] = color[2]; color[5] = color[6]; color[9] = color[10];  color[13] = color[14];
 			color[2] = color[3]; color[6] = color[7]; color[10] = color[11]; color[14] = color[15];
-			
+
 			if (x < width - 3) {
 				x += 3;
 				if (PixelsPerMask == 2) {
-					color[3] = *(((unsigned short*)src_line[0]) + x);					
+					color[3] = *(((unsigned short*)src_line[0]) + x);
 					color[7] = *(((unsigned short*)src_line[1]) + x);
 					color[11] = *(((unsigned short*)src_line[2]) + x);
 					color[15] = *(((unsigned short*)src_line[3]) + x);
@@ -223,14 +223,14 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 		/* We're done with one line, so we shift the source lines up */
 		src_line[0] = src_line[1];
 		src_line[1] = src_line[2];
-		src_line[2] = src_line[3];		
+		src_line[2] = src_line[3];
 
 		/* Read next line */
 		if (y + 3 >= height)
 			src_line[3] = src_line[2];
 		else
 			src_line[3] = src_line[2] + src_pitch;
-			
+
 		/* Then shift the color matrix up */
 		if (PixelsPerMask == 2) {
 			unsigned short *sbp;
@@ -254,9 +254,9 @@ void Super2xSaI_ex(uint8_t *src, uint32_t src_pitch,
 			lbp = (uint32_t*)src_line[3];
 			color[12] = *lbp;    color[13] = color[12];  color[14] = *(lbp + 1); color[15] = *(lbp + 2);
 		}
-		
+
 	} // y loop
-	
+
 }
 
 
@@ -282,7 +282,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     Super2xSaI_ex(mpi->planes[0], mpi->stride[0],
 		  dmpi->planes[0], dmpi->stride[0],
 		  mpi->w, mpi->h, mpi->bpp/8);
-    
+
     return vf_next_put_image(vf,dmpi, pts);
 }
 

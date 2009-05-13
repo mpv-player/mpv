@@ -104,7 +104,7 @@ static void prButton( GtkObject * object,gpointer user_data )
 	ChangeSkin( sbSelectedSkin );
 	if ( skinName ) free( skinName );
 	skinName=strdup( sbSelectedSkin );
-	break;   
+	break;
   }
  }
  HideSkinBrowser();

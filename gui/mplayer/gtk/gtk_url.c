@@ -44,7 +44,7 @@ void ShowURLDialogBox( void )
 {
  if ( URL ) gtkActive( URL );
    else URL=create_URL();
-   
+
  if ( URLList )
   {
    URLItem * item = URLList;
@@ -56,13 +56,13 @@ void ShowURLDialogBox( void )
      item=item->next;
     }
   }
-   
+
  if ( URLComboEntrys )
   {
    gtk_entry_set_text( GTK_ENTRY( URLEntry ),URLComboEntrys->data );
    gtk_combo_set_popdown_strings( GTK_COMBO( URLCombo ),URLComboEntrys );
   }
- 
+
  gtk_widget_show( URL );
 }
 
@@ -75,7 +75,7 @@ void HideURLDialogBox( void )
 }
 
 static void on_Button_pressed( GtkButton * button,gpointer user_data )
-{ 
+{
  URLItem * item;
 
  if ( (int)user_data )
@@ -96,7 +96,7 @@ static void on_Button_pressed( GtkButton * button,gpointer user_data )
        free( str ); str=tmp;
       }
      URLComboEntrys=g_list_prepend( URLComboEntrys,(gchar *)str );
-     
+
      item=calloc( 1,sizeof( URLItem ) );
      item->url=gstrdup( str );
      gtkSet( gtkAddURLItem,0,(void *)item );
@@ -105,7 +105,7 @@ static void on_Button_pressed( GtkButton * button,gpointer user_data )
      mplEventHandling( evPlayNetwork,0 );
     }
   }
- HideURLDialogBox(); 
+ HideURLDialogBox();
 }
 
 GtkWidget * create_URL( void )
@@ -128,7 +128,7 @@ GtkWidget * create_URL( void )
  gtk_window_set_position( GTK_WINDOW( URL ),GTK_WIN_POS_CENTER );
  gtk_window_set_policy( GTK_WINDOW( URL ),TRUE,TRUE,FALSE );
  gtk_window_set_wmclass( GTK_WINDOW( URL ),"Network","MPlayer" );
- 
+
  gtk_widget_realize( URL );
  gtkAddIcon( URL );
 
@@ -155,7 +155,7 @@ GtkWidget * create_URL( void )
 
  Ok=AddButton( MSGTR_Ok,hbuttonbox1 );
  Cancel=AddButton( MSGTR_Cancel,hbuttonbox1 );
- 
+
  gtk_widget_add_accelerator( Ok,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
  gtk_widget_add_accelerator( Cancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 

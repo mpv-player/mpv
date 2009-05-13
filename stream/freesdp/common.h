@@ -127,7 +127,7 @@ typedef enum
 } fsdp_error_t;
 
 /**
- * @short Type of network 
+ * @short Type of network
  *
  * Initially, SDP defines "Internet". New network types may be
  * registered with IANA. However, the number of types is expected to
@@ -154,7 +154,7 @@ typedef enum
 } fsdp_address_type_t;
 
 /**
- * @short Type of bandwith modifiers 
+ * @short Type of bandwith modifiers
  *
  * Bandwidth modifiers specify the meaning of the bandwidth
  * value. Initially "Conference Total" and "Application Specific" are

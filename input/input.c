@@ -199,17 +199,17 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_CEXIT, "exit", 0, { {-1,{0}} } },
   { MP_CMD_CHIDE, "hide", 0, { {MP_CMD_ARG_INT,{3000}}, {-1,{0}} } },
 #endif
- 
+
   { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", 0, { {-1,{0}} } },
   { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", 0, { {-1,{0}} } },
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SET_PROPERTY, "set_property", 2, { {MP_CMD_ARG_STRING, {0}},  {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_GET_PROPERTY, "get_property", 1, { {MP_CMD_ARG_STRING, {0}},  {-1,{0}} } },
   { MP_CMD_STEP_PROPERTY, "step_property", 1, { {MP_CMD_ARG_STRING, {0}}, {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
-  
+
   { MP_CMD_SEEK_CHAPTER, "seek_chapter", 1, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", 2, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
-  
+
   { 0, NULL, 0, {} }
 };
 
@@ -363,7 +363,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { {  MOUSE_BTN4, 0 }, "seek -10" },
   { {  MOUSE_BTN5, 0 }, "volume 1" },
   { {  MOUSE_BTN6, 0 }, "volume -1" },
-  
+
 #ifdef CONFIG_DVDNAV
   { { KEY_KP8, 0 }, "dvdnav up" },   // up
   { { KEY_KP2, 0 }, "dvdnav down" },   // down
@@ -486,9 +486,9 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_VOLUME_UP, 0 }, "volume 1" },
   { { KEY_VOLUME_DOWN, 0 }, "volume -1" },
   { { KEY_MUTE, 0 }, "mute" },
-          
+
   { { KEY_CLOSE_WIN, 0 }, "quit" },
-  
+
   { { '!', 0 }, "seek_chapter -1" },
   { { '@', 0 }, "seek_chapter 1" },
   { { 'A', 0 }, "switch_angle 1" },
@@ -872,7 +872,7 @@ mp_input_parse_cmd(char* str) {
 	if(e <= ptr2 || *(e - 1) != '\\') break;
 	ptr2 = e + 1;
       }
-      
+
       if(term != ' ' && (!e || e[0] == '\0')) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnterminatedArg,cmd_def->name,i+1);
 	ptr = NULL;
@@ -930,8 +930,8 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
     mp_fd->buffer = malloc(MP_CMD_MAX_SIZE);
     mp_fd->pos = 0;
     mp_fd->size = MP_CMD_MAX_SIZE;
-  } 
-  
+  }
+
   // Get some data if needed/possible
   while (!mp_fd->got_cmd && !mp_fd->eof && (mp_fd->size - mp_fd->pos > 1) ) {
     int r = ((mp_cmd_func_t)mp_fd->read_func)(mp_fd->fd,mp_fd->buffer+mp_fd->pos,mp_fd->size - 1 - mp_fd->pos);
@@ -992,7 +992,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
       memmove(mp_fd->buffer,end+1,mp_fd->pos-(l+1));
     mp_fd->pos -= l+1;
   }
-   
+
   if(*ret)
     return 1;
   else
@@ -1028,7 +1028,7 @@ mp_input_add_cmd_filter(mp_input_cmd_filter func, void* ctx) {
   filter->next = cmd_filters;
   cmd_filters = filter;
 }
-  
+
 
 static char*
 mp_input_find_bind_for_key(const mp_cmd_bind_t* binds, int n,int* keys) {
@@ -1130,7 +1130,7 @@ interpret_key(int code, int paused)
       }
       code &= ~MP_KEY_DOWN;
       // Check if we don't already have this key as pushed
-      for(j = 0; j < num_key_down; j++) { 
+      for(j = 0; j < num_key_down; j++) {
 	if(key_down[j] == code)
 	  break;
       }
@@ -1145,7 +1145,7 @@ interpret_key(int code, int paused)
     // key released
     // Check if the key is in the down key, driver which can't send push event
     // send only release event
-    for(j = 0; j < num_key_down; j++) { 
+    for(j = 0; j < num_key_down; j++) {
       if(key_down[j] == code)
 	break;
     }
@@ -1157,7 +1157,7 @@ interpret_key(int code, int paused)
       key_down[num_key_down] = code;
       num_key_down++;
       last_key_down = 1;
-    } 
+    }
     // We ignore key from last combination
     ret = last_key_down ? mp_input_get_cmd_from_keys(num_key_down,key_down,paused) : NULL;
     // Remove the key
@@ -1180,7 +1180,7 @@ static mp_cmd_t *check_autorepeat(int paused)
     unsigned int t = GetTimer();
     // First time : wait delay
     if(ar_state == 0 && (t - last_key_down) >= ar_delay*1000) {
-      ar_cmd = mp_input_get_cmd_from_keys(num_key_down,key_down,paused);      
+      ar_cmd = mp_input_get_cmd_from_keys(num_key_down,key_down,paused);
       if(!ar_cmd) {
 	ar_state = -1;
 	return NULL;
@@ -1340,14 +1340,14 @@ mp_input_get_queued_cmd(int peek_only) {
     return NULL;
 
   ret = cmd_queue[cmd_queue_start];
-  
-  if (!peek_only) {  
+
+  if (!peek_only) {
   cmd_queue_length--;
   cmd_queue_start = (cmd_queue_start + 1) % CMD_QUEUE_SIZE;
   }
-  
+
   return ret;
-}  
+}
 
 /**
  * \param peek_only when set, the returned command stays in the queue.
@@ -1401,7 +1401,7 @@ mp_cmd_free(mp_cmd_t* cmd) {
 
   if(cmd->name)
     free(cmd->name);
-  
+
   for(i=0; i < MP_CMD_MAX_ARGS && cmd->args[i].type != -1; i++) {
     if(cmd->args[i].type == MP_CMD_ARG_STRING && cmd->args[i].v.s != NULL)
       free(cmd->args[i].v.s);
@@ -1439,7 +1439,7 @@ mp_input_get_key_name(int key) {
     if(key_names[i].key == key)
       return key_names[i].name;
   }
-  
+
   if(isascii(key)) {
     snprintf(key_str,12,"%c",(char)key);
     return key_str;
@@ -1530,7 +1530,7 @@ mp_input_bind_keys(const int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
       }
     }
   }
-  
+
   if(!bind) {
     bind_section->cmd_binds = realloc(bind_section->cmd_binds,(i+2)*sizeof(mp_cmd_bind_t));
     memset(&bind_section->cmd_binds[i],0,2*sizeof(mp_cmd_bind_t));
@@ -1562,7 +1562,7 @@ mp_input_free_binds(mp_cmd_bind_t* binds) {
   free(binds);
 
 }
-  
+
 static int
 mp_input_parse_config(char *file) {
   int fd;
@@ -1742,11 +1742,11 @@ mp_input_init(int use_gui) {
   if(use_gui)
     mp_input_add_binds(gui_def_cmd_binds);
 #endif
-  
+
   file = config_file[0] != '/' ? get_path(config_file) : config_file;
   if(!file)
     return;
-  
+
   if( !mp_input_parse_config(file)) {
     // free file if it was allocated by get_path(),
     // before it gets overwritten
@@ -1810,7 +1810,7 @@ mp_input_init(int use_gui) {
       mp_input_add_key_fd(fd,1,mp_input_appleir_read,(mp_close_func_t)close);
   }
 #endif
-  
+
   if(in_file) {
     struct stat st;
     if(stat(in_file,&st))

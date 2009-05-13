@@ -65,16 +65,16 @@ static void uninit(sh_video_t *sh){
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
     if(len<=0) return NULL; // skipped frame
-    
+
     if(flags&3){
 	// framedrop:
         DMO_VideoDecoder_DecodeInternal(sh->context, data, len, 0, 0);
 	return NULL;
     }
-    
-    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/, 
+
+    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
 	sh->disp_w, sh->disp_h);
-    
+
     if(!mpi){	// temporary!
 	mp_msg(MSGT_DECVIDEO,MSGL_WARN,MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec);
 	return NULL;

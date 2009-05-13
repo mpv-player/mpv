@@ -59,7 +59,7 @@ static const opt_t subopts[] = {
   {NULL}
 };
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
   "V4L2 MPEG Video Decoder Output",
   "v4l2",
@@ -73,7 +73,7 @@ v4l2_write (unsigned char *data, int len)
 {
   if (v4l2_fd < 0)
     return 0;
-  
+
   return write (v4l2_fd, data, len);
 }
 
@@ -107,30 +107,30 @@ preinit (const char *arg)
             "\n" );
     return -1;
   }
-  
+
   if (!device)
-    device = strdup (DEFAULT_MPEG_DECODER);    
-  
+    device = strdup (DEFAULT_MPEG_DECODER);
+
   v4l2_fd = open (device, O_RDWR);
   if (v4l2_fd < 0)
-  {  
+  {
     free (device);
     mp_msg (MSGT_VO, MSGL_FATAL, "%s %s\n", V4L2_VO_HDR, strerror (errno));
     return -1;
   }
 
   /* check for device hardware MPEG decoding capability */
-  ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG; 
-  ctrls.count = 0; 
+  ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG;
+  ctrls.count = 0;
   ctrls.controls = NULL;
-  
+
   if (ioctl (v4l2_fd, VIDIOC_G_EXT_CTRLS, &ctrls) < 0)
   {
     free (device);
     mp_msg (MSGT_OPEN, MSGL_FATAL, "%s %s\n", V4L2_VO_HDR, strerror (errno));
     return -1;
   }
-  
+
   /* list available outputs */
   vout.index = 0;
   err = 1;
@@ -186,7 +186,7 @@ preinit (const char *arg)
             "%s can't get output (%s).\n", V4L2_VO_HDR, strerror (errno));
     return -1;
   }
-  
+
   return 0;
 }
 
@@ -248,7 +248,7 @@ query_format (uint32_t format)
 {
   if (format != IMGFMT_MPEGPES)
     return 0;
-    
+
   return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_TIMER;
 }
 
@@ -260,6 +260,6 @@ control (uint32_t request, void *data, ...)
   case VOCTRL_QUERY_FORMAT:
     return query_format (*((uint32_t*) data));
   }
-  
+
   return VO_NOTIMPL;
 }

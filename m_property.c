@@ -101,7 +101,7 @@ char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ct
     int l,fr=0,pos=0,size=strlen(str)+512;
     char *p = NULL,*e,*ret = malloc(size), num_val;
     int skip = 0, lvl = 0, skip_lvl = 0;
-    
+
     while(str[0]) {
         if(str[0] == '\\') {
             int sl = 1;
@@ -114,7 +114,7 @@ char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ct
                 p = "\r", l = 1; break;
             case 't':
                 p = "\t", l = 1; break;
-            case 'x': 
+            case 'x':
                 if(str[2]) {
                     char num[3] = { str[2], str[3], 0 };
                     char* end = num;
@@ -145,7 +145,7 @@ char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ct
             str = e+1;
         } else if(str[0] == '?' && str[1] == '(' && (e = strchr(str+2,':'))) {
             lvl++;
-            if(!skip) {            
+            if(!skip) {
                 int is_not = str[2] == '!';
                 int pl = e - str - (is_not ? 3 : 2);
                 char pname[pl+1];
@@ -161,9 +161,9 @@ char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ct
             str = e+1, l = 0;
         } else
             p = str, l = 1, str++;
-        
+
         if(skip || l <= 0) continue;
-        
+
         if(pos+l+1 > size) {
             size = pos+l+512;
             ret = realloc(ret,size);
@@ -172,7 +172,7 @@ char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ct
         pos += l;
         if(fr) free(p), fr = 0;
     }
-    
+
     ret[pos] = 0;
     return ret;
 }
@@ -180,7 +180,7 @@ char* m_properties_expand_string(const m_option_t* prop_list,char* str, void *ct
 void m_properties_print_help_list(const m_option_t* list) {
     char min[50],max[50];
     int i,count = 0;
-    
+
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_PropertyListHeader);
     for(i = 0 ; list[i].name ; i++) {
         const m_option_t* opt = &list[i];

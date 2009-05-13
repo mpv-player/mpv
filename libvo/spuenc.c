@@ -4,7 +4,7 @@
  * Copyright (C) 2000   Alejandro J. Cura <alecu@protocultura.net>
  *
  * (modified a bit to work with the dxr3 driver...4/2/2002 cg)
- * 
+ *
  * Based on the hard work of:
  *
  *   Samuel Hocevar <sam@via.ecp.fr> and Michel Lespinasse <walken@via.ecp.fr>
@@ -48,13 +48,13 @@ encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 
 /* the format of this is well described by a page:
  * http://members.aol.com/mpucoder/DVD/spu.html
- * 
- * note I changed the layout of commands to turn off the subpic as the 
- * first command, and then turn on the new subpic...this is so we can 
- * leave the subpic on for an arbitrary ammount of time as controlled by 
+ *
+ * note I changed the layout of commands to turn off the subpic as the
+ * first command, and then turn on the new subpic...this is so we can
+ * leave the subpic on for an arbitrary ammount of time as controlled by
  * mplayer (ie when we turn on the subpic we don't know how long it should
  * stay on when using mplayer).
- * with this layout we turn off the last subpic as we are turning on the 
+ * with this layout we turn off the last subpic as we are turning on the
  * new one.
  * The original hd it turn on the subpic, and delay the turn off command using
  * the durration/delay feature.
@@ -65,7 +65,7 @@ encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 //	ed->data[i++]= 0x00;
 //	ed->data[i++]= 0x00; //durration before turn off command occurs
 			     //in 90000/1024 units
-	
+
 	/* x1 */
 //	x1=i+4;
 //	ed->data[i++]= x1 >> 8;//location of next command block
@@ -73,8 +73,8 @@ encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 	/* finish it */
 //	ed->data[i++]= 0x02;//turn off command
 //	ed->data[i++]= 0xff;//end of command block
-	x1= i; //marker for last command block address 
-	
+	x1= i; //marker for last command block address
+
 	/* display duration... */
 	ed->data[i++]= 0x00;
 	ed->data[i++]= 0x00; //durration before turn on command occurs
@@ -92,9 +92,9 @@ encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 	ed->data[i++]= 0x08;
 	ed->data[i++]= 0x7f;
 /*
- * The palette is a coded index (one of 16) 0 is black, 0xf is white 
+ * The palette is a coded index (one of 16) 0 is black, 0xf is white
  * (unless you screw with the default palette)
- * for what I am doing I only use white. 
+ * for what I am doing I only use white.
  * 7 is lt grey, and 8 is dk grey...
  * */
 	/* 0x04: transparency info (reversed) */
@@ -130,11 +130,11 @@ encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 	/* x0 */
 	ed->data[2]= (controlstart) >> 8;
 	ed->data[3]= (controlstart) & 0xff;
-	
+
 	/* packet size */
 	ed->data[0]= i >> 8;
 	ed->data[1]= i & 0xff;
-	
+
 	ed->count= i;
 }
 
@@ -179,7 +179,7 @@ encode_do_row( encodedata* ed, pixbuf* pb, int row ) {
 	unsigned char* pix= pb->pixels + row * pb->x;
 	int color= *pix;
 	int n= 0; /* the number of pixels of this color */
-	
+
 	while( i++ < pb->x ) {
 		/* FIXME: watch this space for EOL */
 		if( *pix != color || n == 255 ) {
@@ -233,7 +233,7 @@ pixbuf_encode_rle(int x, int y, int w, int h, char *inbuf,  int stride,encodedat
 
 void
 pixbuf_load_xpm( pixbuf* pb, char* xpm[] ) {
-	int colors, chrs, l, n; 
+	int colors, chrs, l, n;
 	char c[4], table[256];
 	unsigned char *b, *i;
 
@@ -250,7 +250,7 @@ pixbuf_load_xpm( pixbuf* pb, char* xpm[] ) {
 		fprintf( stderr, "the size is excesive\n");
 		exit (-1);
 	}
-	
+
 	for( l=0; l<colors; l++ ) {
 		n= sscanf( xpm[l+1], "%c c #%x", &c[l], &pb->rgb[l]);
 		if( n < 2 ) {
@@ -262,7 +262,7 @@ pixbuf_load_xpm( pixbuf* pb, char* xpm[] ) {
 
 	pb->pixels= malloc( pb->x * pb->y );
 	b= pb->pixels;
-	
+
 	for( l= colors+1; l <= pb->y + colors; l++ ) {
 		i= xpm[l];
 		while( (int)*i) {

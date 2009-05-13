@@ -38,9 +38,9 @@ void ShowMessageBox( const char * msg )
 }
 
 static void on_Ok_released( GtkButton * button,gpointer user_data  )
-{ 
- gtk_widget_hide( MessageBox ); 
- gtk_widget_destroy( MessageBox ); 
+{
+ gtk_widget_hide( MessageBox );
+ gtk_widget_destroy( MessageBox );
  MessageBox=NULL;
 }
 
@@ -66,7 +66,7 @@ GtkWidget * create_MessageBox( int type )
  gtk_window_set_modal( GTK_WINDOW( MessageBox ),TRUE );
  gtk_window_set_policy( GTK_WINDOW( MessageBox ),TRUE,TRUE,FALSE );
  gtk_window_set_wmclass( GTK_WINDOW( MessageBox ),"Message","MPlayer" );
- 
+
  gtk_widget_realize( MessageBox );
  gtkAddIcon( MessageBox );
 

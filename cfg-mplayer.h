@@ -74,7 +74,7 @@ const m_option_t tvscan_conf[]={
 /*
  * CONF_TYPE_FUNC_FULL :
  * allows own implementations for passing the params
- * 
+ *
  * the function receives parameter name and argument (if it does not start with - )
  * useful with a conf.name like 'aa*' to parse several parameters to a function
  * return 0 =ok, but we didn't need the param (could be the filename)
@@ -122,7 +122,7 @@ const m_option_t mplayer_opts[]={
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"noalsa", "-noalsa has been removed. Remove it from your config file.\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
+	{"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 #ifdef CONFIG_X11
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -147,10 +147,10 @@ const m_option_t mplayer_opts[]={
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
 #if defined(CONFIG_FBDEV) || defined(CONFIG_VESA)
-       {"monitor-hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
-       {"monitor-vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
-       {"monitor-dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
-#endif 
+       {"monitor-hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+       {"monitor-vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+       {"monitor-dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#endif
 
 #ifdef CONFIG_FBDEV
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -196,7 +196,7 @@ const m_option_t mplayer_opts[]={
 
 	{"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nograbpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	
+
     {"adapter", &vo_adapter_num, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
     {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
 	{"wid", &WinID, CONF_TYPE_INT64, 0, 0, 0, NULL},
@@ -307,7 +307,7 @@ const m_option_t mplayer_opts[]={
 
 	{"gui", "The -gui option will only work as the first command line argument.\n", CONF_TYPE_PRINT, 0, 0, 0, (void *)1},
 	{"nogui", "The -nogui option will only work as the first command line argument.\n", CONF_TYPE_PRINT, 0, 0, 0, (void *)1},
-      
+
 #ifdef CONFIG_GUI
 	{"skin", &skinName, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	{"enqueue", &enqueue, CONF_TYPE_FLAG, 0, 0, 1, NULL},

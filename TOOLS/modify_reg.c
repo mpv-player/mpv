@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
         if (c == EOF)
             break;
         switch(c) {
-          case 'r': 
+          case 'r':
             localregpathname = optarg;
             break;
           case 'l':

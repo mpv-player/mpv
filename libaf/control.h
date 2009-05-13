@@ -22,12 +22,12 @@
 #include <sys/types.h>
 
 /*********************************************
-// Control info struct. 
+// Control info struct.
 //
 // This struct is the argument in a info call to a filter.
 */
 
-// Argument types 
+// Argument types
 #define AF_CONTROL_TYPE_BOOL	(0x0<<0)
 #define AF_CONTROL_TYPE_CHAR	(0x1<<0)
 #define AF_CONTROL_TYPE_INT	(0x2<<0)
@@ -52,9 +52,9 @@ typedef struct af_control_info_s{
   int	 def;	// Control enumrification
   char*	 name; 	// Name of argument
   char*	 info;	// Description of what it does
-  int 	 flags;	// Flags as defined above	
-  float	 max;	// Max and min value 
-  float	 min;	// (only aplicable on float and int) 
+  int 	 flags;	// Flags as defined above
+  float	 max;	// Max and min value
+  float	 min;	// (only aplicable on float and int)
   int	 xdim;	// 1st dimension
   int	 ydim;	// 2nd dimension (=0 for everything except matrix)
   size_t sz;	// Size of argument in bytes
@@ -73,10 +73,10 @@ typedef struct af_control_ext_s{
 }af_control_ext_t;
 
 /*********************************************
-// Control parameters 
+// Control parameters
 */
 
-/* The control system is divided into 3 levels 
+/* The control system is divided into 3 levels
    mandatory calls 	 - all filters must answer to all of these
    optional calls  	 - are optional
    filter specific calls - applies only to some filters
@@ -115,12 +115,12 @@ typedef struct af_control_ext_s{
 // FILTER SPECIFIC CALLS
 
 // Basic operations: These can be ored with any of the below calls
-// Set argument 
+// Set argument
 #define AF_CONTROL_SET			0x00000000
 // Get argument
 #define AF_CONTROL_GET			0x00000001
 // Get info about the control, i.e fill in everything except argument
-#define AF_CONTROL_INFO			0x00000002  
+#define AF_CONTROL_INFO			0x00000002
 
 // Resample
 
@@ -153,8 +153,8 @@ typedef struct af_control_ext_s{
 
 // Set make af_channels into a router
 #define AF_CONTROL_CHANNELS_ROUTER	0x00000A00 | AF_CONTROL_FILTER_SPECIFIC
-	
-// Volume 
+
+// Volume
 
 // Turn volume control on and off, arg is int*
 #define AF_CONTROL_VOLUME_ON_OFF	0x00000B00 | AF_CONTROL_FILTER_SPECIFIC
@@ -165,10 +165,10 @@ typedef struct af_control_ext_s{
 // Set volume level, arg is a float* with the volume for all the channels
 #define AF_CONTROL_VOLUME_LEVEL		0x00000D00 | AF_CONTROL_FILTER_SPECIFIC
 
-// Probed power level for all channels, arg is a float* 
+// Probed power level for all channels, arg is a float*
 #define AF_CONTROL_VOLUME_PROBE		0x00000E00 | AF_CONTROL_FILTER_SPECIFIC
 
-// Maximum probed power level for all channels, arg is a float* 
+// Maximum probed power level for all channels, arg is a float*
 #define AF_CONTROL_VOLUME_PROBE_MAX	0x00000F00 | AF_CONTROL_FILTER_SPECIFIC
 
 // Compressor/expander
@@ -193,13 +193,13 @@ typedef struct af_control_ext_s{
 // Turn noise gate on an off
 #define AF_CONTROL_GATE_ON_OFF	 	0x00001500 | AF_CONTROL_FILTER_SPECIFIC
 
-// Noise gate threshold [dB] 
+// Noise gate threshold [dB]
 #define AF_CONTROL_GATE_THRESH	 	0x00001600 | AF_CONTROL_FILTER_SPECIFIC
 
 // Noise gate attack time [ms]
 #define AF_CONTROL_GATE_ATTACK	 	0x00001700 | AF_CONTROL_FILTER_SPECIFIC
 
-// Noise gate release time [ms] 
+// Noise gate release time [ms]
 #define AF_CONTROL_GATE_RELEASE 	0x00001800 | AF_CONTROL_FILTER_SPECIFIC
 
 // Noise gate release range level [dB]
@@ -207,16 +207,16 @@ typedef struct af_control_ext_s{
 
 // Pan
 
-// Pan levels, arg is a control_ext with a float* 
+// Pan levels, arg is a control_ext with a float*
 #define AF_CONTROL_PAN_LEVEL	 	0x00001A00 | AF_CONTROL_FILTER_SPECIFIC
 
 // Number of outputs from pan, arg is int*
 #define AF_CONTROL_PAN_NOUT	 	0x00001B00 | AF_CONTROL_FILTER_SPECIFIC
- 
+
 // Balance, arg is float*; range -1 (left) to 1 (right), 0 center
 #define AF_CONTROL_PAN_BALANCE	 	0x00002500 | AF_CONTROL_FILTER_SPECIFIC
 
-// Set equalizer gain, arg is a control_ext with a float* 
+// Set equalizer gain, arg is a control_ext with a float*
 #define AF_CONTROL_EQUALIZER_GAIN 	0x00001C00 | AF_CONTROL_FILTER_SPECIFIC
 
 

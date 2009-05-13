@@ -120,7 +120,7 @@ udp_open_socket (URL_t *url)
       return -1;
     }
   }
-	
+
 #if HAVE_WINSOCK2_H
   if (isalpha (url->hostname[0]))
   {
@@ -170,7 +170,7 @@ udp_open_socket (URL_t *url)
 
   FD_ZERO (&set);
   FD_SET (socket_server_fd, &set);
-  
+
   err = select (socket_server_fd + 1, &set, NULL, NULL, &tv);
   if (err < 0)
   {

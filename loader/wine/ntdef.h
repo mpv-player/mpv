@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#define NTAPI   __stdcall 
+#define NTAPI   __stdcall
 
 #ifndef IN
 #define IN
@@ -32,7 +32,7 @@ typedef LONG NTSTATUS;
 typedef NTSTATUS *PNTSTATUS;
 
 typedef short CSHORT;
-typedef CSHORT *PCSHORT;  
+typedef CSHORT *PCSHORT;
 
 typedef WCHAR * PWCHAR;
 

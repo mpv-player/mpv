@@ -33,12 +33,12 @@
  * Parse a connection (c=<network type> <address type> <connection
  * address>) line. If the textual description in <code>p</code> begins
  * with a connection line, it is parsed. If not, nothing is done.
- * 
+ *
  * @param p fraction of textual SDP description.
  * @param ntype where to store the network type.
  * @param atype where to store the address type.
  * @param address where to store the connection address as a string.
- * 
+ *
  * @return parse error code.
  **/
 static fsdp_error_t
@@ -51,7 +51,7 @@ fsdp_parse_c (const char **p, fsdp_network_type_t * ntype,
  * textual description in <code>p</code> begins with a bandwidth line,
  * it is parsed as well as all b lines inmediately after it. If not,
  * nothing is done.
- * 
+ *
  * @param p fraction of textual SDP description.
  * @param bw_modifiers pointer to empty array of bandwidth modifiers to fill.
  * @param bw_modifiers_count where to set the number of bandwidth
@@ -96,11 +96,11 @@ static fsdp_error_t
 fsdp_parse_rtpmap (fsdp_rtpmap_t *** rtpmap, unsigned int *counter,
 		   const char *value);
 
-/** 
+/**
  * Maximun default field len for "expected to be short" fields, like
  * username, session_id or inet addresses.
  *
- * MDFLENS value must be MAXSHORTFIELDLEN - 1 
+ * MDFLENS value must be MAXSHORTFIELDLEN - 1
  **/
 #define MAXSHORTFIELDLEN 96
 #define MSFLENS "95"

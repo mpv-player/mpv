@@ -1,5 +1,5 @@
 //**************************************************************************//
-//             .SUB 
+//             .SUB
 //**************************************************************************//
 
 #include "config.h"
@@ -24,7 +24,7 @@ extern float sub_delay;
 extern float  sub_fps;
 
 void step_sub(sub_data *subd, float pts, int movement) {
-    subtitle *subs; 
+    subtitle *subs;
     int key;
 
     if (subd == NULL) return;
@@ -55,10 +55,10 @@ void step_sub(sub_data *subd, float pts, int movement) {
 void find_sub(sub_data* subd,int key){
     subtitle *subs;
     int i,j;
-    
+
     if ( !subd || subd->sub_num == 0) return;
     subs = subd->subtitles;
-    
+
     if (last_sub_data != subd) {
         // Sub data changed, reset nosub range.
         last_sub_data = subd;
@@ -80,9 +80,9 @@ void find_sub(sub_data* subd,int key){
       vo_sub=NULL; // no sub here
       return;
     }
-    
+
 //    printf("\r---- sub changed ----\n");
-    
+
     // check next sub.
     if(current_sub>=0 && current_sub+1 < subd->sub_num){
       if(key>subs[current_sub].end && key<subs[current_sub+1].start){
@@ -99,9 +99,9 @@ void find_sub(sub_data* subd,int key){
     }
 
 //    printf("\r---- sub log search... ----\n");
-    
+
     // use logarithmic search:
-    i=0; 
+    i=0;
     j = subd->sub_num - 1;
 //    printf("Searching %d in %d..%d\n",key,subs[i].start,subs[j].end);
     while(j>=i){
@@ -112,7 +112,7 @@ void find_sub(sub_data* subd,int key){
         else return; // found!
     }
 //    if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
-    
+
     // check where are we...
     if(key<vo_sub->start){
       if(current_sub<=0){
@@ -152,7 +152,7 @@ void find_sub(sub_data* subd,int key){
           return;
       }
     }
-    
+
     mp_msg(MSGT_FIXME,MSGL_FIXME,"SUB ERROR:  %d  ?  %d --- %d  [%d]  \n",key,(int)vo_sub->start,(int)vo_sub->end,current_sub);
 
     vo_sub=NULL; // no sub here

@@ -96,7 +96,7 @@ static inline void tdfx_outl(unsigned int reg, u32 val) {
 static inline void banshee_make_room(int size) {
   while((tdfx_inl(STATUS) & 0x1f) < size);
 }
- 
+
 static inline void banshee_wait_idle(void) {
   int i = 0;
 
@@ -116,15 +116,15 @@ static unsigned long get_lfb_size(void) {
   u32 lfbsize   = 0;
   int sgram_p     = 0;
 
-  draminit0 = tdfx_inl(DRAMINIT0);  
+  draminit0 = tdfx_inl(DRAMINIT0);
   draminit1 = tdfx_inl(DRAMINIT1);
 
   if ((pci_dev->device == PCI_DEVICE_ID_3DFX_BANSHEE) ||
       (pci_dev->device == PCI_DEVICE_ID_3DFX_VOODOO3)) {
     sgram_p = (draminit1 & DRAMINIT1_MEM_SDRAM) ? 0 : 1;
-  
+
     lfbsize = sgram_p ?
-      (((draminit0 & DRAMINIT0_SGRAM_NUM)  ? 2 : 1) * 
+      (((draminit0 & DRAMINIT0_SGRAM_NUM)  ? 2 : 1) *
        ((draminit0 & DRAMINIT0_SGRAM_TYPE) ? 8 : 4) * 1024 * 1024) :
       16 * 1024 * 1024;
   } else {
@@ -144,7 +144,7 @@ static unsigned long get_lfb_size(void) {
   miscinit1 |= sgram_p ? 0 : MISCINIT1_2DBLOCK_DIS;
   miscinit1 |= MISCINIT1_CLUT_INV;
 
-  banshee_make_room(1); 
+  banshee_make_room(1);
   tdfx_outl(MISCINIT1, miscinit1);
 #endif
 
@@ -163,7 +163,7 @@ static int tdfx_vid_find_card(void)
   else
     return 0;
 
-  
+
   pci_dev = dev;
 
 #if LINUX_VERSION_CODE >= 0x020300
@@ -181,7 +181,7 @@ static int tdfx_vid_find_card(void)
   printk(KERN_INFO "tdfx_vid: Found %d MB (%d bytes) of memory\n",
 	 tdfx_ram_size / 1024 / 1024,tdfx_ram_size);
 
-  
+
 #if 0
   {
     int temp;
@@ -232,12 +232,12 @@ static int agp_init(void) {
 #endif
   drm_agp->enable(agp_info.mode);
 
-  
+
   printk(KERN_INFO "AGP Enabled\n");
 
   return 1;
 }
-    
+
 static void agp_close(void) {
 
   if(!drm_agp) return;
@@ -247,7 +247,7 @@ static void agp_close(void) {
     drm_agp->free_memory(agp_mem);
     agp_mem = NULL;
   }
-      
+
 
   drm_agp->release();
   inter_module_put("drm_agp");
@@ -306,7 +306,7 @@ static void setup_fifo(u32 offset,ssize_t pages) {
   tdfx_outl(CMDBASESIZE0,size);
 
   banshee_wait_idle();
-  
+
 }
 #endif
 
@@ -407,7 +407,7 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   u32 cmin,cmax,srcbase,srcxy,srcfmt,srcsize;
   u32 dstbase,dstxy,dstfmt,dstsize = 0;
   u32 cmd_extra = 0,src_ck[2],dst_ck[2],rop123=0;
-  
+
   //printk(KERN_INFO "tdfx_vid: Make src fmt 0x%x\n",blit->src_format);
   src_fmt = tdfx_vid_make_format(1,blit->src_stride,blit->src_format);
   if(!src_fmt)
@@ -423,10 +423,10 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   // No stretch : fix me the cmd should be 1 but it
   // doesn't work. Maybe some other regs need to be set
   // as non-stretch blit have more options
-  if(((!blit->dst_w) && (!blit->dst_h)) || 
+  if(((!blit->dst_w) && (!blit->dst_h)) ||
      ((blit->dst_w == blit->src_w) && (blit->dst_h == blit->src_h)))
     cmd = 2;
-  
+
   // Save the regs otherwise fb get crazy
   // we can perhaps avoid some ...
   banshee_wait_idle();
@@ -451,14 +451,14 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
     dst_ck[0] = tdfx_inl(DSTCOLORKEYMIN);
     dst_ck[1] = tdfx_inl(DSTCOLORKEYMAX);
     tdfx_outl(SRCCOLORKEYMIN,blit->dst_colorkey[0]);
-    tdfx_outl(SRCCOLORKEYMAX,blit->dst_colorkey[1]);   
+    tdfx_outl(SRCCOLORKEYMAX,blit->dst_colorkey[1]);
   }
   if(blit->colorkey) {
     cmd_extra = tdfx_inl(COMMANDEXTRA_2D);
     rop123 = tdfx_inl(ROP123);
     tdfx_outl(COMMANDEXTRA_2D, blit->colorkey);
     tdfx_outl(ROP123,(blit->rop[1] | (blit->rop[2] << 8) | blit->rop[3] << 16));
-    
+
   }
   // Get rid of the clipping at the moment
   tdfx_outl(CLIP0MIN,0);
@@ -499,7 +499,7 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   }
   if(blit->colorkey & TDFX_VID_DST_COLORKEY) {
     tdfx_outl(SRCCOLORKEYMIN,dst_ck[0]);
-    tdfx_outl(SRCCOLORKEYMAX,dst_ck[1]);   
+    tdfx_outl(SRCCOLORKEYMAX,dst_ck[1]);
   }
   if(blit->colorkey) {
     tdfx_outl(COMMANDEXTRA_2D,cmd_extra);
@@ -518,9 +518,9 @@ static int tdfx_vid_set_yuv(unsigned long arg) {
   banshee_make_room(2);
   tdfx_outl(YUVBASEADDRESS,yuv.base & 0x01FFFFFF);
   tdfx_outl(YUVSTRIDE, yuv.stride & 0x3FFF);
-  
+
   banshee_wait_idle();
-  
+
   return 0;
 }
 
@@ -779,7 +779,7 @@ static int tdfx_vid_ioctl(struct inode *inode, struct file *file, unsigned int c
   default:
     printk(KERN_ERR "tdfx_vid: Invalid ioctl %d\n",cmd);
     return -EINVAL;
-  } 
+  }
   return 0;
 }
 
@@ -802,7 +802,7 @@ static void tdfx_vid_mopen(struct vm_area_struct *vma) {
   unsigned long phys;
 
   printk(KERN_DEBUG "tdfx_vid: mopen\n");
-  
+
   for(i = 0 ; i < agp_mem->page_count ; i++) {
     phys = agp_mem->memory[i] & ~(0x00000fff);
     page = virt_to_page(phys_to_virt(phys));
@@ -836,7 +836,7 @@ static void tdfx_vid_mclose(struct vm_area_struct *vma)  {
 }
 
 static struct page *tdfx_vid_nopage(struct vm_area_struct *vma,
-				    unsigned long address, 
+				    unsigned long address,
 				    int write_access) {
   unsigned long off;
   uint32_t n;
@@ -883,10 +883,10 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
     }
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,3)
     if(remap_page_range(vma, vma->vm_start,map_start,
-			vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+			vma->vm_end - vma->vm_start, vma->vm_page_prot))
 #else
     if(remap_page_range(vma->vm_start, (unsigned long)map_start,
-			vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+			vma->vm_end - vma->vm_start, vma->vm_page_prot))
 #endif
       {
 	printk(KERN_ERR "tdfx_vid: error mapping video memory\n");
@@ -919,10 +919,10 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
   if(tdfx_map_io) {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,3)
     if(remap_page_range(vma, vma->vm_start,agp_info.aper_base,
-			vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+			vma->vm_end - vma->vm_start, vma->vm_page_prot))
 #else
     if(remap_page_range(vma->vm_start, (unsigned long)agp_info.aper_base,
-			vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+			vma->vm_end - vma->vm_start, vma->vm_page_prot))
 #endif
       {
 	printk(KERN_ERR "tdfx_vid: error mapping video memory\n");
@@ -952,7 +952,7 @@ static int tdfx_vid_release(struct inode *inode, struct file *file)
     drm_agp->free_memory(agp_mem);
     agp_mem = NULL;
   }
-  
+
   tdfx_vid_in_use = 0;
 
   MOD_DEC_USE_COUNT;
@@ -962,7 +962,7 @@ static int tdfx_vid_release(struct inode *inode, struct file *file)
 static long long tdfx_vid_lseek(struct file *file, long long offset, int origin)
 {
 	return -ESPIPE;
-}					 
+}
 
 static int tdfx_vid_open(struct inode *inode, struct file *file)
 {
@@ -975,7 +975,7 @@ static int tdfx_vid_open(struct inode *inode, struct file *file)
 	if(minor != 0)
 	 return -ENXIO;
 
-	if(tdfx_vid_in_use == 1) 
+	if(tdfx_vid_in_use == 1)
 		return -EBUSY;
 
 	tdfx_vid_in_use = 1;
@@ -1033,7 +1033,7 @@ int init_module(void)
     return -EINVAL;
   }
 
-  
+
 
   return 0;
 

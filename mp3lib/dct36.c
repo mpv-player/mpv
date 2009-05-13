@@ -4,7 +4,7 @@
  * $Id$
  */
 
-/* 
+/*
 // This is an optimized DCT from Jeff Tsay's maplay 1.2+ package.
 // Saved one multiplication by doing the 'twiddle factor' stuff
 // together with the window mul. (MH)
@@ -187,7 +187,7 @@ static void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
     out2[8-(v)] = tmp * w[26-(v)];  } \
     sum0 -= sum1; \
     ts[SBLIMIT*(8-(v))] = out1[8-(v)] + sum0 * w[8-(v)]; \
-    ts[SBLIMIT*(9+(v))] = out1[9+(v)] + sum0 * w[9+(v)]; 
+    ts[SBLIMIT*(9+(v))] = out1[9+(v)] + sum0 * w[9+(v)];
 #define MACRO1(v) { \
 	real sum0,sum1; \
     sum0 = tmp1a + tmp2a; \
@@ -212,7 +212,7 @@ static void dct36(real *inbuf,real *o1,real *o2,real *wintab,real *tsbuf)
     tb33 = in[2*3+1] * c[3];
     tb66 = in[2*6+1] * c[6];
 
-    { 
+    {
       real tmp1a,tmp2a,tmp1b,tmp2b;
       tmp1a =             in[2*1+0] * c[1] + ta33 + in[2*5+0] * c[5] + in[2*7+0] * c[7];
       tmp1b =             in[2*1+1] * c[1] + tb33 + in[2*5+1] * c[5] + in[2*7+1] * c[7];

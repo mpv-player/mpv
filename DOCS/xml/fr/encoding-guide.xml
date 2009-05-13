@@ -39,7 +39,7 @@
 
 <para>
   Si vous ne vous sentez pas de taille, vous devriez utiliser une des
-  interfaces graphiques listées sur la page de notre projet dans 
+  interfaces graphiques listées sur la page de notre projet dans
   <ulink url="http://www.mplayerhq.hu/design7/projects.html#mencoder_frontends">Section
   MEncoder</ulink>.
   Ainsi, vous devriez être capable de faire de encodages de DVD de haute qualité
@@ -75,7 +75,7 @@ bonne qualité
 <sect3 id="menc-feat-dvd-mpeg4-preparing-encode-fps">
 <title>Identification du nombre d'images par seconde de la source</title>
 <para>
-  Voici une liste de types de matériel source courants, où vous devriez les trouver et 
+  Voici une liste de types de matériel source courants, où vous devriez les trouver et
   leurs propriétés&nbsp;:
 </para>
 <itemizedlist>
@@ -94,8 +94,8 @@ bonne qualité
   L'oeil humain est censé compenser cette alternance de trames mais dès lors
   que vous
   comprenez l'entrelacement, vous apprendrez à le voir sur la télévision et vous ne la regarderez
-  plus de la même façon. Deux trames ne font <emphasis role="bold">pas</emphasis> une image 
-  complète, car elles sont capturées avec un décalage d'1/50e de seconde et donc, à moins 
+  plus de la même façon. Deux trames ne font <emphasis role="bold">pas</emphasis> une image
+  complète, car elles sont capturées avec un décalage d'1/50e de seconde et donc, à moins
   qu'il n'y ait pas de mouvement, elles ne s'alignent pas parfaitement.
 </para></listitem>
 <listitem><para>
@@ -182,7 +182,7 @@ bonne qualité
   Au cas où vous rencontriez un film au format NTSC ou PAL et vouliez l'encodez,
   le mieux serait de trouver une copie du film dans le format original.
   La conversion entre ces deux formats est hautement destructrice et ne peut
-  être inversee proprement, votre encodage en souffrirait grandement s'il était 
+  être inversee proprement, votre encodage en souffrirait grandement s'il était
   fait à partir d'une source déja convertie (en NTSC ou PAL).
 </para>
 <para>
@@ -194,7 +194,7 @@ bonne qualité
   numéro des trames auxquelles une image doit être montrée dans l'en-tête de cette image.
   Si cette méthode est utilisée, on dit que le film est "soft-téléciné"
   puisque le procédé impose uniquement au lecteur DVD d'appliquer le pulldown sur le film
-  plutôt que d'altérer le film lui-même. 
+  plutôt que d'altérer le film lui-même.
   Ce cas est de loin préférable puisqu'il peut être facilement inversé
   (en fait, ignoré) par l'encodeur et puisqu'il préserve la qualité au maximum.
   Malgré cela, beaucoup de studios de production de DVD et d'émission n'utilisent pas
@@ -227,7 +227,7 @@ bonne qualité
 </para></listitem>
 <listitem><para>
   Si <application>MPlayer</application> montre un nombre d'images par seconde constant
-  et que chacune des images des scènes de mouvement souffre d'un effet de peigne, alors 
+  et que chacune des images des scènes de mouvement souffre d'un effet de peigne, alors
   votre film est une vidéo NTSC à 60000/1001 trames par seconde.
 </para></listitem>
 <listitem><para>
@@ -309,7 +309,7 @@ bonne qualité
 </note>
 
 <para>
-  Dans chacun de ces modes, le codec vidéo (tel que 
+  Dans chacun de ces modes, le codec vidéo (tel que
   <systemitem class="library">libavcodec</systemitem>)
   sépare les images vidéo en macroblocs de 16x16 pixels et applique ensuite
   un quantificateur sur chaque macrobloc. Plus le quantificateur est bas, meilleure
@@ -327,7 +327,7 @@ bonne qualité
   Si la taille du fichier vous est vraiment égale, vous pourriez aussi bien
   fixer un débit constant infini (en pratique, dela signifie une valeur assez
   haute pour ne pas poser de limites, tel que 10000Kbit). Sans réelle
-  restriction de débit, le codec utilisera le plus 
+  restriction de débit, le codec utilisera le plus
   bas quantificateur possible pour chaque macrobloc (tel que spécifié par
   <option>vqmin</option> pour <systemitem class="library">libavcodec</systemitem>,
   qui vaut 2 par défaut). Dès que vous spécifiez un débit suffisament bas pour
@@ -340,7 +340,7 @@ bonne qualité
 
 <para>
   Avec un quantificateur constant, le codec utilise
-  le même quantificateur (spécifié par l'option <option>vqscale</option> pour 
+  le même quantificateur (spécifié par l'option <option>vqscale</option> pour
   <systemitem class="library">libavcodec</systemitem>) sur chaque macrobloc.
   Si vous voulez un encodage de la meilleure qualité possible, cette fois encore
   en ignorant le débit, vous pouvez utiliser <option>vqscale=2</option>. Cela
@@ -372,7 +372,7 @@ bonne qualité
 <para>
   Si vous utilisez <option>vqscale=2</option>, alors vous gaspillez des bits.
   Si vous utilisez <option>vqscale=3</option>, vous n'avez pas la meilleure
-  qualité d'encodage. Supposez que vous encodez un DVD avec 
+  qualité d'encodage. Supposez que vous encodez un DVD avec
   <option>vqscale=3</option>, et que le résultat est 1800Kbit/s. Si vous faites
   un encodage en deux passes avec <option>vbitrate=1800</option>, la vidéo produite
   aura une <emphasis role="bold">meilleure qualité</emphasis> pour le
@@ -902,7 +902,7 @@ bonne qualité
 </para>
 
 <para>
-  Dans certain cas, le redimensionnement n'est pas souhaitable. Il est délicat 
+  Dans certain cas, le redimensionnement n'est pas souhaitable. Il est délicat
   dans le sens vertical avec des vidéos entrelacées, si vous désirez
   conserver l'entrelacement, vous devrez vous abstenir de redimensionner.
   Sans redimensionner, pour utiliser des dimensions multiples de 16,
@@ -1017,7 +1017,7 @@ bonne qualité
   d'information sur la source vidéo.
   En premier lieu, il faut calculer le format de l'encodage&nbsp;:
   <systemitem>ARc = (Wc x (ARa / PRdvd )) / Hc</systemitem>
-   
+
 <itemizedlist>
 <title>Où&nbsp;:</title>
 <listitem><para>
@@ -1424,7 +1424,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   d'encodage &mdash; de typiquement 40-60% &mdash; avec très peu voire aucune
   détérioration de l'image.
   Le codec <systemitem class="library">x264</systemitem> permet aussi
-  l'encodage multi-threadé ce qui l'accélère pour le moment de 94% par CPU 
+  l'encodage multi-threadé ce qui l'accélère pour le moment de 94% par CPU
   avec une baisse de PSNR comprise entre 0.005dB et 0.01dB avec un réglage classique.
 </para></listitem>
 
@@ -1477,7 +1477,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <screen>
 mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>son.ac3</replaceable>
 </screen>
-  mettra dans le fichier <replaceable>son.ac3</replaceable> la piste audio 
+  mettra dans le fichier <replaceable>son.ac3</replaceable> la piste audio
   129 du fichier <replaceable>fichier_source.vob</replaceable> (NB&nbsp;: les
   fichiers VOB des DVD utilisent normalement un système de numérotation
   différent pour les pistes audio, ainsi la piste numéro 129 est la deuxième
@@ -1817,7 +1817,7 @@ mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpf
 <systemitem class="library">libavcodec</systemitem> pour atteindre une qualité optimum sont des
   questions en dehors des propos de cette section.
   Référez-vous aux autres sections contenues dans
-  <link linkend="encoding-guide">L'encodage avec 
+  <link linkend="encoding-guide">L'encodage avec
 <application>MPlayer</application></link>.
   </para></listitem>
 <listitem><para>
@@ -1992,7 +1992,7 @@ mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpf
 <title>Comment encoder chaque catégorie&thinsp;?</title>
 <para>
   Comme évoqué au départ, les exemples de lignes de commande
-  <application>MEncoder</application> ne doivent <emphasis role="bold">pas</emphasis> être utilisés tels quels; 
+  <application>MEncoder</application> ne doivent <emphasis role="bold">pas</emphasis> être utilisés tels quels;
   ils fournissent uniquement les paramètres minimum pour encoder chaque catégorie.
 </para>
 
@@ -2059,7 +2059,7 @@ mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpf
   Consultez <option>mplayer -pphelp</option> et <option>mplayer -vf help</option>
   pour voir lesquels sont
   disponibles (selectionnez les lignes contenant &quot;deint&quot; avec grep),
-  lisez <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">comparaison des filtres de désentrelacement</ulink> 
+  lisez <ulink url="http://guru.multimedia.cx/deinterlacing-filters/">comparaison des filtres de désentrelacement</ulink>
   de Michael Niedermayer,
   et fouillez dans les
   <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
@@ -2140,7 +2140,7 @@ mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpf
 </screen>
   </para></listitem>
   <listitem><para>
-      <option>-vf filmdint</option> est similaire à 
+      <option>-vf filmdint</option> est similaire à
       <option>-vf pullup</option>&nbsp;: les deux filtres tentent d'appairer
       deux demi-trames pour construire une trame complète.
       Néanmoins, <option>filmdint</option> desentrelacera les demi-trames
@@ -2183,7 +2183,7 @@ mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio -dumpf
 <sect3 id="menc-feat-telecine-encode-mixedpi">
 <title>Mélange de progressive et d'entrelacée</title>
 <para>
-  Il y a deux façons de gérer cette catégorie, chacune étant un 
+  Il y a deux façons de gérer cette catégorie, chacune étant un
   compromis. Vous devez faire votre choix en vous basant sur la durée/localisation
   de chaque type.
 </para>
@@ -3097,7 +3097,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,\
   entraînera une qualité inférieure (à moins que vous n'augmentiez le débit).
   Le recadrage enlève quand à lui complétement les pixels à l'extérieur du
   nouveau cadrage. C'est un compromis dont vous devrez tenir compte
-  selon les circonstances. Par exemple, si une vidéo DVD a été 
+  selon les circonstances. Par exemple, si une vidéo DVD a été
   faite pour la télévision, vous pourriez vouloir éviter le
   redimensionnement vertical, étant donné que l'échantillon de lignes correspond
   à la manière avec laquelle le contenu a été enregistré.
@@ -3936,7 +3936,7 @@ résultats&thinsp;?</title>
   Note&nbsp;: activé par défaut.
 </para>
 <para>
-  Avec cette option activée, l'encodeur utilise une procédure de décision 
+  Avec cette option activée, l'encodeur utilise une procédure de décision
   raisonnablement rapide pour réduire le nombre d'images B utilisées dans
   les scènes pour lesquelles leur utilisation n'apporterait pas grand-chose.
   Vous pouvez utiliser <option>b_bias</option> pour affiner la tendance
@@ -3985,7 +3985,7 @@ résultats&thinsp;?</title>
 <emphasis role="bold">threads</emphasis>&nbsp;:
 Cette option permet de lancer des threads autorisant ainsi l'encodage en parallèle sur plusieurs CPUs.
 Il est possible de choisir manuellement le nombre de threads à créer ou, mieux, d'utiliser
-<option>threads=auto</option> et laisser 
+<option>threads=auto</option> et laisser
 <systemitem class="library">x264</systemitem> détecter le nombre de CPU disponible et choisir
 le nombre de threads approprié.
 Si vous possédez une machine multi-processeurs, vous devriez songer à utiliser cette option.
@@ -4150,7 +4150,7 @@ Elle permet d'augmenter la vitesse d'encodage linéairement en fonction du nombr
   détails ou de bruit).
   Le filtre de H264 réussit très bien à camoufler les artefacts qui se apparaissent.
   De toutes façons, si la complexité spatiale de la source est élevée, les
-  artefacts sont moins discernables parce qu'ils tendent à ressembler 
+  artefacts sont moins discernables parce qu'ils tendent à ressembler
   à du détail ou du bruit.
   La vision humaine remarque facilement qu'un détail a été enlevé
   mais ne remarque pas si facilement quand un bruit est mal représenté.
@@ -4488,7 +4488,7 @@ fichiers compatibles <application>QuickTime</application>
 	mais il ne les supporte pas multipléxés dans le format de container AVI.
 	Cependant, vous pouvez utiliser <application>MEncoder</application> pour encoder
 	la vidéo et l'audio, et ensuite utiliser un programme externe comme
-	<application>mp4creator</application> (appartenant à la 
+	<application>mp4creator</application> (appartenant à la
 	<ulink url="http://mpeg4ip.sourceforge.net/">suite MPEG4IP</ulink>)
 	pour remultiplexer les pistes vidéos et audios dans un container MP4.
 </para>
@@ -4496,12 +4496,12 @@ fichiers compatibles <application>QuickTime</application>
 <para>
 	Le support <application>QuickTime</application> du H.264 étant limité,
 	il vous faudra laisser tomber certaines options avancées.
-	Si vous encodez votre vidéo en utilisant des options que 
-	<application>QuickTime</application> 7 ne supporte pas, 
+	Si vous encodez votre vidéo en utilisant des options que
+	<application>QuickTime</application> 7 ne supporte pas,
 	les lecteurs basés sur <application>QuickTime</application> afficheront
 	un joli écran blanc au lieu de la vidéo attendue.
 </para>
-	
+
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">trames-B</emphasis>&nbsp;:
@@ -4663,7 +4663,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 -oac faac -faacopts br=192:mpeg=4:object=2 -channels 2 -srate 48000 \
 -ofps 24000/1001</screen>
 </para>
-	
+
 <para>
 	L'AVI résultant doit être parfaitement lu
 	par <application>MPlayer</application>, mais bien entendu
@@ -4697,7 +4697,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 <para>
 	Maintenant utilisez <application>mp4creator</application> pour créer
 	un nouveau fichier MP4 depuis les flux audio et vidéo.
-	
+
 	<screen>mp4creator -create=narnia.aac narnia.mp4
 	mp4creator -create=narnia.h264 -rate=23.976 narnia.mp4</screen>
 
@@ -4710,13 +4710,13 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 	Le fichier <systemitem>narnia.mp4</systemitem> devrait être lisible
 	par n'importe quelle application <application>QuickTime</application> 7,
 	comme le <application>lecteur QuickTime</application> ou
-	comme <application>iTunes</application>. Si vous planifiez de voir la 
+	comme <application>iTunes</application>. Si vous planifiez de voir la
 	vidéo dans un navigateur Internet avec le plugin <application>QuickTime</application>,
 	vous devriez aussi renseigner le film de sorte que le plugin
 	<application>QuickTime</application> puisse commencer à le lire
 	pendant qu'il se télécharge. <application>mp4creator</application>
   peut créer ces pistes de renseignement&nbsp;:
-	
+
 	<screen>mp4creator -hint=1 narnia.mp4
 	mp4creator -hint=2 narnia.mp4
 	mp4creator -optimize narnia.mp4</screen>
@@ -4763,7 +4763,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
 </sect2>
 
 </sect1>
-	
+
 <sect1 id="menc-feat-vcd-dvd">
 <title>Utiliser <application>MEncoder</application> pour créer des fichiers compatibles VCD/SVCD/DVD.</title>
 
@@ -4906,7 +4906,7 @@ me=umh:partitions=all:trellis=1:qp_step=4:qcomp=0.7:direct_pred=auto:keyint=300 
   Si votre film est au format 2,35:1 (la plupart des films d'action récents), vous
   devrez ajouter des bords noirs ou recadrer le film en 16:9
   pour faire un DVD ou un VCD.
-  Si vous ajoutez des bords noirs, essayez qu'ils soient d'une épaisseur multiple 
+  Si vous ajoutez des bords noirs, essayez qu'ils soient d'une épaisseur multiple
   de 16 de façon à minimiser l'impact sur la performance d'encodage.
   Le DVD a heureusement un débit suffisamment élevé pour que vous n'ayez pas trop
   à vous inquiéter pour l'efficacité de l'encodage, par contre, le SVCD et le VCD

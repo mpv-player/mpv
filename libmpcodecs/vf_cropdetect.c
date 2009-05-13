@@ -73,7 +73,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     dmpi->height=mpi->height;
 
 if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
-    
+
     for(y=0;y<vf->priv->y1;y++){
 	if(checkline(mpi->planes[0]+mpi->stride[0]*y,bpp,mpi->w,bpp)>vf->priv->limit){
 	    vf->priv->y1=y;
@@ -106,7 +106,7 @@ if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
     // make sure they stay rounded!
     x=(vf->priv->x1+1)&(~1);
     y=(vf->priv->y1+1)&(~1);
-    
+
     w = vf->priv->x2 - x + 1;
     h = vf->priv->y2 - y + 1;
 

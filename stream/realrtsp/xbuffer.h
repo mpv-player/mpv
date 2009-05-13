@@ -1,4 +1,4 @@
-/* 
+/*
  * xbuffer code
  *
  * Includes a minimalistic replacement for xine_buffer functions used in

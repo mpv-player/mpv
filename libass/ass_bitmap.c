@@ -237,7 +237,7 @@ static bitmap_t* fix_outline_and_shadow(bitmap_t* bm_g, bitmap_t* bm_o)
 	unsigned char* g = bm_g->buffer + (t - bm_g->top) * bm_g->w + (l - bm_g->left);
 	unsigned char* o = bm_o->buffer + (t - bm_o->top) * bm_o->w + (l - bm_o->left);
 	unsigned char* s = bm_s->buffer + (t - bm_s->top) * bm_s->w + (l - bm_s->left);
-	
+
 	for (y = 0; y < b - t; ++y) {
 		for (x = 0; x < r - l; ++x) {
 			unsigned char c_g, c_o;
@@ -309,7 +309,7 @@ int glyph_to_bitmap(ass_synth_priv_t* priv_blur,
 	if (*bm_o)
 		resize_tmp(priv_blur, (*bm_o)->w, (*bm_o)->h);
 	resize_tmp(priv_blur, (*bm_g)->w, (*bm_g)->h);
-	
+
 	if (be) {
 		while (be--) {
 			if (*bm_o)

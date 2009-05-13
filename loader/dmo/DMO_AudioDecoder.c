@@ -14,7 +14,7 @@
 #include "DMO_AudioDecoder.h"
 
 struct DMO_AudioDecoder
-{ 
+{
     DMO_MEDIA_TYPE m_sOurType, m_sDestType;
     DMO_Filter* m_pDMO_Filter;
     char* m_sVhdr;
@@ -44,17 +44,17 @@ DMO_AudioDecoder * DMO_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX
     Setup_LDT_Keeper();
     Setup_FS_Segment();
 #endif
-        
+
     this = malloc(sizeof(DMO_AudioDecoder));
-    
+
     this->m_iFlushed=1;
-    
+
     sz = 18 + wf->cbSize;
     this->m_sVhdr = malloc(sz);
     memcpy(this->m_sVhdr, wf, sz);
     this->m_sVhdr2 = malloc(18);
     memcpy(this->m_sVhdr2, this->m_sVhdr, 18);
-    
+
     pWF = (WAVEFORMATEX*)this->m_sVhdr2;
     pWF->wFormatTag = 1;
     pWF->wBitsPerSample = 16;
@@ -62,7 +62,7 @@ DMO_AudioDecoder * DMO_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX
     pWF->nBlockAlign = 2*pWF->nChannels; //pWF->nChannels * (pWF->wBitsPerSample + 7) / 8;
     pWF->nAvgBytesPerSec = pWF->nBlockAlign * pWF->nSamplesPerSec;
     pWF->cbSize = 0;
-    
+
     memset(&this->m_sOurType, 0, sizeof(this->m_sOurType));
     this->m_sOurType.majortype=MEDIATYPE_Audio;
     this->m_sOurType.subtype=MEDIASUBTYPE_PCM;
@@ -92,7 +92,7 @@ print_wave_header((WAVEFORMATEX *)this->m_sVhdr2, MSGL_V);
            free(this);
            return NULL;
         }
-        
+
     return this;
 }
 
@@ -120,7 +120,7 @@ int DMO_AudioDecoder_Convert(DMO_AudioDecoder *this, const void* in_data, unsign
 #ifdef WIN32_LOADER
     Setup_FS_Segment();
 #endif
-    
+
     //m_pDMO_Filter->m_pMedia->vt->Lock(m_pDMO_Filter->m_pMedia, 1);
     bufferin = CMediaBufferCreate(in_size, (void*)in_data, in_size, 1);
     r = this->m_pDMO_Filter->m_pMedia->vt->ProcessInput(this->m_pDMO_Filter->m_pMedia, 0,
@@ -148,7 +148,7 @@ int DMO_AudioDecoder_Convert(DMO_AudioDecoder *this, const void* in_data, unsign
 
 	((IMediaBuffer*)db.pBuffer)->vt->GetBufferAndLength((IMediaBuffer*)db.pBuffer, 0, &written);
 	((IMediaBuffer*)db.pBuffer)->vt->Release((IUnknown*)db.pBuffer);
- 
+
 	//printf("RESULTB: %d 0x%x %ld\n", r, r, written);
 	//printf("Converted  %d  -> %d\n", in_size, out_size);
     }

@@ -229,7 +229,7 @@ uc_ovl_map_hzoom (uint32_t sw, uint32_t dw, uint32_t * zoom, uint32_t * mini,
       *mini |= V1_X_INTERPOLY;
     }
   else /* sw > dw - Zoom out */
-    {		
+    {
       /* Find a suitable divider (1 << d) = {2, 4, 8 or 16} */
       sw1 = sw;
       for (d = 1; d < 5; d++)
@@ -380,7 +380,7 @@ uc_ovl_map_v1_control (uint32_t format, int sw,
     {
       /* Minified video will be skewed without this workaround. */
       if (sw <= 80) /* Fetch count <= 5 */
-	{			
+	{
 	  *fifo = UC_MAP_V1_FIFO_CONTROL (16, 0, 0);
 	}
       else
@@ -464,7 +464,7 @@ unichrome_probe (int verbose, int force)
   err = pci_scan (lst, &num_pci);
   if (err)
     {
-      printf ("[unichrome] Error occurred during pci scan: %s\n", 
+      printf ("[unichrome] Error occurred during pci scan: %s\n",
 	      strerror (err));
       return err;
     }

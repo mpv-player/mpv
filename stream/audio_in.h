@@ -27,11 +27,11 @@ typedef struct {
 } ai_oss_t;
 #endif
 
-typedef struct 
+typedef struct
 {
     int type;
     int setup;
-    
+
     /* requested values */
     int req_channels;
     int req_samplerate;
@@ -42,7 +42,7 @@ typedef struct
     int blocksize;
     int bytes_per_sample;
     int samplesize;
-    
+
 #ifdef CONFIG_ALSA
     ai_alsa_t alsa;
 #endif

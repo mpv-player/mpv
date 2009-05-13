@@ -1,6 +1,6 @@
-/* 
+/*
    RTjpeg (C) Justin Schoeman 1998 (justin@suntiger.ee.up.ac.za)
-   
+
    With modifications by:
    (c) 1998, 1999 by Joerg Walter <trouble@moes.pmnet.uni-oldenburg.de>
    and

@@ -142,7 +142,7 @@ static int init(sh_video_t *sh){
 //    unsigned int outfmt=sh->codec->outfmt[sh->outfmtidx];
     int i, o_bih_len;
     vd_vfw_ctx *priv;
-  
+
     /* Hack for VSSH codec: new dll can't decode old files
      * In my samples old files have no extradata, so use that info
      * to decide what dll should be used (here and in vd_dshow).
@@ -171,7 +171,7 @@ static int init(sh_video_t *sh){
 //    sh->bih->biBitCount=32;
 
     o_bih_len = ICDecompressGetFormatSize(priv->handle, sh->bih);
-  
+
     if(o_bih_len < sizeof(BITMAPINFOHEADER)){
        mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressGetFormatSize returned a bogus value: %d\n", o_bih_len);
        return 0;
@@ -268,7 +268,7 @@ static int init(sh_video_t *sh){
 static void uninit(sh_video_t *sh){
     HRESULT ret;
     vd_vfw_ctx *priv = sh->context;
-    
+
 #ifdef BUILD_VFWEX
     ret = ICDecompressEndEx(priv->handle);
 #else
@@ -286,7 +286,7 @@ static void uninit(sh_video_t *sh){
 	mp_msg(MSGT_WIN32, MSGL_WARN, "ICClose failed: %ld\n", ret);
 	return;
     }
-    
+
     free(priv->o_bih);
     free(priv);
 }
@@ -299,9 +299,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(len<=0) return NULL; // skipped frame
 
-    mpi=mpcodecs_get_image(sh, 
+    mpi=mpcodecs_get_image(sh,
 	(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_STATIC) ?
-	MP_IMGTYPE_STATIC : MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_WIDTH, 
+	MP_IMGTYPE_STATIC : MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_WIDTH,
 	sh->disp_w, sh->disp_h);
     if(!mpi){	// temporary!
 	mp_msg(MSGT_DECVIDEO,MSGL_WARN,MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec);
@@ -315,9 +315,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     sh->bih->biSizeImage = len;
 
 #ifdef BUILD_VFWEX
-    ret = ICDecompressEx(priv->handle, 
+    ret = ICDecompressEx(priv->handle,
 #else
-    ret = ICDecompress(priv->handle, 
+    ret = ICDecompress(priv->handle,
 #endif
 	  ( (sh->ds->flags&1) ? 0 : ICDECOMPRESS_NOTKEYFRAME ) |
 	  ( ((flags&3)==2 && !(sh->ds->flags&1))?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ),
@@ -327,7 +327,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
       mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error decompressing frame, err=%ld\n",ret);
       return NULL;
     }
-    
+
     // export palette:
     if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
 	if (priv->palette)
@@ -339,6 +339,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	else
 	    mpi->planes[1]=NULL;
     }
-        
+
     return mpi;
 }

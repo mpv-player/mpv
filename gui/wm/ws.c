@@ -63,7 +63,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#undef ENABLE_DPMS 
+#undef ENABLE_DPMS
 
 typedef struct
 {
@@ -126,8 +126,8 @@ inline int wsSearch( Window win );
 
 typedef void(*wsTConvFunc)( const unsigned char * in_pixels, unsigned char * out_pixels, unsigned num_pixels );
 wsTConvFunc wsConvFunc = NULL;
-										
-void rgb32torgb32( const unsigned char * src, unsigned char * dst,unsigned int src_size )																					
+
+void rgb32torgb32( const unsigned char * src, unsigned char * dst,unsigned int src_size )
 { memcpy( dst,src,src_size ); }
 
 // ---
@@ -166,7 +166,7 @@ void wsWindowDecoration( wsTWindow * win,long d )
  if ( wsMotifHints == None ) return;
 
  memset( &wsMotifWmHints,0,sizeof( MotifWmHints ) );
- wsMotifWmHints.flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS; 
+ wsMotifWmHints.flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
  if ( d )
   {
    wsMotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE;
@@ -218,7 +218,7 @@ if(mDisplay){
 
 /* enable DND atoms */
 wsXDNDInitialize();
- 
+
 { /* on remote display XShm will be disabled - LGB */
  char *dispname=DisplayString(wsDisplay);
  int localdisp=1;
@@ -808,7 +808,7 @@ void wsFullScreen( wsTWindow * win )
 #ifdef ENABLE_DPMS
     wsScreenSaverOff( wsDisplay );
 #endif
-    
+
      vo_x11_ewmh_fullscreen( _NET_WM_STATE_ADD ); // adds fullscreen state if wm supports EWMH
    }
 
@@ -1290,7 +1290,7 @@ void wsSetIcon( Display * dsp,Window win,Pixmap icon,Pixmap mask )
  XWMHints * wm;
  long	    data[2];
  Atom	    iconatom;
- 
+
  wm=XGetWMHints( dsp,win );
  if ( !wm ) wm=XAllocWMHints();
 
@@ -1304,7 +1304,7 @@ void wsSetIcon( Display * dsp,Window win,Pixmap icon,Pixmap mask )
  data[1]=mask;
  iconatom=XInternAtom( dsp,"KWM_WIN_ICON",0 );
  XChangeProperty( dsp,win,iconatom,iconatom,32,PropModeReplace,(unsigned char *)data,2 );
- 
+
  XFree( wm );
 }
 

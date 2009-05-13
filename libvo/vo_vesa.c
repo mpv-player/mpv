@@ -74,7 +74,7 @@
 
 #define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
 	"VESA VBE 2.0 video output",
 	"vesa",
@@ -131,7 +131,7 @@ static vidix_grkey_t gr_key;
 /* Neomagic TV out */
 static int neomagic_tvout = 0;
 static int neomagic_tvnorm = NEO_PAL;
- 
+
 #define HAS_DGA()  (win.idx == -1)
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
 #define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_WRITEABLE)
@@ -147,7 +147,7 @@ static char * vbeErrToStr(int err)
   }
   else
   switch(err)
-  { 
+  {
     case VBE_OK: retval = "No error"; break;
     case VBE_VM86_FAIL: retval = "vm86() syscall failed"; break;
     case VBE_OUT_OF_DOS_MEM: retval = "Out of DOS memory"; break;
@@ -384,7 +384,7 @@ static void flip_page(void)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
 	mp_msg(MSGT_VO,MSGL_DBG3, "vo_vesa: flip_page was called\n");
-  if(flip_trigger) 
+  if(flip_trigger)
   {
     if(!HAS_DGA()) vbeCopyData(dga_buffer);
     flip_trigger = 0;
@@ -559,7 +559,7 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
 {
     unsigned pixclk;
     float H_freq;
-    
+
     range_t *monitor_hfreq = NULL;
     range_t *monitor_vfreq = NULL;
     range_t *monitor_dotclock = NULL;
@@ -567,43 +567,43 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
     monitor_hfreq = str2range(monitor_hfreq_str);
     monitor_vfreq = str2range(monitor_vfreq_str);
     monitor_dotclock = str2range(monitor_dotclock_str);
-    
+
 		if (!monitor_hfreq || !monitor_vfreq || !monitor_dotclock) {
 			mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor);
 			return 0;
 		}
 
     H_freq = range_max(monitor_hfreq)/1000;
-    
+
 //    printf("H_freq MAX %f\n",H_freq);
-    
+
     do
     {
     H_freq -= 0.01;
-    GTF_calcTimings(x,y,H_freq,GTF_HF,0, 0,crtc_pass);		      
-//    printf("PixelCLK %d\n",(unsigned)crtc_pass->PixelClock);    
+    GTF_calcTimings(x,y,H_freq,GTF_HF,0, 0,crtc_pass);
+//    printf("PixelCLK %d\n",(unsigned)crtc_pass->PixelClock);
     }
     while ( (!in_range(monitor_vfreq,crtc_pass->RefreshRate/100)||
 	    !in_range(monitor_hfreq,H_freq*1000))&&(H_freq>0));
-    
+
     pixclk = crtc_pass->PixelClock;
 //    printf("PIXclk before %d\n",pixclk);
-    vbeGetPixelClock(&mode,&pixclk); 
+    vbeGetPixelClock(&mode,&pixclk);
 //    printf("PIXclk after %d\n",pixclk);
     GTF_calcTimings(x,y,pixclk/1000000,GTF_PF,0,0,crtc_pass);
 //    printf("Flags: %x\n",(unsigned) crtc_pass->Flags);
-/*    
+/*
     printf("hTotal %d\n",crtc_pass->hTotal);
     printf("hSyncStart %d\n",crtc_pass->hSyncStart);
     printf("hSyncEnd %d\n",crtc_pass->hSyncEnd);
-    
+
     printf("vTotal %d\n",crtc_pass->vTotal);
     printf("vSyncStart %d\n",crtc_pass->vSyncStart);
     printf("vSyncEnd %d\n",crtc_pass->vSyncEnd);
-    
+
     printf("RR %d\n",crtc_pass->RefreshRate);
     printf("PixelCLK %d\n",(unsigned)crtc_pass->PixelClock);*/
-    
+
     if (!in_range(monitor_vfreq,crtc_pass->RefreshRate/100)||
 	!in_range(monitor_hfreq,H_freq*1000)) {
         mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_UnableToFitTheMode);
@@ -650,7 +650,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	{
 	  if(use_scaler) use_scaler = 2;
 	  else          fs_mode = 1;
-	} 
+	}
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
 	memcpy(vib.VESASignature,"VBE2",4);
 	if(!vib_set && (err=vbeGetControllerInfo(&vib)) != VBE_OK)
@@ -805,7 +805,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		      if(use_scaler > 1
 #ifdef CONFIG_VIDIX
 				|| vidix_name
-#endif			  
+#endif
 			  )
 		      {
 		        aspect_save_orig(width,height);
@@ -825,7 +825,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 #ifdef CONFIG_VIDIX
 		&& !vidix_name
 #endif
-		) 
+		)
 		{
 		    sws = sws_getContextFromCmdLine(srcW,srcH,srcFourcc,dstW,dstH,dstFourcc);
 		    if(!sws)
@@ -930,28 +930,28 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		{
 			PRINT_VBE_ERR("vbeSaveState",err);
 		}
-		
-		/* TODO: 
+
+		/* TODO:
 		         user might pass refresh value,
 			 GTF constants might be read from monitor
 			 for best results, I don't have a spec (RM)
 		*/
-		
+
 		if (((int)(vib.VESAVersion >> 8) & 0xff) > 2) {
-		
+
 		if (set_refresh(video_mode_info.XResolution,video_mode_info.YResolution,video_mode,&crtc_pass))
 		video_mode = video_mode | 0x800;
-		
+
 		}
-		
+
 		;
-		
+
 		if ((err=vbeSetMode(video_mode,&crtc_pass)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSetMode",err);
 			return -1;
 		}
-		
+
 		if (neomagic_tvout) {
 		    err = vbeSetTV(video_mode,neomagic_tvnorm);
 		    if (err!=0x4f) {
@@ -959,7 +959,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		    }
 		    else {
  		    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv);
-		    } 
+		    }
 		}
 		/* Now we are in video mode!!!*/
 		/* Below 'return -1' is impossible */
@@ -994,7 +994,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		  else mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingVidix);
 		  vidix_start();
 
-		  /* set colorkey */       
+		  /* set colorkey */
 		  if (vidix_grkey_support())
 		  {
 		    vidix_grkey_get(&gr_key);
@@ -1010,7 +1010,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 #endif
 			gr_key.ckey.op = CKEY_FALSE;
 		    vidix_grkey_set(&gr_key);
-		  }         
+		  }
 		  vidix_opened = 1;
 		}
 #endif
@@ -1115,7 +1115,7 @@ static int control(uint32_t request, void *data, ...)
     {
       va_list ap;
       int value;
-    
+
       va_start(ap, data);
       value = va_arg(ap, int);
       va_end(ap);
@@ -1126,7 +1126,7 @@ static int control(uint32_t request, void *data, ...)
     {
       va_list ap;
       int *value;
-    
+
       va_start(ap, data);
       value = va_arg(ap, int*);
       va_end(ap);

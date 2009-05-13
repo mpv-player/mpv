@@ -237,7 +237,7 @@ radio_step_channel <-1|1>
     'channels' radio parameter was set.
 
 radio_step_freq <value>
-    Tune frequency by the <value> (positive - up, negative - down). 
+    Tune frequency by the <value> (positive - up, negative - down).
 
 seek <value> [type]
     Seek to some place in the movie.
@@ -541,7 +541,7 @@ teletext_page      int       0       799     X   X   X
 teletext_subpage   int       0       64      X   X   X
 teletext_mode      flag      0       1       X   X   X    0 - off, 1 - on
 teletext_format    int       0       3       X   X   X    0 - opaque,
-                                                          1 - transparent, 
+                                                          1 - transparent,
                                                           2 - opaque inverted,
                                                           3 - transp. inv.
 teletext_half_page int       0       2       X   X   X    0 - off, 1 - top half,

@@ -38,9 +38,9 @@ const char *timer_name = "Darwin accurate";
 float sleep_accurate(float time_frame)
 {
 	uint64_t deadline = time_frame / timebase_ratio + mach_absolute_time();
-	
+
 	mach_wait_until(deadline);
-	
+
 	return (mach_absolute_time() - deadline) * timebase_ratio;
 }
 
@@ -67,10 +67,10 @@ unsigned int GetTimerMS(void)
 float GetRelativeTime(void)
 {
   double last_time = relative_time;
-  
+
   if (!relative_time)
     InitTimer();
-  
+
   relative_time = mach_absolute_time() * timebase_ratio;
 
   return (float)(relative_time-last_time);
@@ -82,9 +82,9 @@ void InitTimer(void)
   struct mach_timebase_info timebase;
 
   mach_timebase_info(&timebase);
-  timebase_ratio = (double)timebase.numer / (double)timebase.denom 
+  timebase_ratio = (double)timebase.numer / (double)timebase.denom
     * (double)1e-9;
-    
+
   relative_time = (double)(mach_absolute_time() * timebase_ratio);
 }
 
@@ -94,7 +94,7 @@ void InitTimer(void)
 int main(void) {
   int i,j, r, c = 200;
   long long t = 0;
-  
+
   InitTimer();
 
   for (i = 0; i < c; i++) {

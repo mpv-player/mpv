@@ -7,7 +7,7 @@
 #include "help_mp.h"
 #include "ad_internal.h"
 
-static ad_info_t info = 
+static ad_info_t info =
 {
 	"Uncompressed DVD/VOB LPCM audio decoder",
 	"dvdpcm",
@@ -40,7 +40,7 @@ static int init(sh_audio_t *sh)
 	  case 1:
 	    mp_msg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_SamplesWanted);
 	    sh->i_bps = sh->channels * sh->samplerate * 5 / 2;
-	  case 2: 
+	  case 2:
 	    sh->sample_format = AF_FORMAT_S24_BE;
 	    sh->samplesize = 3;
 	    break;
@@ -139,7 +139,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
       }
       len = j;
     }
-  } else 
+  } else
   len=demux_read_data(sh_audio->ds,buf,(minlen+3)&(~3));
   return len;
 }

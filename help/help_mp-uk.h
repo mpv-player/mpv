@@ -50,7 +50,7 @@ static const char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c: 
+// mplayer.c:
 #define MSGTR_Exiting "\nВиходимо...\n"
 #define MSGTR_ExitingHow "\nВиходимо... (%s)\n"
 #define MSGTR_Exit_quit "Вихід"
@@ -455,7 +455,7 @@ static const char help_text[]=
 "                 найкраща: CBR кодування, найвища якость\n"\
 "                 (320 kbps бітрейт)\n"\
 "                 <8-320>: ABR кодування з вказаним приблизним бітрейтом.\n\n"
-   
+
 // codec-cfg.c
 #define MSGTR_DuplicateFourcc "подвоєні FourCC"
 #define MSGTR_TooManyFourccs "забагато FourCCs/форматів..."
@@ -776,7 +776,7 @@ static const char help_text[]=
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Фатальна помилка!"
 #define MSGTR_MSGBOX_LABEL_Error "Помилка!"
-#define MSGTR_MSGBOX_LABEL_Warning "Попередження!" 
+#define MSGTR_MSGBOX_LABEL_Warning "Попередження!"
 
 // bitmap.c
 #define MSGTR_NotEnoughMemoryC32To1 "[c32to1] недостатньо пам'яті для картинки\n"

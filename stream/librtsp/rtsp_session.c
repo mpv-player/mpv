@@ -77,7 +77,7 @@ struct rtsp_session_s {
 };
 
 /*
- * closes an rtsp connection 
+ * closes an rtsp connection
  */
 
 static void rtsp_close(rtsp_t *s) {
@@ -96,7 +96,7 @@ static void rtsp_close(rtsp_t *s) {
   if (s->user_agent) free(s->user_agent);
   rtsp_free_answers(s);
   rtsp_unschedule_all(s);
-  free(s);  
+  free(s);
 }
 
 //rtsp_session_t *rtsp_session_start(char *mrl) {
@@ -112,7 +112,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
   rtsp_session->s = NULL;
   rtsp_session->real_session = NULL;
   rtsp_session->rtp_session = NULL;
- 
+
 //connect:
   *redir = 0;
 
@@ -164,7 +164,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
         return NULL;
       }
     }
-	
+
     rtsp_session->real_session = init_real_rtsp_session ();
     if(!strncmp(h->streams[0]->mime_type, "application/vnd.rn-rmadriver", h->streams[0]->mime_type_size) ||
        !strncmp(h->streams[0]->mime_type, "application/smil", h->streams[0]->mime_type_size)) {
@@ -239,12 +239,12 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host,
     }
   }
   free(server);
-  
+
   return rtsp_session;
 }
 
 int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
-  
+
   if (this->real_session) {
   int to_copy=len;
   char *dest=data;
@@ -257,7 +257,7 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
   if (len < 0) return 0;
   if (this->real_session->recv_size < 0) return -1;
   while (to_copy > fill) {
-    
+
     memcpy(dest, source, fill);
     to_copy -= fill;
     dest += fill;
@@ -278,7 +278,7 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
       return len-to_copy;
     }
   }
-  
+
   memcpy(dest, source, to_copy);
   this->real_session->recv_read += to_copy;
 
@@ -298,7 +298,7 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
 
     if (l == 0)
       rtsp_session_end (this);
-    
+
     return l;
   }
 

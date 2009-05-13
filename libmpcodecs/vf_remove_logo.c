@@ -23,7 +23,7 @@
 
 /**
  * \file vf_remove_logo.c
- * 
+ *
  * \brief Advanced blur-based logo removing filter.
 
  *     Hello and welcome. This code implements a filter to remove annoying TV
@@ -195,7 +195,7 @@ static void calculate_bounding_rectangle(int * posx1, int * posy1, int * posx2, 
   int x; /* Temporary variables to run  */
   int y; /* through each row or column. */
   int start_x;
-  int start_y; 
+  int start_y;
   int end_x = filter->width - 1;
   int end_y = filter->height - 1;
   int did_we_find_a_logo_pixel = 0;
@@ -318,7 +318,7 @@ static void initialize_masks(vf_instance_t * vf)
         if ((b * b) + (c * c) <= (a * a)) /* Circular 0/1 mask. */
           mask[a][b + a][c + a] = 1;
         else
-          mask[a][b + a][c + a] = 0; 
+          mask[a][b + a][c + a] = 0;
       }
     }
   }
@@ -766,7 +766,7 @@ static void convert_yv12(const vf_instance_t * const vf, const char * const sour
  */
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
-    
+
     dmpi=vf_get_image(vf->next,((vf_priv_s *)vf->priv)->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->w, mpi->h);

@@ -292,7 +292,7 @@ int dvd_sid_from_lang(stream_t *stream, unsigned char* lang) {
         return d->subtitles[i].id;
       }
     }
-    lang+=2; 
+    lang+=2;
     while (lang[0]==',' || lang[0]==' ') ++lang;
   }
   mp_msg(MSGT_OPEN,MSGL_WARN,MSGTR_DVDnoMatchingSubtitle);
@@ -313,11 +313,11 @@ static int dvd_next_cell(dvd_priv_t *d) {
   mp_msg(MSGT_DVD,MSGL_DBG2, "dvd_next_cell: next2=0x%X  \n",next_cell);
 
   ++next_cell;
-  if(next_cell>=d->last_cell) 
+  if(next_cell>=d->last_cell)
     return -1; // EOF
   if(d->cur_pgc->cell_playback[next_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK ) {
     next_cell+=dvd_angle;
-    if(next_cell>=d->last_cell) 
+    if(next_cell>=d->last_cell)
       return -1; // EOF
   }
   mp_msg(MSGT_DVD,MSGL_DBG2, "dvd_next_cell: next3=0x%X  \n",next_cell);
@@ -354,12 +354,12 @@ read_next:
     int next=dvd_next_cell(d);
     if(next>=0) {
       d->cur_cell=next;
-      // if( d->cur_pgc->cell_playback[d->cur_cell].block_type 
+      // if( d->cur_pgc->cell_playback[d->cur_cell].block_type
       // == BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle;
       d->cur_pack = d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
       d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;
       mp_msg(MSGT_DVD,MSGL_V, "DVD next cell: %d  pack: 0x%X-0x%X  \n",d->cur_cell,d->cur_pack,d->cell_last_pack);
-    } else 
+    } else
         return -1; // EOF
   }
 
@@ -702,10 +702,10 @@ static int dvd_seek_to_time(stream_t *stream, ifo_handle_t *vts_file, double sec
     return 1;
 }
 
-static int control(stream_t *stream,int cmd,void* arg) 
+static int control(stream_t *stream,int cmd,void* arg)
 {
     dvd_priv_t *d = stream->priv;
-    switch(cmd) 
+    switch(cmd)
     {
         case STREAM_CTRL_GET_TIME_LENGTH:
         {
@@ -715,7 +715,7 @@ static int control(stream_t *stream,int cmd,void* arg)
         case STREAM_CTRL_GET_NUM_CHAPTERS:
         {
             if(! d->cur_pgc->nr_of_programs) return STREAM_UNSUPPORTED;
-            *((unsigned int *)arg) = d->cur_pgc->nr_of_programs; 
+            *((unsigned int *)arg) = d->cur_pgc->nr_of_programs;
             return 1;
         }
         case STREAM_CTRL_SEEK_TO_CHAPTER:
@@ -1051,7 +1051,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     d->angle_seek=0;
       d->last_cell=d->cur_pgc->nr_of_cells;
 
-    if(d->cur_pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK ) 
+    if(d->cur_pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK )
       d->cur_cell+=dvd_angle;
     d->cur_pack = d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
     d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;

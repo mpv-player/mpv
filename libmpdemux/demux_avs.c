@@ -54,7 +54,7 @@ typedef WINAPI AVS_Clip* (*imp_avs_take_clip)(AVS_Value, AVS_ScriptEnvironment *
 typedef WINAPI void (*imp_avs_release_clip)(AVS_Clip *);
 typedef WINAPI AVS_VideoFrame* (*imp_avs_get_frame)(AVS_Clip *, int n);
 typedef WINAPI void (*imp_avs_release_video_frame)(AVS_VideoFrame *);
-typedef WINAPI int (*imp_avs_get_audio)(AVS_Clip *, void * buf, uint64_t start, uint64_t count); 
+typedef WINAPI int (*imp_avs_get_audio)(AVS_Clip *, void * buf, uint64_t start, uint64_t count);
 
 #define Q(string) # string
 #define IMPORT_FUNC(x) \
@@ -74,7 +74,7 @@ typedef struct tagAVS
     int frameno;
     uint64_t sampleno;
     int init;
-    
+
     imp_avs_create_script_environment avs_create_script_environment;
     imp_avs_invoke avs_invoke;
     imp_avs_get_video_info avs_get_video_info;
@@ -86,24 +86,24 @@ typedef struct tagAVS
 } AVS_T;
 
 AVS_T *initAVS(const char *filename)
-{   
+{
     AVS_T *AVS = malloc (sizeof(AVS_T));
     AVS_Value arg0 = avs_new_value_string(filename);
     AVS_Value args = avs_new_value_array(&arg0, 1);
-    
+
     memset(AVS, 0, sizeof(AVS_T));
 
 #ifdef WIN32_LOADER
     AVS->ldt_fs = Setup_LDT_Keeper();
 #endif
-    
+
     AVS->dll = LoadLibraryA("avisynth.dll");
     if(!AVS->dll)
     {
         mp_msg(MSGT_DEMUX ,MSGL_V, "AVS: failed to load avisynth.dll\n");
         goto avs_err;
     }
-    
+
     /* Dynamic import of needed stuff from avisynth.dll */
     IMPORT_FUNC(avs_create_script_environment);
     IMPORT_FUNC(avs_invoke);
@@ -113,17 +113,17 @@ AVS_T *initAVS(const char *filename)
     IMPORT_FUNC(avs_get_frame);
     IMPORT_FUNC(avs_release_video_frame);
     IMPORT_FUNC(avs_get_audio);
-    
+
     AVS->avs_env = AVS->avs_create_script_environment(AVISYNTH_INTERFACE_VERSION);
     if (!AVS->avs_env)
     {
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_create_script_environment failed\n");
         goto avs_err;
     }
-    
+
 
     AVS->handler = AVS->avs_invoke(AVS->avs_env, "Import", args, 0);
-    
+
     if (avs_is_error(AVS->handler))
     {
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Avisynth error: %s\n", avs_as_string(AVS->handler));
@@ -135,7 +135,7 @@ AVS_T *initAVS(const char *filename)
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Avisynth doesn't return a clip\n");
         goto avs_err;
     }
-    
+
     return AVS;
 
 avs_err:
@@ -156,7 +156,7 @@ static __inline int get_mmioFOURCC(const AVS_VideoInfo *v)
     if (avs_is_rgb32(v)) return mmioFOURCC(32, 'R', 'G', 'B');
     if (avs_is_yv12(v)) return mmioFOURCC('Y', 'V', '1', '2');
     if (avs_is_yuy(v)) return mmioFOURCC('Y', 'U', 'Y', ' ');
-    if (avs_is_yuy2(v)) return mmioFOURCC('Y', 'U', 'Y', '2');    
+    if (avs_is_yuy2(v)) return mmioFOURCC('Y', 'U', 'Y', '2');
     return 0;
 }
 #endif
@@ -202,7 +202,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         AVS->frameno++;
         AVS->avs_release_video_frame(curr_frame);
     }
-    
+
     /* Audio */
     if (ds == demuxer->audio)
     {
@@ -218,7 +218,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         }
         dp = new_demux_packet(l);
         dp->pts = AVS->sampleno / sh_audio->samplerate;
-        
+
         if (AVS->avs_get_audio(AVS->clip, dp->buffer, AVS->sampleno, samples))
         {
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_get_audio() failed\n");
@@ -228,7 +228,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
         AVS->sampleno += samples;
     }
-    
+
     return 1;
 }
 
@@ -256,7 +256,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_get_video_info() call failed\n");
         return NULL;
     }
-    
+
     if (!avs_is_yv12(AVS->video_info))
     {
         AVS->handler = AVS->avs_invoke(AVS->avs_env, "ConvertToYV12", avs_new_value_array(&AVS->handler, 1), 0);
@@ -265,9 +265,9 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Cannot convert input video to YV12: %s\n", avs_as_string(AVS->handler));
             return NULL;
         }
-        
+
         AVS->clip = AVS->avs_take_clip(AVS->handler, AVS->avs_env);
-        
+
         if(!AVS->clip)
         {
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_take_clip() failed\n");
@@ -281,39 +281,39 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
             return NULL;
         }
     }
-    
+
     // TODO check field-based ??
 
-    /* Video */  
+    /* Video */
     if (avs_has_video(AVS->video_info))
     {
         sh_video_t *sh_video = new_sh_video(demuxer, 0);
         found = 1;
-        
+
         if (demuxer->video->id == -1) demuxer->video->id = 0;
         if (demuxer->video->id == 0)
         demuxer->video->sh = sh_video;
         sh_video->ds = demuxer->video;
-        
+
         sh_video->disp_w = AVS->video_info->width;
         sh_video->disp_h = AVS->video_info->height;
-        
+
         //sh_video->format = get_mmioFOURCC(AVS->video_info);
         sh_video->format = mmioFOURCC('Y', 'V', '1', '2');
         sh_video->fps = (double) AVS->video_info->fps_numerator / (double) AVS->video_info->fps_denominator;
         sh_video->frametime = 1.0 / sh_video->fps;
-        
+
         sh_video->bih = malloc(sizeof(BITMAPINFOHEADER) + (256 * 4));
         sh_video->bih->biCompression = sh_video->format;
         sh_video->bih->biBitCount = avs_bits_per_pixel(AVS->video_info);
         //sh_video->bih->biPlanes = 2;
-        
+
         sh_video->bih->biWidth = AVS->video_info->width;
         sh_video->bih->biHeight = AVS->video_info->height;
         sh_video->num_frames = 0;
         sh_video->num_frames_decoded = 0;
     }
-    
+
     /* Audio */
     if (avs_has_audio(AVS->video_info))
       switch (AVS->video_info->sample_type) {
@@ -335,7 +335,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
         if (demuxer->audio->id == 0)
         demuxer->audio->sh = sh_audio;
         sh_audio->ds = demuxer->audio;
-        
+
         sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
         sh_audio->wf->wFormatTag = sh_audio->format =
             (AVS->video_info->sample_type == AVS_SAMPLE_FLOAT) ? 0x3 : 0x1;
@@ -357,7 +357,7 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
 }
 
 static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
-{   
+{
     sh_video_t *sh_video=demuxer->video->sh;
     sh_audio_t *sh_audio=demuxer->audio->sh;
     AVS_T *AVS = demuxer->priv;
@@ -416,15 +416,15 @@ static void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs, float audio_
     double duration = sh_video ?
                       (double)AVS->video_info->num_frames / sh_video->fps :
                       (double)AVS->video_info->num_audio_samples / sh_audio->samplerate;
-    
+
     //mp_msg(MSGT_DEMUX, MSGL_V, "AVS: seek rel_seek_secs = %f - flags = %x\n", rel_seek_secs, flags);
-    
+
     if (flags&SEEK_ABSOLUTE) video_pos=0;
     if (flags&SEEK_FACTOR) rel_seek_secs *= duration;
 
     video_pos += rel_seek_secs;
     if (video_pos < 0) video_pos = 0;
-        
+
     if (sh_video) {
       AVS->frameno = FFMIN(video_pos * sh_video->fps,
                            AVS->video_info->num_frames);
@@ -443,16 +443,16 @@ static int avs_check_file(demuxer_t *demuxer)
     mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_check_file - attempting to open file %s\n", demuxer->filename);
 
     if (!demuxer->filename) return 0;
-    
+
     /* Avoid crazy memory eating when passing an mpg stream */
     if (demuxer->movi_end > MAX_AVS_SIZE)
     {
         mp_msg(MSGT_DEMUX,MSGL_V, "AVS: File is too big, aborting...\n");
         return 0;
     }
-    
+
     demuxer->priv = initAVS(demuxer->filename);
-    
+
     if (demuxer->priv)
     {
         mp_msg(MSGT_DEMUX,MSGL_V, "AVS: Init Ok\n");

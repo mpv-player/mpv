@@ -1494,7 +1494,7 @@ static void set_hue(uint8_t hue)
 VDXDriver sis_drv = {
   "sis",
   NULL,
-    
+
   .probe = sis_probe,
   .get_caps = sis_get_caps,
   .query_fourcc = sis_query_fourcc,

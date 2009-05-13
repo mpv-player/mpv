@@ -82,7 +82,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
     else {
       int num = s->muxer->muxbuf_num++;
       muxbuf_t *buf, *tmp;
-      
+
       tmp = realloc_struct(s->muxer->muxbuf, (num+1), sizeof(muxbuf_t));
       if(!tmp) {
         mp_msg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufReallocErr);
@@ -90,7 +90,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
       }
       s->muxer->muxbuf = tmp;
       buf = s->muxer->muxbuf + num;
-      
+
       /* buffer this frame */
       buf->stream = s;
       buf->dts= dts;
@@ -110,47 +110,47 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
       for (num = 0; s->muxer->streams[num]; ++num)
         if (!s->muxer->streams[num]->muxbuf_seen)
           s->muxer->muxbuf_skip_buffer = 0;
-      
+
       /* see if we can flush buffer now */
       if (s->muxer->muxbuf_skip_buffer) {
         mp_msg(MSGT_MUXER, MSGL_V, MSGTR_MuxbufSending, s->muxer->muxbuf_num);
-        
+
         /* fix parameters for all streams */
         for (num = 0; s->muxer->streams[num]; ++num) {
           muxer_stream_t *str = s->muxer->streams[num];
           if(str->muxer->fix_stream_parameters)
             muxer_stream_fix_parameters(str->muxer, str);
         }
-        
+
         /* write header */
         if (s->muxer->cont_write_header)
           muxer_write_header(s->muxer);
-        
+
         /* send all buffered frames to muxer */
         for (num = 0; num < s->muxer->muxbuf_num; ++num) {
           muxbuf_t tmp_buf;
           buf = s->muxer->muxbuf + num;
           s = buf->stream;
-          
+
           /* 1. save timer and buffer (might have changed by now) */
           tmp_buf.dts = s->timer;
           tmp_buf.buffer = s->buffer;
-          
+
           /* 2. move stored timer and buffer into stream and mux it */
           s->timer = buf->dts;
           s->buffer = buf->buffer;
           s->muxer->cont_write_chunk(s, buf->len, buf->flags, buf->dts, buf->pts);
-          
+
           /* 3. restore saved timer and buffer */
           s->timer = tmp_buf.dts;
           s->buffer = tmp_buf.buffer;
         }
-        
+
         free(s->muxer->muxbuf);
         s->muxer->muxbuf_num = 0;
       }
     }
-    
+
     /* this code moved directly from muxer_avi.c */
     // alter counters:
     if(s->h.dwSampleSize){
@@ -163,7 +163,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
     }
     s->timer=(double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
     s->size+=len;
-    
+
     return;
 }
 

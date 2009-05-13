@@ -31,7 +31,7 @@ static unsigned int getfmt(unsigned int outfmt){
     case IMGFMT_ABGR:
 	return outfmt;
     }
-    return 0;    
+    return 0;
 }
 
 static void put_pixel(uint8_t *buf, int x, int y, int stride, int r, int g, int b, int fmt){
@@ -44,7 +44,7 @@ static void put_pixel(uint8_t *buf, int x, int y, int stride, int r, int g, int 
     break;
     case IMGFMT_RGB16: ((uint16_t*)(buf + y*stride))[x]= ((b>>3)<<11) | ((g>>2)<<5) | (r>>3);
     break;
-    case IMGFMT_RGB24: 
+    case IMGFMT_RGB24:
         buf[3*x + y*stride + 0]= r;
         buf[3*x + y*stride + 1]= g;
         buf[3*x + y*stride + 2]= b;
@@ -102,11 +102,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
          for(x=0; x<w; x++){
              int c= 256*x/w;
              int r=0,g=0,b=0;
-             
+
              if(3*y<h)        r=c;
              else if(3*y<2*h) g=c;
              else                  b=c;
-             
+
              put_pixel(dmpi->planes[0], x, y, dmpi->stride[0], r, g, b, vf->priv->fmt);
          }
      }

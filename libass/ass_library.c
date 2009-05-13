@@ -62,13 +62,13 @@ void ass_set_style_overrides(ass_library_t* priv, char** list)
 	char** p;
 	char** q;
 	int cnt;
-	
+
 	if (priv->style_overrides) {
 		for (p = priv->style_overrides; *p; ++p)
 			free(*p);
 		free(priv->style_overrides);
 	}
-	
+
 	if (!list) return;
 
 	for (p = list, cnt = 0; *p; ++p, ++cnt) {}
@@ -91,14 +91,14 @@ void ass_add_font(ass_library_t* priv, char* name, char* data, int size)
 	if (!name || !data || !size)
 		return;
 	grow_array((void**)&priv->fontdata, priv->num_fontdata, sizeof(*priv->fontdata));
-	
+
 	priv->fontdata[idx].name = strdup(name);
-	
+
 	priv->fontdata[idx].data = malloc(size);
 	memcpy(priv->fontdata[idx].data, data, size);
-	
+
 	priv->fontdata[idx].size = size;
-	
+
 	priv->num_fontdata ++;
 }
 

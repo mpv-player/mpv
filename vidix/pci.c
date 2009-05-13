@@ -8,7 +8,7 @@
  *
  *  purpose:          This program will scan for and print details of
  *                    devices on the PCI bus.
- 
+
  *  author:           Robin Cutshaw (robin@xfree86.org)
  *
  *  supported O/S's:  SVR4, UnixWare, SCO, Solaris,
@@ -24,9 +24,9 @@
  *                        and link with PharLap or other dos extender for exe
  *
  */
- 
+
 /* $XFree86: xc/programs/Xserver/hw/xfree86/etc/scanpci.c,v 3.34.2.17 1998/11/10 11:55:40 dawes Exp $ */
- 
+
 /*
  * Copyright 1995 by Robin Cutshaw <robin@XFree86.Org>
  *
@@ -50,7 +50,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
- 
+
 #include "dha.h"
 #include <errno.h>
 #include <string.h>
@@ -100,23 +100,23 @@
  * to change too much code
  */
 #include <smem.h>
- 
+
 static unsigned char *pciConfBase;
- 
+
 static __inline__ unsigned long
 static swapl(unsigned long val)
 {
 	unsigned char *p = (unsigned char *)&val;
 	return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | (p[0] << 0);
 }
- 
- 
+
+
 #define BUS(tag) (((tag)>>16)&0xff)
 #define DFN(tag) (((tag)>>8)&0xff)
- 
+
 #define PCIBIOS_DEVICE_NOT_FOUND	0x86
 #define PCIBIOS_SUCCESSFUL		0x00
- 
+
 int pciconfig_read(
           unsigned char bus,
           unsigned char dev,
@@ -126,7 +126,7 @@ int pciconfig_read(
 {
 	unsigned long _val;
 	unsigned long *ptr;
- 
+
 	dev >>= 3;
 	if (bus || dev >= 16) {
 		*val = 0xFFFFFFFF;
@@ -138,7 +138,7 @@ int pciconfig_read(
 	*val = _val;
 	return PCIBIOS_SUCCESSFUL;
 }
- 
+
 int pciconfig_write(
           unsigned char bus,
           unsigned char dev,
@@ -148,7 +148,7 @@ int pciconfig_write(
 {
 	unsigned long _val;
 	unsigned long *ptr;
- 
+
 	dev >>= 3;
 	_val = swapl(val);
 	if (bus || dev >= 16) {
@@ -160,7 +160,7 @@ int pciconfig_write(
 	return PCIBIOS_SUCCESSFUL;
 }
 #endif /* defined(Lynx) && defined(__powerpc__) */
- 
+
 #if !defined(__powerpc__)
 struct pci_config_reg {
     /* start of official PCI config space header */
@@ -361,19 +361,19 @@ struct pci_config_reg {
 /* ?? */
 	struct {
 	    unsigned long bg_rsrvd[2];
- 
+
 	    unsigned char secondary_latency_timer;
 	    unsigned char subordinate_bus_number;
 	    unsigned char secondary_bus_number;
 	    unsigned char primary_bus_number;
- 
+
 	    unsigned short secondary_status;
 	    unsigned char io_limit;
 	    unsigned char io_base;
- 
+
 	    unsigned short mem_limit;
 	    unsigned short mem_base;
- 
+
 	    unsigned short prefetch_mem_limit;
 	    unsigned short prefetch_mem_base;
 	} bg;
@@ -449,19 +449,19 @@ struct pci_config_reg {
 #define PCI_MAP_ROM_REG         0x30
 #define PCI_INTERRUPT_REG       0x3C
 #define PCI_REG_USERCONFIG      0x40
- 
+
 static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 /*static struct pci_device *pcidev=NULL ;*/
- 
+
 #if defined(__alpha__)
 #define PCI_EN 0x00000000
 #else
 #define PCI_EN 0x80000000
 #endif
- 
+
 #define	PCI_MODE1_ADDRESS_REG		0xCF8
 #define	PCI_MODE1_DATA_REG		0xCFC
- 
+
 #define	PCI_MODE2_ENABLE_REG		0xCF8
 #ifdef PC98
 #define	PCI_MODE2_FORWARD_REG		0xCF9
@@ -487,14 +487,14 @@ static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 #include "sysdep/pci_x86.c"
 #endif
 #endif /*CONFIG_SVGAHELPER */
- 
+
 static pciinfo_t *pci_lst;
- 
+
 static void identify_card(struct pci_config_reg *pcr, int idx)
 {
-  /* local overflow test */ 
+  /* local overflow test */
   if (idx>=MAX_PCI_DEVICES) return ;
- 
+
   pci_lst[idx].bus     = pcibus ;
   pci_lst[idx].card    = pcicard ;
   pci_lst[idx].func    = pcifunc ;
@@ -525,30 +525,30 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 #endif
     int func, hostbridges=0;
     int ret = -1;
-    
+
     pci_lst = pci_list;
     *num_pci = 0;
- 
+
     ret = enable_os_io();
     if (ret != 0)
 	return ret;
 
     if((pcr._configtype = pci_config_type()) == 0xFFFF) return ENODEV;
- 
+
     /* Try pci config 1 probe first */
- 
+
     if ((pcr._configtype == 1) || do_mode1_scan) {
     /*printf("\nPCI probing configuration type 1\n");*/
- 
+
     pcr._ioaddr = 0xFFFF;
- 
+
     pcr._pcibuses[0] = 0;
     pcr._pcinumbus = 1;
     pcr._pcibusidx = 0;
- 
+
     do {
         /*printf("Probing for devices on PCI bus %d:\n\n", pcr._pcibusidx);*/
- 
+
         for (pcr._cardnum = 0x0; pcr._cardnum < MAX_PCI_DEVICES_PER_BUS;
 		pcr._cardnum += 0x1) {
 	  func = 0;
@@ -557,14 +557,14 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 						func);
             if ((pcr._vendor == 0xFFFF) || (pcr._device == 0xFFFF))
                 break;   /* nothing there */
- 
+
 	    /*printf("\npci bus 0x%x cardnum 0x%02x function 0x%04x: vendor 0x%04x device 0x%04x\n",
 	        pcr._pcibuses[pcr._pcibusidx], pcr._cardnum, func,
 		pcr._vendor, pcr._device);*/
 	    pcibus = pcr._pcibuses[pcr._pcibusidx];
 	    pcicard = pcr._cardnum;
 	    pcifunc = func;
- 
+
 	    pcr._status_command = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
 					pcr._cardnum,func,PCI_CMD_STAT_REG);
 	    pcr._class_revision = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
@@ -615,10 +615,10 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 	    } else {
 	        func++;
 	    }
- 
+
 	    if (idx++ >= MAX_PCI_DEVICES)
 	        continue;
- 
+
 	    identify_card(&pcr, (*num_pci)++);
 	  } while( func < 8 );
         }
@@ -627,35 +627,35 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 
 #if !defined(__alpha__) && !defined(__powerpc__) && !defined(__sh__)
     /* Now try pci config 2 probe (deprecated) */
- 
+
     if ((pcr._configtype == 2) || do_mode2_scan) {
     outb(PCI_MODE2_ENABLE_REG, 0xF1);
     outb(PCI_MODE2_FORWARD_REG, 0x00); /* bus 0 for now */
- 
+
     /*printf("\nPCI probing configuration type 2\n");*/
- 
+
     pcr._pcibuses[0] = 0;
     pcr._pcinumbus = 1;
     pcr._pcibusidx = 0;
     idx = 0;
- 
+
     do {
         for (pcr._ioaddr = 0xC000; pcr._ioaddr < 0xD000; pcr._ioaddr += 0x0100){
 	    outb(PCI_MODE2_FORWARD_REG, pcr._pcibuses[pcr._pcibusidx]); /* bus 0 for now */
             pcr._device_vendor = inl(pcr._ioaddr);
 	    outb(PCI_MODE2_FORWARD_REG, 0x00); /* bus 0 for now */
- 
+
             if ((pcr._vendor == 0xFFFF) || (pcr._device == 0xFFFF))
                 continue;
             if ((pcr._vendor == 0xF0F0) || (pcr._device == 0xF0F0))
                 continue;  /* catch ASUS P55TP4XE motherboards */
- 
+
 	    /*printf("\npci bus 0x%x slot at 0x%04x, vendor 0x%04x device 0x%04x\n",
 	        pcr._pcibuses[pcr._pcibusidx], pcr._ioaddr, pcr._vendor,
                 pcr._device);*/
 	    pcibus = pcr._pcibuses[pcr._pcibusidx] ;
 	    pcicard = pcr._ioaddr ; pcifunc = 0 ;
- 
+
 	    outb(PCI_MODE2_FORWARD_REG, pcr._pcibuses[pcr._pcibusidx]); /* bus 0 for now */
             pcr._status_command = inl(pcr._ioaddr + 0x04);
             pcr._class_revision = inl(pcr._ioaddr + 0x08);
@@ -670,28 +670,28 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
             pcr._max_min_ipin_iline = inl(pcr._ioaddr + 0x3C);
             pcr._user_config = inl(pcr._ioaddr + 0x40);
 	    outb(PCI_MODE2_FORWARD_REG, 0x00); /* bus 0 for now */
- 
+
             /* check for pci-pci bridges (currently we only know Digital) */
             if ((pcr._vendor == 0x1011) && (pcr._device == 0x0001))
                 if (pcr._secondary_bus_number > 0)
                     pcr._pcibuses[pcr._pcinumbus++] = pcr._secondary_bus_number;
- 
+
 	    if (idx++ >= MAX_PCI_DEVICES)
 	        continue;
- 
+
 	    identify_card(&pcr, (*num_pci)++);
 	}
     } while (++pcr._pcibusidx < pcr._pcinumbus);
- 
+
     outb(PCI_MODE2_ENABLE_REG, 0x00);
     }
- 
+
 #endif /* !__alpha__ && !__powerpc__ && !__sh__ */
- 
+
     disable_os_io();
- 
+
     return 0 ;
- 
+
 }
 
 #if !defined(ENOTSUP)
@@ -706,13 +706,13 @@ int pci_config_read(unsigned char bus, unsigned char dev, unsigned char func,
 		    unsigned char cmd, int len, unsigned long *val)
 {
     int ret;
-    
+
     if (len != 4)
     {
 	fprintf(stderr,"pci_config_read: Reading non-dword not supported!\n");
 	return ENOTSUP;
     }
-    
+
     ret = enable_os_io();
     if (ret != 0)
 	return ret;
@@ -725,7 +725,7 @@ int pci_config_read(unsigned char bus, unsigned char dev, unsigned char func,
 
 int enable_app_io( void )
 {
-  return enable_os_io();  
+  return enable_os_io();
 }
 
 int disable_app_io( void )

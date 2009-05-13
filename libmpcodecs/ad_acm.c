@@ -11,7 +11,7 @@
 #include "ad_internal.h"
 #include "osdep/timer.h"
 
-static ad_info_t info = 
+static ad_info_t info =
 {
 	"Win32/ACM decoders",
 	"acm",
@@ -46,12 +46,12 @@ static int preinit(sh_audio_t *sh_audio)
     WAVEFORMATEX *in_fmt = sh_audio->wf;
     DWORD srcsize = 0;
     acm_context_t *priv;
-    
+
     priv = malloc(sizeof(acm_context_t));
     if (!priv)
 	return 0;
     sh_audio->context = priv;
-    
+
     mp_msg(MSGT_WIN32, MSGL_V, "======= Win32 (ACM) AUDIO Codec init =======\n");
 
 //    priv->handle = NULL;
@@ -71,7 +71,7 @@ static int preinit(sh_audio_t *sh_audio)
     priv->o_wf->wBitsPerSample = 16;
 //    priv->o_wf->wBitsPerSample = inf_fmt->wBitsPerSample;
     priv->o_wf->cbSize = 0;
-    
+
     if ( mp_msg_test(MSGT_DECAUDIO,MSGL_V) )
     {
 	mp_msg(MSGT_DECAUDIO, MSGL_V, "Input format:\n");
@@ -94,7 +94,7 @@ static int preinit(sh_audio_t *sh_audio)
 	return 0;
     }
     mp_msg(MSGT_WIN32, MSGL_V, "Audio codec opened OK! ;-)\n");
-    
+
     acmStreamSize(priv->handle, in_fmt->nBlockAlign, &srcsize, ACM_STREAMSIZEF_SOURCE);
     //if ( mp_msg_test(MSGT_DECAUDIO,MSGL_V) ) printf("Audio ACM output buffer min. size: %ld (reported by codec)\n", srcsize);
     srcsize *= 2;
@@ -122,7 +122,7 @@ static int preinit(sh_audio_t *sh_audio)
     mp_msg(MSGT_WIN32,MSGL_V,"Audio ACM input buffer min. size: %ld\n",srcsize);
 
     sh_audio->audio_in_minsize=2*srcsize; // audio input min. size
-    
+
     sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
     sh_audio->channels=priv->o_wf->nChannels;
     sh_audio->samplerate=priv->o_wf->nSamplesPerSec;
@@ -136,10 +136,10 @@ static void uninit(sh_audio_t *sh)
 {
     HRESULT ret;
     acm_context_t *priv = sh->context;
-    
+
 retry:
     ret = acmStreamClose(priv->handle, 0);
-    
+
     if (ret)
     switch(ret)
     {
@@ -155,7 +155,7 @@ retry:
 	    mp_msg(MSGT_WIN32, MSGL_WARN, "ACM_Decoder: unknown error occurred: %ld\n", ret);
 	    return;
     }
-    
+
     MSACM_UnregisterAllDrivers();
 
     free(priv->o_wf);
@@ -207,7 +207,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     memset(&ash, 0, sizeof(ash));
     ash.cbStruct=sizeof(ash);
     ash.fdwStatus=0;
-    ash.dwUser=0; 
+    ash.dwUser=0;
     ash.pbSrc=sh_audio->a_in_buffer;
     ash.cbSrcLength=sh_audio->a_in_buffer_len;
     ash.pbDst=buf;

@@ -61,7 +61,7 @@
 #define Y4M_SAR_MPEG1_4  { 10000, 7615 }
 #define Y4M_SAR_MPEG1_5  { 10000, 8055 }
 #define Y4M_SAR_MPEG1_6  { 10000, 8437 } /* Anamorphic 16:9 NTSC */
-#define Y4M_SAR_MPEG1_7  { 10000, 8935 } 
+#define Y4M_SAR_MPEG1_7  { 10000, 8935 }
 #define Y4M_SAR_MPEG1_8  { 10000, 9375 } /* PAL/SECAM 4:3 */
 #define Y4M_SAR_MPEG1_9  { 10000, 9815 }
 #define Y4M_SAR_MPEG1_10 { 10000, 10255 }

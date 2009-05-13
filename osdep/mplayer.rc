@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <winver.h>   
+#include <winver.h>
 #include "version.h"
 
 1 VERSIONINFO
@@ -27,8 +27,8 @@ PRODUCTVERSION 0,0,9,0
 FILEOS VOS__WINDOWS32
 FILETYPE VFT_APP
 {
-    BLOCK "StringFileInfo" 
-    {  
+    BLOCK "StringFileInfo"
+    {
 	    BLOCK "000004b0" // LANG_NEUTRAL,UNICODE_CP
         {
 		    VALUE "Comments","MPlayer is distributed under the terms of the GNU General Public License Version 2. Source code is available at http://www.mplayerhq.hu\000"
@@ -44,7 +44,7 @@ FILETYPE VFT_APP
             //VALUE "SpecialBuild","\000"
         }
     }
-    BLOCK "VarFileInfo"  
+    BLOCK "VarFileInfo"
     {
 	    VALUE "Translation",0,0x04b0
     }

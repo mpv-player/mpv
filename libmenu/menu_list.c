@@ -87,7 +87,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
     if(m) mpriv->current = m;
     else ptr_l = 0;
   }
-  
+
   for(i = 0, m = mpriv->menu ; m ; m = m->next, i++) {
     int ll;
     if(m->hide) continue;
@@ -101,7 +101,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
     x += mpriv->minb;
   if(y > 0)
     y += mpriv->minb;
-  else 
+  else
     y = mpriv->minb;
 
   need_h = count * line_h - mpriv->vspace;
@@ -151,7 +151,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
 			MENU_TEXT_TOP|(x < 0 ? MENU_TEXT_HCENTER :MENU_TEXT_LEFT));
     dy += th;
   }
-  
+
   dx = x < 0 ? (mpi->w - need_w) / 2 : x;
   bx = x < 0 ? (mpi->w - bg_w) / 2 : x - mpriv->minb;
 
@@ -273,7 +273,7 @@ void menu_list_read_cmd(menu_t* menu,int cmd) {
         mouse_y >= selection_y && mouse_y < selection_y + selection_h)
       menu_read_cmd(menu, MENU_CMD_OK);
     break;
-  }    
+  }
 }
 
 int menu_list_jump_to_key(menu_t* menu,int c) {
@@ -311,7 +311,7 @@ void menu_list_add_entry(menu_t* menu,list_entry_t* entry) {
   l->next = entry;
   entry->prev = l;
 }
-    
+
 void menu_list_init(menu_t* menu) {
   if(!mpriv)
     mpriv = calloc(1,sizeof(struct menu_priv_s));
@@ -328,7 +328,7 @@ void menu_list_uninit(menu_t* menu,free_entry_t free_func) {
     free_func(i);
     i = j;
   }
-  
+
   mpriv->menu = mpriv->current = NULL;
 
 }

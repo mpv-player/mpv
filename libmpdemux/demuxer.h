@@ -190,7 +190,7 @@ typedef struct demuxers_desc_st {
   int safe_check; ///< If 1 detection is safe and fast, do it before file extension check
 
   /// Check if can demux the file, return DEMUXER_TYPE_xxx on success
-  int (*check_file)(struct demuxer_st *demuxer); ///< Mandatory if safe_check == 1, else optional 
+  int (*check_file)(struct demuxer_st *demuxer); ///< Mandatory if safe_check == 1, else optional
   /// Get packets from file, return 0 on eof
   int (*fill_buffer)(struct demuxer_st *demuxer, demux_stream_t *ds); ///< Mandatory
   /// Open the demuxer, return demuxer on success, NULL on failure
@@ -242,7 +242,7 @@ typedef struct demuxer_st {
 
   demux_chapter_t* chapters;
   int num_chapters;
-  
+
   demux_attachment_t* attachments;
   int num_attachments;
 

@@ -101,7 +101,7 @@ Group:          Applications/Multimedia
 Requires:       mplayer = %{version}-%{release}
 
 %description -n mencoder
-This package contains the MPlayer movie encoder. 
+This package contains the MPlayer movie encoder.
 
 %package        doc
 Summary:        MPlayer documentation in various languages
@@ -221,7 +221,7 @@ mv -f mplayer gmplayer
 
 %{__make}
 
-# build HTML documentation from XML files 
+# build HTML documentation from XML files
 pushd DOCS/xml
 %{__make} html-chunked
 popd

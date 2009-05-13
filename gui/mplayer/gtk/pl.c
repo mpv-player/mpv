@@ -153,7 +153,7 @@ void ShowPlayList( void )
      pos=strtok( NULL,"/" );
      gtk_ctree_get_node_info( GTK_CTREE( CTDirTree ),node,NULL,NULL,NULL,NULL,NULL,NULL,&leaf,NULL );
      if ( !leaf && pos ) gtk_ctree_expand( GTK_CTREE( CTDirTree ),node );
-      else 
+      else
        {
         DirNodeType * DirNode;
         gtk_ctree_select( GTK_CTREE( CTDirTree ),node );
@@ -247,7 +247,7 @@ static void plButtonReleased( GtkButton * button,gpointer user_data )
 	 }
        }
   case 0: // cancel
-       HidePlayList(); 
+       HidePlayList();
        break;
   case 2: // remove
        {
@@ -258,7 +258,7 @@ static void plButtonReleased( GtkButton * button,gpointer user_data )
 
         gtk_clist_freeze( GTK_CLIST( CLSelected ) );
         for ( i=0;i<NrOfSelected-c;i++ )
-  	 if ( CLListSelected[i] ) 
+  	 if ( CLListSelected[i] )
 	  {
 	   gtk_clist_remove( GTK_CLIST( CLSelected ),i - c );
 	   c++;
@@ -341,7 +341,7 @@ static void plCTree( GtkCTree * ctree,GtkCTreeNode * parent_node,gpointer user_d
    gtk_clist_freeze( GTK_CLIST( ctree ) );
    node=gtk_ctree_find_by_row_data( ctree,parent_node,NULL );
    gtk_ctree_remove_node( ctree,node );
-			   
+
    if ( (dir=opendir( DirNode->path ) ) )
     {
      while( (dirent=readdir( dir )) )
@@ -363,7 +363,7 @@ static void plCTree( GtkCTree * ctree,GtkCTreeNode * parent_node,gpointer user_d
       }
      closedir( dir );
     }
-		    
+
    gtk_ctree_sort_node( ctree,parent_node );
    gtk_clist_thaw( GTK_CLIST( ctree ) );
   }
@@ -443,7 +443,7 @@ GtkWidget * create_PlayList( void )
 
   scrolledwindow1=gtk_scrolled_window_new( NULL,NULL );
   gtk_widget_show( scrolledwindow1 );
-  gtk_container_add( GTK_CONTAINER( 
+  gtk_container_add( GTK_CONTAINER(
     AddFrame( NULL,0,hbox1,1 ) ),scrolledwindow1 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow1 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
@@ -469,10 +469,10 @@ GtkWidget * create_PlayList( void )
   gtk_ctree_expand( GTK_CTREE( CTDirTree ),parent );
   gtk_widget_show( CTDirTree );
 
-  
+
   gtk_clist_set_column_widget( GTK_CLIST( CTDirTree ),0,
     AddLabel( MSGTR_PLAYLIST_DirectoryTree,NULL ) );
-  
+
   vbox2=AddVBox(
     AddFrame( NULL,1,hbox1,1 ),0 );
 

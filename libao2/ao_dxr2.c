@@ -67,7 +67,7 @@ static int control(int cmd,void *arg){
       ao_control_vol_t* vol = (ao_control_vol_t*)arg;
       // We need this trick because the volume stepping is often too small
       diff = ((vol->left+vol->right) / 2 - (volume*19.0/100.0)) * 19.0 / 100.0;
-      v.arg = volume + (diff > 0 ? ceil(diff) : floor(diff)); 
+      v.arg = volume + (diff > 0 ? ceil(diff) : floor(diff));
       if(v.arg > 19) v.arg = 19;
       if(v.arg < 0) v.arg = 0;
       if(v.arg != volume) {
@@ -95,7 +95,7 @@ static int init(int rate,int channels,int format,int flags){
 	  return 0;
 
         last_freq_id = -1;
-        
+
 	ao_data.outburst=2048;
 	ao_data.samplerate=rate;
 	ao_data.channels=channels;
@@ -178,11 +178,11 @@ static int get_space(void){
 static void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned int timestamp,int freq_id)
 {
   int write_dxr2(const unsigned char *data, int len);
-  
+
   if(dxr2_fd < 0) {
     mp_msg(MSGT_AO,MSGL_ERR,"DXR2 fd is not valid\n");
     return;
-  }    
+  }
 
   if(last_freq_id != freq_id) {
     ioctl(dxr2_fd, DXR2_IOC_SET_AUDIO_SAMPLE_FREQUENCY, &freq_id);

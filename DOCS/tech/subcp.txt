@@ -1,7 +1,7 @@
 Ascii Subtitle / Font CODEPAGEs
 ===============================
 
-The subtitle encoding issue seems a bit confusing, so I'll try to 
+The subtitle encoding issue seems a bit confusing, so I'll try to
 summarize it here.
 
 There are 2 approaches:
@@ -10,7 +10,7 @@ There are 2 approaches:
 	subfont --unicode <signle-byte encoding known by iconv> ...
 or
 	subfont --unicode <path to custom encoding file> ...
-	(this custom encoding file could list all iso-8859-* characters to create 
+	(this custom encoding file could list all iso-8859-* characters to create
 single font file for common encodings)
 
 and then run mplayer this way (-subcp and -utf8 expect Unicode font!):
@@ -23,8 +23,8 @@ or
 or
 	subfont <path to custom signle-byte or EUC encoding file> ...
 
-and then run mplayer without any encoding options for signle-byte 
-encodings, or with -unicode option for EUC (and the like) encodings 
+and then run mplayer without any encoding options for signle-byte
+encodings, or with -unicode option for EUC (and the like) encodings
 (which is only partially implemented in mplayer).
 
 AFAIK, CJK encodings: EUC-*, BIG5 and GB2312 work more or less this way:
@@ -34,11 +34,11 @@ AFAIK, CJK encodings: EUC-*, BIG5 and GB2312 work more or less this way:
 - other characters are single-byte.
 
 
-I tested charmap2enc script only with /usr/share/i18n/charmaps/EUC-KR.gz 
+I tested charmap2enc script only with /usr/share/i18n/charmaps/EUC-KR.gz
 (on RedHat). It wasn't intended to be perfect.
 
 
--- 
+--
 Artur Zaprzala
 
 

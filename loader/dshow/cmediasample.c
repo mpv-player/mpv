@@ -119,7 +119,7 @@ static long STDCALL CMediaSample_Release(IUnknown* This)
  * \param[out] address of variable that receives pointer to sample's buffer
  *
  * \return S_OK success
- * \return apropriate error otherwise 
+ * \return apropriate error otherwise
  *
  * \note The calles should not free or reallocate buffer
  *
@@ -157,7 +157,7 @@ static long STDCALL CMediaSample_GetSize(IMediaSample * This)
  *
  * \return S_OK success
  * \return VFW_E_NO_STOP_TIME The sample has valid start time, but no stop time
- * \return VFW_E_SAMPLE_TIME_NOT_SET The sample is not time-stamped 
+ * \return VFW_E_SAMPLE_TIME_NOT_SET The sample is not time-stamped
  *
  * \remarks
  * Both values are relative to stream time
@@ -334,7 +334,7 @@ static HRESULT STDCALL CMediaSample_SetActualDataLength(IMediaSample* This,
  *
  * \remarks
  * If media type is not changed from previous sample, ppMediaType is null
- * If method returns S_OK caller should free memory allocated for structure 
+ * If method returns S_OK caller should free memory allocated for structure
  * including pbFormat block
  */
 static HRESULT STDCALL CMediaSample_GetMediaType(IMediaSample* This,
@@ -384,7 +384,7 @@ static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
 }
 
 /**
- * \brief IMediaSample::IsDiscontinuity (determines if this sample represents data break 
+ * \brief IMediaSample::IsDiscontinuity (determines if this sample represents data break
  *        in stream)
  *
  * \param[in] This pointer to CMediaSample object
@@ -392,7 +392,7 @@ static HRESULT STDCALL CMediaSample_SetMediaType(IMediaSample * This,
  * \return S_OK if this sample is break in data stream
  * \return S_FALSE otherwise
  *
- * \remarks 
+ * \remarks
  * Discontinuity occures when filter seeks to different place in the stream or when drops
  * samples.
  *
@@ -404,7 +404,7 @@ static HRESULT STDCALL CMediaSample_IsDiscontinuity(IMediaSample * This)
 }
 
 /**
- * \brief IMediaSample::IsDiscontinuity (specifies whether this sample represents data break 
+ * \brief IMediaSample::IsDiscontinuity (specifies whether this sample represents data break
  *        in stream)
  *
  * \param[in] This pointer to CMediaSample object
@@ -430,7 +430,7 @@ static HRESULT STDCALL CMediaSample_SetDiscontinuity(IMediaSample * This,
  * \param[out] pTimeEnd pointer to variable that receives end time
  *
  * \return S_OK success
- * \return VFW_E_MEDIA_TIME_NOT_SET The sample is not time-stamped 
+ * \return VFW_E_MEDIA_TIME_NOT_SET The sample is not time-stamped
  *
  */
 static HRESULT STDCALL CMediaSample_GetMediaTime(IMediaSample * This,

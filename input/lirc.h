@@ -19,7 +19,7 @@
 #ifndef MPLAYER_LIRC_H
 #define MPLAYER_LIRC_H
 
-int 
+int
 mp_input_lirc_init(void);
 
 int

@@ -34,9 +34,9 @@
 /*
  * mmap() anonymous space, depending on the system's mmap() style. On systems
  * that use the /dev/zero mapping idiom, zerofd will be set to the file descriptor
- * of the opened /dev/zero. 
+ * of the opened /dev/zero.
  */
- 
+
  /**
  * \brief mmap() anonymous space, depending on the system's mmap() style. On systems
  * that use the /dev/zero mapping idiom, zerofd will be set to the file descriptor
@@ -47,7 +47,7 @@
  * \param prot protections (region accessibility).
  * \param flags specifies the type of the mapped object.
  * \param offset start mapping at byte offset.
- * \param zerofd 
+ * \param zerofd
  * \return a pointer to the mapped region upon successful completion, -1 otherwise.
  */
 void *mmap_anon(void *addr, size_t len, int prot, int flags, off_t offset)

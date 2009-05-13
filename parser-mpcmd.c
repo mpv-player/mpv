@@ -56,8 +56,8 @@ static int is_entry_option(char *opt, char *param, play_tree_t** ret) {
 static inline void add_entry(play_tree_t **last_parentp,
 	play_tree_t **last_entryp, play_tree_t *entry) {
     if(*last_entryp == NULL)
-      play_tree_set_child(*last_parentp,entry);		      
-    else 
+      play_tree_set_child(*last_parentp,entry);
+    else
       play_tree_append_entry(*last_entryp,entry);
     *last_entryp = entry;
 }
@@ -88,7 +88,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
   mode = GLOBAL;
 #ifdef CONFIG_MACOSX_FINDER
   root=macosx_finder_args(config, argc, argv);
-  if(root) 
+  if(root)
   	return root;
 #endif
 
@@ -136,7 +136,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	last_parent = last_entry->parent;
 	continue;
       }
-			
+
     if ((no_more_opts == 0) && (*opt == '-') && (*(opt+1) != 0)) /* option */
       {
 	int tmp = 0;
@@ -230,12 +230,12 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
                } else {
                    end_title=strtol(splitpos+1,NULL,10);
                }
-              
-               if (dvd_range(start_title) && dvd_range(end_title) && (start_title<end_title))      
+
+               if (dvd_range(start_title) && dvd_range(end_title) && (start_title<end_title))
                {
                  for (j=start_title;j<=end_title;j++)
                  {
-                  if (j!=start_title) 
+                  if (j!=start_title)
                       entry=play_tree_new();
                   snprintf(entbuf,9,"dvd://%d",j);
                   play_tree_add_file(entry,entbuf);
@@ -245,7 +245,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
                } else {
                  mp_msg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_InvalidPlayEntry, argv[i]);
                }
-         
+
 	     } else { // dvd:// or dvd://x entry
                 play_tree_add_file(entry,argv[i]);
              }

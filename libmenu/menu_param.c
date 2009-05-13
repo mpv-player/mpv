@@ -60,7 +60,7 @@ struct menu_priv_s {
   char* na;
   int hide_na;
 };
- 
+
 static struct menu_priv_s cfg_dflt = {
   MENU_LIST_PRIV_DFLT,
   NULL,
@@ -112,7 +112,7 @@ static int parse_args(menu_t* menu,char* args) {
   int r;
   m_option_t* opt;
   ASX_Parser_t* parser = asx_parser_new();
-  
+
 
   while(1) {
     r = asx_get_element(parser,&args,&element,&body,&attribs);
@@ -120,7 +120,7 @@ static int parse_args(menu_t* menu,char* args) {
       mp_msg(MSGT_OSD_MENU,MSGL_ERR,MSGTR_LIBMENU_SyntaxErrorAtLine,parser->line);
       asx_parser_free(parser);
       return -1;
-    } else if(r == 0) {      
+    } else if(r == 0) {
       asx_parser_free(parser);
       if(!m)
         mp_msg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition);
@@ -200,7 +200,7 @@ static void read_cmd(menu_t* menu,int cmd) {
       if(mp_property_do(e->prop,M_PROPERTY_STEP_DOWN,NULL,menu->ctx) > 0)
         update_entries(menu, 0);
       return;
-      
+
     case MENU_CMD_OK:
       // check that the property is writable
       if(mp_property_do(e->prop,M_PROPERTY_SET,NULL,menu->ctx) < 0) return;
@@ -281,7 +281,7 @@ static int openMenu(menu_t* menu, char* args) {
     mp_msg(MSGT_OSD_MENU,MSGL_ERR,MSGTR_LIBMENU_PrefMenuNeedsAnArgument);
     return 0;
   }
- 
+
   menu_list_init(menu);
   return parse_args(menu,args);
 }

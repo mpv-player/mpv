@@ -118,14 +118,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     s->dr = calloc(LD,af->data->bps);
     if((NULL == s->dl) || (NULL == s->dr))
       mp_msg(MSGT_AFILTER, MSGL_FATAL, "[delay] Out of memory\n");
-    
+
     // Initialize delay queue index
     if(AF_OK != af_from_ms(1, &s->d, &s->wi, af->data->rate, 0.0, 1000.0))
       return AF_ERROR;
 //    printf("%i\n",s->wi);
     s->ri = 0;
 
-    if((af->data->format != ((af_data_t*)arg)->format) || 
+    if((af->data->format != ((af_data_t*)arg)->format) ||
        (af->data->bps    != ((af_data_t*)arg)->bps)){
       ((af_data_t*)arg)->format = af->data->format;
       ((af_data_t*)arg)->bps = af->data->bps;
@@ -171,7 +171,7 @@ static float steering_matrix[][12] = {
 // Filter data through filter
 static af_data_t* play(struct af_instance_s* af, af_data_t* data){
   af_surround_t* s   = (af_surround_t*)af->setup;
-  float*	 m   = steering_matrix[0]; 
+  float*	 m   = steering_matrix[0];
   float*     	 in  = data->audio; 	// Input audio data
   float*     	 out = NULL;		// Output audio data
   float*	 end = in + data->len / sizeof(float); // Loop end
@@ -236,10 +236,10 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data){
 #endif
 
     // Next sample...
-    in = &in[data->nch];  
+    in = &in[data->nch];
     out = &out[af->data->nch];
   }
-  
+
   // Save indexes
   s->i  = i; s->ri = ri; s->wi = wi;
 

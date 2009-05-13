@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
 
 #include <inttypes.h>
 #include <math.h>
@@ -80,16 +80,16 @@ typedef struct af_volume_s
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
-  af_volnorm_t* s   = (af_volnorm_t*)af->setup; 
+  af_volnorm_t* s   = (af_volnorm_t*)af->setup;
 
   switch(cmd){
   case AF_CONTROL_REINIT:
     // Sanity check
     if(!arg) return AF_ERROR;
-    
+
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
-    
+
     if(((af_data_t*)arg)->format == (AF_FORMAT_S16_NE)){
       af->data->format = AF_FORMAT_S16_NE;
       af->data->bps    = 2;
@@ -113,7 +113,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Deallocate memory 
+// Deallocate memory
 static void uninit(struct af_instance_s* af)
 {
   if(af->data)
@@ -129,26 +129,26 @@ static void method1_int16(af_volnorm_t *s, af_data_t *c)
   int len = c->len/2;		// Number of samples
   float curavg = 0.0, newavg, neededmul;
   int tmp;
-  
+
   for (i = 0; i < len; i++)
   {
     tmp = data[i];
     curavg += tmp * tmp;
   }
   curavg = sqrt(curavg / (float) len);
-  
+
   // Evaluate an adequate 'mul' coefficient based on previous state, current
   // samples level, etc
-  
+
   if (curavg > SIL_S16)
   {
     neededmul = s->mid_s16 / (curavg * s->mul);
     s->mul = (1.0 - SMOOTH_MUL) * s->mul + SMOOTH_MUL * neededmul;
-    
+
     // clamp the mul coefficient
     s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
   }
-  
+
   // Scale & clamp the samples
   for (i = 0; i < len; i++)
   {
@@ -156,10 +156,10 @@ static void method1_int16(af_volnorm_t *s, af_data_t *c)
     tmp = clamp(tmp, SHRT_MIN, SHRT_MAX);
     data[i] = tmp;
   }
-  
+
   // Evaulation of newavg (not 100% accurate because of values clamping)
   newavg = s->mul * curavg;
-  
+
   // Stores computed values for future smoothing
   s->lastavg = (1.0 - SMOOTH_LASTAVG) * s->lastavg + SMOOTH_LASTAVG * newavg;
 }
@@ -170,33 +170,33 @@ static void method1_float(af_volnorm_t *s, af_data_t *c)
   float *data = (float*)c->audio;	// Audio data
   int len = c->len/4;		// Number of samples
   float curavg = 0.0, newavg, neededmul, tmp;
-  
+
   for (i = 0; i < len; i++)
   {
     tmp = data[i];
     curavg += tmp * tmp;
   }
   curavg = sqrt(curavg / (float) len);
-  
+
   // Evaluate an adequate 'mul' coefficient based on previous state, current
   // samples level, etc
-  
+
   if (curavg > SIL_FLOAT) // FIXME
   {
     neededmul = s->mid_float / (curavg * s->mul);
     s->mul = (1.0 - SMOOTH_MUL) * s->mul + SMOOTH_MUL * neededmul;
-    
+
     // clamp the mul coefficient
     s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
   }
-  
+
   // Scale & clamp the samples
   for (i = 0; i < len; i++)
     data[i] *= s->mul;
-  
+
   // Evaulation of newavg (not 100% accurate because of values clamping)
   newavg = s->mul * curavg;
-  
+
   // Stores computed values for future smoothing
   s->lastavg = (1.0 - SMOOTH_LASTAVG) * s->lastavg + SMOOTH_LASTAVG * newavg;
 }
@@ -208,14 +208,14 @@ static void method2_int16(af_volnorm_t *s, af_data_t *c)
   int len = c->len/2;		// Number of samples
   float curavg = 0.0, newavg, avg = 0.0;
   int tmp, totallen = 0;
-  
+
   for (i = 0; i < len; i++)
   {
     tmp = data[i];
     curavg += tmp * tmp;
   }
   curavg = sqrt(curavg / (float) len);
-  
+
   // Evaluate an adequate 'mul' coefficient based on previous state, current
   // samples level, etc
   for (i = 0; i < NSAMPLES; i++)
@@ -223,7 +223,7 @@ static void method2_int16(af_volnorm_t *s, af_data_t *c)
     avg += s->mem[i].avg * (float)s->mem[i].len;
     totallen += s->mem[i].len;
   }
-  
+
   if (totallen > MIN_SAMPLE_SIZE)
   {
     avg /= (float)totallen;
@@ -233,7 +233,7 @@ static void method2_int16(af_volnorm_t *s, af_data_t *c)
 	s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
     }
   }
-  
+
   // Scale & clamp the samples
   for (i = 0; i < len; i++)
   {
@@ -241,10 +241,10 @@ static void method2_int16(af_volnorm_t *s, af_data_t *c)
     tmp = clamp(tmp, SHRT_MIN, SHRT_MAX);
     data[i] = tmp;
   }
-  
+
   // Evaulation of newavg (not 100% accurate because of values clamping)
   newavg = s->mul * curavg;
-  
+
   // Stores computed values for future smoothing
   s->mem[s->idx].len = len;
   s->mem[s->idx].avg = newavg;
@@ -258,14 +258,14 @@ static void method2_float(af_volnorm_t *s, af_data_t *c)
   int len = c->len/4;		// Number of samples
   float curavg = 0.0, newavg, avg = 0.0, tmp;
   int totallen = 0;
-  
+
   for (i = 0; i < len; i++)
   {
     tmp = data[i];
     curavg += tmp * tmp;
   }
   curavg = sqrt(curavg / (float) len);
-  
+
   // Evaluate an adequate 'mul' coefficient based on previous state, current
   // samples level, etc
   for (i = 0; i < NSAMPLES; i++)
@@ -273,7 +273,7 @@ static void method2_float(af_volnorm_t *s, af_data_t *c)
     avg += s->mem[i].avg * (float)s->mem[i].len;
     totallen += s->mem[i].len;
   }
-  
+
   if (totallen > MIN_SAMPLE_SIZE)
   {
     avg /= (float)totallen;
@@ -283,14 +283,14 @@ static void method2_float(af_volnorm_t *s, af_data_t *c)
 	s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
     }
   }
-  
+
   // Scale & clamp the samples
   for (i = 0; i < len; i++)
     data[i] *= s->mul;
-  
+
   // Evaulation of newavg (not 100% accurate because of values clamping)
   newavg = s->mul * curavg;
-  
+
   // Stores computed values for future smoothing
   s->mem[s->idx].len = len;
   s->mem[s->idx].avg = newavg;
@@ -310,7 +310,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	method1_int16(s, data);
   }
   else if(af->data->format == (AF_FORMAT_FLOAT_NE))
-  { 
+  {
     if (s->method)
 	method2_float(s, data);
     else

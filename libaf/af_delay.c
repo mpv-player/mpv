@@ -37,7 +37,7 @@ typedef struct af_delay_s
   void* q[AF_NCH];   	// Circular queues used for delaying audio signal
   int 	wi[AF_NCH];  	// Write index
   int 	ri;		// Read index
-  float	d[AF_NCH];   	// Delay [ms] 	
+  float	d[AF_NCH];   	// Delay [ms]
 }af_delay_t;
 
 // Initialization and runtime control
@@ -108,7 +108,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Deallocate memory 
+// Deallocate memory
 static void uninit(struct af_instance_s* af)
 {
   int i;
@@ -134,7 +134,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     switch(c->bps){
     case 1:{
       int8_t* a = c->audio;
-      int8_t* q = s->q[ch]; 
+      int8_t* q = s->q[ch];
       int wi = s->wi[ch];
       ri = s->ri;
       for(i=ch;i<len;i+=nch){
@@ -148,7 +148,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     }
     case 2:{
       int16_t* a = c->audio;
-      int16_t* q = s->q[ch]; 
+      int16_t* q = s->q[ch];
       int wi = s->wi[ch];
       ri = s->ri;
       for(i=ch;i<len;i+=nch){
@@ -162,7 +162,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     }
     case 4:{
       int32_t* a = c->audio;
-      int32_t* q = s->q[ch]; 
+      int32_t* q = s->q[ch];
       int wi = s->wi[ch];
       ri = s->ri;
       for(i=ch;i<len;i+=nch){

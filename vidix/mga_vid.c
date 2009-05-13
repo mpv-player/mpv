@@ -172,12 +172,12 @@ typedef struct bes_registers_s
 	uint32_t beshiscal;
 	//BES Horizontal source start [10.14] (for scaling)
 	uint32_t beshsrcst;
-	//BES Horizontal source ending [10.14] (for scaling) 
+	//BES Horizontal source ending [10.14] (for scaling)
 	uint32_t beshsrcend;
-	//BES Horizontal source last 
+	//BES Horizontal source last
 	uint32_t beshsrclst;
 
-	
+
 	//BES Vertical coord
 	uint32_t besvcoord;
 	//BES Vertical inverse scaling [5.14]
@@ -248,7 +248,7 @@ static crtc2_registers_t cregs;
 #ifdef CRTC2
 /*CRTC2 registers*/
 #define XMISCCTRL  0x1e
-#define C2CTL       0x3c10 
+#define C2CTL       0x3c10
 #define C2DATACTL   0x3c4c
 #define C2MISC      0x3c44
 #define C2HPARAM    0x3c14
@@ -279,7 +279,7 @@ static crtc2_registers_t cregs;
 #define BESA1CORG   0x3d10
 #define BESA1ORG    0x3d00
 
-#define BESA2C3ORG  0x3d64 
+#define BESA2C3ORG  0x3d64
 #define BESA2CORG   0x3d14
 #define BESA2ORG    0x3d04
 
@@ -315,7 +315,7 @@ static crtc2_registers_t cregs;
 static void crtc2_frame_sel(int frame)
 {
 switch(frame) {
-case 0:	
+case 0:
 	cregs.c2pl2startadd0=regs.besa1corg;
 	cregs.c2pl3startadd0=regs.besa1c3org;
 	cregs.c2startadd0=regs.besa1org;
@@ -353,7 +353,7 @@ static int mga_frame_select(unsigned int frame)
 	//we don't need the vcount protection as we're only hitting
 	//one register (and it doesn't seem to be double buffered)
 	regs.besctl = (regs.besctl & ~0x07000000) + (mga_next_frame << 25);
-	writel( regs.besctl, mga_mmio_base + BESCTL ); 
+	writel( regs.besctl, mga_mmio_base + BESCTL );
 
 //	writel( regs.besglobctl + ((readl(mga_mmio_base + VCOUNT)+2)<<16),
 	writel( regs.besglobctl + (MGA_VSYNC_POS<<16),
@@ -374,7 +374,7 @@ static void mga_vid_write_regs(int restore)
 			mga_mmio_base + BESGLOBCTL);
 
 	// color or coordinate keying
-	
+
 	if(restore && colkey_saved){
 	    // restore it
 	    colkey_saved=0;
@@ -382,7 +382,7 @@ static void mga_vid_write_regs(int restore)
 		// Set color key registers:
 		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
 		writeb( colkey_on, mga_mmio_base + X_DATAREG);
-		
+
 		writeb( XCOLKEY0RED, mga_mmio_base + PALWTADD);
 		writeb( colkey_color[0], mga_mmio_base + X_DATAREG);
 		writeb( XCOLKEY0GREEN, mga_mmio_base + PALWTADD);
@@ -407,7 +407,7 @@ static void mga_vid_write_regs(int restore)
 		// Get color key registers:
 		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
 		colkey_on=(unsigned char)readb(mga_mmio_base + X_DATAREG) & 1;
-		
+
 		writeb( XCOLKEY0RED, mga_mmio_base + PALWTADD);
 		colkey_color[0]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
 		writeb( XCOLKEY0GREEN, mga_mmio_base + PALWTADD);
@@ -426,7 +426,7 @@ static void mga_vid_write_regs(int restore)
 		writeb( XCOLMSK, mga_mmio_base + PALWTADD);
 		colkey_mask[3]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
 	}
-	
+
 if(!restore){
 	writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
 	writeb( mga_grkey.ckey.op == CKEY_TRUE, mga_mmio_base + X_DATAREG);
@@ -435,7 +435,7 @@ if(!restore){
 		uint32_t r=0, g=0, b=0;
 
 		writeb( XMULCTRL, mga_mmio_base + PALWTADD);
-		switch (readb (mga_mmio_base + X_DATAREG)) 
+		switch (readb (mga_mmio_base + X_DATAREG))
 		{
 			case BPP_8:
 				/* Need to look up the color index, just using
@@ -467,7 +467,7 @@ if(!restore){
 		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
 		writeb( 1, mga_mmio_base + X_DATAREG);
 
-		// Disable color keying on alpha channel 
+		// Disable color keying on alpha channel
 		writeb( XCOLMSK, mga_mmio_base + PALWTADD);
 		writeb( 0x00, mga_mmio_base + X_DATAREG);
 		writeb( X_COLKEY, mga_mmio_base + PALWTADD);
@@ -499,10 +499,10 @@ if(!restore){
 }
 
 	// Backend Scaler
-	writel( regs.besctl,      mga_mmio_base + BESCTL); 
+	writel( regs.besctl,      mga_mmio_base + BESCTL);
 	if(is_g400)
-		writel( regs.beslumactl,  mga_mmio_base + BESLUMACTL); 
-	writel( regs.bespitch,    mga_mmio_base + BESPITCH); 
+		writel( regs.beslumactl,  mga_mmio_base + BESLUMACTL);
+	writel( regs.bespitch,    mga_mmio_base + BESPITCH);
 
 	writel( regs.besa1org,    mga_mmio_base + BESA1ORG);
 	writel( regs.besa1corg,   mga_mmio_base + BESA1CORG);
@@ -512,7 +512,7 @@ if(!restore){
 	writel( regs.besb1corg,   mga_mmio_base + BESB1CORG);
 	writel( regs.besb2org,    mga_mmio_base + BESB2ORG);
 	writel( regs.besb2corg,   mga_mmio_base + BESB2CORG);
-	if(is_g400) 
+	if(is_g400)
 	{
 		writel( regs.besa1c3org,  mga_mmio_base + BESA1C3ORG);
 		writel( regs.besa2c3org,  mga_mmio_base + BESA2C3ORG);
@@ -525,7 +525,7 @@ if(!restore){
 	writel( regs.beshsrcst,   mga_mmio_base + BESHSRCST);
 	writel( regs.beshsrcend,  mga_mmio_base + BESHSRCEND);
 	writel( regs.beshsrclst,  mga_mmio_base + BESHSRCLST);
-	
+
 	writel( regs.besvcoord,   mga_mmio_base + BESVCOORD);
 	writel( regs.besviscal,   mga_mmio_base + BESVISCAL);
 
@@ -533,7 +533,7 @@ if(!restore){
 	writel( regs.besv1wght,   mga_mmio_base + BESV1WGHT);
 	writel( regs.besv2srclst, mga_mmio_base + BESV2SRCLST);
 	writel( regs.besv2wght,   mga_mmio_base + BESV2WGHT);
-	
+
 	//update the registers somewhere between 1 and 2 frames from now.
 	writel( regs.besglobctl + ((readl(mga_mmio_base + VCOUNT)+2)<<16),
 			mga_mmio_base + BESGLOBCTL);
@@ -562,7 +562,7 @@ if(!restore){
 	writel(cregs.c2pl2startadd0, mga_mmio_base + C2PL2STARTADD0);
 	writel(cregs.c2pl3startadd0, mga_mmio_base + C2PL3STARTADD0);
 	writel(cregs.c2spicstartadd0, mga_mmio_base + C2SPICSTARTADD0);
-#endif	
+#endif
 }
 
 #if MGA_ALLOW_IRQ
@@ -573,13 +573,13 @@ static void enable_irq(void)
 	cc = readl(mga_mmio_base + IEN);
 
 	writeb( 0x11, mga_mmio_base + CRTCX);
-	
+
 	writeb(0x20, mga_mmio_base + CRTCD );  /* clear 0, enable off */
 	writeb(0x00, mga_mmio_base + CRTCD );  /* enable on */
 	writeb(0x10, mga_mmio_base + CRTCD );  /* clear = 1 */
-	
+
 	writel( regs.besglobctl , mga_mmio_base + BESGLOBCTL);
-    	
+
 	return;
 }
 
@@ -598,16 +598,16 @@ void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
 
 		cc = readl(mga_mmio_base + STATUS);
 		if ( ! (cc & 0x10) ) return;  /* vsyncpen */
-	} 
+	}
 
 	regs.besctl = (regs.besctl & ~0x07000000) + (mga_next_frame << 25);
-	writel( regs.besctl, mga_mmio_base + BESCTL ); 
+	writel( regs.besctl, mga_mmio_base + BESCTL );
 
 #ifdef CRTC2
-// sem pridat vyber obrazku !!!!	
+// sem pridat vyber obrazku !!!!
 	crtc2_frame_sel(mga_next_frame);
 #endif
-	
+
 	if ( irq != -1 ) {
 		writeb( 0x11, mga_mmio_base + CRTCX);
 		writeb( 0, mga_mmio_base + CRTCD );
@@ -640,7 +640,7 @@ static int mga_config_playback(vidix_playback_t *config)
 	unsigned int vsyncstart = vdispend + lower_margin;
 	unsigned int vsyncend = vsyncstart + vsync_len;
 	unsigned int vtotal = vsyncend + upper_margin;
-#endif 
+#endif
 
     if ((config->num_frames < 1) || (config->num_frames > 4))
     {
@@ -655,7 +655,7 @@ static int mga_config_playback(vidix_playback_t *config)
     sh = config->src.h;
     dw = config->dest.w;
     dh = config->dest.h;
-    
+
     config->dest.pitch.y=32;
     config->dest.pitch.u=config->dest.pitch.v=32;
 
@@ -717,16 +717,16 @@ static int mga_config_playback(vidix_playback_t *config)
     /* for G200 set Interleaved UV planes */
     if (!is_g400)
 	config->flags = VID_PLAY_INTERLEAVED_UV | INTERLEAVING_UV;
-	
-    //Setup the BES registers for a three plane 4:2:0 video source 
+
+    //Setup the BES registers for a three plane 4:2:0 video source
 
     regs.besglobctl = 0;
 
     switch(config->fourcc)
     {
-	case IMGFMT_YV12:	
-	case IMGFMT_I420:	
-	case IMGFMT_IYUV:	
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
 	regs.besctl = 1         // BES enabled
                     + (0<<6)    // even start polarity
                     + (1<<10)   // x filtering enabled
@@ -736,7 +736,7 @@ static int mga_config_playback(vidix_playback_t *config)
                     + (1<<18);  // dither enabled
         break;
 
-    case IMGFMT_YUY2:	
+    case IMGFMT_YUY2:
 	regs.besctl = 1         // BES enabled
                     + (0<<6)    // even start polarity
                     + (1<<10)   // x filtering enabled
@@ -748,7 +748,7 @@ static int mga_config_playback(vidix_playback_t *config)
 	regs.besglobctl = 0;        // YUY2 format selected
         break;
 
-    case IMGFMT_UYVY:	
+    case IMGFMT_UYVY:
 	regs.besctl = 1         // BES enabled
                     + (0<<6)    // even start polarity
                     + (1<<10)   // x filtering enabled
@@ -772,19 +772,19 @@ static int mga_config_playback(vidix_playback_t *config)
 	bestop = y > 0 ? y : 0;
 	regs.beshcoord = (besleft<<16) + (x + dw-1);
 	regs.besvcoord = (bestop<<16) + (y + dh-1);
-	
+
 	//Setup source dimensions
 	regs.beshsrclst  = (sw - 1) << 16;
-	regs.bespitch = (sw + 31) & ~31 ; 
-	
+	regs.bespitch = (sw + 31) & ~31 ;
+
 	//Setup horizontal scaling
 	ifactor = ((sw-1)<<14)/(dw-1);
 	ofsleft = besleft - x;
-		
+
 	regs.beshiscal = ifactor<<2;
 	regs.beshsrcst = (ofsleft*ifactor)<<2;
 	regs.beshsrcend = regs.beshsrcst + (((dw - ofsleft - 1) * ifactor) << 2);
-	
+
 	//Setup vertical scaling
 	ifactor = ((sh-1)<<14)/(dh-1);
 	ofstop = bestop - y;
@@ -802,9 +802,9 @@ if(config->fourcc==IMGFMT_YV12
  ||config->fourcc==IMGFMT_I420
  ){
         // planar YUV frames:
-	if (is_g400) 
+	if (is_g400)
 		baseadrofs = (((ofstop*regs.besviscal)/4)>>16)*regs.bespitch;
-	else 
+	else
 		baseadrofs = (((ofstop*regs.besviscal)/2)>>16)*regs.bespitch;
 
     if(config->fourcc==IMGFMT_YV12){
@@ -839,9 +839,9 @@ if(config->fourcc==IMGFMT_YV12
 
 
 switch(config->fourcc){
-    case IMGFMT_YV12:	
-    case IMGFMT_I420:	
-    case IMGFMT_IYUV:	
+    case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
 	cregs.c2ctl = 1         // CRTC2 enabled
 		    + (1<<1)	// external clock
 		    + (0<<2)	// external clock
@@ -897,7 +897,7 @@ switch(config->fourcc){
 */		    ;
         break;
 
-    case IMGFMT_YUY2:	
+    case IMGFMT_YUY2:
 	cregs.c2ctl = 1         // CRTC2 enabled
 		    + (1<<1)	// external clock
 		    + (0<<2)	// external clock
@@ -955,7 +955,7 @@ switch(config->fourcc){
 */			;
           break;
 
-    case IMGFMT_UYVY:	
+    case IMGFMT_UYVY:
 	cregs.c2ctl = 1         // CRTC2 enabled
 		    + (1<<1)	// external clock
 		    + (0<<2)	// external clock
@@ -1014,7 +1014,7 @@ switch(config->fourcc){
 
 	cregs.c2hparam=((hdispend - 8) << 16) | (htotal - 8);
 	cregs.c2hsync=((hsyncend - 8) << 16) | (hsyncstart - 8);
-	
+
 	cregs.c2misc=0	// CRTCV2 656 togg f0
 		    +(0<<1) // CRTCV2 656 togg f0
 		    +(0<<2) // CRTCV2 656 togg f0
@@ -1029,15 +1029,15 @@ switch(config->fourcc){
 
 	cregs.c2pl2startadd0=regs.besa1corg;
 	cregs.c2pl3startadd0=regs.besa1c3org;
-		    
-	cregs.c2preload=(vsyncstart << 16) | (hsyncstart); // from 
-	
+
+	cregs.c2preload=(vsyncstart << 16) | (hsyncstart); // from
+
 	cregs.c2spicstartadd0=0; // not used
-	
+
     cregs.c2startadd0=regs.besa1org;
-	
+
     cregs.c2subpiclut=0; //not used
-	
+
     cregs.c2vparam=((vdispend - 1) << 16) | (vtotal - 1);
     cregs.c2vsync=((vsyncend - 1) << 16) | (vsyncstart - 1);
 #endif /* CRTC2 */
@@ -1069,7 +1069,7 @@ static int mga_playback_off(void)
 {
     if (mga_verbose) printf("[mga] playback off\n");
 
-    vid_src_ready = 0;   
+    vid_src_ready = 0;
 #if MGA_ALLOW_IRQ
     if (mga_irq != -1)
 	disable_irq();
@@ -1102,7 +1102,7 @@ static int mga_probe(int verbose,int force)
 
 	if (mga_verbose)
 	    printf("[mga] found %d pci devices\n", num_pci);
-	
+
 	for (i = 0; i < num_pci; i++)
 	{
 	    if (mga_verbose > 1)
@@ -1158,7 +1158,7 @@ static int mga_init(void)
 {
     unsigned int card_option = 0;
     int err;
-    
+
     if (mga_verbose) printf("[mga] init\n");
 
     mga_vid_in_use = 0;
@@ -1215,7 +1215,7 @@ static int mga_init(void)
 	    {
 		default: mga_ram_size = 8;
 	    }
-	} 
+	}
 
         printf("[mga] detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 #endif
@@ -1272,7 +1272,7 @@ static void mga_destroy(void)
     if (mga_verbose) printf("[mga] destroy\n");
 
     /* FIXME turn off BES */
-    vid_src_ready = 0;   
+    vid_src_ready = 0;
     regs.besctl &= ~1;
     regs.besglobctl &= ~(1<<6);  // UYVY format selected
     mga_vid_write_regs(1);
@@ -1306,7 +1306,7 @@ static int mga_query_fourcc(vidix_fourcc_t *to)
 	    to->depth = to->flags = 0;
 	    return ENOTSUP;
     }
-    
+
     to->depth = VID_DEPTH_12BPP |
 		VID_DEPTH_15BPP | VID_DEPTH_16BPP |
 		VID_DEPTH_24BPP | VID_DEPTH_32BPP;
@@ -1345,9 +1345,9 @@ static int mga_set_eq( const vidix_video_eq_t * eq)
     // only brightness&contrast are supported:
     if(!(eq->cap & (VEQ_CAP_BRIGHTNESS|VEQ_CAP_CONTRAST)))
 	return ENOTSUP;
-    
+
     //regs.beslumactl = readl(mga_mmio_base + BESLUMACTL);
-    if (eq->cap & VEQ_CAP_BRIGHTNESS) { 
+    if (eq->cap & VEQ_CAP_BRIGHTNESS) {
 	regs.beslumactl &= 0xFFFF;
 	regs.beslumactl |= (eq->brightness*255/2000)<<16;
     }
@@ -1372,7 +1372,7 @@ static int mga_get_eq( vidix_video_eq_t * eq)
     eq->brightness = (signed short int)(regs.beslumactl >> 16) * 1000 / 128;
     eq->contrast = (signed short int)(regs.beslumactl & 0xFFFF) * 1000 / 128 - 1000;
     eq->cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST;
-    
+
     printf("MGA GET_EQ: br=%d c=%d  \n",eq->brightness,eq->contrast);
 
     return 0;
@@ -1386,7 +1386,7 @@ VDXDriver mga_crtc2_drv = {
   "mga_crtc2",
 #endif
   NULL,
-    
+
   .probe = mga_probe,
   .get_caps = mga_get_caps,
   .query_fourcc = mga_query_fourcc,

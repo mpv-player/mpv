@@ -68,7 +68,7 @@ static const struct {
   { APPLE_IR_BACKWARD,          2,   AR_PREV_HOLD },
   { APPLE_IR_MENU,              1,   AR_MENU      },
   { APPLE_IR_MENU,              2,   AR_MENU_HOLD },
-  { APPLE_IR_PLUS,              1,   AR_VUP       },  
+  { APPLE_IR_PLUS,              1,   AR_VUP       },
   { APPLE_IR_MINUS,             1,   AR_VDOWN     },
   { -1,                        -1,   -1           }
 };
@@ -102,7 +102,7 @@ int mp_input_appleir_init (char *dev)
       fd = open (file, O_RDONLY | O_NONBLOCK);
       if (fd < 0)
         continue;
-      
+
       ioctl (fd, EVIOCGID, &id);
       if (id.bustype == BUS_USB &&
           id.vendor  == USB_VENDOR_APPLE &&
@@ -147,6 +147,6 @@ int mp_input_appleir_read (int fd)
     if (apple_ir_mapping[i].linux_keycode == ev.code &&
         apple_ir_mapping[i].value == ev.value)
       return apple_ir_mapping[i].mp_keycode;
-  
+
   return MP_INPUT_NOTHING;
 }

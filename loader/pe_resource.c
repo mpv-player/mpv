@@ -29,7 +29,7 @@
 #include "ext.h"
 
 /**********************************************************************
- *  HMODULE32toPE_MODREF 
+ *  HMODULE32toPE_MODREF
  *
  * small helper function to get a PE_MODREF from a passed HMODULE32
  */
@@ -65,13 +65,13 @@ PIMAGE_RESOURCE_DIRECTORY GetResDirEntryW(PIMAGE_RESOURCE_DIRECTORY resdirptr,
 		return GetResDirEntryW(resdirptr,(LPCWSTR)atoi(buf),root,allowdefault);
 	}
 	entryTable = (PIMAGE_RESOURCE_DIRECTORY_ENTRY) (
-			(BYTE *) resdirptr + 
+			(BYTE *) resdirptr +
                         sizeof(IMAGE_RESOURCE_DIRECTORY));
 	namelen = lstrlenW(name);
 	for (entrynum = 0; entrynum < resdirptr->NumberOfNamedEntries; entrynum++)
 	{
 		PIMAGE_RESOURCE_DIR_STRING_U str =
-		(PIMAGE_RESOURCE_DIR_STRING_U) (root + 
+		(PIMAGE_RESOURCE_DIR_STRING_U) (root +
 			entryTable[entrynum].u1.s.NameOffset);
 		if(namelen != str->Length)
 			continue;
@@ -83,7 +83,7 @@ PIMAGE_RESOURCE_DIRECTORY GetResDirEntryW(PIMAGE_RESOURCE_DIRECTORY resdirptr,
 	return NULL;
     } else {
 	entryTable = (PIMAGE_RESOURCE_DIRECTORY_ENTRY) (
-			(BYTE *) resdirptr + 
+			(BYTE *) resdirptr +
                         sizeof(IMAGE_RESOURCE_DIRECTORY) +
 			resdirptr->NumberOfNamedEntries * sizeof(IMAGE_RESOURCE_DIRECTORY_ENTRY));
 	for (entrynum = 0; entrynum < resdirptr->NumberOfIdEntries; entrynum++)
@@ -108,7 +108,7 @@ PIMAGE_RESOURCE_DIRECTORY GetResDirEntryA( PIMAGE_RESOURCE_DIRECTORY resdirptr,
 					   WIN_BOOL allowdefault )
 {
     PIMAGE_RESOURCE_DIRECTORY retv;
-    LPWSTR nameW = HIWORD(name)? HEAP_strdupAtoW( GetProcessHeap(), 0, name ) 
+    LPWSTR nameW = HIWORD(name)? HEAP_strdupAtoW( GetProcessHeap(), 0, name )
                                : (LPWSTR)name;
 
     retv = GetResDirEntryW( resdirptr, nameW, root, allowdefault );
@@ -178,7 +178,7 @@ PE_EnumResourceTypesA(HMODULE hmod,ENUMRESTYPEPROCA lpfun,LONG lparam) {
     PIMAGE_RESOURCE_DIRECTORY		resdir;
     PIMAGE_RESOURCE_DIRECTORY_ENTRY	et;
     WIN_BOOL	ret;
-    HANDLE	heap = GetProcessHeap();	
+    HANDLE	heap = GetProcessHeap();
 
     if (!pem || !pem->pe_resource)
     	return FALSE;
@@ -245,7 +245,7 @@ PE_EnumResourceNamesA(
     PIMAGE_RESOURCE_DIRECTORY		resdir;
     PIMAGE_RESOURCE_DIRECTORY_ENTRY	et;
     WIN_BOOL	ret;
-    HANDLE	heap = GetProcessHeap();	
+    HANDLE	heap = GetProcessHeap();
     LPWSTR	typeW;
 
     if (!pem || !pem->pe_resource)
@@ -325,7 +325,7 @@ PE_EnumResourceLanguagesA(
     PIMAGE_RESOURCE_DIRECTORY		resdir;
     PIMAGE_RESOURCE_DIRECTORY_ENTRY	et;
     WIN_BOOL	ret;
-    HANDLE	heap = GetProcessHeap();	
+    HANDLE	heap = GetProcessHeap();
     LPWSTR	nameW,typeW;
 
     if (!pem || !pem->pe_resource)

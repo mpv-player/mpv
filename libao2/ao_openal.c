@@ -42,7 +42,7 @@
 #include "osdep/timer.h"
 #include "subopt-helper.h"
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
   "OpenAL audio output",
   "openal",

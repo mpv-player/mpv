@@ -71,7 +71,7 @@ static int open_live_sdp(stream_t *stream,int mode, void* opts, int* file_format
       return STREAM_ERROR;
     }
 
-    len=lseek(f,0,SEEK_END); 
+    len=lseek(f,0,SEEK_END);
     lseek(f,0,SEEK_SET);
     if(len == -1)
       return STREAM_ERROR;

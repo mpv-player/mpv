@@ -54,11 +54,11 @@ static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int
     int y, x;
     int interp, dist;
     uint8_t *xdst, *xsrc;
-    
+
     uint8_t *topleft, *botleft, *topright;
     int xclipl, xclipr, yclipt, yclipb;
     int logo_x1, logo_x2, logo_y1, logo_y2;
-    
+
     xclipl = MAX(-logo_x, 0);
     xclipr = MAX(logo_x+logo_w-width, 0);
     yclipt = MAX(-logo_y, 0);
@@ -77,7 +77,7 @@ static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int
 
     dst += (logo_y1+1)*dstStride;
     src += (logo_y1+1)*srcStride;
-    
+
     for(y = logo_y1+1; y < logo_y2-1; y++)
     {
 	for (x = logo_x1+1, xdst = dst+logo_x1+1, xsrc = src+logo_x1+1; x < logo_x2-1; x++, xdst++, xsrc++) {
@@ -198,7 +198,7 @@ static unsigned int fmt_list[]={
 
 static int open(vf_instance_t *vf, char* args){
     int res;
-    
+
     vf->config=config;
     vf->put_image=put_image;
     vf->get_image=get_image;
@@ -230,7 +230,7 @@ static int open(vf_instance_t *vf, char* args){
 	vf->priv->band = 4;
 	vf->priv->show = 1;
     }
-    
+
 
     vf->priv->lw += vf->priv->band*2;
     vf->priv->lh += vf->priv->band*2;

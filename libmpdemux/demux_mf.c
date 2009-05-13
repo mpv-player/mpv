@@ -36,7 +36,7 @@ static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,float audio_del
   mf_t * mf = (mf_t *)demuxer->priv;
   sh_video_t   * sh_video = demuxer->video->sh;
   int newpos = (flags & SEEK_ABSOLUTE)?0:mf->curr_frame - 1;
-  
+
   if ( flags & SEEK_FACTOR ) newpos+=rel_seek_secs*(mf->nr_of_files - 1);
    else newpos+=rel_seek_secs * sh_video->fps;
   if ( newpos < 0 ) newpos=0;
@@ -107,7 +107,7 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video_t   *sh_video = NULL;
   mf_t         *mf = NULL;
   int i;
-  
+
   if(!demuxer->stream->url) return NULL;
   if(strncmp(demuxer->stream->url, "mf://", 5)) return NULL;
 
@@ -140,7 +140,7 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   // parent video demuxer stream (this is getting wacky), or else
   // video_read_properties() will choke
   sh_video->ds = demuxer->video;
-  
+
   for (i = 0; type2format[i].type; i++)
     if (strcasecmp(mf_type, type2format[i].type) == 0)
       break;
@@ -180,7 +180,7 @@ static void demux_close_mf(demuxer_t* demuxer) {
 
   if(!mf)
     return;
-  free(mf);  
+  free(mf);
 }
 
 static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {

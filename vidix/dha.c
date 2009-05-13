@@ -90,7 +90,7 @@
 static int mem_fd = -1;
 
 void *map_phys_mem(unsigned long base, unsigned long size)
-{    
+{
 #if ARCH_ALPHA
 /* TODO: move it into sysdep */
   base += bus_base();
@@ -121,12 +121,12 @@ dha_helper_way:
   else
   {
     dhahelper_memory_t mem_req;
-    
+
     mem_req.operation = MEMORY_OP_MAP;
     mem_req.start = base;
     mem_req.offset = 0;
     mem_req.size = size;
-    
+
     if (ioctl(mem_fd, DHAHELPER_MEMORY, &mem_req) < 0)
     {
 	perror("libdha: DHA kernelhelper failed");
@@ -176,10 +176,10 @@ void unmap_phys_mem(void *ptr, unsigned long size)
       perror("libdha: unmapping memory failed");
       return;
   }
-  
+
   close(mem_fd);
   mem_fd = -1;
-  
+
   return;
 }
 

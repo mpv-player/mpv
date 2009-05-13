@@ -119,19 +119,19 @@ int ai_alsa_setup(audio_in_t *ai)
 int ai_alsa_init(audio_in_t *ai)
 {
     int err;
-    
+
     err = snd_pcm_open(&ai->alsa.handle, ai->alsa.device, SND_PCM_STREAM_CAPTURE, 0);
     if (err < 0) {
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio, snd_strerror(err));
 	return -1;
     }
-    
+
     err = snd_output_stdio_attach(&ai->alsa.log, stderr, 0);
-    
+
     if (err < 0) {
 	return -1;
     }
-    
+
     err = ai_alsa_setup(ai);
 
     return err;
@@ -153,7 +153,7 @@ int ai_alsa_xrun(audio_in_t *ai)
 {
     snd_pcm_status_t *status;
     int res;
-	
+
     snd_pcm_status_alloca(&status);
     if ((res = snd_pcm_status(ai->alsa.handle, status))<0) {
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_AlsaStatusError, snd_strerror(res));

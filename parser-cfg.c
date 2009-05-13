@@ -67,7 +67,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 		ret = -1;
 		goto out;
 	} else
-	  
+
 	config->mode = M_CONFIG_FILE;
 
 	if ((line = malloc(MAX_LINE_LEN + 1)) == NULL) {
@@ -124,7 +124,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 			continue;
 		}
 		opt[opt_pos] = '\0';
-		
+
 		/* Profile declaration */
 		if(opt_pos > 2 && opt[0] == '[' && opt[opt_pos-1] == ']') {
 			opt[opt_pos-1] = '\0';
@@ -232,7 +232,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 			errors++;
 			continue;
 			/* break */
-		}	
+		}
 nextline:
 		;
 	}

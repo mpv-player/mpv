@@ -33,7 +33,7 @@
  *
  * time values are in centiseconds, because that's
  * what the gif spec uses for it's delay values.
- * 
+ *
  * preinit looks for arguments in one of the following formats (in this order):
  * fps:filename  -- sets the framerate (float) and output file
  * fps           -- sets the framerate (float), default file out.gif
@@ -136,18 +136,18 @@ static int preinit(const char *arg)
 	} else {
 		mp_msg(MSGT_VO, MSGL_V, "GIF89a: output fps forced to %.2f\n", target_fps);
 	}
-	
+
 	ideal_delay = 100 / target_fps; // in centiseconds
 	frame_cycle = vo_fps / target_fps;
 	// we make one output frame every (frame_cycle) frames, on average.
-	
+
 	if (gif_filename == NULL) {
 		gif_filename = strdup(DEFAULT_FILE);
 		mp_msg(MSGT_VO, MSGL_V, "GIF89a: default, file \"%s\"\n", gif_filename);
 	} else {
 		mp_msg(MSGT_VO, MSGL_V, "GIF89a: file forced to \"%s\"\n", gif_filename);
 	}
-	
+
 	mp_msg(MSGT_VO, MSGL_DBG2, "GIF89a: Preinit OK\n");
 	return 0;
 }
@@ -164,7 +164,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 	mp_msg(MSGT_VO, MSGL_DBG2, "GIF89a: Config entered [%dx%d]\n", s_width,s_height);
 	mp_msg(MSGT_VO, MSGL_DBG2, "GIF89a: With requested format: %s\n", vo_format_name(format));
-	
+
 	// save these for later.
 	img_width = s_width;
 	img_height = s_height;
@@ -179,12 +179,12 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	// multiple configs without uninit will result in two
 	// movies concatenated in one gif file.  the output
 	// gif will have the dimensions of the first movie.
-	
+
 	if (format != IMGFMT_RGB24) {
 		mp_msg(MSGT_VO, MSGL_ERR, "GIF89a: Error - given unsupported colorspace.\n");
 		return 1;
 	}
-	
+
 	// the EGifSetGifVersion line causes segfaults in certain
 	// earlier versions of libungif.  i don't know exactly which,
 	// but certainly in all those before v4.  if you have problems,
@@ -195,7 +195,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	mp_msg(MSGT_VO, MSGL_ERR, "GIF89a: Your version of libungif needs to be upgraded.\n");
 	mp_msg(MSGT_VO, MSGL_ERR, "GIF89a: Some functionality has been disabled.\n");
 #endif
-	
+
 	new_gif = EGifOpenFileName(gif_filename, 0);
 	if (new_gif == NULL) {
 		mp_msg(MSGT_VO, MSGL_ERR, "GIF89a: error opening file \"%s\" for output.\n", gif_filename);
@@ -222,7 +222,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		mp_msg(MSGT_VO, MSGL_ERR, "GIF89a: malloc failed.\n");
 		return 1;
 	}
-	
+
 	// initialize the delay and framedrop variables.
 	ideal_time = 0;
 	real_time = 0;
@@ -265,7 +265,7 @@ static int gif_reduce(int width, int height, uint8_t *src, uint8_t *dst, GifColo
 		*G++ = *src++;
 		*B++ = *src++;
 	}
-	
+
 	R = Ra; G = Ga; B = Ba;
 	return QuantizeBuffer(width, height, &size, R, G, B, dst, colors);
 }
@@ -294,7 +294,7 @@ static void flip_page(void)
 	frame_adj += cycle_pos;
 	frame_adj -= frame_cycle;
 	cycle_pos = 0;
-	
+
 	// set up the delay control block
 	CB[0] = (char)(delay >> 8);
 	CB[1] = (char)(delay & 0xff);
@@ -350,7 +350,7 @@ static int control(uint32_t request, void *data, ...)
 static void uninit(void)
 {
 	mp_msg(MSGT_VO, MSGL_DBG2, "GIF89a: Uninit entered\n");
-	
+
 	if (new_gif != NULL) {
 		char temp[256];
 		// comment the gif and close it
@@ -360,13 +360,13 @@ static void uninit(void)
 		EGifPutComment(new_gif, temp);
 		EGifCloseFile(new_gif); // also frees gif storage space.
 	}
-	
+
 	// free our allocated ram
 	if (gif_filename != NULL) free(gif_filename);
 	if (slice_data != NULL) free(slice_data);
 	if (reduce_data != NULL) free(reduce_data);
 	if (reduce_cmap != NULL) FreeMapObject(reduce_cmap);
-	
+
 	// set the pointers back to null.
 	new_gif = NULL;
 	gif_filename = NULL;

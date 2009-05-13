@@ -31,12 +31,12 @@
    probing is enable by AF_CONTROL_VOLUME_PROBE_ON_OFF and is done on a
    per channel basis. The result from the probing is obtained using
    AF_CONTROL_VOLUME_PROBE_GET and AF_CONTROL_VOLUME_PROBE_GET_MAX. The
-   probed values are calculated in dB. 
+   probed values are calculated in dB.
 */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
 
 #include <inttypes.h>
 #include <math.h>
@@ -59,16 +59,16 @@ typedef struct af_volume_s
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
-  af_volume_t* s   = (af_volume_t*)af->setup; 
+  af_volume_t* s   = (af_volume_t*)af->setup;
 
   switch(cmd){
   case AF_CONTROL_REINIT:
     // Sanity check
     if(!arg) return AF_ERROR;
-    
+
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
-    
+
     if(s->fast && (((af_data_t*)arg)->format != (AF_FORMAT_FLOAT_NE))){
       af->data->format = AF_FORMAT_S16_NE;
       af->data->bps    = 2;
@@ -91,22 +91,22 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     for(i=0;i<AF_NCH;i++) vol[i]=v;
     return control(af,AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, vol);
   }
-  case AF_CONTROL_POST_CREATE:	
-    s->fast = ((((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) == 
+  case AF_CONTROL_POST_CREATE:
+    s->fast = ((((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) ==
       AF_INIT_FLOAT) ? 0 : 1;
     return AF_OK;
   case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_SET:
     memcpy(s->enable,(int*)arg,AF_NCH*sizeof(int));
-    return AF_OK; 
+    return AF_OK;
   case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_GET:
     memcpy((int*)arg,s->enable,AF_NCH*sizeof(int));
-    return AF_OK; 
+    return AF_OK;
   case AF_CONTROL_VOLUME_SOFTCLIP | AF_CONTROL_SET:
     s->soft = *(int*)arg;
-    return AF_OK; 
+    return AF_OK;
   case AF_CONTROL_VOLUME_SOFTCLIP | AF_CONTROL_GET:
     *(int*)arg = s->soft;
-    return AF_OK; 
+    return AF_OK;
   case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET:
     return af_from_dB(AF_NCH,(float*)arg,s->level,20.0,-200.0,60.0);
   case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET:
@@ -130,7 +130,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Deallocate memory 
+// Deallocate memory
 static void uninit(struct af_instance_s* af)
 {
   if(af->data)
@@ -145,7 +145,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   af_data_t*    c   = data;			// Current working data
   af_volume_t*  s   = (af_volume_t*)af->setup; 	// Setup for this instance
   int           ch  = 0;			// Channel counter
-  register int	nch = c->nch;			// Number of channels	
+  register int	nch = c->nch;			// Number of channels
   register int  i   = 0;
 
   // Basic operation volume control only (used on slow machines)
@@ -154,7 +154,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     int         len = c->len/2;			// Number of samples
     for(ch = 0; ch < nch ; ch++){
       if(s->enable[ch]){
-	register int vol = (int)(255.0 * s->level[ch]); 
+	register int vol = (int)(255.0 * s->level[ch]);
 	for(i=ch;i<len;i+=nch){
 	  register int x = (a[i] * vol) >> 8;
 	  a[i]=clamp(x,SHRT_MIN,SHRT_MAX);
@@ -163,7 +163,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     }
   }
   // Machine is fast and data is floating point
-  else if(af->data->format == (AF_FORMAT_FLOAT_NE)){ 
+  else if(af->data->format == (AF_FORMAT_FLOAT_NE)){
     float*   	a   	= (float*)c->audio;	// Audio data
     int       	len 	= c->len/4;		// Number of samples
     for(ch = 0; ch < nch ; ch++){
@@ -172,7 +172,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	float	t   = 1.0 - s->time;
 	for(i=ch;i<len;i+=nch){
 	  register float x 	= a[i];
-	  register float pow 	= x*x;	
+	  register float pow 	= x*x;
 	  // Check maximum power value
 	  if(pow > s->max[ch])
 	    s->max[ch] = pow;

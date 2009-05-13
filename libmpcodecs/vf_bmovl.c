@@ -211,7 +211,7 @@ _read_cmd(int fd, char *cmd, char *args) {
 	}
 	return TRUE;
 }
-			
+
 
 static int
 put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
@@ -318,7 +318,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 				vf->priv->x2 = av_clip(imgx + imgw, vf->priv->x2, vf->priv->w);
 				vf->priv->y2 = av_clip(imgy + imgh, vf->priv->y2, vf->priv->h);
 			}
-			
+
 			if( command == CMD_CLEAR ) {
 				sscanf( args, "%d %d %d %d", &imgw, &imgh, &imgx, &imgy);
 				mp_msg(MSGT_VFILTER, MSGL_DBG2, "\nDEBUG: CLEAR: %d %d %d %d\n\n", imgw, imgh, imgx, imgy);
@@ -435,19 +435,19 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 						dmpi->planes[2][pos] = vf->priv->bitmap.v[pos];
 					}
 				} else { // Alphablended pixel
-					dmpi->planes[0][pos] = 
-						((255 - alpha) * (int)dmpi->planes[0][pos] + 
+					dmpi->planes[0][pos] =
+						((255 - alpha) * (int)dmpi->planes[0][pos] +
 						alpha * (int)vf->priv->bitmap.y[pos]) >> 8;
-					
+
 					if ((ypos%2) && (xpos%2)) {
 						pos = ( (ypos/2) * dmpi->stride[1] ) + (xpos/2);
 
-						dmpi->planes[1][pos] = 
-							((255 - alpha) * (int)dmpi->planes[1][pos] + 
+						dmpi->planes[1][pos] =
+							((255 - alpha) * (int)dmpi->planes[1][pos] +
 							alpha * (int)vf->priv->bitmap.u[pos]) >> 8;
-						
-						dmpi->planes[2][pos] = 
-							((255 - alpha) * (int)dmpi->planes[2][pos] + 
+
+						dmpi->planes[2][pos] =
+							((255 - alpha) * (int)dmpi->planes[2][pos] +
 							alpha * (int)vf->priv->bitmap.v[pos]) >> 8;
 					}
 			    }

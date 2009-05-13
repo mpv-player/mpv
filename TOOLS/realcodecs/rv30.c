@@ -212,7 +212,7 @@ void hexdump(void *pos, int len) {
 	int lines=(len+15)>>4;
 	while(lines--) {
 		int len1=len, i;
-		fprintf(stderr, "%0x  ", cpos); 
+		fprintf(stderr, "%0x  ", cpos);
 		cpos1=cpos;
 		for (i=0;i<16;i++) {
 			if (len1>0) {
@@ -232,7 +232,7 @@ void hexdump(void *pos, int len) {
 			}
 			len--;
 		}
-		fputs("\n", stderr);		
+		fputs("\n", stderr);
 	}
 	fputc('\n', stderr);
 }

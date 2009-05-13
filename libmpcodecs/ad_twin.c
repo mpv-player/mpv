@@ -11,7 +11,7 @@
 
 #include "help_mp.h"
 
-static ad_info_t info = 
+static ad_info_t info =
 {
     "TWinVQ decoder",
     "vqf",
@@ -204,7 +204,7 @@ static int bread(char   *data,    /* Output: Output data array */
     unsigned char mask, tmpdat;
     int  retval;
     vqf_priv_t *priv=sh->context;
-    
+
     /*--- Main operation ---*/
     retval = 0;
     mask = 0x1;
@@ -223,7 +223,7 @@ static int bread(char   *data,    /* Output: Output data array */
         tmpdat = (unsigned char)priv->buf[ibufadr];
         tmpdat >>= (BYTE_BIT-ibufbit-1);
         /* current data bit */
-        
+
         idata = ibits*size;                   /* output data address */
         data[idata] = (char)(tmpdat & mask);  /* set output data */
         for (icl=1; icl<size; icl++)
@@ -249,7 +249,7 @@ static int get_bstm(int *data,          /* Input: input data */
     unsigned    work;
     char    tmpbit[BITS_INT];
     int     retval;
-    
+
     if ( nbits > BITS_INT ){
         mp_msg(MSGT_DECAUDIO, MSGL_ERR, "get_bstm(): %d: %d Error.\n",
             nbits, BITS_INT);
@@ -346,7 +346,7 @@ static int GetPpcInfo( tvqConfInfo *cf, INDEX *index, sh_audio_t *sh)
     int idiv, i_sup;
     int bitcount = 0;
     vqf_priv_t*priv=sh->context;
-    
+
     for ( idiv=0; idiv<cf->N_DIV_P; idiv++ ){
         bitcount += get_bstm(&(index->pls[idiv]), priv->bits_0[BLK_PPC][idiv],sh);       /*CB0*/
         bitcount += get_bstm(&(index->pls[idiv+cf->N_DIV_P]), priv->bits_1[BLK_PPC][idiv],sh);/*CB1*/
@@ -355,7 +355,7 @@ static int GetPpcInfo( tvqConfInfo *cf, INDEX *index, sh_audio_t *sh)
         bitcount += get_bstm(&(index->pit[i_sup]), cf->BASF_BIT,sh);
         bitcount += get_bstm(&(index->pgain[i_sup]), cf->PGAIN_BIT,sh);
     }
-    
+
     return bitcount;
 }
 
@@ -372,7 +372,7 @@ static int GetEbcInfo( tvqConfInfo *cf, tvqConfInfoSubBlock *cfg, INDEX *index, 
             }
         }
     }
-    
+
     return bitcount;
 }
 
@@ -385,7 +385,7 @@ static int vqf_read_frame(sh_audio_t *sh,INDEX *index)
     int numFixedBitsPerFrame = TvqGetNumFixedBitsPerFrame();
     int btype;
     vqf_priv_t *priv=sh->context;
-    
+
     /*--- Initialization ---*/
     variableBits = 0;
     bitcount = 0;
@@ -403,10 +403,10 @@ static int vqf_read_frame(sh_audio_t *sh,INDEX *index)
     cfg = &priv->cf.cfg[btype]; // set the block dependent paremeters table
 
     bitcount += variableBits;
-    
+
     /* Interleaved vector quantization */
     bitcount += GetVqInfo( cfg, priv->bits_0[btype], priv->bits_1[btype], variableBits, index, sh );
-    
+
     /* Bark-scale envelope */
     bitcount += GetBseInfo( &priv->cf, cfg, index, sh );
     /* Gain */
@@ -421,7 +421,7 @@ static int vqf_read_frame(sh_audio_t *sh,INDEX *index)
     if ( cfg->ebc_enable ){
         bitcount += GetEbcInfo( &priv->cf, cfg, index, sh );
     }
-    
+
     return bitcount == numFixedBitsPerFrame ? bitcount/8 : 0;
 }
 
@@ -434,7 +434,7 @@ static void frtobuf_s16(float out[],       /* Input  --- input data frame */
     unsigned ismp, ich;
     float *ptr;
     float dtmp;
-    
+
     for ( ich=0; ich<numChannels; ich++ ){
         ptr = out+ich*frameSize;
         for ( ismp=0; ismp<frameSize; ismp++ ){
@@ -461,7 +461,7 @@ static void frtobuf_float(float out[],       /* Input  --- input data frame */
     unsigned ismp, ich;
     float *ptr;
     float dtmp;
-    
+
     for ( ich=0; ich<numChannels; ich++ ){
         ptr = out+ich*frameSize;
         for ( ismp=0; ismp<frameSize; ismp++ ){

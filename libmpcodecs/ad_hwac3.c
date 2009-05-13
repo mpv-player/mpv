@@ -27,7 +27,7 @@
 
 static int isdts = -1;
 
-static ad_info_t info = 
+static ad_info_t info =
 {
   "AC3/DTS pass-through S/PDIF",
   "hwac3",
@@ -80,7 +80,7 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
     else
     {
       length = a52_syncinfo(sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
-      if(length >= 7 && length <= 3840) 
+      if(length >= 7 && length <= 3840)
       {
         if(isdts != 0)
         {
@@ -100,13 +100,13 @@ static int ac3dts_fillbuff(sh_audio_t *sh_audio)
   sh_audio->i_bps = bit_rate / 8;
   demux_read_data(sh_audio->ds, sh_audio->a_in_buffer + 12, length - 12);
   sh_audio->a_in_buffer_len = length;
-    
+
   // TODO: is DTS also checksummed?
 #ifdef CONFIG_LIBA52_INTERNAL
   if(isdts == 0 && crc16_block(sh_audio->a_in_buffer + 2, length - 2) != 0)
     mp_msg(MSGT_DECAUDIO, MSGL_STATUS, "a52: CRC check failed!  \n");
 #endif
-    
+
   return length;
 }
 
@@ -162,7 +162,7 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
   int len = sh_audio->a_in_buffer_len;
-  
+
   if(len <= 0)
     if((len = ac3dts_fillbuff(sh_audio)) <= 0)
       return len; /*EOF*/
@@ -305,7 +305,7 @@ static int dts_decode_header(uint8_t *indata_ptr, int *rate, int *nblks, int *sf
        Frame type ( 1: Normal frame; 0: Termination frame ) */
     ftype = indata_ptr[4+le_mode] >> 7;
 
-  if(ftype != 1) 
+  if(ftype != 1)
   {
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: Termination frames not handled, REPORT BUG\n");
     return -1;
@@ -384,29 +384,29 @@ static int dts_decode_header(uint8_t *indata_ptr, int *rate, int *nblks, int *sf
     *rate = (indata_ptr[10+le_mode] & 0x3f) >> 1;
   }
 #if 0
-  if(*sfreq != 13) 
+  if(*sfreq != 13)
   {
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: Only 48kHz supported, REPORT BUG\n");
     return -1;
   }
 #endif
-  if((fsize > 8192) || (fsize < 96)) 
+  if((fsize > 8192) || (fsize < 96))
   {
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: fsize: %d invalid, REPORT BUG\n", fsize);
     return -1;
   }
-    
+
   if(*nblks != 8 &&
     *nblks != 16 &&
     *nblks != 32 &&
     *nblks != 64 &&
     *nblks != 128 &&
-    ftype == 1) 
+    ftype == 1)
   {
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: nblks %d not valid for normal frame, REPORT BUG\n", *nblks);
     return -1;
   }
-  
+
   return fsize;
 }
 
@@ -416,7 +416,7 @@ static int dts_syncinfo(uint8_t *indata_ptr, int *flags, int *sample_rate, int *
   int fsize;
   int rate;
   int sfreq;
-  
+
   fsize = dts_decode_header(indata_ptr, &rate, &nblks, &sfreq);
   if(fsize >= 0)
   {
@@ -479,7 +479,7 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
 
   buf16[0] = 0xf872; /* iec 61937     */
   buf16[1] = 0x4e1f; /*  syncword     */
-  switch(nr_samples) 
+  switch(nr_samples)
   {
   case 512:
     buf16[2] = 0x000b;      /* DTS-1 (512-sample bursts) */
@@ -495,7 +495,7 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
     buf16[2] = 0x0000;
     break;
   }
- 
+
   if(fsize + 8 > nr_samples * 2 * 2)
   {
     // dts wav (14bits LE) match this condition, one way to passthrough

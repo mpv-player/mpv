@@ -1,6 +1,6 @@
 		VIDIX - VIDeo Interface for *niX
 		~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		
+
 This interface was designed and introduced as interface to userspace drivers
 to provide DGA everywhere where it's possible (unline X11).
 I hope that these drivers will be portable same as X11 (not only on *nix).
@@ -12,10 +12,10 @@ What is it:
 - Unlikely linux's drivers it uses mathematics library.
 
 Why it was developed:
-As said Vladimir Dergachev 
+As said Vladimir Dergachev
 (http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/gatos/km/km.rfc.txt):
 "0) Motivation
-    v4l, v4l2 and Xv are all suffering from the same problem: attempt to fit 
+    v4l, v4l2 and Xv are all suffering from the same problem: attempt to fit
     existing multimedia devices into a fixed scheme."
 Well - I tried to implement something similar by motivation.
 
@@ -42,7 +42,7 @@ So any suggestions, reports, criticism are gladly accepted.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    vidix_playback_t.fourcc	- contains fourcc of movie
    vidix_playback_t.capability	- currently contsinas copy of vidix_capability_t.flags
-   vidix_playback_t.blend_factor- currently unused   
+   vidix_playback_t.blend_factor- currently unused
    vidix_playback_t.src		- x,y,w,h fields contain original movie size
 				  (in pixels) x and y often are nulls.
    vidix_playback_t.src.pitch.y   These fields contain source pitches
@@ -61,23 +61,23 @@ So any suggestions, reports, criticism are gladly accepted.
    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    vidix_playback_t.num_frames  - real # of frames which will be used by driver.
 				  (Should be less or equal to app's num_frames).
-				  
+
    vidix_playback_t.dest.pitch.y   These fields should contain alignment
    vidix_playback_t.dest.pitch.u - for each Y,U,V plane in bytes.
    vidix_playback_t.dest.pitch.v   (For packed fourcc only Y value is used)
-   
+
    vidix_playback_t.frame_size	- Driver should tell to app which size of
 				      source frame (src.w and src.h) should
 				      use APP (according to pitches and offsets)
 
    vidix_playback_t.offsets	- offsets from begin of BES memory for each frame
-   
+
    vidix_playback_t.offset.y	  These field should contain offset
    vidix_playback_t.offset.u	- for each Y,U,V plane within frame.
    vidix_playback_t.offset.v	  (For packed fourcc only Y value is used)
 
    vidix_playback_t.dga_addr	- Address of BES memory.
-   
+
 Also see this picture:
 
 VIDEO MEMORY layout:
@@ -128,8 +128,8 @@ Formula: (For Y plane) copy source to:
 10) APP calls vixPlaybackOff. Driver should deactivate BES on this call.
 11) If vixDestroy is defined APP calls this function before unloading driver
     from memory.
-    
-    
+
+
 What functions are mandatory:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 vixGetVersion

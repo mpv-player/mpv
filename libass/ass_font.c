@@ -121,10 +121,10 @@ static int add_face(void* fc_priv, ass_font_t* font, uint32_t ch)
 	FT_Face face;
 	int error;
 	int mem_idx;
-	
+
 	if (font->n_faces == ASS_FONT_MAX_FACES)
 		return -1;
-	
+
 	path = fontconfig_select(fc_priv, font->desc.family, font->desc.treat_family_as_pattern, font->desc.bold,
 					      font->desc.italic, &index, ch);
 
@@ -145,7 +145,7 @@ static int add_face(void* fc_priv, ass_font_t* font, uint32_t ch)
 	}
 	charmap_magic(face);
 	buggy_font_workaround(face);
-	
+
 	font->faces[font->n_faces++] = face;
 	update_transform(font);
 	face_set_size(face, font->size);
@@ -164,7 +164,7 @@ ass_font_t* ass_font_new(ass_library_t* library, FT_Library ftlibrary, void* fc_
 	fontp = ass_font_cache_find(desc);
 	if (fontp)
 		return fontp;
-	
+
 	font.library = library;
 	font.ftlibrary = ftlibrary;
 	font.n_faces = 0;
@@ -256,7 +256,7 @@ void ass_font_get_asc_desc(ass_font_t* font, uint32_t ch, int* asc, int* desc)
 			return;
 		}
 	}
-	
+
 	*asc = *desc = 0;
 }
 
@@ -308,18 +308,18 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 	case ASS_HINTING_NORMAL: flags = FT_LOAD_FORCE_AUTOHINT; break;
 	case ASS_HINTING_NATIVE: flags = 0; break;
 	}
-	
+
 	error = FT_Load_Glyph(face, index, FT_LOAD_NO_BITMAP | flags);
 	if (error) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return 0;
 	}
-	
+
 #if (FREETYPE_MAJOR > 2) || \
     ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR >= 2)) || \
     ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR == 1) && (FREETYPE_PATCH >= 10))
 // FreeType >= 2.1.10 required
-	if (!(face->style_flags & FT_STYLE_FLAG_ITALIC) && 
+	if (!(face->style_flags & FT_STYLE_FLAG_ITALIC) &&
 			(font->desc.italic > 55)) {
 		FT_GlyphSlot_Oblique(face->glyph);
 	}
@@ -329,7 +329,7 @@ FT_Glyph ass_font_get_glyph(void* fontconfig_priv, ass_font_t* font, uint32_t ch
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_ErrorLoadingGlyph);
 		return 0;
 	}
-	
+
 	return glyph;
 }
 

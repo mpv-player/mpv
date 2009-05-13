@@ -78,21 +78,21 @@ rtsp_streaming_start (stream_t *stream)
                          port = (stream->streaming_ctrl->url->port ?
                                  stream->streaming_ctrl->url->port :
                                  RTSP_DEFAULT_PORT), 1);
-    
+
     if (fd < 0 && !stream->streaming_ctrl->url->port)
       fd = connect2Server (stream->streaming_ctrl->url->hostname,
                            port = 7070, 1);
 
     if (fd < 0)
       return -1;
-    
+
     file = stream->streaming_ctrl->url->file;
     if (file[0] == '/')
       file++;
 
     mrl = malloc (strlen (stream->streaming_ctrl->url->hostname)
                   + strlen (file) + 16);
-    
+
     sprintf (mrl, "rtsp://%s:%i/%s",
              stream->streaming_ctrl->url->hostname, port, file);
 
@@ -112,20 +112,20 @@ rtsp_streaming_start (stream_t *stream)
 
     free (mrl);
     temp--;
-  } while ((redirected != 0) && (temp > 0));    
+  } while ((redirected != 0) && (temp > 0));
 
   if (!rtsp)
     return -1;
 
   stream->fd = fd;
   stream->streaming_ctrl->data = rtsp;
-  
+
   stream->streaming_ctrl->streaming_read = rtsp_streaming_read;
   stream->streaming_ctrl->streaming_seek = NULL;
   stream->streaming_ctrl->prebuffer_size = 128*1024;  // 640 KBytes
   stream->streaming_ctrl->buffering = 1;
   stream->streaming_ctrl->status = streaming_playing_e;
-  
+
   return 0;
 }
 
@@ -133,7 +133,7 @@ static void
 rtsp_streaming_close (struct stream_st *s)
 {
   rtsp_session_t *rtsp = NULL;
-  
+
   rtsp = (rtsp_session_t *) s->streaming_ctrl->data;
   if (rtsp)
     rtsp_session_end (rtsp);
@@ -144,7 +144,7 @@ rtsp_streaming_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
   URL_t *url;
   extern int index_mode;
-  
+
   mp_msg (MSGT_OPEN, MSGL_V, "STREAM_RTSP, URL: %s\n", stream->url);
   stream->streaming_ctrl = streaming_ctrl_new ();
   if (!stream->streaming_ctrl)

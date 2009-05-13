@@ -110,7 +110,7 @@ static int8_t *initNoise(FilterParam *fp){
 				x2 = 2.0 * rand()/(float)RAND_MAX - 1.0;
 				w = x1 * x1 + x2 * x2;
 			} while ( w >= 1.0 );
-		
+
 			w = sqrt( (-2.0 * log( w ) ) / w );
 			y1= x1 * w;
 			y1*= strength / sqrt(3.0);
@@ -125,7 +125,7 @@ static int8_t *initNoise(FilterParam *fp){
 		}
 		if (RAND_N(6) == 0) j--;
 	}
-	
+
 
 	for (i = 0; i < MAX_RES; i++)
 	    for (j = 0; j < 3; j++)
@@ -246,7 +246,7 @@ static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t 
 		"movq %%mm1, (%4, %%"REG_a")	\n\t"
 		"add $8, %%"REG_a"		\n\t"
 		" js 1b				\n\t"
-		:: "r" (src+mmx_len), "r" (shift[0]+mmx_len), "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len), 
+		:: "r" (src+mmx_len), "r" (shift[0]+mmx_len), "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len),
                    "r" (dst+mmx_len), "g" (-mmx_len)
 		: "%"REG_a
 	);
@@ -261,7 +261,7 @@ static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t 
 static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
 	int i;
         int8_t *src2= (int8_t*)src;
-	
+
 	for(i=0; i<len; i++)
 	{
 	    const int n= shift[0][i] + shift[1][i] + shift[2][i];
@@ -374,7 +374,7 @@ static void uninit(struct vf_instance_s* vf){
 
 	if(vf->priv->lumaParam.noise) free(vf->priv->lumaParam.noise);
 	vf->priv->lumaParam.noise= NULL;
-	
+
 	free(vf->priv);
 	vf->priv=NULL;
 }
@@ -446,7 +446,7 @@ static int open(vf_instance_t *vf, char* args){
         return 0; // no csp match :(
     }
 
- 
+
 #if HAVE_MMX
     if(gCpuCaps.hasMMX){
         lineNoise= lineNoise_MMX;
@@ -457,7 +457,7 @@ static int open(vf_instance_t *vf, char* args){
     if(gCpuCaps.hasMMX2) lineNoise= lineNoise_MMX2;
 //    if(gCpuCaps.hasMMX) lineNoiseAvg= lineNoiseAvg_MMX2;
 #endif
-    
+
     return 1;
 }
 

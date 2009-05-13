@@ -861,7 +861,7 @@ static int draw_slice(uint8_t *image[], int stride[], int w, int h,
     if ((decoder == VDP_INVALID_HANDLE || decoder_max_refs < max_refs)
         && !create_vdp_decoder(max_refs))
         return VO_FALSE;
-    
+
     vdp_st = vdp_decoder_render(decoder, rndr->surface, (void *)&rndr->info, rndr->bitstream_buffers_used, rndr->bitstream_buffers);
     CHECK_ST_WARNING("Failed VDPAU decoder rendering");
     return VO_TRUE;

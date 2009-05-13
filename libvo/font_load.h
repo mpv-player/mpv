@@ -54,13 +54,13 @@ typedef struct font_desc {
 
 #ifdef CONFIG_FREETYPE
     int face_cnt;
-    
+
     FT_Face faces[16];
     FT_UInt glyph_index[65536];
 
     int max_width, max_height;
 
-    struct 
+    struct
     {
 	int g_r;
 	int o_r;

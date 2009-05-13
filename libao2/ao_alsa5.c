@@ -32,7 +32,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
     "ALSA-0.5.x audio output",
     "alsa5",
@@ -117,7 +117,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    alsa_format.format = SND_PCM_SFMT_MPEG;
 	    break;
     }
-    
+
     switch(alsa_format.format)
     {
 	case SND_PCM_SFMT_S16_LE:
@@ -230,7 +230,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     setup.format = alsa_format;
     setup.buf.stream.queue_size = ao_data.buffersize;
     setup.msbits_per_sample = ao_data.bps;
-    
+
     if ((err = snd_pcm_channel_setup(alsa_handler, &setup)) < 0)
     {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_CantSetChan, snd_strerror(err));
@@ -333,10 +333,10 @@ static void audio_resume(void)
 static int play(void* data, int len, int flags)
 {
     int got_len;
-    
+
     if (!len)
 	return 0;
-    
+
     if ((got_len = snd_pcm_write(alsa_handler, data, len)) < 0)
     {
 	if (got_len == -EPIPE) /* underrun? */
@@ -365,7 +365,7 @@ static int play(void* data, int len, int flags)
 static int get_space(void)
 {
     snd_pcm_channel_status_t ch_stat;
-    
+
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
 
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
@@ -378,9 +378,9 @@ static int get_space(void)
 static float get_delay(void)
 {
     snd_pcm_channel_status_t ch_stat;
-    
+
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
-    
+
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
 	return (float)ao_data.buffersize/(float)ao_data.bps; /* error occurred */
     else

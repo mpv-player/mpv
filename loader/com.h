@@ -71,7 +71,7 @@ struct IClassFactory
     struct IClassFactory_vt* vt;
 };
 
-#ifdef WIN32_LOADER 
+#ifdef WIN32_LOADER
 long CoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
  		      long dwClsContext, const GUID* riid, void** ppv);
 void* CoTaskMemAlloc(unsigned long cb);

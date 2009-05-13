@@ -34,7 +34,7 @@ static int config(struct vf_instance_s* vf,
 
     lavc_venc_context.width = width;
     lavc_venc_context.height = height;
-    
+
     if(!lavc_venc_context.time_base.num || !lavc_venc_context.time_base.den){
 	// guess FPS:
 	switch(height){
@@ -81,7 +81,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     pic->linesize[1]=mpi->stride[1];
     pic->linesize[2]=mpi->stride[2];
 
-    out_size = avcodec_encode_video(&lavc_venc_context, 
+    out_size = avcodec_encode_video(&lavc_venc_context,
 	vf->priv->outbuf, vf->priv->outbuf_size, pic);
 
     if(out_size<=0) return 1;
@@ -89,14 +89,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     dmpi=vf_get_image(vf->next,IMGFMT_MPEGPES,
 	MP_IMGTYPE_EXPORT, 0,
 	mpi->w, mpi->h);
-    
+
     vf->priv->pes.data=vf->priv->outbuf;
     vf->priv->pes.size=out_size;
     vf->priv->pes.id=0x1E0;
     vf->priv->pes.timestamp=-1; // dunno
-    
+
     dmpi->planes[0]=(unsigned char*)&vf->priv->pes;
-    
+
     return vf_next_put_image(vf,dmpi, MP_NOPTS_VALUE);
 }
 
@@ -115,7 +115,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 static int open(vf_instance_t *vf, char* args){
     int p_quality=0;
     float p_fps=0;
-    
+
     vf->config=config;
     vf->put_image=put_image;
     vf->query_format=query_format;
@@ -133,7 +133,7 @@ static int open(vf_instance_t *vf, char* args){
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_MissingLAVCcodec, "mpeg1video");
 	return 0;
     }
-    
+
     vf->priv->context=avcodec_alloc_context();
     vf->priv->pic = avcodec_alloc_frame();
 

@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
       return 1;
   }
   printf("monitor_aspect: %f\n",monitor_aspect);
-  aspect(&w,&h,z); 
+  aspect(&w,&h,z);
   printf("new size:       %dx%d\n",w,h);
   return 0;
 }

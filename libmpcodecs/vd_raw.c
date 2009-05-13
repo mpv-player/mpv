@@ -59,10 +59,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
     int frame_size;
     int format = sh->bih ? sh->bih->biCompression : sh->format;
-    
+
     if(len<=0) return NULL; // skipped frame
 
-    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, 
+    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0,
 	sh->disp_w, sh->disp_h);
     if(!mpi) return NULL;
 
@@ -119,6 +119,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    len,frame_size);
 	return NULL;
     }
-    
+
     return mpi;
 }

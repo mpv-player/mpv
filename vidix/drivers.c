@@ -50,7 +50,7 @@ extern VDXDriver unichrome_drv;
 static void vidix_register_driver (VDXDriver *drv)
 {
   VDXDriver **d;
-  
+
   d = &first_driver;
   while (*d != NULL)
     d = &(*d)->next;
@@ -125,7 +125,7 @@ static int vidix_probe_driver (VDXContext *ctx, VDXDriver *drv,
               drv->name);
      return 0;
   }
-  
+
   if (verbose)
     printf ("vidixlib: %s probed o'k\n", drv->name);
 
@@ -145,7 +145,7 @@ static void vidix_list_drivers (void)
     vidix_capability_t cap;
     drv->get_caps (&cap);
     printf (" * %s - %s\n", drv->name, cap.name);
-    drv = drv->next; 
+    drv = drv->next;
   }
 }
 
@@ -160,7 +160,7 @@ int vidix_find_driver (VDXContext *ctx, const char *name,
     ctx->drv = NULL;
     return 0;
   }
-  
+
   drv = first_driver;
   while (drv)
   {

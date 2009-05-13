@@ -45,16 +45,16 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 {
 	int i;
 	short out[24]; // output buffer for the partial metrics from the mmx code
-	
+
 	__asm__ (
 		"movl $4, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t" // 4 even difference sums
 		"pxor %%mm5, %%mm5 \n\t" // 4 odd difference sums
 		"pxor %%mm7, %%mm7 \n\t" // all zeros
-		
+
 		ASMALIGN(4)
 		"1: \n\t"
-		
+
 		// Even difference
 		"movq (%%"REG_S"), %%mm0 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"
@@ -73,7 +73,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"paddw %%mm1, %%mm4 \n\t"
 		"paddw %%mm2, %%mm4 \n\t"
 		"paddw %%mm3, %%mm4 \n\t"
-		
+
 		// Odd difference
 		"movq (%%"REG_S"), %%mm0 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"
@@ -92,12 +92,12 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"paddw %%mm1, %%mm5 \n\t"
 		"paddw %%mm2, %%mm5 \n\t"
 		"paddw %%mm3, %%mm5 \n\t"
-			
+
 		"decl %%ecx \n\t"
 		"jnz 1b \n\t"
 		"movq %%mm4, (%%"REG_d") \n\t"
 		"movq %%mm5, 8(%%"REG_d") \n\t"
-		: 
+		:
 		: "S" (old), "D" (new), "a" (os), "b" (ns), "d" (out)
 		: "memory"
 		);
@@ -111,10 +111,10 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"pxor %%mm4, %%mm4 \n\t" // Past spacial noise
 		"pxor %%mm5, %%mm5 \n\t" // Temporal noise
 		"pxor %%mm6, %%mm6 \n\t" // Current spacial noise
-		
+
 		ASMALIGN(4)
 		"2: \n\t"
-		
+
 		"movq (%%"REG_S"), %%mm0 \n\t"
 		"movq (%%"REG_S",%%"REG_a"), %%mm1 \n\t"
 		"add %%"REG_a", %%"REG_S" \n\t"
@@ -133,10 +133,10 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"psubw %%mm0, %%mm4 \n\t"
 		"psubw %%mm2, %%mm5 \n\t"
 		"psubw %%mm2, %%mm6 \n\t"
-		
+
 		"decl %%ecx \n\t"
 		"jnz 2b \n\t"
-		
+
 		"movq %%mm0, %%mm1 \n\t"
 		"movq %%mm0, %%mm2 \n\t"
 		"movq %%mm0, %%mm3 \n\t"
@@ -165,10 +165,10 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm5, %%mm5 \n\t"
 		"pxor %%mm6, %%mm6 \n\t"
-		
+
 		ASMALIGN(4)
 		"3: \n\t"
-		
+
 		"movq (%%"REG_S"), %%mm0 \n\t"
 		"movq (%%"REG_S",%%"REG_a"), %%mm1 \n\t"
 		"add %%"REG_a", %%"REG_S" \n\t"
@@ -187,10 +187,10 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"psubw %%mm0, %%mm4 \n\t"
 		"psubw %%mm2, %%mm5 \n\t"
 		"psubw %%mm2, %%mm6 \n\t"
-		
+
 		"decl %%ecx \n\t"
 		"jnz 3b \n\t"
-		
+
 		"movq %%mm0, %%mm1 \n\t"
 		"movq %%mm0, %%mm2 \n\t"
 		"movq %%mm0, %%mm3 \n\t"
@@ -208,7 +208,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"movq %%mm6, 40(%%"REG_d") \n\t"
 
 		"emms \n\t"
-		: 
+		:
 		: "S" (old), "D" (new), "a" ((long)os), "b" ((long)ns), "d" (out)
 		: "memory"
 		);
@@ -328,7 +328,7 @@ static int foo(struct vf_priv_s *p, mp_image_t *new, mp_image_t *cur)
 		p->dropnext = 0;
 		return F_DROP;
 	}
-	
+
 	// Sometimes a pulldown frame comes all by itself, so both
 	// its top and bottom field are duplicates from the adjacent
 	// two frames. We can just drop such a frame, but we
@@ -338,7 +338,7 @@ static int foo(struct vf_priv_s *p, mp_image_t *new, mp_image_t *cur)
 		p->dropnext = 1;
 		return F_NEXT;
 	}
-	
+
 	// If none of these conditions hold, we will consider the frame
 	// progressive and just show it as-is.
 	if (!(  (3*f[0].r.e < f[0].r.o) ||
@@ -424,7 +424,7 @@ static int do_put_image(struct vf_instance_s* vf, mp_image_t *dmpi)
 		dropflag = (++p->lastdrop >= 5) && (4*p->inframes <= 5*p->outframes);
 		break;
 	}
-	
+
 	if (dropflag) {
 		//mp_msg(MSGT_VFILTER, MSGL_V, "drop! [%d/%d=%g]\n",
 		//	p->outframes, p->inframes, (float)p->outframes/p->inframes);
@@ -457,7 +457,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	p->dmpi->qscale = mpi->qscale;
 	p->dmpi->qstride = mpi->qstride;
 	p->dmpi->qscale_type = mpi->qscale_type;
-		
+
 	switch (foo(p, mpi, p->dmpi)) {
 	case F_DROP:
 		copy_image(p->dmpi, mpi, 2);

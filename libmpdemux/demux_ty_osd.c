@@ -1,10 +1,10 @@
 // Most of this was written by Mike Baker <mbm@linux.com>
 // and released under the GPL v2+ license.
 //
-// Modifications and SEVERE cleanup of the code was done by 
-// Christopher Wingert 
+// Modifications and SEVERE cleanup of the code was done by
+// Christopher Wingert
 // Copyright 2003
-// 
+//
 // Released under GPL2 License.
 
 #include <stdio.h>
@@ -148,12 +148,12 @@ static void ty_RollupBuf( int dest, int source, int numLines )
 static void ty_drawchar( char c )
 {
    if ( c < 2 ) return;
-  
-   if ( TY_OSD_flags & TY_OSD_MODE && TY_CC_stat != TY_CCNONE && 
+
+   if ( TY_OSD_flags & TY_OSD_MODE && TY_CC_stat != TY_CCNONE &&
       TY_CC_CUR_Y != -1 )
       ty_DrawChar( &TY_CC_CUR_X, &TY_CC_CUR_Y, c, 4, 13 );
 
-   if ( TY_CC_ptr - TY_CC_buf > sizeof( TY_CC_buf ) - 1 ) 
+   if ( TY_CC_ptr - TY_CC_buf > sizeof( TY_CC_buf ) - 1 )
    {        // buffer overflow
       TY_CC_ptr = TY_CC_buf;
       memset( TY_CC_buf, 0, sizeof( TY_CC_buf ) );
@@ -163,10 +163,10 @@ static void ty_drawchar( char c )
 
 static void ty_draw(void)
 {
-   if ( TY_CC_ptr != TY_CC_buf && TY_OSD_flags & TY_TEXT_MODE ) 
+   if ( TY_CC_ptr != TY_CC_buf && TY_OSD_flags & TY_TEXT_MODE )
    {
       if ( *( TY_CC_ptr - 1 ) == '\n' ) *( TY_CC_ptr - 1 ) = 0;
-    
+
       mp_msg( MSGT_DEMUX, MSGL_V, "CC: %s\n", TY_CC_buf );
   }
   TY_CC_lastcap = time( NULL );
@@ -181,9 +181,9 @@ static void ty_draw(void)
 
 static int CC_last = 0;
 static char CC_mode = 0;
-static int CC_row[] = 
-{ 
-   11, -1, 1, 2, 3, 4, 12, 13, 14, 15, 5, 6, 7, 8, 9, 10 
+static int CC_row[] =
+{
+   11, -1, 1, 2, 3, 4, 12, 13, 14, 15, 5, 6, 7, 8, 9, 10
 };
 
 // char specialchar[] = { '®', '°', '½', '¿', '*', '¢', '£', 14, 'à', ' ', 'è', 'â', 'ê', 'î', 'ô', 'û' };
@@ -196,7 +196,7 @@ static int ty_CCdecode( char b1, char b2 )
    if ( b1 & 0x60 )                // text
    {
        if ( !TY_OSD_debug && TY_CC_stat == TY_CCNONE ) return 0;
-       if ( TY_OSD_debug > 3 ) 
+       if ( TY_OSD_debug > 3 )
        {
           mp_msg( MSGT_DEMUX, MSGL_DBG3, "%c %c", b1, b2 );
        }
@@ -204,24 +204,24 @@ static int ty_CCdecode( char b1, char b2 )
        ty_drawchar( b2 );
 
        if ( TY_CC_stat > 0 && TY_OSD_flags & TY_OSD_MODE ) ty_DrawOSD();
-   } 
-   else if ( ( b1 & 0x10 ) && ( b2 > 0x1F ) && ( data != CC_last ) ) 
+   }
+   else if ( ( b1 & 0x10 ) && ( b2 > 0x1F ) && ( data != CC_last ) )
    {
       #define CURRENT ( ( b1 & 0x08 ) >> 3 )
 
-      if ( CC_mode != CURRENT && TY_CC_stat != TY_CCNONE ) 
+      if ( CC_mode != CURRENT && TY_CC_stat != TY_CCNONE )
       {
          if ( TY_OSD_debug && TY_CC_ptr != TY_CC_buf ) ty_draw();
          TY_CC_stat = TY_CCNONE;
          return 0;
       }
 
-      if ( TY_CC_stat == TY_CCNONE || TY_CC_CUR_Y == -1 ) 
+      if ( TY_CC_stat == TY_CCNONE || TY_CC_CUR_Y == -1 )
       {
-         if ( TY_CC_ptr != TY_CC_buf ) 
+         if ( TY_CC_ptr != TY_CC_buf )
          {
-            if ( TY_OSD_debug ) 
-               mp_msg( MSGT_DEMUX, MSGL_DBG3, "(TY_OSD_debug) %s\n", 
+            if ( TY_OSD_debug )
+               mp_msg( MSGT_DEMUX, MSGL_DBG3, "(TY_OSD_debug) %s\n",
                   TY_CC_buf );
             TY_CC_ptr = TY_CC_buf;
             memset(TY_CC_buf, 0, sizeof(TY_CC_buf));
@@ -229,9 +229,9 @@ static int ty_CCdecode( char b1, char b2 )
 
          if ( CC_mode != CURRENT ) return 0;
       }
-    
+
       // preamble address code (row & indent)
-      if ( b2 & 0x40 ) 
+      if ( b2 & 0x40 )
       {
          TY_CC_CUR_Y = CC_row[ ( ( b1 << 1 ) & 14 ) | ( ( b2 >> 5 ) & 1 ) ];
 
@@ -249,14 +249,14 @@ static int ty_CCdecode( char b1, char b2 )
 				TY_CC_Y_Offset = SUB_MAX_TEXT - 5 - 12;
 			}
 
-         if ( TY_OSD_debug > 3 ) 
+         if ( TY_OSD_debug > 3 )
             mp_msg( MSGT_DEMUX, MSGL_DBG3, "<< preamble %d >>\n", TY_CC_CUR_Y );
 
          // we still have something in the text buffer
-         if (TY_CC_ptr != TY_CC_buf) 
+         if (TY_CC_ptr != TY_CC_buf)
          {
             *(TY_CC_ptr++) = '\n';
-            if ( TY_CC_TextItalic ) 
+            if ( TY_CC_TextItalic )
             {
                TY_CC_TextItalic = 0;
             }
@@ -266,33 +266,33 @@ static int ty_CCdecode( char b1, char b2 )
          // row contains indent flag
          if ( b2 & 0x10 )
          {
-            for ( x = 0 ; x < ( ( b2 & 0x0F ) << 1 ) ; x++ ) 
+            for ( x = 0 ; x < ( ( b2 & 0x0F ) << 1 ) ; x++ )
             {
                TY_CC_CUR_X++;
                *(TY_CC_ptr++) = ' ';
             }
          }
-      } 
-      else 
+      }
+      else
       // !(b2 & 0x40)
       {
-         if ( TY_OSD_debug > 3 ) 
+         if ( TY_OSD_debug > 3 )
             mp_msg( MSGT_DEMUX, MSGL_DBG3, "<< %02x >>\n", b1 & 0x7 );
-         switch (b1 & 0x07) 
+         switch (b1 & 0x07)
          {
             case 0x00:                      // attribute
 				{
-               if ( TY_OSD_debug > 1 ) 
+               if ( TY_OSD_debug > 1 )
                   mp_msg( MSGT_DEMUX, MSGL_DBG3, "<<A: %d>>\n", b2 );
                break;
 				}
             case 0x01:                      // midrow or char
 				{
-               switch (b2 & 0x70) 
+               switch (b2 & 0x70)
                {
                   case 0x20:                // midrow attribute change
                   {
-                     switch (b2 & 0x0e) 
+                     switch (b2 & 0x0e)
                      {
                         case 0x00:          // italics off
                         {
@@ -308,16 +308,16 @@ static int ty_CCdecode( char b1, char b2 )
                         }
                         default:
                         {
-                           if ( TY_OSD_debug > 1 ) 
-                              mp_msg( MSGT_DEMUX, MSGL_DBG3, "<<D: %d>>\n", 
+                           if ( TY_OSD_debug > 1 )
+                              mp_msg( MSGT_DEMUX, MSGL_DBG3, "<<D: %d>>\n",
                                  b2 & 0x0e );
                         }
                      }
-                     if ( b2 & 0x01 ) 
-                     {       
+                     if ( b2 & 0x01 )
+                     {
                         // TextUnderline = 1;
-                     } 
-                     else 
+                     }
+                     else
                      {
                         // TextUnderline = 0;
                      }
@@ -326,12 +326,12 @@ static int ty_CCdecode( char b1, char b2 )
                   case 0x30:                // special character..
                   {
                      // transparent space
-                     if ( ( b2 & 0x0f ) == 9 ) 
+                     if ( ( b2 & 0x0f ) == 9 )
                      {
                         TY_CC_CUR_X++;
                         *(TY_CC_ptr++) = ' ';
-                     } 
-                     else 
+                     }
+                     else
                      {
                         // ty_drawchar(specialchar[ b2 & 0x0f ] );
                         ty_drawchar( ' ' );
@@ -345,14 +345,14 @@ static int ty_CCdecode( char b1, char b2 )
             case 0x04:                      // misc
             case 0x05:                      // misc + F
 				{
-               if ( TY_OSD_debug > 3 ) 
+               if ( TY_OSD_debug > 3 )
                   mp_msg( MSGT_DEMUX, MSGL_DBG3, "<< misc %02x >>\n", b2 );
-               switch ( b2 ) 
+               switch ( b2 )
                {
                   case 0x20:                // resume caption (new caption)
                   {
-                     if ( TY_OSD_flags & TY_OSD_MODE && 
-                        TY_CC_stat != TY_CCPOPUP ) 
+                     if ( TY_OSD_flags & TY_OSD_MODE &&
+                        TY_CC_stat != TY_CCPOPUP )
 								ty_ClearOSD( 1 );
                      TY_CC_stat = TY_CCPOPUP;
                      break;
@@ -363,7 +363,7 @@ static int ty_CCdecode( char b1, char b2 )
                      TY_CC_CUR_X--;
                      break;
                   }
-              
+
                   case 0x25:       // 2-4 row captions
                   case 0x26:
                   case 0x27:
@@ -395,18 +395,18 @@ static int ty_CCdecode( char b1, char b2 )
                   case 0x2C:                // erase displayed memory
                   {
                      TY_CC_lastcap = 0;
-                     if ( TY_OSD_flags & TY_OSD_MODE ) 
+                     if ( TY_OSD_flags & TY_OSD_MODE )
                      {
-                        if ( TY_CC_stat > TY_CCPOPUP || TY_CC_ptr == TY_CC_buf ) 
+                        if ( TY_CC_stat > TY_CCPOPUP || TY_CC_ptr == TY_CC_buf )
                         {
                            ty_ClearOSD( 1 );
                            ty_draw();
-                        } 
-                        else 
-                        { 
+                        }
+                        else
+                        {
                            ty_ClearOSD( 1 );
 
-                           // CRW - 
+                           // CRW -
                            // new buffer
                            // Used to be a buffer swap here, dunno why
                         }
@@ -418,13 +418,13 @@ static int ty_CCdecode( char b1, char b2 )
                   {
                      ty_draw();
                      TY_CC_CUR_X = 1;
-                     if ( TY_OSD_flags & TY_OSD_MODE ) 
+                     if ( TY_OSD_flags & TY_OSD_MODE )
                      {
                         if ( TY_CC_stat > TY_CCPAINTON )
                            ty_RollupBuf
                            (
-                              TY_CC_CUR_Y - TY_CC_stat + 1 , 
-                              TY_CC_CUR_Y - TY_CC_stat + 2, 
+                              TY_CC_CUR_Y - TY_CC_stat + 1 ,
+                              TY_CC_CUR_Y - TY_CC_stat + 2,
                               TY_CC_stat - 1
                             );
                         else
@@ -442,13 +442,13 @@ static int ty_CCdecode( char b1, char b2 )
                   case 0x2E:                // erase non-displayed memory
                   {
                      if ( TY_OSD_debug && TY_CC_ptr != TY_CC_buf )
-                        mp_msg( MSGT_DEMUX, MSGL_DBG3, "(TY_OSD_debug) %s\n", 
+                        mp_msg( MSGT_DEMUX, MSGL_DBG3, "(TY_OSD_debug) %s\n",
                            TY_CC_buf );
                      if ( TY_OSD_flags & TY_OSD_MODE ) ty_ClearOSD( 1 );
 
                      TY_CC_CUR_X = 1;
                      TY_CC_CUR_Y = -1;
-              
+
                      TY_CC_ptr = TY_CC_buf;
                      memset( TY_CC_buf, 0, sizeof( TY_CC_buf ) );
                   }
@@ -534,7 +534,7 @@ static void ty_DisplayXDSInfo(void)
          size =  strlen( ty_XDS_Display[ index ] );
 
          // Right Justify the XDS Stuff
-         memcpy( &( ty_OSD1.text[ 0 ][ TY_CC_MAX_X - size - 1 ] ), 
+         memcpy( &( ty_OSD1.text[ 0 ][ TY_CC_MAX_X - size - 1 ] ),
             ty_XDS_Display[ index ], size );
          free( ty_XDS_Display[ index ] );
          ty_XDS_Display[ index ] = 0;
@@ -574,14 +574,14 @@ static char TY_XDS    [ 8 ][ 25 ][ 34 ];
 static char TY_XDS_new[ 8 ][ 25 ][ 34 ];
 
 // Array of [ MPAARating|TVRating ][ NumberRatings ]
-static const char * const TY_XDS_CHIP[ 2 ][ 8 ] = 
+static const char * const TY_XDS_CHIP[ 2 ][ 8 ] =
 {
    { "(NOT APPLICABLE)", "G", "PG", "PG-13", "R", "NC-17", "X", "(NOT RATED)" },
-   { "(NOT RATED)", "TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA", 
+   { "(NOT RATED)", "TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA",
       "(NOT RATED)" }
 };
 
-static const char * const TY_XDS_modes[] = 
+static const char * const TY_XDS_modes[] =
 {
   "CURRENT",                        // 01h-02h current program
   "FUTURE ",                        // 03h-04h future program
@@ -599,8 +599,8 @@ static int ty_XDSdecode( char b1, char b2 )
 {
    char line[ 80 ];
 
-   if ( b1 < 0x0F ) 
-   {                                        // start packet 
+   if ( b1 < 0x0F )
+   {                                        // start packet
       TY_XDS_length = 0;
       TY_XDS_mode = b1 >> 1;                // every other mode is a resume
       TY_XDS_type = b2;
@@ -609,19 +609,19 @@ static int ty_XDSdecode( char b1, char b2 )
    }
 
    TY_XDS_checksum += b1 + b2;
-  
+
    // eof (next byte is checksum)
-   if ( b1 == 0x0F ) 
-   {        
+   if ( b1 == 0x0F )
+   {
       // validity check
-      if ( !TY_XDS_length || TY_XDS_checksum & 0x7F )  
+      if ( !TY_XDS_length || TY_XDS_checksum & 0x7F )
       {
-         if ( TY_OSD_debug > 3 && !TY_XDS_length ) 
+         if ( TY_OSD_debug > 3 && !TY_XDS_length )
          {
-            mp_msg( MSGT_DEMUX, MSGL_DBG3, 
+            mp_msg( MSGT_DEMUX, MSGL_DBG3,
                "%% TY_XDS CHECKSUM ERROR (ignoring)\n" );
-         } 
-         else 
+         }
+         else
          {
             TY_XDS_mode = 0;
             TY_XDS_type = 0;
@@ -631,22 +631,22 @@ static int ty_XDSdecode( char b1, char b2 )
 
       // check to see if the data has changed.
       if ( strncmp( TY_XDS[ TY_XDS_mode ][ TY_XDS_type ],
-         TY_XDS_new[ TY_XDS_mode ][ TY_XDS_type ], TY_XDS_length - 1 ) ) 
+         TY_XDS_new[ TY_XDS_mode ][ TY_XDS_type ], TY_XDS_length - 1 ) )
       {
          char *TY_XDS_ptr = TY_XDS[ TY_XDS_mode ][ TY_XDS_type ];
 
          TY_XDS_ptr[ TY_XDS_length ] = 0;
-         memcpy( TY_XDS[ TY_XDS_mode ][ TY_XDS_type ], 
+         memcpy( TY_XDS[ TY_XDS_mode ][ TY_XDS_type ],
             TY_XDS_new[ TY_XDS_mode ][ TY_XDS_type ], TY_XDS_length );
 
          // nasty hack: only print time codes if seconds are 0
-         if ( TY_XDS_mode == 3 && TY_XDS_type == 1 && 
-            !( TY_XDS_new[ 3 ][ 1 ][ 3 ] & 0x20 ) ) 
+         if ( TY_XDS_mode == 3 && TY_XDS_type == 1 &&
+            !( TY_XDS_new[ 3 ][ 1 ][ 3 ] & 0x20 ) )
 			{
             return 0;
 			}
-         if ( TY_XDS_mode == 0 && TY_XDS_type == 2 &&  
-            ( TY_XDS_new[ 0 ][ 2 ][ 4 ] & 0x3f ) > 1 ) 
+         if ( TY_XDS_mode == 0 && TY_XDS_type == 2 &&
+            ( TY_XDS_new[ 0 ][ 2 ][ 4 ] & 0x3f ) > 1 )
 			{
             return 0;
 			}
@@ -654,24 +654,24 @@ static int ty_XDSdecode( char b1, char b2 )
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "%% %s ", TY_XDS_modes[ TY_XDS_mode ] );
 
          line[ 0 ] = 0;
-         // printf( "XDS Code %x\n", 
+         // printf( "XDS Code %x\n",
 			//    ( TY_XDS_mode << 9 ) + TY_XDS_type + 0x100 );
-         switch ( ( TY_XDS_mode << 9 ) + TY_XDS_type + 0x100 ) 
+         switch ( ( TY_XDS_mode << 9 ) + TY_XDS_type + 0x100 )
          {
             // cases are specified in 2 bytes hex representing mode, type.
             // TY_XDS_ptr will point to the current class buffer
             case 0x0101:                    // current
             case 0x0301:                    // future
             {
-               char *mon[] = 
-               { 
+               char *mon[] =
+               {
                   "0", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
                   "Aug", "Sep", "Oct", "Nov", "Dec", "13", "14", "15"
                };
                ty_AddXDSToDisplay( "AIR DATE: %s %2d %d:%02d:00",
-                 mon[ TY_XDS_ptr[ 3 ] & 0x0f ], 
+                 mon[ TY_XDS_ptr[ 3 ] & 0x0f ],
                  TY_XDS_ptr[ 2 ] & 0x1f,
-                 TY_XDS_ptr[ 1 ] & 0x1f, 
+                 TY_XDS_ptr[ 1 ] & 0x1f,
                  TY_XDS_ptr[ 0 ] & 0x3f
                  );
 
@@ -685,9 +685,9 @@ static int ty_XDSdecode( char b1, char b2 )
             {
                ty_AddXDSToDisplay(
                   "DURATION: %d:%02d:%02d of %d:%02d:%02d",
-                  TY_XDS_ptr[ 3 ] & 0x3f, 
+                  TY_XDS_ptr[ 3 ] & 0x3f,
                   TY_XDS_ptr[ 2 ] & 0x3f,
-                  TY_XDS_ptr[ 4 ] & 0x3f, 
+                  TY_XDS_ptr[ 4 ] & 0x3f,
                   TY_XDS_ptr[ 1 ] & 0x3f,
                   TY_XDS_ptr[ 0 ] & 0x3f, 0);
                break;
@@ -696,7 +696,7 @@ static int ty_XDSdecode( char b1, char b2 )
             case 0x0103:                    // current program name
             case 0x0303:                    // future
             {
-               ty_AddXDSToDisplay( "TITLE: %s", TY_XDS_ptr ); 
+               ty_AddXDSToDisplay( "TITLE: %s", TY_XDS_ptr );
                break;
             }
 
@@ -722,19 +722,19 @@ static int ty_XDSdecode( char b1, char b2 )
                sprintf( line, "%sRATING: %s", line,
                   TY_XDS_CHIP[ ( TY_XDS_ptr[ 0 ] & 0x08 ) >> 3 ]
                   [ TY_XDS_ptr[ 1 ] & 0x07 ] );
-               if ( TY_XDS_ptr[ 0 ] & 0x20 ) 
+               if ( TY_XDS_ptr[ 0 ] & 0x20 )
                   sprintf( line, "%s DIALOGUE", line );
-               if ( TY_XDS_ptr[ 1 ] & 0x08 ) 
+               if ( TY_XDS_ptr[ 1 ] & 0x08 )
                   sprintf( line, "%s LANGUAGE", line );
-               if ( TY_XDS_ptr[ 1 ] & 0x10 ) 
+               if ( TY_XDS_ptr[ 1 ] & 0x10 )
                   sprintf( line, "%s SEXUAL", line );
-               if ( TY_XDS_ptr[ 1 ] & 0x20 ) 
+               if ( TY_XDS_ptr[ 1 ] & 0x20 )
                   sprintf( line, "%s VIOLENCE", line );
                ty_AddXDSToDisplay( line );
 
                // raw output for verification.
                if ( TY_OSD_debug > 1 )
-                  mp_msg( MSGT_DEMUX, MSGL_DBG3, " (%02x %02x)", 
+                  mp_msg( MSGT_DEMUX, MSGL_DBG3, " (%02x %02x)",
                      TY_XDS_ptr[ 0 ], TY_XDS_ptr[ 1 ] );
                break;
             }
@@ -743,7 +743,7 @@ static int ty_XDSdecode( char b1, char b2 )
             case 0x0306:                    // future
             {
                // requires table, never actually seen it used either
-               ty_AddXDSToDisplay( "AUDIO: %02x %02x", TY_XDS_ptr[ 0 ], 
+               ty_AddXDSToDisplay( "AUDIO: %02x %02x", TY_XDS_ptr[ 0 ],
                   TY_XDS_ptr[ 1 ] );
                break;
             }
@@ -752,7 +752,7 @@ static int ty_XDSdecode( char b1, char b2 )
             case 0x0309:                    // future
             {
                // requires table, rare
-               ty_AddXDSToDisplay( "ASPECT: %02x %02x", 
+               ty_AddXDSToDisplay( "ASPECT: %02x %02x",
                   TY_XDS_ptr[ 0 ], TY_XDS_ptr[ 1 ] );
                break;
             }
@@ -766,19 +766,19 @@ static int ty_XDSdecode( char b1, char b2 )
             case 0x0116:
             case 0x0117:
             {
-               ty_AddXDSToDisplay( "DESCRIP: %s", TY_XDS_ptr ); 
+               ty_AddXDSToDisplay( "DESCRIP: %s", TY_XDS_ptr );
                break;
             }
 
             case 0x0501:                    // channel network name
             {
-               ty_AddXDSToDisplay( "NETWORK: %s", TY_XDS_ptr ); 
+               ty_AddXDSToDisplay( "NETWORK: %s", TY_XDS_ptr );
                break;
             }
 
             case 0x0502:                    // channel network call letters
             {
-               ty_AddXDSToDisplay( "CALLSIGN: %s", TY_XDS_ptr ); 
+               ty_AddXDSToDisplay( "CALLSIGN: %s", TY_XDS_ptr );
                break;
             }
 
@@ -786,7 +786,7 @@ static int ty_XDSdecode( char b1, char b2 )
             {
 #define TIMEZONE          ( TY_XDS[ 3 ][ 4 ][ 0 ] & 0x1f )
 #define DST               ( ( TY_XDS[ 3 ][ 4 ][ 0 ] & 0x20 ) >> 5 )
-               struct tm tm = 
+               struct tm tm =
                {
                   .tm_sec = 0,                                // sec
                   .tm_min = ( TY_XDS_ptr[ 0 ] & 0x3F ),       // min
@@ -801,17 +801,17 @@ static int ty_XDSdecode( char b1, char b2 )
 
                time_t time_t = mktime( &tm );
                char *timestr;
-    
+
                time_t -= ( ( TIMEZONE - DST ) * 60 * 60 );
                timestr = ctime( &time_t );
                timestr[ strlen( timestr ) - 1 ] = 0;
-    
+
                sprintf( line, "%sCUR.TIME: %s ", line, timestr );
-               if ( TY_XDS[ 3 ][ 4 ][ 0 ] ) 
+               if ( TY_XDS[ 3 ][ 4 ][ 0 ] )
                {
                   sprintf( line, "%sUTC-%d", line, TIMEZONE );
                   if (DST) sprintf( line, "%s DST", line );
-               } 
+               }
                else
                   sprintf( line, "%sUTC", line );
 
@@ -822,7 +822,7 @@ static int ty_XDSdecode( char b1, char b2 )
 
             case 0x0704:                    //misc. local time zone
             {
-               sprintf( line, "%sTIMEZONE: UTC-%d", 
+               sprintf( line, "%sTIMEZONE: UTC-%d",
                   line, TY_XDS_ptr[ 0 ] & 0x1f );
                if ( TY_XDS_ptr[ 0 ] & 0x20 ) sprintf( line, "%s DST", line );
                ty_AddXDSToDisplay( line );
@@ -831,26 +831,26 @@ static int ty_XDSdecode( char b1, char b2 )
 
             default:
             {
-               mp_msg( MSGT_DEMUX, MSGL_DBG3, "UNKNOWN CLASS %d TYPE %d", 
+               mp_msg( MSGT_DEMUX, MSGL_DBG3, "UNKNOWN CLASS %d TYPE %d",
                   ( TY_XDS_mode << 1 ) + 1, TY_XDS_type );
-              if ( TY_OSD_debug > 1 ) 
+              if ( TY_OSD_debug > 1 )
               {
                   int x;
                   mp_msg( MSGT_DEMUX, MSGL_DBG3, "\nDUMP:\n" );
                   for ( x = 0 ; x < TY_XDS_length ; x++ )
-                    mp_msg( MSGT_DEMUX, MSGL_DBG3, " %02x %c", 
+                    mp_msg( MSGT_DEMUX, MSGL_DBG3, " %02x %c",
                        TY_XDS_ptr[ x ], TY_XDS_ptr[ x ] );
                   mp_msg( MSGT_DEMUX, MSGL_DBG3, "\n" );
-               } 
+               }
             }
          }
-         if ( TY_OSD_debug > 1 ) 
+         if ( TY_OSD_debug > 1 )
             mp_msg( MSGT_DEMUX, MSGL_DBG3, " (%d)", TY_XDS_length );
       }
       TY_XDS_mode = 0;
       TY_XDS_type = 0;
-   } 
-   else if ( TY_XDS_length < 34 ) 
+   }
+   else if ( TY_XDS_length < 34 )
    {
       TY_XDS_new[ TY_XDS_mode ][ TY_XDS_type ][ TY_XDS_length++ ] = b1;
       TY_XDS_new[ TY_XDS_mode ][ TY_XDS_type ][ TY_XDS_length++ ] = b2;

@@ -599,7 +599,7 @@ typedef struct
 #define WM_IME_COMPOSITION          0x010f
 #define WM_IME_KEYLAST              0x010f
 
-#define WM_INITDIALOG       0x0110 
+#define WM_INITDIALOG       0x0110
 #define WM_COMMAND          0x0111
 #define WM_SYSCOMMAND       0x0112
 #define WM_TIMER	    0x0113
@@ -644,7 +644,7 @@ typedef struct
 
 
 #define WM_MOUSELAST	    WM_MOUSEWHEEL
- 
+
 #define WHEEL_DELTA      120
 #define WHEEL_PAGESCROLL  (UINT_MAX)
 #define WM_PARENTNOTIFY     0x0210
@@ -733,19 +733,19 @@ typedef struct
 #define WM_QUERYAFXWNDPROC  0x0360
 #define WM_SIZEPARENT       0x0361
 #define WM_SETMESSAGESTRING 0x0362
-#define WM_IDLEUPDATECMDUI  0x0363 
+#define WM_IDLEUPDATECMDUI  0x0363
 #define WM_INITIALUPDATE    0x0364
 #define WM_COMMANDHELP      0x0365
 #define WM_HELPHITTEST      0x0366
 #define WM_EXITHELPMODE     0x0367
 #define WM_RECALCPARENT     0x0368
 #define WM_SIZECHILD        0x0369
-#define WM_KICKIDLE         0x036A 
+#define WM_KICKIDLE         0x036A
 #define WM_QUERYCENTERWND   0x036B
 #define WM_DISABLEMODAL     0x036C
-#define WM_FLOATSTATUS      0x036D 
-#define WM_ACTIVATETOPLEVEL 0x036E 
-#define WM_QUERY3DCONTROLS  0x036F 
+#define WM_FLOATSTATUS      0x036D
+#define WM_ACTIVATETOPLEVEL 0x036E
+#define WM_QUERY3DCONTROLS  0x036F
 #define WM_SOCKET_NOTIFY    0x0373
 #define WM_SOCKET_DEAD      0x0374
 #define WM_POPMESSAGESTRING 0x0375
@@ -789,7 +789,7 @@ typedef struct
 #define IDYES               6
 #define IDNO                7
 #define IDCLOSE             8
-#define IDHELP              9      
+#define IDHELP              9
 
 /****** Window classes ******/
 
@@ -838,7 +838,7 @@ typedef struct
     BYTE    rgbReserved[32];
 } PAINTSTRUCT, *PPAINTSTRUCT, *LPPAINTSTRUCT;
 
-typedef struct 
+typedef struct
 {
     HMENU   hWindowMenu;
     UINT    idFirstChild;
@@ -874,7 +874,7 @@ typedef struct
 DECL_WINELIB_TYPE_AW(MDICREATESTRUCT)
 DECL_WINELIB_TYPE_AW(LPMDICREATESTRUCT)
 
-#define MDITILE_VERTICAL     0x0000   
+#define MDITILE_VERTICAL     0x0000
 #define MDITILE_HORIZONTAL   0x0001
 #define MDITILE_SKIPDISABLED 0x0002
 
@@ -1058,7 +1058,7 @@ typedef struct
 #define PRF_ERASEBKGND      0x00000008L
 #define PRF_CHILDREN        0x00000010L
 #define PRF_OWNED           0x00000020L
- 
+
   /* Offsets for GetClassLong() and GetClassWord() */
 #define GCL_MENUNAME        (-8)
 #define GCW_HBRBACKGROUND   (-10)
@@ -1295,7 +1295,7 @@ typedef struct tagMSG
 
 #define POINTSTOPOINT(pt, pts)                          \
         { (pt).x = (LONG)(SHORT)LOWORD(*(LONG*)&pts);   \
-          (pt).y = (LONG)(SHORT)HIWORD(*(LONG*)&pts); }          
+          (pt).y = (LONG)(SHORT)HIWORD(*(LONG*)&pts); }
 
 #define POINTTOPOINTS(pt)      (MAKELONG((short)((pt).x), (short)((pt).y)))
 
@@ -1345,7 +1345,7 @@ typedef struct
 #define TPM_NONOTIFY      0x0080
 #define TPM_RETURNCMD     0x0100
 
-typedef struct 
+typedef struct
 {
     UINT   cbSize;
     RECT   rcExclude;
@@ -1518,7 +1518,7 @@ typedef WIN_BOOL CALLBACK (*DRAWSTATEPROC)(HDC,LPARAM,WPARAM,INT,INT);
 #define BST_CHECKED          0x0001
 #define BST_INDETERMINATE    0x0002
 #define BST_PUSHED           0x0004
-#define BST_FOCUS            0x0008      
+#define BST_FOCUS            0x0008
 
 /* Static Control Styles */
 #define SS_LEFT             0x00000000L
@@ -1578,8 +1578,8 @@ typedef struct
     INT     nPos;
     INT     nTrackPos;
 } SCROLLINFO, *LPSCROLLINFO;
- 
-/* GetScrollInfo() flags */ 
+
+/* GetScrollInfo() flags */
 #define SIF_RANGE           0x0001
 #define SIF_PAGE            0x0002
 #define SIF_POS             0x0004
@@ -1781,7 +1781,7 @@ typedef struct
 #define	HELPINFO_MENUITEM	0x0002
 
 /* Structure pointed to by lParam of WM_HELP */
-typedef struct			
+typedef struct
 {
     UINT	cbSize;		/* Size in bytes of this struct  */
     INT	iContextType;	/* Either HELPINFO_WINDOW or HELPINFO_MENUITEM */
@@ -1843,28 +1843,28 @@ typedef struct numberfmt32w {
 } NUMBERFMTW;
 
 typedef struct currencyfmt32a
-{   
-	UINT      NumDigits;   
-	UINT      LeadingZero; 
-	UINT      Grouping;   
-	LPCSTR    lpDecimalSep;   
-	LPCSTR    lpThousandSep; 
-	UINT      NegativeOrder;   
-	UINT      PositiveOrder; 
+{
+	UINT      NumDigits;
+	UINT      LeadingZero;
+	UINT      Grouping;
+	LPCSTR    lpDecimalSep;
+	LPCSTR    lpThousandSep;
+	UINT      NegativeOrder;
+	UINT      PositiveOrder;
 	LPCSTR    lpCurrencySymbol;
-} CURRENCYFMTA; 
+} CURRENCYFMTA;
 
 typedef struct currencyfmt32w
-{   
-	UINT      NumDigits;   
-	UINT      LeadingZero; 
-	UINT      Grouping;   
-	LPCWSTR   lpDecimalSep;   
-	LPCWSTR   lpThousandSep; 
-	UINT      NegativeOrder;   
-	UINT      PositiveOrder; 
+{
+	UINT      NumDigits;
+	UINT      LeadingZero;
+	UINT      Grouping;
+	LPCWSTR   lpDecimalSep;
+	LPCWSTR   lpThousandSep;
+	UINT      NegativeOrder;
+	UINT      PositiveOrder;
 	LPCWSTR   lpCurrencySymbol;
-} CURRENCYFMTW; 
+} CURRENCYFMTW;
 
 #define MONITOR_DEFAULTTONULL       0x00000000
 #define MONITOR_DEFAULTTOPRIMARY    0x00000001
@@ -2070,7 +2070,7 @@ typedef struct
 #define MNC_IGNORE 0
 #define MNC_CLOSE 1
 #define MNC_EXECUTE 2
-#define MNC_SELECT 3 
+#define MNC_SELECT 3
 
 /* SystemParametersInfo */
 /* defines below are for all win versions */
@@ -2764,7 +2764,7 @@ typedef struct
 #define VK_NONAME           0xFC
 #define VK_PA1              0xFD
 #define VK_OEM_CLEAR        0xFE
-  
+
   /* Key status flags for mouse events */
 #define MK_LBUTTON	    0x0001
 #define MK_RBUTTON	    0x0002

@@ -52,7 +52,7 @@ url_new(const char* url) {
 	int jumpSize = 3;
 
 	if( url==NULL ) return NULL;
-	
+
         if (strlen(url) > (SIZE_MAX / 3 - 1)) {
                 mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
                 goto err_out;
@@ -158,7 +158,7 @@ url_new(const char* url) {
 		ptr2 = ptr1;
 
 	}
-	
+
 	// look if the port is given
 	ptr2 = strstr(ptr2, ":");
 	// If the : is after the first / it isn't the port
@@ -204,7 +204,7 @@ url_new(const char* url) {
 				goto err_out;
 			}
 		}
-	} 
+	}
 	// Check if a filename was given or set, else set it with '/'
 	if( Curl->file==NULL ) {
 		Curl->file = malloc(2);
@@ -214,7 +214,7 @@ url_new(const char* url) {
 		}
 		strcpy(Curl->file, "/");
 	}
-	
+
         free(escfilename);
 	return Curl;
 err_out:
@@ -259,7 +259,7 @@ url_unescape_string(char *outbuf, const char *inbuf)
 			}
 		}
 		*outbuf++ = c;
-	} 
+	}
         *outbuf++='\0'; //add nullterm to string
 }
 
@@ -285,7 +285,7 @@ url_escape_string_part(char *outbuf, const char *inbuf) {
                            ((c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'F'))) {
                                                               // check if part of an escape sequence
                             *outbuf++=c;                      // already
-			      
+
                                                               // dont escape again
                             mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_URL_StringAlreadyEscaped,c,c1,c2);
                                                               // error as this should not happen against RFC 2396
@@ -313,7 +313,7 @@ url_escape_string(char *outbuf, const char *inbuf) {
 	unsigned char c;
         int i = 0,j,len = strlen(inbuf);
 	char* tmp,*unesc = NULL, *in;
-	
+
 	// Look if we have an ip6 address, if so skip it there is
 	// no need to escape anything in there.
 	tmp = strstr(inbuf,"://[");
@@ -327,7 +327,7 @@ url_escape_string(char *outbuf, const char *inbuf) {
 			tmp = NULL;
 		}
 	}
-	
+
 	tmp = NULL;
 	while(i < len) {
 		// look for the next char that must be kept
@@ -353,7 +353,7 @@ url_escape_string(char *outbuf, const char *inbuf) {
 			in = tmp;
 		} else // take the rest of the string
 			in = (char*)inbuf+i;
-		
+
 		if(!unesc) unesc = malloc(len+1);
 		// unescape first to avoid escaping escape
 		url_unescape_string(unesc,in);

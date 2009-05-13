@@ -229,7 +229,7 @@ inline static unsigned char* stream_read_line(stream_t *s,unsigned char* mem, in
     len = s->buf_len-s->buf_pos;
     // try to fill the buffer
     if(len <= 0 &&
-       (!cache_stream_fill_buffer(s) || 
+       (!cache_stream_fill_buffer(s) ||
         (len = s->buf_len-s->buf_pos) <= 0)) break;
     end = (unsigned char*) memchr((void*)(s->buffer+s->buf_pos),'\n',len);
     if(end) len = end - (s->buffer+s->buf_pos) + 1;
@@ -267,7 +267,7 @@ inline static int stream_seek(stream_t *s,off_t pos){
       return 1;
     }
   }
-  
+
   return cache_stream_seek_long(s,pos);
 }
 
@@ -312,7 +312,7 @@ extern char * audio_stream;
 
 typedef struct {
  int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm
- int language; 
+ int language;
  int type;
  int channels;
 } stream_language_t;

@@ -18,12 +18,12 @@
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    
+
     if(vf_next_query_format(vf,IMGFMT_YV12)<=0){
 	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupport, "YVU9");
 	return 0;
     }
-    
+
     return vf_next_config(vf,width,height,d_width,d_height,flags,IMGFMT_YV12);
 }
 
@@ -56,7 +56,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     }
 
     vf_clone_mpi_attributes(dmpi, mpi);
-    
+
     return vf_next_put_image(vf,dmpi, pts);
 }
 

@@ -38,7 +38,7 @@ static long freqs[9] = { 44100, 48000, 32000,	// MPEG 1.0
 			 11025, 12000,  8000};  // MPEG 2.5
 
 int mp_mp3_get_lsf(unsigned char* hbuf){
-    unsigned long newhead = 
+    unsigned long newhead =
       hbuf[0] << 24 |
       hbuf[1] << 16 |
       hbuf[2] <<  8 |
@@ -56,7 +56,7 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int*
     int stereo,ssize,lsf,framesize,padding,bitrate_index,sampling_frequency, divisor;
     int bitrate;
     int layer, mult[3] = { 12000, 144000, 144000 };
-    unsigned long newhead = 
+    unsigned long newhead =
       hbuf[0] << 24 |
       hbuf[1] << 16 |
       hbuf[2] <<  8 |
@@ -73,8 +73,8 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int*
 #endif
 
     layer = 4-((newhead>>17)&3);
-    if(layer==4){ 
-      mp_msg(MSGT_DEMUXER,MSGL_DBG2,"not layer-1/2/3\n"); 
+    if(layer==4){
+      mp_msg(MSGT_DEMUXER,MSGL_DBG2,"not layer-1/2/3\n");
       return -1;
     }
 
@@ -121,14 +121,14 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int*
     bitrate = tabsel_123[lsf][layer-1][bitrate_index];
     framesize = bitrate * mult[layer-1];
 
-    mp_msg(MSGT_DEMUXER,MSGL_DBG2,"FRAMESIZE: %d, layer: %d, bitrate: %d, mult: %d\n", 
+    mp_msg(MSGT_DEMUXER,MSGL_DBG2,"FRAMESIZE: %d, layer: %d, bitrate: %d, mult: %d\n",
     	framesize, layer, tabsel_123[lsf][layer-1][bitrate_index], mult[layer-1]);
     if(!framesize){
 	mp_msg(MSGT_DEMUXER,MSGL_DBG2,"invalid framesize/bitrate_index\n");
 	return -1;
     }
 
-    divisor = (layer == 3 ? (freqs[sampling_frequency] << lsf) : freqs[sampling_frequency]); 
+    divisor = (layer == 3 ? (freqs[sampling_frequency] << lsf) : freqs[sampling_frequency]);
     framesize /= divisor;
     if(layer==1)
       framesize = (framesize+padding)*4;

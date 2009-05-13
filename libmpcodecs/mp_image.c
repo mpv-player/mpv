@@ -45,7 +45,7 @@ mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt) {
     if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
   }
   mpi->flags|=MP_IMGFLAG_ALLOCATED;
-  
+
   return mpi;
 }
 
@@ -58,7 +58,7 @@ void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) {
     memcpy_pic(dmpi->planes[2], mpi->planes[2], mpi->chroma_width, mpi->chroma_height,
 	       dmpi->stride[2],mpi->stride[2]);
   } else {
-    memcpy_pic(dmpi->planes[0],mpi->planes[0], 
+    memcpy_pic(dmpi->planes[0],mpi->planes[0],
 	       mpi->w*(dmpi->bpp/8), mpi->h,
 	       dmpi->stride[0],mpi->stride[0]);
   }

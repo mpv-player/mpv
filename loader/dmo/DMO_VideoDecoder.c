@@ -20,7 +20,7 @@
 struct DMO_VideoDecoder
 {
     IVideoDecoder iv;
-    
+
     DMO_Filter* m_pDMO_Filter;
     AM_MEDIA_TYPE m_sOurType, m_sDestType;
     VIDEOINFOHEADER* m_sVhdr;
@@ -63,7 +63,7 @@ struct ct {
     int cap;
     char *name;
 	    };
-            
+
 static ct check[] = {
     { fccI420, 12, &MEDIASUBTYPE_I420,   CAP_I420, NULL     },
     { fccYV12, 12, &MEDIASUBTYPE_YV12,   CAP_YV12, NULL     },
@@ -86,10 +86,10 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
     DMO_VideoDecoder *this;
     HRESULT result;
     ct* c;
-                        
+
     this = malloc(sizeof(DMO_VideoDecoder));
     memset( this, 0, sizeof(DMO_VideoDecoder));
-    
+
     this->m_sVhdr2 = 0;
     this->m_iLastQuality = -1;
     this->m_iMaxAuto = maxauto;
@@ -103,10 +103,10 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
     /*try*/
     {
         unsigned int bihs;
-        
+
 	bihs = (format->biSize < (int) sizeof(BITMAPINFOHEADER)) ?
 	    sizeof(BITMAPINFOHEADER) : format->biSize;
-     
+
         this->iv.m_bh = malloc(bihs);
         memcpy(this->iv.m_bh, format, bihs);
         this->iv.m_bh->biSize = bihs;
@@ -118,7 +118,7 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
         this->iv.m_iPlaypos = -1;
         this->iv.m_fQuality = 0.0f;
         this->iv.m_bCapable16b = true;
-                
+
         bihs += sizeof(VIDEOINFOHEADER) - sizeof(BITMAPINFOHEADER);
 	this->m_sVhdr = malloc(bihs);
 	memset(this->m_sVhdr, 0, bihs);
@@ -162,7 +162,7 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
 	this->m_sDestType.pUnk = 0;
 	this->m_sDestType.cbFormat = sizeof(VIDEOINFOHEADER);
 	this->m_sDestType.pbFormat = (char*)this->m_sVhdr2;
-        
+
         memset(&this->iv.m_obh, 0, sizeof(this->iv.m_obh));
 	memcpy(&this->iv.m_obh, this->iv.m_bh, sizeof(this->iv.m_obh) < (unsigned) this->iv.m_bh->biSize
 	       ? sizeof(this->iv.m_obh) : (unsigned) this->iv.m_bh->biSize);
@@ -175,7 +175,7 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
 
 
 	this->m_pDMO_Filter = DMO_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType);
-	
+
 	if (!this->m_pDMO_Filter)
 	{
 	    printf("Failed to create DMO filter\n");
@@ -217,7 +217,7 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
 	    break;
 #endif
 	default:
-              
+
 	    this->m_Caps = CAP_NONE;
 
 	    printf("Decoder supports the following formats: ");
@@ -275,7 +275,7 @@ void DMO_VideoDecoder_StartInternal(DMO_VideoDecoder *this)
     Debug printf("DMO_VideoDecoder_StartInternal\n");
     //cout << "DSSTART" << endl;
     this->m_pDMO_Filter->Start(this->m_pDMO_Filter);
-    
+
     props.cBuffers = 1;
     props.cbBuffer = this->m_sDestType.lSampleSize;
 
@@ -283,7 +283,7 @@ void DMO_VideoDecoder_StartInternal(DMO_VideoDecoder *this)
     props.cbPrefix = 0;
     this->m_pDMO_Filter->m_pAll->vt->SetProperties(this->m_pDMO_Filter->m_pAll, &props, &props1);
     this->m_pDMO_Filter->m_pAll->vt->Commit(this->m_pDMO_Filter->m_pAll);
-#endif    
+#endif
     this->iv.m_State = START;
 }
 
@@ -301,7 +301,7 @@ int DMO_VideoDecoder_DecodeInternal(DMO_VideoDecoder *this, const void* src, int
     DMO_OUTPUT_DATA_BUFFER db;
     CMediaBuffer* bufferin;
 //+    uint8_t* imdata = dest ? dest->Data() : 0;
-    
+
     Debug printf("DMO_VideoDecoder_DecodeInternal(%p,%p,%d,%d,%p)\n",this,src,size,is_keyframe,imdata);
 
 //    this->m_pDMO_Filter->m_pAll->vt->GetBuffer(this->m_pDMO_Filter->m_pAll, &sample, 0, 0, 0);
@@ -362,14 +362,14 @@ int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int c
 {
     HRESULT result;
     int should_test=1;
-    
+
     Debug printf("DMO_VideoDecoder_SetDestFmt (%p, %d, %d)\n",this,bits,(int)csp);
-        
+
        /* if (!CImage::Supported(csp, bits))
 	return -1;
 */
     // BitmapInfo temp = m_obh;
-    
+
     if (!csp)	// RGB
     {
 	int ok = true;
@@ -400,7 +400,7 @@ int DMO_VideoDecoder_SetDestFmt(DMO_VideoDecoder *this, int bits, unsigned int c
 	      this->iv.m_obh.biCompression=3;//BI_BITFIELDS
 	      this->iv.m_obh.biSizeImage=abs((int)(2*this->iv.m_obh.biWidth*this->iv.m_obh.biHeight));
 	    }
-            
+
             if( bits == 16 ) {
 	      this->iv.m_obh.colors[0]=0xF800;
 	      this->iv.m_obh.colors[1]=0x07E0;

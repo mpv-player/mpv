@@ -138,7 +138,7 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
     int         width, height;
     unsigned char *bbuffer;
     int i, uni_charmap = 1;
-    
+
     error = FT_Select_Charmap(face, ft_encoding_unicode);
 //    fprintf(stderr, "select unicode charmap: %d\n", error);
 
@@ -207,7 +207,7 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
 
     ymax = (double)(face->bbox.yMax)/(double)face->units_per_EM*ppem+1;
     ymin = (double)(face->bbox.yMin)/(double)face->units_per_EM*ppem-1;
-    
+
     width = ppem*(face->bbox.xMax-face->bbox.xMin)/face->units_per_EM+3+2*padding;
     if (desc->max_width < width) desc->max_width = width;
     width = ALIGN(width);
@@ -222,7 +222,7 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
 	mp_msg(MSGT_OSD, MSGL_ERR, "Something went wrong. Use the source!\n");
 	return -1;
     }
-    
+
     height = ymax - ymin + 2*padding;
     if (height <= 0) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "Wrong bounding box, height <= 0 !\n");
@@ -231,7 +231,7 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
 
     if (desc->max_height < height) desc->max_height = height;
     desc->pic_b[pic_idx]->charheight = height;
-    
+
 //    fprintf(stderr, "font height2: %d\n", height);
     desc->pic_b[pic_idx]->baseline = ymax + padding;
     desc->pic_b[pic_idx]->padding = padding;
@@ -239,7 +239,7 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
     desc->pic_b[pic_idx]->current_count = 0;
 
     bbuffer = NULL;
-    
+
     desc->pic_b[pic_idx]->w = width;
     desc->pic_b[pic_idx]->h = height;
     desc->pic_b[pic_idx]->c = colors;
@@ -261,7 +261,7 @@ static void outline(
 	int msize) {
 
     int x, y;
-    
+
     for (y = 0; y<height; y++) {
 	for (x = 0; x<width; x++) {
 	    const int src= s[x];
@@ -494,12 +494,12 @@ void render_one_glyph(font_desc_t *desc, int c)
     FT_BitmapGlyph glyph;
     int width, height, stride, maxw, off;
     unsigned char *abuffer, *bbuffer;
-    
+
     int	const	load_flags = FT_LOAD_DEFAULT;
     int		pen_xa;
     int font = desc->font[c];
     int error;
-    
+
 //    fprintf(stderr, "render_one_glyph %d\n", c);
 
     if (!desc->dynamic) return;
@@ -507,7 +507,7 @@ void render_one_glyph(font_desc_t *desc, int c)
     if (desc->font[c] == -1) return;
 
     glyph_index = desc->glyph_index[c];
-    
+
     // load glyph
     error = FT_Load_Glyph(desc->faces[font], glyph_index, load_flags);
     if (error) {
@@ -538,7 +538,7 @@ void render_one_glyph(font_desc_t *desc, int c)
 //    fprintf(stderr, "glyph generated\n");
 
     maxw = desc->pic_b[font]->charwidth;
-    
+
     if (glyph->bitmap.width > maxw) {
 	fprintf(stderr, "glyph too wide!\n");
     }
@@ -559,7 +559,7 @@ void render_one_glyph(font_desc_t *desc, int c)
 	memset(desc->pic_b[font]->bmp+off, 0, increment);
 	memset(desc->pic_a[font]->bmp+off, 0, increment);
     }
-    
+
     abuffer = desc->pic_a[font]->bmp;
     bbuffer = desc->pic_b[font]->bmp;
 
@@ -571,10 +571,10 @@ void render_one_glyph(font_desc_t *desc, int c)
 		 desc->pic_b[font]->baseline - glyph->top,
 		 desc->pic_b[font]->charwidth, desc->pic_b[font]->charheight,
 		 glyph->bitmap.width <= maxw ? glyph->bitmap.width : maxw);
-    
+
 //    fprintf(stderr, "glyph pasted\n");
     FT_Done_Glyph((FT_Glyph)glyph);
-    
+
     /* advance pen */
     pen_xa = f266ToInt(slot->advance.x) + 2*desc->pic_b[font]->padding;
     if (pen_xa > maxw) pen_xa = maxw;
@@ -594,7 +594,7 @@ void render_one_glyph(font_desc_t *desc, int c)
 		desc->tables.o_size);
     }
 //    fprintf(stderr, "fg: outline t = %lf\n", GetTimer()-t);
-    
+
     if (desc->tables.g_r) {
 	blur(abuffer+off, desc->tables.tmp, width, height, stride,
 	     desc->tables.gt2, desc->tables.g_r,
@@ -650,19 +650,19 @@ static int prepare_font(font_desc_t *desc, FT_Face face, float ppem, int pic_idx
 
 //    fprintf(stderr, "fg: w = %d, h = %d\n", desc->pic_a[pic_idx]->w, desc->pic_a[pic_idx]->h);
     return 0;
-    
+
 }
 
 static int generate_tables(font_desc_t *desc, double thickness, double radius)
 {
     int width = desc->max_height;
     int height = desc->max_width;
-    
+
     double A = log(1.0/base)/(radius*radius*2);
     int mx, my, i;
     double volume_diff, volume_factor = 0;
     unsigned char *omtp;
-    
+
     desc->tables.g_r = ceil(radius);
     desc->tables.o_r = ceil(thickness);
     desc->tables.g_w = 2*desc->tables.g_r+1;
@@ -683,7 +683,7 @@ static int generate_tables(font_desc_t *desc, double thickness, double radius)
 
     omtp = desc->tables.omt;
     desc->tables.tmp = malloc((width+1)*height*sizeof(short));
-    
+
     if (desc->tables.om==NULL || desc->tables.omt==NULL || desc->tables.tmp==NULL) {
 	return -1;
     };
@@ -712,7 +712,7 @@ static int generate_tables(font_desc_t *desc, double thickness, double radius)
 	    }
 	}
     }
-    
+
     /* outline matrix */
     for (my = 0; my<desc->tables.o_w; ++my) {
 	for (mx = 0; mx<desc->tables.o_w; ++mx) {
@@ -757,22 +757,22 @@ static int prepare_charset(char *charmap, char *encoding, FT_ULong *charset, FT_
     int count = 0;
     int charset_size;
     iconv_t cd;
-    
+
     // check if ucs-4 is available
     cd = iconv_open(charmap, charmap);
     if (cd==(iconv_t)-1) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "iconv doesn't know %s encoding. Use the source!\n", charmap);
 	return -1;
     }
-    
+
     iconv_close(cd);
-    
+
     cd = iconv_open(charmap, encoding);
     if (cd==(iconv_t)-1) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "Unsupported encoding `%s', use iconv --list to list character sets known on your system.\n", encoding);
 	return -1;
     }
-    
+
     charset_size = 256 - first_char;
     for (i = 0; i<charset_size; ++i) {
 	charcodes[count] = i+first_char;
@@ -787,7 +787,7 @@ static int prepare_charset(char *charmap, char *encoding, FT_ULong *charset, FT_
 	mp_msg(MSGT_OSD, MSGL_ERR, "No characters to render!\n");
 	return -1;
     }
-    
+
     return charset_size;
 }
 
@@ -843,7 +843,7 @@ static font_desc_t* init_font_desc(void)
     memset(desc,0,sizeof(font_desc_t));
 
     desc->dynamic = 1;
-    
+
     /* setup sane defaults */
     desc->name = NULL;
     desc->fpath = NULL;
@@ -866,21 +866,21 @@ static font_desc_t* init_font_desc(void)
 	desc->start[i] = desc->width[i] = desc->font[i] = -1;
     for(i = 0; i < 16; i++)
 	desc->pic_a[i] = desc->pic_b[i] = NULL;
-    
+
     return desc;
 }
 
 void free_font_desc(font_desc_t *desc)
 {
     int i;
-    
+
     if (!desc) return;
 
 //    if (!desc->dynamic) return; // some vo_aa crap, better leaking than crashing
 
     if (desc->name) free(desc->name);
     if (desc->fpath) free(desc->fpath);
-    
+
     for(i = 0; i < 16; i++) {
 	if (desc->pic_a[i]) {
 	    if (desc->pic_a[i]->bmp) free(desc->pic_a[i]->bmp);
@@ -903,14 +903,14 @@ void free_font_desc(font_desc_t *desc)
     for(i = 0; i < desc->face_cnt; i++) {
 	FT_Done_Face(desc->faces[i]);
     }
-    
+
     free(desc);
 }
 
 static int load_sub_face(const char *name, int face_index, FT_Face *face)
 {
     int err = -1;
-    
+
     if (name) err = FT_New_Face(library, name, face_index, face);
 
     if (err) {
@@ -940,12 +940,12 @@ static int load_osd_face(FT_Face *face)
 int kerning(font_desc_t *desc, int prevc, int c)
 {
     FT_Vector kern;
-    
+
     if (!desc->dynamic) return 0;
     if (prevc < 0 || c < 0) return 0;
     if (desc->font[prevc] != desc->font[c]) return 0;
     if (desc->font[prevc] == -1 || desc->font[c] == -1) return 0;
-    FT_Get_Kerning(desc->faces[desc->font[c]], 
+    FT_Get_Kerning(desc->faces[desc->font[c]],
 		   desc->glyph_index[prevc], desc->glyph_index[c],
 		   ft_kerning_default, &kern);
 
@@ -968,7 +968,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int face_index, int movie_widt
     int charset_size;
     int i, j;
     int unicode;
-    
+
     float movie_size;
 
     float subtitle_font_ppem;
@@ -1065,14 +1065,14 @@ gen_osd:
     err = prepare_font(desc, face, osd_font_ppem, desc->face_cnt-1,
 		       OSD_CHARSET_SIZE, osd_charset, osd_charcodes, 0,
 		       subtitle_font_thickness, subtitle_font_radius);
-    
+
     if (err) {
 	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_CannotPrepareOSDFont);
 	goto err_out;
     }
 
     err = generate_tables(desc, subtitle_font_thickness, subtitle_font_radius);
-    
+
     if (err) {
 	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_CannotGenerateTables);
 	goto err_out;
@@ -1108,7 +1108,7 @@ err_out:
 int init_freetype(void)
 {
     int err;
-    
+
     /* initialize freetype */
     err = FT_Init_FreeType(&library);
     if (err) {
@@ -1126,7 +1126,7 @@ int done_freetype(void)
 
     if (!using_freetype)
 	return 0;
-    
+
     err = FT_Done_FreeType(library);
     if (err) {
 	mp_msg(MSGT_OSD, MSGL_ERR, MSGTR_LIBVO_FONT_LOAD_FT_DoneFreeTypeFailed);

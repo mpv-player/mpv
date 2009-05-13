@@ -52,7 +52,7 @@
 
 #define TDFX_VID_YUV_STRIDE        (1024)
 #define TDFX_VID_YUV_PLANE_SIZE    (0x0100000)
-                                 
+
 
 typedef struct tdfx_vid_blit_s {
   uint32_t src;

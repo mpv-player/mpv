@@ -27,9 +27,9 @@ static int config(struct vf_instance_s* vf,
         pixel_stride= mpi->stride[0];
     else
         pixel_stride= 8*mpi->stride[0] / mpi->bpp;
-        
-#endif        
-    
+
+#endif
+
     if(vf->priv->interleave){
         vf->priv->height= 2*height;
         vf->priv->width= width - (pixel_stride/2);
@@ -54,7 +54,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
 	vf->priv->width, vf->priv->height);
-    
+
     // set up mpi as a double-stride image of dmpi:
     vf->dmpi->planes[0]=mpi->planes[0];
     vf->dmpi->stride[0]=(mpi->stride[0]*vf->priv->stridefactor)>>1;
@@ -65,7 +65,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	vf->dmpi->stride[2]=(mpi->stride[2]*vf->priv->stridefactor)>>1;
     } else
 	vf->dmpi->planes[1]=mpi->planes[1]; // passthru bgr8 palette!!!
-    
+
     return vf_next_put_image(vf,vf->dmpi, pts);
 }
 

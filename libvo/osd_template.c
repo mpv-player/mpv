@@ -56,7 +56,7 @@ static inline void RENAME(vo_draw_alpha_yv12)(int w,int h, unsigned char* src, u
         "movq %%mm5, %%mm7\n\t"
         "psllw $8, %%mm5\n\t" //FF00FF00FF00
         "psrlw $8, %%mm4\n\t" //00FF00FF00FF
-        ::);        
+        ::);
 #endif
     for(y=0;y<h;y++){
         register int x;
@@ -127,7 +127,7 @@ static inline void RENAME(vo_draw_alpha_yuy2)(int w,int h, unsigned char* src, u
         "movq %%mm5, %%mm4\n\t"
         "psllw $8, %%mm5\n\t" //FF00FF00FF00
         "psrlw $8, %%mm4\n\t" //00FF00FF00FF
-        ::);        
+        ::);
 #endif
     for(y=0;y<h;y++){
         register int x;
@@ -216,7 +216,7 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
     __asm__ volatile(
         "pxor %%mm7, %%mm7\n\t"
         "pcmpeqb %%mm6, %%mm6\n\t" // F..F
-        ::);        
+        ::);
 #endif
     for(y=0;y<h;y++){
         register unsigned char *dst = dstbase;
@@ -279,7 +279,7 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 
 		"movb %%ch, (%0)\n\t"
 		"movb %%ah, 1(%0)\n\t"
-		
+
                 "movzbl 2(%0), %%eax\n\t"
 		"imull %1, %%eax\n\t"
 		"addl %2, %%eax\n\t"

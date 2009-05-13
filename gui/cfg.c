@@ -106,7 +106,7 @@ static m_config_t * gui_conf;
 static const m_option_t gui_opts[] =
 {
  { "enable_audio_equ",&gtkEnableAudioEqualizer,CONF_TYPE_FLAG,0,0,1,NULL },
- 
+
  { "vo_driver",&video_driver_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
  { "vo_panscan",&vo_panscan,CONF_TYPE_FLOAT,CONF_RANGE,0.0,1.0,NULL },
  { "vo_doublebuffering",&vo_doublebuffering,CONF_TYPE_FLAG,0,0,1,NULL },
@@ -153,7 +153,7 @@ static const m_option_t gui_opts[] =
 
  { "dvd_device",&dvd_device,CONF_TYPE_STRING,0,0,0,NULL },
  { "cdrom_device",&cdrom_device,CONF_TYPE_STRING,0,0,0,NULL },
- 
+
  { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
  { "sub_auto_load",&sub_auto,CONF_TYPE_FLAG,0,0,1,NULL },
  { "sub_unicode",&sub_unicode,CONF_TYPE_FLAG,0,0,1,NULL },
@@ -182,14 +182,14 @@ static const m_option_t gui_opts[] =
  { "cache",&gtkCacheOn,CONF_TYPE_FLAG,0,0,1,NULL },
  { "cache_size",&gtkCacheSize,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
 
- { "playbar",&gtkEnablePlayBar,CONF_TYPE_FLAG,0,0,1,NULL }, 
+ { "playbar",&gtkEnablePlayBar,CONF_TYPE_FLAG,0,0,1,NULL },
  { "load_fullscreen",&gtkLoadFullscreen,CONF_TYPE_FLAG,0,0,1,NULL },
  { "show_videowin", &gtkShowVideoWindow,CONF_TYPE_FLAG,0,0,1,NULL },
  { "stopxscreensaver",&stop_xscreensaver,CONF_TYPE_FLAG,0,0,1,NULL },
 
  { "autosync",&gtkAutoSyncOn,CONF_TYPE_FLAG,0,0,1,NULL },
  { "autosync_size",&gtkAutoSync,CONF_TYPE_INT,CONF_RANGE,0,10000,NULL },
- 
+
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
 
  { "gui_save_pos", &gui_save_pos, CONF_TYPE_FLAG,0,0,1,NULL},
@@ -204,7 +204,7 @@ static const m_option_t gui_opts[] =
  { "equ_channel_4",&gtkEquChannel4,CONF_TYPE_STRING,0,0,0,NULL },
  { "equ_channel_5",&gtkEquChannel5,CONF_TYPE_STRING,0,0,0,NULL },
  { "equ_channel_6",&gtkEquChannel6,CONF_TYPE_STRING,0,0,0,NULL },
- 
+
 #if 1
 #define audio_equ_row( i,j ) { "equ_band_"#i#j,&gtkEquChannels[i][j],CONF_TYPE_FLOAT,CONF_RANGE,-15.0,15.0,NULL },
    audio_equ_row( 0,0 ) audio_equ_row( 0,1 ) audio_equ_row( 0,2 ) audio_equ_row( 0,3 ) audio_equ_row( 0,4 ) audio_equ_row( 0,5 ) audio_equ_row( 0,6 ) audio_equ_row( 0,7 ) audio_equ_row( 0,8 ) audio_equ_row( 0,9 )
@@ -240,7 +240,7 @@ int cfg_read( void )
  mp_msg( MSGT_GPLAYER,MSGL_V,"[cfg] reading config file: %s\n",cfg );
  gui_conf=m_config_new();
  m_config_register_options( gui_conf,gui_opts );
- if ( !disable_gui_conf && m_config_parse_config_file( gui_conf,cfg ) < 0 ) 
+ if ( !disable_gui_conf && m_config_parse_config_file( gui_conf,cfg ) < 0 )
   {
    mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_ConfigFileError );
 //   exit( 1 );
@@ -305,7 +305,7 @@ int cfg_write( void )
  FILE * f;
  int    i;
 
-// -- save configuration 
+// -- save configuration
  if ( (f=fopen( cfg,"wt+" )) )
   {
    for ( i=0;gui_opts[i].name;i++ )
@@ -323,7 +323,7 @@ int cfg_write( void )
    fclose( f );
   }
  free( cfg );
- 
+
 // -- save playlist
  cfg=get_path( "gui.pl" );
  if ( (f=fopen( cfg,"wt+" )) )
@@ -332,7 +332,7 @@ int cfg_write( void )
    while ( plCurrent )
     {
      if ( plCurrent->path && plCurrent->name )
-      { 
+      {
        fprintf( f,"%s\n",plCurrent->path );
        fprintf( f,"%s\n",plCurrent->name );
       }

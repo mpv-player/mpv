@@ -91,7 +91,7 @@ void update_subtitles(sh_video_t *sh_video, demux_stream_t *d_dvdsub, int reset)
         current_module = "find_sub";
         if (pts > sub_last_pts || pts < sub_last_pts-1.0) {
             find_sub(subdata, (pts+sub_delay) *
-                     (subdata->sub_uses_time ? 100. : sub_fps)); 
+                     (subdata->sub_uses_time ? 100. : sub_fps));
             if (vo_sub) vo_sub_last = vo_sub;
             // FIXME! frame counter...
             sub_last_pts = pts;

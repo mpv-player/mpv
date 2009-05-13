@@ -47,7 +47,7 @@ typedef struct __attribute__((__packed__)) WAVEFILTER_ECHO {
    DWORD           dwDelay;
 } ECHOWAVEFILTER, *PECHOWAVEFILTER, *NPECHOWAVEFILTER, *LPECHOWAVEFILTER;
 #endif  /* WAVEFILTER_ECHO */
-    
+
 #ifndef _WAVEFORMATEX_
 #define _WAVEFORMATEX_
 typedef struct __attribute__((__packed__)) WAVEFORMATEX {

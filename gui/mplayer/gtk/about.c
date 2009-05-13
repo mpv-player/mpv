@@ -69,7 +69,7 @@ GtkWidget * create_About( void )
 
   gtk_widget_realize( About );
   gtkAddIcon( About );
-  
+
   vbox=AddVBox( AddDialogFrame( About ),0 );
 
   pixmapstyle=gtk_widget_get_style( About );
@@ -94,8 +94,8 @@ GtkWidget * create_About( void )
   gtk_text_view_set_editable(GTK_TEXT_VIEW(AboutText), FALSE);
   gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(AboutText), FALSE);
   AboutTextBuffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (AboutText));
-  gtk_text_buffer_get_iter_at_offset (AboutTextBuffer, &iter, 0);  
-#else  
+  gtk_text_buffer_get_iter_at_offset (AboutTextBuffer, &iter, 0);
+#else
   AboutText=gtk_text_new( NULL,NULL );
   gtk_text_set_editable(GTK_TEXT(AboutText), FALSE);
 #endif
@@ -103,15 +103,15 @@ GtkWidget * create_About( void )
   gtk_widget_show( AboutText );
   gtk_container_add( GTK_CONTAINER( scrolledwindow1 ),AboutText );
 #ifdef CONFIG_GTK2
-  gtk_text_buffer_insert (AboutTextBuffer, &iter,   
-#else  
+  gtk_text_buffer_insert (AboutTextBuffer, &iter,
+#else
   gtk_text_insert( GTK_TEXT( AboutText ),NULL,NULL,NULL,
 #endif
-  	"\n" 
-	MSGTR_ABOUT_UHU 
-	"             (http://www.uhulinux.hu/)\n" 
-	"\n" 
-	MSGTR_ABOUT_Contributors 
+  	"\n"
+	MSGTR_ABOUT_UHU
+	"             (http://www.uhulinux.hu/)\n"
+	"\n"
+	MSGTR_ABOUT_Contributors
 	"\n"
 	"     * Ackermann, Andreas\n"
 	"     * adland\n"
@@ -267,8 +267,8 @@ GtkWidget * create_About( void )
 	"     * Zealey, Mark\n"
 	"     * Ziv-Av, Matan\n"
 	"     * Zoltán, Márk Vicián\n"
-	"\n" 
-	MSGTR_ABOUT_Codecs_libs_contributions 
+	"\n"
+	MSGTR_ABOUT_Codecs_libs_contributions
 	"\n"
 	"     * Bellard, Fabrice\n"
 	"     * Chappelier, Vivien and Vincent, Damien\n"
@@ -280,7 +280,7 @@ GtkWidget * create_About( void )
 	"     * Lespinasse, Michel\n"
 	"     * Podlipec, Mark\n"
 	"\n"
-	MSGTR_ABOUT_Translations 
+	MSGTR_ABOUT_Translations
 	"\n"
 	"     * Biernat, Marcin\n"
 	"     * Fargas, Marc\n"
@@ -297,8 +297,8 @@ GtkWidget * create_About( void )
 	"     * Schiller, Wacław\n"
 	"     * Zubimendi, Andoni\n"
 	"\n"
-	MSGTR_ABOUT_Skins 
-	"\n" 
+	MSGTR_ABOUT_Skins
+	"\n"
 	"     * Azrael\n"
 	"     * Bekesi, Viktor\n"
 	"     * Burt.S.\n"

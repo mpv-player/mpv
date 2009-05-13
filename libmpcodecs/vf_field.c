@@ -24,7 +24,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->width, mpi->height/2);
-    
+
     // set up mpi as a double-stride image of dmpi:
     vf->dmpi->planes[0]=mpi->planes[0]+mpi->stride[0]*vf->priv->field;
     vf->dmpi->stride[0]=2*mpi->stride[0];
@@ -37,7 +37,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	vf->dmpi->stride[2]=2*mpi->stride[2];
     } else
 	vf->dmpi->planes[1]=mpi->planes[1]; // passthru bgr8 palette!!!
-    
+
     return vf_next_put_image(vf,vf->dmpi, pts);
 }
 

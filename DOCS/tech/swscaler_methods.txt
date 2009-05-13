@@ -28,7 +28,7 @@ blocky (upscale only)
 
 recommendations: (based upon my personal opinion many ppl might disagree ...)
 ---------------------------------------------------------------------
-        
+
 the recommended scalers for upscaling:
 fast_bilinear, point if speed is important
 cubic, spline, lanczos if quality is important
@@ -38,8 +38,8 @@ fast_bilinear, point if speed is important
 gauss, bilinear if quality is important
 cubic, spline, lanczos if a sharper picture is important
 
-note: when encoding at a limited amount of bits (not constant quantizer) 
-then a slightly blurred input might look better after decoding than a slightly 
+note: when encoding at a limited amount of bits (not constant quantizer)
+then a slightly blurred input might look better after decoding than a slightly
 sharpened one, especially for lower bitrates
 
 sws numbers / names / artifact types
@@ -64,6 +64,6 @@ m mosaic (blocky) (upscale only)
 		short filter		 b
 -sws 10	bicubic spline			r
 
-Notes: 
+Notes:
 	area upscale is identical to bilinear
 

@@ -66,7 +66,7 @@ struct m_profile {
 typedef struct m_config {
   /// Registered options.
   /** This contains all options and suboptions.
-   */ 
+   */
   m_config_option_t* opts;
   /// Current stack level.
   int lvl;
@@ -174,7 +174,7 @@ m_config_add_profile(m_config_t* config, char* name);
 
 /// Set the description of a profile.
 /** Used by the config file parser when defining a profile.
- * 
+ *
  *  \param p The profile object.
  *  \param arg The profile's name.
  */
@@ -183,7 +183,7 @@ m_profile_set_desc(m_profile_t* p, char* desc);
 
 /// Add an option to a profile.
 /** Used by the config file parser when defining a profile.
- * 
+ *
  *  \param config The config object.
  *  \param p The profile object.
  *  \param name The option's name.
@@ -195,7 +195,7 @@ m_config_set_profile_option(m_config_t* config, m_profile_t* p,
 
 /// Enables profile usage
 /** Used by the config file parser when loading a profile.
- * 
+ *
  *  \param config The config object.
  *  \param p The profile object.
  */

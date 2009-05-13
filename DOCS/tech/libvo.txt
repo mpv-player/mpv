@@ -106,7 +106,7 @@ Each vo driver _has_ to implement these:
 		that sets vo_dx, vo_dy etc. appropriately before config()
 		is called.
 
-    config():	
+    config():
       Set up the video system. You get the dimensions and flags.
       width, height: size of the source image
       d_width, d_height: wanted scaled/display size (it's a hint)
@@ -116,7 +116,7 @@ Each vo driver _has_ to implement these:
 	0x04	- allow software scaling (-zoom)
 	0x08	- flipping (-flip)
       They're defined as VOFLAG_* (see libvo/video_out.h)
-      
+
       IMPORTANT NOTE: config() may be called 0 (zero), 1 or more (2,3...)
       times between preinit() and uninit() calls. You MUST handle it, and
       you shouldn't crash at second config() call or at uninit() without
@@ -158,7 +158,7 @@ Each vo driver _has_ to implement these:
 	 this filter automatically.
 	 Make sure you set VFCAP_OSD depending on whether you implemented it
 	 or not.
-	 
+
 	 NOTE: This one will be obsolete soon! But it's still useful when
 	 you want to do tricks, like rendering osd _after_ hardware scaling
 	 (tdfxfb) or render subtitles under of the image (vo_mpegpes, sdl)

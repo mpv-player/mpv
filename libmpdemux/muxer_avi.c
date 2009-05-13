@@ -310,7 +310,7 @@ static void avifile_write_header(muxer_t *muxer){
           mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_SettingVideoDelay, (float)s->h.dwStart * s->h.dwScale/s->h.dwRate);
       }
   }
-  
+
   if (isodml) {
       unsigned int rifflen, movilen;
       int i;
@@ -387,7 +387,7 @@ static void avifile_write_header(muxer_t *muxer){
       }
   }
   write_avi_list(muxer->stream,listtypeAVIHEADER,hdrsize);
-  
+
   le2me_MainAVIHeader(&muxer->avih);
   write_avi_chunk(muxer->stream,ckidAVIMAINHDR,sizeof(muxer->avih),&muxer->avih); /* MainAVIHeader */
   le2me_MainAVIHeader(&muxer->avih);
@@ -463,7 +463,7 @@ static void avifile_write_header(muxer_t *muxer){
           le2me_WAVEFORMATEX(s->wf);
           write_avi_chunk(muxer->stream,ckidSTREAMFORMAT,wfsize,s->wf); /* WAVEFORMATEX */
           le2me_WAVEFORMATEX(s->wf);
-}	  
+}
 	  break;
       }
       if (isodml && si && si->superidx && si->superidxsize) {

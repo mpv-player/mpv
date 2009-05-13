@@ -39,7 +39,7 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   dd_priv_t* priv;
 
   ret = calloc(1,sizeof(demuxer_t));
-  
+
   priv = malloc(sizeof(dd_priv_t));
   priv->vd = vd;
   priv->ad = ad;
@@ -50,7 +50,7 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   // Video is the most important :-)
   ret->stream = vd->stream;
   ret->seekable = vd->seekable && ad->seekable && sd->seekable;
- 
+
   ret->video = vd->video;
   ret->audio = ad->audio;
   ret->sub = sd->sub;
@@ -76,7 +76,7 @@ static int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
     return demux_fill_buffer(priv->ad,ds);
   else if(ds->demuxer == priv->sd)
     return demux_fill_buffer(priv->sd,ds);
- 
+
   mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MPDEMUX_DEMUXERS_FillBufferError);
   return 0;
 }
@@ -132,7 +132,7 @@ static void demux_close_demuxers(demuxer_t* demuxer) {
 
   free(priv);
 }
-  
+
 
 static int demux_demuxers_control(demuxer_t *demuxer,int cmd, void *arg){
   dd_priv_t* priv = demuxer->priv;

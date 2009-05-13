@@ -21,7 +21,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	int ret;
 
 	vf->priv->frame = (vf->priv->frame+1)%4;
-	
+
 	dmpi = vf_get_image(vf->next, mpi->imgfmt,
 		MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
 		MP_IMGFLAG_PRESERVE, mpi->width, mpi->height);

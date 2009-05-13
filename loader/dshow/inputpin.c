@@ -445,9 +445,9 @@ static long STDCALL CInputPin_QueryInternalConnections(IPin* This,
  * \return S_OK - success
  * \return E_UNEXPECTED - The pin is output pin
  *
- * \note 
- * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream, 
- * IMemAllocator::GetBuffer runs in different (streaming) thread then other 
+ * \note
+ * IMemoryInputPin::Receive,IMemoryInputPin::ReceiveMultiple, IMemoryInputPin::EndOfStream,
+ * IMemAllocator::GetBuffer runs in different (streaming) thread then other
  * methods (application thread).
  * IMemoryInputPin::NewSegment runs either in streaming or application thread.
  * Developer must use critical sections for thread-safing work.
@@ -602,7 +602,7 @@ static long STDCALL CBaseFilter_GetClassID(IBaseFilter * This,
  *
  * \remarks
  * When filter is stopped it does onot deliver or process any samples and rejects any samples
- * from upstream filter. 
+ * from upstream filter.
  * Transition may be asynchronous. In this case method should return S_FALSE.
  * Method always sets filter's state to State_Stopped even if error occured.
  *
@@ -700,8 +700,8 @@ static long STDCALL CBaseFilter_SetSyncSource(IBaseFilter* This,
  * \brief IMediafilter::GetSyncSource (gets current reference clock)
  *
  * \param[in] This pointer to IBaseFilter interface
- * \param[out] pClock address of variable that receives pointer to clock's 
- *  IReferenceClock interface 
+ * \param[out] pClock address of variable that receives pointer to clock's
+ *  IReferenceClock interface
  *
  * \return S_OK success
  * \return E_POINTER Null pointer
@@ -790,7 +790,7 @@ static long STDCALL CBaseFilter_QueryFilterInfo(IBaseFilter* This,
  *
  * \remarks
  * Filter should not call to graph's AddRef method.
- * The IFilterGraph is guaranteed to be valid until graph manager calls this method again with 
+ * The IFilterGraph is guaranteed to be valid until graph manager calls this method again with
  * the value NULL.
  *
  */
@@ -943,7 +943,7 @@ static long STDCALL CBaseFilter2_GetClassID(IBaseFilter* This,
  *
  * \remarks
  * When filter is stopped it does onot deliver or process any samples and rejects any samples
- * from upstream filter. 
+ * from upstream filter.
  * Transition may be asynchronous. In this case method should return S_FALSE.
  * Method always sets filter's state to State_Stopped even if error occured.
  *
@@ -1042,8 +1042,8 @@ static long STDCALL CBaseFilter2_SetSyncSource(IBaseFilter* This,
  * \brief IMediafilter::GetSyncSource (gets current reference clock)
  *
  * \param[in] This pointer to IBaseFilter interface
- * \param[out] pClock address of variable that receives pointer to clock's 
- *  IReferenceClock interface 
+ * \param[out] pClock address of variable that receives pointer to clock's
+ *  IReferenceClock interface
  *
  * \return S_OK success
  * \return E_POINTER Null pointer
@@ -1131,7 +1131,7 @@ static long STDCALL CBaseFilter2_QueryFilterInfo(IBaseFilter* This,
  *
  * \remarks
  * Filter should not call to graph's AddRef method.
- * The IFilterGraph is guaranteed to be valid until graph manager calls this method again with 
+ * The IFilterGraph is guaranteed to be valid until graph manager calls this method again with
  * the value NULL.
  *
  */

@@ -346,7 +346,7 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 #define GRA_I	0x3ce
 #define GRA_D	0x3cf
 
-#ifndef FB_ACCEL_3DFX_BANSHEE 
+#ifndef FB_ACCEL_3DFX_BANSHEE
 #define FB_ACCEL_3DFX_BANSHEE 31
 #endif
 
@@ -362,12 +362,12 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 
 #define XYREG(x,y)		(((((unsigned long)y) & 0x1FFF) << 16) | (((unsigned long)x) & 0x1FFF))
 
-//#define TDFXFB_DEBUG 
+//#define TDFXFB_DEBUG
 #ifdef TDFXFB_DEBUG
 #define DPRINTK(a,b...) printk(KERN_DEBUG "fb: %s: " a, __FUNCTION__ , ## b)
 #else
 #define DPRINTK(a,b...)
-#endif 
+#endif
 
 /* ------------------------------------------------------------------------- */
 

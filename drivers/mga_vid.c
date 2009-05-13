@@ -63,7 +63,7 @@
 
 #include "mga_vid.h"
 
-#ifdef CONFIG_MTRR 
+#ifdef CONFIG_MTRR
 #include <asm/mtrr.h>
 #endif
 
@@ -80,19 +80,19 @@
 
 #define DEFAULT_MGA_VID_MAJOR 178
 
-#ifndef PCI_DEVICE_ID_MATROX_G200_PCI 
+#ifndef PCI_DEVICE_ID_MATROX_G200_PCI
 #define PCI_DEVICE_ID_MATROX_G200_PCI 0x0520
 #endif
 
-#ifndef PCI_DEVICE_ID_MATROX_G200_AGP 
+#ifndef PCI_DEVICE_ID_MATROX_G200_AGP
 #define PCI_DEVICE_ID_MATROX_G200_AGP 0x0521
 #endif
 
-#ifndef PCI_DEVICE_ID_MATROX_G400 
+#ifndef PCI_DEVICE_ID_MATROX_G400
 #define PCI_DEVICE_ID_MATROX_G400 0x0525
 #endif
 
-#ifndef PCI_DEVICE_ID_MATROX_G550 
+#ifndef PCI_DEVICE_ID_MATROX_G550
 #define PCI_DEVICE_ID_MATROX_G550 0x2527
 #endif
 
@@ -208,12 +208,12 @@ typedef struct bes_registers_s
 	uint32_t beshiscal;
 	//BES Horizontal source start [10.14] (for scaling)
 	uint32_t beshsrcst;
-	//BES Horizontal source ending [10.14] (for scaling) 
+	//BES Horizontal source ending [10.14] (for scaling)
 	uint32_t beshsrcend;
-	//BES Horizontal source last 
+	//BES Horizontal source last
 	uint32_t beshsrclst;
 
-	
+
 	//BES Vertical coord
 	uint32_t besvcoord;
 	//BES Vertical inverse scaling [5.14]
@@ -291,7 +291,7 @@ typedef struct crtc2_registers_s
 
 /*CRTC2 registers*/
 #define XMISCCTRL  0x1e
-#define C2CTL       0x3c10 
+#define C2CTL       0x3c10
 #define C2DATACTL   0x3c4c
 #define C2MISC      0x3c44
 #define C2HPARAM    0x3c14
@@ -323,7 +323,7 @@ typedef struct crtc2_registers_s
 #define BESA1CORG   0x3d10
 #define BESA1ORG    0x3d00
 
-#define BESA2C3ORG  0x3d64 
+#define BESA2C3ORG  0x3d64
 #define BESA2CORG   0x3d14
 #define BESA2ORG    0x3d04
 
@@ -381,7 +381,7 @@ typedef struct mga_card_s {
 	uint32_t vid_overlay_on;
 
 	uint8_t *mmio_base;
-	uint32_t mem_base; 
+	uint32_t mem_base;
 	int src_base;	// YUV buffer position in video memory
 	uint32_t ram_size;	// how much megabytes videoram we have
 	uint32_t top_reserved;	// reserved space for console font (matroxfb + fastfont)
@@ -391,7 +391,7 @@ typedef struct mga_card_s {
 
 	struct pci_dev *pci_dev;
 
-	mga_vid_config_t config; 
+	mga_vid_config_t config;
 	int configured; // set to 1 when the card is configured over ioctl
 
 	int colkey_saved;
@@ -400,7 +400,7 @@ typedef struct mga_card_s {
 	unsigned char colkey_mask[4];
 
 	int irq; // = -1
-	int next_frame; 
+	int next_frame;
 } mga_card_t;
 
 #define MGA_MAX_CARDS 16
@@ -427,7 +427,7 @@ MODULE_PARM(major, "i");
 static void crtc2_frame_sel(mga_card_t * card, int frame)
 {
 switch(frame) {
-case 0:	
+case 0:
 	card->cregs.c2pl2startadd0=card->regs.besa1corg;
 	card->cregs.c2pl3startadd0=card->regs.besa1c3org;
 	card->cregs.c2startadd0=card->regs.besa1org;
@@ -463,7 +463,7 @@ static void mga_vid_frame_sel(mga_card_t * card, int frame)
 	//we don't need the vcount protection as we're only hitting
 	//one register (and it doesn't seem to be double buffered)
 	card->regs.besctl = (card->regs.besctl & ~0x07000000) + (frame << 25);
-	writel( card->regs.besctl, card->mmio_base + BESCTL ); 
+	writel( card->regs.besctl, card->mmio_base + BESCTL );
 
 //	writel( card->regs.besglobctl + ((readl(card->mmio_base + VCOUNT)+2)<<16),
 	writel( card->regs.besglobctl + (MGA_VSYNC_POS<<16),
@@ -483,7 +483,7 @@ static void mga_vid_write_regs(mga_card_t * card, int restore)
 			card->mmio_base + BESGLOBCTL);
 
 	// color or coordinate keying
-	
+
 	if(restore && card->colkey_saved){
 	    // restore it
 	    card->colkey_saved=0;
@@ -491,12 +491,12 @@ static void mga_vid_write_regs(mga_card_t * card, int restore)
 #ifdef MP_DEBUG
 		printk("mga_vid: Restoring colorkey (ON: %d  %02X:%02X:%02X)\n",
 			card->colkey_on,card->colkey_color[0],card->colkey_color[1],card->colkey_color[2]);
-#endif		
+#endif
 
 		// Set color key registers:
 		writeb( XKEYOPMODE, card->mmio_base + PALWTADD);
 		writeb( card->colkey_on, card->mmio_base + X_DATAREG);
-		
+
 		writeb( XCOLKEY0RED, card->mmio_base + PALWTADD);
 		writeb( card->colkey_color[0], card->mmio_base + X_DATAREG);
 		writeb( XCOLKEY0GREEN, card->mmio_base + PALWTADD);
@@ -521,7 +521,7 @@ static void mga_vid_write_regs(mga_card_t * card, int restore)
 		// Get color key registers:
 		writeb( XKEYOPMODE, card->mmio_base + PALWTADD);
 		card->colkey_on=(unsigned char)readb(card->mmio_base + X_DATAREG) & 1;
-		
+
 		writeb( XCOLKEY0RED, card->mmio_base + PALWTADD);
 		card->colkey_color[0]=(unsigned char)readb(card->mmio_base + X_DATAREG);
 		writeb( XCOLKEY0GREEN, card->mmio_base + PALWTADD);
@@ -543,19 +543,19 @@ static void mga_vid_write_regs(mga_card_t * card, int restore)
 #ifdef MP_DEBUG
 		printk("mga_vid: Saved colorkey (ON: %d  %02X:%02X:%02X)\n",
 			card->colkey_on, card->colkey_color[0], card->colkey_color[1], card->colkey_color[2]);
-#endif		
+#endif
 
 	}
-	
+
 if(!restore){
 	writeb( XKEYOPMODE, card->mmio_base + PALWTADD);
 	writeb( card->config.colkey_on, card->mmio_base + X_DATAREG);
-	if ( card->config.colkey_on ) 
+	if ( card->config.colkey_on )
 	{
 		uint32_t r=0, g=0, b=0;
 
 		writeb( XMULCTRL, card->mmio_base + PALWTADD);
-		switch (readb (card->mmio_base + X_DATAREG)) 
+		switch (readb (card->mmio_base + X_DATAREG))
 		{
 			case BPP_8:
 				/* Need to look up the color index, just using color 0 for now. */
@@ -582,7 +582,7 @@ if(!restore){
 			break;
 		}
 
-		// Disable color keying on alpha channel 
+		// Disable color keying on alpha channel
 		writeb( XCOLMSK, card->mmio_base + PALWTADD);
 		writeb( 0x00, card->mmio_base + X_DATAREG);
 		writeb( X_COLKEY, card->mmio_base + PALWTADD);
@@ -609,10 +609,10 @@ if(!restore){
 }
 
 	// Backend Scaler
-	writel( card->regs.besctl,      card->mmio_base + BESCTL); 
+	writel( card->regs.besctl,      card->mmio_base + BESCTL);
 	if(card->is_g400)
-		writel( card->regs.beslumactl,  card->mmio_base + BESLUMACTL); 
-	writel( card->regs.bespitch,    card->mmio_base + BESPITCH); 
+		writel( card->regs.beslumactl,  card->mmio_base + BESLUMACTL);
+	writel( card->regs.bespitch,    card->mmio_base + BESPITCH);
 
 	writel( card->regs.besa1org,    card->mmio_base + BESA1ORG);
 	writel( card->regs.besa1corg,   card->mmio_base + BESA1CORG);
@@ -622,7 +622,7 @@ if(!restore){
 	writel( card->regs.besb1corg,   card->mmio_base + BESB1CORG);
 	writel( card->regs.besb2org,    card->mmio_base + BESB2ORG);
 	writel( card->regs.besb2corg,   card->mmio_base + BESB2CORG);
-	if(card->is_g400) 
+	if(card->is_g400)
 	{
 		writel( card->regs.besa1c3org,  card->mmio_base + BESA1C3ORG);
 		writel( card->regs.besa2c3org,  card->mmio_base + BESA2C3ORG);
@@ -635,7 +635,7 @@ if(!restore){
 	writel( card->regs.beshsrcst,   card->mmio_base + BESHSRCST);
 	writel( card->regs.beshsrcend,  card->mmio_base + BESHSRCEND);
 	writel( card->regs.beshsrclst,  card->mmio_base + BESHSRCLST);
-	
+
 	writel( card->regs.besvcoord,   card->mmio_base + BESVCOORD);
 	writel( card->regs.besviscal,   card->mmio_base + BESVISCAL);
 
@@ -643,7 +643,7 @@ if(!restore){
 	writel( card->regs.besv1wght,   card->mmio_base + BESV1WGHT);
 	writel( card->regs.besv2srclst, card->mmio_base + BESV2SRCLST);
 	writel( card->regs.besv2wght,   card->mmio_base + BESV2WGHT);
-	
+
 	//update the registers somewhere between 1 and 2 frames from now.
 	writel( card->regs.besglobctl + ((readl(card->mmio_base + VCOUNT)+2)<<16),
 			card->mmio_base + BESGLOBCTL);
@@ -682,7 +682,7 @@ if(!restore){
 
 #ifdef MP_DEBUG
 	printk("c2offset = %d\n",card->cregs.c2offset);
-#endif	
+#endif
 
 	writel(card->cregs.c2offset, card->mmio_base + C2OFFSET);
 	writel(card->cregs.c2startadd0, card->mmio_base + C2STARTADD0);
@@ -699,7 +699,7 @@ if(!restore){
 //	writel(card->cregs.c2ctl,	card->mmio_base + C2CTL);
 //	printk("c2ctl:0x%08x c2datactl:0x%08x\n",readl(card->mmio_base + C2CTL),readl(card->mmio_base + C2DATACTL));
 //	printk("c2misc:0x%08x\n", readl(card->mmio_base + C2MISC));
-#endif	
+#endif
 }
 
 static int mga_vid_set_config(mga_card_t * card)
@@ -725,7 +725,7 @@ static int mga_vid_set_config(mga_card_t * card)
 	unsigned int vsyncstart = vdispend + lower_margin;
 	unsigned int vsyncend = vsyncstart + vsync_len;
 	unsigned int vtotal = vsyncend + upper_margin;
-#endif 
+#endif
 	x = config->x_org;
 	y = config->y_org;
 	sw = config->src_width;
@@ -736,7 +736,7 @@ static int mga_vid_set_config(mga_card_t * card)
 #ifdef MP_DEBUG
 	printk(KERN_DEBUG "mga_vid: Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
 	       dw, dh, x, y, sw, sh, config->format);
-#endif	
+#endif
 
 	if(sw<4 || sh<4 || dw<4 || dh<4){
 	    printk(KERN_ERR "mga_vid: Invalid src/dest dimenstions\n");
@@ -744,15 +744,15 @@ static int mga_vid_set_config(mga_card_t * card)
 	}
 
 	//FIXME check that window is valid and inside desktop
-	
-	//Setup the BES registers for a three plane 4:2:0 video source 
+
+	//Setup the BES registers for a three plane 4:2:0 video source
 
 	card->regs.besglobctl = 0;
 
 switch(config->format){
-    case MGA_VID_FORMAT_YV12:	
-    case MGA_VID_FORMAT_I420:	
-    case MGA_VID_FORMAT_IYUV:	
+    case MGA_VID_FORMAT_YV12:
+    case MGA_VID_FORMAT_I420:
+    case MGA_VID_FORMAT_IYUV:
 	card->regs.besctl = 1   // BES enabled
                     + (0<<6)    // even start polarity
                     + (1<<10)   // x filtering enabled
@@ -764,7 +764,7 @@ switch(config->format){
 	if(card->is_g400)
 	{
 		//zoom disabled, zoom filter disabled, 420 3 plane format, proc amp
-		//disabled, rgb mode disabled 
+		//disabled, rgb mode disabled
 		card->regs.besglobctl = (1<<5);
 	}
 	else
@@ -776,7 +776,7 @@ switch(config->format){
 #endif
         break;
 
-    case MGA_VID_FORMAT_YUY2:	
+    case MGA_VID_FORMAT_YUY2:
 	card->regs.besctl = 1   // BES enabled
                     + (0<<6)    // even start polarity
                     + (1<<10)   // x filtering enabled
@@ -788,7 +788,7 @@ switch(config->format){
 	card->regs.besglobctl = 0;        // YUY2 format selected
         break;
 
-    case MGA_VID_FORMAT_UYVY:	
+    case MGA_VID_FORMAT_UYVY:
 	card->regs.besctl = 1   // BES enabled
                     + (0<<6)    // even start polarity
                     + (1<<10)   // x filtering enabled
@@ -805,12 +805,12 @@ switch(config->format){
 	return -1;
 }
 
-	// setting black&white mode 
-	card->regs.besctl|=(card->regs.blackie<<20); 
+	// setting black&white mode
+	card->regs.besctl|=(card->regs.blackie<<20);
 
 	//Enable contrast and brightness control
 	card->regs.besglobctl |= (1<<5) + (1<<7);
-	
+
 	// brightness (-128..127) && contrast (0..255)
 	card->regs.beslumactl = (card->brightness << 16) | ((card->contrast+0x80)&0xFFFF);
 
@@ -819,19 +819,19 @@ switch(config->format){
 	bestop = y > 0 ? y : 0;
 	card->regs.beshcoord = (besleft<<16) + (x + dw-1);
 	card->regs.besvcoord = (bestop<<16) + (y + dh-1);
-	
+
 	//Setup source dimensions
 	card->regs.beshsrclst  = (sw - 1) << 16;
-	card->regs.bespitch = (sw + 31) & ~31 ; 
-	
+	card->regs.bespitch = (sw + 31) & ~31 ;
+
 	//Setup horizontal scaling
 	ifactor = ((sw-1)<<14)/(dw-1);
 	ofsleft = besleft - x;
-		
+
 	card->regs.beshiscal = ifactor<<2;
 	card->regs.beshsrcst = (ofsleft*ifactor)<<2;
 	card->regs.beshsrcend = card->regs.beshsrcst + (((dw - ofsleft - 1) * ifactor) << 2);
-	
+
 	//Setup vertical scaling
 	ifactor = ((sh-1)<<14)/(dh-1);
 	ofstop = bestop - y;
@@ -850,9 +850,9 @@ if(config->format==MGA_VID_FORMAT_YV12
  ||config->format==MGA_VID_FORMAT_I420
  ){
         // planar YUV frames:
-	if (card->is_g400) 
+	if (card->is_g400)
 		baseadrofs = ( ( (ofstop * card->regs.besviscal ) / 4 ) >> 16 ) * card->regs.bespitch;
-	else 
+	else
 		baseadrofs = ( ( ( ofstop * card->regs.besviscal ) / 2 ) >> 16 ) * card->regs.bespitch;
 
     if(config->format==MGA_VID_FORMAT_YV12 || !card->is_g400){
@@ -887,9 +887,9 @@ if(config->format==MGA_VID_FORMAT_YV12
 
 
 switch(config->format){
-    case MGA_VID_FORMAT_YV12:	
-    case MGA_VID_FORMAT_I420:	
-    case MGA_VID_FORMAT_IYUV:	
+    case MGA_VID_FORMAT_YV12:
+    case MGA_VID_FORMAT_I420:
+    case MGA_VID_FORMAT_IYUV:
 	card->cregs.c2ctl = 1   // CRTC2 enabled
 		    + (1<<1)	// external clock
 		    + (0<<2)	// external clock
@@ -945,7 +945,7 @@ switch(config->format){
 */		    ;
         break;
 
-    case MGA_VID_FORMAT_YUY2:	
+    case MGA_VID_FORMAT_YUY2:
 	card->cregs.c2ctl = 1   // CRTC2 enabled
 		    + (1<<1)	// external clock
 		    + (0<<2)	// external clock
@@ -1003,7 +1003,7 @@ switch(config->format){
 */			;
           break;
 
-    case MGA_VID_FORMAT_UYVY:	
+    case MGA_VID_FORMAT_UYVY:
 	card->cregs.c2ctl = 1   // CRTC2 enabled
 		    + (1<<1)	// external clock
 		    + (0<<2)	// external clock
@@ -1066,7 +1066,7 @@ switch(config->format){
 
 	card->cregs.c2hparam = ( (hdispend - 8) << 16) | (htotal - 8);
 	card->cregs.c2hsync = ( (hsyncend - 8) << 16) | (hsyncstart - 8);
-	
+
 	card->cregs.c2misc=0	// CRTCV2 656 togg f0
 		    +(0<<1) // CRTCV2 656 togg f0
 		    +(0<<2) // CRTCV2 656 togg f0
@@ -1083,21 +1083,21 @@ switch(config->format){
 //	card->cregs.c2pl2startadd1=card->regs.besa2corg;
 	card->cregs.c2pl3startadd0=card->regs.besa1c3org;
 //	card->cregs.c2pl3startadd1=card->regs.besa2c3org;
-		    
-	card->cregs.c2preload=(vsyncstart << 16) | (hsyncstart); // from 
-	
+
+	card->cregs.c2preload=(vsyncstart << 16) | (hsyncstart); // from
+
 	card->cregs.c2spicstartadd0=0; // not used
 //	card->cregs.c2spicstartadd1=0; // not used
-	
+
 	card->cregs.c2startadd0=card->regs.besa1org;
 //	card->cregs.c2startadd1=card->regs.besa2org;
-	
+
 	card->cregs.c2subpiclut=0; //not used
-	
+
 	card->cregs.c2vparam = ( (vdispend - 1) << 16) | (vtotal - 1);
 	card->cregs.c2vsync = ( (vsyncend - 1) << 16) | (vsyncstart - 1);
 
-	
+
 #endif
 
 	mga_vid_write_regs(card, 0);
@@ -1113,11 +1113,11 @@ static void enable_irq(mga_card_t * card){
 //	printk(KERN_ALERT "*** !!! IRQREG = %d\n", (int)(cc&0xff));
 
 	writeb(0x11, card->mmio_base + CRTCX);
-	
+
 	writeb(0x20, card->mmio_base + CRTCD);  /* clear 0, enable off */
 	writeb(0x00, card->mmio_base + CRTCD);  /* enable on */
 	writeb(0x10, card->mmio_base + CRTCD);  /* clear = 1 */
-	
+
 	writel(card->regs.besglobctl , card->mmio_base + BESGLOBCTL);
 
 }
@@ -1144,21 +1144,21 @@ static void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
 		cc = readl(card->mmio_base + STATUS);
 		if ( ! (cc & 0x10) ) return;  /* vsyncpen */
 // 		debug_irqcnt++;
-	} 
+	}
 
 //    if ( debug_irqignore ) {
 //	debug_irqignore = 0;
 
 //	frame=(frame+1)&1;
 	card->regs.besctl = (card->regs.besctl & ~0x07000000) + (card->next_frame << 25);
-	writel( card->regs.besctl, card->mmio_base + BESCTL ); 
+	writel( card->regs.besctl, card->mmio_base + BESCTL );
 
 #ifdef CRTC2
-// sem pridat vyber obrazku !!!!	
+// sem pridat vyber obrazku !!!!
 // i han echt kei ahnig was das obe heisse söll
 	crtc2_frame_sel(card->next_frame);
 #endif
-	
+
 #if 0
 	++counter;
 	if(!(counter&63)){
@@ -1191,7 +1191,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 	uint32_t tmp;
 	mga_card_t * card = (mga_card_t *) file->private_data;
 
-	switch(cmd) 
+	switch(cmd)
 	{
 		case MGA_VID_GET_VERSION:
 			tmp = MGA_VID_VERSION;
@@ -1210,7 +1210,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			//FIXME remove
 
 			printk(KERN_DEBUG "mga_vid: Received configuration\n");
-#endif			
+#endif
 
  			if(copy_from_user(&card->config,(mga_vid_config_t*) arg,sizeof(mga_vid_config_t)))
 			{
@@ -1231,7 +1231,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 				printk(KERN_ERR "mga_vid: illegal num_frames: %d\n",card->config.num_frames);
 				return -EFAULT;
 			}
-			
+
 			card->src_base = (card->ram_size * 0x100000 - card->config.num_frames * card->config.frame_size - card->top_reserved);
 			if(card->src_base<0){
 				printk(KERN_ERR "mga_vid: not enough memory for frames!\n");
@@ -1240,13 +1240,13 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			card->src_base &= (~0xFFFF); // 64k boundary
 #ifdef MP_DEBUG
 			printk(KERN_DEBUG "mga YUV buffer base: 0x%X\n", card->src_base);
-#endif			
-			
-			if (card->is_g400) 
+#endif
+
+			if (card->is_g400)
 			  card->config.card_type = MGA_G400;
 			else
 			  card->config.card_type = MGA_G200;
-		       
+
 			card->config.ram_size = card->ram_size;
 
 			if (copy_to_user((mga_vid_config_t *) arg, &card->config, sizeof(mga_vid_config_t)))
@@ -1255,7 +1255,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 				return -EFAULT;
 			}
 
-			result = mga_vid_set_config(card);	
+			result = mga_vid_set_config(card);
 			if(!result) card->configured=1;
 			return result;
 		break;
@@ -1263,7 +1263,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		case MGA_VID_ON:
 #ifdef MP_DEBUG
 			printk(KERN_DEBUG "mga_vid: Video ON\n");
-#endif			
+#endif
 			card->vid_src_ready = 1;
 			if(card->vid_overlay_on)
 			{
@@ -1279,8 +1279,8 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		case MGA_VID_OFF:
 #ifdef MP_DEBUG
 			printk(KERN_DEBUG "mga_vid: Video OFF (ioctl)\n");
-#endif			
-			card->vid_src_ready = 0;   
+#endif
+			card->vid_src_ready = 0;
 #ifdef MGA_ALLOW_IRQ
 			if ( card->irq != -1 ) disable_irq(card);
 #endif
@@ -1288,7 +1288,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
                         card->regs.besglobctl &= ~(1<<6);  // UYVY format selected
 			mga_vid_write_regs(card, 0);
 		break;
-			
+
 		case MGA_VID_FSEL:
 			if(copy_from_user(&frame,(int *) arg,sizeof(int)))
 			{
@@ -1311,7 +1311,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 				return -EFAULT;
 			}
 		break;
-			
+
 		case MGA_VID_SET_LUMA:
 			tmp = arg;
 			card->brightness=tmp>>16; card->contrast=tmp&0xFFFF;
@@ -1319,12 +1319,12 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			card->regs.beslumactl = (card->brightness << 16) | ((card->contrast+0x80)&0xFFFF);
 			mga_vid_write_regs(card, 0);
 		break;
-			
+
 	        default:
 			printk(KERN_ERR "mga_vid: Invalid ioctl\n");
 			return -EINVAL;
 	}
-       
+
 	return 0;
 }
 
@@ -1349,15 +1349,15 @@ static int mga_vid_find_card(void)
 		}
 
 		card = kmalloc(sizeof(mga_card_t), GFP_KERNEL);
-		if(!card) 
-		{ 
+		if(!card)
+		{
 			printk(KERN_ERR "mga_vid: memory allocation failed\n");
 			mga_cards_num--;
 			break;
 		}
-		
+
 		mga_cards[mga_cards_num - 1] = card;
-		
+
 		switch(dev->device) {
 		case PCI_DEVICE_ID_MATROX_G550:
 			mga_dev_name = "MGA G550";
@@ -1385,14 +1385,14 @@ static int mga_vid_find_card(void)
 			break;
 		}
 	}
- 	
+
 	if(!mga_cards_num)
 	{
 		printk(KERN_ERR "mga_vid: No supported cards found\n");
 	} else {
 		printk(KERN_INFO "mga_vid: %d supported cards found\n", mga_cards_num);
 	}
-	
+
 	return mga_cards_num;
 }
 
@@ -1419,7 +1419,7 @@ static ssize_t mga_vid_read(struct file *file, char *buf, size_t count, loff_t *
 {
 	uint32_t size;
 	mga_card_t * card = (mga_card_t *) file->private_data;
-	
+
 	if(!card->param_buff) return -ESPIPE;
 	if(!(*ppos)) mga_param_buff_fill(card);
 	if(*ppos >= card->param_buff_len) return 0;
@@ -1437,18 +1437,18 @@ static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, l
 	{
 		short brightness;
 		brightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
-		if (brightness>127 || brightness<-128) { brightness=0;} 
+		if (brightness>127 || brightness<-128) { brightness=0;}
 //		printk(KERN_DEBUG "mga_vid: brightness modified ( %d ) \n",brightness);
 		card->brightness=brightness;
-	} else 
+	} else
 	if(memcmp(buf,PARAM_CONTRAST,min(count,strlen(PARAM_CONTRAST))) == 0)
 	{
 		short contrast;
 		contrast=simple_strtol(&buf[strlen(PARAM_CONTRAST)],NULL,10);
-		if (contrast>127 || contrast<-128) { contrast=0;} 
+		if (contrast>127 || contrast<-128) { contrast=0;}
 //		printk(KERN_DEBUG "mga_vid: contrast modified ( %d ) \n",contrast);
 		card->contrast=contrast;
-	} else 
+	} else
 
         if(memcmp(buf,PARAM_BLACKIE,min(count,strlen(PARAM_BLACKIE))) == 0)
 	{
@@ -1467,7 +1467,7 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 
 #ifdef MP_DEBUG
 	printk(KERN_DEBUG "mga_vid: mapping video memory into userspace\n");
-#endif	
+#endif
 
 	if(!card->configured)
 	{
@@ -1476,7 +1476,7 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 	}
 
 	if(remap_page_range(vma->vm_start, card->mem_base + card->src_base,
-		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+		 vma->vm_end - vma->vm_start, vma->vm_page_prot))
 	{
 		printk(KERN_ERR "mga_vid: error mapping video memory\n");
 		return -EAGAIN;
@@ -1492,11 +1492,11 @@ static int mga_vid_release(struct inode *inode, struct file *file)
 	//Close the window just in case
 #ifdef MP_DEBUG
 	printk(KERN_DEBUG "mga_vid: Video OFF (release)\n");
-#endif	
+#endif
 
 	card = (mga_card_t *) file->private_data;
 
-	card->vid_src_ready = 0;   
+	card->vid_src_ready = 0;
 	card->regs.besctl &= ~1;
         card->regs.besglobctl &= ~(1<<6);  // UYVY format selected
 //	card->config.colkey_on=0; //!!!
@@ -1510,12 +1510,12 @@ static int mga_vid_release(struct inode *inode, struct file *file)
 static long long mga_vid_lseek(struct file *file, long long offset, int origin)
 {
 	return -ESPIPE;
-}					 
+}
 
 static int mga_vid_open(struct inode *inode, struct file *file)
 {
 	mga_card_t * card;
-	
+
 	int minor = MINOR(inode->i_rdev);
 
 	if(!file->private_data)
@@ -1530,17 +1530,17 @@ static int mga_vid_open(struct inode *inode, struct file *file)
 		file->private_data = mga_cards[minor];
 #ifdef MP_DEBUG
 		printk(KERN_DEBUG "mga_vid: Not using devfs\n");
-#endif	
+#endif
 	}
 #ifdef MP_DEBUG
 	  else {
 		printk(KERN_DEBUG "mga_vid: Using devfs\n");
 	}
-#endif	
+#endif
 
 	card = (mga_card_t *) file->private_data;
 
-	if(card->vid_in_use == 1) 
+	if(card->vid_in_use == 1)
 		return -EBUSY;
 
 	card->vid_in_use = 1;
@@ -1596,7 +1596,7 @@ static void cards_init(mga_card_t * card, struct pci_dev * dev, int card_number,
 	card->brightness = mga_brightness[card_number];
 	card->contrast = mga_contrast[card_number];
 	card->top_reserved = mga_top_reserved[card_number];
-	
+
 #if LINUX_VERSION_CODE >= 0x020300
 	card->mmio_base = ioremap_nocache(dev->resource[1].start,0x4000);
 	card->mem_base =  dev->resource[0].start;
@@ -1626,7 +1626,7 @@ static void cards_init(mga_card_t * card, struct pci_dev * dev, int card_number,
 		    // SDRAM:
 		    case 0x00:
 		    case 0x04:  card->ram_size = 16; break;
-		    case 0x03:  
+		    case 0x03:
 		    case 0x05:  card->ram_size = 32; break;
 		    // SGRAM:
 		    case 0x10:
@@ -1652,7 +1652,7 @@ static void cards_init(mga_card_t * card, struct pci_dev * dev, int card_number,
 //		    case 0x13:  card->ram_size = 8; break;
 		    default: card->ram_size = 8;
 		}
-	    } 
+	    }
 #if 0
 //	    printk("List resources -----------\n");
 	    for(temp=0;temp<DEVICE_COUNT_RESOURCE;temp++){
@@ -1700,8 +1700,8 @@ static void cards_init(mga_card_t * card, struct pci_dev * dev, int card_number,
 
 }
 
-/* 
- * Main Initialization Function 
+/*
+ * Main Initialization Function
  */
 
 static int mga_vid_initialize(void)
@@ -1720,7 +1720,7 @@ static int mga_vid_initialize(void)
 			}
 		}
 	}
-	
+
 	if(register_chrdev(major, "mga_vid", &mga_vid_fops))
 	{
 		printk(KERN_ERR "mga_vid: unable to get major: %d\n", major);

@@ -67,7 +67,7 @@
 #include "radeon_vid.h"
 #include "radeon.h"
 
-#ifdef CONFIG_MTRR 
+#ifdef CONFIG_MTRR
 #include <asm/mtrr.h>
 #endif
 
@@ -90,7 +90,7 @@ MODULE_DESCRIPTION("Accelerated YUV BES driver for Radeons. Version: "RADEON_VID
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
 #endif
-#ifdef CONFIG_MTRR 
+#ifdef CONFIG_MTRR
 MODULE_PARM(mtrr, "i");
 MODULE_PARM_DESC(mtrr, "Tune MTRR (touch=1(default))");
 static int mtrr __initdata = 1;
@@ -193,17 +193,17 @@ typedef struct bes_registers_s
   uint32_t test;
   /* Configurable stuff */
   int double_buff;
-  
+
   int brightness;
   int saturation;
-  
+
   int ckey_on;
   uint32_t graphics_key_clr;
   uint32_t graphics_key_msk;
-  
+
   int deinterlace_on;
   uint32_t deinterlace_pattern;
-  
+
 } bes_registers_t;
 
 typedef struct video_registers_s
@@ -225,7 +225,7 @@ static int IsR200=0;
 #define DECLARE_VREG(name) { name, 0 }
 #endif
 #ifdef DEBUG
-static video_registers_t vregs[] = 
+static video_registers_t vregs[] =
 {
   DECLARE_VREG(VIDEOMUX_CNTL),
   DECLARE_VREG(VIPPAD_MASK),
@@ -323,14 +323,14 @@ static video_registers_t vregs[] =
 static uint32_t radeon_vid_in_use = 0;
 
 static uint8_t *radeon_mmio_base = 0;
-static uint32_t radeon_mem_base = 0; 
+static uint32_t radeon_mem_base = 0;
 static int32_t radeon_overlay_off = 0;
 static uint32_t radeon_ram_size = 0;
 #define PARAM_BUFF_SIZE 4096
 static uint8_t *radeon_param_buff = NULL;
 static uint32_t radeon_param_buff_size=0;
 static uint32_t radeon_param_buff_len=0; /* real length of buffer */
-static mga_vid_config_t radeon_config; 
+static mga_vid_config_t radeon_config;
 
 static char *fourcc_format_name(int format)
 {
@@ -562,7 +562,7 @@ static void radeon_set_transform(float bright, float cont, float sat,
 	CAdjGCr = sat * (OvHueSin * trans[ref].RefGCb + OvHueCos * trans[ref].RefGCr);
 	CAdjBCb = sat * OvHueCos * trans[ref].RefBCb;
 	CAdjBCr = sat * OvHueSin * trans[ref].RefBCb;
-    
+
 #if 0 /* default constants */
         CAdjLuma = 1.16455078125;
 
@@ -582,16 +582,16 @@ static void radeon_set_transform(float bright, float cont, float sat,
 	OvBCr = CAdjBCr;
 	OvROff = CAdjOff -
 		OvLuma * Loff - (OvRCb + OvRCr) * Coff;
-	OvGOff = CAdjOff - 
+	OvGOff = CAdjOff -
 		OvLuma * Loff - (OvGCb + OvGCr) * Coff;
-	OvBOff = CAdjOff - 
+	OvBOff = CAdjOff -
 		OvLuma * Loff - (OvBCb + OvBCr) * Coff;
 #if 0 /* default constants */
 	OvROff = -888.5;
 	OvGOff = 545;
 	OvBOff = -1104;
-#endif 
-   
+#endif
+
 	dwOvROff = ((int)(OvROff * 2.0)) & 0x1fff;
 	dwOvGOff = (int)(OvGOff * 2.0) & 0x1fff;
 	dwOvBOff = (int)(OvBOff * 2.0) & 0x1fff;
@@ -627,7 +627,7 @@ static void radeon_set_transform(float bright, float cont, float sat,
 
 #ifndef RAGE128
 /* Gamma curve definition */
-typedef struct 
+typedef struct
 {
 	unsigned int gammaReg;
 	unsigned int gammaSlope;
@@ -635,7 +635,7 @@ typedef struct
 }GAMMA_SETTINGS;
 
 /* Recommended gamma curve parameters */
-GAMMA_SETTINGS r200_def_gamma[18] = 
+GAMMA_SETTINGS r200_def_gamma[18] =
 {
 	{OV0_GAMMA_0_F, 0x100, 0x0000},
 	{OV0_GAMMA_10_1F, 0x100, 0x0020},
@@ -657,7 +657,7 @@ GAMMA_SETTINGS r200_def_gamma[18] =
 	{OV0_GAMMA_3C0_3FF, 0x100, 0x0700}
 };
 
-GAMMA_SETTINGS r100_def_gamma[6] = 
+GAMMA_SETTINGS r100_def_gamma[6] =
 {
 	{OV0_GAMMA_0_F, 0x100, 0x0000},
 	{OV0_GAMMA_10_1F, 0x100, 0x0020},
@@ -864,7 +864,7 @@ RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) des
 	/* 4:1:0 */
 	case IMGFMT_IF09:
         case IMGFMT_YVU9:
-	/* 4:2:0 */	
+	/* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
@@ -1089,7 +1089,7 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 						 radeon_config.colkey_red,
 						 radeon_config.colkey_green,
 						 radeon_config.colkey_blue);
-			if(swap_fourcc) radeon_config.format = swab32(radeon_config.format); 
+			if(swap_fourcc) radeon_config.format = swab32(radeon_config.format);
 			printk(RVID_MSG"configuring for '%s' fourcc\n",fourcc_format_name(radeon_config.format));
 			return radeon_vid_init_video(&radeon_config);
 		break;
@@ -1235,9 +1235,9 @@ static int __init radeon_vid_config_card(void)
 	radeon_ram_size /= 0x100000;
 	detected_chip = i;
 	printk(RVID_MSG"Found %s (%uMb memory)\n",ati_card_ids[i].name,radeon_ram_size);
-#ifndef RAGE128	
-	if(ati_card_ids[i].id == PCI_DEVICE_ID_R200_QL || 
-	   ati_card_ids[i].id == PCI_DEVICE_ID_R200_BB || 
+#ifndef RAGE128
+	if(ati_card_ids[i].id == PCI_DEVICE_ID_R200_QL ||
+	   ati_card_ids[i].id == PCI_DEVICE_ID_R200_BB ||
 	   ati_card_ids[i].id == PCI_DEVICE_ID_RV200_QW) IsR200 = 1;
 #endif
 	return TRUE;
@@ -1323,7 +1323,7 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
     {
       long brightness;
       brightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
-      if(brightness >= -64 && brightness <= 63) 
+      if(brightness >= -64 && brightness <= 63)
       {
         besr.brightness = brightness;
 	OUTREG(OV0_COLOUR_CNTL, (brightness & 0x7f) |
@@ -1402,7 +1402,7 @@ static int radeon_vid_mmap(struct file *file, struct vm_area_struct *vma)
 
 	RTRACE(RVID_MSG"mapping video memory into userspace\n");
 	if(remap_page_range(vma->vm_start, radeon_mem_base + radeon_overlay_off,
-		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+		 vma->vm_end - vma->vm_start, vma->vm_page_prot))
 	{
 		printk(RVID_MSG"error mapping video memory\n");
 		return -EAGAIN;
@@ -1423,7 +1423,7 @@ static int radeon_vid_release(struct inode *inode, struct file *file)
 static long long radeon_vid_lseek(struct file *file, long long offset, int origin)
 {
 	return -ESPIPE;
-}					 
+}
 
 static int radeon_vid_open(struct inode *inode, struct file *file)
 {
@@ -1432,7 +1432,7 @@ static int radeon_vid_open(struct inode *inode, struct file *file)
 	if(minor != 0)
 	 return -ENXIO;
 
-	if(radeon_vid_in_use == 1) 
+	if(radeon_vid_in_use == 1)
 		return -EBUSY;
 
 	radeon_vid_in_use = 1;
@@ -1483,8 +1483,8 @@ static struct file_operations radeon_vid_fops =
 };
 #endif
 
-/* 
- * Main Initialization Function 
+/*
+ * Main Initialization Function
  */
 
 static int __init radeon_vid_initialize(void)

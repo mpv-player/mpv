@@ -139,7 +139,7 @@ typedef enum {
   MP_CMD_DVDNAV_SELECT,
   MP_CMD_DVDNAV_PREVMENU,
   MP_CMD_DVDNAV_MOUSECLICK,
-  
+
   /// GUI commands
   MP_CMD_GUI_EVENTS = 5000,
   MP_CMD_GUI_LOADFILE,
@@ -183,7 +183,7 @@ typedef enum {
 #define MP_INPUT_RETRY -4
 
 // For the key's drivers, if possible you can send key up and key down
-// events. Key up is the default, to send a key down you must use the 
+// events. Key up is the default, to send a key down you must use the
 // OR operator between the key code and MP_KEY_DOWN.
 #define MP_KEY_DOWN (1<<29)
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)

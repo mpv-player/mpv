@@ -17,7 +17,7 @@
 #include "mpbswap.h"
 #include "ad_internal.h"
 
-static ad_info_t info = 
+static ad_info_t info =
 {
 	"MS ADPCM audio decoder",
 	"msadpcm",
@@ -60,7 +60,7 @@ static const int8_t ms_adapt_coeff2[] =
 static int preinit(sh_audio_t *sh_audio)
 {
   sh_audio->audio_out_minsize = sh_audio->wf->nBlockAlign * 4;
-  sh_audio->ds->ss_div = 
+  sh_audio->ds->ss_div =
     (sh_audio->wf->nBlockAlign - MS_ADPCM_PREAMBLE_SIZE) * 2;
   sh_audio->audio_in_minsize =
   sh_audio->ds->ss_mul = sh_audio->wf->nBlockAlign;
@@ -208,8 +208,8 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 {
   int res;
   if (demux_read_data(sh_audio->ds, sh_audio->a_in_buffer,
-    sh_audio->ds->ss_mul) != 
-    sh_audio->ds->ss_mul) 
+    sh_audio->ds->ss_mul) !=
+    sh_audio->ds->ss_mul)
       return -1; /* EOF */
 
   res = ms_adpcm_decode_block(

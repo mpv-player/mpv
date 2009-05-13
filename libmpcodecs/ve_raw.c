@@ -29,7 +29,7 @@ struct vf_priv_s {
 static int set_format(struct vf_instance_s *vf, unsigned int fmt) {
     if (!force_fourcc)
         mux_v->bih->biCompression = fmt;
-    
+
     mux_v->bih->biPlanes = 1;
     if (IMGFMT_IS_RGB(fmt)) {
 	if (IMGFMT_RGB_DEPTH(fmt) < 8 && !(fmt&128))
@@ -140,7 +140,7 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->priv = malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
     vf->priv->mux = (muxer_stream_t*)args;
-    
+
     mux_v->bih = calloc(1, sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize = sizeof(BITMAPINFOHEADER);
     mux_v->bih->biWidth = 0;

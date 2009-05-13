@@ -27,7 +27,7 @@ MPP   - Miscellaneous peripheral port. (includes macrovision's filter - copy
 	protection mechanism)
 OV    - Video overlay (YUV BES) (include subpictures, gamma correction and
         adaptive deinterlacing)
-CAP0  - Video capturing 
+CAP0  - Video capturing
 CAP1  - Video capturing (second unit)
 RT    - Rage theatre: video encoding and mixing
 MUX   - video muxer
@@ -227,7 +227,7 @@ OUTREG(OVERLAY_Y_X_END,((drw_x+drw_w)<<16)|(drw_y+drw_h));
  ************************************
 
 #define OV0_Y_X_START                          0x0400
-#define OV0_Y_X_END                            0x0404  
+#define OV0_Y_X_END                            0x0404
 
 ...
 

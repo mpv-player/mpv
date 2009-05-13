@@ -72,7 +72,7 @@ struct fc_instance_s {
  * \param index out: font index inside a file
  * \param code: the character that should be present in the font, can be 0
  * \return font file path
-*/ 
+*/
 static char* _select_font(fc_instance_t* priv, const char* family, int treat_family_as_pattern,
 			  unsigned bold, unsigned italic, int* index, uint32_t code)
 {
@@ -87,7 +87,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, int treat_fam
 	int curf;
 	char* retval = NULL;
 	int family_cnt;
-	
+
 	*index = 0;
 
 	if (treat_family_as_pattern)
@@ -97,7 +97,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, int treat_fam
 
 	if (!pat)
 		goto error;
-	
+
 	if (!treat_family_as_pattern) {
 		FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)family);
 
@@ -130,7 +130,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, int treat_fam
 	FcPatternAddInteger(pat, FC_WEIGHT, bold);
 
 	FcDefaultSubstitute(pat);
-	
+
 	rc = FcConfigSubstitute(priv->config, pat, FcMatchPattern);
 	if (!rc)
 		goto error;
@@ -235,7 +235,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, int treat_fam
  * \param index out: font index inside a file
  * \param code: the character that should be present in the font, can be 0
  * \return font file path
-*/ 
+*/
 char* fontconfig_select(fc_instance_t* priv, const char* family, int treat_family_as_pattern,
 			unsigned bold, unsigned italic, int* index, uint32_t code)
 {
@@ -249,23 +249,23 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, int treat_famil
 	if (!res && priv->family_default) {
 		res = _select_font(priv, priv->family_default, 0, bold, italic, index, code);
 		if (res)
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFontFamily, 
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFontFamily,
 					family, bold, italic, res, *index);
 	}
 	if (!res && priv->path_default) {
 		res = priv->path_default;
 		*index = priv->index_default;
-		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFont, 
+		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingDefaultFont,
 		       family, bold, italic, res, *index);
 	}
 	if (!res) {
 		res = _select_font(priv, "Arial", 0, bold, italic, index, code);
 		if (res)
-			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingArialFontFamily, 
+			mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_UsingArialFontFamily,
 					family, bold, italic, res, *index);
 	}
 	if (res)
-		mp_msg(MSGT_ASS, MSGL_V, "fontconfig_select: (%s, %d, %d) -> %s, %d\n", 
+		mp_msg(MSGT_ASS, MSGL_V, "fontconfig_select: (%s, %d, %d) -> %s, %d\n",
 				family, bold, italic, res, *index);
 	return res;
 }
@@ -316,7 +316,7 @@ static char* validate_fname(char* name)
  * \param idx index of the processed font in library->fontdata
  * With FontConfig >= 2.4.2, builds a font pattern in memory via FT_New_Memory_Face/FcFreeTypeQueryFace.
  * With older FontConfig versions, save the font to ~/.mplayer/fonts.
-*/ 
+*/
 static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Library ftlibrary, int idx)
 {
 	int rc;
@@ -347,7 +347,7 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
 	} else if (!S_ISDIR(st.st_mode)) {
 		mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_NotADirectory, fonts_dir);
 	}
-	
+
 	fname = validate_fname((char*)name);
 
 	snprintf(buf, 1000, "%s/%s", fonts_dir, fname);
@@ -407,14 +407,14 @@ static void process_fontdata(fc_instance_t* priv, ass_library_t* library, FT_Lib
  * \param family default font family
  * \param path default font path
  * \return pointer to fontconfig private data
-*/ 
+*/
 fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, const char* family, const char* path, int fc)
 {
 	int rc;
 	fc_instance_t* priv = calloc(1, sizeof(fc_instance_t));
 	const char* dir = library->fonts_dir;
 	int i;
-	
+
 	if (!fc) {
 		mp_msg(MSGT_ASS, MSGL_WARN,
 		       MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed);
@@ -497,9 +497,9 @@ fc_instance_t* fontconfig_init(ass_library_t* library, FT_Library ftlibrary, con
 	fc_instance_t* priv;
 
 	mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_LIBASS_FontconfigDisabledDefaultFontWillBeUsed);
-	
+
 	priv = calloc(1, sizeof(fc_instance_t));
-	
+
 	priv->path_default = strdup(path);
 	priv->index_default = 0;
 	return priv;

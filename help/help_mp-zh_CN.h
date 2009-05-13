@@ -1,11 +1,11 @@
 // Synced with help_mp-en.h r29209 （MSGTR_RecommendedVideoBitrate）
 // Reminder of hard terms which need better/final solution later:
-//   (file links to be updated later if available!);  
-//   NAV; section/subsection;  XScreenSaver; keycolor;  
-//   AGP move failed on Y plane;  
+//   (file links to be updated later if available!);
+//   NAV; section/subsection;  XScreenSaver; keycolor;
+//   AGP move failed on Y plane;
 //   profile? demuxer? drain? flush?
 //
-// Translated by JRaSH <jrash06@163.com> 
+// Translated by JRaSH <jrash06@163.com>
 // (Translator before 2007-05-01)
 // Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2 AT yahoo.com>
 // (Translator before 2006-04-24)
@@ -952,7 +952,7 @@ static const char help_text[]=
 
 // vo_null.c
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] 未知子设备: %s。\n"
-															
+
 // vo_png.c
 #define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] 警告: 压缩级别设置为 0, 停用压缩!\n"
 #define MSGTR_LIBVO_PNG_Warning2 "[VO_PNG] 信息: 使用 -vo png:z=<n> 设置 0 到 9 的压缩级别。\n"

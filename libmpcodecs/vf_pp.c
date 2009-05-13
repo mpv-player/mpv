@@ -48,7 +48,7 @@ static int config(struct vf_instance_s* vf,
     case IMGFMT_411P: flags|= PP_FORMAT_411; break;
     default:          flags|= PP_FORMAT_420; break;
     }
-        
+
     if(vf->priv->context) pp_free_context(vf->priv->context);
     vf->priv->context= pp_get_context(width, height, flags);
 
@@ -90,7 +90,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(vf->priv->pp&0xFFFF) return; // non-local filters enabled
-    if((mpi->type==MP_IMGTYPE_IPB || vf->priv->pp) && 
+    if((mpi->type==MP_IMGTYPE_IPB || vf->priv->pp) &&
 	mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
     if(!(mpi->flags&MP_IMGFLAG_ACCEPT_STRIDE) && mpi->imgfmt!=vf->priv->outfmt)
 	return; // colorspace differ
@@ -120,7 +120,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	    (mpi->width+7)&(~7),(mpi->height+7)&(~7));
 	vf->dmpi->w=mpi->w; vf->dmpi->h=mpi->h; // display w;h
     }
-    
+
     if(vf->priv->pp || !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// do the postprocessing! (or copy if no DR)
 	pp_postprocess(mpi->planes           ,mpi->stride,
@@ -155,7 +155,7 @@ static int open(vf_instance_t *vf, char* args){
     char *endptr, *name;
     int i;
     int hex_mode=0;
-    
+
     vf->query_format=query_format;
     vf->control=control;
     vf->config=config;
@@ -169,7 +169,7 @@ static int open(vf_instance_t *vf, char* args){
     // check csp:
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
     if(!vf->priv->outfmt) return 0; // no csp match :(
-    
+
     if(args){
 	hex_mode= strtol(args, &endptr, 0);
 	if(*endptr){
@@ -192,9 +192,9 @@ static int open(vf_instance_t *vf, char* args){
         /* hex mode for compatibility */
         for(i=0; i<=PP_QUALITY_MAX; i++){
 	    PPMode *ppMode;
-	    
+
 	    ppMode= (PPMode*)memalign(8, sizeof(PPMode));
-	    
+
 	    ppMode->lumMode= hex_mode;
 	    ppMode->chromMode= ((hex_mode&0xFF)>>4) | (hex_mode&0xFFFFFF00);
 	    ppMode->maxTmpNoise[0]= 700;
@@ -204,12 +204,12 @@ static int open(vf_instance_t *vf, char* args){
 	    ppMode->minAllowedY= 16;
 	    ppMode->baseDcDiff= 256/4;
 	    ppMode->flatnessThreshold=40;
-    
+
             vf->priv->ppMode[i]= ppMode;
         }
     }
 #endif
-    
+
     vf->priv->pp=PP_QUALITY_MAX;
     return 1;
 }

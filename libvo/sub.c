@@ -132,7 +132,7 @@ static void draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsign
 		x0, x0+w, y0, y0+h);
 	return;
     }
-    
+
     for (i = 0; i < h; i++) {
 	for (j = 0; j < w; j++, b++, a++, bs++, as++) {
 	    if (*b < *bs) *b = *bs;
@@ -207,7 +207,7 @@ inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
 	  x+=vo_font->width[c]+vo_font->charspace;
 	  h=get_height(c,h);
         }
-	
+
 	obj->bbox.x2=x-vo_font->charspace;
 	obj->bbox.y2=obj->bbox.y1+h;
 	obj->flags|=OSDFLAG_BBOX;
@@ -263,7 +263,7 @@ inline static void vo_update_nav (mp_osd_obj_t *obj, int dxs, int dys, int left_
   obj->bbox.y1 = obj->y = sy;
   obj->bbox.x2 = ex;
   obj->bbox.y2 = ey;
-  
+
   alloc_buf (obj);
   len = obj->stride * (obj->bbox.y2 - obj->bbox.y1);
   memset (obj->bitmap_buffer, OSD_NAV_BOX_ALPHA, len);
@@ -465,7 +465,7 @@ TODO: support for separated graphics symbols (where six rectangles does not touc
 
 ********** *********** (0:hm/3)
 ***   **** ****   ****
-*** 1 **** **** 2 **** 
+*** 1 **** **** 2 ****
 ***   **** ****   ****
 ********** ***********
 ********** ***********
@@ -482,11 +482,11 @@ TODO: support for separated graphics symbols (where six rectangles does not touc
 ********** *********** (hm-hm/3:hm/3)
 ***   **** ****   ****
 *** 5 **** **** 6 ****
-***   **** ****   **** 
-********** ***********   
+***   **** ****   ****
+********** ***********
 ********** ***********
 
-*/              
+*/
                 if(tc.gfx>1){ //separated gfx
                     for(b=0;b<6;b++){
                         color=(tc.unicode>>b)&1?tc.fg:tc.bg;
@@ -522,29 +522,29 @@ int vo_osd_progbar_type=-1;
 int vo_osd_progbar_value=100;   // 0..256
 
 // if we have n=256 bars then OSD progbar looks like below
-// 
+//
 // 0   1    2    3 ... 256  <= vo_osd_progbar_value
 // |   |    |    |       |
 // [ ===  ===  === ... === ]
-// 
+//
 //  the above schema is rescalled to n=elems bars
 
 inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
 
     obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
-    
+
     if(vo_osd_progbar_type<0 || !vo_font){
        obj->flags&=~OSDFLAG_VISIBLE;
        return;
     }
-    
+
     render_one_glyph(vo_font, OSD_PB_START);
     render_one_glyph(vo_font, OSD_PB_END);
     render_one_glyph(vo_font, OSD_PB_0);
     render_one_glyph(vo_font, OSD_PB_1);
     render_one_glyph(vo_font, vo_osd_progbar_type);
 
-    // calculate bbox corners:    
+    // calculate bbox corners:
     {	int h=0;
         int y=(dys-vo_font->height)/2;
         int delimw=vo_font->width[OSD_PB_START]
@@ -574,7 +574,7 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
     }
 
     alloc_buf(obj);
-    
+
     {
 	int minw = vo_font->width[OSD_PB_START]+vo_font->width[OSD_PB_END]+vo_font->width[OSD_PB_0];
 	if (vo_osd_progbar_type>0 && vo_font->font[vo_osd_progbar_type]>=0){
@@ -582,7 +582,7 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
 	}
 	if (obj->bbox.x2 - obj->bbox.x1 < minw) return; // space too small, don't render anything
     }
-    
+
     // render it:
     {	unsigned char *s;
    	unsigned char *sa;
@@ -601,7 +601,7 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
 	   if (ev & 0xFF)  mark++;
 	   if (mark>elems) mark=elems;
 	}
-   
+
 
 //        printf("osd.progbar  width=%d  xpos=%d\n",width,x);
 
@@ -615,7 +615,7 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
               vo_font->pic_a[font]->bmp+vo_font->start[c],
               vo_font->pic_a[font]->w);
 	}
-   
+
         c=OSD_PB_START;
         if ((font=vo_font->font[c])>=0)
             draw_alpha_buf(obj,x,y,
@@ -678,14 +678,14 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    int xmin=dxs,xmax=0;
    int h,lasth;
    int xtblc, utblc;
-   
+
    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
 
    if(!vo_sub || !sub_font || !sub_visibility || (sub_font->font[40]<0)){
        obj->flags&=~OSDFLAG_VISIBLE;
        return;
    }
-   
+
    obj->bbox.y2=obj->y=dys;
    obj->params.subtitle.lines=0;
 
@@ -704,7 +704,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
       while (l) {
 	    xsize = -sub_font->charspace;
 	  l--;
-	  t=vo_sub->text[i++];	  
+	  t=vo_sub->text[i++];
 	    char_position = 0;
 	    char_seq = calloc(strlen(t), sizeof(int));
 
@@ -749,7 +749,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		    prevc = c;
 		} else {
 		    int delta_xsize = sub_font->width[c] + sub_font->charspace + kerning(sub_font, prevc, c);
-		    
+
 		    if (xsize + delta_xsize <= dxs) {
 			if (!x) x = 1;
 			prevc = c;
@@ -940,7 +940,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	}
 	if(obj->params.subtitle.lines)
 	    obj->y = dys - ((obj->params.subtitle.lines - 1) * sub_font->height + sub_font->pic_a[sub_font->font[40]]->h);
-	
+
 	// free memory
 	if (otp_sub != NULL) {
 	    for (tmp = otp_sub->ott; tmp->next != NULL; free(tmp->prev)) {
@@ -949,13 +949,13 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	    }
 	    free(tmp->text);
 	    free(tmp);
-	
+
 	    for(pmt = otp_sub; pmt->next != NULL; free(pmt->prev)) {
 		pmt = pmt->next;
 	    }
 	    free(pmt);
 	}
-	
+
     }
     /// vertical alignment
     h = dys - obj->y;
@@ -984,7 +984,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
     alloc_buf(obj);
 
     y = obj->y;
-    
+
     obj->alignment = 0;
     switch(vo_sub->alignment) {
        case SUB_ALIGNMENT_BOTTOMLEFT:
@@ -1038,7 +1038,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
          y+=sub_font->height;
 	}
     }
-    
+
 }
 
 inline static void vo_update_spudec_sub(mp_osd_obj_t* obj, int dxs, int dys)
@@ -1130,7 +1130,7 @@ int vo_update_osd_ext(int dxs,int dys, int left_border, int top_border,
 	prev_dys = dys;
 	defer_counter = 0;
     } else {
-       if (!vo_font) 
+       if (!vo_font)
            load_font_ft(dxs, dys, &vo_font, font_name, osd_font_scale_factor);
        if (!sub_font) {
            if (sub_font_name)
@@ -1244,7 +1244,7 @@ void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h)){
     mp_osd_obj_t* obj=vo_osd_list;
     vo_update_osd(dxs,dys);
     while(obj){
-      if(((obj->flags&OSDFLAG_CHANGED) || (obj->flags&OSDFLAG_VISIBLE)) && 
+      if(((obj->flags&OSDFLAG_CHANGED) || (obj->flags&OSDFLAG_VISIBLE)) &&
          (obj->flags&OSDFLAG_OLD_BBOX)){
           int w=obj->old_bbox.x2-obj->old_bbox.x1;
 	  int h=obj->old_bbox.y2-obj->old_bbox.y1;

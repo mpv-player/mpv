@@ -191,7 +191,7 @@ LOCAL int stream_head_read(unsigned char *hbuf,uint32_t *newhead){
    * we may not be able to address unaligned 32-bit data on non-x86 cpus.
    * Fall back to some portable code.
    */
-  *newhead = 
+  *newhead =
       hbuf[0] << 24 |
       hbuf[1] << 16 |
       hbuf[2] <<  8 |
@@ -215,7 +215,7 @@ LOCAL int stream_head_shift(unsigned char *hbuf,uint32_t *head){
 LOCAL int decode_header(struct frame *fr,uint32_t newhead){
 
     // head_check:
-    if( (newhead & 0xffe00000) != 0xffe00000 ||  
+    if( (newhead & 0xffe00000) != 0xffe00000 ||
         (newhead & 0x0000fc00) == 0x0000fc00) return FALSE;
 
     fr->lay = 4-((newhead>>17)&3);

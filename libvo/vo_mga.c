@@ -38,7 +38,7 @@
 #include "sub.h"
 #include "aspect.h"
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
 	"Matrox G200/G4x0/G550 overlay (/dev/mga_vid)",
 	"mga",
@@ -77,7 +77,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		aspect_save_orig(width,height);
 		aspect_save_prescale(d_width,d_height);
 		aspect_save_screenres(vo_screenwidth,vo_screenheight);
-	
+
 		if(flags&VOFLAG_FULLSCREEN) { /* -fs */
 			aspect(&d_width,&d_height,A_ZOOM);
 			vo_fs = VO_TRUE;
@@ -97,7 +97,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		mga_vid_config.x_org=(vo_screenwidth-d_width)/2;
 		mga_vid_config.y_org=(vo_screenheight-d_height)/2;
 	}
-	
+
     return mga_init(width,height,format);
 }
 

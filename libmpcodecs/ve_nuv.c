@@ -62,7 +62,7 @@ m_option_t nuvopts_conf[]={
   {"l", &nuv_priv_dflt.l, CONF_TYPE_INT, M_OPT_RANGE,0,20, NULL},
   {"c", &nuv_priv_dflt.c, CONF_TYPE_INT, M_OPT_RANGE,0,20, NULL},
   {NULL, NULL, 0, 0, 0, 0, NULL}
-};  
+};
 
 //===========================================================================//
 
@@ -112,16 +112,16 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
   memset(header, 0, FRAMEHEADERSIZE); // Reset the header
   if(vf->priv->lzo)
     memset(vf->priv->zbuffer,0,FRAMEHEADERSIZE);
-    
+
   // This has to be don here otherwise tv with sound doesn't work
-  if(!vf->priv->tbl_wrote) {    
+  if(!vf->priv->tbl_wrote) {
     RTjpeg_init_compress((uint32_t *)data,mpi->width,mpi->height,vf->priv->q);
     RTjpeg_init_mcompress();
 
     header[0] = 'D'; // frametype: compressor data
     header[1] = 'R'; // comptype:  compressor data for RTjpeg
     AV_WL32(header + 8, COMPDATASIZE); // packetlength
-  
+
     mux_v->buffer=vf->priv->buffer;
     muxer_write_chunk(mux_v,FRAMEHEADERSIZE + COMPDATASIZE, 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     vf->priv->tbl_wrote = 1;
@@ -175,7 +175,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     }
 
   }
-    
+
   header[0] = 'V'; // frametype: video frame
   AV_WL32(header + 8, len); // packetlength
   mux_v->buffer = header;
@@ -206,7 +206,7 @@ static int vf_open(vf_instance_t *vf, char* args){
   vf->priv=malloc(sizeof(struct vf_priv_s));
   memcpy(vf->priv, &nuv_priv_dflt,sizeof(struct vf_priv_s));
   vf->priv->mux=(muxer_stream_t*)args;
-  
+
   mux_v->bih=calloc(1, sizeof(BITMAPINFOHEADER));
   mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
   mux_v->bih->biWidth=0;

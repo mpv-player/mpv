@@ -26,8 +26,8 @@ const GUID IID_IClassFactory =
     {0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46}
 };
 
-HRESULT STDCALL CoInitialize(LPVOID pvReserved); 
-void STDCALL CoUninitialize(void); 
+HRESULT STDCALL CoInitialize(LPVOID pvReserved);
+void STDCALL CoUninitialize(void);
 #endif
 
 static void DS_Filter_Start(DS_Filter* This)
@@ -137,9 +137,9 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 #endif
 
     /*
-        tempAll is not used  anywhere. 
+        tempAll is not used  anywhere.
 	MemAllocatorCreate() is called to ensure that RegisterComObject for IMemoryAllocator
-	will be	called before possible call 
+	will be	called before possible call
 	to CoCreateInstance(...,&IID_IMemoryAllocator,...) from binary codec.
     */
     tempAll=MemAllocatorCreate();

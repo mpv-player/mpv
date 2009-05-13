@@ -80,7 +80,7 @@ typedef struct {
  Probably the linux .so-s were compiled with old GCC without setting
  packing, so it adds 2 bytes padding after the quality field.
  In windows it seems that there's no padding in it.
- 
+
  -- alex
 */
 
@@ -132,7 +132,7 @@ static int load_syms_linux(char *path)
     raSetFlavor = dlsym(handle, "RASetFlavor");
     raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
     raSetPwd = dlsym(handle, "RASetPwd"); // optional, used by SIPR
-    
+
     if (raCloseCodec && raDecode && raFreeDecoder &&
 	(raOpenCodec||raOpenCodec2) && raSetFlavor &&
 	/*raSetDLLAccessPath &&*/ raInitDecoder)
@@ -140,12 +140,12 @@ static int load_syms_linux(char *path)
 	rv_handle = handle;
 	return 1;
     }
-    
+
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot resolve symbols - incompatible dll: %s\n",path);
     dlclose(handle);
     return 0;
 }
-#endif    
+#endif
 
 #ifdef CONFIG_WIN32DLL
 
@@ -159,7 +159,7 @@ int WINAPI FreeLibrary(void *handle);
 static int load_syms_windows(char *path)
 {
     void *handle;
-    
+
     mp_msg(MSGT_DECVIDEO, MSGL_V, "opening win32 dll '%s'\n", path);
 #ifdef WIN32_LOADER
     Setup_LDT_Keeper();
@@ -180,7 +180,7 @@ static int load_syms_windows(char *path)
     wraSetFlavor = GetProcAddress(handle, "RASetFlavor");
     wraSetDLLAccessPath = GetProcAddress(handle, "SetDLLAccessPath");
     wraSetPwd = GetProcAddress(handle, "RASetPwd"); // optional, used by SIPR
-    
+
     if (wraCloseCodec && wraDecode && wraFreeDecoder &&
 	(wraOpenCodec || wraOpenCodec2) && wraSetFlavor &&
 	/*wraSetDLLAccessPath &&*/ wraInitDecoder)
@@ -189,11 +189,11 @@ static int load_syms_windows(char *path)
 	dll_type = 1;
 	return 1;
     }
-    
+
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot resolve symbols - incompatible dll: %s\n",path);
     FreeLibrary(handle);
     return 0;
-    
+
 }
 #endif
 
@@ -210,8 +210,8 @@ static int preinit(sh_audio_t *sh){
 
     /* first try to load linux dlls, if failed and we're supporting win32 dlls,
        then try to load the windows ones */
-      
-#ifdef HAVE_LIBDL       
+
+#ifdef HAVE_LIBDL
     if (strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
 #ifdef CONFIG_WIN32DLL
@@ -273,7 +273,7 @@ static int preinit(sh_audio_t *sh){
   sh->samplesize=sh->wf->wBitsPerSample/8;
   sh->channels=sh->wf->nChannels;
 
-  { 
+  {
     ra_init_t init_data={
 	sh->wf->nSamplesPerSec,
 	sh->wf->wBitsPerSample,
@@ -323,10 +323,10 @@ static int preinit(sh_audio_t *sh){
 #endif
 	raSetPwd(sh->context,"Ardubancel Quazanga"); // set password... lol.
     }
-  
+
   if (sh->format == mmioFOURCC('s','i','p','r')) {
     short flavor;
-    
+
     if (sh->wf->nAvgBytesPerSec > 1531)
         flavor = 3;
     else if (sh->wf->nAvgBytesPerSec > 937)
@@ -350,10 +350,10 @@ static int preinit(sh_audio_t *sh){
   } // sipr flavor
 
     sh->i_bps=sh->wf->nAvgBytesPerSec;
-    
+
   sh->audio_out_minsize=128000; // no idea how to get... :(
   sh->audio_in_minsize = sh->wf->nBlockAlign;
-  
+
   return 1; // return values: 1=OK 0=ERROR
 }
 
@@ -362,7 +362,7 @@ static int init(sh_audio_t *sh_audio){
 
   // you can store HANDLE or private struct pointer at sh->context
   // you can access WAVEFORMATEX header at sh->wf
-  
+
   // set sample format/rate parameters if you didn't do it in preinit() yet.
 
   return 1; // return values: 1=OK 0=ERROR
@@ -406,7 +406,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       sh->a_in_buffer_size=
       sh->a_in_buffer_len=sh->wf->nBlockAlign;
   }
-  
+
 #ifdef CONFIG_WIN32DLL
     if (dll_type == 1)
       result=wraDecode(sh->context, sh->a_in_buffer+sh->a_in_buffer_size-sh->a_in_buffer_len, sh->wf->nBlockAlign,
@@ -416,7 +416,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   result=raDecode(sh->context, sh->a_in_buffer+sh->a_in_buffer_size-sh->a_in_buffer_len, sh->wf->nBlockAlign,
        buf, &len, -1);
   sh->a_in_buffer_len-=sh->wf->nBlockAlign;
-  
+
 //  printf("radecode: %d bytes, res=0x%X  \n",len,result);
 
   return len; // return value: number of _bytes_ written to output buffer,

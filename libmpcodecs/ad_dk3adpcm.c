@@ -2,7 +2,7 @@
     DK3 ADPCM Decoder for MPlayer
       by Mike Melanson
 
-    "This format number was used by Duck Corp. but not officially 
+    "This format number was used by Duck Corp. but not officially
     registered with Microsoft"
 
     This file is responsible for decoding audio data encoded with
@@ -19,7 +19,7 @@
 #include "mpbswap.h"
 #include "ad_internal.h"
 
-static ad_info_t info = 
+static ad_info_t info =
 {
 	"Duck Corp. DK3 ADPCM decoder",
 	"dk3adpcm",
@@ -71,7 +71,7 @@ static int adpcm_index[16] =
 static int preinit(sh_audio_t *sh_audio)
 {
   sh_audio->audio_out_minsize = sh_audio->wf->nBlockAlign * 6;
-  sh_audio->ds->ss_div = 
+  sh_audio->ds->ss_div =
     (sh_audio->wf->nBlockAlign - DK3_ADPCM_PREAMBLE_SIZE) * 8 / 3;
   sh_audio->audio_in_minsize=
   sh_audio->ds->ss_mul = sh_audio->wf->nBlockAlign;
@@ -233,8 +233,8 @@ static int dk3_adpcm_decode_block(unsigned short *output, unsigned char *input,
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
   if (demux_read_data(sh_audio->ds, sh_audio->a_in_buffer,
-    sh_audio->ds->ss_mul) != 
-    sh_audio->ds->ss_mul) 
+    sh_audio->ds->ss_mul) !=
+    sh_audio->ds->ss_mul)
       return -1; /* EOF */
 
   if (maxlen < 2 * 4 * sh_audio->wf->nBlockAlign * 2 / 3) {

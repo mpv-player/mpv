@@ -346,12 +346,12 @@ Prophet 4000XT), vous devriez télécharger les pilotes depuis le
 
 <sect2 id="intel">
   <title>Cartes Intel</title>
-  
+
   <para>
     Ces cartes sont présentes sur de nombreux portables.  Un Xorg récent est
 recommendé.
   </para>
-  
+
   <para>
     Pour permettre la lecture de vidéo de la résolution d'un DVD (voir plus),
     modifiez le fichier XF86Config/xorg.conf comme tel&nbsp;:
@@ -1048,7 +1048,7 @@ avec
 
 <sect1 id="tdfx_vid">
   <title>tdfx_vid</title>
-  
+
   <para>
     Il s'agit de la combinaison d'un module du noyau Linux et d'un pilote de
     sortie vidéo similaire à <link linkend="mga_vid">mga_vid</link>.
@@ -1059,7 +1059,7 @@ avec
     <command>configure</command> pour compiler le pilote de la sortie vidéo
     puis compilez le module noyau avec les instructions suivantes.
   </para>
-  
+
   <procedure>
     <title>Installation du module noyau tdfx_vid.o&nbsp;:</title>
     <step><para>
@@ -1083,13 +1083,13 @@ class="username">root</systemitem>)
         <programlisting>alias char-major-178 tdfx_vid</programlisting>
       </para></step>
   </procedure>
-  
+
   <para>
     Une application de test appelée <command>tdfx_vid_test</command> est
 disponible dans le même répertoire  Elle devrait afficher des informations
 utiles si tout fonctionne bien.
   </para>
-  
+
 </sect1>
 
 
@@ -2155,7 +2155,7 @@ ATSC)
   Vous pouvez aussi mettre 8192, ce qui sélectionnera tous les pids de cette
   fréquence, puis vous pourrez basculer entre les programmes avec TAB.
   Ceci risque de nécessiter plus de bande passante bien que les cartes à bas
-  coût transfèrent toujours tous les canaux au moins vers le noyau si bien 
+  coût transfèrent toujours tous les canaux au moins vers le noyau si bien
   que cela ne fait pas beaucoup de différence pour elles.
   Autres utilisations possibles&nbsp;: pid televideo, seconde piste audio,...
 </para>
@@ -2699,7 +2699,7 @@ redimensionneur YUV des cartes G200/G400/G450/G550) ne fonctionne pas
 dessus ! Le pilote Windows contourne cela, probablement en utilisant le
 moteur 3D pour zoomer, et le framebuffer YUV pour afficher l'image zoomée.
 Si vous voulez vraiment utiliser X, utilisez les options
-    <option>-vo x11 -fs -zoom</option>, mais ce sera 
+    <option>-vo x11 -fs -zoom</option>, mais ce sera
     <emphasis role="bold">LENT</emphasis>, et aura la protection anticopie
     <emphasis role="bold">Macrovision</emphasis> activée
     (vous pouvez &quot;contourner&quot; Macrovision en utilisant ce

@@ -144,11 +144,11 @@ static int analyze_fixed_pattern(struct vf_priv_s *p, mp_image_t *new, mp_image_
 static int analyze_aggressive(struct vf_priv_s *p, mp_image_t *new, mp_image_t *old)
 {
 	struct metrics m, pm;
-	
+
 	if (p->frame >= 0) p->frame = (p->frame+1)%5;
-	
+
 	diff_fields(&m, old, new);
-	
+
 	status(p->frame, &m);
 
 	pm = p->pm;
@@ -173,7 +173,7 @@ static int analyze_aggressive(struct vf_priv_s *p, mp_image_t *new, mp_image_t *
 				p->pm = pm; /* hack :) */
 				p->frame = 3;
 				return TC_IL1;
-			} 
+			}
 		} else {
 			mp_msg(MSGT_VFILTER, MSGL_V, "mismatched telecine fields!\n");
 			p->frame = -1;
@@ -283,7 +283,7 @@ static int do_put_image(struct vf_instance_s* vf, mp_image_t *dmpi)
 		dropflag = (++p->lastdrop >= 5) && (4*p->inframes <= 5*p->outframes);
 		break;
 	}
-	
+
 	if (dropflag) {
 		mp_msg(MSGT_VFILTER, MSGL_V, "drop! [%d/%d=%g]\n",
 			p->outframes, p->inframes, (float)p->outframes/p->inframes);
@@ -311,7 +311,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	else dmpi = vf_get_image(vf->next, mpi->imgfmt,
 		MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
 		MP_IMGFLAG_PRESERVE, mpi->width, mpi->height);
-		
+
 	switch (p->analyze(p, mpi, dmpi)) {
 	case TC_DROP:
 		/* Don't copy anything unless we'll need to read it. */

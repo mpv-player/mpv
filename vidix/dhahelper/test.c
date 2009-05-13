@@ -27,7 +27,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
- 
+
 #include "dhahelper.h"
 
 int main(int argc, char *argv[])
@@ -58,13 +58,13 @@ int main(int argc, char *argv[])
 	printf("ret: %s\n", strerror(errno));
 
 	mem.ret = (int)mmap(NULL, (size_t)mem.size, PROT_READ, MAP_SHARED, fd, (off_t)0);
-	printf("allocated to %x\n", mem.ret); 
+	printf("allocated to %x\n", mem.ret);
 
 	if (argc > 1)
 	    if (mem.ret != 0)
 	    {
  		int i;
- 
+
 		for (i = 0; i < 256; i++)
 		    printf("[%x] ", *(int *)(mem.ret+i));
 		printf("\n");

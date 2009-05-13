@@ -197,7 +197,7 @@ má sice podporu xv, ale karta samotná je velmi pomalá, takže ji raději prod
 </para>
 
 <para>
-Pro karty S3 Virge nyní existuje nativní framebuffer ovladač podobný 
+Pro karty S3 Virge nyní existuje nativní framebuffer ovladač podobný
 tdfxfb. Nastavte si framebuffer (čili přidejte
 "<option>vga=792 video=vesa:mtrr</option>" do příkazového řádku kernelu) a
 použijte <option>-vo s3fb</option> (<option>-vf yuy2</option> a

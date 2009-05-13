@@ -39,7 +39,7 @@ static void dct12(real *in,real *rawout1,real *rawout2,register real *wi,registe
      register real *out1 = rawout1;
      ts[SBLIMIT*0] = out1[0]; ts[SBLIMIT*1] = out1[1]; ts[SBLIMIT*2] = out1[2];
      ts[SBLIMIT*3] = out1[3]; ts[SBLIMIT*4] = out1[4]; ts[SBLIMIT*5] = out1[5];
- 
+
      DCT12_PART1
 
      {
@@ -73,7 +73,7 @@ static void dct12(real *in,real *rawout1,real *rawout2,register real *wi,registe
   {
      real in0,in1,in2,in3,in4,in5;
      register real *out2 = rawout2;
- 
+
      DCT12_PART1
 
      {
@@ -102,7 +102,7 @@ static void dct12(real *in,real *rawout1,real *rawout2,register real *wi,registe
      ts[(17-2)*SBLIMIT] += in4 * wi[5-2];
   }
 
-  in++; 
+  in++;
 
   {
      real in0,in1,in2,in3,in4,in5;

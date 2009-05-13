@@ -16,7 +16,7 @@ struct vf_priv_s {
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
-	
+
 	if (vf->priv->skipflag)
 		return vf->priv->skipflag = 0;
 
@@ -32,7 +32,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 		dmpi->planes[2] = mpi->planes[2];
 		dmpi->stride[2] = mpi->stride[2];
 	}
-	
+
 	return vf_next_put_image(vf, dmpi, pts);
 }
 

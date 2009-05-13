@@ -649,7 +649,7 @@ FARPROC WINAPI GetProcAddress( HMODULE hModule, LPCSTR function )
 
 #ifdef DEBUG_QTX_API
 
-/* 
+/*
 http://lists.apple.com/archives/quicktime-api/2003/Jan/msg00278.html
 */
 
@@ -720,7 +720,7 @@ static int dump_component(char* name, int type, void* orig, ComponentParameters 
     ++c_level;
     ret=orig(params,glob);
     --c_level;
-    
+
     if(ret>=0x1000)
 	fprintf(stderr,"%*s return=0x%X\n",3*c_level,"",ret);
     else
@@ -757,35 +757,35 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
   char* pname=NULL;
   int plen=-1;
   // find the code:
-  
+
   dptr=0x62b67ae0;dptr+=2*((reg->eax>>16)&255);
 //  printf("FUNC: flag=%d ptr=%p\n",dptr[0],dptr[1]);
   if(dptr[0]&255){
       dptr=dptr[1];dptr+=4*(reg->eax&65535);
 //      printf("FUNC: ptr2=%p  eax=%p  edx=%p\n",dptr[1],dptr[0],dptr[2]);
-      pwrapper=dptr[1]; pptr=dptr[0]; plen=dptr[2]; 
+      pwrapper=dptr[1]; pptr=dptr[0]; plen=dptr[2];
   } else {
       pwrapper=0x62924910;
       switch(dptr[1]){
       case 0x629248d0:
           dptr=0x62b672c0;dptr+=2*(reg->eax&65535);
 //          printf("FUNC: ptr2=%p  eax=%p  edx=%p\n",0x62924910,dptr[0],dptr[1]);
-          pptr=dptr[0]; plen=dptr[1]; 
+          pptr=dptr[0]; plen=dptr[1];
 	  break;
       case 0x62924e40:
           dptr=0x62b67c70;dptr+=2*(reg->eax&65535);
 //          printf("FUNC: ptr2=%p  eax=%p  edx=%p\n",0x62924910,dptr[0],dptr[1]);
-          pptr=dptr[0]; plen=dptr[1]; 
+          pptr=dptr[0]; plen=dptr[1];
 	  break;
       case 0x62924e60:
           dptr=0x62b68108;if(reg->eax&0x8000) dptr+=2*(reg->eax|0xffff0000); else dptr+=2*(reg->eax&65535);
 //          printf("FUNC: ptr2=%p  eax=%p  edx=%p\n",0x62924910,dptr[0],dptr[1]);
-          pptr=dptr[0]; plen=dptr[1]; 
+          pptr=dptr[0]; plen=dptr[1];
 	  break;
       case 0x62924e80:
           dptr=0x62b68108;if(reg->eax&0x8000) dptr+=2*(reg->eax|0xffff0000); else dptr+=2*(reg->eax&65535);
 //          printf("FUNC: ptr2=%p  eax=%p  edx=%p\n",0x62924910,dptr[0],dptr[1]);
-          pptr=dptr[0]; plen=dptr[1]; 
+          pptr=dptr[0]; plen=dptr[1];
 	  break;
       default:
           printf("FUNC: unknown ptr & psize!\n");
@@ -823,7 +823,7 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
   fflush(stdout);
 
 #endif
-  
+
 #if 1
   // emulate some functions:
   switch(reg->eax){
@@ -914,7 +914,7 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
       }
   }
 
-  // print stack/reg information 
+  // print stack/reg information
   printf("ENTER(%d) stack = %d bytes @ %p\n"
 	 "eax = 0x%08x edx = 0x%08x ebx = 0x%08x ecx = 0x%08x\n"
 	 "esp = 0x%08x ebp = 0x%08x esi = 0x%08x edi = 0x%08x\n"
@@ -930,15 +930,15 @@ static int report_func(void *stack_base, int stack_size, reg386_t *reg, uint32_t
   ++ret_i;
 
 #if 0
-  // print first 7 longs in the stack (return address, arg[1], arg[2] ... ) 
+  // print first 7 longs in the stack (return address, arg[1], arg[2] ... )
   printf("stack[] = { ");
   for (i=0;i<7;i++) {
     printf("%08x ", ((uint32_t *)stack_base)[i]);
   }
   printf("}\n\n");
 #endif
-  
-//  // mess with function parameters 
+
+//  // mess with function parameters
 //  ((uint32_t *)stack_base)[1] = 0x66554433;
 
 //  // mess with return address...
@@ -966,7 +966,7 @@ static int report_func_ret(void *stack_base, int stack_size, reg386_t *reg, uint
   printf("\n");
   fflush(stdout);
 #else
-  // print stack/reg information 
+  // print stack/reg information
   printf("LEAVE(%d) stack = %d bytes @ %p\n"
 	 "eax = 0x%08x edx = 0x%08x ebx = 0x%08x ecx = 0x%08x\n"
 	 "esp = 0x%08x ebp = 0x%08x esi = 0x%08x edi = 0x%08x\n"
@@ -978,7 +978,7 @@ static int report_func_ret(void *stack_base, int stack_size, reg386_t *reg, uint
 #endif
 
 #if 0
-  // print first 7 longs in the stack (return address, arg[1], arg[2] ... ) 
+  // print first 7 longs in the stack (return address, arg[1], arg[2] ... )
   printf("stack[] = { ");
   for (i=0;i<7;i++) {
     printf("%08x ", ((uint32_t *)stack_base)[i]);
@@ -987,8 +987,8 @@ static int report_func_ret(void *stack_base, int stack_size, reg386_t *reg, uint
 #endif
 
 #endif
-  
-//  // mess with function parameters 
+
+//  // mess with function parameters
 //  ((uint32_t *)stack_base)[1] = 0x66554433;
 
 //  // mess with return address...

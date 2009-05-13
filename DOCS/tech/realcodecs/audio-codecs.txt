@@ -65,7 +65,7 @@ void *GetRAFlavorProperty(ra_main_t *raMain, ulong flavor, ulong property,
 returns property data for a specific data
 
 This is not important, because it's just a read only function.
-These flavor properties don't seem to exist in 
+These flavor properties don't seem to exist in
 
 
 ulong RADecode(ra_main_t *raMain, char *input_buffer,
@@ -91,7 +91,7 @@ audio data storage:
 With Real Audio V5 (or earlier?), the audio streams can be interleaved,
 i.e. the stream is striped amongst several data packets. The packets
 (which have a fixed size packet_len) are split up into a fixed number
-of num_parts equally sized parts - I call them leaves in lack of 
+of num_parts equally sized parts - I call them leaves in lack of
 better name. The leaves have the size leaf_size = packet_len / num_parts.
 
 To create a bunch of packets, you need 2*num_parts stream packets.

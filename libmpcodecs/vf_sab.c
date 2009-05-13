@@ -103,16 +103,16 @@ static int allocStuff(FilterParam *f, int width, int height){
 	swsF.chrH= swsF.chrV= NULL;
 	f->preFilterContext= sws_getContext(
 		width, height, PIX_FMT_GRAY8, width, height, PIX_FMT_GRAY8, get_sws_cpuflags()|SWS_POINT, &swsF, NULL, NULL);
-	
+
 	sws_freeVec(vec);
 	vec = sws_getGaussianVec(f->strength, 5.0);
 	for(i=0; i<512; i++){
 		double d;
 		int index= i-256 + vec->length/2;
-		
+
 		if(index<0 || index>=vec->length) 	d= 0.0;
 		else					d= vec->coeff[index];
-		
+
 		f->colorDiffCoeff[i]= (int)(d/vec->coeff[vec->length/2]*(1<<12) + 0.5);
 	}
 	sws_freeVec(vec);
@@ -124,25 +124,25 @@ static int allocStuff(FilterParam *f, int width, int height){
 	for(y=0; y<vec->length; y++){
 		for(x=0; x<vec->length; x++){
 			double d= vec->coeff[x] * vec->coeff[y];
-			
+
 			f->distCoeff[x + y*f->distStride]= (int)(d*(1<<10) + 0.5);
 //			if(y==vec->length/2)
 //				printf("%6d ", f->distCoeff[x + y*f->distStride]);
 		}
 	}
 	sws_freeVec(vec);
-	
+
 	return 0;
 }
 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-	
+
 	int sw, sh;
 //__asm__ volatile("emms\n\t");
 	allocStuff(&vf->priv->luma, width, height);
-	
+
 	getSubSampleFactors(&sw, &sh, outfmt);
 	allocStuff(&vf->priv->chroma, width>>sw, height>>sh);
 
@@ -152,10 +152,10 @@ static int config(struct vf_instance_s* vf,
 static void freeBuffers(FilterParam *f){
 	if(f->preFilterContext) sws_freeContext(f->preFilterContext);
 	f->preFilterContext=NULL;
-	
+
 	if(f->preFilterBuf) free(f->preFilterBuf);
 	f->preFilterBuf=NULL;
-	
+
 	if(f->distCoeff) free(f->distCoeff);
 	f->distCoeff=NULL;
 }
@@ -181,7 +181,7 @@ static inline void blur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride,
 
 //	f.preFilterContext->swScale(f.preFilterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
 	sws_scale(f.preFilterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
-	
+
 	for(y=0; y<h; y++){
 		for(x=0; x<w; x++){
 			int sum=0;
@@ -247,11 +247,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 		mpi->w,mpi->h);
 
 	assert(mpi->flags&MP_IMGFLAG_PLANAR);
-	
+
 	blur(dmpi->planes[0], mpi->planes[0], mpi->w,mpi->h, dmpi->stride[0], mpi->stride[0], &vf->priv->luma);
 	blur(dmpi->planes[1], mpi->planes[1], cw    , ch   , dmpi->stride[1], mpi->stride[1], &vf->priv->chroma);
 	blur(dmpi->planes[2], mpi->planes[2], cw    , ch   , dmpi->stride[2], mpi->stride[2], &vf->priv->chroma);
-    
+
 	return vf_next_put_image(vf,dmpi, pts);
 }
 
@@ -284,7 +284,7 @@ static int open(vf_instance_t *vf, char* args){
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
 	if(args==NULL) return 0;
-	
+
 	e=sscanf(args, "%f:%f:%f:%f:%f:%f",
 		&vf->priv->luma.radius,
 		&vf->priv->luma.preFilterRadius,
@@ -295,7 +295,7 @@ static int open(vf_instance_t *vf, char* args){
 		);
 
 	vf->priv->luma.quality = vf->priv->chroma.quality= 3.0;
-	
+
 	if(e==3){
 		vf->priv->chroma.radius= vf->priv->luma.radius;
 		vf->priv->chroma.preFilterRadius = vf->priv->luma.preFilterRadius;
@@ -305,7 +305,7 @@ static int open(vf_instance_t *vf, char* args){
 
 //	if(vf->priv->luma.radius < 0) return 0;
 //	if(vf->priv->chroma.radius < 0) return 0;
-		
+
 	return 1;
 }
 

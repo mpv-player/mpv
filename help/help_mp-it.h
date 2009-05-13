@@ -556,7 +556,7 @@ static const char help_text[]=
 #define MSGTR_DVDnoVMG "Impossibile aprire le informazioni VMG!\n"
 #define MSGTR_DVDnoVOBs "Impossibile aprire il VOB del titolo (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDnoMatchingAudio "Non trovata la lingua dell'audio DVD corrispondente!\n"
-#define MSGTR_DVDaudioChannel "Scelto canale audio DVD: %d lingua: %c%c\n" 
+#define MSGTR_DVDaudioChannel "Scelto canale audio DVD: %d lingua: %c%c\n"
 #define MSGTR_DVDaudioStreamInfo "flusso audio: %d formato: %s (%s) lingua: %s aid: %d.\n"
 #define MSGTR_DVDnumAudioChannels "numero di canali audio sul disco: %d.\n"
 #define MSGTR_DVDnoMatchingSubtitle "Non trovata la lingua dei sottotitoli DVD corrispondente!\n"
@@ -633,7 +633,7 @@ static const char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Rilevato formato NTSC 30000/1001fps, cambio framerate.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: Rilevato formato NTSC 24000/1001fps progressivo, cambio framerate.\n"
 
-#define MSGTR_CacheFill "\rRiempio cache: %5.2f%% (%"PRId64" byte)   " 
+#define MSGTR_CacheFill "\rRiempio cache: %5.2f%% (%"PRId64" byte)   "
 #define MSGTR_NoBindFound "Nessun controllo legato al tasto '%s'."
 #define MSGTR_FailedToOpen "Apertura di '%s' fallita.\n"
 							       //
@@ -704,7 +704,7 @@ static const char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Impossibile inviare l'evento schermo pieno EWMH!\n"
-#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Non riesco a trovare la finestra di XScreenSaver.\n" 
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Non riesco a trovare la finestra di XScreenSaver.\n"
 #define MSGTR_SelectedVideoMode "XF86VM: Scelta modalità video %dx%d per la dimensione immagine %dx%d.\n"
 
 #define MSGTR_InsertingAfVolume "[Mixer] Nessun mixer hardware, filtro volume inserito automaticamente.\n"
@@ -722,7 +722,7 @@ static const char help_text[]=
 #define MSGTR_AudioFileSelect "Seleziona canale audio esterno..."
 #define MSGTR_FontSelect "Seleziona il carattere..."
 #define MSGTR_PlayList "PlayList"
-#define MSGTR_Equalizer "Equalizzatore"			 
+#define MSGTR_Equalizer "Equalizzatore"
 #define MSGTR_ConfigureEqualizer "Configurazione Equalizzatore"
 #define MSGTR_SkinBrowser "Gestore Skin"
 #define MSGTR_Network "Flusso dati dalla rete..."
@@ -733,7 +733,7 @@ static const char help_text[]=
 #define MSGTR_NoChapter "nessun capitolo"
 #define MSGTR_Chapter "capitolo %d"
 #define MSGTR_NoFileLoaded "nessun file caricato"
-			 
+
 // --- buttons ---
 #define MSGTR_Ok "Ok"
 #define MSGTR_Cancel "Annulla"
@@ -1050,7 +1050,7 @@ static const char help_text[]=
 
 // vo_yuv4mpeg.c
 #define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "La modalità interlacciata richiede l'altezza immagine divisibile per 4."
-#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Impossibile allocare il buffer di linea per la modalità interlacciata." 
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Impossibile allocare il buffer di linea per la modalità interlacciata."
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "L'input non è RGB, non posso separare la crominanza per campi!"
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "La larghezza immagine dev'essere divisibile per 2."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Non c'è abbastanza memoria per allocare il framebuffer RGB."
@@ -1126,7 +1126,7 @@ static const char help_text[]=
 #define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] fallimento nell'aprire il flusso di riproduzione ESD: %s\n"
 
 // ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Impostazione mixer DVB fallita: %s.\n" 
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Impostazione mixer DVB fallita: %s.\n"
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz non supportati, prova a ricampionare (resample).\n"
 
 // ao_pcm.c
@@ -1250,7 +1250,7 @@ static const char help_text[]=
 
 // ======================= audio filters ================================
 
-// libaf 
+// libaf
 
 // af_ladspa.c
 #define MSGTR_AF_LADSPA_AvailableLabels "etichette disponibili in"
@@ -1897,7 +1897,7 @@ static const char help_text[]=
 "[VO_XV] DOCS/HTML/it/video.html#xv!\n"\
 "[VO_XV] Vedi 'mplayer -vo help' per altri (non-xv) driver di uscita video.\n"\
 "[VO_XV] Prova con -vo x11.\n"
- 
+
 
 // loader/ldt_keeper.c
 #define MSGTR_LOADER_DYLD_Warning "ATTENZIONE: Tentativo di utilizzare codec DLL, senza la variabile d'ambiente\n           DYLD_BIND_AT_LAUNCH impostata. Ciò porterà probabilmente a un crash.\n"

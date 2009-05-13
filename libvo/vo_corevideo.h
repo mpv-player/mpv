@@ -42,21 +42,21 @@
 	NSWindow *window;
 	NSOpenGLContext *glContext;
 	NSEvent *event;
-	
+
 	//CoreVideo
 	CVPixelBufferRef frameBuffers[2];
 	CVOpenGLTextureCacheRef textureCache;
 	CVOpenGLTextureRef texture;
 	NSRect textureFrame;
-	
-    GLfloat	lowerLeft[2]; 
-    GLfloat lowerRight[2]; 
+
+    GLfloat	lowerLeft[2];
+    GLfloat lowerRight[2];
     GLfloat upperRight[2];
     GLfloat upperLeft[2];
-	
+
 	BOOL mouseHide;
 	float winSizeMult;
-	
+
 	//menu command id
 	NSMenuItem *kQuitCmd;
 	NSMenuItem *kHalfScreenCmd;
@@ -68,7 +68,7 @@
 	NSMenuItem *kAspectFullCmd;
 	NSMenuItem *kAspectWideCmd;
 	NSMenuItem *kPanScanCmd;
-	
+
 	//timestamps for disabling screensaver and mouse hiding
 	int lastMouseHide;
 	int lastScreensaverUpdate;

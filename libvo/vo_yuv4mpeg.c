@@ -60,7 +60,7 @@
 #include "libmpcodecs/vf_scale.h"
 #include "libavutil/rational.h"
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
 	"yuv4mpeg output for mjpegtools",
 	"yuv4mpeg",
@@ -96,8 +96,8 @@ static int write_bytes;
 static int config_interlace = Y4M_ILACE_NONE;
 #define Y4M_IS_INTERLACED (config_interlace != Y4M_ILACE_NONE)
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width, 
-       uint32_t d_height, uint32_t flags, char *title, 
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
+       uint32_t d_height, uint32_t flags, char *title,
        uint32_t format)
 {
 	AVRational pixelaspect = av_div_q((AVRational){d_width, d_height},
@@ -126,7 +126,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 				MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4);
 			return -1;
 		}
-		
+
 		rgb_line_buffer = malloc(image_width * 3);
 		if (!rgb_line_buffer)
 		{
@@ -134,19 +134,19 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 				MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail);
 			return -1;
 		}
-		
+
 		if (using_format == IMGFMT_YV12)
 			mp_msg(MSGT_VO,MSGL_WARN,
 				MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB);
 	}
-				
+
 	if (width % 2)
 	{
 		mp_msg(MSGT_VO,MSGL_FATAL,
 			MSGTR_VO_YUV4MPEG_WidthDivisibleBy2);
 		return -1;
-	}	
-	
+	}
+
 	if(using_format != IMGFMT_YV12)
 	{
 		sws_rgb2rgb_init(get_sws_cpuflags());
@@ -163,7 +163,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	image = malloc(write_bytes);
 
 	yuv_out = fopen(yuv_filename, "wb");
-	if (!yuv_out || image == 0) 
+	if (!yuv_out || image == 0)
 	{
 		mp_msg(MSGT_VO,MSGL_FATAL,
 			MSGTR_VO_YUV4MPEG_OutFileOpenError,
@@ -173,8 +173,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	image_y = image;
 	image_u = image_y + image_width * image_height;
 	image_v = image_u + image_width * image_height / 4;
-	
-	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%d:%d I%c A%d:%d\n", 
+
+	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%d:%d I%c A%d:%d\n",
 			image_width, image_height, fps_frac.num, fps_frac.den,
 			config_interlace,
 			pixelaspect.num, pixelaspect.den);
@@ -187,7 +187,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 static void swap_fields(uint8_t *ptr, const int h, const int stride)
 {
 	int i;
-	
+
 	for (i=0; i<h; i +=2)
 	{
 		fast_memcpy(rgb_line_buffer     , ptr + stride *  i   , stride);
@@ -201,10 +201,10 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	switch (using_format)
 	{
     	case IMGFMT_YV12:
-	    	vo_draw_alpha_yv12(w, h, src, srca, stride, 
+	    	vo_draw_alpha_yv12(w, h, src, srca, stride,
 				       image + y0 * image_width + x0, image_width);
 			break;
-		
+
 		case IMGFMT_BGR|24:
 		case IMGFMT_RGB|24:
 			if (config_interlace != Y4M_ILACE_BOTTOM_FIRST)
@@ -216,7 +216,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 
 				vo_draw_alpha_rgb24(w, h, src, srca, stride,
 						rgb_buffer + (y0 * image_width  + x0) * 3, image_width * 3);
-				
+
 				swap_fields (rgb_buffer, image_height, image_width * 3);
 			}
 			break;
@@ -238,7 +238,7 @@ static void deinterleave_fields(uint8_t *ptr, const int stride,
 		line_state[i] = 0;
 
 	line_state[0] = 1;
-	
+
 	while(k_start < modv)
 	{
 		i = j = k_start;
@@ -252,7 +252,7 @@ static void deinterleave_fields(uint8_t *ptr, const int stride,
 			fast_memcpy(ptr + stride * i, ptr + stride * j, stride);
 		}
 		fast_memcpy(ptr + stride * i, rgb_line_buffer, stride);
-		
+
 		while(k_start < modv && line_state[k_start])
 			k_start++;
 	}
@@ -321,24 +321,24 @@ static void flip_page (void)
 	uint8_t *upper_y, *upper_u, *upper_v, *rgb_buffer_lower;
 	int rgb_stride, uv_stride, field_height;
 	unsigned int i, low_ofs;
-	
+
 	fprintf(yuv_out, "FRAME\n");
-	
+
 	if (using_format != IMGFMT_YV12)
 	{
 		rgb_stride = image_width * 3;
 		uv_stride = image_width / 2;
-		
+
 		if (Y4M_IS_INTERLACED)
 		{
-			field_height = image_height / 2;		
+			field_height = image_height / 2;
 
 			upper_y = image;
 			upper_u = upper_y + image_width * field_height;
 			upper_v = upper_u + image_width * field_height / 4;
 			low_ofs = image_width * field_height * 3 / 2;
 			rgb_buffer_lower = rgb_buffer + rgb_stride * field_height;
-		
+
 			deinterleave_fields(rgb_buffer, rgb_stride, image_height);
 
 			rgb24toyv12(rgb_buffer, upper_y, upper_u, upper_v,
@@ -348,7 +348,7 @@ static void flip_page (void)
 						 upper_u + low_ofs, upper_v + low_ofs,
 						 image_width, field_height,
 						 image_width, uv_stride, rgb_stride);
-		
+
 			/* Write Y plane */
 			for(i = 0; i < field_height; i++)
 			{
@@ -383,11 +383,11 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
 {
 	int i;
 	uint8_t *dst, *src = srcimg[0];
-	
+
 	switch (using_format)
 	{
 		case IMGFMT_YV12:
-		
+
 		// copy Y:
 		dst = image_y + image_width * y + x;
 		for (i = 0; i < h; i++)
@@ -414,7 +414,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
 			}
 		}
 		break;
-		
+
 		case IMGFMT_BGR24:
 		case IMGFMT_RGB24:
 			dst = rgb_buffer + (image_width * y + x) * 3;
@@ -447,13 +447,13 @@ static int draw_frame(uint8_t * src[])
 
 static int query_format(uint32_t format)
 {
-    
+
 	if (Y4M_IS_INTERLACED)
     {
 		/* When processing interlaced material we want to get the raw RGB
          * data and do the YV12 conversion ourselves to have the chrominance
          * information sampled correct. */
-		
+
 		switch(format)
 		{
 			case IMGFMT_YV12:
@@ -473,7 +473,7 @@ static int query_format(uint32_t format)
     		case IMGFMT_BGR|24:
     		case IMGFMT_RGB|24:
         		return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
-    	}	
+    	}
 	}
 	return 0;
 }
@@ -488,7 +488,7 @@ static void uninit(void)
 	if(yuv_out)
 		fclose(yuv_out);
 	yuv_out = NULL;
-	
+
 	if(rgb_buffer)
 		free(rgb_buffer);
 	rgb_buffer = NULL;
@@ -524,7 +524,7 @@ static int preinit(const char *arg)
   il_bf = 0;
   yuv_filename = strdup("stream.yuv");
   if (subopt_parse(arg, subopts) != 0) {
-    mp_msg(MSGT_VO, MSGL_FATAL, MSGTR_VO_YUV4MPEG_UnknownSubDev, arg); 
+    mp_msg(MSGT_VO, MSGL_FATAL, MSGTR_VO_YUV4MPEG_UnknownSubDev, arg);
     return -1;
   }
 

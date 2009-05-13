@@ -112,7 +112,7 @@ int readcrtc(int reg) {
 
 void writecrtc(int reg, int value) {
   outb(reg, 0x3d4);
-  outb(value, 0x3d5);   
+  outb(value, 0x3d5);
 }
 
 // enable S3 registers
@@ -173,7 +173,7 @@ int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, in
   src_wc = src_w - crop * 2;
   src_hc = src_h - crop * 2;
   pitch = src_w * bpp;
-   
+
   // video card memory layout:
   // 0-n: visible screen memory, n = width * height * bytes per pixel
   // n-m: scaler source memory, n is aligned to a page boundary
@@ -182,16 +182,16 @@ int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, in
   // offset is the first aligned byte after the screen memory, where the scaler input buffer is
   tmp = (yres * line_length + 4095) & ~4095;
   offset += tmp;
-   
+
   // start is the top left viewable scaler input pixel
   start = offset + crop * pitch + crop * bpp;
-   
+
   OUTREG(COL_CHROMA_KEY_CONTROL_REG, 0x47000000);
   OUTREG(CHROMA_KEY_UPPER_BOUND_REG, 0x0);
   OUTREG(BLEND_CONTROL_REG, 0x00000020);
   OUTREG(DOUBLE_BUFFER_REG, 0x0); /* Choose fbaddr0 as stream source. */
   OUTREG(OPAQUE_OVERLAY_CONTROL_REG, 0x0);
-   
+
   OUTREG(PSTREAM_CONTROL_REG, 0x06000000);
   OUTREG(PSTREAM_FBADDR0_REG, 0x0);
   OUTREG(PSTREAM_FBADDR1_REG, 0x0);
@@ -199,7 +199,7 @@ int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, in
   OUTREG(PSTREAM_START_REG, 0x00010001);
   OUTREG(PSTREAM_WINDOW_SIZE_REG, 0x00010001);
   //OUTREG(SSTREAM_WINDOW_SIZE_REG, ( ((xres-1) << 16) | yres) & 0x7ff07ff);
-   
+
   if (dst_w == src_w)
     tmp = 0;
   else
@@ -221,9 +221,9 @@ int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, in
   OUTREG(DDA_VERT_REG, (((~dst_h)-1) & 0xfff ) | 0xc000);
   writecrtc(0x92, (((pitch + 7) / 8) >> 8) | 0x80);
   writecrtc(0x93, (pitch + 7) / 8);
-   
+
   writecrtc(0x67, readcrtc(0x67) | 0x4);
-   
+
   return offset;
 }
 
@@ -314,12 +314,12 @@ static void uninit(void)
     yuv_off();
     inpage0 = NULL;
   }
-   
+
   if(smem) {
     munmap(smem, fb_finfo.smem_len);
     smem = NULL;
   }
-   
+
   disable();
 
   if(fd != -1) {
@@ -332,20 +332,20 @@ static void clear_screen(void)
 {
   if (inpage0) {
     int n;
-           
+
     memset(smem, 0, screenheight * screenstride);
-           
+
     if (in_format == IMGFMT_YUY2) {
       unsigned short *ptr;
       int i;
-                 
+
       ptr = (unsigned short *)inpage0;
       n = in_width * in_height;
       if (vo_doublebuffering)
         n *= 2;
       for(i=0; i<n; i++)
         *ptr++ = 0x8000;
-                 
+
     } else {
       n = in_depth * in_width * in_height;
       if (vo_doublebuffering)
@@ -359,7 +359,7 @@ static void clear_screen(void)
 static void setup_screen(uint32_t full)
 {
   int inpageoffset;
-   
+
   aspect(&vidwidth, &vidheight, full ? A_ZOOM : A_NOZOOM);
 
   // center picture
@@ -368,12 +368,12 @@ static void setup_screen(uint32_t full)
 
   geometry(&vidx, &vidy, &vidwidth, &vidheight, screenwidth, screenheight);
   vo_fs = full;
-   
+
   inpageoffset = yuv_on(in_s3_format, in_width, in_height, vidx, vidy, vidwidth, vidheight, 0, screenwidth, screenheight, screenstride, 0);
   inpage0 = smem + inpageoffset;
   inpage = inpage0;
   mp_msg(MSGT_VO, MSGL_INFO, "s3fb: output is at %dx%d +%dx%d\n", vidx, vidy, vidwidth, vidheight);
-   
+
   clear_screen();
 }
 
@@ -396,19 +396,19 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
   screendepth = fb_vinfo.bits_per_pixel / 8;
 
   switch(in_format) {
-        
+
   case IMGFMT_YUY2:
     in_depth = 2;
     in_s3_format = 1;
     alpha_func = vo_draw_alpha_yuy2;
     break;
-           
+
   case IMGFMT_BGR15:
     in_depth = 2;
     in_s3_format = 3;
     alpha_func = vo_draw_alpha_rgb16;
     break;
-           
+
   case IMGFMT_BGR16:
     in_depth = 2;
     in_s3_format = 5;
@@ -431,13 +431,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: Eik! Something's wrong with control().\n");
     return -1;
   }
-   
+
   offset = in_width * in_depth * in_height;
   if (vo_doublebuffering)
     page = offset;
   else
     page = 0;
-   
+
   if(screenheight * screenstride + page + offset > fb_finfo.smem_len) {
     mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: Not enough video memory to play this movie. Try at a lower resolution\n");
     return -1;
@@ -446,7 +446,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
   setup_screen(flags & VOFLAG_FULLSCREEN);
   if (vo_doublebuffering)
     inpage = inpage0 + page;
-      
+
   mp_msg(MSGT_VO, MSGL_INFO, "s3fb: screen is %dx%d at %d bpp, in is %dx%d at %d bpp, norm is %dx%d\n",
          screenwidth, screenheight, screendepth * 8,
          in_width, in_height, in_depth * 8,

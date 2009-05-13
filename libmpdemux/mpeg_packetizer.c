@@ -60,7 +60,7 @@ send_mpeg_pes_packet_ll(unsigned char *data, int len, int id, uint64_t pts,
   mp_msg (MSGT_HEADER, MSGL_DBG2,
           "MPEG%d PES packet: 0x%x => %"PRIu64"   \n", type, id, pts);
   memset (pes_header, '\0', PES_MAX_SIZE);
-  
+
   /* startcode */
   pes_header[0] = 0;
   pes_header[1] = 0;
@@ -84,26 +84,26 @@ send_mpeg_pes_packet_ll(unsigned char *data, int len, int id, uint64_t pts,
     pes_header[4] = plen >> 8;
     pes_header[5] = plen & 255;
     idx = 6;
-    
+
     if (ptslen)
     {
       int x;
-      
+
       if(type == 2)
       {
         pes_header[idx++] = 0x81;
         pes_header[idx++] = 0x80;
         pes_header[idx++] = ptslen;
       }
-      
+
       /* presentation time stamp */
       x = (0x02 << 4) | (((pts >> 30) & 0x07) << 1) | 1;
       pes_header[idx++] = x;
-      
+
       x = ((((pts >> 15) & 0x7fff) << 1) | 1);
       pes_header[idx++] = x >>8;
       pes_header[idx++] = x & 255;
-      
+
       x = (((pts & 0x7fff) << 1) | 1);
       pes_header[idx++] = x >> 8;
       pes_header[idx++] = x & 255;
@@ -125,7 +125,7 @@ send_mpeg_pes_packet_ll(unsigned char *data, int len, int id, uint64_t pts,
         memcpy(&pes_header[idx], header, header_len);
         idx += header_len;
     }
-    
+
     my_write (pes_header, idx);
     n = my_write (data, payload_size);
 

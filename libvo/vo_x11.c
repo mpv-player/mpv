@@ -352,8 +352,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
          && vinfo.visualid != XVisualIDFromVisual(attribs.visual)))
         XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
 
-    /* set image size (which is indeed neither the input nor output size), 
-       if zoom is on it will be changed during draw_slice anyway so we don't duplicate the aspect code here 
+    /* set image size (which is indeed neither the input nor output size),
+       if zoom is on it will be changed during draw_slice anyway so we don't duplicate the aspect code here
      */
     image_width = (width + 7) & (~7);
     image_height = height;
@@ -619,13 +619,13 @@ static int query_format(uint32_t format)
 
     switch (format)
     {
-//   case IMGFMT_BGR8:  
+//   case IMGFMT_BGR8:
 //   case IMGFMT_BGR15:
 //   case IMGFMT_BGR16:
 //   case IMGFMT_BGR24:
 //   case IMGFMT_BGR32:
 //    return 0x2;
-//   case IMGFMT_YUY2: 
+//   case IMGFMT_YUY2:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
         case IMGFMT_YV12:

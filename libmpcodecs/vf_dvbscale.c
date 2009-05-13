@@ -21,7 +21,7 @@ static int config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt){
 
     int scaled_y=vf->priv->aspect*d_height/d_width;
-    
+
     d_width=width; // do X-scaling by hardware
     d_height=scaled_y;
 

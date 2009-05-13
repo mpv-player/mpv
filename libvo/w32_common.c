@@ -176,7 +176,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 break;
             }
     }
-    
+
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
@@ -215,7 +215,7 @@ int vo_w32_check_events(void) {
         if (r.right != vo_dwidth || r.bottom != vo_dheight)
             MoveWindow(vo_window, 0, 0, r.right, r.bottom, FALSE);
     }
-    
+
     return event_flags;
 }
 
@@ -392,7 +392,7 @@ static int createRenderingContext(void) {
     }
 
     SetPixelFormat(vo_hdc, pf, &pfd);
-    
+
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n", vo_screenwidth, vo_screenheight, vo_depthonscreen);
 
     ReleaseDC(vo_window, vo_hdc);
@@ -455,7 +455,7 @@ int vo_w32_init(void) {
         return 1;
 
     hInstance = GetModuleHandle(0);
-    
+
     if (GetModuleFileName(0, exedir, MAX_PATH))
         mplayerIcon = ExtractIcon(hInstance, exedir, 0);
     if (!mplayerIcon)

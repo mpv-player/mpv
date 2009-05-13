@@ -86,7 +86,7 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
     int pos,newb,len;
 
   //printf("CACHE2_READ: 0x%X <= 0x%X <= 0x%X  \n",s->min_filepos,s->read_filepos,s->max_filepos);
-    
+
     if(s->read_filepos>=s->max_filepos || s->read_filepos<s->min_filepos){
 	// eof?
 	if(s->eof) break;
@@ -106,21 +106,21 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
 
     if(newb>s->buffer_size-pos) newb=s->buffer_size-pos; // handle wrap...
     if(newb>size) newb=size;
-    
+
     // check:
     if(s->read_filepos<s->min_filepos) mp_msg(MSGT_CACHE,MSGL_ERR,"Ehh. s->read_filepos<s->min_filepos !!! Report bug...\n");
-    
+
     // len=write(mem,newb)
     //printf("Buffer read: %d bytes\n",newb);
     memcpy(buf,&s->buffer[pos],newb);
     buf+=newb;
     len=newb;
     // ...
-    
+
     s->read_filepos+=len;
     size-=len;
     total+=len;
-    
+
   }
   cache_fill_status=(s->max_filepos-s->read_filepos)/(s->buffer_size / 100);
   return total;
@@ -129,7 +129,7 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
 int cache_fill(cache_vars_t* s){
   int back,back2,newb,space,len,pos;
   off_t read=s->read_filepos;
-  
+
   if(read<s->min_filepos || read>s->max_filepos){
       // seek...
       mp_msg(MSGT_CACHE,MSGL_DBG2,"Out of boundaries... seeking to 0x%"PRIX64"  \n",(int64_t)read);
@@ -144,36 +144,36 @@ int cache_fill(cache_vars_t* s){
         mp_msg(MSGT_CACHE,MSGL_DBG2,"Seek done. new pos: 0x%"PRIX64"  \n",(int64_t)stream_tell(s->stream));
       }
   }
-  
+
   // calc number of back-bytes:
   back=read - s->min_filepos;
   if(back<0) back=0; // strange...
   if(back>s->back_size) back=s->back_size;
-  
+
   // calc number of new bytes:
   newb=s->max_filepos - read;
   if(newb<0) newb=0; // strange...
 
   // calc free buffer space:
   space=s->buffer_size - (newb+back);
-  
+
   // calc bufferpos:
   pos=s->max_filepos - s->offset;
   if(pos>=s->buffer_size) pos-=s->buffer_size; // wrap-around
-  
+
   if(space<s->fill_limit){
 //    printf("Buffer is full (%d bytes free, limit: %d)\n",space,s->fill_limit);
     return 0; // no fill...
   }
 
 //  printf("### read=0x%X  back=%d  newb=%d  space=%d  pos=%d\n",read,back,newb,space,pos);
-     
+
   // reduce space if needed:
   if(space>s->buffer_size-pos) space=s->buffer_size-pos;
-  
+
 //  if(space>32768) space=32768; // limit one-time block size
   if(space>4*s->sector_size) space=4*s->sector_size;
-  
+
 //  if(s->seek_lock) return 0; // FIXME
 
 #if 1
@@ -183,7 +183,7 @@ int cache_fill(cache_vars_t* s){
 #else
   s->min_filepos=read-back; // avoid seeking-back to temp area...
 #endif
-  
+
   // ....
   //printf("Buffer fill: %d bytes of %d\n",space,s->buffer_size);
   //len=stream_fill_buffer(s->stream);
@@ -191,15 +191,15 @@ int cache_fill(cache_vars_t* s){
   // ....
   len=stream_read(s->stream,&s->buffer[pos],space);
   if(!len) s->eof=1;
-  
+
   s->max_filepos+=len;
   if(pos+len>=s->buffer_size){
       // wrap...
       s->offset+=s->buffer_size;
   }
-  
+
   return len;
-  
+
 }
 
 static int cache_execute_control(cache_vars_t *s) {
@@ -254,7 +254,7 @@ cache_vars_t* cache_init(int size,int sector){
   cache_vars_t* s=malloc(sizeof(cache_vars_t));
 #endif
   if(s==NULL) return NULL;
-  
+
   memset(s,0,sizeof(cache_vars_t));
   num=size/sector;
   if(num < 16){
@@ -332,7 +332,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   if (min > s->buffer_size - s->fill_limit) {
      min = s->buffer_size - s->fill_limit;
   }
-  
+
 #if !defined(__MINGW32__) && !defined(PTHREAD_CACHE) && !defined(__OS2__)
   if((stream->cache_pid=fork())){
 #else
@@ -367,7 +367,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     mp_msg(MSGT_CACHE,MSGL_STATUS,"\n");
     return 1; // parent exits
   }
-  
+
 #if defined(__MINGW32__) || defined(PTHREAD_CACHE) || defined(__OS2__)
 }
 #ifdef PTHREAD_CACHE
@@ -376,7 +376,7 @@ static void *ThreadProc( void *s ){
 static void ThreadProc( void *s ){
 #endif
 #endif
-  
+
 #ifdef CONFIG_GUI
   use_gui = 0; // mp_msg may not use gui stuff in forked code
 #endif
@@ -421,10 +421,10 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
   cache_vars_t* s;
   off_t newpos;
   if(!stream->cache_pid) return stream_seek_long(stream,pos);
-  
+
   s=stream->cache_data;
 //  s->seek_lock=1;
-  
+
   mp_msg(MSGT_CACHE,MSGL_DBG2,"CACHE2_SEEK: 0x%"PRIX64" <= 0x%"PRIX64" (0x%"PRIX64") <= 0x%"PRIX64"  \n",s->min_filepos,pos,s->read_filepos,s->max_filepos);
 
   newpos=pos/s->sector_size; newpos*=s->sector_size; // align

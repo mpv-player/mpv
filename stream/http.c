@@ -1,4 +1,4 @@
-/* 
+/*
  * HTTP Helper
  * by Bertrand Baudet <bertrand_baudet@yahoo.com>
  * (C) 2001, MPlayer team.
@@ -204,7 +204,7 @@ static int nop_streaming_start( stream_t *stream ) {
 
 	fd = stream->fd;
 	if( fd<0 ) {
-		fd = http_send_request( stream->streaming_ctrl->url, 0 ); 
+		fd = http_send_request( stream->streaming_ctrl->url, 0 );
 		if( fd<0 ) return -1;
 		http_hdr = http_read_response( fd );
 		if( http_hdr==NULL ) return -1;
@@ -233,7 +233,7 @@ static int nop_streaming_start( stream_t *stream ) {
 				if (next_url != NULL && rd_url != NULL) {
 					mp_msg(MSGT_NETWORK,MSGL_STATUS,"Redirected: Using this url instead %s\n",next_url);
 							stream->streaming_ctrl->url=check4proxies(rd_url);
-					ret=nop_streaming_start(stream); //recursively get streaming started 
+					ret=nop_streaming_start(stream); //recursively get streaming started
 				} else {
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Redirection failed\n");
 					closesocket( fd );
@@ -333,7 +333,7 @@ int
 http_is_header_entire( HTTP_header_t *http_hdr ) {
 	if( http_hdr==NULL ) return -1;
 	if( http_hdr->buffer==NULL ) return 0; // empty
-	
+
 	if( strstr(http_hdr->buffer, "\r\n\r\n")==NULL &&
 	    strstr(http_hdr->buffer, "\n\n")==NULL ) return 0;
 	return 1;
@@ -424,7 +424,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		http_set_field( http_hdr, field );
 		hdr_ptr = ptr+((*ptr=='\r')?2:1);
 	} while( hdr_ptr<(http_hdr->buffer+pos_hdr_sep) );
-	
+
 	if( field!=NULL ) free( field );
 
 	if( pos_hdr_sep+hdr_sep_len<http_hdr->buffer_size ) {
@@ -459,7 +459,7 @@ http_build_request( HTTP_header_t *http_hdr ) {
 	// Add the Method line
 	len = strlen(http_hdr->method)+strlen(uri)+12;
 	// Add the fields
-	field = http_hdr->first_field; 
+	field = http_hdr->first_field;
 	while( field!=NULL ) {
 		len += strlen(field->field_name)+2;
 		field = field->next;
@@ -499,7 +499,7 @@ http_build_request( HTTP_header_t *http_hdr ) {
 	}
 
 	if( uri ) free( uri );
-	return http_hdr->buffer;	
+	return http_hdr->buffer;
 }
 
 char *
@@ -522,7 +522,7 @@ http_get_next_field( HTTP_header_t *http_hdr ) {
 	if( http_hdr==NULL ) return NULL;
 
 	field = http_hdr->field_search_pos;
-	while( field!=NULL ) { 
+	while( field!=NULL ) {
 		ptr = strstr( field->field_name, ":" );
 		if( ptr==NULL ) return NULL;
 		if( !strncasecmp( field->field_name, http_hdr->field_search, ptr-(field->field_name) ) ) {
@@ -598,7 +598,7 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 	if( password!=NULL ) {
 		pass_len = strlen(password);
 	}
-	
+
 	usr_pass = malloc(strlen(username)+pass_len+2);
 	if( usr_pass==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
@@ -622,22 +622,22 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 	}
 
 	b64_usr_pass[out_len]='\0';
-	
+
 	auth = malloc(encoded_len+22);
 	if( auth==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		goto out;
 	}
-	
+
 	sprintf( auth, "Authorization: Basic %s", b64_usr_pass);
 	http_set_field( http_hdr, auth );
 	res = 0;
-	
+
 out:
 	free( usr_pass );
 	free( b64_usr_pass );
 	free( auth );
-	
+
 	return res;
 }
 
@@ -665,7 +665,7 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 	mp_msg(MSGT_NETWORK,MSGL_V,"--- HTTP DEBUG HEADER --- END ---\n");
 }
 
-int 
+int
 base64_encode(const void *enc, int encLen, char *out, int outMax) {
 	static const char	b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -764,7 +764,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 		if( mp_msg_test(MSGT_NETWORK,MSGL_V) ) {
 			http_debug_hdr( http_hdr );
 		}
-		
+
 		// Check if we can make partial content requests and thus seek in http-streams
 		if( http_hdr!=NULL && http_hdr->status_code==200 ) {
 		    char *accept_ranges;
@@ -780,8 +780,8 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 			switch( http_hdr->status_code ) {
 				case 200: { // OK
 					char *field_data;
-					// If content-type == video/nsv we most likely have a winamp video stream 
-					// otherwise it should be mp3. if there are more types consider adding mime type 
+					// If content-type == video/nsv we most likely have a winamp video stream
+					// otherwise it should be mp3. if there are more types consider adding mime type
 					// handling like later
 					if ( (field_data = http_get_field(http_hdr, "content-type")) != NULL && (!strcmp(field_data, "video/nsv") || !strcmp(field_data, "misc/ultravox")))
 						*file_format = DEMUXER_TYPE_NSV;
@@ -810,7 +810,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 			}
 		}
 
-		// Assume standard http if not ICY			
+		// Assume standard http if not ICY
 		switch( http_hdr->status_code ) {
 			case 200: // OK
 				// Look if we can use the Content-Type
@@ -858,7 +858,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 						free(url->protocol);
 						url->protocol = strdup("unsv");
 					}
-					redirect = 1;	
+					redirect = 1;
 				}
 				break;
 			case 401: // Authentication required
@@ -922,7 +922,7 @@ static int open_s1(stream_t *stream,int mode, void* opts, int* file_format) {
 	url = url_new(stream->url);
 	stream->streaming_ctrl->url = check4proxies(url);
 	url_free(url);
-	
+
 	mp_msg(MSGT_OPEN, MSGL_V, "STREAM_HTTP(1), URL: %s\n", stream->url);
 	seekable = http_streaming_start(stream, file_format);
 	if((seekable < 0) || (*file_format == DEMUXER_TYPE_ASF)) {
@@ -951,7 +951,7 @@ static int open_s2(stream_t *stream,int mode, void* opts, int* file_format) {
 	url = url_new(stream->url);
 	stream->streaming_ctrl->url = check4proxies(url);
 	url_free(url);
-	
+
 	mp_msg(MSGT_OPEN, MSGL_V, "STREAM_HTTP(2), URL: %s\n", stream->url);
 	seekable = http_streaming_start(stream, file_format);
 	if(seekable < 0) {

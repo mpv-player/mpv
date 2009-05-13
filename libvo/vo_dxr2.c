@@ -176,7 +176,7 @@ int write_dxr2(const unsigned char *data, int len)
     mp_msg (MSGT_VO, MSGL_ERR, "DXR2 fd is not valid\n");
     return 0;
   }
-  
+
   while (len>0) if ((dxr2bufpos+len) <= BUF_SIZE) {
     fast_memcpy(dxr2buf+dxr2bufpos, data, len);
     dxr2bufpos+=len;
@@ -251,7 +251,7 @@ void dxr2_send_sub_packet(unsigned char* data,int len,int id,unsigned int timest
   while(len>=4){
     int payload_size= PACK_MAX_SIZE-(7+ptslen+3);
     if(payload_size>len) payload_size= len;
-    
+
     pack[4]=(3+ptslen+1+payload_size)>>8;
     pack[5]=(3+ptslen+1+payload_size)&255;
 
@@ -272,11 +272,11 @@ void dxr2_send_sub_packet(unsigned char* data,int len,int id,unsigned int timest
       pack[8]=0x00;
     }
     pack[ptslen+9] = id;
-    
+
     write_dxr2(pack,7+ptslen+3);
     write_dxr2(data,payload_size);
     len -= payload_size;
-    data += payload_size;   
+    data += payload_size;
     ptslen = 0;
   }
 }
@@ -293,7 +293,7 @@ static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
   crop.arg3 = cr_top;
   crop.arg4 = cr_bot;
   ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_CROPPING, &crop);
-  
+
   oc.arg1 = 0x40;
   oc.arg2 = 0xff;
   oc.arg3 = 0x40;
@@ -322,7 +322,7 @@ static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
     uint8_t* src[] = { img, NULL, NULL };
     int stride[] = { vo_screenwidth * 3 , 0, 0 };
     int cc = vo_config_count;
-   
+
     memset(img,255,vo_screenwidth*vo_screenheight*3);
     vo_config_count = sub_config_count;
     if(sub_vo->config(vo_screenwidth,vo_screenheight,vo_screenwidth,vo_screenheight,
@@ -339,10 +339,10 @@ static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
     free(img);
     sub_config_count++;
     vo_config_count = cc;
-    
+
     om.arg = DXR2_OVERLAY_WINDOW_COLOUR_KEY;
     ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
-    
+
     vga->xScreen = vo_screenwidth;
     vga->yScreen = vo_screenheight;
     vga->hOffWinKey = 100;
@@ -441,7 +441,7 @@ static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
   if(ret > 11 && !olx_cor) olx_cor = xc;
   if(ret > 12 && !oly_cor) oly_cor = yc;
   if(ret > 13 && !olw_cor) olw_cor = wc;
-  if(ret > 14 && !olh_cor) olh_cor = hc;    
+  if(ret > 14 && !olh_cor) olh_cor = hc;
   return ret >= 11 ? 1 : 0;
 }
 
@@ -482,7 +482,7 @@ static void dxr2_set_overlay_window(void) {
       vo_dheight = movie_h;
       vo_dx = (vo_screenwidth - vo_dwidth) / 2;
       vo_dy = (vo_screenheight - vo_dheight) / 2;
-    }      
+    }
   }
 
   if(sub_w != vo_dwidth || sub_h != vo_dheight) {
@@ -503,7 +503,7 @@ static void dxr2_set_overlay_window(void) {
     mp_msg(MSGT_VO,MSGL_V,"VO: [dxr2] set win size w=%d h=%d and offset x=%d y=%d \n",win.arg1,win.arg2,sub_x_off,sub_y_off);
     ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_DIMENSION, &win);
   }
-  
+
   if(vo_dx != sub_x || vo_dy != sub_y) {
     sub_x = vo_dx + olx_cor + sub_x_off;
     sub_y = vo_dy + oly_cor + sub_y_off;
@@ -535,7 +535,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t 
   // Video stream setup
   arg3.arg1 = DXR2_STREAM_VIDEO;
   arg3.arg2 = 0;
-  ioctl(dxr2_fd, DXR2_IOC_SELECT_STREAM, &arg3);	
+  ioctl(dxr2_fd, DXR2_IOC_SELECT_STREAM, &arg3);
   if (vo_fps > 28)
     arg3.arg1 = DXR2_SRC_VIDEO_FREQ_30;
   else arg3.arg1 = DXR2_SRC_VIDEO_FREQ_25;
@@ -577,7 +577,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t 
   ioctl(dxr2_fd, DXR2_IOC_SET_TV_INTERLACED_MODE, &arg);
   arg = pixel_mode;
   ioctl(dxr2_fd, DXR2_IOC_SET_TV_PIXEL_MODE, &arg);
-  
+
   if (norm) {
     if (strcmp(norm, "ntsc")==0)
       arg = DXR2_OUTPUTFORMAT_NTSC;
@@ -669,8 +669,8 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t 
     if(!sub_vo_win && !ol_osd) {
       sub_vo->uninit();
       sub_vo = NULL;
-    } 
- 
+    }
+
     while(sub_vo) {
       dxr2_sixArg_t oc;
       int i,sub_flags = VOFLAG_SWSCALE | (flags & VOFLAG_FULLSCREEN);
@@ -691,7 +691,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t 
       oc.arg5 = ck_bmin;
       oc.arg6 = ck_bmax;
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_COLOUR, &oc);
-      
+
       om.arg = DXR2_OVERLAY_WINDOW_COLOUR_KEY;
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
       sub_img = malloc(width*height*3);
@@ -721,7 +721,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t 
   }
 
   if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
-  
+
   // start playing
   if(ioctl(dxr2_fd, DXR2_IOC_PLAY, NULL) == 0) {
     playing = 1;
@@ -843,7 +843,7 @@ static int preinit(const char *arg) {
       use_ol = 0;
     }
   }
-  
+
   if(!sub_vo) {
     if(use_ol)
       mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] Sub driver '%s' not found => no overlay\n",arg);
@@ -957,13 +957,13 @@ static int control(uint32_t request, void *data, ...)
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_POSITION,&win);
       return VO_TRUE;
     }
-  case VOCTRL_SET_SPU_PALETTE: { 
+  case VOCTRL_SET_SPU_PALETTE: {
     if(ioctl(dxr2_fd,DXR2_IOC_SET_SUBPICTURE_PALETTE,data) < 0) {
       mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] SPU palette loading failed\n");
       return VO_ERROR;
     }
-    return VO_TRUE; 
-  } 
+    return VO_TRUE;
+  }
   }
   return VO_NOTIMPL;
 }

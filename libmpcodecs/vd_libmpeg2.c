@@ -9,7 +9,7 @@
 
 //#undef MPEG12_POSTPROC
 
-static vd_info_t info = 
+static vd_info_t info =
 {
 	"libmpeg2 MPEG 1/2 Video decoder",
 	"libmpeg2",
@@ -56,7 +56,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	    return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
-    
+
     return CONTROL_UNKNOWN;
 }
 
@@ -120,7 +120,7 @@ static void uninit(sh_video_t *sh){
     free(sh->context);
 }
 
-static void draw_slice (void * _sh, uint8_t * const * src, unsigned int y){ 
+static void draw_slice (void * _sh, uint8_t * const * src, unsigned int y){
     sh_video_t* sh = (sh_video_t*) _sh;
     vd_libmpeg2_ctx_t *context = sh->context;
     mpeg2dec_t* mpeg2dec = context->mpeg2dec;
@@ -147,9 +147,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     // MPlayer registers its own draw_slice callback, prevent libmpeg2 from freeing the context
     mpeg2dec->decoder.convert=NULL;
     mpeg2dec->decoder.convert_id=NULL;
-    
+
     if(len<=0) return NULL; // skipped null frame
-    
+
     // append extra 'end of frame' code:
     ((char*)data+len)[0]=0;
     ((char*)data+len)[1]=0;
@@ -162,14 +162,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     } else {
         mpeg2_buffer (mpeg2dec, data, (uint8_t *)data+len);
     }
-    
+
     while(1){
 	int state=mpeg2_parse (mpeg2dec);
 	int type, use_callback;
 	mp_image_t* mpi_new;
 	unsigned long pw, ph;
 	int imgfmt;
-	
+
 	switch(state){
 	case STATE_BUFFER:
 	    if (mpeg2dec->pending_length) {
@@ -209,7 +209,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    break;
 	case STATE_PICTURE:
 	    type=info->current_picture->flags&PIC_MASK_CODING_TYPE;
-	    
+
 	    drop_frame = framedrop && (mpeg2dec->decoder.coding_type == B_TYPE);
             drop_frame |= framedrop>=2; // hard drop
             if (drop_frame) {
@@ -268,7 +268,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	        mpeg2dec->decoder.convert=NULL;
 	        mpeg2dec->decoder.convert_id=NULL;
 	    }
-	    
+
 	    break;
 	case STATE_SLICE:
 	case STATE_END:

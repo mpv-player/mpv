@@ -64,7 +64,7 @@ en caso contrario será más dificil diagnosticar el problema correctamente.
 <para>
 Una guía excelente y bien escrita para hacer preguntas en foros públicos es
 <ulink url="http://www.sindominio.net/ayuda/preguntas-inteligentes.html"> Cómo hacer
-preguntas inteligentes</ulink> por 
+preguntas inteligentes</ulink> por
 <ulink url="http://www.catb.org/~esr/">Eric S. Raymond</ulink>.
 Hay otra llamada
 <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">Cómo informar de errores
@@ -270,7 +270,7 @@ nuevo con este archivo pequeño y si el error sigue apareciendo su muestra será
 para nosotros.
 Por favor, ¡<emphasis role="bold">nunca</emphasis> envíe estos archivos por correo!
 Súbalos, y envío solo la ruta/nombre del archivo en nuestro servidor FTP. Si el
-archivo está disponible en la red, entonces enviar la URL 
+archivo está disponible en la red, entonces enviar la URL
 <emphasis role="bold">exacta</emphasis> es suficiente.
 </para>
 </sect2>

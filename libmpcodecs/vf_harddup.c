@@ -18,7 +18,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	mp_image_t *dmpi;
 
 	vf->priv->last_mpi = mpi;
-	
+
 	dmpi = vf_get_image(vf->next, mpi->imgfmt,
 		MP_IMGTYPE_EXPORT, 0, mpi->width, mpi->height);
 
@@ -30,7 +30,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 		dmpi->planes[2] = mpi->planes[2];
 		dmpi->stride[2] = mpi->stride[2];
 	}
-	
+
 	return vf_next_put_image(vf, dmpi, pts);
 }
 

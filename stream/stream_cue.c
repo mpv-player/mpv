@@ -323,7 +323,7 @@ static int cue_read_cue (char *in_cue_filename)
      if (*t == '\0')
        strcpy(t, "/");
   }
-  
+
   av_strlcpy(bincue_path,t,sizeof( bincue_path ));
   mp_msg(MSGT_OPEN,MSGL_V,"dirname: %s, cuepath: %s\n", t, bincue_path);
 
@@ -504,7 +504,7 @@ static int cue_vcd_read(stream_t *stream, char *mem, int size) {
               tracks[track].start_sector)
              * cue_mode_2_sector_size(tracks[track].mode);
 
-  
+
   if(position >= tracks[track+1].start_offset)
     return 0;
 
@@ -560,7 +560,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
   if(!track)
     track = 1;
-  
+
   f = cue_read_cue(filename);
   if(f < 0) {
     m_struct_free(&stream_opts,opts);
@@ -569,7 +569,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   cue_vcd_read_toc();
   ret2=cue_vcd_get_track_end(track);
   ret=cue_vcd_seek_to_track(track);
-  if(ret<0){ 
+  if(ret<0){
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");
     return STREAM_UNSUPPORTED;
   }

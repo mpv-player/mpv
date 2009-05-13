@@ -4,7 +4,7 @@
 /**
  * \file subopt-helper.h
  *
- * \brief Datatype and functions declarations for usage 
+ * \brief Datatype and functions declarations for usage
  *        of the suboption parser.
  *
  */

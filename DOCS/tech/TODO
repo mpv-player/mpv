@@ -26,7 +26,7 @@ FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 - fix vo_svga vs. -vf scale - DONE?
 - Re: [MPlayer-cvslog] CVS: main/libvo vo_vesa.c,1.82,1.83
-  This patch makes mplayer unusable in console mode, always leaves the 
+  This patch makes mplayer unusable in console mode, always leaves the
   console in graphic mode.
 - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
 - finish testing /old-incoming/ samples

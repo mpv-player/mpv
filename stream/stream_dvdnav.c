@@ -275,7 +275,7 @@ static int seek(stream_t *s, off_t newpos) {
   uint32_t sector = 0;
   dvdnav_priv_t *priv = s->priv;
 
-  if(s->end_pos && newpos > s->end_pos) 
+  if(s->end_pos && newpos > s->end_pos)
      newpos = s->end_pos;
   sector = newpos / 2048ULL;
   if(dvdnav_sector_search(priv->dvdnav, (uint64_t) sector, SEEK_SET) != DVDNAV_STATUS_OK)
@@ -387,7 +387,7 @@ static int control(stream_t *stream, int cmd, void* arg) {
   dvdnav_priv_t* priv=stream->priv;
   int tit, part;
 
-  switch(cmd) 
+  switch(cmd)
   {
     case STREAM_CTRL_SEEK_TO_CHAPTER:
     {
@@ -542,12 +542,12 @@ static void show_audio_subs_languages(dvdnav_t *nav)
     id = i + base[format];
     if (lang != 0xFFFF) {
       mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo, i,
-             dvd_audio_stream_types[format], dvd_audio_stream_channels[channels], tmp, id); 
+             dvd_audio_stream_types[format], dvd_audio_stream_channels[channels], tmp, id);
       if(lang && tmp[0])
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", id, tmp);
     }
   }
-  
+
   for(i=0; i<32; i++)
   {
     lg = dvdnav_get_spu_logical_stream(nav, i);
@@ -571,8 +571,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   char *filename;
   dvdnav_priv_t *priv;
 
-  if(p->device) filename = p->device; 
-  else if(dvd_device) filename= dvd_device; 
+  if(p->device) filename = p->device;
+  else if(dvd_device) filename= dvd_device;
   else filename = DEFAULT_DVD_DEVICE;
   if(!(priv=new_dvdnav_stream(filename))) {
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename, strerror(errno));
@@ -694,7 +694,7 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
 static int mp_dvdnav_get_aid_from_format (stream_t *stream, int index, uint8_t lg) {
   dvdnav_priv_t * priv = stream->priv;
   uint8_t format;
-  
+
   format = dvdnav_audio_stream_format(priv->dvdnav, lg);
   switch(format) {
   case DVDNAV_FORMAT_AC3:
@@ -989,7 +989,7 @@ int mp_dvdnav_spu_has_changed (stream_t *stream, int clear) {
 
   if (clear)
     priv->state &= ~NAV_FLAG_SPU_CHANGE;
-  
+
   return 1;
 }
 

@@ -245,7 +245,7 @@ get_metrics_faster_c(unsigned char *a, unsigned char *b, int as, int bs,
 	a += 2*as;
 	b += 2*bs;
     } while (--lines);
-    
+
 }
 
 static inline void

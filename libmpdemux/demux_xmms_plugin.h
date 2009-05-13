@@ -40,10 +40,10 @@ typedef struct
 	void (*configure) (void);	/* Show the configuration dialog */
 	void (*get_volume) (int *l, int *r);
 	void (*set_volume) (int l, int r);	/* Set the volume */
-	int (*open_audio) (AFormat fmt, int rate, int nch);	/* Open the device, if the device can't handle the given 
+	int (*open_audio) (AFormat fmt, int rate, int nch);	/* Open the device, if the device can't handle the given
 								   parameters the plugin is responsible for downmixing
 								   the data to the right format before outputting it */
-	void (*write_audio) (void *ptr, int length);	/* The input plugin calls this to write data to the output 
+	void (*write_audio) (void *ptr, int length);	/* The input plugin calls this to write data to the output
 							   buffer */
 	void (*close_audio) (void);	/* No comment... */
 	void (*flush) (int time);	/* Flush the buffer and set the plugins internal timers to time */
@@ -100,7 +100,7 @@ typedef struct
 	void (*set_volume) (int l, int r);	/*  you want the output plugin to handle it */
 	void (*cleanup) (void);			/* Called when xmms exit */
 	InputVisType (*get_vis_type) (void); /* OBSOLETE, DO NOT USE! */
-	void (*add_vis_pcm) (int time, AFormat fmt, int nch, int length, void *ptr); /* Send data to the visualization plugins 
+	void (*add_vis_pcm) (int time, AFormat fmt, int nch, int length, void *ptr); /* Send data to the visualization plugins
 											Preferably 512 samples/block */
 	void (*set_info) (char *title, int length, int rate, int freq, int nch);	/* Fill in the stuff that is shown in the player window
 											   set length to -1 if it's unknown. Filled in by xmms */

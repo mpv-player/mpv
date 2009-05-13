@@ -87,19 +87,19 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	else
 		w= mpi->w * mpi->bpp/8;
 
-	interleave(dmpi->planes[0], mpi->planes[0], 
+	interleave(dmpi->planes[0], mpi->planes[0],
 		w, mpi->h, dmpi->stride[0], mpi->stride[0], luma->interleave, luma->swap);
 
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
 		int cw= mpi->w >> mpi->chroma_x_shift;
 		int ch= mpi->h >> mpi->chroma_y_shift;
 
-		interleave(dmpi->planes[1], mpi->planes[1], cw,ch, 
+		interleave(dmpi->planes[1], mpi->planes[1], cw,ch,
 			dmpi->stride[1], mpi->stride[1], chroma->interleave, luma->swap);
-		interleave(dmpi->planes[2], mpi->planes[2], cw,ch, 
+		interleave(dmpi->planes[2], mpi->planes[2], cw,ch,
 			dmpi->stride[2], mpi->stride[2], chroma->interleave, luma->swap);
 	}
-    
+
 	return vf_next_put_image(vf,dmpi, pts);
 }
 
@@ -125,7 +125,7 @@ static int open(vf_instance_t *vf, char* args){
 //	vf->get_image=get_image;
 	vf->priv=malloc(sizeof(struct vf_priv_s));
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
-	
+
 	if(args)
 	{
 		char *arg2= strchr(args,':');

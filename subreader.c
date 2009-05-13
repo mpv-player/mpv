@@ -272,7 +272,7 @@ static subtitle *sub_read_line_microdvd(stream_t *st,subtitle *current) {
 	     (sscanf (line,
 		      "{%ld}{%ld}%[^\r\n]",
 		      &(current->start), &(current->end), line2) < 3));
-	
+
     p=line2;
 
     next=p, i=0;
@@ -437,11 +437,11 @@ static subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current) {
 		if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 		if ((len=sscanf (line, "%d:%d:%d%c%n",&a1,&a2,&a3,&separator,&plen)) < 4)
 			continue;
-		
+
 		if (!(current->start = a1*360000+a2*6000+a3*100))
 			continue;
                 /* removed by wodzu
-		p=line;	
+		p=line;
  		// finds the body of the subtitle
  		for (i=0; i<3; i++){
 		   p=strchr(p,':');
@@ -540,7 +540,7 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current) {
 	int hour1, min1, sec1, hunsec1,
 	    hour2, min2, sec2, hunsec2, nothing;
 	int num;
-	
+
 	char line[LINE_LEN+1],
 	     line3[LINE_LEN+1],
 	     *line2;
@@ -578,7 +578,7 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current) {
 	current->lines=0;num=0;
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
 	current->end   = 360000*hour2 + 6000*min2 + 100*sec2 + hunsec2;
-	
+
         while (((tmp=strstr(line2, "\\n")) != NULL) || ((tmp=strstr(line2, "\\N")) != NULL) ){
 		current->text[num]=malloc(tmp-line2+1);
 		strncpy (current->text[num], line2, tmp-line2);
@@ -753,7 +753,7 @@ static subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
 #else
 	// void subtitle -> end of previous marked and exit
 	previous_aqt_sub = NULL;
-#endif	
+#endif
 	return NULL;
 	}
 
@@ -809,7 +809,7 @@ static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
 #else
 	// void subtitle -> end of previous marked and exit
 	previous_subrip09_sub = NULL;
-#endif	
+#endif
 	return NULL;
 	}
 
@@ -1187,7 +1187,7 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
       if((op = malloc((max(2*orig_len,2*len) + 1))) == NULL) {
 	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
 	l++;
-	break;	
+	break;
       }
       fribidi_unicode_to_charset ( char_set_num, visual, len,op);
       free (ip);
@@ -1212,7 +1212,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block,
 	int i = sub_num;
 	unsigned long subfms = (sub_uses_time ? 100 : fps) * subtime;
 	unsigned long overlap = (sub_uses_time ? 100 : fps) / 5; // 0.2s
-	
+
 	n=m=0;
 	if (i)	for (;;){
 		if (sub->end <= sub->start){
@@ -1253,7 +1253,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block,
 		/* timed sub fps correction ::atmos */
 		/* the frame-based case is handled in mpcommon.c
 		 * where find_sub is called */
-		if(sub_uses_time && sub_fps) {	
+		if(sub_uses_time && sub_fps) {
 			sub->start *= sub_fps/fps;
 			sub->end   *= sub_fps/fps;
 		}
@@ -1409,7 +1409,7 @@ sub_data* sub_read_file (char *filename, float fps) {
         }
 #ifndef CONFIG_SORTSUB
 	sub = &first[sub_num];
-#endif	
+#endif
 	memset(sub, '\0', sizeof(subtitle));
         sub=srp->read(fd,sub);
         if(!sub) break;   // EOF
@@ -1468,7 +1468,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     		}
 	    }
 	}
-#endif	
+#endif
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
 
@@ -2043,7 +2043,7 @@ void dump_srt(sub_data* subd, float fps){
 	s=temp/100;   temp%=100;
 	ms=temp*10;
 	fprintf(fd,"%02d:%02d:%02d,%03d\n",h,m,s,ms);
-	
+
 	for(j=0;j<onesub->lines;j++)
 	    fprintf(fd,"%s\n",onesub->text[j]);
 
@@ -2067,7 +2067,7 @@ void dump_mpsub(sub_data* subd, float fps){
 		perror ("dump_mpsub: fopen");
 		return;
 	}
-	
+
 
 	if (subd->sub_uses_time) fprintf (fd,"FORMAT=TIME\n\n");
 	else fprintf (fd, "FORMAT=%5.2f\n\n", fps);
@@ -2176,7 +2176,7 @@ void dump_jacosub(sub_data* subd, float fps) {
 	s=temp/100;   temp%=100;
 	cs=temp;
 	fprintf(fd,"%02d:%02d:%02d.%02d {~} ",h,m,s,cs);
-	
+
 	for(j=0;j<onesub->lines;j++)
 	    fprintf(fd,"%s%s",j ? "\\n" : "", onesub->text[j]);
 
@@ -2221,7 +2221,7 @@ void dump_sami(sub_data* subd, float fps) {
 	temp -= sub_delay * 100;
 	fprintf(fd,"\t<SYNC Start=%lu>\n"
 		    "\t  <P>", temp * 10);
-	
+
 	for(j=0;j<onesub->lines;j++)
 	    fprintf(fd,"%s%s",j ? "<br>" : "", onesub->text[j]);
 

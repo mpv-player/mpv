@@ -63,7 +63,7 @@ int vo_mpegpes_fd2 = -1;
 
 #include <errno.h>
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
 #ifdef CONFIG_DVB
 	"DVB audio output",
@@ -194,7 +194,7 @@ static int preinit(const char *arg)
 #ifdef CONFIG_DVB
 	if(!ao_file)
 		return init_device(card);
-#else	
+#else
 	if(!ao_file)
 		return vo_mpegpes_fd;	//video fd
 #endif

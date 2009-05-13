@@ -11,7 +11,7 @@ http://natsuki.mplayerhq.hu/~reimar/mpl_mingw32.tar.bz2
 NOTE that this is likely to be quite out-dated and might include packages
 with security issues, so do not use it to build binaries for real use.
 
-After extracting this package into the MPlayer source-tree, 
+After extracting this package into the MPlayer source-tree,
 you only need to run the included linux-mingw.sh to configure (it just runs
 ./configure --host-cc=cc --target=i686-mingw32msvc --cc=i586-mingw32msvc-cc
 --windres=i586-mingw32msvc-windres --ranlib=i586-mingw32msvc-ranlib

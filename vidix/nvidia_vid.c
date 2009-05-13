@@ -95,16 +95,16 @@ static struct nvidia_cards nvidia_card_ids[] = {
   /*NV04*/
   {DEVICE_NVIDIA_NV4_RIVA_TNT,NV_ARCH_04},
   {DEVICE_NVIDIA_NV5_RIVA_TNT2_TNT2,NV_ARCH_04},
-  {DEVICE_NVIDIA_NV5_RIVA_TNT2,NV_ARCH_04},  
-  {DEVICE_NVIDIA_NV5_RIVA_TNT22,NV_ARCH_04},  
-  {DEVICE_NVIDIA_NV5_RIVA_TNT23,NV_ARCH_04},  
+  {DEVICE_NVIDIA_NV5_RIVA_TNT2,NV_ARCH_04},
+  {DEVICE_NVIDIA_NV5_RIVA_TNT22,NV_ARCH_04},
+  {DEVICE_NVIDIA_NV5_RIVA_TNT23,NV_ARCH_04},
   {DEVICE_NVIDIA_NV6_VANTA_VANTA_LT,NV_ARCH_04},
   {DEVICE_NVIDIA_NV5M64_RIVA_TNT2,NV_ARCH_04},
   {DEVICE_NVIDIA_NV6_VANTA,NV_ARCH_04},
   {DEVICE_NVIDIA_NV6_VANTA2,NV_ARCH_04},
   {DEVICE_NVIDIA2_TNT,NV_ARCH_04},
-  {DEVICE_NVIDIA2_TNT2,NV_ARCH_04},  
-  {DEVICE_NVIDIA2_VTNT2,NV_ARCH_04},  
+  {DEVICE_NVIDIA2_TNT2,NV_ARCH_04},
+  {DEVICE_NVIDIA2_VTNT2,NV_ARCH_04},
   {DEVICE_NVIDIA2_UTNT2	,NV_ARCH_04},
   {DEVICE_NVIDIA2_ITNT2,NV_ARCH_04},
   {DEVICE_NVIDIA_NV5_ALADDIN_TNT2,NV_ARCH_04},
@@ -149,7 +149,7 @@ static struct nvidia_cards nvidia_card_ids[] = {
   {DEVICE_NVIDIA_NV18M_GEFORCE4_4482,NV_ARCH_10},
   {DEVICE_NVIDIA_NVCRUSH11_GEFORCE2_MX,NV_ARCH_10},
   {DEVICE_NVIDIA_NV18_GEFORCE4_MX5,NV_ARCH_10},
-  {DEVICE_NVIDIA_NV18_GEFORCE_PCX,NV_ARCH_10}, 
+  {DEVICE_NVIDIA_NV18_GEFORCE_PCX,NV_ARCH_10},
   /*NV20*/
   {DEVICE_NVIDIA_NV20_GEFORCE3,NV_ARCH_20},
   {DEVICE_NVIDIA_NV20_GEFORCE3_TI,NV_ARCH_20},
@@ -417,10 +417,10 @@ typedef struct rivatv_chip rivatv_chip;
 
 
 struct rivatv_info {
-    unsigned int use_colorkey;    
+    unsigned int use_colorkey;
     unsigned int colorkey; /* saved xv colorkey*/
     unsigned int vidixcolorkey; /*currently used colorkey*/
-    unsigned int depth; 
+    unsigned int depth;
     unsigned int format;
     unsigned int pitch;
     unsigned int width,height;
@@ -550,8 +550,8 @@ static void  rivatv_enable_PMEDIA (struct rivatv_info *info){
         /* NV_PVIDEO_KEY */
 	    info->colorkey = VID_RD32 (info->chip.PVIDEO, 0x240);
         break;
-    }       
-    
+    }
+
 
 	/* re-enable interrupts again */
 //	VID_WR32 (info->chip.PMC, 0x000140, 0x01);
@@ -617,13 +617,13 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 
 #if !defined(__MINGW32__) && !defined(__CYGWIN__)
         key = key | 0x00008000;
-#endif       
+#endif
 		break;
 	case 16: // XXX unchecked
 		key = ((r >> 3) << 11) | ((g >> 2) << 5) | ((b >> 3));
 #if !defined(__MINGW32__) && !defined(__CYGWIN__)
         key = key | 0x00008000;
-#endif       
+#endif
 		break;
 	case 24: // XXX unchecked, maybe swap order of masking - FIXME Can the card be in 24 bit mode anyway?
 		key = (chromakey & 0x00FFFFFF) | 0x00800000;
@@ -632,7 +632,7 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 		key = chromakey;
 #if !defined(__MINGW32__) && !defined(__CYGWIN__)
         key = key | 0x80000000;
-#endif       
+#endif
 		break;
 	}
 	//printf("[nvidia_vid] depth=%d %08X \n", info->depth, chromakey);
@@ -717,7 +717,7 @@ static void rivatv_overlay_start (struct rivatv_info *info,int bufno){
             // setting y to 8 seems to work ok, though
             if(info->chip.arch < NV_ARCH_10 && y < 8) y = 8;
     }
-    
+
 	    /* adjust negative output window variables */
 	    if (x < 0) {
 		  lwidth = info->d_width + x;
@@ -784,8 +784,8 @@ static void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 		//VID_WR32 (info->chip.PVIDEO, 0x950 + 4, (height << 16) | width);
 
 		/* NV_PVIDEO_FORMAT */
-        value = info->pitch;       
-	    if(info->use_colorkey)value |= 1 << 20; 
+        value = info->pitch;
+	    if(info->use_colorkey)value |= 1 << 20;
         if(info->format == IMGFMT_YUY2)value |= 1 << 16;
         VID_WR32 (info->chip.PVIDEO, 0x958 + 0, value);
 	    //VID_WR32 (info->chip.PVIDEO, 0x958 + 4, (pitch << 1) | 0x00100000);
@@ -849,12 +849,12 @@ static void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 		VID_WR32 (info->chip.PVIDEO, 0x21C + 4, 0);
 
 		/* NV_PVIDEO_INTR_EN_0_NOTIFY_ENABLED */
-//		VID_OR32 (info->chip.PVIDEO, 0x140, 0x01);                                 
+//		VID_OR32 (info->chip.PVIDEO, 0x140, 0x01);
 
 		/* NV_PVIDEO_OVERLAY (KEY_ON, VIDEO_ON, FORMAT_CCIR) */
         value = 0x1; /*video on*/
         if(info->format==IMGFMT_YUY2)value |= 0x100;
-        if(info->use_colorkey)value |=0x10;       
+        if(info->use_colorkey)value |=0x10;
         VID_WR32 (info->chip.PVIDEO, 0x244, value);
 
 		/* NV_PVIDEO_SU_STATE */
@@ -863,7 +863,7 @@ static void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 	}
     /*set colorkey*/
     rivatv_overlay_colorkey(info,info->vidixcolorkey);
-    
+
 }
 
 
@@ -875,13 +875,13 @@ static void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 static rivatv_info* info;
 
 
-      
-      
+
+
 static int nv_init(void){
 	int mtrr;
   info = calloc(1,sizeof(rivatv_info));
   info->control_base = map_phys_mem(pci_info.base0, 0x00C00000 + 0x00008000);
-  info->chip.arch =  nvidia_card_ids[find_chip(pci_info.device)].arch;  
+  info->chip.arch =  nvidia_card_ids[find_chip(pci_info.device)].arch;
   printf("[nvidia_vid] arch %x register base %p\n",info->chip.arch,info->control_base);
   info->chip.PFIFO  = (uint32_t *) (info->control_base + 0x00002000);
   info->chip.FIFO   = (uint32_t *) (info->control_base + 0x00800000);
@@ -925,7 +925,7 @@ static int nv_init(void){
         info->chip.PRAMIN = (uint32_t *) (info->video_base + 0x00C00000);
         break;
 	}
-    case NV_ARCH_04:	
+    case NV_ARCH_04:
 	case NV_ARCH_10:
 	case NV_ARCH_20:
     case NV_ARCH_30:
@@ -947,12 +947,12 @@ static int nv_init(void){
 	  printf("[nvidia_vid] unable to setup MTRR: %s\n", strerror(mtrr));
   else
 	  printf("[nvidia_vid] MTRR set up\n");
-  
+
   nv_getscreenproperties(info);
   if(!info->depth)printf("[nvidia_vid] text mode: %ux%u\n",info->screen_x,info->screen_y);
   else printf("[nvidia_vid] video mode: %ux%u@%u\n",info->screen_x,info->screen_y, info->depth);
- 
-   
+
+
   rivatv_enable_PMEDIA(info);
   info->cur_frame = 0;
   info->use_colorkey = 0;
@@ -1015,8 +1015,8 @@ static int nv_config_playback(vidix_playback_t *vinfo){
 
     printf("[nvidia_vid] setting up a %dx%d-%dx%d video window (src %dx%d), format 0x%X\n",
 		    info->d_width, info->d_height, info->wx, info->wy, info->width, info->height, vinfo->fourcc);
-    
-    
+
+
     vinfo->dga_addr=info->picture_base;
 
     switch (vinfo->fourcc)

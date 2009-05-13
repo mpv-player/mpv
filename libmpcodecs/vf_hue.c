@@ -65,7 +65,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	dmpi=vf_get_image(vf->next, mpi->imgfmt,
 			  MP_IMGTYPE_EXPORT, 0,
 			  mpi->w, mpi->h);
-	
+
 	dmpi->planes[0] = mpi->planes[0];
 	dmpi->stride[0] = mpi->stride[0];
 	dmpi->stride[1] = mpi->stride[1];
@@ -75,7 +75,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 		vf->priv->buf[0] = malloc(mpi->stride[1]*mpi->h >> mpi->chroma_y_shift);
 		vf->priv->buf[1] = malloc(mpi->stride[2]*mpi->h >> mpi->chroma_y_shift);
 	}
-	
+
 	if (vf->priv->hue == 0 && vf->priv->saturation == 1){
 		dmpi->planes[1] = mpi->planes[1];
 		dmpi->planes[2] = mpi->planes[2];
@@ -85,7 +85,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 		process(dmpi->planes[1], dmpi->planes[2],
 			mpi->planes[1], mpi->planes[2],
 			dmpi->stride[1],mpi->stride[1],
-			mpi->w>> mpi->chroma_x_shift, mpi->h>> mpi->chroma_y_shift, 
+			mpi->w>> mpi->chroma_x_shift, mpi->h>> mpi->chroma_y_shift,
 			vf->priv->hue, vf->priv->saturation);
 	}
 
@@ -151,7 +151,7 @@ static int open(vf_instance_t *vf, char* args)
 	vf->query_format=query_format;
 	vf->put_image=put_image;
 	vf->uninit=uninit;
-	
+
 	if(!vf->priv) {
 	vf->priv = malloc(sizeof(struct vf_priv_s));
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));

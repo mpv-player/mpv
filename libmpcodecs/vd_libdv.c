@@ -62,7 +62,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 {
    mp_image_t* mpi;
    dv_decoder_t *decoder=sh->context;
-   
+
    if(len<=0 || (flags&3)){
 //      fprintf(stderr,"decode() (rawdv) SKIPPED\n");
       return NULL; // skipped frame
@@ -71,13 +71,13 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
    dv_parse_header(decoder, data);
 
    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE, sh->disp_w, sh->disp_h);
-    
+
    if(!mpi){	// temporary!
       fprintf(stderr,"couldn't allocate image for stderr codec\n");
       return NULL;
    }
 
    dv_decode_full_frame(decoder, data, e_dv_color_yuv, mpi->planes, mpi->stride);
-   
+
    return mpi;
 }

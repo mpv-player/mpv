@@ -32,13 +32,13 @@
 
    n number of filter taps, where mod(n,4)==0
    w filter taps
-   x input signal must be a circular buffer which is indexed backwards 
+   x input signal must be a circular buffer which is indexed backwards
 */
 inline FLOAT_TYPE af_filter_fir(register unsigned int n, const FLOAT_TYPE* w,
                                 const FLOAT_TYPE* x)
 {
   register FLOAT_TYPE y; // Output
-  y = 0.0; 
+  y = 0.0;
   do{
     n--;
     y+=w[n]*x[n];
@@ -52,7 +52,7 @@ inline FLOAT_TYPE af_filter_fir(register unsigned int n, const FLOAT_TYPE* w,
    d  number of filters
    xi current index in xq
    w  filter taps k by n big
-   x  input signal must be a circular buffers which are indexed backwards 
+   x  input signal must be a circular buffers which are indexed backwards
    y  output buffer
    s  output buffer stride
 */
@@ -82,7 +82,7 @@ int af_filter_updatepq(unsigned int n, unsigned int d, unsigned int xi,
 {
   register FLOAT_TYPE* txq = *xq + xi;
   register int nt = n*2;
-  
+
   while(d-- >0){
     *txq= *(txq+n) = *in;
     txq+=nt;
@@ -99,13 +99,13 @@ int af_filter_updatepq(unsigned int n, unsigned int d, unsigned int xi,
 
    n     filter length must be odd for HP and BS filters
    w     buffer for the filter taps (must be n long)
-   fc    cutoff frequencies (1 for LP and HP, 2 for BP and BS) 
+   fc    cutoff frequencies (1 for LP and HP, 2 for BP and BS)
          0 < fc < 1 where 1 <=> Fs/2
    flags window and filter type as defined in filter.h
-         variables are ored together: i.e. LP|HAMMING will give a 
-	 low pass filter designed using a hamming window  
+         variables are ored together: i.e. LP|HAMMING will give a
+	 low pass filter designed using a hamming window
    opt   beta constant used only when designing using kaiser windows
-   
+
    returns 0 if OK, -1 if fail
 */
 int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
@@ -142,10 +142,10 @@ int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
   case(KAISER):
     af_window_kaiser(n,w,opt); break;
   default:
-    return -1;	
+    return -1;
   }
 
-  if(flags & (LP | HP)){ 
+  if(flags & (LP | HP)){
     fc1=*fc;
     // Cutoff frequency must be < 0.5 where 0.5 <=> Fs/2
     fc1 = ((fc1 <= 1.0) && (fc1 > 0.0)) ? fc1/2 : 0.25;
@@ -154,7 +154,7 @@ int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
     if(flags & LP){ // Low pass filter
 
       // If the filter length is odd, there is one point which is exactly
-      // in the middle. The value at this point is 2*fCutoff*sin(x)/x, 
+      // in the middle. The value at this point is 2*fCutoff*sin(x)/x,
       // where x is zero. To make sure nothing strange happens, we set this
       // value separately.
       if (o){
@@ -206,9 +206,9 @@ int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
 	t2 = sin(k3 * t1)/(M_PI * t1); // Sinc fc2
 	t3 = sin(k1 * t1)/(M_PI * t1); // Sinc fc1
 	g += w[end-i-1] * (t3 + t2);   // Total gain in filter
-	w[end-i-1] = w[n-end+i] = w[end-i-1] * (t2 - t3); 
+	w[end-i-1] = w[n-end+i] = w[end-i-1] * (t2 - t3);
       }
-    }      
+    }
     else{ // Band stop
       if (!o) // Band stop filters must have odd length
 	return -1;
@@ -220,7 +220,7 @@ int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
 	t1 = (FLOAT_TYPE)(i+1);
 	t2 = sin(k1 * t1)/(M_PI * t1); // Sinc fc1
 	t3 = sin(k3 * t1)/(M_PI * t1); // Sinc fc2
-	w[end-i-1] = w[n-end+i] = w[end-i-1] * (t2 - t3); 
+	w[end-i-1] = w[n-end+i] = w[end-i-1] * (t2 - t3);
 	g += 2*w[end-i-1]; // Total gain in filter
       }
     }
@@ -228,9 +228,9 @@ int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
 
   // Normalize gain
   g=1/g;
-  for (i=0; i<n; i++) 
+  for (i=0; i<n; i++)
     w[i] *= g;
-  
+
   return 0;
 }
 
@@ -239,7 +239,7 @@ int af_filter_design_fir(unsigned int n, FLOAT_TYPE* w, const FLOAT_TYPE* fc,
    n     length of prototype filter
    k     number of polyphase components
    w     prototype filter taps
-   pw    Parallel FIR filter 
+   pw    Parallel FIR filter
    g     Filter gain
    flags FWD forward indexing
          REW reverse indexing
@@ -254,7 +254,7 @@ int af_filter_design_pfir(unsigned int n, unsigned int k, const FLOAT_TYPE* w,
   int i;     	// Counters
   int j;
   FLOAT_TYPE t;	// g * w[i]
-  
+
   // Sanity check
   if(l<1 || k<1 || !w || !pw)
     return -1;
@@ -287,7 +287,7 @@ int af_filter_design_pfir(unsigned int n, unsigned int k, const FLOAT_TYPE* w,
 
 /* Pre-warp the coefficients of a numerator or denominator.
    Note that a0 is assumed to be 1, so there is no wrapping
-   of it.  
+   of it.
 */
 static void af_filter_prewarp(FLOAT_TYPE* a, FLOAT_TYPE fc, FLOAT_TYPE fs)
 {
@@ -299,7 +299,7 @@ static void af_filter_prewarp(FLOAT_TYPE* a, FLOAT_TYPE fc, FLOAT_TYPE fs)
 
 /* Transform the numerator and denominator coefficients of s-domain
    biquad section into corresponding z-domain coefficients.
-   
+
    The transfer function for z-domain is:
 
           1 + alpha1 * z^(-1) + alpha2 * z^(-2)
@@ -310,7 +310,7 @@ static void af_filter_prewarp(FLOAT_TYPE* a, FLOAT_TYPE fc, FLOAT_TYPE fs)
    order:
    beta1, beta2    (denominator)
    alpha1, alpha2  (numerator)
-   
+
    Arguments:
    a       - s-domain numerator coefficients
    b       - s-domain denominator coefficients
@@ -318,10 +318,10 @@ static void af_filter_prewarp(FLOAT_TYPE* a, FLOAT_TYPE fc, FLOAT_TYPE fs)
              biquad section in such a way, as to make it the
              coefficient by which to multiply the overall filter gain
              in order to achieve a desired overall filter gain,
-             specified in initial value of k.  
+             specified in initial value of k.
    fs 	   - sampling rate (Hz)
    coef    - array of z-domain coefficients to be filled in.
- 
+
    Return: On return, set coef z-domain coefficients and k to the gain
    required to maintain overall gain = 1.0;
 */
@@ -352,26 +352,26 @@ static void af_filter_bilinear(const FLOAT_TYPE* a, const FLOAT_TYPE* b, FLOAT_T
 /* IIR filter design using bilinear transform and prewarp. Transforms
    2nd order s domain analog filter into a digital IIR biquad link. To
    create a filter fill in a, b, Q and fs and make space for coef and k.
-   
 
-   Example Butterworth design: 
+
+   Example Butterworth design:
 
    Below are Butterworth polynomials, arranged as a series of 2nd
    order sections:
 
    Note: n is filter order.
-   
+
    n  Polynomials
    -------------------------------------------------------------------
    2  s^2 + 1.4142s + 1
    4  (s^2 + 0.765367s + 1) * (s^2 + 1.847759s + 1)
    6  (s^2 + 0.5176387s + 1) * (s^2 + 1.414214 + 1) * (s^2 + 1.931852s + 1)
-   
+
    For n=4 we have following equation for the filter transfer function:
                        1                              1
    T(s) = --------------------------- * ----------------------------
           s^2 + (1/Q) * 0.765367s + 1   s^2 + (1/Q) * 1.847759s + 1
-   
+
    The filter consists of two 2nd order sections since highest s power
    is 2.  Now we can take the coefficients, or the numbers by which s
    is multiplied and plug them into a standard formula to be used by
@@ -414,7 +414,7 @@ static void af_filter_bilinear(const FLOAT_TYPE* a, const FLOAT_TYPE* b, FLOAT_T
              biquad section in such a way, as to make it the
              coefficient by which to multiply the overall filter gain
              in order to achieve a desired overall filter gain,
-             specified in initial value of k.  
+             specified in initial value of k.
    fs 	   - sampling rate (Hz)
    coef    - array of z-domain coefficients to be filled in.
 
@@ -432,7 +432,7 @@ int af_filter_szxform(const FLOAT_TYPE* a, const FLOAT_TYPE* b, FLOAT_TYPE Q, FL
   FLOAT_TYPE at[3];
   FLOAT_TYPE bt[3];
 
-  if(!a || !b || !k || !coef || (Q>1000.0 || Q< 1.0)) 
+  if(!a || !b || !k || !coef || (Q>1000.0 || Q< 1.0))
     return -1;
 
   memcpy(at,a,3*sizeof(FLOAT_TYPE));

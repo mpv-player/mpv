@@ -6,7 +6,7 @@
  * Copyright (C) 2002 the xine project
  *
  * This file is part of xine, a free video player.
- * 
+ *
  * xine is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -83,7 +83,7 @@ typedef struct {
 
   int         sym;
   int         num;
-  
+
   char        str[ASMRP_MAX_ID];
 
   /* private part */
@@ -113,7 +113,7 @@ static void asmrp_dispose (asmrp_t *p) {
 
   int i;
 
-  for (i=0; i<p->sym_tab_num; i++) 
+  for (i=0; i<p->sym_tab_num; i++)
     free (p->sym_tab[i].id);
 
   free (p);
@@ -133,7 +133,7 @@ static void asmrp_init (asmrp_t *p, const char *str) {
 
   p->buf = strdup (str);
   p->pos = 0;
-  
+
   asmrp_getch (p);
 }
 
@@ -169,10 +169,10 @@ static void asmrp_string (asmrp_t *p) {
     asmrp_getch (p);
   }
   p->str[l]=0;
-  
+
   if (p->ch=='"')
     asmrp_getch (p);
-  
+
   p->sym = ASMRP_SYM_STRING;
 }
 
@@ -193,7 +193,7 @@ static void asmrp_identifier (asmrp_t *p) {
     asmrp_getch (p);
   }
   p->str[l]=0;
-  
+
   p->sym = ASMRP_SYM_ID;
 }
 
@@ -397,10 +397,10 @@ static int asmrp_set_id (asmrp_t *p, char *s, int v) {
     printf ("new symbol '%s'\n", s);
 #endif
 
-  }    
+  }
 
   p->sym_tab[i].v = v;
- 
+
 #ifdef LOG
   printf ("symbol '%s' assigned %d\n", s, v);
 #endif
@@ -413,7 +413,7 @@ static int asmrp_condition (asmrp_t *p) ;
 static int asmrp_operand (asmrp_t *p) {
 
   int i, ret;
-  
+
 #ifdef LOG
   printf ("operand\n");
 #endif
@@ -425,7 +425,7 @@ static int asmrp_operand (asmrp_t *p) {
   case ASMRP_SYM_DOLLAR:
 
     asmrp_get_sym (p);
-    
+
     if (p->sym != ASMRP_SYM_ID) {
       mp_msg(MSGT_STREAM, MSGL_ERR, "error: identifier expected.\n");
       break;
@@ -466,7 +466,7 @@ static int asmrp_operand (asmrp_t *p) {
 #ifdef LOG
   printf ("operand done, =%d\n", ret);
 #endif
-  
+
   return ret;
 }
 
@@ -520,7 +520,7 @@ static int asmrp_comp_expression (asmrp_t *p) {
 }
 
 static int asmrp_condition (asmrp_t *p) {
-  
+
   int a;
 
 #ifdef LOG
@@ -579,7 +579,7 @@ static void asmrp_assignment (asmrp_t *p) {
   }
   asmrp_get_sym (p);
 
-  if ( (p->sym != ASMRP_SYM_NUM) && (p->sym != ASMRP_SYM_STRING) 
+  if ( (p->sym != ASMRP_SYM_NUM) && (p->sym != ASMRP_SYM_STRING)
        && (p->sym != ASMRP_SYM_ID)) {
     mp_msg(MSGT_STREAM, MSGL_ERR, "error: number or string expected\n");
     return;
@@ -592,7 +592,7 @@ static void asmrp_assignment (asmrp_t *p) {
 }
 
 static int asmrp_rule (asmrp_t *p) {
-  
+
   int ret;
 
 #ifdef LOG
@@ -600,16 +600,16 @@ static int asmrp_rule (asmrp_t *p) {
 #endif
 
   ret = 1;
-  
+
   if (p->sym == ASMRP_SYM_HASH) {
 
     asmrp_get_sym (p);
     ret = asmrp_condition (p);
 
     while (p->sym == ASMRP_SYM_COMMA) {
-      
+
       asmrp_get_sym (p);
-      
+
       asmrp_assignment (p);
     }
 

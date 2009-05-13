@@ -19,17 +19,17 @@
     It accepts all PES variants, including files created by VDR.
     Note: VOB (video object) is simple mpeg stream, but it usually has 01BD
     packets which may contain subtitles and non-mpeg audio. Usually found on DVD discs.
-    
+
     Headers: mpeg streams has no global header. each frame sequence (also called GOP,
     group of pictures) contains an sequence header, it describes that block.
     In normal mpeg 1/2 content there are groups of 12-15 frames (24/30 fps).
     It means you can freely seek in mpeg streams, and even can cut it to
     small parts with standard file tools (dd, cut) without destroying it.
-    
+
     Codecs: video is always mpeg video (mpeg1, mpeg2 or mpeg4).
     audio is usually mpeg audio (any layer allowed, but it's layer 2 in most files)
     but 01BD packets may contain AC3, DTS or LPCM too.
-    
+
     FPS: mpeg2 content allows variable framerate, in form of delayed frames.
     It's mostly used for playback 24fps content at 29.97/30 fps (NTSC) rate.
     (so called Telecine or 3:2 pulldown effect)
@@ -77,7 +77,7 @@
     as VBR is unusual, and Microsoft's AVI specs only describe CBR audio.
     I also note, that most AVI encoders/multiplexers create bad files if
     using VBR audio. only 2 exception (known by me): NaNDub and MEncoder.
-    
+
     FPS: only constant framerate allowed, but it's possible to skip frames.
 
   - ASF streams:
@@ -94,7 +94,7 @@
     but all files i've seen had it at the beginning of the file.
     Asf uses fixed packet size, so it is seekable without any INDEX block,
     and broken files are playable well.
-    
+
     Codecs: video is mostly microsoft's mpeg4 variants: MP42, MP43 (aka DivX),
             WMV1 and WMV2. but any codecs allowed.
             audio is usually wma or voxware, sometimes mp3, but any codecs allowed.
@@ -106,16 +106,16 @@
     They come from Mac users, usually with .mov or .qt extension, but as
     MPEG Group chose quicktime as recommended file format for MPEG4,
     sometimes you meet quicktime files with .mpg or .mp4 extension.
-  
+
     At first look, it's a mixture of ASF and AVI.
     It requires INDEX block for random access and seeking, and even for
     playback, like AVI, but uses timestamps instead of constant framerate
     and has more flexible stream options (including network stuff) like ASF.
-    
+
     Headers: header can be placed at the beginning or at the end of file.
     About half of my files have it at the beginning, others have it at the end.
     Broken files are only playable if they have header at the beginning!
-    
+
     Codecs: any codecs allowed, both CBR and VBR.
     Note: most new mov files use Sorenson video and QDesign Music audio,
     they are patented, closed, secret, (TM)-ed etc formats, only Apple's
@@ -128,7 +128,7 @@
     files even has no keyframes, so forget seeking!
     Video is standard h.263 (in vivo/2.0 files it's modified, non-standard
     h.263), audio is either standard g.723 or Vivo Siren codec.
-    
+
     Note, that microsoft licensed vivo stuff, and included in their netshow
     v2.0 program, so there are VfW/ACM codecs for vivo video and audio.
 
@@ -142,14 +142,14 @@
     appended fragments of the video frame. RV30+ supports B frames, so
     you have to parse some bits of the first fragment to get the real PTS.
     The audio frames are fixed size (CBR) but using the same scrambling
-    (out-of-order interleaving) as in the ASF files. 
-    
+    (out-of-order interleaving) as in the ASF files.
+
     Codecs: Audio is either COOK(er), SIPR(o), ATRAC3 or DNET.
     The DNET is actually a byte-swapped low-bitrate Dolby AC3 variant :)
     Video is RV10 (h263 variant), RV20 (rp G2), RV30 (rp v8) or RV40 (rp v9).
-    
+
     FPS: variable, just like in ASF.
-    
+
     Note, that similarity of real and asf has some background - they worked
     together on the (never finished/used) ASF v2 spec for some time.
 

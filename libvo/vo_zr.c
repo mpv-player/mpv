@@ -44,7 +44,7 @@
 
 #include "jpeg_enc.h"
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
 	"Zoran ZR360[56]7/ZR36060 Driver (DC10(+)/buz/lml33/MatroxRR)",
 	"zr",
@@ -73,7 +73,7 @@ typedef struct {
 	/* commandline args given for this device (and defaults) */
 	int vdec, hdec; 	/* requested decimation 1,2,4 */
 	int fd; 		/* force decimation */
-	int xdoff, ydoff;	/* offset from upperleft of screen 
+	int xdoff, ydoff;	/* offset from upperleft of screen
 				 * default is 'centered' */
 	int quality; 		/* jpeg quality 1=best, 20=bad */
 	geo_t g;		/* view window (zrcrop) */
@@ -105,13 +105,13 @@ typedef struct {
 } zr_info_t;
 
 static zr_info_t zr_info[ZR_MAX_DEVICES] = {
-	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0, 
+	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0,
 	0, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0, 
+	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0,
 	0, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0, 
+	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0,
 	0, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0, 
+	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0,
 	0, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
 
@@ -137,7 +137,7 @@ int zoran_getcap(zr_info_t *zr) {
 		    NULL
 		};
 		int i = 0;
-		
+
 		do
 		{
 		    if ((stat(devs[i], &vstat) == 0) && S_ISCHR(vstat.st_mode))
@@ -154,23 +154,23 @@ int zoran_getcap(zr_info_t *zr) {
 		    return 1;
 		}
 	}
-			
+
 	zr->vdes = open(dev, O_RDWR);
 
 	if (zr->vdes < 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "zr: error opening %s: %s\n", 
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error opening %s: %s\n",
 		       dev, strerror(errno));
 		return 1;
 	}
 
-	/* before we can ask for the maximum resolution, we must set 
+	/* before we can ask for the maximum resolution, we must set
 	 * the correct tv norm */
 
 	if (ioctl(zr->vdes, MJPIOC_G_PARAMS, &zr->p) < 0) {
 		mp_msg(MSGT_VO, MSGL_ERR, "zr: device at %s is probably not a DC10(+)/buz/lml33\n", dev);
 		return 1;
 	}
-	
+
 	if (zr->p.norm != zr->norm && zr->norm != VIDEO_MODE_AUTO) {
 		/* attempt to set requested norm */
 		zr->p.norm = zr->norm;
@@ -186,16 +186,16 @@ int zoran_getcap(zr_info_t *zr) {
 			return 1;
 		}
 	}
-	
+
 	if (ioctl(zr->vdes, VIDIOCGCAP, &zr->vc) < 0) {
 		mp_msg(MSGT_VO, MSGL_ERR, "zr: error getting video capabilities from %s\n", dev);
 		return 1;
 	}
 	mp_msg(MSGT_VO, MSGL_V, "zr: MJPEG card reports maxwidth=%d, maxheight=%d\n", zr->vc.maxwidth, zr->vc.maxheight);
-	
+
 	return 0;
 }
-	
+
 int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
 	/* center the image, and stretch it as far as possible (try to keep
 	 * aspect) and check if it fits */
@@ -210,12 +210,12 @@ int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
 	}
 
 	zr->p.decimation = 0;
-	zr->p.HorDcm = stretchx; 
+	zr->p.HorDcm = stretchx;
 	zr->p.VerDcm = stretchy;
 	zr->p.TmpDcm = 1;
 	zr->p.field_per_buff = zr->fields;
 	if (zr->xdoff == -1) {
-		zr->p.img_x = (zr->vc.maxwidth - 
+		zr->p.img_x = (zr->vc.maxwidth -
 				zr->p.HorDcm*(int)zr->image_width/zr->hdec)/2;
 	} else {
 		zr->p.img_x = zr->xdoff;
@@ -244,14 +244,14 @@ int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
 	}
 
 	/* the buffer count allocated may be different to the request */
-	zr->buf = (unsigned char*)mmap(0, zr->zrq.count*zr->zrq.size, 
+	zr->buf = (unsigned char*)mmap(0, zr->zrq.count*zr->zrq.size,
 			PROT_READ|PROT_WRITE, MAP_SHARED, zr->vdes, 0);
 
 	if (zr->buf == MAP_FAILED) {
 		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %ld buffers of size %ld\n", zr->zrq.count, zr->zrq.size);
 		return 1;
 	}
-	
+
 	mp_msg(MSGT_VO, MSGL_V, "zr: got %ld buffers of size %ld (wanted %d buffers of size %d)\n", zr->zrq.count, zr->zrq.size, MJPEG_NBUFFERS, MJPEG_SIZE);
 	if (zr->zrq.count < MJPEG_NBUFFERS) {
 		mp_msg(MSGT_VO, MSGL_V, "zr: got not enough buffers\n");
@@ -270,13 +270,13 @@ void uninit_zoran(zr_info_t *zr) {
 		zr->image=NULL;
 	}
 	while (zr->queue > zr->synco + 1) {
-		if (ioctl(zr->vdes, MJPIOC_SYNC, &zr->zs) < 0) 
-			mp_msg(MSGT_VO, MSGL_ERR, "zr: error waiting for buffers to become free\n"); 
+		if (ioctl(zr->vdes, MJPIOC_SYNC, &zr->zs) < 0)
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: error waiting for buffers to become free\n");
 		zr->synco++;
 	}
 	/* stop streaming */
 	zr->frame = -1;
-	if (ioctl(zr->vdes, MJPIOC_QBUF_PLAY, &zr->frame) < 0) 
+	if (ioctl(zr->vdes, MJPIOC_QBUF_PLAY, &zr->frame) < 0)
 		mp_msg(MSGT_VO, MSGL_ERR, "zr: error stopping playback of last frame\n");
 	if (munmap(zr->buf,zr->zrq.count*zr->zrq.size))
 	   mp_msg(MSGT_VO, MSGL_ERR, "zr: error unmapping buffer\n");
@@ -290,7 +290,7 @@ int zr_geometry_sane(geo_t *g, unsigned int width, unsigned int height) {
 			mp_msg(MSGT_VO, MSGL_ERR, "zr: arguments in -zrcrop must be multiples of 2\n");
 			return 1;
 		}
-		if (g->width <= 0 || g->height <= 0 || 
+		if (g->width <= 0 || g->height <= 0 ||
 				g->xoff < 0 || g->yoff < 0) {
 			mp_msg(MSGT_VO, MSGL_ERR, "zr: width and height must be positive and offset nonnegative\n");
 			return 1;
@@ -314,7 +314,7 @@ int zr_geometry_sane(geo_t *g, unsigned int width, unsigned int height) {
 }
 
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width, 
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	int i, tmp, stretchx, stretchy;
@@ -336,9 +336,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		/* make the scaling decision
 		 * we are capable of stretching the image in the horizontal
 		 * direction by factors 1, 2 and 4
-		 * we can stretch the image in the vertical direction by a 
+		 * we can stretch the image in the vertical direction by a
 		 * factor of 1 and 2 AND we must decide about interlacing */
-		if (g->width > zr->vc.maxwidth/2 || 
+		if (g->width > zr->vc.maxwidth/2 ||
 				g->height > zr->vc.maxheight/2) {
 			stretchx = 1;
 			stretchy = 1;
@@ -350,7 +350,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 				stretchy = 2;
 			}
 			stretchx = zr->hdec;
-		} else if (g->width > zr->vc.maxwidth/4 || 
+		} else if (g->width > zr->vc.maxwidth/4 ||
 				g->height > zr->vc.maxheight/4) {
 			stretchx = 2;
 			stretchy = 1;
@@ -398,7 +398,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 			g->xoff += 2*((g->width - zr->hdec*(tmp-16))/4);
 			/* g->off must be a multiple of 2 */
 			g->width = zr->hdec*(tmp - 16);
-			g->set = 0; /* we abuse this field to 
+			g->set = 0; /* we abuse this field to
 				       report that g has changed*/
 		}
 		tmp = 8*zr->fields*((g->height - 1)/(zr->vdec*zr->fields*8)+1);
@@ -408,7 +408,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 			g->height = zr->vdec*(tmp - 8*zr->fields);
 			g->set = 0;
 		}
-		if (!g->set) 
+		if (!g->set)
 			mp_msg(MSGT_VO, MSGL_V, "zr: auto(re)cropping %dx%d+%d+%d to make the image fit on the screen\n", g->width, g->height, g->xoff, g->yoff);
 
 		/* the height must be a multiple of fields*8 and the width
@@ -426,7 +426,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		zr->off_c += (zr->image_width - g->width)/4;
 		zr->size = zr->image_width*zr->image_height;
 		mp_msg(MSGT_VO, MSGL_V, "zr: input: %dx%d, cropped: %dx%d, output: %dx%d, off_y=%d, off_c=%d\n", width, height, g->width, g->height, zr->image_width, zr->image_height, zr->off_y, zr->off_c);
-	
+
 		zr->image = malloc(2*zr->size); /* this buffer allows for YUV422 data,
 					 * so it is a bit too big for YUV420 */
 		if (!zr->image) {
@@ -442,16 +442,16 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 				zr->y_data = zr->image;
 				zr->u_data = zr->image + zr->size;
 				zr->v_data = zr->image + 3*zr->size/2;
-	
+
 				zr->y_stride = zr->image_width;
 				zr->u_stride = zr->image_width/2;
 				zr->v_stride = zr->image_width/2;
-	
-				zr->j = jpeg_enc_init(zr->image_width/zr->hdec, 
+
+				zr->j = jpeg_enc_init(zr->image_width/zr->hdec,
 						zr->image_height/zr->fields,
 						zr->hdec, zr->y_stride*zr->fields,
 						zr->hdec, zr->u_stride*zr->fields,
-						zr->hdec, zr->v_stride*zr->fields, 
+						zr->hdec, zr->v_stride*zr->fields,
 						1, zr->quality, zr->bw);
 				break;
 			case IMGFMT_YUY2:
@@ -461,39 +461,39 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 					zr->image[tmp+2] = 0;
 					zr->image[tmp+3] = 0x80;
 				}
-	
+
 				zr->y_data = zr->image;
 				zr->u_data = zr->image + 1;
 				zr->v_data = zr->image + 3;
-	
+
 				zr->y_stride = 2*zr->image_width;
 				zr->u_stride = 2*zr->image_width;
 				zr->v_stride = 2*zr->image_width;
-	
-				zr->j = jpeg_enc_init(zr->image_width/zr->hdec, 
+
+				zr->j = jpeg_enc_init(zr->image_width/zr->hdec,
 						zr->image_height/zr->fields,
-						zr->hdec*2, 
+						zr->hdec*2,
 						zr->y_stride*zr->fields,
-						zr->hdec*4, 
+						zr->hdec*4,
 						zr->u_stride*zr->fields,
-						zr->hdec*4, 
+						zr->hdec*4,
 						zr->v_stride*zr->fields,
 						0, zr->quality, zr->bw);
 				break;
 			default:
 				mp_msg(MSGT_VO, MSGL_FATAL, "zr: internal inconsistency in vo_zr\n");
 		}
-	
-	
+
+
 		if (zr->j == NULL) {
 			mp_msg(MSGT_VO, MSGL_ERR, "zr: error initializing the jpeg encoder\n");
 			return 1;
 		}
-	
+
 		if (init_zoran(zr, stretchx, stretchy)) {
 			return 1;
 		}
-	
+
 	}
 	return 0;
 }
@@ -508,26 +508,26 @@ static void flip_page (void) {
 	/* do we have a free buffer? */
 	for (j = 0; j < zr_count; j++) {
 		zr_info_t *zr = &zr_info[j];
-		/* using MJPEG_NBUFFERS here, using the real number of 
+		/* using MJPEG_NBUFFERS here, using the real number of
 		 * buffers may give sync issues (real number of buffers
 		 * is always sufficient) */
 		if (zr->queue-zr->synco < MJPEG_NBUFFERS) {
 			zr->frame = zr->queue;
 		} else {
-			if (ioctl(zr->vdes, MJPIOC_SYNC, &zr->zs) < 0) 
-				mp_msg(MSGT_VO, MSGL_ERR, "zr: error waiting for buffers to become free\n"); 
+			if (ioctl(zr->vdes, MJPIOC_SYNC, &zr->zs) < 0)
+				mp_msg(MSGT_VO, MSGL_ERR, "zr: error waiting for buffers to become free\n");
 			zr->frame = zr->zs.frame;
 			zr->synco++;
 		}
 		k=0;
-		for (i = 0; i < zr->fields; i++) 
-			k+=jpeg_enc_frame(zr->j, zr->y_data + i*zr->y_stride, 
-					zr->u_data + i*zr->u_stride, 
-					zr->v_data + i*zr->v_stride, 
+		for (i = 0; i < zr->fields; i++)
+			k+=jpeg_enc_frame(zr->j, zr->y_data + i*zr->y_stride,
+					zr->u_data + i*zr->u_stride,
+					zr->v_data + i*zr->v_stride,
 					zr->buf + zr->frame*zr->zrq.size+k);
 		if (k > zr->zrq.size) mp_msg(MSGT_VO, MSGL_WARN, "zr: jpeg image too large for maximum buffer size. Lower the jpeg encoding\nquality or the resolution of the movie.\n");
 	}
-	/* Warning: Only the first jpeg image contains huffman- and 
+	/* Warning: Only the first jpeg image contains huffman- and
 	 * quantisation tables, so don't expect files other than
 	 * test0001.jpg to be readable */
 	/*sprintf(filename, "test%04d.jpg", framenum);
@@ -538,10 +538,10 @@ static void flip_page (void) {
 	/*fp = fopen("test1.jpg", "r");
 	fread(buf+frame*zrq.size, 1, 2126, fp);
 	fclose(fp);*/
-	
+
 	for (j = 0; j < zr_count; j++) {
 		zr_info_t *zr = &zr_info[j];
-		if (ioctl(zr->vdes, MJPIOC_QBUF_PLAY, &zr->frame) < 0) 
+		if (ioctl(zr->vdes, MJPIOC_QBUF_PLAY, &zr->frame) < 0)
 			mp_msg(MSGT_VO, MSGL_ERR, "zr: error queueing buffer for playback\n");
 		zr->queue++;
 	}
@@ -569,7 +569,7 @@ static int draw_frame(uint8_t * src[]) {
 }
 
 static int query_format(uint32_t format) {
-	if(format==IMGFMT_YV12 || format==IMGFMT_YUY2) 
+	if(format==IMGFMT_YV12 || format==IMGFMT_YUY2)
 	    return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW;
 	return 0;
 }
@@ -642,7 +642,7 @@ static int draw_slice(uint8_t *srcimg[], int stride[],
 		if (!zr->bw) {
     			// copy U+V:
 			uint8_t *dst1=zr->image + zr->size + zr->off_c+ (y/(zr->vdec*2))*zr->image_width/2+(x/2);
-			uint8_t *dst2=zr->image + 3*zr->size/2 + zr->off_c + 
+			uint8_t *dst2=zr->image + 3*zr->size/2 + zr->off_c +
 					(y/(zr->vdec*2))*
 					zr->image_width/2+(x/2);
 			for (i = 0; i< h/2; i++) {
@@ -702,7 +702,7 @@ vo_zr_parseoption(const m_option_t* conf, const char *opt, const char *param){
 		}
 	}
 	if (param == NULL) return ERR_MISSING_PARAM;
-	if (sscanf(param, "%dx%d+%d+%d", &g->width, &g->height, 
+	if (sscanf(param, "%dx%d+%d+%d", &g->width, &g->height,
 				&g->xoff, &g->yoff) != 4) {
 		g->xoff = 0; g->yoff = 0;
 		if (sscanf(param, "%dx%d", &g->width, &g->height) != 2) {
@@ -772,7 +772,7 @@ vo_zr_parseoption(const m_option_t* conf, const char *opt, const char *param){
 		    "  -zrnorm     specify norm PAL/NTSC (default: leave at current setting)\n"
 		    "\n"
 		    "Cinerama support: additional occurances of -zrcrop activate cinerama mode,\n"
-		    "suppose you have a 704x272 movie, two DC10+ cards and two beamers (or tv's),\n"              
+		    "suppose you have a 704x272 movie, two DC10+ cards and two beamers (or tv's),\n"
 		    "then you would issue the following command:\n\n"
 		    "mplayer -vo zr -zrcrop 352x272+0+0 -zrdev /dev/video0 -zrcrop 352x272+352+0 \\\n"
 		    "       -zrdev /dev/video1 movie.avi\n\n"
@@ -784,7 +784,7 @@ vo_zr_parseoption(const m_option_t* conf, const char *opt, const char *param){
 		    "a DC10+ (and no beamers) is tested, however)\n"
 	      );
 	exit(0);
-		
+
     }
     return ERR_NOT_AN_OPTION;
 }
@@ -822,7 +822,7 @@ void vo_zr_revertoption(const m_option_t* opt,const char* param) {
 
 static int preinit(const char *arg)
 {
-    if(arg) 
+    if(arg)
     {
 	printf("vo_zr: Unknown subdevice: %s\n",arg);
 	return ENOSYS;

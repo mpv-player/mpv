@@ -45,7 +45,7 @@
 void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
 void (APIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
 void (APIENTRY *BindBuffer)(GLenum, GLuint);
-GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum); 
+GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum);
 GLboolean (APIENTRY *UnmapBuffer)(GLenum);
 void (APIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
 void (APIENTRY *CombinerParameterfv)(GLenum, const GLfloat *);
@@ -192,7 +192,7 @@ int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
   if (!gl_texfmt) gl_texfmt = &dummy3;
   if (!gl_format) gl_format = &dummy2;
   if (!gl_type) gl_type = &dummy2;
-  
+
   *bpp = IMGFMT_IS_BGR(fmt)?IMGFMT_BGR_DEPTH(fmt):IMGFMT_RGB_DEPTH(fmt);
   *gl_texfmt = 3;
   switch (fmt) {
@@ -1440,7 +1440,7 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 #ifdef GL_WIN32
 #include "w32_common.h"
 /**
- * \brief little helper since wglGetProcAddress definition does not fit our 
+ * \brief little helper since wglGetProcAddress definition does not fit our
  *        getProcAddress
  * \param procName name of function to look up
  * \return function pointer returned by wglGetProcAddress

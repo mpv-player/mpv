@@ -59,7 +59,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
 
   if(p->stream->eof && (p->buffer_end == 0 || p->iter[0] == '\0'))
     return NULL;
-    
+
   assert(p->buffer_end < p->buffer_size);
   assert(!p->buffer[p->buffer_end]);
   while(1) {
@@ -71,7 +71,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
       p->buffer_size += BUF_STEP;
       resize = 0;
     }
-    
+
     if(p->buffer_size - p->buffer_end > 1 && ! p->stream->eof) {
       r = stream_read(p->stream,p->buffer + p->buffer_end,p->buffer_size - p->buffer_end - 1);
       if(r > 0) {
@@ -83,7 +83,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
       }
       assert(!p->buffer[p->buffer_end]);
     }
-    
+
     end = strchr(p->iter,'\n');
     if(!end) {
       if(p->stream->eof) {
@@ -145,7 +145,7 @@ parse_asx(play_tree_parser_t* p) {
   char* line = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying asx...\n");
-  
+
   while(1) {
     if(get_line) {
       line = play_tree_parser_get_line(p);
@@ -190,7 +190,7 @@ parse_asx(play_tree_parser_t* p) {
 	get_line = 1;
     }
   }
-	
+
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected asx format\n");
 
   // We have an asx : load it in memory and parse
@@ -205,7 +205,7 @@ parse_asx(play_tree_parser_t* p) {
 static char*
 pls_entry_get_value(char* line) {
   char* i;
-  
+
   i = strchr(line,'=');
   if(!i || i[1] == '\0')
     return NULL;
@@ -306,7 +306,7 @@ parse_pls(play_tree_parser_t* p) {
 	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"No value in entry %s\n",line);
       else
 	entries[num-1].length = strdup(v);
-    } else 
+    } else
       mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Unknown entry type %s\n",line);
     line = play_tree_parser_get_line(p);
   }
@@ -338,7 +338,7 @@ parse_pls(play_tree_parser_t* p) {
   free(entries);
 
   entry = play_tree_new();
-  play_tree_set_child(entry,list);	
+  play_tree_set_child(entry,list);
   return entry;
 }
 
@@ -384,7 +384,7 @@ parse_ref_ini(play_tree_parser_t* p) {
 
   if(!list) return NULL;
   entry = play_tree_new();
-  play_tree_set_child(entry,list);	
+  play_tree_set_child(entry,list);
   return entry;
 }
 
@@ -429,11 +429,11 @@ parse_m3u(play_tree_parser_t* p) {
       play_tree_append_entry(last_entry,entry);
     last_entry = entry;
   }
-   
+
   if(!list) return NULL;
   entry = play_tree_new();
   play_tree_set_child(entry,list);
-  return entry;    
+  return entry;
 }
 
 static play_tree_t*
@@ -480,7 +480,7 @@ parse_smil(play_tree_parser_t* p) {
     }
   }
 
-  //Get entries from smil 
+  //Get entries from smil
   src_line = line;
   line = NULL;
   do {
@@ -526,7 +526,7 @@ parse_smil(play_tree_parser_t* p) {
     }
     pos = line;
    while (pos) {
-    if (!entrymode) { // all entries filled so far 
+    if (!entrymode) { // all entries filled so far
      while ((pos=strchr(pos, '<'))) {
       if (strncasecmp(pos,"<video",6)==0  || strncasecmp(pos,"<audio",6)==0 || strncasecmp(pos,"<media",6)==0) {
           entrymode=1;
@@ -623,11 +623,11 @@ parse_textplain(play_tree_parser_t* p) {
     if (strlen(line) > 5)
       for(c = line; c[0]; c++ )
         if ( ((c[0] == '.') && //start with . and next have smil with optional ? or &
-           (tolower(c[1]) == 's') && (tolower(c[2])== 'm') && 
+           (tolower(c[1]) == 's') && (tolower(c[2])== 'm') &&
            (tolower(c[3]) == 'i') && (tolower(c[4]) == 'l') &&
            (!c[5] || c[5] == '?' || c[5] == '&')) || // or
           ((c[0] == '.') && // start with . and next have smi or ram with optional ? or &
-          ( ((tolower(c[1]) == 's') && (tolower(c[2])== 'm') && (tolower(c[3]) == 'i')) || 
+          ( ((tolower(c[1]) == 's') && (tolower(c[2])== 'm') && (tolower(c[3]) == 'i')) ||
             ((tolower(c[1]) == 'r') && (tolower(c[2])== 'a') && (tolower(c[3]) == 'm')) )
            && (!c[4] || c[4] == '?' || c[4] == '&')) ){
           entry=embedded_playlist_parse(line);
@@ -648,11 +648,11 @@ parse_textplain(play_tree_parser_t* p) {
       last_entry = entry;
     }
   }
-   
+
   if(!list) return NULL;
   entry = play_tree_new();
   play_tree_set_child(entry,list);
-  return entry;    
+  return entry;
 }
 
 play_tree_t*
@@ -713,7 +713,7 @@ play_tree_add_basepath(play_tree_t* pt, char* bp) {
 void play_tree_add_bpf(play_tree_t* pt, char* filename)
 {
   char *ls, *file;
-  
+
   if (pt && filename)
   {
     file = strdup(filename);
@@ -805,7 +805,7 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced) {
     tree = parse_m3u(p);
     if(tree) break;
     play_tree_parser_reset(p);
-    
+
     tree = parse_ref_ini(p);
     if(tree) break;
     play_tree_parser_reset(p);
@@ -813,7 +813,7 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced) {
     tree = parse_smil(p);
     if(tree) break;
     play_tree_parser_reset(p);
-     
+
     // Here come the others formats ( textplain must stay the last one )
     if (forced)
     {
@@ -825,12 +825,12 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced) {
 
   if(tree)
     mp_msg(MSGT_PLAYTREE,MSGL_V,"Playlist successfully parsed\n");
-  else 
+  else
     mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_ERR:MSGL_V),"Error while parsing playlist\n");
 
   if(tree)
     tree = play_tree_cleanup(tree);
-  
+
   if(!tree) mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_WARN:MSGL_V),"Warning: empty playlist\n");
 
   return tree;

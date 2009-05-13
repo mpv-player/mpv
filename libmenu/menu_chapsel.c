@@ -71,8 +71,8 @@ static m_option_t cfg_fields[] = {
 
 static char *fmt_replace(const char *fmt, const char *chapter_name,
                          const char *start) {
-    static const char ctag[] = "${chapter_name}"; 
-    static const char stag[] = "${start}"; 
+    static const char ctag[] = "${chapter_name}";
+    static const char stag[] = "${start}";
     int l = strlen(fmt);
     int cl = strlen(chapter_name);
     int sl = strlen(start);

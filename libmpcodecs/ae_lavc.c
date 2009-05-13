@@ -42,18 +42,18 @@ static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 	mux_a->h.dwRate = mux_a->wf->nAvgBytesPerSec;
 	if(lavc_actx->block_align)
 		mux_a->h.dwSampleSize = mux_a->h.dwScale = lavc_actx->block_align;
-	else 
+	else
 	{
 		mux_a->h.dwScale = (mux_a->wf->nAvgBytesPerSec * lavc_actx->frame_size)/ mux_a->wf->nSamplesPerSec; /* for cbr */
-	
+
 		if ((mux_a->wf->nAvgBytesPerSec *
-			lavc_actx->frame_size) % mux_a->wf->nSamplesPerSec) 
+			lavc_actx->frame_size) % mux_a->wf->nSamplesPerSec)
 		{
 			mux_a->h.dwScale = lavc_actx->frame_size;
 			mux_a->h.dwRate = lavc_actx->sample_rate;
 			mux_a->h.dwSampleSize = 0; // Blocksize not constant
-		} 
-		else 
+		}
+		else
 			mux_a->h.dwSampleSize = 0;
 	}
         if(mux_a->h.dwSampleSize)
@@ -63,7 +63,7 @@ static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 	mux_a->h.dwSuggestedBufferSize = (encoder->params.audio_preload*mux_a->wf->nAvgBytesPerSec)/1000;
 	mux_a->h.dwSuggestedBufferSize -= mux_a->h.dwSuggestedBufferSize % mux_a->wf->nBlockAlign;
 
-	switch(lavc_param_atag) 
+	switch(lavc_param_atag)
 	{
 		case 0x11: /* imaadpcm */
 			mux_a->wf->wBitsPerSample = 4;
@@ -91,13 +91,13 @@ static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 			break;
 	}
 
-	// Fix allocation    
+	// Fix allocation
 	mux_a->wf = realloc(mux_a->wf, sizeof(WAVEFORMATEX)+mux_a->wf->cbSize);
-	
+
 	encoder->input_format = AF_FORMAT_S16_NE;
 	encoder->min_buffer_size = mux_a->h.dwSuggestedBufferSize;
 	encoder->max_buffer_size = mux_a->h.dwSuggestedBufferSize*2;
-	
+
 	return 1;
 }
 
@@ -163,7 +163,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 {
 	encoder->params.samples_per_frame = encoder->params.sample_rate;
 	encoder->params.bitrate = encoder->params.sample_rate * encoder->params.channels * 2 * 8;
-	
+
 	if(!lavc_param_acodec)
 	{
 		mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_NoLavcAudioCodecName);
@@ -202,7 +202,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 		mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CouldntAllocateLavcContext);
 		return 0;
 	}
-	
+
 	// put sample parameters
 	lavc_actx->channels = encoder->params.channels;
 	lavc_actx->sample_rate = encoder->params.sample_rate;
@@ -212,7 +212,7 @@ int mpae_init_lavc(audio_encoder_t *encoder)
                 lavc_actx->bit_rate = encoder->params.bitrate = lavc_param_abitrate * 1000;
         else
                 lavc_actx->bit_rate = encoder->params.bitrate = lavc_param_abitrate;
-	
+
 
 	/*
 	* Special case for adpcm_ima_wav.

@@ -72,7 +72,7 @@ dla przeciętnego użytkownika.
 
 <para>
 Najpierw należy pobrać źródła MPlayera z SVN.
-Więcej szczegółów na ten temat znajduje się w 
+Więcej szczegółów na ten temat znajduje się w
 <ulink url="http://www.mplayerhq.hu/design7/dload.html#svn">sekcji o Subversion strony pobierania</ulink>.
 </para>
 
@@ -134,7 +134,7 @@ To pomoże ci łatwo znaleźć łatkę, która jest winowajcą.
 Jeżeli znajdziesz łatkę, która jest źródłem problemu, to znaczy, że już
 prawie osiągnąłeś sukces; wyślij informację o niej na
 <ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>
-lub zapisz się na listę 
+lub zapisz się na listę
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
 i tam wyślij raport.
 Istnieje szansa, że autor łatki zasugeruje w jaki sposób rozwiązać problem.

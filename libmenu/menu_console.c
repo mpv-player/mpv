@@ -67,7 +67,7 @@ struct menu_priv_s {
   history_t* history;
   history_t* cur_history;
   int history_size;
-  
+
   char* mp_prompt;
   char* child_prompt;
   int buf_lines; // Buffer size (in line)
@@ -161,11 +161,11 @@ static void add_string(struct menu_priv_s* priv, char* l) {
     priv->add_line = 0;
     return;
   }
-  
+
   if(eol) {
     eol[0] = '\0';
     add_string(priv,l);
-    if(eol[1]) { 
+    if(eol[1]) {
       add_line(priv,eol+1);
       priv->add_line = 0;
     } else
@@ -215,7 +215,7 @@ static void draw(menu_t* menu, mp_image_t* mpi) {
 
   if(mpriv->bg >= 0)
     menu_draw_box(mpi,mpriv->bg,mpriv->bg_alpha,0,0,mpi->w,h);
-  
+
   if(!mpriv->child || !mpriv->raw_child){
     char input[strlen(mpriv->cur_history->buffer) + strlen(mpriv->prompt) + 1];
     sprintf(input,"%s%s",mpriv->prompt,mpriv->cur_history->buffer);
@@ -259,11 +259,11 @@ static void check_child(menu_t* menu) {
     r = waitpid(mpriv->child,&child_status,WNOHANG);
     if(r < 0){
       if(errno==ECHILD){  ///exiting children get handled in mplayer.c
-        for(i = 0 ; i < 3 ; i++) 
+        for(i = 0 ; i < 3 ; i++)
           close(mpriv->child_fd[i]);
         mpriv->child = 0;
         mpriv->prompt = mpriv->mp_prompt;
-        //add_line(mpriv,"Child process exited");    
+        //add_line(mpriv,"Child process exited");
       }
       else mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WaitPidError,strerror(errno));
     }
@@ -271,7 +271,7 @@ static void check_child(menu_t* menu) {
     mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_SelectError);
     return;
   }
-  
+
   w = 0;
   for(i = 1 ; i < 3 ; i++) {
     if(FD_ISSET(mpriv->child_fd[i],&rfd)){
@@ -338,7 +338,7 @@ static int run_shell_cmd(menu_t* menu, char* cmd) {
 static void enter_cmd(menu_t* menu) {
   history_t* h;
   char input[strlen(mpriv->cur_history->buffer) + strlen(mpriv->prompt) + 1];
-  
+
   sprintf(input,"%s%s",mpriv->prompt,mpriv->cur_history->buffer);
   add_line(mpriv,input);
 
@@ -360,7 +360,7 @@ static void enter_cmd(menu_t* menu) {
     mpriv->history = h;
   } else
     mpriv->history->buffer[0] = '\0';
-    
+
   mpriv->cur_history = mpriv->history;
   //mpriv->input = mpriv->cur_history->buffer;
 }
@@ -477,7 +477,7 @@ static int openMenu(menu_t* menu, char* args) {
   mpriv->cur_history = mpriv->history = calloc(1,sizeof(history_t));
   mpriv->cur_history->buffer = calloc(255,1);
   mpriv->cur_history->size = 255;
-  
+
   if(args)
     add_line(mpriv,args);
 

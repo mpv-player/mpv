@@ -106,7 +106,7 @@ steps of decoding with libmpcodecs:
 3. vd asks libvo (control(VOCTRL_GET_IMAGE)), if it can provide such buffer:
    - if it can -> do direct rendering
    - it it can not -> allocate system ram area with memalign()/malloc()
-   Note: codec may request EXPORT buffer, it means buffer allocation is 
+   Note: codec may request EXPORT buffer, it means buffer allocation is
    done inside the codec, so we cannot do DR :(
 4. codec decodes one frame to the mpi struct (system ram or direct rendering)
 5. if it isn't DR, we call libvo's draw functions to blit image to video ram

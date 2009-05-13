@@ -36,13 +36,13 @@ by a right click).
   <emphasis>labels</emphasis>.
   For every item, you must specify its position and size.
   </para>
-  
+
   <para>
   A <emphasis role="bold">button</emphasis> has three states (pressed, released,
   disabled), thus its image must be divided into three parts vertically. See the
   <link linkend="skin-button">button</link> item for details.
   </para>
-  
+
   <para>
   A <emphasis role="bold">potmeter</emphasis> (mainly used for the seek bar and
   volume/balance control) can have any number of phases by dividing its image
@@ -50,7 +50,7 @@ by a right click).
   <link linkend="skin-hpotmeter">hpotmeter</link> and
   <link linkend="skin-potmeter">potmeter</link> for details.
   </para>
-  
+
   <para>
   <emphasis role="bold">Labels</emphasis> are a bit special: The characters
   needed to draw them are taken from an image file, and the characters in the

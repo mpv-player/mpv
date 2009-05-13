@@ -21,7 +21,7 @@
 
 /*
  * This implementation is based on an algorithm described in
- * "Aria Nosratinia Embedded Post-Processing for 
+ * "Aria Nosratinia Embedded Post-Processing for
  * Enhancement of Compressed Images (1999)"
  * (http://citeseer.nj.nec.com/nosratinia99embedded.html)
  * Futher, with splitting (i)dct into hor/ver passes, one of them can be
@@ -31,7 +31,7 @@
 /*
   Heavily optimized version of SPP filter by Nikolaj
  */
- 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -110,7 +110,7 @@ static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_st
     src[x + pos]=src[x + pos - 8*src_stride]=0;				\
     if(temp & 0x100) temp= ~(temp>>31);					\
     dst[x + pos]= temp;
-    
+
     for(y=0; y<height; y++){
 	const uint8_t *d= dither[y];
 	for(x=0; x<width; x+=8){
@@ -122,7 +122,7 @@ static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_st
 	    STORE(4);
 	    STORE(5);
 	    STORE(6);
-	    STORE(7);      
+	    STORE(7);
 	}
 	src+=src_stride;
 	dst+=dst_stride;
@@ -137,7 +137,7 @@ static void store_slice2_c(uint8_t *dst, int16_t *src, int dst_stride, int src_s
     src[x + pos + 16*src_stride]=0;					\
     if(temp & 0x100) temp= ~(temp>>31);					\
     dst[x + pos]= temp;
-   
+
     for(y=0; y<height; y++){
 	const uint8_t *d= dither[y];
 	for(x=0; x<width; x+=8){
@@ -149,7 +149,7 @@ static void store_slice2_c(uint8_t *dst, int16_t *src, int dst_stride, int src_s
 	    STORE2(4);
 	    STORE2(5);
 	    STORE2(6);
-	    STORE2(7);      
+	    STORE2(7);
 	}
 	src+=src_stride;
 	dst+=dst_stride;
@@ -243,7 +243,7 @@ static void store_slice_mmx(uint8_t *dst, int16_t *src, long dst_stride, long sr
 	: "m" (width), "m" (src_stride), "g" (od), "m" (dst_stride), "g" (end),
 	  "m" (log2_scale), "m" (src), "m" (dst) //input
 	: "%"REG_a, "%"REG_c, "%"REG_d, "%"REG_S, "%"REG_D
-	);    
+	);
 }
 
 //This func reads from 2 slices, 0 & 2  and clears 2-nd
@@ -311,7 +311,7 @@ static void store_slice2_mmx(uint8_t *dst, int16_t *src, long dst_stride, long s
 	: "m" (width), "m" (src_stride), "g" (od), "m" (dst_stride), "g" (end),
 	  "m" (log2_scale), "m" (src), "m" (dst) //input
 	: "%"REG_a, "%"REG_c, "%"REG_d, "%"REG_D, "%"REG_S
-	);  
+	);
 }
 
 static void mul_thrmat_mmx(struct vf_priv_s *p, int q)
@@ -393,7 +393,7 @@ static void mul_thrmat_mmx(struct vf_priv_s *p, int q)
 }
 
 static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,  int cnt);
-static void row_idct_mmx(DCTELEM* workspace, 
+static void row_idct_mmx(DCTELEM* workspace,
 			 int16_t* output_adr,  int output_stride,  int cnt);
 static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size,  int cnt);
 
@@ -413,19 +413,19 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src,
     int x, x0, y, es, qy, t;
     const int stride= is_luma ? p->temp_stride : (width+16);//((width+16+15)&(~15))
     const int step=6-p->log2_count;
-    const int qps= 3 + is_luma; 
+    const int qps= 3 + is_luma;
     int32_t __attribute__((aligned(32))) block_align[4*8*BLOCKSZ+ 4*8*BLOCKSZ];
     DCTELEM *block= (DCTELEM *)block_align;
-    DCTELEM *block3=(DCTELEM *)(block_align+4*8*BLOCKSZ);    
+    DCTELEM *block3=(DCTELEM *)(block_align+4*8*BLOCKSZ);
 
     memset(block3, 0, 4*8*BLOCKSZ);
 
-    //p->src=src-src_stride*8-8;//!    
+    //p->src=src-src_stride*8-8;//!
     if (!src || !dst) return; // HACK avoid crash for Y8 colourspace
     for(y=0; y<height; y++){
         int index= 8 + 8*stride + y*stride;
         fast_memcpy(p->src + index, src + y*src_stride, width);//this line can be avoided by using DR & user fr.buffers
-        for(x=0; x<8; x++){ 
+        for(x=0; x<8; x++){
             p->src[index         - x - 1]= p->src[index +         x    ];
             p->src[index + width + x    ]= p->src[index + width - x - 1];
         }
@@ -447,11 +447,11 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src,
 	row_fdct_s(block, p->src + y*stride +2-(y&1), stride, 2);
 	for(x0=0; x0<width+8-8*(BLOCKSZ-1); x0+=8*(BLOCKSZ-1)){
 	    row_fdct_s(block+8*8, p->src + y*stride+8+x0 +2-(y&1), stride, 2*(BLOCKSZ-1));
-	    if(p->qp)        
+	    if(p->qp)
 		column_fidct_s((int16_t*)(&p->threshold_mtx[0]), block+0*8, block3+0*8, 8*(BLOCKSZ-1)); //yes, this is a HOTSPOT
 	    else
 		for (x=0; x<8*(BLOCKSZ-1); x+=8) {
-		    t=x+x0-2; //correct t=x+x0-2-(y&1), but its the same 
+		    t=x+x0-2; //correct t=x+x0-2-(y&1), but its the same
 		    if (t<0) t=0;//t always < width-2
 		    t=qp_store[qy+(t>>qps)];
 		    if(p->mpeg2) t>>=1; //copy p->mpeg2,prev_q to locals?
@@ -463,24 +463,24 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src,
 	    memmove(block3, block3+(BLOCKSZ-1)*64, 6*8*sizeof(DCTELEM));
 	}
 	//
-	es=width+8-x0; //  8, ...      
+	es=width+8-x0; //  8, ...
 	if (es>8)
 	    row_fdct_s(block+8*8, p->src + y*stride+8+x0 +2-(y&1), stride, (es-4)>>2);
 	column_fidct_s((int16_t*)(&p->threshold_mtx[0]), block, block3, es&(~1));
 	row_idct_s(block3+0*8, p->temp + (y&15)*stride+x0+2-(y&1), stride, es>>2);
 	{const int y1=y-8+step;//l5-7  l4-6
 	    if (!(y1&7) && y1) {
-		if (y1&8) store_slice_s(dst + (y1-8)*dst_stride, p->temp+ 8 +8*stride, 
+		if (y1&8) store_slice_s(dst + (y1-8)*dst_stride, p->temp+ 8 +8*stride,
 					dst_stride, stride, width, 8, 5-p->log2_count);
-		else store_slice2_s(dst + (y1-8)*dst_stride, p->temp+ 8 +0*stride, 
-				    dst_stride, stride, width, 8, 5-p->log2_count);    
+		else store_slice2_s(dst + (y1-8)*dst_stride, p->temp+ 8 +0*stride,
+				    dst_stride, stride, width, 8, 5-p->log2_count);
 	    } }
     }
 
     if (y&7) {  // == height & 7
-	if (y&8) store_slice_s(dst + ((y-8)&~7)*dst_stride, p->temp+ 8 +8*stride, 
+	if (y&8) store_slice_s(dst + ((y-8)&~7)*dst_stride, p->temp+ 8 +8*stride,
 			       dst_stride, stride, width, y&7, 5-p->log2_count);
-	else store_slice2_s(dst + ((y-8)&~7)*dst_stride, p->temp+ 8 +0*stride, 
+	else store_slice2_s(dst + ((y-8)&~7)*dst_stride, p->temp+ 8 +0*stride,
 			    dst_stride, stride, width, y&7, 5-p->log2_count);
     }
 }
@@ -577,7 +577,7 @@ static void uninit(struct vf_instance_s* vf)
     //vf->priv->avctx= NULL;
     if(vf->priv->non_b_qp) free(vf->priv->non_b_qp);
     vf->priv->non_b_qp= NULL;
-        
+
     av_free(vf->priv);
     vf->priv=NULL;
 }
@@ -621,23 +621,23 @@ static int open(vf_instance_t *vf, char* args)
     int i=0, bias;
     int custom_threshold_m[64];
     int log2c=-1;
-    
+
     vf->config=config;
     vf->put_image=put_image;
     vf->get_image=get_image;
     vf->query_format=query_format;
     vf->uninit=uninit;
     vf->control= control;
-    vf->priv=av_mallocz(sizeof(struct vf_priv_s));//assumes align 16 ! 
-    
+    vf->priv=av_mallocz(sizeof(struct vf_priv_s));//assumes align 16 !
+
     avcodec_init();
 
     //vf->priv->avctx= avcodec_alloc_context();
     //dsputil_init(&vf->priv->dsp, vf->priv->avctx);
-    
+
     vf->priv->log2_count= 4;
     vf->priv->bframes = 0;
-    
+
     if (args) sscanf(args, "%d:%d:%d:%d", &log2c, &vf->priv->qp, &i, &vf->priv->bframes);
 
     if( log2c >=4 && log2c <=5 )
@@ -650,7 +650,7 @@ static int open(vf_instance_t *vf, char* args)
 
     if (i < -15) i = -15;
     if (i > 32) i = 32;
-    
+
     bias= (1<<4)+i; //regulable
     vf->priv->prev_q=0;
     //
@@ -702,21 +702,21 @@ const vf_info_t vf_info_fspp = {
 
 #if HAVE_MMX
 
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_382683433)=FIX64(0.382683433, 14); 
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_541196100)=FIX64(0.541196100, 14); 
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_707106781)=FIX64(0.707106781, 14); 
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_306562965)=FIX64(1.306562965, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_382683433)=FIX64(0.382683433, 14);
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_541196100)=FIX64(0.541196100, 14);
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_707106781)=FIX64(0.707106781, 14);
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_306562965)=FIX64(1.306562965, 14);
 
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_414213562_A)=FIX64(1.414213562, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_414213562_A)=FIX64(1.414213562, 14);
 
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_847759065)=FIX64(1.847759065, 13); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_847759065)=FIX64(1.847759065, 13);
 DECLARE_ASM_CONST(8, uint64_t, MM_FIX_2_613125930)=FIX64(-2.613125930, 13); //-
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_414213562)=FIX64(1.414213562, 13); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_414213562)=FIX64(1.414213562, 13);
 DECLARE_ASM_CONST(8, uint64_t, MM_FIX_1_082392200)=FIX64(1.082392200, 13);
 //for t3,t5,t7 == 0 shortcut
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_847759065)=FIX64(0.847759065, 14); 
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_566454497)=FIX64(0.566454497, 14); 
-DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_198912367)=FIX64(0.198912367, 14); 
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_847759065)=FIX64(0.847759065, 14);
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_566454497)=FIX64(0.566454497, 14);
+DECLARE_ASM_CONST(8, uint64_t, MM_FIX_0_198912367)=FIX64(0.198912367, 14);
 
 DECLARE_ASM_CONST(8, uint64_t, MM_DESCALE_RND)=C64(4);
 DECLARE_ASM_CONST(8, uint64_t, MM_2)=C64(2);
@@ -724,14 +724,14 @@ DECLARE_ASM_CONST(8, uint64_t, MM_2)=C64(2);
 #else /* !HAVE_MMX */
 
 typedef int32_t int_simd16_t;
-static const int16_t FIX_0_382683433=FIX(0.382683433, 14); 
-static const int16_t FIX_0_541196100=FIX(0.541196100, 14); 
-static const int16_t FIX_0_707106781=FIX(0.707106781, 14); 
-static const int16_t FIX_1_306562965=FIX(1.306562965, 14); 
-static const int16_t FIX_1_414213562_A=FIX(1.414213562, 14); 
-static const int16_t FIX_1_847759065=FIX(1.847759065, 13); 
+static const int16_t FIX_0_382683433=FIX(0.382683433, 14);
+static const int16_t FIX_0_541196100=FIX(0.541196100, 14);
+static const int16_t FIX_0_707106781=FIX(0.707106781, 14);
+static const int16_t FIX_1_306562965=FIX(1.306562965, 14);
+static const int16_t FIX_1_414213562_A=FIX(1.414213562, 14);
+static const int16_t FIX_1_847759065=FIX(1.847759065, 13);
 static const int16_t FIX_2_613125930=FIX(-2.613125930, 13); //-
-static const int16_t FIX_1_414213562=FIX(1.414213562, 13); 
+static const int16_t FIX_1_414213562=FIX(1.414213562, 13);
 static const int16_t FIX_1_082392200=FIX(1.082392200, 13);
 
 #endif
@@ -749,46 +749,46 @@ static void column_fidct_c(int16_t* thr_adr, DCTELEM *data, DCTELEM *output, int
     DCTELEM* wsptr;
     int16_t *threshold;
     int ctr;
-  
+
     dataptr = data;
     wsptr = output;
 
     for (; cnt > 0; cnt-=2) { //start positions
 	threshold=(int16_t*)thr_adr;//threshold_mtx
-	for (ctr = DCTSIZE; ctr > 0; ctr--) { 
-	    // Process columns from input, add to output. 
+	for (ctr = DCTSIZE; ctr > 0; ctr--) {
+	    // Process columns from input, add to output.
 	    tmp0 = dataptr[DCTSIZE*0] + dataptr[DCTSIZE*7];
 	    tmp7 = dataptr[DCTSIZE*0] - dataptr[DCTSIZE*7];
-    
+
 	    tmp1 = dataptr[DCTSIZE*1] + dataptr[DCTSIZE*6];
 	    tmp6 = dataptr[DCTSIZE*1] - dataptr[DCTSIZE*6];
-    
+
 	    tmp2 = dataptr[DCTSIZE*2] + dataptr[DCTSIZE*5];
 	    tmp5 = dataptr[DCTSIZE*2] - dataptr[DCTSIZE*5];
-    
+
 	    tmp3 = dataptr[DCTSIZE*3] + dataptr[DCTSIZE*4];
 	    tmp4 = dataptr[DCTSIZE*3] - dataptr[DCTSIZE*4];
 
 	    // Even part of FDCT
-    
+
 	    tmp10 = tmp0 + tmp3;
 	    tmp13 = tmp0 - tmp3;
 	    tmp11 = tmp1 + tmp2;
 	    tmp12 = tmp1 - tmp2;
 
-	    d0 = tmp10 + tmp11; 
+	    d0 = tmp10 + tmp11;
 	    d4 = tmp10 - tmp11;
-    
-	    z1 = MULTIPLY16H((tmp12 + tmp13) <<2, FIX_0_707106781); 
-	    d2 = tmp13 + z1; 
-	    d6 = tmp13 - z1;    
+
+	    z1 = MULTIPLY16H((tmp12 + tmp13) <<2, FIX_0_707106781);
+	    d2 = tmp13 + z1;
+	    d6 = tmp13 - z1;
 
 	    // Even part of IDCT
 
 	    THRESHOLD(tmp0, d0, threshold[0*8]);
 	    THRESHOLD(tmp1, d2, threshold[2*8]);
 	    THRESHOLD(tmp2, d4, threshold[4*8]);
-	    THRESHOLD(tmp3, d6, threshold[6*8]);     
+	    THRESHOLD(tmp3, d6, threshold[6*8]);
 	    tmp0+=2;
 	    tmp10 = (tmp0 + tmp2)>>2;
 	    tmp11 = (tmp0 - tmp2)>>2;
@@ -803,22 +803,22 @@ static void column_fidct_c(int16_t* thr_adr, DCTELEM *data, DCTELEM *output, int
 
 	    // Odd part of FDCT
 
-	    tmp10 = tmp4 + tmp5;  
+	    tmp10 = tmp4 + tmp5;
 	    tmp11 = tmp5 + tmp6;
 	    tmp12 = tmp6 + tmp7;
-        
-	    z5 = MULTIPLY16H((tmp10 - tmp12)<<2, FIX_0_382683433); 
-	    z2 = MULTIPLY16H(tmp10 <<2, FIX_0_541196100) + z5; 
-	    z4 = MULTIPLY16H(tmp12 <<2, FIX_1_306562965) + z5; 
-	    z3 = MULTIPLY16H(tmp11 <<2, FIX_0_707106781); 
 
-	    z11 = tmp7 + z3;        
+	    z5 = MULTIPLY16H((tmp10 - tmp12)<<2, FIX_0_382683433);
+	    z2 = MULTIPLY16H(tmp10 <<2, FIX_0_541196100) + z5;
+	    z4 = MULTIPLY16H(tmp12 <<2, FIX_1_306562965) + z5;
+	    z3 = MULTIPLY16H(tmp11 <<2, FIX_0_707106781);
+
+	    z11 = tmp7 + z3;
 	    z13 = tmp7 - z3;
 
-	    d5 = z13 + z2; 
+	    d5 = z13 + z2;
 	    d3 = z13 - z2;
 	    d1 = z11 + z4;
-	    d7 = z11 - z4;    
+	    d7 = z11 - z4;
 
 	    // Odd part of IDCT
 
@@ -857,7 +857,7 @@ static void column_fidct_c(int16_t* thr_adr, DCTELEM *data, DCTELEM *output, int
 	    threshold++;
 	}
 	dataptr+=8; //skip each second start pos
-	wsptr  +=8;       
+	wsptr  +=8;
     }
 }
 
@@ -874,7 +874,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq "DCTSIZE_S"*3*2(%%"REG_S"), %%mm7 \n\t"
 	"movq %%mm1, %%mm0             \n\t"
 
-	"paddw "DCTSIZE_S"*7*2(%%"REG_S"), %%mm1 \n\t" //t0    
+	"paddw "DCTSIZE_S"*7*2(%%"REG_S"), %%mm1 \n\t" //t0
 	"movq %%mm7, %%mm3             \n\t"
 
 	"paddw "DCTSIZE_S"*4*2(%%"REG_S"), %%mm7 \n\t" //t3
@@ -892,13 +892,13 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"paddw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t2
 	"movq %%mm6, %%mm7             \n\t"
 
-	"paddw %%mm2, %%mm6            \n\t" //t11    
+	"paddw %%mm2, %%mm6            \n\t" //t11
 	"psubw %%mm2, %%mm7            \n\t" //t12
 
 	"movq %%mm5, %%mm2             \n\t"
 	"paddw %%mm6, %%mm5            \n\t" //d0
 	// i0 t13 t12 i3 i1 d0 - d4
-	"psubw %%mm6, %%mm2            \n\t" //d4      
+	"psubw %%mm6, %%mm2            \n\t" //d4
 	"paddw %%mm1, %%mm7            \n\t"
 
 	"movq  4*16(%%"REG_d"), %%mm6      \n\t"
@@ -938,7 +938,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 
 	"paddusw 2*16(%%"REG_d"), %%mm1    \n\t"
 	"psubw %%mm7, %%mm6            \n\t"
-	// t7 d2 /t11 t4 t6 - d6 /t10     
+	// t7 d2 /t11 t4 t6 - d6 /t10
 
 	"paddw 2*16(%%"REG_d"), %%mm1      \n\t"
 	"paddusw %%mm7, %%mm6          \n\t"
@@ -950,7 +950,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubusw %%mm7, %%mm6          \n\t"
 
 	//movq [edi+"DCTSIZE_S"*2*2], mm1
-	//movq [edi+"DCTSIZE_S"*6*2], mm6     
+	//movq [edi+"DCTSIZE_S"*6*2], mm6
 	"movq %%mm1, %%mm7             \n\t"
 	"psraw $2, %%mm2              \n\t"
 
@@ -970,7 +970,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm6, %%mm7            \n\t" //'t3
 
 	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
-	"psubw %%mm6, %%mm1            \n\t" //'t12        
+	"psubw %%mm6, %%mm1            \n\t" //'t12
 
 	"psubw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t5
 	"movq %%mm5, %%mm6             \n\t"
@@ -1000,7 +1000,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm1, %%mm6            \n\t" //'t2
 	// t7 't12 't11 t4 t6 - 't13 't10   ---
 
-	"paddw %%mm3, %%mm7            \n\t" //z2        
+	"paddw %%mm3, %%mm7            \n\t" //z2
 
 	"movq %%mm5, 1*8+%3            \n\t"
 	"paddw %%mm3, %%mm4            \n\t" //z4
@@ -1009,10 +1009,10 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm0, %%mm1             \n\t"
 
 	"movq %%mm6, 2*8+%3            \n\t"
-	"psubw %%mm2, %%mm1            \n\t" //z13            
+	"psubw %%mm2, %%mm1            \n\t" //z13
 
 //===
-	"paddw %%mm2, %%mm0            \n\t" //z11 
+	"paddw %%mm2, %%mm0            \n\t" //z11
 	"movq %%mm1, %%mm5             \n\t"
 
 	"movq 5*16(%%"REG_d"), %%mm2       \n\t"
@@ -1025,12 +1025,12 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm2, %%mm5            \n\t"
 
 	"movq %%mm0, %%mm6             \n\t"
-	"paddw %%mm4, %%mm0            \n\t" //d1    
+	"paddw %%mm4, %%mm0            \n\t" //d1
 
 	"paddusw %%mm3, %%mm1          \n\t"
-	"psubw %%mm4, %%mm6            \n\t" //d7  
+	"psubw %%mm4, %%mm6            \n\t" //d7
 
-	// d1 d3 - - - d5 d7 -    
+	// d1 d3 - - - d5 d7 -
 	"movq 7*16(%%"REG_d"), %%mm4       \n\t"
 	"psubw %%mm7, %%mm0            \n\t"
 
@@ -1082,7 +1082,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 
 	"movq 1*8+%3, %%mm6            \n\t"
 	//paddw mm3, MM_2
-	"psraw $2, %%mm3              \n\t" //tmp7     
+	"psraw $2, %%mm3              \n\t" //tmp7
 
 	"pmulhw "MANGLE(MM_FIX_0_198912367)", %%mm2 \n\t" //-tmp4
 	"psubw %%mm3, %%mm4            \n\t"
@@ -1135,7 +1135,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"2:                    \n\t"
 	//--- non DC2
 	//psraw mm1, 2 w/o it -> offset. thr1, thr1, thr1  (actually thr1, thr1, thr1-1)
-	//psraw mm5, 2              
+	//psraw mm5, 2
 	//psraw mm0, 2
 	//psraw mm6, 2
 	"movq %%mm5, %%mm3             \n\t"
@@ -1205,7 +1205,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"paddw %%mm2, %%mm7            \n\t"
 
 	"movq %%mm3, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
-	"paddw %%mm2, %%mm0            \n\t" //'t4     
+	"paddw %%mm2, %%mm0            \n\t" //'t4
 
 	// 't4 't6 't5 - - - - 't7
 	"movq %%mm7, "DCTSIZE_S"*2*2(%%"REG_D") \n\t"
@@ -1226,13 +1226,13 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"add $8, %%"REG_D"               \n\t"
 
 	"4:                     \n\t"
-//=part 2 (the same)===========================================================    
+//=part 2 (the same)===========================================================
 	"movq "DCTSIZE_S"*0*2(%%"REG_S"), %%mm1 \n\t"
 	//
 	"movq "DCTSIZE_S"*3*2(%%"REG_S"), %%mm7 \n\t"
 	"movq %%mm1, %%mm0             \n\t"
 
-	"paddw "DCTSIZE_S"*7*2(%%"REG_S"), %%mm1 \n\t" //t0    
+	"paddw "DCTSIZE_S"*7*2(%%"REG_S"), %%mm1 \n\t" //t0
 	"movq %%mm7, %%mm3             \n\t"
 
 	"paddw "DCTSIZE_S"*4*2(%%"REG_S"), %%mm7 \n\t" //t3
@@ -1250,13 +1250,13 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"paddw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t2
 	"movq %%mm6, %%mm7             \n\t"
 
-	"paddw %%mm2, %%mm6            \n\t" //t11    
+	"paddw %%mm2, %%mm6            \n\t" //t11
 	"psubw %%mm2, %%mm7            \n\t" //t12
 
 	"movq %%mm5, %%mm2             \n\t"
 	"paddw %%mm6, %%mm5            \n\t" //d0
 	// i0 t13 t12 i3 i1 d0 - d4
-	"psubw %%mm6, %%mm2            \n\t" //d4      
+	"psubw %%mm6, %%mm2            \n\t" //d4
 	"paddw %%mm1, %%mm7            \n\t"
 
 	"movq  1*8+4*16(%%"REG_d"), %%mm6  \n\t"
@@ -1296,7 +1296,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 
 	"paddusw 1*8+2*16(%%"REG_d"), %%mm1 \n\t"
 	"psubw %%mm7, %%mm6            \n\t"
-	// t7 d2 /t11 t4 t6 - d6 /t10     
+	// t7 d2 /t11 t4 t6 - d6 /t10
 
 	"paddw 1*8+2*16(%%"REG_d"), %%mm1  \n\t"
 	"paddusw %%mm7, %%mm6          \n\t"
@@ -1308,7 +1308,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubusw %%mm7, %%mm6          \n\t"
 
 	//movq [edi+"DCTSIZE_S"*2*2], mm1
-	//movq [edi+"DCTSIZE_S"*6*2], mm6     
+	//movq [edi+"DCTSIZE_S"*6*2], mm6
 	"movq %%mm1, %%mm7             \n\t"
 	"psraw $2, %%mm2              \n\t"
 
@@ -1328,7 +1328,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm6, %%mm7            \n\t" //'t3
 
 	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
-	"psubw %%mm6, %%mm1            \n\t" //'t12        
+	"psubw %%mm6, %%mm1            \n\t" //'t12
 
 	"psubw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t5
 	"movq %%mm5, %%mm6             \n\t"
@@ -1358,7 +1358,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm1, %%mm6            \n\t" //'t2
 	// t7 't12 't11 t4 t6 - 't13 't10   ---
 
-	"paddw %%mm3, %%mm7            \n\t" //z2        
+	"paddw %%mm3, %%mm7            \n\t" //z2
 
 	"movq %%mm5, 1*8+%3            \n\t"
 	"paddw %%mm3, %%mm4            \n\t" //z4
@@ -1367,10 +1367,10 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm0, %%mm1             \n\t"
 
 	"movq %%mm6, 2*8+%3            \n\t"
-	"psubw %%mm2, %%mm1            \n\t" //z13            
+	"psubw %%mm2, %%mm1            \n\t" //z13
 
 //===
-	"paddw %%mm2, %%mm0            \n\t" //z11 
+	"paddw %%mm2, %%mm0            \n\t" //z11
 	"movq %%mm1, %%mm5             \n\t"
 
 	"movq 1*8+5*16(%%"REG_d"), %%mm2   \n\t"
@@ -1383,12 +1383,12 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm2, %%mm5            \n\t"
 
 	"movq %%mm0, %%mm6             \n\t"
-	"paddw %%mm4, %%mm0            \n\t" //d1    
+	"paddw %%mm4, %%mm0            \n\t" //d1
 
 	"paddusw %%mm3, %%mm1          \n\t"
-	"psubw %%mm4, %%mm6            \n\t" //d7  
+	"psubw %%mm4, %%mm6            \n\t" //d7
 
-	// d1 d3 - - - d5 d7 -    
+	// d1 d3 - - - d5 d7 -
 	"movq 1*8+7*16(%%"REG_d"), %%mm4   \n\t"
 	"psubw %%mm7, %%mm0            \n\t"
 
@@ -1440,7 +1440,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 
 	"movq 1*8+%3, %%mm6            \n\t"
 	//paddw mm3, MM_2
-	"psraw $2, %%mm3              \n\t" //tmp7     
+	"psraw $2, %%mm3              \n\t" //tmp7
 
 	"pmulhw "MANGLE(MM_FIX_0_198912367)", %%mm2 \n\t" //-tmp4
 	"psubw %%mm3, %%mm4            \n\t"
@@ -1495,7 +1495,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"3:                    \n\t"
 	//--- non DC2
 	//psraw mm1, 2 w/o it -> offset. thr1, thr1, thr1  (actually thr1, thr1, thr1-1)
-	//psraw mm5, 2              
+	//psraw mm5, 2
 	//psraw mm0, 2
 	//psraw mm6, 2
 	"movq %%mm5, %%mm3             \n\t"
@@ -1565,7 +1565,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"paddw %%mm2, %%mm7            \n\t"
 
 	"movq %%mm3, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
-	"paddw %%mm2, %%mm0            \n\t" //'t4     
+	"paddw %%mm2, %%mm0            \n\t" //'t4
 
 	// 't4 't6 't5 - - - - 't7
 	"movq %%mm7, "DCTSIZE_S"*2*2(%%"REG_D") \n\t"
@@ -1606,13 +1606,13 @@ static void row_idct_c(DCTELEM* workspace,
     int_simd16_t z5, z10, z11, z12, z13;
     int16_t* outptr;
     DCTELEM* wsptr;
-    
+
     cnt*=4;
     wsptr = workspace;
     outptr = output_adr;
-    for (; cnt > 0; cnt--) {    
-	// Even part 
-	//Simd version reads 4x4 block and transposes it    
+    for (; cnt > 0; cnt--) {
+	// Even part
+	//Simd version reads 4x4 block and transposes it
 	tmp10 = ( wsptr[2] +  wsptr[3]);
 	tmp11 = ( wsptr[2] -  wsptr[3]);
 
@@ -1624,7 +1624,7 @@ static void row_idct_c(DCTELEM* workspace,
 	tmp1 = tmp11 + tmp12;
 	tmp2 = tmp11 - tmp12;
 
-	// Odd part 
+	// Odd part
 	//Also transpose, with previous:
 	// ---- ----      ||||
 	// ---- ---- idct ||||
@@ -1635,7 +1635,7 @@ static void row_idct_c(DCTELEM* workspace,
 	z11 = wsptr[6] + wsptr[7];
 	z12 = wsptr[6] - wsptr[7];
 
-	tmp7 = z11 + z13;   
+	tmp7 = z11 + z13;
 	tmp11 = MULTIPLY16H(z11 - z13, FIX_1_414213562);
 
 	z5 =    MULTIPLY16H(z10 + z12, FIX_1_847759065);
@@ -1657,13 +1657,13 @@ static void row_idct_c(DCTELEM* workspace,
 	outptr[7*output_stride]+= DESCALE(tmp0 - tmp7, 3); //no += ?
 	outptr++;
 
-	wsptr += DCTSIZE;       // advance pointer to next row     
+	wsptr += DCTSIZE;       // advance pointer to next row
     }
 }
 
 #else /* HAVE_MMX */
 
-static void row_idct_mmx (DCTELEM* workspace, 
+static void row_idct_mmx (DCTELEM* workspace,
 			  int16_t* output_adr,  int output_stride,  int cnt)
 {
     uint64_t __attribute__((aligned(8))) temps[4];
@@ -1728,14 +1728,14 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"movq %%mm6, 1*8+%3            \n\t" //t3
 	"punpcklwd %%mm2, %%mm3        \n\t"
 
-	//transpose 4x4    
+	//transpose 4x4
 	"movq "DCTSIZE_S"*3*2+"DCTSIZE_S"(%%"REG_S"), %%mm6 \n\t"
 	"punpckhwd %%mm2, %%mm4        \n\t"
 
 	"movq %%mm5, %%mm2             \n\t"
 	"punpcklwd %%mm6, %%mm5        \n\t"
 
-	"psubw %%mm0, %%mm7            \n\t" //t2    
+	"psubw %%mm0, %%mm7            \n\t" //t2
 	"punpckhwd %%mm6, %%mm2        \n\t"
 
 	"movq %%mm3, %%mm0             \n\t"
@@ -1749,13 +1749,13 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"punpckldq %%mm2, %%mm4        \n\t" //6
 
 	"psubw %%mm0, %%mm3            \n\t" //z10
-	"punpckhdq %%mm2, %%mm5        \n\t" //7     
+	"punpckhdq %%mm2, %%mm5        \n\t" //7
 
 	"paddw %%mm0, %%mm6            \n\t" //z13
 	"movq %%mm4, %%mm2             \n\t"
 
 	"movq %%mm3, %%mm0             \n\t"
-	"psubw %%mm5, %%mm4            \n\t" //z12    
+	"psubw %%mm5, %%mm4            \n\t" //z12
 
 	"pmulhw "MANGLE(MM_FIX_2_613125930)", %%mm0 \n\t" //-
 	"paddw %%mm4, %%mm3            \n\t"
@@ -1769,11 +1769,11 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"psubw %%mm6, %%mm2            \n\t"
 	"paddw %%mm6, %%mm5            \n\t" //t7
 
-	"pmulhw "MANGLE(MM_FIX_1_414213562)", %%mm2 \n\t" //t11    
+	"pmulhw "MANGLE(MM_FIX_1_414213562)", %%mm2 \n\t" //t11
 	"paddw %%mm3, %%mm0            \n\t" //t12
 
 	"psllw $3, %%mm0              \n\t"
-	"psubw %%mm3, %%mm4            \n\t" //t10    
+	"psubw %%mm3, %%mm4            \n\t" //t10
 
 	"movq 0*8+%3, %%mm6            \n\t"
 	"movq %%mm1, %%mm3             \n\t"
@@ -1785,7 +1785,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"paddw %%mm0, %%mm1            \n\t" //d1
 
 	"psubw %%mm0, %%mm2            \n\t" //t5
-	"psubw %%mm0, %%mm3            \n\t" //d6         
+	"psubw %%mm0, %%mm3            \n\t" //d6
 
 	"paddw %%mm2, %%mm4            \n\t" //t4
 	"movq %%mm7, %%mm0             \n\t"
@@ -1832,7 +1832,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"paddw (%%"REG_D",%%"REG_d",), %%mm3    \n\t"
 	"psraw $3, %%mm6              \n\t"
 
-	"paddw 1*8+%3, %%mm4           \n\t" //d4        
+	"paddw 1*8+%3, %%mm4           \n\t" //d4
 	"paddw %%mm2, %%mm5            \n\t"
 
 	"paddw (%%"REG_D",%%"REG_a",4), %%mm6   \n\t"
@@ -1872,13 +1872,13 @@ static void row_fdct_c(DCTELEM *data, const uint8_t *pixels, int line_size, int 
     int_simd16_t tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
     int_simd16_t tmp10, tmp11, tmp12, tmp13;
     int_simd16_t z1, z2, z3, z4, z5, z11, z13;
-    DCTELEM *dataptr;  
-  
+    DCTELEM *dataptr;
+
     cnt*=4;
-    // Pass 1: process rows. 
-  
+    // Pass 1: process rows.
+
     dataptr = data;
-    for (; cnt > 0; cnt--) {    
+    for (; cnt > 0; cnt--) {
 	tmp0 = pixels[line_size*0] + pixels[line_size*7];
 	tmp7 = pixels[line_size*0] - pixels[line_size*7];
 	tmp1 = pixels[line_size*1] + pixels[line_size*6];
@@ -1887,26 +1887,26 @@ static void row_fdct_c(DCTELEM *data, const uint8_t *pixels, int line_size, int 
 	tmp5 = pixels[line_size*2] - pixels[line_size*5];
 	tmp3 = pixels[line_size*3] + pixels[line_size*4];
 	tmp4 = pixels[line_size*3] - pixels[line_size*4];
-    
-	// Even part 
-    
-	tmp10 = tmp0 + tmp3;    
+
+	// Even part
+
+	tmp10 = tmp0 + tmp3;
 	tmp13 = tmp0 - tmp3;
 	tmp11 = tmp1 + tmp2;
 	tmp12 = tmp1 - tmp2;
-	//Even columns are written first, this leads to different order of columns 
+	//Even columns are written first, this leads to different order of columns
 	//in column_fidct(), but they are processed independently, so all ok.
 	//Later in the row_idct() columns readed at the same order.
-	dataptr[2] = tmp10 + tmp11; 
+	dataptr[2] = tmp10 + tmp11;
 	dataptr[3] = tmp10 - tmp11;
-    
-	z1 = MULTIPLY16H((tmp12 + tmp13)<<2, FIX_0_707106781);
-	dataptr[0] = tmp13 + z1;    
-	dataptr[1] = tmp13 - z1;
-    
-	// Odd part 
 
-	tmp10 = (tmp4 + tmp5) <<2;  
+	z1 = MULTIPLY16H((tmp12 + tmp13)<<2, FIX_0_707106781);
+	dataptr[0] = tmp13 + z1;
+	dataptr[1] = tmp13 - z1;
+
+	// Odd part
+
+	tmp10 = (tmp4 + tmp5) <<2;
 	tmp11 = (tmp5 + tmp6) <<2;
 	tmp12 = (tmp6 + tmp7) <<2;
 
@@ -1924,7 +1924,7 @@ static void row_fdct_c(DCTELEM *data, const uint8_t *pixels, int line_size, int 
 	dataptr[7] = z11 - z4;
 
 	pixels++;               // advance pointer to next column
-	dataptr += DCTSIZE;         
+	dataptr += DCTSIZE;
     }
 }
 
@@ -1949,7 +1949,7 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"add %%"REG_d", %%"REG_S"             \n\t"
 
 	"movq %%mm0, %%mm5             \n\t"
-	//       
+	//
 
 	"movd (%%"REG_S",%%"REG_a",4), %%mm3    \n\t" //7  ;prefetch!
 	"movq %%mm1, %%mm6             \n\t"
@@ -1991,7 +1991,7 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"psubw %%mm5, %%mm0            \n\t" //t13
 
 	"psubw %%mm2, %%mm1            \n\t"
-	"paddw %%mm2, %%mm7            \n\t" //t11    
+	"paddw %%mm2, %%mm7            \n\t" //t11
 
 	"paddw %%mm0, %%mm1            \n\t"
 	"movq %%mm7, %%mm2             \n\t"
@@ -2012,7 +2012,7 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"paddw %%mm1, %%mm0            \n\t" //d0
 	"punpckhwd %%mm6, %%mm2        \n\t"
 
-	"psubw %%mm1, %%mm5            \n\t" //d1                
+	"psubw %%mm1, %%mm5            \n\t" //d1
 	"movq %%mm0, %%mm6             \n\t"
 
 	"movq 1*8+%3, %%mm1            \n\t"
@@ -2028,16 +2028,16 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"movq %%mm6, %%mm7             \n\t"
 
 	"movq %%mm0, "DCTSIZE_S"*0*2(%%"REG_D") \n\t"
-	"punpckldq %%mm2, %%mm6        \n\t" //2     
+	"punpckldq %%mm2, %%mm6        \n\t" //2
 
 	"movq %%mm5, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
-	"punpckhdq %%mm2, %%mm7        \n\t" //3    
+	"punpckhdq %%mm2, %%mm7        \n\t" //3
 
 	"movq %%mm6, "DCTSIZE_S"*2*2(%%"REG_D") \n\t"
 	"paddw %%mm1, %%mm4            \n\t"
 
 	"movq %%mm7, "DCTSIZE_S"*3*2(%%"REG_D") \n\t"
-	"psllw $2, %%mm3              \n\t" //t10    
+	"psllw $2, %%mm3              \n\t" //t10
 
 	"movq 0*8+%3, %%mm2           \n\t"
 	"psllw $2, %%mm4              \n\t" //t11
@@ -2064,17 +2064,17 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"movq %%mm5, %%mm7             \n\t"
 
 	"paddw %%mm0, %%mm2            \n\t" //d4
-	"psubw %%mm0, %%mm6            \n\t" //d5    
+	"psubw %%mm0, %%mm6            \n\t" //d5
 
 	"movq %%mm2, %%mm4             \n\t"
-	"paddw %%mm3, %%mm1            \n\t" //z4    
+	"paddw %%mm3, %%mm1            \n\t" //z4
 
 	//transpose 4x4
 	"punpcklwd %%mm6, %%mm2        \n\t"
 	"paddw %%mm1, %%mm5            \n\t" //d6
 
 	"punpckhwd %%mm6, %%mm4        \n\t"
-	"psubw %%mm1, %%mm7            \n\t" //d7    
+	"psubw %%mm1, %%mm7            \n\t" //d7
 
 	"movq %%mm5, %%mm6             \n\t"
 	"punpcklwd %%mm7, %%mm5        \n\t"
@@ -2092,13 +2092,13 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"punpckldq %%mm6, %%mm4        \n\t" //6
 
 	"movq %%mm7, "DCTSIZE_S"*1*2+"DCTSIZE_S"(%%"REG_D") \n\t"
-	"punpckhdq %%mm6, %%mm5        \n\t" //7    
+	"punpckhdq %%mm6, %%mm5        \n\t" //7
 
 	"movq %%mm4, "DCTSIZE_S"*2*2+"DCTSIZE_S"(%%"REG_D") \n\t"
 	"add $4, %%"REG_S"               \n\t"
 
 	"movq %%mm5, "DCTSIZE_S"*3*2+"DCTSIZE_S"(%%"REG_D") \n\t"
-	"add $"DCTSIZE_S"*2*4, %%"REG_D"      \n\t" //4 rows    
+	"add $"DCTSIZE_S"*2*4, %%"REG_D"      \n\t" //4 rows
 	"dec %%"REG_c"                   \n\t"
 	"jnz 6b                  \n\t"
 

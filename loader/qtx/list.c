@@ -16,7 +16,7 @@ void* GetProcAddress(void* handle,char* func);
 
 #define __stdcall __attribute__((__stdcall__))
 #define __cdecl   __attribute__((__cdecl__))
-#define APIENTRY 
+#define APIENTRY
 
 int main(void) {
     void *handler;
@@ -51,7 +51,7 @@ int main(void) {
     desc.componentManufacturer=0;
     desc.componentFlags=0;
     desc.componentFlagsMask=0;
-    
+
     printf("Count = %ld\n",CountComponents(&desc));
 
     exit(0);

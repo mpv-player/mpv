@@ -74,7 +74,7 @@ word b;
 
 /****************/
 static word gsm_asr (a,n)
-word a; 
+word a;
 int n;
 {
         if (n >= 16) return -(a < 0);
@@ -91,7 +91,7 @@ int n;
 
 /****************/
 static word gsm_asl (a,n)
-word a; 
+word a;
 int n;
 {
         if (n >= 16) return 0;
@@ -151,7 +151,7 @@ register word   * xMc;  /* [0..12]                      IN      */
 word            mant;
 word            exp;
 register word   * xMp;  /* [0..12]                      OUT     */
-/* 
+/*
  *  This part is for decoding the RPE sequence of coded xMc[0..12]
  *  samples to obtain the xMp[0..12] array.  Table 4.6 is used to get
  *  the mantissa of xmaxc (FAC[0..7]).
@@ -161,7 +161,7 @@ register word   * xMp;  /* [0..12]                      OUT     */
         word    temp, temp1, temp2, temp3;
         longword        ltmp;
 
-        assert( mant >= 0 && mant <= 7 ); 
+        assert( mant >= 0 && mant <= 7 );
 
         temp1 = gsm_FAC[ mant ];        /* see 4.2-15 for mant */
         temp2 = gsm_sub( 6, exp );      /* see 4.2-15 for exp  */
@@ -248,7 +248,7 @@ register word 	* s;
   register longword	ltmp;	/* for GSM_ADD */
   register word		tmp;
 
-  for (k = 160; k--; s++) 
+  for (k = 160; k--; s++)
   {
     tmp = GSM_MULT_R( msr, 28180 );
     msr = GSM_ADD(*s, tmp);  	   /* Deemphasis 	     */
@@ -285,7 +285,7 @@ register word           * drp;     /* [-120..-1] IN, [-120..40] OUT */
          */
         brp = gsm_QLB[ bcr ];
 
-        /*  Computation of the reconstructed short term residual 
+        /*  Computation of the reconstructed short term residual
          *  signal drp[0..39]
          */
         assert(brp != MIN_WORD);
@@ -398,7 +398,7 @@ word    * LARpp;        /* out: decoded ..                      */
 }
 
 /* 4.2.9 */
-/* Computation of the quantized reflection coefficients 
+/* Computation of the quantized reflection coefficients
  */
 
 /* 4.2.9.1  Interpolation of the LARpp[1..8] to get the LARp[1..8]
@@ -564,7 +564,7 @@ word		*s;		/* [0..159]		OUT 	*/
   word		erp[40], wt[160];
   word		*drp = S->dp0 + 120;
 
-  for (j=0; j <= 3; j++, xmaxcr++, bcr++, Ncr++, Mcr++, xMcr += 13) 
+  for (j=0; j <= 3; j++, xmaxcr++, bcr++, Ncr++, Mcr++, xMcr += 13)
   {
     Gsm_RPE_Decoding( S, *xmaxcr, *Mcr, xMcr, erp );
     Gsm_Long_Term_Synthesis_Filtering( S, *Ncr, *bcr, erp, drp );
@@ -583,7 +583,7 @@ word		*s;		/* [0..159]		OUT 	*/
  ****-------------------------------------------------------------------****/
 void XA_MSGSM_Decoder(unsigned char *ibuf,unsigned short *obuf)
 { word sr;
-  word  LARc[8], Nc[4], Mc[4], bc[4], xmaxc[4], xmc[13*4];	
+  word  LARc[8], Nc[4], Mc[4], bc[4], xmaxc[4], xmc[13*4];
 
   sr = *ibuf++;
 
@@ -773,7 +773,7 @@ void XA_MSGSM_Decoder(unsigned char *ibuf,unsigned short *obuf)
   xmaxc[2] = sr & 0x3f;  sr >>= 6;
   xmc[26] = sr & 0x7;  sr >>= 3;
   xmc[27] = sr & 0x7;  sr >>= 3;
-  sr |= (word)*ibuf++ << 1;	
+  sr |= (word)*ibuf++ << 1;
   xmc[28] = sr & 0x7;  sr >>= 3;
   xmc[29] = sr & 0x7;  sr >>= 3;
   xmc[30] = sr & 0x7;  sr >>= 3;
@@ -790,7 +790,7 @@ void XA_MSGSM_Decoder(unsigned char *ibuf,unsigned short *obuf)
   xmc[38] = sr & 0x7;  sr >>= 3;
   sr = *ibuf++;
   Nc[3] = sr & 0x7f;  sr >>= 7;
-  sr |= (word)*ibuf++ << 1;		
+  sr |= (word)*ibuf++ << 1;
   bc[3] = sr & 0x3;  sr >>= 2;
   Mc[3] = sr & 0x3;  sr >>= 2;
   sr |= (word)*ibuf++ << 5;
@@ -816,7 +816,7 @@ void XA_MSGSM_Decoder(unsigned char *ibuf,unsigned short *obuf)
   GSM_Decode(&gsm_state, LARc, Nc, bc, Mc, xmaxc, xmc, &obuf[160]);
 
   /* Return number of source bytes consumed and output samples produced */
-//  *icnt = 65;		
+//  *icnt = 65;
 //  *ocnt = 320;
   return;
 }
@@ -824,7 +824,7 @@ void XA_MSGSM_Decoder(unsigned char *ibuf,unsigned short *obuf)
 #define GSM_MAGIC 0xd
 
 void XA_GSM_Decoder(unsigned char *ibuf,unsigned short *obuf)
-{ word  LARc[8], Nc[4], Mc[4], bc[4], xmaxc[4], xmc[13*4];	
+{ word  LARc[8], Nc[4], Mc[4], bc[4], xmaxc[4], xmc[13*4];
 
 	/* Sanity */
   if (((*ibuf >> 4) & 0x0F) != GSM_MAGIC)

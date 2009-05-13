@@ -121,7 +121,7 @@ const stream_info_t stream_info_tv = {
   "tv",
   "Benjamin Zores, Albeu",
   "",
-  tv_stream_open, 			
+  tv_stream_open,
   { "tv", NULL },
   &stream_opts,
   1

@@ -339,7 +339,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
             {
                 if (part != inContent)
                     break;
-                switch (button) 
+                switch (button)
                 {
                 case kEventMouseButtonPrimary:
                     mplayer_put_key(MOUSE_BTN0);

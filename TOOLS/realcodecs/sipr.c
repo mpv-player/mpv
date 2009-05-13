@@ -206,7 +206,7 @@ void hexdump(void *pos, int len) {
 	int lines=(len+15)>>4;
 	while(lines--) {
 		int len1=len, i;
-		fprintf(stderr, "%0x  ", cpos); 
+		fprintf(stderr, "%0x  ", cpos);
 		cpos1=cpos;
 		for (i=0;i<16;i++) {
 			if (len1>0) {
@@ -226,7 +226,7 @@ void hexdump(void *pos, int len) {
 			}
 			len--;
 		}
-		fputs("\n", stderr);		
+		fputs("\n", stderr);
 	}
 	fputc('\n', stderr);
 }
@@ -246,7 +246,7 @@ static int pkno=0;
 ulong RADecode(ulong p1,ulong p2,ulong p3,ulong p4,ulong* p5,ulong p6) {
 	ulong result;
 	int x,y;
-	
+
 	fprintf(stderr, "RADecode(ulong ctx=0x%0lx, ", p1);
 	fprintf(stderr, "ulong src=0x%0lx,\n", p2);
 	fprintf(stderr, "ulong len=0x%0lx,", p3);
@@ -375,7 +375,7 @@ ulong RAInitDecoder(ulong p1,ulong p2) {
 	memset(temp2,0x77,256);
 	memcpy(temp2,temp[6],16);
 	temp[6]=temp2;
-	
+
 	result=(*raInitDecoder)(p1,temp);
 	hexdump((void*)temp[6], 32);
 #endif
@@ -445,7 +445,7 @@ ulong RASetFlavor(ulong p1,ulong p2,ulong p3) {
 
 	fputs("######################## FLAVOR PROPERTIES ###################\n\n", stderr);
 #endif
-	
+
 	return result;
 }
 

@@ -58,17 +58,17 @@ mf_t* open_mf(char * filename){
  mf=calloc( 1,sizeof( mf_t ) );
 
  if( filename[0] == '@' )
-  { 
+  {
    FILE *lst_f=fopen(filename + 1,"r");
-   if ( lst_f ) 
+   if ( lst_f )
     {
      fname=malloc( 255 );
-     while ( fgets( fname,255,lst_f ) ) 
+     while ( fgets( fname,255,lst_f ) )
       {
        /* remove spaces from end of fname */
        char *t=fname + strlen( fname ) - 1;
        while ( t > fname && isspace( *t ) ) *(t--)=0;
-       if ( stat( fname,&fs ) ) 
+       if ( stat( fname,&fs ) )
         {
          mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
         }
@@ -80,7 +80,7 @@ mf_t* open_mf(char * filename){
         }
       }
       fclose( lst_f );
-	     
+
       mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
       goto exit_mf;
     }
@@ -88,12 +88,12 @@ mf_t* open_mf(char * filename){
   }
 
  if( strchr( filename,',') )
-  { 
+  {
    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] filelist: %s\n",filename );
- 
+
    while ( ( fname=strsep( &filename,"," ) ) )
     {
-     if ( stat( fname,&fs ) ) 
+     if ( stat( fname,&fs ) )
       {
        mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
       }
@@ -106,15 +106,15 @@ mf_t* open_mf(char * filename){
       }
     }
    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
- 
+
    goto exit_mf;
-  } 
+  }
 
  fname=malloc( strlen( filename ) + 32 );
 
  if ( !strchr( filename,'%' ) )
   {
-   strcpy( fname,filename ); 
+   strcpy( fname,filename );
    if ( !strchr( filename,'*' ) ) strcat( fname,"*" );
 
    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] search expr: %s\n",fname );
@@ -139,11 +139,11 @@ mf_t* open_mf(char * filename){
   }
 
  mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] search expr: %s\n",filename );
- 
+
  while ( error_count < 5 )
   {
    sprintf( fname,filename,count++ );
-   if ( stat( fname,&fs ) ) 
+   if ( stat( fname,&fs ) )
     {
      error_count++;
      mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );

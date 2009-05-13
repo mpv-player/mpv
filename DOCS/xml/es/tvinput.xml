@@ -60,9 +60,9 @@ resultante deberían ser divisibles por 16.
 <para>
 Si captura el vídeo con una resolución vertical más grande que la mitad de
 la resolución total (por ejemplo: 288 para PAL o 240 para NTSC), asegúrese que
-activó el desentrelazado. De otro modo obtendrá una película la cual esta 
+activó el desentrelazado. De otro modo obtendrá una película la cual esta
 distorsionada durante las escenas con movimientos rápidos y el controlador de tasa
-de bits probablemente no podrá ser capaz de retener la cantidad de información necesaria 
+de bits probablemente no podrá ser capaz de retener la cantidad de información necesaria
 ya que el entrelazado produce una gran cantidad de detalles y por lo tanto consume
 una gran cantidad de ancho de banda. Puede activar el desentrelazado con
 la opción <option>-vf pp=DEINT_TYPE</option>. Normalmente
@@ -75,11 +75,11 @@ personales. Vea otros algoritmos de desentrelazado en el manual y pruebelos.
 <para>
 Corte el área no usada. Cuando captura vídeo, las áreas en los bordes normalmente
 son negras y contienen algo de ruido. Esto también consume un montón de ancho
-de banda innecesario. Más precisamente no son las áreas en negro por si mismas 
+de banda innecesario. Más precisamente no son las áreas en negro por si mismas
 pero si las bruscas transcisiones entre el negro y la imagen de vídeo brillante
 pero por ahora eso no es importante por ahora. Antes de empezar a capturar,
 ajuste los argumentos de la opción <option>crop</option> de tal manera que todo
-lo negro quede afuera. Nuevamente, no se olvide de mantener las dimensiones 
+lo negro quede afuera. Nuevamente, no se olvide de mantener las dimensiones
 de manera razonables.
 </para>
 </listitem>
@@ -88,7 +88,7 @@ de manera razonables.
 <para>
 Observe la carga de CPU. La mayoría del tiempo no debería cruzar el límite
 del 90%. Si tiene un gran buffer de captura, <application>MEncoder</application>
-puede sobrevivir una sobrecarga por unos pocos segundos y nada más. Es mejor apagar 
+puede sobrevivir una sobrecarga por unos pocos segundos y nada más. Es mejor apagar
 los salvadores de pantalla 3D OpenGL y ese tipo de cosas.
 </para>
 </listitem>
@@ -97,7 +97,7 @@ los salvadores de pantalla 3D OpenGL y ese tipo de cosas.
 <para>
 No se meta con el reloj del sistema. <application>MEncoder</application> usa
 el reloj del sistema para mantener sincronía entre Audio y Vídeo. Si ajusta
-el reloj del sistema (particularmente volviendo hacia atrás en el tiempo), 
+el reloj del sistema (particularmente volviendo hacia atrás en el tiempo),
 <application>MEncoder</application> se confunde y pierde cuadros. Esto es un
 problema importante si está conectado a una red y corre algún tipo de software
 de sincronización como NTP. Debería desactivar NTP durante el proceso de captura
@@ -124,7 +124,7 @@ masivo de ciclos de CPU.
 <listitem>
 <para>
 Para especificar el espacio de colores I420 (<option>outfmt=i420</option>), deberá
-agregar una opción <option>-vc rawi420</option> debido a un conflicto de fourcc con 
+agregar una opción <option>-vc rawi420</option> debido a un conflicto de fourcc con
 un codec de vídeo de Intel Indeo.
 </para>
 </listitem>

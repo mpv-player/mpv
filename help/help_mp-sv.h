@@ -26,7 +26,7 @@ static const char help_text[]=
 " -vid x -aid y       välj video (x) och audio (y) ström att spela\n"
 " -fps x -srate y     ändra video (x fps) och audio (y Hz) frekvens\n"
 " -pp <kvalité>       aktivera postredigeringsfilter (detaljer på manualsidan)\n"
-" -framedrop          aktivera reducering av antalet bildrutor (för långsamma maskiner)\n" 
+" -framedrop          aktivera reducering av antalet bildrutor (för långsamma maskiner)\n"
 "\n"
 "Grundläggande navigering: (komplett lista återfinns på manualsidan, läs även input.conf)\n"
 " <-  eller  ->       sök bakåt/framåt 10 sekunder\n"
@@ -415,7 +415,7 @@ static const char help_text[]=
 #define MSGTR_OutdatedCodecsConf "Denna codecs.conf är för gammal och inkompatibel med denna MPlayer version!" // release is more like 'släpp', sounds wrong, using version instead
 
 // fifo.c
-#define MSGTR_CannotMakePipe "Kan inte skapa en PIPE!\n" // FIXME make? 
+#define MSGTR_CannotMakePipe "Kan inte skapa en PIPE!\n" // FIXME make?
 
 // m_config.c
 #define MSGTR_SaveSlotTooOld "Allt för gammal sparningsslottar funna från nivå %d: %d !!!\n" // FIXME slot?
@@ -573,7 +573,7 @@ static const char help_text[]=
 #define MSGTR_FontSelect "Välj font..."
 // NOTE: If you change MSGTR_PlayList pleace see if it still fits MSGTR_MENU_PlayList
 #define MSGTR_PlayList "Spellista"
-#define MSGTR_Equalizer "Equalizer" 
+#define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Skinläsare"
 #define MSGTR_Network "Nätverksströmning..."
 // NOTE: If you change MSGTR_Preferences pleace see if it still fits MSGTR_MENU_Preferences
@@ -852,7 +852,7 @@ static const char help_text[]=
 
 // ======================= AO Audio Output drivers ========================
 
-// libao2 
+// libao2
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed "audio_out: alsa9- samt alsa1xmodulerna har blivit borttagna, använd -ao istället.\n"
@@ -881,7 +881,7 @@ static const char help_text[]=
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound misslyckades: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latency: [server: %0.2fs, net: %0.2fs] (adjust %0.2fs)\n" // FIXME translate?
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] misslyckades att öppna uppspelningsström: %s\n" 
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] misslyckades att öppna uppspelningsström: %s\n"
 
 // ao_mpegpes.c
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB-audio-sättningsmixer misslyckades: %s\n" // set ~= sättning?
@@ -929,7 +929,7 @@ static const char help_text[]=
 #define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: önskat format: %d Hz, %d kanaler, %s\n"
 #define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: inga ljudkort funna.\n"
 #define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: icke godkänt format (%s) önskat - ut deaktiverat.\n" // FIXME output -> ut here?
-#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: uppspelningsöppningsfel: %s\n" 
+#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: uppspelningsöppningsfel: %s\n"
 #define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: pcm-infofel: %s\n"
 #define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d ljurtkort funna, använder: %s\n"
 #define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: pcm-kanalinfofel: %s\n"

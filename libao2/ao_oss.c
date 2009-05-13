@@ -48,7 +48,7 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
 	"OSS/ioctl audio output",
 	"oss",
@@ -199,7 +199,7 @@ static int control(int cmd,void *arg){
 
 	    if(ao_data.format == AF_FORMAT_AC3)
 		return CONTROL_TRUE;
-    
+
 	    if ((fd = open(oss_mixer_device, O_RDONLY)) > 0)
 	    {
 		ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
@@ -260,17 +260,17 @@ static int init(int rate,int channels,int format,int flags){
     oss_mixer_device=mdev;
   else
     oss_mixer_device=PATH_DEV_MIXER;
-  
+
   if(mchan){
     int fd, devs, i;
-    
+
     if ((fd = open(oss_mixer_device, O_RDONLY)) == -1){
       mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantOpenMixer,
         oss_mixer_device, strerror(errno));
     }else{
       ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
       close(fd);
-      
+
       for (i=0; i<SOUND_MIXER_NRDEVICES; i++){
         if(!strcasecmp(mixer_channels[i], mchan)){
           if(!(devs & (1 << i))){
@@ -308,19 +308,19 @@ static int init(int rate,int channels,int format,int flags){
   if(fcntl(audio_fd, F_SETFL, 0) < 0) {
    mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_OSS_CantMakeFd, strerror(errno));
    return 0;
-  }  
+  }
 #endif
 
 #if defined(FD_CLOEXEC) && defined(F_SETFD)
   fcntl(audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
-  
+
   if(format == AF_FORMAT_AC3) {
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   }
 
-ac3_retry:  
+ac3_retry:
   ao_data.format=format;
   oss_format=format2oss(format);
   if (oss_format == -1) {
@@ -348,7 +348,7 @@ ac3_retry:
 
   mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
     af_fmt2str_short(ao_data.format), af_fmt2str_short(format));
-  
+
   ao_data.channels = channels;
   if(format != AF_FORMAT_AC3) {
     // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it

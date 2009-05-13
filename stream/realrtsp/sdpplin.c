@@ -25,7 +25,7 @@
  * sdp/sdpplin parser.
  *
  */
- 
+
 #include "config.h"
 #include "stream/librtsp/rtsp.h"
 #include "sdpplin.h"
@@ -62,7 +62,7 @@ static char *b64_decode(const char *in, char *out, int *size)
   dtable['='] = 0;
 
   k=0;
-  
+
   /*CONSTANTCONDITION*/
   for (j=0; j<strlen(in); j+=4)
   {
@@ -121,7 +121,7 @@ static int filter(const char *in, const char *filter, char **out) {
 
     return len-flen;
   }
-  
+
   return 0;
 }
 static sdpplin_stream_t *sdpplin_parse_stream(char **data) {
@@ -131,7 +131,7 @@ static sdpplin_stream_t *sdpplin_parse_stream(char **data) {
   char      *decoded=xbuffer_init(32);
   int       handled;
   int       got_mimetype;
-    
+
   if (filter(*data, "m=", &buf)) {
     desc->id = strdup(buf);
   } else
@@ -156,7 +156,7 @@ static sdpplin_stream_t *sdpplin_parse_stream(char **data) {
 #endif
 
     handled=0;
-    
+
     if(filter(*data,"a=control:streamid=",&buf)) {
       desc->stream_id=atoi(buf);
       handled=1;
@@ -178,7 +178,7 @@ static sdpplin_stream_t *sdpplin_parse_stream(char **data) {
       handled=1;
       *data=nl(*data);
     }
-    
+
     if(filter(*data,"a=StartTime:integer;",&buf)) {
       desc->start_time=atoi(buf);
       handled=1;
@@ -222,7 +222,7 @@ static sdpplin_stream_t *sdpplin_parse_stream(char **data) {
       printf("mlti_data_size: %i\n", desc->mlti_data_size);
 #endif
     }
-    
+
     if(filter(*data,"a=ASMRuleBook:string;",&buf)) {
       desc->asm_rule_book=strdup(buf);
       handled=1;
@@ -250,7 +250,7 @@ static sdpplin_stream_t *sdpplin_parse_stream(char **data) {
 
   xbuffer_free(buf);
   xbuffer_free(decoded);
-  
+
   return desc;
 }
 
@@ -273,7 +273,7 @@ sdpplin_t *sdpplin_parse(char *data) {
 #endif
 
     handled=0;
-    
+
     if (filter(data, "m=", &buf)) {
       sdpplin_stream_t *stream=sdpplin_parse_stream(&data);
 #ifdef LOG
@@ -306,28 +306,28 @@ sdpplin_t *sdpplin_parse(char *data) {
       handled=1;
       data=nl(data);
     }
-    
+
     if(filter(data,"a=Author:buffer;",&buf)) {
       decoded=b64_decode(buf, decoded, &len);
       desc->author=strdup(decoded);
       handled=1;
       data=nl(data);
     }
-    
+
     if(filter(data,"a=Copyright:buffer;",&buf)) {
       decoded=b64_decode(buf, decoded, &len);
       desc->copyright=strdup(decoded);
       handled=1;
       data=nl(data);
     }
-    
+
     if(filter(data,"a=Abstract:buffer;",&buf)) {
       decoded=b64_decode(buf, decoded, &len);
       desc->abstract=strdup(decoded);
       handled=1;
       data=nl(data);
     }
-    
+
     if(filter(data,"a=StreamCount:integer;",&buf)) {
       desc->stream_count=(unsigned int)atoi(buf);
       desc->stream=calloc(desc->stream_count, sizeof(sdpplin_stream_t*));
@@ -355,7 +355,7 @@ sdpplin_t *sdpplin_parse(char *data) {
 
   xbuffer_free(buf);
   xbuffer_free(decoded);
-  
+
   return desc;
 }
 

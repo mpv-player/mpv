@@ -26,7 +26,7 @@
  * @todo use QP to decide filter strength
  * @todo wavelet normalization / least squares optimal signal vs. noise thresholds
  */
- 
+
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>

@@ -247,9 +247,9 @@ while(1){
       *(uint32_t *)s->dwChunkId = stream_read_dword_le(demuxer->stream);
       stream_read(demuxer->stream, (char *)s->dwReserved, 3*4);
       memset(s->dwReserved, 0, 3*4);
-	  
+
       print_avisuperindex_chunk(s,MSGL_V);
-      
+
       // Check and fix this useless crap
       if(s->wLongsPerEntry != sizeof (avisuperindex_entry)/4) {
           mp_msg (MSGT_HEADER, MSGL_WARN, "Broken super index chunk size: %u\n",s->wLongsPerEntry);
@@ -269,7 +269,7 @@ while(1){
 	  s->aIndex[i].qwOffset = stream_read_qword_le(demuxer->stream);
 	  s->aIndex[i].dwSize = stream_read_dword_le(demuxer->stream);
 	  s->aIndex[i].dwDuration = stream_read_dword_le(demuxer->stream);
-	  mp_msg (MSGT_HEADER, MSGL_V, "ODML (%.4s): [%d] 0x%016"PRIx64" 0x%04x %u\n", 
+	  mp_msg (MSGT_HEADER, MSGL_V, "ODML (%.4s): [%d] 0x%016"PRIx64" 0x%04x %u\n",
 		  (s->dwChunkId), i,
 		  (uint64_t)s->aIndex[i].qwOffset, s->aIndex[i].dwSize, s->aIndex[i].dwDuration);
       }
@@ -459,7 +459,7 @@ while(1){
   } else
   if(chunksize>0) stream_skip(demuxer->stream,chunksize); else
   if((int)chunksize<0) mp_msg(MSGT_HEADER,MSGL_WARN,"chunksize=%u  (id=%.4s)\n",chunksize,(char *) &id);
-  
+
 }
 
 if (priv->suidx_size > 0 && priv->idx_size == 0) {
@@ -504,7 +504,7 @@ if (priv->isodml && (index_mode==-1 || index_mode==0 || index_mode==1)) {
 	    print_avistdindex_chunk(&cx->stdidx[j],MSGL_V);
 	    priv->idx_size += cx->stdidx[j].nEntriesInUse;
 	    cx->stdidx[j].aIndex = malloc(cx->stdidx[j].nEntriesInUse*sizeof(avistdindex_entry));
-	    stream_read(demuxer->stream, (char *)cx->stdidx[j].aIndex, 
+	    stream_read(demuxer->stream, (char *)cx->stdidx[j].aIndex,
 		    cx->stdidx[j].nEntriesInUse*sizeof(avistdindex_entry));
 	    for (k=0;k<cx->stdidx[j].nEntriesInUse; k++)
 		le2me_AVISTDIDXENTRY(&cx->stdidx[j].aIndex[k]);
@@ -635,7 +635,7 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
   // build index for file:
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
-  
+
   priv->idx_pos=0;
   priv->idx_size=0;
   priv->idx=NULL;
@@ -669,7 +669,7 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
     idx->dwFlags|=(demuxer->filepos>>16)&0xffff0000U;
     idx->dwChunkOffset=(unsigned long)demuxer->filepos;
     idx->dwChunkLength=len;
-    
+
     c=stream_read_dword(demuxer->stream);
 
     if(!len) idx->dwFlags&=~AVIIF_KEYFRAME;

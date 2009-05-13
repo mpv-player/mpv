@@ -105,10 +105,10 @@ static int framenum = 0;
  *                  returns, everything went well.
  */
 
-static void jpeg_mkdir(char *buf, int verbose) { 
+static void jpeg_mkdir(char *buf, int verbose) {
     struct stat stat_p;
 
-#ifndef __MINGW32__	
+#ifndef __MINGW32__
     if ( mkdir(buf, 0755) < 0 ) {
 #else
     if ( mkdir(buf) < 0 ) {
@@ -133,7 +133,7 @@ static void jpeg_mkdir(char *buf, int verbose) {
                             buf, MSGTR_VO_DirExistsButNotWritable);
                     exit_player(MSGTR_Exit_error);
                 }
-                
+
                 mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
                         buf, MSGTR_VO_DirExistsAndIsWritable);
                 break;
@@ -145,7 +145,7 @@ static void jpeg_mkdir(char *buf, int verbose) {
                         buf, MSGTR_VO_CantCreateDirectory);
                 exit_player(MSGTR_Exit_error);
         } /* end switch */
-    } else if ( verbose ) {  
+    } else if ( verbose ) {
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
                 buf, MSGTR_VO_DirectoryCreateSuccess);
     } /* end if */
@@ -160,9 +160,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     char buf[BUFLENGTH];
 
     /* Create outdir. */
-    
+
     snprintf(buf, BUFLENGTH, "%s", jpeg_outdir);
- 
+
     jpeg_mkdir(buf, 1); /* This function only returns if creation was
                            successful. If not, the player will exit. */
 
@@ -171,7 +171,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     /* Save for JFIF-Header PAR */
     image_d_width = d_width;
     image_d_height = d_height;
-    
+
     return 0;
 }
 
@@ -185,7 +185,7 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
     JSAMPROW row_pointer[1];
     int row_stride;
 
-    if ( !buffer ) return 1; 
+    if ( !buffer ) return 1;
     if ( (outfile = fopen(name, "wb") ) == NULL ) {
         mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s\n", info.short_name,
                 MSGTR_VO_CantCreateFile);
@@ -194,11 +194,11 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
                 strerror(errno) );
         exit_player(MSGTR_Exit_error);
     }
- 
+
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
     jpeg_stdio_dest(&cinfo, outfile);
-    
+
     cinfo.image_width = image_width;
     cinfo.image_height = image_height;
     cinfo.input_components = 3;
@@ -223,9 +223,9 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
     if ( jpeg_progressive_mode ) {
         jpeg_simple_progression(&cinfo);
     }
-    
+
     jpeg_start_compress(&cinfo, TRUE);
-    
+
     row_stride = image_width * 3;
     while (cinfo.next_scanline < cinfo.image_height) {
         row_pointer[0] = &buffer[cinfo.next_scanline * row_stride];
@@ -235,7 +235,7 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
     jpeg_finish_compress(&cinfo);
     fclose(outfile);
     jpeg_destroy_compress(&cinfo);
-    
+
     return 0;
 }
 
@@ -262,15 +262,15 @@ static int draw_frame(uint8_t *src[])
         jpeg_mkdir(buf, 0); /* This function only returns if creation was
                                successful. If not, the player will exit. */
     }
-    
+
     framenum++;
 
     /* snprintf the full pathname of the outputfile */
     snprintf(buf, BUFLENGTH, "%s/%s/%08d.jpg", jpeg_outdir, subdirname,
                                                                     framenum);
-    
+
     framecounter++;
-    
+
     return jpeg_write(buf, src[0]);
 }
 
@@ -301,7 +301,7 @@ static int query_format(uint32_t format)
     if (format == IMGFMT_RGB24) {
         return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW;
     }
-    
+
     return 0;
 }
 

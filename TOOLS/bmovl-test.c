@@ -15,10 +15,10 @@ blit(int fifo, unsigned char *bitmap, int width, int height,
 {
 	char str[100];
 	int  nbytes;
-	
+
 	sprintf(str, "RGBA32 %d %d %d %d %d %d\n",
 	        width, height, xpos, ypos, alpha, clear);
-	
+
 	if(DEBUG) printf("Sending %s", str);
 
 	write(fifo, str, strlen(str));
@@ -33,7 +33,7 @@ set_alpha(int fifo, int width, int height, int xpos, int ypos, int alpha) {
 
 	sprintf(str, "ALPHA %d %d %d %d %d\n",
 	        width, height, xpos, ypos, alpha);
-	
+
 	if(DEBUG) printf("Sending %s", str);
 
 	write(fifo, str, strlen(str));
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 	for(i=-255; i <= 0; i++)
 		set_alpha(fifo, image->w, image->h,
 		          (width/2)-(image->w/2), (height/2)-(image->h/2), i);
-	
+
 
 	// Clean up
 	free(bitmap);

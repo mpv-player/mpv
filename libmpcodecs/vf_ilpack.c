@@ -71,7 +71,7 @@ static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm6, %%mm4 \n\t"
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
-		
+
 		"add $8, %0 \n\t"
 		"add $4, %1 \n\t"
 		"add $4, %2 \n\t"
@@ -81,7 +81,7 @@ static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 		"decl %4 \n\t"
 		"jnz 1b \n\t"
 		"emms \n\t"
-		: 
+		:
 		: "r" (y), "r" (u), "r" (v), "r" (dst), "r" (w/8)
 		: "memory"
 		);
@@ -100,12 +100,12 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 		"movl (%%"REG_d"), %%"REG_d" \n\t"
 #endif
 		"pxor %%mm0, %%mm0 \n\t"
-		
+
 		ASMALIGN(4)
 		".Lli0: \n\t"
 		"movq (%%"REG_S"), %%mm1 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"
-		
+
 		"movq (%%"REG_a",%%"REG_d",2), %%mm4 \n\t"
 		"movq (%%"REG_b",%%"REG_BP",2), %%mm6 \n\t"
 		"punpcklbw %%mm0, %%mm4 \n\t"
@@ -135,13 +135,13 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm6, %%mm4 \n\t"
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
-		
+
 		"movq %%mm1, (%%"REG_D") \n\t"
 		"movq %%mm2, 8(%%"REG_D") \n\t"
-		
+
 		"movq 8(%%"REG_S"), %%mm1 \n\t"
 		"movq 8(%%"REG_S"), %%mm2 \n\t"
-		
+
 		"movq (%%"REG_a",%%"REG_d",2), %%mm4 \n\t"
 		"movq (%%"REG_b",%%"REG_BP",2), %%mm6 \n\t"
 		"punpckhbw %%mm0, %%mm4 \n\t"
@@ -171,20 +171,20 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm6, %%mm4 \n\t"
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
-		
+
 		"add $16, %%"REG_S" \n\t"
 		"add $8, %%"REG_a" \n\t"
 		"add $8, %%"REG_b" \n\t"
-		
+
 		"movq %%mm1, 16(%%"REG_D") \n\t"
 		"movq %%mm2, 24(%%"REG_D") \n\t"
 		"add $32, %%"REG_D" \n\t"
-		
+
 		"decl %%ecx \n\t"
 		"jnz .Lli0 \n\t"
 		"emms \n\t"
 		"pop %%"REG_BP" \n\t"
-		: 
+		:
 		: "S" (y), "D" (dst), "a" (u), "b" (v), "c" (w/16),
 #if ARCH_X86_64
 		"d" ((x86_reg)us), "r" ((x86_reg)vs)
@@ -208,12 +208,12 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 		"movl (%%"REG_d"), %%"REG_d" \n\t"
 #endif
 		"pxor %%mm0, %%mm0 \n\t"
-		
+
 		ASMALIGN(4)
 		".Lli1: \n\t"
 		"movq (%%"REG_S"), %%mm1 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"
-		
+
 		"movq (%%"REG_a",%%"REG_d",2), %%mm4 \n\t"
 		"movq (%%"REG_b",%%"REG_BP",2), %%mm6 \n\t"
 		"punpcklbw %%mm0, %%mm4 \n\t"
@@ -245,13 +245,13 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm6, %%mm4 \n\t"
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
-		
+
 		"movq %%mm1, (%%"REG_D") \n\t"
 		"movq %%mm2, 8(%%"REG_D") \n\t"
-		
+
 		"movq 8(%%"REG_S"), %%mm1 \n\t"
 		"movq 8(%%"REG_S"), %%mm2 \n\t"
-		
+
 		"movq (%%"REG_a",%%"REG_d",2), %%mm4 \n\t"
 		"movq (%%"REG_b",%%"REG_BP",2), %%mm6 \n\t"
 		"punpckhbw %%mm0, %%mm4 \n\t"
@@ -283,20 +283,20 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm6, %%mm4 \n\t"
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
-		
+
 		"add $16, %%"REG_S" \n\t"
 		"add $8, %%"REG_a" \n\t"
 		"add $8, %%"REG_b" \n\t"
-		
+
 		"movq %%mm1, 16(%%"REG_D") \n\t"
 		"movq %%mm2, 24(%%"REG_D") \n\t"
 		"add $32, %%"REG_D" \n\t"
-		
+
 		"decl %%ecx \n\t"
 		"jnz .Lli1 \n\t"
 		"emms \n\t"
 		"pop %%"REG_BP" \n\t"
-		: 
+		:
 		: "S" (y), "D" (dst), "a" (u), "b" (v), "c" (w/16),
 #if ARCH_X86_64
 		"d" ((x86_reg)us), "r" ((x86_reg)vs)
@@ -392,7 +392,7 @@ static int open(vf_instance_t *vf, char* args)
 	vf->priv = calloc(1, sizeof(struct vf_priv_s));
 	vf->priv->mode = 1;
 	if (args) sscanf(args, "%d", &vf->priv->mode);
-	
+
 	pack_nn = (pack_func_t *)pack_nn_C;
 	pack_li_0 = pack_li_0_C;
 	pack_li_1 = pack_li_1_C;
@@ -417,7 +417,7 @@ static int open(vf_instance_t *vf, char* args)
 		vf->priv->pack[1] = pack_li_1;
 		break;
 	}
-	
+
 	return 1;
 }
 

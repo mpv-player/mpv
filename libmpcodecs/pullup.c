@@ -18,9 +18,9 @@ static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"movl $4, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
-		
+
 		"1: \n\t"
-		
+
 		"movq (%%"REG_S"), %%mm0 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"
 		"add  %%"REG_a", %%"REG_S" \n\t"
@@ -38,7 +38,7 @@ static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"paddw %%mm1, %%mm4 \n\t"
 		"paddw %%mm2, %%mm4 \n\t"
 		"paddw %%mm3, %%mm4 \n\t"
-		
+
 		"decl %%ecx \n\t"
 		"jnz 1b \n\t"
 
@@ -66,7 +66,7 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"pxor %%mm6, %%mm6 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
 		"sub  %%"REG_a", %%"REG_D" \n\t"
-		
+
 		"2: \n\t"
 
 		"movq (%%"REG_D"), %%mm0 \n\t"
@@ -96,7 +96,7 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"psubusw %%mm2, %%mm1 \n\t"
 		"paddw %%mm0, %%mm6 \n\t"
 		"paddw %%mm1, %%mm6 \n\t"
-		
+
 		"movq (%%"REG_D",%%"REG_a"), %%mm0 \n\t"
 		"movq (%%"REG_S"), %%mm1 \n\t"
 		"punpcklbw %%mm7, %%mm0 \n\t"
@@ -110,7 +110,7 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"psubusw %%mm2, %%mm1 \n\t"
 		"paddw %%mm0, %%mm6 \n\t"
 		"paddw %%mm1, %%mm6 \n\t"
-		
+
 		"movq (%%"REG_D",%%"REG_a"), %%mm0 \n\t"
 		"movq (%%"REG_S"), %%mm1 \n\t"
 		"punpckhbw %%mm7, %%mm0 \n\t"
@@ -129,7 +129,7 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"add  %%"REG_a", %%"REG_D" \n\t"
 		"decl %%ecx \n\t"
 		"jnz 2b \n\t"
-		
+
 		"movq %%mm6, %%mm5 \n\t"
 		"punpcklwd %%mm7, %%mm6 \n\t"
 		"punpckhwd %%mm7, %%mm5 \n\t"
@@ -138,7 +138,7 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"psrlq $32, %%mm5 \n\t"
 		"movd %%mm5, %%edx \n\t"
 		"addl %%edx, %%eax \n\t"
-		
+
 		"emms \n\t"
 		: "=a" (ret)
 		: "S" (a), "D" (b), "a" (s)
@@ -154,9 +154,9 @@ static int var_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"movl $3, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
-		
+
 		"1: \n\t"
-		
+
 		"movq (%%"REG_S"), %%mm0 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"
 		"movq (%%"REG_S",%%"REG_a"), %%mm1 \n\t"
@@ -173,7 +173,7 @@ static int var_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"paddw %%mm1, %%mm4 \n\t"
 		"paddw %%mm2, %%mm4 \n\t"
 		"paddw %%mm3, %%mm4 \n\t"
-		
+
 		"decl %%ecx \n\t"
 		"jnz 1b \n\t"
 
@@ -297,7 +297,7 @@ struct pullup_buffer *pullup_get_buffer(struct pullup_context *c, int parity)
 		alloc_buffer(c, c->last->buffer);
 		return pullup_lock_buffer(c->last->buffer, parity);
 	}
-	
+
 	/* Prefer a buffer with both fields open */
 	for (i = 0; i < c->nbuffers; i++) {
 		if (c->buffers[i].lock[0]) continue;
@@ -307,7 +307,7 @@ struct pullup_buffer *pullup_get_buffer(struct pullup_context *c, int parity)
 	}
 
 	if (parity == 2) return 0;
-	
+
 	/* Search for any half-free buffer */
 	for (i = 0; i < c->nbuffers; i++) {
 		if (((parity+1) & 1) && c->buffers[i].lock[0]) continue;
@@ -315,7 +315,7 @@ struct pullup_buffer *pullup_get_buffer(struct pullup_context *c, int parity)
 		alloc_buffer(c, &c->buffers[i]);
 		return pullup_lock_buffer(&c->buffers[i], parity);
 	}
-	
+
 	return 0;
 }
 
@@ -399,10 +399,10 @@ static void check_field_queue(struct pullup_context *c)
 void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int parity)
 {
 	struct pullup_field *f;
-	
+
 	/* Grow the circular list if needed */
 	check_field_queue(c);
-	
+
 	/* Cannot have two fields of same parity in a row; drop the new one */
 	if (c->last && c->last->parity == parity) return;
 
@@ -426,7 +426,7 @@ void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int 
 void pullup_flush_fields(struct pullup_context *c)
 {
 	struct pullup_field *f;
-	
+
 	for (f = c->first; f && f != c->head; f = f->next) {
 		pullup_release_buffer(f->buffer, f->parity);
 		f->buffer = 0;
@@ -455,7 +455,7 @@ static int queue_length(struct pullup_field *begin, struct pullup_field *end)
 {
 	int count = 1;
 	struct pullup_field *f;
-	
+
 	if (!begin || !end) return 0;
 	for (f = begin; f != end; f = f->next) count++;
 	return count;
@@ -567,7 +567,7 @@ static int decide_frame_length(struct pullup_context *c)
 	struct pullup_field *f1 = f0->next;
 	struct pullup_field *f2 = f1->next;
 	int l;
-	
+
 	if (queue_length(c->first, c->last) < 4) return 0;
 	foo(c);
 
@@ -575,7 +575,7 @@ static int decide_frame_length(struct pullup_context *c)
 
 	l = find_first_break(f0, 3);
 	if (l == 1 && c->strict_breaks < 0) l = 0;
-	
+
 	switch (l) {
 	case 1:
 		if (c->strict_breaks < 1 && f0->affinity == 1 && f1->affinity == -1)
@@ -653,7 +653,7 @@ struct pullup_frame *pullup_get_frame(struct pullup_context *c)
 		c->first->buffer = 0;
 		c->first = c->first->next;
 	}
-	
+
 	if (n == 1) {
 		fr->ofields[fr->parity] = fr->ifields[0];
 		fr->ofields[fr->parity^1] = 0;
@@ -669,7 +669,7 @@ struct pullup_frame *pullup_get_frame(struct pullup_context *c)
 	}
 	pullup_lock_buffer(fr->ofields[0], 0);
 	pullup_lock_buffer(fr->ofields[1], 1);
-	
+
 	if (fr->ofields[0] == fr->ofields[1]) {
 		fr->buffer = fr->ofields[0];
 		pullup_lock_buffer(fr->buffer, 2);
@@ -756,7 +756,7 @@ void pullup_init_context(struct pullup_context *c)
 	c->metric_h = (c->h[mp] - ((c->junk_top + c->junk_bottom) << 1)) >> 3;
 	c->metric_offset = c->junk_left*c->bpp[mp] + (c->junk_top<<1)*c->stride[mp];
 	c->metric_len = c->metric_w * c->metric_h;
-	
+
 	c->head = make_field_queue(c, 8);
 
 	c->frame = calloc(1, sizeof (struct pullup_frame));

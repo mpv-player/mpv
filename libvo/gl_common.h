@@ -51,7 +51,7 @@
 
 /**
  * \defgroup glextdefines OpenGL extension defines
- * 
+ *
  * conditionally define all extension defines used.
  * vendor specific extensions should be marked as such
  * (e.g. _NV), _ARB is not used to ease readability.
@@ -374,7 +374,7 @@ void swapGlBuffers(void);
 extern void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
 extern void (APIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
 extern void (APIENTRY *BindBuffer)(GLenum, GLuint);
-extern GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum); 
+extern GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum);
 extern GLboolean (APIENTRY *UnmapBuffer)(GLenum);
 extern void (APIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
 extern void (APIENTRY *CombinerParameterfv)(GLenum, const GLfloat *);

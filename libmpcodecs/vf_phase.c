@@ -36,7 +36,7 @@ static void do_plane(unsigned char *to, unsigned char *from,
    {
    unsigned char *buf, *end;
    int top;
- 
+
    if(!*bufp)
       {
       mode=PROGRESSIVE;
@@ -81,7 +81,7 @@ static enum mode analyze_plane(unsigned char *old, unsigned char *new,
    else if(mode==AUTO_ANALYZE)
       mode=fields&MP_IMGFIELD_ORDERED?fields&MP_IMGFIELD_TOP_FIRST?
 	 TOP_FIRST_ANALYZE:BOTTOM_FIRST_ANALYZE:FULL_ANALYZE;
-   
+
    if(fixed_mode(mode))
       bdiff=pdiff=tdiff=65536.0;
    else
@@ -116,7 +116,7 @@ static enum mode analyze_plane(unsigned char *old, unsigned char *new,
 		     pdif+=diff(new, ns, new, ns),
 		     bdif+=diff(new, ns, old, os);
 	       break;
-	       
+
 	    case ANALYZE:
 	       if(top)
 		  for(rend=new+w; new<rend; new++, old++)
@@ -144,20 +144,20 @@ static enum mode analyze_plane(unsigned char *old, unsigned char *new,
 	 pdiff+=(double)pdif;
 	 tdiff+=(double)tdif;
 	 bdiff+=(double)bdif;
-	 }      
+	 }
 
       scale=1.0/(w*(h-3))/25.0;
       pdiff*=scale;
       tdiff*=scale;
       bdiff*=scale;
-      
+
       if(mode==TOP_FIRST_ANALYZE)
 	 bdiff=65536.0;
       else if(mode==BOTTOM_FIRST_ANALYZE)
 	 tdiff=65536.0;
       else if(mode==ANALYZE)
 	 pdiff=65536.0;
-      
+
       if(bdiff<pdiff && bdiff<tdiff)
 	 mode=BOTTOM_FIRST;
       else if(tdiff<pdiff && tdiff<bdiff)
@@ -205,7 +205,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
    do_plane(dmpi->planes[0], mpi->planes[0],
 	    w, dmpi->h,
 	    dmpi->stride[0], mpi->stride[0],
-	    &vf->priv->buf[0], mode);      
+	    &vf->priv->buf[0], mode);
 
    if(dmpi->flags&MP_IMGFLAG_PLANAR)
       {
@@ -241,10 +241,10 @@ static int open(vf_instance_t *vf, char* args)
       uninit(vf);
       return 0;
       }
-   
+
    vf->priv->mode=AUTO_ANALYZE;
    vf->priv->verbose=0;
-      
+
    while(args && *args)
       {
       switch(*args)

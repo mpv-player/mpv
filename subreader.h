@@ -46,7 +46,7 @@ typedef struct {
 
     unsigned long start;
     unsigned long end;
-    
+
     char *text[SUB_MAX_TEXT];
     double endpts[SUB_MAX_TEXT];
     unsigned char alignment;
@@ -55,7 +55,7 @@ typedef struct {
 typedef struct {
     subtitle *subtitles;
     char *filename;
-    int sub_uses_time; 
+    int sub_uses_time;
     int sub_num;          // number of subtitle structs
     int sub_errs;
 } sub_data;

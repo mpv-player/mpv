@@ -268,12 +268,12 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
   if (h == -1) h = vf->h;
 
   w2=(mp_imgflag&MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE)?((w+15)&(~15)):w;
-  
+
   if(vf->put_image==vf_next_put_image){
       // passthru mode, if the filter uses the fallback/default put_image() code
       return vf_get_image(vf->next,outfmt,mp_imgtype,mp_imgflag,w,h);
   }
-  
+
   // Note: we should call libvo first to check if it supports direct rendering
   // and if not, then fallback to software buffers:
   switch(mp_imgtype & 0xff){
@@ -343,7 +343,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 
 	// check libvo first!
 	if(vf->get_image) vf->get_image(vf,mpi);
-	
+
         if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
           // non-direct and not yet allocated image. allocate it!
           if (!mpi->bpp) { // no way we can allocate this
@@ -351,8 +351,8 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
                      "vf_get_image: Tried to allocate a format that can not be allocated!\n");
               return NULL;
           }
-	  
-	  // check if codec prefer aligned stride:  
+
+	  // check if codec prefer aligned stride:
 	  if(mp_imgflag&MP_IMGFLAG_PREFER_ALIGNED_STRIDE){
 	      int align=(mpi->flags&MP_IMGFLAG_PLANAR &&
 	                 mpi->flags&MP_IMGFLAG_YUV) ?
@@ -369,7 +369,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 		  }
 	      }
 	  }
-	  
+
 	  // IF09 - allocate space for 4. plane delta info - unused
 	  if (mpi->imgfmt == IMGFMT_IF09)
 	  {
@@ -382,9 +382,9 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	     mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
 	  if(mpi->flags&MP_IMGFLAG_PLANAR){
 	      // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
-	      //if(!mpi->stride[0]) 
+	      //if(!mpi->stride[0])
 	      mpi->stride[0]=mpi->width;
-	      //if(!mpi->stride[1]) 
+	      //if(!mpi->stride[1])
 	      if(mpi->num_planes > 2){
 	      mpi->stride[1]=mpi->stride[2]=mpi->chroma_width;
 	      if(mpi->flags&MP_IMGFLAG_SWAPPED){
@@ -402,7 +402,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	          mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
 	      }
 	  } else {
-	      //if(!mpi->stride[0]) 
+	      //if(!mpi->stride[0])
 	      mpi->stride[0]=mpi->width*mpi->bpp/8;
 	  }
 //	  printf("clearing img!\n");
@@ -725,7 +725,7 @@ void vf_next_draw_slice(struct vf_instance_s* vf,unsigned char** src, int * stri
 
 vf_instance_t* append_filters(vf_instance_t* last){
   vf_instance_t* vf;
-  int i; 
+  int i;
 
   if(vf_settings) {
     // We want to add them in the 'right order'

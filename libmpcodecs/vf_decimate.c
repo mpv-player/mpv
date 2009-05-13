@@ -27,10 +27,10 @@ static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 		"movl $8, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
-		
+
 		ASMALIGN(4)
 		"1: \n\t"
-		
+
 		"movq (%%"REG_S"), %%mm0 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"
 		"add %%"REG_a", %%"REG_S" \n\t"
@@ -48,12 +48,12 @@ static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 		"paddw %%mm1, %%mm4 \n\t"
 		"paddw %%mm2, %%mm4 \n\t"
 		"paddw %%mm3, %%mm4 \n\t"
-		
+
 		"decl %%ecx \n\t"
 		"jnz 1b \n\t"
 		"movq %%mm4, (%%"REG_d") \n\t"
 		"emms \n\t"
-		: 
+		:
 		: "S" (old), "D" (new), "a" ((long)os), "b" ((long)ns), "d" (out)
 		: "%ecx", "memory"
 		);
@@ -132,7 +132,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	}
 	vf->priv->last++;
 	vf->priv->cnt=0;
-	
+
 	memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h,
 		dmpi->stride[0], mpi->stride[0]);
 	if (mpi->flags & MP_IMGFLAG_PLANAR) {

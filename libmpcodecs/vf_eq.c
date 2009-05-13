@@ -42,7 +42,7 @@ static void process_MMX(unsigned char *dest, int dstride, unsigned char *src, in
 
 	brvec[0] = brvec[1] = brvec[2] = brvec[3] = brightness;
 	contvec[0] = contvec[1] = contvec[2] = contvec[3] = contrast;
-		
+
 	while (h--) {
 		__asm__ volatile (
 			"movq (%5), %%mm3 \n\t"
@@ -121,7 +121,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	dmpi=vf_get_image(vf->next, mpi->imgfmt,
 			  MP_IMGTYPE_EXPORT, 0,
 			  mpi->w, mpi->h);
-	
+
 	dmpi->stride[0] = mpi->stride[0];
 	dmpi->planes[1] = mpi->planes[1];
 	dmpi->planes[2] = mpi->planes[2];
@@ -129,7 +129,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 	dmpi->stride[2] = mpi->stride[2];
 
 	if (!vf->priv->buf) vf->priv->buf = malloc(mpi->stride[0]*mpi->h);
-	
+
 	if ((vf->priv->brightness == 0) && (vf->priv->contrast == 0))
 		dmpi->planes[0] = mpi->planes[0];
 	else {
@@ -207,7 +207,7 @@ static int open(vf_instance_t *vf, char* args)
 	vf->query_format=query_format;
 	vf->put_image=put_image;
 	vf->uninit=uninit;
-	
+
 	if(!vf->priv) {
 	vf->priv = malloc(sizeof(struct vf_priv_s));
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
@@ -218,7 +218,7 @@ static int open(vf_instance_t *vf, char* args)
 #if HAVE_MMX
 	if(gCpuCaps.hasMMX) process = process_MMX;
 #endif
-	
+
 	return 1;
 }
 

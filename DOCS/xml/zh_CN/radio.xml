@@ -7,7 +7,7 @@
 <title>电台输入</title>
 
 <para>
-这一部分将说明如何从V4L兼容的电台调谐器收听电台广播。 
+这一部分将说明如何从V4L兼容的电台调谐器收听电台广播。
 请阅读手册中关于电台的可选项和键盘控制的描述。
 </para>
 
@@ -52,7 +52,7 @@
 <listitem><para>
   <application>MEncoder</application>不能用于音频捕捉,
   因为它需要视频流才工作。 因此你可以, 或使用ALSA项目的<application>arecord</application>,
-  或者使用选项<option>-ao pcm:file=file.wav</option>。 在后一种情况下, 
+  或者使用选项<option>-ao pcm:file=file.wav</option>。 在后一种情况下,
   你将听不到任何声音 (除非你用了输入线, 并且关闭了输入线静音)。
 </para></listitem>
 </itemizedlist>

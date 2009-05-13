@@ -1,6 +1,6 @@
-/* 
+/*
    RTjpeg (C) Justin Schoeman 1998 (justin@suntiger.ee.up.ac.za)
-   
+
    With modifications by:
    (c) 1998, 1999 by Joerg Walter <trouble@moes.pmnet.uni-oldenburg.de>
    and
@@ -55,14 +55,14 @@ static const unsigned char RTjpeg_ZZ[64]={
 63 };
 
 static const __u64 RTjpeg_aan_tab[64]={
-4294967296ULL, 5957222912ULL, 5611718144ULL, 5050464768ULL, 4294967296ULL, 3374581504ULL, 2324432128ULL, 1184891264ULL, 
-5957222912ULL, 8263040512ULL, 7783580160ULL, 7005009920ULL, 5957222912ULL, 4680582144ULL, 3224107520ULL, 1643641088ULL, 
-5611718144ULL, 7783580160ULL, 7331904512ULL, 6598688768ULL, 5611718144ULL, 4408998912ULL, 3036936960ULL, 1548224000ULL, 
-5050464768ULL, 7005009920ULL, 6598688768ULL, 5938608128ULL, 5050464768ULL, 3968072960ULL, 2733115392ULL, 1393296000ULL, 
-4294967296ULL, 5957222912ULL, 5611718144ULL, 5050464768ULL, 4294967296ULL, 3374581504ULL, 2324432128ULL, 1184891264ULL, 
-3374581504ULL, 4680582144ULL, 4408998912ULL, 3968072960ULL, 3374581504ULL, 2651326208ULL, 1826357504ULL, 931136000ULL, 
-2324432128ULL, 3224107520ULL, 3036936960ULL, 2733115392ULL, 2324432128ULL, 1826357504ULL, 1258030336ULL, 641204288ULL, 
-1184891264ULL, 1643641088ULL, 1548224000ULL, 1393296000ULL, 1184891264ULL, 931136000ULL, 641204288ULL, 326894240ULL, 
+4294967296ULL, 5957222912ULL, 5611718144ULL, 5050464768ULL, 4294967296ULL, 3374581504ULL, 2324432128ULL, 1184891264ULL,
+5957222912ULL, 8263040512ULL, 7783580160ULL, 7005009920ULL, 5957222912ULL, 4680582144ULL, 3224107520ULL, 1643641088ULL,
+5611718144ULL, 7783580160ULL, 7331904512ULL, 6598688768ULL, 5611718144ULL, 4408998912ULL, 3036936960ULL, 1548224000ULL,
+5050464768ULL, 7005009920ULL, 6598688768ULL, 5938608128ULL, 5050464768ULL, 3968072960ULL, 2733115392ULL, 1393296000ULL,
+4294967296ULL, 5957222912ULL, 5611718144ULL, 5050464768ULL, 4294967296ULL, 3374581504ULL, 2324432128ULL, 1184891264ULL,
+3374581504ULL, 4680582144ULL, 4408998912ULL, 3968072960ULL, 3374581504ULL, 2651326208ULL, 1826357504ULL, 931136000ULL,
+2324432128ULL, 3224107520ULL, 3036936960ULL, 2733115392ULL, 2324432128ULL, 1826357504ULL, 1258030336ULL, 641204288ULL,
+1184891264ULL, 1643641088ULL, 1548224000ULL, 1393296000ULL, 1184891264ULL, 931136000ULL, 641204288ULL, 326894240ULL,
 };
 
 #if !HAVE_MMX
@@ -115,7 +115,7 @@ static const unsigned char RTjpeg_chrom_quant_tbl[64] = {
     99,  99,  99,  99,  99,  99,  99,  99
  };
 
-#ifdef BETTERCOMPRESSION 
+#ifdef BETTERCOMPRESSION
 
 /*--------------------------------------------------*/
 /*  better encoding, but needs a lot more cpu time  */
@@ -160,19 +160,19 @@ static int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
  bitten = ((unsigned char)ci) << 2;
 
  if (ci==0) {
-   ((__u8*)strm)[1]= bitten; 
+   ((__u8*)strm)[1]= bitten;
    co = 2;
    return (int)co;
  }
- 
- /* bitoff=0 because the high 6bit contain first non zero position */ 
+
+ /* bitoff=0 because the high 6bit contain first non zero position */
  bitoff = 0;
  co = 1;
 
  for(; ci>0; ci--) {
 
    ZZvalue = data[RTjpeg_ZZ[ci]];
-   
+
    switch(ZZvalue) {
    case 0:
 	break;
@@ -189,21 +189,21 @@ static int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
    }
 
    if( bitoff == 0 ) {
-      ((__u8*)strm)[co]= bitten; 
+      ((__u8*)strm)[co]= bitten;
       bitten = 0;
-      bitoff = 8; 
+      bitoff = 8;
       co++;
    } /* "fall through" */
-   bitoff-=2; 
+   bitoff-=2;
 
  }
- 
+
  /* ci must be 0 */
  if(bitoff != 6) {
 
-      ((__u8*)strm)[co]= bitten; 
+      ((__u8*)strm)[co]= bitten;
       co++;
-     
+
  }
  goto BAUCHWEH;
 
@@ -218,7 +218,7 @@ HERZWEH:
    break;
  case 2:
  case 0:
-   ((__u8*)strm)[co]= bitten; 
+   ((__u8*)strm)[co]= bitten;
    bitoff = 4;
    co++;
    bitten = 0; // clear half nibble values in bitten
@@ -234,48 +234,48 @@ HERZWEH:
    if( (ZZvalue > 7) || (ZZvalue < -7) ) {
         bitten |= (0x08<<bitoff);
 	goto HIRNWEH;
-   } 
-   
+   }
+
    bitten |= (ZZvalue&0xf)<<bitoff;
 
    if( bitoff == 0 ) {
-      ((__u8*)strm)[co]= bitten; 
+      ((__u8*)strm)[co]= bitten;
       bitten = 0;
       bitoff = 8;
       co++;
    } /* "fall thru" */
    bitoff-=4;
  }
- 
+
  /* ci must be 0 */
  if( bitoff == 0 ) {
-    ((__u8*)strm)[co]= bitten; 
+    ((__u8*)strm)[co]= bitten;
     co++;
- }  
+ }
  goto BAUCHWEH;
 
 HIRNWEH:
 
- ((__u8*)strm)[co]= bitten; 
+ ((__u8*)strm)[co]= bitten;
  co++;
-  
+
 
  /* bitting is over now we bite */
  for(; ci>0; ci--) {
 
    ZZvalue = data[RTjpeg_ZZ[ci]];
 
-   if(ZZvalue>0) 
+   if(ZZvalue>0)
    {
      strm[co++]=(__s8)(ZZvalue>127)?127:ZZvalue;
-   } 
-   else 
+   }
+   else
    {
      strm[co++]=(__s8)(ZZvalue<-128)?-128:ZZvalue;
    }
 
  }
- 
+
 
 BAUCHWEH:
   /* we gotoo much now we are ill */
@@ -312,39 +312,39 @@ static int RTjpeg_b2s(__s16 *data, __s8 *strm, __u8 bt8)
 
  (__u8)strm[0]=(__u8)(data[RTjpeg_ZZ[0]]>254) ? 254:((data[RTjpeg_ZZ[0]]<0)?0:data[RTjpeg_ZZ[0]]);
 
- for(ci=1; ci<=bt8; ci++) 
+ for(ci=1; ci<=bt8; ci++)
  {
 	ZZvalue = data[RTjpeg_ZZ[ci]];
 
-   if(ZZvalue>0) 
+   if(ZZvalue>0)
 	{
      strm[co++]=(__s8)(ZZvalue>127)?127:ZZvalue;
-   } 
-	else 
+   }
+	else
 	{
      strm[co++]=(__s8)(ZZvalue<-128)?-128:ZZvalue;
    }
  }
 
- for(; ci<64; ci++) 
+ for(; ci<64; ci++)
  {
   ZZvalue = data[RTjpeg_ZZ[ci]];
 
   if(ZZvalue>0)
   {
    strm[co++]=(__s8)(ZZvalue>63)?63:ZZvalue;
-  } 
+  }
   else if(ZZvalue<0)
   {
    strm[co++]=(__s8)(ZZvalue<-64)?-64:ZZvalue;
-  } 
+  }
   else /* compress zeros */
   {
    tmp=ci;
    do
    {
     ci++;
-   } 
+   }
 	while((ci<64)&&(data[RTjpeg_ZZ[ci]]==0));
 
    strm[co++]=(__s8)(63+(ci-tmp));
@@ -367,7 +367,7 @@ static int RTjpeg_s2b(__s16 *data, __s8 *strm, __u8 bt8, __u32 *qtbl)
   i=RTjpeg_ZZ[co];
   data[i]=strm[ci++]*qtbl[i];
  }
- 
+
  for(; co<64; co++)
  {
   if(strm[ci]>63)
@@ -391,7 +391,7 @@ static void RTjpeg_quant_init(void)
 {
  int i;
  __s16 *qtbl;
- 
+
  qtbl=(__s16 *)RTjpeg_lqt;
  for(i=0; i<64; i++)qtbl[i]=(__s16)RTjpeg_lqt[i];
 
@@ -406,36 +406,36 @@ static void RTjpeg_quant(__s16 *block, __s32 *qtbl)
 {
  int i;
  mmx_t *bl, *ql;
- 
+
  ql=(mmx_t *)qtbl;
  bl=(mmx_t *)block;
- 
+
  movq_m2r(RTjpeg_ones, mm6);
  movq_m2r(RTjpeg_half, mm7);
 
- for(i=16; i; i--) 
+ for(i=16; i; i--)
  {
   movq_m2r(*(ql++), mm0); /* quant vals (4) */
   movq_m2r(*bl, mm2); /* block vals (4) */
   movq_r2r(mm0, mm1);
   movq_r2r(mm2, mm3);
-  
+
   punpcklwd_r2r(mm6, mm0); /*           1 qb 1 qa */
   punpckhwd_r2r(mm6, mm1); /* 1 qd 1 qc */
-  
+
   punpcklwd_r2r(mm7, mm2); /*                   32767 bb 32767 ba */
   punpckhwd_r2r(mm7, mm3); /* 32767 bd 32767 bc */
-  
+
   pmaddwd_r2r(mm2, mm0); /*                         32767+bb*qb 32767+ba*qa */
   pmaddwd_r2r(mm3, mm1); /* 32767+bd*qd 32767+bc*qc */
-  
+
   psrad_i2r(16, mm0);
   psrad_i2r(16, mm1);
-  
+
   packssdw_r2r(mm1, mm0);
-  
+
   movq_r2m(mm0, *(bl++));
-  
+
  }
 }
 #else
@@ -446,7 +446,7 @@ static void RTjpeg_quant_init(void)
 static void RTjpeg_quant(__s16 *block, __s32 *qtbl)
 {
  int i;
- 
+
  for(i=0; i<64; i++)
    block[i]=(__s16)((block[i]*qtbl[i]+32767)>>16);
 }
@@ -477,7 +477,7 @@ static mmx_t RTjpeg_zero ={0x0000000000000000LL};
 static void RTjpeg_dct_init(void)
 {
  int i;
- 
+
  for(i=0; i<64; i++)
  {
   RTjpeg_lqt[i]=(((__u64)RTjpeg_lqt[i]<<32)/RTjpeg_aan_tab[i]);
@@ -507,19 +507,19 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
     tmp5 = idataptr[2] - idataptr[5];
     tmp3 = idataptr[3] + idataptr[4];
     tmp4 = idataptr[3] - idataptr[4];
-    
+
     tmp10 = (tmp0 + tmp3);	/* phase 2 */
     tmp13 = tmp0 - tmp3;
     tmp11 = (tmp1 + tmp2);
     tmp12 = tmp1 - tmp2;
-    
+
     wsptr[0] = (tmp10 + tmp11)<<8; /* phase 3 */
     wsptr[4] = (tmp10 - tmp11)<<8;
-    
+
     z1 = D_MULTIPLY(tmp12 + tmp13, FIX_0_707106781); /* c4 */
     wsptr[2] = (tmp13<<8) + z1;	/* phase 5 */
     wsptr[6] = (tmp13<<8) - z1;
-    
+
     tmp10 = tmp4 + tmp5;	/* phase 2 */
     tmp11 = tmp5 + tmp6;
     tmp12 = tmp6 + tmp7;
@@ -552,15 +552,15 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
     tmp5 = wsptr[16] - wsptr[40];
     tmp3 = wsptr[24] + wsptr[32];
     tmp4 = wsptr[24] - wsptr[32];
-    
+
     tmp10 = tmp0 + tmp3;	/* phase 2 */
     tmp13 = tmp0 - tmp3;
     tmp11 = tmp1 + tmp2;
     tmp12 = tmp1 - tmp2;
-    
+
     odataptr[0] = DESCALE10(tmp10 + tmp11); /* phase 3 */
     odataptr[32] = DESCALE10(tmp10 - tmp11);
-    
+
     z1 = D_MULTIPLY(tmp12 + tmp13, FIX_0_707106781); /* c4 */
     odataptr[16] = DESCALE20((tmp13<<8) + z1); /* phase 5 */
     odataptr[48] = DESCALE20((tmp13<<8) - z1);
@@ -595,85 +595,85 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
    movq_m2r(RTjpeg_zero, mm2);
 
 
-	movq_m2r(*idata2, mm0);		 
-	movq_r2r(mm0, mm1);		 			
+	movq_m2r(*idata2, mm0);
+	movq_r2r(mm0, mm1);
 
 	punpcklbw_r2r(mm2, mm0);
 	movq_r2m(mm0, *(dataptr));
 
 	punpckhbw_r2r(mm2, mm1);
 	movq_r2m(mm1, *(dataptr+1));
-	
+
 	idata2 += rskip;
 
-	movq_m2r(*idata2, mm0);		 
-	movq_r2r(mm0, mm1);		 			
+	movq_m2r(*idata2, mm0);
+	movq_r2r(mm0, mm1);
 
 	punpcklbw_r2r(mm2, mm0);
 	movq_r2m(mm0, *(dataptr+2));
 
 	punpckhbw_r2r(mm2, mm1);
 	movq_r2m(mm1, *(dataptr+3));
-	
+
 	idata2 += rskip;
 
-	movq_m2r(*idata2, mm0);		 
-	movq_r2r(mm0, mm1);		 			
+	movq_m2r(*idata2, mm0);
+	movq_r2r(mm0, mm1);
 
 	punpcklbw_r2r(mm2, mm0);
 	movq_r2m(mm0, *(dataptr+4));
 
 	punpckhbw_r2r(mm2, mm1);
 	movq_r2m(mm1, *(dataptr+5));
-	
+
 	idata2 += rskip;
 
-	movq_m2r(*idata2, mm0);		 
-	movq_r2r(mm0, mm1);		 			
+	movq_m2r(*idata2, mm0);
+	movq_r2r(mm0, mm1);
 
 	punpcklbw_r2r(mm2, mm0);
 	movq_r2m(mm0, *(dataptr+6));
 
 	punpckhbw_r2r(mm2, mm1);
 	movq_r2m(mm1, *(dataptr+7));
-	
+
 	idata2 += rskip;
 
-	movq_m2r(*idata2, mm0);		 
-	movq_r2r(mm0, mm1);		 			
+	movq_m2r(*idata2, mm0);
+	movq_r2r(mm0, mm1);
 
 	punpcklbw_r2r(mm2, mm0);
 	movq_r2m(mm0, *(dataptr+8));
 
 	punpckhbw_r2r(mm2, mm1);
 	movq_r2m(mm1, *(dataptr+9));
-	
+
 	idata2 += rskip;
 
-	movq_m2r(*idata2, mm0);		 
-	movq_r2r(mm0, mm1);		 			
+	movq_m2r(*idata2, mm0);
+	movq_r2r(mm0, mm1);
 
 	punpcklbw_r2r(mm2, mm0);
 	movq_r2m(mm0, *(dataptr+10));
 
 	punpckhbw_r2r(mm2, mm1);
 	movq_r2m(mm1, *(dataptr+11));
-	
+
 	idata2 += rskip;
 
-	movq_m2r(*idata2, mm0);		 
-	movq_r2r(mm0, mm1);		 			
+	movq_m2r(*idata2, mm0);
+	movq_r2r(mm0, mm1);
 
 	punpcklbw_r2r(mm2, mm0);
 	movq_r2m(mm0, *(dataptr+12));
 
 	punpckhbw_r2r(mm2, mm1);
 	movq_r2m(mm1, *(dataptr+13));
-	
+
 	idata2 += rskip;
 
-	movq_m2r(*idata2, mm0);		 
-	movq_r2r(mm0, mm1);		 			
+	movq_m2r(*idata2, mm0);
+	movq_r2r(mm0, mm1);
 
 	punpcklbw_r2r(mm2, mm0);
 	movq_r2m(mm0, *(dataptr+14));
@@ -686,15 +686,15 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 	movq_m2r(*(dataptr+9), mm7);		 	// m03:m02|m01:m00 - first line (line 4)and copy into m5
 
 	movq_m2r(*(dataptr+13), mm6);	    	// m23:m22|m21:m20 - third line (line 6)and copy into m2
-	movq_r2r(mm7, mm5);		 			
+	movq_r2r(mm7, mm5);
 
 	punpcklwd_m2r(*(dataptr+11), mm7); 	// m11:m01|m10:m00 - interleave first and second lines
-	movq_r2r(mm6, mm2);						 
+	movq_r2r(mm6, mm2);
 
 	punpcklwd_m2r(*(dataptr+15), mm6);  // m31:m21|m30:m20 - interleave third and fourth lines
 	movq_r2r(mm7, mm1);
 
-	movq_m2r(*(dataptr+11), mm3);	      // m13:m13|m11:m10 - second line	 
+	movq_m2r(*(dataptr+11), mm3);	      // m13:m13|m11:m10 - second line
 	punpckldq_r2r(mm6, mm7);				// m30:m20|m10:m00 - interleave to produce result 1
 
 	movq_m2r(*(dataptr+15), mm0);	      // m13:m13|m11:m10 - fourth line
@@ -702,7 +702,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 
 	movq_r2m(mm7,*(dataptr+9));			// write result 1
 	punpckhwd_r2r(mm3, mm5);				// m13:m03|m12:m02 - interleave first and second lines
-	
+
 	movq_r2m(mm1,*(dataptr+11));			// write result 2
 	punpckhwd_r2r(mm0, mm2);				// m33:m23|m32:m22 - interleave third and fourth lines
 
@@ -728,7 +728,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 	movq_r2r(mm0, mm4);
 
 	//
-	movq_m2r(*(dataptr+8), mm1);			// n03:n02|n01:n00 - first line 
+	movq_m2r(*(dataptr+8), mm1);			// n03:n02|n01:n00 - first line
 	punpckldq_r2r(mm2, mm0);				// m30:m20|m10:m00 - interleave to produce first result
 
 	movq_m2r(*(dataptr+12), mm3);			// n23:n22|n21:n20 - third line
@@ -843,14 +843,14 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
    movq_r2r(mm0, mm3);
 
 	psllw_i2r(2, mm6);			// m8 * 2^2
-	paddw_r2r(mm1, mm0);		
+	paddw_r2r(mm1, mm0);
 
 	pmulhw_m2r(RTjpeg_C4, mm6);			// z1
-	psubw_r2r(mm1, mm3);		
+	psubw_r2r(mm1, mm3);
 
    movq_r2m(mm0, *dataptr);
    movq_r2r(mm7, mm0);
-   
+
     /* Odd part */
    movq_r2m(mm3, *(dataptr+8));
 	paddw_r2r(mm5, mm4);						// tmp10
@@ -872,7 +872,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 	psubw_r2r(mm2, mm1);						// tmp10 - tmp12
 	psllw_i2r(2, mm4);			// m8 * 2^2
 
-	movq_m2r(RTjpeg_C2mC6, mm0);		
+	movq_m2r(RTjpeg_C2mC6, mm0);
 	psllw_i2r(2, mm1);
 
 	pmulhw_m2r(RTjpeg_C6, mm1);			// z5
@@ -972,7 +972,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 
    movq_r2m(mm0, *(dataptr+1)); 			//save y0
 	movq_r2r(mm7, mm0);						// copy tmp13
-  
+
 	/* odd part */
 
    movq_r2m(mm3, *(dataptr+9)); 			//save y4
@@ -999,14 +999,14 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 	psllw_i2r(2, mm1);			// shift (tmp10-tmp12)
 
 	pmulhw_m2r(RTjpeg_C6, mm1);    		// z5
-	psllw_i2r(2, mm5);			// prepare for multiply 
+	psllw_i2r(2, mm5);			// prepare for multiply
 
 	pmulhw_r2r(mm0, mm4);					// multiply by converted real
 
 	/* stage 5 */
 
 	pmulhw_m2r(RTjpeg_C4, mm5);			// z3
-	psllw_i2r(2, mm2);			// prepare for multiply 
+	psllw_i2r(2, mm2);			// prepare for multiply
 
 	pmulhw_m2r(RTjpeg_C2pC6, mm2);		// multiply
 	movq_r2r(mm3, mm0);						// copy tmp7
@@ -1032,7 +1032,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 
    movq_r2m(mm6, *(dataptr+3)); 			//save y1
 	psubw_r2r(mm2, mm0);						// y7
-	
+
 /************************************************************************************************
 					Start of Transpose
 ************************************************************************************************/
@@ -1077,9 +1077,9 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 	punpcklwd_m2r(*(dataptr+7), mm2);  	// m31:m21|m30:m20 - interleave third and fourth lines
 	movq_r2r(mm0, mm4);						// copy first intermediate result
 
-	
 
-	movq_m2r(*(dataptr+8), mm1);			// n03:n02|n01:n00 - first line 
+
+	movq_m2r(*(dataptr+8), mm1);			// n03:n02|n01:n00 - first line
 	punpckldq_r2r(mm2, mm0);				// m30:m20|m10:m00 - interleave to produce first result
 
 	movq_m2r(*(dataptr+12), mm3);			// n23:n22|n21:n20 - third line
@@ -1106,7 +1106,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 	movq_r2r(mm1, mm4);						// copy second intermediate result
 
 	movq_r2m(mm6, *(dataptr+12));			// write result 3 out
-	punpckldq_r2r(mm3, mm1);				// 
+	punpckldq_r2r(mm3, mm1);				//
 
 	punpckhwd_m2r(*(dataptr+14), mm0);  // n33:n23|n32:n22 - interleave third and fourth lines
 	movq_r2r(mm2, mm6);						// copy second intermediate result
@@ -1133,7 +1133,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 
 	punpcklwd_m2r(*(dataptr+2), mm0);  	// m11:m01|m10:m00 - interleave first and second lines
 	movq_r2r(mm7, mm4);						// copy third line
-	
+
 	punpcklwd_m2r(*(dataptr+6), mm7);  	// m31:m21|m30:m20 - interleave third and fourth lines
 	movq_r2r(mm0, mm1);						// copy first intermediate result
 
@@ -1193,14 +1193,14 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
    movq_r2r(mm0, mm3);
 
 	psllw_i2r(2, mm6);			// m8 * 2^2
-	paddw_r2r(mm1, mm0);		
+	paddw_r2r(mm1, mm0);
 
 	pmulhw_m2r(RTjpeg_C4, mm6);			// z1
-	psubw_r2r(mm1, mm3);		
+	psubw_r2r(mm1, mm3);
 
    movq_r2m(mm0, *dataptr);
    movq_r2r(mm7, mm0);
-   
+
     /* Odd part */
    movq_r2m(mm3, *(dataptr+8));
 	paddw_r2r(mm5, mm4);						// tmp10
@@ -1321,7 +1321,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 
    movq_r2m(mm0, *(dataptr+1)); 			//save y0
 	movq_r2r(mm7, mm0);						// copy tmp13
-  
+
 	/* odd part */
 
    movq_r2m(mm3, *(dataptr+9)); 			//save y4
@@ -1348,14 +1348,14 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
 	psllw_i2r(2, mm1);			// shift (tmp10-tmp12)
 
 	pmulhw_m2r(RTjpeg_C6, mm1);    		// z5
-	psllw_i2r(2, mm5);			// prepare for multiply 
+	psllw_i2r(2, mm5);			// prepare for multiply
 
 	pmulhw_r2r(mm0, mm4);					// multiply by converted real
 
 	/* stage 5 */
 
 	pmulhw_m2r(RTjpeg_C4, mm5);			// z3
-	psllw_i2r(2, mm2);			// prepare for multiply 
+	psllw_i2r(2, mm2);			// prepare for multiply
 
 	pmulhw_m2r(RTjpeg_C2pC6, mm2);		// multiply
 	movq_r2r(mm3, mm0);						// copy tmp7
@@ -1385,7 +1385,7 @@ static void RTjpeg_dctY(__u8 *idata, __s16 *odata, int rskip)
    movq_r2m(mm6, *(dataptr+3)); 			//save y1
 
    movq_r2m(mm0, *(dataptr+15)); 		//save y7
-	
+
 
 #endif
 }
@@ -1411,12 +1411,12 @@ Initialise all the cache-aliged data blocks
 static void RTjpeg_init_data(void)
 {
  unsigned long dptr;
- 
+
  dptr=(unsigned long)&(RTjpeg_alldata[0]);
  dptr+=32;
  dptr=dptr>>5;
  dptr=dptr<<5; /* cache align data */
- 
+
  RTjpeg_block=(__s16 *)dptr;
  dptr+=sizeof(__s16)*64;
  RTjpeg_lqt=(__s32 *)dptr;
@@ -1443,7 +1443,7 @@ static void RTjpeg_init_Q(__u8 Q)
 {
  int i;
  __u64 qual;
- 
+
  qual=(__u64)Q<<(32-7); /* 32 bit FP, 255=2, 0=0 */
 
  for(i=0; i<64; i++)
@@ -1457,7 +1457,7 @@ static void RTjpeg_init_Q(__u8 Q)
   RTjpeg_lqt[i]=((1<<16)/RTjpeg_liqt[i])>>3;
   RTjpeg_cqt[i]=((1<<16)/RTjpeg_ciqt[i])>>3;
  }
- 
+
  RTjpeg_lb8=0;
  while(RTjpeg_liqt[RTjpeg_ZZ[++RTjpeg_lb8]]<=8);
  RTjpeg_lb8--;
@@ -1475,21 +1475,21 @@ External Function
 
 Initialise compression.
 
-Input: buf -> pointer to 128 ints for quant values store to pass back to 
+Input: buf -> pointer to 128 ints for quant values store to pass back to
                 init_decompress.
        width -> width of image
        height -> height of image
        Q -> quality factor (192=best, 32=worst)
-       
+
 */
 
 void RTjpeg_init_compress(__u32 *buf, int width, int height, __u8 Q)
 {
  int i;
  __u64 qual;
- 
+
  RTjpeg_init_data();
- 
+
  RTjpeg_width=width;
  RTjpeg_height=height;
  RTjpeg_Ywidth = RTjpeg_width>>3;
@@ -1510,14 +1510,14 @@ void RTjpeg_init_compress(__u32 *buf, int width, int height, __u8 Q)
   RTjpeg_lqt[i]=((1<<16)/RTjpeg_liqt[i])>>3;
   RTjpeg_cqt[i]=((1<<16)/RTjpeg_ciqt[i])>>3;
  }
- 
+
  RTjpeg_lb8=0;
  while(RTjpeg_liqt[RTjpeg_ZZ[++RTjpeg_lb8]]<=8);
  RTjpeg_lb8--;
  RTjpeg_cb8=0;
  while(RTjpeg_ciqt[RTjpeg_ZZ[++RTjpeg_cb8]]<=8);
  RTjpeg_cb8--;
- 
+
  RTjpeg_dct_init();
  RTjpeg_quant_init();
 
@@ -1573,7 +1573,7 @@ int RTjpeg_compressYUV420(__s8 *sp, unsigned char *bp)
   bp1+=RTjpeg_width<<4;
   bp2+=RTjpeg_width<<2;
   bp3+=RTjpeg_width<<2;
-			 
+
  }
 #if HAVE_MMX
  emms();
@@ -1617,11 +1617,11 @@ static int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
  mmx_t *mblock=(mmx_t *)RTjpeg_block;
  volatile mmx_t result;
  static mmx_t neg={0xffffffffffffffffULL};
- 
+
  movq_m2r(*mask, mm7);
  movq_m2r(neg, mm6);
  pxor_r2r(mm5, mm5);
- 
+
  for(i=0; i<8; i++)
  {
   movq_m2r(*(mblock++), mm0);
@@ -1644,7 +1644,7 @@ static int RTjpeg_bcomp(__s16 *old, mmx_t *mask)
   			por_r2r(mm3, mm5);
  }
  movq_r2m(mm5, result);
- 
+
  if(result.q)
  {
   return 0;
@@ -1683,7 +1683,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
  RTjpeg_lmask=lmask;
  RTjpeg_cmask=cmask;
 #endif
- 
+
  sb=sp;
  block=RTjpeg_old;
 /* Y */
@@ -1696,7 +1696,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
    if(RTjpeg_bcomp(block, &RTjpeg_lmask))
    {
     *((__u8 *)sp++)=255;
-   } 
+   }
 	else sp+=RTjpeg_b2s(RTjpeg_block, sp, RTjpeg_lb8);
    block+=64;
 
@@ -1705,7 +1705,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
    if(RTjpeg_bcomp(block, &RTjpeg_lmask))
    {
     *((__u8 *)sp++)=255;
-   } 
+   }
 	else sp+=RTjpeg_b2s(RTjpeg_block, sp, RTjpeg_lb8);
    block+=64;
 
@@ -1714,7 +1714,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
    if(RTjpeg_bcomp(block, &RTjpeg_lmask))
    {
     *((__u8 *)sp++)=255;
-   } 
+   }
 	else sp+=RTjpeg_b2s(RTjpeg_block, sp, RTjpeg_lb8);
    block+=64;
 
@@ -1723,7 +1723,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
    if(RTjpeg_bcomp(block, &RTjpeg_lmask))
    {
     *((__u8 *)sp++)=255;
-   } 
+   }
 	else sp+=RTjpeg_b2s(RTjpeg_block, sp, RTjpeg_lb8);
    block+=64;
 
@@ -1732,7 +1732,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
    if(RTjpeg_bcomp(block, &RTjpeg_cmask))
    {
     *((__u8 *)sp++)=255;
-   } 
+   }
 	else sp+=RTjpeg_b2s(RTjpeg_block, sp, RTjpeg_cb8);
    block+=64;
 
@@ -1741,7 +1741,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
    if(RTjpeg_bcomp(block, &RTjpeg_cmask))
    {
     *((__u8 *)sp++)=255;
-   } 
+   }
 	else sp+=RTjpeg_b2s(RTjpeg_block, sp, RTjpeg_cb8);
    block+=64;
   }
@@ -1749,7 +1749,7 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
   bp1+=RTjpeg_width<<4;
   bp2+=RTjpeg_width<<2;
   bp3+=RTjpeg_width<<2;
-			 
+
  }
 #if HAVE_MMX
  emms();

@@ -53,7 +53,7 @@ static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
 			"paddw %%mm4, %%mm2 \n\t"
 			"psrlw $1, %%mm1 \n\t"
 			"psrlw $1, %%mm2 \n\t"
-			
+
 			"movq (%2), %%mm3 \n\t"
 			"movq (%3), %%mm5 \n\t"
 			"punpcklbw %%mm0, %%mm3 \n\t"
@@ -198,11 +198,11 @@ static int open(vf_instance_t *vf, char* args)
 	vf->query_format=query_format;
 	vf->put_image=put_image;
 	vf->uninit=uninit;
-	
+
 	vf->priv = calloc(1, sizeof (struct vf_priv_s));
 	vf->priv->field = 2;
 	if (args) sscanf(args, "%d", &vf->priv->field);
-	
+
 	halfpack = halfpack_C;
 #if HAVE_MMX
 	if(gCpuCaps.hasMMX) halfpack = halfpack_MMX;

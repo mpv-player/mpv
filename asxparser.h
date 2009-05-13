@@ -15,7 +15,7 @@ struct ASX_Parser_t {
   char* last_body;
   int deep;
 };
-  
+
 ASX_Parser_t*
 asx_parser_new(void);
 

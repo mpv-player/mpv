@@ -35,23 +35,23 @@ static void smb_auth_fn(const char *server, const char *share,
 	     char *password, int pwmaxlen)
 {
   char temp[128];
-  
-  strcpy(temp, "LAN");				  
+
+  strcpy(temp, "LAN");
   if (temp[strlen(temp) - 1] == 0x0a)
     temp[strlen(temp) - 1] = 0x00;
-  
+
   if (temp[0]) strncpy(workgroup, temp, wgmaxlen - 1);
-  
-  strcpy(temp, smb_username); 
+
+  strcpy(temp, smb_username);
   if (temp[strlen(temp) - 1] == 0x0a)
     temp[strlen(temp) - 1] = 0x00;
-  
+
   if (temp[0]) strncpy(username, temp, unmaxlen - 1);
-						      
-  strcpy(temp, smb_password); 
+
+  strcpy(temp, smb_password);
   if (temp[strlen(temp) - 1] == 0x0a)
     temp[strlen(temp) - 1] = 0x00;
-								
+
    if (temp[0]) strncpy(password, temp, pwmaxlen - 1);
 }
 
@@ -98,9 +98,9 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
   mode_t m = 0;
   off_t len;
   int fd, err;
-  
+
   filename = stream->url;
-  
+
   if(mode == STREAM_READ)
     m = O_RDONLY;
   else if (mode == STREAM_WRITE) //who's gonna do that ?
@@ -110,27 +110,27 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
     m_struct_free (&stream_opts, opts);
     return STREAM_UNSUPPORTED;
   }
-  
+
   if(!filename) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[smb] Bad url\n");
     m_struct_free(&stream_opts, opts);
     return STREAM_ERROR;
   }
-  
+
   err = smbc_init(smb_auth_fn, 1);
   if (err < 0) {
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBInitError,err);
     m_struct_free(&stream_opts, opts);
     return STREAM_ERROR;
   }
-  
+
   fd = smbc_open(filename, m,0644);
-  if (fd < 0) {	
+  if (fd < 0) {
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBFileNotFound, filename);
     m_struct_free(&stream_opts, opts);
     return STREAM_ERROR;
   }
-  
+
   stream->flags = mode;
   len = 0;
   if(mode == STREAM_READ) {
@@ -148,7 +148,7 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
   stream->write_buffer = write_buffer;
   stream->close = close_f;
   stream->control = control;
-  
+
   m_struct_free(&stream_opts, opts);
   return STREAM_OK;
 }

@@ -85,7 +85,7 @@ static void unsharp( uint8_t *dst, uint8_t *src, int dstStride, int srcStride, i
     if( !fp->amount ) {
 	if( src == dst )
 	    return;
-	if( dstStride == srcStride ) 
+	if( dstStride == srcStride )
 	    fast_memcpy( dst, src, srcStride*height );
 	else
 	    for( y=0; y<height; y++, dst+=dstStride, src+=srcStride )
@@ -112,7 +112,7 @@ static void unsharp( uint8_t *dst, uint8_t *src, int dstStride, int srcStride, i
 	    if( x>=stepsX && y>=stepsY ) {
 		uint8_t* srx = src - stepsY*srcStride + x - stepsX;
 		uint8_t* dsx = dst - stepsY*dstStride + x - stepsX;
-		
+
 		res = (int32_t)*srx + ( ( ( (int32_t)*srx - (int32_t)((Tmp1+halfscale) >> scalebits) ) * amount ) >> 16 );
 		*dsx = res>255 ? 255 : res<0 ? 0 : (uint8_t)res;
 	    }
@@ -160,7 +160,7 @@ static int config( struct vf_instance_s* vf,
 //===========================================================================//
 
 static void get_image( struct vf_instance_s* vf, mp_image_t *mpi ) {
-    if( mpi->flags & MP_IMGFLAG_PRESERVE ) 
+    if( mpi->flags & MP_IMGFLAG_PRESERVE )
 	return; // don't change
     if( mpi->imgfmt!=vf->priv->outfmt )
 	return; // colorspace differ
@@ -185,13 +185,13 @@ static int put_image( struct vf_instance_s* vf, mp_image_t *mpi, double pts) {
 	// no DR, so get a new image! hope we'll get DR buffer:
 	vf->dmpi = vf_get_image( vf->next,vf->priv->outfmt, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE, mpi->w, mpi->h);
     dmpi= vf->dmpi;
-    
+
     unsharp( dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w,   mpi->h,   &vf->priv->lumaParam );
     unsharp( dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2, &vf->priv->chromaParam );
     unsharp( dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2, &vf->priv->chromaParam );
-    
+
     vf_clone_mpi_attributes(dmpi, mpi);
-    
+
 #if HAVE_MMX
     if(gCpuCaps.hasMMX)
 	__asm__ volatile ("emms\n\t");
@@ -200,7 +200,7 @@ static int put_image( struct vf_instance_s* vf, mp_image_t *mpi, double pts) {
     if(gCpuCaps.hasMMX2)
 	__asm__ volatile ("sfence\n\t");
 #endif
-    
+
     return vf_next_put_image( vf, dmpi, pts);
 }
 
@@ -284,17 +284,17 @@ static int open( vf_instance_t *vf, char* args ) {
 	if( args2 )
 	    parse( &vf->priv->lumaParam, args2 );
 	else {
-	    vf->priv->lumaParam.amount = 
-	    vf->priv->lumaParam.msizeX = 
+	    vf->priv->lumaParam.amount =
+	    vf->priv->lumaParam.msizeX =
 	    vf->priv->lumaParam.msizeY = 0;
 	}
 
 	args2 = strchr( args, 'c' );
-	if( args2 ) 
+	if( args2 )
 	    parse( &vf->priv->chromaParam, args2 );
 	else {
-	    vf->priv->chromaParam.amount = 
-	    vf->priv->chromaParam.msizeX = 
+	    vf->priv->chromaParam.amount =
+	    vf->priv->chromaParam.msizeX =
 	    vf->priv->chromaParam.msizeY = 0;
 	}
 

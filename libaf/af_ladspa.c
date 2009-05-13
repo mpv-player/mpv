@@ -212,7 +212,7 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
     }
 
     if (setup->ninputs == 0) {
-        mp_msg(MSGT_AFILTER, MSGL_WARN, "%s: %s\n", setup->myname, 
+        mp_msg(MSGT_AFILTER, MSGL_WARN, "%s: %s\n", setup->myname,
                                                 MSGTR_AF_LADSPA_WarnNoInputs);
     } else if (setup->ninputs == 1) {
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: this is a mono effect\n", setup->myname);
@@ -281,7 +281,7 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
  * filename (with or without the addition of the .so extension) in various
  * directories specified by the LADSPA_PATH environment variable. If all fails
  * it tries the filename directly as an absolute path to the library.
- * 
+ *
  * \param filename  filename of the library to load.
  * \param flag      see dlopen(3) for a description of the flags.
  *
@@ -411,7 +411,7 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
     /* if label == help, list all labels in library and exit */
 
     if (strcmp(setup->label, "help") == 0) {
-        mp_msg(MSGT_AFILTER, MSGL_INFO, "%s: %s %s:\n", setup->myname, 
+        mp_msg(MSGT_AFILTER, MSGL_INFO, "%s: %s %s:\n", setup->myname,
                 MSGTR_AF_LADSPA_AvailableLabels, setup->file);
         for (i=0; ; i++) {
             ladspa_descriptor = descriptor_function(i);
@@ -558,7 +558,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: label --> %s\n", setup->myname,
                                                                 setup->label);
 /*        if (*(char*)arg != '0') arg++; */ /* read ':' */
- 
+
         free(buf); /* no longer needed */
 
         /* set new setup->myname */
@@ -716,7 +716,7 @@ static void uninit(struct af_instance_s *af) {
 /* ------------------------------------------------------------------------- */
 
 /** \brief Process chunk of audio data through the selected LADSPA Plugin.
- * 
+ *
  * \param af    Pointer to audio filter instance
  * \param data  Pointer to chunk of audio data
  *
@@ -730,7 +730,7 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data) {
     int nsamples = data->len/4; /* /4 because it's 32-bit float */
     int nch = data->nch;
     int rate = data->rate;
-    int i, p; 
+    int i, p;
 
     if (setup->status !=AF_OK)
         return data;
@@ -845,7 +845,7 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data) {
          * and right. connect it to the second port.
          */
 
-        for (p = i; p % setup->ninputs; p++) { 
+        for (p = i; p % setup->ninputs; p++) {
             pdes->connect_port(setup->chhandles[i-1],
                                setup->inputs[p % setup->ninputs],
                                setup->inbufs[i-1]);

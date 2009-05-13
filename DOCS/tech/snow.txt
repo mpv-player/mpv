@@ -32,7 +32,7 @@ OPTIONS RECOGNIZED BY SNOW
 
  * cmp, subcmp, mbcmp
    Set the comparison function, default: 0 (SAD).
-   useful values = 0 (SAD), 1 (SSD), 2 (SATD), 
+   useful values = 0 (SAD), 1 (SSD), 2 (SATD),
                    11 (5/3 wavelet), 12 (9/7 wavelet).
    SAD is fastest and lowest quality.
    SSD is the only function that makes correct decisions about intra vs

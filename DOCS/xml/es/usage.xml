@@ -422,7 +422,7 @@ el protocolo HTTP, FTP, MMS o RTSP/RTP.
 <para>
 La reprodución comienza símplemente añadiendo la URL en la línea de órdenes.
 <application>MPlayer</application> también tiene en cuenta a la variable
-de entorno <envar>http_proxy</envar>, y usa el proxy si está disponible. El 
+de entorno <envar>http_proxy</envar>, y usa el proxy si está disponible. El
 uso de proxy también puede forzarse con:
 <screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
 </para>
@@ -435,7 +435,7 @@ por ejemplo para reproducir desde FTP:
 </para>
 
 <note><para>
-Nota: también es recomendable activar la <option>-cache</option>cuando 
+Nota: también es recomendable activar la <option>-cache</option>cuando
 se reproduce desde la red:
 <screen>wget ftp://micorsops.com/algo.avi -O - | mplayer -cache 8192 -</screen>
 </para></note>
@@ -450,7 +450,7 @@ para <application>MPlayer</application> desde un host remoto. El propósito
 principal de esta característica es hacer posible la reproducción directa
 usando CD o DVD de otro ordenador a través de la red (suponiendo que tiene
 el ancho de banda requerido). En el lado bajo algunos tipos de flujos
-(actualmente TV y MF) no se pueden usar de manera remota debido a que 
+(actualmente TV y MF) no se pueden usar de manera remota debido a que
 están implementados a nivel de demultiplexor. De todos modos para MF y TV
 debería de tener una cantidad insana de ancho de banda.
 </para>
@@ -483,7 +483,7 @@ También puede acceder a los archivos en este servidor :
   mplayer -cache 5000 <replaceable>mpst://nombre-servidor//usr/local/peliculas/lol.avi</replaceable>
 </screen>
 Note que las rutas que no empiezan con un / deben ser relativas
-al directorio donde el servidor está corriendo. La opción <option>-cache</option> 
+al directorio donde el servidor está corriendo. La opción <option>-cache</option>
 no es necesaria pero es altamente recomendable.
 </para>
 
@@ -509,7 +509,7 @@ un archivo de configuración de EDL especifico de una película.
 
 <para>
 Esto es útil para aquellos que quieran mirar una película "de manera familiar".
-Puede cortar secciones de violencia, profanidad, Jar-Jar Binks... de una 
+Puede cortar secciones de violencia, profanidad, Jar-Jar Binks... de una
 película de acuerdo a sus preferencias personales. A un lado de esto, tiene
 otros usos, como pasar automáticamente comerciales en archivos de vídeos que
 mire.
@@ -517,7 +517,7 @@ mire.
 
 <para>
 El formato de archivo EDL es muy simple. Una vez que el sistema EDL haya
-alcanzado cierto nivel de maduración, es muy probable que se implemente 
+alcanzado cierto nivel de maduración, es muy probable que se implemente
 un formato de archivo basada en XML (manteniendo compatibilidad con los
 formatos previos de EDL).
 </para>
@@ -534,11 +534,11 @@ que se le aplique al vídeo.
 <sect2 id="edl_making">
 <title>Haciendo un archivo EDL</title>
 <para>
-El actual formato de un archivo EDL es: 
+El actual formato de un archivo EDL es:
 <programlisting>
 [segundo de inicio] [segundo final] [acción]
 </programlisting>
-Donde los segundos son números de punto flotante y la acción es o bien 
+Donde los segundos son números de punto flotante y la acción es o bien
 <literal>0</literal> para saltar esa parte o <literal>1</literal> para silenciarla. Por ejemplo:
 <programlisting>
 5.3   7.1    0

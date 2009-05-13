@@ -41,7 +41,7 @@ static int play(void* data,int len,int flags);
   rounded down to 0 or the data will never be played (as MPlayer will never
   call play() with a larger len).
 
-static float get_delay(void); 
+static float get_delay(void);
   Returns how long time it will take to play the data currently in the
   output buffer. Be exact, if possible, since the whole timing depends
   on this! In the worst case, return the maximum delay.
@@ -53,4 +53,4 @@ static void audio_pause(void);
   Pause playing but do not delete buffered data if possible.
 
 static void audio_resume(void);
-  Continue playing after audio_pause().  
+  Continue playing after audio_pause().

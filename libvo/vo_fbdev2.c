@@ -109,15 +109,15 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   int i, cols, rcols, gcols, bcols;
   uint16_t *red, *green, *blue;
   struct fb_cmap *cmap;
-        
+
   rcols = 1 << var->red.length;
   gcols = 1 << var->green.length;
   bcols = 1 << var->blue.length;
-  
+
   /* Make our palette the length of the deepest color */
   cols = (rcols > gcols ? rcols : gcols);
   cols = (cols > bcols ? cols : bcols);
-  
+
   red = malloc(cols * sizeof(red[0]));
   if(!red) {
 	  mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't allocate red palette with %d entries.\n", cols);
@@ -125,7 +125,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   }
   for(i=0; i< rcols; i++)
     red[i] = (65535/(rcols-1)) * i;
-  
+
   green = malloc(cols * sizeof(green[0]));
   if(!green) {
 	  mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't allocate green palette with %d entries.\n", cols);
@@ -134,7 +134,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   }
   for(i=0; i< gcols; i++)
     green[i] = (65535/(gcols-1)) * i;
-  
+
   blue = malloc(cols * sizeof(blue[0]));
   if(!blue) {
 	  mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't allocate blue palette with %d entries.\n", cols);
@@ -144,7 +144,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   }
   for(i=0; i< bcols; i++)
     blue[i] = (65535/(bcols-1)) * i;
-  
+
   cmap = malloc(sizeof(struct fb_cmap));
   if(!cmap) {
 	  mp_msg(MSGT_VO, MSGL_ERR, "[fbdev2] Can't allocate color map\n");
@@ -160,7 +160,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   cmap->blue = blue;
   cmap->green = green;
   cmap->transp = NULL;
-  
+
   return cmap;
 }
 
@@ -173,7 +173,7 @@ static int fb_preinit(int reset)
 		fb_preinit_done = 0;
 		return 0;
 	}
-	
+
 	if (fb_preinit_done)
 		return fb_err;
 	fb_preinit_done = 1;

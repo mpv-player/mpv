@@ -3,7 +3,7 @@
 #include <dvdread/ifo_types.h>
 #include "stream_dvd_common.h"
 
-/** 
+/**
 \brief Converts DVD time structure to milliseconds.
 \param *dev the DVD time structure to convert
 \return returns the time in milliseconds

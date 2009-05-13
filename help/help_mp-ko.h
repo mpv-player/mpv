@@ -47,7 +47,7 @@ static const char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c: 
+// mplayer.c:
 
 #define MSGTR_Exiting "\n종료합니다.\n"
 #define MSGTR_ExitingHow "\n종료합니다... (%s)\n"
@@ -371,7 +371,7 @@ static const char help_text[]=
 #define MSGTR_IDFGCVD "죄송합니다. GUI 호환 비디오 출력 드라이버를 찾지 못했습니다."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[스킨] 스킨 설정파일의 %d번째 줄에 오류가 있습니다.: %s" 
+#define MSGTR_SKIN_ERRORMESSAGE "[스킨] 스킨 설정파일의 %d번째 줄에 오류가 있습니다.: %s"
 #define MSGTR_SKIN_WARNING1 "[스킨] 설정파일의 %d번째 줄 경고:\n위젯(%s)을 찾았지만 그 앞에 \"section\"을 찾을 수 없습니다."
 #define MSGTR_SKIN_WARNING2 "[스킨] 설정파일의 %d번째 줄 경고:\n위젯(%s)을 찾았지만 그 앞에 \"subsection\"을 찾을 수 없습니다."
 #define MSGTR_SKIN_WARNING3 "[스킨] 설정파일의 %d번째 줄 경고:\n이 subsection은 현재 위젯에서 지원되지 않습니다. (%s)"
@@ -558,6 +558,6 @@ static const char help_text[]=
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "치명적 오류!"
 #define MSGTR_MSGBOX_LABEL_Error "오류!"
-#define MSGTR_MSGBOX_LABEL_Warning "경고!" 
+#define MSGTR_MSGBOX_LABEL_Warning "경고!"
 
 #endif

@@ -14,7 +14,7 @@
 
 extern int avcodec_initialized;
 
-struct vf_priv_s 
+struct vf_priv_s
 {
   int       width, height;
   int       pix_fmt;
@@ -69,7 +69,7 @@ imgfmt_to_pixfmt (int imgfmt)
 }
 
 
-static int 
+static int
 config (struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
         unsigned int flags, unsigned int outfmt)
@@ -79,7 +79,7 @@ config (struct vf_instance_s* vf,
   priv->pix_fmt = imgfmt_to_pixfmt(outfmt);
   if(priv->pix_fmt == -1)
     return 0;
-  
+
   /* The deinterlacer will fail if this is false */
   if ((width & 3) != 0 || (height & 3) != 0)
     return 0;
@@ -95,21 +95,21 @@ config (struct vf_instance_s* vf,
 			flags, outfmt);
 }
 
-static int 
+static int
 put_image (struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
   struct vf_priv_s *priv = vf->priv;
   mp_image_t* dmpi;
   AVPicture pic;
   AVPicture lavc_picture;
-  
+
   lavc_picture.data[0]     = mpi->planes[0];
   lavc_picture.data[1]     = mpi->planes[1];
   lavc_picture.data[2]     = mpi->planes[2];
   lavc_picture.linesize[0] = mpi->stride[0];
   lavc_picture.linesize[1] = mpi->stride[1];
   lavc_picture.linesize[2] = mpi->stride[2];
-  
+
   dmpi = vf_get_image(vf->next, mpi->imgfmt,
 		      MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 		      priv->width, priv->height);
@@ -121,18 +121,18 @@ put_image (struct vf_instance_s* vf, mp_image_t *mpi, double pts)
   pic.linesize[1] = dmpi->stride[1];
   pic.linesize[2] = dmpi->stride[2];
 
-  if (avpicture_deinterlace(&pic, &lavc_picture, 
+  if (avpicture_deinterlace(&pic, &lavc_picture,
 			    priv->pix_fmt, priv->width, priv->height) < 0)
     {
       /* This should not happen -- see config() */
       return 0;
     }
-  
+
   return vf_next_put_image(vf, dmpi, pts);
 }
 
 
-static int 
+static int
 query_format (struct vf_instance_s* vf, unsigned int fmt)
 {
   if(imgfmt_to_pixfmt(fmt) == -1)
@@ -142,7 +142,7 @@ query_format (struct vf_instance_s* vf, unsigned int fmt)
 }
 
 
-static int 
+static int
 open (vf_instance_t *vf, char* args)
 {
   /* We don't have any args */

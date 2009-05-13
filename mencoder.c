@@ -114,8 +114,8 @@ static char* spudec_ifo=NULL;
 
 static char** audio_codec_list=NULL;  // override audio codec
 static char** video_codec_list=NULL;  // override video codec
-static char** audio_fm_list=NULL;     // override audio codec family 
-static char** video_fm_list=NULL;     // override video codec family 
+static char** audio_fm_list=NULL;     // override audio codec family
+static char** video_fm_list=NULL;     // override video codec family
 extern char *demuxer_name; // override demuxer
 extern char *audio_demuxer_name; // override audio demuxer
 extern char *sub_demuxer_name; // override sub demuxer
@@ -305,7 +305,7 @@ static void parse_cfgfiles( m_config_t* conf )
   char *conffile;
   if (!disable_system_conf &&
       m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mencoder.conf") < 0)
-    mencoder_exit(1,MSGTR_ConfigFileError); 
+    mencoder_exit(1,MSGTR_ConfigFileError);
 
   if (!disable_user_conf) {
     if ((conffile = get_path("mencoder.conf")) == NULL) {
@@ -418,7 +418,7 @@ user_correct_pts = 0;
 #if (defined(__MINGW32__) || defined(__CYGWIN__)) && defined(CONFIG_WIN32DLL)
   set_path_env();
 #endif
-  
+
   InitTimer();
 
 // check codec.conf
@@ -439,13 +439,13 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
 {
 	char *extension;
-	
+
 	if (!out_filename) mencoder_exit(1,MSGTR_MissingOutputFilename);
 	extension=strrchr(out_filename,'.');
 	if (extension != NULL && strlen(extension) > 3 && strlen(extension) < 6)
 	{
 		extension++;
-		
+
 		switch (out_file_format)
 		{
 			case MUXER_TYPE_AVI:
@@ -456,12 +456,12 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 			case MUXER_TYPE_MPEG:
 			if (strcasecmp(extension,"mpg") &&
 				strcasecmp(extension,"mpeg") &&
-				strcasecmp(extension,"vob")) 
+				strcasecmp(extension,"vob"))
 				mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_MencoderWrongFormatMPG);
 			break;
 		}
 	}
-}				
+}
  /* Display what configure line was used */
  mp_msg(MSGT_MENCODER, MSGL_V, "Configuration: " CONFIGURATION "\n");
 
@@ -477,7 +477,7 @@ if (frameno_filename) {
 
 #ifdef CONFIG_PRIORITY
   set_priority();
-#endif	
+#endif
 
 // check font
 #ifdef CONFIG_FREETYPE
@@ -511,7 +511,7 @@ play_next_file:
   m_config_push(mconfig);
   m_entry_set_options(mconfig,&filelist[curfile]);
   filename = filelist[curfile].name;
- 
+
   if(!filename){
 	mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_MissingFilename);
 	mencoder_exit(1,NULL);
@@ -554,7 +554,7 @@ if(stream->type==STREAMTYPE_DVDNAV){
   }
 
   select_audio(demuxer, audio_id, audio_lang);
- 
+
   if (dvdsub_id < 0 && dvdsub_lang)
     dvdsub_id = demuxer_sub_track_by_lang(demuxer, dvdsub_lang);
 
@@ -584,7 +584,7 @@ sh_video=d_video->sh;
 
   if(!sh_video)
   {
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VideoStreamRequired); 
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VideoStreamRequired);
 	mencoder_exit(1,NULL);
   }
 
@@ -822,7 +822,7 @@ default: {
         sh_video->vfilter=vf_open_encoder(NULL,"xvid",(char *)mux_v); break;
     case VCODEC_QTVIDEO:
         sh_video->vfilter=vf_open_encoder(NULL,"qtvideo",(char *)mux_v); break;
-    case VCODEC_NUV:        
+    case VCODEC_NUV:
         sh_video->vfilter=vf_open_encoder(NULL,"nuv",(char *)mux_v); break;
     case VCODEC_X264:
         sh_video->vfilter=vf_open_encoder(NULL,"x264",(char *)mux_v); break;
@@ -904,7 +904,7 @@ if(mux_a->codec != ACODEC_COPY) {
     aencoder = new_audio_encoder(mux_a, &aparams);
     if(!aencoder)
         mencoder_exit(1, NULL);
-    if(!init_audio_filters(sh_audio, 
+    if(!init_audio_filters(sh_audio,
         new_srate,
         &aparams.sample_rate, &aparams.channels, &aencoder->input_format)) {
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_NoMatchingFilter);
@@ -1035,7 +1035,7 @@ if (out_file_format == MUXER_TYPE_MPEG)
 	}
 	}
 
-if(file_format == DEMUXER_TYPE_TV) 
+if(file_format == DEMUXER_TYPE_TV)
 	{
 	mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection);
 	audio_preload = 0.0;
@@ -1147,11 +1147,11 @@ if(sh_audio){
 				len = aencoder->decode_buffer_size;
 
 			len = dec_audio(sh_audio, aencoder->decode_buffer, len);
-			mux_a->buffer_len += aencoder->encode(aencoder, mux_a->buffer + mux_a->buffer_len, 
+			mux_a->buffer_len += aencoder->encode(aencoder, mux_a->buffer + mux_a->buffer_len,
 				aencoder->decode_buffer, len, mux_a->buffer_size-mux_a->buffer_len);
 			if(mux_a->buffer_len < mux_a->wf->nBlockAlign)
 				len = 0;
-			else 
+			else
 				len = mux_a->wf->nBlockAlign*(mux_a->buffer_len/mux_a->wf->nBlockAlign);
 		}
 		else	/* VBR */
@@ -1210,7 +1210,7 @@ if(sh_audio){
 
 	audiosamples++;
 	audiorate+= (GetTimerMS() - ptimer_start);
-	
+
     }
 }
 
@@ -1296,9 +1296,9 @@ default:
     {void *decoded_frame = decode_video(sh_video,frame_data.start,frame_data.in_size,
       skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), MP_NOPTS_VALUE);
     blit_frame = decoded_frame && filter_video(sh_video, decoded_frame, MP_NOPTS_VALUE);}
-    
+
     if (sh_video->vf_initialized < 0) mencoder_exit(1, NULL);
-    
+
     if(!blit_frame){
       if (play_n_frames >= 0)
         play_n_frames++;
@@ -1356,7 +1356,7 @@ if(sh_audio && !demuxer2){
 //	printf("samples=%d  \n",samples);
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
       delay_corrected=1;
-    } else 
+    } else
 #endif
     {
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
@@ -1425,7 +1425,7 @@ if(sh_audio && !demuxer2){
 		mp_msg(MSGT_STATUSLINE,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/B/S %d/%d/%d \r",
 	    	mux_v->timer, decoded_frameno, (int)(p*100),
 	    	(t>1) ? (int)(decoded_frameno/t+0.5) : 0,
-	    	(p>0.001) ? (int)((t/p-t)/60) : 0, 
+	    	(p>0.001) ? (int)((t/p-t)/60) : 0,
 	    	(p>0.001) ? (int)(stream_tell(muxer->stream)/p/1024/1024) : 0,
 	    	v_pts_corr,
 	    	(mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
@@ -1437,7 +1437,7 @@ if(sh_audio && !demuxer2){
 	mp_msg(MSGT_STATUSLINE,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %5.2ffps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d]\r",
 	    mux_v->timer, decoded_frameno, (int)(p*100),
 	    (t>1) ? (float)(decoded_frameno/t) : 0,
-	    (p>0.001) ? (int)((t/p-t)/60) : 0, 
+	    (p>0.001) ? (int)((t/p-t)/60) : 0,
 	    (p>0.001) ? (int)(stream_tell(muxer->stream)/p/1024/1024) : 0,
 	    v_pts_corr,
 	    (mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,

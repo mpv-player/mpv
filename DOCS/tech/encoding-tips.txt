@@ -122,7 +122,7 @@ long, encoded at 25fps (those nasty NTSC fps values give me
 headaches. Adjust to your needs, of course!). This leaves you with
 a video bitrate of:
 
-                $videosize * 8 
+                $videosize * 8
 $videobitrate = --------------
                 $length * 1000
 
@@ -152,7 +152,7 @@ vbitate and scale. Why? Because both together tell the codec how
 many bits it may spend on each frame for each bit: and this is
 the 'bpp' value (bits per pixel). It's simply defined as
 
-         $videobitrate * 1000       
+         $videobitrate * 1000
 $bpp = -----------------------
        $width * $height * $fps
 
@@ -260,7 +260,7 @@ majority of quantizers at 4 and above then you should probably decrease
 the resolution (you'll definitly see block artefacts).
 
 
-Well... Several people will probably disagree with me on certain 
+Well... Several people will probably disagree with me on certain
 points here, especially when it comes down to hard values (like the
 $bpp categories and the percentage of the quantizers used). But
 the idea is still valid.
@@ -275,13 +275,13 @@ end up with movies that could certainly look better.
 
 Now please shoot me if you have any complaints ;)
 
--- 
+--
  ==> Ciao, Mosu (Moritz Bunkus)
 
 ===========
 ANOTHER APPROACH: BITS PER BLOCK:
 
->          $videobitrate * 1000       
+>          $videobitrate * 1000
 > $bpp = -----------------------
 >        $width * $height * $fps
 
@@ -341,7 +341,7 @@ scale down again in desesperate need of some bandwidth :)
 In my experience, don't try to go below a width of 576 without closely
 watching what's going on.
 
--- 
+--
 Rémi
 
 ===========
@@ -488,18 +488,18 @@ I found myself that  4:3 B&W old movies are very hard  to compress well. In
 addition to the 4:3 aspect ratio which  eats lots of bits, those movies are
 typically very "noisy", which doesn't help at all. Anyway :
 
-> After a few tries I am                                                        
-> still a little bit disappointed with the video quality. Since it is a         
-> "dark" movies, there is a lot of black on the pictures, and on the            
-> encoded avi I can see a lot of annoying "mpeg squares". I am using            
-> avifile codec, but the best I think is to give you the command line I         
-> used to encode a preview of the result:                                       
+> After a few tries I am
+> still a little bit disappointed with the video quality. Since it is a
+> "dark" movies, there is a lot of black on the pictures, and on the
+> encoded avi I can see a lot of annoying "mpeg squares". I am using
+> avifile codec, but the best I think is to give you the command line I
+> used to encode a preview of the result:
 
->                                                                               
-> First pass:                                                                   
-> mencoder TITLE01-ANGLE1.VOB -oac copy -ovc lavc -lavcopts                     
-> vcodec=mpeg4:vhq:vpass=1:vbitrate=800:keyint=48 -ofps 23.976 -npp lb          
-> -ss 2:00 -endpos 0:30 -vf scale -zoom -xy 640 -o movie.avi                   
+>
+> First pass:
+> mencoder TITLE01-ANGLE1.VOB -oac copy -ovc lavc -lavcopts
+> vcodec=mpeg4:vhq:vpass=1:vbitrate=800:keyint=48 -ofps 23.976 -npp lb
+> -ss 2:00 -endpos 0:30 -vf scale -zoom -xy 640 -o movie.avi
 
 1) keyint=48 is way too low. The  default value is 250, this is in *frames*
 not seconds. Keyframes are significantly larger than P or B frames, so the
@@ -555,35 +555,35 @@ Be warned that these options are really experimental and the result
 could be very good or very bad depending on your visualization device
 (computer CRT, TV or TFT screen). Don't push too hard these options.
 
-> Second pass:                                                                  
-> the same with vpass=2                                                         
+> Second pass:
+> the same with vpass=2
 
 7) I've found  that lavc gives better  results when the first  pass is done
 with  "vqscale=2" instead  of a  target bitrate.  The statistics  collected
 seems to be more precise. YMMV.
 
-> I am new to mencoder, so please tell me any idea you have even if it          
-> obvious. I also tried the "gray" option of lavc, to encode B&W only,          
-> but strangely it gives me "pink" squares from time to time.                   
+> I am new to mencoder, so please tell me any idea you have even if it
+> obvious. I also tried the "gray" option of lavc, to encode B&W only,
+> but strangely it gives me "pink" squares from time to time.
 
 Yes, I've seen  that too. Playing the resulting file  with "-lavdopts gray"
 fix the problem but it's not very nice ...
 
-> So if you could tell me what option of mencoder or lavc I should be           
-> looking at to lower the number of "squares" on the image, it would be         
-> great. The version of mencoder i use is 0.90pre8 on a macos x PPC             
-> platform. I guess I would have the same problem by encoding anime             
-> movies, where there are a lot of region of the image with the same            
-> color. So if you managed to solve this problem...                             
+> So if you could tell me what option of mencoder or lavc I should be
+> looking at to lower the number of "squares" on the image, it would be
+> great. The version of mencoder i use is 0.90pre8 on a macos x PPC
+> platform. I guess I would have the same problem by encoding anime
+> movies, where there are a lot of region of the image with the same
+> color. So if you managed to solve this problem...
 
 You could  also try the  "mpeg_quant" flag. It  selects a different  set of
 quantizers and produce  somewhat sharper pictures and less  blocks on large
 zones with the same or similar luminance, at the expense of some bits.
 
-> This is completely off topic, but do you know how I can create good           
-> subtitles from vobsub subtitles ? I checked the -dumpmpsub option of          
-> mplayer, but is there a way to do it really fast (ie without having to        
-> play the whole movie) ?                                                       
+> This is completely off topic, but do you know how I can create good
+> subtitles from vobsub subtitles ? I checked the -dumpmpsub option of
+> mplayer, but is there a way to do it really fast (ie without having to
+> play the whole movie) ?
 
 I didn't  find a way under  *nix to produce reasonably  good text subtitles
 from vobsubs. OCR  *nix softwares seems either not suited  to the task, not
@@ -601,14 +601,14 @@ for f in 0 1 2 3 4 5 6 7 8 9 10 11 ; do \
 done
 
 (and yes, I've a DVD with 12 subtitles)
---                                                                              
+--
 Rémi
 
 
 ================================================================================
 
 
-TIPS FOR SMOKE & CLOUDS 
+TIPS FOR SMOKE & CLOUDS
 
 Q: I'm trying  to encode Dante's Peak and I'm  having problems with clouds,
 fog and  smoke: They don't  look fine  (they look very  bad if I  watch the
@@ -620,10 +620,10 @@ In particular I'm using vqscale=2:vhq:v4mv
 
 A: Try adding "vqcomp=0.7:vqblur=0.2:mpeg_quant" to lavcopts.
 
-Q: I tried your suggestion and it  improved the image a little ... but not 
-enough. I was playing with different  options and I couldn't find the way. 
-I  suppose that  the vob  is not  so good  (watching it  in TV  trough the 
-computer looks better than my encoding, but it isn't a lot of better).     
+Q: I tried your suggestion and it  improved the image a little ... but not
+enough. I was playing with different  options and I couldn't find the way.
+I  suppose that  the vob  is not  so good  (watching it  in TV  trough the
+computer looks better than my encoding, but it isn't a lot of better).
 
 A: Yes, those scenes with qscale=2 looks terrible :-(
 
@@ -652,46 +652,46 @@ A = Rémi
 
 TIPS FOR TWEAKING RATECONTROL
 
-(For the purpose of this explanation, consider "2nd pass" to be any beyond 
-the 1st. The algorithm is run only on P-frames; I- and B-frames use QPs 
-based on the adjacent P. While x264's 2pass ratecontrol is based on lavc's, 
+(For the purpose of this explanation, consider "2nd pass" to be any beyond
+the 1st. The algorithm is run only on P-frames; I- and B-frames use QPs
+based on the adjacent P. While x264's 2pass ratecontrol is based on lavc's,
 it has diverged somewhat and not all of this is valid for x264.)
 
 Consider the default ratecontrol equation in lavc: "tex^qComp".
-At the beginning of the 2nd pass, rc_eq is evaluated for each frame, and 
-the result is the number of bits allocated to that frame (multiplied by 
+At the beginning of the 2nd pass, rc_eq is evaluated for each frame, and
+the result is the number of bits allocated to that frame (multiplied by
 some constant as needed to match the total requested bitrate).
 
-"tex" is the complexity of a frame, i.e. the estimated number of bits it 
-would take to encode at a given quantizer. (If the 1st pass was CQP and 
-not turbo, then we know tex exactly. Otherwise it is calculated by 
-multiplying the 1st pass's bits by the QP of that frame. But that's not 
+"tex" is the complexity of a frame, i.e. the estimated number of bits it
+would take to encode at a given quantizer. (If the 1st pass was CQP and
+not turbo, then we know tex exactly. Otherwise it is calculated by
+multiplying the 1st pass's bits by the QP of that frame. But that's not
 why CQP is potentially good; more on that later.)
-"qComp" is just a constant. It has no effect outside the rc_eq, and is 
+"qComp" is just a constant. It has no effect outside the rc_eq, and is
 directly set by the vqcomp parameter.
 
-If vqcomp=1, then rc_eq=tex^1=tex, so 2pass allocates to each frame the 
+If vqcomp=1, then rc_eq=tex^1=tex, so 2pass allocates to each frame the
 number of bits needed to encode them all at the same QP.
-If vqcomp=0, then rc_eq=tex^0=1, so 2pass allocates the same number of 
-bits to each frame, i.e. CBR. (Actually, this is worse than 1pass CBR in 
-terms of quality; CBR can vary within its allowed buffer size, while 
+If vqcomp=0, then rc_eq=tex^0=1, so 2pass allocates the same number of
+bits to each frame, i.e. CBR. (Actually, this is worse than 1pass CBR in
+terms of quality; CBR can vary within its allowed buffer size, while
 vqcomp=0 tries to make each frame exactly the same size.)
-If vqcomp=0.5, then rc_eq=sqrt(tex), so the allocation is somewhere 
-between CBR and CQP. High complexity frames get somewhat lower quality 
+If vqcomp=0.5, then rc_eq=sqrt(tex), so the allocation is somewhere
+between CBR and CQP. High complexity frames get somewhat lower quality
 than low complexity, but still more bits.
 
-While the actual selection of a good value of vqcomp is experimental, the 
+While the actual selection of a good value of vqcomp is experimental, the
 following underlying factors determine the result:
-Arguing towards CQP: You want the movie to be somewhere approaching 
-constant quality; oscillating quality is even more annoying than constant 
-low quality. (However, constant quality does not mean constant PSNR nor 
-constant QP. Details are less noticeable in high-motion scenes, so you can 
-get away with somewhat higher QP in high-complexity frames for the same 
+Arguing towards CQP: You want the movie to be somewhere approaching
+constant quality; oscillating quality is even more annoying than constant
+low quality. (However, constant quality does not mean constant PSNR nor
+constant QP. Details are less noticeable in high-motion scenes, so you can
+get away with somewhat higher QP in high-complexity frames for the same
 perceived quality.)
-Arguing towards CBR: You get more quality per bit if you spend those bits 
-in frames where motion compensation works well (which tends to be 
-correlated with "tex"): A given artifact may stick around several seconds 
-in a low-motion scene, and you only have to fix it in one frame to improve 
+Arguing towards CBR: You get more quality per bit if you spend those bits
+in frames where motion compensation works well (which tends to be
+correlated with "tex"): A given artifact may stick around several seconds
+in a low-motion scene, and you only have to fix it in one frame to improve
 the quality of the whole sequence.
 
 Now for why the 1st pass ratecontrol method matters:

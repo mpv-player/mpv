@@ -38,7 +38,7 @@
 #include "libass/ass.h"
 #include "libass/ass_mp.h"
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
   "X11 (OpenGL)",
   "gl",
@@ -472,7 +472,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   autodetectGlExtensions();
   texSize(image_width, image_height, &texture_width, &texture_height);
 
-  glDisable(GL_BLEND); 
+  glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
   glDisable(GL_CULL_FACE);
@@ -530,7 +530,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 /* connect to server, create and map window,
  * allocate colors and (shared) memory
  */
-static int 
+static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
   image_height = height;
@@ -935,7 +935,7 @@ skip_upload:
 static int
 draw_frame(uint8_t *src[])
 {
-  return VO_ERROR; 
+  return VO_ERROR;
 }
 
 static int

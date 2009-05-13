@@ -5,7 +5,7 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-// Preklad do slovenčiny 
+// Preklad do slovenčiny
 
 static const char help_text[]=
 "Použitie:   mplayer [prepínače] [url|cesta/]menosúboru\n"
@@ -558,7 +558,7 @@ static const char help_text[]=
 #define MSGTR_NI_Detected "Detekovaný"
 #define MSGTR_NI_Message "%s NEPREKLADANÝ formát súboru AVI!\n"
 
-#define MSGTR_UsingNINI "Používam NEPREKLADANÝ poškodený formát súboru AVI!\n" 
+#define MSGTR_UsingNINI "Používam NEPREKLADANÝ poškodený formát súboru AVI!\n"
 #define MSGTR_CouldntDetFNo "Nemôžem určiť počet snímkov (pre absolútny posun)  \n"
 #define MSGTR_CantSeekRawAVI "Nemôžem sa posúvať v surových (raw) .AVI prúdoch! (Potrebujem index, zkuste použíť voľbu -idx!)  \n"
 #define MSGTR_CantSeekFile "Nemôžem sa posúvať v tomto súbore!  \n"
@@ -621,7 +621,7 @@ static const char help_text[]=
 #define MSGTR_ADecoderPreinitFailed "ADecoder preinit zlyhal :(\n"
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Alokujem %d bytov pre vstupný buffer\n"
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Alokujem %d + %d = %d bytov pre výstupný buffer\n"
-			 
+
 // LIRC:
 #define MSGTR_SettingUpLIRC "Zapínam podporu LIRC...\n"
 #define MSGTR_LIRCopenfailed "Zlyhal pokus o otvorenie podpory LIRC!\n"

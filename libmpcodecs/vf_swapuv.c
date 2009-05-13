@@ -33,7 +33,7 @@
 //===========================================================================//
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
-    mp_image_t *dmpi= vf_get_image(vf->next, mpi->imgfmt, 
+    mp_image_t *dmpi= vf_get_image(vf->next, mpi->imgfmt,
 	mpi->type, mpi->flags, mpi->w, mpi->h);
 
     mpi->planes[0]=dmpi->planes[0];
@@ -50,7 +50,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
-    
+
     if(mpi->flags&MP_IMGFLAG_DIRECT){
 	dmpi=(mp_image_t*)mpi->priv;
     } else {
@@ -64,7 +64,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	dmpi->stride[2]=mpi->stride[1];
 	dmpi->width=mpi->width;
     }
-    
+
     vf_clone_mpi_attributes(dmpi, mpi);
 
     return vf_next_put_image(vf,dmpi, pts);

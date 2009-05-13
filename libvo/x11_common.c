@@ -336,7 +336,7 @@ static int vo_wm_detect(void)
                    "[x11] Using workaround for Metacity bugs.\n");
         }
     }
-// --- netwm 
+// --- netwm
     if (x11_get_property(XA_NET_SUPPORTED, &args, &nitems))
     {
         mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports NetWM.\n");
@@ -416,7 +416,7 @@ int vo_init(void)
 // Window    mRootWin;
     XWindowAttributes attribs;
     char *dispName;
-	
+
 	if (vo_rootwin)
 		WinID = 0; // use root window
 
@@ -609,7 +609,7 @@ static const struct keymap keymap[] = {
     {wsGrayRight, KEY_KP6}, {wsGrayHome, KEY_KP7}, {wsGrayUp, KEY_KP8},
     {wsGrayPgUp, KEY_KP9}, {wsGrayDelete, KEY_KPDEL},
 
-    {0, 0} 
+    {0, 0}
 };
 
 void vo_x11_putkey(int key)
@@ -2135,7 +2135,7 @@ void vo_xv_print_ck_info(void)
 
   switch ( xv_ck_info.source )
   {
-    case CK_SRC_CUR:      
+    case CK_SRC_CUR:
       mp_msg( MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06lx).\n",
               xv_colorkey );
       break;
@@ -2198,12 +2198,12 @@ int vo_xv_init_colorkey(void)
     if ( xv_ck_info.source != CK_SRC_CUR )
     {
       xv_colorkey = vo_colorkey;
-  
+
       /* check if we have to set the colorkey too */
       if ( xv_ck_info.source == CK_SRC_SET )
       {
         xv_atom = XInternAtom(mDisplay, "XV_COLORKEY",False);
-  
+
         rez = XvSetPortAttribute( mDisplay, xv_port, xv_atom, vo_colorkey );
         if ( rez != Success )
         {
@@ -2213,7 +2213,7 @@ int vo_xv_init_colorkey(void)
         }
       }
     }
-    else 
+    else
     {
       int colorkey_ret;
 
@@ -2231,13 +2231,13 @@ int vo_xv_init_colorkey(void)
       }
     }
 
-    xv_atom = xv_intern_atom_if_exists( "XV_AUTOPAINT_COLORKEY" );    
+    xv_atom = xv_intern_atom_if_exists( "XV_AUTOPAINT_COLORKEY" );
 
     /* should we draw the colorkey ourselves or activate autopainting? */
     if ( xv_ck_info.method == CK_METHOD_AUTOPAINT )
     {
       rez = !Success; // reset rez to something different than Success
- 
+
       if ( xv_atom != None ) // autopaint is supported
       {
         rez = XvSetPortAttribute( mDisplay, xv_port, xv_atom, 1 );
@@ -2381,11 +2381,11 @@ void xv_setup_colorkeyhandling( char const * ck_method_str,
     else if ( strncmp( ck_method_str, "man", 3 ) == 0 )
     {
       xv_ck_info.method = CK_METHOD_MANUALFILL;
-    }    
+    }
     else if ( strncmp( ck_method_str, "auto", 4 ) == 0 )
     {
       xv_ck_info.method = CK_METHOD_AUTOPAINT;
-    }    
+    }
   }
 }
 

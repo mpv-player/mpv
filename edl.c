@@ -22,12 +22,12 @@ static edl_record_ptr edl_alloc_new(edl_record_ptr next_edl_record)
         mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_EdlOutOfMem);
         exit(1);
     }
-    
+
     if (next_edl_record) // if this isn't the first record, tell the previous one what the new one is.
         next_edl_record->next = new_record;
     new_record->prev = next_edl_record;
     new_record->next = NULL;
-    
+
     return new_record;
 }
 
@@ -81,14 +81,14 @@ edl_record_ptr edl_parse_file(void)
                 mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadlyFormattedLine,
                        lineCount);
                 continue;
-            } 
- 
+            }
+
             if (next_edl_record && start <= next_edl_record->stop_sec)
             {
                 mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
                 mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineOverlap,
                        next_edl_record->stop_sec, start);
-                continue;    
+                continue;
             }
 
             if (stop <= start)
@@ -110,9 +110,9 @@ edl_record_ptr edl_parse_file(void)
                 next_edl_record->length_sec = 0;
                 next_edl_record->start_sec = start;
                 next_edl_record->stop_sec = start;
-                
+
                 next_edl_record = edl_alloc_new(next_edl_record);
-                
+
                 next_edl_record->action = action;
                 next_edl_record->length_sec = 0;
                 next_edl_record->start_sec = stop;
@@ -128,11 +128,11 @@ edl_record_ptr edl_parse_file(void)
         }
 
         fclose(fd);
-    }        
+    }
 
-    if (edl_records) 
+    if (edl_records)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo, record_count);
-    else 
+    else
         mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
 
     return edl_records;

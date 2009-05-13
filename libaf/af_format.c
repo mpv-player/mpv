@@ -36,7 +36,7 @@
    format */
 
 /* The below includes retrieves functions for converting to and from
-   ulaw and alaw */ 
+   ulaw and alaw */
 #include "af_format_ulaw.h"
 #include "af_format_alaw.h"
 
@@ -62,7 +62,7 @@ static af_data_t* play_s16_float(struct af_instance_s* af, af_data_t* data);
 static int check_bps(int bps)
 {
   if(bps != 4 && bps != 3 && bps != 2 && bps != 1){
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] The number of bytes per sample" 
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] The number of bytes per sample"
 	   " must be 1, 2, 3 or 4. Current value is %i \n",bps);
     return AF_ERROR;
   }
@@ -74,11 +74,11 @@ static int check_format(int format)
 {
   char buf[256];
   switch(format & AF_FORMAT_SPECIAL_MASK){
-  case(AF_FORMAT_IMA_ADPCM): 
-  case(AF_FORMAT_MPEG2): 
+  case(AF_FORMAT_IMA_ADPCM):
+  case(AF_FORMAT_MPEG2):
   case(AF_FORMAT_AC3):
     mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] Sample format %s not yet supported \n",
-	 af_fmt2str(format,buf,256)); 
+	 af_fmt2str(format,buf,256));
     return AF_ERROR;
   }
   return AF_OK;
@@ -92,9 +92,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     char buf1[256];
     char buf2[256];
     af_data_t *data = arg;
-    
-    // Make sure this filter isn't redundant 
-    if(af->data->format == data->format && 
+
+    // Make sure this filter isn't redundant
+    if(af->data->format == data->format &&
        af->data->bps == data->bps)
       return AF_DETACH;
 
@@ -112,9 +112,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->rate = data->rate;
     af->data->nch  = data->nch;
     af->mul        = (double)af->data->bps / data->bps;
-    
+
     af->play = play; // set default
-    
+
     // look whether only endianness differences are there
     if ((af->data->format & ~AF_FORMAT_END_MASK) ==
 	(data->format & ~AF_FORMAT_END_MASK))
@@ -164,13 +164,13 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Deallocate memory 
+// Deallocate memory
 static void uninit(struct af_instance_s* af)
 {
   if (af->data)
       free(af->data->audio);
   free(af->data);
-  af->setup = 0;  
+  af->setup = 0;
 }
 
 static af_data_t* play_swapendian(struct af_instance_s* af, af_data_t* data)
@@ -271,10 +271,10 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     }
   } else {
     // Input must be int
-    
+
     // Change signed/unsigned
     if((c->format&AF_FORMAT_SIGN_MASK) != (l->format&AF_FORMAT_SIGN_MASK)){
-      si2us(c->audio,len,c->bps); 
+      si2us(c->audio,len,c->bps);
     }
     // Convert to special formats
     switch(l->format&(AF_FORMAT_SPECIAL_MASK|AF_FORMAT_POINT_MASK)){
@@ -297,7 +297,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     }
   }
 
-  // Switch from cpu native endian to the correct endianness 
+  // Switch from cpu native endian to the correct endianness
   if((l->format&AF_FORMAT_END_MASK)!=AF_FORMAT_NE)
     endian(l->audio,l->audio,len,l->bps);
 
@@ -450,7 +450,7 @@ static void change_bps(void* in, void* out, int len, int inbps, int outbps)
 	((uint32_t*)out)[i]=(uint32_t)load24bit(in, i);
       break;
     }
-    break;      
+    break;
   case(4):
     switch(outbps){
     case(1):
@@ -466,7 +466,7 @@ static void change_bps(void* in, void* out, int len, int inbps, int outbps)
         store24bit(out, i, ((uint32_t*)in)[i]);
       break;
     }
-    break;      
+    break;
   }
 }
 
@@ -478,7 +478,7 @@ static void float2int(float* in, void* out, int len, int bps)
     for(i=0;i<len;i++)
       ((int8_t*)out)[i] = lrintf(127.0 * in[i]);
     break;
-  case(2): 
+  case(2):
     for(i=0;i<len;i++)
       ((int16_t*)out)[i] = lrintf(32767.0 * in[i]);
     break;
@@ -490,7 +490,7 @@ static void float2int(float* in, void* out, int len, int bps)
     for(i=0;i<len;i++)
       ((int32_t*)out)[i] = lrintf(2147483647.0 * in[i]);
     break;
-  }	
+  }
 }
 
 static void int2float(void* in, float* out, int len, int bps)
@@ -513,5 +513,5 @@ static void int2float(void* in, float* out, int len, int bps)
     for(i=0;i<len;i++)
       out[i]=(1.0/2147483648.0)*((int32_t*)in)[i];
     break;
-  }	
+  }
 }

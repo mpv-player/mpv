@@ -3,7 +3,7 @@
  *
  * Nathan Laredo (laredo@broked.net)
  *
- * Frequencies are given in kHz 
+ * Frequencies are given in kHz
  */
 
 #ifndef MPLAYER_FREQUENCIES_H
@@ -20,7 +20,7 @@
    containing 8 bits frame sync, 5 bits control, 11 bits additional data, and
    704 bits audio data.  The bit rate is reduced by transmitting only 10 bits
    plus parity of each 14 bit sample, the largest sample in a frame determines
-   which 10 bits are transmitted.  The parity bits for audio samples also 
+   which 10 bits are transmitted.  The parity bits for audio samples also
    specify the scaling factor used for that channel during that frame.  The
    companeded audio data is interleaved to reduce the influence of dropouts
    and the whole frame except for sync bits is scrambled for spectrum shaping.

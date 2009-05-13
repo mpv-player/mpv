@@ -79,7 +79,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     unsigned char *p;
 
     if(len<=0) return NULL; // skipped frame
-    
+
  png=png_create_read_struct( PNG_LIBPNG_VER_STRING,NULL,NULL,NULL );
  info=png_create_info_struct( png );
  endinfo=png_create_info_struct( png );
@@ -131,13 +131,13 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
   }
 #endif
 
-    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE, 
+    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	png_width,png_height);
     if(!mpi) return NULL;
 
 // Let's DECODE!
  row_p=malloc( sizeof( png_bytep ) * png_height );
-//png_get_rowbytes( png,info ) 
+//png_get_rowbytes( png,info )
  for ( i=0; i < png_height; i++ ) row_p[i]=mpi->planes[0] + mpi->stride[0]*i;
  png_read_image( png,row_p );
  free( row_p );
@@ -153,7 +153,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	 *p++ = 0;
      }
  }
- 
+
  png_read_end( png,endinfo );
  png_destroy_read_struct( &png,&info,&endinfo );
 

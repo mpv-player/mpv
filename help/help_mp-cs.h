@@ -246,7 +246,7 @@ static const char help_text[]=
 #define MSGTR_SubScale "Zvětšení titulků: %s"
 #define MSGTR_SubVisibleStatus "Titulky: %s"
 #define MSGTR_SubForcedOnlyStatus "Pouze vynucené titulky: %s"
- 
+
 // mencoder.c
 #define MSGTR_UsingPass3ControlFile "Řídicí soubor pro tříprůchodový režim: %s\n"
 #define MSGTR_MissingFilename "\nChybí jméno souboru.\n\n"
@@ -1180,7 +1180,7 @@ static const char help_text[]=
 #define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] selhalo otevření datového proudu ESD pro přehrávání: %s\n"
 
 // ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] selhalo nastavení DVB zvukového mixeru: %s.\n" 
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] selhalo nastavení DVB zvukového mixeru: %s.\n"
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz není podporováno, zkuste převzorkovat.\n"
 
 // ao_pcm.c

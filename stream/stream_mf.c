@@ -33,7 +33,7 @@ mf_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
   stream->type = STREAMTYPE_MF;
   *file_format = DEMUXER_TYPE_MF;
-  
+
   return STREAM_OK;
 }
 
@@ -42,7 +42,7 @@ const stream_info_t stream_info_mf = {
   "mf",
   "Benjamin Zores, Albeu",
   "",
-  mf_stream_open, 			
+  mf_stream_open,
   { "mf", NULL },
   NULL,
   1

@@ -16,7 +16,7 @@ para LINUX</title>
   <year>2006</year>
   <year>2007</year>
   <year>2008</year>
-  <year>2009</year>	
+  <year>2009</year>
   <holder>MPlayer team</holder>
 </copyright>
 <legalnotice>
@@ -24,7 +24,7 @@ para LINUX</title>
 
   <para>Este programa es software libre; usted puede distribuirlo y/o modificarlo
   bajo los términos de la Licencia Pública General GNU, tal y como está publicada
-  por la Free Software Foundation; ya sea la versión 2 de la Licencia, o 
+  por la Free Software Foundation; ya sea la versión 2 de la Licencia, o
   (a su elección) cualquier versión posterior.</para>
 
   <para>Este programa se distribuye con la intención de ser útil, pero SIN NINGUNA
@@ -45,7 +45,7 @@ para LINUX</title>
 Si es la primera vez que va a instalarlo: asegúrese de leer todo desde
 aquí hasta el final de la sección de instalación, y siga los enlaces
 que vaya encontrando. Si tiene otras preguntas, vuelva a la <link linkend="toc">
-Tabla de Contenidos</link> y busque el asunto particular, lea las <link 
+Tabla de Contenidos</link> y busque el asunto particular, lea las <link
 linkend="faq">preguntas frecuentes</link>, o intente usando grep entre los
 archivos. La mayoría de las cuestiones debe estar contestadas en algún lugar de por
 aquí y el resto probablemente ya haya sido preguntado en nuestras
@@ -64,10 +64,10 @@ de información valiosa allí.
 en muchos otros Unices, y en CPUs <emphasis role="bold">no-x86</emphasis>, vea la
 sección de <link linkend="ports">adaptaciones</link>). Puede reproducir casi todos
 los archivos MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM,
-NuppelVideo, yuv4mpeg, FILM, RoQ, PVA y Matroska, soportado por muchos codecs 
+NuppelVideo, yuv4mpeg, FILM, RoQ, PVA y Matroska, soportado por muchos codecs
 nativos, de XAnim, de RealPlayer y de DLL de Win32. Puede ver películas en formato
 <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
-y <emphasis>DivX</emphasis> también (¡y no es necesaria la librería avifile!). 
+y <emphasis>DivX</emphasis> también (¡y no es necesaria la librería avifile!).
 Otra gran característica de <application>MPlayer</application> es el amplio
 rango de controladores de salida soportados. Funciona con X11, Xv, DGA, OpenGL,
 SVGAlib, fbdev, AAlib, libcaca, DirectFB, ¡pero también puede usar GGI y SDL (y de esta

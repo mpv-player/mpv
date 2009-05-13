@@ -256,7 +256,7 @@ m_option_t xvidencopts_conf[] =
 	{"frame_drop_ratio", &xvidenc_frame_drop_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"max_key_interval", &xvidenc_max_key_interval, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"greyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL}, /* kept for backward compatibility */
-	{"grayscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},		
+	{"grayscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nogreyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"lumi_mask", &xvidenc_luminance_masking, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nolumi_mask", &xvidenc_luminance_masking, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -347,9 +347,9 @@ typedef struct xvid_mplayer_module_t
 	int max_sse_u;
 	int max_sse_v;
 	int max_framenum;
-	
+
 	int pixels;
-	
+
 	/* DAR/PAR and all that thingies */
 	int d_width;
 	int d_height;
@@ -380,11 +380,11 @@ config(struct vf_instance_s* vf,
 {
 	int err;
 	xvid_mplayer_module_t *mod = (xvid_mplayer_module_t *)vf->priv;
-	
+
 	/* Complete the muxer initialization */
 	mod->mux->bih->biWidth = width;
 	mod->mux->bih->biHeight = height;
-	mod->mux->bih->biSizeImage = 
+	mod->mux->bih->biSizeImage =
 		mod->mux->bih->biWidth * mod->mux->bih->biHeight * 3 / 2;
 	mod->mux->aspect = (float)d_width/d_height;
 
@@ -425,7 +425,7 @@ config(struct vf_instance_s* vf,
 		       "xvid: xvidcore returned a '%s' error\n", errorstring(err));
 		return BAD;
 	}
-	
+
 	/* Store the encoder instance into the private data */
 	mod->instance = mod->create.handle;
 
@@ -517,7 +517,7 @@ static int
 put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	int size;
-	xvid_enc_stats_t stats; 
+	xvid_enc_stats_t stats;
 	xvid_mplayer_module_t *mod = (xvid_mplayer_module_t *)vf->priv;
 
 	/* Prepare the stats */
@@ -630,7 +630,7 @@ vf_open(vf_instance_t *vf, char* args)
 		       XVID_VERSION_PATCH(xvid_gbl_info.actual_version),
 		       xvid_gbl_info.build);
 	}
-		
+
 	/* Initialize the xvid_gbl_init structure */
 	memset(&xvid_gbl_init, 0, sizeof(xvid_gbl_init_t));
 	xvid_gbl_init.version = XVID_VERSION;
@@ -681,7 +681,7 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 			"xvid:[ERROR] \"%s\" is an invalid profile name\n", xvidenc_profile);
 		return BAD;
 	}
-	
+
 	/* -------------------------------------------------------------------
 	 * Dispatch all settings having an impact on the "create" structure
 	 * This includes plugins as they are passed to encore through the
@@ -736,7 +736,7 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 	if(selected_profile->flags & PROFILE_DXN)
 		create->global |= XVID_GLOBAL_DIVX5_USERDATA;
 #endif
-	
+
 	create->max_key_interval = xvidenc_max_key_interval;
 	create->frame_drop_ratio = xvidenc_frame_drop_ratio;
 	create->min_quant[0] = xvidenc_min_quant[0];
@@ -899,12 +899,12 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 
 	if( !(selected_profile->flags & PROFILE_DXN) )
 	{
-	if(xvidenc_dar_aspect > 0) 
+	if(xvidenc_dar_aspect > 0)
 	    ar = av_d2q(xvidenc_dar_aspect * mod->mux->bih->biHeight / mod->mux->bih->biWidth, 255);
 	else if(xvidenc_autoaspect)
 	    ar = av_d2q((float)mod->d_width / mod->d_height * mod->mux->bih->biHeight / mod->mux->bih->biWidth, 255);
 	else ar.num = ar.den = 0;
-	
+
 	if(ar.den != 0) {
 		if(ar.num == 12 && ar.den == 11)
 		    frame->par = XVID_PAR_43_PAL;
@@ -915,12 +915,12 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 		else if(ar.num == 40 && ar.den == 33)
 		    frame->par = XVID_PAR_169_NTSC;
 		else
-		{    
+		{
 		    frame->par = XVID_PAR_EXT;
 		    frame->par_width = ar.num;
 		    frame->par_height= ar.den;
 		}
-			
+
 	} else if(xvidenc_par != NULL) {
 		if(strcasecmp(xvidenc_par, "pal43") == 0)
 			frame->par = XVID_PAR_43_PAL;
@@ -947,7 +947,7 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 	}
 
 	/* Display par information */
-	mp_msg(MSGT_MENCODER, MSGL_INFO, "xvid: par=%d/%d (%s), displayed=%dx%d, sampled=%dx%d\n", 
+	mp_msg(MSGT_MENCODER, MSGL_INFO, "xvid: par=%d/%d (%s), displayed=%dx%d, sampled=%dx%d\n",
 			ar.num, ar.den, par_string(frame->par),
 			mod->d_width, mod->d_height, mod->mux->bih->biWidth, mod->mux->bih->biHeight);
 	}
@@ -1101,7 +1101,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 			       squant.num,
 			       squant.den,
 			       (float)(squant.num)/(float)(squant.den));
-			
+
 		} else {
 			mp_msg(MSGT_MENCODER, MSGL_INFO,
 			       "xvid: CBR Rate Control -- bitrate=%dkbit/s\n",
@@ -1272,7 +1272,7 @@ static int set_frame_struct(xvid_mplayer_module_t *mod, mp_image_t *mpi)
 }
 
 static void
-flush_internal_buffers(xvid_mplayer_module_t *mod)		
+flush_internal_buffers(xvid_mplayer_module_t *mod)
 {
 	int size;
 	xvid_enc_frame_t *frame = &mod->frame;
@@ -1336,7 +1336,7 @@ update_stats(xvid_mplayer_module_t *mod, xvid_enc_stats_t *stats)
 			mod->max_sse_v = stats->sse_v;
 			mod->max_framenum = mod->frames;
 		}
-		
+
 		if (xvidenc_psnr) {
 			if (!mod->fvstats) {
 				char filename[20];
@@ -1408,7 +1408,7 @@ static void *read_matrix(unsigned char *filename)
 	int i;
 	unsigned char *matrix;
 	FILE *input;
-	
+
 	/* Allocate matrix space */
 	if((matrix = malloc(64*sizeof(unsigned char))) == NULL)
 	   return NULL;
@@ -1450,7 +1450,7 @@ static void *read_matrix(unsigned char *filename)
 	fclose(input);
 
 	return matrix;
-	
+
 }
 
 

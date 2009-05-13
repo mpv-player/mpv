@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#usage: 
+#usage:
 #
 # vobshift.py in.idx out.idx -8.45
 #
@@ -35,7 +35,7 @@ def delta2text(d):
 
 def shift(line,seconds):
 	triplet = tripletize(line)
-	
+
 	base = text2delta(triplet[1])
 	base = base + datetime.timedelta(seconds=seconds)
 	base = delta2text(base)
@@ -52,7 +52,7 @@ o = open(OUTFILE,'wt')
 for line in open(INFILE):
     if line.startswith('timestamp'):
 	line = shift(line,DIFF)
-    
+
     o.write(line)
 
 o.close()

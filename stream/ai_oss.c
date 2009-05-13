@@ -75,11 +75,11 @@ int ai_oss_init(audio_in_t *ai)
 	       ai->oss.device, strerror(errno));
 	return -1;
     }
-	
+
     ioctl_param = 0 ;
     mp_msg(MSGT_TV, MSGL_V, "ioctl dsp getfmt: %d\n",
 	   ioctl(ai->oss.audio_fd, SNDCTL_DSP_GETFMTS, &ioctl_param));
-	
+
     mp_msg(MSGT_TV, MSGL_V, "Supported formats: %x\n", ioctl_param);
     if (!(ioctl_param & AFMT_S16_LE))
 	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIOSS_UnsupportedFmt);
@@ -93,7 +93,7 @@ int ai_oss_init(audio_in_t *ai)
     }
 
     if (ai_oss_set_channels(ai) < 0) return -1;
-	
+
     ioctl_param = ai->req_samplerate;
     mp_msg(MSGT_TV, MSGL_V, "ioctl dsp speed: %d\n",
 	   err = ioctl(ai->oss.audio_fd, SNDCTL_DSP_SPEED, &ioctl_param));

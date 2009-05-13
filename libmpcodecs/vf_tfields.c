@@ -205,7 +205,7 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 			"pmullw %%mm6, %%mm3 \n\t"
 			"movq (%%"REG_S",%%"REG_a",2), %%mm2 \n\t"
 			"psubusw %%mm3, %%mm1 \n\t"
-			"punpcklbw %%mm0, %%mm2 \n\t"	
+			"punpcklbw %%mm0, %%mm2 \n\t"
 			"pmullw %%mm7, %%mm2 \n\t"
 			"psubusw %%mm2, %%mm1 \n\t"
 			"psrlw $7, %%mm1 \n\t"
@@ -222,12 +222,12 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 			"pmullw %%mm6, %%mm3 \n\t"
 			"psubusw %%mm3, %%mm2 \n\t"
 			"movq (%%"REG_S",%%"REG_a",2), %%mm3 \n\t"
-			"punpckhbw %%mm0, %%mm3 \n\t"	
+			"punpckhbw %%mm0, %%mm3 \n\t"
 			"add $8, %%"REG_S" \n\t"
 			"pmullw %%mm7, %%mm3 \n\t"
 			"psubusw %%mm3, %%mm2 \n\t"
 			"psrlw $7, %%mm2 \n\t"
-			
+
 			"packuswb %%mm2, %%mm1 \n\t"
 			"movq %%mm1, (%%"REG_D") \n\t"
 			"add $8, %%"REG_D" \n\t"

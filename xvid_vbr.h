@@ -180,7 +180,7 @@ typedef struct vbr_control_t
 	/* ----------- Internal data - do not modify ----------- */
 	vbr_init_function_ptr      init;
 	vbr_get_quant_function_ptr getquant;
-	vbr_get_intra_function_ptr getintra;	
+	vbr_get_intra_function_ptr getintra;
 	vbr_update_function_ptr    update;
 	vbr_finish_function_ptr    finish;
 

@@ -106,7 +106,7 @@ struct play_tree_iter {
   int num_files;
   int entry_pushed;
   int mode;
- 
+
   ///  loop/valid stack to save/revert status when we go up/down.
   int* status_stack;
   /// status stack size
@@ -115,7 +115,7 @@ struct play_tree_iter {
 ///@}
 
 /// Create a new empty playtree item.
-play_tree_t* 
+play_tree_t*
 play_tree_new(void);
 
 /// Free a playtree item.
@@ -201,7 +201,7 @@ play_tree_iter_free(play_tree_iter_t* iter);
  *  \param with_node TRUE == stop on nodes with children, FALSE == go directly to the next child
  *  \return See \ref PlaytreeIterReturn.
  */
-int 
+int
 play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes);
 
 /// Step up, useful to break a loop, etc.
@@ -268,7 +268,7 @@ void pt_iter_replace_entry(play_tree_iter_t* iter, play_tree_t* entry);
 /// Adds a new file to the playtree, if it is not valid it is created.
 void pt_add_file(play_tree_t** ppt, char* filename);
 
-/// \brief Performs a convert to playtree-syntax, by concat path/file 
+/// \brief Performs a convert to playtree-syntax, by concat path/file
 /// and performs pt_add_file
 void pt_add_gui_file(play_tree_t** ppt, char* path, char* file);
 

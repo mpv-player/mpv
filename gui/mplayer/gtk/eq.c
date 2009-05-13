@@ -91,7 +91,7 @@ static void eqSetBands( int channel )
    get_video_colors( guiIntfStruct.sh_video,"hue",&vo_gamma_hue );
    get_video_colors( guiIntfStruct.sh_video,"saturation",&vo_gamma_saturation );
   }
-										    
+
  gtk_adjustment_set_value( VContrastadj,(float)vo_gamma_contrast );
  gtk_adjustment_set_value( VBrightnessadj,(float)vo_gamma_brightness );
  gtk_adjustment_set_value( VHueadj,(float)vo_gamma_hue );
@@ -177,7 +177,7 @@ void HideEqualizer( void )
 static gboolean eqHScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data )
 {
  equalizer_t eq;
- switch ( (int)user_data ) 
+ switch ( (int)user_data )
   {
    case 0: eq.gain=A3125adj->value; break;
    case 1: eq.gain=A6250adj->value; break;
@@ -193,13 +193,13 @@ static gboolean eqHScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpoin
   }
  eq.gain=0.0f - eq.gain;
  eq.band=(int)user_data;
- if ( Channel == -1 ) 
+ if ( Channel == -1 )
   {
    int i;
    for ( i=0;i<6;i++ )
     { eq.channel=i; gtkSet( gtkSetEqualizer,0,&eq ); }
   } else { eq.channel=Channel; gtkSet( gtkSetEqualizer,0,&eq ); }
-  
+
  return FALSE;
 }
 
@@ -218,16 +218,16 @@ static gboolean eqVScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpoin
 }
 
 static void eqButtonReleased( GtkButton * button,gpointer user_data )
-{ 
+{
  switch( (int)user_data )
   {
    case 0: HideEqualizer(); break;
-   case 1: 
+   case 1:
 	if ( gtk_notebook_get_current_page( GTK_NOTEBOOK( Notebook ) ) == 0 )
-	 { 
+	 {
 	  if ( !guiIntfStruct.Playing || !gtkEnableAudioEqualizer ) break;
-	  gtkSet( gtkSetEqualizer,0,NULL ); 
-	  eqSetBands( Channel ); 
+	  gtkSet( gtkSetEqualizer,0,NULL );
+	  eqSetBands( Channel );
 	 }
 	 else
 	  {
@@ -324,7 +324,7 @@ GtkWidget * create_Equalizer( void )
   A3125adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A3125=AddVScaler( A3125adj,NULL,-1 );
     gtk_table_attach( GTK_TABLE( table1 ),A3125,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),0,0 );
-  
+
   A6250adj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-eqRange,eqRange,0.5,0,0 ) );
   A6250=AddVScaler( A6250adj,NULL,-1 );
     gtk_table_attach( GTK_TABLE( table1 ),A6250,1,2,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),0,0 );
@@ -408,7 +408,7 @@ GtkWidget * create_Equalizer( void )
   gtk_widget_set_name( table1,"table1" );
   gtk_widget_show( table1 );
   gtk_container_add( GTK_CONTAINER( Notebook ),table1 );
-  
+
   gtk_table_attach( GTK_TABLE( table1 ),
     AddLabel( MSGTR_EQU_Contrast,NULL ),
     0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
@@ -457,7 +457,7 @@ GtkWidget * create_Equalizer( void )
   Config=AddButton( MSGTR_Config,hbuttonbox1 );
   Clear=AddButton( MSGTR_Clear,hbuttonbox1 );
   Ok=AddButton( MSGTR_Ok,hbuttonbox1 );
-  
+
   gtk_widget_add_accelerator( Ok,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
   gtk_widget_add_accelerator( Ok,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
 
@@ -481,7 +481,7 @@ GtkWidget * create_Equalizer( void )
   gtk_signal_connect( GTK_OBJECT( VBrightness ),"motion_notify_event",GTK_SIGNAL_FUNC( eqVScaleMotion ),(void*)2 );
   gtk_signal_connect( GTK_OBJECT( VHue ),"motion_notify_event",GTK_SIGNAL_FUNC( eqVScaleMotion ),(void*)3 );
   gtk_signal_connect( GTK_OBJECT( VSaturation ),"motion_notify_event",GTK_SIGNAL_FUNC( eqVScaleMotion ),(void *)4 );
-  
+
   gtk_signal_connect( GTK_OBJECT( Ok ),"clicked",GTK_SIGNAL_FUNC( eqButtonReleased ),(void *)0 );
   gtk_signal_connect( GTK_OBJECT( Clear ),"clicked",GTK_SIGNAL_FUNC( eqButtonReleased ),(void *)1 );
   gtk_signal_connect( GTK_OBJECT( Config ),"clicked",GTK_SIGNAL_FUNC( eqButtonReleased ),(void *)2 );
@@ -518,14 +518,14 @@ void ShowEquConfig( void )
 
  if ( EquConfig ) gtkActive( EquConfig );
     else EquConfig=create_EquConfig();
-	
+
  Items=g_list_append( Items,(gpointer)MSGTR_EQU_Front_Right  );
  Items=g_list_append( Items,(gpointer)MSGTR_EQU_Front_Left );
  Items=g_list_append( Items,(gpointer)MSGTR_EQU_Back_Right );
  Items=g_list_append( Items,(gpointer)MSGTR_EQU_Back_Left );
  Items=g_list_append( Items,(gpointer)MSGTR_EQU_Center );
  Items=g_list_append( Items,(gpointer)MSGTR_EQU_Bass );
- 
+
  gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel1 ),Items );
  gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel2 ),Items );
  gtk_combo_set_popdown_strings( GTK_COMBO( CBChannel3 ),Items );
@@ -550,7 +550,7 @@ void HideEquConfig( void )
 {
  if ( !EquConfig ) return;
  gtk_widget_hide( EquConfig );
- gtk_widget_destroy( EquConfig ); 
+ gtk_widget_destroy( EquConfig );
  EquConfig=NULL;
 }
 
@@ -634,35 +634,35 @@ GtkWidget * create_EquConfig( void )
 
   CBChannel2=AddComboBox( NULL );
     gtk_table_attach( GTK_TABLE( table1 ),CBChannel2,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  
+
   CEChannel2=GTK_COMBO( CBChannel2 )->entry;
   gtk_widget_set_name( CEChannel2,"CEChannel2" );
   gtk_widget_show( CEChannel2 );
 
   CBChannel3=AddComboBox( NULL );
     gtk_table_attach( GTK_TABLE( table1 ),CBChannel3,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  
+
   CEChannel3=GTK_COMBO( CBChannel3 )->entry;
   gtk_widget_set_name( CEChannel3,"CEChannel3" );
   gtk_widget_show( CEChannel3 );
 
   CBChannel4=AddComboBox( NULL );
     gtk_table_attach( GTK_TABLE( table1 ),CBChannel4,1,2,3,4,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  
+
   CEChannel4=GTK_COMBO( CBChannel4 )->entry;
   gtk_widget_set_name( CEChannel4,"CEChannel4" );
   gtk_widget_show( CEChannel4 );
 
   CBChannel5=AddComboBox( NULL );
     gtk_table_attach( GTK_TABLE( table1 ),CBChannel5,1,2,4,5,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  
+
   CEChannel5=GTK_COMBO( CBChannel5 )->entry;
   gtk_widget_set_name( CEChannel5,"CEChannel5" );
   gtk_widget_show( CEChannel5 );
 
   CBChannel6=AddComboBox( NULL );
     gtk_table_attach( GTK_TABLE( table1 ),CBChannel6,1,2,5,6,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
-  
+
   CEChannel6=GTK_COMBO( CBChannel6 )->entry;
   gtk_widget_set_name( CEChannel6,"CEChannel6" );
   gtk_widget_show( CEChannel6 );
@@ -680,7 +680,7 @@ GtkWidget * create_EquConfig( void )
   gtk_widget_add_accelerator( ecCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
   gtk_signal_connect( GTK_OBJECT( EquConfig ),"destroy",GTK_SIGNAL_FUNC( WidgetDestroy ),&EquConfig );
-  
+
   gtk_signal_connect( GTK_OBJECT( ecOk ),"clicked",GTK_SIGNAL_FUNC( ecButtonReleased ),(void *)1 );
   gtk_signal_connect( GTK_OBJECT( ecCancel ),"clicked",GTK_SIGNAL_FUNC( ecButtonReleased ),(void *)0 );
 

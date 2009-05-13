@@ -101,7 +101,7 @@ void subcc_init(void)
 	buf1.lines=buf2.lines=0;
 	fb=&buf1;
 	bb=&buf2;
-	
+
 	initialized=1;
 }
 
@@ -114,7 +114,7 @@ static void append_char(char c)
 		memset(bb->text[bb->lines - 1],0,CC_MAX_LINE_LENGTH);
 		cursor_pos=0;
 	}
-	
+
 	if(c=='\n')
 	{
 		if(cursor_pos>0 && bb->lines < SUB_MAX_TEXT)
@@ -158,7 +158,7 @@ static void display_buffer(subtitle * buf)
 static void cc_decode_EIA608(unsigned short int data)
 {
 
-  static unsigned short int lastcode=0x0000;	
+  static unsigned short int lastcode=0x0000;
   unsigned char c1 = data & 0x7f;
   unsigned char c2 = (data >> 8) & 0x7f;
 
@@ -327,7 +327,7 @@ void subcc_process_data(unsigned char *inputdata,unsigned int len)
 {
 	if(!subcc_enabled) return;
 	if(!initialized) subcc_init();
-	
+
 	subcc_decode(inputdata, len);
 }
 

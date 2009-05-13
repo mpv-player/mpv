@@ -41,7 +41,7 @@
 #include "get_path.h"
 
 #define DEF_SZ 512 // default buffer size (in samples)
-#define SHARED_FILE "mplayer-af_export" /* default file name 
+#define SHARED_FILE "mplayer-af_export" /* default file name
 					   (relative to ~/.mplayer/ */
 
 #define SIZE_HEADER (2 * sizeof(int) + sizeof(unsigned long long))
@@ -81,46 +81,46 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       munmap(s->mmap_area, SIZE_HEADER + (af->data->bps*s->sz*af->data->nch));
     // close previous file descriptor
     if(s->fd)
-      close(s->fd);	
+      close(s->fd);
 
     // Accept only int16_t as input format (which sucks)
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
     af->data->format = AF_FORMAT_S16_NE;
     af->data->bps    = 2;
-	
+
     // If buffer length isn't set, set it to the default value
     if(s->sz == 0)
       s->sz = DEF_SZ;
-	
+
     // Allocate new buffers (as one continuous block)
     s->buf[0] = calloc(s->sz*af->data->nch, af->data->bps);
     if(NULL == s->buf[0])
       mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Out of memory\n");
     for(i = 1; i < af->data->nch; i++)
       s->buf[i] = s->buf[0] + i*s->sz*af->data->bps;
-	
+
     // Init memory mapping
     s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC, 0640);
     mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Exporting to file: %s\n", s->filename);
     if(s->fd < 0)
-      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not open/create file: %s\n", 
+      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not open/create file: %s\n",
 	     s->filename);
-    
+
     // header + buffer
     mapsize = (SIZE_HEADER + (af->data->bps * s->sz * af->data->nch));
-    
+
     // grow file to needed size
     for(i = 0; i < mapsize; i++){
       char null = 0;
       write(s->fd, (void*) &null, 1);
     }
-	
+
     // mmap size
     s->mmap_area = mmap(0, mapsize, PROT_READ|PROT_WRITE,MAP_SHARED, s->fd, 0);
     if(s->mmap_area == NULL)
       mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not mmap file %s\n", s->filename);
-    mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Memory mapped to file: %s (%p)\n", 
+    mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Memory mapped to file: %s (%p)\n",
 	   s->filename, s->mmap_area);
 
     // Initialize header
@@ -134,15 +134,15 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_COMMAND_LINE:{
     int i=0;
     char *str = arg;
-    
+
     if (!str){
-      if(s->filename) 
+      if(s->filename)
 	free(s->filename);
 
       s->filename = get_path(SHARED_FILE);
       return AF_OK;
     }
-	
+
     while((str[i]) && (str[i] != ':'))
       i++;
 
@@ -152,9 +152,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     s->filename = calloc(i + 1, 1);
     memcpy(s->filename, str, i);
     s->filename[i] = 0;
-	
+
     sscanf(str + i + 1, "%d", &(s->sz));
-  
+
     return af->control(af, AF_CONTROL_EXPORT_SZ | AF_CONTROL_SET, &s->sz);
   }
   case AF_CONTROL_EXPORT_SZ | AF_CONTROL_SET:
@@ -167,7 +167,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_EXPORT_SZ | AF_CONTROL_GET:
     *(int*) arg = s->sz;
     return AF_OK;
-      
+
   }
   return AF_UNKNOWN;
 }
@@ -186,10 +186,10 @@ static void uninit( struct af_instance_s* af )
     af_export_t* s = af->setup;
     if (s->buf && s->buf[0])
       free(s->buf[0]);
-    
+
     // Free mmaped area
     if(s->mmap_area)
-      munmap(s->mmap_area, sizeof(af_export_t));	  
+      munmap(s->mmap_area, sizeof(af_export_t));
 
     if(s->fd > -1)
       close(s->fd);
@@ -215,15 +215,15 @@ static af_data_t* play( struct af_instance_s* af, af_data_t* data )
   int		len = c->len/c->bps; // Number of sample in data chunk
   int 		sz  = s->sz;         // buffer size (in samples)
   int 		flag = 0;	     // Set to 1 if buffer is filled
-  
+
   int 		ch, i;
 
   // Fill all buffers
   for(ch = 0; ch < nch; ch++){
     int 	wi = s->wi;    	 // Reset write index
-    int16_t* 	b  = s->buf[ch]; // Current buffer 
+    int16_t* 	b  = s->buf[ch]; // Current buffer
 
-    // Copy data to export buffers 
+    // Copy data to export buffers
     for(i = ch; i < len; i += nch){
       b[wi++] = a[i];
       if(wi >= sz){ // Don't write outside the end of the buffer
@@ -239,7 +239,7 @@ static af_data_t* play( struct af_instance_s* af, af_data_t* data )
     // update buffer in mapped area
     memcpy(s->mmap_area + SIZE_HEADER, s->buf[0], sz * c->bps * nch);
     s->count++; // increment counter (to sync)
-    memcpy(s->mmap_area + SIZE_HEADER - sizeof(s->count), 
+    memcpy(s->mmap_area + SIZE_HEADER - sizeof(s->count),
 	   &(s->count), sizeof(s->count));
   }
 
@@ -248,7 +248,7 @@ static af_data_t* play( struct af_instance_s* af, af_data_t* data )
 }
 
 /* Allocate memory and set function pointers
-   af audio filter instance 
+   af audio filter instance
    returns AF_OK or AF_ERROR
 */
 static int af_open( af_instance_t* af )

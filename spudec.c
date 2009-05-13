@@ -196,7 +196,7 @@ static inline void spudec_cut_image(spudec_handle_t *this)
 	  this->image_size = 0;
 	  return;
   }
-  
+
 //  printf("new h %d new start %d (sz %d st %d)---\n\n", this->height, this->start_row, this->image_size, this->stride);
 
   image = malloc(2 * this->stride * this->height);
@@ -593,7 +593,7 @@ void spudec_reset(void *this)	// called after seek
 }
 
 void spudec_heartbeat(void *this, unsigned int pts100)
-{ 
+{
   spudec_handle_t *spu = (spudec_handle_t*) this;
   spu->now_pts = pts100;
 
@@ -761,7 +761,7 @@ void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh, int ds,
 		firsttime = 0;
 		oldvar = spu_gaussvar;
 	}
-	
+
 	ctx=sws_getContext(sw, sh, PIX_FMT_GRAY8, dw, dh, PIX_FMT_GRAY8, SWS_GAUSS, &filter, NULL, NULL);
 	sws_scale(ctx,&s1,&ss,0,sh,&d1,&ds);
 	for (i=ss*sh-1; i>=0; i--) if (!s2[i]) s2[i] = 255; //else s2[i] = 1;
@@ -778,8 +778,8 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 
   if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts) {
 
-    // check if only forced subtitles are requested 
-    if( (spu->forced_subs_only) && !(spu->is_forced_sub) ){ 
+    // check if only forced subtitles are requested
+    if( (spu->forced_subs_only) && !(spu->is_forced_sub) ){
 	return;
     }
 
@@ -903,7 +903,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 
 	       The original rectangular region that the scaled pixel
 	       represents is cut in 9 rectangular areas like this:
-	       
+
 	       +---+-----------------+---+
 	       | 1 |        2        | 3 |
 	       +---+-----------------+---+
@@ -1012,7 +1012,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 		      alpha += tmp;
 		      color += tmp * spu->image[base + walkx];
 		    }
-		  }		    
+		  }
 		}
 		/* 6: center right part */
 		if (right > 0.0 && height > 0) {

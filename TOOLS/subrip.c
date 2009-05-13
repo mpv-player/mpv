@@ -210,7 +210,7 @@ main(int argc, char **argv)
 	spudec_assemble(spudec, packet, packet_len, pts100);
 	if (spudec->queue_head) {
 		spudec_heartbeat(spudec, spudec->queue_head->start_pts);
-	if (spudec_changed(spudec)) 
+	if (spudec_changed(spudec))
 	    spudec_draw(spudec, draw_alpha);
 	}
     }

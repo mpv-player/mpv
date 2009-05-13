@@ -3,23 +3,23 @@
 # QEPDVCD
 #
 # Most of this stuff comes straight from MPlayer documentation.
-# Options are limited only to a small useful subset, if you 
+# Options are limited only to a small useful subset, if you
 # want more control, RTFM and DIY.
 #
 # Version:          0.1
 #
 # Licence:          GPL
 #
-# Author:           Reynaldo H. Verdejo Pinochet <reynaldo@opendot.cl> 
+# Author:           Reynaldo H. Verdejo Pinochet <reynaldo@opendot.cl>
 #
-# Script:           MPlayer Sources. Anything supported to vcd/svcd pal/ntsc 
+# Script:           MPlayer Sources. Anything supported to vcd/svcd pal/ntsc
 #
 # requires:         mencoder
 #
-# sugests:          vcdimager / cdrecord 
+# sugests:          vcdimager / cdrecord
 #
 # Thanks to:        Carlos Navarro Salas - name author ;)
-#					
+#
 #
 
 # Defaults
@@ -276,7 +276,7 @@ for j in $(seq 0 $CICLES); do
 			fi
 		done
 	fi
-		
+
 # Mencoder Time ;-) ###################################################
 
 mencoder \

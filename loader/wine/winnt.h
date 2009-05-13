@@ -152,11 +152,11 @@ typedef struct FLOATING_SAVE_AREA
 {
     DWORD   ControlWord;
     DWORD   StatusWord;
-    DWORD   TagWord;    
+    DWORD   TagWord;
     DWORD   ErrorOffset;
     DWORD   ErrorSelector;
     DWORD   DataOffset;
-    DWORD   DataSelector;    
+    DWORD   DataSelector;
     BYTE    RegisterArea[SIZE_OF_80387_REGISTERS];
     DWORD   Cr0NpxState;
 } FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
@@ -180,18 +180,18 @@ typedef struct CONTEXT86
     DWORD   SegGs;
     DWORD   SegFs;
     DWORD   SegEs;
-    DWORD   SegDs;    
+    DWORD   SegDs;
 
     /* These are selected by CONTEXT_INTEGER */
     DWORD   Edi;
     DWORD   Esi;
     DWORD   Ebx;
-    DWORD   Edx;    
+    DWORD   Edx;
     DWORD   Ecx;
     DWORD   Eax;
 
     /* These are selected by CONTEXT_CONTROL */
-    DWORD   Ebp;    
+    DWORD   Ebp;
     DWORD   Eip;
     DWORD   SegCs;
     DWORD   EFlags;
@@ -228,7 +228,7 @@ typedef CONTEXT86 CONTEXT;
 #if defined(_ALPHA_) || defined(__alpha__)
 
 #define CONTEXT_ALPHA   0x00020000
- 
+
 #define CONTEXT_CONTROL		(CONTEXT_ALPHA | 0x00000001L)
 #define CONTEXT_FLOATING_POINT	(CONTEXT_ALPHA | 0x00000002L)
 #define CONTEXT_INTEGER		(CONTEXT_ALPHA | 0x00000004L)
@@ -543,10 +543,10 @@ typedef struct STACK_FRAME_HEADER
 
 #ifdef __sparc__
 
-/* 
- * FIXME:  
+/*
+ * FIXME:
  *
- * There is no official CONTEXT structure defined for the SPARC 
+ * There is no official CONTEXT structure defined for the SPARC
  * architecture, so I just made one up.
  *
  * This structure is valid only for 32-bit SPARC architectures,
@@ -556,8 +556,8 @@ typedef struct STACK_FRAME_HEADER
  * the rest of the register window chain is not visible.
  *
  * The layout follows the Solaris 'prgregset_t' structure.
- * 
- */ 
+ *
+ */
 
 #define CONTEXT_SPARC            0x10000000
 
@@ -663,7 +663,7 @@ typedef HANDLE *PHANDLE;
 #define CH_reg(context)      (*((BYTE*)&ECX_reg(context)+1))
 #define DL_reg(context)      (*(BYTE*)&EDX_reg(context))
 #define DH_reg(context)      (*((BYTE*)&EDX_reg(context)+1))
-                            
+
 #define SET_CFLAG(context)   (EFL_reg(context) |= 0x0001)
 #define RESET_CFLAG(context) (EFL_reg(context) &= ~0x0001)
 #define SET_ZFLAG(context)   (EFL_reg(context) |= 0x0040)
@@ -756,7 +756,7 @@ typedef HANDLE *PHANDLE;
 #ifdef __sparc__
 # define GET_IP(context) ((LPVOID)(context)->pc)
 #endif
- 
+
 #if !defined(GET_IP) && !defined(RC_INVOKED)
 # error You must define GET_IP for this CPU
 #endif
@@ -772,7 +772,7 @@ typedef HANDLE *PHANDLE;
 #define STATUS_TIMEOUT                   0x00000102
 #define STATUS_PENDING                   0x00000103
 
-#define STATUS_GUARD_PAGE_VIOLATION      0x80000001    
+#define STATUS_GUARD_PAGE_VIOLATION      0x80000001
 #define STATUS_DATATYPE_MISALIGNMENT     0x80000002
 #define STATUS_BREAKPOINT                0x80000003
 #define STATUS_SINGLE_STEP               0x80000004
@@ -885,7 +885,7 @@ typedef HANDLE *PHANDLE;
 #define STATUS_FILE_LOCK_CONFLICT        0xC0000055  /* FIXME: not sure */
 #define	STATUS_UNKNOWN_REVISION          0xC0000058
 #define	STATUS_INVALID_SECURITY_DESCR    0xC0000079
-#define STATUS_DISK_FULL                 0xC000007F 
+#define STATUS_DISK_FULL                 0xC000007F
 #define STATUS_SECTION_NOT_EXTENDED      0xC0000087
 #define STATUS_ARRAY_BOUNDS_EXCEEDED     0xC000008C
 #define STATUS_FLOAT_DENORMAL_OPERAND    0xC000008D
@@ -963,11 +963,11 @@ typedef HANDLE *PHANDLE;
 #define ExceptionContinueSearch    1
 #define ExceptionNestedException   2
 #define ExceptionCollidedUnwind    3
- 
+
 /*
  * Return values from filters in except() and from UnhandledExceptionFilter
  */
- 
+
 #define EXCEPTION_EXECUTE_HANDLER        1
 #define EXCEPTION_CONTINUE_SEARCH        0
 #define EXCEPTION_CONTINUE_EXECUTION    -1
@@ -985,9 +985,9 @@ typedef HANDLE *PHANDLE;
 
 #define EXCEPTION_CONTINUABLE        0
 #define EXCEPTION_NONCONTINUABLE     EH_NONCONTINUABLE
- 
+
 /*
- * The exception record used by Win32 to give additional information 
+ * The exception record used by Win32 to give additional information
  * about exception to exception handlers.
  */
 
@@ -1008,7 +1008,7 @@ typedef struct EXCEPTION_RECORD
  * The exception pointers structure passed to exception filters
  * in except() and the UnhandledExceptionFilter().
  */
- 
+
 typedef struct EXCEPTION_POINTERS
 {
   PEXCEPTION_RECORD  ExceptionRecord;
@@ -1017,8 +1017,8 @@ typedef struct EXCEPTION_POINTERS
 
 
 /*
- * The exception frame, used for registering exception handlers 
- * Win32 cares only about this, but compilers generally emit 
+ * The exception frame, used for registering exception handlers
+ * Win32 cares only about this, but compilers generally emit
  * larger exception frames for their own use.
  */
 
@@ -1120,7 +1120,7 @@ typedef struct IMAGE_DOS_HEADER {
  * This is the Windows executable (NE) header.
  * the name IMAGE_OS2_HEADER is misleading, but in the SDK this way.
  */
-typedef struct 
+typedef struct
 {
     WORD  ne_magic;             /* 00 NE signature 'NE' */
     BYTE  ne_ver;               /* 02 Linker version number */
@@ -1232,7 +1232,7 @@ typedef struct IMAGE_VXD_HEADER {
 #define	IMAGE_FILE_MACHINE_R4000	0x166
 #define	IMAGE_FILE_MACHINE_R10000	0x168
 #define	IMAGE_FILE_MACHINE_ALPHA	0x184
-#define	IMAGE_FILE_MACHINE_POWERPC	0x1F0  
+#define	IMAGE_FILE_MACHINE_POWERPC	0x1F0
 
 #define	IMAGE_SIZEOF_FILE_HEADER	20
 
@@ -1379,8 +1379,8 @@ typedef struct IMAGE_SECTION_HEADER {
 #define IMAGE_SCN_CNT_INITIALIZED_DATA		0x00000040
 #define IMAGE_SCN_CNT_UNINITIALIZED_DATA	0x00000080
 
-#define	IMAGE_SCN_LNK_OTHER			0x00000100 
-#define	IMAGE_SCN_LNK_INFO			0x00000200  
+#define	IMAGE_SCN_LNK_OTHER			0x00000100
+#define	IMAGE_SCN_LNK_INFO			0x00000200
 /* #define	IMAGE_SCN_TYPE_OVER		0x00000400 - Reserved */
 #define	IMAGE_SCN_LNK_REMOVE			0x00000800
 #define	IMAGE_SCN_LNK_COMDAT			0x00001000
@@ -1635,7 +1635,7 @@ typedef struct IMAGE_IMPORT_DESCRIPTOR {
 	DWORD	ForwarderChain;	/* -1 if no forwarders */
 	DWORD	Name;
 	/* RVA to IAT (if bound this IAT has actual addresses) */
-	PIMAGE_THUNK_DATA FirstThunk;	
+	PIMAGE_THUNK_DATA FirstThunk;
 } IMAGE_IMPORT_DESCRIPTOR,*PIMAGE_IMPORT_DESCRIPTOR;
 
 #define	IMAGE_ORDINAL_FLAG		0x80000000
@@ -2037,7 +2037,7 @@ typedef struct tagMESSAGE_RESOURCE_DATA {
 
 /*
  * Here follows typedefs for security and tokens.
- */ 
+ */
 
 /*
  * First a constant for the following typdefs.
@@ -2053,17 +2053,17 @@ typedef PVOID PACCESS_TOKEN;
  */
 
 typedef enum TOKEN_INFORMATION_CLASS {
-  TokenUser = 1, 
-  TokenGroups, 
-  TokenPrivileges, 
-  TokenOwner, 
-  TokenPrimaryGroup, 
-  TokenDefaultDacl, 
-  TokenSource, 
-  TokenType, 
-  TokenImpersonationLevel, 
-  TokenStatistics 
-} TOKEN_INFORMATION_CLASS; 
+  TokenUser = 1,
+  TokenGroups,
+  TokenPrivileges,
+  TokenOwner,
+  TokenPrimaryGroup,
+  TokenDefaultDacl,
+  TokenSource,
+  TokenType,
+  TokenImpersonationLevel,
+  TokenStatistics
+} TOKEN_INFORMATION_CLASS;
 
 #ifndef SECURITY_DEFINED
 #define SECURITY_DEFINED
@@ -2101,8 +2101,8 @@ typedef struct SID {
 #define	SID_RECOMMENDED_SUB_AUTHORITIES	(1)	/* recommended subauths */
 
 
-/* 
- * ACL 
+/*
+ * ACL
  */
 
 #define ACL_REVISION1 1
@@ -2158,7 +2158,7 @@ typedef struct {
     PACL Dacl;
 } SECURITY_DESCRIPTOR, *PSECURITY_DESCRIPTOR;
 
-#define SECURITY_DESCRIPTOR_MIN_LENGTH   (sizeof(SECURITY_DESCRIPTOR)) 
+#define SECURITY_DESCRIPTOR_MIN_LENGTH   (sizeof(SECURITY_DESCRIPTOR))
 
 #include "poppack.h"
 
@@ -2166,15 +2166,15 @@ typedef struct {
 
 #include "pshpack1.h"
 
-/* 
+/*
  * SID_AND_ATTRIBUTES
  */
 
 typedef struct SID_AND_ATTRIBUTES {
-  PSID  Sid; 
-  DWORD Attributes; 
-} SID_AND_ATTRIBUTES ; 
- 
+  PSID  Sid;
+  DWORD Attributes;
+} SID_AND_ATTRIBUTES ;
+
 /* security entities */
 #define SECURITY_NULL_RID			(0x00000000L)
 #define SECURITY_WORLD_RID			(0x00000000L)
@@ -2190,7 +2190,7 @@ typedef struct SID_AND_ATTRIBUTES {
 
 /* S-1-3 */
 #define SECURITY_CREATOR_SID_AUTHORITY		{0,0,0,0,0,3}
-#define SECURITY_CREATOR_OWNER_RID		(0x00000000L) 
+#define SECURITY_CREATOR_OWNER_RID		(0x00000000L)
 #define SECURITY_CREATOR_GROUP_RID		(0x00000001L)
 #define SECURITY_CREATOR_OWNER_SERVER_RID	(0x00000002L)
 #define SECURITY_CREATOR_GROUP_SERVER_RID	(0x00000003L)
@@ -2199,7 +2199,7 @@ typedef struct SID_AND_ATTRIBUTES {
 #define SECURITY_NON_UNIQUE_AUTHORITY		{0,0,0,0,0,4}
 
 /* S-1-5 */
-#define SECURITY_NT_AUTHORITY			{0,0,0,0,0,5} 
+#define SECURITY_NT_AUTHORITY			{0,0,0,0,0,5}
 #define SECURITY_DIALUP_RID                     0x00000001L
 #define SECURITY_NETWORK_RID                    0x00000002L
 #define SECURITY_BATCH_RID                      0x00000003L
@@ -2234,17 +2234,17 @@ typedef struct SID_AND_ATTRIBUTES {
  */
 
 typedef struct TOKEN_USER {
-  SID_AND_ATTRIBUTES User; 
-} TOKEN_USER; 
+  SID_AND_ATTRIBUTES User;
+} TOKEN_USER;
 
 /*
  * TOKEN_GROUPS
  */
 
 typedef struct TOKEN_GROUPS  {
-  DWORD GroupCount; 
-  SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY]; 
-} TOKEN_GROUPS; 
+  DWORD GroupCount;
+  SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY];
+} TOKEN_GROUPS;
 
 /*
  * LUID_AND_ATTRIBUTES
@@ -2273,9 +2273,9 @@ typedef union ULARGE_INTEGER {
 typedef LARGE_INTEGER LUID,*PLUID;
 
 typedef struct LUID_AND_ATTRIBUTES {
-  LUID   Luid; 
-  DWORD  Attributes; 
-} LUID_AND_ATTRIBUTES; 
+  LUID   Luid;
+  DWORD  Attributes;
+} LUID_AND_ATTRIBUTES;
 
 /*
  * PRIVILEGE_SET
@@ -2292,25 +2292,25 @@ typedef struct PRIVILEGE_SET {
  */
 
 typedef struct TOKEN_PRIVILEGES {
-  DWORD PrivilegeCount; 
-  LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY]; 
-} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES; 
+  DWORD PrivilegeCount;
+  LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY];
+} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES;
 
 /*
  * TOKEN_OWNER
  */
 
 typedef struct TOKEN_OWNER {
-  PSID Owner; 
-} TOKEN_OWNER; 
+  PSID Owner;
+} TOKEN_OWNER;
 
 /*
  * TOKEN_PRIMARY_GROUP
  */
 
 typedef struct TOKEN_PRIMARY_GROUP {
-  PSID PrimaryGroup; 
-} TOKEN_PRIMARY_GROUP; 
+  PSID PrimaryGroup;
+} TOKEN_PRIMARY_GROUP;
 
 
 /*
@@ -2318,37 +2318,37 @@ typedef struct TOKEN_PRIMARY_GROUP {
  */
 
 typedef struct TOKEN_DEFAULT_DACL {
-  PACL DefaultDacl; 
-} TOKEN_DEFAULT_DACL; 
+  PACL DefaultDacl;
+} TOKEN_DEFAULT_DACL;
 
 /*
  * TOKEN_SOURCEL
  */
 
 typedef struct TOKEN_SOURCE {
-  char Sourcename[8]; 
-  LUID SourceIdentifier; 
-} TOKEN_SOURCE; 
+  char Sourcename[8];
+  LUID SourceIdentifier;
+} TOKEN_SOURCE;
 
 /*
  * TOKEN_TYPE
  */
 
 typedef enum tagTOKEN_TYPE {
-  TokenPrimary = 1, 
-  TokenImpersonation 
-} TOKEN_TYPE; 
+  TokenPrimary = 1,
+  TokenImpersonation
+} TOKEN_TYPE;
 
 /*
  * SECURITY_IMPERSONATION_LEVEL
  */
 
 typedef enum SECURITY_IMPERSONATION_LEVEL {
-  SecurityAnonymous, 
-  SecurityIdentification, 
-  SecurityImpersonation, 
-  SecurityDelegation 
-} SECURITY_IMPERSONATION_LEVEL, *PSECURITY_IMPERSONATION_LEVEL; 
+  SecurityAnonymous,
+  SecurityIdentification,
+  SecurityImpersonation,
+  SecurityDelegation
+} SECURITY_IMPERSONATION_LEVEL, *PSECURITY_IMPERSONATION_LEVEL;
 
 
 typedef BOOLEAN SECURITY_CONTEXT_TRACKING_MODE,
@@ -2369,20 +2369,20 @@ typedef struct SECURITY_QUALITY_OF_SERVICE {
  */
 
 typedef struct TOKEN_STATISTICS {
-  LUID  TokenId; 
-  LUID  AuthenticationId; 
-  LARGE_INTEGER ExpirationTime; 
-  TOKEN_TYPE    TokenType; 
-  SECURITY_IMPERSONATION_LEVEL ImpersonationLevel; 
-  DWORD DynamicCharged; 
-  DWORD DynamicAvailable; 
-  DWORD GroupCount; 
-  DWORD PrivilegeCount; 
-  LUID  ModifiedId; 
-} TOKEN_STATISTICS; 
+  LUID  TokenId;
+  LUID  AuthenticationId;
+  LARGE_INTEGER ExpirationTime;
+  TOKEN_TYPE    TokenType;
+  SECURITY_IMPERSONATION_LEVEL ImpersonationLevel;
+  DWORD DynamicCharged;
+  DWORD DynamicAvailable;
+  DWORD GroupCount;
+  DWORD PrivilegeCount;
+  LUID  ModifiedId;
+} TOKEN_STATISTICS;
 
-/* 
- *	ACLs of NT 
+/*
+ *	ACLs of NT
  */
 
 #define	ACL_REVISION	2
@@ -2414,7 +2414,7 @@ typedef struct ACE_HEADER {
 #define	SUCCESSFUL_ACCESS_ACE_FLAG	0x40
 #define	FAILED_ACCESS_ACE_FLAG		0x80
 
-/* different ACEs depending on AceType 
+/* different ACEs depending on AceType
  * SidStart marks the begin of a SID
  * so the thing finally looks like this:
  * 0: ACE_HEADER
@@ -2513,8 +2513,8 @@ typedef enum tagSID_NAME_USE {
 #define THREAD_DIRECT_IMPERSONATION 0x0200
 #define THREAD_ALL_ACCESS          (STANDARD_RIGHTS_REQUIRED|SYNCHRONIZE|0x3ff)
 
-#define THREAD_BASE_PRIORITY_LOWRT  15 
-#define THREAD_BASE_PRIORITY_MAX    2 
+#define THREAD_BASE_PRIORITY_LOWRT  15
+#define THREAD_BASE_PRIORITY_MAX    2
 #define THREAD_BASE_PRIORITY_MIN   -2
 #define THREAD_BASE_PRIORITY_IDLE  -15
 

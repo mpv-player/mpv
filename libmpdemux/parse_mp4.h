@@ -27,25 +27,25 @@
 #include <inttypes.h>
 
 /* one byte tag identifiers */
-#define MP4ODescrTag			0x01 
-#define MP4IODescrTag			0x02 
-#define MP4ESDescrTag			0x03 
-#define MP4DecConfigDescrTag		0x04 
-#define MP4DecSpecificDescrTag		0x05 
-#define MP4SLConfigDescrTag		0x06 
-#define MP4ContentIdDescrTag		0x07 
-#define MP4SupplContentIdDescrTag	0x08 
-#define MP4IPIPtrDescrTag		0x09 
-#define MP4IPMPPtrDescrTag		0x0A 
-#define MP4IPMPDescrTag			0x0B 
-#define MP4RegistrationDescrTag		0x0D 
-#define MP4ESIDIncDescrTag		0x0E 
-#define MP4ESIDRefDescrTag		0x0F 
-#define MP4FileIODescrTag		0x10 
-#define MP4FileODescrTag		0x11 
-#define MP4ExtProfileLevelDescrTag	0x13 
-#define MP4ExtDescrTagsStart		0x80 
-#define MP4ExtDescrTagsEnd		0xFE 
+#define MP4ODescrTag			0x01
+#define MP4IODescrTag			0x02
+#define MP4ESDescrTag			0x03
+#define MP4DecConfigDescrTag		0x04
+#define MP4DecSpecificDescrTag		0x05
+#define MP4SLConfigDescrTag		0x06
+#define MP4ContentIdDescrTag		0x07
+#define MP4SupplContentIdDescrTag	0x08
+#define MP4IPIPtrDescrTag		0x09
+#define MP4IPMPPtrDescrTag		0x0A
+#define MP4IPMPDescrTag			0x0B
+#define MP4RegistrationDescrTag		0x0D
+#define MP4ESIDIncDescrTag		0x0E
+#define MP4ESIDRefDescrTag		0x0F
+#define MP4FileIODescrTag		0x10
+#define MP4FileODescrTag		0x11
+#define MP4ExtProfileLevelDescrTag	0x13
+#define MP4ExtDescrTagsStart		0x80
+#define MP4ExtDescrTagsEnd		0xFE
 
 /* object type identifiers in the ESDS */
 /* See http://gpac.sourceforge.net/tutorial/mediatypes.htm */
@@ -88,11 +88,11 @@
 typedef struct {
   uint8_t  version;
   uint24_t flags;
-  
+
   /* 0x03 ESDescrTag */
   uint16_t ESId;
   uint8_t  streamPriority;
-  
+
   /* 0x04 DecConfigDescrTag */
   uint8_t  objectTypeId;
   uint8_t  streamType;
@@ -100,7 +100,7 @@ typedef struct {
    * only 6bit, followed by:
    * 1bit  upStream
    * 1bit  reserved
-   */  
+   */
   uint24_t bufferSizeDB;
   uint32_t maxBitrate;
   uint32_t avgBitrate;
@@ -118,11 +118,11 @@ typedef struct {
    * for them and doubt they
    * are currently needed ::atmos
    */
-  
+
 } esds_t;
 
 int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds);
-void mp4_free_esds(esds_t *esds); 
+void mp4_free_esds(esds_t *esds);
 
 #endif /* MPLAYER_PARSE_MP4_H */
 

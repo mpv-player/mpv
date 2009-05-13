@@ -53,7 +53,7 @@
 #endif
 
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
     "General X11 driver for overlay capable video output drivers",
     "xover",
@@ -102,11 +102,11 @@ static void set_window(int force_update)
 	       drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
 
       /* following stuff copied from vo_xmga.c */
-    } 
-  else 
-    { 
+    }
+  else
+    {
       aspect(&dwidth,&dheight,A_NOZOOM);
-      drwcX=drwX=vo_dx; drwcY=drwY=vo_dy; drwWidth=vo_dwidth; drwHeight=vo_dheight; 
+      drwcX=drwX=vo_dx; drwcY=drwY=vo_dy; drwWidth=vo_dwidth; drwHeight=vo_dheight;
     }
 
 #if X11_FULLSCREEN
@@ -132,12 +132,12 @@ static void set_window(int force_update)
       XineramaScreenInfo *screens;
       int num_screens;
       int i = 0;
-	
+
       screens = XineramaQueryScreens(mDisplay, &num_screens);
-	
+
       /* find the screen we are on */
       while (i<num_screens &&
-	     ((screens[i].x_org < (int)drwcX) || 
+	     ((screens[i].x_org < (int)drwcX) ||
 	      (screens[i].y_org < (int)drwcY) ||
 	      (screens[i].x_org + screens[i].width >= (int)drwcX) ||
 	      (screens[i].y_org + screens[i].height >= (int)drwcY)))
@@ -265,7 +265,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
   aspect(&d_width, &d_height, A_NOZOOM);
 
-  vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;    
+  vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
   vo_dx += xinerama_x;
   vo_dy += xinerama_y;
   vo_dwidth=d_width; vo_dheight=d_height;
@@ -301,7 +301,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                   window_width, window_height, flags,
 	          xswa.colormap, "xvidix", title);
 	    XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
-	 
+
 #ifdef CONFIG_GUI
     }
 #endif

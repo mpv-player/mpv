@@ -66,11 +66,11 @@ static int parse_psm(demuxer_t *demux, int len) {
   unsigned char c, id, type;
   unsigned int plen, prog_len, es_map_len;
   mpg_demuxer_t *priv = (mpg_demuxer_t *) demux->priv;
-  
+
   mp_dbg(MSGT_DEMUX,MSGL_V, "PARSE_PSM, len=%d\n", len);
   if(! len || len > 1018)
     return 0;
-  
+
   c = stream_read_char(demux->stream);
   if(! (c & 0x80)) {
     stream_skip(demux->stream, len - 1);  //not yet valid, discard
@@ -717,7 +717,7 @@ static int demux_mpg_probe(demuxer_t *demuxer) {
              file_format=DEMUXER_TYPE_MPEG4_ES;
         } else
          // fuzzy h264-es detection. do NOT enable without heavy testing of mpeg formats detection!
-        if((num_h264_slice>3 || (num_h264_dpa>3 && num_h264_dpb>3 && num_h264_dpc>3)) && 
+        if((num_h264_slice>3 || (num_h264_dpa>3 && num_h264_dpb>3 && num_h264_dpc>3)) &&
           /* FIXME num_h264_sps>=1 && */ num_h264_pps>=1 && num_h264_idr>=1 &&
           num_elementary_packets1B6==0 && num_elementary_packetsPES==0 &&
           demuxer->synced<2) {
@@ -909,7 +909,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
     int precision = 1;
     float oldpts = 0;
     off_t oldpos = demuxer->filepos;
-    float newpts = 0; 
+    float newpts = 0;
     off_t newpos = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : oldpos;
 
     if(mpg_d)
@@ -925,7 +925,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
     } else
       newpts += rel_seek_secs;
     if (newpts < 0) newpts = 0;
-	
+
     if(flags&SEEK_FACTOR){
 	// float seek 0..1
 	newpos+=(demuxer->movi_end-demuxer->movi_start)*rel_seek_secs;
@@ -1030,7 +1030,7 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
 
 	case DEMUXER_CTRL_SWITCH_AUDIO:
             if(! (mpg_d && mpg_d->num_a_streams > 1 && demuxer->audio && demuxer->audio->sh))
-	      return DEMUXER_CTRL_NOTIMPL; 
+	      return DEMUXER_CTRL_NOTIMPL;
 	    else {
               demux_stream_t *d_audio = demuxer->audio;
               sh_audio_t *sh_audio = d_audio->sh;

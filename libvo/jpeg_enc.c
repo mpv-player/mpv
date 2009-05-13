@@ -33,7 +33,7 @@
 #include <string.h>
 #include "config.h"
 #include "mp_msg.h"
-/* We need this #define because we need ../libavcodec/common.h to #define 
+/* We need this #define because we need ../libavcodec/common.h to #define
  * be2me_32, otherwise the linker will complain that it doesn't exist */
 #define HAVE_AV_CONFIG_H
 #include "libavcodec/avcodec.h"
@@ -61,7 +61,7 @@ static const unsigned short aanscales[64] = {
     4520,  6270,  5906,  5315,  4520,  3552,  2446,  1247
 };
 
-static void convert_matrix(MpegEncContext *s, int (*qmat)[64], 
+static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 		uint16_t (*qmat16)[2][64], const uint16_t *quant_matrix,
 		int bias, int qmin, int qmax)
 {
@@ -72,9 +72,9 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 	if (s->dsp.fdct == ff_jpeg_fdct_islow) {
 		for (i = 0; i < 64; i++) {
 			const int j = s->dsp.idct_permutation[i];
-			/* 16    <= qscale * quant_matrix[i] <= 7905 
+			/* 16    <= qscale * quant_matrix[i] <= 7905
 			 * 19952 <= aanscales[i] *  \
-			 * 	        qscale * quant_matrix[i]     <= 205026 
+			 * 	        qscale * quant_matrix[i]     <= 205026
 			 * (1<<36)/19952 >= (1<<36)/(aanscales[i] * \
 			 * 	qscale * quant_matrix[i]) >= (1<<36)/249205025
 			 * 3444240       >= (1<<36)/(aanscales[i] *
@@ -89,8 +89,8 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
                 /* 19952         <= aanscales[i] * qscale * quant_matrix[i]           <= 249205026 */
                 /* (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= (1<<36)/249205026 */
                 /* 3444240       >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= 275 */
-                
-                qmat[qscale][i] = (int)((UINT64_C(1) << (QMAT_SHIFT + 11)) / 
+
+                qmat[qscale][i] = (int)((UINT64_C(1) << (QMAT_SHIFT + 11)) /
                                 (aanscales[i] * qscale * quant_matrix[j]));
             }
         } else {
@@ -111,7 +111,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
     }
 }
 
-static inline void encode_dc(MpegEncContext *s, int val, 
+static inline void encode_dc(MpegEncContext *s, int val,
                              uint8_t *huff_size, uint16_t *huff_code)
 {
     int mant, nbits;
@@ -124,16 +124,16 @@ static inline void encode_dc(MpegEncContext *s, int val,
             val = -val;
             mant--;
         }
-        
+
         /* compute the log (XXX: optimize) */
         nbits = 0;
         while (val != 0) {
             val = val >> 1;
             nbits++;
         }
-            
+
         put_bits(&s->pb, huff_size[nbits], huff_code[nbits]);
-        
+
         put_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
     }
 }
@@ -145,7 +145,7 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
     MJpegContext *m = s->mjpeg_ctx;
     uint8_t *huff_size_ac;
     uint16_t *huff_code_ac;
-    
+
     /* DC coef */
     component = (n <= 3 ? 0 : n - 4 + 1);
     dc = block[0]; /* overflow is impossible */
@@ -160,9 +160,9 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
         huff_code_ac = m->huff_code_ac_chrominance;
     }
     s->last_dc[component] = dc;
-    
+
     /* AC coefs */
-    
+
     run = 0;
     last_index = s->block_last_index[n];
     for(i=1;i<=last_index;i++) {
@@ -180,7 +180,7 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
                 val = -val;
                 mant--;
             }
-            
+
             /* compute the log (XXX: optimize) */
             nbits = 0;
             while (val != 0) {
@@ -190,7 +190,7 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
             code = (run << 4) | nbits;
 
             put_bits(&s->pb, huff_size_ac[code], huff_code_ac[code]);
-        
+
             put_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
             run = 0;
         }
@@ -210,7 +210,7 @@ static inline void clip_coeffs(MpegEncContext *s, DCTELEM *block, int last_index
     for(i=0; i<=last_index; i++){
         const int j = s->intra_scantable.permutated[i];
         int level = block[j];
-       
+
         if     (level>maxlevel) level=maxlevel;
         else if(level<minlevel) level=minlevel;
         block[j]= level;
@@ -242,9 +242,9 @@ static void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
 				m->huff_code_ac_chrominance[0]);
     	} else {
 		/* we trick encode_block here so that it uses
-		 * chrominance huffman tables instead of luminance ones 
+		 * chrominance huffman tables instead of luminance ones
 		 * (see the effect of second argument of encode_block) */
-		encode_block(j->s, j->s->block[2], 4); 
+		encode_block(j->s, j->s->block[2], 4);
 		encode_block(j->s, j->s->block[3], 5);
     	}
 }
@@ -252,13 +252,13 @@ static void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
 /* this function can take all kinds of YUV colorspaces
  * YV12, YVYU, UYVY. The necesary parameters must be set up by the caller
  * y_ps means "y pixel size", y_rs means "y row size".
- * For YUYV, for example, is u_buf = y_buf + 1, v_buf = y_buf + 3, 
+ * For YUYV, for example, is u_buf = y_buf + 1, v_buf = y_buf + 3,
  * y_ps = 2, u_ps = 4, v_ps = 4, y_rs = u_rs = v_rs.
  *
  *  The actual buffers must be passed with mjpeg_encode_frame, this is
  *  to make it possible to call encode on the buffer provided by the
  *  codec in draw_frame.
- *  
+ *
  * The data is straightened out at the moment it is put in DCT
  * blocks, there are therefore no spurious memcopies involved */
 /* Notice that w must be a multiple of 16 and h must be a multiple of 8 */
@@ -271,13 +271,13 @@ static void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
 /* The encoder doesn't know anything about interlacing, the halve height
  * needs to be passed and the double rowstride. Which field gets encoded
  * is decided by what buffers are passed to mjpeg_encode_frame */
-jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize, 
+jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 		int u_psize, int u_rsize, int v_psize, int v_rsize,
 		int cu, int q, int b) {
 	jpeg_enc_t *j;
 	int i = 0;
 	mp_msg(MSGT_VO, MSGL_V, "JPEnc init: %dx%d %d %d %d %d %d %d\n",
-			w, h, y_psize, y_rsize, u_psize, 
+			w, h, y_psize, y_rsize, u_psize,
 			u_rsize, v_psize, v_rsize);
 
 	j = av_malloc(sizeof(jpeg_enc_t));
@@ -291,11 +291,11 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	}
 
 	/* info on how to access the pixels */
-	j->y_ps = y_psize; 
-	j->u_ps = u_psize; 
+	j->y_ps = y_psize;
+	j->u_ps = u_psize;
 	j->v_ps = v_psize;
-	j->y_rs = y_rsize; 
-	j->u_rs = u_rsize; 
+	j->y_rs = y_rsize;
+	j->u_rs = u_rsize;
 	j->v_rs = v_rsize;
 
 	j->s->width = w;
@@ -355,15 +355,15 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->s->mb_intra = 1;
 
 	j->s->intra_matrix[0] = ff_mpeg1_default_intra_matrix[0];
-	for (i = 1; i < 64; i++) 
+	for (i = 1; i < 64; i++)
 		j->s->intra_matrix[i] = av_clip_uint8(
 			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3);
-	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16, 
+	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16,
 			j->s->intra_matrix, j->s->intra_quant_bias, 8, 8);
 	return j;
-}	
+}
 
-int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data, 
+int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 		unsigned char *u_data, unsigned char *v_data, char *bufr) {
 	int i, k, mb_x, mb_y, overflow;
 	short int *dest;
@@ -376,8 +376,8 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 
 	j->s->header_bits = put_bits_count(&j->s->pb);
 
-	j->s->last_dc[0] = 128; 
-	j->s->last_dc[1] = 128; 
+	j->s->last_dc[0] = 128;
+	j->s->last_dc[1] = 128;
 	j->s->last_dc[2] = 128;
 
 	for (mb_y = 0; mb_y < j->s->mb_height; mb_y++) {
@@ -385,7 +385,7 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 			/* conversion 8 to 16 bit and filling of blocks
 			 * must be mmx optimized */
 			/* fill 2 Y macroblocks and one U and one V */
-			source = mb_y * 8 * j->y_rs + 
+			source = mb_y * 8 * j->y_rs +
 				16 * j->y_ps * mb_x + y_data;
 			dest = j->s->block[0];
 			for (i = 0; i < 8; i++) {
@@ -395,7 +395,7 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 				dest += 8;
 				source += j->y_rs;
 			}
-			source = mb_y * 8 * j->y_rs + 
+			source = mb_y * 8 * j->y_rs +
 				(16*mb_x + 8)*j->y_ps + y_data;
 			dest = j->s->block[1];
 			for (i = 0; i < 8; i++) {
@@ -406,7 +406,7 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 				source += j->y_rs;
 			}
 			if (!j->bw && j->cheap_upsample) {
-				source = mb_y*4*j->u_rs + 
+				source = mb_y*4*j->u_rs +
 					8*mb_x*j->u_ps + u_data;
 				dest = j->s->block[2];
 				for (i = 0; i < 4; i++) {
@@ -417,7 +417,7 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 					dest += 16;
 					source += j->u_rs;
 				}
-				source = mb_y*4*j->v_rs + 
+				source = mb_y*4*j->v_rs +
 					8*mb_x*j->v_ps + v_data;
 				dest = j->s->block[3];
 				for (i = 0; i < 4; i++) {
@@ -429,20 +429,20 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 					source += j->u_rs;
 				}
 			} else if (!j->bw && !j->cheap_upsample) {
-				source = mb_y*8*j->u_rs + 
+				source = mb_y*8*j->u_rs +
 					8*mb_x*j->u_ps + u_data;
 				dest = j->s->block[2];
 				for (i = 0; i < 8; i++) {
-					for (k = 0; k < 8; k++) 
+					for (k = 0; k < 8; k++)
 						dest[k] = source[k*j->u_ps];
 					dest += 8;
 					source += j->u_rs;
 				}
-				source = mb_y*8*j->v_rs + 
+				source = mb_y*8*j->v_rs +
 					8*mb_x*j->v_ps + v_data;
 				dest = j->s->block[3];
 				for (i = 0; i < 8; i++) {
-					for (k = 0; k < 8; k++) 
+					for (k = 0; k < 8; k++)
 						dest[k] = source[k*j->v_ps];
 					dest += 8;
 					source += j->u_rs;
@@ -450,27 +450,27 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 			}
 			emms_c(); /* is this really needed? */
 
-			j->s->block_last_index[0] = 
-				j->s->dct_quantize(j->s, j->s->block[0], 
+			j->s->block_last_index[0] =
+				j->s->dct_quantize(j->s, j->s->block[0],
 						0, 8, &overflow);
-			if (overflow) clip_coeffs(j->s, j->s->block[0], 
+			if (overflow) clip_coeffs(j->s, j->s->block[0],
 					j->s->block_last_index[0]);
-			j->s->block_last_index[1] = 
-				j->s->dct_quantize(j->s, j->s->block[1], 
+			j->s->block_last_index[1] =
+				j->s->dct_quantize(j->s, j->s->block[1],
 						1, 8, &overflow);
-			if (overflow) clip_coeffs(j->s, j->s->block[1], 
+			if (overflow) clip_coeffs(j->s, j->s->block[1],
 					j->s->block_last_index[1]);
 
 			if (!j->bw) {
 				j->s->block_last_index[4] =
 					j->s->dct_quantize(j->s, j->s->block[2],
 							4, 8, &overflow);
-				if (overflow) clip_coeffs(j->s, j->s->block[2], 
+				if (overflow) clip_coeffs(j->s, j->s->block[2],
 						j->s->block_last_index[2]);
 				j->s->block_last_index[5] =
 					j->s->dct_quantize(j->s, j->s->block[3],
 							5, 8, &overflow);
-				if (overflow) clip_coeffs(j->s, j->s->block[3], 
+				if (overflow) clip_coeffs(j->s, j->s->block[3],
 						j->s->block_last_index[3]);
 			}
 			zr_mjpeg_encode_mb(j);
@@ -478,12 +478,12 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 	}
 	emms_c();
 	ff_mjpeg_encode_picture_trailer(j->s);
-	flush_put_bits(&j->s->pb);	
+	flush_put_bits(&j->s->pb);
 
 	//FIXME
 	//if (j->s->mjpeg_write_tables == 1)
 	//	j->s->mjpeg_write_tables = 0;
-	
+
 	return put_bits_ptr(&(j->s->pb)) - j->s->pb.buf;
 }
 

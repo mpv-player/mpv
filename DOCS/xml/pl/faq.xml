@@ -408,7 +408,7 @@ Czy używasz FVWM? Spróbuj tego:
 <orderedlist>
 <listitem><para>
   <menuchoice><guimenu>Start</guimenu> <guisubmenu>Settings</guisubmenu>
-    <guisubmenu>Configuration</guisubmenu> 
+    <guisubmenu>Configuration</guisubmenu>
 	<guimenuitem>Base Configuration</guimenuitem></menuchoice>
 </para></listitem>
 <listitem><para>
@@ -533,7 +533,7 @@ współdziałają ze sobą dobrze w Fedorze.
 <para>
 Problem powoduje exec-shield, który ustawia losowy adres, pod który będą
 ładowane biblioteki systemowe. Dzieje się to podczas prelinkowania (raz
-na dwa tygodnie)    
+na dwa tygodnie)
 </para>
 <para>
 <application>MPlayer</application> próbuje załadować windowsowy DLL pod

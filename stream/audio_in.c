@@ -43,7 +43,7 @@ int audio_in_init(audio_in_t *ai, int type)
 
 int audio_in_setup(audio_in_t *ai)
 {
-    
+
     switch (ai->type) {
 #ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:
@@ -178,7 +178,7 @@ int audio_in_start_capture(audio_in_t *ai)
 int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 {
     int ret;
-    
+
     switch (ai->type) {
 #ifdef CONFIG_ALSA
     case AUDIO_IN_ALSA:

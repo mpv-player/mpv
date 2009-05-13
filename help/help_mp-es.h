@@ -1,10 +1,10 @@
-// Spanish translation by 
+// Spanish translation by
 //
 // Diego Biurrun
 // Reynaldo H. Verdejo Pinochet
 //
 // Original work done by:
-// 
+//
 // Leandro Lucarella <leandro at lucarella.com.ar>,
 // Jesús Climent <jesus.climent at hispalinux.es>,
 // Sefanja Ruijsenaars <sefanja at gmx.net>,
@@ -71,7 +71,7 @@ static const char help_text[]=
 #define MSGTR_NoHomeDir "No se puede encontrar el directorio HOME.\n"
 #define MSGTR_GetpathProblem "Problema en get_path(\"config\").\n"
 #define MSGTR_CreatingCfgFile "Creando archivo de configuración: %s.\n"
-#define MSGTR_BuiltinCodecsConf "Usando codecs.conf interno por omisión.\n" 
+#define MSGTR_BuiltinCodecsConf "Usando codecs.conf interno por omisión.\n"
 #define MSGTR_CantLoadFont "No se pudo cargar typografía: %s.\n"
 #define MSGTR_CantLoadSub "No se pudo cargar subtítulo: %s.\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: No se encuentró el stream seleccionado.\n"
@@ -262,7 +262,7 @@ static const char help_text[]=
 #define MSGTR_SubScale "Escalado de subtítulos: %s"
 #define MSGTR_SubVisibleStatus "Subtítulos: %s"
 #define MSGTR_SubForcedOnlyStatus "Sólo subtítulos forzados: %s"
- 
+
 // mencoder.c
 #define MSGTR_UsingPass3ControlFile "Usando el archivo de control pass3: %s\n"
 #define MSGTR_MissingFilename "\nFalta el nombre del archivo.\n\n"
@@ -477,7 +477,7 @@ static const char help_text[]=
 "                 (320 kbps de tasa de bits)\n"\
 "                 <8-320>: codificación ABR con tasa de bits en promedio en los kbps dados.\n\n"
 
-// codec-cfg.c 
+// codec-cfg.c
 #define MSGTR_DuplicateFourcc "FourCC duplicado"
 #define MSGTR_TooManyFourccs "demasiados FourCCs/formatos..."
 #define MSGTR_ParseError "error en el analísis"
@@ -942,7 +942,7 @@ static const char help_text[]=
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Xcorrection: %d.\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Fallé seteando el signal mix!\n"
 
-// vo_jpeg.c 
+// vo_jpeg.c
 #define MSGTR_VO_JPEG_ProgressiveJPEG "JPEG progresivo habilitado."
 #define MSGTR_VO_JPEG_NoProgressiveJPEG "JPEG progresivo deshabilitado."
 #define MSGTR_VO_JPEG_BaselineJPEG "Baseline JPEG habilitado."
@@ -995,7 +995,7 @@ static const char help_text[]=
 #define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit falló: %s.\n"
 #define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] Fallo la inicialización de SDL: %s.\n"
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Utilizando el driver: %s.\n"
- 
+
 // vo_svga.c
 #define MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable "[VO_SVGA] El vid_mode forzado %d (%s) no esta disponible.\n"
 #define MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall "[VO_SVGA] El vid_mode forzado %d (%s) es muy pequeño.\n"
@@ -1193,7 +1193,7 @@ static const char help_text[]=
 // ao_mpegpes.c
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Fallo configurando mezclador de audio DVB:%s\n"
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz no soportado, trate de resamplear...\n"
- 
+
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Archivo: %s (%s)\nPCM: Samplerate: %iHz Canales: %s Formato %s\n"
 #define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: El volcado más rápido se logra con -vc null -vo null\nPCM: Info: Para escribir archivos de onda (WAVE) use -ao pcm:waveheader (valor por omisión).\n"
@@ -1380,7 +1380,7 @@ static const char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "No se puede abrir %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantInitAppleRemote "No se puede inicializar la entrada del Apple Remote.\n"
 
-// lirc.c 
+// lirc.c
 #define MSGTR_SettingUpLIRC "Configurando soporte para LIRC...\n"
 #define MSGTR_LIRCopenfailed "Fallo al abrir el soporte para LIRC.\n"
 #define MSGTR_LIRCcfgerr "Fallo al leer archivo de configuración de LIRC %s.\n"

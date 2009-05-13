@@ -70,7 +70,7 @@ static int demux_fli_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
   // seem to do it, even though it takes a file offset as a parameter
   stream_seek(demuxer->stream, frames->filepos[frames->current_frame]);
   ds_read_packet(demuxer->video,
-    demuxer->stream, 
+    demuxer->stream,
     frames->frame_size[frames->current_frame],
     frames->current_frame/sh_video->fps,
     frames->filepos[frames->current_frame],
@@ -104,7 +104,7 @@ static demuxer_t* demux_open_fli(demuxer_t* demuxer){
   demuxer->movi_end = stream_read_dword_le(demuxer->stream);
 
   magic_number = stream_read_word_le(demuxer->stream);
-  
+
   if ((magic_number != 0xAF11) && (magic_number != 0xAF12))
   {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "Bad/unknown magic number (%04x)\n",
@@ -146,7 +146,7 @@ static demuxer_t* demux_open_fli(demuxer_t* demuxer){
   sh_video->bih->biSize = sizeof(BITMAPINFOHEADER) + 128;
   sh_video->bih->biWidth = sh_video->disp_w;
   sh_video->bih->biHeight = sh_video->disp_h;
-    
+
   // skip the video depth and flags
   stream_skip(demuxer->stream, 4);
 

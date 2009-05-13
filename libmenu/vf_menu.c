@@ -71,7 +71,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
   switch(cmd->id) {
   case MP_CMD_MENU : {  // Convert txt cmd from the users into libmenu stuff
     char* arg = cmd->args[0].v.s;
-    
+
     if (!priv->current->show && strcmp(arg,"hide"))
       priv->current->show = 1;
     else if(strcmp(arg,"up") == 0)
@@ -132,7 +132,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     return;
   }
 }
-  
+
 static int key_cb(int code) {
   return menu_read_key(st_priv->current,code);
 }
@@ -214,7 +214,7 @@ static void uninit(vf_instance_t *vf) {
 }
 
 static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height,
-		  unsigned int flags, unsigned int outfmt) { 
+		  unsigned int flags, unsigned int outfmt) {
 #ifdef CONFIG_FREETYPE
   // here is the right place to get screen dimensions
   if (force_load_font) {

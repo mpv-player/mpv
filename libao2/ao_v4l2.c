@@ -38,7 +38,7 @@
 
 static int freq = 0;
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
   "V4L2 MPEG Audio Decoder output",
   "v4l2",
@@ -70,7 +70,7 @@ init (int rate, int channels, int format, int flags)
             "AO: [v4l2] can only handle MPEG audio streams.\n");
     return 0;
   }
-  
+
   ao_data.outburst = 2048;
   ao_data.samplerate = rate;
   ao_data.channels = channels;
@@ -129,11 +129,11 @@ get_space (void)
   x = (float) (vo_pts - ao_data.pts) / 90000.0;
   if (x <= 0)
     return 0;
-  
+
   y  = freq * 4 * x;
   y /= ao_data.outburst;
   y *= ao_data.outburst;
-  
+
   if (y > 32000)
     y = 32000;
 
@@ -145,7 +145,7 @@ static int
 play (void *data, int len, int flags)
 {
   int v4l2_write (unsigned char *data, int len);
-  
+
   if (ao_data.format != AF_FORMAT_MPEG2)
     return 0;
 

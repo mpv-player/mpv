@@ -252,8 +252,8 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ){
 	// try full DR !
 	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	    mpi->type, mpi->flags, 
-            MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
+	    mpi->type, mpi->flags,
+            MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
             MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
 #if 1
 	if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
@@ -295,8 +295,8 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
     if(!mpi->priv)
 	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 //	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-	    MP_IMGTYPE_TEMP, mpi->flags, 
-            MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
+	    MP_IMGTYPE_TEMP, mpi->flags,
+            MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
             MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
     if(!(vf->dmpi->flags&MP_IMGFLAG_DRAW_CALLBACK))
 	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices); // shouldn't happen.
@@ -309,7 +309,7 @@ static void draw_top_blackbar_slice(struct vf_instance_s* vf,
 	vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
 			   vf->dmpi->w,vf->priv->exp_y,0,0);
     }
-    
+
 }
 
 static void draw_bottom_blackbar_slice(struct vf_instance_s* vf,
@@ -335,7 +335,7 @@ static void draw_bottom_blackbar_slice(struct vf_instance_s* vf,
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
 //    printf("draw_slice() called %d at %d\n",h,y);
-    
+
     if (y == 0 && y+h == vf->h) {
 	// special case - only one slice
 	draw_top_blackbar_slice(vf, src, stride, w, h, x, y);
@@ -380,7 +380,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	vf->priv->exp_w, vf->priv->exp_h);
-    
+
     // copy mpi->dmpi...
     if(mpi->flags&MP_IMGFLAG_PLANAR){
 	memcpy_pic(vf->dmpi->planes[0]+

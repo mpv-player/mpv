@@ -704,13 +704,13 @@ static inline void dump_CodecDecompressParams(void* xxx){
     printf("sequenceID=%d\n",cd->sequenceID);
     idh=cd->imageDescription;
     if(idh && idh[0]) dump_ImageDescription(idh[0]);
-    
+
     for(i=0;i<sizeof(CodecDecompressParams);i++){
 	printf(" %02X",((unsigned char*)cd)[i]);
 	if((i%16)==15) printf("\n");
     }
     printf("\n");
-    
+
     printf("data=%p  size=%d\n",cd->data,cd->bufferSize);
     printf("frameno=%d  lines: %d .. %d   condflags=0x%X  callerflags=0x%X\n",
 	cd->frameNumber, cd->startLine, cd->stopLine, cd->conditionFlags,cd->callerFlags);

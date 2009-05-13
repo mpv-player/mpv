@@ -82,7 +82,7 @@ por ejemplo), de manera que pueda crear algo grande.
 Actualmente hay tres ventanas que decorar: la
 <link linkend="skin-file-main">ventana principal</link>, la
 <link linkend="skin-file-subwindow">subventana</link>, la
-<link linkend="skin-file-main">barra de reproducción</link>, y el 
+<link linkend="skin-file-main">barra de reproducción</link>, y el
 <link linkend="skin-file-menu">skin del menú</link> (que puede activarse
 con clic derecho).
 
@@ -103,7 +103,7 @@ con clic derecho).
   Un <emphasis role="bold">medidor</emphasis> (usado principalmente para la barra
   de búsqueda y el control de volumen/balance) puede tener cualquier número de fases
   dividiendo su imagen en diferentes partes unas debajo de otras. Vea
-  <link linkend="skin-hpotmeter">hpotmeter</link> y 
+  <link linkend="skin-hpotmeter">hpotmeter</link> y
   <link linkend="skin-potmeter">potmeter</link> para detalles.
 </para><para>
   <emphasis role="bold">Etiquetas</emphasis> son un poco especiales: Los caractere
@@ -187,7 +187,7 @@ Necesita los siguientes archivos para construir un skin:
 </para>
 </sect2>
 </sect1>
- 
+
 <sect1 id="skin-file">
 <title>El archivo de skin</title>
 <para>
@@ -261,7 +261,7 @@ section = movieplayer
   window = sub
   ; ... objetos para la subventana ...
   end
-  
+
   window = menu
   ; ... objetos para el menú ...
   end

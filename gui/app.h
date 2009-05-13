@@ -150,7 +150,7 @@ typedef struct
  char     * label;
 // ---
  int        event;
-// --- 
+// ---
  int        R,G,B;
 } wItem;
 
@@ -166,7 +166,7 @@ typedef struct
  wItem           bar;
  wsTWindow       barWindow;
  int             barIsPresent;
-  
+
  wItem           menuBase;
  wItem           menuSelected;
  wsTWindow       menuWindow;

@@ -8,7 +8,7 @@
 <para>
 Основная платформа разработки &mdash; это Linux на x86, хотя
 <application>MPlayer</application> работает под многими другими портами Linux.
-Бинарные пакеты <application>MPlayer</application>'а доступны из нескольких источников. 
+Бинарные пакеты <application>MPlayer</application>'а доступны из нескольких источников.
 Тем не менее,
 <emphasis role="bold">ни один из этих пакетов не поддерживается</emphasis>.
 Сообщайте о проблемах их авторам, а не нам.
@@ -23,7 +23,7 @@
 кодом <application>MPlayer</application>'а:
 <screen>fakeroot debian/rules binary</screen>
 
-Если  вы хотите передать дополнительные опции configure, установите 
+Если  вы хотите передать дополнительные опции configure, установите
 соответствующее значение переменной окружения <envar>DEB_BUILD_OPTIONS</envar>.
 В частности, если хотите поддержку GUI и OSD, укажите:
 
@@ -99,26 +99,26 @@ MPlayer</application> &mdash; это скачать его с
 <sect1 id="bsd">
 <title>*BSD</title>
 <para>
-<application>MPlayer</application> работает на всех известных семействах BSD. 
+<application>MPlayer</application> работает на всех известных семействах BSD.
 Существуют портированные[ports]/пакеты сорцов[pkgsrcs]/fink/
-и т.п. версии <application>MPlayer</application>, которые, наверное, проще использовать, 
+и т.п. версии <application>MPlayer</application>, которые, наверное, проще использовать,
 чем просто исходный код.
 </para>
 
 <para>
-Чтобы собрать <application>MPlayer</application>, Вам понадобится GNU make (gmake &mdash; 
+Чтобы собрать <application>MPlayer</application>, Вам понадобится GNU make (gmake &mdash;
 родной BSD make не будет работать) и свежая версия binutils.
 </para>
 
 <para>
-Если <application>MPlayer</application> ругается, что он не может найти 
+Если <application>MPlayer</application> ругается, что он не может найти
 <filename>/dev/cdrom</filename> или
 <filename>/dev/dvd</filename>, создайте соответствующую ссылку:
 <screen>ln -s /dev/<replaceable>Ваше_cdrom_устройство</replaceable> /dev/cdrom</screen>
 </para>
 
 <para>
-Чтобы использовать Win32 DLL'и с <application>MPlayer</application>'ом, Вам необходимо 
+Чтобы использовать Win32 DLL'и с <application>MPlayer</application>'ом, Вам необходимо
 перекомпилировать
 ядро с "<envar>option USER_LDT</envar>" (если только у Вас не FreeBSD-CURRENT,
 где это включено по умолчанию).
@@ -185,7 +185,7 @@ MPlayer</application> &mdash; это скачать его с
 
 <para>
 На <emphasis role="bold">UltraSPARC</emphasis>'ах, <application>MPlayer</application>
-использует преимущество их расширения <emphasis role="bold">VIS</emphasis> 
+использует преимущество их расширения <emphasis role="bold">VIS</emphasis>
 (эквивалент MMX), но (в настоящий момент) только в
 <systemitem class="library">libmpeg2</systemitem>,
 <systemitem class="library">libvo</systemitem>
@@ -199,10 +199,10 @@ and <systemitem class="library">libavcodec</systemitem>, но не в
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">mediaLib</emphasis> в данный
-  момент отключена по умолчанию в 
+  момент отключена по умолчанию в
   <application>MPlayer</application> из-за поломанности.
-  Пользователи SPARC, компилировавшие MPlayer с mediaLib 
-  сообщали об изобилии зелёного оттенка в видео, кодируемом и 
+  Пользователи SPARC, компилировавшие MPlayer с mediaLib
+  сообщали об изобилии зелёного оттенка в видео, кодируемом и
   декодируемом libavcodec.
   Если хотите, можете включить ее:
   <screen>$ ./configure --enable-mlib</screen>
@@ -240,8 +240,8 @@ make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
 Скрипт <filename>configure</filename> пытается обнаружить, какой ассемблер
 используется Вашей командой "gcc" (в том случае, если автоопределение
 не сработает, используйте опцию
-<option>--as=<replaceable>/там/где/у/Вас/установлен/gnu-as</replaceable></option>, 
-чтобы сообщить скрипту <filename>configure</filename>, где можно обнаружить 
+<option>--as=<replaceable>/там/где/у/Вас/установлен/gnu-as</replaceable></option>,
+чтобы сообщить скрипту <filename>configure</filename>, где можно обнаружить
 GNU "as" на Вашей системе).
 </para>
 
@@ -256,7 +256,7 @@ GNU "as" на Вашей системе).
 Checking assembler (/usr/ccs/bin/as) ... , failed
 Please upgrade(downgrade) binutils to 2.10.1...<!--
   --></screen>
-  (Решение: Установите и используйте gcc, сконфигурированный с 
+  (Решение: Установите и используйте gcc, сконфигурированный с
   <option>--with-as=gas</option>)
 </para>
 
@@ -293,7 +293,7 @@ MPlayer interrupted by signal 11 in module: init_audio_codec
   Nevada b31 релизах. Исправлено в Solaris Nevada b32; тем не менее
   Sun еще следует портировать исправление обратно на Solaris 10. Проект MPlayer
   осведомил Sun об этой проблеме и патч в данный момент готовится для
-  Solaris 10. Больше информации об этой ошибке ищите 
+  Solaris 10. Больше информации об этой ошибке ищите
   на:
   <ulink url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
 </para></listitem>
@@ -333,7 +333,7 @@ MPlayer interrupted by signal 11 in module: init_audio_codec
 <title>HP-UX</title>
 
 <para>
-Joe Page на своей домашней странице держит подробное 
+Joe Page на своей домашней странице держит подробное
 <ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOWTO</ulink>
 по <application>MPlayer</application> на HP-UX, написанное Martin Gansser.
 С этими инструкциями сборка должна работать "прямо из коробки".
@@ -426,11 +426,11 @@ Segmentation fault<!--
   <para>
   Решение:
   Ядро HP-UX по-умолчанию для каждого процесса имеет размер стека равный 8MB(?).
-  (11.0 и новые патчи для 10.20 позволяют вам увеличить <systemitem>maxssiz</systemitem> 
-  вплоть до 350MB для 32-х битных программ). Вы должны расширить 
+  (11.0 и новые патчи для 10.20 позволяют вам увеличить <systemitem>maxssiz</systemitem>
+  вплоть до 350MB для 32-х битных программ). Вы должны расширить
   <systemitem>maxssiz</systemitem>
-  и перекомпилировать ядро (и перезагрузиться). Чтобы сделать это, можно использовать SAM. 
-  (Находясь в нем, проверьте параметр <systemitem>maxdsiz</systemitem> на предмет 
+  и перекомпилировать ядро (и перезагрузиться). Чтобы сделать это, можно использовать SAM.
+  (Находясь в нем, проверьте параметр <systemitem>maxdsiz</systemitem> на предмет
   максимального количества данных, которые могут использоваться программами.
   64 Мб по умолчанию может хватить или не хватить в зависимости от Ваших приложений.)
   </para>
@@ -447,7 +447,7 @@ Segmentation fault<!--
 <application>MPlayer</application> успешно собирается на AIX 5.1,
 5.2, и 5.3, используя GCC 3.3 или новее. Сборка
 <application>MPlayer</application> не проверена на AIX 4.3.3 и более ранних.
-Крайне рекомендуется собирать 
+Крайне рекомендуется собирать
 <application>MPlayer</application> используя GCC 3.4 или старше, и, как минимум,
 GCC 4.0, если собираете на POWER5.
 </para>
@@ -455,7 +455,7 @@ GCC 4.0, если собираете на POWER5.
 <para>
 Убедитесь, что используете GNU make
 (<filename>/opt/freeware/bin/gmake</filename>) для сборки
-<application>MPlayer</application>, поскольку столкнетесь с проблемами при 
+<application>MPlayer</application>, поскольку столкнетесь с проблемами при
 использовании <filename>/usr/ccs/bin/make</filename>.
 </para>
 
@@ -482,14 +482,14 @@ GCC 4.0, если собираете на POWER5.
 
 <para>
 Вывод звука через Ultimedia Services не поддерживается, т.к.
-Ultimedia была убрана из AIX 5.1; таким образом, остается единственный 
+Ultimedia была убрана из AIX 5.1; таким образом, остается единственный
 вариант: использовать драйвер AIX Open Sound system (OSS) от
-4Front Technologies с 
-<ulink url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink>. 
-Для некоммерческого использования 4Front Technologies 
-распространяет драйвер OSS под AIX 5.1 бесплатно; несмотря на это, 
+4Front Technologies с
+<ulink url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink>.
+Для некоммерческого использования 4Front Technologies
+распространяет драйвер OSS под AIX 5.1 бесплатно; несмотря на это,
 на текущий день нет драйверов вывода звука для AIX 5.2 или 5.3.
-drivers for AIX 5.2 or 5.3. Это означает, что сейчас 
+drivers for AIX 5.2 or 5.3. Это означает, что сейчас
 <emphasis role="bold">AIX 5.2 и 5.3 несовместимы с выводом звука MPlayer.</emphasis>
 </para>
 
@@ -507,7 +507,7 @@ No working iconv program found, use
 --charset=US-ASCII to continue anyway.
 Messages in the GTK-2 interface will be broken then.<!--
   --></screen>
-  Это из-за того, что AIX использует нестандартные имена кодировок; 
+  Это из-за того, что AIX использует нестандартные имена кодировок;
   поэтому перекодировка сообщений в данный момент не работает.
   Решение - использовать:
   <screen>$ ./configure --charset=noconv</screen>
@@ -545,14 +545,14 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медл
 Да, <application>MPlayer</application> работает под Windows под
 <ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> и
 <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
-Пока ещё нет официального GUI, но версия командной строки полностью функциональна. 
+Пока ещё нет официального GUI, но версия командной строки полностью функциональна.
 Обратитесь к списку рассылки
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
-за помощью и дополнительной информацией. 
-Официальные бинарники под Windows могут быть найдены на 
+за помощью и дополнительной информацией.
+Официальные бинарники под Windows могут быть найдены на
 <ulink url="http://www.mplayerhq.hu/design7/dload.html">странице загрузки</ulink>.
 Пакеты установки и простые GUI фронтенды доступны из внешних
-источников, мы собрали их в разделе Windows на  
+источников, мы собрали их в разделе Windows на
 <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">нашей
 странице проектов</ulink>.
 </para>
@@ -562,7 +562,7 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медл
 поместите на рабочий стол ссылку, со следующим содержимым в секции execute:
 <screen><replaceable>c:\путь\к\</replaceable>mplayer.exe %1</screen>
 Это позволит <application>MPlayer</application> воспроизводить любой фильм,
-который вы перетащите на созданный ярлык. Добавьте <option>-fs</option> 
+который вы перетащите на созданный ярлык. Добавьте <option>-fs</option>
 для полноэкранного режима.
 </para>
 
@@ -570,10 +570,10 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медл
 Лучшие результаты получаются при использовании родного DirectX видео
 вывода (<option>-vo directx</option>). Альтернативой является использование OpenGL или
 SDL, но производительность OpenGL сильно зависит от машины, а SDL на некоторых
-системах искажает видео или вылетает. 
+системах искажает видео или вылетает.
 Если изображение искажено, попробуйте отключить аппаратное ускорение, указав
 <option>-vo directx:noaccel</option>. Скачайте
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/dx7headers.tgz">файлы заголовков 
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/dx7headers.tgz">файлы заголовков
 DirectX 7</ulink>, чтобы скомпилировать видео драйвер DirectX. Кроме того,
 вам потребуется установленный DirectX 7, чтобы работал DirectX видеодрайвер.
 </para>
@@ -618,12 +618,12 @@ mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>colorspace</repl
   <filename>configure</filename> опцию
   <option>--codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
   (или <option>--codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>, но
-  только под <application>Cygwin</application>). 
+  только под <application>Cygwin</application>).
   У нас были сообщения о том,
   что Real DLL должны быть доступны пользователю, запускающему
   <application>MPlayer</application>, для записи, но только на
   некоторых системах (NT4). Если у Вас проблемы с ними, попробуйте сделать их
-  доступными на запись. 
+  доступными на запись.
 </para>
 
 <para>
@@ -666,7 +666,7 @@ mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>
 
 <para>
 Файлы заголовков DirectX надо распаковать в
-<filename class="directory">/usr/include/</filename> или 
+<filename class="directory">/usr/include/</filename> или
 <filename class="directory">/usr/local/include/</filename>.
 </para>
 
@@ -692,7 +692,7 @@ mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>
 </para>
 
 <para>
-Распакуйте файлы заголовков DirectX в 
+Распакуйте файлы заголовков DirectX в
 <filename class="directory">/mingw/include/</filename>.
 </para>
 
@@ -705,7 +705,7 @@ mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>
 </para>
 
 <para>
-Полные инструкции по сборке <application>MPlayer</application> и необходимых 
+Полные инструкции по сборке <application>MPlayer</application> и необходимых
 библиотек могут быть найдены на странице
 <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/win32/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.
 </para>
@@ -720,19 +720,19 @@ mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>
 <title>Mac OS</title>
 
 <para>
-<application>MPlayer</application> не работает на Mac OS версий меньше 10, 
+<application>MPlayer</application> не работает на Mac OS версий меньше 10,
 но компилируется "из коробки" на Mac OS X 10.2 и старше. Предпочитаемым компилятором
 является версия Apple GCC 3.x или более позднего. Вы можете получить начальное окружение
 для компиляции, установив Apple'овский
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>.
-Если у вас Mac OS X 10.3.9 или выше и QuickTime 7, можете использовать 
+Если у вас Mac OS X 10.3.9 или выше и QuickTime 7, можете использовать
 драйвер видео вывода <option>corevideo</option>.
 </para>
 
 <para>
 К сожалению, основное окружение не позволяет получить преимущество от всех
 приятных возможностей <application>MPlayer</application>. В частности,
-чтобы иметь включенную поддержку OSD, потребуются установленные в системе 
+чтобы иметь включенную поддержку OSD, потребуются установленные в системе
 библиотеки <systemitem class="library">fontconfig</systemitem>
 и <systemitem class="library">freetype</systemitem>.
 В отличие от остальных Unix'ов, таких как Linux и клоны BSD, OS X
@@ -743,13 +743,13 @@ mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>
 Есть как минимум два на выбор:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink> и
 <ulink url="http://www.macports.org/">MacPorts</ulink>.
-Они оба предоставляют одинаковый сервис (т.е. огромное количество пакетов 
+Они оба предоставляют одинаковый сервис (т.е. огромное количество пакетов
 для установки, разрешение зависимостей, возможность простой
 установки/обновления/удаления пакетов и т.д.).
 Fink предлагает как предкомпилированные бинарные пакеты, так и сборку
 всего из исходников, в то время как MacPorts предлагает только собирать из
 исходных текстов.
-Автор данного руководства выбрал MacPorts исходя из того простого соображения, 
+Автор данного руководства выбрал MacPorts исходя из того простого соображения,
 что его базовая установка легче.
 Последующие примеры будут основаны на MacPorts.
 </para>
@@ -757,16 +757,16 @@ Fink предлагает как предкомпилированные бина
 <para>
 В частности для компиляции <application>MPlayer</application> с поддержкой OSD:
 <screen>sudo port install pkgconfig</screen>
-Это установит <application>pkg-config</application>, который является системой 
+Это установит <application>pkg-config</application>, который является системой
 управления флагами компиляции/сборки библиотек.
 Скрипт <systemitem>configure</systemitem> программы <application>MPlayer</application>
 использует его для правильного обнаружения библиотек.
 Тем же способом можно установить <application>fontconfig</application>:
 <screen>sudo port install fontconfig</screen>
-Затем можно продолжить, запустив <application>MPlayer</application>'овский 
+Затем можно продолжить, запустив <application>MPlayer</application>'овский
 <systemitem>configure</systemitem> скрипт (задайте переменные окружения
 <systemitem>PKG_CONFIG_PATH</systemitem> и <systemitem>PATH</systemitem> так,
-чтобы <systemitem>configure</systemitem> мог найти библиотеки, установленные 
+чтобы <systemitem>configure</systemitem> мог найти библиотеки, установленные
 при помощи MacPorts):
 <screen>
 PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure
@@ -779,14 +779,14 @@ PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure
 <title>MPlayer OS X GUI</title>
 <para>
 Вы можете получить родной GUI для <application>MPlayer</application> вместе с
-предкомпилированными бинарниками <application>MPlayer</application> для Mac OS X 
-из проекта 
-<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>, но предупреждаем: 
+предкомпилированными бинарниками <application>MPlayer</application> для Mac OS X
+из проекта
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>, но предупреждаем:
 этот проект давно не развивается.
 </para>
 
 <para>
-К счастью, <application>MPlayerOSX</application> был подхвачен членом команды 
+К счастью, <application>MPlayerOSX</application> был подхвачен членом команды
 <application>MPlayer</application>. Предварительные релизы доступны с нашей
 <ulink url="http://mplayerhq.hu/dload.html">страницы загрузки</ulink>
 и скоро ожидается официальный релиз.
@@ -795,9 +795,9 @@ PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure
 <para>
 Чтобы самостоятельно собрать <application>MPlayerOSX</application> из
 исходный текстов, вам потребуется
-<systemitem>mplayerosx</systemitem>, 
-<systemitem>main</systemitem> и копию 
-<systemitem>main</systemitem> SVN модуля, называющегося 
+<systemitem>mplayerosx</systemitem>,
+<systemitem>main</systemitem> и копию
+<systemitem>main</systemitem> SVN модуля, называющегося
 <systemitem>main_noaltivec</systemitem>.
 <systemitem>mplayerosx</systemitem> - это GUI frontend,
 <systemitem>main</systemitem> - это MPlayer, а
@@ -828,7 +828,7 @@ MPlayer_source_directory
 </para>
 
 <para>
-Для начала, чтобы добиться максимальной обратной совместимости, установите 
+Для начала, чтобы добиться максимальной обратной совместимости, установите
 переменную окружения:
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>

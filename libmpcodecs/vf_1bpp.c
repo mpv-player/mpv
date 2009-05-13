@@ -25,7 +25,7 @@ static const unsigned int bgr_list[]={
     IMGFMT_IYUV,
     IMGFMT_422P,
     IMGFMT_444P,
-    
+
     IMGFMT_YUY2,
     IMGFMT_BGR15,
     IMGFMT_RGB15,
@@ -105,7 +105,7 @@ static void convert(mp_image_t *mpi, mp_image_t *dmpi, int value0, int value1,in
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
-    
+
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,

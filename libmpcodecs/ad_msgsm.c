@@ -5,7 +5,7 @@
 #include "config.h"
 #include "ad_internal.h"
 
-static ad_info_t info = 
+static ad_info_t info =
 {
 	"native GSM/MSGSM audio decoder",
 	"msgsm",

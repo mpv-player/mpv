@@ -27,7 +27,7 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
 	"Null audio output",
 	"null",
@@ -41,14 +41,14 @@ struct	timeval last_tv;
 int	buffer;
 
 static void drain(void){
- 
+
     struct timeval now_tv;
     int temp, temp2;
 
     gettimeofday(&now_tv, 0);
     temp = now_tv.tv_sec - last_tv.tv_sec;
     temp *= ao_data.bps;
-    
+
     temp2 = now_tv.tv_usec - last_tv.tv_usec;
     temp2 /= 1000;
     temp2 *= ao_data.bps;

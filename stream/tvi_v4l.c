@@ -797,7 +797,7 @@ static int vbi_init(priv_t* priv,char* device)
         mp_msg(MSGT_TV,MSGL_ERR,"vbi: could not open device %s\n",priv->vbi_dev);
         return  TVI_CONTROL_FALSE;
     }
-    
+
     if(ioctl(vbi_fd,VIDIOCGCAP,&cap)<0){
         mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query capatibilities failed for %s\n",priv->vbi_dev);
         close(vbi_fd);
@@ -845,7 +845,7 @@ static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
     ptsp->count[1]=fmt.count[1];
     ptsp->bufsize = ptsp->samples_per_line * (ptsp->count[0] + ptsp->count[1]);
 
-    mp_msg(MSGT_TV,MSGL_V,"vbi_get_props: sampling_rate=%d,offset:%d,samples_per_line: %d\n interlaced:%s, count=[%d,%d]\n",    
+    mp_msg(MSGT_TV,MSGL_V,"vbi_get_props: sampling_rate=%d,offset:%d,samples_per_line: %d\n interlaced:%s, count=[%d,%d]\n",
         ptsp->sampling_rate,
         ptsp->offset,
         ptsp->samples_per_line,
@@ -1541,7 +1541,7 @@ static int set_mute(priv_t* priv,int value)
 {
     if (!priv->capability.audios) {
         return 0;
-	
+
     if(value)
         priv->audio[priv->audio_id].flags |=VIDEO_AUDIO_MUTE;
     else

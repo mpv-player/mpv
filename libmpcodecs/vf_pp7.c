@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
- 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -227,9 +227,9 @@ static void init_thres2(void){
 }
 
 static int hardthresh_c(DCTELEM *src, int qp){
-    int i; 
+    int i;
     int a;
-    
+
     a= src[0] * factor[0];
     for(i=1; i<16; i++){
         unsigned int threshold1= thres2[qp][i];
@@ -243,9 +243,9 @@ static int hardthresh_c(DCTELEM *src, int qp){
 }
 
 static int mediumthresh_c(DCTELEM *src, int qp){
-    int i; 
+    int i;
     int a;
-    
+
     a= src[0] * factor[0];
     for(i=1; i<16; i++){
         unsigned int threshold1= thres2[qp][i];
@@ -264,9 +264,9 @@ static int mediumthresh_c(DCTELEM *src, int qp){
 }
 
 static int softthresh_c(DCTELEM *src, int qp){
-    int i; 
+    int i;
     int a;
-    
+
     a= src[0] * factor[0];
     for(i=1; i<16; i++){
         unsigned int threshold1= thres2[qp][i];
@@ -293,7 +293,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
     for(y=0; y<height; y++){
         int index= 8 + 8*stride + y*stride;
         fast_memcpy(p_src + index, src + y*src_stride, width);
-        for(x=0; x<8; x++){ 
+        for(x=0; x<8; x++){
             p_src[index         - x - 1]= p_src[index +         x    ];
             p_src[index + width + x    ]= p_src[index + width - x - 1];
         }
@@ -309,14 +309,14 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
             const int index= x + y*stride + (8-3)*(1+stride) + 8; //FIXME silly offset
             uint8_t *src  = p_src + index;
             DCTELEM *tp= temp+4*x;
-            
+
             dctA_c(tp+4*8, src, stride);
-        }        
+        }
         for(x=0; x<width; ){
             const int qps= 3 + is_luma;
             int qp;
             int end= XMIN(x+8, width);
-            
+
             if(p->qp)
                 qp= p->qp;
             else{
@@ -328,12 +328,12 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
                 uint8_t *src  = p_src + index;
                 DCTELEM *tp= temp+4*x;
                 int v;
-                
+
                 if((x&3)==0)
                     dctA_c(tp+4*8, src, stride);
-                
+
                 dctB(block, tp);
-                
+
                 v= requantize(block, qp);
                 v= (v + dither[y&7][x&7])>>6;
                 if((unsigned)v > 255)
@@ -351,7 +351,7 @@ static int config(struct vf_instance_s* vf,
 
     vf->priv->temp_stride= (width+16+15)&(~15);
     vf->priv->src = memalign(8, vf->priv->temp_stride*(h+8)*sizeof(uint8_t));
-    
+
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
@@ -412,7 +412,7 @@ static void uninit(struct vf_instance_s* vf){
 
     if(vf->priv->src) free(vf->priv->src);
     vf->priv->src= NULL;
-    
+
     free(vf->priv);
     vf->priv=NULL;
 }
@@ -449,14 +449,14 @@ static int open(vf_instance_t *vf, char* args){
     vf->control= control;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
-    
+
     if (args) sscanf(args, "%d:%d", &vf->priv->qp, &vf->priv->mode);
 
     if(vf->priv->qp < 0)
         vf->priv->qp = 0;
 
     init_thres2();
-        
+
     switch(vf->priv->mode){
 	case 0: requantize= hardthresh_c; break;
 	case 1: requantize= softthresh_c; break;
@@ -477,7 +477,7 @@ static int open(vf_instance_t *vf, char* args){
 	}
     }
 #endif
-    
+
     return 1;
 }
 

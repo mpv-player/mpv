@@ -194,7 +194,7 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
       roq_data->chunks = (roq_chunk_t *)realloc(roq_data->chunks,
         (roq_data->total_chunks + 1) * sizeof (roq_chunk_t));
       roq_data->chunks[roq_data->total_chunks].chunk_type = CHUNK_TYPE_AUDIO;
-      roq_data->chunks[roq_data->total_chunks].chunk_offset = 
+      roq_data->chunks[roq_data->total_chunks].chunk_offset =
         stream_tell(demuxer->stream) - 8;
       roq_data->chunks[roq_data->total_chunks].chunk_size = chunk_size + 8;
       roq_data->chunks[roq_data->total_chunks].running_audio_sample_count =
@@ -203,7 +203,7 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
       // audio housekeeping
       if (chunk_size > largest_audio_chunk)
         largest_audio_chunk = chunk_size;
-      roq_data->total_audio_sample_count += 
+      roq_data->total_audio_sample_count +=
         (chunk_size / sh_audio->wf->nChannels);
 
       stream_skip(demuxer->stream, chunk_size);
@@ -217,10 +217,10 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
       roq_data->chunks = (roq_chunk_t *)realloc(roq_data->chunks,
         (roq_data->total_chunks + 1) * sizeof (roq_chunk_t));
       roq_data->chunks[roq_data->total_chunks].chunk_type = CHUNK_TYPE_VIDEO;
-      roq_data->chunks[roq_data->total_chunks].chunk_offset = 
+      roq_data->chunks[roq_data->total_chunks].chunk_offset =
         stream_tell(demuxer->stream) - 8;
       roq_data->chunks[roq_data->total_chunks].chunk_size = chunk_size + 8;
-      roq_data->chunks[roq_data->total_chunks].video_chunk_number = 
+      roq_data->chunks[roq_data->total_chunks].video_chunk_number =
         roq_data->total_video_chunks++;
 
       stream_skip(demuxer->stream, chunk_size);
@@ -264,7 +264,7 @@ static void demux_close_roq(demuxer_t* demuxer) {
     return;
   free(roq_data);
 }
-  
+
 
 const demuxer_desc_t demuxer_desc_roq = {
   "RoQ demuxer",

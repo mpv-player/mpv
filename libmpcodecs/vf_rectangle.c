@@ -74,7 +74,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 			mpi->w, mpi->h);
 
     memcpy_pic(dmpi->planes[0],mpi->planes[0],mpi->w*bpp, mpi->h,
-	       dmpi->stride[0],mpi->stride[0]);    
+	       dmpi->stride[0],mpi->stride[0]);
     if(mpi->flags&MP_IMGFLAG_PLANAR && mpi->flags&MP_IMGFLAG_YUV){
 	memcpy_pic(dmpi->planes[1],mpi->planes[1],
 		   mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift,
@@ -148,7 +148,7 @@ open(vf_instance_t* vf, char* args) {
     vf->priv->w = -1;
     vf->priv->h = -1;
     if (args)
-	sscanf(args, "%d:%d:%d:%d", 
+	sscanf(args, "%d:%d:%d:%d",
 	       &vf->priv->w, &vf->priv->h, &vf->priv->x, &vf->priv->y);
     return 1;
 }

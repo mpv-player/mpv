@@ -28,11 +28,11 @@ static int bind_pcm(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 	mux_a->wf->nAvgBytesPerSec=mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
 	mux_a->wf->wBitsPerSample=16;
 	mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
-	
+
 	encoder->input_format = (mux_a->wf->wBitsPerSample==8) ? AF_FORMAT_U8 : AF_FORMAT_S16_LE;
 	encoder->min_buffer_size = 16384;
 	encoder->max_buffer_size = mux_a->wf->nAvgBytesPerSec;
-	
+
 	return 1;
 }
 
@@ -70,14 +70,14 @@ int mpae_init_pcm(audio_encoder_t *encoder)
 {
 	encoder->params.samples_per_frame = encoder->params.sample_rate;
 	encoder->params.bitrate = encoder->params.sample_rate * encoder->params.channels * 2 * 8;
-	
+
 	encoder->decode_buffer_size = encoder->params.bitrate / 8;
 	encoder->bind = bind_pcm;
 	encoder->get_frame_size = get_frame_size;
 	encoder->set_decoded_len = set_decoded_len;
 	encoder->encode = encode_pcm;
 	encoder->close = close_pcm;
-	
+
 	return 1;
 }
 

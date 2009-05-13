@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
 
 #include <inttypes.h>
 #include <math.h>
@@ -40,13 +40,13 @@ static af_data_t* play_float(struct af_instance_s* af, af_data_t* data);
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
-  af_extrastereo_t* s   = (af_extrastereo_t*)af->setup; 
+  af_extrastereo_t* s   = (af_extrastereo_t*)af->setup;
 
   switch(cmd){
   case AF_CONTROL_REINIT:{
     // Sanity check
     if(!arg) return AF_ERROR;
-    
+
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = 2;
     if (((af_data_t*)arg)->format == AF_FORMAT_FLOAT_NE)
@@ -79,7 +79,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Deallocate memory 
+// Deallocate memory
 static void uninit(struct af_instance_s* af)
 {
   if(af->data)
@@ -96,11 +96,11 @@ static af_data_t* play_s16(struct af_instance_s* af, af_data_t* data)
   int16_t *a = (int16_t*)data->audio;	// Audio data
   int len = data->len/2;		// Number of samples
   int avg, l, r;
-  
+
   for (i = 0; i < len; i+=2)
   {
     avg = (a[i] + a[i + 1]) / 2;
-    
+
     l = avg + (int)(s->mul * (a[i] - avg));
     r = avg + (int)(s->mul * (a[i + 1] - avg));
 
@@ -118,14 +118,14 @@ static af_data_t* play_float(struct af_instance_s* af, af_data_t* data)
   float *a = (float*)data->audio;	// Audio data
   int len = data->len/4;		// Number of samples
   float avg, l, r;
-  
+
   for (i = 0; i < len; i+=2)
   {
     avg = (a[i] + a[i + 1]) / 2;
-    
+
     l = avg + (s->mul * (a[i] - avg));
     r = avg + (s->mul * (a[i + 1] - avg));
-    
+
     a[i] = af_softclip(l);
     a[i + 1] = af_softclip(r);
   }

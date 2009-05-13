@@ -1,11 +1,11 @@
 /*
- * CDDB HTTP protocol 
+ * CDDB HTTP protocol
  * by Bertrand Baudet <bertrand_baudet@yahoo.com>
  * (C) 2002, MPlayer team.
  *
  * Implementation follow the freedb.howto1.06.txt specification
  * from http://freedb.freedb.org
- * 
+ *
  * discid computation by Jeremy D. Zawodny
  *	 Copyright (c) 1998-2000 Jeremy D. Zawodny <Jeremy@Zawodny.com>
  *	 Code release under GPL
@@ -68,7 +68,7 @@ stream_t* open_cdda(char *dev, char *track);
 static cd_toc_t cdtoc[100];
 static int cdtoc_last_track;
 
-int 
+int
 read_toc(const char *dev) {
 	int first = 0, last = -1;
 	int i;
@@ -100,7 +100,7 @@ read_toc(const char *dev) {
 	if( drive<0 ) {
 		return drive;
 	}
-	
+
 #if defined(__linux__) || defined(__bsdi__)
 	{
 	struct cdrom_tochdr tochdr;
@@ -203,7 +203,7 @@ read_toc(const char *dev) {
 	return last;
 }
 
-/** 
+/**
 \brief Reads TOC from CD in the given device and prints the number of tracks
        and the length of each track in minute:second:frame format.
 \param *dev the device to analyse
@@ -236,7 +236,7 @@ int cdd_identify(const char *dev)
 	return cdtoc_last_track;
 }
 
-unsigned int 
+unsigned int
 cddb_sum(int n) {
 	unsigned int ret;
 
@@ -248,7 +248,7 @@ cddb_sum(int n) {
 	return ret;
 }
 
-unsigned long 
+unsigned long
 cddb_discid(int tot_trks) {
 	unsigned int i, t = 0, n = 0;
 
@@ -270,9 +270,9 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 	int fd, ret = 0;
 	URL_t *url;
 	HTTP_header_t *http_hdr;
-	
+
 	if( reply_parser==NULL || command==NULL || cddb_data==NULL ) return -1;
-	
+
 	sprintf( request, "http://%s/~cddb/cddb.cgi?cmd=%s%s&proto=%d", cddb_data->freedb_server, command, cddb_data->cddb_hello, cddb_data->freedb_proto_level );
 	mp_msg(MSGT_OPEN, MSGL_INFO,"Request[%s]\n", request );
 
@@ -281,7 +281,7 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NotAValidURL);
 		return -1;
 	}
-	
+
 	fd = http_send_request(url,0);
 	if( fd<0 ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest);
@@ -310,7 +310,7 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 
 	http_free( http_hdr );
 	url_free( url );
-	
+
 	return ret;
 }
 
@@ -322,9 +322,9 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 	size_t file_size;
 
 	if( cddb_data==NULL || cddb_data->cache_dir==NULL ) return -1;
-	
+
 	sprintf( file_name, "%s%08lx", cddb_data->cache_dir, cddb_data->disc_id);
-	
+
 	file_fd = open(file_name, O_RDONLY
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 	| O_BINARY
@@ -342,7 +342,7 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 	} else {
 		file_size = stats.st_size < UINT_MAX ? stats.st_size : UINT_MAX - 1;
 	}
-	
+
 	cddb_data->xmcd_file = malloc(file_size+1);
 	if( cddb_data->xmcd_file==NULL ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
@@ -356,9 +356,9 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 		return -1;
 	}
 	cddb_data->xmcd_file[cddb_data->xmcd_file_size] = 0;
-	
+
 	close(file_fd);
-	
+
 	return 0;
 }
 
@@ -387,15 +387,15 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 			return -1;
 		}
 	}
-	
+
 	sprintf( file_name, "%s%08lx", cddb_data->cache_dir, cddb_data->disc_id );
-	
+
 	file_fd = creat(file_name, S_IRUSR|S_IWUSR);
 	if( file_fd<0 ) {
 		perror("create");
 		return -1;
 	}
-	
+
 	wrote = write(file_fd, cddb_data->xmcd_file, cddb_data->xmcd_file_size);
 	if( wrote<0 ) {
 		perror("write");
@@ -407,7 +407,7 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 		close(file_fd);
 		return -1;
 	}
-	
+
 	close(file_fd);
 
 	return 0;
@@ -421,7 +421,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	int ret, status;
 
 	if( http_hdr==NULL || cddb_data==NULL ) return -1;
-	
+
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
@@ -472,7 +472,7 @@ int
 cddb_request_titles(cddb_data_t *cddb_data) {
 	char command[1024];
 	sprintf( command, "cddb+read+%s+%08lx", cddb_data->category, cddb_data->disc_id);
-	return cddb_http_request(command, cddb_read_parse, cddb_data); 
+	return cddb_http_request(command, cddb_read_parse, cddb_data);
 }
 
 int
@@ -480,7 +480,7 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	char album_title[100];
 	char *ptr = NULL;
 	int ret;
-	
+
 	ptr = strstr(http_hdr->body, "\n");
 	if( ptr==NULL ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_UnableToFindEOL);
@@ -517,7 +517,7 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	char album_title[100];
 	char *ptr = NULL;
 	int ret, status;
-	
+
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
@@ -562,7 +562,7 @@ misc c711930d Santana / Supernatural
 rock c711930d Santana / Supernatural
 blues c711930d Santana / Supernatural
 .]
-*/	
+*/
 		case 211:
 			// Found inexact matches, list follows
 			cddb_parse_matches_list(http_hdr, cddb_data);
@@ -571,7 +571,7 @@ blues c711930d Santana / Supernatural
 			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr);
 			break;
 		default:
-			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);	
+			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);
 	}
 	return -1;
 }
@@ -581,10 +581,10 @@ cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	int max;
 	int ret, status;
 	char *ptr;
-	
+
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);	
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 
@@ -603,7 +603,7 @@ cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			cddb_data->freedb_proto_level = max;
 			return 0;
 		default:
-			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);	
+			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);
 	}
 	return -1;
 }
@@ -646,9 +646,9 @@ void
 cddb_create_hello(cddb_data_t *cddb_data) {
 	char host_name[51];
 	char *user_name;
-	
+
 	if( cddb_data->anonymous ) {	// Default is anonymous
-		/* Note from Eduardo Pérez Ureta <eperez@it.uc3m.es> : 
+		/* Note from Eduardo Pérez Ureta <eperez@it.uc3m.es> :
 		 * We don't send current user/host name in hello to prevent spam.
 		 * Software that sends this is considered spyware
 		 * that most people don't like.
@@ -664,7 +664,7 @@ cddb_create_hello(cddb_data_t *cddb_data) {
 	sprintf( cddb_data->cddb_hello, "&hello=%s+%s+%s+%s", user_name, host_name, "MPlayer", VERSION );
 }
 
-int 
+int
 cddb_retrieve(cddb_data_t *cddb_data) {
 	char offsets[1024], command[1024];
 	char *ptr;
@@ -678,7 +678,7 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 	}
 	ptr[0]=0;
 	time_len = (cdtoc[cddb_data->tracks].frame)/75;
-	
+
 	cddb_data->freedb_server = DEFAULT_FREEDB_SERVER;
 	cddb_data->freedb_proto_level = 1;
 	cddb_data->xmcd_file = NULL;
@@ -727,7 +727,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NoCDInDrive);
 		return -1;
 	}
-	
+
 	home_dir = getenv("HOME");
 #ifdef __MINGW32__
 	if( home_dir==NULL ) home_dir = getenv("USERPROFILE");
@@ -759,7 +759,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 		*xmcd_file = cddb_data.xmcd_file;
 		return 0;
 	}
-	
+
 	return -1;
 }
 
@@ -820,7 +820,7 @@ xmcd_parse_ttitle(cd_info_t *cd_info, char *line) {
 		ptr = strstr(ptr, "=");
 		if( ptr==NULL ) return NULL;
 		ptr++;
-		
+
 		sec = cdtoc[track_nb].frame;
 		off = cdtoc[track_nb+1].frame-sec+1;
 
@@ -836,12 +836,12 @@ cddb_parse_xmcd(char *xmcd_file) {
 	char *ptr, *ptr2;
 	unsigned int audiolen;
 	if( xmcd_file==NULL ) return NULL;
-	
+
 	cd_info = cd_info_new();
 	if( cd_info==NULL ) {
 		return NULL;
 	}
-	
+
 	length = strlen(xmcd_file);
 	ptr = xmcd_file;
 	while( ptr!=NULL && pos<length ) {
@@ -866,10 +866,10 @@ cddb_parse_xmcd(char *xmcd_file) {
 		ptr = ptr2+1;
 	}
 
-	audiolen = cdtoc[cd_info->nb_tracks].frame-cdtoc[0].frame;	
+	audiolen = cdtoc[cd_info->nb_tracks].frame-cdtoc[0].frame;
 	cd_info->min  = (unsigned int)(audiolen/(60*75));
 	cd_info->sec  = (unsigned int)((audiolen/75)%60);
 	cd_info->msec = (unsigned int)(audiolen%75);
-	
+
 	return cd_info;
 }

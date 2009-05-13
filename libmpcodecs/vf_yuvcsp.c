@@ -38,7 +38,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->width, mpi->height);
-    
+
     y_in = mpi->planes[0];
     cb_in = mpi->planes[1];
     cr_in = mpi->planes[2];
@@ -46,7 +46,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     y_out = vf->dmpi->planes[0];
     cb_out = vf->dmpi->planes[1];
     cr_out = vf->dmpi->planes[2];
-    
+
     for (i = 0; i < mpi->height; i++)
 	for (j = 0; j < mpi->width; j++)
 	    y_out[i*vf->dmpi->stride[0]+j] = clamp_y(y_in[i*mpi->stride[0]+j]);
@@ -57,7 +57,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	    cb_out[i*vf->dmpi->stride[1]+j] = clamp_c(cb_in[i*mpi->stride[1]+j]);
 	    cr_out[i*vf->dmpi->stride[2]+j] = clamp_c(cr_in[i*mpi->stride[2]+j]);
 	}
-    
+
     return vf_next_put_image(vf,vf->dmpi, pts);
 }
 

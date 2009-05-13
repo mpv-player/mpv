@@ -1,4 +1,4 @@
-/* 
+/*
  * HTTP Helper
  * by Bertrand Baudet <bertrand_baudet@yahoo.com>
  * (C) 2001, MPlayer team.

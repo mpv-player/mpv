@@ -54,7 +54,7 @@ static inline void TranslateFilename( int c,char * tmp,size_t tmplen )
 {
  int i;
  char * p;
- 
+
  switch ( guiIntfStruct.StreamType )
   {
    case STREAMTYPE_STREAM:
@@ -214,16 +214,16 @@ void PutImage( txSample * bf,int x,int y,int max,int ofs )
  for ( iy=y;iy < (int)(y+bf->Height / max);iy++ )
   for ( ix=x;ix < (int)(x+bf->Width);ix++ )
    {
-    tmp=drw[i++]; 
+    tmp=drw[i++];
     if ( tmp != 0x00ff00ff ) buf[iy * image_width + ix]=tmp;
    }
 #else
- yc=y * image_width; 
+ yc=y * image_width;
  for ( iy=y;iy < (int)(y+bf->Height / max);iy++ )
   {
    for ( ix=x;ix < (int)(x+bf->Width);ix++ )
     {
-     tmp=drw[i++]; 
+     tmp=drw[i++];
      if ( tmp != 0x00ff00ff ) buf[yc + ix]=tmp;
     }
    yc+=image_width;
@@ -248,7 +248,7 @@ void SimplePotmeterPutImage( txSample * bf,int x,int y,float frac )
  {
   for ( ix=x;ix < (int)(x+w);ix++ )
    {
-    tmp=drw[i++]; 
+    tmp=drw[i++];
     if ( tmp != 0x00ff00ff ) buf[iy * image_width + ix]=tmp;
    }
   i+=r;
