@@ -34,6 +34,10 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
+#ifdef __MINGW32__
+// for GetFileType to detect pipes
+#include <windows.h>
+#endif
 
 static const ao_info_t info =
 {
@@ -175,7 +179,13 @@ static int init(int rate,int channels,int format,int flags){
 static void uninit(int immed){
 
     if(ao_pcm_waveheader){ /* Rewrite wave header */
-        if (fseek(fp, 0, SEEK_SET) != 0)
+        int broken_seek = 0;
+#ifdef __MINGW32__
+        // Windows, in its usual idiocy "emulates" seeks on pipes so it always looks
+        // like they work. So we have to detect them brute-force.
+        broken_seek = GetFileType((HANDLE)_get_osfhandle(_fileno(fp))) != FILE_TYPE_DISK;
+#endif
+        if (broken_seek || fseek(fp, 0, SEEK_SET) != 0)
             mp_msg(MSGT_AO, MSGL_ERR, "Could not seek to start, WAV size headers not updated!\n");
         else if (data_length > 0x7ffff000)
             mp_msg(MSGT_AO, MSGL_ERR, "File larger than allowed for WAV files, may play truncated!\n");
