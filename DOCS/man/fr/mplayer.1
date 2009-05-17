@@ -1,4 +1,4 @@
-.\" synced with r29147
+.\" synced with r29244
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
@@ -5352,12 +5352,25 @@ et les effets de masquage.
 Ne fonctionne qu'avec deux canaux audio.
 .PD 0
 .RSs
-.IPs level=<1\-3>
-Défini le niveau de mixage entre les deux canaux, où un niveau plus élevé
-signifie un effet plus prononcé (par défaut\ : 3).
-.IPs profile=<0\-1>
-Déifini le profil à utiliser, où 1 donne un son plus doux que 0
-(par défaut\ : 1).
+.IPs fcut=<300\-1000>
+Défini la fréquence de coupure (en Hz).
+.IPs feed=<10\-150>
+Défini le niveau d'entrée des basses fréquences (en dixième de dB).
+.IPs profile=<valeur>
+Plusieurs profils sont disponibles\ :
+.RSs
+default\ : réglage par défaut (fcut=700, feed=45);
+.br
+cmoy: implémentation du circuit Chu Moy (fcut=700, feed=60);
+.br
+jmeier: implémentation du circuit Jan Meier (fcut=650, feed=95).
+.REss
+.PD 1
+.RE
+.sp 1
+.RS
+Si les options fcut et/ou sont utilisées en même temps qu'un profil, ce sont
+ces options qui ont priorité sur les réglages apporté par le profil.
 .RE
 .PD 1
 .
