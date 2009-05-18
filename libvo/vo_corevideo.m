@@ -240,9 +240,11 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
-	if(shared_buffer)
+	if(shared_buffer) {
+		NSAutoreleasePool *pool = [NSAutoreleasePool new];
 		[mplayerosxProto render];
-	else {
+		[pool release];
+	} else {
 		[mpGLView setCurrentTexture];
 		[mpGLView render];
 		if (vo_doublebuffering) {
