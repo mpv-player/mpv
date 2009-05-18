@@ -230,7 +230,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
 static void check_events(void)
 {
-	[mpGLView check_events];
+	if (mpGLView)
+		[mpGLView check_events];
 }
 
 static void draw_osd(void)
@@ -370,10 +371,7 @@ static int preinit(const char *arg)
 		return -1;
 	}
 
-	NSApplicationLoad();
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
-	NSApp = [NSApplication sharedApplication];
-	isLeopardOrLater = floor(NSAppKitVersionNumber) > 824;
 
 	if (!buffer_name)
 		buffer_name = strdup(DEFAULT_BUFFER_NAME);
@@ -382,6 +380,10 @@ static int preinit(const char *arg)
 
 	if(!shared_buffer)
 	{
+		NSApplicationLoad();
+		NSApp = [NSApplication sharedApplication];
+		isLeopardOrLater = floor(NSAppKitVersionNumber) > 824;
+
 		#if !defined (CONFIG_MACOSX_FINDER) || !defined (CONFIG_SDL)
 		//this chunk of code is heavily based off SDL_macosx.m from SDL
 		ProcessSerialNumber myProc, frProc;
