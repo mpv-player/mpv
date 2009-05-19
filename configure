@@ -8333,6 +8333,7 @@ XV = $_xv
 XVID4 = $_xvid
 XVIDIX = $xvidix
 XVMC = $_xvmc
+XVR100 = $_xvr100
 YUV4MPEG = $_yuv4mpeg
 ZR = $_zr
 
