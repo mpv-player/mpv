@@ -2782,6 +2782,7 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
     uint64_t missing_time = 0;
     int part_count = 0;
     int num_chapters = 0;
+    uint64_t prev_part_offset;
     for (int i = 0; i < m->num_ordered_chapters; i++) {
         struct matroska_chapter *c = m->ordered_chapters + i;
 
@@ -2795,15 +2796,17 @@ static void build_ordered_chapter_timeline(struct MPContext *mpctx)
     found2:;
         chapters[num_chapters].start = starttime / 1000.;
         chapters[num_chapters].name = talloc_strdup(chapters, c->name);
-        // Only add a separate part if the time or file actually changes
-        uint64_t prev_end = !part_count ? 0 : starttime
-            - timeline[part_count - 1].start
-            + timeline[part_count - 1].source_start;
-        if (part_count == 0 || c->start != prev_end
+        /* Only add a separate part if the time or file actually changes.
+         * Matroska files have chapter divisions that are redundant from
+         * timeline point of view because the same chapter structure is used
+         * both to specify the timeline and for normal chapter information.
+         * Removing a missing inserted external chapter can also cause this. */
+        if (part_count == 0 || c->start != starttime + prev_part_offset
             || sources + j != timeline[part_count - 1].source) {
             timeline[part_count].source = sources + j;
             timeline[part_count].start = chapters[num_chapters].start;
             timeline[part_count].source_start = c->start / 1000.;
+            prev_part_offset = c->start - starttime;
             part_count++;
         }
         starttime += c->end - c->start;
