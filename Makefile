@@ -658,18 +658,18 @@ SRCS_MPLAYER-$(XVR100)        += libvo/vo_xvr100.c
 SRCS_MPLAYER-$(YUV4MPEG)      += libvo/vo_yuv4mpeg.c
 SRCS_MPLAYER-$(ZR)            += libvo/jpeg_enc.c libvo/vo_zr.c libvo/vo_zr2.c
 
-SRCS_MPLAYER = mplayer.c \
+SRCS_MPLAYER = command.c \
                m_property.c \
+               mixer.c \
                mp_fifo.c \
                mp_msg.c \
-               mixer.c \
+               mplayer.c \
                parser-mpcmd.c \
-               command.c \
                input/input.c \
-               libao2/audio_out.c \
                libao2/ao_mpegpes.c \
                libao2/ao_null.c \
                libao2/ao_pcm.c \
+               libao2/audio_out.c \
                libvo/aspect.c \
                libvo/geometry.c \
                libvo/spuenc.c \
