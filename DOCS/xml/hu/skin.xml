@@ -1,67 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r26990 -->
+<!-- synced with r29305 -->
 <appendix id="skin">
 <title><application>MPlayer</application> skin formátum</title>
 
 <sect1 id="skin-overview">
 <title>Áttekintés</title>
 
-<para>
-Igazából ennek nincs köze a skin formátumához, de tudnod kell, hogy
-az <application>MPlayer</application>nek
-<emphasis role="bold">nincs</emphasis> beépített skin-je,
-így <emphasis role="bold">legalább egy skin-nek telepítve kell
-lennie, hogy használni tudd a GUI-t.</emphasis>
-</para>
-
 <!-- ********** -->
-
-<sect2 id="skin-overview-directories">
-<title>Könyvtárak</title>
-
-<para>
-Az alábbi könyvtárak kerülnek átvizsgálásra (sorrendben):
-<orderedlist>
-<listitem><para>
-  <filename class="directory">$(DATADIR)/skins/</filename>
-</para></listitem>
-<listitem><para>
-  <filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
-</para></listitem>
-<listitem><para>
-  <filename class="directory">~/.mplayer/skins/</filename>
-</para></listitem>
-</orderedlist>
-</para>
-
-<para>
-Figyelj rá, hogy az első elérési út változhat az
-<application>MPlayer</application> konfigurációjának megfelelően
-(lásd a <command>configure</command> script
-<option>--prefix</option> és <option>--datadir</option> kapcsolóit).
-</para>
-
-<para>
-Minden skin a saját könyvtárába kerül telepítésre a fent felsorolt könyvtárakon
-belül, például:
-<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="skin-overview-formats">
-<title>Képformátumok</title>
-
-<para>A képeknek truecolor-os (24 vagy 32 bpp) PNG-knek kell lenniük.</para>
-<para>
-A fő ablakban és a playbar-on (lásd lejjebb) használhatsz transzparens képeket:
-Az #FF00FF (bíborvörös) színnel feltöltött területek teljesen
-transzparensek lesznek, ha az <application>MPlayer</application>-rel
-nézed. Ez azt jelenti, hogy formázott ablakjaid is lehetnek, ha az X
-szerverednek van XShape kiterjesztése.
-</para>
-</sect2>
 
 <sect2 id="skin-overview-components">
 <title>Skin komponensek</title>
@@ -161,6 +106,19 @@ Van egy fontos dolog, amiről eddig nem beszéltünk: a gombokhoz, potméterekhe
 hogy mit csináljon, ha rákattintanak. Ez <link linkend="skin-gui">üzenetekkel</link>
 (eseményekkel) van megvalósítva. Minden elemhez meg kell adnod, hogy milyen
 üzenetet generál, amikor kattintanak rá.
+</para>
+</sect2>
+
+<sect2 id="skin-overview-formats">
+<title>Képformátumok</title>
+
+<para>A képeknek truecolor-os (24 vagy 32 bpp) PNG-knek kell lenniük.</para>
+<para>
+A fő ablakban és a playbar-on (lásd lejjebb) használhatsz transzparens képeket:
+Az #FF00FF (bíborvörös) színnel feltöltött területek teljesen
+transzparensek lesznek, ha az <application>MPlayer</application>-rel
+nézed. Ez azt jelenti, hogy formázott ablakjaid is lehetnek, ha az X
+szerverednek van XShape kiterjesztése.
 </para>
 </sect2>
 
