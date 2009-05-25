@@ -85,7 +85,7 @@
 #endif /* CONFIG_LIVE555 */
 #ifdef CONFIG_LIBNEMESI || CONFIG_LIVE555
 	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
-        {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"rtsp-stream-over-tcp", &rtsp_transport_tcp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
 	{"rtsp-stream-over-tcp", "-rtsp-stream-over-tcp requires the \"LIVE555 Streaming Media\" or \"libnemesi\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif /* CONFIG_LIVE555 || CONFIG_LIBNEMESI */

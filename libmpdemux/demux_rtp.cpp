@@ -110,7 +110,12 @@ static char* openURL_sip(SIPClient* client, char const* url) {
   }
 }
 
-int rtspStreamOverTCP = 0;
+#ifdef CONFIG_LIBNEMESI
+extern int rtsp_transport_tcp;
+#else
+int rtsp_transport_tcp = 0;
+#endif
+
 extern int rtsp_port;
 
 extern "C" int audio_id, video_id, dvdsub_id;
@@ -229,7 +234,7 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
 	if (rtspClient != NULL) {
 	  // Issue a RTSP "SETUP" command on the chosen subsession:
 	  if (!rtspClient->setupMediaSubsession(*subsession, False,
-						rtspStreamOverTCP)) break;
+						rtsp_transport_tcp)) break;
 	  if (!strcmp(subsession->mediumName(), "audio"))
 	    audiofound = 1;
 	  if (!strcmp(subsession->mediumName(), "video"))
@@ -327,7 +332,7 @@ extern "C" int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds) {
     const float ptsBehindLimit = 60.0; // seconds
     if (ptsBehind < ptsBehindThreshold ||
 	ptsBehind > ptsBehindLimit ||
-	rtspStreamOverTCP) { // packet's OK
+	rtsp_transport_tcp) { // packet's OK
       ds_add_packet(ds, dp);
       break;
     }
