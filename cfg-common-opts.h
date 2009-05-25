@@ -82,14 +82,18 @@
 
 #ifdef CONFIG_LIVE555
         {"sdp", "-sdp has been removed, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+#endif /* CONFIG_LIVE555 */
+#ifdef CONFIG_LIBNEMESI || CONFIG_LIVE555
 	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
         {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#elif defined (CONFIG_LIBNEMESI)
-        {"rtsp-stream-over-tcp", &rtsp_transport_tcp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#else
+	{"rtsp-stream-over-tcp", "-rtsp-stream-over-tcp requires the \"LIVE555 Streaming Media\" or \"libnemesi\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif /* CONFIG_LIVE555 || CONFIG_LIBNEMESI */
+#ifdef CONFIG_LIBNEMESI
         {"rtsp-stream-over-sctp", &rtsp_transport_sctp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
-	{"rtsp-stream-over-tcp", "-rtsp-stream-over-tcp requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif /* CONFIG_LIVE555 */
+        {"rtsp-stream-over-sctp", "-rtsp-stream-over-sctp requires the", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif /* CONFIG_LIBNEMESI */
 #ifdef CONFIG_NETWORK
         {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},
         {"rtsp-destination", &rtsp_destination, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
