@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r29209 （MSGTR_RecommendedVideoBitrate）
+// Synced with help_mp-en.h r29209 (MSGTR_DuplicateFourcc)
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);
 //   NAV; section/subsection;  XScreenSaver; keycolor;
@@ -282,105 +282,103 @@ static const char help_text[]=
 #define MSGTR_ErrorWritingFile "%s：写入文件出错。\n"
 #define MSGTR_FlushingVideoFrames "\n立即输出视频帧缓冲中的内容。\n"
 #define MSGTR_FiltersHaveNotBeenConfiguredEmptyFile "过滤器尚未配置！文件为空？\n"
-#define MSGTR_RecommendedVideoBitrate "%s CD 推荐的视频比特率为: %d\n"
-#define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d B/s)  大小: %"PRIu64" 字节  %5.3f 秒  %d 帧\n"
-#define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d B/s)  大小: %"PRIu64" 字节  %5.3f 秒\n"
-#define MSGTR_EdlSkipStartEndCurrent "EDL跳过: 开始: %.2f  结束: %.2f   当前: V: %.2f  A: %.2f     \r"
-#define MSGTR_OpenedStream "成功: 格式: %d数据: 0x%X - 0x%x\n"
-#define MSGTR_VCodecFramecopy "视频编解码器: 帧复制 (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "音频编解码器: 帧复制 (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
-#define MSGTR_CBRPCMAudioSelected "已选 CBR PCM 音频。\n"
-#define MSGTR_MP3AudioSelected "已选 MP3音频。\n"
-#define MSGTR_CannotAllocateBytes "不能分配 %d 字节。\n"
+#define MSGTR_RecommendedVideoBitrate "%s CD 的推荐视频比特率为：%d\n"
+#define MSGTR_VideoStreamResult "\n视频流：%8.3f kbit/s （%d B/s） 大小：%"PRIu64" 字节  %5.3f 秒  %d 帧\n"
+#define MSGTR_AudioStreamResult "\n音频流：%8.3f kbit/s （%d B/s） 大小：%"PRIu64" 字节  %5.3f 秒\n"
+#define MSGTR_EdlSkipStartEndCurrent "EDL 跳跃：开始位置：%.2f  结束位置：%.2f   当前位置：V：%.2f  A：%.2f     \r"
+#define MSGTR_OpenedStream "成功：格式：%d  数据：0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "视频编解码器：复制帧（%dx%d %dbpp fourcc=%x）\n"
+#define MSGTR_ACodecFramecopy "音频编解码器：复制帧（format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d）\n"
+#define MSGTR_CBRPCMAudioSelected "已选择 CBR PCM 音频。\n"
+#define MSGTR_MP3AudioSelected "已选择 MP3音频。\n"
+#define MSGTR_CannotAllocateBytes "无法分配出 %d 字节。\n"
 #define MSGTR_SettingAudioDelay "设置音频延迟为 %5.3fs。\n"
 #define MSGTR_SettingVideoDelay "设置视频延迟为 %5.3fs。\n"
 #define MSGTR_SettingAudioInputGain "设置音频输出增益为 %f。\n"
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n"
-#define MSGTR_LimitingAudioPreload "限制音频预载值为 0.4s。\n"
-#define MSGTR_IncreasingAudioDensity "增加音频密度为 4。\n"
-#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "锁定音频预载值为 0, 最大 PTS 校验为 0。\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR 音频: %d 字节/秒, %d 字节/块\n"
-#define MSGTR_LameVersion "LAME 版本 %s (%s)\n\n"
-#define MSGTR_InvalidBitrateForLamePreset "错误: 在此预设值上指定的比特率超出有效范围。\n"\
+#define MSGTR_LimitingAudioPreload "限制音频预加载长度为 0.4s。\n"
+#define MSGTR_IncreasingAudioDensity "增加音频密度至 4。\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "强制音频预加载长度为 0，最大 PTS 校验长度为 0。\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR 音频：%d 字节/秒，%d 字节/块\n"
+#define MSGTR_LameVersion "LAME 版本 %s（%s）\n\n"
+#define MSGTR_InvalidBitrateForLamePreset "错误：指定的比特率超出该预设配置的有效范围。\n"\
 "\n"\
-"当使用这种模式时你必须给定一个在\"8\"到\"320\"之间的数值。\n"\
+"当使用该模式时，你必须输入一个\"8\"到\"320\"之间的数值。\n"\
 "\n"\
-"更多信息，请试试: \"-lameopts preset=help\"\n"
-#define MSGTR_InvalidLamePresetOptions "错误: 你没有给定一个有效的配置和/或预设值选项。\n"\
+"获取更多信息，请尝试：\"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "错误：你没有给 preset 指定一个有效的配置集和/或选项。\n"\
 "\n"\
-"可用的配置轮廓(profile)包括:\n"\
+"可用的配置集包括:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
 "                 insane\n"\
-"   <cbr> (ABR Mode) - ABR 模式是暗含的。要使用这个选项,\n"\
-"                      简单地指定一个比特率就行了。例如:\n"\
-"                      \"preset=185\"就可以激活这个\n"\
-"                      预设值并使用 185 作为平均比特率。\n"\
+"   <cbr>（ABR 模式） - 默认使用的是 ABR 模式。\n"\
+"                      要使用该模式，只要指定一个比特率就行了。\n"\
+"                      例如：“preset=185”启用该预设配置，\n"\
+"                      使用 185 作为平均比特率。\n"\
 "\n"\
-"    一些例子:\n"\
+"    一些例子：\n"\
 "\n"\
 "    \"-lameopts fast:preset=standard  \"\n"\
 " or \"-lameopts  cbr:preset=192       \"\n"\
 " or \"-lameopts      preset=172       \"\n"\
 " or \"-lameopts      preset=extreme   \"\n"\
 "\n"\
-"更多信息，请试试: \"-lameopts preset=help\"\n"
+"要获取更多信息，请尝试使用：\"-lameopts preset=help\"\n"
 #define MSGTR_LamePresetsLongInfo "\n"\
-"预设值开关设计为提供最好的品质。\n"\
+"预设配置开关经过设计以提供最好的编码质量。\n"\
 "\n"\
-"它们大多数已经经过严格的双盲聆听测试来调整和检验性能,\n"\
-"以达到我们预期的目标。\n"\
+"大多数配置已经经过严格的双盲聆听的测试和调整，以验证并达到这个目标。\n"\
 "\n"\
-"它们不断地被升级以便和最新的发展保持一致,\n"\
-"所以应该能给你提供目前 LAME 所能提供的将近最好的品质。\n"\
+"这些配置经过不断升级以跟上最近的开发成果，所以应该能给你提供目前 LAME \n"\
+"所能提供的将近最好的质量。\n"\
 "\n"\
-"预设值激活:\n"\
+"启用这些预设配置：\n"\
 "\n"\
-"   VBR 模式 (通常情况下的最高品质):\n"\
+"   使用 VBR 模式（通常质量最高）：\n"\
 "\n"\
-"     \"preset=standard\" 此项预设值显然应该是大多数人在处理大多数的音乐的时候\n"\
-"                             所用到的选项, 它的品质已经相当高。\n" \
+"     “preset=standard” 该预设配置在处理大多数音乐上，通常大多数人应该是感\n"\
+"                             觉不到差异的，其质量已经相当高。\n" \
 "\n"\
-"     \"preset=extreme\" 如果你有极好的听力和相当的设备, 这项预设值一般会比\n"\
-"                             \"standard\"模式的品质还要提高一点。\n"\
+"     “preset=extreme” 如果你有极好的听力和相当的设备，该预设配置一般会比\n"\
+"                             “standard”模式提供更高一点的质量。\n"\
 "\n"\
-"   CBR 320kbps (预设值开关选项里的最高品质):\n"\
+"   使用 CBR 320kbps（预设配置开关选项里的最高质量）：\n"\
 "\n"\
-"     \"preset=insane\"  对于大多数人和在大多数情况下, 这个选项都显得有些过度。\n"\
-"                             但是如果你一定要有最高品质并且完全不关心文件大小,\n"\
+"     “preset=insane”  对于大多数人在大多数情况下，该选项通常有些过度。但是\n"\
+"                             如果你一定要有最高质量并且完全不关心文件大小，\n"\
 "                             那这正是适合你的。\n"\
 "\n"\
-"   ABR 模式 (根据给定比特率高品质, 但不及 VBR):\n"\
+"   使用 ABR 模式（给定比特率下提供较高质量，但不及 VBR 质量高）：\n"\
 "\n"\
-"     \"preset=<kbps>\"  使用这个预设值总是会在一个指定的比特率下有不错的品质。\n"\
-"                             根据的比特率, 预设值将会决定这种情况下所能达到最\n"\
-"                             好效果的设置。\n"\
-"                             虽然这种方法可行, 但它并没有 VBR 模式那么灵活, \n"\
-"                             同样, 一般也达不到 VBR 在高比特率下的同等品质。\n"\
+"     \"preset=<kbps>\"  使用该预设配置通常会在一个指定的比特率下提错良好的质量。\n"\
+"                             根据输入的比特率，预设配置将判断该情形下的最优设置。\n"\
+"                             虽然该方法行之有效，但并没有 VBR 模式那么灵活，\n"\
+"                             并且通常在高比特率下达不到 VBR 所具有的同等质量。\n"\
 "\n"\
-"以下选项在相应的配置文件里也可使用:\n"\
+"以下选项在相应的配置集中也可使用:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
 "                 insane\n"\
-"   <cbr> (ABR Mode) - ABR 模式是暗含的。要使用这个选项,\n"\
-"                      简单地指定一个比特率就行了。例如:\n"\
-"                      \"preset=185\"就可以激活这个\n"\
-"                      预设值并使用 185 作为平均比特率。\n"\
+"   <cbr>（ABR Mode）- 默认使用的是 ABR 模式。要使用该模式，\n"\
+"                      只要指定一个比特率就行了。例如：\n"\
+"                      “preset=185”启用该预设配置，\n"\
+"                      使用 185 作为平均比特率。\n"\
 "\n"\
-"   \"fast\" - 在一个特定的配置文件里启用这新的快速 VBR 模式。\n"\
-"            速度切换的坏处是比特率常常要比一般情况下的稍高, \n"\
-"            品质也会稍低一点。\n"\
-"      警告: 在当前版本下, 快速预设值可能比一般模式偏高得太多。\n"\
+"   “fast” - 在特定的配置集中启用新的高速 VBR 模式。\n"\
+"            速度开关的坏处是比特率往往比普通模式下稍高，\n"\
+"            并且质量也会稍低一点。\n"\
+"      警告：在当前版本下, 高速预设配置可能产生比一般模式高太多的比特率。\n"\
 "\n"\
-"   \"cbr\"  - 如果你使用 ABR 模式(见上)时, 采用特定的比特率, 如\n"\
-"            80, 96, 112, 128, 160, 192, 224, 256, 320, 你可以使\n"\
-"            用\"cbr\"选项强制以 CBR 模式代替标准 ABR 模式编码。\n"\
-"            ABR 固然提供更高的品质, 但是 CBR 在某些情况下可能会\n"\
-"            相当重要, 比如从 internet 送一个 MP3 流。\n"\
+"   “cbr”  - 如果你使用 ABR 模式（见上）时指定了一个比特率, 如\n"\
+"            80、96、112、128、160、192、224、256、320，你可以使\n"\
+"            用“cbr”选项强制以 CBR 模式编码代替标准 ABR 模式。\n"\
+"            ABR 固然提供更高的质量，但是 CBR 在某些情况下可能会\n"\
+"            相当有用，比如当在因特网上传送 MP3 流可能十分重要时。\n"\
 "\n"\
-"    例如:\n"\
+"    举例：\n"\
 "\n"\
 "    \"-lameopts fast:preset=standard  \"\n"\
 " 或 \"-lameopts  cbr:preset=192       \"\n"\
@@ -388,78 +386,78 @@ static const char help_text[]=
 " 或 \"-lameopts      preset=extreme   \"\n"\
 "\n"\
 "\n"\
-"ABR 模式下一些可用的别名:\n"\
+"ABR 模式下有一些可用的别名：\n"\
 "phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
 #define MSGTR_LameCantInit \
-"不能设定 LAME 选项, 检查比特率/采样率, 一些\n"\
-"非常低的比特率(<32)需要低采样率(如 -srate 8000)。\n"\
-"如果都不行, 试试使用预设值。"
+"无法设定 LAME 选项，请检查比特率/采样率，一些\n"\
+"非常低的比特率（<32）需要低采样率（如 -srate 8000）。\n"\
+"如果其它方法都不行，请试试使用预设配置。"
 #define MSGTR_ConfigFileError "配置文件错误"
 #define MSGTR_ErrorParsingCommandLine "解析命令行错误"
-#define MSGTR_VideoStreamRequired "视频流是必须的!\n"
-#define MSGTR_ForcingInputFPS "输入帧率将被替换为 %5.3f。\n"
-#define MSGTR_RawvideoDoesNotSupportAudio "RAWVIDEO 输出文件格式不支持音频 - 停用音频。\n"
-#define MSGTR_DemuxerDoesntSupportNosound "目前此分路器还不支持 -nosound。\n"
+#define MSGTR_VideoStreamRequired "必须有视频流！\n"
+#define MSGTR_ForcingInputFPS "输入帧率将视为 %5.3f。\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "RAWVIDEO 输出文件格式不支持音频 - 禁用音频。\n"
+#define MSGTR_DemuxerDoesntSupportNosound "该流分离器还不支持 -nosound。\n"
 #define MSGTR_MemAllocFailed "内存分配失败。\n"
-#define MSGTR_NoMatchingFilter "没找到匹配的 filter/ao 格式!\n"
-#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, C 编译器可能挂了?\n"
-#define MSGTR_NoLavcAudioCodecName "音频 LAVC, 没有编解码器名!\n"
-#define MSGTR_LavcAudioCodecNotFound "音频 LAVC, 找不到对应的编码器 %s。\n"
-#define MSGTR_CouldntAllocateLavcContext "音频 LAVC, 不能分配上下文!\n"
-#define MSGTR_CouldntOpenCodec "打不开编解码器 %s, br=%d。\n"
-#define MSGTR_CantCopyAudioFormat "音频格式 0x%x 和 '-oac copy' 不兼容, 请试试用 '-oac pcm' 代替或者用 '-fafmttag'。\n"
+#define MSGTR_NoMatchingFilter "没找到匹配的过滤器/音频输出格式!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30，C 编译器可能已损坏？\n"
+#define MSGTR_NoLavcAudioCodecName "音频 LAVC，没有指定编解码器名称！\n"
+#define MSGTR_LavcAudioCodecNotFound "音频 LAVC，无法找到编解码器 %s 对应的编码器。\n"
+#define MSGTR_CouldntAllocateLavcContext "音频 LAVC，无法分配运行环境！\n"
+#define MSGTR_CouldntOpenCodec "无法打开编解码器 %s，br=%d。\n"
+#define MSGTR_CantCopyAudioFormat "音频格式 0x%x 与‘-oac copy’不兼容，请尝试换成‘-oac pcm’或者用‘-fafmttag’屏蔽该选项。\n"
 
 // cfg-mencoder.h
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     可变比特率方式\n"\
-"                0: cbr (常比特率)\n"\
-"                1: mt (Mark Taylor VBR 算法)\n"\
-"                2: rh (Robert Hegemann VBR 算法 - 默认)\n"\
-"                3: abr (平均比特率)\n"\
-"                4: mtrh (Mark Taylor Robert Hegemann VBR 算法)\n"\
+"                0：cbr（恒定比特率）\n"\
+"                1：mt（Mark Taylor VBR 算法）\n"\
+"                2：rh（Robert Hegemann VBR 算法 - 默认值）\n"\
+"                3：abr（平均比特率）\n"\
+"                4：mtrh（Mark Taylor Robert Hegemann VBR 算法）\n"\
 "\n"\
 " abr           平均比特率\n"\
 "\n"\
-" cbr           常比特率\n"\
-"               也会在后继 ABR 预设值模式中强制以 CBR 模式编码。\n"\
+" cbr           恒定比特率\n"\
+"               同时在后面指定的 ABR 预设模式中强制以 CBR 模式编码。\n"\
 "\n"\
-" br=<0-1024>   以 kBit 为单位设置比特率 (仅用于 CBR 和 ABR)\n"\
+" br=<0-1024>   以 kBit 为单位设置比特率（仅用于 CBR 和 ABR）\n"\
 "\n"\
-" q=<0-9>       编码质量 (0-最高, 9-最低) (仅用于 VBR)\n"\
+" q=<0-9>       编码质量（0-最高，9-最低）（仅用于 VBR）\n"\
 "\n"\
-" aq=<0-9>      算法质量 (0-最好/最慢, 9-最低/最快)\n"\
+" aq=<0-9>      算法质量（0-最好/运行最慢，9-最差/运行最快）\n"\
 "\n"\
 " ratio=<1-100> 压缩率\n"\
 "\n"\
 " vol=<0-10>    设置音频输入增益\n"\
 "\n"\
-" mode=<0-3>    (默认: 自动)\n"\
-"                0: 立体声\n"\
-"                1: 联合立体声\n"\
-"                2: 双声道\n"\
-"                3: 单声道\n"\
+" mode=<0-3>    （默认值：自动）\n"\
+"                0：立体声\n"\
+"                1：联合立体声\n"\
+"                2：双声道\n"\
+"                3：单声道\n"\
 "\n"\
 " padding=<0-2>\n"\
-"                0: 无\n"\
-"                1: 所有\n"\
-"                2: 调整\n"\
+"                0：无\n"\
+"                1：所有\n"\
+"                2：调整\n"\
 "\n"\
-" fast          在后继 VBR 预设值模式中切换到更快的编码方式，\n"\
-"               品质稍低而比特率稍高。\n"\
+" fast          在后面指定 VBR 预设模式中打开更快的编码方式，\n"\
+"               质量较低而比特率较高。\n"\
 "\n"\
-" preset=<value> 可能提供最高品质的设置。\n"\
-"                 medium: VBR 编码，品质：好\n"\
-"                 (比特率范围 150-180 kbps)\n"\
-"                 standard:  VBR 编码, 品质：高\n"\
-"                 (比特率范围 170-210 kbps)\n"\
-"                 extreme: VBR 编码，品质：非常高\n"\
-"                 (比特率范围 200-240 kbps)\n"\
-"                 insane:  CBR 编码，品质：最高\n"\
-"                 (比特率 320 kbps)\n"\
-"                 <8-320>: 以给定比特率为平均比特率的 ABR 编码。\n\n"
+" preset=<value> 提供尽可能最高质量的设置。\n"\
+"                 medium：VBR 编码，质量好\n"\
+"                 （比特率范围 150-180 kbps）\n"\
+"                 standard：VBR 编码，质量高\n"\
+"                 （比特率范围 170-210 kbps）\n"\
+"                 extreme：VBR 编码，质量非常高\n"\
+"                 （比特率范围 200-240 kbps）\n"\
+"                 insane：CBR 编码，质量最高\n"\
+"                 （比特率 320 kbps）\n"\
+"                 <8-320>：以给定比特率为平均比特率的 ABR 编码方式。\n\n"
 
 //codec-cfg.c
 #define MSGTR_DuplicateFourcc "重复的 FourCC"
