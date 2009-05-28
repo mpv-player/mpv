@@ -1,4 +1,4 @@
-.\" synced with r27454
+.\" synced with r27691
 .\" Encoding: iso-8859-1
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Questa pagina di manuale è stata fatta da Gabucino, Diego Biurrun,
@@ -940,7 +940,7 @@ assicurarti che non causi problemi di sicurezza (per es.\& assicurati di usare
 percorsi assoluti se "." e nella tua PATH come in Windows).
 .sp 1
 Questo può essere usato (male) per disabilitare salvaschermi che non usano le
-corrette API di X.
+corrette API di X (vedi anche \-stop\-xscreensaver).
 Se pensi sia troppo complicato, chiedi all'autore del salvaschermo di supportare
 le API di X adeguate.
 .sp 1
@@ -3207,7 +3207,7 @@ della finestra stessa piuttosto che dello schermo.
 .br
 .I NOTA:
 Questa opzione è supportata dai driver di uscita video x11, xmga, xv, xvmc,
-xvidix, gl, gl2, directx e tdfxfb.
+xvidix, gl, gl2, directx, fbdev e tdfxfb.
 .sp 1
 .I ESEMPIO:
 .PD 0
@@ -3354,6 +3354,8 @@ x11 e TV-out.
 .TP
 .B \-stop\-xscreensaver (solo X11)
 Disattiva il salvaschermo di X alla partenza e lo riattiva all'uscita.
+Se il tuo salvaschermo non gestisce né la API XSS né XResetScreenSaver,
+perfavore usa al suo posto \-heartbeat\-cmd.
 .
 .TP
 .B "\-vm \ \ \ "
@@ -4339,7 +4341,7 @@ fattore di 'lisciatura' (default: 0).
 .IPs quality=<0\-100>
 fattore di qualità (default: 75).
 .IPs outdir=<nome_dir>
-Specifica la directory dove salvare i file (default: ./).
+Specifica la directory dove salvare i file JPEG (default: ./).
 .IPs subdirs=<prefisso>
 Crea sottodirectory numerate con il prefisso specificato in cui salvare i file
 invece che nella directory corrente.
@@ -4370,8 +4372,7 @@ Scrive i file PNM in modalità raw, cioè grezza (default).
 .IPs ascii
 Scrive i file PNM in modalità ASCII.
 .IPs outdir=<nome_dir>
-Specifica la directory dove salvare i file.
-Se non specificata tutti i file verranno salvati nella directory corrente.
+Specifica la directory dove salvare i file PNM (default: ./).
 .IPs subdirs=<prefisso>
 Crea sottodirectory numerate con il prefisso specificato in cui salvare i file
 invece che nella directory corrente.
@@ -4391,6 +4392,12 @@ Sono supportati i formati RGB e BGR a 24 bpp.
 .IPs z=<0\-9>
 Specifica il livello di compressione.
 0 indica nessuna compressione, 9 invece è il massimo.
+.IPs outdir=<nome_dir>
+Specifica la directory dove salvare i file PNG (default: ./).
+.IPs alpha (default: noalpha)
+Crea file PNG con un canale alpha.
+Nota che MPlayer solitamente non gestisce l'alpha, quindi questa opzione sarà
+utile solo in rari casi.
 .RE
 .PD 1
 .
@@ -4682,8 +4689,21 @@ a risoluzione completa.
 Se <l> viene specificato la decodifica a bassa risoluzione verrà usata solo
 se la larghezza del video è maggiore od uguale a <l>.
 .RE
-.IPs "o\ \ \ \ "
-FIXME: Da documentare.
+.B o=<chiave>=<valore>[,<chiave>=<valore>[,...]]
+Passa varie opzioni AVOption al decoder di libavcodec.
+Nota, una patch che renda inutile o= e che possa passare al sistema di AVOption
+tutte le opzioni non conosciute è benvenuta.
+Si può trovare una lista completa delle opzioni AVOption nel manuale di FFmpeg.
+Nota che alcune opzioni possono andare in conflitto con quelle di MEncoder.
+.sp 1
+.RS
+.I ESEMPIO:
+.RE
+.RSs
+.PD 0
+.IPs o=debug=pict
+.PD 1
+.RE
 .IPs "sb=<numero> (solo MPEG-2)"
 Salta il numero indicato di righe di macroblocchi in basso.
 .IPs "st=<numero> (solo MPEG-2)"
@@ -7740,11 +7760,11 @@ sintassi seguente:
 .RE
 .
 .PP
-Dove <codec> può essere: lavc, xvidenc, divx4, lame, toolame, twolame,
+Dove <codec> può essere: lavc, xvidenc, divx4, mp3lame, toolame, twolame,
 nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .
-.SS lame (\-lameopts)
+.SS mp3lame (\-lameopts)
 .
 .TP
 .B "help\ \ \ "
@@ -7983,6 +8003,21 @@ Leggi i sorgenti per avere i dettagli completi.
 .PD 1
 .
 .TP
+.B o=<chiave>=<valore>[,<chiave>=<valore>[,...]]
+Passa varie opzioni AVOption al decoder di libavcodec.
+Nota, una patch che renda inutile o= e che possa passare al sistema di AVOption
+tutte le opzioni non conosciute è benvenuta.
+Si può trovare una lista completa delle opzioni AVOption nel manuale di FFmpeg.
+Nota che alcune opzioni possono andare in conflitto con quelle di MEncoder.
+.sp 1
+.RS
+.I ESEMPIO:
+.RE
+.RSs
+.PD 0
+.IPs o=bt=100k
+.PD 1
+.RE
 .B acodec=<valore>
 codec audio (default: mp2)
 .PD 0
@@ -9464,10 +9499,6 @@ FIXME: Da documentare.
 .B skip_threshold=<0\-1000000>
 FIXME: Da documentare.
 .
-.TP
-.B "o\ \ \ \ \ \ "
-FIXME: Da documentare.
-.
 .
 .SS nuv (\-nuvopts)
 .
@@ -10932,8 +10963,22 @@ Durata massima in secondi per analizzare le proprietà del flusso.
 Forza uno specifico demuxer di libavformat.
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: Da documentare.
+.B o=<chiave>=<valore>[,<chiave>=<valore>[,...]]
+Passa varie opzioni AVOption al decoder di libavcodec.
+Nota, una patch che renda inutile o= e che possa passare al sistema di AVOption
+tutte le opzioni non conosciute è benvenuta.
+Si può trovare una lista completa delle opzioni AVOption nel manuale di FFmpeg.
+Nota che alcune opzioni possono andare in conflitto con quelle di MPlayer o
+MEncoder.
+.sp 1
+.RS
+.I ESEMPIO:
+.RE
+.RSs
+.PD 0
+.IPs o=ignidx
+.PD 1
+.RE
 .
 .TP
 .B probesize=<valore>
@@ -10991,6 +11036,8 @@ Formato MPEG-4
 Formato MPEG-4 con intestazioni extra richieste dal firmware di Apple iPod
 .IPs "dv\ \ \ "
 Formato contenitore Sony Digital Video
+.IPs "matroska\ \ \ "
+Matroska
 .RE
 .PD 1
 .TP
@@ -11000,8 +11047,21 @@ attualmente significativo solo per MPEG[12].
 A volte è necessario aumentarlo per evitare errori di 'buffer underflows'.
 .
 .TP
-.B "o\ \ \ \ \ \ "
-FIXME: Da documentare.
+.B o=<chiave>=<valore>[,<chiave>=<valore>[,...]]
+Passa varie opzioni AVOption al decoder di libavcodec.
+Nota, una patch che renda inutile o= e che possa passare al sistema di AVOption
+tutte le opzioni non conosciute è benvenuta.
+Si può trovare una lista completa delle opzioni AVOption nel manuale di FFmpeg.
+Nota che alcune opzioni possono andare in conflitto con quelle di MEncoder.
+.sp 1
+.RS
+.I ESEMPIO:
+.RE
+.RSs
+.PD 0
+.IPs o=packetsize=100
+.PD 1
+.RE
 .
 .TP
 .B packetsize=<dimensione>
