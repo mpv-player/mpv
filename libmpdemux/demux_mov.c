@@ -1549,7 +1549,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 				break;
 			    case MOV_FOURCC('n','a','m','e'):
 			    case MOV_FOURCC(0xa9,'n','a','m'):
-				demux_info_add(demuxer, "name", &text[2]);
+				demux_info_add(demuxer, "title", &text[2]);
 				mp_msg(MSGT_DEMUX, MSGL_V, " Name: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'A','R','T'):

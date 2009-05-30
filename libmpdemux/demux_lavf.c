@@ -476,7 +476,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         return NULL;
     }
 
-    if(avfc->title    [0]) demux_info_add(demuxer, "name"     , avfc->title    );
+    if(avfc->title    [0]) demux_info_add(demuxer, "title"    , avfc->title    );
     if(avfc->author   [0]) demux_info_add(demuxer, "author"   , avfc->author   );
     if(avfc->copyright[0]) demux_info_add(demuxer, "copyright", avfc->copyright);
     if(avfc->comment  [0]) demux_info_add(demuxer, "comments" , avfc->comment  );

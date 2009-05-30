@@ -208,7 +208,7 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	/* only for displaying some informations about movie*/
 	if (!strcmp(opt, "Title"))
 	{
-	    demux_info_add(demux, "name", param);
+	    demux_info_add(demux, "title", param);
 	    priv->title = strdup(param);
 	}
 	if (!strcmp(opt, "Author"))
