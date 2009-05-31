@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include <stdio.h>
+#include <string.h>
 #include <windows.h>
 #include "keycodes.h"
 #include "input/input.h"
@@ -187,7 +188,7 @@ static const struct {
 
 char* get_term_charset(void)
 {
-    static char codepage[10];
+    char codepage[10];
     unsigned i, cpno = GetConsoleOutputCP();
     if (!cpno)
         cpno = GetACP();
@@ -196,9 +197,9 @@ char* get_term_charset(void)
 
     for (i = 0; cp_alias[i].cp; i++)
         if (cpno == cp_alias[i].cp)
-            return cp_alias[i].alias;
+            return strdup(cp_alias[i].alias);
 
     snprintf(codepage, sizeof(codepage), "CP%u", cpno);
-    return codepage;
+    return strdup(codepage);
 }
 #endif
