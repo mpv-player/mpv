@@ -171,7 +171,7 @@ static int lavf_check_file(demuxer_t *demuxer){
     return DEMUXER_TYPE_LAVF;
 }
 
-static const char *preferred_list[] = {
+static const char * const preferred_list[] = {
     "dxa",
     "wv",
     "nuv",
@@ -188,7 +188,7 @@ static const char *preferred_list[] = {
 
 static int lavf_check_preferred_file(demuxer_t *demuxer){
     if (lavf_check_file(demuxer)) {
-        char **p = preferred_list;
+        const char * const *p = preferred_list;
         lavf_priv_t *priv = demuxer->priv;
         while (*p) {
             if (strcmp(*p, priv->avif->name) == 0)
