@@ -141,12 +141,6 @@ static int lavf_check_file(demuxer_t *demuxer){
 
     av_register_all();
 
-    if(stream_read(demuxer->stream, buf, PROBE_BUF_SIZE)!=PROBE_BUF_SIZE)
-        return 0;
-    avpd.filename= demuxer->stream->url;
-    avpd.buf= buf;
-    avpd.buf_size= PROBE_BUF_SIZE;
-
     if (opt_format) {
         if (strcmp(opt_format, "help") == 0) {
            list_formats();
@@ -160,6 +154,13 @@ static int lavf_check_file(demuxer_t *demuxer){
         mp_msg(MSGT_DEMUX,MSGL_INFO,"Forced lavf %s demuxer\n", priv->avif->long_name);
         return DEMUXER_TYPE_LAVF;
     }
+
+    if(stream_read(demuxer->stream, buf, PROBE_BUF_SIZE)!=PROBE_BUF_SIZE)
+        return 0;
+    avpd.filename= demuxer->stream->url;
+    avpd.buf= buf;
+    avpd.buf_size= PROBE_BUF_SIZE;
+
     priv->avif= av_probe_input_format(&avpd, 1);
     if(!priv->avif){
         mp_msg(MSGT_HEADER,MSGL_V,"LAVF_check: no clue about this gibberish!\n");
