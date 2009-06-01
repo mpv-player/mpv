@@ -1381,7 +1381,8 @@ if test -z "$_target" ; then
           host_arch=i386
         fi
       ;;
-      macppc|ppc|ppc64) host_arch=ppc ;;
+      macppc|ppc) host_arch=ppc ;;
+      ppc64) host_arch=ppc64 ;;
       alpha) host_arch=alpha ;;
       sparc) host_arch=sparc ;;
       sparc64) host_arch=sparc64 ;;
@@ -2085,14 +2086,14 @@ EOF
   ppc|ppc64|powerpc|powerpc64)
     _arch='PPC'
     def_dcbzl='#define HAVE_DCBZL 0'
-    def_ppc64='#define HAVE_PPC64 0'
     _target_arch='ARCH_PPC = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
+      _arch='PPC PPC64'
+      _target_subarch='ARCH_PPC64 = yes'
       def_fast_64bit='#define HAVE_FAST_64BIT 1'
-      def_ppc64='#define HAVE_PPC64 1'
     fi
     echocheck "CPU type"
     case $system_name in
@@ -8818,7 +8819,6 @@ $def_memalign_hack
 $def_mlib
 $def_mkstemp
 $def_posix_memalign
-$def_ppc64
 $def_pthreads
 $def_ten_operands
 $def_threads
