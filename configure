@@ -1714,8 +1714,8 @@ _arch_all='X86 X86_32 X86_64 IA64 SPARC ARM AVR32 SH4 PPC PPC64 ALPHA MIPS SGI_M
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _arch='X86 X86_32'
-  _target_arch_x86="ARCH_X86 = yes"
-  _target_arch="ARCH_X86_32 = yes"
+  _target_arch="ARCH_X86 = yes"
+  _target_subarch="ARCH_X86_32 = yes"
   def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
   iproc=486
   proc=i486
@@ -1954,8 +1954,8 @@ EOF
 
   x86_64|amd64)
     _arch='X86 X86_64'
-    _target_arch='ARCH_X86_64 = yes'
-    _target_arch_x86="ARCH_X86 = yes"
+    _target_subarch='ARCH_X86_64 = yes'
+    _target_arch="ARCH_X86 = yes"
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='x86_64'
@@ -8164,7 +8164,7 @@ EXESUF = $_exesuf
 EXESUFS_ALL = .exe
 
 $_target_arch
-$_target_arch_x86
+$_target_subarch
 $(echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/')
 
 MENCODER = $_mencoder
