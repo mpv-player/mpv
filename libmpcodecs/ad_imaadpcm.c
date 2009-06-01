@@ -163,8 +163,8 @@ static void decode_nibbles(unsigned short *output,
 static int qt_ima_adpcm_decode_block(unsigned short *output,
   unsigned char *input, int channels, int block_size)
 {
-  int initial_predictor[2];
-  int initial_index[2];
+  int initial_predictor[2] = {0};
+  int initial_index[2] = {0};
   int i;
 
   if (channels != 1) channels = 2;
