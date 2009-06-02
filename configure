@@ -8124,6 +8124,7 @@ MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 
 AR = $_ar
+AS = $_cc
 CC = $_cc
 CXX = $_cc
 HOST_CC = $_host_cc
