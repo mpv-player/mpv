@@ -240,7 +240,7 @@ static void store_slice_mmx(uint8_t *dst, int16_t *src, long dst_stride, long sr
 	"jl 2b                      \n\t"
 
 	:
-	: "m" (width), "m" (src_stride), "g" (od), "m" (dst_stride), "g" (end),
+	: "m" (width), "m" (src_stride), "erm" (od), "m" (dst_stride), "erm" (end),
 	  "m" (log2_scale), "m" (src), "m" (dst) //input
 	: "%"REG_a, "%"REG_c, "%"REG_d, "%"REG_S, "%"REG_D
 	);
@@ -308,7 +308,7 @@ static void store_slice2_mmx(uint8_t *dst, int16_t *src, long dst_stride, long s
 	"jl 2b                      \n\t"
 
 	:
-	: "m" (width), "m" (src_stride), "g" (od), "m" (dst_stride), "g" (end),
+	: "m" (width), "m" (src_stride), "erm" (od), "m" (dst_stride), "erm" (end),
 	  "m" (log2_scale), "m" (src), "m" (dst) //input
 	: "%"REG_a, "%"REG_c, "%"REG_d, "%"REG_D, "%"REG_S
 	);
