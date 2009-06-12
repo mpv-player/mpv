@@ -1360,8 +1360,8 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
     int source = -1, reset_spu = 0;
     char *sub_name;
 
-    if (global_sub_size <= 0)
-	return M_PROPERTY_UNAVAILABLE;
+    if (!mpctx->sh_video || global_sub_size <= 0)
+        return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_GET:
