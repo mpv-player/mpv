@@ -439,9 +439,9 @@ Miscellaneous options:
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
   --charset=charset      convert the console messages to this character set
+  --language-msg=LINGUA  language used for messages and the GUI [en]
   --language=list        a white space or comma separated list of languages for
-                         translated man pages, the first language is used for
-                         messages and the GUI (the environment variable
+                         translated man pages (the environment variable
                          \$LINGUAS is also honored) [en]
                          (Available: all $msg_lang_all)
   --with-install=PATH    path to a custom install program
@@ -848,6 +848,9 @@ for ac_option do
     ;;
   --charset=*)
     _charset=$(echo $ac_option | cut -d '=' -f 2)
+    ;;
+  --language-msg=*)
+    _language_msg=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --language=*)
     _language=$(echo $ac_option | cut -d '=' -f 2)
@@ -2791,7 +2794,9 @@ echores "$_langinfo"
 
 echocheck "language"
 test -z "$_language" && _language=$LINGUAS
+test -z "$_language_msg" && _language_msg=$LINGUAS
 _language=$(echo $_language | tr , " ")
+_language_msg=$(echo $_language_msg | tr , " ")
 if $(echo $_language | grep -q all) ; then
   doc_lang=en ; doc_langs=$doc_lang_all
   man_lang=en ; man_langs=$man_lang_all
@@ -2806,13 +2811,13 @@ else
   done
   man_langs=$tmp_man_langs
   doc_langs=$tmp_man_langs
-  for lang in $_language ; do
+  for lang in $_language_msg ; do
     if test -f "help/help_mp-${lang}.h" ; then
       msg_lang=$lang
       break
     else
       echo ${_echo_n} "$lang not found, ${_echo_c}"
-      _language=$(echo $_language | sed "s/$lang *//")
+      _language_msg=$(echo $_language_msg | sed "s/$lang *//")
     fi
   done
 fi
