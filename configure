@@ -2795,7 +2795,6 @@ _language=$(echo $_language | tr , " ")
 if $(echo $_language | grep -q all) ; then
   doc_lang=en ; doc_langs=$doc_lang_all
   man_lang=en ; man_langs=$man_lang_all
-  msg_lang=en
 else
   for lang in $_language ; do
     if test -d DOCS/man/$lang ; then
