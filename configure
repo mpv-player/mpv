@@ -694,7 +694,7 @@ _directfb=auto
 _zr=auto
 _bl=no
 _largefiles=yes
-#_language=en
+#language=en
 _shm=auto
 _linux_devfs=no
 _charset="UTF-8"
@@ -850,10 +850,10 @@ for ac_option do
     _charset=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --language-msg=*)
-    _language_msg=$(echo $ac_option | cut -d '=' -f 2)
+    language_msg=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --language=*)
-    _language=$(echo $ac_option | cut -d '=' -f 2)
+    language=$(echo $ac_option | cut -d '=' -f 2)
     ;;
 
   --enable-static)
@@ -2793,15 +2793,15 @@ echores "$_langinfo"
 
 
 echocheck "language"
-test -z "$_language" && _language=$LINGUAS
-test -z "$_language_msg" && _language_msg=$LINGUAS
-_language=$(echo $_language | tr , " ")
-_language_msg=$(echo $_language_msg | tr , " ")
-if $(echo $_language | grep -q all) ; then
+test -z "$language" && language=$LINGUAS
+test -z "$language_msg" && language_msg=$LINGUAS
+language=$(echo $language | tr , " ")
+language_msg=$(echo $language_msg | tr , " ")
+if $(echo $language | grep -q all) ; then
   doc_lang=en ; doc_langs=$doc_lang_all
   man_lang=en ; man_langs=$man_lang_all
 else
-  for lang in $_language ; do
+  for lang in $language ; do
     if test -d DOCS/man/$lang ; then
       tmp_man_langs="$tmp_man_langs $lang"
     fi
@@ -2811,13 +2811,13 @@ else
   done
   man_langs=$tmp_man_langs
   doc_langs=$tmp_man_langs
-  for lang in $_language_msg ; do
+  for lang in $language_msg ; do
     if test -f "help/help_mp-${lang}.h" ; then
       msg_lang=$lang
       break
     else
       echo ${_echo_n} "$lang not found, ${_echo_c}"
-      _language_msg=$(echo $_language_msg | sed "s/$lang *//")
+      language_msg=$(echo $language_msg | sed "s/$lang *//")
     fi
   done
 fi
