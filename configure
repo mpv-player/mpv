@@ -2827,18 +2827,18 @@ for lang in $language_doc ; do
   test -d DOCS/xml/$lang && tmp_language_doc="$tmp_language_doc $lang"
 done
 language_doc=$tmp_language_doc
-test -z "language_doc" && language_doc=en
+test -z "$language_doc" && language_doc=en
 
 for lang in $language_man ; do
   test -d DOCS/man/$lang && tmp_language_man="$tmp_language_man $lang"
 done
 language_man=$tmp_language_man
-test -z "language_man" && language_man=en
+test -z "$language_man" && language_man=en
 
 for lang in $language_msg ; do
   test -f "help/help_mp-${lang}.h" && language_msg=$lang && break
 done
-test -z "language_msg" && language_msg=en
+test -z "$language_msg" && language_msg=en
 _mp_help="help/help_mp-${language_msg}.h"
 echores "messages: $language_msg - man pages: $language_man - documentation: $language_doc"
 
