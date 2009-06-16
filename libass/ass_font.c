@@ -127,6 +127,8 @@ static int add_face(void* fc_priv, ass_font_t* font, uint32_t ch)
 
 	path = fontconfig_select(fc_priv, font->desc.family, font->desc.treat_family_as_pattern, font->desc.bold,
 					      font->desc.italic, &index, ch);
+	if (!path)
+		return -1;
 
 	mem_idx = find_font(font->library, path);
 	if (mem_idx >= 0) {
