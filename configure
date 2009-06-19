@@ -8127,9 +8127,9 @@ export LC_ALL = C
 CONFIGURATION = $_configuration
 
 CHARSET = $_charset
-DOC_LANGS = $doc_langs
+DOC_LANGS = $language_doc
 DOC_LANG_ALL = $doc_lang_all
-MAN_LANGS = $man_langs
+MAN_LANGS = $language_man
 MAN_LANG_ALL = $man_lang_all
 
 prefix = \$(DESTDIR)$_prefix
