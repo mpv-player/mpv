@@ -846,8 +846,9 @@ int vo_x11_check_events(Display * mydisplay)
                     break;
                 {
                     int old_w = vo_dwidth, old_h = vo_dheight;
+		    int old_x = vo_dx, old_y = vo_dy;
                     vo_x11_update_geometry();
-                    if (vo_dwidth != old_w || vo_dheight != old_h)
+                    if (vo_dwidth != old_w || vo_dheight != old_h || vo_dx != old_x || vo_dy != old_y)
                         ret |= VO_EVENT_RESIZE;
                 }
                 break;
