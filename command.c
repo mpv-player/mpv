@@ -2029,7 +2029,7 @@ static const m_option_t mp_properties[] = {
     { "channels", mp_property_channels, CONF_TYPE_INT,
      0, 0, 0, NULL },
     { "switch_audio", mp_property_audio, CONF_TYPE_INT,
-     CONF_RANGE, -2, MAX_A_STREAMS - 1, NULL },
+     CONF_RANGE, -2, 65535, NULL },
     { "balance", mp_property_balance, CONF_TYPE_FLOAT,
      M_OPT_RANGE, -1, 1, NULL },
 
@@ -2075,7 +2075,7 @@ static const m_option_t mp_properties[] = {
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
      0, 0, 0, NULL },
     { "switch_video", mp_property_video, CONF_TYPE_INT,
-     CONF_RANGE, -2, MAX_V_STREAMS - 1, NULL },
+     CONF_RANGE, -2, 65535, NULL },
     { "switch_program", mp_property_program, CONF_TYPE_INT,
      CONF_RANGE, -1, 65535, NULL },
 
