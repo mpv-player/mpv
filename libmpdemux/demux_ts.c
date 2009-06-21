@@ -700,14 +700,12 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 
 			if(is_video)
 			{
-				mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_VIDEO_ID=%d\n", es.pid);
     				chosen_pid = (req_vpid == es.pid);
 				if((! chosen_pid) && (req_vpid > 0))
 					continue;
 			}
 			else if(is_audio)
 			{
-				mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_AUDIO_ID=%d\n", es.pid);
 				if (es.lang[0] > 0)
 					mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_AID_%d_LANG=%s\n", es.pid, es.lang);
 				if(req_apid > 0)
