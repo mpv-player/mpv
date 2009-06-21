@@ -3378,14 +3378,9 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 			}
 			else	//audio track <n>
 			{
-				for(i = 0; i < 8192; i++)
-				{
-					if(priv->ts.streams[i].id == n && priv->ts.streams[i].type == reftype)
-					{
+				if (n >= 8192 || priv->ts.streams[n].type != reftype) return DEMUXER_CTRL_NOTIMPL;
+				i = n;
 						sh = priv->ts.streams[i].sh;
-						break;
-					}
-				}
 			}
 
 			if(sh)
@@ -3456,12 +3451,12 @@ static int demux_ts_control(demuxer_t *demuxer, int cmd, void *arg)
 				if(!vid_done && priv->ts.streams[pmt->es[j].pid].type == TYPE_VIDEO)
 				{
 					vid_done = 1;
-					prog->vid = priv->ts.streams[pmt->es[j].pid].id;
+					prog->vid = pmt->es[j].pid;
 				}
 				else if(!aid_done && priv->ts.streams[pmt->es[j].pid].type == TYPE_AUDIO)
 				{
 					aid_done = 1;
-					prog->aid = priv->ts.streams[pmt->es[j].pid].id;
+					prog->aid = pmt->es[j].pid;
 				}
 			}
 
