@@ -2722,6 +2722,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		rap_flag = 0;
 		mp4_dec = NULL;
 		es->is_synced = 0;
+		es->lang[0] = 0;
 		si = NULL;
 
 		junk = priv->ts.packet_size - TS_PACKET_SIZE;
