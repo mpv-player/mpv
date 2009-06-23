@@ -286,6 +286,7 @@ try_fec:
 }
 
 static int parse_avc_sps(uint8_t *buf, int len, int *w, int *h);
+static inline uint8_t *pid_lang_from_pmt(ts_priv_t *priv, int pid);
 
 static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 {
@@ -300,6 +301,7 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 		sh_audio_t *sh = new_sh_audio_aid(demuxer, priv->last_aid, es->pid);
 		if(sh)
 		{
+			const char *lang = pid_lang_from_pmt(priv, es->pid);
 			sh->format = IS_AUDIO(es->type) ? es->type : es->subtype;
 			sh->ds = demuxer->audio;
 
@@ -307,6 +309,8 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 			priv->ts.streams[es->pid].sh = sh;
 			priv->ts.streams[es->pid].type = TYPE_AUDIO;
 			mp_msg(MSGT_DEMUX, MSGL_V, "\r\nADDED AUDIO PID %d, type: %x stream n. %d\r\n", es->pid, sh->format, priv->last_aid);
+			if (lang && lang[0])
+				mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_AID_%d_LANG=%s\n", es->pid, lang);
 			priv->last_aid++;
 		}
 
@@ -706,8 +710,6 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			}
 			else if(is_audio)
 			{
-				if (es.lang[0] > 0)
-					mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_AID_%d_LANG=%s\n", es.pid, es.lang);
 				if(req_apid > 0)
 				{
 					chosen_pid = (req_apid == es.pid);
