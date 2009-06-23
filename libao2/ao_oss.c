@@ -172,6 +172,29 @@ static int prepause_space;
 static const char *oss_mixer_device = PATH_DEV_MIXER;
 static int oss_mixer_channel = SOUND_MIXER_PCM;
 
+#ifdef SNDCTL_DSP_GETPLAYVOL
+static int volume_oss4(ao_control_vol_t *vol, int cmd) {
+    int v;
+
+    if (audio_fd < 0)
+        return CONTROL_ERROR;
+
+    if (cmd == AOCONTROL_GET_VOLUME) {
+        if (ioctl(audio_fd, SNDCTL_DSP_GETPLAYVOL, &v) == -1)
+            return CONTROL_ERROR;
+        vol->right = (v & 0xff00) >> 8;
+        vol->left = v & 0x00ff;
+        return CONTROL_OK;
+    } else if (cmd == AOCONTROL_SET_VOLUME) {
+        v = ((int) vol->right << 8) | (int) vol->left;
+        if (ioctl(audio_fd, SNDCTL_DSP_SETPLAYVOL, &v) == -1)
+            return CONTROL_ERROR;
+        return CONTROL_OK;
+    } else
+        return CONTROL_UNKNOWN;
+}
+#endif
+
 // to set/get/query special features/parameters
 static int control(int cmd,void *arg){
     switch(cmd){
@@ -196,6 +219,12 @@ static int control(int cmd,void *arg){
 	{
 	    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 	    int fd, v, devs;
+
+#ifdef SNDCTL_DSP_GETPLAYVOL
+        // Try OSS4 first
+        if (volume_oss4(vol, cmd) == CONTROL_OK)
+            return CONTROL_OK;
+#endif
 
 	    if(ao_data.format == AF_FORMAT_AC3)
 		return CONTROL_TRUE;

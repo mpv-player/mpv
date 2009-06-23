@@ -5351,6 +5351,15 @@ EOF
      cc_check && _real_ossaudio=yes
      if test "$_real_ossaudio" = yes; then
        def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
+       # Check for OSS4 headers (override default headers)
+       # Does not apply to systems where OSS4 is native (e.g. FreeBSD)
+       if test -f /etc/oss.conf; then
+         . /etc/oss.conf
+         _ossinc="$OSSLIBDIR/include"
+         if test -f "$_ossinc/sys/soundcard.h"; then
+           extra_cflags="-I$_ossinc $extra_cflags"
+         fi
+       fi
      elif netbsd || openbsd ; then
        def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound"'
        extra_ldflags="$extra_ldflags -lossaudio"
