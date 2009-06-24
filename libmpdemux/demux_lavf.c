@@ -220,6 +220,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
     lavf_priv_t *priv= demuxer->priv;
     AVStream *st= avfc->streams[i];
     AVCodecContext *codec= st->codec;
+    AVMetadataTag *lang = av_metadata_get(st->metadata, "language", NULL, 0);
     int g;
 
     switch(codec->codec_type){
@@ -290,8 +291,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                     sh_audio->format = 0x7;
                     break;
             }
-            if (st->language) {
-              sh_audio->lang = strdup(st->language);
+            if (lang && lang->value) {
+              sh_audio->lang = strdup(lang->value);
               mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", i, sh_audio->lang);
             }
             if (st->disposition & AV_DISPOSITION_DEFAULT)
@@ -396,8 +397,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
                 sh_sub->extradata_len = codec->extradata_size;
             }
-            if (st->language) {
-              sh_sub->lang = strdup(st->language);
+            if (lang && lang->value) {
+              sh_sub->lang = strdup(lang->value);
               mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", priv->sub_streams, sh_sub->lang);
             }
             if (st->disposition & AV_DISPOSITION_DEFAULT)
