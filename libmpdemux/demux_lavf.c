@@ -291,8 +291,10 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                     sh_audio->format = 0x7;
                     break;
             }
-            if (st->language)
+            if (st->language) {
               sh_audio->lang = strdup(st->language);
+              mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", i, sh_audio->lang);
+            }
             if (st->disposition & AV_DISPOSITION_DEFAULT)
               sh_audio->default_track = 1;
             if(mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf, MSGL_V);
@@ -399,8 +401,10 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
                 sh_sub->extradata_len = codec->extradata_size;
             }
-            if (st->language)
+            if (st->language) {
               sh_sub->lang = strdup(st->language);
+              mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", priv->sub_streams, sh_sub->lang);
+            }
             if (st->disposition & AV_DISPOSITION_DEFAULT)
               sh_sub->default_track = 1;
             priv->sub_streams++;
