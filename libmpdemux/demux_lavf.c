@@ -227,8 +227,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
             int override_tag;
             WAVEFORMATEX *wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
             sh_audio_t* sh_audio;
-            if(priv->audio_streams >= MAX_A_STREAMS)
-                break;
             sh_audio=new_sh_audio(demuxer, i);
             mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", i);
             if(!sh_audio)
@@ -309,8 +307,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
         case CODEC_TYPE_VIDEO:{
             sh_video_t* sh_video;
             BITMAPINFOHEADER *bih;
-            if(priv->video_streams >= MAX_V_STREAMS)
-                break;
             sh_video=new_sh_video(demuxer, i);
             mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "lavf", i);
             if(!sh_video) break;
@@ -378,8 +374,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
         case CODEC_TYPE_SUBTITLE:{
             sh_sub_t* sh_sub;
             char type;
-            if(priv->sub_streams >= MAX_S_STREAMS)
-                break;
             /* only support text subtitles for now */
             if(codec->codec_id == CODEC_ID_TEXT)
                 type = 't';
