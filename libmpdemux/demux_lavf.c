@@ -225,7 +225,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
     switch(codec->codec_type){
         case CODEC_TYPE_AUDIO:{
             int override_tag;
-            WAVEFORMATEX *wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
+            WAVEFORMATEX *wf;
             sh_audio_t* sh_audio;
             sh_audio=new_sh_audio(demuxer, i);
             mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "lavf", i);
@@ -233,6 +233,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i) {
                 break;
             priv->astreams[priv->audio_streams] = i;
             priv->audio_streams++;
+            wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
             // For some formats (like PCM) always trust CODEC_ID_* more than codec_tag
             override_tag= av_codec_get_tag(mp_wav_override_taglists, codec->codec_id);
             if (override_tag)
