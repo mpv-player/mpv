@@ -185,7 +185,7 @@ static int parse_fbmode_cfg(char *cfgfile)
         return -1;
     }
 
-    if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
+    if ((line = malloc(MAX_LINE_LEN + 1)) == NULL) {
         mp_msg(MSGT_VO, MSGL_V, "can't get memory for 'line': %s\n", strerror(errno));
         return -2;
     }
@@ -212,7 +212,7 @@ static int parse_fbmode_cfg(char *cfgfile)
             if (!validate_mode(mode))
                 goto err_out_not_valid;
         loop_enter:
-            if (!(fb_modes = (fb_mode_t *)
+            if (!(fb_modes =
                   realloc(fb_modes, sizeof(fb_mode_t) * (nr_modes + 1)))) {
                 mp_msg(MSGT_VO, MSGL_V, "can't realloc 'fb_modes' (nr_modes = %d):"
                        " %s\n", nr_modes, strerror(errno));
@@ -949,8 +949,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         int x_offset = 0, y_offset = 0;
         geometry(&x_offset, &y_offset, &out_width, &out_height, fb_xres, fb_yres);
 
-        frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
-                                        MAP_SHARED, fb_dev_fd, 0);
+        frame_buffer = mmap(0, fb_size, PROT_READ | PROT_WRITE,
+                            MAP_SHARED, fb_dev_fd, 0);
         if (frame_buffer == (uint8_t *) -1) {
             mp_msg(MSGT_VO, MSGL_ERR, "Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
             return 1;
