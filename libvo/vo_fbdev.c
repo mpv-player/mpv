@@ -46,6 +46,7 @@
 #endif
 #include "aspect.h"
 #include "mp_msg.h"
+#include "libavutil/common.h"
 
 static const vo_info_t info = {
     "Framebuffer Device",
@@ -491,7 +492,7 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 
 static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 {
-    p->bits_per_pixel = (bpp + 1) & ~1;
+    p->bits_per_pixel = FFALIGN(bpp, 2);
     p->red.msb_right  = p->green.msb_right = p->blue.msb_right = p->transp.msb_right = 0;
     p->transp.offset  = p->transp.length = 0;
     p->blue.offset    = 0;
@@ -610,8 +611,7 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
     bcols = 1 << var->blue.length;
 
     /* Make our palette the length of the deepest color */
-    cols = rcols > gcols ? rcols : gcols;
-    cols = cols  > bcols ? cols  : bcols;
+    cols = FFMAX3(rcols, gcols, bcols);
 
     red = malloc(cols * sizeof(red[0]));
     if (!red) {
