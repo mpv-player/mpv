@@ -972,7 +972,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         mp_msg(MSGT_VO, MSGL_ERR, "can't fopen /dev/tty: %s\n", strerror(errno));
     }
 
-        vt_set_textarea(last_row, fb_yres);
+    vt_set_textarea(last_row, fb_yres);
 
     return 0;
 }
@@ -1056,7 +1056,7 @@ static void uninit(void)
         if (ioctl(fb_tty_fd, KDSETMODE, KD_TEXT) < 0)
             mp_msg(MSGT_VO, MSGL_WARN, "Can't restore text mode: %s\n", strerror(errno));
     }
-        vt_set_textarea(0, fb_orig_vinfo.yres);
+    vt_set_textarea(0, fb_orig_vinfo.yres);
     close(fb_tty_fd);
     close(fb_dev_fd);
     if (frame_buffer)
