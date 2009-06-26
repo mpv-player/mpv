@@ -39,7 +39,7 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 {
         int width, height, xoff, yoff, xper, yper;
 
-	width = height = xoff = yoff = xper = yper = INT_MIN;
+        RESET_GEOMETRY
 
         if(vo_geometry != NULL) {
 		if(sscanf(vo_geometry, "%ix%i+%i+%i", &width, &height, &xoff, &yoff) != 4 )
