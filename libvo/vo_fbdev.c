@@ -610,8 +610,8 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
     bcols = 1 << var->blue.length;
 
     /* Make our palette the length of the deepest color */
-    cols = (rcols > gcols ? rcols : gcols);
-    cols = (cols  > bcols ? cols  : bcols);
+    cols = rcols > gcols ? rcols : gcols;
+    cols = cols  > bcols ? cols  : bcols;
 
     red = malloc(cols * sizeof(red[0]));
     if (!red) {
@@ -763,7 +763,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         mp_msg(MSGT_VO, MSGL_ERR, "-fbmode can only be used with -vm\n");
         return 1;
     }
-    if (vm && (parse_fbmode_cfg(fb_mode_cfgfile) < 0))
+    if (vm && parse_fbmode_cfg(fb_mode_cfgfile) < 0)
         return 1;
     if (d_width && (fs || vm)) {
         out_width  = d_width;
@@ -1095,19 +1095,19 @@ static int preinit(const char *vo_subdevice)
         }
     }
     if (!pre_init_err)
-        return pre_init_err = (fb_preinit(0) ? 0 : -1);
+        return pre_init_err = fb_preinit(0) ? 0 : -1;
     return -1;
 }
 
 static uint32_t get_image(mp_image_t *mpi)
 {
     if (!IMGFMT_IS_BGR(mpi->imgfmt) ||
-        (IMGFMT_BGR_DEPTH(mpi->imgfmt) != fb_bpp) ||
-        ((mpi->type != MP_IMGTYPE_STATIC) && (mpi->type != MP_IMGTYPE_TEMP)) ||
+        IMGFMT_BGR_DEPTH(mpi->imgfmt) != fb_bpp ||
+        (mpi->type != MP_IMGTYPE_STATIC && mpi->type != MP_IMGTYPE_TEMP) ||
         (mpi->flags & MP_IMGFLAG_PLANAR) ||
         (mpi->flags & MP_IMGFLAG_YUV) ||
-        (mpi->width != in_width) ||
-        (mpi->height != in_height)
+        mpi->width != in_width ||
+        mpi->height != in_height
        )
         return VO_FALSE;
 
@@ -1123,7 +1123,7 @@ static int control(uint32_t request, void *data, ...)
     case VOCTRL_GET_IMAGE:
         return get_image(data);
     case VOCTRL_QUERY_FORMAT:
-        return query_format(*((uint32_t*)data));
+        return query_format(*(uint32_t*)data);
     }
 
 #ifdef CONFIG_VIDIX
