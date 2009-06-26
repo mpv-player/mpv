@@ -918,7 +918,7 @@ mp_input_parse_cmd(char* str) {
   return cmd;
 }
 
-#define MP_CMD_MAX_SIZE 256
+#define MP_CMD_MAX_SIZE 4096
 
 static int
 mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
