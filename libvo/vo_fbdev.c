@@ -1057,6 +1057,8 @@ static void uninit(void)
             mp_msg(MSGT_VO, MSGL_WARN, "Can't restore text mode: %s\n", strerror(errno));
     }
     vt_set_textarea(0, fb_orig_vinfo.yres);
+    if (vt_fp)
+        fclose(vt_fp);
     close(fb_tty_fd);
     close(fb_dev_fd);
     if (frame_buffer)
