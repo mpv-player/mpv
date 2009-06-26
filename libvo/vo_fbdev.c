@@ -1011,17 +1011,11 @@ static int draw_frame(uint8_t *src[])
 
 static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
-    uint8_t *d, *s;
+    uint8_t *d;
 
     d = center + fb_line_len * y + fb_pixel_size * x;
 
-    s = src[0];
-    while (h) {
-        fast_memcpy(d, s, w * fb_pixel_size);
-        d += fb_line_len;
-        s += stride[0];
-        h--;
-    }
+    memcpy_pic2(d, src[0], w * fb_pixel_size, h, fb_line_len, stride[0], 1);
 
     return 0;
 }
