@@ -556,7 +556,6 @@ static fb_mode_t *fb_mode = NULL;
 
 /* vt related variables */
 static FILE *vt_fp = NULL;
-static int vt_doit = 1;
 
 /* vo_fbdev related variables */
 static int fb_dev_fd;
@@ -969,12 +968,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         if (fs || vm)
             memset(frame_buffer, '\0', fb_line_len * fb_yres);
     }
-    if (vt_doit && !(vt_fp = fopen("/dev/tty", "w"))) {
+    if (!(vt_fp = fopen("/dev/tty", "w"))) {
         mp_msg(MSGT_VO, MSGL_ERR, "can't fopen /dev/tty: %s\n", strerror(errno));
-        vt_doit = 0;
     }
 
-    if (vt_doit)
         vt_set_textarea(last_row, fb_yres);
 
     return 0;
@@ -1059,7 +1056,6 @@ static void uninit(void)
         if (ioctl(fb_tty_fd, KDSETMODE, KD_TEXT) < 0)
             mp_msg(MSGT_VO, MSGL_WARN, "Can't restore text mode: %s\n", strerror(errno));
     }
-    if (vt_doit)
         vt_set_textarea(0, fb_orig_vinfo.yres);
     close(fb_tty_fd);
     close(fb_dev_fd);
