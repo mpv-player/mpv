@@ -749,7 +749,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     struct fb_cmap *cmap;
     int vm   = flags & VOFLAG_MODESWITCHING;
     int zoom = flags & VOFLAG_SWSCALE;
-    int vt_fd;
 
     fs = flags & VOFLAG_FULLSCREEN;
 
@@ -970,12 +969,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         if (fs || vm)
             memset(frame_buffer, '\0', fb_line_len * fb_yres);
     }
-    if (vt_doit && (vt_fd = open("/dev/tty", O_WRONLY)) == -1) {
-        mp_msg(MSGT_VO, MSGL_ERR, "can't open /dev/tty: %s\n", strerror(errno));
-        vt_doit = 0;
-    }
-    if (vt_doit && !(vt_fp = fdopen(vt_fd, "w"))) {
-        mp_msg(MSGT_VO, MSGL_ERR, "can't fdopen /dev/tty: %s\n", strerror(errno));
+    if (vt_doit && !(vt_fp = fopen("/dev/tty", "w"))) {
+        mp_msg(MSGT_VO, MSGL_ERR, "can't fopen /dev/tty: %s\n", strerror(errno));
         vt_doit = 0;
     }
 
