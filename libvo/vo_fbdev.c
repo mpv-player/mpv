@@ -673,6 +673,8 @@ static int fb_preinit(int reset)
     if (fb_preinit_done)
         return fb_works;
 
+    fb_dev_fd = fb_tty_fd = -1;
+
     if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
         fb_dev_name = strdup("/dev/fb0");
     mp_msg(MSGT_VO, MSGL_V, "using %s\n", fb_dev_name);
@@ -683,7 +685,7 @@ static int fb_preinit(int reset)
     }
     if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
         mp_msg(MSGT_VO, MSGL_ERR, "Can't get VSCREENINFO: %s\n", strerror(errno));
-        goto err_out_fd;
+        goto err_out;
     }
     fb_orig_vinfo = fb_vinfo;
 
@@ -696,13 +698,13 @@ static int fb_preinit(int reset)
 
     if (fb_bpp == 8 && !vo_dbpp) {
         mp_msg(MSGT_VO, MSGL_ERR, "8 bpp output is not supported.\n");
-        goto err_out_tty_fd;
+        goto err_out;
     }
 
     if (vo_dbpp) {
         if (vo_dbpp != 15 && vo_dbpp != 16 && vo_dbpp != 24 && vo_dbpp != 32) {
             mp_msg(MSGT_VO, MSGL_ERR, "can't switch to %d bpp\n", vo_dbpp);
-            goto err_out_fd;
+            goto err_out;
         }
         fb_bpp = vo_dbpp;
     }
@@ -713,13 +715,13 @@ static int fb_preinit(int reset)
     fb_preinit_done = 1;
     fb_works = 1;
     return 1;
-err_out_tty_fd:
+err_out:
+    if (fb_tty_fd != -1)
     close(fb_tty_fd);
     fb_tty_fd = -1;
-err_out_fd:
+    if (fb_dev_fd != -1)
     close(fb_dev_fd);
     fb_dev_fd = -1;
-err_out:
     fb_preinit_done = 1;
     fb_works = 0;
     return 0;
