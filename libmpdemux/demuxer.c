@@ -1328,6 +1328,13 @@ int demuxer_add_chapter(demuxer_t *demuxer, const char *name, uint64_t start,
     demuxer->chapters[demuxer->num_chapters].end = end;
     demuxer->chapters[demuxer->num_chapters].name = strdup(name ? name : MSGTR_Unknown);
 
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_ID=%d\n", demuxer->num_chapters);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_START=%"PRIu64"\n", demuxer->num_chapters, start);
+    if (end)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_END=%"PRIu64"\n", demuxer->num_chapters, end);
+    if (name)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CHAPTER_%d_NAME=%s\n", demuxer->num_chapters, name);
+
     return demuxer->num_chapters++;
 }
 
