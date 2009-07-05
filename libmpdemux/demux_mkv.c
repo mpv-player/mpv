@@ -307,7 +307,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
           zstream.opaque = (voidpf) 0;
           if (inflateInit (&zstream) != Z_OK)
             {
-              mp_msg (MSGT_DEMUX, MSGL_WARN,
+              mp_tmsg (MSGT_DEMUX, MSGL_WARN,
                       MSGTR_MPDEMUX_MKV_ZlibInitializationFailed);
               return modified;
             }
@@ -324,7 +324,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
             result = inflate (&zstream, Z_NO_FLUSH);
             if (result != Z_OK && result != Z_STREAM_END)
               {
-                mp_msg (MSGT_DEMUX, MSGL_WARN,
+                mp_tmsg (MSGT_DEMUX, MSGL_WARN,
                         MSGTR_MPDEMUX_MKV_ZlibDecompressionFailed);
                 free(*dest);
                 *dest = NULL;
@@ -356,7 +356,7 @@ demux_mkv_decode (mkv_track_t *track, uint8_t *src, uint8_t **dest,
               if (!(result & AV_LZO_OUTPUT_FULL))
                 {
 lzo_fail:
-                  mp_msg (MSGT_DEMUX, MSGL_WARN,
+                  mp_tmsg (MSGT_DEMUX, MSGL_WARN,
                           MSGTR_MPDEMUX_MKV_LzoDecompressionFailed);
                   free(*dest);
                   *dest = NULL;
@@ -544,25 +544,25 @@ demux_mkv_read_trackencodings (demuxer_t *demuxer, mkv_track_t *track)
 
                       if (e.type == 1)
                         {
-                          mp_msg(MSGT_DEMUX, MSGL_WARN,
+                          mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                                  MSGTR_MPDEMUX_MKV_TrackEncrypted, track->tnum);
                         }
                       else if (e.type != 0)
                         {
-                          mp_msg(MSGT_DEMUX, MSGL_WARN,
+                          mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                                  MSGTR_MPDEMUX_MKV_UnknownContentEncoding, track->tnum);
                         }
 
                       if (e.comp_algo != 0 && e.comp_algo != 2)
                         {
-                          mp_msg (MSGT_DEMUX, MSGL_WARN,
+                          mp_tmsg (MSGT_DEMUX, MSGL_WARN,
                                   MSGTR_MPDEMUX_MKV_UnknownCompression,
                                   track->tnum, e.comp_algo);
                         }
 #if !CONFIG_ZLIB
                       else if (e.comp_algo == 0)
                         {
-                          mp_msg (MSGT_DEMUX, MSGL_WARN,
+                          mp_tmsg (MSGT_DEMUX, MSGL_WARN,
                                   MSGTR_MPDEMUX_MKV_ZlibCompressionUnsupported,
                                   track->tnum);
                         }
@@ -1533,10 +1533,10 @@ display_create_tracks (demuxer_t *demuxer)
           break;
         }
       if (mkv_d->tracks[i]->name)
-        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_TrackIDName,
+        mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_TrackIDName,
              mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id, mkv_d->tracks[i]->name, str);
       else
-        mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_TrackID,
+        mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_TrackID,
              mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id, str);
     }
 }
@@ -1674,7 +1674,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
             }
           track->reorder_timecodes = opts->user_correct_pts == 0;
           if (!vi->id) {
-              mp_msg (MSGT_DEMUX,MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownCodecID,
+              mp_tmsg (MSGT_DEMUX,MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownCodecID,
                       track->codec_id, track->tnum);
               free(bih);
               return 1;
@@ -1788,7 +1788,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
         {
           if (track->private_data == NULL || track->private_size == 0)
             {
-              mp_msg (MSGT_DEMUX, MSGL_WARN,
+              mp_tmsg (MSGT_DEMUX, MSGL_WARN,
                       MSGTR_MPDEMUX_MKV_FlacTrackDoesNotContainValidHeaders);
               return 1;
             }
@@ -1809,7 +1809,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
         }
       else
         {
-          mp_msg (MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownAudioCodec,
+          mp_tmsg (MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_MKV_UnknownAudioCodec,
                   track->codec_id, track->tnum);
           free_sh_audio(demuxer, track->tnum);
           return 1;
@@ -2066,7 +2066,7 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track, int sid)
     }
   else
     {
-      mp_msg (MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_MKV_SubtitleTypeNotSupported,
+      mp_tmsg (MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_MKV_SubtitleTypeNotSupported,
               track->codec_id);
       return 1;
     }
@@ -2208,14 +2208,14 @@ demux_mkv_open (demuxer_t *demuxer)
 
   if (track && demuxer->v_streams[track->tnum])
               {
-                mp_msg (MSGT_DEMUX, MSGL_INFO,
+                mp_tmsg (MSGT_DEMUX, MSGL_INFO,
                         MSGTR_MPDEMUX_MKV_WillPlayVideoTrack, track->tnum);
                 demuxer->video->id = track->tnum;
                 demuxer->video->sh = demuxer->v_streams[track->tnum];
               }
   else
     {
-      mp_msg (MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_NoVideoTrackFound);
+      mp_tmsg (MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_NoVideoTrackFound);
       demuxer->video->id = -2;
     }
 
@@ -2248,7 +2248,7 @@ demux_mkv_open (demuxer_t *demuxer)
     }
   else
     {
-      mp_msg (MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_NoAudioTrackFound);
+      mp_tmsg (MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_MKV_NoAudioTrackFound);
       demuxer->audio->id = -2;
     }
 

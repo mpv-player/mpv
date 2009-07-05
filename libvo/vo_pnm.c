@@ -97,8 +97,8 @@ char *pnm_file_extension = NULL;
  */
 
 static void pnm_write_error(void) {
-    mp_msg(MSGT_VO, MSGL_ERR, MSGTR_ErrorWritingFile, info.short_name);
-    exit_player_bad(MSGTR_Exit_error);
+    mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_ErrorWritingFile, info.short_name);
+    exit_player_bad(_(MSGTR_Exit_error));
 }
 
 /* ------------------------------------------------------------------------- */
@@ -134,7 +134,7 @@ static int preinit(const char *arg)
     const char *info_message = NULL;
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                                            MSGTR_VO_ParsingSuboptions);
+           _(MSGTR_VO_ParsingSuboptions));
 
     pnm_maxfiles = 1000;
     pnm_outdir = strdup(".");
@@ -155,29 +155,29 @@ static int preinit(const char *arg)
 
     switch (pnm_mode) {
         case PNM_ASCII_MODE:
-            info_message = MSGTR_VO_PNM_ASCIIMode;
+            info_message = _(MSGTR_VO_PNM_ASCIIMode);
             break;
         case PNM_RAW_MODE:
-            info_message = MSGTR_VO_PNM_RawMode;
+            info_message = _(MSGTR_VO_PNM_RawMode);
             break;
     }
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
 
     switch (pnm_type) {
         case PNM_TYPE_PPM:
-            info_message = MSGTR_VO_PNM_PPMType;
+            info_message = _(MSGTR_VO_PNM_PPMType);
             break;
         case PNM_TYPE_PGM:
-            info_message = MSGTR_VO_PNM_PGMType;
+            info_message = _(MSGTR_VO_PNM_PGMType);
             break;
         case PNM_TYPE_PGMYUV:
-            info_message = MSGTR_VO_PNM_PGMYUVType;
+            info_message = _(MSGTR_VO_PNM_PGMYUVType);
             break;
     }
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                                            MSGTR_VO_SuboptionsParsedOK);
+           _(MSGTR_VO_SuboptionsParsedOK));
     return 0;
 }
 
@@ -211,38 +211,38 @@ static void pnm_mkdir(char *buf, int verbose) {
             case EEXIST:
                 if ( stat(buf, &stat_p ) < 0 ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
-                            MSGTR_VO_GenericError, strerror(errno) );
+                           _(MSGTR_VO_GenericError), strerror(errno) );
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
-                            MSGTR_VO_UnableToAccess,buf);
-                    exit_player_bad(MSGTR_Exit_error);
+                           _(MSGTR_VO_UnableToAccess), buf);
+                    exit_player_bad(_(MSGTR_Exit_error));
                 }
                 if ( !S_ISDIR(stat_p.st_mode) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
-                            buf, MSGTR_VO_ExistsButNoDirectory);
-                    exit_player_bad(MSGTR_Exit_error);
+                           buf, _(MSGTR_VO_ExistsButNoDirectory));
+                    exit_player_bad(_(MSGTR_Exit_error));
                 }
                 if ( !(stat_p.st_mode & S_IWUSR) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
-                            buf, MSGTR_VO_DirExistsButNotWritable);
-                    exit_player_bad(MSGTR_Exit_error);
+                           buf, _(MSGTR_VO_DirExistsButNotWritable));
+                    exit_player_bad(_(MSGTR_Exit_error));
                 }
                 
                 if (strcmp(buf, ".") != 0) {
                 mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
-                        buf, MSGTR_VO_DirExistsAndIsWritable);
+                       buf, _(MSGTR_VO_DirExistsAndIsWritable));
                 }
                 break;
 
             default:
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
-                        MSGTR_VO_GenericError, strerror(errno) );
+                       _(MSGTR_VO_GenericError), strerror(errno) );
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
-                        buf, MSGTR_VO_CantCreateDirectory);
-                exit_player_bad(MSGTR_Exit_error);
+                       buf, _(MSGTR_VO_CantCreateDirectory));
+                exit_player_bad(_(MSGTR_Exit_error));
         } /* end switch */
     } else if ( verbose ) {  
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
-                buf, MSGTR_VO_DirectoryCreateSuccess);
+               buf, _(MSGTR_VO_DirectoryCreateSuccess));
     } /* end if */
 }
 
@@ -442,7 +442,7 @@ static void pnm_write_image(mp_image_t *mpi)
 
     if (!mpi) {
         mp_msg(MSGT_VO, MSGL_ERR, "%s: No image data suplied to video output driver\n", info.short_name );
-        exit_player_bad(MSGTR_Exit_error);
+        exit_player_bad(_(MSGTR_Exit_error));
     }
         
     /* Start writing to new subdirectory after a certain amount of frames */
@@ -474,7 +474,7 @@ static void pnm_write_image(mp_image_t *mpi)
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
                 info.short_name, MSGTR_VO_GenericError,
                 strerror(errno) );
-        exit_player_bad(MSGTR_Exit_error);
+        exit_player_bad(_(MSGTR_Exit_error));
     }
     
     pnm_write_pnm(outfile, mpi);

@@ -133,11 +133,11 @@ static int init(int rate,int channels,int format,int flags){
 	/* Allocate ring-buffer memory */
 	buffer = av_fifo_alloc(BUFFSIZE);
 
-	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_INFO, rate, (channels > 1) ? "Stereo" : "Mono", af_fmt2str_short(format));
+	mp_tmsg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_INFO, rate, (channels > 1) ? "Stereo" : "Mono", af_fmt2str_short(format));
 
 	if(ao_subdevice) {
 		setenv("SDL_AUDIODRIVER", ao_subdevice, 1);
-		mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_DriverInfo, ao_subdevice);
+		mp_tmsg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_DriverInfo, ao_subdevice);
 	}
 
 	ao_data.channels=channels;
@@ -171,7 +171,7 @@ static int init(int rate,int channels,int format,int flags){
 	    default:
                 aspec.format = AUDIO_S16LSB;
                 ao_data.format = AF_FORMAT_S16_LE;
-                mp_msg(MSGT_AO,MSGL_WARN,MSGTR_AO_SDL_UnsupportedAudioFmt, format);
+                mp_tmsg(MSGT_AO,MSGL_WARN,MSGTR_AO_SDL_UnsupportedAudioFmt, format);
 	}
 
 	/* The desired audio frequency in samples-per-second. */
@@ -192,13 +192,13 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 
 	/* initialize the SDL Audio system */
         if (SDL_Init (SDL_INIT_AUDIO/*|SDL_INIT_NOPARACHUTE*/)) {
-                mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_SDL_CantInit, SDL_GetError());
+                mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_SDL_CantInit, SDL_GetError());
                 return 0;
         }
 
 	/* Open the audio device and start playing sound! */
 	if(SDL_OpenAudio(&aspec, &obtained) < 0) {
-        	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_SDL_CantOpenAudio, SDL_GetError());
+        	mp_tmsg(MSGT_AO,MSGL_ERR,MSGTR_AO_SDL_CantOpenAudio, SDL_GetError());
         	return 0;
 	} 
 
@@ -226,7 +226,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 		ao_data.format = AF_FORMAT_U16_BE;
 	    break;
 	    default:
-                mp_msg(MSGT_AO,MSGL_WARN,MSGTR_AO_SDL_UnsupportedAudioFmt, obtained.format);
+                mp_tmsg(MSGT_AO,MSGL_WARN,MSGTR_AO_SDL_UnsupportedAudioFmt, obtained.format);
                 return 0;
 	}
 

@@ -56,7 +56,7 @@ static demux_stream_t* demux_avi_select_stream(demuxer_t *demux,
 	    // workaround old mencoder's bug:
 	    if(sh->audio.dwSampleSize==1 && sh->audio.dwScale==1 &&
 	       (sh->wf->nBlockAlign==1152 || sh->wf->nBlockAlign==576)){
-		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_WorkAroundBlockAlignHeaderBug);
+		mp_tmsg(MSGT_DEMUX,MSGL_WARN,MSGTR_WorkAroundBlockAlignHeaderBug);
 		priv->audio_block_size=1;
 	    }
 	  }
@@ -253,7 +253,7 @@ do{
   if(ds)
     if(ds->packs+1>=MAX_PACKS || ds->bytes+len>=MAX_PACK_BYTES){
 	// this packet will cause a buffer overflow, switch to -ni mode!!!
-	mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_SwitchToNi);
+	mp_tmsg(MSGT_DEMUX,MSGL_WARN,MSGTR_SwitchToNi);
 	if(priv->idx_size>0){
 	    // has index
 	    demux->type=DEMUXER_TYPE_AVI_NI;
@@ -427,11 +427,11 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
   read_avi_header(demuxer,(demuxer->stream->flags & STREAM_SEEK_BW)?index_mode:-2);
   
   if(demuxer->audio->id>=0 && !demuxer->a_streams[demuxer->audio->id]){
-      mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_InvalidAudioStreamNosound,demuxer->audio->id);
+      mp_tmsg(MSGT_DEMUX,MSGL_WARN,MSGTR_InvalidAudioStreamNosound,demuxer->audio->id);
       demuxer->audio->id=-2; // disabled
   }
   if(demuxer->video->id>=0 && !demuxer->v_streams[demuxer->video->id]){
-      mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_InvalidAudioStreamUsingDefault,demuxer->video->id);
+      mp_tmsg(MSGT_DEMUX,MSGL_WARN,MSGTR_InvalidAudioStreamUsingDefault,demuxer->video->id);
       demuxer->video->id=-1; // autodetect
   }
   
@@ -479,14 +479,14 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
         }
       }
       if(v_pos==-1){
-        mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI_NI: " MSGTR_MissingVideoStream);
+        mp_tmsg(MSGT_DEMUX,MSGL_ERR,"AVI_NI: " MSGTR_MissingVideoStream);
 	return NULL;
       }
       if(a_pos==-1){
         d_audio->sh=sh_audio=NULL;
       } else {
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
-          mp_msg(MSGT_DEMUX,MSGL_INFO,MSGTR_NI_Message,force_ni?MSGTR_NI_Forced:MSGTR_NI_Detected);
+          mp_tmsg(MSGT_DEMUX,MSGL_INFO,MSGTR_NI_Message,force_ni?MSGTR_NI_Forced:MSGTR_NI_Detected);
           demuxer->type=DEMUXER_TYPE_AVI_NI; // HACK!!!!
           demuxer->desc=&demuxer_desc_avi_ni; // HACK!!!!
 	  pts_from_bps=1; // force BPS sync!
@@ -495,7 +495,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
   } else {
       // no index
       if(force_ni){
-          mp_msg(MSGT_DEMUX,MSGL_INFO,MSGTR_UsingNINI);
+          mp_tmsg(MSGT_DEMUX,MSGL_INFO,MSGTR_UsingNINI);
           demuxer->type=DEMUXER_TYPE_AVI_NINI; // HACK!!!!
           demuxer->desc=&demuxer_desc_avi_nini; // HACK!!!!
 	  priv->idx_pos_a=
@@ -505,14 +505,14 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       demuxer->seekable=0;
   }
   if(!ds_fill_buffer(d_video)){
-    mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI: " MSGTR_MissingVideoStreamBug);
+    mp_tmsg(MSGT_DEMUX,MSGL_ERR,"AVI: " MSGTR_MissingVideoStreamBug);
     return NULL;
   }
   sh_video=d_video->sh;sh_video->ds=d_video;
   if(d_audio->id!=-2){
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!priv->audio_streams || !ds_fill_buffer(d_audio)){
-      mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI: " MSGTR_MissingAudioStream);
+      mp_tmsg(MSGT_DEMUX,MSGL_INFO,"AVI: " MSGTR_MissingAudioStream);
       d_audio->sh=sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
@@ -552,7 +552,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       // bad video header, try to get number of frames from audio
       if(sh_audio && sh_audio->wf->nAvgBytesPerSec) priv->numberofframes=sh_video->fps*sh_audio->audio.dwLength/sh_audio->audio.dwRate*sh_audio->audio.dwScale;
     if(priv->numberofframes<=1){
-      mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CouldntDetFNo);
+      mp_tmsg(MSGT_SEEK,MSGL_WARN,MSGTR_CouldntDetFNo);
       priv->numberofframes=0;
     }          
 
@@ -828,7 +828,7 @@ static int avi_check_file(demuxer_t *demuxer)
     if(id==mmioFOURCC('A','V','I',0x19))
       return DEMUXER_TYPE_AVI;
     if(id==mmioFOURCC('O','N','2','f')){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_ON2AviFormat);
+      mp_tmsg(MSGT_DEMUXER,MSGL_INFO,MSGTR_ON2AviFormat);
       return DEMUXER_TYPE_AVI;
     }
   }
@@ -856,7 +856,7 @@ static demuxer_t* demux_open_hack_avi(demuxer_t *demuxer)
       s = new_ds_stream(demuxer->audio);
       od = new_demuxer(opts, s,DEMUXER_TYPE_OGG,-1,-2,-2,NULL);
       if(!demux_ogg_open(od)) {
-        mp_msg( MSGT_DEMUXER,MSGL_ERR,MSGTR_ErrorOpeningOGGDemuxer);
+        mp_tmsg( MSGT_DEMUXER,MSGL_ERR,MSGTR_ErrorOpeningOGGDemuxer);
         free_stream(s);
         demuxer->audio->id = -2;
       } else

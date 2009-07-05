@@ -543,7 +543,7 @@ static demuxer_t* demux_open_vivo(demuxer_t* demuxer){
     vivo_priv_t* priv=demuxer->priv;
 
   if(!ds_fill_buffer(demuxer->video)){
-    mp_msg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingVideoStreamBug);
+    mp_tmsg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingVideoStreamBug);
     return NULL;
   }
 
@@ -626,7 +626,7 @@ static demuxer_t* demux_open_vivo(demuxer_t* demuxer){
 /* AUDIO init */
 if (demuxer->audio->id >= -1){
   if(!ds_fill_buffer(demuxer->audio)){
-    mp_msg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingAudioStream);
+    mp_tmsg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingAudioStream);
   } else
 {		sh_audio_t* sh=new_sh_audio(demuxer,1);
 

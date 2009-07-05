@@ -111,12 +111,12 @@ static int preinit(const char *arg)
 		name = "/dev/fb0";
 
 	if((fd = open(name, O_RDWR)) == -1) {
-		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_CantOpen, name, strerror(errno));
+		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_CantOpen, name, strerror(errno));
 		return -1;
 	}
 
 	if(ioctl(fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
-		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo,
+		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo,
 				strerror(errno));
 		close(fd);
 		fd = -1;
@@ -124,7 +124,7 @@ static int preinit(const char *arg)
 	}
 
 	if(ioctl(fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
-		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo,
+		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo,
 				strerror(errno));
 		close(fd);
 		fd = -1;
@@ -133,7 +133,7 @@ static int preinit(const char *arg)
 
 	/* BANSHEE means any of the series aparently */
 	if (fb_finfo.accel != FB_ACCEL_3DFX_BANSHEE) {
-		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports);
+		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports);
 		close(fd);
 		fd = -1;
 		return -1;
@@ -146,7 +146,7 @@ static int preinit(const char *arg)
 	case 32:
 	  break; // Ok
 	default:
-	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_OutputIsNotSupported, fb_vinfo.bits_per_pixel);
+	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_OutputIsNotSupported, fb_vinfo.bits_per_pixel);
 	  close(fd);
 	  fd = -1;
 	  return -1;
@@ -159,7 +159,7 @@ static int preinit(const char *arg)
 					MAP_SHARED, fd, fb_finfo.smem_len);
 
 	if((long)memBase0 == -1 || (long)memBase1 == -1) {
-		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas, strerror(errno));
+		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas, strerror(errno));
 		if((long)memBase0 != -1)
 		  munmap(memBase0, fb_finfo.smem_len);
 		if((long)memBase1 != -1)
@@ -266,7 +266,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		break;
 
 	default:
-		mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported, fb_vinfo.bits_per_pixel);
+		mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported, fb_vinfo.bits_per_pixel);
 		return -1;
 	}
 
@@ -304,7 +304,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		break;
 
 	default:
-		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl);
+		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl);
 		return -1;
 	}
 
@@ -321,7 +321,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	inpageoffset = hidpageoffset + screenwidth * screenheight * screendepth;
 
 	if(inpageoffset + in_width * in_depth * in_height > fb_finfo.smem_len) {
-		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay);
+		mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay);
 		return -1;
 	}
 
@@ -333,7 +333,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
 	memset(inpage, 0, in_width * in_height * in_depth);
 
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXFB_ScreenIs,
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXFB_ScreenIs,
 			screenwidth, screenheight, screendepth * 8,
 			in_width, in_height, in_depth * 8,
 			d_width, d_height);

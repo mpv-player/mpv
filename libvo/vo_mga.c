@@ -85,7 +85,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 			aspect(&d_width,&d_height,A_NOZOOM);
 			vo_fs = VO_FALSE;
 		}
-		mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_MGA_AspectResized,d_width,d_height);
+		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_MGA_AspectResized,d_width,d_height);
 	}
 
 	vo_dwidth=d_width; vo_dheight=d_height;
@@ -103,7 +103,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
 static void uninit(void)
 {
-    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_MGA_Uninit);
+    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_MGA_Uninit);
     mga_uninit();
 }
 

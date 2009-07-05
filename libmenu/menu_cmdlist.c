@@ -119,19 +119,19 @@ static int parse_args(menu_t* menu,char* args) {
   while(1) {
     r = asx_get_element(parser,&args,&element,&body,&attribs);
     if(r < 0) {
-      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_SyntaxErrorAtLine,parser->line);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_SyntaxErrorAtLine,parser->line);
       asx_parser_free(parser);
       return -1;
     } else if(r == 0) {      
       asx_parser_free(parser);
       if(!m)
-	mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition);
+	mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition);
       return m ? 1 : 0;
     }
     // Has it a name ?
     name = asx_get_attrib("name",attribs);
     if(!name) {
-      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName,parser->line);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName,parser->line);
       free(element);
       if(body) free(body);
       asx_free_attribs(attribs);
@@ -157,7 +157,7 @@ static int open_cmdlist(menu_t* menu, char* args) {
   menu->close = close_menu;
 
   if(!args) {
-    mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuNeedsAnArgument);
+    mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuNeedsAnArgument);
     return 0;
   }
  

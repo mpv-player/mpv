@@ -64,18 +64,18 @@ m_option_t lameopts_conf[]={
 	{"fast", "MPlayer was built without -lameopts fast support (requires libmp3lame >=3.92).\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"preset", "MPlayer was built without -lameopts preset support (requires libmp3lame >=3.92).\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
-	{"help", MSGTR_MEncoderMP3LameHelp, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"help", _(MSGTR_MEncoderMP3LameHelp), CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 
 static int bind_lame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 {
-    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MP3AudioSelected);
+    mp_tmsg(MSGT_MENCODER, MSGL_INFO, MSGTR_MP3AudioSelected);
     mux_a->h.dwSampleSize=0; // VBR
     mux_a->h.dwRate=encoder->params.sample_rate;
     mux_a->h.dwScale=encoder->params.samples_per_frame; // samples/frame
-    if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_msg(MSGT_MENCODER,MSGL_WARN,MSGTR_MP3WaveFormatSizeNot30,sizeof(MPEGLAYER3WAVEFORMAT));
+    if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_tmsg(MSGT_MENCODER,MSGL_WARN,MSGTR_MP3WaveFormatSizeNot30,sizeof(MPEGLAYER3WAVEFORMAT));
     mux_a->wf=malloc(sizeof(MPEGLAYER3WAVEFORMAT)); // should be 30
     mux_a->wf->wFormatTag=0x55; // MP3
     mux_a->wf->nChannels= (lame_param_mode<0) ? encoder->params.channels : ((lame_param_mode==3) ? 1 : 2);
@@ -143,7 +143,7 @@ static void fixup(audio_encoder_t *encoder)
         encoder->stream->h.dwRate=encoder->stream->wf->nAvgBytesPerSec;
         encoder->stream->h.dwScale=1;
         encoder->stream->wf->nBlockAlign=1;
-        mp_msg(MSGT_MENCODER, MSGL_V, MSGTR_CBRAudioByterate,
+        mp_tmsg(MSGT_MENCODER, MSGL_V, MSGTR_CBRAudioByterate,
             encoder->stream->h.dwRate,((MPEGLAYER3WAVEFORMAT*)(encoder->stream->wf))->nBlockSize);
     }
 }
@@ -174,20 +174,20 @@ int mpae_init_lame(audio_encoder_t *encoder)
     if(lame_param_mode>=0) lame_set_mode(lame,lame_param_mode); // j-st
     if(lame_param_ratio>0) lame_set_compression_ratio(lame,lame_param_ratio);
     if(lame_param_scale>0) {
-        mp_msg(MSGT_MENCODER, MSGL_V, MSGTR_SettingAudioInputGain, lame_param_scale);
+        mp_tmsg(MSGT_MENCODER, MSGL_V, MSGTR_SettingAudioInputGain, lame_param_scale);
         lame_set_scale(lame,lame_param_scale);
     }
     if(lame_param_lowpassfreq>=-1) lame_set_lowpassfreq(lame,lame_param_lowpassfreq);
     if(lame_param_highpassfreq>=-1) lame_set_highpassfreq(lame,lame_param_highpassfreq);
 #ifdef CONFIG_MP3LAME_PRESET
     if(lame_param_preset != NULL) {
-        mp_msg(MSGT_MENCODER, MSGL_V, MSGTR_LamePresetEquals,lame_param_preset);
+        mp_tmsg(MSGT_MENCODER, MSGL_V, MSGTR_LamePresetEquals,lame_param_preset);
         if(lame_presets_set(lame,lame_param_fast, (lame_param_vbr==0), lame_param_preset) < 0)
             return 0;
     }
 #endif
     if(lame_init_params(lame) == -1) {
-        mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameCantInit); 
+        mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameCantInit); 
         return 0;
     }
     if( mp_msg_test(MSGT_MENCODER,MSGL_V) ) {
@@ -211,8 +211,8 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
     int mono = 0;
 
     if (strcmp(preset_name, "help") == 0) {
-        mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-        mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LamePresetsLongInfo);
+        mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
+        mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LamePresetsLongInfo);
         return -1;
     }
 
@@ -307,14 +307,14 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
 
         }
         else {
-            mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-            mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_InvalidBitrateForLamePreset);
+            mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
+            mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_InvalidBitrateForLamePreset);
             return -1;
         }
     }
 
-    mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
-    mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_InvalidLamePresetOptions);
+    mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameVersion, get_lame_version(), get_lame_url());
+    mp_tmsg(MSGT_MENCODER, MSGL_FATAL, MSGTR_InvalidLamePresetOptions);
     return -1;
 }
 #endif

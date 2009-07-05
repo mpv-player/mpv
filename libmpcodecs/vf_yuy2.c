@@ -23,7 +23,7 @@ static int config(struct vf_instance* vf,
     sws_rgb2rgb_init(get_sws_cpuflags());
     
     if(vf_next_query_format(vf,IMGFMT_YUY2)<=0){
-	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupport, "YUY2");
+	mp_tmsg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupport, "YUY2");
 	return 0;
     }
     

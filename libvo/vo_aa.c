@@ -617,9 +617,9 @@ static int parse_suboptions(const char *arg) {
         helpmsg = strdup(aa_help);
         for (i=0; i<(signed)strlen(helpmsg); i++)
             if (helpmsg[i] == '-') helpmsg[i] = ' ';
-        mp_msg(MSGT_VO, MSGL_INFO, MSGTR_VO_AA_HelpHeader);
+        mp_tmsg(MSGT_VO, MSGL_INFO, MSGTR_VO_AA_HelpHeader);
         mp_msg(MSGT_VO, MSGL_INFO, "%s\n\n", helpmsg);
-        mp_msg(MSGT_VO, MSGL_INFO, MSGTR_VO_AA_AdditionalOptions);
+        mp_tmsg(MSGT_VO, MSGL_INFO, MSGTR_VO_AA_AdditionalOptions);
         retval = -1;
     }
     if (retval == 0) {

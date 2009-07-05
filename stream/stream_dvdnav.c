@@ -541,7 +541,7 @@ static void show_audio_subs_languages(dvdnav_t *nav)
       format = 1; //unknown
     id = i + base[format];
     if (lang != 0xFFFF) {
-      mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo, i,
+      mp_tmsg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo, i,
              dvd_audio_stream_types[format], dvd_audio_stream_channels[channels], tmp, id); 
       if(lang && tmp[0])
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", id, tmp);
@@ -562,7 +562,7 @@ static void show_audio_subs_languages(dvdnav_t *nav)
     }
     tmp[2] = 0;
     if (lang != 0xFFFF)
-      mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i+0x20, tmp);
+      mp_tmsg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, i+0x20, tmp);
   }
 }
 
@@ -575,7 +575,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   else if(dvd_device) filename= dvd_device; 
   else filename = DEFAULT_DVD_DEVICE;
   if(!(priv=new_dvdnav_stream(filename))) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename, strerror(errno));
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename, strerror(errno));
     return STREAM_UNSUPPORTED;
   }
 

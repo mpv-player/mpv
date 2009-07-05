@@ -125,7 +125,7 @@ if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
     h -= shrink_by;
     y += (shrink_by / 2 + 1) & ~1;
 
-    mp_msg(MSGT_VFILTER, MSGL_INFO, MSGTR_MPCODECS_CropArea,
+    mp_tmsg(MSGT_VFILTER, MSGL_INFO, MSGTR_MPCODECS_CropArea,
 	vf->priv->x1,vf->priv->x2,
 	vf->priv->y1,vf->priv->y2,
 	w,h,x,y);

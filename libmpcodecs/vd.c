@@ -121,7 +121,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (!sh->disp_w || !sh->disp_h)
         return 0;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_VoConfigRequest, w, h,
+    mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_VoConfigRequest, w, h,
            vo_format_name(preferred_outfmt));
 
     if (get_video_quality_max(sh) <= 0 && divx_quality) {
@@ -177,7 +177,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (j < 0) {
         // TODO: no match - we should use conversion...
         if (strcmp(vf->info->name, "scale") && palette != -1) {
-            mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_CouldNotFindColorspace);
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_CouldNotFindColorspace);
             sc = vf = vf_open_filter(opts, vf, "scale", NULL);
             goto csp_again;
         } else if (palette == 1) {
@@ -208,12 +208,12 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
                 goto csp_again;
             }
         }
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_VOincompCodec);
+        mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_VOincompCodec);
         sh->vf_initialized = -1;
         return 0;               // failed
     }
     out_fmt = sh->codec->outfmt[j];
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_UsingXAsOutputCspNoY,
+    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_UsingXAsOutputCspNoY,
            vo_format_name(out_fmt), j);
     sh->outfmtidx = j;
     sh->vfilter = vf;
@@ -269,7 +269,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         }
         if (sh->aspect > 0.01) {
             int w;
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_MovieAspectIsSet,
+            mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_MovieAspectIsSet,
                    sh->aspect);
             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n",
                    sh->aspect);
@@ -283,7 +283,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
             } else
                 screen_size_x = w;      // keep new width
         } else {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_MovieAspectUndefined);
+            mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_MovieAspectUndefined);
         }
     }
 
@@ -303,7 +303,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (vf_config_wrapper
         (vf, sh->disp_w, sh->disp_h, screen_size_x, screen_size_y, vocfg_flags,
          out_fmt) == 0) {
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_CannotInitVO);
+        mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_CannotInitVO);
         sh->vf_initialized = -1;
         return 0;
     }

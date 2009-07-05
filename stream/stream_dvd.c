@@ -66,13 +66,13 @@ static void dvd_set_speed(char *device, unsigned speed)
     return;
   case -1: /* restore default value */
     if (dvd_speed == 0) return; /* we haven't touched the speed setting */
-    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDrestoreSpeed);
+    mp_tmsg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDrestoreSpeed);
     break;
   default: /* limit to <speed> KB/s */
     // speed < 100 is multiple of DVD single speed (1350KB/s)
     if (speed < 100)
       speed *= 1350;
-    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitSpeed, speed);
+    mp_tmsg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitSpeed, speed);
     break;
   }
 
@@ -105,14 +105,14 @@ static void dvd_set_speed(char *device, unsigned speed)
 
   fd = open(device, O_RDWR | O_NONBLOCK);
   if (fd == -1) {
-    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDspeedCantOpen);
+    mp_tmsg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDspeedCantOpen);
     return;
   }
 
   if (ioctl(fd, SG_IO, &sghdr) < 0)
-    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitFail);
+    mp_tmsg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitFail);
   else
-    mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitOk);
+    mp_tmsg(MSGT_OPEN, MSGL_INFO, MSGTR_DVDlimitOk);
 
   close(fd);
 #endif
@@ -170,26 +170,26 @@ int dvd_parse_chapter_range(const m_option_t *conf, const char *range) {
   if(*range && isdigit(*range)) {
     dvd_chapter = strtol(range, &s, 10);
     if(range == s) {
-      mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
+      mp_tmsg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
       return M_OPT_INVALID;
     }
   }
   if(*s == 0)
     return 0;
   else if(*s != '-') {
-    mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
+    mp_tmsg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
     return M_OPT_INVALID;
   }
   ++s;
   if(*s == 0)
       return 0;
   if(! isdigit(*s)) {
-    mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
+    mp_tmsg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
     return M_OPT_INVALID;
   }
   dvd_last_chapter = strtol(s, &t, 10);
   if (s == t || *t) {
-    mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
+    mp_tmsg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
     return M_OPT_INVALID;
   }
   return 0;
@@ -245,7 +245,7 @@ int dvd_aid_from_lang(stream_t *stream, unsigned char* lang) {
       code=lang[1]|(lang[0]<<8);
       for(i=0;i<d->nr_of_channels;i++) {
         if(d->audio_streams[i].language==code) {
-          mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDaudioChannel,
+          mp_tmsg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDaudioChannel,
           d->audio_streams[i].id, lang[0],lang[1]);
           return d->audio_streams[i].id;
         }
@@ -253,7 +253,7 @@ int dvd_aid_from_lang(stream_t *stream, unsigned char* lang) {
       }
       lang+=2; while (lang[0]==',' || lang[0]==' ') ++lang;
     }
-    mp_msg(MSGT_OPEN,MSGL_WARN,MSGTR_DVDnoMatchingAudio);
+    mp_tmsg(MSGT_OPEN,MSGL_WARN,MSGTR_DVDnoMatchingAudio);
   }
   return -1;
 }
@@ -288,14 +288,14 @@ int dvd_sid_from_lang(stream_t *stream, unsigned char* lang) {
     code=lang[1]|(lang[0]<<8);
     for(i=0;i<d->nr_of_subtitles;i++) {
       if(d->subtitles[i].language==code) {
-        mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDsubtitleChannel, i, lang[0],lang[1]);
+        mp_tmsg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDsubtitleChannel, i, lang[0],lang[1]);
         return d->subtitles[i].id;
       }
     }
     lang+=2; 
     while (lang[0]==',' || lang[0]==' ') ++lang;
   }
-  mp_msg(MSGT_OPEN,MSGL_WARN,MSGTR_DVDnoMatchingSubtitle);
+  mp_tmsg(MSGT_OPEN,MSGL_WARN,MSGTR_DVDnoMatchingSubtitle);
   return -1;
 }
 
@@ -813,12 +813,12 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         snprintf(temp_device, len, "/dev/rdisk%d", i);
         dvd = DVDOpen(temp_device);
         if(!dvd) {
-          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device, strerror(errno));
+          mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device, strerror(errno));
         } else {
 #if DVDREAD_VERSION <= LIBDVDREAD_VERSION(0,9,4)
           dvd_file_t *dvdfile = DVDOpenFile(dvd,dvd_title,DVD_READ_INFO_FILE);
           if(!dvdfile) {
-            mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device, strerror(errno));
+            mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device, strerror(errno));
             DVDClose(dvd);
             continue;
           }
@@ -838,7 +838,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     {
         dvd = DVDOpen(dvd_device_current);
         if(!dvd) {
-          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device_current, strerror(errno));
+          mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device_current, strerror(errno));
           m_struct_free(&stream_opts,opts);
           return STREAM_UNSUPPORTED;
         }
@@ -852,7 +852,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      */
     vmg_file = ifoOpen(dvd, 0);
     if(!vmg_file) {
-      mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoVMG);
+      mp_tmsg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoVMG);
       DVDClose( dvd );
       m_struct_free(&stream_opts,opts);
       return STREAM_UNSUPPORTED;
@@ -889,9 +889,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     /**
      * Make sure our title number is valid.
      */
-    mp_msg(MSGT_OPEN,MSGL_STATUS, MSGTR_DVDnumTitles, tt_srpt->nr_of_srpts );
+    mp_tmsg(MSGT_OPEN,MSGL_STATUS, MSGTR_DVDnumTitles, tt_srpt->nr_of_srpts );
     if(dvd_title < 1 || dvd_title > tt_srpt->nr_of_srpts) {
-      mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidTitle, dvd_title);
+      mp_tmsg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidTitle, dvd_title);
       ifoClose( vmg_file );
       DVDClose( dvd );
       m_struct_free(&stream_opts,opts);
@@ -902,9 +902,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     /**
      * Make sure the angle number is valid for this title.
      */
-    mp_msg(MSGT_OPEN,MSGL_STATUS, MSGTR_DVDnumAngles, tt_srpt->title[dvd_title].nr_of_angles);
+    mp_tmsg(MSGT_OPEN,MSGL_STATUS, MSGTR_DVDnumAngles, tt_srpt->title[dvd_title].nr_of_angles);
     if(dvd_angle<1 || dvd_angle>tt_srpt->title[dvd_title].nr_of_angles) {
-      mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidAngle, dvd_angle);
+      mp_tmsg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidAngle, dvd_angle);
       goto fail;
     }
     --dvd_angle; // remap 1.. -> 0..
@@ -915,7 +915,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      */
     vts_file = ifoOpen( dvd, tt_srpt->title[dvd_title].title_set_nr );
     if(!vts_file) {
-      mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoIFO, tt_srpt->title[dvd_title].title_set_nr );
+      mp_tmsg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoIFO, tt_srpt->title[dvd_title].title_set_nr );
       goto fail;
     }
     /**
@@ -923,7 +923,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      */
     title = DVDOpenFile(dvd, tt_srpt->title[dvd_title].title_set_nr, DVD_READ_TITLE_VOBS);
     if(!title) {
-      mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoVOBs, tt_srpt->title[dvd_title].title_set_nr);
+      mp_tmsg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoVOBs, tt_srpt->title[dvd_title].title_set_nr);
       ifoClose( vts_file );
       goto fail;
     }
@@ -983,7 +983,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
            //  1 - stereo
            //  5 - 5.1
            audio_stream->channels=audio->channels;
-           mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo,
+           mp_tmsg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDaudioStreamInfo,
              d->nr_of_channels,
              dvd_audio_stream_types[ audio->audio_format ],
              dvd_audio_stream_channels[ audio->channels ],
@@ -997,7 +997,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
            d->nr_of_channels++;
          }
       }
-      mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDnumAudioChannels,d->nr_of_channels );
+      mp_tmsg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDnumAudioChannels,d->nr_of_channels );
     }
 
     /**
@@ -1029,13 +1029,13 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         else if(video->display_aspect_ratio == 3) /* 16:9 */
           sub_stream->id = pgc->subp_control[i] >> 8 & 31;
 
-        mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, sub_stream->id, tmp);
+        mp_tmsg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDsubtitleLanguage, sub_stream->id, tmp);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sub_stream->id);
         if(language && tmp[0])
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sub_stream->id, tmp);
         d->nr_of_subtitles++;
       }
-      mp_msg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDnumSubtitles,d->nr_of_subtitles);
+      mp_tmsg(MSGT_OPEN,MSGL_STATUS,MSGTR_DVDnumSubtitles,d->nr_of_subtitles);
     }
 
     /**
@@ -1087,7 +1087,7 @@ fail:
       m_struct_free(&stream_opts, opts);
       return STREAM_UNSUPPORTED;
   }
-  mp_msg(MSGT_DVD,MSGL_ERR,MSGTR_NoDVDSupport);
+  mp_tmsg(MSGT_DVD,MSGL_ERR,MSGTR_NoDVDSupport);
   m_struct_free(&stream_opts,opts);
   return STREAM_UNSUPPORTED;
 }

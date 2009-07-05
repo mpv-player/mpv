@@ -67,7 +67,7 @@ static int open_live_sdp(stream_t *stream,int mode, void* opts, int* file_format
     f = open(filename,O_RDONLY);
 #endif
     if(f < 0) {
-      mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);
+      mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);
       return STREAM_ERROR;
     }
 

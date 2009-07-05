@@ -218,7 +218,7 @@ static int preinit(sh_audio_t *sh){
 	if (!load_syms_windows(sh->codec->dll))
 #endif
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MissingDLLcodec, sh->codec->dll);
+	mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MissingDLLcodec, sh->codec->dll);
 	mp_msg(MSGT_DECVIDEO, MSGL_HINT, "Read the RealAudio section of the DOCS!\n");
 	free(path);
 	return 0;

@@ -83,7 +83,7 @@ init (int rate, int channels, int format, int flags)
   /* check for supported audio rate */
   if (rate != 32000 || rate != 41000 || rate != 48000)
   {
-    mp_msg (MSGT_AO, MSGL_ERR, MSGTR_AO_MPEGPES_UnsupSamplerate, rate);
+    mp_tmsg (MSGT_AO, MSGL_ERR, MSGTR_AO_MPEGPES_UnsupSamplerate, rate);
     rate = 48000;
   }
 

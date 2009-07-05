@@ -195,7 +195,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 #endif
 
   if(!cdd) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice);
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice);
     m_struct_free(&stream_opts,opts);
     free(cddb_info);
     return STREAM_ERROR;
@@ -211,7 +211,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   }
 
   if(cdda_open(cdd) != 0) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_MPDEMUX_CDDA_CantOpenDisc);
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_MPDEMUX_CDDA_CantOpenDisc);
     cdda_close(cdd);
     m_struct_free(&stream_opts,opts);
     free(cddb_info);
@@ -219,7 +219,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   }
 
   cd_info = cd_info_new();
-  mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks,cdda_tracks(cdd));
+  mp_tmsg(MSGT_OPEN,MSGL_INFO,MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks,cdda_tracks(cdd));
   for(i=0;i<cdd->tracks;i++) {
 	  char track_name[80];
 	  long sec=cdda_track_firstsector(cdd,i+1);

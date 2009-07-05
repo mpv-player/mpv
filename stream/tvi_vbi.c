@@ -810,7 +810,7 @@ static void prepare_visible_page(priv_vbi_t* priv){
     curr_pg=get_from_cache(priv,priv->curr_pagenum,
         get_subpagenum_from_cache(priv,priv->curr_pagenum));
     if (!pg && !curr_pg){
-        p=MSGTR_TV_NoTeletext;
+        p=_(MSGTR_TV_NoTeletext);
         for(i=0;i<VBI_COLUMNS && *p;i++){
             GET_UTF8(priv->display_page[i].unicode,*p++,break;);
         }
@@ -1664,7 +1664,7 @@ int teletext_control(void* p, int cmd, void *arg)
         priv->subpagenum=0x3f7f;
         pll_reset(priv,fine_tune);
         if(tv_param->tlang==-1){
-            mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSupportedLanguages);
+            mp_tmsg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSupportedLanguages);
             for(i=0; tt_languages[i].lang_code; i++){
                 mp_msg(MSGT_TV,MSGL_INFO,"  %3d  %s\n",
                     tt_languages[i].lang_code, tt_languages[i].lang_name);
@@ -1677,7 +1677,7 @@ int teletext_control(void* p, int cmd, void *arg)
                     break;
             }
             if (priv->primary_language!=tt_languages[i].lang_code){
-                mp_msg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSelectedLanguage,
+                mp_tmsg(MSGT_TV,MSGL_INFO,MSGTR_TV_TTSelectedLanguage,
                     tt_languages[i].lang_name);
                 priv->primary_language=tt_languages[i].lang_code;
             }

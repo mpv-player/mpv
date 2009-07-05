@@ -233,7 +233,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         {
         if(ioctl(priv->tunerfd, TVTUNER_GETFREQ, &priv->tunerfreq) < 0)
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "TVTUNER_GETFREQ", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "TVTUNER_GETFREQ", strerror(errno));
             return TVI_CONTROL_FALSE;
             }
 
@@ -247,7 +247,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
         if(ioctl(priv->tunerfd, TVTUNER_SETFREQ, &priv->tunerfreq) < 0) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "TVTUNER_SETFREQ", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "TVTUNER_SETFREQ", strerror(errno));
             return 0;
             }
 
@@ -258,7 +258,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         int status;
         if(ioctl(priv->tunerfd, TVTUNER_GETSTATUS, &status) < 0)
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "GETSTATUS", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "GETSTATUS", strerror(errno));
             return 0;
             }
         *(int*)arg=(status & 0x02)? 100 : 0;
@@ -274,7 +274,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         {
         if(ioctl(priv->btfd, METEORGINPUT, &priv->input) < 0)
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORGINPUT", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORGINPUT", strerror(errno));
             return TVI_CONTROL_FALSE;
             }
 
@@ -288,7 +288,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
         if(ioctl(priv->btfd, METEORSINPUT, &priv->input) < 0) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSINPUT", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSINPUT", strerror(errno));
             return 0;
             }
 
@@ -317,7 +317,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
            if(ioctl(priv->dspfd, SNDCTL_DSP_SPEED, &dspspeed) == -1) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848InvalidAudioRate, strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848InvalidAudioRate, strerror(errno));
             return TVI_CONTROL_FALSE;
             }
 
@@ -405,20 +405,20 @@ static int control(priv_t *priv, int cmd, void *arg)
 
         if(ioctl(priv->btfd, METEORSFMT, &priv->iformat) < 0) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFMT", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFMT", strerror(errno));
             return TVI_CONTROL_FALSE;
             }
     
         if(ioctl(priv->btfd, METEORSETGEO, &priv->geom) < 0) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSETGEO", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSETGEO", strerror(errno));
             return 0;
             }
 
 	tmp_fps = priv->fps;
         if(ioctl(priv->btfd, METEORSFPS, &tmp_fps) < 0) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFPS", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFPS", strerror(errno));
             return 0;
             }
 
@@ -426,7 +426,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	if(priv->tunerready == TRUE &&
 	    ioctl(priv->tunerfd, BT848_SAUDIO, &priv->tv_param->audio_id) < 0)
 	    {
-           mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "BT848_SAUDIO", strerror(errno));
+           mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "BT848_SAUDIO", strerror(errno));
 	    }
 #endif
 
@@ -455,7 +455,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
         if(ioctl(priv->btfd, METEORSETGEO, &priv->geom) < 0) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorSettingWidth, strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorSettingWidth, strerror(errno));
             return 0;
             }
 
@@ -480,7 +480,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
         if(ioctl(priv->btfd, METEORSETGEO, &priv->geom) < 0) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorSettingWidth, strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorSettingWidth, strerror(errno));
             return 0;
             }
 
@@ -502,7 +502,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
         if(ioctl(priv->btfd, METEORSFPS, &priv->fps) < 0) 
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFPS", strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFPS", strerror(errno));
             return 0;
             }
 
@@ -553,33 +553,33 @@ priv->btfd = open(priv->btdev, O_RDONLY);
 
 if(priv->btfd < 0)
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorOpeningBktrDev, strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorOpeningBktrDev, strerror(errno));
     priv->videoready = FALSE;
     }
 
 if(priv->videoready == TRUE && 
    ioctl(priv->btfd, METEORSFMT, &priv->iformat) < 0) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "SETEORSFMT", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "SETEORSFMT", strerror(errno));
     }
 
 if(priv->videoready == TRUE &&
    ioctl(priv->btfd, METEORSINPUT, &priv->source) < 0) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSINPUT", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSINPUT", strerror(errno));
     }
 
 tmp_fps = priv->fps;
 if(priv->videoready == TRUE &&
    ioctl(priv->btfd, METEORSFPS, &tmp_fps) < 0) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFPS", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSFPS", strerror(errno));
     }
 
 if(priv->videoready == TRUE &&
    ioctl(priv->btfd, METEORSETGEO, &priv->geom) < 0) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSGEQ", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSGEQ", strerror(errno));
     }
 
 if(priv->videoready == TRUE)
@@ -591,7 +591,7 @@ if(priv->videoready == TRUE)
 
     if(priv->livebuf == (u_char *) MAP_FAILED)
         {
-        mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848MmapFailed, strerror(errno));
+        mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848MmapFailed, strerror(errno));
         priv->videoready = FALSE;
         }
 
@@ -601,7 +601,7 @@ if(priv->videoready == TRUE)
 
         if(priv->framebuf[count].buf == NULL)
             {
-            mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848FrameBufAllocFailed, strerror(errno));
+            mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848FrameBufAllocFailed, strerror(errno));
             priv->videoready = FALSE;
             break;
             }
@@ -619,7 +619,7 @@ priv->tunerfd = open(priv->tunerdev, O_RDONLY);
 
 if(priv->tunerfd < 0)
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorOpeningTunerDev, strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorOpeningTunerDev, strerror(errno));
     priv->tunerready = FALSE;
     }
 
@@ -637,7 +637,7 @@ priv->dspframesize = priv->dspspeed*priv->dspsamplesize/8/priv->fps *
 
 if((priv->dspfd = open (priv->dspdev, O_RDONLY, 0)) < 0)
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorOpeningDspDev, strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorOpeningDspDev, strerror(errno));
     priv->dspready = FALSE;
     } 
 
@@ -645,7 +645,7 @@ marg = (256 << 16) | 12;
 
 if (ioctl(priv->dspfd, SNDCTL_DSP_SETFRAGMENT, &marg ) < 0 ) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "SNDCTL_DSP_SETFRAGMENT", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "SNDCTL_DSP_SETFRAGMENT", strerror(errno));
     priv->dspready = FALSE;
     }
 
@@ -655,7 +655,7 @@ if((priv->dspready == TRUE) &&
    (ioctl(priv->dspfd, SNDCTL_DSP_SPEED, &priv->dspspeed) == -1) ||
    (ioctl(priv->dspfd, SNDCTL_DSP_SETFMT, &priv->dspfmt) == -1)))
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorConfiguringDsp, strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorConfiguringDsp, strerror(errno));
     close(priv->dspfd);
     priv->dspready = FALSE;
     }
@@ -680,7 +680,7 @@ marg = SIGUSR1;
 
 if(ioctl(priv->btfd, METEORSSIGNAL, &marg) < 0) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSSIGNAL", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSSIGNAL", strerror(errno));
     return 0;
     }
 
@@ -694,7 +694,7 @@ marg = METEOR_CAP_CONTINOUS;
 
 if(ioctl(priv->btfd, METEORCAPTUR, &marg) < 0) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORCAPTUR", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORCAPTUR", strerror(errno));
     return 0;
     }
 
@@ -711,7 +711,7 @@ marg = METEOR_SIG_MODE_MASK;
 
 if(ioctl( priv->btfd, METEORSSIGNAL, &marg) < 0 ) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSSIGNAL", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "METEORSSIGNAL", strerror(errno));
     return 0;
     }
 
@@ -719,7 +719,7 @@ marg = METEOR_CAP_STOP_CONT;
 
 if(ioctl(priv->btfd, METEORCAPTUR, &marg) < 0 ) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848UnableToStopCapture, strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848UnableToStopCapture, strerror(errno));
     return 0;
     }
 
@@ -814,7 +814,7 @@ while(bytesread < len)
 
     if(ret == -1)
         {
-        mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorReadingAudio, strerror(errno));
+        mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848ErrorReadingAudio, strerror(errno));
         return 0;
         }
 
@@ -854,7 +854,7 @@ if(priv->dspready == FALSE) return 0;
 #ifdef CONFIG_SUN_AUDIO
 if(ioctl(priv->dspfd, AUDIO_GETINFO, &auinf) < 0) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "AUDIO_GETINFO", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "AUDIO_GETINFO", strerror(errno));
     return TVI_CONTROL_FALSE;
     }
 else
@@ -862,7 +862,7 @@ else
 #else
 if(ioctl(priv->dspfd, FIONREAD, &bytesavail) < 0) 
     {
-    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "FIONREAD", strerror(errno));
+    mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_TV_Bt848IoctlFailed, "FIONREAD", strerror(errno));
     return TVI_CONTROL_FALSE;
     }
 #endif

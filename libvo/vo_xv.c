@@ -217,7 +217,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if ((ctx->max_width != 0 && ctx->max_height != 0)
         && (ctx->image_width > ctx->max_width
             || ctx->image_height > ctx->max_height)) {
-        mp_msg(MSGT_VO, MSGL_ERR, MSGTR_VO_XV_ImagedimTooHigh,
+        mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_VO_XV_ImagedimTooHigh,
                ctx->image_width, ctx->image_height, ctx->max_width,
                ctx->max_height);
         return -1;
@@ -335,7 +335,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
         ctx->Shmem_Flag = 1;
     else {
         ctx->Shmem_Flag = 0;
-        mp_msg(MSGT_VO, MSGL_INFO, MSGTR_LIBVO_XV_SharedMemoryNotSupported);
+        mp_tmsg(MSGT_VO, MSGL_INFO, MSGTR_LIBVO_XV_SharedMemoryNotSupported);
     }
     if (ctx->Shmem_Flag) {
         ctx->xvimage[foo] =
@@ -704,7 +704,7 @@ static int preinit(struct vo *vo, const char *arg)
     /* check for Xvideo extension */
     unsigned int ver, rel, req, ev, err;
     if (Success != XvQueryExtension(x11->display, &ver, &rel, &req, &ev, &err)) {
-        mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_XvNotSupportedByX11);
+        mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_XvNotSupportedByX11);
         goto error;
     }
 
@@ -712,7 +712,7 @@ static int preinit(struct vo *vo, const char *arg)
     if (Success !=
         XvQueryAdaptors(x11->display, DefaultRootWindow(x11->display),
                         &ctx->adaptors, &ctx->ai)) {
-        mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_XvQueryAdaptorsFailed);
+        mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_XvQueryAdaptorsFailed);
         goto error;
     }
 
@@ -737,7 +737,7 @@ static int preinit(struct vo *vo, const char *arg)
             if (XvGrabPort(x11->display, x11->xv_port, CurrentTime))
                 x11->xv_port = 0;
         } else {
-            mp_msg(MSGT_VO, MSGL_WARN, MSGTR_LIBVO_XV_InvalidPortParameter);
+            mp_tmsg(MSGT_VO, MSGL_WARN, MSGTR_LIBVO_XV_InvalidPortParameter);
             x11->xv_port = 0;
         }
     }
@@ -757,7 +757,7 @@ static int preinit(struct vo *vo, const char *arg)
                            i, ctx->ai[i].name);
                     break;
                 } else {
-                    mp_msg(MSGT_VO, MSGL_WARN, MSGTR_LIBVO_XV_CouldNotGrabPort,
+                    mp_tmsg(MSGT_VO, MSGL_WARN, MSGTR_LIBVO_XV_CouldNotGrabPort,
                            (int) xv_p);
                     ++busy_ports;
                 }
@@ -765,9 +765,9 @@ static int preinit(struct vo *vo, const char *arg)
     }
     if (!x11->xv_port) {
         if (busy_ports)
-            mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_CouldNotFindFreePort);
+            mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_CouldNotFindFreePort);
         else
-            mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_NoXvideoSupport);
+            mp_tmsg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_XV_NoXvideoSupport);
         goto error;
     }
 

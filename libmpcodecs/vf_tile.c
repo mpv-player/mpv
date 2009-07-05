@@ -279,7 +279,7 @@ static int open(vf_instance_t *vf, char* args)
 //    er |= parse_int( &args, &p->bkgSet, 0 );
 
     if (er) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR, MSGTR_MPCODECS_ErrorParsingArgument);
+        mp_tmsg(MSGT_VFILTER, MSGL_ERR, MSGTR_MPCODECS_ErrorParsingArgument);
         return 0;
     }
     /* Load some default */

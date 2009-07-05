@@ -265,10 +265,10 @@ static void check_child(menu_t* menu) {
         mpriv->prompt = mpriv->mp_prompt;
         //add_line(mpriv,"Child process exited");    
       }
-      else mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WaitPidError,strerror(errno));
+      else mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WaitPidError,strerror(errno));
     }
   } else if(r < 0) {
-    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_SelectError);
+    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_SelectError);
     return;
   }
   
@@ -278,7 +278,7 @@ static void check_child(menu_t* menu) {
       if(w) mpriv->add_line = 1;
       r = read(mpriv->child_fd[i],buffer,255);
       if(r < 0)
-	mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReadErrorOnChildFD, i == 1 ? "stdout":"stderr");
+	mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReadErrorOnChildFD, i == 1 ? "stdout":"stderr");
       else if(r>0) {
 	buffer[r] = '\0';
 	add_string(mpriv,buffer);
@@ -296,9 +296,9 @@ static int run_shell_cmd(menu_t* menu, char* cmd) {
 #ifndef __MINGW32__
   int in[2],out[2],err[2];
 
-  mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_LIBMENU_ConsoleRun,cmd);
+  mp_tmsg(MSGT_GLOBAL,MSGL_INFO,MSGTR_LIBMENU_ConsoleRun,cmd);
   if(mpriv->child) {
-    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_AChildIsAlreadyRunning);
+    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_AChildIsAlreadyRunning);
     return 0;
   }
 
@@ -308,7 +308,7 @@ static int run_shell_cmd(menu_t* menu, char* cmd) {
 
   mpriv->child = fork();
   if(mpriv->child < 0) {
-    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ForkFailed);
+    mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ForkFailed);
     close_pipe(in);
     close_pipe(out);
     close_pipe(err);
@@ -382,14 +382,14 @@ static void read_cmd(menu_t* menu,int cmd) {
       while(l > 0) {
 	int w = write(mpriv->child_fd[0],str,l);
 	if(w < 0) {
-	  mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WriteError);
+	  mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WriteError);
 	  break;
 	}
 	l -= w;
 	str += w;
       }
       if(write(mpriv->child_fd[0],"\n",1) < 0)
-	mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WriteError);
+	mp_tmsg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WriteError);
       enter_cmd(menu);
       return;
     }

@@ -181,7 +181,7 @@ void m_properties_print_help_list(const m_option_t* list) {
     char min[50],max[50];
     int i,count = 0;
     
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_PropertyListHeader);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_PropertyListHeader);
     for(i = 0 ; list[i].name ; i++) {
         const m_option_t* opt = &list[i];
         if(opt->flags & M_OPT_MIN)
@@ -199,7 +199,7 @@ void m_properties_print_help_list(const m_option_t* list) {
                max);
         count++;
     }
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_TotalProperties, count);
+    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_TotalProperties, count);
 }
 
 // Some generic property implementations
@@ -250,7 +250,7 @@ int m_property_flag_ro(const m_option_t* prop,int action,
     switch(action) {
     case M_PROPERTY_PRINT:
         if(!arg) return 0;
-        *(char**)arg = strdup((var > prop->min) ? MSGTR_Enabled : MSGTR_Disabled);
+        *(char**)arg = strdup((var > prop->min) ? _(MSGTR_Enabled) : _(MSGTR_Disabled));
         return 1;
     }
     return m_property_int_ro(prop,action,arg,var);

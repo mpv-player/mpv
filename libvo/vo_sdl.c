@@ -425,7 +425,7 @@ static int sdl_open (void *plugin, void *name)
 		 */
 		priv->sdlflags &= ~SDL_HWSURFACE;
 		if ((!SDL_ListModes (vidInfo->vfmt, priv->sdlflags)) && (!priv->fullmodes)) {
-			mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput);
+			mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput);
 			return -1;
 		}
 	}
@@ -706,7 +706,7 @@ static void set_fullmode (int mode) {
         setup_surfaces();
 	}		
     else
-        mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_SetVideoModeFailedFull, SDL_GetError());
+        mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_SetVideoModeFailedFull, SDL_GetError());
 }
 
 
@@ -728,7 +728,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
     switch(format){
         case IMGFMT_I420:
-            mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_MappingI420ToIYUV);
+            mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_MappingI420ToIYUV);
             format = SDL_IYUV_OVERLAY;
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
@@ -750,7 +750,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			priv->mode = RGB;
 			break;
 		default:
- 			mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_UnsupportedImageFormat,format);
+ 			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_UnsupportedImageFormat,format);
 			return -1;
 	}
 
@@ -808,7 +808,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	}
 	if(flags&VOFLAG_FULLSCREEN) {
  	  	mp_msg(MSGT_VO,MSGL_V, "SDL: setting zoomed fullscreen without modeswitching\n");
- 		    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom);
+ 		    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom);
 		priv->fulltype = VOFLAG_FULLSCREEN;
 		set_fullmode(priv->fullmode);
           	/*if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags)))
@@ -845,7 +845,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	}
 
         if(!priv->surface) { // cannot SetVideoMode
- 		mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_FailedToSetVideoMode, SDL_GetError());
+ 		mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_FailedToSetVideoMode, SDL_GetError());
 		return -1;
 	}	
 
@@ -933,7 +933,7 @@ static int setup_surfaces(void)
 	    default:
 		/* Initialize and create the YUV Overlay used for video out */
 		if (!(priv->overlay = SDL_CreateYUVOverlay (surfwidth, surfheight, priv->format, priv->surface))) {
-			mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_CouldntCreateAYUVOverlay, SDL_GetError());
+			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_CouldntCreateAYUVOverlay, SDL_GetError());
 			return -1;
 		}
 		priv->framePlaneY = priv->width * priv->height;
@@ -946,14 +946,14 @@ static int setup_surfaces(void)
 	
     if(priv->mode != YUV) {
         if(!priv->rgbsurface) {
-            mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_CouldntCreateARGBSurface, SDL_GetError());
+            mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_CouldntCreateARGBSurface, SDL_GetError());
             return -1;
         }
 
         priv->dblit = 0;
 
         if((priv->format&0xFF) != priv->bpp)
-            mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion, priv->format&0xFF, priv->bpp);
+            mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion, priv->format&0xFF, priv->bpp);
 
         priv->framePlaneRGB = priv->width * priv->height * priv->rgbsurface->format->BytesPerPixel;
         priv->stridePlaneRGB = priv->width * priv->rgbsurface->format->BytesPerPixel;
@@ -1081,7 +1081,7 @@ static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 
     break;
     default:
-	mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice);
+	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice);
     }
 
 	SDL_OVR_UNLOCK
@@ -1443,7 +1443,7 @@ static void flip_page (void)
 		if(!priv->dblit) {
 		  	/* blit to the RGB surface */
 			if(SDL_BlitSurface (priv->rgbsurface, NULL, priv->surface, NULL))
-				mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_BlitFailed, SDL_GetError());
+				mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_SDL_BlitFailed, SDL_GetError());
 		}
 
 		/* update screen */
@@ -1566,14 +1566,14 @@ static int preinit(const char *arg)
     /* initialize the SDL Video system */
     if (!SDL_WasInit(SDL_INIT_VIDEO)) {
         if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
-            mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SDL_InitializationFailed, SDL_GetError());
+            mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SDL_InitializationFailed, SDL_GetError());
 
             return -1;
         }
     }
 
     SDL_VideoDriverName(priv->driver, 8);
-    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_UsingDriver, priv->driver);
+    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SDL_UsingDriver, priv->driver);
 
     priv->X = 0;
 #ifdef CONFIG_X11

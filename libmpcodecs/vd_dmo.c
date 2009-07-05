@@ -30,8 +30,8 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int init(sh_video_t *sh){
     unsigned int out_fmt;
     if(!(sh->context=DMO_VideoDecoder_Open(sh->codec->dll,&sh->codec->guid, sh->bih, 0, 0))){
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);
-        mp_msg(MSGT_DECVIDEO,MSGL_HINT,MSGTR_DownloadCodecPackage);
+        mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);
+        mp_tmsg(MSGT_DECVIDEO,MSGL_HINT,MSGTR_DownloadCodecPackage);
 	return 0;
     }
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
@@ -50,7 +50,7 @@ static int init(sh_video_t *sh){
 	DMO_VideoDecoder_SetDestFmt(sh->context,out_fmt&255,0);    // RGB/BGR
     }
     DMO_VideoDecoder_StartInternal(sh->context);
-    mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_DMOInitOK);
+    mp_tmsg(MSGT_DECVIDEO,MSGL_V,MSGTR_DMOInitOK);
     return 1;
 }
 
@@ -76,7 +76,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	sh->disp_w, sh->disp_h);
     
     if(!mpi){	// temporary!
-	mp_msg(MSGT_DECVIDEO,MSGL_WARN,MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec);
+	mp_tmsg(MSGT_DECVIDEO,MSGL_WARN,MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec);
 	return NULL;
     }
 

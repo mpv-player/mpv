@@ -44,9 +44,9 @@ void print_version(const char* name)
 	   gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
 	   gCpuCaps.hasSSE, gCpuCaps.hasSSE2, gCpuCaps.hasSSSE3);
 #if CONFIG_RUNTIME_CPUDETECT
-    mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithRuntimeDetection);
+    mp_tmsg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithRuntimeDetection);
 #else
-    mp_msg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithCPUExtensions);
+    mp_tmsg(MSGT_CPLAYER,MSGL_V, MSGTR_CompiledWithCPUExtensions);
 if (HAVE_MMX)
     mp_msg(MSGT_CPLAYER,MSGL_V," MMX");
 if (HAVE_MMX2)

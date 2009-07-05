@@ -61,7 +61,7 @@ static int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
   else if(ds->demuxer == priv->sd)
     return demux_fill_buffer(priv->sd,ds);
  
-  mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MPDEMUX_DEMUXERS_FillBufferError);
+  mp_tmsg(MSGT_DEMUX,MSGL_WARN,MSGTR_MPDEMUX_DEMUXERS_FillBufferError);
   return 0;
 }
 

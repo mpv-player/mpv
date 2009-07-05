@@ -38,7 +38,7 @@ static int asf_read_wrapper(int fd, void *buffer, int len, streaming_ctrl_t *str
     while (len > 0) {
         int got = nop_streaming_read(fd, buf, len, stream_ctrl);
         if (got <= 0) {
-            mp_msg(MSGT_NETWORK, MSGL_ERR, MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream);
+            mp_tmsg(MSGT_NETWORK, MSGL_ERR, MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream);
             return got;
         }
         buf += got;
@@ -109,11 +109,11 @@ printf("0x%02X\n", stream_chunck->type );
 	if( drop_packet!=NULL ) *drop_packet = 0;
 
 	if( stream_chunck->size<8 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_StreamChunkSize2Small, stream_chunck->size);
+		mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_StreamChunkSize2Small, stream_chunck->size);
 		return -1;
 	}
 	if( stream_chunck->size!=stream_chunck->size_confirm ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_SizeConfirmMismatch, stream_chunck->size, stream_chunck->size_confirm);
+		mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_SizeConfirmMismatch, stream_chunck->size, stream_chunck->size_confirm);
 		return -1;
 	}
 /*	
@@ -185,13 +185,13 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  // Endian handling of the stream chunk
 	  le2me_ASF_stream_chunck_t(&chunk);
 	  size = asf_streaming( &chunk, &r) - sizeof(ASF_stream_chunck_t);
-	  if(r) mp_msg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_ASF_WarnDropHeader);
+	  if(r) mp_tmsg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_ASF_WarnDropHeader);
 	  if(size < 0){
-	    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader);
+	    mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader);
 		return -1;
 	  }
 	  if (chunk.type != ASF_STREAMING_HEADER) {
-	    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk);
+	    mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk);
 	    return -1;
 	  }
 	  
@@ -199,7 +199,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  if (size > SIZE_MAX - buffer_size) return -1;
 	  buffer = malloc(size+buffer_size);
 	  if(buffer == NULL) {
-	    mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_ASF_BufferMallocFailed,size+buffer_size);
+	    mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_ASF_BufferMallocFailed,size+buffer_size);
 	    return -1;
 	  }
 	  if( chunk_buffer!=NULL ) {
@@ -216,7 +216,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  if( chunk_size2read==0 ) {
 		ASF_header_t *asfh = (ASF_header_t *)buffer;
 		if(size < (int)sizeof(ASF_header_t)) {
-		    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrChunk2Small);
+		    mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrChunk2Small);
 		    return -1;
 		} else mp_msg(MSGT_NETWORK,MSGL_DBG2,"Got chunk\n");
 		chunk_size2read = AV_RL64(&asfh->objh.size);
@@ -357,7 +357,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
   free(a_rates);
 
   if (a_idx < 0 && v_idx < 0) {
-    mp_msg(MSGT_NETWORK, MSGL_FATAL, MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay);
+    mp_tmsg(MSGT_NETWORK, MSGL_FATAL, MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay);
     return -1;
   }
 
@@ -367,7 +367,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
   else if (a_idx >= 0)
     asf_ctrl->audio_id = asf_ctrl->audio_streams[a_idx];
   else if (asf_ctrl->n_audio) {
-    mp_msg(MSGT_NETWORK, MSGL_WARN, MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio);
+    mp_tmsg(MSGT_NETWORK, MSGL_WARN, MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio);
     *streaming_ctrl->audio_id_ptr = -2;
   }
 
@@ -377,14 +377,14 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
   else if (v_idx >= 0)
     asf_ctrl->video_id = asf_ctrl->video_streams[v_idx];
   else if (asf_ctrl->n_video) {
-    mp_msg(MSGT_NETWORK, MSGL_WARN, MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo);
+    mp_tmsg(MSGT_NETWORK, MSGL_WARN, MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo);
     *streaming_ctrl->video_id_ptr = -2;
   }
 
   return 1;
 
 len_err_out:
-  mp_msg(MSGT_NETWORK, MSGL_FATAL, MSGTR_MPDEMUX_ASF_InvalidLenInHeader);
+  mp_tmsg(MSGT_NETWORK, MSGL_FATAL, MSGTR_MPDEMUX_ASF_InvalidLenInHeader);
   if (buffer) free(buffer);
   if (v_rates) free(v_rates);
   if (a_rates) free(a_rates);
@@ -406,14 +406,14 @@ static int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ct
       le2me_ASF_stream_chunck_t(&chunk);
       chunk_size = asf_streaming( &chunk, &drop_chunk );
       if(chunk_size < 0) {
-	mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader);
+	mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader);
 	return -1;
       }
       chunk_size -= sizeof(ASF_stream_chunck_t);
 	
       if(chunk.type != ASF_STREAMING_HEADER && (!drop_chunk)) {
 	if (asf_http_ctrl->packet_size < chunk_size) {
-	  mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket);
+	  mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket);
 	  return -1;
 	}
 	waiting = asf_http_ctrl->packet_size;
@@ -505,7 +505,7 @@ static int asf_http_streaming_type(char *content_type, char *features, HTTP_head
 				(!strcasecmp(content_type, "video/x-ms-afs")) ||
 				(!strcasecmp(content_type, "video/x-ms-wmv")) ||
 				(!strcasecmp(content_type, "video/x-ms-wma")) ) {
-				mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ASFRedirector);
+				mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ASFRedirector);
 				return ASF_Redirector_e;
 			} else if( !strcasecmp(content_type, "text/plain") ) {
 				mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Plain text\n");
@@ -547,7 +547,7 @@ static HTTP_header_t *asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	if( !strcasecmp( url->protocol, "http_proxy" ) ) {
 		server_url = url_new( (url->file)+1 );
 		if( server_url==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_InvalidProxyURL);
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_InvalidProxyURL);
 			http_free( http_hdr );
 			return NULL;
 		}
@@ -608,7 +608,7 @@ static HTTP_header_t *asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 			// First request goes here.
 			break;
 		default:
-			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_UnknownASFStreamType);
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_UnknownASFStreamType);
 	}
 
 	http_set_field( http_hdr, "Connection: Close" );
@@ -622,7 +622,7 @@ static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTT
 	char features[64] = "\0";
 	size_t len;
 	if( http_response_parse(http_hdr)<0 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse);
+		mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse);
 		return -1;
 	}
 	switch( http_hdr->status_code ) {
@@ -631,7 +631,7 @@ static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTT
 		case 401: // Authentication required
 			return ASF_Authenticate_e;
 		default:
-			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ServerReturn, http_hdr->status_code, http_hdr->reason_phrase);
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_ServerReturn, http_hdr->status_code, http_hdr->reason_phrase);
 			return -1;
 	}
 
@@ -655,7 +655,7 @@ static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTT
 				  len = (unsigned int)(end-pragma);
 				}
 				if(len > sizeof(features) - 1) {
-				  mp_msg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma,pragma,len,sizeof(features) - 1);
+				  mp_tmsg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma,pragma,len,sizeof(features) - 1);
 				  len = sizeof(features) - 1;
 				}
 				strncpy( features, pragma, len );
@@ -686,7 +686,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 
 	asf_http_ctrl = malloc(sizeof(asf_http_streaming_ctrl_t));
 	if( asf_http_ctrl==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return -1;
 	}
 	asf_http_ctrl->streaming_type = ASF_Unknown_e;
@@ -712,7 +712,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 		for(i=0; i < (int)http_hdr->buffer_size ; ) {
 			int r = send( fd, http_hdr->buffer+i, http_hdr->buffer_size-i, 0 );
 			if(r <0) {
-				mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_SocketWriteError,strerror(errno));
+				mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_SocketWriteError,strerror(errno));
 				goto err_out;
 			}
 			i += r;
@@ -734,7 +734,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 		}
 		ret = asf_http_parse_response(asf_http_ctrl, http_hdr);
 		if( ret<0 ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_HeaderParseFailed);
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_HeaderParseFailed);
 			goto err_out;
 		}
 		switch( asf_http_ctrl->streaming_type ) {
@@ -752,7 +752,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 						ret = asf_streaming_parse_header(fd,stream->streaming_ctrl);
 						if(ret < 0) goto err_out;
 						if(asf_http_ctrl->n_audio == 0 && asf_http_ctrl->n_video == 0) {
-							mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_NoStreamFound);
+							mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_NoStreamFound);
 							goto err_out;
 						}
 						asf_http_ctrl->request++;
@@ -778,7 +778,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 				break;
 			case ASF_Unknown_e:
 			default:
-				mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_UnknownASFStreamingType);
+				mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_UnknownASFStreamingType);
 				goto err_out;
 		}
 	// Check if we got a redirect.	
@@ -821,7 +821,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 	stream->streaming_ctrl->url = check4proxies(url);
 	url_free(url);
 	
-	mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_MPDEMUX_ASF_InfoStreamASFURL, stream->url);
+	mp_tmsg(MSGT_OPEN, MSGL_INFO, MSGTR_MPDEMUX_ASF_InfoStreamASFURL, stream->url);
 	if((!strncmp(stream->url, "http", 4)) && (*file_format!=DEMUXER_TYPE_ASF && *file_format!=DEMUXER_TYPE_UNKNOWN)) {
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
@@ -829,7 +829,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 	}
 
 	if(asf_streaming_start(stream, file_format) < 0) {
-		mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_ASF_StreamingFailed);
+		mp_tmsg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_ASF_StreamingFailed);
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
 		return STREAM_UNSUPPORTED;

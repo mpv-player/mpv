@@ -108,7 +108,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 		case AF_INET6: our_s_addr = (void *) &server_address.six.sin6_addr; break;
 #endif
 		default:
-			mp_msg(MSGT_NETWORK,MSGL_ERR, MSGTR_MPDEMUX_NW_UnknownAF, af);
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR, MSGTR_MPDEMUX_NW_UnknownAF, af);
 			return TCP_ERROR_FATAL;
 	}
 	
@@ -123,7 +123,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	if ( inet_addr(host)==INADDR_NONE )
 #endif
 	{
-		if(verb) mp_msg(MSGT_NETWORK,MSGL_STATUS,MSGTR_MPDEMUX_NW_ResolvingHostForAF, host, af2String(af));
+		if(verb) mp_tmsg(MSGT_NETWORK,MSGL_STATUS,MSGTR_MPDEMUX_NW_ResolvingHostForAF, host, af2String(af));
 		
 #ifdef HAVE_GETHOSTBYNAME2
 		hp=(struct hostent*)gethostbyname2( host, af );
@@ -131,7 +131,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 		hp=(struct hostent*)gethostbyname( host );
 #endif
 		if( hp==NULL ) {
-			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_CantResolv, af2String(af), host);
+			if(verb) mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_CantResolv, af2String(af), host);
 			return TCP_ERROR_FATAL;
 		}
 		
@@ -158,7 +158,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 			break;
 #endif
 		default:
-			mp_msg(MSGT_NETWORK,MSGL_ERR, MSGTR_MPDEMUX_NW_UnknownAF, af);
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR, MSGTR_MPDEMUX_NW_UnknownAF, af);
 			return TCP_ERROR_FATAL;
 	}
 
@@ -167,7 +167,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 #else
 	inet_ntop(af, our_s_addr, buf, 255);
 #endif
-	if(verb) mp_msg(MSGT_NETWORK,MSGL_STATUS,MSGTR_MPDEMUX_NW_ConnectingToServer, host, buf , port );
+	if(verb) mp_tmsg(MSGT_NETWORK,MSGL_STATUS,MSGTR_MPDEMUX_NW_ConnectingToServer, host, buf , port );
 
 	// Turn the socket as non blocking so we can timeout on the connection
 #if !HAVE_WINSOCK2_H
@@ -182,7 +182,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 #else
 		if( (WSAGetLastError() != WSAEINPROGRESS) && (WSAGetLastError() != WSAEWOULDBLOCK) ) {
 #endif
-			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_CantConnect2Server, af2String(af));
+			if(verb) mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_CantConnect2Server, af2String(af));
 			closesocket(socket_server_fd);
 			return TCP_ERROR_PORT;
 		}
@@ -195,7 +195,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
 	      if(count > 30 || stream_check_interrupt(500)) {
 		if(count > 30)
-		  mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnTimeout);
+		  mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnTimeout);
 		else
 		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interrupted by user\n");
 		return TCP_ERROR_TIMEOUT;
@@ -206,7 +206,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	      tv.tv_sec = 0;
 	      tv.tv_usec = 500000;
 	}
-	if (ret < 0) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_SelectFailed);
+	if (ret < 0) mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_SelectFailed);
 
 	// Turn back the socket as blocking
 #if !HAVE_WINSOCK2_H
@@ -219,11 +219,11 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	err_len = sizeof(int);
 	ret =  getsockopt(socket_server_fd,SOL_SOCKET,SO_ERROR,&err,&err_len);
 	if(ret < 0) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_GetSockOptFailed,strerror(errno));
+		mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_GetSockOptFailed,strerror(errno));
 		return TCP_ERROR_FATAL;
 	}
 	if(err > 0) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnectError,strerror(err));
+		mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnectError,strerror(err));
 		return TCP_ERROR_PORT;
 	}
 	

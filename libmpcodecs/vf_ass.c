@@ -117,7 +117,7 @@ static void get_image(struct vf_instance* vf, mp_image_t *mpi)
 
 	if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
 			!(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
-		mp_msg(MSGT_ASS, MSGL_INFO, MSGTR_MPCODECS_FullDRNotPossible);
+		mp_tmsg(MSGT_ASS, MSGL_INFO, MSGTR_MPCODECS_FullDRNotPossible);
 		return;
 	}
 
@@ -166,7 +166,7 @@ static int prepare_image(struct vf_instance* vf, mp_image_t *mpi)
 {
 	if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 		vf->dmpi = mpi->priv;
-		if (!vf->dmpi) { mp_msg(MSGT_ASS, MSGL_WARN, MSGTR_MPCODECS_FunWhydowegetNULL); return 0; }
+		if (!vf->dmpi) { mp_tmsg(MSGT_ASS, MSGL_WARN, MSGTR_MPCODECS_FunWhydowegetNULL); return 0; }
 		mpi->priv = NULL;
 		// we've used DR, so we're ready...
 		if (ass_top_margin)

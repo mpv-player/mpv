@@ -68,7 +68,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
       
       tmp = realloc_struct(s->muxer->muxbuf, (num+1), sizeof(muxbuf_t));
       if(!tmp) {
-        mp_msg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufReallocErr);
+        mp_tmsg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufReallocErr);
         return;
       }
       s->muxer->muxbuf = tmp;
@@ -82,7 +82,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
       buf->flags = flags;
       buf->buffer = malloc(len);
       if (!buf->buffer) {
-        mp_msg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufMallocErr);
+        mp_tmsg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufMallocErr);
         return;
       }
       memcpy(buf->buffer, s->buffer, buf->len);
@@ -96,7 +96,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
       
       /* see if we can flush buffer now */
       if (s->muxer->muxbuf_skip_buffer) {
-        mp_msg(MSGT_MUXER, MSGL_V, MSGTR_MuxbufSending, s->muxer->muxbuf_num);
+        mp_tmsg(MSGT_MUXER, MSGL_V, MSGTR_MuxbufSending, s->muxer->muxbuf_num);
         
         /* fix parameters for all streams */
         for (num = 0; s->muxer->streams[num]; ++num) {
@@ -139,7 +139,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
     if(s->h.dwSampleSize){
       // CBR
       s->h.dwLength+=len/s->h.dwSampleSize;
-      if(len%s->h.dwSampleSize) mp_msg(MSGT_MUXER, MSGL_WARN, MSGTR_WarningLenIsntDivisible);
+      if(len%s->h.dwSampleSize) mp_tmsg(MSGT_MUXER, MSGL_WARN, MSGTR_WarningLenIsntDivisible);
     } else {
       // VBR
       s->h.dwLength++;

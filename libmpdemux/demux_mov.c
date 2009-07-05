@@ -1303,7 +1303,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_FOURCC('t','r','a','k'): {
 //	    if(trak) printf("MOV: Warning! trak in trak?\n");
 	    if(priv->track_db>=MOV_MAX_TRACKS){
-		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVtooManyTrk);
+		mp_tmsg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVtooManyTrk);
 		return;
 	    }
 	    if(!priv->track_db) mp_msg(MSGT_DEMUX, MSGL_V, "--------------\n");
@@ -1317,13 +1317,13 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    switch(trak->type){
 	    case MOV_TRAK_AUDIO: {
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
-		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "mov", priv->track_db);
+		mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "mov", priv->track_db);
 		gen_sh_audio(sh, trak, priv->timescale);
 		break;
 	    }
 	    case MOV_TRAK_VIDEO: {
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
-		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "mov", priv->track_db);
+		mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "mov", priv->track_db);
 		gen_sh_video(sh, trak, priv->timescale);
 		break;
 	    }
@@ -1332,7 +1332,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    trak->fourcc == mmioFOURCC('t','x','3','g') ||
 		    trak->fourcc == mmioFOURCC('t','e','x','t')) {
 			sh_sub_t *sh = new_sh_sub(demuxer, priv->track_db);
-			mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "mov", priv->track_db);
+			mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_SubtitleID, "mov", priv->track_db);
 			if (trak->fourcc == mmioFOURCC('m','p','4','s'))
 				init_vobsub(sh, trak);
 			else {
@@ -1398,13 +1398,13 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	}
 #if !CONFIG_ZLIB
 	case MOV_FOURCC('c','m','o','v'): {
-	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
+	    mp_tmsg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
 	    return;
 	}
 #else
 	case MOV_FOURCC('m','o','o','v'):
 	case MOV_FOURCC('c','m','o','v'): {
-//	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
+//	    mp_tmsg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
 	    lschunks(demuxer,level+1,pos+len,NULL);
 	    break;
 	}
@@ -1728,7 +1728,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
                "MOV: %*s desc #%d: %.4s  (%"PRId64" bytes)\n", level, "",
                i, (char *)&fourcc, (int64_t)len - 16);
         if (fourcc != trak->fourcc && i)
-          mp_msg(MSGT_DEMUX, MSGL_WARN, MSGTR_MOVvariableFourCC);
+          mp_tmsg(MSGT_DEMUX, MSGL_WARN, MSGTR_MOVvariableFourCC);
 //      if(!i)
         {
           trak->fourcc = fourcc;

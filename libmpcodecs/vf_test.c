@@ -52,7 +52,7 @@ static int config(struct vf_instance* vf,
 	unsigned int flags, unsigned int outfmt){
 
     if(vf_next_query_format(vf,IMGFMT_YV12)<=0){
-	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupport, "YV12");
+	mp_tmsg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupport, "YV12");
 	return 0;
     }
 

@@ -19,7 +19,7 @@ static edl_record_ptr edl_alloc_new(edl_record_ptr next_edl_record)
 {
     edl_record_ptr new_record = calloc(1, sizeof(struct edl_record));
     if (!new_record) {
-        mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_EdlOutOfMem);
+        mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_EdlOutOfMem);
         exit(1);
     }
     
@@ -78,24 +78,24 @@ edl_record_ptr edl_parse_file(void)
             if ((sscanf(line, "%f %f %d", &start, &stop, &action))
                 != 3)
             {
-                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadlyFormattedLine,
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadlyFormattedLine,
                        lineCount);
                 continue;
             } 
  
             if (next_edl_record && start <= next_edl_record->stop_sec)
             {
-                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
-                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineOverlap,
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineOverlap,
                        next_edl_record->stop_sec, start);
                 continue;    
             }
 
             if (stop <= start)
             {
-                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine,
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine,
                        line);
-                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineBadStop);
+                mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineBadStop);
                 continue;
             }
 
@@ -131,9 +131,9 @@ edl_record_ptr edl_parse_file(void)
     }        
 
     if (edl_records) 
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo, record_count);
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo, record_count);
     else 
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
 
     return edl_records;
 }

@@ -57,7 +57,7 @@ static int config(struct vf_instance* vf,
     // check:
     if(vf->priv->crop_w+vf->priv->crop_x>width ||
        vf->priv->crop_h+vf->priv->crop_y>height){
-	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_CropBadPositionWidthHeight);
+	mp_tmsg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_CropBadPositionWidthHeight);
 	return 0;
     }
     if(!opts->screen_size_x && !opts->screen_size_y){

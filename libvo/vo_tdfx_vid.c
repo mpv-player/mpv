@@ -87,10 +87,10 @@ static void clear_screen(void) {
   mov.dst = front_buffer;
   mov.dst_stride = tdfx_cfg.screen_stride;
 
-  mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXVID_Move, mov.width,mov.src_stride,mov.height,mov.dst_stride);
+  mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXVID_Move, mov.width,mov.src_stride,mov.height,mov.dst_stride);
 
   if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov))
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen);
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen);
   
 }
 #endif
@@ -176,7 +176,7 @@ flip_page(void)
       blit.dst_h = src_height;
       blit.dst_format = IMGFMT_BGR16;
       if(ioctl(tdfx_fd,TDFX_VID_BLIT,&blit))
-	mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_BlitFailed);
+	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_BlitFailed);
     }
     return;
   }
@@ -198,7 +198,7 @@ flip_page(void)
   blit.dst_format = dst_fmt;
 
   if(ioctl(tdfx_fd,TDFX_VID_BLIT,&blit))
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_BlitFailed);
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_BlitFailed);
 }
 
 static int
@@ -266,7 +266,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   case IMGFMT_BGR24:
   case IMGFMT_BGR32:
     if(use_overlay)
-      mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXVID_NonNativeOverlayFormatNeedConversion);
+      mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXVID_NonNativeOverlayFormatNeedConversion);
   case IMGFMT_BGR15:
   case IMGFMT_BGR16:
     src_bpp = ((format & 0x3F)+7)/8; 
@@ -282,7 +282,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     src_bpp = 2;
     break;
   default:
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_UnsupportedInputFormat,format);
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_UnsupportedInputFormat,format);
     return 1;
   }
 
@@ -338,28 +338,28 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     ov.use_colorkey = 0;
 
     if(ioctl(tdfx_fd,TDFX_VID_SET_OVERLAY,&ov)) {
-      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_OverlaySetupFailed);
+      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_OverlaySetupFailed);
       use_overlay = 0;
       break;
     }
     tdfx_ov = ov;
     if(use_overlay == 1) {
       if(ioctl(tdfx_fd,TDFX_VID_OVERLAY_ON)) {
-	mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_OverlayOnFailed);
+	mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_OverlayOnFailed);
 	use_overlay = 0;
 	break;
       }
       use_overlay++;
     }
     
-    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXVID_OverlayReady,
+    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXVID_OverlayReady,
 	   src_width,src_stride,src_height,src_bpp,
 	   dst_width,dst_stride,dst_height,dst_bpp);
     break;
   }
 
   if(!use_overlay)
-    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXVID_TextureBlitReady,
+    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXVID_TextureBlitReady,
 	   src_width,src_stride,src_height,src_bpp,
 	   dst_width,dst_stride,dst_height,dst_bpp);
   
@@ -371,7 +371,7 @@ uninit(void)
 {
   if(use_overlay == 2) {
     if(ioctl(tdfx_fd,TDFX_VID_OVERLAY_OFF))
-      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_OverlayOffFailed);
+      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_OverlayOffFailed);
     use_overlay--;
   }
   close(tdfx_fd);
@@ -388,13 +388,13 @@ static int preinit(const char *arg)
  
   tdfx_fd = open(arg ? arg : "/dev/tdfx_vid", O_RDWR);
   if(tdfx_fd < 0) {
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_CantOpen,arg ? arg : "/dev/tdfx_vid",
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_CantOpen,arg ? arg : "/dev/tdfx_vid",
 	   strerror(errno));
     return 1;
   }
 
   if(ioctl(tdfx_fd,TDFX_VID_GET_CONFIG,&tdfx_cfg)) {
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg,strerror(errno));
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg,strerror(errno));
     return 1;
   }
 
@@ -413,7 +413,7 @@ static int preinit(const char *arg)
 		  tdfx_fd, 0);
 
   if(agp_mem == MAP_FAILED) {
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_MemmapFailed);
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_MemmapFailed);
     return 1;
   }
   
@@ -465,7 +465,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     mpi->stride[2] = mpi->chroma_width;
     break;
   default:
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_GetImageTodo);
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_GetImageTodo);
     return VO_FALSE;
   }
   mpi->flags |= MP_IMGFLAG_DIRECT;
@@ -531,7 +531,7 @@ static uint32_t draw_image(mp_image_t *mpi){
     mov.dst_stride = src_stride;
 	 
     if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov))
-      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AgpMoveFailed);
+      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AgpMoveFailed);
     break;
 
   case IMGFMT_YV12:
@@ -560,7 +560,7 @@ static uint32_t draw_image(mp_image_t *mpi){
     yuv.base = back_buffer;
     yuv.stride = src_stride;
     if(ioctl(tdfx_fd,TDFX_VID_SET_YUV,&yuv)) {
-      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_SetYuvFailed);
+      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_SetYuvFailed);
       break;
     }
     
@@ -576,7 +576,7 @@ static uint32_t draw_image(mp_image_t *mpi){
     mov.dst_stride = TDFX_VID_YUV_STRIDE;
 
     if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
-      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane);
+      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane);
       break;
     }
     //return 0;
@@ -588,7 +588,7 @@ static uint32_t draw_image(mp_image_t *mpi){
     mov.src_stride = buffer_stride[p];
     mov.dst += TDFX_VID_YUV_PLANE_SIZE;
     if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
-      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane);
+      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane);
       break;
     }
     // V
@@ -597,12 +597,12 @@ static uint32_t draw_image(mp_image_t *mpi){
     mov.src_stride = buffer_stride[p];
     mov.dst += TDFX_VID_YUV_PLANE_SIZE;
     if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
-      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane);
+      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane);
       break;
     }
     break;
   default:
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_UnknownFormat,mpi->imgfmt);
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_UnknownFormat,mpi->imgfmt);
     return VO_TRUE;
   }
 

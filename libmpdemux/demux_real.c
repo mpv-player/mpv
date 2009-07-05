@@ -1266,7 +1266,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    int i;
 		    char *buft;
 		    int hdr_size;
-		    mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "real", stream_id);
+		    mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "real", stream_id);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"version: %d\n", version);
@@ -1467,7 +1467,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		}
 	  } else if (strstr(mimet,"X-MP3-draft-00")) {
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
-    		    mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "real", stream_id);
+    		    mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_AudioID, "real", stream_id);
 
 		    /* Emulate WAVEFORMATEX struct: */
 		    sh->wf = malloc(sizeof(WAVEFORMATEX));
@@ -1503,7 +1503,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		} else {
 		    /* video header */
 		    sh_video_t *sh = new_sh_video(demuxer, stream_id);
-		    mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "real", stream_id);
+		    mp_tmsg(MSGT_DEMUX, MSGL_INFO, MSGTR_VideoID, "real", stream_id);
 
 		    sh->format = stream_read_dword_le(demuxer->stream); /* fourcc */
 		    mp_msg(MSGT_DEMUX,MSGL_V,"video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
@@ -1726,13 +1726,13 @@ header_end:
     if(demuxer->video->id==-1 && v_streams>0){
 	// find the valid video stream:
 	if(!ds_fill_buffer(demuxer->video)){
-          mp_msg(MSGT_DEMUXER,MSGL_INFO,"RM: " MSGTR_MissingVideoStream);
+          mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"RM: " MSGTR_MissingVideoStream);
 	}
     }
     if(demuxer->audio->id==-1 && a_streams>0){
 	// find the valid audio stream:
 	if(!ds_fill_buffer(demuxer->audio)){
-          mp_msg(MSGT_DEMUXER,MSGL_INFO,"RM: " MSGTR_MissingAudioStream);
+          mp_tmsg(MSGT_DEMUXER,MSGL_INFO,"RM: " MSGTR_MissingAudioStream);
 	}
     }
 

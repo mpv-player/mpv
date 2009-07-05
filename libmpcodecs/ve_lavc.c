@@ -531,7 +531,7 @@ static int config(struct vf_instance* vf,
     lavc_venc_context->flags = 0;
     if (lavc_param_mb_decision)
     {
-	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_HighQualityEncodingSelected);
+	mp_tmsg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_HighQualityEncodingSelected);
         lavc_venc_context->mb_decision= lavc_param_mb_decision;
     }
 
@@ -683,7 +683,7 @@ static int config(struct vf_instance* vf,
     /* fixed qscale :p */
     if (lavc_param_vqscale >= 0.0)
     {
-	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_UsingConstantQscale, lavc_param_vqscale);
+	mp_tmsg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_UsingConstantQscale, lavc_param_vqscale);
 	lavc_venc_context->flags |= CODEC_FLAG_QSCALE;
         lavc_venc_context->global_quality= 
 	vf->priv->pic->quality = (int)(FF_QP2LAMBDA * lavc_param_vqscale + 0.5);
@@ -693,7 +693,7 @@ static int config(struct vf_instance* vf,
 	avcodec_thread_init(lavc_venc_context, lavc_param_threads);
 
     if (avcodec_open(lavc_venc_context, vf->priv->codec) != 0) {
-	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantOpenCodec);
+	mp_tmsg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantOpenCodec);
 	return 0;
     }
 
@@ -1041,7 +1041,7 @@ static int vf_open(vf_instance_t *vf, char* args){
 
     vf->priv->codec = (AVCodec *)avcodec_find_encoder_by_name(lavc_param_vcodec);
     if (!vf->priv->codec) {
-	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_MissingLAVCcodec, lavc_param_vcodec);
+	mp_tmsg(MSGT_MENCODER,MSGL_ERR,MSGTR_MissingLAVCcodec, lavc_param_vcodec);
 	return 0;
     }
 

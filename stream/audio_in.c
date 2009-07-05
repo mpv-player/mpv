@@ -185,16 +185,16 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 	ret = snd_pcm_readi(ai->alsa.handle, buffer, ai->alsa.chunk_size);
 	if (ret != ai->alsa.chunk_size) {
 	    if (ret < 0) {
-		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio, snd_strerror(ret));
+		mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio, snd_strerror(ret));
 		if (ret == -EPIPE) {
 		    if (ai_alsa_xrun(ai) == 0) {
-			mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut);
+			mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut);
 		    } else {
-			mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover);
+			mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover);
 		    }
 		}
 	    } else {
-		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples);
+		mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples);
 	    }
 	    return -1;
 	}
@@ -205,9 +205,9 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 	ret = read(ai->oss.audio_fd, buffer, ai->blocksize);
 	if (ret != ai->blocksize) {
 	    if (ret < 0) {
-		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio, strerror(errno));
+		mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio, strerror(errno));
 	    } else {
-		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples);
+		mp_tmsg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples);
 	    }
 	    return -1;
 	}

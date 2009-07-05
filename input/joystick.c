@@ -51,11 +51,11 @@ int mp_input_joystick_init(char* dev) {
   int initialized = 0;
   struct js_event ev;
   
-  mp_msg(MSGT_INPUT,MSGL_V,MSGTR_INPUT_JOYSTICK_Opening,dev ? dev : JS_DEV);
+  mp_tmsg(MSGT_INPUT,MSGL_V,MSGTR_INPUT_JOYSTICK_Opening,dev ? dev : JS_DEV);
 
   fd = open( dev ? dev : JS_DEV , O_RDONLY | O_NONBLOCK );
   if(fd < 0) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_CantOpen,dev ? dev : JS_DEV,strerror(errno));
+    mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_CantOpen,dev ? dev : JS_DEV,strerror(errno));
     return -1;
   }
   
@@ -70,7 +70,7 @@ int mp_input_joystick_init(char* dev) {
 	  initialized = 1;
 	  break;
 	}
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,strerror(errno));
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,strerror(errno));
 	close(fd);
 	return -1;
       }	
@@ -78,7 +78,7 @@ int mp_input_joystick_init(char* dev) {
     }
     if((unsigned int)l < sizeof(struct js_event)) {
       if(l > 0)
-	mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_LoosingBytes,l);	  
+	mp_tmsg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_LoosingBytes,l);	  
       break;
     }
     if(ev.type == JS_EVENT_BUTTON)
@@ -102,9 +102,9 @@ int mp_input_joystick_read(void *ctx, int fd) {
       else if(errno == EAGAIN)
 	return MP_INPUT_NOTHING;
       if( r < 0)
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,strerror(errno));
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,strerror(errno));
       else
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,"EOF"); 
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,"EOF"); 
       return MP_INPUT_DEAD;
     } 	
     l += r;
@@ -112,12 +112,12 @@ int mp_input_joystick_read(void *ctx, int fd) {
 
   if((unsigned int)l < sizeof(struct js_event)) {
     if(l > 0)
-      mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_LoosingBytes,l);
+      mp_tmsg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_LoosingBytes,l);
     return MP_INPUT_NOTHING;
   }
 
   if(ev.type & JS_EVENT_INIT) {
-    mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_WarnLostSync);	
+    mp_tmsg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_WarnLostSync);	
     ev.type &= ~JS_EVENT_INIT;
     if(ev.type == JS_EVENT_BUTTON) {
       int s = (btns >> ev.number) & 1;
@@ -154,7 +154,7 @@ int mp_input_joystick_read(void *ctx, int fd) {
     } else
       return MP_INPUT_NOTHING;
   } else {
-    mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_WarnUnknownEvent,ev.type);	
+    mp_tmsg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_WarnUnknownEvent,ev.type);	
     return MP_INPUT_ERROR;
   }
 

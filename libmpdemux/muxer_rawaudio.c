@@ -16,7 +16,7 @@ static muxer_stream_t* rawaudiofile_new_stream(muxer_t *muxer,int type){
     muxer_stream_t* s;
     if (!muxer) return NULL;
     if(type==MUXER_TYPE_AUDIO && muxer->avih.dwStreams>=1){
-        mp_msg(MSGT_MUXER,MSGL_ERR,MSGTR_TooManyStreams" "MSGTR_RawMuxerOnlyOneStream);
+        mp_tmsg(MSGT_MUXER,MSGL_ERR,MSGTR_TooManyStreams" "MSGTR_RawMuxerOnlyOneStream);
         return NULL;
     }
     s=malloc(sizeof(muxer_stream_t));
@@ -35,12 +35,12 @@ static muxer_stream_t* rawaudiofile_new_stream(muxer_t *muxer,int type){
         muxer->avih.dwStreams++;
         break;
     case MUXER_TYPE_VIDEO:
-        mp_msg(MSGT_MUXER,MSGL_WARN,MSGTR_IgnoringVideoStream);
+        mp_tmsg(MSGT_MUXER,MSGL_WARN,MSGTR_IgnoringVideoStream);
         s->ckid=mmioFOURCC(('0'+s->id/10),('0'+(s->id%10)),'d','c');
         s->h.fccType=streamtypeAUDIO;
         break;
     default:
-        mp_msg(MSGT_MUXER,MSGL_ERR,MSGTR_UnknownStreamType,type);
+        mp_tmsg(MSGT_MUXER,MSGL_ERR,MSGTR_UnknownStreamType,type);
         return NULL;
     }
     return s;

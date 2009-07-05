@@ -2376,7 +2376,7 @@ static void mpegfile_write_index(muxer_t *muxer)
 	double fake_timer;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 
-	mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingTrailer);
+	mp_tmsg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingTrailer);
 
 	for(i = 0; i < muxer->avih.dwStreams; i++)
 	{
@@ -2398,7 +2398,7 @@ static void mpegfile_write_header(muxer_t *muxer)
 {
 	muxer_priv_t *priv = (muxer_priv_t*) muxer->priv;
 	
-	mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingHeader);
+	mp_tmsg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingHeader);
 	
 	priv->headers_cnt++;
 	

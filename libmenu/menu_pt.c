@@ -98,7 +98,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 	  d--;
 	}
 	if(i == NULL) {
-	  mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_CantfindTheTargetItem);
+	  mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_CantfindTheTargetItem);
 	  break;
 	}
       }
@@ -111,7 +111,7 @@ static void read_cmd(menu_t* menu,int cmd) {
       mp_input_queue_cmd(menu->input_ctx, c);
     }
     else
-      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_FailedToBuildCommand,str);
+      mp_tmsg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_FailedToBuildCommand,str);
   } break;
   default:
     menu_list_read_cmd(menu,cmd);

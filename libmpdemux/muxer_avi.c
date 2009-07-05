@@ -273,7 +273,7 @@ static void avifile_write_header(muxer_t *muxer){
   struct avi_stream_info *vsi = muxer->def_v->priv;
   int isodml = vsi->riffofspos > 0;
 
-  mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingHeader);
+  mp_tmsg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingHeader);
   if (aspect == 0) {
     mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: Aspect information not (yet?) available or unspecified, not writing vprp header.\n");
   } else {
@@ -285,11 +285,11 @@ static void avifile_write_header(muxer_t *muxer){
       muxer_stream_t *s = muxer->streams[i];
       if (s->type == MUXER_TYPE_AUDIO && muxer->audio_delay_fix > 0.0) {
           s->h.dwStart = muxer->audio_delay_fix * s->h.dwRate/s->h.dwScale + 0.5;
-          mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_SettingAudioDelay, (float)s->h.dwStart * s->h.dwScale/s->h.dwRate);
+          mp_tmsg(MSGT_MUXER, MSGL_INFO, MSGTR_SettingAudioDelay, (float)s->h.dwStart * s->h.dwScale/s->h.dwRate);
       }
       if (s->type == MUXER_TYPE_VIDEO && muxer->audio_delay_fix < 0.0) {
           s->h.dwStart = -muxer->audio_delay_fix * s->h.dwRate/s->h.dwScale + 0.5;
-          mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_SettingVideoDelay, (float)s->h.dwStart * s->h.dwScale/s->h.dwRate);
+          mp_tmsg(MSGT_MUXER, MSGL_INFO, MSGTR_SettingVideoDelay, (float)s->h.dwStart * s->h.dwScale/s->h.dwRate);
       }
   }
   
@@ -652,7 +652,7 @@ static void avifile_write_standard_index(muxer_t *muxer){
 static void avifile_write_index(muxer_t *muxer){
   struct avi_stream_info *vsi = muxer->def_v->priv;
 
-  mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingTrailer);
+  mp_tmsg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingTrailer);
   if (vsi->riffofspos > 0){
     avifile_odml_write_index(muxer);
   } else {

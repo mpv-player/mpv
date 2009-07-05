@@ -117,7 +117,7 @@ static int fmt2sgial(int *format, int *width) {
 // to set/get/query special features/parameters
 static int control(int cmd, void *arg){
   
-  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_INFO);
+  mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_INFO);
   
   switch(cmd) {
   case AOCONTROL_QUERY_FORMAT:
@@ -138,7 +138,7 @@ static int init(int rate, int channels, int format, int flags) {
 
   smpfmt = fmt2sgial(&format, &smpwidth);
 
-  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_InitInfo, rate, (channels > 1) ? "Stereo" : "Mono", af_fmt2str_short(format));
+  mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_InitInfo, rate, (channels > 1) ? "Stereo" : "Mono", af_fmt2str_short(format));
   
   { /* from /usr/share/src/dmedia/audio/setrate.c */
   
@@ -148,7 +148,7 @@ static int init(int rate, int channels, int format, int flags) {
     if(ao_subdevice) {
       rv = alGetResourceByName(AL_SYSTEM, ao_subdevice, AL_OUTPUT_DEVICE_TYPE);
       if (!rv) {
-	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InvalidDevice);
+	mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InvalidDevice);
 	return 0;
       }
     }
@@ -161,20 +161,20 @@ static int init(int rate, int channels, int format, int flags) {
     x[1].value.i = AL_CRYSTAL_MCLK_TYPE;
 
     if (alSetParams(rv,x, 2)<0) {
-      mp_msg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantSetParms_Samplerate, alGetErrorString(oserror()));
+      mp_tmsg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantSetParms_Samplerate, alGetErrorString(oserror()));
     }
     
     if (x[0].sizeOut < 0) {
-      mp_msg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantSetAlRate);
+      mp_tmsg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantSetAlRate);
     }
 
     if (alGetParams(rv,x, 1)<0) {
-      mp_msg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantGetParms, alGetErrorString(oserror()));
+      mp_tmsg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantGetParms, alGetErrorString(oserror()));
     }
     
     realrate = alFixedToDouble(x[0].value.ll);
     if (frate != realrate) {
-      mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_SampleRateInfo, realrate, frate);
+      mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_SampleRateInfo, realrate, frate);
     } 
     sample_rate = (int)realrate;
   }
@@ -191,7 +191,7 @@ static int init(int rate, int channels, int format, int flags) {
   ao_config = alNewConfig();
   
   if (!ao_config) {
-    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitConfigError, alGetErrorString(oserror()));
+    mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitConfigError, alGetErrorString(oserror()));
     return 0;
   }
   
@@ -200,14 +200,14 @@ static int init(int rate, int channels, int format, int flags) {
      alSetSampFmt(ao_config, smpfmt) < 0 ||
      alSetQueueSize(ao_config, sample_rate) < 0 ||
      alSetDevice(ao_config, rv) < 0) {
-    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitConfigError, alGetErrorString(oserror()));
+    mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitConfigError, alGetErrorString(oserror()));
     return 0;
   }
   
   ao_port = alOpenPort("mplayer", "w", ao_config);
   
   if (!ao_port) {
-    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitOpenAudioFailed, alGetErrorString(oserror()));
+    mp_tmsg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitOpenAudioFailed, alGetErrorString(oserror()));
     return 0;
   }
   
@@ -222,7 +222,7 @@ static void uninit(int immed) {
 
   /* TODO: samplerate should be set back to the value before mplayer was started! */
 
-  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_Uninit);
+  mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_Uninit);
 
   if (ao_config) {
     alFreeConfig(ao_config);
@@ -241,7 +241,7 @@ static void uninit(int immed) {
 // stop playing and empty buffers (for seeking/pause)
 static void reset(void) {
   
-  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_Reset);
+  mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_Reset);
   
   alDiscardFrames(ao_port, queue_size);
 }
@@ -249,14 +249,14 @@ static void reset(void) {
 // stop playing, keep buffers (for pause)
 static void audio_pause(void) {
     
-  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_PauseInfo);
+  mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_PauseInfo);
     
 }
 
 // resume playing, after audio_pause()
 static void audio_resume(void) {
 
-  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_ResumeInfo);
+  mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_ResumeInfo);
 
 }
 

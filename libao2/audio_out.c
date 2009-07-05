@@ -124,7 +124,7 @@ const ao_functions_t* const audio_out_drivers[] =
 
 void list_audio_out(void){
     int i=0;
-    mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AvailableAudioOutputDrivers);
+    mp_tmsg(MSGT_AO, MSGL_INFO, MSGTR_AvailableAudioOutputDrivers);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_OUTPUTS\n");
     while (audio_out_drivers[i]) {
         const ao_info_t *info = audio_out_drivers[i++]->info;
@@ -152,7 +152,7 @@ const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate
         else
             ao_len = strlen(ao);
 
-        mp_msg(MSGT_AO, MSGL_V, MSGTR_AO_TryingPreferredAudioDriver,
+        mp_tmsg(MSGT_AO, MSGL_V, MSGTR_AO_TryingPreferredAudioDriver,
                ao_len, ao, ao_subdevice ? ao_subdevice : "[none]");
 
         for(i=0;audio_out_drivers[i];i++){
@@ -162,12 +162,12 @@ const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate
                 if(audio_out->init(rate,channels,format,flags))
                     return audio_out; // success!
                 else
-                    mp_msg(MSGT_AO, MSGL_WARN, MSGTR_AO_FailedInit, ao);
+                    mp_tmsg(MSGT_AO, MSGL_WARN, MSGTR_AO_FailedInit, ao);
                 break;
             }
         }
 	if (!audio_out_drivers[i]) // we searched through the entire list
-            mp_msg(MSGT_AO, MSGL_WARN, MSGTR_AO_NoSuchDriver, ao_len, ao);
+            mp_tmsg(MSGT_AO, MSGL_WARN, MSGTR_AO_NoSuchDriver, ao_len, ao);
         // continue...
         ++ao_list;
         if(!(ao_list[0])) return NULL; // do NOT fallback to others
@@ -177,7 +177,7 @@ const ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate
         ao_subdevice = NULL;
     }
 
-    mp_msg(MSGT_AO, MSGL_V, MSGTR_AO_TryingEveryKnown);
+    mp_tmsg(MSGT_AO, MSGL_V, MSGTR_AO_TryingEveryKnown);
 
     // now try the rest...
     for(i=0;audio_out_drivers[i];i++){

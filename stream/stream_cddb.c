@@ -82,7 +82,7 @@ read_toc(const char *dev) {
         drive = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
 
         if(!DeviceIoControl(drive, IOCTL_CDROM_READ_TOC, NULL, 0, &toc, sizeof(CDROM_TOC), &r, 0)) {
-                mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadTOC);
+                mp_tmsg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadTOC);
                 return 0;
         }
 
@@ -219,7 +219,7 @@ int cdd_identify(const char *dev)
 		int i, min, sec, frame;
 		cdtoc_last_track = read_toc(dev);
 		if (cdtoc_last_track < 0) {
-			mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToOpenDevice, dev);
+			mp_tmsg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToOpenDevice, dev);
 			return -1;
 		}
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACKS=%d\n", cdtoc_last_track);
@@ -278,19 +278,19 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 
 	url = url_new(request);
 	if( url==NULL ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NotAValidURL);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NotAValidURL);
 		return -1;
 	}
 	
 	fd = http_send_request(url,0);
 	if( fd<0 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest);
 		return -1;
 	}
 
 	http_hdr = http_read_response( fd );
 	if( http_hdr==NULL ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse);
 		return -1;
 	}
 
@@ -302,10 +302,10 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 			ret = reply_parser(http_hdr, cddb_data);
 			break;
 		case 400:
-			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND);
+			mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND);
 			break;
 		default:
-			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown);
+			mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown);
 	}
 
 	http_free( http_hdr );
@@ -331,7 +331,7 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 #endif
 	);
 	if( file_fd<0 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NoCacheFound);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NoCacheFound);
 		return -1;
 	}
 
@@ -345,13 +345,13 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 	
 	cddb_data->xmcd_file = malloc(file_size+1);
 	if( cddb_data->xmcd_file==NULL ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 		close(file_fd);
 		return -1;
 	}
 	cddb_data->xmcd_file_size = read(file_fd, cddb_data->xmcd_file, file_size);
 	if( cddb_data->xmcd_file_size!=file_size ) {
-		mp_msg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead);
+		mp_tmsg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead);
 		close(file_fd);
 		return -1;
 	}
@@ -383,7 +383,7 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 		if( ret<0 ) {
 #endif
 			perror("mkdir");
-			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory, cddb_data->cache_dir);
+			mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory, cddb_data->cache_dir);
 			return -1;
 		}
 	}
@@ -403,7 +403,7 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 		return -1;
 	}
 	if( (unsigned int)wrote!=cddb_data->xmcd_file_size ) {
-		mp_msg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten);
+		mp_tmsg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten);
 		close(file_fd);
 		return -1;
 	}
@@ -424,7 +424,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 
@@ -432,13 +432,13 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 		case 210:
 			ret = sscanf( http_hdr->body, "%d %99s %08lx", &status, category, &disc_id);
 			if( ret!=3 ) {
-				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
+				mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
 			}
 			// Check if it's a xmcd database file
 			ptr = strstr(http_hdr->body, "# xmcd");
 			if( ptr==NULL ) {
-				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned);
+				mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned);
 				return -1;
 			}
 			ptr = strdup(ptr);
@@ -455,7 +455,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			// Ok found the end
 			// do a sanity check
 			if( http_hdr->body_size<(unsigned int)(ptr2-ptr) ) {
-				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_UnexpectedFIXME);
+				mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_UnexpectedFIXME);
 				return -1;
 			}
 			cddb_data->xmcd_file = ptr;
@@ -463,7 +463,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			cddb_data->xmcd_file[cddb_data->xmcd_file_size] = '\0';
 			return cddb_write_cache(cddb_data);
 		default:
-			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);
+			mp_tmsg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);
 	}
 	return 0;
 }
@@ -483,7 +483,7 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	
 	ptr = strstr(http_hdr->body, "\n");
 	if( ptr==NULL ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_UnableToFindEOL);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_UnableToFindEOL);
 		return -1;
 	}
 	ptr++;
@@ -491,7 +491,7 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	// So let's take the first one.
 	ret = sscanf(ptr, "%99s %08lx %99s", cddb_data->category, &(cddb_data->disc_id), album_title);
 	if( ret!=3 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 	ptr = strstr(http_hdr->body, album_title);
@@ -508,7 +508,7 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 		strncpy(album_title, ptr, len);
 		album_title[len]='\0';
 	}
-	mp_msg(MSGT_DEMUX, MSGL_STATUS, MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle, album_title);
+	mp_tmsg(MSGT_DEMUX, MSGL_STATUS, MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle, album_title);
 	return 0;
 }
 
@@ -520,7 +520,7 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 
@@ -529,7 +529,7 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			// Found exact match
 			ret = sscanf(http_hdr->body, "%d %99s %08lx %99s", &status, cddb_data->category, &(cddb_data->disc_id), album_title);
 			if( ret!=4 ) {
-				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
+				mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
 			}
 			ptr = strstr(http_hdr->body, album_title);
@@ -546,11 +546,11 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 				strncpy(album_title, ptr, len);
 				album_title[len]='\0';
 			}
-			mp_msg(MSGT_DEMUX, MSGL_STATUS, MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle, album_title);
+			mp_tmsg(MSGT_DEMUX, MSGL_STATUS, MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle, album_title);
 			return cddb_request_titles(cddb_data);
 		case 202:
 			// No match found
-			mp_msg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_AlbumNotFound);
+			mp_tmsg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_AlbumNotFound);
 			break;
 		case 210:
 			// Found exact matches, list follows
@@ -568,10 +568,10 @@ blues c711930d Santana / Supernatural
 			cddb_parse_matches_list(http_hdr, cddb_data);
 			return cddb_request_titles(cddb_data);
 		case 500:
-			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr);
+			mp_tmsg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr);
 			break;
 		default:
-			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);	
+			mp_tmsg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);	
 	}
 	return -1;
 }
@@ -584,7 +584,7 @@ cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);	
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);	
 		return -1;
 	}
 
@@ -592,18 +592,18 @@ cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 		case 210:
 			ptr = strstr(http_hdr->body, "max proto:");
 			if( ptr==NULL ) {
-				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
+				mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
 			}
 			ret = sscanf(ptr, "max proto: %d", &max);
 			if( ret!=1 ) {
-				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
+				mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
 			}
 			cddb_data->freedb_proto_level = max;
 			return 0;
 		default:
-			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);	
+			mp_tmsg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);	
 	}
 	return -1;
 }
@@ -619,7 +619,7 @@ cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 
@@ -629,10 +629,10 @@ cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			ret = cddb_data->anonymous;	// For gcc complaining about unused parameter.
 			return 0;
 		case 401:
-			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable);
+			mp_tmsg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable);
 			break;
 		default:
-			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);
+			mp_tmsg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);
 	}
 	return -1;
 }
@@ -685,7 +685,7 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 
 	cddb_create_hello(cddb_data);
 	if( cddb_get_proto_level(cddb_data)<0 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel);
 		return -1;
 	}
 
@@ -711,7 +711,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	{
 	    cdtoc_last_track = read_toc(dev);
 	    if (cdtoc_last_track < 0) {
-		mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToOpenDevice, dev);
+		mp_tmsg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToOpenDevice, dev);
 		return -1;
 	    }
 	}
@@ -724,7 +724,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	// Check if there is a CD in the drive
 	// FIXME: That's not really a good way to check
 	if( cddb_data.disc_id==0 ) {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NoCDInDrive);
+		mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NoCDInDrive);
 		return -1;
 	}
 	
@@ -740,7 +740,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	} else {
 		cddb_data.cache_dir = malloc(strlen(home_dir)+strlen(cddb_cache_dir)+1);
 		if( cddb_data.cache_dir==NULL ) {
-			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
+			mp_tmsg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 			return -1;
 		}
 		sprintf(cddb_data.cache_dir, "%s%s", home_dir, cddb_cache_dir );

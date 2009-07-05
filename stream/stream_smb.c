@@ -119,14 +119,14 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
   
   err = smbc_init(smb_auth_fn, 1);
   if (err < 0) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBInitError,err);
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBInitError,err);
     m_struct_free(&stream_opts, opts);
     return STREAM_ERROR;
   }
   
   fd = smbc_open(filename, m,0644);
   if (fd < 0) {	
-    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBFileNotFound, filename);
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBFileNotFound, filename);
     m_struct_free(&stream_opts, opts);
     return STREAM_ERROR;
   }

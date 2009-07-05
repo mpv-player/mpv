@@ -442,13 +442,13 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         }
         if (chapter_name)
             set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
-                        MSGTR_OSDChapter, chapter + 1, chapter_name);
+                        _(MSGTR_OSDChapter), chapter + 1, chapter_name);
     }
     else if (step_all > 0)
         mpctx->rel_seek_secs = 1000000000.;
     else
         set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
-                    MSGTR_OSDChapter, 0, MSGTR_Unknown);
+                    _(MSGTR_OSDChapter), 0, _(MSGTR_Unknown));
     if (chapter_name)
         talloc_free(chapter_name);
     return M_PROPERTY_OK;
@@ -522,7 +522,7 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     }
     angle = demuxer_set_angle(mpctx->demuxer, angle);
     set_osd_msg(OSD_MSG_TEXT, 1, opts->osd_duration,
-                        MSGTR_OSDAngle, angle, angles);
+                        _(MSGTR_OSDAngle), angle, angles);
     if (angle_name)
         free(angle_name);
     return M_PROPERTY_OK;
@@ -681,7 +681,7 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
 	if (!arg)
 	    return M_PROPERTY_ERROR;
 	if (mpctx->edl_muted) {
-	    *(char **) arg = strdup(MSGTR_EnabledEdl);
+	    *(char **) arg = strdup(_(MSGTR_EnabledEdl));
 	    return M_PROPERTY_OK;
 	}
     default:
@@ -856,9 +856,9 @@ static int mp_property_audio(m_option_t *prop, int action, void *arg,
 	    return M_PROPERTY_ERROR;
 
         if (opts->audio_id < 0)
-	    *(char **) arg = strdup(MSGTR_Disabled);
+	    *(char **) arg = strdup(_(MSGTR_Disabled));
 	else {
-	    char lang[40] = MSGTR_Unknown;
+	    char lang[40] = _(MSGTR_Unknown);
             sh_audio_t* sh = mpctx->sh_audio;
             if (sh && sh->lang)
                 av_strlcpy(lang, sh->lang, 40);
@@ -935,9 +935,9 @@ static int mp_property_video(m_option_t *prop, int action, void *arg,
 	    return M_PROPERTY_ERROR;
 
         if (opts->video_id < 0)
-	    *(char **) arg = strdup(MSGTR_Disabled);
+	    *(char **) arg = strdup(_(MSGTR_Disabled));
 	else {
-	    char lang[40] = MSGTR_Unknown;
+	    char lang[40] = _(MSGTR_Unknown);
 	    *(char **) arg = malloc(64);
             snprintf(*(char **) arg, 64, "(%d) %s", opts->video_id, lang);
 	}
@@ -1161,9 +1161,9 @@ static int mp_property_framedropping(m_option_t *prop, int action,
     case M_PROPERTY_PRINT:
 	if (!arg)
 	    return M_PROPERTY_ERROR;
-	*(char **) arg = strdup(frame_dropping == 1 ? MSGTR_Enabled :
-				(frame_dropping == 2 ? MSGTR_HardFrameDrop :
-				 MSGTR_Disabled));
+	*(char **) arg = strdup(frame_dropping == 1 ? _(MSGTR_Enabled) :
+				(frame_dropping == 2 ? _(MSGTR_HardFrameDrop) :
+				 _(MSGTR_Disabled)));
 	return M_PROPERTY_OK;
     default:
 	return m_property_choice(prop, action, arg, &frame_dropping);
@@ -1411,16 +1411,16 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
              || mpctx->demuxer->type == DEMUXER_TYPE_OGG)
              && d_sub && d_sub->sh && opts->sub_id >= 0) {
             const char* lang = ((sh_sub_t*)d_sub->sh)->lang;
-            if (!lang) lang = MSGTR_Unknown;
+            if (!lang) lang = _(MSGTR_Unknown);
             snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, lang);
 	    return M_PROPERTY_OK;
 	}
 
 	if (vo_vobsub && vobsub_id >= 0) {
-	    const char *language = MSGTR_Unknown;
+	    const char *language = _(MSGTR_Unknown);
 	    language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
 	    snprintf(*(char **) arg, 63, "(%d) %s",
-		     vobsub_id, language ? language : MSGTR_Unknown);
+		     vobsub_id, language ? language : _(MSGTR_Unknown));
 	    return M_PROPERTY_OK;
 	}
 #ifdef CONFIG_DVDREAD
@@ -1436,10 +1436,10 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
 	}
 #endif
         if (opts->sub_id >= 0) {
-            snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, MSGTR_Unknown);
+            snprintf(*(char **) arg, 63, "(%d) %s", opts->sub_id, _(MSGTR_Unknown));
 	    return M_PROPERTY_OK;
 	}
-	snprintf(*(char **) arg, 63, MSGTR_Disabled);
+	snprintf(*(char **) arg, 63, _(MSGTR_Disabled));
 	return M_PROPERTY_OK;
 
     case M_PROPERTY_SET:
@@ -1571,16 +1571,16 @@ static int mp_property_sub_source(m_option_t *prop, int action, void *arg,
         switch (sub_source(mpctx))
         {
         case SUB_SOURCE_SUBS:
-            snprintf(*(char **) arg, 63, MSGTR_SubSourceFile);
+            snprintf(*(char **) arg, 63, _(MSGTR_SubSourceFile));
             break;
         case SUB_SOURCE_VOBSUB:
-            snprintf(*(char **) arg, 63, MSGTR_SubSourceVobsub);
+            snprintf(*(char **) arg, 63, _(MSGTR_SubSourceVobsub));
             break;
         case SUB_SOURCE_DEMUX:
-            snprintf(*(char **) arg, 63, MSGTR_SubSourceDemux);
+            snprintf(*(char **) arg, 63, _(MSGTR_SubSourceDemux));
             break;
         default:
-            snprintf(*(char **) arg, 63, MSGTR_Disabled);
+            snprintf(*(char **) arg, 63, _(MSGTR_Disabled));
         }
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
@@ -1668,7 +1668,7 @@ static int mp_property_sub_by_type(m_option_t *prop, int action, void *arg,
             return mp_property_sub(prop, M_PROPERTY_PRINT, arg, mpctx);
         *(char **) arg = malloc(64);
         (*(char **) arg)[63] = 0;
-        snprintf(*(char **) arg, 63, MSGTR_Disabled);
+        snprintf(*(char **) arg, 63, _(MSGTR_Disabled));
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         if (!arg)
@@ -1740,7 +1740,7 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
 static int mp_property_sub_alignment(m_option_t *prop, int action,
 				     void *arg, MPContext *mpctx)
 {
-    char *name[] = { MSGTR_Top, MSGTR_Center, MSGTR_Bottom };
+    char *name[] = { _(MSGTR_Top), _(MSGTR_Center), _(MSGTR_Bottom) };
 
     if (!mpctx->sh_video || mpctx->global_sub_pos < 0
 	|| sub_source(mpctx) != SUB_SOURCE_SUBS)
@@ -2234,51 +2234,51 @@ static struct {
     const char *osd_msg;
 } set_prop_cmd[] = {
     // general
-    { "loop", MP_CMD_LOOP, 0, 0, -1, MSGTR_LoopStatus },
+    { "loop", MP_CMD_LOOP, 0, 0, -1, _(MSGTR_LoopStatus) },
     { "chapter", MP_CMD_SEEK_CHAPTER, 0, -1, -1, NULL },
     { "angle", MP_CMD_SWITCH_ANGLE, 0, 0, -1, NULL },
     { "pause", MP_CMD_PAUSE, 0, 0, -1, NULL },
     // audio
-    { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
-    { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
-    { "audio_delay", MP_CMD_AUDIO_DELAY, 0, 0, -1, MSGTR_AVDelayStatus },
-    { "switch_audio", MP_CMD_SWITCH_AUDIO, 1, 0, -1, MSGTR_OSDAudio },
-    { "balance", MP_CMD_BALANCE, 0, OSD_BALANCE, -1, MSGTR_Balance },
+    { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, _(MSGTR_Volume) },
+    { "mute", MP_CMD_MUTE, 1, 0, -1, _(MSGTR_MuteStatus) },
+    { "audio_delay", MP_CMD_AUDIO_DELAY, 0, 0, -1, _(MSGTR_AVDelayStatus) },
+    { "switch_audio", MP_CMD_SWITCH_AUDIO, 1, 0, -1, _(MSGTR_OSDAudio) },
+    { "balance", MP_CMD_BALANCE, 0, OSD_BALANCE, -1, _(MSGTR_Balance) },
     // video
     { "fullscreen", MP_CMD_VO_FULLSCREEN, 1, 0, -1, NULL },
-    { "panscan", MP_CMD_PANSCAN, 0, OSD_PANSCAN, -1, MSGTR_Panscan },
-    { "ontop", MP_CMD_VO_ONTOP, 1, 0, -1, MSGTR_OnTopStatus },
-    { "rootwin", MP_CMD_VO_ROOTWIN, 1, 0, -1, MSGTR_RootwinStatus },
-    { "border", MP_CMD_VO_BORDER, 1, 0, -1, MSGTR_BorderStatus },
-    { "framedropping", MP_CMD_FRAMEDROPPING, 1, 0, -1, MSGTR_FramedroppingStatus },
-    { "gamma", MP_CMD_GAMMA, 0, OSD_BRIGHTNESS, -1, MSGTR_Gamma },
-    { "brightness", MP_CMD_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, MSGTR_Brightness },
-    { "contrast", MP_CMD_CONTRAST, 0, OSD_CONTRAST, -1, MSGTR_Contrast },
-    { "saturation", MP_CMD_SATURATION, 0, OSD_SATURATION, -1, MSGTR_Saturation },
-    { "hue", MP_CMD_HUE, 0, OSD_HUE, -1, MSGTR_Hue },
-    { "vsync", MP_CMD_SWITCH_VSYNC, 1, 0, -1, MSGTR_VSyncStatus },
+    { "panscan", MP_CMD_PANSCAN, 0, OSD_PANSCAN, -1, _(MSGTR_Panscan) },
+    { "ontop", MP_CMD_VO_ONTOP, 1, 0, -1, _(MSGTR_OnTopStatus) },
+    { "rootwin", MP_CMD_VO_ROOTWIN, 1, 0, -1, _(MSGTR_RootwinStatus) },
+    { "border", MP_CMD_VO_BORDER, 1, 0, -1, _(MSGTR_BorderStatus) },
+    { "framedropping", MP_CMD_FRAMEDROPPING, 1, 0, -1, _(MSGTR_FramedroppingStatus) },
+    { "gamma", MP_CMD_GAMMA, 0, OSD_BRIGHTNESS, -1, _(MSGTR_Gamma) },
+    { "brightness", MP_CMD_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, _(MSGTR_Brightness) },
+    { "contrast", MP_CMD_CONTRAST, 0, OSD_CONTRAST, -1, _(MSGTR_Contrast) },
+    { "saturation", MP_CMD_SATURATION, 0, OSD_SATURATION, -1, _(MSGTR_Saturation) },
+    { "hue", MP_CMD_HUE, 0, OSD_HUE, -1, _(MSGTR_Hue) },
+    { "vsync", MP_CMD_SWITCH_VSYNC, 1, 0, -1, _(MSGTR_VSyncStatus) },
 	// subs
-    { "sub", MP_CMD_SUB_SELECT, 1, 0, -1, MSGTR_SubSelectStatus },
-    { "sub_source", MP_CMD_SUB_SOURCE, 1, 0, -1, MSGTR_SubSourceStatus },
-    { "sub_vob", MP_CMD_SUB_VOB, 1, 0, -1, MSGTR_SubSelectStatus },
-    { "sub_demux", MP_CMD_SUB_DEMUX, 1, 0, -1, MSGTR_SubSelectStatus },
-    { "sub_file", MP_CMD_SUB_FILE, 1, 0, -1, MSGTR_SubSelectStatus },
-    { "sub_pos", MP_CMD_SUB_POS, 0, 0, -1, MSGTR_SubPosStatus },
-    { "sub_alignment", MP_CMD_SUB_ALIGNMENT, 1, 0, -1, MSGTR_SubAlignStatus },
-    { "sub_delay", MP_CMD_SUB_DELAY, 0, 0, OSD_MSG_SUB_DELAY, MSGTR_SubDelayStatus },
-    { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1, 0, -1, MSGTR_SubVisibleStatus },
-    { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1, 0, -1, MSGTR_SubForcedOnlyStatus },
+    { "sub", MP_CMD_SUB_SELECT, 1, 0, -1, _(MSGTR_SubSelectStatus) },
+    { "sub_source", MP_CMD_SUB_SOURCE, 1, 0, -1, _(MSGTR_SubSourceStatus) },
+    { "sub_vob", MP_CMD_SUB_VOB, 1, 0, -1, _(MSGTR_SubSelectStatus) },
+    { "sub_demux", MP_CMD_SUB_DEMUX, 1, 0, -1, _(MSGTR_SubSelectStatus) },
+    { "sub_file", MP_CMD_SUB_FILE, 1, 0, -1, _(MSGTR_SubSelectStatus) },
+    { "sub_pos", MP_CMD_SUB_POS, 0, 0, -1, _(MSGTR_SubPosStatus) },
+    { "sub_alignment", MP_CMD_SUB_ALIGNMENT, 1, 0, -1, _(MSGTR_SubAlignStatus) },
+    { "sub_delay", MP_CMD_SUB_DELAY, 0, 0, OSD_MSG_SUB_DELAY, _(MSGTR_SubDelayStatus) },
+    { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1, 0, -1, _(MSGTR_SubVisibleStatus) },
+    { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1, 0, -1, _(MSGTR_SubForcedOnlyStatus) },
 #ifdef CONFIG_FREETYPE
-    { "sub_scale", MP_CMD_SUB_SCALE, 0, 0, -1, MSGTR_SubScale},
+    { "sub_scale", MP_CMD_SUB_SCALE, 0, 0, -1, _(MSGTR_SubScale)},
 #endif
 #ifdef CONFIG_ASS
     { "ass_use_margins", MP_CMD_ASS_USE_MARGINS, 1, 0, -1, NULL },
 #endif
 #ifdef CONFIG_TV
-    { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, MSGTR_Brightness },
-    { "tv_hue", MP_CMD_TV_SET_HUE, 0, OSD_HUE, -1, MSGTR_Hue },
-    { "tv_saturation", MP_CMD_TV_SET_SATURATION, 0, OSD_SATURATION, -1, MSGTR_Saturation },
-    { "tv_contrast", MP_CMD_TV_SET_CONTRAST, 0, OSD_CONTRAST, -1, MSGTR_Contrast },
+    { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, _(MSGTR_Brightness) },
+    { "tv_hue", MP_CMD_TV_SET_HUE, 0, OSD_HUE, -1, _(MSGTR_Hue) },
+    { "tv_saturation", MP_CMD_TV_SET_SATURATION, 0, OSD_SATURATION, -1, _(MSGTR_Saturation) },
+    { "tv_contrast", MP_CMD_TV_SET_CONTRAST, 0, OSD_CONTRAST, -1, _(MSGTR_Contrast) },
 #endif
     { NULL, 0, 0, 0, -1, NULL }
 };
@@ -2484,13 +2484,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    playing_audio_pts(mpctx);
 		if (mpctx->begin_skip == MP_NOPTS_VALUE) {
 		    mpctx->begin_skip = v;
-		    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdloutStartSkip);
+		    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdloutStartSkip);
 		} else {
 		    if (mpctx->begin_skip > v)
-			mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdloutBadStop);
+			mp_tmsg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdloutBadStop);
 		    else {
 			fprintf(edl_fd, "%f %f %d\n", mpctx->begin_skip, v, 0);
-			mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdloutEndSkip);
+			mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdloutEndSkip);
 		    }
 		    mpctx->begin_skip = MP_NOPTS_VALUE;
 		}
@@ -2511,7 +2511,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		float v = cmd->args[0].v.f;
 		opts->playback_speed += v;
 		build_afilter_chain(mpctx, sh_audio, &ao_data);
-		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
+		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, _(MSGTR_OSDSpeed),
 			    opts->playback_speed);
 	    } break;
 
@@ -2519,7 +2519,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		float v = cmd->args[0].v.f;
 		opts->playback_speed *= v;
 		build_afilter_chain(mpctx, sh_audio, &ao_data);
-		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
+		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, _(MSGTR_OSDSpeed),
 			    opts->playback_speed);
 	    } break;
 
@@ -2527,7 +2527,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		float v = cmd->args[0].v.f;
 		opts->playback_speed = v;
 		build_afilter_chain(mpctx, sh_audio, &ao_data);
-		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, MSGTR_OSDSpeed,
+		set_osd_msg(OSD_MSG_SPEED, 1, osd_duration, _(MSGTR_OSDSpeed),
 			    opts->playback_speed);
 	    } break;
 
@@ -2614,7 +2614,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 				      sub_delay) * 1000 + .5, movement) / 1000.;
 #endif
 		set_osd_msg(OSD_MSG_SUB_DELAY, 1, osd_duration,
-			    MSGTR_OSDSubDelay, ROUND(sub_delay * 1000));
+			    _(MSGTR_OSDSubDelay), ROUND(sub_delay * 1000));
 	    }
 	    break;
 
@@ -2636,9 +2636,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		   argument is given to the OSD command, i.e. in slave mode. */
 		if (v == -1 && opts->osd_level <= 1)
 		    set_osd_msg(OSD_MSG_OSD_STATUS, 0, osd_duration,
-				MSGTR_OSDosd,
-				opts->osd_level ? MSGTR_OSDenabled :
-				MSGTR_OSDdisabled);
+				_(MSGTR_OSDosd),
+				opts->osd_level ? _(MSGTR_OSDenabled) :
+				_(MSGTR_OSDdisabled));
 		else
 		    rm_osd_msg(OSD_MSG_OSD_STATUS);
 	    }
@@ -2688,7 +2688,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 	case MP_CMD_LOADLIST:{
             play_tree_t *e = parse_playlist_file(mpctx->mconfig, cmd->args[0].v.s);
 		if (!e)
-		    mp_msg(MSGT_CPLAYER, MSGL_ERR,
+		    mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
 			   MSGTR_PlaylistLoadUnable, cmd->args[0].v.s);
 		else {
 		    if (cmd->args[1].v.i)	// append
@@ -2728,7 +2728,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 				       RADIO_CHANNEL_LOWER);
 		if (radio_get_channel_name(mpctx->demuxer->stream)) {
 		    set_osd_msg(OSD_MSG_RADIO_CHANNEL, 1, osd_duration,
-				MSGTR_OSDChannel,
+				_(MSGTR_OSDChannel),
 				radio_get_channel_name(mpctx->demuxer->stream));
 		}
 	    }
@@ -2739,7 +2739,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		radio_set_channel(mpctx->demuxer->stream, cmd->args[0].v.s);
 		if (radio_get_channel_name(mpctx->demuxer->stream)) {
 		    set_osd_msg(OSD_MSG_RADIO_CHANNEL, 1, osd_duration,
-				MSGTR_OSDChannel,
+				_(MSGTR_OSDChannel),
 				radio_get_channel_name(mpctx->demuxer->stream));
 		}
 	    }
@@ -2809,7 +2809,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		    }
 		    if (tv_channel_list) {
 			set_osd_msg(OSD_MSG_TV_CHANNEL, 1, osd_duration,
-				    MSGTR_OSDChannel, tv_channel_current->name);
+				    _(MSGTR_OSDChannel), tv_channel_current->name);
 			//vo_osd_changed(OSDTYPE_SUBTITLE);
 		    }
 		}
@@ -2849,7 +2849,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 			       cmd->args[0].v.s);
 		if (tv_channel_list) {
 		    set_osd_msg(OSD_MSG_TV_CHANNEL, 1, osd_duration,
-				MSGTR_OSDChannel, tv_channel_current->name);
+				_(MSGTR_OSDChannel), tv_channel_current->name);
 		    //vo_osd_changed(OSDTYPE_SUBTITLE);
 		}
 	    }
@@ -2882,7 +2882,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		tv_last_channel((tvi_handle_t *) (mpctx->demuxer->priv));
 		if (tv_channel_list) {
 		    set_osd_msg(OSD_MSG_TV_CHANNEL, 1, osd_duration,
-				MSGTR_OSDChannel, tv_channel_current->name);
+				_(MSGTR_OSDChannel), tv_channel_current->name);
 		    //vo_osd_changed(OSDTYPE_SUBTITLE);
 		}
 	    }
@@ -2943,7 +2943,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 		if (v < 0) {
 		    for (v = 0; v < mpctx->set_of_sub_size; ++v) {
 			subd = mpctx->set_of_subtitles[v];
-			mp_msg(MSGT_CPLAYER, MSGL_STATUS,
+			mp_tmsg(MSGT_CPLAYER, MSGL_STATUS,
 			       MSGTR_RemovedSubtitleFile, v + 1,
 			       filename_recode(subd->filename));
 			sub_free(subd);

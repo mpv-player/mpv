@@ -98,7 +98,7 @@ streaming_ctrl_new(void) {
 	streaming_ctrl_t *streaming_ctrl;
 	streaming_ctrl = malloc(sizeof(streaming_ctrl_t));
 	if( streaming_ctrl==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return NULL;
 	}
 	memset( streaming_ctrl, 0, sizeof(streaming_ctrl_t) );
@@ -135,14 +135,14 @@ check4proxies( URL_t *url ) {
 			URL_t *proxy_url = url_new( proxy );
 
 			if( proxy_url==NULL ) {
-				mp_msg(MSGT_NETWORK,MSGL_WARN,
+				mp_tmsg(MSGT_NETWORK,MSGL_WARN,
 					MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout);
 				return url_out;
 			}
 			
 #ifdef HAVE_AF_INET6
 			if (network_ipv4_only_proxy && (gethostbyname(url->hostname)==NULL)) {
-				mp_msg(MSGT_NETWORK,MSGL_WARN,
+				mp_tmsg(MSGT_NETWORK,MSGL_WARN,
 					MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy);
 				url_free(proxy_url);
 				return url_out;
@@ -153,7 +153,7 @@ check4proxies( URL_t *url ) {
 			len = strlen( proxy_url->hostname ) + strlen( url->url ) + 20;	// 20 = http_proxy:// + port
 			new_url = malloc( len+1 );
 			if( new_url==NULL ) {
-				mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+				mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 				url_free(proxy_url);
 				return url_out;
 			}
@@ -238,7 +238,7 @@ http_send_request( URL_t *url, off_t pos ) {
 	
 	ret = send( fd, http_hdr->buffer, http_hdr->buffer_size, 0 );
 	if( ret!=(int)http_hdr->buffer_size ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest);
+		mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest);
 		goto err_out;
 	}
 	
@@ -267,12 +267,12 @@ http_read_response( int fd ) {
 	do {
 		i = recv( fd, response, BUFFER_SIZE, 0 ); 
 		if( i<0 ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ReadFailed);
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ReadFailed);
 			http_free( http_hdr );
 			return NULL;
 		}
 		if( i==0 ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_Read0CouldBeEOF);
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_Read0CouldBeEOF);
 			http_free( http_hdr );
 			return NULL;
 		}
@@ -287,7 +287,7 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 	char *aut;
 
 	if( *auth_retry==1 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_AuthFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_AuthFailed);
 		return -1;
 	}
 	if( *auth_retry>0 ) {
@@ -306,28 +306,28 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 		char *aut_space;
 		aut_space = strstr(aut, "realm=");
 		if( aut_space!=NULL ) aut_space += 6;
-		mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_AuthRequiredFor, aut_space);
+		mp_tmsg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_AuthRequiredFor, aut_space);
 	} else {
-		mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_AuthRequired);
+		mp_tmsg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_AuthRequired);
 	}
 	if( network_username ) {
 		url->username = strdup(network_username);
 		if( url->username==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+			mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 			return -1;
 		}
 	} else {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_AuthFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_AuthFailed);
 		return -1;
 	}
 	if( network_password ) {
 		url->password = strdup(network_password);
 		if( url->password==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+			mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 			return -1;
 		}
 	} else {
-		mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank);
+		mp_tmsg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank);
 	}
 	(*auth_retry)++;
 	return 0;
@@ -360,7 +360,7 @@ http_seek( stream_t *stream, off_t pos ) {
 			}
 			break;
 		default:
-			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ErrServerReturned, http_hdr->status_code, http_hdr->reason_phrase );
+			mp_tmsg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ErrServerReturned, http_hdr->status_code, http_hdr->reason_phrase );
 			close( fd );
 			fd = -1;
 	}
@@ -382,7 +382,7 @@ streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size) {
 //printf("streaming_bufferize\n");
 	streaming_ctrl->buffer = malloc(size);
 	if( streaming_ctrl->buffer==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+		mp_tmsg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return -1;
 	}
 	memcpy( streaming_ctrl->buffer, buffer, size );
@@ -442,7 +442,7 @@ void fixup_network_stream_cache(stream_t *stream) {
       stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;
       if( stream_cache_size<64 ) stream_cache_size = 64;	// 16KBytes min buffer
     }
-    mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_CacheSizeSetTo, stream_cache_size);
+    mp_tmsg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_CacheSizeSetTo, stream_cache_size);
   }
 }
 

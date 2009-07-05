@@ -194,7 +194,7 @@ static inline void vbeSwitchBank(unsigned long offset)
     show_err:
     vesa_term();
     PRINT_VBE_ERR("vbeSetWindow",err);
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_FatalErrorOccurred);
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_FatalErrorOccurred);
     abort();
   }
   win.low = new_offset * gran;
@@ -396,7 +396,7 @@ static void flip_page(void)
     {
       vesa_term();
       PRINT_VBE_ERR("vbeSetDisplayStart",err);
-      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_FatalErrorOccurred);
+      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_FatalErrorOccurred);
       abort();
     }
     multi_idx = multi_idx ? 0 : 1;
@@ -462,7 +462,7 @@ static uint32_t parseSubDevice(const char *sd)
    else
    if(memcmp(sd,"vidix",5) == 0) vidix_name = &sd[5]; /* vidix_name will be valid within init() */
 #endif
-   else { mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_UnknownSubdevice, sd); return 0xFFFFFFFFUL; }
+   else { mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_UnknownSubdevice, sd); return 0xFFFFFFFFUL; }
    return flags;
 }
 
@@ -550,7 +550,7 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
   total = min(total,nbuffs);
   while(i < total) { multi_buff[i++] = offset; offset += screen_size; }
   if(!i)
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory, screen_size, vsize);
+    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory, screen_size, vsize);
   return i;
 }
 
@@ -569,7 +569,7 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
     monitor_dotclock = str2range(monitor_dotclock_str);
     
 		if (!monitor_hfreq || !monitor_vfreq || !monitor_dotclock) {
-			mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor);
+			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor);
 			return 0;
 		}
 
@@ -606,7 +606,7 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
     
     if (!in_range(monitor_vfreq,crtc_pass->RefreshRate/100)||
 	!in_range(monitor_hfreq,H_freq*1000)) {
-        mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_UnableToFitTheMode);
+        mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_UnableToFitTheMode);
 	return 0;
     }
 
@@ -637,13 +637,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	fs_mode = 0;
         if(subdev_flags == 0xFFFFFFFEUL)
 	{
-	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_DetectedInternalFatalError);
+	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_DetectedInternalFatalError);
 	  return -1;
 	}
 	if(subdev_flags == 0xFFFFFFFFUL) return -1;
 	if(flags & VOFLAG_FLIPPING)
 	{
-	  mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported);
+	  mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported);
 	}
 	if(flags & VOFLAG_SWSCALE) use_scaler = 1;
 	if(flags & VOFLAG_FULLSCREEN)
@@ -656,30 +656,30 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	if(!vib_set && (err=vbeGetControllerInfo(&vib)) != VBE_OK)
 	{
 	  PRINT_VBE_ERR("vbeGetControllerInfo",err);
-	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound);
+	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound);
 	  return -1;
 	}
 	vib_set = 1;
 	/* Print general info here */
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion,
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion,
 		(int)(vib.VESAVersion >> 8) & 0xff,
 		(int)(vib.VESAVersion & 0xff),
 		(int)(vib.OemSoftwareRev & 0xffff));
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_VideoMemory,vib.TotalMemory*64);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_Capabilites
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_VideoMemory,vib.TotalMemory*64);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_Capabilites
 		,vib.Capabilities & VBE_DAC_8BIT ? "8-bit DAC," : "6-bit DAC,"
 		,vib.Capabilities & VBE_NONVGA_CRTC ? "non-VGA CRTC,":"VGA CRTC,"
 		,vib.Capabilities & VBE_SNOWED_RAMDAC ? "snowed RAMDAC,":"normal RAMDAC,"
 		,vib.Capabilities & VBE_STEREOSCOPIC ? "stereoscopic,":"no stereoscopic,"
 		,vib.Capabilities & VBE_STEREO_EVC ? "Stereo EVC":"no stereo");
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemInfo,vib.OemStringPtr);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemRevision,vib.OemSoftwareRev);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemVendor,vib.OemVendorNamePtr);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemProductName,vib.OemProductNamePtr);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemProductRev,vib.OemProductRevPtr);
-	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_Hint);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemInfo,vib.OemStringPtr);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemRevision,vib.OemSoftwareRev);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemVendor,vib.OemVendorNamePtr);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemProductName,vib.OemProductNamePtr);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OemProductRev,vib.OemProductRevPtr);
+	mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_Hint);
 	/* Find best mode here */
 	num_modes = 0;
 	mode_ptr = vib.VideoModePtr;
@@ -795,7 +795,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			return -1;
 		}
 		dstBpp = video_mode_info.BitsPerPixel;
- 		mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingVesaMode
+ 		mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingVesaMode
 			,best_mode_idx,video_mode,video_mode_info.XResolution
 			,video_mode_info.YResolution,dstBpp);
 		if(subdev_flags & SUBDEV_NODGA) video_mode_info.PhysBasePtr = 0;
@@ -830,7 +830,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		    sws = sws_getContextFromCmdLine(srcW,srcH,srcFourcc,dstW,dstH,dstFourcc);
 		    if(!sws)
 		    {
- 			mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_CantInitializeSwscaler);
+ 			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_CantInitializeSwscaler);
 			return -1;
 		    }
 		    else if( mp_msg_test(MSGT_VO,MSGL_V) ) {
@@ -850,7 +850,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		    vsize = vib.TotalMemory*64*1024;
 		    lfb = vbeMapVideoBuffer(video_mode_info.PhysBasePtr,vsize);
 		    if(lfb == NULL)
-		      mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_CantUseDga);
+		      mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_CantUseDga);
 		    else
 		    {
 		      video_base = win.ptr = lfb;
@@ -858,7 +858,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		      win.high = vsize;
 		      win.idx = -1; /* HAS_DGA() is on */
 		      video_mode |= VESA_MODE_USE_LINEAR;
- 		      mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingDga
+ 		      mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingDga
 			     ,video_mode_info.PhysBasePtr
 			     ,vsize);
 		      if( mp_msg_test(MSGT_VO,MSGL_V) ) {
@@ -866,30 +866,30 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		      printf("\n");
 		      if(!(multi_size = fillMultiBuffer(vsize,2))) return -1;
 		      if(vo_doublebuffering && multi_size < 2)
- 			mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_CantUseDoubleBuffering);
+ 			mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_CantUseDoubleBuffering);
 		    }
 		}
 		if(win.idx == -2)
 		{
- 		   mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantFindNeitherDga);
+ 		   mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantFindNeitherDga);
 		   return -1;
 		}
 		if(!HAS_DGA())
 		{
 		  if(subdev_flags & SUBDEV_FORCEDGA)
 		  {
- 			mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_YouveForcedDga);
+ 			mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_YouveForcedDga);
 			return -1;
 		  }
 		  if(!(win_seg = win.idx == 0 ? video_mode_info.WinASegment:video_mode_info.WinBSegment))
 		  {
- 		    mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantFindValidWindowAddress);
+ 		    mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantFindValidWindowAddress);
 		    return -1;
 		  }
 		  win.ptr = PhysToVirtSO(win_seg,0);
 		  win.low = 0L;
 		  win.high= video_mode_info.WinSize*1024;
- 		  mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingBankSwitchingMode
+ 		  mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingBankSwitchingMode
 			 ,(unsigned long)win.ptr,(unsigned long)win.high);
 		}
 		if(video_mode_info.XResolution > dstW)
@@ -919,7 +919,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		  {
 		    if(!(dga_buffer = memalign(64,video_mode_info.XResolution*video_mode_info.YResolution*dstBpp)))
 		    {
- 		      mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer);
+ 		      mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer);
 		      return -1;
 		    }
 		    if( mp_msg_test(MSGT_VO,MSGL_V) ) {
@@ -955,10 +955,10 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		if (neomagic_tvout) {
 		    err = vbeSetTV(video_mode,neomagic_tvnorm);
 		    if (err!=0x4f) {
- 		    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_SorryUnsupportedMode);
+ 		    mp_tmsg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_SorryUnsupportedMode);
 		    }
 		    else {
- 		    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv);
+ 		    mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv);
 		    } 
 		}
 		/* Now we are in video mode!!!*/
@@ -972,11 +972,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		{
 		  if(vlvo_init(width,height,x_offset,y_offset,dstW,dstH,format,dstBpp) != 0)
 		  {
- 		    mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay);
+ 		    mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay);
 		    vesa_term();
 		    return -1;
 		  }
-		  else mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingVideoOverlay,lvo_name);
+		  else mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingVideoOverlay,lvo_name);
 		  lvo_opened = 1;
 		}
 #ifdef CONFIG_VIDIX
@@ -987,11 +987,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 				dstH,format,dstBpp,
 				video_mode_info.XResolution,video_mode_info.YResolution) != 0)
 		  {
-		    mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantInitializeVidixDriver);
+		    mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantInitializeVidixDriver);
 		    vesa_term();
 		    return -1;
 		  }
-		  else mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingVidix);
+		  else mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_UsingVidix);
 		  vidix_start();
 
 		  /* set colorkey */       
@@ -1017,12 +1017,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	}
 	else
 	{
- 	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantFindModeFor,width,height,bpp);
+ 	  mp_tmsg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_VESA_CantFindModeFor,width,height,bpp);
 	  return -1;
 	}
 	if( mp_msg_test(MSGT_VO,MSGL_V) )
 	{
-	  mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_InitializationComplete);
+	  mp_tmsg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_VESA_InitializationComplete);
 	  fflush(stdout);
 	}
 	if(HAS_DGA() && vo_doublebuffering)

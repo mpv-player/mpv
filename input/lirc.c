@@ -40,9 +40,9 @@ mp_input_lirc_init(void) {
   int lirc_sock;
   int mode;
 
-  mp_msg(MSGT_LIRC,MSGL_V,MSGTR_SettingUpLIRC);
+  mp_tmsg(MSGT_LIRC,MSGL_V,MSGTR_SettingUpLIRC);
   if((lirc_sock=lirc_init("mplayer",1))==-1){
-    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCopenfailed);
+    mp_tmsg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCopenfailed);
     return -1;
   }
 
@@ -55,7 +55,7 @@ mp_input_lirc_init(void) {
   }
 
   if(lirc_readconfig( lirc_configfile,&lirc_config,NULL )!=0 ){
-    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCcfgerr,
+    mp_tmsg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCcfgerr,
 		    lirc_configfile == NULL ? "~/.lircrc" : lirc_configfile);
     lirc_deinit();
     return -1;

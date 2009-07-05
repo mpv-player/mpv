@@ -318,7 +318,7 @@ void vo_destroy(struct vo *vo)
 void list_video_out(void)
 {
     int i = 0;
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
+    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_OUTPUTS\n");
     while (video_out_drivers[i]) {
         const vo_info_t *info = video_out_drivers[i++]->info;
@@ -346,9 +346,9 @@ struct vo *init_best_video_out(struct MPOpts *opts, struct vo_x11_state *x11,
             char *name = strdup(vo_list[0]);
             vo_subdevice = strchr(name,':');
             if (!strcmp(name, "pgm"))
-                mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_PGM_HasBeenReplaced);
+                mp_tmsg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_PGM_HasBeenReplaced);
             if (!strcmp(name, "md5"))
-                mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_MD5_HasBeenReplaced);
+                mp_tmsg(MSGT_CPLAYER, MSGL_ERR, MSGTR_VO_MD5_HasBeenReplaced);
             if (vo_subdevice) {
                 vo_subdevice[0] = 0;
                 ++vo_subdevice;

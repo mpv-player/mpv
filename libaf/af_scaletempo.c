@@ -470,26 +470,26 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       return AF_ERROR;
     }
     if (s->scale_nominal <= 0) {
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
+      mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
+             _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
              ": scale > 0\n");
       return AF_ERROR;
     }
     if (s->ms_stride <= 0) {
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
+      mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
+             _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
              ": stride > 0\n");
       return AF_ERROR;
     }
     if (s->percent_overlap < 0 || s->percent_overlap > 1) {
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
+      mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
+             _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
              ": 0 <= overlap <= 1\n");
       return AF_ERROR;
     }
     if (s->ms_search < 0) {
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-             MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
+      mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
+             _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
              ": search >= 0\n");
       return AF_ERROR;
     }
@@ -507,8 +507,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
         s->speed_tempo = 1;
         s->speed_pitch = 1;
       } else {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
-               MSGTR_ErrorParsingCommandLine ": " MSGTR_AF_ValueOutOfRange
+        mp_tmsg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] "
+               _(MSGTR_ErrorParsingCommandLine) ": " _(MSGTR_AF_ValueOutOfRange)
                ": speed=[pitch|tempo|none|both]\n");
         return AF_ERROR;
       }

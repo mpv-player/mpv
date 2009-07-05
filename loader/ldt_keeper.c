@@ -209,7 +209,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 
 #ifdef __APPLE__
     if (getenv("DYLD_BIND_AT_LAUNCH") == NULL)
-        mp_msg(MSGT_LOADER, MSGL_WARN, MSGTR_LOADER_DYLD_Warning);
+        mp_tmsg(MSGT_LOADER, MSGL_WARN, MSGTR_LOADER_DYLD_Warning);
 #endif /* __APPLE__ */
     
     fs_seg=

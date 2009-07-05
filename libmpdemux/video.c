@@ -114,7 +114,7 @@ switch(video_codec){
      videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE + MP_INPUT_BUFFER_PADDING_SIZE);
      if (videobuffer) memset(videobuffer+VIDEOBUFFER_SIZE, 0, MP_INPUT_BUFFER_PADDING_SIZE);
      else {
-       mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
+       mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
        return 0;
      }
    }
@@ -207,7 +207,7 @@ switch(video_codec){
      videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE + MP_INPUT_BUFFER_PADDING_SIZE);
      if (videobuffer) memset(videobuffer+VIDEOBUFFER_SIZE, 0, MP_INPUT_BUFFER_PADDING_SIZE);
      else {
-       mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
+       mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
        return 0;
      }
    }
@@ -260,7 +260,7 @@ mpeg_header_parser:
       if(i==0x1B3) break; // found it!
       if(!i || !skip_video_packet(d_video)){
         if( mp_msg_test(MSGT_DECVIDEO,MSGL_V) )  mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
-        mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MpegNoSequHdr);
+        mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MpegNoSequHdr);
         return 0;
       }
    }
@@ -270,27 +270,27 @@ mpeg_header_parser:
      videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE + MP_INPUT_BUFFER_PADDING_SIZE);
      if (videobuffer) memset(videobuffer+VIDEOBUFFER_SIZE, 0, MP_INPUT_BUFFER_PADDING_SIZE);
      else {
-       mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
+       mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
        return 0;
      }
    }
 
    if(!read_video_packet(d_video)){ 
-     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CannotReadMpegSequHdr);
+     mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CannotReadMpegSequHdr);
      return 0;
    }
    if(mp_header_process_sequence_header (&picture, &videobuffer[4])) {
-     mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_BadMpegSequHdr); 
+     mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_BadMpegSequHdr); 
      goto mpeg_header_parser;
    }
    if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
     int pos=videobuf_len;
     if(!read_video_packet(d_video)){ 
-      mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CannotReadMpegSequHdrEx);
+      mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CannotReadMpegSequHdrEx);
       return 0;
     }
     if(mp_header_process_extension (&picture, &videobuffer[pos+4])) {
-      mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_BadMpegSequHdrEx);
+      mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_BadMpegSequHdrEx);
       return 0;
     }
    }
@@ -338,7 +338,7 @@ mpeg_header_parser:
      videobuffer=(char*)memalign(8,VIDEOBUFFER_SIZE + MP_INPUT_BUFFER_PADDING_SIZE);
      if (videobuffer) memset(videobuffer+VIDEOBUFFER_SIZE, 0, MP_INPUT_BUFFER_PADDING_SIZE);
      else {
-       mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
+       mp_tmsg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_ShMemAllocFail);
        return 0;
      }
    }
@@ -472,14 +472,14 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     if(telecine){
         frame_time=1;
         if(telecine_cnt<-1.5 || telecine_cnt>1.5){
-            mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_LeaveTelecineMode);
+            mp_tmsg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_LeaveTelecineMode);
             telecine=0;
         }
     } else
         if(telecine_cnt>-0.5 && telecine_cnt<0.5 && !force_fps){
             sh_video->fps=sh_video->fps*4/5;
             sh_video->frametime=sh_video->frametime*5/4;
-            mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_EnterTelecineMode);
+            mp_tmsg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_EnterTelecineMode);
             telecine=1;
         }
   } else if(video_codec == VIDEO_MPEG4){

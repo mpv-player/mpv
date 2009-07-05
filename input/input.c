@@ -650,7 +650,7 @@ int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
                         mp_cmd_func_t read_func, mp_close_func_t close_func)
 {
   if (ictx->num_cmd_fd == MP_MAX_CMD_FD) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds,fd);
+    mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds,fd);
     return 0;
   }
   if (select && fd < 0) {
@@ -716,7 +716,7 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
                         void *ctx)
 {
   if (ictx->num_key_fd == MP_MAX_KEY_FD) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
+    mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
     return 0;
   }
   if (select && fd < 0) {
@@ -829,7 +829,7 @@ mp_input_parse_cmd(char* str) {
       errno = 0;
       cmd->args[i].v.i = atoi(ptr);
       if(errno != 0) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrArgMustBeInt,cmd_def->name,i+1);
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrArgMustBeInt,cmd_def->name,i+1);
 	ptr = NULL;
       }
       break;
@@ -837,7 +837,7 @@ mp_input_parse_cmd(char* str) {
       errno = 0;
       cmd->args[i].v.f = atof(ptr);
       if(errno != 0) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrArgMustBeFloat,cmd_def->name,i+1);
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrArgMustBeFloat,cmd_def->name,i+1);
 	ptr = NULL;
       }
       break;
@@ -859,7 +859,7 @@ mp_input_parse_cmd(char* str) {
       }
       
       if(term != ' ' && (!e || e[0] == '\0')) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnterminatedArg,cmd_def->name,i+1);
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnterminatedArg,cmd_def->name,i+1);
 	ptr = NULL;
 	break;
       } else if(!e) e = ptr+strlen(ptr);
@@ -877,14 +877,14 @@ mp_input_parse_cmd(char* str) {
       ptr = NULL;
       break;
     default :
-      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnknownArg,i);
+      mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnknownArg,i);
     }
   }
   cmd->nargs = i;
 
   if(cmd_def->nargs > cmd->nargs) {
 /*    mp_msg(MSGT_INPUT,MSGL_ERR,"Got command '%s' but\n",str); */
-    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2FewArgs,cmd_def->name,cmd_def->nargs,cmd->nargs);
+    mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2FewArgs,cmd_def->name,cmd_def->nargs,cmd->nargs);
     mp_cmd_free(cmd);
     return NULL;
   }
@@ -924,7 +924,7 @@ static int read_cmd(mp_input_fd_t* mp_fd, char** ret)
       switch(r) {
       case MP_INPUT_ERROR:
       case MP_INPUT_DEAD:
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrReadingCmdFd,mp_fd->fd,strerror(errno));
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrReadingCmdFd,mp_fd->fd,strerror(errno));
       case MP_INPUT_NOTHING:
 	return r;
       case MP_INPUT_RETRY:
@@ -950,7 +950,7 @@ static int read_cmd(mp_input_fd_t* mp_fd, char** ret)
     if(!end) {
       // If buffer is full we must drop all until the next \n
       if(mp_fd->size - mp_fd->pos <= 1) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent,mp_fd->fd);
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent,mp_fd->fd);
 	mp_fd->pos = 0;
 	mp_fd->drop = 1;
       }
@@ -1067,7 +1067,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys,
     cmd = find_bind_for_key(def_cmd_binds,n,keys);
 
   if(cmd == NULL) {
-      mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_NoBindFound, get_key_name(keys[0],
+      mp_tmsg(MSGT_INPUT,MSGL_WARN,MSGTR_NoBindFound, get_key_name(keys[0],
                                                                   key_buf));
     if(n > 1) {
       int s;
@@ -1080,7 +1080,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys,
   if (strcmp(cmd, "ignore") == 0) return NULL;
   ret =  mp_input_parse_cmd(cmd);
   if(!ret) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrInvalidCommandForKey,
+    mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrInvalidCommandForKey,
            get_key_name(ictx->key_down[0], key_buf));
     if (ictx->num_key_down > 1) {
       unsigned int s;
@@ -1109,7 +1109,7 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code, int paused)
 
     if(code & MP_KEY_DOWN) {
       if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
 	return NULL;
       }
       code &= ~MP_KEY_DOWN;
@@ -1135,7 +1135,7 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code, int paused)
     }
     if (j == ictx->num_key_down) { // key was not in the down keys : add it
       if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
 	return NULL;
       }
       ictx->key_down[ictx->num_key_down] = code;
@@ -1239,7 +1239,7 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 		time_val = NULL;
 	    if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
 		if (errno != EINTR)
-		    mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrSelect,
+		    mp_tmsg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrSelect,
 			    strerror(errno));
 		FD_ZERO(&fds);
 	    }
@@ -1264,10 +1264,10 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 		return ret;
 	}
 	else if (code == MP_INPUT_ERROR)
-	    mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrOnKeyInFd,
+	    mp_tmsg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrOnKeyInFd,
 		   key_fds[i].fd);
 	else if (code == MP_INPUT_DEAD) {
-	    mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrDeadKeyOnFd,
+	    mp_tmsg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrDeadKeyOnFd,
 		   key_fds[i].fd);
 	    key_fds[i].dead = 1;
 	}
@@ -1291,7 +1291,7 @@ static mp_cmd_t *read_events(struct input_ctx *ictx, int time, int paused)
 		return ret;
 	}
 	else if (r == MP_INPUT_ERROR)
-	    mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrOnCmdFd,
+	    mp_tmsg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrOnCmdFd,
 		   cmd_fds[i].fd);
 	else if (r == MP_INPUT_DEAD)
 	    cmd_fds[i].dead = 1;
@@ -1538,7 +1538,7 @@ static int parse_config(struct input_ctx *ictx, char *file)
       if(r < 0) {
 	if(errno == EINTR)
 	  continue;
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrReadingInputConfig,file,strerror(errno));
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrReadingInputConfig,file,strerror(errno));
 	close(fd);
 	return 0;
       } else if(r == 0) {
@@ -1591,9 +1591,9 @@ static int parse_config(struct input_ctx *ictx, char *file)
       if(end[0] == '\0') { // Key name doesn't fit in the buffer
 	if(buffer == iter) {
 	  if(eof && (buffer-iter) == bs)
-	    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnfinishedBinding,iter);
+	    mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnfinishedBinding,iter);
 	  else
-	    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName,iter);
+	    mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName,iter);
 	  return 0;
 	}
 	memmove(buffer,iter,end-iter);
@@ -1605,7 +1605,7 @@ static int parse_config(struct input_ctx *ictx, char *file)
 	strncpy(name,iter,end-iter);
 	name[end-iter] = '\0';
 	if (!get_input_from_name(name,keys)) {
-	  mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnknownKey,name);
+	  mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnknownKey,name);
 	  close(fd);
 	  return 0;
 	}
@@ -1620,10 +1620,10 @@ static int parse_config(struct input_ctx *ictx, char *file)
       if(iter[0] == '\n' || iter[0] == '\r') {
 	int i;
         char key_buf[12];
-	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrNoCmdForKey, get_key_name(keys[0], key_buf));
+	mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrNoCmdForKey, get_key_name(keys[0], key_buf));
 	for(i = 1; keys[i] != 0 ; i++)
             mp_msg(MSGT_INPUT,MSGL_ERR,"-%s", get_key_name(keys[i], key_buf));
-	mp_msg(MSGT_INPUT,MSGL_ERR,"\n");
+        mp_msg(MSGT_INPUT,MSGL_ERR,"\n");
 	keys[0] = 0;
 	if(iter > buffer) {
 	  memmove(buffer,iter,bs- (iter-buffer));
@@ -1635,7 +1635,7 @@ static int parse_config(struct input_ctx *ictx, char *file)
 	/* NOTHING */;
       if(end[0] == '\0' && ! (eof && ((end+1) - buffer) == bs)) {
 	if(iter == buffer) {
-	  mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd,buffer);
+	  mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd,buffer);
 	  close(fd);
 	  return 0;
 	}
@@ -1660,7 +1660,7 @@ static int parse_config(struct input_ctx *ictx, char *file)
       continue;
     }
   }
-  mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrWhyHere);
+  mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrWhyHere);
   close(fd);
   mp_input_set_section(ictx, NULL);
   return 0;
@@ -1736,7 +1736,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   if (input_conf->use_joystick) {
     int fd = mp_input_joystick_init(input_conf->js_dev);
     if(fd < 0)
-      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitJoystick);
+      mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitJoystick);
     else
         mp_input_add_key_fd(ictx, fd, 1, mp_input_joystick_read,
                             (mp_close_func_t)close,NULL);
@@ -1763,7 +1763,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
 #ifdef CONFIG_APPLE_REMOTE
   if (input_conf->use_ar) {
     if(mp_input_ar_init() < 0)
-      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
+      mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
     else
         mp_input_add_key_fd(ictx, -1, 0, mp_input_ar_read, mp_input_ar_close,
                             NULL);
@@ -1774,7 +1774,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   if (input_conf->use_ar) {
     int fd = mp_input_appleir_init(input_conf->ar_dev);
     if(fd < 0)
-      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
+      mp_tmsg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitAppleRemote);
     else
         mp_input_add_key_fd(ictx, fd, 1, mp_input_appleir_read,
                             (mp_close_func_t)close, NULL);
@@ -1784,7 +1784,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   if (input_conf->in_file) {
     struct stat st;
     if (stat(input_conf->in_file, &st))
-      mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrCantStatFile, input_conf->in_file, strerror(errno));
+      mp_tmsg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrCantStatFile, input_conf->in_file, strerror(errno));
     else {
       int in_file_fd = open(input_conf->in_file,
                             S_ISFIFO(st.st_mode) ? O_RDWR : O_RDONLY);
@@ -1792,7 +1792,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
           mp_input_add_cmd_fd(ictx, in_file_fd, 1, NULL,
                               (mp_close_func_t)close);
       else
-	mp_msg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrCantOpenFile,
+	mp_tmsg(MSGT_INPUT, MSGL_ERR, MSGTR_INPUT_INPUT_ErrCantOpenFile,
                input_conf->in_file, strerror(errno));
     }
   }

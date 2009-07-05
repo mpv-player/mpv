@@ -73,7 +73,7 @@ void set_priority(void)
             if (strcasecmp(priority_presets_defs[i].name, proc_priority) == 0)
                 break;
         }
-        mp_msg(MSGT_CPLAYER, MSGL_STATUS, MSGTR_SettingProcessPriority,
+        mp_tmsg(MSGT_CPLAYER, MSGL_STATUS, MSGTR_SettingProcessPriority,
                priority_presets_defs[i].name);
 
 #ifdef __OS2__
