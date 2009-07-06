@@ -1792,9 +1792,9 @@ static void globalInit(void){
 
 static SwsFunc getSwsFunc(SwsContext *c)
 {
+#if CONFIG_RUNTIME_CPUDETECT && CONFIG_GPL
     int flags = c->flags;
 
-#if CONFIG_RUNTIME_CPUDETECT && CONFIG_GPL
 #if ARCH_X86
     // ordered per speed fastest first
     if (flags & SWS_CPU_CAPS_MMX2) {
@@ -2371,7 +2371,8 @@ static int handle_jpeg(enum PixelFormat *format)
 }
 
 SwsContext *sws_getContext(int srcW, int srcH, enum PixelFormat srcFormat, int dstW, int dstH, enum PixelFormat dstFormat, int flags,
-                           SwsFilter *srcFilter, SwsFilter *dstFilter, double *param){
+                           SwsFilter *srcFilter, SwsFilter *dstFilter, const double *param)
+{
 
     SwsContext *c;
     int i;
@@ -3400,7 +3401,7 @@ void sws_freeContext(SwsContext *c){
 struct SwsContext *sws_getCachedContext(struct SwsContext *context,
                                         int srcW, int srcH, enum PixelFormat srcFormat,
                                         int dstW, int dstH, enum PixelFormat dstFormat, int flags,
-                                        SwsFilter *srcFilter, SwsFilter *dstFilter, double *param)
+                                        SwsFilter *srcFilter, SwsFilter *dstFilter, const double *param)
 {
     static const double default_param[2] = {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT};
 

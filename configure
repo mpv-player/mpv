@@ -2090,12 +2090,14 @@ EOF
   ppc|ppc64|powerpc|powerpc64)
     _arch='PPC'
     def_dcbzl='#define HAVE_DCBZL 0'
+    def_ppc64='#define HAVE_PPC64 0'
     _target_arch='ARCH_PPC = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
       def_fast_64bit='#define HAVE_FAST_64BIT 1'
+      def_ppc64='#define HAVE_PPC64 1'
     fi
     echocheck "CPU type"
     case $system_name in
@@ -5817,7 +5819,7 @@ if test "$_dvdread_internal" = auto ; then
      || darwin || win32 || os2; then
     _dvdread_internal=yes
     _dvdread=yes
-    extra_cflags="$extra_cflags -Ilibdvdread4"
+    extra_cflags="-Ilibdvdread4 $extra_cflags"
   fi
 elif test "$_dvdread" = auto ; then
   _dvdread=no
@@ -5830,15 +5832,15 @@ elif test "$_dvdread" = auto ; then
 #include <dvdread/nav_read.h>
 int main(void) { return 0; }
 EOF
-  fi
-  _dvdreadcflags=$($_dvdreadconfig --cflags)
-  _dvdreadlibs=$($_dvdreadconfig --libs)
-  if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
-    $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
-    _dvdread=yes
-    extra_cflags="$extra_cflags $_dvdreadcflags"
-    extra_ldflags="$extra_ldflags $_dvdreadlibs"
-    _res_comment="external"
+    _dvdreadcflags=$($_dvdreadconfig --cflags)
+    _dvdreadlibs=$($_dvdreadconfig --libs)
+    if cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE \
+      $_dvdreadcflags $_dvdreadlibs $_ld_dl ; then
+      _dvdread=yes
+      extra_cflags="$extra_cflags $_dvdreadcflags"
+      extra_ldflags="$extra_ldflags $_dvdreadlibs"
+      _res_comment="external"
+    fi
   fi
 fi
 
@@ -7378,6 +7380,7 @@ else
   _libavencoders="MPEG1VIDEO_ENCODER SNOW_ENCODER"
   test "$_zlib" = yes && _libavencoders="$_libavencoders PNG_ENCODER"
   _libavmuxers=""
+  def_muxers='#define CONFIG_MUXERS 0'
 fi
 echores "$_mencoder"
 
@@ -8838,6 +8841,7 @@ $def_memalign_hack
 $def_mlib
 $def_mkstemp
 $def_posix_memalign
+$def_ppc64
 $def_pthreads
 $def_ten_operands
 $def_threads

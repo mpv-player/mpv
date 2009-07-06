@@ -563,7 +563,7 @@ packet_queue_ensure(packet_queue_t *queue, unsigned int needed_size)
 static int
 packet_queue_grow(packet_queue_t *queue)
 {
-    if (packet_queue_ensure(queue, queue->packets_size + 1) < 0) 
+    if (packet_queue_ensure(queue, queue->packets_size + 1) < 0)
 	return -1;
     packet_construct(queue->packets + queue->packets_size);
     ++queue->packets_size;
@@ -1380,7 +1380,7 @@ vobsub_out_output(void *me, const unsigned char *packet, int len, double pts)
 	last_pts = pts;
 	last_pts_set = 1;
 
-	/* Packet start code: Windows' Vobsub needs this */ 
+	/* Packet start code: Windows' Vobsub needs this */
 	p = buffer;
 	*p++ = 0;		/* 0x00 */
 	*p++ = 0;

@@ -1,14 +1,29 @@
 /*
-    FILM file parser for the MPlayer program
-      by Mike Melanson
-
-    This demuxer handles FILM (a.k.a. CPK) files commonly found on
-    Sega Saturn CD-ROM games. FILM files have also been found on 3DO
-    games.
-
-    Details of the FILM file format can be found at:
-      http://www.pcisys.net/~melanson/codecs/
-*/
+ * FILM file parser
+ * Copyright (C) 2002 Mike Melanson
+ *
+ * This demuxer handles FILM (a.k.a. CPK) files commonly found on Sega
+ * Saturn CD-ROM games. FILM files have also been found on 3DO games.
+ *
+ * details of the FILM file format can be found at:
+ * http://www.pcisys.net/~melanson/codecs/
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

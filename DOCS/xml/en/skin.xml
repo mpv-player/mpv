@@ -6,61 +6,7 @@
 <sect1 id="skin-overview">
 <title>Overview</title>
 
-<para>
-It does not really have anything to do with the skin format, but you should
-know that <application>MPlayer</application> has
-<emphasis role="bold">no</emphasis> builtin skin, so
-<emphasis role="bold">at least one skin must be installed in order to be able
-to use the GUI.</emphasis>
-</para>
-
 <!-- ********** -->
-
-<sect2 id="skin-overview-directories">
-<title>Directories</title>
-
-<para>
-The directories searched for skins are (in order):
-<orderedlist>
-<listitem><para>
-  <filename class="directory">$(DATADIR)/skins/</filename>
-</para></listitem>
-<listitem><para>
-  <filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
-</para></listitem>
-<listitem><para>
-  <filename class="directory">~/.mplayer/skins/</filename>
-</para></listitem>
-</orderedlist>
-</para>
-
-<para>
-Note that the first path may vary according to the way
-<application>MPlayer</application> was configured (see the
-<option>--prefix</option> and <option>--datadir</option>
-arguments of the <command>configure</command> script).
-</para>
-
-<para>
-Every skin is installed into its own directory under one of the directories
-listed above, for example:
-<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
-</para>
-</sect2>
-
-<!-- ********** -->
-
-<sect2 id="skin-overview-formats">
-<title>Image formats</title>
-
-<para>Images must be truecolor (24 or 32 bpp) PNGs.</para>
-<para>
-In the main window and in the playbar (see below) you can use images with
-`transparency': Regions filled with the color #FF00FF (magenta) are fully
-transparent when viewed by <application>MPlayer</application>. This means
-that you can even have shaped windows if your X server has the XShape extension.
-</para>
-</sect2>
 
 <sect2 id="skin-overview-components">
 <title>Skin components</title>
@@ -159,6 +105,18 @@ menu entries to work, <application>MPlayer</application> must know what to
 do if they are clicked. This is done by <link linkend="skin-gui">messages</link>
 (events). For these items you must define the messages to be generated when
 they are clicked.
+</para>
+</sect2>
+
+<sect2 id="skin-overview-formats">
+<title>Image formats</title>
+
+<para>Images must be truecolor (24 or 32 bpp) PNGs.</para>
+<para>
+In the main window and in the playbar (see below) you can use images with
+`transparency': Regions filled with the color #FF00FF (magenta) are fully
+transparent when viewed by <application>MPlayer</application>. This means
+that you can even have shaped windows if your X server has the XShape extension.
 </para>
 </sect2>
 

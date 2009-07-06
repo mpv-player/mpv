@@ -38,7 +38,7 @@
 
 #define PROBE_NORMAL    0 /* normal probing */
 #define PROBE_FORCE     1 /* ignore device_id but recognize device if it's known */
-  
+
 typedef enum vidix_dev_type {
   TYPE_OUTPUT  =        0x00000000,	/* Is a video playback device */
   TYPE_CAPTURE =	0x00000001,	/* Is a capture device */
@@ -58,7 +58,7 @@ typedef enum vidix_dev_flag {
   FLAG_SUBPIC	  =	0x00001000, /* Card supports DVD subpictures */
   FLAG_EQUALIZER  =	0x00002000, /* Card supports equalizer */
 } vidix_dev_flag_t;
-  
+
 typedef struct vidix_capability_s
 {
   char name[64]; /* Driver name */

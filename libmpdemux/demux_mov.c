@@ -1,22 +1,43 @@
-//  QuickTime MOV file parser by A'rpi
-//  additional work by Atmos
-//  based on TOOLS/movinfo.c by A'rpi & Al3x
-//  compressed header support from moov.c of the openquicktime lib.
-//  References: http://openquicktime.sf.net/, http://www.heroinewarrior.com/
-//  http://www.geocities.com/SiliconValley/Lakes/2160/fformats/files/mov.pdf
-//  (above url no longer works, file mirrored somewhere? ::atmos)
-//  The QuickTime File Format PDF from Apple:
-//  http://developer.apple.com/techpubs/quicktime/qtdevdocs/PDF/QTFileFormat.pdf
-//  (Complete list of documentation at http://developer.apple.com/quicktime/)
-//  MP4-Lib sources from http://mpeg4ip.sf.net/ might be useful for .mp4
-//  as well as .mov specific stuff.
-//  All sort of Stuff about MPEG4:
-//  http://www.cmlab.csie.ntu.edu.tw/~pkhsiao/thesis.html
-//  I really recommend N4270-1.doc and N4270-2.doc which are exact specs
-//  of the MP4-File Format and the MPEG4 Specific extensions. ::atmos
-//  TSGS#15(02)0088
-//  http://www.3gpp.org/ftp/tsg_sa/TSG_SA/TSGS_15/Docs/pdf/SP-020088.pdf
-//  http://www.3gpp2.org/Public_html/specs/C.S0050-0_v1.0_121503.pdf
+/*
+ * QuickTime MOV file parser
+ * copyright(c) 2001 A'rpi
+ * additional work by Atmos
+ * based on TOOLS/movinfo.c by A'rpi & Al3x
+ * compressed header support from moov.c of the openquicktime lib.
+ *
+ * references: http://openquicktime.sf.net/, http://www.heroinewarrior.com/
+ * http://www.geocities.com/SiliconValley/Lakes/2160/fformats/files/mov.pdf
+ * (above URL no longer works, file mirrored somewhere? ::atmos)
+ * The QuickTime File Format PDF from Apple:
+ * http://developer.apple.com/techpubs/quicktime/qtdevdocs/PDF/QTFileFormat.pdf
+ * (Complete list of documentation at http://developer.apple.com/quicktime/)
+ * MP4-Lib sources from http://mpeg4ip.sf.net/ might be useful for .mp4
+ * as well as .mov specific stuff.
+ *
+ * All sort of Stuff about MPEG4:
+ * http://www.cmlab.csie.ntu.edu.tw/~pkhsiao/thesis.html
+ * I really recommend N4270-1.doc and N4270-2.doc which are exact specs
+ * of the MP4-File Format and the MPEG4 Specific extensions. ::atmos
+ * TSGS#15(02)0088
+ * http://www.3gpp.org/ftp/tsg_sa/TSG_SA/TSGS_15/Docs/pdf/SP-020088.pdf
+ * http://www.3gpp2.org/Public_html/specs/C.S0050-0_v1.0_121503.pdf
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
