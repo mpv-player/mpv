@@ -223,3 +223,8 @@ void mp_msg(int mod, int lev, const char *format, ... ){
     fprintf(stream, "%s", tmp);
     fflush(stream);
 }
+
+char *mp_gtext(const char *string)
+{
+    return string;
+}
