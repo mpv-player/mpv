@@ -70,7 +70,7 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
     mtrrp = malloc(sizeof (struct mtrr));
     mtrrp->base = base;
     mtrrp->len = size;
-    mtrrp->type = type;  
+    mtrrp->type = type;
     mtrrp->flags = MTRR_VALID | MTRR_PRIVATE;
     n = 1;
 

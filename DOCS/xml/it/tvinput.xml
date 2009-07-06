@@ -52,7 +52,7 @@ Qui ci sono giusto alcuni consigli:
 <listitem><para>
   Scegli una sana dimensione dell'immagine. Le dimensioni dell'immagine
   risultante dovrebbero essere divisibili per 16.
-</para></listitem> 
+</para></listitem>
 <listitem>
   <para>
   Se catturi il video con una risoluzione verticale maggiore di metà della
@@ -88,7 +88,7 @@ Qui ci sono giusto alcuni consigli:
   <application>MEncoder</application> può gestire un sovraccarico per pochi
   secondi, ma non di più. E' meglio disattivare screensaver 3D OpenGL e cose
   del genere.
-</para></listitem> 
+</para></listitem>
 <listitem><para>
   Non pacioccare con il clock di sistema. <application>MEncoder</application>
   usa il clock di sistema per gestire la sincronizzazione A/V. Se tu modifichi
@@ -121,7 +121,7 @@ Qui ci sono giusto alcuni consigli:
   <filename>linux/Documentation/sound/btaudio</filename> (nei sorgenti del
   kernel, non di <application>MPlayer</application>) per alcune istruzioni su
   come usare tale driver.
-</para></listitem> 
+</para></listitem>
 <listitem><para>
   Se <application>MEncoder</application> non può aprire il dispositivo audio,
   assicurati che sia veramente disponibile. Ci sono alcuni problemi con sound

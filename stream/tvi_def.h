@@ -65,11 +65,11 @@ static void free_handle(tvi_handle_t *h)
 
 /**
  Fills video frame in given buffer with blue color for yv12,i420,uyvy,yuy2.
- Other formats will be filled with 0xC0 
+ Other formats will be filled with 0xC0
 */
 static inline void fill_blank_frame(char* buffer,int len,int fmt){
     int i;
-    // RGB(0,0,255) <-> YVU(41,110,240) 
+    // RGB(0,0,255) <-> YVU(41,110,240)
 
     switch(fmt){
     case IMGFMT_YV12:

@@ -53,16 +53,16 @@
 <!-- declare-characteristic preserve-sdata?
      No longer appears necessary as it is a JadeTex issue. -->
 
-<!-- generate-legalnotice-link? 
+<!-- generate-legalnotice-link?
      Not currently supported in Norm's XSL stylesheets. Logged
      at SourceForge as a bug. -->
 
 <!-- Should graphics be used for admonitions (notes, warnings)? 0 or 1 -->
 <xsl:param name="admon.graphics" select="0"/>
 
-<!-- If using admon graphics (1 above), what is path to graphics? 
+<!-- If using admon graphics (1 above), what is path to graphics?
      Should be the path relative to your document and MUST end with
-     a trailing slash.  Also, this parameter needs to be on a 
+     a trailing slash.  Also, this parameter needs to be on a
      single line. -->
 <xsl:param name="admon.graphics.path">images/</xsl:param>
 
@@ -82,7 +82,7 @@
 
 <!-- generate-article-titlepage -->
 
-<!-- Equivalent to chunk-skip-first-element-list - forces TOC on separate page 
+<!-- Equivalent to chunk-skip-first-element-list - forces TOC on separate page
      If 0, first sect is on page for chapter or article -->
 <xsl:param name="chunk.first.sections" select="'1'"/>
 
@@ -97,7 +97,7 @@
 <!-- Filename for the root chunk -->
 <xsl:param name="root.filename" select="'index'"/>
 
-<!-- shade-verbatim 
+<!-- shade-verbatim
      I have created a function below that shades the verbatim sections.
      logic would need to be added to check if this is set.
      Norm has added parameters to his 1.44 stylesheets that support
@@ -126,7 +126,7 @@
 <!-- To what depth (in sections) should the TOC go? -->
 <xsl:param name="toc.section.depth" select="2"/>
 
-<!-- Custom 'emphasis' template to allow 'role="strong"' to 
+<!-- Custom 'emphasis' template to allow 'role="strong"' to
      also produce a bold item. -->
 <xsl:template match="emphasis">
   <xsl:choose>
@@ -140,10 +140,10 @@
 </xsl:template>
 
 <!-- book-titlepage-recto-elements
-     article-titlepage-recto-elements 
-     article-titlepage-recto-mode 
-     article-title 
-     
+     article-titlepage-recto-elements
+     article-titlepage-recto-mode
+     article-title
+
      - Customizing these elements (for instance, to list what is on the
        title page) involves writing a layer for html/titlepage.templates.xml and the
        other files html/titlepage.xsl and html/titlepage.templates.xsl - Norm
@@ -151,7 +151,7 @@
 
 <!-- The remainder of ldp.dsl deals with changing the foreground and
      background colors of verbatim elements although in reading through the
-     DSSSL it doesn't look like it actually changed the foreground colors. 
+     DSSSL it doesn't look like it actually changed the foreground colors.
      The changing of the background shading can be done at two locations
      (one numbered, one not) in the template below. -->
 

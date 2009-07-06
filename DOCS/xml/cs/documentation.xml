@@ -15,7 +15,7 @@
   <year>2006</year>
   <year>2007</year>
   <year>2008</year>
-  <year>2009</year>	
+  <year>2009</year>
   <holder>MPlayer team</holder>
 </copyright>
 <legalnotice>
@@ -46,7 +46,7 @@ do konce kapitoly Instalace a následovat linky, které naleznete.
 Pokud máte jiné dotazy, vraťte se zpět na  <link linkend="toc">Obsah</link>
 a vyhledejte si příslušnou část. Přečtěte si <xref linkend="faq"/>,
 nebo zkuste grep na souborech. Odpovědi na většinu otázek by měly být někde tady,
-zbytek byl pravděpodobně probrán v některé z našich 
+zbytek byl pravděpodobně probrán v některé z našich
 <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">e-mailových konferencí</ulink>.
 <!-- FIXME: This refers to nonexistent links
 Prohledejte
@@ -65,7 +65,7 @@ mnoho hodnotných informací.
 jiných Unixech a <emphasis role="bold">ne-x86</emphasis> CPU, viz
 <xref linkend="ports"/>).
 Přehraje většinu MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI,
-RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska souborů s podporou 
+RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska souborů s podporou
 mnoha nativních XAnim, RealPlayer a Win32 DLL kodeků. Můžete sledovat
 <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>
 a také <emphasis role="bold">MPEG-4 (DivX)</emphasis> filmy. Další skvělou vlastností

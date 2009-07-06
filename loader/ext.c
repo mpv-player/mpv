@@ -250,7 +250,7 @@ LPVOID FILE_dommap( int unix_handle, LPVOID start,
     {
         ret = mmap_anon( start, size_low, prot, flags, offset_low );
     }
-    else 
+    else
     {
         fd = unix_handle;
         ret = mmap( start, size_low, prot, flags, fd, offset_low );

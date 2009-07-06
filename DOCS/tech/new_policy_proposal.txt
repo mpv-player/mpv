@@ -90,7 +90,7 @@ Reverting broken commits
   If you are even just slightly uncertain how to revert something then ask on
   the mplayer-dev-eng mailing list.
 
-Broken code 
+Broken code
    You must not commit code which breaks MPlayer! (Meaning unfinished but
    enabled code which breaks compilation or compiles but does not work.)
    You can commit unfinished stuff (for testing etc), but it must be disabled
@@ -256,7 +256,7 @@ public developer mailing list and rate options each with an integer
 unrated options shall be counted equal to the default option
 Any leader can cast a veto against any option except the default up to 10 days
 days after a vote has been started, to do so she has to reply to the original
-vote mail on the public developer mailing list and replace 
+vote mail on the public developer mailing list and replace
 [VOTE] by [VOTE-VETO]
 Developers and leaders who use gpg/pgp MUST sign their votes and vetoes
 
@@ -287,7 +287,7 @@ furthermore B wins even though 100 of 101 developers prefer A over B
 
 S. Changes to developer and Leader status
 ----------------------------------------
-The majority of leaders, that is yes>no can give and take away 
+The majority of leaders, that is yes>no can give and take away
 developer and leader status to people
 furthermore any developer or leader can step back and thus loose
 his leader and or developer status

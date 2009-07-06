@@ -69,7 +69,7 @@ typedef struct vf_instance {
 // control codes:
 #include "mpc_info.h"
 
-typedef struct vf_seteq_s 
+typedef struct vf_seteq_s
 {
     const char *item;
     int value;

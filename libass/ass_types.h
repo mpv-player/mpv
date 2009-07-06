@@ -100,7 +100,7 @@ typedef struct ass_track_s {
 	char* event_format; // event format line
 
 	enum {TRACK_TYPE_UNKNOWN = 0, TRACK_TYPE_ASS, TRACK_TYPE_SSA} track_type;
-	
+
 	// script header fields
 	int PlayResX;
 	int PlayResY;
@@ -108,7 +108,7 @@ typedef struct ass_track_s {
 	int WrapStyle;
 	char ScaledBorderAndShadow;
 
-	
+
 	int default_style; // index of default style
 	char* name; // file name in case of external subs, 0 for streams
 

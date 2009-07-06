@@ -21,11 +21,11 @@
 
 #include <vbe.h>
 
-#define GTF_VF 0 
-#define GTF_HF 1 
+#define GTF_VF 0
+#define GTF_HF 1
 #define GTF_PF 2
 
-		     
+
 typedef struct {
     double	Vsync_need;	   /* Number of lines for vert sync (default 3) */
     double	min_Vsync_BP;	   /* Minimum vertical sync + back porch (us) (default 550)*/
@@ -39,7 +39,7 @@ typedef struct {
     double  m;		/* Blanking formula gradient (default 600)*/
     } GTF_constants;
 
-//#ifndef __VESA_VBELIB_INCLUDED__ 
+//#ifndef __VESA_VBELIB_INCLUDED__
 //    struct VesaCRTCInfoBlock {
 //    unsigned short hTotal;     /* Horizontal total in pixels */
 //    unsigned short hSyncStart; /* Horizontal sync start in pixels */
@@ -51,7 +51,7 @@ typedef struct {
 //    unsigned long  PixelClock; /* Pixel clock in units of Hz */
 //    unsigned short RefreshRate;/* Refresh rate in units of 0.01 Hz*/
 //    unsigned char  Reserved[40];/* remainder of CRTCInfoBlock*/
-//}__attribute__ ((packed));		    
+//}__attribute__ ((packed));
 
 //#define VESA_CRTC_DOUBLESCAN 0x01
 //#define VESA_CRTC_INTERLACED 0x02

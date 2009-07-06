@@ -72,7 +72,7 @@ static const evName evNames[] =
   { evSetMoviePosition,  "evSetMoviePosition"  },
   { evSetVolume,         "evSetVolume"         },
   { evSetBalance,        "evSetBalance"        },
-  { evHelp,		 "evHelp"	       },	
+  { evHelp,		 "evHelp"	       },
   { evLoadSubtitle,      "evLoadSubtitle"      },
   { evPlayDVD,		 "evPlayDVD"	       },
   { evPlayVCD,		 "evPlayVCD"	       },
@@ -108,7 +108,7 @@ void appClearItem( wItem * item )
  item->tmp=0;
  item->key=0; item->key2=0;
  item->Bitmap.Width=0; item->Bitmap.Height=0; item->Bitmap.BPP=0; item->Bitmap.ImageSize=0;
- if ( item->Bitmap.Image ) free( item->Bitmap.Image ); 
+ if ( item->Bitmap.Image ) free( item->Bitmap.Image );
  item->Bitmap.Image=NULL;
 // ---
  item->fontid=0;
@@ -235,5 +235,5 @@ void btnSet( int event,int set )
     { appMPlayer.Items[j].pressed=set; appMPlayer.barItems[j].tmp=0; }
  for ( j=0;j<appMPlayer.NumberOfBarItems + 1;j++ )
    if ( appMPlayer.barItems[j].msg == event )
-    { appMPlayer.barItems[j].pressed=set; appMPlayer.barItems[j].tmp=0; } 
+    { appMPlayer.barItems[j].pressed=set; appMPlayer.barItems[j].tmp=0; }
 }

@@ -90,7 +90,7 @@ typedef struct MPContext {
     struct timeline_part *timeline;
     int num_timeline_parts;
     int timeline_part;
-    struct chapter *chapters;   
+    struct chapter *chapters;
     int num_chapters;
     double video_offset;
 

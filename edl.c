@@ -22,12 +22,12 @@ static edl_record_ptr edl_alloc_new(edl_record_ptr next_edl_record)
         mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Can't allocate enough memory to hold EDL data.\n");
         exit(1);
     }
-    
+
     if (next_edl_record) // if this isn't the first record, tell the previous one what the new one is.
         next_edl_record->next = new_record;
     new_record->prev = next_edl_record;
     new_record->next = NULL;
-    
+
     return new_record;
 }
 
@@ -81,8 +81,8 @@ edl_record_ptr edl_parse_file(void)
                 mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Badly formatted EDL line [%d], discarding.\n",
                        lineCount);
                 continue;
-            } 
- 
+            }
+
             if (next_edl_record && start <= next_edl_record->stop_sec)
             {
                 mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Invalid EDL line: %s\n", line);
@@ -90,7 +90,7 @@ edl_record_ptr edl_parse_file(void)
 					"Last stop position was [%f]; next start is [%f].\n"\
 					"Entries must be in chronological order, cannot overlap. Discarding.\n",
                        next_edl_record->stop_sec, start);
-                continue;    
+                continue;
             }
 
             if (stop <= start)
@@ -112,9 +112,9 @@ edl_record_ptr edl_parse_file(void)
                 next_edl_record->length_sec = 0;
                 next_edl_record->start_sec = start;
                 next_edl_record->stop_sec = start;
-                
+
                 next_edl_record = edl_alloc_new(next_edl_record);
-                
+
                 next_edl_record->action = action;
                 next_edl_record->length_sec = 0;
                 next_edl_record->start_sec = stop;
@@ -130,11 +130,11 @@ edl_record_ptr edl_parse_file(void)
         }
 
         fclose(fd);
-    }        
+    }
 
-    if (edl_records) 
+    if (edl_records)
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Read %d EDL actions.\n", record_count);
-    else 
+    else
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "There are no EDL actions to take care of.\n");
 
     return edl_records;

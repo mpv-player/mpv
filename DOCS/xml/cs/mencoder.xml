@@ -292,7 +292,7 @@ následovanou cestou do kořenového adresáře skopírovaného DVD.
 
 Volby <option>-dvd-device</option> a <option>-cdrom-device</option>
 lze rovněž použít k přenastavení cest k souborům zařízení pro přímé
-čtení disků, pokud výchozí 
+čtení disků, pokud výchozí
 <filename>/dev/dvd</filename> a <filename>/dev/cdrom</filename> na vašem
 systému nepracují.
 </para>
@@ -608,7 +608,7 @@ Vytvoření MPEG-4 souboru ze seznamu vyjmenovaných JPEG souborů
 (seznam.txt v aktuálním adresáři obsahuje seznam souborů k použití
 jako zdroj, každý soubor na samostatném řádku):
 <screen>
-mencoder mf://<replaceable>@seznam.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
+mencoder mf://<replaceable>@seznam.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \
     -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>

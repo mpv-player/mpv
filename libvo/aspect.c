@@ -146,4 +146,3 @@ void panscan_calc(struct vo *vo)
     vo->panscan_x = vo_panscan_area * vo->panscan_amount * vo->aspdat.asp;
     vo->panscan_y = vo_panscan_area * vo->panscan_amount;
 }
-

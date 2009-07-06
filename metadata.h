@@ -53,4 +53,3 @@ struct MPContext;
 char *get_metadata(struct MPContext *mpctx, metadata_t type);
 
 #endif /* MPLAYER_METADATA_H */
-

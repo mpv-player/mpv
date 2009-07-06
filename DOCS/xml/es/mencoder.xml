@@ -61,7 +61,7 @@ codificado una sola vez, y no como en el modo 2-pasadas. De manera esquemática:
   <emphasis>Primera pasada:</emphasis>
 
   <screen>mencoder <replaceable>file/DVD</replaceable> -ovc frameno -oac mp3lame -lameopts vbr=3 -o frameno.avi</screen>
-  
+
   Se crea un archivo avi solo-audio, que contiene
   <emphasis role="bold">únicamente</emphasis> el flujo de audio requerido. No olvide
   <option>-lameopts</option>, si necesita establecer algunos parámetros. Si está
@@ -185,7 +185,7 @@ Esta sección habla del modo <emphasis role="bold">copiandolos</emphasis>.
   <emphasis role="bold">Flujo de audio</emphasis> (opción <option>-oac copy</option>):
   sinceramente. Es posible usar un archivo de audio externo (MP3, WAV) y
   multiplexarlo dentro del flujo de salida. Use para ello la opción
-  <option>-audiofile <replaceable>filename</replaceable></option>. 
+  <option>-audiofile <replaceable>filename</replaceable></option>.
   </para></listitem>
 </itemizedlist>
 </sect1>
@@ -285,7 +285,7 @@ de audio no están soportados). Puede codificar con los siguientes codecs
   MPEG2 video
   </entry></row>
 <row><entry>huffyuv</entry><entry>
-  compresión sin pérdidas 
+  compresión sin pérdidas
   </entry></row>
 <row><entry>asv1</entry><entry>
   ASUS Video v1
@@ -595,7 +595,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Reproduzca el DVD y ejecute el filtro de detección de recorte
   (<option>-vf cropdetect</option>) en él. Esto le dará un rectángulo de
   recorte para usar en la codificación. La razón para el recorte es que muchas
-  películas no están en las relaciones de aspecto estándar (16/9 o 4/3), o, 
+  películas no están en las relaciones de aspecto estándar (16/9 o 4/3), o,
   por cualquier razón, la imagen no se ajusta bien dentro del marco de imagen.
   Además querrá recortar las bandas negras durante el ripeo. También mejora la
   calidad de la imagen porque el filo de las bandas negras consume un montón
@@ -612,7 +612,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   constante, AKA calidad constante es una buena elección. De este modo cada
   marco de imagen toma tantos bits como necesite para mantener el nivel de
   calidad deseado, pero sin necesitar múltiples pasadas en la codificación.
-  Con 
+  Con
   <systemitem class="library">libavcodec</systemitem>, obtendrá una calidad
   constante usando
   <option>-lavcopts vqscale=<replaceable>N</replaceable></option>.
@@ -764,7 +764,7 @@ mencoder dvd://1 -aid 128 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vqscale=3:v
   hacen que la codificacion dure más. Especialmente <option>trell</option>
   ralentiza la codificación pero incrementa la calidad visiblemente. Si quiere
   desentrelazar, añada un filtro <option>pp</option> a <option>-vf</option>,
-  por ejemplo <option>-vf pp=fd,crop=720:364:0:56</option> (en ese orden). 
+  por ejemplo <option>-vf pp=fd,crop=720:364:0:56</option> (en ese orden).
   Si no necesita invertir el telecine, quite <option>-ofps 23.976</option>.
 </para>
 </sect2>
@@ -821,7 +821,7 @@ mencoder dvd://1 -aid 128 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vqscale=3:v
   numeradas pares) representa un momento en el tiempo 1/59.94 de un
   segundo después de otro. Al reproducir video entrelazado en un
   ordenador se ve mal porque el monitor tiene una resolución mayor
-  y porque el video es mostrado marco-tras-marco en lugar de 
+  y porque el video es mostrado marco-tras-marco en lugar de
   campo-tras-campo.
 </para>
 
@@ -1064,7 +1064,7 @@ Notas:
 
   <screen>mencoder dvd://1 -nosound -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
   </para></listitem>
-<listitem><para> 
+<listitem><para>
   Use un filtro de desentrelazado antes de codificar. Hay varios
   filtros disponibles para elegir, cada uno con sus ventajas y sus
   desventajas. Consulte <option>mplayer -pphelp</option> para ver
@@ -1228,7 +1228,7 @@ Notas:
   saltitos porque debe ser mostrado a 59.94 campos por segundo, lo que
   hace que los marcos duplicados no estén durante mucho tiempo en pantalla.
   </para>
-  
+
   <para>
   En cualquier caso, es mejor considerar su contenido y cómo quiere
   mostrarlo. Si su video es 90% progresivo y no tiene intención de
@@ -1237,7 +1237,7 @@ Notas:
   está si todo está entrelazado.
   </para>
   </listitem>
-  
+
 <listitem><para>
   Trátelo como entrelazado. Algunas características de las partes
   progresivas serán tratadas por duplicado, resultando en una imagen

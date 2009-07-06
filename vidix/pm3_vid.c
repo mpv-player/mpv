@@ -65,7 +65,7 @@ static vidix_capability_t pm3_cap =
     { 0, 0, 0, 0 }
 };
 
-static unsigned short pm3_card_ids[] = 
+static unsigned short pm3_card_ids[] =
 {
     DEVICE_3DLABS_GLINT_R3
 };
@@ -173,7 +173,7 @@ static int pm3_query_fourcc(vidix_fourcc_t *to)
     return ENOSYS;
 }
 
-#define FORMAT_RGB8888	PM3VideoOverlayMode_COLORFORMAT_RGB8888 
+#define FORMAT_RGB8888	PM3VideoOverlayMode_COLORFORMAT_RGB8888
 #define FORMAT_RGB4444	PM3VideoOverlayMode_COLORFORMAT_RGB4444
 #define FORMAT_RGB5551	PM3VideoOverlayMode_COLORFORMAT_RGB5551
 #define FORMAT_RGB565	PM3VideoOverlayMode_COLORFORMAT_RGB565
@@ -306,9 +306,9 @@ static int pm3_config_playback(vidix_playback_t *info)
     RAMDAC_SET_REG(PM3RD_VideoOverlayXEndLow, (info->dest.x+drw_w) & 0xff);
     RAMDAC_SET_REG(PM3RD_VideoOverlayXEndHigh,
 		   ((info->dest.x+drw_w) & 0xf00)>>8);
-    RAMDAC_SET_REG(PM3RD_VideoOverlayYStartLow, (info->dest.y & 0xff)); 
+    RAMDAC_SET_REG(PM3RD_VideoOverlayYStartLow, (info->dest.y & 0xff));
     RAMDAC_SET_REG(PM3RD_VideoOverlayYStartHigh, (info->dest.y & 0xf00)>>8);
-    RAMDAC_SET_REG(PM3RD_VideoOverlayYEndLow, (info->dest.y+drw_h) & 0xff); 
+    RAMDAC_SET_REG(PM3RD_VideoOverlayYEndLow, (info->dest.y+drw_h) & 0xff);
     RAMDAC_SET_REG(PM3RD_VideoOverlayYEndHigh,
 		   ((info->dest.y+drw_h) & 0xf00)>>8);
 
@@ -323,7 +323,7 @@ static int pm3_config_playback(vidix_playback_t *info)
 	PM3VideoOverlayMode_BUFFERSYNC_MANUAL |
 	PM3VideoOverlayMode_FLIP_VIDEO;
 
-    overlay_control = 
+    overlay_control =
 	PM3RD_VideoOverlayControl_KEY_COLOR |
 	PM3RD_VideoOverlayControl_MODE_MAINKEY |
 	PM3RD_VideoOverlayControl_DIRECTCOLOR_ENABLED;

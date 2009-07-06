@@ -40,7 +40,7 @@
 
 #include <jack/jack.h>
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
   "JACK audio output",
   "jack",
@@ -360,4 +360,3 @@ static float get_delay(void) {
   }
   return (float)buffered / (float)ao_data.bps + in_jack;
 }
-

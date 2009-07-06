@@ -42,7 +42,7 @@
 #include "osdep/timer.h"
 #include "subopt-helper.h"
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
   "OpenAL audio output",
   "openal",
@@ -251,4 +251,3 @@ static float get_delay(void) {
   alGetSourcei(sources[0], AL_BUFFERS_QUEUED, &queued);
   return queued * CHUNK_SIZE / 2 / (float)ao_data.samplerate;
 }
-

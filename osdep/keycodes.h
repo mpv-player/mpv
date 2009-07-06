@@ -72,7 +72,7 @@
 #define KEY_VOLUME_UP (KEY_MM_BASE+10)
 #define KEY_VOLUME_DOWN (KEY_MM_BASE+11)
 #define KEY_MUTE (KEY_MM_BASE+12)
-  
+
 /* Keypad keys */
 #define KEY_KEYPAD (KEY_BASE+32)
 #define KEY_KP0 (KEY_KEYPAD+0)

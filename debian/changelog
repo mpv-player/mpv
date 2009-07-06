@@ -104,14 +104,14 @@ mplayer (0.90pre2-1) unstable; urgency=low
 
 mplayer (0.60-3) unstable; urgency=low
 
-  * install xvidix correctly 
+  * install xvidix correctly
 
  -- Dariush Pietrzak <eyck@ghost.anime.pl>  Sun, 17 Mar 2002 16:38:54 +0100
 
 mplayer (0.60-2) unstable; urgency=low
 
   * This is meaningless, just to mark that more then 2 months have passed
-    since last release and lots of thing in mplayer have changed. 
+    since last release and lots of thing in mplayer have changed.
 
  -- Dariush Pietrzak <eyck@ghost.anime.pl>  Thu,  7 Mar 2002 00:34:20 +0100
 
@@ -149,7 +149,7 @@ mplayer (0.50-3) unstable; urgency=low
 
 mplayer (0.50-2) unstable; urgency=low
 
-  * gui added to package/menu 
+  * gui added to package/menu
 
  -- Dariush Pietrzak <eyck@ghost.anime.pl>  Wed,  7 Nov 2001 11:31:46 +0100
 
@@ -161,31 +161,31 @@ mplayer (0.50-1) unstable; urgency=low
 
 mplayer (0.18-4) unstable; urgency=low
 
-  * Changes to debian packaging suggested Josip Rodin 
+  * Changes to debian packaging suggested Josip Rodin
 
  -- Dariush Pietrzak <eyck@ghost.forumakad.pl>  Wed, 22 Aug 2001 22:40:58 +0200
 
 mplayer (0.18-3) unstable; urgency=low
 
-  * fixed templates. 
+  * fixed templates.
 
  -- Dariush Pietrzak <eyck@ghost.tinet.pl>  Sat, 28 Jul 2001 09:45:45 +0200
 
 mplayer (0.18-2) unstable; urgency=low
 
-  * modified debian scripts 
+  * modified debian scripts
 
  -- Dariush Pietrzak <eyck@ghost.tinet.pl>  Fri, 27 Jul 2001 09:25:52 +0200
 
 mplayer (0.18-1) unstable; urgency=low
 
-  * lots of changes in mplayer 
+  * lots of changes in mplayer
 
  -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Mon, 25 Jun 2001 15:59:18 +0200
 
 mplayer (0.17a-2) unstable; urgency=low
 
-  * mplayer.conf file, automatic menu files update 
+  * mplayer.conf file, automatic menu files update
 
  -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Sun, 20 May 2001 22:50:41 +0200
 

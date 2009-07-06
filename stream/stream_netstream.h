@@ -73,9 +73,9 @@ static int net_read(int fd, char* buf, int len) {
 
 static mp_net_stream_packet_t* read_packet(int fd) {
   uint16_t len;
-  mp_net_stream_packet_t* pack = 
+  mp_net_stream_packet_t* pack =
     (mp_net_stream_packet_t*)malloc(sizeof(mp_net_stream_packet_t));
-  
+
   if(!net_read(fd,(char*)pack,sizeof(mp_net_stream_packet_t))) {
     free(pack);
     return NULL;
@@ -124,12 +124,12 @@ static int net_write(int fd, char* buf, int len) {
 
 static int write_packet(int fd, uint8_t cmd,char* data,int len) {
   mp_net_stream_packet_t* pack = malloc(len + sizeof(mp_net_stream_packet_t));
-  
+
   if(len > 0 && data)
     memcpy(pack->data,data,len);
   pack->len = len + sizeof(mp_net_stream_packet_t);
   pack->cmd = cmd;
-  
+
   //  printf("Write packet %d %d (%p) %d\n",fd,cmd,data,len);
   pack->len = le2me_16(pack->len);
   if(net_write(fd,(char*)pack,pack->len)) {

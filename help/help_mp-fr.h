@@ -53,7 +53,7 @@ static const char help_text[]=
 
 // ========================= Messages MPlayer ===========================
 
-// mplayer.c: 
+// mplayer.c:
 
 #define MSGTR_Exiting "\nSortie...\n"
 #define MSGTR_ExitingHow "\nSortie... (%s)\n"
@@ -1083,7 +1083,7 @@ static const char help_text[]=
 
 // ======================= AO Pilote Sortie Audio ========================
 
-// libao2 
+// libao2
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed "audio_out : modules alsa9 et alsa1x enlevés, utiliser plutôt -ao alsa.\n"
@@ -1244,7 +1244,7 @@ static const char help_text[]=
 
 // ======================= AF Filtres Audio ================================
 
-// libaf 
+// libaf
 #define MSGTR_AF_ValueOutOfRange MSGTR_VO_ValueOutOfRange
 
 // af_ladspa.c

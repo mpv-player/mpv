@@ -32,15 +32,15 @@
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">binutils</emphasis> - рекомендуемая версия - это
-  <emphasis role="bold">2.11.x</emphasis>. 
+  <emphasis role="bold">2.11.x</emphasis>.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> - рекомендуемые версии:
-  2.95 и 3.4+.  Известно, что 2.96 и 3.0.x генерируют испорченный код. 
+  2.95 и 3.4+.  Известно, что 2.96 и 3.0.x генерируют испорченный код.
   С 3.1 и 3.2 были проблемы, с 3.3. тоже были небольшие проблемы. На PowerPC используйте 4.x+.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XOrg/XFree86</emphasis> - рекомендуемая версия - 
+  <emphasis role="bold">XOrg/XFree86</emphasis> - рекомендуемая версия -
   4.3 или более поздняя.  Убедитесь, что также установлен
   <emphasis role="bold">пакет разработки</emphasis>, иначе это не будет работать.
   Вам необязательно иметь X, некоторые драйверы вывода видео работают и без него.
@@ -112,17 +112,17 @@
 читайте <link linkend="mencoder">секцию <application>MEncoder</application></link>.
 </para></listitem>
 <listitem><para>
-  Если у Вас есть V4L совместимый <emphasis role="bold">TV тюнер</emphasis>, и Вы хотите 
-  смотреть/захватывать и кодировать MPlayer'ом фильмы, читайте секцию 
+  Если у Вас есть V4L совместимый <emphasis role="bold">TV тюнер</emphasis>, и Вы хотите
+  смотреть/захватывать и кодировать MPlayer'ом фильмы, читайте секцию
   <link linkend="tv-input">TV вход</link>.
 </para></listitem>
 <listitem><para>
   Если у вас есть V4L совместимый <emphasis role="bold">Radio тюнер</emphasis>,
-  и вы хотите слушать/записывать MPlayer'ом радиопередачи, читайте секцию 
+  и вы хотите слушать/записывать MPlayer'ом радиопередачи, читайте секцию
   <link linkend="radio">Радио</link>.
 </para></listitem>
 <listitem><para>
-  Существует изящное <emphasis role="bold">OSD Меню</emphasis> готовое для использования. 
+  Существует изящное <emphasis role="bold">OSD Меню</emphasis> готовое для использования.
   Проверьте секцию <link linkend="subosd">OSD Меню</link>.
 </para></listitem>
 </itemizedlist>
@@ -144,7 +144,7 @@ make install
 </para>
 
 <para>
-Обратите внимание на то, что если у Вас в <filename>~/.mplayer/</filename> есть 
+Обратите внимание на то, что если у Вас в <filename>~/.mplayer/</filename> есть
 файл <filename>codecs.conf</filename>, то встроенный и системный файлы
 <filename>codecs.conf</filename> будут полностью игнорированы. Не делайте
 этого, если только Вы не собираетесь развлекаться со внутренностями <application>MPlayer</application>'а,
@@ -168,7 +168,7 @@ make install
 <filename>configure.log</filename>, они содержат информацию о том, что будет собрано,
 а что нет. Возможно Вы захотите просмотреть файлы <filename>config.h</filename> и
 <filename>config.mak</filename>.
-Если у Вас стоят какие-то библиотеки, которые не определяются 
+Если у Вас стоят какие-то библиотеки, которые не определяются
 <filename>./configure</filename>, проверьте, что у Вас установлены соответствующие
 заголовки[header files] (обычно это -dev пакеты) и их версии совпадают. Файл
 <filename>configure.log</filename> Обычно сообщит Вам, чего не хватает для сборки.
@@ -192,22 +192,22 @@ make install
 <title>Как насчёт GUI?</title>
 
 <para>
-Для GUI требуется GTK 1.2.x или GTK 2.0 (он не целиком GTK'шный, но панельки - да). Шкуры 
-хранятся в PNG формате, поэтому GTK, <systemitem class="library">libpng</systemitem> 
-(и их части для разработчиков, обычно они называются 
-<systemitem class="library">gtk-dev</systemitem> и 
+Для GUI требуется GTK 1.2.x или GTK 2.0 (он не целиком GTK'шный, но панельки - да). Шкуры
+хранятся в PNG формате, поэтому GTK, <systemitem class="library">libpng</systemitem>
+(и их части для разработчиков, обычно они называются
+<systemitem class="library">gtk-dev</systemitem> и
 <systemitem class="library">libpng-dev</systemitem>) должны быть установлены.
 Вы можете собрать GUI, указав <option>--enable-gui</option> в <option>./configure</option>.
 Затем, чтобы использовать GUI, Вы должны запускать <command>gmplayer</command>.
 </para>
 
 <para>
-Поскольку <application>MPlayer</application> не содержит ни одной шкуры, Вы должны скачать 
-их, если Вы хотите использовать GUI. См. 
+Поскольку <application>MPlayer</application> не содержит ни одной шкуры, Вы должны скачать
+их, если Вы хотите использовать GUI. См.
 <ulink url="http://www.mplayerhq.hu/dload.html">download page[страницу
 закачек]</ulink>. Они должны быть извлечены в системный каталог
-(<filename class="directory">$PREFIX/share/mplayer/skins</filename>), или в 
-<filename class="directory">$HOME/.mplayer/skins</filename>. По умолчанию, MPlayer ищет 
+(<filename class="directory">$PREFIX/share/mplayer/skins</filename>), или в
+<filename class="directory">$HOME/.mplayer/skins</filename>. По умолчанию, MPlayer ищет
 каталог <filename class="directory">default</filename>
 в этих каталогах, но вы можете использовать опцию <option>-skin <replaceable>newskin</replaceable></option>,
 или директиву конфигурационного файла <option>skin=newskin</option>, чтобы использовать
@@ -225,7 +225,7 @@ make install
 <para>
 Чтобы насладиться OSD и субтитрами, надо указать <application>MPlayer</application> какой
 шрифт использовать. Подойдет любой TrueType или специальный растровый шрифт. Тем не менее,
-рекомендуется использовать TrueType шрифты, поскольку они лучше выглядят, корректно 
+рекомендуется использовать TrueType шрифты, поскольку они лучше выглядят, корректно
 масштабируются до размера фильма, у лучше справляются с различными кодировками.
 </para>
 
@@ -238,8 +238,8 @@ make install
 Есть два способа заставить работать TrueType шрифты. Первый - указать опцию <option>-font</option>,
 чтобы указать путь к TrueType шрифту из команднов строки. Эта опция будет хорошим кандидатом на
 помещение в файл конфигурации (для подробностей смотрите страницу man руководства).
-Второй - создание символической ссылки с именем <filename>subfont.ttf</filename> на выбранный 
-файл шрифта. Либо 
+Второй - создание символической ссылки с именем <filename>subfont.ttf</filename> на выбранный
+файл шрифта. Либо
 <screen>
 ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf
 </screen>
@@ -250,17 +250,17 @@ ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/
 </para>
 
 <para>
-Если <application>MPlayer</application> был скомпилирован с поддержкой 
+Если <application>MPlayer</application> был скомпилирован с поддержкой
 <systemitem class="library">fontconfig</systemitem>, эти методы не будут работать,
 вместо этого, опция <option>-font</option> ожидает
 <systemitem class="library">fontconfig</systemitem> название шрифта,
- и по умолчанию это шрифт sans-serif. Пример: 
+ и по умолчанию это шрифт sans-serif. Пример:
 <screen>
 mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable>
 </screen>
 </para>
 <para>
-Чтобы получить список шрифтов, известных 
+Чтобы получить список шрифтов, известных
 <systemitem class="library">fontconfig</systemitem>,
 используйте <command>fc-list</command>
 </para>
@@ -272,8 +272,8 @@ mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anim
 <title>Растровые шрифты</title>
 <para>
 Если по каким-то причинам вам необходимо использовать растровый шрифт, скачайте набор таковых с
-нашего сайта. Вы можете выбирать между различными 
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO шрифтами</ulink> и 
+нашего сайта. Вы можете выбирать между различными
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO шрифтами</ulink> и
 набором шрифтов
 <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">созданных пользователями</ulink>
 в различных кодировках.
@@ -296,7 +296,7 @@ ln -s <replaceable>$PREFIX/mplayer/arial-24</replaceable> $PREFIX/mplayer/font
 Шрифты должны иметь соответствующий им <filename>font.desc</filename> файл, отображающий
 позиции юникод шрифта в кодовую страницу текста субтитров. Другое решение - иметь субтитры,
 кодированные в UTF-8 и использовать опцию <option>-utf8</option> или просто дать файлу
-с субтитрами такое же, как у видео файла, имя с расширением <filename>.utf</filename>, 
+с субтитрами такое же, как у видео файла, имя с расширением <filename>.utf</filename>,
 положив его в один каталог с фильмом.
 </para>
 </sect2>
@@ -317,7 +317,7 @@ ln -s <replaceable>$PREFIX/mplayer/arial-24</replaceable> $PREFIX/mplayer/font
 <orderedlist>
 <title>Установка</title>
 <listitem><para>
-  скомпилируйте <application>MPlayer</application>, указав 
+  скомпилируйте <application>MPlayer</application>, указав
   <filename>./configure</filename> параметр <option>--enable-menu</option>
 </para></listitem>
 <listitem><para>
@@ -328,9 +328,9 @@ ln -s <replaceable>$PREFIX/mplayer/arial-24</replaceable> $PREFIX/mplayer/font
   class="directory">.mplayer</filename>
 </para></listitem>
 <listitem><para>
-  скопируйте <filename>etc/input.conf</filename> в Ваш каталог 
+  скопируйте <filename>etc/input.conf</filename> в Ваш каталог
   <filename class="directory">.mplayer</filename>, или в системный конфигурационный
-  каталог <application>MPlayer</application>'а (по умолчанию: 
+  каталог <application>MPlayer</application>'а (по умолчанию:
   <filename class="directory">/usr/local/etc/mplayer</filename>)
 </para></listitem>
 <listitem><para>
@@ -514,7 +514,7 @@ Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHa
   пользователей:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
   <screen>sysctl dev/rtc/max-user-freq=1024</screen>
-  Можно сделать эти изменения постоянными, добавив последнюю в 
+  Можно сделать эти изменения постоянными, добавив последнюю в
   <filename>/etc/sysctl.conf</filename>.
   </para>
   <para>

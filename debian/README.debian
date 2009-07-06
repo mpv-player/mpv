@@ -11,6 +11,6 @@ mplayer for Debian
   DEB_BUILD_OPTIONS like that:
 
   eyck@ghost$ DEB_BUILD_OPTIONS="--enable-streaming" fakeroot debian/rules binary
-  
+
 
 Dariush Pietrzak <eyck@ghost.anime.pl>  Sat Jan  5 20:28:23 CET 2002

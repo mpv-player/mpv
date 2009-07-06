@@ -116,9 +116,9 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
   struct asf_priv* asf = demux->priv;
   demux_stream_t *ds=NULL;
   int close_seg=0;
-  
+
   mp_dbg(MSGT_DEMUX,MSGL_DBG4,"demux_asf.read_packet: id=%d seq=%d len=%d\n",id,seq,len);
-  
+
   if(demux->video->id==-1)
     if(demux->v_streams[id])
         demux->video->id=id;
@@ -134,7 +134,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
         ds->sh=demux->a_streams[id];
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected ASF audio ID = %d\n",ds->id);
       }
-  } else 
+  } else
   if(id==demux->video->id){
       // video
       ds=demux->video;
@@ -143,7 +143,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected ASF video ID = %d\n",ds->id);
       }
   }
-  
+
   if(ds){
     if(ds->asf_packet){
       demux_packet_t* dp=ds->asf_packet;
@@ -230,7 +230,7 @@ static void get_payload_extension_data(demuxer_t *demux, unsigned char** pp, uns
     *seg_time=0.0;
     asf->new_vid_frame_seg = 0;
 
-    for (i=0; i<ext_max; i++) {    
+    for (i=0; i<ext_max; i++) {
         uint16_t payextsize;
         uint8_t segment_marker;
 
@@ -243,12 +243,12 @@ static void get_payload_extension_data(demuxer_t *demux, unsigned char** pp, uns
             payextsize = AV_RL16(pi);
             pi+=2;
         }
-       
+
         // if this is the timing info extension then read the payload time
         if (i == ext_timing_index)
             payload_time = AV_RL64(pi+8);
-        
-        // if this is the video frame info extension then 
+
+        // if this is the video frame info extension then
         // set the keyframe indicator, the 'new frame segment' indicator
         // and (initially) the 'frame time'
         if (i == asf->vid_ext_frame_index && id==demux->video->id) {
@@ -271,7 +271,7 @@ static void get_payload_extension_data(demuxer_t *demux, unsigned char** pp, uns
             //       ^    this is new video frame marker
             //
             //   ^^^^     these bits indicate the framerate
-            //            0X4 is 29.97i, 0X3 is 25i, 0X7 is 29.97p, ???=25p 
+            //            0X4 is 29.97i, 0X3 is 25i, 0X7 is 29.97p, ???=25p
             //
             //        ^^^ these bits indicate the frame type:
             //              001 means I-frame
@@ -282,7 +282,7 @@ static void get_payload_extension_data(demuxer_t *demux, unsigned char** pp, uns
             if (asf->new_vid_frame_seg) asf->last_vid_seq = seq;
 
             if (asf->avg_vid_frame_time == 0) {
-                // set the average frame time initially (in 100ns units). 
+                // set the average frame time initially (in 100ns units).
                 // This is based on what works for known samples.
                 // It can be extended if more samples of different types can be obtained.
                 if (((segment_marker & 0XF0) >> 4) == 4) {
@@ -298,9 +298,9 @@ static void get_payload_extension_data(demuxer_t *demux, unsigned char** pp, uns
                     asf->avg_vid_frame_time = (uint64_t)((1.001 / 60.0) * 10000000.0);
                     asf->know_frame_time=1;
                 } else {
-                    // we dont know the frame time initially so 
+                    // we dont know the frame time initially so
                     // make a guess and then recalculate as we go.
-                    asf->avg_vid_frame_time = (uint64_t)((1.001 / 60.0) * 10000000.0); 
+                    asf->avg_vid_frame_time = (uint64_t)((1.001 / 60.0) * 10000000.0);
                     asf->know_frame_time=0;
                 }
             }
@@ -309,9 +309,9 @@ static void get_payload_extension_data(demuxer_t *demux, unsigned char** pp, uns
         pi +=payextsize;
     }
 
-    if (id==demux->video->id && asf->new_vid_frame_seg) {    
+    if (id==demux->video->id && asf->new_vid_frame_seg) {
         asf->vid_frame_ct++;
-        // Some samples only have timings on key frames and 
+        // Some samples only have timings on key frames and
         // the rest contain non-cronological timestamps. Interpolating
         // the values between key frames works for all samples.
         if (*keyframe) {
@@ -321,7 +321,7 @@ static void get_payload_extension_data(demuxer_t *demux, unsigned char** pp, uns
                 // Giving precedence to the 'weight' of the existing
                 // average limits damage done to new value when there is
                 // a sudden time jump which happens occasionally.
-                asf->avg_vid_frame_time = 
+                asf->avg_vid_frame_time =
                    (0.9 * asf->avg_vid_frame_time) +
                    (0.1 * ((payload_time - asf->last_key_payload_time) / asf->vid_frame_ct));
             }
@@ -359,7 +359,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
     stream_read(demux->stream,asf->packet,asf->packetsize);
     if(demux->stream->eof) return 0; // EOF
     if(asf->packetsize < 2) return 0; // Packet too short
-    
+
     {
 	    unsigned char* p=asf->packet;
             unsigned char* p_end=asf->packet+asf->packetsize;
@@ -374,13 +374,13 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
             int segs=1;
             unsigned char segsizetype=0x80;
             int seg=-1;
-            
+
             if( mp_msg_test(MSGT_DEMUX,MSGL_DBG2) ){
                 int i;
                 for(i=0;i<FFMIN(16, asf->packetsize);i++) printf(" %02X",asf->packet[i]);
                 printf("\n");
             }
-            
+
 	    // skip ECC data if present by testing bit 7 of flags
 	    // 1xxxbbbb -> ecc data present, skip bbbb byte(s)
 	    // 0xxxxxxx -> payload parsing info starts
@@ -391,7 +391,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 		flags = p[0];
 		segtype = p[1];
 	    }
-	    
+
             //if(segtype!=0x5d) printf("Warning! packet[4] != 0x5d  \n");
 
 	    p+=2; // skip flags & segtype
@@ -407,7 +407,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
             // Read padding size (padding):
 	    if(!check_varlen(p, p_end, flags>> 3)) return 0; // Not enough data
 	    padding = read_varlen(&p, flags >> 3, 0);
-	    
+
 	    if(((flags>>5)&3)!=0){
               // Explicit (absoulte) packet size
               mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Explicit packet size specified: %d  \n",plen);
@@ -463,7 +463,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
               // Read media object number (seq):
 	      if(!check_varlen(p, p_end, segtype >> 4)) break; // Not enough data
 	      seq = read_varlen(&p, segtype >> 4, 0);
-	      
+
               // Read offset or timestamp:
 	      if(!check_varlen(p, p_end, segtype >> 2)) break; // Not enough data
 	      x = read_varlen(&p, segtype >> 2, 0);
@@ -471,9 +471,9 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
               // Read replic.data len:
 	      if(!check_varlen(p, p_end, segtype)) break; // Not enough data
 	      rlen = read_varlen(&p, segtype, 0);
-	      
+
 //	      printf("### rlen=%d   \n",rlen);
-      
+
               switch(rlen){
               case 0x01: // 1 = special, means grouping
 	        //printf("grouping: %02X  \n",p[0]);
@@ -539,11 +539,11 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
                 p+=len;
                 break;
 	      }
-              
+
             } // for segs
             return 1; // success
     }
-    
+
     mp_msg(MSGT_DEMUX,MSGL_V,"%08"PRIX64":  UNKNOWN TYPE  %02X %02X %02X %02X %02X...\n",(int64_t)demux->filepos,asf->packet[0],asf->packet[1],asf->packet[2],asf->packet[3],asf->packet[4]);
     return 0;
 }
@@ -584,7 +584,7 @@ static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
     if(sh_audio){
       ds_fill_buffer(d_audio);
     }
-    
+
     if (d_video->id >= 0)
     while(1){
 	if(sh_audio && !d_audio->eof){
@@ -680,10 +680,10 @@ static void demux_close_asf(demuxer_t *demuxer) {
 
     if (asf->aud_repdata_sizes)
       free(asf->aud_repdata_sizes);
-      
+
     if (asf->vid_repdata_sizes)
       free(asf->vid_repdata_sizes);
-      
+
     free(asf);
 }
 

@@ -82,10 +82,10 @@ char * gstrcat( char ** dest,const char * src )
  if ( *dest )
   {
    tmp=malloc( strlen( *dest ) + strlen( src ) + 1 );
-   
+
    if ( tmp ) /* TODO: advanced error handling */
     {
-     strcpy( tmp,*dest ); strcat( tmp,src ); free( *dest ); 
+     strcpy( tmp,*dest ); strcat( tmp,src ); free( *dest );
     }
    }
   else
@@ -175,7 +175,7 @@ void greplace(char ***list, const char *search, const char *replace)
  (*list)[i] = gstrdup(replace);
  (*list)[i + 1] = NULL;
 }
-							    
+
 void guiInit( void )
 {
  int i;
@@ -191,7 +191,7 @@ void guiInit( void )
  if ( stream_cache_size > 0 ) { gtkCacheOn=1; gtkCacheSize=stream_cache_size; }
  else if ( stream_cache_size == 0 ) gtkCacheOn = 0;
  if ( autosync && autosync != gtkAutoSync ) { gtkAutoSyncOn=1; gtkAutoSync=autosync; }
-   
+
 #ifdef CONFIG_ASS
  gtkASS.enabled = ass_enabled;
  gtkASS.use_margins = ass_use_margins;
@@ -200,7 +200,7 @@ void guiInit( void )
 #endif
 
  gtkInit();
-// --- initialize X 
+// --- initialize X
  wsXInit( (void *)mDisplay );
 // --- load skin
  skinDirInHome=get_path("skins");
@@ -245,7 +245,7 @@ void guiInit( void )
     appMPlayer.sub.y=0;
    }
   if (guiWinID>=0) appMPlayer.mainWindow.Parent=guiWinID;
- 
+
  wsCreateWindow( &appMPlayer.subWindow,
   appMPlayer.sub.x,appMPlayer.sub.y,appMPlayer.sub.width,appMPlayer.sub.height,
   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsHideWindow,"MPlayer - Video" );
@@ -295,11 +295,11 @@ void guiInit( void )
 
  wsSetIcon( wsDisplay,appMPlayer.mainWindow.WindowID,guiIcon,guiIconMask );
  wsSetIcon( wsDisplay,appMPlayer.subWindow.WindowID,guiIcon,guiIconMask );
- 
+
  guiIntfStruct.Playing=0;
 
  if ( !appMPlayer.mainDecoration ) wsWindowDecoration( &appMPlayer.mainWindow,0 );
- 
+
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
 #if 0
  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
@@ -369,7 +369,7 @@ void guiDone( void )
    gui_main_pos_x=appMPlayer.mainWindow.X; gui_main_pos_y=appMPlayer.mainWindow.Y;
    gui_sub_pos_x=appMPlayer.subWindow.X; gui_sub_pos_y=appMPlayer.subWindow.Y;
   }
- 
+
 #ifdef CONFIG_ASS
  ass_enabled = gtkASS.enabled;
  ass_use_margins = gtkASS.use_margins;
@@ -426,7 +426,7 @@ void guiLoadFont( void )
   {
    vo_font=read_font_desc( font_name,font_factor,0 );
    if ( !vo_font ) mp_msg( MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name );
-  } 
+  }
   else
    {
     font_name=gstrdup( get_path( "font/font.desc" ) );
@@ -479,9 +479,9 @@ void guiLoadSubtitle( char * name )
    mp_msg( MSGT_GPLAYER,MSGL_INFO,MSGTR_LoadingSubtitles,name );
    subdata=sub_read_file( name, guiIntfStruct.FPS );
    if ( !subdata ) mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_CantLoadSub,name );
-   sub_name = (malloc(2 * sizeof(char*))); //when mplayer will be restarted 
-   sub_name[0] = strdup(name);             //sub_name[0] will be read 
-   sub_name[1] = NULL;  
+   sub_name = (malloc(2 * sizeof(char*))); //when mplayer will be restarted
+   sub_name[0] = strdup(name);             //sub_name[0] will be read
+   sub_name[1] = NULL;
   }
  update_set_of_subtitles();
 
@@ -530,7 +530,7 @@ int guiGetEvent( int type,char * arg )
  stream_t * stream = (stream_t *) arg;
 #ifdef CONFIG_DVDREAD
  dvd_priv_t * dvdp = (dvd_priv_t *) arg;
-#endif 
+#endif
 
  if (guiIntfStruct.mpcontext) {
    audio_out = mpctx_get_audio_out(guiIntfStruct.mpcontext);
@@ -548,7 +548,7 @@ int guiGetEvent( int type,char * arg )
    case guiCEvent:
         switch ( (int)arg )
 	 {
-	  case guiSetPlay: 
+	  case guiSetPlay:
 	       guiIntfStruct.Playing=1;
 //	       if ( !gtkShowVideoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
 	       break;
@@ -612,15 +612,15 @@ int guiGetEvent( int type,char * arg )
 	switch( stream->type )
 	 {
 #ifdef CONFIG_DVDREAD
-	  case STREAMTYPE_DVD: 
+	  case STREAMTYPE_DVD:
 	       guiGetEvent( guiSetDVD,(char *)stream->priv );
 	       break;
 #endif
 #ifdef CONFIG_VCD
-	  case STREAMTYPE_VCD: 
+	  case STREAMTYPE_VCD:
 	       {
 	        int i;
-		
+
 		if (!stream->priv)
 		{
 		    guiIntfStruct.VCDTracks=0;
@@ -678,10 +678,10 @@ int guiGetEvent( int type,char * arg )
 	 }
 
 	if ( guiIntfStruct.NoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
-	
+
 	if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM ) btnSet( evSetMoviePosition,btnDisabled );
 	 else btnSet( evSetMoviePosition,btnReleased );
-	 
+
 // -- audio
         if ( audio_out )
 	{
@@ -732,14 +732,14 @@ int guiGetEvent( int type,char * arg )
 	  vcd_track=0;
 	  dvd_title=0;
 	  force_fps=0;
-	 }				
+	 }
 	guiIntfStruct.demuxer=NULL;
 	guiIntfStruct.sh_video=NULL;
 	wsPostRedisplay( &appMPlayer.subWindow );
 	break;
    case guiSetParameters:
         guiGetEvent( guiSetDefaults,NULL );
-        switch ( guiIntfStruct.StreamType ) 
+        switch ( guiIntfStruct.StreamType )
          {
 	  case STREAMTYPE_PLAYLIST:
 	       break;
@@ -765,32 +765,32 @@ int guiGetEvent( int type,char * arg )
 #endif
 	 }
 	//if ( guiIntfStruct.StreamType != STREAMTYPE_PLAYLIST ) // Does not make problems anymore!
-	 {	
+	 {
 	  if ( guiIntfStruct.Filename ) filename=gstrdup( guiIntfStruct.Filename );
 	   else if ( filename ) guiSetFilename( guiIntfStruct.Filename,filename );
 	 }
 // --- video opts
-       
+
        if ( !video_driver_list )
 	{
          int i = 0;
            while ( video_out_drivers[i++] )
-	    if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
+	    if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
 	     {
 	      gaddlist( &video_driver_list,(char *)video_out_drivers[i - 1]->info->short_name );
 	      break;
 	     }
 	 }
-	
+
 	if ( !video_driver_list && !video_driver_list[0] ) { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player( "gui init" ); }
 
 	{
 	 int i = 0;
          guiIntfStruct.NoWindow=False;
          while ( video_out_drivers[i++] )
-	  if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
+	  if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
 	   {
-	    if  ( ( video_driver_list && !gstrcmp( video_driver_list[0],(char *)video_out_drivers[i - 1]->info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) ) 
+	    if  ( ( video_driver_list && !gstrcmp( video_driver_list[0],(char *)video_out_drivers[i - 1]->info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) )
 	      { guiIntfStruct.NoWindow=True; break; }
 	   }
 	}
@@ -809,10 +809,10 @@ int guiGetEvent( int type,char * arg )
 	   }
 	 }
 #endif
-// ---	 
+// ---
 	if ( gtkVfPP ) add_vf( "pp" );
 	 else remove_vf( "pp" );
-		 
+
 // --- audio opts
 //	if ( ao_plugin_cfg.plugin_list ) { free( ao_plugin_cfg.plugin_list ); ao_plugin_cfg.plugin_list=NULL; }
 	if (gtkAONorm)
@@ -891,14 +891,14 @@ int guiGetEvent( int type,char * arg )
 	gtkSubDumpMPSub=gtkSubDumpSrt=0;
         guiLoadFont();
 
-// --- misc		    
+// --- misc
 	if ( gtkCacheOn ) stream_cache_size=gtkCacheSize;
 	if ( gtkAutoSyncOn ) autosync=gtkAutoSync;
 
         if ( guiIntfStruct.AudioFile ) audio_stream=gstrdup( guiIntfStruct.AudioFile );
 	  else if ( guiIntfStruct.FilenameChanged ) gfree( (void**)&audio_stream );
 	  //audio_stream=NULL;
-	
+
         guiIntfStruct.DiskChanged=0;
         guiIntfStruct.FilenameChanged=0;
         guiIntfStruct.NewPlay=0;
@@ -921,7 +921,7 @@ void guiEventHandling( void )
  gtkEventHandling();
 }
 
-// --- 
+// ---
 
 float gtkEquChannels[6][10];
 
@@ -953,7 +953,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 {
  equalizer_t * eq = (equalizer_t *)vparam;
  plItem      * item = (plItem *)vparam;
- 
+
  URLItem     * url_item = (URLItem *)vparam;
  int           is_added = True;
 
@@ -988,7 +988,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	if ( plCurrent && plCurrent->next)
 	 {
 	  plCurrent=plCurrent->next;
-	  /*if ( !plCurrent && plList ) 
+	  /*if ( !plCurrent && plList )
 	   {
 	    plItem * next = plList;
 	    while ( next->next ) { if ( !next->next ) break; next=next->next; }
@@ -1026,7 +1026,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	 // Free it
 	 if ( curr->path ) free( curr->path );
 	 if ( curr->name ) free( curr->name );
-	 free( curr ); 
+	 free( curr );
         }
 	mplCurr(); // Instead of using mplNext && mplPrev
 
@@ -1040,7 +1040,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	  {
 	   if ( curr->path ) free( curr->path );
 	   if ( curr->name ) free( curr->name );
-	   free( curr ); 
+	   free( curr );
 	  }
 	  else
 	   {
@@ -1049,7 +1049,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	      next=curr->next;
 	      if ( curr->path ) free( curr->path );
 	      if ( curr->name ) free( curr->name );
-	      free( curr ); 
+	      free( curr );
 	      curr=next;
 	     }
 	   }
@@ -1201,7 +1201,7 @@ int import_file_into_gui(char* temp, int insert)
 {
   char *filename, *pathname;
   plItem * item;
-	
+
   filename = strdup(mp_basename(temp));
   pathname = strdup(temp);
   if (strlen(pathname)-strlen(filename)>0)
@@ -1231,10 +1231,10 @@ int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* confi
 {
   play_tree_iter_t* my_pt_iter=NULL;
   int result=0;
-  
+
   if (!enqueue) // Delete playlist before "appending"
     gtkSet(gtkDelPl,0,0);
-  
+
   if((my_pt_iter=pt_iter_create(&my_playtree,config)))
   {
     while ((filename=pt_iter_get_next_file(my_pt_iter))!=NULL)
@@ -1250,7 +1250,7 @@ int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* confi
   if (!enqueue)
     filename=guiIntfStruct.Filename; // Backward compatibility; if file is specified on commandline,
   				     // gmplayer does directly start in Play-Mode.
-  else 
+  else
     filename=NULL;
 
   return result;
@@ -1262,7 +1262,7 @@ int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* confi
 // The file which contained the playlist is thereby replaced with it's contents.
 
 int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* config)
-{ 
+{
   play_tree_iter_t* my_pt_iter=NULL;
   int result=0;
   plItem * save=(plItem*)gtkSet( gtkGetCurrPlItem, 0, 0); // Save current item
@@ -1271,23 +1271,23 @@ int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* conf
   {
     while ((filename=pt_iter_get_next_file(my_pt_iter))!=NULL)
     {
-      if (import_file_into_gui(filename, 1)) // insert it into the list and set plCurrent=new item 
+      if (import_file_into_gui(filename, 1)) // insert it into the list and set plCurrent=new item
         result=1;
     }
     pt_iter_destroy(&my_pt_iter);
   }
 
-  if (save) 
+  if (save)
     gtkSet(gtkSetCurrPlItem, 0, (void*)save);
   else
     gtkSet(gtkSetCurrPlItem, 0, (void*)plList); // go to head, if plList was empty before
 
   if (save && result)
     gtkSet(gtkDelCurrPlItem, 0, 0);
-  
+
   mplCurr();  // Update filename
   filename=NULL;
-  
+
   return result;
 }
 

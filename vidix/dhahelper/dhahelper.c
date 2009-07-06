@@ -34,10 +34,10 @@
 
     Usage:
 	mknod -m 666 /dev/dhahelper c 180 0
-	
+
 	Also you can change the major number, setting the "dhahelper_major"
 	module parameter, the default is 180, specified in dhahelper.h.
-	
+
 	Note: do not use other than minor==0, the module forbids it.
 
     TODO:
@@ -236,7 +236,7 @@ static int dhahelper_ioctl(struct inode *inode, struct file *file,
 		    printk(KERN_ERR "dhahelper: failed copy to userspace\n");
 		return -EFAULT;
 	    }
-	    
+
 	    break;
 	}
 	case DHAHELPER_MEMORY:
@@ -249,7 +249,7 @@ static int dhahelper_ioctl(struct inode *inode, struct file *file,
 		    printk(KERN_ERR "dhahelper: failed copy from userspace\n");
 		return -EFAULT;
 	    }
-	    
+
 	    switch(mem.operation)
 	    {
 		case MEMORY_OP_MAP:
@@ -271,14 +271,14 @@ static int dhahelper_ioctl(struct inode *inode, struct file *file,
 			    mem.operation);
 		    return -EINVAL;
 	    }
-	    
+
 	    if (copy_to_user((dhahelper_memory_t *)arg, &mem, sizeof(dhahelper_memory_t)))
 	    {
 		if (dhahelper_verbosity > 0)
 		    printk(KERN_ERR "dhahelper: failed copy to userspace\n");
 		return -EFAULT;
 	    }
-	    
+
 	    break;
 	}
 	default:
@@ -298,11 +298,11 @@ static int dhahelper_mmap(struct file *file, struct vm_area_struct *vma)
 	    printk(KERN_ERR "dhahelper: mapping not requested before mmap\n");
 	return -EFAULT;
     }
-    
+
     if (dhahelper_verbosity > 1)
 	printk(KERN_INFO "dhahelper: mapping %x (size: %x)\n",
 	    last_mem_request.start+last_mem_request.offset, last_mem_request.size);
-    
+
     if (remap_page_range(0, last_mem_request.start + last_mem_request.offset,
 	last_mem_request.size, vma->vm_page_prot))
     {
@@ -342,7 +342,7 @@ static struct file_operations dhahelper_fops =
 
 #if KERNEL_VERSION < KERNEL_VERSION(2,4,0)
 int init_module(void)
-#else 
+#else
 static int __init init_dhahelper(void)
 #endif
 {
@@ -355,7 +355,7 @@ static int __init init_dhahelper(void)
 		dhahelper_major);
 	return -EIO;
     }
-    
+
     return 0;
 }
 

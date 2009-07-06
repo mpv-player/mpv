@@ -122,7 +122,7 @@ static int parse_args(menu_t* menu,char* args) {
       mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] syntax error at line: %d\n",parser->line);
       asx_parser_free(parser);
       return -1;
-    } else if(r == 0) {      
+    } else if(r == 0) {
       asx_parser_free(parser);
       if(!m)
 	mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] No entry found in the menu definition.\n");
@@ -160,7 +160,7 @@ static int open_cmdlist(menu_t* menu, char* args) {
     mp_tmsg(MSGT_GLOBAL,MSGL_WARN,"[MENU] List menu needs an argument.\n");
     return 0;
   }
- 
+
   menu_list_init(menu);
   if(!parse_args(menu,args))
     return 0;

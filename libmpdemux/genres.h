@@ -18,7 +18,7 @@
  ***********************************
  * FILE: GENRES.H
  * NAME: ID3EDIT - ID3 tag v 1.1 editor
- * DESCRIPTION: Genres character array 
+ * DESCRIPTION: Genres character array
  * AUTHOR: Jason Carter
  ***********************************
  *

@@ -235,7 +235,7 @@ Jak widzisz, <systemitem class="library">libavformat</systemitem> pozwala
 <application>MEncoderowi</application> tworzyć sporą ilość różnych formatów.
 Niestety, ponieważ <application>MEncoder</application> nie był tworzony
 z myślą o innych formatach niż AVI, powinieneś mieć paranoidalne podejście do
-wynikowych plików. 
+wynikowych plików.
 Dokładnie sprawdź czy jest prawidłowa synchronizacja audio/video i czy plik
 może zostać prawidłowo odtworzony przez odtwarzacze inne niż
 <application>MPlayer</application>.
@@ -465,7 +465,7 @@ się za bardzo docelowymi szybkościami transmisji.
 
 <para>
 Często zachodzi potrzeba zmiany wielkości obrazu. Powodów tego może być wiele:
-zmniejszenie rozmiaru pliku, przepustowość sieci, itd. Większość ludzi stosuje 
+zmniejszenie rozmiaru pliku, przepustowość sieci, itd. Większość ludzi stosuje
 przeskalowywanie nawet przy konwertowaniu płyt DVD, SVCD do DivX AVI. Jeżeli
 chcesz przeskalowywać, przeczytaj sekcję o <link linkend="aspect">zachowywaniu proporcji obrazu</link>.
 </para>
@@ -597,7 +597,7 @@ Tworzenie plików MPEG-4 z jawnie podanej listy plików JPEG (list.txt w aktualn
 katalogu, zawiera listę plików, które mają zostać użyte jako źródło, po jednym
 w każdym wierszu):
 <screen>
-mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
+mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \
     -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>wyjście.avi</replaceable>
 </screen>
 </para>

@@ -35,7 +35,7 @@
  * to change too much code
  */
 #include <smem.h>
- 
+
 static unsigned char *pciConfBase;
 
 static __inline__ void enable_os_io(void)
@@ -54,23 +54,23 @@ static __inline__ void disable_os_io(void)
 }
 
 #include <smem.h>
- 
+
 static unsigned char *pciConfBase;
- 
+
 static __inline__ unsigned long
 static swapl(unsigned long val)
 {
 	unsigned char *p = (unsigned char *)&val;
 	return (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | (p[0] << 0);
 }
- 
- 
+
+
 #define BUS(tag) (((tag)>>16)&0xff)
 #define DFN(tag) (((tag)>>8)&0xff)
- 
+
 #define PCIBIOS_DEVICE_NOT_FOUND	0x86
 #define PCIBIOS_SUCCESSFUL		0x00
- 
+
 static int pciconfig_read(
           unsigned char bus,
           unsigned char dev,
@@ -80,7 +80,7 @@ static int pciconfig_read(
 {
 	unsigned long _val;
 	unsigned long *ptr;
- 
+
 	dev >>= 3;
 	if (bus || dev >= 16) {
 		*val = 0xFFFFFFFF;
@@ -92,7 +92,7 @@ static int pciconfig_read(
 	*val = _val;
 	return PCIBIOS_SUCCESSFUL;
 }
- 
+
 static int pciconfig_write(
           unsigned char bus,
           unsigned char dev,
@@ -102,7 +102,7 @@ static int pciconfig_write(
 {
 	unsigned long _val;
 	unsigned long *ptr;
- 
+
 	dev >>= 3;
 	_val = swapl(val);
 	if (bus || dev >= 16) {

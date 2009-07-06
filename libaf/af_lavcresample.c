@@ -34,7 +34,7 @@ typedef struct af_resample_s{
     int16_t *in[AF_NCH];
     int in_alloc;
     int index;
-    
+
     int filter_length;
     int linear;
     int phase_shift;
@@ -45,7 +45,7 @@ typedef struct af_resample_s{
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
-  af_resample_t* s   = (af_resample_t*)af->setup; 
+  af_resample_t* s   = (af_resample_t*)af->setup;
   af_data_t *data= (af_data_t*)arg;
   int out_rate, test_output_res; // helpers for checking input format
 
@@ -83,7 +83,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Deallocate memory 
+// Deallocate memory
 static void uninit(struct af_instance_s* af)
 {
     if(af->data)
@@ -101,7 +101,7 @@ static void uninit(struct af_instance_s* af)
 
 // Filter data through filter
 static af_data_t* play(struct af_instance_s* af, af_data_t* data)
-{    
+{
   af_resample_t *s = af->setup;
   int i, j, consumed, ret;
   int16_t *in = (int16_t*)data->audio;
@@ -110,14 +110,14 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   int in_len  = data->len/(2*chans);
   int out_len = in_len * af->mul + 10;
   int16_t tmp[AF_NCH][out_len];
-    
+
   if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
       return NULL;
-  
+
   out= (int16_t*)af->data->audio;
-  
+
   out_len= min(out_len, af->data->len/(2*chans));
-  
+
   if(s->in_alloc < in_len + s->index){
       s->in_alloc= in_len + s->index;
       for(i=0; i<chans; i++){
@@ -145,7 +145,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
       ret= av_resample(s->avrctx, tmp[i], s->in[i], &consumed, in_len, out_len, i+1 == chans);
   }
   out_len= ret;
-  
+
   s->index= in_len - consumed;
   for(i=0; i<chans; i++){
       memmove(s->in[i], s->in[i] + consumed, s->index*sizeof(int16_t));

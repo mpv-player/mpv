@@ -51,7 +51,7 @@ int my_read_gif(GifFileType *gif, uint8_t *buf, int len) {
   return stream_read(gif->UserData, buf, len);
 }
 #endif
-  
+
 static int gif_check_file(demuxer_t *demuxer)
 {
   if (stream_read_int24(demuxer->stream) == GIF_SIGNATURE)
@@ -125,7 +125,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
           // http://samples.mplayerhq.hu/GIF/broken-gif/CLAIRE.GIF
           if (refmode == 0) refmode = 1;
           frametime = (p[3] << 8) | p[2]; // set the time, centiseconds
-          transparent_col = p[4];  
+          transparent_col = p[4];
         }
         priv->current_pts += frametime;
       } else if ((code == 0xFE) && (verbose)) { // comment extension
@@ -151,7 +151,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
       }
     }
   }
-  
+
   if (DGifGetImageDesc(gif) == GIF_ERROR) {
     PrintGifError();
     return 0; // oops
@@ -164,7 +164,7 @@ static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     fast_memcpy(dp->buffer, priv->refimg, priv->w * priv->h);
   else
     memset(dp->buffer, gif->SBackGroundColor, priv->w * priv->h);
-  
+
   if (DGifGetLine(gif, buf, len) == GIF_ERROR) {
     PrintGifError();
     return 0; // oops
@@ -275,10 +275,10 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   sh_video->ds = demuxer->video;
 
   sh_video->format = mmioFOURCC(8, 'R', 'G', 'B');
-  
+
   sh_video->fps = 5.0f;
   sh_video->frametime = 1.0f / sh_video->fps;
-  
+
   sh_video->bih = malloc(sizeof(BITMAPINFOHEADER) + (256 * 4));
   sh_video->bih->biCompression = sh_video->format;
   sh_video->bih->biWidth = priv->w = (uint16_t)gif->SWidth;
@@ -287,7 +287,7 @@ static demuxer_t* demux_open_gif(demuxer_t* demuxer)
   sh_video->bih->biPlanes = 2;
   priv->palette = (unsigned char *)(sh_video->bih + 1);
   priv->refimg = malloc(priv->w * priv->h);
-  
+
   priv->gif = gif;
   demuxer->priv = priv;
 

@@ -72,17 +72,17 @@ int strtocolor(char** q, uint32_t* res)
 	uint32_t color = 0;
 	int result;
 	char* p = *q;
-	
-	if (*p == '&') ++p; 
+
+	if (*p == '&') ++p;
 	else mp_msg(MSGT_ASS, MSGL_DBG2, "suspicious color format: \"%s\"\n", p);
-	
-	if (*p == 'H' || *p == 'h') { 
+
+	if (*p == 'H' || *p == 'h') {
 		++p;
 		result = mystrtou32(&p, 16, &color);
 	} else {
 		result = mystrtou32(&p, 0, &color);
 	}
-	
+
 	{
 		unsigned char* tmp = (unsigned char*)(&color);
 		unsigned char b;

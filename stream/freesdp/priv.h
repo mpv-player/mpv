@@ -51,13 +51,13 @@
 
 /**
  * @example formatdemo.c
- * 
+ *
  * A basic SDP descriptions formatter based on FreeSDP.
  **/
 
 /**
  * @example parsedemo.c
- * 
+ *
  * A basic SDP descriptions parser based on FreeSDP.
  **/
 

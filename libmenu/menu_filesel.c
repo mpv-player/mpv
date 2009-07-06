@@ -63,7 +63,7 @@ struct menu_priv_s {
   char* file_action;
   char* dir_action;
   char** actions;
-  char* filter; 
+  char* filter;
 };
 
 static struct menu_priv_s cfg_dflt = {
@@ -103,7 +103,7 @@ static char* replace_path(char* title , char* dir , int escape) {
   if(p) {
     int tl = strlen(title);
     int dl = strlen(dir);
-    int t1l = p-title; 
+    int t1l = p-title;
     int l = tl - 2 + dl;
     char *r, *n, *d = dir;
 
@@ -294,7 +294,7 @@ static int open_dir(menu_t* menu,char* args) {
         mp_tmsg(MSGT_GLOBAL,MSGL_ERR,"[MENU] realloc error: %s\n", strerror(errno));
 	n--;
         goto bailout;
-      } 
+      }
       namelist=tp;
     }
 
@@ -304,7 +304,7 @@ static int open_dir(menu_t* menu,char* args) {
       n--;
       goto bailout;
     }
-     
+
     strcpy(namelist[n], dp->d_name);
     if(S_ISDIR(st.st_mode))
       strcat(namelist[n], "/");
@@ -432,7 +432,7 @@ static int open_fs(menu_t* menu, char* args) {
     if (!path || path[0] == '\0') {
       struct stat st;
       int path_fp;
-      
+
       path_fp = open (MENU_KEEP_PATH, O_RDONLY);
       if (path_fp >= 0) {
         if (!fstat (path_fp, &st) && (st.st_size > 0)) {
@@ -448,7 +448,7 @@ static int open_fs(menu_t* menu, char* args) {
       }
     }
   }
-  
+
   getcwd(wd,PATH_MAX);
   if (!path || path[0] == '\0') {
 #if 0
@@ -494,7 +494,7 @@ static int open_fs(menu_t* menu, char* args) {
 
   return r;
 }
-  
+
 const menu_info_t menu_info_filesel = {
   "File seletor menu",
   "filesel",

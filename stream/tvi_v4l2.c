@@ -80,7 +80,7 @@ struct map {
 typedef struct {
     unsigned char               *data;     ///< frame contents
     long long                   timestamp; ///< frame timestamp
-    int                         framesize; ///< actual frame size 
+    int                         framesize; ///< actual frame size
 } video_buffer_entry;
 
 /* private data */
@@ -330,7 +330,7 @@ static int pixfmt2depth(int pixfmt)
     return 0;
 }
 
-static int amode2v4l(int amode) 
+static int amode2v4l(int amode)
 {
     switch (amode) {
     case 0:
@@ -492,7 +492,7 @@ static int getstd(priv_t *priv)
  *                                                                     *
 \***********************************************************************/
 
-static int set_mute(priv_t *priv, int value) 
+static int set_mute(priv_t *priv, int value)
 {
     struct v4l2_control control;
     control.id = V4L2_CID_AUDIO_MUTE;
@@ -535,7 +535,7 @@ static int set_control(priv_t *priv, struct v4l2_control *control, int val_signe
                 (qctrl.maximum - qctrl.default_value) / 50;
         }
     }
-    
+
 
     if (ioctl(priv->video_fd, VIDIOC_S_CTRL, control) < 0) {
         mp_msg(MSGT_TV, MSGL_ERR,"%s: ioctl set %s %d failed: %s\n",
@@ -609,7 +609,7 @@ static int vbi_init(priv_t* priv,char* device)
         mp_msg(MSGT_TV,MSGL_ERR,"vbi: could not open device %s\n",priv->vbi_dev);
         return  TVI_CONTROL_FALSE;
     }
-    
+
     if(ioctl(vbi_fd,VIDIOC_QUERYCAP,&cap)<0){
         mp_msg(MSGT_TV,MSGL_ERR,"vbi: Query capatibilities failed for %s\n",priv->vbi_dev);
         close(vbi_fd);
@@ -662,7 +662,7 @@ static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
     ptsp->count[1]=fmt.fmt.vbi.count[1];
     ptsp->bufsize = ptsp->samples_per_line * (ptsp->count[0] + ptsp->count[1]);
 
-    mp_msg(MSGT_TV,MSGL_V,"vbi_get_props: sampling_rate=%d,offset:%d,samples_per_line: %d\n interlaced:%s, count=[%d,%d]\n",    
+    mp_msg(MSGT_TV,MSGL_V,"vbi_get_props: sampling_rate=%d,offset:%d,samples_per_line: %d\n interlaced:%s, count=[%d,%d]\n",
         ptsp->sampling_rate,
         ptsp->offset,
         ptsp->samples_per_line,
@@ -694,7 +694,7 @@ static void *vbi_grabber(void *data)
     mp_msg(MSGT_TV,MSGL_V,"vbi: vbi capture thread started.\n");
 
     while (!priv->vbi_shutdown){
-        bytes=read(priv->vbi_fd,buf,tsp.bufsize);	
+        bytes=read(priv->vbi_fd,buf,tsp.bufsize);
         if(bytes<0 && errno==EINTR)
             continue;
 	if (bytes!=tsp.bufsize){
@@ -759,7 +759,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         if (getfmt(priv) < 0) return TVI_CONTROL_FALSE;
         priv->format.fmt.pix.pixelformat = fcc_mp2vl(*(int *)arg);
         priv->format.fmt.pix.field = V4L2_FIELD_ANY;
-            
+
         priv->mp_format = *(int *)arg;
         mp_msg(MSGT_TV, MSGL_V, "%s: set format: %s\n", info.short_name,
                pixfmt2name(priv->format.fmt.pix.pixelformat));
@@ -1122,7 +1122,7 @@ static int uninit(priv_t *priv)
         free(priv->vbi_dev);
 	priv->vbi_dev=0;
     }
-    
+
 #endif
 
     priv->shutdown = 1;
@@ -1398,7 +1398,7 @@ static int get_capture_buffer_size(priv_t *priv)
     } else {
 #ifdef HAVE_SYS_SYSINFO_H
         struct sysinfo si;
-        
+
         sysinfo(&si);
         if (si.totalram<2*1024*1024) {
             bufsize = 1024*1024;
@@ -1409,10 +1409,10 @@ static int get_capture_buffer_size(priv_t *priv)
         bufsize = 16*1024*1024;
 #endif
     }
-    
+
     cnt = bufsize/priv->format.fmt.pix.sizeimage;
     if (cnt < 2) cnt = 2;
-    
+
     return cnt;
 }
 
@@ -1433,7 +1433,7 @@ static int start(priv_t *priv)
     } else {
         priv->video_buffer_size_max = get_capture_buffer_size(priv);
     }
-    
+
     if (!priv->tv_param->noaudio) {
         setup_audio_buffer_sizes(priv);
         priv->audio_skew_buffer = calloc(priv->aud_skew_cnt, sizeof(long long));
@@ -1484,10 +1484,10 @@ static int start(priv_t *priv)
                    "You will probably experience heavy framedrops.\n");
         }
     }
-    
+
     {
         int bytesperline = priv->format.fmt.pix.width*pixfmt2depth(priv->format.fmt.pix.pixelformat)/8;
-        
+
         mp_msg(MSGT_TV, MSGL_V, "Using a ring buffer for maximum %d frames, %d MB total size.\n",
                priv->video_buffer_size_max,
                priv->video_buffer_size_max*priv->format.fmt.pix.height*bytesperline/(1024*1024));
@@ -1505,14 +1505,14 @@ static int start(priv_t *priv)
     priv->video_head = 0;
     priv->video_tail = 0;
     priv->video_cnt = 0;
-    
+
     /* request buffers */
     if (priv->immediate_mode) {
         request.count = 2;
     } else {
         request.count = BUFFER_COUNT;
     }
-    
+
     request.type  = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     request.memory = V4L2_MEMORY_MMAP;
     if (ioctl(priv->video_fd, VIDIOC_REQBUFS, &request) < 0) {
@@ -1575,7 +1575,7 @@ static int start(priv_t *priv)
     priv->first = 1;
 
     set_mute(priv, 0);
-    
+
     return 1;
 }
 
@@ -1629,7 +1629,7 @@ static void *video_grabber(void *data)
     for (priv->frames = 0; !priv->shutdown;)
     {
         int ret;
-        
+
         if (priv->immediate_mode) {
             while (priv->video_cnt == priv->video_buffer_size_max) {
                 usleep(10000);
@@ -1638,7 +1638,7 @@ static void *video_grabber(void *data)
                 }
             }
         }
-                
+
         FD_ZERO (&rdset);
         FD_SET (priv->video_fd, &rdset);
 
@@ -1691,7 +1691,7 @@ static void *video_grabber(void *data)
                         mp_msg(MSGT_TV, MSGL_ERR, "%s: ioctl queue buffer failed: %s\n",
                                info.short_name, strerror(errno));
                         return 0;
-                    }                
+                    }
                 }
             }
             continue;
@@ -1767,7 +1767,7 @@ static void *video_grabber(void *data)
                 priv->video_ringbuffer[priv->video_tail].timestamp = interval - skew;
                 if (priv->audio_insert_null_samples && priv->video_ringbuffer[priv->video_tail].timestamp > 0) {
                     pthread_mutex_lock(&priv->audio_mutex);
-                    priv->video_ringbuffer[priv->video_tail].timestamp += 
+                    priv->video_ringbuffer[priv->video_tail].timestamp +=
                         (priv->audio_null_blocks_inserted
                          - priv->dropped_frames_timeshift/priv->audio_usecs_per_block)
                         *priv->audio_usecs_per_block;
@@ -1815,8 +1815,8 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 
 static int get_video_framesize(priv_t *priv)
 {
-    /* 
-      this routine will be called before grab_video_frame 
+    /*
+      this routine will be called before grab_video_frame
       thus let's return topmost frame's size
     */
     if (priv->video_cnt)
@@ -1838,7 +1838,7 @@ static void read_doublespeed(priv_t *priv)
     short *s;
     short *d;
     int i;
-    
+
     audio_in_read_chunk(&priv->audio_in, bufx);
     audio_in_read_chunk(&priv->audio_in, bufx+priv->audio_in.blocksize);
 
@@ -1848,7 +1848,7 @@ static void read_doublespeed(priv_t *priv)
         *d++ = *s++;
         *s++;
     }
-    
+
 }
 #endif
 
@@ -1930,7 +1930,7 @@ static void *audio_grabber(void *data)
         priv->audio_skew += priv->audio_skew_delta_total/2;
 
         // now finally, priv->audio_skew contains fairly good approximation
-        // of the current value 
+        // of the current value
 
         // current skew factor (assuming linearity)
         // used for further interpolation in video_grabber
@@ -1948,7 +1948,7 @@ static void *audio_grabber(void *data)
         prev_skew = priv->audio_skew;
         priv->audio_skew += priv->audio_start_time - priv->first_frame;
         pthread_mutex_unlock(&priv->skew_mutex);
-        
+
 //        fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
 
         pthread_mutex_lock(&priv->audio_mutex);

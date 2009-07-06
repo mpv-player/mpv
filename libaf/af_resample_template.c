@@ -21,8 +21,8 @@
 /* This file contains the resampling engine, the sample format is
    controlled by the FORMAT parameter, the filter length by the L
    parameter and the resampling type by UP and DN. This file should
-   only be included by af_resample.c 
-*/ 
+   only be included by af_resample.c
+*/
 
 #undef L
 #undef SHIFT
@@ -46,16 +46,16 @@
 #if defined(FORMAT_I)
 #define SHIFT >>16
 #define FORMAT int16_t
-#else 
+#else
 #define SHIFT
 #define FORMAT float
 #endif
 
 // Short filter
-#if defined(L8) 
+#if defined(L8)
 
 #define L   	8	// Filter length
-// Unrolled loop to speed up execution 
+// Unrolled loop to speed up execution
 #define FIR(x,w,y) \
   (y[0])  = ( w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+w[3]*x[3] \
             + w[4]*x[4]+w[5]*x[5]+w[6]*x[6]+w[7]*x[7] ) SHIFT
@@ -65,7 +65,7 @@
 #else  /* L8/L16 */
 
 #define L   	16
-// Unrolled loop to speed up execution 
+// Unrolled loop to speed up execution
 #define FIR(x,w,y) \
   y[0] = ( w[0] *x[0] +w[1] *x[1] +w[2] *x[2] +w[3] *x[3] \
          + w[4] *x[4] +w[5] *x[5] +w[6] *x[6] +w[7] *x[7] \
@@ -74,7 +74,7 @@
 
 #endif /* L8/L16 */
 
-// Macro to add data to circular que 
+// Macro to add data to circular que
 #define ADDQUE(xi,xq,in)\
   xq[xi]=xq[(xi)+L]=*(in);\
   xi=((xi)-1)&(L-1);
@@ -83,15 +83,15 @@
 
   uint32_t		ci    = l->nch; 	// Index for channels
   uint32_t		nch   = l->nch;   	// Number of channels
-  uint32_t		inc   = s->up/s->dn; 
-  uint32_t		level = s->up%s->dn; 
+  uint32_t		inc   = s->up/s->dn;
+  uint32_t		level = s->up%s->dn;
   uint32_t		up    = s->up;
   uint32_t		dn    = s->dn;
   uint32_t		ns    = c->len/l->bps;
   register FORMAT*	w     = s->w;
 
   register uint32_t	wi    = 0;
-  register uint32_t	xi    = 0; 
+  register uint32_t	xi    = 0;
 
   // Index current channel
   while(ci--){
@@ -126,8 +126,8 @@
 #if defined(DN) /* DN */
   uint32_t		ci    = l->nch; 	// Index for channels
   uint32_t		nch   = l->nch;   	// Number of channels
-  uint32_t		inc   = s->dn/s->up; 
-  uint32_t		level = s->dn%s->up; 
+  uint32_t		inc   = s->dn/s->up;
+  uint32_t		level = s->dn%s->up;
   uint32_t		up    = s->up;
   uint32_t		dn    = s->dn;
   uint32_t		ns    = c->len/l->bps;
@@ -136,7 +136,7 @@
   register int32_t	i     = 0;
   register uint32_t	wi    = 0;
   register uint32_t	xi    = 0;
-  
+
   // Index current channel
   while(ci--){
     // Temporary pointers
@@ -156,7 +156,7 @@
 	len++;	out+=nch;
 
 	// Update wi to point at the correct polyphase component
-	wi=(wi+dn)%up;  
+	wi=(wi+dn)%up;
 
 	// Insert i number of new samples in queue
 	i = inc;

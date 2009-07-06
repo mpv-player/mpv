@@ -412,7 +412,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 \
  </para></listitem>
  </itemizedlist>
  </para>
- 
+
  <example id="encode_for_psp">
  <title>Encodage pour PSP</title>
  <para>
@@ -642,13 +642,13 @@ w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell
 Création d'un fichier MPEG4 depuis une liste de fichiers JPEG (le fichier list.txt contenu
 dans le répertoire courant, liste les fichiers utilisés comme source, un par ligne):
 <screen>
-mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
+mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \
     -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>sortie.avi</replaceable>
 </screen>
 </para>
 </informalexample>
 
-Il est possible de mélanger différents types d'images, quelque soit 
+Il est possible de mélanger différents types d'images, quelque soit
 la méthode utilisée &mdash; fichiers individuels, joker( i.e * )
 ou fichier avec liste &mdash; à condition que, bien sûr, elles soient de même dimension.
 De fait, vous pouvez par exemple, prendre une image de type PNG

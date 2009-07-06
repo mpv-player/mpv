@@ -200,7 +200,7 @@ static int init(int rate,int channels,int format,int flags)
     }
 
     wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec * wformat.Format.nBlockAlign;
- 
+
     //open sound device
     //WAVE_MAPPER always points to the default wave device on the system
     result = waveOutOpen(&hWaveOut,WAVE_MAPPER,(WAVEFORMATEX*)&wformat,(DWORD_PTR)waveOutProc,0,CALLBACK_FUNCTION);

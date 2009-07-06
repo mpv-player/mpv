@@ -37,7 +37,7 @@
 #include "video_out_internal.h"
 #include "subopt-helper.h"
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
 	"PNG file",
 	"png",
@@ -55,21 +55,21 @@ struct pngdata {
 	FILE * fp;
 	png_structp png_ptr;
 	png_infop info_ptr;
-	enum {OK,ERROR} status;  
+	enum {OK,ERROR} status;
 };
 
 static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
-    
+
 	    if(z_compression == 0) {
  		    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_PNG] Warning: compression level set to 0, compression disabled!\n");
  		    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_PNG] Info: Use -vo png:z=<n> to set compression level from 0 to 9.\n");
  		    mp_tmsg(MSGT_VO,MSGL_INFO, "[VO_PNG] Info: (0 = no compression, 1 = fastest, lowest - 9 best, slowest compression)\n");
-	    }	    
-    
+	    }
+
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Compression level %i\n", z_compression);
-	  	
+
     return 0;
 }
 
@@ -86,13 +86,13 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
        (PNG_LIBPNG_VER_STRING, NULL,
         NULL, NULL);
     png.info_ptr = png_create_info_struct(png.png_ptr);
-   
+
     if (!png.png_ptr) {
        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Failed to init png pointer\n");
        png.status = ERROR;
        return png;
-    }   
-    
+    }
+
     if (!png.info_ptr) {
        mp_msg(MSGT_VO,MSGL_DBG2, "PNG Failed to init png infopointer\n");
        png_destroy_write_struct(&png.png_ptr,
@@ -100,7 +100,7 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
        png.status = ERROR;
        return png;
     }
-    
+
     if (setjmp(png.png_ptr->jmpbuf)) {
         mp_msg(MSGT_VO,MSGL_DBG2, "PNG Internal error!\n");
         png_destroy_write_struct(&png.png_ptr, &png.info_ptr);
@@ -108,48 +108,48 @@ static struct pngdata create_png (char * fname, int image_width, int image_heigh
         png.status = ERROR;
         return png;
     }
-    
+
     png.fp = fopen (fname, "wb");
     if (png.fp == NULL) {
  	mp_tmsg(MSGT_VO,MSGL_WARN, "\n[VO_PNG] Error opening '%s' for writing!\n", strerror(errno));
        	png.status = ERROR;
        	return png;
-    }	    
-    
+    }
+
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Init IO\n");
     png_init_io(png.png_ptr, png.fp);
 
     /* set the zlib compression level */
     png_set_compression_level(png.png_ptr, z_compression);
-		    
-    
+
+
     /*png_set_IHDR(png_ptr, info_ptr, width, height,
        bit_depth, color_type, interlace_type,
        compression_type, filter_type)*/
     png_set_IHDR(png.png_ptr, png.info_ptr, image_width, image_height,
        8, use_alpha ? PNG_COLOR_TYPE_RGBA : PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
        PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-    
+
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write Info\n");
     png_write_info(png.png_ptr, png.info_ptr);
-    
+
     if(swapped) {
         mp_msg(MSGT_VO,MSGL_DBG2, "PNG Set BGR Conversion\n");
     	png_set_bgr(png.png_ptr);
-    }	
+    }
 
     png.status = OK;
     return png;
-}    
-       
+}
+
 static uint8_t destroy_png(struct pngdata png) {
-	    
+
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Write End\n");
     png_write_end(png.png_ptr, png.info_ptr);
 
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Destroy Write Struct\n");
     png_destroy_write_struct(&png.png_ptr, &png.info_ptr);
-    
+
     fclose (png.fp);
 
     return 0;
@@ -163,7 +163,7 @@ static uint32_t draw_image(mp_image_t* mpi){
 
     // if -dr or -slices then do nothing:
     if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
-    
+
     snprintf (buf, 100, "%08d.png", ++framenum);
 
     png = create_png(buf, mpi->w, mpi->h, IMGFMT_IS_BGR(mpi->imgfmt));
@@ -171,7 +171,7 @@ static uint32_t draw_image(mp_image_t* mpi){
     if(png.status){
  	    mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_PNG] Error in create_png.\n");
 	    return 1;
-    }	     
+    }
 
     mp_msg(MSGT_VO,MSGL_DBG2, "PNG Creating Row Pointers\n");
     for ( k = 0; k < mpi->h; k++ )

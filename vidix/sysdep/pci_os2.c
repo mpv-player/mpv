@@ -37,7 +37,7 @@ static __inline__ int enable_os_io(void)
 	ULONG dlen,action;
 	APIRET rc;
 	static char *ioDrvPath = "/dev/fastio$";
- 
+
 	if (DosOpen((PSZ)ioDrvPath, (PHFILE)&hfd, (PULONG)&action,
 	   (ULONG)0, FILE_SYSTEM, FILE_OPEN,
 	   OPEN_SHARE_DENYNONE|OPEN_FLAGS_NOINHERIT|OPEN_ACCESS_READONLY,
@@ -47,9 +47,9 @@ static __inline__ int enable_os_io(void)
 		return 42;
 	}
 	callgate[0] = callgate[1] = 0;
- 
+
 /* Get callgate from driver for fast io to ports and other stuff */
- 
+
 	rc = DosDevIOCtl(hfd, (ULONG)0x76, (ULONG)0x64,
 		NULL, 0, NULL,
 		(ULONG*)&callgate[2], sizeof(USHORT), &dlen);
@@ -59,14 +59,14 @@ static __inline__ int enable_os_io(void)
 		DosClose(hfd);
 		return 42;
 	}
- 
+
 /* Calling callgate with function 13 sets IOPL for the program */
- 
+
 	__asm__ volatile ("movl $13,%%ebx;.byte 0xff,0x1d;.long _callgate"
 			: /*no outputs */
 			: /*no inputs */
 			: "eax","ebx","ecx","edx","cc");
- 
+
         DosClose(hfd);
 	return 0;
 }

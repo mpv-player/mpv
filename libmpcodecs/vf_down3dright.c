@@ -146,4 +146,3 @@ const vf_info_t vf_info_down3dright = {
 	open,
 	NULL
 };
-

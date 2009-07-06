@@ -50,16 +50,16 @@ write_frame_g200(uint8_t *y,uint8_t *cr, uint8_t *cb)
 	dest = mga_vid_base;
 	bespitch = (config.src_width + 31) & ~31;
 
-	for(h=0; h < config.src_height; h++) 
+	for(h=0; h < config.src_height; h++)
 	{
 		memcpy(dest, y, config.src_width);
 		y += config.src_width;
 		dest += bespitch;
 	}
 
-	for(h=0; h < config.src_height/2; h++) 
+	for(h=0; h < config.src_height/2; h++)
 	{
-		for(w=0; w < config.src_width/2; w++) 
+		for(w=0; w < config.src_width/2; w++)
 		{
 			*dest++ = *cb++;
 			*dest++ = *cr++;
@@ -77,21 +77,21 @@ write_frame_g400(uint8_t *y,uint8_t *cr, uint8_t *cb)
 	dest = mga_vid_base;
 	bespitch = (config.src_width + 31) & ~31;
 
-	for(h=0; h < config.src_height; h++) 
+	for(h=0; h < config.src_height; h++)
 	{
 		memcpy(dest, y, config.src_width);
 		y += config.src_width;
 		dest += bespitch;
 	}
 
-	for(h=0; h < config.src_height/2; h++) 
+	for(h=0; h < config.src_height/2; h++)
 	{
 		memcpy(dest, cb, config.src_width/2);
 		cb += config.src_width/2;
 		dest += bespitch/2;
 	}
 
-	for(h=0; h < config.src_height/2; h++) 
+	for(h=0; h < config.src_height/2; h++)
 	{
 		memcpy(dest, cr, config.src_width/2);
 		cr += config.src_width/2;
@@ -120,15 +120,15 @@ draw_cool_pattern(void)
 	}
 
 	i = 0;
-	for (y=0; y<config.src_height/2; y++) 
-		for (x=0; x<config.src_width/2; x++) 
+	for (y=0; y<config.src_height/2; y++)
+		for (x=0; x<config.src_width/2; x++)
 		{
 				cr_image[i++] = x - 128;
 		}
 
 	i = 0;
-	for (y=0; y<config.src_height/2; y++) 
-		for (x=0; x<config.src_width/2; x++) 
+	for (y=0; y<config.src_height/2; y++)
+		for (x=0; x<config.src_width/2; x++)
 		{
 				cb_image[i++] = y - 128;
 		}
@@ -147,22 +147,22 @@ draw_color_blend(void)
 	}
 
 	i = 0;
-	for (y=0; y<config.src_height/2; y++) 
-		for (x=0; x<config.src_width/2; x++) 
+	for (y=0; y<config.src_height/2; y++)
+		for (x=0; x<config.src_width/2; x++)
 		{
 				cr_image[i++] = x - 128;
 		}
 
 	i = 0;
-	for (y=0; y<config.src_height/2; y++) 
-		for (x=0; x<config.src_width/2; x++) 
+	for (y=0; y<config.src_height/2; y++)
+		for (x=0; x<config.src_width/2; x++)
 		{
 				cb_image[i++] = y - 128;
 		}
 }
 
 
-int 
+int
 main(void)
 {
 	int f;
@@ -192,7 +192,7 @@ main(void)
 		perror("Error in config ioctl");
 	}
 
-	if (config.card_type == MGA_G200) 
+	if (config.card_type == MGA_G200)
 	{
 		printf("Testing MGA G200 Backend Scaler with %d MB of RAM\n", config.ram_size);
 	  is_g400 = 0;
@@ -202,7 +202,7 @@ main(void)
 		printf("Testing MGA G400 Backend Scaler with %d MB of RAM\n", config.ram_size);
 	  is_g400 = 1;
 	}
-	
+
 	ioctl(f,MGA_VID_ON,0);
 	mga_vid_base = (uint8_t*)mmap(0,256 * 4096,PROT_WRITE,MAP_SHARED,f,0);
 	printf("mga_vid_base = %8p\n",mga_vid_base);

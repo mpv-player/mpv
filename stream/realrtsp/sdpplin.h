@@ -98,7 +98,7 @@ typedef struct {
   int duration;
 
   sdpplin_stream_t **stream;
-  
+
 } sdpplin_t;
 
 sdpplin_t *sdpplin_parse(char *data);

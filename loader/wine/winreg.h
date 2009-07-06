@@ -34,7 +34,7 @@ extern "C" {
 /*
  *	registry provider structs
  */
-typedef struct value_entA 
+typedef struct value_entA
 {   LPSTR	ve_valuename;
     DWORD	ve_valuelen;
     DWORD_PTR	ve_valueptr;

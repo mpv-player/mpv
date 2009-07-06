@@ -3,4 +3,3 @@ static char* default_config=
 "\n"
 //"nosound=nem"
 "\n";
-

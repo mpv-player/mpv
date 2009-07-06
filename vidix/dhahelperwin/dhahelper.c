@@ -87,7 +87,7 @@ STDCALL NTSTATUS DriverEntry (IN PDRIVER_OBJECT DriverObject,IN PUNICODE_STRING 
   // can make requests to this device).
 
   ntStatus = IoCreateDevice(DriverObject,0,&DeviceNameUnicodeString,FILE_DEVICE_DHAHELPER,0,TRUE,&DeviceObject);
-	
+
   if (NT_SUCCESS(ntStatus)){
     // Create dispatch points for device control, create, close.
     DriverObject->MajorFunction[IRP_MJ_CREATE] =
@@ -134,7 +134,7 @@ static STDCALL NTSTATUS dhahelperdispatch(IN PDEVICE_OBJECT DeviceObject,IN PIRP
 
   Irp->IoStatus.Status      = STATUS_SUCCESS;
   Irp->IoStatus.Information = 0;
-  
+
   IrpStack = IoGetCurrentIrpStackLocation(Irp);
 
   // Get the pointer to the input/output buffer and it's length
@@ -225,7 +225,7 @@ static STDCALL void dhahelperunload(IN PDRIVER_OBJECT DriverObject){
   NTSTATUS ntStatus=STATUS_SUCCESS;
   OutputDebugString ("dhahelper: entering dhahelperunload");
   OutputDebugString ("dhahelper: unmapping remaining memory");
-  
+
   while(alloccount && (ntStatus==STATUS_SUCCESS))ntStatus = UnmapPhysicalMemory(alloclist[alloccount-1].UserVirtualAddress);
   RtlInitUnicodeString (&DeviceLinkUnicodeString, L"\\DosDevices\\DHAHELPER");
   ntStatus = IoDeleteSymbolicLink (&DeviceLinkUnicodeString);
@@ -260,7 +260,7 @@ static STDCALL NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG 
   PVOID UserVirtualAddress=NULL;
   PHYSICAL_ADDRESS   pStartPhysAddress;
   OutputDebugString ("dhahelper: entering MapPhysicalMemoryToLinearSpace");
-    
+
 #ifdef _WIN64
   pStartPhysAddress.QuadPart = (ULONGLONG)pPhysAddress;
 #else
@@ -273,7 +273,7 @@ static STDCALL NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG 
     if(!SystemVirtualAddress){
       OutputDebugString("dhahelper: MmMapIoSpace failed");
       return STATUS_INVALID_PARAMETER;
-    } 
+    }
     OutputDebugString("dhahelper: SystemVirtualAddress 0x%x",SystemVirtualAddress);
     Mdl=IoAllocateMdl(SystemVirtualAddress, PhysMemSizeInBytes, FALSE, FALSE,NULL);
     if(!Mdl){
@@ -293,22 +293,22 @@ static STDCALL NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG 
     }
     OutputDebugString("dhahelper: UserVirtualAddress 0x%x",UserVirtualAddress);
 #ifndef NO_SEH
-  }__except(EXCEPTION_EXECUTE_HANDLER){  
-       NTSTATUS           ntStatus; 
-       ntStatus = GetExceptionCode(); 
+  }__except(EXCEPTION_EXECUTE_HANDLER){
+       NTSTATUS           ntStatus;
+       ntStatus = GetExceptionCode();
        OutputDebugString("dhahelper: MapPhysicalMemoryToLinearSpace failed due to exception 0x%0x\n", ntStatus);
-       return ntStatus;       
+       return ntStatus;
   }
 #endif
 
-  
+
   OutputDebugString("dhahelper: adding data to internal allocation list");
   alloclisttmp=MmAllocateNonCachedMemory((alloccount+1)*sizeof(alloc_priv));
-  
+
 
   if(!alloclisttmp){
     OutputDebugString("dhahelper: not enough memory to create temporary allocation list");
-    MmUnmapLockedPages(UserVirtualAddress, Mdl); 
+    MmUnmapLockedPages(UserVirtualAddress, Mdl);
     IoFreeMdl(Mdl);
     return STATUS_INSUFFICIENT_RESOURCES;
   }
@@ -322,9 +322,9 @@ static STDCALL NTSTATUS MapPhysicalMemoryToLinearSpace(PVOID pPhysAddress,ULONG 
   alloclist[alloccount].UserVirtualAddress=UserVirtualAddress;
   alloclist[alloccount].PhysMemSizeInBytes=PhysMemSizeInBytes;
   ++alloccount;
-  
-   *PhysMemLin=UserVirtualAddress;	
-  
+
+   *PhysMemLin=UserVirtualAddress;
+
   OutputDebugString("dhahelper: leaving MapPhysicalMemoryToLinearSpace");
   return STATUS_SUCCESS;
 }
@@ -338,7 +338,7 @@ static STDCALL NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress){
     OutputDebugString("dhahelper: UnmapPhysicalMemory: nothing todo -> leaving...");
     return STATUS_SUCCESS;
   }
- 
+
   for(i=0;i<alloccount;i++){
     if(alloclist[i].UserVirtualAddress!=UserVirtualAddress){
       if(x!=i){
@@ -346,7 +346,7 @@ static STDCALL NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress){
        alloclist[x].SystemVirtualAddress=alloclist[i].SystemVirtualAddress;
        alloclist[x].UserVirtualAddress=alloclist[i].UserVirtualAddress;
        alloclist[x].PhysMemSizeInBytes=alloclist[i].PhysMemSizeInBytes;
- 
+
       }
       x++;
     }
@@ -355,23 +355,23 @@ static STDCALL NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress){
 #ifndef NO_SEH
         __try {
 #endif
-          MmUnmapLockedPages(alloclist[x].UserVirtualAddress, alloclist[x].Mdl); 
+          MmUnmapLockedPages(alloclist[x].UserVirtualAddress, alloclist[x].Mdl);
           IoFreeMdl(alloclist[x].Mdl);
-          MmUnmapIoSpace(alloclist[x].SystemVirtualAddress,alloclist[x].PhysMemSizeInBytes);       
+          MmUnmapIoSpace(alloclist[x].SystemVirtualAddress,alloclist[x].PhysMemSizeInBytes);
 #ifndef NO_SEH
-        }__except(EXCEPTION_EXECUTE_HANDLER){  
-          NTSTATUS           ntStatus; 
-          ntStatus = GetExceptionCode(); 
+        }__except(EXCEPTION_EXECUTE_HANDLER){
+          NTSTATUS           ntStatus;
+          ntStatus = GetExceptionCode();
           OutputDebugString("dhahelper: UnmapPhysicalMemory failed due to exception 0x%0x (Mdl 0x%x)\n", ntStatus,alloclist[x].Mdl);
-          return ntStatus;       
+          return ntStatus;
         }
 #endif
       }
       alloccounttmp--;
     }
-    
+
   }
-  
+
   if(alloccounttmp){
       alloc_priv* alloclisttmp;
       alloclisttmp=MmAllocateNonCachedMemory(alloccounttmp*sizeof(alloc_priv));
@@ -384,7 +384,7 @@ static STDCALL NTSTATUS UnmapPhysicalMemory(PVOID UserVirtualAddress){
       alloclist=alloclisttmp;
   }
   alloccount=alloccounttmp;
-  
+
   OutputDebugString("dhahelper: leaving UnmapPhysicalMemory");
   return STATUS_SUCCESS;
 }

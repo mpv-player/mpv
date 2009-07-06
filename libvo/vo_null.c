@@ -30,7 +30,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-static const vo_info_t info = 
+static const vo_info_t info =
 {
 	"Null video output",
 	"null",
@@ -90,7 +90,7 @@ static void check_events(void)
 
 static int preinit(const char *arg)
 {
-    if(arg) 
+    if(arg)
     {
 	mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_NULL] Unknown subdevice: %s.\n",arg);
 	return ENOSYS;

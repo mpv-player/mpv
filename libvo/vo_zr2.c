@@ -72,7 +72,7 @@ typedef struct {
 static vo_zr2_priv_t priv;
 
 #define ZR2_MJPEG_NBUFFERS	2
-#define ZR2_MJPEG_SIZE		1024*256	
+#define ZR2_MJPEG_SIZE		1024*256
 
 /* some convenient #define's, is this portable enough? */
 #define DBG2(...) mp_msg(MSGT_VO, MSGL_DBG2, "vo_zr2: " __VA_ARGS__)
@@ -83,7 +83,7 @@ static vo_zr2_priv_t priv;
 static void stop_playing(vo_zr2_priv_t *p) {
 	if (p->playing) {
 		p->frame = -1;
-		if (ioctl(p->vdes, MJPIOC_QBUF_PLAY, &p->frame) < 0)  
+		if (ioctl(p->vdes, MJPIOC_QBUF_PLAY, &p->frame) < 0)
 			ERROR("error stopping playback\n");
 		p->playing = 0;
 		p->sync = 0;
@@ -166,7 +166,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
 
 	/* copy the jpeg image to the buffer which we acquired */
 	fast_memcpy(p->buf + p->zrq.size*p->frame, mpi->planes[0], size);
-			
+
 	return VO_TRUE;
 }
 
@@ -235,7 +235,7 @@ static int preinit(const char *arg) {
 		free(dev_arg);
 		return -1;
 	}
-				
+
 	/* interpret the strings we got from subopt_parse */
 	if (norm_arg) {
 		norm = get_norm(norm_arg);
@@ -258,7 +258,7 @@ static int preinit(const char *arg) {
 		uninit();
 		return 1;
 	}
-	
+
 	free(dev_arg);
 
 	/* check if we really are dealing with a zoran card */
@@ -268,12 +268,12 @@ static int preinit(const char *arg) {
 		return 1;
 	}
 
-	VERBOSE("kernel driver version %d.%d, current norm is %s\n", 
+	VERBOSE("kernel driver version %d.%d, current norm is %s\n",
 			p->zp.major_version, p->zp.minor_version,
 			normstring(p->zp.norm));
 
 	/* changing the norm in the zoran_params and MJPIOC_S_PARAMS
-	 * does nothing the last time I tried, so bail out if the norm 
+	 * does nothing the last time I tried, so bail out if the norm
 	 * is not correct */
 	if (norm != VIDEO_MODE_AUTO &&  p->zp.norm != norm) {
 		ERROR("mplayer currently can't change the video norm, "
@@ -281,19 +281,19 @@ static int preinit(const char *arg) {
 		uninit();
 		return 1;
 	}
-		
+
 	/* gather useful information */
 	if (ioctl(p->vdes, VIDIOCGCAP, &p->vc) < 0) {
 		ERROR("error getting video capabilities from %s\n", dev);
 		uninit();
 		return 1;
 	}
-	
-	VERBOSE("card reports maxwidth=%d, maxheight=%d\n", 
+
+	VERBOSE("card reports maxwidth=%d, maxheight=%d\n",
 			p->vc.maxwidth, p->vc.maxheight);
 
-	/* according to the mjpegtools source, some cards return a bogus 
-	 * vc.maxwidth, correct it here. If a new zoran card appears with a 
+	/* according to the mjpegtools source, some cards return a bogus
+	 * vc.maxwidth, correct it here. If a new zoran card appears with a
 	 * maxwidth different 640, 720 or 768 this code may lead to problems */
 	if (p->vc.maxwidth != 640 && p->vc.maxwidth != 768) {
 		VERBOSE("card probably reported bogus width (%d), "
@@ -305,16 +305,16 @@ static int preinit(const char *arg) {
 	p->zrq.size = ZR2_MJPEG_SIZE;
 
 	if (ioctl(p->vdes, MJPIOC_REQBUFS, &p->zrq)) {
-		ERROR("error requesting %d buffers of size %d\n", 
+		ERROR("error requesting %d buffers of size %d\n",
 				ZR2_MJPEG_NBUFFERS, ZR2_MJPEG_NBUFFERS);
 		uninit();
 		return 1;
 	}
-	
+
 	VERBOSE("got %ld buffers of size %ld (wanted %d buffers of size %d)\n",
 			p->zrq.count, p->zrq.size, ZR2_MJPEG_NBUFFERS,
 			ZR2_MJPEG_SIZE);
-	
+
 	p->buf = (unsigned char*)mmap(0, p->zrq.count*p->zrq.size,
 			PROT_READ|PROT_WRITE, MAP_SHARED, p->vdes, 0);
 
@@ -327,7 +327,7 @@ static int preinit(const char *arg) {
     	return 0;
 }
 
-static int config(uint32_t width, uint32_t height, uint32_t d_width, 
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
 	int fields = 1, top_first = 1, err = 0;
 	int stretchx = 1, stretchy = 1;
@@ -361,9 +361,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		ERROR("input width=%d, must be multiple of 16\n", width);
 		err = 1;
 	}
-	
+
 	if (height%(fields*8) != 0) {
-		ERROR("input height=%d, must be multiple of %d\n", 
+		ERROR("input height=%d, must be multiple of %d\n",
 				height, 2*fields);
 		err = 1;
 	}
@@ -430,9 +430,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 			zptmp.img_width, 2*zptmp.img_height,
 			zptmp.img_x, 2*zptmp.img_y,
 			width, height, (fields == 1) ? "non-interlaced" : "",
-			(fields == 2 && top_first == 1) 
+			(fields == 2 && top_first == 1)
 			?  "interlaced top first" : "",
-			(fields == 2 && top_first == 0) 
+			(fields == 2 && top_first == 0)
 			? "interlaced bottom first" : "");
 
 	if (memcmp(&zptmp, &p->zp, sizeof(zptmp))) {
@@ -476,7 +476,7 @@ static void flip_page(void) {
 	/* queueing the buffer for playback */
 	/* queueing the first buffer automatically starts playback */
 	if (p->playing == 0) p->playing = 1;
-	if (ioctl(p->vdes, MJPIOC_QBUF_PLAY, &p->frame) < 0) 
+	if (ioctl(p->vdes, MJPIOC_QBUF_PLAY, &p->frame) < 0)
 		ERROR("error queueing buffer for playback\n");
 	else p->queue++;
 }
@@ -490,7 +490,7 @@ static void uninit(void) {
 
 	stop_playing(p);
 
-	if (p->buf && munmap(p->buf, p->zrq.size*p->zrq.count)) 
+	if (p->buf && munmap(p->buf, p->zrq.size*p->zrq.count))
 		ERROR("error munmapping buffer: %s\n", strerror(errno));
 
 	if (p->vdes >= 0) close(p->vdes);

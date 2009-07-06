@@ -73,7 +73,7 @@ typedef struct {
 static int ra_check_file(demuxer_t* demuxer)
 {
 	unsigned int chunk_id;
-  
+
 	chunk_id = stream_read_dword_le(demuxer->stream);
 	if (chunk_id == FOURCC_DOTRA)
 		return DEMUXER_TYPE_REALAUDIO;
@@ -339,7 +339,7 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 static void demux_close_ra(demuxer_t *demuxer)
 {
 	ra_priv_t* ra_priv = demuxer->priv;
- 
+
     if (ra_priv) {
 	    if (ra_priv->audio_buf)
 	        free (ra_priv->audio_buf);

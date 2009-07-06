@@ -33,7 +33,7 @@ enum { AVISYNTH_INTERFACE_VERSION = 2 };
 enum
 {
   AVS_SAMPLE_INT8  = 1<<0,
-  AVS_SAMPLE_INT16 = 1<<1, 
+  AVS_SAMPLE_INT16 = 1<<1,
   AVS_SAMPLE_INT24 = 1<<2,
   AVS_SAMPLE_INT32 = 1<<3,
   AVS_SAMPLE_FLOAT = 1<<4
@@ -53,7 +53,7 @@ enum
 // Colorspace properties.
 enum
 {
-  AVS_CS_BGR = 1<<28,  
+  AVS_CS_BGR = 1<<28,
   AVS_CS_YUV = 1<<29,
   AVS_CS_INTERLEAVED = 1<<30,
   AVS_CS_PLANAR = 1<<31
@@ -96,7 +96,7 @@ typedef struct AVS_VideoInfo {
   int num_frames;
 
   int pixel_type;
-  
+
   int audio_samples_per_second;   // 0 means no audio
   int sample_type;
   uint64_t num_audio_samples;
@@ -153,13 +153,13 @@ static inline int avs_is_yuy(const AVS_VideoInfo * p)
 { return p->pixel_type & AVS_CS_YUV; }
 
 static inline int avs_is_yuy2(const AVS_VideoInfo * p)
-{ return (p->pixel_type & AVS_CS_YUY2) == AVS_CS_YUY2; }  
+{ return (p->pixel_type & AVS_CS_YUY2) == AVS_CS_YUY2; }
 
 static inline int avs_is_yv12(const AVS_VideoInfo * p)
-{ return ((p->pixel_type & AVS_CS_YV12) == AVS_CS_YV12)||((p->pixel_type & AVS_CS_I420) == AVS_CS_I420); }       
+{ return ((p->pixel_type & AVS_CS_YV12) == AVS_CS_YV12)||((p->pixel_type & AVS_CS_I420) == AVS_CS_I420); }
 
-static inline int avs_bits_per_pixel(const AVS_VideoInfo * p) 
-{ 
+static inline int avs_bits_per_pixel(const AVS_VideoInfo * p)
+{
   switch (p->pixel_type) {
       case AVS_CS_BGR24: return 24;
       case AVS_CS_BGR32: return 32;

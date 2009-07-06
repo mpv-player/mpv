@@ -34,7 +34,7 @@ int geometry_xy_changed = 0;
 
 // xpos,ypos: position of the left upper corner
 // widw,widh: width and height of the window
-// scrw,scrh: width and height of the current screen 
+// scrw,scrh: width and height of the current screen
 int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 {
         int width, height, xoff, yoff, xper, yper;
@@ -81,7 +81,7 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		mp_msg(MSGT_VO, MSGL_V,"geometry set to width: %i,"
 		  "height: %i, xoff: %i, yoff: %i, xper: %i, yper: %i\n",
 		  width, height, xoff, yoff, xper, yper);
-		  
+
 		if(xper >= 0 && xper <= 100) xoff = (scrw - *widw) * ((float)xper / 100.0);
 		if(yper >= 0 && yper <= 100) yoff = (scrh - *widh) * ((float)yper / 100.0);
 
@@ -90,7 +90,7 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		  width, height, xoff, yoff, xper, yper);
 		mp_msg(MSGT_VO, MSGL_V,"geometry window parameter: widw: %i,"
 		  " widh: %i, scrw: %i, scrh: %i\n",*widw, *widh, scrw, scrh);
-		  
+
 		if (xoff != INT_MIN && xpos) *xpos = xoff;
 		if (yoff != INT_MIN && ypos) *ypos = yoff;
 		if (width  > 0 && widw) *widw = width;

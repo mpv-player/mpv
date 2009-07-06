@@ -83,7 +83,7 @@ extern const menu_list_priv_t menu_list_priv_dflt;
   0xFF, 0xFF, \
   0xA4, 0x50 \
 }
-  
+
 
 #define MENU_LIST_PRIV_FIELDS \
   { "minbor", M_ST_OFF(menu_list_priv_t,minb), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL }, \

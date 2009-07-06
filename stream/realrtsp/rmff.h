@@ -107,7 +107,7 @@ typedef struct {
   uint32_t data_offset;
   uint16_t num_streams;
   uint16_t flags;
-    
+
 } rmff_prop_t;
 
 typedef struct {
@@ -150,11 +150,11 @@ typedef struct {
   char      *copyright;
   uint16_t  comment_len;
   char      *comment;
-  
+
 } rmff_cont_t;
 
 typedef struct {
-  
+
   uint32_t object_id;
   uint32_t size;
   uint16_t object_version;
@@ -187,7 +187,7 @@ typedef struct {
 /*
  * constructors for header structs
  */
- 
+
 rmff_fileheader_t *rmff_new_fileheader(uint32_t num_headers);
 
 rmff_prop_t *rmff_new_prop (
@@ -256,7 +256,7 @@ void rmff_fix_header(rmff_header_t *h);
  * returns the size of the header (incl. first data-header)
  */
 int rmff_get_header_size(rmff_header_t *h);
- 
+
 /*
  * dumps the header <h> to <buffer>. <max> is the size of <buffer>
  */

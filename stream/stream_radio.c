@@ -654,17 +654,17 @@ static const radio_driver_t radio_driver_bsdbt848={
 };
 #endif /* CONFIG_RADIO_BSDBT848 */
 
-static inline int init_frac(radio_priv_t* priv){ 
+static inline int init_frac(radio_priv_t* priv){
     return priv->driver->init_frac(priv);
 }
-static inline int set_frequency(radio_priv_t* priv,float frequency){ 
+static inline int set_frequency(radio_priv_t* priv,float frequency){
     if ((frequency<priv->rangelow)||(frequency>priv->rangehigh)){
         mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Wrong frequency: %.2f\n",frequency);
         return STREAM_ERROR;
     }
     if(priv->driver->set_frequency(priv,frequency)!=STREAM_OK)
         return STREAM_ERROR;
-	
+
 #ifdef CONFIG_RADIO_CAPTURE
     if(clear_buffer(priv)!=STREAM_OK){
         mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Clearing buffer failed: %s\n",strerror(errno));
@@ -673,13 +673,13 @@ static inline int set_frequency(radio_priv_t* priv,float frequency){
 #endif
    return STREAM_OK;
 }
-static inline int get_frequency(radio_priv_t* priv,float* frequency){ 
+static inline int get_frequency(radio_priv_t* priv,float* frequency){
     return priv->driver->get_frequency(priv,frequency);
 }
-static inline void set_volume(radio_priv_t* priv,int volume){ 
+static inline void set_volume(radio_priv_t* priv,int volume){
     priv->driver->set_volume(priv,volume);
 }
-static inline int get_volume(radio_priv_t* priv,int* volume){ 
+static inline int get_volume(radio_priv_t* priv,int* volume){
     return priv->driver->get_volume(priv,volume);
 }
 
@@ -786,11 +786,11 @@ static int grab_audio_frame(radio_priv_t *priv, char *buffer, int len)
 {
     int i;
     mp_tmsg(MSGT_RADIO, MSGL_DBG3, "[radio] %s: in buffer=%d dropped=%d\n","grab_audio_frame",priv->audio_cnt,priv->audio_drop);
-    /* Cache buffer must be filled by some audio packets when playing starts. 
+    /* Cache buffer must be filled by some audio packets when playing starts.
        Otherwise MPlayer will quit with EOF error.
        Probably, there is need more carefull checking rather than simple 'for' loop
        (something like timer or similar).
-       
+
        1000ms delay will happen only at first buffer filling. At next call function
        just fills buffer until either buffer full or no data from driver available.
     */
@@ -937,10 +937,10 @@ int radio_set_freq(struct stream *stream, float frequency){
 int radio_step_freq(struct stream *stream, float step_interval){
     float frequency;
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
-    
+
     if (get_frequency(priv,&frequency)!=STREAM_OK)
         return 0;
-    
+
     frequency+=step_interval;
     if (frequency>priv->rangehigh)
         frequency=priv->rangehigh;
@@ -1007,7 +1007,7 @@ int radio_set_channel(struct stream *stream, char *channel) {
 
     if (*channel=='\0')
         mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Wrong channel name: %s\n",channel);
-    
+
     if (priv->radio_channel_list) {
         channel_int = strtol(channel,&endptr,10);
         tmp = priv->radio_channel_list;
@@ -1076,7 +1076,7 @@ static int fill_buffer_s(struct stream *s, char *buffer, int max_len){
 
 
 /*
- order if significant! 
+ order if significant!
  when no driver explicitly specified first available will be used
  */
 static const radio_driver_t* radio_drivers[]={
@@ -1136,7 +1136,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
             priv->driver=radio_drivers[i];
     }
     mp_msg(MSGT_RADIO,MSGL_V,"\n");
-    
+
     if(priv->driver)
         mp_msg(MSGT_RADIO, MSGL_INFO, priv->driver->info);
     else{
@@ -1263,4 +1263,3 @@ const stream_info_t stream_info_radio = {
     &stream_opts,
     1 // Urls are an option string
 };
-

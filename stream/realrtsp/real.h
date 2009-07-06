@@ -26,7 +26,7 @@
  * adopted from joschkas real tools.
  *
  */
- 
+
 #ifndef MPLAYER_REAL_H
 #define MPLAYER_REAL_H
 

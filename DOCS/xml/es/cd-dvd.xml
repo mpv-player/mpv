@@ -87,7 +87,7 @@ Ejemplo:
 
 <para>
 El dispositivo DVD por defecto es <filename>/dev/dvd</filename>. Si su
-configuración es diferente, haga un enlace simbólico o especifique el 
+configuración es diferente, haga un enlace simbólico o especifique el
 dispositivo correcto en la línea de órdenes con la opción
 <option>-dvd-device</option>.
 </para>
@@ -195,7 +195,7 @@ key, petición de título):
 <listitem><para>
 <emphasis role="bold">bus key</emphasis>: Esta clave es negociada durante
 la autenticación (una larga mezcla de ioctls y varios intercambios de
-claves, material de encriptación) y es usada para encriptar el título y 
+claves, material de encriptación) y es usada para encriptar el título y
 las claves de disco antes de enviarlas sobre el bus sin proteger
 (para prevenir robos de claves). El bus key necesita obtener y
 predesencriptar la clave encriptada de disco.
@@ -244,7 +244,7 @@ una continuación del patrón). El método es también conocido como
 En raras ocasiones esto falla porque no hay suficientes datos
 desencriptados en el disco para realizar un ataque estadístico
 o porque las claves cambian en mitad de un título. Este método es la
-única manera de desencriptar un DVD almacenado en un disco duro o en 
+única manera de desencriptar un DVD almacenado en un disco duro o en
 un DVD con la región incorrecta en una unidad RPC2 (lento).
 </para></listitem>
 </orderedlist>
@@ -280,7 +280,7 @@ opción <option>-cdrom-device</option>.
 <note><para>
 Al menos las unidades de CD-ROM SCSI Plextor y algunas Toshiba tienen un
 rendimiento horrible leyendo VCDs. Esto es porque el <systemitem>ioctl</systemitem>
-CDROMREADRAW no está completamente implementado en estas unidades. Si tiene 
+CDROMREADRAW no está completamente implementado en estas unidades. Si tiene
 conocimientos sobre la programación SCSI, por favor
 <ulink url="../../tech/patches.txt">ayúdenos</ulink> a implementar soporte SCSI
 genérico para VCDs.
@@ -330,7 +330,7 @@ en ninguna de sus aplicaciones). Bajo Linux no puede copiar o reproducir estos
 archivos (solo contienen basura). Bajo Windows es posible que el controlador
 iso9660 emule lectura cruda de las pistas en estos archivos. Para reproducir
 un archivo .DAT necesita el controlador del kernel que se encuentra en la
-versión para Linux de PowerDVD. Contiene un controlador de sistema de archivos iso9660 
+versión para Linux de PowerDVD. Contiene un controlador de sistema de archivos iso9660
 modificado (<filename>vcdfs/isofs-2.4.X.o</filename>), que permite emular las
 pistas crudas a través de este archivo de sombra .DAT. Si monta el disco usando
 ese controlador, puede copiar e incluso reproducir los archivos .DAT con

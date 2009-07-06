@@ -165,7 +165,7 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 #else
 	sprintf(demux_dev, "/dev/ost/demux%d", priv->card);
 #endif
-	
+
 	mp_msg(MSGT_DEMUX, MSGL_V, "FIX %d -> %d\n", priv->demux_fds_cnt, cnt);
 	if(priv->demux_fds_cnt >= cnt)
 	{
@@ -189,9 +189,9 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 			}
 			else
 				priv->demux_fds_cnt++;
-		}	
+		}
 	}
-	
+
 	return 1;
 }
 
@@ -396,7 +396,7 @@ static int check_status(int fd_frontend, int tmout)
 		strength=0;
 		if(ioctl(fd_frontend,FE_READ_UNCORRECTED_BLOCKS,&strength) >= 0)
 		mp_msg(MSGT_DEMUX, MSGL_V, "UNC: %d\n",strength);
-		
+
 		print_status(festatus);
 	}
 	else
@@ -415,7 +415,7 @@ static int check_status(int fd_frontend, int tmout)
 	int32_t strength;
 	fe_status_t festatus;
 	FrontendEvent event;
-	
+
 	struct pollfd pfd[1];
 
 	i = 0; res = -1;
@@ -484,12 +484,12 @@ static int check_status(int fd_frontend, int tmout)
 
 		festatus=0;
 		mp_msg(MSGT_DEMUX, MSGL_V, "FE_STATUS:");
-		
+
 		if(ioctl(fd_frontend,FE_READ_STATUS,&festatus) >= 0)
 			print_status(festatus);
 		else
 			mp_msg(MSGT_DEMUX, MSGL_ERR, " ERROR, UNABLE TO READ_STATUS");
-		    
+
 		mp_msg(MSGT_DEMUX, MSGL_V, "\n");
 	}
 	else
@@ -568,14 +568,14 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
         scmd.u.diseqc.params[0] = 0xf0 |
                                   (((sat_no) << 2) & 0x0F) |
 				  (hi_lo ? 1 : 0) |
-                                  (polv ? 0 : 2); 
+                                  (polv ? 0 : 2);
 
         if (ioctl(secfd,SEC_SEND_SEQUENCE,&scmds) < 0)
 	{
           mp_msg(MSGT_DEMUX, MSGL_ERR, "Error sending DisEqC");
           return -1;
         }
-	
+
 	return 0;
 }
 #endif

@@ -31,10 +31,10 @@ int aac_parse_frame(uint8_t *buf, int *srate, int *num)
 {
 	int i = 0, sr, fl = 0, id;
 	static int srates[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 0, 0, 0};
-	
+
 	if((buf[i] != 0xFF) || ((buf[i+1] & 0xF6) != 0xF0))
 		return 0;
-	
+
 	id = (buf[i+1] >> 3) & 0x01;	//id=1 mpeg2, 0: mpeg4
 	sr = (buf[i+2] >> 2)  & 0x0F;
 	if(sr > 11)

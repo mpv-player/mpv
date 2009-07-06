@@ -35,7 +35,7 @@ char *lirc_configfile;
 
 static char* cmd_buf = NULL;
 
-int 
+int
 mp_input_lirc_init(void) {
   int lirc_sock;
   int mode;
@@ -81,7 +81,7 @@ int mp_input_lirc_read(int fd,char* dest, int s) {
     }
     return w;
   }
-      
+
   // Nothing in the buffer, poll the lirc fd
   if(lirc_nextcode(&code) != 0) {
     mp_msg(MSGT_LIRC,MSGL_ERR,"Lirc error :(\n");

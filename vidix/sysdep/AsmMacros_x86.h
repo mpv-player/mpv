@@ -92,7 +92,7 @@ extern int svgahelper_initialized;
 static __inline__ void svga_outb(short port, char value)
 {
     io_t iov;
-    
+
     iov.val = value;
     iov.port = port;
     ioctl(svgahelper_fd, SVGALIB_HELPER_IOCSOUTB, &iov);
@@ -101,7 +101,7 @@ static __inline__ void svga_outb(short port, char value)
 static __inline__ void svga_outw(short port, char value)
 {
     io_t iov;
-    
+
     iov.val = value;
     iov.port = port;
     ioctl(svgahelper_fd, SVGALIB_HELPER_IOCSOUTW, &iov);
@@ -110,7 +110,7 @@ static __inline__ void svga_outw(short port, char value)
 static __inline__ void svga_outl(short port, unsigned int value)
 {
     io_t iov;
-    
+
     iov.val = value;
     iov.port = port;
     ioctl(svgahelper_fd, SVGALIB_HELPER_IOCSOUTL, &iov);
@@ -119,30 +119,30 @@ static __inline__ void svga_outl(short port, unsigned int value)
 static __inline__ unsigned int svga_inb(short port)
 {
     io_t iov;
-    
+
     iov.port = port;
     ioctl(svgahelper_fd, SVGALIB_HELPER_IOCGINB, &iov);
-    
+
     return iov.val;
 }
 
 static __inline__ unsigned int svga_inw(short port)
 {
     io_t iov;
-    
+
     iov.port = port;
     ioctl(svgahelper_fd, SVGALIB_HELPER_IOCGINW, &iov);
-    
+
     return iov.val;
 }
 
 static __inline__ unsigned int svga_inl(short port)
 {
     io_t iov;
-    
+
     iov.port = port;
     ioctl(svgahelper_fd, SVGALIB_HELPER_IOCGINL, &iov);
-    
+
     return iov.val;
 }
 #endif /* CONIFG_SVGAHELPER */
@@ -161,7 +161,7 @@ static __inline__ void outb(short port,char val)
     if (dhahelper_initialized == 1)
     {
 	dhahelper_port_t _port;
-	
+
 	_port.operation = PORT_OP_WRITE;
 	_port.addr = port;
 	_port.size = 1;
@@ -189,7 +189,7 @@ static __inline__ void outw(short port,short val)
     if (dhahelper_initialized == 1)
     {
 	dhahelper_port_t _port;
-	
+
 	_port.operation = PORT_OP_WRITE;
 	_port.addr = port;
 	_port.size = 2;
@@ -217,7 +217,7 @@ static __inline__ void outl(short port,unsigned int val)
     if (dhahelper_initialized == 1)
     {
 	dhahelper_port_t _port;
-	
+
 	_port.operation = PORT_OP_WRITE;
 	_port.addr = port;
 	_port.size = 4;
@@ -246,7 +246,7 @@ static __inline__ unsigned int inb(short port)
     if (dhahelper_initialized == 1)
     {
 	dhahelper_port_t _port;
-	
+
 	_port.operation = PORT_OP_READ;
 	_port.addr = port;
 	_port.size = 1;
@@ -276,7 +276,7 @@ static __inline__ unsigned int inw(short port)
     if (dhahelper_initialized == 1)
     {
 	dhahelper_port_t _port;
-	
+
 	_port.operation = PORT_OP_READ;
 	_port.addr = port;
 	_port.size = 2;
@@ -306,7 +306,7 @@ static __inline__ unsigned int inl(short port)
     if (dhahelper_initialized == 1)
     {
 	dhahelper_port_t _port;
-	
+
 	_port.operation = PORT_OP_READ;
 	_port.addr = port;
 	_port.size = 4;

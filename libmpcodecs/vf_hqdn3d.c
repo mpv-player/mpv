@@ -101,7 +101,7 @@ static void deNoiseSpacial(
     int sLineOffs = 0, dLineOffs = 0;
     unsigned int PixelAnt;
     unsigned int PixelDst;
-    
+
     /* First pixel has no left nor top neighbor. */
     PixelDst = LineAnt[0] = PixelAnt = Frame[0]<<16;
     FrameDest[0]= ((PixelDst+0x10007FFF)>>16);
@@ -142,7 +142,7 @@ static void deNoise(unsigned char *Frame,        // mpi->planes[x]
     unsigned int PixelAnt;
     unsigned int PixelDst;
     unsigned short* FrameAnt=(*FrameAntPtr);
-    
+
     if(!FrameAnt){
 	(*FrameAntPtr)=FrameAnt=malloc(W*H*sizeof(unsigned short));
 	for (Y = 0; Y < H; Y++){

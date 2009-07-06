@@ -969,7 +969,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction) {
 				tv_channel_current = tv_channel_current->next;
 			else
 				tv_channel_current = tv_channel_list;
-				
+
 				tv_set_norm_i(tvh, tv_channel_current->norm);
 				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 				mp_tmsg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n",

@@ -108,7 +108,7 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 
 <sect1 id="subosd">
 <title>Napisy i OSD</title>
- 
+
 <para>
 <application>MPlayer</application> może wyświetlać napisy podczas odtwarzania
 filmu. Obecnie obsługiwane są następujące formaty:
@@ -131,7 +131,7 @@ filmu. Obecnie obsługiwane są następujące formaty:
   </listitem>
 </itemizedlist>
 </para>
- 
+
 <para>
 <application>MPlayer</application> może zrzucić wyżej wymienione formaty napisów
 (<emphasis role="bold">poza pierwszymi trzema</emphasis>) do następujących formatów,
@@ -144,16 +144,16 @@ jeśli podasz odpowiednią opcję:
   <listitem><para>Sami: <option>-dumpsami</option></para></listitem>
 </itemizedlist>
 </para>
- 
+
 <para>
 <application>MEncoder</application> może zrzucić napisy DVD do formatu
 <link linkend="menc-feat-extractsub">VOBsub</link>.
 </para>
- 
+
 <para>
 Opcje wiersza poleceń różnią się nieco dla poszczególnych formatów:
 </para>
- 
+
 <formalpara>
 <title>Format VOBsub</title>
 <para>
@@ -174,7 +174,7 @@ zawartego w pliku<filename>.IDX</filename>, żeby ustawić język napisów. Jeż
 zakończy się niepowodzeniem, napisy nie będą wyświetlane.
 </para>
 </formalpara>
- 
+
 <formalpara>
 <title>Inne formaty napisów</title>
 <para>
@@ -185,7 +185,7 @@ musisz przekazać opcję <option>-sub
 <replaceable>przykład.txt</replaceable></option> (pełna ścieżka jest opcjonalna).
 </para>
 </formalpara>
- 
+
 <variablelist>
 <title>Dopasowywanie czasu wyświetlania i położenia napisów:</title>
 <varlistentry>
@@ -540,7 +540,7 @@ Aktualny format pliku EDL jest następujący:
 gdzie liczby odpowiadające sekundom nie muszą być całkowite, zaś akcja może
 przyjmować wartość <literal>0</literal> dla pominięcia bądź
 <literal>1</literal> dla wyciszenia.
-Na przykład: 
+Na przykład:
 <programlisting>
 5.3   7.1    0
 15    16.7   1
@@ -579,19 +579,19 @@ w którym możesz także zmienić domyślne pomijanie bloku na wyciszanie.
 
 <para>
 Większość płyt DVD, a także wiele innych plików, zawiera dźwięk przestrzenny.
-<application>MPlayer</application> obsługuje dźwięk przestrzenny, ale opcja ta 
-nie jest domyślnie włączona, ponieważ sprzęt przeznaczony dla zwykłego stereo 
-jest znacznie bedziej popularny. Aby odtworzyć plik zawierający więcej niż dwa 
+<application>MPlayer</application> obsługuje dźwięk przestrzenny, ale opcja ta
+nie jest domyślnie włączona, ponieważ sprzęt przeznaczony dla zwykłego stereo
+jest znacznie bedziej popularny. Aby odtworzyć plik zawierający więcej niż dwa
 kanały audio, użyj opcji <option>-channels</option>.
 Na przykład, aby odtworzyć DVD z audio 5.1:
 <screen>mplayer dvd://1 -channels 6</screen>
 Zauważmy, że mimo nazwy "5.1", używanych jest 6 kanałów.
-Jeżeli posiadasz sprzęt pozwalający na odtwarzanie dźwięku przestrzennego możesz 
-bezpiecznie wpisać <option>channels</option> do swojego pliku konfiguracyjnego 
-<application>MPlayera</application> (<filename>~/.mplayer/config</filename>). 
+Jeżeli posiadasz sprzęt pozwalający na odtwarzanie dźwięku przestrzennego możesz
+bezpiecznie wpisać <option>channels</option> do swojego pliku konfiguracyjnego
+<application>MPlayera</application> (<filename>~/.mplayer/config</filename>).
 Przykładowo, aby domyślnie włączyć efekt kwadrofonii, należy dodać wiersz:
 <programlisting>channels=4</programlisting>
-Od tego momentu, <application>MPlayer</application> będzie odtwarzał cztery 
+Od tego momentu, <application>MPlayer</application> będzie odtwarzał cztery
 kanały audio, zawsze gdy będą one dostępne.
 </para>
 </sect3>
@@ -601,10 +601,10 @@ kanały audio, zawsze gdy będą one dostępne.
 <title>Odtwarzanie plików stereo przy użyciu czterech głośników</title>
 
 <para>
-<application>MPlayer</application> standardowo nie duplikuje kanałów, ani nie 
+<application>MPlayer</application> standardowo nie duplikuje kanałów, ani nie
 robi tego większość sterowników audio. Jeżeli chcesz zrobić to ręcznie:
 <screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
-Zobacz sekcję o 
+Zobacz sekcję o
 <link linkend="advaudio-channels-copying">kopiowaniu kanałów</link>,
 jest tam wyjaśnienie tego polecenia.
 </para>
@@ -615,17 +615,17 @@ jest tam wyjaśnienie tego polecenia.
 <title>Przekazywanie AC3/DTS</title>
 
 <para>
-Dźwięk przestrzenny na płytach DVD zazwyczaj kodowany jest w formacie AC3 
-(Dolby Digital) lub DTS (Digital Theater System). Część współczesnego sprzętu 
+Dźwięk przestrzenny na płytach DVD zazwyczaj kodowany jest w formacie AC3
+(Dolby Digital) lub DTS (Digital Theater System). Część współczesnego sprzętu
 audio jest w stanie dekodować te formaty.
-<application>MPlayer</application> może zostać skonfigurowany, aby przekazywał 
-dane audio bez ich dekodowania. Rozwiązanie takie będzie działało tylko, jeżeli 
+<application>MPlayer</application> może zostać skonfigurowany, aby przekazywał
+dane audio bez ich dekodowania. Rozwiązanie takie będzie działało tylko, jeżeli
 posiadasz w swojej karcie muzycznej złącze S/PDIF (Sony/Philips Digital Interface).
 </para>
 
 <para>
-Jeżeli twój sprzęt audio potrafi dekodować zarówno AC3 jak i DTS, możesz 
-bezpiecznie włączyć przekazywanie dla obu formatów. W przeciwnym razie, tylko 
+Jeżeli twój sprzęt audio potrafi dekodować zarówno AC3 jak i DTS, możesz
+bezpiecznie włączyć przekazywanie dla obu formatów. W przeciwnym razie, tylko
 dla tego formatu, który jest obsługiwany przez Twój sprzęt.
 </para>
 
@@ -643,7 +643,7 @@ dla tego formatu, który jest obsługiwany przez Twój sprzęt.
 </itemizedlist>
 
 <itemizedlist>
-<title>Aby włączyć przekazywanie w pliku konfiguracyjnym 
+<title>Aby włączyć przekazywanie w pliku konfiguracyjnym
   <application>MPlayera</application>: </title>
 <listitem><para>
   dla AC3 użyj <option>ac=hwac3,</option>
@@ -657,12 +657,12 @@ dla tego formatu, który jest obsługiwany przez Twój sprzęt.
 </itemizedlist>
 
 <para>
-Zauważ, że na końcu opcji <option>ac=hwac3,</option> oraz 
-<option>ac=hwdts,</option> są przecinki. Powodują one, że 
-<application>MPlayer</application> będzie używał standardowych kodeków, które 
-są normalnie używane podczas odtwarzania plików, które nie posiadają dźwięku 
-AC3 ani DTS. 
-Opcja <option>afm=hwac3</option> nie wymaga przecinka, 
+Zauważ, że na końcu opcji <option>ac=hwac3,</option> oraz
+<option>ac=hwdts,</option> są przecinki. Powodują one, że
+<application>MPlayer</application> będzie używał standardowych kodeków, które
+są normalnie używane podczas odtwarzania plików, które nie posiadają dźwięku
+AC3 ani DTS.
+Opcja <option>afm=hwac3</option> nie wymaga przecinka,
 samo podanie rodziny kodeków powoduje że <application>MPlayer</application>
 wypróbuje inne gdy będzie musiał.
 </para>
@@ -700,7 +700,7 @@ Ta sekcja musi dopiero zostać napisana i nie może zostać ukończona zanim
 ktoś nie dostarczy przykładowych plików do testów. Jeżeli posiadasz jakieś
 pliki audio zakodowane macierzowo (matrix-encoded), wiesz kto je posiada lub
 wiesz cokolwiek co mogłoby być pomocne, wyślij proszę informację na listę
-mailingową 
+mailingową
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>
 W temacie podaj "[matrix-encoded audio]".
 </para>
@@ -836,7 +836,7 @@ ich i sprawdź czy odpowiednie źródła dźwięku się zgadzają. Kanały są n
 <para>
 Opcja <option>-channels</option> jest używana w celu określenia liczby kanałów
 dekodowanego audio. Niektóre kodeki audio wykorzystują tę liczbę aby zdecydować
-czy konieczne jest zmniejszenie liczby kanałów poprzez miksowanie. 
+czy konieczne jest zmniejszenie liczby kanałów poprzez miksowanie.
 Zauważ, że ustawienie tej opcji nie jest równoważne z ustawieniem liczby
 wyjściowych kanałów. Przykładowo, używając opcji <option>-channels 4</option>
 aby odtworzyć plik stereo MP3, otrzymamy 2 kanały wyjściowe, bowiem kodek MP3

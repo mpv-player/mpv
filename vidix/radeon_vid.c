@@ -105,19 +105,19 @@ typedef struct bes_registers_s
   uint32_t test;
   /* Configurable stuff */
   int double_buff;
-  
+
   int brightness;
   int saturation;
-  
+
   int ckey_on;
   uint32_t graphics_key_clr;
   uint32_t graphics_key_msk;
   uint32_t ckey_cntl;
   uint32_t merge_cntl;
-  
+
   int deinterlace_on;
   uint32_t deinterlace_pattern;
-  
+
   unsigned chip_flags;
 } bes_registers_t;
 
@@ -130,7 +130,7 @@ typedef struct video_registers_s
 
 static bes_registers_t besr;
 #define DECLARE_VREG(name) { #name, name, 0 }
-static const video_registers_t vregs[] = 
+static const video_registers_t vregs[] =
 {
   DECLARE_VREG(VIDEOMUX_CNTL),
   DECLARE_VREG(VIPPAD_MASK),
@@ -288,7 +288,7 @@ typedef struct ati_card_ids_s
     unsigned flags;
 }ati_card_ids_t;
 
-static const ati_card_ids_t ati_card_ids[] = 
+static const ati_card_ids_t ati_card_ids[] =
 {
 #ifdef RAGE128
  /*
@@ -522,7 +522,7 @@ static const ati_card_ids_t ati_card_ids[] =
 
 
 static void * radeon_mmio_base = 0;
-static void * radeon_mem_base = 0; 
+static void * radeon_mem_base = 0;
 static int32_t radeon_overlay_off = 0;
 static uint32_t radeon_ram_size = 0;
 
@@ -668,7 +668,7 @@ static uint32_t radeon_get_xres( void )
 {
   uint32_t xres,h_total;
 #ifndef RAGE128
-  if(rinfo.hasCRTC2 && 
+  if(rinfo.hasCRTC2 &&
        (rinfo.dviDispType == MT_CTV || rinfo.dviDispType == MT_STV))
 	h_total = INREG(CRTC2_H_TOTAL_DISP);
   else
@@ -682,7 +682,7 @@ static uint32_t radeon_get_yres( void )
 {
   uint32_t yres,v_total;
 #ifndef RAGE128
-  if(rinfo.hasCRTC2 && 
+  if(rinfo.hasCRTC2 &&
        (rinfo.dviDispType == MT_CTV || rinfo.dviDispType == MT_STV))
 	v_total = INREG(CRTC2_V_TOTAL_DISP);
   else
@@ -697,7 +697,7 @@ static void radeon_wait_vsync(void)
     int i;
 
     OUTREG(GEN_INT_STATUS, VSYNC_INT_AK);
-    for (i = 0; i < 2000000; i++) 
+    for (i = 0; i < 2000000; i++)
     {
 	if (INREG(GEN_INT_STATUS) & VSYNC_INT) break;
     }
@@ -1000,7 +1000,7 @@ static void radeon_set_transform(float bright, float cont, float sat,
 	CAdjGCr = sat * (OvHueSin * trans[ref].RefGCb + OvHueCos * trans[ref].RefGCr);
 	CAdjBCb = sat * OvHueCos * trans[ref].RefBCb;
 	CAdjBCr = sat * OvHueSin * trans[ref].RefBCb;
-    
+
 	OvLuma = CAdjLuma;
 	OvRCb = CAdjRCb;
 	OvRCr = CAdjRCr;
@@ -1010,11 +1010,11 @@ static void radeon_set_transform(float bright, float cont, float sat,
 	OvBCr = CAdjBCr;
 	OvROff = RedAdj + CAdjOff -
 		OvLuma * Loff - (OvRCb + OvRCr) * Coff;
-	OvGOff = GreenAdj + CAdjOff - 
+	OvGOff = GreenAdj + CAdjOff -
 		OvLuma * Loff - (OvGCb + OvGCr) * Coff;
-	OvBOff = BlueAdj + CAdjOff - 
+	OvBOff = BlueAdj + CAdjOff -
 		OvLuma * Loff - (OvBCb + OvBCr) * Coff;
-   
+
 	dwOvROff = ((int)(OvROff * 2.0)) & 0x1fff;
 	dwOvGOff = (int)(OvGOff * 2.0) & 0x1fff;
 	dwOvBOff = (int)(OvBOff * 2.0) & 0x1fff;
@@ -1038,7 +1038,7 @@ static void radeon_set_transform(float bright, float cont, float sat,
 }
 
 /* Gamma curve definition */
-typedef struct 
+typedef struct
 {
 	unsigned int gammaReg;
 	unsigned int gammaSlope;
@@ -1046,7 +1046,7 @@ typedef struct
 }GAMMA_SETTINGS;
 
 /* Recommended gamma curve parameters */
-static const GAMMA_SETTINGS r200_def_gamma[18] = 
+static const GAMMA_SETTINGS r200_def_gamma[18] =
 {
 	{OV0_GAMMA_0_F, 0x100, 0x0000},
 	{OV0_GAMMA_10_1F, 0x100, 0x0020},
@@ -1068,7 +1068,7 @@ static const GAMMA_SETTINGS r200_def_gamma[18] =
 	{OV0_GAMMA_3C0_3FF, 0x100, 0x0700}
 };
 
-static const GAMMA_SETTINGS r100_def_gamma[6] = 
+static const GAMMA_SETTINGS r100_def_gamma[6] =
 {
 	{OV0_GAMMA_0_F, 0x100, 0x0000},
 	{OV0_GAMMA_10_1F, 0x100, 0x0020},
@@ -1114,7 +1114,7 @@ static void make_default_gamma_correction( void )
     }
 }
 #endif
-	
+
 static void radeon_vid_make_default(void)
 {
 #ifdef RAGE128
@@ -1147,7 +1147,7 @@ static int find_chip(unsigned chip_id)
 static pciinfo_t pci_info;
 static int probed=0;
 
-static vidix_capability_t def_cap = 
+static vidix_capability_t def_cap =
 {
 #ifdef RAGE128
     "BES driver for Rage128 cards",
@@ -1296,11 +1296,11 @@ static int radeon_init(void)
 {
   int err;
 
-  if(!probed) 
+  if(!probed)
   {
     printf(RADEON_MSG" Driver was not probed but is being initializing\n");
     return EINTR;
-  }    
+  }
   if((radeon_mmio_base = map_phys_mem(pci_info.base2,0xFFFF))==(void *)-1) return ENOMEM;
   radeon_ram_size = INREG(CONFIG_MEMSIZE);
   /* mem size is bits [28:0], mask off the rest. Range: from 1Mb up to 512 Mb */
@@ -1320,7 +1320,7 @@ static int radeon_init(void)
       printf(RADEON_MSG" Working around buggy RS482 Radeon Xpress 200 Memory Detection\n");
       radeon_ram_size = (INREG(CONFIG_MEMSIZE) + 0x100000) << 2;
       radeon_ram_size &=  CONFIG_MEMSIZE_MASK;
-  } 
+  }
 #else
   /* Rage Mobility (rage128) also has memsize bug */
   if (radeon_ram_size == 0 &&
@@ -1340,7 +1340,7 @@ static int radeon_init(void)
   {
     memset(&rinfo,0,sizeof(rinfo_t));
     if((besr.chip_flags&R_100) != R_100) rinfo.hasCRTC2 = 1;
-    
+
     radeon_get_moninfo(&rinfo);
 	if(rinfo.hasCRTC2) {
 	    printf(RADEON_MSG" DVI port has %s monitor connected\n",GET_MON_NAME(rinfo.dviDispType));
@@ -1351,7 +1351,7 @@ static int radeon_init(void)
   }
 #endif
   save_regs();
-  return 0;  
+  return 0;
 }
 
 static void radeon_destroy(void)
@@ -1364,7 +1364,7 @@ static void radeon_destroy(void)
 static int radeon_get_caps(vidix_capability_t *to)
 {
   memcpy(to,&def_cap,sizeof(vidix_capability_t));
-  return 0; 
+  return 0;
 }
 
 /*
@@ -1378,14 +1378,14 @@ typedef struct fourcc_desc_s
     unsigned max_srcw;
 }fourcc_desc_t;
 
-static const fourcc_desc_t supported_fourcc[] = 
+static const fourcc_desc_t supported_fourcc[] =
 {
   { IMGFMT_Y800, 1567 },
   { IMGFMT_YVU9, 1567 },
   { IMGFMT_IF09, 1567 },
   { IMGFMT_YV12, 1567 },
   { IMGFMT_I420, 1567 },
-  { IMGFMT_IYUV, 1567 }, 
+  { IMGFMT_IYUV, 1567 },
   { IMGFMT_UYVY, 1551 },
   { IMGFMT_YUY2, 1551 },
   { IMGFMT_YVYU, 1551 },
@@ -1445,7 +1445,7 @@ static void radeon_vid_stop_video( void )
     OUTREG(OV0_EXCLUSIVE_HORZ, 0);
     OUTREG(OV0_AUTO_FLIP_CNTL, 0);   /* maybe */
     OUTREG(OV0_FILTER_CNTL, FILTER_HARDCODED_COEF);
-#ifdef RAGE128    
+#ifdef RAGE128
     OUTREG(OV0_KEY_CNTL, GRAPHIC_KEY_FN_NE);
 #else
     OUTREG(OV0_KEY_CNTL, GRAPHIC_KEY_FN_EQ);
@@ -2289,7 +2289,7 @@ static void ComputeXStartEnd(
     }
     val_OV0_P3_X_START = val_OV0_P2_X_START;
     val_OV0_P3_X_END = val_OV0_P2_X_END;
-    
+
     besr.p1_x_start_end = (val_OV0_P1_X_END&0x7ff) | ((val_OV0_P1_X_START&0x7ff)<<16);
     besr.p2_x_start_end = (val_OV0_P2_X_END&0x7ff) | ((val_OV0_P2_X_START&0x7ff)<<16);
     besr.p3_x_start_end = (val_OV0_P3_X_END&0x7ff) | ((val_OV0_P3_X_START&0x7ff)<<16);
@@ -2594,19 +2594,19 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
 	case IMGFMT_I420: pitch = (src_w + mpitch) & ~mpitch;
-			  config->dest.pitch.y = 
-			  config->dest.pitch.u = 
+			  config->dest.pitch.y =
+			  config->dest.pitch.u =
 			  config->dest.pitch.v = best_pitch;
 			  break;
 	/* RGB 4:4:4:4 */
 	case IMGFMT_RGB32:
 	case IMGFMT_BGR32: pitch = (src_w*4 + mpitch) & ~mpitch;
-			  config->dest.pitch.y = 
-			  config->dest.pitch.u = 
+			  config->dest.pitch.y =
+			  config->dest.pitch.u =
 			  config->dest.pitch.v = best_pitch;
 			  break;
 	/* 4:2:2 */
-	
+
 	default: /* RGB15, RGB16, YVYU, UYVY, YUY2 */
 			  pitch = ((src_w*2) + mpitch) & ~mpitch;
 			  config->dest.pitch.y =
@@ -2914,7 +2914,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 				    ((tmp << 12) & 0x70000000);
 
 	    tmp = ((top >> 1) & 0x0000ffff) + 0x00018000;
-	    besr.p23_v_accum_init = (is_420||is_410) ? 
+	    besr.p23_v_accum_init = (is_420||is_410) ?
 				    ((tmp << 4) & OV0_P23_V_ACCUM_INIT_MASK)
 				    |(OV0_P23_MAX_LN_IN_PER_LN_OUT & 1) : 0;
 	}
@@ -3074,7 +3074,7 @@ static void radeon_compute_framesize(vidix_playback_t *info)
 		info->frame_size = awidth*info->src.h;
 		break;
     /* YUY2 YVYU, RGB15, RGB16 */
-    default:	
+    default:
 		awidth = (info->src.w*2 + (pitch-1)) & ~(pitch-1);
 		info->frame_size = awidth*info->src.h;
 		break;
@@ -3091,7 +3091,7 @@ static int radeon_config_playback(vidix_playback_t *info)
   if(info->num_frames==1) besr.double_buff=0;
   else			  besr.double_buff=1;
   radeon_compute_framesize(info);
-    
+
   rgb_size = radeon_get_xres()*radeon_get_yres()*((radeon_vid_get_dbpp()+7)/8);
   nfr = info->num_frames;
   radeon_video_size = radeon_ram_size;
@@ -3120,7 +3120,7 @@ static int radeon_config_playback(vidix_playback_t *info)
   if(nfr <= 0) return EINVAL;
   info->num_frames = nfr;
   besr.vid_nbufs = info->num_frames;
-  info->dga_addr = (char *)radeon_mem_base + radeon_overlay_off;  
+  info->dga_addr = (char *)radeon_mem_base + radeon_overlay_off;
   radeon_vid_init_video(info);
   return 0;
 }
@@ -3283,7 +3283,7 @@ static int radeon_playback_set_deint(const vidix_deinterlace_t * info)
   }
   else OUTREG(OV0_SCALE_CNTL,sflg & (~SCALER_ADAPTIVE_DEINT));
   OUTREG(OV0_REG_LOAD_CNTL,		0);
-  return 0;  
+  return 0;
 }
 
 static int radeon_playback_get_deint(vidix_deinterlace_t * info)
@@ -3421,7 +3421,7 @@ VDXDriver radeon_drv = {
   "radeon",
 #endif
   NULL,
-    
+
   .probe = radeon_probe,
   .get_caps = radeon_get_caps,
   .query_fourcc = radeon_query_fourcc,

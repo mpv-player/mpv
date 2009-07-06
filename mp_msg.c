@@ -219,7 +219,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
         print_msg_module(stream, mod);
     set_msg_color(stream, lev);
     header = tmp[strlen(tmp)-1] == '\n' || tmp[strlen(tmp)-1] == '\r';
- 
+
     fprintf(stream, "%s", tmp);
     fflush(stream);
 }

@@ -51,21 +51,21 @@ typedef struct tv_param_s {
     int scan_threshold;
     float scan_period;
     /**
-      Terminate stream with video renderer instead of Null renderer 
+      Terminate stream with video renderer instead of Null renderer
       Will help if video freezes but audio does not.
       May not work with -vo directx and -vf crop combination.
     */
     int hidden_video_renderer;
     /**
       For VIVO cards VP pin have to be rendered too.
-      This tweak will cause VidePort pin stream to be terminated with video renderer 
+      This tweak will cause VidePort pin stream to be terminated with video renderer
       instead of removing it from graph.
       Use if your card have vp pin and video is still choppy.
       May not work with -vo directx and -vf crop combination.
     */
     int hidden_vp_renderer;
     /**
-      Use system clock as sync source instead of default graph clock (usually the clock 
+      Use system clock as sync source instead of default graph clock (usually the clock
       from one of live sources in graph.
     */
     int system_clock;
@@ -77,9 +77,9 @@ typedef struct tv_param_s {
     */
     int normalize_audio_chunks;
 } tv_param_t;
-  
+
 extern tv_param_t stream_tv_defaults;
- 
+
 typedef struct tvi_info_s
 {
     struct tvi_handle_s * (*tvi_init)(tv_param_t* tv_param);
@@ -201,9 +201,9 @@ typedef struct {
 //tvi_* ioctl (not tvi_vbi.c !!!)
 #define TVI_CONTROL_VBI_INIT           0x501   ///< vbi init
 
-/* 
-  TELETEXT controls (through tv_teletext_control() ) 
-   NOTE: 
+/*
+  TELETEXT controls (through tv_teletext_control() )
+   NOTE:
     _SET_ should be _GET_ +1
    _STEP_ should be _GET_ +2
 */
@@ -314,7 +314,7 @@ typedef struct tt_char_s{
 typedef struct tt_link_s{
     int pagenum;          ///< page number
     int subpagenum;       ///< subpage number
-} tt_link_t;    
+} tt_link_t;
 
 typedef struct tt_page_s{
     int pagenum;          ///< page number

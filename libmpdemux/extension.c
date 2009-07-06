@@ -104,4 +104,3 @@ int demuxer_type_by_filename(char* filename){
   }
   return DEMUXER_TYPE_UNKNOWN;
 }
-

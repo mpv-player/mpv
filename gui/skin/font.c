@@ -46,7 +46,7 @@ int fntAddNewFont( char * name )
  if ( ( Fonts[id]=calloc( 1,sizeof( bmpFont ) ) ) == NULL ) return -1;
 
  av_strlcpy( Fonts[id]->name,name,128 ); // FIXME: as defined in font.h
- for ( i=0;i<256;i++ ) 
+ for ( i=0;i<256;i++ )
    Fonts[id]->Fnt[i].x=Fonts[id]->Fnt[i].y=Fonts[id]->Fnt[i].sx=Fonts[id]->Fnt[i].sy=-1;
 
  return id;
@@ -75,14 +75,14 @@ int fntRead( char * path,char * fname )
  unsigned char   param[256];
  int             c,linenumber = 0;
  int             id = fntAddNewFont( fname );
- 
+
  if ( id < 0 ) return id;
 
  av_strlcpy( tmp,path,sizeof( tmp ) );
  av_strlcat( tmp,fname,sizeof( tmp ) ); av_strlcat( tmp,".fnt",sizeof( tmp ) );
- if ( ( f=fopen( tmp,"rt" ) ) == NULL ) 
+ if ( ( f=fopen( tmp,"rt" ) ) == NULL )
    { free( Fonts[id] ); return -3; }
-   
+
  while ( !feof( f ) )
   {
    fgets( tmp,255,f ); linenumber++;
@@ -189,7 +189,7 @@ txSample * fntRender( wItem * item,int px,const char * fmt,... )
  tw=fntTextWidth( id,p );
  fbw=Fonts[id]->Bitmap.Width;
 
- if ( item->Bitmap.Image == NULL ) 
+ if ( item->Bitmap.Image == NULL )
   {
    item->Bitmap.Height=item->height=fntTextHeight( id,p );
    item->Bitmap.Width=item->width=iw;
@@ -203,8 +203,8 @@ txSample * fntRender( wItem * item,int px,const char * fmt,... )
  ibuf=(uint32_t *)Fonts[id]->Bitmap.Image;
 
  for ( i=0;i < item->Bitmap.ImageSize / 4;i++ ) obuf[i]=0xff00ff;
- 
- if ( tw <= iw ) 
+
+ if ( tw <= iw )
   {
    switch ( item->align )
     {
@@ -213,23 +213,23 @@ txSample * fntRender( wItem * item,int px,const char * fmt,... )
      case fntAlignCenter: dx=( iw - fntTextWidth( id,p ) ) / 2; break;
      case fntAlignRight:  dx=iw - fntTextWidth( id,p ); break;
     }
-    
+
   } else dx+=px;
 
  ofs=dx;
- 
+
  for ( i=0;i < (int)strlen( p );i++ )
   {
    c=(unsigned int)p[i];
    fw=Fonts[id]->Fnt[c].sx;
-   
+
    if ( fw == -1 ) { c=32; fw=Fonts[id]->Fnt[c].sx; }
-   
+
    fh=Fonts[id]->Fnt[c].sy;
    fyc=Fonts[id]->Fnt[c].y * fbw + Fonts[id]->Fnt[c].x;
    yc=dx;
-     
-   if ( dx >= 0 ) 
+
+   if ( dx >= 0 )
     for ( y=0;y < fh;y++ )
      {
       for ( x=0; x < fw;x++ )
@@ -247,14 +247,14 @@ txSample * fntRender( wItem * item,int px,const char * fmt,... )
     {
      c=(unsigned int)p[i];
      fw=Fonts[id]->Fnt[c].sx;
-  
+
      if ( fw == -1 ) { c=32; fw=Fonts[id]->Fnt[c].sx; }
 
      fh=Fonts[id]->Fnt[c].sy;
      fyc=Fonts[id]->Fnt[c].y * fbw + Fonts[id]->Fnt[c].x;
 
      dx-=fw; yc=dx;
-     if ( dx >= 0 ) 
+     if ( dx >= 0 )
       for ( y=0;y < fh;y++ )
        {
         for ( x=fw - 1;x >= 0;x-- )

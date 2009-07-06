@@ -18,24 +18,24 @@ typedef DWORD FOURCC;
 #ifdef _MSC_VER
 #pragma warning(disable:4200)
 #endif
-    
+
 /* The following is a short description of the AVI file format.  Please
  * see the accompanying documentation for a full explanation.
  *
  * An AVI file is the following RIFF form:
  *
- *	RIFF('AVI' 
+ *	RIFF('AVI'
  *	      LIST('hdrl'
  *		    avih(<MainAVIHeader>)
  *                  LIST ('strl'
  *                      strh(<Stream header>)
  *                      strf(<Stream format>)
  *                      ... additional header data
- *            LIST('movi'	 
- *      	  { LIST('rec' 
+ *            LIST('movi'
+ *      	  { LIST('rec'
  *      		      SubChunk...
  *      		   )
- *      	      | SubChunk } ....	    
+ *      	      | SubChunk } ....
  *            )
  *            [ <AVIIndex> ]
  *      )
@@ -47,7 +47,7 @@ typedef DWORD FOURCC;
  *	be a BITMAPINFO structure, including palette.  For an audio stream,
  *	this should be a WAVEFORMAT (or PCMWAVEFORMAT) structure.
  *
- *	The actual data is contained in subchunks within the 'movi' LIST 
+ *	The actual data is contained in subchunks within the 'movi' LIST
  *	chunk.  The first two characters of each data chunk are the
  *	stream number with which that data is associated.
  *
@@ -62,17 +62,17 @@ typedef DWORD FOURCC;
  *
  * The grouping into LIST 'rec' chunks implies only that the contents of
  *   the chunk should be read into memory at the same time.  This
- *   grouping is used for files specifically intended to be played from 
+ *   grouping is used for files specifically intended to be played from
  *   CD-ROM.
  *
- * The index chunk at the end of the file should contain one entry for 
+ * The index chunk at the end of the file should contain one entry for
  *   each data chunk in the file.
- *       
+ *
  * Limitations for the current software:
  *	Only one video stream and one audio stream are allowed.
  *	The streams must start at the beginning of the file.
  *
- * 
+ *
  * To register codec types please obtain a copy of the Multimedia
  * Developer Registration Kit from:
  *
@@ -153,9 +153,9 @@ typedef WORD TWOCC;
 			    (ToHex(((stream) & 0xf0) >> 4)), tcc)
 
 /*
-** Main AVI File Header 
-*/	     
-		     
+** Main AVI File Header
+*/
+
 /* flags for use in <dwFlags> in AVIFileHdr */
 #define AVIF_HASINDEX		0x00000010	// Index at end of file?
 #define AVIF_MUSTUSEINDEX	0x00000020
@@ -178,10 +178,10 @@ typedef struct
     DWORD		dwInitialFrames;
     DWORD		dwStreams;
     DWORD		dwSuggestedBufferSize;
-    
+
     DWORD		dwWidth;
     DWORD		dwHeight;
-    
+
     DWORD		dwReserved[4];
 } MainAVIHeader;
 
@@ -193,7 +193,7 @@ typedef struct
 
 #define AVISF_VIDEO_PALCHANGES		0x00010000
 
-  
+
 typedef struct {
     FOURCC		fccType;
     FOURCC		fccHandler;
@@ -201,7 +201,7 @@ typedef struct {
     WORD		wPriority;
     WORD		wLanguage;
     DWORD		dwInitialFrames;
-    DWORD		dwScale;	
+    DWORD		dwScale;
     DWORD		dwRate;	/* dwRate / dwScale == samples/second */
     DWORD		dwStart;
     DWORD		dwLength; /* In units above... */

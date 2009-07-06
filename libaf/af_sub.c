@@ -30,7 +30,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
 
 #include "af.h"
 #include "dsp.h"
@@ -38,7 +38,7 @@
 // Q value for low-pass filter
 #define Q 1.0
 
-// Analog domain biquad section 
+// Analog domain biquad section
 typedef struct{
   float a[3];		// Numerator coefficients
   float b[3];		// Denominator coefficients
@@ -56,13 +56,13 @@ typedef struct af_sub_s
   float	fc;		// Cutoff frequency [Hz] for low-pass filter
   float k;		// Filter gain;
   int ch;		// Channel number which to insert the filtered data
-  
+
 }af_sub_t;
 
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
-  af_sub_t* s   = af->setup; 
+  af_sub_t* s   = af->setup;
 
   switch(cmd){
   case AF_CONTROL_REINIT:{
@@ -120,7 +120,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Deallocate memory 
+// Deallocate memory
 static void uninit(struct af_instance_s* af)
 {
   if(af->data)
@@ -146,7 +146,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   af_data_t*    c   = data;	 // Current working data
   af_sub_t*  	s   = af->setup; // Setup for this instance
   float*   	a   = c->audio;	 // Audio data
-  int		len = c->len/4;	 // Number of samples in current audio block 
+  int		len = c->len/4;	 // Number of samples in current audio block
   int		nch = c->nch;	 // Number of channels
   int		ch  = s->ch;	 // Channel in which to insert the sub audio
   register int  i;

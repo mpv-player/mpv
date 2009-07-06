@@ -19,7 +19,7 @@
 #define MAKE_ACM_VERSION(mjr, mnr, bld) \
   (((long)(mjr)<<24) | ((long)(mnr)<<16) | ((long)bld))
 
-#define ACMDRVOPENDESC_SECTIONNAME_CHARS    
+#define ACMDRVOPENDESC_SECTIONNAME_CHARS
 
 #define ACMDM_DRIVER_NOTIFY             (ACMDM_BASE + 1)
 #define ACMDM_DRIVER_DETAILS            (ACMDM_BASE + 10)

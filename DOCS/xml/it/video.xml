@@ -1337,7 +1337,7 @@ stante).
 <listitem><para>
   Questo driver chiama la funzione <function>int 10h</function> percui non è
   un emulatore - fa riferimento a cose <emphasis role="bold">reali</emphasis>
-  del BIOS <emphasis role="bold">reale</emphasis> in 
+  del BIOS <emphasis role="bold">reale</emphasis> in
   <emphasis>modalità reale</emphasis> (attualmente in modalità vm86).
 </para></listitem>
 <listitem><para>
@@ -1482,7 +1482,7 @@ bassa risoluzione.
 
 <formalpara><title>PREAMBOLO</title>
 <para>
-<acronym>VIDIX</acronym> è un nome breve che sta per 
+<acronym>VIDIX</acronym> è un nome breve che sta per
 <emphasis role="bold">VID</emphasis>eo
 <emphasis role="bold">I</emphasis>nterface
 per *ni<emphasis role="bold">X</emphasis>.
@@ -1964,7 +1964,7 @@ Se <application>MPlayer</application> si lamenta frequentemente di
 <screen>Troppi pacchetti video/audio nel buffer</screen> oppure noti una
 desincronizzazione crescente tra l'audio e il video, verifica la presenza del
 pid PCR nel tuo flusso (serve per adeguarsi alla modalità di buffering del
-trasmettitore) e/o prova ad usare il demuxer MPEG-TS di libavformat aggiungendo 
+trasmettitore) e/o prova ad usare il demuxer MPEG-TS di libavformat aggiungendo
 <option>-demuxer lavf -lavfdopts probesize=128</option> alla tua riga comando.
 </para>
 
@@ -2075,7 +2075,7 @@ fluida di film non a 25fps e transcodifica in tempo reale tra MPEG-2 e MPEG-4
 <application>MPlayer</application> fornisce una riproduzione accelerata
 hardware con la scheda Creative DXR2.
 </para>
-  
+
 <para>
 Prima di tutto ti serviranno dei driver DXR2 correttamente installati. Puoi
 trovare i driver e le istruzioni per l'installazione sul sito
@@ -2217,7 +2217,7 @@ con <option>:sync</option>.
   Vedi la pagina man per ulteriori informazioni circa <option>-vf lavc</option>.
   Attualmente non c'è modo di impostare gli fps dell'em8300, il che significa
   che sono fissati a 30000/1001 fps.
-  A causa di ciò si raccomanda caldamente di usare 
+  A causa di ciò si raccomanda caldamente di usare
   <option>-vf lavc=<replaceable>qualità</replaceable>:25</option> soprattutto
   se stai usando il pre-buffering. Allora perché 25 e non 30000/1001?
   Bene, il fatto è che quando usi 30000/1001 l'immagine diventa un pochino
@@ -2349,7 +2349,7 @@ costruire un muro video di 2x2.
 <para>
 Infine una nota importante: non avviare o fermare XawTV sul dispoitivo di
 riproduzione durante la riproduzione stessa, o ti manderà in crash il
-computer. Va tuttavia bene <emphasis role="bold">PRIMA</emphasis> lanciare 
+computer. Va tuttavia bene <emphasis role="bold">PRIMA</emphasis> lanciare
 XawTV, <emphasis role="bold">POI</emphasis> avviare
 <application>MPlayer</application>, attendere l'uscita di
 <application>MPlayer</application>, e <emphasis role="bold">DOPO</emphasis>

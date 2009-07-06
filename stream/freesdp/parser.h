@@ -46,7 +46,7 @@ BEGIN_C_DECLS
  * functions.
  *
  * @param description a multimedia session description formatted in
- * SDP.  
+ * SDP.
  * @param dsc pointer that is updated to point to a fsdp_description_t
  * object. This fsdp_description_t object should have been previously
  * allocated using <code>fsdp_description_new()</code>; to free it,
@@ -60,12 +60,12 @@ fsdp_error_t fsdp_parse (const char *description, fsdp_description_t * dsc);
 /**
  * Get the SDP protocol version of the description.
  *
- * @return SDP protocol version number. 
+ * @return SDP protocol version number.
  **/
 unsigned int fsdp_get_version (const fsdp_description_t * dsc);
 
 /**
- * Get the username provided by the originator of the session. 
+ * Get the username provided by the originator of the session.
  *
  * @param dsc SDP description object.
  * @return username of the session owner
@@ -73,7 +73,7 @@ unsigned int fsdp_get_version (const fsdp_description_t * dsc);
 const char *fsdp_get_owner_username (const fsdp_description_t * dsc);
 
 /**
- * Get the id for the session described in <code>dsc</code>. 
+ * Get the id for the session described in <code>dsc</code>.
  *
  * @param dsc SDP description object.
  * @return id string for this session.
@@ -241,7 +241,7 @@ unsigned int fsdp_get_bw_modifier_count (const fsdp_description_t * dsc);
  * @param dsc SDP description object.
  * @param index number of bandwidth modifier.
  *
- * @return global bandwidth modifier type.  
+ * @return global bandwidth modifier type.
  * @retval FSDP_BW_MOD_TYPE_UNDEFINED if no global bandwith modifier
  * type is defined or invalid index.
  * @retval FSDP_BW_MOD_TYPE_UNKNOWN if an unknown bandwith modifier is
@@ -254,7 +254,7 @@ fsdp_get_bw_modifier_type (const fsdp_description_t * dsc,
 			   unsigned int index);
 
 /**
- * Get the textual bandwidth modifier type when it is unknown. 
+ * Get the textual bandwidth modifier type when it is unknown.
  *
  * @param dsc SDP description object.
  * @param index number of bandwidth modifier.
@@ -267,7 +267,7 @@ const char *fsdp_get_bw_modifier_type_unknown (const fsdp_description_t * dsc,
 					       unsigned int index);
 
 /**
- * Get the value for the bandwidth modifier. 
+ * Get the value for the bandwidth modifier.
  *
  * @param dsc SDP description object.
  * @param index number of bandwidth modifier.
@@ -474,7 +474,7 @@ unsigned int fsdp_get_sdplang_count (const fsdp_description_t * dsc);
 const char *fsdp_get_sdplang (const fsdp_description_t * dsc,
 			      unsigned int index);
 
-/** 
+/**
  * Get the mode of the conference, specified with attributes sendrecv,
  * sendonly, recvonly and inactive.
  *

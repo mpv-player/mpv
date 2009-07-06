@@ -167,7 +167,7 @@ static int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *outp
     return 0;
   }
   mp_msg(MSGT_WIN32,MSGL_V,"ICCompressGetFormat OK\n");
-  
+
   if (temp_len > sizeof(BITMAPINFOHEADER))
   {
     unsigned char* temp=(unsigned char*)output_bih;
@@ -220,7 +220,7 @@ static int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *outp
     mp_msg(MSGT_WIN32,MSGL_INFO,"  biBitCount %d\n", output_bih->biBitCount);
     mp_msg(MSGT_WIN32,MSGL_INFO,"  biCompression 0x%lx ('%.4s')\n", output_bih->biCompression, (char *)&output_bih->biCompression);
     mp_msg(MSGT_WIN32,MSGL_INFO,"  biSizeImage %ld\n", output_bih->biSizeImage);
-  
+
   encoder_buf_size=input_bih->biSizeImage;
   encoder_buf=malloc(encoder_buf_size);
   encoder_frameno=0;

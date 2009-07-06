@@ -19,7 +19,7 @@
 <!-- Imports the common LDP customization layer. -->
 <xsl:import href="ldp-html-common.xsl"/>
 
-<!-- If there was some reason to override 'ldp-html-common.xsl' or to 
+<!-- If there was some reason to override 'ldp-html-common.xsl' or to
      perform any other customizations that affect *only* the generation
      of multiple HTML files, those templates or parameters could be
      entered here. -->

@@ -197,7 +197,7 @@ static int preinit(const char *arg)
  *                  returns, everything went well.
  */
 
-static void pnm_mkdir(char *buf, int verbose) { 
+static void pnm_mkdir(char *buf, int verbose) {
     struct stat stat_p;
 
 /* Silly MING32 bug workaround */
@@ -226,7 +226,7 @@ static void pnm_mkdir(char *buf, int verbose) {
                            buf, _("Output directory already exists, but is not writable."));
                     exit_player_bad(_("Fatal error"));
                 }
-                
+
                 if (strcmp(buf, ".") != 0) {
                 mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
                        buf, _("Output directory already exists and is writable."));
@@ -240,7 +240,7 @@ static void pnm_mkdir(char *buf, int verbose) {
                        buf, _("Unable to create output directory."));
                 exit_player_bad(_("Fatal error"));
         } /* end switch */
-    } else if ( verbose ) {  
+    } else if ( verbose ) {
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
                buf, _("Output directory successfully created."));
     } /* end if */
@@ -267,7 +267,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
 
     /* Create outdir. */
-    
+
     snprintf(buf, BUFLENGTH, "%s", pnm_outdir);
     pnm_mkdir(buf, 1); /* This function only returns if creation was
                            successful. If not, the player will exit. */
@@ -444,7 +444,7 @@ static void pnm_write_image(mp_image_t *mpi)
         mp_msg(MSGT_VO, MSGL_ERR, "%s: No image data suplied to video output driver\n", info.short_name );
         exit_player_bad(_("Fatal error"));
     }
-        
+
     /* Start writing to new subdirectory after a certain amount of frames */
     if ( framecounter == pnm_maxfiles ) {
         framecounter = 0;
@@ -460,14 +460,14 @@ static void pnm_write_image(mp_image_t *mpi)
         pnm_mkdir(buf, 0); /* This function only returns if creation was
                                successful. If not, the player will exit. */
     }
-    
+
     framenum++;
     framecounter++;
 
     /* snprintf the full pathname of the outputfile */
     snprintf(buf, BUFLENGTH, "%s/%s/%08d.%s", pnm_outdir, subdirname,
                                             framenum, pnm_file_extension);
-    
+
     if ( (outfile = fopen(buf, "wb") ) == NULL ) {
         mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s\n", info.short_name,
                 "Unable to create output file.");
@@ -476,7 +476,7 @@ static void pnm_write_image(mp_image_t *mpi)
                 strerror(errno) );
         exit_player_bad(_("Fatal error"));
     }
-    
+
     pnm_write_pnm(outfile, mpi);
 
     fclose(outfile);
@@ -595,4 +595,3 @@ static void flip_page (void)
 #undef PNM_TYPE_PGMYUV
 
 /* ------------------------------------------------------------------------- */
-

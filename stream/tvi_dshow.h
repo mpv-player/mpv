@@ -29,7 +29,7 @@ typedef struct IReferenceClock *LPREFERENCECLOCK;
 typedef struct IMediaSample *LPMEDIASAMPLE;
 typedef struct IVideoWindow *LPVIDEOWINDOW;
 
-typedef struct 
+typedef struct
 {
     long cBuffers;
     long cbBuffer;
@@ -613,7 +613,7 @@ DECLARE_INTERFACE(IMediaSample)
     STDMETHOD(SetMediaTime )(THIS_ long long* ,long long* );
 };
 
-    
+
 #undef INTERFACE
 #define INTERFACE IAMBufferNegotiation
 DECLARE_INTERFACE(IAMBufferNegotiation)

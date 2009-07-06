@@ -77,4 +77,3 @@ const stream_info_t stream_info_rtsp = {
   NULL,
   0 /* Urls are an option string */
 };
-

@@ -50,7 +50,7 @@ static const char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c: 
+// mplayer.c:
 
 #define MSGTR_Exiting "\n Afslutter...\n"
 #define MSGTR_ExitingHow "\n Afslutter... (%s)\n"
@@ -369,7 +369,7 @@ static const char help_text[]=
 #define MSGTR_NEEDLAVC "For at afspille ikke-mpeg filer med dit DXR3/H+ skal du kode filmen igen.\nVenligst aktiver lavc i DXR3/H+ configboxen."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[tema] fejl i konfigurationsfilen til temaet på linje %d: %s" 
+#define MSGTR_SKIN_ERRORMESSAGE "[tema] fejl i konfigurationsfilen til temaet på linje %d: %s"
 #define MSGTR_SKIN_WARNING1 "[tema] advarsel i konfigurationsfilen til temaet på linje %d: widget fundet men før \"section\" ikke fundet (%s)"
 #define MSGTR_SKIN_WARNING2 "[tema] advarsel i konfigurationsfilen til temaet på linje %d: widget fundet men før \"subsection\" ikke fundet (%s)"
 #define MSGTR_SKIN_WARNING3 "[tema] advarsel i konfigurationsfilen til temaet på linje %d: denne undersektion er ikke understøttet af dette widget (%s)"
@@ -560,6 +560,6 @@ static const char help_text[]=
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal fejl!"
 #define MSGTR_MSGBOX_LABEL_Error "Fejl!"
-#define MSGTR_MSGBOX_LABEL_Warning "Advarsel!" 
+#define MSGTR_MSGBOX_LABEL_Warning "Advarsel!"
 
 #endif

@@ -33,7 +33,7 @@ CC: while (<CCONF>)
 	next CC if (m/^[ \t]*\;/);
 	s/\;.*//g;
 	s/#.*//g;
-	
+
 	if (m/^videocodec (.*)/)
 	{
 		$codec = $1;
@@ -105,17 +105,17 @@ close CODEC_CABS;
 sub find_codec
 {
 	my ($fourcc) = @_;
-	
+
 	my $guid = sprintf ("%08X", unpack ("V", $fourcc))."-0000-0010-8000-00AA00389B71";
-	
+
 	my $req = HTTP::Request->new (POST => "http://activex.microsoft.com/objects/ocget.dll");
 	$req->header ('Accept', '*/*');
 	$req->content_type ('application/x-www-form-urlencoded');
 	$req->content ("CLSID=%7B${guid}%7D\n");
 	#$req->content ('CLSID={'.${guid}.'}');
-	
+
 	my $res = $ua->request ($req);
-	
+
 	if ($res->is_success) {
 		print "Lookup returned success... weird!\n";
 		return 1;
@@ -147,17 +147,17 @@ sub find_codec
 sub get_codec
 {
 	my ($url) = @_;
-	
+
 	my $req = HTTP::Request->new (GET => $url);
 	$req->header ("Accept", "*/*");
 	my $res = $ua->request ($req);
-	
+
 	if ($res->is_success)
 	{
 		open TMP, ">tmp.cab" or die "Unable to open tmp.cab";
 		print TMP $res->content;
 		close TMP;
-		
+
 		system "cabextract tmp.cab";
 		unlink "tmp.cab";
 	}
@@ -166,4 +166,3 @@ sub get_codec
 		print "No such file!\n";
 	}
 }
-

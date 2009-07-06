@@ -305,7 +305,7 @@ Opening audio decoder: [acm] Win32/ACM decoders
 sysi86(SI86DSCR): Invalid argument
 Couldn't install fs segment, expect segfault
 
- 
+
 MPlayer interrupted by signal 11 in module: init_audio_codec
 ...
 </screen>

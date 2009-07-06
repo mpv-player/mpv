@@ -22,10 +22,10 @@ LIBAD_EXTERN(libmad)
 
 typedef struct mad_decoder_s {
 
-  struct mad_synth  synth; 
+  struct mad_synth  synth;
   struct mad_stream stream;
   struct mad_frame  frame;
-  
+
   int have_frame;
 
   int               output_sampling_rate;
@@ -39,14 +39,14 @@ static int preinit(sh_audio_t *sh){
   mad_decoder_t *this = (mad_decoder_t *) malloc(sizeof(mad_decoder_t));
   memset(this,0,sizeof(mad_decoder_t));
   sh->context = this;
-  
+
   mad_synth_init  (&this->synth);
   mad_stream_init (&this->stream);
   mad_frame_init  (&this->frame);
-  
+
   sh->audio_out_minsize=2*4608;
   sh->audio_in_minsize=4096;
-  
+
   return 1;
 }
 
@@ -82,12 +82,12 @@ static int init(sh_audio_t *sh){
 
   this->have_frame=read_frame(sh);
   if(!this->have_frame) return 0; // failed to sync...
-  
+
   sh->channels=(this->frame.header.mode == MAD_MODE_SINGLE_CHANNEL) ? 1 : 2;
   sh->samplerate=this->frame.header.samplerate;
   sh->i_bps=this->frame.header.bitrate/8;
   sh->samplesize=2;
-  
+
   return 1;
 }
 
@@ -137,19 +137,19 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
 	  len+=2*nchannels*nsamples;
 	  buf+=2*nchannels*nsamples;
-	  
+
 	  while (nsamples--) {
 	    /* output sample(s) in 16-bit signed little-endian PCM */
-	    
+
 	    *output++ = scale(*left_ch++);
-	    
-	    if (nchannels == 2) 
+
+	    if (nchannels == 2)
 	      *output++ = scale(*right_ch++);
 
 	  }
 	}
   }
-  
+
   return len?len:-1;
 }
 

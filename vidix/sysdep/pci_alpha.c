@@ -19,11 +19,10 @@ static int pci_get_vendor(
 static long pci_config_read_long(
           unsigned char bus,
           unsigned char dev,
-          int func, 
+          int func,
           unsigned cmd)
 {
     unsigned long retval;
     pciconfig_read(bus, dev<<3, cmd, 4, &retval);
     return retval;
 }
-

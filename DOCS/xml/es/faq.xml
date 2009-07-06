@@ -49,7 +49,7 @@ Eso nos ayuda a mejorar contínuamente <application>MPlayer</application>.
 Siempre son bienvenidos codeadores y documentadores. Lea la
 <ulink url="../../tech/">documentación técnica</ulink>
 para obtener una primera impresión. Deberá suscribirse a la lista
-de correo 
+de correo
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
 y comenzar a escribir código. Si quiere ayudar con la documentación,
 únase a la lista de correo
@@ -400,7 +400,7 @@ Descargue los codecs Win32 de nuestra
 Umm, ¿qué es &quot;IdegCounter&quot;?
 </para></question>
 <answer><para>
-Una combinación de una palabra en Húngaro y una Inglesa. &quot;Ideg&quot; en Húngaro 
+Una combinación de una palabra en Húngaro y una Inglesa. &quot;Ideg&quot; en Húngaro
 quiere decir lo mismo que &quot;nervio&quot; en Español, y es pronunciado algo parecido a
 &quot;ydaegh&quot;. Al principio fue  usado para medir el nivel de Nervios de A'rpi, después
 de la (umm) &quot;misteriosa&quot; desaparición de codigo CVS ;)
@@ -905,7 +905,7 @@ tamaño de textura limitado a 256x256.
 
 <qandaentry>
 <question><para>
-Yo tengo una tarjeta TNT/TNT2 de nVidia, y tengo una banda con colores extraña, ¡justo 
+Yo tengo una tarjeta TNT/TNT2 de nVidia, y tengo una banda con colores extraña, ¡justo
 debajo de la pelicula! ¿De quién es la culpa de esto?
 </para></question>
 <answer><para>
@@ -1189,7 +1189,7 @@ pelicula en un CD. Mire a ver si tienes libmp3lame instalado correctamente.
 ¿No puedo codificar archivos ASF a AVI/DivX porque usa 1000 fps?
 </para></question>
 <answer><para>
-ASF usa una tasa de cuadros variable pero AVI usa una fija, debe 
+ASF usa una tasa de cuadros variable pero AVI usa una fija, debe
 fijarlo a mano usando <option>-ofps</option>.
 </para></answer>
 </qandaentry>

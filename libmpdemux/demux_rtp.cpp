@@ -92,7 +92,7 @@ typedef struct RTPState {
 extern "C" char* network_username;
 extern "C" char* network_password;
 static char* openURL_rtsp(RTSPClient* client, char const* url) {
-  // If we were given a user name (and optional password), then use them: 
+  // If we were given a user name (and optional password), then use them:
   if (network_username != NULL) {
     char const* password = network_password == NULL ? "" : network_password;
     return client->describeWithPassword(url, network_username, password);
@@ -102,7 +102,7 @@ static char* openURL_rtsp(RTSPClient* client, char const* url) {
 }
 
 static char* openURL_sip(SIPClient* client, char const* url) {
-  // If we were given a user name (and optional password), then use them: 
+  // If we were given a user name (and optional password), then use them:
   if (network_username != NULL) {
     char const* password = network_password == NULL ? "" : network_password;
     return client->inviteWithPassword(url, network_username, password);
@@ -111,7 +111,7 @@ static char* openURL_sip(SIPClient* client, char const* url) {
   }
 }
 
-int rtspStreamOverTCP = 0; 
+int rtspStreamOverTCP = 0;
 extern int rtsp_port;
 
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
@@ -127,7 +127,7 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
     SIPClient* sipClient = NULL;
 
     if (demuxer == NULL || demuxer->stream == NULL) break;  // shouldn't happen
-    demuxer->stream->eof = 0; // just in case 
+    demuxer->stream->eof = 0; // just in case
 
     // Look at the stream's 'priv' field to see if we were initiated
     // via a SDP description:
@@ -208,7 +208,7 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
 
       if (rtsp_port)
           subsession->setClientPortNum (rtsp_port);
-      
+
       if (!subsession->initiate()) {
 	fprintf(stderr, "Failed to initiate \"%s/%s\" RTP subsession: %s\n", subsession->mediumName(), subsession->codecName(), env->getResultMsg());
       } else {
@@ -314,7 +314,7 @@ extern "C" int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds) {
     if (dp == NULL) return 0;
 
     if (demuxer->stream->eof) return 0; // source stream has closed down
-  
+
     // Before using this packet, check to make sure that its presentation
     // time is not far behind the other stream (if any).  If it is,
     // then we discard this packet, and get another instead.  (The rest of
@@ -333,7 +333,7 @@ extern "C" int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds) {
       ds_add_packet(ds, dp);
       break;
     }
-    
+
 #ifdef DEBUG_PRINT_DISCARDED_PACKETS
     RTPState* rtpState = (RTPState*)(demuxer->priv);
     ReadBufferQueue* bufferQueue = ds == demuxer->video ? rtpState->videoBufferQueue : rtpState->audioBufferQueue;
@@ -424,7 +424,7 @@ static void afterReading(void* clientData, unsigned frameSize,
   resize_demux_packet(dp, frameSize + headersize);
 
   // Set the packet's presentation time stamp, depending on whether or
-  // not our RTP source's timestamps have been synchronized yet: 
+  // not our RTP source's timestamps have been synchronized yet:
   Boolean hasBeenSynchronized
     = bufferQueue->rtpSource()->hasBeenSynchronizedUsingRTCP();
   if (hasBeenSynchronized) {
@@ -437,7 +437,7 @@ static void afterReading(void* clientData, unsigned frameSize,
     if (fst->tv_sec == 0 && fst->tv_usec == 0) {
       *fst = presentationTime;
     }
-    
+
     // For the "pts" field, use the time differential from the first
     // synchronized time, rather than absolute time, in order to avoid
     // round-off errors when converting to a float:
@@ -502,7 +502,7 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
     fprintf(stderr, "(demux_rtp)getBuffer failed: no appropriate RTP subsession has been set up\n");
     return NULL;
   }
-  
+
   demux_packet_t* dp = NULL;
   if (!mustGetNewData) {
     // Check whether we have a previously-saved buffer that we can use:
@@ -619,7 +619,7 @@ ReadBufferQueue::ReadBufferQueue(MediaSubsession* subsession,
     fReadSource(subsession == NULL ? NULL : subsession->readSource()),
     fRTPSource(subsession == NULL ? NULL : subsession->rtpSource()),
     fOurDemuxer(demuxer), fTag(strdup(tag)) {
-} 
+}
 
 ReadBufferQueue::~ReadBufferQueue() {
   delete fTag;
@@ -649,7 +649,7 @@ demux_packet_t* ReadBufferQueue::getPendingBuffer() {
   demux_packet_t* dp = pendingDPHead;
   if (dp != NULL) {
     pendingDPHead = dp->next;
-    if (pendingDPHead == NULL) pendingDPTail = NULL; 
+    if (pendingDPHead == NULL) pendingDPTail = NULL;
 
     dp->next = NULL;
   }

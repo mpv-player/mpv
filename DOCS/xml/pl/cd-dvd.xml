@@ -216,9 +216,9 @@ co jest dokładniej opisane na stronie man.
 Napędy DVD RPC-1 zabezpieczają ustawienia regionu jedynie poprzez
 oprogramowanie. Napędy RPC-2 mają sprzętowe zabezpieczenie, które pozwala na co
 najwyżej 5 zmian. Jeżeli posiadamy napęd DVD RPC-2 wymagana/zalecana jest
-aktualizacja firmware'u do RPC-1. 
-Nowe wersje firmware'ów można znaleźć w internecie. 
-Poszukiwania radzimy rozpocząć od 
+aktualizacja firmware'u do RPC-1.
+Nowe wersje firmware'ów można znaleźć w internecie.
+Poszukiwania radzimy rozpocząć od
 <ulink url="http://forum.rpc-1.com/dl_all.php">forum firmware'ów</ulink>.
 Jeżeli nie ma tam nowej wersji firmware'u dla naszego urządzenia, użyj
 <ulink url="http://linvdr.org/projects/regionset/">regionset tool
@@ -265,7 +265,7 @@ i odtwarzać plik wynikowy za pomocą <application>MPlayera</application>
 <formalpara>
 <title>Struktura VCD</title>
 <para>
-Video CD (VCD) składa się z sektorów CD-ROM XA, tzn. ścieżek CD-ROM 
+Video CD (VCD) składa się z sektorów CD-ROM XA, tzn. ścieżek CD-ROM
 mode 2 form 1 i form 2:
 <itemizedlist>
 <listitem><para>
@@ -279,7 +279,7 @@ mode 2 form 1 i form 2:
 </para></listitem>
 
 <listitem><para>
-  Druga i pozostałe ścieżki są zwykle ścieżkami video MPEG typu raw o gęstości 
+  Druga i pozostałe ścieżki są zwykle ścieżkami video MPEG typu raw o gęstości
   2324 bajtów/sektor, zawierającymi jeden pakiet danych MGEG PS na sektor.
   Ścieżki te są w formacje mode 2 form 1, więc przechowują one więcej danych na
   sektor, w zamian za słabszą korekcję błędów. Możliwe są też ścieżki CD-DA na
@@ -287,7 +287,7 @@ mode 2 form 1 i form 2:
   trików aby ścieżki nie zawierające systemu plików ISO-9660 były widoczne
   w systemie plików. W pozostałych systemach, jak na przykład w systemie
   GNU/Linux, nie ma takiej możliwości (jeszcze). W takim przypadku dane MPEG
-  <emphasis role="bold">nie mogą być montowane</emphasis>. 
+  <emphasis role="bold">nie mogą być montowane</emphasis>.
   Jako że większość filmów znajduje się na tego typu ścieżce,
   powinieneś spróbować na początek opcji <option>vcd://2</option>.
 </para></listitem>
@@ -300,8 +300,8 @@ mode 2 form 1 i form 2:
 
 <listitem><para>
   Definicja standardu Video CD, nazywana "Białą Księgą" Phillipsa,
-  generalnie nie jest dostępna online, musi być zakupiona u Phillipsa. 
-  Bardziej szczegółowe informacje na temat Video CD można znaleźć na 
+  generalnie nie jest dostępna online, musi być zakupiona u Phillipsa.
+  Bardziej szczegółowe informacje na temat Video CD można znaleźć na
   <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">stronie dokumentacji vcdimagera</ulink>.
 </para></listitem>
 </itemizedlist>

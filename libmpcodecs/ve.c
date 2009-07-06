@@ -55,4 +55,3 @@ vf_instance_t* vf_open_encoder(struct MPOpts *opts, vf_instance_t* next, const c
     char* vf_args[] = { "_oldargs_", args, NULL };
     return vf_open_plugin(opts, encoder_list,next,name,vf_args);
 }
-

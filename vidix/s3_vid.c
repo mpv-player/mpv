@@ -41,12 +41,12 @@
 
 static void S3SetColorKeyOld (void);
 static void S3SetColorKeyNew (void);
-static void S3SetColorKey2000 (void); 
+static void S3SetColorKey2000 (void);
 static void (*S3SetColorKey) (void) = NULL;
 
 static void S3SetColorOld (void);
 static void S3SetColorNew (void);
-static void S3SetColor2000 (void); 
+static void S3SetColor2000 (void);
 static void (*S3SetColor) (void) = NULL;
 
 static void S3DisplayVideoOld (void);
@@ -305,7 +305,7 @@ static void S3DisplayVideoOld (void)
     ssControl = ((info->src_w - 1) << 1) - ((info->drw_w - 1) & 0xffff);
     ssControl |= GetBlendForFourCC (info->format) << 24;
     if (info->src_w != info->drw_w)
-      ssControl |= 2 << 28; 
+      ssControl |= 2 << 28;
 
     OUTREG (SSTREAM_CONTROL_REG, ssControl);
     OUTREG (SSTREAM_STRETCH_REG, (((info->src_w - info->drw_w) & 0x7ff) << 16) | (info->src_w - 1));
@@ -658,7 +658,7 @@ static int s3_init (void)
     break;
 
   case S3_SAVAGE4:
-    /* 
+    /*
      * The Savage4 has one ugly special case to consider.  On
      * systems with 4 banks of 2Mx32 SDRAM, the BIOS says 4MB
      * when it really means 8MB.  Why do it the same when you
@@ -726,7 +726,7 @@ static int is_supported_fourcc (uint32_t fourcc)
 {
   switch (fourcc)
   {
-//FIXME: Burst Command Interface should be used 
+//FIXME: Burst Command Interface should be used
 // for planar to packed conversion
 //    case IMGFMT_YV12:
 //    case IMGFMT_I420:

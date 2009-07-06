@@ -5,9 +5,9 @@
  */
 
 /*
- * Layer 2 Alloc tables .. 
+ * Layer 2 Alloc tables ..
  * most other tables are calculated on program start (which is (of course)
- * not ISO-conform) .. 
+ * not ISO-conform) ..
  * Layer-3 huffman table is in huffman.h
  */
 
@@ -157,4 +157,3 @@ static struct al_table alloc_4[] = {
     {2,0},{5,3},{7,5},{10,9},
     {2,0},{5,3},{7,5},{10,9},
     {2,0},{5,3},{7,5},{10,9}  };
-

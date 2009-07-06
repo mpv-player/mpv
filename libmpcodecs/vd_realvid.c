@@ -123,7 +123,7 @@ static int load_syms_linux(char *path) {
 	rv_handle = handle;
 	return 1;
     }
-	
+
 		rvyuv_custom_message = dlsym(handle, "RV40toYUV420CustomMessage");
 		rvyuv_free = dlsym(handle, "RV40toYUV420Free");
 		rvyuv_init = dlsym(handle, "RV40toYUV420Init");
@@ -281,7 +281,7 @@ static int init(sh_video_t *sh){
 
 	/* first try to load linux dlls, if failed and we're supporting win32 dlls,
 	   then try to load the windows ones */
-#ifdef HAVE_LIBDL       
+#ifdef HAVE_LIBDL
 	if(strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
 #ifdef CONFIG_WIN32DLL
@@ -393,7 +393,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    buffer=malloc(bufsz);
 	    if (!buffer) return 0;
 	}
-	
+
 	for (i=0; i<2*(chunks+1); i++)
 		extra[i] = le2me_32(extra[i]);
 
@@ -412,7 +412,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    sh->disp_h=transform_out[4];
 	    if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
 	    initialized=1;
-	} 
+	}
 	    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0 /*MP_IMGFLAG_ACCEPT_STRIDE*/,
 		    sh->disp_w, sh->disp_h);
 	    if(!mpi) return NULL;
@@ -426,6 +426,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	if(transform_out[0] &&
 	   (sh->disp_w != transform_out[3] || sh->disp_h != transform_out[4]))
 	    initialized = 0;
-	
+
 	return result ? NULL : mpi;
 }

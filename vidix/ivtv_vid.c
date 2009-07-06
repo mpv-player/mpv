@@ -145,7 +145,7 @@ static void de_macro_uv(unsigned char *srcu, unsigned char *srcv,
 	unsigned char *dst_2;
 	unsigned int h_tail, w_tail;
 	unsigned int h_size;
-	
+
 	// The uv plane is half the size of the y plane, so 'correct' all dimensions.
 	w /= 2;
 	h /= 2;
@@ -263,7 +263,7 @@ int ivtv_probe(int verbose, int force)
 			}
 		}
 	}
-	
+
 	if(ivtv_verbose)
 		printf(IVTV_MSG"Can't find chip\n");
 	return ENXIO;
@@ -304,7 +304,7 @@ card_found:
 	/* Try to find YUV device */
 	unsigned char yuv_device_number = 48, yuv_device = 48 + fb_number;
 	char yuv_device_name[] = "/dev/videoXXX\0";
-	
+
 	do {
 		sprintf(yuv_device_name, "/dev/video%u", yuv_device);
 		yuvdev = open(yuv_device_name, O_RDWR);
@@ -380,7 +380,7 @@ void ivtv_destroy(void)
 	if(ivtv_verbose)
 		printf(IVTV_MSG"destroy\n");
 	if(-1 != yuvdev)
-		close(yuvdev);	
+		close(yuvdev);
 	if(-1 != fbdev)
 		close(fbdev);
 	if(NULL != outbuf)
@@ -401,7 +401,7 @@ int ivtv_query_fourcc(vidix_fourcc_t *to)
 {
 	if(ivtv_verbose)
 		printf(IVTV_MSG"query fourcc (%x)\n", to->fourcc);
-	
+
 	int supports = 0;
 	switch(to->fourcc)
 	{
@@ -411,7 +411,7 @@ int ivtv_query_fourcc(vidix_fourcc_t *to)
 	default:
 		supports = 0;
 	}
-	
+
 	if(!supports) {
 		to->depth = to->flags = 0;
 		return ENOTSUP;
@@ -429,12 +429,12 @@ int ivtv_config_playback(vidix_playback_t *info)
 		printf(IVTV_MSG"config playback\n");
 
 	if(2 == ivtv_verbose){
-		printf(IVTV_MSG"src : x:%d y:%d w:%d h:%d\n", 
+		printf(IVTV_MSG"src : x:%d y:%d w:%d h:%d\n",
 			info->src.x, info->src.y, info->src.w, info->src.h);
-		printf(IVTV_MSG"dest: x:%d y:%d w:%d h:%d\n", 
+		printf(IVTV_MSG"dest: x:%d y:%d w:%d h:%d\n",
 			info->dest.x, info->dest.y, info->dest.w, info->dest.h);
 	}
-	
+
 	memcpy(&destVideo, &info->dest, sizeof(vidix_rect_t));
 	memcpy(&srcVideo, &info->src, sizeof(vidix_rect_t));
 
@@ -447,7 +447,7 @@ int ivtv_config_playback(vidix_playback_t *info)
 	info->offset.y = 0;
 	info->offset.u = info->src.w * info->src.h;
 	info->offset.v = info->offset.u + ((info->src.w * info->src.h)/4);
-	info->dga_addr = memBase = malloc(info->num_frames*info->frame_size);   
+	info->dga_addr = memBase = malloc(info->num_frames*info->frame_size);
 	if(ivtv_verbose)
 		printf(IVTV_MSG"frame_size: %d, dga_addr: %p\n",
 	info->frame_size, info->dga_addr);
@@ -477,9 +477,9 @@ int ivtv_playback_on(void)
 
 int ivtv_playback_off(void)
 {
-	if(ivtv_verbose) 
+	if(ivtv_verbose)
 		printf(IVTV_MSG"playback off\n");
-	
+
 	if(0 == alpha_disable) {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 		if (-1 != fbdev) {

@@ -211,17 +211,17 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_CEXIT, "exit", 0, { {-1,{0}} } },
   { MP_CMD_CHIDE, "hide", 0, { {MP_CMD_ARG_INT,{3000}}, {-1,{0}} } },
 #endif
- 
+
   { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", 0, { {-1,{0}} } },
   { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", 0, { {-1,{0}} } },
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SET_PROPERTY, "set_property", 2, { {MP_CMD_ARG_STRING, {0}},  {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_GET_PROPERTY, "get_property", 1, { {MP_CMD_ARG_STRING, {0}},  {-1,{0}} } },
   { MP_CMD_STEP_PROPERTY, "step_property", 1, { {MP_CMD_ARG_STRING, {0}}, {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
-  
+
   { MP_CMD_SEEK_CHAPTER, "seek_chapter", 1, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", 2, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
-  
+
   { 0, NULL, 0, {} }
 };
 
@@ -375,7 +375,7 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { {  MOUSE_BTN4, 0 }, "seek -10" },
   { {  MOUSE_BTN5, 0 }, "volume 1" },
   { {  MOUSE_BTN6, 0 }, "volume -1" },
-  
+
 #ifdef CONFIG_DVDNAV
   { { KEY_KP8, 0 }, "dvdnav up" },   // up
   { { KEY_KP2, 0 }, "dvdnav down" },   // down
@@ -498,9 +498,9 @@ static const mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_VOLUME_UP, 0 }, "volume 1" },
   { { KEY_VOLUME_DOWN, 0 }, "volume -1" },
   { { KEY_MUTE, 0 }, "mute" },
-          
+
   { { KEY_CLOSE_WIN, 0 }, "quit" },
-  
+
   { { '!', 0 }, "seek_chapter -1" },
   { { '@', 0 }, "seek_chapter 1" },
   { { 'A', 0 }, "switch_angle 1" },
@@ -857,7 +857,7 @@ mp_input_parse_cmd(char* str) {
 	if(e <= ptr2 || *(e - 1) != '\\') break;
 	ptr2 = e + 1;
       }
-      
+
       if(term != ' ' && (!e || e[0] == '\0')) {
 	mp_tmsg(MSGT_INPUT,MSGL_ERR,"Command %s: argument %d is unterminated.\n",cmd_def->name,i+1);
 	ptr = NULL;
@@ -913,8 +913,8 @@ static int read_cmd(mp_input_fd_t* mp_fd, char** ret)
     mp_fd->buffer = talloc_size(NULL, MP_CMD_MAX_SIZE);
     mp_fd->pos = 0;
     mp_fd->size = MP_CMD_MAX_SIZE;
-  } 
-  
+  }
+
   // Get some data if needed/possible
   while (!mp_fd->got_cmd && !mp_fd->eof && (mp_fd->size - mp_fd->pos > 1) ) {
     int r = mp_fd->read_func.cmd(mp_fd->fd, mp_fd->buffer+mp_fd->pos,
@@ -972,7 +972,7 @@ static int read_cmd(mp_input_fd_t* mp_fd, char** ret)
     mp_fd->pos -= l+1;
     memmove(mp_fd->buffer, end+1, mp_fd->pos);
   }
-   
+
   if(*ret)
     return 1;
   else
@@ -1007,7 +1007,7 @@ mp_input_add_cmd_filter(mp_input_cmd_filter func, void* ctx) {
   filter->next = cmd_filters;
   cmd_filters = filter;
 }
-  
+
 
 static char *find_bind_for_key(const mp_cmd_bind_t* binds, int n,int* keys)
 {
@@ -1141,7 +1141,7 @@ static mp_cmd_t* interpret_key(struct input_ctx *ictx, int code, int paused)
       ictx->key_down[ictx->num_key_down] = code;
       ictx->num_key_down++;
       ictx->last_key_down = 1;
-    } 
+    }
     // We ignore key from last combination
     ret = ictx->last_key_down ?
         get_cmd_from_keys(ictx, ictx->num_key_down, ictx->key_down, paused)
@@ -1319,14 +1319,14 @@ static mp_cmd_t *get_queued_cmd(struct input_ctx *ictx, int peek_only)
     return NULL;
 
   ret = ictx->cmd_queue[ictx->cmd_queue_start];
-  
-  if (!peek_only) {  
+
+  if (!peek_only) {
       ictx->cmd_queue_length--;
       ictx->cmd_queue_start = (ictx->cmd_queue_start + 1) % CMD_QUEUE_SIZE;
   }
-  
+
   return ret;
-}  
+}
 
 /**
  * \param peek_only when set, the returned command stays in the queue.
@@ -1402,7 +1402,7 @@ static char *get_key_name(int key, char buffer[12])
     if(key_names[i].key == key)
       return key_names[i].name;
   }
-  
+
   if(isascii(key)) {
     snprintf(buffer, 12, "%c",(char)key);
     return buffer;
@@ -1493,7 +1493,7 @@ static void bind_keys(struct input_ctx *ictx,
       }
     }
   }
-  
+
   if(!bind) {
       bind_section->cmd_binds = talloc_realloc(bind_section,
                                                bind_section->cmd_binds,
@@ -1707,12 +1707,12 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
   if(use_gui)
       add_binds(ictx, gui_def_cmd_binds);
 #endif
-  
+
   char *config_file = input_conf->config_file;
   file = config_file[0] != '/' ? get_path(config_file) : config_file;
   if(!file)
     return ictx;
-  
+
   if (!parse_config(ictx, file)) {
     // free file if it was allocated by get_path(),
     // before it gets overwritten
@@ -1780,7 +1780,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf, int use_gui)
                             (mp_close_func_t)close, NULL);
   }
 #endif
-  
+
   if (input_conf->in_file) {
     struct stat st;
     if (stat(input_conf->in_file, &st))

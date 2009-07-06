@@ -38,14 +38,14 @@ static int smjpeg_check_file(demuxer_t* demuxer){
     int orig_pos = stream_tell(demuxer->stream);
     char buf[8];
     int version;
-    
+
     mp_msg(MSGT_DEMUX, MSGL_V, "Checking for SMJPEG\n");
-    
+
     if (stream_read_word(demuxer->stream) == 0xA)
     {
 	stream_read(demuxer->stream, buf, 6);
 	buf[7] = 0;
-    
+
 	if (strncmp("SMJPEG", buf, 6)) {
 	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Failed: SMJPEG\n");
 	    return 0;
@@ -61,7 +61,7 @@ static int smjpeg_check_file(demuxer_t* demuxer){
 	    version);
 	return 0;
     }
-    
+
     stream_seek(demuxer->stream, orig_pos);
 
     return DEMUXER_TYPE_SMJPEG;
@@ -76,11 +76,11 @@ static int demux_smjpeg_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
     int dtype, dsize, dpts;
 
     demux->filepos = stream_tell(demux->stream);
-    
+
     dtype = stream_read_dword_le(demux->stream);
     dpts = stream_read_dword(demux->stream);
     dsize = stream_read_dword(demux->stream);
-    
+
     switch(dtype)
     {
 	case mmioFOURCC('s','n','d','D'):
@@ -110,10 +110,10 @@ static demuxer_t* demux_open_smjpeg(demuxer_t* demuxer){
     /* file header */
     stream_skip(demuxer->stream, 8); /* \x00\x0aSMJPEG */
     stream_skip(demuxer->stream, 4);
-    
+
     mp_msg(MSGT_DEMUX, MSGL_INFO, "This clip is %d seconds\n",
 	stream_read_dword(demuxer->stream));
-    
+
     /* stream header */
     while (i < 3)
     {
@@ -128,7 +128,7 @@ static demuxer_t* demux_open_smjpeg(demuxer_t* demuxer){
 	    sh_video = new_sh_video(demuxer, 0);
 	    demuxer->video->sh = sh_video;
 	    sh_video->ds = demuxer->video;
-	    
+
 	    sh_video->bih = malloc(sizeof(BITMAPINFOHEADER));
 	    memset(sh_video->bih, 0, sizeof(BITMAPINFOHEADER));
 
@@ -156,7 +156,7 @@ static demuxer_t* demux_open_smjpeg(demuxer_t* demuxer){
 
 	    sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
 	    memset(sh_audio->wf, 0, sizeof(WAVEFORMATEX));
-	    
+
 	    sh_audio->samplerate = stream_read_word(demuxer->stream);
 	    sh_audio->wf->wBitsPerSample = stream_read_char(demuxer->stream);
 	    sh_audio->channels = stream_read_char(demuxer->stream);
@@ -176,7 +176,7 @@ static demuxer_t* demux_open_smjpeg(demuxer_t* demuxer){
     }
 
     demuxer->seekable = 0;
-    
+
     return demuxer;
 }
 

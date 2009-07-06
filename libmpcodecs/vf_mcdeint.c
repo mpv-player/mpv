@@ -25,7 +25,7 @@ Known Issues:
   frames are created purely based on spatial interpolation then for example
   a thin black line or another random and not interpolateable pattern
   will cause problems
-  Note: completly ignoring the "unavailable" lines during motion estimation 
+  Note: completly ignoring the "unavailable" lines during motion estimation
   didnt look any better, so the most obvious solution would be to improve
   tfields or penalize problematic motion vectors ...
 
@@ -33,7 +33,7 @@ Known Issues:
   and as a result sometimes creates artifacts
 
 * only past frames are used, we should ideally use future frames too, something
-  like filtering the whole movie in forward and then backward direction seems 
+  like filtering the whole movie in forward and then backward direction seems
   like a interresting idea but the current filter framework is FAR from
   supporting such things
 

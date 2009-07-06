@@ -321,9 +321,9 @@ typedef struct
 #define GETBASEIRQ	10
 
 /* Purge functions for Comm Port */
-#define PURGE_TXABORT       0x0001  /* Kill the pending/current writes to the 
+#define PURGE_TXABORT       0x0001  /* Kill the pending/current writes to the
 				       comm port */
-#define PURGE_RXABORT       0x0002  /*Kill the pending/current reads to 
+#define PURGE_RXABORT       0x0002  /*Kill the pending/current reads to
 				     the comm port */
 #define PURGE_TXCLEAR       0x0004  /* Kill the transmit queue if there*/
 #define PURGE_RXCLEAR       0x0008  /* Kill the typeahead buffer if there*/
@@ -398,7 +398,7 @@ typedef struct
 #define RT_GROUP_ICON        WINELIB_NAME_AW(RT_GROUP_ICON)
 
 
-#define LMEM_FIXED          0   
+#define LMEM_FIXED          0
 #define LMEM_MOVEABLE       0x0002
 #define LMEM_NOCOMPACT      0x0010
 #define LMEM_NODISCARD      0x0020
@@ -833,10 +833,10 @@ typedef struct LDT_ENTRY {
 	struct {
 	    BYTE	BaseMid;
 	    BYTE	Flags1;/*Declare as bytes to avoid alignment problems */
-	    BYTE	Flags2; 
+	    BYTE	Flags2;
 	    BYTE	BaseHi;
 	} Bytes;
-	struct {	    
+	struct {
 	    unsigned	BaseMid		: 8;
 	    unsigned	Type		: 5;
 	    unsigned	Dpl		: 2;
@@ -877,7 +877,7 @@ typedef struct DllVersionInfo {
  * This one seems to be a Win32 only definition. It also is defined with
  * WINAPI instead of CALLBACK in the windows headers.
  */
-typedef DWORD WINAPI (*LPPROGRESS_ROUTINE)(LARGE_INTEGER, LARGE_INTEGER, LARGE_INTEGER, 
+typedef DWORD WINAPI (*LPPROGRESS_ROUTINE)(LARGE_INTEGER, LARGE_INTEGER, LARGE_INTEGER,
                                            LARGE_INTEGER, DWORD, DWORD, HANDLE,
                                            HANDLE, LPVOID);
 
@@ -1075,7 +1075,7 @@ typedef struct tagCOMMTIMEOUTS {
 	DWORD	WriteTotalTimeoutMultiplier;
 	DWORD	WriteTotalTimeoutConstant;
 } COMMTIMEOUTS,*LPCOMMTIMEOUTS;
-  
+
 #include "poppack.h"
 
 typedef void CALLBACK (*PAPCFUNC)(ULONG_PTR);
@@ -1095,7 +1095,7 @@ WIN_BOOL      WINAPI SetCommState(INT,LPDCB);
 WIN_BOOL      WINAPI TransmitCommChar(INT,CHAR);
 WIN_BOOL      WINAPI SetupComm(HANDLE, DWORD, DWORD);
 WIN_BOOL      WINAPI GetCommProperties(HANDLE, LPDCB *);
-  
+
 /*DWORD WINAPI GetVersion( void );*/
 WIN_BOOL16 WINAPI GetVersionEx16(OSVERSIONINFO16*);
 WIN_BOOL WINAPI GetVersionExA(OSVERSIONINFOA*);
@@ -1116,7 +1116,7 @@ void      WINAPI RaiseException(DWORD,DWORD,DWORD,const LPDWORD);
 WIN_BOOL    WINAPI SetProcessWorkingSetSize(HANDLE,DWORD,DWORD);
 WIN_BOOL    WINAPI TerminateProcess(HANDLE,DWORD);
 WIN_BOOL    WINAPI TerminateThread(HANDLE,DWORD);
-WIN_BOOL    WINAPI GetExitCodeThread(HANDLE,LPDWORD); 
+WIN_BOOL    WINAPI GetExitCodeThread(HANDLE,LPDWORD);
 
 /* GetBinaryType return values.
  */
@@ -1368,7 +1368,7 @@ WIN_BOOL        WINAPI LookupAccountSidW(LPCWSTR,PSID,LPWSTR,LPDWORD,LPWSTR,LPDW
 #define     LookupAccountSid WINELIB_NAME_AW(LookupAccountSidW)
 WIN_BOOL        WINAPI LocalFileTimeToFileTime(const FILETIME*,LPFILETIME);
 WIN_BOOL        WINAPI LockFile(HANDLE,DWORD,DWORD,DWORD,DWORD);
-WIN_BOOL        WINAPI LockFileEx(HANDLE, DWORD, DWORD, DWORD, DWORD, LPOVERLAPPED);    
+WIN_BOOL        WINAPI LockFileEx(HANDLE, DWORD, DWORD, DWORD, DWORD, LPOVERLAPPED);
 WIN_BOOL        WINAPI LookupPrivilegeValueA(LPCSTR,LPCSTR,LPVOID);
 WIN_BOOL        WINAPI LookupPrivilegeValueW(LPCWSTR,LPCWSTR,LPVOID);
 #define     LookupPrivilegeValue WINELIB_NAME_AW(LookupPrivilegeValue)

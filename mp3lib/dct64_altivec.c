@@ -46,7 +46,7 @@ void dct64_altivec(real *a,real *b,real *c)
 {
   real __attribute__ ((aligned(16))) b1[0x20];
   real __attribute__ ((aligned(16))) b2[0x20];
-  
+
   real *out0 = a;
   real *out1 = b;
   real *samples = c;
@@ -57,7 +57,7 @@ void dct64_altivec(real *a,real *b,real *c)
 
   if (((unsigned long)b1 & 0x0000000F) ||
       ((unsigned long)b2 & 0x0000000F))
-    
+
   {
     printf("MISALIGNED:\t%p\t%p\t%p\t%p\t%p\n",
            b1, b2, a, b, samples);
@@ -65,7 +65,7 @@ void dct64_altivec(real *a,real *b,real *c)
 
 
 #ifdef ALTIVEC_USE_REFERENCE_C_CODE
-  
+
   {
     register real *costab = mp3lib_pnts[0];
 
@@ -249,7 +249,7 @@ void dct64_altivec(real *a,real *b,real *c)
       costabv3 = vec_perm(costabv3, costabv4, costab_perm);
       costabv5 = vec_ld(64, costab);
       costabv4 = vec_perm(costabv4, costabv5, costab_perm);
-    
+
       temp1 = vec_sub(vec_perm(samplesv4, samplesv4, reverse),
                       samplesv5);
       temp2 = vec_madd(temp1,
@@ -257,7 +257,7 @@ void dct64_altivec(real *a,real *b,real *c)
                        vczero);
       //vec_st(temp2, 64, b1);
       b1v4 = temp2;
-    
+
       temp1 = vec_sub(vec_perm(samplesv3, samplesv3, reverse),
                       samplesv6);
       temp2 = vec_madd(temp1,
@@ -272,7 +272,7 @@ void dct64_altivec(real *a,real *b,real *c)
                        vczero);
       //vec_st(temp2, 96, b1);
       b1v6 = temp2;
-    
+
       temp1 = vec_sub(vec_perm(samplesv1, samplesv1, reverse),
                       samplesv8);
       temp2 = vec_madd(temp1,
@@ -299,7 +299,7 @@ void dct64_altivec(real *a,real *b,real *c)
         costabv2 = vec_perm(costabv2, costabv3 , costab_perm);
         costabv1r = vec_perm(costabv1, costabv1, reverse);
         costabv2r = vec_perm(costabv2, costabv2, reverse);
-    
+
         temp1 = vec_add(b1v0, vec_perm(b1v3, b1v3, reverse));
         //vec_st(temp1, 0, b2);
         b2v0 = temp1;
@@ -333,7 +333,7 @@ void dct64_altivec(real *a,real *b,real *c)
       {
         register real *costab = mp3lib_pnts[2];
 
-    
+
         vector float costabv1r, costabv1, costabv2;
         vector unsigned char costab_perm = vec_lvsl(0, costab);
 
@@ -341,13 +341,13 @@ void dct64_altivec(real *a,real *b,real *c)
         costabv2 = vec_ld(16, costab);
         costabv1 = vec_perm(costabv1, costabv2, costab_perm);
         costabv1r = vec_perm(costabv1, costabv1, reverse);
-    
+
         temp1 = vec_add(b2v0, vec_perm(b2v1, b2v1, reverse));
         vec_st(temp1, 0, b1);
         temp2 = vec_sub(vec_perm(b2v0, b2v0, reverse), b2v1);
         temp1 = vec_madd(temp2, costabv1r, vczero);
         vec_st(temp1, 16, b1);
-    
+
         temp1 = vec_add(b2v2, vec_perm(b2v3, b2v3, reverse));
         vec_st(temp1, 32, b1);
         temp2 = vec_sub(b2v3, vec_perm(b2v2, b2v2, reverse));
@@ -365,7 +365,7 @@ void dct64_altivec(real *a,real *b,real *c)
         temp2 = vec_sub(b2v7, vec_perm(b2v6, b2v6, reverse));
         temp1 = vec_madd(temp2, costabv1r, vczero);
         vec_st(temp1, 112, b1);
-    
+
       }
     }
   }

@@ -1633,7 +1633,7 @@ This means that this sources don't support ISA and VLB cards */
 #	define GRAPHIC_KEY_FN_EQ		0x00000050L // EQ and NE are exchanged relative to radeon
 #	define CMP_MIX_MASK			0x00000100L
 #	define CMP_MIX_OR			0x00000000L
-#	define CMP_MIX_AND			0x00000100L   
+#	define CMP_MIX_AND			0x00000100L
 /*	?			BlockIOTag(0x107u) */
 #define OVERLAY_SCALE_INC	BlockIOTag(0x108u)
 #define OVERLAY_SCALE_CNTL	BlockIOTag(0x109u)

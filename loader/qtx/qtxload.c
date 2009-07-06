@@ -27,7 +27,7 @@ void* GetProcAddress(void* handle,char* func);
 
 #define __stdcall __attribute__((__stdcall__))
 #define __cdecl   __attribute__((__cdecl__))
-#define APIENTRY 
+#define APIENTRY
 
 unsigned int* x_table[0x00001837];
 
@@ -60,7 +60,7 @@ int main(void) {
 
     InitializeQTML = 0x6299e590;//GetProcAddress(handler, "InitializeQTML");
     InitializeQTML(6+16);
-    
+
     printf("loading svq3\n");
     handler2= LoadLibraryA("/root/.wine/fake_windows/Windows/System/QuickTime/QuickTimeEssentials.qtx");
     printf("done\n");
@@ -82,7 +82,7 @@ int main(void) {
     desc.componentManufacturer=0;
     desc.componentFlags=0;
     desc.componentFlagsMask=0;
-    
+
     params = malloc(sizeof(ComponentParameters)+2048);
 
     params->flags = 0;

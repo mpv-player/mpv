@@ -1,7 +1,7 @@
 /* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/glint/glint_regs.h,v 1.31 2001/12/08 16:01:52 alanh Exp $ */
 
 /*
- * glint register file 
+ * glint register file
  *
  * Copyright by Stefan Dirsch, Dirk Hohndel, Alan Hourihane
  * Authors: Alan Hourihane, <alanh@fairlite.demon.co.uk>
@@ -12,7 +12,7 @@
  * this work is sponsored by S.u.S.E. GmbH, Fuerth, Elsa GmbH, Aachen and
  * Siemens Nixdorf Informationssysteme
  *
- */ 
+ */
 
 #ifndef MPLAYER_GLINT_REGS_H
 #define MPLAYER_GLINT_REGS_H
@@ -45,7 +45,7 @@
 #define CFGIntLine							0x3c
 
 /* Base Adresses */
-#define CFGBaseAddr0							0x10 
+#define CFGBaseAddr0							0x10
 #define CFGBaseAddr1							0x14
 #define CFGBaseAddr2							0x18
 #define CFGBaseAddr3							0x1C
@@ -164,7 +164,7 @@
     #define RowCharge4    0 << 10
     #define TimeRCD4      0 <<  7
     #define TimeRC4       0x4 << 3
-    #define TimeRP4       1 
+    #define TimeRP4       1
     #define CAS3Latency4  0 << 16
     #define BootAdress4   0x10
     #define NumberBanks4  1 << 29
@@ -474,7 +474,7 @@
  * GLINT Core Registers *
  ************************/
 
-#define GLINT_TAG(major,offset)		(((major) << 7) | ((offset) << 3)) 
+#define GLINT_TAG(major,offset)		(((major) << 7) | ((offset) << 3))
 #define GLINT_TAG_ADDR(major,offset)	(0x8000 | GLINT_TAG((major),(offset)))
 
 #define UNIT_DISABLE							0
@@ -691,7 +691,7 @@
 	#define CDDA_FlatShading			                0
 	/* UNIT_DISABLE			*/
 	#define CDDA_GouraudShading					0x0002
-        
+
 
 #define ConstantColor				GLINT_TAG_ADDR(0x0f,0x0d)
 #define GLINTColor				GLINT_TAG_ADDR(0x0f,0x0e)
@@ -867,7 +867,7 @@
         #define GWIN_OverrideWriteFilter (1 << 19)
 
 	/* ??? is this needed, set by permedia (2) modules */
-        #define GWIN_DisableLBUpdate    0x40000 
+        #define GWIN_DisableLBUpdate    0x40000
 
 #define StencilMode				GLINT_TAG_ADDR(0x13,0x01)
 #define StencilData				GLINT_TAG_ADDR(0x13,0x02)
@@ -1100,8 +1100,8 @@
 	#define DM_DiamondExit					0x0800
 	#define DM_NoDraw					0x1000
 	#define DM_ClampEnable					0x2000
-	#define DM_ClampedTexParMode				0x4000 
-	#define DM_NormalizedTexParMode				0xC000 
+	#define DM_ClampedTexParMode				0x4000
+	#define DM_NormalizedTexParMode				0xC000
 
 
         #define DDCMD_AreaStrippleEnable                        0x0001
@@ -1194,7 +1194,7 @@ do{								\
         unsigned char tmp;                                      \
 	while(delay--){tmp = GLINT_READ_REG(InFIFOSpace);};     \
 	} while(0)
-        
+
 #define GLINT_MASK_WRITE_REG(v,m,r)				\
 	GLINT_WRITE_REG((GLINT_READ_REG(r)&(m))|(v),r)
 
@@ -1240,7 +1240,7 @@ do{								\
 		pGlint->ROP = rop;				\
 	}
 #endif
-	
+
 #define CHECKCLIPPING						\
 {								\
 	if (pGlint->ClippingOn) {				\
@@ -1258,7 +1258,7 @@ do{								\
 		REPLICATE(planemask); 				\
 		GLINT_WRITE_REG(planemask, FBHardwareWriteMask);\
 	}							\
-} 
+}
 #else
 #define DO_PLANEMASK(planemask)					\
 	{							\

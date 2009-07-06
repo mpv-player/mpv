@@ -45,7 +45,7 @@ static int init(sh_video_t *sh)
 
     if (sh->bih->biSizeImage <= 0) {
 	mp_msg (MSGT_DECVIDEO, MSGL_ERR, "[%s] Invalid frame size\n", MOD_NAME);
-	return 0; 
+	return 0;
     }
 
     priv = malloc(sizeof(lzo_context_t));
@@ -66,7 +66,7 @@ static int init(sh_video_t *sh)
 static void uninit(sh_video_t *sh)
 {
     lzo_context_t *priv = sh->context;
-    
+
     if (priv)
     {
 	free(priv->buffer);
@@ -87,11 +87,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
     if (len <= 0) {
 	    return NULL; // skipped frame
     }
-    
+
     r = av_lzo1x_decode(priv->buffer, &w, data, &len);
     if (r) {
 	/* this should NEVER happen */
-	mp_msg (MSGT_DECVIDEO, MSGL_ERR, 
+	mp_msg (MSGT_DECVIDEO, MSGL_ERR,
 		"[%s] internal error - decompression failed: %d\n", MOD_NAME, r);
       return NULL;
     }
@@ -140,7 +140,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
         mpi->stride[1] = sh->disp_w / 2;
     }
 
-    mp_msg (MSGT_DECVIDEO, MSGL_DBG2, 
+    mp_msg (MSGT_DECVIDEO, MSGL_DBG2,
 		"[%s] decompressed %lu bytes into %lu bytes\n", MOD_NAME,
 		(long) len, (long)w);
 

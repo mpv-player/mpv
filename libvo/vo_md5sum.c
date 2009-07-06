@@ -229,7 +229,7 @@ static uint32_t draw_image(mp_image_t *mpi)
         }
     } else { /* Packed */
         if (mpi->flags & MP_IMGFLAG_YUV) { /* Packed YUV */
-            
+
             return VO_FALSE;
         } else { /* Packed RGB */
             av_md5_sum(md5sum, rgbimage, mpi->w * (mpi->bpp >> 3) * mpi->h);
@@ -311,4 +311,3 @@ static void flip_page (void)
 #undef MD5SUM_YUV_MODE
 
 /* ------------------------------------------------------------------------- */
-

@@ -48,10 +48,10 @@ rtp_streaming_start (stream_t *stream)
 
   streaming_ctrl = stream->streaming_ctrl;
   fd = stream->fd;
-	
+
   if (fd < 0)
   {
-    fd = udp_open_socket (streaming_ctrl->url); 
+    fd = udp_open_socket (streaming_ctrl->url);
     if (fd < 0)
       return -1;
     stream->fd = fd;
@@ -62,7 +62,7 @@ rtp_streaming_start (stream_t *stream)
   streaming_ctrl->prebuffer_size = 64 * 1024; /* 64 KBytes */
   streaming_ctrl->buffering = 0;
   streaming_ctrl->status = streaming_playing_e;
-  
+
   return 0;
 }
 
@@ -71,7 +71,7 @@ rtp_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
   URL_t *url;
   extern int network_bandwidth;
-  
+
   mp_msg (MSGT_OPEN, MSGL_INFO, "STREAM_RTP, URL: %s\n", stream->url);
   stream->streaming_ctrl = streaming_ctrl_new ();
   if (!stream->streaming_ctrl)
@@ -87,7 +87,7 @@ rtp_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
             "You must enter a port number for RTP streams!\n");
     streaming_ctrl_free (stream->streaming_ctrl);
     stream->streaming_ctrl = NULL;
-  
+
     return STREAM_UNSUPPORTED;
   }
 
@@ -96,13 +96,13 @@ rtp_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
     mp_msg (MSGT_NETWORK, MSGL_ERR, "rtp_streaming_start failed\n");
     streaming_ctrl_free (stream->streaming_ctrl);
     stream->streaming_ctrl = NULL;
-  
+
     return STREAM_UNSUPPORTED;
   }
 
   stream->type = STREAMTYPE_STREAM;
   fixup_network_stream_cache (stream);
-  
+
   return STREAM_OK;
 }
 

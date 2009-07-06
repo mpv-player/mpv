@@ -74,7 +74,7 @@ static int init(sh_audio_t *sh)
 	sh->samplerate = srate;
 	sh->i_bps = br * 125;
 	sh->samplesize = 2;
-	
+
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"AC_HWMPA initialized, bitrate: %d kb/s\r\n", len);
 	return 1;
 }

@@ -112,7 +112,7 @@ void mixer_mute(mixer_t *mixer)
 {
  if (mixer->muted) mixer_setvolume(mixer, mixer->last_l, mixer->last_r);
   else
-   { 
+   {
     mixer_getvolume(mixer, &mixer->last_l, &mixer->last_r);
     mixer_setvolume(mixer, 0, 0);
     mixer->muted=1;
@@ -160,4 +160,3 @@ void mixer_setbalance(mixer_t *mixer, float val)
   af_pan_balance->control(af_pan_balance,
       AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val);
 }
-

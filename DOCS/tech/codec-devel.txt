@@ -74,7 +74,7 @@ the driver name.
 
 Next, create a new source file which contains the main decoding function
 that MPlayer will call to decode data. Eventually, you may have multiple
-files which comprise your decoder, but let's start simple here. 
+files which comprise your decoder, but let's start simple here.
 For audio codecs, see ad_sample.c skeleton. For video, choose one of the
 existing vd_*.c files which you think is close to your codec in behaviour.
 
@@ -188,7 +188,7 @@ files:
 - Makefile
 - etc/codecs.conf
 - ad.c or vd.c
-Of course, you will need to include your newly-created file(s): 
+Of course, you will need to include your newly-created file(s):
 vd_<name>.c -OR- ad_<name>.c. If you contribute enough decoders, the
 development team may even grant you write privileges to the Subversion
 repository.
@@ -198,7 +198,7 @@ You may think you're finished when you release the codec and if you're
 extremely lucky, you will be right. However, it's more likely that people
 will start throwing all kinds of oddball media at your decoder that it
 never counted on. Cheer up; take comfort in knowing that people are
-testing your code and attempting to use it as a real world 
+testing your code and attempting to use it as a real world
 application. Download the problem media that people upload to the MPlayer
 FTP site and get back to work, implementing fixed code that addresses the
 issues. Contribute more patches and encourage people to hammer on your

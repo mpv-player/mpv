@@ -315,7 +315,7 @@ if [ "$burning" = 1 ]; then
 cat <<EOF
 
 Please insert a blank cd in your cdwriter.
-(If you are using a rewritable media, 
+(If you are using a rewritable media,
 don't forgot to blank it before using divx2svcd.)
 Press any key when your are ready.
 EOF

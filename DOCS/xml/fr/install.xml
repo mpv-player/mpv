@@ -47,7 +47,7 @@ cherchez dans la doc et vous trouverez les réponses adéquates.
 <listitem><para>
   <emphasis role="bold">FreeType</emphasis> - version 2.0.9 ou supérieure requise pour l'affichage des
   sous-titres et du OSD (On Screen Display).
-  </para></listitem>  
+  </para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - décodeur JPEG optionnel, utilisé
     par le pilote de sortie vidéo JPEG.
@@ -111,7 +111,7 @@ cherchez dans la doc et vous trouverez les réponses adéquates.
   Si vous possédez un carte <emphasis role="bold">tuner radio</emphasis> compatible
   V4L, et désirez écouter et capturer du son avec <application>MPlayer</application>,
   lisez la rubrique <link linkend="radio">Entrée Radio</link>.
-  </para></listitem>  
+  </para></listitem>
 <listitem><para>
   Il y a un élégant <emphasis role="bold">Menu OSD</emphasis> prêt à être utilisé.
   Regardez la section <link linkend="osdmenu">menu OSD</link>.
@@ -229,11 +229,11 @@ les différents jeux de caractères.
 
 <para>
 Il y a deux façons de rendre les polices TrueType opérationnelles. La première
-est de spécifier le nom du fichier de la police TrueType à utiliser grâce à l'option 
+est de spécifier le nom du fichier de la police TrueType à utiliser grâce à l'option
 <option>-font</option>. Il peut être intéressant de placer
 cette option dans votre fichier de configuration (voir la page de manuel pour plus de détails).
 La seconde façon est de créer un lien symbolique (symlink) baptisé <filename>subfont.ttf</filename> pointant vers le fichier
-contenant la police de votre choix. Pour choisir une police commune à tous les utilisateurs, tapez 
+contenant la police de votre choix. Pour choisir une police commune à tous les utilisateurs, tapez
 <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
 Pour définir une police propre à chaque utilisateur, tapez
 <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
@@ -250,7 +250,7 @@ Un exemple :
 </para>
 
 <para>
-Pour obtenir la liste des polices compatibles avec <systemitem class="library">fontconfig</systemitem>, 
+Pour obtenir la liste des polices compatibles avec <systemitem class="library">fontconfig</systemitem>,
 executez <command>fc-list</command> dans la console.
 </para>
 </sect2>
@@ -260,8 +260,8 @@ executez <command>fc-list</command> dans la console.
 
 <para>
 Si pour une raison quelconque vous souhaitez ou devez employer des polices bitmap, téléchargez en un jeu
-depuis notre page web. Vous avez les choix entre différentes 
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">polices ISO</ulink> et quelques autres 
+depuis notre page web. Vous avez les choix entre différentes
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">polices ISO</ulink> et quelques autres
 <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">polices développées par des utilisateurs</ulink>
 supportant plusieurs encodages.
 </para>
@@ -271,7 +271,7 @@ Décompressez le fichier que vous avez téléchargé dans le répertoire
 <filename class="directory">~/.mplayer</filename> ou dans
 <filename class="directory">$PREFIX/share/mplayer</filename>.
 Ensuite, renommez ou créez un lien symbolique de l'un des répertoires ainsi créés vers
-le sous-repertoire 
+le sous-repertoire
 <filename class="directory">font</filename>. Exemple :
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
 <screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
@@ -495,7 +495,7 @@ de fichiers  <systemitem class="systemname">/proc </systemitem>. Pour ceci, les 
 votre disposition :
 <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
 ou  <screen>sysctl dev/rtc/max-user-freq=1024</screen>
-Vous pouvez rendre ce réglagle permanant en ajoutant la seconde commande au fichier 
+Vous pouvez rendre ce réglagle permanant en ajoutant la seconde commande au fichier
 <filename>/etc/sysctl.conf</filename>.
 </para>
 

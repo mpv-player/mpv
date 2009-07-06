@@ -30,7 +30,7 @@ LIBVD_EXTERN(qtvideo)
 static ComponentInstance ci=NULL; // codec handle
 //static CodecInfo cinfo;	// for ImageCodecGetCodecInfo()
 //Component prev=NULL;
-//ComponentResult cres; // 
+//ComponentResult cres; //
 static CodecCapabilities codeccap; // for decpar
 static CodecDecompressParams decpar; // for ImageCodecPreDecompress()
 //static ImageSubCodecDecompressCapabilities icap; // for ImageCodecInitialize()
@@ -63,7 +63,7 @@ static    ComponentResult (*ImageCodecPreDecompress)(ComponentInstance      ci,
                                  CodecDecompressParams * params);
 static    ComponentResult (*ImageCodecBandDecompress)(ComponentInstance      ci,
                                  CodecDecompressParams * params);
-static    PixMapHandle    (*GetGWorldPixMap)(GWorldPtr offscreenGWorld);                  
+static    PixMapHandle    (*GetGWorldPixMap)(GWorldPtr offscreenGWorld);
 static    OSErr           (*QTNewGWorldFromPtr)(GWorldPtr *gw,
 			       OSType pixelFormat,
 			       const Rect *boundsRect,
@@ -71,8 +71,8 @@ static    OSErr           (*QTNewGWorldFromPtr)(GWorldPtr *gw,
                                /*GDHandle*/void* aGDevice, //unused anyway
                                GWorldFlags flags,
                                void *baseAddr,
-                               long rowBytes); 
-static    OSErr           (*NewHandleClear)(Size byteCount);                          
+                               long rowBytes);
+static    OSErr           (*NewHandleClear)(Size byteCount);
 #endif /* #ifndef CONFIG_QUICKTIME */
 
 // to set/get/query special features/parameters
@@ -108,7 +108,7 @@ static int init(sh_video_t *sh){
     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load QuickTime.qts\n" );
     return 0;
     }
-    
+
     handler = LoadLibraryA("qtmlClient.dll");
     if(!handler){
     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load qtmlClient.dll\n");
@@ -130,7 +130,7 @@ static int init(sh_video_t *sh){
     QTNewGWorldFromPtr = (OSErr(*)(GWorldPtr *,OSType,const Rect *,CTabHandle,void*,GWorldFlags,void *,long))GetProcAddress(handler, "QTNewGWorldFromPtr");
     NewHandleClear = (OSErr(*)(Size))GetProcAddress(handler, "NewHandleClear");
     //     = GetProcAddress(handler, "");
-    
+
     if(!InitializeQTML || !EnterMovies || !FindNextComponent || !ImageCodecBandDecompress){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,"invalid qtmlClient.dll!\n");
 	return 0;
@@ -167,7 +167,7 @@ static int init(sh_video_t *sh){
 			(((unsigned char)'d')<<8)|
 			(((unsigned char)'c'));
 #if 0
-    desc.componentSubType= 
+    desc.componentSubType=
 		    (((unsigned char)'S'<<24))|
 			(((unsigned char)'V')<<16)|
 			(((unsigned char)'Q')<<8)|
@@ -193,7 +193,7 @@ static int init(sh_video_t *sh){
     memset(&icap,0,sizeof(icap));
     cres=ImageCodecInitialize(ci,&icap);
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecInitialize->%#x  size=%d (%d)\n",cres,icap.recordSize,icap.decompressRecordSize);
-    
+
     memset(&cinfo,0,sizeof(cinfo));
     cres=ImageCodecGetCodecInfo(ci,&cinfo);
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Flags: compr: 0x%X  decomp: 0x%X format: 0x%X\n",
@@ -225,7 +225,7 @@ static int init(sh_video_t *sh){
     dump_ImageDescription(*framedescHandle);
 #endif
 //Find codecscomponent for video decompression
-//    result = FindCodec ('SVQ1',anyCodec,&compressor,&decompressor );                 
+//    result = FindCodec ('SVQ1',anyCodec,&compressor,&decompressor );
 //    printf("FindCodec SVQ1 returned:%i compressor: 0x%X decompressor: 0x%X\n",result,compressor,decompressor);
 
     sh->context = (void *)kYUVSPixelFormat;
@@ -291,10 +291,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int i;
     mp_image_t* mpi;
     ComponentResult cres;
-    
+
     if(len<=0) return NULL; // skipped frame
 
-    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, MP_IMGFLAG_PRESERVE, 
+    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, MP_IMGFLAG_PRESERVE,
 	sh->disp_w, sh->disp_h);
     if(!mpi) return NULL;
 
@@ -304,13 +304,13 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 if(!codec_initialized){
     result = QTNewGWorldFromPtr(
-        &OutBufferGWorld,  
+        &OutBufferGWorld,
 //        kYUVSPixelFormat, //pixel format of new GWorld == YUY2
 	(OSType)sh->context,
         &OutBufferRect,   //we should benchmark if yvu9 is faster for svq3, too
-        0, 
-        0, 
-        0, 
+        0,
+        0,
+        0,
         mpi->planes[0],
         mpi->stride[0]);
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"NewGWorldFromPtr returned:%ld\n",65536-(result&0xffff));
@@ -333,7 +333,7 @@ if(!codec_initialized){
     decpar.accuracy = codecNormalQuality;
 //    decpar.port = OutBufferGWorld;
 //    decpar.preferredOffscreenPixelSize=17207;
-    
+
 //    decpar.sequenceID=malloc(1000);
 //    memset(decpar.sequenceID,0,1000);
 
@@ -344,13 +344,13 @@ if(!codec_initialized){
 
 //    decpar.srcRect = SrcRect;
     decpar.srcRect = OutBufferRect;
-    
+
     decpar.transferMode = srcCopy;
-    decpar.dstPixMap = **GetGWorldPixMap( OutBufferGWorld);//destPixmap; 
-  
+    decpar.dstPixMap = **GetGWorldPixMap( OutBufferGWorld);//destPixmap;
+
     cres=ImageCodecPreDecompress(ci,&decpar);
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecPreDecompress cres=0x%X\n",cres);
-    
+
     if(decpar.wantedDestinationPixelTypes)
     { OSType *p=*(decpar.wantedDestinationPixelTypes);
       if(p) while(*p){
@@ -358,7 +358,7 @@ if(!codec_initialized){
 	  ++p;
       }
     }
-    
+
 
 //    decpar.conditionFlags=0x10FFF; // first
 //    decpar.preferredOffscreenPixelSize=17207;
@@ -388,7 +388,7 @@ if(!codec_initialized){
 	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecBandDecompress cres=0x%X (-0x%X) %d\n",cres,-cres,cres);
 	return NULL;
     }
-    
+
 //    for(i=0;i<8;i++)
 //	printf("img_base[%d]=%p\n",i,((int*)decpar.dstPixMap.baseAddr)[i]);
 
@@ -418,7 +418,7 @@ if((int)sh->context==0x73797639){	// Sorenson 16-bit YUV -> std YVU9
 	for(x=0;x<mpi->w/4;x++) dst[x]=src[x];
 	src+=((mpi->w+63)&(~63))/4;
     }
-    
+
 }
 
 

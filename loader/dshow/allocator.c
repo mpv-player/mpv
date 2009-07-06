@@ -147,7 +147,7 @@ static HRESULT STDCALL MemAllocator_SetProperties(IMemAllocator * This,
     *pActual = *pRequest;
     /*
        DirectShow DOCS ("Negotiating Allocators" chapter) says that allocator might not
-       honor the requested properties. Thus, since WMSP audio codecs requests bufer with two 
+       honor the requested properties. Thus, since WMSP audio codecs requests bufer with two
        bytes length for unknown reason, we should correct requested value. Otherwise above
        codec don't want to load.
     */

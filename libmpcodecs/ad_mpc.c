@@ -158,7 +158,7 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
   int status, len;
   MPC_SAMPLE_FORMAT *sample_buffer = (MPC_SAMPLE_FORMAT *)buf;
   mpc_uint32_t *packet = NULL;
-  
+
   context_t *cd = (context_t *) sh->context;
   if (maxlen < MAX_FRAMESIZE) {
     mp_msg(MSGT_DECAUDIO, MSGL_V, "maxlen too small in decode_audio\n");
@@ -215,4 +215,3 @@ static int control(sh_audio_t *sh, int cmd, void* arg, ...) {
   }
   return CONTROL_UNKNOWN;
 }
-

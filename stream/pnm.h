@@ -21,7 +21,7 @@
  *
  * pnm util functions header by joschka
  */
- 
+
 #ifndef MPLAYER_PNM_H
 #define MPLAYER_PNM_H
 

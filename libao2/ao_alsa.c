@@ -57,7 +57,7 @@
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
     "ALSA-0.9.x-1.x audio output",
     "alsa",
@@ -73,7 +73,7 @@ static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
 
 /* 16 sets buffersize to 16 * chunksize is as default 1024
- * which seems to be good avarge for most situations 
+ * which seems to be good avarge for most situations
  * so buffersize is 16384 frames by default */
 static int alsa_fragcount = 16;
 static snd_pcm_uframes_t chunk_size = 1024;
@@ -157,7 +157,7 @@ static int control(int cmd, void *arg)
 
       //allocate simple id
       snd_mixer_selem_id_alloca(&sid);
-	
+
       //sets simple-mixer index and name
       snd_mixer_selem_id_set_index(sid, mix_index);
       snd_mixer_selem_id_set_name(sid, mix_name);
@@ -173,7 +173,7 @@ static int control(int cmd, void *arg)
       }
 
       if ((err = snd_mixer_attach(handle, card)) < 0) {
-	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Mixer attach %s error: %s\n", 
+	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Mixer attach %s error: %s\n",
 	       card, snd_strerror(err));
 	snd_mixer_close(handle);
 	return CONTROL_ERROR;
@@ -208,7 +208,7 @@ static int control(int cmd, void *arg)
 
 	//setting channels
 	if ((err = snd_mixer_selem_set_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, set_vol)) < 0) {
-	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Error setting left channel, %s\n", 
+	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Error setting left channel, %s\n",
 		 snd_strerror(err));
 	  return CONTROL_ERROR;
 	}
@@ -217,11 +217,11 @@ static int control(int cmd, void *arg)
 	set_vol = vol->right / f_multi + pmin + 0.5;
 
 	if ((err = snd_mixer_selem_set_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, set_vol)) < 0) {
-	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Error setting right channel, %s\n", 
+	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Error setting right channel, %s\n",
 		 snd_strerror(err));
 	  return CONTROL_ERROR;
 	}
-	mp_msg(MSGT_AO,MSGL_DBG2,"right=%li, pmin=%li, pmax=%li, mult=%f\n", 
+	mp_msg(MSGT_AO,MSGL_DBG2,"right=%li, pmin=%li, pmax=%li, mult=%f\n",
 	       set_vol, pmin, pmax, f_multi);
 
 	if (snd_mixer_selem_has_playback_switch(elem)) {
@@ -246,7 +246,7 @@ static int control(int cmd, void *arg)
       snd_mixer_close(handle);
       return CONTROL_OK;
     }
-    
+
   } //end switch
   return CONTROL_UNKNOWN;
 }
@@ -359,7 +359,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     prepause_frames = 0;
 
     snd_lib_error_set_handler(alsa_error_handler);
-    
+
     ao_data.samplerate = rate_hz;
     ao_data.format = format;
     ao_data.channels = channels;
@@ -419,7 +419,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	alsa_format = SND_PCM_FORMAT_MPEG; //? default should be -1
 	break;
       }
-    
+
     //subdevice parsing
     // set defaults
     block = 1;
@@ -547,11 +547,11 @@ static int init(int rate_hz, int channels, int format, int flags)
 		 snd_strerror(err));
 	  return 0;
 	}
-    
+
       err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,
 					 SND_PCM_ACCESS_RW_INTERLEAVED);
       if (err < 0) {
-	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set access type: %s\n", 
+	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set access type: %s\n",
 	       snd_strerror(err));
 	return 0;
       }
@@ -595,8 +595,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	}
 #endif
 
-      if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, 
-						 &ao_data.samplerate, NULL)) < 0) 
+      if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams,
+						 &ao_data.samplerate, NULL)) < 0)
         {
 	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set samplerate-2: %s\n",
 		 snd_strerror(err));
@@ -612,7 +612,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	int alsa_buffer_time = 500000; /* original 60 */
 	int alsa_period_time;
 	alsa_period_time = alsa_buffer_time/4;
-	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams, 
+	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams,
 							  &alsa_buffer_time, NULL)) < 0)
 	  {
 	    mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set buffer time near: %s\n",
@@ -621,7 +621,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  } else
 	    alsa_buffer_time = err;
 
-	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, 
+	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams,
 							  &alsa_period_time, NULL)) < 0)
 	  /* original: alsa_buffer_time/ao_data.bps */
 	  {
@@ -631,13 +631,13 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 	mp_tmsg(MSGT_AO,MSGL_INFO,"[AO_ALSA] buffer_time: %d, period_time :%d\n",
 	       alsa_buffer_time, err);
-      } 
+      }
 #endif//end SET_BUFFERTIME
 
 #ifdef SET_CHUNKSIZE
       {
 	//set chunksize
-	if ((err = snd_pcm_hw_params_set_period_size_near(alsa_handler, alsa_hwparams, 
+	if ((err = snd_pcm_hw_params_set_period_size_near(alsa_handler, alsa_hwparams,
 							  &chunk_size, NULL)) < 0)
 	  {
 	    mp_tmsg(MSGT_AO,MSGL_ERR,"[AO ALSA] Unable to set period size(%ld): %s\n",
@@ -649,7 +649,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	}
 	if ((err = snd_pcm_hw_params_set_periods_near(alsa_handler, alsa_hwparams,
 						      &alsa_fragcount, NULL)) < 0) {
-	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set periods: %s\n", 
+	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set periods: %s\n",
 		 snd_strerror(err));
 	  return 0;
 	}
@@ -890,15 +890,15 @@ static int get_space(void)
 {
     snd_pcm_status_t *status;
     int ret;
-    
+
     snd_pcm_status_alloca(&status);
-    
+
     if ((ret = snd_pcm_status(alsa_handler, status)) < 0)
     {
 	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Cannot get pcm status: %s\n", snd_strerror(ret));
 	return 0;
     }
-    
+
     unsigned space = snd_pcm_status_get_avail(status) * bytes_per_sample;
     if (space > ao_data.buffersize) // Buffer underrun?
         space = ao_data.buffersize;
@@ -910,10 +910,10 @@ static float get_delay(void)
 {
   if (alsa_handler) {
     snd_pcm_sframes_t delay;
-    
+
     if (snd_pcm_delay(alsa_handler, &delay) < 0)
       return 0;
-    
+
     if (delay < 0) {
       /* underrun - move the application pointer forward to catch up */
 #if SND_LIB_VERSION >= 0x000901 /* snd_pcm_forward() exists since 0.9.0rc8 */

@@ -331,11 +331,11 @@ static const unsigned int latin_subchars[8][13]={
  * List of supported languages.
  *
  * lang_code bits for primary Language:
- * bits 7-4 corresponds to bits 14-11 of 28 packet's first triplet 
+ * bits 7-4 corresponds to bits 14-11 of 28 packet's first triplet
  * bits 3-1 corresponds to bits C12-C14 of packet 0 (lang)
  *
  * lang_code bits for secondary Language:
- * bits 7-5 corresponds to bits 3-1 of 28 packet's second triplet 
+ * bits 7-5 corresponds to bits 3-1 of 28 packet's second triplet
  * bits 4,2 corresponds to bits 18,16 of 28 packet's first triplet
  * bits 3,1 corresponds to bits 15,17 of 28 packet's first triplet
  *
@@ -370,7 +370,7 @@ struct {
   { 0x16, LATIN,     "Italian"},
 
   { 0x1d, LATIN,     "Serbian/Croatian/Slovenian (Latin)"},
-  
+
   { 0x20, CYRILLIC1, "Serbian/Croatian (Cyrillic)"},
   { 0x21, CYRILLIC2, "Russian, Bulgarian"},
   { 0x22, LATIN,     "Estonian"},
@@ -409,7 +409,7 @@ static int corrHamm24(unsigned char *data){
         syndrom^=((cw>>i)&1)*(i+33);
 
     syndrom^=(cw>>11)&32;
-   
+
     if(syndrom&31){
         if(syndrom < 32 || syndrom > 55)
             return -1;
@@ -508,7 +508,7 @@ static void init_vbi_consts(priv_vbi_t* priv){
  *
  *
  * Page numbers 0xYYY (where Y is not belongs to (0..9).
- * Page number belongs to [0x000,0x799] or [0x100:0x899] (first 0 can be 
+ * Page number belongs to [0x000,0x799] or [0x100:0x899] (first 0 can be
  * treated as '8')
  */
 static int steppage(int p, int direction, int skip_hidden)
@@ -628,7 +628,7 @@ static inline tt_page* get_from_cache(priv_vbi_t* priv, int pagenum,int subpagen
 static void clear_cache(priv_vbi_t* priv){
     int i;
     tt_page* tp;
-    
+
     /*
       Skip next 5 buffers to avoid mixing teletext pages from different
       channels during channel switch
@@ -724,7 +724,7 @@ static void decode_page(tt_char* p,unsigned char* raw,int primary_lang,int secon
             p[i].fg=fg_color;
             p[i].bg=bg_color;
             p[i].flh=flash;
-            
+
             if ((c&0x60)==0){ //control chars
                 if(c>=0x08 && c<=0x09){//Flash/Steady
                     flash=c==0x08;
@@ -860,7 +860,7 @@ static void prepare_visible_page(priv_vbi_t* priv){
         priv->display_page[10].unicode=' ';
     }
     priv->display_page[11].unicode=' ';
-    for(i=VBI_COLUMNS;i>VBI_TIME_LINEPOS || 
+    for(i=VBI_COLUMNS;i>VBI_TIME_LINEPOS ||
             ((curr_pg->raw[i]&0x60) && curr_pg->raw[i]!=0x20 && i>11);
             --i)
         if(curr_pg->raw[i]&0x60)
@@ -1247,7 +1247,7 @@ static int decode_pkt27(priv_vbi_t* priv,unsigned char* data,int magAddr){
             return 0;
         }
 
-    /* 
+    /*
       Not a X/27/0 Format 1 packet or
       flag "show links on row 24" is not set.
     */
@@ -1294,7 +1294,7 @@ static void decode_pkt28(priv_vbi_t* priv,unsigned char*data){
 
     priv->primary_language=(t1>>7)&0x7f;
     priv->secondary_language=((t2<<4) | (t1>>14))&0x7f;
-    if (priv->secondary_language==0x7f) 
+    if (priv->secondary_language==0x7f)
         //No secondary language required
         priv->secondary_language=priv->primary_language;
     else // Swapping bits 1 and 3

@@ -211,7 +211,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
     if (getenv("DYLD_BIND_AT_LAUNCH") == NULL)
         mp_tmsg(MSGT_LOADER, MSGL_WARN, "WARNING: Attempting to use DLL codecs but environment variable\n DYLD_BIND_AT_LAUNCH not set. This will likely crash.\n");
 #endif /* __APPLE__ */
-    
+
     fs_seg=
     ldt_fs->fs_seg = mmap_anon(NULL, getpagesize(), PROT_READ | PROT_WRITE, MAP_PRIVATE, 0);
     if (ldt_fs->fs_seg == (void*)-1)

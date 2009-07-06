@@ -221,7 +221,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
 	dlclose(priv->file_handler);
 	return 0;
     }
-	
+
     mod_hdr = what_the();
     if (!mod_hdr)
     {
@@ -229,7 +229,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
 	dlclose(priv->file_handler);
 	return 0;
     }
-    
+
     mp_msg(MSGT_DECVIDEO, MSGL_V, "=== XAnim Codec ===\n");
     mp_msg(MSGT_DECVIDEO, MSGL_V, " Filename: %s (API revision: %x)\n", filename, mod_hdr->api_rev);
     mp_msg(MSGT_DECVIDEO, MSGL_V, " Codec: %s. Rev: %s\n", mod_hdr->desc, mod_hdr->rev);
@@ -255,7 +255,7 @@ static int xacodec_load(sh_video_t *sh, char *filename)
 	dlclose(priv->file_handler);
 	return 0;
     }
-    
+
     mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Exported functions by codec: [functable: %p entries: %d]\n",
 	mod_hdr->funcs, mod_hdr->num_funcs);
     for (i = 0; i < (int)mod_hdr->num_funcs; i++)
@@ -637,7 +637,7 @@ static int init(sh_video_t *sh)
     char dll[1024];
     XA_CODEC_HDR codec_hdr;
     int i;
-    
+
     priv = malloc(sizeof(vd_xanim_ctx));
     if (!priv)
 	return 0;
@@ -645,7 +645,7 @@ static int init(sh_video_t *sh)
     memset(priv, 0, sizeof(vd_xanim_ctx));
 
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12)) return 0;
-    
+
     priv->iq_func = NULL;
     priv->dec_func = NULL;
 
@@ -751,7 +751,7 @@ static mp_image_t* decode(sh_video_t *sh, void *data, int len, int flags)
 {
     vd_xanim_ctx *priv = sh->context;
     unsigned int ret;
-    
+
     if (len <= 0)
 	return NULL; // skipped frame
 
@@ -759,7 +759,7 @@ static mp_image_t* decode(sh_video_t *sh, void *data, int len, int flags)
 
     if(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_STATIC){
 	// allocate static buffer for cvid-like codecs:
-	priv->mpi = mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, 
+	priv->mpi = mpcodecs_get_image(sh, MP_IMGTYPE_STATIC,
 	    MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 	    (sh->disp_w+3)&(~3), (sh->disp_h+3)&(~3));
 	if (!priv->mpi) return NULL;
@@ -817,6 +817,6 @@ static mp_image_t* decode(sh_video_t *sh, void *data, int len, int flags)
 	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "body\n");
 	return NULL;
     }
-    
+
     return priv->mpi;
 }

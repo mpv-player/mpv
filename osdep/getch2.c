@@ -304,4 +304,3 @@ char* get_term_charset(void)
     return charset;
 }
 #endif
-

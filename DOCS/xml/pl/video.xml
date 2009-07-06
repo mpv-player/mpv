@@ -1901,10 +1901,10 @@ dla TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Jeśli <application>MPlayer</application> często uskarża się na
-  <screen>Too many video/audio packets in the buffer</screen> 
+  <screen>Too many video/audio packets in the buffer</screen>
   (za dużo pakietów video/audio w buforze) albo jeśli zauważysz rosnący brak
   synchronizacji między audio a video spróbuj użyć demuksera MPEG-TS
-  z libavformat, dodając 
+  z libavformat, dodając
   <option>-demuxer lavf -lavfdopts probesize=128</option>
   do wiersza poleceń.
 </para>
@@ -2578,7 +2578,7 @@ prosty analogowy koder TV, inne mają bardziej zaawansowaną wersję.
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Układ analogowy</emphasis>:
-  Doniesiono nam, że dobre wyjście TV można uzyskać używając 
+  Doniesiono nam, że dobre wyjście TV można uzyskać używając
   <option>-vo fbdev</option> lub <option>-vo fbdev2</option>. Potrzebujesz
   wkompilowanego w jądro vesafb i przekazane do poleceń jądra:
   <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
@@ -2598,7 +2598,7 @@ prosty analogowy koder TV, inne mają bardziej zaawansowaną wersję.
   trzy razy.
   Przetestowane na Tecra 800, jądro 2.6.15 z vesafb, ALSA v1.0.10.
 </para></listitem>
-  
+
 <listitem>
   <para>
   <emphasis role="bold">Układ kodujący Chrontel 70xx</emphasis>:

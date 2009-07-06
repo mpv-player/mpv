@@ -97,4 +97,3 @@ static const AVCodecTag mp_bmp_tags[] = {
 };
 
 const struct AVCodecTag *mp_bmp_taglists[] = {codec_bmp_tags, mp_bmp_tags, 0};
-

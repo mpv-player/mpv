@@ -68,7 +68,7 @@ BEGIN {
     }
     first_pass=1;
     init_name_db();
-    while(getline <in_file) 
+    while(getline <in_file)
     {
 # count up lines
 	line++;
@@ -235,8 +235,8 @@ function get_short_vendor_name(from)
   for(i=2;i<=n;i++) svendor=sprintf("%s%s%s", svendor, length(name[i])?"_":"", name[i]);
   new_name = svendor;
   vend_suffix = 2;
-# check for unique 
-  while(new_name in vendor_names) 
+# check for unique
+  while(new_name in vendor_names)
   {
     new_name = sprintf("%s%u", svendor, vend_suffix)
     vend_suffix = vend_suffix + 1;
@@ -257,8 +257,8 @@ function get_short_device_name(from_name)
   for(i=2;i<=n;i++) sdevice=sprintf("%s%s%s", sdevice, length(name[i])?"_":"", name[i]);
   new_name = sdevice;
   dev_suffix = 2;
-# check for unique 
-  while(new_name in device_names) 
+# check for unique
+  while(new_name in device_names)
   {
     new_name = sprintf("%s%u", sdevice, dev_suffix)
     dev_suffix = dev_suffix + 1;
@@ -279,8 +279,8 @@ function get_short_subdevice_name(from_name)
   for(i=2;i<=n;i++) ssdevice=sprintf("%s%s%s", ssdevice, length(name[i])?"_":"", name[i]);
   new_name = ssdevice;
   sdev_suffix = 2;
-# check for unique 
-  while(new_name in subdevice_names) 
+# check for unique
+  while(new_name in subdevice_names)
   {
     new_name = sprintf("%s%u", ssdevice, sdev_suffix)
     sdev_suffix = sdev_suffix + 1;

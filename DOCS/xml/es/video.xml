@@ -579,7 +579,7 @@ funciona bien con todos los controladores de chipsets para XFree existentes.
 <listitem><para>
   Algunos controladores símplemente fallan al volver a la resolución
   normal (use
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> y 
+  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> y
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>
   para volver al modo normal de manera manual).
   </para></listitem>
@@ -917,7 +917,7 @@ make<!--
   Para que se cargue/descargue automáticamente cuando sea necesario,
   primero inserte la siguiente línea al final de
   <filename>/etc/modules.conf</filename>:
-  
+
   <programlisting>alias char-major-178 mga_vid</programlisting>
 
   Después copie el módulo <filename>mga_vid.o</filename> al lugar
@@ -929,7 +929,7 @@ make<!--
   </para></step>
 <step><para>
   Ahora deberá (re)compilar <application>MPlayer</application>,
-  <filename>./configure</filename> detectará 
+  <filename>./configure</filename> detectará
   <filename>/dev/mga_vid</filename> y construirá el controlador 'mga'.
   Luego lo podrá usar con <application>MPlayer</application> mediante
   <option>-vo mga</option> si tiene una consola matroxfb, o
@@ -1006,7 +1006,7 @@ una variable de entorno (por lo menos con nVidia):
 <para>
 AAlib es una biblioteca para mostrar gráficos en modo texto, usando un
 render ASCII potente. Hay <emphasis>montones</emphasis> de programas que
-tienen soporte para AAlib, como Doom, Quake, etc. 
+tienen soporte para AAlib, como Doom, Quake, etc.
 <application>MPlayer</application> contiene un controlador que funciona
 bastante bien para ello. Si <filename>./configure</filename> detecta
 que aalib está instalado, el controlador aalib libvo será compilado.
@@ -1030,7 +1030,7 @@ de renderizado:
   aumentar contraste
   </entry></row>
 <row><entry><keycap>3</keycap></entry><entry>
-  reducir brillo 
+  reducir brillo
   </entry></row>
 <row><entry><keycap>4</keycap></entry><entry>
   aumentar brillo
@@ -1057,7 +1057,7 @@ de renderizado:
 <varlistentry>
   <term><option>-aaosdcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    cambia el color OSD 
+    cambia el color OSD
     </para></listitem>
 </varlistentry>
 <varlistentry>
@@ -1404,7 +1404,7 @@ DGA</link>, e insertela en su <filename>XF86Config</filename>.
   Con XFree86 3.x.x: tiene que cambiar entre las resoluciones disponibles
   con las teclas
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
-  y 
+  y
   <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>.
   </para></listitem>
 </itemizedlist>
@@ -1424,7 +1424,7 @@ necesarios para modos de video de baja resolución.
 <formalpara>
 <title>PREÁMBULO</title>
 <para>
-<acronym>VIDIX</acronym> es la abreviatura para 
+<acronym>VIDIX</acronym> es la abreviatura para
 <emphasis role="bold">VID</emphasis>eo<emphasis role="bold">I</emphasis>nterface
 para *ni<emphasis role="bold">X</emphasis>.
 VIDIX ha sido diseñado e introducido como una interfaz para los controladores de
@@ -1606,7 +1606,7 @@ puede ser encontrado en las placas base VIA Epia.
 </para>
 
 <para>
-El controlador ha sido escrito y es mantenido por, 
+El controlador ha sido escrito y es mantenido por,
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M.
 Robinson</ulink>.
 </para>
@@ -1711,7 +1711,7 @@ La capa de selección puede hacerse con el método de subdispositivo, p.e.:
 <sect2 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
-Lea por favor la sección <link linkend="directfb">principal de DirectFB</link> para 
+Lea por favor la sección <link linkend="directfb">principal de DirectFB</link> para
 información general.
 </para>
 
@@ -1722,7 +1722,7 @@ en el monitor principal.
 </para>
 
 <para>
-Ville Syrjala tiene un 
+Ville Syrjala tiene un
 <ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">LEAME</ulink>
 y un
 <ulink url="http://www.sci.fi/~syrjala/directfb/matrox_tv-out_howto">COMO</ulink>
@@ -2232,9 +2232,9 @@ tamaño de VCD y escalar a menor tamaño del original las películas.
 <para>
 Este controlador se comunica con el controlador del kernel disponible en
 <ulink url="http://mjpeg.sourceforge.net"/>, por eso
-antes de nada deberá tener este funcionando. La presencia de una tarjeta MJPEG 
+antes de nada deberá tener este funcionando. La presencia de una tarjeta MJPEG
 es autodetectada por el script <filename>configure</filename>, si la autodetección
-falla, fuércela con 
+falla, fuércela con
 <screen>./configure --enable-zr</screen>
 </para>
 <para>
@@ -2333,7 +2333,7 @@ para instrucciones sobre salida-TV de Matrox G450/G550 , ¡vaya a la sección si
 <varlistentry>
   <term>XFree86</term>
   <listitem><para>
-    Usando el controladoro y el módulo HAL, disponible en 
+    Usando el controladoro y el módulo HAL, disponible en
     <ulink url="http://www.matrox.com">el sitio web  de Matrox</ulink>.
     Esto hará que tenga salida de TV bajo X.
     </para><para>
@@ -2396,7 +2396,7 @@ para instrucciones sobre salida-TV de Matrox G450/G550 , ¡vaya a la sección si
       Bueno. La siguiente tarea es hacer que el cursor en tty1 (o donde sea)
       desaparezca, y desactive el apagado automático del monitor. Ejecute
       las siguientes órdenes:
-      
+
       <screen>
 echo -e '\033[?25l'
 setterm -blank 0<!--
@@ -2417,7 +2417,7 @@ setterm -blank 0<!--
       <screen>
 mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>nombrearchivo</replaceable><!--
    --></screen>
-   
+
       (Si usa X, ahora cambie a matroxfb con por ejemplo
       <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>F1</keycap>.)
       Cambie <literal>640</literal> y <literal>512</literal> si establece
@@ -2543,7 +2543,7 @@ Consulte <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">esta URL</u
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
-Lo primero, DEBE descargar los controladores de fuente-cerrada desde 
+Lo primero, DEBE descargar los controladores de fuente-cerrada desde
 <ulink url="http://nvidia.com"/>. No voy a describir el proceso de instalación y configuración
 porque no es el objetivo que pretende cubrir esta documentación.
 </para>
@@ -2589,7 +2589,7 @@ Evítelo si es posible.
 Debe usar <option>-vo vesa</option>. El chip probado tiene capacidad solo para
 una relación de aspecto 1.333333, por lo que debe asegurarse de que usa
 las opciones <option>-x</option>, <option>-y</option> y/o los filtros
-<option>-vf scale,crop,expand</option> si la imagen no le deja habilitar 
+<option>-vf scale,crop,expand</option> si la imagen no le deja habilitar
 la salida de TV. La resolución máxima es 720*576 a 16bpp.
 </para>
 <para>

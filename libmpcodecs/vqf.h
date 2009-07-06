@@ -215,9 +215,9 @@ typedef struct {
 
 #ifdef V2PLUS_SUPPORT
 // TwinVQ FB coding tool control
-DllPort void  TvqFbCountUsedBits(int nbit);  // count number of used bits 
+DllPort void  TvqFbCountUsedBits(int nbit);  // count number of used bits
 DllPort float TvqGetFbCurrentBitrate(void);  // query average bitrate for the tool
-DllPort int   TvqGetFbTotalBits(void);  // query total number of used bits 
+DllPort int   TvqGetFbTotalBits(void);  // query total number of used bits
 #endif
 
 #ifdef __cplusplus

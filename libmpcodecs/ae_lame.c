@@ -142,11 +142,11 @@ static int bind_lame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize=encoder->params.samples_per_frame; // ???
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nFramesPerBlock=1;
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nCodecDelay=0;
-    
+
     encoder->input_format = AF_FORMAT_S16_NE;
     encoder->min_buffer_size = 4608;
     encoder->max_buffer_size = mux_a->h.dwRate * mux_a->wf->nChannels * 2;
-    
+
     return 1;
 }
 
@@ -246,7 +246,7 @@ int mpae_init_lame(audio_encoder_t *encoder)
         lame_print_config(lame);
         lame_print_internals(lame);
     }
-    
+
     encoder->bind = bind_lame;
     encoder->get_frame_size = get_frame_size;
     encoder->encode = encode_lame;
@@ -256,7 +256,7 @@ int mpae_init_lame(audio_encoder_t *encoder)
 }
 
 #ifdef CONFIG_MP3LAME_PRESET
-/* lame_presets_set 
+/* lame_presets_set
    taken out of presets_set in lame-3.93.1/frontend/parse.c and modified */
 static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_name )
 {
@@ -395,7 +395,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
         return 0;
     }
 #endif
-    
+
     if (strcmp(preset_name, "standard") == 0) {
         if (fast > 0)
            lame_set_preset(gfp, STANDARD_FAST);
@@ -404,7 +404,7 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
 
         return 0;
     }
-    
+
     else if (strcmp(preset_name, "extreme") == 0){
         if (fast > 0)
            lame_set_preset(gfp, EXTREME_FAST);
@@ -413,12 +413,12 @@ static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_
 
         return 0;
     }
-    					
-    else if (((strcmp(preset_name, "insane") == 0) || 
+
+    else if (((strcmp(preset_name, "insane") == 0) ||
               (strcmp(preset_name, "320"   ) == 0))   && (fast < 1)) {
 
         lame_set_preset(gfp, INSANE);
- 
+
         return 0;
     }
 

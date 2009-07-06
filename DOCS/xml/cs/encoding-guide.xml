@@ -260,7 +260,7 @@ Prozatím si řekneme několik návodů pro identifikaci o jaký typ materiálu 
 <para>
   <application>MPlayer</application> umí spomalit přehrávání videa
   pomocí volby -speed.
-  Zkuste použít <option>-speed</option> 0.2 pro velmi pomalé přehrávání 
+  Zkuste použít <option>-speed</option> 0.2 pro velmi pomalé přehrávání
   nebo opakovaně stiskejte klávesu "<keycap>.</keycap>" pro krokováníé po
   snímcích a najděte vzor, pokud jej nevidíte při plné rychlosti.
 </para>
@@ -1687,7 +1687,7 @@ přímo Matroska týmem, pokryjeme jen jejich použití.
 </para>
 
 <para>
-Asi nejsnazší způsob, jak začít s Matroskou je použít 
+Asi nejsnazší způsob, jak začít s Matroskou je použít
 <application>MMG</application>, grafickou nadstavbu dodávanou s
 <application>mkvtoolnix</application> a řídit se
 <ulink url="http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge-gui.html">návodem k mkvmerge GUI (mmg)</ulink>
@@ -2137,7 +2137,7 @@ bude mít 24000/1001 snímků za sekundu.
   metodou pro enkódování jak telecinovaného, tak "smíšeného progresivního a
   telecinovaného".
   <screen>
-mencoder dvd://1 -oac copy -vf pullup,softskip 
+mencoder dvd://1 -oac copy -vf pullup,softskip
     -ovc lavc -ofps 24000/1001<!--
   --></screen>
 </para></listitem>
@@ -2325,7 +2325,7 @@ Můžete enkódovat do následujících kodeků (více méně aktuální):
 <sect2 id="menc-feat-enc-libavcodec-video-codecs">
 <title>Video kodeky
 <systemitem class="library">libavcodec</systemitem></title>
- 
+
 <para>
 <informaltable frame="all">
 <tgroup cols="2">
@@ -3891,7 +3891,7 @@ z větší části odpovídají změnám datového toku.
   <emphasis role="bold">partitions=all</emphasis>:
   Tato volba zapíná použití bloků 8x4, 4x8 a 4x4 v predikovaných
   makroblocích (navíc k výchozím blokům).
-  Její aktivace vede k poměrně stálé 
+  Její aktivace vede k poměrně stálé
   10%-15% ztrátě rychlosti. Tato volba je poměrně neužitečná ve zdroji
   obsahujícím pouze pomalý pohyb, naproti tomu u některých zdrojů s rychlým
   pohybem, přesněji zdrojů s velkým množstvím malých pohyblivých objektů,
@@ -4090,7 +4090,7 @@ z větší části odpovídají změnám datového toku.
   převinutelnost, můžete si nastavit mnohem vyšší hodnoty
   (rozumějte že zisk z toho klesá a může být neznatelný až žádný).
   Video proud bude stále mít převíjecí body, pokud jsou zde nějaké změny scény.
-</para></listitem> 
+</para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">deblock</emphasis>:
@@ -4406,7 +4406,7 @@ mencoder -dvd-device <replaceable>zeiram.iso</replaceable> dvd://7 -o <replaceab
   Pro sestavení na Linuxu můžete použít <application>Wine</application>:
 <screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
 
-Pro sestavení na Windows v <application>MinGW</application> nebo 
+Pro sestavení na Windows v <application>MinGW</application> nebo
 <application>Cygwin</application> použijte:
 <screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
 
@@ -4735,7 +4735,7 @@ mp4creator -optimize narnia.mp4</screen>
 <para>
   Pokud chcete přidat stopy, které se objevují v iTunes, můžete použít
   <ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>.
-  
+
   <screen>AtomicParsley narnia.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
 
   Volba <option>--metaEnema</option> odstraňuje existující metadata
@@ -4806,7 +4806,7 @@ nebo přidat černé okraje, aby byl kompatibilní.
 <tbody>
 <row>
   <entry>NTSC DVD</entry>
-  <entry>720x480, 704x480, 352x480, 352x240</entry> 
+  <entry>720x480, 704x480, 352x480, 352x240</entry>
   <entry>MPEG-2</entry>
   <entry>9800 kbps</entry>
   <entry>48000 Hz</entry>
@@ -4819,7 +4819,7 @@ nebo přidat černé okraje, aby byl kompatibilní.
   <entry>NTSC DVD</entry>
   <entry>352x240<footnote id='fn-rare-resolutions'><para>
     Tato rozlišení jsou zřídka použita pro DVD, protože
-    mají docela nízkou kvalitu.</para></footnote></entry> 
+    mají docela nízkou kvalitu.</para></footnote></entry>
   <entry>MPEG-1</entry>
   <entry>1856 kbps</entry>
   <entry>48000 Hz</entry>
@@ -4975,7 +4975,7 @@ DVD (s časovými značkami v každém snímku, je-li to možné):
 <para>
 DVD s NTSC Pullup:
 <screen>-of mpeg -mpegopts format=dvd:tsaf:telecine -ofps 24000/1001</screen>
-Toto umožňuje enkódovat 24000/1001 fps progresivní materiál při 30000/1001 
+Toto umožňuje enkódovat 24000/1001 fps progresivní materiál při 30000/1001
 fps při zachování slučitelnosti s DVD.
 </para>
 

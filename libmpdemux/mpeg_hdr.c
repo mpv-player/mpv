@@ -74,7 +74,7 @@ static int header_process_sequence_extension (mp_mpeg_header_t * picture,
 					      unsigned char * buffer)
 {
     /* check chroma format, size extensions, marker bit */
-	    
+
     if ( ((buffer[1] & 0x06) == 0x00) ||
          ((buffer[1] & 0x01) != 0x00) || (buffer[2] & 0xe0) ||
          ((buffer[3] & 0x01) != 0x01) )
@@ -125,7 +125,7 @@ int mp_header_process_extension (mp_mpeg_header_t * picture, unsigned char * buf
 float mpeg12_aspect_info(mp_mpeg_header_t *picture)
 {
     float aspect = 0.0;
-    
+
     switch(picture->aspect_ratio_information) {
       case 2:  // PAL/NTSC SVCD/DVD 4:3
       case 8:  // PAL VCD 4:3
@@ -150,7 +150,7 @@ float mpeg12_aspect_info(mp_mpeg_header_t *picture)
                " developers, so that we can add support for it!\nAssuming 1:1 aspect for now.\n",
                picture->aspect_ratio_information);
     }
-    
+
     return aspect;
 }
 
@@ -159,19 +159,19 @@ unsigned char mp_getbits(unsigned char *buffer, unsigned int from, unsigned char
 {
     unsigned int n;
     unsigned char m, u, l, y;
-    
+
     n = from / 8;
     m = from % 8;
     u = 8 - m;
     l = (len > u ? len - u : 0);
-    
+
     y = (buffer[n] << m);
     if(8 > len)
     	y  >>= (8-len);
     if(l)
     	y |= (buffer[n+1] >> (8-l));
-	
-    //fprintf(stderr, "GETBITS(%d -> %d): bytes=0x%x 0x%x, n=%d, m=%d, l=%d, u=%d, Y=%d\n", 
+
+    //fprintf(stderr, "GETBITS(%d -> %d): bytes=0x%x 0x%x, n=%d, m=%d, l=%d, u=%d, Y=%d\n",
     //	from, (int) len, (int) buffer[n],(int) buffer[n+1], n, (int) m, (int) l, (int) u, (int) y);
     return  y;
 }
@@ -205,7 +205,7 @@ static int read_timeinc(mp_mpeg_header_t * picture, unsigned char * buffer, int 
 int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer)
 {
     unsigned int n, aspect=0, aspectw=0, aspecth=0,  x=1, v;
-    
+
     //begins with 0x0000012x
     picture->fps = 0;
     picture->timeinc_bits = picture->timeinc_resolution = picture->timeinc_unit = 0;
@@ -221,21 +221,21 @@ int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer)
       aspecth = getbits(buffer, n, 8);
       n += 8;
     }
-    
+
     if(getbits(buffer, n, 1)) {
       n += 4;
       if(getbits(buffer, n, 1))
         n += 79;
       n++;
     } else n++;
-    
+
     n+=3;
-    
+
     picture->timeinc_resolution = getbits(buffer, n, 8) << 8;
     n += 8;
     picture->timeinc_resolution |= getbits(buffer, n, 8);
     n += 8;
-    
+
     picture->timeinc_bits = 0;
     v = picture->timeinc_resolution - 1;
     while(v && (x<16)) {
@@ -243,20 +243,20 @@ int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer)
       picture->timeinc_bits++;
     }
     picture->timeinc_bits = (picture->timeinc_bits > 1 ? picture->timeinc_bits : 1);
-    
+
     n++; //marker bit
-    
+
     if(getbits(buffer, n, 1)) {	//fixed_vop_timeinc
       n++;
       n = read_timeinc(picture, buffer, n);
-      
+
       if(picture->timeinc_unit)
         picture->fps = (float) picture->timeinc_resolution / (float) picture->timeinc_unit;
     }
-    
-    //fprintf(stderr, "ASPECT: %d, PARW=%d, PARH=%d, TIMEINCRESOLUTION: %d, FIXED_TIMEINC: %d (number of bits: %d), FPS: %u\n", 
+
+    //fprintf(stderr, "ASPECT: %d, PARW=%d, PARH=%d, TIMEINCRESOLUTION: %d, FIXED_TIMEINC: %d (number of bits: %d), FPS: %u\n",
     //	aspect, aspectw, aspecth, picture->timeinc_resolution, picture->timeinc_unit, picture->timeinc_bits, picture->fps);
-    
+
     return 0;
 }
 
@@ -279,10 +279,10 @@ void mp4_header_process_vop(mp_mpeg_header_t * picture, unsigned char * buffer)
 static unsigned int read_golomb(unsigned char *buffer, unsigned int *init)
 {
   unsigned int x, v = 0, v2 = 0, m, len = 0, n = *init;
-  
+
   while(getbits(buffer, n++, 1) == 0)
     len++;
-  
+
   x = len + n;
   while(n < x)
   {
@@ -292,12 +292,12 @@ static unsigned int read_golomb(unsigned char *buffer, unsigned int *init)
     if(x - n > 8)
       v <<= 8;
   }
-  
+
   v2 = 1;
   for(n = 0; n < len; n++)
     v2 <<= 1;
   v2 = (v2 - 1) + v;
-  
+
   //fprintf(stderr, "READ_GOLOMB(%u), V=2^%u + %u-1 = %u\n", *init, len, v, v2);
   *init = x;
   return v2;
@@ -307,7 +307,7 @@ static unsigned int read_golomb(unsigned char *buffer, unsigned int *init)
 static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsigned int n)
 {
   unsigned int overscan, vsp_color, chroma, timing, fixed_fps;
-  
+
   if(getbits(buf, n++, 1))
   {
     picture->aspect_ratio_information = getbits(buf, n, 8);
@@ -316,12 +316,12 @@ static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsig
     {
       picture->display_picture_width = (getbits(buf, n, 8) << 8) | getbits(buf, n + 8, 8);
       n += 16;
-      
+
       picture->display_picture_height = (getbits(buf, n, 8) << 8) | getbits(buf, n + 8, 8);
       n += 16;
     }
   }
-  
+
   if((overscan=getbits(buf, n++, 1)))
     n++;
   if((vsp_color=getbits(buf, n++, 1)))
@@ -339,21 +339,21 @@ static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsig
   {
     picture->timeinc_unit = (getbits(buf, n, 8) << 24) | (getbits(buf, n+8, 8) << 16) | (getbits(buf, n+16, 8) << 8) | getbits(buf, n+24, 8);
     n += 32;
-    
+
     picture->timeinc_resolution = (getbits(buf, n, 8) << 24) | (getbits(buf, n+8, 8) << 16) | (getbits(buf, n+16, 8) << 8) | getbits(buf, n+24, 8);
     n += 32;
-    
+
     fixed_fps = getbits(buf, n, 1);
-    
+
     if(picture->timeinc_unit > 0 && picture->timeinc_resolution > 0)
       picture->fps = (float) picture->timeinc_resolution / (float) picture->timeinc_unit;
     if(fixed_fps)
       picture->fps /= 2;
   }
-  
+
   //fprintf(stderr, "H264_PARSE_VUI, OVESCAN=%u, VSP_COLOR=%u, CHROMA=%u, TIMING=%u, DISPW=%u, DISPH=%u, TIMERES=%u, TIMEINC=%u, FIXED_FPS=%u\n", overscan, vsp_color, chroma, timing, picture->display_picture_width, picture->display_picture_height,
   //	picture->timeinc_resolution, picture->timeinc_unit, picture->timeinc_unit, fixed_fps);
-  
+
   return n;
 }
 
@@ -365,7 +365,7 @@ int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
   int frame_mbs_only;
 
   len = mp_unescape03(buf, len);
-  
+
   picture->fps = picture->timeinc_unit = picture->timeinc_resolution = 0;
   n = 24;
   read_golomb(buf, &n);
@@ -498,7 +498,7 @@ int mp_vc1_decode_sequence_header(mp_mpeg_header_t * picture, unsigned char * bu
       {
         frexp = getbits16(buf, n, 16);
         n += 16;
-        picture->fps = (double) (frexp+1) / 32.0; 
+        picture->fps = (double) (frexp+1) / 32.0;
       }
       else
       {

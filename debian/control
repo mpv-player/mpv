@@ -8,7 +8,7 @@ Build-Depends: libgtk1.2-dev | libgtk2.0-dev, libpng12-dev, zlib1g-dev, x11proto
 Package: mplayer
 Architecture: any
 Depends: ${shlibs:Depends},debconf
-Description: The Ultimate Movie Player 
+Description: The Ultimate Movie Player
  MPlayer is a movie player for LINUX (runs on many other Unices, and non-x86
  CPUs, see the ports section). It plays most MPEG, VOB, AVI, OGG/OGM, VIVO,
  ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA files,

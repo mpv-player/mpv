@@ -203,7 +203,7 @@ static inline void dbgprintf(char* fmt, ...)
     if ( mp_msg_test(MSGT_WIN32,MSGL_DBG3) )
     {
 	va_list va;
-	
+
 	va_start(va, fmt);
 	vprintf(fmt, va);
 //	mp_dbg(MSGT_WIN32, MSGL_DBG3, fmt, va);
@@ -854,7 +854,7 @@ static void* WINAPI expWaitForMultipleObjects(int count, const void** objects,
 
     dbgprintf("WaitForMultipleObjects(%d, 0x%x, %d, duration %d) =>\n",
 	count, objects, WaitAll, duration);
-    
+
     for (i = 0; i < count; i++)
     {
 	object = (void *)objects[i];
@@ -877,7 +877,7 @@ static HANDLE WINAPI expCreateMutexA(void *pSecAttr,
 		    char bInitialOwner, const char *name)
 {
     HANDLE mlist = (HANDLE)expCreateEventA(pSecAttr, 0, 0, name);
-    
+
     if (name)
 	dbgprintf("CreateMutexA(0x%x, %d, '%s') => 0x%x\n",
 	    pSecAttr, bInitialOwner, name, mlist);
@@ -1396,7 +1396,7 @@ static void WINAPI expDeleteCriticalSection(CRITICAL_SECTION *c)
 	dbgprintf("Win32 Warning: Deleting uninitialized Critical Section %p!!\n", c);
 	return;
     }
-    
+
     if (cs->locked)
     {
 	dbgprintf("Win32 Warning: Deleting unlocked Critical Section %p!!\n", c);
@@ -2513,7 +2513,7 @@ static int WINAPI expMonitorFromPoint(void *p, int flags)
     return 0;
 }
 
-static int WINAPI expEnumDisplayMonitors(void *dc, RECT *r, 
+static int WINAPI expEnumDisplayMonitors(void *dc, RECT *r,
     int WINAPI (*callback_proc)(), void *callback_param)
 {
     dbgprintf("EnumDisplayMonitors(0x%x, 0x%x, 0x%x, 0x%x) => ?\n",
@@ -2523,26 +2523,26 @@ static int WINAPI expEnumDisplayMonitors(void *dc, RECT *r,
 
 #if 0
 typedef struct tagMONITORINFO {
-    DWORD  cbSize; 
-    RECT   rcMonitor; 
-    RECT   rcWork; 
-    DWORD  dwFlags; 
-} MONITORINFO, *LPMONITORINFO; 
+    DWORD  cbSize;
+    RECT   rcMonitor;
+    RECT   rcWork;
+    DWORD  dwFlags;
+} MONITORINFO, *LPMONITORINFO;
 #endif
 
 #define CCHDEVICENAME 8
-typedef struct tagMONITORINFOEX {  
-    DWORD  cbSize; 
-    RECT   rcMonitor; 
-    RECT   rcWork; 
-    DWORD  dwFlags; 
+typedef struct tagMONITORINFOEX {
+    DWORD  cbSize;
+    RECT   rcMonitor;
+    RECT   rcWork;
+    DWORD  dwFlags;
     TCHAR  szDevice[CCHDEVICENAME];
-} MONITORINFOEX, *LPMONITORINFOEX; 
+} MONITORINFOEX, *LPMONITORINFOEX;
 
 static int WINAPI expGetMonitorInfoA(void *mon, LPMONITORINFO lpmi)
 {
     dbgprintf("GetMonitorInfoA(0x%x, 0x%x) => 1\n", mon, lpmi);
-    
+
     lpmi->rcMonitor.right = lpmi->rcWork.right = PSEUDO_SCREEN_WIDTH;
     lpmi->rcMonitor.left = lpmi->rcWork.left = 0;
     lpmi->rcMonitor.bottom = lpmi->rcWork.bottom = PSEUDO_SCREEN_HEIGHT;
@@ -2556,7 +2556,7 @@ static int WINAPI expGetMonitorInfoA(void *mon, LPMONITORINFO lpmi)
 	dbgprintf("MONITORINFOEX!\n");
 	strncpy(lpmiex->szDevice, "Monitor1", CCHDEVICENAME);
     }
-    
+
     return 1;
 }
 
@@ -3433,7 +3433,7 @@ static int WINAPI expCreateDirectoryA(const char *pathname, void *sa)
 	buf[0] = '.';
 	buf[1] = 0;
     }
-#if 0    
+#if 0
     if (strrchr(pathname, '\\'))
 	mkdir(strcat(strrchr(pathname, '\\')+1, '/'), 666);
     else
@@ -3826,7 +3826,7 @@ static HRESULT WINAPI expCoInitialize(
 static void WINAPI expCoUninitialize(void)
 {
     dbgprintf("CoUninitialize() called\n");
-} 
+}
 
 /* allow static linking */
 HRESULT WINAPI CoInitializeEx(LPVOID lpReserved, DWORD dwCoInit)
@@ -3835,7 +3835,7 @@ HRESULT WINAPI CoInitializeEx(LPVOID lpReserved, DWORD dwCoInit)
 }
 HRESULT WINAPI CoInitialize(LPVOID lpReserved)
 {
-    return expCoInitialize(lpReserved); 
+    return expCoInitialize(lpReserved);
 }
 void WINAPI CoUninitialize(void)
 {
@@ -4625,25 +4625,25 @@ static int expDirectDrawCreate(void)
 }
 
 #if 1
-typedef struct tagPALETTEENTRY { 
-    BYTE peRed; 
-    BYTE peGreen; 
-    BYTE peBlue; 
-    BYTE peFlags; 
-} PALETTEENTRY; 
+typedef struct tagPALETTEENTRY {
+    BYTE peRed;
+    BYTE peGreen;
+    BYTE peBlue;
+    BYTE peFlags;
+} PALETTEENTRY;
 
 /* reversed the first 2 entries */
-typedef struct tagLOGPALETTE { 
-    WORD         palNumEntries; 
-    WORD         palVersion; 
-    PALETTEENTRY palPalEntry[1]; 
-} LOGPALETTE; 
+typedef struct tagLOGPALETTE {
+    WORD         palNumEntries;
+    WORD         palVersion;
+    PALETTEENTRY palPalEntry[1];
+} LOGPALETTE;
 
 static HPALETTE WINAPI expCreatePalette(CONST LOGPALETTE *lpgpl)
 {
     HPALETTE test;
     int i;
-    
+
     dbgprintf("CreatePalette(%x) => NULL\n", lpgpl);
 
     i = sizeof(LOGPALETTE)+((lpgpl->palNumEntries-1)*sizeof(PALETTEENTRY));
@@ -4671,10 +4671,10 @@ static int WINAPI expGetClientRect(HWND win, RECT *r)
 }
 
 #if 0
-typedef struct tagPOINT { 
-    LONG x; 
-    LONG y; 
-} POINT, *PPOINT; 
+typedef struct tagPOINT {
+    LONG x;
+    LONG y;
+} POINT, *PPOINT;
 #endif
 
 static int WINAPI expClientToScreen(HWND win, POINT *p)
@@ -4718,7 +4718,7 @@ static void *exprealloc(void *ptr, size_t size)
     if (!ptr)
 	return my_mreq(size,0);
     else
-	return my_realloc(ptr, size);        
+	return my_realloc(ptr, size);
 }
 
 /* Fake GetOpenFileNameA from comdlg32.dll for ViVD codec */

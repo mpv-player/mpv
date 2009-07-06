@@ -135,7 +135,7 @@ static int vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int 
 	    src2+= stride[2];
 	}
     }
-    else 
+    else
     {
 		/* Plane V */
 		dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.v;
@@ -176,12 +176,12 @@ static int vidix_draw_slice_410(uint8_t *image[], int stride[], int w,int h,int 
         src+=stride[0];
         dest += dstrides.y;
     }
-    
+
     if (vidix_play.flags & VID_PLAY_INTERLEAVED_UV)
     {
 	mp_tmsg(MSGT_VO,MSGL_WARN, "[VO_SUB_VIDIX] Interleaved UV for YUV410P not supported.\n");
     }
-    else 
+    else
     {
 		/* Plane V */
 		dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.v;
@@ -284,7 +284,7 @@ static void     vidix_flip_page(void)
   {
 	vdlPlaybackFrameSelect(vidix_handler,next_frame);
 	next_frame=(next_frame+1)%vidix_play.num_frames;
-  }	
+  }
 }
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
@@ -395,7 +395,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	  mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Unsupported FourCC for this VIDIX driver: %x (%s).\n",
 	    format,vo_format_name(format));
 	  return -1;
-	} 
+	}
 
 	if(((vidix_cap.maxwidth != -1) && (vid_w > vidix_cap.maxwidth)) ||
 	    ((vidix_cap.minwidth != -1) && (vid_w < vidix_cap.minwidth)) ||
@@ -550,7 +550,7 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; /* slow video ram */
     if(( (mpi->stride[0]==dstrides.y && (!(mpi->flags&MP_IMGFLAG_PLANAR) ||
       (mpi->stride[1]==dstrides.u && mpi->stride[2]==dstrides.v)) )
-      || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))) && 
+      || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))) &&
        (!forced_fourcc && !(vidix_play.flags & VID_PLAY_INTERLEAVED_UV)))
     {
 	if(mpi->flags&MP_IMGFLAG_ACCEPT_WIDTH){
@@ -602,7 +602,7 @@ uint32_t vidix_control(uint32_t request, void *data)
     if(!video_on) return VO_FALSE;
 
     struct voctrl_set_equalizer_args *args = data;
-    
+
     /* vidix eq ranges are -1000..1000 */
     if (!strcasecmp(args->name, "brightness"))
     {
@@ -638,7 +638,7 @@ uint32_t vidix_control(uint32_t request, void *data)
 	return VO_FALSE;
 
     struct voctrl_get_equalizer_args *args = data;
-    
+
     /* vidix eq ranges are -1000..1000 */
     if (!strcasecmp(args->name, "brightness"))
     {
@@ -678,7 +678,7 @@ int vidix_preinit(const char *drvname, struct vo_old_functions *server)
 	vidix_handler = vdlOpen(drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
 				TYPE_OUTPUT,
 				verbose);
-              
+
 	if(vidix_handler == NULL)
 	{
 		mp_tmsg(MSGT_VO,MSGL_ERR, "[VO_SUB_VIDIX] Couldn't find working VIDIX driver.\n");

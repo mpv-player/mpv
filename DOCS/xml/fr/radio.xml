@@ -8,7 +8,7 @@
 
 <para>
 Cette section a pour but de vous expliquer comment écouter la radio
-depuis un tuner compatible V4L (Video For Linux). Reportez-vous à la 
+depuis un tuner compatible V4L (Video For Linux). Reportez-vous à la
 page de manuel pour la description des options controlant la radio ainsi
 que pour la liste des raccourcis clavier.
 </para>
@@ -57,7 +57,7 @@ station doivent être remplacés par le caractère underscore "_".
 Il y a plusieurs façons d'enregistrer la radio. Vous pouvez soit utiliser votre
 carte son via un cable externe reliant votre carte vidéo et le line-in de la carte son
 ou utiliser l'ADC integré à la puce saa7134. Dans le second cas, vous devez charger le
-pilote <systemitem>saa7134-alsa</systemitem> ou <systemitem>saa7134-oss</systemitem> selon 
+pilote <systemitem>saa7134-alsa</systemitem> ou <systemitem>saa7134-oss</systemitem> selon
 votre configuration.
 </para>
 </listitem>
@@ -66,7 +66,7 @@ votre configuration.
 <para>
 <application>MEncoder</application> ne peut pas être utilisé pour enregistrer la radio car
 il doit necessairement travailler sur un flux vidéo. Vous pouvez soit utiliser le logiciel
-<application>arecord</application> du projet ALSA ou utiliser l'option 
+<application>arecord</application> du projet ALSA ou utiliser l'option
 <option>-ao pcm:file=fichier.wav</option>. Dans ce cas, vous n'entenderez rien,
 sauf si vous utilisez un cable branché au line-in et que le volume du line-in n'est pas nul).
 </para>

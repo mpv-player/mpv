@@ -29,8 +29,8 @@ static play_tree_t *files=NULL;
 static inline void add_entry(play_tree_t **last_parentp, play_tree_t **last_entryp, play_tree_t *entry) {
 
 	if(*last_entryp==NULL)
-		play_tree_set_child(*last_parentp, entry);		      
-	else 
+		play_tree_set_child(*last_parentp, entry);
+	else
 		play_tree_append_entry(*last_entryp, entry);
 
 	*last_entryp=entry;
@@ -97,7 +97,7 @@ long itemsInList;
 		}
 		else
 			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "AECountItems() error %d\n", res);
-		
+
 		AEDisposeDesc(&docList);
 	}
 	else

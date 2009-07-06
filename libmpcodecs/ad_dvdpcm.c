@@ -40,7 +40,7 @@ static int init(sh_audio_t *sh)
 	  case 1:
 	    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Samples of this format are needed to improve support. Please contact the developers.\n");
 	    sh->i_bps = sh->channels * sh->samplerate * 5 / 2;
-	  case 2: 
+	  case 2:
 	    sh->sample_format = AF_FORMAT_S24_BE;
 	    sh->samplesize = 3;
 	    break;
@@ -139,7 +139,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
       }
       len = j;
     }
-  } else 
+  } else
   len=demux_read_data(sh_audio->ds,buf,(minlen+3)&(~3));
   return len;
 }

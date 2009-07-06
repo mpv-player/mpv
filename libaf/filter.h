@@ -26,7 +26,7 @@
 #define MPLAYER_FILTER_H
 
 
-// Design and implementation of different types of digital filters 
+// Design and implementation of different types of digital filters
 
 
 // Flags used for filter design
@@ -79,7 +79,7 @@ int af_filter_szxform(const FLOAT_TYPE* a, const FLOAT_TYPE* b, FLOAT_TYPE Q,
 /* Add new data to circular queue designed to be used with a FIR
    filter. xq is the circular queue, in pointing at the new sample, xi
    current index for xq and n the length of the filter. xq must be n*2
-   long. 
+   long.
 */
 #define af_filter_updateq(n,xi,xq,in)\
   xq[xi]=(xq)[(xi)+(n)]=*(in);\

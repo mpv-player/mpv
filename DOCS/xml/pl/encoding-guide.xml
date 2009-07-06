@@ -111,7 +111,7 @@ i framerate</title>
 <listitem><para>
   <emphasis role="bold">Grafika komputerowa (CG)</emphasis>: Może być dowolny
   framerate, ale niektóre są częstsze niż inne; wartości 24 i 30 klatek na
-  sekundę są typowe dla NTSC, a 25fps jest typowe dla PAL. 
+  sekundę są typowe dla NTSC, a 25fps jest typowe dla PAL.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Stary film</emphasis>: Rozmaite niższe framerate.
@@ -1070,7 +1070,7 @@ informacje z każdego makrobloku.
 skompresować obraz. Jeśli nie ma dość bitów widać krawędzie tych bloków.)
 Dlatego też mądrze jest wybrać CQ w zakresie 0,20 do 0,22 na film jednopłytkowy
 i 0,26-0,28 na dwupłytkowy przy standardowych opcjach kodowania.
-Bardziej zaawansowane opcje kodowania, takie jak te podane tutaj dla 
+Bardziej zaawansowane opcje kodowania, takie jak te podane tutaj dla
 <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="library">libavcodec</systemitem></link>
 i
 <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">Xvid</systemitem></link>
@@ -1284,7 +1284,7 @@ With these things in mind, here is our first example:
 mencoder <replaceable>capture.avi</replaceable> -mc 0 -oac lavc -ovc lavc -lavcopts \
     vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224
 </screen>
-Note the <option>ilme</option> and <option>ildct</option> options. 
+Note the <option>ilme</option> and <option>ildct</option> options.
 </para>
 </sect2>
 
@@ -1378,7 +1378,7 @@ which widely depend on personal taste and technical constraints.
   bugs which have not yet been noticed and which can ruin an encode.
   This is simply the tradeoff for using bleeding-edge technology.
   </para>
-  
+
   <para>
   What is more, beginning to use a new codec requires that you spend some
   time becoming familiar with its options, so that you know what
@@ -1410,13 +1410,13 @@ which widely depend on personal taste and technical constraints.
   However, they may have some very advanced options that, if enabled,
   will make the encode really slow for marginal gains.
   </para>
-  
+
   <para>
   If you are after blazing speed you should stick around the default
   settings of the video codec (although you should still try the other
   options which are mentioned in other sections of this guide).
   </para>
-  
+
   <para>
   You may also consider choosing a codec which can do multi-threaded
   processing, though this is only useful for users of machines with
@@ -1562,7 +1562,7 @@ will encode <replaceable>destination_sound.wav</replaceable> with
 the encoding quality 1, which is roughly equivalent to 80Kb/s, and
 is the minimum quality at which you should encode if you care about
 quality.
-Please note that <application>MEncoder</application> currently cannot 
+Please note that <application>MEncoder</application> currently cannot
 mux Vorbis audio tracks
 into the output file because it only supports AVI and MPEG
 containers as an output, each of which may lead to audio/video
@@ -1730,7 +1730,7 @@ only cover its usage.
 </para>
 
 <para>
-Probably the easiest way to get started with Matroska is to use 
+Probably the easiest way to get started with Matroska is to use
 <application>MMG</application>, the graphical frontend shipped with
 <application>mkvtoolnix</application>, and follow the
 <ulink url="http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge-gui.html">guide to mkvmerge GUI (mmg)</ulink>
@@ -2197,7 +2197,7 @@ will be 24000/1001 frames per second.
   accurate method available for encoding both telecine and
   "mixed progressive and telecine".
   <screen>
-mencoder dvd://1 -oac copy -vf pullup,softskip 
+mencoder dvd://1 -oac copy -vf pullup,softskip
     -ovc lavc -ofps 24000/1001<!--
   --></screen>
 </para></listitem>
@@ -3963,7 +3963,7 @@ random differences in the achieved bitrate.
   This option is for choosing the motion estimation search method.
   Altering this option provides a straightforward quality-vs-speed
   tradeoff. <option>me=dia</option> is only a few percent faster than
-  the default search, at a cost of under 0.1dB global PSNR. The 
+  the default search, at a cost of under 0.1dB global PSNR. The
   default setting (<option>me=hex</option>) is a reasonable tradeoff
   between speed and quality. <option>me=umh</option> gains a little under
   0.1dB global PSNR, with a speed penalty that varies depending on
@@ -4192,7 +4192,7 @@ random differences in the achieved bitrate.
   (understanding that there are diminishing returns which may become
   vanishingly low, or even zero). The video stream will still have seekable
   points as long as there are some scene changes.
-</para></listitem> 
+</para></listitem>
 <listitem>
   <para>
   <emphasis role="bold">deblock</emphasis>:
@@ -4508,17 +4508,17 @@ and other options. This is known to work on x86 on both *NIX and Windows.
 </para>
 <para>
 First you must build the <application>vfw2menc</application> program.
-It is located in the <filename class="directory">TOOLS</filename> subdirectory 
+It is located in the <filename class="directory">TOOLS</filename> subdirectory
 of the MPlayer source tree.
 To build on Linux, this can be done using <application>Wine</application>:
 <screen>winegcc vfw2menc.c -o vfw2menc -lwinmm -lole32</screen>
 
-To build on Windows in <application>MinGW</application> or 
+To build on Windows in <application>MinGW</application> or
 <application>Cygwin</application> use:
 <screen>gcc vfw2menc.c -o vfw2menc.exe -lwinmm -lole32</screen>
 
 To build on <application>MSVC</application> you will need getopt.
-Getopt can be found in the original <application>vfw2menc</application> 
+Getopt can be found in the original <application>vfw2menc</application>
 archive available at:
 The <ulink url="http://oss.netfarm.it/mplayer-win32.php">MPlayer on win32</ulink> project.
 </para>
@@ -4528,13 +4528,13 @@ Below is an example with the VP6 codec.
 <screen>
 vfw2menc -f VP62 -d vp6vfw.dll -s firstpass.mcf
 </screen>
-This will open the VP6 codec dialog window. 
+This will open the VP6 codec dialog window.
 Repeat this step for the second pass
 and use <option>-s <replaceable>secondpass.mcf</replaceable></option>.
 </para>
 </informalexample>
 <para>
-Windows users can use 
+Windows users can use
 <option>-xvfwopts codec=vp6vfw.dll:compdata=dialog</option> to have
 the codec dialog display before encoding starts.
 </para>
@@ -4839,11 +4839,11 @@ mp4creator -optimize narnia.mp4</screen>
 <para>
   If you want to add tags to your video that show up in iTunes, you can use
   <ulink url="http://atomicparsley.sourceforge.net/">AtomicParsley</ulink>.
-  
+
   <screen>AtomicParsley narnia.mp4 --metaEnema --title "The Chronicles of Narnia" --year 2005 --stik Movie --freefree --overWrite</screen>
 
   The <option>--metaEnema</option> option removes any existing metadata
-  (<application>mp4creator</application> inserts its name in the 
+  (<application>mp4creator</application> inserts its name in the
   "encoding tool" tag), and <option>--freefree</option> reclaims the
   space from the deleted metadata.
   The <option>--stik</option> option sets the type of video (such as Movie
@@ -4911,7 +4911,7 @@ compliant.
 <tbody>
 <row>
   <entry>NTSC DVD</entry>
-  <entry>720x480, 704x480, 352x480, 352x240</entry> 
+  <entry>720x480, 704x480, 352x480, 352x240</entry>
   <entry>MPEG-2</entry>
   <entry>9800 kbps</entry>
   <entry>48000 Hz</entry>
@@ -4924,7 +4924,7 @@ compliant.
   <entry>NTSC DVD</entry>
   <entry>352x240<footnote id='fn-rare-resolutions'><para>
   These resolutions are rarely used for DVDs because
-  they are fairly low quality.</para></footnote></entry> 
+  they are fairly low quality.</para></footnote></entry>
   <entry>MPEG-1</entry>
   <entry>1856 kbps</entry>
   <entry>48000 Hz</entry>
@@ -5019,7 +5019,7 @@ highly bitrate-starved and require effort to obtain acceptable quality.
 <title>GOP Size Constraints</title>
 
 <para>
-DVD, VCD, and SVCD also constrain you to relatively low 
+DVD, VCD, and SVCD also constrain you to relatively low
 GOP (Group of Pictures) sizes.
 For 30 fps material the largest allowed GOP size is 18.
 For 25 or 24 fps, the maximum is 15.
@@ -5035,7 +5035,7 @@ The GOP size is set using the <option>keyint</option> option.
 VCD video is required to be CBR at 1152 kbps.
 This highly limiting constraint also comes along with an extremely low vbv
 buffer size of 327 kilobits.
-SVCD allows varying video bitrates up to 2500 kbps, and a somewhat less 
+SVCD allows varying video bitrates up to 2500 kbps, and a somewhat less
 restrictive vbv buffer size of 917 kilobits is allowed.
 DVD video bitrates may range anywhere up to 9800 kbps (though typical
 bitrates are about half that), and the vbv buffer size is 1835 kilobits.
@@ -5082,7 +5082,7 @@ DVD (with timestamps on every frame, if possible):
 <para>
 DVD with NTSC Pullup:
 <screen>-of mpeg -mpegopts format=dvd:tsaf:telecine -ofps 24000/1001</screen>
-This allows 24000/1001 fps progressive content to be encoded at 30000/1001 
+This allows 24000/1001 fps progressive content to be encoded at 30000/1001
 fps whilst maintaining DVD-compliance.
 </para>
 
@@ -5148,7 +5148,7 @@ or in the manual page.
 <para>
 If the audio sample rate in the original file is not the same as
 required by the target format, sample rate conversion is required.
-This is achieved using the <option>-srate</option> option and 
+This is achieved using the <option>-srate</option> option and
 the <option>-af lavcresample</option> audio filter together.
 </para>
 
@@ -5216,7 +5216,7 @@ or DVD:
   Used to set the GOP size.
   18 for 30fps material, or 15 for 25/24 fps material.
   Commercial producers seem to prefer keyframe intervals of 12.
-  It is possible to make this much larger and still retain compatibility 
+  It is possible to make this much larger and still retain compatibility
   with most players.
   A <option>keyint</option> of 25 should never cause any problems.
 </para></listitem>

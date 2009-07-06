@@ -71,7 +71,7 @@ GtkWidget * AddVBox( GtkWidget * parent,int type )
  vbox=gtk_vbox_new( FALSE,0 );
  gtk_widget_set_name( vbox,"vbox" );
  gtk_widget_show( vbox );
- if ( parent ) 
+ if ( parent )
   {
    if ( type ) gtk_box_pack_start( GTK_BOX( parent ),vbox,FALSE,FALSE,0 );
     else gtk_container_add( GTK_CONTAINER( parent ),vbox );

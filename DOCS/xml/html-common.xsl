@@ -5,7 +5,7 @@
 <xsl:output method="html" indent="no"
             doctype-system="http://www.w3.org/TR/html4/loose.dtd"
             doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"/>
- 
+
 <!-- **************
      Set parameters
      ************** -->
@@ -38,7 +38,7 @@
 
   <!-- Generate more links for Site Navigation Bar -->
   <xsl:param name="html.extra.head.links" select="1"/>
- 
+
   <!-- Label sections too (eg. 2.1, 2.1.1) -->
   <xsl:param name="section.autolabel" select="'1'"/>
   <xsl:param name="section.label.includes.component.label" select="'1'"/>

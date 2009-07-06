@@ -10,10 +10,10 @@ aquí para obtener el resto de detalles sanguinolientos.
 </para>
 
 <para>
-En esta sección trataré de guiarlo a través del proceso de compilación y 
+En esta sección trataré de guiarlo a través del proceso de compilación y
 configuración de <application>MPlayer</application>. No es fácil, pero
 no necesariamente difícil. Si experimenta un comportamiento diferente
-al que explico, por favor busque en esta documentación y encontrará 
+al que explico, por favor busque en esta documentación y encontrará
 las respuestas. Si ve un enlace, por favor sigalo y lea atentamente
 su contenido. Le llevará algún tiempo, pero vale la pena.
 </para>
@@ -39,9 +39,9 @@ núcleo 2.4.x es recomendado.
   tambien tuvieron sus problemas.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - versión sugerida <emphasis role="bold">siempre la 
+  <emphasis role="bold">XFree86</emphasis> - versión sugerida <emphasis role="bold">siempre la
   más nueva</emphasis> (4.3). Normalmente, todos quieren esto, desde XFree 4.0.2,
-  viene con la extensión <link linkend="xv">XVideo</link> (referida en varios 
+  viene con la extensión <link linkend="xv">XVideo</link> (referida en varios
   lugares como <emphasis role="bold">Xv</emphasis>) que se usa en efecto para
   activar la aceleración YUV por hardware (mostrado rápido de imagen) en placas
   que lo soportan.
@@ -62,7 +62,7 @@ núcleo 2.4.x es recomendado.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - decodificador opcional de JPEG, usado por la opción <option>-mf</option>
-  y algunos archivos MOV de QT. Útil para ambos <application>MPlayer</application> y 
+  y algunos archivos MOV de QT. Útil para ambos <application>MPlayer</application> y
   <application>MEncoder</application> si planea trabar con archivos jpeg.
   </para></listitem>
 <listitem><para>
@@ -168,7 +168,7 @@ configuración (vea la página de manual).
 
 <para>
 Los usuarios de Debian pueden construir un paquete .deb, es muy simple.
-Simplemente ejecute 
+Simplemente ejecute
 <screen>fakeroot debian/rules binary</screen>
 en el directorio raíz de <application>MPlayer</application>. Vea la
 sección <link linkend="debian">paquetes de Debian</link> para instrucciones
@@ -226,7 +226,7 @@ url="http://www.mplayerhq.hu/dload.html">página de descargas</ulink>.
 Deberían ser extraídas al directorio global de pieles normal (<filename
 class="directory">$PREFIX/share/mplayer/skins/</filename>), o al directorio
 personal  <filename class="directory">$HOME/.mplayer/skins/</filename>.
-<application>MPlayer</application> por omisión busca en esos directorios 
+<application>MPlayer</application> por omisión busca en esos directorios
 por un directorio llamado <filename class="directory">default</filename>, pero
 puede usar la opción <option>-skin <replaceable>pielnueva</replaceable></option>,
 o usar la directiva <literal>skin=pielnueva</literal> en el archivo de configuración
@@ -300,7 +300,7 @@ La opción <option>-vobsubid</option> es como la opción
 (lenguajes) con ella. En el caso que <option>-vobsubid</option> se omita,
 <application>MPlayer</application> tratará de usar el lenguaje dado por la
 opción <option>-slang</option> y sino usará el <systemitem>langidx</systemitem>
-en el archivo <filename>.IDX</filename> para configurar el lenguaje de los 
+en el archivo <filename>.IDX</filename> para configurar el lenguaje de los
 subtítulos. Si esto falla no habrá subtítulos.
 </para>
 </formalpara>
@@ -308,7 +308,7 @@ subtítulos. Si esto falla no habrá subtítulos.
 <formalpara>
 <title>Otros subtítulos</title>
 <para>
-Los otros formatos consisten de un archivo de texto simple conteniendo el 
+Los otros formatos consisten de un archivo de texto simple conteniendo el
 tiempo y la información del texto a colocar. Uso: si tiene un archivo como
 <filename><replaceable>ejemplo.txt</replaceable></filename>, debe pasarle a
 <application>MPlayer</application> la opción
@@ -329,7 +329,7 @@ tiempo y la información del texto a colocar. Uso: si tiene un archivo como
 <varlistentry>
   <term><option>-subfps <replaceable>TASA</replaceable></option></term>
   <listitem><para>
-    Especifica la tasa de cuadros por segundo del archivo de subtítulos 
+    Especifica la tasa de cuadros por segundo del archivo de subtítulos
     (número flotante).
     </para></listitem>
 </varlistentry>
@@ -364,7 +364,7 @@ Para más información acerca de subtítulos para DVD, lea la sección
 <title>El formato de subtítulos propio de <application>MPlayer</application> (MPsub)</title>
 <para>
 <application>MPlayer</application> introduce un nuevo formato de subtítulos
-llamado <emphasis role="bold">MPsub</emphasis>. Fue diseñado por Gabucino. 
+llamado <emphasis role="bold">MPsub</emphasis>. Fue diseñado por Gabucino.
 Básicamente su característica más importante es ser basado <emphasis>
 dinámicamente</emphasis> en el tiempo (a pesar de que tiene un modo por
 cuadros también). Un ejemplo (de <ulink
@@ -390,7 +390,7 @@ Como puede ver, el objetivo principal fue <emphasis role="bold">hacer
 la edición/temporización/unión y cortado de subtítulos más fácil</emphasis>.
 Y, si - por decirlo - consigue un subtitulo SSA pero esta mal temporizado
 o tiene problemas de retraso con su versión de la película, entonces puede
-hacer 
+hacer
 <screen>mplayer <replaceable>vacío.avi</replaceable> -sub fuente.ssa -dumpmpsub</screen>.
 Un archivo <filename>dump.mpsub</filename> se creara en el directorio actual,
 que contendrá la fuente del texto de los subtítulos, pero en el formato
@@ -468,10 +468,10 @@ Hay muchas maneras de conseguirlo:
   en formato UTF8 y usar la opción <option>-utf8</option> o simplemente nombrar
   a los archivos de subtítulos <filename>&lt;nombre_del_video&gt;utf</filename> y
   tenerlo en el mismo directorio que el archivo de vídeo. La recodificación desde
-  diferentes códigos de página a UTF8 lo puede hacer usando los programas 
+  diferentes códigos de página a UTF8 lo puede hacer usando los programas
   <command>konwert</command> o <command>iconv</command>.
   </para><para>
-  
+
   <table id="algunas_urls">
   <title>Algunas URLs</title>
   <tgroup cols="2">
@@ -492,7 +492,7 @@ Hay muchas maneras de conseguirlo:
   <row><entry>
     <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
     </entry><entry>
-    Tipografías Coreanas y plugin RAW 
+    Tipografías Coreanas y plugin RAW
     </entry></row>
   </tbody>
   </tgroup>
@@ -532,7 +532,7 @@ OSD tiene 4 estados (cambielo con <keycap>o</keycap>):
   barra de volumen + barra de búsqueda + reloj + duración total de la pelicula
   </para></listitem>
 <listitem><para>
-  solamente subtítulos 
+  solamente subtítulos
   </para></listitem>
 </orderedlist>
 
@@ -565,7 +565,7 @@ completamente configurable por el usuario.
   asegúrese de tener una fuente OSD instalada
   </para></listitem>
 <listitem><para>
-  copie el archivo <filename>etc/menu.conf</filename> a su directorio 
+  copie el archivo <filename>etc/menu.conf</filename> a su directorio
   <filename class="directory">.mplayer</filename>
   </para></listitem>
 <listitem><para>
@@ -695,7 +695,7 @@ Existen tres métodos de temporización en <application>MPlayer</application>.
 
 <itemizedlist>
 <listitem><para>
-<emphasis role="bold">Para usar el método viejo</emphasis>, no tiene que hacer 
+<emphasis role="bold">Para usar el método viejo</emphasis>, no tiene que hacer
   nada. Usa <systemitem>usleep()</systemitem> para ajustar la sincronización
   A/V, con una precisión de +/- 10ms. Sin embargo muchas veces la sincronización
   debe ser más precisa.
@@ -737,7 +737,7 @@ Existen tres métodos de temporización en <application>MPlayer</application>.
   requiere más CPU.
   </para></listitem>
 </itemizedlist>
-<note><para><emphasis role="bold">¡NUNCA instale un archivo ejecutable de 
+<note><para><emphasis role="bold">¡NUNCA instale un archivo ejecutable de
 <application>MPlayer</application>con permisos de SUID root en un sistema
 multiusuario!</emphasis>
 Es una manera fácil para cualquiera de convertirse en administrador.

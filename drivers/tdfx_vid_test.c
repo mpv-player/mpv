@@ -38,9 +38,9 @@ static void print_tdfd_vid_cfg(tdfx_vid_config_t* cfg) {
 	    "  Screen: %d x %d\n",
 	    cfg->version,
 	    cfg->ram_size,
-	    cfg->screen_width, cfg->screen_height);	    
+	    cfg->screen_width, cfg->screen_height);
 }
-     
+
 
 int main(void) {
   int fd;
@@ -63,7 +63,7 @@ int main(void) {
     close(fd);
     return 1;
   }
-  
+
   print_tdfd_vid_cfg(&cfg);
 
   mem = mmap( NULL, 640*480*2, PROT_READ | PROT_WRITE, MAP_SHARED,
@@ -79,9 +79,9 @@ int main(void) {
 /*     ptr[1] = (i & 0xFF); */
 /*     ptr += 2; */
 /*   } */
-    
+
   memset(mem,0xFF,640*480*2);
-  
+
   memset(&move, 0, sizeof(tdfx_vid_agp_move_t));
   move.width = 640;
   move.height = 240;
@@ -92,7 +92,7 @@ int main(void) {
     printf("AGP Move failed !!!!\n");
     return 0;
   }
-  
+
   printf("AGP Move ????\n");
   sleep(1);
 
@@ -114,7 +114,7 @@ int main(void) {
     printf("Blit failed !!!!\n");
     return 0;
   }
-  
+
   close(fd);
   return 1;
 }

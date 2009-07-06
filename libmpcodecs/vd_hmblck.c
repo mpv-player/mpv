@@ -90,7 +90,7 @@ static int nv12_to_yv12(unsigned char *data, int len, mp_image_t* mpi, int swapp
 
     // chroma data is interlaced UVUV... so deinterlace it
     for(idx=0; idx<UV_size; idx++ ) {
-        *(dst_U + idx) = *(src + (idx<<1) + (swapped ? 1 : 0)); 
+        *(dst_U + idx) = *(src + (idx<<1) + (swapped ? 1 : 0));
         *(dst_V + idx) = *(src + (idx<<1) + (swapped ? 0 : 1));
     }
     return 1;

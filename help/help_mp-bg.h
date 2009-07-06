@@ -199,7 +199,7 @@ static const char help_text[]=
 #define MSGTR_ForcingOutputFourcc "Налагане на изходния fourcc код да бъде %x [%.4s]\n"
 #define MSGTR_DuplicateFrames "\n%d дублиращи се кадъра!\n"
 #define MSGTR_SkipFrame "\nПрескочен кадър!\n"
-#define MSGTR_ResolutionDoesntMatch "\nНовият видео файл има различна резолюция или цветови формат от предишния.\n" 
+#define MSGTR_ResolutionDoesntMatch "\nНовият видео файл има различна резолюция или цветови формат от предишния.\n"
 #define MSGTR_FrameCopyFileMismatch "\nВсички видео файлове трябва да имат идентични резолюции, кадрови честоти и кодеци за -ovc copy.\n"
 #define MSGTR_AudioCopyFileMismatch "\nВсички файлове трябва да имат идентични аудио кодеци и формати за -oac copy.\n"
 #define MSGTR_NoSpeedWithFrameCopy "ПРЕДУПРЕЖДЕНИЕ: -speed не работи гарантирано правилно с -oac copy!\n"\
@@ -870,7 +870,7 @@ static const char help_text[]=
 "  osdcolor    задава цвят за osd\n  subcolor    задава цвета на субтитрите\n" \
 "        параметрите за цвят са:\n           0 : нормален\n" \
 "           1 : dim\n           2 : удебелен\n           3 : удебелен шрифт\n" \
-"           4 : обърнат\n           5 : специален\n\n\n" 
+"           4 : обърнат\n           5 : специален\n\n\n"
 
 
 // vo_jpeg.c

@@ -84,7 +84,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd){
 	mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
 	return NULL;
       }
-        
+
       if (i<=tochdr.cdth_trk1)
       mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d  mode: %d\n",
           (int)tocentry.cdte_track,
@@ -149,7 +149,7 @@ static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
       vcd->entry.cdte_addr.msf.minute++;
     }
   }
-    
+
   return VCD_SECTOR_DATA;
 }
 
@@ -171,7 +171,7 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
   cdxa.cdxa_length = 1;
   cdxa.cdxa_data = vcd->buf;
   cdxa.cdxa_format = CDROM_XA_SECTOR_DATA;
-  
+
   if(ioctl(vcd->fd,CDROMCDXA,&cdxa)==-1) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"CDROMCDXA: %s\n",strerror(errno));
     return 0;

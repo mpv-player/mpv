@@ -138,7 +138,7 @@ wsXDNDProcessSelection(wsTWindow* wnd, XEvent *event)
 	if (num >= MAX_DND_FILES)
 	  break;
       }
-	
+
       /* Handle the files */
       if(wnd->DandDHandler){
 	wnd->DandDHandler(num,files);
@@ -187,7 +187,7 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
 			   offset,256,False,XA_ATOM,&ret_type,
 			   &ret_format,&ret_items,&ret_left,
 			   (unsigned char**)&ret_buff);
-	
+
 	/* sanity checks...*/
 	if(ret_buff == NULL || ret_type != XA_ATOM || ret_format != 8*sizeof(Atom)){
 	  XFree(ret_buff);
@@ -210,11 +210,11 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
     }
     return True;
   }
-  
+
   if (event->message_type == XA_XdndLeave) {
     return True;
   }
-  
+
   if (event->message_type == XA_XdndDrop) {
     if (event->data.l[0] != XGetSelectionOwner(wsDisplay, XA_XdndSelection)){
       puts("Wierd selection owner... QT?");
@@ -226,7 +226,7 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
     }
     return True;
   }
-  
+
   if (event->message_type == XA_XdndPosition) {
     Window srcwin = event->data.l[0];
     if (atom_support == None){
@@ -241,19 +241,19 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
       xevent.xany.display = wsDisplay;
       xevent.xclient.window = srcwin;
       xevent.xclient.message_type = XA_XdndStatus;
-      xevent.xclient.format = 32; 
-      
+      xevent.xclient.format = 32;
+
       XDND_STATUS_TARGET_WIN (&xevent) = event->window;
       XDND_STATUS_WILL_ACCEPT_SET (&xevent, True);
       XDND_STATUS_WANT_POSITION_SET(&xevent, True);
       /* actually need smth real here */
       XDND_STATUS_RECT_SET(&xevent, 0, 0, 1024,768);
       XDND_STATUS_ACTION(&xevent) = XA_XdndActionCopy;
-      
+
       XSendEvent(wsDisplay, srcwin, 0, 0, &xevent);
     }
     return True;
   }
-  
+
   return False;
 }

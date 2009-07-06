@@ -30,9 +30,9 @@
 #include "mp_msg.h"
 #include "mpbswap.h"
 
-#ifdef WIN32_LOADER 
+#ifdef WIN32_LOADER
 #include "loader/ldt_keeper.h"
-#endif 
+#endif
 
 #include "loader/qtx/qtxsdk/components.h"
 #include "loader/wine/windef.h"
@@ -321,7 +321,7 @@ static int vf_open(vf_instance_t *vf, char* args){
         mp_msg(MSGT_MENCODER,MSGL_ERR,"unable to load QuickTime.qts\n" );
         return 0;
     }
-    
+
     handler = LoadLibraryA("qtmlClient.dll");
     if(!handler){
         mp_msg(MSGT_MENCODER,MSGL_ERR,"unable to load qtmlClient.dll\n");

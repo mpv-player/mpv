@@ -86,7 +86,7 @@ void gtkInit( void )
   GtkWidget * win;
   win=gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
-  if ( !gtkIcon ) 
+  if ( !gtkIcon )
     gtkIcon=gdk_pixmap_colormap_create_from_xpm_d( win->window,gdk_colormap_get_system(),&gtkIconMask,&win->style->bg[GTK_STATE_NORMAL],MPlayer_mini_xpm );
 
   guiIcon=GDK_WINDOW_XWINDOW( gtkIcon );
@@ -94,7 +94,7 @@ void gtkInit( void )
 
   gtk_widget_destroy( win );
  }
- 
+
  gtkInitialized=1;
 }
 
@@ -166,7 +166,7 @@ void gtkMessageBox( int type,const gchar * str )
 }
 
 void gtkSetLayer( GtkWidget * wdg )
-{ 
+{
  wsSetLayer( gdk_display,GDK_WINDOW_XWINDOW( wdg->window ),appMPlayer.subWindow.isFullScreen );
  gtkActive( wdg );
 }
@@ -194,8 +194,8 @@ void gtkShow( int type,char * param )
 	  gtk_clist_sort( GTK_CLIST( SkinList ) );
           gtk_widget_show( SkinBrowser );
 	  gtkSetLayer( SkinBrowser );
-         } 
-	 else 
+         }
+	 else
 	  {
 	   gtk_widget_destroy( SkinBrowser );
 	   gtkMessageBox( GTK_MB_ERROR,"Skin dirs not found ... Please install skins." );
@@ -231,20 +231,20 @@ void gtkShow( int type,char * param )
    case evShowPopUpMenu:
         gtkPopupMenu=evNone;
         gtkPopupMenuParam=0;
-        if ( PopUpMenu ) 
-	 { 
-	  gtk_widget_hide( PopUpMenu ); 
+        if ( PopUpMenu )
+	 {
+	  gtk_widget_hide( PopUpMenu );
 	  gtk_widget_destroy( PopUpMenu );
 	 }
         PopUpMenu=create_PopUpMenu();
         gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
         break;
    case evHidePopUpMenu:
-        if ( PopUpMenu ) 
+        if ( PopUpMenu )
 	 {
 	  gtk_widget_hide( PopUpMenu );
 	  gtk_widget_destroy( PopUpMenu );
-	  PopUpMenu=NULL; 
+	  PopUpMenu=NULL;
 	 }
         break;
    case evPlayNetwork:

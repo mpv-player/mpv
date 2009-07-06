@@ -216,7 +216,7 @@ sub commandline {
 	"iframes"	=> \$options{iframes},
 	"pframes"	=> \$options{pframes},
 	"bframes"	=> \$options{bframes},
-	"aframes"	=> sub { $options{iframes} = 1; 
+	"aframes"	=> sub { $options{iframes} = 1;
 				 $options{pframes}  = 1;
 				 $options{bframes}  = 1; },
         "qs=s"     	=> \$options{qs},

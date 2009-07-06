@@ -32,7 +32,7 @@ static const struct m_struct_st stream_opts = {
   sizeof(struct stream_priv_s),
   &stream_priv_dflts,
   stream_opts_fields
-};  
+};
 
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
   int r = read(s->fd,buffer,max_len);
@@ -121,7 +121,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 
 #if defined(__CYGWIN__)|| defined(__MINGW32__)
   m |= O_BINARY;
-#endif    
+#endif
 
   if(!strcmp(filename,"-")){
     if(mode == STREAM_READ) {

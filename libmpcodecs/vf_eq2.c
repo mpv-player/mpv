@@ -117,7 +117,7 @@ void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
   int      pel;
   short    brvec[4];
   short    contvec[4];
-  
+
 //  printf("\nmmx: src=%p dst=%p w=%d h=%d ds=%d ss=%d\n",src,dst,w,h,dstride,sstride);
 
   contrast = (int) (par->c * 256 * 16);

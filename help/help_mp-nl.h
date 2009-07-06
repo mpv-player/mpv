@@ -832,7 +832,7 @@ static const char help_text[]=
 
 // ======================= AO Audio Output drivers ========================
 
-// libao2 
+// libao2
 
 // audio_out.c
 #define MSGTR_AO_ALSA9_1x_Removed "audio_out: de alsa9 en alsa1x modules werden verwijderd, gebruik -ao alsa.\n"
@@ -864,7 +864,7 @@ static const char help_text[]=
 #define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] Kon de esd playback stream niet openen: %s\n"
 
 // ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB het instellen van de audio mixer is mislukt: %s\n" 
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB het instellen van de audio mixer is mislukt: %s\n"
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d s niet ondersteund, probeer \"-aop list=resample\"\n"
 
 // ao_null.c

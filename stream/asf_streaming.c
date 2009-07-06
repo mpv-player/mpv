@@ -54,7 +54,7 @@ static int asf_read_wrapper(int fd, void *buffer, int len, streaming_ctrl_t *str
 //   internet connection, the TCP connection will not get
 //   through
 // * Then we can try HTTP.
-// 
+//
 // Note: Using 	WMP sequence  MMSU then MMST and then HTTP.
 
 static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
@@ -83,7 +83,7 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
 		if( fd==-2 ) return -1;
 	}
 
-    //Is protocol http, http_proxy, or mms? 
+    //Is protocol http, http_proxy, or mms?
     if (!strcasecmp(proto, "http_proxy") || !strcasecmp(proto, "http") ||
 	!strcasecmp(proto, "mms") || !strcasecmp(proto, "mmsh") ||
 	!strcasecmp(proto, "mmshttp"))
@@ -101,7 +101,7 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
 }
 
 static int asf_streaming(ASF_stream_chunck_t *stream_chunck, int *drop_packet ) {
-/*	
+/*
 printf("ASF stream chunck size=%d\n", stream_chunck->size);
 printf("length: %d\n", length );
 printf("0x%02X\n", stream_chunck->type );
@@ -116,7 +116,7 @@ printf("0x%02X\n", stream_chunck->type );
 		mp_tmsg(MSGT_NETWORK,MSGL_ERR,"size_confirm mismatch!: %d %d\n", stream_chunck->size, stream_chunck->size_confirm);
 		return -1;
 	}
-/*	
+/*
 	printf("  type: 0x%02X\n", stream_chunck->type );
 	printf("  size: %d (0x%02X)\n", stream_chunck->size, stream_chunck->size );
 	printf("  sequence_number: 0x%04X\n", stream_chunck->sequence_number );
@@ -173,7 +173,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
   int bw = streaming_ctrl->bandwidth;
   int *v_rates = NULL, *a_rates = NULL;
   int v_rate = 0, a_rate = 0, a_idx = -1, v_idx = -1;
-  
+
   if(asf_ctrl == NULL) return -1;
 
 	// The ASF header can be in several network chunks. For example if the content description
@@ -194,7 +194,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	    mp_tmsg(MSGT_NETWORK,MSGL_ERR,"Didn't get a header as first chunk !!!!\n");
 	    return -1;
 	  }
-	  
+
 	  // audit: do not overflow buffer_size
 	  if (size > SIZE_MAX - buffer_size) return -1;
 	  buffer = malloc(size+buffer_size);
@@ -209,7 +209,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	  chunk_buffer = buffer;
 	  buffer += buffer_size;
 	  buffer_size += size;
-	  
+
 	  if (asf_read_wrapper(fd, buffer, size, streaming_ctrl) <= 0)
 	    return -1;
 
@@ -225,9 +225,9 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
   } while( buffer_size<chunk_size2read);
   buffer = chunk_buffer;
   size = buffer_size;
-	  
+
   start = sizeof(ASF_header_t);
-  
+
   pos = find_asf_guid(buffer, asf_file_header_guid, start, size);
   if (pos >= 0) {
     ASF_file_header_t *fileh = (ASF_file_header_t *) &buffer[pos];
@@ -240,7 +240,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
       }
 */
       asf_ctrl->packet_size = AV_RL32(&fileh->max_packet_size);
-      // before playing. 
+      // before playing.
       // preroll: time in ms to bufferize before playing
       streaming_ctrl->prebuffer_size = (unsigned int)(((double)fileh->preroll/1000.0)*((double)fileh->max_bitrate/8.0));
   }
@@ -287,7 +287,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	int stream_count;
 	char *ptr = &buffer[pos];
 	char *end = &buffer[size];
-	
+
 	mp_msg(MSGT_NETWORK, MSGL_V, "Stream bitrate properties object\n");
 		if (ptr + 2 > end) goto len_err_out;
 		stream_count = AV_RL16(ptr);
@@ -352,7 +352,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 
   // find best audio stream
   a_idx = max_idx(asf_ctrl->n_audio, a_rates, bw - v_rate);
-    
+
   free(v_rates);
   free(a_rates);
 
@@ -401,7 +401,7 @@ static int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ct
     if (rest == 0 && waiting == 0) {
       if (asf_read_wrapper(fd, &chunk, sizeof(ASF_stream_chunck_t), streaming_ctrl) <= 0)
         return -1;
-      
+
       // Endian handling of the stream chunk
       le2me_ASF_stream_chunck_t(&chunk);
       chunk_size = asf_streaming( &chunk, &drop_chunk );
@@ -410,7 +410,7 @@ static int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ct
 	return -1;
       }
       chunk_size -= sizeof(ASF_stream_chunck_t);
-	
+
       if(chunk.type != ASF_STREAMING_HEADER && (!drop_chunk)) {
 	if (asf_http_ctrl->packet_size < chunk_size) {
 	  mp_tmsg(MSGT_NETWORK,MSGL_ERR,"Error: chunk_size > packet_size\n");
@@ -473,7 +473,7 @@ static int asf_http_streaming_type(char *content_type, char *features, HTTP_head
 	if( 	!strcasecmp(content_type, "application/octet-stream") ||
 		!strcasecmp(content_type, "application/vnd.ms.wms-hdr.asfv1") ||        // New in Corona, first request
 		!strcasecmp(content_type, "application/x-mms-framed") ||                // New in Corana, second request
-		!strcasecmp(content_type, "video/x-ms-asf")) {               
+		!strcasecmp(content_type, "video/x-ms-asf")) {
 
 		if( strstr(features, "broadcast") ) {
 			mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Live stream\n");
@@ -558,10 +558,10 @@ static HTTP_header_t *asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 		http_set_uri( http_hdr, url->file );
 		sprintf( str, "Host: %.220s:%d", url->hostname, url->port );
 	}
-	
+
 	http_set_field( http_hdr, str );
 	http_set_field( http_hdr, "Pragma: xClientGUID={c77e7400-738a-11d2-9add-0020af0a3278}" );
-	sprintf(str, 
+	sprintf(str,
 		"Pragma: no-cache,rate=1.000000,stream-time=0,stream-offset=%u:%u,request-context=%d,max-duration=%u",
 		offset_hi, offset_lo, asf_http_ctrl->request, length );
 	http_set_field( http_hdr, str );
@@ -643,7 +643,7 @@ static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTT
 		char *comma_ptr=NULL;
 		char *end;
 //printf("Pragma: [%s]\n", pragma );
-		// The pragma line can get severals attributes 
+		// The pragma line can get severals attributes
 		// separeted with a comma ','.
 		do {
 			if( !strncasecmp( pragma, "features=", 9) ) {
@@ -651,7 +651,7 @@ static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTT
 				end = strstr( pragma, "," );
 				if( end==NULL ) {
 				  len = strlen(pragma);
-				} else { 
+				} else {
 				  len = (unsigned int)(end-pragma);
 				}
 				if(len > sizeof(features) - 1) {
@@ -716,7 +716,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 				goto err_out;
 			}
 			i += r;
-		}       
+		}
 		http_free( http_hdr );
 		http_hdr = http_new_header();
 		do {
@@ -781,7 +781,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 				mp_tmsg(MSGT_NETWORK,MSGL_ERR,"unknown ASF streaming type\n");
 				goto err_out;
 		}
-	// Check if we got a redirect.	
+	// Check if we got a redirect.
 	} while(!done);
 
 	stream->fd = fd;
@@ -820,7 +820,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 	url = url_new(stream->url);
 	stream->streaming_ctrl->url = check4proxies(url);
 	url_free(url);
-	
+
 	mp_tmsg(MSGT_OPEN, MSGL_INFO, "STREAM_ASF, URL: %s\n", stream->url);
 	if((!strncmp(stream->url, "http", 4)) && (*file_format!=DEMUXER_TYPE_ASF && *file_format!=DEMUXER_TYPE_UNKNOWN)) {
 		streaming_ctrl_free(stream->streaming_ctrl);
@@ -834,7 +834,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 		stream->streaming_ctrl = NULL;
 		return STREAM_UNSUPPORTED;
 	}
-	
+
 	if (*file_format != DEMUXER_TYPE_PLAYLIST)
 		*file_format = DEMUXER_TYPE_ASF;
 	stream->type = STREAMTYPE_STREAM;
@@ -852,4 +852,3 @@ const stream_info_t stream_info_asf = {
   NULL,
   0 // Urls are an option string
 };
-

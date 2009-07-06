@@ -174,7 +174,7 @@ Float32 vol;
 				ao->b_muted = 0;
 			return CONTROL_TRUE;
 		}
-		
+
 		vol=(control_vol->left+control_vol->right)*4.0/200.0;
 		err = AudioUnitSetParameter(ao->theOutputUnit, kHALOutputParam_Volume, kAudioUnitScope_Global, 0, vol, 0);
 		if(err==0) {
@@ -189,7 +189,7 @@ Float32 vol;
 	default:
 	  return CONTROL_FALSE;
 	}
-	
+
 }
 
 
@@ -237,8 +237,8 @@ static OSStatus DeviceListener( AudioDeviceID inDevice,
 static int init(int rate,int channels,int format,int flags)
 {
 AudioStreamBasicDescription inDesc;
-ComponentDescription desc; 
-Component comp; 
+ComponentDescription desc;
+Component comp;
 AURenderCallbackStruct renderCallback;
 OSStatus err;
 UInt32 size, maxFrames, i_param_size;
@@ -396,20 +396,20 @@ int b_alive;
 	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
 	desc.componentFlags = 0;
 	desc.componentFlagsMask = 0;
-				
+
 	comp = FindNextComponent(NULL, &desc);  //Finds an component that meets the desc spec's
 	if (comp == NULL) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to find Output Unit component\n");
 		goto err_out;
 	}
-		
+
 	err = OpenAComponent(comp, &(ao->theOutputUnit));  //gains access to the services provided by the component
 	if (err) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to open Output Unit component: [%4.4s]\n", (char *)&err);
 		goto err_out;
 	}
 
-	// Initialize AudioUnit 
+	// Initialize AudioUnit
 	err = AudioUnitInitialize(ao->theOutputUnit);
 	if (err) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to initialize Output Unit component: [%4.4s]\n", (char *)&err);
@@ -426,7 +426,7 @@ int b_alive;
 
 	size = sizeof(UInt32);
 	err = AudioUnitGetProperty(ao->theOutputUnit, kAudioDevicePropertyBufferSize, kAudioUnitScope_Input, 0, &maxFrames, &size);
-	
+
 	if (err)
 	{
 		ao_msg(MSGT_AO,MSGL_WARN, "AudioUnitGetProperty returned [%4.4s] when getting kAudioDevicePropertyBufferSize\n", (char *)&err);
@@ -434,7 +434,7 @@ int b_alive;
 	}
 
 	ao->chunk_size = maxFrames;//*inDesc.mBytesPerFrame;
-    
+
 	ao_data.samplerate = inDesc.mSampleRate;
 	ao_data.channels = inDesc.mChannelsPerFrame;
     ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
@@ -444,7 +444,7 @@ int b_alive;
 	ao->num_chunks = (ao_data.bps+ao->chunk_size-1)/ao->chunk_size;
     ao->buffer_len = ao->num_chunks * ao->chunk_size;
     ao->buffer = av_fifo_alloc(ao->buffer_len);
-	
+
 	ao_msg(MSGT_AO,MSGL_V, "using %5d chunks of %d bytes (buffer len %d bytes)\n", (int)ao->num_chunks, (int)ao->chunk_size, (int)ao->buffer_len);
 
     renderCallback.inputProc = theRenderProc;
@@ -456,7 +456,7 @@ int b_alive;
 	}
 
 	reset();
-    
+
     return CONTROL_OK;
 
 err_out2:
@@ -467,7 +467,7 @@ err_out:
     av_fifo_free(ao->buffer);
     free(ao);
     ao = NULL;
-    return CONTROL_FALSE; 
+    return CONTROL_FALSE;
 }
 
 /*****************************************************************************
@@ -734,7 +734,7 @@ err_out:
     av_fifo_free(ao->buffer);
     free(ao);
     ao = NULL;
-    return CONTROL_FALSE; 
+    return CONTROL_FALSE;
 }
 
 /*****************************************************************************
@@ -943,7 +943,7 @@ static OSStatus RenderCallbackSPDIF( AudioDeviceID inDevice,
 
 
 static int play(void* output_samples,int num_bytes,int flags)
-{  
+{
     int wrote, b_digital;
 
     // Check whether we need to reset the digital output stream.

@@ -401,7 +401,7 @@ ad alcuna voce del menu!
 <answer><para>
 Stai usando FVWM? Prova a fare così:
 <orderedlist>
-<!-- TODO: substitute with italian translation of menu items --> 
+<!-- TODO: substitute with italian translation of menu items -->
 <listitem><para>
   <menuchoice><guimenu>Start</guimenu><guisubmenu>Settings</guisubmenu>
     <guisubmenu>Configuration</guisubmenu>
@@ -458,7 +458,7 @@ Come faccio a far sì che i sottotitoli vengano visualizzati sui margini neri
 esterni al film?
 </para></question>
 <answer><para>
-Usa il filtro video <systemitem>expand</systemitem> per aumentare l'area 
+Usa il filtro video <systemitem>expand</systemitem> per aumentare l'area
 verticale su cui il film viene visualizzato, e posiziona il film stesso sul
 bordo superiore, per esempio:
 <screen>mplayer -vf expand=0:-100:0:0 -slang it dvd://1</screen>
@@ -607,7 +607,7 @@ riproducendo file sul mio portatile.
 E' un effetto del sistema di gestione/risparmio energetico del tuo portatile
 (del BIOS, non del kernel). Collega l'alimentazione esterna
 <emphasis role="bold">prima</emphasis> di accendere il tuo portatile. Puoi
-anche provare se 
+anche provare se
 <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
 può esserti d'aiuto (un'interfaccia SpeedStep per Linux).
 </para></answer>

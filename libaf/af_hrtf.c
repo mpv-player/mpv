@@ -75,7 +75,7 @@ typedef struct af_hrtf_s {
  *    nk:	length of the convolution kernel
  *    sx:	ring buffer
  *    sk:	convolution kernel
- *    offset:	offset on the ring buffer, can be 
+ *    offset:	offset on the ring buffer, can be
  */
 static float conv(const int nx, const int nk, const float *sx, const float *sk,
 		  const int offset)
@@ -338,7 +338,7 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
 	}
 	s->print_flag = 1;
 	return AF_OK;
-    }    
+    }
 
     return AF_UNKNOWN;
 }
@@ -429,7 +429,7 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data)
 		 "[hrtf] bogus decode_mode: %d\n", s->decode_mode);
 	  break;
 	}
-	
+
        if(s->matrix_mode)
 	  mp_msg(MSGT_AFILTER, MSGL_INFO,
 		 "[hrtf] Using active matrix to decode rear center "
@@ -439,20 +439,20 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data)
     out = af->data->audio;
 
     /* MPlayer's 5 channel layout (notation for the variable):
-     * 
+     *
      * 0: L (LF), 1: R (RF), 2: Ls (LR), 3: Rs (RR), 4: C (CF), matrix
      * encoded: Cs (CR)
-     * 
+     *
      * or: L = left, C = center, R = right, F = front, R = rear
-     * 
+     *
      * Filter notation:
-     * 
+     *
      *      CF
      * OF        AF
      *      Ear->
      * OR        AR
      *      CR
-     * 
+     *
      * or: C = center, A = same side, O = opposite, F = front, R = rear
      */
 
@@ -667,7 +667,7 @@ static int af_open(af_instance_t* af)
     }
     for(i = 0; i < s->basslen; i++)
 	s->ba_ir[i] *= BASSGAIN;
-    
+
     return AF_OK;
 }
 

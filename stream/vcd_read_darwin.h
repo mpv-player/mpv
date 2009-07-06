@@ -56,7 +56,7 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 	vcd->entry.address = track;
 	vcd->entry.bufferLength = sizeof(entry);
 	vcd->entry.buffer = &entry;
-  
+
 	if (ioctl(vcd->fd, DKIOCCDREADTRACKINFO, &vcd->entry))
 	{
 		mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif1: %s\n",strerror(errno));
@@ -69,21 +69,21 @@ int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 int vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
 	struct CDTrackInfo entry;
-	
+
 	if (track > vcd->hdr.lastTrackNumberInLastSessionLSB) {
 		mp_msg(MSGT_OPEN, MSGL_ERR,
 		       "track number %d greater than last track number %d\n",
 		       track, vcd->hdr.lastTrackNumberInLastSessionLSB);
 		return -1;
 	}
-	
+
 	//read track info
 	memset( &vcd->entry, 0, sizeof(vcd->entry));
 	vcd->entry.addressType = kCDTrackInfoAddressTypeTrackNumber;
 	vcd->entry.address = track<vcd->hdr.lastTrackNumberInLastSessionLSB?track+1:vcd->hdr.lastTrackNumberInLastSessionLSB;
 	vcd->entry.bufferLength = sizeof(entry);
 	vcd->entry.buffer = &entry;
-  
+
 	if (ioctl(vcd->fd, DKIOCCDREADTRACKINFO, &vcd->entry))
 	{
 		mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
@@ -101,25 +101,25 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 {
 	dk_cd_read_disc_info_t tochdr;
 	struct CDDiscInfo hdr;
-	
+
 	dk_cd_read_track_info_t tocentry;
 	struct CDTrackInfo entry;
 	CDMSF trackMSF;
-	
+
 	mp_vcd_priv_t* vcd;
 	int i, min = 0, sec = 0, frame = 0;
-  
+
 	//read toc header
     memset(&tochdr, 0, sizeof(tochdr));
     tochdr.buffer = &hdr;
     tochdr.bufferLength = sizeof(hdr);
-  
+
     if (ioctl(fd, DKIOCCDREADDISCINFO, &tochdr) < 0)
 	{
 		mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
 		return NULL;
     }
-	
+
 	//print all track info
 	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", hdr.firstTrackNumberInLastSessionLSB);
 	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", hdr.lastTrackNumberInLastSessionLSB);
@@ -137,13 +137,13 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 			mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
 			return NULL;
 		}
-		
+
 		trackMSF = CDConvertLBAToMSF(be2me_32(entry.trackStartAddress));
 		}
 		else
 			trackMSF = CDConvertLBAToMSF(be2me_32(entry.trackStartAddress)
 			                             + be2me_32(entry.trackSize));
-        
+
 		//mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
 		if (i<=hdr.lastTrackNumberInLastSessionLSB)
 		mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d: format=%d  %02d:%02d:%02d\n",
@@ -180,7 +180,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 		  frame = trackMSF.frame;
 		}
 	}
- 
+
 	vcd = malloc(sizeof(mp_vcd_priv_t));
 	vcd->fd = fd;
 	vcd->hdr = hdr;
@@ -198,14 +198,14 @@ static int vcd_read(mp_vcd_priv_t* vcd,char *mem)
 	{
 		vcd->msf.frame=0;
 		vcd->msf.second++;
-        
+
 		if (vcd->msf.second==60)
 		{
 			vcd->msf.second=0;
 			vcd->msf.minute++;
         }
       }
-	  
+
       memcpy(mem,vcd->buf.data,VCD_SECTOR_DATA);
       return VCD_SECTOR_DATA;
 }

@@ -119,7 +119,7 @@ static const char* nas_state(unsigned int state) {
 	return nas_states[state];
 }
 
-static const ao_info_t info = 
+static const ao_info_t info =
 {
 	"NAS audio output",
 	"nas",
@@ -201,7 +201,7 @@ static int nas_readBuffer(struct ao_nas_data *nas_data, unsigned int num)
 	 * Now write the new buffer to the network.
 	 */
 	AuWriteElement(nas_data->aud, nas_data->flow, 0, num, nas_data->server_buffer, AuFalse, &as);
-	if (as != AuSuccess) 
+	if (as != AuSuccess)
 		nas_print_error(nas_data->aud, "nas_readBuffer(): AuWriteElement", as);
 
 	return num;
@@ -229,7 +229,7 @@ static int nas_empty_event_queue(struct ao_nas_data *nas_data)
 {
 	AuEvent ev;
 	int result = 0;
-	
+
 	while (AuScanForTypedEvent(nas_data->aud, AuEventsQueuedAfterFlush,
 				   AuTrue, AuEventTypeElementNotify, &ev)) {
 		AuDispatchEvent(nas_data->aud, &ev);
@@ -462,7 +462,7 @@ static int init(int rate,int channels,int format,int flags)
 	mp_msg(MSGT_AO, MSGL_V, "ao_nas: init(): Using audioserver %s\n", server);
 
 	nas_data->aud = AuOpenServer(server, 0, NULL, 0, NULL, NULL);
-	if (!nas_data->aud) { 
+	if (!nas_data->aud) {
 		mp_msg(MSGT_AO, MSGL_ERR, "ao_nas: init(): Can't open nas audio server -> nosound\n");
 		return 0;
 	}
@@ -571,7 +571,7 @@ static void audio_resume(void)
 static int get_space(void)
 {
 	int result;
-	
+
 	mp_msg(MSGT_AO, MSGL_DBG3, "ao_nas: get_space()\n");
 
 	pthread_mutex_lock(&nas_data->buffer_mutex);
@@ -631,7 +631,7 @@ static int play(void* data,int len,int flags)
 static float get_delay(void)
 {
 	float result;
-	
+
 	mp_msg(MSGT_AO, MSGL_DBG3, "ao_nas: get_delay()\n");
 
 	pthread_mutex_lock(&nas_data->buffer_mutex);

@@ -39,7 +39,7 @@ typedef struct {
 #define NMS_MAX_FORMATS 16
 
 MIMEto4CC supported_audio[NMS_MAX_FORMATS] = {
-    {"MPA", 0x55}, 
+    {"MPA", 0x55},
     {"vorbis", mmioFOURCC('v','r','b','s')},
     {"mpeg4-generic", mmioFOURCC('M','P','4','A')},
     {NULL, 0},
@@ -325,7 +325,7 @@ static int get_data_for_session(Nemesi_DemuxerStreamData * ndsd,
     }
 }
 
-static void stream_add_packet(Nemesi_DemuxerStreamData * ndsd, 
+static void stream_add_packet(Nemesi_DemuxerStreamData * ndsd,
                               Nemesi_SessionType stype,
                               demux_stream_t* ds, rtp_frame * fr)
 {

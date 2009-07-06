@@ -128,7 +128,7 @@ void m_properties_print_help_list(const m_option_t* list);
  *  ${NAME} is expanded to the value of property NAME or an empty
  *  string in case of error. $(NAME:STR) expand STR only if the property
  *  NAME is available.
- * 
+ *
  *  \param prop_list An array of \ref m_option describing the available
  *                   properties.
  *  \param str The string to expand.

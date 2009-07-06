@@ -54,7 +54,7 @@ unsigned int GetTimer(void)
   struct timeval tv;
   gettimeofday(&tv,NULL);
   return tv.tv_sec * 1000000 + tv.tv_usec;
-}  
+}
 
 // Returns current time in milliseconds
 unsigned int GetTimerMS(void)
@@ -62,7 +62,7 @@ unsigned int GetTimerMS(void)
   struct timeval tv;
   gettimeofday(&tv,NULL);
   return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}  
+}
 
 // Initialize timer, must be called at least once at start
 void InitTimer(void)

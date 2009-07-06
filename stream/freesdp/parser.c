@@ -1,7 +1,7 @@
 /*
   This file is part of FreeSDP
   Copyright (C) 2001,2002,2003 Federico Montesino Pouzols <fedemp@altern.org>
-  
+
   FreeSDP is free software; you can redistribute it and/or modify it
   under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2 of the License, or
@@ -380,7 +380,7 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
   }
 
   /* `k=' line (encryption key) [optional] */
-  /* k=<method> 
+  /* k=<method>
      k=<method>:<encryption key> */
   result = fsdp_parse_k (&p, &(dsc->k_encryption_method),
 			 &(dsc->k_encryption_content));
@@ -687,7 +687,7 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
         return result;
 
       /* `k=' line (encryption key) [optional] */
-      /* k=<method> 
+      /* k=<method>
          k=<method>:<encryption key> */
       result = fsdp_parse_k (&p, &(media->k_encryption_method),
                              &(media->k_encryption_content));

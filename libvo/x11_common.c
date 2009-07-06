@@ -310,7 +310,7 @@ static int vo_wm_detect(struct vo *vo)
                    "[x11] Using workaround for Metacity bugs.\n");
         }
     }
-// --- netwm 
+// --- netwm
     if (x11_get_property(x11, x11->XA_NET_SUPPORTED, &args, &nitems))
     {
         mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports NetWM.\n");
@@ -394,7 +394,7 @@ int vo_init(struct vo *vo)
 // Window    mRootWin;
     XWindowAttributes attribs;
     char *dispName;
-	
+
 	if (vo_rootwin)
 		WinID = 0; // use root window
 
@@ -589,7 +589,7 @@ static const struct keymap keymap[] = {
     {wsGrayRight, KEY_KP6}, {wsGrayHome, KEY_KP7}, {wsGrayUp, KEY_KP8},
     {wsGrayPgUp, KEY_KP9}, {wsGrayDelete, KEY_KPDEL},
 
-    {0, 0} 
+    {0, 0}
 };
 
 void vo_x11_putkey(struct vo *vo, int key)
@@ -2133,7 +2133,7 @@ static void vo_xv_print_ck_info(struct vo_x11_state *x11)
 
   switch ( x11->xv_ck_info.source )
   {
-    case CK_SRC_CUR:      
+    case CK_SRC_CUR:
       mp_msg( MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06lx).\n",
               x11->xv_colorkey );
       break;
@@ -2197,12 +2197,12 @@ int vo_xv_init_colorkey(struct vo *vo)
     if ( x11->xv_ck_info.source != CK_SRC_CUR )
     {
       x11->xv_colorkey = vo_colorkey;
-  
+
       /* check if we have to set the colorkey too */
       if ( x11->xv_ck_info.source == CK_SRC_SET )
       {
         xv_atom = XInternAtom(x11->display, "XV_COLORKEY",False);
-  
+
         rez = XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, vo_colorkey);
         if ( rez != Success )
         {
@@ -2212,7 +2212,7 @@ int vo_xv_init_colorkey(struct vo *vo)
         }
       }
     }
-    else 
+    else
     {
       int colorkey_ret;
 
@@ -2236,7 +2236,7 @@ int vo_xv_init_colorkey(struct vo *vo)
     if ( x11->xv_ck_info.method == CK_METHOD_AUTOPAINT )
     {
       rez = !Success; // reset rez to something different than Success
- 
+
       if ( xv_atom != None ) // autopaint is supported
       {
         rez = XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, 1);
@@ -2383,11 +2383,11 @@ void xv_setup_colorkeyhandling(struct vo *vo, const char *ck_method_str,
     else if ( strncmp( ck_method_str, "man", 3 ) == 0 )
     {
       x11->xv_ck_info.method = CK_METHOD_MANUALFILL;
-    }    
+    }
     else if ( strncmp( ck_method_str, "auto", 4 ) == 0 )
     {
       x11->xv_ck_info.method = CK_METHOD_AUTOPAINT;
-    }    
+    }
   }
 }
 

@@ -32,7 +32,7 @@ int dvd_title=0;
 
 stream_t* open_stream(char* filename, struct MPOpts *options, int* file_format)
 {
-  // Check if playlist or unknown 
+  // Check if playlist or unknown
   if (*file_format != DEMUXER_TYPE_PLAYLIST){
     *file_format=DEMUXER_TYPE_UNKNOWN;
   }
@@ -46,4 +46,3 @@ if(!filename) {
 
   return open_stream_full(filename,STREAM_READ,options,file_format);
 }
-

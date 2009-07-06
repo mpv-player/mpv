@@ -70,7 +70,7 @@ typedef struct
    guiResizeStruct       resize;
    guiVideoStruct        videodata;
    guiUnknownErrorStruct error;
-   
+
    struct MPContext * mpcontext;
    void * sh_video;
    void * afilter;
@@ -116,10 +116,10 @@ typedef struct
 
    char * Subtitlename;
    int    SubtitleChanged;
-   
+
    char * Othername;
    int    OtherChanged;
-   
+
    char * AudioFile;
    int    AudioFileChanged;
 

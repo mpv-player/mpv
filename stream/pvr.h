@@ -40,7 +40,7 @@ const char *pvr_get_current_stationname (stream_t *stream);
 /**
  * @brief Get the current channel name.
  *        The pointer is valid, till the stream is closed.
- * @return The stream's channel name 
+ * @return The stream's channel name
  */
 const char *pvr_get_current_channelname (stream_t *stream);
 

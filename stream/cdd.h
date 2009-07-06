@@ -11,7 +11,7 @@
 #endif
 
 typedef struct {
-	char cddb_hello[1024];	
+	char cddb_hello[1024];
 	unsigned long disc_id;
 	unsigned int tracks;
 	char *cache_dir;

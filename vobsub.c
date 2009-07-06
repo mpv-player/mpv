@@ -465,7 +465,7 @@ mpeg_run(mpeg_t *mpeg)
 	    len = buf[0] << 8 | buf[1];
 	    if (len > 0 && rar_seek(mpeg->stream, len, SEEK_CUR))
 		return -1;
-		
+
 	}
 	else {
 	    mp_msg(MSGT_VOBSUB,MSGL_ERR,"unknown header 0x%02X%02X%02X%02X\n",
@@ -1009,7 +1009,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	      if(force)
 		mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: Can't open SUB file\n");
 	      else {
-		
+
 		free(buf);
 		free(vob);
 		return NULL;

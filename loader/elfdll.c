@@ -213,7 +213,7 @@ static WINE_MODREF *ELFDLL_CreateModref(HMODULE hModule, LPCSTR path)
 	/* Link MODREF into process list */
 
 //	EnterCriticalSection( &PROCESS_Current()->crit_section );
-	
+
 	if(local_wm)
         {
     	    local_wm->next = (modref_list*) malloc(sizeof(modref_list));
@@ -227,7 +227,7 @@ static WINE_MODREF *ELFDLL_CreateModref(HMODULE hModule, LPCSTR path)
 	    local_wm = (modref_list*) malloc(sizeof(modref_list));
 	    local_wm->next=local_wm->prev=NULL;
     	    local_wm->wm=wm;
-	}	
+	}
 
 //	LeaveCriticalSection( &PROCESS_Current()->crit_section );
 	return wm;
@@ -263,7 +263,7 @@ WINE_MODREF *ELFDLL_LoadLibraryExA(LPCSTR path, DWORD flags)
 /*	strcpy(soname, name);
 	strcat(soname, "_elfdll_image");
 	image = (struct elfdll_image *)dlsym(dlhandle, soname);
-	if(!image) 
+	if(!image)
 	{
 		ERR("Could not get elfdll image descriptor %s (%s)\n", soname, dlerror());
 		dlclose(dlhandle);

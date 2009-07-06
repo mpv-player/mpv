@@ -458,4 +458,3 @@ static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
 	if(len) small_memcpy(to, from, len);
 	return retval;
 }
-

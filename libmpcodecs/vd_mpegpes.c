@@ -55,7 +55,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
                 return 0;
         }
     }
-    
+
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, sh->disp_w, sh->disp_h);
     packet.data=data;
     packet.size=len;

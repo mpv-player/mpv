@@ -69,14 +69,14 @@ static int pci_config_type(void)
 static long pci_config_read_long(
           unsigned char bus,
           unsigned char dev,
-          int func, 
+          int func,
           unsigned cmd)
 {
     pcic_t p;
-    
+
     p.address = cmd;
     p.pcipos = (bus << 8) | dev | (func << 5);
-    
+
     if (ioctl(svgahelper_fd, SVGALIB_HELPER_IOCGPCIINL, &p))
 	return -1;
 
@@ -116,10 +116,10 @@ static __inline__ int enable_os_io(void)
 
 #if defined(__powerpc__) && defined(__linux__)
 /* should be fixed? */
-#else    
+#else
     if (iopl(3) != 0)
 	return errno;
-#endif    
+#endif
     return 0;
 }
 
@@ -137,10 +137,10 @@ static __inline__ int disable_os_io(void)
 #endif
 #if defined(__powerpc__) && defined(__linux__)
 /* should be fixed? */
-#else    
+#else
     if (iopl(0) != 0)
 	return errno;
-#endif    
+#endif
     return 0;
 }
 
@@ -152,8 +152,8 @@ static __inline__ int disable_os_io(void)
 #if defined(CONFIG_PCI_LINUX_PROC)
 static int pci_config_type( void ) { return 1; }
 
-/* pci operations for (powerpc) Linux 
-   questions, suggestions etc: 
+/* pci operations for (powerpc) Linux
+   questions, suggestions etc:
    mplayer-dev-eng@mplayerhq.hu, colin@colino.net*/
 #include <fcntl.h>
 //#include <sys/io.h>
@@ -179,11 +179,11 @@ static int pci_get_vendor(
              pread(fd, &device, 2, PCI_DEVICE_ID) == 2) {
 	    vendor = le2me_16(vendor);
 	    device = le2me_16(device);
-	    retval = vendor + (device<<16); /*no worries about byte order, 
+	    retval = vendor + (device<<16); /*no worries about byte order,
 	    				      all ppc are bigendian*/
     } else {
 	    retval = 0xFFFF;
-    }   
+    }
     if (fd > 0) {
 	    close(fd);
     }
@@ -193,7 +193,7 @@ static int pci_get_vendor(
 static long pci_config_read_long(
           unsigned char bus,
           unsigned char dev,
-          int func, 
+          int func,
           unsigned cmd)
 {
     long retval;
@@ -208,7 +208,7 @@ static long pci_config_read_long(
 	    retval = le2me_32(retval);
     } else {
 	    retval = 0;
-    }   
+    }
     if (fd > 0) {
 	    close(fd);
     }

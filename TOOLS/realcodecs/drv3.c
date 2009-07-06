@@ -161,7 +161,7 @@ static void hexdump(void *pos, int len) {
 	int lines=(len+15)>>4;
 	while(lines--) {
 		int len1=len, i;
-		fprintf(stderr, "#R# %0x  ", (int)cpos-(int)pos); 
+		fprintf(stderr, "#R# %0x  ", (int)cpos-(int)pos);
 		cpos1=cpos;
 		for (i=0;i<16;i++) {
 			if (len1>0) {
@@ -181,7 +181,7 @@ static void hexdump(void *pos, int len) {
 			}
 			len--;
 		}
-		fputs("\n", stderr);		
+		fputs("\n", stderr);
 	}
 	fputc('\n', stderr);
 }
@@ -242,7 +242,7 @@ ulong RV20toYUV420HiveMessage(ulong *p1,ulong p2) {
 	memset(h_temp,0x77,1000);
 	memcpy(h_temp,p1,4);
 	fprintf(stderr,"COPY OK!\n");
-	
+
 //	tic();
 //	result=(*rvyuvHiveMessage)(p1,p2);
 	result=(*rvyuvHiveMessage)(h_temp,p2);
@@ -256,7 +256,7 @@ ulong RV20toYUV420HiveMessage(ulong *p1,ulong p2) {
 
 //	p1[0]=0;
 //	p1[1]=0x20000000;
-	
+
 	fprintf(stderr,"<HIVE %ld %p\n",p1[0],p1[1]);
 
 //	hexdump((void*)p1, sizeof(struct init_data));
@@ -362,28 +362,28 @@ ulong RV20toYUV420Transform(ulong p1,ulong p2,ulong p3,ulong p4,ulong p5) {
 	pch=p1;
 	crc_src=build_crc(pch, pp3[0]);
 
-	pp4=pp3[3];	
+	pp4=pp3[3];
 	fprintf(stderr,"transin1[%p]: {%ld/%ld} ",pp4,pp3[2],pp3[0]);
 //	pp4[0],pp4[1],pp4[2],pp4[3],
 //	pp4[4],pp4[5],pp4[6],pp4[7]);
-	
+
 	memset(temp,0x77,128*4);
-	
+
 	memcpy(temp,pp4,8*(pp3[2]+1));
 	for(i=0;i<=pp3[2];i++){
 	    fprintf(stderr," %p(%ld)",temp[i*2],temp[i*2+1]);
 	}
         fprintf(stderr,"\n");
-	
+
 
 	pp3[3]=pp4=temp;
-	
+
 //	pp4[2]=
 //	pp4[3]=
 //	pp4[4]=NULL;
-	
+
 	//pp4[6]=pp4[5];
-	
+
 	v=p5;
 /*	fprintf(stderr, "rvyuvMain=0x%0x\n", v);
 	v+=0x3c;
@@ -406,7 +406,7 @@ ulong RV20toYUV420Transform(ulong p1,ulong p2,ulong p3,ulong p4,ulong p5) {
 		fprintf(stderr, "[$+178h]=0x%0x\n", v);
 		hexdump(v, 128);
 	}
-*/	
+*/
 //	tic();
 	result=(*rvyuvTransform)(p1,p2,p3,p4,p5);
 //	toc();

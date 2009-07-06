@@ -90,10 +90,10 @@ typedef struct
     uint32_t		dwInitialFrames;
     uint32_t		dwStreams;
     uint32_t		dwSuggestedBufferSize;
-    
+
     uint32_t		dwWidth;
     uint32_t		dwHeight;
-    
+
     uint32_t		dwReserved[4];
 } MainAVIHeader;
 
@@ -111,7 +111,7 @@ typedef struct {
     uint16_t		wPriority;
     uint16_t		wLanguage;
     uint32_t		dwInitialFrames;
-    uint32_t		dwScale;	
+    uint32_t		dwScale;
     uint32_t		dwRate;	/* dwRate / dwScale == samples/second */
     uint32_t		dwStart;
     uint32_t		dwLength; /* In units above... */
@@ -151,7 +151,7 @@ typedef struct avistdindex_entry {
     uint32_t dwSize;             // bit 31 is set if this is NOT a keyframe
 } avistdindex_entry;
 
-// Standard index 
+// Standard index
 typedef struct __attribute__((packed)) avistdindex_chunk {
     char           fcc[4];       // ix##
     uint32_t  dwSize;            // size of this chunk
@@ -164,7 +164,7 @@ typedef struct __attribute__((packed)) avistdindex_chunk {
     uint32_t  dwReserved3;       // must be 0
     avistdindex_entry *aIndex;   // the actual frames
 } avistdindex_chunk;
-    
+
 
 // Base Index Form 'indx'
 typedef struct avisuperindex_chunk {

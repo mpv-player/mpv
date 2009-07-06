@@ -82,7 +82,7 @@ parseQTState_video(QuickTimeGenericRTPSource::QTState const& qtState,
 static Boolean
 parseQTState_audio(QuickTimeGenericRTPSource::QTState const& qtState,
 		   unsigned& fourcc, unsigned& numChannels); // forward
-		       
+
 static BITMAPINFOHEADER * insertVideoExtradata(BITMAPINFOHEADER *bih,
                                                unsigned char * extraData,
                                                unsigned size)
@@ -111,7 +111,7 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
   sh_video->bih = bih;
   demux_stream_t* d_video = demuxer->video;
   d_video->sh = sh_video; sh_video->ds = d_video;
-  
+
   // Map known video MIME types to the BITMAPINFOHEADER parameters
   // that this program uses.  (Note that not all types need all
   // of the parameters to be set.)
@@ -187,11 +187,11 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
       while (pos+8 < endpos) {
         unsigned atomLength = pos[0]<<24 | pos[1]<<16 | pos[2]<<8 | pos[3];
         if (atomLength == 0 || atomLength > endpos-pos) break;
-        if ((!memcmp(pos+4, "avcC", 4) && fourcc==mmioFOURCC('a','v','c','1') || 
-             !memcmp(pos+4, "esds", 4) || 
+        if ((!memcmp(pos+4, "avcC", 4) && fourcc==mmioFOURCC('a','v','c','1') ||
+             !memcmp(pos+4, "esds", 4) ||
              !memcmp(pos+4, "SMI ", 4) && fourcc==mmioFOURCC('S','V','Q','3')) &&
             atomLength > 8) {
-          sh_video->bih = bih = 
+          sh_video->bih = bih =
               insertVideoExtradata(bih, pos+8, atomLength-8);
           break;
         }
@@ -217,7 +217,7 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
   demux_stream_t* d_audio = demuxer->audio;
   d_audio->sh = sh_audio; sh_audio->ds = d_audio;
   d_audio->id = sh_audio->aid;
-  
+
   wf->nChannels = subsession->numChannels();
 
   // Map known audio MIME types to the WAVEFORMATEX parameters
@@ -358,7 +358,7 @@ static void needVideoFrameRate(demuxer_t* demuxer,
     sh_video->frametime = 1.0f/fps;
     return;
   }
-  
+
   // Keep looking at incoming frames until we see two with different,
   // non-zero "pts" timestamps:
   unsigned char* packetData; unsigned packetDataLen;

@@ -160,7 +160,7 @@ for lang in `grep 'DOC_LANGS =' ../../config.mak|cut -d= -f2`; do
      ************************************************** -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
     "$_dtd"
-[ 
+[
 EOF
 
   for file in `find $lang en -name \*.xml -exec basename \{\} \; | sort -u`; do

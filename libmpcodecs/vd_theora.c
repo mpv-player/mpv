@@ -31,7 +31,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	    return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
-    
+
     return CONTROL_UNKNOWN;
 }
 
@@ -55,7 +55,7 @@ static int init(sh_video_t *sh){
     switch(sh->codec->outfmt[sh->outfmtidx])
     {
        case IMGFMT_YV12: /* well, this should work... */ break;
-       default: 
+       default:
 	  mp_msg (MSGT_DECVIDEO,MSGL_ERR,"Unsupported out_fmt: 0x%X\n",
 		  sh->codec->outfmt[sh->outfmtidx]);
 	  return 0;
@@ -71,7 +71,7 @@ static int init(sh_video_t *sh){
 
        theora_info_init(&context->inf);
        theora_comment_init(&context->cc);
-       
+
        /* Read all header packets, pass them to theora_decode_header. */
        for (i = 0; i < THEORA_NUM_HEADER_PACKETS; i++)
        {
@@ -112,13 +112,13 @@ static int init(sh_video_t *sh){
        sh->aspect = (float)(context->inf.aspect_numerator * context->inf.frame_width)/
           (context->inf.aspect_denominator * context->inf.frame_height);
     }
-    
+
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Theora video init ok!\n");
 
     return mpcodecs_config_vo (sh,context->inf.frame_width,context->inf.frame_height,IMGFMT_YV12);
 }
 
-/* 
+/*
  * uninit driver
  */
 static void uninit(sh_video_t *sh)
@@ -137,7 +137,7 @@ static void uninit(sh_video_t *sh)
 /*
  * decode frame
  */
-static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags) 
+static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 {
    theora_struct_t *context = (theora_struct_t *)sh->context;
    int errorCode = 0;
@@ -175,6 +175,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
     mpi->stride[1]=yuv.uv_stride;
     mpi->planes[2]=yuv.v;
     mpi->stride[2]=yuv.uv_stride;
-   
+
     return mpi;
 }

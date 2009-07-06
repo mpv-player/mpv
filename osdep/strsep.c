@@ -53,6 +53,6 @@ char *strsep(char **stringp, const char *delim) {
   }
   else
     *stringp = NULL;
- 
+
   return begin;
 }

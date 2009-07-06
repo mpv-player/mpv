@@ -1,5 +1,5 @@
 
-How work the playtree ? 
+How work the playtree ?
 
 Good question, I try to explain but note that it's the first doc
 I write :)
@@ -25,7 +25,7 @@ struct play_tree {
 
 The play_tree_t* hold the links in the 4 directions, the params hold
 all parameters of this entry, loop is obvious (loop < 0 mean infint loop),
-files hold all the files of this entry and entry_type obviously tell the 
+files hold all the files of this entry and entry_type obviously tell the
 type of this entry (Node, file, dvd, vcd ot tv).
 
 An entry can hold more than one file, why ?
@@ -47,7 +47,7 @@ be raised).
 Then to create a list of entry you should use play_tree_append_entry,
 play_tree_prepend_entry or play_tree_insert_entry.
 In all this function you can use any entry of the the list as first argument,
-no need that it's the first one. The same apply when you set the child of a node, 
+no need that it's the first one. The same apply when you set the child of a node,
 the child argument can be any entry in a list.
 To remove an entry from the tree use play_tree_remove. If the second arg (free_it)
 is true it will also free it, if the entry should be freed and the third
@@ -103,7 +103,7 @@ iter->num_files and which one it returned using iter->file.
 In case the entry is a DVD, VCD or TV channel the returned string is not a filename
 but "DVD title x", "VCD track x" or "TV channel x".
 To distinc those case from a normal file you can check iter->tree->entry_type.
-It will contain one of PLAY_TREE_ENTRY_DVD, PLAY_TREE_ENTRY_VCD, 
+It will contain one of PLAY_TREE_ENTRY_DVD, PLAY_TREE_ENTRY_VCD,
 PLAY_TREE_ENTRY_TV or PLAY_TREE_ENTRY_FILE.
 
 If you need to make some check with the iter, such as will next entry be valid, etc

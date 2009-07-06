@@ -4,7 +4,7 @@ use POSIX;
 
 sub round {
   my $v = shift;
-  
+
   return floor($v + 0.5);
 }
 

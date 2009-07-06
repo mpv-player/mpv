@@ -255,7 +255,7 @@ Ta opcja jest też dobrym kandydatem do włożenie w plik konfiguracyjny
 (szczegóły na stronie man).
 Drugi to stworzenie dowiązania symbolicznego (symlink) o nazwie
 <filename>subfont.ttf</filename> wskazującego na wybraną czcionkę.
-Albo 
+Albo
 <screen>
 ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> ~/.mplayer/subfont.ttf
 </screen>
@@ -268,7 +268,7 @@ ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> $PREFI
 <para>
 Jeśli <application>MPlayer</application> był skompilowany z obsługą
 <systemitem class="library">fontconfig</systemitem>, te metody nie zadziałają,
-zamiast tego <option>-font</option> oczekuje nazwy czcionki według 
+zamiast tego <option>-font</option> oczekuje nazwy czcionki według
 <systemitem class="library">fontconfig</systemitem> i domyślnie bierze
 czcionkę sans-serif.
 Przykład:

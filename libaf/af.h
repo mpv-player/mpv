@@ -33,7 +33,7 @@
 #undef AF_INIT_TYPE
 #define AF_INIT_TYPE \
   ((gCpuCaps.has3DNow || gCpuCaps.hasSSE)?AF_INIT_FAST:AF_INIT_SLOW)
-#endif 
+#endif
 
 struct af_instance_s;
 
@@ -59,8 +59,8 @@ typedef struct af_data_s
 #define AF_FLAGS_NOT_REENTRANT 	0x00000001
 
 /* Audio filter information not specific for current instance, but for
-   a specific filter */ 
-typedef struct af_info_s 
+   a specific filter */
+typedef struct af_info_s
 {
   const char *info;
   const char *name;
@@ -80,7 +80,7 @@ typedef struct af_instance_s
   void* setup;	  // setup data for this specific instance and filter
   af_data_t* data; // configuration for outgoing data stream
   struct af_instance_s* next;
-  struct af_instance_s* prev;  
+  struct af_instance_s* prev;
   double delay; /* Delay caused by the filter, in units of bytes read without
 		 * corresponding output */
   double mul; /* length multiplier: how much does this instance change
@@ -100,7 +100,7 @@ extern int* af_cpu_speed;
 #define AF_INIT_FLOAT		0x00000004
 #define AF_INIT_FORMAT_MASK	0x00000004
 
-// Default init type 
+// Default init type
 #ifndef AF_INIT_TYPE
 #if HAVE_SSE || HAVE_AMD3DNOW
 #define AF_INIT_TYPE (af_cpu_speed?*af_cpu_speed:AF_INIT_FAST)
@@ -194,7 +194,7 @@ void af_remove(af_stream_t* s, af_instance_t* af);
  * \brief find filter in chain by name
  * \param name name of the filter to find
  * \return first filter with right name or NULL if not found
- * 
+ *
  * This function is used for finding already initialized filters
  */
 af_instance_t* af_get(af_stream_t* s, char* name);
@@ -288,7 +288,7 @@ int af_from_ms(int n, float* in, int* out, int rate, float mi, float ma);
  * \param rate sample rate
  * \return AF_ERROR on error, AF_OK otherwise
  */
-int af_to_ms(int n, int* in, float* out, int rate); 
+int af_to_ms(int n, int* in, float* out, int rate);
 
 /**
  * \brief test if output format matches
@@ -317,7 +317,7 @@ void af_help(void);
  * \brief fill the missing parameters in the af_data_t structure
  * \param data structure to fill
  * \ingroup af_filter
- * 
+ *
  * Currently only sets bps based on format
  */
 void af_fix_parameters(af_data_t *data);
@@ -344,7 +344,7 @@ void af_fix_parameters(af_data_t *data);
 #endif
 
 #ifndef sign
-#define sign(a) (((a)>0)?(1):(-1)) 
+#define sign(a) (((a)>0)?(1):(-1))
 #endif
 
 #ifndef lrnd

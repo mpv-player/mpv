@@ -83,7 +83,7 @@ glyph_hash_val_t* cache_find_glyph(glyph_hash_key_t* key);
 void ass_glyph_cache_reset(void);
 void ass_glyph_cache_done(void);
 
-typedef struct hashmap_s hashmap_t; 
+typedef struct hashmap_s hashmap_t;
 typedef void (*hashmap_item_dtor_t)(void* key, size_t key_size, void* value, size_t value_size);
 typedef int (*hashmap_key_compare_t)(void* key1, void* key2, size_t key_size);
 typedef unsigned (*hashmap_hash_t)(void* key, size_t key_size);

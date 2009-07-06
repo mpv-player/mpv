@@ -32,17 +32,17 @@ typedef struct MapDevRequest
 #define FILE_DEVICE_UNKNOWN             0x00000022
 #define METHOD_NEITHER                  3
 
-    
+
 int IsWinNT(void) {
   OSVERSIONINFO OSVersionInfo;
   OSVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
   GetVersionEx(&OSVersionInfo);
   return OSVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_NT;
-}  
+}
 
-static HANDLE hDriver = INVALID_HANDLE_VALUE;  
-    
-    
+static HANDLE hDriver = INVALID_HANDLE_VALUE;
+
+
 /* Memory Map a piece of Real Memory */
 void *map_phys_mem(unsigned long base, unsigned long size) {
   if(!IsWinNT()){

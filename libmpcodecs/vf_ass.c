@@ -89,12 +89,12 @@ static int config(struct vf_instance* vf,
 	if (!opts->screen_size_x && !opts->screen_size_y) {
 		d_width = d_width * vf->priv->outw / width;
 		d_height = d_height * vf->priv->outh / height;
-	} 
+	}
 
 	vf->priv->planes[1] = malloc(vf->priv->outw * vf->priv->outh);
 	vf->priv->planes[2] = malloc(vf->priv->outw * vf->priv->outh);
 	vf->priv->line_limits = malloc((vf->priv->outh + 1) / 2 * sizeof(*vf->priv->line_limits));
-	
+
 	if (vf->priv->ass_priv) {
 		ass_configure(vf->priv->ass_priv, vf->priv->outw, vf->priv->outh, 0);
 		ass_set_aspect_ratio(vf->priv->ass_priv, ((double)d_width) / d_height);
@@ -108,10 +108,10 @@ static void get_image(struct vf_instance* vf, mp_image_t *mpi)
 	if(mpi->type == MP_IMGTYPE_IPB) return;
 	if(mpi->flags & MP_IMGFLAG_PRESERVE) return;
 	if(mpi->imgfmt != vf->priv->outfmt) return; // colorspace differ
-	    
+
 	// width never changes, always try full DR
 	mpi->priv = vf->dmpi = vf_get_image(vf->next, mpi->imgfmt,
-			mpi->type, mpi->flags | MP_IMGFLAG_READABLE, 
+			mpi->type, mpi->flags | MP_IMGFLAG_READABLE,
 			vf->priv->outw,
 			vf->priv->outh);
 
@@ -233,7 +233,7 @@ static void copy_from_image(struct vf_instance* vf)
 	for (pl = 1; pl < 3; ++pl) {
 		int dst_stride = vf->priv->outw;
 		int src_stride = vf->dmpi->stride[pl];
-		
+
 		unsigned char* src = vf->dmpi->planes[pl];
 		unsigned char* dst = vf->priv->planes[pl];
 		for (int i = 0; i < (vf->priv->outh + 1) / 2; i++) {
@@ -262,7 +262,7 @@ static void copy_to_image(struct vf_instance* vf)
 	for (pl = 1; pl < 3; ++pl) {
 		int dst_stride = vf->dmpi->stride[pl];
 		int src_stride = vf->priv->outw;
-		
+
 		unsigned char* dst = vf->dmpi->planes[pl];
 		unsigned char* src = vf->priv->planes[pl];
 		unsigned char* src_next = vf->priv->planes[pl] + src_stride;
@@ -307,7 +307,7 @@ static void my_draw_bitmap(struct vf_instance* vf, unsigned char* bitmap, int bi
 		dsty += dmpi->stride[0];
 		dstu += vf->priv->outw;
 		dstv += vf->priv->outw;
-	} 
+	}
 }
 
 static int render_frame(struct vf_instance* vf, mp_image_t *mpi, const ass_image_t* img)
@@ -333,7 +333,7 @@ static int put_image(struct vf_instance* vf, mp_image_t *mpi, double pts)
 	ass_image_t* images = 0;
 	if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE))
 		images = ass_mp_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5, NULL);
-	
+
 	prepare_image(vf, mpi);
 	if (images) render_frame(vf, mpi, images);
 
@@ -394,10 +394,10 @@ static int open(vf_instance_t *vf, char* args)
 		uninit(vf);
 		return 0;
 	}
-	
+
 	if (vf->priv->auto_insert)
 		mp_msg(MSGT_ASS, MSGL_INFO, "[ass] auto-open\n");
-	
+
 	vf->config = config;
 	vf->query_format = query_format;
 	vf->uninit = uninit;
@@ -429,4 +429,3 @@ const vf_info_t vf_info_ass = {
 	open,
 	&vf_opts
 };
-

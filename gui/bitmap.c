@@ -34,9 +34,9 @@ static int pngRead( unsigned char * fname,txSample * bf )
  int             len;
  AVCodecContext *avctx;
  AVFrame        *frame;
- 
+
  FILE *fp=fopen( fname,"rb" );
- if ( !fp ) 
+ if ( !fp )
   {
    mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png] file read error ( %s )\n",fname );
    return 1;
@@ -108,10 +108,10 @@ static int conv24to32( txSample * bf )
 static void Normalize( txSample * bf )
 {
  int           i;
-#ifndef WORDS_BIGENDIAN 
+#ifndef WORDS_BIGENDIAN
  for ( i=0;i < (int)bf->ImageSize;i+=4 ) bf->Image[i+3]=0;
 #else
- for ( i=0;i < (int)bf->ImageSize;i+=4 ) bf->Image[i]=0; 
+ for ( i=0;i < (int)bf->ImageSize;i+=4 ) bf->Image[i]=0;
 #endif
 }
 
@@ -146,7 +146,7 @@ int bpRead( char * fname, txSample * bf )
 {
  fname=fExist( fname );
  if ( fname == NULL ) return -2;
- if ( pngRead( fname,bf ) ) 
+ if ( pngRead( fname,bf ) )
   {
    mp_dbg( MSGT_GPLAYER,MSGL_FATAL,"[bitmap] unknown file type ( %s )\n",fname );
    return -5;
