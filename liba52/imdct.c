@@ -72,24 +72,24 @@ static const int pm128[128] attribute_used __attribute__((aligned(16))) =
 	5, 21, 37, 53, 69, 85, 101, 117, 13, 29, 45,  61, 77, 93, 109, 125,
 	3, 19, 35, 51, 67, 83,  99, 115, 11, 43, 75, 107, 27, 59,  91, 123,
 	7, 23, 39, 55, 71, 87, 103, 119, 15, 31, 47,  63, 79, 95, 111, 127
-}; 
+};
 
 static uint8_t attribute_used bit_reverse_512[] = {
-	0x00, 0x40, 0x20, 0x60, 0x10, 0x50, 0x30, 0x70, 
-	0x08, 0x48, 0x28, 0x68, 0x18, 0x58, 0x38, 0x78, 
-	0x04, 0x44, 0x24, 0x64, 0x14, 0x54, 0x34, 0x74, 
-	0x0c, 0x4c, 0x2c, 0x6c, 0x1c, 0x5c, 0x3c, 0x7c, 
-	0x02, 0x42, 0x22, 0x62, 0x12, 0x52, 0x32, 0x72, 
-	0x0a, 0x4a, 0x2a, 0x6a, 0x1a, 0x5a, 0x3a, 0x7a, 
-	0x06, 0x46, 0x26, 0x66, 0x16, 0x56, 0x36, 0x76, 
-	0x0e, 0x4e, 0x2e, 0x6e, 0x1e, 0x5e, 0x3e, 0x7e, 
-	0x01, 0x41, 0x21, 0x61, 0x11, 0x51, 0x31, 0x71, 
-	0x09, 0x49, 0x29, 0x69, 0x19, 0x59, 0x39, 0x79, 
-	0x05, 0x45, 0x25, 0x65, 0x15, 0x55, 0x35, 0x75, 
-	0x0d, 0x4d, 0x2d, 0x6d, 0x1d, 0x5d, 0x3d, 0x7d, 
-	0x03, 0x43, 0x23, 0x63, 0x13, 0x53, 0x33, 0x73, 
-	0x0b, 0x4b, 0x2b, 0x6b, 0x1b, 0x5b, 0x3b, 0x7b, 
-	0x07, 0x47, 0x27, 0x67, 0x17, 0x57, 0x37, 0x77, 
+	0x00, 0x40, 0x20, 0x60, 0x10, 0x50, 0x30, 0x70,
+	0x08, 0x48, 0x28, 0x68, 0x18, 0x58, 0x38, 0x78,
+	0x04, 0x44, 0x24, 0x64, 0x14, 0x54, 0x34, 0x74,
+	0x0c, 0x4c, 0x2c, 0x6c, 0x1c, 0x5c, 0x3c, 0x7c,
+	0x02, 0x42, 0x22, 0x62, 0x12, 0x52, 0x32, 0x72,
+	0x0a, 0x4a, 0x2a, 0x6a, 0x1a, 0x5a, 0x3a, 0x7a,
+	0x06, 0x46, 0x26, 0x66, 0x16, 0x56, 0x36, 0x76,
+	0x0e, 0x4e, 0x2e, 0x6e, 0x1e, 0x5e, 0x3e, 0x7e,
+	0x01, 0x41, 0x21, 0x61, 0x11, 0x51, 0x31, 0x71,
+	0x09, 0x49, 0x29, 0x69, 0x19, 0x59, 0x39, 0x79,
+	0x05, 0x45, 0x25, 0x65, 0x15, 0x55, 0x35, 0x75,
+	0x0d, 0x4d, 0x2d, 0x6d, 0x1d, 0x5d, 0x3d, 0x7d,
+	0x03, 0x43, 0x23, 0x63, 0x13, 0x53, 0x33, 0x73,
+	0x0b, 0x4b, 0x2b, 0x6b, 0x1b, 0x5b, 0x3b, 0x7b,
+	0x07, 0x47, 0x27, 0x67, 0x17, 0x57, 0x37, 0x77,
 	0x0f, 0x4f, 0x2f, 0x6f, 0x1f, 0x5f, 0x3f, 0x7f};
 
 static uint8_t fftorder[] = {
@@ -120,8 +120,8 @@ static sample_t __attribute__((aligned(16))) xcos1[128];
 static sample_t __attribute__((aligned(16))) xsin1[128];
 
 #if ARCH_X86 || ARCH_X86_64
-// NOTE: SSE needs 16byte alignment or it will segfault 
-// 
+// NOTE: SSE needs 16byte alignment or it will segfault
+//
 static float __attribute__((aligned(16))) sseSinCos1c[256];
 static float __attribute__((aligned(16))) sseSinCos1d[256];
 static float attribute_used __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
@@ -328,7 +328,7 @@ void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias)
     sample_t t_r, t_i, a_r, a_i, b_r, b_i, w_1, w_2;
     const sample_t * window = a52_imdct_window;
     complex_t buf[128];
-	
+
     for (i = 0; i < 128; i++) {
 	k = fftorder[i];
 	t_r = pre1[i].real;
@@ -417,17 +417,17 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
   sample_t *data_ptr;
   sample_t *delay_ptr;
   sample_t *window_ptr;
-	
+
   /* 512 IMDCT with source and dest data in 'data' */
-	
+
   /* Pre IFFT complex multiply plus IFFT cmplx conjugate & reordering*/
   for( i=0; i < 128; i++) {
-    /* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
+    /* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */
     int j= bit_reverse_512[i];
     buf[i].real =         (data[256-2*j-1] * xcos1[j])  -  (data[2*j]       * xsin1[j]);
     buf[i].imag = -1.0 * ((data[2*j]       * xcos1[j])  +  (data[256-2*j-1] * xsin1[j]));
   }
-  
+
   /* 1. iteration */
   for(i = 0; i < 128; i += 2) {
 #if 0
@@ -440,7 +440,7 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
     buf[i+1].real = tmp_a_r - tmp_b_r;
     buf[i+1].imag =  tmp_a_i - tmp_b_i;
 #else
-    vector float temp, bufv; 
+    vector float temp, bufv;
 
     bufv = vec_ld(i << 3, (float*)buf);
     temp = vec_perm(bufv, bufv, vcprm(2,3,0,1));
@@ -448,7 +448,7 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
     vec_st(bufv, i << 3, (float*)buf);
 #endif
   }
-        
+
   /* 2. iteration */
   // Note w[1]={{1,0}, {0,-1}}
   for(i = 0; i < 128; i += 4) {
@@ -472,7 +472,7 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
     buf[i+3].imag =  tmp_a_i + tmp_b_i;
 #else
     vector float buf01, buf23, temp1, temp2;
-	
+
     buf01 = vec_ld((i + 0) << 3, (float*)buf);
     buf23 = vec_ld((i + 2) << 3, (float*)buf);
     buf23 = vec_perm(buf23,buf23,vcprm(0,1,3,2));
@@ -540,14 +540,14 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
     buf45 = vec_ld((i + 4) << 3, (float*)buf);
     buf67 = vec_ld((i + 6) << 3, (float*)buf);
     buf67 = vec_perm(buf67, buf67, vcprm(1,0,2,3));
-	
+
     vec_st(vec_add(buf01, buf45), (i + 0) << 3, (float*)buf);
     vec_st(vec_madd(buf67, vcii(p,n,p,p), buf23), (i + 2) << 3, (float*)buf);
     vec_st(vec_sub(buf01, buf45), (i + 4) << 3, (float*)buf);
     vec_st(vec_nmsub(buf67, vcii(p,n,p,p), buf23), (i + 6) << 3, (float*)buf);
 #endif
   }
-    
+
   /* 4-7. iterations */
   for (m=3; m < 7; m++) {
     two_m = (1 << m);
@@ -600,10 +600,10 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
         vecq = vec_madd(temp4, vcii(n,p,n,p), temp3);
         // then butterfly with buf[p] and buf[p+1]
         vecp = vec_ld(p << 3, (float*)buf);
-        
+
         temp1 = vec_add(vecp, vecq);
         temp2 = vec_sub(vecp, vecq);
-                
+
         vec_st(temp1, p << 3, (float*)buf);
         vec_st(temp2, q << 3, (float*)buf);
 #endif
@@ -660,7 +660,7 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
     tempCS01 = vec_perm(cosv, sinv, vcprm(s0,0,s1,1));
     temp2 = vec_madd(temp1133, tempCS01, vczero);
     bufv_0 = vec_madd(temp2, vcii(p,n,p,n), temp1);
-    
+
     vec_st(bufv_0, (i + 0) << 3, (float*)buf);
 
     /* idem with bufv_2 and high-order cosv/sinv */
@@ -674,36 +674,36 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
     bufv_2 = vec_madd(temp2, vcii(p,n,p,n), temp1);
 
     vec_st(bufv_2, (i + 2) << 3, (float*)buf);
-    
+
 #endif
   }
-  
+
   data_ptr = data;
   delay_ptr = delay;
   window_ptr = a52_imdct_window;
 
   /* Window and convert to real valued signal */
-  for(i=0; i< 64; i++) { 
-    *data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
-    *data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
+  for(i=0; i< 64; i++) {
+    *data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias;
+    *data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias;
   }
-    
-  for(i=0; i< 64; i++) { 
-    *data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
-    *data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
+
+  for(i=0; i< 64; i++) {
+    *data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias;
+    *data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias;
   }
-    
+
   /* The trailing edge of the window goes into the delay line */
   delay_ptr = delay;
 
-  for(i=0; i< 64; i++) { 
-    *delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
-    *delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
+  for(i=0; i< 64; i++) {
+    *delay_ptr++  = -buf[64+i].real   * *--window_ptr;
+    *delay_ptr++  =  buf[64-i-1].imag * *--window_ptr;
   }
-    
+
   for(i=0; i<64; i++) {
-    *delay_ptr++  =  buf[i].imag       * *--window_ptr; 
-    *delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
+    *delay_ptr++  =  buf[i].imag       * *--window_ptr;
+    *delay_ptr++  = -buf[128-i-1].real * *--window_ptr;
   }
 }
 #endif
@@ -716,8 +716,8 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
 #define HAVE_AMD3DNOW 1
 #include "srfftp_3dnow.h"
 
-const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = {{ 0x00000000UL, 0x80000000UL }}; 
-const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = {{ 0x80000000UL, 0x00000000UL }}; 
+const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = {{ 0x00000000UL, 0x80000000UL }};
+const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = {{ 0x80000000UL, 0x00000000UL }};
 const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
 
 #undef HAVE_AMD3DNOWEXT
@@ -746,9 +746,9 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     sample_t *data_ptr;
     sample_t *delay_ptr;
     sample_t *window_ptr;
-	
+
     /* 512 IMDCT with source and dest data in 'data' */
-    /* see the c version (dct_do_512()), its allmost identical, just in C */ 
+    /* see the c version (dct_do_512()), its allmost identical, just in C */
 
     /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
     /* Bit reversed shuffling */
@@ -809,7 +809,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	}
     }
 */
-    
+
     /* 1. iteration */
 	// Note w[0][0]={1,0}
 	__asm__ volatile(
@@ -831,7 +831,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		:: "g" (buf), "r" (buf + 128)
 		: "%"REG_S
 	);
-        
+
     /* 2. iteration */
 	// Note w[1]={{1,0}, {0,-1}}
 	__asm__ volatile(
@@ -863,8 +863,8 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
  Note sseW2+48={1,-1,sqrt(2),-sqrt(2))
 */
 	__asm__ volatile(
-		"movaps 48+"MANGLE(sseW2)", %%xmm6\n\t" 
-		"movaps 16+"MANGLE(sseW2)", %%xmm7\n\t" 
+		"movaps 48+"MANGLE(sseW2)", %%xmm6\n\t"
+		"movaps 16+"MANGLE(sseW2)", %%xmm7\n\t"
 		"xorps %%xmm5, %%xmm5		\n\t"
 		"xorps %%xmm2, %%xmm2		\n\t"
 		"mov %0, %%"REG_S"		\n\t"
@@ -890,10 +890,10 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"addps %%xmm1, %%xmm3		\n\t"
 		"subps %%xmm4, %%xmm0		\n\t"
 		"subps %%xmm5, %%xmm1		\n\t"
-		"movaps %%xmm2, (%%"REG_S")	\n\t" 
-		"movaps %%xmm3, 16(%%"REG_S")	\n\t" 
-		"movaps %%xmm0, 32(%%"REG_S")	\n\t" 
-		"movaps %%xmm1, 48(%%"REG_S")	\n\t" 
+		"movaps %%xmm2, (%%"REG_S")	\n\t"
+		"movaps %%xmm3, 16(%%"REG_S")	\n\t"
+		"movaps %%xmm0, 32(%%"REG_S")	\n\t"
+		"movaps %%xmm1, 48(%%"REG_S")	\n\t"
 		"add $64, %%"REG_S"	\n\t"
 		"cmp %1, %%"REG_S"	\n\t"
 		" jb 1b			\n\t"
@@ -927,7 +927,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"movaps %%xmm1, (%%"REG_S", %%"REG_D")	\n\t"
 		"movaps %%xmm0, (%%"REG_d", %%"REG_D")	\n\t"
 		"add $16, %%"REG_D"			\n\t"
-		"cmp %3, %%"REG_D"			\n\t" //FIXME (opt) count against 0 
+		"cmp %3, %%"REG_D"			\n\t" //FIXME (opt) count against 0
 		"jb 2b					\n\t"
 		"add %2, %%"REG_S"			\n\t"
 		"cmp %1, %%"REG_S"			\n\t"
@@ -954,9 +954,9 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		" jnz 1b				\n\t"
 		:: "r" (buf+128)
 		: "%"REG_S
-	);   
+	);
 
-	
+
     data_ptr = data;
     delay_ptr = delay;
     window_ptr = a52_imdct_window;
@@ -980,7 +980,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
 		"add  $16, %%"REG_S"			\n\t"
 		"sub  $16, %%"REG_D"			\n\t"
-		"cmp  $512, %%"REG_S"			\n\t" 
+		"cmp  $512, %%"REG_S"			\n\t"
 		" jb 1b					\n\t"
 		:: "r" (buf+64), "r" (data_ptr), "r" (delay_ptr), "m" (bias)
 		: "%"REG_S, "%"REG_D
@@ -988,7 +988,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	data_ptr+=128;
 	delay_ptr+=128;
 //	window_ptr+=128;
-	
+
 	__asm__ volatile(
 		"mov $1024, %%"REG_D"			\n\t"  // 512
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
@@ -1007,7 +1007,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
 		"add $16, %%"REG_S"			\n\t"
 		"sub $16, %%"REG_D"			\n\t"
-		"cmp $512, %%"REG_S"			\n\t" 
+		"cmp $512, %%"REG_S"			\n\t"
 		" jb 1b					\n\t"
 		:: "r" (buf), "r" (data_ptr), "r" (delay_ptr), "m" (bias)
 		: "%"REG_S, "%"REG_D
@@ -1025,21 +1025,21 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"1:					\n\t"
 		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? ? A
 		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? ? C
-		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // D ? ? C 
-		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // B ? ? A 
+		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // D ? ? C
+		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // B ? ? A
 		"shufps $0xCC, %%xmm1, %%xmm0		\n\t" // D C B A
 		"mulps 1024+"MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
 		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
 		"add $16, %%"REG_S"			\n\t"
 		"sub $16, %%"REG_D"			\n\t"
-		"cmp $512, %%"REG_S"			\n\t" 
+		"cmp $512, %%"REG_S"			\n\t"
 		" jb 1b					\n\t"
 		:: "r" (buf+64), "r" (delay_ptr)
 		: "%"REG_S, "%"REG_D
 	);
 	delay_ptr+=128;
 //	window_ptr-=128;
-	
+
 	__asm__ volatile(
 		"mov $1024, %%"REG_D"			\n\t"  // 1024
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
@@ -1047,14 +1047,14 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"1:					\n\t"
 		"movlps (%0, %%"REG_S"), %%xmm0	\n\t" // ? ? A ?
 		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? C ?
-		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // ? D C ? 
-		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // ? B A ? 
+		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // ? D C ?
+		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // ? B A ?
 		"shufps $0x99, %%xmm1, %%xmm0		\n\t" // D C B A
 		"mulps 1536+"MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
 		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
 		"add $16, %%"REG_S"			\n\t"
 		"sub $16, %%"REG_D"			\n\t"
-		"cmp $512, %%"REG_S"			\n\t" 
+		"cmp $512, %%"REG_S"			\n\t"
 		" jb 1b					\n\t"
 		:: "r" (buf), "r" (delay_ptr)
 		: "%"REG_S, "%"REG_D
@@ -1088,7 +1088,7 @@ void a52_imdct_256(sample_t * data, sample_t * delay, sample_t bias)
     /* Post IFFT complex multiply */
     /* Window and convert to real valued signal */
     for (i = 0; i < 32; i++) {
-	/* y1[n] = z1[n] * (xcos2[n] + j * xs in2[n]) ; */ 
+	/* y1[n] = z1[n] * (xcos2[n] + j * xs in2[n]) ; */
 	t_r = post2[i].real;
 	t_i = post2[i].imag;
 
@@ -1209,12 +1209,12 @@ void a52_imdct_init (uint32_t mm_accel)
 	    sseSinCos1c[2*i+0]= xcos1[i];
 	    sseSinCos1c[2*i+1]= -xcos1[i];
 	    sseSinCos1d[2*i+0]= xsin1[i];
-	    sseSinCos1d[2*i+1]= xsin1[i];	
+	    sseSinCos1d[2*i+1]= xsin1[i];
 	}
 	for (i = 1; i < 7; i++) {
 	    j = 1 << i;
 	    for (k = 0; k < j; k+=2) {
-	    
+
 	    	sseW[i][4*k + 0] = w[i][k+0].real;
 	    	sseW[i][4*k + 1] = w[i][k+0].real;
 	    	sseW[i][4*k + 2] = w[i][k+1].real;
@@ -1223,15 +1223,15 @@ void a52_imdct_init (uint32_t mm_accel)
 	    	sseW[i][4*k + 4] = -w[i][k+0].imag;
 	    	sseW[i][4*k + 5] = w[i][k+0].imag;
 	    	sseW[i][4*k + 6] = -w[i][k+1].imag;
-	    	sseW[i][4*k + 7] = w[i][k+1].imag;	    
-	    	
+	    	sseW[i][4*k + 7] = w[i][k+1].imag;
+
 	//we multiply more or less uninitalized numbers so we need to use exactly 0.0
 		if(k==0)
 		{
 //			sseW[i][4*k + 0]= sseW[i][4*k + 1]= 1.0;
 			sseW[i][4*k + 4]= sseW[i][4*k + 5]= 0.0;
 		}
-		
+
 		if(2*k == j)
 		{
 			sseW[i][4*k + 0]= sseW[i][4*k + 1]= 0.0;
@@ -1243,9 +1243,9 @@ void a52_imdct_init (uint32_t mm_accel)
 	for(i=0; i<128; i++)
 	{
 		sseWindow[2*i+0]= -a52_imdct_window[2*i+0];
-		sseWindow[2*i+1]=  a52_imdct_window[2*i+1];	
+		sseWindow[2*i+1]=  a52_imdct_window[2*i+1];
 	}
-	
+
 	for(i=0; i<64; i++)
 	{
 		sseWindow[256 + 2*i+0]= -a52_imdct_window[254 - 2*i+1];

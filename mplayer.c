@@ -460,7 +460,7 @@ static char *get_demuxer_info(struct MPContext *mpctx, char *tag) {
     return NULL;
 
   for (n = 0; info[2*n] != NULL ; n++)
-    if (!strcmp (info[2*n], tag))
+    if (!strcasecmp (info[2*n], tag))
       break;
 
   return info[2*n+1] ? strdup (info[2*n+1]) : NULL;
@@ -3941,7 +3941,8 @@ if (mpctx->global_sub_size) {
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels);
   }
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2lf\n", demuxer_get_time_length(mpctx->demuxer));
-  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_SEEKABLE=%d\n", mpctx->stream->seek ? 1 : 0);
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_SEEKABLE=%d\n",
+         mpctx->stream->seek && (!mpctx->demuxer || mpctx->demuxer->seekable));
   if (mpctx->demuxer) {
       if (mpctx->demuxer->num_chapters == 0)
           stream_control(mpctx->demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &mpctx->demuxer->num_chapters);

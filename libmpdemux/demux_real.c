@@ -1181,7 +1181,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    buf = malloc(len+1);
 		    stream_read(demuxer->stream, buf, len);
 		    buf[len] = 0;
-		    demux_info_add(demuxer, "name", buf);
+		    demux_info_add(demuxer, "title", buf);
 		    free(buf);
 		}
 

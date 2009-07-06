@@ -33,6 +33,7 @@
 #include "network.h"
 #include "stream.h"
 #include "tcp.h"
+#include "libavutil/avstring.h"
 
 /* IPv6 options */
 int   network_prefer_ipv4 = 0;
@@ -163,7 +164,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	}
 
 #if HAVE_INET_ATON || defined(HAVE_WINSOCK2_H)
-	strncpy( buf, inet_ntoa( *((struct in_addr*)our_s_addr) ), 255);
+	av_strlcpy( buf, inet_ntoa( *((struct in_addr*)our_s_addr) ), 255);
 #else
 	inet_ntop(af, our_s_addr, buf, 255);
 #endif

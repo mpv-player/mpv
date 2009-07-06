@@ -375,7 +375,7 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
   } table[] = {
     { "ENCODED_USING", "Software" },
     { "ENCODER_URL", "Encoder URL" },
-    { "TITLE", "Name" },
+    { "TITLE", "Title" },
     { "ARTIST", "Artist" },
     { "COMMENT", "Comments" },
     { "DATE", "Creation Date" },

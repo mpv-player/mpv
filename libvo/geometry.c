@@ -30,7 +30,7 @@ char *vo_geometry = NULL;
 int geometry_wh_changed = 0;
 int geometry_xy_changed = 0;
 
-#define RESET_GEOMETRY width = height = xoff = yoff = xper = yper = -1;
+#define RESET_GEOMETRY width = height = xoff = yoff = xper = yper = INT_MIN;
 
 // xpos,ypos: position of the left upper corner
 // widw,widh: width and height of the window
@@ -39,7 +39,7 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 {
         int width, height, xoff, yoff, xper, yper;
 
-	width = height = xoff = yoff = xper = yper = INT_MIN;
+        RESET_GEOMETRY
 
         if(vo_geometry != NULL) {
 		if(sscanf(vo_geometry, "%ix%i+%i+%i", &width, &height, &xoff, &yoff) != 4 )

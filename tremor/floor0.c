@@ -45,12 +45,12 @@ typedef struct {
 #include "lsp_lookup.h"
 
 /* interpolated 1./sqrt(p) where .5 <= a < 1. (.100000... to .111111...) in
-   16.16 format 
+   16.16 format
    returns in m.8 format */
 
 static long ADJUST_SQRT2[2]={8192,5792};
 static inline ogg_int32_t vorbis_invsqlook_i(long a,long e){
-  long i=(a&0x7fff)>>(INVSQ_LOOKUP_I_SHIFT-1); 
+  long i=(a&0x7fff)>>(INVSQ_LOOKUP_I_SHIFT-1);
   long d=a&INVSQ_LOOKUP_I_MASK;                              /*  0.10 */
   long val=INVSQ_LOOKUP_I[i]-                                /*  1.16 */
     ((INVSQ_LOOKUP_IDel[i]*d)>>INVSQ_LOOKUP_I_SHIFT);        /* result 1.16 */
@@ -65,7 +65,7 @@ static inline ogg_int32_t vorbis_fromdBlook_i(long a){
   int i=(-a)>>(12-FROMdB2_SHIFT);
   if(i<0) return 0x7fffffff;
   if(i>=(FROMdB_LOOKUP_SZ<<FROMdB_SHIFT))return 0;
-  
+
   return FROMdB_LOOKUP[i>>FROMdB_SHIFT] * FROMdB2_LOOKUP[i&FROMdB2_MASK];
 }
 
@@ -84,14 +84,14 @@ static inline ogg_int32_t vorbis_coslook2_i(long a){
   a=a&0x1ffff;
 
   if(a>0x10000)a=0x20000-a;
-  {               
+  {
     int i=a>>COS_LOOKUP_I_SHIFT;
     int d=a&COS_LOOKUP_I_MASK;
     a=((COS_LOOKUP_I[i]<<COS_LOOKUP_I_SHIFT)-
        d*(COS_LOOKUP_I[i]-COS_LOOKUP_I[i+1]))>>
       (COS_LOOKUP_I_SHIFT-LSP_FRACBITS+14);
   }
-  
+
   return(a);
 }
 
@@ -105,9 +105,9 @@ static const int barklook[28]={
 /* used in init only; interpolate the long way */
 static inline ogg_int32_t toBARK(int n){
   int i;
-  for(i=0;i<27;i++) 
+  for(i=0;i<27;i++)
     if(n>=barklook[i] && n<barklook[i+1])break;
-  
+
   if(i==27){
     return 27<<15;
   }else{
@@ -177,22 +177,22 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
 
     pi=((pi*pi)>>16);
     qi=((qi*qi)>>16);
-    
+
     if(m&1){
-      qexp= qexp*2-28*((m+1)>>1)+m;	     
+      qexp= qexp*2-28*((m+1)>>1)+m;
       pi*=(1<<14)-((wi*wi)>>14);
-      qi+=pi>>14;     
+      qi+=pi>>14;
     }else{
       qexp= qexp*2-13*m;
-      
+
       pi*=(1<<14)-wi;
       qi*=(1<<14)+wi;
-      
+
       qi=(qi+pi)>>14;
     }
-    
+
     if(qi&0xffff0000){ /* checks for 1.xxxxxxxxxxxxxxxx */
-      qi>>=1; qexp++; 
+      qi>>=1; qexp++;
     }else
       lsp_norm_asm(&qi,&qexp);
 
@@ -225,7 +225,7 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
       if(!(shift=MLOOP_1[(pi|qi)>>25]))
 	if(!(shift=MLOOP_2[(pi|qi)>>19]))
 	  shift=MLOOP_3[(pi|qi)>>16];
-      
+
       pi>>=shift;
       qi>>=shift;
       qexp+=shift-14*((m+1)>>1);
@@ -242,7 +242,7 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
 
       /* p*=p(1-w), q*=q(1+w), let normalization drift because it isn't
 	 worth tracking step by step */
-      
+
       pi>>=shift;
       qi>>=shift;
       qexp+=shift-7*m;
@@ -250,32 +250,32 @@ void vorbis_lsp_to_curve(ogg_int32_t *curve,int *map,int n,int ln,
       pi=((pi*pi)>>16);
       qi=((qi*qi)>>16);
       qexp=qexp*2+m;
-      
+
       pi*=(1<<14)-wi;
       qi*=(1<<14)+wi;
       qi=(qi+pi)>>14;
-      
+
     }
-    
+
 
     /* we've let the normalization drift because it wasn't important;
        however, for the lookup, things must be normalized again.  We
        need at most one right shift or a number of left shifts */
 
     if(qi&0xffff0000){ /* checks for 1.xxxxxxxxxxxxxxxx */
-      qi>>=1; qexp++; 
+      qi>>=1; qexp++;
     }else
       while(qi && !(qi&0x8000)){ /* checks for 0.0xxxxxxxxxxxxxxx or less*/
-	qi<<=1; qexp--; 
+	qi<<=1; qexp--;
       }
 
 #endif
 
     amp=vorbis_fromdBlook_i(ampi*                     /*  n.4         */
-			    vorbis_invsqlook_i(qi,qexp)- 
+			    vorbis_invsqlook_i(qi,qexp)-
 			                              /*  m.8, m+n<=8 */
 			    ampoffseti);              /*  8.12[0]     */
-    
+
 #ifdef _LOW_ACCURACY_
     amp>>=9;
 #endif
@@ -316,12 +316,12 @@ static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
   info->ampbits=oggpack_read(opb,6);
   info->ampdB=oggpack_read(opb,8);
   info->numbooks=oggpack_read(opb,4)+1;
-  
+
   if(info->order<1)goto err_out;
   if(info->rate<1)goto err_out;
   if(info->barkmap<1)goto err_out;
   if(info->numbooks<1)goto err_out;
-    
+
   for(j=0;j<info->numbooks;j++){
     info->books[j]=oggpack_read(opb,8);
     if(info->books[j]<0 || info->books[j]>=ci->books)goto err_out;
@@ -344,7 +344,7 @@ static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
 static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
                               vorbis_info_floor *i){
   int j;
-  ogg_int32_t scale; 
+  ogg_int32_t scale;
   vorbis_info        *vi=vd->vi;
   codec_setup_info   *ci=(codec_setup_info *)vi->codec_setup;
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
@@ -382,26 +382,26 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
   int j,k;
-  
+
   int ampraw=oggpack_read(&vb->opb,info->ampbits);
   if(ampraw>0){ /* also handles the -1 out of data case */
     long maxval=(1<<info->ampbits)-1;
     int amp=((ampraw*info->ampdB)<<4)/maxval;
     int booknum=oggpack_read(&vb->opb,_ilog(info->numbooks));
-    
+
     if(booknum!=-1 && booknum<info->numbooks){ /* be paranoid */
       codec_setup_info  *ci=(codec_setup_info *)vb->vd->vi->codec_setup;
       codebook *b=ci->fullbooks+info->books[booknum];
       ogg_int32_t last=0;
       ogg_int32_t *lsp=(ogg_int32_t *)_vorbis_block_alloc(vb,sizeof(*lsp)*(look->m+1));
-            
+
       for(j=0;j<look->m;j+=b->dim)
 	if(vorbis_book_decodev_set(b,lsp+j,&vb->opb,b->dim,-24)==-1)goto eop;
       for(j=0;j<look->m;){
 	for(k=0;k<b->dim;k++,j++)lsp[j]+=last;
 	last=lsp[j-1];
       }
-      
+
       lsp[look->m]=amp;
       return(lsp);
     }
@@ -414,7 +414,7 @@ static int floor0_inverse2(vorbis_block *vb,vorbis_look_floor *i,
 			   void *memo,ogg_int32_t *out){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
-  
+
   if(memo){
     ogg_int32_t *lsp=(ogg_int32_t *)memo;
     ogg_int32_t amp=lsp[look->m];

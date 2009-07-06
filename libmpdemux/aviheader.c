@@ -167,7 +167,7 @@ while(1){
     case mmioFOURCC('I','M','E','D'): hdr="Medium";break;
     // INAM - Stores the title of the subject of the file, such as
     // "Seattle from Above."
-    case mmioFOURCC('I','N','A','M'): hdr="Name";break;
+    case mmioFOURCC('I','N','A','M'): hdr="Title";break;
     // IPLT - Specifies the number of colors requested when digitizing
     // an image, such as "256."
     case mmioFOURCC('I','P','L','T'): hdr="Palette Setting";break;

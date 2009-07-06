@@ -193,8 +193,6 @@ SRCS_COMMON-$(LIBNUT)                += libmpdemux/demux_nut.c
 SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
 SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
 SRCS_COMMON-$(LIBTHEORA)             += libmpcodecs/vd_theora.c
-SRCS_COMMON-$(LIBVORBIS)             += libmpcodecs/ad_libvorbis.c \
-                                        libmpdemux/demux_ogg.c
 SRCS_COMMON-$(LIVE555)               += libmpdemux/demux_rtp.cpp \
                                         libmpdemux/demux_rtp_codec.cpp \
                                         stream/stream_live555.c
@@ -288,6 +286,8 @@ SRCS_COMMON-$(TV_V4L1)               += stream/tvi_v4l.c  stream/audio_in.c
 SRCS_COMMON-$(TV_V4L2)               += stream/tvi_v4l2.c stream/audio_in.c
 SRCS_COMMON-$(UNRAR_EXEC)            += unrar_exec.c
 SRCS_COMMON-$(VCD)                   += stream/stream_vcd.c
+SRCS_COMMON-$(VORBIS)                += libmpcodecs/ad_libvorbis.c \
+                                        libmpdemux/demux_ogg.c
 SRCS_COMMON-$(VSTREAM)               += stream/stream_vstream.c
 SRCS_COMMON-$(WIN32_EMULATION)       += loader/elfdll.c \
                                         loader/ext.c \
@@ -661,18 +661,18 @@ SRCS_MPLAYER-$(XVR100)        += libvo/vo_xvr100.c
 SRCS_MPLAYER-$(YUV4MPEG)      += libvo/vo_yuv4mpeg.c
 SRCS_MPLAYER-$(ZR)            += libvo/jpeg_enc.c libvo/vo_zr.c libvo/vo_zr2.c
 
-SRCS_MPLAYER = mplayer.c \
+SRCS_MPLAYER = command.c \
                m_property.c \
+               mixer.c \
                mp_fifo.c \
                mp_msg.c \
-               mixer.c \
+               mplayer.c \
                parser-mpcmd.c \
-               command.c \
                input/input.c \
-               libao2/audio_out.c \
                libao2/ao_mpegpes.c \
                libao2/ao_null.c \
                libao2/ao_pcm.c \
+               libao2/audio_out.c \
                libvo/aspect.c \
                libvo/geometry.c \
                libvo/old_vo_wrapper.c \
@@ -990,10 +990,10 @@ doxygen:
 	doxygen DOCS/tech/Doxyfile
 
 TAGS:
-	rm -f $@; ( find -name '*.[chS]' -o -name '*.asm' -print ) | xargs etags -a
+	rm -f $@; find . -name '*.[chS]' -o -name '*.asm' | xargs etags -a
 
 tags:
-	rm -f $@; ( find -name '*.[chS]' -o -name '*.asm' -print ) | xargs ctags -a
+	rm -f $@; find . -name '*.[chS]' -o -name '*.asm' | xargs ctags -a
 
 
 

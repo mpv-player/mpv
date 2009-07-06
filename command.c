@@ -415,7 +415,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         if (!arg)
             return M_PROPERTY_ERROR;
         M_PROPERTY_CLAMP(prop, *(int*)arg);
-        step_all = *(int *)arg - (chapter + 1);
+        step_all = *(int *)arg - chapter;
         chapter += step_all;
         break;
     case M_PROPERTY_STEP_UP:
@@ -2035,7 +2035,7 @@ static const m_option_t mp_properties[] = {
     { "time_pos", mp_property_time_pos, CONF_TYPE_TIME,
      M_OPT_MIN, 0, 0, NULL },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
-     M_OPT_MIN, 1, 0, NULL },
+     M_OPT_MIN, 0, 0, NULL },
     { "chapters", mp_property_chapters, CONF_TYPE_INT,
      0, 0, 0, NULL },
     { "angle", mp_property_angle, CONF_TYPE_INT,
@@ -2063,7 +2063,7 @@ static const m_option_t mp_properties[] = {
     { "channels", mp_property_channels, CONF_TYPE_INT,
      0, 0, 0, NULL },
     { "switch_audio", mp_property_audio, CONF_TYPE_INT,
-     CONF_RANGE, -2, MAX_A_STREAMS - 1, NULL },
+     CONF_RANGE, -2, 65535, NULL },
     { "balance", mp_property_balance, CONF_TYPE_FLOAT,
      M_OPT_RANGE, -1, 1, NULL },
 
@@ -2109,7 +2109,7 @@ static const m_option_t mp_properties[] = {
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
      0, 0, 0, NULL },
     { "switch_video", mp_property_video, CONF_TYPE_INT,
-     CONF_RANGE, -2, MAX_V_STREAMS - 1, NULL },
+     CONF_RANGE, -2, 65535, NULL },
     { "switch_program", mp_property_program, CONF_TYPE_INT,
      CONF_RANGE, -1, 65535, NULL },
 

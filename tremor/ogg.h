@@ -88,7 +88,7 @@ typedef struct {
   long  e_o_s;
 
   ogg_int64_t  granulepos;
-  
+
   ogg_int64_t  packetno;     /* sequence number for decode; the framing
 				knows where there's a hole in the data,
 				but we need coupling so that the codec

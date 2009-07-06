@@ -108,6 +108,8 @@ unsigned swscale_version(void)
         || (x)==PIX_FMT_YUVA420P    \
         || (x)==PIX_FMT_YUYV422     \
         || (x)==PIX_FMT_UYVY422     \
+        || (x)==PIX_FMT_RGB48BE     \
+        || (x)==PIX_FMT_RGB48LE     \
         || (x)==PIX_FMT_RGB32       \
         || (x)==PIX_FMT_RGB32_1     \
         || (x)==PIX_FMT_BGR24       \
@@ -281,17 +283,17 @@ static unsigned char clip_table[768];
 
 static SwsVector *sws_getConvVec(SwsVector *a, SwsVector *b);
 
-static const uint8_t  __attribute__((aligned(8))) dither_2x2_4[2][8]={
+DECLARE_ALIGNED(8, static const uint8_t, dither_2x2_4[2][8])={
 {  1,   3,   1,   3,   1,   3,   1,   3, },
 {  2,   0,   2,   0,   2,   0,   2,   0, },
 };
 
-static const uint8_t  __attribute__((aligned(8))) dither_2x2_8[2][8]={
+DECLARE_ALIGNED(8, static const uint8_t, dither_2x2_8[2][8])={
 {  6,   2,   6,   2,   6,   2,   6,   2, },
 {  0,   4,   0,   4,   0,   4,   0,   4, },
 };
 
-const uint8_t  __attribute__((aligned(8))) dither_8x8_32[8][8]={
+DECLARE_ALIGNED(8, const uint8_t, dither_8x8_32[8][8])={
 { 17,   9,  23,  15,  16,   8,  22,  14, },
 {  5,  29,   3,  27,   4,  28,   2,  26, },
 { 21,  13,  19,  11,  20,  12,  18,  10, },
@@ -303,7 +305,7 @@ const uint8_t  __attribute__((aligned(8))) dither_8x8_32[8][8]={
 };
 
 #if 0
-const uint8_t  __attribute__((aligned(8))) dither_8x8_64[8][8]={
+DECLARE_ALIGNED(8, const uint8_t, dither_8x8_64[8][8])={
 {  0,  48,  12,  60,   3,  51,  15,  63, },
 { 32,  16,  44,  28,  35,  19,  47,  31, },
 {  8,  56,   4,  52,  11,  59,   7,  55, },
@@ -315,7 +317,7 @@ const uint8_t  __attribute__((aligned(8))) dither_8x8_64[8][8]={
 };
 #endif
 
-const uint8_t  __attribute__((aligned(8))) dither_8x8_73[8][8]={
+DECLARE_ALIGNED(8, const uint8_t, dither_8x8_73[8][8])={
 {  0,  55,  14,  68,   3,  58,  17,  72, },
 { 37,  18,  50,  32,  40,  22,  54,  35, },
 {  9,  64,   5,  59,  13,  67,   8,  63, },
@@ -327,7 +329,7 @@ const uint8_t  __attribute__((aligned(8))) dither_8x8_73[8][8]={
 };
 
 #if 0
-const uint8_t  __attribute__((aligned(8))) dither_8x8_128[8][8]={
+DECLARE_ALIGNED(8, const uint8_t, dither_8x8_128[8][8])={
 { 68,  36,  92,  60,  66,  34,  90,  58, },
 { 20, 116,  12, 108,  18, 114,  10, 106, },
 { 84,  52,  76,  44,  82,  50,  74,  42, },
@@ -340,7 +342,7 @@ const uint8_t  __attribute__((aligned(8))) dither_8x8_128[8][8]={
 #endif
 
 #if 1
-const uint8_t  __attribute__((aligned(8))) dither_8x8_220[8][8]={
+DECLARE_ALIGNED(8, const uint8_t, dither_8x8_220[8][8])={
 {117,  62, 158, 103, 113,  58, 155, 100, },
 { 34, 199,  21, 186,  31, 196,  17, 182, },
 {144,  89, 131,  76, 141,  86, 127,  72, },
@@ -352,7 +354,7 @@ const uint8_t  __attribute__((aligned(8))) dither_8x8_220[8][8]={
 };
 #elif 1
 // tries to correct a gamma of 1.5
-const uint8_t  __attribute__((aligned(8))) dither_8x8_220[8][8]={
+DECLARE_ALIGNED(8, const uint8_t, dither_8x8_220[8][8])={
 {  0, 143,  18, 200,   2, 156,  25, 215, },
 { 78,  28, 125,  64,  89,  36, 138,  74, },
 { 10, 180,   3, 161,  16, 195,   8, 175, },
@@ -364,7 +366,7 @@ const uint8_t  __attribute__((aligned(8))) dither_8x8_220[8][8]={
 };
 #elif 1
 // tries to correct a gamma of 2.0
-const uint8_t  __attribute__((aligned(8))) dither_8x8_220[8][8]={
+DECLARE_ALIGNED(8, const uint8_t, dither_8x8_220[8][8])={
 {  0, 124,   8, 193,   0, 140,  12, 213, },
 { 55,  14, 104,  42,  66,  19, 119,  52, },
 {  3, 168,   1, 145,   6, 187,   3, 162, },
@@ -376,7 +378,7 @@ const uint8_t  __attribute__((aligned(8))) dither_8x8_220[8][8]={
 };
 #else
 // tries to correct a gamma of 2.5
-const uint8_t  __attribute__((aligned(8))) dither_8x8_220[8][8]={
+DECLARE_ALIGNED(8, const uint8_t, dither_8x8_220[8][8])={
 {  0, 107,   3, 187,   0, 125,   6, 212, },
 { 39,   7,  86,  28,  49,  11, 102,  36, },
 {  1, 158,   0, 131,   3, 180,   1, 151, },
@@ -463,6 +465,10 @@ const char *sws_format_name(enum PixelFormat format)
             return "rgb4";
         case PIX_FMT_RGB4_BYTE:
             return "rgb4 byte";
+        case PIX_FMT_RGB48BE:
+            return "rgb48be";
+        case PIX_FMT_RGB48LE:
+            return "rgb48le";
         case PIX_FMT_NV12:
             return "nv12";
         case PIX_FMT_NV21:
@@ -847,6 +853,24 @@ static inline void yuv2nv12XinC(const int16_t *lumFilter, const int16_t **lumSrc
 #define YSCALE_YUV_2_ANYRGB_C(func, func2, func_g16, func_monoblack)\
     switch(c->dstFormat)\
     {\
+    case PIX_FMT_RGB48BE:\
+    case PIX_FMT_RGB48LE:\
+        func(uint8_t,0)\
+            ((uint8_t*)dest)[ 0]= r[Y1];\
+            ((uint8_t*)dest)[ 1]= r[Y1];\
+            ((uint8_t*)dest)[ 2]= g[Y1];\
+            ((uint8_t*)dest)[ 3]= g[Y1];\
+            ((uint8_t*)dest)[ 4]= b[Y1];\
+            ((uint8_t*)dest)[ 5]= b[Y1];\
+            ((uint8_t*)dest)[ 6]= r[Y2];\
+            ((uint8_t*)dest)[ 7]= r[Y2];\
+            ((uint8_t*)dest)[ 8]= g[Y2];\
+            ((uint8_t*)dest)[ 9]= g[Y2];\
+            ((uint8_t*)dest)[10]= b[Y2];\
+            ((uint8_t*)dest)[11]= b[Y2];\
+            dest+=12;\
+        }\
+        break;\
     case PIX_FMT_RGBA:\
     case PIX_FMT_BGRA:\
         if (CONFIG_SMALL){\
@@ -1118,15 +1142,171 @@ static void fillPlane(uint8_t* plane, int stride, int width, int height, int y, 
     }
 }
 
+static inline void rgb48ToY(uint8_t *dst, const uint8_t *src, int width)
+{
+    int i;
+    for (i = 0; i < width; i++) {
+        int r = src[i*6+0];
+        int g = src[i*6+2];
+        int b = src[i*6+4];
+
+        dst[i] = (RY*r + GY*g + BY*b + (33<<(RGB2YUV_SHIFT-1))) >> RGB2YUV_SHIFT;
+    }
+}
+
+static inline void rgb48ToUV(uint8_t *dstU, uint8_t *dstV,
+                             uint8_t *src1, uint8_t *src2, int width)
+{
+    int i;
+    assert(src1==src2);
+    for (i = 0; i < width; i++) {
+        int r = src1[6*i + 0];
+        int g = src1[6*i + 2];
+        int b = src1[6*i + 4];
+
+        dstU[i] = (RU*r + GU*g + BU*b + (257<<(RGB2YUV_SHIFT-1))) >> RGB2YUV_SHIFT;
+        dstV[i] = (RV*r + GV*g + BV*b + (257<<(RGB2YUV_SHIFT-1))) >> RGB2YUV_SHIFT;
+    }
+}
+
+static inline void rgb48ToUV_half(uint8_t *dstU, uint8_t *dstV,
+                                  uint8_t *src1, uint8_t *src2, int width)
+{
+    int i;
+    assert(src1==src2);
+    for (i = 0; i < width; i++) {
+        int r= src1[12*i + 0] + src1[12*i + 6];
+        int g= src1[12*i + 2] + src1[12*i + 8];
+        int b= src1[12*i + 4] + src1[12*i + 10];
+
+        dstU[i]= (RU*r + GU*g + BU*b + (257<<RGB2YUV_SHIFT)) >> (RGB2YUV_SHIFT+1);
+        dstV[i]= (RV*r + GV*g + BV*b + (257<<RGB2YUV_SHIFT)) >> (RGB2YUV_SHIFT+1);
+    }
+}
+
+#define BGR2Y(type, name, shr, shg, shb, maskr, maskg, maskb, RY, GY, BY, S)\
+static inline void name(uint8_t *dst, const uint8_t *src, long width, uint32_t *unused)\
+{\
+    int i;\
+    for (i=0; i<width; i++)\
+    {\
+        int b= (((const type*)src)[i]>>shb)&maskb;\
+        int g= (((const type*)src)[i]>>shg)&maskg;\
+        int r= (((const type*)src)[i]>>shr)&maskr;\
+\
+        dst[i]= (((RY)*r + (GY)*g + (BY)*b + (33<<((S)-1)))>>(S));\
+    }\
+}
+
+BGR2Y(uint32_t, bgr32ToY,16, 0, 0, 0x00FF, 0xFF00, 0x00FF, RY<< 8, GY   , BY<< 8, RGB2YUV_SHIFT+8)
+BGR2Y(uint32_t, rgb32ToY, 0, 0,16, 0x00FF, 0xFF00, 0x00FF, RY<< 8, GY   , BY<< 8, RGB2YUV_SHIFT+8)
+BGR2Y(uint16_t, bgr16ToY, 0, 0, 0, 0x001F, 0x07E0, 0xF800, RY<<11, GY<<5, BY    , RGB2YUV_SHIFT+8)
+BGR2Y(uint16_t, bgr15ToY, 0, 0, 0, 0x001F, 0x03E0, 0x7C00, RY<<10, GY<<5, BY    , RGB2YUV_SHIFT+7)
+BGR2Y(uint16_t, rgb16ToY, 0, 0, 0, 0xF800, 0x07E0, 0x001F, RY    , GY<<5, BY<<11, RGB2YUV_SHIFT+8)
+BGR2Y(uint16_t, rgb15ToY, 0, 0, 0, 0x7C00, 0x03E0, 0x001F, RY    , GY<<5, BY<<10, RGB2YUV_SHIFT+7)
+
+static inline void abgrToA(uint8_t *dst, const uint8_t *src, long width, uint32_t *unused){
+    int i;
+    for (i=0; i<width; i++){
+        dst[i]= src[4*i];
+    }
+}
+
+#define BGR2UV(type, name, shr, shg, shb, maska, maskr, maskg, maskb, RU, GU, BU, RV, GV, BV, S)\
+static inline void name(uint8_t *dstU, uint8_t *dstV, const uint8_t *src, const uint8_t *dummy, long width, uint32_t *unused)\
+{\
+    int i;\
+    for (i=0; i<width; i++)\
+    {\
+        int b= (((const type*)src)[i]&maskb)>>shb;\
+        int g= (((const type*)src)[i]&maskg)>>shg;\
+        int r= (((const type*)src)[i]&maskr)>>shr;\
+\
+        dstU[i]= ((RU)*r + (GU)*g + (BU)*b + (257<<((S)-1)))>>(S);\
+        dstV[i]= ((RV)*r + (GV)*g + (BV)*b + (257<<((S)-1)))>>(S);\
+    }\
+}\
+static inline void name ## _half(uint8_t *dstU, uint8_t *dstV, const uint8_t *src, const uint8_t *dummy, long width, uint32_t *unused)\
+{\
+    int i;\
+    for (i=0; i<width; i++)\
+    {\
+        int pix0= ((const type*)src)[2*i+0];\
+        int pix1= ((const type*)src)[2*i+1];\
+        int g= (pix0&~(maskr|maskb))+(pix1&~(maskr|maskb));\
+        int b= ((pix0+pix1-g)&(maskb|(2*maskb)))>>shb;\
+        int r= ((pix0+pix1-g)&(maskr|(2*maskr)))>>shr;\
+        g&= maskg|(2*maskg);\
+\
+        g>>=shg;\
+\
+        dstU[i]= ((RU)*r + (GU)*g + (BU)*b + (257<<(S)))>>((S)+1);\
+        dstV[i]= ((RV)*r + (GV)*g + (BV)*b + (257<<(S)))>>((S)+1);\
+    }\
+}
+
+BGR2UV(uint32_t, bgr32ToUV,16, 0, 0, 0xFF000000, 0xFF0000, 0xFF00,   0x00FF, RU<< 8, GU   , BU<< 8, RV<< 8, GV   , BV<< 8, RGB2YUV_SHIFT+8)
+BGR2UV(uint32_t, rgb32ToUV, 0, 0,16, 0xFF000000,   0x00FF, 0xFF00, 0xFF0000, RU<< 8, GU   , BU<< 8, RV<< 8, GV   , BV<< 8, RGB2YUV_SHIFT+8)
+BGR2UV(uint16_t, bgr16ToUV, 0, 0, 0,          0,   0x001F, 0x07E0,   0xF800, RU<<11, GU<<5, BU    , RV<<11, GV<<5, BV    , RGB2YUV_SHIFT+8)
+BGR2UV(uint16_t, bgr15ToUV, 0, 0, 0,          0,   0x001F, 0x03E0,   0x7C00, RU<<10, GU<<5, BU    , RV<<10, GV<<5, BV    , RGB2YUV_SHIFT+7)
+BGR2UV(uint16_t, rgb16ToUV, 0, 0, 0,          0,   0xF800, 0x07E0,   0x001F, RU    , GU<<5, BU<<11, RV    , GV<<5, BV<<11, RGB2YUV_SHIFT+8)
+BGR2UV(uint16_t, rgb15ToUV, 0, 0, 0,          0,   0x7C00, 0x03E0,   0x001F, RU    , GU<<5, BU<<10, RV    , GV<<5, BV<<10, RGB2YUV_SHIFT+7)
+
+static inline void palToY(uint8_t *dst, const uint8_t *src, long width, uint32_t *pal)
+{
+    int i;
+    for (i=0; i<width; i++)
+    {
+        int d= src[i];
+
+        dst[i]= pal[d] & 0xFF;
+    }
+}
+
+static inline void palToUV(uint8_t *dstU, uint8_t *dstV,
+                           const uint8_t *src1, const uint8_t *src2,
+                           long width, uint32_t *pal)
+{
+    int i;
+    assert(src1 == src2);
+    for (i=0; i<width; i++)
+    {
+        int p= pal[src1[i]];
+
+        dstU[i]= p>>8;
+        dstV[i]= p>>16;
+    }
+}
+
+static inline void monowhite2Y(uint8_t *dst, const uint8_t *src, long width, uint32_t *unused)
+{
+    int i, j;
+    for (i=0; i<width/8; i++){
+        int d= ~src[i];
+        for(j=0; j<8; j++)
+            dst[8*i+j]= ((d>>(7-j))&1)*255;
+    }
+}
+
+static inline void monoblack2Y(uint8_t *dst, const uint8_t *src, long width, uint32_t *unused)
+{
+    int i, j;
+    for (i=0; i<width/8; i++){
+        int d= src[i];
+        for(j=0; j<8; j++)
+            dst[8*i+j]= ((d>>(7-j))&1)*255;
+    }
+}
+
+
 //Note: we have C, MMX, MMX2, 3DNOW versions, there is no 3DNOW+MMX2 one
 //Plain C versions
-#if !HAVE_MMX || CONFIG_RUNTIME_CPUDETECT || !CONFIG_GPL
+#if ((!HAVE_MMX || !CONFIG_GPL) && !HAVE_ALTIVEC) || CONFIG_RUNTIME_CPUDETECT
 #define COMPILE_C
 #endif
 
 #if ARCH_PPC
-#if (HAVE_ALTIVEC || CONFIG_RUNTIME_CPUDETECT) && CONFIG_GPL
-#undef COMPILE_C
+#if HAVE_ALTIVEC || CONFIG_RUNTIME_CPUDETECT
 #define COMPILE_ALTIVEC
 #endif
 #endif //ARCH_PPC
@@ -1792,10 +1972,10 @@ static void globalInit(void){
 
 static SwsFunc getSwsFunc(SwsContext *c)
 {
-#if CONFIG_RUNTIME_CPUDETECT && CONFIG_GPL
+#if CONFIG_RUNTIME_CPUDETECT
     int flags = c->flags;
 
-#if ARCH_X86
+#if ARCH_X86 && CONFIG_GPL
     // ordered per speed fastest first
     if (flags & SWS_CPU_CAPS_MMX2) {
         sws_init_swScale_MMX2(c);
@@ -1823,7 +2003,7 @@ static SwsFunc getSwsFunc(SwsContext *c)
 #endif
     sws_init_swScale_C(c);
     return swScale_C;
-#endif /* ARCH_X86 */
+#endif /* ARCH_X86 && CONFIG_GPL */
 #else //CONFIG_RUNTIME_CPUDETECT
 #if   HAVE_MMX2
     sws_init_swScale_MMX2(c);
@@ -2385,7 +2565,7 @@ SwsContext *sws_getContext(int srcW, int srcH, enum PixelFormat srcFormat, int d
         __asm__ volatile("emms\n\t"::: "memory");
 #endif
 
-#if !CONFIG_RUNTIME_CPUDETECT || !CONFIG_GPL //ensure that the flags match the compiled variant if cpudetect is off
+#if !CONFIG_RUNTIME_CPUDETECT //ensure that the flags match the compiled variant if cpudetect is off
     flags &= ~(SWS_CPU_CAPS_MMX|SWS_CPU_CAPS_MMX2|SWS_CPU_CAPS_3DNOW|SWS_CPU_CAPS_ALTIVEC|SWS_CPU_CAPS_BFIN);
 #if   HAVE_MMX2
     flags |= SWS_CPU_CAPS_MMX|SWS_CPU_CAPS_MMX2;
@@ -2551,6 +2731,8 @@ SwsContext *sws_getContext(int srcW, int srcH, enum PixelFormat srcFormat, int d
            && srcFormat != PIX_FMT_MONOWHITE && dstFormat != PIX_FMT_MONOWHITE
                                              && dstFormat != PIX_FMT_RGB32_1
                                              && dstFormat != PIX_FMT_BGR32_1
+           && srcFormat != PIX_FMT_RGB48LE   && dstFormat != PIX_FMT_RGB48LE
+           && srcFormat != PIX_FMT_RGB48BE   && dstFormat != PIX_FMT_RGB48BE
            && (!needsDither || (c->flags&(SWS_FAST_BILINEAR|SWS_POINT))))
              c->swScale= rgb2rgbWrapper;
 

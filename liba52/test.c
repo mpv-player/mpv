@@ -21,7 +21,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-//#define TIMING //needs Pentium or newer 
+//#define TIMING //needs Pentium or newer
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,7 +80,7 @@ long long t, sum=0, min=256*256*256*64;
     if(gCpuCaps.hasSSE) 	accel |= MM_ACCEL_X86_SSE;
     if(gCpuCaps.has3DNow) 	accel |= MM_ACCEL_X86_3DNOW;
 //    if(gCpuCaps.has3DNowExt) 	accel |= MM_ACCEL_X86_3DNOWEXT;
-    
+
     state = a52_init (accel);
     if (state == NULL) {
 	fprintf (stderr, "A52 init failed\n");
@@ -112,13 +112,13 @@ ENDTIMING
     while(buf_size<length){
 	buf[buf_size++]=getchar();
     }
-    
+
     buf_size=0;
 
     // decode:
     flags=A52_STEREO; //A52_STEREO; //A52_DOLBY; //A52_STEREO; // A52_DOLBY // A52_2F2R // A52_3F2R | A52_LFE
     channels=2;
-    
+
     flags |= A52_ADJUST_LEVEL;
 STARTTIMING
     if (a52_frame (state, buf, &flags, &level, bias))

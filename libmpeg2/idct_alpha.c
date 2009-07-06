@@ -221,7 +221,7 @@ void mpeg2_idct_add_mvi (const int last, int16_t * block,
 	    shorts0 ^= signs0;
 	    /* clamp. */
 	    shorts0 = maxsw4 (shorts0, 0);
-	    shorts0 = minsw4 (shorts0, clampmask);	
+	    shorts0 = minsw4 (shorts0, clampmask);
 
 	    /* next 4.  */
 	    pix1 = unpkbw (ldl (dest + 4));

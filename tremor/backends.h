@@ -68,8 +68,8 @@ typedef struct{
   int   class_subbook[VIF_CLASS][8]; /* [VIF_CLASS][subs] */
 
 
-  int   mult;                      /* 1 2 3 or 4 */ 
-  int   postlist[VIF_POSIT+2];    /* first two implicit */ 
+  int   mult;                      /* 1 2 3 or 4 */
+  int   postlist[VIF_POSIT+2];    /* first two implicit */
 
 } vorbis_info_floor1;
 
@@ -110,7 +110,7 @@ typedef struct{
 typedef struct vorbis_info_mapping0{
   int   submaps;  /* <= 16 */
   int   chmuxlist[256];   /* up to 256 channels in a Vorbis stream */
-  
+
   int   floorsubmap[16];   /* [mux] submap to floors */
   int   residuesubmap[16]; /* [mux] submap to residue */
 

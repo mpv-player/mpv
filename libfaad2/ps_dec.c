@@ -1625,7 +1625,7 @@ static void ps_mix_phase(ps_info *ps, qmf_t X_left[38][64], qmf_t X_right[38][64
 
                 /* ringbuffer index */
                 if (i == 0)
-                { 
+                {
                     i = 2;
                 }
                 i--;

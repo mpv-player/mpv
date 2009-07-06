@@ -28,7 +28,7 @@
 
 #ifdef _WIN32
 #  include <malloc.h>
-#  define rint(x)   (floor((x)+0.5f)) 
+#  define rint(x)   (floor((x)+0.5f))
 #  define NO_FLOAT_MATH_LIB
 #  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
 #endif

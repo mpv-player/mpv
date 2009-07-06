@@ -42,10 +42,10 @@ static inline uint32_t arch_accel (uint32_t accel)
 #if 0
     if (accel & (MPEG2_ACCEL_X86_3DNOW | MPEG2_ACCEL_X86_MMXEXT))
 	accel |= MPEG2_ACCEL_X86_MMX;
-	
+
     if (accel & (MPEG2_ACCEL_X86_SSE2 | MPEG2_ACCEL_X86_SSE3))
 	accel |= MPEG2_ACCEL_X86_MMXEXT;
-	
+
     if (accel & (MPEG2_ACCEL_X86_SSE3))
 	accel |= MPEG2_ACCEL_X86_SSE2;
 

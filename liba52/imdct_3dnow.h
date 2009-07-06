@@ -43,7 +43,7 @@
 static void FFT_4_3DNOW(complex_t *x)
 {
   /* delta_p = 1 here */
-  /* x[k] = sum_{i=0..3} x[i] * w^{i*k}, w=e^{-2*pi/4} 
+  /* x[k] = sum_{i=0..3} x[i] * w^{i*k}, w=e^{-2*pi/4}
    */
   __asm__ volatile(
 	"movq	24(%1), %%mm3\n\t"
@@ -86,10 +86,10 @@ static void FFT_4_3DNOW(complex_t *x)
 static void FFT_8_3DNOW(complex_t *x)
 {
   /* delta_p = diag{1, sqrt(i)} here */
-  /* x[k] = sum_{i=0..7} x[i] * w^{i*k}, w=e^{-2*pi/8} 
+  /* x[k] = sum_{i=0..7} x[i] * w^{i*k}, w=e^{-2*pi/8}
    */
   complex_t wT1, wB1, wB2;
-  
+
   __asm__ volatile(
 	"movq	8(%2), %%mm0\n\t"
 	"movq	24(%2), %%mm1\n\t"
@@ -111,9 +111,9 @@ static void FFT_8_3DNOW(complex_t *x)
 	:"memory");
 
   fft_4_3dnow(&x[0]);
-  
+
   /* x[0] x[4] x[2] x[6] */
-  
+
   __asm__ volatile(
       "movq	40(%1), %%mm0\n\t"
       "movq	%%mm0,	%%mm3\n\t"
@@ -151,7 +151,7 @@ static void FFT_8_3DNOW(complex_t *x)
       :"=r"(x)
       :"0"(x), "r"(&wT1), "r"(&wB1)
       :"memory");
-  
+
   /* x[1] x[5] */
   __asm__ volatile (
 	"movq	%6,	%%mm6\n\t"
@@ -180,7 +180,7 @@ static void FFT_8_3DNOW(complex_t *x)
 	"pxor	%%mm6,	%%mm1\n\t"
 	"pfacc	%%mm1,	%%mm0\n\t"
 	"pfmul	%4,	%%mm0\n\t"
-	
+
 	"movq	40(%3),	%%mm5\n\t"
 #if HAVE_AMD3DNOWEXT
 	"pswapd	%%mm5,	%%mm5\n\t"
@@ -189,7 +189,7 @@ static void FFT_8_3DNOW(complex_t *x)
 	"punpckhdq %%mm1, %%mm5\n\t"
 #endif
 	"movq	%%mm5,	%0\n\t"
-	
+
 	"movq	8(%3),	%%mm1\n\t"
 	"movq	%%mm1,	%%mm2\n\t"
 	"pfsub	%%mm0,	%%mm1\n\t"
@@ -197,7 +197,7 @@ static void FFT_8_3DNOW(complex_t *x)
 	"movq	%%mm1,	40(%3)\n\t"
 	"movq	%%mm2,	8(%3)\n\t"
 	:"=m"(wB2)
-	:"m"(wT1), "m"(wB1), "r"(x), "m"(HSQRT2_3DNOW), 
+	:"m"(wT1), "m"(wB1), "r"(x), "m"(HSQRT2_3DNOW),
 	 "m"(x_plus_minus_3dnow), "m"(x_minus_plus_3dnow)
 	:"memory");
 
@@ -212,7 +212,7 @@ static void FFT_8_3DNOW(complex_t *x)
 	"punpckldq %%mm1, %%mm2\n\t"
 	"punpckhdq %%mm2, %%mm1\n\t"
 #endif
-	"pxor	%%mm6,	%%mm1\n\t"	
+	"pxor	%%mm6,	%%mm1\n\t"
 	"pfadd	%%mm1,	%%mm0\n\t"
 	"movq	%2,	%%mm2\n\t"
 	"movq	56(%4),	%%mm3\n\t"
@@ -253,10 +253,10 @@ static void FFT_ASMB_3DNOW(int k, complex_t *x, complex_t *wTB,
   x3k = x2k + 2 * k;
   x4k = x3k + 2 * k;
   wB = wTB + 2 * k;
-  
+
   TRANSZERO_3DNOW(x[0],x2k[0],x3k[0],x4k[0]);
   TRANS_3DNOW(x[1],x2k[1],x3k[1],x4k[1],wTB[1],wB[1],d[1],d_3[1]);
-  
+
   --k;
   for(;;) {
      TRANS_3DNOW(x[2],x2k[2],x3k[2],x4k[2],wTB[2],wB[2],d[2],d_3[2]);
@@ -271,7 +271,7 @@ static void FFT_ASMB_3DNOW(int k, complex_t *x, complex_t *wTB,
      wTB += 2;
      wB += 2;
   }
- 
+
 }
 
 void FFT_ASMB16_3DNOW(complex_t *x, complex_t *wTB)
@@ -291,13 +291,13 @@ void FFT_ASMB16_3DNOW(complex_t *x, complex_t *wTB)
   /* transform x[3], x[11], x[7], x[15] */
   TRANS_3DNOW(x[3],x[7],x[11],x[15],wTB[3],wTB[7],delta16[3],delta16_3[3]);
 
-} 
+}
 
 static void FFT_128P_3DNOW(complex_t *a)
 {
   FFT_8_3DNOW(&a[0]); FFT_4_3DNOW(&a[8]); FFT_4_3DNOW(&a[12]);
   FFT_ASMB16_3DNOW(&a[0], &a[8]);
-  
+
   FFT_8_3DNOW(&a[16]), FFT_8_3DNOW(&a[24]);
   FFT_ASMB_3DNOW(4, &a[0], &a[16],&delta32[0], &delta32_3[0]);
 
@@ -314,7 +314,7 @@ static void FFT_128P_3DNOW(complex_t *a)
   FFT_ASMB16_3DNOW(&a[64], &a[72]);
 
   FFT_8_3DNOW(&a[80]); FFT_8_3DNOW(&a[88]);
-  
+
   /* FFT_32(&a[64]); */
   FFT_ASMB_3DNOW(4, &a[64], &a[80],&delta32[0], &delta32_3[0]);
 
@@ -325,7 +325,7 @@ static void FFT_128P_3DNOW(complex_t *a)
   FFT_8_3DNOW(&a[112]), FFT_8_3DNOW(&a[120]);
   /* FFT_32(&a[96]); */
   FFT_ASMB_3DNOW(4, &a[96], &a[112], &delta32[0], &delta32_3[0]);
-  
+
   /* FFT_128(&a[0]); */
   FFT_ASMB_3DNOW(16, &a[0], &a[64], &delta128[0], &delta128_3[0]);
 }
@@ -353,9 +353,9 @@ imdct_do_512_3dnow
     sample_t *data_ptr;
     sample_t *delay_ptr;
     sample_t *window_ptr;
-	
+
     /* 512 IMDCT with source and dest data in 'data' */
-	
+
     /* Pre IFFT complex multiply plus IFFT cmplx conjugate & reordering*/
 #if 1
       __asm__ volatile (
@@ -396,7 +396,7 @@ imdct_do_512_3dnow
 #else
   __asm__ volatile ("femms":::"memory");
     for( i=0; i < 128; i++) {
-	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
+	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */
 	int j= pm128[i];
 	buf[i].real =         (data[256-2*j-1] * xcos1[j])  -  (data[2*j]       * xsin1[j]);
 	buf[i].imag = -1.0 * ((data[2*j]       * xcos1[j])  +  (data[256-2*j-1] * xsin1[j]));
@@ -432,9 +432,9 @@ imdct_do_512_3dnow
 
     FFT_128P_3DNOW (&buf[0]);
 //    __asm__ volatile ("femms \n\t":::"memory");
-    
+
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
-#if 1  
+#if 1
   __asm__ volatile (
 	"movq %0, %%mm7\n\t"
 	"movq %1, %%mm6\n\t"
@@ -448,9 +448,9 @@ imdct_do_512_3dnow
 #if !HAVE_AMD3DNOWEXT
 		"punpckldq %%mm1, %%mm2\n\t"
 		"punpckhdq %%mm2, %%mm1\n\t"
-#else			 
+#else
 		"pswapd %%mm1, %%mm1\n\t" /* ac3_buf[i].re | ac3_buf[i].im */
-#endif			 
+#endif
 		"movd %3, %%mm3\n\t" /* ac3_xsin[i] */
 		"punpckldq %2, %%mm3\n\t" /* ac3_xsin[i] | ac3_xcos[i] */
 		"pfmul %%mm3, %%mm0\n\t"
@@ -472,7 +472,7 @@ imdct_do_512_3dnow
 /*		ac3_buf[i].re =(tmp_a_r * ac3_xcos1[i])  +  (tmp_a_i  * ac3_xsin1[i]);
 		ac3_buf[i].im =(tmp_a_r * ac3_xsin1[i])  -  (tmp_a_i  * ac3_xcos1[i]);*/
 	}
-#else    
+#else
   __asm__ volatile ("femms":::"memory");
     for( i=0; i < 128; i++) {
 	/* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
@@ -482,7 +482,7 @@ imdct_do_512_3dnow
 	buf[i].imag =(tmp_a_r * xsin1[i])  +  (tmp_a_i  * xcos1[i]);
     }
 #endif
-	
+
     data_ptr = data;
     delay_ptr = delay;
     window_ptr = a52_imdct_window;
@@ -519,16 +519,16 @@ imdct_do_512_3dnow
 		delay_ptr += 2;
 	}
 	window_ptr += 128;
-#else    
+#else
   __asm__ volatile ("femms":::"memory");
-    for(i=0; i< 64; i++) { 
-	*data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
-	*data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
+    for(i=0; i< 64; i++) {
+	*data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias;
+	*data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias;
     }
-    
-    for(i=0; i< 64; i++) { 
-	*data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
-	*data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
+
+    for(i=0; i< 64; i++) {
+	*data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias;
+	*data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias;
     }
 #endif
 
@@ -566,16 +566,16 @@ imdct_do_512_3dnow
 		delay_ptr += 2;
 	}
   __asm__ volatile ("femms":::"memory");
-#else    
+#else
   __asm__ volatile ("femms":::"memory");
-    for(i=0; i< 64; i++) { 
-	*delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
-	*delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
+    for(i=0; i< 64; i++) {
+	*delay_ptr++  = -buf[64+i].real   * *--window_ptr;
+	*delay_ptr++  =  buf[64-i-1].imag * *--window_ptr;
     }
-    
+
     for(i=0; i<64; i++) {
-	*delay_ptr++  =  buf[i].imag       * *--window_ptr; 
-	*delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
+	*delay_ptr++  =  buf[i].imag       * *--window_ptr;
+	*delay_ptr++  = -buf[128-i-1].real * *--window_ptr;
     }
-#endif    
+#endif
 }

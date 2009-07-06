@@ -64,7 +64,7 @@ a52_state_t * a52_init (uint32_t mm_accel)
     if (state == NULL)
 	return NULL;
 
-#if defined(__MINGW32__) && defined(HAVE_SSE) 
+#if defined(__MINGW32__) && defined(HAVE_SSE)
     state->samples = av_malloc(256 * 12 * sizeof (sample_t));
 #else
     state->samples = memalign (16, 256 * 12 * sizeof (sample_t));
@@ -72,8 +72,8 @@ a52_state_t * a52_init (uint32_t mm_accel)
     if(((int)state->samples%16) && (mm_accel&MM_ACCEL_X86_SSE)){
       mm_accel &=~MM_ACCEL_X86_SSE;
       fprintf(stderr, "liba52: unable to get 16 byte aligned memory disabling usage of SSE instructions\n");
-    }   
- 
+    }
+
     if (state->samples == NULL) {
 	free (state);
 	return NULL;
@@ -274,7 +274,7 @@ static int parse_exponents (a52_state_t * state, int expstr, int ngrps,
 	case EXP_D15:
 	    *(dest++) = exponent;
 	}
-    }	
+    }
 
     return 0;
 }
@@ -322,7 +322,7 @@ static inline int16_t dither_gen (a52_state_t * state)
     int16_t nstate;
 
     nstate = dither_lut[state->lfsr_state >> 8] ^ (state->lfsr_state << 8);
-	
+
     state->lfsr_state = (uint16_t) nstate;
 
     return nstate;
@@ -652,7 +652,7 @@ int a52_block (a52_state_t * state)
 	cplexpstr = bitstream_get (state, 2);
     for (i = 0; i < nfchans; i++)
 	chexpstr[i] = bitstream_get (state, 2);
-    if (state->lfeon) 
+    if (state->lfeon)
 	lfeexpstr = bitstream_get (state, 1);
 
     for (i = 0; i < nfchans; i++)
@@ -870,7 +870,7 @@ int a52_block (a52_state_t * state)
 		if (blksw[i])
 		    a52_imdct_256 (samples + 256 * i, samples + 1536 + 256 * i,
 				   bias);
-		else 
+		else
 		    a52_imdct_512 (samples + 256 * i, samples + 1536 + 256 * i,
 				   bias);
 	    } else {
@@ -899,7 +899,7 @@ int a52_block (a52_state_t * state)
 	    for (i = 0; i < nfchans; i++)
 		a52_imdct_256 (samples + 256 * i, samples + 1536 + 256 * i,
 			       state->bias);
-	else 
+	else
 	    for (i = 0; i < nfchans; i++)
 		a52_imdct_512 (samples + 256 * i, samples + 1536 + 256 * i,
 			       state->bias);

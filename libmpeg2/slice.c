@@ -1906,7 +1906,7 @@ void mpeg2_slice (mpeg2_decoder_t * const decoder, const int code,
 
 	    if (   ((macroblock_modes >> MOTION_TYPE_SHIFT) < 0)
                 || ((macroblock_modes >> MOTION_TYPE_SHIFT) >=
-                    (int)(sizeof(decoder->motion_parser) 
+                    (int)(sizeof(decoder->motion_parser)
                           / sizeof(decoder->motion_parser[0])))
 	       ) {
 		break; // Illegal !

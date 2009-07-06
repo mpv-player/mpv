@@ -425,6 +425,20 @@ Audio output:
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
+Language options:
+  --charset=charset      convert the console messages to this character set
+  --language-doc=lang    language to use for the documentation [en]
+  --language-man=lang    language to use for the man pages [en]
+  --language-msg=lang    language to use for the messages and the GUI [en]
+  --language=lang        default language to use [en]
+Specific options override --language. You can pass a list of languages separated
+by whitespace or commas instead of a single language. Nonexisting translations
+will be dropped from each list. All documentation and man page translations
+available in the list will be installed, for the messages the first available
+translation will be used. The value "all" will activate all translations. The
+LINGUAS environment variable is honored. In all cases the fallback is English.
+Available values are: all $msg_lang_all
+
 Miscellaneous options:
   --enable-runtime-cpudetection    enable runtime CPU detection [disable]
   --enable-cross-compile enable cross-compilation [autodetect]
@@ -438,12 +452,6 @@ Miscellaneous options:
   --windres=WINDRES      windres to build MPlayer [windres]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
-  --charset=charset      convert the console messages to this character set
-  --language=list        a white space or comma separated list of languages for
-                         translated man pages, the first language is used for
-                         messages and the GUI (the environment variable
-                         \$LINGUAS is also honored) [en]
-                         (Available: all $msg_lang_all)
   --with-install=PATH    path to a custom install program
 
 Advanced options:
@@ -694,7 +702,7 @@ _directfb=auto
 _zr=auto
 _bl=no
 _largefiles=yes
-#_language=en
+#language=en
 _shm=auto
 _linux_devfs=no
 _charset="UTF-8"
@@ -849,8 +857,17 @@ for ac_option do
   --charset=*)
     _charset=$(echo $ac_option | cut -d '=' -f 2)
     ;;
+  --language-doc=*)
+    language_doc=$(echo $ac_option | cut -d '=' -f 2)
+    ;;
+  --language-man=*)
+    language_man=$(echo $ac_option | cut -d '=' -f 2)
+    ;;
+  --language-msg=*)
+    language_msg=$(echo $ac_option | cut -d '=' -f 2)
+    ;;
   --language=*)
-    _language=$(echo $ac_option | cut -d '=' -f 2)
+    language=$(echo $ac_option | cut -d '=' -f 2)
     ;;
 
   --enable-static)
@@ -1386,7 +1403,8 @@ if test -z "$_target" ; then
           host_arch=i386
         fi
       ;;
-      macppc|ppc|ppc64) host_arch=ppc ;;
+      macppc|ppc) host_arch=ppc ;;
+      ppc64) host_arch=ppc64 ;;
       alpha) host_arch=alpha ;;
       sparc) host_arch=sparc ;;
       sparc64) host_arch=sparc64 ;;
@@ -1715,12 +1733,12 @@ fi
 
 def_fast_64bit='#define HAVE_FAST_64BIT 0'
 def_fast_unaligned='#define HAVE_FAST_UNALIGNED 0'
-_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM AVR32 SH4 PPC ALPHA SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
+_arch_all='X86 X86_32 X86_64 IA64 SPARC ARM AVR32 SH4 PPC PPC64 ALPHA MIPS SGI_MIPS PA_RISC S390 S390X VAX BFIN XTENSA GENERIC'
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
   _arch='X86 X86_32'
-  _target_arch_x86="ARCH_X86 = yes"
-  _target_arch="ARCH_X86_32 = yes"
+  _target_arch="ARCH_X86 = yes"
+  _target_subarch="ARCH_X86_32 = yes"
   def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
   iproc=486
   proc=i486
@@ -1959,8 +1977,8 @@ EOF
 
   x86_64|amd64)
     _arch='X86 X86_64'
-    _target_arch='ARCH_X86_64 = yes'
-    _target_arch_x86="ARCH_X86 = yes"
+    _target_subarch='ARCH_X86_64 = yes'
+    _target_arch="ARCH_X86 = yes"
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     iproc='x86_64'
@@ -2090,14 +2108,14 @@ EOF
   ppc|ppc64|powerpc|powerpc64)
     _arch='PPC'
     def_dcbzl='#define HAVE_DCBZL 0'
-    def_ppc64='#define HAVE_PPC64 0'
     _target_arch='ARCH_PPC = yes'
     def_fast_unaligned='#define HAVE_FAST_UNALIGNED 1'
     iproc='ppc'
 
     if test "$host_arch" = "ppc64" -o "$host_arch" = "powerpc64" ; then
+      _arch='PPC PPC64'
+      _target_subarch='ARCH_PPC64 = yes'
       def_fast_64bit='#define HAVE_FAST_64BIT 1'
-      def_ppc64='#define HAVE_PPC64 1'
     fi
     echocheck "CPU type"
     case $system_name in
@@ -2794,40 +2812,40 @@ echores "$_langinfo"
 
 
 echocheck "language"
-test -z "$_language" && _language=$LINGUAS
-_language=$(echo $_language | tr , " ")
-if $(echo $_language | grep -q all) ; then
-  doc_lang=en ; doc_langs=$doc_lang_all
-  man_lang=en ; man_langs=$man_lang_all
-  msg_lang=en
-else
-  for lang in $_language ; do
-    if test -d DOCS/man/$lang ; then
-      tmp_man_langs="$tmp_man_langs $lang"
-    fi
-    if test -d DOCS/xml/$lang ; then
-      tmp_doc_langs="$tmp_doc_langs $lang"
-    fi
-  done
-  man_langs=$tmp_man_langs
-  doc_langs=$tmp_man_langs
-  for lang in $_language ; do
-    if test -f "help/help_mp-${lang}.h" ; then
-      msg_lang=$lang
-      break
-    else
-      echo ${_echo_n} "$lang not found, ${_echo_c}"
-      _language=$(echo $_language | sed "s/$lang *//")
-    fi
-  done
-fi
-test -z "$doc_langs" && doc_langs=en
-test -z "$man_langs" && man_langs=en
-test -z "$doc_lang" && doc_lang=$(echo $doc_langs | cut -f1 -d" ")
-test -z "$man_lang" && man_lang=$(echo $man_langs | cut -f1 -d" ")
-test -z "$msg_lang" && msg_lang=en
-_mp_help="help/help_mp-${msg_lang}.h"
-echores "messages: $msg_lang - man pages: $man_langs - documentation: $doc_langs"
+# Set preferred languages, "all" uses English as main language.
+test -z "$language" && language=$LINGUAS
+test -z "$language_doc" && language_doc=$language
+test -z "$language_man" && language_man=$language
+test -z "$language_msg" && language_msg=$language
+language_doc=$(echo $language_doc | tr , " ")
+language_man=$(echo $language_man | tr , " ")
+language_msg=$(echo $language_msg | tr , " ")
+
+test "$language_doc" = "all" && language_doc=$doc_lang_all
+test "$language_man" = "all" && language_man=$man_lang_all
+test "$language_msg" = "all" && language_msg=en
+
+# Prune non-existing translations from language lists.
+# Set message translation to the first available language.
+# Fall back on English.
+for lang in $language_doc ; do
+  test -d DOCS/xml/$lang && tmp_language_doc="$tmp_language_doc $lang"
+done
+language_doc=$tmp_language_doc
+test -z "$language_doc" && language_doc=en
+
+for lang in $language_man ; do
+  test -d DOCS/man/$lang && tmp_language_man="$tmp_language_man $lang"
+done
+language_man=$tmp_language_man
+test -z "$language_man" && language_man=en
+
+for lang in $language_msg ; do
+  test -f "help/help_mp-${lang}.h" && language_msg=$lang && break
+done
+test -z "$language_msg" && language_msg=en
+_mp_help="help/help_mp-${language_msg}.h"
+echores "messages: $language_msg - man pages: $language_man - documentation: $language_doc"
 
 
 echocheck "enable sighandler"
@@ -5766,6 +5784,9 @@ elif openbsd ; then
   default_cdrom_device="/dev/rcd0a"
 elif sunos ; then
   default_cdrom_device="/vol/dev/aliases/cdrom0"
+  # Modern Solaris versions use HAL instead of the vold daemon, the volfs
+  # file system and the volfs service.
+  test -r "/cdrom/cdrom0" && default_cdrom_device="/cdrom/cdrom0"
 elif amigaos ; then
   default_cdrom_device="a1ide.device:2"
 else
@@ -7286,6 +7307,7 @@ if test "$_libnut" = auto ; then
 #include <stdlib.h>
 #include <inttypes.h>
 #include <libnut.h>
+nut_context_tt * nut;
 int main(void) { (void)nut_error(0); return 0; }
 EOF
   _libnut=no
@@ -7952,7 +7974,7 @@ fi
 # (FIXME: 'echocheck "dynamic linking"' above and modify here accordingly)
 _ld_dl_dynamic=''
 freebsd || netbsd || openbsd || dragonfly || bsdos && _ld_dl_dynamic='-rdynamic'
-if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin && ! os2 ; then
+if test "$_real" = yes || test "$_xanim" = yes && ! win32 && ! qnx && ! darwin && ! os2 && ! sunos; then
   _ld_dl_dynamic='-rdynamic'
 fi
 
@@ -8131,11 +8153,9 @@ export LC_ALL = C
 CONFIGURATION = $_configuration
 
 CHARSET = $_charset
-DOC_LANG = $doc_lang
-DOC_LANGS = $doc_langs
+DOC_LANGS = $language_doc
 DOC_LANG_ALL = $doc_lang_all
-MAN_LANG = $man_lang
-MAN_LANGS = $man_langs
+MAN_LANGS = $language_man
 MAN_LANG_ALL = $man_lang_all
 
 prefix = \$(DESTDIR)$_prefix
@@ -8146,6 +8166,7 @@ MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 
 AR = $_ar
+AS = $_cc
 CC = $_cc
 CXX = $_cc
 HOST_CC = $_host_cc
@@ -8188,7 +8209,7 @@ EXESUF = $_exesuf
 EXESUFS_ALL = .exe
 
 $_target_arch
-$_target_arch_x86
+$_target_subarch
 $(echo $_cpuexts | tr '[a-z] ' '[A-Z]\n' | sed 's/^/HAVE_/;s/$/=yes/')
 
 MENCODER = $_mencoder
@@ -8272,7 +8293,6 @@ LIBNEMESI = $_nemesi
 LIBNUT = $_libnut
 LIBSMBCLIENT = $_smb
 LIBTHEORA = $_theora
-LIBVORBIS = $_vorbis
 LIRC = $_lirc
 LIVE555 = $_live
 MACOSX_BUNDLE = $_macosx_bundle
@@ -8342,6 +8362,7 @@ VIDIX_S3=$_vidix_drv_s3
 VIDIX_SH_VEU=$_vidix_drv_sh_veu
 VIDIX_SIS=$_vidix_drv_sis
 VIDIX_UNICHROME=$_vidix_drv_unichrome
+VORBIS = $_vorbis
 VSTREAM = $_vstream
 WII = $_wii
 WIN32DLL = $_win32dll
@@ -8357,6 +8378,7 @@ XV = $_xv
 XVID4 = $_xvid
 XVIDIX = $xvidix
 XVMC = $_xvmc
+XVR100 = $_xvr100
 YUV4MPEG = $_yuv4mpeg
 ZR = $_zr
 
@@ -8841,7 +8863,6 @@ $def_memalign_hack
 $def_mlib
 $def_mkstemp
 $def_posix_memalign
-$def_ppc64
 $def_pthreads
 $def_ten_operands
 $def_threads
@@ -8931,8 +8952,9 @@ Config files successfully generated by ./configure $_configuration !
   Optimizing for: $_optimizing
 
   Languages:
-    Messages/GUI: $msg_lang
-    Manual pages: $man_langs
+    Messages/GUI: $language_msg
+    Manual pages: $language_man
+    Documentation: $language_doc
 
   Enabled optional drivers:
     Input: $_inputmodules

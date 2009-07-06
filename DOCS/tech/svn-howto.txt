@@ -315,6 +315,15 @@ II. POLICY / RULES:
     IRC is good for quick discussions, but nobody is there 24/7.
 
 
+14. MPlayer contains some external code that is partly patched, partly copied
+    verbatim (see Copyright for details). This code should not be modified
+    unless there is a very good reason. Much of it is maintained upstream.
+    We should be good open source citizens, submit our fixes upstream and keep
+    the differences as small as possible.
+    If you have to modify external code, do not forget to update the diff file
+    with our local changes.
+
+
 Also read DOCS/tech/patches.txt !!!!
 
 We think our rules are not too hard. If you have comments, contact us.

@@ -1,4 +1,4 @@
-.\" Synced with r29147
+.\" Synced with r29305
 .\" MPlayer (C) 2000-2009 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -33,7 +33,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2009. 04. 05." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2009. 05. 24." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -5102,10 +5102,25 @@ a fej árnyékoló hatását.
 Csak 2 csatornás audió esetén használható.
 .PD 0
 .RSs
-.IPs level=<1\-3>
-Beállítja az összemosás szintjét, a nagyobb szint erõsebb effektet jelent (alapértelmezett: 3).
-.IPs profile=<0\-1>
-Kiválasztja az összemosás profilt, az 1 finomabb hangot ad, mint a 0 (alapértelmezett: 1).
+.IPs fcut=<300\-1000>
+Megadja a vágási frekvenciát Hz-ben.
+.IPs feed=<10\-150>
+Megadja az erõsítés mértékét az alacsony frekvenciákhoz 0.1*dB-ben.
+.IPs profile=<érték>
+Több profil is elérhetõ a kényelmesebb használatért:
+.RSs
+default: ez lesz használva, ha nincs más megadva (fcut=700, feed=45);
+.br
+cmoy: Chu Moy körkörös implementáció (fcut=700, feed=60);
+.br
+jmeier: Jan Meier körkörös implementáció (fcut=650, feed=95).
+.REss
+.PD 1
+.RE
+.sp 1
+.RS
+Ha az fcut vagy a feed opció meg van adva egy profil mellett, a profilon
+felül azok az értékek lesznek felhasználva.
 .RE
 .PD 1
 .

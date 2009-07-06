@@ -41,7 +41,7 @@ typedef uint16_t ogg_uint16_t;
 
 #if 0
 
-#ifdef _WIN32 
+#ifdef _WIN32
 
 #  ifndef __GNUC__
    /* MSVC/Borland */
